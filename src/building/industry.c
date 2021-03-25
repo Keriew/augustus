@@ -80,6 +80,11 @@ int building_is_workshop(building_type type)
     return type >= BUILDING_WINE_WORKSHOP && type <= BUILDING_POTTERY_WORKSHOP;
 }
 
+int building_is_primary_product_producer(building_type type)
+{
+    return building_is_raw_resource_producer(type) || building_is_farm(type) || type == BUILDING_WHARF;
+}
+
 static int max_progress(const building *b)
 {
     return b->subtype.workshop_type ? MAX_PROGRESS_WORKSHOP : MAX_PROGRESS_RAW;
@@ -251,6 +256,11 @@ void building_industry_update_wheat_production(void)
         }
         update_farm_image(b);
     }
+}
+
+int building_stockpiling_enabled(building *b)
+{
+    return b->data.industry.is_stockpiling;
 }
 
 int building_industry_has_produced_resource(building *b)

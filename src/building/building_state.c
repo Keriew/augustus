@@ -1,8 +1,5 @@
 #include "building_state.h"
-
-#include "building/building.h"
 #include "building/monument.h"
-#include "game/file_io.h"
 #include "game/resource.h"
 
 static int is_industry_type(const building *b)
@@ -133,6 +130,7 @@ static void write_type_data(buffer *buf, const building *b)
             buffer_write_u8(buf, 0);
         }
     }
+    buffer_write_u8(buf, b->data.industry.is_stockpiling);
 }
 
 void building_state_save_to_buffer(buffer *buf, const building *b)
@@ -221,7 +219,7 @@ void building_state_save_to_buffer(buffer *buf, const building *b)
     // up until that point in Augustus' development
 }
 
-static void read_type_data(buffer *buf, building *b)
+static void read_type_data(buffer *buf, building *b, int building_buf_size)
 {
     if (building_is_house(b->type)) {
         for (int i = 0; i < INVENTORY_MAX; i++) {
@@ -323,6 +321,10 @@ static void read_type_data(buffer *buf, building *b)
         b->data.entertainment.play = buffer_read_u8(buf);
         buffer_skip(buf, 12);
     }
+
+    if (building_buf_size >= BUILDING_STATE_RESOURCE_STOCKPILING) {
+        b->data.industry.is_stockpiling = buffer_read_u8(buf);
+    }
 }
 
 void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_size)
@@ -378,7 +380,7 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     b->house_tax_coverage = buffer_read_u8(buf);
     b->house_pantheon_access = buffer_read_u8(buf);
     b->formation_id = buffer_read_i16(buf);
-    read_type_data(buf, b);
+    read_type_data(buf, b, building_buf_size);
     b->tax_income_or_storage = buffer_read_i32(buf);
     b->house_days_without_food = buffer_read_u8(buf);
     b->ruin_has_plague = buffer_read_u8(buf);

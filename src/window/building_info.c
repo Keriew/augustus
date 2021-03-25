@@ -1,7 +1,8 @@
+#include <building/industry.h>
+#include "building/industry.h"
 #include "building_info.h"
 
 #include "building/barracks.h"
-#include "building/building.h"
 #include "building/culture.h"
 #include "building/house_evolution.h"
 #include "building/model.h"
@@ -9,7 +10,6 @@
 #include "building/warehouse.h"
 #include "city/data_private.h"
 #include "city/map.h"
-#include "city/resource.h"
 #include "city/view.h"
 #include "core/calc.h"
 #include "core/image_group.h"
@@ -31,20 +31,15 @@
 #include "map/grid.h"
 #include "map/image.h"
 #include "map/property.h"
-#include "map/road_access.h"
 #include "map/sprite.h"
 #include "map/terrain.h"
-#include "translation/translation.h"
 #include "window/advisors.h"
 #include "window/city.h"
 #include "window/message_dialog.h"
-#include "window/building/common.h"
-#include "window/building/culture.h"
 #include "window/building/distribution.h"
 #include "window/building/figures.h"
 #include "window/building/government.h"
 #include "window/building/house.h"
-#include "window/building/industry.h"
 #include "window/building/military.h"
 #include "window/building/terrain.h"
 #include "window/building/utility.h"
@@ -750,6 +745,11 @@ static void draw_foreground(void)
     // building-specific buttons
     if (context.type == BUILDING_INFO_BUILDING) {
         int btype = building_get(context.building_id)->type;
+
+        if (building_is_primary_product_producer(btype)) {
+            window_building_draw_primary_product_stockpiling(&context);
+        }
+
         if (btype == BUILDING_LIGHTHOUSE && b->data.monument.phase == MONUMENT_FINISHED) {
             window_building_draw_lighthouse_foreground(&context);
         } else if (btype == BUILDING_GRANARY) {
@@ -914,6 +914,8 @@ static int handle_specific_building_info_mouse(const mouse *m)
             window_building_handle_mouse_colosseum(m, &context);
         } else if (btype == BUILDING_HIPPODROME) {
             window_building_handle_mouse_hippodrome(m, &context);
+        } else if (building_is_primary_product_producer(btype)) {
+            window_building_handle_mouse_primary_product_producer(m, &context);
         }
     }
     return 0;
@@ -970,6 +972,8 @@ static void get_tooltip(tooltip_context *c)
                 translation = TR_TOOLTIP_BUTTON_MOTHBALL_OFF;
             }
         }
+    } else if (building_is_primary_product_producer(btype)) {
+        window_building_primary_product_producer_stockpiling_tooltip(&translation);
     } else if (context.type == BUILDING_INFO_LEGION) {
         text_id = window_building_get_legion_info_tooltip_text(&context);
     } else if (context.type == BUILDING_INFO_BUILDING && context.storage_show_special_orders) {
