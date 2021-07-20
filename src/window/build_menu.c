@@ -21,12 +21,12 @@
 #include "widget/sidebar/city.h"
 #include "window/city.h"
 
-#define MENU_X_OFFSET 290
+#define MENU_X_OFFSET 400
 #define MENU_Y_OFFSET 110
 #define MENU_ITEM_HEIGHT 24
-#define MENU_ITEM_WIDTH 208
+#define MENU_ITEM_WIDTH 300
 #define MENU_CLICK_MARGIN 20
-#define MENU_TEXT_X_OFFSET 8
+#define MENU_TEXT_X_OFFSET 8 + (2 * MENU_ICON_WIDTH)
 
 
 #define MENU_ICON_WIDTH 14
@@ -39,36 +39,36 @@ static void button_menu_index(int param1, int param2);
 static void button_menu_item(int item);
 
 static generic_button build_menu_buttons[] = {
-    {0, 0, 290, 20, button_menu_index, button_none, 1, 0},
-    {0, 24, 290, 20, button_menu_index, button_none, 2, 0},
-    {0, 48, 290, 20, button_menu_index, button_none, 3, 0},
-    {0, 72, 290, 20, button_menu_index, button_none, 4, 0},
-    {0, 96, 290, 20, button_menu_index, button_none, 5, 0},
-    {0, 120, 290, 20, button_menu_index, button_none, 6, 0},
-    {0, 144, 290, 20, button_menu_index, button_none, 7, 0},
-    {0, 168, 290, 20, button_menu_index, button_none, 8, 0},
-    {0, 192, 290, 20, button_menu_index, button_none, 9, 0},
-    {0, 216, 290, 20, button_menu_index, button_none, 10, 0},
-    {0, 240, 290, 20, button_menu_index, button_none, 11, 0},
-    {0, 264, 290, 20, button_menu_index, button_none, 12, 0},
-    {0, 288, 290, 20, button_menu_index, button_none, 13, 0},
-    {0, 312, 290, 20, button_menu_index, button_none, 14, 0},
-    {0, 336, 290, 20, button_menu_index, button_none, 15, 0},
-    {0, 360, 290, 20, button_menu_index, button_none, 16, 0},
-    {0, 384, 290, 20, button_menu_index, button_none, 17, 0},
-    {0, 408, 290, 20, button_menu_index, button_none, 18, 0},
-    {0, 432, 290, 20, button_menu_index, button_none, 19, 0},
-    {0, 456, 290, 20, button_menu_index, button_none, 20, 0},
-    {0, 480, 290, 20, button_menu_index, button_none, 21, 0},
-    {0, 504, 290, 20, button_menu_index, button_none, 22, 0},
-    {0, 528, 290, 20, button_menu_index, button_none, 23, 0},
-    {0, 552, 290, 20, button_menu_index, button_none, 24, 0},
-    {0, 576, 290, 20, button_menu_index, button_none, 25, 0},
-    {0, 600, 290, 20, button_menu_index, button_none, 26, 0},
-    {0, 624, 290, 20, button_menu_index, button_none, 27, 0},
-    {0, 648, 290, 20, button_menu_index, button_none, 28, 0},
-    {0, 672, 290, 20, button_menu_index, button_none, 29, 0},
-    {0, 696, 290, 20, button_menu_index, button_none, 30, 0},
+    {0,  0 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 1,  0},
+    {0,  1 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 2,  0},
+    {0,  2 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 3,  0},
+    {0,  3 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 4,  0},
+    {0,  4 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 5,  0},
+    {0,  5 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 6,  0},
+    {0,  6 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 7,  0},
+    {0,  7 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 8,  0},
+    {0,  8 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 9,  0},
+    {0,  9 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 10, 0},
+    {0, 10 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 11, 0},
+    {0, 11 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 12, 0},
+    {0, 12 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 13, 0},
+    {0, 13 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 14, 0},
+    {0, 14 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 15, 0},
+    {0, 15 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 16, 0},
+    {0, 16 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 17, 0},
+    {0, 17 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 18, 0},
+    {0, 18 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 19, 0},
+    {0, 19 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 20, 0},
+    {0, 20 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 21, 0},
+    {0, 21 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 22, 0},
+    {0, 22 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 23, 0},
+    {0, 23 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 24, 0},
+    {0, 24 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 25, 0},
+    {0, 25 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 26, 0},
+    {0, 26 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 27, 0},
+    {0, 27 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 28, 0},
+    {0, 28 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 29, 0},
+    {0, 29 * 24, MENU_X_OFFSET, 20, button_menu_index, button_none, 30, 0},
 };
 
 static const int Y_MENU_OFFSETS[] = {
@@ -176,16 +176,16 @@ static void draw_menu_buttons(void)
     int item_x_align = x_offset - MENU_X_OFFSET - 8;
     for (int i = 0; i < data.num_items; i++) {
         item_index = building_menu_next_index(data.selected_submenu, item_index);
-        label_draw(item_x_align, data.y_offset + MENU_Y_OFFSET + MENU_ITEM_HEIGHT * i, 18,
+        label_draw(item_x_align, data.y_offset + MENU_Y_OFFSET + MENU_ITEM_HEIGHT * i, 25,
             data.focus_button_id == i + 1 ? 1 : 2);
         int type = building_menu_type(data.selected_submenu, item_index);
         if (is_all_button(type)) {
-            text_draw_centered(translation_for(TR_BUILD_ALL_TEMPLES),
+            text_draw(translation_for(TR_BUILD_ALL_TEMPLES),
                 item_x_align + MENU_TEXT_X_OFFSET, data.y_offset + MENU_Y_OFFSET + 3 + MENU_ITEM_HEIGHT * i,
-                MENU_ITEM_WIDTH, FONT_NORMAL_GREEN, 0);
+                FONT_NORMAL_GREEN, 0);
         } else {
-            lang_text_draw_centered(28, type, item_x_align + MENU_TEXT_X_OFFSET, data.y_offset + MENU_Y_OFFSET + 3 + MENU_ITEM_HEIGHT * i,
-                MENU_ITEM_WIDTH, FONT_NORMAL_GREEN);
+            lang_text_draw(28, type, item_x_align + MENU_TEXT_X_OFFSET, data.y_offset + MENU_Y_OFFSET + 3 + MENU_ITEM_HEIGHT * i,
+                FONT_NORMAL_GREEN);
         }
         if (type == BUILDING_DRAGGABLE_RESERVOIR) {
             type = BUILDING_RESERVOIR;
@@ -227,6 +227,19 @@ static void draw_menu_buttons(void)
             image_draw(image_id, item_x_align + icons_drawn * MENU_ICON_WIDTH + MENU_ICON_X_OFFSET,
                 data.y_offset + MENU_Y_OFFSET + MENU_ICON_Y_OFFSET + MENU_ITEM_HEIGHT * i);
             icons_drawn++;
+
+            for (int r = RESOURCE_TIMBER; r <= RESOURCE_MARBLE; r++) {
+                int resources_needed = building_monument_total_resources_needed_for_monument_type(type, r);
+                if (resources_needed == 0) {
+                    continue;
+                }
+                int image_id = image_group(GROUP_RESOURCE_ICONS);
+                int resource_width = MENU_ICON_WIDTH + text_get_width((uint8_t*)"999", FONT_NORMAL_BLACK);
+                int res_x_offset = x_offset - 82 - 3 + (r - 3 - RESOURCE_TIMBER) * resource_width;
+                int y_offset = data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i;
+                image_draw(image_id + r, res_x_offset, y_offset);
+                text_draw_number(resources_needed, '@', " ", res_x_offset + MENU_ICON_WIDTH, y_offset, FONT_NORMAL_BLACK);
+            }
         }
 
     }

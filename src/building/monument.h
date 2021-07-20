@@ -40,6 +40,7 @@ int building_monument_progress(building *b);
 void building_monument_recalculate_monuments(void);
 int building_monument_working(building_type type);
 int building_monument_resources_needed_for_monument_type(building_type type, int resource, int phase);
+int building_monument_total_resources_needed_for_monument_type(building_type type, int resource);
 int building_monument_resource_in_delivery(int monument_id, int resource_id);
 int building_monument_resource_in_delivery_multipart(building *b, int resource_id);
 void building_monument_remove_delivery(int figure_id);

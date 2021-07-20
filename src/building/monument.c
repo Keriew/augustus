@@ -353,6 +353,16 @@ int building_monument_resources_needed_for_monument_type(building_type type, int
     }
 }
 
+int building_monument_total_resources_needed_for_monument_type(building_type type, int resource)
+{
+    int total = 0;
+    for (int phase = 1; phase <= building_monument_phases(type); phase++)
+    {
+        total += building_monument_resources_needed_for_monument_type(type, resource, phase);
+    }
+    return total;
+}
+
 void building_monument_set_phase(building *b, int phase)
 {
     if (phase == building_monument_phases(b->type)) {
