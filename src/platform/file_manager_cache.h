@@ -10,6 +10,8 @@ typedef struct file_info {
     char name[FILE_NAME_MAX];
     const char *extension;
     int type;
+    unsigned int modified_time;
+
     struct file_info *next;
 } file_info;
 
@@ -23,6 +25,8 @@ const dir_info *platform_file_manager_cache_get_dir_info(const char *dir);
 int platform_file_manager_cache_file_has_extension(const file_info *f, const char *extension);
 void platform_file_manager_cache_add_file_info(const char *filename);
 void platform_file_manager_cache_delete_file_info(const char *filename);
+
+int platform_file_manager_cache_has_stat(void);
 
 #endif
 

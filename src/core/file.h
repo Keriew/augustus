@@ -85,4 +85,11 @@ int file_exists(const char *filename, int localizable);
  */
 int file_remove(const char *filename);
 
+/**
+ * Get the modified time of a file
+ * @param filename Filename to check
+ * @return platform specific timestamp representing time of modification
+ */
+unsigned int file_get_modified_time(const char *filename);
+
 #endif // CORE_FILE_H

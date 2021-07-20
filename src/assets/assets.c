@@ -30,7 +30,7 @@ void assets_init(void)
     }
 
     for (int i = 0; i < xml_files->num_files; ++i) {
-        xml_process_assetlist_file(xml_files->files[i]);
+        xml_process_assetlist_file(xml_files->files[i].name);
     }
 
     // By default, if the requested image is not found, the roadblock image will be shown.

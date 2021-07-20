@@ -2,6 +2,7 @@
 #define PLATFORM_FILE_MANAGER_H
 
 #include <stdio.h>
+#include <stdbool.h>
 
 enum {
     TYPE_NONE = 0,
@@ -33,7 +34,7 @@ int platform_file_manager_set_base_path(const char *path);
  * @return LIST_ERROR if error, LIST_MATCH if there was a match in the callback, LIST_NO_MATCH if no match was set
  */
 int platform_file_manager_list_directory_contents(
-    const char *dir, int type, const char *extension, int (*callback)(const char *));
+    const char *dir, int type, const char *extension, int (*callback)(const char *, unsigned int));
 
 /**
  * Indicates whether the file name casing should be checked
@@ -82,8 +83,11 @@ FILE *platform_file_manager_open_asset(const char *asset, const char *mode);
  */
 int platform_file_manager_remove_file(const char *filename);
 
-
 int platform_file_manager_close_file(FILE *stream);
 
+/**
+ * Returns true if the platform support `stat`.
+ */
+bool platform_file_manager_has_stat(void);
 
 #endif // PLATFORM_FILE_MANAGER_H

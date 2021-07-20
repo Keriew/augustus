@@ -26,6 +26,7 @@
 #include "window/editor/map.h"
 #include "window/plain_message_dialog.h"
 
+#include <assert.h>
 #include <string.h>
 
 #define NUM_FILES_IN_VIEW 12
@@ -34,26 +35,28 @@
 static const time_millis NOT_EXIST_MESSAGE_TIMEOUT = 500;
 
 static void button_ok_cancel(int is_ok, int param2);
+static void button_sort(int param1, int param2);
 static void button_select_file(int index, int param2);
 static void on_scroll(void);
 
-static image_button image_buttons[] = {
-    {344, 335, 39, 26, IB_NORMAL, GROUP_OK_CANCEL_SCROLL_BUTTONS, 0, button_ok_cancel, button_none, 1, 0, 1},
-    {392, 335, 39, 26, IB_NORMAL, GROUP_OK_CANCEL_SCROLL_BUTTONS, 4, button_ok_cancel, button_none, 0, 0, 1},
+static image_button ok_cancel_sort_buttons[] = {
+    {344 + 0 * 48, 335, 39, 26, IB_NORMAL, GROUP_OK_CANCEL_SCROLL_BUTTONS, 0, button_ok_cancel, button_none, 1, 0, 1},
+    {344 + 1 * 48, 335, 39, 26, IB_NORMAL, GROUP_OK_CANCEL_SCROLL_BUTTONS, 4, button_ok_cancel, button_none, 0, 0, 1},
+    {344 + 2 * 48, 335, 39, 26, IB_NORMAL, GROUP_OK_CANCEL_SCROLL_BUTTONS, 8, button_sort,      button_none, 0, 0, 1},
 };
 static generic_button file_buttons[] = {
-    {160, 128, 288, 16, button_select_file, button_none, 0, 0},
-    {160, 144, 288, 16, button_select_file, button_none, 1, 0},
-    {160, 160, 288, 16, button_select_file, button_none, 2, 0},
-    {160, 176, 288, 16, button_select_file, button_none, 3, 0},
-    {160, 192, 288, 16, button_select_file, button_none, 4, 0},
-    {160, 208, 288, 16, button_select_file, button_none, 5, 0},
-    {160, 224, 288, 16, button_select_file, button_none, 6, 0},
-    {160, 240, 288, 16, button_select_file, button_none, 7, 0},
-    {160, 256, 288, 16, button_select_file, button_none, 8, 0},
-    {160, 272, 288, 16, button_select_file, button_none, 9, 0},
-    {160, 288, 288, 16, button_select_file, button_none, 10, 0},
-    {160, 304, 288, 16, button_select_file, button_none, 11, 0},
+    {160, 128 + 16 * 0,  288, 16, button_select_file, button_none, 0, 0},
+    {160, 128 + 16 * 1,  288, 16, button_select_file, button_none, 1, 0},
+    {160, 128 + 16 * 2,  288, 16, button_select_file, button_none, 2, 0},
+    {160, 128 + 16 * 3,  288, 16, button_select_file, button_none, 3, 0},
+    {160, 128 + 16 * 4,  288, 16, button_select_file, button_none, 4, 0},
+    {160, 128 + 16 * 5,  288, 16, button_select_file, button_none, 5, 0},
+    {160, 128 + 16 * 6,  288, 16, button_select_file, button_none, 6, 0},
+    {160, 128 + 16 * 7,  288, 16, button_select_file, button_none, 7, 0},
+    {160, 128 + 16 * 8,  288, 16, button_select_file, button_none, 8, 0},
+    {160, 128 + 16 * 9,  288, 16, button_select_file, button_none, 9, 0},
+    {160, 128 + 16 * 10, 288, 16, button_select_file, button_none, 10, 0},
+    {160, 128 + 16 * 11, 288, 16, button_select_file, button_none, 11, 0},
 };
 
 static scrollbar_type scrollbar = { 464, 120, 206, on_scroll };
@@ -70,6 +73,7 @@ static struct {
     int focus_button_id;
     int double_click;
     const dir_listing *file_list;
+    unsigned int sort_by;
 
     file_type_data *file_data;
     uint8_t typed_name[FILE_NAME_MAX];
@@ -93,13 +97,13 @@ static int find_first_file_with_prefix(const char *prefix)
     int right = data.file_list->num_files;
     while (left < right) {
         int middle = (left + right) / 2;
-        if (platform_file_manager_compare_filename_prefix(data.file_list->files[middle], prefix, len) >= 0) {
+        if (platform_file_manager_compare_filename_prefix(data.file_list->files[middle].name, prefix, len) >= 0) {
             right = middle;
         } else {
             left = middle + 1;
         }
     }
-    if (platform_file_manager_compare_filename_prefix(data.file_list->files[left], prefix, len) == 0) {
+    if (platform_file_manager_compare_filename_prefix(data.file_list->files[left].name, prefix, len) == 0) {
         return left;
     } else {
         return -1;
@@ -160,6 +164,10 @@ static void init(file_type type, file_dialog_type dialog_type)
             data.file_list = dir_find_files_with_extension(".", saved_game_data_expanded.extension);
         }
     }
+
+    data.sort_by = 0;  // Sorting is by name by default
+    button_sort(0, 0); // Sort by modified date
+
     scrollbar_init(&scrollbar, 0, data.file_list->num_files - NUM_FILES_IN_VIEW);
     scroll_to_typed_text();
 
@@ -193,13 +201,13 @@ static void draw_foreground(void)
         if (data.focus_button_id == i + 1) {
             font = FONT_NORMAL_WHITE;
         }
-        encoding_from_utf8(data.file_list->files[scrollbar.scroll_position + i], file, FILE_NAME_MAX);
+        encoding_from_utf8(data.file_list->files[scrollbar.scroll_position + i].name, file, FILE_NAME_MAX);
         //file_remove_extension(file);
         text_ellipsize(file, font, MAX_FILE_WINDOW_TEXT_WIDTH);
         text_draw(file, 160, 130 + 16 * i, font, 0);
     }
 
-    image_buttons_draw(0, 0, image_buttons, 2);
+    image_buttons_draw(0, 0, ok_cancel_sort_buttons, platform_file_manager_has_stat() ? 3 : 2);
     scrollbar_draw(&scrollbar);
 
     graphics_reset_dialog();
@@ -231,7 +239,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
     const mouse *m_dialog = mouse_in_dialog(m);
     if (input_box_handle_mouse(m_dialog, &file_name_input) ||
         generic_buttons_handle_mouse(m_dialog, 0, 0, file_buttons, NUM_FILES_IN_VIEW, &data.focus_button_id) ||
-        image_buttons_handle_mouse(m_dialog, 0, 0, image_buttons, 2, 0) ||
+        image_buttons_handle_mouse(m_dialog, 0, 0, ok_cancel_sort_buttons, 3, 0) ||
         scrollbar_handle_mouse(&scrollbar, m_dialog)) {
         return;
     }
@@ -331,6 +339,21 @@ static void button_ok_cancel(int is_ok, int param2)
     strncpy(data.file_data->last_loaded_file, filename, FILE_NAME_MAX - 1);
 }
 
+static void button_sort(int param1, int param2)
+{
+    if (!platform_file_manager_has_stat()) {
+        return;
+    }
+
+    if (data.sort_by == 0) {
+        dir_sort_by_modified_time();
+    }
+    else {
+        dir_sort_by_filename();
+    }
+    data.sort_by = (data.sort_by + 1) % 2 ;
+}
+
 static void on_scroll(void)
 {
     data.message_not_exist_start_time = 0;
@@ -339,7 +362,7 @@ static void on_scroll(void)
 static void button_select_file(int index, int param2)
 {
     if (index < data.file_list->num_files) {
-        strncpy(data.selected_file, data.file_list->files[scrollbar.scroll_position + index], FILE_NAME_MAX - 1);
+        strncpy(data.selected_file, data.file_list->files[scrollbar.scroll_position + index].name, FILE_NAME_MAX - 1);
         encoding_from_utf8(data.selected_file, data.typed_name, FILE_NAME_MAX);
         string_copy(data.typed_name, data.previously_seen_typed_name, FILE_NAME_MAX);
         input_box_refresh_text(&file_name_input);

@@ -91,6 +91,7 @@ const dir_info *platform_file_manager_cache_get_dir_info(const char *dir)
             if (S_ISDIR(file_info.st_mode)) {
                 type = TYPE_DIR;
             }
+            file_item->modified_time = file_info.st_mtime;
         } else {
             // When stat does not work, we check if a file is a directory by trying to open it as a dir
             // For performance reasons, we only check for a directory if the name has no extension
@@ -166,6 +167,11 @@ int platform_file_manager_cache_file_has_extension(const file_info *f, const cha
         return 1;
     }
     return platform_file_manager_compare_filename(f->extension, extension) == 0;
+}
+
+int platform_file_manager_cache_has_stat(void)
+{
+    return stat_status == STAT_WORKS;
 }
 
 #endif // __vita__

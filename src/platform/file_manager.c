@@ -225,7 +225,7 @@ static const dir_name get_assets_directory(void)
 }
 
 int platform_file_manager_list_directory_contents(
-    const char *dir, int type, const char *extension, int (*callback)(const char *))
+    const char *dir, int type, const char *extension, int (*callback)(const char *, unsigned int))
 {
     if (type == TYPE_NONE) {
         return LIST_ERROR;
@@ -263,7 +263,7 @@ int platform_file_manager_list_directory_contents(
         if (!platform_file_manager_cache_file_has_extension(f, extension)) {
             continue;
         }
-        match = callback(f->name);
+        match = callback(f->name, f->modified_time);
         if (match == LIST_MATCH) {
             break;
         }
@@ -292,9 +292,9 @@ int platform_file_manager_list_directory_contents(
                 // Skip current (.), parent (..) and hidden directories (.*)
                 continue;
             }
-            match = callback(name);
+            match = callback(name, file_info.st_mtime);
         } else if (file_has_extension(name, extension)) {
-            match = callback(name);
+            match = callback(name, file_info.st_mtime);
         }
         if (match == LIST_MATCH) {
             break;
@@ -495,6 +495,7 @@ FILE *platform_file_manager_open_asset(const char *asset, const char *mode)
 }
 #endif
 
+
 int platform_file_manager_close_file(FILE *stream)
 {
     int result = fclose(stream);
@@ -507,4 +508,16 @@ int platform_file_manager_close_file(FILE *stream)
     }
 #endif
     return result;
+}
+
+bool platform_file_manager_has_stat(void)
+{
+#ifdef __ANDROID__
+    return 0; // TODO: modified_time not implemented for android.
+#endif
+#ifdef USE_FILE_CACHE
+    return platform_file_manager_cache_has_stat();
+#else
+    return 1;
+#endif
 }
