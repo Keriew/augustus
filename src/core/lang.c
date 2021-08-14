@@ -474,6 +474,10 @@ const uint8_t *lang_get_string(int group, int index)
                 return translation_for(TR_BUILDING_CARAVANSERAI);
             case BUILDING_ROOFED_GARDEN_WALL:
                 return translation_for(TR_BUILDING_ROOFED_GARDEN_WALL);
+            case BUILDING_GARDEN_WALL_GATE:
+                return translation_for(TR_BUILDING_GARDEN_WALL_GATE);
+            case BUILDING_PALISADE:
+                return translation_for(TR_BUILDING_PALISADE);
             default:
                 break;
         }

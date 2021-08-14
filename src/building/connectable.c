@@ -10,6 +10,7 @@
 #include "map/grid.h"
 #include "map/image.h"
 #include "map/property.h"
+#include "map/random.h"
 #include "map/terrain.h"
 
 #define MAX_TILES 8
@@ -18,6 +19,9 @@ typedef struct  {
     const unsigned char tiles[MAX_TILES];
     const unsigned char offset_for_orientation[4];
     const int rotation;
+    const unsigned char terrain_tiles[MAX_TILES];
+    const int use_terrain;
+    const int max_random;
 } building_image_context;
 
 static const building_type connectable_buildings[] = {
@@ -35,6 +39,8 @@ static const building_type connectable_buildings[] = {
     BUILDING_PLUM_PATH,
     BUILDING_GARDEN_WALL,
     BUILDING_ROOFED_GARDEN_WALL,
+    BUILDING_GARDEN_WALL_GATE,
+    BUILDING_PALISADE,
 };
 
 static const int MAX_CONNECTABLE_BUILDINGS = sizeof(connectable_buildings) / sizeof(building_type);
@@ -101,6 +107,44 @@ static const building_image_context building_images_treeless_path[8] = {
     { { 2, 2, 2, 2, 2, 2, 2, 2 }, {  0, 54,  0, 54 }, -1 },
 };
 
+static const building_image_context building_images_garden_gate[14] = {
+    { { 1, 2, 0, 2, 1, 2, 0, 2 }, { 2, 0, 2, 0 }, -1,},
+    { { 0, 2, 1, 2, 0, 2, 1, 2 }, { 0, 2, 0, 2 }, -1,},
+    { { 1, 2, 0, 2, 0, 2, 0, 2 }, { 2, 0, 2, 0 }, -1 },
+    { { 0, 2, 1, 2, 0, 2, 0, 2 }, { 0, 2, 0, 2 }, -1 },
+    { { 0, 2, 0, 2, 1, 2, 0, 2 }, { 2, 0, 2, 0 }, -1 },
+    { { 0, 2, 0, 2, 0, 2, 1, 2 }, { 0, 2, 0, 2 }, -1 },
+    { { 2, 2, 2, 2, 2, 2, 2, 2 }, { 0, 2, 0, 2 }, -1, { 1, 2, 0, 2, 1, 2, 0, 2 }, 1 },
+    { { 2, 2, 2, 2, 2, 2, 2, 2 }, { 2, 0, 2, 0 }, -1, { 0, 2, 1, 2, 0, 2, 1, 2 }, 1 },
+    { { 2, 2, 2, 2, 2, 2, 2, 2 }, { 0, 2, 0, 2 }, -1, { 1, 2, 0, 2, 0, 2, 0, 2 }, 1 },
+    { { 2, 2, 2, 2, 2, 2, 2, 2 }, { 2, 0, 2, 0 }, -1, { 0, 2, 1, 2, 0, 2, 0, 2 }, 1 },
+    { { 2, 2, 2, 2, 2, 2, 2, 2 }, { 0, 2, 0, 2 }, -1, { 0, 2, 0, 2, 1, 2, 0, 2 }, 1 },
+    { { 2, 2, 2, 2, 2, 2, 2, 2 }, { 2, 0, 2, 0 }, -1, { 0, 2, 0, 2, 0, 2, 1, 2 }, 1 },
+    { { 2, 2, 2, 2, 2, 2, 2, 2 }, { 2, 0, 2, 0 },  0 },
+    { { 2, 2, 2, 2, 2, 2, 2, 2 }, { 0, 2, 0, 2 }, -1 },
+};
+
+static const  building_image_context building_images_palisades[18] = {
+    { { 1, 2, 1, 2, 0, 2, 0, 2 }, {  15,  14,  13,  12 }, -1, { 0 }, 0, 0 },
+    { { 0, 2, 1, 2, 1, 2, 0, 2 }, {  12,  15,  14,  13 }, -1, { 0 }, 0, 0 },
+    { { 0, 2, 0, 2, 1, 2, 1, 2 }, {  13,  12,  15,  14 }, -1, { 0 }, 0, 0 },
+    { { 1, 2, 0, 2, 0, 2, 1, 2 }, {  14,  13,  12,  15 }, -1, { 0 }, 0, 0 },
+    { { 1, 2, 0, 2, 1, 2, 0, 2 }, {  6,  0,  6,  0 }, -1, { 0 }, 0, 6 },
+    { { 0, 2, 1, 2, 0, 2, 1, 2 }, {  0,  6,  0,  6 }, -1, { 0 }, 0, 6 },
+    { { 1, 2, 0, 2, 0, 2, 0, 2 }, {  6,  0,  6,  0 }, -1, { 0 }, 0, 6 },
+    { { 0, 2, 1, 2, 0, 2, 0, 2 }, {  0,  6,  0,  6 }, -1, { 0 }, 0, 6 },
+    { { 0, 2, 0, 2, 1, 2, 0, 2 }, {  6,  0,  6,  0 }, -1, { 0 }, 0, 6 },
+    { { 0, 2, 0, 2, 0, 2, 1, 2 }, {  0,  6,  0,  6 }, -1, { 0 }, 0, 6 },
+    { { 1, 2, 1, 2, 1, 2, 0, 2 }, {  19,  17,  16,  18 }, -1, { 0 }, 0, 0 },
+    { { 0, 2, 1, 2, 1, 2, 1, 2 }, {  18,  19,  17,  16 }, -1, { 0 }, 0, 0 },
+    { { 1, 2, 0, 2, 1, 2, 1, 2 }, {  16,  18,  19,  17 }, -1, { 0 }, 0, 0 },
+    { { 1, 2, 1, 2, 0, 2, 1, 2 }, {  17,  16,  18,  19 }, -1, { 0 }, 0, 0 },
+    { { 1, 2, 1, 2, 1, 2, 1, 2 }, { 20, 20, 20, 20 }, -1, { 0 }, 0, 0 },
+    { { 2, 2, 2, 2, 2, 2, 2, 2 }, {  6,  0,  6,  0 },  0, { 0 }, 0, 6 },
+    { { 2, 2, 2, 2, 2, 2, 2, 2 }, {  0,  6,  0,  6 },  1, { 0 }, 0, 6 },
+    { { 2, 2, 2, 2, 2, 2, 2, 2 }, { 20, 20, 20, 20 }, -1, { 0 }, 0, 0 },
+};
+
 static struct {
     const building_image_context *context;
     int size;
@@ -111,26 +155,49 @@ static struct {
     { building_images_path_intersection, 9 },
     { building_images_treeless_path, 8 },
     { building_images_hedges, 18 },
+    { building_images_garden_gate, 14},
+    { building_images_palisades, 18 },
 };
 
+int building_connectable_gate_type(building_type type)
+{
+    switch (type) {
+        case BUILDING_GARDEN_WALL:
+        case BUILDING_ROOFED_GARDEN_WALL:
+            return BUILDING_GARDEN_WALL_GATE;
+        default:
+            return 0;
+    }
+}
+
 static int context_matches_tiles(const building_image_context *context,
-    const int tiles[MAX_TILES], int rotation)
+    const int tiles[MAX_TILES], int rotation, int terrain_tiles[MAX_TILES])
 {
     for (int i = 0; i < MAX_TILES; i++) {
+        if (context->use_terrain) {
+            if (context->terrain_tiles[i] != 2 && terrain_tiles[i] != context->terrain_tiles[i]) {
+                return 0;
+            }
+        }
         if (context->tiles[i] != 2 && tiles[i] != context->tiles[i]) {
             return 0;
         }
     }
+
     return context->rotation == -1 || context->rotation == rotation;
 }
 
-static int get_image_offset(int group, int tiles[MAX_TILES], int rotation)
+static int get_image_offset(int group, int tiles[MAX_TILES], int rotation, int terrain_tiles[MAX_TILES], int grid_offset)
 {
     const building_image_context *context = context_pointers[group].context;
     int size = context_pointers[group].size;
     for (int i = 0; i < size; i++) {
-        if (context_matches_tiles(&context[i], tiles, rotation)) {
-            return context[i].offset_for_orientation[city_view_orientation() / 2];
+        if (context_matches_tiles(&context[i], tiles, rotation, terrain_tiles)) {
+            int offset = context[i].offset_for_orientation[city_view_orientation() / 2];
+            if (context[i].max_random) {
+                offset += map_random_get(grid_offset) % context[i].max_random;
+            }
+            return offset;
         }
     }
     return -1;
@@ -159,7 +226,7 @@ int building_connectable_get_hedge_offset(int grid_offset)
     } else {
         rotation = building_rotation_get_rotation_with_limit(BUILDING_CONNECTABLE_ROTATION_LIMIT_HEDGES);
     }
-    return get_image_offset(CONTEXT_HEDGES, tiles, rotation);
+    return get_image_offset(CONTEXT_HEDGES, tiles, rotation, 0, grid_offset);
 }
 
 int building_connectable_get_colonnade_offset(int grid_offset)
@@ -183,7 +250,24 @@ int building_connectable_get_colonnade_offset(int grid_offset)
     } else {
         rotation = building_rotation_get_rotation_with_limit(BUILDING_CONNECTABLE_ROTATION_LIMIT_HEDGES);
     }
-    return get_image_offset(CONTEXT_COLONNADE, tiles, rotation);
+    return get_image_offset(CONTEXT_COLONNADE, tiles, rotation, 0, grid_offset);
+}
+
+static int is_garden_path(building_type type)
+{
+    return type == BUILDING_DATE_PATH || type == BUILDING_ELM_PATH || type == BUILDING_FIG_PATH ||
+        type == BUILDING_FIR_PATH || type == BUILDING_OAK_PATH || type == BUILDING_PALM_PATH ||
+        type == BUILDING_PINE_PATH || type == BUILDING_PLUM_PATH || type == BUILDING_GARDEN_PATH;
+}
+
+static int is_garden_wall_or_gate(building_type type)
+{
+    return type == BUILDING_GARDEN_WALL || type == BUILDING_ROOFED_GARDEN_WALL || type == BUILDING_GARDEN_WALL_GATE;
+}
+
+static int is_garden_wall(building_type type)
+{
+    return type == BUILDING_GARDEN_WALL || type == BUILDING_ROOFED_GARDEN_WALL;
 }
 
 int building_connectable_get_garden_wall_offset(int grid_offset)
@@ -195,9 +279,7 @@ int building_connectable_get_garden_wall_offset(int grid_offset)
             continue;
         }
         building *b = building_get(map_building_at(offset));
-        if (b->type == BUILDING_GARDEN_WALL || b->type == BUILDING_ROOFED_GARDEN_WALL ||
-            (map_property_is_constructing(offset) && (building_construction_type() == BUILDING_GARDEN_WALL 
-                || building_construction_type() == BUILDING_ROOFED_GARDEN_WALL))) {
+        if (is_garden_wall_or_gate(b->type) || (map_property_is_constructing(offset) && is_garden_wall_or_gate(building_construction_type()))) {
             tiles[i] = 1;
         }
     }
@@ -208,14 +290,7 @@ int building_connectable_get_garden_wall_offset(int grid_offset)
     } else {
         rotation = building_rotation_get_rotation_with_limit(BUILDING_CONNECTABLE_ROTATION_LIMIT_HEDGES);
     }
-    return get_image_offset(CONTEXT_GARDEN_WALLS, tiles, rotation);
-}
-
-static int is_garden_path(building_type type)
-{
-    return type == BUILDING_DATE_PATH || type == BUILDING_ELM_PATH || type == BUILDING_FIG_PATH ||
-        type == BUILDING_FIR_PATH || type == BUILDING_OAK_PATH || type == BUILDING_PALM_PATH ||
-        type == BUILDING_PINE_PATH || type == BUILDING_PLUM_PATH || type == BUILDING_GARDEN_PATH;
+    return get_image_offset(CONTEXT_GARDEN_WALLS, tiles, rotation, 0, grid_offset);
 }
 
 int building_connectable_get_garden_path_offset(int grid_offset, int context)
@@ -238,7 +313,61 @@ int building_connectable_get_garden_path_offset(int grid_offset, int context)
     } else {
         rotation = building_rotation_get_rotation_with_limit(BUILDING_CONNECTABLE_ROTATION_LIMIT_PATHS);
     }
-    return get_image_offset(context, tiles, rotation);
+    return get_image_offset(context, tiles, rotation, 0, grid_offset);
+}
+
+int building_connectable_get_garden_gate_offset(int grid_offset)
+{
+    int tiles[MAX_TILES] = { 0 };
+    int terrain_tiles[MAX_TILES] = { 0 };
+    for (int i = 0; i < MAX_TILES; i += 2) {
+        int offset = grid_offset + map_grid_direction_delta(i);
+
+        if (map_terrain_is(offset, TERRAIN_ROAD)) {
+            terrain_tiles[i] = 1;
+        }
+
+        if (!map_terrain_is(offset, TERRAIN_BUILDING) && !map_property_is_constructing(offset)) {
+            continue;
+        }
+        building *b = building_get(map_building_at(offset));
+        if (is_garden_wall(b->type) || 
+            (map_property_is_constructing(offset) && !map_terrain_is(offset, TERRAIN_ROAD) && is_garden_wall(building_construction_type()))) {
+            tiles[i] = 1;
+        }
+    }
+    int building_id = map_building_at(grid_offset);
+    int rotation;
+    if (building_id) {
+        rotation = building_get(building_id)->subtype.orientation;
+    } else {
+        rotation = building_rotation_get_rotation_with_limit(BUILDING_CONNECTABLE_ROTATION_LIMIT_PATHS);
+    }
+    return get_image_offset(CONTEXT_GARDEN_GATE, tiles, rotation, terrain_tiles, grid_offset);
+}
+
+int building_connectable_get_palisade_offset(int grid_offset)
+{
+    int tiles[MAX_TILES] = { 0 };
+    for (int i = 0; i < MAX_TILES; i += 2) {
+        int offset = grid_offset + map_grid_direction_delta(i);
+        if (!map_terrain_is(offset, TERRAIN_BUILDING) && !map_property_is_constructing(offset)) {
+            continue;
+        }
+        building *b = building_get(map_building_at(offset));
+        if (b->type == BUILDING_PALISADE ||
+            (map_property_is_constructing(offset) && building_construction_type() == BUILDING_PALISADE)) {
+            tiles[i] = 1;
+        }
+    }
+    int building_id = map_building_at(grid_offset);
+    int rotation;
+    if (building_id) {
+        rotation = building_get(building_id)->subtype.orientation;
+    } else {
+        rotation = building_rotation_get_rotation_with_limit(BUILDING_CONNECTABLE_ROTATION_LIMIT_HEDGES);
+    }
+    return get_image_offset(CONTEXT_PALISADES, tiles, rotation, 0, grid_offset);
 }
 
 int building_is_connectable(building_type type)
