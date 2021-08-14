@@ -3,17 +3,12 @@
 #include "building/list.h"
 #include "building/monument.h"
 #include "city/data_private.h"
-#include "city/message.h"
-#include "city/resource.h"
-#include "city/view.h"
 #include "city/warning.h"
 #include "core/calc.h"
 #include "core/image.h"
 #include "core/random.h"
-#include "game/resource.h"
 #include "figure/figure.h"
 #include "map/building_tiles.h"
-#include "map/road_access.h"
 #include "scenario/property.h"
 
 #define MAX_PROGRESS_RAW 200
@@ -78,11 +73,6 @@ int building_is_raw_resource_producer(building_type type)
 int building_is_workshop(building_type type)
 {
     return type >= BUILDING_WINE_WORKSHOP && type <= BUILDING_POTTERY_WORKSHOP;
-}
-
-int building_is_primary_product_producer(building_type type)
-{
-    return building_is_raw_resource_producer(type) || building_is_farm(type) || type == BUILDING_WHARF;
 }
 
 static int max_progress(const building *b)

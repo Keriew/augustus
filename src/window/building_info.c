@@ -1,14 +1,12 @@
-#include <building/industry.h>
-#include "building/industry.h"
 #include "building_info.h"
 
 #include "building/barracks.h"
 #include "building/culture.h"
 #include "building/house_evolution.h"
+#include "building/industry.h"
 #include "building/model.h"
 #include "building/monument.h"
 #include "building/warehouse.h"
-#include "city/data_private.h"
 #include "city/map.h"
 #include "city/view.h"
 #include "core/calc.h"

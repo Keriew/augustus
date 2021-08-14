@@ -7,7 +7,6 @@
 int building_is_farm(building_type type);
 int building_is_raw_resource_producer(building_type type);
 int building_is_workshop(building_type type);
-int building_is_primary_product_producer(building_type type);
 
 void building_industry_update_production(void);
 void building_industry_update_wheat_production(void);

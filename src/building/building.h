@@ -200,6 +200,8 @@ void building_update_state(void);
 
 void building_update_desirability(void);
 
+int building_is_primary_product_producer(building_type type);
+
 int building_is_house(building_type type);
 
 int building_is_ceres_temple(building_type type);
@@ -216,7 +218,7 @@ int building_has_supplier_inventory(building_type type);
 
 int building_is_statue_garden_temple(building_type type);
 
-int building_is_fort(building_type type);
+int building_is_primary_product_producer(building_type type);
 
 int building_mothball_toggle(building *b);
 

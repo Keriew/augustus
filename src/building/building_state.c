@@ -102,9 +102,10 @@ static void write_type_data(buffer *buf, const building *b)
         buffer_write_i16(buf, b->data.dock.trade_ship_id);
     } else if (is_industry_type(b)) {
         buffer_write_i16(buf, b->data.industry.progress);
-        for (int i = 0; i < 12; i++) {
+        for (int i = 0; i < 11; i++) {
             buffer_write_u8(buf, 0);
         }
+        buffer_write_u8(buf, b->data.industry.is_stockpiling);
         buffer_write_u8(buf, b->data.industry.has_fish);
         for (int i = 0; i < 14; i++) {
             buffer_write_u8(buf, 0);
@@ -130,7 +131,6 @@ static void write_type_data(buffer *buf, const building *b)
             buffer_write_u8(buf, 0);
         }
     }
-    buffer_write_u8(buf, b->data.industry.is_stockpiling);
 }
 
 void building_state_save_to_buffer(buffer *buf, const building *b)
@@ -303,7 +303,8 @@ static void read_type_data(buffer *buf, building *b, int building_buf_size)
         b->data.dock.trade_ship_id = buffer_read_i16(buf);
     } else if (is_industry_type(b)) {
         b->data.industry.progress = buffer_read_i16(buf);
-        buffer_skip(buf, 12);
+        buffer_skip(buf, 11);
+        b->data.industry.is_stockpiling = buffer_read_u8(buf);
         b->data.industry.has_fish = buffer_read_u8(buf);
         buffer_skip(buf, 14);
         b->data.industry.blessing_days_left = buffer_read_u8(buf);
@@ -320,10 +321,6 @@ static void read_type_data(buffer *buf, building *b, int building_buf_size)
         b->data.entertainment.days2 = buffer_read_u8(buf);
         b->data.entertainment.play = buffer_read_u8(buf);
         buffer_skip(buf, 12);
-    }
-
-    if (building_buf_size >= BUILDING_STATE_RESOURCE_STOCKPILING) {
-        b->data.industry.is_stockpiling = buffer_read_u8(buf);
     }
 }
 
