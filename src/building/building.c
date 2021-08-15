@@ -2,6 +2,7 @@
 
 #include "building/building_state.h"
 #include "building/building_variant.h"
+#include "building/industry.h"
 #include "building/menu.h"
 #include "building/monument.h"
 #include "building/properties.h"
@@ -14,7 +15,6 @@
 #include "core/array.h"
 #include "core/log.h"
 #include "figure/formation_legion.h"
-#include "industry.h"
 #include "game/difficulty.h"
 #include "game/resource.h"
 #include "game/undo.h"

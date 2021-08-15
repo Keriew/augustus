@@ -1124,7 +1124,7 @@ static void toggle_partial_resource_state(int index, int param2)
 
 static void button_stockpiling(int param1, int param2)
 {
-    building* b = building_get(data.building_id);
+    building *b = building_get(data.building_id);
     if (building_is_primary_product_producer(b->type)) {
         building_stockpiling_toggle(b);
     }
