@@ -373,7 +373,7 @@ static translation_string all_strings[] = {
     {TR_MAP_EDITOR_OPTIONS, "Impostazioni scenario" },
     {TR_BUTTON_GO_TO_SITE, "Vai alla posizione" },
     {TR_RETURN_ALL_TO_FORT, "Ritorna tutti" },
-    {TR_OPTION_MENU_COST, "Questo costerà"}
+    {TR_OPTION_MENU_COST, "Questo costerà"},
     {TR_CONFIG_ARE_YOU_SURE, "Sei sicuro?"},
     {TR_CONFIG_YOU_WILL_LOSE_YOUR_CONFIGS, "Perderai tutte le impostazioni personalizzate"},
     {TR_CONFIG_YOU_WILL_LOSE_YOUR_HOTKEYS, "Perderai tutte le tue scorciatoie da tastiera"},
