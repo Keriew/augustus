@@ -956,6 +956,10 @@ else()
         install(TARGETS ${SHORT_NAME} RUNTIME DESTINATION bin)
     endif()
 
+    if(MSVC)
+       target_link_libraries(${SHORT_NAME} dbghelp shlwapi)
+    endif()
+
     if(UNIX AND NOT APPLE)
         install(FILES "res/augustus.desktop" DESTINATION "share/applications" RENAME "com.github.keriew.augustus.desktop")
         install(FILES "res/augustus.metainfo.xml" DESTINATION "share/metainfo" RENAME "com.github.keriew.augustus.metainfo.xml")
