@@ -1,6 +1,6 @@
 #include "SDL.h"
 
-#include "core/backtrace.h"
+#include "platform/backtrace.h"
 #include "core/config.h"
 #include "core/encoding.h"
 #include "core/file.h"
@@ -60,14 +60,6 @@ static struct {
     int active;
     int quit;
 } data = {1, 0};
-
-static void exit_with_status(int status)
-{
-#ifdef __EMSCRIPTEN__
-    EM_ASM(Module.quitGame($0), status);
-#endif
-    exit(status);
-}
 
 #if defined(_WIN32) || defined(__vita__) || defined(__SWITCH__) || defined(__ANDROID__)
 /* Log to separate file on windows, since we don't have a console there */

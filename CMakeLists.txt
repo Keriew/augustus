@@ -229,9 +229,20 @@ elseif (${TARGET_PLATFORM} STREQUAL "android")
     )
 endif()
 
+if (WIN32)
+    set(PLATFORM_FILES
+        ${PLATFORM_FILES}
+        ${PROJECT_SOURCE_DIR}/src/platform/windows/backtrace.c
+    )
+else()
+    set(PLATFORM_FILES
+        ${PLATFORM_FILES}
+        ${PROJECT_SOURCE_DIR}/src/platform/posix/backtrace.c
+    )
+endif()
+
 set(CORE_FILES
     ${PROJECT_SOURCE_DIR}/src/core/array.c
-    ${PROJECT_SOURCE_DIR}/src/core/backtrace.c
     ${PROJECT_SOURCE_DIR}/src/core/buffer.c
     ${PROJECT_SOURCE_DIR}/src/core/calc.c
     ${PROJECT_SOURCE_DIR}/src/core/config.c
@@ -956,7 +967,7 @@ else()
         install(TARGETS ${SHORT_NAME} RUNTIME DESTINATION bin)
     endif()
 
-    if(MSVC)
+    if(WIN32)
        target_link_libraries(${SHORT_NAME} dbghelp shlwapi)
     endif()
 
