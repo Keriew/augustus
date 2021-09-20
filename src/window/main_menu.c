@@ -25,6 +25,13 @@
 
 #define MAX_BUTTONS 6
 
+enum main_menu_id { mm_id_new_career = 1,
+                    mm_id_load_file = 2,
+                    mm_id_city_editor = 3,
+                    mm_id_mission_editor = 4,
+                    mm_id_options = 5,
+                    mm_id_exit_dlg = 6};
+
 static void button_click(int type, int param2);
 
 static struct {
@@ -33,12 +40,12 @@ static struct {
 } data;
 
 static generic_button buttons[] = {
-    {192, 130, 256, 25, button_click, button_none, 1, 0},
-    {192, 170, 256, 25, button_click, button_none, 2, 0},
-    {192, 210, 256, 25, button_click, button_none, 3, 0},
-    {192, 250, 256, 25, button_click, button_none, 4, 0},
-    {192, 290, 256, 25, button_click, button_none, 5, 0},
-    {192, 330, 256, 25, button_click, button_none, 6, 0},
+    {192, 130, 256, 25, button_click, button_none, mm_id_new_career, 0},
+    {192, 170, 256, 25, button_click, button_none, mm_id_load_file, 0},
+    {192, 210, 256, 25, button_click, button_none, mm_id_city_editor, 0},
+    {192, 250, 256, 25, button_click, button_none, mm_id_mission_editor, 0},
+    {192, 290, 256, 25, button_click, button_none, mm_id_options, 0},
+    {192, 330, 256, 25, button_click, button_none, mm_id_exit_dlg, 0},
 };
 
 static void draw_version_string(void)
@@ -112,22 +119,22 @@ static void confirm_exit(int accepted, int checked)
 
 static void button_click(int type, int param2)
 {
-    if (type == 1) {
+    if (type == mm_id_new_career) {
         window_new_career_show();
-    } else if (type == 2) {
+    } else if (type == mm_id_load_file) {
         window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_LOAD);
-    } else if (type == 3) {
+    } else if (type == mm_id_city_editor) {
         window_cck_selection_show();
-    } else if (type == 4) {
+    } else if (type == mm_id_mission_editor) {
         if (!editor_is_present() || !game_init_editor()) {
             window_plain_message_dialog_show(
                 TR_NO_EDITOR_TITLE, TR_NO_EDITOR_MESSAGE, 1);
         } else {
             sound_music_play_editor();
         }
-    } else if (type == 5) {
+    } else if (type == mm_id_options) {
         window_config_show(CONFIG_FIRST_PAGE, 1);
-    } else if (type == 6) {
+    } else if (type == mm_id_exit_dlg) {
         window_popup_dialog_show(POPUP_DIALOG_QUIT, confirm_exit, 1);
     }
 }

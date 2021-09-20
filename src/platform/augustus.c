@@ -12,6 +12,7 @@
 #include "graphics/screen.h"
 #include "input/mouse.h"
 #include "input/touch.h"
+#include "input/hotkey.h"
 #include "platform/arguments.h"
 #include "platform/file_manager.h"
 #include "platform/joystick.h"
@@ -237,7 +238,6 @@ static void handle_window_event(SDL_WindowEvent *event, int *window_active)
             SDL_Log("Window move to coordinates x: %d y: %d\n", (int) event->data1, (int) event->data2);
             platform_screen_move(event->data1, event->data2);
             break;
-
         case SDL_WINDOWEVENT_SHOWN:
             SDL_Log("Window %d shown", (unsigned int) event->windowID);
             *window_active = 1;
@@ -318,7 +318,7 @@ static void handle_event(SDL_Event *event)
             break;
 
         case SDL_QUIT:
-            data.quit = 1;
+            hotkey_handle_escape();
             break;
 
         case SDL_USEREVENT:
