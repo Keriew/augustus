@@ -94,7 +94,13 @@ static int compare_modified_time(const void *va, const void *vb)
     const dir_entry* a = (const dir_entry*) va;
     const dir_entry* b = (const dir_entry*) vb;
 
-    return a->modified_time < b->modified_time;
+        if (a->modified_time < b->modified_time) {
+        return 1;
+    } else if (a->modified_time == b->modified_time) {
+        return 0;
+    } else {
+        return -1;
+    }
 }
 
 void dir_sort_by_modified_time(void)
