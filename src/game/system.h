@@ -188,5 +188,6 @@ void system_setup_crash_handler(void);
  * Exit the game
  */
 void system_exit(void);
+void system_toggle_console(void);
 
 #endif // GAME_SYSTEM_H

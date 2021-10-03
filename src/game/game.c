@@ -187,10 +187,17 @@ void game_run(void)
     }
 }
 
-void game_draw(void)
+static int need_force_draw = 0;
+void game_draw()
 {
-    window_draw(0);
+    window_draw(need_force_draw);
     sound_city_play();
+
+    need_force_draw = 0;
+}
+
+void game_force_draw() {
+    need_force_draw = 1;
 }
 
 void game_exit(void)

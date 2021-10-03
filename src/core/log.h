@@ -22,4 +22,7 @@ void log_info(const char *msg, const char *param_str, int param_int);
  */
 void log_error(const char *msg, const char *param_str, int param_int);
 
+void log_window_init();
+void log_window_draw();
+
 #endif // CORE_DEBUG_H
