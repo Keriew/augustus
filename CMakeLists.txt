@@ -189,6 +189,11 @@ set(ZLIB_FILES
     ext/zlib/zutil.c
 )
 
+file(GLOB MUJS_HEADERS_LIST ${PROJECT_SOURCE_DIR}/src/mujs/*.h)
+file(GLOB MUSJ_SOURCES_LIST ${PROJECT_SOURCE_DIR}/src/mujs/*.c)
+
+file(GLOB JSVM_SOURCES_LIST ${PROJECT_SOURCE_DIR}/src/jsvm/*.c)
+
 set(PLATFORM_FILES
     ${PROJECT_SOURCE_DIR}/src/platform/arguments.c
     ${PROJECT_SOURCE_DIR}/src/platform/augustus.c
@@ -678,6 +683,8 @@ set(SOURCE_FILES
     ${TINYFD_FILES}
     ${PROJECT_SOURCE_DIR}/res/augustus.rc
     ${MACOSX_FILES}
+    ${MUSJ_SOURCES_LIST}
+    ${JSVM_SOURCES_LIST}
 )
 
 if(${TARGET_PLATFORM} STREQUAL "emscripten" AND EMSCRIPTEN_LOAD_SDL_PORTS)
@@ -853,6 +860,7 @@ endif()
 
 include_directories(ext)
 include_directories(src)
+include_directories(src/mujs)
 if(MSVC)
     include_directories(ext/dirent)
 endif()

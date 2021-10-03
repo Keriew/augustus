@@ -448,6 +448,10 @@ void hotkey_key_released(key_type key, key_modifier_type modifiers)
     if (key == KEY_TYPE_NONE) {
         return;
     }
+    if (key == KEY_TYPE_GRAVE) {
+        system_toggle_console();
+        return;
+    }
     for (int i = 0; i < data.num_arrows; i++) {
         arrow_definition *arrow = &data.arrows[i];
         if (arrow->key == key) {

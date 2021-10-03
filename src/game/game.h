@@ -12,6 +12,7 @@ int game_reload_language(void);
 void game_run(void);
 
 void game_draw(void);
+void game_force_draw();
 
 void game_exit_editor(void);
 

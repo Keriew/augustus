@@ -4,7 +4,9 @@
 #include "core/encoding.h"
 #include "core/file.h"
 #include "core/lang.h"
+#include "core/log.h"
 #include "core/time.h"
+#include "jsvm/jsvm.h"
 #include "game/game.h"
 #include "game/settings.h"
 #include "game/system.h"
@@ -19,6 +21,7 @@
 #include "platform/prefs.h"
 #include "platform/screen.h"
 #include "platform/touch.h"
+#include "window/main_menu.h"
 
 #include "tinyfiledialogs/tinyfiledialogs.h"
 
@@ -58,7 +61,8 @@ enum {
 static struct {
     int active;
     int quit;
-} data = {1, 0};
+    int console;
+} data = {1, 0, 0};
 
 #if defined(_WIN32) || defined(__vita__) || defined(__SWITCH__) || defined(__ANDROID__)
 /* Log to separate file on windows, since we don't have a console there */
@@ -109,6 +113,11 @@ static void post_event(int code)
 void system_exit(void)
 {
     post_event(USER_EVENT_QUIT);
+}
+
+void system_toggle_console(void) {
+    data.console = !data.console;
+    game_force_draw();
 }
 
 void system_resize(int width, int height)
@@ -189,8 +198,13 @@ static void run_and_draw(void)
     game_run();
     game_draw();
 
+    if (data.console)
+        log_window_draw();
+
     platform_screen_update();
     platform_screen_render();
+
+    js_vm_sync();
 }
 #endif
 
@@ -393,6 +407,7 @@ static int init_sdl(void)
     SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
 #endif
     SDL_Log("SDL initialized");
+    log_window_init();
     return 1;
 }
 
@@ -511,6 +526,7 @@ static void setup(const julius_args *args)
 {
     system_setup_crash_handler();
     setup_logging();
+    js_vm_setup();
 
     SDL_Log("Augustus version %s", system_version());
 
