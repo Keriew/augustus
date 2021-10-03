@@ -22,4 +22,8 @@ void log_info(const char *msg, const char *param_str, int param_int);
  */
 void log_error(const char *msg, const char *param_str, int param_int);
 
+const char *log_history_get_line(unsigned int line);
+void log_history_clear(void);
+unsigned int log_history_capacity(void);
+
 #endif // CORE_DEBUG_H

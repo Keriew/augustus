@@ -71,6 +71,8 @@ typedef uint32_t color_t;
 
 #define COLOR_COMPONENT(c, shift) (((c) >> (shift)) & 0xff)
 
+#define COLOR_WINDOW_LOG_BACKGROUND 0x800055ff
+
 // Note: for the blending functions to work properly, variables must be of type color_t
 
 #define COLOR_MIX_ALPHA(alpha_src, alpha_dst) ((alpha_src) + (((alpha_dst) * (0xff - (alpha_src))) >> 8))

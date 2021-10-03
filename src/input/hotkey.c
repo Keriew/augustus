@@ -364,7 +364,7 @@ void hotkey_install_mapping(hotkey_mapping *mappings, int num_mappings)
     for (int i = 0; i < num_mappings; i++) {
         hotkey_action action = mappings[i].action;
         if (action == HOTKEY_ARROW_UP || action == HOTKEY_ARROW_DOWN ||
-            action == HOTKEY_ARROW_LEFT || action == HOTKEY_ARROW_RIGHT) {
+                action == HOTKEY_ARROW_LEFT || action == HOTKEY_ARROW_RIGHT) {
             total_arrows++;
         } else {
             total_definitions++;
@@ -392,7 +392,7 @@ void hotkey_install_mapping(hotkey_mapping *mappings, int num_mappings)
     for (int i = 0; i < num_mappings; i++) {
         hotkey_action action = mappings[i].action;
         if (action == HOTKEY_ARROW_UP || action == HOTKEY_ARROW_DOWN ||
-            action == HOTKEY_ARROW_LEFT || action == HOTKEY_ARROW_RIGHT) {
+                action == HOTKEY_ARROW_LEFT || action == HOTKEY_ARROW_RIGHT) {
             add_arrow(&mappings[i]);
         } else {
             add_definition(&mappings[i]);
@@ -446,6 +446,10 @@ void hotkey_key_released(key_type key, key_modifier_type modifiers)
         return;
     }
     if (key == KEY_TYPE_NONE) {
+        return;
+    }
+    if (key == KEY_TYPE_GRAVE) {
+        system_toggle_console();
         return;
     }
     for (int i = 0; i < data.num_arrows; i++) {

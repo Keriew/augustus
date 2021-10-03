@@ -187,7 +187,7 @@ void game_run(void)
     }
 }
 
-void game_draw(void)
+void game_draw()
 {
     window_draw(0);
     sound_city_play();
