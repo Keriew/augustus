@@ -22,8 +22,6 @@ int building_warehouse_get_amount(building *warehouse, int resource);
 
 int building_warehouse_add_resource(building *b, int resource);
 
-
-
 int building_warehouse_is_accepting(int resource, building *b);
 int building_warehouse_is_getting(int resource, building *b);
 int building_warehouse_is_not_accepting(int resource, building *b);

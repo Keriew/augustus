@@ -43,6 +43,11 @@ void city_overlay_problems_prepare_building(building *b)
         return;
     }
 
+    if (b->sickness_level || b->ruin_has_plague) {
+        b->show_on_problem_overlay = 1;
+        return;
+    }
+
     if (b->state == BUILDING_STATE_MOTHBALLED) {
         b->show_on_problem_overlay = 1;
         return;

@@ -30,6 +30,9 @@ static void destroy_on_fire(building *b, int plagued)
     int was_tent = b->house_size && b->subtype.house_level <= HOUSE_LARGE_TENT;
     b->house_population = 0;
     b->house_size = 0;
+    b->sickness_level = 0;
+    b->sickness_last_doctor_cure = 0;
+    b->sickness_duration = 0;
     b->output_resource_id = 0;
     b->distance_from_entry = 0;
     building_clear_related_data(b);

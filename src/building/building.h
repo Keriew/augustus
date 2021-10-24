@@ -177,6 +177,9 @@ typedef struct building {
     unsigned char variant;
     unsigned char upgrade_level;
     unsigned char strike_duration_days;
+    unsigned char sickness_level;
+    unsigned char sickness_duration;
+    unsigned char sickness_last_doctor_cure;
 } building;
 
 building *building_get(int id);

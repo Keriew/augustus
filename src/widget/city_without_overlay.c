@@ -338,7 +338,11 @@ static void draw_figures(int x, int y, int grid_offset)
 static void draw_dock_workers(const building *b, int x, int y, color_t color_mask)
 {
     int num_dockers = building_dock_count_idle_dockers(b);
-    if (num_dockers > 0) {
+
+    // draw skull over dock
+    if (b->ruin_has_plague) {
+        image_draw_masked(image_group(GROUP_PLAGUE_SKULL), x + 88, y - 86, color_mask);
+    } else if (num_dockers > 0) {
         int image_dock = map_image_at(b->grid_offset);
         int image_dockers = image_group(GROUP_BUILDING_DOCK_DOCKERS);
         if (image_dock == image_group(GROUP_BUILDING_DOCK_1)) {
@@ -375,12 +379,17 @@ static int get_warehouse_flag_image_id(const building *b)
 
 static void draw_warehouse_flag(const building *b, int x, int y, color_t color_mask)
 {
-    int image_id = get_warehouse_flag_image_id(b);
-    if (!image_id) {
-        return;
+    // draw skull over warehouse
+    if (b->ruin_has_plague) {
+        image_draw_masked(image_group(GROUP_PLAGUE_SKULL), x + 14, y - 84, color_mask);
+    } else {
+        int image_id = get_warehouse_flag_image_id(b);
+        if (!image_id) {
+            return;
+        }
+        image_id += b->data.warehouse.flag_frame;
+        image_draw_masked(image_id, x + 19, y - 56, color_mask);
     }
-    image_id += b->data.warehouse.flag_frame;
-    image_draw_masked(image_id, x + 19, y - 56, color_mask);
 }
 
 static void draw_warehouse_ornaments(const building *b, int x, int y, color_t color_mask)
@@ -391,9 +400,15 @@ static void draw_warehouse_ornaments(const building *b, int x, int y, color_t co
 static void draw_granary_stores(const image *img, const building *b, int x, int y, color_t color_mask)
 {
     image_draw_masked(image_group(GROUP_BUILDING_GRANARY) + 1,
-        x + img->sprite_offset_x,
-        y + 60 + img->sprite_offset_y - img->height,
-        color_mask);
+                      x + img->sprite_offset_x,
+                      y + 60 + img->sprite_offset_y - img->height,
+                      color_mask);
+
+    // draw skull over granary
+    if (b->ruin_has_plague) {
+        image_draw_masked(image_group(GROUP_PLAGUE_SKULL), x + 80, y - 130, color_mask);
+    }
+
     if (b->data.granary.resource_stored[RESOURCE_NONE] < FULL_GRANARY) {
         image_draw_masked(image_group(GROUP_BUILDING_GRANARY) + 2, x + 33, y - 60, color_mask);
     }
