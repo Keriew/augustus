@@ -10,7 +10,11 @@
 #include "platform/platform.h"
 #include "platform/vita/vita.h"
 
+#ifndef BUILDING_ASSET_PACKER
 #include "SDL.h"
+#else
+#define SDL_VERSION_ATLEAST(x, y, z) 0
+#endif
 
 #include <dirent.h>
 #include <stdlib.h>
@@ -143,7 +147,7 @@ static char assets_directory[FILE_NAME_MAX];
 
 static int write_base_path_to(char *dest)
 {
-#if SDL_VERSION_ATLEAST(2, 0, 1)
+#if !defined(BUILDING_ASSET_PACKER) && SDL_VERSION_ATLEAST(2, 0, 1)
     if (!platform_sdl_version_at_least(2, 0, 1)) {
         return 0;
     }

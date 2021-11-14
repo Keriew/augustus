@@ -115,6 +115,7 @@ int png_read(const char *path, color_t *pixels, int x_offset, int y_offset, int 
             if (!load_png(path)) {
                 return 0;
             }
+            strncpy(data.last_png.path, path, FILE_NAME_MAX - 1);
             data.last_png.width = png_get_image_width(data.png_ptr, data.info_ptr);
             data.last_png.height = png_get_image_height(data.png_ptr, data.info_ptr);
         }

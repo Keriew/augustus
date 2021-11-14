@@ -25,18 +25,20 @@ static void load_dummy_layer(layer *l)
 
 void layer_load(layer *l)
 {
-    const image *layer_image = image_get(l->original_image_id);
+#ifndef BUILDING_ASSET_PACKER
+    const image *layer_image = image_get(l->calculated_image_id);
     if (layer_image->draw.type == IMAGE_TYPE_EXTRA_ASSET) {
         // Ugly const removal. The only other way would be to memcpy the image data.
         // That's a waste of ram, and we're not going to change l->data anyway
-        l->data = (color_t *) image_data(l->original_image_id);
+        l->data = (color_t *) image_data(l->calculated_image_id);
         l->is_asset_image_reference = 1;
         if (!l->data) {
-            log_error("Problem loading layer from image id", 0, l->original_image_id);
+            log_error("Problem loading layer from image id", 0, l->calculated_image_id);
             load_dummy_layer(l);
         }
         return;
     }
+#endif
     int size = l->width * l->height * sizeof(color_t);
     l->data = malloc(size);
     if (!l->data) {
@@ -53,26 +55,33 @@ void layer_load(layer *l)
         }
         return;
     }
+#ifndef BUILDING_ASSET_PACKER
     graphics_set_custom_canvas(l->data, l->width, l->height);
     if (layer_image->draw.type == IMAGE_TYPE_ISOMETRIC) {
         int tiles = (l->width + 2) / 60;
         int y_offset = l->height - 30 * tiles;
         y_offset += 15 * tiles - 15;
         if (l->part & PART_FOOTPRINT) {
-            image_draw_isometric_footprint_from_draw_tile(l->original_image_id, 0, y_offset, 0);
+            image_draw_isometric_footprint_from_draw_tile(l->calculated_image_id, 0, y_offset, 0);
         }
         if (l->part & PART_TOP) {
-            image_draw_isometric_top_from_draw_tile(l->original_image_id, 0, y_offset, 0);
+            image_draw_isometric_top_from_draw_tile(l->calculated_image_id, 0, y_offset, 0);
         }
     } else {
-        image_draw(l->original_image_id, 0, 0);
+        image_draw(l->calculated_image_id, 0, 0);
     }
     graphics_restore_original_canvas();
+#endif
 }
 
 void layer_unload(layer *l)
 {
     free(l->asset_image_path);
+#ifdef BUILDING_ASSET_PACKER
+    free(l->original_path);
+    free(l->original_image_group);
+    free(l->original_image_id);
+#endif
     if (!l->is_asset_image_reference) {
         free(l->data);
     }
@@ -81,6 +90,11 @@ void layer_unload(layer *l)
     } else {
         l->data = 0;
         l->asset_image_path = 0;
+#ifdef BUILDING_ASSET_PACKER
+        l->original_path = 0;
+        l->original_image_group = 0;
+        l->original_image_id = 0;
+#endif
     }
 }
 
@@ -110,6 +124,22 @@ color_t layer_get_color_for_image_position(const layer *l, int x, int y)
     return l->data[y * l->width + x];
 }
 
+#ifdef BUILDING_ASSET_PACKER
+static char *copy_attribute(const char *attribute)
+{
+    if (!attribute) {
+        return 0;
+    }
+    char *dest = malloc((strlen(attribute) + 1) * sizeof(char));
+    if (!dest) {
+        log_error("There was no memory to copy the attribute", attribute, 0);
+        return 0;
+    }
+    strncpy(dest, attribute, strlen(attribute) + 1);
+    return dest;
+}
+#endif
+
 layer *layer_add_from_image_path(layer *l, const char *path,
     int src_x, int src_y, int offset_x, int offset_y, int width, int height)
 {
@@ -121,7 +151,15 @@ layer *layer_add_from_image_path(layer *l, const char *path,
     l->width = width;
     l->height = height;
     l->asset_image_path = malloc(FILE_NAME_MAX * sizeof(char));
-    xml_get_full_image_path(l->asset_image_path, path);
+    if (path) {
+        xml_get_full_image_path(l->asset_image_path, path);
+    } else {
+        snprintf(l->asset_image_path, FILE_NAME_MAX, "%s.png", group_get_current()->name);
+    }
+
+#ifdef BUILDING_ASSET_PACKER
+    l->original_path = copy_attribute(path);
+#endif
     if ((!l->width || !l->height) && !png_get_image_size(l->asset_image_path, &l->width, &l->height)) {
         log_info("Unable to load image", path, 0);
         layer_unload(l);
@@ -141,19 +179,25 @@ layer *layer_add_from_image_id(layer *l, const char *group_id, const char *image
     l->src_y = 0;
     l->width = 0;
     l->height = 0;
+    l->x_offset = offset_x;
+    l->y_offset = offset_y;
+#ifdef BUILDING_ASSET_PACKER
+    l->original_image_group = copy_attribute(group_id);
+    l->original_image_id = copy_attribute(image_id);
+#else
     const image *original_image = 0;
     if (strcmp(group_id, "this") == 0) {
         const image_groups *group = group_get_current();
         const asset_image *image = asset_image_get_from_id(group->first_image_index);
         while (image && image->index <= group->last_image_index) {
             if (strcmp(image->id, image_id) == 0) {
-                l->original_image_id = image->index + MAIN_ENTRIES;
+                l->calculated_image_id = image->index + MAIN_ENTRIES;
                 original_image = &image->img;
                 break;
             }
             image = asset_image_get_from_id(image->index + 1);
         }
-        if (!l->original_image_id) {
+        if (!l->calculated_image_id) {
             log_error("Unable to find image on current group with id", image_id, 0);
             layer_unload(l);
             return 0;
@@ -161,8 +205,8 @@ layer *layer_add_from_image_id(layer *l, const char *group_id, const char *image
     } else {
         int group = string_to_int(string_from_ascii(group_id));
         int id = image_id ? string_to_int(string_from_ascii(image_id)) : 0;
-        l->original_image_id = image_group(group) + id;
-        original_image = image_get(l->original_image_id);
+        l->calculated_image_id = image_group(group) + id;
+        original_image = image_get(l->calculated_image_id);
     }
     if (!original_image) {
         log_error("Unable to find image for group id", group_id, 0);
@@ -171,7 +215,6 @@ layer *layer_add_from_image_id(layer *l, const char *group_id, const char *image
     }
     l->width = original_image->width;
     l->height = original_image->height;
-    l->x_offset = offset_x;
-    l->y_offset = offset_y;
+#endif
     return l;
 }

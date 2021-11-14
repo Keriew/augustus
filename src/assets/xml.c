@@ -106,7 +106,7 @@ static void xml_start_assetlist_element(const char **attributes)
 static void xml_start_image_element(const char **attributes)
 {
     int total_attributes = count_xml_attributes(attributes);
-    if (total_attributes < 2 || total_attributes > 10 || total_attributes % 2) {
+    if (total_attributes > 10 || total_attributes % 2) {
         data.error = 1;
         return;
     }
@@ -308,21 +308,24 @@ static void xml_start_frame_element(const char **attributes)
         }
     }
     img->last_layer = &img->first_layer;
-    if (!path && !(group && id)) {
+    if (!asset_image_add_layer(img, path, group, id, src_x, src_y,
+        0, 0, img->img.width, img->img.height, INVERT_NONE, ROTATE_NONE, PART_BOTH)) {
         img->active = 0;
         return;
     }
-    asset_image_add_layer(img, path, group, id, src_x, src_y,
-        0, 0, img->img.width, img->img.height, INVERT_NONE, ROTATE_NONE, PART_BOTH);
     img->img.draw.data_length = img->img.width * img->img.height * sizeof(color_t);
     img->img.draw.uncompressed_length = img->img.draw.data_length;
+#ifndef BUILDING_ASSET_PACKER
     if (!img->img.draw.data_length) {
         asset_image_unload(img);
         return;
     }
     img->img.draw.type = IMAGE_TYPE_EXTRA_ASSET;
     asset_image_load(img);
-
+#else
+    data.current_image->has_frame_elements = 1;
+#endif
+    data.current_group->last_image_index = img->index;
     data.current_image->img.num_animation_sprites++;
 }
 
@@ -334,6 +337,7 @@ static void xml_end_assetlist_element(void)
 
 static void xml_end_image_element(void)
 {
+#ifndef BUILDING_ASSET_PACKER
     image *img = &data.current_image->img;
     img->draw.data_length = img->width * img->height * sizeof(color_t);
     img->draw.uncompressed_length = img->draw.data_length;
@@ -345,6 +349,7 @@ static void xml_end_image_element(void)
     if (img->draw.data_length < IMAGE_PRELOAD_MAX_SIZE) {
         asset_image_load(data.current_image);
     }
+#endif
 }
 
 static void xml_end_layer_element(void)
@@ -443,6 +448,11 @@ void xml_process_assetlist_file(const char *xml_file_name)
     if (data.current_group && (data.error || !data.finished)) {
         group_unload_current();
     }
+#ifdef BUILDING_ASSET_PACKER
+    else {
+        strncpy(group_get_current()->path, xml_file_name, XML_STRING_MAX_LENGTH - 1);
+    }
+#endif
 
     clear_xml_info();
 

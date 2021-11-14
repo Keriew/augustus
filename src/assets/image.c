@@ -95,9 +95,18 @@ int asset_image_load(asset_image *img)
     return 1;
 }
 
+static inline int layer_is_empty(const layer *l)
+{
+#ifndef BUILDING_ASSET_PACKER
+    return !l->width && !l->height;
+#else
+    return !l->original_image_group && !l->original_image_id && !l->original_path;
+#endif
+}
+
 static layer *create_layer_for_image(asset_image *img)
 {
-    if (!img->last_layer->width || !img->last_layer->height) {
+    if (layer_is_empty(img->last_layer)) {
         return img->last_layer;
     }
     layer *l = malloc(sizeof(layer));
@@ -117,13 +126,10 @@ int asset_image_add_layer(asset_image *img,
 {
     layer *current_layer = create_layer_for_image(img);
 
-    if (path) {
-        current_layer = layer_add_from_image_path(current_layer, path, src_x, src_y, offset_x, offset_y, width, height);
-    } else if (group_id) {
+    if (group_id) {
         current_layer = layer_add_from_image_id(current_layer, group_id, image_id, offset_x, offset_y);
     } else {
-        layer_unload(current_layer);
-        return 0;
+        current_layer = layer_add_from_image_path(current_layer, path, src_x, src_y, offset_x, offset_y, width, height);
     }
     if (!current_layer) {
         return 0;
@@ -137,6 +143,11 @@ int asset_image_add_layer(asset_image *img,
     current_layer->invert = invert;
     current_layer->rotate = rotate;
     current_layer->part = part;
+#ifdef BUILDING_ASSET_PACKER
+    if (img->last_layer != current_layer) {
+        img->last_layer->next = current_layer;
+    }
+#endif
     img->last_layer = current_layer;
     return 1;
 }

@@ -26,7 +26,7 @@ typedef enum {
 
 typedef struct layer {
     char *asset_image_path;
-    int original_image_id;
+    int calculated_image_id;
     int src_x;
     int src_y;
     int x_offset;
@@ -39,6 +39,14 @@ typedef struct layer {
     int is_asset_image_reference;
     color_t *data;
     struct layer *prev;
+    // Extra layer information specific for the asset packer
+#ifdef BUILDING_ASSET_PACKER
+    struct layer *next;
+    char *original_path;
+    char *original_image_group;
+    char *original_image_id;
+#endif
+
 } layer;
 
 void layer_load(layer *l);

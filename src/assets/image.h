@@ -16,6 +16,9 @@ typedef struct {
     image img;
     color_t *data;
     int is_clone;
+#ifdef BUILDING_ASSET_PACKER
+    int has_frame_elements;
+#endif
 } asset_image;
 
 int asset_image_load(asset_image *img);
