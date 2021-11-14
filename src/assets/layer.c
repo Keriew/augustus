@@ -46,7 +46,7 @@ void layer_load(layer *l)
     }
     memset(l->data, 0, size);
     if (l->asset_image_path) {
-        if (!png_read(l->asset_image_path, l->data, l->width, l->height)) {
+        if (!png_read(l->asset_image_path, l->data, l->src_x, l->src_y, l->width, l->height)) {
             free(l->data);
             log_error("Problem loading layer from file", l->asset_image_path, 0);
             load_dummy_layer(l);
@@ -110,14 +110,19 @@ color_t layer_get_color_for_image_position(const layer *l, int x, int y)
     return l->data[y * l->width + x];
 }
 
-layer *layer_add_from_image_path(layer *l, const char *path, int offset_x, int offset_y)
+layer *layer_add_from_image_path(layer *l, const char *path,
+    int src_x, int src_y, int offset_x, int offset_y, int width, int height)
 {
     if (!l) {
         return 0;
     }
+    l->src_x = src_x;
+    l->src_y = src_y;
+    l->width = width;
+    l->height = height;
     l->asset_image_path = malloc(FILE_NAME_MAX * sizeof(char));
     xml_get_full_image_path(l->asset_image_path, path);
-    if (!png_get_image_size(l->asset_image_path, &l->width, &l->height)) {
+    if ((!l->width || !l->height) && !png_get_image_size(l->asset_image_path, &l->width, &l->height)) {
         log_info("Unable to load image", path, 0);
         layer_unload(l);
         return 0;
@@ -127,12 +132,13 @@ layer *layer_add_from_image_path(layer *l, const char *path, int offset_x, int o
     return l;
 }
 
-layer *layer_add_from_image_id(layer *l, const char *group_id, const char *image_id,
-    int offset_x, int offset_y)
+layer *layer_add_from_image_id(layer *l, const char *group_id, const char *image_id, int offset_x, int offset_y)
 {
     if (!l) {
         return 0;
     }
+    l->src_x = 0;
+    l->src_y = 0;
     l->width = 0;
     l->height = 0;
     const image *original_image = 0;

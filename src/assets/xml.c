@@ -17,16 +17,16 @@
 #define XML_BUFFER_SIZE 1024
 #define XML_MAX_DEPTH 4
 #define XML_MAX_ELEMENTS_PER_DEPTH 2
-#define XML_MAX_ATTRIBUTES 8
+#define XML_MAX_ATTRIBUTES 12
 #define XML_TAG_MAX_LENGTH 12
 
 static const char XML_FILE_ELEMENTS[XML_MAX_DEPTH][XML_MAX_ELEMENTS_PER_DEPTH][XML_TAG_MAX_LENGTH] = { { "assetlist" }, { "image" }, { "layer", "animation" }, { "frame" } };
 static const char XML_FILE_ATTRIBUTES[XML_MAX_DEPTH][XML_MAX_ELEMENTS_PER_DEPTH][XML_MAX_ATTRIBUTES][XML_TAG_MAX_LENGTH] = {
     { { "name" } }, // assetlist
     { { "id", "src", "width", "height", "group", "image" } }, // image
-    { { "src", "group", "image", "x", "y", "invert", "rotate", "part" }, // layer
+    { { "src", "group", "image", "src_x", "src_y", "x", "y", "width", "height", "invert", "rotate", "part" }, // layer
     { "frames", "speed", "reversible", "x", "y" } }, // animation
-    { { "src", "width", "height", "group", "image" } } // frame
+    { { "src", "src_x", "src_y", "width", "height", "group", "image" } } // frame
 };
 
 static void xml_start_assetlist_element(const char **attributes);
@@ -145,7 +145,7 @@ static void xml_start_image_element(const char **attributes)
     }
     img->last_layer = &img->first_layer;
     if (path || group) {
-        asset_image_add_layer(img, path, group, id, 0, 0, INVERT_NONE, ROTATE_NONE, PART_BOTH);
+        asset_image_add_layer(img, path, group, id, 0, 0, 0, 0, 0, 0, INVERT_NONE, ROTATE_NONE, PART_BOTH);
     }
 }
 
@@ -154,11 +154,15 @@ static void xml_start_layer_element(const char **attributes)
     const char *path = 0;
     const char *group = 0;
     const char *id = 0;
+    int src_x = 0;
+    int src_y = 0;
     int offset_x = 0;
     int offset_y = 0;
+    int width = 0;
+    int height = 0;
     asset_image *img = data.current_image;
     int total_attributes = count_xml_attributes(attributes);
-    if (total_attributes < 2 || total_attributes > 14 || total_attributes % 2) {
+    if (total_attributes < 2 || total_attributes > 22 || total_attributes % 2) {
         data.error = 1;
         return;
     }
@@ -176,12 +180,24 @@ static void xml_start_layer_element(const char **attributes)
             id = attributes[i + 1];
         }
         if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][3]) == 0) {
-            offset_x = string_to_int(string_from_ascii(attributes[i + 1]));
+            src_x = string_to_int(string_from_ascii(attributes[i + 1]));
         }
         if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][4]) == 0) {
-            offset_y = string_to_int(string_from_ascii(attributes[i + 1]));
+            src_y = string_to_int(string_from_ascii(attributes[i + 1]));
         }
         if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][5]) == 0) {
+            offset_x = string_to_int(string_from_ascii(attributes[i + 1]));
+        }
+        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][6]) == 0) {
+            offset_y = string_to_int(string_from_ascii(attributes[i + 1]));
+        }
+        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][7]) == 0) {
+            width = string_to_int(string_from_ascii(attributes[i + 1]));
+        }
+        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][8]) == 0) {
+            height = string_to_int(string_from_ascii(attributes[i + 1]));
+        }
+        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][9]) == 0) {
             if (strcmp(attributes[i + 1], "horizontal") == 0) {
                 invert = INVERT_HORIZONTAL;
             } else if (strcmp(attributes[i + 1], "vertical") == 0) {
@@ -190,7 +206,7 @@ static void xml_start_layer_element(const char **attributes)
                 invert = INVERT_BOTH;
             }
         }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][6]) == 0) {
+        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][10]) == 0) {
             if (strcmp(attributes[i + 1], "90") == 0) {
                 rotate = ROTATE_90_DEGREES;
             } else if (strcmp(attributes[i + 1], "180") == 0) {
@@ -199,7 +215,7 @@ static void xml_start_layer_element(const char **attributes)
                 rotate = ROTATE_270_DEGREES;
             }
         }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][7]) == 0) {
+        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][11]) == 0) {
             if (strcmp(attributes[i + 1], "footprint") == 0) {
                 part = PART_FOOTPRINT;
             } else if (strcmp(attributes[i + 1], "top") == 0) {
@@ -207,7 +223,8 @@ static void xml_start_layer_element(const char **attributes)
             }
         }
     }
-    if (!asset_image_add_layer(img, path, group, id, offset_x, offset_y, invert, rotate, part)) {
+    if (!asset_image_add_layer(img, path, group, id, src_x, src_y,
+        offset_x, offset_y, width, height, invert, rotate, part)) {
         log_info("Invalid layer for image", img->id, 0);
         return;
     }
@@ -265,20 +282,28 @@ static void xml_start_frame_element(const char **attributes)
     const char *path = 0;
     const char *group = 0;
     const char *id = 0;
+    int src_x = 0;
+    int src_y = 0;
     for (int i = 0; i < total_attributes; i += 2) {
         if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[3][0][0]) == 0) {
             path = attributes[i + 1];
         }
         if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[3][0][1]) == 0) {
-            img->img.width = string_to_int(string_from_ascii(attributes[i + 1]));
+            src_x = string_to_int(string_from_ascii(attributes[i + 1]));
         }
         if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[3][0][2]) == 0) {
-            img->img.height = string_to_int(string_from_ascii(attributes[i + 1]));
+            src_y = string_to_int(string_from_ascii(attributes[i + 1]));
         }
         if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[3][0][3]) == 0) {
-            group = attributes[i + 1];
+            img->img.width = string_to_int(string_from_ascii(attributes[i + 1]));
         }
         if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[3][0][4]) == 0) {
+            img->img.height = string_to_int(string_from_ascii(attributes[i + 1]));
+        }
+        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[3][0][5]) == 0) {
+            group = attributes[i + 1];
+        }
+        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[3][0][6]) == 0) {
             id = attributes[i + 1];
         }
     }
@@ -287,7 +312,8 @@ static void xml_start_frame_element(const char **attributes)
         img->active = 0;
         return;
     }
-    asset_image_add_layer(img, path, group, id, 0, 0, INVERT_NONE, ROTATE_NONE, PART_BOTH);
+    asset_image_add_layer(img, path, group, id, src_x, src_y,
+        0, 0, img->img.width, img->img.height, INVERT_NONE, ROTATE_NONE, PART_BOTH);
     img->img.draw.data_length = img->img.width * img->img.height * sizeof(color_t);
     img->img.draw.uncompressed_length = img->img.draw.data_length;
     if (!img->img.draw.data_length) {

@@ -44,7 +44,7 @@ static SDL_Surface *generate_cursor_surface(const cursor *c)
     color_t *pixels = cursor_surface->pixels;
     SDL_memset(pixels, 0, sizeof(color_t) * size * size);
     if (!config_get(CONFIG_SCREEN_COLOR_CURSORS) ||
-        !png_read(cursor_path, pixels, size, size)) {
+        !png_read(cursor_path, pixels, 0, 0, size, size)) {
         for (int y = 0; y < c->height; y++) {
             for (int x = 0; x < c->width; x++) {
                 pixels[y * size + x] = mouse_colors[c->data[y * c->width + x] - 32];
