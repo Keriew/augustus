@@ -4,8 +4,6 @@
 #include "assets/layer.h"
 #include "assets/xml.h"
 
-#define IMAGE_PRELOAD_MAX_SIZE 65535
-
 typedef struct {
     int index;
     int active;
@@ -18,6 +16,7 @@ typedef struct {
     int is_clone;
 #ifdef BUILDING_ASSET_PACKER
     int has_frame_elements;
+    int has_defined_size;
 #endif
 } asset_image;
 

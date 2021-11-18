@@ -108,14 +108,16 @@ color_t layer_get_color_for_image_position(const layer *l, int x, int y)
         x = y;
         y = temp;
     }
-    if (l->rotate == ROTATE_90_DEGREES || l->rotate == ROTATE_180_DEGREES) {
-        x = l->width - x;
-        y = l->height - y;
+    layer_invert_type invert = l->invert;
+    if (l->rotate == ROTATE_90_DEGREES) {
+        invert ^= INVERT_VERTICAL;
+    } else if (l->rotate == ROTATE_180_DEGREES) {
+        invert ^= INVERT_BOTH;
     }
-    if (l->invert & INVERT_HORIZONTAL) {
+    if (invert & INVERT_HORIZONTAL) {
         x = l->width - x - 1;
     }
-    if (l->invert & INVERT_VERTICAL) {
+    if (invert & INVERT_VERTICAL) {
         y = l->height - y - 1;
     }
     if (x < 0 || x >= l->width || y < 0 || y >= l->height) {

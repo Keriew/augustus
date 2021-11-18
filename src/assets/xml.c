@@ -126,20 +126,21 @@ static void xml_start_image_element(const char **attributes)
     for (int i = 0; i < total_attributes; i += 2) {
         if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[1][0][0]) == 0) {
             strncpy(img->id, attributes[i + 1], XML_STRING_MAX_LENGTH - 1);
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[1][0][1]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[1][0][1]) == 0) {
             path = attributes[i + 1];
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[1][0][2]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[1][0][2]) == 0) {
             img->img.width = string_to_int(string_from_ascii(attributes[i + 1]));
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[1][0][3]) == 0) {
+#ifdef BUILDING_ASSET_PACKER
+            img->has_defined_size = 1;
+#endif
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[1][0][3]) == 0) {
             img->img.height = string_to_int(string_from_ascii(attributes[i + 1]));
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[1][0][4]) == 0) {
+#ifdef BUILDING_ASSET_PACKER
+            img->has_defined_size = 1;
+#endif
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[1][0][4]) == 0) {
             group = attributes[i + 1];
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[1][0][5]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[1][0][5]) == 0) {
             id = attributes[i + 1];
         }
     }
@@ -172,32 +173,23 @@ static void xml_start_layer_element(const char **attributes)
     for (int i = 0; i < total_attributes; i += 2) {
         if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][0]) == 0) {
             path = attributes[i + 1];
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][1]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][1]) == 0) {
             group = attributes[i + 1];
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][2]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][2]) == 0) {
             id = attributes[i + 1];
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][3]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][3]) == 0) {
             src_x = string_to_int(string_from_ascii(attributes[i + 1]));
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][4]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][4]) == 0) {
             src_y = string_to_int(string_from_ascii(attributes[i + 1]));
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][5]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][5]) == 0) {
             offset_x = string_to_int(string_from_ascii(attributes[i + 1]));
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][6]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][6]) == 0) {
             offset_y = string_to_int(string_from_ascii(attributes[i + 1]));
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][7]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][7]) == 0) {
             width = string_to_int(string_from_ascii(attributes[i + 1]));
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][8]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][8]) == 0) {
             height = string_to_int(string_from_ascii(attributes[i + 1]));
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][9]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][9]) == 0) {
             if (strcmp(attributes[i + 1], "horizontal") == 0) {
                 invert = INVERT_HORIZONTAL;
             } else if (strcmp(attributes[i + 1], "vertical") == 0) {
@@ -205,8 +197,7 @@ static void xml_start_layer_element(const char **attributes)
             } else if (strcmp(attributes[i + 1], "both") == 0) {
                 invert = INVERT_BOTH;
             }
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][10]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][10]) == 0) {
             if (strcmp(attributes[i + 1], "90") == 0) {
                 rotate = ROTATE_90_DEGREES;
             } else if (strcmp(attributes[i + 1], "180") == 0) {
@@ -214,8 +205,7 @@ static void xml_start_layer_element(const char **attributes)
             } else if (strcmp(attributes[i + 1], "270") == 0) {
                 rotate = ROTATE_270_DEGREES;
             }
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][11]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][0][11]) == 0) {
             if (strcmp(attributes[i + 1], "footprint") == 0) {
                 part = PART_FOOTPRINT;
             } else if (strcmp(attributes[i + 1], "top") == 0) {
@@ -245,21 +235,17 @@ static void xml_start_animation_element(const char **attributes)
     for (int i = 0; i < total_attributes; i += 2) {
         if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][1][0]) == 0) {
             img->img.num_animation_sprites = string_to_int(string_from_ascii(attributes[i + 1]));
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][1][1]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][1][1]) == 0) {
             img->img.animation_speed_id = calc_bound(string_to_int(string_from_ascii(attributes[i + 1])), 0, 50);
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][1][2]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][1][2]) == 0) {
             const char *value = attributes[i + 1];
             if (strcmp(value, "true") == 0 || strcmp(value, "1") == 0 || strcmp(value, "reversible") == 0 ||
                 strcmp(value, "yes") == 0 || strcmp(value, "y") == 0) {
                 img->img.animation_can_reverse = 1;
             }
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][1][3]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][1][3]) == 0) {
             img->img.sprite_offset_x = string_to_int(string_from_ascii(attributes[i + 1]));
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][1][4]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[2][1][4]) == 0) {
             img->img.sprite_offset_y = string_to_int(string_from_ascii(attributes[i + 1]));
         }
     }
@@ -287,23 +273,17 @@ static void xml_start_frame_element(const char **attributes)
     for (int i = 0; i < total_attributes; i += 2) {
         if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[3][0][0]) == 0) {
             path = attributes[i + 1];
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[3][0][1]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[3][0][1]) == 0) {
             src_x = string_to_int(string_from_ascii(attributes[i + 1]));
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[3][0][2]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[3][0][2]) == 0) {
             src_y = string_to_int(string_from_ascii(attributes[i + 1]));
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[3][0][3]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[3][0][3]) == 0) {
             img->img.width = string_to_int(string_from_ascii(attributes[i + 1]));
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[3][0][4]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[3][0][4]) == 0) {
             img->img.height = string_to_int(string_from_ascii(attributes[i + 1]));
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[3][0][5]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[3][0][5]) == 0) {
             group = attributes[i + 1];
-        }
-        if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[3][0][6]) == 0) {
+        } else if (strcmp(attributes[i], XML_FILE_ATTRIBUTES[3][0][6]) == 0) {
             id = attributes[i + 1];
         }
     }
@@ -346,9 +326,7 @@ static void xml_end_image_element(void)
         return;
     }
     img->draw.type = IMAGE_TYPE_EXTRA_ASSET;
-    if (img->draw.data_length < IMAGE_PRELOAD_MAX_SIZE) {
-        asset_image_load(data.current_image);
-    }
+    asset_image_load(data.current_image);
 #endif
 }
 

@@ -134,11 +134,20 @@ int asset_image_add_layer(asset_image *img,
     if (!current_layer) {
         return 0;
     }
-    if (!img->img.width) {
-        img->img.width = current_layer->width;
-    }
-    if (!img->img.height) {
-        img->img.height = current_layer->height;
+    if (rotate == ROTATE_NONE || rotate == ROTATE_180_DEGREES) {
+        if (!img->img.width) {
+            img->img.width = current_layer->width;
+        }
+        if (!img->img.height) {
+            img->img.height = current_layer->height;
+        }
+    } else {
+        if (!img->img.width) {
+            img->img.width = current_layer->height;
+        }
+        if (!img->img.height) {
+            img->img.height = current_layer->width;
+        }
     }
     current_layer->invert = invert;
     current_layer->rotate = rotate;
