@@ -78,7 +78,6 @@ void layer_unload(layer *l)
 {
     free(l->asset_image_path);
 #ifdef BUILDING_ASSET_PACKER
-    free(l->original_path);
     free(l->original_image_group);
     free(l->original_image_id);
 #endif
@@ -91,7 +90,6 @@ void layer_unload(layer *l)
         l->data = 0;
         l->asset_image_path = 0;
 #ifdef BUILDING_ASSET_PACKER
-        l->original_path = 0;
         l->original_image_group = 0;
         l->original_image_id = 0;
 #endif
@@ -159,9 +157,6 @@ layer *layer_add_from_image_path(layer *l, const char *path,
         snprintf(l->asset_image_path, FILE_NAME_MAX, "%s.png", group_get_current()->name);
     }
 
-#ifdef BUILDING_ASSET_PACKER
-    l->original_path = copy_attribute(path);
-#endif
     if ((!l->width || !l->height) && !png_get_image_size(l->asset_image_path, &l->width, &l->height)) {
         log_info("Unable to load image", path, 0);
         layer_unload(l);

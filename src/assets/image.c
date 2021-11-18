@@ -100,7 +100,7 @@ static inline int layer_is_empty(const layer *l)
 #ifndef BUILDING_ASSET_PACKER
     return !l->width && !l->height;
 #else
-    return !l->original_image_group && !l->original_image_id && !l->original_path;
+    return !l->original_image_group && !l->original_image_id && !l->asset_image_path;
 #endif
 }
 

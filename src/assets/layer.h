@@ -42,7 +42,6 @@ typedef struct layer {
     // Extra layer information specific for the asset packer
 #ifdef BUILDING_ASSET_PACKER
     struct layer *next;
-    char *original_path;
     char *original_image_group;
     char *original_image_id;
 #endif

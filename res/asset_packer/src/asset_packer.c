@@ -25,10 +25,12 @@
 #include <sys/stat.h>
 #endif
 
-#define FORMAT_XML
+// #define FORMAT_XML
 
-#define IMAGE_SIZE 4096
-#define NEW_ASSETS_DIR "new_assets"
+#define ASSETS_IMAGE_SIZE 4096
+#define CURSOR_IMAGE_SIZE 256
+#define NEW_ASSETS_DIR "packed_assets"
+#define CURSORS_DIR "Color_Cursors"
 #define LINE_LENGTH 300
 #define BYTES_PER_PIXEL 4
 
@@ -43,6 +45,8 @@
 static const char *LAYER_PART[] = { "footprint", "top" };
 static const char *LAYER_ROTATE[] = { "90", "180", "270" };
 static const char *LAYER_INVERT[] = { "horizontal", "vertical", "both" };
+
+static char current_file[MAX_PATH];
 
 static color_t *final_image_pixels;
 static unsigned int final_image_width;
@@ -73,6 +77,7 @@ static void copy_asset_to_final_image(const layer *l, const image_packer_rect *r
         return;
     }
     if (!png_read(l->asset_image_path, layer_pixels, 0, 0, rect->input.width, rect->input.height)) {
+        free(layer_pixels);
         return;
     }
 
@@ -82,17 +87,17 @@ static void copy_asset_to_final_image(const layer *l, const image_packer_rect *r
             color_t* dst_pixel = &final_image_pixels[(y + rect->output.y) * final_image_width + rect->output.x];
             memcpy(dst_pixel, src_pixel, rect->input.width * sizeof(color_t));
         }
-   } else {
-       for (unsigned int y = 0; y < rect->input.height; y++) {
-           color_t* src_pixel = &layer_pixels[y * rect->input.width];
-           color_t* dst_pixel = &final_image_pixels[(rect->output.y + rect->input.width - 1) *
-               final_image_width + y + rect->output.x];
-           for (unsigned int x = 0; x < rect->input.width; x++) {
-               *dst_pixel = *src_pixel++;
-               dst_pixel -= final_image_width;
-           }
-       }
-   }
+    } else {
+        for (unsigned int y = 0; y < rect->input.height; y++) {
+            color_t* src_pixel = &layer_pixels[y * rect->input.width];
+            color_t* dst_pixel = &final_image_pixels[(rect->output.y + rect->input.width - 1) *
+                final_image_width + y + rect->output.x];
+            for (unsigned int x = 0; x < rect->input.width; x++) {
+                *dst_pixel = *src_pixel++;
+                dst_pixel -= final_image_width;
+            }
+        }
+    }
     free(layer_pixels);
 }
 
@@ -168,7 +173,7 @@ static void save_final_image(const char *path)
 
 int is_extra_asset(const layer *l)
 {
-    return l->original_path != 0 && l->width != 0 && l->height != 0;
+    return l->asset_image_path != 0 && l->width != 0 && l->height != 0;
 }
 
 static unsigned int count_assets_in_group(int group_id)
@@ -346,7 +351,6 @@ static void pack_group(int group_id)
     }
 
     static char current_dir[MAX_PATH];
-    static char current_file[MAX_PATH];
     static char current_line[LINE_LENGTH];
 
     snprintf(current_dir, MAX_PATH, "%s/%s/", NEW_ASSETS_DIR, group->name);
@@ -362,7 +366,7 @@ static void pack_group(int group_id)
     unsigned int num_images = count_assets_in_group(group_id);
 
     image_packer packer;
-    image_packer_init(&packer, num_images, IMAGE_SIZE, IMAGE_SIZE);
+    image_packer_init(&packer, num_images, ASSETS_IMAGE_SIZE, ASSETS_IMAGE_SIZE);
 
     packer.options.allow_rotation = 1;
     packer.options.fail_policy = IMAGE_PACKER_NEW_IMAGE;
@@ -457,6 +461,80 @@ static void pack_group(int group_id)
     free(final_image_pixels);
 }
 
+static void pack_cursors(void)
+{
+    static const char *cursor_names[] = { "Arrow", "Shovel", "Sword" };
+    static const char *cursor_sizes[] = { "150", "200" };
+
+    #define NUM_CURSOR_NAMES (sizeof(cursor_names) / sizeof(cursor_names[0]))
+    #define NUM_CURSOR_SIZES (sizeof(cursor_sizes) / sizeof(cursor_sizes[0]) + 1)
+
+    static layer cursors[NUM_CURSOR_NAMES * NUM_CURSOR_SIZES];
+    
+    image_packer packer;
+    image_packer_init(&packer, NUM_CURSOR_NAMES * NUM_CURSOR_SIZES, CURSOR_IMAGE_SIZE, CURSOR_IMAGE_SIZE);
+
+    packer.options.reduce_image_size = 1;
+    packer.options.sort_by = IMAGE_PACKER_SORT_BY_AREA;
+
+    for (int i = 0; i < NUM_CURSOR_NAMES; i++) {    
+        for (int j = 0; j < NUM_CURSOR_SIZES; j++) {
+            int index = i * NUM_CURSOR_SIZES + j;
+            layer *cursor = &cursors[index];
+            cursor->asset_image_path = malloc(MAX_PATH);
+            if (!cursor->asset_image_path) {
+                log_error("Out of memory.", 0, 0);
+                image_packer_free(&packer);
+                return;
+            }
+            if (j > 0) {
+                snprintf(cursor->asset_image_path, MAX_PATH, "%s/%s_%s.png", CURSORS_DIR,
+                    cursor_names[i], cursor_sizes[j - 1]);
+            } else {
+                snprintf(cursor->asset_image_path, MAX_PATH, "%s/%s.png", CURSORS_DIR, cursor_names[i]);
+            }
+            if (!png_get_image_size(cursor->asset_image_path, &cursor->width, &cursor->height)) {
+                image_packer_free(&packer);
+                return;
+            }
+            packer.rects[index].input.width = cursor->width;
+            packer.rects[index].input.height = cursor->height;
+        }
+    }
+
+    image_packer_pack(&packer);
+
+    final_image_width = packer.result.last_image_width;
+    final_image_height = packer.result.last_image_height;
+    final_image_pixels = malloc(sizeof(color_t) * final_image_width * final_image_height);
+    if (!final_image_pixels) {
+        log_error("Out of memory when creating the final cursor image.", 0, 0);
+        image_packer_free(&packer);
+        return;
+    }
+    memset(final_image_pixels, 0, sizeof(color_t) * final_image_width * final_image_height);
+
+    log_info("Cursor positions and sizes in packed image:", 0, 0);
+
+    printf("   Name             x       y      width      height\n");
+
+    for (int i = 0; i < NUM_CURSOR_NAMES * NUM_CURSOR_SIZES; i++) {
+        layer *cursor = &cursors[i];
+        pack_layer(&packer, cursor, i);
+        printf("%-16s  %3d     %3d        %3d         %3d\n",
+            cursor->asset_image_path + strlen(CURSORS_DIR) + 1,
+            packer.rects[i].output.x, packer.rects[i].output.y, cursor->width, cursor->height);
+    }
+
+    snprintf(current_file, MAX_PATH, "%s/%s.png", NEW_ASSETS_DIR, CURSORS_DIR);
+
+    save_final_image(current_file);
+
+    free(final_image_pixels);
+
+    image_packer_free(&packer);
+}
+
 int main(int argc, char **argv)
 {
     const dir_listing *xml_files = dir_find_files_with_extension(ASSETS_DIRECTORY, "xml");
@@ -484,6 +562,10 @@ int main(int argc, char **argv)
     for (int i = 0; i < group_get_total(); i++) {
         pack_group(i);
     }
+
+    log_info("Packing cursors...", 0, 0);
+
+    pack_cursors();
 
     log_info("All done!", 0, 0);
 
