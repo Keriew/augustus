@@ -5,7 +5,6 @@
 #include "core/locale.h"
 #include "core/string.h"
 #include "core/time.h"
-#include "game/settings.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 
