@@ -1,4 +1,4 @@
-#include "stub.h"
+#include "log.h"
 
 #include "assets/assets.h"
 #include "assets/group.h"
@@ -17,6 +17,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -25,14 +26,12 @@
 #include <sys/stat.h>
 #endif
 
-// #define FORMAT_XML
-
 #define ASSETS_IMAGE_SIZE 4096
 #define CURSOR_IMAGE_SIZE 256
 #define NEW_ASSETS_DIR "packed_assets"
 #define CURSORS_DIR "Color_Cursors"
-#define LINE_LENGTH 300
 #define BYTES_PER_PIXEL 4
+#define FILE_NAME_MAX 300
 
 #ifdef FORMAT_XML
 #define FORMAT_NEWLINE "\n"
@@ -46,7 +45,7 @@ static const char *LAYER_PART[] = { "footprint", "top" };
 static const char *LAYER_ROTATE[] = { "90", "180", "270" };
 static const char *LAYER_INVERT[] = { "horizontal", "vertical", "both" };
 
-static char current_file[MAX_PATH];
+static char current_file[FILE_NAME_MAX];
 
 static color_t *final_image_pixels;
 static unsigned int final_image_width;
@@ -71,35 +70,10 @@ static int create_new_directory(const char *name)
 
 static void copy_asset_to_final_image(const layer *l, const image_packer_rect *rect)
 {
-    color_t *layer_pixels = malloc(sizeof(color_t) * l->width * l->height);
-    if (!layer_pixels) {
-        log_error("Out of memory.", 0, 0);
-        return;
-    }
-    if (!png_read(l->asset_image_path, layer_pixels, 0, 0, rect->input.width, rect->input.height)) {
-        free(layer_pixels);
-        return;
-    }
-
-    if (!rect->output.rotated) {
-        for (unsigned int y = 0; y < rect->input.height; y++) {
-            color_t* src_pixel = &layer_pixels[y * rect->input.width];
-            color_t* dst_pixel = &final_image_pixels[(y + rect->output.y) * final_image_width + rect->output.x];
-            memcpy(dst_pixel, src_pixel, rect->input.width * sizeof(color_t));
-        }
-    } else {
-        for (unsigned int y = 0; y < rect->input.height; y++) {
-            color_t* src_pixel = &layer_pixels[y * rect->input.width];
-            color_t* dst_pixel = &final_image_pixels[(rect->output.y + rect->input.width - 1) *
-                final_image_width + y + rect->output.x];
-            for (unsigned int x = 0; x < rect->input.width; x++) {
-                *dst_pixel = *src_pixel++;
-                dst_pixel -= final_image_width;
-            }
-        }
-    }
-    free(layer_pixels);
+    png_read(l->asset_image_path, final_image_pixels, 0, 0, rect->input.width, rect->input.height,
+        rect->output.x, rect->output.y, final_image_width, rect->output.rotated);
 }
+
 
 static void save_final_image(const char *path)
 {
@@ -191,122 +165,92 @@ static unsigned int count_assets_in_group(int group_id)
     return extra_assets;
 }
 
-static void add_attribute_int(char **offset, unsigned int *max_length, const char *name, int value)
+static void add_attribute_int(FILE *dest, const char *name, int value)
 {
     if (value != 0) {
-        int written = snprintf(*offset, *max_length, " %s=\"%d\"", name, value);
-        *offset += written;
-        *max_length -= written;
+        fprintf(dest, " %s=\"%d\"", name, value);
     }
 }
 
-static void add_attribute_bool(char **offset, unsigned int *max_length,
-    const char *name, int value, const char *expression_if_true)
+static void add_attribute_bool(FILE *dest, const char *name, int value, const char *expression_if_true)
 {
     if (value != 0) {
-        int written = snprintf(*offset, *max_length, " %s=\"%s\"", name, expression_if_true);
-        *offset += written;
-        *max_length -= written;
+        fprintf(dest, " %s=\"%s\"", name, expression_if_true);
     }
 }
 
-static void add_attribute_enum(char **offset, unsigned int *max_length,
-    const char *name, int value, const char **display_value, int max_values)
+static void add_attribute_enum(FILE *dest, const char *name, int value, const char **display_value, int max_values)
 {
     if (value > 0 && value <= max_values) {
-        int written = snprintf(*offset, *max_length, " %s=\"%s\"", name, display_value[value - 1]);
-        *offset += written;
-        *max_length -= written;
+        fprintf(dest, " %s=\"%s\"", name, display_value[value - 1]);
     }
 }
 
-static void add_attribute_string(char **offset, unsigned int *max_length, const char *name, const char *value)
+static void add_attribute_string(FILE *dest, const char *name, const char *value)
 {
     if (value && *value != 0) {
-        int written = snprintf(*offset, *max_length, " %s=\"%s\"", name, value);
-        *offset += written;
-        *max_length -= written;
+        fprintf(dest, " %s=\"%s\"", name, value);
     }
 }
 
-static void create_image_xml_line(char *dest, unsigned int max_length, const asset_image *image)
+static void create_image_xml_line(FILE *xml_file, const asset_image *image)
 {
-    char *offset = dest;
-    int written = 0;
+    fprintf(xml_file, "%s<image", FORMAT_IDENT);
 
-    written = snprintf(offset, max_length, "%s<image", FORMAT_IDENT);
-    offset += written;
-    max_length -= written;
-
-    add_attribute_string(&offset, &max_length, "id", image->id);
+    add_attribute_string(xml_file, "id", image->id);
     if (image->has_defined_size) {
-        add_attribute_int(&offset, &max_length, "width", image->img.width);
-        add_attribute_int(&offset, &max_length, "height", image->img.height);
+        add_attribute_int(xml_file, "width", image->img.width);
+        add_attribute_int(xml_file, "height", image->img.height);
     }
-    snprintf(offset, max_length, ">%s", FORMAT_NEWLINE);
+    fprintf(xml_file, ">%s", FORMAT_NEWLINE);
 }
 
-static void create_layer_xml_line(char *dest, unsigned int max_length, const layer *l)
+static void create_layer_xml_line(FILE *xml_file, const layer *l)
 {
-    char *offset = dest;
-    int written = 0;
+    fprintf(xml_file, "%s%s<layer", FORMAT_IDENT, FORMAT_IDENT);
 
-    written = snprintf(offset, max_length, "%s%s<layer", FORMAT_IDENT, FORMAT_IDENT);
-    offset += written;
-    max_length -= written;
+    add_attribute_int(xml_file, "group", l->original_image_group);
+    add_attribute_int(xml_file, "image", l->original_image_id);
+    add_attribute_int(xml_file, "src_x", l->src_x);
+    add_attribute_int(xml_file, "src_y", l->src_y);
+    add_attribute_int(xml_file, "x", l->x_offset);
+    add_attribute_int(xml_file, "y", l->y_offset);
+    add_attribute_int(xml_file, "width", l->width);
+    add_attribute_int(xml_file, "height", l->height);
+    add_attribute_enum(xml_file, "invert", l->invert, LAYER_INVERT, 3);
+    add_attribute_enum(xml_file, "rotate", l->rotate, LAYER_ROTATE, 3);
+    add_attribute_enum(xml_file, "part", l->part, LAYER_PART, 2);
 
-    add_attribute_string(&offset, &max_length, "group", l->original_image_group);
-    add_attribute_string(&offset, &max_length, "image", l->original_image_id);
-    add_attribute_int(&offset, &max_length, "src_x", l->src_x);
-    add_attribute_int(&offset, &max_length, "src_y", l->src_y);
-    add_attribute_int(&offset, &max_length, "x", l->x_offset);
-    add_attribute_int(&offset, &max_length, "y", l->y_offset);
-    add_attribute_int(&offset, &max_length, "width", l->width);
-    add_attribute_int(&offset, &max_length, "height", l->height);
-    add_attribute_enum(&offset, &max_length, "invert", l->invert, LAYER_INVERT, 3);
-    add_attribute_enum(&offset, &max_length, "rotate", l->rotate, LAYER_ROTATE, 3);
-    add_attribute_enum(&offset, &max_length, "part", l->part, LAYER_PART, 2);
-
-    snprintf(offset, max_length, "/>%s", FORMAT_NEWLINE);
+    fprintf(xml_file, "/>%s", FORMAT_NEWLINE);
 }
 
-static int create_animation_xml_line(char *dest, unsigned int max_length, const asset_image *image)
+static void create_animation_xml_line(FILE *xml_file, const asset_image *image)
 {
-    char *offset = dest;
-    int written = 0;
-
-    written = snprintf(offset, max_length, "%s%s<animation", FORMAT_IDENT, FORMAT_IDENT);
-    offset += written;
-    max_length -= written;
+    fprintf(xml_file, "%s%s<animation", FORMAT_IDENT, FORMAT_IDENT);
 
     if (!image->has_frame_elements) {
-        add_attribute_int(&offset, &max_length, "frames", image->img.num_animation_sprites);
+        add_attribute_int(xml_file, "frames", image->img.num_animation_sprites);
     }
-    add_attribute_int(&offset, &max_length, "speed", image->img.animation_speed_id);
-    add_attribute_int(&offset, &max_length, "x", image->img.sprite_offset_x);
-    add_attribute_int(&offset, &max_length, "y", image->img.sprite_offset_y);
-    add_attribute_bool(&offset, &max_length, "reversible", image->img.animation_can_reverse, "true");
+    add_attribute_int(xml_file, "speed", image->img.animation_speed_id);
+    add_attribute_int(xml_file, "x", image->img.sprite_offset_x);
+    add_attribute_int(xml_file, "y", image->img.sprite_offset_y);
+    add_attribute_bool(xml_file, "reversible", image->img.animation_can_reverse, "true");
 
-    snprintf(offset, max_length, "%s>%s", image->has_frame_elements ? "" : "/", FORMAT_NEWLINE);
+    fprintf(xml_file, "%s>%s", image->has_frame_elements ? "" : "/", FORMAT_NEWLINE);
 }
 
-static void create_frame_xml_line(char *dest, unsigned int max_length, const layer *l)
+static void create_frame_xml_line(FILE *xml_file, const layer *l)
 {
-    char *offset = dest;
-    int written = 0;
+    fprintf(xml_file, "%s%s%s<frame", FORMAT_IDENT, FORMAT_IDENT, FORMAT_IDENT);
 
-    written = snprintf(offset, max_length, "%s%s%s<frame", FORMAT_IDENT, FORMAT_IDENT, FORMAT_IDENT);
-    offset += written;
-    max_length -= written;
+    add_attribute_int(xml_file, "group", l->original_image_group);
+    add_attribute_int(xml_file, "image", l->original_image_id);
+    add_attribute_int(xml_file, "src_x", l->src_x);
+    add_attribute_int(xml_file, "src_y", l->src_y);
+    add_attribute_int(xml_file, "width", l->width);
+    add_attribute_int(xml_file, "height", l->height);
 
-    add_attribute_string(&offset, &max_length, "group", l->original_image_group);
-    add_attribute_string(&offset, &max_length, "image", l->original_image_id);
-    add_attribute_int(&offset, &max_length, "src_x", l->src_x);
-    add_attribute_int(&offset, &max_length, "src_y", l->src_y);
-    add_attribute_int(&offset, &max_length, "width", l->width);
-    add_attribute_int(&offset, &max_length, "height", l->height);
-
-    snprintf(offset, max_length, "/>%s", FORMAT_NEWLINE);
+    fprintf(xml_file, "/>%s", FORMAT_NEWLINE);
 }
 
 static int pack_layer(const image_packer *packer, layer *l, int rect_id)
@@ -345,16 +289,15 @@ static void pack_group(int group_id)
 {
     const image_groups *group = group_get_from_id(group_id);
 
-    if (!group || !group->name) {
+    if (!group || !*group->name) {
         log_error("Could not retreive a valid group from id", 0, group_id);
         return;
     }
 
-    static char current_dir[MAX_PATH];
-    static char current_line[LINE_LENGTH];
+    static char current_dir[FILE_NAME_MAX];
 
-    snprintf(current_dir, MAX_PATH, "%s/%s/", NEW_ASSETS_DIR, group->name);
-    snprintf(current_file, MAX_PATH, "%s/%s", NEW_ASSETS_DIR, group->path);
+    snprintf(current_dir, FILE_NAME_MAX, "%s/%s/", NEW_ASSETS_DIR, group->name);
+    snprintf(current_file, FILE_NAME_MAX, "%s/%s", NEW_ASSETS_DIR, group->path);
 
     FILE *xml_dest = fopen(current_file, "wb");
 
@@ -369,7 +312,6 @@ static void pack_group(int group_id)
     image_packer_init(&packer, num_images, ASSETS_IMAGE_SIZE, ASSETS_IMAGE_SIZE);
 
     packer.options.allow_rotation = 1;
-    packer.options.fail_policy = IMAGE_PACKER_NEW_IMAGE;
     packer.options.reduce_image_size = 1;
 
     int rect_id = 0;
@@ -422,24 +364,20 @@ static void pack_group(int group_id)
 
     for (int image_id = group->first_image_index; image_id <= group->last_image_index; image_id++) {
         asset_image *image = asset_image_get_from_id(image_id);
-        create_image_xml_line(current_line, LINE_LENGTH, image);
-        fprintf(xml_dest, current_line);
+        create_image_xml_line(xml_dest, image);
         for (layer *l = &image->first_layer; l; l = l->next) {
             rect_id += pack_layer(&packer, l, rect_id);
-            create_layer_xml_line(current_line, LINE_LENGTH, l);
-            fprintf(xml_dest, current_line);
+            create_layer_xml_line(xml_dest, l);
         }
         if (image->img.num_animation_sprites) {
-            create_animation_xml_line(current_line, LINE_LENGTH, image);
-            fprintf(xml_dest, current_line);
+            create_animation_xml_line(xml_dest, image);
             if (image->has_frame_elements) {
                 for (int i = 0; i < image->img.num_animation_sprites; i++) {
                     image_id++;
                     asset_image *frame = asset_image_get_from_id(image_id);
                     layer *l = frame->last_layer;
                     rect_id += pack_layer(&packer, l, rect_id);
-                    create_frame_xml_line(current_line, LINE_LENGTH, l);
-                    fprintf(xml_dest, current_line);
+                    create_frame_xml_line(xml_dest, l);
                 }
                 fprintf(xml_dest, "%s%s</animation>%s", FORMAT_IDENT, FORMAT_IDENT, FORMAT_NEWLINE);
             }
@@ -452,7 +390,7 @@ static void pack_group(int group_id)
     fclose(xml_dest);
     image_packer_free(&packer);
 
-    snprintf(current_file, MAX_PATH, "%s/%s.png", NEW_ASSETS_DIR, group->name);
+    snprintf(current_file, FILE_NAME_MAX, "%s/%s.png", NEW_ASSETS_DIR, group->name);
 
     log_info("Creating png file...", 0, 0);
 
@@ -474,6 +412,7 @@ static void pack_cursors(void)
     image_packer packer;
     image_packer_init(&packer, NUM_CURSOR_NAMES * NUM_CURSOR_SIZES, CURSOR_IMAGE_SIZE, CURSOR_IMAGE_SIZE);
 
+    packer.options.allow_rotation = 1;
     packer.options.reduce_image_size = 1;
     packer.options.sort_by = IMAGE_PACKER_SORT_BY_AREA;
 
@@ -481,17 +420,17 @@ static void pack_cursors(void)
         for (int j = 0; j < NUM_CURSOR_SIZES; j++) {
             int index = i * NUM_CURSOR_SIZES + j;
             layer *cursor = &cursors[index];
-            cursor->asset_image_path = malloc(MAX_PATH);
+            cursor->asset_image_path = malloc(FILE_NAME_MAX);
             if (!cursor->asset_image_path) {
                 log_error("Out of memory.", 0, 0);
                 image_packer_free(&packer);
                 return;
             }
             if (j > 0) {
-                snprintf(cursor->asset_image_path, MAX_PATH, "%s/%s_%s.png", CURSORS_DIR,
+                snprintf(cursor->asset_image_path, FILE_NAME_MAX, "%s/%s_%s.png", CURSORS_DIR,
                     cursor_names[i], cursor_sizes[j - 1]);
             } else {
-                snprintf(cursor->asset_image_path, MAX_PATH, "%s/%s.png", CURSORS_DIR, cursor_names[i]);
+                snprintf(cursor->asset_image_path, FILE_NAME_MAX, "%s/%s.png", CURSORS_DIR, cursor_names[i]);
             }
             if (!png_get_image_size(cursor->asset_image_path, &cursor->width, &cursor->height)) {
                 image_packer_free(&packer);
@@ -526,7 +465,7 @@ static void pack_cursors(void)
             packer.rects[i].output.x, packer.rects[i].output.y, cursor->width, cursor->height);
     }
 
-    snprintf(current_file, MAX_PATH, "%s/%s.png", NEW_ASSETS_DIR, CURSORS_DIR);
+    snprintf(current_file, FILE_NAME_MAX, "%s/%s.png", NEW_ASSETS_DIR, CURSORS_DIR);
 
     save_final_image(current_file);
 
@@ -548,6 +487,8 @@ int main(int argc, char **argv)
         return 2;
     }
 
+#ifdef PACK_XMLS
+
     if (!group_create_all(xml_files->num_files) || !asset_image_init_array()) {
         log_error("Not enough memory to initialize extra assets.", 0, 0);
         return 3;
@@ -563,12 +504,18 @@ int main(int argc, char **argv)
         pack_group(i);
     }
 
+#endif
+
+#ifdef PACK_CURSORS
+
     log_info("Packing cursors...", 0, 0);
 
     pack_cursors();
 
+#endif
+
     log_info("All done!", 0, 0);
 
-    png_release();
+    png_unload();
     return 0;
 }

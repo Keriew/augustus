@@ -48,7 +48,7 @@ void layer_load(layer *l)
     }
     memset(l->data, 0, size);
     if (l->asset_image_path) {
-        if (!png_read(l->asset_image_path, l->data, l->src_x, l->src_y, l->width, l->height)) {
+        if (!png_read(l->asset_image_path, l->data, l->src_x, l->src_y, l->width, l->height, 0, 0, l->width, 0)) {
             free(l->data);
             log_error("Problem loading layer from file", l->asset_image_path, 0);
             load_dummy_layer(l);
@@ -77,10 +77,6 @@ void layer_load(layer *l)
 void layer_unload(layer *l)
 {
     free(l->asset_image_path);
-#ifdef BUILDING_ASSET_PACKER
-    free(l->original_image_group);
-    free(l->original_image_id);
-#endif
     if (!l->is_asset_image_reference) {
         free(l->data);
     }
@@ -124,22 +120,6 @@ color_t layer_get_color_for_image_position(const layer *l, int x, int y)
     return l->data[y * l->width + x];
 }
 
-#ifdef BUILDING_ASSET_PACKER
-static char *copy_attribute(const char *attribute)
-{
-    if (!attribute) {
-        return 0;
-    }
-    char *dest = malloc((strlen(attribute) + 1) * sizeof(char));
-    if (!dest) {
-        log_error("There was no memory to copy the attribute", attribute, 0);
-        return 0;
-    }
-    strncpy(dest, attribute, strlen(attribute) + 1);
-    return dest;
-}
-#endif
-
 layer *layer_add_from_image_path(layer *l, const char *path,
     int src_x, int src_y, int offset_x, int offset_y, int width, int height)
 {
@@ -179,8 +159,8 @@ layer *layer_add_from_image_id(layer *l, const char *group_id, const char *image
     l->x_offset = offset_x;
     l->y_offset = offset_y;
 #ifdef BUILDING_ASSET_PACKER
-    l->original_image_group = copy_attribute(group_id);
-    l->original_image_id = copy_attribute(image_id);
+    l->original_image_group = group_id ? string_to_int(string_from_ascii(group_id)) : 0;
+    l->original_image_id = image_id ? string_to_int(string_from_ascii(image_id)) : 0;
 #else
     const image *original_image = 0;
     if (strcmp(group_id, "this") == 0) {

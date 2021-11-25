@@ -82,6 +82,26 @@ if (!$?) {
 }
 echo "Uploaded. URL: https://augustus.josecadete.net/$repo.html"
 
+echo "Packing the assets"
+
+cd .\res\asset_packer
+mkdir build
+cd build
+
+$env:path = "C:\msys64\mingw32\bin;${env:path}"
+cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release -DSYSTEM_LIBS=OFF -D CMAKE_C_COMPILER=i686-w64-mingw32-gcc.exe -D CMAKE_MAKE_PROGRAM=mingw32-make.exe ..
+cmake --build . -j 4 --config Release
+if ($?) {
+    Move-Item -Path ..\..\..\assets
+    .\asset_packer.exe
+    if ($?) {
+        Move-Item -Path packed_assets -Destination ..\..\..\assets
+    } else {
+        echo "Unable to pack the assets. Using the original folder"
+        Move-Item -Path assets -Destination ..\..\..
+    }
+}
+
 $assets_file = "assets-$version-$repo.zip"
 7z a "$assets_file" assets
 

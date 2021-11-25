@@ -1,4 +1,10 @@
 cmake_minimum_required(VERSION 3.1)
+include(CMakeDependentOption)
+
+option(SYSTEM_LIBS "Use system libraries when available." ON)
+option(FORMAT_XML "Prettify the generated XML" OFF)
+option(PACK_XMLS "Pack the images from the XML files" ON)
+option(PACK_CURSORS "Pack the cursor images" ON)
 
 set(SHORT_NAME "asset_packer")
 
@@ -62,11 +68,23 @@ set(PLATFORM_FILES
     ${MAIN_DIR}/src/platform/file_manager.c
 )
 
+add_compile_definitions(BUILDING_ASSET_PACKER)
+
+if(FORMAT_XML)
+    add_compile_definitions(FORMAT_XML)
+endif()
+
+if (PACK_XMLS)
+    add_compile_definitions(PACK_XMLS)
+endif()
+
+if (PACK_CURSORS)
+    add_compile_definitions(PACK_CURSORS)
+endif()
+
 if(MSVC)
     add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 endif()
-
-add_compile_definitions(BUILDING_ASSET_PACKER)
 
 add_executable(${SHORT_NAME}
     ${PROJECT_SOURCE_DIR}/src/asset_packer.c
@@ -75,15 +93,19 @@ add_executable(${SHORT_NAME}
     ${PLATFORM_FILES}
 )
 
-find_package(ZLIB)
-find_package(PNG)
-find_package(EXPAT)
+if(SYSTEM_LIBS)
+    find_package(ZLIB)
+    find_package(PNG)
+    find_package(EXPAT)
+endif()
 
 if(ZLIB_FOUND)
     include_directories(${ZLIB_INCLUDE_DIRS})
     target_link_libraries(${SHORT_NAME} ${ZLIB_LIBRARIES})
 else()
-    message(STATUS "Zlib was not found but that's ok: falling back to internal version")
+    if(SYSTEM_LIBS)
+        message(STATUS "Zlib was not found but that's ok: falling back to internal version")
+    endif()
     include_directories(${MAIN_DIR}/ext/zlib)
     target_sources(${SHORT_NAME} PRIVATE "${ZLIB_FILES}")
 endif()
@@ -92,7 +114,9 @@ if(PNG_FOUND)
     include_directories(${PNG_INCLUDE_DIRS})
     target_link_libraries(${SHORT_NAME} ${PNG_LIBRARIES})
 else()
-    message(STATUS "PNG was not found but that's ok: falling back to internal version")
+    if(SYSTEM_LIBS)
+        message(STATUS "PNG was not found but that's ok: falling back to internal version")
+    endif()
     include_directories(${MAIN_DIR}/ext/png)
     target_sources(${SHORT_NAME} PRIVATE "${PNG_FILES}")
 endif()
@@ -101,7 +125,9 @@ if(EXPAT_FOUND)
     include_directories(${EXPAT_INCLUDE_DIRS})
     target_link_libraries(${SHORT_NAME} ${EXPAT_LIBRARIES})
 else()
-    message(STATUS "Expat was not found but that's ok: falling back to internal version")
+    if(SYSTEM_LIBS)
+        message(STATUS "Expat was not found but that's ok: falling back to internal version")
+    endif()
     include_directories(${MAIN_DIR}/ext/expat)
     target_sources(${SHORT_NAME} PRIVATE "${EXPAT_FILES}")
     if(NOT WIN32)

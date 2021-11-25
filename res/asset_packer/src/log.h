@@ -1,5 +1,5 @@
-#ifndef STUB_H
-#define STUB_H
+#ifndef LOG_H
+#define LOG_H
 
 #include <stdio.h>
 
@@ -31,4 +31,4 @@ void log_error(const char *msg, const char *param_str, int param_int)
 	log_internal("ERROR", msg, param_str, param_int);
 }
 
-#endif // STUB_H
+#endif // LOG_H

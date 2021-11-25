@@ -36,7 +36,7 @@ void assets_init(void)
     // This ensures compatibility with previous release versions of Augustus, which only had roadblocks
     data.roadblock_image_id = assets_get_group_id("Roadblocks");
     data.roadblock_image = asset_image_get_from_id(data.roadblock_image_id - MAIN_ENTRIES);
-    png_release();
+    png_unload();
     data.loaded = 1;
 }
 
