@@ -209,8 +209,8 @@ static void create_layer_xml_line(FILE *xml_file, const layer *l)
 {
     fprintf(xml_file, "%s%s<layer", FORMAT_IDENT, FORMAT_IDENT);
 
-    add_attribute_int(xml_file, "group", l->original_image_group);
-    add_attribute_int(xml_file, "image", l->original_image_id);
+    add_attribute_string(xml_file, "group", l->original_image_group);
+    add_attribute_string(xml_file, "image", l->original_image_id);
     add_attribute_int(xml_file, "src_x", l->src_x);
     add_attribute_int(xml_file, "src_y", l->src_y);
     add_attribute_int(xml_file, "x", l->x_offset);
@@ -243,8 +243,8 @@ static void create_frame_xml_line(FILE *xml_file, const layer *l)
 {
     fprintf(xml_file, "%s%s%s<frame", FORMAT_IDENT, FORMAT_IDENT, FORMAT_IDENT);
 
-    add_attribute_int(xml_file, "group", l->original_image_group);
-    add_attribute_int(xml_file, "image", l->original_image_id);
+    add_attribute_string(xml_file, "group", l->original_image_group);
+    add_attribute_string(xml_file, "image", l->original_image_id);
     add_attribute_int(xml_file, "src_x", l->src_x);
     add_attribute_int(xml_file, "src_y", l->src_y);
     add_attribute_int(xml_file, "width", l->width);
