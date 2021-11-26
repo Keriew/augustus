@@ -81,7 +81,7 @@ typedef const char *dir_name;
 
 #ifdef __vita__
 #define CURRENT_DIR VITA_PATH_PREFIX
-#define set_dir_name(n) vita_prepend_path(n)
+#define set_dir_name(n) ( strncmp(n, "app0:", 5) ? vita_prepend_path(n) : n )
 #define free_dir_name(n)
 #elif defined(_WIN32)
 #define CURRENT_DIR L"."
@@ -127,7 +127,6 @@ static const char *ASSET_DIRS[MAX_ASSET_DIRS] = {
 #endif
     ".",
 #ifdef __vita__
-    VITA_PATH_PREFIX,
     "app0:",
 #elif defined (__SWITCH__)
     "romfs:",
@@ -211,11 +210,7 @@ static const dir_name get_assets_directory(void)
 #ifdef __SWITCH__
         }
 #endif
-#ifndef __vita__
         dir_name result = set_dir_name(assets_directory);
-#else
-        dir_name result = assets_directory;
-#endif
         fs_dir_type *dir = fs_dir_open(result);
         if (dir) {
             fs_dir_close(dir);
@@ -242,15 +237,7 @@ int platform_file_manager_list_directory_contents(
     } else if (strcmp(dir, ASSETS_DIRECTORY) == 0) {
         current_dir = get_assets_directory();
     } else {
-#ifdef __vita__
-        if (strncmp(dir, "app0:", 5) != 0) {
-            current_dir = set_dir_name(dir);
-        } else {
-            current_dir = dir;
-        }
-#else
         current_dir = set_dir_name(dir);
-#endif
     }
 #ifdef __ANDROID__
     int match = android_get_directory_contents(current_dir, type, extension, callback);
@@ -362,9 +349,7 @@ FILE *platform_file_manager_open_file(const char *filename, const char *mode)
             platform_file_manager_cache_add_file_info(filename);
         }
     }
-    if (strncmp(filename, "app0:", 5) != 0) {
-        filename = vita_prepend_path(filename);
-    }
+    filename = set_dir_name(filename);
     return fopen(filename, mode);
 }
 
