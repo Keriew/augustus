@@ -10,6 +10,8 @@
 #include "game/tutorial.h"
 #include "scenario/property.h"
 
+static const building_type PLAGUE_BUILDINGS[] = { BUILDING_DOCK, BUILDING_WAREHOUSE, BUILDING_GRANARY };
+
 int city_health(void)
 {
     return city_data.health.value;
@@ -23,25 +25,28 @@ void city_health_change(int amount)
 static void cause_plague_in_building(int building_id)
 {
     building *b = building_get(building_id);
-    if (!b->ruin_has_plague) {
+    if (!b->has_plague) {
 
         // remove all eatable resources from granary and warehouse
         if (b->type == BUILDING_GRANARY) {
-            for (int resource = RESOURCE_MIN_FOOD; resource < RESOURCE_MAX_FOOD; resource++) {
-                building_granary_remove_resource(b, resource, 3200);
+            for (int r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+                building_granary_remove_resource(b, r, FULL_GRANARY);
             }
         }
 
         if (b->type == BUILDING_WAREHOUSE) {
-            for (int resource = RESOURCE_MIN_FOOD; resource < RESOURCE_IRON; resource++) {
-                building_warehouse_remove_resource(b, resource, 32);
+            for (int r = RESOURCE_MIN_FOOD; r < RESOURCE_IRON; r++) {
+                building_warehouse_remove_resource(b, r, FULL_WAREHOUSE);
             }
         }
 
-        // set building to plague status and use fire process to manage plague on it
-        b->ruin_has_plague = 1;
-        b->fire_proof = 1;
+        // Set building to plague status and use fire process to manage plague on it
+        b->has_plague = 1;
         b->sickness_duration = 0;
+
+        if (b->type == BUILDING_WAREHOUSE || b->type == BUILDING_GRANARY || b->type == BUILDING_DOCK) {
+            city_message_post(1, MESSAGE_SICKNESS, b->type, b->grid_offset);
+        }
     }
 }
 
@@ -49,11 +54,11 @@ void city_health_update_sickness_level_in_building(int building_id)
 {
     building *b = building_get(building_id);
 
-    if (!b->ruin_has_plague && b->state == BUILDING_STATE_IN_USE) {
-        b->sickness_level += 3;
+    if (!b->has_plague && b->state == BUILDING_STATE_IN_USE) {
+        b->sickness_level += 1;
 
-        if (b->sickness_level > 100) {
-            b->sickness_level = 100;
+        if (b->sickness_level > MAX_SICKNESS_LEVEL) {
+            b->sickness_level = MAX_SICKNESS_LEVEL;
         }
     }
 }
@@ -79,7 +84,7 @@ void city_health_dispatch_sickness(figure *f)
     }
 }
 
-static int cause_plague()
+static int cause_plague(void)
 {
     int sick_people = 0;
     // kill people who have sickness level to max in houses
@@ -88,7 +93,7 @@ static int cause_plague()
         for (building *b = building_first_of_type(type); b; b = next_of_type) {
             next_of_type = b->next_of_type;
             if (b->state == BUILDING_STATE_IN_USE && b->house_size && b->house_population) {
-                if (b->sickness_level == 100) {
+                if (b->sickness_level == MAX_SICKNESS_LEVEL) {
                     sick_people = 1;
                     building_destroy_by_plague(b);
                 }
@@ -99,21 +104,22 @@ static int cause_plague()
     if (sick_people) {
         city_message_post(1, MESSAGE_HEALTH_PESTILENCE, 0, 0);
     }
+
     // cause plague in docks
     for (building *dock = building_first_of_type(BUILDING_DOCK); dock; dock = dock->next_of_type) {
-        if (dock->sickness_level == 100) {
+        if (dock->sickness_level == MAX_SICKNESS_LEVEL) {
             cause_plague_in_building(dock->id);
         }
     }
     // cause plague in warehouses
     for (building *warehouse = building_first_of_type(BUILDING_WAREHOUSE); warehouse; warehouse = warehouse->next_of_type) {
-        if (warehouse->sickness_level == 100) {
+        if (warehouse->sickness_level == MAX_SICKNESS_LEVEL) {
             cause_plague_in_building(warehouse->id);
         }
     }
     // cause plague in granaries
     for (building *granary = building_first_of_type(BUILDING_GRANARY); granary; granary = granary->next_of_type) {
-        if (granary->sickness_level == 100) {
+        if (granary->sickness_level == MAX_SICKNESS_LEVEL) {
             cause_plague_in_building(granary->id);
         }
     }
@@ -204,12 +210,12 @@ static void cause_disease(int total_people)
 
 static void increase_sickness_level_in_building(building *b)
 {
-    if (!b->ruin_has_plague) {
+    if (!b->has_plague) {
         if(b->sickness_level) {
             b->sickness_level += 5;
 
-            if (b->sickness_level > 100) {
-                b->sickness_level = 100;
+            if (b->sickness_level > MAX_SICKNESS_LEVEL) {
+                b->sickness_level = MAX_SICKNESS_LEVEL;
             }
         }
     }
@@ -223,16 +229,11 @@ static void increase_sickness_level_in_buildings(void)
         }
     }
 
-    for (building *warehouse = building_first_of_type(BUILDING_WAREHOUSE); warehouse; warehouse = warehouse->next_of_type) {
-        increase_sickness_level_in_building(warehouse);
-    }
-
-    for (building *granary = building_first_of_type(BUILDING_GRANARY); granary; granary = granary->next_of_type) {
-        increase_sickness_level_in_building(granary);
-    }
-
-    for (building *dock = building_first_of_type(BUILDING_GRANARY); dock; dock = dock->next_of_type) {
-        increase_sickness_level_in_building(dock);
+    for (int i = 0; i < 3; i++) {
+        building_type type = PLAGUE_BUILDINGS[i];
+        for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
+            increase_sickness_level_in_building(b);
+        }
     }
 }
 
@@ -310,50 +311,36 @@ int city_health_get_global_sickness_level(void)
                 building_number++;
                 building_sickness_level += b->sickness_level;
 
-                if (b->sickness_level > 90) {
+                if (b->sickness_level > HIGH_SICKNESS_LEVEL) {
                     near_plague = 2;
-                } else if (b->sickness_level > 60) {
+                } else if (b->sickness_level > MEDIUM_SICKNESS_LEVEL) {
                     near_plague = 1;
                 }
             }
         }
     }
-    for (building *dock = building_first_of_type(BUILDING_DOCK); dock; dock = dock->next_of_type) {
-        building_number++;
-        building_sickness_level += dock->sickness_level;
-        if (dock->sickness_level > 90) {
-            near_plague = 2;
-        } else if (dock->sickness_level > 60) {
-            near_plague = 1;
-        }
-    }
-    for (building *warehouse = building_first_of_type(BUILDING_WAREHOUSE); warehouse; warehouse = warehouse->next_of_type) {
-        building_number++;
-        building_sickness_level += warehouse->sickness_level;
-        if (warehouse->sickness_level > 90) {
-            near_plague = 2;
-        } else if (warehouse->sickness_level > 60) {
-            near_plague = 1;
-        }
-    }
-    for (building *granary = building_first_of_type(BUILDING_GRANARY); granary; granary = granary->next_of_type) {
-        building_number++;
-        building_sickness_level += granary->sickness_level;
-        if (granary->sickness_level > 90) {
-            near_plague = 2;
-        } else if (granary->sickness_level > 60) {
-            near_plague = 1;
+
+    for (int i = 0; i < 3; i++) {
+        building_type type = PLAGUE_BUILDINGS[i];
+        for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
+            building_number++;
+            building_sickness_level += b->sickness_level;
+            if (b->sickness_level > HIGH_SICKNESS_LEVEL && near_plague < 2) {
+                near_plague = 2;
+            } else if (b->sickness_level > MEDIUM_SICKNESS_LEVEL && !near_plague) {
+                near_plague = 1;
+            }
         }
     }
 
     int global_rating = building_sickness_level / building_number;
     int global_sickness_level;
 
-    if (global_rating < 30 && !near_plague) {
+    if (global_rating < LOW_SICKNESS_LEVEL && !near_plague) {
         global_sickness_level = SICKNESS_LEVEL_LOW;
-    } else if (global_rating < 60 && !near_plague) {
+    } else if (global_rating < MEDIUM_SICKNESS_LEVEL && !near_plague) {
         global_sickness_level = SICKNESS_LEVEL_MEDIUM;
-    } else if (global_rating < 90 && near_plague == 1) {
+    } else if (global_rating < HIGH_SICKNESS_LEVEL && near_plague == 1) {
         global_sickness_level = SICKNESS_LEVEL_HIGH;
     } else {
         global_sickness_level = SICKNESS_LEVEL_PLAGUE;

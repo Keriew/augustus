@@ -90,7 +90,7 @@ int figure_trade_caravan_can_buy(figure *trader, int building_id, int city_id)
         !(config_get(CONFIG_GP_CH_ALLOW_EXPORTING_FROM_GRANARIES) && b->type == BUILDING_GRANARY)) {
         return 0;
     }
-    if (b->ruin_has_plague) {
+    if (b->has_plague) {
         return 0;
     }
     if (trader->trader_amount_bought >= figure_trade_land_trade_units()) {
@@ -125,7 +125,7 @@ int figure_trade_caravan_can_sell(figure *trader, int building_id, int city_id)
     if (b->type != BUILDING_WAREHOUSE && b->type != BUILDING_GRANARY) {
         return 0;
     }
-    if (b->ruin_has_plague) {
+    if (b->has_plague) {
         return 0;
     }
     if (trader->loads_sold_or_carrying >= figure_trade_land_trade_units()) {
@@ -511,6 +511,7 @@ void figure_trade_caravan_action(figure *f)
                     if (resource) {
                         trade_route_increase_traded(empire_city_get_route_id(f->empire_city_id), resource);
                         trader_record_bought_resource(f->trader_id, resource);
+                        city_health_update_sickness_level_in_building(f->destination_building_id);
 
                         f->trader_amount_bought++;
                     } else {

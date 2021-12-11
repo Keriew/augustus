@@ -131,7 +131,7 @@ int building_granary_add_resource(building *granary, int resource, int is_produc
     if (building_granary_is_not_accepting(resource, granary)) {
         return 0;
     }
-    if (granary->ruin_has_plague) {
+    if (granary->has_plague) {
         return 0;
     }
     if (is_produced) {
@@ -153,7 +153,7 @@ int building_granary_remove_resource(building *granary, int resource, int amount
     if (amount <= 0) {
         return 0;
     }
-    if (granary->ruin_has_plague) {
+    if (granary->has_plague) {
         return 0;
     }
 
@@ -285,7 +285,7 @@ void building_granaries_calculate_stocks(void)
 
     for (building *b = building_first_of_type(BUILDING_GRANARY); b; b = b->next_of_type) {
         if (b->state != BUILDING_STATE_IN_USE || !b->has_road_access ||
-            b->distance_from_entry <= 0 || b->ruin_has_plague) {
+            b->distance_from_entry <= 0 || b->has_plague) {
             continue;
         }
         int total_non_getting = 0;
@@ -317,7 +317,7 @@ void building_granaries_calculate_stocks(void)
 int building_granary_accepts_storage(building *b, int resource, int *understaffed)
 {
     if (b->state != BUILDING_STATE_IN_USE || b->type != BUILDING_GRANARY ||
-        !b->has_road_access || b->distance_from_entry <= 0 || b->ruin_has_plague) {
+        !b->has_road_access || b->distance_from_entry <= 0 || b->has_plague) {
         return 0;
     }
     int pct_workers = calc_percentage(b->num_workers, model_get_building(b->type)->laborers);
@@ -386,7 +386,7 @@ int building_getting_granary_for_storing(int x, int y, int resource, int road_ne
     int min_dist = INFINITE;
     int min_building_id = 0;
     for (building *b = building_first_of_type(BUILDING_GRANARY); b; b = b->next_of_type) {
-        if (b->state != BUILDING_STATE_IN_USE || b->ruin_has_plague) {
+        if (b->state != BUILDING_STATE_IN_USE || b->has_plague) {
             continue;
         }
         if (!b->has_road_access || b->distance_from_entry <= 0 || b->road_network_id != road_network_id) {
@@ -478,7 +478,7 @@ void building_granary_bless(void)
     int min_stored = INFINITE;
     building *min_building = 0;
     for (building *b = building_first_of_type(BUILDING_GRANARY); b; b = b->next_of_type) {
-        if (b->state != BUILDING_STATE_IN_USE || b->ruin_has_plague) {
+        if (b->state != BUILDING_STATE_IN_USE || b->has_plague) {
             continue;
         }
         int total_stored = 0;
@@ -511,7 +511,7 @@ void building_granary_warehouse_curse(int big)
     int max_stored = 0;
     building *max_building = 0;
     for (building *b = building_first_of_type(BUILDING_GRANARY); b; b = b->next_of_type) {
-        if (b->state != BUILDING_STATE_IN_USE || b->ruin_has_plague) {
+        if (b->state != BUILDING_STATE_IN_USE || b->has_plague) {
             continue;
         }
         int total_stored = 0;
@@ -525,7 +525,7 @@ void building_granary_warehouse_curse(int big)
         }
     }
     for (building *b = building_first_of_type(BUILDING_WAREHOUSE); b; b = b->next_of_type) {
-        if (b->state != BUILDING_STATE_IN_USE || b->ruin_has_plague) {
+        if (b->state != BUILDING_STATE_IN_USE || b->has_plague) {
             continue;
         }
         int total_stored = 0;

@@ -4,6 +4,11 @@
 #include "building/building.h"
 #include "map/point.h"
 
+#define FULL_WAREHOUSE 32
+#define THREEQ_WAREHOUSE 24
+#define HALF_WAREHOUSE 16
+#define QUARTER_WAREHOUSE 8
+
 enum {
     WAREHOUSE_ROOM = 0,
     WAREHOUSE_FULL = 1,

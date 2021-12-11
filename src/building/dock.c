@@ -82,7 +82,7 @@ int building_dock_can_import_from_ship(building *dock, int ship_id)
     }
 
     // dock has plague, trading is disabled
-    if (dock->ruin_has_plague) {
+    if (dock->has_plague) {
         return 0;
     }
 
@@ -102,7 +102,7 @@ int building_dock_can_export_to_ship(building *dock, int ship_id)
     }
 
     // dock has plague, trading is disabled
-    if (dock->ruin_has_plague) {
+    if (dock->has_plague) {
         return 0;
     }
 
@@ -359,7 +359,7 @@ void building_dock_get_ship_request_tile(const building *dock, ship_dock_request
 int building_dock_is_working(int dock_id)
 {
     building *b = building_get(dock_id);
-    return b->state == BUILDING_STATE_IN_USE && b->type == BUILDING_DOCK && b->num_workers > 0 && !b->ruin_has_plague;
+    return b->state == BUILDING_STATE_IN_USE && b->type == BUILDING_DOCK && b->num_workers > 0 && !b->has_plague;
 }
 
 int building_dock_reposition_anchored_ship(int ship_id, map_point *tile)

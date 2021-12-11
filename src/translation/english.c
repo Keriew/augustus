@@ -725,18 +725,21 @@ static translation_string all_strings[] = {
     {TR_WINDOW_BUILDING_DISTRIBUTION_CART_PUSHER_RETURNING_WITH, "The cart pusher is returning with a delivery." },
     {TR_BUTTON_YEARLY_AUTOSAVE_OFF, "Yearly autosave OFF"},
     {TR_BUTTON_YEARLY_AUTOSAVE_ON, "Yearly autosave ON" },
-    {TR_BUILDING_DOCK_PLAGUE_DESC, "The plague was brought here by trader ship, the port is in quarantine while a doctor decontaminates the area."},
+    {TR_BUILDING_DOCK_PLAGUE_DESC, "The plague was brought here by a trade ship, the port is in quarantine while a doctor decontaminates the area."},
     {TR_BUILDING_GRANARY_PLAGUE_DESC, "The plague was brought here by a contaminated worker. This granary is in quarantine while a doctor decontaminates the area."},
     {TR_BUILDING_WAREHOUSE_PLAGUE_DESC, "The plague was brought here by a contaminated worker. This warehouse is in quarantine while a doctor decontaminates the area."},
+    {TR_BUILDING_FUMIGATION_DESC, "The building is being disinfected, the fumigation should last a few days."},
     {TR_OVERLAY_SICKNESS, "Sickness"},
     {TR_ADVISOR_SICKNESS_LEVEL_LOW, "Very few diseases are spread in the city, and the business is functioning perfectly. The city's level of hygiene makes it possible to effectively stem epidemics from outside cities."},
     {TR_ADVISOR_SICKNESS_LEVEL_MEDIUM, "A few cases of plague have broken out in the city, but the situation is under control. Ensure a correct level of hygiene so that the business is not impacted. Hospitals are effective at preventing epidemics."},
     {TR_ADVISOR_SICKNESS_LEVEL_HIGH, "There are many cases of plague in the city. Commercial buildings may go into quarantine if you do not remedy the situation quickly. Place hospitals near docks and warehouses to stem epidemics from outer cities."},
-    {TR_ADVISOR_SICKNESS_LEVEL_PLAGUE, "The plague ravaged the city and trade was severely impacted. Doctors are requisitioned to decontaminate the places most affected by the epidemic. The situation must absolutely be restored!"},
+    {TR_ADVISOR_SICKNESS_LEVEL_PLAGUE, "The plague ravage the city and trade is severely impacted. Doctors are requisitioned to decontaminate the places most affected by the epidemic. The situation must absolutely be restored!"},
     {TR_TOOLTIP_OVERLAY_SICKNESS_LOW, "Very few diseases"},
     {TR_TOOLTIP_OVERLAY_SICKNESS_MEDIUM, "A few cases of plague"},
     {TR_TOOLTIP_OVERLAY_SICKNESS_HIGH, "There are many cases of plague"},
     {TR_TOOLTIP_OVERLAY_SICKNESS_PLAGUE, "The plague is wreaking havoc"},
+    {TR_CITY_MESSAGE_TITLE_SICKNESS, "The plague in the city"},
+    {TR_CITY_MESSAGE_TEXT_SICKNESS, "The plague ravage the city, a building has been placed in quarantine and doctors are requisitioned to decontaminate it."},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

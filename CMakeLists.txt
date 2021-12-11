@@ -963,7 +963,7 @@ else()
     endif()
 
     if(WIN32)
-        target_link_libraries(${SHORT_NAME} dbghelp shlwapi)
+       target_link_libraries(${SHORT_NAME} dbghelp shlwapi)
     endif()
 
     if(UNIX AND NOT APPLE)

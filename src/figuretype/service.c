@@ -247,7 +247,7 @@ static int fight_plague(figure *f, int force)
 
     // find in docks
     for (building *dock = building_first_of_type(BUILDING_DOCK); dock; dock = dock->next_of_type) {
-        if (dock->ruin_has_plague) {
+        if (dock->has_plague) {
             building_with_plague = dock->id;
             break;
         }
@@ -256,7 +256,7 @@ static int fight_plague(figure *f, int force)
     // if no docks, find in warehouses
     if (!building_with_plague) {
         for (building *warehouse = building_first_of_type(BUILDING_WAREHOUSE); warehouse; warehouse = warehouse->next_of_type) {
-            if (warehouse->ruin_has_plague) {
+            if (warehouse->has_plague) {
                 building_with_plague = warehouse->id;
                 break;
             }
@@ -265,7 +265,7 @@ static int fight_plague(figure *f, int force)
         // if no warehouse, find in granaries
         if (!building_with_plague) {
             for (building *granary = building_first_of_type(BUILDING_GRANARY); granary; granary = granary->next_of_type) {
-                if (granary->ruin_has_plague) {
+                if (granary->has_plague) {
                     building_with_plague = granary->id;
                     break;
                 }
@@ -285,7 +285,7 @@ static int fight_plague(figure *f, int force)
                 return 0;
             }
             building *building = building_get(f->destination_building_id);
-            if (building->ruin_has_plague) {
+            if (building->has_plague) {
                 return 1;
             }
     }
@@ -313,13 +313,14 @@ static int fight_plague(figure *f, int force)
 
 static void heal_plague(figure *f)
 {
-    building *building_with_plague_id = building_get(f->destination_building_id);
-    int distance = calc_maximum_distance(f->x, f->y, building_with_plague_id->x, building_with_plague_id->y);
+    building *building_with_plague = building_get(f->destination_building_id);
+    int distance = calc_maximum_distance(f->x, f->y, building_with_plague->x, building_with_plague->y);
 
-    if (building_with_plague_id->ruin_has_plague && distance < 5) {
-        if (f->type == FIGURE_DOCTOR || f->type == FIGURE_SURGEON) {
-            building_with_plague_id->sickness_duration = 99;
+    if (building_with_plague->has_plague && distance < 5) {
+        if (building_with_plague->sickness_duration < 95) {
+            building_with_plague->sickness_duration = 95;
         }
+        building_with_plague->sickness_last_doctor_cure = 99; // Use sickness_last_doctor_cure = 99 to know if doctor is currently healing building
     } else {
         f->wait_ticks = 1;
     }
@@ -372,6 +373,8 @@ void figure_doctor_action(figure *f)
             break;
         case FIGURE_ACTION_232_DOCTOR_AT_PLAGUE:
             heal_plague(f);
+            figure_image_increase_offset(f, 10);
+            f->image_id = assets_get_group_id("Health") + f->image_offset;
             break;
     }
 }

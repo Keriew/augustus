@@ -728,6 +728,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_DOCK_PLAGUE_DESC, "La peste a été apportée ici par un navire marchant, le port est en quarantaine le temps qu'un médecin décontamine le secteur."},
     {TR_BUILDING_GRANARY_PLAGUE_DESC, "La peste a été apportée ici par un ouvier contaminé. Ce grenier est en quarantaine le temps qu'un médecin décontamine le secteur."},
     {TR_BUILDING_WAREHOUSE_PLAGUE_DESC, "La peste a été apportée ici par un ouvier contaminé. Cet entrepôt est en quarantaine le temps qu'un médecin décontamine le secteur."},
+    {TR_BUILDING_FUMIGATION_DESC, "Le bâtiment est en cours de désinfection, la fumigation devrait durer quelques jours."},
     {TR_OVERLAY_SICKNESS, "Maladies"},
     {TR_ADVISOR_SICKNESS_LEVEL_LOW, "Très peu de maladies se propagent dans la cité, et le commerce fonctionne parfaitement. Le niveau d'hygiène de la cité permet d'endiguer efficacement les épidémies provenant des cités extérieures."},
     {TR_ADVISOR_SICKNESS_LEVEL_MEDIUM, "Quelques cas de peste se sont déclarés dans la cité mais la situation est sous contrôle. Assurez-vous d'un niveau d'hygiène correct afin que le commerce ne soit pas impacté. Les hôpitaux sont efficaces pour prévenir les épidémies."},
@@ -737,6 +738,8 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_OVERLAY_SICKNESS_MEDIUM, "Quelques cas de peste"},
     {TR_TOOLTIP_OVERLAY_SICKNESS_HIGH, "De nombreux cas de peste"},
     {TR_TOOLTIP_OVERLAY_SICKNESS_PLAGUE, "La peste fait des ravages"},
+    {TR_CITY_MESSAGE_TITLE_SICKNESS, "La peste dans la cité"},
+    {TR_CITY_MESSAGE_TEXT_SICKNESS, "La peste ravage la cité, un bâtiment a été placé en quarantaine et des médecins sont réquisitionnés pour décontaminer le décontaminer."},
 };
 
 void translation_french(const translation_string **strings, int *num_strings)

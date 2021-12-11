@@ -43,8 +43,18 @@ void city_overlay_problems_prepare_building(building *b)
         return;
     }
 
-    if (b->sickness_level || b->ruin_has_plague) {
+    if (b->has_plague) {
         b->show_on_problem_overlay = 1;
+
+        if (b->type == BUILDING_WAREHOUSE) {
+            building *space = b;
+            for (int i = 0; i < 8; i++) {
+                space = building_next(space);
+                if (space->type == BUILDING_WAREHOUSE_SPACE) {
+                    space->show_on_problem_overlay = 1;
+                }
+            }
+        }
         return;
     }
 

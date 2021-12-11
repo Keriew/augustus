@@ -273,9 +273,13 @@ void window_building_draw_dock(building_info_context *c)
 
     building *b = building_get(c->building_id);
 
-    if (b->ruin_has_plague) {
+    if (b->has_plague) {
         window_building_play_sound(c, "wavs/clinic.wav");
-        window_building_draw_description_from_tr_string(c, TR_BUILDING_DOCK_PLAGUE_DESC);
+        if (b->sickness_last_doctor_cure == 99) {
+            window_building_draw_description_from_tr_string(c, TR_BUILDING_FUMIGATION_DESC);
+        } else {
+            window_building_draw_description_from_tr_string(c, TR_BUILDING_DOCK_PLAGUE_DESC);
+        }
     } else {
         window_building_play_sound(c, "wavs/dock.wav");
         if (!c->has_road_access) {
@@ -643,14 +647,18 @@ void window_building_draw_granary(building_info_context *c)
 
     lang_text_draw_centered(98, 0, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
 
-    if (b->ruin_has_plague) {
+    if (b->has_plague) {
         window_building_play_sound(c, "wavs/clinic.wav");
     } else {
         window_building_play_sound(c, "wavs/granary.wav");
     }
 
-    if (b->ruin_has_plague) {
-        window_building_draw_description_from_tr_string(c, TR_BUILDING_GRANARY_PLAGUE_DESC);
+    if (b->has_plague) {
+        if (b->sickness_last_doctor_cure == 99) {
+            window_building_draw_description_from_tr_string(c, TR_BUILDING_FUMIGATION_DESC);
+        } else {
+            window_building_draw_description_from_tr_string(c, TR_BUILDING_GRANARY_PLAGUE_DESC);
+        }
     } else if (!c->has_road_access) {
         window_building_draw_description_at(c, 40, 69, 25);
     } else if (scenario_property_rome_supplies_wheat()) {
@@ -890,14 +898,18 @@ void window_building_draw_warehouse(building_info_context *c)
 
     lang_text_draw_centered(99, 0, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
 
-    if (b->ruin_has_plague) {
+    if (b->has_plague) {
         window_building_play_sound(c, "wavs/clinic.wav");
     } else {
         window_building_play_sound(c, "wavs/warehouse.wav");
     }
 
-    if (b->ruin_has_plague) {
-        window_building_draw_description_from_tr_string(c, TR_BUILDING_WAREHOUSE_PLAGUE_DESC);
+    if (b->has_plague) {
+        if (b->sickness_last_doctor_cure == 99) {
+            window_building_draw_description_from_tr_string(c, TR_BUILDING_FUMIGATION_DESC);
+        } else {
+            window_building_draw_description_from_tr_string(c, TR_BUILDING_WAREHOUSE_PLAGUE_DESC);
+        }
     } else if (!c->has_road_access) {
         window_building_draw_description(c, 69, 25);
     } else {

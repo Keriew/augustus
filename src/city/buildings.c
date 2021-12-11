@@ -3,6 +3,8 @@
 #include "city/data_private.h"
 #include "core/calc.h"
 
+static const building_type PLAGUE_BUILDINGS[] = { BUILDING_DOCK, BUILDING_WAREHOUSE, BUILDING_GRANARY };
+
 int city_buildings_has_senate(void)
 {
     return city_data.building.senate_placed;
@@ -253,50 +255,21 @@ int city_buildings_get_closest_plague(int x, int y, int *distance)
     int min_occupied_building_id = 0;
     int min_occupied_dist = *distance = 10000;
 
-    // find closest in docks
-    for (building *dock = building_first_of_type(BUILDING_DOCK); dock; dock = dock->next_of_type) {
-        if (dock->ruin_has_plague && dock->distance_from_entry) {
-            int dist = calc_maximum_distance(x, y, dock->x, dock->y);
-            if (dock->figure_id4) {
-                if (dist < min_occupied_dist) {
-                    min_occupied_dist = dist;
-                    min_occupied_building_id = dock->id;
+    // Find closest in buildings (docks, granaries or warehouses)
+    for (int i = 0 ; i < 3; i++) {
+        building_type type = PLAGUE_BUILDINGS[i];
+        for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
+            if (b->has_plague && b->distance_from_entry) {
+                int dist = calc_maximum_distance(x, y, b->x, b->y);
+                if (b->figure_id4) {
+                    if (dist < min_occupied_dist) {
+                        min_occupied_dist = dist;
+                        min_occupied_building_id = b->id;
+                    }
+                } else if (dist < *distance) {
+                    *distance = dist;
+                    min_free_building_id = b->id;
                 }
-            } else if (dist < *distance) {
-                *distance = dist;
-                min_free_building_id = dock->id;
-            }
-        }
-    }
-
-    // find closest in warehouses
-    for (building *warehouse = building_first_of_type(BUILDING_WAREHOUSE); warehouse; warehouse = warehouse->next_of_type) {
-        if (warehouse->ruin_has_plague && warehouse->distance_from_entry) {
-            int dist = calc_maximum_distance(x, y, warehouse->x, warehouse->y);
-            if (warehouse->figure_id4) {
-                if (dist < min_occupied_dist) {
-                    min_occupied_dist = dist;
-                    min_occupied_building_id = warehouse->id;
-                }
-            } else if (dist < *distance) {
-                *distance = dist;
-                min_free_building_id = warehouse->id;
-            }
-        }
-    }
-
-    // find closest in granaries
-    for (building *granary = building_first_of_type(BUILDING_GRANARY); granary; granary = granary->next_of_type) {
-        if (granary->ruin_has_plague && granary->distance_from_entry) {
-            int dist = calc_maximum_distance(x, y, granary->x, granary->y);
-            if (granary->figure_id4) {
-                if (dist < min_occupied_dist) {
-                    min_occupied_dist = dist;
-                    min_occupied_building_id = granary->id;
-                }
-            } else if (dist < *distance) {
-                *distance = dist;
-                min_free_building_id = granary->id;
             }
         }
     }
@@ -312,32 +285,27 @@ static void update_sickness_duration(int building_id)
 {
     building *b = building_get(building_id);
 
-    if (b->ruin_has_plague) {
-        // stop plague after time or if doctor heal it
+    if (b->has_plague) {
+        // Stop plague after time or if doctor heals it
         if (b->sickness_duration == 99) {
             b->sickness_duration = 0;
-            b->ruin_has_plague = 0;
+            b->has_plague = 0;
             b->sickness_level = 0;
             b->sickness_last_doctor_cure = 0;
             b->figure_id4 = 0;
-            b->fire_proof = 0;
+            b->fumigation_frame = 0;
         } else {
-            b->sickness_duration++;
+            b->sickness_duration += 1;
         }
     }
 }
 
 void city_buildings_update_plague(void)
 {
-    for (building *dock = building_first_of_type(BUILDING_DOCK); dock; dock = dock->next_of_type) {
-        update_sickness_duration(dock->id);
-    }
-
-    for (building *warehouse = building_first_of_type(BUILDING_WAREHOUSE); warehouse; warehouse = warehouse->next_of_type) {
-        update_sickness_duration(warehouse->id);
-    }
-
-    for (building *granary = building_first_of_type(BUILDING_GRANARY); granary; granary = granary->next_of_type) {
-        update_sickness_duration(granary->id);
+    for (int i = 0 ; i < 3; i++) {
+        building_type type = PLAGUE_BUILDINGS[i];
+        for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
+            update_sickness_duration(b->id);
+        }
     }
 }

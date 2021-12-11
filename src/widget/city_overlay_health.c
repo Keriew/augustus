@@ -1,5 +1,6 @@
 #include "city_overlay_health.h"
 
+#include "city/health.h"
 #include "game/state.h"
 #include "translation/translation.h"
 
@@ -51,8 +52,8 @@ static int show_figure_hospital(const figure *f)
 static int show_figure_sickness(const figure *f)
 {
     return f->type == FIGURE_SURGEON || f->type == FIGURE_DOCTOR || f->type == FIGURE_DOCKER ||
-    f->type == FIGURE_CART_PUSHER || f->type == FIGURE_TRADE_SHIP || f->type == FIGURE_WAREHOUSEMAN ||
-    f->type == FIGURE_TRADE_CARAVAN || f->type == FIGURE_TRADE_CARAVAN_DONKEY;
+           f->type == FIGURE_CART_PUSHER || f->type == FIGURE_TRADE_SHIP || f->type == FIGURE_WAREHOUSEMAN ||
+           f->type == FIGURE_TRADE_CARAVAN || f->type == FIGURE_TRADE_CARAVAN_DONKEY;
 }
 
 static int get_column_height_barber(const building *b)
@@ -134,11 +135,11 @@ static int get_tooltip_hospital(tooltip_context *c, const building *b)
 
 static int get_tooltip_sickness(tooltip_context *c, const building *b)
 {
-    if (b->sickness_level < 30) {
+    if (b->sickness_level < LOW_SICKNESS_LEVEL) {
         c->translation_key = TR_TOOLTIP_OVERLAY_SICKNESS_LOW;
-    } else if (b->sickness_level < 60) {
+    } else if (b->sickness_level < MEDIUM_SICKNESS_LEVEL) {
         c->translation_key = TR_TOOLTIP_OVERLAY_SICKNESS_MEDIUM;
-    } else if (b->sickness_level < 90) {
+    } else if (b->sickness_level < HIGH_SICKNESS_LEVEL) {
         c->translation_key = TR_TOOLTIP_OVERLAY_SICKNESS_HIGH;
     } else {
         c->translation_key = TR_TOOLTIP_OVERLAY_SICKNESS_PLAGUE;
