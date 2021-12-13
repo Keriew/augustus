@@ -33,6 +33,7 @@ static void destroy_on_fire(building *b, int plagued)
     b->sickness_level = 0;
     b->sickness_last_doctor_cure = 0;
     b->fumigation_frame = 0;
+    b->fumigation_direction = 0;
     b->sickness_duration = 0;
     b->output_resource_id = 0;
     b->distance_from_entry = 0;

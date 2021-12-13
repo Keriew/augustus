@@ -2,16 +2,16 @@
 <!DOCTYPE assetlist>
 
 <assetlist name="Health">
-    <!-- Note: Doctor Healing animation frames 01-06 -->
-    <image id="Doctor heal 01" src="Doctor_heal_plague_01"/>
-    <image id="Doctor heal 02" src="Doctor_heal_plague_02"/>
-    <image id="Doctor heal 03" src="Doctor_heal_plague_03"/>
-    <image id="Doctor heal 04" src="Doctor_heal_plague_04"/>
-    <image id="Doctor heal 05" src="Doctor_heal_plague_05"/>
-    <image id="Doctor heal 06" src="Doctor_heal_plague_06"/>
-    <image id="Doctor heal 07" src="Doctor_heal_plague_05"/>
-    <image id="Doctor heal 08" src="Doctor_heal_plague_04"/>
-    <image id="Doctor heal 09" src="Doctor_heal_plague_03"/>
-    <image id="Doctor heal 10" src="Doctor_heal_plague_02"/>
-    <image id="Doctor heal 11" src="Doctor_heal_plague_01"/>
+    <!-- Note: Doctor Healing animation frames 01-11 -->
+    <image id="Doctor heal" src="Doctor_heal_plague_01"/>
+    <image src="Doctor_heal_plague_02"/>
+    <image src="Doctor_heal_plague_03"/>
+    <image src="Doctor_heal_plague_04"/>
+    <image src="Doctor_heal_plague_05"/>
+    <image src="Doctor_heal_plague_06"/>
+    <image src="Doctor_heal_plague_05"/>
+    <image src="Doctor_heal_plague_04"/>
+    <image src="Doctor_heal_plague_03"/>
+    <image src="Doctor_heal_plague_02"/>
+    <image src="Doctor_heal_plague_01"/>
 </assetlist>

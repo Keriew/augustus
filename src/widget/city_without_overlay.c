@@ -335,20 +335,18 @@ static void draw_figures(int x, int y, int grid_offset)
     }
 }
 
-static int fumigation_direction = 1;
-
 static void draw_fumigation(building *b, int x, int y, color_t color_mask)
 {
-    int image_id = 5354; // smoke image_id
+    int image_id = image_group(GROUP_FIGURE_EXPLOSION); // smoke image_id
     image_id += b->fumigation_frame;
     image_draw_masked(image_id, x, y, color_mask);
-    if (image_id == 5357) {
-        fumigation_direction = 0;
+    if (image_id == image_group(GROUP_FIGURE_EXPLOSION) + 3) {
+        b->fumigation_direction = 0;
     }
-    if (image_id == 5354) {
-        fumigation_direction = 1;
+    if (image_id == image_group(GROUP_FIGURE_EXPLOSION)) {
+        b->fumigation_direction = 1;
     }
-    building_animation_advance_fumigation(b, fumigation_direction);
+    building_animation_advance_fumigation(b);
 }
 
 static void draw_plague(building *b, int x, int y, color_t color_mask)
@@ -386,13 +384,13 @@ static void draw_plague(building *b, int x, int y, color_t color_mask)
         if (b->sickness_last_doctor_cure == 99) {
             draw_fumigation(b, x_pos, y_pos, color_mask);
         } else {
-            fumigation_direction = 1;
+            b->fumigation_direction = 1;
             image_draw_masked(image_group(GROUP_PLAGUE_SKULL), x_pos, y_pos, color_mask);
         }
     }
 }
 
-static void draw_dock_workers(building *b, int x, int y, color_t color_mask)
+static void draw_dock_workers(const building *b, int x, int y, color_t color_mask)
 {
     if (!b->has_plague) {
         int num_dockers = building_dock_count_idle_dockers(b);
@@ -419,7 +417,7 @@ static void draw_dock_workers(building *b, int x, int y, color_t color_mask)
     }
 }
 
-static int get_warehouse_flag_image_id(building *b)
+static int get_warehouse_flag_image_id(const building *b)
 {
     const building_storage *storage = building_storage_get(b->storage_id);
     int permission_mask = 0x7;
@@ -432,7 +430,7 @@ static int get_warehouse_flag_image_id(building *b)
     return image_id;
 }
 
-static void draw_warehouse_flag(building *b, int x, int y, color_t color_mask)
+static void draw_warehouse_flag(const building *b, int x, int y, color_t color_mask)
 {
     if (!b->has_plague) {
         int image_id = get_warehouse_flag_image_id(b);
@@ -449,13 +447,12 @@ static void draw_warehouse_ornaments(int x, int y, color_t color_mask)
     image_draw_masked(image_group(GROUP_BUILDING_WAREHOUSE) + 17, x - 4, y - 42, color_mask);
 }
 
-static void draw_granary_stores(const image *img, building *b, int x, int y, color_t color_mask)
+static void draw_granary_stores(const image *img, const building *b, int x, int y, color_t color_mask)
 {
     image_draw_masked(image_group(GROUP_BUILDING_GRANARY) + 1,
-                      x + img->sprite_offset_x,
-                      y + 60 + img->sprite_offset_y - img->height,
-                      color_mask);
-
+        x + img->sprite_offset_x,
+        y + 60 + img->sprite_offset_y - img->height,
+        color_mask);
     if (b->data.granary.resource_stored[RESOURCE_NONE] < FULL_GRANARY) {
         image_draw_masked(image_group(GROUP_BUILDING_GRANARY) + 2, x + 33, y - 60, color_mask);
     }

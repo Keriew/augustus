@@ -181,6 +181,7 @@ typedef struct building {
     unsigned char sickness_duration;
     unsigned char sickness_last_doctor_cure;
     unsigned char fumigation_frame;
+    unsigned char fumigation_direction;
 } building;
 
 building *building_get(int id);

@@ -3,6 +3,8 @@
 #include "city/data_private.h"
 #include "core/calc.h"
 
+#define NUM_PLAGUE_BUILDINGS sizeof(PLAGUE_BUILDINGS) / sizeof(building_type)
+
 static const building_type PLAGUE_BUILDINGS[] = { BUILDING_DOCK, BUILDING_WAREHOUSE, BUILDING_GRANARY };
 
 int city_buildings_has_senate(void)
@@ -256,7 +258,7 @@ int city_buildings_get_closest_plague(int x, int y, int *distance)
     int min_occupied_dist = *distance = 10000;
 
     // Find closest in buildings (docks, granaries or warehouses)
-    for (int i = 0 ; i < 3; i++) {
+    for (int i = 0 ; i < NUM_PLAGUE_BUILDINGS; i++) {
         building_type type = PLAGUE_BUILDINGS[i];
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
             if (b->has_plague && b->distance_from_entry) {
@@ -294,6 +296,7 @@ static void update_sickness_duration(int building_id)
             b->sickness_last_doctor_cure = 0;
             b->figure_id4 = 0;
             b->fumigation_frame = 0;
+            b->fumigation_direction = 0;
         } else {
             b->sickness_duration += 1;
         }
@@ -302,7 +305,7 @@ static void update_sickness_duration(int building_id)
 
 void city_buildings_update_plague(void)
 {
-    for (int i = 0 ; i < 3; i++) {
+    for (int i = 0 ; i < NUM_PLAGUE_BUILDINGS; i++) {
         building_type type = PLAGUE_BUILDINGS[i];
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
             update_sickness_duration(b->id);
