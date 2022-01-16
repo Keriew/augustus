@@ -1405,7 +1405,8 @@ static void spawn_figure_native_hut(building *b)
 static void spawn_figure_native_meeting(building *b)
 {
     map_building_tiles_add(b->id, b->x, b->y, 2, building_image_get(b), TERRAIN_BUILDING);
-    if (city_buildings_is_mission_post_operational() && !has_figure_of_type(b, FIGURE_NATIVE_TRADER)) {
+    int pacified = b->sentiment.native_anger < 100;
+    if (pacified && !has_figure_of_type(b, FIGURE_NATIVE_TRADER)) {
         int x_out, y_out;
         if (map_terrain_get_adjacent_road_or_clear_land(b->x, b->y, b->size, &x_out, &y_out)) {
             b->figure_spawn_delay++;
@@ -1548,6 +1549,13 @@ static void spawn_figure_fort_supplier(building *fort)
         return;
     }
 
+    int spawn_delay = 20;
+    fort->figure_spawn_delay++;
+    if (fort->figure_spawn_delay <= spawn_delay) {
+        return;
+    }
+
+    fort->figure_spawn_delay = 0;
     map_point road;
     if (map_has_road_access(supply_post->x, supply_post->y, supply_post->size, &road)) {
         figure *f = figure_create(FIGURE_MESS_HALL_FORT_SUPPLIER, road.x, road.y, DIR_4_BOTTOM);
