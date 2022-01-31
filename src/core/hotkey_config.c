@@ -97,7 +97,8 @@ static const char *ini_keys[] = {
     "show_overlay_tax_income",
     "show_overlay_religion",
     "show_overlay_roads",
-    "rotate_map_north"
+    "rotate_map_north",
+    "build_wheat_farm"
 };
 
 static struct {

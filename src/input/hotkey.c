@@ -346,6 +346,10 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
         case HOTKEY_ROTATE_MAP_NORTH:
             def->action = &data.hotkey_state.rotate_map_north;
             break;
+        case HOTKEY_BUILD_WHEAT_FARM:
+            def->action = &data.hotkey_state.building;
+            def->value = BUILDING_WHEAT_FARM;
+            break;
 		default:
             def->action = 0;
     }
