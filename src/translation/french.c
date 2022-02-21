@@ -69,7 +69,6 @@ static translation_string all_strings[] = {
     {TR_CONFIG_FIX_100_YEAR_GHOSTS, "Corrige le bug des fantômes de 100 ans"},
     {TR_CONFIG_FIX_EDITOR_EVENTS, "Corrige \"Nouvel Empereur\" et la survie des parties créees avec l'éditeur"},
     {TR_CONFIG_DRAW_WALKER_WAYPOINTS, "Un clic droit sur un bâtiment affiche les points de passage"},
-    {TR_CONFIG_ENABLE_ZOOM, "Activer le zoom (peut être lent et utilise plus de RAM)"},
     {TR_CONFIG_COMPLETE_RATING_COLUMNS, "Corrige les colonnes d'évaluation incomplètes"},
     {TR_CONFIG_GRANDFESTIVAL, "Les grandes fêtes permettent une bénédiction supplémentaire d'un dieu"},
     {TR_CONFIG_DIFFICULTY, "Difficulté :"},
@@ -100,10 +99,6 @@ static translation_string all_strings[] = {
     {TR_CONFIG_NOT_ACCEPTING_WAREHOUSES, "Les entrepôts et les greniers n'acceptent rien par défaut"},
     {TR_CONFIG_HOUSES_DONT_EXPAND_INTO_GARDENS, "Les logements ne s'étendent pas sur les jardins"},
     {TR_CONFIG_ROAMERS_DONT_SKIP_CORNERS, "Les marcheurs itinérants ne coupent pas les virages"},
-    {TR_CONFIG_ZOOM_COULD_NOT_BE_ENABLED_TITLE, "Le zoom de la cité n'a pas pu être activé"},
-    {TR_CONFIG_ZOOM_COULD_NOT_BE_ENABLED_MESSAGE,
-        "Votre système ne dispose pas de suffisamment de mémoire graphique pour activer le zoom sur la cité.\n"
-        "Le zoom de la cité n'a pas été activé."},
     {TR_CONFIG_SHOW_MAX_POSSIBLE_PROSPERITY, "Afficher la prospérité maximale atteignable avec le logement actuel"},
     {TR_HOTKEY_TITLE, "Configuration raccourcis clavier"},
     {TR_HOTKEY_LABEL, "Touche"},
@@ -746,6 +741,19 @@ static translation_string all_strings[] = {
     {TR_CITY_WARNING_DATA_COPY_NOT_SUPPORTED, "Impossible de copier des réglages pour ce bâtiment" },
     {TR_CITY_WARNING_DATA_PASTE_SUCCESS, "Réglages appliqués" },
     {TR_CITY_WARNING_DATA_PASTE_NOT_SUPPORTED, "Impossible d'appliquer des réglages à ce bâtiment" },
+    {TR_HOTKEY_SHOW_OVERLAY_FOOD_STOCKS, "Stock Vivres"},
+    {TR_HOTKEY_SHOW_OVERLAY_ENTERTAINMENT, "Loisirs" },
+    {TR_HOTKEY_SHOW_OVERLAY_SCHOOL, "Écoles" },
+    {TR_HOTKEY_SHOW_OVERLAY_LIBRARY, "Bibliothèques" },
+    {TR_HOTKEY_SHOW_OVERLAY_ACADEMY, "Universités" },
+    {TR_HOTKEY_SHOW_OVERLAY_BARBER, "Barbiers" },
+    {TR_HOTKEY_SHOW_OVERLAY_BATHHOUSE, "Thermes" },
+    {TR_HOTKEY_SHOW_OVERLAY_CLINIC, "Dispensaires" },
+    {TR_HOTKEY_SHOW_OVERLAY_TAX_INCOME, "Impôts" },
+    {TR_HOTKEY_SHOW_OVERLAY_RELIGION, "Religion" },
+    {TR_HOTKEY_SHOW_OVERLAY_ROADS, "Routes" },
+    {TR_HOTKEY_ROTATE_MAP_NORTH, "Orienter la carte au Nord" },
+    {TR_HOTKEY_BUILD_WHEAT_FARM, "Ferme Blé" }
 };
 
 void translation_french(const translation_string **strings, int *num_strings)
