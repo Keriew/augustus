@@ -27,7 +27,8 @@
 #define HAS_TEXTURE_SCALE_MODE 0
 #endif
 
-// SDL 2.0.18 still has some drawing bugs with geometry rendering, so we only enable it with SDL 2.0.20
+// Even though geometry rendering is supported since SDL 2.0.18, that version still has some drawing bugs, so we only
+// enable geometry rendering with SDL 2.0.20. Also, the software renderer also has drawing bugs, so it's also disabled.
 #if SDL_VERSION_ATLEAST(2, 0, 20)
 #define USE_RENDER_GEOMETRY
 #define HAS_RENDER_GEOMETRY (platform_sdl_version_at_least(2, 0, 20) && !data.is_software_renderer)
@@ -1128,6 +1129,20 @@ int platform_renderer_create_render_texture(int width, int height)
 int platform_renderer_lost_render_texture(void)
 {
     return !data.render_texture && data.renderer;
+}
+
+void platform_renderer_invalidate_target_textures(void)
+{
+    if (data.custom_textures[CUSTOM_IMAGE_RED_FOOTPRINT].texture) {
+        SDL_DestroyTexture(data.custom_textures[CUSTOM_IMAGE_RED_FOOTPRINT].texture);
+        data.custom_textures[CUSTOM_IMAGE_RED_FOOTPRINT].texture = 0;
+        create_blend_texture(CUSTOM_IMAGE_RED_FOOTPRINT);
+    }
+    if (data.custom_textures[CUSTOM_IMAGE_GREEN_FOOTPRINT].texture) {
+        SDL_DestroyTexture(data.custom_textures[CUSTOM_IMAGE_GREEN_FOOTPRINT].texture);
+        data.custom_textures[CUSTOM_IMAGE_GREEN_FOOTPRINT].texture = 0;
+        create_blend_texture(CUSTOM_IMAGE_GREEN_FOOTPRINT);
+    }
 }
 
 void platform_renderer_clear(void)
