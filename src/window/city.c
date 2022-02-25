@@ -40,8 +40,8 @@
 #include "widget/sidebar/city.h"
 #include "widget/sidebar/military.h"
 #include "window/advisors.h"
-#include "window/file_dialog.h"
 #include "window/empire.h"
+#include "window/file_dialog.h"
 #include "window/message_list.h"
 
 static void draw_background(void)

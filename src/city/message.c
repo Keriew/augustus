@@ -1,5 +1,7 @@
 #include "message.h"
 
+#include "city/warning.h"
+#include "core/config.h"
 #include "core/encoding.h"
 #include "core/file.h"
 #include "core/lang.h"
@@ -10,8 +12,6 @@
 #include "graphics/window.h"
 #include "sound/effect.h"
 #include "window/message_dialog.h"
-#include "city/warning.h"
-#include "core/config.h"
 
 #define MAX_MESSAGES 1000
 #define MAX_QUEUE 20

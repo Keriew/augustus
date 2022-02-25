@@ -758,7 +758,7 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_SHOW_OVERLAY_ROADS, "Roads overlay" },
     {TR_HOTKEY_ROTATE_MAP_NORTH, "Rotate map to North" },
     {TR_HOTKEY_BUILD_WHEAT_FARM, "Wheat farm" },
-    {TR_CONFIG_UI_MESSAGE_ALERTS, "Message alerts not message boxes"},
+    {TR_CONFIG_UI_MESSAGE_ALERTS, "Show new messages as alerts instead of popups"},
     {TR_HOTKEY_SHOW_MESSAGES, "Show messages"},   
     {TR_HOTKEY_SHOW_EMPIRE_MAP, "Show empire map"}     
 };
