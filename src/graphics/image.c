@@ -35,10 +35,14 @@ void image_blend_footprint_color(int x, int y, color_t color, float scale)
 
 static color_t base_color_for_font(font_t font)
 {
-    if (font == FONT_NORMAL_PLAIN || font == FONT_LARGE_PLAIN || font == FONT_SMALL_PLAIN) {
-        return COLOR_FONT_PLAIN;
+    switch (font) {
+        case FONT_SMALL_PLAIN:
+        case FONT_NORMAL_PLAIN:
+        case FONT_LARGE_PLAIN:
+            return COLOR_FONT_PLAIN;
+        default:
+            return COLOR_MASK_NONE;
     }
-    return COLOR_MASK_NONE;
 }
 
 static void draw_multibyte_letter(font_t font, const image *img, int x, int y, color_t color, float scale)
@@ -60,6 +64,10 @@ static void draw_multibyte_letter(font_t font, const image *img, int x, int y, c
         case FONT_LARGE_BLACK:
             graphics_renderer()->draw_image(img, x + 1, y + 1, 0xffcead9c, scale);
             graphics_renderer()->draw_image(img, x, y, COLOR_BLACK, scale);
+            break;
+        case FONT_NORMAL_BROWN:
+        case FONT_LARGE_BROWN:
+            graphics_renderer()->draw_image(img, x, y, COLOR_FONT_PLAIN, scale);
             break;
         default: // Plain + brown
             if (!color) {
@@ -186,8 +194,6 @@ void image_draw_isometric_top_from_draw_tile(int image_id, int x, int y, color_t
     if ((img->atlas.id >> IMAGE_ATLAS_BIT_OFFSET) == ATLAS_UNPACKED_EXTRA_ASSET) {
         assets_load_unpacked_asset(image_id);
     }
-    int num_tiles = (img->width + 2) / (FOOTPRINT_WIDTH + 2);
-    y -= FOOTPRINT_HALF_HEIGHT * (num_tiles - 1);
-    y -= img->top_height - FOOTPRINT_HALF_HEIGHT * num_tiles;
+    y -= img->top_height - FOOTPRINT_HALF_HEIGHT;
     graphics_renderer()->draw_isometric_top(img, x, y, color_mask, scale);
 }

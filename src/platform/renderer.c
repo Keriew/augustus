@@ -1,5 +1,6 @@
 #include "renderer.h"
 
+#include "city/view.h"
 #include "core/calc.h"
 #include "core/time.h"
 #include "graphics/renderer.h"
@@ -474,13 +475,14 @@ static void draw_isometric_footprint_raw(const image *img, SDL_Texture *texture,
     float maxv = (src_coords->y + height - texture_coord_correction) / (float) texture_height;
 
     float dst_coord_correction = scale == 1.0f ? 0.5f : 1.0f / scale;
+    float grid_correction = city_view_should_show_grid() ? dst_coord_correction : 0.0f;
 
-    float minx = dst_coords->x - dst_coord_correction;
-    float miny = dst_coords->y;
+    float minx = dst_coords->x - dst_coord_correction + grid_correction;
+    float miny = dst_coords->y + grid_correction;
     float medx = dst_coords->x + half_width / scale;
     float medy = dst_coords->y + half_height / scale;
-    float maxx = dst_coords->x + dst_coord_correction + width / scale;
-    float maxy = dst_coords->y + height / scale;
+    float maxx = dst_coords->x + dst_coord_correction + width / scale - grid_correction;
+    float maxy = dst_coords->y + height / scale - grid_correction;
 
     const float uv[8] = { medu, minv, minu, medv, medu, maxv, maxu, medv };
     const float xy[8] = { medx, miny, minx, medy, medx, maxy, maxx, medy };
@@ -597,19 +599,24 @@ static void draw_texture(const image *img, int x, int y, color_t color, float sc
 
     int texture_coord_correction = scale == 1.0f ? 0 : 1;
 
+    int dst_coord_correction = img->is_isometric && city_view_should_show_grid() ? 1 + texture_coord_correction * 2 : 0;
+
     SDL_Rect src_coords = { x_offset + texture_coord_correction, y_offset + texture_coord_correction,
         img->width - texture_coord_correction, height - texture_coord_correction };
 
 #ifdef USE_RENDERCOPYF
     if (HAS_RENDERCOPYF) {
-        SDL_FRect dst_coords = { x / scale, y / scale, img->width / scale, height / scale };
+        SDL_FRect dst_coords = { (x + dst_coord_correction) / scale, (y + dst_coord_correction) / scale,
+            (img->width - dst_coord_correction) / scale, (height - dst_coord_correction) / scale };
         SDL_RenderCopyF(data.renderer, texture, &src_coords, &dst_coords);
         return;
     }
 #endif
 
-    SDL_Rect dst_coords = { (int) round(x / scale), (int) round(y / scale),
-        (int) round(img->width / scale), (int) round(height / scale) };
+    SDL_Rect dst_coords = { (int) round((x + dst_coord_correction) / scale),
+        (int) round((y + dst_coord_correction) / scale),
+        (int) round((img->width - dst_coord_correction) / scale),
+        (int) round((height - dst_coord_correction) / scale) };
     SDL_RenderCopy(data.renderer, texture, &src_coords, &dst_coords);
 }
 
@@ -771,13 +778,11 @@ static int save_to_texture(int texture_id, int x, int y, int width, int height)
         if (texture_info) {
             SDL_DestroyTexture(texture_info->texture);
             texture_info->texture = 0;
+            texture_info->tex_width = 0;
+            texture_info->tex_height = 0;
         }
         texture = SDL_CreateTexture(data.renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET, width, height);
         if (!texture) {
-            if (texture_info) {
-                texture_info->tex_width = 0;
-                texture_info->tex_height = 0;
-            }
             return 0;
         }
 #ifdef USE_TEXTURE_SCALE_MODE
@@ -791,7 +796,6 @@ static int save_to_texture(int texture_id, int x, int y, int width, int height)
 
     SDL_Rect former_viewport;
     SDL_RenderGetViewport(data.renderer, &former_viewport);
-
     SDL_Rect src_rect = { x + former_viewport.x, y + former_viewport.y, width, height };
     SDL_Rect dst_rect = { 0, 0, width, height };
     SDL_SetRenderTarget(data.renderer, texture);
@@ -832,7 +836,7 @@ static int save_to_texture(int texture_id, int x, int y, int width, int height)
     return texture_info->id;
 }
 
-static void draw_saved_texture(int texture_id, int x, int y, int width, int height)
+static void draw_saved_texture(int texture_id, int x, int y)
 {
     if (data.paused) {
         return;
@@ -842,7 +846,7 @@ static void draw_saved_texture(int texture_id, int x, int y, int width, int heig
         return;
     }
     SDL_Rect src_coords = { 0, 0, texture_info->width, texture_info->height };
-    SDL_Rect dst_coords = { x, y, width, height };
+    SDL_Rect dst_coords = { x, y, texture_info->width, texture_info->height };
     SDL_RenderCopy(data.renderer, texture_info->texture, &src_coords, &dst_coords);
 }
 
@@ -861,6 +865,9 @@ static void create_blend_texture(custom_image_type type)
     SDL_RenderGetClipRect(data.renderer, &former_clip);
 
     SDL_SetRenderTarget(data.renderer, texture);
+    SDL_Rect rect = { 0, 0, 58, 30 };
+    SDL_RenderSetClipRect(data.renderer, &rect);
+    SDL_RenderSetViewport(data.renderer, &rect);
     SDL_SetRenderDrawColor(data.renderer, 0xff, 0xff, 0xff, 0xff);
     color_t color = type == CUSTOM_IMAGE_RED_FOOTPRINT ? COLOR_MASK_RED : COLOR_MASK_GREEN;
     SDL_RenderClear(data.renderer);

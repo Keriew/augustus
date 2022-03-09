@@ -24,9 +24,12 @@ static void load_dummy_layer(layer *l)
 #ifndef BUILDING_ASSET_PACKER
 static void copy_regular_image(layer *l, color_t *dst, const image *img, const color_t *atlas_pixels, int atlas_width)
 {
-    for (int y = 0; y < l->height; y++) {
-        memcpy(&dst[y * l->width], &atlas_pixels[(y + img->atlas.y_offset) * atlas_width + img->atlas.x_offset],
-            l->width * sizeof(color_t));
+    int height = l->height - img->y_offset;
+    int width = l->width - img->x_offset;
+    for (int y = 0; y < height; y++) {
+        memcpy(&dst[(y + img->y_offset) * l->width + img->x_offset],
+            &atlas_pixels[(y + img->atlas.y_offset) * atlas_width + img->atlas.x_offset],
+            width * sizeof(color_t));
     }
 }
 
@@ -95,6 +98,9 @@ static void load_layer_from_another_image(layer *l, color_t **main_data, int *ma
         if (!l->grayscale) {
             l->data = asset_img->data;
             return;
+        }
+        while(asset_img->is_reference) {
+            asset_img = asset_image_get_from_id(asset_img->first_layer.calculated_image_id - IMAGE_MAIN_ENTRIES);
         }
     }
 
@@ -272,7 +278,7 @@ static char *copy_attribute(const char *attribute)
 static int determine_layer_height(const image *img, layer_isometric_part part)
 {
     if (!img->is_isometric || graphics_renderer()->isometric_images_are_joined()) {
-        return img->height;
+        return img->height + img->y_offset;
     }
     if (part == PART_BOTH || part == PART_FOOTPRINT) {
         if (img->top_height) {
@@ -329,7 +335,7 @@ int layer_add_from_image_id(layer *l, const char *group_id, const char *image_id
         layer_unload(l);
         return 0;
     }
-    l->width = original_image->width;
+    l->width = original_image->width + original_image->x_offset;
     l->height = determine_layer_height(original_image, l->part);
 #endif
     return 1;
