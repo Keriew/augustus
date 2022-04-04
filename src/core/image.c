@@ -27,11 +27,14 @@
 #define CYRILLIC_FONT_INDEX_OFFSET HEADER_SIZE
 #define CYRILLIC_FONT_INDEX_SIZE ENTRY_SIZE * CYRILLIC_FONT_ENTRIES
 
+#define JAPANESE_HALF_WIDTH_CHARS 63
+
 #define MAIN_DATA_SIZE 12100000
 #define ENEMY_DATA_SIZE 2400000
 #define CYRILLIC_FONT_DATA_SIZE 1500000
 #define TRAD_CHINESE_FONT_DATA_SIZE 7200000
 #define KOREAN_FONT_DATA_SIZE 7500000
+#define JAPANESE_FONT_DATA_SIZE 11000000
 
 #define CYRILLIC_FONT_BASE_OFFSET 201
 
@@ -58,6 +61,7 @@ typedef struct {
 typedef struct {
     int width;
     int height;
+    int half_width;
 } multibyte_font_sizes;
 
 typedef struct {
@@ -65,8 +69,8 @@ typedef struct {
     const char *file_v1;
     const char *file_v2;
     int data_size;
-    int entries;
     int chars;
+    int half_width_chars;
     struct {
         multibyte_font_sizes v1[3];
         multibyte_font_sizes v2[3];
@@ -78,7 +82,8 @@ typedef enum {
     MULTIBYTE_FONT_TRADITIONAL_CHINESE = 0,
     MULTIBYTE_FONT_SIMPLIFIED_CHINESE = 1,
     MULTIBYTE_FONT_KOREAN = 2,
-    MULTIBYTE_FONT_MAX = 3
+    MULTIBYTE_FONT_JAPANESE = 3,
+    MULTIBYTE_FONT_MAX = 4
 } multibyte_font_type;
 
 static const int FOOTPRINT_X_START_PER_HEIGHT[] = {
@@ -113,6 +118,7 @@ static const char CHINESE_FONTS_555[NAME_SIZE] = "rome.555";
 static const char CHINESE_FONTS_555_V2[NAME_SIZE] = "rome-v2.555";
 static const char KOREAN_FONTS_555[NAME_SIZE] = "korean.555";
 static const char KOREAN_FONTS_555_V2[NAME_SIZE] = "korean-v2.555";
+static const char JAPANESE_FONTS_555[NAME_SIZE] = "japanese-v2.555";
 
 static const char ENEMY_GRAPHICS_SG2[][NAME_SIZE] = {
     "goths.sg2",
@@ -165,7 +171,6 @@ static multibyte_font_data multibyte_font_info[MULTIBYTE_FONT_MAX] = {
         .file_v1 = CHINESE_FONTS_555,
         .file_v2 = CHINESE_FONTS_555_V2,
         .data_size = TRAD_CHINESE_FONT_DATA_SIZE,
-        .entries = FONT_STYLES * IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS,
         .chars = IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS,
         .sizes = {
             .v1 = { { 13, 11 }, { 17, 15 }, { 20, 18 } },
@@ -178,7 +183,6 @@ static multibyte_font_data multibyte_font_info[MULTIBYTE_FONT_MAX] = {
         .file_v1 = CHINESE_FONTS_555,
         .file_v2 = CHINESE_FONTS_555_V2,
         .data_size = TRAD_CHINESE_FONT_DATA_SIZE,
-        .entries = FONT_STYLES * IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS,
         .chars = IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS,
         .sizes = {
             .v1 = { { 13, 11 }, { 17, 15 }, { 20, 18 } },
@@ -191,13 +195,22 @@ static multibyte_font_data multibyte_font_info[MULTIBYTE_FONT_MAX] = {
         .file_v1 = KOREAN_FONTS_555,
         .file_v2 = KOREAN_FONTS_555_V2,
         .data_size = KOREAN_FONT_DATA_SIZE,
-        .entries = FONT_STYLES * IMAGE_FONT_MULTIBYTE_KOREAN_MAX_CHARS,
         .chars = IMAGE_FONT_MULTIBYTE_KOREAN_MAX_CHARS,
         .sizes = {
             .v1 = { { 12, 12 }, { 15, 15 }, { 20, 20 } },
             .v2 = { { 12, 12 }, { 15, 15 }, { 20, 20 } },
+        }
+    },
+    {
+        .name = "Japanese",
+        .file_v2 = JAPANESE_FONTS_555,
+        .data_size = JAPANESE_FONT_DATA_SIZE,
+        .chars = IMAGE_FONT_MULTIBYTE_JAPANESE_MAX_CHARS,
+        .half_width_chars = JAPANESE_HALF_WIDTH_CHARS,
+        .sizes = {
+            .v2 = { { 13, 12, 7 }, { 16, 15, 9 }, { 21, 20, 11 } }
         },
-        .letter_spacing = 0
+        .letter_spacing = 1
     }
 };
 
@@ -697,35 +710,39 @@ static int load_cyrillic_fonts(void)
     return 1;
 }
 
-static void parse_4bit_multibyte_font(buffer *input, color_t *pixels, multibyte_font_sizes *font_size,
-    int letter_spacing, int num_chars, int offset)
+static int parse_4bit_multibyte_font(buffer *input, color_t *pixels, multibyte_font_sizes *font_size,
+    int letter_spacing, int num_chars, int num_half_width, int offset)
 {
+    int pixel_offset = 0;
     for (int i = 0; i < num_chars; i++) {
-        color_t *letter = &pixels[i * font_size->width * font_size->height];
+        int width = i < num_half_width ? font_size->half_width : font_size->width;
+        color_t *letter = &pixels[pixel_offset];
         int y_first_opaque = font_size->height;
         int y_last_opaque = -1;
         for (int row = 0; row < font_size->height; row++) {
-            color_t *pixel = &letter[row * font_size->width];
+            color_t *pixel = &letter[row * width];
             uint8_t bits = 0;
             for (int col = 0; col < font_size->width - letter_spacing; col++) {
                 if (col % 2 == 0) {
                     bits = buffer_read_u8(input);
                 }
-                uint8_t value = bits & 0xf;
-                if (value != 0) {
-                    uint32_t color_value = (value * 16 + value);
-                    *pixel = (color_value << COLOR_BITSHIFT_ALPHA) | COLOR_CHANNEL_RGB;
-                    if (row < y_first_opaque) {
-                        y_first_opaque = row;
+                if (col < width) {
+                    uint8_t value = bits & 0xf;
+                    if (value != 0) {
+                        uint32_t color_value = (value * 16 + value);
+                        *pixel = (color_value << COLOR_BITSHIFT_ALPHA) | COLOR_CHANNEL_RGB;
+                        if (row < y_first_opaque) {
+                            y_first_opaque = row;
+                        }
+                        y_last_opaque = row;
                     }
-                    y_last_opaque = row;
+                    pixel++;
                 }
-                pixel++;
                 bits >>= 4;
             }
         }
         image *img = &data.font[offset + i];
-        img->width = font_size->width;
+        img->width = width;
         img->y_offset = y_first_opaque;
         img->height = y_last_opaque - y_first_opaque + 1;
 
@@ -736,20 +753,24 @@ static void parse_4bit_multibyte_font(buffer *input, color_t *pixels, multibyte_
         image_packer_rect *rect = &data.packer.rects[offset + i];
         rect->input.width = img->width;
         rect->input.height = img->height;
+
+        pixel_offset += width * font_size->height;
     }
+    return pixel_offset;
 }
 
-static void parse_1bit_multibyte_font(buffer *input, color_t *pixels, multibyte_font_sizes *font_size,
-    int letter_spacing, int num_chars, int offset)
+static int parse_1bit_multibyte_font(buffer *input, color_t *pixels, multibyte_font_sizes *font_size,
+    int letter_spacing, int num_chars, int num_half_width, int offset)
 {
-    int bytes_per_row = (font_size->width - 1) <= 16 ? 2 : 3;
-
+    int pixel_offset = 0;
     for (int i = 0; i < num_chars; i++) {
-        color_t *letter = &pixels[i * font_size->width * font_size->height];
+        int width = i < num_half_width ? font_size->half_width : font_size->width;
+        int bytes_per_row = (width - 1) <= 16 ? 2 : 3;
+        color_t *letter = &pixels[pixel_offset];
         int y_first_opaque = font_size->height;
         int y_last_opaque = -1;
         for (int row = 0; row < font_size->height; row++) {
-            color_t *pixel = &letter[row * font_size->width];
+            color_t *pixel = &letter[row * width];
             unsigned int bits = buffer_read_u16(input);
             if (bytes_per_row == 3) {
                 bits += buffer_read_u8(input) << 16;
@@ -772,7 +793,7 @@ static void parse_1bit_multibyte_font(buffer *input, color_t *pixels, multibyte_
             }
         }
         image *img = &data.font[offset + i];
-        img->width = font_size->width;
+        img->width = width;
         img->y_offset = y_first_opaque;
         img->height = y_last_opaque - y_first_opaque + 1;
 
@@ -783,15 +804,20 @@ static void parse_1bit_multibyte_font(buffer *input, color_t *pixels, multibyte_
         image_packer_rect *rect = &data.packer.rects[offset + i];
         rect->input.width = img->width;
         rect->input.height = img->height;
+
+        pixel_offset += width * font_size->height;
     }
+    return pixel_offset;
 }
 
 static int load_multibyte_font(multibyte_font_type type)
 {
     multibyte_font_data *font_info = &multibyte_font_info[type];
 
+    int entries = FONT_STYLES * font_info->chars;
+
     uint8_t *tmp_data = malloc(font_info->data_size * sizeof(uint8_t));
-    if (!tmp_data || !alloc_font_memory(font_info->entries)) {
+    if (!tmp_data || !alloc_font_memory(entries)) {
         free(tmp_data);
         return 0;
     }
@@ -799,16 +825,16 @@ static int load_multibyte_font(multibyte_font_type type)
     log_info("Parsing multibyte font", font_info->name, 0);
 
     int file_version = 2;
-    int data_size = io_read_file_into_buffer(font_info->file_v2, MAY_BE_LOCALIZED,
-        tmp_data, font_info->data_size);
+    int data_size = io_read_file_into_buffer(font_info->file_v2, MAY_BE_LOCALIZED, tmp_data, font_info->data_size);
     if (!data_size) {
-        file_version = 1;
-        data_size = io_read_file_into_buffer(font_info->file_v1, MAY_BE_LOCALIZED,
-            tmp_data, font_info->data_size);
+        if (font_info->file_v1) {
+            file_version = 1;
+            data_size = io_read_file_into_buffer(font_info->file_v1, MAY_BE_LOCALIZED, tmp_data, font_info->data_size);
+        }
         if (!data_size) {
             free_font_memory();
             free(tmp_data);
-            log_error("Julius requires extra files for the characters:", font_info->file_v2, 0);
+            log_error("Augustus requires extra files for the characters:", font_info->file_v2, 0);
             return 0;
         }
     }
@@ -816,9 +842,10 @@ static int load_multibyte_font(multibyte_font_type type)
     buffer input;
     buffer_init(&input, tmp_data, data_size);
     int num_chars = font_info->chars;
+    int num_half_width = font_info->half_width_chars;
+    int num_full_width = num_chars - num_half_width;
 
-    if (image_packer_init(&data.packer, font_info->entries,
-        data.max_image_width, data.max_image_height) != IMAGE_PACKER_OK) {
+    if (image_packer_init(&data.packer, entries, data.max_image_width, data.max_image_height) != IMAGE_PACKER_OK) {
         free_font_memory();
         free(tmp_data);
         log_error("Internal error loading font", 0, 0);
@@ -829,8 +856,8 @@ static int load_multibyte_font(multibyte_font_type type)
     data.packer.options.sort_by = IMAGE_PACKER_SORT_BY_AREA;
 
     multibyte_font_sizes *font_sizes;
-    void (*parse_multibyte_font)(buffer * input, color_t * pixels, multibyte_font_sizes * font_size,
-        int letter_spacing, int num_chars, int offset);
+    int (*parse_multibyte_font)(buffer *input, color_t *pixels, multibyte_font_sizes *font_size,
+        int letter_spacing, int num_chars, int num_half_width, int offset);
     if (file_version == 2) {
         font_sizes = font_info->sizes.v2;
         parse_multibyte_font = parse_4bit_multibyte_font;
@@ -840,7 +867,10 @@ static int load_multibyte_font(multibyte_font_type type)
     }
 
     int font_data_size = (font_sizes[0].width * font_sizes[0].height + font_sizes[1].width * font_sizes[1].height +
-        font_sizes[2].width * font_sizes[2].height) * num_chars * sizeof(color_t);
+        font_sizes[2].width * font_sizes[2].height) * num_full_width * sizeof(color_t);
+    font_data_size += (font_sizes[0].half_width * font_sizes[0].height +
+        font_sizes[1].half_width * font_sizes[1].height +
+        font_sizes[2].half_width * font_sizes[2].height) * num_half_width * sizeof(color_t);
 
     color_t *font_data = malloc(font_data_size);
     if (!font_data) {
@@ -853,8 +883,8 @@ static int load_multibyte_font(multibyte_font_type type)
     memset(font_data, 0, font_data_size);
     color_t *font_offset = font_data;
     for (int i = 0; i < FONT_STYLES; i++) {
-        parse_multibyte_font(&input, font_offset, &font_sizes[i], font_info->letter_spacing, num_chars, num_chars * i);
-        font_offset += font_sizes[i].width * font_sizes[i].height * num_chars;
+        font_offset += parse_multibyte_font(&input, font_offset, &font_sizes[i], font_info->letter_spacing,
+            num_chars, num_half_width, num_chars * i);
     }
 
     image_packer_pack(&data.packer);
@@ -912,6 +942,8 @@ int image_load_fonts(encoding_type encoding)
         return load_multibyte_font(MULTIBYTE_FONT_SIMPLIFIED_CHINESE);
     } else if (encoding == ENCODING_KOREAN) {
         return load_multibyte_font(MULTIBYTE_FONT_KOREAN);
+    } else if (encoding == ENCODING_JAPANESE) {
+        return load_multibyte_font(MULTIBYTE_FONT_JAPANESE);
     } else {
         free_font_memory();
         return 1;
@@ -1047,7 +1079,7 @@ void image_load_external_data(int image_id)
     }
     data.external_image_id = image_id;
     const image *img = &data.main[image_id];
-    graphics_renderer()->create_custom_image(CUSTOM_IMAGE_EXTERNAL, img->width, img->height);
+    graphics_renderer()->create_custom_image(CUSTOM_IMAGE_EXTERNAL, img->width, img->height, 0);
     int row_width;
     color_t *dst = graphics_renderer()->get_custom_image_buffer(CUSTOM_IMAGE_EXTERNAL, &row_width);
     if (!dst) {

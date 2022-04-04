@@ -104,6 +104,12 @@ static void draw_background(void)
         TR_WINDOW_RACE_BET_BUTTON), 90, 358, 300, button_enabled ? FONT_NORMAL_BLACK : FONT_NORMAL_PLAIN,
         button_enabled ? 0 : COLOR_FONT_LIGHT_GRAY);
 
+    int image_id = assets_get_image_id("UI_Elements", "Hipp_Team_Blue");
+
+    for (int i = 0; i < 4; i++) {
+        image_draw(image_id + i, 39 + i * 110, 150, COLOR_MASK_NONE, SCALE_NONE);
+    }
+
     graphics_reset_dialog();
 }
 
@@ -111,13 +117,12 @@ static void draw_foreground(void)
 {
     graphics_in_dialog_with_size(BLOCK_SIZE * data.width_blocks, BLOCK_SIZE * data.height_blocks);
 
-    int image_id = assets_get_image_id("UI_Elements", "Hipp_Blues_UH");
-    int image_id_focus = assets_get_image_id("UI_Elements", "Hipp_Blues_H");
+    int border_id = assets_get_image_id("UI_Elements", "Image Border Small");
 
     for (int i = 0; i < 4; i++) {
-        int slice_id = (2 * i);
-        int id = data.focus_button_id == (i + 1) || data.chosen_horse == (i + 1) ? image_id_focus : image_id;
-        image_draw(id + slice_id, 34 + i * 110, 145, COLOR_MASK_NONE, SCALE_NONE);
+        color_t color = data.focus_button_id == (i + 1) || data.chosen_horse == (i + 1) ?
+            COLOR_BORDER_RED : COLOR_BORDER_GREEN;
+        image_draw_border(border_id, 34 + i * 110, 145, color);
     }
 
     arrow_buttons_draw(0, 0, amount_buttons, 2);

@@ -22,13 +22,15 @@
 
 #define MAX_BUTTONS 18
 
+#define MAX_VISIBLE_LEGIONS 6
+
 static void button_go_to_legion(int legion_id, int param2);
 static void button_return_to_fort(int legion_id, int param2);
 static void button_empire_service(int legion_id, int param2);
 static void button_return_all_to_fort(int param1, int param2);
 static void on_scroll(void);
 
-static scrollbar_type scrollbar = { 592, 70, 272, on_scroll };
+static scrollbar_type scrollbar = { 592, 70, 272, 576, MAX_VISIBLE_LEGIONS, on_scroll };
 
 static generic_button fort_buttons[] = {
     {384, 83, 30, 30, button_go_to_legion, button_none, 1, 0},
@@ -62,7 +64,7 @@ static int num_legions;
 static void init()
 {
     num_legions = formation_get_num_legions();
-    scrollbar_init(&scrollbar, 0, num_legions - 6);
+    scrollbar_init(&scrollbar, 0, num_legions);
 }
 
 static int draw_background(void)
@@ -221,14 +223,15 @@ static void draw_foreground(void)
 
 static int handle_mouse(const mouse *m)
 {
+    focus_additional_button_id = 0;
     if (scrollbar_handle_mouse(&scrollbar, m)) {
+        focus_button_id = 0;
         return 1;
     }
     int buttons = 3 * num_legions;
     if (buttons > MAX_BUTTONS) {
         buttons = MAX_BUTTONS;
     }
-    focus_additional_button_id = 0;
     int result = generic_buttons_handle_mouse(m, 0, 0, fort_buttons, buttons, &focus_button_id);
     if (result == 0) {
         int num_legions_not_at_fort = get_num_legions_not_at_fort();

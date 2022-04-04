@@ -36,6 +36,7 @@
 #include "widget/city_without_overlay.h"
 #include "widget/city_pause_menu.h"
 #include "widget/minimap.h"
+#include "widget/sidebar/extra.h"
 #include "window/building_info.h"
 #include "window/city.h"
 
@@ -188,13 +189,16 @@ static void draw_construction_buttons(void)
 
 void widget_city_draw_touch_buttons(void)
 {
-    draw_pause_button();
+    if (!sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED)) {
+        draw_pause_button();
+    }
     draw_construction_buttons();
 }
 
 static int is_pause_button(int x, int y)
 {
-    return x < 4 * BLOCK_SIZE + 4 && y >= 24 && y < 56 + 4 * BLOCK_SIZE;
+    return !sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED) &&
+        x < 4 * BLOCK_SIZE + 4 && y >= 24 && y < 56 + 4 * BLOCK_SIZE;
 }
 
 static int is_cancel_construction_button(int x, int y)
@@ -551,7 +555,7 @@ static void handle_mouse(const mouse *m)
 {
     map_tile *tile = &data.current_tile;
     update_city_view_coords(m->x, m->y, tile);
-    zoom_map(m);
+    zoom_map(m, city_view_get_scale());
     building_construction_reset_draw_as_constructing();
     if (m->left.went_down) {
         if (handle_legion_click(tile)) {
@@ -657,7 +661,7 @@ void widget_city_handle_input_military(const mouse *m, const hotkeys *h, int leg
         window_city_show();
     } else {
         update_city_view_coords(m->x, m->y, tile);
-        zoom_map(m);
+        zoom_map(m, city_view_get_scale());
         if ((!m->is_touch && m->left.went_down)
             || (m->is_touch && m->left.went_up && touch_was_click(touch_get_earliest()))) {
             military_map_click(legion_formation_id, tile);

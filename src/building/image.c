@@ -115,8 +115,11 @@ int building_image_get(building *b)
         case BUILDING_CHARIOT_MAKER:
             return image_group(GROUP_BUILDING_CHARIOT_MAKER);
         case BUILDING_SMALL_STATUE:
+        {
+            int orientation = building_rotation_get_building_orientation(b->subtype.orientation) / 2;
             return assets_get_image_id("Aesthetics", "V Small Statue") +
-                (b->subtype.orientation % 2) * building_properties_for_type(b->type)->rotation_offset;
+                (orientation % 2) * building_properties_for_type(b->type)->rotation_offset;
+        }
         case BUILDING_MEDIUM_STATUE:
             return image_group(GROUP_BUILDING_STATUE) + 1;
         case BUILDING_LARGE_STATUE:
@@ -226,7 +229,17 @@ int building_image_get(building *b)
         case BUILDING_FORUM:
             return image_group(GROUP_BUILDING_FORUM);
         case BUILDING_FOUNTAIN:
-            return image_group(GROUP_BUILDING_FOUNTAIN_1);
+            if (b->upgrade_level == 3) {
+                return scenario_property_climate() == CLIMATE_DESERT ?
+                    assets_get_image_id("Econ_Logistics", "Fountain_Desert_Fix") :
+                    image_group(GROUP_BUILDING_FOUNTAIN_4);
+            } else if (b->upgrade_level == 2) {
+                return image_group(GROUP_BUILDING_FOUNTAIN_3);
+            } else if (b->upgrade_level == 1) {
+                return image_group(GROUP_BUILDING_FOUNTAIN_2);
+            } else {
+                return image_group(GROUP_BUILDING_FOUNTAIN_1);
+            }
         case BUILDING_WELL:
             return image_group(GROUP_BUILDING_WELL);
         case BUILDING_RESERVOIR:
@@ -611,13 +624,18 @@ int building_image_get(building *b)
         case BUILDING_ARENA:
             return assets_get_image_id("Entertainment", "Arena ON");
         case BUILDING_HORSE_STATUE:
-            return assets_get_image_id("Aesthetics", "Eque Statue") +
-                b->subtype.orientation % 2;
+        {
+            int orientation = building_rotation_get_building_orientation(b->subtype.orientation) / 2;
+            return assets_get_image_id("Aesthetics", "Eque Statue") + orientation % 2;
+        }
         case BUILDING_DOLPHIN_FOUNTAIN:
             return assets_get_image_id("Engineer", "Eng Guild ON");
         case BUILDING_LEGION_STATUE:
+        {
+            int orientation = building_rotation_get_building_orientation(b->subtype.orientation) / 2;
             return assets_get_image_id("Aesthetics", "legio statue") +
-                (b->subtype.orientation % 2) * building_properties_for_type(b->type)->rotation_offset;
+                (orientation % 2) * building_properties_for_type(b->type)->rotation_offset;
+        }
         case BUILDING_WATCHTOWER:
             switch (scenario_property_climate()) {
                 case CLIMATE_NORTHERN:
@@ -632,7 +650,10 @@ int building_image_get(building *b)
                 case MONUMENT_START:
                     return assets_get_image_id("Minor_Monuments", "Mausoleum S Cons");
                 default:
-                    return assets_get_image_id("Minor_Monuments", "Mausoleum S") + b->subtype.orientation % 2;
+                {
+                    int orientation = building_rotation_get_building_orientation(b->subtype.orientation) / 2;
+                    return assets_get_image_id("Minor_Monuments", "Mausoleum S") + orientation % 2;
+                }
             }
         case BUILDING_LARGE_MAUSOLEUM:
             switch (b->data.monument.phase) {
@@ -671,9 +692,12 @@ int building_image_get(building *b)
             return assets_get_group_id("Aesthetics") + (b->type - BUILDING_PINE_TREE);
         case BUILDING_SMALL_STATUE_ALT:
         case BUILDING_SMALL_STATUE_ALT_B:
+        {
+            int orientation = building_rotation_get_building_orientation(b->subtype.orientation) / 2;
             return assets_get_image_id("Aesthetics", "sml statue 2") +
-                (b->type - BUILDING_SMALL_STATUE_ALT) + (b->subtype.orientation % 2) *
+                (b->type - BUILDING_SMALL_STATUE_ALT) + (orientation % 2) *
                 building_properties_for_type(b->type)->rotation_offset;
+        }
         case BUILDING_HEDGE_DARK:
             return assets_get_image_id("Aesthetics", "D Hedge 01") +
                 building_connectable_get_hedge_offset(b->grid_offset);

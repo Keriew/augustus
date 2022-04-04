@@ -3,6 +3,7 @@
 #include "core/calc.h"
 #include "core/image.h"
 #include "core/image_group.h"
+#include "core/locale.h"
 #include "core/string.h"
 #include "graphics/image.h"
 #include "graphics/image_button.h"
@@ -14,7 +15,10 @@
 
 static void on_scroll(void);
 
-static scrollbar_type scrollbar = {0, 0, 0, on_scroll};
+static scrollbar_type scrollbar = {
+    .has_y_margin = 1,
+    .on_scroll_callback = on_scroll
+};
 
 static struct {
     int message_id;
@@ -30,6 +34,7 @@ static struct {
     const font_definition *normal_font;
     const font_definition *link_font;
     int line_height;
+    int paragraph_indent;
 
     int x_text;
     int y_text;
@@ -57,10 +62,12 @@ int rich_text_init(
         scrollbar.x = data.x_text + BLOCK_SIZE * data.text_width_blocks - 1;
         scrollbar.y = data.y_text;
         scrollbar.height = BLOCK_SIZE * data.text_height_blocks;
-        scrollbar_init(&scrollbar, scrollbar.scroll_position, data.num_lines - data.text_height_lines);
+        scrollbar.elements_in_view = data.text_height_lines;
+        scrollbar_init(&scrollbar, scrollbar.scroll_position, data.num_lines);
         if (data.num_lines <= data.text_height_lines && adjust_width_on_no_scroll) {
             data.text_width_blocks += 2;
         }
+        scrollbar.scrollable_width = BLOCK_SIZE * data.text_width_blocks;
         window_invalidate();
     }
     return data.text_width_blocks;
@@ -71,6 +78,7 @@ void rich_text_set_fonts(font_t normal_font, font_t link_font, int line_spacing)
     data.normal_font = font_definition_for(normal_font);
     data.link_font = font_definition_for(link_font);
     data.line_height = data.normal_font->line_height + line_spacing;
+    data.paragraph_indent = locale_paragraph_indent();
 }
 
 void rich_text_reset(int scroll_position)
@@ -252,7 +260,7 @@ static int draw_text(const uint8_t *text, int x_offset, int y_offset,
         }
         int line_index = 0;
         int current_width, x_line_offset;
-        current_width = x_line_offset = paragraph ? 50 : 0;
+        current_width = x_line_offset = paragraph ? data.paragraph_indent : 0;
         paragraph = 0;
         while ((has_more_characters || image_height_lines) && current_width < box_width) {
             if (image_height_lines) {

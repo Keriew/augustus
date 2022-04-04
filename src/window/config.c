@@ -1,6 +1,5 @@
 #include "config.h"
 
-#include "city/view.h"
 #include "core/calc.h"
 #include "core/config.h"
 #include "core/dir.h"
@@ -83,7 +82,9 @@ static const uint8_t *display_text_scroll_speed(void);
 static const uint8_t *display_text_difficulty(void);
 static const uint8_t *display_text_max_grand_temples(void);
 
-static scrollbar_type scrollbar = { 580, ITEM_Y_OFFSET, ITEM_HEIGHT * NUM_VISIBLE_ITEMS, on_scroll, 4 };
+static scrollbar_type scrollbar = {
+    580, ITEM_Y_OFFSET, ITEM_HEIGHT * NUM_VISIBLE_ITEMS, CHECKBOX_WIDTH, NUM_VISIBLE_ITEMS, on_scroll, 0, 4
+};
 
 enum {
     TYPE_NONE,
@@ -209,7 +210,8 @@ static config_widget all_widgets[CONFIG_PAGES][MAX_WIDGETS] = {
         {TYPE_CHECKBOX, CONFIG_UI_DIGIT_SEPARATOR, TR_CONFIG_DIGIT_SEPARATOR},
         {TYPE_CHECKBOX, CONFIG_UI_INVERSE_MAP_DRAG, TR_CONFIG_UI_INVERSE_MAP_DRAG},
         {TYPE_CHECKBOX, CONFIG_UI_MESSAGE_ALERTS, TR_CONFIG_UI_MESSAGE_ALERTS},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_GRID_DURING_CONSTRUCTION, TR_CONFIG_UI_SHOW_GRID_DURING_CONSTRUCTION},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_GRID, TR_CONFIG_UI_SHOW_GRID},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_PARTIAL_GRID_AROUND_CONSTRUCTION, TR_CONFIG_UI_SHOW_PARTIAL_GRID_AROUND_CONSTRUCTION},
     },
     { // Difficulty
         {TYPE_NUMERICAL_DESC, RANGE_DIFFICULTY, TR_CONFIG_DIFFICULTY},
@@ -499,7 +501,7 @@ static void set_page(int page)
     for (int i = 0; i < data.page; i++) {
         data.starting_option += data.widgets_per_page[i];
     }
-    scrollbar_init(&scrollbar, 0, data.widgets_per_page[data.page] - NUM_VISIBLE_ITEMS);
+    scrollbar_init(&scrollbar, 0, data.widgets_per_page[page]);
 }
 
 static void init(int page, int show_background_image)
@@ -952,16 +954,20 @@ static int numerical_range_handle_mouse(const mouse *m, int x, int y, int numeri
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
+    data.focus_button = 0;
+
     if (data.active_numerical_range) {
         numerical_range_handle_mouse(m_dialog, NUMERICAL_RANGE_X, 0, data.active_numerical_range);
         return;
     }
+
     if (scrollbar_handle_mouse(&scrollbar, m_dialog)) {
+        data.page_focus_button = 0;
+        data.bottom_focus_button = 0;
         return;
     }
-    int handled = 0;
-    data.focus_button = 0;
 
+    int handled = 0;
     for (int i = 0; i < NUM_VISIBLE_ITEMS && i < data.widgets_per_page[data.page]; i++) {
         config_widget *w = data.widgets[i + data.starting_option + scrollbar.scroll_position];
         int y = ITEM_Y_OFFSET + ITEM_HEIGHT * i;
