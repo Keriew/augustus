@@ -41,6 +41,8 @@ static const building_type connectable_buildings[] = {
     BUILDING_ROOFED_GARDEN_WALL,
     BUILDING_GARDEN_WALL_GATE,
     BUILDING_PALISADE,
+    BUILDING_HEDGE_GATE_DARK,
+    BUILDING_HEDGE_GATE_LIGHT,
 };
 
 static const int MAX_CONNECTABLE_BUILDINGS = sizeof(connectable_buildings) / sizeof(building_type);
@@ -165,6 +167,10 @@ int building_connectable_gate_type(building_type type)
         case BUILDING_GARDEN_WALL:
         case BUILDING_ROOFED_GARDEN_WALL:
             return BUILDING_GARDEN_WALL_GATE;
+        case BUILDING_HEDGE_DARK:
+            return BUILDING_HEDGE_GATE_DARK;
+        case BUILDING_HEDGE_LIGHT:
+            return BUILDING_HEDGE_GATE_LIGHT;
         default:
             return 0;
     }
@@ -203,19 +209,27 @@ static int get_image_offset(int group, int tiles[MAX_TILES], int rotation, int t
     return -1;
 }
 
+static int is_hedge_wall_or_gate(building_type type)
+{
+    return type == BUILDING_HEDGE_DARK || type == BUILDING_HEDGE_GATE_DARK || type == BUILDING_HEDGE_LIGHT || type == BUILDING_HEDGE_GATE_LIGHT;
+}
+
+static int is_hedge_wall(building_type type)
+{
+    return type == BUILDING_HEDGE_DARK || type == BUILDING_HEDGE_LIGHT;
+}
+
 int building_connectable_get_hedge_offset(int grid_offset)
 {
     int tiles[MAX_TILES] = { 0 };
     for (int i = 0; i < MAX_TILES; i += 2) {
         int offset = grid_offset + map_grid_direction_delta(i);
-        if (!map_terrain_is(offset, TERRAIN_BUILDING) && !map_property_is_constructing(offset))
-        {
+        if (!map_terrain_is(offset, TERRAIN_BUILDING) && !map_property_is_constructing(offset)) {
             continue;
         }
         building *b = building_get(map_building_at(offset));
-        if (b->type == BUILDING_HEDGE_DARK || b->type == BUILDING_HEDGE_LIGHT ||
-            (map_property_is_constructing(offset) &&
-            (building_construction_type() == BUILDING_HEDGE_DARK || building_construction_type() == BUILDING_HEDGE_LIGHT))) {
+        if (is_hedge_wall_or_gate(b->type) ||
+            (map_property_is_constructing(offset) && (is_hedge_wall(building_construction_type())))) {
             tiles[i] = 1;
         }
     }
@@ -227,6 +241,36 @@ int building_connectable_get_hedge_offset(int grid_offset)
         rotation = building_rotation_get_rotation_with_limit(BUILDING_CONNECTABLE_ROTATION_LIMIT_HEDGES);
     }
     return get_image_offset(CONTEXT_HEDGES, tiles, rotation, 0, grid_offset);
+}
+
+int building_connectable_get_hedge_gate_offset(int grid_offset)
+{
+    int tiles[MAX_TILES] = { 0 };
+    int terrain_tiles[MAX_TILES] = { 0 };
+    for (int i = 0; i < MAX_TILES; i += 2) {
+        int offset = grid_offset + map_grid_direction_delta(i);
+
+        if (map_terrain_is(offset, TERRAIN_ROAD)) {
+            terrain_tiles[i] = 1;
+        }
+
+        if (!map_terrain_is(offset, TERRAIN_BUILDING) && !map_property_is_constructing(offset)) {
+            continue;
+        }
+        building *b = building_get(map_building_at(offset));
+        if (is_hedge_wall(b->type) || (map_property_is_constructing(offset) && !map_terrain_is(offset, TERRAIN_ROAD)
+            && is_hedge_wall(building_construction_type()))) {
+            tiles[i] = 1;
+        }
+    }
+    int building_id = map_building_at(grid_offset);
+    int rotation;
+    if (building_id) {
+        rotation = building_get(building_id)->subtype.orientation;
+    } else {
+        rotation = building_rotation_get_rotation_with_limit(BUILDING_CONNECTABLE_ROTATION_LIMIT_PATHS);
+    }
+    return get_image_offset(CONTEXT_GARDEN_GATE, tiles, rotation, terrain_tiles, grid_offset);
 }
 
 int building_connectable_get_colonnade_offset(int grid_offset)
