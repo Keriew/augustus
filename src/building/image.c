@@ -181,7 +181,11 @@ int building_image_get(building *b)
                 return assets_get_image_id("Health_Education", "Upgraded_School");
             }
         case BUILDING_ACADEMY:
-            return image_group(GROUP_BUILDING_ACADEMY);
+            if (!b->upgrade_level) {
+                return assets_get_image_id("Health_Education", "Academy_Fix");
+            } else {
+                return assets_get_image_id("Health_Education", "Upgraded_Academy");
+            }
         case BUILDING_LIBRARY:
             if (!b->upgrade_level) {
                 return assets_get_image_id("Health_Education", "Downgraded_Library");
@@ -439,7 +443,17 @@ int building_image_get(building *b)
                 return image_id;
             }
         case BUILDING_FORT:
-            return image_group(GROUP_BUILDING_FORT);
+        case BUILDING_FORT_JAVELIN:
+        case BUILDING_FORT_LEGIONARIES:
+        case BUILDING_FORT_MOUNTED:
+            switch (scenario_property_climate()) {
+                case CLIMATE_NORTHERN:
+                    return assets_get_image_id("Military", "Fort_Main_North");
+                case CLIMATE_DESERT:
+                    return assets_get_image_id("Military", "Fort_Main_South");
+                default:
+                    return assets_get_image_id("Military", "Fort_Main_Central");
+            }
         case BUILDING_FORT_GROUND:
             return image_group(GROUP_BUILDING_FORT) + 1;
         case BUILDING_NATIVE_HUT:
@@ -637,14 +651,22 @@ int building_image_get(building *b)
                 (orientation % 2) * building_properties_for_type(b->type)->rotation_offset;
         }
         case BUILDING_WATCHTOWER:
+        {
+            int image_id = 0;
             switch (scenario_property_climate()) {
                 case CLIMATE_NORTHERN:
-                    return assets_get_image_id("Military", "Watchtower N ON");
+                    image_id = assets_get_image_id("Military", "Watchtower N ON");
+                    break;
                 case CLIMATE_DESERT:
-                    return assets_get_image_id("Military", "Watchtower S ON");
+                    image_id = assets_get_image_id("Military", "Watchtower S ON");
+                    break;
                 default:
-                    return assets_get_image_id("Military", "Watchtower C ON");
+                    image_id = assets_get_image_id("Military", "Watchtower C ON");
+                    break;
             }
+            int orientation = building_rotation_get_building_orientation(b->subtype.orientation) / 2;
+            return image_id + (orientation % 2) * building_properties_for_type(b->type)->rotation_offset;
+        }
         case BUILDING_SMALL_MAUSOLEUM:
             switch (b->data.monument.phase) {
                 case MONUMENT_START:

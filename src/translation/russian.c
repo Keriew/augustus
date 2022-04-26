@@ -780,7 +780,11 @@ static translation_string all_strings[] = {
     {TR_BUILDING_WINDOW_INDUSTRY_LOW_EFFICIENCY_RAW_MATERIALS, "Это здание имеет низкую эффективность. Это может быть связано с отсутствием ближайшего пункта назначения для готовых товаров." },
     {TR_BUILDING_WINDOW_INDUSTRY_LOW_EFFICIENCY_WORKSHOPS, "Это здание имеет низкую эффективность. Это может быть связано с отсутствием постоянных поставок сырья или с близкого расположения места для готовых товаров." },
     {TR_BUILDING_WINDOW_INDUSTRY_WHARF_AVERAGE_CATCH, "Среднемесячный улов:" },
-    {TR_WARNING_SCREENSHOT_SAVED, "Скриншот сохранен: "} // TODO: Google translate
+    {TR_WARNING_SCREENSHOT_SAVED, "Снимок экрана сохранен: "},
+    {TR_OUT_OF_MONEY, "Кончились деньги"},
+    {TR_CITY_MESSAGE_TITLE_EMPERORS_WRATH, "Злость императора" },
+    {TR_CITY_MESSAGE_TEXT_EMPERORS_WRATH, "Вы лишились милости Цезаря, и поэтому он приказал вас арестовать. Если вы не восстановите свою благосклонность к императору, его элитные легионеры вскоре вторгнутся в ваш город." },
+    {TR_BUILDING_ACADEMY_UPGRADE_DESC, "Эта академия работает. Местное развитие позволило вашим горожанам расширить здание, предоставив больше места для речей и исследований."},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
