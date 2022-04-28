@@ -166,12 +166,8 @@ static struct {
         int y;
         int width;
         int height;
-    } dst;
-    struct {
-        int x;
-        int y;
-        int width;
-        int height;
+        int width_tiles;
+        int height_tiles;
     } screen;
     struct {
         int x;
@@ -179,9 +175,15 @@ static struct {
         int width;
         int height;
     } minimap;
+    struct {
+        int width;
+        int height;
+        int stride;
+        color_t *buffer;
+    } cache;
+    int offset_x;
+    int offset_y;
     float scale;
-    color_t *cache;
-    int cache_width;
     const minimap_functions *functions;
     struct {
         int x;
@@ -202,10 +204,7 @@ void widget_minimap_invalidate(void)
 
 static void foreach_map_tile(map_callback *callback)
 {
-    city_view_foreach_minimap_tile(0, 0, data.minimap.x, data.minimap.y, data.minimap.width, data.minimap.height * 2,
-        //data.absolute_x, data.absolute_y,
-        //data.width_tiles, data.height_tiles,
-        callback);
+    city_view_foreach_minimap_tile(0, 0, data.minimap.x, data.minimap.y, data.minimap.width, data.minimap.height, callback);
 }
 
 static void set_bounds(int x_offset, int y_offset, int width, int height)
@@ -214,6 +213,8 @@ static void set_bounds(int x_offset, int y_offset, int width, int height)
     data.screen.y = y_offset;
     data.screen.width = width;
     data.screen.height = height;
+    data.screen.width_tiles = width / 2;
+    data.screen.height_tiles = height;
 
     city_view_get_camera(&data.camera_x, &data.camera_y);
     int view_width_tiles, view_height_tiles;
@@ -230,6 +231,23 @@ static void set_bounds(int x_offset, int y_offset, int width, int height)
     if (data.minimap.width * 2 < data.screen.width) {
         data.screen.x += (data.screen.width - data.minimap.width * 2) / 2;
         data.screen.width = data.minimap.width * 2;
+    } else if (view_width_tiles <= data.screen.width) {
+        if (data.camera_x > data.screen.width_tiles)
+           // scale_width = 1.0f;
+            if ((data.minimap.width - data.width_tiles) / 2 > 0) {
+                if (data.camera_x < data.absolute_x) {
+                    data.absolute_x = data.camera_x;
+                } else if (data.camera_x > data.width_tiles + data.absolute_x - view_width_tiles) {
+                    data.absolute_x = view_width_tiles + data.camera_x - data.width_tiles;
+                }
+            }
+        /*  /*else {
+            data.absolute_x = data.camera_x;
+            if (data.absolute_x < (VIEW_X_MAX - data.minimap_width) / 2) {
+                data.absolute_x = (VIEW_X_MAX - data.minimap_width) / 2;
+            }
+            scale_width = data.width_tiles / (float) view_width_tiles;
+        }*/
     }
     if (data.minimap.height < data.screen.height) {
         data.screen.y += (data.screen.height - data.minimap.height) / 2;
@@ -311,7 +329,7 @@ static inline void draw_pixel(int x, int y, color_t color)
     if (x < 0 || x >= data.minimap.width * 2 || y < 0 || y >= data.minimap.height) {
         return;
     }
-    data.cache[y * data.cache_width + x] = color;
+    data.cache.buffer[y * data.cache.stride + x] = color;
 }
 
 static inline void draw_tile(int x_offset, int y_offset, const tile_color *colors)
@@ -367,7 +385,7 @@ static void draw_building(int size, int x_offset, int y_offset, const tile_color
         if (x_end + x_offset >= data.screen.width) {
             x_end = data.screen.width - x_offset;
         }
-        color_t *value = &data.cache[(y_offset + y) * data.cache_width + x_start + x_offset + 1];
+        color_t *value = &data.cache.buffer[(y_offset + y) * data.cache.stride + x_start + x_offset + 1];
         for (int x = x_start; x < x_end - 1; x++) {
             *value++ = ((x + y) & 1) ? colors[0].left : colors[0].right;
         }
@@ -390,7 +408,7 @@ static void draw_building(int size, int x_offset, int y_offset, const tile_color
         if (x_end + x_offset >= data.screen.width) {
             x_end = data.screen.width - x_offset;
         }
-        color_t *value = &data.cache[(y_offset + y) * data.cache_width + x_start + x_offset + 1];
+        color_t *value = &data.cache.buffer[(y_offset + y) * data.cache.stride + x_start + x_offset + 1];
         for (int x = x_start; x < x_end - 1; x++) {
             *value++ = ((x + y) & 1) ? colors[0].right : colors[0].left;
         }
@@ -490,17 +508,17 @@ static void prepare_minimap_cache(void)
         graphics_renderer()->create_custom_image(CUSTOM_IMAGE_MINIMAP, data.functions->map.width() * 2,
             data.functions->map.height() * 2, 0);
     }
-    data.cache = graphics_renderer()->get_custom_image_buffer(CUSTOM_IMAGE_MINIMAP, &data.cache_width);
+    data.cache.buffer = graphics_renderer()->get_custom_image_buffer(CUSTOM_IMAGE_MINIMAP, &data.cache.stride);
 }
 
 static void clear_minimap(void)
 {
-    memset(data.cache, 0, data.functions->map.height() * 2 * data.cache_width * sizeof(color_t));
+    memset(data.cache.buffer, 0, data.functions->map.height() * 2 * data.cache.stride * sizeof(color_t));
 }
 
 static void draw_minimap(void)
 {
-    if (!data.cache) {
+    if (!data.cache.buffer) {
         return;
     }
     graphics_set_clip_rectangle(data.screen.x, data.screen.y, data.screen.width, data.screen.height);
@@ -523,7 +541,7 @@ static void draw_using_cache(int x_offset, int y_offset, int width, int height)
 {
     /*
     if (width != data.screenwidth || height != data.height) {
-        draw_uncached(x_offset, y_offset, width, height);
+        draw_uncache.bufferd(x_offset, y_offset, width, height);
         return;
     }
 
