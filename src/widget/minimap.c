@@ -4,6 +4,7 @@
 #include "building/building.h"
 #include "building/monument.h"
 #include "city/view.h"
+#include "core/calc.h"
 #include "figure/figure.h"
 #include "figure/formation.h"
 #include "graphics/graphics.h"
@@ -54,7 +55,10 @@ typedef struct {
         int (*tile_size)(int grid_offset);
         int (*random)(int grid_offset);
     } offset;
+    void (*viewport)(int *x, int *y, int *width, int *height);
 } minimap_functions;
+
+static void get_viewport(int *x, int *y, int *width, int *height);
 
 static minimap_functions functions = {
     .climate = scenario_property_climate,
@@ -66,7 +70,8 @@ static minimap_functions functions = {
     .offset.is_draw_tile = map_property_is_draw_tile,
     .offset.tile_size = map_property_multi_tile_size,
     .offset.random = map_random_get,
-    .building = building_get
+    .building = building_get,
+    .viewport = get_viewport
 };
 
 typedef struct {
@@ -88,9 +93,7 @@ typedef struct {
     tile_color monument[2];
 } tile_color_set;
 
-// Since the minimap tiles are only 25 color sets per climate, we just hardcode them.
-// This "hack" is necessary to avoid reloading the climate graphics when selecting
-// a scenario with another climate in the CCK selection screen, which is expensive.
+// Since the minimap tiles are only 25 color sets per climate, we just hardcode them
 static const tile_color_set MINIMAP_COLOR_SETS[3] = {
     // central
     {
@@ -191,11 +194,21 @@ static struct {
         int grid_offset;
     } mouse;
     int refresh_requested;
-    int camera_x;
-    int camera_y;
+    struct {
+        int x;
+        int y;
+        int width;
+        int height;
+    } viewport;
 } data = {
     .functions = &functions
 };
+
+static void get_viewport(int *x, int *y, int *width, int *height)
+{
+    city_view_get_camera(x, y);
+    city_view_get_viewport_size_tiles(width, height);
+}
 
 void widget_minimap_invalidate(void)
 {
@@ -204,7 +217,8 @@ void widget_minimap_invalidate(void)
 
 static void foreach_map_tile(map_callback *callback)
 {
-    city_view_foreach_minimap_tile(0, 0, data.minimap.x, data.minimap.y, data.minimap.width, data.minimap.height, callback);
+    city_view_foreach_minimap_tile(0, 0, data.minimap.x, data.minimap.y,
+        data.minimap.width, data.minimap.height, callback);
 }
 
 static void set_bounds(int x_offset, int y_offset, int width, int height)
@@ -216,92 +230,54 @@ static void set_bounds(int x_offset, int y_offset, int width, int height)
     data.screen.width_tiles = width / 2;
     data.screen.height_tiles = height;
 
-    city_view_get_camera(&data.camera_x, &data.camera_y);
-    int view_width_tiles, view_height_tiles;
-    city_view_get_viewport_size_tiles(&view_width_tiles, &view_height_tiles);
-
     data.minimap.width = data.functions->map.width();
     data.minimap.height = data.functions->map.height() * 2;
     data.minimap.x = (VIEW_X_MAX - data.minimap.width) / 2;
     data.minimap.y = (VIEW_Y_MAX - data.minimap.height) / 2;
 
-    // ensure even height
-    data.minimap.y &= ~1;
+    if (data.functions->viewport) {
+        data.functions->viewport(&data.viewport.x, &data.viewport.y, &data.viewport.width, &data.viewport.height);
 
-    if (data.minimap.width * 2 < data.screen.width) {
-        data.screen.x += (data.screen.width - data.minimap.width * 2) / 2;
-        data.screen.width = data.minimap.width * 2;
-    } else if (view_width_tiles <= data.screen.width) {
-        if (data.camera_x > data.screen.width_tiles)
-           // scale_width = 1.0f;
-            if ((data.minimap.width - data.width_tiles) / 2 > 0) {
-                if (data.camera_x < data.absolute_x) {
-                    data.absolute_x = data.camera_x;
-                } else if (data.camera_x > data.width_tiles + data.absolute_x - view_width_tiles) {
-                    data.absolute_x = view_width_tiles + data.camera_x - data.width_tiles;
+        float scale_width = data.viewport.width / (float) data.screen.width_tiles;
+        float scale_height = data.viewport.height / (float) data.screen.height_tiles;
+
+        data.scale = scale_width > scale_height ? scale_width : scale_height;
+    }
+
+    if (data.scale < 1.0f) {
+        data.scale = SCALE_NONE;
+    }
+
+    int adjusted_camera_x = (data.viewport.x - data.minimap.x) * 2;
+    int adjusted_camera_y = data.viewport.y - data.minimap.y;
+    int minimap_width_pixels = (data.minimap.width * 2) / data.scale;
+    int minimap_height_pixels = data.minimap.height / data.scale;
+
+    data.offset_x = (minimap_width_pixels - data.screen.width) / 2;
+    data.offset_y = (minimap_height_pixels - data.screen.height) / 2;
+
+    if (data.functions->viewport) {
+        if (minimap_width_pixels > data.screen.width) {
+            if (data.offset_x > adjusted_camera_x) {
+                data.offset_x = adjusted_camera_x;
+                if (data.offset_x < 0) {
+                    data.offset_x = 0;
                 }
-            }
-        /*  /*else {
-            data.absolute_x = data.camera_x;
-            if (data.absolute_x < (VIEW_X_MAX - data.minimap_width) / 2) {
-                data.absolute_x = (VIEW_X_MAX - data.minimap_width) / 2;
-            }
-            scale_width = data.width_tiles / (float) view_width_tiles;
-        }*/
-    }
-    if (data.minimap.height < data.screen.height) {
-        data.screen.y += (data.screen.height - data.minimap.height) / 2;
-        data.screen.height = data.minimap.height;
-    }
-
-
-
-
-    /*
-    data.absolute_x = (VIEW_X_MAX - data.minimap_width) / 2;
-    data.absolute_y = (VIEW_Y_MAX - 2 * data.minimap_height) / 2;
-
-    float scale_width;
-    float scale_height;
-
-    if (view_width_tiles <= data.width_tiles) {
-        scale_width = 1.0f;
-        if ((data.minimap_width - data.width_tiles) / 2 > 0) {
-            if (data.camera_x < data.absolute_x) {
-                data.absolute_x = data.camera_x;
-            } else if (data.camera_x > data.width_tiles + data.absolute_x - view_width_tiles) {
-                data.absolute_x = view_width_tiles + data.camera_x - data.width_tiles;
+            } else if ((adjusted_camera_x + data.viewport.width * 2) / data.scale > data.offset_x + data.screen.width) {
+                data.offset_x = (adjusted_camera_x + data.viewport.width * 2) / data.scale - data.screen.width;
             }
         }
-    } else {
-        data.absolute_x = data.camera_x;
-        if (data.absolute_x < (VIEW_X_MAX - data.minimap_width) / 2) {
-            data.absolute_x = (VIEW_X_MAX - data.minimap_width) / 2;
-        }
-        scale_width = data.width_tiles / (float) view_width_tiles;
-    }
-    if (view_height_tiles <= data.height_tiles) {
-        scale_height = 1.0f;
-        if ((2 * data.minimap_height - data.height_tiles) / 2 > 0) {
-            if (data.camera_y < data.absolute_y) {
-                data.absolute_y = data.camera_y;
-            } else if (data.camera_y > data.height_tiles + data.absolute_y - view_height_tiles) {
-                data.absolute_y = view_height_tiles + data.camera_y - data.height_tiles;
+        if (minimap_height_pixels > data.screen.height) {
+            if (data.offset_y > adjusted_camera_y) {
+                data.offset_y = adjusted_camera_y;
+                if (data.offset_y < 0) {
+                    data.offset_y = 0;
+                }
+            } else if ((adjusted_camera_y + data.viewport.height) / data.scale > data.offset_y + data.screen.height) {
+                data.offset_y = (adjusted_camera_y + data.viewport.height) / data.scale - data.screen.height;
             }
         }
-    } else {
-        data.absolute_y = data.camera_y;
-        if (data.absolute_y < (VIEW_Y_MAX - 2 * data.minimap_height) / 2) {
-            data.absolute_y = (VIEW_Y_MAX - 2 * data.minimap_height) / 2;
-        }
-        scale_height = data.height_tiles / (float) view_height_tiles;
     }
-    if (scale_width < scale_height) {
-        data.scale = scale_width;
-    } else {
-        data.scale = scale_height;
-    }
-    */
 }
 
 static int has_figure_color(figure *f)
@@ -326,9 +302,6 @@ static int has_figure_color(figure *f)
 
 static inline void draw_pixel(int x, int y, color_t color)
 {
-    if (x < 0 || x >= data.minimap.width * 2 || y < 0 || y >= data.minimap.height) {
-        return;
-    }
     data.cache.buffer[y * data.cache.stride + x] = color;
 }
 
@@ -371,9 +344,7 @@ static void draw_building(int size, int x_offset, int y_offset, const tile_color
     y_offset -= size - 1;
     int start_y = y_offset < 0 ? -y_offset : 0;
     int end_y = height / 2 + 1;
-    if (end_y + y_offset > data.screen.height) {
-        end_y = data.screen.height - y_offset;
-    }
+
     for (int y = start_y; y < end_y; y++) {
         int x_start = height / 2 - y;
         int x_end = width - x_start - 1;
@@ -381,9 +352,6 @@ static void draw_building(int size, int x_offset, int y_offset, const tile_color
         draw_pixel(x_end + x_offset, y + y_offset, colors[1].right);
         if (x_start + x_offset < 0) {
             x_start = -x_offset - 1;
-        }
-        if (x_end + x_offset >= data.screen.width) {
-            x_end = data.screen.width - x_offset;
         }
         color_t *value = &data.cache.buffer[(y_offset + y) * data.cache.stride + x_start + x_offset + 1];
         for (int x = x_start; x < x_end - 1; x++) {
@@ -393,9 +361,6 @@ static void draw_building(int size, int x_offset, int y_offset, const tile_color
     y_offset += height / 2 + 1;
     start_y = y_offset < 0 ? -y_offset : 0;
     end_y = height / 2;
-    if (end_y + y_offset > data.screen.height) {
-        end_y = data.screen.height - y_offset;
-    }
 
     for (int y = start_y; y < end_y; y++) {
         int x_start = y + 1;
@@ -404,9 +369,6 @@ static void draw_building(int size, int x_offset, int y_offset, const tile_color
         draw_pixel(x_end + x_offset, y + y_offset, colors[1].right);
         if (x_start + x_offset < 0) {
             x_start = -x_offset - 1;
-        }
-        if (x_end + x_offset >= data.screen.width) {
-            x_end = data.screen.width - x_offset;
         }
         color_t *value = &data.cache.buffer[(y_offset + y) * data.cache.stride + x_start + x_offset + 1];
         for (int x = x_start; x < x_end - 1; x++) {
@@ -480,24 +442,23 @@ static void draw_minimap_tile(int x_view, int y_view, int grid_offset)
 
 static void draw_viewport_rectangle(void)
 {
-    int camera_x, camera_y;
-    int camera_pixels_x, camera_pixels_y;
-    city_view_get_camera(&camera_x, &camera_y);
-    city_view_get_pixel_offset(&camera_pixels_x, &camera_pixels_y);
-    int view_width_tiles, view_height_tiles;
-    city_view_get_viewport_size_tiles(&view_width_tiles, &view_height_tiles);
-
-    int x_offset = data.screen.x + 2 * (camera_x - data.minimap.x) - 2 + camera_pixels_x / 30;
+    if (!data.functions->viewport) {
+        return;
+    }
+    int x_offset = 2 * (data.viewport.x - data.minimap.x) - 2 / 30;
+    x_offset /= data.scale;
+    x_offset += data.screen.x - data.offset_x;
     if (x_offset < data.screen.x) {
         x_offset = data.screen.x;
     }
-    if (x_offset + 2 * view_width_tiles + 4 > data.screen.x + data.screen.width) {
+    if (x_offset + 2 * data.viewport.width + 4 > data.screen.x + data.screen.width) {
         x_offset -= 2;
     }
-    int y_offset = data.screen.y + camera_y - data.minimap.y + 2;
+    int y_offset = data.viewport.y - data.minimap.y + 2;
+    y_offset /= data.scale;
+    y_offset += data.screen.y - data.offset_y;
     graphics_draw_rect(x_offset, y_offset,
-        view_width_tiles * 2 + 4,
-        view_height_tiles - 4,
+        (data.viewport.width * 2) / data.scale + 4, data.viewport.height / data.scale - 4,
         COLOR_MINIMAP_VIEWPORT);
 }
 
@@ -516,81 +477,32 @@ static void clear_minimap(void)
     memset(data.cache.buffer, 0, data.functions->map.height() * 2 * data.cache.stride * sizeof(color_t));
 }
 
-static void draw_minimap(void)
-{
-    if (!data.cache.buffer) {
-        return;
-    }
-    graphics_set_clip_rectangle(data.screen.x, data.screen.y, data.screen.width, data.screen.height);
-    clear_minimap();
-    foreach_map_tile(draw_minimap_tile);
-    graphics_renderer()->update_custom_image(CUSTOM_IMAGE_MINIMAP);
-    graphics_renderer()->draw_custom_image(CUSTOM_IMAGE_MINIMAP, data.screen.x, data.screen.y, SCALE_NONE);
-    draw_viewport_rectangle();
-    graphics_reset_clip_rectangle();
-}
-
-static void draw_uncached(int x_offset, int y_offset, int width, int height)
-{
-    prepare_minimap_cache();
-    set_bounds(x_offset, y_offset, width, height);
-    draw_minimap();
-}
-
-static void draw_using_cache(int x_offset, int y_offset, int width, int height)
-{
-    /*
-    if (width != data.screenwidth || height != data.height) {
-        draw_uncache.bufferd(x_offset, y_offset, width, height);
-        return;
-    }
-
-    /*int old_absolute_x = data.absolute_x;
-    int old_absolute_y = data.absolute_y;
-    set_bounds(x_offset, y_offset, width, height);
-    if (data.absolute_x != old_absolute_x || data.absolute_y != old_absolute_y) {
-        draw_minimap();
-        return;
-    }*/
-
-    graphics_set_clip_rectangle(x_offset, y_offset, width, height);
-    graphics_renderer()->draw_custom_image(CUSTOM_IMAGE_MINIMAP, data.screen.x, data.screen.y, SCALE_NONE);
-    draw_viewport_rectangle();
-    graphics_reset_clip_rectangle();
-}
-
-static int should_refresh(int force)
-{
-    if (data.refresh_requested || force) {
-        data.refresh_requested = 0;
-        return REFRESH_FULL;
-    }
-    int new_x, new_y;
-    city_view_get_camera(&new_x, &new_y);
-    if (data.camera_x != new_x || data.camera_y != new_y) {
-        return REFRESH_CAMERA_MOVED;
-    }
-    return REFRESH_NOT_NEEDED;
-}
-
 void widget_minimap_draw(int x_offset, int y_offset, int width, int height, int force)
 {
-    int refresh_type = should_refresh(force);
-    if (refresh_type != REFRESH_NOT_NEEDED) {
-        graphics_fill_rect(x_offset, y_offset, width, height, COLOR_BLACK);
-        draw_uncached(x_offset, y_offset, width, height);
-/*
-        if (refresh_type == REFRESH_FULL) {
-            draw_uncached(x_offset, y_offset, width, height);
-        } else {
-            draw_using_cache(x_offset, y_offset, width, height);
+    set_bounds(x_offset, y_offset, width, height);
+    graphics_set_clip_rectangle(x_offset, y_offset, width, height);
+    graphics_fill_rect(x_offset, y_offset, width, height, COLOR_BLACK);
+
+    if (data.refresh_requested || force) {
+        prepare_minimap_cache();
+        if (!data.cache.buffer) {
+            return;
         }
-        */
-        graphics_draw_line(x_offset - 1, x_offset - 1 + width, y_offset - 1, y_offset - 1, COLOR_MINIMAP_DARK);
-        graphics_draw_line(x_offset - 1, x_offset - 1, y_offset, y_offset + height, COLOR_MINIMAP_DARK);
-        graphics_draw_line(x_offset - 1 + width, x_offset - 1 + width, y_offset,
-            y_offset + height, COLOR_MINIMAP_LIGHT);
+        clear_minimap();
+        foreach_map_tile(draw_minimap_tile);
+        graphics_renderer()->update_custom_image(CUSTOM_IMAGE_MINIMAP);
+        data.refresh_requested = 0;
     }
+    
+    graphics_renderer()->draw_custom_image(CUSTOM_IMAGE_MINIMAP,
+        (data.screen.x - data.offset_x) * data.scale, (data.screen.y - data.offset_y) * data.scale, data.scale);
+    draw_viewport_rectangle();
+    graphics_reset_clip_rectangle();
+    
+    graphics_draw_line(x_offset - 1, x_offset - 1 + width, y_offset - 1, y_offset - 1, COLOR_MINIMAP_DARK);
+    graphics_draw_line(x_offset - 1, x_offset - 1, y_offset, y_offset + height, COLOR_MINIMAP_DARK);
+    graphics_draw_line(x_offset - 1 + width, x_offset - 1 + width, y_offset,
+        y_offset + height, COLOR_MINIMAP_LIGHT);
 }
 
 static void update_mouse_grid_offset(int x_view, int y_view, int grid_offset)
@@ -602,8 +514,8 @@ static void update_mouse_grid_offset(int x_view, int y_view, int grid_offset)
 
 static int get_mouse_grid_offset(const mouse *m)
 {
-    data.mouse.x = m->x;
-    data.mouse.y = m->y;
+    data.mouse.x = (m->x - data.screen.x) * data.scale + data.offset_x;
+    data.mouse.y = (m->y - data.screen.y) * data.scale + data.offset_y;
     data.mouse.grid_offset = 0;
     foreach_map_tile(update_mouse_grid_offset);
     return data.mouse.grid_offset;
