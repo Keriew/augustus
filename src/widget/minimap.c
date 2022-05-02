@@ -93,7 +93,7 @@ typedef struct {
     tile_color monument[2];
 } tile_color_set;
 
-// Since the minimap tiles are only 25 color sets per climate, we just hardcode them
+// Since the minimap tiles are only 25 color sets per climate, we just hardcode them.
 static const tile_color_set MINIMAP_COLOR_SETS[3] = {
     // central
     {
@@ -128,16 +128,16 @@ static const tile_color_set MINIMAP_COLOR_SETS[3] = {
         .rock = {{0xff8c8484, 0xff5a5252}, {0xff9c9c94, 0xffa5a5a5}, {0xffa5a5a5, 0xff848484}, {0xff5a5252, 0xff9c9c94}},
         .meadow = {{0xff427318, 0xff8c9442}, {0xffb5ad4a, 0xff738c39}, {0xff8c8c39, 0xff6b7b29}, {0xff527331, 0xff5a8442}},
         .grass = {
-            {0xff4a8431, 0xff4a7329}, { 0xff527b29, 0xff4a7329 }, { 0xff526b29, 0xff5a8439 }, { 0xff397321, 0xff4a6b21 },
-            { 0xff527b31, 0xff5a7331 }, { 0xff4a7329, 0xff5a7329 }, { 0xff4a6b18, 0xff316b21 }, { 0xff527b29, 0xff527329 }
+            {0xff4a8431, 0xff4a7329}, {0xff527b29, 0xff4a7329}, {0xff526b29, 0xff5a8439}, {0xff397321, 0xff4a6b21},
+            {0xff527b31, 0xff5a7331}, {0xff4a7329, 0xff5a7329}, {0xff4a6b18, 0xff316b21}, {0xff527b29, 0xff527329}
         },
-        .road = { 0xff736b63, 0xff4a3121 },
-                .wall = { 0xffd6d3c6, 0xfff7f3de },
-                .aqueduct = { 0xff5282bd, 0xff84baff },
-                .reservoir = { {0xff5282bd, 0xff5282bd}, {0xff84baff, 0xff84baff} }, // Edges, center
-                .house = { {0xffffb28c, 0xffd65110}, {0xffef824a, 0xffffa273} }, // Edges, center
-                .building = { {0xfffffbde, 0xffefd34a}, {0xfffff3c6, 0xffffebb5} }, // Edges, center
-                .monument = { {0xfff5deff, 0xffb84aef}, {0xffe9c6ff, 0xffdfb5ff} } // Edges, center
+        .road = {0xff736b63, 0xff4a3121},
+        .wall = {0xffd6d3c6, 0xfff7f3de},
+        .aqueduct = {0xff5282bd, 0xff84baff},
+        .reservoir = {{0xff5282bd, 0xff5282bd}, {0xff84baff, 0xff84baff}}, // Edges, center
+        .house = {{0xffffb28c, 0xffd65110}, {0xffef824a, 0xffffa273}}, // Edges, center
+        .building = {{0xfffffbde, 0xffefd34a}, {0xfffff3c6, 0xffffebb5}}, // Edges, center
+        .monument = {{0xfff5deff, 0xffb84aef}, {0xffe9c6ff, 0xffdfb5ff}} // Edges, center
     },
     // desert
     {
@@ -177,16 +177,14 @@ static struct {
         int y;
         int width;
         int height;
+        int offset_x;
+        int offset_y;
+        float scale;
     } minimap;
     struct {
-        int width;
-        int height;
         int stride;
         color_t *buffer;
     } cache;
-    int offset_x;
-    int offset_y;
-    float scale;
     const minimap_functions *functions;
     struct {
         int x;
@@ -241,40 +239,44 @@ static void set_bounds(int x_offset, int y_offset, int width, int height)
         float scale_width = data.viewport.width / (float) data.screen.width_tiles;
         float scale_height = data.viewport.height / (float) data.screen.height_tiles;
 
-        data.scale = scale_width > scale_height ? scale_width : scale_height;
+        data.minimap.scale = scale_width > scale_height ? scale_width : scale_height;
     }
 
-    if (data.scale < 1.0f) {
-        data.scale = SCALE_NONE;
+    if (data.minimap.scale < 1.0f) {
+        data.minimap.scale = SCALE_NONE;
     }
 
     int adjusted_camera_x = (data.viewport.x - data.minimap.x) * 2;
     int adjusted_camera_y = data.viewport.y - data.minimap.y;
-    int minimap_width_pixels = (data.minimap.width * 2) / data.scale;
-    int minimap_height_pixels = data.minimap.height / data.scale;
+    int minimap_width_pixels = (data.minimap.width * 2) / data.minimap.scale;
+    int minimap_height_pixels = data.minimap.height / data.minimap.scale;
 
-    data.offset_x = (minimap_width_pixels - data.screen.width) / 2;
-    data.offset_y = (minimap_height_pixels - data.screen.height) / 2;
+    data.minimap.offset_x = (minimap_width_pixels - data.screen.width) / 2;
+    data.minimap.offset_y = (minimap_height_pixels - data.screen.height) / 2;
 
     if (data.functions->viewport) {
         if (minimap_width_pixels > data.screen.width) {
-            if (data.offset_x > adjusted_camera_x) {
-                data.offset_x = adjusted_camera_x;
-                if (data.offset_x < 0) {
-                    data.offset_x = 0;
+            if (data.minimap.offset_x > adjusted_camera_x) {
+                data.minimap.offset_x = adjusted_camera_x;
+                if (data.minimap.offset_x < 0) {
+                    data.minimap.offset_x = 0;
                 }
-            } else if ((adjusted_camera_x + data.viewport.width * 2) / data.scale > data.offset_x + data.screen.width) {
-                data.offset_x = (adjusted_camera_x + data.viewport.width * 2) / data.scale - data.screen.width;
+            } else if ((adjusted_camera_x + data.viewport.width * 2) / data.minimap.scale >
+                data.minimap.offset_x + data.screen.width) {
+                data.minimap.offset_x = (adjusted_camera_x + data.viewport.width * 2) / data.minimap.scale -
+                    data.screen.width;
             }
         }
         if (minimap_height_pixels > data.screen.height) {
-            if (data.offset_y > adjusted_camera_y) {
-                data.offset_y = adjusted_camera_y;
-                if (data.offset_y < 0) {
-                    data.offset_y = 0;
+            if (data.minimap.offset_y > adjusted_camera_y) {
+                data.minimap.offset_y = adjusted_camera_y;
+                if (data.minimap.offset_y < 0) {
+                    data.minimap.offset_y = 0;
                 }
-            } else if ((adjusted_camera_y + data.viewport.height) / data.scale > data.offset_y + data.screen.height) {
-                data.offset_y = (adjusted_camera_y + data.viewport.height) / data.scale - data.screen.height;
+            } else if ((adjusted_camera_y + data.viewport.height) / data.minimap.scale >
+                data.minimap.offset_y + data.screen.height) {
+                data.minimap.offset_y = (adjusted_camera_y + data.viewport.height) / data.minimap.scale -
+                    data.screen.height;
             }
         }
     }
@@ -446,8 +448,8 @@ static void draw_viewport_rectangle(void)
         return;
     }
     int x_offset = 2 * (data.viewport.x - data.minimap.x) - 2 / 30;
-    x_offset /= data.scale;
-    x_offset += data.screen.x - data.offset_x;
+    x_offset /= data.minimap.scale;
+    x_offset += data.screen.x - data.minimap.offset_x;
     if (x_offset < data.screen.x) {
         x_offset = data.screen.x;
     }
@@ -455,10 +457,10 @@ static void draw_viewport_rectangle(void)
         x_offset -= 2;
     }
     int y_offset = data.viewport.y - data.minimap.y + 2;
-    y_offset /= data.scale;
-    y_offset += data.screen.y - data.offset_y;
+    y_offset /= data.minimap.scale;
+    y_offset += data.screen.y - data.minimap.offset_y;
     graphics_draw_rect(x_offset, y_offset,
-        (data.viewport.width * 2) / data.scale + 4, data.viewport.height / data.scale - 4,
+        (data.viewport.width * 2) / data.minimap.scale + 4, data.viewport.height / data.minimap.scale - 4,
         COLOR_MINIMAP_VIEWPORT);
 }
 
@@ -495,7 +497,8 @@ void widget_minimap_draw(int x_offset, int y_offset, int width, int height, int 
     }
     
     graphics_renderer()->draw_custom_image(CUSTOM_IMAGE_MINIMAP,
-        (data.screen.x - data.offset_x) * data.scale, (data.screen.y - data.offset_y) * data.scale, data.scale);
+        (data.screen.x - data.minimap.offset_x) * data.minimap.scale, (data.screen.y - data.minimap.offset_y) *
+        data.minimap.scale, data.minimap.scale);
     draw_viewport_rectangle();
     graphics_reset_clip_rectangle();
     
@@ -514,8 +517,8 @@ static void update_mouse_grid_offset(int x_view, int y_view, int grid_offset)
 
 static int get_mouse_grid_offset(const mouse *m)
 {
-    data.mouse.x = (m->x - data.screen.x) * data.scale + data.offset_x;
-    data.mouse.y = (m->y - data.screen.y) * data.scale + data.offset_y;
+    data.mouse.x = (m->x - data.screen.x) * data.minimap.scale + data.minimap.offset_x;
+    data.mouse.y = (m->y - data.screen.y) * data.minimap.scale + data.minimap.offset_y;
     data.mouse.grid_offset = 0;
     foreach_map_tile(update_mouse_grid_offset);
     return data.mouse.grid_offset;
