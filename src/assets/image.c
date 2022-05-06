@@ -209,8 +209,8 @@ static int load_image(asset_image *img, color_t **main_images, int *main_image_w
         } else {
             image_start_x = l->x_offset < 0 ? 0 : l->x_offset;
             image_start_y = l->y_offset < 0 ? 0 : l->y_offset;
-            image_valid_width = image_start_y + l->height - (l->y_offset < 0 ? -l->y_offset : 0);
-            image_valid_height = image_start_x + l->width - (l->x_offset < 0 ? -l->x_offset : 0);
+            image_valid_width = image_start_x + l->height - (l->x_offset < 0 ? -l->x_offset : 0);
+            image_valid_height = image_start_y + l->width - (l->y_offset < 0 ? -l->y_offset : 0);
             layer_step_x = l->width;
         }
         if (image_valid_width > img->img.width) {
@@ -548,8 +548,8 @@ void asset_image_copy_isometric_top(color_t *dst, const color_t *src, int width,
     for (int y = 0; y < height; y++) {
         const color_t *src_row = &src[(src_y_offset + y) * src_width + src_x_offset];
         color_t *dst_row = &dst[(dst_y_offset + y) * dst_width + dst_x_offset];
-        int footprint_row = y - height - 1 - tiles * FOOTPRINT_HALF_HEIGHT;
-        int half_top_pixels_in_row = (footprint_row < 0 ? width : width - 2 + 4 * footprint_row) / 2;
+        int footprint_row = y - height - 1 + tiles * FOOTPRINT_HALF_HEIGHT;
+        int half_top_pixels_in_row = (footprint_row < 0 ? width : width - 2 - 4 * footprint_row) / 2;
         memcpy(dst_row, src_row, half_top_pixels_in_row * sizeof(color_t));
         src_row += width - half_top_pixels_in_row;
         dst_row += width - half_top_pixels_in_row;
