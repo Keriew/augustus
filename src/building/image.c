@@ -698,9 +698,11 @@ int building_image_get(building *b)
                 default:
                     switch (scenario_property_climate()) {
                         case CLIMATE_DESERT:
-                            return assets_get_image_id("Logistics", "Caravanserai S ON");
+                            return assets_get_image_id("Logistics", "Caravanserai_S_ON");
+                        case CLIMATE_NORTHERN:
+                            return assets_get_image_id("Logistics", "Caravanserai_N_ON");
                         default:
-                            return assets_get_image_id("Logistics", "Caravanserai N ON");
+                            return assets_get_image_id("Logistics", "Caravanserai_C_ON");
                     }
             }
         case BUILDING_PINE_TREE:
@@ -806,6 +808,8 @@ int building_image_get(building *b)
                 default:
                     return assets_get_image_id("Military", "Pal Wall C 01") + building_connectable_get_palisade_offset(b->grid_offset);
             }
+        case BUILDING_PALISADE_GATE:
+            return assets_get_image_id("Military", "Palisade_Gate") + building_connectable_get_palisade_gate_offset(b->grid_offset);
         default:
             return 0;
     }

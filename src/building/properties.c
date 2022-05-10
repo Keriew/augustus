@@ -4,7 +4,7 @@
 #include "core/image_group.h" 
 #include "type.h"
 
-#define AUGUSTUS_BUILDINGS 62
+#define AUGUSTUS_BUILDINGS 63
 
 augustus_building_properties_mapping augustus_building_properties[AUGUSTUS_BUILDINGS] = {
     {BUILDING_ROADBLOCK, { 1, 1, 0, 0, 0 }, "Logistics", 0},
@@ -62,14 +62,14 @@ augustus_building_properties_mapping augustus_building_properties[AUGUSTUS_BUILD
     {BUILDING_LARGE_MAUSOLEUM, {3,1,0,0,0}, "Religion", "Mausoleum L"},
     {BUILDING_WATCHTOWER, {2,1,0,0,21}, "Military", "Watchtower C OFF"},
     {BUILDING_LIBRARY, {2,0,0,0,0}, "Health_Education", "Downgraded_Library"},
-    {BUILDING_CARAVANSERAI, { 4, 1, 0, 0, 0 }, "Logistics", "Caravanserai N OFF"},
+    {BUILDING_CARAVANSERAI, { 4, 1, 0, 0, 0 }, "Logistics", "Caravanserai_C_OFF"},
     {BUILDING_SMALL_STATUE, {1,1,0,0,-12}, "Aesthetics", "V Small Statue" },
     {BUILDING_ROOFED_GARDEN_WALL, { 1, 1, 0, 0, 0 }, "Aesthetics", "R Garden Wall 01"},
     {BUILDING_GARDEN_WALL_GATE, { 1, 1, 0, 0, 0 }, "Aesthetics", "Garden Gate"},
     {BUILDING_PALISADE, {1,1,0,0,0}, "Military", "Pal Wall C 01"},
     {BUILDING_HEDGE_GATE_DARK, { 1, 1, 0, 0, 0 }, "Aesthetics", "D Hedge Gate"},
     {BUILDING_HEDGE_GATE_LIGHT, { 1, 1, 0, 0, 0 }, "Aesthetics", "L Hedge Gate"},
-
+    {BUILDING_PALISADE_GATE, {1, 1, 0, 0, 0}, "Military", "Palisade_Gate"},
 };
 
 void init_augustus_building_properties()
