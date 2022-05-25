@@ -644,8 +644,9 @@ static void draw_isometric_top(const image *img, int x, int y, color_t color, fl
     set_texture_scale_mode(texture, scale);
 
     int x_offset = img->atlas.x_offset;
-    int y_offset = img->atlas.y_offset + 1;
-    int height = img->top_height;
+    int y_offset = img->atlas.y_offset;
+    int height = img->top_height + 1;
+    y -= 1;
 
 #ifdef USE_RENDER_GEOMETRY
     if (HAS_RENDER_GEOMETRY) {
@@ -1209,6 +1210,9 @@ static void draw_software_mouse_cursor(void)
     const mouse *mouse = mouse_get();
     if (!mouse->is_touch) {
         cursor_shape current = platform_cursor_get_current_shape();
+        if (current == CURSOR_DISABLED) {
+            return;
+        }
         int size = calc_adjust_with_percentage(data.cursors[current].size,
             calc_percentage(100, platform_screen_get_scale()));
         SDL_Rect dst;

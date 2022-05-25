@@ -6,10 +6,11 @@
 #define CURSOR_TYPE_MAX 3
 
 typedef enum {
+    CURSOR_DISABLED = -1,
     CURSOR_ARROW = 0,
     CURSOR_SHOVEL = 1,
     CURSOR_SWORD = 2,
-    CURSOR_MAX,
+    CURSOR_MAX = 3,
 } cursor_shape;
 
 typedef enum {

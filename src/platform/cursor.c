@@ -19,6 +19,7 @@ static struct {
     SDL_Surface *surfaces[CURSOR_MAX];
     cursor_shape current_shape;
     cursor_scale current_scale;
+    int disabled;
 } data;
 
 static const color_t mouse_colors[] = {
@@ -84,6 +85,7 @@ static cursor_scale get_cursor_scale(int scale_percentage)
 
 void system_init_cursors(int scale_percentage)
 {
+    data.disabled = 0;
     data.current_scale = get_cursor_scale(scale_percentage);
     for (int i = 0; i < CURSOR_MAX; i++) {
         const cursor *list = input_cursor_data(i, data.current_scale);
@@ -116,17 +118,19 @@ void system_set_cursor(int cursor_id)
 
 void system_show_cursor(void)
 {
+    data.disabled = 0;
     SDL_ShowCursor(SDL_ENABLE);
 }
 
 void system_hide_cursor(void)
 {
+    data.disabled = 1;
     SDL_ShowCursor(SDL_DISABLE);
 }
 
 cursor_shape platform_cursor_get_current_shape(void)
 {
-    return data.current_shape;
+    return data.disabled ? CURSOR_DISABLED : data.current_shape;
 }
 
 cursor_scale platform_cursor_get_current_scale(void)

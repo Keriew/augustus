@@ -4,7 +4,6 @@
 
 Chat: [Discord](http://www.discord.gg/GamerZakh) (kindly hosted by GamerZakh)
 
-  
 | Platform | Latest release | Unstable build |
 |----------|----------------|----------------|
 | Windows  | [![Download](https://augustus.josecadete.net/badge/release/windows.svg)](https://augustus.josecadete.net/download/latest/release/windows) | [![Download](https://augustus.josecadete.net/badge/development/windows.svg)](https://augustus.josecadete.net/download/latest/development/windows)  [(Download development assets)](https://augustus.josecadete.net/download/latest/development/assets) | 
