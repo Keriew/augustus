@@ -4,7 +4,7 @@
 #include "core/image_group.h" 
 #include "type.h"
 
-#define AUGUSTUS_BUILDINGS 63
+#define AUGUSTUS_BUILDINGS 64
 
 augustus_building_properties_mapping augustus_building_properties[AUGUSTUS_BUILDINGS] = {
     {BUILDING_ROADBLOCK, { 1, 1, 0, 0, 0 }, "Logistics", 0},
@@ -60,7 +60,7 @@ augustus_building_properties_mapping augustus_building_properties[AUGUSTUS_BUILD
     {BUILDING_NYMPHAEUM, {3,0,0,0,0}, "Religion", "Nymphaeum OFF"},
     {BUILDING_SMALL_MAUSOLEUM, {2,1,0,0,1}, "Religion", "Mausoleum S"},
     {BUILDING_LARGE_MAUSOLEUM, {3,1,0,0,0}, "Religion", "Mausoleum L"},
-    {BUILDING_WATCHTOWER, {2,1,0,0,21}, "Military", "Watchtower C OFF"},
+    {BUILDING_WATCHTOWER, {2,1,0,0,0}, "Military", "Watchtower C OFF"},
     {BUILDING_LIBRARY, {2,0,0,0,0}, "Health_Education", "Downgraded_Library"},
     {BUILDING_CARAVANSERAI, { 4, 1, 0, 0, 0 }, "Logistics", "Caravanserai_C_OFF"},
     {BUILDING_SMALL_STATUE, {1,1,0,0,-12}, "Aesthetics", "V Small Statue" },
@@ -70,6 +70,7 @@ augustus_building_properties_mapping augustus_building_properties[AUGUSTUS_BUILD
     {BUILDING_HEDGE_GATE_DARK, { 1, 1, 0, 0, 0 }, "Aesthetics", "D Hedge Gate"},
     {BUILDING_HEDGE_GATE_LIGHT, { 1, 1, 0, 0, 0 }, "Aesthetics", "L Hedge Gate"},
     {BUILDING_PALISADE_GATE, {1, 1, 0, 0, 0}, "Military", "Palisade_Gate"},
+    {BUILDING_MEDIUM_STATUE, {2,1,0,0,1}, "Aesthetics", "Med_Statue_R" },
 };
 
 void init_augustus_building_properties()
@@ -247,6 +248,7 @@ static int is_vanilla_building_with_changed_properties(building_type type)
     switch (type) {
         case BUILDING_LIBRARY:
         case BUILDING_SMALL_STATUE:
+        case BUILDING_MEDIUM_STATUE:
             return 1;
         default:
             return 0;

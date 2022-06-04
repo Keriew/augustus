@@ -281,9 +281,9 @@ static void add_to_map(int type, building *b, int size,
             add_building(b);
             break;
         case BUILDING_SMALL_STATUE:
+        case BUILDING_MEDIUM_STATUE:
         case BUILDING_HORSE_STATUE:
         case BUILDING_LEGION_STATUE:
-        case BUILDING_WATCHTOWER:
             b->subtype.orientation = building_rotation_get_rotation();
             add_building(b);
             break;

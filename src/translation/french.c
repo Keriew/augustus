@@ -739,8 +739,8 @@ static translation_string all_strings[] = {
     {TR_BUILDING_FUMIGATION_DESC, "Le bâtiment est en cours de désinfection, la fumigation devrait durer quelques jours."},
     {TR_OVERLAY_SICKNESS, "Maladies"},
     {TR_ADVISOR_SICKNESS_LEVEL_LOW, "Très peu de maladies se propagent dans la cité, et le commerce fonctionne parfaitement. Le niveau d'hygiène de la cité permet d'endiguer efficacement les épidémies provenant des cités extérieures."},
-    {TR_ADVISOR_SICKNESS_LEVEL_MEDIUM, "Quelques foyers infectieux se déclarent dans la cité mais la situation est sous contrôle. Assurez-vous d'un niveau d'hygiène correct afin que le commerce ne soit pas perturbé. Les hôpitaux sont plus efficaces que les dispensaires pour prévenir les épidémies."},
-    {TR_ADVISOR_SICKNESS_LEVEL_HIGH, "De nombreuses maladies infectieuses circulent dans certains secteurs de la cité. Si vous ne remédiez pas rapidement à la situation, les bâtiments de commerce risquent de passer en quarantaine. Placez les hôpitaux près des docks, greniers, et entrepôts pour endiguer les épidémies provenant des cités extérieures."},
+    {TR_ADVISOR_SICKNESS_LEVEL_MEDIUM, "Quelques foyers infectieux se déclarent dans la cité mais la situation est sous contrôle. Assurez-vous d'un niveau d'hygiène correct en construisant suffisamment de dispensaires afin que le commerce ne soit pas perturbé."},
+    {TR_ADVISOR_SICKNESS_LEVEL_HIGH, "De nombreuses maladies infectieuses circulent dans certains secteurs de la cité. Si vous n'agissez pas rapidement, les bâtiments de commerce risquent de passer en quarantaine. Construisez des dispensaires et surveillez votre couverture hospitalière afin d'endiguer les épidémies provenant des cités extérieures."},
     {TR_ADVISOR_SICKNESS_LEVEL_PLAGUE, "La peste s'est déclarée dans la cité et le commerce est fortement perturbé. Des médecins et chirurgiens sont réquisitionnés pour décontaminer les lieux les plus touchés par l'épidémie. Il faut absolument rétablir la situation!"},
     {TR_TOOLTIP_OVERLAY_SICKNESS_LOW, "Très peu de maladies"},
     {TR_TOOLTIP_OVERLAY_SICKNESS_MEDIUM, "Quelques maladies infectieuses"},
@@ -774,7 +774,9 @@ static translation_string all_strings[] = {
     {TR_OUT_OF_MONEY, "Faillite"},
     {TR_CITY_MESSAGE_TITLE_EMPERORS_WRATH, "Fureur de l'Empereur" },
     {TR_CITY_MESSAGE_TEXT_EMPERORS_WRATH, "Vous êtes tombé en disgrâce auprès de César et ce dernier a ordonné votre arrestation. À moins d'améliorer l'estime que l'Empereur vous porte, ses légions d'élite envahiront bientôt votre cité." },
-    {TR_BUILDING_ACADEMY_UPGRADE_DESC, "Cette université est opérationnelle. Le développement de la zone a permis d'agrandir le bâtiment, permettant la tenue de nombreuses conférences et recherches."}
+    {TR_BUILDING_ACADEMY_UPGRADE_DESC, "Cette université est opérationnelle. Le développement de la zone a permis d'agrandir le bâtiment, permettant la tenue de nombreuses conférences et recherches."},
+    {TR_BUILDING_PALISADE_GATE, "Portail de palissade"},
+    {TR_BUILDING_PALISADE_GATE_DESC, "Cet étroit portail en bois permet de contrôler le passage des citoyens à travers les défenses de la cité."}
 };
 
 void translation_french(const translation_string **strings, int *num_strings)
