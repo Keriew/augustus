@@ -40,10 +40,12 @@ static building_type get_clone_type_from_building(building *b, building_type clo
         case BUILDING_NATIVE_MEETING:
             return BUILDING_NONE;
         case BUILDING_BURNING_RUIN:
-            if (b)
+            if (b) {
                 return get_clone_type_from_building(b, map_rubble_building_type(b->grid_offset));
-            else
+            }
+            else {
                 return BUILDING_NONE;
+            }
         case BUILDING_GARDEN_WALL_GATE:
         // Check neighbouring tiles to see if it's a part of garden wall.
         // If it is, return that garden wall type, otherwise return default garden wall type.
@@ -87,7 +89,7 @@ building_type building_clone_type_from_grid_offset(int grid_offset)
             return get_clone_type_from_building(b, b->type);
         }
     } else if (terrain & TERRAIN_RUBBLE) {
-        return get_clone_type_from_building((building*)0, map_rubble_building_type(grid_offset));
+        return get_clone_type_from_building(0, map_rubble_building_type(grid_offset));
     } else if (terrain & TERRAIN_AQUEDUCT) {
         return BUILDING_AQUEDUCT;
     } else if (terrain & TERRAIN_WALL) {
