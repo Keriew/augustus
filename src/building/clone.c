@@ -42,8 +42,7 @@ static building_type get_clone_type_from_building(building *b, building_type clo
         case BUILDING_BURNING_RUIN:
             if (b) {
                 return get_clone_type_from_building(b, map_rubble_building_type(b->grid_offset));
-            }
-            else {
+            } else {
                 return BUILDING_NONE;
             }
         case BUILDING_GARDEN_WALL_GATE:
