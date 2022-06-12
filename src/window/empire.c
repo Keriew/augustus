@@ -540,9 +540,32 @@ static void handle_input(const mouse *m, const hotkeys *h)
                 }
             }
         }
+        // allow de-selection only for objects that are currently selected/drawn, otherwise exit empire map
         if (input_go_back_requested(m, h)) {
-            empire_clear_selected_object();
-            window_invalidate();
+            switch (obj->type) {
+                case EMPIRE_OBJECT_CITY:
+                    empire_clear_selected_object();
+                    window_invalidate();
+                    break;
+                case EMPIRE_OBJECT_ROMAN_ARMY:
+                    if (city_military_distant_battle_roman_army_is_traveling()) {
+                        if (city_military_distant_battle_roman_months_traveled() == obj->distant_battle_travel_months) {
+                            empire_clear_selected_object();
+                            window_invalidate();
+                            break;
+                        }
+                    }
+                case EMPIRE_OBJECT_ENEMY_ARMY:
+                    if (city_military_months_until_distant_battle() > 0) {
+                        if (city_military_distant_battle_enemy_months_traveled() == obj->distant_battle_travel_months) {
+                            empire_clear_selected_object();
+                            window_invalidate();
+                            break;
+                        }
+                    }
+                default:
+                    window_city_show();
+            }
         }
     } else {
         if (input_go_back_requested(m, h)) {
