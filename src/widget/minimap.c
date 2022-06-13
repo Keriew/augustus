@@ -205,8 +205,6 @@ static void setup_minimap(int x_offset, int y_offset, int width, int height)
     float max_scale_height = data.minimap.height / (float) data.screen.height;
 
     data.minimap.max_scale = max_scale_width > max_scale_height ? max_scale_width : max_scale_height;
-
-    minimap_colors.climate = &CLIMATE_VARIANTS[data.functions->climate()];
 }
 
 static void position_minimap(int x_offset, int y_offset, int width, int height)
@@ -504,6 +502,7 @@ void widget_minimap_update(const minimap_functions *functions)
         return;
     }
     clear_minimap();
+    minimap_colors.climate = &CLIMATE_VARIANTS[data.functions->climate()];
     foreach_map_tile(draw_minimap_tile);
     graphics_renderer()->update_custom_image(CUSTOM_IMAGE_MINIMAP);
 }
