@@ -63,27 +63,27 @@
 		<layer group="this" image="Architect 06" x="36" y="1"/>
 	</image>
 	<image id="Architects_Guild_On_07" width="75" height="48">
-		<layer src="Architects_Guild_On_07" x="0" y="0"/>
+		<layer src="Architects_Guild_On_04" x="0" y="0"/>
 		<layer group="this" image="Architect 07" x="36" y="1"/>
 	</image>
 	<image id="Architects_Guild_On_08" width="75" height="48">
-		<layer src="Architects_Guild_On_08" x="0" y="0"/>
+		<layer src="Architects_Guild_On_02" x="0" y="0"/>
 		<layer group="this" image="Architect 08" x="36" y="1"/>
 	</image>
 	<image id="Architects_Guild_On_09" width="75" height="48">
-		<layer src="Architects_Guild_On_09" x="0" y="0"/>
+		<layer src="Architects_Guild_On_01" x="0" y="0"/>
 		<layer group="this" image="Architect 09" x="36" y="1"/>
 	</image>
 	<image id="Architects_Guild_On_10" width="75" height="48">
-		<layer src="Architects_Guild_On_10" x="0" y="0"/>
+		<layer src="Architects_Guild_On_03" x="0" y="0"/>
 		<layer group="this" image="Architect 10" x="36" y="1"/>
 	</image>
 	<image id="Architects_Guild_On_11" width="75" height="48">
-		<layer src="Architects_Guild_On_11" x="0" y="0"/>
+		<layer src="Architects_Guild_On_05" x="0" y="0"/>
 		<layer group="this" image="Architect 11" x="36" y="1"/>
 	</image>
 	<image id="Architects_Guild_On_12" width="75" height="48">
-		<layer src="Architects_Guild_On_12" x="0" y="0"/>
+		<layer src="Architects_Guild_On_04" x="0" y="0"/>
 		<layer group="this" image="Architect 12" x="36" y="1"/>
 	</image>
 	<!-- Note: Architect's Guild OFF Variant -->
@@ -339,8 +339,14 @@
 	<!-- Note: Lighthouse Construction 01-04 are the 0%, 25%, 50%, and 75% construction phases respectively -->
 	<image id="Lighthouse Const 01" src="Lighthouse_Construction_01" isometric="true"/>
 	<image id="Lighthouse Const 02" src="Lighthouse_Construction_02" isometric="true"/>
-	<image id="Lighthouse Const 03" src="Lighthouse_Construction_03" isometric="true"/>
-	<image id="Lighthouse Const 04" src="Lighthouse_Construction_04" isometric="true"/>
+	<image id="Lighthouse Const 03" width="178" height="139" isometric="true">
+		<layer group="this" image="Lighthouse Const 02" x="0" y="34"/>
+		<layer src="Lighthouse_Construction_03" x="55" y="0"/>
+	</image>
+	<image id="Lighthouse Const 04" width="178" height="198" isometric="true">
+		<layer group="this" image="Lighthouse Const 03" x="0" y="59"/>
+		<layer src="Lighthouse_Construction_04" x="18" y="0"/>
+	</image>
 	<!-- Note: Lighthouse OFF Variant -->
 	<image id="Lighthouse OFF" src="Lighthouse_OFF" isometric="true"/>
 	<!-- Note: Lighthouse ON Variant -->
@@ -463,4 +469,30 @@
 			<frame id="Warehouse_Flag_All_8" src="flag_all_traders_a8"/>
 		</animation>
 	</image>
+	<!-- Note: Builder worker animation frames 01-12 -->
+	<image id="Builder_01" src="Builder_01"/>
+	<image id="Builder_02" src="Builder_02"/>
+	<image id="Builder_03" src="Builder_03"/>
+	<image id="Builder_04" src="Builder_04"/>
+	<image id="Builder_05" src="Builder_05"/>
+	<image id="Builder_06" src="Builder_06"/>
+	<image id="Builder_07" src="Builder_07"/>
+	<image id="Builder_08" src="Builder_08"/>
+	<image id="Builder_09" src="Builder_09"/>
+	<image id="Builder_10" src="Builder_10"/>
+	<image id="Builder_11" src="Builder_11"/>
+	<image id="Builder_12" src="Builder_12"/>
+	<!-- Note: Chiselling worker animation frames 01-12 -->
+	<image id="Chisel_NE_01" src="Chisel_NE_01"/>
+	<image id="Chisel_NE_02" src="Chisel_NE_02"/>
+	<image id="Chisel_NE_03" src="Chisel_NE_03"/>
+	<image id="Chisel_NE_04" src="Chisel_NE_04"/>
+	<image id="Chisel_NE_05" src="Chisel_NE_05"/>
+	<image id="Chisel_NE_06" src="Chisel_NE_06"/>
+	<image id="Chisel_NE_07" src="Chisel_NE_06"/>
+	<image id="Chisel_NE_08" src="Chisel_NE_05"/>
+	<image id="Chisel_NE_09" src="Chisel_NE_04"/>
+	<image id="Chisel_NE_10" src="Chisel_NE_03"/>
+	<image id="Chisel_NE_11" src="Chisel_NE_02"/>
+	<image id="Chisel_NE_12" src="Chisel_NE_01"/>
 </assetlist>

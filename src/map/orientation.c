@@ -249,7 +249,7 @@ void map_orientation_update_buildings(void)
 {
     for (int i = 1; i < building_count(); i++) {
         building *b = building_get(i);
-        if (b->state == BUILDING_STATE_UNUSED) {
+        if (b->state == BUILDING_STATE_UNUSED || b->state == BUILDING_STATE_DELETED_BY_GAME) {
             continue;
         }
         switch (b->type) {
@@ -275,6 +275,7 @@ void map_orientation_update_buildings(void)
             case BUILDING_SMALL_STATUE:
             case BUILDING_SMALL_STATUE_ALT:
             case BUILDING_SMALL_STATUE_ALT_B:
+            case BUILDING_MEDIUM_STATUE:
             case BUILDING_LEGION_STATUE:
             case BUILDING_PAVILION_BLUE:
             case BUILDING_HORSE_STATUE:

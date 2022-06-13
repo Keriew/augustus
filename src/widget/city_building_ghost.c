@@ -18,7 +18,9 @@
 #include "core/config.h"
 #include "core/config.h"
 #include "core/log.h"
+#include "figure/figure.h"
 #include "figure/formation.h"
+#include "figuretype/animal.h"
 #include "graphics/image.h"
 #include "input/scroll.h"
 #include "map/bridge.h"
@@ -157,10 +159,11 @@ static struct {
 static building ghost_building;
 static float scale = SCALE_NONE;
 
-static int is_blocked_for_building(int grid_offset, int num_tiles, int *blocked_tiles)
+static int is_blocked_for_building(int grid_offset, int building_size, int *blocked_tiles)
 {
     int orientation_index = city_view_orientation() / 2;
     int blocked = 0;
+    int num_tiles = building_size * building_size;
     for (int i = 0; i < num_tiles; i++) {
         int tile_offset = grid_offset + TILE_GRID_OFFSETS[orientation_index][i];
         int tile_blocked = 0;
@@ -169,6 +172,7 @@ static int is_blocked_for_building(int grid_offset, int num_tiles, int *blocked_
         }
         if (map_has_figure_at(tile_offset)) {
             tile_blocked = 1;
+            figure_animal_try_nudge_at(grid_offset, tile_offset, building_size);
         }
         blocked_tiles[i] = tile_blocked;
         blocked += tile_blocked;
@@ -280,20 +284,15 @@ static void draw_regular_building(building_type type, int image_id, int x, int y
         image_draw_warehouse(image_id, x, y, color);
     } else if (type == BUILDING_GRANARY) {
         image_draw_isometric_footprint(image_id, x, y, color, scale);
-        const image *img = image_get(image_id + 1);
-        image_draw(image_id + 1,
-            x + img->animation.sprite_offset_x - 32, y + img->animation.sprite_offset_y - 64, color, scale);
+        image_draw(image_id + 1, x - 32, y - 64, color, scale);
     } else if (type == BUILDING_HOUSE_VACANT_LOT) {
         draw_building(image_group(GROUP_BUILDING_HOUSE_VACANT_LOT), x, y, color);
     } else if (type == BUILDING_TRIUMPHAL_ARCH) {
         draw_building(image_id, x, y, color);
-        const image *img = image_get(image_id + 1);
         if (image_id == image_group(GROUP_BUILDING_TRIUMPHAL_ARCH)) {
-            image_draw(image_id + 1,
-                x + img->animation.sprite_offset_x + 4, y + img->animation.sprite_offset_y - 51, color, scale);
+            image_draw(image_id + 1, x + 4, y - 51, color, scale);
         } else {
-            image_draw(image_id + 1,
-                x + img->animation.sprite_offset_x - 33, y + img->animation.sprite_offset_y - 56, color, scale);
+            image_draw(image_id + 1, x - 33, y - 56, color, scale);
         }
     } else if (type != BUILDING_CLEAR_LAND) {
         draw_building(image_id, x, y, color);
@@ -453,13 +452,17 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
                 forbidden_terrain &= ~TERRAIN_WALL;
             }
         }
-        if (fully_blocked || forbidden_terrain || (map_has_figure_at(tile_offset) && type != BUILDING_PLAZA)) {
+
+        if (fully_blocked || forbidden_terrain) {
             blocked_tiles[i] = 1;
+        } else if (map_has_figure_at(tile_offset) && type != BUILDING_PLAZA) {
+            blocked_tiles[i] = 1;
+            figure_animal_try_nudge_at(grid_offset, tile_offset, building_size);
         } else {
             blocked_tiles[i] = 0;
         }
     }
-    if (type >= BUILDING_ROADBLOCK || type == BUILDING_LIBRARY || type == BUILDING_SMALL_STATUE) {
+    if (type >= BUILDING_ROADBLOCK || type == BUILDING_LIBRARY || type == BUILDING_SMALL_STATUE || type == BUILDING_MEDIUM_STATUE) {
         image_id = get_new_building_image_id(tile->x, tile->y, grid_offset, type, props);
         draw_regular_building(type, image_id, x_view, y_view, grid_offset, num_tiles, blocked_tiles);
     } else {
@@ -474,9 +477,12 @@ static void draw_single_reservoir(int x, int y, color_t color, int has_water, in
     draw_building(image_id, x, y, color);
     if (has_water) {
         const image *img = image_get(image_id);
-        int x_water = x - FOOTPRINT_WIDTH + img->animation.sprite_offset_x - 2;
-        int y_water = y + img->animation.sprite_offset_y - img->top_height + FOOTPRINT_HALF_HEIGHT * 3;
-        image_draw(image_id + 1, x_water, y_water, color, scale);
+        if (img->animation) {
+            int x_water = x - FOOTPRINT_WIDTH + img->animation->sprite_offset_x - 2;
+            int top_height = img->top ? img->top->original.height : 0;
+            int y_water = y + img->animation->sprite_offset_y - top_height + FOOTPRINT_HALF_HEIGHT * 3;
+            image_draw(image_id + 1, x_water, y_water, color, scale);
+        }
     }
     if (reservoir_range_data.blocked && draw_blocked) {
         for (int i = 0; i < 9; i++) {
@@ -675,9 +681,11 @@ static void draw_fountain(const map_tile *tile, int x, int y)
     draw_building(image_id, x, y, color_mask);
     if (map_terrain_is(tile->grid_offset, TERRAIN_RESERVOIR_RANGE)) {
         const image *img = image_get(image_id);
-        image_draw(image_id + 1, x + img->animation.sprite_offset_x, y + img->animation.sprite_offset_y,
-            color_mask, scale);
-    }
+        if (img->animation) {
+            image_draw(image_id + 1, x + img->animation->sprite_offset_x, y + img->animation->sprite_offset_y,
+                color_mask, scale);
+        }
+        }
     draw_building_tiles(x, y, 1, &blocked);
 }
 
@@ -703,7 +711,8 @@ static void draw_well(const map_tile *tile, int x, int y)
 static void draw_bathhouse(const map_tile *tile, int x, int y)
 {
     int grid_offset = tile->grid_offset;
-    int num_tiles = 4;
+    const int building_size = 2;
+    const int num_tiles = 4;
     int blocked_tiles[4];
     int blocked = 0;
     color_t color;
@@ -713,7 +722,7 @@ static void draw_bathhouse(const map_tile *tile, int x, int y)
             blocked_tiles[i] = 1;
         }
     } else {
-        blocked = is_blocked_for_building(grid_offset, num_tiles, blocked_tiles);
+        blocked = is_blocked_for_building(grid_offset, building_size, blocked_tiles);
     }
     int image_id = image_group(building_properties_for_type(BUILDING_BATHHOUSE)->image_group);
 
@@ -734,9 +743,7 @@ static void draw_bathhouse(const map_tile *tile, int x, int y)
     }
     draw_building(image_id, x, y, color);
     if (has_water) {
-        const image *img = image_get(image_id);
-        image_draw(image_id - 1, x + img->animation.sprite_offset_x - 7, y + img->animation.sprite_offset_y + 6,
-            color, scale);
+        image_draw(image_id - 1, x - 7, y + 6, color, scale);
     }
     draw_building_tiles(x, y, num_tiles, blocked_tiles);
 }
@@ -744,14 +751,15 @@ static void draw_bathhouse(const map_tile *tile, int x, int y)
 static void draw_pond(const map_tile *tile, int x, int y, int type)
 {
     int grid_offset = tile->grid_offset;
-    int num_tiles = (type == BUILDING_LARGE_POND) ? 9 : 4;
+    int building_size = (type == BUILDING_LARGE_POND) ? 3 : 2;
+    int num_tiles = building_size * building_size;
     int blocked_tiles[9];
     if (city_finance_out_of_money()) {
         for (int i = 0; i < num_tiles; i++) {
             blocked_tiles[i] = 1;
         }
     } else {
-        is_blocked_for_building(grid_offset, num_tiles, blocked_tiles);
+        is_blocked_for_building(grid_offset, building_size, blocked_tiles);
     }
 
     int has_water = 0;
@@ -838,10 +846,10 @@ static void draw_fort(const map_tile *tile, int x, int y)
 {
     int blocked = 0;
 
-    int num_tiles_fort = building_properties_for_type(BUILDING_FORT)->size;
-    num_tiles_fort *= num_tiles_fort;
-    int num_tiles_ground = building_properties_for_type(BUILDING_FORT_GROUND)->size;
-    num_tiles_ground *= num_tiles_ground;
+    int building_size_fort = building_properties_for_type(BUILDING_FORT)->size;
+    int num_tiles_fort = building_size_fort * building_size_fort;
+    int building_size_ground = building_properties_for_type(BUILDING_FORT_GROUND)->size;
+    int num_tiles_ground = building_size_ground * building_size_ground;
 
     int grid_offset_fort = tile->grid_offset;
     int grid_offset_ground = grid_offset_fort +
@@ -858,8 +866,8 @@ static void draw_fort(const map_tile *tile, int x, int y)
             blocked_tiles_ground[i] = 1;
         }
     } else {
-        blocked |= is_blocked_for_building(grid_offset_fort, num_tiles_fort, blocked_tiles_fort);
-        blocked |= is_blocked_for_building(grid_offset_ground, num_tiles_ground, blocked_tiles_ground);
+        blocked |= is_blocked_for_building(grid_offset_fort, building_size_fort, blocked_tiles_fort);
+        blocked |= is_blocked_for_building(grid_offset_ground, building_size_ground, blocked_tiles_ground);
     }
 
     int orientation_index = building_rotation_get_building_orientation(building_rotation_get_rotation()) / 2;
@@ -892,7 +900,8 @@ static void draw_hippodrome(const map_tile *tile, int x, int y)
     if (city_buildings_has_hippodrome() || city_finance_out_of_money()) {
         blocked = 1;
     }
-    int num_tiles = 25;
+    const int building_block_size = 5;
+    const int num_tiles = 25;
 
     building_rotation_force_two_orientations();
     int orientation_index = building_rotation_get_building_orientation(building_rotation_get_rotation()) / 2;
@@ -911,9 +920,9 @@ static void draw_hippodrome(const map_tile *tile, int x, int y)
             blocked_tiles3[i] = 1;
         }
     } else {
-        blocked |= is_blocked_for_building(grid_offset1, num_tiles, blocked_tiles1);
-        blocked |= is_blocked_for_building(grid_offset2, num_tiles, blocked_tiles2);
-        blocked |= is_blocked_for_building(grid_offset3, num_tiles, blocked_tiles3);
+        blocked |= is_blocked_for_building(grid_offset1, building_block_size, blocked_tiles1);
+        blocked |= is_blocked_for_building(grid_offset2, building_block_size, blocked_tiles2);
+        blocked |= is_blocked_for_building(grid_offset3, building_block_size, blocked_tiles3);
     }
 
     int x_part1 = x;
