@@ -117,6 +117,7 @@ static void update_entries(void)
 {
     int total_images = data.active_group->last_image_index - data.active_group->first_image_index + 1;
     data.total_entries = 0;
+    return;
     free(data.entries);
     data.entries = malloc(sizeof(asset_entry) * total_images);
     if (!data.entries) {
@@ -144,6 +145,12 @@ static void update_entries(void)
 
 static void select_index(int index)
 {
+    if (data.total_entries == 0) {
+        data.selected_index = 0;
+        free(data.selected_asset_id);
+        data.selected_asset_id = 0;
+        return;
+    }
     data.selected_index = index;
     const asset_image *img = asset_image_get_from_id(data.active_group->first_image_index + data.entries[index].index);
     free(data.selected_asset_id);
@@ -421,42 +428,42 @@ static void draw_asset_list(int x_offset, int y_offset)
         x_offset + 24, y_offset + 16, FONT_NORMAL_BLACK);
     scrollbar_draw(&scrollbar);
     inner_panel_draw(x_offset + 16, y_offset + 32, 14, outer_height_blocks - 4);
-    if (!data.active_group || !data.total_entries) {
-        lang_text_draw_centered(CUSTOM_TRANSLATION, TR_WINDOW_ASSET_PREVIEWER_NO_IMAGES, x_offset + 16, y_offset + 32 +
-            ((outer_height_blocks - 3) * BLOCK_SIZE - 20) / 2, 14 * BLOCK_SIZE, FONT_NORMAL_GREEN);
-        return;
-    }
     x_offset += 20;
     y_offset += 24;
-    int images_in_list = data.total_entries;
-    if (images_in_list > scrollbar.elements_in_view) {
-        images_in_list = scrollbar.elements_in_view;
-    }
-    for (int i = 0; i < images_in_list; i++) {
-        y_offset += ASSET_BUTTON_SIZE;
-        int current_index = i + scrollbar.scroll_position;
-        int current_image = data.entries[current_index].index;
-        font_t font = current_index == data.selected_index ? FONT_NORMAL_WHITE : FONT_NORMAL_GREEN;
-        if (i == (data.asset_button_id - 1)) {
-            button_border_draw(x_offset + 3, y_offset - 5, 13 * BLOCK_SIZE, ASSET_BUTTON_SIZE + 2, 1);
+    if (!data.active_group || !data.total_entries) {
+        lang_text_draw_centered(CUSTOM_TRANSLATION, TR_WINDOW_ASSET_PREVIEWER_NO_ASSETS, x_offset - 4, y_offset + 8 +
+            ((outer_height_blocks - 3) * BLOCK_SIZE - 20) / 2, 14 * BLOCK_SIZE, FONT_NORMAL_GREEN);
+    } else {
+        int images_in_list = data.total_entries;
+        if (images_in_list > scrollbar.elements_in_view) {
+            images_in_list = scrollbar.elements_in_view;
         }
-        const asset_image *img = asset_image_get_from_id(data.active_group->first_image_index + current_image);
-        int width = text_draw_number(current_image + 1, '@', "", x_offset, y_offset, font, COLOR_MASK_NONE);
-        const uint8_t *asset_name;
-        if (img->id) {
-            encode_asset_id(img->id);
-            if (data.encoded_asset_id) {
-                asset_name = data.encoded_asset_id;
-            } else {
-                asset_name = lang_get_string(CUSTOM_TRANSLATION, TR_WINDOW_ASSET_PREVIEWER_UNNAMED_ASSET);
+        for (int i = 0; i < images_in_list; i++) {
+            y_offset += ASSET_BUTTON_SIZE;
+            int current_index = i + scrollbar.scroll_position;
+            int current_image = data.entries[current_index].index;
+            font_t font = current_index == data.selected_index ? FONT_NORMAL_WHITE : FONT_NORMAL_GREEN;
+            if (i == (data.asset_button_id - 1)) {
+                button_border_draw(x_offset + 3, y_offset - 5, 13 * BLOCK_SIZE, ASSET_BUTTON_SIZE + 2, 1);
             }
-        } else {
-            asset_name = lang_get_string(CUSTOM_TRANSLATION, data.entries[current_index].is_animation_frame ?
-                TR_WINDOW_ASSET_PREVIEWER_ANIMATION_FRAME : TR_WINDOW_ASSET_PREVIEWER_UNNAMED_ASSET);
+            const asset_image *img = asset_image_get_from_id(data.active_group->first_image_index + current_image);
+            int width = text_draw_number(current_image + 1, '@', "", x_offset, y_offset, font, COLOR_MASK_NONE);
+            const uint8_t *asset_name;
+            if (img->id) {
+                encode_asset_id(img->id);
+                if (data.encoded_asset_id) {
+                    asset_name = data.encoded_asset_id;
+                } else {
+                    asset_name = lang_get_string(CUSTOM_TRANSLATION, TR_WINDOW_ASSET_PREVIEWER_UNNAMED_ASSET);
+                }
+            } else {
+                asset_name = lang_get_string(CUSTOM_TRANSLATION, data.entries[current_index].is_animation_frame ?
+                    TR_WINDOW_ASSET_PREVIEWER_ANIMATION_FRAME : TR_WINDOW_ASSET_PREVIEWER_UNNAMED_ASSET);
+            }
+            width += text_draw(string_from_ascii("-"), x_offset + width, y_offset, font, COLOR_MASK_NONE);
+            text_draw_ellipsized(asset_name, x_offset + width, y_offset, 13 * BLOCK_SIZE - width,
+                font, COLOR_MASK_NONE);
         }
-        width += text_draw(string_from_ascii("-"), x_offset + width, y_offset, font, COLOR_MASK_NONE);
-        text_draw_ellipsized(asset_name, x_offset + width, y_offset, 13 * BLOCK_SIZE - width,
-            font, COLOR_MASK_NONE);
     }
     const generic_button *last_btn = &asset_buttons[scrollbar.elements_in_view];
     y_offset = 10 * BLOCK_SIZE + 42;
@@ -516,6 +523,10 @@ static void draw_foreground(void)
 
     draw_asset_list(8, 10 * BLOCK_SIZE);
 
+    if (data.total_entries == 0) {
+        return;
+    }
+
     int image_id = get_current_asset_index() + IMAGE_MAIN_ENTRIES;
     const image *img = image_get(image_id);
     if (data.animation.enabled && img->animation) {
@@ -571,6 +582,9 @@ static void get_tooltip(tooltip_context *c)
     }
 
     int current_index = data.asset_button_id - 1 + scrollbar.scroll_position;
+    if (current_index >= data.total_entries) {
+        return;
+    }
     font_t font = (current_index == data.selected_index - 1) ? FONT_NORMAL_WHITE : FONT_NORMAL_GREEN;
 
     const asset_image *img =
@@ -673,7 +687,7 @@ static void recalculate_selected_index(void)
 
 static void refresh_window(void)
 {
-    int asset_index = data.entries[scrollbar.scroll_position].index;
+    int asset_index = data.total_entries > 0 ? data.entries[scrollbar.scroll_position].index : 0;
     load_assets(0);
     recalculate_selected_index();
     window_invalidate();
@@ -723,13 +737,17 @@ static void button_top(int option, int param2)
 static void button_toggle_animation_frames(int param1, int param2)
 {
     data.hide_animation_frames ^= 1;
-    int asset_index = data.entries[scrollbar.scroll_position].index;
-    int is_animation_frame = data.entries[scrollbar.scroll_position].is_animation_frame;
-    if (data.entries[data.selected_index].is_animation_frame && data.hide_animation_frames) {
-        for (int i = data.selected_index - 1; i >= 0; i--) {
-            if (!data.entries[i].is_animation_frame) {
-                select_index(i);
-                break;
+    int asset_index = 0;
+    int is_animation_frame = 0;
+    if (data.total_entries > 0) {
+        asset_index = data.entries[scrollbar.scroll_position].index;
+        is_animation_frame = data.entries[scrollbar.scroll_position].is_animation_frame;
+        if (data.entries[data.selected_index].is_animation_frame && data.hide_animation_frames) {
+            for (int i = data.selected_index - 1; i >= 0; i--) {
+                if (!data.entries[i].is_animation_frame) {
+                    select_index(i);
+                    break;
+                }
             }
         }
     }
