@@ -117,7 +117,6 @@ static void update_entries(void)
 {
     int total_images = data.active_group->last_image_index - data.active_group->first_image_index + 1;
     data.total_entries = 0;
-    return;
     free(data.entries);
     data.entries = malloc(sizeof(asset_entry) * total_images);
     if (!data.entries) {
