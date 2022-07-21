@@ -58,13 +58,12 @@ typedef enum {
 
 #define ASSET_BUTTON_SIZE 18
 
-static void button_asset(int asset, int param2);
+static void button_asset_entry(int index, int param2);
 static void button_top(int option, int param2);
 static void button_toggle_animation_frames(int param1, int param2);
-static void on_scroll(void);
 
 static scrollbar_type scrollbar = {
-    8 + 15 * BLOCK_SIZE, 12 * BLOCK_SIZE, 0, 14 * BLOCK_SIZE, 13 * BLOCK_SIZE, on_scroll, 0, 4
+    8 + 15 * BLOCK_SIZE, 12 * BLOCK_SIZE, 0, 14 * BLOCK_SIZE, 13 * BLOCK_SIZE, window_invalidate, 0, 4
 };
 
 static generic_button buttons[NUM_BUTTONS] = {
@@ -89,36 +88,35 @@ typedef struct {
 static struct {
     const dir_listing *xml_files;
     const uint8_t **xml_file_names;
+    image_groups *active_group;
+    int active_group_index;
     const image_atlas_data *main_atlas;
     terrain terrain;
     scenario_climate climate;
     const uint8_t *terrain_texts[TERRAIN_MAX];
     const uint8_t *zoom_texts[TOTAL_ZOOM_VALUES];
-    int asset_group;
+    uint8_t *encoded_asset_id;
+    int encoded_asset_id_size;
     int focus_button_id;
     int asset_button_id;
     int x_offset_top;
-    int max_asset_buttons;
-    int hide_animation_frames;
-    int viewable_images;
     asset_entry *entries;
-    int scale;
-    image_groups *group;
+    int total_entries;
     int selected_index;
     char *selected_asset_id;
+    int hide_animation_frames;
+    int scale;
     struct {
         int enabled;
         int frame;
         int reversed;
     } animation;
-    uint8_t *encoded_asset_id;
-    int encoded_asset_id_size;
 } data;
 
-static void calculate_viewable_images(void)
+static void update_entries(void)
 {
-    int total_images = data.group->last_image_index - data.group->first_image_index + 1;
-    data.viewable_images = 0;
+    int total_images = data.active_group->last_image_index - data.active_group->first_image_index + 1;
+    data.total_entries = 0;
     free(data.entries);
     data.entries = malloc(sizeof(asset_entry) * total_images);
     if (!data.entries) {
@@ -140,14 +138,14 @@ static void calculate_viewable_images(void)
                 animation_sprites = img->animation->num_sprites;
             }
         }
-        data.viewable_images++;
+        data.total_entries++;
     }
 }
 
 static void select_index(int index)
 {
     data.selected_index = index;
-    const asset_image *img = asset_image_get_from_id(data.group->first_image_index + data.entries[index].index);
+    const asset_image *img = asset_image_get_from_id(data.active_group->first_image_index + data.entries[index].index);
     free(data.selected_asset_id);
     data.selected_asset_id = 0;
     if (img->id) {
@@ -159,16 +157,68 @@ static void select_index(int index)
     }
 }
 
+static void scroll_to_index(int index, int force)
+{
+    if (index < scrollbar.scroll_position || force) {
+        scrollbar.scroll_position = index;
+    } else if (index >= scrollbar.scroll_position + scrollbar.elements_in_view) {
+        scrollbar.scroll_position = index - scrollbar.elements_in_view + 1;
+    }
+    if (scrollbar.scroll_position > scrollbar.max_scroll_position) {
+        scrollbar.scroll_position = scrollbar.max_scroll_position;
+    }
+}
+
+static void set_max_asset_buttons(void)
+{
+    int asset_list_height = (screen_height() - 16 * BLOCK_SIZE) - screen_height() % BLOCK_SIZE;
+    int max_asset_buttons = asset_list_height / ASSET_BUTTON_SIZE;
+    if (scrollbar.elements_in_view == max_asset_buttons) {
+        return;
+    }
+    free(asset_buttons);
+    asset_buttons = malloc((max_asset_buttons + 1) * sizeof(generic_button));
+    if (!asset_buttons) {
+        return;
+    }
+    for (int i = 0; i < max_asset_buttons; i++) {
+        generic_button *btn = &asset_buttons[i];
+        btn->x = 0;
+        btn->y = i * ASSET_BUTTON_SIZE;
+        btn->width = 13 * BLOCK_SIZE;
+        btn->height = ASSET_BUTTON_SIZE;
+        btn->left_click_handler = button_asset_entry;
+        btn->right_click_handler = button_none;
+        btn->parameter1 = i;
+        btn->parameter2 = 0;
+    }
+    generic_button *last_btn = &asset_buttons[max_asset_buttons];
+    last_btn->x = 0;
+    last_btn->y = asset_list_height + 8;
+    last_btn->width = 13 * BLOCK_SIZE;
+    last_btn->height = 20;
+    last_btn->left_click_handler = button_toggle_animation_frames;
+    last_btn->right_click_handler = button_none;
+    last_btn->parameter1 = 0;
+    last_btn->parameter2 = 0;
+
+    scrollbar.height = asset_list_height;
+    scrollbar.elements_in_view = max_asset_buttons;
+    scrollbar_update_total_elements(&scrollbar, data.total_entries);
+    scroll_to_index(scrollbar.scroll_position, 0);
+}
+
 static void load_assets(int changed)
 {
-    assets_load_single_group(data.xml_files->files[data.asset_group],
+    assets_load_single_group(data.xml_files->files[data.active_group_index],
         data.main_atlas->buffers, data.main_atlas->image_widths);
-    data.group = group_get_current();
-    calculate_viewable_images();
+    data.active_group = group_get_current();
+    update_entries();
     if (changed) {
         select_index(0);
+        set_max_asset_buttons();
     }
-    scrollbar_init(&scrollbar, 0, data.viewable_images);
+    scrollbar_init(&scrollbar, 0, data.total_entries);
 }
 
 static int load_climate(int force)
@@ -180,7 +230,7 @@ static int load_climate(int force)
             return 0;
         }
         data.main_atlas = graphics_renderer()->get_image_atlas(ATLAS_MAIN);
-        load_assets(0);
+        load_assets(force);
         data.climate = climate;
     }
 
@@ -211,58 +261,8 @@ static void get_asset_groups(void)
     data.terrain_texts[TERRAIN_DESERT] = lang_get_string(CUSTOM_TRANSLATION, TR_WINDOW_ASSET_PREVIEWER_TERRAIN_DESERT);
 }
 
-static void set_max_asset_buttons(void)
+static void create_zoom_selection_list(void)
 {
-    int asset_list_height = (screen_height() - 16 * BLOCK_SIZE) - screen_height() % BLOCK_SIZE;
-    int max_asset_buttons = asset_list_height / ASSET_BUTTON_SIZE;
-    if (data.max_asset_buttons == max_asset_buttons) {
-        return;
-    }
-    free(asset_buttons);
-    asset_buttons = malloc((max_asset_buttons + 1) * sizeof(generic_button));
-    if (!asset_buttons) {
-        return;
-    }
-    for (int i = 0; i < max_asset_buttons; i++) {
-        generic_button *btn = &asset_buttons[i];
-        btn->x = 0;
-        btn->y = i * ASSET_BUTTON_SIZE;
-        btn->width = 13 * BLOCK_SIZE;
-        btn->height = ASSET_BUTTON_SIZE;
-        btn->left_click_handler = button_asset;
-        btn->right_click_handler = button_none;
-        btn->parameter1 = i;
-        btn->parameter2 = 0;
-    }
-    generic_button *last_btn = &asset_buttons[max_asset_buttons];
-    last_btn->x = 0;
-    last_btn->y = asset_list_height + 8;
-    last_btn->width = 13 * BLOCK_SIZE;
-    last_btn->height = 20;
-    last_btn->left_click_handler = button_toggle_animation_frames;
-    last_btn->right_click_handler = button_none;
-    last_btn->parameter1 = 0;
-    last_btn->parameter2 = 0;
-
-    data.max_asset_buttons = max_asset_buttons;
-    scrollbar.height = asset_list_height;
-    scrollbar.elements_in_view = max_asset_buttons;
-    scrollbar_init(&scrollbar, 0, data.viewable_images);
-}
-
-static int init(void)
-{
-    get_asset_groups();
-
-    if (data.xml_files->num_files == 0) {
-        log_error("No asset files found", 0, 0);
-        return 0;
-    }
-    data.animation.enabled = 1;
-    data.hide_animation_frames = 1;
-    data.scale = 100;
-    random_generate_pool();
-    sound_music_play_editor();
     for (int i = 0; i < TOTAL_ZOOM_VALUES; i++) {
         if (data.zoom_texts[i]) {
             continue;
@@ -276,6 +276,28 @@ static int init(void)
         text[index + 1] = 0;
         data.zoom_texts[i] = text;
     }
+}
+
+static void set_initial_options(void)
+{
+    data.animation.enabled = 1;
+    data.animation.frame = 1;
+    data.hide_animation_frames = 1;
+    data.scale = 100;
+}
+
+static int init(void)
+{
+    get_asset_groups();
+
+    if (data.xml_files->num_files == 0) {
+        log_error("No asset files found", 0, 0);
+        return 0;
+    }
+    set_initial_options();
+    create_zoom_selection_list();
+    random_generate_pool();
+    sound_music_play_editor();
     return load_climate(1);
 }
 
@@ -299,110 +321,14 @@ static void draw_terrain_background(void)
     }
 }
 
-static void encode_asset_id(const char *id)
+static inline int get_current_asset_index(void)
 {
-    int size_needed = (int) strlen(id) + 1;
-    if (size_needed > data.encoded_asset_id_size) {
-        free(data.encoded_asset_id);
-        data.encoded_asset_id = malloc(size_needed * sizeof(uint8_t));
-        if (!data.encoded_asset_id) {
-            data.encoded_asset_id_size = 0;
-            return;
-        }
-        data.encoded_asset_id_size = size_needed;
-    }
-    encoding_from_utf8(id, data.encoded_asset_id, size_needed);
-}
-
-static void draw_asset_list(int x_offset, int y_offset)
-{
-    int outer_width_blocks = scrollbar.elements_in_view < data.viewable_images ? 18 : 16;
-    int outer_height_blocks = (screen_height() - y_offset - BLOCK_SIZE) / BLOCK_SIZE;
-
-    outer_panel_draw(x_offset, y_offset, outer_width_blocks, outer_height_blocks);
-    lang_text_draw(CUSTOM_TRANSLATION, TR_WINDOW_ASSET_PREVIEWER_ASSET,
-        x_offset + 24, y_offset + 16, FONT_NORMAL_BLACK);
-    scrollbar_draw(&scrollbar);
-    inner_panel_draw(x_offset + 16, y_offset + 32, 14, outer_height_blocks - 4);
-    if (!data.group || !data.viewable_images) {
-        text_draw_centered(string_from_ascii("No images"), x_offset + 16, y_offset + 32 +
-            ((outer_height_blocks - 3) * BLOCK_SIZE - 20) / 2, 14 * BLOCK_SIZE, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
-        return;
-    }
-    x_offset += 20;
-    y_offset += 24;
-    int images_in_list = data.viewable_images;
-    if (images_in_list > data.max_asset_buttons) {
-        images_in_list = data.max_asset_buttons;
-    }
-    for (int i = 0; i < images_in_list; i++) {
-        y_offset += ASSET_BUTTON_SIZE;
-        int current_index = i + scrollbar.scroll_position;
-        int current_image = data.entries[current_index].index;
-        font_t font = current_index == data.selected_index ? FONT_NORMAL_WHITE : FONT_NORMAL_GREEN;
-        if (i == (data.asset_button_id - 1)) {
-            button_border_draw(x_offset + 3, y_offset - 5, 13 * BLOCK_SIZE, ASSET_BUTTON_SIZE + 2, 1);
-        }
-        const asset_image *img = asset_image_get_from_id(data.group->first_image_index + current_image);
-        int width = text_draw_number(current_image + 1, '@', "", x_offset, y_offset, font, COLOR_MASK_NONE);
-        const uint8_t *asset_name;
-        if (img->id) {
-            encode_asset_id(img->id);
-            if (data.encoded_asset_id) {
-                asset_name = data.encoded_asset_id;
-            } else {
-                asset_name = lang_get_string(CUSTOM_TRANSLATION, TR_WINDOW_ASSET_PREVIEWER_UNNAMED_ASSET);
-            }
-        } else {
-            asset_name = lang_get_string(CUSTOM_TRANSLATION, data.entries[current_index].is_animation_frame ?
-                TR_WINDOW_ASSET_PREVIEWER_ANIMATION_FRAME : TR_WINDOW_ASSET_PREVIEWER_UNNAMED_ASSET);
-        }
-        width += text_draw(string_from_ascii("-"), x_offset + width, y_offset, font, COLOR_MASK_NONE);
-        text_draw_ellipsized(asset_name, x_offset + width, y_offset, 13 * BLOCK_SIZE - width,
-            font, COLOR_MASK_NONE);
-    }
-    const generic_button *last_btn = &asset_buttons[data.max_asset_buttons];
-    y_offset = 10 * BLOCK_SIZE + 42;
-    button_border_draw(x_offset, y_offset + last_btn->y, 20, 20, data.asset_button_id == data.max_asset_buttons + 1);
-    if (!data.hide_animation_frames) {
-        text_draw(string_from_ascii("x"), x_offset + 6, y_offset + last_btn->y + 3, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
-    }
-    lang_text_draw(CUSTOM_TRANSLATION, TR_WINDOW_ASSET_PREVIEWER_SHOW_ANIMATION_FRAMES,
-        x_offset + 28, y_offset + last_btn->y + 4, FONT_NORMAL_BLACK);
-}
-
-static void advance_animation_frame(const image *img)
-{
-    if (img->animation->can_reverse) {
-        if (data.animation.reversed) {
-            data.animation.frame--;
-            if (data.animation.frame < 1) {
-                data.animation.frame = 1;
-                data.animation.reversed = 0;
-            }
-        } else {
-            data.animation.frame++;
-            if (data.animation.frame > img->animation->num_sprites) {
-                data.animation.frame = img->animation->num_sprites;
-                data.animation.reversed = 1;
-            }
-        }
-    } else {
-        data.animation.frame++;
-        if (data.animation.frame > img->animation->num_sprites) {
-            data.animation.frame = 1;
-        }
-    }
-}
-
-static inline int get_current_asset_id(void)
-{
-    return data.entries[data.selected_index].index + data.group->first_image_index + IMAGE_MAIN_ENTRIES;
+    return data.entries[data.selected_index].index + data.active_group->first_image_index;
 }
 
 static void draw_asset(void)
 {
-    int image_id = get_current_asset_id();
+    int image_id = get_current_asset_index() + IMAGE_MAIN_ENTRIES;
     const image *img = image_get(image_id);
     int x_start = 18 * BLOCK_SIZE;
     int y_start = 12 * BLOCK_SIZE;
@@ -436,6 +362,10 @@ static void draw_background(void)
         draw_terrain_background();
     }
 
+    if (data.total_entries > 0) {
+        draw_asset();
+    }
+
     data.x_offset_top = (screen_width() - 39 * BLOCK_SIZE) / 2;
     set_max_asset_buttons();
 
@@ -444,7 +374,7 @@ static void draw_background(void)
         data.x_offset_top + 16, 24, 530, FONT_LARGE_BLACK);
 
     lang_text_draw(CUSTOM_TRANSLATION, TR_WINDOW_ASSET_PREVIEWER_GROUP, data.x_offset_top + 16, 69, FONT_NORMAL_BLACK);
-    text_draw_centered(data.xml_file_names[data.asset_group], data.x_offset_top + 16, 89, 180,
+    text_draw_centered(data.xml_file_names[data.active_group_index], data.x_offset_top + 16, 89, 180,
         FONT_NORMAL_BLACK, COLOR_MASK_NONE);
     lang_text_draw(CUSTOM_TRANSLATION, TR_WINDOW_ASSET_PREVIEWER_TERRAIN,
         data.x_offset_top + 216, 69, FONT_NORMAL_BLACK);
@@ -464,9 +394,102 @@ static void draw_background(void)
         data.x_offset_top + 546, 34, 80, FONT_NORMAL_BLACK);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_WINDOW_ASSET_PREVIEWER_QUIT,
         data.x_offset_top + 546, 79, 80, FONT_NORMAL_BLACK);
+}
 
-    if (data.viewable_images > 0) {
-        draw_asset();
+static void encode_asset_id(const char *id)
+{
+    int size_needed = (int) strlen(id) + 1;
+    if (size_needed > data.encoded_asset_id_size) {
+        free(data.encoded_asset_id);
+        data.encoded_asset_id = malloc(size_needed * sizeof(uint8_t));
+        if (!data.encoded_asset_id) {
+            data.encoded_asset_id_size = 0;
+            return;
+        }
+        data.encoded_asset_id_size = size_needed;
+    }
+    encoding_from_utf8(id, data.encoded_asset_id, size_needed);
+}
+
+static void draw_asset_list(int x_offset, int y_offset)
+{
+    int outer_width_blocks = scrollbar.elements_in_view < data.total_entries ? 18 : 16;
+    int outer_height_blocks = (screen_height() - y_offset - BLOCK_SIZE) / BLOCK_SIZE;
+
+    outer_panel_draw(x_offset, y_offset, outer_width_blocks, outer_height_blocks);
+    lang_text_draw(CUSTOM_TRANSLATION, TR_WINDOW_ASSET_PREVIEWER_ASSET,
+        x_offset + 24, y_offset + 16, FONT_NORMAL_BLACK);
+    scrollbar_draw(&scrollbar);
+    inner_panel_draw(x_offset + 16, y_offset + 32, 14, outer_height_blocks - 4);
+    if (!data.active_group || !data.total_entries) {
+        lang_text_draw_centered(CUSTOM_TRANSLATION, TR_WINDOW_ASSET_PREVIEWER_NO_IMAGES, x_offset + 16, y_offset + 32 +
+            ((outer_height_blocks - 3) * BLOCK_SIZE - 20) / 2, 14 * BLOCK_SIZE, FONT_NORMAL_GREEN);
+        return;
+    }
+    x_offset += 20;
+    y_offset += 24;
+    int images_in_list = data.total_entries;
+    if (images_in_list > scrollbar.elements_in_view) {
+        images_in_list = scrollbar.elements_in_view;
+    }
+    for (int i = 0; i < images_in_list; i++) {
+        y_offset += ASSET_BUTTON_SIZE;
+        int current_index = i + scrollbar.scroll_position;
+        int current_image = data.entries[current_index].index;
+        font_t font = current_index == data.selected_index ? FONT_NORMAL_WHITE : FONT_NORMAL_GREEN;
+        if (i == (data.asset_button_id - 1)) {
+            button_border_draw(x_offset + 3, y_offset - 5, 13 * BLOCK_SIZE, ASSET_BUTTON_SIZE + 2, 1);
+        }
+        const asset_image *img = asset_image_get_from_id(data.active_group->first_image_index + current_image);
+        int width = text_draw_number(current_image + 1, '@', "", x_offset, y_offset, font, COLOR_MASK_NONE);
+        const uint8_t *asset_name;
+        if (img->id) {
+            encode_asset_id(img->id);
+            if (data.encoded_asset_id) {
+                asset_name = data.encoded_asset_id;
+            } else {
+                asset_name = lang_get_string(CUSTOM_TRANSLATION, TR_WINDOW_ASSET_PREVIEWER_UNNAMED_ASSET);
+            }
+        } else {
+            asset_name = lang_get_string(CUSTOM_TRANSLATION, data.entries[current_index].is_animation_frame ?
+                TR_WINDOW_ASSET_PREVIEWER_ANIMATION_FRAME : TR_WINDOW_ASSET_PREVIEWER_UNNAMED_ASSET);
+        }
+        width += text_draw(string_from_ascii("-"), x_offset + width, y_offset, font, COLOR_MASK_NONE);
+        text_draw_ellipsized(asset_name, x_offset + width, y_offset, 13 * BLOCK_SIZE - width,
+            font, COLOR_MASK_NONE);
+    }
+    const generic_button *last_btn = &asset_buttons[scrollbar.elements_in_view];
+    y_offset = 10 * BLOCK_SIZE + 42;
+    button_border_draw(x_offset, y_offset + last_btn->y, 20, 20,
+        data.asset_button_id == scrollbar.elements_in_view + 1);
+    if (!data.hide_animation_frames) {
+        text_draw(string_from_ascii("x"), x_offset + 6, y_offset + last_btn->y + 3, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+    }
+    lang_text_draw(CUSTOM_TRANSLATION, TR_WINDOW_ASSET_PREVIEWER_SHOW_ANIMATION_FRAMES,
+        x_offset + 28, y_offset + last_btn->y + 4, FONT_NORMAL_BLACK);
+}
+
+static void advance_animation_frame(const image *img)
+{
+    if (img->animation->can_reverse) {
+        if (data.animation.reversed) {
+            data.animation.frame--;
+            if (data.animation.frame < 1) {
+                data.animation.frame = 1;
+                data.animation.reversed = 0;
+            }
+        } else {
+            data.animation.frame++;
+            if (data.animation.frame > img->animation->num_sprites) {
+                data.animation.frame = img->animation->num_sprites;
+                data.animation.reversed = 1;
+            }
+        }
+    } else {
+        data.animation.frame++;
+        if (data.animation.frame > img->animation->num_sprites) {
+            data.animation.frame = 1;
+        }
     }
 }
 
@@ -493,25 +516,13 @@ static void draw_foreground(void)
 
     draw_asset_list(8, 10 * BLOCK_SIZE);
 
-    int image_id = get_current_asset_id();
+    int image_id = get_current_asset_index() + IMAGE_MAIN_ENTRIES;
     const image *img = image_get(image_id);
     if (data.animation.enabled && img->animation) {
         if (game_animation_should_advance(img->animation->speed_id)) {
             advance_animation_frame(img);
             window_invalidate();
         }
-    }
-}
-
-static void scroll_to_index(int index, int force)
-{
-    if (index < scrollbar.scroll_position || force) {
-        scrollbar.scroll_position = index;
-    } else if (index >= scrollbar.scroll_position + scrollbar.elements_in_view) {
-        scrollbar.scroll_position = index - scrollbar.elements_in_view + 1;
-    }
-    if (scrollbar.scroll_position > scrollbar.max_scroll_position) {
-        scrollbar.scroll_position = scrollbar.max_scroll_position;
     }
 }
 
@@ -533,7 +544,7 @@ static void handle_arrow_keys(int direction)
             return;
     }
     int new_index = data.selected_index + delta;
-    if (new_index < 0 || new_index >= data.viewable_images) {
+    if (new_index < 0 || new_index >= data.total_entries) {
         return;
     }
     select_index(new_index);
@@ -549,7 +560,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
     if (!generic_buttons_handle_mouse(m, data.x_offset_top + 16, 60, buttons, NUM_BUTTONS, &data.focus_button_id)) {
         generic_buttons_handle_mouse(m, 28, 10 * BLOCK_SIZE + 42, asset_buttons,
-            data.max_asset_buttons + 1, &data.asset_button_id);
+            scrollbar.elements_in_view + 1, &data.asset_button_id);
     }
 }
 
@@ -562,7 +573,8 @@ static void get_tooltip(tooltip_context *c)
     int current_index = data.asset_button_id - 1 + scrollbar.scroll_position;
     font_t font = (current_index == data.selected_index - 1) ? FONT_NORMAL_WHITE : FONT_NORMAL_GREEN;
 
-    const asset_image *img = asset_image_get_from_id(data.group->first_image_index + data.entries[current_index].index);
+    const asset_image *img =
+        asset_image_get_from_id(data.active_group->first_image_index + data.entries[current_index].index);
     if (!img || !img->id) {
         return;
     }
@@ -575,15 +587,15 @@ static void get_tooltip(tooltip_context *c)
     base_width += text_get_width(string_from_ascii(" - "), font);
 
     if (text_width > 13 * BLOCK_SIZE - base_width) {
-        c->precomposed_text = string_from_ascii(img->id);
+        c->precomposed_text = data.encoded_asset_id;
         c->type = TOOLTIP_BUTTON;
     }
 }
 
 static void change_asset_group(int group)
 {
-    if (data.asset_group != group) {
-        data.asset_group = group;
+    if (data.active_group_index != group) {
+        data.active_group_index = group;
         load_assets(1);
         window_invalidate();
     }
@@ -608,13 +620,13 @@ static void set_zoom(int value)
     }
 }
 
-static void button_asset(int index, int param2)
+static void button_asset_entry(int index, int param2)
 {
-    if (!data.group) {
+    if (!data.active_group) {
         return;
     }
     index += scrollbar.scroll_position;
-    if (index == data.selected_index || index >= data.viewable_images) {
+    if (index == data.selected_index || index >= data.total_entries) {
         return;
     }
     select_index(index);
@@ -636,23 +648,24 @@ static void confirm_exit(int accepted, int checked)
 static void recalculate_selected_index(void)
 {
     if (data.selected_asset_id) {
-        if (data.selected_index < data.viewable_images) {
+        if (data.selected_index < data.total_entries) {
             const asset_image *img =
-                asset_image_get_from_id(data.group->first_image_index + data.entries[data.selected_index].index);
+                asset_image_get_from_id(get_current_asset_index());
             if (img->id && strcmp(data.selected_asset_id, img->id) == 0) {
                 return;
             }
         }
-        for (int i = 0; i < data.viewable_images; i++) {
-            const asset_image *img = asset_image_get_from_id(data.group->first_image_index + data.entries[i].index);
+        for (int i = 0; i < data.total_entries; i++) {
+            const asset_image *img =
+                asset_image_get_from_id(data.active_group->first_image_index + data.entries[i].index);
             if (img->id && strcmp(data.selected_asset_id, img->id) == 0) {
                 select_index(i);
                 return;
             }
         }
     }
-    if (data.selected_index >= data.viewable_images) {
-        select_index(data.viewable_images - 1);
+    if (data.selected_index >= data.total_entries) {
+        select_index(data.total_entries - 1);
     } else {
         select_index(data.selected_index);
     }
@@ -664,13 +677,13 @@ static void refresh_window(void)
     load_assets(0);
     recalculate_selected_index();
     window_invalidate();
-    for (int i = 0; i < data.viewable_images; i++) {
+    for (int i = 0; i < data.total_entries; i++) {
         if (data.entries[i].index == asset_index) {
             scroll_to_index(i, 1);
             return;
         }
     }
-    scroll_to_index(data.viewable_images, 1);
+    scroll_to_index(data.total_entries, 1);
 }
 
 static void button_top(int option, int param2)
@@ -720,24 +733,19 @@ static void button_toggle_animation_frames(int param1, int param2)
             }
         }
     }
-    calculate_viewable_images();
-    scrollbar_init(&scrollbar, 0, data.viewable_images);
+    update_entries();
+    scrollbar_update_total_elements(&scrollbar, data.total_entries);
     recalculate_selected_index();
     window_invalidate();
 
-    for (int i = 0; i < data.viewable_images; i++) {
+    for (int i = 0; i < data.total_entries; i++) {
         if (data.entries[i].index == asset_index ||
             (is_animation_frame && data.hide_animation_frames && data.entries[i].index > asset_index)) {
             scroll_to_index(i, 1);
             return;
         }
     }
-    scroll_to_index(data.viewable_images, 1);
-}
-
-static void on_scroll(void)
-{
-    window_invalidate();
+    scroll_to_index(data.total_entries, 1);
 }
 
 int window_asset_previewer_show(void)
