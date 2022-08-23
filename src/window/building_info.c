@@ -154,6 +154,7 @@ static int get_height_id(void)
             case BUILDING_HEDGE_GATE_DARK:
             case BUILDING_HEDGE_GATE_LIGHT:
             case BUILDING_PALISADE_GATE:
+            case BUILDING_GLADIATOR_STATUE:
                 return 1;
 
             case BUILDING_SENATE:
@@ -684,7 +685,8 @@ static void draw_background(void)
             btype == BUILDING_SMALL_STATUE_ALT_B ||
             btype == BUILDING_LEGION_STATUE ||
             btype == BUILDING_DECORATIVE_COLUMN ||
-            btype == BUILDING_HORSE_STATUE) {
+            btype == BUILDING_HORSE_STATUE ||
+            btype == BUILDING_GLADIATOR_STATUE) {
             window_building_draw_statue(&context);
         } else if (btype == BUILDING_LARGE_STATUE) {
             window_building_draw_large_statue(&context);
@@ -993,6 +995,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
 static void get_tooltip(tooltip_context *c)
 {
     int text_id = 0, group_id = 0, translation = 0;
+    const uint8_t *precomposed_text = 0;
     building *b = building_get(context.building_id);
     int btype = b->type;
     if (focus_image_button_id) {
@@ -1021,19 +1024,22 @@ static void get_tooltip(tooltip_context *c)
         window_building_granary_get_tooltip_distribution_permissions(&translation);
     } else if (btype == BUILDING_WAREHOUSE) {
         window_building_warehouse_get_tooltip_distribution_permissions(&translation);
+    } else if (btype == BUILDING_DOCK) {
+        precomposed_text = window_building_dock_get_tooltip(&context);        
     }
     if (!text_id && !group_id && !translation) {
         if (btype >= BUILDING_WHEAT_FARM && btype <= BUILDING_POTTERY_WORKSHOP) {
             window_building_industry_get_tooltip(&context, &translation);
         }
     }
-    if (text_id || group_id || translation) {
+    if (text_id || group_id || translation || precomposed_text) {
         c->type = TOOLTIP_BUTTON;
         c->text_id = text_id;
         c->translation_key = translation;
         if (group_id) {
             c->text_group = group_id;
         }
+        c->precomposed_text = precomposed_text;
     }
 }
 

@@ -8,6 +8,7 @@ typedef struct {
     // fixed keys with multiple functions
     int enter_pressed;
     int escape_pressed;
+    int f5_pressed;
     // keys with specific function
     int cycle_legion;
     int decrease_game_speed;
@@ -43,6 +44,7 @@ void hotkey_reset_state(void);
 
 void hotkey_key_pressed(key_type key, key_modifier_type modifiers, int repeat);
 void hotkey_key_released(key_type key, key_modifier_type modifiers);
+int hotkey_shift_pressed(void);
 
 void hotkey_set_value_for_action(hotkey_action action, int value);
 

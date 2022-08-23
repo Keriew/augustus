@@ -112,12 +112,8 @@ static void draw_foreground(void)
     widget_sidebar_city_draw_foreground();
     if (window_is(WINDOW_CITY) || window_is(WINDOW_CITY_MILITARY)) {
         draw_time_left();
-        if (mouse_get()->is_touch) {
-            widget_city_draw_touch_buttons();
-            if (sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED)) {
-                draw_paused_banner();
-            }
-        } else {
+        widget_city_draw_construction_buttons();
+        if (!mouse_get()->is_touch || sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED)) {
             draw_paused_banner();
         }
     }
@@ -137,9 +133,8 @@ static void draw_foreground_military(void)
         widget_sidebar_city_draw_foreground();
     }
     draw_time_left();
-    if (mouse_get()->is_touch) {
-        widget_city_draw_touch_buttons();
-    } else {
+    widget_city_draw_construction_buttons();
+    if (!mouse_get()->is_touch || sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED)) {
         draw_paused_banner();
     }
 }
@@ -344,6 +339,7 @@ static void show_overlay_from_grid_offset(int grid_offset)
         case BUILDING_PLUM_PATH:
         case BUILDING_PALM_PATH:
         case BUILDING_DATE_PATH:
+        case BUILDING_GARDEN_PATH:
         case BUILDING_PAVILION_BLUE:
         case BUILDING_PAVILION_RED:
         case BUILDING_PAVILION_ORANGE:
@@ -352,6 +348,9 @@ static void show_overlay_from_grid_offset(int grid_offset)
         case BUILDING_SMALL_STATUE_ALT:
         case BUILDING_SMALL_STATUE_ALT_B:
         case BUILDING_OBELISK:
+        case BUILDING_HORSE_STATUE:
+        case BUILDING_LEGION_STATUE:
+        case BUILDING_GLADIATOR_STATUE:
             overlay = OVERLAY_DESIRABILITY;
             break;
         case BUILDING_MISSION_POST:
@@ -439,6 +438,9 @@ static void handle_hotkeys(const hotkeys *h)
     if (h->show_overlay) {
         show_overlay(h->show_overlay);
     }
+    if (h->show_overlay_relative) {
+        show_overlay_from_grid_offset(widget_city_current_grid_offset());
+    }
     if (h->toggle_overlay) {
         exit_military_command();
         game_state_toggle_overlay();
@@ -452,16 +454,22 @@ static void handle_hotkeys(const hotkeys *h)
         cycle_legion();
     }
     if (h->rotate_map_left) {
-        game_orientation_rotate_left();
-        window_invalidate();
+        if (!building_construction_in_progress()) {
+            game_orientation_rotate_left();
+            window_invalidate();
+        }
     }
     if (h->rotate_map_right) {
-        game_orientation_rotate_right();
-        window_invalidate();
+        if (!building_construction_in_progress()) {
+            game_orientation_rotate_right();
+            window_invalidate();
+        }
     }
     if (h->rotate_map_north) {
-        game_orientation_rotate_north();
-        window_invalidate();
+        if (!building_construction_in_progress()) {
+            game_orientation_rotate_north();
+            window_invalidate();
+        }
     }
     if (h->go_to_bookmark) {
         if (map_bookmark_go_to(h->go_to_bookmark - 1)) {
@@ -510,21 +518,14 @@ static void handle_hotkeys(const hotkeys *h)
             building_data_transfer_paste(b);
         }
     }
-
-    if (h->show_overlay_relative) {
-        show_overlay_from_grid_offset(widget_city_current_grid_offset());
-    }
-
     if (h->show_empire_map) {
         if (!window_is(WINDOW_EMPIRE)) {
             window_empire_show_checked();
         }
     }
-
     if (h->show_messages) {
         window_message_list_show();
     }
-
 }
 
 static void handle_input(const mouse *m, const hotkeys *h)

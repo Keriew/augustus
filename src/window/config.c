@@ -212,6 +212,7 @@ static config_widget all_widgets[CONFIG_PAGES][MAX_WIDGETS] = {
         {TYPE_CHECKBOX, CONFIG_UI_MESSAGE_ALERTS, TR_CONFIG_UI_MESSAGE_ALERTS},
         {TYPE_CHECKBOX, CONFIG_UI_SHOW_GRID, TR_CONFIG_UI_SHOW_GRID},
         {TYPE_CHECKBOX, CONFIG_UI_SHOW_PARTIAL_GRID_AROUND_CONSTRUCTION, TR_CONFIG_UI_SHOW_PARTIAL_GRID_AROUND_CONSTRUCTION},
+        {TYPE_CHECKBOX, CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS, TR_CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS},        
     },
     { // Difficulty
         {TYPE_NUMERICAL_DESC, RANGE_DIFFICULTY, TR_CONFIG_DIFFICULTY},
@@ -961,7 +962,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         return;
     }
 
-    if (scrollbar_handle_mouse(&scrollbar, m_dialog)) {
+    if (scrollbar_handle_mouse(&scrollbar, m_dialog, 1)) {
         data.page_focus_button = 0;
         data.bottom_focus_button = 0;
         return;
@@ -979,6 +980,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
             }
         } else if (w->type == TYPE_SELECT) {
             generic_button *btn = &select_buttons[w->subtype];
+            btn->parameter1 = y + w->y_offset;
             int focus = 0;
             handled |= generic_buttons_handle_mouse(m_dialog, 0, y + w->y_offset, btn, 1, &focus);
             if (focus) {
@@ -1023,12 +1025,12 @@ static void button_hotkeys(int param1, int param2)
     window_hotkey_config_show();
 }
 
-static void button_language_select(int param1, int param2)
+static void button_language_select(int height, int param2)
 {
     const generic_button *btn = &select_buttons[SELECT_LANGUAGE];
     window_select_list_show_text(
-        screen_dialog_offset_x() + btn->x + btn->width - 10,
-        screen_dialog_offset_y() + 45,
+        screen_dialog_offset_x() + btn->x,
+        screen_dialog_offset_y() + height + btn->height,
         data.language_options, data.num_language_options, set_language
     );
 }

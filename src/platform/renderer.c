@@ -6,6 +6,7 @@
 #include "graphics/renderer.h"
 #include "graphics/screen.h"
 #include "platform/cursor.h"
+#include "platform/emscripten/emscripten.h"
 #include "platform/haiku/haiku.h"
 #include "platform/platform.h"
 #include "platform/screen.h"
@@ -39,10 +40,11 @@
 
 #define MAX_PACKED_IMAGE_SIZE 64000
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__EMSCRIPTEN__)
 // On the arm versions of android, for some reason, atlas textures that are too large will make the renderer fetch
 // some images from the atlas with an off-by-one pixel, making things look terrible. Defining a smaller atlas texture
 // prevents the problem, at the cost of performance due to the extra texture context switching.
+// This also happens on emscripten for android, hence the emscripten inclusion.
 #define MAX_TEXTURE_SIZE 1024
 #endif
 
@@ -74,7 +76,6 @@ static struct {
             int x, y;
         } hotspot;
     } cursors[CURSOR_MAX];
-
     SDL_Texture **texture_lists[ATLAS_MAX];
     image_atlas_data atlas_data[ATLAS_MAX];
     struct {
@@ -99,6 +100,8 @@ static struct {
     graphics_renderer_interface renderer_interface;
     int supports_yuv_textures;
     float city_scale;
+    int should_correct_texture_offset;
+    int disable_linear_filter;
 } data;
 
 static int save_screen_buffer(color_t *pixels, int x, int y, int width, int height, int row_width)
@@ -107,7 +110,8 @@ static int save_screen_buffer(color_t *pixels, int x, int y, int width, int heig
         return 0;
     }
     SDL_Rect rect = { x, y, width, height };
-    return SDL_RenderReadPixels(data.renderer, &rect, SDL_PIXELFORMAT_ARGB8888, pixels, row_width * sizeof(color_t)) == 0;
+    return SDL_RenderReadPixels(data.renderer, &rect, SDL_PIXELFORMAT_ARGB8888, pixels,
+        row_width * sizeof(color_t)) == 0;
 }
 
 static void draw_line(int x_start, int x_end, int y_start, int y_end, color_t color)
@@ -191,7 +195,7 @@ static void clear_screen(void)
     if (data.paused) {
         return;
     }
-    SDL_SetRenderDrawColor(data.renderer, 0, 0, 0, 0xff);
+    SDL_SetRenderDrawColor(data.renderer, 0, 0, 0, 0);
     SDL_RenderClear(data.renderer);
 }
 
@@ -199,6 +203,16 @@ static void get_max_image_size(int *width, int *height)
 {
     *width = data.max_texture_size.width;
     *height = data.max_texture_size.height;
+}
+
+static void free_unpacked_assets(void)
+{
+    for (int i = 0; i < MAX_UNPACKED_IMAGES; i++) {
+        if (data.unpacked_images[i].texture) {
+            SDL_DestroyTexture(data.unpacked_images[i].texture);
+        }
+    }
+    memset(data.unpacked_images, 0, sizeof(data.unpacked_images));
 }
 
 static void free_texture_atlas(atlas_type type)
@@ -214,6 +228,10 @@ static void free_texture_atlas(atlas_type type)
         }
     }
     free(list);
+
+    if (type == ATLAS_EXTRA_ASSET) {
+        free_unpacked_assets();
+    }
 }
 
 static void free_atlas_data_buffers(atlas_type type)
@@ -304,7 +322,7 @@ static const image_atlas_data *prepare_texture_atlas(atlas_type type, int num_im
     return atlas_data;
 }
 
-static int create_texture_atlas(const image_atlas_data *atlas_data)
+static int create_texture_atlas(const image_atlas_data *atlas_data, int delete_buffers)
 {
     if (!atlas_data || atlas_data != &data.atlas_data[atlas_data->type] || !atlas_data->num_images) {
         return 0;
@@ -330,14 +348,17 @@ static int create_texture_atlas(const image_atlas_data *atlas_data)
             32, atlas_data->image_widths[i] * sizeof(color_t),
             COLOR_CHANNEL_RED, COLOR_CHANNEL_GREEN, COLOR_CHANNEL_BLUE, COLOR_CHANNEL_ALPHA);
         if (!surface) {
-            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unable to create surface for texture. Reason: %s", SDL_GetError());
+            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unable to create surface for texture. Reason: %s",
+                SDL_GetError());
             free_texture_atlas(atlas_data->type);
             return 0;
         }
         list[i] = SDL_CreateTextureFromSurface(data.renderer, surface);
         SDL_FreeSurface(surface);
-        free(atlas_data->buffers[i]);
-        atlas_data->buffers[i] = 0;
+        if (delete_buffers) {
+            free(atlas_data->buffers[i]);
+            atlas_data->buffers[i] = 0;
+        }
         if (!list[i]) {
             SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unable to create texture. Reason: %s", SDL_GetError());
             free_texture_atlas(atlas_data->type);
@@ -346,13 +367,23 @@ static int create_texture_atlas(const image_atlas_data *atlas_data)
         SDL_SetTextureBlendMode(list[i], SDL_BLENDMODE_BLEND);
     }
 #endif
-    free_atlas_data_buffers(atlas_data->type);
+    if (delete_buffers) {
+        free_atlas_data_buffers(atlas_data->type);
+    }
     return 1;
 }
 
 static int has_texture_atlas(atlas_type type)
 {
     return data.texture_lists[type] != 0;
+}
+
+static const image_atlas_data *get_texture_atlas(atlas_type type)
+{
+    if (!has_texture_atlas(type)) {
+        return 0;
+    }
+    return &data.atlas_data[type];
 }
 
 static void free_all_textures(void)
@@ -382,13 +413,6 @@ static void free_all_textures(void)
     data.texture_buffers.first = 0;
     data.texture_buffers.last = 0;
     data.texture_buffers.current_id = 0;
-
-    for (int i = 0; i < MAX_UNPACKED_IMAGES; i++) {
-        if (data.unpacked_images[i].texture) {
-            SDL_DestroyTexture(data.unpacked_images[i].texture);
-        }
-    }
-    memset(data.unpacked_images, 0, sizeof(data.unpacked_images));
 }
 
 static SDL_Texture *get_texture(int texture_id)
@@ -427,9 +451,13 @@ static void set_texture_color_and_scale_mode(SDL_Texture *texture, color_t color
     }
     SDL_ScaleMode current_scale_mode;
     SDL_GetTextureScaleMode(texture, &current_scale_mode);
-    SDL_ScaleMode city_scale_mode = data.city_scale > 2.0f ? SDL_ScaleModeLinear : SDL_ScaleModeNearest;
+
+    SDL_ScaleMode city_scale_mode = SDL_ScaleModeNearest;
     SDL_ScaleMode texture_scale_mode = scale != 1.0f ? SDL_ScaleModeLinear : SDL_ScaleModeNearest;
     SDL_ScaleMode desired_scale_mode = data.city_scale == scale ? city_scale_mode : texture_scale_mode;
+    if (data.disable_linear_filter) {
+        desired_scale_mode = SDL_ScaleModeNearest;
+    }
     if (current_scale_mode != desired_scale_mode) {
         SDL_SetTextureScaleMode(texture, desired_scale_mode);
     }
@@ -455,24 +483,15 @@ static void draw_texture(const image *img, int x, int y, color_t color, float sc
     x += img->x_offset;
     y += img->y_offset;
 
-    // The renderer draws the textures off-by-one when "scale * 100" is a multiple of 8, this fixes that rendering bug
-    // by properly offseting the textures
-    int src_correction = (((int) (scale * 100)) % 8) == 0 ? 1 : 0;
-
-    // On Android, when linear filtering is enabled, the src coordinates become incorrect, causing a visual glitch
-#ifdef __ANDROID__
-    if (data.city_scale > 2.0f) {
-        src_correction = 1;
-    }
-#endif
+    int src_correction = scale == data.city_scale && data.should_correct_texture_offset ? 1 : 0;
 
     SDL_Rect src_coords = { img->atlas.x_offset + src_correction, img->atlas.y_offset + src_correction,
         img->width - src_correction, img->height - src_correction };
 
     // When zooming out, instead of drawing the grid image, we reduce the isometric textures' size,
     // which ends up simulating a grid without any performance penalty
-    int grid_correction = (img->is_isometric && config_get(CONFIG_UI_SHOW_GRID) && data.city_scale > 2.0f) ? 2 : 0;
-
+    int grid_correction = (img->is_isometric && config_get(CONFIG_UI_SHOW_GRID) && data.city_scale > 2.0f) ?
+        2 : -src_correction;
 
 #ifdef USE_RENDERCOPYF
     if (HAS_RENDERCOPYF) {
@@ -731,7 +750,7 @@ static void create_blend_texture(custom_image_type type)
     data.custom_textures[type].img.atlas.id = (ATLAS_CUSTOM << IMAGE_ATLAS_BIT_OFFSET) | type;
 }
 
-static void draw_custom_texture(custom_image_type type, int x, int y, float scale)
+static void draw_custom_texture(custom_image_type type, int x, int y, float scale, int disable_filtering)
 {
     if (data.paused) {
         return;
@@ -741,7 +760,9 @@ static void draw_custom_texture(custom_image_type type, int x, int y, float scal
             create_blend_texture(type);
         }
     }
+    data.disable_linear_filter = disable_filtering;
     draw_texture(&data.custom_textures[type].img, x, y, 0, scale);
+    data.disable_linear_filter = 0;
 }
 
 static int has_custom_texture(custom_image_type type)
@@ -817,11 +838,12 @@ static int should_pack_image(int width, int height)
     return width * height < MAX_PACKED_IMAGE_SIZE;
 }
 
-static void update_scale_mode(int city_scale)
+static void update_scale(int city_scale)
 {
-#ifdef USE_TEXTURE_SCALE_MODE
+    // The renderer draws the textures off-by-one when "scale * 100" is a multiple of 8, or when zooming out enough,
+    // this fixes that rendering bug by properly offseting the textures
+    data.should_correct_texture_offset = (city_scale > 250 && (city_scale % 100) != 0) || (city_scale % 8) == 0;
     data.city_scale = city_scale / 100.0f;
-#endif
 }
 
 static int supports_yuv_texture(void)
@@ -854,11 +876,12 @@ static void create_renderer_interface(void)
     data.renderer_interface.get_max_image_size = get_max_image_size;
     data.renderer_interface.prepare_image_atlas = prepare_texture_atlas;
     data.renderer_interface.create_image_atlas = create_texture_atlas;
+    data.renderer_interface.get_image_atlas = get_texture_atlas;
     data.renderer_interface.has_image_atlas = has_texture_atlas;
     data.renderer_interface.free_image_atlas = free_texture_atlas_and_data;
     data.renderer_interface.load_unpacked_image = load_unpacked_image;
     data.renderer_interface.should_pack_image = should_pack_image;
-    data.renderer_interface.update_scale_mode = update_scale_mode;
+    data.renderer_interface.update_scale = update_scale;
 
     graphics_renderer_set_interface(&data.renderer_interface);
 }
@@ -902,14 +925,21 @@ int platform_renderer_init(SDL_Window *window)
         data.max_texture_size.height = info.max_texture_height;
     }
     data.paused = 0;
-
+   
 #ifdef MAX_TEXTURE_SIZE
-    if (data.max_texture_size.width > MAX_TEXTURE_SIZE) {
-        data.max_texture_size.width = MAX_TEXTURE_SIZE;
+#ifdef __EMSCRIPTEN__
+    int is_android = EM_ASM_INT(return navigator.userAgent.toLowerCase().indexOf("android") > -1);
+    if (is_android) {
+#endif
+        if (data.max_texture_size.width > MAX_TEXTURE_SIZE) {
+            data.max_texture_size.width = MAX_TEXTURE_SIZE;
+        }
+        if (data.max_texture_size.height > MAX_TEXTURE_SIZE) {
+            data.max_texture_size.height = MAX_TEXTURE_SIZE;
+        }
+#ifdef __EMSCRIPTEN__
     }
-    if (data.max_texture_size.height > MAX_TEXTURE_SIZE) {
-        data.max_texture_size.height = MAX_TEXTURE_SIZE;
-    }
+#endif
 #endif
 
     SDL_SetRenderDrawColor(data.renderer, 0, 0, 0, 0xff);

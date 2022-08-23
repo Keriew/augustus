@@ -281,6 +281,14 @@ void load_custom_messages(void)
     m->video.text = (uint8_t *) "smk/Emp_send_army.smk";
     m->urgent = 1;
     i += 1;
+
+    m = &data.message_entries[i];
+    set_message_parameters(m, TR_CITY_MESSAGE_TITLE_MARS_MINOR_CURSE_PREVENTED, TR_CITY_MESSAGE_TEXT_MARS_MINOR_CURSE_PREVENTED, 1, MESSAGE_TYPE_GENERAL);
+    i += 1;
+
+    m = &data.message_entries[i];
+    set_message_parameters(m, TR_CITY_MESSAGE_TITLE_ENEMIES_LEAVING, TR_CITY_MESSAGE_TEXT_ENEMIES_LEAVING, 1, MESSAGE_TYPE_GENERAL);
+    i += 1;
 }
 
 
@@ -489,6 +497,8 @@ const uint8_t *lang_get_string(int group, int index)
                 return translation_for(TR_BUILDING_GARDEN_WALL_GATE);
             case BUILDING_PALISADE:
                 return translation_for(TR_BUILDING_PALISADE);
+            case BUILDING_GLADIATOR_STATUE:
+                return translation_for(TR_BUILDING_GLADIATOR_STATUE);
             default:
                 break;
         }

@@ -82,22 +82,29 @@ static const char *ini_keys[] = {
     "resize_to_1024",
     "save_screenshot",
     "save_city_screenshot",
+    "save_minimap_screenshot",
     "clone_building",
     "copy_building_settings",
     "paste_building_settings",
     "undo",
     "show_overlay_food_stocks",
     "show_overlay_entertainment",
+    "show_overlay_education",
     "show_overlay_school",
     "show_overlay_library",
     "show_overlay_academy",
     "show_overlay_barber",
     "show_overlay_bathhouse",
     "show_overlay_clinic",
+    "show_overlay_hospital",
     "show_overlay_sickness",
     "show_overlay_tax_income",
+    "show_overlay_desirability",
+    "show_overlay_sentiment",
+    "show_overlay_mothball",
     "show_overlay_religion",
     "show_overlay_roads",
+    "show_overlay_levy",
     "rotate_map_north",
     "build_wheat_farm",
     "show_empire_map",
@@ -204,6 +211,7 @@ static void init_defaults(void)
     set_mapping(KEY_TYPE_F12, KEY_MOD_NONE, HOTKEY_SAVE_SCREENSHOT);
     set_mapping(KEY_TYPE_F12, KEY_MOD_ALT, HOTKEY_SAVE_SCREENSHOT); // mac specific
     set_mapping(KEY_TYPE_F12, KEY_MOD_CTRL, HOTKEY_SAVE_CITY_SCREENSHOT);
+    set_mapping(KEY_TYPE_F12, KEY_MOD_SHIFT, HOTKEY_SAVE_MINIMAP_SCREENSHOT);
 }
 
 const hotkey_mapping *hotkey_for_action(hotkey_action action, int index)

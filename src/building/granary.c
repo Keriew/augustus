@@ -85,6 +85,7 @@ int building_granary_is_gettable(int resource, building *b)
         return 0;
     }
 }
+
 int building_granary_is_not_accepting(int resource, building *b)
 {
     return !((building_granary_is_accepting(resource, b) || building_granary_is_getting(resource, b)));
@@ -234,6 +235,32 @@ int building_granaries_send_resources_to_rome(int resource, int amount)
     return amount;
 }
 
+static int maximum_receptible_amount(int resource, building *b)
+{
+    if (b->has_plague) {
+        return 0;
+    }
+    int stored_amount = b->data.granary.resource_stored[resource];
+    int max_amount;
+    switch (building_storage_get(b->storage_id)->resource_state[resource]) {
+        case BUILDING_STORAGE_STATE_GETTING:
+            max_amount = FULL_GRANARY;
+            break;
+        case BUILDING_STORAGE_STATE_GETTING_3QUARTERS:
+            max_amount = THREEQUARTERS_GRANARY;
+            break;
+        case BUILDING_STORAGE_STATE_GETTING_HALF:
+            max_amount = HALF_GRANARY;
+            break;
+        case BUILDING_STORAGE_STATE_GETTING_QUARTER:
+            max_amount = QUARTER_GRANARY;
+            break;
+        default:
+            return 0;
+    }
+    return (max_amount > stored_amount) ? (max_amount - stored_amount) : 0;
+}
+
 int building_granary_remove_for_getting_deliveryman(building *src, building *dst, int *resource)
 {
     int max_amount = 0;
@@ -274,6 +301,10 @@ int building_granary_remove_for_getting_deliveryman(building *src, building *dst
     }
     if (max_amount > dst->data.granary.resource_stored[RESOURCE_NONE]) {
         max_amount = dst->data.granary.resource_stored[RESOURCE_NONE];
+    }
+    const int receptible_amount = maximum_receptible_amount(max_resource, dst);
+    if (max_amount > receptible_amount) {
+        max_amount = receptible_amount;
     }
     building_granary_remove_resource(src, max_resource, max_amount);
     *resource = max_resource;

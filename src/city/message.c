@@ -206,7 +206,7 @@ void city_message_post(int use_popup, int message_type, int param1, int param2)
     }
 
     if (config_get(CONFIG_UI_MESSAGE_ALERTS)) {
-        city_warning_show_console(lang_get_message(text_id)->title.text);
+        city_warning_show_custom(lang_get_message(text_id)->title.text, NEW_WARNING_SLOT);
         use_popup = 0;
     }
     if (is_invasion_message(msg->message_type) && setting_game_speed() > 70) {
@@ -424,6 +424,7 @@ message_advisor city_message_get_advisor(city_message_type message_type)
         case MESSAGE_LOCAL_UPRISING_MARS:
         case MESSAGE_GRAND_TEMPLE_COMPLETE:
         case MESSAGE_PANTHEON_COMPLETE:
+        case MESSAGE_WRATH_OF_MARS_NO_NATIVES:
             return MESSAGE_ADVISOR_RELIGION;
 
         case MESSAGE_INCREASED_TRADING:

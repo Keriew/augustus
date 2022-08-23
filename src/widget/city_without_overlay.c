@@ -120,59 +120,60 @@ static void draw_footprint(int x, int y, int grid_offset)
 {
     sound_city_progress_ambient();
     building_construction_record_view_position(x, y, grid_offset);
-    if (grid_offset >= 0 && map_property_is_draw_tile(grid_offset)) {
-        // Valid grid_offset and leftmost tile -> draw
-        int building_id = map_building_at(grid_offset);
-        color_t color_mask = 0;
-        if (building_id) {
-            building *b = building_get(building_id);
-            if (draw_building_as_deleted(b)) {
-                color_mask = COLOR_MASK_RED;
+    if (grid_offset < 0 || !map_property_is_draw_tile(grid_offset)) {
+        return;
+    }
+    // Valid grid_offset and leftmost tile -> draw
+    int building_id = map_building_at(grid_offset);
+    color_t color_mask = 0;
+    if (building_id) {
+        building *b = building_get(building_id);
+        if (draw_building_as_deleted(b)) {
+            color_mask = COLOR_MASK_RED;
+        }
+        int view_x, view_y, view_width, view_height;
+        city_view_get_viewport(&view_x, &view_y, &view_width, &view_height);
+
+        if (b->state == BUILDING_STATE_IN_USE) {
+            int direction;
+            if (x < view_x + 100) {
+                direction = SOUND_DIRECTION_LEFT;
+            } else if (x > view_x + view_width - 100) {
+                direction = SOUND_DIRECTION_RIGHT;
+            } else {
+                direction = SOUND_DIRECTION_CENTER;
             }
-            int view_x, view_y, view_width, view_height;
-            city_view_get_viewport(&view_x, &view_y, &view_width, &view_height);
-            
-            if (b->state == BUILDING_STATE_IN_USE) {
-                int direction;
-                if (x < view_x + 100) {
-                    direction = SOUND_DIRECTION_LEFT;
-                } else if (x > view_x + view_width - 100) {
-                    direction = SOUND_DIRECTION_RIGHT;
-                } else {
-                    direction = SOUND_DIRECTION_CENTER;
-                }
-                if (building_monument_is_unfinished_monument(b)) {
-                    sound_city_mark_construction_site_view(direction);
-                } else {
-                    sound_city_mark_building_view(b->type, b->num_workers, direction);
-                }
+            if (building_monument_is_unfinished_monument(b)) {
+                sound_city_mark_construction_site_view(direction);
+            } else {
+                sound_city_mark_building_view(b->type, b->num_workers, direction);
             }
         }
-        if (map_terrain_is(grid_offset, TERRAIN_GARDEN)) {
-            sound_city_mark_building_view(BUILDING_GARDENS, 0, SOUND_DIRECTION_CENTER);
+    }
+    if (map_terrain_is(grid_offset, TERRAIN_GARDEN)) {
+        sound_city_mark_building_view(BUILDING_GARDENS, 0, SOUND_DIRECTION_CENTER);
+    }
+    int image_id = map_image_at(grid_offset);
+    if (map_property_is_constructing(grid_offset)) { //&&
+        //  !building_is_connectable(building_construction_type())) {
+        image_id = image_group(GROUP_TERRAIN_OVERLAY);
+    }
+    if (draw_context.advance_water_animation &&
+        image_id >= draw_context.image_id_water_first &&
+        image_id <= draw_context.image_id_water_last) {
+        image_id++;
+        if (image_id > draw_context.image_id_water_last) {
+            image_id = draw_context.image_id_water_first;
         }
-        int image_id = map_image_at(grid_offset);
-        if (map_property_is_constructing(grid_offset)) { //&&
-          //  !building_is_connectable(building_construction_type())) {
-            image_id = image_group(GROUP_TERRAIN_OVERLAY);
+        map_image_set(grid_offset, image_id);
+    }
+    image_draw_isometric_footprint_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
+    if (!building_id && config_get(CONFIG_UI_SHOW_GRID) && draw_context.scale <= 2.0f) {
+        static int grid_id = 0;
+        if (!grid_id) {
+            grid_id = assets_get_image_id("UI", "Grid_Full");
         }
-        if (draw_context.advance_water_animation &&
-            image_id >= draw_context.image_id_water_first &&
-            image_id <= draw_context.image_id_water_last) {
-            image_id++;
-            if (image_id > draw_context.image_id_water_last) {
-                image_id = draw_context.image_id_water_first;
-            }
-            map_image_set(grid_offset, image_id);
-        }
-        image_draw_isometric_footprint_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
-        if (!building_id && config_get(CONFIG_UI_SHOW_GRID) && draw_context.scale <= 2.0f) {
-            static int grid_id = 0;
-            if (!grid_id) {
-                grid_id = assets_get_image_id("UI", "Grid_Full");
-            }
-            image_draw(grid_id, x, y, COLOR_GRID, draw_context.scale);
-        }
+        image_draw(grid_id, x, y, COLOR_GRID, draw_context.scale);
     }
 }
 
@@ -366,13 +367,33 @@ static void draw_fumigation(building *b, int x, int y, color_t color_mask)
     building_animation_advance_fumigation(b);
 }
 
+static void get_plague_icon_position_for_house(building *b, int *x, int *y, int is_fumigating)
+{
+    const image *img = image_get(building_image_get(b));
+    int icon_id = is_fumigating ? image_group(GROUP_FIGURE_EXPLOSION) + 3 : image_group(GROUP_PLAGUE_SKULL);
+
+    *x = (img->width - image_get(icon_id)->width) / 2;
+    *y = -image_get(icon_id)->height / 2;
+
+    if (img->top) {
+        *y -= img->top->original.height;
+    }
+}
+
 static void draw_plague(building *b, int x, int y, color_t color_mask)
 {
     int x_pos = 0;
     int y_pos = 0;
+    int is_fumigating = b->sickness_doctor_cure == 99;
 
-    if (b->type == BUILDING_DOCK) {
-        if (b->sickness_doctor_cure == 99) {
+    if (building_is_house(b->type)) {
+        get_plague_icon_position_for_house(b, &x_pos, &y_pos, is_fumigating);
+        if (x_pos || y_pos) {
+            x_pos += x;
+            y_pos += y;
+        }
+    } else if (b->type == BUILDING_DOCK) {
+        if (is_fumigating) {
             x_pos = x + 68;
             y_pos = y - 38;
         } else {
@@ -380,7 +401,7 @@ static void draw_plague(building *b, int x, int y, color_t color_mask)
             y_pos = y - 84;
         }
     } else if (b->type == BUILDING_WAREHOUSE) {
-        if (b->sickness_doctor_cure == 99) {
+        if (is_fumigating) {
             x_pos = x + 10;
             y_pos = y - 64;
         } else {
@@ -388,7 +409,7 @@ static void draw_plague(building *b, int x, int y, color_t color_mask)
             y_pos = y - 84;
         }
     } else if (b->type == BUILDING_GRANARY) {
-        if (b->sickness_doctor_cure == 99) {
+        if (is_fumigating) {
             x_pos = x + 70;
             y_pos = y - 114;
         } else {
@@ -398,7 +419,7 @@ static void draw_plague(building *b, int x, int y, color_t color_mask)
     }
 
     if (x_pos && y_pos) {
-        if (b->sickness_doctor_cure == 99) {
+        if (is_fumigating) {
             draw_fumigation(b, x_pos, y_pos, color_mask);
         } else {
             b->fumigation_direction = 1;
@@ -505,14 +526,14 @@ static void draw_animation(int x, int y, int grid_offset)
 {
     int image_id = map_image_at(grid_offset);
     const image *img = image_get(image_id);
+    int building_id = map_building_at(grid_offset);
+    building *b = building_get(building_id);
+    color_t color_mask = 0;
+    if (draw_building_as_deleted(b) || map_property_is_deleted(grid_offset)) {
+        color_mask = COLOR_MASK_RED;
+    }
     if (img->animation) {
         if (map_property_is_draw_tile(grid_offset)) {
-            int building_id = map_building_at(grid_offset);
-            building *b = building_get(building_id);
-            color_t color_mask = 0;
-            if (draw_building_as_deleted(b) || map_property_is_deleted(grid_offset)) {
-                color_mask = COLOR_MASK_RED;
-            }
             if (b->type == BUILDING_DOCK) {
                 draw_dock_workers(b, x, y, color_mask);
             } else if (b->type == BUILDING_WAREHOUSE) {
@@ -557,6 +578,8 @@ static void draw_animation(int x, int y, int grid_offset)
                 draw_plague(b, x, y, color_mask);
             }
         }
+    } else if (map_property_is_draw_tile(grid_offset) && building_id && b->has_plague) {
+        draw_plague(b, x, y, color_mask);
     } else if (map_sprite_bridge_at(grid_offset)) {
         city_draw_bridge(x, y, draw_context.scale, grid_offset);
     } else if (building_get(map_building_at(grid_offset))->type == BUILDING_FORT) {

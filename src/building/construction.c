@@ -112,6 +112,19 @@ int building_construction_type_can_cycle(building_type type)
     return 0;
 }
 
+int building_construction_type_num_cycles(building_type type)
+{
+    for (int i = 0; i < BUILDING_CYCLES; i++) {
+        int size = building_cycles[i].size;
+        for (int j = 0; j < size; j++) {
+            if (building_cycles[i].array[j] == type) {
+                return size * building_cycles[i].rotations_to_next;
+            }
+        }
+    }
+    return 1;
+}
+
 int building_construction_cycle_forward(void)
 {
     if (data.type == BUILDING_NONE) {
@@ -221,7 +234,7 @@ static int place_houses(int measure_only, int x_start, int y_start, int x_end, i
     if (!measure_only) {
         building_construction_warning_check_food_stocks(BUILDING_HOUSE_VACANT_LOT);
         if (needs_road_warning) {
-            city_warning_show(WARNING_HOUSE_TOO_FAR_FROM_ROAD);
+            city_warning_show(WARNING_HOUSE_TOO_FAR_FROM_ROAD, NEW_WARNING_SLOT);
         }
         map_routing_update_land();
         window_invalidate();
@@ -635,7 +648,6 @@ int building_construction_is_updatable(void)
     }
 }
 
-
 void building_construction_cancel(void)
 {
     map_property_clear_constructing_and_deleted();
@@ -813,7 +825,7 @@ void building_construction_update(int x, int y, int grid_offset)
             !config_get(CONFIG_GP_CH_MULTIPLE_BARRACKS)) &&
             !(type == BUILDING_DISTRIBUTION_CENTER_UNUSED && city_buildings_has_distribution_center()) &&
             !(type == BUILDING_MESS_HALL && city_buildings_has_mess_hall()) &&
-            !building_monument_has_monument(type) &&
+            !building_monument_get_id(type) &&
             !(building_monument_is_grand_temple(type) &&
             building_monument_count_grand_temples() >= config_get(CONFIG_GP_CH_MAX_GRAND_TEMPLES))) {
             int size = building_properties_for_type(type)->size;
@@ -864,7 +876,7 @@ void building_construction_place(void)
     }
     if (city_finance_out_of_money()) {
         map_property_clear_constructing_and_deleted();
-        city_warning_show(WARNING_OUT_OF_MONEY);
+        city_warning_show(WARNING_OUT_OF_MONEY, NEW_WARNING_SLOT);
         return;
     }
 
@@ -880,7 +892,7 @@ void building_construction_place(void)
         } else {
             map_property_clear_constructing_and_deleted();
         }
-        city_warning_show(enemy_type == FIGURE_WOLF ? WARNING_WOLF_NEARBY : WARNING_ENEMY_NEARBY);
+        city_warning_show(enemy_type == FIGURE_WOLF ? WARNING_WOLF_NEARBY : WARNING_ENEMY_NEARBY, NEW_WARNING_SLOT);
         return;
     }
 
@@ -908,21 +920,21 @@ void building_construction_place(void)
     } else if (type == BUILDING_LOW_BRIDGE) {
         int length = map_bridge_add(x_end, y_end, 0);
         if (length <= 1) {
-            city_warning_show(WARNING_SHORE_NEEDED);
+            city_warning_show(WARNING_SHORE_NEEDED, NEW_WARNING_SLOT);
             return;
         }
         placement_cost *= length;
     } else if (type == BUILDING_SHIP_BRIDGE) {
         int length = map_bridge_add(x_end, y_end, 1);
         if (length <= 1) {
-            city_warning_show(WARNING_SHORE_NEEDED);
+            city_warning_show(WARNING_SHORE_NEEDED, NEW_WARNING_SLOT);
             return;
         }
         placement_cost *= length;
     } else if (type == BUILDING_AQUEDUCT) {
         int cost;
         if (!building_construction_place_aqueduct(x_start, y_start, x_end, y_end, &cost)) {
-            city_warning_show(WARNING_CLEAR_LAND_NEEDED);
+            city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return;
         }
         placement_cost = cost;
@@ -932,7 +944,7 @@ void building_construction_place(void)
         struct reservoir_info info;
         if (!place_reservoir_and_aqueducts(0, x_start, y_start, x_end, y_end, &info)) {
             map_property_clear_constructing_and_deleted();
-            city_warning_show(WARNING_CLEAR_LAND_NEEDED);
+            city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return;
         }
         if (info.place_reservoir_at_start == PLACE_RESERVOIR_YES) {
@@ -992,17 +1004,8 @@ void building_construction_place(void)
         return;
     }
 
-    if (data.type == BUILDING_MENU_SMALL_TEMPLES) {
-        data.sub_type++;
-        if (data.sub_type > BUILDING_SMALL_TEMPLE_VENUS) {
-            data.sub_type = BUILDING_SMALL_TEMPLE_CERES;
-        }
-    }
-    if (data.type == BUILDING_MENU_LARGE_TEMPLES) {
-        data.sub_type++;
-        if (data.sub_type > BUILDING_LARGE_TEMPLE_VENUS) {
-            data.sub_type = BUILDING_LARGE_TEMPLE_CERES;
-        }
+    if (data.type == BUILDING_MENU_SMALL_TEMPLES || data.type == BUILDING_MENU_LARGE_TEMPLES) {
+        building_rotation_rotate_forward();
     }
     formation_move_herds_away(x_end, y_end);
     city_finance_process_construction(placement_cost);

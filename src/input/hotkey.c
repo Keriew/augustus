@@ -34,6 +34,7 @@ typedef struct {
     int resize_to;
     int save_screenshot;
     int save_city_screenshot;
+    int save_minimap_screenshot;
 } global_hotkeys;
 
 static struct {
@@ -43,6 +44,7 @@ static struct {
     int num_definitions;
     arrow_definition *arrows;
     int num_arrows;
+    int shift_pressed;
 } data;
 
 static void set_definition_for_action(hotkey_action action, hotkey_definition *def)
@@ -219,6 +221,9 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
         case HOTKEY_SAVE_CITY_SCREENSHOT:
             def->action = &data.global_hotkey_state.save_city_screenshot;
             break;
+        case HOTKEY_SAVE_MINIMAP_SCREENSHOT:
+            def->action = &data.global_hotkey_state.save_minimap_screenshot;
+            break;
         case HOTKEY_BUILD_VACANT_HOUSE:
             def->action = &data.hotkey_state.building;
             def->value = BUILDING_HOUSE_VACANT_LOT;
@@ -307,6 +312,10 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
             def->action = &data.hotkey_state.show_overlay;
             def->value = OVERLAY_ENTERTAINMENT;
             break;
+        case HOTKEY_SHOW_OVERLAY_EDUCATION:
+            def->action = &data.hotkey_state.show_overlay;
+            def->value = OVERLAY_EDUCATION;
+            break;
         case HOTKEY_SHOW_OVERLAY_SCHOOL:
             def->action = &data.hotkey_state.show_overlay;
             def->value = OVERLAY_SCHOOL;
@@ -331,6 +340,10 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
             def->action = &data.hotkey_state.show_overlay;
             def->value = OVERLAY_CLINIC;
             break;
+        case HOTKEY_SHOW_OVERLAY_HOSPITAL:
+            def->action = &data.hotkey_state.show_overlay;
+            def->value = OVERLAY_HOSPITAL;
+            break;
         case HOTKEY_SHOW_OVERLAY_SICKNESS:
             def->action = &data.hotkey_state.show_overlay;
             def->value = OVERLAY_SICKNESS;
@@ -339,6 +352,18 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
             def->action = &data.hotkey_state.show_overlay;
             def->value = OVERLAY_TAX_INCOME;
             break;
+        case HOTKEY_SHOW_OVERLAY_DESIRABILITY:
+            def->action = &data.hotkey_state.show_overlay;
+            def->value = OVERLAY_DESIRABILITY;
+            break;
+        case HOTKEY_SHOW_OVERLAY_SENTIMENT:
+            def->action = &data.hotkey_state.show_overlay;
+            def->value = OVERLAY_SENTIMENT;
+            break;
+        case HOTKEY_SHOW_OVERLAY_MOTHBALL:
+            def->action = &data.hotkey_state.show_overlay;
+            def->value = OVERLAY_MOTHBALL;
+            break;
         case HOTKEY_SHOW_OVERLAY_RELIGION:
             def->action = &data.hotkey_state.show_overlay;
             def->value = OVERLAY_RELIGION;
@@ -346,6 +371,10 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
         case HOTKEY_SHOW_OVERLAY_ROADS:
             def->action = &data.hotkey_state.show_overlay;
             def->value = OVERLAY_ROADS;
+            break;
+        case HOTKEY_SHOW_OVERLAY_LEVY:
+            def->action = &data.hotkey_state.show_overlay;
+            def->value = OVERLAY_LEVY;
             break;
         case HOTKEY_ROTATE_MAP_NORTH:
             def->action = &data.hotkey_state.rotate_map_north;
@@ -421,7 +450,7 @@ static int allocate_mapping_memory(int total_definitions, int total_arrows)
 
 void hotkey_install_mapping(hotkey_mapping *mappings, int num_mappings)
 {
-    int total_definitions = 2; // Enter and ESC are fixed hotkeys
+    int total_definitions = 3; // Enter, ESC and F5 are fixed hotkeys
     int total_arrows = 0;
     for (int i = 0; i < num_mappings; i++) {
         hotkey_action action = mappings[i].action;
@@ -449,7 +478,13 @@ void hotkey_install_mapping(hotkey_mapping *mappings, int num_mappings)
     data.definitions[1].repeatable = 0;
     data.definitions[1].value = 1;
 
-    data.num_definitions = 2;
+    data.definitions[2].action = &data.hotkey_state.f5_pressed;
+    data.definitions[2].key = KEY_TYPE_F5;
+    data.definitions[2].modifiers = 0;
+    data.definitions[2].repeatable = 0;
+    data.definitions[2].value = 1;
+
+    data.num_definitions = 3;
 
     for (int i = 0; i < num_mappings; i++) {
         hotkey_action action = mappings[i].action;
@@ -475,6 +510,8 @@ void hotkey_reset_state(void)
 
 void hotkey_key_pressed(key_type key, key_modifier_type modifiers, int repeat)
 {
+    data.shift_pressed = modifiers == KEY_MOD_SHIFT;
+
     if (window_is(WINDOW_HOTKEY_EDITOR)) {
         window_hotkey_editor_key_pressed(key, modifiers);
         return;
@@ -485,6 +522,9 @@ void hotkey_key_pressed(key_type key, key_modifier_type modifiers, int repeat)
     int found_action = 0;
     for (int i = 0; i < data.num_definitions; i++) {
         hotkey_definition *def = &data.definitions[i];
+        if (window_is(WINDOW_ASSET_PREVIEWER) && key == KEY_TYPE_F5 && def->action != &data.hotkey_state.f5_pressed) {
+            continue;
+        }
         if (def->key == key && def->modifiers == modifiers && (!repeat || def->repeatable)) {
             *(def->action) = def->value;
             found_action = 1;
@@ -503,6 +543,8 @@ void hotkey_key_pressed(key_type key, key_modifier_type modifiers, int repeat)
 
 void hotkey_key_released(key_type key, key_modifier_type modifiers)
 {
+    data.shift_pressed = modifiers == KEY_MOD_SHIFT;
+
     if (window_is(WINDOW_HOTKEY_EDITOR)) {
         window_hotkey_editor_key_released(key, modifiers);
         return;
@@ -516,6 +558,11 @@ void hotkey_key_released(key_type key, key_modifier_type modifiers)
             arrow->action(0);
         }
     }
+}
+
+int hotkey_shift_pressed(void)
+{
+    return data.shift_pressed;
 }
 
 static void confirm_exit(int accepted, int checked)
@@ -547,10 +594,13 @@ void hotkey_handle_global_keys(void)
         system_set_fullscreen(!setting_fullscreen());
     }
     if (data.global_hotkey_state.save_screenshot) {
-        graphics_save_screenshot(0);
+        graphics_save_screenshot(SCREENSHOT_DISPLAY);
     }
     if (data.global_hotkey_state.save_city_screenshot) {
-        graphics_save_screenshot(1);
+        graphics_save_screenshot(SCREENSHOT_FULL_CITY);
+    }
+    if (data.global_hotkey_state.save_minimap_screenshot) {
+        graphics_save_screenshot(SCREENSHOT_MINIMAP);
     }
 }
 

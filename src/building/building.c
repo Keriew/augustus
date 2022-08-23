@@ -48,6 +48,22 @@ building *building_get(int id)
     return array_item(data.buildings, id);
 }
 
+void building_get_from_buffer(buffer *buf, int id, building *b, int includes_building_size, int save_version,
+    int buffer_offset)
+{
+    buffer_set(buf, 0);
+    int building_buf_size = BUILDING_STATE_ORIGINAL_BUFFER_SIZE;
+    int buf_skip = 0;
+
+    if (includes_building_size) {
+        building_buf_size = buffer_read_i32(buf);
+        buf_skip = 4;
+    }
+    buf_skip += buffer_offset;
+    buffer_set(buf, building_buf_size * id + buf_skip);
+    building_state_load_from_buffer(buf, b, building_buf_size, save_version);
+}
+
 int building_count(void)
 {
     return data.buildings.size;
@@ -150,7 +166,7 @@ building *building_create(building_type type, int x, int y)
     building *b;
     array_new_item(data.buildings, 1, b);
     if (!b) {
-        city_warning_show(WARNING_DATA_LIMIT_REACHED);
+        city_warning_show(WARNING_DATA_LIMIT_REACHED, NEW_WARNING_SLOT);
         return array_first(data.buildings);
     }
 
@@ -463,7 +479,7 @@ int building_is_statue_garden_temple(building_type type)
         (type >= BUILDING_SMALL_POND && type <= BUILDING_PANTHEON) ||
         (type == BUILDING_GARDENS) || (type == BUILDING_GARDEN_PATH) ||
         (type >= BUILDING_HORSE_STATUE && type <= BUILDING_LARGE_MAUSOLEUM) ||
-        type == BUILDING_GARDEN_WALL
+        type == BUILDING_GARDEN_WALL || type == BUILDING_GLADIATOR_STATUE
         );
 }
 

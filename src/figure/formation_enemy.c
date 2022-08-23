@@ -241,7 +241,7 @@ int formation_rioter_get_target_building_for_robbery(int x, int y, int *x_tile, 
     return best_building->id;
 }
 
-static void set_enemy_target_building(formation *m)
+static int set_enemy_target_building(formation *m)
 {
     int attack = m->attack_type;
     if (attack == FORMATION_ATTACK_RANDOM) {
@@ -260,6 +260,7 @@ static void set_enemy_target_building(formation *m)
             formation_set_destination_building(m, best_building->x, best_building->y, best_building->id);
         }
     }
+    return best_building != 0;
 }
 
 static void set_native_target_building(formation *m)
@@ -299,6 +300,8 @@ static void set_native_target_building(formation *m)
     }
     if (min_building) {
         formation_set_destination_building(m, min_building->x, min_building->y, min_building->id);
+    } else {
+        formation_retreat(m);
     }
 }
 
@@ -522,6 +525,17 @@ static void update_enemy_movement(formation *m, int roman_distance)
     }
 }
 
+static int formation_fully_in_city(const formation *m)
+{
+    for (int n = 0; n < MAX_FORMATION_FIGURES; n++) {
+        figure *f = figure_get(m->figures[n]);
+        if (f->state != FIGURE_STATE_DEAD && f->is_ghost) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 static void update_enemy_formation(formation *m, int *roman_distance)
 {
     enemy_army *army = enemy_army_get_editable(m->invasion_id);
@@ -583,7 +597,10 @@ static void update_enemy_formation(formation *m, int *roman_distance)
             army->destination_y = y_tile;
             army->destination_building_id = 0;
         } else {
-            set_enemy_target_building(m);
+            if (!set_enemy_target_building(m) && !army->started_retreating && formation_fully_in_city(m)) {
+                city_message_post(1, MESSAGE_ENEMIES_LEAVING, 0, 0);
+                army->started_retreating = 1;
+            }
             army->destination_x = m->destination_x;
             army->destination_y = m->destination_y;
             army->destination_building_id = m->destination_building_id;
@@ -591,9 +608,11 @@ static void update_enemy_formation(formation *m, int *roman_distance)
     }
     m->enemy_legion_index = army->num_legions++;
     m->wait_ticks++;
-    formation_set_destination_building(m,
-        army->destination_x, army->destination_y, army->destination_building_id
-    );
+    if (!army->started_retreating) {
+        formation_set_destination_building(m, army->destination_x, army->destination_y, army->destination_building_id);
+    } else {
+        formation_retreat(m);
+    }
 
     update_enemy_movement(m, *roman_distance);
 }

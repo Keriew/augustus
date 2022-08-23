@@ -271,7 +271,7 @@ static void on_scroll(void)
 static int handle_mouse(const mouse *m)
 {
     data.focus_button_id = 0;
-    return scrollbar_handle_mouse(&scrollbar, m) ||
+    return scrollbar_handle_mouse(&scrollbar, m, 1) ||
         generic_buttons_handle_mouse(m, 0, 0, resource_buttons, MAX_VISIBLE_ROWS + 4, &data.focus_button_id);
 }
 
@@ -302,7 +302,7 @@ static void show_policy(trade_policy_type policy_type)
 
 static void button_prices(int param1, int param2)
 {
-    window_trade_prices_show();
+    window_trade_prices_show(17, 53, 622, 334);
 }
 
 static void button_empire(int param1, int param2)

@@ -58,7 +58,11 @@ endif()
 
 if (CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror=implicit-function-declaration")
+endif()
 
+# Fix bug in cmake that expects the resource compiler for mingw to have the toolchain prefix in the name
+if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.24.0 AND MINGW)
+    set(CMAKE_RC_COMPILER "windres")
 endif()
 
 set(PROJECT_VERSION_MAJOR 3)
@@ -524,7 +528,6 @@ set(WIDGET_FILES
     ${PROJECT_SOURCE_DIR}/src/widget/map_editor_tool.c
     ${PROJECT_SOURCE_DIR}/src/widget/map_editor_pause_menu.c
     ${PROJECT_SOURCE_DIR}/src/widget/minimap.c
-    ${PROJECT_SOURCE_DIR}/src/widget/scenario_minimap.c
     ${PROJECT_SOURCE_DIR}/src/widget/top_menu.c
     ${PROJECT_SOURCE_DIR}/src/widget/top_menu_editor.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/city.c
@@ -549,6 +552,7 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/advisor/ratings.c
     ${PROJECT_SOURCE_DIR}/src/window/advisor/religion.c
     ${PROJECT_SOURCE_DIR}/src/window/advisor/trade.c
+    ${PROJECT_SOURCE_DIR}/src/window/asset_previewer.c
     ${PROJECT_SOURCE_DIR}/src/window/build_menu.c
     ${PROJECT_SOURCE_DIR}/src/window/building_info.c
     ${PROJECT_SOURCE_DIR}/src/window/building/common.c

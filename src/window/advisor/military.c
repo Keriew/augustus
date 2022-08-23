@@ -176,7 +176,7 @@ static int draw_background(void)
         image_draw(image_id, 387, 86 + 44 * i, COLOR_MASK_NONE, SCALE_NONE);
 
         button_border_draw(464, 83 + 44 * i, 30, 30, 0);
-        if (m->is_at_fort) {
+        if (m->is_at_fort || m->in_distant_battle) {
             image_draw(image_id + 2, 467, 86 + 44 * i, COLOR_MASK_NONE, SCALE_NONE);
         } else {
             image_draw(image_id + 1, 467, 86 + 44 * i, COLOR_MASK_NONE, SCALE_NONE);
@@ -224,7 +224,7 @@ static void draw_foreground(void)
 static int handle_mouse(const mouse *m)
 {
     focus_additional_button_id = 0;
-    if (scrollbar_handle_mouse(&scrollbar, m)) {
+    if (scrollbar_handle_mouse(&scrollbar, m, 1)) {
         focus_button_id = 0;
         return 1;
     }

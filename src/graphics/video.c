@@ -97,7 +97,7 @@ static int load_mpg(const char *filename)
     if (!path) {
         return 0;
     }
-    FILE *mpg = file_open(mpg_filename, "rb");
+    FILE *mpg = file_open(path, "rb");
     data.plm = plm_create_with_file(mpg, 1);
 
     if (!data.plm) {
@@ -339,7 +339,7 @@ void video_draw(int x_offset, int y_offset)
         update_video_frame();
         data.video.draw_frame = 0;
     }
-    graphics_renderer()->draw_custom_image(CUSTOM_IMAGE_VIDEO, x_offset, y_offset, 1.0f);
+    graphics_renderer()->draw_custom_image(CUSTOM_IMAGE_VIDEO, x_offset, y_offset, 1.0f, 0);
 }
 
 void video_draw_fullscreen(void)
@@ -370,5 +370,5 @@ void video_draw_fullscreen(void)
     }
 
     graphics_renderer()->clear_screen();
-    graphics_renderer()->draw_custom_image(CUSTOM_IMAGE_VIDEO, x, y, scale);
+    graphics_renderer()->draw_custom_image(CUSTOM_IMAGE_VIDEO, x, y, scale, 0);
 }

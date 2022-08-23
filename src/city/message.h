@@ -183,7 +183,8 @@ typedef enum {
     MESSAGE_IG_GAMES_END = 154,
     MESSAGE_SICKNESS = 155,
     MESSAGE_CAESAR_ANGER = 156,
-
+    MESSAGE_WRATH_OF_MARS_NO_NATIVES = 157,
+    MESSAGE_ENEMIES_LEAVING = 158
 } city_message_type;
 
 typedef struct {

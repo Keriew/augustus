@@ -4,7 +4,7 @@
 #include "core/image_group.h" 
 #include "type.h"
 
-#define AUGUSTUS_BUILDINGS 64
+#define AUGUSTUS_BUILDINGS 65
 
 augustus_building_properties_mapping augustus_building_properties[AUGUSTUS_BUILDINGS] = {
     {BUILDING_ROADBLOCK, { 1, 1, 0, 0, 0 }, "Logistics", 0},
@@ -37,8 +37,8 @@ augustus_building_properties_mapping augustus_building_properties[AUGUSTUS_BUILD
     {BUILDING_PAVILION_ORANGE, { 1, 1, 0, 0, 0 }, "Aesthetics", "pavilion orange"},
     {BUILDING_PAVILION_YELLOW, { 1, 1, 0, 0, 0 }, "Aesthetics", "pavilion yellow"},
     {BUILDING_PAVILION_GREEN, { 1, 1, 0, 0, 0 }, "Aesthetics", "pavilion green"},
-    {BUILDING_SMALL_STATUE_ALT, { 1, 1, 0, 0, 14 }, "Aesthetics", "sml statue 2"},
-    {BUILDING_SMALL_STATUE_ALT_B, { 1, 1, 0, 0, 14 }, "Aesthetics", "sml statue 3"},
+    {BUILDING_SMALL_STATUE_ALT, { 1, 1, 0, 0, 13 }, "Aesthetics", "sml statue 2"},
+    {BUILDING_SMALL_STATUE_ALT_B, { 1, 1, 0, 0, 13 }, "Aesthetics", "sml statue 3"},
     {BUILDING_OBELISK, { 2, 1, 0, 0, 0 }, "Aesthetics", "obelisk"},
     {BUILDING_PANTHEON, { 7, 1, 0, 0, 0 }, "Religion", "Pantheon Off"},
     {BUILDING_ARCHITECT_GUILD, { 2, 1, 0, 0, 0 }, "Logistics", "Arch Guild OFF"},
@@ -71,6 +71,7 @@ augustus_building_properties_mapping augustus_building_properties[AUGUSTUS_BUILD
     {BUILDING_HEDGE_GATE_LIGHT, { 1, 1, 0, 0, 0 }, "Aesthetics", "L Hedge Gate"},
     {BUILDING_PALISADE_GATE, {1, 1, 0, 0, 0}, "Military", "Palisade_Gate"},
     {BUILDING_MEDIUM_STATUE, {2,1,0,0,1}, "Aesthetics", "Med_Statue_R" },
+    {BUILDING_GLADIATOR_STATUE, {1,1,0,0,1}, "Aesthetics", ""},
 };
 
 void init_augustus_building_properties()

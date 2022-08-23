@@ -100,14 +100,14 @@ static const building_image_context building_images_tree_path[8] = {
 };
 
 static const building_image_context building_images_treeless_path[8] = {
-    { { 1, 2, 0, 2, 1, 2, 0, 2 }, { 64, 0,  64,  0 }, -1 },
-    { { 0, 2, 1, 2, 0, 2, 1, 2 }, {  0, 64,  0, 64 }, -1 },
-    { { 1, 2, 0, 2, 0, 2, 0, 2 }, { 64, 0,  64,  0 }, -1 },
-    { { 0, 2, 1, 2, 0, 2, 0, 2 }, {  0, 64,  0, 64 }, -1 },
-    { { 0, 2, 0, 2, 1, 2, 0, 2 }, { 64, 0,  64,  0 }, -1 },
-    { { 0, 2, 0, 2, 0, 2, 1, 2 }, {  0, 64,  0, 64 }, -1 },
-    { { 2, 2, 2, 2, 2, 2, 2, 2 }, { 64, 0,  64,  0 },  0 },
-    { { 2, 2, 2, 2, 2, 2, 2, 2 }, {  0, 64,  0, 64 }, -1 },
+    { { 1, 2, 0, 2, 1, 2, 0, 2 }, { 140, 0,  140,  0 }, -1 },
+    { { 0, 2, 1, 2, 0, 2, 1, 2 }, {  0, 140,  0, 140 }, -1 },
+    { { 1, 2, 0, 2, 0, 2, 0, 2 }, { 140, 0,  140,  0 }, -1 },
+    { { 0, 2, 1, 2, 0, 2, 0, 2 }, {  0, 140,  0, 140 }, -1 },
+    { { 0, 2, 0, 2, 1, 2, 0, 2 }, { 140, 0,  140,  0 }, -1 },
+    { { 0, 2, 0, 2, 0, 2, 1, 2 }, {  0, 140,  0, 140 }, -1 },
+    { { 2, 2, 2, 2, 2, 2, 2, 2 }, { 140, 0,  140,  0 },  0 },
+    { { 2, 2, 2, 2, 2, 2, 2, 2 }, {  0, 140,  0, 140 }, -1 },
 };
 
 static const building_image_context building_images_garden_gate[14] = {
@@ -456,6 +456,7 @@ int building_connectable_get_palisade_gate_offset(int grid_offset)
     }
     return get_image_offset(CONTEXT_GARDEN_GATE, tiles, rotation, terrain_tiles, grid_offset);
 }
+
 int building_is_connectable(building_type type)
 {
     for (int i = 0; i < MAX_CONNECTABLE_BUILDINGS; i++) {
@@ -464,6 +465,24 @@ int building_is_connectable(building_type type)
         }
     }
     return 0;
+}
+
+int building_connectable_num_variants(building_type type)
+{
+    if (!building_is_connectable(type)) {
+        return 0;
+    }
+    switch (type) {
+        case BUILDING_HEDGE_DARK:
+        case BUILDING_HEDGE_LIGHT:
+        case BUILDING_COLONNADE:
+        case BUILDING_GARDEN_WALL:
+        case BUILDING_ROOFED_GARDEN_WALL:
+        case BUILDING_PALISADE:
+            return BUILDING_CONNECTABLE_ROTATION_LIMIT_HEDGES;
+        default:
+            return BUILDING_CONNECTABLE_ROTATION_LIMIT_PATHS;
+    }
 }
 
 void building_connectable_update_connections_for_type(building_type type)

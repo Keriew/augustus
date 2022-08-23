@@ -35,9 +35,6 @@ void city_overlay_problems_prepare_building(building *b)
 {
     b = building_main(b);
 
-    if (b->house_size) {
-        return;
-    }
     if (b->strike_duration_days > 0) {
         b->show_on_problem_overlay = 1;
         return;
@@ -45,27 +42,11 @@ void city_overlay_problems_prepare_building(building *b)
 
     if (b->has_plague) {
         b->show_on_problem_overlay = 1;
-
-        if (b->type == BUILDING_WAREHOUSE) {
-            building *space = b;
-            for (int i = 0; i < 8; i++) {
-                space = building_next(space);
-                if (space->type == BUILDING_WAREHOUSE_SPACE) {
-                    space->show_on_problem_overlay = 1;
-                }
-            }
-        }
-        return;
-    }
-
-    if (b->state == BUILDING_STATE_MOTHBALLED) {
+    } else if (b->state == BUILDING_STATE_MOTHBALLED) {
         b->show_on_problem_overlay = 1;
-        return;
     } else if (!b->num_workers && building_get_laborers(b->type)) {
         b->show_on_problem_overlay = 1;
-        return;
-    }
-    if (b->type == BUILDING_FOUNTAIN || b->type == BUILDING_BATHHOUSE) {
+    } else if (b->type == BUILDING_FOUNTAIN || b->type == BUILDING_BATHHOUSE) {
         if (!b->has_water_access) {
             b->show_on_problem_overlay = 1;
         }
@@ -79,8 +60,19 @@ void city_overlay_problems_prepare_building(building *b)
         } else if (b->loads_stored <= 0) {
             b->show_on_problem_overlay = 1;
         }
-    } 
+    } else if ((b->type == BUILDING_THEATER || b->type == BUILDING_AMPHITHEATER || b->type == BUILDING_ARENA ||
+        b->type == BUILDING_COLOSSEUM || b->type == BUILDING_HIPPODROME) && !b->data.entertainment.days1) {
+        b->show_on_problem_overlay = 1;
+    } else if ((b->type == BUILDING_ARENA || b->type == BUILDING_COLOSSEUM) && !b->data.entertainment.days2) {
+        b->show_on_problem_overlay = 1;
+    }
 
+    if (b->show_on_problem_overlay) {
+        while (b->next_part_building_id) {
+            b = building_get(b->next_part_building_id);
+            b->show_on_problem_overlay = 1;
+        }
+    }
 }
 
 static int show_building_fire_crime(const building *b)
@@ -274,8 +266,8 @@ static int get_tooltip_problems(tooltip_context *c, const building *b)
     if (guard < 9) {
         b = main_building;
     }
-    if (b->house_size) {
-        return 0;
+    if (b->has_plague) {
+        c->translation_key = TR_TOOLTIP_OVERLAY_PROBLEMS_PLAGUE;
     }
     if (b->strike_duration_days > 0) {
         c->translation_key = TR_TOOLTIP_OVERLAY_PROBLEMS_STRIKE;
@@ -295,7 +287,29 @@ static int get_tooltip_problems(tooltip_context *c, const building *b)
         } else if (b->loads_stored <= 0) {
             c->translation_key = TR_TOOLTIP_OVERLAY_PROBLEMS_NO_RESOURCES;
         }
-    } 
+    } else if (b->type == BUILDING_THEATER && !b->data.entertainment.days1) {
+        c->text_group = 72;
+        return 5;
+    } else if (b->type == BUILDING_AMPHITHEATER) {
+        if (!b->data.entertainment.days1) {
+            c->text_group = 71;
+            return 7;
+        } else if (!b->data.entertainment.days2) {
+            c->text_group = 71;
+            return 9;
+        }
+    } else if (b->type == BUILDING_ARENA || b->type == BUILDING_COLOSSEUM) {
+        if (!b->data.entertainment.days1) {
+            c->text_group = 74;
+            return 7;
+        } else if (!b->data.entertainment.days2) {
+            c->text_group = 74;
+            return 9;
+        }
+    } else if (b->type == BUILDING_HIPPODROME && !b->data.entertainment.days1) {
+        c->text_group = 73;
+        return 5;
+    }
     if (c->translation_key) {
         return 1;
     }

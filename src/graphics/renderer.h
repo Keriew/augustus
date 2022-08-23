@@ -61,7 +61,7 @@ typedef struct {
     void (*update_custom_image)(custom_image_type type);
     void (*update_custom_image_yuv)(custom_image_type type, const uint8_t *y_data, int y_width,
         const uint8_t *cb_data, int cb_width, const uint8_t *cr_data, int cr_width);
-    void (*draw_custom_image)(custom_image_type type, int x, int y, float scale);
+    void (*draw_custom_image)(custom_image_type type, int x, int y, float scale, int disable_filtering);
     int (*supports_yuv_image_format)(void);
 
     int (*save_image_from_screen)(int image_id, int x, int y, int width, int height);
@@ -71,7 +71,8 @@ typedef struct {
     void (*get_max_image_size)(int *width, int *height);
 
     const image_atlas_data *(*prepare_image_atlas)(atlas_type type, int num_images, int last_width, int last_height);
-    int (*create_image_atlas)(const image_atlas_data *data);
+    int (*create_image_atlas)(const image_atlas_data *data, int delete_buffers);
+    const image_atlas_data *(*get_image_atlas)(atlas_type type);
     int (*has_image_atlas)(atlas_type type);
     void (*free_image_atlas)(atlas_type type);
 
@@ -79,7 +80,7 @@ typedef struct {
 
     int (*should_pack_image)(int width, int height);
 
-    void (*update_scale_mode)(int city_scale);
+    void (*update_scale)(int city_scale);
 } graphics_renderer_interface;
 
 const graphics_renderer_interface *graphics_renderer(void);
