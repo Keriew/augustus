@@ -138,7 +138,9 @@ static int get_tooltip_hospital(tooltip_context *c, const building *b)
 
 static int get_tooltip_sickness(tooltip_context *c, const building *b)
 {
-    if (b->sickness_level < LOW_SICKNESS_LEVEL) {
+    if (b->sickness_level < 1) {
+        c->translation_key = TR_TOOLTIP_OVERLAY_SICKNESS_NONE;
+    } else if (b->sickness_level < LOW_SICKNESS_LEVEL) {
         c->translation_key = TR_TOOLTIP_OVERLAY_SICKNESS_LOW;
     } else if (b->sickness_level < MEDIUM_SICKNESS_LEVEL) {
         c->translation_key = TR_TOOLTIP_OVERLAY_SICKNESS_MEDIUM;
