@@ -62,7 +62,9 @@ static int draw_background(void)
     int sickness_level = city_health_get_global_sickness_level();
     int text_id = city_health() / 10 + 16;
 
-    if (sickness_level == SICKNESS_LEVEL_HIGH) {
+    if (sickness_level == SICKNESS_LEVEL_MEDIUM) {
+        text_id = 21;
+    } else if (sickness_level == SICKNESS_LEVEL_HIGH) {
         text_id = 18;
     } else if (sickness_level == SICKNESS_LEVEL_PLAGUE) {
         text_id = 16;

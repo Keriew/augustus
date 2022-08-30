@@ -416,10 +416,12 @@ int city_health_get_global_sickness_level(void)
     if (global_rating < LOW_SICKNESS_LEVEL && !plague_incoming) {
         global_sickness_level = SICKNESS_LEVEL_LOW;
     } else if (global_rating < MEDIUM_SICKNESS_LEVEL && !plague_incoming) {
-        global_sickness_level = SICKNESS_LEVEL_MEDIUM;
+        global_sickness_level = SICKNESS_LEVEL_LOW;
     } else if (global_rating < HIGH_SICKNESS_LEVEL && plague_incoming == 1) {
+        global_sickness_level = SICKNESS_LEVEL_MEDIUM;
+    } else if (global_rating < MAX_SICKNESS_LEVEL && plague_incoming == 2) {
         global_sickness_level = SICKNESS_LEVEL_HIGH;
-    } else {
+    } else if (global_rating >= MAX_SICKNESS_LEVEL) {
         global_sickness_level = SICKNESS_LEVEL_PLAGUE;
     }
 
