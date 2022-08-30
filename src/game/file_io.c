@@ -58,7 +58,7 @@
 
 #define PIECE_SIZE_DYNAMIC 0
 
-static const int SAVE_GAME_CURRENT_VERSION = 0x88;
+static const int SAVE_GAME_CURRENT_VERSION = 0x89;
 
 static const int SAVE_GAME_LAST_ORIGINAL_LIMITS_VERSION = 0x66;
 static const int SAVE_GAME_LAST_SMALLER_IMAGE_ID_VERSION = 0x76;
@@ -73,6 +73,7 @@ static const int SAVE_GAME_INCREASE_GRANARY_CAPACITY = 0x85;
 // static const int SAVE_GAME_ROADBLOCK_DATA_MOVED_FROM_SUBTYPE = 0x86; This define is unneeded for now
 static const int SAVE_GAME_LAST_ORIGINAL_TERRAIN_DATA_SIZE_VERSION = 0x86;
 static const int SAVE_GAME_LAST_CARAVANSERAI_WRONG_OFFSET = 0x87;
+static const int SAVE_GAME_CARAVANSERAI_LIGHTHOUSE_WRONG_ID = 0x88;
 
 static char compress_buffer[COMPRESS_BUFFER_SIZE];
 
