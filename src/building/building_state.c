@@ -425,7 +425,7 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     b->figure_id2 = buffer_read_i16(buf);
     if (save_version <= SAVE_GAME_CARAVANSERAI_LIGHTHOUSE_WRONG_ID && (b->type == BUILDING_LIGHTHOUSE || b->type == BUILDING_CARAVANSERAI)) {
         b->figure_id = b->figure_id2;
-        b->figure_id2 = FIGURE_NONE;
+        b->figure_id2 = 0;
     }
     b->immigrant_figure_id = buffer_read_i16(buf);
     b->figure_id4 = buffer_read_i16(buf);
