@@ -1,7 +1,6 @@
 #ifndef BUILDING_DOCK_H
 #define BUILDING_DOCK_H
 
-#include <stdbool.h>
 #include "building/building.h"
 #include "map/point.h"
 #include "game/resource.h"
@@ -17,7 +16,7 @@ typedef enum {
 
 typedef struct handled_good {
     unsigned char road_network_id;
-    bool goods[RESOURCE_MAX - 1];
+    int goods[RESOURCE_MAX - 1];
 } handled_good;
 
 int building_dock_count_idle_dockers(const building *dock);
@@ -50,5 +49,5 @@ void building_dock_set_can_trade_with_route(int route_id, int dock_id, int can_t
 
 void building_dock_get_handled_goods(handled_good *handled_goods, int ship_id);
 
-bool building_dock_goods_handled(handled_good *handled_goods, building *dock, figure *ship);
+int building_dock_goods_handled(handled_good *handled_goods, building *dock, figure *ship);
 #endif // BUILDING_DOCK_H

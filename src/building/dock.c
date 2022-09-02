@@ -238,74 +238,89 @@ int building_dock_get_destination(int ship_id, int exclude_dock_id, map_point *t
     }
 }
 
+// returns a list of goods that have been "handled" (i.e. the dock allowed for it to be traded) for each road network a ship has visited
 void building_dock_get_handled_goods(handled_good *handled_goods, int ship_id)
 {
     figure* ship = figure_get(ship_id);
+
+    // zero out the array
     for (int i = 0; i < 10; i++) {
         handled_good *handled_good = handled_goods + i;
         handled_good->road_network_id = 0;
         for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-            handled_good->goods[r - 1] = false;
+            handled_good->goods[r - 1] = 0;
         }
     }
-    for (int i = 0; i < 10; i++) {
-        int dock_id = city_buildings_get_working_dock(i);
-        if (!dock_id)
-            continue;
-        if (!figure_trader_ship_docked_once_at_dock(ship, dock_id))
-            continue;
-        building* dock = building_get(dock_id);
 
-        bool added_handled_good = false;
+    int next_idx = 0;
+    // loop through the docks
+    for (int i = 0; i < 10; i++) {
+        // check and see if the ship has visited this dock
+        if (!(ship->building_id & (1 << i))) {
+            continue;
+        }
+
+        // get the actual dock
+        int dock_id = city_buildings_get_working_dock(i);
+        if (!dock_id) {
+            continue;
+        }
+        building *dock = building_get(dock_id);
+
+        // see if we already have a handled_good pair for this road network
+        int added_handled_good = 0;
         for (int j = 0; j < 10; j++) {
             handled_good *handled_good = handled_goods + j;
             if (handled_good->road_network_id == dock->road_network_id) {
+                // we've already visited a dock on this road network. add all the resources that this dock handles
                 for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-                    if (building_distribution_is_good_accepted(r - 1, dock))
-                        handled_good->goods[r - 1] = true;
+                    if (building_distribution_is_good_accepted(r - 1, dock)) {
+                        handled_good->goods[r - 1] = 1;
+                    }
                 }
-                added_handled_good = true;
+                added_handled_good = 1;
                 break;
             }
         }
 
         if (!added_handled_good) {
-            for (int j = 0; j < 10; j++) {
-                handled_good *handled_good = handled_goods + j;
-                if (handled_good->road_network_id == 0) {
-                    handled_good->road_network_id = dock->road_network_id;
-                    for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-                        if (building_distribution_is_good_accepted(r - 1, dock))
-                            handled_good->goods[r - 1] = true;
-                    }
-                    added_handled_good = true;
-                    break;
+            // no handled_good found for this road network. use the next available one and add all the resources it accepts
+            handled_good *handled_good = handled_goods + next_idx;
+            handled_good->road_network_id = dock->road_network_id;
+            for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+                if (building_distribution_is_good_accepted(r - 1, dock)) {
+                    handled_good->goods[r - 1] = 1;
                 }
             }
+            added_handled_good = 1;
+            next_idx++;
         }
     }
 }
 
-bool building_dock_goods_handled(handled_good *handled_goods, building *dock, figure *ship)
+int building_dock_goods_handled(handled_good *handled_goods, building *dock, figure *ship)
 {
     for (int i = 0; i < 10; i++) {
         handled_good *handled_good = handled_goods + i;
-        if (handled_good->road_network_id != dock->road_network_id)
+        if (handled_good->road_network_id != dock->road_network_id) {
             continue;
+        }
         // we've visited docks on this road network
         for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-            if (!empire_can_import_resource_from_city(ship->empire_city_id, r) && !empire_can_export_resource_to_city(ship->empire_city_id, r))
+            if (!empire_can_import_resource_from_city(ship->empire_city_id, r) && !empire_can_export_resource_to_city(ship->empire_city_id, r)) {
                 // the ship doesn't buy or sell this good
                 continue;
-            if (building_distribution_is_good_accepted(r - 1, dock) && !handled_good->goods[r - 1])
+            }
+            if (building_distribution_is_good_accepted(r - 1, dock) && !handled_good->goods[r - 1]) {
                 // this dock accepts a good that all previous docks on this road network did not accept
-                return false;
+                return 0;
+            }
         }
         // all goods at this dock have already been handled on this road network
-        return true;
+        return 1;
     }
     // no matching road networks, assume unhandled
-    return false;
+    return 0;
 }
 
 int building_dock_get_closer_free_destination(int ship_id, ship_dock_request_type request_type, map_point *tile)
