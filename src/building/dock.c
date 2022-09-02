@@ -252,7 +252,7 @@ void building_dock_get_handled_goods(handled_good *handled_goods, int ship_id)
         }
     }
 
-    int next_idx = 0;
+    int next_available_idx = 0;
     // loop through the docks
     for (int i = 0; i < 10; i++) {
         // check and see if the ship has visited this dock
@@ -284,8 +284,8 @@ void building_dock_get_handled_goods(handled_good *handled_goods, int ship_id)
         }
 
         if (!added_handled_good) {
-            // no handled_good found for this road network. use the next available one and add all the resources it accepts
-            handled_good *handled_good = handled_goods + next_idx;
+            // no handled_good found for this road network. use the next available one and add all the resources that the dock accepts
+            handled_good *handled_good = handled_goods + next_available_idx;
             handled_good->road_network_id = dock->road_network_id;
             for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
                 if (building_distribution_is_good_accepted(r - 1, dock)) {
@@ -293,7 +293,7 @@ void building_dock_get_handled_goods(handled_good *handled_goods, int ship_id)
                 }
             }
             added_handled_good = 1;
-            next_idx++;
+            next_available_idx++;
         }
     }
 }
