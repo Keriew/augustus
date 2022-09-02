@@ -6,7 +6,6 @@
 
 #define SAVE_GAME_ROADBLOCK_DATA_MOVED_FROM_SUBTYPE 0x86
 #define SAVE_GAME_CARAVANSERAI_OFFSET_FIX 0x88
-#define SAVE_GAME_CARAVANSERAI_LIGHTHOUSE_WRONG_ID 0x88
 
 static int is_industry_type(const building *b)
 {
@@ -396,7 +395,7 @@ static void read_type_data(buffer *buf, building *b, int version)
     }
 }
 
-void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_size, int save_version)
+void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_size, int save_version, int for_preview)
 {
     b->state = buffer_read_u8(buf);
     b->faction_id = buffer_read_u8(buf);
@@ -534,7 +533,12 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
         b->fumigation_direction = buffer_read_u8(buf);
     }
 
-    if (save_version <= SAVE_GAME_CARAVANSERAI_LIGHTHOUSE_WRONG_ID && (b->type == BUILDING_LIGHTHOUSE || b->type == BUILDING_CARAVANSERAI)) {
+    if (
+        (b->type == BUILDING_LIGHTHOUSE || b->type == BUILDING_CARAVANSERAI) && 
+        b->figure_id2 && 
+        !for_preview && 
+        figure_get(b->figure_id2)->type != FIGURE_LABOR_SEEKER
+    ) {
         b->figure_id = b->figure_id2;
         b->figure_id2 = 0;
     }
