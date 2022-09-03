@@ -4,17 +4,17 @@
 #include "city/buildings.h"
 #include "city/resource.h"
 #include "empire/city.h"
+#include "empire/empire.h"
+#include "figure/figure.h"
+#include "figure/trader.h"
+#include "figuretype/trader.h"
+#include "game/resource.h"
 #include "map/figure.h"
 #include "map/grid.h"
 #include "map/routing.h"
+#include "map/routing_data.h"
 #include "map/terrain.h"
 #include "scenario/map.h"
-#include "empire/empire.h"
-#include "figure/trader.h"
-#include "figuretype/trader.h"
-#include "map/routing_data.h"
-#include "game/resource.h"
-#include "figure/figure.h"
 
 #include <string.h>
 
