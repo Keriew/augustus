@@ -6,6 +6,8 @@
 #include "game/resource.h"
 #include "figure/figure.h"
 
+#define MAX_DOCKS 10
+
 typedef enum {
     SHIP_DOCK_REQUEST_1_DOCKING = 1,
     SHIP_DOCK_REQUEST_2_FIRST_QUEUE = 2,
@@ -16,7 +18,7 @@ typedef enum {
 
 typedef struct handled_good {
     unsigned char road_network_id;
-    int goods[RESOURCE_MAX - 1];
+    uint16_t goods;
 } handled_good;
 
 int building_dock_count_idle_dockers(const building *dock);
