@@ -33,7 +33,7 @@ int figure_trade_sea_trade_units();
 
 int figure_trader_ship_docked_once_at_dock(figure *ship, int dock_id);
 
-int figure_trader_ship_docked_once_at_dock_by_num(figure *ship, int dock_num);
+int figure_trader_ship_already_docked_at(figure *ship, int dock_num);
 
 int figure_trader_ship_can_queue_for_import(figure *ship);
 

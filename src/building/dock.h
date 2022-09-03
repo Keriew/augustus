@@ -3,8 +3,6 @@
 
 #include "building/building.h"
 #include "map/point.h"
-#include "game/resource.h"
-#include "figure/figure.h"
 
 #define MAX_DOCKS 10
 
@@ -15,11 +13,6 @@ typedef enum {
     SHIP_DOCK_REQUEST_6_ANY_QUEUE = 6,
     SHIP_DOCK_REQUEST_7_ANY = 7,
 } ship_dock_request_type;
-
-typedef struct handled_good {
-    unsigned char road_network_id;
-    int goods[RESOURCE_MAX - 1];
-} handled_good;
 
 int building_dock_count_idle_dockers(const building *dock);
 
@@ -48,8 +41,4 @@ int building_dock_can_export_to_ship(building *dock, int ship_id);
 int building_dock_can_trade_with_route(int route_id, int dock_id);
 
 void building_dock_set_can_trade_with_route(int route_id, int dock_id, int can_trade);
-
-void building_dock_get_handled_goods(handled_good *handled_goods, int ship_id);
-
-int building_dock_goods_handled(handled_good *handled_goods, building *dock, figure *ship);
 #endif // BUILDING_DOCK_H
