@@ -269,7 +269,11 @@ void building_dock_get_handled_goods(handled_good *handled_goods, int ship_id)
             handled_good *handled_good = &handled_goods[j];
             if (handled_good->road_network_id == dock->road_network_id) {
                 // we've already visited a dock on this road network. add all the resources that this dock handles
-                handled_good->goods &= ~dock->subtype.market_goods;
+                for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+                    if (building_distribution_is_good_accepted(r - 1, dock)) {
+                        handled_good->goods[r - 1] = 1;
+                    }
+                }
                 added_handled_good = 1;
                 break;
             }
@@ -279,16 +283,15 @@ void building_dock_get_handled_goods(handled_good *handled_goods, int ship_id)
             // no handled_good found for this road network. use the next available one and add all the resources that the dock accepts
             handled_good *handled_good = &handled_goods[next_available_idx];
             handled_good->road_network_id = dock->road_network_id;
-            handled_good->goods = ~dock->subtype.market_goods;
+            for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+                if (building_distribution_is_good_accepted(r - 1, dock)) {
+                    handled_good->goods[r - 1] = 1;
+                }
+            }
             added_handled_good = 1;
             next_available_idx++;
         }
     }
-}
-
-int is_good_handled(inventory_type r, handled_good *handled_good)
-{
-    return handled_good->goods & (1 << r);
 }
 
 int building_dock_goods_handled(handled_good *handled_goods, building *dock, figure *ship)
@@ -304,7 +307,7 @@ int building_dock_goods_handled(handled_good *handled_goods, building *dock, fig
                 // the ship doesn't buy or sell this good
                 continue;
             }
-            if (building_distribution_is_good_accepted(r - 1, dock) && !is_good_handled(r - 1, handled_good)) {
+            if (building_distribution_is_good_accepted(r - 1, dock) && !handled_good->goods[r - 1]) {
                 // this dock accepts a good that all previous docks on this road network did not accept
                 return 0;
             }

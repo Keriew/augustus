@@ -18,7 +18,7 @@ typedef enum {
 
 typedef struct handled_good {
     unsigned char road_network_id;
-    uint16_t goods;
+    int goods[RESOURCE_MAX - 1];
 } handled_good;
 
 int building_dock_count_idle_dockers(const building *dock);
