@@ -210,6 +210,11 @@ static void draw_building(int image_id, int x, int y, color_t color)
     image_draw_isometric_top(image_id, x, y, color, scale);
 }
 
+static void draw_well_range(int x, int y, int grid_offset)
+{
+    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_DARK_BLUE, scale);
+}
+
 static void draw_fountain_range(int x, int y, int grid_offset)
 {
     image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_BLUE, scale);
@@ -664,6 +669,16 @@ static void draw_aqueduct(const map_tile *tile, int x, int y)
     draw_building_tiles(x, y, 1, &blocked);
 }
 
+static void draw_water_structure_ranges()
+{
+    for (building *b = building_first_of_type(BUILDING_WELL); b; b = b->next_of_type) {
+        city_view_foreach_tile_in_range(b->grid_offset, 1, map_water_supply_well_radius(), draw_well_range);
+    }
+    for (building *b = building_first_of_type(BUILDING_FOUNTAIN); b; b = b->next_of_type) {
+        city_view_foreach_tile_in_range(b->grid_offset, 1, map_water_supply_fountain_radius(), draw_fountain_range);
+    }
+}
+
 static void draw_fountain(const map_tile *tile, int x, int y)
 {
     color_t color_mask;
@@ -675,8 +690,8 @@ static void draw_fountain(const map_tile *tile, int x, int y)
     }
     int image_id = image_group(building_properties_for_type(BUILDING_FOUNTAIN)->image_group);
     if (config_get(CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE)) {
-        city_view_foreach_tile_in_range(tile->grid_offset, 1,
-            map_water_supply_fountain_radius(), draw_fountain_range);
+        draw_water_structure_ranges();
+        city_view_foreach_tile_in_range(tile->grid_offset, 1, map_water_supply_fountain_radius(), draw_fountain_range);
     }
     draw_building(image_id, x, y, color_mask);
     if (map_terrain_is(tile->grid_offset, TERRAIN_RESERVOIR_RANGE)) {
@@ -701,8 +716,8 @@ static void draw_well(const map_tile *tile, int x, int y)
     }
     int image_id = image_group(building_properties_for_type(BUILDING_WELL)->image_group);
     if (config_get(CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE)) {
-        city_view_foreach_tile_in_range(tile->grid_offset, 1,
-            map_water_supply_well_radius(), draw_fountain_range);
+        draw_water_structure_ranges();
+        city_view_foreach_tile_in_range(tile->grid_offset, 1, map_water_supply_well_radius(), draw_well_range);
     }
     draw_building(image_id, x, y, color_mask);
     draw_building_tiles(x, y, 1, &blocked);
