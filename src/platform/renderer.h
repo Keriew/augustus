@@ -20,6 +20,10 @@ void platform_renderer_clear(void);
 
 void platform_renderer_render(void);
 
+void switch_to_extra_texture(void);
+
+void switch_to_default_texture(color_t color);
+
 void platform_renderer_pause(void);
 
 void platform_renderer_resume(void);

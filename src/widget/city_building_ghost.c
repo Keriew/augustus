@@ -22,6 +22,7 @@
 #include "figure/formation.h"
 #include "figuretype/animal.h"
 #include "graphics/image.h"
+#include "graphics/renderer.h"
 #include "input/scroll.h"
 #include "map/bridge.h"
 #include "map/building.h"
@@ -37,6 +38,7 @@
 #include "map/water.h"
 #include "map/water_supply.h"
 #include "scenario/property.h"
+#include "widget/city.h"
 #include "widget/city_bridge.h"
 
 #define MAX_TILES 49
@@ -212,12 +214,22 @@ static void draw_building(int image_id, int x, int y, color_t color)
 
 static void draw_well_range(int x, int y, int grid_offset)
 {
-    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_DARK_BLUE, scale);
+    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_BLUE, scale);
 }
 
 static void draw_fountain_range(int x, int y, int grid_offset)
 {
     image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_BLUE, scale);
+}
+
+static void draw_all_wells_range(int x, int y, int grid_offset)
+{
+    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_NONE, scale);
+}
+
+static void draw_all_fountains_range(int x, int y, int grid_offset)
+{
+    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_NONE, scale);
 }
 
 static void image_draw_warehouse(int image_id, int x, int y, color_t color)
@@ -671,12 +683,16 @@ static void draw_aqueduct(const map_tile *tile, int x, int y)
 
 static void draw_water_structure_ranges()
 {
+    graphics_renderer()->switch_to_extra_texture();
+    set_city_clip_rectangle();
     for (building *b = building_first_of_type(BUILDING_WELL); b; b = b->next_of_type) {
-        city_view_foreach_tile_in_range(b->grid_offset, 1, map_water_supply_well_radius(), draw_well_range);
+        city_view_foreach_tile_in_range(b->grid_offset, 1, map_water_supply_well_radius(), draw_all_wells_range);
     }
     for (building *b = building_first_of_type(BUILDING_FOUNTAIN); b; b = b->next_of_type) {
-        city_view_foreach_tile_in_range(b->grid_offset, 1, map_water_supply_fountain_radius(), draw_fountain_range);
+        city_view_foreach_tile_in_range(b->grid_offset, 1, map_water_supply_fountain_radius(), draw_all_fountains_range);
     }
+    graphics_renderer()->switch_to_default_texture(COLOR_MASK_BLUE);
+    set_city_clip_rectangle();
 }
 
 static void draw_fountain(const map_tile *tile, int x, int y)
