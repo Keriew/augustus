@@ -214,7 +214,7 @@ static void draw_building(int image_id, int x, int y, color_t color)
 
 static void draw_well_range(int x, int y, int grid_offset)
 {
-    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_BLUE, scale);
+    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_DARK_BLUE, scale);
 }
 
 static void draw_fountain_range(int x, int y, int grid_offset)
@@ -224,12 +224,12 @@ static void draw_fountain_range(int x, int y, int grid_offset)
 
 static void draw_all_wells_range(int x, int y, int grid_offset)
 {
-    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_NONE, scale);
+    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, 0xff001199, scale);
 }
 
 static void draw_all_fountains_range(int x, int y, int grid_offset)
 {
-    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_NONE, scale);
+    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, 0xff3377ff, scale);
 }
 
 static void image_draw_warehouse(int image_id, int x, int y, color_t color)
@@ -691,7 +691,7 @@ static void draw_water_structure_ranges()
     for (building *b = building_first_of_type(BUILDING_FOUNTAIN); b; b = b->next_of_type) {
         city_view_foreach_tile_in_range(b->grid_offset, 1, map_water_supply_fountain_radius(), draw_all_fountains_range);
     }
-    graphics_renderer()->switch_to_default_texture(COLOR_MASK_BLUE);
+    graphics_renderer()->switch_to_default_texture(0x66ffffff);
     set_city_clip_rectangle();
 }
 
