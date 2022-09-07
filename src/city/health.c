@@ -400,7 +400,6 @@ int city_health_get_global_sickness_level(void)
         return SICKNESS_LEVEL_LOW;
     }
 
-    int global_rating = building_sickness_level / building_number;
     int global_sickness_level = SICKNESS_LEVEL_LOW;
 
     if (max_sickness_level == MAX_SICKNESS_LEVEL) { // one or many houses is plagued
@@ -408,10 +407,6 @@ int city_health_get_global_sickness_level(void)
     } else if (max_sickness_level >= HIGH_SICKNESS_LEVEL) { // one or many houses have sickness_level >= 90
         global_sickness_level = SICKNESS_LEVEL_HIGH;
     } else if (max_sickness_level >= MEDIUM_SICKNESS_LEVEL) { // one or many houses have sickness_level >= 60
-        global_sickness_level = SICKNESS_LEVEL_MEDIUM;
-    } else if (global_rating < LOW_SICKNESS_LEVEL) { // the global sickness_level is under 30
-        global_sickness_level = SICKNESS_LEVEL_LOW;
-    } else if (global_rating < MEDIUM_SICKNESS_LEVEL) { // the global sickness_level is under 60
         global_sickness_level = SICKNESS_LEVEL_MEDIUM;
     }
 
