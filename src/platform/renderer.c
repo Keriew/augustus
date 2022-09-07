@@ -59,7 +59,6 @@ typedef struct buffer_texture {
 static struct {
     SDL_Renderer *renderer;
     SDL_Texture *render_texture;
-    SDL_Texture *extra_texture;
     int is_software_renderer;
     int paused;
     struct {
@@ -875,8 +874,6 @@ static void create_renderer_interface(void)
     data.renderer_interface.load_unpacked_image = load_unpacked_image;
     data.renderer_interface.should_pack_image = should_pack_image;
     data.renderer_interface.update_scale = update_scale;
-    data.renderer_interface.switch_to_extra_texture = switch_to_extra_texture;
-    data.renderer_interface.switch_to_default_texture = switch_to_default_texture;
 
     graphics_renderer_set_interface(&data.renderer_interface);
 }
@@ -950,10 +947,6 @@ static void destroy_render_texture(void)
         SDL_DestroyTexture(data.render_texture);
         data.render_texture = 0;
     }
-    if (data.extra_texture) {
-        SDL_DestroyTexture(data.extra_texture);
-        data.extra_texture = 0;
-    }
 }
 
 int platform_renderer_create_render_texture(int width, int height)
@@ -983,11 +976,6 @@ int platform_renderer_create_render_texture(int width, int height)
     SDL_RenderSetLogicalSize(data.renderer, width, height);
 
     data.render_texture = SDL_CreateTexture(data.renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET, width, height);
-    data.extra_texture = SDL_CreateTexture(data.renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET, width, height);
-    if (data.extra_texture) {
-        SDL_SetTextureBlendMode(data.extra_texture, SDL_BLENDMODE_BLEND);
-    }
-
     if (data.render_texture) {
         SDL_Log("Render texture created (%d x %d)", width, height);
         SDL_SetRenderTarget(data.renderer, data.render_texture);
@@ -1073,26 +1061,6 @@ void platform_renderer_render(void)
 #endif
     SDL_RenderPresent(data.renderer);
     SDL_SetRenderTarget(data.renderer, data.render_texture);
-}
-
-void switch_to_extra_texture(void)
-{
-    if (data.paused) {
-        return;
-    }
-    SDL_SetRenderTarget(data.renderer, data.extra_texture);
-    SDL_SetRenderDrawColor(data.renderer, 0, 0, 0, 0);
-    SDL_RenderClear(data.renderer);
-}
-
-void switch_to_default_texture(color_t color)
-{
-    if (data.paused) {
-        return;
-    }
-    SDL_SetRenderTarget(data.renderer, data.render_texture);
-    set_texture_color_and_scale_mode(data.extra_texture, color, 1);
-    SDL_RenderCopy(data.renderer, data.extra_texture, NULL, NULL);
 }
 
 void platform_renderer_generate_mouse_cursor_texture(int cursor_id, int size, const color_t *pixels,

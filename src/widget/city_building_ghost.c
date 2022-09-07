@@ -41,6 +41,8 @@
 #include "widget/city.h"
 #include "widget/city_bridge.h"
 
+#include <string.h>
+
 #define MAX_TILES 49
 
 static const int X_VIEW_OFFSETS[MAX_TILES] = {
@@ -160,6 +162,35 @@ static struct {
 
 static building ghost_building;
 static float scale = SCALE_NONE;
+static enum {
+    WATER_ACCESS_NONE = 0b00,
+    WATER_ACCESS_WELL = 0b01,
+    WATER_ACCESS_FOUNTAIN = 0b10
+} water_access;
+static uint8_t has_water_access[GRID_SIZE * GRID_SIZE];
+
+static void set_well_access(int x, int y, int grid_offset)
+{
+    has_water_access[grid_offset] |= WATER_ACCESS_WELL;
+}
+
+static void set_fountain_access(int x, int y, int grid_offset)
+{
+    has_water_access[grid_offset] |= WATER_ACCESS_FOUNTAIN;
+}
+
+void city_building_ghost_set_type(building_type type)
+{
+    if (type != BUILDING_FOUNTAIN && type != BUILDING_WELL)
+        return;
+    memset(has_water_access, 0, sizeof(uint8_t) * GRID_SIZE * GRID_SIZE);
+    for (building *b = building_first_of_type(BUILDING_WELL); b; b = b->next_of_type) {
+        city_view_foreach_tile_in_range(b->grid_offset, 1, map_water_supply_well_radius(), set_well_access);
+    }
+    for (building *b = building_first_of_type(BUILDING_FOUNTAIN); b; b = b->next_of_type) {
+        city_view_foreach_tile_in_range(b->grid_offset, 1, map_water_supply_fountain_radius(), set_fountain_access);
+    }
+}
 
 static int is_blocked_for_building(int grid_offset, int building_size, int *blocked_tiles)
 {
@@ -220,16 +251,6 @@ static void draw_well_range(int x, int y, int grid_offset)
 static void draw_fountain_range(int x, int y, int grid_offset)
 {
     image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_BLUE, scale);
-}
-
-static void draw_all_wells_range(int x, int y, int grid_offset)
-{
-    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, 0xff001199, scale);
-}
-
-static void draw_all_fountains_range(int x, int y, int grid_offset)
-{
-    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, 0xff3377ff, scale);
 }
 
 static void image_draw_warehouse(int image_id, int x, int y, color_t color)
@@ -681,18 +702,19 @@ static void draw_aqueduct(const map_tile *tile, int x, int y)
     draw_building_tiles(x, y, 1, &blocked);
 }
 
+static void draw_water_access(int x, int y, int grid_offset)
+{
+    uint8_t water_access = has_water_access[grid_offset];
+    if (water_access & WATER_ACCESS_FOUNTAIN) {
+        draw_fountain_range(x, y, grid_offset);
+    } else if (water_access & WATER_ACCESS_WELL) {
+        draw_well_range(x, y, grid_offset);
+    }
+}
+
 static void draw_water_structure_ranges()
 {
-    graphics_renderer()->switch_to_extra_texture();
-    set_city_clip_rectangle();
-    for (building *b = building_first_of_type(BUILDING_WELL); b; b = b->next_of_type) {
-        city_view_foreach_tile_in_range(b->grid_offset, 1, map_water_supply_well_radius(), draw_all_wells_range);
-    }
-    for (building *b = building_first_of_type(BUILDING_FOUNTAIN); b; b = b->next_of_type) {
-        city_view_foreach_tile_in_range(b->grid_offset, 1, map_water_supply_fountain_radius(), draw_all_fountains_range);
-    }
-    graphics_renderer()->switch_to_default_texture(0x66ffffff);
-    set_city_clip_rectangle();
+    city_view_foreach_map_tile(draw_water_access);
 }
 
 static void draw_fountain(const map_tile *tile, int x, int y)

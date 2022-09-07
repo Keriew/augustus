@@ -81,9 +81,6 @@ typedef struct {
     int (*should_pack_image)(int width, int height);
 
     void (*update_scale)(int city_scale);
-
-    void (*switch_to_extra_texture)(void);
-    void (*switch_to_default_texture)(color_t color);
 } graphics_renderer_interface;
 
 const graphics_renderer_interface *graphics_renderer(void);
