@@ -39,7 +39,6 @@
 #include "map/terrain.h"
 #include "map/tiles.h"
 #include "map/water.h"
-#include "widget/city_building_ghost.h"
 
 #define BUILDING_CYCLES 4
 #define MAX_CYCLE_SIZE 10
@@ -536,7 +535,6 @@ void building_construction_set_type(building_type type)
     if (building_construction_can_rotate()) {
         building_rotation_setup_rotation();
     }
-    city_building_ghost_set_type(type);
 }
 
 void building_construction_clear_type(void)
