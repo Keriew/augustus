@@ -758,8 +758,6 @@ static translation_string all_strings[] = {
     {TR_CITY_WARNING_DATA_COPY_NOT_SUPPORTED, "Impossible de copier des réglages pour ce bâtiment" },
     {TR_CITY_WARNING_DATA_PASTE_SUCCESS, "Réglages appliqués" },
     {TR_CITY_WARNING_DATA_PASTE_NOT_SUPPORTED, "Impossible d'appliquer des réglages à ce bâtiment" },
-    {TR_CITY_WARNING_DATA_MOTHBALL_ON, "Building is now mothballed" },
-    {TR_CITY_WARNING_DATA_MOTHBALL_OFF, "Building is now active" },
     {TR_HOTKEY_SHOW_OVERLAY_FOOD_STOCKS, "Stock Vivres"},
     {TR_HOTKEY_SHOW_OVERLAY_ENTERTAINMENT, "Loisirs" },
     {TR_HOTKEY_SHOW_OVERLAY_EDUCATION, "Éducation" },
