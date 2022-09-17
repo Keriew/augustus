@@ -504,8 +504,10 @@ static void handle_hotkeys(const hotkeys *h)
             building *b = building_main(building_get(building_id));
             building_mothball_toggle(b);
             if (b->state == BUILDING_STATE_IN_USE) {
+                city_warning_clear_all();
                 city_warning_show(WARNING_DATA_MOTHBALL_OFF, NEW_WARNING_SLOT);
             } else if (b->state == BUILDING_STATE_MOTHBALLED) {
+                city_warning_clear_all();
                 city_warning_show(WARNING_DATA_MOTHBALL_ON, NEW_WARNING_SLOT);
             }
         }
