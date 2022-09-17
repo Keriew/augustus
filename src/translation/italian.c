@@ -136,7 +136,6 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_EDIT_TITLE, "Premi nuova pulsante scorciatoia"},
     {TR_BUILDING_ROADBLOCK, "Blocco stradale"},
     {TR_BUILDING_ROADBLOCK_DESC, "Il Blocco stradale blocca i vagabondi."},
-    {TR_BUILDING_MOTHBALL_TOGGLE, "Mothball" },
     {TR_BUILDING_ARCHITECT_GUILD, "Gilda degli Ingienieri" },
     {TR_BUILDING_ARCHITECT_GUILD_DESC, "Gli ingenieri di questa gilda lavorano senza sosta alla costruzione dei monumenti per la gloria di Roma" },
     {TR_BUILDING_GRAND_TEMPLE_ADD_MODULE, "Concedi un epiteto sul tempio" },
