@@ -712,8 +712,6 @@ static translation_string all_strings[] = {
     {TR_WINDOW_BUILDING_DISTRIBUTION_CART_PUSHER_GETTING, "Il magazziniere sta andando a prendere i beni da un altro magazzino."},
     {TR_TOOLTIP_BUTTON_ACCEPT_WORKERS, "Non consegnare risorse a officine e granai" },
     {TR_CITY_WARNING_GRANARY_BREAKIN, "Un granaio è stato saccheggiato!" },
-    {TR_CITY_WARNING_DATA_MOTHBALL_ON, "Building is now mothballed" },
-    {TR_CITY_WARNING_DATA_MOTHBALL_OFF, "Building is now active" },
     {TR_BUILDING_GARDEN_WALL, "Muro di cinta a volte " },
     {TR_BUILDING_ROOFED_GARDEN_WALL, "Muro di cinta coperto" },
     {TR_BUILDING_GARDEN_WALL_GATE, "Cancello" },
