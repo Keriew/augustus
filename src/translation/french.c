@@ -171,7 +171,6 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_EDIT_TITLE, "Appuyez sur une touche"},
     {TR_BUILDING_ROADBLOCK, "Barrage routier" },
     {TR_BUILDING_ROADBLOCK_DESC, "Les barrages routiers stoppent les citoyens itinérants."},
-    {TR_BUILDING_MOTHBALL_TOGGLE, "Mothball" },
     {TR_BUILDING_ARCHITECT_GUILD, "Guilde des architectes"},
     {TR_BUILDING_ARCHITECT_GUILD_DESC, "Ici, les architectes travaillent sans relâche afin de construire des monuments pour la gloire de Rome."},
     {TR_BUILDING_GRAND_TEMPLE_ADD_MODULE, "Accorder une épithète au temple"},
