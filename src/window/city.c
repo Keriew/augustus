@@ -41,6 +41,7 @@
 #include "widget/sidebar/extra.h"
 #include "widget/sidebar/military.h"
 #include "window/advisors.h"
+#include "window/building_info.h"
 #include "window/empire.h"
 #include "window/file_dialog.h"
 #include "window/message_list.h"
@@ -510,6 +511,14 @@ static void handle_hotkeys(const hotkeys *h)
                 city_warning_clear_all();
                 city_warning_show(WARNING_DATA_MOTHBALL_ON, NEW_WARNING_SLOT);
             }
+        }
+    }
+    if (h->storage_order) {
+        int building_id = map_building_at(widget_city_current_grid_offset());
+        int grid_offset = widget_city_current_grid_offset();
+        if (building_id) {         
+           window_building_info_show(grid_offset);
+           window_building_info_show_storage_orders();
         }
     }
     if (h->clone_building) {
