@@ -16,10 +16,6 @@ building *building_barracks_get_unmanned_tower(building *barracks, map_point *ro
 
 int building_barracks_create_tower_sentry(building *barracks, int x, int y);
 
-void building_barracks_save_state(buffer *buf);
-
-void building_barracks_load_state(buffer *buf);
-
 void building_barracks_toggle_priority(building* barracks);
 
 int building_barracks_get_priority(building* barracks);

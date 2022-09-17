@@ -195,16 +195,6 @@ int building_barracks_create_tower_sentry(building *barracks, int x, int y)
     return 1;
 }
 
-void building_barracks_save_state(buffer *buf)
-{
-    buffer_skip(buf, sizeof(int));
-}
-
-void building_barracks_load_state(buffer *buf)
-{
-    buffer_skip(buf, sizeof(int));
-}
-
 void building_barracks_toggle_priority(building *barracks)
 {
     barracks->subtype.barracks_priority = 1 - barracks->subtype.barracks_priority;
