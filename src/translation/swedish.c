@@ -846,3 +846,4 @@ void translation_swedish(const translation_string **strings, int *num_strings)
     *strings = all_strings;
     *num_strings = sizeof(all_strings) / sizeof(translation_string);
 }
+
