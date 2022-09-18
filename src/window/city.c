@@ -514,8 +514,8 @@ static void handle_hotkeys(const hotkeys *h)
         }
     }
     if (h->storage_order) {
-        int building_id = map_building_at(widget_city_current_grid_offset());
         int grid_offset = widget_city_current_grid_offset();
+        int building_id = map_building_at(grid_offset);       
         if (building_id) {         
            window_building_info_show(grid_offset);
            window_building_info_show_storage_orders();
