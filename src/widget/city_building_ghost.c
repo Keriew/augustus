@@ -1201,6 +1201,9 @@ void city_building_ghost_draw(const map_tile *tile)
         case BUILDING_ROAD:
             draw_road(tile, x, y);
             break;
+        case BUILDING_HOUSE_VACANT_LOT:
+            city_water_ghost_draw_water_structure_ranges();
+            draw_default(tile, x, y, type);
         default:
             draw_default(tile, x, y, type);
             break;
