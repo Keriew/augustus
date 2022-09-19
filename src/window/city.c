@@ -5,6 +5,8 @@
 #include "building/construction.h"
 #include "building/data_transfer.h"
 #include "building/menu.h"
+#include "building/model.h"
+#include "building/monument.h"
 #include "building/properties.h"
 #include "building/rotation.h"
 #include "building/type.h"
@@ -501,24 +503,44 @@ static void handle_hotkeys(const hotkeys *h)
     }
     if (h->mothball_toggle) {
         int building_id = map_building_at(widget_city_current_grid_offset());
-        if (building_id) {
-            building *b = building_main(building_get(building_id));
-            building_mothball_toggle(b);
-            if (b->state == BUILDING_STATE_IN_USE) {
-                city_warning_clear_all();
-                city_warning_show(WARNING_DATA_MOTHBALL_OFF, NEW_WARNING_SLOT);
-            } else if (b->state == BUILDING_STATE_MOTHBALLED) {
-                city_warning_clear_all();
-                city_warning_show(WARNING_DATA_MOTHBALL_ON, NEW_WARNING_SLOT);
-            }
+        building *b = building_main(building_get(building_id));
+        if (building_id && model_get_building(b->type)->laborers) {
+                building_mothball_toggle(b);
+                if (b->state == BUILDING_STATE_IN_USE) {
+                    city_warning_clear_all();
+                    city_warning_show(WARNING_DATA_MOTHBALL_OFF, NEW_WARNING_SLOT);
+                } else if (b->state == BUILDING_STATE_MOTHBALLED) {
+                    city_warning_clear_all();
+                    city_warning_show(WARNING_DATA_MOTHBALL_ON, NEW_WARNING_SLOT);
+                }
         }
     }
     if (h->storage_order) {
         int grid_offset = widget_city_current_grid_offset();
         int building_id = map_building_at(grid_offset);       
-        if (building_id) {         
-           window_building_info_show(grid_offset);
-           window_building_info_show_storage_orders();
+        if (building_id) {   
+            building *b = building_main(building_get(building_id));
+            if (b->type == BUILDING_WAREHOUSE || 
+                b->type == BUILDING_WAREHOUSE_SPACE ||
+                b->type == BUILDING_GRANARY ||
+                b->type == BUILDING_MARKET ||
+                b->type == BUILDING_DOCK ||
+                b->type == BUILDING_MESS_HALL ||
+                b->type == BUILDING_TAVERN ||
+                b->type == BUILDING_ROADBLOCK ||
+                b->type == BUILDING_CARAVANSERAI ||
+                (b->type == BUILDING_SMALL_TEMPLE_CERES && building_monument_gt_module_is_active(VENUS_MODULE_1_DISTRIBUTE_WINE)) ||
+                (b->type == BUILDING_LARGE_TEMPLE_CERES && building_monument_gt_module_is_active(VENUS_MODULE_1_DISTRIBUTE_WINE)) ||
+                (b->type == BUILDING_SMALL_TEMPLE_VENUS && building_monument_gt_module_is_active(CERES_MODULE_2_DISTRIBUTE_FOOD)) ||
+                (b->type == BUILDING_LARGE_TEMPLE_VENUS && building_monument_gt_module_is_active(CERES_MODULE_2_DISTRIBUTE_FOOD)) ||
+                b->type == BUILDING_CARAVANSERAI ||
+                b->type == BUILDING_GARDEN_WALL_GATE ||
+                b->type == BUILDING_HEDGE_GATE_DARK ||
+                b->type == BUILDING_HEDGE_GATE_LIGHT ||
+                b->type == BUILDING_PALISADE_GATE) {
+                    window_building_info_show(grid_offset);
+                    window_building_info_show_storage_orders();
+            }
         }
     }
     if (h->clone_building) {
