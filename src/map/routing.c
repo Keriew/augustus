@@ -178,7 +178,7 @@ static inline int distance_left(int x, int y)
 }
 
 static void route_queue_from_to(int src_x, int src_y, int dst_x, int dst_y, int max_tiles,
-    void (*callback)(int next_offset, int dist, int remaining_dist))
+    int (*callback)(int next_offset, int dist, int remaining_dist))
 {
     clear_data();
     distance.dst_x = dst_x;
@@ -186,6 +186,9 @@ static void route_queue_from_to(int src_x, int src_y, int dst_x, int dst_y, int 
     int dest = map_grid_offset(dst_x, dst_y);
     ordered_enqueue(map_grid_offset(src_x, src_y), 1, 0);
     int tiles = 0;
+    if (!valid_offset(dest) || !callback(dest, 1, 0)) {
+        return;
+    }
     while (queue.tail) {
         int offset = ordered_queue_pop();
         if (offset == dest || (max_tiles && ++tiles > max_tiles)) {
@@ -196,9 +199,12 @@ static void route_queue_from_to(int src_x, int src_y, int dst_x, int dst_y, int 
         int dist = 1 + distance.determined.items[offset];
         distance.possible.items[offset] = 1;
         for (int i = 0; i < 4; i++) {
-            if (valid_offset(offset + ROUTE_OFFSETS[i])) {
-                callback(offset + ROUTE_OFFSETS[i], dist,
-                    distance_left(x + ROUTE_OFFSETS_X[i], y + ROUTE_OFFSETS_Y[i]));
+            int next_offset = offset + ROUTE_OFFSETS[i];
+            if (valid_offset(next_offset)) {
+                int remaining_dist = distance_left(x + ROUTE_OFFSETS_X[i], y + ROUTE_OFFSETS_Y[i]);
+                if (callback(next_offset, dist, remaining_dist)) {
+                    ordered_enqueue(next_offset, dist, remaining_dist);
+                }
             }
         }
     }
@@ -453,11 +459,12 @@ static inline int has_fighting_enemy(int grid_offset)
     return fighting_data.status.items[grid_offset] & 2;
 }
 
-static void callback_travel_citizen_land(int next_offset, int dist, int remaining_dist)
+static int callback_travel_citizen_land(int next_offset, int dist, int remaining_dist)
 {
     if (terrain_land_citizen.items[next_offset] >= 0 && !has_fighting_friendly(next_offset)) {
-        ordered_enqueue(next_offset, dist, remaining_dist);
+        return 1;
     }
+    return 0;
 }
 
 int map_routing_citizen_can_travel_over_land(int src_x, int src_y, int dst_x, int dst_y)
@@ -467,12 +474,13 @@ int map_routing_citizen_can_travel_over_land(int src_x, int src_y, int dst_x, in
     return distance.determined.items[map_grid_offset(dst_x, dst_y)] != 0;
 }
 
-static void callback_travel_citizen_road_garden(int next_offset, int dist, int remaining_dist)
+static int callback_travel_citizen_road_garden(int next_offset, int dist, int remaining_dist)
 {
     if (terrain_land_citizen.items[next_offset] >= CITIZEN_0_ROAD &&
         terrain_land_citizen.items[next_offset] <= CITIZEN_2_PASSABLE_TERRAIN) {
-        ordered_enqueue(next_offset, dist, remaining_dist);
+        return 1;
     }
+    return 0;
 }
 
 int map_routing_citizen_can_travel_over_road_garden(int src_x, int src_y, int dst_x, int dst_y)
@@ -487,12 +495,13 @@ int map_routing_citizen_can_travel_over_road_garden(int src_x, int src_y, int ds
     return distance.determined.items[dst_offset] != 0;
 }
 
-static void callback_travel_walls(int next_offset, int dist, int remaining_dist)
+static int callback_travel_walls(int next_offset, int dist, int remaining_dist)
 {
     if (terrain_walls.items[next_offset] >= WALL_0_PASSABLE &&
         terrain_walls.items[next_offset] <= 2) {
-        ordered_enqueue(next_offset, dist, remaining_dist);
+        return 1;
     }
+    return 0;
 }
 
 int map_routing_can_travel_over_walls(int src_x, int src_y, int dst_x, int dst_y)
@@ -502,26 +511,31 @@ int map_routing_can_travel_over_walls(int src_x, int src_y, int dst_x, int dst_y
     return distance.determined.items[map_grid_offset(dst_x, dst_y)] != 0;
 }
 
-static void callback_travel_noncitizen_land_through_building(int next_offset, int dist, int remaining_dist)
+static int callback_travel_noncitizen_land_through_building(int next_offset, int dist, int remaining_dist)
 {
-    if (!has_fighting_enemy(next_offset)) {
-        if (terrain_land_noncitizen.items[next_offset] == NONCITIZEN_0_PASSABLE ||
-            terrain_land_noncitizen.items[next_offset] == NONCITIZEN_2_CLEARABLE ||
-            (terrain_land_noncitizen.items[next_offset] == NONCITIZEN_1_BUILDING &&
-            map_building_at(next_offset) == state.through_building_id)) {
-            ordered_enqueue(next_offset, dist, remaining_dist);
-        }
+    if (has_fighting_enemy(next_offset)) {
+        return 0;
     }
+    int8_t terrain = terrain_land_noncitizen.items[next_offset];
+    if (terrain == NONCITIZEN_0_PASSABLE || terrain == NONCITIZEN_2_CLEARABLE) {
+        return 1;
+    }
+    if (terrain == NONCITIZEN_1_BUILDING && map_building_at(next_offset) == state.through_building_id) {
+        return 1;
+    }
+    return 0;
 }
 
-static void callback_travel_noncitizen_land(int next_offset, int dist, int remaining_dist)
+static int callback_travel_noncitizen_land(int next_offset, int dist, int remaining_dist)
 {
-    if (!has_fighting_enemy(next_offset)) {
-        if (terrain_land_noncitizen.items[next_offset] >= NONCITIZEN_0_PASSABLE &&
-            terrain_land_noncitizen.items[next_offset] < NONCITIZEN_5_FORT) {
-            ordered_enqueue(next_offset, dist, remaining_dist);
-        }
+    if (has_fighting_enemy(next_offset)) {
+        return 0;
     }
+    uint8_t terrain = terrain_land_noncitizen.items[next_offset];
+    if (terrain >= NONCITIZEN_0_PASSABLE && terrain < NONCITIZEN_5_FORT) {
+        return 1;
+    }
+    return 0;
 }
 
 int map_routing_noncitizen_can_travel_over_land(
@@ -538,11 +552,12 @@ int map_routing_noncitizen_can_travel_over_land(
     return distance.determined.items[map_grid_offset(dst_x, dst_y)] != 0;
 }
 
-static void callback_travel_noncitizen_through_everything(int next_offset, int dist, int remaining_dist)
+static int callback_travel_noncitizen_through_everything(int next_offset, int dist, int remaining_dist)
 {
     if (terrain_land_noncitizen.items[next_offset] >= NONCITIZEN_0_PASSABLE) {
-        ordered_enqueue(next_offset, dist, remaining_dist);
+        return 1;
     }
+    return 0;
 }
 
 int map_routing_noncitizen_can_travel_through_everything(int src_x, int src_y, int dst_x, int dst_y)
