@@ -53,6 +53,7 @@ static struct {
 
 static struct {
     int through_building_id;
+    int dest_building_id;
 } state;
 
 static void reset_fighting_status(void)
@@ -520,7 +521,8 @@ static int callback_travel_noncitizen_land_through_building(int next_offset, int
     if (terrain == NONCITIZEN_0_PASSABLE || terrain == NONCITIZEN_2_CLEARABLE) {
         return 1;
     }
-    if (terrain == NONCITIZEN_1_BUILDING && map_building_at(next_offset) == state.through_building_id) {
+    int map_building_id = map_building_at(next_offset);
+    if (terrain == NONCITIZEN_1_BUILDING && (map_building_id == state.through_building_id || map_building_id == state.dest_building_id)) {
         return 1;
     }
     return 0;
@@ -545,6 +547,8 @@ int map_routing_noncitizen_can_travel_over_land(
     ++stats.enemy_routes_calculated;
     if (only_through_building_id) {
         state.through_building_id = only_through_building_id;
+        // due to formation offsets, the destination building may not be the same as the "through building" (a.k.a. target building)
+        state.dest_building_id = map_building_at(map_grid_offset(dst_x, dst_y));
         route_queue_from_to(src_x, src_y, dst_x, dst_y, 0, callback_travel_noncitizen_land_through_building);
     } else {
         route_queue_from_to(src_x, src_y, dst_x, dst_y, max_tiles, callback_travel_noncitizen_land);
