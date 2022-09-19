@@ -381,6 +381,27 @@ static void show_overlay_from_grid_offset(int grid_offset)
     }
 }
 
+static int has_storage_orders(building_type type)
+{
+    return type == BUILDING_WAREHOUSE ||
+        type == BUILDING_WAREHOUSE_SPACE ||
+        type == BUILDING_GRANARY ||
+        type == BUILDING_MARKET ||
+        type == BUILDING_DOCK ||
+        type == BUILDING_MESS_HALL ||
+        type == BUILDING_TAVERN ||
+        type == BUILDING_ROADBLOCK ||
+        type == BUILDING_CARAVANSERAI ||
+        type == BUILDING_GARDEN_WALL_GATE ||
+        type == BUILDING_HEDGE_GATE_DARK ||
+        type == BUILDING_HEDGE_GATE_LIGHT ||
+        type == BUILDING_PALISADE_GATE ||
+        (type == BUILDING_SMALL_TEMPLE_CERES && building_monument_gt_module_is_active(VENUS_MODULE_1_DISTRIBUTE_WINE)) ||
+        (type == BUILDING_LARGE_TEMPLE_CERES && building_monument_gt_module_is_active(VENUS_MODULE_1_DISTRIBUTE_WINE)) ||
+        (type == BUILDING_SMALL_TEMPLE_VENUS && building_monument_gt_module_is_active(CERES_MODULE_2_DISTRIBUTE_FOOD)) ||
+        (type == BUILDING_LARGE_TEMPLE_VENUS && building_monument_gt_module_is_active(CERES_MODULE_2_DISTRIBUTE_FOOD));
+}
+
 static void cycle_legion(void)
 {
     static int current_legion_id = 1;
@@ -520,24 +541,7 @@ static void handle_hotkeys(const hotkeys *h)
         int building_id = map_building_at(grid_offset);       
         if (building_id) {   
             building *b = building_main(building_get(building_id));
-            if (b->type == BUILDING_WAREHOUSE || 
-                b->type == BUILDING_WAREHOUSE_SPACE ||
-                b->type == BUILDING_GRANARY ||
-                b->type == BUILDING_MARKET ||
-                b->type == BUILDING_DOCK ||
-                b->type == BUILDING_MESS_HALL ||
-                b->type == BUILDING_TAVERN ||
-                b->type == BUILDING_ROADBLOCK ||
-                b->type == BUILDING_CARAVANSERAI ||
-                (b->type == BUILDING_SMALL_TEMPLE_CERES && building_monument_gt_module_is_active(VENUS_MODULE_1_DISTRIBUTE_WINE)) ||
-                (b->type == BUILDING_LARGE_TEMPLE_CERES && building_monument_gt_module_is_active(VENUS_MODULE_1_DISTRIBUTE_WINE)) ||
-                (b->type == BUILDING_SMALL_TEMPLE_VENUS && building_monument_gt_module_is_active(CERES_MODULE_2_DISTRIBUTE_FOOD)) ||
-                (b->type == BUILDING_LARGE_TEMPLE_VENUS && building_monument_gt_module_is_active(CERES_MODULE_2_DISTRIBUTE_FOOD)) ||
-                b->type == BUILDING_CARAVANSERAI ||
-                b->type == BUILDING_GARDEN_WALL_GATE ||
-                b->type == BUILDING_HEDGE_GATE_DARK ||
-                b->type == BUILDING_HEDGE_GATE_LIGHT ||
-                b->type == BUILDING_PALISADE_GATE) {
+            if (has_storage_orders(b->type)) {
                     window_building_info_show(grid_offset);
                     window_building_info_show_storage_orders();
             }
