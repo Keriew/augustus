@@ -29,6 +29,7 @@ static const char *ini_keys[] = {
     "ui_visual_feedback_on_delete",
     "ui_allow_cycling_temples",
     "ui_show_water_structure_range",
+    "ui_show_water_structure_range_houses",
     "ui_show_construction_size",
     "ui_highlight_legions",
     "ui_show_military_sidebar",
@@ -62,6 +63,7 @@ static const char *ini_keys[] = {
     "gameplay_change_disable_infinite_wolves_spawning",
     "gameplay_change_romers_dont_skip_corners",
     "gameplay_change_yearly_autosave",
+    "gameplay_change_auto_kill_animals",
 };
 
 static const char *ini_string_keys[] = {
