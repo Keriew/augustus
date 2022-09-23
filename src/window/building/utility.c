@@ -350,6 +350,15 @@ void window_building_draw_native_crops(building_info_context *c)
     draw_native(c, 133);
 }
 
+void window_building_draw_highway(building_info_context *c)
+{
+    //c->help_id = 0;
+    //window_building_play_sound(c, "wavs/aquaduct.wav");
+    outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_HIGHWAY, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
+    window_building_draw_description_at(c, BLOCK_SIZE * c->height_blocks - 144, CUSTOM_TRANSLATION, TR_BUILDING_HIGHWAY_DESC);
+}
+
 void toggle_figure_state(int index, int param2)
 {
     building *b = building_get(data.building_id);

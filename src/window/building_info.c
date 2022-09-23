@@ -753,6 +753,8 @@ static void draw_background(void)
             } else {
                 window_building_draw_palisade_gate(&context);
             }
+        } else if (btype == BUILDING_HIGHWAY) {
+            window_building_draw_highway(&context);
         }
     } else if (context.type == BUILDING_INFO_LEGION) {
         window_building_draw_legion_info(&context);
