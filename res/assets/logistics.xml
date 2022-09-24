@@ -515,5 +515,5 @@
 			<frame src="Engineers_Post_Upgrade_ON_10"/>
 		</animation>
 	</image>
-	<image id="Highway" src="Highway"/>
+	<image id="Highway" src="Highway" isometric="true"/>
 </assetlist>
