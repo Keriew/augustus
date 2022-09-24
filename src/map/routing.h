@@ -8,6 +8,7 @@ typedef enum {
     ROUTED_BUILDING_WALL = 1,
     ROUTED_BUILDING_AQUEDUCT = 2,
     ROUTED_BUILDING_AQUEDUCT_WITHOUT_GRAPHIC = 4,
+    ROUTED_BUILDING_HIGHWAY = 5,
 } routed_building_type;
 
 void map_routing_calculate_distances(int x, int y);

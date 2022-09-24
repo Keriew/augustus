@@ -765,6 +765,24 @@ int map_tiles_set_road(int x, int y)
     return tile_set;
 }
 
+int map_tiles_set_highway(int x, int y)
+{
+    int terrain = TERRAIN_HIGHWAY_TOP;
+    for (int xx = x; xx <= x + 1; xx++) {
+        for (int yy = y; yy <= y + 1; yy++) {
+            int grid_offset = map_grid_offset(xx, yy);
+            map_terrain_add(grid_offset, terrain);
+            map_property_clear_constructing(grid_offset);
+            const terrain_image *img = map_image_context_get_paved_road(grid_offset);
+            int image_id = image_group(GROUP_TERRAIN_ROAD) + img->group_offset + img->item_offset;
+            map_image_set(grid_offset, image_id);
+            map_property_mark_draw_tile(grid_offset);
+            terrain <<= 1;
+        }
+    }
+    return 1;
+}
+
 static void clear_empty_land_image(int x, int y, int grid_offset)
 {
     if (!map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {

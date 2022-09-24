@@ -51,6 +51,8 @@ static int place_routed_building(int x_start, int y_start, int x_end, int y_end,
             case ROUTED_BUILDING_AQUEDUCT_WITHOUT_GRAPHIC:
                 *items += 1;
                 break;
+            case ROUTED_BUILDING_HIGHWAY:
+                *items += map_tiles_set_highway(x_end, y_end);
         }
         int direction = calc_general_direction(x_end, y_end, x_start, y_start);
         if (direction == DIR_8_NONE) {
@@ -95,6 +97,34 @@ int building_construction_place_road(int measure_only, int x_start, int y_start,
     int items_placed = 0;
     if (map_routing_calculate_distances_for_building(ROUTED_BUILDING_ROAD, x_start, y_start) &&
             place_routed_building(x_start, y_start, x_end, y_end, ROUTED_BUILDING_ROAD, &items_placed)) {
+        if (!measure_only) {
+            map_routing_update_land();
+            window_invalidate();
+        }
+    }
+    return items_placed;
+}
+
+int building_construction_place_highway(int measure_only, int x_start, int y_start, int x_end, int y_end)
+{
+    game_undo_restore_map(0);
+
+    int start_offset = map_grid_offset(x_start, y_start);
+    int end_offset = map_grid_offset(x_end, y_end);
+    int forbidden_terrain_mask =
+        TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_BUILDING |
+        TERRAIN_SHRUB | TERRAIN_ROAD | TERRAIN_GARDEN | TERRAIN_ELEVATION |
+        TERRAIN_RUBBLE | TERRAIN_AQUEDUCT | TERRAIN_ACCESS_RAMP;
+    if (map_terrain_is(start_offset, forbidden_terrain_mask)) {
+        return 0;
+    }
+    if (map_terrain_is(end_offset, forbidden_terrain_mask)) {
+        return 0;
+    }
+
+    int items_placed = 0;
+    if (map_routing_calculate_distances_for_building(ROUTED_BUILDING_HIGHWAY, x_start, y_start) &&
+        place_routed_building(x_start, y_start, x_end, y_end, ROUTED_BUILDING_HIGHWAY, &items_placed)) {
         if (!measure_only) {
             map_routing_update_land();
             window_invalidate();
