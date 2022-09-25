@@ -181,7 +181,7 @@ static inline int valid_offset(int grid_offset)
 
 static inline int distance_left(int x, int y)
 {
-    return abs(distance.dst_x - x) + abs(distance.dst_y - y);
+    return (abs(distance.dst_x - x) + abs(distance.dst_y - y)) * 2;
 }
 
 static void route_queue_from_to(int src_x, int src_y, int dst_x, int dst_y, int max_tiles,
