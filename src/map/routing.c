@@ -25,6 +25,12 @@ typedef enum {
 static const int ROUTE_OFFSETS[] = { -162, 1, 162, -1, -161, 163, 161, -163 };
 static const int ROUTE_OFFSETS_X[] = { 0, 1, 0, -1,  1, 1, -1, -1 };
 static const int ROUTE_OFFSETS_Y[] = { -1, 0, 1,  0, -1, 1,  1, -1 };
+static const int HIGHWAY_DIRECTIONS[] = { 
+    TERRAIN_HIGHWAY_TOP_LEFT | TERRAIN_HIGHWAY_BOTTOM_LEFT, // down
+    TERRAIN_HIGHWAY_BOTTOM_LEFT | TERRAIN_HIGHWAY_BOTTOM_RIGHT, // right
+    TERRAIN_HIGHWAY_TOP_RIGHT | TERRAIN_HIGHWAY_BOTTOM_RIGHT, // up
+    TERRAIN_HIGHWAY_TOP_LEFT | TERRAIN_HIGHWAY_TOP_RIGHT, // left
+};
 
 static struct {
     grid_i16 possible;
@@ -179,7 +185,7 @@ static inline int distance_left(int x, int y)
 }
 
 static void route_queue_from_to(int src_x, int src_y, int dst_x, int dst_y, int max_tiles,
-    int (*callback)(int next_offset))
+    int (*callback)(int offset, int next_offset, int direction))
 {
     clear_data();
     distance.dst_x = dst_x;
@@ -194,15 +200,17 @@ static void route_queue_from_to(int src_x, int src_y, int dst_x, int dst_y, int 
         }
         int x = map_grid_offset_to_x(offset);
         int y = map_grid_offset_to_y(offset);
-        int dist = 1 + distance.determined.items[offset];
         distance.possible.items[offset] = 1;
         for (int i = 0; i < 4; i++) {
             int next_offset = offset + ROUTE_OFFSETS[i];
-            if (valid_offset(next_offset)) {
+            if (valid_offset(next_offset) && callback(offset, next_offset, i)) {
                 int remaining_dist = distance_left(x + ROUTE_OFFSETS_X[i], y + ROUTE_OFFSETS_Y[i]);
-                if (callback(next_offset)) {
-                    ordered_enqueue(next_offset, dist, remaining_dist);
+                int dist = 2 + distance.determined.items[offset];
+                int next_terrain = map_terrain_get(next_offset);
+                if ((next_terrain & TERRAIN_HIGHWAY) > 0) {
+                    dist--;
                 }
+                ordered_enqueue(next_offset, dist, remaining_dist);
             }
         }
     }
@@ -457,7 +465,20 @@ static inline int has_fighting_enemy(int grid_offset)
     return fighting_data.status.items[grid_offset] & 2;
 }
 
-static int callback_travel_citizen_land(int next_offset)
+static int is_highway_passable(int offset, int direction)
+{
+    int terrain = map_terrain_get(offset);
+    if ((terrain & TERRAIN_HIGHWAY) == 0) {
+        return 1;
+    }
+    int highway_directions = HIGHWAY_DIRECTIONS[direction];
+    if (terrain & highway_directions) {
+        return 1;
+    }
+    return 0;
+}
+
+static int callback_travel_citizen_land(int offset, int next_offset, int direction)
 {
     if (terrain_land_citizen.items[next_offset] >= 0 && !has_fighting_friendly(next_offset)) {
         return 1;
@@ -472,10 +493,11 @@ int map_routing_citizen_can_travel_over_land(int src_x, int src_y, int dst_x, in
     return distance.determined.items[map_grid_offset(dst_x, dst_y)] != 0;
 }
 
-static int callback_travel_citizen_road_garden(int next_offset)
+static int callback_travel_citizen_road_garden(int offset, int next_offset, int direction)
 {
     if (terrain_land_citizen.items[next_offset] >= CITIZEN_0_ROAD &&
-        terrain_land_citizen.items[next_offset] <= CITIZEN_2_PASSABLE_TERRAIN) {
+        terrain_land_citizen.items[next_offset] <= CITIZEN_2_PASSABLE_TERRAIN &&
+        is_highway_passable(offset, direction)) {
         return 1;
     }
     return 0;
@@ -493,7 +515,7 @@ int map_routing_citizen_can_travel_over_road_garden(int src_x, int src_y, int ds
     return distance.determined.items[dst_offset] != 0;
 }
 
-static int callback_travel_walls(int next_offset)
+static int callback_travel_walls(int offset, int next_offset, int direction)
 {
     if (terrain_walls.items[next_offset] >= WALL_0_PASSABLE &&
         terrain_walls.items[next_offset] <= 2) {
@@ -509,7 +531,7 @@ int map_routing_can_travel_over_walls(int src_x, int src_y, int dst_x, int dst_y
     return distance.determined.items[map_grid_offset(dst_x, dst_y)] != 0;
 }
 
-static int callback_travel_noncitizen_land_through_building(int next_offset)
+static int callback_travel_noncitizen_land_through_building(int offset, int next_offset, int direction)
 {
     if (has_fighting_enemy(next_offset)) {
         return 0;
@@ -525,7 +547,7 @@ static int callback_travel_noncitizen_land_through_building(int next_offset)
     return 0;
 }
 
-static int callback_travel_noncitizen_land(int next_offset)
+static int callback_travel_noncitizen_land(int offset, int next_offset, int direction)
 {
     if (has_fighting_enemy(next_offset)) {
         return 0;
@@ -553,7 +575,7 @@ int map_routing_noncitizen_can_travel_over_land(
     return distance.determined.items[map_grid_offset(dst_x, dst_y)] != 0;
 }
 
-static int callback_travel_noncitizen_through_everything(int next_offset)
+static int callback_travel_noncitizen_through_everything(int offset, int next_offset, int direction)
 {
     if (terrain_land_noncitizen.items[next_offset] >= NONCITIZEN_0_PASSABLE) {
         return 1;

@@ -283,6 +283,10 @@ static void advance_route_tile(figure *f, int roaming_enabled)
 
 static void walk_ticks(figure *f, int num_ticks, int roaming_enabled)
 {
+    int terrain = map_terrain_get(map_grid_offset(f->x, f->y));
+    if ((terrain & TERRAIN_HIGHWAY) > 0) {
+        num_ticks *= 2;
+    }
     while (num_ticks > 0) {
         num_ticks--;
         f->progress_on_tile++;

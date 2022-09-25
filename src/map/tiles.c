@@ -765,18 +765,32 @@ int map_tiles_set_road(int x, int y)
     return tile_set;
 }
 
+static void set_highway_image(int x, int y, int grid_offset)
+{
+    if (!map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+        return;
+    }
+    const terrain_image *img = map_image_context_get_paved_road(grid_offset);
+    int image_id = image_group(GROUP_TERRAIN_ROAD) + img->group_offset + img->item_offset;
+    map_image_set(grid_offset, image_id);
+    map_property_set_multi_tile_size(grid_offset, 1);
+    map_property_mark_draw_tile(grid_offset);
+}
+
+void map_tiles_update_all_highways(void)
+{
+    foreach_map_tile(set_highway_image);
+}
+
 int map_tiles_set_highway(int x, int y)
 {
-    int terrain = TERRAIN_HIGHWAY_TOP;
+    int terrain = TERRAIN_HIGHWAY_TOP_LEFT;
     for (int xx = x; xx <= x + 1; xx++) {
         for (int yy = y; yy <= y + 1; yy++) {
             int grid_offset = map_grid_offset(xx, yy);
             map_terrain_add(grid_offset, terrain);
             map_property_clear_constructing(grid_offset);
-            const terrain_image *img = map_image_context_get_paved_road(grid_offset);
-            int image_id = image_group(GROUP_TERRAIN_ROAD) + img->group_offset + img->item_offset;
-            map_image_set(grid_offset, image_id);
-            map_property_mark_draw_tile(grid_offset);
+            set_highway_image(x, y, grid_offset);
             terrain <<= 1;
         }
     }
@@ -1257,6 +1271,7 @@ void map_tiles_update_all(void)
     map_tiles_update_all_meadow();
     map_tiles_update_all_rubble();
     map_tiles_update_all_roads();
+    map_tiles_update_all_highways();
     map_tiles_update_all_plazas();
     map_tiles_update_all_walls();
     map_tiles_update_all_aqueducts(0);
