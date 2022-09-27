@@ -248,7 +248,7 @@ static void set_assets_directory(void)
         }
         free_dir_name(result);
     }
-    strncpy(assets_directory, ".", FILE_NAME_MAX - 1);
+    strncpy(assets_directory, "C:/code/augustus/res/assets", FILE_NAME_MAX - 1);
 #endif
 }
 

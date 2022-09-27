@@ -61,10 +61,10 @@ int map_routing_get_path(uint8_t *path, int src_x, int src_y, int dst_x, int dst
     int step = num_directions == 8 ? 1 : 2;
 
     while (distance > 1) {
-        distance = map_routing_distance(grid_offset);
+        
         int direction = -1;
         int general_direction = calc_general_direction(x, y, src_x, src_y);
-        for (int d = 0; d < 8; d += step) {
+        /*for (int d = 0; d < 8; d += step) {
             if (d != last_direction) {
                 int next_offset = grid_offset + map_grid_direction_delta(d);
                 int next_distance = map_routing_distance(next_offset);
@@ -78,11 +78,19 @@ int map_routing_get_path(uint8_t *path, int src_x, int src_y, int dst_x, int dst
                     }
                 }
             }
-        }
+        }*/
+        int next_offset = map_routing_parent(grid_offset);
+        int next_x = map_grid_offset_to_x(next_offset);
+        int next_y = map_grid_offset_to_y(next_offset);
+        direction = calc_general_direction(x, y, next_x, next_y);
         if (direction == -1) {
             return 0;
         }
-        adjust_tile_in_direction(direction, &x, &y, &grid_offset);
+        x = next_x;
+        y = next_y;
+        grid_offset = next_offset;
+        distance = map_routing_distance(grid_offset);
+        //adjust_tile_in_direction(direction, &x, &y, &grid_offset);
         int forward_direction = (direction + 4) % 8;
         direction_path[num_tiles++] = forward_direction;
         last_direction = forward_direction;

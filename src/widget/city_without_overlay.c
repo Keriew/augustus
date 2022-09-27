@@ -26,6 +26,7 @@
 #include "game/resource.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
+#include "graphics/text.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
 #include "map/building.h"
@@ -33,6 +34,7 @@
 #include "map/grid.h"
 #include "map/image.h"
 #include "map/property.h"
+#include "map/routing.h"
 #include "map/sprite.h"
 #include "map/terrain.h"
 #include "scenario/property.h"
@@ -40,6 +42,8 @@
 #include "widget/city_bridge.h"
 #include "widget/city_building_ghost.h"
 #include "widget/city_figure.h"
+
+#include <stdio.h>
 
 #define OFFSET(x,y) (x + GRID_SIZE * y)
 
@@ -731,6 +735,41 @@ static int get_highlighted_formation_id(const map_tile *tile)
     return highlighted_formation_id;
 }
 
+static void draw_pathfinding(int x, int y, int grid_offset)
+{
+    int tx = map_grid_offset_to_x(grid_offset);
+    int ty = map_grid_offset_to_y(grid_offset);
+    map_routing_distance_grid *distance = map_routing_get_distance_grid();
+    uint32_t parent = distance->parent.items[grid_offset];
+    int16_t dist = distance->determined.items[grid_offset];
+    if (parent == 0 || parent == -1) {
+        return;
+    }
+    int ptx = map_grid_offset_to_x(parent);
+    int pty = map_grid_offset_to_y(parent);
+    int direction = calc_general_direction(tx, ty, ptx, pty);
+    int image_id;
+    if (direction == DIR_0_TOP) {
+        image_id = assets_get_image_id("UI", "pointer_top_right");
+    } else if (direction == DIR_2_RIGHT) {
+        image_id = assets_get_image_id("UI", "pointer_bottom_right");
+    } else if (direction == DIR_4_BOTTOM) {
+        image_id = assets_get_image_id("UI", "pointer_bottom_left");
+    } else if (direction == DIR_6_LEFT) {
+        image_id = assets_get_image_id("UI", "pointer_top_left");
+    } else {
+        return;
+    }
+    image_draw(image_id, x, y, 0, 1);
+    if (tx == distance->dst_x && ty == distance->dst_y) {
+        int dst_image_id = assets_get_image_id("UI", "Happy God Icon");
+        image_draw(dst_image_id, x + 29 - 10, y + 15 - 10, 0, 1);
+    }
+    char *text[20];
+    sprintf(text, "%d", dist);
+    text_draw_centered(text, x, y, 58, FONT_NORMAL_BLACK, COLOR_WHITE);
+}
+
 void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_coord, const map_tile *tile)
 {
     int highlighted_formation_id = get_highlighted_formation_id(tile);
@@ -739,7 +778,7 @@ void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_
     city_view_get_viewport(&x, &y, &width, &height);
     graphics_fill_rect(x, y, width, height, COLOR_BLACK);
     int should_mark_deleting = city_building_ghost_mark_deleting(tile);
-    city_view_foreach_valid_map_tile(draw_footprint, 0, 0);
+    city_view_foreach_valid_map_tile(draw_footprint, draw_pathfinding, 0);
     if (!should_mark_deleting) {
         city_view_foreach_valid_map_tile(
             draw_top,

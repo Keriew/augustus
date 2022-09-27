@@ -32,12 +32,7 @@ static const int HIGHWAY_DIRECTIONS[] = {
     TERRAIN_HIGHWAY_TOP_LEFT | TERRAIN_HIGHWAY_TOP_RIGHT, // left
 };
 
-static struct {
-    grid_i16 possible;
-    grid_i16 determined;
-    int dst_x;
-    int dst_y;
-} distance;
+static map_routing_distance_grid distance;
 
 static struct {
     int total_routes_calculated;
@@ -71,11 +66,17 @@ static void reset_fighting_status(void)
     }
 }
 
+map_routing_distance_grid *map_routing_get_distance_grid(void)
+{
+    return &distance;
+}
+
 static void clear_data(void)
 {
     reset_fighting_status();
     map_grid_clear_i16(distance.possible.items);
     map_grid_clear_i16(distance.determined.items);
+    map_grid_clear_u32(distance.parent.items);
     queue.head = 0;
     queue.tail = 0;
 }
@@ -150,7 +151,7 @@ static inline void ordered_queue_reduce_index(int index, int offset, int dist)
     }
 }
 
-static void ordered_enqueue(int next_offset, int current_dist, int remaining_dist)
+static void ordered_enqueue(int offset, int next_offset, int current_dist, int remaining_dist)
 {
     int possible_dist = remaining_dist + current_dist;
     int index = queue.tail;
@@ -170,18 +171,20 @@ static void ordered_enqueue(int next_offset, int current_dist, int remaining_dis
     }
     distance.determined.items[next_offset] = current_dist;
     distance.possible.items[next_offset] = possible_dist;
+    distance.parent.items[next_offset] = offset;
 
     ordered_queue_reduce_index(index, next_offset, possible_dist);
 }
 
-static inline int valid_offset(int grid_offset)
+static inline int valid_offset(int grid_offset, int possible_dist)
 {
-    return map_grid_is_valid_offset(grid_offset) && distance.determined.items[grid_offset] == 0;
+    int determined = distance.determined.items[grid_offset];
+    return map_grid_is_valid_offset(grid_offset) && (determined == 0 || possible_dist < determined);
 }
 
 static inline int distance_left(int x, int y)
 {
-    return (abs(distance.dst_x - x) + abs(distance.dst_y - y)) * 2;
+    return abs(distance.dst_x - x) + abs(distance.dst_y - y);
 }
 
 static void route_queue_from_to(int src_x, int src_y, int dst_x, int dst_y, int max_tiles,
@@ -191,7 +194,7 @@ static void route_queue_from_to(int src_x, int src_y, int dst_x, int dst_y, int 
     distance.dst_x = dst_x;
     distance.dst_y = dst_y;
     int dest = map_grid_offset(dst_x, dst_y);
-    ordered_enqueue(map_grid_offset(src_x, src_y), 1, 0);
+    ordered_enqueue(-1, map_grid_offset(src_x, src_y), 1, 0);
     int tiles = 0;
     while (queue.tail) {
         int offset = ordered_queue_pop();
@@ -203,14 +206,16 @@ static void route_queue_from_to(int src_x, int src_y, int dst_x, int dst_y, int 
         distance.possible.items[offset] = 1;
         for (int i = 0; i < 4; i++) {
             int next_offset = offset + ROUTE_OFFSETS[i];
-            if (valid_offset(next_offset) && callback(offset, next_offset, i)) {
-                int remaining_dist = distance_left(x + ROUTE_OFFSETS_X[i], y + ROUTE_OFFSETS_Y[i]);
-                int dist = 2 + distance.determined.items[offset];
-                int next_terrain = map_terrain_get(next_offset);
-                if ((next_terrain & TERRAIN_HIGHWAY) > 0) {
-                    dist--;
-                }
-                ordered_enqueue(next_offset, dist, remaining_dist);
+            int remaining_dist = distance_left(x + ROUTE_OFFSETS_X[i], y + ROUTE_OFFSETS_Y[i]);
+            int dist = 2 + distance.determined.items[offset];
+            int next_terrain = map_terrain_get(next_offset);
+            if ((next_terrain & TERRAIN_HIGHWAY) > 0) {
+                dist--;
+            }
+            int next_x = map_grid_offset_to_x(next_offset);
+            int next_y = map_grid_offset_to_y(next_offset);
+            if (valid_offset(next_offset, dist) && callback(offset, next_offset, i)) {
+                ordered_enqueue(offset, next_offset, dist, remaining_dist);
             }
         }
     }
@@ -237,7 +242,7 @@ static void route_queue_all_from(int source, max_directions directions, int (*ca
         } else {
             int dist = 1 + distance.determined.items[offset];
             for (int i = 0; i < directions; i++) {
-                if (valid_offset(offset + ROUTE_OFFSETS[i])) {
+                if (valid_offset(offset + ROUTE_OFFSETS[i], dist)) {
                     if (callback(offset + ROUTE_OFFSETS[i], dist) == UNTIL_STOP) {
                         break;
                     }
@@ -605,6 +610,11 @@ void map_routing_block(int x, int y, int size)
 int map_routing_distance(int grid_offset)
 {
     return distance.determined.items[grid_offset];
+}
+
+int map_routing_parent(int grid_offset)
+{
+    return distance.parent.items[grid_offset];
 }
 
 void map_routing_save_state(buffer *buf)
