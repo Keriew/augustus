@@ -7,6 +7,7 @@ set_property(CACHE TARGET_PLATFORM PROPERTY STRINGS default vita switch android 
 string(TOLOWER ${TARGET_PLATFORM} TARGET_PLATFORM)
 
 option(DRAW_FPS "Draw FPS on the top left corner of the window." OFF)
+option(DRAW_ROUTING "Draw routing debug information." OFF)
 option(SYSTEM_LIBS "Use system libraries when available." ON)
 option(EMSCRIPTEN_LOAD_SDL_PORTS "Load SDL and SDL_mixer emscripten ports instead of compiling them" OFF)
 option(LINK_MPG123 "Link mpg123 statically to Julius instead of relying on a library." OFF)
@@ -152,6 +153,10 @@ endif()
 
 if(DRAW_FPS)
   add_definitions(-DDRAW_FPS)
+endif()
+
+if(DRAW_ROUTING)
+    add_compile_definitions(DRAW_ROUTING)
 endif()
 
 set(ASSETS_DIR ${PROJECT_SOURCE_DIR}/res/assets)

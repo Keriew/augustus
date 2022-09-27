@@ -43,7 +43,9 @@
 #include "widget/city_building_ghost.h"
 #include "widget/city_figure.h"
 
+#ifdef DRAW_ROUTING
 #include <stdio.h>
+#endif
 
 #define OFFSET(x,y) (x + GRID_SIZE * y)
 
@@ -735,7 +737,7 @@ static int get_highlighted_formation_id(const map_tile *tile)
     return highlighted_formation_id;
 }
 
-static void draw_pathfinding(int x, int y, int grid_offset)
+static void draw_routing(int x, int y, int grid_offset)
 {
     int tx = map_grid_offset_to_x(grid_offset);
     int ty = map_grid_offset_to_y(grid_offset);
@@ -778,7 +780,10 @@ void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_
     city_view_get_viewport(&x, &y, &width, &height);
     graphics_fill_rect(x, y, width, height, COLOR_BLACK);
     int should_mark_deleting = city_building_ghost_mark_deleting(tile);
-    city_view_foreach_valid_map_tile(draw_footprint, draw_pathfinding, 0);
+    city_view_foreach_valid_map_tile(draw_footprint, 0, 0);
+#ifdef DRAW_ROUTING
+    city_view_foreach_valid_map_tile(draw_footprint, draw_routing, 0);
+#endif
     if (!should_mark_deleting) {
         city_view_foreach_valid_map_tile(
             draw_top,
