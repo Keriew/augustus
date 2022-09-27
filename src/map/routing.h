@@ -15,7 +15,6 @@ typedef enum {
 typedef struct map_routing_distance_grid {
     grid_i16 possible;
     grid_i16 determined;
-    grid_u32 parent;
     int dst_x;
     int dst_y;
 } map_routing_distance_grid;
@@ -31,7 +30,6 @@ int map_routing_calculate_distances_for_building(routed_building_type type, int 
 void map_routing_delete_first_wall_or_aqueduct(int x, int y);
 
 int map_routing_distance(int grid_offset);
-int map_routing_parent(int grid_offset);
 
 int map_routing_citizen_can_travel_over_land(int src_x, int src_y, int dst_x, int dst_y);
 int map_routing_citizen_can_travel_over_road_garden(int src_x, int src_y, int dst_x, int dst_y);

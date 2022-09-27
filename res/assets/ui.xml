@@ -223,8 +223,4 @@
 	<image id="11Legion_Elephants" src="11Legion_Elephants"/>
 	<image id="13Legion_Bulls" src="13Legion_Bulls"/>
 	<image id="14Legion_Centaurs" src="14Legion_Centaurs"/>
-	<image id="pointer_top_right" src="pointer_top_right" isometric="true"/>
-	<image id="pointer_top_left" src="pointer_top_left" isometric="true"/>
-	<image id="pointer_bottom_right" src="pointer_bottom_right" isometric="true"/>
-	<image id="pointer_bottom_left" src="pointer_bottom_left" isometric="true"/>
 </assetlist>

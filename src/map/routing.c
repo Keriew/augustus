@@ -76,7 +76,6 @@ static void clear_data(void)
     reset_fighting_status();
     map_grid_clear_i16(distance.possible.items);
     map_grid_clear_i16(distance.determined.items);
-    map_grid_clear_u32(distance.parent.items);
     queue.head = 0;
     queue.tail = 0;
 }
@@ -171,7 +170,6 @@ static void ordered_enqueue(int offset, int next_offset, int current_dist, int r
     }
     distance.determined.items[next_offset] = current_dist;
     distance.possible.items[next_offset] = possible_dist;
-    distance.parent.items[next_offset] = offset;
 
     ordered_queue_reduce_index(index, next_offset, possible_dist);
 }
@@ -610,11 +608,6 @@ void map_routing_block(int x, int y, int size)
 int map_routing_distance(int grid_offset)
 {
     return distance.determined.items[grid_offset];
-}
-
-int map_routing_parent(int grid_offset)
-{
-    return distance.parent.items[grid_offset];
 }
 
 void map_routing_save_state(buffer *buf)

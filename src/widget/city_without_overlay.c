@@ -742,27 +742,10 @@ static void draw_routing(int x, int y, int grid_offset)
     int tx = map_grid_offset_to_x(grid_offset);
     int ty = map_grid_offset_to_y(grid_offset);
     map_routing_distance_grid *distance = map_routing_get_distance_grid();
-    uint32_t parent = distance->parent.items[grid_offset];
     int16_t dist = distance->determined.items[grid_offset];
-    if (parent == 0 || parent == -1) {
+    if (!dist) {
         return;
     }
-    int ptx = map_grid_offset_to_x(parent);
-    int pty = map_grid_offset_to_y(parent);
-    int direction = calc_general_direction(tx, ty, ptx, pty);
-    int image_id;
-    if (direction == DIR_0_TOP) {
-        image_id = assets_get_image_id("UI", "pointer_top_right");
-    } else if (direction == DIR_2_RIGHT) {
-        image_id = assets_get_image_id("UI", "pointer_bottom_right");
-    } else if (direction == DIR_4_BOTTOM) {
-        image_id = assets_get_image_id("UI", "pointer_bottom_left");
-    } else if (direction == DIR_6_LEFT) {
-        image_id = assets_get_image_id("UI", "pointer_top_left");
-    } else {
-        return;
-    }
-    image_draw(image_id, x, y, 0, 1);
     if (tx == distance->dst_x && ty == distance->dst_y) {
         int dst_image_id = assets_get_image_id("UI", "Happy God Icon");
         image_draw(dst_image_id, x + 29 - 10, y + 15 - 10, 0, 1);
