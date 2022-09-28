@@ -483,7 +483,7 @@ static int is_highway_passable(int offset, int direction)
 
 static int callback_travel_citizen_land(int offset, int next_offset, int direction)
 {
-    if (terrain_land_citizen.items[next_offset] >= 0 && !has_fighting_friendly(next_offset)) {
+    if (terrain_land_citizen.items[next_offset] >= 0 && !has_fighting_friendly(next_offset) && is_highway_passable(offset, direction)) {
         return 1;
     }
     return 0;
