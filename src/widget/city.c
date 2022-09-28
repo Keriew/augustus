@@ -276,10 +276,17 @@ static void update_city_view_coords(int x, int y, map_tile *tile)
 {
     view_tile view;
     if (city_view_pixels_to_view_tile(x, y, &view)) {
+        int snap = 1;
+        building_type type = building_construction_type();
+        if (type == BUILDING_HIGHWAY) {
+            snap = 2;
+        }
         tile->grid_offset = city_view_tile_to_grid_offset(&view);
+        tile->x = map_grid_offset_to_x(tile->grid_offset) / snap * snap;
+        tile->y = map_grid_offset_to_y(tile->grid_offset) / snap * snap;
+        tile->grid_offset = map_grid_offset(tile->x, tile->y);
+        city_view_grid_offset_to_xy_view(tile->grid_offset, &view.x, &view.y);
         city_view_set_selected_view_tile(&view);
-        tile->x = map_grid_offset_to_x(tile->grid_offset);
-        tile->y = map_grid_offset_to_y(tile->grid_offset);
     } else {
         tile->grid_offset = tile->x = tile->y = 0;
     }
