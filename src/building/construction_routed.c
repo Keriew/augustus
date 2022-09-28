@@ -28,6 +28,10 @@ static int place_routed_building(int x_start, int y_start, int x_end, int y_end,
     *items = 0;
     int grid_offset = map_grid_offset(x_end, y_end);
     int guard = 0;
+    int step_size = 1;
+    if (type == ROUTED_BUILDING_HIGHWAY) {
+        step_size = 2;
+    }
     // reverse routing
     while (1) {
         if (++guard >= 400) {
@@ -61,7 +65,7 @@ static int place_routed_building(int x_start, int y_start, int x_end, int y_end,
         int routed = 0;
         for (int i = 0; i < 4; i++) {
             int index = direction_indices[direction][i];
-            int new_grid_offset = grid_offset + map_grid_direction_delta(index);
+            int new_grid_offset = grid_offset + map_grid_direction_delta(index) * step_size;
             int new_dist = map_routing_distance(new_grid_offset);
             if (new_dist > 0 && new_dist < distance) {
                 grid_offset = new_grid_offset;

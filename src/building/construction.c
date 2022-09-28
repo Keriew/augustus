@@ -708,6 +708,11 @@ void building_construction_update(int x, int y, int grid_offset)
         if (items_placed >= 0) {
             current_cost *= items_placed;
         }
+    } else if (type == BUILDING_HIGHWAY) {
+        int items_placed = building_construction_place_highway(1, data.start.x, data.start.y, x, y);
+        if (items_placed >= 0) {
+            current_cost *= items_placed;
+        }
     } else if (type == BUILDING_PLAZA) {
         int items_placed = place_plaza(data.start.x, data.start.y, x, y);
         if (items_placed >= 0) {
