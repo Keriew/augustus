@@ -316,9 +316,16 @@ static int callback_calc_distance_build_wall(int next_offset, int dist)
 
 static int callback_calc_distance_build_highway(int next_offset, int dist)
 {
-    if (terrain_land_citizen.items[next_offset] == CITIZEN_4_CLEAR_TERRAIN) {
-        enqueue(next_offset, dist);
+    int size = 2;
+    for (int x = 0; x < size; x++) {
+        for (int y = 0; y < size; y++) {
+            int offset = next_offset + x + GRID_SIZE * y;
+            if (terrain_land_citizen.items[offset] != CITIZEN_4_CLEAR_TERRAIN) {
+                return 0;
+            }
+        }
     }
+    enqueue(next_offset, dist);
     return 1;
 }
 

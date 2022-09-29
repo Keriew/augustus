@@ -771,7 +771,7 @@ static void set_highway_image(int x, int y, int grid_offset)
         return;
     }
     const terrain_image *img = map_image_context_get_paved_road(grid_offset);
-    int image_id = image_group(GROUP_TERRAIN_ROAD) + img->group_offset + img->item_offset;
+    int image_id = 639; // paved road placeholder sprite for the time being
     map_image_set(grid_offset, image_id);
     map_property_set_multi_tile_size(grid_offset, 1);
     map_property_mark_draw_tile(grid_offset);

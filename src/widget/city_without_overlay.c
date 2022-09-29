@@ -43,7 +43,7 @@
 #include "widget/city_building_ghost.h"
 #include "widget/city_figure.h"
 
-#ifdef DRAW_ROUTING
+#if defined DRAW_ROUTING || defined DRAW_TILE_COORDS
 #include <stdio.h>
 #endif
 
@@ -755,6 +755,37 @@ static void draw_routing(int x, int y, int grid_offset)
     text_draw_centered(text, x, y, 58, FONT_NORMAL_BLACK, COLOR_WHITE);
 }
 
+static void draw_highway_terrain(int x, int y, int grid_offset)
+{
+    int terrain = map_terrain_get(grid_offset);
+    if (terrain & TERRAIN_HIGHWAY_TOP_LEFT) {
+        text_draw_centered("TL", x, y + 6, 58, FONT_NORMAL_BLACK, COLOR_WHITE);
+    }
+    if (terrain & TERRAIN_HIGHWAY_TOP_RIGHT) {
+        text_draw_centered("TR", x, y + 6, 58, FONT_NORMAL_BLACK, COLOR_WHITE);
+    }
+    if (terrain & TERRAIN_HIGHWAY_BOTTOM_LEFT) {
+        text_draw_centered("BL", x, y + 6, 58, FONT_NORMAL_BLACK, COLOR_WHITE);
+    }
+    if (terrain & TERRAIN_HIGHWAY_BOTTOM_RIGHT) {
+        text_draw_centered("BR", x, y + 6, 58, FONT_NORMAL_BLACK, COLOR_WHITE);
+    }
+}
+
+static void draw_tile_coords(int x, int y, int grid_offset)
+{
+    int tx = map_grid_offset_to_x(grid_offset);
+    int ty = map_grid_offset_to_y(grid_offset);
+    if (tx % 2 != 0 || ty % 2 != 0) {
+        //return;
+    }
+    char *text[20];
+    //sprintf(text, "%d,%d", tx, ty);
+    //text_draw_centered(text, x, y + 4, 58, FONT_SMALL_PLAIN, COLOR_WHITE);
+    sprintf(text, "%d", grid_offset);
+    text_draw_centered(text, x, y + 10, 58, FONT_SMALL_PLAIN, COLOR_WHITE);
+}
+
 void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_coord, const map_tile *tile)
 {
     int highlighted_formation_id = get_highlighted_formation_id(tile);
@@ -766,6 +797,12 @@ void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_
     city_view_foreach_valid_map_tile(draw_footprint, 0, 0);
 #ifdef DRAW_ROUTING
     city_view_foreach_valid_map_tile(draw_routing, 0, 0);
+#endif
+#ifdef DRAW_HIGHWAY_TERRAIN
+    city_view_foreach_valid_map_tile(draw_highway_terrain, 0, 0);
+#endif
+#ifdef DRAW_TILE_COORDS
+    city_view_foreach_valid_map_tile(draw_tile_coords, 0, 0);
 #endif
     if (!should_mark_deleting) {
         city_view_foreach_valid_map_tile(
