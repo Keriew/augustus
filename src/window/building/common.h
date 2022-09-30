@@ -27,7 +27,8 @@ typedef enum {
     TERRAIN_INFO_GARDEN = 12,
     TERRAIN_INFO_PLAZA = 13,
     TERRAIN_INFO_ENTRY_FLAG = 14,
-    TERRAIN_INFO_EXIT_FLAG = 15
+    TERRAIN_INFO_EXIT_FLAG = 15,
+    TERRAIN_INFO_HIGHWAY = 16,
 } terrain_info_type;
 
 typedef struct {

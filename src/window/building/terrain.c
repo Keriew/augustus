@@ -36,6 +36,8 @@ void window_building_draw_terrain(building_info_context *c)
         window_building_draw_garden(c);
     } else if (c->terrain_type == TERRAIN_INFO_PLAZA && c->figure.count <= 0) {
         window_building_draw_plaza(c);
+    } else if (c->terrain_type == TERRAIN_INFO_HIGHWAY && c->figure.count <= 0) {
+        window_building_draw_highway(c);
     } else {
         if (c->can_play_sound) {
             c->can_play_sound = 0;

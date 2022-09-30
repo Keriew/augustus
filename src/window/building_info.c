@@ -82,6 +82,7 @@ static int get_height_id(void)
             case TERRAIN_INFO_RUBBLE:
             case TERRAIN_INFO_WALL:
             case TERRAIN_INFO_GARDEN:
+            case TERRAIN_INFO_HIGHWAY:
                 return 1;
             default:
                 return 5;
@@ -320,6 +321,8 @@ static void init(int grid_offset)
         context.terrain_type = TERRAIN_INFO_RUBBLE;
     } else if (map_terrain_is(grid_offset, TERRAIN_WALL)) {
         context.terrain_type = TERRAIN_INFO_WALL;
+    } else if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+        context.terrain_type = TERRAIN_INFO_HIGHWAY;
     } else if (!context.building_id) {
         context.terrain_type = TERRAIN_INFO_EMPTY;
     } else {
@@ -753,8 +756,6 @@ static void draw_background(void)
             } else {
                 window_building_draw_palisade_gate(&context);
             }
-        } else if (btype == BUILDING_HIGHWAY) {
-            window_building_draw_highway(&context);
         }
     } else if (context.type == BUILDING_INFO_LEGION) {
         window_building_draw_legion_info(&context);
