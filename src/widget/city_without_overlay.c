@@ -34,6 +34,9 @@
 #include "map/grid.h"
 #include "map/image.h"
 #include "map/property.h"
+#ifdef DRAW_ROAD_NETWORK_IDS
+#include "map/road_network.h"
+#endif
 #include "map/routing.h"
 #include "map/sprite.h"
 #include "map/terrain.h"
@@ -43,7 +46,7 @@
 #include "widget/city_building_ghost.h"
 #include "widget/city_figure.h"
 
-#if defined DRAW_ROUTING || defined DRAW_TILE_COORDS
+#if defined DRAW_ROUTING || defined DRAW_TILE_COORDS || defined DRAW_ROAD_NETWORK_IDS
 #include <stdio.h>
 #endif
 
@@ -737,6 +740,7 @@ static int get_highlighted_formation_id(const map_tile *tile)
     return highlighted_formation_id;
 }
 
+#ifdef DRAW_ROUTING
 static void draw_routing(int x, int y, int grid_offset)
 {
     int tx = map_grid_offset_to_x(grid_offset);
@@ -754,7 +758,9 @@ static void draw_routing(int x, int y, int grid_offset)
     sprintf(text, "%d", dist);
     text_draw_centered(text, x, y, 58, FONT_NORMAL_BLACK, COLOR_WHITE);
 }
+#endif
 
+#ifdef DRAW_HIGHWAY_TERRAIN
 static void draw_highway_terrain(int x, int y, int grid_offset)
 {
     int terrain = map_terrain_get(grid_offset);
@@ -771,7 +777,9 @@ static void draw_highway_terrain(int x, int y, int grid_offset)
         text_draw_centered("BR", x, y + 6, 58, FONT_NORMAL_BLACK, COLOR_WHITE);
     }
 }
+#endif
 
+#ifdef DRAW_TILE_COORDS
 static void draw_tile_coords(int x, int y, int grid_offset)
 {
     int tx = map_grid_offset_to_x(grid_offset);
@@ -785,6 +793,19 @@ static void draw_tile_coords(int x, int y, int grid_offset)
     //sprintf(text, "%d", grid_offset);
     //text_draw_centered(text, x, y + 10, 58, FONT_SMALL_PLAIN, COLOR_WHITE);
 }
+#endif
+
+#ifdef DRAW_ROAD_NETWORK_IDS
+static void draw_road_network_id(int x, int y, int grid_offset)
+{
+    int tx = map_grid_offset_to_x(grid_offset);
+    int ty = map_grid_offset_to_y(grid_offset);
+    int road_network_id = map_road_network_get(grid_offset);
+    char *text[20];
+    sprintf(text, "%d", road_network_id);
+    text_draw_centered(text, x, y + 4, 58, FONT_NORMAL_BLACK, COLOR_WHITE);
+}
+#endif
 
 void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_coord, const map_tile *tile)
 {
@@ -803,6 +824,9 @@ void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_
 #endif
 #ifdef DRAW_TILE_COORDS
     city_view_foreach_valid_map_tile(draw_tile_coords, 0, 0);
+#endif
+#ifdef DRAW_ROAD_NETWORK_IDS
+    city_view_foreach_valid_map_tile(draw_road_network_id, 0, 0);
 #endif
     if (!should_mark_deleting) {
         city_view_foreach_valid_map_tile(
