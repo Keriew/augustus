@@ -789,7 +789,6 @@ int map_tiles_set_highway(int x, int y)
         for (int yy = y; yy <= y + 1; yy++) {
             int grid_offset = map_grid_offset(xx, yy);
             map_terrain_remove(grid_offset, TERRAIN_ROAD);
-            map_terrain_remove(grid_offset, TERRAIN_HIGHWAY);
             map_terrain_add(grid_offset, terrain);
             map_property_clear_constructing(grid_offset);
             set_highway_image(x, y, grid_offset);

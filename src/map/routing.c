@@ -185,6 +185,19 @@ static inline int distance_left(int x, int y)
     return abs(distance.dst_x - x) + abs(distance.dst_y - y);
 }
 
+static int receive_highway_bonus(int offset, int direction)
+{
+    int terrain = map_terrain_get(offset);
+    if ((terrain & TERRAIN_HIGHWAY) == 0) {
+        return 0;
+    }
+    int highway_directions = HIGHWAY_DIRECTIONS[direction];
+    if (terrain & highway_directions) {
+        return 1;
+    }
+    return 0;
+}
+
 static void route_queue_from_to(int src_x, int src_y, int dst_x, int dst_y, int max_tiles,
     int (*callback)(int offset, int next_offset, int direction))
 {
@@ -206,8 +219,7 @@ static void route_queue_from_to(int src_x, int src_y, int dst_x, int dst_y, int 
             int next_offset = offset + ROUTE_OFFSETS[i];
             int remaining_dist = distance_left(x + ROUTE_OFFSETS_X[i], y + ROUTE_OFFSETS_Y[i]);
             int dist = 2 + distance.determined.items[offset];
-            int next_terrain = map_terrain_get(next_offset);
-            if ((next_terrain & TERRAIN_HIGHWAY) > 0) {
+            if (receive_highway_bonus(offset, i)) {
                 dist--;
             }
             int next_x = map_grid_offset_to_x(next_offset);
@@ -490,22 +502,9 @@ static inline int has_fighting_enemy(int grid_offset)
     return fighting_data.status.items[grid_offset] & 2;
 }
 
-static int is_highway_passable(int offset, int direction)
-{
-    int terrain = map_terrain_get(offset);
-    if ((terrain & TERRAIN_HIGHWAY) == 0) {
-        return 1;
-    }
-    int highway_directions = HIGHWAY_DIRECTIONS[direction];
-    if (terrain & highway_directions) {
-        return 1;
-    }
-    return 0;
-}
-
 static int callback_travel_citizen_land(int offset, int next_offset, int direction)
 {
-    if (terrain_land_citizen.items[next_offset] >= 0 && !has_fighting_friendly(next_offset) && is_highway_passable(offset, direction)) {
+    if (terrain_land_citizen.items[next_offset] >= 0 && !has_fighting_friendly(next_offset)) {
         return 1;
     }
     return 0;
@@ -521,8 +520,7 @@ int map_routing_citizen_can_travel_over_land(int src_x, int src_y, int dst_x, in
 static int callback_travel_citizen_road_garden(int offset, int next_offset, int direction)
 {
     if (terrain_land_citizen.items[next_offset] >= CITIZEN_0_ROAD &&
-        terrain_land_citizen.items[next_offset] <= CITIZEN_2_PASSABLE_TERRAIN &&
-        is_highway_passable(offset, direction)) {
+        terrain_land_citizen.items[next_offset] <= CITIZEN_2_PASSABLE_TERRAIN) {
         return 1;
     }
     return 0;
