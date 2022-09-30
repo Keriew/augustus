@@ -320,7 +320,8 @@ static int callback_calc_distance_build_highway(int next_offset, int dist)
     for (int x = 0; x < size; x++) {
         for (int y = 0; y < size; y++) {
             int offset = next_offset + x + GRID_SIZE * y;
-            if (terrain_land_citizen.items[offset] != CITIZEN_4_CLEAR_TERRAIN) {
+            int terrain = terrain_land_citizen.items[offset];
+            if (terrain != CITIZEN_4_CLEAR_TERRAIN && terrain != CITIZEN_0_ROAD) {
                 return 1;
             }
         }
