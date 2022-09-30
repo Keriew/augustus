@@ -780,10 +780,10 @@ static void draw_tile_coords(int x, int y, int grid_offset)
         //return;
     }
     char *text[20];
-    //sprintf(text, "%d,%d", tx, ty);
-    //text_draw_centered(text, x, y + 4, 58, FONT_SMALL_PLAIN, COLOR_WHITE);
-    sprintf(text, "%d", grid_offset);
-    text_draw_centered(text, x, y + 10, 58, FONT_SMALL_PLAIN, COLOR_WHITE);
+    sprintf(text, "%d,%d", tx, ty);
+    text_draw_centered(text, x, y + 4, 58, FONT_SMALL_PLAIN, COLOR_WHITE);
+    //sprintf(text, "%d", grid_offset);
+    //text_draw_centered(text, x, y + 10, 58, FONT_SMALL_PLAIN, COLOR_WHITE);
 }
 
 void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_coord, const map_tile *tile)
