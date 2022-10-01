@@ -691,7 +691,7 @@ static void set_aqueduct_image(int grid_offset, int is_road, const terrain_image
                 group_offset = 2;
             }
         }
-        if (map_tiles_is_paved_road(grid_offset)) {
+        if (map_tiles_is_paved_road(grid_offset) || map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
             group_offset -= 2;
         } else {
             group_offset += 6;
@@ -770,9 +770,13 @@ static void set_highway_image(int x, int y, int grid_offset)
     if (!map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
         return;
     }
-    const terrain_image *img = map_image_context_get_paved_road(grid_offset);
-    int image_id = 639; // paved road placeholder sprite for the time being
-    map_image_set(grid_offset, image_id);
+    if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
+        const terrain_image *img = map_image_context_get_aqueduct(grid_offset, 0);
+        set_aqueduct_image(grid_offset, 1, img);
+    }
+    else {
+        map_image_set(grid_offset, 639); // paved road placeholder sprite for the time being
+    }
     map_property_set_multi_tile_size(grid_offset, 1);
     map_property_mark_draw_tile(grid_offset);
 }
@@ -966,7 +970,7 @@ void map_tiles_set_water(int x, int y)
 static void set_aqueduct(int grid_offset)
 {
     const terrain_image *img = map_image_context_get_aqueduct(grid_offset, aqueduct_include_construction);
-    int is_road = map_terrain_is(grid_offset, TERRAIN_ROAD);
+    int is_road = map_terrain_is(grid_offset, TERRAIN_ROAD | TERRAIN_HIGHWAY);
     if (is_road) {
         map_property_clear_plaza_or_earthquake(grid_offset);
     }
