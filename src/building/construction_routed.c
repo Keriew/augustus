@@ -35,9 +35,8 @@ static int place_routed_building(int x_start, int y_start, int x_end, int y_end,
         // so find the closest adjacent grid_offset and set our end point there
         if (abs(x_end - x_start) % 2 == 1 || abs(y_end - y_start) % 2 == 1) {
             int min_distance = 10000;
-            for (int i = 0; i < 4; i++) {
-                int index = direction_indices[0][i];
-                int new_grid_offset = grid_offset + map_grid_direction_delta(index);
+            for (int i = 0; i < 8; i++) {
+                int new_grid_offset = grid_offset + map_grid_direction_delta(i);
                 int new_dist = map_routing_distance(new_grid_offset);
                 if (new_dist > 0 && new_dist < min_distance) {
                     min_distance = new_dist;
