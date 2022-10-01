@@ -754,6 +754,9 @@ void map_tiles_update_area_roads(int x, int y, int size)
 int map_tiles_set_road(int x, int y)
 {
     int grid_offset = map_grid_offset(x, y);
+    if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+        return 0;
+    }
     int tile_set = 0;
     if (!map_terrain_is(grid_offset, TERRAIN_ROAD)) {
         tile_set = 1;
