@@ -22,6 +22,7 @@ int map_tiles_set_road(int x, int y);
 
 void map_tiles_update_all_highways(void);
 int map_tiles_set_highway(int x, int y);
+int map_tiles_clear_highway(int grid_offset, int measure_only);
 
 void map_tiles_update_all_empty_land(void);
 void map_tiles_update_region_empty_land(int x_min, int y_min, int x_max, int y_max);

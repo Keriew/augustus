@@ -29,7 +29,7 @@
             TERRAIN_ROAD | TERRAIN_BUILDING | TERRAIN_GARDEN)
 
 static int aqueduct_include_construction = 0;
-
+static int highway_top_offsets[4] = { 0, -GRID_SIZE, -1, -GRID_SIZE - 1 };
 
 static int is_clear(int x, int y, int size, int disallowed_terrain, int check_image)
 {
@@ -803,6 +803,46 @@ int map_tiles_set_highway(int x, int y)
         }
     }
     return 1;
+}
+
+static int clear_highway_from_top(int grid_offset, int measure_only)
+{
+    int cleared = 0;
+    int x = map_grid_offset_to_x(grid_offset);
+    int y = map_grid_offset_to_y(grid_offset);
+    int terrain = TERRAIN_HIGHWAY_TOP_LEFT;
+    for (int xx = x; xx <= x + 1; xx++) {
+        for (int yy = y; yy <= y + 1; yy++) {
+            int highway_offset = map_grid_offset(xx, yy);
+            if (!map_terrain_is(highway_offset, TERRAIN_HIGHWAY)) {
+                continue;
+            }
+            map_property_mark_deleted(highway_offset);
+            if (!measure_only) {
+                map_terrain_remove(highway_offset, terrain);
+            }
+            terrain <<= 1;
+            cleared = 1;
+        }
+    }
+    return cleared;
+}
+
+int map_tiles_clear_highway(int grid_offset, int measure_only)
+{
+    int items_cleared = 0;
+    int terrain = map_terrain_get(grid_offset);
+    int x = map_grid_offset_to_x(grid_offset);
+    int y = map_grid_offset_to_y(grid_offset);
+    int highway_terrain = TERRAIN_HIGHWAY_TOP_LEFT;
+    for (int i = 0; i < 4; i++) {
+        if (terrain & highway_terrain) {
+            int highway_top = grid_offset + highway_top_offsets[i];
+            items_cleared += clear_highway_from_top(highway_top, measure_only);
+        }
+        highway_terrain <<= 1;
+    }
+    return items_cleared;
 }
 
 static void clear_empty_land_image(int x, int y, int grid_offset)

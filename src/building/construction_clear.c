@@ -56,6 +56,7 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
     map_grid_start_end_to_area(x_start, y_start, x_end, y_end, &x_min, &y_min, &x_max, &y_max);
 
     int visual_feedback_on_delete = 1;
+    int highways_removed = 0;
 
     for (int y = y_min; y <= y_max; y++) {
         for (int x = x_min; x <= x_max; x++) {
@@ -74,6 +75,10 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
                     continue;
                 } else if (map_terrain_is(grid_offset, TERRAIN_WATER)) { // keep the "bridge is free" bug from C3
                     continue;
+                } else if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+                    int next_highways_removed = map_tiles_clear_highway(grid_offset, measure_only);
+                    highways_removed += next_highways_removed;
+                    items_placed += next_highways_removed;
                 } else if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)
                     || map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
                     items_placed++;
@@ -144,6 +149,10 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
                     map_bridge_remove(grid_offset, measure_only);
                     items_placed++;
                 }
+            } else if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+                int next_highways_removed = map_tiles_clear_highway(grid_offset, measure_only);
+                highways_removed += next_highways_removed;
+                items_placed += next_highways_removed;
             } else if (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
                 if (map_terrain_is(grid_offset, TERRAIN_ROAD)) {
                     map_property_clear_plaza_or_earthquake(grid_offset);
@@ -159,6 +168,12 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
             radius = y_max - y_min + 3;
         } else {
             radius = x_max - x_min + 3;
+        }
+        if (highways_removed) {
+            x_min -= 1;
+            y_min -= 1;
+            x_max += 1;
+            y_max += 1;
         }
         map_tiles_update_region_empty_land(x_min, y_min, x_max, y_max);
         map_tiles_update_region_meadow(x_min, y_min, x_max, y_max);
