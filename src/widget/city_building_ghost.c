@@ -1059,6 +1059,41 @@ static void draw_road(const map_tile *tile, int x, int y)
     }
 }
 
+static void draw_highway(const map_tile *tile, int x, int y)
+{
+    const building_properties *props = building_properties_for_type(BUILDING_HIGHWAY);
+
+    // check if we can place building
+    int grid_offset = tile->grid_offset;
+    int fully_blocked = city_finance_out_of_money();
+
+    int num_tiles = props->size * props->size;
+    int blocked_tiles[MAX_TILES];
+    int orientation_index = city_view_orientation() / 2;
+    int any_non_highway = 0;
+
+    for (int i = 0; i < num_tiles; i++) {
+        int tile_offset = grid_offset + TILE_GRID_OFFSETS[orientation_index][i];
+        int terrain = map_terrain_get(tile_offset);
+        int forbidden_terrain = terrain & TERRAIN_NOT_CLEAR & ~TERRAIN_HIGHWAY;
+        if (fully_blocked || forbidden_terrain) {
+            blocked_tiles[i] = 1;
+        } else {
+            blocked_tiles[i] = 0;
+        }
+        if (!(terrain & TERRAIN_HIGHWAY)) {
+            any_non_highway = 1;
+        }
+    }
+    if (!any_non_highway) {
+        for (int i = 0; i < num_tiles; i++) {
+            blocked_tiles[i] = 1;
+        }
+    }
+    int image_id = get_new_building_image_id(tile->x, tile->y, grid_offset, BUILDING_HIGHWAY, props);
+    draw_regular_building(BUILDING_HIGHWAY, image_id, x, y, grid_offset, num_tiles, blocked_tiles);
+}
+
 int city_building_ghost_mark_deleting(const map_tile *tile)
 {
     int construction_type = building_construction_type();
@@ -1209,6 +1244,10 @@ void city_building_ghost_draw(const map_tile *tile)
                 city_water_ghost_draw_water_structure_ranges();
             }
             draw_default(tile, x, y, type);
+            break;
+        case BUILDING_HIGHWAY:
+            draw_highway(tile, x, y);
+            break;
         default:
             draw_default(tile, x, y, type);
             break;
