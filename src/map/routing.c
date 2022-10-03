@@ -519,8 +519,8 @@ int map_routing_citizen_can_travel_over_land(int src_x, int src_y, int dst_x, in
 
 static int callback_travel_citizen_road_garden(int offset, int next_offset, int direction)
 {
-    if (terrain_land_citizen.items[next_offset] >= CITIZEN_0_ROAD &&
-        terrain_land_citizen.items[next_offset] <= CITIZEN_2_PASSABLE_TERRAIN) {
+    if (terrain_land_citizen.items[next_offset] == CITIZEN_0_ROAD ||
+        terrain_land_citizen.items[next_offset] == CITIZEN_2_PASSABLE_TERRAIN) {
         return 1;
     }
     return 0;
@@ -529,12 +529,33 @@ static int callback_travel_citizen_road_garden(int offset, int next_offset, int 
 int map_routing_citizen_can_travel_over_road_garden(int src_x, int src_y, int dst_x, int dst_y)
 {
     int dst_offset = map_grid_offset(dst_x, dst_y);
+    if (terrain_land_citizen.items[dst_offset] != CITIZEN_0_ROAD &&
+        terrain_land_citizen.items[dst_offset] != CITIZEN_2_PASSABLE_TERRAIN) {
+        return 0;
+    }
+    ++stats.total_routes_calculated;
+    route_queue_from_to(src_x, src_y, dst_x, dst_y, 0, callback_travel_citizen_road_garden);
+    return distance.determined.items[dst_offset] != 0;
+}
+
+static int callback_travel_citizen_road_garden_highway(int offset, int next_offset, int direction)
+{
+    if (terrain_land_citizen.items[next_offset] >= CITIZEN_0_ROAD &&
+        terrain_land_citizen.items[next_offset] <= CITIZEN_2_PASSABLE_TERRAIN) {
+        return 1;
+    }
+    return 0;
+}
+
+int map_routing_citizen_can_travel_over_road_garden_highway(int src_x, int src_y, int dst_x, int dst_y)
+{
+    int dst_offset = map_grid_offset(dst_x, dst_y);
     if (terrain_land_citizen.items[dst_offset] < CITIZEN_0_ROAD ||
         terrain_land_citizen.items[dst_offset] > CITIZEN_2_PASSABLE_TERRAIN) {
         return 0;
     }
     ++stats.total_routes_calculated;
-    route_queue_from_to(src_x, src_y, dst_x, dst_y, 0, callback_travel_citizen_road_garden);
+    route_queue_from_to(src_x, src_y, dst_x, dst_y, 0, callback_travel_citizen_road_garden_highway);
     return distance.determined.items[dst_offset] != 0;
 }
 

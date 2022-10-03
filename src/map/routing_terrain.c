@@ -136,7 +136,7 @@ void map_routing_update_land_citizen(void)
             } else if (terrain & TERRAIN_AQUEDUCT) {
                 terrain_land_citizen.items[grid_offset] = get_land_type_citizen_aqueduct(grid_offset);
             } else if (terrain & TERRAIN_HIGHWAY) {
-                terrain_land_citizen.items[grid_offset] = CITIZEN_0_ROAD;
+                terrain_land_citizen.items[grid_offset] = CITIZEN_1_HIGHWAY;
             } else if (terrain & TERRAIN_NOT_CLEAR) {
                 terrain_land_citizen.items[grid_offset] = CITIZEN_N1_BLOCKED;
             } else {

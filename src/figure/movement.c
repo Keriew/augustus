@@ -424,6 +424,10 @@ void figure_movement_move_ticks_tower_sentry(figure *f, int num_ticks)
 
 void figure_movement_follow_ticks(figure *f, int num_ticks)
 {
+    int terrain = map_terrain_get(map_grid_offset(f->x, f->y));
+    if (terrain & TERRAIN_HIGHWAY) {
+        num_ticks *= 2;
+    }
     const figure *leader = figure_get(f->leading_figure_id);
     if (f->x == f->source_x && f->y == f->source_y) {
         f->is_ghost = 1;
