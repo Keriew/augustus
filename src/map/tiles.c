@@ -802,6 +802,7 @@ int map_tiles_set_highway(int x, int y)
             terrain <<= 1;
         }
     }
+    foreach_region_tile(x - 1, y - 1, x + 2, y + 2, set_road_image);
     return 1;
 }
 
