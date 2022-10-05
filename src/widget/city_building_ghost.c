@@ -456,6 +456,9 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
                 type == BUILDING_PLAZA || building_type_is_roadblock(type)) {
                 forbidden_terrain &= ~TERRAIN_ROAD;
             }
+            if (type == BUILDING_GATEHOUSE) {
+                forbidden_terrain &= ~TERRAIN_HIGHWAY;
+            }
             if (type == BUILDING_TOWER) {
                 forbidden_terrain &= ~TERRAIN_WALL;
             }
