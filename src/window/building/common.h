@@ -46,7 +46,7 @@ typedef struct {
     int formation_id;
     int formation_types;
     int barracks_soldiers_requested;
-    int worst_desirability_building_id;
+    int worst_desirability_building_type;
     int warehouse_space_text;
     building_info_type type;
     terrain_info_type terrain_type;

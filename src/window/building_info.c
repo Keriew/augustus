@@ -350,8 +350,8 @@ static void init(int grid_offset)
                 break;
             default:
                 if (b->house_size) {
-                    context.worst_desirability_building_id = building_house_determine_worst_desirability_building(b);
-                    building_house_determine_evolve_text(b, context.worst_desirability_building_id);
+                    context.worst_desirability_building_type = building_house_determine_worst_desirability_building_type(b);
+                    building_house_determine_evolve_text(b, context.worst_desirability_building_type);
                 }
                 break;
         }
