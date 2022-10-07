@@ -516,4 +516,5 @@
 		</animation>
 	</image>
 	<image id="Highway" src="Highway" isometric="true"/>
+	<image id="Highway1" src="Highway1" isometric="true"/>
 </assetlist>

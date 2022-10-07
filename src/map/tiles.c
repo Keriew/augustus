@@ -778,7 +778,8 @@ static void set_highway_image(int x, int y, int grid_offset)
         set_aqueduct_image(grid_offset, 1, img);
     }
     else {
-        map_image_set(grid_offset, 639); // paved road placeholder sprite for the time being
+        int image_id = assets_get_image_id("Logistics", "Highway1");
+        map_image_set(grid_offset, image_id); // paved road placeholder sprite for the time being
     }
     map_property_set_multi_tile_size(grid_offset, 1);
     map_property_mark_draw_tile(grid_offset);
