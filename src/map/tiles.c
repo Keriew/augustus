@@ -817,10 +817,10 @@ int map_tiles_set_highway(int x, int y)
             map_terrain_remove(grid_offset, TERRAIN_ROAD);
             map_terrain_add(grid_offset, terrain);
             map_property_clear_constructing(grid_offset);
-            set_highway_image(x, y, grid_offset);
             terrain <<= 1;
         }
     }
+    foreach_region_tile(x - 1, y - 1, x + 2, y + 2, set_highway_image);
     foreach_region_tile(x - 1, y - 1, x + 2, y + 2, set_road_image);
     return 1;
 }
@@ -845,6 +845,7 @@ static int clear_highway_from_top(int grid_offset, int measure_only)
             cleared = 1;
         }
     }
+    foreach_region_tile(x - 1, y - 1, x + 2, y + 2, set_highway_image);
     return cleared;
 }
 
