@@ -20,6 +20,8 @@
 #include "map/terrain.h"
 #include "scenario/map.h"
 
+#include <stdio.h>
+
 #define OFFSET(x,y) (x + GRID_SIZE * y)
 
 #define FORBIDDEN_TERRAIN_MEADOW (TERRAIN_AQUEDUCT | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP |\
@@ -778,7 +780,10 @@ static void set_highway_image(int x, int y, int grid_offset)
         set_aqueduct_image(grid_offset, 1, img);
     }
     else {
-        int image_id = assets_get_image_id("Logistics", "Highway1");
+        int random = (map_random_get(grid_offset) & 3) + 1;
+        char name[10];
+        sprintf(name, "Highway%d", random);
+        int image_id = assets_get_image_id("Logistics", name);
         map_image_set(grid_offset, image_id); // paved road placeholder sprite for the time being
     }
     map_property_set_multi_tile_size(grid_offset, 1);

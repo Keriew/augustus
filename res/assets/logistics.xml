@@ -517,4 +517,7 @@
 	</image>
 	<image id="Highway" src="Highway" isometric="true"/>
 	<image id="Highway1" src="Highway1" isometric="true"/>
+	<image id="Highway2" src="Highway2" isometric="true"/>
+	<image id="Highway3" src="Highway3" isometric="true"/>
+	<image id="Highway4" src="Highway4" isometric="true"/>
 </assetlist>
