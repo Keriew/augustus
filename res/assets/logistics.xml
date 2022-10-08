@@ -516,8 +516,22 @@
 		</animation>
 	</image>
 	<image id="Highway" src="Highway" isometric="true"/>
-	<image id="Highway1" src="Highway1" isometric="true"/>
-	<image id="Highway2" src="Highway2" isometric="true"/>
-	<image id="Highway3" src="Highway3" isometric="true"/>
-	<image id="Highway4" src="Highway4" isometric="true"/>
+	<image id="Highway1" src="Highway0001" isometric="true"/>
+	<image id="Highway2" src="Highway0002" isometric="true"/>
+	<image id="Highway3" src="Highway0003" isometric="true"/>
+	<image id="Highway4" src="Highway0004" isometric="true"/>
+	<image id="Highway5" src="Highway0005" isometric="true"/>
+	<image id="Highway6" src="Highway0006" isometric="true"/>
+	<image id="Highway7" src="Highway0007" isometric="true"/>
+	<image id="Highway8" src="Highway0008" isometric="true"/>
+	<image id="Highway9" src="Highway0009" isometric="true"/>
+	<image id="Highway10" src="Highway0010" isometric="true"/>
+	<image id="Highway11" src="Highway0011" isometric="true"/>
+	<image id="Highway12" src="Highway0012" isometric="true"/>
+	<image id="Highway13" src="Highway0013" isometric="true"/>
+	<image id="Highway14" src="Highway0014" isometric="true"/>
+	<image id="Highway15" src="Highway0015" isometric="true"/>
+	<image id="Highway16" src="Highway0016" isometric="true"/>
+	<image id="Highway17" src="Highway0017" isometric="true"/>
+	<image id="Highway18" src="Highway0018" isometric="true"/>
 </assetlist>

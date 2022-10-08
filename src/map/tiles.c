@@ -31,7 +31,8 @@
             TERRAIN_ROAD | TERRAIN_BUILDING | TERRAIN_GARDEN)
 
 static int aqueduct_include_construction = 0;
-static int highway_top_offsets[4] = { 0, -GRID_SIZE, -1, -GRID_SIZE - 1 };
+static int highway_top_tile_offsets[4] = { 0, -GRID_SIZE, -1, -GRID_SIZE - 1 };
+static int highway_wall_direction_offsets[4] = { 1, -GRID_SIZE, -1, GRID_SIZE };
 
 static int is_clear(int x, int y, int size, int disallowed_terrain, int check_image)
 {
@@ -778,13 +779,25 @@ static void set_highway_image(int x, int y, int grid_offset)
     if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
         const terrain_image *img = map_image_context_get_aqueduct(grid_offset, 0);
         set_aqueduct_image(grid_offset, 1, img);
-    }
-    else {
-        int random = (map_random_get(grid_offset) & 3) + 1;
+    } else {
+        int highway_image_id = 1;
+        for (int d = 0; d < 4; d++) {
+            if (!map_terrain_is(grid_offset + highway_wall_direction_offsets[d], TERRAIN_HIGHWAY)) {
+                highway_image_id = d + 2;
+                if (!map_terrain_is(grid_offset + highway_wall_direction_offsets[(d + 1) % 4], TERRAIN_HIGHWAY)) {
+                    highway_image_id += 4;
+                    break;
+                }
+            }
+        }
+        int random = (map_random_get(grid_offset) & 1);
+        if (random > 0) {
+            highway_image_id += 9;
+        }
         char name[10];
-        sprintf(name, "Highway%d", random);
+        sprintf(name, "Highway%d", highway_image_id);
         int image_id = assets_get_image_id("Logistics", name);
-        map_image_set(grid_offset, image_id); // paved road placeholder sprite for the time being
+        map_image_set(grid_offset, image_id);
     }
     map_property_set_multi_tile_size(grid_offset, 1);
     map_property_mark_draw_tile(grid_offset);
@@ -844,8 +857,8 @@ int map_tiles_clear_highway(int grid_offset, int measure_only)
     int highway_terrain = TERRAIN_HIGHWAY_TOP_LEFT;
     for (int i = 0; i < 4; i++) {
         if (terrain & highway_terrain) {
-            int highway_top = grid_offset + highway_top_offsets[i];
-            items_cleared += clear_highway_from_top(highway_top, measure_only);
+            int highway_top_tile = grid_offset + highway_top_tile_offsets[i];
+            items_cleared += clear_highway_from_top(highway_top_tile, measure_only);
         }
         highway_terrain <<= 1;
     }
