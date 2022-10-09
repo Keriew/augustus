@@ -13,6 +13,8 @@
 #include "map/tiles.h"
 #include "graphics/window.h"
 
+#include <stdlib.h>
+
 static int place_routed_building(int x_start, int y_start, int x_end, int y_end, routed_building_type type, int *items)
 {
     static const int direction_indices[8][4] = {
