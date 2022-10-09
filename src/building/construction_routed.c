@@ -197,7 +197,7 @@ int building_construction_place_aqueduct(int x_start, int y_start, int x_end, in
         if (map_terrain_count_directly_adjacent_with_types(grid_offset, TERRAIN_ROAD | TERRAIN_AQUEDUCT)) {
             blocked = 1;
         }
-    } else if (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
+    } else if (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR) && !map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
         blocked = 1;
     }
     grid_offset = map_grid_offset(x_end, y_end);
@@ -209,7 +209,7 @@ int building_construction_place_aqueduct(int x_start, int y_start, int x_end, in
             blocked = 1;
         }
 
-    } else if (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
+    } else if (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR) && !map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
         blocked = 1;
     }
     if (blocked) {

@@ -647,7 +647,7 @@ static void draw_aqueduct(const map_tile *tile, int x, int y)
                 if (map_terrain_count_directly_adjacent_with_types(grid_offset, TERRAIN_ROAD | TERRAIN_AQUEDUCT)) {
                     blocked = 1;
                 }
-            } else if (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
+            } else if (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR) && !map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
                 blocked = 1;
             }
         }
