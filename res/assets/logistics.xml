@@ -534,4 +534,8 @@
 	<image id="Highway16" src="Highway0016" isometric="true"/>
 	<image id="Highway17" src="Highway0017" isometric="true"/>
 	<image id="Highway18" src="Highway0018" isometric="true"/>
+	<image id="Highway_Aqueduct_Full_Left" src="Highway_Aqueduct_Full_Left" isometric="true"/>
+	<image id="Highway_Aqueduct_Full_Right" src="Highway_Aqueduct_Full_Right" isometric="true"/>
+	<image id="Highway_Aqueduct_Empty_Left" src="Highway_Aqueduct_Empty_Left" isometric="true"/>
+	<image id="Highway_Aqueduct_Empty_Right" src="Highway_Aqueduct_Empty_Right" isometric="true"/>
 </assetlist>

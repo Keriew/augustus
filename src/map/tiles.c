@@ -694,7 +694,7 @@ static void set_aqueduct_image(int grid_offset, int is_road, const terrain_image
                 group_offset = 2;
             }
         }
-        if (map_tiles_is_paved_road(grid_offset) || map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+        if (map_tiles_is_paved_road(grid_offset)) {
             group_offset -= 2;
         } else {
             group_offset += 6;
@@ -702,13 +702,22 @@ static void set_aqueduct_image(int grid_offset, int is_road, const terrain_image
     }
     int image_aqueduct = image_group(GROUP_BUILDING_AQUEDUCT);
     int water_offset;
-    int image_id = map_image_at(grid_offset);
-    if (image_id >= image_aqueduct && image_id < image_aqueduct + 15) {
+    if (map_aqueduct_at(grid_offset)) {
         water_offset = 0;
     } else {
         water_offset = 15;
     }
-    map_image_set(grid_offset, image_aqueduct + water_offset + group_offset);
+    int image_id = image_aqueduct + water_offset + group_offset;
+    if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+        image_id = assets_get_image_id("Logistics", "Highway_Aqueduct_Full_Left");
+        if (map_terrain_is(grid_offset - 1, TERRAIN_AQUEDUCT) || map_terrain_is(grid_offset + 1, TERRAIN_AQUEDUCT)) {
+            image_id += 1;
+        }
+        if (water_offset) {
+            image_id += 2;
+        }
+    }
+    map_image_set(grid_offset, image_id);
     map_property_set_multi_tile_size(grid_offset, 1);
     map_property_mark_draw_tile(grid_offset);
 }
@@ -778,25 +787,24 @@ static void set_highway_image(int x, int y, int grid_offset)
     }
     if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
         const terrain_image *img = map_image_context_get_aqueduct(grid_offset, 0);
-        set_aqueduct_image(grid_offset, 1, img);
+        set_aqueduct_image(grid_offset, 0, img);
     } else {
-        int highway_image_id = 1;
+        int highway_image_offset = 0;
         for (int d = 0; d < 4; d++) {
             if (!map_terrain_is(grid_offset + highway_wall_direction_offsets[d], TERRAIN_HIGHWAY)) {
-                highway_image_id = d + 2;
+                highway_image_offset = d + 1;
                 if (!map_terrain_is(grid_offset + highway_wall_direction_offsets[(d + 1) % 4], TERRAIN_HIGHWAY)) {
-                    highway_image_id += 4;
+                    highway_image_offset += 4;
                     break;
                 }
             }
         }
         int random = (map_random_get(grid_offset) & 1);
         if (random > 0) {
-            highway_image_id += 9;
+            highway_image_offset += 9;
         }
-        char name[10];
-        sprintf(name, "Highway%d", highway_image_id);
-        int image_id = assets_get_image_id("Logistics", name);
+        int image_id = assets_get_image_id("Logistics", "Highway1");
+        image_id += highway_image_offset;
         map_image_set(grid_offset, image_id);
     }
     map_property_set_multi_tile_size(grid_offset, 1);

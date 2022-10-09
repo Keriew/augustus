@@ -75,6 +75,8 @@ void map_water_supply_update_houses(void)
 static void set_all_aqueducts_to_no_water(void)
 {
     int image_without_water = image_group(GROUP_BUILDING_AQUEDUCT_NO_WATER);
+    int highway_image_with_water = assets_get_image_id("Logistics", "Highway_Aqueduct_Full_Left");
+    int highway_image_without_water = assets_get_image_id("Logistics", "Highway_Aqueduct_Empty_Left");
     int grid_offset = map_data.start_offset;
     for (int y = 0; y < map_data.height; y++, grid_offset += map_data.border_size) {
         for (int x = 0; x < map_data.width; x++, grid_offset++) {
@@ -83,6 +85,8 @@ static void set_all_aqueducts_to_no_water(void)
                 int image_id = map_image_at(grid_offset);
                 if (image_id < image_without_water) {
                     map_image_set(grid_offset, image_id + 15);
+                } else if (image_id >= highway_image_with_water && image_id < highway_image_without_water) {
+                    map_image_set(grid_offset, image_id + 2);
                 }
             }
         }
@@ -98,14 +102,19 @@ static void fill_aqueducts_from_offset(int grid_offset)
     int guard = 0;
     int next_offset;
     int image_without_water = image_group(GROUP_BUILDING_AQUEDUCT_NO_WATER);
+    int highway_image_with_water = assets_get_image_id("Logistics", "Highway_Aqueduct_Full_Left");
+    int highway_image_without_water = assets_get_image_id("Logistics", "Highway_Aqueduct_Empty_Left");
+
     do {
         if (++guard >= GRID_SIZE * GRID_SIZE) {
             break;
         }
         map_aqueduct_set(grid_offset, 1);
         int image_id = map_image_at(grid_offset);
-        if (image_id >= image_without_water) {
+        if (image_id >= image_without_water && image_id < highway_image_with_water) {
             map_image_set(grid_offset, image_id - 15);
+        } else if (image_id >= highway_image_without_water) {
+            map_image_set(grid_offset, image_id - 2);
         }
         next_offset = -1;
         for (int i = 0; i < 4; i++) {
