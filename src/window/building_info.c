@@ -83,6 +83,8 @@ static int get_height_id(void)
             case TERRAIN_INFO_WALL:
             case TERRAIN_INFO_GARDEN:
                 return 1;
+            case TERRAIN_INFO_HIGHWAY:
+                return 7;
             default:
                 return 5;
         }

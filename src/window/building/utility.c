@@ -2,6 +2,7 @@
 
 #include "building/building.h"
 #include "building/roadblock.h"
+#include "city/finance.h"
 #include "core/image.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
@@ -358,7 +359,8 @@ void window_building_draw_highway(building_info_context *c)
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_HIGHWAY, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
     window_building_draw_figure_list(c);
-    window_building_draw_description_at(c, BLOCK_SIZE * c->height_blocks - 113, CUSTOM_TRANSLATION, TR_BUILDING_HIGHWAY_DESC);
+    window_building_draw_description_at(c, BLOCK_SIZE * c->height_blocks - 150, CUSTOM_TRANSLATION, TR_BUILDING_HIGHWAY_DESC);
+    window_building_draw_levy(HIGHWAY_LEVY_MONTHLY, c->x_offset - 270, c->y_offset + BLOCK_SIZE * c->height_blocks - 110);
 }
 
 void toggle_figure_state(int index, int param2)
