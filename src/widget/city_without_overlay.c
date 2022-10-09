@@ -801,7 +801,7 @@ static void draw_road_network_id(int x, int y, int grid_offset)
     int tx = map_grid_offset_to_x(grid_offset);
     int ty = map_grid_offset_to_y(grid_offset);
     int road_network_id = map_road_network_get(grid_offset);
-    char *text[20];
+    char text[20];
     sprintf(text, "%d", road_network_id);
     text_draw_centered(text, x, y + 4, 58, FONT_NORMAL_BLACK, COLOR_WHITE);
 }
