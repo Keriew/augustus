@@ -75,7 +75,7 @@ augustus_building_properties_mapping augustus_building_properties[AUGUSTUS_BUILD
     {BUILDING_HIGHWAY, { 2, 1, 0, 0, 0 }, "Logistics", "Highway_Placement"}
 };
 
-void init_augustus_building_properties()
+void init_augustus_building_properties(void)
 {
     for (int i = 0; i < AUGUSTUS_BUILDINGS; ++i) {
         if (augustus_building_properties[i].asset_image_id) {
