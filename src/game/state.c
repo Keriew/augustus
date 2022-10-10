@@ -6,6 +6,7 @@
 #include "core/random.h"
 #include "map/ring.h"
 #include "map/building.h"
+#include "map/tiles.h"
 #include "map/water_supply.h"
 
 static struct {
