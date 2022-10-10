@@ -8,6 +8,7 @@
 #include "graphics/window.h"
 #include "map/road_network.h"
 #include "map/routing.h"
+#include "map/terrain.h"
 #include "platform/renderer.h"
 
 #ifdef DRAW_FPS
