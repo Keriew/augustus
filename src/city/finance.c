@@ -351,7 +351,7 @@ static void pay_monthly_building_levies(void)
     int grid_offset = map_data.start_offset;
     for (int y = 0; y < map_data.height; y++, grid_offset += map_data.border_size) {
         for (int x = 0; x < map_data.width; x++, grid_offset++) {
-            if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+            if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY_TOP_LEFT)) {
                 levies += HIGHWAY_LEVY_MONTHLY;
             }
         }

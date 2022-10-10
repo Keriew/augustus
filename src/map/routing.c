@@ -66,7 +66,7 @@ static void reset_fighting_status(void)
     }
 }
 
-map_routing_distance_grid *map_routing_get_distance_grid(void)
+const map_routing_distance_grid *map_routing_get_distance_grid(void)
 {
     return &distance;
 }
@@ -150,7 +150,7 @@ static inline void ordered_queue_reduce_index(int index, int offset, int dist)
     }
 }
 
-static void ordered_enqueue(int offset, int next_offset, int current_dist, int remaining_dist)
+static void ordered_enqueue(int next_offset, int current_dist, int remaining_dist)
 {
     int possible_dist = remaining_dist + current_dist;
     int index = queue.tail;
@@ -187,12 +187,8 @@ static inline int distance_left(int x, int y)
 
 static int receive_highway_bonus(int offset, int direction)
 {
-    int terrain = map_terrain_get(offset);
-    if ((terrain & TERRAIN_HIGHWAY) == 0) {
-        return 0;
-    }
     int highway_directions = HIGHWAY_DIRECTIONS[direction];
-    if (terrain & highway_directions) {
+    if (map_terrain_is(offset, highway_directions)) {
         return 1;
     }
     return 0;
@@ -205,7 +201,7 @@ static void route_queue_from_to(int src_x, int src_y, int dst_x, int dst_y, int 
     distance.dst_x = dst_x;
     distance.dst_y = dst_y;
     int dest = map_grid_offset(dst_x, dst_y);
-    ordered_enqueue(-1, map_grid_offset(src_x, src_y), 1, 0);
+    ordered_enqueue(map_grid_offset(src_x, src_y), 1, 0);
     int tiles = 0;
     while (queue.tail) {
         int offset = ordered_queue_pop();
@@ -225,7 +221,7 @@ static void route_queue_from_to(int src_x, int src_y, int dst_x, int dst_y, int 
             int next_x = map_grid_offset_to_x(next_offset);
             int next_y = map_grid_offset_to_y(next_offset);
             if (valid_offset(next_offset, dist) && callback(offset, next_offset, i)) {
-                ordered_enqueue(offset, next_offset, dist, remaining_dist);
+                ordered_enqueue(next_offset, dist, remaining_dist);
             }
         }
     }

@@ -515,27 +515,27 @@
 			<frame src="Engineers_Post_Upgrade_ON_10"/>
 		</animation>
 	</image>
-	<image id="Highway" src="Highway" isometric="true"/>
-	<image id="Highway1" src="Highway0001" isometric="true"/>
-	<image id="Highway2" src="Highway0002" isometric="true"/>
-	<image id="Highway3" src="Highway0003" isometric="true"/>
-	<image id="Highway4" src="Highway0004" isometric="true"/>
-	<image id="Highway5" src="Highway0005" isometric="true"/>
-	<image id="Highway6" src="Highway0006" isometric="true"/>
-	<image id="Highway7" src="Highway0007" isometric="true"/>
-	<image id="Highway8" src="Highway0008" isometric="true"/>
-	<image id="Highway9" src="Highway0009" isometric="true"/>
-	<image id="Highway10" src="Highway0010" isometric="true"/>
-	<image id="Highway11" src="Highway0011" isometric="true"/>
-	<image id="Highway12" src="Highway0012" isometric="true"/>
-	<image id="Highway13" src="Highway0013" isometric="true"/>
-	<image id="Highway14" src="Highway0014" isometric="true"/>
-	<image id="Highway15" src="Highway0015" isometric="true"/>
-	<image id="Highway16" src="Highway0016" isometric="true"/>
-	<image id="Highway17" src="Highway0017" isometric="true"/>
-	<image id="Highway18" src="Highway0018" isometric="true"/>
-	<image id="Highway_Aqueduct_Full_Left" src="Highway_Aqueduct_Full_Left" isometric="true"/>
-	<image id="Highway_Aqueduct_Full_Right" src="Highway_Aqueduct_Full_Right" isometric="true"/>
-	<image id="Highway_Aqueduct_Empty_Left" src="Highway_Aqueduct_Empty_Left" isometric="true"/>
-	<image id="Highway_Aqueduct_Empty_Right" src="Highway_Aqueduct_Empty_Right" isometric="true"/>
+	<image id="Highway_Placement" src="Highway_Placement" isometric="true"/>
+	<image id="Highway_Tile_Start" src="Highway0001" isometric="true"/>
+	<image src="Highway0002" isometric="true"/>
+	<image src="Highway0003" isometric="true"/>
+	<image src="Highway0004" isometric="true"/>
+	<image src="Highway0005" isometric="true"/>
+	<image src="Highway0006" isometric="true"/>
+	<image src="Highway0007" isometric="true"/>
+	<image src="Highway0008" isometric="true"/>
+	<image src="Highway0009" isometric="true"/>
+	<image src="Highway0010" isometric="true"/>
+	<image src="Highway0011" isometric="true"/>
+	<image src="Highway0012" isometric="true"/>
+	<image src="Highway0013" isometric="true"/>
+	<image src="Highway0014" isometric="true"/>
+	<image src="Highway0015" isometric="true"/>
+	<image src="Highway0016" isometric="true"/>
+	<image src="Highway0017" isometric="true"/>
+	<image src="Highway0018" isometric="true"/>
+	<image id="Highway_Aqueduct_Full_Start" src="Highway_Aqueduct_Full_Left" isometric="true"/>
+	<image src="Highway_Aqueduct_Full_Right" isometric="true"/>
+	<image id="Highway_Aqueduct_Empty_Start" src="Highway_Aqueduct_Empty_Left" isometric="true"/>
+	<image src="Highway_Aqueduct_Empty_Right" isometric="true"/>
 </assetlist>

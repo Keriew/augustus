@@ -20,8 +20,6 @@
 #include "map/terrain.h"
 #include "scenario/map.h"
 
-#include <stdio.h>
-
 #define OFFSET(x,y) (x + GRID_SIZE * y)
 
 #define FORBIDDEN_TERRAIN_MEADOW (TERRAIN_AQUEDUCT | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP |\
@@ -714,7 +712,7 @@ static void set_aqueduct_image(int grid_offset, int is_road, const terrain_image
     }
     int image_id = image_aqueduct + water_offset + group_offset;
     if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
-        image_id = assets_get_image_id("Logistics", "Highway_Aqueduct_Full_Left");
+        image_id = assets_get_image_id("Logistics", "Highway_Aqueduct_Full_Start");
         if (map_terrain_is(grid_offset - 1, TERRAIN_AQUEDUCT) || map_terrain_is(grid_offset + 1, TERRAIN_AQUEDUCT)) {
             image_id += 1;
         }
@@ -808,7 +806,7 @@ static void set_highway_image(int x, int y, int grid_offset)
         if (random > 0) {
             highway_image_offset += 9;
         }
-        int image_id = assets_get_image_id("Logistics", "Highway1");
+        int image_id = assets_get_image_id("Logistics", "Highway_Tile_Start");
         image_id += highway_image_offset;
         map_image_set(grid_offset, image_id);
     }

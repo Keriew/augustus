@@ -19,7 +19,7 @@ typedef struct map_routing_distance_grid {
     int dst_y;
 } map_routing_distance_grid;
 
-map_routing_distance_grid *map_routing_get_distance_grid(void);
+const map_routing_distance_grid *map_routing_get_distance_grid(void);
 
 void map_routing_calculate_distances(int x, int y);
 void map_routing_calculate_distances_water_boat(int x, int y);

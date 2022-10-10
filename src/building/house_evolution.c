@@ -870,7 +870,7 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
     }
 }
 
-static int get_building_type_at_tile(const building *house, int x, int y)
+static building_type get_building_type_at_tile(const building *house, int x, int y)
 {
     int grid_offset = map_grid_offset(x, y);
     int building_id = map_building_at(grid_offset);
@@ -878,30 +878,30 @@ static int get_building_type_at_tile(const building *house, int x, int y)
         if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
             return BUILDING_HIGHWAY;
         } else {
-            return 0;
+            return BUILDING_NONE;
         }
     }
     building *b = building_get(building_id);
     if (b->state != BUILDING_STATE_IN_USE || building_id == house->id) {
-        return 0;
+        return BUILDING_NONE;
     }
     if (b->house_size && b->type >= house->type) {
-        return 0;
+        return BUILDING_NONE;
     }
     return b->type;
 }
 
-int building_house_determine_worst_desirability_building_type(const building *house)
+building_type building_house_determine_worst_desirability_building_type(const building *house)
 {
     int lowest_desirability = 0;
-    int lowest_building_type = 0;
+    building_type lowest_building_type = BUILDING_NONE;
     int x_min, y_min, x_max, y_max;
     map_grid_get_area(house->x, house->y, 1, 6, &x_min, &y_min, &x_max, &y_max);
 
     for (int y = y_min; y <= y_max; y++) {
         for (int x = x_min; x <= x_max; x++) {
             int building_type = get_building_type_at_tile(house, x, y);
-            model_building *model = model_get_building(building_type);
+            const model_building *model = model_get_building(building_type);
             // simplified desirability calculation
             int des = model->desirability_value;
             int step_size = model->desirability_step_size;

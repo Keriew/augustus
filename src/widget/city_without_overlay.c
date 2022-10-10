@@ -26,7 +26,6 @@
 #include "game/resource.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
-#include "graphics/text.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
 #include "map/building.h"
@@ -34,10 +33,6 @@
 #include "map/grid.h"
 #include "map/image.h"
 #include "map/property.h"
-#ifdef DRAW_ROAD_NETWORK_IDS
-#include "map/road_network.h"
-#endif
-#include "map/routing.h"
 #include "map/sprite.h"
 #include "map/terrain.h"
 #include "scenario/property.h"
@@ -45,9 +40,8 @@
 #include "widget/city_bridge.h"
 #include "widget/city_building_ghost.h"
 #include "widget/city_figure.h"
-
-#if defined DRAW_ROUTING || defined DRAW_TILE_COORDS || defined DRAW_ROAD_NETWORK_IDS
-#include <stdio.h>
+#ifndef NDEBUG
+#include "widget/debug.h"
 #endif
 
 #define OFFSET(x,y) (x + GRID_SIZE * y)
@@ -740,73 +734,6 @@ static int get_highlighted_formation_id(const map_tile *tile)
     return highlighted_formation_id;
 }
 
-#ifdef DRAW_ROUTING
-static void draw_routing(int x, int y, int grid_offset)
-{
-    int tx = map_grid_offset_to_x(grid_offset);
-    int ty = map_grid_offset_to_y(grid_offset);
-    map_routing_distance_grid *distance = map_routing_get_distance_grid();
-    int16_t dist = distance->determined.items[grid_offset];
-    if (!dist) {
-        return;
-    }
-    if (tx == distance->dst_x && ty == distance->dst_y) {
-        int dst_image_id = assets_get_image_id("UI", "Happy God Icon");
-        image_draw(dst_image_id, x + 29 - 10, y + 15 - 10, 0, 1);
-    }
-    char *text[20];
-    sprintf(text, "%d", dist);
-    text_draw_centered(text, x, y, 58, FONT_NORMAL_BLACK, COLOR_WHITE);
-}
-#endif
-
-#ifdef DRAW_HIGHWAY_TERRAIN
-static void draw_highway_terrain(int x, int y, int grid_offset)
-{
-    int terrain = map_terrain_get(grid_offset);
-    if (terrain & TERRAIN_HIGHWAY_TOP_LEFT) {
-        text_draw_centered("TL", x, y + 6, 58, FONT_NORMAL_BLACK, COLOR_WHITE);
-    }
-    if (terrain & TERRAIN_HIGHWAY_TOP_RIGHT) {
-        text_draw_centered("TR", x, y + 6, 58, FONT_NORMAL_BLACK, COLOR_WHITE);
-    }
-    if (terrain & TERRAIN_HIGHWAY_BOTTOM_LEFT) {
-        text_draw_centered("BL", x, y + 6, 58, FONT_NORMAL_BLACK, COLOR_WHITE);
-    }
-    if (terrain & TERRAIN_HIGHWAY_BOTTOM_RIGHT) {
-        text_draw_centered("BR", x, y + 6, 58, FONT_NORMAL_BLACK, COLOR_WHITE);
-    }
-}
-#endif
-
-#ifdef DRAW_TILE_COORDS
-static void draw_tile_coords(int x, int y, int grid_offset)
-{
-    int tx = map_grid_offset_to_x(grid_offset);
-    int ty = map_grid_offset_to_y(grid_offset);
-    if (tx % 2 != 0 || ty % 2 != 0) {
-        //return;
-    }
-    char *text[20];
-    //sprintf(text, "%d,%d", tx, ty);
-    //text_draw_centered(text, x, y + 4, 58, FONT_SMALL_PLAIN, COLOR_WHITE);
-    sprintf(text, "%d", grid_offset);
-    text_draw_centered(text, x, y + 10, 58, FONT_SMALL_PLAIN, COLOR_WHITE);
-}
-#endif
-
-#ifdef DRAW_ROAD_NETWORK_IDS
-static void draw_road_network_id(int x, int y, int grid_offset)
-{
-    int tx = map_grid_offset_to_x(grid_offset);
-    int ty = map_grid_offset_to_y(grid_offset);
-    int road_network_id = map_road_network_get(grid_offset);
-    char text[20];
-    sprintf(text, "%d", road_network_id);
-    text_draw_centered(text, x, y + 4, 58, FONT_NORMAL_BLACK, COLOR_WHITE);
-}
-#endif
-
 void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_coord, const map_tile *tile)
 {
     int highlighted_formation_id = get_highlighted_formation_id(tile);
@@ -816,17 +743,8 @@ void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_
     graphics_fill_rect(x, y, width, height, COLOR_BLACK);
     int should_mark_deleting = city_building_ghost_mark_deleting(tile);
     city_view_foreach_valid_map_tile(draw_footprint, 0, 0);
-#ifdef DRAW_ROUTING
-    city_view_foreach_valid_map_tile(draw_routing, 0, 0);
-#endif
-#ifdef DRAW_HIGHWAY_TERRAIN
-    city_view_foreach_valid_map_tile(draw_highway_terrain, 0, 0);
-#endif
-#ifdef DRAW_TILE_COORDS
-    city_view_foreach_valid_map_tile(draw_tile_coords, 0, 0);
-#endif
-#ifdef DRAW_ROAD_NETWORK_IDS
-    city_view_foreach_valid_map_tile(draw_road_network_id, 0, 0);
+#ifndef NDEBUG
+    debug_draw_city();
 #endif
     if (!should_mark_deleting) {
         city_view_foreach_valid_map_tile(

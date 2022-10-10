@@ -34,6 +34,17 @@ static struct {
     int tail;
 } queue;
 
+static int image_without_water = 0;
+static int highway_image_with_water = 0;
+static int highway_image_without_water = 0;
+
+void map_water_supply_init(void)
+{
+    image_without_water = image_group(GROUP_BUILDING_AQUEDUCT_NO_WATER);
+    highway_image_with_water = assets_get_image_id("Logistics", "Highway_Aqueduct_Full_Start");
+    highway_image_without_water = assets_get_image_id("Logistics", "Highway_Aqueduct_Empty_Start");
+}
+
 static void mark_well_access(int well_id, int radius)
 {
     building *well = building_get(well_id);
@@ -74,9 +85,6 @@ void map_water_supply_update_houses(void)
 
 static void set_all_aqueducts_to_no_water(void)
 {
-    int image_without_water = image_group(GROUP_BUILDING_AQUEDUCT_NO_WATER);
-    int highway_image_with_water = assets_get_image_id("Logistics", "Highway_Aqueduct_Full_Left");
-    int highway_image_without_water = assets_get_image_id("Logistics", "Highway_Aqueduct_Empty_Left");
     int grid_offset = map_data.start_offset;
     for (int y = 0; y < map_data.height; y++, grid_offset += map_data.border_size) {
         for (int x = 0; x < map_data.width; x++, grid_offset++) {
@@ -101,9 +109,6 @@ static void fill_aqueducts_from_offset(int grid_offset)
     memset(&queue, 0, sizeof(queue));
     int guard = 0;
     int next_offset;
-    int image_without_water = image_group(GROUP_BUILDING_AQUEDUCT_NO_WATER);
-    int highway_image_with_water = assets_get_image_id("Logistics", "Highway_Aqueduct_Full_Left");
-    int highway_image_without_water = assets_get_image_id("Logistics", "Highway_Aqueduct_Empty_Left");
 
     do {
         if (++guard >= GRID_SIZE * GRID_SIZE) {
