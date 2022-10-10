@@ -441,7 +441,9 @@ static void draw_minimap_tile(int x_view, int y_view, int grid_offset)
     }
     int rand = data.functions->offset.random(grid_offset);
     const tile_color *colors;
-    if (terrain & TERRAIN_ROAD) {
+    if (terrain & TERRAIN_AQUEDUCT) {
+        colors = &minimap_colors.aqueduct;
+    } else if (terrain & TERRAIN_ROAD) {
         colors = &minimap_colors.climate->road;
     } else if (terrain & TERRAIN_HIGHWAY) {
         colors = &minimap_colors.climate->highway;
@@ -451,8 +453,6 @@ static void draw_minimap_tile(int x_view, int y_view, int grid_offset)
         colors = &minimap_colors.climate->tree[rand & 3];
     } else if (terrain & (TERRAIN_ROCK | TERRAIN_ELEVATION)) {
         colors = &minimap_colors.climate->rock[rand & 3];
-    } else if (terrain & TERRAIN_AQUEDUCT) {
-        colors = &minimap_colors.aqueduct;
     } else if (terrain & TERRAIN_WALL) {
         colors = &minimap_colors.wall;
     } else if (terrain & TERRAIN_MEADOW) {
