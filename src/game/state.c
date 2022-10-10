@@ -25,6 +25,7 @@ void game_state_init(void)
     random_generate_pool();
 
     city_warning_clear_all();
+    map_tiles_init();
     map_water_supply_init();
 }
 

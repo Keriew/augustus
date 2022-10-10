@@ -31,6 +31,14 @@
 static int aqueduct_include_construction = 0;
 static int highway_top_tile_offsets[4] = { 0, -GRID_SIZE, -1, -GRID_SIZE - 1 };
 static int highway_wall_direction_offsets[4] = { 1, -GRID_SIZE, -1, GRID_SIZE };
+static int highway_image_with_water = 0;
+static int highway_image_without_water = 0;
+
+void map_tiles_init(void)
+{
+    highway_image_with_water = assets_get_image_id("Logistics", "Highway_Aqueduct_Full_Start");
+    highway_image_without_water = assets_get_image_id("Logistics", "Highway_Aqueduct_Empty_Start");
+}
 
 static int is_clear(int x, int y, int size, int disallowed_terrain, int check_image)
 {
@@ -705,22 +713,25 @@ static void set_aqueduct_image(int grid_offset, int is_road, const terrain_image
     }
     int image_aqueduct = image_group(GROUP_BUILDING_AQUEDUCT);
     int water_offset;
-    if (map_aqueduct_at(grid_offset)) {
+    int image_id = map_image_at(grid_offset);
+    int is_regular_water = image_id >= image_aqueduct && image_id < image_aqueduct + 15;
+    int is_highway_water = image_id >= highway_image_with_water && image_id < highway_image_without_water;
+    if (is_regular_water || is_highway_water) {
         water_offset = 0;
     } else {
         water_offset = 15;
     }
-    int image_id = image_aqueduct + water_offset + group_offset;
+    int new_image_id = image_aqueduct + water_offset + group_offset;
     if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
-        image_id = assets_get_image_id("Logistics", "Highway_Aqueduct_Full_Start");
+        new_image_id = assets_get_image_id("Logistics", "Highway_Aqueduct_Full_Start");
         if (map_terrain_is(grid_offset - 1, TERRAIN_AQUEDUCT) || map_terrain_is(grid_offset + 1, TERRAIN_AQUEDUCT)) {
-            image_id += 1;
+            new_image_id += 1;
         }
         if (water_offset) {
-            image_id += 2;
+            new_image_id += 2;
         }
     }
-    map_image_set(grid_offset, image_id);
+    map_image_set(grid_offset, new_image_id);
     map_property_set_multi_tile_size(grid_offset, 1);
     map_property_mark_draw_tile(grid_offset);
 }
