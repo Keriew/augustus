@@ -239,6 +239,9 @@ set(PLATFORM_FILES
     ${PROJECT_SOURCE_DIR}/src/platform/virtual_keyboard.c
 )
 
+if("${CMAKE_BUILD_TYPE}" MATCHES "Debug")
+    list(APPEND PLATFORM_FILES ${PROJECT_SOURCE_DIR}/src/platform/debug.c)
+endif()
 if (${TARGET_PLATFORM} STREQUAL "vita")
     set(PLATFORM_FILES
         ${PLATFORM_FILES}
@@ -556,11 +559,7 @@ set(WIDGET_FILES
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/extra.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/military.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/slide.c
-    ${PROJECT_SOURCE_DIR}/src/widget/debug.c
 )
-if("${CMAKE_BUILD_TYPE}" MATCHES "Debug")
-    list(APPEND WIDGET_FILES ${PROJECT_SOURCE_DIR}/src/widget/debug.c)
-endif()
 set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/advisors.c
     ${PROJECT_SOURCE_DIR}/src/window/advisor/chief.c

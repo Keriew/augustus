@@ -1,5 +1,3 @@
-#include "SDL.h"
-
 #include "city/view.h"
 #include "core/string.h"
 #include "game/game.h"
@@ -10,6 +8,8 @@
 #include "map/routing.h"
 #include "map/terrain.h"
 #include "platform/renderer.h"
+
+#include "SDL.h"
 
 #ifdef DRAW_FPS
 static struct {

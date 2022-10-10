@@ -35,14 +35,14 @@
 #include "map/property.h"
 #include "map/sprite.h"
 #include "map/terrain.h"
+#ifndef NDEBUG
+#include "platform/debug.h"
+#endif
 #include "scenario/property.h"
 #include "sound/city.h"
 #include "widget/city_bridge.h"
 #include "widget/city_building_ghost.h"
 #include "widget/city_figure.h"
-#ifndef NDEBUG
-#include "widget/debug.h"
-#endif
 
 #define OFFSET(x,y) (x + GRID_SIZE * y)
 

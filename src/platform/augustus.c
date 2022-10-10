@@ -14,6 +14,9 @@
 #include "input/mouse.h"
 #include "input/touch.h"
 #include "platform/arguments.h"
+#ifndef NDEBUG
+#include "platform/debug.h"
+#endif
 #include "platform/file_manager.h"
 #include "platform/joystick.h"
 #include "platform/keyboard_input.h"
@@ -22,9 +25,6 @@
 #include "platform/renderer.h"
 #include "platform/screen.h"
 #include "platform/touch.h"
-#ifndef NDEBUG
-#include "widget/debug.h"
-#endif
 #include "window/asset_previewer.h"
 
 #include "tinyfiledialogs/tinyfiledialogs.h"
