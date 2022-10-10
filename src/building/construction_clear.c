@@ -75,12 +75,13 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
                     continue;
                 } else if (map_terrain_is(grid_offset, TERRAIN_WATER)) { // keep the "bridge is free" bug from C3
                     continue;
+                } else if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
+                    items_placed++;
                 } else if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
                     int next_highways_removed = map_tiles_clear_highway(grid_offset, measure_only);
                     highways_removed += next_highways_removed;
                     items_placed += next_highways_removed;
-                } else if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)
-                    || map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
+                } else if (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
                     items_placed++;
                 }
                 continue;
@@ -139,7 +140,7 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
                     space->state = BUILDING_STATE_DELETED_BY_PLAYER;
                 }
             } else if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
-                map_terrain_remove(grid_offset, TERRAIN_CLEARABLE);
+                map_terrain_remove(grid_offset, TERRAIN_CLEARABLE & ~TERRAIN_HIGHWAY);
                 items_placed++;
                 map_aqueduct_remove(grid_offset);
             } else if (map_terrain_is(grid_offset, TERRAIN_WATER)) {

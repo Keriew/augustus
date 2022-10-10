@@ -1108,7 +1108,7 @@ int city_building_ghost_mark_deleting(const map_tile *tile)
         map_property_clear_constructing_and_deleted();
     }
     map_building_tiles_mark_deleting(tile->grid_offset);
-    if (map_terrain_is(tile->grid_offset, TERRAIN_HIGHWAY)) {
+    if (map_terrain_is(tile->grid_offset, TERRAIN_HIGHWAY) && !map_terrain_is(tile->grid_offset, TERRAIN_AQUEDUCT)) {
         map_tiles_clear_highway(tile->grid_offset, 1);
     }
     return 1;
