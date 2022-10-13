@@ -810,6 +810,8 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_MONUMENT_PHASES, " phases. "},
     {TR_TOOLTIP_MONUMENT_RESOURCE_REQUIREMENTS, "Resource requirements:\n"},
     {TR_BUILDING_GLADIATOR_STATUE, "Gladiator statue"},
+    { TR_BUILDING_HIGHWAY, "Highway" },
+    { TR_BUILDING_HIGHWAY_DESC, "Highways allow citizens to reach their destination more quickly." },
     {TR_ADVISOR_NO_ACTIVE_COLOSSEUM, "No active colosseum in the city"},
     {TR_ADVISOR_ACTIVE_COLOSSEUM, "The city is served by the colosseum"},
     {TR_ADVISOR_NO_ACTIVE_HIPPODROME, "No active hippodrome in the city"},
@@ -844,7 +846,10 @@ static translation_string all_strings[] = {
     {TR_CHEAT_FINISHED_MONUMENTS, "Monuments finished"},
     {TR_CHEAT_UPDATED_MONUMENTS, "Monuments updated"},
     {TR_CHEAT_UNLOCKED_ALL_BUILDINGS, "All buildings unlocked"},
-    {TR_CHEAT_INCITED_RIOT, "Incited a riot"}
+    {TR_CHEAT_INCITED_RIOT, "Incited a riot"},
+    {TR_CITY_MESSAGE_TITLE_ROAD_TO_ROME_WARNING, "City Inacessible" },
+    {TR_CITY_MESSAGE_TEXT_ROAD_TO_ROME_WARNING, "The road to Rome is obstructed. Unless we immediately restore the access to the imperial highway, the engineers from Rome will be forced to take action." },
+
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

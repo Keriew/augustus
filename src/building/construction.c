@@ -605,6 +605,9 @@ void building_construction_start(int x, int y, int grid_offset)
                 can_start = map_routing_calculate_distances_for_building(
                     ROUTED_BUILDING_WALL, data.start.x, data.start.y);
                 break;
+            case BUILDING_HIGHWAY:
+                can_start = map_routing_calculate_distances_for_building(
+                    ROUTED_BUILDING_HIGHWAY, data.start.x, data.start.y);
             default:
                 break;
         }
@@ -649,6 +652,7 @@ int building_construction_is_updatable(void)
         case BUILDING_GARDENS:
         case BUILDING_HOUSE_VACANT_LOT:
         case BUILDING_PALISADE:
+        case BUILDING_HIGHWAY:
             return 1;
         default:
             return 0;
@@ -659,9 +663,7 @@ void building_construction_cancel(void)
 {
     map_property_clear_constructing_and_deleted();
     if (data.in_progress && building_construction_is_updatable()) {
-        if (building_construction_is_updatable()) {
-            game_undo_restore_map(1);
-        }
+        game_undo_restore_map(1);
         data.in_progress = 0;
         data.cost_preview = 0;
     } else {
@@ -702,6 +704,11 @@ void building_construction_update(int x, int y, int grid_offset)
         }
     } else if (type == BUILDING_ROAD) {
         int items_placed = building_construction_place_road(1, data.start.x, data.start.y, x, y);
+        if (items_placed >= 0) {
+            current_cost *= items_placed;
+        }
+    } else if (type == BUILDING_HIGHWAY) {
+        int items_placed = building_construction_place_highway(1, data.start.x, data.start.y, x, y);
         if (items_placed >= 0) {
             current_cost *= items_placed;
         }
@@ -868,6 +875,15 @@ static figure_type nearby_enemy_type(int x_start, int y_start, int x_end, int y_
     return FIGURE_NONE;
 }
 
+void building_construction_offset_start_from_orientation(int *x, int *y, int size)
+{
+    switch (city_view_orientation()) {
+        case DIR_2_RIGHT: *x = *x - size + 1; break;
+        case DIR_4_BOTTOM: *x = *x - size + 1; *y = *y - size + 1; break;
+        case DIR_6_LEFT: *y = *y - size + 1; break;
+    }
+}
+
 void building_construction_place(void)
 {
     data.cost_preview = 0;
@@ -919,6 +935,8 @@ void building_construction_place(void)
         placement_cost *= building_construction_place_wall(0, x_start, y_start, x_end, y_end);
     } else if (type == BUILDING_ROAD) {
         placement_cost *= building_construction_place_road(0, x_start, y_start, x_end, y_end);
+    } else if (type == BUILDING_HIGHWAY) {
+        placement_cost *= building_construction_place_highway(0, x_start, y_start, x_end, y_end);
     } else if (type == BUILDING_PLAZA) {
         placement_cost *= place_plaza(x_start, y_start, x_end, y_end);
     } else if (type == BUILDING_GARDENS) {

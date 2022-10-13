@@ -215,8 +215,8 @@ static void add_to_map(int type, building *b, int size,
             break;
         case BUILDING_GATEHOUSE:
             b->subtype.orientation = orientation;
-            map_building_tiles_add(b->id, b->x, b->y, size,
-                building_image_get(b), TERRAIN_BUILDING | TERRAIN_GATEHOUSE);
+            map_building_tiles_add_remove(b->id, b->x, b->y, size,
+                building_image_get(b), TERRAIN_BUILDING | TERRAIN_GATEHOUSE, TERRAIN_CLEARABLE & ~TERRAIN_HIGHWAY);
             map_orientation_update_buildings();
             map_terrain_add_gatehouse_roads(b->x, b->y, orientation);
             map_tiles_update_area_roads(b->x, b->y, 5);
@@ -303,6 +303,9 @@ static void add_to_map(int type, building *b, int size,
             map_tiles_update_area_roads(b->x, b->y, 4);
             building_monument_set_phase(b, MONUMENT_START);
             break;
+        case BUILDING_HIGHWAY:
+            add_building(b);
+            break;
     }
     map_routing_update_land();
     map_routing_update_walls();
@@ -312,7 +315,7 @@ int building_construction_place_building(building_type type, int x, int y)
 {
     int terrain_mask = TERRAIN_ALL;
     if (type == BUILDING_GATEHOUSE || type == BUILDING_TRIUMPHAL_ARCH || building_type_is_roadblock(type)) {
-        terrain_mask = ~TERRAIN_ROAD;
+        terrain_mask = ~TERRAIN_ROAD & ~TERRAIN_HIGHWAY;
     } else if (type == BUILDING_TOWER) {
         terrain_mask = ~TERRAIN_WALL;
     }
@@ -326,11 +329,7 @@ int building_construction_place_building(building_type type, int x, int y)
     } else if (type == BUILDING_TRIUMPHAL_ARCH) {
         building_orientation = map_orientation_for_triumphal_arch(x, y);
     }
-    switch (city_view_orientation()) {
-        case DIR_2_RIGHT: x = x - size + 1; break;
-        case DIR_4_BOTTOM: x = x - size + 1; y = y - size + 1; break;
-        case DIR_6_LEFT: y = y - size + 1; break;
-    }
+    building_construction_offset_start_from_orientation(&x, &y, size);
     // extra checks
     if (type == BUILDING_GATEHOUSE) {
         if (!map_tiles_are_clear(x, y, size, terrain_mask)) {
