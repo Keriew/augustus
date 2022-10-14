@@ -767,33 +767,6 @@ static void set_road_image(int x, int y, int grid_offset)
     map_property_mark_draw_tile(grid_offset);
 }
 
-void map_tiles_update_all_roads(void)
-{
-    foreach_map_tile(set_road_image);
-}
-
-void map_tiles_update_area_roads(int x, int y, int size)
-{
-    foreach_region_tile(x - 1, y - 1, x + size - 2, y + size - 2, set_road_image);
-}
-
-int map_tiles_set_road(int x, int y)
-{
-    int grid_offset = map_grid_offset(x, y);
-    if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
-        return 0;
-    }
-    int tile_set = 0;
-    if (!map_terrain_is(grid_offset, TERRAIN_ROAD)) {
-        tile_set = 1;
-    }
-    map_terrain_add(grid_offset, TERRAIN_ROAD);
-    map_property_clear_constructing(grid_offset);
-
-    foreach_region_tile(x - 1, y - 1, x + 1, y + 1, set_road_image);
-    return tile_set;
-}
-
 static void set_highway_image(int x, int y, int grid_offset)
 {
     if (!map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
@@ -830,6 +803,34 @@ static void set_highway_image(int x, int y, int grid_offset)
     }
     map_property_set_multi_tile_size(grid_offset, 1);
     map_property_mark_draw_tile(grid_offset);
+}
+
+void map_tiles_update_all_roads(void)
+{
+    foreach_map_tile(set_road_image);
+}
+
+void map_tiles_update_area_roads(int x, int y, int size)
+{
+    foreach_region_tile(x - 1, y - 1, x + size - 2, y + size - 2, set_road_image);
+}
+
+int map_tiles_set_road(int x, int y)
+{
+    int grid_offset = map_grid_offset(x, y);
+    if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+        return 0;
+    }
+    int tile_set = 0;
+    if (!map_terrain_is(grid_offset, TERRAIN_ROAD)) {
+        tile_set = 1;
+    }
+    map_terrain_add(grid_offset, TERRAIN_ROAD);
+    map_property_clear_constructing(grid_offset);
+
+    foreach_region_tile(x - 1, y - 1, x + 1, y + 1, set_road_image);
+    foreach_region_tile(x - 1, y - 1, x + 1, y + 1, set_highway_image);
+    return tile_set;
 }
 
 void map_tiles_update_all_highways(void)
