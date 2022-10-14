@@ -804,10 +804,16 @@ static void set_highway_image(int x, int y, int grid_offset)
         set_aqueduct_image(grid_offset, 0, img);
     } else {
         int highway_image_offset = 0;
+        int open_terrain = TERRAIN_HIGHWAY | TERRAIN_ROAD | TERRAIN_GATEHOUSE;
         for (int d = 0; d < 4; d++) {
-            if (!map_terrain_is(grid_offset + highway_wall_direction_offsets[d], TERRAIN_HIGHWAY)) {
+            int direction_offset = grid_offset + highway_wall_direction_offsets[d];
+            // should this side have a wall?
+            if (!map_terrain_is(direction_offset, open_terrain)) {
                 highway_image_offset = ((d + city_view_orientation() / 2) % 4) + 1;
-                if (!map_terrain_is(grid_offset + highway_wall_direction_offsets[(d + 1) % 4], TERRAIN_HIGHWAY)) {
+                int next_direction_offset = grid_offset + highway_wall_direction_offsets[(d + 1) % 4];
+                // is this a corner?
+                if (!map_terrain_is(next_direction_offset, open_terrain)) {
+                    // increment by 4 to get the corner image
                     highway_image_offset += 4;
                     break;
                 }
@@ -815,6 +821,7 @@ static void set_highway_image(int x, int y, int grid_offset)
         }
         int random = (map_random_get(grid_offset) & 1);
         if (random > 0) {
+            // increment by 9 to get a variant
             highway_image_offset += 9;
         }
         int image_id = assets_get_image_id("Logistics", "Highway_Tile_Start");
@@ -828,6 +835,11 @@ static void set_highway_image(int x, int y, int grid_offset)
 void map_tiles_update_all_highways(void)
 {
     foreach_map_tile(set_highway_image);
+}
+
+void map_tiles_update_area_highways(int x, int y, int size)
+{
+    foreach_region_tile(x - 1, y - 1, x + size, y + size, set_highway_image);
 }
 
 int map_tiles_set_highway(int x, int y)
