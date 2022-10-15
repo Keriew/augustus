@@ -389,6 +389,9 @@ static int callback_calc_distance_build_aqueduct(int next_offset, int dist)
     if (map_terrain_is(next_offset, TERRAIN_ROAD) && !map_can_place_aqueduct_on_road(next_offset)) {
         distance.determined.items[next_offset] = -1;
         blocked = 1;
+    } else if (map_terrain_is(next_offset, TERRAIN_HIGHWAY) && !map_aqueduct_can_overlap_highway(next_offset)) {
+        distance.determined.items[next_offset] = -1;
+        blocked = 1;
     }
     if (!blocked) {
         enqueue(next_offset, dist);
@@ -425,6 +428,12 @@ static int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aquedu
             return 1;
         }
         return 0;
+    } else if (terrain_land_citizen.items[grid_offset] == CITIZEN_1_HIGHWAY) {
+        if (is_aqueduct) {
+            return map_aqueduct_can_overlap_highway(grid_offset);
+        } else {
+            return 1;
+        }
     } else {
         return 1;
     }

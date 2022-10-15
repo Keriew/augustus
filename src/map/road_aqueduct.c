@@ -155,3 +155,72 @@ int map_is_straight_road_for_aqueduct(int grid_offset)
         return 0;
     }
 }
+
+static int is_highway_and_aqueduct(int x, int y)
+{
+    int grid_offset = map_grid_offset(x, y);
+    if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY) && map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
+        return 1;
+    }
+    return 0;
+}
+
+static int aqueduct_highway_corner(int start_x, int start_y, int x, int y)
+{
+    if (!is_highway_and_aqueduct(x, y)) {
+        return 0;
+    }
+    int c1x, c1y, c2x, c2y;
+    map_grid_get_corner_tiles(start_x, start_y, x, y, &c1x, &c1y, &c2x, &c2y);
+    int c1_offs = map_grid_offset(c1x, c1y);
+    int c2_offs = map_grid_offset(c2x, c2y);
+    if (map_terrain_is(c1_offs, TERRAIN_AQUEDUCT) || map_terrain_is(c2_offs, TERRAIN_AQUEDUCT)) {
+        return 1;
+    }
+    return 0;
+}
+
+static int aqueduct_highway_line(int x, int y, int x_start_offs, int y_start_offs, int x_dir, int y_dir)
+{
+    int next_x = x + x_start_offs;
+    int next_y = y + y_start_offs;
+    for (int i = 0; i < 3; i++) {
+        if ((next_x != x || next_y != y) && !is_highway_and_aqueduct(next_x, next_y)) {
+            return 0;
+        }
+        next_x += x_dir;
+        next_y += y_dir;
+    }
+    return 1;
+}
+
+int map_aqueduct_can_overlap_highway(int grid_offset)
+{
+    int x = map_grid_offset_to_x(grid_offset);
+    int y = map_grid_offset_to_y(grid_offset);
+    if (aqueduct_highway_corner(x, y, x + 1, y)) {
+        return 0;
+    } else if (aqueduct_highway_corner(x, y, x - 1, y)) {
+        return 0;
+    } else if (aqueduct_highway_corner(x, y, x, y + 1)) {
+        return 0;
+    } else if (aqueduct_highway_corner(x, y, x, y - 1)) {
+        return 0;
+    }
+
+    if (aqueduct_highway_line(x, y, -2, 0, 1, 0)) {
+        return 0;
+    } else if (aqueduct_highway_line(x, y, -1, 0, 1, 0)) {
+        return 0;
+    } else if (aqueduct_highway_line(x, y, 0, 0, 1, 0)) {
+        return 0;
+    } else if (aqueduct_highway_line(x, y, 0, -2, 0, 1)) {
+        return 0;
+    } else if (aqueduct_highway_line(x, y, 0, -1, 0, 1)) {
+        return 0;
+    } else if (aqueduct_highway_line(x, y, 0, 0, 0, 1)) {
+        return 0;
+    }
+
+    return 1;
+}
