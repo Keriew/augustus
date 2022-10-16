@@ -225,7 +225,7 @@ static void route_queue_from_to(int src_x, int src_y, int dst_x, int dst_y, int 
     }
 }
 
-static void route_queue_all_from(int source, max_directions directions, int (*callback)(int next_offset, int dist), int is_boat, int step_size)
+static void route_queue_all_from(int source, max_directions directions, int (*callback)(int next_offset, int dist, int direction), int is_boat, int step_size)
 {
     clear_data();
     map_grid_clear_u8(water_drag.items);
@@ -249,7 +249,7 @@ static void route_queue_all_from(int source, max_directions directions, int (*ca
                 int route_offset = ROUTE_OFFSETS[i] * step_size;
                 int next_offset = offset + route_offset;
                 if (valid_offset(next_offset, dist)) {
-                    if (callback(next_offset, dist) == UNTIL_STOP) {
+                    if (callback(next_offset, dist, i) == UNTIL_STOP) {
                         break;
                     }
                 }
@@ -258,7 +258,7 @@ static void route_queue_all_from(int source, max_directions directions, int (*ca
     }
 }
 
-static int callback_calc_distance(int next_offset, int dist)
+static int callback_calc_distance(int next_offset, int dist, int direction)
 {
     if (terrain_land_citizen.items[next_offset] >= CITIZEN_0_ROAD) {
         enqueue(next_offset, dist);
@@ -272,7 +272,7 @@ void map_routing_calculate_distances(int x, int y)
     route_queue_all_from(map_grid_offset(x, y), DIRECTIONS_NO_DIAGONALS, callback_calc_distance, 0, 1);
 }
 
-static int callback_calc_distance_water_boat(int next_offset, int dist)
+static int callback_calc_distance_water_boat(int next_offset, int dist, int direction)
 {
     if (terrain_water.items[next_offset] != WATER_N1_BLOCKED &&
         terrain_water.items[next_offset] != WATER_N3_LOW_BRIDGE) {
@@ -294,7 +294,7 @@ void map_routing_calculate_distances_water_boat(int x, int y)
     }
 }
 
-static int callback_calc_distance_water_flotsam(int next_offset, int dist)
+static int callback_calc_distance_water_flotsam(int next_offset, int dist, int direction)
 {
     if (terrain_water.items[next_offset] != WATER_N1_BLOCKED) {
         enqueue(next_offset, dist);
@@ -312,7 +312,7 @@ void map_routing_calculate_distances_water_flotsam(int x, int y)
     }
 }
 
-static int callback_calc_distance_build_wall(int next_offset, int dist)
+static int callback_calc_distance_build_wall(int next_offset, int dist, int direction)
 {
     if (terrain_land_citizen.items[next_offset] == CITIZEN_4_CLEAR_TERRAIN) {
         enqueue(next_offset, dist);
@@ -335,7 +335,7 @@ static int can_build_highway(int next_offset, int dist)
     return 1;
 }
 
-static int callback_calc_distance_build_highway(int next_offset, int dist)
+static int callback_calc_distance_build_highway(int next_offset, int dist, int direction)
 {
     if (can_build_highway(next_offset, dist)) {
         enqueue(next_offset, dist);
@@ -343,7 +343,7 @@ static int callback_calc_distance_build_highway(int next_offset, int dist)
     return 1;
 }
 
-static int callback_calc_distance_build_road(int next_offset, int dist)
+static int callback_calc_distance_build_road(int next_offset, int dist, int direction)
 {
     int blocked = 0;
     switch (terrain_land_citizen.items[next_offset]) {
@@ -369,8 +369,38 @@ static int callback_calc_distance_build_road(int next_offset, int dist)
     return 1;
 }
 
-static int callback_calc_distance_build_aqueduct(int next_offset, int dist)
+static int callback_calc_distance_build_aqueduct(int next_offset, int dist, int direction)
 {
+    if (map_terrain_is(next_offset, TERRAIN_HIGHWAY)) {
+        // check for existing highway/aqueduct tiles that won't work with this one
+        if (!map_aqueduct_can_overlap_highway(next_offset)) {
+            return 1;
+        }
+        // only allow every other crossing to be enqueued so that aqueducts can't be built along highways
+        // don't check the first tile though because it might be on a highway
+        if (dist > 2) {
+            for (int i = 0; i < 4; i++) {
+                int surrounding_offset = next_offset + ROUTE_OFFSETS[i];
+                if (map_grid_is_valid_offset(surrounding_offset) && map_terrain_is(surrounding_offset, TERRAIN_HIGHWAY) && distance.determined.items[surrounding_offset]) {
+                    return 1;
+                }
+            }
+        }
+        // check up to two tiles ahead to see if we've cleared the highway. if we have, put in scores from here to there
+        int direction_offset = ROUTE_OFFSETS[direction];
+        for (int i = 1; i <= 2; i++) {
+            int next_offset2 = next_offset + direction_offset * i;
+            if (map_grid_is_valid_offset(next_offset2) && !map_terrain_is(next_offset2, TERRAIN_HIGHWAY)) {
+                for (int j = 0; j < i; j++) {
+                    distance.determined.items[next_offset + direction_offset * j] = dist + j;
+                }
+                enqueue(next_offset2, dist + i);
+                break;
+            }
+        }
+        return 1;
+    }
+
     int blocked = 0;
     switch (terrain_land_citizen.items[next_offset]) {
         case CITIZEN_N3_AQUEDUCT:
@@ -387,9 +417,6 @@ static int callback_calc_distance_build_aqueduct(int next_offset, int dist)
             break;
     }
     if (map_terrain_is(next_offset, TERRAIN_ROAD) && !map_can_place_aqueduct_on_road(next_offset)) {
-        distance.determined.items[next_offset] = -1;
-        blocked = 1;
-    } else if (map_terrain_is(next_offset, TERRAIN_HIGHWAY) && !map_aqueduct_can_overlap_highway(next_offset)) {
         distance.determined.items[next_offset] = -1;
         blocked = 1;
     }
@@ -473,7 +500,7 @@ int map_routing_calculate_distances_for_building(routed_building_type type, int 
     return 1;
 }
 
-static int callback_delete_wall_aqueduct(int next_offset, int dist)
+static int callback_delete_wall_aqueduct(int next_offset, int dist, int direction)
 {
     if (terrain_land_citizen.items[next_offset] < CITIZEN_0_ROAD) {
         if (map_terrain_is(next_offset, TERRAIN_AQUEDUCT | TERRAIN_WALL)) {
