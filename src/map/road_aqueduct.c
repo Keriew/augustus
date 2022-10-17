@@ -156,22 +156,33 @@ int map_is_straight_road_for_aqueduct(int grid_offset)
     }
 }
 
-static int is_highway_and_aqueduct(int x, int y)
+static int is_highway(int x, int y)
 {
     int grid_offset = map_grid_offset(x, y);
-    if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY) && map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
+    if (map_grid_is_valid_offset(grid_offset) && map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
         return 1;
     }
     return 0;
 }
 
-static int aqueduct_highway_corner(int start_x, int start_y, int x, int y)
+static int is_highway_and_aqueduct(int x, int y)
 {
-    if (!is_highway_and_aqueduct(x, y)) {
+    int grid_offset = map_grid_offset(x, y);
+    if (map_grid_is_valid_offset(grid_offset) && map_terrain_is(grid_offset, TERRAIN_HIGHWAY) && map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
+        return 1;
+    }
+    return 0;
+}
+
+// check to see if placing an aqueduct here would create an aqueduct corner on a highway
+// note: this tile does NOT need to be on a highway to create a corner on one
+static int aqueduct_highway_corner(int x, int y, int check_x, int check_y)
+{
+    if (!is_highway_and_aqueduct(check_x, check_y)) {
         return 0;
     }
     int c1x, c1y, c2x, c2y;
-    map_grid_get_corner_tiles(start_x, start_y, x, y, &c1x, &c1y, &c2x, &c2y);
+    map_grid_get_corner_tiles(x, y, check_x, check_y, &c1x, &c1y, &c2x, &c2y);
     int c1_offs = map_grid_offset(c1x, c1y);
     int c2_offs = map_grid_offset(c2x, c2y);
     if (map_terrain_is(c1_offs, TERRAIN_AQUEDUCT) || map_terrain_is(c2_offs, TERRAIN_AQUEDUCT)) {
@@ -180,18 +191,31 @@ static int aqueduct_highway_corner(int start_x, int start_y, int x, int y)
     return 0;
 }
 
-static int aqueduct_highway_line(int x, int y, int x_start_offs, int y_start_offs, int x_dir, int y_dir)
+// check to see if placing an aqueduct here would create a line (at least two aqueduct tiles) along a highway
+static int aqueduct_highway_line(int x, int y, int is_check_x)
 {
-    int next_x = x + x_start_offs;
-    int next_y = y + y_start_offs;
-    for (int i = 0; i < 3; i++) {
-        if ((next_x != x || next_y != y) && !is_highway_and_aqueduct(next_x, next_y)) {
-            return 0;
-        }
-        next_x += x_dir;
-        next_y += y_dir;
+    int grid_offset = map_grid_offset(x, y);
+    if (!map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+        return 0;
     }
-    return 1;
+    int x_offs = 1;
+    int y_offs = 0;
+    if (!is_check_x) {
+        x_offs = 0;
+        y_offs = 1;
+    }
+    int left_occupied = is_highway_and_aqueduct(x - x_offs, y - y_offs);
+    int right_occupied = is_highway_and_aqueduct(x + x_offs, y + y_offs);
+    if (left_occupied && right_occupied) {
+        return 1;
+    }
+    if (left_occupied && is_highway(x - x_offs * 2, y - y_offs * 2)) {
+        return 1;
+    }
+    if (right_occupied && is_highway(x + x_offs * 2, y + y_offs * 2)) {
+        return 1;
+    }
+    return 0;
 }
 
 int map_valid_highway_aqueduct_placement(int grid_offset)
@@ -208,17 +232,9 @@ int map_valid_highway_aqueduct_placement(int grid_offset)
         return 0;
     }
 
-    if (aqueduct_highway_line(x, y, -2, 0, 1, 0)) {
+    if (aqueduct_highway_line(x, y, 1)) {
         return 0;
-    } else if (aqueduct_highway_line(x, y, -1, 0, 1, 0)) {
-        return 0;
-    } else if (aqueduct_highway_line(x, y, 0, 0, 1, 0)) {
-        return 0;
-    } else if (aqueduct_highway_line(x, y, 0, -2, 0, 1)) {
-        return 0;
-    } else if (aqueduct_highway_line(x, y, 0, -1, 0, 1)) {
-        return 0;
-    } else if (aqueduct_highway_line(x, y, 0, 0, 0, 1)) {
+    } else if (aqueduct_highway_line(x, y, 0)) {
         return 0;
     }
 
