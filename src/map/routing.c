@@ -371,11 +371,11 @@ static int callback_calc_distance_build_road(int next_offset, int dist, int dire
 
 static int callback_calc_distance_build_aqueduct(int next_offset, int dist, int direction)
 {
+    // check for existing highway/aqueduct tiles that won't work with this one
+    if (!map_valid_highway_aqueduct_placement(next_offset)) {
+        return 1;
+    }
     if (map_terrain_is(next_offset, TERRAIN_HIGHWAY)) {
-        // check for existing highway/aqueduct tiles that won't work with this one
-        if (!map_aqueduct_can_overlap_highway(next_offset)) {
-            return 1;
-        }
         // only allow every other crossing to be enqueued so that aqueducts can't be built along highways
         // don't check the first tile though because it might be on a highway
         if (dist > 2) {
@@ -428,6 +428,9 @@ static int callback_calc_distance_build_aqueduct(int next_offset, int dist, int 
 
 static int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aqueduct)
 {
+    if (is_aqueduct && !map_valid_highway_aqueduct_placement(grid_offset)) {
+        return 0;
+    }
     if (terrain_land_citizen.items[grid_offset] == CITIZEN_N1_BLOCKED) {
         // not open land, can only if:
         // - aqueduct should be placed, and:
@@ -455,12 +458,6 @@ static int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aquedu
             return 1;
         }
         return 0;
-    } else if (terrain_land_citizen.items[grid_offset] == CITIZEN_1_HIGHWAY) {
-        if (is_aqueduct) {
-            return map_aqueduct_can_overlap_highway(grid_offset);
-        } else {
-            return 1;
-        }
     } else {
         return 1;
     }

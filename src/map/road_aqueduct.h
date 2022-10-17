@@ -9,6 +9,6 @@ int map_get_aqueduct_with_road_image(int grid_offset);
 
 int map_is_straight_road_for_aqueduct(int grid_offset);
 
-int map_aqueduct_can_overlap_highway(int grid_offset);
+int map_valid_highway_aqueduct_placement(int grid_offset);
 
 #endif // MAP_ROAD_AQUEDUCT_H

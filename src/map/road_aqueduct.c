@@ -194,7 +194,7 @@ static int aqueduct_highway_line(int x, int y, int x_start_offs, int y_start_off
     return 1;
 }
 
-int map_aqueduct_can_overlap_highway(int grid_offset)
+int map_valid_highway_aqueduct_placement(int grid_offset)
 {
     int x = map_grid_offset_to_x(grid_offset);
     int y = map_grid_offset_to_y(grid_offset);
