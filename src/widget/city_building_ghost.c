@@ -1073,18 +1073,26 @@ static void draw_highway(const map_tile *tile, int x, int y)
     int num_tiles = props->size * props->size;
     int blocked_tiles[MAX_TILES];
     int orientation_index = city_view_orientation() / 2;
-    int any_non_highway = 0;
 
+    // we temporarily mark the highway terrain so that map_valid_highway_aqueduct_placement() returns the right result
+    map_terrain_backup();
+    map_tiles_mark_highway(grid_offset);
     for (int i = 0; i < num_tiles; i++) {
         int tile_offset = grid_offset + TILE_GRID_OFFSETS[orientation_index][i];
         int terrain = map_terrain_get(tile_offset);
-        int forbidden_terrain = terrain & TERRAIN_NOT_CLEAR & ~TERRAIN_HIGHWAY;
-        if (fully_blocked || forbidden_terrain) {
+        int has_forbidden_terrain = terrain & TERRAIN_NOT_CLEAR & ~TERRAIN_HIGHWAY & ~TERRAIN_AQUEDUCT;
+        if (fully_blocked || has_forbidden_terrain || !map_valid_highway_aqueduct_placement(tile_offset)) {
             blocked_tiles[i] = 1;
         } else {
             blocked_tiles[i] = 0;
         }
-        if (!(terrain & TERRAIN_HIGHWAY)) {
+    }
+    map_terrain_restore();
+
+    int any_non_highway = 0;
+    for (int i = 0; i < num_tiles; i++) {
+        int tile_offset = grid_offset + TILE_GRID_OFFSETS[orientation_index][i];
+        if (!map_terrain_is(tile_offset, TERRAIN_HIGHWAY)) {
             any_non_highway = 1;
         }
     }
@@ -1093,6 +1101,7 @@ static void draw_highway(const map_tile *tile, int x, int y)
             blocked_tiles[i] = 1;
         }
     }
+
     int image_id = get_new_building_image_id(tile->x, tile->y, grid_offset, BUILDING_HIGHWAY, props);
     draw_regular_building(BUILDING_HIGHWAY, image_id, x, y, grid_offset, num_tiles, blocked_tiles);
 }

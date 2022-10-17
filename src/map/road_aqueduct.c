@@ -176,13 +176,13 @@ static int is_highway_and_aqueduct(int x, int y)
 
 // check to see if placing an aqueduct here would create an aqueduct corner on a highway
 // note: this tile does NOT need to be on a highway to create a corner on one
-static int aqueduct_highway_corner(int x, int y, int check_x, int check_y)
+static int aqueduct_highway_corner(int x, int y, int corner_x, int corner_y)
 {
-    if (!is_highway_and_aqueduct(check_x, check_y)) {
+    if (!is_highway_and_aqueduct(corner_x, corner_y)) {
         return 0;
     }
     int c1x, c1y, c2x, c2y;
-    map_grid_get_corner_tiles(x, y, check_x, check_y, &c1x, &c1y, &c2x, &c2y);
+    map_grid_get_corner_tiles(x, y, corner_x, corner_y, &c1x, &c1y, &c2x, &c2y);
     int c1_offs = map_grid_offset(c1x, c1y);
     int c2_offs = map_grid_offset(c2x, c2y);
     if (map_terrain_is(c1_offs, TERRAIN_AQUEDUCT) || map_terrain_is(c2_offs, TERRAIN_AQUEDUCT)) {
