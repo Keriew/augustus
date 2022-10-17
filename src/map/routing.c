@@ -320,19 +320,47 @@ static int callback_calc_distance_build_wall(int next_offset, int dist, int dire
     return 1;
 }
 
+static int mark_highway(int offset)
+{
+    int x = map_grid_offset_to_x(offset);
+    int y = map_grid_offset_to_y(offset);
+    int terrain = TERRAIN_HIGHWAY_TOP_LEFT;
+    for (int xx = x; xx <= x + 1; xx++) {
+        for (int yy = y; yy <= y + 1; yy++) {
+            int grid_offset = map_grid_offset(xx, yy);
+            map_terrain_add(grid_offset, terrain);
+            terrain <<= 1;
+        }
+    }
+}
+
 static int can_build_highway(int next_offset, int dist)
 {
     int size = 2;
+    int is_valid = 1;
+    // we temporarily mark the highway terrain so that map_valid_highway_aqueduct_placement() returns the right result
+    map_terrain_backup();
+    mark_highway(next_offset, 0);
+    for (int i = 0; i < 4; i++) {
+        int offset = next_offset + ROUTE_OFFSETS[i] * 2;
+        if (map_grid_is_valid_offset(offset) && distance.determined.items[offset] > 0) {
+            mark_highway(offset, 0);
+        }
+    }
     for (int x = 0; x < size; x++) {
         for (int y = 0; y < size; y++) {
-            int offset = next_offset + x + GRID_SIZE * y;
+            int offset = next_offset + map_grid_delta(x, y);
             int terrain = terrain_land_citizen.items[offset];
             if (terrain != CITIZEN_4_CLEAR_TERRAIN && terrain != CITIZEN_0_ROAD && terrain != CITIZEN_1_HIGHWAY && terrain != CITIZEN_N3_AQUEDUCT) {
-                return 0;
+                is_valid = 0;
+            } else if (terrain == CITIZEN_N3_AQUEDUCT && !map_valid_highway_aqueduct_placement(offset)) {
+                is_valid = 0;
             }
         }
     }
-    return 1;
+    map_terrain_restore();
+
+    return is_valid;
 }
 
 static int callback_calc_distance_build_highway(int next_offset, int dist, int direction)
