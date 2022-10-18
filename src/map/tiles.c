@@ -874,20 +874,6 @@ void map_tiles_update_area_highways(int x, int y, int size)
     foreach_region_tile(x - 1, y - 1, x + size, y + size, set_highway_image);
 }
 
-void map_tiles_mark_highway(int grid_offset)
-{
-    int x = map_grid_offset_to_x(grid_offset);
-    int y = map_grid_offset_to_y(grid_offset);
-    int terrain = TERRAIN_HIGHWAY_TOP_LEFT;
-    for (int xx = x; xx <= x + 1; xx++) {
-        for (int yy = y; yy <= y + 1; yy++) {
-            int grid_offset = map_grid_offset(xx, yy);
-            map_terrain_add(grid_offset, terrain);
-            terrain <<= 1;
-        }
-    }
-}
-
 int map_tiles_set_highway(int x, int y)
 {
     int terrain = TERRAIN_HIGHWAY_TOP_LEFT;

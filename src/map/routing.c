@@ -321,38 +321,27 @@ static int callback_calc_distance_build_wall(int next_offset, int dist, int dire
     return 1;
 }
 
-static int can_build_highway(int next_offset, int dist)
+static int can_build_highway(int next_offset, int dist, int check_highway_routing)
 {
     int size = 2;
-    int is_valid = 1;
-    // we temporarily mark the highway terrain so that map_valid_highway_aqueduct_placement() returns the right result
-    map_terrain_backup();
-    map_tiles_mark_highway(next_offset);
-    for (int i = 0; i < 4; i++) {
-        int offset = next_offset + ROUTE_OFFSETS[i] * 2;
-        if (map_grid_is_valid_offset(offset) && distance.determined.items[offset] > 0) {
-            map_tiles_mark_highway(offset);
-        }
-    }
     for (int x = 0; x < size; x++) {
         for (int y = 0; y < size; y++) {
             int offset = next_offset + map_grid_delta(x, y);
             int terrain = terrain_land_citizen.items[offset];
             if (terrain != CITIZEN_4_CLEAR_TERRAIN && terrain != CITIZEN_0_ROAD && terrain != CITIZEN_1_HIGHWAY && terrain != CITIZEN_N3_AQUEDUCT) {
-                is_valid = 0;
-            } else if (terrain == CITIZEN_N3_AQUEDUCT && !map_valid_highway_aqueduct_placement(offset)) {
-                is_valid = 0;
+                return 0;
+            } else if (terrain == CITIZEN_N3_AQUEDUCT && !map_can_place_highway_under_aqueduct(offset, check_highway_routing)) {
+                return 0;
             }
         }
     }
-    map_terrain_restore();
 
-    return is_valid;
+    return 1;
 }
 
 static int callback_calc_distance_build_highway(int next_offset, int dist, int direction)
 {
-    if (can_build_highway(next_offset, dist)) {
+    if (can_build_highway(next_offset, dist, 1)) {
         enqueue(next_offset, dist);
     }
     return 1;
@@ -387,7 +376,7 @@ static int callback_calc_distance_build_road(int next_offset, int dist, int dire
 static int callback_calc_distance_build_aqueduct(int next_offset, int dist, int direction)
 {
     // check for existing highway/aqueduct tiles that won't work with this one
-    if (!map_valid_highway_aqueduct_placement(next_offset)) {
+    if (!map_can_place_aqueduct_on_highway(next_offset)) {
         return 1;
     }
     if (map_terrain_is(next_offset, TERRAIN_HIGHWAY)) {
@@ -443,7 +432,7 @@ static int callback_calc_distance_build_aqueduct(int next_offset, int dist, int 
 
 static int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aqueduct)
 {
-    if (is_aqueduct && !map_valid_highway_aqueduct_placement(grid_offset)) {
+    if (is_aqueduct && !map_can_place_aqueduct_on_highway(grid_offset)) {
         return 0;
     }
     if (terrain_land_citizen.items[grid_offset] == CITIZEN_N1_BLOCKED) {
@@ -489,7 +478,7 @@ int map_routing_calculate_distances_for_building(routed_building_type type, int 
     clear_data();
 
     if (type == ROUTED_BUILDING_HIGHWAY) {
-        if (!can_build_highway(source_offset, 1)) {
+        if (!can_build_highway(source_offset, 1, 0)) {
             return 0;
         }
         route_queue_all_from(source_offset, DIRECTIONS_NO_DIAGONALS, callback_calc_distance_build_highway, 0, 2);

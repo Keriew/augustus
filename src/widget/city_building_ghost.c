@@ -647,7 +647,9 @@ static void draw_aqueduct(const map_tile *tile, int x, int y)
                 if (map_terrain_count_directly_adjacent_with_types(grid_offset, TERRAIN_ROAD | TERRAIN_AQUEDUCT)) {
                     blocked = 1;
                 }
-            } else if (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR) && !map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+            } else if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+                blocked = !map_can_place_aqueduct_on_highway(grid_offset);
+            } else if (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
                 blocked = 1;
             }
         }
@@ -1074,20 +1076,16 @@ static void draw_highway(const map_tile *tile, int x, int y)
     int blocked_tiles[MAX_TILES];
     int orientation_index = city_view_orientation() / 2;
 
-    // we temporarily mark the highway terrain so that map_valid_highway_aqueduct_placement() returns the right result
-    map_terrain_backup();
-    map_tiles_mark_highway(grid_offset);
     for (int i = 0; i < num_tiles; i++) {
         int tile_offset = grid_offset + TILE_GRID_OFFSETS[orientation_index][i];
         int terrain = map_terrain_get(tile_offset);
         int has_forbidden_terrain = terrain & TERRAIN_NOT_CLEAR & ~TERRAIN_HIGHWAY & ~TERRAIN_AQUEDUCT;
-        if (fully_blocked || has_forbidden_terrain || !map_valid_highway_aqueduct_placement(tile_offset)) {
+        if (fully_blocked || has_forbidden_terrain || !map_can_place_highway_under_aqueduct(tile_offset, 0)) {
             blocked_tiles[i] = 1;
         } else {
             blocked_tiles[i] = 0;
         }
     }
-    map_terrain_restore();
 
     int any_non_highway = 0;
     for (int i = 0; i < num_tiles; i++) {
