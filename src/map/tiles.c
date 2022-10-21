@@ -1,6 +1,7 @@
 #include "tiles.h"
 
 #include "assets/assets.h"
+#include "building/building.h"
 #include "city/map.h"
 #include "city/view.h"
 #include "core/direction.h"
@@ -181,7 +182,7 @@ static void update_tree_image(int x, int y, int grid_offset)
         }
         map_property_set_multi_tile_size(grid_offset, 1);
         map_property_mark_draw_tile(grid_offset);
-        map_aqueduct_set(grid_offset, 0);
+        map_aqueduct_remove(grid_offset);
     }
 }
 
@@ -356,7 +357,7 @@ static void determine_garden_tile(int x, int y, int grid_offset)
     if (image_id >= base_image && image_id <= base_image + 6) {
         map_terrain_add(grid_offset, TERRAIN_GARDEN);
         map_property_clear_constructing(grid_offset);
-        map_aqueduct_set(grid_offset, 0);
+        map_aqueduct_remove(grid_offset);
     }
 }
 
@@ -696,18 +697,34 @@ int map_tiles_is_paved_road(int grid_offset)
     return 0;
 }
 
+static int is_highway_access(int grid_offset)
+{
+    if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY | TERRAIN_ROAD | TERRAIN_GATEHOUSE | TERRAIN_ACCESS_RAMP)) {
+        return 1;
+    }
+    if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+        const building *b = building_get(map_building_at(grid_offset));
+        if (b->type == BUILDING_GRANARY) {
+            return grid_offset == b->grid_offset + map_grid_delta(1, 0) ||
+                grid_offset == b->grid_offset + map_grid_delta(0, 1) ||
+                grid_offset == b->grid_offset + map_grid_delta(2, 1) ||
+                grid_offset == b->grid_offset + map_grid_delta(1, 2);
+        }
+    }
+    return 0;
+}
+
 static int get_highway_wall_offset(int grid_offset)
 {
     int wall_offset = 0;
-    int no_walled_terrain = TERRAIN_HIGHWAY | TERRAIN_ROAD | TERRAIN_GATEHOUSE;
     for (int d = 0; d < 4; d++) {
         int direction_offset = grid_offset + highway_wall_direction_offsets[d];
         // should this side have a wall?
-        if (!map_terrain_is(direction_offset, no_walled_terrain)) {
+        if (!is_highway_access(direction_offset)) {
             wall_offset = ((d + city_view_orientation() / 2) % 4) + 1;
             int next_direction_offset = grid_offset + highway_wall_direction_offsets[(d + 1) % 4];
             // is this a corner?
-            if (!map_terrain_is(next_direction_offset, no_walled_terrain)) {
+            if (!is_highway_access(next_direction_offset)) {
                 // increment by 4 to get the corner image
                 wall_offset += 4;
                 break;
@@ -798,7 +815,7 @@ static void set_road_image(int x, int y, int grid_offset)
 
 static void set_highway_image(int x, int y, int grid_offset)
 {
-    if (!map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+    if (!map_terrain_is(grid_offset, TERRAIN_HIGHWAY) || map_terrain_is(grid_offset, TERRAIN_GATEHOUSE)) {
         return;
     }
     if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
@@ -1005,7 +1022,7 @@ static void set_meadow_image(int x, int y, int grid_offset)
         }
         map_property_set_multi_tile_size(grid_offset, 1);
         map_property_mark_draw_tile(grid_offset);
-        map_aqueduct_set(grid_offset, 0);
+        map_aqueduct_remove(grid_offset);
     }
 }
 
@@ -1086,12 +1103,12 @@ static void set_aqueduct(int grid_offset)
         map_property_clear_plaza_or_earthquake(grid_offset);
     }
     set_aqueduct_image(grid_offset, is_road, img);
-    map_aqueduct_set(grid_offset, img->aqueduct_offset);
+    map_aqueduct_set_image(grid_offset, img->aqueduct_offset);
 }
 
 static void update_aqueduct_tile(int x, int y, int grid_offset)
 {
-    if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT) && map_aqueduct_at(grid_offset) <= 15) {
+    if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT) && map_aqueduct_image_at(grid_offset) <= 15) {
         set_aqueduct(grid_offset);
     }
 }
@@ -1153,7 +1170,7 @@ static void set_rubble_image(int x, int y, int grid_offset)
         map_image_set(grid_offset, image_group(GROUP_TERRAIN_RUBBLE) + (map_random_get(grid_offset) & 7));
         map_property_set_multi_tile_size(grid_offset, 1);
         map_property_mark_draw_tile(grid_offset);
-        map_aqueduct_set(grid_offset, 0);
+        map_aqueduct_remove(grid_offset);
     }
 }
 
@@ -1234,7 +1251,7 @@ static int get_access_ramp_image_offset(int x, int y)
 
 static void set_elevation_aqueduct_image(int grid_offset)
 {
-    if (map_aqueduct_at(grid_offset) <= 15 && !map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+    if (map_aqueduct_image_at(grid_offset) <= 15 && !map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
         set_aqueduct(grid_offset);
     }
 }
