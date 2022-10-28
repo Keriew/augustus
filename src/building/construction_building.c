@@ -330,6 +330,7 @@ int building_construction_place_building(building_type type, int x, int y)
     } else if (type == BUILDING_TRIUMPHAL_ARCH) {
         building_orientation = map_orientation_for_triumphal_arch(x, y);
     }
+    building_construction_offset_start_from_orientation(&x, &y, size);
     // extra checks
     if (type == BUILDING_GATEHOUSE) {
         if (!map_tiles_are_clear(x, y, size, terrain_mask)) {
