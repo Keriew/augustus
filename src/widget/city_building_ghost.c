@@ -20,6 +20,7 @@
 #include "core/log.h"
 #include "figure/figure.h"
 #include "figure/formation.h"
+#include "figure/roamer_preview.h"
 #include "figuretype/animal.h"
 #include "graphics/image.h"
 #include "graphics/renderer.h"
@@ -430,6 +431,25 @@ static int is_fully_blocked(int map_x, int map_y, building_type type, int buildi
     return 0;
 }
 
+static void set_roamer_path(building_type type, const map_tile *tile, int is_blocked)
+{
+    if (!is_blocked) {
+        figure_roamer_preview_create(type, tile->grid_offset, tile->x, tile->y);
+    } else {
+        int building_id = map_building_at(tile->grid_offset);
+        if (!building_id) {
+            figure_roamer_preview_reset();
+            return;
+        }
+        building *b = building_main(building_get(building_id));
+        if (b->type == type && b->grid_offset == tile->grid_offset) {
+            figure_roamer_preview_create(type, tile->grid_offset, tile->x, tile->y);
+        } else {
+            figure_roamer_preview_reset();
+        }
+    }
+}
+
 static void draw_default(const map_tile *tile, int x_view, int y_view, building_type type)
 {
     const building_properties *props = building_properties_for_type(type);
@@ -480,6 +500,7 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
         image_id = get_building_image_id(tile->x, tile->y, type, props);
         draw_regular_building(type, image_id, x_view, y_view, grid_offset, num_tiles, blocked_tiles);
     }
+    set_roamer_path(type, tile, has_blocked_tiles(num_tiles, blocked_tiles));
 }
 
 static void draw_single_reservoir(int x, int y, color_t color, int has_water, int draw_blocked)
@@ -759,6 +780,7 @@ static void draw_bathhouse(const map_tile *tile, int x, int y)
         image_draw(image_id - 1, x - 7, y + 6, color, scale);
     }
     draw_building_tiles(x, y, num_tiles, blocked_tiles);
+    set_roamer_path(BUILDING_BATHHOUSE, tile, has_blocked_tiles(num_tiles, blocked_tiles));
 }
 
 static void draw_pond(const map_tile *tile, int x, int y, int type)
@@ -989,6 +1011,9 @@ static void draw_hippodrome(const map_tile *tile, int x, int y)
         draw_building(image_id, x_part1, y_part1, color_mask);
         draw_building_tiles(x_part1, y_part1, num_tiles, blocked_tiles1);
     }
+    int is_blocked = has_blocked_tiles(num_tiles, blocked_tiles1) || has_blocked_tiles(num_tiles, blocked_tiles2) ||
+        has_blocked_tiles(num_tiles, blocked_tiles3);
+    set_roamer_path(BUILDING_HIPPODROME, tile, is_blocked);
 }
 
 static void draw_shipyard_wharf(const map_tile *tile, int x, int y, building_type type)
@@ -1126,6 +1151,7 @@ static void draw_grand_temple_neptune(const map_tile *tile, int x, int y)
     city_view_foreach_tile_in_range(tile->grid_offset, props->size, radius, draw_grand_temple_neptune_range);
     int image_id = get_new_building_image_id(tile->x, tile->y, tile->grid_offset, BUILDING_GRAND_TEMPLE_NEPTUNE, props);
     draw_regular_building(BUILDING_GRAND_TEMPLE_NEPTUNE, image_id, x, y, tile->grid_offset, num_tiles, blocked);
+    set_roamer_path(BUILDING_GRAND_TEMPLE_NEPTUNE, tile, has_blocked_tiles(num_tiles, blocked));
 }
 
 int city_building_ghost_mark_deleting(const map_tile *tile)
@@ -1216,11 +1242,13 @@ static void draw_partial_grid(int grid_offset, int x, int y, building_type type)
 void city_building_ghost_draw(const map_tile *tile)
 {
     if (!tile->grid_offset || scroll_in_progress()) {
+        figure_roamer_preview_reset();
         return;
     }
     building_type type = building_construction_type();
     ghost_building.type = type;
     if (building_construction_draw_as_constructing() || type == BUILDING_NONE || type == BUILDING_CLEAR_LAND) {
+        figure_roamer_preview_reset();
         return;
     }
     scale = city_view_get_scale() / 100.0f;

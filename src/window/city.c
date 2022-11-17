@@ -17,6 +17,7 @@
 #include "core/config.h"
 #include "figure/formation.h"
 #include "figure/formation_legion.h"
+#include "figure/roamer_preview.h"
 #include "game/orientation.h"
 #include "game/settings.h"
 #include "game/state.h"
@@ -664,6 +665,7 @@ void window_city_draw(void)
 
 void window_city_show(void)
 {
+    figure_roamer_preview_reset();
     if (formation_get_selected()) {
         formation_set_selected(0);
         if (config_get(CONFIG_UI_SHOW_MILITARY_SIDEBAR) && widget_sidebar_military_exit()) {
