@@ -17,7 +17,6 @@
 #define SHOWN_BUILDING_OFFSET 12
 
 static struct {
-    figure roamer;
     grid_u8 travelled_tiles;
     int dirty;
     building_type types[MAX_STORED_BUILDING_TYPES];
@@ -225,51 +224,51 @@ void figure_roamer_preview_create(building_type b_type, int grid_offset, int x, 
     int num_ticks = fig_type == FIGURE_CHARIOTEER || fig_type == FIGURE_SCHOOL_CHILD ? 2 : 1;
     int should_return = fig_type == FIGURE_SCHOOL_CHILD ? 0 : 1;
 
-    figure *f = &data.roamer;
-
     for (int i = 0; i < TOTAL_ROAMERS; i++) {
-        memset(f, 0, sizeof(figure));
+        figure roamer;
         
-        f->source_x = f->destination_x = f->previous_tile_x = road.x;
-        f->source_y = f->destination_y = f->previous_tile_y = road.y;
-        f->terrain_usage = TERRAIN_USAGE_ROADS;
-        f->cross_country_x = 15 * road.x;
-        f->cross_country_y = 15 * road.y;
-        f->progress_on_tile = 15;
-        f->direction = DIR_0_TOP;
-        f->faction_id = FIGURE_FACTION_ROAMER_PREVIEW;
-        f->type = fig_type;
-        f->max_roam_length = roam_length;
+        memset(&roamer, 0, sizeof(figure));
+        
+        roamer.source_x = roamer.destination_x = roamer.previous_tile_x = road.x;
+        roamer.source_y = roamer.destination_y = roamer.previous_tile_y = road.y;
+        roamer.terrain_usage = TERRAIN_USAGE_ROADS;
+        roamer.cross_country_x = 15 * road.x;
+        roamer.cross_country_y = 15 * road.y;
+        roamer.progress_on_tile = 15;
+        roamer.direction = DIR_0_TOP;
+        roamer.faction_id = FIGURE_FACTION_ROAMER_PREVIEW;
+        roamer.type = fig_type;
+        roamer.max_roam_length = roam_length;
 
         if (figure_walks_into_building) {
-            f->x = x_road;
-            f->y = y_road;
+            roamer.x = x_road;
+            roamer.y = y_road;
         } else {
-            f->x = road.x;
-            f->y = road.y;
+            roamer.x = road.x;
+            roamer.y = road.y;
         }
-        f->grid_offset = map_grid_offset(f->x, f->y);
-        if (map_grid_is_valid_offset(f->grid_offset)) {
-            data.travelled_tiles.items[f->grid_offset] = FIGURE_ROAMER_PREVIEW_EXIT_TILE;
+        roamer.grid_offset = map_grid_offset(roamer.x, roamer.y);
+        if (map_grid_is_valid_offset(roamer.grid_offset)) {
+            data.travelled_tiles.items[roamer.grid_offset] = FIGURE_ROAMER_PREVIEW_EXIT_TILE;
         }
-        init_roaming(f, i * 2, x, y);
-        while (++f->roam_length <= f->max_roam_length) {
-            figure_movement_roam_ticks(f, num_ticks);
+        init_roaming(&roamer, i * 2, x, y);
+        while (++roamer.roam_length <= roamer.max_roam_length) {
+            figure_movement_roam_ticks(&roamer, num_ticks);
         }
-        figure_route_remove(f);
+        figure_route_remove(&roamer);
         if (!should_return || !has_closest_road) {
             continue;
         }
-        f->destination_x = x_road;
-        f->destination_y = y_road;
-        while (f->direction != DIR_FIGURE_AT_DESTINATION &&
-            f->direction != DIR_FIGURE_REROUTE && f->direction != DIR_FIGURE_LOST) {
-            figure_movement_move_ticks(f, num_ticks);
+        roamer.destination_x = x_road;
+        roamer.destination_y = y_road;
+        while (roamer.direction != DIR_FIGURE_AT_DESTINATION &&
+            roamer.direction != DIR_FIGURE_REROUTE && roamer.direction != DIR_FIGURE_LOST) {
+            figure_movement_move_ticks(&roamer, num_ticks);
         }
-        figure_route_remove(f);
-        if (f->direction == DIR_FIGURE_AT_DESTINATION) {
-            int tile_type = data.travelled_tiles.items[f->grid_offset];
-            data.travelled_tiles.items[f->grid_offset] = tile_type < FIGURE_ROAMER_PREVIEW_EXIT_TILE ?
+        figure_route_remove(&roamer);
+        if (roamer.direction == DIR_FIGURE_AT_DESTINATION) {
+            int tile_type = data.travelled_tiles.items[roamer.grid_offset];
+            data.travelled_tiles.items[roamer.grid_offset] = tile_type < FIGURE_ROAMER_PREVIEW_EXIT_TILE ?
                 FIGURE_ROAMER_PREVIEW_ENTRY_TILE : FIGURE_ROAMER_PREVIEW_ENTRY_EXIT_TILE;
         }
     }
@@ -304,7 +303,6 @@ void figure_roamer_preview_create_all_for_building_type(building_type type)
 void figure_roamer_preview_reset(building_type type, int force)
 {
     if (force || data.dirty) {
-        memset(&data.roamer, 0, sizeof(figure));
         map_grid_clear_u8(data.travelled_tiles.items);
         int show_other_roamers = 0;
         figure_type fig_type = building_type_to_figure_type(type);
