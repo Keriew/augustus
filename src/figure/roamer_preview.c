@@ -16,8 +16,6 @@
 static struct {
     figure roamer;
     grid_u8 travelled_tiles;
-    int grid_offset;
-    building_type type;
     int active;
 } data;
 
@@ -183,9 +181,6 @@ void figure_roamer_preview_create(building_type b_type, int grid_offset, int x, 
         figure_roamer_preview_reset();
         return;
     }
-    if (grid_offset == data.grid_offset && b_type == data.type) {
-        return;
-    }
 
     figure_roamer_preview_reset();
 
@@ -199,8 +194,7 @@ void figure_roamer_preview_create(building_type b_type, int grid_offset, int x, 
     }
 
     data.active = 1;
-    data.grid_offset = grid_offset;
-    data.type = b_type;
+
     int b_size = building_is_farm(b_type) ? 3 : building_properties_for_type(b_type)->size;
 
     map_point road;
@@ -277,8 +271,6 @@ void figure_roamer_preview_reset(void)
     if (data.active) {
         memset(&data.roamer, 0, sizeof(figure));
         map_grid_clear_u8(data.travelled_tiles.items);
-        data.grid_offset = 0;
-        data.type = BUILDING_NONE;
         data.active = 0;
     }
 }

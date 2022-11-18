@@ -300,8 +300,6 @@ static void init(int grid_offset)
         building *b = building_get(context.building_id);
         context.type = BUILDING_INFO_BUILDING;
         context.worker_percentage = calc_percentage(b->num_workers, model_get_building(b->type)->laborers);
-        figure_roamer_preview_create(b->type, b->grid_offset, b->x, b->y);
-
         switch (b->type) {
             case BUILDING_FORT_GROUND:
                 context.building_id = b->prev_part_building_id;
@@ -381,6 +379,7 @@ static void init(int grid_offset)
                 }
                 break;
         }
+        figure_roamer_preview_create(b->type, b->grid_offset, b->x, b->y);
     }
     // figures
     context.figure.selected_index = 0;
