@@ -1,5 +1,6 @@
 #include "roamer_preview.h"
 
+#include "building/industry.h"
 #include "building/properties.h"
 #include "core/config.h"
 #include "figure/figure.h"
@@ -26,7 +27,9 @@ static figure_type building_type_to_figure_type(building_type type)
         case BUILDING_MARKET:
             return FIGURE_MARKET_TRADER;
         case BUILDING_SENATE:
+        case BUILDING_SENATE_UPGRADED:
         case BUILDING_FORUM:
+        case BUILDING_FORUM_UPGRADED:
             return FIGURE_TAX_COLLECTOR;
         case BUILDING_SCHOOL:
             return FIGURE_SCHOOL_CHILD;
@@ -76,6 +79,40 @@ static figure_type building_type_to_figure_type(building_type type)
             return FIGURE_PRIEST;
         case BUILDING_MISSION_POST:
             return FIGURE_MISSIONARY;
+        case BUILDING_BARRACKS:
+        case BUILDING_MILITARY_ACADEMY:
+        case BUILDING_MESS_HALL:
+        case BUILDING_WAREHOUSE:
+        case BUILDING_GRANARY:
+        case BUILDING_TOWER:
+        case BUILDING_ACTOR_COLONY:
+        case BUILDING_GLADIATOR_SCHOOL:
+        case BUILDING_LION_HOUSE:
+        case BUILDING_CHARIOT_MAKER:
+        case BUILDING_WHEAT_FARM:
+        case BUILDING_PIG_FARM:
+        case BUILDING_FRUIT_FARM:
+        case BUILDING_OLIVE_FARM:
+        case BUILDING_VINES_FARM:
+        case BUILDING_VEGETABLE_FARM:
+        case BUILDING_CLAY_PIT:
+        case BUILDING_TIMBER_YARD:
+        case BUILDING_IRON_MINE:
+        case BUILDING_MARBLE_QUARRY:
+        case BUILDING_POTTERY_WORKSHOP:
+        case BUILDING_OIL_WORKSHOP:
+        case BUILDING_WINE_WORKSHOP:
+        case BUILDING_FURNITURE_WORKSHOP:
+        case BUILDING_WEAPONS_WORKSHOP:
+        case BUILDING_WORKCAMP:
+        case BUILDING_ARCHITECT_GUILD:
+        case BUILDING_WHARF:
+        case BUILDING_DOCK:
+        case BUILDING_SHIPYARD:
+        case BUILDING_CARAVANSERAI:
+        case BUILDING_LIGHTHOUSE:
+        case BUILDING_WATCHTOWER:
+            return FIGURE_LABOR_SEEKER;
         default:
             return FIGURE_NONE;
     }
@@ -157,10 +194,14 @@ void figure_roamer_preview_create(building_type b_type, int grid_offset, int x, 
         return;
     }
 
+    if (fig_type == FIGURE_LABOR_SEEKER && config_get(CONFIG_GP_CH_GLOBAL_LABOUR)) {
+        return;
+    }
+
     data.active = 1;
     data.grid_offset = grid_offset;
     data.type = b_type;
-    int b_size = building_properties_for_type(b_type)->size;
+    int b_size = building_is_farm(b_type) ? 3 : building_properties_for_type(b_type)->size;
 
     map_point road;
     if (!map_has_road_access(x, y, b_size, &road)) {
