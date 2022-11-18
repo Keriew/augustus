@@ -379,6 +379,7 @@ static void init(int grid_offset)
                 }
                 break;
         }
+        figure_roamer_preview_reset(b->type, 1);
         figure_roamer_preview_create(b->type, b->grid_offset, b->x, b->y);
     }
     // figures

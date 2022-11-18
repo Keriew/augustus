@@ -6,17 +6,22 @@
 #include "figure/figure.h"
 #include "figure/movement.h"
 #include "figure/route.h"
+#include "map/building.h"
 #include "map/grid.h"
 #include "map/road_access.h"
 
 #include <string.h>
 
 #define TOTAL_ROAMERS 4
+#define MAX_STORED_BUILDING_TYPES 4
+#define SHOWN_BUILDING_OFFSET 12
 
 static struct {
     figure roamer;
     grid_u8 travelled_tiles;
-    int active;
+    int dirty;
+    building_type types[MAX_STORED_BUILDING_TYPES];
+    int stored_building_types;
 } data;
 
 static figure_type building_type_to_figure_type(building_type type)
@@ -178,11 +183,9 @@ static void init_roaming(figure *f, int roam_dir, int x, int y)
 void figure_roamer_preview_create(building_type b_type, int grid_offset, int x, int y)
 {
     if (!config_get(CONFIG_UI_SHOW_ROAMING_PATH)) {
-        figure_roamer_preview_reset();
+        figure_roamer_preview_reset(BUILDING_NONE, 1);
         return;
     }
-
-    figure_roamer_preview_reset();
 
     figure_type fig_type = building_type_to_figure_type(b_type);
     if (fig_type == FIGURE_NONE) {
@@ -193,7 +196,13 @@ void figure_roamer_preview_create(building_type b_type, int grid_offset, int x, 
         return;
     }
 
-    data.active = 1;
+    if (data.travelled_tiles.items[grid_offset] == SHOWN_BUILDING_OFFSET) {
+        return;
+    }
+
+    data.dirty = 1;
+
+    data.travelled_tiles.items[grid_offset] = SHOWN_BUILDING_OFFSET;
 
     int b_size = building_is_farm(b_type) ? 3 : building_properties_for_type(b_type)->size;
 
@@ -266,13 +275,67 @@ void figure_roamer_preview_create(building_type b_type, int grid_offset, int x, 
     }
 }
 
-void figure_roamer_preview_reset(void)
+void figure_roamer_preview_create_all_for_building_type(building_type type)
 {
-    if (data.active) {
+    if (type == BUILDING_NONE) {
+        return;
+    }
+    if (!config_get(CONFIG_UI_SHOW_ROAMING_PATH)) {
+        figure_roamer_preview_reset_building_types();
+        return;
+    }
+    for (int i = 0; i < data.stored_building_types; i++) {
+        if (data.types[i] == type) {
+            return;
+        }
+    }
+    if (data.stored_building_types == MAX_STORED_BUILDING_TYPES) {
+        return;
+    }
+    int dirty = data.dirty;
+    for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
+        figure_roamer_preview_create(type, b->grid_offset, b->x, b->y);
+    }
+    data.dirty = dirty;
+    data.types[data.stored_building_types] = type;
+    data.stored_building_types++;
+}
+
+void figure_roamer_preview_reset(building_type type, int force)
+{
+    if (force || data.dirty) {
         memset(&data.roamer, 0, sizeof(figure));
         map_grid_clear_u8(data.travelled_tiles.items);
-        data.active = 0;
+        int show_other_roamers = 0;
+        figure_type fig_type = building_type_to_figure_type(type);
+        if (fig_type == FIGURE_LABOR_SEEKER && config_get(CONFIG_GP_CH_GLOBAL_LABOUR)) {
+            fig_type = FIGURE_NONE;
+        }
+        if (fig_type == FIGURE_NONE) {
+            show_other_roamers = 1;
+        } else {
+            for (int i = 0; i < data.stored_building_types; i++) {
+                if (building_type_to_figure_type(data.types[i]) == fig_type) {
+                    show_other_roamers = 1;
+                    break;
+                }
+            }
+        }
+        if (show_other_roamers) {
+            for (int i = 0; i < data.stored_building_types; i++) {
+                for (building *b = building_first_of_type(data.types[i]); b; b = b->next_of_type) {
+                    figure_roamer_preview_create(b->type, b->grid_offset, b->x, b->y);
+                }
+            }
+        }
+        data.dirty = 0;
     }
+}
+
+void figure_roamer_preview_reset_building_types(void)
+{
+    data.stored_building_types = 0;
+    figure_roamer_preview_reset(BUILDING_NONE, 1);
 }
 
 void figure_roamer_preview_add_grid_offset_to_travelled_path(int grid_offset)

@@ -655,7 +655,6 @@ static void draw_custom_layer(int x, int y, int grid_offset)
     overlay->draw_custom_layer(x, y, scale, grid_offset);
 }
 
-
 void city_with_overlay_draw(const map_tile *tile)
 {
     if (!select_city_overlay()) {
@@ -681,6 +680,7 @@ void city_with_overlay_draw(const map_tile *tile)
         city_view_foreach_map_tile(draw_figures);
         city_view_foreach_map_tile(deletion_draw_terrain_top);
         city_view_foreach_map_tile(deletion_draw_animations);
+        city_building_ghost_draw(tile);
         city_view_foreach_map_tile(draw_elevated_figures);
     }
     if (overlay->draw_custom_layer) {
