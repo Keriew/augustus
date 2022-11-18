@@ -439,21 +439,13 @@ static int is_fully_blocked(int map_x, int map_y, building_type type, int buildi
     return 0;
 }
 
-static void reset_ghost_roamers(void)
-{
-    building_type type = building_construction_type();
-    int force = data.roamer_preview.type != type;
-    data.roamer_preview.grid_offset = 0;
-    data.roamer_preview.type = type;
-    figure_roamer_preview_reset(type, force);
-}
-
 static void set_roamer_path(building_type type, const map_tile *tile, int is_blocked)
 {
     if (data.roamer_preview.grid_offset == tile->grid_offset && data.roamer_preview.type == type) {
         return;
     }
-    reset_ghost_roamers();
+    figure_roamer_preview_reset(type);
+    data.roamer_preview.type = type;
     data.roamer_preview.grid_offset = tile->grid_offset;
     if (!is_blocked) {
         figure_roamer_preview_create(type, tile->grid_offset, tile->x, tile->y);
@@ -1262,13 +1254,11 @@ static void draw_partial_grid(int grid_offset, int x, int y, building_type type)
 void city_building_ghost_draw(const map_tile *tile)
 {
     if (!tile->grid_offset || scroll_in_progress()) {
-        reset_ghost_roamers();
         return;
     }
     building_type type = building_construction_type();
     data.ghost_building.type = type;
     if (building_construction_draw_as_constructing() || type == BUILDING_NONE || type == BUILDING_CLEAR_LAND) {
-        reset_ghost_roamers();
         return;
     }
     data.scale = city_view_get_scale() / 100.0f;

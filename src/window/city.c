@@ -53,6 +53,9 @@ static int mothball_warning_id;
 
 static void draw_background(void)
 {
+    if (window_is(WINDOW_CITY)) {
+        figure_roamer_preview_reset(building_construction_type());
+    }
     widget_sidebar_city_draw_background();
     widget_top_menu_draw(1);
 }
@@ -219,6 +222,7 @@ static void show_roamers_for_overlay(int overlay)
             figure_roamer_preview_reset_building_types();
             break;
     }
+    widget_city_clear_routing_grid_offset();
 }
 
 static void show_overlay(int overlay)

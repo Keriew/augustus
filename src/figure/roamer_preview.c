@@ -18,7 +18,6 @@
 
 static struct {
     grid_u8 travelled_tiles;
-    int dirty;
     building_type types[MAX_STORED_BUILDING_TYPES];
     int stored_building_types;
 } data;
@@ -182,7 +181,7 @@ static void init_roaming(figure *f, int roam_dir, int x, int y)
 void figure_roamer_preview_create(building_type b_type, int grid_offset, int x, int y)
 {
     if (!config_get(CONFIG_UI_SHOW_ROAMING_PATH)) {
-        figure_roamer_preview_reset(BUILDING_NONE, 1);
+        figure_roamer_preview_reset(BUILDING_NONE);
         return;
     }
 
@@ -198,8 +197,6 @@ void figure_roamer_preview_create(building_type b_type, int grid_offset, int x, 
     if (data.travelled_tiles.items[grid_offset] == SHOWN_BUILDING_OFFSET) {
         return;
     }
-
-    data.dirty = 1;
 
     data.travelled_tiles.items[grid_offset] = SHOWN_BUILDING_OFFSET;
 
@@ -291,49 +288,44 @@ void figure_roamer_preview_create_all_for_building_type(building_type type)
     if (data.stored_building_types == MAX_STORED_BUILDING_TYPES) {
         return;
     }
-    int dirty = data.dirty;
     for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
         figure_roamer_preview_create(type, b->grid_offset, b->x, b->y);
     }
-    data.dirty = dirty;
     data.types[data.stored_building_types] = type;
     data.stored_building_types++;
 }
 
-void figure_roamer_preview_reset(building_type type, int force)
+void figure_roamer_preview_reset(building_type type)
 {
-    if (force || data.dirty) {
-        map_grid_clear_u8(data.travelled_tiles.items);
-        int show_other_roamers = 0;
-        figure_type fig_type = building_type_to_figure_type(type);
-        if (fig_type == FIGURE_LABOR_SEEKER && config_get(CONFIG_GP_CH_GLOBAL_LABOUR)) {
-            fig_type = FIGURE_NONE;
-        }
-        if (fig_type == FIGURE_NONE) {
-            show_other_roamers = 1;
-        } else {
-            for (int i = 0; i < data.stored_building_types; i++) {
-                if (building_type_to_figure_type(data.types[i]) == fig_type) {
-                    show_other_roamers = 1;
-                    break;
-                }
+    map_grid_clear_u8(data.travelled_tiles.items);
+    int show_other_roamers = 0;
+    figure_type fig_type = building_type_to_figure_type(type);
+    if (fig_type == FIGURE_LABOR_SEEKER && config_get(CONFIG_GP_CH_GLOBAL_LABOUR)) {
+        fig_type = FIGURE_NONE;
+    }
+    if (fig_type == FIGURE_NONE) {
+        show_other_roamers = 1;
+    } else {
+        for (int i = 0; i < data.stored_building_types; i++) {
+            if (building_type_to_figure_type(data.types[i]) == fig_type) {
+                show_other_roamers = 1;
+                break;
             }
         }
-        if (show_other_roamers) {
-            for (int i = 0; i < data.stored_building_types; i++) {
-                for (building *b = building_first_of_type(data.types[i]); b; b = b->next_of_type) {
-                    figure_roamer_preview_create(b->type, b->grid_offset, b->x, b->y);
-                }
+    }
+    if (show_other_roamers) {
+        for (int i = 0; i < data.stored_building_types; i++) {
+            for (building *b = building_first_of_type(data.types[i]); b; b = b->next_of_type) {
+                figure_roamer_preview_create(b->type, b->grid_offset, b->x, b->y);
             }
         }
-        data.dirty = 0;
     }
 }
 
 void figure_roamer_preview_reset_building_types(void)
 {
     data.stored_building_types = 0;
-    figure_roamer_preview_reset(BUILDING_NONE, 1);
+    figure_roamer_preview_reset(BUILDING_NONE);
 }
 
 void figure_roamer_preview_add_grid_offset_to_travelled_path(int grid_offset)

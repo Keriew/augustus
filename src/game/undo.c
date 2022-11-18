@@ -300,7 +300,7 @@ void game_undo_perform(void)
     }
     map_routing_update_land();
     map_routing_update_walls();
-    figure_roamer_preview_reset(building_construction_type(), 1);
+    figure_roamer_preview_reset(building_construction_type());
     data.num_buildings = 0;
 }
 
