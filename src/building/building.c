@@ -18,7 +18,7 @@
 #include "core/log.h"
 #include "figure/formation_legion.h"
 #include "game/difficulty.h"
-#include "game/resource.h"
+#include "game/save_version.h"
 #include "game/undo.h"
 #include "map/building_tiles.h"
 #include "map/desirability.h"
@@ -267,12 +267,14 @@ building *building_create(building_type type, int x, int y)
     }
 
     if (type == BUILDING_GRANARY) {
-        b->data.granary.resource_stored[RESOURCE_NONE] = FULL_GRANARY;
+        b->resources[RESOURCE_NONE] = FULL_GRANARY;
     }
 
     if (type == BUILDING_MARKET) {
         // Set it as accepting all goods
-        b->subtype.market_goods = 0x0000;
+        for (int i = 0; i < RESOURCE_MAX; i++) {
+            b->accepted_goods[i] = 1;
+        }
     }
 
     if (type == BUILDING_WAREHOUSE || type == BUILDING_HIPPODROME) {
@@ -669,12 +671,12 @@ void building_save_state(buffer *buf, buffer *highest_id, buffer *highest_id_eve
     buffer_write_i32(corrupt_houses, extra.unfixable_houses);
 }
 
-void building_load_state(buffer *buf, buffer *sequence, buffer *corrupt_houses, int includes_building_size, int save_version)
+void building_load_state(buffer *buf, buffer *sequence, buffer *corrupt_houses, int save_version)
 {
     int building_buf_size = BUILDING_STATE_ORIGINAL_BUFFER_SIZE;
     int buf_size = buf->size;
 
-    if (includes_building_size) {
+    if (save_version > SAVE_GAME_LAST_STATIC_VERSION) {
         building_buf_size = buffer_read_i32(buf);
         buf_size -= 4;
     }

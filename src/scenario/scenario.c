@@ -244,7 +244,7 @@ void scenario_load_state(buffer *buf, int version)
         scenario.requests[i].year = buffer_read_i16(buf);
     }
     for (int i = 0; i < MAX_REQUESTS; i++) {
-        scenario.requests[i].resource = buffer_read_i16(buf);
+        scenario.requests[i].resource = resource_remap(buffer_read_i16(buf));
     }
     for (int i = 0; i < MAX_REQUESTS; i++) {
         scenario.requests[i].amount = buffer_read_i16(buf);

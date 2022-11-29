@@ -2,10 +2,7 @@
 #include "building/monument.h"
 #include "building/roadblock.h"
 #include "figure/figure.h"
-#include "game/resource.h"
-
-#define SAVE_GAME_ROADBLOCK_DATA_MOVED_FROM_SUBTYPE 0x86
-#define SAVE_GAME_CARAVANSERAI_OFFSET_FIX 0x88
+#include "game/save_version.h"
 
 static int is_industry_type(const building *b)
 {
@@ -51,8 +48,8 @@ static void write_type_data(buffer *buf, const building *b)
     // Do not place this after if (building_has_supplier_inventory(b->type) or after if (building_monument_is_monument(b))
     // Because Caravanserai is monument AND supplier building and resources_needed / inventory is same memory spot
     } else if (b->type == BUILDING_CARAVANSERAI) {
-        for (int i = 0; i < RESOURCE_MAX; i++) {
-            buffer_write_i16(buf, b->data.monument.resources_needed[i]);
+        for (int i = 0; i < RESOURCE_MAX_LEGACY; i++) {
+            buffer_write_i16(buf, b->resources[i]);
         }
         buffer_write_i32(buf, b->data.monument.upgrades);
         buffer_write_i16(buf, b->data.monument.progress);
@@ -61,8 +58,8 @@ static void write_type_data(buffer *buf, const building *b)
         buffer_write_u8(buf, 0);
         // As above, Ceres and Venus temples are both monuments and suppliers 
     } else if (b->type == BUILDING_LARGE_TEMPLE_CERES || b->type == BUILDING_LARGE_TEMPLE_VENUS) {
-        for (int i = 0; i < RESOURCE_MAX; i++) {
-            buffer_write_i16(buf, b->data.monument.resources_needed[i]);
+        for (int i = 0; i < RESOURCE_MAX_LEGACY; i++) {
+            buffer_write_i16(buf, b->resources[i]);
         }
         buffer_write_i32(buf, b->data.monument.upgrades);
         buffer_write_i16(buf, b->data.monument.progress);
@@ -88,14 +85,14 @@ static void write_type_data(buffer *buf, const building *b)
         }
     } else if (b->type == BUILDING_GRANARY) {
         buffer_write_i16(buf, 0);
-        for (int i = 0; i < RESOURCE_MAX; i++) {
-            buffer_write_i16(buf, b->data.granary.resource_stored[i]);
+        for (int i = 0; i < RESOURCE_MAX_LEGACY; i++) {
+            buffer_write_i16(buf, b->resources[i]);
         }
         buffer_write_i32(buf, 0);
         buffer_write_i32(buf, 0);
     } else if (building_monument_is_monument(b)) {
-        for (int i = 0; i < RESOURCE_MAX; i++) {
-            buffer_write_i16(buf, b->data.monument.resources_needed[i]);
+        for (int i = 0; i < RESOURCE_MAX_LEGACY; i++) {
+            buffer_write_i16(buf, b->resources[i]);
         }
         buffer_write_i32(buf, b->data.monument.upgrades);
         buffer_write_i16(buf, b->data.monument.progress);
@@ -253,6 +250,16 @@ void building_state_save_to_buffer(buffer *buf, const building *b)
     buffer_write_u8(buf, b->fumigation_frame);
     buffer_write_u8(buf, b->fumigation_direction);
 
+    // extra resources
+    for (int i = RESOURCE_MAX_LEGACY; i < RESOURCE_MAX; i++) {
+        buffer_write_i16(buf, b->resources[i]);
+    }
+
+    // accepted goods
+    for (int i = RESOURCE_MIN; i < RESOURCE_MAX; i++) {
+        buffer_write_u8(buf, b->accepted_goods[i]);
+    }
+
     // New building state code should always be added at the end to preserve savegame retrocompatibility
     // Also, don't forget to update BUILDING_STATE_CURRENT_BUFFER_SIZE and if possible, add a new macro like
     // BUILDING_STATE_NEW_FEATURE_BUFFER_SIZE with the full building state buffer size including all added features
@@ -297,8 +304,8 @@ static void read_type_data(buffer *buf, building *b, int version)
     // Do not place this after if (building_has_supplier_inventory(b->type) or after if (building_monument_is_monument(b))
     // Because Caravanserai is monument AND supplier building and resources_needed / inventory is same memory spot
     } else if (b->type == BUILDING_CARAVANSERAI) {
-        for (int i = 0; i < RESOURCE_MAX; i++) {
-            b->data.monument.resources_needed[i] = buffer_read_i16(buf);
+        for (int i = 0; i < RESOURCE_MAX_LEGACY; i++) {
+            b->resources[resource_remap(i)] = buffer_read_i16(buf);
         }
         b->data.monument.upgrades = buffer_read_i32(buf);
         b->data.monument.progress = buffer_read_i16(buf);
@@ -306,13 +313,13 @@ static void read_type_data(buffer *buf, building *b, int version)
         b->data.market.fetch_inventory_id = buffer_read_u8(buf);
         // Old savegame versions had a bug where the caravanserai's building type data size was off by 1
         // Old save versions don't need to skip the byte, while new save versions do
-        if (version >= SAVE_GAME_CARAVANSERAI_OFFSET_FIX) {
+        if (version > SAVE_GAME_LAST_CARAVANSERAI_WRONG_OFFSET) {
             buffer_skip(buf, 1);
         }
         // As above, Ceres and Venus temples are both monuments and suppliers 
     } else if (b->type == BUILDING_LARGE_TEMPLE_CERES || b->type == BUILDING_LARGE_TEMPLE_VENUS) {
-        for (int i = 0; i < RESOURCE_MAX; i++) {
-            b->data.monument.resources_needed[i] = buffer_read_i16(buf);
+        for (int i = 0; i < RESOURCE_MAX_LEGACY; i++) {
+            b->resources[resource_remap(i)] = buffer_read_i16(buf);
         }
         b->data.monument.upgrades = buffer_read_i32(buf);
         b->data.monument.progress = buffer_read_i16(buf);
@@ -337,16 +344,16 @@ static void read_type_data(buffer *buf, building *b, int version)
         buffer_skip(buf, 8);
     } else if (b->type == BUILDING_GRANARY) {
         buffer_skip(buf, 2);
-        for (int i = 0; i < RESOURCE_MAX; i++) {
-            b->data.granary.resource_stored[i] = buffer_read_i16(buf);
+        for (int i = 0; i < RESOURCE_MAX_LEGACY; i++) {
+            b->resources[resource_remap(i)] = buffer_read_i16(buf);
         }
         buffer_skip(buf, 8);
     } else if (building_monument_is_monument(b)) {
-        for (int i = 0; i < RESOURCE_MAX; i++) {
-            b->data.monument.resources_needed[i] = buffer_read_i16(buf);
+        for (int i = 0; i < RESOURCE_MAX_LEGACY; i++) {
+            b->resources[resource_remap(i)] = buffer_read_i16(buf);
         }
-        if (b->data.monument.resources_needed[RESOURCE_NONE] < 0) {
-            b->data.monument.resources_needed[RESOURCE_NONE] = 1;
+        if (b->resources[RESOURCE_NONE] < 0) {
+            b->resources[RESOURCE_NONE] = 1;
         }
         b->data.monument.upgrades = buffer_read_i32(buf);
         b->data.monument.progress = buffer_read_i16(buf);
@@ -398,6 +405,15 @@ static void read_type_data(buffer *buf, building *b, int version)
     }
 }
 
+static void migrate_accepted_goods(building *b, int permissions)
+{
+    for (int i = 0; i < RESOURCE_MAX_LEGACY; i++) {
+        int goods_bit = 1 << i;
+        int id = b->type == BUILDING_DOCK ? resource_remap(i) : resource_from_inventory(i);
+        b->accepted_goods[id] = !(permissions & goods_bit);
+    }
+}
+
 void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_size, int save_version, int for_preview)
 {
     b->state = buffer_read_u8(buf);
@@ -410,7 +426,14 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     b->y = buffer_read_u8(buf);
     b->grid_offset = buffer_read_i16(buf);
     b->type = buffer_read_i16(buf);
-    b->subtype.house_level = buffer_read_i16(buf); // which union field we use does not matter
+    if (b->type == BUILDING_WAREHOUSE_SPACE) {
+        b->subtype.warehouse_resource_id = resource_remap(buffer_read_i16(buf));
+    } else if (save_version <= SAVE_GAME_LAST_STATIC_RESOURCES &&
+        (b->type == BUILDING_DOCK || building_has_supplier_inventory(b->type))) {
+        migrate_accepted_goods(b, buffer_read_i16(buf));
+    } else {
+        b->subtype.house_level = buffer_read_i16(buf); // which union field we use does not matter        
+    }
     b->road_network_id = buffer_read_u8(buf);
     b->monthly_levy = buffer_read_u8(buf);
     b->created_sequence = buffer_read_u16(buf);
@@ -440,7 +463,7 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     b->has_well_access = buffer_read_u8(buf);
     b->num_workers = buffer_read_i16(buf);
     b->labor_category = buffer_read_u8(buf);
-    b->output_resource_id = buffer_read_u8(buf);
+    b->output_resource_id = resource_remap(buffer_read_u8(buf));
     b->has_road_access = buffer_read_u8(buf);
     b->house_criminal_active = buffer_read_u8(buf);
     b->damage_risk = buffer_read_i16(buf);
@@ -461,7 +484,6 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     b->storage_id = buffer_read_u8(buf);
     b->sentiment.house_happiness = buffer_read_i8(buf); // which union field we use does not matter
     b->show_on_problem_overlay = buffer_read_u8(buf);
-
 
     // Wharves produce meat
     if (b->type == BUILDING_WHARF) {
@@ -534,6 +556,16 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
         b->sickness_doctor_cure = buffer_read_u8(buf);
         b->fumigation_frame = buffer_read_u8(buf);
         b->fumigation_direction = buffer_read_u8(buf);
+    }
+
+    for (int i = RESOURCE_MAX_LEGACY; i < resource_total_mapped(); i++) {
+        b->resources[resource_remap(i)] = buffer_read_i16(buf);
+    }
+
+    if (save_version > SAVE_GAME_LAST_STATIC_RESOURCES) {
+        for (int i = 0; i < resource_total_mapped(); i++) {
+            b->accepted_goods[resource_remap(i)] = buffer_read_u8(buf);
+        }
     }
 
     if (

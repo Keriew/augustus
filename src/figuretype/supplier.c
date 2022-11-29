@@ -44,7 +44,7 @@ static int take_food_from_granary(figure *f, int market_id, int granary_id)
     building *granary = building_get(granary_id);
     int market_units = building_get(market_id)->data.market.inventory[f->collecting_item_id];
     int max_units = 0;
-    int granary_units = granary->data.granary.resource_stored[resource];
+    int granary_units = granary->resources[resource];
     int num_loads;
     if (building_get(market_id)->data.market.is_mess_hall) {
         max_units = MAX_FOOD_STOCKED_MESS_HALL - market_units;

@@ -1,6 +1,8 @@
 #ifndef GAME_RESOURCE_H
 #define GAME_RESOURCE_H
 
+#include "core/lang.h"
+
 /**
  * @file
  * Type definitions for resources
@@ -17,6 +19,7 @@ typedef enum {
     RESOURCE_OLIVES = 4,
     RESOURCE_VINES = 5,
     RESOURCE_MEAT = 6,
+    RESOURCE_FISH = 6,
     RESOURCE_WINE = 7,
     RESOURCE_OIL = 8,
     RESOURCE_IRON = 9,
@@ -31,10 +34,13 @@ typedef enum {
     // helper constants
     RESOURCE_MIN = 1,
     RESOURCE_MAX = 16,
+    RESOURCE_MAX_LEGACY = 16,
     RESOURCE_MIN_FOOD = 1,
     RESOURCE_MAX_FOOD = 7,
+    RESOURCE_MAX_FOOD_LEGACY = 7,
     RESOURCE_MIN_RAW = 9,
-    RESOURCE_MAX_RAW = 13
+    RESOURCE_MAX_RAW = 13,
+    RESOURCE_SPECIAL = 2
 } resource_type;
 
 typedef enum {
@@ -70,17 +76,45 @@ typedef enum {
 } workshop_type;
 
 typedef enum {
-    RESOURCE_IMAGE_STORAGE = 0,
-    RESOURCE_IMAGE_CART = 1,
-    RESOURCE_IMAGE_FOOD_CART = 2,
-    RESOURCE_IMAGE_ICON = 3
-} resource_image_type;
+    RESOURCE_FLAG_NONE = 0,
+    RESOURCE_FLAG_FOOD = 1,
+    RESOURCE_FLAG_RAW_MATERIAL = 2,
+    RESOURCE_FLAG_GOOD = 4,
+    RESOURCE_FLAG_SPECIAL = 8
+} resource_flags;
 
-int resource_image_offset(resource_type resource, resource_image_type type);
+typedef struct {
+    resource_type type;
+    resource_flags flags;
+    const uint8_t *text;
+    inventory_type inventory_id;
+    struct {
+        int storage;
+        struct {
+            int single_load;
+            int multiple_loads;
+            int eight_loads;
+        } cart;
+        int icon;
+        int empire;
+        struct {
+            int icon;
+            int empire;
+        } editor;
+    } image;
+    struct {
+        int buy;
+        int sell;
+    } default_trade_price;
+} resource_data;
+
+void resource_init(void);
 
 int resource_is_food(resource_type resource);
 
 workshop_type resource_to_workshop_type(resource_type resource);
+
+const resource_data *resource_get_data(resource_type resource);
 
 int inventory_is_set(int inventory, int flag);
 
@@ -89,5 +123,13 @@ void inventory_set(int *inventory, int flag);
 int resource_from_inventory(int inventory_id);
 
 int resource_to_inventory(resource_type resource);
+
+void resource_set_mapping(int version);
+
+resource_type resource_remap(int id);
+
+int resource_total_mapped(void);
+
+int resource_total_food_mapped(void);
 
 #endif // GAME_RESOURCE_H

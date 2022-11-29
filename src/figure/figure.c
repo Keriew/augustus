@@ -5,6 +5,8 @@
 #include "core/log.h"
 #include "city/emperor.h"
 #include "core/random.h"
+#include "game/resource.h"
+#include "game/save_version.h"
 #include "empire/city.h"
 #include "figure/name.h"
 #include "figure/route.h"
@@ -360,7 +362,7 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size)
     f->cart_image_id = buffer_read_i16(buf);
     f->next_figure_id_on_same_tile = buffer_read_i16(buf);
     f->type = buffer_read_u8(buf);
-    f->resource_id = buffer_read_u8(buf);
+    f->resource_id = resource_remap(buffer_read_u8(buf));
     f->use_cross_country = buffer_read_u8(buf);
     f->is_friendly = buffer_read_u8(buf);
     f->state = buffer_read_u8(buf);
@@ -431,7 +433,7 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size)
     f->height_adjusted_ticks = buffer_read_u8(buf);
     f->current_height = buffer_read_u8(buf);
     f->target_height = buffer_read_u8(buf);
-    f->collecting_item_id = buffer_read_u8(buf);
+    f->collecting_item_id = resource_remap(buffer_read_u8(buf));
     f->trade_ship_failed_dock_attempts = buffer_read_u8(buf);
     f->phrase_sequence_exact = buffer_read_u8(buf);
     f->phrase_id = buffer_read_i8(buf);
@@ -473,14 +475,14 @@ void figure_save_state(buffer *list, buffer *seq)
     }
 }
 
-void figure_load_state(buffer *list, buffer *seq, int includes_figure_size)
+void figure_load_state(buffer *list, buffer *seq, int version)
 {
     data.created_sequence = buffer_read_i32(seq);
 
     int figure_buf_size = FIGURE_ORIGINAL_BUFFER_SIZE;
     int buf_size = list->size;
 
-    if (includes_figure_size) {
+    if (version > SAVE_GAME_LAST_STATIC_VERSION) {
         figure_buf_size = buffer_read_i32(list);
         buf_size -= 4;
     }

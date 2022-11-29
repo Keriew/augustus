@@ -38,29 +38,22 @@ int building_market_get_needed_inventory(building* market)
 {
     int needed = INVENTORY_FLAG_NONE;
     if (!scenario_property_rome_supplies_wheat()) {
-        if (building_distribution_is_good_accepted(INVENTORY_WHEAT, market)) {
-            inventory_set(&needed, INVENTORY_WHEAT);
-        }
-        if (building_distribution_is_good_accepted(INVENTORY_VEGETABLES, market)) {
-            inventory_set(&needed, INVENTORY_VEGETABLES);
-        }
-        if (building_distribution_is_good_accepted(INVENTORY_FRUIT, market)) {
-            inventory_set(&needed, INVENTORY_FRUIT);
-        }
-        if (building_distribution_is_good_accepted(INVENTORY_MEAT, market)) {
-            inventory_set(&needed, INVENTORY_MEAT);
+        for (int i = RESOURCE_MIN_FOOD; i < RESOURCE_MAX_FOOD; i++) {
+            if (building_distribution_is_good_accepted(i, market)) {
+                inventory_set(&needed, resource_to_inventory(i));
+            }
         }
     }
-    if (market->data.market.pottery_demand && building_distribution_is_good_accepted(INVENTORY_POTTERY, market)) {
+    if (market->data.market.pottery_demand && building_distribution_is_good_accepted(RESOURCE_POTTERY, market)) {
         inventory_set(&needed, INVENTORY_POTTERY);
     }
-    if (market->data.market.furniture_demand && building_distribution_is_good_accepted(INVENTORY_FURNITURE, market)) {
+    if (market->data.market.furniture_demand && building_distribution_is_good_accepted(RESOURCE_FURNITURE, market)) {
         inventory_set(&needed, INVENTORY_FURNITURE);
     }
-    if (market->data.market.oil_demand && building_distribution_is_good_accepted(INVENTORY_OIL, market)) {
+    if (market->data.market.oil_demand && building_distribution_is_good_accepted(RESOURCE_OIL, market)) {
         inventory_set(&needed, INVENTORY_OIL);
     }
-    if (market->data.market.wine_demand && building_distribution_is_good_accepted(INVENTORY_WINE, market)) {
+    if (market->data.market.wine_demand && building_distribution_is_good_accepted(RESOURCE_WINE, market)) {
         inventory_set(&needed, INVENTORY_WINE);
     }
     return needed;

@@ -4,6 +4,7 @@
 #include "building/type.h"
 #include "core/buffer.h"
 #include "core/time.h"
+#include "game/resource.h"
 
 typedef struct building {
     int id;
@@ -30,7 +31,6 @@ typedef struct building {
         short orientation;
         short fort_figure_type;
         short native_meeting_center_id;
-        short market_goods;
         short barracks_priority;
     } subtype;
     unsigned char road_network_id;
@@ -82,7 +82,7 @@ typedef struct building {
             int accepted_route_ids;
         } dock;
         struct {
-            short inventory[8];
+            short inventory[INVENTORY_MAX];
             short pottery_demand;
             short furniture_demand;
             short oil_demand;
@@ -90,9 +90,6 @@ typedef struct building {
             unsigned char fetch_inventory_id;
             unsigned char is_mess_hall;
         } market;
-        struct {
-            short resource_stored[16];
-        } granary;
         struct {
             short progress;
             unsigned char blessing_days_left;
@@ -113,7 +110,7 @@ typedef struct building {
             unsigned char play;
         } entertainment;
         struct {
-            short inventory[8];
+            short inventory[INVENTORY_MAX];
             unsigned char theater;
             unsigned char amphitheater_actor;
             unsigned char amphitheater_gladiator;
@@ -142,7 +139,6 @@ typedef struct building {
             unsigned char evolve_text_id;
         } house;
         struct {
-            short resources_needed[16];
             int upgrades;
             short progress;
             short phase;
@@ -186,6 +182,8 @@ typedef struct building {
     unsigned char sickness_doctor_cure;
     unsigned char fumigation_frame;
     unsigned char fumigation_direction;
+    short resources[RESOURCE_MAX];
+    unsigned char accepted_goods[RESOURCE_MAX];
 } building;
 
 building *building_get(int id);
@@ -258,6 +256,6 @@ void building_clear_all(void);
 void building_save_state(buffer *buf, buffer *highest_id, buffer *highest_id_ever,
                          buffer *sequence, buffer *corrupt_houses);
 
-void building_load_state(buffer *buf, buffer *sequence, buffer *corrupt_houses, int includes_building_size, int save_version);
+void building_load_state(buffer *buf, buffer *sequence, buffer *corrupt_houses, int save_version);
 
 #endif // BUILDING_BUILDING_H

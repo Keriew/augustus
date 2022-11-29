@@ -27,6 +27,7 @@
 #include "figure/name.h"
 #include "figure/route.h"
 #include "figure/trader.h"
+#include "game/save_version.h"
 #include "game/time.h"
 #include "game/tutorial.h"
 #include "map/aqueduct.h"
@@ -63,31 +64,7 @@
 #define UNCOMPRESSED 0x80000000
 #define PIECE_SIZE_DYNAMIC 0
 
-static const int SAVE_GAME_CURRENT_VERSION = 0x90;
 
-static const int SAVE_GAME_LAST_ORIGINAL_LIMITS_VERSION = 0x66;
-static const int SAVE_GAME_LAST_SMALLER_IMAGE_ID_VERSION = 0x76;
-static const int SAVE_GAME_LAST_NO_DELIVERIES_VERSION = 0x77;
-static const int SAVE_GAME_LAST_STATIC_VERSION = 0x78;
-static const int SAVE_GAME_LAST_JOINED_IMPORT_EXPORT_VERSION = 0x79;
-static const int SAVE_GAME_LAST_STATIC_BUILDING_COUNT_VERSION = 0x80;
-static const int SAVE_GAME_LAST_STATIC_MONUMENT_DELIVERIES_VERSION = 0x81;
-static const int SAVE_GAME_LAST_STORED_IMAGE_IDS = 0x83;
-// SAVE_GAME_INCREASE_GRANARY_CAPACITY shall be updated if we decide to change granary capacity again.
-static const int SAVE_GAME_INCREASE_GRANARY_CAPACITY = 0x85;
-// static const int SAVE_GAME_ROADBLOCK_DATA_MOVED_FROM_SUBTYPE = 0x86; This define is unneeded for now
-static const int SAVE_GAME_LAST_ORIGINAL_TERRAIN_DATA_SIZE_VERSION = 0x86;
-static const int SAVE_GAME_LAST_CARAVANSERAI_WRONG_OFFSET = 0x87;
-static const int SAVE_GAME_LAST_ZIP_COMPRESSION = 0x88;
-static const int SAVE_GAME_LAST_ENEMY_ARMIES_BUFFER_BUG = 0x89;
-static const int SAVE_GAME_LAST_BARRACKS_TOWER_SENTRY_REQUEST = 0x8a;
-// static const int SAVE_GAME_LAST_WITHOUT_HIGHWAYS = 0x8b; no actual changes to how games are saved. Crudelios just wants this here
-static const int SAVE_GAME_LAST_UNVERSIONED_SCENARIOS = 0x8c;
-static const int SAVE_GAME_LAST_EMPIRE_RESOURCES_ALWAYS_WRITE = 0x8d;
-// the difference between this version and UNVERSIONED_SCENARIOS above is this one actually saves the scenario version
-// in the data, whereas the previous one did a lookup based on the save version
-static const int SAVE_GAME_LAST_NO_SCENARIO_VERSION = 0x8e;
-static const int SAVE_GAME_LAST_UNKNOWN_UNUSED_CITY_DATA = 0x8f;
 
 static char *compress_buffer;
 int compress_buffer_size;
@@ -556,6 +533,8 @@ static int save_version_to_scenario_version(int save_version, buffer *buf) {
 
 static void savegame_load_from_state(savegame_state *state, int version)
 {
+    resource_set_mapping(version);
+
     int scenario_version = save_version_to_scenario_version(version, state->scenario_version);
     scenario_settings_load_state(state->scenario_campaign_mission,
         state->scenario_settings,
@@ -577,22 +556,14 @@ static void savegame_load_from_state(savegame_state *state, int version)
     map_random_load_state(state->random_grid);
     map_desirability_load_state(state->desirability_grid);
     map_elevation_load_state(state->elevation_grid);
-    figure_load_state(state->figures, state->figure_sequence, version > SAVE_GAME_LAST_STATIC_VERSION);
+    figure_load_state(state->figures, state->figure_sequence, version);
     figure_route_load_state(state->route_figures, state->route_paths);
     formations_load_state(state->formations, state->formation_totals, version);
 
-    city_data_load_state(state->city_data,
-        state->city_graph_order,
-        state->city_entry_exit_xy,
-        state->city_entry_exit_grid_offset,
-        version > SAVE_GAME_LAST_JOINED_IMPORT_EXPORT_VERSION,
-        version > SAVE_GAME_LAST_UNKNOWN_UNUSED_CITY_DATA);
+    city_data_load_state(state->city_data, state->city_graph_order, state->city_entry_exit_xy,
+        state->city_entry_exit_grid_offset, version);
 
-    building_load_state(state->buildings,
-        state->building_extra_sequence,
-        state->building_extra_corrupt_houses,
-        version > SAVE_GAME_LAST_STATIC_VERSION,
-        version);
+    building_load_state(state->buildings, state->building_extra_sequence, state->building_extra_corrupt_houses, version);
     city_view_load_state(state->city_view_orientation, state->city_view_camera);
     game_time_load_state(state->game_time);
     random_load_state(state->random_iv);
@@ -628,7 +599,7 @@ static void savegame_load_from_state(savegame_state *state, int version)
 
     tutorial_load_state(state->tutorial_part1, state->tutorial_part2, state->tutorial_part3);
 
-    building_storage_load_state(state->building_storages, version > SAVE_GAME_LAST_STATIC_VERSION);
+    building_storage_load_state(state->building_storages, version);
     scenario_gladiator_revolt_load_state(state->gladiator_revolt);
     trade_routes_load_state(state->trade_route_limit, state->trade_route_traded);
     map_routing_load_state(state->routing_counters);

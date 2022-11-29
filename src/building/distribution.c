@@ -12,21 +12,19 @@ static const int INVENTORY_SEARCH_ORDER[INVENTORY_MAX] = {
     INVENTORY_POTTERY, INVENTORY_FURNITURE, INVENTORY_OIL, INVENTORY_WINE
 };
 
-int building_distribution_is_good_accepted(inventory_type resource, building *b)
+int building_distribution_is_good_accepted(resource_type resource, building *b)
 {
-    int goods_bit = 1 << resource;
-    return !(b->subtype.market_goods & goods_bit);
+    return b->accepted_goods[resource];
 }
 
-void building_distribution_toggle_good_accepted(inventory_type resource, building *b)
+void building_distribution_toggle_good_accepted(resource_type resource, building *b)
 {
-    int goods_bit = 1 << resource;
-    b->subtype.market_goods ^= goods_bit;
+    b->accepted_goods[resource] ^= 1;
 }
 
 void building_distribution_unaccept_all_goods(building *b)
 {
-    b->subtype.market_goods = 0xffff;
+    memset(b->accepted_goods, 0, sizeof(b->accepted_goods));
 }
 
 void building_distribution_update_demands(building *b)
@@ -68,7 +66,7 @@ int building_distribution_fetch(const building *b, inventory_storage_info *info,
 
 static void update_food_resource(inventory_storage_info *info, resource_type resource, const building *b, int distance)
 {
-    if (distance < info->min_distance && b->data.granary.resource_stored[resource]) {
+    if (distance < info->min_distance && b->resources[resource]) {
         info->min_distance = distance;
         info->building_id = b->id;
     }
@@ -168,4 +166,3 @@ int building_distribution_get_raw_material_storages(inventory_storage_info *info
     }
     return 0;
 }
-

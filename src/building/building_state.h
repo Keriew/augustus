@@ -3,13 +3,14 @@
 
 #include "building/building.h"
 #include "core/buffer.h"
+#include "game/resource.h"
 
 #define BUILDING_STATE_ORIGINAL_BUFFER_SIZE 128
 #define BUILDING_STATE_TOURISM_BUFFER_SIZE 134
 #define BUILDING_STATE_VARIANTS_AND_UPGRADES 136
 #define BUILDING_STATE_STRIKES 137
 #define BUILDING_STATE_SICKNESS 142
-#define BUILDING_STATE_CURRENT_BUFFER_SIZE 142
+#define BUILDING_STATE_CURRENT_BUFFER_SIZE 142 + ((RESOURCE_MAX - RESOURCE_MAX_LEGACY) * 2) + RESOURCE_MAX
 
 
 void building_state_save_to_buffer(buffer *buf, const building *b);

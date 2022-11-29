@@ -323,11 +323,12 @@ static void tax_collector_coverage(building *b, int *max_tax_multiplier)
     }
 }
 
-static void distribute_good(building *b, building *market, int stock_wanted, int inventory_resource)
+static void distribute_good(building *b, building *market, int stock_wanted, resource_type resource)
 {
-    if (!building_distribution_is_good_accepted(inventory_resource, market)) {
+    if (!building_distribution_is_good_accepted(resource, market)) {
         return;
     }
+    int inventory_resource = resource_to_inventory(resource);
     int amount_wanted = stock_wanted - b->data.house.inventory[inventory_resource];
     if (market->data.market.inventory[inventory_resource] > 0 && amount_wanted > 0) {
         if (amount_wanted <= market->data.market.inventory[inventory_resource]) {
@@ -377,7 +378,7 @@ static void distribute_market_resources(building *b, building *market)
     if (model->food_types) {
         for (int i = INVENTORY_MIN_FOOD; i < INVENTORY_MAX_FOOD; i++) {
             if (b->data.house.inventory[i] >= max_food_stocks ||
-                !building_distribution_is_good_accepted(i, market)) {
+                !building_distribution_is_good_accepted(resource_from_inventory(i), market)) {
                 continue;
             }
             if (market->data.market.inventory[i] >= max_food_stocks) {
@@ -401,19 +402,19 @@ static void distribute_market_resources(building *b, building *market)
 
     if (model->pottery) {
         market->data.market.pottery_demand = 10;
-        distribute_good(b, market, goods_no * model->pottery, INVENTORY_POTTERY);
+        distribute_good(b, market, goods_no * model->pottery, RESOURCE_POTTERY);
     }
     if (model->furniture) {
         market->data.market.furniture_demand = 10;
-        distribute_good(b, market, goods_no * model->furniture, INVENTORY_FURNITURE);
+        distribute_good(b, market, goods_no * model->furniture, RESOURCE_FURNITURE);
     }
     if (model->oil) {
         market->data.market.oil_demand = 10;
-        distribute_good(b, market, goods_no * model->oil, INVENTORY_OIL);
+        distribute_good(b, market, goods_no * model->oil, RESOURCE_OIL);
     }
     if (model->wine) {
         market->data.market.wine_demand = 10;
-        distribute_good(b, market, goods_no * model->wine, INVENTORY_WINE);
+        distribute_good(b, market, goods_no * model->wine, RESOURCE_WINE);
     }
 }
 

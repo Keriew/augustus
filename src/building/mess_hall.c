@@ -10,17 +10,10 @@ static int get_needed_food(building *mess_hall)
 {
     int food_needed = INVENTORY_FLAG_NONE;
 
-    if (building_distribution_is_good_accepted(INVENTORY_WHEAT, mess_hall)) {
-        inventory_set(&food_needed, INVENTORY_WHEAT);
-    }
-    if (building_distribution_is_good_accepted(INVENTORY_VEGETABLES, mess_hall)) {
-        inventory_set(&food_needed, INVENTORY_VEGETABLES);
-    }
-    if (building_distribution_is_good_accepted(INVENTORY_FRUIT, mess_hall)) {
-        inventory_set(&food_needed, INVENTORY_FRUIT);
-    }
-    if (building_distribution_is_good_accepted(INVENTORY_MEAT, mess_hall)) {
-        inventory_set(&food_needed, INVENTORY_MEAT);
+    for (int i = RESOURCE_MIN_FOOD; i < RESOURCE_MAX_FOOD; i++) {
+        if (building_distribution_is_good_accepted(i, mess_hall)) {
+            inventory_set(&food_needed, resource_to_inventory(i));
+        }
     }
 
     return food_needed;

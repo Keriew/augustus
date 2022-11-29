@@ -12,7 +12,7 @@
 int building_temple_get_storage_destination(building *temple)
 {
     if (building_is_venus_temple(temple->type)) {
-        if (!building_distribution_is_good_accepted(INVENTORY_WINE, temple) || !temple->data.market.wine_demand) {
+        if (!building_distribution_is_good_accepted(RESOURCE_WINE, temple) || !temple->data.market.wine_demand) {
             return 0;
         }
         building *grand_temple = building_get(building_monument_get_venus_gt());
@@ -28,12 +28,13 @@ int building_temple_get_storage_destination(building *temple)
         return 0;
     }
 
-    int inventory = resource_to_inventory(city_resource_ceres_temple_food());
+    resource_type resource = city_resource_ceres_temple_food();
+    int inventory = resource_to_inventory(resource);
     if (inventory == INVENTORY_NONE) {
         return 0;
     }
-    if (!building_distribution_is_good_accepted(inventory, temple) &&
-        (!building_distribution_is_good_accepted(INVENTORY_OIL, temple) || !temple->data.market.oil_demand)) {
+    if (!building_distribution_is_good_accepted(resource, temple) &&
+        (!building_distribution_is_good_accepted(RESOURCE_OIL, temple) || !temple->data.market.oil_demand)) {
         return 0;
     }
 
@@ -43,12 +44,12 @@ int building_temple_get_storage_destination(building *temple)
         return 0;
     }
 
-    if (building_distribution_is_good_accepted(inventory, temple) &&
+    if (building_distribution_is_good_accepted(resource, temple) &&
         data[inventory].building_id && temple->data.market.inventory[inventory] < MAX_FOOD) {
         temple->data.market.fetch_inventory_id = inventory;
         return data[inventory].building_id;
     }
-    if (building_distribution_is_good_accepted(INVENTORY_OIL, temple) && temple->data.market.oil_demand &&
+    if (building_distribution_is_good_accepted(RESOURCE_OIL, temple) && temple->data.market.oil_demand &&
         data[INVENTORY_OIL].building_id && temple->data.market.inventory[INVENTORY_OIL] < BASELINE_STOCK) {
         temple->data.market.fetch_inventory_id = INVENTORY_OIL;
         return data[INVENTORY_OIL].building_id;

@@ -93,32 +93,32 @@ void empire_object_load(buffer *buf, int version)
         int old_buys_resource[8];
         if (version <= SCENARIO_LAST_UNVERSIONED) {
             for (int r = 0; r < 10; r++) {
-                old_sells_resource[r] = buffer_read_u8(buf);
+                old_sells_resource[r] = resource_remap(buffer_read_u8(buf));
             }
             buffer_skip(buf, 2);
             for (int r = 0; r < 8; r++) {
-                old_buys_resource[r] = buffer_read_u8(buf);
+                old_buys_resource[r] = resource_remap(buffer_read_u8(buf));
             }
         } else if (version <= SCENARIO_LAST_EMPIRE_RESOURCES_U8) {
-            for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-                full->city_sells_resource[r] = buffer_read_u8(buf);
+            for (int r = RESOURCE_MIN; r < RESOURCE_MAX_LEGACY; r++) {
+                full->city_sells_resource[resource_remap(r)] = buffer_read_u8(buf);
             }
-            for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-                full->city_buys_resource[r] = buffer_read_u8(buf);
+            for (int r = RESOURCE_MIN; r < RESOURCE_MAX_LEGACY; r++) {
+                full->city_buys_resource[resource_remap(r)] = buffer_read_u8(buf);
             }
         } else if (version <= SCENARIO_LAST_EMPIRE_RESOURCES_ALWAYS_WRITE) {
-            for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-                full->city_sells_resource[r] = buffer_read_i32(buf);
+            for (int r = RESOURCE_MIN; r < RESOURCE_MAX_LEGACY; r++) {
+                full->city_sells_resource[resource_remap(r)] = buffer_read_i32(buf);
             }
-            for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-                full->city_buys_resource[r] = buffer_read_i32(buf);
+            for (int r = RESOURCE_MIN; r < RESOURCE_MAX_LEGACY; r++) {
+                full->city_buys_resource[resource_remap(r)] = buffer_read_i32(buf);
             }
         } else if (obj->type == EMPIRE_OBJECT_CITY) {
-            for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-                full->city_sells_resource[r] = buffer_read_i16(buf);
+            for (int r = RESOURCE_MIN; r < resource_total_mapped(); r++) {
+                full->city_sells_resource[resource_remap(r)] = buffer_read_i16(buf);
             }
-            for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-                full->city_buys_resource[r] = buffer_read_i16(buf);
+            for (int r = RESOURCE_MIN; r < resource_total_mapped(); r++) {
+                full->city_buys_resource[resource_remap(r)] = buffer_read_i16(buf);
             }
         }
         obj->invasion_path_id = buffer_read_u8(buf);
@@ -127,7 +127,7 @@ void empire_object_load(buffer *buf, int version)
             int trade40 = buffer_read_u16(buf);
             int trade25 = buffer_read_u16(buf);
             int trade15 = buffer_read_u16(buf);
-            for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+            for (int r = RESOURCE_MIN; r < RESOURCE_MAX_LEGACY; r++) {
                 int resource_flag = 1 << r;
                 int amount = 0;
                 if (trade40 & resource_flag) {
