@@ -128,7 +128,6 @@ static void prepare_map_for_editing(void)
     map_tiles_update_all_aqueducts(0);
     map_natives_init_editor();
     map_routing_update_all();
-    resource_init();
 
     city_view_init();
     game_state_unpause();

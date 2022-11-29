@@ -65,21 +65,8 @@ static resource_data resource_info[RESOURCE_MAX + RESOURCE_SPECIAL] = {
     [RESOURCE_TROOPS] =     { .type = RESOURCE_TROOPS,     .inventory_id = INVENTORY_NONE,       .flags = RESOURCE_FLAG_SPECIAL }
 };
 
-static int resource_image_offset(resource_type resource, int type)
-{
-    return 0;
-    if (resource == RESOURCE_MEAT && scenario_building_allowed(BUILDING_WHARF)) {
-        switch (type) {
-       //     case RESOURCE_IMAGE_STORAGE: return 40;
-        //    case RESOURCE_IMAGE_CART: return 648;
-         //   case RESOURCE_IMAGE_FOOD_CART: return 8;
-          //  case RESOURCE_IMAGE_ICON: return 11;
-            default: return 0;
-        }
-    } else {
-        return 0;
-    }
-}
+// TODO when separating fish from meat this goes to the main resource array
+static resource_data fish_resource = { .type = RESOURCE_FISH, .inventory_id = INVENTORY_FISH, .flags = RESOURCE_FLAG_FOOD, .default_trade_price = {  44,  36 } };
 
 int resource_is_food(resource_type resource)
 {
@@ -129,19 +116,22 @@ void resource_init(void)
         info->image.editor.empire = image_group(GROUP_EDITOR_EMPIRE_RESOURCES) + i;
     }
 
-    if (scenario_building_allowed(BUILDING_WHARF)) {
-        resource_data *info = &resource_info[RESOURCE_FISH];
-        info->text = lang_get_string(CUSTOM_TRANSLATION, TR_RESOURCE_FISH);
-        info->image.cart.single_load += 648;
-        info->image.cart.multiple_loads += 8;
-        info->image.cart.eight_loads += 8;
-        info->image.storage += 40;
-        info->image.icon += 11;
-    }
+    fish_resource.text = lang_get_string(CUSTOM_TRANSLATION, TR_RESOURCE_FISH);
+    fish_resource.image.cart.single_load = image_group(GROUP_FIGURE_CARTPUSHER_CART) + 696;
+    fish_resource.image.cart.multiple_loads = image_group(GROUP_FIGURE_CARTPUSHER_CART_MULTIPLE_FOOD) + 56;
+    fish_resource.image.cart.eight_loads = image_group(GROUP_FIGURE_CARTPUSHER_CART_MULTIPLE_FOOD) + 88;
+    fish_resource.image.storage = image_group(GROUP_BUILDING_WAREHOUSE_STORAGE_FILLED) + 60;
+    fish_resource.image.icon = image_group(GROUP_RESOURCE_ICONS) + 17;
+    fish_resource.image.empire = image_group(GROUP_EMPIRE_RESOURCES) + 17;
+    fish_resource.image.editor.icon = image_group(GROUP_EDITOR_RESOURCE_ICONS) + 17;
+    fish_resource.image.editor.empire = image_group(GROUP_EDITOR_EMPIRE_RESOURCES) + 17;
 }
 
 const resource_data *resource_get_data(resource_type resource)
 {
+    if (resource == RESOURCE_MEAT && scenario_building_allowed(BUILDING_WHARF)) {
+        return &fish_resource;
+    }
     return &resource_info[resource];
 }
 

@@ -152,7 +152,6 @@ static void initialize_scenario_data(const uint8_t *scenario_name)
 
     map_natives_init();
 
-    resource_init();
     city_view_init();
 
     figure_create_fishing_points();
@@ -258,7 +257,6 @@ static void initialize_saved_game(void)
 
     scenario_map_init();
 
-    resource_init();
     city_view_init();
 
     map_routing_update_all();
