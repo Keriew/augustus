@@ -5,9 +5,30 @@
 #include "core/image_group_editor.h"
 #include "game/save_version.h"
 #include "scenario/building.h"
+#include "translation/translation.h"
 
 #define NUM_SPECIAL_RESOURCES 2
 #define RESOURCE_MAPPING_MAX RESOURCE_MAX + NUM_SPECIAL_RESOURCES
+
+enum {
+    ORIGINAL_WHEAT_ID = 1,
+    ORIGINAL_VEGETABLES_ID = 2,
+    ORIGINAL_FRUIT_ID = 3,
+    ORIGINAL_OLIVES_ID = 4,
+    ORIGINAL_VINES_ID = 5,
+    ORIGINAL_MEAT_ID = 6,
+    ORIGINAL_WINE_ID = 7,
+    ORIGINAL_OIL_ID = 8,
+    ORIGINAL_IRON_ID = 9,
+    ORIGINAL_TIMBER_ID = 10,
+    ORIGINAL_CLAY_ID = 11,
+    ORIGINAL_MARBLE_ID = 12,
+    ORIGINAL_WEAPONS_ID = 13,
+    ORIGINAL_FURNITURE_ID = 14,
+    ORIGINAL_POTTERY_ID = 15,
+    ORIGINAL_DENARII_ID = 16,
+    ORIGINAL_TROOPS_ID = 17
+};
 
 static const resource_type resource_mappings[][RESOURCE_MAPPING_MAX] = {
     {
@@ -85,34 +106,37 @@ workshop_type resource_to_workshop_type(resource_type resource)
 
 void resource_init(void)
 {
-    // storage:
-    // image_group(GROUP_BUILDING_WAREHOUSE_STORAGE_FILLED) +
-    //4 * (resource - 1) +
-        //resource_image_offset(b->subtype.warehouse_resource_id, RESOURCE_IMAGE_STORAGE)
+    int food_index = 0;
+    int good_index = 0;
 
-    // cartpusher:
-    //image_group(GROUP_FIGURE_CARTPUSHER_CART) +
-        //8 * f->resource_id + resource_image_offset(f->resource_id, RESOURCE_IMAGE_CART);
-    // single 4650 (starts empty)
-    // 8 food 5266
-    // multiple goods 8288
-//    static const int CART_OFFSET_MULTIPLE_LOADS_FOOD[] = { 0, 0, 8, 16, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-//    static const int CART_OFFSET_MULTIPLE_LOADS_NON_FOOD[] = { 0, 0, 0, 0, 0, 8, 0, 16, 24, 32, 40, 48, 56, 64, 72, 80 };
-//    static const int CART_OFFSET_8_LOADS_FOOD[] = { 0, 40, 48, 56, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    for (int i = RESOURCE_MIN; i < RESOURCE_MAX_LEGACY; i++) {
+        resource_data *info = &resource_info[resource_mappings[0][i]];
+        info->text = lang_get_string(23, i);
+        info->image.cart.single_load = image_group(GROUP_FIGURE_CARTPUSHER_CART) + 8 * i;
+        if (resource_is_food(info->type)) {
+            info->image.cart.multiple_loads = image_group(GROUP_FIGURE_CARTPUSHER_CART_MULTIPLE_FOOD) + 8 * food_index;
+            info->image.cart.eight_loads = image_group(GROUP_FIGURE_CARTPUSHER_CART_MULTIPLE_FOOD) + 32 + 8 * (food_index + 1);
+            food_index++;
+        } else {
+            info->image.cart.multiple_loads = image_group(GROUP_FIGURE_CARTPUSHER_CART_MULTIPLE_RESOURCE) + 8 * good_index;
+            info->image.cart.eight_loads = image_group(GROUP_FIGURE_CARTPUSHER_CART_MULTIPLE_RESOURCE) + 8 * good_index;
+            good_index++;
+        }
+        info->image.empire = image_group(GROUP_EMPIRE_RESOURCES) + i;
+        info->image.icon = image_group(GROUP_RESOURCE_ICONS) + i;
+        info->image.storage = image_group(GROUP_BUILDING_WAREHOUSE_STORAGE_FILLED) + 4 * (i - 1);
+        info->image.editor.icon = image_group(GROUP_EDITOR_RESOURCE_ICONS) + i;
+        info->image.editor.empire = image_group(GROUP_EDITOR_EMPIRE_RESOURCES) + i;
+    }
 
-    resource_data *info = &resource_info[RESOURCE_WHEAT];
-    info->text = lang_get_string(23, RESOURCE_WHEAT);
-    info->image.cart.single_load = image_group(GROUP_FIGURE_CARTPUSHER_CART) + 8;
-    info->image.cart.multiple_loads = image_group(GROUP_FIGURE_CARTPUSHER_CART_MULTIPLE_FOOD);
-    info->image.cart.eight_loads = image_group(GROUP_FIGURE_CARTPUSHER_CART_MULTIPLE_FOOD) + 40;
-    info->image.empire = image_group(GROUP_EMPIRE_RESOURCES) + 1;
-    info->image.icon = image_group(GROUP_RESOURCE_ICONS) + 1;
-    info->image.storage = image_group(GROUP_BUILDING_WAREHOUSE_STORAGE_FILLED);
-    info->image.editor.icon = image_group(GROUP_EDITOR_RESOURCE_ICONS) + 1;
-    info->image.editor.empire = image_group(GROUP_EDITOR_EMPIRE_RESOURCES) + 1;
-
-    for (int i = 0; i < RESOURCE_MAX + RESOURCE_SPECIAL; i++) {
-        
+    if (scenario_building_allowed(BUILDING_WHARF)) {
+        resource_data *info = &resource_info[RESOURCE_FISH];
+        info->text = lang_get_string(CUSTOM_TRANSLATION, TR_RESOURCE_FISH);
+        info->image.cart.single_load += 648;
+        info->image.cart.multiple_loads += 8;
+        info->image.cart.eight_loads += 8;
+        info->image.storage += 40;
+        info->image.icon += 11;
     }
 }
 
