@@ -24,24 +24,24 @@ static struct {
 } mapping = { resource_mappings[0], RESOURCE_MAX, RESOURCE_MAX_FOOD_LEGACY };
 
 static resource_data resource_info[RESOURCE_MAX + RESOURCE_SPECIAL] = {
-    [RESOURCE_NONE] = { type: RESOURCE_NONE, inventory_id: INVENTORY_NONE },
-    [RESOURCE_WHEAT] = { type: RESOURCE_WHEAT, inventory_id: INVENTORY_WHEAT, flags: RESOURCE_FLAG_FOOD, default_trade_price: { 28, 22 } },
-    [RESOURCE_VEGETABLES] = { type: RESOURCE_VEGETABLES, inventory_id: INVENTORY_VEGETABLES, flags: RESOURCE_FLAG_FOOD, default_trade_price: { 38, 30 } },
-    [RESOURCE_FRUIT] = { type: RESOURCE_FRUIT, inventory_id : INVENTORY_VEGETABLES,flags : RESOURCE_FLAG_FOOD, default_trade_price : { 38, 30 } },
-    [RESOURCE_OLIVES] = { type: RESOURCE_OLIVES, inventory_id : INVENTORY_NONE, flags : RESOURCE_FLAG_RAW_MATERIAL, default_trade_price : { 42, 34 } },
-    [RESOURCE_VINES] = { type: RESOURCE_VINES, inventory_id : INVENTORY_NONE, flags : RESOURCE_FLAG_RAW_MATERIAL, default_trade_price : { 44, 36 } },
-    [RESOURCE_MEAT] = { type: RESOURCE_MEAT, inventory_id : INVENTORY_VEGETABLES,flags : RESOURCE_FLAG_FOOD, default_trade_price : { 44, 36 } },
-    [RESOURCE_WINE] = { type: RESOURCE_WINE, inventory_id : INVENTORY_VEGETABLES,flags : RESOURCE_FLAG_GOOD, default_trade_price : { 215, 160 } },
-    [RESOURCE_OIL] = { type: RESOURCE_OIL, inventory_id : INVENTORY_VEGETABLES,flags : RESOURCE_FLAG_GOOD, default_trade_price : { 180, 140 } },
-    [RESOURCE_IRON] = { type: RESOURCE_IRON, inventory_id : INVENTORY_NONE, flags : RESOURCE_FLAG_RAW_MATERIAL, default_trade_price : { 60, 40 } },
-    [RESOURCE_TIMBER] = { type: RESOURCE_TIMBER, inventory_id : INVENTORY_NONE, flags : RESOURCE_FLAG_RAW_MATERIAL, default_trade_price : { 50, 35 } },
-    [RESOURCE_CLAY] = { type: RESOURCE_CLAY, inventory_id : INVENTORY_NONE, flags : RESOURCE_FLAG_RAW_MATERIAL, default_trade_price : { 40, 30 } },
-    [RESOURCE_MARBLE] = { type: RESOURCE_MARBLE, inventory_id : INVENTORY_NONE, flags : RESOURCE_FLAG_RAW_MATERIAL, default_trade_price : { 200, 140 } },
-    [RESOURCE_WEAPONS] = { type: RESOURCE_WEAPONS, inventory_id : INVENTORY_NONE, flags : RESOURCE_FLAG_GOOD, default_trade_price : { 250, 180 } },
-    [RESOURCE_FURNITURE] = { type: RESOURCE_FURNITURE, inventory_id : INVENTORY_VEGETABLES, flags : RESOURCE_FLAG_GOOD, default_trade_price : { 200, 150 } },
-    [RESOURCE_POTTERY] = { type: RESOURCE_POTTERY, inventory_id : INVENTORY_VEGETABLES, flags : RESOURCE_FLAG_GOOD, default_trade_price : { 180, 140 } },
-    [RESOURCE_DENARII] = { type: RESOURCE_DENARII, inventory_id : INVENTORY_NONE, flags : RESOURCE_FLAG_SPECIAL },
-    [RESOURCE_TROOPS] = { type: RESOURCE_TROOPS, inventory_id : INVENTORY_NONE, flags : RESOURCE_FLAG_SPECIAL }
+    [RESOURCE_NONE] =       { .type = RESOURCE_NONE,       .inventory_id = INVENTORY_NONE },
+    [RESOURCE_WHEAT] =      { .type = RESOURCE_WHEAT,      .inventory_id = INVENTORY_WHEAT,      .flags = RESOURCE_FLAG_FOOD,         .default_trade_price = {  28,  22 } },
+    [RESOURCE_VEGETABLES] = { .type = RESOURCE_VEGETABLES, .inventory_id = INVENTORY_VEGETABLES, .flags = RESOURCE_FLAG_FOOD,         .default_trade_price = {  38,  30 } },
+    [RESOURCE_FRUIT] =      { .type = RESOURCE_FRUIT,      .inventory_id = INVENTORY_FRUIT,      .flags = RESOURCE_FLAG_FOOD,         .default_trade_price = {  38,  30 } },
+    [RESOURCE_OLIVES] =     { .type = RESOURCE_OLIVES,     .inventory_id = INVENTORY_NONE,       .flags = RESOURCE_FLAG_RAW_MATERIAL, .default_trade_price = {  42,  34 } },
+    [RESOURCE_VINES] =      { .type = RESOURCE_VINES,      .inventory_id = INVENTORY_NONE,       .flags = RESOURCE_FLAG_RAW_MATERIAL, .default_trade_price = {  44,  36 } },
+    [RESOURCE_MEAT] =       { .type = RESOURCE_MEAT,       .inventory_id = INVENTORY_MEAT,       .flags = RESOURCE_FLAG_FOOD,         .default_trade_price = {  44,  36 } },
+    [RESOURCE_WINE] =       { .type = RESOURCE_WINE,       .inventory_id = INVENTORY_WINE,       .flags = RESOURCE_FLAG_GOOD,         .default_trade_price = { 215, 160 } },
+    [RESOURCE_OIL] =        { .type = RESOURCE_OIL,        .inventory_id = INVENTORY_OIL,        .flags = RESOURCE_FLAG_GOOD,         .default_trade_price = { 180, 140 } },
+    [RESOURCE_IRON] =       { .type = RESOURCE_IRON,       .inventory_id = INVENTORY_NONE,       .flags = RESOURCE_FLAG_RAW_MATERIAL, .default_trade_price = {  60,  40 } },
+    [RESOURCE_TIMBER] =     { .type = RESOURCE_TIMBER,     .inventory_id = INVENTORY_NONE,       .flags = RESOURCE_FLAG_RAW_MATERIAL, .default_trade_price = {  50,  35 } },
+    [RESOURCE_CLAY] =       { .type = RESOURCE_CLAY,       .inventory_id = INVENTORY_NONE,       .flags = RESOURCE_FLAG_RAW_MATERIAL, .default_trade_price = {  40,  30 } },
+    [RESOURCE_MARBLE] =     { .type = RESOURCE_MARBLE,     .inventory_id = INVENTORY_NONE,       .flags = RESOURCE_FLAG_RAW_MATERIAL, .default_trade_price = { 200, 140 } },
+    [RESOURCE_WEAPONS] =    { .type = RESOURCE_WEAPONS,    .inventory_id = INVENTORY_NONE,       .flags = RESOURCE_FLAG_GOOD,         .default_trade_price = { 250, 180 } },
+    [RESOURCE_FURNITURE] =  { .type = RESOURCE_FURNITURE,  .inventory_id = INVENTORY_FURNITURE,  .flags = RESOURCE_FLAG_GOOD,         .default_trade_price = { 200, 150 } },
+    [RESOURCE_POTTERY] =    { .type = RESOURCE_POTTERY,    .inventory_id = INVENTORY_POTTERY,    .flags = RESOURCE_FLAG_GOOD,         .default_trade_price = { 180, 140 } },
+    [RESOURCE_DENARII] =    { .type = RESOURCE_DENARII,    .inventory_id = INVENTORY_NONE,       .flags = RESOURCE_FLAG_SPECIAL },
+    [RESOURCE_TROOPS] =     { .type = RESOURCE_TROOPS,     .inventory_id = INVENTORY_NONE,       .flags = RESOURCE_FLAG_SPECIAL }
 };
 
 static int resource_image_offset(resource_type resource, int type)
