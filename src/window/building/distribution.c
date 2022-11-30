@@ -917,7 +917,7 @@ void window_building_draw_warehouse(building_info_context *c)
             int amount = building_warehouse_get_amount(b, r);
             image_draw(resource_get_data(r)->image.icon, x, y, COLOR_MASK_NONE, SCALE_NONE);
             int width = text_draw_number(amount, '@', " ", x + 24, y + 7, FONT_SMALL_PLAIN, COLOR_FONT_PLAIN);
-            text_draw(resource_get_data(r)->text, x + 24 + width, y + 7, FONT_SMALL_PLAIN, COLOR_MASK_NONE);
+            text_draw(resource_get_data(r)->text, x + 24 + width, y + 7, FONT_SMALL_PLAIN, COLOR_FONT_PLAIN);
         }
     }
     inner_panel_draw(c->x_offset + 16, c->y_offset + 168, c->width_blocks - 2, 6);

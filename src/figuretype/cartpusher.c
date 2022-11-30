@@ -28,7 +28,7 @@ static int cartpusher_carries_food(figure *f)
 
 static void set_cart_graphic(figure *f, int always_carries_resource)
 {
-    int carried = f->loads_sold_or_carrying + always_carries_resource;
+    int carried = f->loads_sold_or_carrying == 0 ? always_carries_resource : f->loads_sold_or_carrying;
     if (carried == 0 || f->resource_id == RESOURCE_NONE) {
         f->cart_image_id = image_group(GROUP_FIGURE_CARTPUSHER_CART);
     } else if (carried == 1) {
@@ -309,7 +309,7 @@ void figure_cartpusher_action(figure *f)
             figure_combat_handle_corpse(f);
             break;
         case FIGURE_ACTION_20_CARTPUSHER_INITIAL:
-            set_cart_graphic(f, 0);
+            set_cart_graphic(f, 1);
             if (!map_routing_citizen_is_passable(f->grid_offset)) {
                 f->state = FIGURE_STATE_DEAD;
             }
