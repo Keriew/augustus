@@ -64,7 +64,6 @@ void map_figure_delete(figure *f)
         f->next_figure_id_on_same_tile = 0;
         return;
     }
-
     if (figures.items[f->grid_offset] == f->id) {
         figures.items[f->grid_offset] = f->next_figure_id_on_same_tile;
     } else {

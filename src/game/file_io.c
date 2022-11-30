@@ -59,11 +59,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define COMPRESS_BUFFER_SIZE 3000000
+#define COMPRESS_BUFFER_SIZE 1000000
 #define UNCOMPRESSED 0x80000000
 #define PIECE_SIZE_DYNAMIC 0
 
-static const int SAVE_GAME_CURRENT_VERSION = 0x8f;
+static const int SAVE_GAME_CURRENT_VERSION = 0x90;
 
 static const int SAVE_GAME_LAST_ORIGINAL_LIMITS_VERSION = 0x66;
 static const int SAVE_GAME_LAST_SMALLER_IMAGE_ID_VERSION = 0x76;
@@ -87,8 +87,10 @@ static const int SAVE_GAME_LAST_EMPIRE_RESOURCES_ALWAYS_WRITE = 0x8d;
 // the difference between this version and UNVERSIONED_SCENARIOS above is this one actually saves the scenario version
 // in the data, whereas the previous one did a lookup based on the save version
 static const int SAVE_GAME_LAST_NO_SCENARIO_VERSION = 0x8e;
+static const int SAVE_GAME_LAST_UNKNOWN_UNUSED_CITY_DATA = 0x8f;
 
-static char compress_buffer[COMPRESS_BUFFER_SIZE];
+static char *compress_buffer;
+int compress_buffer_size;
 
 typedef struct {
     buffer buf;
@@ -223,6 +225,7 @@ typedef struct {
         int monument_deliveries;
         int enemy_armies;
         int scenario;
+        int graph_order;
     } piece_sizes;
     struct {
         int culture1;
@@ -237,6 +240,7 @@ typedef struct {
     int has_barracks_tower_sentry_request;
     int has_custom_empires;
     int has_scenario_version;
+    int has_city_faction_info;
 } savegame_version_data;
 
 static struct {
@@ -356,6 +360,7 @@ static void get_version_data(savegame_version_data *version_data, int version)
     version_data->piece_sizes.building_storages = 6400 * multiplier;
     version_data->piece_sizes.monument_deliveries = version > SAVE_GAME_LAST_STATIC_MONUMENT_DELIVERIES_VERSION ? PIECE_SIZE_DYNAMIC : 3200;
     version_data->piece_sizes.enemy_armies = version > SAVE_GAME_LAST_ENEMY_ARMIES_BUFFER_BUG ? (MAX_ENEMY_ARMIES * sizeof(int) * 9) : 900;
+    version_data->piece_sizes.graph_order = version > SAVE_GAME_LAST_UNKNOWN_UNUSED_CITY_DATA ? 4 : 8;
 
     version_data->building_counts.culture1 = 132 * count_multiplier;
     version_data->building_counts.culture2 = 32 * count_multiplier;
@@ -376,11 +381,28 @@ static void get_version_data(savegame_version_data *version_data, int version)
         version_data->has_custom_empires = 1;
     }
     version_data->has_scenario_version = version > SAVE_GAME_LAST_NO_SCENARIO_VERSION;
+    version_data->has_city_faction_info = version <= SAVE_GAME_LAST_UNKNOWN_UNUSED_CITY_DATA;
+}
+
+static void prepare_compressed_buffer(void)
+{
+    compress_buffer = malloc(sizeof(char) * COMPRESS_BUFFER_SIZE);
+    if (compress_buffer) {
+        compress_buffer_size = COMPRESS_BUFFER_SIZE;
+    }
+}
+
+static void free_compressed_buffer(void)
+{
+    free(compress_buffer);
+    compress_buffer_size = 0;
 }
 
 static void init_savegame_data(int version)
 {
     clear_savegame_pieces();
+
+    prepare_compressed_buffer();
 
     savegame_version_data version_data;
     get_version_data(&version_data, version);
@@ -413,9 +435,13 @@ static void init_savegame_data(int version)
     state->formations = create_savegame_piece(version_data.piece_sizes.formations, 1);
     state->formation_totals = create_savegame_piece(12, 0);
     state->city_data = create_savegame_piece(36136, 1);
-    state->city_faction_unknown = create_savegame_piece(2, 0);
+    if (version_data.has_city_faction_info) {
+        state->city_faction_unknown = create_savegame_piece(2, 0);
+    }
     state->player_name = create_savegame_piece(64, 0);
-    state->city_faction = create_savegame_piece(4, 0);
+    if (version_data.has_city_faction_info) {
+        state->city_faction = create_savegame_piece(4, 0);
+    }
     state->buildings = create_savegame_piece(version_data.piece_sizes.buildings, 1);
     state->city_view_orientation = create_savegame_piece(4, 0);
     state->game_time = create_savegame_piece(20, 0);
@@ -423,7 +449,7 @@ static void init_savegame_data(int version)
     state->random_iv = create_savegame_piece(8, 0);
     state->city_view_camera = create_savegame_piece(8, 0);
     state->building_count_culture1 = create_savegame_piece(version_data.building_counts.culture1, 0);
-    state->city_graph_order = create_savegame_piece(8, 0);
+    state->city_graph_order = create_savegame_piece(version_data.piece_sizes.graph_order, 0);
     state->emperor_change_time = create_savegame_piece(8, 0);
     state->empire = create_savegame_piece(12, 0);
     state->empire_cities = create_savegame_piece(2706, 1);
@@ -556,12 +582,11 @@ static void savegame_load_from_state(savegame_state *state, int version)
     formations_load_state(state->formations, state->formation_totals, version);
 
     city_data_load_state(state->city_data,
-        state->city_faction,
-        state->city_faction_unknown,
         state->city_graph_order,
         state->city_entry_exit_xy,
         state->city_entry_exit_grid_offset,
-        version > SAVE_GAME_LAST_JOINED_IMPORT_EXPORT_VERSION);
+        version > SAVE_GAME_LAST_JOINED_IMPORT_EXPORT_VERSION,
+        version > SAVE_GAME_LAST_UNKNOWN_UNUSED_CITY_DATA);
 
     building_load_state(state->buildings,
         state->building_extra_sequence,
@@ -654,8 +679,6 @@ static void savegame_save_to_state(savegame_state *state)
     formations_save_state(state->formations, state->formation_totals);
 
     city_data_save_state(state->city_data,
-        state->city_faction,
-        state->city_faction_unknown,
         state->city_graph_order,
         state->city_entry_exit_xy,
         state->city_entry_exit_grid_offset);
@@ -757,8 +780,13 @@ static void write_int32(FILE *fp, int value)
 
 static int read_compressed_chunk(FILE *fp, void *buffer, int bytes_to_read, int read_as_zlib)
 {
-    if (bytes_to_read > COMPRESS_BUFFER_SIZE) {
-        return 0;
+    if (bytes_to_read > compress_buffer_size) {
+        char *new_compress_buffer = realloc(compress_buffer, sizeof(char) * bytes_to_read);
+        if (!new_compress_buffer) {
+            return 0;
+        }
+        compress_buffer = new_compress_buffer;
+        compress_buffer_size = bytes_to_read;
     }
     int input_size = read_int32(fp);
     if ((unsigned int)input_size == UNCOMPRESSED) {
@@ -785,8 +813,13 @@ static int read_compressed_savegame_chunk(FILE *fp, void *buffer, int bytes_to_r
 
 static int write_compressed_chunk(FILE *fp, void *buffer, int bytes_to_write)
 {
-    if (bytes_to_write > COMPRESS_BUFFER_SIZE) {
-        return 0;
+    if (bytes_to_write > compress_buffer_size) {
+        char *new_compress_buffer = realloc(compress_buffer, sizeof(char) * bytes_to_write);
+        if (!new_compress_buffer) {
+            return 0;
+        }
+        compress_buffer = new_compress_buffer;
+        compress_buffer_size = bytes_to_write;
     }
     int output_size = 0;
     if (zlib_helper_compress(buffer, bytes_to_write, compress_buffer, COMPRESS_BUFFER_SIZE, &output_size)) {
@@ -1055,6 +1088,7 @@ int game_file_io_read_saved_game(const char *filename, int offset)
         log_info("Savegame version", 0, version);
         init_savegame_data(version);
         result = savegame_read_from_file(fp, version);
+        free_compressed_buffer();
     }
     file_close(fp);
     if (!result) {
@@ -1213,9 +1247,13 @@ static int savegame_read_file_info(FILE *fp, saved_game_info *info, int version)
         return 0;
     }
 
-    skip_piece(fp, 2, 0);
+    if (version_data.has_city_faction_info) {
+        skip_piece(fp, 2, 0);
+    }
     skip_piece(fp, 64, 0);
-    skip_piece(fp, 4, 0);
+    if (version_data.has_city_faction_info) {
+        skip_piece(fp, 4, 0);
+    }
 
     if (!prepare_dynamic_piece(fp, &buildings) || !read_compressed_savegame_chunk(fp, buildings.buf.data, buildings.buf.size, version)) {
         return 0;
@@ -1231,7 +1269,7 @@ static int savegame_read_file_info(FILE *fp, saved_game_info *info, int version)
     skip_piece(fp, 8, 0);
     skip_piece(fp, 8, 0);
     skip_piece(fp, version_data.building_counts.culture1, 0);
-    skip_piece(fp, 8, 0);
+    skip_piece(fp, version_data.piece_sizes.graph_order, 0);
     skip_piece(fp, 8, 0);
     skip_piece(fp, 12, 0);
     skip_piece(fp, 2706, 1);
@@ -1259,7 +1297,8 @@ static int savegame_read_file_info(FILE *fp, saved_game_info *info, int version)
 
     info->custom_mission = read_int32(fp);
 
-    city_data_load_basic_info(&city_data.buf, &info->population, &info->treasury, &minimap_data.caravanserai_id);
+    city_data_load_basic_info(&city_data.buf, &info->population, &info->treasury, &minimap_data.caravanserai_id,
+        version > SAVE_GAME_LAST_UNKNOWN_UNUSED_CITY_DATA);
     game_time_load_basic_info(&game_time.buf, &info->month, &info->year);
 
     int grid_start;
@@ -1308,7 +1347,9 @@ int game_file_io_read_saved_game_info(const char *filename, saved_game_info *inf
     int result = 0;
     int version = get_savegame_version(fp);
     if (version && version <= SAVE_GAME_CURRENT_VERSION) {
+        prepare_compressed_buffer();
         result = savegame_read_file_info(fp, info, version);
+        free_compressed_buffer();
     }
     file_close(fp);
     return result;
@@ -1327,6 +1368,7 @@ int game_file_io_write_saved_game(const char *filename)
         return 0;
     }
     savegame_write_to_file(fp);
+    free_compressed_buffer();
     file_close(fp);
     return 1;
 }

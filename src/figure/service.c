@@ -8,6 +8,7 @@
 #include "city/finance.h"
 #include "core/config.h"
 #include "core/random.h"
+#include "figure/roamer_preview.h"
 #include "figuretype/crime.h"
 #include "game/resource.h"
 #include "game/time.h"

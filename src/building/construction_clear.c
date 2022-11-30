@@ -4,6 +4,7 @@
 #include "building/monument.h"
 #include "city/warning.h"
 #include "core/config.h"
+#include "figure/roamer_preview.h"
 #include "figuretype/migrant.h"
 #include "game/undo.h"
 #include "graphics/window.h"
@@ -116,6 +117,10 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
                     b->figure_id = homeless->id;
                 }
                 if (b->state != BUILDING_STATE_DELETED_BY_PLAYER) {
+                    if (b->type == BUILDING_SHIPYARD && b->figure_id) {
+                        figure *f = figure_get(b->figure_id);
+                        f->state = FIGURE_STATE_DEAD;
+                    }
                     items_placed++;
                     game_undo_add_building(b);
                 }
@@ -191,6 +196,7 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
         map_routing_update_walls();
         map_routing_update_water();
         building_update_state();
+        figure_roamer_preview_reset(BUILDING_CLEAR_LAND);
         window_invalidate();
     }
     return items_placed;
