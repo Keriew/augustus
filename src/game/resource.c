@@ -123,6 +123,11 @@ void resource_init(void)
     fish_resource.image.empire = image_group(GROUP_EMPIRE_RESOURCES) + 17;
     fish_resource.image.editor.icon = image_group(GROUP_EDITOR_RESOURCE_ICONS) + 17;
     fish_resource.image.editor.empire = image_group(GROUP_EDITOR_EMPIRE_RESOURCES) + 17;
+
+    resource_info[RESOURCE_DENARII].image.icon = image_group(GROUP_RESOURCE_ICONS) + 16;
+    resource_info[RESOURCE_DENARII].text = lang_get_string(23, 16);
+
+    resource_info[RESOURCE_TROOPS].text = lang_get_string(23, 17);
 }
 
 const resource_data *resource_get_data(resource_type resource)
