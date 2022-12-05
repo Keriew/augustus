@@ -52,7 +52,7 @@ resource_type building_distribution_fetch(const building *b, inventory_storage_i
         min_stock = 1;
     }
     for (resource_type current_resource = RESOURCE_MIN; current_resource < RESOURCE_MAX; current_resource++) {
-        if (!resource_is_good(current_resource) || !resource_get_data(current_resource)->is_inventory) {
+        if (!resource_get_data(current_resource)->is_inventory) {
             continue;
         }
         if (allowed[current_resource] &&
