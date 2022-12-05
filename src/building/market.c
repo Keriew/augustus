@@ -40,16 +40,20 @@ int building_market_get_max_goods_stock(building *market)
     return max_stock;
 }
 
+static int is_good_wanted(building *market, resource_type resource)
+{
+    return market->accepted_goods[resource] > 1;
+}
+
 void building_market_get_needed_inventory(building *market, int needed[RESOURCE_MAX])
 {
     needed[RESOURCE_NONE] = 0;
-    if (!scenario_property_rome_supplies_wheat()) {
-        for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX_FOOD; r++) {
-            needed[r] = resource_get_data(r)->is_inventory && building_distribution_is_good_accepted(r, market);
-        }
+    for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX_FOOD; r++) {
+        needed[r] = !scenario_property_rome_supplies_wheat() &&
+            resource_get_data(r)->is_inventory && building_distribution_is_good_accepted(r, market);
     }
     for (resource_type r = RESOURCE_MAX_FOOD; r < RESOURCE_MAX; r++) {
-        needed[r] = resource_get_data(r)->is_inventory && building_distribution_is_good_accepted(r, market);
+        needed[r] = resource_get_data(r)->is_inventory && is_good_wanted(market, r);
     }
 }
 

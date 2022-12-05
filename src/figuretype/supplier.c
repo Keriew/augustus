@@ -243,7 +243,7 @@ void figure_supplier_action(figure *f)
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->wait_ticks = 0;
                 int id = f->id;
-                if (f->collecting_item_id > 3) {
+                if (!resource_is_food(f->collecting_item_id)) {
                     int max_amount = f->type == FIGURE_LIGHTHOUSE_SUPPLIER ? 1 : 2;
                     if (!take_resource_from_warehouse(f, f->destination_building_id, max_amount)) {
                         f->state = FIGURE_STATE_DEAD;

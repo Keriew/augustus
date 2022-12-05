@@ -352,7 +352,26 @@ static void figure_save(buffer *buf, const figure *f)
     buffer_write_i16(buf, f->opponent_id);
 }
 
-static void figure_load(buffer *buf, figure *f, int figure_buf_size)
+static int get_resource_id(figure_type type, int resource)
+{
+    
+    switch (type) {
+        case FIGURE_PRIEST_SUPPLIER:
+        case FIGURE_BARKEEP_SUPPLIER:
+        case FIGURE_MESS_HALL_SUPPLIER:
+        case FIGURE_MARKET_SUPPLIER:
+        case FIGURE_CARAVANSERAI_SUPPLIER:
+        case FIGURE_PRIEST:
+        case FIGURE_DELIVERY_BOY:
+        case FIGURE_MESS_HALL_COLLECTOR:
+        case FIGURE_CARAVANSERAI_COLLECTOR:
+            return resource_map_legacy_inventory(resource);
+        default:
+            return resource_remap(resource);
+    }
+}
+
+static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version)
 {
     f->alternative_location_index = buffer_read_u8(buf);
     f->image_offset = buffer_read_u8(buf);
@@ -433,7 +452,8 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size)
     f->height_adjusted_ticks = buffer_read_u8(buf);
     f->current_height = buffer_read_u8(buf);
     f->target_height = buffer_read_u8(buf);
-    f->collecting_item_id = resource_remap(buffer_read_u8(buf));
+    f->collecting_item_id = (version <= SAVE_GAME_LAST_STATIC_RESOURCES) ?
+        get_resource_id(f->type, buffer_read_u8(buf)) : resource_remap(buffer_read_u8(buf));
     f->trade_ship_failed_dock_attempts = buffer_read_u8(buf);
     f->phrase_sequence_exact = buffer_read_u8(buf);
     f->phrase_id = buffer_read_i8(buf);
@@ -498,7 +518,7 @@ void figure_load_state(buffer *list, buffer *seq, int version)
 
     for (int i = 0; i < figures_to_load; i++) {
         figure *f = array_next(data.figures);
-        figure_load(list, f, figure_buf_size);
+        figure_load(list, f, figure_buf_size, version);
         if (f->state) {
             highest_id_in_use = i;
         }
