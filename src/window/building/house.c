@@ -151,15 +151,16 @@ void window_building_draw_house(building_info_context *c)
 
     // food inventory
     if (model_get_house(b->subtype.house_level)->food_types) {
-        for (int i = INVENTORY_MIN_FOOD; i < INVENTORY_MAX_FOOD; i++) {
-            resource_type resource = resource_from_inventory(i);
-            image_draw(resource_get_data(resource)->image.icon, c->x_offset + x_offset, c->y_offset + y_content,
+        for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+            if (!resource_is_food(r) || !resource_get_data(r)->is_inventory) {
+                continue;
+            }
+            image_draw(resource_get_data(r)->image.icon, c->x_offset + x_offset, c->y_offset + y_content,
                 COLOR_MASK_NONE, SCALE_NONE);
-            text_draw_number(b->data.house.inventory[i], '@', " ",
+            text_draw_number(b->resources[r], '@', " ",
                 c->x_offset + x_offset + 32, c->y_offset + y_amount, FONT_NORMAL_BROWN, 0);
+            x_offset += 110;
         }
-
-        x_offset += 110;
     } else {
         // no food necessary
         lang_text_draw_multiline(127, 33, c->x_offset + x_offset + 4, c->y_offset + y_content,
@@ -170,12 +171,15 @@ void window_building_draw_house(building_info_context *c)
     y_content += 35;
     y_amount += 35;
 
-    for (int i = INVENTORY_MAX_GOOD - 1; i >= INVENTORY_MIN_GOOD; i--) {
-        resource_type resource = resource_from_inventory(i);
-        image_draw(resource_get_data(resource)->image.icon, c->x_offset + x_offset, c->y_offset + y_content,
+    for (resource_type r = RESOURCE_MAX_FOOD; r < RESOURCE_MAX; r++) {
+        if (!resource_is_good(r) || !resource_get_data(r)->is_inventory) {
+            continue;
+        }
+        image_draw(resource_get_data(r)->image.icon, c->x_offset + x_offset, c->y_offset + y_content,
             COLOR_MASK_NONE, SCALE_NONE);
-        text_draw_number(b->data.house.inventory[i], '@', " ",
+        text_draw_number(b->resources[r], '@', " ",
             c->x_offset + x_offset + 32, c->y_offset + y_amount, FONT_NORMAL_BROWN, 0);
+        x_offset += 110;
     }
 
     if (b->has_plague) {

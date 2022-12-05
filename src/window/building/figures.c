@@ -377,23 +377,13 @@ static void draw_supplier(building_info_context *c, figure *f)
         width = lang_text_draw(64, f->type, c->x_offset + 92, c->y_offset + 139, FONT_NORMAL_BROWN);
     }
 
+    resource_type resource = f->collecting_item_id;
+
     if (f->action_state == FIGURE_ACTION_145_SUPPLIER_GOING_TO_STORAGE) {
         width += lang_text_draw(129, 17, c->x_offset + 90 + width, c->y_offset + 139, FONT_NORMAL_BROWN);
-        int resource;
-        if (f->type == FIGURE_LIGHTHOUSE_SUPPLIER) {
-            resource = f->collecting_item_id;
-        } else {
-            resource = resource_from_inventory(f->collecting_item_id);
-        }
         image_draw(resource_get_data(resource)->image.icon,
             c->x_offset + 90 + width, c->y_offset + 135, COLOR_MASK_NONE, SCALE_NONE);
     } else if (f->action_state == FIGURE_ACTION_146_SUPPLIER_RETURNING) {
-        int resource;
-        if (f->type == FIGURE_LIGHTHOUSE_SUPPLIER) {
-            resource = f->collecting_item_id;
-        } else {
-            resource = resource_from_inventory(f->collecting_item_id);
-        }
         if (resource != RESOURCE_NONE) {
             width += lang_text_draw(129, 18, c->x_offset + 90 + width, c->y_offset + 139, FONT_NORMAL_BROWN);
             image_draw(resource_get_data(resource)->image.icon,

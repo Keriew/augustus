@@ -1096,9 +1096,9 @@ static void spawn_figure_tavern(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
-            if (!has_figure_of_type(b, FIGURE_BARKEEP) && b->data.market.inventory[INVENTORY_WINE] > 21) {
-                b->data.market.inventory[INVENTORY_WINE] -= 20;
-                b->data.market.inventory[INVENTORY_MEAT] -= calc_bound(40, 40, b->data.market.inventory[INVENTORY_MEAT]);
+            if (!has_figure_of_type(b, FIGURE_BARKEEP) && b->resources[RESOURCE_WINE] > 21) {
+                b->resources[RESOURCE_WINE] -= 20;
+                b->resources[RESOURCE_MEAT] -= calc_bound(40, 40, b->resources[RESOURCE_MEAT]);
                 create_roaming_figure(b, road.x, road.y, FIGURE_BARKEEP);
             }
         }
@@ -1547,8 +1547,10 @@ static void spawn_figure_fort_supplier(building *fort)
     
     int total_food_in_mess_hall = 0;
 
-    for (int i = INVENTORY_MIN_FOOD; i < INVENTORY_MAX_FOOD; ++i) {
-        total_food_in_mess_hall += supply_post->data.market.inventory[i];
+    for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+        if (resource_is_food(r)) {
+            total_food_in_mess_hall += supply_post->resources[r];
+        }
     }
 
     if (!total_food_in_mess_hall) {

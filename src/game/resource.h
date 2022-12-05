@@ -43,6 +43,9 @@ typedef enum {
     RESOURCE_SPECIAL = 2
 } resource_type;
 
+#define LEGACY_INVENTORY_MAX 8
+
+/**
 typedef enum {
     INVENTORY_NONE = -1,
     INVENTORY_WHEAT = 0,
@@ -66,6 +69,7 @@ typedef enum {
     INVENTORY_FLAG_ALL_GOODS = 0xf0,
     INVENTORY_FLAG_ALL = 0xff
 } inventory_type;
+**/
 
 typedef enum {
     WORKSHOP_NONE = 0,
@@ -88,7 +92,7 @@ typedef struct {
     resource_type type;
     resource_flags flags;
     const uint8_t *text;
-    inventory_type inventory_id;
+    int is_inventory;
     struct {
         int storage;
         struct {
@@ -113,19 +117,17 @@ void resource_init(void);
 
 int resource_is_food(resource_type resource);
 
+int resource_is_raw_material(resource_type resource);
+
+int resource_is_good(resource_type resource);
+
 workshop_type resource_to_workshop_type(resource_type resource);
 
 const resource_data *resource_get_data(resource_type resource);
 
-int inventory_is_set(int inventory, int flag);
-
-void inventory_set(int *inventory, int flag);
-
-int resource_from_inventory(int inventory_id);
-
-int resource_to_inventory(resource_type resource);
-
 void resource_set_mapping(int version);
+
+resource_type resource_map_legacy_inventory(int id);
 
 resource_type resource_remap(int id);
 

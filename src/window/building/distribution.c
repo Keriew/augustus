@@ -72,6 +72,7 @@ static generic_button orders_resource_buttons[] = {
     {0, 264, 210, 22, toggle_resource_state, button_none, 13, 0},
     {0, 286, 210, 22, toggle_resource_state, button_none, 14, 0},
     {0, 308, 210, 22, toggle_resource_state, button_none, 15, 0},
+    {0, 330, 210, 22, toggle_resource_state, button_none, 16, 0},
 };
 
 static generic_button orders_partial_resource_buttons[] = {
@@ -90,6 +91,7 @@ static generic_button orders_partial_resource_buttons[] = {
     {210, 264, 28, 22, toggle_partial_resource_state, button_none, 13, 0},
     {210, 286, 28, 22, toggle_partial_resource_state, button_none, 14, 0},
     {210, 308, 28, 22, toggle_partial_resource_state, button_none, 15, 0},
+    {210, 330, 28, 22, toggle_partial_resource_state, button_none, 16, 0},
 };
 
 static generic_button warehouse_distribution_permissions_buttons[] = {
@@ -428,6 +430,16 @@ void dock_cities_set_scroll_position(int scroll_position)
     data.dock_scrollbar_position = scroll_position;
 }
 
+static int has_food_stocks(const building *b)
+{
+    for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+        if (b->resources[r] && resource_is_food(r) && resource_get_data(r)->is_inventory) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 static void window_building_draw_stocks(building_info_context *c, building *b, int draw_goods,
     int always_show_food, int draw_higher)
 {
@@ -437,15 +449,14 @@ static void window_building_draw_stocks(building_info_context *c, building *b, i
     int y_offset = draw_higher ? 44 : 64;
 
     // food stocks
-    if (always_show_food || b->data.market.inventory[INVENTORY_WHEAT] ||
-        b->data.market.inventory[INVENTORY_VEGETABLES] || b->data.market.inventory[INVENTORY_FRUIT] ||
-        b->data.market.inventory[INVENTORY_MEAT]) {
-
-        for (int i = INVENTORY_MIN_FOOD; i < INVENTORY_MAX_FOOD; i++) {
-            resource_type resource = resource_from_inventory(i);
-            font = building_distribution_is_good_accepted(resource, b) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
-            image_draw(resource_get_data(resource)->image.icon, c->x_offset + x_offset, c->y_offset + y_offset, COLOR_MASK_NONE, SCALE_NONE);
-            text_draw_number(b->data.market.inventory[i], '@', " ",
+    if (always_show_food || has_food_stocks(b)) {
+        for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+            if (!resource_is_food(r) || !resource_get_data(r)->is_inventory) {
+                continue;
+            }
+            font = building_distribution_is_good_accepted(r, b) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
+            image_draw(resource_get_data(r)->image.icon, c->x_offset + x_offset, c->y_offset + y_offset, COLOR_MASK_NONE, SCALE_NONE);
+            text_draw_number(b->resources[r], '@', " ",
                 c->x_offset + x_offset + 32, c->y_offset + y_offset + 6, font, 0);
             x_offset += 110;
         }
@@ -458,12 +469,14 @@ static void window_building_draw_stocks(building_info_context *c, building *b, i
 
     // good stocks
     if (draw_goods) {
-        for (int i = INVENTORY_MAX_GOOD - 1; i >= INVENTORY_MIN_GOOD; i--) {
-            resource_type resource = resource_from_inventory(i);
-            font = building_distribution_is_good_accepted(resource, b) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
-            image_draw(resource_get_data(resource)->image.icon, c->x_offset + x_offset, c->y_offset + y_offset,
+        for (resource_type r = RESOURCE_MAX_FOOD; r < RESOURCE_MAX; r++) {
+            if (!resource_is_good(r) || !resource_get_data(r)->is_inventory) {
+                continue;
+            }
+            font = building_distribution_is_good_accepted(r, b) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
+            image_draw(resource_get_data(r)->image.icon, c->x_offset + x_offset, c->y_offset + y_offset,
                 COLOR_MASK_NONE, SCALE_NONE);
-            text_draw_number(b->data.market.inventory[i], '@', " ",
+            text_draw_number(b->resources[r], '@', " ",
                 c->x_offset + x_offset + 32, c->y_offset + y_offset + 6, font, 0);
             x_offset += 110;
         }
@@ -506,30 +519,34 @@ void window_building_draw_supplier_orders(building_info_context *c, const uint8_
     inner_panel_draw(c->x_offset + 16, y_offset + 42, c->width_blocks - 2, 21);
 }
 
-static int get_allowed_inventory_for_supplier(building_type type)
+static int inventory_allowed_for_building_type(resource_type resource, building_type type)
 {
-    int allowed = INVENTORY_FLAG_NONE;
-    switch (type) {
-        case BUILDING_MARKET:
-            return INVENTORY_FLAG_ALL;
-        case BUILDING_CARAVANSERAI:
-        case BUILDING_MESS_HALL:
-            return INVENTORY_FLAG_ALL_FOODS;
-        case BUILDING_TAVERN:
-            inventory_set(&allowed, INVENTORY_WINE);
-            inventory_set(&allowed, INVENTORY_MEAT);
-            return allowed;
-        case BUILDING_SMALL_TEMPLE_VENUS:
-        case BUILDING_LARGE_TEMPLE_VENUS:
-            inventory_set(&allowed, INVENTORY_WINE);
-            return allowed;
-        case BUILDING_SMALL_TEMPLE_CERES:
-        case BUILDING_LARGE_TEMPLE_CERES:
-            inventory_set(&allowed, resource_to_inventory(city_resource_ceres_temple_food()));
-            inventory_set(&allowed, INVENTORY_OIL);
-            return allowed;
-        default:
-            return INVENTORY_FLAG_NONE;
+    if (!resource_get_data(resource)->is_inventory) {
+        return 0;
+    }
+    if (type == BUILDING_MARKET) {
+        return 1;
+    }
+    if ((type == BUILDING_CARAVANSERAI || type == BUILDING_MESS_HALL) && resource_is_food(resource)) {
+        return 1;
+    }
+    if (type == BUILDING_TAVERN && (resource == RESOURCE_WINE || resource == RESOURCE_MEAT)) {
+        return 1;
+    }
+    if ((type == BUILDING_SMALL_TEMPLE_VENUS || type == BUILDING_LARGE_TEMPLE_VENUS) && resource == RESOURCE_WINE) {
+        return 1;
+    }
+    if ((type == BUILDING_SMALL_TEMPLE_CERES || type == BUILDING_LARGE_TEMPLE_CERES) &&
+        (resource == city_resource_ceres_temple_food() || resource == RESOURCE_OIL)) {
+        return 1;
+    }
+    return 0;
+}
+
+static void get_allowed_inventory_for_supplier(building_type type, int allowed[RESOURCE_MAX])
+{
+    for (resource_type r = RESOURCE_NONE; r < RESOURCE_MAX; r++) {
+        allowed[r] = inventory_allowed_for_building_type(r, type);
     }
 }
 
@@ -562,12 +579,12 @@ void window_building_draw_supplier_orders_foreground(building_info_context *c)
     }
 
     const resource_list *list = city_resource_get_potential();
-    int allowed = get_allowed_inventory_for_supplier(b->type);
+    int allowed[RESOURCE_MAX];
+    get_allowed_inventory_for_supplier(b->type, allowed);
     int row = 0;
     for (int i = 0; i < list->size; i++) {
         resource_type resource = list->items[i];
-        int inventory = resource_to_inventory(resource);
-        if (inventory == INVENTORY_NONE || !inventory_is_set(allowed, inventory)) {
+        if (resource == RESOURCE_NONE || !allowed[resource]) {
             continue;
         }
         int image_id = resource_get_data(resource)->image.icon;
@@ -600,7 +617,7 @@ void window_building_handle_mouse_supplier_orders(const mouse *m, building_info_
 
     data.building_id = c->building_id;
     if (generic_buttons_handle_mouse(m, c->x_offset + 180, y_offset + 46,
-        orders_resource_buttons, INVENTORY_MAX,
+        orders_resource_buttons, RESOURCE_MAX,
         &data.resource_focus_button_id)) {
         return;
     }
@@ -1198,44 +1215,43 @@ static void go_to_orders(int param1, int param2)
 static int get_resource_index_for_supplier(building_type type, int index)
 {
     const resource_list *list = city_resource_get_potential();
-    int allowed = get_allowed_inventory_for_supplier(type);
+    int allowed[RESOURCE_MAX];
+    get_allowed_inventory_for_supplier(type, allowed);
     for (int i = 0; i < list->size; i++) {
-        int resource = list->items[i];
-        int inventory = resource_to_inventory(resource);
-        if (inventory == INVENTORY_NONE || !inventory_is_set(allowed, inventory)) {
+        resource_type resource = list->items[i];
+        if (resource == RESOURCE_NONE || !allowed[resource]) {
             continue;
         }
         if (!index--) {
-            return inventory;
+            return resource;
         }
     }
-    return INVENTORY_NONE;
+    return RESOURCE_NONE;
 }
 
 static void toggle_resource_state(int index, int param2)
 {
     building *b = building_get(data.building_id);
-    int resource;
+    if (!index) {
+        return;
+    }
+    index -= 1;
+    resource_type resource;
     if (building_has_supplier_inventory(b->type) || b->type == BUILDING_DOCK) {
-        int resource;
         if (b->type == BUILDING_DOCK) {
-            resource = city_resource_get_potential()->items[index - 1];
-            if (resource == RESOURCE_NONE) {
-                return;
-            }
-            resource -= 1;
+            resource = city_resource_get_potential()->items[index];
         } else {
-            resource = get_resource_index_for_supplier(b->type, index - 1);
-            if (resource == INVENTORY_NONE) {
-                return;
-            }
+            resource = get_resource_index_for_supplier(b->type, index);
+        }
+        if (resource == RESOURCE_NONE) {
+            return;
         }
         building_distribution_toggle_good_accepted(resource, b);
     } else {
         if (b->type == BUILDING_WAREHOUSE) {
-            resource = city_resource_get_available()->items[index - 1];
+            resource = city_resource_get_available()->items[index];
         } else {
-            resource = city_resource_get_available_foods()->items[index - 1];
+            resource = city_resource_get_available_foods()->items[index];
         }
         building_storage_cycle_resource_state(b->storage_id, resource);
     }

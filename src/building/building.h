@@ -82,11 +82,6 @@ typedef struct building {
             int accepted_route_ids;
         } dock;
         struct {
-            short inventory[INVENTORY_MAX];
-            short pottery_demand;
-            short furniture_demand;
-            short oil_demand;
-            short wine_demand;
             unsigned char fetch_inventory_id;
             unsigned char is_mess_hall;
         } market;
@@ -110,7 +105,6 @@ typedef struct building {
             unsigned char play;
         } entertainment;
         struct {
-            short inventory[INVENTORY_MAX];
             unsigned char theater;
             unsigned char amphitheater_actor;
             unsigned char amphitheater_gladiator;

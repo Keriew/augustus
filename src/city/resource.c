@@ -297,25 +297,19 @@ void city_resource_determine_available(void)
     }
 }
 
-int city_resource_ceres_temple_food(void)
+resource_type city_resource_ceres_temple_food(void)
 {
     // locally produced
-    for (int i = RESOURCE_MIN_FOOD; i < RESOURCE_MAX_FOOD; i++) {
-        if (i == RESOURCE_OLIVES || i == RESOURCE_VINES) {
-            continue;
-        }
-        if (can_produce_resource(i)) {
-            return i;
+    for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+        if (resource_is_food(r) && can_produce_resource(r)) {
+            return r;
         }
     }
 
     // imported, if no food is locally produced
-    for (int i = RESOURCE_MIN_FOOD; i < RESOURCE_MAX_FOOD; i++) {
-        if (i == RESOURCE_OLIVES || i == RESOURCE_VINES) {
-            continue;
-        }
-        if (empire_can_import_resource_potentially(i)) {
-            return i;
+    for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+        if (resource_is_food(r) && empire_can_import_resource_potentially(r)) {
+            return r;
         }
     }
 
@@ -324,8 +318,8 @@ int city_resource_ceres_temple_food(void)
 
 static void calculate_available_food(void)
 {
-    for (int i = 0; i < RESOURCE_MAX_FOOD; i++) {
-        city_data.resource.granary_food_stored[i] = 0;
+    for (resource_type r = 0; r < RESOURCE_MAX_FOOD; r++) {
+        city_data.resource.granary_food_stored[r] = 0;
     }
     city_data.resource.granary_total_stored = 0;
     city_data.resource.food_types_available = 0;
@@ -396,7 +390,7 @@ void city_resource_calculate_food_stocks_and_supply_wheat(void)
             building_type type = supplied_buildings[i];
             for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
                 if (b->state == BUILDING_STATE_IN_USE) {
-                    b->data.market.inventory[INVENTORY_WHEAT] = 200;
+                    b->resources[RESOURCE_WHEAT] = 200;
                 }
             }
         }
@@ -446,8 +440,8 @@ static int house_consume_food(void)
                 amount_per_type = calc_adjust_with_percentage(b->house_population, 50);
             }
             int foodtypes_available = 0;
-            for (int i = INVENTORY_MIN_FOOD; i < INVENTORY_MAX_FOOD; i++) {
-                if (b->data.house.inventory[i]) {
+            for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+                if (b->resources[r] && resource_is_food(r) && resource_get_data(r)->is_inventory) {
                     foodtypes_available++;
                 }
             }
@@ -459,17 +453,20 @@ static int house_consume_food(void)
             if (scenario_property_rome_supplies_wheat()) {
                 city_data.resource.food_types_eaten = 1;
                 city_data.resource.food_types_available = 1;
-                b->data.house.inventory[INVENTORY_WHEAT] = amount_per_type;
+                b->resources[RESOURCE_WHEAT] = amount_per_type;
                 b->data.house.num_foods = 1;
             } else if (num_types > 0) {
-                for (int t = INVENTORY_MIN_FOOD; t < INVENTORY_MAX_FOOD; t++) {
-                    if (b->data.house.inventory[t] >= amount_per_type) {
-                        b->data.house.inventory[t] -= amount_per_type;
+                for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+                    if (!resource_is_food(r) || !resource_get_data(r)->is_inventory) {
+                        continue;
+                    }
+                    if (b->resources[r] >= amount_per_type) {
+                        b->resources[r] -= amount_per_type;
                         b->data.house.num_foods++;
                         total_consumed += amount_per_type;
-                    } else if (b->data.house.inventory[t]) {
+                    } else if (b->resources[r]) {
                         // has food but not enough
-                        b->data.house.inventory[t] = 0;
+                        b->resources[r] = 0;
                         b->data.house.num_foods++;
                         total_consumed += amount_per_type;
                     }
@@ -497,8 +494,10 @@ static int mess_hall_consume_food(void)
     int proportionate_amount = 0;
     int amount_for_type = 0;
 
-    for (int i = INVENTORY_MIN_FOOD; i < INVENTORY_MAX_FOOD; ++i) {
-        total_food_in_mess_hall += b->data.market.inventory[i];
+    for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+        if (resource_is_food(r)) {
+            total_food_in_mess_hall += b->resources[r];
+        }
     }
 
     city_data.mess_hall.total_food = total_food_in_mess_hall;
@@ -507,11 +506,14 @@ static int mess_hall_consume_food(void)
     }
 
     if (total_food_in_mess_hall > 0) {
-        for (int i = INVENTORY_MIN_FOOD; i < INVENTORY_MAX_FOOD; ++i) {
-            proportionate_amount = food_required * b->data.market.inventory[i] / total_food_in_mess_hall;
+        for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+            if (!resource_is_food(r)) {
+                continue;
+            }
+            proportionate_amount = food_required * b->resources[r] / total_food_in_mess_hall;
             if (proportionate_amount > 0) {
-                amount_for_type = calc_bound((int) ceil(proportionate_amount), 0, b->data.market.inventory[i]);
-                b->data.market.inventory[i] -= amount_for_type;
+                amount_for_type = calc_bound((int) ceil(proportionate_amount), 0, b->resources[r]);
+                b->resources[r] -= amount_for_type;
                 ++num_foods;
             }
         }
@@ -556,8 +558,10 @@ static int caravanserai_consume_food(void)
     int proportionate_amount = 0;
     int amount_for_type = 0;
 
-    for (int i = INVENTORY_MIN_FOOD; i < INVENTORY_MAX_FOOD; ++i) {
-        total_food_in_caravanserai += b->data.market.inventory[i];
+    for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+        if (resource_is_food(r)) {
+            total_food_in_caravanserai += b->resources[r];
+        }
     }
 
     city_data.caravanserai.total_food = total_food_in_caravanserai;
@@ -567,11 +571,14 @@ static int caravanserai_consume_food(void)
         return 0;
     }
 
-    for (int i = INVENTORY_MIN_FOOD; i < INVENTORY_MAX_FOOD; ++i) {
-        proportionate_amount = food_required * b->data.market.inventory[i] / total_food_in_caravanserai;
+    for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+        if (!resource_is_food(r)) {
+            continue;
+        }
+        proportionate_amount = food_required * b->resources[r] / total_food_in_caravanserai;
         if (proportionate_amount > 0) {
-            amount_for_type = calc_bound(proportionate_amount, 0, b->data.market.inventory[i]);
-            b->data.market.inventory[i] -= amount_for_type;
+            amount_for_type = calc_bound(proportionate_amount, 0, b->resources[r]);
+            b->resources[r] -= amount_for_type;
         }
     }
 
