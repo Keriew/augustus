@@ -203,6 +203,12 @@ typedef struct {
         int enemy_armies;
         int scenario;
         int graph_order;
+        int city_data;
+        int empire_cities;
+        int trade_prices;
+        int trade_route_limit;
+        int trade_route_traded;
+        int figure_traders;
     } piece_sizes;
     struct {
         int culture1;
@@ -311,6 +317,10 @@ static void get_version_data(savegame_version_data *version_data, int version)
 {
     int multiplier = 1;
     int count_multiplier = 1;
+
+    int total_new_resources = resource_total_mapped() - RESOURCE_MAX_LEGACY;
+    int total_new_food = resource_total_food_mapped() - RESOURCE_MAX_FOOD_LEGACY;
+
     version_data->piece_sizes.burning_totals = 8;
     if (version > SAVE_GAME_LAST_ORIGINAL_LIMITS_VERSION) {
         multiplier = 5;
@@ -338,6 +348,23 @@ static void get_version_data(savegame_version_data *version_data, int version)
     version_data->piece_sizes.monument_deliveries = version > SAVE_GAME_LAST_STATIC_MONUMENT_DELIVERIES_VERSION ? PIECE_SIZE_DYNAMIC : 3200;
     version_data->piece_sizes.enemy_armies = version > SAVE_GAME_LAST_ENEMY_ARMIES_BUFFER_BUG ? (MAX_ENEMY_ARMIES * sizeof(int) * 9) : 900;
     version_data->piece_sizes.graph_order = version > SAVE_GAME_LAST_UNKNOWN_UNUSED_CITY_DATA ? 4 : 8;
+    if (version <= SAVE_GAME_LAST_UNKNOWN_UNUSED_CITY_DATA) {
+        version_data->piece_sizes.city_data = 36136;
+    } else {
+        version_data->piece_sizes.city_data = 11885;
+        if (version > SAVE_GAME_LAST_STATIC_RESOURCES) {
+            version_data->piece_sizes.city_data += total_new_resources * 18;
+            version_data->piece_sizes.city_data += total_new_food * 4;
+        }
+    }
+    version_data->piece_sizes.empire_cities = 2706;
+    if (version > SAVE_GAME_LAST_STATIC_RESOURCES) {
+        version_data->piece_sizes.empire_cities += total_new_resources * 2;
+    }
+    version_data->piece_sizes.trade_prices = 8 * resource_total_mapped();
+    version_data->piece_sizes.trade_route_limit = 20 * 4 * resource_total_mapped();
+    version_data->piece_sizes.trade_route_traded = 20 * 4 * resource_total_mapped();
+    version_data->piece_sizes.figure_traders = 1604 + 100 * 2 * resource_total_mapped();
 
     version_data->building_counts.culture1 = 132 * count_multiplier;
     version_data->building_counts.culture2 = 32 * count_multiplier;
@@ -411,7 +438,7 @@ static void init_savegame_data(int version)
     state->route_paths = create_savegame_piece(version_data.piece_sizes.route_paths, 1);
     state->formations = create_savegame_piece(version_data.piece_sizes.formations, 1);
     state->formation_totals = create_savegame_piece(12, 0);
-    state->city_data = create_savegame_piece(36136, 1);
+    state->city_data = create_savegame_piece(version_data.piece_sizes.city_data, 1);
     if (version_data.has_city_faction_info) {
         state->city_faction_unknown = create_savegame_piece(2, 0);
     }
@@ -431,7 +458,7 @@ static void init_savegame_data(int version)
     state->empire = create_savegame_piece(12, 0);
     state->empire_cities = create_savegame_piece(2706, 1);
     state->building_count_industry = create_savegame_piece(version_data.building_counts.industry, 0);
-    state->trade_prices = create_savegame_piece(128, 0);
+    state->trade_prices = create_savegame_piece(version_data.piece_sizes.trade_prices, 0);
     state->figure_names = create_savegame_piece(84, 0);
     state->culture_coverage = create_savegame_piece(60, 0);
     state->scenario = create_savegame_piece(version_data.piece_sizes.scenario, 0);
@@ -450,7 +477,7 @@ static void init_savegame_data(int version)
     state->scenario_is_custom = create_savegame_piece(4, 0);
     state->city_sounds = create_savegame_piece(8960, 0);
     state->building_extra_highest_id = create_savegame_piece(4, 0);
-    state->figure_traders = create_savegame_piece(4804, 0);
+    state->figure_traders = create_savegame_piece(version_data.piece_sizes.figure_traders, 0);
     state->building_list_burning = create_savegame_piece(version_data.piece_sizes.building_list_burning, 1);
     state->building_list_small = create_savegame_piece(version_data.piece_sizes.building_list_small, 1);
     state->building_list_large = create_savegame_piece(version_data.piece_sizes.building_list_large, 1);
@@ -462,8 +489,8 @@ static void init_savegame_data(int version)
     state->building_count_support = create_savegame_piece(version_data.building_counts.support, 0);
     state->tutorial_part2 = create_savegame_piece(4, 0);
     state->gladiator_revolt = create_savegame_piece(16, 0);
-    state->trade_route_limit = create_savegame_piece(1280, 1);
-    state->trade_route_traded = create_savegame_piece(1280, 1);
+    state->trade_route_limit = create_savegame_piece(version_data.piece_sizes.trade_route_limit, 1);
+    state->trade_route_traded = create_savegame_piece(version_data.piece_sizes.trade_route_traded, 1);
     if (version_data.has_barracks_tower_sentry_request) {
         state->building_barracks_tower_sentry = create_savegame_piece(4, 0);
     }
@@ -533,8 +560,6 @@ static int save_version_to_scenario_version(int save_version, buffer *buf) {
 
 static void savegame_load_from_state(savegame_state *state, int version)
 {
-    resource_set_mapping(version);
-
     int scenario_version = save_version_to_scenario_version(version, state->scenario_version);
     scenario_settings_load_state(state->scenario_campaign_mission,
         state->scenario_settings,
@@ -1057,6 +1082,7 @@ int game_file_io_read_saved_game(const char *filename, int offset)
             return -1;
         }
         log_info("Savegame version", 0, version);
+        resource_set_mapping(version);
         init_savegame_data(version);
         result = savegame_read_from_file(fp, version);
         free_compressed_buffer();

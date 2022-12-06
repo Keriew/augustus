@@ -51,7 +51,7 @@ void empire_object_load(buffer *buf, int version)
 {
     empire_object_clear();
     // we're loading a scenario that does not have a custom empire
-    if (buf->size == sizeof(int) && buffer_read_i32(buf) == 0) {
+    if (buf->size == sizeof(int32_t) && buffer_read_i32(buf) == 0) {
         return;
     }
 
@@ -170,13 +170,13 @@ void empire_object_save(buffer *buf)
 {
     char *buf_data;
     if (scenario.empire.id != SCENARIO_CUSTOM_EMPIRE) {
-        buf_data = malloc(sizeof(int));
-        buffer_init(buf, buf_data, sizeof(int));
+        buf_data = malloc(sizeof(int32_t));
+        buffer_init(buf, buf_data, sizeof(int32_t));
         buffer_write_i32(buf, 0);
         return;
     }
     int size_per_obj = 78;
-    int size_per_city = 138;
+    int size_per_city = 138 + 4 * (RESOURCE_MAX - RESOURCE_MAX_LEGACY);
     int total_size = 0;
     for (int i = 0; i < MAX_EMPIRE_OBJECTS; i++) {
         full_empire_object *full = &objects[i];
