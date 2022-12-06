@@ -6,7 +6,8 @@
 #include "empire/trade_route.h"
 #include "empire/type.h"
 #include "game/animation.h"
-#include "game/file_io.h"
+#include "game/save_version.h"
+#include "scenario/data.h"
 #include "scenario/empire.h"
 
 #include <stdlib.h>

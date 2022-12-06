@@ -4,7 +4,7 @@
 #include "empire/city.h"
 #include "empire/trade_route.h"
 #include "game/difficulty.h"
-#include "game/file_io.h"
+#include "game/save_version.h"
 #include "game/settings.h"
 #include "scenario/data.h"
 
