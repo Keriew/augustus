@@ -674,7 +674,7 @@ void city_message_save_state(buffer *messages, buffer *extra, buffer *counts, bu
     buffer_write_u8(population, data.population_shown.pop25000);
 }
 
-static void update_param_if_resource(city_message *msg)
+static void update_message_param_if_resource(city_message *msg)
 {
     switch (msg->message_type) {
         case MESSAGE_INCREASED_TRADING:
