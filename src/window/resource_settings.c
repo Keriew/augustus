@@ -77,7 +77,7 @@ static void draw_foreground(void)
     text_draw(resource_get_data(data.resource)->text, 60, 137, FONT_LARGE_BLACK, COLOR_MASK_NONE);
 
     if (empire_can_produce_resource(data.resource) ||
-        (data.resource == RESOURCE_MEAT && scenario_building_allowed(BUILDING_WHARF))) {
+        (data.resource == RESOURCE_FISH && scenario_building_allowed(BUILDING_WHARF))) {
         int total_buildings = building_count_industry_total(data.resource);
         int active_buildings = building_count_industry_active(data.resource);
         if (building_count_industry_total(data.resource) <= 0) {

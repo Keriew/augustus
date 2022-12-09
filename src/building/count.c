@@ -234,7 +234,7 @@ void building_count_update(void)
                 if (b->num_workers > 0) {
                     city_buildings_add_working_wharf(!b->data.industry.fishing_boat_id);
                 }
-                increase_industry_count(RESOURCE_MEAT, b->num_workers > 0 && b->data.industry.fishing_boat_id);
+                increase_industry_count(RESOURCE_FISH, b->num_workers > 0 && b->data.industry.fishing_boat_id);
                 break;
             case BUILDING_DOCK:
                 if (b->num_workers > 0 && b->has_water_access) {
@@ -293,6 +293,10 @@ int building_count_colosseum(void)
 
 int building_count_active(building_type type)
 {
+    int active = 0;
+    for (const building *b = building_first_of_type(type); b; b = b->next_of_type) {
+        
+    }
     return data.buildings[type].active;
 }
 
