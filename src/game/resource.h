@@ -1,6 +1,7 @@
 #ifndef GAME_RESOURCE_H
 #define GAME_RESOURCE_H
 
+#include "building/type.h"
 #include "core/lang.h"
 
 /**
@@ -72,6 +73,7 @@ typedef struct {
     resource_flags flags;
     const uint8_t *text;
     int is_inventory;
+    building_type industry;
     struct {
         int storage;
         struct {
