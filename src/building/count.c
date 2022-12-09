@@ -293,10 +293,6 @@ int building_count_colosseum(void)
 
 int building_count_active(building_type type)
 {
-    int active = 0;
-    for (const building *b = building_first_of_type(type); b; b = b->next_of_type) {
-        
-    }
     return data.buildings[type].active;
 }
 
