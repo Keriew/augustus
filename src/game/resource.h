@@ -40,7 +40,7 @@ typedef enum {
     RESOURCE_MAX_FOOD_LEGACY = 7,
     RESOURCE_MIN_RAW = 9,
     RESOURCE_MAX_RAW = 13,
-    RESOURCE_SPECIAL = 2
+    RESOURCE_TOTAL_SPECIAL = 2
 } resource_type;
 
 #define LEGACY_INVENTORY_MAX 8

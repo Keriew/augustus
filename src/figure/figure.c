@@ -381,7 +381,12 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     f->cart_image_id = buffer_read_i16(buf);
     f->next_figure_id_on_same_tile = buffer_read_i16(buf);
     f->type = buffer_read_u8(buf);
-    f->resource_id = resource_remap(buffer_read_u8(buf));
+    int resource = buffer_read_u8(buf);
+    if (f->type == FIGURE_HIPPODROME_HORSES || f->type == FIGURE_FLOTSAM || resource < RESOURCE_NONE) {
+        f->resource_id = resource;
+    } else {
+        f->resource_id = resource_remap(buffer_read_u8(buf));
+    }
     f->use_cross_country = buffer_read_u8(buf);
     f->is_friendly = buffer_read_u8(buf);
     f->state = buffer_read_u8(buf);

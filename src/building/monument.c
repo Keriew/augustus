@@ -742,7 +742,7 @@ static void delivery_load(buffer *buf, monument_delivery *delivery, int size)
 {
     delivery->walker_id = buffer_read_i32(buf);
     delivery->destination_id = buffer_read_i32(buf);
-    delivery->resource = buffer_read_i32(buf);
+    delivery->resource = resource_remap(buffer_read_i32(buf));
     delivery->cartloads = buffer_read_i32(buf);
 
     if (size > ORIGINAL_DELIVERY_BUFFER_SIZE) {

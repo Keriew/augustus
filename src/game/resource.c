@@ -7,7 +7,7 @@
 #include "scenario/building.h"
 #include "translation/translation.h"
 
-#define RESOURCE_ALL RESOURCE_MAX + RESOURCE_SPECIAL
+#define RESOURCE_ALL (RESOURCE_MAX + RESOURCE_TOTAL_SPECIAL)
 
 static const resource_type resource_mappings[][RESOURCE_ALL] = {
     {
@@ -33,7 +33,7 @@ static struct {
     legacy_inventory_mapping,
     RESOURCE_MAX_LEGACY,
     RESOURCE_MAX_FOOD_LEGACY,
-    RESOURCE_SPECIAL
+    RESOURCE_TOTAL_SPECIAL
 };
 
 static resource_data resource_info[RESOURCE_ALL] = {
