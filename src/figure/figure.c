@@ -373,6 +373,7 @@ static int get_resource_id(figure_type type, int resource)
 
 static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version)
 {
+    int index = buf->index;
     f->alternative_location_index = buffer_read_u8(buf);
     f->image_offset = buffer_read_u8(buf);
     f->is_enemy_image = buffer_read_u8(buf);
@@ -385,7 +386,7 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     if (f->type == FIGURE_HIPPODROME_HORSES || f->type == FIGURE_FLOTSAM || resource < RESOURCE_NONE) {
         f->resource_id = resource;
     } else {
-        f->resource_id = resource_remap(buffer_read_u8(buf));
+        f->resource_id = resource_remap(resource);
     }
     f->use_cross_country = buffer_read_u8(buf);
     f->is_friendly = buffer_read_u8(buf);
