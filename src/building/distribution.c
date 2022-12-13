@@ -1,5 +1,6 @@
 #include "distribution.h"
 
+#include "building/properties.h"
 #include "building/storage.h"
 #include "building/warehouse.h"
 #include "city/resource.h"
@@ -92,8 +93,8 @@ static int is_invalid_destination(building *b, int permission, int road_network)
         !building_storage_get_permission(permission, b));
 }
 
-int building_distribution_get_inventory_storages(inventory_storage_info *info, building_type type,
-    int road_network, int x, int y, int max_distance)
+static int building_distribution_get_inventory_storages(inventory_storage_info *info, building_type type,
+    int road_network, int x, int y, int w, int h, int max_distance)
 {
     for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
         info[r].min_distance = max_distance;
@@ -113,7 +114,7 @@ int building_distribution_get_inventory_storages(inventory_storage_info *info, b
         if (type && is_invalid_destination(b, permission, road_network)) {
             continue;
         }
-        int distance = calc_maximum_distance(x, y, b->x, b->y);
+        int distance = building_dist(x, y, w, h, b);
 
         for (int r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
             if (resource_is_food(r) && resource_get_data(r)->is_inventory) {
@@ -125,7 +126,7 @@ int building_distribution_get_inventory_storages(inventory_storage_info *info, b
         if (type && is_invalid_destination(b, permission, road_network)) {
             continue;
         }
-        int distance = calc_maximum_distance(x, y, b->x, b->y);
+        int distance = building_dist(x, y, w, h, b);
 
         for (int r = RESOURCE_MAX_FOOD; r < RESOURCE_MAX; r++) {
             if (resource_is_good(r) && resource_get_data(r)->is_inventory) {
@@ -142,8 +143,8 @@ int building_distribution_get_inventory_storages(inventory_storage_info *info, b
     return 0;
 }
 
-int building_distribution_get_raw_material_storages(inventory_storage_info *info, building_type type,
-                                                 int road_network, int x, int y, int max_distance)
+static int building_distribution_get_raw_material_storages(inventory_storage_info *info, building_type type,
+    int road_network, int x, int y, int w, int h, int max_distance)
 {
     for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
         info[r].min_distance = max_distance;
@@ -156,7 +157,7 @@ int building_distribution_get_raw_material_storages(inventory_storage_info *info
         if (type && is_invalid_destination(b, permission, road_network)) {
             continue;
         }
-        int distance = calc_maximum_distance(x, y, b->x, b->y);
+        int distance = building_dist(x, y, w, h, b);
 
         for (resource_type r = RESOURCE_MAX_FOOD; r < RESOURCE_MAX; r++) {
             if (resource_is_raw_material(r)) {
@@ -171,4 +172,32 @@ int building_distribution_get_raw_material_storages(inventory_storage_info *info
         }
     }
     return 0;
+}
+
+int building_distribution_get_inventory_storages_for_building(inventory_storage_info *info, building *start, int max_distance) 
+{
+    int size = building_properties_for_type(start->type)->size;
+    return building_distribution_get_inventory_storages(info, start->type, start->road_network_id,
+        start->x, start->y, size, size, max_distance);
+}
+
+int building_distribution_get_raw_material_storages_for_building(inventory_storage_info *info, building *start, int max_distance)
+{
+    int size = building_properties_for_type(start->type)->size;
+    return building_distribution_get_raw_material_storages(info, start->type, start->road_network_id,
+        start->x, start->y, size, size, max_distance);
+}
+
+int building_distribution_get_inventory_storages_for_figure(inventory_storage_info *info, building_type type,
+    int road_network, figure *start, int max_distance)
+{
+    return building_distribution_get_inventory_storages(info, type, road_network,
+        start->x, start->y, 1, 1, max_distance);
+}
+
+int building_distribution_get_raw_material_storages_for_figure(inventory_storage_info *info, building_type type,
+    int road_network, figure *start, int max_distance)
+{
+    return building_distribution_get_raw_material_storages(info, type, road_network,
+        start->x, start->y, 1, 1, max_distance);
 }

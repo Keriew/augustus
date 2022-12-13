@@ -202,6 +202,7 @@ static config_widget all_widgets[CONFIG_PAGES][MAX_WIDGETS] = {
         {TYPE_CHECKBOX, CONFIG_UI_DISABLE_MOUSE_EDGE_SCROLLING, TR_CONFIG_DISABLE_MOUSE_EDGE_SCROLLING},
         {TYPE_CHECKBOX, CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE, TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE},
         {TYPE_CHECKBOX, CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE_HOUSES, TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE_HOUSES},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_MARKET_RANGE, TR_CONFIG_SHOW_MARKET_RANGE},
         {TYPE_CHECKBOX, CONFIG_UI_SHOW_CONSTRUCTION_SIZE, TR_CONFIG_SHOW_CONSTRUCTION_SIZE},
         {TYPE_CHECKBOX, CONFIG_UI_HIGHLIGHT_LEGIONS, TR_CONFIG_HIGHLIGHT_LEGIONS},
         {TYPE_CHECKBOX, CONFIG_UI_SHOW_MILITARY_SIDEBAR, TR_CONFIG_SHOW_MILITARY_SIDEBAR},
@@ -1065,7 +1066,9 @@ static void cancel_values(void)
 
 static int config_change_basic(config_key key)
 {
-    config_set(key, data.config_values[key].new_value);
+    if (key < CONFIG_MAX_ENTRIES) {
+        config_set(key, data.config_values[key].new_value);
+    }
     data.config_values[key].original_value = data.config_values[key].new_value;
     return 1;
 }

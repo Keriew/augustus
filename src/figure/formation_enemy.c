@@ -81,7 +81,8 @@ static const int RIOTER_ATTACK_PRIORITY[29] = {
     BUILDING_HOUSE_LARGE_VILLA,
 };
 
-static const int LAYOUT_ORIENTATION_OFFSETS[13][4][40] = {
+#define NUM_LAYOUT_FORMATIONS 40
+static const int LAYOUT_ORIENTATION_OFFSETS[13][4][NUM_LAYOUT_FORMATIONS] = {
     {
         {0, 0, -3, 0, 3, 0, -8, 0, 8, 0, -3, 8, 3, 8, 0},
         {0, 0, 0, -3, 0, 3, 0, -8, 0, 8, 8, -3, 8, 3, 0},
@@ -393,6 +394,14 @@ static void mars_kill_enemies(void)
     city_message_post(1, MESSAGE_SPIRIT_OF_MARS, 0, grid_offset);
 }
 
+static void get_layout_orientation_offset(const enemy_army *army, const formation *m, int *x_offset, int *y_offset)
+{
+    int layout = army->layout;
+    int legion_index_offset = (2 * m->enemy_legion_index) % NUM_LAYOUT_FORMATIONS;
+    *x_offset = LAYOUT_ORIENTATION_OFFSETS[layout][m->orientation / 2][legion_index_offset];
+    *y_offset = LAYOUT_ORIENTATION_OFFSETS[layout][m->orientation / 2][legion_index_offset + 1];
+}
+
 static void update_enemy_movement(formation *m, int roman_distance)
 {
     const enemy_army *army = enemy_army_get(m->invasion_id);
@@ -503,21 +512,21 @@ static void update_enemy_movement(formation *m, int roman_distance)
             formation_set_destination(m, army->destination_x, army->destination_y);
         }
     } else if (regroup) {
-        int layout = army->layout;
-        int x_offset = LAYOUT_ORIENTATION_OFFSETS[layout][m->orientation / 2][2 * m->enemy_legion_index] +
-            army->home_x;
-        int y_offset = LAYOUT_ORIENTATION_OFFSETS[layout][m->orientation / 2][2 * m->enemy_legion_index + 1] +
-            army->home_y;
+        int x_offset, y_offset;
+        get_layout_orientation_offset(army, m, &x_offset, &y_offset);
+        x_offset += army->home_x;
+        y_offset += army->home_y;
+        map_grid_bound(&x_offset, &y_offset);
         int x_tile, y_tile;
         if (formation_enemy_move_formation_to(m, x_offset, y_offset, &x_tile, &y_tile)) {
             formation_set_destination(m, x_tile, y_tile);
         }
     } else if (advance) {
-        int layout = army->layout;
-        int x_offset = LAYOUT_ORIENTATION_OFFSETS[layout][m->orientation / 2][2 * m->enemy_legion_index] +
-            army->destination_x;
-        int y_offset = LAYOUT_ORIENTATION_OFFSETS[layout][m->orientation / 2][2 * m->enemy_legion_index + 1] +
-            army->destination_y;
+        int x_offset, y_offset;
+        get_layout_orientation_offset(army, m, &x_offset, &y_offset);
+        x_offset += army->destination_x;
+        y_offset += army->destination_y;
+        map_grid_bound(&x_offset, &y_offset);
         int x_tile, y_tile;
         if (formation_enemy_move_formation_to(m, x_offset, y_offset, &x_tile, &y_tile)) {
             formation_set_destination(m, x_tile, y_tile);
@@ -581,7 +590,7 @@ static void update_enemy_formation(formation *m, int *roman_distance)
         army->home_y = m->y_home;
         army->layout = m->layout;
         *roman_distance = 0;
-        map_routing_noncitizen_can_travel_over_land(m->x_home, m->y_home, -2, -2, 8, 100000, 300);
+        map_routing_noncitizen_can_travel_over_land(m->x_home, m->y_home, -1, -1, 8, 100000, 300);
         int x_tile, y_tile;
         if (map_soldier_strength_get_max(m->x_home, m->y_home, 16, &x_tile, &y_tile)) {
             *roman_distance = 1;

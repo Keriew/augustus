@@ -28,6 +28,8 @@
 #define MAX_WIDTH 2032
 #define MAX_HEIGHT 1136
 
+#define OUR_CITY -1
+
 static void button_change_empire(int is_up, int param2);
 static void button_ok(int param1, int param2);
 static void button_refresh(int param1, int param2);
@@ -227,7 +229,7 @@ static void draw_city_info(const empire_city *city)
             int resource_x_offset = x_offset + 30 + width;
             for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
                 if (empire_object_city_sells_resource(city->empire_object_id, r)) {
-                    draw_resource(r, 0, resource_x_offset, y_offset - 9);
+                    draw_resource(r, OUR_CITY, resource_x_offset, y_offset - 9);
                     resource_x_offset += 32;
                 }
             }

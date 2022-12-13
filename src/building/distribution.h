@@ -2,6 +2,7 @@
 #define BUILDING_DISTRIBUTION_H
 
 #include "building/building.h"
+#include "figure/figure.h"
 #include "game/resource.h"
 
 typedef struct {
@@ -17,10 +18,14 @@ void building_distribution_unaccept_all_goods(building *b);
 
 void building_distribution_update_demands(building *b);
 
-resource_type building_distribution_fetch(const building *b, inventory_storage_info *info,
+resource_type building_distribution_fetch(const building * b, inventory_storage_info * info,
     int min_stock, int pick_first, const int allowed[RESOURCE_MAX]);
-int building_distribution_get_inventory_storages(inventory_storage_info *info, building_type type,
-    int road_network, int x, int y, int max_distance);
-int building_distribution_get_raw_material_storages(inventory_storage_info *info, building_type type,
-    int road_network, int x, int y, int max_distance);
+int building_distribution_get_inventory_storages_for_building(inventory_storage_info *info,
+    building *start, int max_distance);
+int building_distribution_get_raw_material_storages_for_building(inventory_storage_info *info,
+    building *start, int max_distance);
+int building_distribution_get_inventory_storages_for_figure(inventory_storage_info *info, building_type type,
+    int road_network, figure *start, int max_distance);
+int building_distribution_get_raw_material_storages_for_figure(inventory_storage_info *info, building_type type,
+    int road_network, figure *start, int max_distance);
 #endif // BUILDING_DISTRIBUTION_H

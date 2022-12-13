@@ -131,9 +131,9 @@ static void draw_roamer_frequency(int x, int y, int grid_offset)
         image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y,
             frequency_colors[travel_frequency - 1], draw_context.scale);
     } else if (travel_frequency == FIGURE_ROAMER_PREVIEW_ENTRY_TILE) {
-        image_blend_footprint_color(x, y, COLOR_MASK_GREEN, draw_context.scale);
-    } else if (travel_frequency == FIGURE_ROAMER_PREVIEW_EXIT_TILE) {
         image_blend_footprint_color(x, y, COLOR_MASK_RED, draw_context.scale);
+    } else if (travel_frequency == FIGURE_ROAMER_PREVIEW_EXIT_TILE) {
+        image_blend_footprint_color(x, y, COLOR_MASK_GREEN, draw_context.scale);
     } else if (travel_frequency == FIGURE_ROAMER_PREVIEW_ENTRY_EXIT_TILE) {
         image_draw_isometric_footprint(image_group(GROUP_TERRAIN_FLAT_TILE),
             x, y, COLOR_MASK_FOOTPRINT_GHOST, draw_context.scale);
@@ -768,12 +768,12 @@ void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_
     city_view_get_viewport(&x, &y, &width, &height);
     graphics_fill_rect(x, y, width, height, COLOR_BLACK);
     int should_mark_deleting = city_building_ghost_mark_deleting(tile);
-    city_view_foreach_valid_map_tile(draw_footprint, 0, 0);
+    city_view_foreach_valid_map_tile(draw_footprint);
 #ifndef NDEBUG
     debug_draw_city();
 #endif
     if (!should_mark_deleting) {
-        city_view_foreach_valid_map_tile(
+        city_view_foreach_valid_map_tile_row(
             draw_top,
             draw_figures,
             draw_animation
@@ -784,14 +784,14 @@ void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_
             }
             city_building_ghost_draw(tile);
         }
-        city_view_foreach_valid_map_tile(
+        city_view_foreach_valid_map_tile_row(
             draw_elevated_figures,
             draw_hippodrome_ornaments,
             0
         );
     } else {
-        city_view_foreach_map_tile(deletion_draw_terrain_top);
-        city_view_foreach_map_tile(deletion_draw_figures_animations);
-        city_view_foreach_map_tile(deletion_draw_remaining);
+        city_view_foreach_valid_map_tile(deletion_draw_terrain_top);
+        city_view_foreach_valid_map_tile(deletion_draw_figures_animations);
+        city_view_foreach_valid_map_tile(deletion_draw_remaining);
     }
 }
