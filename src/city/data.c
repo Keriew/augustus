@@ -135,12 +135,6 @@ static void save_main_data(buffer *main)
     for (int i = 0; i < RESOURCE_MAX_FOOD; i++) {
         buffer_write_i32(main, city_data.resource.granary_food_stored[i]);
     }
-    for (int i = 0; i < 6; i++) {
-        buffer_write_i32(main, city_data.resource.stored_in_workshops[i]);
-    }
-    for (int i = 0; i < 6; i++) {
-        buffer_write_i32(main, city_data.resource.space_in_workshops[i]);
-    }
     buffer_write_i32(main, city_data.resource.granary_total_stored);
     buffer_write_i32(main, city_data.resource.food_types_available);
     buffer_write_i32(main, city_data.resource.food_types_eaten);
@@ -597,11 +591,8 @@ static void load_main_data(buffer *main, int version)
     for (int i = 0; i < resource_total_food_mapped(); i++) {
         city_data.resource.granary_food_stored[resource_remap(i)] = buffer_read_i32(main);
     }
-    for (int i = 0; i < 6; i++) {
-        city_data.resource.stored_in_workshops[i] = buffer_read_i32(main);
-    }
-    for (int i = 0; i < 6; i++) {
-        city_data.resource.space_in_workshops[i] = buffer_read_i32(main);
+    if (version <= SAVE_GAME_LAST_STATIC_RESOURCES) {
+        buffer_skip(main, 6 * sizeof(int32_t) * 2); // skip space in workshops and stored in workshops
     }
     city_data.resource.granary_total_stored = buffer_read_i32(main);
     city_data.resource.food_types_available = buffer_read_i32(main);
@@ -1057,9 +1048,10 @@ void city_data_load_state(buffer *main, buffer *graph_order,
     load_entry_exit(entry_exit_xy, entry_exit_grid_offset);
 }
 
-void city_data_load_basic_info(buffer *main, int *population, int *treasury, int *caravanserai_id,
-    int discard_unused_values)
+void city_data_load_basic_info(buffer *main, int *population, int *treasury, int *caravanserai_id, int version)
 {
+    int discard_unused_values = version > SAVE_GAME_LAST_UNKNOWN_UNUSED_CITY_DATA;
+    int discard_workshop_bytes = (version > SAVE_GAME_LAST_STATIC_RESOURCES) ? 6 * sizeof(int32_t) * 2 : 0;
     int total_new_resources = resource_total_mapped() - RESOURCE_MAX_LEGACY;
     int total_new_food = resource_total_food_mapped() - RESOURCE_MAX_FOOD_LEGACY;
     int new_resources_bytes_offset = total_new_resources * 7 * sizeof(int16_t) + total_new_food * sizeof(int32_t);
@@ -1067,6 +1059,6 @@ void city_data_load_basic_info(buffer *main, int *population, int *treasury, int
     *treasury = buffer_read_i32(main);
     buffer_skip(main, discard_unused_values ? 16 : 20);
     *population = buffer_read_i32(main);
-    buffer_skip(main, discard_unused_values ? 10363 + new_resources_bytes_offset : 10596);
+    buffer_skip(main, discard_unused_values ? 10363 - discard_workshop_bytes + new_resources_bytes_offset : 10596);
     *caravanserai_id = buffer_read_i32(main);
 }

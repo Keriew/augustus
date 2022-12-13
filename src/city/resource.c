@@ -191,11 +191,6 @@ void city_resource_toggle_mothballed(resource_type resource)
     city_data.resource.mothballed[resource] = city_data.resource.mothballed[resource] ? 0 : 1;
 }
 
-int city_resource_has_workshop_with_room(int workshop_type)
-{
-    return city_data.resource.space_in_workshops[workshop_type] > 0;
-}
-
 void city_resource_add_produced_to_granary(int amount)
 {
     city_data.resource.food_produced_this_month += amount;
@@ -392,32 +387,6 @@ void city_resource_calculate_food_stocks_and_supply_wheat(void)
                 if (b->state == BUILDING_STATE_IN_USE) {
                     b->resources[RESOURCE_WHEAT] = 200;
                 }
-            }
-        }
-    }
-}
-
-void city_resource_calculate_workshop_stocks(void)
-{
-    for (int i = 0; i < 6; i++) {
-        city_data.resource.stored_in_workshops[i] = 0;
-        city_data.resource.space_in_workshops[i] = 0;
-    }
-    for (building_type type = BUILDING_WINE_WORKSHOP; type <= BUILDING_POTTERY_WORKSHOP; type++) {
-        for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
-            if (b->state != BUILDING_STATE_IN_USE) {
-                continue;
-            }
-            b->has_road_access = 0;
-            if (map_has_road_access(b->x, b->y, b->size, 0)) {
-                b->has_road_access = 1;
-                int room = 2 - b->loads_stored;
-                if (room < 0) {
-                    room = 0;
-                }
-                int workshop_resource = b->subtype.workshop_type;
-                city_data.resource.space_in_workshops[workshop_resource] += room;
-                city_data.resource.stored_in_workshops[workshop_resource] += b->loads_stored;
             }
         }
     }

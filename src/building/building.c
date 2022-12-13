@@ -245,23 +245,18 @@ building *building_create(building_type type, int x, int y)
             break;
         case BUILDING_WINE_WORKSHOP:
             b->output_resource_id = RESOURCE_WINE;
-            b->subtype.workshop_type = WORKSHOP_VINES_TO_WINE;
             break;
         case BUILDING_OIL_WORKSHOP:
             b->output_resource_id = RESOURCE_OIL;
-            b->subtype.workshop_type = WORKSHOP_OLIVES_TO_OIL;
             break;
         case BUILDING_WEAPONS_WORKSHOP:
             b->output_resource_id = RESOURCE_WEAPONS;
-            b->subtype.workshop_type = WORKSHOP_IRON_TO_WEAPONS;
             break;
         case BUILDING_FURNITURE_WORKSHOP:
             b->output_resource_id = RESOURCE_FURNITURE;
-            b->subtype.workshop_type = WORKSHOP_TIMBER_TO_FURNITURE;
             break;
         case BUILDING_POTTERY_WORKSHOP:
             b->output_resource_id = RESOURCE_POTTERY;
-            b->subtype.workshop_type = WORKSHOP_CLAY_TO_POTTERY;
             break;
         case BUILDING_GRAND_TEMPLE_VENUS:
             b->output_resource_id = RESOURCE_WINE;

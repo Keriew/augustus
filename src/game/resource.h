@@ -52,15 +52,6 @@ enum {
 };
 
 typedef enum {
-    WORKSHOP_NONE = 0,
-    WORKSHOP_OLIVES_TO_OIL = 1,
-    WORKSHOP_VINES_TO_WINE = 2,
-    WORKSHOP_IRON_TO_WEAPONS = 3,
-    WORKSHOP_TIMBER_TO_FURNITURE = 4,
-    WORKSHOP_CLAY_TO_POTTERY = 5
-} workshop_type;
-
-typedef enum {
     RESOURCE_FLAG_NONE = 0,
     RESOURCE_FLAG_FOOD = 1,
     RESOURCE_FLAG_RAW_MATERIAL = 2,
@@ -74,6 +65,7 @@ typedef struct {
     const uint8_t *text;
     int is_inventory;
     building_type industry;
+    building_type workshop;
     struct {
         int storage;
         struct {
@@ -101,8 +93,6 @@ int resource_is_food(resource_type resource);
 int resource_is_raw_material(resource_type resource);
 
 int resource_is_good(resource_type resource);
-
-workshop_type resource_to_workshop_type(resource_type resource);
 
 const resource_data *resource_get_data(resource_type resource);
 

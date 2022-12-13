@@ -373,7 +373,6 @@ static int get_resource_id(figure_type type, int resource)
 
 static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version)
 {
-    int index = buf->index;
     f->alternative_location_index = buffer_read_u8(buf);
     f->image_offset = buffer_read_u8(buf);
     f->is_enemy_image = buffer_read_u8(buf);

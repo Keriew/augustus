@@ -700,15 +700,12 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
     space = warehouse;
     for (int i = 0; i < 8; i++) {
         space = building_next(space);
-        if (space->id > 0 && space->loads_stored > 0) {
-            if (!city_resource_is_stockpiled(space->subtype.warehouse_resource_id)) {
-                int workshop_type = resource_to_workshop_type(space->subtype.warehouse_resource_id);
-                if (workshop_type != WORKSHOP_NONE && city_resource_has_workshop_with_room(workshop_type) &&
-                    building_has_workshop_for_raw_material_with_room(workshop_type, warehouse->road_network_id)) {
-                    *resource = space->subtype.warehouse_resource_id;
-                    return WAREHOUSE_TASK_DELIVERING;
-                }
-            }
+        if (space->id > 0 && space->loads_stored > 0 &&
+            !city_resource_is_stockpiled(space->subtype.warehouse_resource_id) &&
+            building_has_workshop_for_raw_material_with_room(space->subtype.warehouse_resource_id,
+                warehouse->road_network_id)) {
+            *resource = space->subtype.warehouse_resource_id;
+            return WAREHOUSE_TASK_DELIVERING;
         }
     }
     // deliver food to getting granary

@@ -359,6 +359,7 @@ static void get_version_data(savegame_version_data *version_data, int version)
     } else {
         version_data->piece_sizes.city_data = 11885;
         if (version > SAVE_GAME_LAST_STATIC_RESOURCES) {
+            version_data->piece_sizes.city_data -= sizeof(int32_t) * 6 * 2;
             version_data->piece_sizes.city_data += total_new_resources * 18;
             version_data->piece_sizes.city_data += total_new_food * 4;
         }
@@ -1316,8 +1317,7 @@ static int savegame_read_file_info(FILE *fp, saved_game_info *info, int version,
 
     info->custom_mission = read_int32(fp);
 
-    city_data_load_basic_info(&city_data.buf, &info->population, &info->treasury, &minimap_data.caravanserai_id,
-        version > SAVE_GAME_LAST_UNKNOWN_UNUSED_CITY_DATA);
+    city_data_load_basic_info(&city_data.buf, &info->population, &info->treasury, &minimap_data.caravanserai_id, version);
     game_time_load_basic_info(&game_time.buf, &info->month, &info->year);
 
     int grid_start;

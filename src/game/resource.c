@@ -41,14 +41,14 @@ static resource_data resource_info[RESOURCE_ALL] = {
     [RESOURCE_WHEAT]      = { .type = RESOURCE_WHEAT,      .flags = RESOURCE_FLAG_FOOD,         .industry = BUILDING_WHEAT_FARM,         .default_trade_price = {  28,  22 }, .is_inventory = 1 },
     [RESOURCE_VEGETABLES] = { .type = RESOURCE_VEGETABLES, .flags = RESOURCE_FLAG_FOOD,         .industry = BUILDING_VEGETABLE_FARM,     .default_trade_price = {  38,  30 }, .is_inventory = 1 },
     [RESOURCE_FRUIT]      = { .type = RESOURCE_FRUIT,      .flags = RESOURCE_FLAG_FOOD,         .industry = BUILDING_FRUIT_FARM,         .default_trade_price = {  38,  30 }, .is_inventory = 1 },
-    [RESOURCE_OLIVES]     = { .type = RESOURCE_OLIVES,     .flags = RESOURCE_FLAG_RAW_MATERIAL, .industry = BUILDING_OLIVE_FARM,         .default_trade_price = {  42,  34 } },
-    [RESOURCE_VINES]      = { .type = RESOURCE_VINES,      .flags = RESOURCE_FLAG_RAW_MATERIAL, .industry = BUILDING_VINES_FARM,         .default_trade_price = {  44,  36 } },
+    [RESOURCE_OLIVES]     = { .type = RESOURCE_OLIVES,     .flags = RESOURCE_FLAG_RAW_MATERIAL, .industry = BUILDING_OLIVE_FARM,         .default_trade_price = {  42,  34 }, .workshop = BUILDING_OIL_WORKSHOP },
+    [RESOURCE_VINES]      = { .type = RESOURCE_VINES,      .flags = RESOURCE_FLAG_RAW_MATERIAL, .industry = BUILDING_VINES_FARM,         .default_trade_price = {  44,  36 }, .workshop = BUILDING_WINE_WORKSHOP },
     [RESOURCE_MEAT]       = { .type = RESOURCE_MEAT,       .flags = RESOURCE_FLAG_FOOD,         .industry = BUILDING_PIG_FARM,           .default_trade_price = {  44,  36 }, .is_inventory = 1 },
     [RESOURCE_WINE]       = { .type = RESOURCE_WINE,       .flags = RESOURCE_FLAG_GOOD,         .industry = BUILDING_WINE_WORKSHOP,      .default_trade_price = { 215, 160 }, .is_inventory = 1 },
     [RESOURCE_OIL]        = { .type = RESOURCE_OIL,        .flags = RESOURCE_FLAG_GOOD,         .industry = BUILDING_OIL_WORKSHOP,       .default_trade_price = { 180, 140 }, .is_inventory = 1 },
-    [RESOURCE_IRON]       = { .type = RESOURCE_IRON,       .flags = RESOURCE_FLAG_RAW_MATERIAL, .industry = BUILDING_IRON_MINE,          .default_trade_price = {  60,  40 } },
-    [RESOURCE_TIMBER]     = { .type = RESOURCE_TIMBER,     .flags = RESOURCE_FLAG_RAW_MATERIAL, .industry = BUILDING_TIMBER_YARD,        .default_trade_price = {  50,  35 } },
-    [RESOURCE_CLAY]       = { .type = RESOURCE_CLAY,       .flags = RESOURCE_FLAG_RAW_MATERIAL, .industry = BUILDING_CLAY_PIT,           .default_trade_price = {  40,  30 } },
+    [RESOURCE_IRON]       = { .type = RESOURCE_IRON,       .flags = RESOURCE_FLAG_RAW_MATERIAL, .industry = BUILDING_IRON_MINE,          .default_trade_price = {  60,  40 }, .workshop = BUILDING_WEAPONS_WORKSHOP },
+    [RESOURCE_TIMBER]     = { .type = RESOURCE_TIMBER,     .flags = RESOURCE_FLAG_RAW_MATERIAL, .industry = BUILDING_TIMBER_YARD,        .default_trade_price = {  50,  35 }, .workshop = BUILDING_FURNITURE_WORKSHOP },
+    [RESOURCE_CLAY]       = { .type = RESOURCE_CLAY,       .flags = RESOURCE_FLAG_RAW_MATERIAL, .industry = BUILDING_CLAY_PIT,           .default_trade_price = {  40,  30 }, .workshop = BUILDING_POTTERY_WORKSHOP },
     [RESOURCE_MARBLE]     = { .type = RESOURCE_MARBLE,     .flags = RESOURCE_FLAG_RAW_MATERIAL, .industry = BUILDING_MARBLE_QUARRY,      .default_trade_price = { 200, 140 } },
     [RESOURCE_WEAPONS]    = { .type = RESOURCE_WEAPONS,    .flags = RESOURCE_FLAG_GOOD,         .industry = BUILDING_WEAPONS_WORKSHOP,   .default_trade_price = { 250, 180 } },
     [RESOURCE_FURNITURE]  = { .type = RESOURCE_FURNITURE,  .flags = RESOURCE_FLAG_GOOD,         .industry = BUILDING_FURNITURE_WORKSHOP, .default_trade_price = { 200, 150 }, .is_inventory = 1 },
@@ -75,24 +75,6 @@ int resource_is_raw_material(resource_type resource)
 int resource_is_good(resource_type resource)
 {
     return (resource_info[resource].flags & RESOURCE_FLAG_GOOD) != 0;
-}
-
-workshop_type resource_to_workshop_type(resource_type resource)
-{
-    switch (resource) {
-        case RESOURCE_OLIVES:
-            return WORKSHOP_OLIVES_TO_OIL;
-        case RESOURCE_VINES:
-            return WORKSHOP_VINES_TO_WINE;
-        case RESOURCE_IRON:
-            return WORKSHOP_IRON_TO_WEAPONS;
-        case RESOURCE_TIMBER:
-            return WORKSHOP_TIMBER_TO_FURNITURE;
-        case RESOURCE_CLAY:
-            return WORKSHOP_CLAY_TO_POTTERY;
-        default:
-            return WORKSHOP_NONE;
-    }
 }
 
 void resource_init(void)
