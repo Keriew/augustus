@@ -1372,7 +1372,7 @@ int game_file_io_read_saved_game_info(const char *filename, saved_game_info *inf
         resource_set_mapping(resource_version);
         memory_block compress_buffer;
         core_memory_block_init(&compress_buffer, COMPRESS_BUFFER_INITIAL_SIZE);
-        result = savegame_read_file_info(fp, info, savegame_version);
+        result = savegame_read_file_info(fp, info, savegame_version, &compress_buffer);
         core_memory_block_free(&compress_buffer);
     }
     file_close(fp);
