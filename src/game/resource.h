@@ -46,10 +46,10 @@ typedef enum {
 
 #define LEGACY_INVENTORY_MAX 8
 
-enum {
+typedef enum {
     RESOURCE_ORIGINAL_VERSION = 0,
-    RESOURCE_CURRENT_VERSION = 0
-};
+    RESOURCE_CURRENT_VERSION = 1
+} resource_version;
 
 typedef enum {
     RESOURCE_FLAG_NONE = 0,

@@ -23,18 +23,12 @@ static const resource_type legacy_inventory_mapping[LEGACY_INVENTORY_MAX] = {
 };
 
 static struct {
-    const resource_type *current;
+    const resource_type *resources;
     const resource_type *inventory;
     int total_resources;
     int total_food_resources;
     int special_resources;
-} mapping = {
-    resource_mappings[RESOURCE_CURRENT_VERSION],
-    legacy_inventory_mapping,
-    RESOURCE_MAX_LEGACY,
-    RESOURCE_MAX_FOOD_LEGACY,
-    RESOURCE_TOTAL_SPECIAL
-};
+} mapping;
 
 static resource_data resource_info[RESOURCE_ALL] = {
     [RESOURCE_NONE]       = { .type = RESOURCE_NONE },
@@ -130,14 +124,15 @@ void resource_set_mapping(int version)
 {
     switch (version) {    
         case RESOURCE_ORIGINAL_VERSION:
-            mapping.current = resource_mappings[RESOURCE_ORIGINAL_VERSION];
+            mapping.resources = resource_mappings[RESOURCE_ORIGINAL_VERSION];
             mapping.inventory = legacy_inventory_mapping;
             mapping.total_resources = RESOURCE_MAX_LEGACY;
             mapping.total_food_resources = RESOURCE_MAX_FOOD_LEGACY;
             break;
+        case RESOURCE_CURRENT_VERSION:
         default:
-            mapping.current = resource_mappings[RESOURCE_CURRENT_VERSION];
-            mapping.inventory = legacy_inventory_mapping;
+            mapping.resources = 0;
+            mapping.inventory = 0;
             mapping.total_resources = RESOURCE_MAX;
             mapping.total_food_resources = RESOURCE_MAX_FOOD;
             break;
@@ -146,16 +141,12 @@ void resource_set_mapping(int version)
 
 resource_type resource_map_legacy_inventory(int id)
 {
-    if (mapping.inventory) {
-        return legacy_inventory_mapping[id];
-    } else {
-        return id;
-    }
+    return mapping.inventory ? mapping.inventory[id] : id;
 }
 
 resource_type resource_remap(int id)
 {
-    return mapping.current[id];
+    return mapping.resources ? mapping.resources[id] : id;
 }
 
 int resource_total_mapped(void)
