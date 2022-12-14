@@ -1221,7 +1221,9 @@ static int savegame_read_file_info(FILE *fp, saved_game_info *info,
         skip_piece(fp, 4, 0);
     }
     if (version_data.features.scenario_version) {
-        fread(scenario_version_data.buf.data, 1, 4, fp);
+        if (fread(scenario_version_data.buf.data, 1, 4, fp) != 4) {
+            return 0;
+        }
     }
 
     int scenario_version = save_version_to_scenario_version(version, &scenario_version_data.buf);

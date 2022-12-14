@@ -203,7 +203,7 @@ static void init(file_type type, file_dialog_type dialog_type)
     scrollbar_init(&scrollbar, 0, data.file_list->num_files);
     scroll_to_typed_text();
 
-    strncpy(data.selected_file, data.file_data->last_loaded_file, FILE_NAME_MAX - 1);
+    strncpy(data.selected_file, data.file_data->last_loaded_file, FILE_NAME_MAX);
     input_box_start(&file_name_input);
 }
 
@@ -379,7 +379,7 @@ static char *get_chosen_filename(void)
     }
 
     // We should use the typed name, which needs to be converted to UTF-8...
-    static char typed_file[FILE_NAME_MAX];
+    static char typed_file[FILE_NAME_MAX + 1];
     encoding_to_utf8(data.typed_name, typed_file, FILE_NAME_MAX, encoding_system_uses_decomposed());
     return typed_file;
 }
@@ -470,7 +470,7 @@ static void button_ok_cancel(int is_ok, int param2)
         }
     }
 
-    strncpy(data.file_data->last_loaded_file, chosen_filename, FILE_NAME_MAX - 1);
+    strncpy(data.file_data->last_loaded_file, chosen_filename, FILE_NAME_MAX);
 }
 
 static void on_scroll(void)
