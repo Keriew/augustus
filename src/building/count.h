@@ -58,28 +58,4 @@ int building_count_grand_temples_active(void);
  */
 int building_count_industry_total(resource_type resource);
 
-/**
- * Save the building counts
- * @param industry Buffer for industry
- * @param culture1 Culture part 1
- * @param culture2 Culture part 2 (schools)
- * @param culture3 Culture part 3 (temples)
- * @param military Military
- * @param support Market and water
- */
-void building_count_save_state(
-    buffer *industry, buffer *culture1, buffer *culture2, buffer *culture3, buffer *military, buffer *support);
-
-/**
- * Load the building counts
- * @param industry Buffer for industry
- * @param culture1 Culture part 1
- * @param culture2 Culture part 2 (schools)
- * @param culture3 Culture part 3 (temples)
- * @param military Military
- * @param support Market and water
- */
-void building_count_load_state(
-    buffer *industry, buffer *culture1, buffer *culture2, buffer *culture3, buffer *military, buffer *support, int includes_buffer_size);
-
 #endif // BUILDING_COUNT_H

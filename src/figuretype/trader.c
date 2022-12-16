@@ -30,6 +30,7 @@
 #include "figure/movement.h"
 #include "figure/route.h"
 #include "figure/trader.h"
+#include "figure/visited_buildings.h"
 #include "map/routing.h"
 #include "map/routing_path.h"
 #include "scenario/map.h"
@@ -745,14 +746,14 @@ static int record_dock(figure *ship, int dock_id)
     if (dock->data.dock.trade_ship_id != 0 && dock->data.dock.trade_ship_id != ship->id) {
         return 0;
     }
-    for (int i = 0; i < MAX_DOCKS; i++) {
-        if (dock_id == city_buildings_get_working_dock(i)) {
-            ship->building_id |= 1 << i;
-            dock->data.dock.trade_ship_id = ship->id;
-            return 1;
-        }
+    visited_building *visited = figure_visited_buildings_add();
+    if (!visited) {
+        return 0;
     }
-    return 0;
+    visited->building_id = dock_id;
+    visited->prev_index = ship->last_visited_index;
+    ship->last_visited_index = visited->index;
+    return 1;
 }
 
 void figure_trade_ship_action(figure *f)
@@ -774,7 +775,6 @@ void figure_trade_ship_action(figure *f)
             f->trader_amount_bought = 0;
             f->is_ghost = 1;
             f->wait_ticks++;
-            f->building_id = 0;
             if (f->wait_ticks > 20) {
                 f->wait_ticks = 0;
                 map_point queue_tile;
@@ -1034,21 +1034,17 @@ int figure_trade_sea_trade_units(void)
     return unit;
 }
 
-int figure_trader_ship_docked_once_at_dock(figure *ship, int dock_id)
+int figure_trader_ship_already_docked_at(figure *ship, int dock_id)
 {
-    for (int i = 0; i < MAX_DOCKS; i++) {
-        if (dock_id == city_buildings_get_working_dock(i)) {
-            if (figure_trader_ship_already_docked_at(ship, i)) {
-                return 1;
-            }
+    int visited_index = ship->last_visited_index;
+    while (visited_index) {
+        const visited_building *visited = figure_visited_buildings_get(visited_index);
+        if (visited->building_id == dock_id) {
+            return 1;
         }
+        visited_index = visited->prev_index;
     }
     return 0;
-}
-
-int figure_trader_ship_already_docked_at(figure *ship, int dock_num)
-{
-    return ship->building_id & (1 << dock_num);
 }
 
 // if ship is moored, do not forward to another dock unless it has more than one third of capacity available.
