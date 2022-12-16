@@ -58,13 +58,3 @@ int building_count_upgraded(building_type type)
     }
     return (type == BUILDING_HIPPODROME) ? upgraded / 3 : upgraded;
 }
-
-int building_count_industry_active(resource_type resource)
-{
-    return building_count_active(resource_get_data(resource)->industry);
-}
-
-int building_count_industry_total(resource_type resource)
-{
-    return building_count_total(resource_get_data(resource)->industry);
-}

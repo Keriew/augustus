@@ -303,6 +303,9 @@ int building_dock_get_destination(int ship_id, int exclude_dock_id, map_point *t
     }
 
     handled_good *handled_goods = malloc(sizeof(handled_good) * total_docks);
+    if (!handled_goods) {
+        return 0;
+    }
     get_already_handled_goods(handled_goods, total_docks, ship_id);
 
     int dock_id = get_free_destination(ship_id, exclude_dock_id, tile, handled_goods, total_docks);

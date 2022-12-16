@@ -11,11 +11,6 @@
  */
 
 /**
- * Updates the building counts and does some extra work on the side
- */
-void building_count_update(void);
-
-/**
  * Returns the active building count for the type
  * @param type Building type
  * @return Number of active buildings
@@ -34,28 +29,19 @@ int building_count_total(building_type type);
  * @param type Building type
  * @return Number of upgraded buildings
  */
-
 int building_count_upgraded(building_type type);
 
-
 /**
- * Returns the active building count for the resource type
- * @param resource Resource type
- * @return Number of active buildings
+ * Returns the total number of grand temples
+ * @return Number of total grand temples
  */
-int building_count_industry_active(resource_type resource);
-
-int building_count_colosseum(void);
-
 int building_count_grand_temples(void);
 
-int building_count_grand_temples_active(void);
-
 /**
- * Returns the building count for the resource type
- * @param resource Resource type
- * @return Total number of buildings
+ * Returns the total number of active grand temples
+ * @return Number of active grand temples
  */
-int building_count_industry_total(resource_type resource);
+int building_count_grand_temples(void);
+int building_count_grand_temples_active(void);
 
 #endif // BUILDING_COUNT_H
