@@ -525,16 +525,16 @@ static void draw_granary_stores(const image *img, const building *b, int x, int 
             y + 60 + img->animation->sprite_offset_y - img->height,
             color_mask, draw_context.scale);
     }
-    if (b->data.granary.resource_stored[RESOURCE_NONE] < FULL_GRANARY) {
+    if (b->resources[RESOURCE_NONE] < FULL_GRANARY) {
         image_draw(image_group(GROUP_BUILDING_GRANARY) + 2, x + 33, y - 60, color_mask, draw_context.scale);
     }
-    if (b->data.granary.resource_stored[RESOURCE_NONE] < THREEQUARTERS_GRANARY) {
+    if (b->resources[RESOURCE_NONE] < THREEQUARTERS_GRANARY) {
         image_draw(image_group(GROUP_BUILDING_GRANARY) + 3, x + 56, y - 50, color_mask, draw_context.scale);
     }
-    if (b->data.granary.resource_stored[RESOURCE_NONE] < HALF_GRANARY) {
+    if (b->resources[RESOURCE_NONE] < HALF_GRANARY) {
         image_draw(image_group(GROUP_BUILDING_GRANARY) + 4, x + 91, y - 50, color_mask, draw_context.scale);
     }
-    if (b->data.granary.resource_stored[RESOURCE_NONE] < QUARTER_GRANARY) {
+    if (b->resources[RESOURCE_NONE] < QUARTER_GRANARY) {
         image_draw(image_group(GROUP_BUILDING_GRANARY) + 5, x + 117, y - 62, color_mask, draw_context.scale);
     }
 }
@@ -768,30 +768,30 @@ void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_
     city_view_get_viewport(&x, &y, &width, &height);
     graphics_fill_rect(x, y, width, height, COLOR_BLACK);
     int should_mark_deleting = city_building_ghost_mark_deleting(tile);
-    city_view_foreach_valid_map_tile(draw_footprint, 0, 0);
+    city_view_foreach_valid_map_tile(draw_footprint);
 #ifndef NDEBUG
     debug_draw_city();
 #endif
     if (!should_mark_deleting) {
-        city_view_foreach_valid_map_tile(
+        city_view_foreach_valid_map_tile_row(
             draw_top,
             draw_figures,
             draw_animation
         );
         if (!selected_figure_id) {
             if (building_is_connectable(building_construction_type())) {
-                city_view_foreach_map_tile(draw_connectable_construction_ghost);
+                city_view_foreach_valid_map_tile(draw_connectable_construction_ghost);
             }
             city_building_ghost_draw(tile);
         }
-        city_view_foreach_valid_map_tile(
+        city_view_foreach_valid_map_tile_row(
             draw_elevated_figures,
             draw_hippodrome_ornaments,
             0
         );
     } else {
-        city_view_foreach_map_tile(deletion_draw_terrain_top);
-        city_view_foreach_map_tile(deletion_draw_figures_animations);
-        city_view_foreach_map_tile(deletion_draw_remaining);
+        city_view_foreach_valid_map_tile(deletion_draw_terrain_top);
+        city_view_foreach_valid_map_tile(deletion_draw_figures_animations);
+        city_view_foreach_valid_map_tile(deletion_draw_remaining);
     }
 }

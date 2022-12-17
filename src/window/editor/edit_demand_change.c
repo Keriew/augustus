@@ -99,7 +99,7 @@ static void draw_foreground(void)
     lang_text_draw_year(scenario_property_start_year() + data.demand_change.year, 100, 158, FONT_NORMAL_BLACK);
 
     button_border_draw(190, 152, 120, 25, data.focus_button_id == 2);
-    lang_text_draw_centered(23, data.demand_change.resource, 190, 158, 120, FONT_NORMAL_BLACK);
+    text_draw_centered(resource_get_data(data.demand_change.resource)->text, 190, 158, 120, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
 
     lang_text_draw(44, 97, 330, 158, FONT_NORMAL_BLACK);
     button_border_draw(420, 152, 200, 25, data.focus_button_id == 3);
@@ -145,7 +145,12 @@ static void set_resource(int value)
 
 static void button_resource(int param1, int param2)
 {
-    window_select_list_show(screen_dialog_offset_x() + 320, screen_dialog_offset_y() + 40, 23, 16, set_resource);
+    static const uint8_t *resource_texts[RESOURCE_MAX];
+    for (resource_type resource = RESOURCE_NONE; resource < RESOURCE_MAX; resource++) {
+        resource_texts[resource] = resource_get_data(resource)->text;
+    }
+    window_select_list_show_text(screen_dialog_offset_x() + 320, screen_dialog_offset_y() + 40,
+        resource_texts, RESOURCE_MAX, set_resource);
 }
 
 static void set_route_id(int index)

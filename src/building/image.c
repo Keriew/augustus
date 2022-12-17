@@ -33,7 +33,28 @@ static const struct {
     {GROUP_BUILDING_HOUSE_PALACE_2, 0, 1}, {GROUP_BUILDING_HOUSE_PALACE_2, 1, 1},
 };
 
-int building_image_get(building *b)
+int building_image_get_base_farm_crop(building_type type)
+{
+    switch (type) {
+        case BUILDING_WHEAT_FARM:
+        case BUILDING_NATIVE_CROPS:
+            return image_group(GROUP_BUILDING_FARM_CROPS);
+        case BUILDING_VEGETABLE_FARM:
+            return image_group(GROUP_BUILDING_FARM_CROPS) + 5;
+        case BUILDING_FRUIT_FARM:
+            return image_group(GROUP_BUILDING_FARM_CROPS) + 10;
+        case BUILDING_OLIVE_FARM:
+            return image_group(GROUP_BUILDING_FARM_CROPS) + 15;
+        case BUILDING_VINES_FARM:
+            return image_group(GROUP_BUILDING_FARM_CROPS) + 20;
+        case BUILDING_PIG_FARM:
+            return image_group(GROUP_BUILDING_FARM_CROPS) + 25;
+        default:
+            return 0;
+    }
+}
+
+int building_image_get(const building *b)
 {
     switch (b->type) {
         case BUILDING_HOUSE_VACANT_LOT:
@@ -384,10 +405,7 @@ int building_image_get(building *b)
             if (b->loads_stored <= 0 || b->subtype.warehouse_resource_id == RESOURCE_NONE) {
                 return image_group(GROUP_BUILDING_WAREHOUSE_STORAGE_EMPTY);
             } else {
-                return image_group(GROUP_BUILDING_WAREHOUSE_STORAGE_FILLED) +
-                    4 * (b->subtype.warehouse_resource_id - 1) +
-                    resource_image_offset(b->subtype.warehouse_resource_id, RESOURCE_IMAGE_STORAGE) +
-                    b->loads_stored - 1;
+                return resource_get_data(b->subtype.warehouse_resource_id)->image.storage + b->loads_stored - 1;
             }
         case BUILDING_HIPPODROME:
             {

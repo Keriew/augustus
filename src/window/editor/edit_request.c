@@ -68,7 +68,7 @@ static void draw_foreground(void)
     text_draw_number_centered(data.request.amount, 330, 158, 80, FONT_NORMAL_BLACK);
 
     button_border_draw(430, 152, 100, 25, data.focus_button_id == 3);
-    lang_text_draw_centered(23, data.request.resource, 430, 158, 100, FONT_NORMAL_BLACK);
+    text_draw_centered(resource_get_data(data.request.resource)->text, 430, 158, 100, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
 
     lang_text_draw(44, 24, 40, 196, FONT_NORMAL_BLACK);
     button_border_draw(70, 190, 140, 25, data.focus_button_id == 4);
@@ -136,7 +136,12 @@ static void set_resource(int value)
 
 static void button_resource(int param1, int param2)
 {
-    window_select_list_show(screen_dialog_offset_x() + 210, screen_dialog_offset_y() + 40, 23, 17, set_resource);
+    static const uint8_t *resource_texts[RESOURCE_MAX + 1];
+    for (resource_type resource = RESOURCE_NONE; resource <= RESOURCE_MAX; resource++) {
+        resource_texts[resource] = resource_get_data(resource)->text;
+    }
+    window_select_list_show_text(screen_dialog_offset_x() + 210, screen_dialog_offset_y() + 40,
+        resource_texts, RESOURCE_MAX + 1, set_resource);
 }
 
 static void set_deadline_years(int value)

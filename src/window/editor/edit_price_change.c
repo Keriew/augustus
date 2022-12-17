@@ -1,5 +1,6 @@
 #include "edit_price_change.h"
 
+#include "game/resource.h"
 #include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
@@ -61,7 +62,7 @@ static void draw_foreground(void)
     lang_text_draw_year(scenario_property_start_year() + data.price_change.year, 100, 158, FONT_NORMAL_BLACK);
 
     button_border_draw(240, 152, 120, 25, data.focus_button_id == 2);
-    lang_text_draw_centered(23, data.price_change.resource, 240, 158, 120, FONT_NORMAL_BLACK);
+    text_draw_centered(resource_get_data(data.price_change.resource)->text, 240, 158, 120, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
 
     button_border_draw(100, 192, 200, 25, data.focus_button_id == 3);
     lang_text_draw_centered(44, data.price_change.is_rise ? 104 : 103, 100, 198, 200, FONT_NORMAL_BLACK);
@@ -105,7 +106,12 @@ static void set_resource(int value)
 
 static void button_resource(int param1, int param2)
 {
-    window_select_list_show(screen_dialog_offset_x() + 25, screen_dialog_offset_y() + 40, 23, 16, set_resource);
+    static const uint8_t *resource_texts[RESOURCE_MAX];
+    for (resource_type resource = RESOURCE_NONE; resource < RESOURCE_MAX; resource++) {
+        resource_texts[resource] = resource_get_data(resource)->text;
+    }
+    window_select_list_show_text(screen_dialog_offset_x() + 25, screen_dialog_offset_y() + 40,
+        resource_texts, RESOURCE_MAX, set_resource);
 }
 
 static void button_toggle_rise(int param1, int param2)

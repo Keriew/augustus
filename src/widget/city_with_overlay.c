@@ -469,15 +469,15 @@ static void draw_building_top(int grid_offset, building *b, int x, int y)
                 x + img->animation->sprite_offset_x, y + img->animation->sprite_offset_y - 30 - (img->height - 90),
                 color_mask, scale);
         }
-        if (b->data.granary.resource_stored[RESOURCE_NONE] < FULL_GRANARY) {
+        if (b->resources[RESOURCE_NONE] < FULL_GRANARY) {
             image_draw(image_group(GROUP_BUILDING_GRANARY) + 2, x + 33, y - 60, color_mask, scale);
-            if (b->data.granary.resource_stored[RESOURCE_NONE] < THREEQUARTERS_GRANARY) {
+            if (b->resources[RESOURCE_NONE] < THREEQUARTERS_GRANARY) {
                 image_draw(image_group(GROUP_BUILDING_GRANARY) + 3, x + 56, y - 50, color_mask, scale);
             }
-            if (b->data.granary.resource_stored[RESOURCE_NONE] < HALF_GRANARY) {
+            if (b->resources[RESOURCE_NONE] < HALF_GRANARY) {
                 image_draw(image_group(GROUP_BUILDING_GRANARY) + 4, x + 91, y - 50, color_mask, scale);
             }
-            if (b->data.granary.resource_stored[RESOURCE_NONE] < QUARTER_GRANARY) {
+            if (b->resources[RESOURCE_NONE] < QUARTER_GRANARY) {
                 image_draw(image_group(GROUP_BUILDING_GRANARY) + 5, x + 117, y - 62, color_mask, scale);
             }
         }
@@ -572,16 +572,16 @@ static void draw_animation(int x, int y, int grid_offset)
                         y + 60 + img->animation->sprite_offset_y - img->height,
                         color_mask, scale);
                 }
-                if (b->data.granary.resource_stored[RESOURCE_NONE] < FULL_GRANARY) {
+                if (b->resources[RESOURCE_NONE] < FULL_GRANARY) {
                     image_draw(image_group(GROUP_BUILDING_GRANARY) + 2, x + 33, y - 60, color_mask, scale);
                 }
-                if (b->data.granary.resource_stored[RESOURCE_NONE] < THREEQUARTERS_GRANARY) {
+                if (b->resources[RESOURCE_NONE] < THREEQUARTERS_GRANARY) {
                     image_draw(image_group(GROUP_BUILDING_GRANARY) + 3, x + 56, y - 50, color_mask, scale);
                 }
-                if (b->data.granary.resource_stored[RESOURCE_NONE] < HALF_GRANARY) {
+                if (b->resources[RESOURCE_NONE] < HALF_GRANARY) {
                     image_draw(image_group(GROUP_BUILDING_GRANARY) + 4, x + 91, y - 50, color_mask, scale);
                 }
-                if (b->data.granary.resource_stored[RESOURCE_NONE] < QUARTER_GRANARY) {
+                if (b->resources[RESOURCE_NONE] < QUARTER_GRANARY) {
                     image_draw(image_group(GROUP_BUILDING_GRANARY) + 5, x + 117, y - 62, color_mask, scale);
                 }
             } else {
@@ -667,24 +667,24 @@ void city_with_overlay_draw(const map_tile *tile)
     city_view_get_viewport(&x, &y, &width, &height);
     graphics_fill_rect(x, y, width, height, COLOR_BLACK);
     int should_mark_deleting = city_building_ghost_mark_deleting(tile);
-    city_view_foreach_map_tile(draw_footprint);
+    city_view_foreach_valid_map_tile(draw_footprint);
     if (!should_mark_deleting) {
-        city_view_foreach_valid_map_tile(
+        city_view_foreach_valid_map_tile_row(
             draw_figures,
             draw_top,
             draw_animation
         );
         city_building_ghost_draw(tile);
-        city_view_foreach_map_tile(draw_elevated_figures);
+        city_view_foreach_valid_map_tile(draw_elevated_figures);
     } else {
-        city_view_foreach_map_tile(draw_figures);
-        city_view_foreach_map_tile(deletion_draw_terrain_top);
-        city_view_foreach_map_tile(deletion_draw_animations);
+        city_view_foreach_valid_map_tile(draw_figures);
+        city_view_foreach_valid_map_tile(deletion_draw_terrain_top);
+        city_view_foreach_valid_map_tile(deletion_draw_animations);
         city_building_ghost_draw(tile);
-        city_view_foreach_map_tile(draw_elevated_figures);
+        city_view_foreach_valid_map_tile(draw_elevated_figures);
     }
     if (overlay->draw_custom_layer) {
-        city_view_foreach_map_tile(draw_custom_layer);
+        city_view_foreach_valid_map_tile(draw_custom_layer);
     }
 }
 
