@@ -8,6 +8,7 @@
 #include "empire/empire.h"
 #include "figure/figure.h"
 #include "figure/trader.h"
+#include "figure/visited_buildings.h"
 #include "figuretype/trader.h"
 #include "game/resource.h"
 #include "map/figure.h"
@@ -22,10 +23,15 @@
 
 #define MAX_DISTANCE_FOR_REROUTING 50
 
-typedef struct handled_good {
+typedef struct {
     unsigned char road_network_id;
     int goods[RESOURCE_MAX];
-} handled_good;
+} handled_goods_by_road_network;
+
+typedef struct {
+    handled_goods_by_road_network *networks;
+    int max_networks;
+} handled_goods;
 
 int building_dock_count_idle_dockers(const building *dock)
 {
@@ -126,45 +132,46 @@ int building_dock_can_export_to_ship(const building *dock, int ship_id)
     return 0;
 }
 
-// returns a list of goods that have been "handled" (i.e. the dock allowed for it to be traded) for each road network a ship has visited
-static void get_already_handled_goods(handled_good *handled_goods, int total_docks, int ship_id)
+// returns a list of goods that have been "handled" (i.e. the dock allowed for it to be traded)
+// for each road network a ship has visited
+static void get_already_handled_goods(handled_goods *handled, int ship_id)
 {
-    memset(handled_goods, 0, sizeof(handled_good) * total_docks);
+    memset(handled->networks, 0, sizeof(handled_goods_by_road_network) * handled->max_networks);
     figure *ship = figure_get(ship_id);
 
     // loop through the docks
     for (const building *dock = building_first_of_type(BUILDING_DOCK); dock; dock = dock->next_of_type) {
         // check and see if the ship has visited this dock
-        if (!building_is_active(dock) || !figure_trader_ship_already_docked_at(ship, dock->id)) {
+        if (!building_is_active(dock) || !figure_visited_building_in_list(ship->last_visited_index, dock->id)) {
             continue;
         }
 
-        // find the handled_good that is on this road network or find the next one that hasn't been assigned to a road network yet
-        handled_good *current_handled_good;
-        for (int j = 0; j < total_docks; j++) {
-            current_handled_good = &handled_goods[j];
-            if (!current_handled_good->road_network_id ||
-                current_handled_good->road_network_id == dock->road_network_id) {
+        // find the handled_good that is on this road network or find the next one that hasn't
+        // been assigned to a road network yet
+        handled_goods_by_road_network *network;
+        for (int j = 0; j < handled->max_networks; j++) {
+            network = &handled->networks[j];
+            if (!network->road_network_id ||
+                network->road_network_id == dock->road_network_id) {
                 break;
             }
         }
 
         // assign the road network (in case this is a new one) and add the goods this dock handles
-        current_handled_good->road_network_id = dock->road_network_id;
+        network->road_network_id = dock->road_network_id;
         for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
             if (building_distribution_is_good_accepted(r, dock)) {
-                current_handled_good->goods[r] = 1;
+                network->goods[r] = 1;
             }
         }
     }
 }
 
-static int all_dock_goods_already_handled(const handled_good *handled_goods, int total_docks,
-    const building *dock, const figure *ship)
+static int all_dock_goods_already_handled(const handled_goods *handled, const building *dock, const figure *ship)
 {
-    for (int i = 0; i < total_docks; i++) {
-        const handled_good *handled_good = &handled_goods[i];
-        if (handled_good->road_network_id != dock->road_network_id) {
+    for (int i = 0; i < handled->max_networks; i++) {
+        const handled_goods_by_road_network *network = &handled->networks[i];
+        if (network->road_network_id != dock->road_network_id) {
             continue;
         }
         // we've visited docks on this road network
@@ -174,7 +181,7 @@ static int all_dock_goods_already_handled(const handled_good *handled_goods, int
                 // the ship doesn't buy or sell this good
                 continue;
             }
-            if (building_distribution_is_good_accepted(r, dock) && !handled_good->goods[r]) {
+            if (building_distribution_is_good_accepted(r, dock) && !network->goods[r]) {
                 // this dock accepts a good that all previous docks on this road network did not accept
                 return 0;
             }
@@ -186,8 +193,7 @@ static int all_dock_goods_already_handled(const handled_good *handled_goods, int
     return 0;
 }
 
-static int get_free_destination(int ship_id, int exclude_dock_id, map_point *tile,
-    handled_good *handled_goods, int total_docks)
+static int get_free_destination(int ship_id, int exclude_dock_id, map_point *tile, const handled_goods *handled)
 {
     figure *ship = figure_get(ship_id);
     int importing_dock_id = 0;
@@ -200,7 +206,7 @@ static int get_free_destination(int ship_id, int exclude_dock_id, map_point *til
         }
 
         if (dock->id == exclude_dock_id ||
-            figure_trader_ship_already_docked_at(ship, dock->id) ||
+            figure_visited_building_in_list(ship->last_visited_index, dock->id) ||
             !building_dock_accepts_ship(ship_id, dock->id)) {
             continue;
         }
@@ -209,7 +215,7 @@ static int get_free_destination(int ship_id, int exclude_dock_id, map_point *til
             continue;
         }
 
-        if (all_dock_goods_already_handled(handled_goods, total_docks, dock, ship)) {
+        if (all_dock_goods_already_handled(handled, dock, ship)) {
             continue;
         }
 
@@ -232,7 +238,7 @@ static int get_free_destination(int ship_id, int exclude_dock_id, map_point *til
 
 
 static int get_queue_destination(int ship_id, int exclude_dock_id, ship_dock_request_type request_type, map_point *tile,
-    handled_good *handled_goods, int total_docks)
+    const handled_goods *handled)
 {
     figure *ship = figure_get(ship_id);
     int importing_dock_id = 0;
@@ -243,11 +249,11 @@ static int get_queue_destination(int ship_id, int exclude_dock_id, ship_dock_req
             continue;
         }
         if (dock->id == exclude_dock_id ||
-            figure_trader_ship_already_docked_at(ship, dock->id) ||
+            figure_visited_building_in_list(ship->last_visited_index, dock->id) ||
             !building_dock_accepts_ship(ship_id, dock->id)) {
             continue;
         }
-        if (all_dock_goods_already_handled(handled_goods, total_docks, dock, ship)) {
+        if (all_dock_goods_already_handled(handled, dock, ship)) {
             continue;
         }
 
@@ -302,22 +308,22 @@ int building_dock_get_destination(int ship_id, int exclude_dock_id, map_point *t
         return 0;
     }
 
-    handled_good *handled_goods = malloc(sizeof(handled_good) * total_docks);
-    if (!handled_goods) {
+    handled_goods handled;
+    handled.networks = malloc(sizeof(handled_goods_by_road_network) * total_docks);
+    if (!handled.networks) {
         return 0;
     }
-    get_already_handled_goods(handled_goods, total_docks, ship_id);
+    handled.max_networks = total_docks;
+    get_already_handled_goods(&handled, ship_id);
 
-    int dock_id = get_free_destination(ship_id, exclude_dock_id, tile, handled_goods, total_docks);
+    int dock_id = get_free_destination(ship_id, exclude_dock_id, tile, &handled);
     if (!dock_id) {
-        dock_id = get_queue_destination(ship_id, exclude_dock_id, SHIP_DOCK_REQUEST_2_FIRST_QUEUE, tile,
-            handled_goods, total_docks);
+        dock_id = get_queue_destination(ship_id, exclude_dock_id, SHIP_DOCK_REQUEST_2_FIRST_QUEUE, tile, &handled);
         if (!dock_id) {
-            dock_id = get_queue_destination(ship_id, exclude_dock_id, SHIP_DOCK_REQUEST_4_SECOND_QUEUE, tile,
-                handled_goods, total_docks);
+            dock_id = get_queue_destination(ship_id, exclude_dock_id, SHIP_DOCK_REQUEST_4_SECOND_QUEUE, tile, &handled);
         }
     }
-    free(handled_goods);
+    free(handled.networks);
     return dock_id;
 }
 
@@ -334,7 +340,7 @@ int building_dock_get_closer_free_destination(int ship_id, ship_dock_request_typ
 
         if (dock->data.dock.trade_ship_id ||
             dock->id == ship->destination_building_id ||
-            figure_trader_ship_already_docked_at(ship, dock->id) ||
+            figure_visited_building_in_list(ship->last_visited_index, dock->id) ||
             !building_dock_accepts_ship(ship_id, dock->id)) {
             continue;
         }

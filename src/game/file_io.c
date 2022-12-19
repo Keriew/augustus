@@ -660,7 +660,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version ver
         empire_object_load(state->custom_empire, scenario_version);
     }
     if (version <= SAVE_GAME_LAST_GLOBAL_BUILDING_INFO) {
-        figure_visited_buildings_migrate_ship_info();
+        figure_visited_buildings_migrate();
     } else {
         figure_visited_buildings_load_state(state->visited_buildings);
     }

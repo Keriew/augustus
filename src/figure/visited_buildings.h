@@ -15,17 +15,20 @@ typedef struct {
 void figure_visited_buildings_init(void);
 
 /**
- * Creates a new visited building entry
- * @return The new entry or 0 on error
+ * Checks if a specific building has already on the visited list
+ * @param index The index of the last element of the list
+ * @param building_id The building to check
+ * @return 1 if the building is already on the list, 0 otherwise
  */
-visited_building *figure_visited_buildings_add(void);
+int figure_visited_building_in_list(int index, int building_id);
 
 /**
- * Gets a visisted building entry from an index
- * @param index The index to fetch
- * @return The respective entry
+ * Adds a building to the list of visited buildings
+ * @param index The index of the last element of the list
+ * @param building_id The building to add
+ * @return A new list index if the building was added or the same index if the building was already on the list
  */
-visited_building *figure_visited_buildings_get(int index);
+int figure_visited_buildings_add(int index, int building_id);
 
 /**
  * Removes an entire list of visited buildings, started at index.
@@ -37,7 +40,10 @@ visited_building *figure_visited_buildings_get(int index);
  */
 void figure_visited_buildings_remove_list(int index);
 
-void figure_visited_buildings_migrate_ship_info(void);
+/**
+ * Migrates the list of visited buildings from the old format to the new one
+ */
+void figure_visited_buildings_migrate(void);
 
 /**
  * Save state to buffer

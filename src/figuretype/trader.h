@@ -31,10 +31,6 @@ int figure_trade_land_trade_units(void);
 
 int figure_trade_sea_trade_units(void);
 
-int figure_trader_ship_already_docked_at(figure *ship, int dock_id);
-
-void figure_trader_ship_remove_visited_docks(figure *ship);
-
 int figure_trader_ship_can_queue_for_import(figure *ship);
 
 int figure_trader_ship_can_queue_for_export(figure *ship);

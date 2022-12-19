@@ -746,13 +746,7 @@ static int record_dock(figure *ship, int dock_id)
     if (dock->data.dock.trade_ship_id != 0 && dock->data.dock.trade_ship_id != ship->id) {
         return 0;
     }
-    visited_building *visited = figure_visited_buildings_add();
-    if (!visited) {
-        return 0;
-    }
-    visited->building_id = dock_id;
-    visited->prev_index = ship->last_visited_index;
-    ship->last_visited_index = visited->index;
+    ship->last_visited_index = figure_visited_buildings_add(ship->last_visited_index, dock_id);
     return 1;
 }
 
@@ -1032,19 +1026,6 @@ int figure_trade_sea_trade_units(void)
     }
 
     return unit;
-}
-
-int figure_trader_ship_already_docked_at(figure *ship, int dock_id)
-{
-    int visited_index = ship->last_visited_index;
-    while (visited_index) {
-        const visited_building *visited = figure_visited_buildings_get(visited_index);
-        if (visited->building_id == dock_id) {
-            return 1;
-        }
-        visited_index = visited->prev_index;
-    }
-    return 0;
 }
 
 // if ship is moored, do not forward to another dock unless it has more than one third of capacity available.

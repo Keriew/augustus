@@ -28,16 +28,28 @@ void figure_visited_buildings_init(void)
     }
 }
 
-visited_building *figure_visited_buildings_add(void)
+int figure_visited_building_in_list(int index, int building_id)
 {
-    visited_building *visited;
-    array_new_item(visited_buildings, 1, visited);
-    return visited;
+    while (index) {
+        const visited_building *visited = array_item(visited_buildings, index);
+        if (visited->building_id == building_id) {
+            return 1;
+        }
+        index = visited->prev_index;
+    }
+    return 0;
 }
 
-visited_building *figure_visited_buildings_get(int index)
+int figure_visited_buildings_add(int index, int building_id)
 {
-    return array_item(visited_buildings, index);
+    if (figure_visited_building_in_list(index, building_id)) {
+        return index;
+    }
+    visited_building *visited;
+    array_new_item(visited_buildings, 1, visited);
+    visited->building_id = building_id;
+    visited->prev_index = index;
+    return visited->index;
 }
 
 void figure_visited_buildings_remove_list(int index)
@@ -81,7 +93,7 @@ void figure_visited_buildings_load_state(buffer *buf)
     }
 }
 
-void figure_visited_buildings_migrate_ship_info(void)
+void figure_visited_buildings_migrate(void)
 {
     if (!array_init(visited_buildings, VISITED_BUILDINGS_ARRAY_SIZE_STEP, visited_building_create, visited_building_in_use)) {
         log_error("Unable to allocate enought memory for the visited docks array. The game will now crash.", 0, 0);
