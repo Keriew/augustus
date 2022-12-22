@@ -283,7 +283,7 @@ void window_building_draw_pottery_workshop(building_info_context *c)
 static int shipyard_boats_needed(void)
 {
     for (const building *wharf = building_first_of_type(BUILDING_WHARF); wharf; wharf = wharf->next_of_type) {
-        if (building_is_active(wharf) && !wharf->data.industry.fishing_boat_id) {
+        if (wharf->num_workers > 0 && !wharf->data.industry.fishing_boat_id) {
             return 1;
         }
     }
