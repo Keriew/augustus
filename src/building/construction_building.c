@@ -202,7 +202,6 @@ static void add_to_map(int type, building *b, int size,
             map_water_add_building(b->id, b->x, b->y, 2);
             break;
         case BUILDING_DOCK:
-            city_buildings_add_dock();
             b->data.dock.orientation = waterside_orientation_abs;
             map_water_add_building(b->id, b->x, b->y, size);
             break;
@@ -234,14 +233,6 @@ static void add_to_map(int type, building *b, int size,
             building_menu_update();
             building_construction_clear_type();
             break;
-        case BUILDING_SENATE_UPGRADED:
-            add_building(b);
-            city_buildings_add_senate(b);
-            break;
-        case BUILDING_BARRACKS:
-            add_building(b);
-            city_buildings_add_barracks(b);
-            break;
         case BUILDING_WAREHOUSE:
             add_warehouse(b);
             break;
@@ -258,10 +249,6 @@ static void add_to_map(int type, building *b, int size,
         case BUILDING_FORT_MOUNTED:
             add_fort(type, b);
             break;
-        // distribution center (also unused)
-        case BUILDING_DISTRIBUTION_CENTER_UNUSED:
-            city_buildings_add_distribution_center(b);
-            break;
         case BUILDING_GRAND_TEMPLE_CERES:
         case BUILDING_GRAND_TEMPLE_NEPTUNE:
         case BUILDING_GRAND_TEMPLE_MERCURY:
@@ -277,7 +264,6 @@ static void add_to_map(int type, building *b, int size,
             break;
         case BUILDING_MESS_HALL:
             b->data.market.is_mess_hall = 1;
-            city_buildings_add_mess_hall(b);
             add_building(b);
             break;
         case BUILDING_SMALL_STATUE:
@@ -299,7 +285,6 @@ static void add_to_map(int type, building *b, int size,
             building_monument_set_phase(b, MONUMENT_START);
             break;
         case BUILDING_CARAVANSERAI:
-            city_buildings_add_caravanserai(b);
             map_tiles_update_area_roads(b->x, b->y, 4);
             building_monument_set_phase(b, MONUMENT_START);
             break;
@@ -363,19 +348,13 @@ int building_construction_place_building(building_type type, int x, int y)
         }
     }
     int waterside_orientation_abs = 0, waterside_orientation_rel = 0;
-    if (type == BUILDING_SHIPYARD || type == BUILDING_WHARF) {
-        if (map_water_determine_orientation_size2(
-            x, y, 0, &waterside_orientation_abs, &waterside_orientation_rel)) {
+    if (type == BUILDING_SHIPYARD || type == BUILDING_WHARF || type == BUILDING_DOCK) {
+        if (map_water_determine_orientation(x, y, building_properties_for_type(type)->size, 0,
+                &waterside_orientation_abs, &waterside_orientation_rel, 1, 0)) {
             city_warning_show(WARNING_SHORE_NEEDED, NEW_WARNING_SLOT);
             return 0;
         }
-    } else if (type == BUILDING_DOCK) {
-        if (map_water_determine_orientation_size3(
-            x, y, 0, &waterside_orientation_abs, &waterside_orientation_rel)) {
-            city_warning_show(WARNING_SHORE_NEEDED, NEW_WARNING_SLOT);
-            return 0;
-        }
-        if (!building_dock_is_connected_to_open_water(x, y)) {
+        if (type == BUILDING_DOCK && !building_dock_is_connected_to_open_water(x, y)) {
             city_warning_show(WARNING_DOCK_OPEN_WATER_NEEDED, NEW_WARNING_SLOT);
             return 0;
         }
@@ -430,7 +409,7 @@ int building_construction_place_building(building_type type, int x, int y)
         return 0;
     }
     if (type == BUILDING_COLOSSEUM) {
-        if (building_count_colosseum()) {
+        if (building_count_total(BUILDING_COLOSSEUM)) {
             city_warning_show(WARNING_ONE_BUILDING_OF_TYPE, NEW_WARNING_SLOT);
             return 0;
         }
