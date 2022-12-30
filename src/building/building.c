@@ -274,7 +274,7 @@ building *building_create(building_type type, int x, int y)
         b->resources[RESOURCE_NONE] = FULL_GRANARY;
     }
 
-    if (type == BUILDING_MARKET) {
+    if (type == BUILDING_MARKET || type == BUILDING_DOCK) {
         // Set it as accepting all goods
         for (int i = 0; i < RESOURCE_MAX; i++) {
             b->accepted_goods[i] = 1;
@@ -698,7 +698,7 @@ void building_load_state(buffer *buf, buffer *sequence, buffer *corrupt_houses, 
 
     if (!array_init(data.buildings, BUILDING_ARRAY_SIZE_STEP, initialize_new_building, building_in_use) ||
         !array_expand(data.buildings, buildings_to_load)) {
-        log_error("Unable to allocate enought memory for the building array. The game will now crash.", 0, 0);
+        log_error("Unable to allocate enough memory for the building array. The game will now crash.", 0, 0);
     }
 
     memset(data.first_of_type, 0, sizeof(data.first_of_type));

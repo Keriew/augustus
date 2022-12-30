@@ -1,5 +1,6 @@
 #include "roamer_preview.h"
 
+#include "building/construction.h"
 #include "building/industry.h"
 #include "building/properties.h"
 #include "core/config.h"
@@ -181,7 +182,7 @@ static void init_roaming(figure *f, int roam_dir, int x, int y)
 void figure_roamer_preview_create(building_type b_type, int grid_offset, int x, int y)
 {
     if (!config_get(CONFIG_UI_SHOW_ROAMING_PATH)) {
-        figure_roamer_preview_reset(BUILDING_NONE);
+        figure_roamer_preview_reset_building_types();
         return;
     }
 
@@ -201,6 +202,8 @@ void figure_roamer_preview_create(building_type b_type, int grid_offset, int x, 
     data.travelled_tiles.items[grid_offset] = SHOWN_BUILDING_OFFSET;
 
     int b_size = building_is_farm(b_type) ? 3 : building_properties_for_type(b_type)->size;
+
+    building_construction_offset_start_from_orientation(&x, &y, b_size);
 
     map_point road;
     if (!map_has_road_access(x, y, b_size, &road)) {
