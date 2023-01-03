@@ -271,8 +271,7 @@ void city_resource_determine_available(void)
     potential.food_list.size = 0;
 
     for (int i = RESOURCE_MIN; i < RESOURCE_MAX; i++) {
-        if (empire_can_produce_resource(i) || empire_can_import_resource(i) ||
-            (i == RESOURCE_FISH && scenario_building_allowed(BUILDING_WHARF))) {
+        if (empire_can_produce_resource(i) || empire_can_import_resource(i)) {
             available.resource_list.items[available.resource_list.size++] = i;
             potential.resource_list.items[potential.resource_list.size++] = i;
         } else if (empire_can_produce_resource_potentially(i) || empire_can_import_resource_potentially(i)) {
@@ -280,8 +279,7 @@ void city_resource_determine_available(void)
         }
     }
     for (int i = RESOURCE_MIN_FOOD; i < RESOURCE_MAX_FOOD; i++) {
-        if (empire_can_produce_resource(i) || empire_can_import_resource(i) ||
-            (i == RESOURCE_FISH && scenario_building_allowed(BUILDING_WHARF))) {
+        if (empire_can_produce_resource(i) || empire_can_import_resource(i)) {
             available.food_list.items[available.food_list.size++] = i;
             potential.food_list.items[potential.food_list.size++] = i;
         } else if (empire_can_produce_resource_potentially(i) || empire_can_import_resource_potentially(i)) {
