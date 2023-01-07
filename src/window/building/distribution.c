@@ -171,7 +171,7 @@ static struct {
     int primary_product_stockpiling_id;
     int image_button_focus_id;
     int showing_special_orders;
-    resource_list distributed_resources;
+    resource_list available_resources;
 } data;
 
 uint8_t warehouse_full_button_text[] = "32";
@@ -483,14 +483,14 @@ static int distributor_handles_resource(resource_type resource, building_type ty
 
 static void set_distributed_resources(building_type type)
 {
-    for (int i = 0; i < data.distributed_resources.size; i++) {
-        data.distributed_resources.items[i] = RESOURCE_NONE;
+    for (int i = 0; i < data.available_resources.size; i++) {
+        data.available_resources.items[i] = RESOURCE_NONE;
     }
-    data.distributed_resources.size = 0;
+    data.available_resources.size = 0;
     const resource_list *list = city_resource_get_potential();
     for (int i = 0; i < list->size; i++) {
         if (distributor_handles_resource(list->items[i], type)) {
-            data.distributed_resources.items[data.distributed_resources.size++] = list->items[i];
+            data.available_resources.items[data.available_resources.size++] = list->items[i];
         }
     }
 }
@@ -511,7 +511,7 @@ void window_building_draw_distributor_orders(building_info_context *c, const uin
         scrollbar.height = 21 * BLOCK_SIZE;
         scrollbar.scrollable_width = (c->width_blocks - 2) * BLOCK_SIZE;
         scrollbar.elements_in_view = 21 * BLOCK_SIZE / 22;
-        scrollbar_init(&scrollbar, 0, data.distributed_resources.size);
+        scrollbar_init(&scrollbar, 0, data.available_resources.size);
 
         data.showing_special_orders = 1;
     }
@@ -553,8 +553,8 @@ void window_building_draw_distributor_orders_foreground(building_info_context *c
 
     int scrollbar_shown = scrollbar.max_scroll_position > 0;
 
-    for (int i = 0; i < scrollbar.elements_in_view && i < data.distributed_resources.size; i++) {
-        resource_type resource = data.distributed_resources.items[i + scrollbar.scroll_position];
+    for (int i = 0; i < scrollbar.elements_in_view && i < data.available_resources.size; i++) {
+        resource_type resource = data.available_resources.items[i + scrollbar.scroll_position];
         int image_id = resource_get_data(resource)->image.icon;
         image_draw(image_id, c->x_offset + 32, y_offset + 46 + 22 * i, COLOR_MASK_NONE, SCALE_NONE);
         if (!scrollbar_shown) {
@@ -587,8 +587,8 @@ int window_building_handle_mouse_distributor_orders(const mouse *m, building_inf
 
     data.building_id = c->building_id;
 
-    int buttons_to_show = data.distributed_resources.size < scrollbar.elements_in_view ?
-        data.distributed_resources.size : scrollbar.elements_in_view;
+    int buttons_to_show = data.available_resources.size < scrollbar.elements_in_view ?
+        data.available_resources.size : scrollbar.elements_in_view;
 
     return scrollbar_handle_mouse(&scrollbar, m, 1) ||
         generic_buttons_handle_mouse(m, c->x_offset + 180, y_offset + 46,
@@ -614,19 +614,17 @@ void window_building_draw_primary_product_stockpiling(building_info_context *c)
     }
 }
 
-static const resource_list *generate_granary_resource_list(building *granary)
+static void generate_granary_resource_list(building *granary)
 {
-    static resource_list list;
-    for (int i = 0; i < list.size; i++) {
-        list.items[i] = RESOURCE_NONE;
+    for (int i = 0; i < data.available_resources.size; i++) {
+        data.available_resources.items[i] = RESOURCE_NONE;
     }
-    list.size = 0;
+    data.available_resources.size = 0;
     for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
         if (granary->resources[r] > 0) {
-            list.items[list.size++] = r;
+            data.available_resources.items[data.available_resources.size++] = r;
         }
     }
-    return &list;
 }
 
 void window_building_draw_granary(building_info_context *c)
@@ -637,12 +635,10 @@ void window_building_draw_granary(building_info_context *c)
 
     building *b = building_get(c->building_id);
 
-
-    const resource_list *list;
     int y_offset_blocks = 0;
     if (!b->has_plague && c->has_road_access) {
-        list = generate_granary_resource_list(b);
-        y_offset_blocks = ((list->size - 1) / 2 - 3) * 2 + 2;
+        generate_granary_resource_list(b);
+        y_offset_blocks = ((data.available_resources.size - 1) / 2 - 3) * 2 + 2;
     }
     c->height_blocks = 22 + y_offset_blocks;    
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
@@ -666,21 +662,21 @@ void window_building_draw_granary(building_info_context *c)
     } else if (scenario_property_rome_supplies_wheat()) {
         window_building_draw_description_at(c, 40, 98, 4);
     } else {
-        if (list->size == 0) {
+        if (data.available_resources.size == 0) {
             lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_GRANARY_NO_FOOD, c->x_offset, c->y_offset + 63,
                 BLOCK_SIZE * c->width_blocks, FONT_NORMAL_BLACK);
         } else {
             int total_stored = 0;
             int x;
             int y = c->y_offset + 31;
-            for (int i = 0; i < list->size; i++) {
+            for (int i = 0; i < data.available_resources.size; i++) {
                 if (i & 1) {
                     x = c->x_offset + 240;
                 } else {
                     x = c->x_offset + 20;
                     y += BLOCK_SIZE * 2;
                 }
-                resource_type r = list->items[i];
+                resource_type r = data.available_resources.items[i];
                 int amount = b->resources[r];
                 total_stored += amount;
                 image_draw(resource_get_data(r)->image.icon, x, y, COLOR_MASK_NONE, SCALE_NONE);
@@ -909,19 +905,17 @@ void window_building_get_tooltip_granary_orders(int *group_id, int *text_id, int
     }
 }
 
-static const resource_list *generate_warehouse_resource_list(building *warehouse)
+static void generate_warehouse_resource_list(building *warehouse)
 {
-    static resource_list list;
-    for (int i = 0; i < list.size; i++) {
-        list.items[i] = RESOURCE_NONE;
+    for (int i = 0; i < data.available_resources.size; i++) {
+        data.available_resources.items[i] = RESOURCE_NONE;
     }
-    list.size = 0;
+    data.available_resources.size = 0;
     for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
         if (building_warehouse_get_amount(warehouse, r) > 0) {
-            list.items[list.size++] = r;
+            data.available_resources.items[data.available_resources.size++] = r;
         }
     }
-    return &list;
 }
 
 void window_building_draw_warehouse(building_info_context *c)
@@ -931,13 +925,11 @@ void window_building_draw_warehouse(building_info_context *c)
     data.showing_special_orders = 0;
 
     building *b = building_get(c->building_id);
-    
 
-    const resource_list *list;
     int y_offset_blocks = 0;
     if (!b->has_plague && c->has_road_access) {
-        list = generate_warehouse_resource_list(b);
-        y_offset_blocks = ((list->size - 1) / 2 - 3) * 2 + 2;
+        generate_warehouse_resource_list(b);
+        y_offset_blocks = ((data.available_resources.size - 1) / 2 - 3) * 2 + 2;
     }
     c->height_blocks = 22 + y_offset_blocks;
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
@@ -959,21 +951,21 @@ void window_building_draw_warehouse(building_info_context *c)
     } else if (!c->has_road_access) {
         window_building_draw_description(c, 69, 25);
     } else {
-        if (list->size == 0) {
+        if (data.available_resources.size == 0) {
             lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_WAREHOUSE_NO_GOODS, c->x_offset, c->y_offset + 63,
                 BLOCK_SIZE * c->width_blocks, FONT_NORMAL_BLACK);
         } else {
             int total_stored = 0;
             int x;
             int y = c->y_offset + 31;
-            for (int i = 0; i < list->size; i++) {
+            for (int i = 0; i < data.available_resources.size; i++) {
                 if (i & 1) {
                     x = c->x_offset + 240;
                 } else {
                     x = c->x_offset + 20;
                     y += BLOCK_SIZE * 2;
                 }
-                resource_type r = list->items[i];
+                resource_type r = data.available_resources.items[i];
                 int amount = building_warehouse_get_amount(b, r);
                 total_stored += amount;
                 image_draw(resource_get_data(r)->image.icon, x, y, COLOR_MASK_NONE, SCALE_NONE);
@@ -1277,7 +1269,7 @@ static void toggle_resource_state(int index, int param2)
     index += scrollbar.scroll_position - 1;
     resource_type resource;
     if (building_has_supplier_inventory(b->type) || b->type == BUILDING_DOCK) {
-        resource = data.distributed_resources.items[index];
+        resource = data.available_resources.items[index];
         building_distribution_toggle_good_accepted(resource, b);
     } else {
         if (b->type == BUILDING_WAREHOUSE) {
