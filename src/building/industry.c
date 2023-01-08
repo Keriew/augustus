@@ -56,7 +56,23 @@ static const building_type INDUSTRY_TYPES[] = {
 
 const int PRODUCTION_PER_MONTH_PER_RESOURCE[] =
 {
-    0, 160, 80, 80, 80, 100, 80, 40, 40, 80, 80, 80, 40, 40, 40, 40
+    0,    // RESOURCE_NONE = 0,
+    160,  // RESOURCE_WHEAT,
+    80,   // RESOURCE_VEGETABLES,
+    80,   // RESOURCE_FRUIT,
+    80,   // RESOURCE_MEAT,
+    100,  // RESOURCE_FISH,
+    80,   // RESOURCE_CLAY,
+    40,   // RESOURCE_TIMBER,
+    40,   // RESOURCE_OLIVES,
+    80,   // RESOURCE_VINES,
+    80,   // RESOURCE_IRON,
+    80,   // RESOURCE_MARBLE,
+    40,   // RESOURCE_POTTERY,
+    40,   // RESOURCE_FURNITURE
+    40,   // RESOURCE_OIL,
+    40,   // RESOURCE_WINE,
+    40    // RESOURCE_WEAPONS,
 };
 
 
