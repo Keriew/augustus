@@ -69,6 +69,47 @@ int building_is_workshop(building_type type)
     return type >= BUILDING_WINE_WORKSHOP && type <= BUILDING_POTTERY_WORKSHOP;
 }
 
+int building_produces(building_type type)
+{
+    switch (type)
+    {
+        case BUILDING_WHEAT_FARM:
+            return RESOURCE_WHEAT;
+        case BUILDING_VEGETABLE_FARM:
+            return RESOURCE_VEGETABLES;
+        case BUILDING_FRUIT_FARM:
+            return RESOURCE_FRUIT;
+        case BUILDING_OLIVE_FARM:
+            return RESOURCE_OLIVES;
+        case BUILDING_VINES_FARM:
+            return RESOURCE_VINES;
+        case BUILDING_PIG_FARM:
+            return RESOURCE_MEAT;
+        case BUILDING_WHARF:
+            return RESOURCE_FISH;
+        case BUILDING_MARBLE_QUARRY:
+            return RESOURCE_MARBLE;
+        case BUILDING_IRON_MINE:
+            return RESOURCE_IRON;
+        case BUILDING_TIMBER_YARD:
+            return RESOURCE_TIMBER;
+        case BUILDING_CLAY_PIT:
+            return RESOURCE_CLAY;
+        case BUILDING_WINE_WORKSHOP:
+            return RESOURCE_WINE;
+        case BUILDING_OIL_WORKSHOP:
+            return RESOURCE_OIL;
+        case BUILDING_WEAPONS_WORKSHOP:
+            return RESOURCE_WEAPONS;
+        case BUILDING_FURNITURE_WORKSHOP:
+            return RESOURCE_FURNITURE;
+        case BUILDING_POTTERY_WORKSHOP:
+            return RESOURCE_POTTERY;
+        default:
+            return RESOURCE_NONE;
+    }
+}
+
 static int max_progress(const building *b)
 {
     return building_is_workshop(b->type) ? MAX_PROGRESS_WORKSHOP : MAX_PROGRESS_RAW;

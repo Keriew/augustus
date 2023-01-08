@@ -105,6 +105,8 @@ static const city_overlay *get_city_overlay(void)
             return city_overlay_for_religion();
         case OVERLAY_TAX_INCOME:
             return city_overlay_for_tax_income();
+        case OVERLAY_EFFICIENCY:
+            return city_overlay_for_efficiency();
         case OVERLAY_FOOD_STOCKS:
             return city_overlay_for_food_stocks();
         case OVERLAY_WATER:
