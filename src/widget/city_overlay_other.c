@@ -21,11 +21,6 @@
 #include "translation/translation.h"
 #include "widget/city_draw_highway.h"
 
-const int PRODUCTION_PER_MONTH_PER_RESOURCE[] =
-{
-    0, 160, 80, 80, 80, 100, 80, 40, 40, 80, 80, 80, 40, 40, 40, 40
-};
-
 static int show_building_religion(const building *b)
 {
     return
@@ -131,18 +126,10 @@ static int get_column_height_religion(const building *b)
 
 static int get_column_height_efficiency(const building *b)
 {
-    if (b->state == BUILDING_STATE_MOTHBALLED) {
+    int percentage = building_get_efficiency(b);
+    if (percentage == -1) {
         return NO_COLUMN;
     }
-    int resource = building_produces(b->type);
-    if (b->data.industry.age_months == 0 || !resource) {
-        return NO_COLUMN;
-    }
-    int production_for_resource = PRODUCTION_PER_MONTH_PER_RESOURCE[resource];
-    if (resource == RESOURCE_WHEAT && scenario_property_climate() == CLIMATE_NORTHERN) {
-        production_for_resource /= 2;
-    }
-    int percentage = calc_percentage(b->data.industry.average_production_per_month, production_for_resource);
     return calc_bound(percentage/10, 1, 10);
 }
 
@@ -241,13 +228,33 @@ static int get_tooltip_religion(tooltip_context *c, const building *b)
     }
 }
 
+//#include <stdio.h>
+
 static int get_tooltip_efficiency(tooltip_context *c, const building *b)
 {
-    int resource = building_produces(b->type);
-    if (resource == RESOURCE_NONE || resource == RESOURCE_FISH) {
+    int efficiency = building_get_efficiency(b);
+    //printf("efficiency: %d\n", efficiency);
+    if (efficiency == -1) {
         return 0;
     }
-    // TODO: add a tooltip?
+    if (efficiency == 0) {
+        c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_0;
+    }
+    else if (efficiency < 25) {
+        c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_1;
+    }
+    else if (efficiency < 50) {
+        c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_2;
+    }
+    else if (efficiency < 80) {
+        c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_3;
+    }
+    else if (efficiency < 95) {
+        c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_4;
+    }
+    else {
+        c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_5;
+    }
     return 0;
 }
 

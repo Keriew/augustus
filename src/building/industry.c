@@ -54,6 +54,12 @@ static const building_type INDUSTRY_TYPES[] = {
     BUILDING_GRAND_TEMPLE_VENUS,
 };
 
+const int PRODUCTION_PER_MONTH_PER_RESOURCE[] =
+{
+    0, 160, 80, 80, 80, 100, 80, 40, 40, 80, 80, 80, 40, 40, 40, 40
+};
+
+
 int building_is_farm(building_type type)
 {
     return type >= BUILDING_WHEAT_FARM && type <= BUILDING_PIG_FARM;
@@ -69,7 +75,7 @@ int building_is_workshop(building_type type)
     return type >= BUILDING_WINE_WORKSHOP && type <= BUILDING_POTTERY_WORKSHOP;
 }
 
-int building_produces(building_type type)
+static int building_produces(building_type type)
 {
     switch (type)
     {
@@ -108,6 +114,23 @@ int building_produces(building_type type)
         default:
             return RESOURCE_NONE;
     }
+}
+
+int building_get_efficiency(const building *b)
+{
+    if (b->state == BUILDING_STATE_MOTHBALLED) {
+        return -1;
+    }
+    int resource = building_produces(b->type);
+    if (b->data.industry.age_months == 0 || !resource) {
+        return -1;
+    }
+    int production_for_resource = PRODUCTION_PER_MONTH_PER_RESOURCE[resource];
+    if (resource == RESOURCE_WHEAT && scenario_property_climate() == CLIMATE_NORTHERN) {
+        production_for_resource /= 2;
+    }
+    int percentage = calc_percentage(b->data.industry.average_production_per_month, production_for_resource);
+    return calc_bound(percentage, 0, 100);
 }
 
 static int max_progress(const building *b)
