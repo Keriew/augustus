@@ -683,7 +683,7 @@ static translation_string all_strings[] = {
     {TR_OVERLAY_EFFICIENCY, "Efficiency" },
     {TR_TOOLTIP_OVERLAY_EFFICIENCY_0, "Nobody can remember the last time this building produced anything." },
     {TR_TOOLTIP_OVERLAY_EFFICIENCY_1, "This building produces hardly anything." },
-    {TR_TOOLTIP_OVERLAY_EFFICIENCY_2, "Very little is produced here." },
+    {TR_TOOLTIP_OVERLAY_EFFICIENCY_2, "Much more could be produced here if its efficiency were higher." },
     {TR_TOOLTIP_OVERLAY_EFFICIENCY_3, "Work is often stopped at this building, and its efficiency is low." },
     {TR_TOOLTIP_OVERLAY_EFFICIENCY_4, "This building is productive and has little downtime." },
     {TR_TOOLTIP_OVERLAY_EFFICIENCY_5, "This building is producing at maximum efficiency." },
