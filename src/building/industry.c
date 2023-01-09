@@ -54,28 +54,6 @@ static const building_type INDUSTRY_TYPES[] = {
     BUILDING_GRAND_TEMPLE_VENUS,
 };
 
-const int PRODUCTION_PER_MONTH_PER_RESOURCE[] =
-{
-    0,    // RESOURCE_NONE = 0,
-    160,  // RESOURCE_WHEAT,
-    80,   // RESOURCE_VEGETABLES,
-    80,   // RESOURCE_FRUIT,
-    80,   // RESOURCE_MEAT,
-    100,  // RESOURCE_FISH,
-    80,   // RESOURCE_CLAY,
-    40,   // RESOURCE_TIMBER,
-    40,   // RESOURCE_OLIVES,
-    80,   // RESOURCE_VINES,
-    80,   // RESOURCE_IRON,
-    80,   // RESOURCE_MARBLE,
-    40,   // RESOURCE_POTTERY,
-    40,   // RESOURCE_FURNITURE
-    40,   // RESOURCE_OIL,
-    40,   // RESOURCE_WINE,
-    40    // RESOURCE_WEAPONS,
-};
-
-
 int building_is_farm(building_type type)
 {
     return type >= BUILDING_WHEAT_FARM && type <= BUILDING_PIG_FARM;
@@ -91,57 +69,16 @@ int building_is_workshop(building_type type)
     return type >= BUILDING_WINE_WORKSHOP && type <= BUILDING_POTTERY_WORKSHOP;
 }
 
-static int building_produces(building_type type)
-{
-    switch (type)
-    {
-        case BUILDING_WHEAT_FARM:
-            return RESOURCE_WHEAT;
-        case BUILDING_VEGETABLE_FARM:
-            return RESOURCE_VEGETABLES;
-        case BUILDING_FRUIT_FARM:
-            return RESOURCE_FRUIT;
-        case BUILDING_PIG_FARM:
-            return RESOURCE_MEAT;
-        case BUILDING_WHARF:
-            return RESOURCE_FISH;
-        case BUILDING_CLAY_PIT:
-            return RESOURCE_CLAY;
-        case BUILDING_TIMBER_YARD:
-            return RESOURCE_TIMBER;
-        case BUILDING_OLIVE_FARM:
-            return RESOURCE_OLIVES;
-        case BUILDING_VINES_FARM:
-            return RESOURCE_VINES;
-        case BUILDING_IRON_MINE:
-            return RESOURCE_IRON;
-        case BUILDING_MARBLE_QUARRY:
-            return RESOURCE_MARBLE;
-        case BUILDING_POTTERY_WORKSHOP:
-            return RESOURCE_POTTERY;
-        case BUILDING_FURNITURE_WORKSHOP:
-            return RESOURCE_FURNITURE;
-        case BUILDING_OIL_WORKSHOP:
-            return RESOURCE_OIL;
-        case BUILDING_WINE_WORKSHOP:
-            return RESOURCE_WINE;
-        case BUILDING_WEAPONS_WORKSHOP:
-            return RESOURCE_WEAPONS;
-        default:
-            return RESOURCE_NONE;
-    }
-}
-
 int building_get_efficiency(const building *b)
 {
     if (b->state == BUILDING_STATE_MOTHBALLED) {
         return -1;
     }
-    int resource = building_produces(b->type);
+    int resource = resource_produced_by_building_type(b->type);
     if (b->data.industry.age_months == 0 || !resource) {
         return -1;
     }
-    int production_for_resource = PRODUCTION_PER_MONTH_PER_RESOURCE[resource];
+    int production_for_resource = resource_production_per_month(resource);
     if (resource == RESOURCE_WHEAT && scenario_property_climate() == CLIMATE_NORTHERN) {
         production_for_resource /= 2;
     }
