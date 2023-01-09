@@ -228,12 +228,9 @@ static int get_tooltip_religion(tooltip_context *c, const building *b)
     }
 }
 
-//#include <stdio.h>
-
 static int get_tooltip_efficiency(tooltip_context *c, const building *b)
 {
     int efficiency = building_get_efficiency(b);
-    //printf("efficiency: %d\n", efficiency);
     if (efficiency == -1) {
         return 0;
     }
