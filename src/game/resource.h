@@ -26,7 +26,7 @@ typedef enum {
     RESOURCE_VEGETABLES,
     RESOURCE_FRUIT,
     RESOURCE_MEAT,
-    RESOURCE_FISH = RESOURCE_MEAT,
+    RESOURCE_FISH,
     RESOURCE_CLAY,
     RESOURCE_TIMBER,
     RESOURCE_OLIVES,
@@ -60,7 +60,8 @@ typedef enum {
     RESOURCE_ORIGINAL_VERSION = 0,
     RESOURCE_DYNAMIC_VERSION = 1,
     RESOURCE_REORDERED_VERSION = 2,
-    RESOURCE_CURRENT_VERSION = 2
+    RESOURCE_SEPARATE_FISH_AND_MEAT_VERSION = 3,
+    RESOURCE_CURRENT_VERSION = RESOURCE_SEPARATE_FISH_AND_MEAT_VERSION
 } resource_version;
 
 typedef enum {
@@ -79,6 +80,7 @@ typedef struct {
     int is_inventory;
     building_type industry;
     building_type workshop;
+    int production_per_month;
     struct {
         warning_type needed;
         warning_type create_industry;
@@ -120,6 +122,10 @@ const resource_data *resource_get_data(resource_type resource);
 void resource_set_mapping(int version);
 
 resource_type resource_map_legacy_inventory(int id);
+
+resource_type resource_produced_by_building_type(int building_type);
+
+int resource_production_per_month(resource_type);
 
 resource_type resource_remap(int id);
 

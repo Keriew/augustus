@@ -189,10 +189,10 @@ static translation_string all_strings[] = {
     {TR_HEADER_HOUSING, "주택"},
     {TR_ADVISOR_HOUSING_ROOM, "주택을 신축할 만한 공간이 있습니다."},
     {TR_ADVISOR_HOUSING_NO_ROOM, "신축 주택을 위한 공간이 없습니다."},
-    {TR_ADVISOR_RESIDENCES_DEMANDING_POTTERY, "입주자들이 도기를 필요로 함"},
-    {TR_ADVISOR_RESIDENCES_DEMANDING_FURNITURE, "입주자들이 가구를 필요로 함"},
-    {TR_ADVISOR_RESIDENCES_DEMANDING_OIL, "입주자들이 기름을 필요로 함"},
-    {TR_ADVISOR_RESIDENCES_DEMANDING_WINE, "입주자들이 포도주를 필요로 함"},
+    {TR_ADVISOR_RESIDENCES_USING_POTTERY, "입주자들이 도기를 필요로 함"},
+    {TR_ADVISOR_RESIDENCES_USING_FURNITURE, "입주자들이 가구를 필요로 함"},
+    {TR_ADVISOR_RESIDENCES_USING_OIL, "입주자들이 기름을 필요로 함"},
+    {TR_ADVISOR_RESIDENCES_USING_WINE, "입주자들이 포도주를 필요로 함"},
     {TR_ADVISOR_TOTAL_NUM_HOUSES, "총 입주자:"},
     {TR_ADVISOR_AVAILABLE_HOUSING_CAPACITY, "입주 가능 인원:"},
     {TR_ADVISOR_TOTAL_HOUSING_CAPACITY, "총 입주 가능 인원:"},
@@ -371,7 +371,8 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_DUPLICATE_TITLE, "단축키가 이미 사용 중"},
     {TR_HOTKEY_DUPLICATE_MESSAGE, "해당 키 조합은 이미 다음의 행동에 할당되어 있습니다:"},
     {TR_CONFIG_DIGIT_SEPARATOR, "Separate digits"},
-    {TR_WARNING_SCREENSHOT_SAVED, "스크린샷이 저장되었습니다: "} // TODO: Google translate
+    {TR_WARNING_SCREENSHOT_SAVED, "스크린샷이 저장되었습니다: "}, // TODO: Google translate
+    {TR_OVERLAY_EFFICIENCY, "능률"},
 };
 
 void translation_korean(const translation_string **strings, int *num_strings)
