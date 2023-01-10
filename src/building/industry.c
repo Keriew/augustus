@@ -79,9 +79,7 @@ int building_get_efficiency(const building *b)
         return -1;
     }
     int production_for_resource = resource_production_per_month(resource);
-    if (resource == RESOURCE_WHEAT && scenario_property_climate() == CLIMATE_NORTHERN) {
-        production_for_resource /= 2;
-    }
+
     int percentage = calc_percentage(b->data.industry.average_production_per_month, production_for_resource);
     return calc_bound(percentage, 0, 100);
 }

@@ -6,6 +6,7 @@
 #include "core/image_group_editor.h"
 #include "game/save_version.h"
 #include "scenario/building.h"
+#include "scenario/property.h"
 #include "translation/translation.h"
 
 #define RESOURCE_ALL (RESOURCE_MAX + RESOURCE_TOTAL_SPECIAL)
@@ -212,7 +213,11 @@ resource_type resource_produced_by_building_type(int building_type)
 
 int resource_production_per_month(resource_type resource)
 {
-    return resource_info[resource].production_per_month;
+    int production = resource_info[resource].production_per_month;
+    if (resource == RESOURCE_WHEAT && scenario_property_climate() == CLIMATE_NORTHERN) {
+        production /= 2;
+    }
+    return production;
 }
 
 resource_type resource_remap(int id)
