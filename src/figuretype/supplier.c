@@ -121,22 +121,12 @@ static int take_resource_from_generic_building(figure *f, int building_id)
 
 static int take_resource_from_warehouse(figure *f, int warehouse_id, int max_amount)
 {
-    int lighthouse_supplier = f->type == FIGURE_LIGHTHOUSE_SUPPLIER;
-    resource_type resource = f->collecting_item_id;
-    if (lighthouse_supplier) {
-        if (!resource_is_raw_material(resource)) {
-            return 0;
-        }
-    } else if (!resource_is_good(resource)) {
-        return 0;
-    }
-
     building *warehouse = building_get(warehouse_id);
     if (warehouse->type != BUILDING_WAREHOUSE) {
         return take_resource_from_generic_building(f, warehouse_id);
     }
     int num_loads;
-    int stored = building_warehouse_get_amount(warehouse, resource);
+    int stored = building_warehouse_get_amount(warehouse, f->collecting_item_id);
     if (stored < max_amount) {
         num_loads = stored;
     } else {
@@ -145,10 +135,10 @@ static int take_resource_from_warehouse(figure *f, int warehouse_id, int max_amo
     if (num_loads <= 0) {
         return 0;
     }
-    building_warehouse_remove_resource(warehouse, resource, num_loads);
+    building_warehouse_remove_resource(warehouse, f->collecting_item_id, num_loads);
 
     // create delivery boys
-    if (!lighthouse_supplier) {
+    if (f->type != FIGURE_LIGHTHOUSE_SUPPLIER) {
         int supplier_id = f->id;
         int boy1 = figure_supplier_create_delivery_boy(supplier_id, supplier_id, FIGURE_DELIVERY_BOY);
         if (num_loads > 1) {
@@ -174,27 +164,18 @@ static int change_market_supplier_destination(figure *f, int dst_building_id)
     return 1;
 }
 
-static int has_inventory_needs(const int needed[RESOURCE_MAX])
-{
-    for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-        if (needed[r]) {
-            return 1;
-        }
-    }
-    return 0;
-}
-
 static int recalculate_market_supplier_destination(figure *f)
 {
     int item = f->collecting_item_id;
     building *market = building_get(f->building_id);
-    inventory_storage_info info[RESOURCE_MAX];
+    resource_storage_info info[RESOURCE_MAX] = { 0 };
 
     int road_network = map_road_network_get(f->grid_offset);
     if (!road_network) {
         return 1;
     }
-    if (!building_distribution_get_inventory_storages_for_figure(info, BUILDING_MARKET, road_network, f, MAX_DISTANCE)) {
+    if (!building_market_get_needed_inventory(market, info) ||
+        !building_distribution_get_resource_storages_for_figure(info, BUILDING_MARKET, road_network, f, MAX_DISTANCE)) {
         return 0;
     }
 
@@ -204,12 +185,7 @@ static int recalculate_market_supplier_destination(figure *f)
     if (info[item].building_id) {
         return change_market_supplier_destination(f, info[item].building_id);
     }
-    int needed_inventory[RESOURCE_MAX];
-    building_market_get_needed_inventory(market, needed_inventory);
-    if (!has_inventory_needs(needed_inventory)) {
-        return 0;
-    }
-    resource_type fetch_inventory = building_market_fetch_inventory(market, info, needed_inventory);
+    resource_type fetch_inventory = building_market_fetch_inventory(market, info);
     if (fetch_inventory == RESOURCE_NONE) {
         return 0;
     }

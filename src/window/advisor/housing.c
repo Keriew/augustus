@@ -3,6 +3,7 @@
 #include "assets/assets.h"
 #include "building/count.h"
 #include "building/house.h"
+#include "building/house_population.h"
 #include "building/model.h"
 #include "city/migration.h"
 #include "city/population.h"
@@ -30,8 +31,8 @@ static void draw_housing_table(void)
     int rows = 0;
 
     resource_list list = { 0 };
-    for (resource_type r = RESOURCE_MIN_GOOD; r < RESOURCE_MAX_GOOD; r++) {
-        if (resource_get_data(r)->is_inventory) {
+    for (resource_type r = RESOURCE_MIN_NON_FOOD; r < RESOURCE_MAX_NON_FOOD; r++) {
+        if (resource_is_inventory(r)) {
             list.items[list.size++] = r;
         }
     }
@@ -115,5 +116,6 @@ const advisor_window_type *window_advisor_housing(void)
     static const advisor_window_type window = {
         draw_background
     };
+    house_population_update_room();
     return &window;
 }

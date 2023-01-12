@@ -122,7 +122,7 @@ static void tavern_coverage(building *b, int products)
     if (products) {
         b->house_tavern_wine_access = MAX_COVERAGE;
         if (products > 1) {
-            b->house_tavern_meat_access = MAX_COVERAGE;
+            b->house_tavern_food_access = MAX_COVERAGE;
         }
     }
 }
@@ -345,7 +345,7 @@ static void collect_offerings_from_house(building *house, building *temple)
     // offerings are generated, not removed from house stores    
     if (house->days_since_offering >= MARS_OFFERING_FREQUENCY) {
         for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
-            if (!resource_get_data(r)->is_inventory) {
+            if (!resource_is_inventory(r)) {
                 continue;
             }
             if (house->resources[r]) {
@@ -372,7 +372,7 @@ static void distribute_market_resources(building *b, building *market)
     int max_food_stocks = 4 * b->house_highest_population;
     int food_types_stored_max = 0;
     for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
-        if (!resource_get_data(r)->is_inventory) {
+        if (!resource_is_inventory(r)) {
             continue;
         }
         if (b->resources[r] >= max_food_stocks) {
@@ -382,7 +382,7 @@ static void distribute_market_resources(building *b, building *market)
     const model_house *model = model_get_house(level);
     if (model->food_types) {
         for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
-            if (!resource_get_data(r)->is_inventory || b->resources[r] >= max_food_stocks ||
+            if (!resource_is_inventory(r) || b->resources[r] >= max_food_stocks ||
                 !building_distribution_is_good_accepted(r, market)) {
                 continue;
             }
@@ -659,9 +659,18 @@ int figure_service_provide_coverage(figure *f)
             houses_serviced = provide_culture(x, y, hippodrome_coverage);
             break;
         case FIGURE_BARKEEP:
+        {
             b = building_get(f->building_id);
-            houses_serviced = provide_entertainment(x, y, b->resources[RESOURCE_WINE] ? b->resources[RESOURCE_MEAT] ? 2 : 1 : 0, tavern_coverage);
+            int tavern_goods = 0;
+            if (b->resources[RESOURCE_WINE]) {
+                tavern_goods = 1;
+                if (b->resources[RESOURCE_MEAT] || b->resources[RESOURCE_FISH]) {
+                    tavern_goods = 2;
+                }
+            }
+            houses_serviced = provide_entertainment(x, y, tavern_goods, tavern_coverage);
             break;
+        }
         case FIGURE_ENGINEER:
         case FIGURE_WORK_CAMP_ARCHITECT:
             {

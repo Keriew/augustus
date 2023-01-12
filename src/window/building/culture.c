@@ -314,7 +314,7 @@ static void draw_temple_info(building_info_context *c, int image_offset)
 
     if (building_is_mars_temple(b->type) && building_monument_gt_module_is_active(MARS_MODULE_1_MESS_HALL)) {
         for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
-            if (!resource_get_data(r)->is_inventory) {
+            if (!resource_is_inventory(r)) {
                 continue;
             }
             image_draw(resource_get_data(r)->image.icon, c->x_offset + x_offset, c->y_offset + 60,
@@ -622,7 +622,7 @@ void window_building_draw_lararium(building_info_context *c)
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     text_draw_centered(translation_for(TR_BUILDING_LARARIUM),
         c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK, 0);
-    window_building_draw_description_at(c, CUSTOM_TRANSLATION, TR_WINDOW_BUILDING_LARARIUM_DESC, 96);
+    window_building_draw_description_at(c, 96, CUSTOM_TRANSLATION, TR_WINDOW_BUILDING_LARARIUM_DESC);
 }
 
 static void draw_grand_temple(building_info_context *c, const char *sound_file,
@@ -803,10 +803,22 @@ void window_building_draw_tavern(building_info_context *c)
 
     text_draw_number(b->resources[RESOURCE_WINE], '@', " ", c->x_offset + 64, c->y_offset + 66, font, 0);
 
-    image_draw(resource_get_data(RESOURCE_MEAT)->image.icon, c->x_offset + 142, c->y_offset + 60,
-        COLOR_MASK_NONE, SCALE_NONE);
-    font = building_distribution_is_good_accepted(RESOURCE_MEAT, b) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
-    text_draw_number(b->resources[RESOURCE_MEAT], '@', " ", c->x_offset + 174, c->y_offset + 66, font, 0);
+    int x_offset = 0;
+
+    if (building_distribution_resource_is_handled(RESOURCE_MEAT, BUILDING_TAVERN)) {
+        image_draw(resource_get_data(RESOURCE_MEAT)->image.icon, c->x_offset + 142, c->y_offset + 60,
+            COLOR_MASK_NONE, SCALE_NONE);
+        font = building_distribution_is_good_accepted(RESOURCE_MEAT, b) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
+        text_draw_number(b->resources[RESOURCE_MEAT], '@', " ", c->x_offset + 174, c->y_offset + 66, font, 0);
+        x_offset = 78;
+    }
+
+    if (building_distribution_resource_is_handled(RESOURCE_FISH, BUILDING_TAVERN)) {
+        image_draw(resource_get_data(RESOURCE_FISH)->image.icon, c->x_offset + 142 + x_offset, c->y_offset + 60,
+            COLOR_MASK_NONE, SCALE_NONE);
+        font = building_distribution_is_good_accepted(RESOURCE_FISH, b) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
+        text_draw_number(b->resources[RESOURCE_FISH], '@', " ", c->x_offset + 174 + x_offset, c->y_offset + 66, font, 0);
+    }
 
     if (!c->has_road_access) {
         window_building_draw_description_at(c, 96, 69, 25);
@@ -816,7 +828,7 @@ void window_building_draw_tavern(building_info_context *c)
     } else if (!b->resources[RESOURCE_WINE]) {
         text_draw_multiline(translation_for(TR_BUILDING_TAVERN_DESC_2),
             c->x_offset + 32, c->y_offset + 96, BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_BLACK, 0);
-    } else if (!b->resources[RESOURCE_MEAT]) {
+    } else if (!b->resources[RESOURCE_MEAT] || !b->resources[RESOURCE_FISH]) {
         text_draw_multiline(translation_for(TR_BUILDING_TAVERN_DESC_3),
             c->x_offset + 32, c->y_offset + 96, BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_BLACK, 0);
     } else {
@@ -826,8 +838,8 @@ void window_building_draw_tavern(building_info_context *c)
 
     inner_panel_draw(c->x_offset + 16, c->y_offset + 156, c->width_blocks - 2, 4);
     window_building_draw_employment(c, 158);
-    window_building_draw_description_at(c, CUSTOM_TRANSLATION,
-        TR_BUILDING_TAVERN_DESC_5, BLOCK_SIZE * c->height_blocks - 110);
+    window_building_draw_description_at(c, BLOCK_SIZE * c->height_blocks - 110, CUSTOM_TRANSLATION,
+        TR_BUILDING_TAVERN_DESC_5);
     return;
 }
 
