@@ -1,4 +1,5 @@
 #include "building_state.h"
+#include "building/industry.h"
 #include "building/monument.h"
 #include "building/roadblock.h"
 #include "figure/figure.h"
@@ -475,9 +476,10 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     b->sentiment.house_happiness = buffer_read_i8(buf); // which union field we use does not matter
     b->show_on_problem_overlay = buffer_read_u8(buf);
 
-    // Wharves produce fish
+    // Wharves produce fish and don't need any progress
     if (b->type == BUILDING_WHARF) {
         b->output_resource_id = RESOURCE_FISH;
+        b->data.industry.progress = 0;
     }
 
     if (building_buf_size < BUILDING_STATE_STRIKES) {
@@ -506,6 +508,11 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
         if (building_type_is_roadblock(b->type)) {
             b->data.roadblock.exceptions = b->subtype.orientation;
         }
+    }
+
+    // Backwards compatibility - double the current progress of industry buildings, except for wheat farms
+    if (save_version < SAVE_GAME_LAST_NO_GOLD_AND_MINTING && b->output_resource_id && b->type != BUILDING_WHEAT_FARM) {
+        b->data.industry.progress *= 2;
     }
 
     // To keep backward savegame compatibility, only fill more recent building struct elements

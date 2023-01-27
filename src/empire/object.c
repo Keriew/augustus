@@ -49,6 +49,30 @@ void empire_object_clear(void)
     memset(objects, 0, sizeof(objects));
 }
 
+static void set_gold_production(full_empire_object *full)
+{
+    if (scenario_empire_id() != SCENARIO_CUSTOM_EMPIRE && empire_city_can_mine_gold(full->city_name_id) &&
+        full->city_sells_resource[RESOURCE_IRON] > 0) {
+        full->city_sells_resource[RESOURCE_GOLD] = full->city_type == EMPIRE_CITY_OURS ? 1 : 5;
+    }
+}
+
+static void update_resource_production_and_trading(full_empire_object *full)
+{
+    if (resource_mapping_get_version() < RESOURCE_HAS_GOLD_VERSION) {
+        set_gold_production(full);
+        if (resource_mapping_get_version() < RESOURCE_SEPARATE_FISH_AND_MEAT_VERSION) {
+            if (full->city_type == EMPIRE_CITY_OURS) {
+                if (full->city_sells_resource[RESOURCE_FISH]) {
+                    full->city_sells_resource[RESOURCE_MEAT] = 1;
+                } else if (scenario_building_allowed(BUILDING_WHARF)) {
+                    full->city_sells_resource[RESOURCE_FISH] = 1;
+                }
+            }
+        }
+    }
+}
+
 void empire_object_load(buffer *buf, int version)
 {
     empire_object_clear();
@@ -167,14 +191,8 @@ void empire_object_load(buffer *buf, int version)
         if (version > SCENARIO_LAST_UNVERSIONED) {
             buffer_read_raw(buf, full->city_custom_name, sizeof(full->city_custom_name));
         }
-
-        // Fix - on old saves, fish resources were enabled simply if a wharf existed
-        if (full->city_type == EMPIRE_CITY_OURS && scenario_building_allowed(BUILDING_WHARF) &&
-            resource_total_mapped() == RESOURCE_MAX_LEGACY) {
-            full->city_sells_resource[RESOURCE_FISH] = 1;
-        }
+        update_resource_production_and_trading(full);
     }
-
     fix_image_ids();
 }
 
