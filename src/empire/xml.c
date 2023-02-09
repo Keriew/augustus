@@ -2,6 +2,7 @@
 
 #include "assets/assets.h"
 #include "core/buffer.h"
+#include "core/calc.h"
 #include "core/file.h"
 #include "core/image_group.h"
 #include "core/log.h"
@@ -13,10 +14,15 @@
 #include "scenario/data.h"
 #include "scenario/empire.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
-#define XML_TOTAL_ELEMENTS 14
+#define XML_TOTAL_ELEMENTS 17
+#define BASE_BORDER_FLAG_IMAGE_ID 3323
+#define BASE_ORNAMENT_IMAGE_ID 3356
+#define BORDER_EDGE_DEFAULT_SPACING 50
+#define TOTAL_ORNAMENTS 20
 
 typedef enum {
     LIST_NONE = -1,
@@ -31,11 +37,47 @@ typedef enum {
     DISTANT_BATTLE_PATH_ENEMY
 } distant_battle_path_type;
 
+enum {
+    BORDER_STATUS_NONE = 0,
+    BORDER_STATUS_CREATING,
+    BORDER_STATUS_DONE
+};
+
 typedef struct {
     int x;
     int y;
     int num_months;
 } waypoint;
+
+static const char *ORNAMENTS[TOTAL_ORNAMENTS] = {
+    "The Stonehenge",
+    "Gallic Wheat",
+    "The Pyrenees",
+    "Iberian Aqueduct",
+    "Triumphal Arch",
+    "West Desert Wheat",
+    "Lighthouse of Alexandria",
+    "West Desert Palm Trees",
+    "Trade Ship",
+    "Waterside Palm Trees",
+    "Colosseum",
+    "The Alps",
+    "Roman Tree",
+    "Greek Mountain Range",
+    "The Parthenon",
+    "The Pyramids",
+    "The Hagia Sophia",
+    "East Desert Palm Trees",
+    "East Desert Wheat",
+    "Trade Camel"
+};
+
+map_point ORNAMENT_POSITIONS[TOTAL_ORNAMENTS] = {
+    {  247,  81 }, {  361, 356 }, {  254, 428 }, {  199, 590 }, {  275, 791 },
+    {  423, 802 }, { 1465, 883 }, {  518, 764 }, {  691, 618 }, {  742, 894 },
+    {  726, 468 }, {  502, 280 }, {  855, 551 }, { 1014, 443 }, { 1158, 698 },
+    { 1431, 961 }, { 1300, 500 }, { 1347, 648 }, { 1707, 783 }, { 1704, 876 }
+};
 
 static struct {
     int success;
@@ -51,9 +93,14 @@ static struct {
     distant_battle_path_type distant_battle_path_type;
     waypoint distant_battle_waypoints[50];
     int distant_battle_wapoint_idx;
+    int border_status;
+    char added_ornaments[TOTAL_ORNAMENTS];
 } data;
 
 static int xml_start_empire(void);
+static int xml_start_ornament(void);
+static int xml_start_border(void);
+static int xml_start_border_edge(void);
 static int xml_start_city(void);
 static int xml_start_buys(void);
 static int xml_start_sells(void);
@@ -65,6 +112,7 @@ static int xml_start_battle(void);
 static int xml_start_distant_battle_path(void);
 static int xml_start_distant_battle_waypoint(void);
 
+static void xml_end_border(void);
 static void xml_end_city(void);
 static void xml_end_sells_buys_or_waypoints(void);
 static void xml_end_invasion_path(void);
@@ -72,6 +120,9 @@ static void xml_end_distant_battle_path(void);
 
 static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "empire", xml_start_empire },
+    { "ornament", xml_start_ornament, 0, "empire" },
+    { "border", xml_start_border, xml_end_border, "empire" },
+    { "edge", xml_start_border_edge, 0, "border" },
     { "cities", 0, 0, "empire" },
     { "city", xml_start_city, xml_end_city, "cities" },
     { "buys", xml_start_buys, xml_end_sells_buys_or_waypoints, "city" },
@@ -110,6 +161,71 @@ static int xml_start_empire(void)
         log_error("No version set", 0, 0);
         return 0;
     }
+    return 1;
+}
+
+static int xml_start_ornament(void)
+{
+    if (!xml_parser_has_attribute("type")) {
+        log_info("No ornament type specified", 0, 0);
+        return 1;
+    }
+    int ornament_id = xml_parser_get_attribute_enum("type", ORNAMENTS, TOTAL_ORNAMENTS, 0);
+    if (ornament_id == -1) {
+        log_info("Invalid ornament type specified", 0, 0);
+        return 1;
+    }
+    if (data.added_ornaments[ornament_id]) {
+        return 1;
+    }
+    data.added_ornaments[ornament_id] = 1;
+    full_empire_object *obj = empire_object_get_full(data.next_empire_obj_id);
+    obj->obj.id = data.next_empire_obj_id;
+    data.next_empire_obj_id++;
+    obj->in_use = 1;
+    obj->obj.type = EMPIRE_OBJECT_ORNAMENT;
+    obj->obj.image_id = BASE_ORNAMENT_IMAGE_ID + ornament_id;
+    obj->obj.x = ORNAMENT_POSITIONS[ornament_id].x;
+    obj->obj.y = ORNAMENT_POSITIONS[ornament_id].y;
+    return 1;
+}
+
+static int xml_start_border(void)
+{
+    if (data.border_status != BORDER_STATUS_NONE) {
+        data.success = 0;
+        log_error("Border is being set twice", 0, 0);
+        return 0;
+    }
+    full_empire_object *obj = empire_object_get_full(data.next_empire_obj_id);
+    obj->obj.id = data.next_empire_obj_id;
+    data.next_empire_obj_id++;
+    obj->in_use = 1;
+    obj->obj.type = EMPIRE_OBJECT_BORDER;
+    obj->obj.width = xml_parser_get_attribute_int("density");
+    if (obj->obj.width == 0) {
+        obj->obj.width = BORDER_EDGE_DEFAULT_SPACING;
+    }
+    data.border_status = BORDER_STATUS_CREATING;
+    return 1;
+}
+
+static int xml_start_border_edge(void)
+{
+    if (data.border_status != BORDER_STATUS_CREATING) {
+        data.success = 0;
+        log_error("Border edge is being wrongly added", 0, 0);
+        return 0;
+    }
+    full_empire_object *obj = empire_object_get_full(data.next_empire_obj_id);
+    obj->obj.id = data.next_empire_obj_id;
+    data.next_empire_obj_id++;
+    obj->in_use = 1;
+    obj->obj.type = EMPIRE_OBJECT_BORDER_EDGE;
+    obj->obj.x = xml_parser_get_attribute_int("x");
+    obj->obj.y = xml_parser_get_attribute_int("y");
+    obj->obj.image_id = xml_parser_get_attribute_bool("hidden") ? 0 : BASE_BORDER_FLAG_IMAGE_ID;
+
     return 1;
 }
 
@@ -180,12 +296,12 @@ static int xml_start_city(void)
     if (city_obj->city_type == EMPIRE_CITY_TRADE || city_obj->city_type == EMPIRE_CITY_FUTURE_TRADE) {
         full_empire_object *route_obj = empire_object_get_full(data.next_empire_obj_id);
         route_obj->obj.id = data.next_empire_obj_id;
+        data.current_trade_route_id++;
         city_obj->obj.trade_route_id = data.current_trade_route_id;
         data.next_empire_obj_id++;
         route_obj->in_use = 1;
         route_obj->obj.type = EMPIRE_OBJECT_LAND_TRADE_ROUTE;
         route_obj->obj.trade_route_id = data.current_trade_route_id;
-        data.current_trade_route_id++;
 
         route_obj->obj.type = xml_parser_get_attribute_enum("trade_route_type",
             trade_route_types, 2, EMPIRE_OBJECT_LAND_TRADE_ROUTE);
@@ -391,6 +507,13 @@ static int xml_start_distant_battle_waypoint(void)
     return 1;
 }
 
+static void xml_end_border(void)
+{
+    if (data.border_status == BORDER_STATUS_CREATING) {
+        data.border_status = BORDER_STATUS_DONE;
+    }
+}
+
 static void xml_end_city(void)
 {
     data.current_city_id = -1;
@@ -473,6 +596,8 @@ static void reset_data(void)
     data.distant_battle_path_type = DISTANT_BATTLE_PATH_NONE;
     memset(data.distant_battle_waypoints, 0, sizeof(data.distant_battle_waypoints));
     data.distant_battle_wapoint_idx = 0;
+    data.border_status = BORDER_STATUS_NONE;
+    memset(data.added_ornaments, 0, sizeof(data.added_ornaments));
 }
 
 static void set_trade_coords(const empire_object *our_city)
@@ -487,39 +612,75 @@ static void set_trade_coords(const empire_object *our_city)
             ) {
             continue;
         }
-        empire_object *trade_route = empire_object_get(trade_city->obj.trade_route_id);
+        empire_object *trade_route = empire_object_get(i + 1);
         if (!trade_route) {
             continue;
         }
 
-        int num_waypoints = 0;
-        for (int j = 0; j < MAX_EMPIRE_OBJECTS; j++) {
-            empire_object *obj = empire_object_get(j);
-            if (obj->type != EMPIRE_OBJECT_TRADE_WAYPOINT || obj->trade_route_id != trade_route->trade_route_id) {
-                continue;
-            }
-            num_waypoints++;
-        }
-
+        int section_distances[MAX_EMPIRE_OBJECTS - 1];
+        int sections = 0;
+        int distance = 0;
         int last_x = our_city->x + 25;
         int last_y = our_city->y + 25;
-        int next_x = trade_city->obj.x + 25;
-        int next_y = trade_city->obj.y + 25;
-        int crossed_waypoints = 0;
-        for (int j = 0; j < MAX_EMPIRE_OBJECTS && crossed_waypoints < num_waypoints / 2 + 1; j++) {
+        int x_diff, y_diff;
+        for (int j = i + 2; j < MAX_EMPIRE_OBJECTS; j++) {
             empire_object *obj = empire_object_get(j);
             if (obj->type != EMPIRE_OBJECT_TRADE_WAYPOINT || obj->trade_route_id != trade_route->trade_route_id) {
-                continue;
+                break;
+            }
+            x_diff = obj->x - last_x;
+            y_diff = obj->y - last_y;
+            section_distances[sections] = (int) sqrt(x_diff * x_diff + y_diff * y_diff);
+            distance += section_distances[sections];
+            last_x = obj->x;
+            last_y = obj->y;
+            sections++;
+        }
+        x_diff = trade_city->obj.x + 25 - last_x;
+        y_diff = trade_city->obj.y + 25 - last_y;
+        section_distances[sections] = (int) sqrt(x_diff * x_diff + y_diff * y_diff);
+        distance += section_distances[sections];
+        sections++;
+    
+        last_x = our_city->x + 25;
+        last_y = our_city->y + 25;
+        int next_x = trade_city->obj.x + 25;
+        int next_y = trade_city->obj.y + 25;
+
+        if (sections == 1) {
+            trade_route->x = (next_x + last_x) / 2 - 16;
+            trade_route->y = (next_y + last_y) / 2 - 10;
+            continue;
+        }
+        int crossed_distance = 0;
+        int current_section = 0;
+        int remaining_distance = 0;
+        while (current_section < sections) {
+            if (current_section == sections - 1) {
+                next_x = trade_city->obj.x + 25;
+                next_y = trade_city->obj.y + 25;
+            } else {
+                empire_object *obj = empire_object_get(current_section + i + 2);
+                next_x = obj->x;
+                next_y = obj->y;
+            }
+            if (section_distances[current_section] + crossed_distance > distance / 2) {
+                remaining_distance = distance / 2 - crossed_distance;
+                break;
             }
             last_x = next_x;
             last_y = next_y;
-            next_x = obj->x;
-            next_y = obj->y;
-            crossed_waypoints++;
+            crossed_distance += section_distances[current_section];
+            current_section++;
         }
+        x_diff = next_x - last_x;
+        y_diff = next_y - last_y;
+        int x_factor = calc_percentage(x_diff, section_distances[current_section]);
+        int y_factor = calc_percentage(y_diff, section_distances[current_section]);
+        trade_route->x = calc_adjust_with_percentage(remaining_distance, x_factor) + last_x - 16;
+        trade_route->y = calc_adjust_with_percentage(remaining_distance, y_factor) + last_y - 10;
 
-        trade_route->x = (next_x + last_x) / 2 - 16;
-        trade_route->y = (next_y + last_y) / 2 - 10;
+        i += sections; // We know the following objects are waypoints so we skip them
     }
 }
 
