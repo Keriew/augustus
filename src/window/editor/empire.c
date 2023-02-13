@@ -1,5 +1,6 @@
 #include "empire.h"
 
+#include "assets/assets.h"
 #include "core/image_group_editor.h"
 #include "core/string.h"
 #include "empire/city.h"
@@ -210,6 +211,11 @@ static void draw_empire_object(const empire_object *obj)
         (obj->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE || obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE)) {
         window_empire_draw_trade_waypoints(obj, data.x_draw_offset, data.y_draw_offset);
     }
+    if (obj->type == EMPIRE_OBJECT_ORNAMENT) {
+        if (image_id < 0) {
+            image_id = assets_lookup_image_id(ASSET_FIRST_ORNAMENT) - 1 - image_id;
+        }
+    }
     image_draw(image_id, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, SCALE_NONE);
     const image *img = image_get(image_id);
     if (img->animation && img->animation->speed_id) {
@@ -218,6 +224,11 @@ static void draw_empire_object(const empire_object *obj)
             data.x_draw_offset + x + img->animation->sprite_offset_x,
             data.y_draw_offset + y + img->animation->sprite_offset_y,
             COLOR_MASK_NONE, SCALE_NONE);
+    }
+    // Manually fix the Hagia Sophia
+    if (obj->image_id == 3372) {
+        image_id = assets_lookup_image_id(ASSET_HAGIA_SOPHIA_FIX);
+        image_draw(image_id, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, SCALE_NONE);
     }
 }
 
