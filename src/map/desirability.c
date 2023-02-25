@@ -98,8 +98,8 @@ static void update_buildings(void)
                     value += 2;
                     range = 1;
                 } else {
-                    if (range <= 1){ // Large Insulae and Grand Insulae have range 0 in c3model.txt
-                        range = 1; // Either this or something like if (house_level = large_insula || house_level = grand_insula) {range = 1;}
+                    if (range <= 1) {
+                        range = 1;
                     }
                     value += 2;
                 }
