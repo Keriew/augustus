@@ -82,10 +82,35 @@ enum {
     ALLOWED_BUILDING_MONUMENTS = 48,
 };
 
-struct win_criteria_t {
+#define MAX_WIN_CRITERIA 10
+
+typedef enum {
+    WIN_CRITERIA_NONE,
+    WIN_CRITERIA_POPULATION_MINIMUM,
+    WIN_CRITERIA_CULTURE,
+    WIN_CRITERIA_PROSPERITY,
+    WIN_CRITERIA_PEACE,
+    WIN_CRITERIA_FAVOR,
+    WIN_CRITERIA_SURVIVAL_YEARS,
+    WIN_CRITERIA_TIME_LIMIT,
+
+    // TODO: Try to implement these
+    WIN_CRITERIA_BUILD_X_BUILDINGS, // Build at least a quantity of a specific building type
+    WIN_CRITERIA_EVOLVE_X_HOUSES,   // Build at least X houses of the given level or higher
+    WIN_CRITERIA_EARN_X_DENARII,    // Have at least X denarii in city coffers
+    WIN_CRITERIA_SELL_X_GOODS,      // Sell at least X of the specific trade good to any trade partner
+    WIN_CRITERIA_HOLD_ROMAN_GAMES,  // Hold roman games at coluseum at least once (requested by Fairbuy)
+    WIN_CRITERIA_GIFT_X_DENARII,    // Spend at least X denarii on gifts to caesar
+
+    WIN_CRITERIA_END
+} win_criteria_type;
+
+typedef struct {
     int enabled;
+    win_criteria_type type;
     int goal;
-};
+    int data;
+} win_criteria_t;
 
 typedef struct {
     int year;
@@ -129,19 +154,7 @@ typedef struct {
 #define DEMAND_CHANGE_LEGACY_IS_FALL -9999
 
 typedef struct {
-    struct win_criteria_t population;
-    struct win_criteria_t culture;
-    struct win_criteria_t prosperity;
-    struct win_criteria_t peace;
-    struct win_criteria_t favor;
-    struct {
-        int enabled;
-        int years;
-    } time_limit;
-    struct {
-        int enabled;
-        int years;
-    } survival_time;
+    win_criteria_t goals[MAX_WIN_CRITERIA];
     int milestone25_year;
     int milestone50_year;
     int milestone75_year;

@@ -7,6 +7,7 @@
 #include "game/save_version.h"
 #include "game/settings.h"
 #include "scenario/data.h"
+#include "scenario/criteria.h"
 
 struct scenario_t scenario;
 
@@ -167,24 +168,10 @@ void scenario_save_state(buffer *buf)
     }
 
     // win criteria
-    buffer_write_i32(buf, scenario.win_criteria.culture.goal);
-    buffer_write_i32(buf, scenario.win_criteria.prosperity.goal);
-    buffer_write_i32(buf, scenario.win_criteria.peace.goal);
-    buffer_write_i32(buf, scenario.win_criteria.favor.goal);
-    buffer_write_u8(buf, scenario.win_criteria.culture.enabled);
-    buffer_write_u8(buf, scenario.win_criteria.prosperity.enabled);
-    buffer_write_u8(buf, scenario.win_criteria.peace.enabled);
-    buffer_write_u8(buf, scenario.win_criteria.favor.enabled);
-    buffer_write_i32(buf, scenario.win_criteria.time_limit.enabled);
-    buffer_write_i32(buf, scenario.win_criteria.time_limit.years);
-    buffer_write_i32(buf, scenario.win_criteria.survival_time.enabled);
-    buffer_write_i32(buf, scenario.win_criteria.survival_time.years);
+    scenario_criteria_save_data(buf);
 
     buffer_write_i32(buf, scenario.earthquake.severity);
     buffer_write_i32(buf, scenario.earthquake.year);
-
-    buffer_write_i32(buf, scenario.win_criteria.population.enabled);
-    buffer_write_i32(buf, scenario.win_criteria.population.goal);
 
     // map points
     buffer_write_i16(buf, scenario.earthquake_point.x);
@@ -400,24 +387,14 @@ void scenario_load_state(buffer *buf, int version)
     }
 
     // win criteria
-    scenario.win_criteria.culture.goal = buffer_read_i32(buf);
-    scenario.win_criteria.prosperity.goal = buffer_read_i32(buf);
-    scenario.win_criteria.peace.goal = buffer_read_i32(buf);
-    scenario.win_criteria.favor.goal = buffer_read_i32(buf);
-    scenario.win_criteria.culture.enabled = buffer_read_u8(buf);
-    scenario.win_criteria.prosperity.enabled = buffer_read_u8(buf);
-    scenario.win_criteria.peace.enabled = buffer_read_u8(buf);
-    scenario.win_criteria.favor.enabled = buffer_read_u8(buf);
-    scenario.win_criteria.time_limit.enabled = buffer_read_i32(buf);
-    scenario.win_criteria.time_limit.years = buffer_read_i32(buf);
-    scenario.win_criteria.survival_time.enabled = buffer_read_i32(buf);
-    scenario.win_criteria.survival_time.years = buffer_read_i32(buf);
+    // Have to split it up since for some reason the earthquake data was stored between
+    // a few different win criteria for older file formats
+    scenario_criteria_load_data(buf, version, 1);
 
     scenario.earthquake.severity = buffer_read_i32(buf);
     scenario.earthquake.year = buffer_read_i32(buf);
 
-    scenario.win_criteria.population.enabled = buffer_read_i32(buf);
-    scenario.win_criteria.population.goal = buffer_read_i32(buf);
+    scenario_criteria_load_data(buf, version, 2);
 
     // map points
     scenario.earthquake_point.x = buffer_read_i16(buf);
@@ -553,21 +530,43 @@ void scenario_objectives_from_buffer(buffer *buf, int version, scenario_win_crit
     } else {
         buffer_set(buf, 1640);
     }
-    win_criteria->culture.goal = buffer_read_i32(buf);
-    win_criteria->prosperity.goal = buffer_read_i32(buf);
-    win_criteria->peace.goal = buffer_read_i32(buf);
-    win_criteria->favor.goal = buffer_read_i32(buf);
-    win_criteria->culture.enabled = buffer_read_u8(buf);
-    win_criteria->prosperity.enabled = buffer_read_u8(buf);
-    win_criteria->peace.enabled = buffer_read_u8(buf);
-    win_criteria->favor.enabled = buffer_read_u8(buf);
-    win_criteria->time_limit.enabled = buffer_read_i32(buf);
-    win_criteria->time_limit.years = buffer_read_i32(buf);
-    win_criteria->survival_time.enabled = buffer_read_i32(buf);
-    win_criteria->survival_time.years = buffer_read_i32(buf);
+    scenario_criteria_clear();
+    int culture_goal = buffer_read_i32(buf);
+    int prosperity_goal = buffer_read_i32(buf);
+    int peace_goal = buffer_read_i32(buf);
+    int favor_goal = buffer_read_i32(buf);
+    int culture_enabled = buffer_read_u8(buf);
+    int prosperity_enabled = buffer_read_u8(buf);
+    int peace_enabled = buffer_read_u8(buf);
+    int favor_enabled = buffer_read_u8(buf);
+    int time_limit_enabled = buffer_read_i32(buf);
+    int time_limit = buffer_read_i32(buf);
+    int survival_time_enabled = buffer_read_i32(buf);
+    int survival_time_years = buffer_read_i32(buf);
+    if (culture_enabled) {
+        scenario_criteria_try_add_or_update_ptr(win_criteria, WIN_CRITERIA_CULTURE, culture_goal, 0);
+    }
+    if (prosperity_enabled) {
+        scenario_criteria_try_add_or_update_ptr(win_criteria, WIN_CRITERIA_PROSPERITY, prosperity_goal, 0);
+    }
+    if (peace_enabled) {
+        scenario_criteria_try_add_or_update_ptr(win_criteria, WIN_CRITERIA_PEACE, peace_goal, 0);
+    }
+    if (favor_enabled) {
+        scenario_criteria_try_add_or_update_ptr(win_criteria, WIN_CRITERIA_FAVOR, favor_goal, 0);
+    }
+    if (time_limit_enabled) {
+        scenario_criteria_try_add_or_update_ptr(win_criteria, WIN_CRITERIA_TIME_LIMIT, time_limit, 0);
+    }
+    if (survival_time_enabled) {
+        scenario_criteria_try_add_or_update_ptr(win_criteria, WIN_CRITERIA_SURVIVAL_YEARS, survival_time_years, 0);
+    }
     buffer_skip(buf, 8);
-    win_criteria->population.enabled = buffer_read_i32(buf);
-    win_criteria->population.goal = buffer_read_i32(buf);
+    int population_enabled = buffer_read_i32(buf);
+    int population_minimum = buffer_read_i32(buf);
+    if (population_enabled) {
+        scenario_criteria_try_add_or_update_ptr(win_criteria, WIN_CRITERIA_POPULATION_MINIMUM, population_minimum, 0);
+    }
 }
 
 void scenario_map_data_from_buffer(buffer *buf, int *width, int *height, int *grid_start, int *grid_border_size)

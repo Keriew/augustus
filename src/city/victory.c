@@ -40,73 +40,40 @@ static int determine_victory_state(void)
     int state = VICTORY_STATE_WON;
     int has_criteria = 0;
 
-    if (scenario_criteria_culture_enabled()) {
-        has_criteria = 1;
-        if (city_data.ratings.culture < scenario_criteria_culture()) {
+    win_criteria_satisfy_state criteria_state = scenario_criteria_test_all();
+    switch (criteria_state) {
+        case WIN_CRITERIA_STATE_NONE:
+            // There are no criteria set
             state = VICTORY_STATE_NONE;
-        }
-    }
-    if (scenario_criteria_prosperity_enabled()) {
-        has_criteria = 1;
-        if (city_data.ratings.prosperity < scenario_criteria_prosperity()) {
+            has_criteria = 0;
+            break;
+        case WIN_CRITERIA_STATE_OK:
+            // All criteria satisfied
+            has_criteria = 1;
+            break;
+        case WIN_CRITERIA_STATE_FAIL:
+            // At least one criteria not satisfied
+            has_criteria = 1;
             state = VICTORY_STATE_NONE;
-        }
-    }
-    if (scenario_criteria_peace_enabled()) {
-        has_criteria = 1;
-        if (city_data.ratings.peace < scenario_criteria_peace()) {
-            state = VICTORY_STATE_NONE;
-        }
-    }
-    if (scenario_criteria_favor_enabled()) {
-        has_criteria = 1;
-        if (city_data.ratings.favor < scenario_criteria_favor()) {
-            state = VICTORY_STATE_NONE;
-        }
-    }
-    if (scenario_criteria_population_enabled()) {
-        has_criteria = 1;
-        if (city_data.population.population < scenario_criteria_population()) {
-            state = VICTORY_STATE_NONE;
-        }
-    }
-
-    if (!has_criteria) {
-        state = VICTORY_STATE_NONE;
-    }
-    // More sensible options for surival time:
-    // require the user to play to the end, even if other win criteria have been set and are met.
-    // At the end, let the user lose if the other win criteria are not met
-    if (game_time_year() >= scenario_criteria_max_year()) {
-        if (scenario_criteria_time_limit_enabled()) {
-            // Lose game automatically when you go over the time limit
-            state = VICTORY_STATE_LOST;
-        } else if (scenario_criteria_survival_enabled()) {
-            if (!has_criteria) {
-                state = VICTORY_STATE_WON;
-            } else if (state != VICTORY_STATE_WON) {
-                // Lose game if you do not meet the criteria at the end of the road
-                state = VICTORY_STATE_LOST;
-            }
-        }
-    } else if (scenario_criteria_survival_enabled()) {
-        // Do not win the game when other criteria are met when survival time is enabled
-        state = VICTORY_STATE_NONE;
-    }
-    if (scenario_criteria_time_limit_enabled() || scenario_criteria_survival_enabled()) {
-        has_criteria = 1;
+            break;
+        case WIN_CRITERIA_STATE_LOSE:
+            // At least one instant-loss criteria failed.
+            return VICTORY_STATE_LOST;
+            has_criteria = 1;
+            break;
     }
     
     if (city_figures_total_invading_enemies() > 2 + city_data.figure.soldiers) {
         if (city_data.population.population < city_data.population.highest_ever / 4) {
-            state = VICTORY_STATE_LOST;
+            return VICTORY_STATE_LOST;
         }
     }
     if (city_figures_total_invading_enemies() > 0) {
         if (city_data.population.population <= 0) {
-            state = VICTORY_STATE_LOST;
+            return VICTORY_STATE_LOST;
         }
     }
+    
     if (!has_criteria) {
         state = VICTORY_STATE_NONE;
     }

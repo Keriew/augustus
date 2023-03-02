@@ -18,6 +18,7 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
+#include "scenario/criteria.h"
 #include "sound/music.h"
 #include "widget/minimap.h"
 #include "window/city.h"
@@ -176,38 +177,46 @@ static void draw_scenario_info(void)
         } else {
             lang_text_draw_centered(44, 127, scenario_info_x, 262, scenario_info_width, FONT_NORMAL_BLACK);
             int width;
-            if (data.info.win_criteria.culture.enabled) {
-                width = text_draw_number(data.info.win_criteria.culture.goal, '@', " ",
+
+            win_criteria_t *criteria = scenario_criteria_get_ptr(&data.info.win_criteria, WIN_CRITERIA_CULTURE);
+            if (criteria != NULL && criteria->enabled) {
+                width = text_draw_number(criteria->goal, '@', " ",
                     scenario_criteria_x, 290, FONT_NORMAL_BLACK, 0);
                 lang_text_draw(44, 129, scenario_criteria_x + width, 290, FONT_NORMAL_BLACK);
             }
-            if (data.info.win_criteria.prosperity.enabled) {
-                width = text_draw_number(data.info.win_criteria.prosperity.goal, '@', " ",
+            criteria = scenario_criteria_get_ptr(&data.info.win_criteria, WIN_CRITERIA_PROSPERITY);
+            if (criteria != NULL && criteria->enabled) {
+                width = text_draw_number(criteria->goal, '@', " ",
                     scenario_criteria_x, 306, FONT_NORMAL_BLACK, 0);
                 lang_text_draw(44, 130, scenario_criteria_x + width, 306, FONT_NORMAL_BLACK);
             }
-            if (data.info.win_criteria.peace.enabled) {
-                width = text_draw_number(data.info.win_criteria.peace.goal, '@', " ",
+            criteria = scenario_criteria_get_ptr(&data.info.win_criteria, WIN_CRITERIA_PEACE);
+            if (criteria != NULL && criteria->enabled) {
+                width = text_draw_number(criteria->goal, '@', " ",
                     scenario_criteria_x, 322, FONT_NORMAL_BLACK, 0);
                 lang_text_draw(44, 131, scenario_criteria_x + width, 322, FONT_NORMAL_BLACK);
             }
-            if (data.info.win_criteria.favor.enabled) {
-                width = text_draw_number(data.info.win_criteria.favor.goal, '@', " ",
+            criteria = scenario_criteria_get_ptr(&data.info.win_criteria, WIN_CRITERIA_FAVOR);
+            if (criteria != NULL && criteria->enabled) {
+                width = text_draw_number(criteria->goal, '@', " ",
                     scenario_criteria_x, 338, FONT_NORMAL_BLACK, 0);
                 lang_text_draw(44, 132, scenario_criteria_x + width, 338, FONT_NORMAL_BLACK);
             }
-            if (data.info.win_criteria.population.enabled) {
-                width = text_draw_number(data.info.win_criteria.population.goal, '@', " ",
+            criteria = scenario_criteria_get_ptr(&data.info.win_criteria, WIN_CRITERIA_POPULATION_MINIMUM);
+            if (criteria != NULL && criteria->enabled) {
+                width = text_draw_number(criteria->goal, '@', " ",
                     scenario_criteria_x, 354, FONT_NORMAL_BLACK, 0);
                 lang_text_draw(44, 133, scenario_criteria_x + width, 354, FONT_NORMAL_BLACK);
             }
-            if (data.info.win_criteria.time_limit.enabled) {
-                width = text_draw_number(data.info.win_criteria.time_limit.years, '@', " ",
+            criteria = scenario_criteria_get_ptr(&data.info.win_criteria, WIN_CRITERIA_TIME_LIMIT);
+            if (criteria != NULL && criteria->enabled) {
+                width = text_draw_number(criteria->goal, '@', " ",
                     scenario_criteria_x, 370, FONT_NORMAL_BLACK, 0);
                 lang_text_draw(44, 134, scenario_criteria_x + width, 370, FONT_NORMAL_BLACK);
             }
-            if (data.info.win_criteria.survival_time.enabled) {
-                width = text_draw_number(data.info.win_criteria.survival_time.years, '@', " ",
+            criteria = scenario_criteria_get_ptr(&data.info.win_criteria, WIN_CRITERIA_SURVIVAL_YEARS);
+            if (criteria != NULL && criteria->enabled) {
+                width = text_draw_number(criteria->goal, '@', " ",
                     scenario_criteria_x, 386, FONT_NORMAL_BLACK, 0);
                 lang_text_draw(44, 135, scenario_criteria_x + width, 386, FONT_NORMAL_BLACK);
             }

@@ -3,6 +3,7 @@
 #include "core/lang.h"
 #include "core/string.h"
 #include "map/grid.h"
+#include "scenario/criteria.h"
 #include "scenario/data.h"
 #include "scenario/empire.h"
 #include "scenario/property.h"
@@ -52,21 +53,11 @@ void scenario_editor_create(int map_size)
     }
     scenario.rome_supplies_wheat = 0;
 
-    scenario.win_criteria.culture.goal = 10;
-    scenario.win_criteria.culture.enabled = 1;
-    scenario.win_criteria.prosperity.goal = 10;
-    scenario.win_criteria.prosperity.enabled = 1;
-    scenario.win_criteria.peace.goal = 10;
-    scenario.win_criteria.peace.enabled = 1;
-    scenario.win_criteria.favor.goal = 10;
-    scenario.win_criteria.favor.enabled = 1;
-    scenario.win_criteria.population.goal = 0;
-    scenario.win_criteria.population.enabled = 0;
-
-    scenario.win_criteria.time_limit.years = 0;
-    scenario.win_criteria.time_limit.enabled = 0;
-    scenario.win_criteria.survival_time.years = 0;
-    scenario.win_criteria.survival_time.enabled = 0;
+    scenario_criteria_clear();
+    scenario_criteria_try_add_or_update(WIN_CRITERIA_CULTURE, 10, 0);
+    scenario_criteria_try_add_or_update(WIN_CRITERIA_PROSPERITY, 10, 0);
+    scenario_criteria_try_add_or_update(WIN_CRITERIA_PEACE, 10, 0);
+    scenario_criteria_try_add_or_update(WIN_CRITERIA_FAVOR, 10, 0);
 
     scenario.earthquake.severity = 0;
     scenario.earthquake.year = 0;
@@ -458,90 +449,90 @@ void scenario_editor_toggle_open_play(void)
 
 void scenario_editor_toggle_culture(void)
 {
-    scenario.win_criteria.culture.enabled = !scenario.win_criteria.culture.enabled;
+    scenario_criteria_toggle(WIN_CRITERIA_CULTURE, 10, 0);
     scenario.is_saved = 0;
 }
 
 void scenario_editor_set_culture(int goal)
 {
-    scenario.win_criteria.culture.goal = goal;
+    scenario_criteria_try_add_or_update(WIN_CRITERIA_CULTURE, goal, 0);
     scenario.is_saved = 0;
 }
 
 void scenario_editor_toggle_prosperity(void)
 {
-    scenario.win_criteria.prosperity.enabled = !scenario.win_criteria.prosperity.enabled;
+    scenario_criteria_toggle(WIN_CRITERIA_PROSPERITY, 10, 0);
     scenario.is_saved = 0;
 }
 
 void scenario_editor_set_prosperity(int goal)
 {
-    scenario.win_criteria.prosperity.goal = goal;
+    scenario_criteria_try_add_or_update(WIN_CRITERIA_PROSPERITY, goal, 0);
     scenario.is_saved = 0;
 }
 
 void scenario_editor_toggle_peace(void)
 {
-    scenario.win_criteria.peace.enabled = !scenario.win_criteria.peace.enabled;
+    scenario_criteria_toggle(WIN_CRITERIA_PEACE, 10, 0);
     scenario.is_saved = 0;
 }
 
 void scenario_editor_set_peace(int goal)
 {
-    scenario.win_criteria.peace.goal = goal;
+    scenario_criteria_try_add_or_update(WIN_CRITERIA_PEACE, goal, 0);
     scenario.is_saved = 0;
 }
 
 void scenario_editor_toggle_favor(void)
 {
-    scenario.win_criteria.favor.enabled = !scenario.win_criteria.favor.enabled;
+    scenario_criteria_toggle(WIN_CRITERIA_FAVOR, 10, 0);
     scenario.is_saved = 0;
 }
 
 void scenario_editor_set_favor(int goal)
 {
-    scenario.win_criteria.favor.goal = goal;
+    scenario_criteria_try_add_or_update(WIN_CRITERIA_FAVOR, goal, 0);
     scenario.is_saved = 0;
 }
 
 void scenario_editor_toggle_population(void)
 {
-    scenario.win_criteria.population.enabled = !scenario.win_criteria.population.enabled;
+    scenario_criteria_toggle(WIN_CRITERIA_POPULATION_MINIMUM, 10, 0);
     scenario.is_saved = 0;
 }
 
 void scenario_editor_set_population(int goal)
 {
-    scenario.win_criteria.population.goal = goal;
+    scenario_criteria_try_add_or_update(WIN_CRITERIA_POPULATION_MINIMUM, goal, 0);
     scenario.is_saved = 0;
 }
 
 void scenario_editor_toggle_time_limit(void)
 {
-    scenario.win_criteria.time_limit.enabled = !scenario.win_criteria.time_limit.enabled;
-    if (scenario.win_criteria.time_limit.enabled) {
-        scenario.win_criteria.survival_time.enabled = 0;
+    int enabled = scenario_criteria_toggle(WIN_CRITERIA_TIME_LIMIT, 10, 0);
+    if (enabled) {
+        scenario_criteria_disable(WIN_CRITERIA_SURVIVAL_YEARS);
     }
     scenario.is_saved = 0;
 }
 
 void scenario_editor_set_time_limit(int years)
 {
-    scenario.win_criteria.time_limit.years = years;
+    scenario_criteria_try_add_or_update(WIN_CRITERIA_TIME_LIMIT, years, 0);
     scenario.is_saved = 0;
 }
 
 void scenario_editor_toggle_survival_time(void)
 {
-    scenario.win_criteria.survival_time.enabled = !scenario.win_criteria.survival_time.enabled;
-    if (scenario.win_criteria.survival_time.enabled) {
-        scenario.win_criteria.time_limit.enabled = 0;
+    int enabled = scenario_criteria_toggle(WIN_CRITERIA_SURVIVAL_YEARS, 10, 0);
+    if (enabled) {
+        scenario_criteria_disable(WIN_CRITERIA_TIME_LIMIT);
     }
     scenario.is_saved = 0;
 }
 
 void scenario_editor_set_survival_time(int years)
 {
-    scenario.win_criteria.survival_time.years = years;
+    scenario_criteria_try_add_or_update(WIN_CRITERIA_SURVIVAL_YEARS, years, 0);
     scenario.is_saved = 0;
 }

@@ -398,8 +398,11 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
     if (version <= SAVE_GAME_LAST_UNVERSIONED_SCENARIOS) {
         version_data->piece_sizes.scenario = 1720;
         version_data->features.custom_empires = 0;
-    } else {
+    } else if (version <= SAVE_GAME_LAST_STATIC_WIN_CRITERIA) {
         version_data->piece_sizes.scenario = 1838;
+        version_data->features.custom_empires = 1;
+    } else {
+        version_data->piece_sizes.scenario = 1900;
         version_data->features.custom_empires = 1;
     }
     version_data->features.scenario_version = version > SAVE_GAME_LAST_NO_SCENARIO_VERSION;
