@@ -1,0 +1,13 @@
+#ifndef CONDITION_TYPES_H
+#define CONDITION_TYPES_H
+
+#include "core/buffer.h"
+#include "scenario/scenario_event_data.h"
+
+void scenario_condition_init(scenario_condition_t *condition);
+void scenario_condition_save_state(buffer *buf, scenario_condition_t *condition, int link_type, int32_t link_id);
+void scenario_condition_load_state(buffer *buf, int version, scenario_condition_t *condition, int *link_type, int32_t *link_id);
+
+int scenario_condition_is_met(scenario_condition_t *condition);
+
+#endif // CONDITION_TYPES_H

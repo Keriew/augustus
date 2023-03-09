@@ -1,0 +1,18 @@
+#include "conditiontype_stats_favor.h"
+
+#include "city/ratings.h"
+#include "scenario/conditiontype/comparison_helper.h"
+
+void scenario_condition_stats_favor_init(scenario_condition_t *condition)
+{
+    // Nothing to init.
+}
+
+int scenario_condition_stats_favor_met(scenario_condition_t *condition)
+{
+    int stat_value = city_rating_favor();
+    int type = condition->parameter1;
+    int32_t value = condition->parameter2;
+
+    return scenario_event_condition_compare_values(type, stat_value, (int)value);
+}

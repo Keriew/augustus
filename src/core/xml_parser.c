@@ -352,6 +352,11 @@ int xml_parser_get_attribute_enum(const char *key,
     return start_offset - 1;
 }
 
+int xml_parser_get_current_line_number(void)
+{
+    return XML_GetCurrentLineNumber(data.parser);
+}
+
 void xml_parser_reset(void)
 {
     data.error = 0;

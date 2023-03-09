@@ -61,6 +61,18 @@ int empire_city_get_route_id(int city_id)
     return array_item(cities, city_id)->route_id;
 }
 
+int empire_city_get_id_by_name(const uint8_t *city_name)
+{
+    empire_city *city;
+    array_foreach(cities, city) {
+        const uint8_t *current_name = empire_city_get_name(city);
+        if (string_equals(current_name, city_name)) {
+            return i;
+        }
+    }
+    return 0;
+}
+
 int empire_can_import_resource(int resource)
 {
     empire_city *city;
@@ -367,6 +379,18 @@ int empire_unlock_all_resources(void)
             for (int resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
                 city->sells_resource[resource] = 1;
             }
+            return 1;
+        }
+	}
+	return 0;
+}
+
+int empire_city_our_city_change_resource_available(int resource, int new_state)
+{
+    empire_city *city;
+    array_foreach(cities, city) {
+        if (city->in_use && (city->type == EMPIRE_CITY_OURS)) {
+            city->sells_resource[resource] = new_state;
             return 1;
         }
 	}

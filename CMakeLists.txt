@@ -283,6 +283,7 @@ set(CORE_FILES
     ${PROJECT_SOURCE_DIR}/src/core/string.c
     ${PROJECT_SOURCE_DIR}/src/core/time.c
     ${PROJECT_SOURCE_DIR}/src/core/xml_parser.c
+    ${PROJECT_SOURCE_DIR}/src/core/xml_exporter.c
     ${PROJECT_SOURCE_DIR}/src/core/zip.c
     ${PROJECT_SOURCE_DIR}/src/core/zlib_helper.c
 )
@@ -504,6 +505,45 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/random_event.c
     ${PROJECT_SOURCE_DIR}/src/scenario/request.c
     ${PROJECT_SOURCE_DIR}/src/scenario/scenario.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/scenario_events_xml.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/scenario_event.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/scenario_events_controller.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/action_types.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/action_math_helper.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_change_allowed_buildings.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_change_resource_produced.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_city_health.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_favor.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_empire_map_convert_future_trade_city.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_gladiator_revolt.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_money.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_request_immediately_start.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_rome_wages.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_savings.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_send_standard_message.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_trade_price.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_trade_problem_land.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_trade_problem_sea.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_trade_route_amount.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_trade_price_set.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/comparison_helper.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/condition_types.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_building_count_active.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_city_population.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_count_own_troops.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_difficulty.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_money.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_population_unemployed.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_request_is_ongoing.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_rome_wages.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_savings.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_stats_favor.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_stats_city_health.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_stats_culture.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_stats_peace.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_stats_prosperity.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_time.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_trade_sell_price.c
 )
 set(GRAPHICS_FILES
     ${PROJECT_SOURCE_DIR}/src/graphics/arrow_button.c
@@ -604,6 +644,10 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/editor/map.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/price_changes.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/requests.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/scenario_events.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/scenario_event_details.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/scenario_action_edit.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/scenario_condition_edit.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/special_events.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/start_year.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/starting_conditions.c

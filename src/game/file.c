@@ -70,6 +70,7 @@
 #include "scenario/property.h"
 #include "scenario/request.h"
 #include "scenario/scenario.h"
+#include "scenario/scenario_events_controller.h"
 #include "sound/city.h"
 #include "sound/music.h"
 
@@ -356,6 +357,8 @@ static int start_scenario(const uint8_t *scenario_name, const char *scenario_fil
 
     tutorial_init();
 
+    scenario_events_init();
+    scenario_events_process_all();
     building_menu_update();
     city_message_init_scenario();
     return 1;

@@ -5,6 +5,7 @@
 #include "map/point.h"
 #include "scenario/property.h"
 #include "scenario/types.h"
+#include "scenario/scenario_event_data.h"
 
 #include <stdint.h>
 
