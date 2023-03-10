@@ -2,7 +2,6 @@
 
 #include "city/message.h"
 #include "empire/city.h"
-#include "empire/trade_prices.h"
 #include "empire/trade_route.h"
 
 void scenario_event_action_trade_route_amount_init(scenario_action_t *action)

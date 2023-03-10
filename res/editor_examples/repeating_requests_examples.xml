@@ -59,6 +59,6 @@
         get to the target favor -->
     <event repeat_months_min="1" repeat_months_max="1"> <!-- Every month... -->
         <condition type="stats_favor" check="gte" value="40"/> <!-- when Caesar's favour is above 40, then... -->
-        <action type="favor" amount="-1"/> <!-- drop Caesar's favor by 1. -->
+        <action type="favor_add" amount="-1"/> <!-- drop Caesar's favor by 1. -->
     </event>
 </events>

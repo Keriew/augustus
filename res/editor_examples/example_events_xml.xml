@@ -12,9 +12,9 @@
              So in total, this basically means: This event start after 4 to 6 months, and repeats every 1 to 4 months after that. -->
         <condition type="time" check="gte" min="4" max="6"/>
         <!-- Give the playre 1000 money -->
-        <action type="money" min="1000" max="1000"/>
+        <action type="money_add" min="1000" max="1000"/>
         <!-- Give the player 1 favor -->
-        <action type="favor" amount="1"/>
+        <action type="favor_add" amount="1"/>
     </event>
     <!-- This event is not setup to repeat, so it will only ever execute its actions once. -->
     <event>
@@ -26,30 +26,30 @@
         <!-- We also only want this to fire if the player is playing on very easy -->
         <condition type="difficulty" check="eq" value="very_easy"/>
         <!-- We give the player an extra 10 favor -->
-        <action type="favor" amount="10"/>
+        <action type="favor_add" amount="10"/>
 		<!-- Here we give the player a random amount of money between 10000 and 15000. -->
-        <action type="money" min="10000" max="15000"/>
+        <action type="money_add" min="10000" max="15000"/>
     </event>
     <event>
 		<!-- On hard and very hard, we want to take some money and favour from the player at 
         the start of the scenario. -->
         <condition type="time" check="eq" amount="0"/>
         <condition type="difficulty" check="gte" value="hard"/>
-        <action type="favor" amount="-7"/>
-        <action type="money" min="-2735" max="-2735"/>
+        <action type="favor_add" amount="-7"/>
+        <action type="money_add" min="-2735" max="-2735"/>
     </event>
     <event>
 		<!-- If after a month you still do not have personal savings, then assume the player has their salary on 0.
         Secretly give them some personal savings to mess with them. -->
         <condition type="time" check="eq" amount="1"/>
-        <condition type="savings" check="eq" value="0"/>
-        <action type="savings" min="77" max="77"/>
+        <condition type="savings_add" check="eq" value="0"/>
+        <action type="savings_add" min="77" max="77"/>
     </event>
     <!-- Every month, if the player's city has less than 2000 money in its coffers, give money but reduce favour. -->
     <event repeat_months_min="1" repeat_months_max="1" max_number_of_repeats="2">
-        <condition type="money" check="lte" value="0"/>
-        <action type="money" amount="500"/>
-        <action type="favor" amount="-5"/>
+        <condition type="money_add" check="lte" value="0"/>
+        <action type="money_add" amount="500"/>
+        <action type="favor_add" amount="-5"/>
     </event>
     <!-- We want to wheat to start off expensive but slowly have its price return to normal to encourage the player to export wheat early on.
     So we do one event that runs at the start of the map to 'silently' increase the price, and then ... -->
@@ -101,7 +101,7 @@
     <!-- Once we have more than 1000 patricians, then we get start receiving some personal gifts. Totally legit. -->
     <event repeat_months_min="7" repeat_months_max="12">
         <condition type="city_population" check="gte" value="1000" class="patrician"/>
-        <action type="savings" min="250" max="350"/>
+        <action type="savings_add" min="250" max="350"/>
     </event>
     <!-- Start a gladiator revolt after 36 months. -->
     <event>

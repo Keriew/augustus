@@ -82,14 +82,6 @@ enum {
     POP_CLASS_SLUMS = 4
 };
 
-enum {
-    ARITHMETIC_TYPE_UNDEFINED = 0,
-    ARITHMETIC_TYPE_SET = 1,
-    ARITHMETIC_TYPE_ADD = 2,
-    ARITHMETIC_TYPE_MULTIPLY = 3,
-    ARITHMETIC_TYPE_DIVIDE = 4
-};
-
 typedef struct {
     condition_types type;
     int32_t parameter1;

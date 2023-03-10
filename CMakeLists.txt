@@ -509,7 +509,6 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/scenario_event.c
     ${PROJECT_SOURCE_DIR}/src/scenario/scenario_events_controller.c
     ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/action_types.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/action_math_helper.c
     ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_change_allowed_buildings.c
     ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_change_resource_produced.c
     ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_city_health.c

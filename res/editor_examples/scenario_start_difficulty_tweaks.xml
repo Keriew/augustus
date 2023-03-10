@@ -8,38 +8,38 @@
     <event>
         <condition type="time" check="eq" amount="0"/>
         <condition type="difficulty" check="eq" value="very_easy"/>
-        <action type="favor" amount="10"/>
-        <action type="money" amount="2000"/>
-        <action type="savings" amount="500"/>
+        <action type="favor_add" amount="10"/>
+        <action type="money_add" amount="2000"/>
+        <action type="savings_add" amount="500"/>
         <action type="rome_wages" amount="-2" set_to_value="false"/>
     </event>
     <!-- Easy -->
     <event>
         <condition type="time" check="eq" amount="0"/>
         <condition type="difficulty" check="eq" value="easy"/>
-        <action type="favor" amount="5"/>
-        <action type="money" amount="1000"/>
-        <action type="savings" amount="200"/>
+        <action type="favor_add" amount="5"/>
+        <action type="money_add" amount="1000"/>
+        <action type="savings_add" amount="200"/>
         <action type="rome_wages" amount="-1" set_to_value="false"/>
     </event>
     <!-- Normal -->
     <event>
         <condition type="time" check="eq" amount="0"/>
         <condition type="difficulty" check="eq" value="normal"/>
-        <action type="savings" amount="100"/>
+        <action type="savings_add" amount="100"/>
     </event>
     <!-- Hard -->
     <event>
         <condition type="time" check="eq" amount="0"/>
         <condition type="difficulty" check="eq" value="hard"/>
-        <action type="money" amount="-1000"/>
+        <action type="money_add" amount="-1000"/>
         <action type="rome_wages" amount="1" set_to_value="false"/>
     </event>
     <!-- Very hard -->
     <event>
         <condition type="time" check="eq" amount="0"/>
         <condition type="difficulty" check="eq" value="very_hard"/>
-        <action type="money" amount="-2000"/>
+        <action type="money_add" amount="-2000"/>
         <action type="rome_wages" amount="2" set_to_value="false"/>
     </event>
 </events>

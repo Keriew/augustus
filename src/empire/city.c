@@ -381,8 +381,8 @@ int empire_unlock_all_resources(void)
             }
             return 1;
         }
-	}
-	return 0;
+    }
+    return 0;
 }
 
 int empire_city_our_city_change_resource_available(int resource, int new_state)
@@ -393,8 +393,8 @@ int empire_city_our_city_change_resource_available(int resource, int new_state)
             city->sells_resource[resource] = new_state;
             return 1;
         }
-	}
-	return 0;
+    }
+    return 0;
 }
 
 const uint8_t *empire_city_get_name(const empire_city *city)
