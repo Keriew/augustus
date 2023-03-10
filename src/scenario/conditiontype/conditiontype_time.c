@@ -24,5 +24,5 @@ int scenario_condition_time_met(scenario_condition_t *condition)
     int32_t max_months = condition->parameter3;
     int32_t target_months = condition->parameter4;
 
-    return scenario_event_condition_compare_values(type, total_months, (int)target_months);
+    return comparison_helper_compare_values(type, total_months, (int)target_months);
 }

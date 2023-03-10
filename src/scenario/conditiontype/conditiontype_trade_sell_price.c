@@ -10,5 +10,5 @@ int scenario_condition_trade_sell_price_met(scenario_condition_t *condition)
     int32_t value = condition->parameter3;
 
     int trade_sell_price = trade_price_base_sell(resource);
-    return scenario_event_condition_compare_values(type, trade_sell_price, (int)value);
+    return comparison_helper_compare_values(type, trade_sell_price, (int)value);
 }

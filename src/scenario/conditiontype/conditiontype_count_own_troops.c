@@ -14,5 +14,5 @@ int scenario_condition_count_own_troops_met(scenario_condition_t *condition)
         soldier_count = city_military_total_soldiers_in_city();
     }
 
-    return scenario_event_condition_compare_values(check, soldier_count, (int)value);
+    return comparison_helper_compare_values(check, soldier_count, (int)value);
 }

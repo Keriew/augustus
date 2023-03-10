@@ -9,5 +9,5 @@ int scenario_condition_stats_favor_met(scenario_condition_t *condition)
     int type = condition->parameter1;
     int32_t value = condition->parameter2;
 
-    return scenario_event_condition_compare_values(type, stat_value, (int)value);
+    return comparison_helper_compare_values(type, stat_value, (int)value);
 }

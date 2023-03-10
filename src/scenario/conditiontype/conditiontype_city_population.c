@@ -18,5 +18,5 @@ int scenario_condition_city_population_met(scenario_condition_t *condition)
         population_value_to_use = city_data.population.people_in_tents_shacks;
     }
 
-    return scenario_event_condition_compare_values(type, population_value_to_use, (int)value);
+    return comparison_helper_compare_values(type, population_value_to_use, (int)value);
 }

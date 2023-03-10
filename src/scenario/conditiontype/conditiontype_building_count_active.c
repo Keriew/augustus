@@ -97,5 +97,5 @@ int scenario_condition_building_count_active_met(scenario_condition_t *condition
     }
     
 
-    return scenario_event_condition_compare_values(type, total_active_count, (int)value);
+    return comparison_helper_compare_values(type, total_active_count, (int)value);
 }

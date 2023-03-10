@@ -14,5 +14,5 @@ int scenario_condition_population_unemployed_met(scenario_condition_t *condition
         unemployed_total = city_labor_unemployment_percentage();
     }
 
-    return scenario_event_condition_compare_values(type, unemployed_total, (int)value);
+    return comparison_helper_compare_values(type, unemployed_total, (int)value);
 }
