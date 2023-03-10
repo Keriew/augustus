@@ -2,11 +2,6 @@
 
 #include "scenario/request.h"
 
-void scenario_condition_request_is_ongoing_init(scenario_condition_t *condition)
-{
-    // Nothing to init.
-}
-
 int scenario_condition_request_is_ongoing_met(scenario_condition_t *condition)
 {
     int32_t request_id = condition->parameter1;

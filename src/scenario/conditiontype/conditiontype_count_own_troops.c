@@ -3,11 +3,6 @@
 #include "city/military.h"
 #include "scenario/conditiontype/comparison_helper.h"
 
-void scenario_condition_count_own_troops_init(scenario_condition_t *condition)
-{
-    // Nothing to init.
-}
-
 int scenario_condition_count_own_troops_met(scenario_condition_t *condition)
 {
     int check = condition->parameter1;

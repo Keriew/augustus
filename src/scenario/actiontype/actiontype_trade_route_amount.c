@@ -4,11 +4,6 @@
 #include "empire/city.h"
 #include "empire/trade_route.h"
 
-void scenario_event_action_trade_route_amount_init(scenario_action_t *action)
-{
-    // Nothing to init.
-}
-
 int scenario_event_action_trade_route_amount_execute(scenario_action_t *action)
 {
     int32_t route_id = action->parameter1;

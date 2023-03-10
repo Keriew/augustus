@@ -3,11 +3,6 @@
 #include "city/data_private.h"
 #include "scenario/conditiontype/comparison_helper.h"
 
-void scenario_condition_city_population_init(scenario_condition_t *condition)
-{
-    // Nothing to init.
-}
-
 int scenario_condition_city_population_met(scenario_condition_t *condition)
 {
     int type = condition->parameter1;

@@ -4,12 +4,7 @@
 #include "city/message.h"
 #include "city/trade.h"
 
-void scenario_event_action_trade_problem_sea_init(scenario_action_t *action)
-{
-    // Nothing to init.
-}
-
-int scenario_event_action_trade_problem_sea_execute(scenario_action_t *action)
+int scenario_event_action_trade_problems_sea_execute(scenario_action_t *action)
 {
     int32_t duration = action->parameter1;
 

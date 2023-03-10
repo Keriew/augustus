@@ -3,11 +3,6 @@
 #include "game/settings.h"
 #include "scenario/conditiontype/comparison_helper.h"
 
-void scenario_condition_difficulty_init(scenario_condition_t *condition)
-{
-    // Nothing to init.
-}
-
 int scenario_condition_difficulty_met(scenario_condition_t *condition)
 {
     int difficulty = setting_difficulty();

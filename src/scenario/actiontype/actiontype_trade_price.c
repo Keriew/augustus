@@ -3,12 +3,7 @@
 #include "city/message.h"
 #include "empire/trade_prices.h"
 
-void scenario_event_action_trade_price_init(scenario_action_t *action)
-{
-    // Nothing to init.
-}
-
-int scenario_event_action_trade_price_execute(scenario_action_t *action)
+int scenario_event_action_trade_price_adjust_execute(scenario_action_t *action)
 {
     int32_t resource = action->parameter1;
     int32_t adjustment = action->parameter2;

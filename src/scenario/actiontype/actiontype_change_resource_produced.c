@@ -3,11 +3,6 @@
 #include "empire/city.h"
 #include "building/menu.h"
 
-void scenario_event_action_change_resource_produced_init(scenario_action_t *action)
-{
-    // Nothing to init.
-}
-
 int scenario_event_action_change_resource_produced_execute(scenario_action_t *action)
 {
     int32_t resource = action->parameter1;

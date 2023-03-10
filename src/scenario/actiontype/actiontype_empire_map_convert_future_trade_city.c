@@ -4,11 +4,6 @@
 #include "empire/city.h"
 #include "empire/object.h"
 
-void scenario_event_action_empire_map_convert_future_trade_city_init(scenario_action_t *action)
-{
-    // Nothing to init.
-}
-
 int scenario_event_action_empire_map_convert_future_trade_city_execute(scenario_action_t *action)
 {
     int32_t target_city_id = action->parameter1;

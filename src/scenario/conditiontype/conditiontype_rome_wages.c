@@ -3,11 +3,6 @@
 #include "city/labor.h"
 #include "scenario/conditiontype/comparison_helper.h"
 
-void scenario_condition_rome_wages_init(scenario_condition_t *condition)
-{
-    // Nothing to init.
-}
-
 int scenario_condition_rome_wages_met(scenario_condition_t *condition)
 {
     int wages = city_labor_wages_rome();

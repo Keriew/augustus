@@ -20,53 +20,8 @@
 void scenario_condition_init(scenario_condition_t *condition)
 {
     switch (condition->type) {
-        case CONDITION_TYPE_BUILDING_COUNT_ACTIVE:
-            scenario_condition_building_count_active_init(condition);
-            break;
-        case CONDITION_TYPE_CITY_POPULATION:
-            scenario_condition_city_population_init(condition);
-            break;
-        case CONDITION_TYPE_COUNT_OWN_TROOPS:
-            scenario_condition_count_own_troops_init(condition);
-            break;
-        case CONDITION_TYPE_DIFFICULTY:
-            scenario_condition_difficulty_init(condition);
-            break;
-        case CONDITION_TYPE_MONEY:
-            scenario_condition_money_init(condition);
-            break;
-        case CONDITION_TYPE_POPS_UNEMPLOYMENT:
-            scenario_condition_population_unemployed_init(condition);
-            break;
-        case CONDITION_TYPE_REQUEST_IS_ONGOING:
-            scenario_condition_request_is_ongoing_init(condition);
-            break;
-        case CONDITION_TYPE_ROME_WAGES:
-            scenario_condition_rome_wages_init(condition);
-            break;
-        case CONDITION_TYPE_SAVINGS:
-            scenario_condition_savings_init(condition);
-            break;
-        case CONDITION_TYPE_STATS_CITY_HEALTH:
-            scenario_condition_stats_city_health_init(condition);
-            break;
-        case CONDITION_TYPE_STATS_CULTURE:
-            scenario_condition_stats_culture_init(condition);
-            break;
-        case CONDITION_TYPE_STATS_FAVOR:
-            scenario_condition_stats_favor_init(condition);
-            break;
-        case CONDITION_TYPE_STATS_PEACE:
-            scenario_condition_stats_peace_init(condition);
-            break;
-        case CONDITION_TYPE_STATS_PROSPERITY:
-            scenario_condition_stats_prosperity_init(condition);
-            break;
         case CONDITION_TYPE_TIME_PASSED:
             scenario_condition_time_init(condition);
-            break;
-        case CONDITION_TYPE_TRADE_SELL_PRICE:
-            scenario_condition_trade_sell_price_init(condition);
             break;
         default:
             break;

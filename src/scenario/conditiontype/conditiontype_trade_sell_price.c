@@ -3,11 +3,6 @@
 #include "empire/trade_prices.h"
 #include "scenario/conditiontype/comparison_helper.h"
 
-void scenario_condition_trade_sell_price_init(scenario_condition_t *condition)
-{
-    // Nothing to init.
-}
-
 int scenario_condition_trade_sell_price_met(scenario_condition_t *condition)
 {
     int32_t resource = condition->parameter1;

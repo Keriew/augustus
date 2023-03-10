@@ -4,11 +4,6 @@
 #include "scenario/data.h"
 #include "scenario/request.h"
 
-void scenario_event_action_request_immediately_start_init(scenario_action_t *action)
-{
-    // Nothing to init.
-}
-
 int scenario_event_action_request_immediately_start_execute(scenario_action_t *action)
 {
     int total_months = game_time_total_months();

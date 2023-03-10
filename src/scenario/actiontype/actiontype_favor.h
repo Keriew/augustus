@@ -1,9 +1,8 @@
-#ifndef ACTION_TYPE_FAVOR_H
-#define ACTION_TYPE_FAVOR_H
+#ifndef ACTION_TYPE_ADJUST_FAVOR_H
+#define ACTION_TYPE_ADJUST_FAVOR_H
 
 #include "scenario/scenario_event_data.h"
 
-void scenario_event_action_favor_init(scenario_action_t *action);
-int scenario_event_action_favor_execute(scenario_action_t *action);
+int scenario_event_action_favor_add_execute(scenario_action_t *action);
 
-#endif // ACTION_TYPE_FAVOR_H
+#endif // ACTION_TYPE_ADJUST_FAVOR_H

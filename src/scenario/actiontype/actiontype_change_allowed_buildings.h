@@ -3,7 +3,6 @@
 
 #include "scenario/scenario_event_data.h"
 
-void scenario_event_action_change_allowed_buildings_init(scenario_action_t *action);
 int scenario_event_action_change_allowed_buildings_execute(scenario_action_t *action);
 
 #endif // ACTION_TYPE_CHANGE_ALLOWED_BUILDINGS_H

@@ -3,11 +3,6 @@
 #include "city/health.h"
 #include "scenario/conditiontype/comparison_helper.h"
 
-void scenario_condition_stats_city_health_init(scenario_condition_t *condition)
-{
-    // Nothing to init.
-}
-
 int scenario_condition_stats_city_health_met(scenario_condition_t *condition)
 {
     int stat_value = city_health();

@@ -3,7 +3,6 @@
 
 #include "scenario/scenario_event_data.h"
 
-void scenario_event_action_change_resource_produced_init(scenario_action_t *action);
 int scenario_event_action_change_resource_produced_execute(scenario_action_t *action);
 
 #endif // ACTION_TYPE_CHANGE_RESOURCE_PRODUCED_H

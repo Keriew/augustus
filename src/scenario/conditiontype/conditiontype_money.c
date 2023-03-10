@@ -3,11 +3,6 @@
 #include "city/finance.h"
 #include "scenario/conditiontype/comparison_helper.h"
 
-void scenario_condition_money_init(scenario_condition_t *condition)
-{
-    // Nothing to init.
-}
-
 int scenario_condition_money_met(scenario_condition_t *condition)
 {
     int funds = city_finance_treasury();

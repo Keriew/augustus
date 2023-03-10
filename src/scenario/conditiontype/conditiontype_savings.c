@@ -3,11 +3,6 @@
 #include "city/emperor.h"
 #include "scenario/conditiontype/comparison_helper.h"
 
-void scenario_condition_savings_init(scenario_condition_t *condition)
-{
-    // Nothing to init.
-}
-
 int scenario_condition_savings_met(scenario_condition_t *condition)
 {
     int funds = city_emperor_personal_savings();

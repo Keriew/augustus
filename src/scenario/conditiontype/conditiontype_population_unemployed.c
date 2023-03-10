@@ -3,11 +3,6 @@
 #include "city/labor.h"
 #include "scenario/conditiontype/comparison_helper.h"
 
-void scenario_condition_population_unemployed_init(scenario_condition_t *condition)
-{
-    // Nothing to init.
-}
-
 int scenario_condition_population_unemployed_met(scenario_condition_t *condition)
 {
     int32_t use_percentage = condition->parameter1;

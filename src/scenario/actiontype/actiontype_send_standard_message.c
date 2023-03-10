@@ -3,11 +3,6 @@
 #include "city/message.h"
 #include "empire/trade_prices.h"
 
-void scenario_event_action_send_standard_message_init(scenario_action_t *action)
-{
-    // Nothing to init.
-}
-
 int scenario_event_action_send_standard_message_execute(scenario_action_t *action)
 {
     int32_t text_id = action->parameter1;
