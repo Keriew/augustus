@@ -113,6 +113,7 @@ static void clear_scenario_data(void)
     building_monument_initialize_deliveries();
     figure_route_clear_all();
     figure_visited_buildings_init();
+    scenario_events_clear();
 
     game_time_init(2098);
 

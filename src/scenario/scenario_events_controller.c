@@ -31,6 +31,7 @@ void new_scenario_event(scenario_event_t *obj, int position)
 
 void scenario_events_clear()
 {
+    scenario_events.size = 0;
     if (!array_init(scenario_events, SCENARIO_EVENTS_SIZE_STEP, new_scenario_event, event_in_use)) {
         log_error("Unable to allocate enough memory for the scenario events array. The game will now crash.", 0, 0);
     }

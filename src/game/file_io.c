@@ -608,6 +608,8 @@ static void scenario_load_from_state(scenario_state *file, scenario_version vers
     scenario_load_state(file->scenario, file->scenario_requests, version);
     if (version > SCENARIO_LAST_NO_EVENTS) {
         scenario_events_load_state(file->scenario_events, file->scenario_conditions, file->scenario_actions);
+    } else {
+        scenario_events_clear();
     }
     if (version > SCENARIO_LAST_UNVERSIONED) {
         empire_object_load(file->empire, version);
@@ -658,6 +660,8 @@ static void savegame_load_from_state(savegame_state *state, savegame_version ver
     scenario_load_state(state->scenario, state->scenario_requests, scenario_version);
     if (scenario_version > SCENARIO_LAST_NO_EVENTS) {
         scenario_events_load_state(state->scenario_events, state->scenario_conditions, state->scenario_actions);
+    } else {
+        scenario_events_clear();
     }
     scenario_map_init();
 
