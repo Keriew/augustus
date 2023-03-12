@@ -400,6 +400,7 @@ static void set_roamer_path(building_type type, int size, const map_tile *tile, 
         return;
     }
     figure_roamer_preview_reset(type);
+    figure_roamer_waypoints_reset();
     data.roamer_preview.type = type;
     data.roamer_preview.grid_offset = tile->grid_offset;
     int grid_x = tile->x;
@@ -408,6 +409,7 @@ static void set_roamer_path(building_type type, int size, const map_tile *tile, 
     
     if (!is_blocked) {
         figure_roamer_preview_create(type, grid_x, grid_y);
+        figure_roamer_waypoints_create(type, grid_x, grid_y);
     } else {
         int building_id = map_building_at(tile->grid_offset);
         if (!building_id) {
@@ -416,6 +418,7 @@ static void set_roamer_path(building_type type, int size, const map_tile *tile, 
         building *b = building_main(building_get(building_id));
         if (b->type == type && b->x == grid_x && b->y == grid_y) {
             figure_roamer_preview_create(type, grid_x, grid_y);
+            figure_roamer_waypoints_create(type, grid_x, grid_y);
         }
     }
 }

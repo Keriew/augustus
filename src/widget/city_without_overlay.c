@@ -140,6 +140,14 @@ static void draw_roamer_frequency(int x, int y, int grid_offset)
     }
 }
 
+static void draw_roamer_waypoints(int x, int y, int grid_offset)
+{
+    int waypoint_value = figure_roamer_preview_get_waypoint(grid_offset);
+    if (waypoint_value) {
+        image_draw_isometric_footprint(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_BUILDING_GHOST, draw_context.scale);
+    }
+}
+
 static void draw_footprint(int x, int y, int grid_offset)
 {
     sound_city_progress_ambient();
@@ -204,6 +212,7 @@ static void draw_footprint(int x, int y, int grid_offset)
         image_draw(grid_id, x, y, COLOR_GRID, draw_context.scale);
     }
     draw_roamer_frequency(x, y, grid_offset);
+    draw_roamer_waypoints(x, y, grid_offset);
 }
 
 static void draw_hippodrome_spectators(const building *b, int x, int y, color_t color_mask)

@@ -21,6 +21,7 @@ static const char *ini_keys[] = {
     "screen_display_scale",
     "screen_cursor_scale",
     "screen_color_cursors",
+    "ui_walker_waypoints",
     "ui_sidebar_info",
     "ui_show_intro_video",
     "ui_smooth_scrolling",

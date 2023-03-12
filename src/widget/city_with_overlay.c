@@ -373,6 +373,14 @@ static void draw_roamer_frequency(int x, int y, int grid_offset)
     }
 }
 
+static void draw_roamer_waypoints(int x, int y, int grid_offset)
+{
+    int waypoint_value = figure_roamer_preview_get_waypoint(grid_offset);
+    if (waypoint_value) {
+        image_draw_isometric_footprint(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_BUILDING_GHOST, scale);
+    }
+}
+
 static void draw_footprint(int x, int y, int grid_offset)
 {
     building_construction_record_view_position(x, y, grid_offset);
@@ -419,6 +427,7 @@ static void draw_footprint(int x, int y, int grid_offset)
         image_draw(grid_id, x, y, COLOR_GRID, scale);
     }
     draw_roamer_frequency(x, y, grid_offset);
+    draw_roamer_waypoints(x, y, grid_offset);
 }
 
 static void draw_overlay_column(int x, int y, int height, column_color_type color_type)

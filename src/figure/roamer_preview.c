@@ -18,6 +18,7 @@
 
 static struct {
     grid_u8 travelled_tiles;
+    grid_u8 waypoint_tiles;
     building_type types[MAX_STORED_BUILDING_TYPES];
     int stored_building_types;
 } data;
@@ -256,10 +257,12 @@ void figure_roamer_preview_create(building_type b_type, int x, int y)
             roamer.progress_on_tile = 15;
             figure_movement_roam_ticks(&roamer, 1);
         }
+
         figure_route_remove(&roamer);
         if (!should_return || !has_closest_road) {
             continue;
         }
+
         roamer.destination_x = x_road;
         roamer.destination_y = y_road;
         while (roamer.direction != DIR_FIGURE_AT_DESTINATION &&
@@ -330,6 +333,45 @@ void figure_roamer_preview_reset(building_type type)
     }
 }
 
+void figure_roamer_waypoints_reset(void)
+{
+    map_grid_clear_u8(data.waypoint_tiles.items);
+}
+
+void figure_roamer_waypoints_create(building_type b_type, int x, int y)
+{
+    if (!config_get(CONFIG_UI_WALKER_WAYPOINTS) || !config_get(CONFIG_UI_SHOW_ROAMING_PATH)) {
+        return;
+    }
+
+    figure_type fig_type = building_type_to_figure_type(b_type);
+    if (fig_type == FIGURE_NONE) {
+        return;
+    }
+
+    if (fig_type == FIGURE_LABOR_SEEKER && config_get(CONFIG_GP_CH_GLOBAL_LABOUR)) {
+        return;
+    }
+
+    int b_size = building_is_farm(b_type) ? 3 : building_properties_for_type(b_type)->size;
+
+    map_point road;
+    if (!map_has_road_access(x, y, b_size, &road)) {
+        return;
+    }
+
+    for (int i = 0; i < TOTAL_ROAMERS; i++) {
+        figure roamer;
+        
+        memset(&roamer, 0, sizeof(figure));
+
+        init_roaming(&roamer, i * 2, x, y);
+
+        int waypoint_offset = map_grid_offset(roamer.destination_x, roamer.destination_y);
+        data.waypoint_tiles.items[waypoint_offset] = 1;
+    }
+}
+
 void figure_roamer_preview_reset_building_types(void)
 {
     data.stored_building_types = 0;
@@ -339,4 +381,9 @@ void figure_roamer_preview_reset_building_types(void)
 int figure_roamer_preview_get_frequency(int grid_offset)
 {
     return map_grid_is_valid_offset(grid_offset) ? data.travelled_tiles.items[grid_offset] : 0;
+}
+
+int figure_roamer_preview_get_waypoint(int grid_offset)
+{
+    return map_grid_is_valid_offset(grid_offset) ? data.waypoint_tiles.items[grid_offset] : 0;
 }

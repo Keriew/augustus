@@ -277,6 +277,7 @@ void game_undo_perform(void)
     map_routing_update_land();
     map_routing_update_walls();
     figure_roamer_preview_reset(building_construction_type());
+    figure_roamer_waypoints_reset();
     data.num_buildings = 0;
 }
 

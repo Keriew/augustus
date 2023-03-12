@@ -810,8 +810,11 @@ void widget_city_setup_routing_preview(void)
     if (building_id) {
         building *b = building_main(building_get(building_id));
         figure_roamer_preview_reset(b->type);
+        figure_roamer_waypoints_reset();
         figure_roamer_preview_create(b->type, b->x, b->y);
+        figure_roamer_waypoints_create(b->type, b->x, b->y);
     } else {
-        figure_roamer_preview_reset(building_construction_type());        
+        figure_roamer_preview_reset(building_construction_type());
+        figure_roamer_waypoints_reset();    
     }
 }

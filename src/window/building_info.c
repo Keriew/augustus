@@ -345,7 +345,9 @@ static void init(int grid_offset)
                 break;
         }
         figure_roamer_preview_reset(b->type);
+        figure_roamer_waypoints_reset();
         figure_roamer_preview_create(b->type, b->x, b->y);
+        figure_roamer_waypoints_create(b->type, b->x, b->y);
     }
     // figures
     context.figure.selected_index = 0;
