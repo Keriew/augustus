@@ -590,6 +590,7 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/advisor/religion.c
     ${PROJECT_SOURCE_DIR}/src/window/advisor/trade.c
     ${PROJECT_SOURCE_DIR}/src/window/asset_previewer.c
+    ${PROJECT_SOURCE_DIR}/src/window/bound_numeric_input.c
     ${PROJECT_SOURCE_DIR}/src/window/build_menu.c
     ${PROJECT_SOURCE_DIR}/src/window/building_info.c
     ${PROJECT_SOURCE_DIR}/src/window/building/common.c
@@ -619,6 +620,11 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/editor/scenario_event_details.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/scenario_action_edit.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/scenario_condition_edit.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/select_city_by_type.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/select_city_trade_route.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/select_scenario_action_type.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/select_scenario_condition_type.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/select_special_attribute_mapping.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/special_events.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/start_year.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/starting_conditions.c
