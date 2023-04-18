@@ -26,6 +26,7 @@
 #define DETAILS_Y_OFFSET 32
 #define DETAILS_ROW_HEIGHT 32
 #define MAX_VISIBLE_ROWS 14
+#define INITIAL_ID_LIST_SIZE 20
 
 static void on_scroll(void);
 static void button_click(int param1, int param2);
@@ -65,6 +66,7 @@ static struct {
     void (*callback)(int);
 
     int *valid_city_ids;
+    int valid_city_ids_size;
     list_item_entry_t list[MAX_VISIBLE_ROWS];
 } data;
 
@@ -94,6 +96,20 @@ static void close(void)
     window_go_back();
 }
 
+static void id_list_mem_handling(int city_array_size)
+{
+    if (!data.valid_city_ids_size) {
+        data.valid_city_ids = malloc(INITIAL_ID_LIST_SIZE * sizeof(int));
+        data.valid_city_ids_size = INITIAL_ID_LIST_SIZE;
+    }
+    if (city_array_size > data.valid_city_ids_size) {
+        data.valid_city_ids = (int *) realloc(data.valid_city_ids, city_array_size * sizeof(int));
+        data.valid_city_ids_size = city_array_size;
+    }
+
+    memset(data.valid_city_ids, 0, data.valid_city_ids_size * sizeof(int));
+}
+
 static void init(void (*callback)(int), empire_city_type type)
 {
     data.callback = callback;
@@ -102,8 +118,8 @@ static void init(void (*callback)(int), empire_city_type type)
     memset(data.list, 0, sizeof(data.list));
 
     int city_array_size = empire_city_get_array_size();
-    data.valid_city_ids = malloc((city_array_size + 1) * sizeof(int));
-    memset(data.valid_city_ids, 0, (city_array_size + 1) * sizeof(int));
+
+    id_list_mem_handling(city_array_size);
 
     for (int i = 1; i < city_array_size; i++) {
         empire_city *city = empire_city_get(i);
