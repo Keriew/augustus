@@ -17,6 +17,7 @@
 #include "window/editor/map.h"
 #include "window/numeric_input.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 #define MAX_BUTTONS 14
@@ -25,8 +26,6 @@
 #define DETAILS_Y_OFFSET 32
 #define DETAILS_ROW_HEIGHT 32
 #define MAX_VISIBLE_ROWS 14
-
-#define MAX_VALID_CITIES 500
 
 static void on_scroll(void);
 static void button_click(int param1, int param2);
@@ -65,7 +64,7 @@ static struct {
     int list_size;
     void (*callback)(int);
 
-    int valid_city_ids[MAX_VALID_CITIES];
+    int *valid_city_ids;
     list_item_entry_t list[MAX_VISIBLE_ROWS];
 } data;
 
@@ -90,15 +89,22 @@ static void populate_list(int offset)
     }
 }
 
+static void close(void)
+{
+    window_go_back();
+}
+
 static void init(void (*callback)(int), empire_city_type type)
 {
     data.callback = callback;
     data.filter_type = type;
-    memset(data.list, 0, sizeof(data.list));
-    memset(data.valid_city_ids, 0, sizeof(data.valid_city_ids));
     data.list_size = 0;
+    memset(data.list, 0, sizeof(data.list));
 
     int city_array_size = empire_city_get_array_size();
+    data.valid_city_ids = malloc((city_array_size + 1) * sizeof(int));
+    memset(data.valid_city_ids, 0, (city_array_size + 1) * sizeof(int));
+
     for (int i = 1; i < city_array_size; i++) {
         empire_city *city = empire_city_get(i);
         if (city->type == data.filter_type) {
@@ -155,7 +161,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         return;
     }
     if (input_go_back_requested(m, h)) {
-        window_go_back();
+        close();
     }
     populate_list(scrollbar.scroll_position);
 }
@@ -167,7 +173,7 @@ static void button_click(int param1, int param2)
     }
 
     data.callback(data.list[param1].city_id);
-    window_go_back();
+    close();
 }
 
 void window_editor_select_city_by_type_show(void (*callback)(int), empire_city_type type)

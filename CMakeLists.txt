@@ -590,7 +590,6 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/advisor/religion.c
     ${PROJECT_SOURCE_DIR}/src/window/advisor/trade.c
     ${PROJECT_SOURCE_DIR}/src/window/asset_previewer.c
-    ${PROJECT_SOURCE_DIR}/src/window/bound_numeric_input.c
     ${PROJECT_SOURCE_DIR}/src/window/build_menu.c
     ${PROJECT_SOURCE_DIR}/src/window/building_info.c
     ${PROJECT_SOURCE_DIR}/src/window/building/common.c

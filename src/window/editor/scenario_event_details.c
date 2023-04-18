@@ -32,6 +32,8 @@ enum {
     SCENARIO_EVENT_DETAILS_SET_MAX_REPEATS = 0,
     SCENARIO_EVENT_DETAILS_SET_REPEAT_MIN,
     SCENARIO_EVENT_DETAILS_SET_REPEAT_MAX,
+    SCENARIO_EVENT_DETAILS_ADD_CONDITION,
+    SCENARIO_EVENT_DETAILS_ADD_ACTION,
 };
 
 static void init(int event_id);
@@ -63,8 +65,8 @@ static generic_button buttons[] = {
     {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (7 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, button_none, 7, 0},
     {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (8 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, button_none, 8, 0},
     {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (9 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, button_none, 9, 0},
-    {SHORT_BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (10 * DETAILS_ROW_HEIGHT), SHORT_BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_add, button_none, 14, 0},
-    {SHORT_BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (11 * DETAILS_ROW_HEIGHT), SHORT_BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_add, button_none, 15, 0}
+    {SHORT_BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (10 * DETAILS_ROW_HEIGHT), SHORT_BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_add, button_none, SCENARIO_EVENT_DETAILS_ADD_CONDITION, 0},
+    {SHORT_BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (11 * DETAILS_ROW_HEIGHT), SHORT_BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_add, button_none, SCENARIO_EVENT_DETAILS_ADD_ACTION, 0}
 };
 #define MAX_BUTTONS (sizeof(buttons) / sizeof(generic_button))
 
@@ -235,7 +237,7 @@ static void draw_foreground(void)
     int i_button_offset = 4;
     for (int i = 0; i < MAX_VISIBLE_ROWS; i++) {
         if (data.list[i].sub_type != SUB_ITEM_TYPE_UNDEFINED) {
-            large_label_draw(buttons[i+i_button_offset].x, buttons[i+i_button_offset].y, buttons[i+i_button_offset].width / 16, data.focus_button_id == i + i_button_offset + 1 ? 1 : 0);
+            large_label_draw(buttons[i + i_button_offset].x, buttons[i + i_button_offset].y, buttons[i + i_button_offset].width / 16, data.focus_button_id == i + i_button_offset + 1 ? 1 : 0);
             if (data.focus_button_id == (i + i_button_offset + 1)
                 && data.list[i].type) {
                 button_border_draw(BUTTON_LEFT_PADDING, y_offset, BUTTON_WIDTH, DETAILS_ROW_HEIGHT, 1);
@@ -371,9 +373,9 @@ static void button_amount(int param1, int param2)
 
 static void button_add(int param1, int param2)
 {
-    if (param1 == 14) {
+    if (param1 == SCENARIO_EVENT_DETAILS_ADD_CONDITION) {
         add_new_condition();
-    } else if (param1 == 15) {
+    } else if (param1 == SCENARIO_EVENT_DETAILS_ADD_ACTION) {
         add_new_action();
     }
 }

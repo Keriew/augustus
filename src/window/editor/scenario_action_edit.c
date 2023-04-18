@@ -13,12 +13,12 @@
 #include "input/input.h"
 #include "scenario/scenario_events_parameter_data.h"
 #include "scenario/action_types/action_handler.h"
-#include "window/bound_numeric_input.h"
 #include "window/editor/map.h"
 #include "window/editor/select_scenario_action_type.h"
 #include "window/editor/select_city_by_type.h"
 #include "window/editor/select_city_trade_route.h"
 #include "window/editor/select_special_attribute_mapping.h"
+#include "window/numeric_input.h"
 #include "window/select_list.h"
 
 #define BUTTON_LEFT_PADDING 32
@@ -63,12 +63,12 @@ static void init(scenario_action_t *action)
 
 static void draw_background(void)
 {
+    data.xml_info = scenario_events_parameter_data_get_actions_xml_attributes(data.action->type);
     window_editor_map_draw_all();
 }
 
 static void draw_foreground(void)
 {
-    data.xml_info = scenario_events_parameter_data_get_actions_xml_attributes(data.action->type);
     graphics_in_dialog();
 
     outer_panel_draw(16, 16, 24, 24);
@@ -242,7 +242,7 @@ static void change_parameter(xml_data_attribute_t *parameter, int param1)
     switch (parameter->type) {
         case PARAMETER_TYPE_NUMBER:
         case PARAMETER_TYPE_MIN_MAX_NUMBER:
-            window_bound_numeric_input_show(screen_dialog_offset_x() + 60, screen_dialog_offset_y() + 50, 9, parameter->min_limit, parameter->max_limit, set_param_value);
+            window_numeric_input_bound_show(screen_dialog_offset_x() + 60, screen_dialog_offset_y() + 50, 9, parameter->min_limit, parameter->max_limit, set_param_value);
             return;
         case PARAMETER_TYPE_CHECK:
         case PARAMETER_TYPE_DIFFICULTY:
