@@ -6,7 +6,42 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define MESSAGE_MEDIA_TEXT_BLOB_INITIAL_SIZE (100 * 1024)
+#define MESSAGE_MEDIA_TEXT_BLOB_SIZE_INCREASE_OVERSHOOT (10 * 1024)
+#define MESSAGE_MEDIA_TEXT_BLOB_INITIAL_ENTRIES 100
+#define MESSAGE_MEDIA_TEXT_BLOB_ENTRIES_INCREASE_OVERSHOOT 10
+
 static message_media_text_blob_t message_media_text_blob;
+
+static void resize_text_blob(int needed_space)
+{
+    if (!message_media_text_blob.max_size_text_blob) {
+        int size = MESSAGE_MEDIA_TEXT_BLOB_INITIAL_SIZE * sizeof(uint8_t);
+        message_media_text_blob.text_blob = (uint8_t *) malloc(size);
+        message_media_text_blob.max_size_text_blob = size;
+    }
+    int needed_max_size = message_media_text_blob.size + needed_space;
+    if (message_media_text_blob.max_size_text_blob < needed_max_size) {
+        int size = needed_max_size + MESSAGE_MEDIA_TEXT_BLOB_SIZE_INCREASE_OVERSHOOT;
+        message_media_text_blob.text_blob = (uint8_t *) realloc(message_media_text_blob.text_blob, size);
+        message_media_text_blob.max_size_text_blob = size;
+    }
+}
+
+static void resize_text_entries(int needed_entries)
+{
+    if (!message_media_text_blob.max_size_text_entries) {
+        int size = MESSAGE_MEDIA_TEXT_BLOB_INITIAL_ENTRIES * sizeof(text_blob_string_t);
+        message_media_text_blob.text_entries = (text_blob_string_t *) malloc(size);
+        message_media_text_blob.max_size_text_entries = size;
+    }
+    int needed_max_count = message_media_text_blob.entry_count + needed_entries;
+    if (message_media_text_blob.max_size_text_entries < needed_max_count * sizeof(text_blob_string_t)) {
+        int size = (needed_max_count + MESSAGE_MEDIA_TEXT_BLOB_ENTRIES_INCREASE_OVERSHOOT) * sizeof(text_blob_string_t);
+        message_media_text_blob.text_entries = (text_blob_string_t *) realloc(message_media_text_blob.text_entries, size);
+        message_media_text_blob.max_size_text_entries = size;
+    }
+}
 
 message_media_text_blob_t *message_media_text_get_data(void)
 {
@@ -15,11 +50,15 @@ message_media_text_blob_t *message_media_text_get_data(void)
 
 void message_media_text_blob_clear(void)
 {
-    memset(message_media_text_blob.text_blob, 0, sizeof(message_media_text_blob.text_blob));
-    message_media_text_blob.size = 0;
+    if (message_media_text_blob.size > 0) {
+        memset(message_media_text_blob.text_blob, 0, sizeof(message_media_text_blob.size));
+        message_media_text_blob.size = 0;
+    }
 
-    memset(message_media_text_blob.text_entries, 0, sizeof(message_media_text_blob.text_entries));
-    message_media_text_blob.entry_count = 0;
+    if (message_media_text_blob.entry_count > 0) {
+        memset(message_media_text_blob.text_entries, 0, message_media_text_blob.entry_count * sizeof(text_blob_string_t));
+        message_media_text_blob.entry_count = 0;
+    }
 }
 
 text_blob_string_t *message_media_text_blob_get_entry(int id)
@@ -40,11 +79,14 @@ uint8_t *message_media_text_blob_get_text(int offset)
 
 text_blob_string_t *message_media_text_blob_add(const uint8_t *text)
 {
+    resize_text_entries(1);
     int length = string_length(text) + 1; //+1 to allow for end of string.
+    resize_text_blob(length);
     int offset = message_media_text_blob.size;
     int index = message_media_text_blob.entry_count;
 
-    if (offset + length >= MESSAGE_MEDIA_TEXT_BLOB_MAXIMUM_SIZE || index >= MESSAGE_MEDIA_TEXT_BLOB_MAXIMUM_ENTRIES) {
+    if (offset + length >= message_media_text_blob.max_size_text_blob ||
+        index >= message_media_text_blob.max_size_text_entries) {
         log_error("This will overfill the message_media_text_blob. The game will now crash.", 0, 0);
     }
 
@@ -89,6 +131,8 @@ void message_media_text_blob_save_state(buffer *blob_buffer, buffer *meta_buffer
 
 void message_media_text_blob_load_state(buffer *blob_buffer, buffer *meta_buffer)
 {
+    resize_text_entries(0);
+    resize_text_blob(0);
     message_media_text_blob_clear();
 
     int buffer_size, version, array_size, struct_size;

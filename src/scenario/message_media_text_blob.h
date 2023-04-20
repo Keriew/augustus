@@ -3,9 +3,6 @@
 
 #include "core/buffer.h"
 
-#define MESSAGE_MEDIA_TEXT_BLOB_MAXIMUM_SIZE (1 * 1024 * 1024)
-#define MESSAGE_MEDIA_TEXT_BLOB_MAXIMUM_ENTRIES 100000
-
 typedef enum {
     MESSAGE_MEDIA_TEXT_BLOB_VERSION = 1,
 
@@ -24,8 +21,11 @@ typedef struct {
 typedef struct {
     int size;
     int entry_count;
-    text_blob_string_t text_entries[MESSAGE_MEDIA_TEXT_BLOB_MAXIMUM_ENTRIES];
-    uint8_t text_blob[MESSAGE_MEDIA_TEXT_BLOB_MAXIMUM_SIZE];
+    text_blob_string_t *text_entries;
+    uint8_t *text_blob;
+
+    int max_size_text_entries;
+    int max_size_text_blob;
 } message_media_text_blob_t;
 
 message_media_text_blob_t *message_media_text_get_data(void);
