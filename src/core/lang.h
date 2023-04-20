@@ -30,7 +30,8 @@ typedef enum {
     MESSAGE_TYPE_TRADE_CHANGE = 5,
     MESSAGE_TYPE_PRICE_CHANGE = 6,
     MESSAGE_TYPE_INVASION = 7,
-    MESSAGE_TYPE_BUILDING_COMPLETION = 8
+    MESSAGE_TYPE_BUILDING_COMPLETION = 8,
+    MESSAGE_TYPE_CUSTOM = 9
 } lang_message_type;
 
 /**
@@ -82,7 +83,7 @@ int lang_dir_is_valid(const char *dir);
  * @return boolean true on success, false on failure
  */
 int lang_load(int is_editor);
-void load_custom_messages(void);
+void load_augustus_messages(void);
 
 /**
  * Gets a localized string

@@ -58,6 +58,7 @@
 #include "map/terrain.h"
 #include "map/tiles.h"
 #include "scenario/criteria.h"
+#include "scenario/custom_messages.h"
 #include "scenario/demand_change.h"
 #include "scenario/distant_battle.h"
 #include "scenario/earthquake.h"
@@ -114,6 +115,7 @@ static void clear_scenario_data(void)
     figure_route_clear_all();
     figure_visited_buildings_init();
     scenario_events_clear();
+    custom_messages_clear_all();
 
     game_time_init(2098);
 
@@ -362,6 +364,9 @@ static int start_scenario(const uint8_t *scenario_name, const char *scenario_fil
     scenario_events_process_all();
     building_menu_update();
     city_message_init_scenario();
+    if (scenario_intro_message() > -1) {
+        city_message_post(1, MESSAGE_CUSTOM_MESSAGE, scenario_intro_message(), 0);
+    }
     return 1;
 }
 

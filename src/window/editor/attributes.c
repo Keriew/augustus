@@ -21,12 +21,14 @@
 #include "widget/minimap.h"
 #include "widget/sidebar/editor.h"
 #include "window/editor/allowed_buildings.h"
+#include "window/editor/custom_messages.h"
 #include "window/editor/demand_changes.h"
 #include "window/editor/invasions.h"
 #include "window/editor/map.h"
 #include "window/editor/price_changes.h"
 #include "window/editor/requests.h"
 #include "window/editor/scenario_events.h"
+#include "window/editor/select_custom_message.h"
 #include "window/editor/special_events.h"
 #include "window/editor/starting_conditions.h"
 #include "window/editor/win_criteria.h"
@@ -44,6 +46,9 @@ static void button_special_events(int param1, int param2);
 static void button_price_changes(int param1, int param2);
 static void button_demand_changes(int param1, int param2);
 static void button_scenario_events(int param1, int param2);
+static void button_custom_messages(int param1, int param2);
+static void button_change_intro(int param1, int param2);
+static void button_delete_intro(int param1, int param2);
 static void change_climate(int param1, int param2);
 static void change_image(int forward, int param2);
 
@@ -58,7 +63,9 @@ static generic_button buttons[] = {
     {212, 356, 250, 30, button_special_events, button_none, 8, 0},
     {212, 396, 250, 30, button_price_changes, button_none, 9, 0},
     {212, 436, 250, 30, button_demand_changes, button_none, 10, 0},
-    {212, 476, 250, 30, button_scenario_events, button_none, 11, 0},
+    {470, 76, 250, 30, button_scenario_events, button_none, 11, 0},
+    {470, 116, 250, 30, button_custom_messages, button_none, 12, 0},
+    {470, 156, 250, 30, button_change_intro, button_delete_intro, 13, 0},
 };
 #define NUMBER_OF_BUTTONS (sizeof(buttons) / sizeof(generic_button))
 
@@ -105,7 +112,7 @@ static void draw_background(void)
 
     graphics_in_dialog();
 
-    outer_panel_draw(0, 28, 30, 32);
+    outer_panel_draw(0, 28, 46, 34);
 
     button_border_draw(18, 278, 184, 144, 0);
     image_draw(image_group(GROUP_EDITOR_SCENARIO_IMAGE) + scenario_image_id(), 20, 280, COLOR_MASK_NONE, SCALE_NONE);
@@ -172,8 +179,20 @@ static void draw_foreground(void)
     button_border_draw(212, 436, 250, 30, data.focus_button_id == 10);
     lang_text_draw_centered(44, 94, 212, 445, 250, FONT_NORMAL_BLACK);
 
-    button_border_draw(212, 476, 250, 30, data.focus_button_id == 11);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_TITLE, 212, 485, 250, FONT_NORMAL_BLACK);
+    button_border_draw(470, 76, 250, 30, data.focus_button_id == 11);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_TITLE, 470, 85, 250, FONT_NORMAL_BLACK);
+
+    button_border_draw(470, 116, 250, 30, data.focus_button_id == 12);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_MESSAGES_TITLE, 470, 125, 250, FONT_NORMAL_BLACK);
+
+    button_border_draw(470, 156, 250, 30, data.focus_button_id == 13);
+    if (scenario_editor_get_custom_message_introduction() == -1) {
+        lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_SELECT_INTRO, 470, 165, 250, FONT_NORMAL_BLACK);
+    } else {
+        text_draw_number(scenario_editor_get_custom_message_introduction(), '@',
+            " ", 470, 165, FONT_NORMAL_BLACK, 0);
+        lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_DESELECT_INTRO, 490, 165, 230, FONT_NORMAL_BLACK);
+    }
 
     arrow_buttons_draw(0, 0, image_arrows, 2);
 
@@ -259,6 +278,29 @@ static void button_scenario_events(int param1, int param2)
 {
     stop(0);
     window_editor_scenario_events_show();
+}
+
+static void button_custom_messages(int param1, int param2)
+{
+    stop(0);
+    window_editor_custom_messages_show();
+}
+
+static void button_change_intro(int param1, int param2)
+{
+    stop(0);
+    if (scenario_editor_get_custom_message_introduction() == -1) {
+        window_editor_select_custom_message_show(scenario_editor_set_custom_message_introduction);
+    } else {
+        scenario_editor_set_custom_message_introduction(-1);
+        window_request_refresh();
+    }
+}
+
+static void button_delete_intro(int param1, int param2)
+{
+    stop(0);
+    scenario_editor_set_custom_message_introduction(-1);
 }
 
 static void change_climate(int param1, int param2)
