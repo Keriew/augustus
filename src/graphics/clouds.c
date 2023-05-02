@@ -92,7 +92,7 @@ static void position_ellipse(ellipse *e, int cloud_width, int cloud_height)
     e->radius = e->half_width > e->half_height ? e->half_width : e->half_height;
 }
 
-static int ellipse_is_inside_image(const ellipse *e)
+static int ellipse_is_inside_bounds(const ellipse *e)
 {
     int x = e->x;
     int y = e->y;
@@ -122,7 +122,7 @@ static void generate_cloud_ellipse(color_t *cloud, int width, int height)
     ellipse e;
     do {
         position_ellipse(&e, width, height);
-    } while (!ellipse_is_inside_image(&e));
+    } while (!ellipse_is_inside_bounds(&e));
 
     // Do the entire diameter
     for (int x = -e.width; x <= e.width; x++) {
