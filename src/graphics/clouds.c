@@ -29,6 +29,8 @@
 
 #define CLOUD_SPEED 0.6
 
+#define PI 3.14159265358979323846
+
 typedef enum {
     STATUS_INACTIVE,
     STATUS_CREATED,
@@ -73,7 +75,7 @@ static int random_from_min_to_range(int min, int range)
 
 static void position_ellipse(ellipse *e, int cloud_width, int cloud_height)
 {
-    double angle = random_fractional_from_stdlib() * M_PI * 2;
+    double angle = random_fractional_from_stdlib() * PI * 2;
 
     e->x = CLOUD_WIDTH / 2 + random_fractional_from_stdlib() * cloud_width * cos(angle);
     e->y = CLOUD_HEIGHT / 2 + random_fractional_from_stdlib() * cloud_height * sin(angle);
