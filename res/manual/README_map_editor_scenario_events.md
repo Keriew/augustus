@@ -332,6 +332,19 @@ Here is a list of available conditions that can be used.
   - Allowed values: A very big list. Refer to: (special_attribute_mappings_standard_message) in code.
 
 
+### Set Tax Rate
++ type = tax_rate_set
++ amount = The new tax rate to set for the player.
+  - Allowed values: Any number from 0 to 100.
+  - Note: This does not prevent the player from changing it again afterwards.
+
+
+### Show custom message
++ type = show_custom_message
++ message_uid = The unique name (uid) of the custom message to display to the player.
+  - Allowed values: Any uid of any message from custom messages that you have imported.
+
+
 ### Trade good price
 + type = trade_price_adjust
 + resource = What resource to use. Allowed values: (Any resource name) "wheat", "timber", "marble", etc.
