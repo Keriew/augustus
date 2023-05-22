@@ -217,7 +217,7 @@ int building_storage_resource_max_storable(building *b, resource_type resource_i
             break;
         case BUILDING_STORAGE_STATE_ACCEPTING_3QUARTERS:
         case BUILDING_STORAGE_STATE_GETTING_3QUARTERS:
-            return THREEQ_STORAGE;
+            return THREE_QUARTERS_STORAGE;
             break;
         case BUILDING_STORAGE_STATE_ACCEPTING_HALF:
         case BUILDING_STORAGE_STATE_GETTING_HALF:
