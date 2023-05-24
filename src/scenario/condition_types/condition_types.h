@@ -5,6 +5,8 @@
 
 int scenario_condition_type_building_count_active_met(const scenario_condition_t *condition);
 
+int scenario_condition_type_building_count_any_met(const scenario_condition_t *condition);
+
 int scenario_condition_type_city_population_met(const scenario_condition_t *condition);
 
 int scenario_condition_type_count_own_troops_met(const scenario_condition_t *condition);
@@ -35,5 +37,7 @@ void scenario_condition_type_time_init(scenario_condition_t *condition);
 int scenario_condition_type_time_met(const scenario_condition_t *condition);
 
 int scenario_condition_type_trade_sell_price_met(const scenario_condition_t *condition);
+
+int scenario_condition_type_tax_rate_met(const scenario_condition_t *condition);
 
 #endif // CONDITION_TYPES_H

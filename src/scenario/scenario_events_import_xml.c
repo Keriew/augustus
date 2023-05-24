@@ -1,17 +1,10 @@
 #include "scenario_events_import_xml.h"
 
-#include "assets/assets.h"
-#include "core/array.h"
-#include "core/buffer.h"
-#include "core/calc.h"
 #include "core/file.h"
-#include "core/image_group.h"
-#include "core/io.h"
 #include "core/lang.h"
 #include "core/log.h"
 #include "core/string.h"
 #include "core/xml_parser.h"
-#include "core/zlib_helper.h"
 #include "empire/city.h"
 #include "empire/type.h"
 #include "scenario/custom_messages.h"
@@ -25,7 +18,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define XML_TOTAL_ELEMENTS 37
+#define XML_TOTAL_ELEMENTS 40
 
 static struct {
     int success;
@@ -78,6 +71,7 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "stats_health", xml_import_create_condition, 0, "conditions" },
     { "count_own_troops", xml_import_create_condition, 0, "conditions" },
     { "request_is_ongoing", xml_import_create_condition, 0, "conditions" }, //20
+    { "tax_rate", xml_import_create_condition, 0, "conditions" },
     { "favor_add", xml_import_create_action, 0, "actions" },
     { "money_add", xml_import_create_action, 0, "actions" },
     { "savings_add", xml_import_create_action, 0, "actions" },
@@ -86,8 +80,8 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "trade_problems_sea", xml_import_create_action, 0, "actions" },
     { "trade_route_amount", xml_import_create_action, 0, "actions" },
     { "change_rome_wages", xml_import_create_action, 0, "actions" },
-    { "gladiator_revolt", xml_import_create_action, 0, "actions" },
-    { "change_resource_produced", xml_import_create_action, 0, "actions" }, //30
+    { "gladiator_revolt", xml_import_create_action, 0, "actions" }, //30
+    { "change_resource_produced", xml_import_create_action, 0, "actions" },
     { "change_allowed_buildings", xml_import_create_action, 0, "actions" },
     { "send_standard_message", xml_import_create_action, 0, "actions" },
     { "city_health", xml_import_create_action, 0, "actions" },
@@ -95,6 +89,8 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "empire_map_convert_future_trade_city", xml_import_create_action, 0, "actions" },
     { "request_immediately_start", xml_import_create_action, 0, "actions" },
     { "show_custom_message", xml_import_create_action, 0, "actions" },
+    { "tax_rate_set", xml_import_create_action, 0, "actions" },
+    { "building_count_any", xml_import_create_condition, 0, "conditions" },
 };
 
 static int xml_import_start_scenario_events(void)

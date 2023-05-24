@@ -18,6 +18,8 @@ int scenario_condition_type_is_met(scenario_condition_t *condition)
     switch (condition->type) {
         case CONDITION_TYPE_BUILDING_COUNT_ACTIVE:
             return scenario_condition_type_building_count_active_met(condition);
+        case CONDITION_TYPE_BUILDING_COUNT_ANY:
+            return scenario_condition_type_building_count_any_met(condition);
         case CONDITION_TYPE_CITY_POPULATION:
             return scenario_condition_type_city_population_met(condition);
         case CONDITION_TYPE_COUNT_OWN_TROOPS:
@@ -48,6 +50,8 @@ int scenario_condition_type_is_met(scenario_condition_t *condition)
             return scenario_condition_type_time_met(condition);
         case CONDITION_TYPE_TRADE_SELL_PRICE:
             return scenario_condition_type_trade_sell_price_met(condition);
+        case CONDITION_TYPE_TAX_RATE:
+            return scenario_condition_type_tax_rate_met(condition);
         default:
             return 0;
     }
