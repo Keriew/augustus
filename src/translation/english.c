@@ -1062,13 +1062,13 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_VALUE_MESSAGE_ROME_LOWERS_WAGES, "Rome lowers wages"},
     {TR_PARAMETER_VALUE_MESSAGE_CONTAMINATED_WATER, "Contaminated water"},
     {TR_PARAMETER_VALUE_MESSAGE_EMPIRE_HAS_EXPANDED, "Empire has expanded"},
-    {TR_PARAMETER_VALUE_MESSAGE_WRATH_OF_CERES, "Warth of Ceres"},
-    {TR_PARAMETER_VALUE_MESSAGE_WRATH_OF_NEPTUNE_NO_SEA_TRADE, "Warth of Neptune (no sea trade)"},
-    {TR_PARAMETER_VALUE_MESSAGE_WRATH_OF_MERCURY, "Warth of Mercury"},
-    {TR_PARAMETER_VALUE_MESSAGE_WRATH_OF_MARS_NO_MILITARY, "Warth of Mars (no military)"},
-    {TR_PARAMETER_VALUE_MESSAGE_WRATH_OF_VENUS, "Warth of Venus"},
-    {TR_PARAMETER_VALUE_MESSAGE_WRATH_OF_NEPTUNE, "Warth of Neptune"},
-    {TR_PARAMETER_VALUE_MESSAGE_WRATH_OF_MARS, "Warth of Mars"},
+    {TR_PARAMETER_VALUE_MESSAGE_WRATH_OF_CERES, "Wrath of Ceres"},
+    {TR_PARAMETER_VALUE_MESSAGE_WRATH_OF_NEPTUNE_NO_SEA_TRADE, "Wrath of Neptune (no sea trade)"},
+    {TR_PARAMETER_VALUE_MESSAGE_WRATH_OF_MERCURY, "Wrath of Mercury"},
+    {TR_PARAMETER_VALUE_MESSAGE_WRATH_OF_MARS_NO_MILITARY, "Wrath of Mars (no military)"},
+    {TR_PARAMETER_VALUE_MESSAGE_WRATH_OF_VENUS, "Wrath of Venus"},
+    {TR_PARAMETER_VALUE_MESSAGE_WRATH_OF_NEPTUNE, "Wrath of Neptune"},
+    {TR_PARAMETER_VALUE_MESSAGE_WRATH_OF_MARS, "Wrath of Mars"},
     {TR_PARAMETER_VALUE_MESSAGE_CERES_IS_UPSET, "Ceres is upset"},
     {TR_PARAMETER_VALUE_MESSAGE_NEPTUNE_IS_UPSET, "Neptune is upset"},
     {TR_PARAMETER_VALUE_MESSAGE_MERCURY_IS_UPSET, "Mercury is upset"},
@@ -1082,7 +1082,7 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_VALUE_MESSAGE_BLESSING_FROM_MERCURY_ALTERNATE, "Blessing from Mercury alternate"},
     {TR_PARAMETER_VALUE_MESSAGE_BLESSING_FROM_NEPTUNE_ALTERNATE, "Blessing from Neptune alternate"},
     {TR_PARAMETER_VALUE_MESSAGE_BLESSING_FROM_VENUS_ALTERNATE, "Blessing from Venus alternate"},
-    {TR_PARAMETER_VALUE_MESSAGE_WRATH_OF_MARS_NO_NATIVES, "Warth of Mars (no natives)"},
+    {TR_PARAMETER_VALUE_MESSAGE_WRATH_OF_MARS_NO_NATIVES, "Wrath of Mars (no natives)"},
     {TR_PARAMETER_VALUE_MESSAGE_GODS_WRATHFUL, "Gods wrathful"},
     {TR_PARAMETER_VALUE_MESSAGE_DISTANT_BATTLE_LOST_NO_TROOPS, "Distant battle lost (no troops)"},
     {TR_PARAMETER_VALUE_MESSAGE_DISTANT_BATTLE_LOST_TOO_LATE, "Distant battle lost (too late)"},
@@ -1122,7 +1122,8 @@ static translation_string all_strings[] = {
     {TR_BUILDING_LOW_STAFF_DESC, "Building is badly understaffed. Will operate at a reduced speed." },
     {TR_BUILDING_HALF_STAFF_DESC, "Building is half understaffed. Will operate at a reduced speed." },
     {TR_BUILDING_SOME_STAFF_DESC, "Building is understaffed. Will operate suboptimally." },
-    {TR_BUILDING_MOST_STAFF_DESC, "Building is some workers. Will have some inefficiency." }
+    {TR_BUILDING_MOST_STAFF_DESC, "Building is some workers. Will have some inefficiency." },
+    {TR_BUILDING_INFO_MOTHBALL_WARNING, "This building is mothballed." }
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

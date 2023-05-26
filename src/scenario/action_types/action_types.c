@@ -218,10 +218,8 @@ int scenario_action_type_trade_price_set_execute(scenario_action_t *action)
     int adjustment = 0;
     if (current_price == amount) {
         return 1;
-    } else if (current_price < amount) {
-        adjustment = amount - current_price;
     } else {
-        adjustment = current_price - amount;
+        adjustment = amount - current_price;
     }
 
     int successfully_changed = trade_price_change(resource, adjustment);
@@ -304,7 +302,6 @@ int scenario_action_type_trade_route_amount_execute(scenario_action_t *action)
         return 0;
     }
 
-    trade_route_set_limit(route_id, resource, amount);
     if (show_message && empire_city_is_trade_route_open(route_id)) {
         int city_id = empire_city_get_for_trade_route(route_id);
         if (city_id < 0) {
@@ -321,6 +318,7 @@ int scenario_action_type_trade_route_amount_execute(scenario_action_t *action)
             city_message_post(1, MESSAGE_TRADE_STOPPED, city_id, resource);
         }
     }
+    trade_route_set_limit(route_id, resource, amount);
 
     return 1;
 }
