@@ -151,6 +151,8 @@ int can_produce_resource(int resource)
         return scenario_building_allowed(BUILDING_CITY_MINT) &&
             building_monument_has_required_resources_to_build(BUILDING_CITY_MINT);
     }
+
+    return 0;
 }
 
 int empire_can_produce_resource(int resource)
@@ -524,7 +526,7 @@ void empire_city_load_state(buffer *buf, int version)
         return;
     }
 
-    int highest_id_in_use;
+    int highest_id_in_use = 0;
 
     for (int i = 0; i < cities_to_load; i++) {
         empire_city *city = array_next(cities);
