@@ -18,7 +18,6 @@
 #include "map/terrain.h"
 #include "scenario/property.h"
 
-#define MONUMENTS_SIZE_STEP 100
 #define DELIVERY_ARRAY_SIZE_STEP 200
 #define ORIGINAL_DELIVERY_BUFFER_SIZE 16
 #define MODULES_PER_TEMPLE 2
@@ -235,14 +234,14 @@ int building_monument_access_point(building *b, map_point *dst)
     return 0;
 }
 
-int building_monument_add_module(building *b, int module_type)
+int building_monument_add_module(building *b, int module)
 {
     if (!building_monument_is_monument(b) ||
         b->data.monument.phase != MONUMENT_FINISHED ||
         (b->data.monument.upgrades && b->type != BUILDING_CARAVANSERAI && b->type != BUILDING_LIGHTHOUSE)) {
         return 0;
     }
-    b->data.monument.upgrades = module_type;
+    b->data.monument.upgrades = module;
     map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
     return 1;
 }
@@ -692,14 +691,14 @@ void building_monument_delivery_save_state(buffer *buf)
 void building_monument_delivery_load_state(buffer *buf, int includes_delivery_buffer_size)
 {
     int delivery_buf_size = ORIGINAL_DELIVERY_BUFFER_SIZE;
-    int buf_size = buf->size;
+    size_t buf_size = buf->size;
 
     if (includes_delivery_buffer_size) {
         delivery_buf_size = buffer_read_i32(buf);
         buf_size -= 4;
     }
 
-    int deliveries_to_load = buf_size / delivery_buf_size;
+    int deliveries_to_load = (int) buf_size / delivery_buf_size;
 
     if (!array_init(monument_deliveries, DELIVERY_ARRAY_SIZE_STEP, 0, delivery_in_use) ||
         !array_expand(monument_deliveries, deliveries_to_load)) {

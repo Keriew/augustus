@@ -15,7 +15,7 @@
 #define MAX_TRACKS 7
 #define MAX_PALETTE 256
 
-#define FLAG_RING 0x01
+// #define FLAG_RING 0x01 - UNUSED
 #define FLAG_Y_INTERLACE 0x02
 #define FLAG_Y_DOUBLE 0x04
 
@@ -27,13 +27,13 @@
 
 #define BLOCK_MONO 0
 #define BLOCK_FULL 1
-#define BLOCK_VOID 2
+// #define BLOCK_VOID 2 - UNUSED
 #define BLOCK_SOLID 3
 
 typedef struct {
     const uint8_t *data;
-    int length;
-    int index;
+    size_t length;
+    size_t index;
     int bit_index;
 } bitstream;
 
@@ -77,13 +77,13 @@ struct smacker_t {
     int32_t frames;
     int32_t us_per_frame;
     int32_t flags;
-    int32_t trees_size;
+    size_t trees_size;
     int32_t audio_size[7];
     int32_t audio_rate[7];
 
     long frame_data_offset_in_file;
     long *frame_offsets;
-    int32_t *frame_sizes;
+    size_t *frame_sizes;
     uint8_t *frame_types;
 
     hufftree16 *mmap_tree;
@@ -145,7 +145,7 @@ static int32_t read_i32(uint8_t *data)
 
 // Bitstream functions
 
-static bitstream *bitstream_init(bitstream *bs, const uint8_t *data, int len)
+static bitstream *bitstream_init(bitstream *bs, const uint8_t *data, size_t len)
 {
     bs->data = data;
     bs->length = len;
@@ -436,10 +436,10 @@ static int read_header(smacker s)
 
 static int read_frame_info(smacker s)
 {
-    int sizes_length = sizeof(int32_t) * s->frames;
-    int types_length = sizeof(uint8_t) * s->frames;
+    size_t sizes_length = sizeof(size_t) * s->frames;
+    size_t types_length = sizeof(uint8_t) * s->frames;
 
-    s->frame_sizes = (int32_t *) clear_malloc(sizes_length);
+    s->frame_sizes = (size_t *) clear_malloc(sizes_length);
     s->frame_offsets = (long *) clear_malloc(sizeof(long) * s->frames);
     s->frame_types = (uint8_t *) clear_malloc(types_length);
 
@@ -461,12 +461,12 @@ static int read_frame_info(smacker s)
     }
 
     uint8_t *data = (uint8_t *) s->frame_sizes;
-    long offset = 0;
+    int offset = 0;
     for (int i = 0; i < s->frames; i++) {
         // Clear first two flag bits in-place (and flip endian-ness if necessary)
         s->frame_sizes[i] = read_i32(&data[4 * i]) & 0xfffffffc;
         s->frame_offsets[i] = offset;
-        offset += s->frame_sizes[i];
+        offset += (long) s->frame_sizes[i];
     }
     return 1;
 }
@@ -707,7 +707,7 @@ static int decode_audio_track(smacker s, int track, uint8_t *data, int length)
 
 static int decode_palette(smacker s, uint8_t *data, int length)
 {
-    color_t new_palette[MAX_PALETTE];
+    color_t new_palette[MAX_PALETTE] = { 0 };
     int index = 0;
     int color_index = 0;
     while (index < length && color_index < MAX_PALETTE) {
@@ -746,7 +746,7 @@ static int decode_palette(smacker s, uint8_t *data, int length)
     return 1;
 }
 
-static int decode_video(smacker s, uint8_t *frame_data, int length)
+static int decode_video(smacker s, uint8_t *frame_data, size_t length)
 {
     reset_escape16(s->mclr_tree);
     reset_escape16(s->mmap_tree);
@@ -810,7 +810,7 @@ static uint8_t *read_frame_data(smacker s, int frame_id)
         log_error("SMK: unable to seek to frame data", 0, frame_id);
         return NULL;
     }
-    int frame_size = s->frame_sizes[frame_id];
+    size_t frame_size = s->frame_sizes[frame_id];
     uint8_t *frame_data = (uint8_t *) clear_malloc(frame_size);
     if (!frame_data) {
         log_error("SMK: no memory for frame data", 0, frame_id);
