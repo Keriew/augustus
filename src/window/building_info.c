@@ -342,7 +342,7 @@ static void init(int grid_offset)
                 context.warehouse_space_text = building_warehouse_get_space_info(b);
                 break;
             case BUILDING_DEPOT:
-                window_building_depot_init();
+                window_building_depot_init(0);
                 break;
             default:
                 if (building_monument_is_unfinished_monument(b)) {
@@ -1131,18 +1131,21 @@ void window_building_info_show_storage_orders(void)
 
 void window_building_info_depot_select_source(void)
 {
+    window_building_depot_init(0);
     context.depot_select_source = 1;
     window_invalidate();
 }
 
 void window_building_info_depot_select_destination(void)
 {
+    window_building_depot_init(0);
     context.depot_select_destination = 1;
     window_invalidate();
 }
 
 void window_building_info_depot_select_resource(void)
 {
+    window_building_depot_init(1);
     context.depot_select_resource = 1;
     window_invalidate();
 }
