@@ -35,4 +35,7 @@ void scenario_settings_load_state(
 
 void scenario_requests_save_state(buffer *buf);
 
+int scenario_get_custom_variable(int id);
+void scenario_set_custom_variable(int id, int new_value);
+
 #endif // SCENARIO_SCENARIO_H

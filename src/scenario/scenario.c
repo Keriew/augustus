@@ -39,6 +39,7 @@ static struct {
     int misc;
     int requests;
     int introduction;
+    int custom_variables;
     int custom_name;
     int end;
 } state_offsets;
@@ -142,6 +143,11 @@ static void state_offsets_init(int scenario_version)
         next_start_offset = state_offsets.introduction + 4;
     }
 
+    if (scenario_version > SCENARIO_LAST_NO_CUSTOM_VARIABLES) {
+        state_offsets.custom_variables = next_start_offset;
+        next_start_offset = state_offsets.custom_variables + (4 * MAX_CUSTOM_VARIABLES);
+    }
+
     state_offsets.custom_name = next_start_offset;
     next_start_offset = state_offsets.custom_name + 51;
 
@@ -157,6 +163,9 @@ int scenario_get_state_buffer_size_by_savegame_version(int savegame_version)
         return state_offsets.end;
     } else if (savegame_version <= SAVE_GAME_LAST_NO_CUSTOM_MESSAGES) {
         state_offsets_init(SCENARIO_LAST_NO_CUSTOM_MESSAGES);
+        return state_offsets.end;
+    } else if (savegame_version <= SAVE_GAME_LAST_NO_CUSTOM_VARIABLES) {
+        state_offsets_init(SCENARIO_LAST_NO_CUSTOM_VARIABLES);
         return state_offsets.end;
     } else {
         state_offsets_init(SCENARIO_CURRENT_VERSION);
@@ -356,6 +365,10 @@ void scenario_save_state(buffer *buf)
     buffer_write_u8(buf, scenario.open_play_scenario_id);
 
     buffer_write_i32(buf, scenario.intro_custom_message_id);
+    
+    for (int i = 0; i < MAX_CUSTOM_VARIABLES; i++) {
+        buffer_write_i32(buf, scenario.custom_variables[i]);
+    }
     
     buffer_write_raw(buf, scenario.empire.custom_name, sizeof(scenario.empire.custom_name));
     buffer_write_u8(buf, 0);
@@ -574,6 +587,18 @@ void scenario_load_state(buffer *buf, buffer *buf_requests, int version)
         scenario.intro_custom_message_id = buffer_read_i32(buf);
     }
     
+    if (version > SCENARIO_LAST_NO_CUSTOM_VARIABLES) {
+        buffer_set(buf, state_offsets.custom_variables);
+        for (int i = 0; i < MAX_CUSTOM_VARIABLES; i++) {
+            scenario.custom_variables[i] = buffer_read_i32(buf);
+        }
+    } else {
+        for (int i = 0; i < MAX_CUSTOM_VARIABLES; i++) {
+            scenario.custom_variables[i] = 0;
+        }
+    }
+    
+    buffer_set(buf, state_offsets.custom_name);
     if (version > SCENARIO_LAST_UNVERSIONED) {
         buffer_read_raw(buf, scenario.empire.custom_name, sizeof(scenario.empire.custom_name));
     }
@@ -761,4 +786,14 @@ void scenario_settings_load_state(
     buffer_skip(player_name, MAX_PLAYER_NAME);
     buffer_read_raw(player_name, scenario.settings.player_name, MAX_PLAYER_NAME);
     buffer_read_raw(scenario_name, scenario.scenario_name, MAX_SCENARIO_NAME);
+}
+
+int scenario_get_custom_variable(int id)
+{
+    return scenario.custom_variables[id];
+}
+
+void scenario_set_custom_variable(int id, int new_value)
+{
+    scenario.custom_variables[id] = new_value;
 }

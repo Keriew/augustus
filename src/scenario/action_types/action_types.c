@@ -20,6 +20,7 @@
 #include "scenario/custom_messages.h"
 #include "scenario/property.h"
 #include "scenario/request.h"
+#include "scenario/scenario.h"
 
 int scenario_action_type_change_allowed_buildings_execute(scenario_action_t *action)
 {
@@ -28,6 +29,21 @@ int scenario_action_type_change_allowed_buildings_execute(scenario_action_t *act
 
     scenario.allowed_buildings[allowed_id] = allowed;
     building_menu_update();
+    
+    return 1;
+}
+
+int scenario_action_type_change_custom_variable_execute(scenario_action_t *action)
+{
+    int variable_id = action->parameter1;
+    int value = action->parameter2;
+    int is_hard_set = action->parameter3;
+
+    if (!is_hard_set) {
+        value = scenario_get_custom_variable(variable_id) + value;
+    }
+
+    scenario_set_custom_variable(variable_id, value);
     
     return 1;
 }
@@ -285,6 +301,34 @@ int scenario_action_type_trade_problems_sea_execute(scenario_action_t *action)
     city_trade_start_sea_trade_problems(duration);
     city_message_post(1, MESSAGE_SEA_TRADE_DISRUPTED, 0, 0);
 
+    return 1;
+}
+
+int scenario_action_type_trade_route_adjust_open_price_execute(scenario_action_t *action)
+{
+    int route_id = action->parameter1;
+    int amount = action->parameter2;
+    int is_hard_set = action->parameter3;
+    int show_message = action->parameter4;
+
+    if (!trade_route_is_valid(route_id)) {
+        return 0;
+    }
+
+    int old_cost = empire_city_get_trade_route_cost(route_id);
+    if (!is_hard_set) {
+        amount = old_cost + amount;
+    }
+
+    empire_city_set_trade_route_cost(route_id, amount);
+
+    if (show_message && !empire_city_is_trade_route_open(route_id)) {
+        int city_id = empire_city_get_for_trade_route(route_id);
+        if (city_id < 0) {
+            city_id = 0;
+        }
+        city_message_post(1, MESSAGE_ROUTE_PRICE_CHANGE, city_id, amount - old_cost);
+    }
     return 1;
 }
 

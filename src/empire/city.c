@@ -265,6 +265,32 @@ int empire_city_is_trade_route_open(int route_id)
     return 0;
 }
 
+int empire_city_get_trade_route_cost(int route_id)
+{
+    empire_city *city;
+    array_foreach(cities, city) {
+        if (city->in_use && city->route_id == route_id) {
+            return city->cost_to_open;
+        }
+    }
+    return 0;
+}
+
+void empire_city_set_trade_route_cost(int route_id, int new_cost)
+{
+    if (new_cost < 0) {
+        new_cost = 0;
+    }
+
+    empire_city *city;
+    array_foreach(cities, city) {
+        if (city->in_use && city->route_id == route_id) {
+            city->cost_to_open = new_cost;
+            return;
+        }
+    }
+}
+
 void empire_city_reset_yearly_trade_amounts(void)
 {
     empire_city *city;

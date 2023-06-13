@@ -12,6 +12,7 @@
 #define MAX_INVASIONS 20
 #define MAX_DEMAND_CHANGES 20
 #define MAX_PRICE_CHANGES 20
+#define MAX_CUSTOM_VARIABLES 100
 
 #define MAX_HERD_POINTS 4
 #define MAX_FISH_POINTS 8
@@ -179,6 +180,8 @@ extern struct scenario_t {
         int distant_battle_enemy_travel_months;
         char custom_name[FILE_NAME_MAX];
     } empire;
+
+    int custom_variables[MAX_CUSTOM_VARIABLES];
 
     request_t requests[MAX_REQUESTS];
 

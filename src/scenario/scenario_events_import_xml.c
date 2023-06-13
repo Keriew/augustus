@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define XML_TOTAL_ELEMENTS 40
+#define XML_TOTAL_ELEMENTS 45
 
 static struct {
     int success;
@@ -91,6 +91,11 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "show_custom_message", xml_import_create_action, 0, "actions" },
     { "tax_rate_set", xml_import_create_action, 0, "actions" },
     { "building_count_any", xml_import_create_condition, 0, "conditions" },
+    { "custom_variable_check", xml_import_create_condition, 0, "conditions" },
+    { "trade_route_open", xml_import_create_condition, 0, "conditions" },
+    { "trade_route_price", xml_import_create_condition, 0, "conditions" },
+    { "change_custom_variable", xml_import_create_action, 0, "actions" },
+    { "change_trade_route_open_price", xml_import_create_action, 0, "actions" },
 };
 
 static int xml_import_start_scenario_events(void)

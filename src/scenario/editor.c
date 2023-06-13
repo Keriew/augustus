@@ -97,6 +97,9 @@ void scenario_editor_create(int map_size)
     for (int i = 0; i < MAX_INVASIONS; i++) {
         scenario.invasions[i].from = 8;
     }
+    for (int i = 0; i < MAX_CUSTOM_VARIABLES; i++) {
+        scenario.custom_variables[i] = 0;
+    }
 
     scenario.random_events.max_wages = 45;
     scenario.random_events.min_wages = 5;
