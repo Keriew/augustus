@@ -99,7 +99,7 @@ static int take_resource_from_generic_building(figure *f, int building_id)
 {
     building *b = building_get(building_id);
     int num_loads;
-    int stored = b->loads_stored;
+    int stored = b->resources[RESOURCE_WINE];
     if (stored < 2) {
         num_loads = stored;
     } else {
@@ -108,7 +108,7 @@ static int take_resource_from_generic_building(figure *f, int building_id)
     if (num_loads <= 0) {
         return 0;
     }
-    b->loads_stored -= num_loads;
+    b->resources[RESOURCE_WINE] -= num_loads;
 
     // create delivery boys
     int priest_id = f->id;
@@ -252,7 +252,7 @@ void figure_supplier_action(figure *f)
             figure_movement_move_ticks(f, 1);
             if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                 if (f->direction == DIR_FIGURE_AT_DESTINATION && f->type == FIGURE_LIGHTHOUSE_SUPPLIER) {
-                    building_get(f->building_id)->loads_stored += 100;
+                    building_get(f->building_id)->resources[RESOURCE_TIMBER] += 100;
                 }
                 f->state = FIGURE_STATE_DEAD;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
@@ -267,19 +267,19 @@ void figure_supplier_action(figure *f)
     } else if (f->type == FIGURE_BARKEEP_SUPPLIER) {
         int dir = figure_image_normalize_direction(f->direction < 8 ? f->direction : f->previous_tile_direction);
         if (f->action_state == FIGURE_ACTION_149_CORPSE) {
-            f->image_id = assets_get_image_id("Entertainment", "Barkeep Death 01") +
+            f->image_id = assets_get_image_id("Walkers", "Barkeep Death 01") +
                 figure_image_corpse_offset(f);
         } else {
-            f->image_id = assets_get_image_id("Entertainment", "Barkeep NE 01") +
+            f->image_id = assets_get_image_id("Walkers", "Barkeep NE 01") +
                 dir * 12 + f->image_offset;
         }
     } else if (f->type == FIGURE_LIGHTHOUSE_SUPPLIER || f->type == FIGURE_CARAVANSERAI_SUPPLIER) {
         int dir = figure_image_normalize_direction(f->direction < 8 ? f->direction : f->previous_tile_direction);
         if (f->action_state == FIGURE_ACTION_149_CORPSE) {
-            f->image_id = assets_get_image_id("Logistics", "Slave death 01") +
+            f->image_id = assets_get_image_id("Walkers", "Slave death 01") +
                 figure_image_corpse_offset(f);
         } else {
-            f->image_id = assets_get_image_id("Logistics", "Slave NE 01") +
+            f->image_id = assets_get_image_id("Walkers", "Slave NE 01") +
                 dir * 12 + f->image_offset;
         }
     } else {
@@ -320,17 +320,17 @@ void figure_delivery_boy_action(figure *f)
 
     if (f->type == FIGURE_MESS_HALL_COLLECTOR) {
         if (f->action_state == FIGURE_ACTION_149_CORPSE) {
-            f->image_id = assets_get_image_id("Military", "M Hall death 01") +
+            f->image_id = assets_get_image_id("Walkers", "M Hall death 01") +
                 figure_image_corpse_offset(f);
         } else {
-            f->image_id = assets_get_image_id("Military", "M Hall NE 01") +
+            f->image_id = assets_get_image_id("Walkers", "M Hall NE 01") +
                 dir * 12 + f->image_offset;
         }
     } else if (f->type == FIGURE_CARAVANSERAI_COLLECTOR) {
         if (f->action_state == FIGURE_ACTION_149_CORPSE) {
-            f->image_id = assets_get_image_id("Logistics", "Slave death 01") + figure_image_corpse_offset(f);
+            f->image_id = assets_get_image_id("Walkers", "Slave death 01") + figure_image_corpse_offset(f);
         } else {
-            f->image_id = assets_get_image_id("Logistics", "Slave NE 01")
+            f->image_id = assets_get_image_id("Walkers", "Slave NE 01")
                 + dir * 12 + f->image_offset;
         }
     } else {
@@ -391,10 +391,10 @@ void figure_fort_supplier_action(figure *f)
 
     int dir = figure_image_normalize_direction(f->direction < 8 ? f->direction : f->previous_tile_direction);
     if (f->action_state == FIGURE_ACTION_149_CORPSE) {
-        f->image_id = assets_get_image_id("Military", "M Hall death 01") +
+        f->image_id = assets_get_image_id("Walkers", "M Hall death 01") +
             figure_image_corpse_offset(f);
     } else {
-        f->image_id = assets_get_image_id("Military", "M Hall NE 01") +
+        f->image_id = assets_get_image_id("Walkers", "M Hall NE 01") +
             dir * 12 + f->image_offset;
     }
 }

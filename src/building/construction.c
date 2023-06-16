@@ -510,6 +510,7 @@ void building_construction_set_type(building_type type)
             case BUILDING_MARBLE_QUARRY:
             case BUILDING_IRON_MINE:
             case BUILDING_GOLD_MINE:
+            case BUILDING_STONE_QUARRY:
                 data.required_terrain.rock = 1;
                 break;
             case BUILDING_TIMBER_YARD:
@@ -528,6 +529,7 @@ void building_construction_set_type(building_type type)
                 data.sub_type = BUILDING_LARGE_TEMPLE_CERES;
                 break;
             case BUILDING_LIGHTHOUSE:
+            case BUILDING_SAND_PIT:
                 data.required_terrain.distant_water = 1;
             default:
                 break;
@@ -681,7 +683,7 @@ void building_construction_cancel(void)
 
 static int should_mark_for_construction(building_type type)
 {
-    if (type == BUILDING_SENATE_UPGRADED && city_buildings_has_senate()) {
+    if (type == BUILDING_SENATE && city_buildings_has_senate()) {
         return 0;
     } else if (type == BUILDING_CITY_MINT && (city_buildings_has_city_mint() || !city_buildings_has_senate())) {
         return 0;
@@ -1097,7 +1099,7 @@ int building_construction_can_place_on_terrain(int x, int y, int *warning_id)
         }
     } else if (data.required_terrain.distant_water) {
         if (!map_terrain_exists_tile_in_radius_with_type(x, y, 3, 9, TERRAIN_WATER)) {
-            set_warning(warning_id, WARNING_WATER_NEEDED_FOR_LIGHTHOUSE);
+            set_warning(warning_id, WARNING_WATER_NEEDED_FOR_BUILDING);
             return 0;
         }
     }

@@ -141,7 +141,7 @@ static int get_height_id(void)
             case BUILDING_GOVERNORS_PALACE:
             case BUILDING_FORUM:
             case BUILDING_ROADBLOCK:
-            case BUILDING_FORUM_UPGRADED:
+            case BUILDING_FORUM_2_UNUSED:
             case BUILDING_WORKCAMP:
             case BUILDING_ARCHITECT_GUILD:
             case BUILDING_OBELISK:
@@ -161,8 +161,8 @@ static int get_height_id(void)
             case BUILDING_GLADIATOR_STATUE:
                 return 1;
 
+            case BUILDING_SENATE_1_UNUSED:
             case BUILDING_SENATE:
-            case BUILDING_SENATE_UPGRADED:
             case BUILDING_FOUNTAIN:
                 return 2;
 
@@ -257,7 +257,7 @@ static void init(int grid_offset)
     context.has_reservoir_pipes = map_terrain_is(grid_offset, TERRAIN_RESERVOIR_RANGE);
     context.aqueduct_has_water = map_aqueduct_has_water_access_at(grid_offset);
 
-    city_resource_determine_available();
+    city_resource_determine_available(1);
     context.type = BUILDING_INFO_TERRAIN;
     context.figure.drawn = 0;
     if (!context.building_id && map_sprite_bridge_at(grid_offset) > 0) {
@@ -342,7 +342,7 @@ static void init(int grid_offset)
                 context.warehouse_space_text = building_warehouse_get_space_info(b);
                 break;
             case BUILDING_DEPOT:
-                window_building_depot_init();
+                window_building_depot_init(0);
                 break;
             default:
                 if (building_monument_is_unfinished_monument(b)) {
@@ -485,6 +485,10 @@ static void draw_background(void)
             window_building_draw_clay_pit(&context);
         } else if (btype == BUILDING_GOLD_MINE) {
             window_building_draw_gold_mine(&context);
+        } else if (btype == BUILDING_STONE_QUARRY) {
+            window_building_draw_stone_quarry(&context);
+        } else if (btype == BUILDING_SAND_PIT) {
+            window_building_draw_sand_pit(&context);
         } else if (btype == BUILDING_WINE_WORKSHOP) {
             window_building_draw_wine_workshop(&context);
         } else if (btype == BUILDING_OIL_WORKSHOP) {
@@ -495,6 +499,10 @@ static void draw_background(void)
             window_building_draw_furniture_workshop(&context);
         } else if (btype == BUILDING_POTTERY_WORKSHOP) {
             window_building_draw_pottery_workshop(&context);
+        } else if (btype == BUILDING_BRICKWORKS) {
+            window_building_draw_brickworks(&context);
+        } else if (btype == BUILDING_CONCRETE_MAKER) {
+            window_building_draw_concrete_maker(&context);
         } else if (btype == BUILDING_CITY_MINT) {
             window_building_draw_city_mint(&context);
         } else if (btype == BUILDING_MARKET) {
@@ -618,9 +626,9 @@ static void draw_background(void)
         } else if (btype == BUILDING_GOVERNORS_HOUSE || btype == BUILDING_GOVERNORS_VILLA ||
             btype == BUILDING_GOVERNORS_PALACE) {
             window_building_draw_governor_home(&context);
-        } else if (btype == BUILDING_FORUM || btype == BUILDING_FORUM_UPGRADED) {
+        } else if (btype == BUILDING_FORUM || btype == BUILDING_FORUM_2_UNUSED) {
             window_building_draw_forum(&context);
-        } else if (btype == BUILDING_SENATE || btype == BUILDING_SENATE_UPGRADED) {
+        } else if (btype == BUILDING_SENATE_1_UNUSED || btype == BUILDING_SENATE) {
             window_building_draw_senate(&context);
         } else if (btype == BUILDING_ENGINEERS_POST) {
             window_building_draw_engineers_post(&context);
@@ -1123,18 +1131,21 @@ void window_building_info_show_storage_orders(void)
 
 void window_building_info_depot_select_source(void)
 {
+    window_building_depot_init(0);
     context.depot_select_source = 1;
     window_invalidate();
 }
 
 void window_building_info_depot_select_destination(void)
 {
+    window_building_depot_init(0);
     context.depot_select_destination = 1;
     window_invalidate();
 }
 
 void window_building_info_depot_select_resource(void)
 {
+    window_building_depot_init(1);
     context.depot_select_resource = 1;
     window_invalidate();
 }
