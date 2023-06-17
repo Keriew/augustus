@@ -905,9 +905,10 @@ static translation_string all_strings[] = {
     {TR_BUILDING_CONCRETE_MAKER_HALF_EMPLOYEES, "This workshop is understaffed. It is taking longer to produce concrete than it should."},
     {TR_BUILDING_CONCRETE_MAKER_SOME_EMPLOYEES, "Very few people work in this workshop. Concrete production is slow as a result."},
     {TR_BUILDING_CONCRETE_MAKER_FEW_EMPLOYEES, "With hardly any workers here, output has nearly stopped. It will produce little concrete over the coming year."},
-    {TR_BUILDING_CONCRETE_MAKER_NO_RESOURCES, "This workshop needs reservoir access, as well as sand delivered to it, from a warehouse or a sand pit, to mix concrete."},
+    {TR_BUILDING_CONCRETE_MAKER_NO_RESOURCES, "This workshop needs water access from a reservoir, fountain or well, as well as sand delivered to it, from a warehouse or a sand pit, to mix concrete."},
     {TR_BUILDING_CONCRETE_MAKER_STORED_SAND, "Stored sand,"},
     {TR_BUILDING_CONCRETE_MAKER_NO_TARGETS, "There are no buildings requiring concrete. Production has stopped."},
+    {TR_BUILDING_CONCRETE_MAKER_IMPROVE_WATER_ACCESS, "This workshop only has well or fountain access. Output could be improved if direct reservoir access was available."},
     {TR_BUILDING_CITY_MINT, "City mint"},
     {TR_BUILDING_CITY_MINT_PHASE_1, "(Foundation)"},
     {TR_BUILDING_CITY_MINT_PHASE_1_TEXT, "Engineers lay the foundation of the building."},
@@ -1186,7 +1187,10 @@ static translation_string all_strings[] = {
     {TR_BUILDING_HALF_STAFF_DESC, "Building is half understaffed. Will operate at a reduced speed." },
     {TR_BUILDING_SOME_STAFF_DESC, "Building is understaffed. Will operate suboptimally." },
     {TR_BUILDING_MOST_STAFF_DESC, "Building is some workers. Will have some inefficiency." },
-    {TR_BUILDING_INFO_MOTHBALL_WARNING, "This building is mothballed." }
+    {TR_BUILDING_INFO_MOTHBALL_WARNING, "This building is mothballed." },
+    {TR_BUILDING_INFO_CARTLOAD, "cartload." },
+    {TR_BUILDING_INFO_CARTLOADS, "cartloads." },
+    
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

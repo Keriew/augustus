@@ -261,10 +261,10 @@ static void draw_workshop(
                     c->x_offset + 60, c->y_offset + 60 + resources_y_offset, FONT_NORMAL_BLACK);
                 int extra_width = lang_text_draw_amount(8, 10, b->resources[chain[i].raw_material],
                     c->x_offset + 60 + width, c->y_offset + 60 + resources_y_offset, font);
-                text_draw_number(chain[i].raw_amount, '(',
-                    (const char *) translation_for(TR_BUILDING_WINDOW_INDUSTRY_NEEDED),
+                text_draw_number_scaled(chain[i].raw_amount, '(',
+                    translation_for(TR_BUILDING_WINDOW_INDUSTRY_NEEDED),
                     c->x_offset + 60 + width + extra_width, c->y_offset + 60 + resources_y_offset,
-                    FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+                    FONT_NORMAL_BLACK, COLOR_MASK_NONE, SCALE_NONE);
                 resources_y_offset += 20;
             }
         }
@@ -292,7 +292,8 @@ static void draw_workshop(
         window_building_draw_description_at(c, 96 + resources_y_offset, group_id, text_offset + 13);
     } else if (b->num_workers <= 0) {
         window_building_draw_description_at(c, 96 + resources_y_offset, group_id, text_offset + 5);
-    } else if (!building_industry_has_raw_materials_for_production(b)) {
+    } else if (!building_industry_has_raw_materials_for_production(b) ||
+        (b->type == BUILDING_CONCRETE_MAKER && !b->has_water_access)) {
         window_building_draw_description_at(c, 96 + resources_y_offset, group_id, text_offset + 11);
     } else if (c->worker_percentage < 25) {
         window_building_draw_description_at(c, 96 + resources_y_offset, group_id, text_offset + 10);
@@ -302,6 +303,9 @@ static void draw_workshop(
         window_building_draw_description_at(c, 96 + resources_y_offset, group_id, text_offset + 8);
     } else if (c->worker_percentage < 100) {
         window_building_draw_description_at(c, 96 + resources_y_offset, group_id, text_offset + 7);
+    } else if (b->type == BUILDING_CONCRETE_MAKER && b->has_water_access == 1) {
+        window_building_draw_description_at(c, 96 + resources_y_offset, CUSTOM_TRANSLATION,
+            TR_BUILDING_CONCRETE_MAKER_IMPROVE_WATER_ACCESS);
     } else if (efficiency < 70) {
         window_building_draw_description_at(c, 96 + resources_y_offset, CUSTOM_TRANSLATION,
             TR_BUILDING_WINDOW_INDUSTRY_LOW_EFFICIENCY_WORKSHOPS);
