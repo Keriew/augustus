@@ -26,9 +26,7 @@ int building_type_is_roadblock(building_type type)
 {
     switch (type) {
         case BUILDING_ROADBLOCK:
-        case BUILDING_ROOFED_GARDEN_WALL_GATE:
-        case BUILDING_PANELLED_GARDEN_GATE:
-        case BUILDING_LOOPED_GARDEN_GATE:
+        case BUILDING_GARDEN_WALL_GATE:
         case BUILDING_HEDGE_GATE_DARK:
         case BUILDING_HEDGE_GATE_LIGHT:
         case BUILDING_PALISADE_GATE:
