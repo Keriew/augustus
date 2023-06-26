@@ -1198,7 +1198,6 @@ static translation_string all_strings[] = {
     {TR_BUILDING_INFO_CARTLOAD, "cartload." },
     {TR_BUILDING_INFO_CARTLOADS, "cartloads." },
     {TR_HOTKEY_SHOW_OVERLAY_RISKS_NATIVE, "Native overlay"},
-    {TR_HOTKEY_BUILD_HIGHWAY, "Highway"},
 
 };
 
