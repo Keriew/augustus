@@ -330,17 +330,17 @@ void city_health_update(void)
                 city_data.health.population_access.clinic += b->house_population;
             }
             if (b->data.house.bathhouse) {
-                house_health += 20;
+                house_health += 15;
                 city_data.health.population_access.baths += b->house_population;
             }
             if (b->data.house.barber) {
                 house_health += 10;
                 city_data.health.population_access.barber += b->house_population;
             }
-            house_health += b->data.house.num_foods * 15;
+            house_health += b->data.house.num_foods * 10;
 
-            int mausoleum_health = building_count_active(BUILDING_SMALL_MAUSOLEUM);
-            mausoleum_health += building_count_active(BUILDING_LARGE_MAUSOLEUM) * 2;
+            int mausoleum_health = building_count_active(BUILDING_SMALL_MAUSOLEUM) * 2;
+            mausoleum_health += building_count_active(BUILDING_LARGE_MAUSOLEUM) * 5;
 
             house_health += calc_bound(mausoleum_health, 0, 10);
 
