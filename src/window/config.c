@@ -74,6 +74,7 @@ static const uint8_t *display_text_video_volume(void);
 static const uint8_t *display_text_scroll_speed(void);
 static const uint8_t *display_text_difficulty(void);
 static const uint8_t *display_text_max_grand_temples(void);
+static const uint8_t *display_text_max_reservoir_range(void);
 
 static scrollbar_type scrollbar = {
     580, ITEM_Y_OFFSET, ITEM_HEIGHT * NUM_VISIBLE_ITEMS, CHECKBOX_WIDTH, NUM_VISIBLE_ITEMS, on_scroll, 0, 4
@@ -106,7 +107,8 @@ enum {
     RANGE_VIDEO_VOLUME,
     RANGE_SCROLL_SPEED,
     RANGE_DIFFICULTY,
-    RANGE_MAX_GRAND_TEMPLES
+    RANGE_MAX_GRAND_TEMPLES,
+    RANGE_MAX_RESERVOIR_RANGE,
 };
 
 enum {
@@ -224,6 +226,8 @@ static config_widget all_widgets[CONFIG_PAGES][MAX_WIDGETS] = {
         {TYPE_CHECKBOX, CONFIG_GP_CH_DISABLE_INFINITE_WOLVES_SPAWNING, TR_CONFIG_GP_CH_DISABLE_INFINITE_WOLVES_SPAWNING },
         {TYPE_NUMERICAL_DESC, RANGE_MAX_GRAND_TEMPLES, TR_CONFIG_MAX_GRAND_TEMPLES},
         {TYPE_NUMERICAL_RANGE, RANGE_MAX_GRAND_TEMPLES, 0, display_text_max_grand_temples},
+        {TYPE_NUMERICAL_DESC, RANGE_MAX_RESERVOIR_RANGE, TR_CONFIG_MAX_RESERVOIR_RANGE},
+        {TYPE_NUMERICAL_RANGE, RANGE_MAX_RESERVOIR_RANGE, 0, display_text_max_reservoir_range},
     },
     { // City Management
         {TYPE_CHECKBOX, CONFIG_GP_CH_NO_SUPPLIER_DISTRIBUTION, TR_CONFIG_NO_SUPPLIER_DISTRIBUTION },
@@ -271,7 +275,8 @@ static numerical_range_widget ranges[] = {
     {130, 25,   0, 100,  1, 0},
     { 50, 30,   0, 100, 10, 0},
     {146, 24,   0,   4,  1, 0},
-    { 50, 30,   0,   5,  1, 0}
+    { 50, 30,   0,   5,  1, 0},
+    { 50, 30,  10,  20,  1, 0},
 };
 
 static generic_button bottom_buttons[NUM_BOTTOM_BUTTONS] = {
@@ -400,6 +405,7 @@ static inline void set_range_values(void)
     ranges[RANGE_DIFFICULTY].value = &data.config_values[CONFIG_ORIGINAL_DIFFICULTY].new_value;
 
     ranges[RANGE_MAX_GRAND_TEMPLES].value = &data.config_values[CONFIG_GP_CH_MAX_GRAND_TEMPLES].new_value;
+    ranges[RANGE_MAX_RESERVOIR_RANGE].value = &data.config_values[CONFIG_GP_CH_MAX_RESERVOIR_RANGE].new_value;
 }
 
 static inline void fetch_original_config_values(void)
@@ -681,6 +687,12 @@ static const uint8_t *display_text_difficulty(void)
 static const uint8_t *display_text_max_grand_temples(void)
 {
     string_from_int(display_text, data.config_values[CONFIG_GP_CH_MAX_GRAND_TEMPLES].new_value, 0);
+    return display_text;
+}
+
+static const uint8_t *display_text_max_reservoir_range(void)
+{
+    string_from_int(display_text, data.config_values[CONFIG_GP_CH_MAX_RESERVOIR_RANGE].new_value, 0);
     return display_text;
 }
 

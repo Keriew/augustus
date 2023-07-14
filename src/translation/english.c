@@ -79,6 +79,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_GRANDFESTIVAL, "Grand festivals allow extra blessing from a god"},
     {TR_CONFIG_DIFFICULTY, "Difficulty:"},
     {TR_CONFIG_MAX_GRAND_TEMPLES, "Maximum number of grand temples per city:"},
+    {TR_CONFIG_MAX_RESERVOIR_RANGE, "Maximum range of a reservoir in tiles:"},
     {TR_CONFIG_INFINITE, "Infinite"},
     {TR_CONFIG_GODS_EFFECTS, "Enable god curses/blessings"},
     {TR_CONFIG_JEALOUS_GODS, "Disable jealousness of gods"},

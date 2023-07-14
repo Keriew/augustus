@@ -44,6 +44,7 @@ static const char *ini_keys[] = {
     "ui_show_roaming_path",
     "ui_draw_cloud_shadows",
     "gameplay_change_max_grand_temples",
+    "gameplay_change_max_reservoir_range",
     "gameplay_change_jealous_gods",
     "gameplay_change_global_labour",
     "gameplay_change_retire_at_60",
@@ -87,7 +88,8 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_UI_HIGHLIGHT_LEGIONS] = 1,
     [CONFIG_SCREEN_DISPLAY_SCALE] = 100,
     [CONFIG_SCREEN_CURSOR_SCALE] = 100,
-    [CONFIG_GP_CH_MAX_GRAND_TEMPLES] = 2
+    [CONFIG_GP_CH_MAX_GRAND_TEMPLES] = 2,
+    [CONFIG_GP_CH_MAX_RESERVOIR_RANGE] = 16
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX];
