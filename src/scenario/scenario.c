@@ -1,6 +1,7 @@
 #include "scenario.h"
 
 #include "city/resource.h"
+#include "core/string.h"
 #include "empire/city.h"
 #include "empire/trade_route.h"
 #include "game/difficulty.h"
@@ -145,7 +146,7 @@ static void state_offsets_init(int scenario_version)
 
     if (scenario_version > SCENARIO_LAST_NO_CUSTOM_VARIABLES) {
         state_offsets.custom_variables = next_start_offset;
-        next_start_offset = state_offsets.custom_variables + (4 * MAX_CUSTOM_VARIABLES);
+        next_start_offset = state_offsets.custom_variables + (9 * MAX_CUSTOM_VARIABLES);
     }
 
     state_offsets.custom_name = next_start_offset;
@@ -367,7 +368,13 @@ void scenario_save_state(buffer *buf)
     buffer_write_i32(buf, scenario.intro_custom_message_id);
     
     for (int i = 0; i < MAX_CUSTOM_VARIABLES; i++) {
-        buffer_write_i32(buf, scenario.custom_variables[i]);
+        buffer_write_u8(buf, scenario.custom_variables[i].in_use);
+        buffer_write_i32(buf, scenario.custom_variables[i].value);
+        if (scenario.custom_variables[i].linked_uid) {
+            buffer_write_i32(buf, scenario.custom_variables[i].linked_uid->id);
+        } else {
+            buffer_write_i32(buf, 0);
+        }
     }
     
     buffer_write_raw(buf, scenario.empire.custom_name, sizeof(scenario.empire.custom_name));
@@ -590,11 +597,20 @@ void scenario_load_state(buffer *buf, buffer *buf_requests, int version)
     if (version > SCENARIO_LAST_NO_CUSTOM_VARIABLES) {
         buffer_set(buf, state_offsets.custom_variables);
         for (int i = 0; i < MAX_CUSTOM_VARIABLES; i++) {
-            scenario.custom_variables[i] = buffer_read_i32(buf);
+            scenario.custom_variables[i].id = i;
+            scenario.custom_variables[i].in_use = buffer_read_u8(buf);
+            scenario.custom_variables[i].value = buffer_read_i32(buf);
+            int uid_text_id = buffer_read_i32(buf);
+            if (uid_text_id) {
+                scenario.custom_variables[i].linked_uid = message_media_text_blob_get_entry(uid_text_id);
+            }
         }
     } else {
         for (int i = 0; i < MAX_CUSTOM_VARIABLES; i++) {
-            scenario.custom_variables[i] = 0;
+            scenario.custom_variables[i].id = i;
+            scenario.custom_variables[i].in_use = 0;
+            scenario.custom_variables[i].value = 0;
+            scenario.custom_variables[i].linked_uid = 0;
         }
     }
     
@@ -788,12 +804,92 @@ void scenario_settings_load_state(
     buffer_read_raw(scenario_name, scenario.scenario_name, MAX_SCENARIO_NAME);
 }
 
-int scenario_get_custom_variable(int id)
+custom_variable_t *scenario_custom_variable_create(const uint8_t *uid, int initial_value)
 {
-    return scenario.custom_variables[id];
+    int id = -1;
+    for (int i = 0; i < MAX_CUSTOM_VARIABLES; i++) {
+        if (scenario.custom_variables[i].in_use == 0) {
+            id = i;
+            break;
+        }
+    }
+    if (id == -1) {
+        return 0;
+    }
+
+    scenario.custom_variables[id].id = id;
+    scenario.custom_variables[id].in_use = 1;
+    scenario.custom_variables[id].value = initial_value;
+    if (scenario.custom_variables[id].linked_uid) {
+        message_media_text_blob_mark_entry_as_unused(scenario.custom_variables[id].linked_uid);
+        scenario.custom_variables[id].linked_uid = 0;
+    }
+    scenario.custom_variables[id].linked_uid = message_media_text_blob_add(uid);
+
+    return &scenario.custom_variables[id];
 }
 
-void scenario_set_custom_variable(int id, int new_value)
+void scenario_custom_variable_set_value(int id, int initial_value)
 {
-    scenario.custom_variables[id] = new_value;
+    scenario.custom_variables[id].value = initial_value;
+}
+
+void scenario_custom_variable_rename(int id, const uint8_t *name)
+{
+    if (scenario.custom_variables[id].linked_uid) {
+        message_media_text_blob_mark_entry_as_unused(scenario.custom_variables[id].linked_uid);
+        scenario.custom_variables[id].linked_uid = 0;
+    }
+    scenario.custom_variables[id].linked_uid = message_media_text_blob_add(name);
+    scenario.custom_variables[id].in_use = 1;
+}
+
+void scenario_custom_toggle_in_use(int id)
+{
+    if (scenario.custom_variables[id].in_use) {
+        scenario.custom_variables[id].in_use = 0;
+    } else {
+        scenario.custom_variables[id].in_use = 1;
+    }
+}
+
+void scenario_delete_all_custom_variables(void)
+{
+    for (int i = 0; i < MAX_CUSTOM_VARIABLES; i++) {
+        scenario.custom_variables[i].id = i;
+        scenario.custom_variables[i].in_use = 0;
+        scenario.custom_variables[i].value = 0;
+        if (scenario.custom_variables[i].linked_uid) {
+            message_media_text_blob_mark_entry_as_unused(scenario.custom_variables[i].linked_uid);
+            scenario.custom_variables[i].linked_uid = 0;
+        }
+    }
+}
+
+custom_variable_t *scenario_get_custom_variable(int id)
+{
+    return &scenario.custom_variables[id];
+}
+
+int scenario_get_custom_variable_id_by_uid(const uint8_t *variable_uid)
+{
+    for (int i = 0; i < MAX_CUSTOM_VARIABLES; i++) {
+        if (scenario.custom_variables[i].linked_uid) {
+            const uint8_t *current_uid = scenario.custom_variables[i].linked_uid->text;
+            if (string_equals(current_uid, variable_uid)) {
+                return i;
+            }
+        }
+    }
+    return 0;
+}
+
+int scenario_get_custom_variable_value(int id)
+{
+    return scenario.custom_variables[id].value;
+}
+
+void scenario_set_custom_variable_value(int id, int new_value)
+{
+    scenario.custom_variables[id].value = new_value;
 }

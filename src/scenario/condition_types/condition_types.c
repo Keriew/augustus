@@ -244,7 +244,7 @@ int scenario_condition_type_count_own_troops_met(const scenario_condition_t *con
 
 int scenario_condition_type_custom_variable_check_met(const scenario_condition_t *condition)
 {
-    int target_variable = scenario_get_custom_variable(condition->parameter1);
+    int target_variable = scenario_get_custom_variable_value(condition->parameter1);
     int comparison = condition->parameter2;
     int value = condition->parameter3;
 

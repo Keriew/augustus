@@ -28,6 +28,7 @@
 #include "window/numeric_input.h"
 #include "window/plain_message_dialog.h"
 #include "window/select_list.h"
+#include "window/text_input.h"
 #include "translation/translation.h"
 
 #include <stdlib.h>

@@ -3,6 +3,7 @@
 
 #include "core/file.h"
 #include "map/point.h"
+#include "scenario/message_media_text_blob.h"
 #include "scenario/property.h"
 #include "scenario/types.h"
 
@@ -151,6 +152,13 @@ typedef struct {
     int milestone75_year;
 } scenario_win_criteria;
 
+typedef struct {
+    int id;
+    int in_use;
+    int value;
+    const text_blob_string_t *linked_uid;
+} custom_variable_t;
+
 extern struct scenario_t {
     uint8_t scenario_name[MAX_SCENARIO_NAME];
 
@@ -181,7 +189,7 @@ extern struct scenario_t {
         char custom_name[FILE_NAME_MAX];
     } empire;
 
-    int custom_variables[MAX_CUSTOM_VARIABLES];
+    custom_variable_t custom_variables[MAX_CUSTOM_VARIABLES];
 
     request_t requests[MAX_REQUESTS];
 

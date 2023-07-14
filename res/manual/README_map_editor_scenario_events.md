@@ -138,13 +138,15 @@ Here is a list of available conditions that can be used.
 
 ### Custom variable value
 + type = custom_variable_check
-+ variable = Which custom variable to use. Allowed values: 0 to 19.
+  - Note: To import custom variable names via the events file, use "<custom_variable uid="Myvariablename" initial_value="0"/>" entries in the variables section at the top of the events file. You can have a maximum of 100 different custom variables.
++ variable_uid = The unique name (uid) of the custom variable to use.
+  - Allowed values: Any uid of any custom variable that you have imported / set up via the editor.
 + check = What sort of check are we doing. Allowed values: "eq", "gte", "lte", "neq", "lt", "gt".
 + value = The amount to check for. Allowed values: -1000000000 to 1000000000.
 
 
 ### Favor
-+ type = favor
++ type = stats_favor
 + check = What sort of check are we doing. Allowed values: "eq", "gte", "lte", "neq", "lt", "gt".
 + value = The amount to check for. Allowed values: Any number from 0 to 100.
 
@@ -289,7 +291,9 @@ Here is a list of available conditions that can be used.
 
 ### Change custom variable
 + type = change_custom_variable
-+ variable = Which custom variable to use. Allowed values: 0 to 19.
+  - Note: To import custom variable names via the events file, use "<custom_variable uid="Myvariablename" initial_value="0"/>" entries in the variables section at the top of the events file. You can have a maximum of 100 different custom variables.
++ variable_uid = The unique name (uid) of the custom variable to use.
+  - Allowed values: Any uid of any custom variable that you have imported / set up via the editor.
 + value = The value to change the custom variable by (or set its value to if set_to_value = true). Allowed values: -1000000000 to 1000000000.
 + set_to_value = Should we set the city health to the given value, instead of adding it? Allowed values: "false" or "true".
   - "true" = The custom variable value will be set to what is given in 'value'.
@@ -318,7 +322,7 @@ Here is a list of available conditions that can be used.
 
 
 ### Favour adjustment
-+ type = favor
++ type = favor_add
 + amount = The amount to adjust favour by. Allowed values: -100 to 100
 
 
@@ -330,7 +334,7 @@ Here is a list of available conditions that can be used.
 
 
 ### Money
-+ type = money
++ type = money_add
 + min = The minimum amount to adjust money by. Allowed values: -10000000 to 10000000. (Negative values remove money.)
 + max = The maximum amount to adjust money by. Allowed values: -10000000 to 10000000. Must be larger than or equal to 'min'.
 
@@ -371,7 +375,7 @@ Here is a list of available conditions that can be used.
 
 
 ### Savings
-+ type = savings
++ type = savings_add
 + min = The minimum amount to adjust savings by. Allowed values: -10000000 to 10000000. (Negative values remove savings.)
 + max = The maximum amount to adjust savings by. Allowed values: -10000000 to 10000000. Must be larger than or equal to 'min'.
 

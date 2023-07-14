@@ -40,10 +40,10 @@ int scenario_action_type_change_custom_variable_execute(scenario_action_t *actio
     int is_hard_set = action->parameter3;
 
     if (!is_hard_set) {
-        value = scenario_get_custom_variable(variable_id) + value;
+        value = scenario_get_custom_variable_value(variable_id) + value;
     }
 
-    scenario_set_custom_variable(variable_id, value);
+    scenario_set_custom_variable_value(variable_id, value);
     
     return 1;
 }
@@ -87,6 +87,7 @@ int scenario_action_type_empire_map_convert_future_trade_city_execute(scenario_a
     if (city->type == EMPIRE_CITY_FUTURE_TRADE) {
         city->type = EMPIRE_CITY_TRADE;
         empire_object_set_expanded(city->empire_object_id, city->type);
+        building_menu_update();
 
         if (show_message) {
             city_message_post(1, MESSAGE_EMPIRE_HAS_EXPANDED, 0, 0);
@@ -363,6 +364,7 @@ int scenario_action_type_trade_route_amount_execute(scenario_action_t *action)
         }
     }
     trade_route_set_limit(route_id, resource, amount);
+    building_menu_update();
 
     return 1;
 }

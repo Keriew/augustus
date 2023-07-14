@@ -36,7 +36,7 @@ enum {
     SCENARIO_EVENT_DETAILS_ADD_ACTION,
 };
 
-static void init(int event_id);
+static void init(int event_id, int from_editor);
 static void init_scroll_list(void);
 static void on_scroll(void);
 static void button_click(int param1, int param2);
@@ -51,7 +51,7 @@ static scrollbar_type scrollbar = {
 };
 
 static generic_button buttons[] = {
-    {540, 32, 64, 14, button_delete_event, button_none, 10, 0},
+    {580, 32, 64, 14, button_delete_event, button_none, 10, 0},
     {SHORT_BUTTON_LEFT_PADDING, EVENT_REPEAT_Y_OFFSET, SHORT_BUTTON_WIDTH, 14, button_amount, button_none, SCENARIO_EVENT_DETAILS_SET_MAX_REPEATS, 0},
     {SHORT_BUTTON_LEFT_PADDING, EVENT_REPEAT_Y_OFFSET + 32, SHORT_BUTTON_WIDTH, 14, button_amount, button_none, SCENARIO_EVENT_DETAILS_SET_REPEAT_MIN, 0},
     {SHORT_BUTTON_LEFT_PADDING, EVENT_REPEAT_Y_OFFSET + 64, SHORT_BUTTON_WIDTH, 14, button_amount, button_none, SCENARIO_EVENT_DETAILS_SET_REPEAT_MAX, 0},
@@ -98,6 +98,7 @@ static struct {
     int total_sub_items;
     int conditions_count;
     int actions_count;
+    int from_editor;
 
     scenario_event_t *event;
 
@@ -171,8 +172,9 @@ static void populate_list(int offset)
     }
 }
 
-static void init(int event_id)
+static void init(int event_id, int from_editor)
 {
+    data.from_editor = from_editor;
     data.event = scenario_event_get(event_id);
 
     init_scroll_list();
@@ -186,6 +188,20 @@ static void init_scroll_list(void)
 
     scrollbar_init(&scrollbar, 0, data.total_sub_items);
     populate_list(0);
+}
+
+static int color_from_state(event_state state)
+{
+    if (!data.from_editor) {
+        if (state == EVENT_STATE_ACTIVE) {
+            return COLOR_MASK_GREEN;
+        } else if (state == EVENT_STATE_PAUSED) {
+            return COLOR_MASK_RED;
+        } else if (state == EVENT_STATE_DISABLED) {
+            return COLOR_MASK_GREY;
+        }
+    }
+    return COLOR_MASK_NONE;
 }
 
 static void draw_background(void)
@@ -206,8 +222,12 @@ static void draw_foreground(void)
         large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / 16, data.focus_button_id == i + 1 ? 1 : 0);
     }
     
-    text_draw_centered(translation_for(TR_EDITOR_SCENARIO_EVENTS_TITLE), 32, 32, SHORT_BUTTON_WIDTH, FONT_LARGE_BLACK, 0);
-    text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENT_ID), data.event->id, "", 400, 40, FONT_NORMAL_PLAIN, COLOR_BLACK);
+    text_draw_centered(translation_for(TR_EDITOR_SCENARIO_EVENTS_TITLE), 16, 32, 320, FONT_LARGE_BLACK, 0);
+    text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENT_ID), data.event->id, "", 336, 40, FONT_NORMAL_PLAIN, COLOR_BLACK);
+    if (!data.from_editor) {
+        text_draw_centered(translation_for(TR_EDITOR_SCENARIO_EVENT_STATE_UNDEFINED + data.event->state), 420, 40, 80, FONT_NORMAL_GREEN, color_from_state(data.event->state));
+    }
+    
     text_draw_centered(translation_for(TR_EDITOR_DELETE), buttons[0].x, buttons[0].y + 8, buttons[0].width + 8, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     if (data.focus_button_id == 1) {
         button_border_draw(buttons[0].x, buttons[0].y, buttons[0].width, buttons[0].height + 8, 1);
@@ -379,7 +399,7 @@ static void button_add(int param1, int param2)
     }
 }
 
-void window_editor_scenario_event_details_show(int event_id)
+void window_editor_scenario_event_details_show(int event_id, int from_editor)
 {
     window_type window = {
         WINDOW_EDITOR_SCENARIO_EVENT_DETAILS,
@@ -387,6 +407,6 @@ void window_editor_scenario_event_details_show(int event_id)
         draw_foreground,
         handle_input
     };
-    init(event_id);
+    init(event_id, from_editor);
     window_show(&window);
 }

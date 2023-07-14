@@ -27,8 +27,8 @@
 #include <string.h>
 
 #define RESOURCES_TO_TRADER_RATIO 60
-#define LAND_TRADER_DELAY_TICKS 4
-#define SEA_TRADER_DELAY_TICKS 30
+#define LAND_TRADER_DELAY_DAYS 4
+#define SEA_TRADER_DELAY_DAYS 30
 #define LEGACY_MAX_CITIES 41
 #define CITIES_ARRAY_SIZE_STEP 50
 
@@ -350,7 +350,7 @@ static int generate_trader(int city_id, empire_city *city)
         city->trader_entry_delay--;
         return 0;
     }
-    city->trader_entry_delay = city->is_sea_trade ? SEA_TRADER_DELAY_TICKS : LAND_TRADER_DELAY_TICKS;
+    city->trader_entry_delay = city->is_sea_trade ? SEA_TRADER_DELAY_DAYS : LAND_TRADER_DELAY_DAYS;
 
     // Check that we have space to trade
     int trade_potential = 0;
