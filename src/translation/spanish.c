@@ -703,6 +703,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_WATCHTOWER_DESC_NO_SOLDIERS, "Esta torre necesita un centinela del cuartel antes de que pueda proteger nuestra ciudad." },
     {TR_CONFIG_INFINITE, "Infinito" },
     {TR_CONFIG_MAX_GRAND_TEMPLES, "Número máximo de grandes templos por ciudad:" },
+    {TR_CONFIG_MAX_RESERVOIR_RANGE, "Alcance máximo de un depósito en baldosas:"},
     {TR_HOTKEY_ROTATE_BUILDING_BACK, "Rotar al edificio anterior" },
     {TR_TOOLTIP_BUTTON_ACCEPT_WORKERS, "Detener recurso a talleres o graneros" },
     {TR_TOOLTIP_BUTTON_STOCKPILING_ON, "Habilitar el almacenamiento en un almacén" },

@@ -752,6 +752,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_BUTTON_REJECT_WORKERS, "Ressourcenzufuhr fortsetzen"},
     {TR_CONFIG_INFINITE, "Unendlich"},
     {TR_CONFIG_MAX_GRAND_TEMPLES, "Maximale Anzahl von Prachttempeln pro Stadt: "},
+    {TR_CONFIG_MAX_RESERVOIR_RANGE, "Maximale Reichweite eines Reservoirs in Kacheln:"},
     {TR_TOOLTIP_BUTTON_ACCEPT_WORKERS, "Halte Ressourcen für Werkstätten oder Getreidespeicher"},
     {TR_TOOLTIP_BUTTON_STOCKPILING_ON, "Ermöglicht das Einlagern in ein Lagerhaus"},
     {TR_TOOLTIP_BUTTON_STOCKPILING_OFF, "Vorratshaltung deaktivieren"},

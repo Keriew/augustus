@@ -79,6 +79,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_GRANDFESTIVAL, "Les grandes fêtes permettent une bénédiction supplémentaire d'un dieu"},
     {TR_CONFIG_DIFFICULTY, "Difficulté :"},
     {TR_CONFIG_MAX_GRAND_TEMPLES, "Nombre maximum de temples monumentaux par cité :"},
+    {TR_CONFIG_MAX_RESERVOIR_RANGE, "Portée maximale d'un réservoir en tuiles:"},
     {TR_CONFIG_INFINITE, "Infini"},
     {TR_CONFIG_GODS_EFFECTS, "Activer les malédictions/bénédictions des dieux"},
     {TR_CONFIG_JEALOUS_GODS, "Désactiver la jalousie des dieux"},

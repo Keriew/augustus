@@ -78,6 +78,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_GRANDFESTIVAL, "Le grandi feste permettono una benedizione extra da parte di una divinità"},
     {TR_CONFIG_DIFFICULTY, "Difficoltà:"},
     {TR_CONFIG_MAX_GRAND_TEMPLES, "Massimo numero di templi grandi per ogni città:"},
+    {TR_CONFIG_MAX_RESERVOIR_RANGE, "Portata massima di un serbatoio in piastrelle:"},
     {TR_CONFIG_INFINITE, "Illimitato"},
     {TR_CONFIG_GODS_EFFECTS, "Abilità benedizioni/maledizioni delle divinità"},
     {TR_CONFIG_JEALOUS_GODS, "Disabilita gelosia delle divinità"},
