@@ -15,7 +15,6 @@
 #include "scenario/editor_events.h"
 #include "scenario/property.h"
 #include "scenario/scenario_events_controller.h"
-#include "widget/input_box.h"
 #include "window/city.h"
 #include "window/editor/attributes.h"
 #include "window/editor/map.h"

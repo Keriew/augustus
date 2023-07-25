@@ -124,7 +124,6 @@ static text_blob_string_t *create_text_blob(int length)
         log_error("This will overfill the message_media_text_blob. The game will now crash.", 0, 0);
     }
 
-    // Increment before use, even if 0, since we do not want to use 0.
     message_media_text_blob.text_entries[index].id = ++message_media_text_blob.highest_id;
     message_media_text_blob.text_entries[index].index = index;
     message_media_text_blob.text_entries[index].in_use = 1;

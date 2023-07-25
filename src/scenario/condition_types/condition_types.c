@@ -384,7 +384,7 @@ int scenario_condition_type_trade_route_open_met(const scenario_condition_t *con
     }
 
     int route_is_open = empire_city_is_trade_route_open(route_id);
-    return (route_is_open == check_for_open);
+    return route_is_open == check_for_open;
 }
 
 int scenario_condition_type_trade_route_price_met(const scenario_condition_t *condition)
@@ -398,8 +398,8 @@ int scenario_condition_type_trade_route_price_met(const scenario_condition_t *co
     }
 
     int route_is_open = empire_city_is_trade_route_open(route_id);
-    int route_price = empire_city_get_trade_route_cost(route_id);
-    return route_is_open ? 0 : route_price;
+    int route_price = route_is_open ? 0 : empire_city_get_trade_route_cost(route_id);
+    return comparison_helper_compare_values(comparison, route_price, value);
 }
 
 int scenario_condition_type_trade_sell_price_met(const scenario_condition_t *condition)

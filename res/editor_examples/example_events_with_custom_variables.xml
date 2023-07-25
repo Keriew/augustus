@@ -2,8 +2,8 @@
 <!DOCTYPE events>
 <events version="2">
     <variables>
-        <custom_variable uid="ConsecutiveMonthsNotInDebt" initial_value="0"/>
-        <custom_variable uid="TotalMonthsInDebt" initial_value="0"/>
+        <variable uid="ConsecutiveMonthsNotInDebt" initial_value="0"/>
+        <variable uid="TotalMonthsInDebt" initial_value="0"/>
     </variables>
     <!-- Repeats forever -->
     <event repeat_months_min="1" repeat_months_max="1">
