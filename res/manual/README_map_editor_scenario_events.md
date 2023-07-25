@@ -137,8 +137,8 @@ Here is a list of available conditions that can be used.
 
 
 ### Custom variable value
-+ type = custom_variable_check
-  - Note: To import custom variable names via the events file, use "<custom_variable uid="Myvariablename" initial_value="0"/>" entries in the variables section at the top of the events file. You can have a maximum of 100 different custom variables.
++ type = variable_check
+  - Note: To import custom variable names via the events file, use "<variable uid="Myvariablename" initial_value="0"/>" entries in the variables section at the top of the events file. You can have a maximum of 100 different custom variables.
 + variable_uid = The unique name (uid) of the custom variable to use.
   - Allowed values: Any uid of any custom variable that you have imported / set up via the editor.
 + check = What sort of check are we doing. Allowed values: "eq", "gte", "lte", "neq", "lt", "gt".
@@ -290,8 +290,8 @@ Here is a list of available conditions that can be used.
 
 
 ### Change custom variable
-+ type = change_custom_variable
-  - Note: To import custom variable names via the events file, use "<custom_variable uid="Myvariablename" initial_value="0"/>" entries in the variables section at the top of the events file. You can have a maximum of 100 different custom variables.
++ type = change_variable
+  - Note: To import custom variable names via the events file, use "<variable uid="Myvariablename" initial_value="0"/>" entries in the variables section at the top of the events file. You can have a maximum of 100 different custom variables.
 + variable_uid = The unique name (uid) of the custom variable to use.
   - Allowed values: Any uid of any custom variable that you have imported / set up via the editor.
 + value = The value to change the custom variable by (or set its value to if set_to_value = true). Allowed values: -1000000000 to 1000000000.

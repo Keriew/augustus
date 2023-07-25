@@ -96,10 +96,10 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "show_custom_message", xml_import_create_action, 0, "actions" },
     { "tax_rate_set", xml_import_create_action, 0, "actions" },
     { "building_count_any", xml_import_create_condition, 0, "conditions" }, //40
-    { "custom_variable_check", xml_import_create_condition, 0, "conditions" },
+    { "variable_check", xml_import_create_condition, 0, "conditions" },
     { "trade_route_open", xml_import_create_condition, 0, "conditions" },
     { "trade_route_price", xml_import_create_condition, 0, "conditions" },
-    { "change_custom_variable", xml_import_create_action, 0, "actions" },
+    { "change_variable", xml_import_create_action, 0, "actions" },
     { "change_trade_route_open_price", xml_import_create_action, 0, "actions" },
     { "variables", xml_import_start_custom_variables, 0, "events" },
     { "variable", xml_import_create_custom_variable, 0, "variables" },
