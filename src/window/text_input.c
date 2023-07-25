@@ -46,7 +46,7 @@ static void init(int x, int y, void (*callback)(char *))
 
 static void close(void)
 {
-    input_box_stop(&text_input);
+    input_box_stop();
     window_go_back();
 }
 
@@ -67,7 +67,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
     if (input_box_handle_mouse(m_dialog, &text_input)) {
         return;
     }
-    if (input_box_is_accepted(&text_input)) {
+    if (input_box_is_accepted()) {
         input_accept();
         return;
     }
