@@ -44,5 +44,6 @@ custom_variable_t *scenario_get_custom_variable(int id);
 int scenario_get_custom_variable_id_by_uid(const uint8_t *variable_uid);
 int scenario_get_custom_variable_value(int id);
 void scenario_set_custom_variable_value(int id, int new_value);
+int scenario_custom_variable_relink_text_blob(int text_id, text_blob_string_t *new_text_link);
 
 #endif // SCENARIO_SCENARIO_H

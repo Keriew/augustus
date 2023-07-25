@@ -23,8 +23,8 @@
 #define BUTTON_WIDTH 608
 #define SHORT_BUTTON_LEFT_PADDING 128
 #define SHORT_BUTTON_WIDTH 480
-#define EVENT_REPEAT_Y_OFFSET 64
-#define DETAILS_Y_OFFSET 160
+#define EVENT_REPEAT_Y_OFFSET 96
+#define DETAILS_Y_OFFSET 192
 #define DETAILS_ROW_HEIGHT 32
 #define MAX_VISIBLE_ROWS 10
 
@@ -213,7 +213,7 @@ static void draw_foreground(void)
 {
     graphics_in_dialog();
 
-    outer_panel_draw(16, 16, 42, 36);
+    outer_panel_draw(16, 16, 42, 37);
 
     for (int i = 0; i < 4; i++) {
         large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / 16, data.focus_button_id == i + 1 ? 1 : 0);
@@ -226,6 +226,8 @@ static void draw_foreground(void)
     text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENT_ID), data.event->id, "", 336, 40, FONT_NORMAL_PLAIN, COLOR_BLACK);
     if (!data.from_editor) {
         text_draw_centered(translation_for(TR_EDITOR_SCENARIO_EVENT_STATE_UNDEFINED + data.event->state), 420, 40, 80, FONT_NORMAL_GREEN, color_from_state(data.event->state));
+        text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENT_EXECUTION_COUNT), data.event->execution_count, "", 40, 72, FONT_NORMAL_PLAIN, COLOR_BLACK);
+        text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENT_MONTHS_UNTIL_ACTIVE), data.event->months_until_active, "", 336, 72, FONT_NORMAL_PLAIN, COLOR_BLACK);
     }
     
     text_draw_centered(translation_for(TR_EDITOR_DELETE), buttons[0].x, buttons[0].y + 8, buttons[0].width + 8, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
@@ -297,7 +299,7 @@ static void draw_foreground(void)
     y_offset += DETAILS_ROW_HEIGHT;
     text_draw_centered(translation_for(TR_EDITOR_SCENARIO_ACTION_ADD), 32, y_offset + 8, SHORT_BUTTON_WIDTH, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
 
-    lang_text_draw_centered(13, 3, 48, 16 * 34, BUTTON_WIDTH, FONT_NORMAL_BLACK);
+    lang_text_draw_centered(13, 3, 48, 16 * 36, BUTTON_WIDTH, FONT_NORMAL_BLACK);
 
     scrollbar_draw(&scrollbar);
     graphics_reset_dialog();

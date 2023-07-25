@@ -5,6 +5,7 @@
 #include "core/string.h"
 #include "scenario/custom_messages.h"
 #include "scenario/custom_media.h"
+#include "scenario/scenario.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -203,7 +204,6 @@ void message_media_text_blob_load_state(buffer *blob_buffer, buffer *meta_buffer
         &struct_size);
 
     message_media_text_blob_clear();
-    resize_text_entries(array_size);
     resize_text_blob(buffer_size);
 
     message_media_text_blob.size = buffer_size;    
@@ -215,6 +215,7 @@ void message_media_text_blob_load_state(buffer *blob_buffer, buffer *meta_buffer
         &array_size,
         &struct_size);
 
+    resize_text_entries(array_size);
     message_media_text_blob.entry_count = array_size;
     for (int i = 0; i < array_size; i++) {
         message_media_text_blob.text_entries[i].id = buffer_read_i32(meta_buffer);
@@ -233,6 +234,8 @@ static void update_text_blob_link(int text_id, text_blob_string_t *new_text_link
     if (custom_messages_relink_text_blob(text_id, new_text_link)) {
         return;
     } else if (custom_media_relink_text_blob(text_id, new_text_link)) {
+        return;
+    } else if (scenario_custom_variable_relink_text_blob(text_id, new_text_link)) {
         return;
     } else {
         log_error("update_text_blob_link -> Failed to find old link to update, the game will now probably crash.", 0, 0);
@@ -265,6 +268,7 @@ void message_media_text_blob_remove_unused(void)
 
     int index = 0;
     int new_size = 0;
+    int new_offset = 0;
     for (int i = 0; i < message_media_text_blob.entry_count; i++) {
         if (message_media_text_blob.text_entries[i].in_use == 0) {
             continue;
@@ -276,11 +280,12 @@ void message_media_text_blob_remove_unused(void)
         int length = message_media_text_blob.text_entries[i].length;
         int offset = message_media_text_blob.text_entries[i].offset;
         new_text_entries[index].length = length;
-        new_text_entries[index].offset = offset;
+        new_text_entries[index].offset = new_offset;
 
-        string_copy(&message_media_text_blob.text_blob[offset], &new_text_blob[offset], length);
-        new_text_entries[index].text = &new_text_blob[offset];
+        string_copy(&message_media_text_blob.text_blob[offset], &new_text_blob[new_offset], length);
+        new_text_entries[index].text = &new_text_blob[new_offset];
         new_size += length;
+        new_offset += length;
 
         update_text_blob_link(text_id, &new_text_entries[index]);
 

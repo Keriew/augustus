@@ -199,7 +199,7 @@ static special_attribute_mapping_t special_attribute_mappings_check[] = {
     { .type = PARAMETER_TYPE_CHECK,                .text = "lte",                           .value = COMPARISON_TYPE_EQUAL_OR_LESS,       .key = TR_PARAMETER_VALUE_COMPARISON_TYPE_EQUAL_OR_LESS },
     { .type = PARAMETER_TYPE_CHECK,                .text = "gte",                           .value = COMPARISON_TYPE_EQUAL_OR_MORE,       .key = TR_PARAMETER_VALUE_COMPARISON_TYPE_EQUAL_OR_MORE },
     { .type = PARAMETER_TYPE_CHECK,                .text = "neq",                           .value = COMPARISON_TYPE_NOT_EQUAL,           .key = TR_PARAMETER_VALUE_COMPARISON_TYPE_NOT_EQUAL },
-    { .type = PARAMETER_TYPE_CHECK,                .text = "lr",                            .value = COMPARISON_TYPE_LESS_THAN,           .key = TR_PARAMETER_VALUE_COMPARISON_TYPE_LESS_THAN },
+    { .type = PARAMETER_TYPE_CHECK,                .text = "lt",                            .value = COMPARISON_TYPE_LESS_THAN,           .key = TR_PARAMETER_VALUE_COMPARISON_TYPE_LESS_THAN },
     { .type = PARAMETER_TYPE_CHECK,                .text = "gt",                            .value = COMPARISON_TYPE_GREATER_THAN,        .key = TR_PARAMETER_VALUE_COMPARISON_TYPE_GREATER_THAN },
 };
 

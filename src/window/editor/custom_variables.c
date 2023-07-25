@@ -86,8 +86,8 @@ static void populate_list(int offset)
     if (offset + MAX_VISIBLE_ROWS > MAX_CUSTOM_VARIABLES) {
         offset = MAX_CUSTOM_VARIABLES - MAX_VISIBLE_ROWS;
     }
-    if (offset < 0) {
-        offset = 0;
+    if (offset < 1) {
+        offset = 1;
     }
     for (int i = 0; i < MAX_VISIBLE_ROWS; i++) {
         int target_id = i + offset;
@@ -169,7 +169,11 @@ static void button_name_click(int button_index, int param2)
     if (!data.list[button_index]) {
         return;
     };
+    int has_name = data.list[button_index]->linked_uid && data.list[button_index]->linked_uid->in_use;
     if (data.select_only) {
+        if (!has_name) {
+            return;
+        }
         data.callback(data.list[button_index]);
         window_go_back();
     } else {
@@ -190,7 +194,7 @@ static void button_delete_variable(int button_index, int param2)
         return;
     };
     const uint8_t empty_name[2] = "";
-    scenario_custom_variable_rename(data.target_variable, empty_name);
+    scenario_custom_variable_rename(data.list[button_index]->id, empty_name);
     scenario_custom_toggle_in_use(data.list[button_index]->id);
 }
 

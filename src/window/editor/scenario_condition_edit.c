@@ -126,6 +126,12 @@ static void draw_foreground(void)
     graphics_reset_dialog();
 }
 
+static void close_window(void)
+{
+    scenario_condition_type_init(data.condition);
+    window_go_back();
+}
+
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
@@ -133,14 +139,14 @@ static void handle_input(const mouse *m, const hotkeys *h)
         return;
     }
     if (input_go_back_requested(m, h)) {
-        window_go_back();
+        close_window();
     }
 }
 
 static void button_delete(int param1, int param2)
 {
     scenario_condition_type_delete(data.condition);
-    window_go_back();
+    close_window();
 }
 
 static void button_change_type(int param1, int param2)

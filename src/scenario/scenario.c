@@ -807,7 +807,7 @@ void scenario_settings_load_state(
 custom_variable_t *scenario_custom_variable_create(const uint8_t *uid, int initial_value)
 {
     int id = -1;
-    for (int i = 0; i < MAX_CUSTOM_VARIABLES; i++) {
+    for (int i = 1; i < MAX_CUSTOM_VARIABLES; i++) {
         if (scenario.custom_variables[i].in_use == 0) {
             id = i;
             break;
@@ -873,7 +873,7 @@ custom_variable_t *scenario_get_custom_variable(int id)
 
 int scenario_get_custom_variable_id_by_uid(const uint8_t *variable_uid)
 {
-    for (int i = 0; i < MAX_CUSTOM_VARIABLES; i++) {
+    for (int i = 1; i < MAX_CUSTOM_VARIABLES; i++) {
         if (scenario.custom_variables[i].linked_uid) {
             const uint8_t *current_uid = scenario.custom_variables[i].linked_uid->text;
             if (string_equals(current_uid, variable_uid)) {
@@ -892,4 +892,17 @@ int scenario_get_custom_variable_value(int id)
 void scenario_set_custom_variable_value(int id, int new_value)
 {
     scenario.custom_variables[id].value = new_value;
+}
+
+int scenario_custom_variable_relink_text_blob(int text_id, text_blob_string_t *new_text_link)
+{
+    custom_variable_t *entry;
+    for (int i = 1; i < MAX_CUSTOM_VARIABLES; i++) {
+        if (scenario.custom_variables[i].linked_uid &&
+            scenario.custom_variables[i].linked_uid->id == text_id) {
+            scenario.custom_variables[i].linked_uid = new_text_link;
+            return 1;
+        }
+    }
+    return 0;
 }

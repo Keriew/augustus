@@ -60,7 +60,8 @@ int scenario_condition_type_is_met(scenario_condition_t *condition)
         case CONDITION_TYPE_TAX_RATE:
             return scenario_condition_type_tax_rate_met(condition);
         default:
-            return 0;
+            // If we cannot figure condition type (such as with deleted conditions) then default to passed.
+            return 1;
     }
 }
 

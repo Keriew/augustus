@@ -103,6 +103,11 @@ static int export_attribute_custom_variable(xml_data_attribute_t *attr, int targ
 {
     const custom_variable_t *variable = scenario_get_custom_variable(target);
     if (variable) {
+        if (!variable->linked_uid) {
+            const uint8_t error_name[] = "ERROR_NO_VARIABLE_NAME_GIVEN";
+            xml_exporter_add_attribute_text(attr->name, error_name);
+            return 1;
+        }
         const uint8_t *variable_uid = variable->linked_uid->text;
         xml_exporter_add_attribute_text(attr->name, variable_uid);
         return 1;

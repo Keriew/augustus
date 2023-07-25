@@ -541,7 +541,7 @@ static int xml_import_special_parse_custom_variable(xml_data_attribute_t *attr, 
 
     const char *value = xml_parser_get_attribute_string(attr->name);
     const uint8_t *converted_name = string_from_ascii(value);
-    int variable_id = custom_messages_get_id_by_uid(converted_name);
+    int variable_id = scenario_get_custom_variable_id_by_uid(converted_name);
 
     if (variable_id) {
         *target = variable_id;
