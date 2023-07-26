@@ -254,7 +254,7 @@ static int export_custom_variable(custom_variable_t *variable)
         return 1;
     }
 
-    xml_exporter_new_element("custom_variable", 1);
+    xml_exporter_new_element("variable", 1);
 
     xml_exporter_add_attribute_text("uid", variable->linked_uid->text);
     xml_exporter_add_attribute_int("initial_value", variable->value);
@@ -268,7 +268,7 @@ static void export_scenario_variables(buffer *buf)
 {
     xml_exporter_new_element("variables", 1);
 
-    for (int i = 0; i < MAX_CUSTOM_VARIABLES; i++) {
+    for (int i = 1; i < MAX_CUSTOM_VARIABLES; i++) {
         custom_variable_t *variable = scenario_get_custom_variable(i);
         export_custom_variable(variable);
     }

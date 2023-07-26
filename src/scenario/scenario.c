@@ -868,6 +868,9 @@ void scenario_delete_all_custom_variables(void)
 
 custom_variable_t *scenario_get_custom_variable(int id)
 {
+    if (id < 1 || id >= MAX_CUSTOM_VARIABLES) {
+        return 0;
+    }
     return &scenario.custom_variables[id];
 }
 
