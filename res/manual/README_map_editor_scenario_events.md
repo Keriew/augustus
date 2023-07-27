@@ -96,7 +96,8 @@ Here is a list of available conditions that can be used.
 + check = What sort of check are we doing. Allowed values: "eq", "gte", "lte", "neq", "lt", "gt".
 + value = The amount to check for. Allowed values: Any number from 0 to 10000000.
 + building = Which type of building to cound.
-  - Allowed values: A very big list. Refer to: (special_attribute_mappings_buildings)
+  - Allowed values: A very big list. Easiest is look at this condition type in the editor.
+    Otherwise, refer to: (special_attribute_mappings_buildings in "https://github.com/Keriew/augustus/blob/9429b006f38873749e4b4aa3c0cee99696eb23b2/src/scenario/scenario_events_parameter_data.c#L234")
   - Some notes:
     - "all_farms" = will count all farm types.
     - "all_raw_materials" = will count all marble quarries, clay pits, timber yards, iron and gold mines.
@@ -114,7 +115,8 @@ Here is a list of available conditions that can be used.
 + check = What sort of check are we doing. Allowed values: "eq", "gte", "lte", "neq", "lt", "gt".
 + value = The amount to check for. Allowed values: Any number from 0 to 10000000.
 + building = Which type of building to cound.
-  - Allowed values: A very big list. Refer to: (special_attribute_mappings_buildings)
+  - Allowed values: A very big list. Easiest is look at this condition type in the editor.
+    Otherwise, refer to: (special_attribute_mappings_buildings in "https://github.com/Keriew/augustus/blob/9429b006f38873749e4b4aa3c0cee99696eb23b2/src/scenario/scenario_events_parameter_data.c#L234")
   - Some notes:
     - "all_farms" = will count all farm types.
     - "all_raw_materials" = will count all marble quarries, clay pits, timber yards, iron and gold mines.

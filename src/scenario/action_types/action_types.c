@@ -33,6 +33,34 @@ int scenario_action_type_change_allowed_buildings_execute(scenario_action_t *act
     return 1;
 }
 
+int scenario_action_type_change_city_rating_execute(scenario_action_t *action)
+{
+    selected_rating rating = action->parameter1;
+    int value = action->parameter2;
+    int is_hard_set = action->parameter3;
+
+    switch (rating) {
+        case SELECTED_RATING_PROSPERITY:
+            if (is_hard_set) {
+                city_ratings_set_prosperity(value);
+            } else {
+                city_ratings_change_prosperity(value);
+            }
+            break;
+        case SELECTED_RATING_PEACE:
+            if (is_hard_set) {
+                city_ratings_set_peace(value);
+            } else {
+                city_ratings_change_peace(value);
+            }
+            break;
+        default:
+            break;
+    }
+
+    return 1;
+}
+
 int scenario_action_type_change_custom_variable_execute(scenario_action_t *action)
 {
     int variable_id = action->parameter1;

@@ -1,4 +1,6 @@
 #include "scenario_events_parameter_data.h"
+#include "city/ratings.h"
+#include "city/resource.h"
 #include "game/resource.h"
 
 #define UNLIMITED 1000000000
@@ -187,6 +189,11 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm2 =    { .name = "amount",         .type = PARAMETER_TYPE_NUMBER,           .min_limit = NEGATIVE_UNLIMITED,          .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
                                         .xml_parm3 =    { .name = "set_to_value",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_SET_TO_VALUE },
                                         .xml_parm4 =    { .name = "show_message",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_SHOW_MESSAGE }, },
+    [ACTION_TYPE_CHANGE_CITY_RATING]          = { .type = ACTION_TYPE_CHANGE_CITY_RATING,
+                                        .xml_attr =     { .name = "change_city_rating",   .type = PARAMETER_TYPE_TEXT,             .key = TR_ACTION_TYPE_CHANGE_CITY_RATING },
+                                        .xml_parm1 =    { .name = "rating",         .type = PARAMETER_TYPE_RATING_TYPE,      .min_limit = 0,           .max_limit = 4,      .key = TR_PARAMETER_TYPE_RESOURCE },
+                                        .xml_parm2 =    { .name = "amount",         .type = PARAMETER_TYPE_NUMBER,           .min_limit = -100,        .max_limit = 100,    .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm3 =    { .name = "set_to_value",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,           .max_limit = 1,      .key = TR_PARAMETER_SET_TO_VALUE }, },
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)
@@ -554,6 +561,13 @@ static special_attribute_mapping_t special_attribute_mappings_media_type[] = {
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_MEDIA_TYPE_SIZE (sizeof(special_attribute_mappings_media_type) / sizeof(special_attribute_mapping_t))
 
+static special_attribute_mapping_t special_attribute_mappings_rating_type[] = {
+    { .type = PARAMETER_TYPE_RATING_TYPE,                .text = "peace",                      .value = SELECTED_RATING_PEACE,          .key = TR_PARAMETER_VALUE_RATING_TYPE_PEACE },
+    { .type = PARAMETER_TYPE_RATING_TYPE,                .text = "prosperity",                 .value = SELECTED_RATING_PROSPERITY,     .key = TR_PARAMETER_VALUE_RATING_TYPE_PROSPERITY },
+};
+
+#define SPECIAL_ATTRIBUTE_MAPPINGS_RATING_TYPE_SIZE (sizeof(special_attribute_mappings_rating_type) / sizeof(special_attribute_mapping_t))
+
 special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mapping(parameter_type type, int index)
 {
     switch (type) {
@@ -574,6 +588,8 @@ special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mappin
             return &special_attribute_mappings_standard_message[index];
         case PARAMETER_TYPE_MEDIA_TYPE:
             return &special_attribute_mappings_media_type[index];
+        case PARAMETER_TYPE_RATING_TYPE:
+            return &special_attribute_mappings_rating_type[index];
         default:
             return 0;
     }
@@ -599,6 +615,8 @@ int scenario_events_parameter_data_get_mappings_size(parameter_type type)
             return SPECIAL_ATTRIBUTE_MAPPINGS_STANDARD_MESSAGE_SIZE;
         case PARAMETER_TYPE_MEDIA_TYPE:
             return SPECIAL_ATTRIBUTE_MAPPINGS_MEDIA_TYPE_SIZE;
+        case PARAMETER_TYPE_RATING_TYPE:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_RATING_TYPE_SIZE;
         default:
             return 0;
     }
@@ -660,6 +678,8 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
             return ALLOWED_BUILDING_FARMS;
         case PARAMETER_TYPE_STANDARD_MESSAGE:
             return MESSAGE_CAESAR_WRATH;
+        case PARAMETER_TYPE_RATING_TYPE:
+            return SELECTED_RATING_PEACE;
         default:
             return 0;
     }

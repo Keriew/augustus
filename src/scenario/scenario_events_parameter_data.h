@@ -27,6 +27,7 @@ typedef enum {
     PARAMETER_TYPE_MEDIA_TYPE,
     PARAMETER_TYPE_CUSTOM_MESSAGE,
     PARAMETER_TYPE_CUSTOM_VARIABLE,
+    PARAMETER_TYPE_RATING_TYPE,
 } parameter_type;
 
 typedef struct {
