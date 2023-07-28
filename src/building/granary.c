@@ -158,6 +158,9 @@ int building_granaries_add_resource(int resource, int amount, int respect_settin
         } else {
             space_available = building_granary_maximum_receptible_amount(resource, b);
         }
+        if (space_available > remaining_to_add) {
+            space_available = remaining_to_add;
+        }
         if (space_available <= 0) {
             continue;
         }
