@@ -21,6 +21,8 @@ int building_granary_remove_export(building *granary, int resource, int land_tra
 
 int building_granary_add_resource(building *granary, int resource, int is_produced);
 
+int building_granaries_add_resource(int resource, int amount, int respect_settings);
+
 int building_granary_remove_resource(building *granary, int resource, int amount);
 
 int building_granary_try_remove_resource(building *granary, int resource, int desired_amount);
@@ -57,6 +59,8 @@ int building_granary_for_getting(building *src, map_point *dst, int min_amount);
 void building_granary_bless(void);
 
 void building_granary_warehouse_curse(int big);
+
+int building_granary_maximum_receptible_amount(int resource, building* b);
 
 int building_granary_is_getting(int resource, building* b);
 

@@ -100,6 +100,19 @@ static scenario_condition_data_t scenario_condition_data[CONDITION_TYPE_MAX] = {
                                         .xml_parm1 =    { .name = "target_city",    .type = PARAMETER_TYPE_ROUTE,            .key = TR_PARAMETER_TYPE_ROUTE },
                                         .xml_parm2 =    { .name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
                                         .xml_parm3 =    { .name = "value",          .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER }, },
+    [CONDITION_TYPE_RESOURCE_STORED_COUNT]     = { .type = CONDITION_TYPE_RESOURCE_STORED_COUNT,
+                                        .xml_attr =     { .name = "resource_stored_count",     .type = PARAMETER_TYPE_TEXT,       .key = TR_CONDITION_TYPE_RESOURCE_STORED_COUNT },
+                                        .xml_parm1 =    { .name = "resource",       .type = PARAMETER_TYPE_RESOURCE,         .key = TR_PARAMETER_TYPE_RESOURCE },
+                                        .xml_parm2 =    { .name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
+                                        .xml_parm3 =    { .name = "value",          .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm4 =    { .name = "storage_type",   .type = PARAMETER_TYPE_STORAGE_TYPE,     .key = TR_PARAMETER_TYPE_STORAGE_TYPE }, },
+    [CONDITION_TYPE_RESOURCE_STORAGE_AVAILABLE]     = { .type = CONDITION_TYPE_RESOURCE_STORAGE_AVAILABLE,
+                                        .xml_attr =     { .name = "resource_storage_available",     .type = PARAMETER_TYPE_TEXT,       .key = TR_CONDITION_TYPE_RESOURCE_STORAGE_AVAILABLE },
+                                        .xml_parm1 =    { .name = "resource",            .type = PARAMETER_TYPE_RESOURCE,         .key = TR_PARAMETER_TYPE_RESOURCE },
+                                        .xml_parm2 =    { .name = "check",               .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
+                                        .xml_parm3 =    { .name = "value",               .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm4 =    { .name = "storage_type",        .type = PARAMETER_TYPE_STORAGE_TYPE,     .key = TR_PARAMETER_TYPE_STORAGE_TYPE },
+                                        .xml_parm5 =    { .name = "respect_settings",    .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,         .max_limit = 1,             .key = TR_PARAMETER_RESPECT_SETTINGS }, },
 };
 
 scenario_condition_data_t *scenario_events_parameter_data_get_conditions_xml_attributes(condition_types type)
@@ -191,9 +204,15 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm4 =    { .name = "show_message",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_SHOW_MESSAGE }, },
     [ACTION_TYPE_CHANGE_CITY_RATING]          = { .type = ACTION_TYPE_CHANGE_CITY_RATING,
                                         .xml_attr =     { .name = "change_city_rating",   .type = PARAMETER_TYPE_TEXT,             .key = TR_ACTION_TYPE_CHANGE_CITY_RATING },
-                                        .xml_parm1 =    { .name = "rating",         .type = PARAMETER_TYPE_RATING_TYPE,      .min_limit = 0,           .max_limit = 4,      .key = TR_PARAMETER_TYPE_RESOURCE },
+                                        .xml_parm1 =    { .name = "rating",         .type = PARAMETER_TYPE_RATING_TYPE,      .min_limit = 0,           .max_limit = 4,      .key = TR_PARAMETER_TYPE_RATING_TYPE },
                                         .xml_parm2 =    { .name = "amount",         .type = PARAMETER_TYPE_NUMBER,           .min_limit = -100,        .max_limit = 100,    .key = TR_PARAMETER_TYPE_NUMBER },
                                         .xml_parm3 =    { .name = "set_to_value",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,           .max_limit = 1,      .key = TR_PARAMETER_SET_TO_VALUE }, },
+    [ACTION_TYPE_CHANGE_RESOURCE_STOCKPILES]     = { .type = ACTION_TYPE_CHANGE_RESOURCE_STOCKPILES,
+                                        .xml_attr =     { .name = "change_resource_stockpiles",    .type = PARAMETER_TYPE_TEXT,             .key = TR_ACTION_TYPE_CHANGE_RESOURCE_STOCKPILES },
+                                        .xml_parm1 =    { .name = "resource",           .type = PARAMETER_TYPE_RESOURCE,         .key = TR_PARAMETER_TYPE_RESOURCE },
+                                        .xml_parm2 =    { .name = "amount",             .type = PARAMETER_TYPE_NUMBER,           .min_limit = NEGATIVE_UNLIMITED,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm3 =    { .name = "storage_type",       .type = PARAMETER_TYPE_STORAGE_TYPE,     .key = TR_PARAMETER_TYPE_STORAGE_TYPE },
+                                        .xml_parm4 =    { .name = "respect_settings",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,                            .max_limit = 1,             .key = TR_PARAMETER_RESPECT_SETTINGS }, },
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)
@@ -568,6 +587,14 @@ static special_attribute_mapping_t special_attribute_mappings_rating_type[] = {
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_RATING_TYPE_SIZE (sizeof(special_attribute_mappings_rating_type) / sizeof(special_attribute_mapping_t))
 
+static special_attribute_mapping_t special_attribute_mappings_storage_type[] = {
+    { .type = PARAMETER_TYPE_STORAGE_TYPE,                .text = "all",                    .value = STORAGE_TYPE_ALL,               .key = TR_PARAMETER_VALUE_STORAGE_TYPE_ALL },
+    { .type = PARAMETER_TYPE_STORAGE_TYPE,                .text = "granaries",              .value = STORAGE_TYPE_GRANARIES,         .key = TR_PARAMETER_VALUE_STORAGE_TYPE_GRANARIES },
+    { .type = PARAMETER_TYPE_STORAGE_TYPE,                .text = "warehouses",             .value = STORAGE_TYPE_WAREHOUSES,        .key = TR_PARAMETER_VALUE_STORAGE_TYPE_WAREHOUSES },
+};
+
+#define SPECIAL_ATTRIBUTE_MAPPINGS_STORAGE_TYPE_SIZE (sizeof(special_attribute_mappings_storage_type) / sizeof(special_attribute_mapping_t))
+
 special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mapping(parameter_type type, int index)
 {
     switch (type) {
@@ -590,6 +617,8 @@ special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mappin
             return &special_attribute_mappings_media_type[index];
         case PARAMETER_TYPE_RATING_TYPE:
             return &special_attribute_mappings_rating_type[index];
+        case PARAMETER_TYPE_STORAGE_TYPE:
+            return &special_attribute_mappings_storage_type[index];
         default:
             return 0;
     }
@@ -617,6 +646,8 @@ int scenario_events_parameter_data_get_mappings_size(parameter_type type)
             return SPECIAL_ATTRIBUTE_MAPPINGS_MEDIA_TYPE_SIZE;
         case PARAMETER_TYPE_RATING_TYPE:
             return SPECIAL_ATTRIBUTE_MAPPINGS_RATING_TYPE_SIZE;
+        case PARAMETER_TYPE_STORAGE_TYPE:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_STORAGE_TYPE_SIZE;
         default:
             return 0;
     }
@@ -680,6 +711,8 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
             return MESSAGE_CAESAR_WRATH;
         case PARAMETER_TYPE_RATING_TYPE:
             return SELECTED_RATING_PEACE;
+        case PARAMETER_TYPE_STORAGE_TYPE:
+            return STORAGE_TYPE_ALL;
         default:
             return 0;
     }

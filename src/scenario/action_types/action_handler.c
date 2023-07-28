@@ -44,6 +44,8 @@ int scenario_action_type_execute(scenario_action_t *action)
             return scenario_action_type_change_custom_variable_execute(action);
         case ACTION_TYPE_CHANGE_RESOURCE_PRODUCED:
             return scenario_action_type_change_resource_produced_execute(action);
+        case ACTION_TYPE_CHANGE_RESOURCE_STOCKPILES:
+            return scenario_action_type_change_resource_stockpiles_execute(action);
         case ACTION_TYPE_EMPIRE_MAP_CONVERT_FUTURE_TRADE_CITY:
             return scenario_action_type_empire_map_convert_future_trade_city_execute(action);
         case ACTION_TYPE_GLADIATOR_REVOLT:

@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define XML_TOTAL_ELEMENTS 47
+#define XML_TOTAL_ELEMENTS 51
 
 static struct {
     int success;
@@ -103,6 +103,10 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "change_trade_route_open_price", xml_import_create_action, 0, "actions" },
     { "variables", xml_import_start_custom_variables, 0, "events" },
     { "variable", xml_import_create_custom_variable, 0, "variables" },
+    { "change_city_rating", xml_import_create_action, 0, "actions" },
+    { "change_resource_stockpiles", xml_import_create_action, 0, "actions" },
+    { "resource_stored_count", xml_import_create_condition, 0, "conditions" }, //50
+    { "resource_storage_available", xml_import_create_condition, 0, "conditions" },
 };
 
 static int xml_import_start_scenario_events(void)
@@ -326,6 +330,7 @@ static int xml_import_special_parse_attribute(xml_data_attribute_t *attr, int *t
         case PARAMETER_TYPE_POP_CLASS:
         case PARAMETER_TYPE_RATING_TYPE:
         case PARAMETER_TYPE_STANDARD_MESSAGE:
+        case PARAMETER_TYPE_STORAGE_TYPE:
             return xml_import_special_parse_type(attr, attr->type, target);
         case PARAMETER_TYPE_BUILDING_COUNTING:
             return xml_import_special_parse_building_counting(attr, target);

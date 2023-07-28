@@ -62,12 +62,12 @@ int building_warehouse_get_amount(building *warehouse, int resource)
     return loads;
 }
 
-int building_warehouse_add_resource(building *b, int resource)
+int building_warehouse_add_resource(building *b, int resource, int respect_settings)
 {
     if (b->id <= 0) {
         return 0;
     }
-    if (building_warehouse_is_not_accepting(resource, building_main(b))) {
+    if (respect_settings && building_warehouse_is_not_accepting(resource, building_main(b))) {
         return 0;
     }
     // Fill partially filled bays first
@@ -113,6 +113,28 @@ int building_warehouse_add_resource(building *b, int resource)
     tutorial_on_add_to_warehouse();
     building_warehouse_space_set_image(b, resource);
     return 1;
+}
+
+int building_warehouses_add_resource(int resource, int amount, int respect_settings)
+{
+    if (amount <= 0) {
+        return 0;
+    }
+    
+    int remaining_to_add = amount;
+    for (building *b = building_first_of_type(BUILDING_WAREHOUSE); b; b = b->next_of_type) {
+        int continue_while = (remaining_to_add > 0);
+        while (continue_while) {
+            int was_added = building_warehouse_add_resource(b, resource, respect_settings);
+            remaining_to_add -= was_added;
+            continue_while = (remaining_to_add > 0) && was_added;
+        }
+        if (remaining_to_add <= 0) {
+            break;
+        }
+    }
+
+    return remaining_to_add;
 }
 
 int building_warehouse_remove_resource(building *warehouse, int resource, int amount)
@@ -323,6 +345,15 @@ static int get_acceptable_quantity(resource_type resource, building *b)
     }
 }
 
+int building_warehouse_maximum_receptible_amount(resource_type resource, building* b)
+{
+    if (b->has_plague) {
+        return 0;
+    }
+    int stored_amount = building_warehouse_get_amount(b, resource);
+    int max_amount = get_acceptable_quantity(resource, b);
+    return (max_amount > stored_amount) ? (max_amount - stored_amount) : 0;
+}
 int building_warehouses_send_resources_to_rome(int resource, int amount)
 {
     building *b = get_next_warehouse();
