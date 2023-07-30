@@ -551,6 +551,40 @@ const uint8_t *lang_get_string(int group, int index)
     return str;
 }
 
+const uint8_t *lang_get_building_type_string(int type)
+{
+    switch (type) {
+        case BUILDING_HOUSE_SMALL_TENT:
+        case BUILDING_HOUSE_LARGE_TENT:
+        case BUILDING_HOUSE_SMALL_SHACK:
+        case BUILDING_HOUSE_LARGE_SHACK:
+        case BUILDING_HOUSE_SMALL_HOVEL:
+        case BUILDING_HOUSE_LARGE_HOVEL:
+        case BUILDING_HOUSE_SMALL_CASA:
+        case BUILDING_HOUSE_LARGE_CASA:
+        case BUILDING_HOUSE_SMALL_INSULA:
+        case BUILDING_HOUSE_MEDIUM_INSULA:
+        case BUILDING_HOUSE_LARGE_INSULA:
+        case BUILDING_HOUSE_GRAND_INSULA:
+        case BUILDING_HOUSE_SMALL_VILLA:
+        case BUILDING_HOUSE_MEDIUM_VILLA:
+        case BUILDING_HOUSE_LARGE_VILLA:
+        case BUILDING_HOUSE_GRAND_VILLA:
+        case BUILDING_HOUSE_SMALL_PALACE:
+        case BUILDING_HOUSE_MEDIUM_PALACE:
+        case BUILDING_HOUSE_LARGE_PALACE:
+        case BUILDING_HOUSE_LUXURY_PALACE:
+        case BUILDING_NATIVE_HUT:
+        case BUILDING_NATIVE_MEETING:
+        case BUILDING_NATIVE_CROPS:
+            return lang_get_string(41, type);
+        default:
+            break;
+    }
+
+    return lang_get_string(28, type);
+}
+
 const lang_message *lang_get_message(int id)
 {
     return &data.message_entries[id];
