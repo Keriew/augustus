@@ -277,24 +277,6 @@ static void draw_foreground(void)
 
             if (data.list[i].type) {
                 text_draw(data.list[i].text, 48, y_offset + 8, FONT_NORMAL_GREEN, font_color);
-                /*
-                text_draw(translation_for(data.list[i].xml_attr->key), 48, y_offset + 8, FONT_NORMAL_GREEN, font_color);
-                if (data.list[i].xml_parm1->type != PARAMETER_TYPE_UNDEFINED) {
-                    text_draw_number(data.list[i].parameter1, ' ', " ", 336, y_offset + 8, FONT_NORMAL_GREEN, font_color);
-                }
-                if (data.list[i].xml_parm2->type != PARAMETER_TYPE_UNDEFINED) {
-                    text_draw_number(data.list[i].parameter2, ' ', " ", 400, y_offset + 8, FONT_NORMAL_GREEN, font_color);
-                }
-                if (data.list[i].xml_parm3->type != PARAMETER_TYPE_UNDEFINED) {
-                    text_draw_number(data.list[i].parameter3, ' ', " ", 464, y_offset + 8, FONT_NORMAL_GREEN, font_color);
-                }
-                if (data.list[i].xml_parm4->type != PARAMETER_TYPE_UNDEFINED) {
-                    text_draw_number(data.list[i].parameter4, ' ', " ", 528, y_offset + 8, FONT_NORMAL_GREEN, font_color);
-                }
-                if (data.list[i].xml_parm5->type != PARAMETER_TYPE_UNDEFINED) {
-                    text_draw(string_from_ascii("..."), 592, y_offset + 8, FONT_NORMAL_GREEN, font_color);
-                }
-                */
             } else {
                 text_draw_centered(translation_for(TR_EDITOR_DELETED), 48, y_offset + 8, SHORT_BUTTON_WIDTH, FONT_NORMAL_PLAIN, font_color);
             }

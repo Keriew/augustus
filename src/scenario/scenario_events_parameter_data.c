@@ -908,11 +908,12 @@ void scenario_events_parameter_data_get_display_string_for_action(scenario_actio
 void scenario_events_parameter_data_get_display_string_for_condition(scenario_condition_t* condition, uint8_t *result_text, int maxlength)
 {
     scenario_condition_data_t *xml_info = scenario_events_parameter_data_get_conditions_xml_attributes(condition->type);
+    result_text = append_text(translation_for(xml_info->xml_attr.key), result_text, &maxlength);
+
     switch (condition->type) {
         case CONDITION_TYPE_BUILDING_COUNT_ACTIVE:
         case CONDITION_TYPE_BUILDING_COUNT_ANY:
             {
-                result_text = append_text(translation_for(xml_info->xml_attr.key), result_text, &maxlength);
                 result_text = append_const_text(string_from_ascii(" "), result_text, &maxlength);
                 result_text = append_const_text(lang_get_building_type_string(condition->parameter3), result_text, &maxlength);
                 result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
@@ -921,8 +922,6 @@ void scenario_events_parameter_data_get_display_string_for_condition(scenario_co
             }
         case CONDITION_TYPE_CITY_POPULATION:
             {
-                result_text = append_text(translation_for(xml_info->xml_attr.key), result_text, &maxlength);
-                result_text = append_const_text(string_from_ascii(" "), result_text, &maxlength);
                 result_text = translation_for_attr_mapping_text(xml_info->xml_parm3.type, condition->parameter3, result_text, &maxlength);
                 result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
                 result_text = translation_for_number_value(condition->parameter2, result_text, &maxlength);
@@ -930,17 +929,102 @@ void scenario_events_parameter_data_get_display_string_for_condition(scenario_co
             }
         case CONDITION_TYPE_COUNT_OWN_TROOPS:
             {
-                result_text = append_text(translation_for(xml_info->xml_attr.key), result_text, &maxlength);
                 result_text = append_const_text(string_from_ascii(" "), result_text, &maxlength);
                 result_text = translation_for_boolean_text(condition->parameter3, TR_PARAMETER_DISPLAY_IN_CITY, TR_PARAMETER_DISPLAY_ANYWHERE, result_text, &maxlength);
                 result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
                 result_text = translation_for_number_value(condition->parameter2, result_text, &maxlength);
                 return;
             }
+        case CONDITION_TYPE_CUSTOM_VARIABLE_CHECK:
+            {
+                result_text = append_const_text(string_from_ascii(" "), result_text, &maxlength);
+
+                const custom_variable_t *variable = scenario_get_custom_variable(condition->parameter1);
+                if (variable && variable->linked_uid) {
+                    result_text = append_text(variable->linked_uid->text, result_text, &maxlength);
+                } else {
+                    result_text = append_const_text(string_from_ascii("???"), result_text, &maxlength);
+                }
+                
+                result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
+                result_text = translation_for_number_value(condition->parameter3, result_text, &maxlength);
+                return;
+            }
+        case CONDITION_TYPE_DIFFICULTY:
+            {
+                result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
+                result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
+                return;
+            }
+        case CONDITION_TYPE_MONEY:
+        case CONDITION_TYPE_SAVINGS:
+        case CONDITION_TYPE_STATS_FAVOR:
+        case CONDITION_TYPE_STATS_PROSPERITY:
+        case CONDITION_TYPE_STATS_CULTURE:
+        case CONDITION_TYPE_STATS_PEACE:
+        case CONDITION_TYPE_ROME_WAGES:
+        case CONDITION_TYPE_TAX_RATE:
+        case CONDITION_TYPE_STATS_CITY_HEALTH:
+            {
+                result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
+                result_text = translation_for_number_value(condition->parameter2, result_text, &maxlength);
+                return;
+            }
+        case CONDITION_TYPE_POPS_UNEMPLOYMENT:
+            {
+                result_text = translation_for_boolean_text(condition->parameter1, TR_PARAMETER_DISPLAY_PERCENTAGE, TR_PARAMETER_DISPLAY_FLAT_NUMBER, result_text, &maxlength);
+                result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
+                result_text = translation_for_number_value(condition->parameter3, result_text, &maxlength);
+                return;
+            }
+        case CONDITION_TYPE_REQUEST_IS_ONGOING:
+            {
+                result_text = translation_for_number_value(condition->parameter1, result_text, &maxlength);
+                result_text = translation_for_boolean_text(condition->parameter2, TR_PARAMETER_DISPLAY_ONGOING, TR_PARAMETER_DISPLAY_NOT_ONGOING, result_text, &maxlength);
+                return;
+            }
+        case CONDITION_TYPE_TIME_PASSED:
+            {
+                result_text = append_const_text(string_from_ascii(" "), result_text, &maxlength);
+                result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
+                result_text = translation_for_min_max_values(condition->parameter2, condition->parameter3, result_text, &maxlength);
+                return;
+            }
+        case CONDITION_TYPE_TRADE_ROUTE_OPEN:
+            {
+                uint8_t text[50];
+                memset(text, 0, 50);
+                scenario_events_parameter_data_get_display_string_for_value(PARAMETER_TYPE_ROUTE, condition->parameter1, text, 50);
+                result_text = append_text(text, result_text, &maxlength);
+                result_text = append_const_text(string_from_ascii(" "), result_text, &maxlength);
+                result_text = translation_for_boolean_text(condition->parameter2, TR_PARAMETER_DISPLAY_ROUTE_OPEN, TR_PARAMETER_DISPLAY_ROUTE_CLOSED, result_text, &maxlength);
+                return;
+            }
+        case CONDITION_TYPE_TRADE_ROUTE_PRICE:
+            {
+                uint8_t text[50];
+                memset(text, 0, 50);
+                scenario_events_parameter_data_get_display_string_for_value(PARAMETER_TYPE_ROUTE, condition->parameter1, text, 50);
+                result_text = append_text(text, result_text, &maxlength);
+                result_text = append_const_text(string_from_ascii(" "), result_text, &maxlength);
+                result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
+                result_text = translation_for_number_value(condition->parameter3, result_text, &maxlength);
+                return;
+            }
+        case CONDITION_TYPE_TRADE_SELL_PRICE:
+            {
+                uint8_t text[50];
+                memset(text, 0, 50);
+                scenario_events_parameter_data_get_display_string_for_value(PARAMETER_TYPE_RESOURCE, condition->parameter1, text, 50);
+                result_text = append_text(text, result_text, &maxlength);
+                result_text = append_const_text(string_from_ascii(" "), result_text, &maxlength);
+                result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
+                result_text = translation_for_number_value(condition->parameter3, result_text, &maxlength);
+                return;
+            }
         default:
             {
-                result_text = append_const_text(string_from_ascii("UNHANDLED CONDITION TYPE! "), result_text, &maxlength);
-                result_text = append_text(translation_for(xml_info->xml_attr.key), result_text, &maxlength);
+                result_text = append_const_text(string_from_ascii(" UNHANDLED CONDITION TYPE!"), result_text, &maxlength);
                 return;
             }
     }
