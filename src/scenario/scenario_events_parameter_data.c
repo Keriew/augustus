@@ -806,3 +806,142 @@ void scenario_events_parameter_data_get_display_string_for_value(parameter_type 
             }
     }
 }
+
+static uint8_t *append_const_text(const uint8_t *text_to_append, uint8_t *result_text, int *maxlength)
+{
+    int text_length = string_length(text_to_append);
+    result_text = string_copy(text_to_append, result_text, *maxlength);
+    *maxlength -= text_length;
+    return result_text;
+}
+
+static uint8_t *append_text(uint8_t *text_to_append, uint8_t *result_text, int *maxlength)
+{
+    int text_length = string_length(text_to_append);
+    result_text = string_copy(text_to_append, result_text, *maxlength);
+    *maxlength -= text_length;
+    return result_text;
+}
+
+static uint8_t *translation_for_set_or_add_text(int parameter, uint8_t *result_text, int *maxlength)
+{
+    result_text = append_const_text(string_from_ascii(" "), result_text, maxlength);
+    if (parameter) {
+        result_text = append_text(translation_for(TR_PARAMETER_DISPLAY_SET_TO), result_text, maxlength);
+    } else {
+        result_text = append_text(translation_for(TR_PARAMETER_DISPLAY_ADD_TO), result_text, maxlength);
+    }
+    return result_text;
+}
+
+static uint8_t *translation_for_min_max_values(int min, int max, uint8_t *result_text, int *maxlength)
+{
+    result_text = append_const_text(string_from_ascii(" "), result_text, maxlength);
+    result_text = append_text(translation_for(TR_PARAMETER_DISPLAY_BETWEEN), result_text, maxlength);
+    result_text = append_const_text(string_from_ascii(" "), result_text, maxlength);
+
+    int number_length = string_from_int(result_text, min, 0);
+    result_text += number_length;
+    *maxlength -= number_length;
+
+    result_text = append_const_text(string_from_ascii(".."), result_text, maxlength);
+
+    number_length = string_from_int(result_text, max, 0);
+    result_text += number_length;
+    *maxlength -= number_length;
+
+    return result_text;
+}
+
+static uint8_t *translation_for_number_value(int value, uint8_t *result_text, int *maxlength)
+{
+    result_text = append_const_text(string_from_ascii(" "), result_text, maxlength);
+
+    int number_length = string_from_int(result_text, value, 0);
+    result_text += number_length;
+    *maxlength -= number_length;
+
+    return result_text;
+}
+
+static uint8_t *translation_for_boolean_text(int value, translation_key true_key, translation_key false_key, uint8_t *result_text, int *maxlength)
+{
+    result_text = append_const_text(string_from_ascii(" "), result_text, maxlength);
+    if (value) {
+        result_text = append_text(translation_for(true_key), result_text, maxlength);
+    } else {
+        result_text = append_text(translation_for(false_key), result_text, maxlength);
+    }
+
+    return result_text;
+}
+
+static uint8_t *translation_for_attr_mapping_text(parameter_type type, int value, uint8_t *result_text, int *maxlength)
+{
+    result_text = append_const_text(string_from_ascii(" "), result_text, maxlength);
+    special_attribute_mapping_t *attr_mapping = scenario_events_parameter_data_get_attribute_mapping_by_value(type, value);
+
+    result_text = append_text(translation_for(attr_mapping->key), result_text, maxlength);
+    return result_text;
+}
+
+void scenario_events_parameter_data_get_display_string_for_action(scenario_action_t* action, uint8_t *result_text, int maxlength)
+{
+    scenario_action_data_t *xml_info = scenario_events_parameter_data_get_actions_xml_attributes(action->type);
+    switch (action->type) {
+        case ACTION_TYPE_ADJUST_CITY_HEALTH:
+            {
+                result_text = append_text(translation_for(xml_info->xml_attr.key), result_text, &maxlength);
+                result_text = translation_for_set_or_add_text(action->parameter3, result_text, &maxlength);
+                result_text = translation_for_min_max_values(action->parameter1, action->parameter2, result_text, &maxlength);
+                return;
+            }
+        default:
+            {
+                result_text = append_const_text(string_from_ascii("UNHANDLED ACTION TYPE! "), result_text, &maxlength);
+                result_text = append_text(translation_for(xml_info->xml_attr.key), result_text, &maxlength);
+                return;
+            }
+    }
+}
+
+void scenario_events_parameter_data_get_display_string_for_condition(scenario_condition_t* condition, uint8_t *result_text, int maxlength)
+{
+    scenario_condition_data_t *xml_info = scenario_events_parameter_data_get_conditions_xml_attributes(condition->type);
+    switch (condition->type) {
+        case CONDITION_TYPE_BUILDING_COUNT_ACTIVE:
+        case CONDITION_TYPE_BUILDING_COUNT_ANY:
+            {
+                result_text = append_text(translation_for(xml_info->xml_attr.key), result_text, &maxlength);
+                result_text = append_const_text(string_from_ascii(" "), result_text, &maxlength);
+                result_text = append_const_text(lang_get_building_type_string(condition->parameter3), result_text, &maxlength);
+                result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
+                result_text = translation_for_number_value(condition->parameter2, result_text, &maxlength);
+                return;
+            }
+        case CONDITION_TYPE_CITY_POPULATION:
+            {
+                result_text = append_text(translation_for(xml_info->xml_attr.key), result_text, &maxlength);
+                result_text = append_const_text(string_from_ascii(" "), result_text, &maxlength);
+                result_text = translation_for_attr_mapping_text(xml_info->xml_parm3.type, condition->parameter3, result_text, &maxlength);
+                result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
+                result_text = translation_for_number_value(condition->parameter2, result_text, &maxlength);
+                return;
+            }
+        case CONDITION_TYPE_COUNT_OWN_TROOPS:
+            {
+                result_text = append_text(translation_for(xml_info->xml_attr.key), result_text, &maxlength);
+                result_text = append_const_text(string_from_ascii(" "), result_text, &maxlength);
+                result_text = translation_for_boolean_text(condition->parameter3, TR_PARAMETER_DISPLAY_IN_CITY, TR_PARAMETER_DISPLAY_ANYWHERE, result_text, &maxlength);
+                result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
+                result_text = translation_for_number_value(condition->parameter2, result_text, &maxlength);
+                return;
+            }
+        default:
+            {
+                result_text = append_const_text(string_from_ascii("UNHANDLED CONDITION TYPE! "), result_text, &maxlength);
+                result_text = append_text(translation_for(xml_info->xml_attr.key), result_text, &maxlength);
+                return;
+            }
+    }
+}
