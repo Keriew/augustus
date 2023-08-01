@@ -1,7 +1,6 @@
 #include "core/lang.h"
 
 #include "building/building.h"
-#include "building/type.h"
 #include "core/buffer.h"
 #include "core/file.h"
 #include "core/io.h"
