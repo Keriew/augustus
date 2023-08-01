@@ -926,6 +926,13 @@ void scenario_events_parameter_data_get_display_string_for_action(scenario_actio
                 result_text = translation_for_boolean_text(action->parameter2, TR_PARAMETER_DISPLAY_ALLOWED, TR_PARAMETER_DISPLAY_DISALLOWED, result_text, &maxlength);
                 return;
             }
+        case ACTION_TYPE_CHANGE_CITY_RATING:
+            {
+                result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RATING_TYPE, action->parameter1, result_text, &maxlength);
+                result_text = translation_for_set_or_add_text(action->parameter3, result_text, &maxlength);
+                result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+                return;
+            }
         case ACTION_TYPE_CHANGE_CUSTOM_VARIABLE:
             {
                 result_text = append_const_text(string_from_ascii(" "), result_text, &maxlength);
@@ -945,6 +952,14 @@ void scenario_events_parameter_data_get_display_string_for_action(scenario_actio
             {
                 result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter1, result_text, &maxlength);
                 result_text = translation_for_boolean_text(action->parameter2, TR_PARAMETER_DISPLAY_ALLOWED, TR_PARAMETER_DISPLAY_DISALLOWED, result_text, &maxlength);
+                return;
+            }
+        case ACTION_TYPE_CHANGE_RESOURCE_STOCKPILES:
+            {
+                result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_STORAGE_TYPE, action->parameter3, result_text, &maxlength);
+                result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter1, result_text, &maxlength);
+                result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+                result_text = translation_for_boolean_text(action->parameter4, TR_PARAMETER_DISPLAY_RESPECT_SETTINGS, TR_PARAMETER_DISPLAY_IGNORE_SETTINGS, result_text, &maxlength);
                 return;
             }
         case ACTION_TYPE_EMPIRE_MAP_CONVERT_FUTURE_TRADE_CITY:
@@ -1095,6 +1110,23 @@ void scenario_events_parameter_data_get_display_string_for_condition(scenario_co
             {
                 result_text = translation_for_number_value(condition->parameter1, result_text, &maxlength);
                 result_text = translation_for_boolean_text(condition->parameter2, TR_PARAMETER_DISPLAY_ONGOING, TR_PARAMETER_DISPLAY_NOT_ONGOING, result_text, &maxlength);
+                return;
+            }
+        case CONDITION_TYPE_RESOURCE_STORAGE_AVAILABLE:
+            {
+                result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_STORAGE_TYPE, condition->parameter4, result_text, &maxlength);
+                result_text = translation_for_boolean_text(condition->parameter5, TR_PARAMETER_DISPLAY_RESPECT_SETTINGS, TR_PARAMETER_DISPLAY_IGNORE_SETTINGS, result_text, &maxlength);
+                result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, condition->parameter1, result_text, &maxlength);
+                result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
+                result_text = translation_for_number_value(condition->parameter3, result_text, &maxlength);
+                return;
+            }
+        case CONDITION_TYPE_RESOURCE_STORED_COUNT:
+            {
+                result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_STORAGE_TYPE, condition->parameter4, result_text, &maxlength);
+                result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, condition->parameter1, result_text, &maxlength);
+                result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
+                result_text = translation_for_number_value(condition->parameter3, result_text, &maxlength);
                 return;
             }
         case CONDITION_TYPE_TIME_PASSED:

@@ -1243,6 +1243,8 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_DISPLAY_BUY_PRICE, "buy price"},
     {TR_PARAMETER_DISPLAY_SELL_PRICE, "sell price"},
     {TR_PARAMETER_DISPLAY_MONTHS, "months"},
+    {TR_PARAMETER_DISPLAY_RESPECT_SETTINGS, "respecting settings"},
+    {TR_PARAMETER_DISPLAY_IGNORE_SETTINGS, "ignoring settings"},
     {TR_ORDER_CONDITION_NEVER, "Never" },
     {TR_ORDER_CONDITION_ALWAYS, "Always" },
     {TR_ORDER_CONDITION_SOURCE_HAS_MORE_THAN, "Source has more than" },
