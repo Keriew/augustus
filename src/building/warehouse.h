@@ -32,7 +32,8 @@ int building_warehouses_add_resource(int resource, int amount, int respect_setti
 int building_warehouse_is_accepting(int resource, building *b);
 int building_warehouse_is_getting(int resource, building *b);
 int building_warehouse_is_not_accepting(int resource, building *b);
-int building_warehouse_maximum_receptible_amount(resource_type resource, building* b);
+int building_warehouse_maximum_receptible_amount(resource_type resource, building *b);
+int building_warehouse_max_space_for_resource(resource_type resource, building *b);
 
 int building_warehouse_remove_resource(building *warehouse, int resource, int amount);
 

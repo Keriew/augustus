@@ -69,6 +69,9 @@ int city_resource_get_available_empty_space_granaries(resource_type food, int re
     }
 
     for (building *b = building_first_of_type(BUILDING_GRANARY); b; b = b->next_of_type) {
+        if (b->state != BUILDING_STATE_IN_USE) {
+            continue;
+        }
         if (!respect_settings) {
             available_storage += b->resources[RESOURCE_NONE];
         } else {
@@ -83,10 +86,14 @@ int city_resource_get_available_empty_space_warehouses(resource_type resource, i
 {
     int available_storage = 0;
     for (building *b = building_first_of_type(BUILDING_WAREHOUSE); b; b = b->next_of_type) {
-        if (!respect_settings) {
-            available_storage += building_warehouse_get_amount(b, RESOURCE_NONE);
+        if (b->state != BUILDING_STATE_IN_USE) {
+            continue;
         }
-        available_storage += building_warehouse_maximum_receptible_amount(resource, b);
+        if (!respect_settings) {
+            available_storage += building_warehouse_max_space_for_resource(resource, b);
+        } else {
+            available_storage += building_warehouse_maximum_receptible_amount(resource, b);
+        }
     }
 
     return available_storage;

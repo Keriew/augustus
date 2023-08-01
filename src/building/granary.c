@@ -147,9 +147,8 @@ int building_granaries_add_resource(int resource, int amount, int respect_settin
         return amount;
     }
 
-    int remaining_to_add = amount;
     for (building *b = building_first_of_type(BUILDING_GRANARY); b; b = b->next_of_type) {
-        if (b->resources[RESOURCE_NONE] <= 0) {
+        if (b->state != BUILDING_STATE_IN_USE || b->resources[RESOURCE_NONE] <= 0) {
             continue;
         }
         int space_available = 0;
@@ -158,22 +157,22 @@ int building_granaries_add_resource(int resource, int amount, int respect_settin
         } else {
             space_available = building_granary_maximum_receptible_amount(resource, b);
         }
-        if (space_available > remaining_to_add) {
-            space_available = remaining_to_add;
+        if (space_available > amount) {
+            space_available = amount;
         }
         if (space_available <= 0) {
             continue;
         }
-        remaining_to_add -= space_available;
+        amount -= space_available;
         b->resources[resource] += space_available;
         b->resources[RESOURCE_NONE] -= space_available;
         city_resource_add_to_granary(resource, space_available);
-        if (remaining_to_add <= 0) {
+        if (amount <= 0) {
             break;
         }
     }
 
-    return remaining_to_add;
+    return amount;
 }
 
 int building_granary_remove_resource(building *granary, int resource, int amount)
@@ -279,7 +278,7 @@ int building_granaries_send_resources_to_rome(int resource, int amount)
     return amount;
 }
 
-int building_granary_maximum_receptible_amount(int resource, building* b)
+int building_granary_maximum_receptible_amount(int resource, building *b)
 {
     if (b->has_plague) {
         return 0;
