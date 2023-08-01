@@ -34,6 +34,11 @@ int scenario_action_type_send_standard_message_execute(scenario_action_t *action
 
 int scenario_action_type_trade_price_set_execute(scenario_action_t *action);
 
+int scenario_action_type_trade_set_buy_price_execute(scenario_action_t *action);
+int scenario_action_type_trade_set_sell_price_execute(scenario_action_t *action);
+
+int scenario_action_type_trade_add_new_resource_execute(scenario_action_t *action);
+
 int scenario_action_type_trade_price_adjust_execute(scenario_action_t *action);
 
 int scenario_action_type_trade_problems_land_execute(scenario_action_t *action);
@@ -41,6 +46,8 @@ int scenario_action_type_trade_problems_land_execute(scenario_action_t *action);
 int scenario_action_type_trade_problems_sea_execute(scenario_action_t *action);
 
 int scenario_action_type_trade_route_adjust_open_price_execute(scenario_action_t *action);
+
+int scenario_action_type_trade_route_open_execute(scenario_action_t *action);
 
 int scenario_action_type_trade_route_amount_execute(scenario_action_t *action);
 

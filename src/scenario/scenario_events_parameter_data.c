@@ -219,6 +219,25 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm2 =    { .name = "amount",             .type = PARAMETER_TYPE_NUMBER,           .min_limit = NEGATIVE_UNLIMITED,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
                                         .xml_parm3 =    { .name = "storage_type",       .type = PARAMETER_TYPE_STORAGE_TYPE,     .key = TR_PARAMETER_TYPE_STORAGE_TYPE },
                                         .xml_parm4 =    { .name = "respect_settings",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,                            .max_limit = 1,             .key = TR_PARAMETER_RESPECT_SETTINGS }, },
+    [ACTION_TYPE_TRADE_OPEN_ROUTE]     = { .type = ACTION_TYPE_TRADE_OPEN_ROUTE,
+                                        .xml_attr =     { .name = "trade_route_open",    .type = PARAMETER_TYPE_TEXT,        .key = TR_ACTION_TYPE_TRADE_OPEN_ROUTE },
+                                        .xml_parm1 =    { .name = "target_city",    .type = PARAMETER_TYPE_ROUTE,            .key = TR_PARAMETER_TYPE_ROUTE },
+                                        .xml_parm2 =    { .name = "apply_cost",     .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_APPLY_COST }, },
+    [ACTION_TYPE_TRADE_ADD_NEW_RESOURCE_TO_ROUTE]     = { .type = ACTION_TYPE_TRADE_ADD_NEW_RESOURCE_TO_ROUTE,
+                                        .xml_attr =     { .name = "change_trade_route_add_new_resource",    .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_TRADE_ADD_NEW_RESOURCE_TO_ROUTE },
+                                        .xml_parm1 =    { .name = "target_city",    .type = PARAMETER_TYPE_ROUTE,            .key = TR_PARAMETER_TYPE_ROUTE },
+                                        .xml_parm2 =    { .name = "resource",       .type = PARAMETER_TYPE_RESOURCE,         .key = TR_PARAMETER_TYPE_RESOURCE },
+                                        .xml_parm3 =    { .name = "amount",         .type = PARAMETER_TYPE_NUMBER,           .min_limit = NEGATIVE_UNLIMITED,          .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm4 =    { .name = "add_as_buying",  .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_ADD_AS_BUYING },
+                                        .xml_parm5 =    { .name = "show_message",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_SHOW_MESSAGE }, },
+    [ACTION_TYPE_TRADE_SET_BUY_PRICE_ONLY]     = { .type = ACTION_TYPE_TRADE_SET_BUY_PRICE_ONLY,
+                                        .xml_attr =     { .name = "trade_buy_price_set",    .type = PARAMETER_TYPE_TEXT,         .key = TR_ACTION_TYPE_TRADE_SET_BUY_PRICE_ONLY },
+                                        .xml_parm1 =    { .name = "resource",       .type = PARAMETER_TYPE_RESOURCE,         .key = TR_PARAMETER_TYPE_RESOURCE },
+                                        .xml_parm2 =    { .name = "amount",         .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER }, },
+    [ACTION_TYPE_TRADE_SET_SELL_PRICE_ONLY]     = { .type = ACTION_TYPE_TRADE_SET_SELL_PRICE_ONLY,
+                                        .xml_attr =     { .name = "trade_sell_price_set",    .type = PARAMETER_TYPE_TEXT,         .key = TR_ACTION_TYPE_TRADE_SET_SELL_PRICE_ONLY },
+                                        .xml_parm1 =    { .name = "resource",       .type = PARAMETER_TYPE_RESOURCE,         .key = TR_PARAMETER_TYPE_RESOURCE },
+                                        .xml_parm2 =    { .name = "amount",         .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER }, },
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)
@@ -1050,6 +1069,15 @@ void scenario_events_parameter_data_get_display_string_for_action(scenario_actio
                 result_text = translation_for_boolean_text(action->parameter4, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
                 return;
             }
+        case ACTION_TYPE_TRADE_ADD_NEW_RESOURCE_TO_ROUTE:
+            {
+                result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, action->parameter1, result_text, &maxlength);
+                result_text = translation_for_boolean_text(action->parameter4, TR_PARAMETER_DISPLAY_ADD_AS_BUYING, TR_PARAMETER_DISPLAY_ADD_AS_SELLING, result_text, &maxlength);
+                result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter2, result_text, &maxlength);
+                result_text = translation_for_number_value(action->parameter3, result_text, &maxlength);
+                result_text = translation_for_boolean_text(action->parameter5, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
+                return;
+            }
         case ACTION_TYPE_TRADE_ADJUST_ROUTE_OPEN_PRICE:
             {
                 result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, action->parameter1, result_text, &maxlength);
@@ -1058,12 +1086,25 @@ void scenario_events_parameter_data_get_display_string_for_action(scenario_actio
                 result_text = translation_for_boolean_text(action->parameter4, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
                 return;
             }
+        case ACTION_TYPE_TRADE_OPEN_ROUTE:
+            {
+                result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, action->parameter1, result_text, &maxlength);
+                result_text = translation_for_boolean_text(action->parameter2, TR_PARAMETER_DISPLAY_APPLY_COST, TR_PARAMETER_DISPLAY_NO_COST, result_text, &maxlength);
+                return;
+            }
         case ACTION_TYPE_TRADE_SET_PRICE:
             {
                 result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter1, result_text, &maxlength);
                 result_text = translation_for_boolean_text(action->parameter3, TR_PARAMETER_DISPLAY_BUY_PRICE, TR_PARAMETER_DISPLAY_SELL_PRICE, result_text, &maxlength);
                 result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
                 result_text = translation_for_boolean_text(action->parameter4, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
+                return;
+            }
+        case ACTION_TYPE_TRADE_SET_BUY_PRICE_ONLY:
+        case ACTION_TYPE_TRADE_SET_SELL_PRICE_ONLY:
+            {
+                result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter1, result_text, &maxlength);
+                result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
                 return;
             }
         case ACTION_TYPE_SHOW_CUSTOM_MESSAGE:
