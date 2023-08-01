@@ -62,7 +62,7 @@ static struct {
     scenario_condition_data_t *xml_info;
 } data;
 
-static uint8_t *translation_for_paramvalue(parameter_type type, int value)
+static uint8_t *translation_for_param_value(parameter_type type, int value)
 {
     memset(data.display_text, 0, MAX_TEXT_LENGTH);
     scenario_events_parameter_data_get_display_string_for_value(type, value, data.display_text, MAX_TEXT_LENGTH);
@@ -101,7 +101,7 @@ static void draw_foreground(void)
         text_draw_centered(translation_for(data.xml_info->xml_parm1.key),
             buttons[button_id].x, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
-        text_draw_centered(translation_for_paramvalue(data.xml_info->xml_parm1.type, data.condition->parameter1),
+        text_draw_centered(translation_for_param_value(data.xml_info->xml_parm1.type, data.condition->parameter1),
             buttons[button_id].x + BUTTON_WIDTH / 2, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     }
@@ -113,7 +113,7 @@ static void draw_foreground(void)
         text_draw_centered(translation_for(data.xml_info->xml_parm2.key),
             buttons[button_id].x, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
-        text_draw_centered(translation_for_paramvalue(data.xml_info->xml_parm2.type, data.condition->parameter2),
+        text_draw_centered(translation_for_param_value(data.xml_info->xml_parm2.type, data.condition->parameter2),
             buttons[button_id].x + BUTTON_WIDTH / 2, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     }
@@ -125,7 +125,7 @@ static void draw_foreground(void)
         text_draw_centered(translation_for(data.xml_info->xml_parm3.key),
             buttons[button_id].x, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
-        text_draw_centered(translation_for_paramvalue(data.xml_info->xml_parm3.type, data.condition->parameter3),
+        text_draw_centered(translation_for_param_value(data.xml_info->xml_parm3.type, data.condition->parameter3),
             buttons[button_id].x + BUTTON_WIDTH / 2, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     }
@@ -137,7 +137,7 @@ static void draw_foreground(void)
         text_draw_centered(translation_for(data.xml_info->xml_parm4.key),
             buttons[button_id].x, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
-        text_draw_centered(translation_for_paramvalue(data.xml_info->xml_parm4.type, data.condition->parameter4),
+        text_draw_centered(translation_for_param_value(data.xml_info->xml_parm4.type, data.condition->parameter4),
             buttons[button_id].x + BUTTON_WIDTH / 2, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     }
@@ -149,7 +149,7 @@ static void draw_foreground(void)
         text_draw_centered(translation_for(data.xml_info->xml_parm5.key),
             buttons[button_id].x, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
-        text_draw_centered(translation_for_paramvalue(data.xml_info->xml_parm5.type, data.condition->parameter5),
+        text_draw_centered(translation_for_param_value(data.xml_info->xml_parm5.type, data.condition->parameter5),
             buttons[button_id].x + BUTTON_WIDTH / 2, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     }

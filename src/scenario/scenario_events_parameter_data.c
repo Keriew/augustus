@@ -1,4 +1,5 @@
 #include "scenario_events_parameter_data.h"
+
 #include "city/ratings.h"
 #include "city/resource.h"
 #include "core/lang.h"
