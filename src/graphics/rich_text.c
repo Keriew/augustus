@@ -290,36 +290,11 @@ static int draw_text(const uint8_t *text, int x_offset, int y_offset,
                 // Word too long to fit on a line, so cut it into smaller pieces.
                 int can_cut_more = 1;
                 while (can_cut_more) {
-                    char c = *text++;
+                    char c = *text;
                     if (c == '@') {
-                        if (*text == 'P') {
-                            paragraph = 1;
-                            text++;
-                            current_width = box_width;
-                            break;
-                        } else if (*text == 'L') {
-                            text++;
-                            current_width = box_width;
-                            break;
-                        } else if (*text == 'G') {
-                            if (line_index) {
-                                num_lines++;
-                            }
-                            text++; // skip 'G'
-                            current_width = box_width;
-                            image_id = string_to_int(text);
-                            c = *text++;
-                            while (c >= '0' && c <= '9') {
-                                c = *text++;
-                            }
-                            image_id += image_group(GROUP_MESSAGE_IMAGES) - 1;
-                            image_height_lines = image_get(image_id)->height / data.line_height + 2;
-                            if (line > 0) {
-                                lines_before_image = 1;
-                            }
-                            break;
-                        }
+                        break;
                     }
+                    *text++;
                     tmp_line[line_index++] = c;
                     int temp_num_chars;
                     int temp_width = get_raw_text_width(tmp_line);
