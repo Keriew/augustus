@@ -199,7 +199,6 @@ static int get_raw_text_width(const uint8_t *str)
     int start_link = 0;
     while (*str && ++guard < 2000) {
         int num_bytes = 1;
-        // normal char
         int letter_id = font_letter_id(data.normal_font, str, &num_bytes);
         if (letter_id >= 0) {
             width += 1 + image_letter(letter_id)->width;
