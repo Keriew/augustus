@@ -9,6 +9,13 @@
 #include "scenario/custom_messages.h"
 #include "scenario/scenario.h"
 
+#ifdef _MSC_VER
+// Of course MSVC is the only compiler that doesn't have POSIX strcasecmp...
+#include <mbstring.h>
+#else
+#include <strings.h>
+#endif
+
 #define UNLIMITED 1000000000
 #define NEGATIVE_UNLIMITED -1000000000
 
@@ -234,6 +241,15 @@ typedef struct {
 static scenario_condition_data_t *scenario_condition_data_alphabetical[CONDITION_TYPE_MAX - 1];
 static scenario_action_data_t *scenario_action_data_alphabetical[ACTION_TYPE_MAX - 1];
 
+static int platform_aware_string_compare(const char *a, const char *b)
+{
+#ifdef _MSC_VER
+    return _mbsicmp((const unsigned char *) a, (const unsigned char *) b);
+#else
+    return strcasecmp(a, b);
+#endif
+}
+
 static int compare_lower(const void *va, const void *vb)
 {
     const sorting_attr_t *a = (const sorting_attr_t *) va;
@@ -241,7 +257,7 @@ static int compare_lower(const void *va, const void *vb)
 
     const char *name_a = (const char *)translation_for(a->key);
     const char *name_b = (const char *)translation_for(b->key);
-    return strcasecmp(name_a, name_b);
+    return platform_aware_string_compare(name_a, name_b);
 }
 
 void scenario_events_parameter_data_sort_alphabetically(void)
