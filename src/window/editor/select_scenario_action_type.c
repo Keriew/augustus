@@ -68,10 +68,11 @@ static void populate_list(int offset)
     if (offset < 0) {
         offset = 0;
     }
+    scenario_events_parameter_data_sort_alphabetically();
     for (int i = 0; i < MAX_VISIBLE_ROWS; i++) {
-        int target_type = i + offset + 1;
-        if (target_type < data.total_types) {
-            data.list[i] = scenario_events_parameter_data_get_actions_xml_attributes(target_type);
+        int target_index = i + offset;
+        if (target_index < data.total_types) {
+            data.list[i] = scenario_events_parameter_data_get_actions_xml_attributes_alphabetical(target_index);
         }
     }
 }
