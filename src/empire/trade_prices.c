@@ -141,29 +141,23 @@ int trade_price_change(resource_type resource, int amount)
 
 int trade_price_set_buy(resource_type resource, int new_price)
 {
-    if (new_price < 3) {
-        prices[resource].buy = 3;
-        prices[resource].sell = 1;
+    if (new_price < 2) {
+        prices[resource].buy = 2;
     } else {
         prices[resource].buy = new_price;
     }
-    if (prices[resource].sell > prices[resource].buy) {
-        prices[resource].sell = prices[resource].buy;
-    }
+
     return 1;
 }
 
 int trade_price_set_sell(resource_type resource, int new_price)
 {
     if (new_price < 1) {
-        prices[resource].buy = 3;
         prices[resource].sell = 1;
     } else {
         prices[resource].sell = new_price;
     }
-    if (prices[resource].sell > prices[resource].buy) {
-        prices[resource].buy = prices[resource].sell;
-    }
+    
     return 1;
 }
 

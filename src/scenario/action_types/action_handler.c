@@ -36,6 +36,8 @@ int scenario_action_type_execute(scenario_action_t *action)
             return scenario_action_type_money_add_execute(action);
         case ACTION_TYPE_ADJUST_SAVINGS:
             return scenario_action_type_savings_add_execute(action);
+        case ACTION_TYPE_BUILDING_FORCE_COLLAPSE:
+            return scenario_action_type_building_force_collapse_execute(action);
         case ACTION_TYPE_CHANGE_ALLOWED_BUILDINGS:
             return scenario_action_type_change_allowed_buildings_execute(action);
         case ACTION_TYPE_CHANGE_CITY_RATING:
@@ -54,7 +56,7 @@ int scenario_action_type_execute(scenario_action_t *action)
             return scenario_action_type_request_immediately_start_execute(action);
         case ACTION_TYPE_SEND_STANDARD_MESSAGE:
             return scenario_action_type_send_standard_message_execute(action);
-        case ACTION_TYPE_TRADE_ADD_NEW_RESOURCE_TO_ROUTE:
+        case ACTION_TYPE_TRADE_ROUTE_ADD_NEW_RESOURCE:
             return scenario_action_type_trade_add_new_resource_execute(action);
         case ACTION_TYPE_TRADE_ADJUST_PRICE:
             return scenario_action_type_trade_price_adjust_execute(action);
@@ -62,7 +64,7 @@ int scenario_action_type_execute(scenario_action_t *action)
             return scenario_action_type_trade_route_amount_execute(action);
         case ACTION_TYPE_TRADE_ADJUST_ROUTE_OPEN_PRICE:
             return scenario_action_type_trade_route_adjust_open_price_execute(action);
-        case ACTION_TYPE_TRADE_OPEN_ROUTE:
+        case ACTION_TYPE_TRADE_ROUTE_SET_OPEN:
             return scenario_action_type_trade_route_open_execute(action);
         case ACTION_TYPE_TRADE_PROBLEM_LAND:
             return scenario_action_type_trade_problems_land_execute(action);
@@ -118,7 +120,7 @@ void scenario_action_type_load_state(buffer *buf, scenario_action_t *action, int
         action->parameter1 = resource_remap(action->parameter1);
     } else if (action->type == ACTION_TYPE_TRADE_ADJUST_ROUTE_AMOUNT) {
         action->parameter2 = resource_remap(action->parameter2);
-    } else if (action->type == ACTION_TYPE_TRADE_ADD_NEW_RESOURCE_TO_ROUTE) {
+    } else if (action->type == ACTION_TYPE_TRADE_ROUTE_ADD_NEW_RESOURCE) {
         action->parameter2 = resource_remap(action->parameter2);
     } else if (action->type == ACTION_TYPE_TRADE_SET_PRICE) {
         action->parameter1 = resource_remap(action->parameter1);        

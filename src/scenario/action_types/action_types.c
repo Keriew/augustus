@@ -1,5 +1,6 @@
 #include "action_types.h"
 
+#include "building/destruction.h"
 #include "building/granary.h"
 #include "building/menu.h"
 #include "building/warehouse.h"
@@ -18,6 +19,8 @@
 #include "empire/trade_route.h"
 #include "game/time.h"
 #include "game/resource.h"
+#include "map/building.h"
+#include "map/grid.h"
 #include "scenario/data.h"
 #include "scenario/gladiator_revolt.h"
 #include "scenario/custom_messages.h"
@@ -282,6 +285,43 @@ int scenario_action_type_savings_add_execute(scenario_action_t *action)
     return 1;
 }
 
+int scenario_action_type_building_force_collapse_execute(scenario_action_t *action)
+{
+    int grid_offset = action->parameter1;
+    int block_radius = action->parameter2;
+    building_type type = action->parameter3;
+    int destroy_all = action->parameter4;
+
+    if (!map_grid_is_valid_offset(grid_offset)) {
+        return 0;
+    }
+
+    for (int y = -block_radius; y <= block_radius; y++) {
+        for (int x = -block_radius; x <= block_radius; x++) {
+            int current_grid_offset = map_grid_add_delta(grid_offset, x, y);
+            if (!map_grid_is_valid_offset(current_grid_offset)) {
+                continue;
+            }
+            int building_id = map_building_at(current_grid_offset);
+            if (!building_id) {
+                continue;
+            }
+            building *b = building_main(building_get(building_id));
+            if (b->type == BUILDING_BURNING_RUIN) {
+                continue;
+            }
+            if (b->state == BUILDING_STATE_DELETED_BY_PLAYER || b->is_deleted) {
+                continue;
+            }
+            if (destroy_all || b->type == type) {
+                building_destroy_by_collapse(b);
+            }
+        }
+    }
+    
+    return 1;
+}
+
 int scenario_action_type_send_standard_message_execute(scenario_action_t *action)
 {
     int text_id = action->parameter1;
@@ -341,9 +381,7 @@ int scenario_action_type_trade_set_buy_price_execute(scenario_action_t *action)
         return 0;
     }
 
-    int successfully_changed = trade_price_set_buy(resource, amount);
-    
-    return successfully_changed;
+    return trade_price_set_buy(resource, amount);
 }
 
 int scenario_action_type_trade_set_sell_price_execute(scenario_action_t *action)
@@ -355,9 +393,7 @@ int scenario_action_type_trade_set_sell_price_execute(scenario_action_t *action)
         return 0;
     }
 
-    int successfully_changed = trade_price_set_sell(resource, amount);
-    
-    return successfully_changed;
+    return trade_price_set_sell(resource, amount);
 }
 
 int scenario_action_type_trade_add_new_resource_execute(scenario_action_t *action)

@@ -30,6 +30,8 @@ int scenario_action_type_rome_wages_execute(scenario_action_t *action);
 void scenario_action_type_savings_add_init(scenario_action_t *action);
 int scenario_action_type_savings_add_execute(scenario_action_t *action);
 
+int scenario_action_type_building_force_collapse_execute(scenario_action_t *action);
+
 int scenario_action_type_send_standard_message_execute(scenario_action_t *action);
 
 int scenario_action_type_trade_price_set_execute(scenario_action_t *action);
