@@ -236,27 +236,13 @@ typedef struct {
 static scenario_condition_data_t *scenario_condition_data_alphabetical[CONDITION_TYPE_MAX - 1];
 static scenario_action_data_t *scenario_action_data_alphabetical[ACTION_TYPE_MAX - 1];
 
-static int strcmp_lowercase(const char *a, const char *b)
+int string_compare(const uint8_t *a, const uint8_t *b)
 {
-    int size = sizeof(a);
-    char *lower_a = malloc(size);
-    memset(lower_a, 0, size);
-
-    for (int i = 0 ; i < size; i++) {
-        lower_a[i] = tolower(a[i]);
+    while (*a && *b && tolower(*a) == tolower(*b)) {
+        ++a;
+        ++b;
     }
-
-    size = sizeof(b);
-    char *lower_b = malloc(size);
-    memset(lower_b, 0, size);
-    for (int i = 0 ; i < size; i++) {
-        lower_b[i] = tolower(b[i]);
-    }
-
-    int compare_result = strcmp(lower_a, lower_b);
-    free(lower_a);
-    free(lower_b);
-    return compare_result;
+    return tolower(*a) - tolower(*b);
 }
 
 static int compare_lower(const void *va, const void *vb)
@@ -264,9 +250,9 @@ static int compare_lower(const void *va, const void *vb)
     const sorting_attr_t *a = (const sorting_attr_t *) va;
     const sorting_attr_t *b = (const sorting_attr_t *) vb;
 
-    const char *name_a = (const char *)translation_for(a->key);
-    const char *name_b = (const char *)translation_for(b->key);
-    return strcmp_lowercase(name_a, name_b);
+    const uint8_t *name_a = translation_for(a->key);
+    const uint8_t *name_b = translation_for(b->key);
+    return string_compare(name_a, name_b);
 }
 
 void scenario_events_parameter_data_sort_alphabetically(void)
