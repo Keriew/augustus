@@ -9,8 +9,6 @@
 #include "scenario/custom_messages.h"
 #include "scenario/scenario.h"
 
-#include <ctype.h>
-
 #define UNLIMITED 1000000000
 #define NEGATIVE_UNLIMITED -1000000000
 
@@ -235,15 +233,6 @@ typedef struct {
 
 static scenario_condition_data_t *scenario_condition_data_alphabetical[CONDITION_TYPE_MAX - 1];
 static scenario_action_data_t *scenario_action_data_alphabetical[ACTION_TYPE_MAX - 1];
-
-int string_compare(const uint8_t *a, const uint8_t *b)
-{
-    while (*a && *b && tolower(*a) == tolower(*b)) {
-        ++a;
-        ++b;
-    }
-    return tolower(*a) - tolower(*b);
-}
 
 static int compare_lower(const void *va, const void *vb)
 {
