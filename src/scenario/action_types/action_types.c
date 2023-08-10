@@ -310,7 +310,7 @@ int scenario_action_type_building_force_collapse_execute(scenario_action_t *acti
             if (b->type == BUILDING_BURNING_RUIN) {
                 continue;
             }
-            if (b->state == BUILDING_STATE_DELETED_BY_PLAYER || b->is_deleted) {
+            if ((b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_MOTHBALLED) || b->is_deleted) {
                 continue;
             }
             if (destroy_all || b->type == type) {
