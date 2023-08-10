@@ -305,7 +305,7 @@ void empire_city_change_buying_of_resource(empire_city *city, resource_type reso
 {
     int buys = amount != NOT_SELLING;
     city->buys_resource[resource] = buys;
-    empire_object_get_full(city->empire_object_id)->city_buys_resource[resource] = buys;
+    empire_object_get_full(city->empire_object_id)->city_buys_resource[resource] = amount;
     if (city->type != EMPIRE_CITY_OURS) {
         trade_route_set_limit(city->route_id, resource, amount);
     }
@@ -315,7 +315,7 @@ void empire_city_change_selling_of_resource(empire_city *city, resource_type res
 {
     int sells = amount != NOT_SELLING;
     city->sells_resource[resource] = sells;
-    empire_object_get_full(city->empire_object_id)->city_sells_resource[resource] = sells;
+    empire_object_get_full(city->empire_object_id)->city_sells_resource[resource] = amount;
     if (city->type != EMPIRE_CITY_OURS) {
         trade_route_set_limit(city->route_id, resource, amount);
     }

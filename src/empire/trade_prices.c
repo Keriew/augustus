@@ -8,8 +8,8 @@
 #include "core/calc.h"
 #include "trade_prices.h"
 
-#define MIN_BUY_PRICE 0
-#define MIN_SELL_PRICE 0
+#define MIN_BUY_PRICE 1
+#define MIN_SELL_PRICE 1
 
 struct trade_price {
     int32_t buy;
