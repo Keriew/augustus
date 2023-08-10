@@ -551,16 +551,6 @@ static int city_can_mine_gold(int city_name_id)
     }
 }
 
-static void change_selling_of_resource(empire_city *city, resource_type resource, unsigned int amount)
-{
-    int sells = amount != NOT_SELLING;
-    city->sells_resource[resource] = sells;
-    empire_object_get_full(city->empire_object_id)->city_sells_resource[resource] = amount;
-    if (city->type != EMPIRE_CITY_OURS) {
-        trade_route_set_limit(city->route_id, resource, amount);
-    }
-}
-
 static void set_gold_production(empire_city *city)
 {
     if (city_can_mine_gold(city->name_id) && city->sells_resource[RESOURCE_IRON]) {
@@ -601,7 +591,7 @@ static void set_new_monument_elements_production(int empire_id, empire_city *cit
                 if (resources_sold > 4) {
                     // Original Damascus, Tarsus should sell sand instead of stone, which can be produced locally
                     if (city->is_sea_trade || (empire_id == damascus_empire_id && city->name_id == 12)) {
-                        change_selling_of_resource(city, RESOURCE_STONE, NOT_SELLING);
+                        empire_city_change_selling_of_resource(city, RESOURCE_STONE, NOT_SELLING);
                     } else {
                         empire_city_change_selling_of_resource(city, RESOURCE_SAND, NOT_SELLING);
                     }
