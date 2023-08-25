@@ -6,62 +6,70 @@
 #include "city/health.h"
 #include "figure/figure.h"
 
-#define BUILDING_SET_SIZE_FARMS 6
-#define BUILDING_SET_SIZE_RAW_MATERIALS 7
-#define BUILDING_SET_SIZE_WORKSHOPS 8
-#define BUILDING_SET_SIZE_SMALL_TEMPLES 5
-#define BUILDING_SET_SIZE_LARGE_TEMPLES 5
-#define BUILDING_SET_SIZE_GRAND_TEMPLES 6
-#define BUILDING_SET_SIZE_DECO_TREES 8
-#define BUILDING_SET_SIZE_DECO_PATHS 9
-#define BUILDING_SET_SIZE_DECO_STATUES 12
-
-static const building_type building_set_farms[BUILDING_SET_SIZE_FARMS] = {
+static const building_type building_set_farms[] = {
     BUILDING_WHEAT_FARM, BUILDING_VEGETABLE_FARM, BUILDING_FRUIT_FARM, BUILDING_OLIVE_FARM,
     BUILDING_VINES_FARM, BUILDING_PIG_FARM
 };
 
-static const building_type building_set_raw_materials[BUILDING_SET_SIZE_RAW_MATERIALS] = {
+#define BUILDING_SET_SIZE_FARMS (sizeof(building_set_farms) / sizeof(building_type))
+
+static const building_type building_set_raw_materials[] = {
     BUILDING_MARBLE_QUARRY, BUILDING_IRON_MINE, BUILDING_TIMBER_YARD, BUILDING_CLAY_PIT,
     BUILDING_GOLD_MINE, BUILDING_STONE_QUARRY, BUILDING_SAND_PIT
 };
 
-static const building_type building_set_workshops[BUILDING_SET_SIZE_WORKSHOPS] = {
+#define BUILDING_SET_SIZE_RAW_MATERIALS (sizeof(building_set_raw_materials) / sizeof(building_type))
+
+static const building_type building_set_workshops[] = {
     BUILDING_WINE_WORKSHOP, BUILDING_OIL_WORKSHOP, BUILDING_WEAPONS_WORKSHOP, BUILDING_FURNITURE_WORKSHOP,
     BUILDING_POTTERY_WORKSHOP, BUILDING_CONCRETE_MAKER, BUILDING_BRICKWORKS, BUILDING_CITY_MINT
 };
 
-static const building_type building_set_small_temples[BUILDING_SET_SIZE_SMALL_TEMPLES] = {
+#define BUILDING_SET_SIZE_WORKSHOPS (sizeof(building_set_workshops) / sizeof(building_type))
+
+static const building_type building_set_small_temples[] = {
     BUILDING_SMALL_TEMPLE_CERES, BUILDING_SMALL_TEMPLE_NEPTUNE, BUILDING_SMALL_TEMPLE_MERCURY, BUILDING_SMALL_TEMPLE_MARS,
     BUILDING_SMALL_TEMPLE_VENUS
 };
 
-static const building_type building_set_large_temples[BUILDING_SET_SIZE_LARGE_TEMPLES] = {
+#define BUILDING_SET_SIZE_SMALL_TEMPLES (sizeof(building_set_small_temples) / sizeof(building_type))
+
+static const building_type building_set_large_temples[] = {
     BUILDING_LARGE_TEMPLE_CERES, BUILDING_LARGE_TEMPLE_NEPTUNE, BUILDING_LARGE_TEMPLE_MERCURY, BUILDING_LARGE_TEMPLE_MARS,
     BUILDING_LARGE_TEMPLE_VENUS
 };
 
-static const building_type building_set_grand_temples[BUILDING_SET_SIZE_GRAND_TEMPLES] = {
+#define BUILDING_SET_SIZE_LARGE_TEMPLES (sizeof(building_set_large_temples) / sizeof(building_type))
+
+static const building_type building_set_grand_temples[] = {
     BUILDING_GRAND_TEMPLE_CERES, BUILDING_GRAND_TEMPLE_NEPTUNE, BUILDING_GRAND_TEMPLE_MERCURY, BUILDING_GRAND_TEMPLE_MARS,
     BUILDING_GRAND_TEMPLE_VENUS, BUILDING_PANTHEON
 };
 
-static const building_type building_set_deco_trees[BUILDING_SET_SIZE_DECO_TREES] = {
+#define BUILDING_SET_SIZE_GRAND_TEMPLES (sizeof(building_set_grand_temples) / sizeof(building_type))
+
+static const building_type building_set_deco_trees[] = {
     BUILDING_PINE_TREE, BUILDING_FIR_TREE, BUILDING_OAK_TREE, BUILDING_ELM_TREE,
     BUILDING_FIG_TREE, BUILDING_PLUM_TREE, BUILDING_PALM_TREE, BUILDING_DATE_TREE
 };
 
-static const building_type building_set_deco_paths[BUILDING_SET_SIZE_DECO_PATHS] = {
+#define BUILDING_SET_SIZE_DECO_TREES (sizeof(building_set_deco_trees) / sizeof(building_type))
+
+static const building_type building_set_deco_paths[] = {
     BUILDING_PINE_PATH, BUILDING_FIR_PATH, BUILDING_OAK_PATH, BUILDING_ELM_PATH,
     BUILDING_FIG_PATH, BUILDING_PLUM_PATH, BUILDING_PALM_PATH, BUILDING_DATE_PATH,
     BUILDING_GARDEN_PATH
 };
 
-static const building_type building_set_deco_statues[BUILDING_SET_SIZE_DECO_STATUES] = {
+#define BUILDING_SET_SIZE_DECO_PATHS (sizeof(building_set_deco_paths) / sizeof(building_type))
+
+static const building_type building_set_deco_statues[] = {
     BUILDING_GARDENS, BUILDING_GRAND_GARDEN, BUILDING_SMALL_STATUE, BUILDING_MEDIUM_STATUE,
     BUILDING_LARGE_STATUE, BUILDING_SMALL_STATUE_ALT, BUILDING_SMALL_STATUE_ALT_B, BUILDING_LEGION_STATUE,
     BUILDING_GLADIATOR_STATUE, BUILDING_SMALL_POND, BUILDING_LARGE_POND, BUILDING_DOLPHIN_FOUNTAIN
 };
+
+#define BUILDING_SET_SIZE_DECO_STATUES (sizeof(building_set_deco_statues) / sizeof(building_type))
 
 int building_count_grand_temples(void)
 {
