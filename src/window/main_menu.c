@@ -102,7 +102,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         hotkey_handle_escape();
     }
     if (h->load_file) {
-        window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_LOAD);
+        window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_LOAD, 0);
     }
 }
 
@@ -118,7 +118,7 @@ static void button_click(int type, int param2)
     if (type == 1) {
         window_new_career_show();
     } else if (type == 2) {
-        window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_LOAD);
+        window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_LOAD, 0);
     } else if (type == 3) {
         window_cck_selection_show();
     } else if (type == 4) {

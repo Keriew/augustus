@@ -125,6 +125,8 @@ static struct {
     savegame_load_status savegame_info_status;
     int redraw_full_window;
     int selected_index;
+
+    int from_editor;
 } data;
 
 static input_box main_input = {
@@ -218,8 +220,9 @@ static int select_correct_index(void)
     return 0;
 }
 
-static void init(file_type type, file_dialog_type dialog_type)
+static void init(file_type type, file_dialog_type dialog_type, int from_editor)
 {
+    data.from_editor = from_editor;
     data.type = type;
     if (type == FILE_TYPE_SCENARIO) {
         data.file_data = &scenario_data_expanded;
@@ -653,10 +656,10 @@ static void confirm_save_file(int accepted, int checked)
         window_editor_map_show();
     } else if (data.type == FILE_TYPE_SCENARIO_EVENTS) {
         scenario_events_export_to_xml(filename);
-        window_editor_scenario_events_show(1);
+        window_editor_scenario_events_show(data.from_editor);
     } else if (data.type == FILE_TYPE_CUSTOM_MESSAGES) {
         custom_messages_export_to_xml(filename);
-        window_editor_custom_messages_show();
+        window_editor_custom_messages_show(data.from_editor);
     }
     strncpy(data.file_data->last_loaded_file, data.selected_file, FILE_NAME_MAX);
 }
@@ -716,7 +719,7 @@ static void button_ok_cancel(int is_ok, int param2)
         } else if (data.type == FILE_TYPE_SCENARIO_EVENTS) {
             int result = scenario_events_xml_parse_file(filename);
             if (result) {
-                window_editor_scenario_events_show(1);
+                window_editor_scenario_events_show(data.from_editor);
             } else {
                 window_plain_message_dialog_show(TR_EDITOR_UNABLE_TO_LOAD_EVENTS_TITLE, TR_EDITOR_CHECK_LOG_MESSAGE, 1);
                 return;
@@ -724,7 +727,7 @@ static void button_ok_cancel(int is_ok, int param2)
         } else if (data.type == FILE_TYPE_CUSTOM_MESSAGES) {
             int result = custom_messages_xml_parse_file(filename);
             if (result) {
-                window_editor_custom_messages_show();
+                window_editor_custom_messages_show(data.from_editor);
             } else {
                 window_plain_message_dialog_show(TR_EDITOR_UNABLE_TO_LOAD_CUSTOM_MESSAGES_TITLE, TR_EDITOR_CHECK_LOG_MESSAGE, 1);
                 return;
@@ -806,7 +809,7 @@ static void button_select_file(int index, int param2)
     }
 }
 
-void window_file_dialog_show(file_type type, file_dialog_type dialog_type)
+void window_file_dialog_show(file_type type, file_dialog_type dialog_type, int from_editor)
 {
     window_type window = {
         WINDOW_FILE_DIALOG,
@@ -814,6 +817,6 @@ void window_file_dialog_show(file_type type, file_dialog_type dialog_type)
         draw_foreground,
         handle_input
     };
-    init(type, dialog_type);
+    init(type, dialog_type, from_editor);
     window_show(&window);
 }

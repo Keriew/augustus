@@ -15,6 +15,6 @@ typedef enum {
     FILE_TYPE_CUSTOM_MESSAGES = 4
 } file_type;
 
-void window_file_dialog_show(file_type type, file_dialog_type dialog_type);
+void window_file_dialog_show(file_type type, file_dialog_type dialog_type, int from_editor);
 
 #endif // WINDOW_FILE_DIALOG_H

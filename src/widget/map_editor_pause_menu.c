@@ -78,10 +78,10 @@ static void handle_input(const mouse *m, const hotkeys *h)
         window_go_back();
     }
     if (h->load_file) {
-        window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_LOAD);
+        window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_LOAD, 1);
     }
     if (h->save_file) {
-        window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_SAVE);
+        window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_SAVE, 1);
     }
 }
 
@@ -103,9 +103,9 @@ static void button_click(int type, int param2)
     } else if (type == 2) {
         menu_file_new_map(1);
     } else if (type == 3) {
-        window_file_dialog_show(FILE_TYPE_SCENARIO, FILE_DIALOG_LOAD);
+        window_file_dialog_show(FILE_TYPE_SCENARIO, FILE_DIALOG_LOAD, 1);
     } else if (type == 4) {
-        window_file_dialog_show(FILE_TYPE_SCENARIO, FILE_DIALOG_SAVE);
+        window_file_dialog_show(FILE_TYPE_SCENARIO, FILE_DIALOG_SAVE, 1);
     } else if (type == 5) {
         window_editor_attributes_show();
     } else if (type == 6) {

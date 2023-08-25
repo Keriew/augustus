@@ -224,9 +224,9 @@ static void button_click(int type, int param2)
     if (type == 9) {
         add_new_event();
     } else if (type == 10) {
-        window_file_dialog_show(FILE_TYPE_SCENARIO_EVENTS, FILE_DIALOG_LOAD);
+        window_file_dialog_show(FILE_TYPE_SCENARIO_EVENTS, FILE_DIALOG_LOAD, data.from_editor);
     } else if (type == 11) {
-        window_file_dialog_show(FILE_TYPE_SCENARIO_EVENTS, FILE_DIALOG_SAVE);
+        window_file_dialog_show(FILE_TYPE_SCENARIO_EVENTS, FILE_DIALOG_SAVE, data.from_editor);
     } else if (type == 12) {
         scenario_events_clear();
         data.total_events = scenario_events_get_count();

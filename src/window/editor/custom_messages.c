@@ -17,6 +17,7 @@
 #include "scenario/custom_messages_import_xml.h"
 #include "scenario/custom_messages.h"
 #include "scenario/message_media_text_blob.h"
+#include "window/city.h"
 #include "window/editor/attributes.h"
 #include "window/editor/map.h"
 #include "window/message_dialog.h"
@@ -56,13 +57,15 @@ static generic_button buttons[] = {
 
 static struct {
     int focus_button_id;
+    int from_editor;
 
     int total_messages;
     custom_message_t *list[MAX_VISIBLE_ROWS];
 } data;
 
-static void init(void)
+static void init(int from_editor)
 {
+    data.from_editor = from_editor;
     data.total_messages = custom_messages_count();
     populate_list(0);
     scrollbar_init(&scrollbar, 0, data.total_messages);
@@ -151,6 +154,15 @@ static void on_scroll(void)
     window_request_refresh();
 }
 
+static void close_window(void)
+{
+    if (data.from_editor) {
+        window_editor_attributes_show();
+    } else {
+        window_city_show();
+    }
+}
+
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
@@ -159,7 +171,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         return;
     }
     if (input_go_back_requested(m, h)) {
-        window_editor_attributes_show();
+        close_window();
     }
     populate_list(scrollbar.scroll_position);
 }
@@ -167,16 +179,16 @@ static void handle_input(const mouse *m, const hotkeys *h)
 static void button_click(int type, int param2)
 {
     if (type == 9) {
-        window_file_dialog_show(FILE_TYPE_CUSTOM_MESSAGES, FILE_DIALOG_LOAD);
+        window_file_dialog_show(FILE_TYPE_CUSTOM_MESSAGES, FILE_DIALOG_LOAD, data.from_editor);
     } else if (type == 10) {
-        window_file_dialog_show(FILE_TYPE_CUSTOM_MESSAGES, FILE_DIALOG_SAVE);
+        window_file_dialog_show(FILE_TYPE_CUSTOM_MESSAGES, FILE_DIALOG_SAVE, data.from_editor);
     } else if (type == 11) {
         custom_messages_clear_all();
-        init();
+        init(data.from_editor);
     }
 }
 
-void window_editor_custom_messages_show(void)
+void window_editor_custom_messages_show(int from_editor)
 {
     window_type window = {
         WINDOW_EDITOR_CUSTOM_MESSAGES,
@@ -184,6 +196,6 @@ void window_editor_custom_messages_show(void)
         draw_foreground,
         handle_input
     };
-    init();
+    init(from_editor);
     window_show(&window);
 }

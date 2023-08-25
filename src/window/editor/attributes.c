@@ -283,7 +283,7 @@ static void button_scenario_events(int param1, int param2)
 static void button_custom_messages(int param1, int param2)
 {
     stop(0);
-    window_editor_custom_messages_show();
+    window_editor_custom_messages_show(1);
 }
 
 static void button_change_intro(int param1, int param2)
