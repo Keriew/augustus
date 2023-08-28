@@ -457,21 +457,21 @@ static void menu_file_load_game(int param)
     clear_state();
     building_construction_clear_type();
     window_go_back();
-    window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_LOAD, 0);
+    window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_LOAD);
 }
 
 static void menu_file_save_game(int param)
 {
     clear_state();
     window_go_back();
-    window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_SAVE, 0);
+    window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_SAVE);
 }
 
 static void menu_file_delete_game(int param)
 {
     clear_state();
     window_go_back();
-    window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_DELETE, 0);
+    window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_DELETE);
 }
 
 static void menu_file_confirm_exit(int accepted, int checked)

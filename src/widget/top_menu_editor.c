@@ -197,14 +197,14 @@ static void menu_file_load_map(int param)
 {
     clear_state();
     window_editor_map_show();
-    window_file_dialog_show(FILE_TYPE_SCENARIO, FILE_DIALOG_LOAD, 1);
+    window_file_dialog_show(FILE_TYPE_SCENARIO, FILE_DIALOG_LOAD);
 }
 
 static void menu_file_save_map(int param)
 {
     clear_state();
     window_editor_map_show();
-    window_file_dialog_show(FILE_TYPE_SCENARIO, FILE_DIALOG_SAVE, 1);
+    window_file_dialog_show(FILE_TYPE_SCENARIO, FILE_DIALOG_SAVE);
 }
 
 static void menu_file_confirm_exit_to_menu(int accepted, int checked)
@@ -314,5 +314,5 @@ static void menu_empire_custom(int param)
     clear_state();
     window_go_back();
     resource_set_mapping(RESOURCE_CURRENT_VERSION);
-    window_file_dialog_show(FILE_TYPE_EMPIRE, FILE_DIALOG_LOAD, 1);
+    window_file_dialog_show(FILE_TYPE_EMPIRE, FILE_DIALOG_LOAD);
 }

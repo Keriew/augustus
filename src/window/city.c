@@ -639,10 +639,10 @@ static void handle_hotkeys(const hotkeys *h)
         map_bookmark_save(h->set_bookmark - 1);
     }
     if (h->load_file) {
-        window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_LOAD, 0);
+        window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_LOAD);
     }
     if (h->save_file) {
-        window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_SAVE, 0);
+        window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_SAVE);
     }
     if (h->rotate_building) {
         building_rotation_rotate_forward();

@@ -50,10 +50,10 @@ static void draw_foreground(void)
 static void handle_hotkeys(const hotkeys *h)
 {
     if (h->load_file) {
-        window_file_dialog_show(FILE_TYPE_SCENARIO, FILE_DIALOG_LOAD, 1);
+        window_file_dialog_show(FILE_TYPE_SCENARIO, FILE_DIALOG_LOAD);
     }
     if (h->save_file) {
-        window_file_dialog_show(FILE_TYPE_SCENARIO, FILE_DIALOG_SAVE, 1);
+        window_file_dialog_show(FILE_TYPE_SCENARIO, FILE_DIALOG_SAVE);
     }
 }
 
