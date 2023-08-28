@@ -73,7 +73,7 @@ static void init_list(void)
     scrollbar_init(&scrollbar, 0, data.total_events);
 }
 
-static void init()
+static void init(void)
 {
     scenario_events_parameter_data_sort_alphabetically();
     init_list();

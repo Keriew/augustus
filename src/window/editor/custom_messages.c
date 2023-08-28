@@ -63,7 +63,7 @@ static struct {
     custom_message_t *list[MAX_VISIBLE_ROWS];
 } data;
 
-static void init()
+static void init(void)
 {
     data.total_messages = custom_messages_count();
     populate_list(0);
