@@ -157,8 +157,14 @@ int scenario_condition_type_building_count_area_met(const scenario_condition_t *
         case BUILDING_MENU_PARKS:
             buildings_in_area = building_set_area_count_deco_statues(minx, miny, maxx, maxy);
             break;
-        case BUILDING_ANY:
-            buildings_in_area = building_count_any_in_area(minx, miny, maxx, maxy);
+        case BUILDING_FORT_LEGIONARIES:
+            buildings_in_area = building_count_fort_type_in_area(minx, miny, maxx, maxy, FIGURE_FORT_LEGIONARY);
+            break;
+        case BUILDING_FORT_JAVELIN:
+            buildings_in_area = building_count_fort_type_in_area(minx, miny, maxx, maxy, FIGURE_FORT_JAVELIN);
+            break;
+        case BUILDING_FORT_MOUNTED:
+            buildings_in_area = building_count_fort_type_in_area(minx, miny, maxx, maxy, FIGURE_FORT_MOUNTED);
             break;
         default:
             buildings_in_area = building_count_in_area(type, minx, miny, maxx, maxy);

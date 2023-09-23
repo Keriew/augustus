@@ -3,6 +3,7 @@
 
 #include "core/buffer.h"
 #include "building/type.h"
+#include "figure/type.h"
 #include "game/resource.h"
 
 /**
@@ -67,9 +68,10 @@ int building_count_in_area(building_type type, int minx, int miny, int maxx, int
  * @param miny Minimum y-axis value of the area to count in
  * @param maxx Maximum x-axis value of the area to count in
  * @param maxy Maximum y-axis value of the area to count in
+ * @param type Figure type
  * @return Total number of buildings
  */
-int building_count_any_in_area(int minx, int miny, int maxx, int maxy);
+int building_count_fort_type_in_area(int minx, int miny, int maxx, int maxy, figure_type type);
 
 /**
  * Returns the total number of buildings (where the type is from the set of buildings)

@@ -2,9 +2,12 @@
 
 #include "building/building.h"
 #include "building/monument.h"
+#include "core/array.h"
 #include "city/buildings.h"
 #include "city/health.h"
 #include "figure/figure.h"
+#include "map/building.h"
+#include "map/grid.h"
 
 static const building_type building_set_farms[] = {
     BUILDING_WHEAT_FARM, BUILDING_VEGETABLE_FARM, BUILDING_FRUIT_FARM, BUILDING_OLIVE_FARM,
@@ -146,28 +149,75 @@ int building_count_upgraded(building_type type)
 
 int building_count_in_area(building_type type, int minx, int miny, int maxx, int maxy)
 {
+    int array_size = building_count();
+    int last_entry_position = 0;
+    int* found_buildings = (int*) malloc(array_size * sizeof(int));
+
     int total = 0;
-    for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
-        if ((b->state == BUILDING_STATE_IN_USE || b->state == BUILDING_STATE_CREATED) && b == building_main(b)) {
-            if (b->x >= minx && b->x <= maxx && b->y >= miny && b->y <= maxy) {
+    for (int x = minx; x <= maxx; x++) {
+        for (int y = miny; y <= maxy; y++) {
+            int grid_offset = map_grid_offset(x, y);
+            int building_id = map_building_at(grid_offset);
+            if (building_id) {
+                building *b = building_main(building_get(building_id));
+                if (type != BUILDING_ANY && b->type != type) {
+                    continue;
+                }
+                if (b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_CREATED) {
+                    continue;
+                }
+
+                for (int i = 0; i < array_size; i ++) {
+                    if (found_buildings[i] == b->id) {
+                        continue;
+                    }
+                }
+
                 total++;
+                found_buildings[last_entry_position] = b->id;
+                last_entry_position++;
             }
         }
     }
+
+    free(found_buildings);
     return total;
 }
 
-int building_count_any_in_area(int minx, int miny, int maxx, int maxy)
+int building_count_fort_type_in_area(int minx, int miny, int maxx, int maxy, figure_type type)
 {
+    int array_size = building_count();
+    int last_entry_position = 0;
+    int* found_buildings = (int*) malloc(array_size * sizeof(int));
+
     int total = 0;
-    for (int id = 1; id < building_count(); id++) {
-        building *b = building_get(id);
-        if ((b->state == BUILDING_STATE_IN_USE || b->state == BUILDING_STATE_CREATED) && b == building_main(b)) {
-            if (b->x >= minx && b->x <= maxx && b->y >= miny && b->y <= maxy) {
+    for (int x = minx; x <= maxx; x++) {
+        for (int y = miny; y <= maxy; y++) {
+            int grid_offset = map_grid_offset(x, y);
+            int building_id = map_building_at(grid_offset);
+            if (building_id) {
+                building *b = building_main(building_get(building_id));
+                if (b->type != BUILDING_FORT || b->subtype.fort_figure_type != type) {
+                    continue;
+                }
+                if (b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_CREATED) {
+                    continue;
+                }
+
+                for (int i = 0; i < array_size; i ++) {
+                    if (found_buildings[i] == b->id) {
+                        continue;
+                    }
+                }
+
                 total++;
+                found_buildings[last_entry_position] = b->id;
+                last_entry_position++;
             }
         }
     }
+
+    free(found_buildings);
     return total;
 }
 
