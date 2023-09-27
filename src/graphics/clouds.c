@@ -9,11 +9,12 @@
 #include <math.h>
 #include <string.h>
 
-#define NUM_CLOUD_ELLIPSES 30
-#define CLOUD_ALPHA_CUTOFF 32
+#define NUM_CLOUD_ELLIPSES 180
+#define CLOUD_ALPHA_INCREASE 16
 
 #define CLOUD_WIDTH 64
 #define CLOUD_HEIGHT 64
+#define CLOUD_SIZE_RATIO 0.05
 
 #define CLOUD_SCALE 12
 
@@ -80,8 +81,8 @@ static void position_ellipse(ellipse *e, int cloud_width, int cloud_height)
     e->x = (int) (CLOUD_WIDTH / 2 + random_fractional_from_stdlib() * cloud_width * cos(angle));
     e->y = (int) (CLOUD_HEIGHT / 2 + random_fractional_from_stdlib() * cloud_height * sin(angle));
 
-    e->width = random_from_min_to_range((int) (CLOUD_WIDTH * 0.10), (int) (CLOUD_WIDTH * 0.10));
-    e->height = random_from_min_to_range((int) (CLOUD_HEIGHT * 0.10), (int) (CLOUD_HEIGHT * 0.10));
+    e->width = random_from_min_to_range((int) (CLOUD_WIDTH * CLOUD_SIZE_RATIO), (int) (CLOUD_WIDTH * CLOUD_SIZE_RATIO));
+    e->height = random_from_min_to_range((int) (CLOUD_HEIGHT * CLOUD_SIZE_RATIO), (int) (CLOUD_HEIGHT * CLOUD_SIZE_RATIO));
 
     e->half_width = e->width / 2;
     e->half_height = e->height / 2;
@@ -100,21 +101,20 @@ static int ellipse_is_inside_bounds(const ellipse *e)
         y - e->height >= 0 && y + e->height < CLOUD_HEIGHT;
 }
 
-static void set_alpha(color_t *cloud, int x, int y, int alpha)
+static void darken_pixel(color_t *cloud, int x, int y)
 {
-    alpha = 255 - alpha;
+    int pixel = y * CLOUD_WIDTH + x;
 
-    int index = y * CLOUD_WIDTH + x;
+    color_t alpha = cloud[pixel] >> COLOR_BITSHIFT_ALPHA;
+    int darken = CLOUD_ALPHA_INCREASE >> (alpha >> 4);
+    alpha = (alpha + ((darken * (255 - alpha)) >> 8));
 
-    int current_alpha = cloud[index] >> COLOR_BITSHIFT_ALPHA;
-
-    alpha = (current_alpha + ((alpha * (255 - current_alpha)) >> 8));
-
-    if (alpha > CLOUD_ALPHA_CUTOFF) {
-        alpha = CLOUD_ALPHA_CUTOFF;
+    // Clamp
+    if (alpha > 255) {
+        alpha = 255;
     }
 
-    cloud[index] = ALPHA_TRANSPARENT | (alpha << COLOR_BITSHIFT_ALPHA);
+    cloud[pixel] = ALPHA_TRANSPARENT | (alpha << COLOR_BITSHIFT_ALPHA);
 }
 
 static void generate_cloud_ellipse(color_t *cloud, int width, int height)
@@ -126,8 +126,7 @@ static void generate_cloud_ellipse(color_t *cloud, int width, int height)
 
     // Do the entire diameter
     for (int x = -e.width; x <= e.width; x++) {
-        int alpha = x * x * e.squared_height * 255 / e.width_times_height;
-        set_alpha(cloud, e.x + x, e.y, alpha);
+        darken_pixel(cloud, e.x + x, e.y);
     }
 
     int line_width = e.width;
@@ -146,18 +145,14 @@ static void generate_cloud_ellipse(color_t *cloud, int width, int height)
         line_delta = line_width - line_limit;
         line_width = line_limit;
 
-        int alpha = squared_y * e.squared_width * 255 / e.width_times_height;
-
-        set_alpha(cloud, e.x, e.y - y, alpha);
-        set_alpha(cloud, e.x, e.y + y, alpha);
+        darken_pixel(cloud, e.x, e.y - y);
+        darken_pixel(cloud, e.x, e.y + y);
 
         for (int x = 1; x <= line_width; x++) {
-            alpha = (x * x * e.squared_height + squared_y * e.squared_width) * 255 / e.width_times_height;
-
-            set_alpha(cloud, e.x + x, e.y - y, alpha);
-            set_alpha(cloud, e.x + x, e.y + y, alpha);
-            set_alpha(cloud, e.x - x, e.y - y, alpha);
-            set_alpha(cloud, e.x - x, e.y + y, alpha);
+            darken_pixel(cloud, e.x + x, e.y - y);
+            darken_pixel(cloud, e.x + x, e.y + y);
+            darken_pixel(cloud, e.x - x, e.y - y);
+            darken_pixel(cloud, e.x - x, e.y + y);
         }
     }
 }

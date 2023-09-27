@@ -74,6 +74,11 @@ static int export_attribute_route(xml_data_attribute_t *attr, int target)
 
 static int export_attribute_resource(xml_data_attribute_t *attr, int target)
 {
+    if (target < RESOURCE_MIN || target > RESOURCE_MAX) {
+        log_exporting_error("Error while exporting resource.");
+        return 0;
+    }
+
     const char *resource_name = resource_get_data(target)->xml_attr_name;
     char resource_name_to_use[50] = " ";
 
@@ -219,10 +224,10 @@ static int export_event(scenario_event_t *event)
         xml_exporter_add_attribute_int("repeat_months_min", event->repeat_months_min);
     }
     if (event->repeat_months_max > 0) {
-        xml_exporter_add_attribute_int("repeat_months_max", event->repeat_months_min);
+        xml_exporter_add_attribute_int("repeat_months_max", event->repeat_months_max);
     }
     if (event->max_number_of_repeats > 0) {
-        xml_exporter_add_attribute_int("max_number_of_repeats", event->repeat_months_min);
+        xml_exporter_add_attribute_int("max_number_of_repeats", event->max_number_of_repeats);
     }
 
     xml_exporter_new_element("conditions", 1);

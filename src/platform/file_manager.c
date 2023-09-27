@@ -36,8 +36,13 @@
 #define fs_dir_open _wopendir
 #define fs_dir_close _wclosedir
 #define fs_dir_read _wreaddir
-#define dir_entry_name(d) wchar_to_utf8(d->d_name)
-typedef const wchar_t *dir_name;
+#define fs_stat _wstat
+#define fs_chdir _wchdir
+#define fs_fopen _wfopen
+#define fs_remove _wremove
+#define dir_entry_name(d) wchar_to_utf8(d)
+typedef struct _stat stat_info;
+typedef wchar_t file_name;
 
 static const char *wchar_to_utf8(const wchar_t *str)
 {
@@ -70,9 +75,14 @@ static wchar_t *utf8_to_wchar(const char *str)
 #ifndef USE_FILE_CACHE
 #define fs_dir_entry struct dirent
 #define fs_dir_read readdir
-#define dir_entry_name(d) ((d)->d_name)
+#define dir_entry_name(d) (d)
+#define fs_stat stat
 #endif
-typedef const char *dir_name;
+#define fs_chdir chdir
+#define fs_fopen fopen
+#define fs_remove remove
+typedef struct stat stat_info;
+typedef char file_name;
 #endif
 
 #ifndef S_ISLNK
@@ -83,23 +93,19 @@ typedef const char *dir_name;
 #define S_ISSOCK(m) 0
 #endif
 
-#ifdef __vita__
-#define CURRENT_DIR VITA_PATH_PREFIX
-#define set_dir_name(n) ( strncmp(n, "app0:", 5) ? vita_prepend_path(n) : n )
-#define free_dir_name(n)
-#elif defined(_WIN32)
+#if defined(_WIN32)
 #define CURRENT_DIR L"."
-#define set_dir_name(n) utf8_to_wchar(n)
-#define free_dir_name(n) free((void *) n)
+#define set_file_name(n) utf8_to_wchar(n)
+#define free_file_name(n) free((void *) n)
 #else
 #define CURRENT_DIR "."
-#define set_dir_name(n) (n)
-#define free_dir_name(n)
+#define set_file_name(n) (n)
+#define free_file_name(n)
 #endif
 
 #ifdef _WIN32
 #include <direct.h>
-#elif !defined(__vita__)
+#else
 #include <unistd.h>
 #endif
 
@@ -139,6 +145,7 @@ static const char *ASSET_DIRS[MAX_ASSET_DIRS] = {
     "***SDL_BASE_PATH***",
 #elif !defined (_WIN32)
     "***RELATIVE_APPIMG_PATH***",
+    "***EXEC_PATH***",
     "***RELATIVE_EXEC_PATH***",
     "~/.local/share/augustus-game",
     "/usr/share/augustus-game",
@@ -211,6 +218,22 @@ static void set_assets_directory(void)
             }
             strncpy(parent, "/share/augustus-game", FILE_NAME_MAX - (parent - assets_directory) - 1);
 #endif
+        } else if (strcmp(ASSET_DIRS[i], "***EXEC_PATH***") == 0) {
+#if defined(_WIN32) || defined(__vita__) || defined(__SWITCH__) || defined(__APPLE__)
+            log_error("***EXEC_PATH*** is not available on your platform.", 0, 0);
+            continue;
+#else
+            char arg0_dir[FILE_NAME_MAX];
+            if (readlink("/proc/self/exe" /* Linux */, arg0_dir, FILE_NAME_MAX) == -1) {
+                if (readlink("/proc/curproc/file" /* FreeBSD */, arg0_dir, FILE_NAME_MAX) == -1) {
+                    if (readlink("/proc/self/path/a.out" /* Solaris */, arg0_dir, FILE_NAME_MAX) == -1) {
+                        continue;
+                    }
+                }
+            }
+            dirname(arg0_dir);
+            strncpy(assets_directory, arg0_dir, FILE_NAME_MAX);
+#endif
         } else if (strcmp(ASSET_DIRS[i], "***RELATIVE_EXEC_PATH***") == 0) {
 #if defined(_WIN32) || defined(__vita__) || defined(__SWITCH__) || defined(__APPLE__)
             log_error("***RELATIVE_EXEC_PATH*** is not available on your platform.", 0, 0);
@@ -244,15 +267,15 @@ static void set_assets_directory(void)
         }
 #endif
         log_info("Trying asset path at", assets_directory, 0);
-        dir_name result = set_dir_name(assets_directory);
+        const file_name *result = set_file_name(assets_directory);
         fs_dir_type *dir = fs_dir_open(result);
         if (dir) {
             fs_dir_close(dir);
             log_info("Asset path detected at", assets_directory, 0);
-            free_dir_name(result);
+            free_file_name(result);
             return;
         }
-        free_dir_name(result);
+        free_file_name(result);
     }
     strncpy(assets_directory, ".", FILE_NAME_MAX - 1);
 #endif
@@ -265,7 +288,7 @@ int platform_file_manager_list_directory_contents(
         return LIST_ERROR;
     }
 
-    dir_name current_dir;
+    const file_name *current_dir;
     size_t assets_directory_length = strlen(ASSETS_DIRECTORY);
 
     if (!dir || !*dir || strcmp(dir, ".") == 0) {
@@ -273,14 +296,18 @@ int platform_file_manager_list_directory_contents(
     } else if (strncmp(dir, ASSETS_DIRECTORY, assets_directory_length) == 0) {
         set_assets_directory();
         if (strlen(dir) == assets_directory_length) {
-            current_dir = set_dir_name(assets_directory);
+            current_dir = set_file_name(assets_directory);
         } else {
             char full_asset_path[FILE_NAME_MAX];
+            // Prevent double slashes as they may not work
+            if (*assets_directory && assets_directory[strlen(assets_directory) - 1] == '/' && dir[assets_directory_length] == '/') {
+                assets_directory_length++;
+            }
             snprintf(full_asset_path, FILE_NAME_MAX, "%s%s", assets_directory, dir + assets_directory_length);
-            current_dir = set_dir_name(full_asset_path);
+            current_dir = set_file_name(full_asset_path);
         }
     } else {
-        current_dir = set_dir_name(dir);
+        current_dir = set_file_name(dir);
     }
 #ifdef __ANDROID__
     int match = android_get_directory_contents(current_dir, type, extension, callback);
@@ -306,22 +333,22 @@ int platform_file_manager_list_directory_contents(
     fs_dir_type *d = fs_dir_open(current_dir);
     if (!d) {
         if (dir && *dir && strcmp(dir, ".") != 0) {
-            free_dir_name(current_dir);
+            free_file_name(current_dir);
         }
         return LIST_ERROR;
     }
     int match = LIST_NO_MATCH;
     fs_dir_entry *entry;
-    struct stat file_info;
+    stat_info file_info;
     while ((entry = fs_dir_read(d)) != 0) {
-        const char *name = dir_entry_name(entry);
-        const char *full_path = name;
+        const char *name = dir_entry_name(entry->d_name);
+        const file_name *full_path = 0;
         if (dir && *dir && strcmp(dir, ".") != 0) {
-            static char full_name[FILE_NAME_MAX];
+            char full_name[FILE_NAME_MAX];
             snprintf(full_name, FILE_NAME_MAX, "%s/%s", dir, name);
-            full_path = full_name;
+            full_path = set_file_name(full_name);
         }
-        if (stat(full_path, &file_info) != -1) {
+        if (fs_stat(full_path ? full_path : entry->d_name, &file_info) != -1) {
             int m = file_info.st_mode;
             if ((!(type & TYPE_FILE) && is_file(m)) ||
                 (!(type & TYPE_DIR) && S_ISDIR(m)) ||
@@ -339,6 +366,7 @@ int platform_file_manager_list_directory_contents(
         } else if (file_has_extension(name, extension)) {
             match = callback(name, (long) file_info.st_mtime);
         }
+        free_file_name(full_path);
         if (match == LIST_MATCH) {
             break;
         }
@@ -346,7 +374,7 @@ int platform_file_manager_list_directory_contents(
     fs_dir_close(d);
 #endif
     if (dir && *dir && strcmp(dir, ".") != 0) {
-        free_dir_name(current_dir);
+        free_file_name(current_dir);
     }
     return match;
 }
@@ -410,85 +438,21 @@ int platform_file_manager_set_base_path(const char *path)
     }
 #ifdef __ANDROID__
     return android_set_base_path(path);
-#elif defined(__vita__)
-    return 1;
-#elif defined(_WIN32)
-    wchar_t *wpath = utf8_to_wchar(path);
-    int result = _wchdir(wpath);
-    free(wpath);
-    return result == 0;
 #else
-    return chdir(path) == 0;
+    const file_name *set_path = set_file_name(path);
+    int result = fs_chdir(set_path);
+    free_file_name(set_path);
+    if (result == 0) {
+#ifdef USE_FILE_CACHE
+        platform_file_manager_cache_invalidate();
+#endif
+        return 1;
+    }
+    return 0;
 #endif
 }
 
-#ifdef __vita__
-FILE *platform_file_manager_open_file(const char *filename, const char *mode)
-{
-    if (strchr(mode, 'w')) {
-        platform_file_manager_cache_update_file_info(filename);
-    }
-    filename = set_dir_name(filename);
-    return fopen(filename, mode);
-}
-
-FILE *platform_file_manager_open_asset(const char *asset, const char *mode)
-{
-    set_assets_directory();
-    const char *cased_asset_path = dir_get_asset(assets_directory, asset);
-    return fopen(cased_asset_path, mode);
-}
-
-int platform_file_manager_remove_file(const char *filename)
-{
-    platform_file_manager_cache_delete_file_info(filename);
-    return remove(vita_prepend_path(filename)) == 0;
-}
-
-#elif defined(_WIN32)
-
-FILE *platform_file_manager_open_file(const char *filename, const char *mode)
-{
-    wchar_t *wfile = utf8_to_wchar(filename);
-    wchar_t *wmode = utf8_to_wchar(mode);
-
-    FILE *fp = _wfopen(wfile, wmode);
-
-    free(wfile);
-    free(wmode);
-
-    return fp;
-}
-
-FILE *platform_file_manager_open_asset(const char *asset, const char *mode)
-{
-    set_assets_directory();
-    const char *cased_asset_path = dir_get_asset(assets_directory, asset);
-
-    if (!cased_asset_path) {
-        return 0;
-    }
-
-    wchar_t *wfile = utf8_to_wchar(cased_asset_path);
-    wchar_t *wmode = utf8_to_wchar(mode);
-
-    FILE *fp = _wfopen(wfile, wmode);
-
-    free(wfile);
-    free(wmode);
-
-    return fp;
-}
-
-int platform_file_manager_remove_file(const char *filename)
-{
-    wchar_t *wfile = utf8_to_wchar(filename);
-    int result = _wremove(wfile);
-    free(wfile);
-    return result == 0;
-}
-
-#elif defined(__ANDROID__)
+#if defined(__ANDROID__)
 
 FILE *platform_file_manager_open_file(const char *filename, const char *mode)
 {
@@ -509,32 +473,6 @@ int platform_file_manager_remove_file(const char *filename)
     return android_remove_file(filename);
 }
 
-#elif defined(__EMSCRIPTEN__)
-
-FILE *platform_file_manager_open_file(const char *filename, const char *mode)
-{
-    writing_to_file = strchr(mode, 'w') != 0;
-    return fopen(filename, mode);
-}
-
-int platform_file_manager_remove_file(const char *filename)
-{
-    if (remove(filename) == 0) {
-        EM_ASM(
-            Module.syncFS();
-        );
-        return 1;
-    }
-    return 0;
-}
-
-FILE *platform_file_manager_open_asset(const char *asset, const char *mode)
-{
-    set_assets_directory();
-    const char *cased_asset_path = dir_get_asset(assets_directory, asset);
-    return fopen(cased_asset_path, mode);
-}
-
 #else
 
 FILE *platform_file_manager_open_file(const char *filename, const char *mode)
@@ -544,7 +482,20 @@ FILE *platform_file_manager_open_file(const char *filename, const char *mode)
         platform_file_manager_cache_update_file_info(filename);
     }
 #endif
-    return fopen(filename, mode);
+
+#if defined(__EMSCRIPTEN__)
+    writing_to_file = strchr(mode, 'w') != 0;
+#endif
+
+    const file_name *wfile = set_file_name(filename);
+    const file_name *wmode = set_file_name(mode);
+
+    FILE *fp = fs_fopen(wfile, wmode);
+
+    free_file_name(wfile);
+    free_file_name(wmode);
+
+    return fp;
 }
 
 int platform_file_manager_remove_file(const char *filename)
@@ -552,14 +503,24 @@ int platform_file_manager_remove_file(const char *filename)
 #ifdef USE_FILE_CACHE
     platform_file_manager_cache_delete_file_info(filename);
 #endif
-    return remove(filename) == 0;
+    file_name *wfile = set_file_name(filename);
+    int result = fs_remove(wfile);
+    free_file_name(wfile);
+#if defined(__EMSCRIPTEN__)
+    if (result == 0) {
+        EM_ASM(
+            Module.syncFS();
+        );
+    }
+#endif
+    return result == 0;
 }
 
 FILE *platform_file_manager_open_asset(const char *asset, const char *mode)
 {
     set_assets_directory();
     const char *cased_asset_path = dir_get_asset(assets_directory, asset);
-    return fopen(cased_asset_path, mode);
+    return platform_file_manager_open_file(cased_asset_path, mode);
 }
 #endif
 

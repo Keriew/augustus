@@ -445,6 +445,7 @@ static int xml_import_special_parse_resource(xml_data_attribute_t *attr, int *ta
         }
     }
 
+    xml_import_log_error("Could not find a matching resource.");
     return 0;
 }
 
@@ -597,6 +598,7 @@ static char *file_to_buffer(const char *filename, int *output_length)
     char *buf = malloc(size);
     if (!buf) {
         log_error("Error opening empire file", filename, 0);
+        file_close(file);
         return 0;
     }
     memset(buf, 0, size);
