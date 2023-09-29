@@ -149,9 +149,9 @@ int building_count_upgraded(building_type type)
 
 int building_count_in_area(building_type type, int minx, int miny, int maxx, int maxy)
 {
-    int array_size = building_count();
-    int last_entry_position = 0;
-    int* found_buildings = (int*) malloc(array_size * sizeof(int));
+    int grid_area = abs((maxx - minx) * (maxy - miny));
+    int array_size = grid_area < building_count() ? grid_area : building_count();
+    int *found_buildings = (int *) malloc(array_size * sizeof(int));
 
     int total = 0;
     for (int x = minx; x <= maxx; x++) {
@@ -167,15 +167,14 @@ int building_count_in_area(building_type type, int minx, int miny, int maxx, int
                     continue;
                 }
 
-                for (int i = 0; i < array_size; i ++) {
+                for (int i = 0; i < total; i++) {
                     if (found_buildings[i] == b->id) {
                         continue;
                     }
                 }
 
+                found_buildings[total] = b->id;
                 total++;
-                found_buildings[last_entry_position] = b->id;
-                last_entry_position++;
             }
         }
     }
@@ -186,9 +185,9 @@ int building_count_in_area(building_type type, int minx, int miny, int maxx, int
 
 int building_count_fort_type_in_area(int minx, int miny, int maxx, int maxy, figure_type type)
 {
-    int array_size = building_count();
-    int last_entry_position = 0;
-    int* found_buildings = (int*) malloc(array_size * sizeof(int));
+    int grid_area = abs((maxx - minx) * (maxy - miny));
+    int array_size = grid_area < building_count() ? grid_area : building_count();
+    int *found_buildings = (int *) malloc(array_size * sizeof(int));
 
     int total = 0;
     for (int x = minx; x <= maxx; x++) {
@@ -204,15 +203,14 @@ int building_count_fort_type_in_area(int minx, int miny, int maxx, int maxy, fig
                     continue;
                 }
 
-                for (int i = 0; i < array_size; i ++) {
+                for (int i = 0; i < total; i++) {
                     if (found_buildings[i] == b->id) {
                         continue;
                     }
                 }
 
+                found_buildings[total] = b->id;
                 total++;
-                found_buildings[last_entry_position] = b->id;
-                last_entry_position++;
             }
         }
     }
