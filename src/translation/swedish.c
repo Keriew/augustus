@@ -708,6 +708,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_PALISADE, "Palissad" },
     {TR_BUILDING_PALISADE_DESC, "Detta gedigna pålverk av trä kommer skydda oss från angripare och fientliga djur."},	
     {TR_CONFIG_MAX_GRAND_TEMPLES, "Maximalt antal storslagna tempel per stad:" },
+    {TR_CONFIG_MAX_RESERVOIR_RANGE, "Maximal räckvidd för en reservoar i plattor:"},
     {TR_CONFIG_USE_COLOR_CURSORS, "Använd färgade muspekare" },
     {TR_OVERLAY_MOTHBALL, "Ur bruk" },
     {TR_OVERLAY_ENEMY, "Fiender" },

@@ -72,6 +72,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_GRANDFESTIVAL, "举办豪华节庆获取神灵更多祝福"},
     {TR_CONFIG_DIFFICULTY, "游戏难度："},
     {TR_CONFIG_MAX_GRAND_TEMPLES, "每座城市宏伟神庙数量上限："},
+    {TR_CONFIG_MAX_RESERVOIR_RANGE, "水库的最大范围（以格为单位）:"},
     {TR_CONFIG_INFINITE, "无限"},
     {TR_CONFIG_GODS_EFFECTS, "开启神灵诅咒/祝福效果"},
     {TR_CONFIG_JEALOUS_GODS, "关闭神灵嫉妒效果"},

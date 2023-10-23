@@ -514,6 +514,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_CITY_SOUNDS, "Włącz dzwięki miasta"},
     {TR_CONFIG_DIFFICULTY, "Poziom trudności:"},
     {TR_CONFIG_MAX_GRAND_TEMPLES, "Maksymalna liczba wielkich świątyń:" },
+    {TR_CONFIG_MAX_RESERVOIR_RANGE, "Maksymalny zasięg zbiornika w płytkach:"},
     {TR_CONFIG_INFINITE, "Bez limitu" },
     {TR_CONFIG_USE_COLOR_CURSORS, "Użyj kolorowych kursorów" },
     {TR_CONFIG_VIDEO_SOUND, "Włącz dźwięk filmów" },

@@ -17,6 +17,8 @@
 #include "map/terrain.h"
 #include "map/tiles.h"
 #include "scenario/property.h"
+#include "core/config.h"
+#include "core/log.h"
 
 #include <string.h>
 
@@ -326,7 +328,7 @@ int map_water_supply_fountain_radius(void)
 
 int map_water_supply_reservoir_radius(void)
 {
-    int radius = RESERVOIR_RADIUS;
+    int radius = config_get(CONFIG_GP_CH_MAX_RESERVOIR_RANGE); // RESERVOIR_RADIUS;
     if (building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE)) {
         radius += 2;
     }

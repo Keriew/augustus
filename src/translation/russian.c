@@ -73,6 +73,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_GRANDFESTIVAL, "Великий фестиваль дает дополнительное благословение от божества"},
     {TR_CONFIG_DIFFICULTY, "Сложность:"},
     {TR_CONFIG_MAX_GRAND_TEMPLES, "Максимальное количество великих храмов в городе:"},
+    {TR_CONFIG_MAX_RESERVOIR_RANGE, "Максимальная дальность резервуара в тайлах:"},
     {TR_CONFIG_INFINITE, "Бесконечно"},
     {TR_CONFIG_GODS_EFFECTS, "Вкл. эффекты богов"},
     {TR_CONFIG_JEALOUS_GODS, "Отключить ревность богов"},

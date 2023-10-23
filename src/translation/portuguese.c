@@ -712,6 +712,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_WATCHTOWER_DESC_NO_SOLDIERS, "Esta torre precisa de um sentinela do quartel para que possa ser útil na defesa da cidade." },
     {TR_CONFIG_INFINITE, "Ilimitado" },
     {TR_CONFIG_MAX_GRAND_TEMPLES, "Número máximo de Santuários por cidade:" },
+    {TR_CONFIG_MAX_RESERVOIR_RANGE, "Alcance máximo de um reservatório em ladrilhos:"},
     {TR_HOTKEY_ROTATE_BUILDING_BACK, "Rotação anterior da construção" },
     {TR_TOOLTIP_BUTTON_ACCEPT_WORKERS, "Suspender recursos para fábricas e celeiros" },
     {TR_TOOLTIP_BUTTON_STOCKPILING_ON, "Permitir estocagem em um armazém" },
