@@ -108,7 +108,8 @@ static int show_building_mothball(const building *b)
 
 static int show_building_warehouses(const building *b)
 {
-    return b->type == BUILDING_WAREHOUSE || b->type == BUILDING_WAREHOUSE_SPACE;
+    return b->type == BUILDING_WAREHOUSE || b->type == BUILDING_WAREHOUSE_SPACE ||
+           b->type == BUILDING_GRANARY || b->type == BUILDING_DEPOT;
 }
 
 static int show_building_storages(const building *b)
@@ -156,11 +157,7 @@ static int show_figure_tax_income(const figure *f)
 
 static int show_figure_warehouses(const figure *f)
 {
-    if (f->type != FIGURE_WAREHOUSEMAN) {
-        return 0;
-    }
-    building *b = building_get(f->building_id);
-    return b->type == BUILDING_WAREHOUSE;
+    return f->type == FIGURE_WAREHOUSEMAN || f->type == FIGURE_DEPOT_CART_PUSHER;
 }
 
 static int show_figure_none(const figure *f)

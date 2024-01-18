@@ -521,6 +521,7 @@ static void show_overlay_from_grid_offset(int grid_offset)
             break;
         case BUILDING_WAREHOUSE:
         case BUILDING_WAREHOUSE_SPACE:
+        case BUILDING_DEPOT:
             overlay = OVERLAY_WAREHOUSE;
             break;
         case BUILDING_DOCK:
