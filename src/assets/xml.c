@@ -68,10 +68,6 @@ static int xml_start_assetlist_element(void)
 
 static int xml_start_image_element(void)
 {
-    if (xml_parser_get_total_attributes() > 12) {
-        return 0;
-    }
-
     asset_image *img = asset_image_create();
     if (!img) {
         return 0;
@@ -108,11 +104,6 @@ static int xml_start_image_element(void)
 
 static int xml_start_layer_element(void)
 {
-    int total_attributes = xml_parser_get_total_attributes();
-    if (total_attributes < 2 || total_attributes > 24) {
-        return 0;
-    }
-
     asset_image *img = data.current_image;
     static const char *part_values[2] = { "footprint", "top" };
     static const char *mask_values[2] = { "grayscale", "alpha" };
@@ -164,7 +155,7 @@ static int xml_start_animation_element(void)
 
 static int xml_start_frame_element(void)
 {
-    if (!data.in_animation || xml_parser_get_total_attributes() < 2) {
+    if (!data.in_animation) {
         return 1;
     }
     asset_image *img = asset_image_create();
