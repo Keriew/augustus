@@ -62,6 +62,11 @@ static int draw_background(void)
     int sickness_level = city_health_get_global_sickness_level();
 
     lang_text_draw(56, 0, 60, 12, FONT_LARGE_BLACK);
+    
+    int x_offset = lang_text_get_width(56, 0, FONT_LARGE_BLACK);    
+    x_offset += lang_text_draw(CUSTOM_TRANSLATION, TR_ADVISOR_HEALTH_RATING, 60 + x_offset, 25, FONT_NORMAL_BLACK);
+    text_draw_number(city_health(), 0, "", 60 + x_offset, 25, FONT_NORMAL_BLACK, 0);
+    
     if (city_population() >= 200) {
         lang_text_draw_multiline(56, city_health() / 10 + 16, 60, 46, 512, FONT_NORMAL_BLACK);
     } else {
@@ -89,6 +94,8 @@ static int draw_background(void)
 
     int text_height = lang_text_draw_multiline(56, 7 + get_health_advice(), 60, 210, 512, FONT_NORMAL_BLACK);
 
+    lang_text_draw(CUSTOM_TRANSLATION, TR_ADVISOR_HEALTH_SURVEILLANCE, 60, 230 + text_height, FONT_NORMAL_BLACK);
+    text_height += 17;
     text_draw_multiline(translation_for(TR_ADVISOR_SICKNESS_LEVEL_LOW + sickness_level),
         60, 230 + text_height, 512, FONT_NORMAL_BLACK, 0);
 
