@@ -127,67 +127,34 @@ static int get_tooltip_health(tooltip_context *c, const building *b)
             if (b->house_population < 1 && house_health < 1) {
                 c->translation_key = TR_TOOLTIP_OVERLAY_HEALTH_NONE;
             } else if (b->house_population >= 1 && house_health < 10) {
-                c->has_numeric_prefix = 1;
-                c->numeric_prefix = house_health;
                 c->translation_key = TR_TOOLTIP_OVERLAY_HEALTH_0;
-                return 1;
             } else if (house_health < 20) {
-                c->has_numeric_prefix = 1;
-                c->numeric_prefix = house_health;
                 c->translation_key = TR_TOOLTIP_OVERLAY_HEALTH_1;
-                return 1;
             } else if (house_health < 30) {
-                c->has_numeric_prefix = 1;
-                c->numeric_prefix = house_health;
                 c->translation_key = TR_TOOLTIP_OVERLAY_HEALTH_2;
-                return 1;
             } else {
-                c->has_numeric_prefix = 1;
-                c->numeric_prefix = house_health;
                 c->translation_key = TR_TOOLTIP_OVERLAY_HEALTH_3;
-                return 1;
             }
         } else if (house_health < 60) {
             if (house_health < 50) {
-                c->has_numeric_prefix = 1;
-                c->numeric_prefix = house_health;
                 c->translation_key = TR_TOOLTIP_OVERLAY_HEALTH_4;
-                return 1;
             } else {
-                c->has_numeric_prefix = 1;
-                c->numeric_prefix = house_health;
                 c->translation_key = TR_TOOLTIP_OVERLAY_HEALTH_5;
-                return 1;
             }
         } else if (house_health < 80) {
             if (house_health < 70) {
-                c->has_numeric_prefix = 1;
-                c->numeric_prefix = house_health;
                 c->translation_key = TR_TOOLTIP_OVERLAY_HEALTH_6;
-                return 1;
             } else {
-                c->has_numeric_prefix = 1;
-                c->numeric_prefix = house_health;
                 c->translation_key = TR_TOOLTIP_OVERLAY_HEALTH_7;
-                return 1;
             }
         } else if (house_health < 100) {
             if (house_health < 90) {
-                c->has_numeric_prefix = 1;
-                c->numeric_prefix = house_health;
                 c->translation_key = TR_TOOLTIP_OVERLAY_HEALTH_8;
-                return 1;
             } else {
-                c->has_numeric_prefix = 1;
-                c->numeric_prefix = house_health;
                 c->translation_key = TR_TOOLTIP_OVERLAY_HEALTH_9;
-                return 1;
             }
-        } else {     
-            c->has_numeric_prefix = 1;
-            c->numeric_prefix = house_health;
+        } else {
             c->translation_key = TR_TOOLTIP_OVERLAY_HEALTH_10;
-            return 1;
         }
     }
     return 0;
