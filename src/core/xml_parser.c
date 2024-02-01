@@ -28,11 +28,12 @@ static struct {
         sxmltok_t *tokens;
         int num_tokens;
         int line_number;
+        unsigned int current_position;
     } parser;
     struct {
         char *data;
         int size;
-        int position;
+        int cursor;
     } buffer;
     const xml_parser_element *current_element;
     struct {
@@ -305,6 +306,21 @@ int xml_parser_init(const xml_parser_element *elements, int total_elements)
     return 1;
 }
 
+static void increase_line_count(unsigned int position)
+{
+    const char *cursor = data.buffer.data + data.parser.current_position;
+    const char *end = data.buffer.data + position;
+
+    for (int i = 0; cursor < end; i++, cursor++) {
+        cursor = memchr(cursor, '\n', end - cursor);
+        if (cursor == 0) {
+            data.parser.line_number += i;
+            break;
+        }
+    }
+    data.parser.current_position = position;
+}
+
 static void process_xml_tokens(const sxmltok_t *tokens, int num_tokens)
 {
     for (int i = 0; i < num_tokens; i++) {
@@ -314,6 +330,7 @@ static void process_xml_tokens(const sxmltok_t *tokens, int num_tokens)
             data.error = 1;
             return;
         }
+        increase_line_count(token->startpos);
         switch (token->type) {
             case SXML_STARTTAG:
                 start_element(token);
@@ -333,21 +350,7 @@ static void process_xml_tokens(const sxmltok_t *tokens, int num_tokens)
         }
         i += token->size;
     }
-}
-
-static int count_lines(unsigned int start_pos, unsigned int end_pos)
-{
-    const char *cursor = data.buffer.data + start_pos;
-    const char *end = data.buffer.data + end_pos;
-
-    for (int i = 0; cursor < end; i++, cursor++) {
-        cursor = memchr(cursor, '\n', end - cursor);
-        if (cursor == 0) {
-            return i;
-        }
-    }
-
-    return 0;
+    increase_line_count(data.parser.context.bufferpos);
 }
 
 int fit_buffer(int size)
@@ -374,25 +377,24 @@ int xml_parser_parse(const char *buffer, unsigned int buffer_size, int is_final)
     }
     sxmlerr_t result;
     data.parser.context.bufferpos = 0;
-    if (!fit_buffer(data.buffer.position + buffer_size)) {
+    if (!fit_buffer(data.buffer.cursor + buffer_size)) {
         log_error("Out of memory", 0, 0);
         data.error = 1;
         return 0;
     }
-    memcpy(data.buffer.data + data.buffer.position, buffer, buffer_size);
-    unsigned int former_position = 0;
+    memcpy(data.buffer.data + data.buffer.cursor, buffer, buffer_size);
+    data.parser.current_position = 0;
     do {
         data.parser.context.ntokens = 0;
-        result = sxml_parse(&data.parser.context, data.buffer.data, buffer_size + data.buffer.position,
+        result = sxml_parse(&data.parser.context, data.buffer.data, buffer_size + data.buffer.cursor,
             data.parser.tokens, data.parser.num_tokens);
-        data.parser.line_number += count_lines(former_position, data.parser.context.bufferpos);
-        if (former_position == data.parser.context.bufferpos && !expand_xml_token_array()) {
+        if (data.parser.current_position == data.parser.context.bufferpos && !expand_xml_token_array()) {
             log_error("Unable to parse more data - token buffer full", 0, 0);
             data.error = 1;
             return 0;
         }
-        former_position = data.parser.context.bufferpos;
         if (result == SXML_ERROR_XMLINVALID) {
+            increase_line_count(data.parser.context.bufferpos);
             log_error("XML parse error on line:", 0, xml_parser_get_current_line_number());
             data.error = 1;
             return 0;
@@ -410,16 +412,16 @@ int xml_parser_parse(const char *buffer, unsigned int buffer_size, int is_final)
             data.error = 1;
             return 0;
         } else {
-            data.buffer.position += buffer_size - data.parser.context.bufferpos;
-            if (!fit_buffer(data.buffer.position + buffer_size)) {
+            data.buffer.cursor += buffer_size - data.parser.context.bufferpos;
+            if (!fit_buffer(data.buffer.cursor + buffer_size)) {
                 log_error("Out of memory", 0, 0);
                 data.error = 1;
                 return 0;
             }
-            memmove(data.buffer.data, data.buffer.data + data.parser.context.bufferpos, data.buffer.position);
+            memmove(data.buffer.data, data.buffer.data + data.parser.context.bufferpos, data.buffer.cursor);
         }
     } else {
-        data.buffer.position = 0;
+        data.buffer.cursor = 0;
     }
 
     return 1;
@@ -525,12 +527,13 @@ void xml_parser_reset(void)
     sxml_init(&data.parser.context);
     data.depth = 0;
     data.parser.line_number = 0;
+    data.parser.current_position = 0;
     data.error_depth = 0;
     data.current_element = 0;
     memset(data.parents, 0, sizeof(xml_parser_element *) * data.total_elements);
     free(data.buffer.data);
     data.buffer.size = 0;
-    data.buffer.position = 0;
+    data.buffer.cursor = 0;
     data.buffer.data = 0;
     data.attributes.first = 0;
     data.attributes.size = 0;
@@ -549,11 +552,12 @@ void xml_parser_free(void)
     data.total_elements = 0;
     data.depth = 0;
     data.parser.line_number = 0;
+    data.parser.current_position = 0;
     data.error_depth = 0;
     data.current_element = 0;
     free(data.buffer.data);
     data.buffer.size = 0;
-    data.buffer.position = 0;
+    data.buffer.cursor = 0;
     data.buffer.data = 0;
     free(data.parser.tokens);
     data.parser.num_tokens = 0;
