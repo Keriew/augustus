@@ -155,7 +155,7 @@ static struct {
 };
 
 static generic_button primary_product_producer_button_stockpiling[] = {
-    {350, 3, 24, 24, button_stockpiling, button_none, 0, 0}
+    {360, 3, 24, 24, button_stockpiling, button_none, 0, 0}
 };
 
 static struct {
@@ -609,9 +609,10 @@ void window_building_draw_primary_product_stockpiling(building_info_context *c)
     int x = c->x_offset + primary_product_producer_button_stockpiling->x;
     int y = c->y_offset + primary_product_producer_button_stockpiling->y + BLOCK_SIZE * c->height_blocks - 40;
     button_border_draw(x, y, 20, 20, data.primary_product_stockpiling_id);
-    image_draw(assets_get_image_id("UI", "Warehousing"), x + 23, y + 4, COLOR_MASK_NONE, SCALE_NONE);
     if (building_stockpiling_enabled(building_get(c->building_id))) {
-        image_draw(assets_get_image_id("UI", "Allowed_Walker_Check"), x + 4, y + 4, COLOR_MASK_NONE, SCALE_NONE);
+        image_draw(assets_get_image_id("UI", "Warehousing"), x + 4, y + 4, COLOR_MASK_NONE, SCALE_NONE);
+    } else {
+        image_draw(assets_get_image_id("UI", "Warehousing_off"), x + 4, y + 4, COLOR_MASK_NONE, SCALE_NONE);
     }
 }
 
