@@ -11,7 +11,6 @@ option(DRAW_ROUTING "Draw routing debug information." OFF)
 option(DRAW_HIGHWAY_TERRAIN "Draw highway debug information." OFF)
 option(DRAW_ROAD_NETWORK_IDS "Draw road network IDs for debugging." OFF)
 option(DRAW_TILE_COORDS "Draw tile coordinates." OFF)
-option(SYSTEM_LIBS "Use system libraries when available." ON)
 
 if(${TARGET_PLATFORM} STREQUAL "vita" AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if(DEFINED ENV{VITASDK})
@@ -170,43 +169,20 @@ if (EXISTS ${PROJECT_SOURCE_DIR}/res/packed_assets)
     set(ASSETS_DIR ${PROJECT_SOURCE_DIR}/res/packed_assets)
 endif()
 
-set(EXPAT_FILES
-    ext/expat/xmlparse.c
-    ext/expat/xmlrole.c
-    ext/expat/xmltok.c
-)
-
 set(TINYFD_FILES
-    ext/tinyfiledialogs/tinyfiledialogs.c
+    ${PROJECT_SOURCE_DIR}/ext/tinyfiledialogs/tinyfiledialogs.c
 )
 
-set(PNG_FILES
-    ext/png/png.c
-    ext/png/pngerror.c
-    ext/png/pngget.c
-    ext/png/pngmem.c
-    ext/png/pngpread.c
-    ext/png/pngread.c
-    ext/png/pngrio.c
-    ext/png/pngrtran.c
-    ext/png/pngrutil.c
-    ext/png/pngset.c
-    ext/png/pngtrans.c
-    ext/png/pngwio.c
-    ext/png/pngwrite.c
-    ext/png/pngwtran.c
-    ext/png/pngwutil.c
+set(SPNG_FILES
+    ${PROJECT_SOURCE_DIR}/ext/spng/spng.c
 )
 
-set(ZLIB_FILES
-    ext/zlib/adler32.c
-    ext/zlib/crc32.c
-    ext/zlib/deflate.c
-    ext/zlib/inffast.c
-    ext/zlib/inflate.c
-    ext/zlib/inftrees.c
-    ext/zlib/trees.c
-    ext/zlib/zutil.c
+set(SXML_FILES
+    ${PROJECT_SOURCE_DIR}/ext/sxml/sxml.c
+)
+
+set(ZIP_FILES
+    ${PROJECT_SOURCE_DIR}/ext/zip/zip.c
 )
 
 set(PLATFORM_FILES
@@ -745,6 +721,9 @@ set(SOURCE_FILES
     ${EDITOR_FILES}
     ${TRANSLATION_FILES}
     ${TINYFD_FILES}
+    ${SPNG_FILES}
+    ${SXML_FILES}
+    ${ZIP_FILES}
     ${PROJECT_SOURCE_DIR}/res/augustus.rc
     ${MACOSX_FILES}
 )
@@ -799,8 +778,6 @@ if(MSVC)
     add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
     string(REGEX REPLACE "/W3" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
     set_source_files_properties(${EXPAT_FILES} PROPERTIES COMPILE_FLAGS "/W3")
-    set_source_files_properties(${PNG_FILES} PROPERTIES COMPILE_FLAGS "/W3")
-    set_source_files_properties(${ZLIB_FILES} PROPERTIES COMPILE_FLAGS "/W3")
     set_source_files_properties(${SOURCE_FILES} PROPERTIES COMPILE_FLAGS "/W4")
     set_source_files_properties(${PROJECT_SOURCE_DIR}/res/augustus.rc PROPERTIES COMPILE_FLAGS "")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /utf-8 /wd4100 /wd4244")
@@ -889,42 +866,6 @@ if(SDL2_MIXER_INCLUDE_DIR)
     include_directories(SYSTEM ${SDL2_MIXER_INCLUDE_DIR})
 endif()
 
-if(SYSTEM_LIBS)
-    find_package(ZLIB)
-    find_package(PNG)
-    find_package(EXPAT)
-endif()
-
-if(ZLIB_FOUND)
-    include_directories(${ZLIB_INCLUDE_DIRS})
-    target_link_libraries(${SHORT_NAME} ${ZLIB_LIBRARIES})
-else()
-    include_directories("ext/zlib")
-    target_sources(${SHORT_NAME} PRIVATE "${ZLIB_FILES}")
-endif()
-
-if(PNG_FOUND)
-    include_directories(SYSTEM ${PNG_INCLUDE_DIRS})
-    target_link_libraries(${SHORT_NAME} ${PNG_LIBRARIES})
-else()
-    if(SYSTEM_LIBS)
-        message(STATUS "PNG was not found but that's ok: falling back to internal version")
-    endif()
-    include_directories("ext/png")
-    target_sources(${SHORT_NAME} PRIVATE "${PNG_FILES}")
-endif()
-
-if(EXPAT_FOUND)
-    include_directories(${EXPAT_INCLUDE_DIRS})
-    target_link_libraries(${SHORT_NAME} ${EXPAT_LIBRARIES})
-else()
-    include_directories("ext/expat")
-    target_sources(${SHORT_NAME} PRIVATE "${EXPAT_FILES}")
-    if(NOT WIN32)
-        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DXML_DEV_URANDOM")
-    endif()
-endif()
-
 if(${TARGET_PLATFORM} STREQUAL "vita")
     include_directories(SYSTEM
         $ENV{VITASDK}/arm-vita-eabi/include
@@ -971,7 +912,7 @@ if(${TARGET_PLATFORM} STREQUAL "vita")
         ScePgf_stub
         SceAppMgr_stub
     )
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D__vita__ -DPNG_ARM_NEON_OPT=0")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D__vita__")
     # this setting enables larger heap memory sizes on Vita, up to ~330 MB
     # useful for pre-loading videos into memory
     set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -d ATTRIBUTE2=12")
@@ -1007,7 +948,7 @@ else()
         target_link_libraries(${SHORT_NAME} m)
     endif()
     if(${TARGET_PLATFORM} STREQUAL "android")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DPNG_ARM_NEON_OPT=0 -D_BSD_SOURCE")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_BSD_SOURCE")
         find_library(log-lib log)
         find_library(android-lib android)
         target_link_libraries(${SHORT_NAME} ${log-lib} ${android-lib})

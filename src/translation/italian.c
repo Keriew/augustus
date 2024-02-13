@@ -651,9 +651,9 @@ static translation_string all_strings[] = {
     {TR_BUILDING_MARS_TEMPLE_MODULE_DESC_NO_MESS, "Questo tempio raccoglierà il cibo per il vostro magazzino di rifornimento, una volta costruito."},
     {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_MAINTENANCE, "Permetti/vieta l'accesso a prefetti e ingegneri"},
     {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_PRIEST, "Permetti/vieta l'accesso ai sacerdoti"},
-    {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_MARKET, "Permetti/vieta l'accesso alle acquirenti del mercato"},
+    {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_MARKET, "Permetti/vieta l'accesso alle mercanti"},
     {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_ENTERTAINER, "Permetti/vieta l'accesso agli intrattenitori"},
-    {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_EDUCATION, "Permetti/vieta l'accesso al personale scolastico"}, // XXX need better translation!
+    {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_EDUCATION, "Permetti/vieta l'accesso agli insegnanti"}, // XXX need better translation!
     {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_MEDICINE, "Permetti/vieta l'accesso al personale sanitario"},
     {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_TAX_COLLECTOR, "Permetti/vieta l'accesso agli esattori delle tasse"},
     {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_LABOR_SEEKER, "Permetti/vieta l'accesso a chi cerca lavoratori"},
@@ -767,7 +767,7 @@ static translation_string all_strings[] = {
     {TR_OVERLAY_MOTHBALL, "Attività sospesa"},
     {TR_OVERLAY_ENEMY, "Nemici"},
     {TR_BUILDING_TAVERN_DESC_5, "I cittadini amano visitare questo stabilimento nel loro tempo libero, per socializzare fra cibi delicati e vini ricercati."},
-    {TR_OVERLAY_LOGISTICS, "Magazzini"},
+//    {TR_OVERLAY_LOGISTICS, "Magazzini"},
     {TR_WINDOW_RACE_BLUE_HORSE_DESCRIPTION, "I Blu - i preferiti di Nettuno. Sono i più promettenti fra i giovani aurighi di Roma, desiderosi di provare il loro valore."},
     {TR_WINDOW_RACE_RED_HORSE_DESCRIPTION, "I Rossi - conosciuti come la squadra del più vincente auriga della storia di Roma - l'ex rematore e salvatore di un console Romano."},
     {TR_WINDOW_RACE_WHITE_HORSE_DESCRIPTION, "I Bianchi - squadra fondata da ex gladiatori. Hanno il combattimento nel sangue e anche da liberti vivono per la lotta."},

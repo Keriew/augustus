@@ -20,8 +20,8 @@ jobs:
           - name: Linux x64
             os: ubuntu-22.04
             cache-key: linux-x64
-            SDL_VERSION: 2.28.5
-            SDL_MIXER_VERSION: 2.6.3
+            SDL_VERSION: 2.30.0
+            SDL_MIXER_VERSION: 2.8.0
             BUILD_TARGET: linux
             DEPLOY: linux
           - name: Linux x64 (old SDL versions)
@@ -35,8 +35,8 @@ jobs:
           - name: macOS
             os: macos-latest
             cache-key: macos
-            SDL_VERSION: 2.28.5
-            SDL_MIXER_VERSION: 2.6.3
+            SDL_VERSION: 2.30.0
+            SDL_MIXER_VERSION: 2.8.0
             BUILD_TARGET: mac
             DEPLOY: mac
           - name: PS Vita
@@ -50,8 +50,8 @@ jobs:
           - name: Android
             os: ubuntu-20.04
             cache-key: android
-            SDL_VERSION: 2.28.5
-            SDL_MIXER_VERSION: 2.6.3
+            SDL_VERSION: 2.30.0
+            SDL_MIXER_VERSION: 2.8.0
             BUILD_TARGET: android
             DEPLOY: android
           - name: Emscripten
@@ -69,18 +69,18 @@ jobs:
       SKIP_UPLOAD: ${{ matrix.SKIP_UPLOAD }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         if: ${{ matrix.cache-key }}
         with:
           path: deps
           key: ${{ matrix.cache-key }}-${{ env.SDL_VERSION }}-${{ env.SDL_MIXER_VERSION }}
       - name: Setup JDK 17
         if: matrix.BUILD_TARGET == 'android'
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -106,7 +106,7 @@ jobs:
           ./.ci_scripts/build_upload.sh
         continue-on-error: true
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
           path: deploy/
@@ -134,16 +134,16 @@ jobs:
     runs-on: windows-latest
     env:
       SDL_VERSION: 2.28.5
-      SDL_MIXER_VERSION: 2.6.3
+      SDL_MIXER_VERSION: 2.8.0
       COMPILER: ${{ matrix.COMPILER }}
       SKIP_UPLOAD: ${{ matrix.SKIP_UPLOAD }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: deps
           key: windows-${{ matrix.cache-key }}-${{ env.SDL_VERSION }}-${{ env.SDL_MIXER_VERSION }}
@@ -174,7 +174,7 @@ jobs:
         run: ./.ci_scripts/build_upload.ps1
         continue-on-error: true
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
           path: deploy\

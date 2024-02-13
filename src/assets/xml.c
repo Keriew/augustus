@@ -56,8 +56,9 @@ static void set_asset_image_base_path(const char *name)
 static int xml_start_assetlist_element(void)
 {
     data.current_group = group_get_new();
-    const char *name = xml_parser_copy_attribute_string("name");
+    char *name = xml_parser_copy_attribute_string("name");
     if (!name || *name == '\0') {
+        free(name);
         return 0;
     }
     data.current_group->name = name;
@@ -68,10 +69,6 @@ static int xml_start_assetlist_element(void)
 
 static int xml_start_image_element(void)
 {
-    if (xml_parser_get_total_attributes() > 12) {
-        return 0;
-    }
-
     asset_image *img = asset_image_create();
     if (!img) {
         return 0;
@@ -108,11 +105,6 @@ static int xml_start_image_element(void)
 
 static int xml_start_layer_element(void)
 {
-    int total_attributes = xml_parser_get_total_attributes();
-    if (total_attributes < 2 || total_attributes > 24) {
-        return 0;
-    }
-
     asset_image *img = data.current_image;
     static const char *part_values[2] = { "footprint", "top" };
     static const char *mask_values[2] = { "grayscale", "alpha" };
@@ -164,7 +156,7 @@ static int xml_start_animation_element(void)
 
 static int xml_start_frame_element(void)
 {
-    if (!data.in_animation || xml_parser_get_total_attributes() < 2) {
+    if (!data.in_animation) {
         return 1;
     }
     asset_image *img = asset_image_create();
@@ -177,6 +169,8 @@ static int xml_start_frame_element(void)
     const char *image_id = xml_parser_get_attribute_string("image");
     int src_x = xml_parser_get_attribute_int("src_x");
     int src_y = xml_parser_get_attribute_int("src_y");
+    int offset_x = xml_parser_get_attribute_int("x");
+    int offset_y = xml_parser_get_attribute_int("y");
     int width = xml_parser_get_attribute_int("width");
     int height = xml_parser_get_attribute_int("height");
     layer_invert_type invert = xml_parser_get_attribute_enum("invert", INVERT_VALUES, 3, INVERT_HORIZONTAL);
@@ -184,7 +178,7 @@ static int xml_start_frame_element(void)
 
     img->last_layer = &img->first_layer;
     if (!asset_image_add_layer(img, path, group, image_id, src_x, src_y,
-        0, 0, width, height, invert, rotate, PART_BOTH, 0)) {
+        offset_x, offset_y, width, height, invert, rotate, PART_BOTH, 0)) {
         img->active = 0;
         return 1;
     }
@@ -193,6 +187,8 @@ static int xml_start_frame_element(void)
         asset_image_unload(img);
         return 1;
     }
+    img->img.width += offset_x;
+    img->img.height += offset_y;
     asset_image_check_and_handle_reference(img);
 #else
     data.current_image->has_frame_elements = 1;

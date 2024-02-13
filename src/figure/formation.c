@@ -299,7 +299,7 @@ void formation_change_morale(formation *m, int amount)
         max_morale = m->has_military_training ? 90 : 80;
     } else if (m->figure_type == FIGURE_ENEMY_CAESAR_LEGIONARY) {
         max_morale = 100;
-    } else if (m->figure_type == FIGURE_FORT_JAVELIN || m->figure_type == FIGURE_FORT_MOUNTED) {
+    } else if (m->figure_type == FIGURE_FORT_JAVELIN || m->figure_type == FIGURE_FORT_MOUNTED || m->figure_type == FIGURE_FORT_INFANTRY) {
         max_morale = m->has_military_training ? 70 : 60;
     } else {
         switch (m->enemy_type) {
@@ -536,7 +536,10 @@ static int add_figure(int formation_id, int figure_id, int deployed, int damage,
             return fig;
         }
     }
-    return 0; // can happen on large invasions
+
+    // The rest of the code can happen on large invasions
+    // Try to balance the remaining soldiers evenly instead of stacking them all on one tile
+    return figure_id % MAX_FORMATION_FIGURES;
 }
 
 void formation_move_herds_away(int x, int y)
