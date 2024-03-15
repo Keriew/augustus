@@ -1393,6 +1393,12 @@ static translation_string all_strings[] = {
     {TR_CHEAT_CASTED_CURSE, "Malédiction lancée"},
     {TR_CHEAT_BUILDINGS_INVINCIBLE, "Les bâtiments construits ne s'effondrent pas"},
     {TR_CHEAT_CLIMATE_CHANGE, "Modification du climat" },
+    {TR_MAIN_MENU_NEW_CAMPAIGN, "Nouvelle campagne"},
+    {TR_WINDOW_SELECT_CAMPAIGN, "Choisir une campagne"},
+    {TR_WINDOW_ORIGINAL_CAMPAIGN_NAME, "Campagne d'origine" },
+    {TR_WINDOW_ORIGINAL_CAMPAIGN_DESC, "Campagne originelle de Caesar III, dans toute sa gloire d'antan et ses 25 ans d'âge."},
+    {TR_WINDOW_CUSTOM_CAMPAIGNS_NOT_IMPLEMENTED_TITLE, "En cours d'ajout" },
+    {TR_WINDOW_CUSTOM_CAMPAIGNS_NOT_IMPLEMENTED_TEXT, "La gestion des campagnes personnalisées est en cours d'ajout.\nVeuillez vérifier les prochaines versions."},
 
 };
 
