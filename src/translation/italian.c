@@ -868,8 +868,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_GOLD_MINE_DESC, "Estrai oro per commerciarlo, o per rifornire la zecca cittadina e produrre denarii."},
     {TR_BUILDING_GOLD_MINE_PRODUCTION, "La produzione è"},
     {TR_BUILDING_GOLD_MINE_COMPLETE, "completa."},
-    {TR_BUILDING_GOLD_MINE_HALTED, "
-	Il tuo consigliere del commercio ha ordinato di interrompere la produzione di oro."},
+    {TR_BUILDING_GOLD_MINE_HALTED, "Il tuo consigliere del commercio ha ordinato di interrompere la produzione di oro."},
     {TR_BUILDING_GOLD_MINE_NO_EMPLOYEES, "Questa miniera non ha lavoratori. La produzione è ferma."},
     {TR_BUILDING_GOLD_MINE_FULL_EMPLOYEES, "Questa miniera ha tutti i lavoratori necessari, e lavora senza sosta per produrre oro."},
     {TR_BUILDING_GOLD_MINE_MANY_EMPLOYEES, "Questa miniera sta lavorando meno della capacità massima. La produzione di oro potrebbe essere più efficiente con più lavoratori."},
