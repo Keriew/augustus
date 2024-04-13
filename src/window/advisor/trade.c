@@ -194,10 +194,6 @@ static int draw_background(void)
     button_border_draw(160, 392, 200, 24, data.focus_button_id == 2);
     lang_text_draw_centered(54, 30, 160, 398, 200, FONT_NORMAL_BLACK);
 
-    if (data.list.size > MAX_VISIBLE_ROWS) {
-        inner_panel_draw(scrollbar.x + 4, scrollbar.y + 28, 2, scrollbar.height / BLOCK_SIZE - 3);
-    }
-
     int land_policy_available = building_monument_working(BUILDING_CARAVANSERAI);
     int sea_policy_available = building_monument_working(BUILDING_LIGHTHOUSE);
 

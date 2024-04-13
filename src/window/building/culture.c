@@ -947,18 +947,18 @@ void window_building_draw_colosseum_background(building_info_context *c)
         window_building_draw_employment(c, 138);
         window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 144);
         if (b->data.entertainment.days1 > 0) {
-            int width = lang_text_draw(74, 8, c->x_offset + 32, c->y_offset + 182, FONT_NORMAL_BROWN);
+            int width = lang_text_draw(74, 8, c->x_offset + 32, c->y_offset + 188, FONT_NORMAL_BROWN);
             lang_text_draw_amount(8, 44, 2 * b->data.entertainment.days1,
-                c->x_offset + width + 32, c->y_offset + 182, FONT_NORMAL_BROWN);
+                c->x_offset + width + 32, c->y_offset + 188, FONT_NORMAL_BROWN);
         } else {
-            lang_text_draw(74, 7, c->x_offset + 32, c->y_offset + 182, FONT_NORMAL_BROWN);
+            lang_text_draw(74, 7, c->x_offset + 32, c->y_offset + 188, FONT_NORMAL_BROWN);
         }
         if (b->data.entertainment.days2 > 0) {
-            int width = lang_text_draw(74, 10, c->x_offset + 32, c->y_offset + 202, FONT_NORMAL_BROWN);
+            int width = lang_text_draw(74, 10, c->x_offset + 32, c->y_offset + 208, FONT_NORMAL_BROWN);
             lang_text_draw_amount(8, 44, 2 * b->data.entertainment.days2,
-                c->x_offset + width + 32, c->y_offset + 202, FONT_NORMAL_BROWN);
+                c->x_offset + width + 32, c->y_offset + 208, FONT_NORMAL_BROWN);
         } else {
-            lang_text_draw(74, 9, c->x_offset + 32, c->y_offset + 202, FONT_NORMAL_BROWN);
+            lang_text_draw(74, 9, c->x_offset + 32, c->y_offset + 208, FONT_NORMAL_BROWN);
         }
 
         if (b->type == BUILDING_ARENA) {

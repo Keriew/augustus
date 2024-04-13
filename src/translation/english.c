@@ -1416,6 +1416,14 @@ static translation_string all_strings[] = {
     {TR_EDITOR_CAESAR_SALARY, "Caesar's salary"},
     {TR_CITY_MESSAGE_TEXT_CARAVANSERAI_COMPLETE, "The caravanserai is completed. New commercial horizons are emerging. Caravans from all over the world are eager to come and trade in your city."},
     {TR_CONFIG_SHOW_DESIRABILITY_RANGE, "Show desirability when building mausoleums and nymphaeums"},
+    {TR_WINDOW_ADVISOR_EPITHETS, "Gods Epithets"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP, "What the gods can grant you"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_CERES, "Ceres gifts"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_NEPTUNE, "Neptune gifts"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_MERCURY, "Mercury gifts"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_MARS, "Mars gifts"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_VENUS, "Venus gifts"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_JUPITER, "Jupiter gifts"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
