@@ -744,7 +744,7 @@ static translation_string all_strings[] = {
 	{TR_WINDOW_GAMES_NO_WATER_ACCESS, "El Coliseo no tiene acceso a una red de agua proveniente de un depósito." },
 	{TR_HOTKEY_COPY_SETTINGS, "Copiar la configuración del edificio" },
     {TR_HOTKEY_PASTE_SETTINGS, "Pegar la configuración del edificio" },
-	{TR_HOTKEY_MOTHBALL_TOGGLE, "Suspender/Reactivar edificio" }															
+	{TR_HOTKEY_MOTHBALL_TOGGLE, "Suspender/Reactivar edificio" },														
     {TR_HOTKEY_SPECIAL_ORDERS, "Mostrar órdenes especiales del edificio" },
 	{TR_WINDOW_ADVISOR_RELIGION_LARARIUMS, "Lararios en la ciudad" },
     {TR_WINDOW_RACE_BET_BUTTON, "Apostar por un caballo" },
@@ -1287,7 +1287,7 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_VALUE_INVASION_TYPE_NATIVES, "Nativos"},
     {TR_PARAMETER_VALUE_INVASION_TYPE_MARS_NATIVES, "Nativos de Marte"},
     {TR_PARAMETER_VALUE_FORMATION_ATTACK_FOOD_CHAIN, "Cadena de alimentos"},
-    {TR_PARAMETER_VALUE_FORMATION_ATTACK_GOLD_STORES, "Tiendas de oro"},
+    {TR_PARAMETER_VALUE_FORMATION_ATTACK_GOLD_STORES, "Tiendas de oro"},
     {TR_PARAMETER_VALUE_FORMATION_ATTACK_BEST_BUILDINGS, "Los mejores edificios"},
     {TR_PARAMETER_VALUE_FORMATION_ATTACK_TROOPS, "Tropas"},
     {TR_PARAMETER_VALUE_FORMATION_ATTACK_RANDOM, "Aleatoriamente"},
