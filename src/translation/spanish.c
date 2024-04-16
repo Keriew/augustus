@@ -862,7 +862,7 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_SHOW_MESSAGES, "Mostrar mensajes"},
     {TR_HOTKEY_SHOW_EMPIRE_MAP, "Mostrar el mapa del imperio"},
     {TR_TOGGLE_GRID, "Cambiar cuadricula"},
-    {TR_WARNING_SCREENSHOT_SAVED, "Captura de pantalla guardada: "} // TODO: Google translate										
+    {TR_WARNING_SCREENSHOT_SAVED, "Captura de pantalla guardada: "}, // TODO: Google translate										
     {TR_OUT_OF_MONEY, "Sin crédito"},
     {TR_CITY_MESSAGE_TITLE_EMPERORS_WRATH, "La ira del Emperador" },
     {TR_CITY_MESSAGE_TEXT_EMPERORS_WRATH, "Has caído de la gracia del César y por eso ha ordenado tu arresto. A menos que recuperes el favor del emperador, ¡sus legionarios de élite pronto invadirán tu ciudad!" },
