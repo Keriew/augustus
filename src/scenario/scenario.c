@@ -610,6 +610,8 @@ void scenario_load_state(buffer *buf, buffer *buf_requests, int version)
             int uid_text_id = buffer_read_i32(buf);
             if (uid_text_id) {
                 scenario.custom_variables[i].linked_uid = message_media_text_blob_get_entry(uid_text_id);
+            } else {
+                scenario.custom_variables[i].linked_uid = 0;
             }
         }
     } else {
@@ -856,11 +858,6 @@ custom_variable_t *scenario_custom_variable_create(const uint8_t *uid, int initi
     scenario.custom_variables[id].linked_uid = message_media_text_blob_add(uid);
 
     return &scenario.custom_variables[id];
-}
-
-void scenario_custom_variable_set_value(int id, int initial_value)
-{
-    scenario.custom_variables[id].value = initial_value;
 }
 
 void scenario_custom_variable_rename(int id, const uint8_t *name)

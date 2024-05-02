@@ -16,9 +16,11 @@
 #include "scenario/message_media_text_blob.h"
 #include "scenario/property.h"
 #include "scenario/scenario.h"
+#include "scenario/scenario_events_controller.h"
 #include "window/editor/attributes.h"
 #include "window/editor/map.h"
 #include "window/numeric_input.h"
+#include "window/plain_message_dialog.h"
 #include "window/text_input.h"
 
 #define BUTTONS_X_OFFSET_NAME 48
@@ -111,24 +113,27 @@ static void draw_foreground(void)
     outer_panel_draw(16, 16, 40, 30);
 
     text_draw_centered(translation_for(TR_EDITOR_CUSTOM_VARIABLES_TITLE), 48, 58, BUTTON_WIDTH, FONT_LARGE_BLACK, 0);
-    text_draw_label_and_number(translation_for(TR_EDITOR_CUSTOM_VARIABLES_COUNT), MAX_CUSTOM_VARIABLES, "", 48, 106, FONT_NORMAL_PLAIN, COLOR_BLACK);
+    text_draw_label_and_number(translation_for(TR_EDITOR_CUSTOM_VARIABLES_COUNT), MAX_CUSTOM_VARIABLES, "", 48, 106,
+        FONT_NORMAL_PLAIN, COLOR_BLACK);
 
     for (int i = 0; i < MAX_VISIBLE_ROWS; i++) {
         int j = (i * 2);
         if (data.list[i]) {
-            large_label_draw(buttons[j].x, buttons[j].y, buttons[j].width / BLOCK_SIZE,
-                data.focus_button_id == j + 1 && editor_is_active() ? 1 : 0);
+            large_label_draw(buttons[j].x, buttons[j].y, buttons[j].width / BLOCK_SIZE, data.focus_button_id == j + 1);
 
-            text_draw_label_and_number(0, data.list[i]->id, "", buttons[j].x, buttons[j].y + 8, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+            text_draw_label_and_number(0, data.list[i]->id, "", buttons[j].x, buttons[j].y + 8,
+                FONT_NORMAL_GREEN, COLOR_MASK_NONE);
             if (data.list[i] && data.list[i]->linked_uid && data.list[i]->linked_uid->text) {
-                text_draw_centered(data.list[i]->linked_uid->text, buttons[j].x + 52, buttons[j].y + 8, 150, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+                text_draw_centered(data.list[i]->linked_uid->text, buttons[j].x + 52, buttons[j].y + 8, 150,
+                    FONT_NORMAL_GREEN, COLOR_MASK_NONE);
             }
             
             if (data.list[i]->in_use && !data.select_only) {
                 large_label_draw(buttons[j+1].x, buttons[j+1].y, buttons[j+1].width / BLOCK_SIZE,
                     data.focus_button_id == j + 2 ? 1 : 0);
 
-                text_draw_number(data.list[i]->value, ' ', "", buttons[j+1].x, buttons[j+1].y + 8, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+                text_draw_number(data.list[i]->value, ' ', "", buttons[j+1].x, buttons[j+1].y + 8,
+                    FONT_NORMAL_GREEN, COLOR_MASK_NONE);
             }
         }
     }
@@ -153,7 +158,8 @@ static void button_variable(int button_index, int param2)
         return;
     }
     data.target_variable = data.list[button_index]->id;
-    window_numeric_input_bound_show(screen_dialog_offset_x() + 60, screen_dialog_offset_y() + 50, 9, -1000000000, 1000000000, set_variable_value);
+    window_numeric_input_bound_show(screen_dialog_offset_x() + 60, screen_dialog_offset_y() + 50, 9,
+        -1000000000, 1000000000, set_variable_value);
 }
 
 static void set_variable_name(const uint8_t *value)
@@ -161,14 +167,28 @@ static void set_variable_name(const uint8_t *value)
     scenario_custom_variable_rename(data.target_variable, value);
 }
 
+static void show_used_event_popup_dialog(const scenario_event_t *event)
+{
+    static uint8_t event_id_text[50];
+    uint8_t *cursor = string_copy(translation_for(TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_CHANGE_EVENT_ID),
+        event_id_text, 50);
+    string_from_int(cursor, event->id, 0);
+    window_plain_message_dialog_show_with_extra(TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_CHANGE_TITLE,
+        TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_CHANGE_TEXT, 0, event_id_text);
+}
+
 static void button_name_click(int button_index, int param2)
 {
-    if (!editor_is_active()) {
-        return;
-    }
     if (!data.list[button_index]) {
         return;
     };
+
+    scenario_event_t *event = scenario_events_get_using_custom_variable(data.list[button_index]->id);
+    if (event) {
+        show_used_event_popup_dialog(event);
+        return;
+    }
+
     int has_name = data.list[button_index]->linked_uid && data.list[button_index]->linked_uid->in_use;
     if (data.select_only) {
         if (!has_name) {
@@ -177,12 +197,12 @@ static void button_name_click(int button_index, int param2)
         data.callback(data.list[button_index]);
         window_go_back();
     } else {
+        data.target_variable = data.list[button_index]->id;
         static uint8_t text_input_title[100];
         uint8_t *cursor = string_copy(translation_for(TR_PARAMETER_TYPE_CUSTOM_VARIABLE), text_input_title, 100);
         cursor = string_copy(string_from_ascii(" "), cursor, 100 - (cursor - text_input_title));
-        string_from_int(cursor, button_index + 1, 0);
+        string_from_int(cursor, data.target_variable, 0);
 
-        data.target_variable = data.list[button_index]->id;
         window_text_input_show(text_input_title, 0, scenario_get_custom_variable_name(data.target_variable),
             MAX_VARIABLE_NAME_SIZE, set_variable_name);
     }
@@ -190,15 +210,17 @@ static void button_name_click(int button_index, int param2)
 
 static void button_delete_variable(int button_index, int param2)
 {
-    if (!editor_is_active()) {
-        return;
-    }
     if (data.select_only) {
         return;
     }
     if (!data.list[button_index]) {
         return;
     };
+    scenario_event_t *event = scenario_events_get_using_custom_variable(data.list[button_index]->id);
+    if (event) {
+        show_used_event_popup_dialog(event);
+        return;
+    }
     const uint8_t empty_name[2] = "";
     scenario_custom_variable_rename(data.list[button_index]->id, empty_name);
 }

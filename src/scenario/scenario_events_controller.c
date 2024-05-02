@@ -267,6 +267,17 @@ void scenario_events_process_all(void)
     }
 }
 
+scenario_event_t *scenario_events_get_using_custom_variable(int custom_variable_id)
+{
+    scenario_event_t *current;
+    array_foreach(scenario_events, current) {
+        if (scenario_event_uses_custom_variable(current, custom_variable_id)) {
+            return current;
+        }
+    }
+    return 0;
+}
+
 void scenario_events_progress_paused(int months_passed)
 {
     scenario_event_t *current;
