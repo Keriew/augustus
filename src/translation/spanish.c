@@ -1447,7 +1447,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_BUTTON_ACCEPT_TRADE_CARAVAN, "Permitir despachar a las caravanas mercantes desde aquí."},
     {TR_TOOLTIP_BUTTON_REJECT_TRADE_CARAVAN, "No permitir despachar a las caravanas mercantes desde aquí."},
     {TR_TOOLTIP_BUTTON_ACCEPT_TRADE_SHIPS, "Permitir despachar a los buques mercantes atracados desde aquí"},
-    {TR_TOOLTIP_BUTTON_REJECT_TRADE_SHIPS, "No permitir despachar a los buques mercantes atracados desde aquí},
+    {TR_TOOLTIP_BUTTON_REJECT_TRADE_SHIPS, "No permitir despachar a los buques mercantes atracados desde aquí"},
     {TR_TOOLTIP_BUTTON_ACCEPT_WORKERS, "Reanudar distribución de recursos a talleres o graneros"},
     {TR_TOOLTIP_BUTTON_REJECT_WORKERS, "Detener distribución de recursos a talleres o graneros"},
     {TR_TOOLTIP_BUTTON_ACCEPT_QUARTERMASTER, "Permitir a los intendentes militares obtener alimentos desde aquí"},
