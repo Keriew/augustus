@@ -775,7 +775,6 @@ static translation_string all_strings[] = {
     {TR_WINDOW_RACE_RED_HORSE_DESCRIPTION, "El equipo rojo, conocido como el equipo del auriga más exitoso en la historia de Roma, un ex remero y salvador de un cónsul romano." },
     {TR_WINDOW_RACE_WHITE_HORSE_DESCRIPTION, "El equipo blanco, fundado por ex gladiadores. Llevan el combate en la sangre e incluso como hombres libres viven para el desafío." },
     {TR_WINDOW_RACE_GREEN_HORSE_DESCRIPTION, "El equipo verde: descendientes de los jinetes 'Céleres' de la época del Reino de Roma. Todavía dicen ser los mejores de los mejores." },
-    {TR_TOOLTIP_BUTTON_REJECT_WORKERS, "Reanudar distribución de recursos a talleres o graneros" },
     {TR_CONFIG_DIGIT_SEPARATOR, "Separar digitos"},
     {TR_TOOLTIP_OVERLAY_PROBLEMS_NO_LABOR, "No hay trabajo" },
     {TR_WINDOW_BUILDING_DISTRIBUTION_GRANARY_CART_PUSHER_GETTING, "El carretero se dirige a buscar comida a otro granero."},
