@@ -1466,8 +1466,8 @@ static translation_string all_strings[] = {
     {TR_WINDOW_ADVISOR_LEGIONARIES, "Legionarios" },
     {TR_BUILDING_FORT_MOUNTED, "Auxiliares - Caballeria" },
     {TR_WINDOW_ADVISOR_MOUNTED, "Caballeria" },
-    {TR_BUILDING_FORT_JAVELIN, "Auxiliares - Javelineros" },
-    {TR_WINDOW_ADVISOR_JAVELIN, "Javelineros" },
+    {TR_BUILDING_FORT_JAVELIN, "Auxiliares - Jabalineros" },
+    {TR_WINDOW_ADVISOR_JAVELIN, "Jabalineros" },
     {TR_WARNING_NO_ARMOURY, "Construye una armería para entregar armas a los barracones" },
     
 };
