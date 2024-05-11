@@ -13,6 +13,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - name: Linux Flatpak
+            os: ubuntu-20.04
+            BUILD_TARGET: flatpak
+            DEPLOY: flatpak
           - name: Linux AppImage
             os: ubuntu-20.04
             BUILD_TARGET: appimage
@@ -129,7 +133,6 @@ jobs:
           - name: Windows MSVC ARM64
             cache-key: msvc-arm64
             COMPILER: msvc-arm64
-            SKIP_UPLOAD: true
     name: ${{ matrix.name }}
     runs-on: windows-latest
     env:
