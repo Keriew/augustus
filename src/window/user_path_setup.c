@@ -27,7 +27,7 @@ static struct {
     int window_status;
     int button_in_focus;
     int first_time;
-    char new_path[FILE_NAME_MAX];
+    char user_path[FILE_NAME_MAX];
 } data;
 
 static void button_pick_option(int param1, int param2);
@@ -45,7 +45,7 @@ static image_button ok_cancel_buttons[] = {
 static void init(int first_time)
 {
     data.show_window = !first_time;
-    data.new_path[0] = 0;
+    snprintf(data.user_path, FILE_NAME_MAX, "%s", pref_user_dir());
     data.button_in_focus = 0;
     data.first_time = first_time;
     if (data.first_time) {
@@ -85,21 +85,18 @@ static int encode_path(uint8_t *output, const char *input, int output_size)
 
 static const uint8_t *get_path_text(void)
 {
-    if (!*data.new_path) {
-        snprintf(data.new_path, FILE_NAME_MAX, "%s", pref_user_dir());
-    }
     static uint8_t text[FILE_NAME_MAX];
     const uint8_t *path_text;
-    if (*data.new_path) {
-        if (strcmp(data.new_path, "./") == 0) {
+    if (*data.user_path) {
+        if (strcmp(data.user_path, "./") == 0) {
             path_text = translation_for(TR_CONFIG_USER_PATH_WITH_SUBDIRECTORIES);
-        } else if (platform_user_path_recommend() && strcmp(data.new_path, platform_user_path_recommend()) == 0) {
+        } else if (platform_user_path_recommend() && strcmp(data.user_path, platform_user_path_recommend()) == 0) {
             uint8_t *cursor = string_copy(translation_for(TR_CONFIG_USER_PATH_RECOMMENDED), text, FILE_NAME_MAX);
-            cursor += encode_path(cursor, data.new_path, FILE_NAME_MAX - (cursor - text));
+            cursor += encode_path(cursor, data.user_path, FILE_NAME_MAX - (cursor - text));
             string_copy(string_from_ascii(")"), cursor, FILE_NAME_MAX - (cursor - text));
             path_text = text;
         } else {
-            encode_path(text, data.new_path, FILE_NAME_MAX);
+            encode_path(text, data.user_path, FILE_NAME_MAX);
             path_text = text;
         }
     } else {
@@ -163,7 +160,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
 
 static const char *get_path_from_dialog(void)
 {
-    const char *user_path = data.new_path;
+    const char *user_path = data.user_path;
     if (!*user_path) {
         user_path = pref_user_dir();
     }
@@ -198,9 +195,9 @@ static void set_paths(int index)
         return;
     }
     if (strcmp(path, pref_data_dir()) == 0) {
-        snprintf(data.new_path, FILE_NAME_MAX, "./");
+        snprintf(data.user_path, FILE_NAME_MAX, "./");
     } else {
-        snprintf(data.new_path, FILE_NAME_MAX, "%s", path);
+        snprintf(data.user_path, FILE_NAME_MAX, "%s", path);
     }
 }
 
@@ -234,7 +231,7 @@ static void copy_user_files(int accepted, int overwrite)
     window_go_back();
     char original_path[FILE_NAME_MAX];
     snprintf(original_path, FILE_NAME_MAX, "%s", pref_user_dir());
-    pref_save_user_dir(data.new_path);
+    pref_save_user_dir(data.user_path);
     platform_user_path_create_subdirectories();
     if (!accepted) {
         return;
@@ -248,11 +245,11 @@ static void button_ok_cancel(int is_ok, int param2)
         cancel();
         return;
     }
-    if (strcmp(data.new_path, pref_user_dir()) == 0) {
+    if (strcmp(data.user_path, pref_user_dir()) == 0) {
         window_go_back();
         return;
     }
-    if (!platform_file_manager_is_directory_writeable(data.new_path)) {
+    if (!platform_file_manager_is_directory_writeable(data.user_path)) {
         window_plain_message_dialog_show(TR_USER_DIRECTORIES_NOT_WRITEABLE_TITLE,
             TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT, !data.first_time);
         return;

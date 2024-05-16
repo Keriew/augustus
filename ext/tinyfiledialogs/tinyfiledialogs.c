@@ -719,9 +719,8 @@ static char * terminalName(void)
 
 static int graphicMode(void)
 {
-		return !( (isTerminalRunning() || terminalName()) )
-						&& ( getenv("DISPLAY")
-						|| (tfd_isDarwin() && (!getenv("SSH_TTY") || getenv("DISPLAY") ) ) ) ;
+		return getenv("DISPLAY")
+					|| (tfd_isDarwin() && (!getenv("SSH_TTY") || getenv("DISPLAY") ) ) ;
 }
 
 static int xdialogPresent(void)

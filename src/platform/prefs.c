@@ -19,6 +19,7 @@ typedef struct {
 static struct {
     directory data;
     directory user;
+    int location_printed;
 } prefs = {
     { .filename = "data_dir.txt" },
     { .filename = "user_dir.txt" }
@@ -30,7 +31,10 @@ static FILE *open_pref_file(const char *filename, const char *mode)
     if (!pref_dir) {
         return NULL;
     }
-    log_info("Location:", pref_dir, 0);
+    if (!prefs.location_printed) {
+        log_info("Pref dir location:", pref_dir, 0);
+        prefs.location_printed = 1;
+    }
     size_t file_len = strlen(filename) + strlen(pref_dir) + 1;
     char *pref_file = malloc(file_len * sizeof(char));
     if (!pref_file) {
@@ -39,7 +43,6 @@ static FILE *open_pref_file(const char *filename, const char *mode)
     }
     snprintf(pref_file, file_len, "%s%s", pref_dir, filename);
     SDL_free(pref_dir);
-
     FILE *fp = fopen(pref_file, mode);
     free(pref_file);
     return fp;
