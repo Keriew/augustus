@@ -44,7 +44,7 @@ static int process_pending_actions(void)
     }
     if (pending_actions & ACTION_SHOW_MESSAGE_USER_DIR_NOT_WRITABLE) {
         window_plain_message_dialog_show(TR_USER_DIRECTORIES_NOT_WRITEABLE_TITLE,
-            TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT, 0);
+            TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT_DETAILED, 0);
         pending_actions ^= ACTION_SHOW_MESSAGE_USER_DIR_NOT_WRITABLE;
         return 1;
     }

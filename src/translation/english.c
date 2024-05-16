@@ -1481,8 +1481,9 @@ static translation_string all_strings[] = {
     {TR_USER_DIRECTORIES_CANCELLED_TITLE, "Directory selection canceled"},
     {TR_USER_DIRECTORIES_CANCELLED_TEXT, "You have decided not to set a user directory. The C3 install directory will be used.\n"
         "You can change your settings later in the configuration window."},
-    {TR_USER_DIRECTORIES_NOT_WRITEABLE_TITLE, "Directory not writeable"},
-    {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT, "The selected directory is not writeable.\n\nPlease select a different directory."},
+    {TR_USER_DIRECTORIES_NOT_WRITEABLE_TITLE, "User directory not writeable"},
+    {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT, "The selected user directory is not writeable.\n\nPlease select a different user directory."},
+    {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT_DETAILED, "The selected user directory is not writeable.\n\nYou will not be able to save your games.\nPlease select a different user directory from the options window on the main menu."},
     {TR_USER_DIRECTORIES_WINDOW_TITLE, "Set user directory"},
     {TR_USER_DIRETORIES_WINDOW_USER_PATH, "User directory:" },
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TITLE, "User path changed"},

@@ -597,6 +597,9 @@ const char *platform_file_manager_get_directory_for_location(int location, const
 int platform_file_manager_is_directory_writeable(const char *directory)
 {
     char file_name[FILE_NAME_MAX];
+    if (!directory || !*directory) {
+        directory = ".";
+    }
     int attempt = 0;
     do {
         snprintf(file_name, FILE_NAME_MAX, "%s/test_%d.txt", directory, random_from_stdlib());

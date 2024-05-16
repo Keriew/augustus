@@ -1147,8 +1147,8 @@ static void cancel_values(void)
         data.config_values[i].new_value = data.config_values[i].original_value;
     }
     for (int i = 0; i < CONFIG_STRING_MAX_ALL; i++) {
-        snprintf(data.config_string_values[i].new_value, CONFIG_STRING_VALUE_MAX, "%s",
-            data.config_string_values[i].original_value);
+        memcpy(data.config_string_values[i].new_value, data.config_string_values[i].original_value,
+            CONFIG_STRING_VALUE_MAX);
     }
 }
 
