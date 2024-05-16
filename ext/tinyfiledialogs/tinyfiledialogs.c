@@ -40,7 +40,7 @@ misrepresented as being the original software.
 #include "tinyfiledialogs.h"
 
 #ifndef USE_TINYFILEDIALOGS
-char *tinyfd_selectFolderDialog(char const *aTitle, char const *aDefaultPath) { return NULL; }
+char *tinyfd_selectFolderDialog(char const *aTitle, char const *aDefaultPath) { return 0; }
 #else
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -78,6 +78,7 @@ char *tinyfd_selectFolderDialog(char const *aTitle, char const *aDefaultPath) { 
  #include <dirent.h> /* on old systems try <sys/dir.h> instead */
  #include <sys/utsname.h>
  #include <signal.h> /* on old systems try <sys/signal.h> instead */
+ #include <unistd.h>
  #define TINYFD_SLASH "/"
 #endif /* _WIN32 */
 
