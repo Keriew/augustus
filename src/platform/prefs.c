@@ -10,8 +10,19 @@
 #include <stdio.h>
 #include <string.h>
 
-static char stored_user_dir[FILE_NAME_MAX];
-static char stored_data_dir[FILE_NAME_MAX];
+typedef struct {
+    const char *filename;
+    int retrieved;
+    char location[FILE_NAME_MAX];
+} directory;
+
+static struct {
+    directory data;
+    directory user;
+} prefs = {
+    { .filename = "data_dir.txt" },
+    { .filename = "user_dir.txt" }
+};
 
 static FILE *open_pref_file(const char *filename, const char *mode)
 {
@@ -34,58 +45,50 @@ static FILE *open_pref_file(const char *filename, const char *mode)
     return fp;
 }
 
-const char *pref_data_dir(void)
+const char *retrieve_directory(directory *dir)
 {
-    if (*stored_data_dir) {
-        return stored_data_dir;
+    if (dir->retrieved) {
+        return dir->location;
     }
-    char data_dir[FILE_NAME_MAX] = { 0 };
-    FILE *fp = open_pref_file("data_dir.txt", "r");
+    FILE *fp = open_pref_file(dir->filename, "r");
     if (fp) {
-        size_t length = fread(data_dir, 1, FILE_NAME_MAX - 1, fp);
+        size_t length = fread(dir->location, 1, FILE_NAME_MAX - 1, fp);
         fclose(fp);
         if (length > 0) {
-            data_dir[length] = 0;
+            dir->location[length] = 0;
         }
     }
-    snprintf(stored_data_dir, FILE_NAME_MAX, "%s", data_dir);
-    return stored_data_dir;
+    dir->retrieved = 1;
+    return dir->location;
+}
+
+void save_directory(directory *dir, const char *location)
+{
+    snprintf(dir->location, FILE_NAME_MAX, "%s", location);
+    FILE *fp = open_pref_file(dir->filename, "w");
+    if (fp) {
+        fwrite(location, 1, strlen(location), fp);
+        fclose(fp);
+    }
+    dir->retrieved = 1;
+}
+
+const char *pref_data_dir(void)
+{
+    return retrieve_directory(&prefs.data);
 }
 
 void pref_save_data_dir(const char *data_dir)
 {
-    snprintf(stored_data_dir, FILE_NAME_MAX, "%s", data_dir);
-    FILE *fp = open_pref_file("data_dir.txt", "w");
-    if (fp) {
-        fwrite(data_dir, 1, strlen(data_dir), fp);
-        fclose(fp);
-    }
+    save_directory(&prefs.data, data_dir);
 }
 
 const char *pref_user_dir(void)
 {
-    if (*stored_user_dir) {
-        return stored_user_dir;
-    }
-    char user_dir[FILE_NAME_MAX] = { 0 };
-    FILE *fp = open_pref_file("user_dir.txt", "r");
-    if (fp) {
-        size_t length = fread(user_dir, 1, FILE_NAME_MAX - 1, fp);
-        fclose(fp);
-        if (length > 0) {
-            user_dir[length] = 0;
-        }
-    }
-    snprintf(stored_user_dir, FILE_NAME_MAX, "%s", user_dir);
-    return stored_user_dir;
+    return retrieve_directory(&prefs.user);
 }
 
 void pref_save_user_dir(const char *user_dir)
 {
-    snprintf(stored_user_dir, FILE_NAME_MAX, "%s", user_dir);
-    FILE *fp = open_pref_file("user_dir.txt", "w");
-    if (fp) {
-        fwrite(user_dir, 1, strlen(user_dir), fp);
-        fclose(fp);
-    }
+    save_directory(&prefs.user, user_dir);
 }
