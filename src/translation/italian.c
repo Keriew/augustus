@@ -868,7 +868,7 @@ static translation_string all_strings[] = {
     {TR_CITY_MESSAGE_TEXT_EMPERORS_WRATH, "Sei caduto in disgrazia e Cesare ha ordinato il tuo arresto. Se non ristabilirai il tuo favore presso l'imperatore, i suoi legionari d'élite invaderanno presto la tua città!"},
     {TR_BUILDING_ACADEMY_UPGRADE_DESC, "Questa accademia è operativa. Lo sviluppo locale ha permesso ai cittadini di ampliare l'edificio, fornendo più sale per le orazioni e la ricerca."},
     {TR_BUILDING_PALISADE_GATE, "Cancello a palizzata"},
-    {TR_BUILDING_PALISADE_GATE_DESC, "Questa stretta porta di legno controlla il movimento delle persone all'interno e all'esterno delle difese della città."},												  
+    {TR_BUILDING_PALISADE_GATE_DESC, "Questa stretta porta di legno controlla il movimento delle persone all'interno e all'esterno delle difese della città."},
     {TR_SAVE_DIALOG_INVALID_FILE, "File non valido"},
 	{TR_SAVE_DIALOG_INVALID_FILE_DESC, "Il salvataggio che stai cercando di aprire non è valido.\n\nIl file potrebbe risultare corrotto a causa di un bug.\n\nSe sei sicuro che il salvataggio sia valido, per favore segnala il problema a:\n\nhttps://github.com/Keriew/augustus/issues/new\n\nPer favore ricorda di allegare anche il file alla segnalazione."},
     {TR_SAVE_DIALOG_INCOMPATIBLE_VERSION, "Versione incompatibile"},
@@ -1474,7 +1474,6 @@ static translation_string all_strings[] = {
     {TR_BUILDING_FORT_JAVELIN, "Ausiliari - Giavellottieri" },
     {TR_WINDOW_ADVISOR_JAVELIN, "Giavellottieri" },
     {TR_WARNING_NO_ARMOURY, "Costruisci un'armeria per consegnare armi alle scuderie" },
-
 };
 
 void translation_italian(const translation_string **strings, int *num_strings)
