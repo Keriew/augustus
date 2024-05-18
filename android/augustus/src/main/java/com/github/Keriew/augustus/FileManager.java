@@ -83,15 +83,24 @@ public class FileManager {
     }
 
     private static FileInfo getDirectoryFromPath(Activity activity, String[] path) {
-        FileInfo currentDir = FileInfo.base;
+        ArrayList<FileInfo> dirList = new ArrayList<>();
+        dirList.add(FileInfo.base);
 
         for (int i = 0; i < path.length - 1; ++i) {
-            currentDir = findFile(activity, currentDir, path[i]);
-            if (currentDir == null || !currentDir.isDirectory()) {
-                return null;
+            if (path[i].equals("..")) {
+                if (dirList.size() == 1) {
+                    return null;
+                }
+                dirList.remove(dirList.size() - 1);
+            } else if (!path[i].isEmpty() && !path[i].equals(".")) {
+                FileInfo currentDir = findFile(activity, dirList.get(dirList.size() - 1), path[i]);
+                if (currentDir == null || !currentDir.isDirectory()) {
+                    return null;
+                }
+                dirList.add(currentDir);
             }
         }
-        return currentDir;
+        return dirList.get(dirList.size() - 1);
     }
 
     private static FileInfo getFileFromPath(AugustusMainActivity activity, String filePath) {
@@ -99,7 +108,7 @@ public class FileManager {
             if (baseUri == Uri.EMPTY) {
                 return null;
             }
-            String[] filePart = filePath.split("(\\|/)");
+            String[] filePart = filePath.split("[\\\\/]");
             FileInfo dirInfo = getDirectoryFromPath(activity, filePart);
             if (dirInfo == null) {
                 return null;
@@ -146,6 +155,7 @@ public class FileManager {
         return fileList.toArray(result);
     }
 
+    @SuppressWarnings("unused")
     public static boolean deleteFile(AugustusMainActivity activity, String filePath) {
         try {
             FileInfo fileInfo = getFileFromPath(activity, filePath);
@@ -212,8 +222,9 @@ public class FileManager {
                     fileInfo.updateModifiedTime();
                 }
             }
-            ParcelFileDescriptor pfd = activity.getContentResolver().openFileDescriptor(fileUri, internalMode);
-            return (pfd == null) ? 0 : pfd.detachFd();
+            try (ParcelFileDescriptor pfd = activity.getContentResolver().openFileDescriptor(fileUri, internalMode)) {
+                return (pfd == null) ? 0 : pfd.detachFd();
+            }
         } catch (Exception e) {
             Log.e("augustus", "Error in openFileDescriptor: " + e);
             return 0;
