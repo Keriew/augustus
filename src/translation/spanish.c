@@ -1441,7 +1441,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_BARRACKS_PRIORITY_TOWER, "Priorizar el entrenamiento de centinelas para las torres."},
     {TR_TOOLTIP_BARRACKS_PRIORITY_WATCHTOWER, "Priorizar el entrenamiento de los vigías para las atalayas."},
     {TR_TOOLTIP_BUTTON_REJECT_DELIVERY, "Impedir que las armerías entreguen armas aquí."},
-    {TR_TOOLTIP_BUTTON_ACCEPT_DELIVERY, "Permitir que las armerías entreguen armas aquí."},																								
+    {TR_TOOLTIP_BUTTON_ACCEPT_DELIVERY, "Permitir que las armerías entreguen armas aquí."},
     {TR_BUILDING_FORT_ARCHERS, "Auxiliares - Arqueros"},
     {TR_WINDOW_ADVISOR_MILITARY_ARCHER, "Arqueros"},
     {TR_TOOLTIP_BUTTON_ACCEPT_MARKET_LADIES, "Permitir al mercado abastercerse desde aquí."},
