@@ -109,18 +109,10 @@ static translation_string all_strings[] = {
     {TR_CONFIG_SHOW_MAX_POSSIBLE_PROSPERITY, "Показ. макс. достижимое процветания с текущим жильем"},
     {TR_CONFIG_AUTO_KILL_ANIMALS, "Граждане будут автоматически убивать безобидных животных"},
     {TR_CONFIG_SHOW_ROAMING_PATH, "Показать пути, пройденные бродячими гражданами"},
-																																							
-			 
-			  
-				
-																									   
     {TR_CONFIG_DRAW_CLOUD_SHADOWS, "Показ. тени облаков"},
     {TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE, "Запрашивать подтверждение при перезаписи файла"},
     {TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, "Невоенные ворота по умолчанию пропускают всех пешеходов"},
     {TR_HOTKEY_TITLE, "Настройки горячих клавиш Augustus"},
-													
-														
-															 
     {TR_HOTKEY_LABEL, "Основная"},
     {TR_HOTKEY_ALTERNATIVE_LABEL, "Альтернативная"},
     {TR_HOTKEY_HEADER_ARROWS, "Кнопки стрелок"},
@@ -175,7 +167,6 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_SHOW_OVERLAY_DAMAGE, "Включить слой риска разрушения"},
     {TR_HOTKEY_SHOW_OVERLAY_CRIME, "Включить слой риска преступлений"},
     {TR_HOTKEY_ROTATE_BUILDING, "Повернуть здание"},
-																	   
     {TR_HOTKEY_ROTATE_BUILDING_BACK, "Вернуть первоначальный вид"},
     {TR_HOTKEY_SHOW_OVERLAY_PROBLEMS, "Слой проблем"},
     {TR_HOTKEY_GO_TO_BOOKMARK_1, "Перейти к закладке 1"},
@@ -188,21 +179,8 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_SET_BOOKMARK_4, "Назначить закладку 4"},
     {TR_HOTKEY_EDITOR_TOGGLE_BATTLE_INFO, "Информация боя"},
     {TR_HOTKEY_EDIT_TITLE, "Введите новую клавишу" },
-																								  
     {TR_BUILDING_ROADBLOCK, "Дорожный блок"},
     {TR_BUILDING_ROADBLOCK_DESC, "Блокирует проход бесцельно бродящим гражданам"},
-
-
-
-
-
-
-
-
-
-
-
-
     {TR_BUILDING_ARCHITECT_GUILD, "Гильдия архитекторов" },
     {TR_BUILDING_ARCHITECT_GUILD_DESC, "Здесь архитекторы неустанно трудятся над возведением памятников во славу Рима." },
     {TR_BUILDING_GRAND_TEMPLE_ADD_MODULE, "Дать храму эпитет" },
@@ -272,9 +250,6 @@ static translation_string all_strings[] = {
     {TR_ADVISOR_AVERAGE_TAX, "Средний налог с жителя" },
     {TR_ADVISOR_AVERAGE_AGE, "Средний возвраст населения" },
     {TR_ADVISOR_PERCENT_IN_WORKFORCE, "Процент трудоспособного населения" },
-	
-	
-	
     {TR_ADVISOR_BIRTHS_LAST_YEAR, "Рождений в прошлом году:" },
     {TR_ADVISOR_DEATHS_LAST_YEAR, "Смертей в прошлом году:" },
     {TR_ADVISOR_TOTAL_POPULATION, "жителей всего" },
@@ -284,7 +259,6 @@ static translation_string all_strings[] = {
     {TR_ADVISOR_DISPATCHING_FOOD_FROM_GRANARIES_TEXT, "Вы уверены?"},
     {TR_ADVISOR_KEEP_STOCKPILING, "Продолжить складирование ресурсов"},
     {TR_ADVISOR_MAX_ATTAINABLE_PROSPERITY_IS, "Максимальное процветание текущего уровня жилья"},
-
     {TR_ADVISOR_POPULATION_AGE, "Возвраст"},
     {TR_ADVISOR_POPULATION_RESIDENTS, "жителей"},
     {TR_ADVISOR_POPULATION_DWELLERS, "обитателей"},
@@ -293,12 +267,12 @@ static translation_string all_strings[] = {
     {TR_CONSTRUCTION_PHASE, "Этап строительства:" },
     {TR_ADD_MODULE, "Повторно освятить храм?" },
     {TR_BUILDING_TEMPLE_MODULE_CONSTRUCTED, "Эпитет дарован." },
-    {TR_BUILDING_CERES_TEMPLE_QUOTE, 'Первой Церера кривым сошником целину всколыхнула,\nПервой - земле принесла и плоды, и покорную пищу,\nПервой - законы дала, и все даровала - Церера!\nБуду ее воспевать. О, только б достойно богини\nПесня пропелась моя! - богиня сей песни достойна.\n-Овидий, 'Метаморфозы' кн. 5},
-    {TR_BUILDING_NEPTUNE_TEMPLE_QUOTE, 'Моря недолог был гнев; сложив о трех зубьях оружье,\nВоды владыка морской усмиряет и вставшего поверх\nВолн голубого зовет Тритона, чьи отроду плечи\nВ алых ракушках, и дуть велит в трубицу морскую:\nЭтим он знак подает отозвать и потоки и волны.\n-Овидий, 'Метаморфозы' кн. 1},
-    {TR_BUILDING_MERCURY_TEMPLE_QUOTE, 'Можно, что хочешь, добыть, - и коров, и овец густорунных,\nМожно купить золотые треноги, коней златогривых,-\nЖизнь же назад получить невозможно; ее не добудешь\nИ не поймаешь, когда чрез ограду зубов улетела.\n-Гомер 'Илиада' песн. 9},
-    {TR_BUILDING_MARS_TEMPLE_QUOTE, 'Тут же крылатых колес ободья для Марса ковали,\nЧтобы их грохотом в бой поднимал он мужей и твердыни.\n-Вергилий, 'Энеида' кн. 8},
-    {TR_BUILDING_VENUS_TEMPLE_QUOTE, 'Ты, о Венера, и ты, сын резвый матери нежной!\nКак наслаждалась я! Как упоеньем несдержанным сердце\nПереполнялось! О, как на постели я вся изомлела!\n-Овидий, 'Метаморфозы' кн. 9},
-    {TR_BUILDING_PANTHEON_QUOTE, 'Вновь распахнулся меж тем\n чертог всемогущий Олимпа;\nВсех на совет родитель богов и людей повелитель\nВ звездный сзывает покой, из которого он озирает\nЗемли все с высоты, и дарданский стан, и латинян.\n-Вергилий, 'Энеида' кн. 10},
+    {TR_BUILDING_CERES_TEMPLE_QUOTE, "'Первой Церера кривым сошником целину всколыхнула,\nПервой - земле принесла и плоды, и покорную пищу,\nПервой - законы дала, и все даровала - Церера!\nБуду ее воспевать. О, только б достойно богини\nПесня пропелась моя! - богиня сей песни достойна.\n-Овидий, 'Метаморфозы' кн. 5"},
+    {TR_BUILDING_NEPTUNE_TEMPLE_QUOTE, "'Моря недолог был гнев; сложив о трех зубьях оружье,\nВоды владыка морской усмиряет и вставшего поверх\nВолн голубого зовет Тритона, чьи отроду плечи\nВ алых ракушках, и дуть велит в трубицу морскую:\nЭтим он знак подает отозвать и потоки и волны.\n-Овидий, 'Метаморфозы' кн. 1"},
+    {TR_BUILDING_MERCURY_TEMPLE_QUOTE, "'Можно, что хочешь, добыть, - и коров, и овец густорунных,\nМожно купить золотые треноги, коней златогривых,-\nЖизнь же назад получить невозможно; ее не добудешь\nИ не поймаешь, когда чрез ограду зубов улетела.\n-Гомер 'Илиада' песн. 9"},
+    {TR_BUILDING_MARS_TEMPLE_QUOTE, "'Тут же крылатых колес ободья для Марса ковали,\nЧтобы их грохотом в бой поднимал он мужей и твердыни.\n-Вергилий, 'Энеида' кн. 8"},
+    {TR_BUILDING_VENUS_TEMPLE_QUOTE, "'Ты, о Венера, и ты, сын резвый матери нежной!\nКак наслаждалась я! Как упоеньем несдержанным сердце\nПереполнялось! О, как на постели я вся изомлела!\n-Овидий, 'Метаморфозы' кн. 9"},
+    {TR_BUILDING_PANTHEON_QUOTE, "'Вновь распахнулся меж тем\n чертог всемогущий Олимпа;\nВсех на совет родитель богов и людей повелитель\nВ звездный сзывает покой, из которого он озирает\nЗемли все с высоты, и дарданский стан, и латинян.\n-Вергилий, 'Энеида' кн. 10"},
     {TR_BUILDING_GRAND_TEMPLE_PHASE_1, "(Подиум)" },
     {TR_BUILDING_GRAND_TEMPLE_PHASE_2, "(Портик)" },
     {TR_BUILDING_GRAND_TEMPLE_PHASE_3, "(Целла)" },
@@ -322,7 +296,6 @@ static translation_string all_strings[] = {
     {TR_BUILDING_PLUM_TREE, "Слива" },
     {TR_BUILDING_PALM_TREE, "Пальма" },
     {TR_BUILDING_DATE_TREE, "Финик" },
-												 
     {TR_BUILDING_PINE_PATH, "Сосновая" },
     {TR_BUILDING_FIR_PATH, "Ельевая" },
     {TR_BUILDING_OAK_PATH, "Дубовая" },
@@ -358,7 +331,6 @@ static translation_string all_strings[] = {
     {TR_BUILDING_MESS_HALL_TROOP_HUNGER_5, "Истощены" },
     {TR_BUILDING_MESS_HALL_FOOD_TYPES_BONUS_1, "Разнообразный рацион ваших солдат значительно повышает боевой дух." },
     {TR_BUILDING_MESS_HALL_FOOD_TYPES_BONUS_2, "Разнообразная и питательная диета, которую получают ваши солдаты, значительно повышает моральный дух." },
-	
     {TR_BUILDING_MESS_HALL_NO_SOLDIERS, "У вас нет солдат, которых нужно накормить." },
     {TR_BUILDING_MESS_HALL_MONTHS_FOOD_STORED, "Запасов продуктов на месяцев:" },
     {TR_BUILDING_MESS_HALL_NO_EMPLOYEES, "В этом посту снабжения нет работников. Продовольствие не может быть собрано." },
@@ -414,7 +386,6 @@ static translation_string all_strings[] = {
     {TR_FIGURE_TYPE_PRIEST_SUPPLIER, "Жрец" },
     {TR_BUILDING_DOCK_CITIES_CONFIG_DESC, "Города с открытой морской торговлей:" },
     {TR_BUILDING_DOCK_CITIES_NO_ROUTES, "Нет открытых морских торговых путей." },
-											  
     {TR_PHRASE_FIGURE_MISSIONARY_EXACT_4, "\"Я сделаю всe восможное чтобы успокоить этих варваров. Я уверен они перестанут атаковать город после того как я с ними переговорю.\"" },
     {TR_CITY_MESSAGE_TITLE_PANTHEON_FESTIVAL, "Ежегодный праздник" },
     {TR_CITY_MESSAGE_TEXT_PANTHEON_FESTIVAL_CERES, "Верующие идут в храмы на празднование Цереалии в честь Цереры. Фермеры приносят дары ради богатых урожаев в ближайшие годы." },
@@ -435,7 +406,6 @@ static translation_string all_strings[] = {
     {TR_BUILDING_CARAVANSERAI_PHASE_2, "(Колоннада)"},
     {TR_BUILDING_CARAVANSERAI_PHASE_1_TEXT, "Инженеры заливают фундамент для будущего места отдыха."},
     {TR_BUILDING_CARAVANSERAI_PHASE_2_TEXT, "Каменщики возводят прямоугольную колоннаду. Внутри будут находиться убежища для торговцев и их животных."},
-																																																																
     {TR_FIGURE_TYPE_CARAVANSERAI_SUPPLIER, "Поставщик" },
     {TR_FIGURE_TYPE_CARAVANSERAI_COLLECTOR, "Сборщик" },
     {TR_BUILDING_CARAVANSERAI_POLICY_TITLE, "Торговая политика" },
@@ -449,7 +419,6 @@ static translation_string all_strings[] = {
     {TR_BUILDING_CARAVANSERAI_POLICY_3, "Вместимость караванов увеличивается на 4 единицы, караван-сараю нужно на 20% больше еды." },
     {TR_BUILDING_CARAVANSERAI_NO_EMPLOYEES, "В этом караван-сарае нет работников. Продовольствие не может быть собрано." },
     {TR_BUILDING_CARAVANSERAI_NO_FOOD, "В этом караван-сарае есть рабочии, но в данный момент они ищут доступный источник еды." },
-				  
     {TR_BUILDING_LIGHTHOUSE_PHASE_1, "(Фундамент)" },
     {TR_BUILDING_LIGHTHOUSE_PHASE_2, "(Постамент)" },
     {TR_BUILDING_LIGHTHOUSE_PHASE_3, "(Башня)" },
@@ -502,7 +471,6 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_OVERLAY_EMPLOYMENT_MISSING_2, " сотрудников нужно в этом здании" },
     {TR_TOOLTIP_OVERLAY_EMPLOYMENT_MOTHBALL, " сотрудников нужно в этом здании (выкл.)" },
     {TR_MAP_EDITOR_OPTIONS, "Настройки сценария" },
-
     {TR_BUILDING_TAVERN, "Таверна" },
     {TR_BUILDING_GRAND_GARDEN, "Великий сад" },
     {TR_BUILDING_TAVERN_DESC_1, "В этой таверне нет рабочих, и она не может быть открыта для посетителей." },
@@ -544,10 +512,6 @@ static translation_string all_strings[] = {
     {TR_BUILDING_WINDOW_INDUSTRY_LOW_EFFICIENCY_RAW_MATERIALS, "Это здание имеет низкую эффективность. Это может быть связано с отсутствием ближайшего пункта назначения для готовых товаров." },
     {TR_BUILDING_WINDOW_INDUSTRY_LOW_EFFICIENCY_WORKSHOPS, "Это здание имеет низкую эффективность. Это может быть связано с отсутствием постоянных поставок сырья или с близкого расположения места для готовых товаров." },
     {TR_BUILDING_WINDOW_INDUSTRY_WHARF_AVERAGE_CATCH, "Среднемесячный улов:" },
-																													  
-										  
-																																		   
-									   
     {TR_BUILDING_WINDOW_INDUSTRY_NEEDED, " нужно)" },
     {TR_WINDOW_ADVISOR_ENTERTAINMENT_TAVERN_COVERAGE, "таверна" },
     {TR_WINDOW_ADVISOR_ENTERTAINMENT_TAVERN_COVERAGE_PLURAL, "таверны" },
@@ -625,21 +589,6 @@ static translation_string all_strings[] = {
     {TR_CITY_MESSAGE_TEXT_IMPERIAL_GAMES_PLANNING, "С объявлением Римских игр люди с самых дальних окраин Империи начали стекаться в ваш город; многие надеются выиграть предстоящие соревнования. Чтобы закончить все возможные приготовления, потребуется не меньше года."},
     {TR_CITY_MESSAGE_TEXT_IMPERIAL_GAMES_STARTING, "Начинается торжественное шествие, а вместе за ним и Римские игры. Пусть сам Юпитер выберет лучших из сегодняшних участников скачек, поединков и других испытаний. Колизей до краев заполнен ожидающими игр гражданами и дарами пшеницы и оливкового масла. Да начнутся игры!"},
     {TR_CITY_MESSAGE_TEXT_IMPERIAL_GAMES_ENDING, "Последний день Римских игр подходит к концу. Каждый без исключения гражданин вкусил сегодня величие римской жизни. Все полны восторга и с полными желудками. Слава победителям игр и слава правителю!"},
- 
- 
- 
-																  
-																									   
-											
-									   
-																											
-										
-																											  
-
-
-
-
-
     {TR_CITY_MESSAGE_TITLE_GREAT_GAMES, "Великие игры"},
     {TR_WINDOW_ADVISOR_ENTERTAINMENT_GAMES_COOLDOWN, "Месяц/а/ев до проведения новых Игр: "},
     {TR_WINDOW_ADVISOR_ENTERTAINMENT_PREPARING_NG, "Месяц/а/ев до проведения Морского Сражения:"},
@@ -660,7 +609,6 @@ static translation_string all_strings[] = {
     {TR_WINDOW_BUILDING_ARENA_BOTH_SHOWS, "На этой арене, к радости зрителям, проводятся гладиаторские бои и охоты на животных."},
     {TR_WINDOW_BUILDING_ARENA_NEEDS_LIONS, "На этой арене регулярно проводятся гладиаторские бои, чтобы развлекать толпу, но бои львов возвысило бы это зрелище."},
     {TR_WINDOW_BUILDING_ARENA_NEEDS_GLADIATORS, "В по арене в поисках добычи бродят голодные звери, но отсутствие обученных гладиаторов приводит к кратковременным представлениям."},
-																																																			  
     {TR_OVERLAY_ARENA_COL, "Арены"},
     {TR_TOOLTIP_OVERLAY_ARENA_COL_1, "Этот дом не имеет доступа к арене или Колизею."},
     {TR_TOOLTIP_OVERLAY_ARENA_COL_2, "У этого дома есть доступ к арене с одним выступлением."},
@@ -713,7 +661,6 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_LABOR_SEEKER, "Переключить доступ соискателям работников" },
     {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_MISSIONARY, "Переключить доступ миссионерам" },
     {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_WATCHMAN, "Переключить доступ стражникам" },
-
     {TR_HOTKEY_DUPLICATE_TITLE, "Горячая клавиша уже назначена"},
     {TR_HOTKEY_DUPLICATE_MESSAGE, "Эта комбинация клавиш уже назначена для следующего действия:"},
     {TR_BUILDING_GARDEN_PATH, "Садовая" },
@@ -804,13 +751,6 @@ static translation_string all_strings[] = {
     {TR_WINDOW_RACE_BET_DESCRIPTION, "Сделайте ставку на лошадь по вашему выбору и удвойте ставку, если ваш конь выиграет. Во время игр ваш заработок даже увеличится в четыре раза!"},
     {TR_WARNING_BET_VICTORY, "Ваш конь победил"},
     {TR_WARNING_BET_DEFEAT, "Ваш конь проиграл"},
-																  
-																									   
-											
-									   
-																											
-										
-																											  
 	{TR_PERSONAL_SAVINGS, "сбережения:"},
     {TR_WINDOW_RACE_BET_BLUE_HORSE, "Ставка на синих"},
     {TR_WINDOW_RACE_BET_RED_HORSE, "Ставка на красных"},
@@ -835,7 +775,6 @@ static translation_string all_strings[] = {
     {TR_WINDOW_RACE_RED_HORSE_DESCRIPTION, "Красная команда - известна как команда самых успешных возничих в истории Рима - бывшего гребца и спасителя римского консула." },
     {TR_WINDOW_RACE_WHITE_HORSE_DESCRIPTION, "Белая команда - основана бывшими гладиаторами. Бойцовские качества они впитали в себя с молоком матери и даже как свободные люди они живут ради трудностей." },
     {TR_WINDOW_RACE_GREEN_HORSE_DESCRIPTION, "Зеленая команда - претендует на происхождение от 'Целересов' - всадников времен Римского царства. Они до сих пор утверждают, что являются лучшими из лучших." },
-
     {TR_CONFIG_DIGIT_SEPARATOR, "Разделить цифры"},
     {TR_TOOLTIP_OVERLAY_PROBLEMS_NO_LABOR, "Нет рабочих" },
     {TR_WINDOW_BUILDING_DISTRIBUTION_GRANARY_CART_PUSHER_GETTING, "Наша тележка забирает товар из другого амбара."},
@@ -915,11 +854,9 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_SHOW_OVERLAY_EMPLOYMENT, "Слой работы" },
     {TR_HOTKEY_ROTATE_MAP_NORTH, "Повернуть карту на север" },
     {TR_HOTKEY_BUILD_WHEAT_FARM, "Пшеничных ферм" },
-
     {TR_HOTKEY_SHOW_MESSAGES, "Показать сообщения"},
     {TR_HOTKEY_SHOW_EMPIRE_MAP, "Показать карту империи"},
     {TR_TOGGLE_GRID, "Переключить сетку"},
-
     {TR_WARNING_SCREENSHOT_SAVED, "Снимок экрана сохранен: "},
     {TR_OUT_OF_MONEY, "Денег больше нет"},
     {TR_CITY_MESSAGE_TITLE_EMPERORS_WRATH, "Злость императора" },
@@ -1174,7 +1111,6 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_APPLY_COST, "Применять открытую стоимость?"},
     {TR_PARAMETER_DESTROY_ALL, "Уничтожить все типы?"},
     {TR_PARAMETER_GRID_OFFSET, "Смещение сетки"},
-
     {TR_PARAMETER_RADIUS, "Радиус"},
     {TR_PARAMETER_TYPE_INVASION_SIZE, "Размер"},
     {TR_PARAMETER_TYPE_INVASION_TYPE, "Тип атаки"},
@@ -1506,14 +1442,11 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_BUTTON_REJECT_DELIVERY, "Запретить доставку оружия из оружейной"},
     {TR_TOOLTIP_BUTTON_ACCEPT_DELIVERY, "Разрешить доставку оружия из оружейной"},
     {TR_CONFIG_SHOW_DESIRABILITY_RANGE, "Покажите привлекательность при постройке мавзолеев и нимфеев"},
-																													  
-																										  
     {TR_BUILDING_FORT_ARCHERS, "Ауксиларии - Лучники"},
     {TR_WINDOW_ADVISOR_MILITARY_ARCHER, "лучников"},
     {TR_TOOLTIP_BUTTON_ACCEPT_MARKET_LADIES, "Разрешить доступ рынкам"},
     {TR_TOOLTIP_BUTTON_REJECT_MARKET_LADIES, "Запретить доступ рынкам"},
     {TR_TOOLTIP_BUTTON_ACCEPT_TRADE_CARAVAN, "Разрешить доступ торговым караванам"},
-
     {TR_TOOLTIP_BUTTON_REJECT_TRADE_CARAVAN, "Запретить доступ торговым караванам"},
     {TR_TOOLTIP_BUTTON_ACCEPT_TRADE_SHIPS, "Разрешить доступ торговым кораблям"},
     {TR_TOOLTIP_BUTTON_REJECT_TRADE_SHIPS, "Запретить доступ торговым кораблям"},
