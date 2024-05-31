@@ -496,7 +496,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_WINDOW_HOUSE_SENTIMENT_8, "Жители довольны вами." },
     {TR_BUILDING_WINDOW_HOUSE_SENTIMENT_9, "Жители очень довольны вами." },
     {TR_BUILDING_WINDOW_HOUSE_SENTIMENT_10, "Жители крайне довольны вами." },
-    {TR_BUILDING_WINDOW_HOUSE_SENTIMENT_11, "Жители любят вас." },
+    {TR_BUILDING_WINDOW_HOUSE_SENTIMENT_11, "Жители обожают вас." },
     {TR_BUILDING_WINDOW_HOUSE_SENTIMENT_12, "Жители почитают вас за бога." },
     {TR_BUILDING_WINDOW_HOUSE_UPSET_HIGH_TAXES, "Жители недовольны высоким налогам." },
     {TR_BUILDING_WINDOW_HOUSE_UPSET_LOW_WAGES, "Жители недовольны низким зарплатам." },
