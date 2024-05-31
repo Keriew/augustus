@@ -1471,6 +1471,12 @@ static translation_string all_strings[] = {
     {TR_BUILDING_FORT_JAVELIN, "Auxiliaries - Javelins" },
     {TR_WINDOW_ADVISOR_JAVELIN, "Javelins" },
     {TR_WARNING_NO_ARMOURY, "Build an armory to deliver weapons to barracks" },
+    {TR_BUILDING_LATRINES, "Latrines"},
+    {TR_BUILDING_LATRINES_DESC_1, "A place of comfort appreciated by the population to talk about the news of the day or their business."},
+    {TR_BUILDING_LATRINES_DESC_2, "Latrines are used by citizens having only access to a well, and help to slightly improve the housing and health levels. Houses in range of a fountain won't make use of public latrines."},
+    {TR_BUILDING_LATRINES_MISSING_EVOLVE, "This house cannot evolve, as it does not have access to a latrine or a clean water supply from a fountain."},
+    {TR_BUILDING_LATRINES_MISSING_DEVOLVE, "This house will devolve soon, as it does not have access to a latrine or a clean water from a fountain."},
+    {TR_BUILDING_LATRINES_NO_WORKERS, "Without employees to maintain the latrines, citizens avoid coming to relax there."},
     {TR_CONFIG_USER_PATH_DEFAULT, "Default (Caesar III installation path, no subdirectories)" },
     {TR_CONFIG_USER_PATH_WITH_SUBDIRECTORIES, "Caesar III installation path, using subdirectories" },
     {TR_CONFIG_USER_PATH_RECOMMENDED, "Recommended ("},
@@ -1490,7 +1496,6 @@ static translation_string all_strings[] = {
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TEXT, "The user path was successfully changed.\nDo you want to copy over your files?"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_OVERWRITE, "Overwrite existing files"},
     {TR_FIGURE_TYPE_ARMORY_CARTPUSHER, "Armory deliveryman"}
-
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

@@ -197,8 +197,9 @@ static int get_height_id(void)
             case BUILDING_AMPHITHEATER:
             case BUILDING_ARENA:
             case BUILDING_CONCRETE_MAKER:
-                            return 5;
-
+            case BUILDING_LATRINES:
+                return 5;
+                
             case BUILDING_DOCK:
             case BUILDING_LIGHTHOUSE:
             case BUILDING_CARAVANSERAI:
@@ -743,6 +744,8 @@ static void draw_background(void)
             window_building_draw_shrine(&context);
         } else if (btype == BUILDING_ARMOURY) {
             window_building_draw_armoury(&context);
+        }  else if (btype == BUILDING_LATRINES) {
+            window_building_draw_latrines(&context);
         }
     } else if (context.type == BUILDING_INFO_LEGION) {
         window_building_draw_legion_info(&context);

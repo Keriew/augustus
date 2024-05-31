@@ -91,7 +91,8 @@ augustus_building_properties_mapping augustus_building_properties[] = {
     {BUILDING_OVERGROWN_GARDENS, {1, 1, 0, 0, 0}, "Aesthetics", "Overgrown_Garden_01"},
     {BUILDING_FORT_AUXILIA_INFANTRY, {3,1,0,0,0}, "Military", 0},
     {BUILDING_FORT_ARCHERS, {3,1,0,0,0}, "Military", 0},
-    {BUILDING_ARMOURY, {2,0,0,0,0}, "Military", "Armoury_OFF_C"}
+    {BUILDING_ARMOURY, {2,0,0,0,0}, "Military", "Armoury_OFF_C"},
+    {BUILDING_LATRINES, {1,1,0,0,0}, "Health_Education", "Latrine_N"}
 };
 
 #define AUGUSTUS_BUILDINGS (sizeof(augustus_building_properties) / sizeof(augustus_building_properties_mapping))
@@ -244,6 +245,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         {1, 1,   0, 0, 0 },
         {1, 1,   0, 0, 0 },
         {2, 1, 216, 0, 0 },
+        {1, 1,   0, 0, 0 },
         {1, 1,   0, 0, 0 },
         {1, 1,   0, 0, 0 },
         {1, 1,   0, 0, 0 },

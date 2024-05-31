@@ -1471,6 +1471,12 @@ static translation_string all_strings[] = {
     {TR_BUILDING_FORT_JAVELIN, "Auxiliaires - Javeline" },
     {TR_WINDOW_ADVISOR_JAVELIN, "Javelines" },
     {TR_WARNING_NO_ARMOURY, "Armurerie requise pour livrer des armes à la caserne" },
+    {TR_BUILDING_LATRINES, "Latrines"},
+    {TR_BUILDING_LATRINES_DESC_1, "Lieu d'aisance apprécié de la population pour parler des nouvelles du jour ou de leurs affaires."},    
+    {TR_BUILDING_LATRINES_DESC_2, "Les latrines sont utilisées par les citoyens n'ayant accès qu'à un puits, et améliorent légèrement le rang de logement et l'hygiène. Les maisons avec accès à une fontaine ne feront pas usage des latrines publiques."},
+    {TR_BUILDING_LATRINES_MISSING_EVOLVE, "Cette maison ne peut pas évoluer, car elle n'a pas accès à des latrines ou à l'eau propre d'une fontaine."},
+    {TR_BUILDING_LATRINES_MISSING_DEVOLVE, "Cette maison va bientôt régresser, car elle n'a pas accès à des latrines ou à l'eau propre d'une fontaine."},
+    {TR_BUILDING_LATRINES_NO_WORKERS, "Sans employés pour entretenir les latrines, les citoyens évitent de venir s'y relaxer."},
     {TR_CONFIG_USER_PATH_DEFAULT, "Défaut (répertoire d'installation de Caesar III, pas de sous-dossiers)" },
     {TR_CONFIG_USER_PATH_WITH_SUBDIRECTORIES, "répertoire d'installation de Caesar III, avec sous-dossiers" },
     {TR_CONFIG_USER_PATH_RECOMMENDED, "Recommandé ("},
@@ -1490,7 +1496,6 @@ static translation_string all_strings[] = {
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TEXT, "Le chemin du répertoire a été modifié avec succès.\nVoulez-vous y copier vos fichiers ?"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_OVERWRITE, "Écraser les fichiers existants"},
     {TR_FIGURE_TYPE_ARMORY_CARTPUSHER, "Livreur de l'Armurerie"}
-    
 };
 
 void translation_french(const translation_string **strings, int *num_strings)
