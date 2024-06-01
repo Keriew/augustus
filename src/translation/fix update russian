@@ -93,7 +93,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_MORE_STOCKPILE, "Дома запасают больше товаров с рынка"},
     {TR_CONFIG_NO_SUPPLIER_DISTRIBUTION, "Закупщицы с рынка не продают товары"},
     {TR_CONFIG_IMMEDIATELY_DELETE_BUILDINGS, "Мгновенное разрушение зданий"},
-    {TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD, "Толкатели тележек из зернохранилищ могут покидать дорогу"},
+    {TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD, "Толкатели тележек из амбаров могут покидать дорогу"},
     {TR_CONFIG_GRANARIES_GET_DOUBLE, "Удвоить вместимость тележек, распределяющих еду между амбарами"},
     {TR_CONFIG_ALLOW_EXPORTING_FROM_GRANARIES, "Разрешить торговцам экспортировать продовольствие из амбаров"},
     {TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD, "Часовые на башне не нуждаются в дороге"},
