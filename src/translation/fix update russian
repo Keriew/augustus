@@ -927,7 +927,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_SAND_PIT_SOME_EMPLOYEES, "В этом карьере работает очень мало людей. В результате добыча песка идет медленно."},
     {TR_BUILDING_SAND_PIT_FEW_EMPLOYEES, "Поскольку рабочих в карьере почти нет, добыча почти прекратилась. В ближайший год здесь будет добываться мало песка."},
     {TR_BUILDING_BRICKWORKS, "Кирпичная мастерская"},
-    {TR_BUILDING_BRICKWORKS_DESC, "Здесь, из песка и глины изготавливаются кирпичи для строительства памятников."},
+    {TR_BUILDING_BRICKWORKS_DESC, "В этой мастерской из песка и глины изготавливаются кирпичи для строительства памятников."},
     {TR_BUILDING_BRICKWORKS_PRODUCTION, "Производство завершено на"},
     {TR_BUILDING_BRICKWORKS_COMPLETE, "."},
     {TR_BUILDING_BRICKWORKS_HALTED, "Ваш советник по торговле приказал прекратить работу на кирпичных мастерских."},
