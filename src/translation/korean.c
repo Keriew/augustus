@@ -315,7 +315,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_OBELISK, "오벨리스크" },
     {TR_BUILDING_POND_DESC, "저수조에서 끌어온 물로 채워진 연못은 동식물에게 물을 제공하고 사람들에게는 시원하고 느긋한 오아시스가 되어줍니다. 모든 시민들은 연못 근처에서 살고 싶어합니다." },
     {TR_BUILDING_WINDOW_POND, "연못"},
-    {TR_BUILDING_OBELISK_DESC, "나일 강의 고대 왕이 만든 고당신 기념물입니다. 이집트인들이 버려둔 것입니다."},
+    {TR_BUILDING_OBELISK_DESC, "나일 강의 고대 왕이 만든 고귀한 기념물입니다. 이집트인들이 버려둔 것입니다."},
     {TR_ADVISOR_FINANCE_LEVIES, "건물 유지비"},
     {TR_CONFIRM_DELETE_MONUMENT, "이 기념물 파괴"},
     {TR_SELECT_EPITHET_PROMPT_HEADER, "부여할 속성 선택"},
