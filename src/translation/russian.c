@@ -1439,7 +1439,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_BARRACKS_PRIORITY_WATCHTOWER, "Приоритетная подготовка сторожевых башен"},
     {TR_TOOLTIP_BUTTON_REJECT_DELIVERY, "Запретить доставку оружия из оружейной"},
     {TR_TOOLTIP_BUTTON_ACCEPT_DELIVERY, "Разрешить доставку оружия из оружейной"},
-    {TR_CONFIG_SHOW_DESIRABILITY_RANGE, "Покажите привлекательность при постройке мавзолеев и нимфеев"},
+    {TR_CONFIG_SHOW_DESIRABILITY_RANGE, "Показывать привлекательность при постройке мавзолеев и нимфеев"},
     {TR_BUILDING_FORT_LEGIONARIES, "Легионеры"},
     {TR_BUILDING_FORT_JAVELIN, "Ауксиларии - Метатели"},
     {TR_BUILDING_FORT_MOUNTED, "Ауксиларии - Всадники"},
