@@ -1400,7 +1400,7 @@ static translation_string all_strings[] = {
     {TR_FIGURE_TYPE_BEGGAR, "거지"},
     {TR_BUILDING_ARMOURY, "무기고" },
     {TR_BUILDING_ARMOURY_NO_EMPLOYEES, "직원이 없으면 무기고는 우리 병사들에게 무기를 전달할 수 없습니다. 무장하지 못한 군단은 우리를 지켜주지 못할테니 마르스가 지켜주기를 바래야합니다!"},
-    {TR_BUILDING_ARMOURY_SOME_EMPLOYEES, "무기고의 직원이 일부만 있기 때문에 군단을 완전히 장비하는 데는 상당한 시간이 걸립니다. 바라건대 우리 적들도 기다려주기를 바랍니다!"},
+    {TR_BUILDING_ARMOURY_SOME_EMPLOYEES, "무기고의 직원이 일부만 있기 때문에 군단을 완전히 장비하는 데는 상당한 시간이 걸립니다. 그러니 우리 적이 기다려주기를 바래야합니다!"},
     {TR_BUILDING_ARMOURY_MANY_EMPLOYEES, "무기고는 군인들에게 무기를 전달할 수 있지만 직원 부족으로 인해 가끔 부족 현상이 발생합니다."},
     {TR_BUILDING_ARMOURY_DESC, "무기고는 우리 병사들에게 무기를 빠르고 효율적인 공급을 보장합니다. 저 야만인들은 로마 병참의 상대가 되지 않습니다!" },
     {TR_BUILDING_TAVERN_DESC_UPGRADED_WINE_NO_FOOD, "이 선술집은 와인이 계속 흐르는 한 시민들에게 즐거움을 선사합니다. 고기나 생선을 공급하면 그 매력이 커질 것입니다. 지역 개발을 통해 건물을 확장할 수 있었습니다. 고객에게 더 많은 공간을 제공할 수 있습니다." },
