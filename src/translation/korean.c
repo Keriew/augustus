@@ -776,7 +776,7 @@ static translation_string all_strings[] = {
     {TR_WINDOW_RACE_RED_HORSE_DESCRIPTION, "레드 팀 - 로마 역사상 가장 성공적인 전차병 팀으로 알려져 있으며 전직 노잡이이자 로마 집정관의 구세주였습니다." },
     {TR_WINDOW_RACE_WHITE_HORSE_DESCRIPTION, "화이트 팀 - 전직 검투사들이 창설했습니다. 그들은 그들의 피속에서 싸우며 심지어 자유인이 되어서도 도전을 위해 살아갑니다." },
     {TR_WINDOW_RACE_GREEN_HORSE_DESCRIPTION, "그린 팀 - 로마 왕국 시대부터 '켈레레스' 기병의 후손들입니다. 그들은 여전히 ​​최고 중의 최고라고 주장합니다." },
-    {TR_CONFIG_DIGIT_SEPARATOR, "자릿수 구분"},
+    {TR_CONFIG_DIGIT_SEPARATOR, "Separate digits"},
     {TR_TOOLTIP_OVERLAY_PROBLEMS_NO_LABOR, "일꾼 없음" },
     {TR_WINDOW_BUILDING_DISTRIBUTION_GRANARY_CART_PUSHER_GETTING, "짐수레꾼이 다른 곡물 창고에서 음식을 가져오러 가는 중입니다."},
     {TR_WINDOW_BUILDING_DISTRIBUTION_CART_PUSHER_RETURNING_WITH, "짐수레꾼이 배달할 물건을 가지고 돌아오고 있습니다." },
