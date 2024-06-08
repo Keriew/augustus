@@ -1138,7 +1138,7 @@ static translation_string all_strings[] = {
     {TR_CONDITION_TYPE_BUILDING_COUNT_ANY, "Количество типов зданий"},
     {TR_CONDITION_TYPE_CUSTOM_VARIABLE_CHECK, "Значение польз. переменной"},
     {TR_CONDITION_TYPE_TRADE_ROUTE_OPEN, "Торговый путь открыт"},
-    {TR_CONDITION_TYPE_TRADE_ROUTE_PRICE, "Торговый путь закрыт"},
+    {TR_CONDITION_TYPE_TRADE_ROUTE_PRICE, "Цена открытия торгового пути"},
     {TR_CONDITION_TYPE_RESOURCE_STORED_COUNT, "Количество хранимых ресурсов"},
     {TR_CONDITION_TYPE_RESOURCE_STORAGE_AVAILABLE, "Доступные хранилища ресурсов"},
     {TR_CONDITION_TYPE_BUILDING_COUNT_AREA, "Здания в области"},
