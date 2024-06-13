@@ -1078,7 +1078,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_CHANGE_TITLE, "Невозможно изменить польз. переменную"},
     {TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_CHANGE_TEXT, "Польз. переменная используется уже минимум одним событием.\n\nУдалите польз. переменную из события, чтобы иметь возможность изменить ее имя или удалить."},
     {TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_CHANGE_EVENT_ID, "Идентификатор самого раннего события c переменной: "},
-    {TR_EDITOR_GRID_OFFSET, " смещение" },
+    {TR_EDITOR_GRID_OFFSET, " ячейка" },
     {TR_EDITOR_RETURN_TO_CITY, "Назад в город"},
     {TR_PARAMETER_TYPE_CHECK, "Сравнительная проверка"},
     {TR_PARAMETER_TYPE_MIN_MAX_NUMBER_MIN, "Минимум"},
