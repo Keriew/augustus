@@ -953,7 +953,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_BRICKWORKS_STORED_SAND, "Запасы песка,"},
     {TR_BUILDING_BRICKWORKS_STORED_CLAY, "Запасы глины,"},
     {TR_BUILDING_CONCRETE_MAKER, "Бетонная мастерская"},
-    {TR_BUILDING_CONCRETE_MAKER_DESC, "Здесь песок смешивается для получения бетона для строительства памятников."},
+    {TR_BUILDING_CONCRETE_MAKER_DESC, "Здесь песок смешивается с водой для получения бетона, необходимого для возведения памятников."},
     {TR_BUILDING_CONCRETE_MAKER_PRODUCTION, "Производство завершено на"},
     {TR_BUILDING_CONCRETE_MAKER_COMPLETE, "."},
     {TR_BUILDING_CONCRETE_MAKER_HALTED, "Ваш советник по торговле приказал прекратить работу на бетономешалках."},
