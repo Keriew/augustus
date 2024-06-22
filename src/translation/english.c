@@ -665,6 +665,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_BOTH_MAUSOLEUM_DESC, "This mausoleum pleases all the gods, though it is not desirable to nearby houses. Such burial places improve sanitary conditions in the city, raising the overall health of your citizens." },
     {TR_FIGURE_TYPE_WATCHMAN, "Watchman" },
     {TR_BUILDING_MARS_TEMPLE_MODULE_DESC_NO_MESS, "This temple will collect food for your supply post, once one is constructed." },
+    {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION, "Walker permissions" },
     {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_MAINTENANCE, "Toggle prefects and engineers access" },
     {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_PRIEST, "Toggle priests access" },
     {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_MARKET, "Toggle market supplier access" },
@@ -1503,7 +1504,9 @@ static translation_string all_strings[] = {
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TITLE, "User path changed"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TEXT, "The user path was successfully changed.\nDo you want to copy over your files?"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_OVERWRITE, "Overwrite existing files"},
-    {TR_FIGURE_TYPE_ARMORY_CARTPUSHER, "Armory deliveryman"}
+    {TR_FIGURE_TYPE_ARMORY_CARTPUSHER, "Armory deliveryman"},
+    {TR_BUILDING_MILITARY_ADVISOR_GOTO, "Visit your Military Advisor?" },
+    {TR_BUILDING_FINANCIAL_ADVISOR_GOTO, "Visit your Financial Advisor?" },
 
 };
 
