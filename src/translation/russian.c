@@ -665,6 +665,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_BOTH_MAUSOLEUM_DESC, "Такие захоронения улучшают санитарные условия в городе, повышая общее состояние здоровья ваших граждан, хотя и не желателен для близлежащих домов." },
     {TR_FIGURE_TYPE_WATCHMAN, "Стражник" },
     {TR_BUILDING_MARS_TEMPLE_MODULE_DESC_NO_MESS, "Этот храм будет собирать еду для вашего поста снабжения, как только будет построен."},
+    {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION, "Разрешения для пешеходов" },
     {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_MAINTENANCE, "Переключить доступ префектам и инженерам" },
     {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_PRIEST, "Переключить доступ жрецам" },
     {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_MARKET, "Переключить доступ рыночной торговке" },
@@ -1504,6 +1505,8 @@ static translation_string all_strings[] = {
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TEXT, "Путь пользователя был успешно изменен.\nНе хотите ли вы скопировать свои файлы?"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_OVERWRITE, "Перезаписать существующие файлы"},
     {TR_FIGURE_TYPE_ARMORY_CARTPUSHER, "Доставщик оружейной"},
+    {TR_BUILDING_MILITARY_ADVISOR_GOTO, "Посетить военного советника?" },
+    {TR_BUILDING_FINANCIAL_ADVISOR_GOTO, "Посетить финансового советника?" },
 
 };
 
