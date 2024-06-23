@@ -180,7 +180,7 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_EDITOR_TOGGLE_BATTLE_INFO, "Информация боя"},
     {TR_HOTKEY_EDIT_TITLE, "Введите новую клавишу" },
     {TR_BUILDING_ROADBLOCK, "Дорожный блок"},
-    {TR_BUILDING_ROADBLOCK_DESC, "Блокирует проход бесцельно бродящим гражданам"},
+    {TR_BUILDING_ROADBLOCK_DESC, "Блокирует проход бесцельно бродящим гражданам в определенные районы вашего города."},
     {TR_BUILDING_ARCHITECT_GUILD, "Гильдия архитекторов" },
     {TR_BUILDING_ARCHITECT_GUILD_DESC, "Здесь архитекторы неустанно трудятся над возведением памятников во славу Рима." },
     {TR_BUILDING_GRAND_TEMPLE_ADD_MODULE, "Дать храму эпитет" },
@@ -1505,8 +1505,7 @@ static translation_string all_strings[] = {
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TEXT, "Путь пользователя был успешно изменен.\nНе хотите ли вы скопировать свои файлы?"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_OVERWRITE, "Перезаписать существующие файлы"},
     {TR_FIGURE_TYPE_ARMORY_CARTPUSHER, "Доставщик оружейной"},
-    {TR_BUILDING_MILITARY_ADVISOR_GOTO, "Посетить военного советника?" },
-    {TR_BUILDING_FINANCIAL_ADVISOR_GOTO, "Посетить финансового советника?" },
+    {TR_TOOLTIP_BUTTON_CAN_GO_TO_ADVISORS, "Показать соответствующего советника для этого здания." },
 
 };
 
