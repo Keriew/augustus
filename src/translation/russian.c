@@ -1133,6 +1133,7 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_TYPE_TARGET_TYPE, "Тип цели атаки"},
     {TR_PARAMETER_TYPE_ENEMY_TYPE, "Тип врага"},
     {TR_PARAMETER_TYPE_GOD, "Бог" },
+    {TR_PARAMETER_TYPE_CLIMATE, "Климат" },
     {TR_CONDITION_TYPE_TIME_PASSED, "Прошедшее время"},
     {TR_CONDITION_TYPE_DIFFICULTY, "Сложность"},
     {TR_CONDITION_TYPE_MONEY, "Городские средства"},
@@ -1189,6 +1190,7 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_CAUSE_BLESSING, "Вызвать благословение" },
     {TR_ACTION_TYPE_CAUSE_MINOR_CURSE, "Вызвать недовольство" },
     {TR_ACTION_TYPE_CAUSE_MAJOR_CURSE, "Вызвать гнев" },
+    {TR_ACTION_TYPE_CHANGE_CLIMATE, "Изменить климат" },
     {TR_PARAMETER_VALUE_COMPARISON_TYPE_EQUAL, "''Равно''"},
     {TR_PARAMETER_VALUE_COMPARISON_TYPE_EQUAL_OR_LESS, "''Меньше или равно''"},
     {TR_PARAMETER_VALUE_COMPARISON_TYPE_EQUAL_OR_MORE, "''Больше или равно''"},
@@ -1329,6 +1331,9 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_VALUE_GOD_MERCURY, "Меркурия"},
     {TR_PARAMETER_VALUE_GOD_NEPTUNE, "Нептуна"},
     {TR_PARAMETER_VALUE_GOD_VENUS, "Венеры"},
+    {TR_PARAMETER_VALUE_CLIMATE_CENTRAL, "Центральный" },
+    {TR_PARAMETER_VALUE_CLIMATE_NORTHERN, "Северный" },
+    {TR_PARAMETER_VALUE_CLIMATE_DESERT, "Пустнынный" },
     {TR_PARAMETER_DISPLAY_SET_TO, "установить на"},
     {TR_PARAMETER_DISPLAY_ADD_TO, "прибавить"},
     {TR_PARAMETER_DISPLAY_BETWEEN, "между"},
@@ -1506,7 +1511,6 @@ static translation_string all_strings[] = {
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_OVERWRITE, "Перезаписать существующие файлы"},
     {TR_FIGURE_TYPE_ARMORY_CARTPUSHER, "Доставщик оружейной"},
     {TR_TOOLTIP_BUTTON_CAN_GO_TO_ADVISORS, "Показать соответствующего советника для этого здания." },
-
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
