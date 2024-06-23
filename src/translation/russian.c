@@ -1318,7 +1318,7 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_VALUE_ENEMY_3_CELT, "Кельты"},
     {TR_PARAMETER_VALUE_ENEMY_4_GOTH, "Готы"},
     {TR_PARAMETER_VALUE_ENEMY_5_PERGAMUM, "Пергамонцы"},
-    {TR_PARAMETER_VALUE_ENEMY_6_SELEUCID, "Селевседы"},
+    {TR_PARAMETER_VALUE_ENEMY_6_SELEUCID, "Селевкиды"},
     {TR_PARAMETER_VALUE_ENEMY_7_ETRUSCAN, "Этруски"},
     {TR_PARAMETER_VALUE_ENEMY_8_GREEK, "Греки"},
     {TR_PARAMETER_VALUE_ENEMY_9_EGYPTIAN, "Египтяне"},
