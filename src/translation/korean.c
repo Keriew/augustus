@@ -1511,7 +1511,7 @@ static translation_string all_strings[] = {
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TEXT, "사용자 경로가 성공적으로 변경되었습니다.\n파일을 복사하시겠습니까?"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_OVERWRITE, "기존 파일 덮어쓰기"},
     {TR_FIGURE_TYPE_ARMORY_CARTPUSHER, "무기고 짐수레꾼"}
-
+    {TR_TOOLTIP_BUTTON_CAN_GO_TO_ADVISORS, "이 건물과 관련된 자문관 방문." },
 };
 
 void translation_korean(const translation_string **strings, int *num_strings)
