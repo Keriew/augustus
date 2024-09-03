@@ -1512,6 +1512,7 @@ static translation_string all_strings[] = {
     {TR_FIGURE_TYPE_ARMORY_CARTPUSHER, "Доставщик оружейной"},
     {TR_TOOLTIP_BUTTON_CAN_GO_TO_ADVISORS, "Показать соответствующего советника для этого здания." },
     {TR_FIGURE_ENEMY_CATAPULT, "Катапульта"},
+    {TR_TOOLTIP_BUTTON_DELETE_COMMON_MESSAGES, "Удалить общие сообщения"}
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
