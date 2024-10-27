@@ -1,5 +1,6 @@
 #include "scenario_events_import_xml.h"
 
+#include "core/encoding.h"
 #include "core/file.h"
 #include "core/lang.h"
 #include "core/log.h"
@@ -161,6 +162,15 @@ static int xml_import_start_event(void)
     }
 
     data.current_event = scenario_event_create(min, max, max_repeats);
+
+    if (!data.current_event) {
+        data.success = 0;
+        log_error("Could not create the event - out of memory", 0, 0);
+        return 0;
+    }
+    if (xml_parser_has_attribute("name")) {
+        encoding_from_utf8(xml_parser_get_attribute_string("name"), data.current_event->name, EVENT_NAME_LENGTH);
+    }
     return 1;
 }
 
@@ -236,7 +246,7 @@ static int xml_import_start_group(void)
     fulfillment_type type = FULFILLMENT_TYPE_ANY;
     if (xml_parser_has_attribute("fulfillment_type")) {
         const char *values[2] = { "all", "any" };
-        int result = xml_parser_get_attribute_enum("type", values, 2, 0);
+        int result = xml_parser_get_attribute_enum("fulfillment_type", values, 2, 0);
         if (result != -1) {
             type = result;
         }

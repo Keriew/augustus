@@ -228,6 +228,10 @@ static int export_event(scenario_event_t *event)
     xml_exporter_new_element("event");
 
     xml_exporter_add_attribute_int("id", event->id);
+
+    if (*event->name) {
+        xml_exporter_add_attribute_encoded_text("name", event->name);
+    }
     if (event->repeat_months_min > 0) {
         xml_exporter_add_attribute_int("repeat_months_min", event->repeat_months_min);
     }
@@ -243,12 +247,13 @@ static int export_event(scenario_event_t *event)
     const scenario_condition_group_t *group;
     array_foreach(event->condition_groups, group) {
         if (group->conditions.size > 0) {
-            xml_exporter_new_element("group");
-            if (group->type == FULFILLMENT_TYPE_ALL) {
-                xml_exporter_add_attribute_text("fulfillment_type", "all");
+            if (group->type != FULFILLMENT_TYPE_ALL) {
+                xml_exporter_new_element("group");
             }
             array_foreach_callback(group->conditions, export_event_condition);
-            xml_exporter_close_element();
+            if (group->type != FULFILLMENT_TYPE_ALL) {
+                xml_exporter_close_element();
+            }
         }
     }
     xml_exporter_close_element();

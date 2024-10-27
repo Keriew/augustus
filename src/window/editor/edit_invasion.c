@@ -99,8 +99,8 @@ static const struct {
     { TR_EDITOR_INVASION_ENEMY_TYPE, 38 },
     { TR_EDITOR_INVASION_FROM, 38 },
     { TR_EDITOR_INVASION_ATTACK_PRIORITY, 38 },
-    { TR_EDITOR_INVASION_REPEAT, 98 },
-    { TR_EDITOR_INVASION_REPEAT_FREQUENCY, 38 }
+    { TR_EDITOR_REPEAT, 98 },
+    { TR_EDITOR_REPEAT_FREQUENCY, 38 }
 };
 
 static int get_largest_section_title_width(void)
@@ -211,23 +211,23 @@ static void draw_background(void)
 
     // Never repeat
     btn = &edit_buttons[6];
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_DO_NOT_REPEAT, x_offset + btn->x + 30,
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_DO_NOT_REPEAT, x_offset + btn->x + 30,
         BASE_Y_OFFSET + btn->y + 3, FONT_NORMAL_BLACK);
 
     // Repeat forever
     btn = &edit_buttons[7];
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_REPEAT_FOREVER, x_offset + btn->x + 30,
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FOREVER, x_offset + btn->x + 30,
         BASE_Y_OFFSET + btn->y + 3, FONT_NORMAL_BLACK);
 
     // Repeat N times
     btn = &edit_buttons[9];
     if (data.invasion.repeat.times == 0 || data.invasion.repeat.times > 2) {
-        text_draw_label_and_number_centered(lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_REPEAT_TEXT),
+        text_draw_label_and_number_centered(lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_TEXT),
             data.invasion.repeat.times,
-            (const char *) lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_REPEAT_TIMES),
+            (const char *) lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_TIMES),
             x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6, btn->width, FONT_NORMAL_BLACK, 0);
     } else {
-        lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_REPEAT_ONCE + data.invasion.repeat.times - 1,
+        lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_ONCE + data.invasion.repeat.times - 1,
             x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6, btn->width, FONT_NORMAL_BLACK);
     }
 
@@ -245,7 +245,7 @@ static void draw_background(void)
     btn = &edit_buttons[11];
     text_draw_number_centered_colored(data.invasion.repeat.interval.max, x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6,
         btn->width, enabled_font, enabled_color);
-    lang_text_draw_colored(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_REPEAT_FREQUENCY_YEARS, x_offset + btn->x + btn->width + 10,
+    lang_text_draw_colored(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_YEARS, x_offset + btn->x + btn->width + 10,
         BASE_Y_OFFSET + btn->y + 6, enabled_font, enabled_color);
 
     // Bottom button labels

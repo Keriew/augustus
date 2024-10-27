@@ -33,19 +33,10 @@ void input_box_start(input_box *box)
     system_keyboard_set_input_rect(box->x + screen_dialog_offset_x(), box->y + screen_dialog_offset_y(),
         box->width_blocks * BLOCK_SIZE - 35, box->height_blocks * BLOCK_SIZE);
     if (box->on_change) {
+        free(box->old_text);
         box->old_text = malloc(sizeof(uint8_t) * box->text_length);
         string_copy(box->text, box->old_text, box->text_length);
     }
-}
-
-void input_box_pause(void)
-{
-    keyboard_pause_capture();
-}
-
-void input_box_resume(void)
-{
-    keyboard_resume_capture();
 }
 
 void input_box_stop(input_box *box)

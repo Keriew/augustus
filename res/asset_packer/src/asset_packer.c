@@ -60,7 +60,7 @@ static unsigned int final_image_width;
 static unsigned int final_image_height;
 
 typedef struct {
-    int id;
+    unsigned int id;
     const char *path;
     image_packer_rect *rect;
     color_t *pixels;
@@ -201,7 +201,7 @@ static void create_frame_xml_line(const layer *l)
     xml_exporter_close_element();
 }
 
-void new_packed_asset(packed_asset *asset, int index)
+void new_packed_asset(packed_asset *asset, unsigned int index)
 {
     asset->id = index;
 }

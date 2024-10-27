@@ -1,6 +1,7 @@
 #include "scenario_event_details.h"
 
 #include "assets/assets.h"
+#include "core/lang.h"
 #include "core/log.h"
 #include "core/string.h"
 #include "editor/editor.h"
@@ -18,6 +19,7 @@
 #include "scenario/scenario_event.h"
 #include "scenario/scenario_events_controller.h"
 #include "scenario/scenario_events_parameter_data.h"
+#include "widget/input_box.h"
 #include "window/editor/map.h"
 #include "window/editor/scenario_action_edit.h"
 #include "window/editor/scenario_condition_edit.h"
@@ -34,15 +36,38 @@
 #define MAX_TEXT_LENGTH 75
 
 enum {
-    SCENARIO_EVENT_DETAILS_SET_MAX_REPEATS = 0,
-    SCENARIO_EVENT_DETAILS_SET_REPEAT_MIN,
-    SCENARIO_EVENT_DETAILS_SET_REPEAT_MAX,
+    REPEAT_MIN = 0,
+    REPEAT_MAX = 1
 };
 
-static void button_amount(const generic_button *button);
+enum {
+    EVENT_REPEAT_NEVER = 0,
+    EVENT_REPEAT_FOREVER = 1,
+    EVENT_REPEAT_TIMES = 2
+};
+
+enum {
+    DO_NOT_DISABLE = 0,
+    DISABLE_ON_NO_REPEAT = 1
+};
+
+enum {
+    SELECT_CONDITIONS = 0,
+    SELECT_ACTIONS = 1
+};
+
+typedef enum {
+    CHECKBOX_NO_SELECTION = 0,
+    CHECKBOX_SOME_SELECTED = 1,
+    CHECKBOX_ALL_SELECTED = 2
+} checkbox_selection_type;
+
 static void button_add_new_condition(const generic_button *button);
 static void button_add_new_action(const generic_button *button);
 static void button_delete_event(const generic_button *button);
+static void button_repeat_type(const generic_button *button);
+static void button_repeat_times(const generic_button *button);
+static void button_repeat_between(const generic_button *button);
 static void button_ok(const generic_button *button);
 
 static void draw_condition_button(const grid_box_item *item);
@@ -52,19 +77,42 @@ static void click_action_button(unsigned int index, unsigned int mouse_x, unsign
 static void handle_condition_tooltip(const grid_box_item *item, tooltip_context *c);
 static void handle_action_tooltip(const grid_box_item *item, tooltip_context *c);
 
-#define NUM_BUTTONS (sizeof(buttons) / sizeof(generic_button))
-
-static generic_button buttons[] = {
-    {24, 404, 288, 25, button_add_new_condition},
-    {328, 404, 288, 25, button_add_new_action},
-    {16, 439, 200, 25, button_delete_event},
-    {524, 439, 100, 25, button_ok},
-};
+static void button_select_all_none(const generic_button *button);
 
 typedef struct {
     int group_id;
     scenario_condition_t *condition;
 } condition_list_item;
+
+static struct {
+    uint8_t event_name[EVENT_NAME_LENGTH];
+    scenario_event_t *event;
+    int repeat_type;
+    struct {
+        condition_list_item *list;
+        unsigned int active;
+        uint8_t *selected;
+        checkbox_selection_type selection_type;
+        unsigned int available;
+    } conditions;
+    struct {
+        scenario_action_t **list;
+        unsigned int active;
+        uint8_t *selected;
+        checkbox_selection_type selection_type;
+        unsigned int available;
+    } actions;
+    grid_box_type *focused_grid_box;
+    struct {
+        unsigned int top;
+        unsigned int select_all_none;
+        unsigned int bottom;
+    } focus_button;
+} data;
+
+static input_box event_name_input = {
+    112, 50, 32, 2, FONT_NORMAL_WHITE, 1, data.event_name, EVENT_NAME_LENGTH
+};
 
 static grid_box_type conditions_grid_box = {
     .x = 16,
@@ -93,30 +141,38 @@ static grid_box_type actions_grid_box = {
     .extend_to_hidden_scrollbar = 1,
     .draw_item = draw_action_button,
     .on_click = click_action_button,
-  // .handle_tooltip = handle_action_tooltip
+    .handle_tooltip = handle_action_tooltip
 };
 
-static struct {
-    unsigned int focus_button_id;
-    scenario_event_t *event;
-    struct {
-        condition_list_item *list;
-        unsigned int active;
-        uint8_t *selected;
-        unsigned int available;
-    } conditions;
-    struct {
-        scenario_action_t **list;
-        unsigned int active;
-        uint8_t *selected;
-        unsigned int available;
-    } actions;
-    grid_box_type *focused_grid_box;
-} data;
+#define NUM_TOP_BUTTONS (sizeof(top_buttons) / sizeof(generic_button))
+
+static generic_button top_buttons[] = {
+    {192, 90, 220, 20, button_repeat_type, 0, EVENT_REPEAT_NEVER},
+    {192, 115, 220, 20, button_repeat_type, 0, EVENT_REPEAT_FOREVER},
+    {192, 140, 20, 20, button_repeat_type, 0, EVENT_REPEAT_TIMES},
+    {222, 138, 190, 25, button_repeat_times},
+    {272, 166, 50, 25, button_repeat_between, 0, REPEAT_MIN, DISABLE_ON_NO_REPEAT},
+    {362, 166, 50, 25, button_repeat_between, 0, REPEAT_MAX, DISABLE_ON_NO_REPEAT},
+};
+
+static generic_button select_all_none_buttons[] = {
+    {16, 203, 20, 20, button_select_all_none, 0, SELECT_CONDITIONS},
+    {320, 203, 20, 20, button_select_all_none, 0, SELECT_ACTIONS}
+};
+
+#define NUM_BOTTOM_BUTTONS (sizeof(bottom_buttons) / sizeof(generic_button))
+
+static generic_button bottom_buttons[] = {
+    {16, 404, 192, 25, button_add_new_condition},
+    {224, 404, 192, 25, button_add_new_action},
+    {432, 404, 192, 25, button_add_new_action},
+    {16, 439, 200, 25, button_delete_event},
+    {524, 439, 100, 25, button_ok},
+};
 
 static unsigned int count_maximum_needed_list_items(void)
 {
-    unsigned int total_items;
+    unsigned int total_items = 0;
     scenario_condition_group_t *group;
     array_foreach(data.event->condition_groups, group) {
         if (group->conditions.size > 0) {
@@ -206,6 +262,7 @@ static void select_no_conditions(void)
     for (unsigned int i = 0; i < data.conditions.active; i++) {
         data.conditions.selected[i] = 0;
     }
+    data.conditions.selection_type = CHECKBOX_NO_SELECTION;
 }
 
 static void select_no_actions(void)
@@ -213,25 +270,46 @@ static void select_no_actions(void)
     for (unsigned int i = 0; i < data.actions.active; i++) {
         data.actions.selected[i] = 0;
     }
+    data.actions.selection_type = CHECKBOX_NO_SELECTION;
 }
 
-static void select_all_conditions(void)
+static void start_input(void)
 {
-    for (unsigned int i = 0; i < data.conditions.active; i++) {
-        data.conditions.selected[i] = 1;
+    string_copy(data.event->name, data.event_name, EVENT_NAME_LENGTH);
+    input_box_start(&event_name_input);
+}
+
+static void stop_input(void)
+{
+    input_box_stop(&event_name_input);
+    string_copy(data.event_name, data.event->name, EVENT_NAME_LENGTH);
+}
+
+static void prepare_event(int event_id)
+{
+    data.event = scenario_event_get(event_id);
+
+    if (data.event->repeat_months_min > data.event->repeat_months_max) {
+        data.event->repeat_months_min = data.event->repeat_months_max;
     }
-}
-
-static void select_all_actions(void)
-{
-    for (unsigned int i = 0; i < data.actions.active; i++) {
-        data.actions.selected[i] = 1;
+    if (data.event->repeat_months_min == 0) {
+        data.repeat_type = EVENT_REPEAT_NEVER;
+        data.event->repeat_months_min = 1;
+        if (data.event->repeat_months_max == 0) {
+            data.event->repeat_months_max = 1;
+        }
+    } else if (data.event->max_number_of_repeats == 0) {
+        data.repeat_type = EVENT_REPEAT_FOREVER;
+        data.event->max_number_of_repeats = 1;
+    } else {
+        data.repeat_type = EVENT_REPEAT_TIMES;
     }
 }
 
 static void init(int event_id)
 {
-    data.event = scenario_event_get(event_id);
+    prepare_event(event_id);
+    start_input();
     grid_box_init(&conditions_grid_box, count_maximum_needed_list_items());
     grid_box_init(&actions_grid_box, data.event->actions.size);
     select_no_conditions();
@@ -260,6 +338,20 @@ static void draw_background(void)
 
     graphics_in_dialog();
 
+    // Helper debug text during city mode
+    if (!editor_is_active()) {
+        text_draw_centered(translation_for(TR_EDITOR_SCENARIO_EVENT_STATE_UNDEFINED + data.event->state),
+            420, 40, 80, FONT_NORMAL_GREEN, color_from_state(data.event->state));
+        text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENT_EXECUTION_COUNT),
+            data.event->execution_count, "", 40, 72, FONT_NORMAL_PLAIN, COLOR_BLACK);
+        text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENT_MONTHS_UNTIL_ACTIVE),
+            data.event->months_until_active, "", 336, 72, FONT_NORMAL_PLAIN, COLOR_BLACK);
+    }
+
+    // Refresh lists
+    grid_box_request_refresh(&conditions_grid_box);
+    grid_box_request_refresh(&actions_grid_box);
+
     outer_panel_draw(0, 0, 40, 30);
 
     // Title and ID
@@ -267,21 +359,118 @@ static void draw_background(void)
     text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENT_ID),
         data.event->id, "", 16, 24, FONT_NORMAL_PLAIN, COLOR_BLACK);
 
-    // Refresh lists
-    grid_box_request_refresh(&conditions_grid_box);
-    grid_box_request_refresh(&actions_grid_box);
+    // "Name" string
+    lang_text_draw_right_aligned(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENT_NAME, 0, event_name_input.y + 10,
+        event_name_input.x - 8, FONT_NORMAL_BLACK);
 
-    // Add condition/action buttons
+    // Top buttons
+    // Repeat type selected checkbox
+    const generic_button *btn = &top_buttons[data.repeat_type];
+    text_draw(string_from_ascii("x"), btn->x + 6, btn->y + 3, FONT_NORMAL_BLACK, 0);
+
+    btn = &top_buttons[0];
+    // Repeat type - Never
+    lang_text_draw_right_aligned(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT, 0, btn->y + 3, btn->x - 16, FONT_NORMAL_BLACK);
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_DO_NOT_REPEAT, btn->x + 30, btn->y + 3, FONT_NORMAL_BLACK);
+
+    // Repeat forever
+    btn = &top_buttons[1];
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FOREVER, btn->x + 30, btn->y + 3, FONT_NORMAL_BLACK);
+
+    // Repeat N times
+    btn = &top_buttons[3];
+    int repeat_times = data.event->max_number_of_repeats;
+    if (repeat_times < 1) {
+        repeat_times = 1;
+    }
+    if (repeat_times > 2) {
+        text_draw_label_and_number_centered(lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_TEXT), repeat_times,
+            (const char *)lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_TIMES),
+            btn->x, btn->y + 6, btn->width, FONT_NORMAL_BLACK, 0);
+    } else {
+        lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_ONCE + repeat_times - 1, btn->x, btn->y + 6,
+            btn->width, FONT_NORMAL_BLACK);
+    }
+
+    // Repeat interval text
+    font_t enabled_font = data.repeat_type == EVENT_REPEAT_NEVER ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK;
+    color_t enabled_color = data.repeat_type == EVENT_REPEAT_NEVER ? COLOR_FONT_LIGHT_GRAY : COLOR_MASK_NONE;
+
+    btn = &top_buttons[4];
+    lang_text_draw_right_aligned(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY, 0, btn->y + 6, top_buttons[0].x - 16,
+        FONT_NORMAL_BLACK);
+    lang_text_draw_colored(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_BETWEEN, top_buttons[0].x, btn->y + 6,
+        enabled_font, enabled_color);
+    text_draw_number_centered_colored(data.event->repeat_months_min, btn->x, btn->y + 6,
+        btn->width, enabled_font, enabled_color);
+    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_AND, btn->x + btn->width,
+        btn->y + 6, btn[1].x - (btn->x + btn->width), enabled_font, enabled_color);
+    btn = &top_buttons[5];
+    text_draw_number_centered_colored(data.event->repeat_months_max, btn->x, btn->y + 6,
+        btn->width, enabled_font, enabled_color);
+    lang_text_draw_colored(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_MONTHS, btn->x + btn->width + 10,
+        btn->y + 6, enabled_font, enabled_color);
+
+    // Checkmarks for select all/none buttons for conditions
+    int checkmark_id = assets_lookup_image_id(ASSET_UI_SELECTION_CHECKMARK);
+    const image *img = image_get(checkmark_id);
+    if (data.conditions.selection_type == CHECKBOX_SOME_SELECTED) {
+        text_draw_centered(string_from_ascii("-"), select_all_none_buttons[0].x, select_all_none_buttons[0].y + 3,
+            select_all_none_buttons[0].width, FONT_LARGE_BLACK, 0);
+    } else if (data.conditions.selection_type == CHECKBOX_ALL_SELECTED) {
+        image_draw(checkmark_id, select_all_none_buttons[0].x + (20 - img->original.width) / 2,
+             select_all_none_buttons[0].y + (20 - img->original.height) / 2, COLOR_MASK_NONE, SCALE_NONE);
+    }
+
+    // Condition grid box label
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_CONDITION,
+        select_all_none_buttons[0].x + select_all_none_buttons[0].width + 6, conditions_grid_box.y - 20,
+        FONT_NORMAL_BLACK);
+
+    // Checkmarks for select all/none buttons for actions
+    if (data.actions.selection_type == CHECKBOX_SOME_SELECTED) {
+        text_draw_centered(string_from_ascii("-"), select_all_none_buttons[1].x, select_all_none_buttons[1].y + 3,
+            select_all_none_buttons[1].width, FONT_LARGE_BLACK, 0);
+    } else if (data.actions.selection_type == CHECKBOX_ALL_SELECTED) {
+        image_draw(checkmark_id, select_all_none_buttons[1].x + (20 - img->original.width) / 2,
+             select_all_none_buttons[1].y + (20 - img->original.height) / 2, COLOR_MASK_NONE, SCALE_NONE);
+    }
+
+    // Action grid box label
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_ACTION,
+        select_all_none_buttons[1].x + select_all_none_buttons[1].width + 6, actions_grid_box.y - 20,
+        FONT_NORMAL_BLACK);
+
+    // No conditions
+    int y_offset = conditions_grid_box.y + conditions_grid_box.height / 2 - 10;
+    if (data.conditions.active == 0) {
+        lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_NO_CONDITIONS, conditions_grid_box.x,
+            y_offset, conditions_grid_box.width, FONT_NORMAL_BLACK);
+    }
+
+    // No actions
+    if (data.actions.active == 0) {
+        lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_NO_ACTIONS, actions_grid_box.x,
+            y_offset, actions_grid_box.width, FONT_NORMAL_BLACK);
+    }
+
+    // New condition button label
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_CONDITION_ADD,
-        buttons[0].x, buttons[0].y + 6, buttons[0].width, FONT_NORMAL_BLACK);
+        bottom_buttons[0].x, bottom_buttons[0].y + 6, bottom_buttons[0].width, FONT_NORMAL_BLACK);
 
+    // Delete selected button label
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_ACTION_ADD,
-        buttons[1].x, buttons[1].y + 6, buttons[1].width, FONT_NORMAL_BLACK);
+        bottom_buttons[1].x, bottom_buttons[1].y + 6, bottom_buttons[1].width, FONT_NORMAL_BLACK);
+
+    // Add action button label
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_ACTION_ADD,
+        bottom_buttons[2].x, bottom_buttons[2].y + 6, bottom_buttons[2].width, FONT_NORMAL_BLACK);
     
     // Bottom buttons
-    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_DELETE, buttons[2].x, buttons[2].y + 6,
-        buttons[2].width, FONT_NORMAL_PLAIN, COLOR_RED);
-    lang_text_draw_centered(18, 3, buttons[3].x, buttons[3].y + 6, buttons[3].width, FONT_NORMAL_BLACK);
+    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_DELETE, bottom_buttons[3].x, bottom_buttons[3].y + 6,
+        bottom_buttons[3].width, FONT_NORMAL_PLAIN, COLOR_RED);
+    lang_text_draw_centered(18, 3, bottom_buttons[4].x, bottom_buttons[4].y + 6, bottom_buttons[4].width,
+        FONT_NORMAL_BLACK);
 
     graphics_reset_dialog();
 }
@@ -334,46 +523,33 @@ static void draw_action_button(const grid_box_item *item)
 static void draw_foreground(void)
 {
     graphics_in_dialog();
-    
-    if (!editor_is_active()) {
-        text_draw_centered(translation_for(TR_EDITOR_SCENARIO_EVENT_STATE_UNDEFINED + data.event->state),
-            420, 40, 80, FONT_NORMAL_GREEN, color_from_state(data.event->state));
-        text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENT_EXECUTION_COUNT),
-            data.event->execution_count, "", 40, 72, FONT_NORMAL_PLAIN, COLOR_BLACK);
-        text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENT_MONTHS_UNTIL_ACTIVE),
-            data.event->months_until_active, "", 336, 72, FONT_NORMAL_PLAIN, COLOR_BLACK);
+
+    input_box_draw(&event_name_input);
+
+    for (unsigned int i = 0; i < NUM_TOP_BUTTONS; i++) {
+        int focus = data.focus_button.top == i + 1;
+        if ((top_buttons[i].parameter2 == DISABLE_ON_NO_REPEAT && data.repeat_type == EVENT_REPEAT_NEVER)) {
+            focus = 0;
+        }
+        int width = i < 2 ? 20 : top_buttons[i].width;
+        button_border_draw(top_buttons[i].x, top_buttons[i].y, width, top_buttons[i].height, focus);
     }
 
-    for (int i = 0; i < NUM_BUTTONS; i++) {
-        button_border_draw(buttons[i].x, buttons[i].y, buttons[i].width, buttons[i].height,
-            data.focus_button_id == i + 1);
-    }
-/****
-    int y_offset = EVENT_REPEAT_Y_OFFSET;
-    if (scenario_event_can_repeat(data.event) == 0) {
-        text_draw_centered(translation_for(TR_EDITOR_SCENARIO_EVENT_DOES_NOT_REPEAT), 32, y_offset + 8,
-            SHORT_BUTTON_WIDTH, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
-    } else if (data.event->max_number_of_repeats > 0) {
-        text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENT_MAX_NUM_REPEATS),
-            data.event->max_number_of_repeats, "", SHORT_BUTTON_LEFT_PADDING + 16, y_offset + 8,
-            FONT_NORMAL_GREEN, COLOR_MASK_NONE);
-    } else {
-        text_draw_centered(translation_for(TR_EDITOR_SCENARIO_EVENT_MAX_NUM_REPEATS), 32, y_offset + 8,
-            SHORT_BUTTON_WIDTH, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
-        text_draw_centered(translation_for(TR_EDITOR_SCENARIO_EVENT_REPEATS_FOREVER), 240, y_offset + 8,
-            SHORT_BUTTON_WIDTH, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+    for (unsigned int i = 0; i < 2; i++) {
+        int focus = data.focus_button.select_all_none == i + 1;
+        if (i == 0 && data.conditions.active == 0) {
+            focus = 0;
+        } else if (i == 1 && data.actions.active == 0) {
+            focus = 0;
+        }
+        button_border_draw(select_all_none_buttons[i].x, select_all_none_buttons[i].y, 20, 20, focus);
     }
 
-    y_offset += DETAILS_ROW_HEIGHT;
-    text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENT_REPEAT_MIN_MONTHS),
-        data.event->repeat_months_min, "", SHORT_BUTTON_LEFT_PADDING + 16, y_offset + 8,
-        FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+    for (unsigned int i = 0; i < NUM_BOTTOM_BUTTONS; i++) {
+        button_border_draw(bottom_buttons[i].x, bottom_buttons[i].y, bottom_buttons[i].width, bottom_buttons[i].height,
+            data.focus_button.bottom == i + 1);
+    }
 
-    y_offset += DETAILS_ROW_HEIGHT;
-    text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENT_REPEAT_MAX_MONTHS),
-        data.event->repeat_months_max, "", SHORT_BUTTON_LEFT_PADDING + 16, y_offset + 8,
-        FONT_NORMAL_GREEN, COLOR_MASK_NONE);
-****/
     grid_box_draw(&conditions_grid_box);
     grid_box_draw(&actions_grid_box);
 
@@ -398,7 +574,10 @@ static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
     get_focused_grid_box(m_dialog);
-    if (generic_buttons_handle_mouse(m_dialog, 0, 0, buttons, NUM_BUTTONS, &data.focus_button_id) ||
+    if (input_box_handle_mouse(m_dialog, &event_name_input) ||
+        generic_buttons_handle_mouse(m_dialog, 0, 0, top_buttons, NUM_TOP_BUTTONS, &data.focus_button.top) ||
+        generic_buttons_handle_mouse(m_dialog, 0, 0, select_all_none_buttons, 2, &data.focus_button.select_all_none) ||
+        generic_buttons_handle_mouse(m_dialog, 0, 0, bottom_buttons, NUM_BOTTOM_BUTTONS, &data.focus_button.bottom) ||
         grid_box_handle_input(data.focused_grid_box, m_dialog, 1)) {
         return;
     }
@@ -407,19 +586,94 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 }
 
-static void set_amount_max_repeats(int value)
+static void button_repeat_type(const generic_button *button)
+{
+    int repeat_type = button->parameter1;
+    if (data.repeat_type == repeat_type) {
+        return;
+    }
+    data.repeat_type = repeat_type;
+    window_request_refresh();
+}
+
+static void set_repeat_times(int value)
 {
     data.event->max_number_of_repeats = value;
 }
 
-static void set_amount_repeat_min(int value)
+static void button_repeat_times(const generic_button *button)
 {
-    data.event->repeat_months_min = value;
+    data.repeat_type = EVENT_REPEAT_TIMES;
+    window_numeric_input_bound_show(0, 0, button,
+        3, 1, 999, set_repeat_times);
 }
 
-static void set_amount_repeat_max(int value)
+static void set_repeat_interval_min(int value)
+{
+    data.event->repeat_months_min = value;
+    if (data.event->repeat_months_max < value) {
+        data.event->repeat_months_max = value;
+    }
+}
+
+static void set_repeat_interval_max(int value)
 {
     data.event->repeat_months_max = value;
+    if (data.event->repeat_months_min > value) {
+        data.event->repeat_months_min = value;
+    }
+}
+
+static void button_repeat_between(const generic_button *button)
+{
+    int amount_type = button->parameter1;
+    if (data.repeat_type == EVENT_REPEAT_NEVER) {
+        return;
+    }
+
+    window_numeric_input_bound_show(0, 0, button,
+        2, 1, 999, amount_type == REPEAT_MIN ? set_repeat_interval_min : set_repeat_interval_max);
+}
+
+static void select_all_conditions(void)
+{
+    for (unsigned int i = 0; i < data.conditions.active; i++) {
+        data.conditions.selected[i] = 1;
+    }
+    data.conditions.selection_type = CHECKBOX_ALL_SELECTED;
+}
+
+static void select_all_actions(void)
+{
+    for (unsigned int i = 0; i < data.actions.active; i++) {
+        data.actions.selected[i] = 1;
+    }
+    data.actions.selection_type = CHECKBOX_ALL_SELECTED;
+}
+
+static void button_select_all_none(const generic_button *button)
+{
+    unsigned int select_type = button->parameter1;
+    if (select_type == SELECT_CONDITIONS) {
+        if (data.conditions.active == 0) {
+            return;
+        }
+        if (data.conditions.selection_type == CHECKBOX_ALL_SELECTED) {
+            select_no_conditions();
+        } else {
+            select_all_conditions();
+        }
+    } else {
+        if (data.actions.active == 0) {
+            return;
+        }
+        if (data.actions.selection_type == CHECKBOX_ALL_SELECTED) {
+            select_no_actions();
+        } else {
+            select_all_actions();
+        }
+    }
+    window_request_refresh();
 }
 
 static void button_add_new_condition(const generic_button *button)
@@ -442,12 +696,58 @@ static void button_add_new_action(const generic_button *button)
 static void button_delete_event(const generic_button *button)
 {
     scenario_event_delete(data.event);
+    stop_input();
     window_go_back();
+}
+
+static void set_repeat_type(void)
+{
+    if (data.repeat_type == EVENT_REPEAT_NEVER) {
+        data.event->repeat_months_min = 0;
+        data.event->repeat_months_max = 0;
+    } else if (data.repeat_type == EVENT_REPEAT_FOREVER) {
+        data.event->max_number_of_repeats = 0;
+    }
 }
 
 static void button_ok(const generic_button *button)
 {
+    stop_input();
+    set_repeat_type();
     window_go_back();
+}
+
+static void update_conditions_selection_type(void)
+{
+    uint8_t some_selected = 0;
+    uint8_t all_selected = 1;
+    for (unsigned int i = 0; i < data.conditions.active; i++) {
+        if (!data.conditions.list[i].condition) {
+            continue;
+        }
+        some_selected |= data.conditions.selected[i];
+        all_selected &= data.conditions.selected[i];
+        if (some_selected != all_selected) {
+            data.conditions.selection_type = CHECKBOX_SOME_SELECTED;
+            return;
+        }
+    }
+    data.conditions.selection_type = some_selected ? CHECKBOX_ALL_SELECTED : CHECKBOX_NO_SELECTION;
+}
+
+static void update_actions_selection_type(void)
+{
+    uint8_t some_selected = 0;
+    uint8_t all_selected = 1;
+    for (unsigned int i = 0; i < data.actions.active; i++) {
+        some_selected |= data.actions.selected[i];
+        all_selected &= data.actions.selected[i];
+        if (some_selected != all_selected) {
+            data.actions.selection_type = CHECKBOX_SOME_SELECTED;
+            return;
+        }
+    }
+    data.actions.selection_type = some_selected ? CHECKBOX_ALL_SELECTED : CHECKBOX_NO_SELECTION;
 }
 
 static void click_condition_button(unsigned int index, unsigned int mouse_x, unsigned int mouse_y)
@@ -461,9 +761,11 @@ static void click_condition_button(unsigned int index, unsigned int mouse_x, uns
         if (mouse_x < 20) {
             if (data.conditions.selected) {
                 data.conditions.selected[index] ^= 1;
+                update_conditions_selection_type();
                 window_request_refresh();
             }
         } else {
+            stop_input();
             window_editor_scenario_condition_edit_show(list_item->condition);
         }
     }
@@ -472,19 +774,8 @@ static void click_condition_button(unsigned int index, unsigned int mouse_x, uns
 static void click_action_button(unsigned int index, unsigned int mouse_x, unsigned int mouse_y)
 {
     if (data.actions.list[index]->type != ACTION_TYPE_UNDEFINED) {
+        stop_input();
         window_editor_scenario_action_edit_show(data.actions.list[index]);
-    }
-}
-
-static void button_amount(const generic_button *button)
-{
-    int param1 = button->parameter1;
-    if (param1 == SCENARIO_EVENT_DETAILS_SET_MAX_REPEATS) {
-        window_numeric_input_show(0, 0, button, 3, 100000, set_amount_max_repeats);
-    } else if (param1 == SCENARIO_EVENT_DETAILS_SET_REPEAT_MIN) {
-        window_numeric_input_show(0, 0, button, 3, 1000, set_amount_repeat_min);
-    } else if (param1 == SCENARIO_EVENT_DETAILS_SET_REPEAT_MAX) {
-        window_numeric_input_show(0, 0, button, 3, 1000, set_amount_repeat_max);
     }
 }
 
@@ -500,6 +791,20 @@ static void handle_condition_tooltip(const grid_box_item *item, tooltip_context 
     static uint8_t text[MAX_TEXT_LENGTH * 2];
     scenario_events_parameter_data_get_display_string_for_condition(list_item->condition, text, MAX_TEXT_LENGTH * 2);
     if (text_get_width(text, FONT_NORMAL_BLACK) > item->width - item->height - 12) {
+        c->precomposed_text = text;
+        c->type = TOOLTIP_BUTTON;
+    }
+}
+
+static void handle_action_tooltip(const grid_box_item *item, tooltip_context *c)
+{
+    const scenario_action_t *action = data.actions.list[item->index];
+    if (action->type == ACTION_TYPE_UNDEFINED) {
+        return;
+    }
+    static uint8_t text[MAX_TEXT_LENGTH * 2];
+    scenario_events_parameter_data_get_display_string_for_action(action, text, MAX_TEXT_LENGTH * 2);
+    if (text_get_width(text, FONT_NORMAL_BLACK) > item->width - 8) {
         c->precomposed_text = text;
         c->type = TOOLTIP_BUTTON;
     }
