@@ -48,7 +48,8 @@ enum {
 
 enum {
     DO_NOT_DISABLE = 0,
-    DISABLE_ON_NO_REPEAT = 1
+    DISABLE_ON_NO_REPEAT = 1,
+    DISABLE_ON_NO_SELECTION = 2
 };
 
 enum {
@@ -153,6 +154,7 @@ static generic_button top_buttons[] = {
     {222, 138, 190, 25, button_repeat_times},
     {272, 166, 50, 25, button_repeat_between, 0, REPEAT_MIN, DISABLE_ON_NO_REPEAT},
     {362, 166, 50, 25, button_repeat_between, 0, REPEAT_MAX, DISABLE_ON_NO_REPEAT},
+    {150, 203, 150, 20, 0, 0, 0, DISABLE_ON_NO_SELECTION}
 };
 
 static generic_button select_all_none_buttons[] = {
@@ -528,7 +530,8 @@ static void draw_foreground(void)
 
     for (unsigned int i = 0; i < NUM_TOP_BUTTONS; i++) {
         int focus = data.focus_button.top == i + 1;
-        if ((top_buttons[i].parameter2 == DISABLE_ON_NO_REPEAT && data.repeat_type == EVENT_REPEAT_NEVER)) {
+        if ((top_buttons[i].parameter2 == DISABLE_ON_NO_REPEAT && data.repeat_type == EVENT_REPEAT_NEVER) ||
+            (top_buttons[i].parameter2 == DISABLE_ON_NO_SELECTION && data.conditions.selection_type == CHECKBOX_NO_SELECTION)) {
             focus = 0;
         }
         int width = i < 2 ? 20 : top_buttons[i].width;
@@ -549,6 +552,11 @@ static void draw_foreground(void)
         button_border_draw(bottom_buttons[i].x, bottom_buttons[i].y, bottom_buttons[i].width, bottom_buttons[i].height,
             data.focus_button.bottom == i + 1);
     }
+
+    // "Set selected to group..." option label
+    color_t color = data.conditions.selection_type == CHECKBOX_NO_SELECTION ? COLOR_FONT_LIGHT_GRAY : 0;
+    text_draw_centered(string_from_ascii("Set selected to group..."), top_buttons[6].x, top_buttons[6].y + 5,
+        top_buttons[6].width, FONT_SMALL_PLAIN, color);
 
     grid_box_draw(&conditions_grid_box);
     grid_box_draw(&actions_grid_box);

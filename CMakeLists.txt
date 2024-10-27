@@ -33,6 +33,12 @@ if(${TARGET_PLATFORM} STREQUAL "emscripten" AND NOT DEFINED CMAKE_TOOLCHAIN_FILE
     endif()
 endif()
 
+# Enable "Edit and Continue" for MSVC
+if (POLICY CMP0141)
+    cmake_policy(SET CMP0141 NEW)
+    set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>")
+endif()
+
 set(SHORT_NAME augustus)
 set(USER_FRIENDLY_NAME Augustus)
 project(${SHORT_NAME} C)
@@ -794,6 +800,12 @@ if(MSVC)
     set_source_files_properties(${SOURCE_FILES} PROPERTIES COMPILE_FLAGS "/W4")
     set_source_files_properties(${PROJECT_SOURCE_DIR}/res/augustus.rc PROPERTIES COMPILE_FLAGS "")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /utf-8 /wd4100 /wd4244")
+  #  message("${CMAKE_MSVC_DEBUG_INFORMATION_FORMAT}")
+   # message("CMAKE_C_FLAGS: ${CMAKE_C_FLAGS_DEBUG}")
+    #   set(CMAKE_C_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
+     #   set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "/SAFESEH:NO /debug /INCREMENTAL /LTCG:OFF")
+      #  set(CMAKE_EXE_LINKER_FLAGS_DEBUG "/SAFESEH:NO /debug /INCREMENTAL /LTCG:OFF")
+      #  set(CMAKE_MODULE_LINKER_FLAGS_DEBUG "/SAFESEH:NO /debug /INCREMENTAL /LTCG:OFF")
 endif()
 
 # Show debug info on crash on 32 bit builds compiled with MinGW
