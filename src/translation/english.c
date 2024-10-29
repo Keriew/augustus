@@ -1552,6 +1552,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SET_A_ROUTE, "(Set a route)"},
     {TR_EDITOR_NO_PRICE_CHANGES, "No price changes"},
     {TR_EDITOR_NEW_PRICE_CHANGE, "New price change"},
+    {TR_TOOLTIP_BUTTON_DELETE_COMMON_MESSAGES, "Delete common messages"},
     {TR_EDITOR_FORM_ERRORS_FOUND, "Errors found in form"},
     {TR_EDITOR_FORM_HAS_FOLLOWING_ERRORS, "The form has the following errors:"},
     {TR_EDITOR_EDIT_REQUEST_NO_RESOURCE, "No resource set"},
@@ -1562,7 +1563,8 @@ static translation_string all_strings[] = {
     {TR_EDITOR_EDIT_INVASION_SET_YEAR, "Invasion cannot start on the first year"},
     {TR_EDITOR_EDIT_DEMAND_CHANGE_NO_YEAR, "The change cannot occour on the first year"},
     {TR_EDITOR_EDIT_DEMAND_CHANGE_INVALID_ROUTE_SET, "Invalid route set"},
-    {TR_TOOLTIP_BUTTON_DELETE_COMMON_MESSAGES, "Delete common messages"}
+    {TR_SELECT_NONE, "Select None"},
+    {TR_SELECT_ALL, "Select All"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

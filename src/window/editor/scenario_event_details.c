@@ -417,8 +417,8 @@ static void draw_background(void)
     int checkmark_id = assets_lookup_image_id(ASSET_UI_SELECTION_CHECKMARK);
     const image *img = image_get(checkmark_id);
     if (data.conditions.selection_type == CHECKBOX_SOME_SELECTED) {
-        text_draw_centered(string_from_ascii("-"), select_all_none_buttons[0].x, select_all_none_buttons[0].y + 3,
-            select_all_none_buttons[0].width, FONT_LARGE_BLACK, 0);
+        text_draw(string_from_ascii("-"), select_all_none_buttons[0].x + 8, select_all_none_buttons[0].y + 4,
+            FONT_NORMAL_BLACK, 0);
     } else if (data.conditions.selection_type == CHECKBOX_ALL_SELECTED) {
         image_draw(checkmark_id, select_all_none_buttons[0].x + (20 - img->original.width) / 2,
              select_all_none_buttons[0].y + (20 - img->original.height) / 2, COLOR_MASK_NONE, SCALE_NONE);
@@ -818,9 +818,30 @@ static void handle_action_tooltip(const grid_box_item *item, tooltip_context *c)
     }
 }
 
+static void handle_check_all_none_tooltip(tooltip_context *c)
+{
+    if (data.focus_button.select_all_none == 1) {
+        if (data.conditions.active > 0) {
+            c->precomposed_text = lang_get_string(CUSTOM_TRANSLATION,
+                data.conditions.selection_type == CHECKBOX_ALL_SELECTED ? TR_SELECT_NONE : TR_SELECT_ALL);
+            c->type = TOOLTIP_BUTTON;
+        }
+    } else if (data.focus_button.select_all_none == 2) {
+        if (data.actions.active > 0) {
+            c->precomposed_text = lang_get_string(CUSTOM_TRANSLATION,
+                data.actions.selection_type == CHECKBOX_ALL_SELECTED ? TR_SELECT_NONE : TR_SELECT_ALL);
+            c->type = TOOLTIP_BUTTON;
+        }
+    }
+}
+
+
 static void get_tooltip(tooltip_context *c)
 {
-    grid_box_handle_tooltip(data.focused_grid_box, c);
+    handle_check_all_none_tooltip(c);
+    if (c->type == TOOLTIP_NONE) {
+        grid_box_handle_tooltip(data.focused_grid_box, c);
+    }
 }
 
 void window_editor_scenario_event_details_show(int event_id)

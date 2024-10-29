@@ -120,7 +120,7 @@ struct { \
  */
 #define array_remove_item(a, index) \
 { \
-    for (int array_index = index; array_index + 1 < (a).size; array_index++) { \
+    for (unsigned int array_index = index; array_index + 1 < (a).size; array_index++) { \
         memcpy(array_item(a, array_index), array_item(a, array_index + 1), sizeof(**(a).items)); \
         if ((a).constructor && (!(a).in_use || (a).in_use(array_item(a, array_index)))) { \
             (a).constructor(array_item(a, array_index), array_index); \
@@ -201,6 +201,39 @@ struct { \
     if ((a).size > 1 && (a).in_use) { \
         while ((a).size - 1 && !(a).in_use(array_item(a, (a).size - 1))) { \
             (a).size--; \
+        } \
+    } \
+}
+
+/**
+ * Packs an array, making all used elements of an array contiguous
+ * Moved elements call their constructors
+ * This function only does anything if the array has an in_use callback
+ * @param a The array structure
+ */
+#define array_pack(a) \
+{ \
+    if ((a).in_use) { \
+        unsigned int items_to_move = 0; \
+        for (unsigned int array_index = 0; array_index < (a).size; array_index++) { \
+            if (!(a).in_use(array_item(a, array_index))) { \
+                items_to_move++; \
+                continue; \
+            } \
+            if (!items_to_move) { \
+                continue; \
+            } \
+            unsigned int new_index = array_index - items_to_move; \
+            memcpy(array_item(a, new_index), array_item(a, array_index), sizeof(**(a).items)); \
+            if ((a).constructor) { \
+                (a).constructor(array_item(a, new_index), new_index); \
+            } \
+        } \
+        if (items_to_move) { \
+            for (unsigned int array_index = (a).size - items_to_move; array_index < (a).size; array_index++) { \
+                memset(array_item(a, array_index), 0, sizeof(**(a).items)); \
+            } \
+            array_trim(a); \
         } \
     } \
 }
