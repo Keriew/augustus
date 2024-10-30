@@ -179,7 +179,7 @@ uint32_t buffer_load_dynamic(buffer *buf);
  * Size of the piece in bytes will be calculated as (Standard header size + (array_size * struct_size))
  * @param buf Buffer
  * @param array_size Number of elements in the array. If you are saving only a single struct, then this must be 1.
- * @param struct_size Size in bytes of a single entry of the array.
+ * @param element_size Size in bytes of a single entry of the array.
  */
 void buffer_init_dynamic_array(buffer *buf, int32_t array_size, int32_t element_size);
 
