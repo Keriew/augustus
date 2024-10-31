@@ -24,6 +24,7 @@
 #include "window/editor/scenario_action_edit.h"
 #include "window/editor/scenario_condition_edit.h"
 #include "window/numeric_input.h"
+#include "window/select_list.h"
 
 #define BUTTON_LEFT_PADDING 32
 #define BUTTON_WIDTH 608
@@ -69,6 +70,7 @@ static void button_delete_event(const generic_button *button);
 static void button_repeat_type(const generic_button *button);
 static void button_repeat_times(const generic_button *button);
 static void button_repeat_between(const generic_button *button);
+static void button_set_selected_to_group(const generic_button *button);
 static void button_ok(const generic_button *button);
 
 static void draw_condition_button(const grid_box_item *item);
@@ -95,6 +97,10 @@ static struct {
         uint8_t *selected;
         checkbox_selection_type selection_type;
         unsigned int available;
+        struct {
+            uint8_t **names;
+            unsigned int available;
+        } groups;
     } conditions;
     struct {
         scenario_action_t **list;
@@ -154,7 +160,7 @@ static generic_button top_buttons[] = {
     {222, 138, 190, 25, button_repeat_times},
     {272, 166, 50, 25, button_repeat_between, 0, REPEAT_MIN, DISABLE_ON_NO_REPEAT},
     {362, 166, 50, 25, button_repeat_between, 0, REPEAT_MAX, DISABLE_ON_NO_REPEAT},
-    {150, 203, 150, 20, 0, 0, 0, DISABLE_ON_NO_SELECTION}
+    {150, 203, 150, 20, button_set_selected_to_group, 0, 0, DISABLE_ON_NO_SELECTION}
 };
 
 static generic_button select_all_none_buttons[] = {
@@ -202,6 +208,7 @@ static void update_visible_conditions_and_actions(void)
     }
     data.conditions.active = 0;
     if (data.conditions.available) {
+        memset(data.conditions.list, 0, data.conditions.available * sizeof(condition_list_item));
         scenario_condition_group_t *group;
         scenario_condition_t *condition;
         for (unsigned int i = 1; i < data.event->condition_groups.size; i++) {
@@ -259,6 +266,38 @@ static void update_visible_conditions_and_actions(void)
     grid_box_update_total_items(&actions_grid_box, data.actions.active);
 }
 
+static void update_groups(void)
+{
+    for (unsigned int i = 0; i < data.conditions.groups.available; i++) {
+        free(data.conditions.groups.names[i]);
+    }
+    free(data.conditions.groups.names);
+    data.conditions.groups.names = calloc(data.event->condition_groups.size + 1, sizeof(uint8_t *));
+    if (!data.conditions.groups.names) {
+        log_error("Unable to create groups list - out of memory. The game will probably crash.", 0, 0);
+        data.conditions.groups.available = 0;
+        return;
+    }
+    data.conditions.groups.available = data.event->condition_groups.size + 1;
+    const uint8_t *text = translation_for(TR_EDITOR_SCENARIO_EVENTS_NO_GROUP);
+    int length = string_length(text) + 1;
+    data.conditions.groups.names[0] = calloc(length, sizeof(uint8_t *));
+    string_copy(text, data.conditions.groups.names[0], length);
+
+    for (unsigned int i = 1; i < data.event->condition_groups.size; i++) {
+        text = translation_for(TR_EDITOR_SCENARIO_EVENTS_GROUP);
+        length = string_length(text) + 11;
+        data.conditions.groups.names[i] = calloc(length, sizeof(uint8_t *));
+        uint8_t *cursor = string_copy(text, data.conditions.groups.names[i], length);
+        string_from_int(cursor, i, 0);
+    }
+
+    text = translation_for(TR_EDITOR_SCENARIO_EVENTS_NEW_GROUP);
+    length = string_length(text) + 1;
+    data.conditions.groups.names[data.event->condition_groups.size] = calloc(length, sizeof(uint8_t *));
+    string_copy(text, data.conditions.groups.names[data.event->condition_groups.size], length);
+}
+
 static void select_no_conditions(void)
 {
     for (unsigned int i = 0; i < data.conditions.active; i++) {
@@ -306,6 +345,8 @@ static void prepare_event(int event_id)
     } else {
         data.repeat_type = EVENT_REPEAT_TIMES;
     }
+
+    update_groups();
 }
 
 static void init(int event_id)
@@ -481,7 +522,7 @@ static void draw_condition_button(const grid_box_item *item)
 {
     const condition_list_item *list_item = &data.conditions.list[item->index];
     if (!list_item->condition) {
-        text_draw(string_from_ascii(list_item->group_id ? "Group" : "No group"), item->x + 4, item->y + 7,
+        text_draw(data.conditions.groups.names[list_item->group_id], item->x + 4, item->y + 7,
             FONT_NORMAL_BLACK, 0);
         return;
     }
@@ -716,6 +757,61 @@ static void set_repeat_type(void)
     } else if (data.repeat_type == EVENT_REPEAT_FOREVER) {
         data.event->max_number_of_repeats = 0;
     }
+}
+
+static void pack_and_clear_conditions(scenario_condition_group_t *group)
+{
+    array_pack(group->conditions);
+    if (group->type == FULFILLMENT_TYPE_ANY && group->conditions.size == 0) {
+        array_clear(group->conditions);
+    }
+}
+
+static void set_selected_to_group(int group_id)
+{
+    scenario_condition_group_t *group;
+    // New group
+    if (group_id >= data.event->condition_groups.size) {
+        group = array_advance(data.event->condition_groups);
+        if (!group) {
+            log_error("Unable to create new group - memory full. The game will probably crash", 0, 0);
+            return;
+        }
+    } else {
+        group = array_item(data.event->condition_groups, group_id);
+    }
+    for (unsigned int i = 0; i < data.conditions.active; i++) {
+        if (!data.conditions.selected[i]) {
+            continue;
+        }
+        // Ignore conditions that are already in the group
+        if (data.conditions.list[i].group_id == group_id || !data.conditions.list[i].condition) {
+            continue;
+        }
+        scenario_condition_t *condition = array_advance(group->conditions);
+        if (!condition) {
+            log_error("Unable to add condition to group - memory full. The game will probably crash", 0, 0);
+            return;
+        }
+        *condition = *data.conditions.list[i].condition;
+        data.conditions.list[i].condition->type = CONDITION_TYPE_UNDEFINED;
+    }
+    array_foreach_callback(data.event->condition_groups, pack_and_clear_conditions);
+    array_pack(data.event->condition_groups);
+    update_groups();
+    select_no_conditions();
+    window_request_refresh();
+}
+
+static void button_set_selected_to_group(const generic_button *button)
+{
+    if (data.conditions.selection_type == CHECKBOX_NO_SELECTION) {
+        return;
+    }
+
+    window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y(), button,
+        (const uint8_t **) data.conditions.groups.names, data.conditions.groups.available,
+        set_selected_to_group);
 }
 
 static void button_ok(const generic_button *button)

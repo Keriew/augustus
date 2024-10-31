@@ -4,17 +4,26 @@
 #include "game/resource.h"
 #include "scenario/condition_types/condition_types.h"
 
+static int condition_in_use(const scenario_condition_t *condition)
+{
+    return condition->type != CONDITION_TYPE_UNDEFINED;
+}
+
 void scenario_condition_group_new(scenario_condition_group_t *group, unsigned int id)
 {
+    // This group has been moved and is not new, no need to setup the array
+    if (group->type == FULFILLMENT_TYPE_ANY) {
+        return;
+    }
     group->type = id == 0 ? FULFILLMENT_TYPE_ALL : FULFILLMENT_TYPE_ANY;
-    if (!array_init(group->conditions, CONDITION_GROUP_ITEMS_ARRAY_SIZE_STEP, 0, 0)) {
+    if (!array_init(group->conditions, CONDITION_GROUP_ITEMS_ARRAY_SIZE_STEP, 0, condition_in_use)) {
         log_error("Unable to allocate enough memory for the scenario condition group. The game will now crash.", 0, 0);
     }
 }
 
 int scenario_condition_group_in_use(const scenario_condition_group_t *group)
 {
-    return group->conditions.size > 0;
+    return group->type == FULFILLMENT_TYPE_ALL || group->conditions.size > 0;
 }
 
 void scenario_condition_type_init(scenario_condition_t *condition)
@@ -139,7 +148,7 @@ void scenario_condition_group_load_state(buffer *buf, scenario_condition_group_t
     *link_id = buffer_read_u32(buf);
     group->type = buffer_read_u8(buf);
     unsigned int total_conditions = buffer_read_u32(buf);
-    if (!array_init(group->conditions, CONDITION_GROUP_ITEMS_ARRAY_SIZE_STEP, 0, 0) ||
+    if (!array_init(group->conditions, CONDITION_GROUP_ITEMS_ARRAY_SIZE_STEP, 0, condition_in_use) ||
         !array_expand(group->conditions, total_conditions)) {
         log_error("Unable to create condition group array. The game will now crash.", 0, 0);
     }

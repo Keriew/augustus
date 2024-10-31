@@ -1063,6 +1063,9 @@ typedef enum {
     TR_EDITOR_SCENARIO_EVENTS_COUNT,
     TR_EDITOR_SCENARIO_EVENTS_CONDITIONS,
     TR_EDITOR_SCENARIO_EVENTS_ACTIONS,
+    TR_EDITOR_SCENARIO_EVENTS_NO_GROUP,
+    TR_EDITOR_SCENARIO_EVENTS_GROUP,
+    TR_EDITOR_SCENARIO_EVENTS_NEW_GROUP,
     TR_EDITOR_UNABLE_TO_LOAD_EVENTS_TITLE,
     TR_EDITOR_CHECK_LOG_MESSAGE,
     TR_EDITOR_UNABLE_TO_SAVE_EVENTS_TITLE,
@@ -1567,7 +1570,7 @@ typedef struct {
 
 void translation_load(language_type language);
 
-uint8_t *translation_for(translation_key key);
+const uint8_t *translation_for(translation_key key);
 
 void translation_czech(const translation_string **strings, int *num_strings);
 void translation_english(const translation_string **strings, int *num_strings);

@@ -372,7 +372,7 @@ void window_building_draw_depot_order_source_destination_background(building_inf
 {
     setup_buttons_for_selected_depot();
 
-    uint8_t *title = translation_for(TR_BUILDING_INFO_DEPOT_SELECT_SOURCE_TITLE);
+    const uint8_t *title = translation_for(TR_BUILDING_INFO_DEPOT_SELECT_SOURCE_TITLE);
     if (is_select_destination) {
         title = translation_for(TR_BUILDING_INFO_DEPOT_SELECT_DESTINATION_TITLE);
     }

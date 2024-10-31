@@ -233,7 +233,7 @@ struct { \
             for (unsigned int array_index = (a).size - items_to_move; array_index < (a).size; array_index++) { \
                 memset(array_item(a, array_index), 0, sizeof(**(a).items)); \
             } \
-            array_trim(a); \
+            (a).size -= items_to_move; \
         } \
     } \
 }
