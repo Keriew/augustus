@@ -1064,6 +1064,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_EVENTS_COUNT, "Total scenario events:" },
     {TR_EDITOR_SCENARIO_EVENTS_CONDITIONS, "conditions" },
     {TR_EDITOR_SCENARIO_EVENTS_ACTIONS, "actions" },
+    {TR_EDITOR_SCENARIO_EVENTS_SET_TO_GROUP, "Set selected to group..."},
     {TR_EDITOR_SCENARIO_EVENTS_NO_GROUP, "No group"},
     {TR_EDITOR_SCENARIO_EVENTS_GROUP, "Group "},
     {TR_EDITOR_SCENARIO_EVENTS_NEW_GROUP, "New group"},
