@@ -7,7 +7,7 @@
 #include "core/xml_exporter.h"
 #include "empire/city.h"
 #include "scenario/custom_messages.h"
-#include "scenario/scenario.h"
+#include "scenario/custom_variable.h"
 #include "scenario/scenario_events_controller.h"
 #include "scenario/scenario_events_parameter_data.h"
 #include "window/plain_message_dialog.h"
@@ -109,18 +109,15 @@ static int export_attribute_custom_message(xml_data_attribute_t *attr, int targe
 
 static int export_attribute_custom_variable(xml_data_attribute_t *attr, int target)
 {
-    const custom_variable_t *variable = scenario_get_custom_variable(target);
-    if (variable) {
-        if (!variable->linked_uid) {
-            const uint8_t error_name[] = "ERROR_NO_VARIABLE_NAME_GIVEN";
-            xml_exporter_add_attribute_encoded_text(attr->name, error_name);
-            return 1;
-        }
-        const uint8_t *variable_uid = variable->linked_uid->text;
-        xml_exporter_add_attribute_encoded_text(attr->name, variable_uid);
-        return 1;
+    if (!scenario_custom_variable_exists(target)) {
+        return 0;
     }
-    return 0;
+    const uint8_t *name = scenario_custom_variable_get_name(target);
+    if (!name) {
+        name = string_from_ascii("ERROR_NO_VARIABLE_NAME_GIVEN");
+    }
+    xml_exporter_add_attribute_encoded_text(attr->name, name);
+    return 1;
 }
 
 static int export_parse_attribute(xml_data_attribute_t *attr, int target)
@@ -259,7 +256,7 @@ static int export_event(scenario_event_t *event)
     xml_exporter_close_element();
 
     xml_exporter_new_element("actions");
-    for (int i = 0; i < event->actions.size; i++) {
+    for (unsigned int i = 0; i < event->actions.size; i++) {
         scenario_action_t *action = array_item(event->actions, i);
         export_event_action(action);
     }
@@ -270,29 +267,22 @@ static int export_event(scenario_event_t *event)
     return 1;
 }
 
-static int export_custom_variable(custom_variable_t *variable)
-{
-    if (!variable->in_use) {
-        return 1;
-    }
-
-    xml_exporter_new_element("variable");
-
-    xml_exporter_add_attribute_encoded_text("uid", variable->linked_uid->text);
-    xml_exporter_add_attribute_int("initial_value", variable->value);
-
-    xml_exporter_close_element();
-    
-    return 1;
-}
-
 static void export_scenario_variables(buffer *buf)
 {
     xml_exporter_new_element("variables");
 
-    for (int i = 1; i < MAX_CUSTOM_VARIABLES; i++) {
-        custom_variable_t *variable = scenario_get_custom_variable(i);
-        export_custom_variable(variable);
+    unsigned int total_variables = scenario_custom_variable_count();
+
+    for (unsigned int i = 0; i < total_variables; i++) {
+        if (!scenario_custom_variable_exists(i)) {
+            continue;
+        }
+        xml_exporter_new_element("variable");
+
+        xml_exporter_add_attribute_encoded_text("name", scenario_custom_variable_get_name(i));
+        xml_exporter_add_attribute_int("value", scenario_custom_variable_get_value(i));
+
+        xml_exporter_close_element();
     }
     xml_exporter_close_element();
     xml_exporter_newline();

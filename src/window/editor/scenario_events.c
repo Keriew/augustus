@@ -230,7 +230,7 @@ static void button_click(const generic_button *button)
 
 static void button_open_variables(const generic_button *button)
 {
-    window_editor_custom_variables_show();
+    window_editor_custom_variables_show(0);
 }
 
 void window_editor_scenario_events_show(void)

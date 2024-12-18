@@ -87,8 +87,8 @@ int scenario_events_get_count(void)
 
 static void info_save_state(buffer *buf)
 {
-    int32_t array_size = scenario_events.size;
-    int32_t struct_size = (6 * sizeof(int32_t)) + (3 * sizeof(int16_t));
+    uint32_t array_size = scenario_events.size;
+    uint32_t struct_size = (6 * sizeof(int32_t)) + (3 * sizeof(int16_t));
     buffer_init_dynamic_array(buf, array_size, struct_size);
 
     scenario_event_t *current;
@@ -154,9 +154,9 @@ void scenario_events_save_state(buffer *buf_events, buffer *buf_conditions,  buf
 
 static void info_load_state(buffer *buf, int is_new_version)
 {
-    int array_size = buffer_load_dynamic_array(buf);
+    unsigned int array_size = buffer_load_dynamic_array(buf);
 
-    for (int i = 0; i < array_size; i++) {
+    for (unsigned int i = 0; i < array_size; i++) {
         scenario_event_t *event = scenario_event_create(0, 0, 0);
         scenario_event_load_state(buf, event, is_new_version);
     }
@@ -166,7 +166,7 @@ static void conditions_load_state_old_version(buffer *buf)
 {
     unsigned int total_conditions = buffer_load_dynamic_array(buf);
 
-    for (int i = 0; i < total_conditions; i++) {
+    for (unsigned int i = 0; i < total_conditions; i++) {
         buffer_skip(buf, 2); // Skip the link type
         int event_id = buffer_read_i32(buf);
         scenario_event_t *event = scenario_event_get(event_id);
@@ -226,11 +226,11 @@ static void load_link_action(scenario_action_t *action, int link_type, int32_t l
 
 static void actions_load_state(buffer *buf)
 {
-    int array_size = buffer_load_dynamic_array(buf);
+    unsigned int array_size = buffer_load_dynamic_array(buf);
 
     int link_type = 0;
     int32_t link_id = 0;
-    for (int i = 0; i < array_size; i++) {
+    for (unsigned int i = 0; i < array_size; i++) {
         scenario_action_t action;
         scenario_action_type_load_state(buf, &action, &link_type, &link_id);
         load_link_action(&action, link_type, link_id);

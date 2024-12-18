@@ -123,14 +123,14 @@ void scenario_price_change_save_state(buffer *buf)
 
 void scenario_price_change_load_state(buffer *buf)
 {
-    int size = buffer_load_dynamic_array(buf);
+    unsigned int size = buffer_load_dynamic_array(buf);
 
     if (!array_init(price_changes, PRICE_CHANGES_ARRAY_SIZE_STEP, new_price_change, price_change_in_use) ||
         !array_expand(price_changes, size)) {
         log_error("Problem creating price changes array - memory full. The gane will now crash.", 0, 0);
     }
 
-    for (int i = 0; i < size; i++) {
+    for (unsigned int i = 0; i < size; i++) {
         price_change_t *price_change = array_next(price_changes);
         price_change->year = buffer_read_i16(buf);
         price_change->month = buffer_read_u8(buf);

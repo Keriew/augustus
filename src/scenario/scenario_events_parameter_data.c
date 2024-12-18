@@ -9,9 +9,9 @@
 #include "figure/formation.h"
 #include "game/resource.h"
 #include "scenario/custom_messages.h"
+#include "scenario/custom_variable.h"
 #include "scenario/invasion.h"
 #include "scenario/request.h"
-#include "scenario/scenario.h"
 
 #define UNLIMITED 1000000000
 #define NEGATIVE_UNLIMITED -1000000000
@@ -1009,10 +1009,9 @@ void scenario_events_parameter_data_get_display_string_for_value(parameter_type 
             return;
         case PARAMETER_TYPE_CUSTOM_VARIABLE:
             {
-                const custom_variable_t *variable = scenario_get_custom_variable(value);
-                if (variable) {
-                    if (variable->linked_uid) {
-                        const uint8_t *text = variable->linked_uid->text;
+                if (scenario_custom_variable_exists(value)) {
+                    const uint8_t *text = scenario_custom_variable_get_name(value);
+                    if (text) {
                         result_text = string_copy(text, result_text, maxlength);
                     }
                 }
@@ -1209,9 +1208,10 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
             {
                 result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
 
-                const custom_variable_t *variable = scenario_get_custom_variable(action->parameter1);
-                if (variable && variable->linked_uid) {
-                    result_text = append_text(variable->linked_uid->text, result_text, &maxlength);
+                if (scenario_custom_variable_exists(action->parameter1) &&
+                    scenario_custom_variable_get_name(action->parameter1)) {
+                    result_text = append_text(scenario_custom_variable_get_name(action->parameter1),
+                        result_text, &maxlength);
                 } else {
                     result_text = append_text(string_from_ascii("???"), result_text, &maxlength);
                 }
@@ -1389,9 +1389,9 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
             {
                 result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
 
-                const custom_variable_t *variable = scenario_get_custom_variable(condition->parameter1);
-                if (variable && variable->linked_uid) {
-                    result_text = append_text(variable->linked_uid->text, result_text, &maxlength);
+                if (scenario_custom_variable_exists(condition->parameter1) &&
+                    scenario_custom_variable_get_name(condition->parameter1)) {
+                    result_text = append_text(scenario_custom_variable_get_name(condition->parameter1), result_text, &maxlength);
                 } else {
                     result_text = append_text(string_from_ascii("???"), result_text, &maxlength);
                 }

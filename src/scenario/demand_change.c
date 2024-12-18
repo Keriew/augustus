@@ -140,14 +140,14 @@ void scenario_demand_change_save_state(buffer *buf)
 
 void scenario_demand_change_load_state(buffer *buf)
 {
-    int size = buffer_load_dynamic_array(buf);
+    unsigned int size = buffer_load_dynamic_array(buf);
 
     if (!array_init(demand_changes, DEMAND_CHANGES_ARRAY_SIZE_STEP, new_demand_change, demand_change_in_use) ||
         !array_expand(demand_changes, size)) {
         log_error("Problem creating demand changes array - memory full. The gane will now crash.", 0, 0);
     }
 
-    for (int i = 0; i < size; i++) {
+    for (unsigned int i = 0; i < size; i++) {
         demand_change_t *demand_change = array_next(demand_changes);
         demand_change->year = buffer_read_i16(buf);
         demand_change->month = buffer_read_u8(buf);

@@ -8,6 +8,7 @@
 #include "game/difficulty.h"
 #include "game/save_version.h"
 #include "game/settings.h"
+#include "scenario/custom_variable.h"
 #include "scenario/data.h"
 #include "scenario/demand_change.h"
 #include "scenario/invasion.h"
@@ -161,7 +162,7 @@ static void calculate_buffer_offsets(int scenario_version)
 
     if (scenario_version > SCENARIO_LAST_NO_CUSTOM_VARIABLES && scenario_version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
         buffer_offsets.custom_variables = next_start_offset;
-        next_start_offset = buffer_offsets.custom_variables + MAX_CUSTOM_VARIABLES * 9;
+        next_start_offset = buffer_offsets.custom_variables + MAX_ORIGINAL_CUSTOM_VARIABLES * 9;
     }
 
     buffer_offsets.custom_name = next_start_offset;
@@ -510,19 +511,9 @@ void scenario_load_state(buffer *buf, int version)
 
     if (version > SCENARIO_LAST_NO_CUSTOM_VARIABLES && version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
         buffer_set(buf, buffer_offsets.custom_variables);
-        for (int i = 0; i < MAX_CUSTOM_VARIABLES; i++) {
-            scenario.custom_variables[i].id = i;
-            scenario.custom_variables[i].in_use = buffer_read_u8(buf);
-            scenario.custom_variables[i].value = buffer_read_i32(buf);
-            int uid_text_id = buffer_read_i32(buf);
-            if (uid_text_id) {
-                scenario.custom_variables[i].linked_uid = message_media_text_blob_get_entry(uid_text_id);
-            } else {
-                scenario.custom_variables[i].linked_uid = 0;
-            }
-        }
+        scenario_custom_variable_load_state_old_version(buf);
     } else {
-        scenario_delete_all_custom_variables();
+        scenario_custom_variable_delete_all();
     }
 
     buffer_set(buf, buffer_offsets.custom_name);
@@ -732,109 +723,4 @@ void scenario_settings_load_state(
             game_campaign_load(CAMPAIGN_ORIGINAL_NAME);
         }
     }
-}
-
-custom_variable_t *scenario_custom_variable_create(const uint8_t *uid, int initial_value)
-{
-    int id = -1;
-    for (int i = 1; i < MAX_CUSTOM_VARIABLES; i++) {
-        if (scenario.custom_variables[i].in_use == 0) {
-            id = i;
-            break;
-        }
-    }
-    if (id == -1) {
-        return 0;
-    }
-
-    scenario.custom_variables[id].id = id;
-    scenario.custom_variables[id].in_use = 1;
-    scenario.custom_variables[id].value = initial_value;
-    if (scenario.custom_variables[id].linked_uid) {
-        message_media_text_blob_mark_entry_as_unused(scenario.custom_variables[id].linked_uid);
-        scenario.custom_variables[id].linked_uid = 0;
-    }
-    scenario.custom_variables[id].linked_uid = message_media_text_blob_add(uid);
-
-    return &scenario.custom_variables[id];
-}
-
-void scenario_custom_variable_rename(int id, const uint8_t *name)
-{
-    if (scenario.custom_variables[id].linked_uid) {
-        message_media_text_blob_mark_entry_as_unused(scenario.custom_variables[id].linked_uid);
-        scenario.custom_variables[id].linked_uid = 0;
-        scenario.custom_variables[id].in_use = 0;
-    }
-    if (*name) {
-        scenario.custom_variables[id].linked_uid = message_media_text_blob_add(name);
-        scenario.custom_variables[id].in_use = 1;
-    }
-}
-
-void scenario_delete_all_custom_variables(void)
-{
-    for (int i = 0; i < MAX_CUSTOM_VARIABLES; i++) {
-        scenario.custom_variables[i].id = i;
-        scenario.custom_variables[i].in_use = 0;
-        scenario.custom_variables[i].value = 0;
-        if (scenario.custom_variables[i].linked_uid) {
-            message_media_text_blob_mark_entry_as_unused(scenario.custom_variables[i].linked_uid);
-            scenario.custom_variables[i].linked_uid = 0;
-        }
-    }
-}
-
-custom_variable_t *scenario_get_custom_variable(int id)
-{
-    if (id < 1 || id >= MAX_CUSTOM_VARIABLES) {
-        return 0;
-    }
-    return &scenario.custom_variables[id];
-}
-
-int scenario_get_custom_variable_id_by_uid(const uint8_t *variable_uid)
-{
-    for (int i = 1; i < MAX_CUSTOM_VARIABLES; i++) {
-        if (scenario.custom_variables[i].linked_uid) {
-            const uint8_t *current_uid = scenario.custom_variables[i].linked_uid->text;
-            if (string_equals(current_uid, variable_uid)) {
-                return i;
-            }
-        }
-    }
-    return 0;
-}
-
-const uint8_t *scenario_get_custom_variable_name(int id)
-{
-    if (id < 1 || id >= MAX_CUSTOM_VARIABLES) {
-        return 0;
-    }
-    if (scenario.custom_variables[id].linked_uid) {
-        return scenario.custom_variables[id].linked_uid->text;
-    }
-    return 0;
-}
-
-int scenario_get_custom_variable_value(int id)
-{
-    return scenario.custom_variables[id].value;
-}
-
-void scenario_set_custom_variable_value(int id, int new_value)
-{
-    scenario.custom_variables[id].value = new_value;
-}
-
-int scenario_custom_variable_relink_text_blob(int text_id, text_blob_string_t *new_text_link)
-{
-    for (int i = 1; i < MAX_CUSTOM_VARIABLES; i++) {
-        if (scenario.custom_variables[i].linked_uid &&
-            scenario.custom_variables[i].linked_uid->id == text_id) {
-            scenario.custom_variables[i].linked_uid = new_text_link;
-            return 1;
-        }
-    }
-    return 0;
 }

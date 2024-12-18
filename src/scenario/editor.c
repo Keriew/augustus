@@ -4,7 +4,7 @@
 #include "core/string.h"
 #include "map/grid.h"
 #include "scenario/criteria.h"
-#include "scenario/data.h"
+#include "scenario/custom_variable.h"
 #include "scenario/demand_change.h"
 #include "scenario/empire.h"
 #include "scenario/property.h"
@@ -112,7 +112,7 @@ void scenario_editor_create(int map_size)
     scenario_request_clear_all();
     scenario_invasion_clear();
     scenario_demand_change_clear_all();
-    scenario_delete_all_custom_variables();
+    scenario_custom_variable_delete_all();
 
     scenario.random_events.max_wages = 45;
     scenario.random_events.min_wages = 5;

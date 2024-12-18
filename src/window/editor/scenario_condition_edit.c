@@ -284,23 +284,23 @@ static void custom_message_selection(void)
     window_editor_select_custom_message_show(set_param_value);
 }
 
-static void set_param_custom_variable(custom_variable_t *variable)
+static void set_param_custom_variable(unsigned int id)
 {
     switch (data.parameter_being_edited) {
         case 1:
-            data.condition->parameter1 = variable->id;
+            data.condition->parameter1 = id;
             return;
         case 2:
-            data.condition->parameter2 = variable->id;
+            data.condition->parameter2 = id;
             return;
         case 3:
-            data.condition->parameter3 = variable->id;
+            data.condition->parameter3 = id;
             return;
         case 4:
-            data.condition->parameter4 = variable->id;
+            data.condition->parameter4 = id;
             return;
         case 5:
-            data.condition->parameter5 = variable->id;
+            data.condition->parameter5 = id;
             return;
         default:
             return;
@@ -309,7 +309,7 @@ static void set_param_custom_variable(custom_variable_t *variable)
 
 static void custom_variable_selection(void)
 {
-    window_editor_custom_variables_select_show(set_param_custom_variable);
+    window_editor_custom_variables_show(set_param_custom_variable);
 }
 
 static void change_parameter(xml_data_attribute_t *parameter, const generic_button *button)

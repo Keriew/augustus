@@ -57,8 +57,8 @@ custom_media_t *custom_media_create(custom_media_type type, const uint8_t *filen
 
 void custom_media_save_state(buffer *buf)
 {
-    int32_t array_size = custom_media.size;
-    int32_t struct_size = (4 * sizeof(int32_t)) + (1 * sizeof(int16_t));
+    uint32_t array_size = custom_media.size;
+    uint32_t struct_size = (4 * sizeof(int32_t)) + (1 * sizeof(int16_t));
     buffer_init_dynamic_array(buf, array_size, struct_size);
 
     custom_media_t *entry;

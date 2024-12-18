@@ -695,14 +695,14 @@ void scenario_invasion_warning_load_state(buffer *invasion_id, buffer *warnings,
 {
     data.last_internal_invasion_id = buffer_read_u16(invasion_id);
 
-    int size = has_dynamic_warnings ? buffer_load_dynamic_array(warnings) : MAX_ORIGINAL_INVASION_WARNINGS;
+    unsigned int size = has_dynamic_warnings ? buffer_load_dynamic_array(warnings) : MAX_ORIGINAL_INVASION_WARNINGS;
 
     if (!array_init(data.warnings, WARNINGS_ARRAY_SIZE_STEP, new_warning, warning_in_use) ||
         !array_expand(data.warnings, size)) {
         log_error("Error creating warnings array - not enough memory. The game will now crash.", 0, 0);
     }
 
-    for (int i = 0; i < size; i++) {
+    for (unsigned int i = 0; i < size; i++) {
         invasion_warning *w = array_next(data.warnings);
         w->in_use = buffer_read_u8(warnings);
         w->handled = buffer_read_u8(warnings);
@@ -744,14 +744,14 @@ void scenario_invasion_save_state(buffer *buf)
 
 void scenario_invasion_load_state(buffer *buf)
 {
-    int size = buffer_load_dynamic_array(buf);
+    unsigned int size = buffer_load_dynamic_array(buf);
 
     if (!array_init(data.invasions, INVASIONS_ARRAY_SIZE_STEP, new_invasion, invasion_in_use) ||
         !array_expand(data.invasions, size)) {
         log_error("Error creating invasions array - not enough memory. The game will now crash.", 0, 0);
     }
 
-    for (size_t i = 0; i < size; i++) {
+    for (unsigned int i = 0; i < size; i++) {
         invasion_t *invasion = array_next(data.invasions);
         invasion->type = buffer_read_i16(buf);
         invasion->year = buffer_read_i16(buf);
@@ -769,11 +769,11 @@ void scenario_invasion_load_state(buffer *buf)
 
 int scenario_invasion_count_active_from_buffer(buffer *buf)
 {
-    int size = buffer_load_dynamic_array(buf);
+    unsigned int size = buffer_load_dynamic_array(buf);
 
     int num_invasions = 0;
 
-    for (int i = 0; i < size; i++) {
+    for (unsigned int i = 0; i < size; i++) {
         if (buffer_read_i16(buf) != INVASION_TYPE_NONE) {
             num_invasions++;
         }

@@ -32,14 +32,5 @@ void scenario_settings_save_state(
 void scenario_settings_load_state(
     buffer *part1, buffer *part2, buffer *part3, buffer *player_name, buffer *scenario_name, buffer *campaign_name);
 
-custom_variable_t *scenario_custom_variable_create(const uint8_t *uid, int initial_value);
-void scenario_custom_variable_rename(int id, const uint8_t *name);
-void scenario_delete_all_custom_variables(void);
-custom_variable_t *scenario_get_custom_variable(int id);
-int scenario_get_custom_variable_id_by_uid(const uint8_t *variable_uid);
-const uint8_t *scenario_get_custom_variable_name(int id);
-int scenario_get_custom_variable_value(int id);
-void scenario_set_custom_variable_value(int id, int new_value);
-int scenario_custom_variable_relink_text_blob(int text_id, text_blob_string_t *new_text_link);
 
 #endif // SCENARIO_SCENARIO_H

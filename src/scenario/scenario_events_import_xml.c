@@ -9,7 +9,7 @@
 #include "empire/city.h"
 #include "empire/type.h"
 #include "scenario/custom_messages.h"
-#include "scenario/scenario.h"
+#include "scenario/custom_variable.h"
 #include "scenario/scenario_event.h"
 #include "scenario/scenario_event_data.h"
 #include "scenario/scenario_events_controller.h"
@@ -180,7 +180,7 @@ static int xml_import_start_custom_variables(void)
         return 0;
     }
 
-    scenario_delete_all_custom_variables();
+    scenario_custom_variable_delete_all();
     data.variables_count = 0;
     return 1;
 }
@@ -191,26 +191,33 @@ static int xml_import_create_custom_variable(void)
         return 0;
     }
 
-    if (!xml_parser_has_attribute("uid")) {
+    if (!xml_parser_has_attribute("uid") && !xml_parser_has_attribute("name")) {
         xml_import_log_error("Variable has no unique identifier (uid)");
         return 0;
     }
 
-    int initial_value = 0;
+    int value = 0;
     if (xml_parser_has_attribute("initial_value")) {
-        initial_value = xml_parser_get_attribute_int("initial_value");
+        value = xml_parser_get_attribute_int("initial_value");
+    } else if (xml_parser_has_attribute("value")) {
+        value = xml_parser_get_attribute_int("value");
     }
 
-    const char *uid_value = xml_parser_get_attribute_string("uid");
-    const uint8_t *uid = string_from_ascii(uid_value);
-    int var_id = scenario_get_custom_variable_id_by_uid(uid);
-    if(var_id) {
+    const char *name = xml_parser_get_attribute_string("uid");
+    if (!name) {
+        name = xml_parser_get_attribute_string("name");
+    }
+
+    uint8_t encoded_name[300];
+    encoding_from_utf8(name, encoded_name, 300);
+    unsigned int id = scenario_custom_variable_get_id_by_name(encoded_name);
+    if(id) {
         xml_import_log_error("Variable unique identifier is not unique");
         return 0;
     }
 
-    custom_variable_t *custom_variable = scenario_custom_variable_create(uid, initial_value);
-    if (!custom_variable) {
+    id = scenario_custom_variable_create(encoded_name, value);
+    if (!id) {
         xml_import_log_error("Could not import the variable!");
         return 0;
     }
@@ -608,7 +615,7 @@ static int xml_import_special_parse_custom_variable(xml_data_attribute_t *attr, 
 
     const char *value = xml_parser_get_attribute_string(attr->name);
     const uint8_t *converted_name = string_from_ascii(value);
-    int variable_id = scenario_get_custom_variable_id_by_uid(converted_name);
+    int variable_id = scenario_custom_variable_get_id_by_name(converted_name);
 
     if (variable_id) {
         *target = variable_id;

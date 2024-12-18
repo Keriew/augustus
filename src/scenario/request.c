@@ -336,7 +336,7 @@ static void request_save(buffer *list, const scenario_request *request)
 
 void scenario_request_save_state(buffer *list)
 {
-    int32_t struct_size = REQUESTS_STRUCT_SIZE_CURRENT;
+    uint32_t struct_size = REQUESTS_STRUCT_SIZE_CURRENT;
     buffer_init_dynamic_array(list, requests.size, struct_size);
 
     const scenario_request *request;
@@ -364,14 +364,14 @@ static void request_load(buffer *list, scenario_request *request)
 
 void scenario_request_load_state(buffer *list)
 {
-    int array_size = buffer_load_dynamic_array(list);
+    unsigned int array_size = buffer_load_dynamic_array(list);
 
     if (!array_init(requests, REQUESTS_ARRAY_SIZE_STEP, new_request, request_in_use) ||
         !array_expand(requests, array_size)) {
         log_error("Error creating requests array. The game will probably crash.", 0, 0);
     }
 
-    for (int i = 0; i < array_size; i++) {
+    for (unsigned int i = 0; i < array_size; i++) {
         scenario_request *request = array_next(requests);
         request_load(list, request);
     }

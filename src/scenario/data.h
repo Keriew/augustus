@@ -3,13 +3,10 @@
 
 #include "core/file.h"
 #include "map/point.h"
-#include "scenario/message_media_text_blob.h"
 #include "scenario/property.h"
 #include "scenario/types.h"
 
 #include <stdint.h>
-
-#define MAX_CUSTOM_VARIABLES 100
 
 #define MAX_HERD_POINTS 4
 #define MAX_FISH_POINTS 8
@@ -104,13 +101,6 @@ typedef struct {
     int milestone75_year;
 } scenario_win_criteria;
 
-typedef struct {
-    int id;
-    int in_use;
-    int value;
-    const text_blob_string_t *linked_uid;
-} custom_variable_t;
-
 extern struct scenario_t {
     uint8_t scenario_name[MAX_SCENARIO_NAME];
 
@@ -142,8 +132,6 @@ extern struct scenario_t {
         int distant_battle_enemy_travel_months;
         char custom_name[FILE_NAME_MAX];
     } empire;
-
-    custom_variable_t custom_variables[MAX_CUSTOM_VARIABLES];
 
     struct {
         int severity;
