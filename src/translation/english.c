@@ -1105,7 +1105,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_SELECT_VICTORY, "Select victory message"},
     {TR_EDITOR_SCENARIO_DESELECT_VICTORY, "Remove victory message"},
     {TR_EDITOR_CUSTOM_VARIABLES_TITLE, "Custom variables" },
-    {TR_EDITOR_CUSTOM_VARIABLES_COUNT, "Maximum possible variables" },
+    {TR_EDITOR_CUSTOM_VARIABLES_COUNT, "Total variables:" },
     {TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_CHANGE_TITLE, "Unable to change custom variable"},
     {TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_CHANGE_TEXT, "The custom variable is being used by at least one event.\n\nRemove the custom variable from the event to be able to change its name or to delete it."},
     {TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_CHANGE_EVENT_ID, "Earliest event ID where variable is used: "},

@@ -1041,7 +1041,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_SELECT_INTRO, "Επιλέξτε εισαγωγή σεναρίου"},
     {TR_EDITOR_SCENARIO_DESELECT_INTRO, "Αποεπιλογή εισαγωγής σεναρίου"},
     {TR_EDITOR_CUSTOM_VARIABLES_TITLE, "Προσαρμοσμένες μεταβλητές" },
-    {TR_EDITOR_CUSTOM_VARIABLES_COUNT, "Μέγιστες δυνατές μεταβλητές" },
     {TR_EDITOR_GRID_OFFSET, "αντιστάθμιση" },
 	{TR_PARAMETER_TYPE_CHECK, "Έλεγχος συγκρίσεων"},		  
     {TR_PARAMETER_TYPE_MIN_MAX_NUMBER_MIN, "Ελάχιστο"},

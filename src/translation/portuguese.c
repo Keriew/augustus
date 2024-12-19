@@ -1069,7 +1069,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_CUSTOM_MESSAGES_EXPORT_FULL, "Exportar mensagens personalizadas" },
     {TR_EDITOR_CUSTOM_MESSAGES_IMPORT_FULL, "Importar mensagens personalizadas" },
     {TR_EDITOR_CUSTOM_MESSAGES_TITLE, "Mensagens personalizadas" },
-    {TR_EDITOR_CUSTOM_VARIABLES_COUNT, "Máximo de variáveis permitidas" },
+    {TR_EDITOR_CUSTOM_VARIABLES_COUNT, "Total de variáveis:" },
     {TR_EDITOR_CUSTOM_VARIABLES_TITLE, "Variáveis personalizadas" },
     {TR_EDITOR_DELETE, "Apagar"},
     {TR_EDITOR_DELETED, "Apagado"},

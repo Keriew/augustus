@@ -1031,7 +1031,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_CUSTOM_MESSAGES_EXPORT_FULL, "Eksportuj niestandardowe wiadomości" },
     {TR_EDITOR_CUSTOM_MESSAGES_IMPORT_FULL, "Importuj niestandardowe wiadomości" },
     {TR_EDITOR_CUSTOM_MESSAGES_TITLE, "Niestandardowe wiadomości" },
-    {TR_EDITOR_CUSTOM_VARIABLES_COUNT, "Maksymalne możliwe zmienne" },
     {TR_EDITOR_CUSTOM_VARIABLES_TITLE, "Zmienne niestandardowe" },
     {TR_EDITOR_DELETE, "Usuń"},
     {TR_EDITOR_DELETED, "Usunięte"},

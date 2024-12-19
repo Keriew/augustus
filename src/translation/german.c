@@ -1186,7 +1186,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_CUSTOM_MESSAGES_EXPORT_FULL, "Benutzerdefinierte Nachrichten exportieren" },
     {TR_EDITOR_CUSTOM_MESSAGES_IMPORT_FULL, "Benutzerdefinierte Nachrichten importieren" },
     {TR_EDITOR_CUSTOM_MESSAGES_TITLE, "Benutzerdef. Nachrichten" },
-    {TR_EDITOR_CUSTOM_VARIABLES_COUNT, "Maximal mögliche Variablen" },
     {TR_EDITOR_CUSTOM_VARIABLES_TITLE, "Benutzerdefinierte Variablen" },
     {TR_EDITOR_DELETE, "Löschen"},
     {TR_EDITOR_DELETED, "Gelöscht"},

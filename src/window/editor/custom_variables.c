@@ -26,7 +26,7 @@
 #include "window/plain_message_dialog.h"
 #include "window/text_input.h"
 
-#define WIDTH_VALUE_BUTTON 96
+#define VALUE_BUTTON_WIDTH 120
 
 static void button_edit_variable(unsigned int index, unsigned int mouse_x, unsigned int mouse_y);
 static void button_new_variable(const generic_button *button);
@@ -43,13 +43,13 @@ static struct {
 } data;
 
 static generic_button new_variable_button = {
-    195, 340, 250, 25, button_new_variable
+    195, 410, 250, 25, button_new_variable
 };
 
 static grid_box_type variable_buttons = {
-    .x = 10,
-    .y = 146,
-    .width = 35 * BLOCK_SIZE,
+    .x = 26,
+    .y = 108,
+    .width = 38 * BLOCK_SIZE,
     .height = 19 * BLOCK_SIZE,
     .num_columns = 1,
     .item_height = 30,
@@ -99,14 +99,25 @@ static void draw_background(void)
 
     outer_panel_draw(16, 16, 40, 30);
 
-    text_draw_centered(translation_for(TR_EDITOR_CUSTOM_VARIABLES_TITLE), 48, 58, 640, FONT_LARGE_BLACK, 0);
-    text_draw_label_and_number(translation_for(TR_EDITOR_CUSTOM_VARIABLES_COUNT), data.custom_variables_in_use, "",
-        48, 106, FONT_NORMAL_PLAIN, COLOR_BLACK);
+    text_draw_centered(translation_for(TR_EDITOR_CUSTOM_VARIABLES_TITLE), 0, 32, 640, FONT_LARGE_BLACK, 0);
+    text_draw_label_and_number_centered(translation_for(TR_EDITOR_CUSTOM_VARIABLES_COUNT), data.custom_variables_in_use, "",
+        0, 70, 640, FONT_NORMAL_BLACK, 0);
+
+
+    text_draw_centered(string_from_ascii("New custom variable"), new_variable_button.x, new_variable_button.y + 8,
+        new_variable_button.width, FONT_NORMAL_BLACK, 0);
+
+    int base_x = variable_buttons.x;
+
+    text_draw_centered(string_from_ascii("ID"), base_x, 96, 40, FONT_SMALL_PLAIN, 0);
+    text_draw(string_from_ascii("Name"), base_x + 40, 96, FONT_SMALL_PLAIN, 0);
+
+    if (!data.callback) {
+        int value_x_offset = grid_box_get_usable_width(&variable_buttons) - VALUE_BUTTON_WIDTH;
+        text_draw(string_from_ascii("Initial value"), base_x + value_x_offset, 96, FONT_SMALL_PLAIN, 0);
+    }
 
     lang_text_draw_centered(13, 3, 48, 450, 640, FONT_NORMAL_BLACK);
-
-    text_draw_centered(string_from_ascii("New custom variable"), new_variable_button.x, new_variable_button.y + 4,
-        new_variable_button.width, FONT_NORMAL_BLACK, 0);
 
     graphics_reset_dialog();
 
@@ -117,25 +128,30 @@ static void draw_variable_button(const grid_box_item *item)
 {
     unsigned int id = data.custom_variable_ids[item->index];
     const uint8_t *name = scenario_custom_variable_get_name(id);
-    //int value = scenario_custom_variable_get_value(id);
-    int value_button_x_offset = item->width - WIDTH_VALUE_BUTTON;
+    int value = scenario_custom_variable_get_value(id);
+    int name_button_width = item->width - 32;
 
-    button_border_draw(item->x, item->y, item->width, item->height,
-        item->is_focused && item->mouse.x < value_button_x_offset);
-    text_draw_label_and_number(0, id, "", item->x, item->y + 12, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+    if (!data.callback) {
+        name_button_width -= VALUE_BUTTON_WIDTH + 4;
+    }
+
+    text_draw_number_centered(id, item->x, item->y + 8, 32, FONT_NORMAL_BLACK);
+
+    button_border_draw(item->x + 32, item->y, name_button_width, item->height,
+        item->is_focused && item->mouse.x >= 32 && item->mouse.x < name_button_width);
 
     if (name && *name) {
-        text_draw(name, item->x + 52, item->y + 12, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+        text_draw(name, item->x + 40, item->y + 8, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
     }
 
     if (data.callback) {
         return;
     }
-   // large_label_draw(buttons[j + 1].x, buttons[j + 1].y, buttons[j + 1].width / BLOCK_SIZE,
-   //     data.focus_button_id == j + 2 ? 1 : 0);
 
-   // text_draw_number(data.list[i]->value, ' ', "", buttons[j + 1].x, buttons[j + 1].y + 8,
-   //     FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+    button_border_draw(item->x + name_button_width + 36, item->y, VALUE_BUTTON_WIDTH, item->height,
+        item->is_focused && item->mouse.x >= name_button_width + 36);
+
+    text_draw_number(value, ' ', "", item->x + name_button_width + 44, item->y + 8, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
 }
 
 
@@ -243,6 +259,7 @@ static void button_new_variable(const generic_button *button)
     }
     populate_list();
     grid_box_update_total_items(&variable_buttons, data.custom_variables_in_use);
+    window_request_refresh();
 }
 
 static void handle_input(const mouse *m, const hotkeys *h)

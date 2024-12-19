@@ -1084,7 +1084,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_SELECT_VICTORY, "Выберите сообщение о победе"},
     {TR_EDITOR_SCENARIO_DESELECT_VICTORY, "Удалить сообщение о победе "},
     {TR_EDITOR_CUSTOM_VARIABLES_TITLE, "Переменные" },
-    {TR_EDITOR_CUSTOM_VARIABLES_COUNT, "Макс. возможных переменных" },
     {TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_CHANGE_TITLE, "Невозможно изменить переменную"},
     {TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_CHANGE_TEXT, "Переменная используется уже минимум одним событием.\n\nУдалите переменную из события, чтобы иметь возможность изменить ее имя или удалить."},
     {TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_CHANGE_EVENT_ID, "ID самого раннего события c переменной: "},

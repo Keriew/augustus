@@ -62,7 +62,7 @@ void grid_box_request_refresh(grid_box_type *grid_box)
     grid_box->refresh_requested = 1;
 }
 
-static unsigned int get_actual_width(const grid_box_type *grid_box)
+unsigned int grid_box_get_usable_width(const grid_box_type *grid_box)
 {
     unsigned int width = grid_box->width;
     if (width <= 2 * BLOCK_SIZE) {
@@ -110,7 +110,7 @@ void grid_box_draw(grid_box_type *grid_box)
     }
     grid_box->refresh_requested = 0;
 
-    unsigned int width = get_actual_width(grid_box);
+    unsigned int width = grid_box_get_usable_width(grid_box);
     unsigned int inner_padding = 0;
 
     if (grid_box->draw_inner_panel) {
@@ -152,7 +152,7 @@ void grid_box_draw(grid_box_type *grid_box)
 static int determine_focus(grid_box_type *grid_box, int x, int y)
 {
     unsigned int inner_padding = grid_box->draw_inner_panel ? BLOCK_SIZE / 2 : 0;
-    unsigned int width = get_actual_width(grid_box);
+    unsigned int width = grid_box_get_usable_width(grid_box);
     unsigned int old_position = grid_box->focus.position;
     if (x < grid_box->x + inner_padding || x >= grid_box->x + width - inner_padding ||
         y < grid_box->y + inner_padding || y >= grid_box->y + grid_box->height - inner_padding) {
@@ -224,7 +224,7 @@ void grid_box_handle_tooltip(const grid_box_type *grid_box, tooltip_context *c)
         return;
     }
     unsigned int inner_padding = grid_box->draw_inner_panel ? BLOCK_SIZE : 0;
-    unsigned int width = (get_actual_width(grid_box) - inner_padding) / grid_box->num_columns;
+    unsigned int width = (grid_box_get_usable_width(grid_box) - inner_padding) / grid_box->num_columns;
     grid_box_item item = {
         .width = width - grid_box->item_margin.horizontal,
         .height = grid_box->item_height,

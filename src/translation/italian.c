@@ -1068,7 +1068,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_SELECT_VICTORY, "Scegli il messaggio di vittoria"},
     {TR_EDITOR_SCENARIO_DESELECT_VICTORY, "Rimuovi il messaggio di vittoria"},																  
     {TR_EDITOR_CUSTOM_VARIABLES_TITLE, "Variabili personalizzate" },
-    {TR_EDITOR_CUSTOM_VARIABLES_COUNT, "Massime variabili possibili" },
     {TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_CHANGE_TITLE, "Impossibile cambiare la variabile personalizzata"},
     {TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_CHANGE_TEXT, "La variabile personalizzata è usata almeno da un evento.\n\nRimuovi la variabile dal relativo evento per poterne cambiare il nome o rimuoverla."},
     {TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_CHANGE_EVENT_ID, "ID del primo evento dove la variabile è usata: "},

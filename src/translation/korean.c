@@ -1039,7 +1039,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_SELECT_INTRO, "Select scenario intro"},
     {TR_EDITOR_SCENARIO_DESELECT_INTRO, "Deselect scenario intro"},
     {TR_EDITOR_CUSTOM_VARIABLES_TITLE, "Custom variables" },
-    {TR_EDITOR_CUSTOM_VARIABLES_COUNT, "Maximum possible variables" },
     {TR_EDITOR_GRID_OFFSET, " offset" },
     {TR_PARAMETER_TYPE_CHECK, "Comparison check"},
     {TR_PARAMETER_TYPE_MIN_MAX_NUMBER_MIN, "Minimum"},
