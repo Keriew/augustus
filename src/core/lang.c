@@ -578,6 +578,15 @@ const uint8_t *lang_get_string(int group, int index)
         }
     }
 
+    if (group == 48) {
+        switch (index) {
+            case TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT);
+            default:
+                break;
+        }
+    }
+
     const uint8_t *str = &data.text_data[data.text_entries[group].offset];
     uint8_t prev = 0;
     while (index > 0) {
@@ -590,13 +599,17 @@ const uint8_t *lang_get_string(int group, int index)
     while (*str < ' ') { // skip non-printables
         ++str;
     }
+
+
+
     return str;
 }
 
 const uint8_t *lang_get_building_type_string(int type)
 {
-    if (building_is_house(type) || type == BUILDING_NATIVE_HUT ||
-        type == BUILDING_NATIVE_MEETING || type == BUILDING_NATIVE_CROPS) {
+    if (building_is_house(type) || type == BUILDING_NATIVE_MEETING ||
+        type == BUILDING_NATIVE_HUT || type == BUILDING_NATIVE_HUT_ALT ||
+        type == BUILDING_NATIVE_CROPS) {
         return lang_get_string(41, type);
     } else {
         return lang_get_string(28, type);

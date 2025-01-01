@@ -38,7 +38,7 @@ typedef struct {
 
 void scenario_editor_create(int map_size);
 
-void scenario_editor_set_native_images(int image_hut, int image_meeting, int image_crops);
+void scenario_editor_set_native_images(int image_alt_hut, int image_hut, int image_meeting, int image_crops);
 
 void scenario_editor_request_get(int index, editor_request *request);
 void scenario_editor_request_delete(int index);

@@ -93,7 +93,8 @@ static int show_building_problems(const building *b)
 
 static int show_building_native(const building *b)
 {
-    return b->type == BUILDING_NATIVE_HUT || b->type == BUILDING_NATIVE_MEETING || b->type == BUILDING_MISSION_POST;
+    return b->type == BUILDING_NATIVE_HUT || b->type == BUILDING_NATIVE_HUT_ALT ||
+        b->type == BUILDING_NATIVE_MEETING || b->type == BUILDING_MISSION_POST;
 }
 
 static int show_building_none(const building *b)

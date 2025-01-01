@@ -140,7 +140,19 @@ static void state_offsets_init(int scenario_version)
     next_start_offset = state_offsets.invasions_part3 + (MAX_INVASION_POINTS * 4);
 
     state_offsets.misc = next_start_offset;
-    next_start_offset = state_offsets.misc + 51;
+    next_start_offset = state_offsets.misc + 24;
+
+    if (scenario_version > SCENARIO_LAST_NO_ALT_NATIVE_HUTS) {
+        state_offsets.size = next_start_offset;
+        next_start_offset = state_offsets.size + sizeof(int32_t);
+    }
+
+    // Native images offset
+    state_offsets.misc = next_start_offset;
+    next_start_offset = state_offsets.misc + 12;
+
+    state_offsets.misc = next_start_offset;
+    next_start_offset = state_offsets.misc + 15;
 
     if (scenario_version > SCENARIO_LAST_NO_CUSTOM_MESSAGES) {
         state_offsets.introduction = next_start_offset;
@@ -174,6 +186,9 @@ int scenario_get_state_buffer_size_by_savegame_version(int savegame_version)
         return state_offsets.end;
     } else if (savegame_version <= SAVE_GAME_LAST_WRONG_SCENARIO_END_OFFSET) {
         state_offsets_init(SCENARIO_LAST_WRONG_END_OFFSET);
+        return state_offsets.end;
+    } else if (savegame_version <= SAVE_GAME_LAST_NO_ALT_NATIVE_HUTS) {
+        state_offsets_init(SCENARIO_LAST_NO_ALT_NATIVE_HUTS);
         return state_offsets.end;
     } else {
         state_offsets_init(SCENARIO_CURRENT_VERSION);
@@ -355,6 +370,7 @@ void scenario_save_state(buffer *buf)
     buffer_write_i32(buf, scenario.win_criteria.milestone50_year);
     buffer_write_i32(buf, scenario.win_criteria.milestone75_year);
 
+    buffer_write_i32(buf, scenario.native_images.alt_hut);
     buffer_write_i32(buf, scenario.native_images.hut);
     buffer_write_i32(buf, scenario.native_images.meeting);
     buffer_write_i32(buf, scenario.native_images.crops);
@@ -579,6 +595,10 @@ void scenario_load_state(buffer *buf, buffer *buf_requests, int version)
     scenario.win_criteria.milestone25_year = buffer_read_i32(buf);
     scenario.win_criteria.milestone50_year = buffer_read_i32(buf);
     scenario.win_criteria.milestone75_year = buffer_read_i32(buf);
+
+    if (version > SCENARIO_LAST_NO_ALT_NATIVE_HUTS) {
+        scenario.native_images.alt_hut = buffer_read_i32(buf);
+    }
 
     scenario.native_images.hut = buffer_read_i32(buf);
     scenario.native_images.meeting = buffer_read_i32(buf);

@@ -563,6 +563,15 @@ int building_image_get(const building *b)
             return image_group(GROUP_BUILDING_FORT) + 1;
         case BUILDING_NATIVE_HUT:
             return image_group(GROUP_BUILDING_NATIVE) + (random_byte() & 1);
+        case BUILDING_NATIVE_HUT_ALT:
+            switch (scenario_property_climate()) {
+                case CLIMATE_NORTHERN:
+                    // TODO: add nothern native hut asset
+                case CLIMATE_DESERT:
+                    // TODO: add desert native hut asset
+                default:
+                    return assets_get_image_id("Terrain_Maps", "Native_Hut_Central_01") + (random_byte() & 1);
+            }
         case BUILDING_NATIVE_MEETING:
             return image_group(GROUP_BUILDING_NATIVE) + 2;
         case BUILDING_NATIVE_CROPS:

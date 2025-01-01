@@ -208,7 +208,8 @@ static int provide_missionary_coverage(int x, int y)
             int building_id = map_building_at(map_grid_offset(xx, yy));
             if (building_id) {
                 building *b = building_get(building_id);
-                if (b->type == BUILDING_NATIVE_HUT || b->type == BUILDING_NATIVE_MEETING) {
+                if (b->type == BUILDING_NATIVE_HUT || b->type == BUILDING_NATIVE_HUT_ALT ||
+                    b->type == BUILDING_NATIVE_MEETING) {
                     b->sentiment.native_anger = 0;
                 }
             }
