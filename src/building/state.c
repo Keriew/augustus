@@ -204,6 +204,9 @@ void building_state_save_to_buffer(buffer *buf, const building *b)
         buffer_write_u8(buf, b->accepted_goods[i]);
     }
 
+    // latrines
+    buffer_write_u8(buf, b->has_latrines_access);
+
     // New building state code should always be added at the end to preserve savegame retrocompatibility
     // Also, don't forget to update BUILDING_STATE_CURRENT_BUFFER_SIZE and if possible, add a new macro like
     // BUILDING_STATE_NEW_FEATURE_BUFFER_SIZE with the full building state buffer size including all added features
@@ -590,7 +593,7 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
         b->fumigation_frame = buffer_read_u8(buf);
         b->fumigation_direction = buffer_read_u8(buf);
     }
-
+    
     if (save_version > SAVE_GAME_LAST_STATIC_RESOURCES) {
         for (int i = 0; i < resource_total_mapped(); i++) {
             b->resources[resource_remap(i)] = buffer_read_i16(buf);
@@ -598,6 +601,10 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
         for (int i = 0; i < resource_total_mapped(); i++) {
             b->accepted_goods[resource_remap(i)] = buffer_read_u8(buf);
         }
+    }
+
+    if (building_buf_size >= BUILDING_STATE_LATRINES) {
+        b->has_latrines_access = buffer_read_u8(buf);
     }
 
     // Update resource requirement changes on monuments
