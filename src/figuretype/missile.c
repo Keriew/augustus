@@ -125,6 +125,28 @@ void figure_explosion_cloud_action(figure *f)
     }
 }
 
+static int javelin_defense(formation *m)
+{
+    if (m->figure_type != FIGURE_FORT_JAVELIN) {
+	    return 0;
+    }
+    if (m->layout != FORMATION_SINGLE_LINE_1 && m->layout != FORMATION_SINGLE_LINE_2) {
+	    return 0;
+    }
+    return -2;
+}
+
+static int archer_defense(formation *m)
+{
+    if (m->figure_type != FIGURE_FORT_ARCHER) {
+	    return 0;
+    }
+    if (m->layout != FORMATION_SINGLE_LINE_1 && m->layout != FORMATION_SINGLE_LINE_2) {
+	    return 0;
+    }
+    return -2;
+}
+
 static void missile_hit_target(figure *f, int target_id, figure_type legionary_type)
 {
     figure *target = figure_get(target_id);
@@ -134,11 +156,13 @@ static void missile_hit_target(figure *f, int target_id, figure_type legionary_t
         figure_properties_for_type(f->type)->missile_attack_value -
         target_props->missile_defense_value;
     formation *m = formation_get(target->formation_id);
-    if (damage_inflicted < 0) {
-        damage_inflicted = 0;
-    }
+    damage_inflicted += javelin_defense(m);
+    damage_inflicted += archer_defense(m);
     if (target->type == legionary_type && m->is_halted && m->layout == FORMATION_COLUMN) {
         damage_inflicted = 1;
+    }
+    if (damage_inflicted < 0) {
+        damage_inflicted = 0;
     }
     int target_damage = damage_inflicted + target->damage;
     if (target_damage <= max_damage) {
