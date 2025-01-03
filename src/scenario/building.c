@@ -172,6 +172,11 @@ int scenario_building_allowed(int type)
     return 1;
 }
 
+int scenario_building_image_alt_native_hut(void)
+{
+    return scenario.native_images.alt_hut;
+}
+
 int scenario_building_image_native_hut(void)
 {
     return scenario.native_images.hut;

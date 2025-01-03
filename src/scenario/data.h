@@ -247,6 +247,7 @@ extern struct scenario_t {
     short allowed_buildings[MAX_ALLOWED_BUILDINGS];
 
     struct {
+        int alt_hut;
         int hut;
         int meeting;
         int crops;
