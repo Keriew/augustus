@@ -82,12 +82,12 @@ static void determine_meeting_center(void)
     }
 }
 
-int alt_native_image_id() {
+int native_hut_alt_get_image_id() {
     switch (scenario_property_climate()) {
         case CLIMATE_NORTHERN:
-            // TODO: add nothern native hut asset
+            return assets_get_image_id("Terrain_Maps", "Native_Hut_Northern_01");
         case CLIMATE_DESERT:
-            // TODO: add desert native hut asset
+            return assets_get_image_id("Terrain_Maps", "Native_Hut_Southern_01");
         default:
             return assets_get_image_id("Terrain_Maps", "Native_Hut_Central_01");
     }
@@ -96,11 +96,11 @@ int alt_native_image_id() {
 void map_natives_init(void)
 {
     int image_hut = scenario_building_image_native_hut();
-    int image_alt_hut = scenario_building_image_alt_native_hut();
+    int scenario_image_alt_hut = scenario_building_image_alt_native_hut();
     int image_meeting = scenario_building_image_native_meeting();
     int image_crops = scenario_building_image_native_crops();
     int native_image = image_group(GROUP_BUILDING_NATIVE);
-    int alt_native_image = alt_native_image_id();
+    int native_hut_alt_image = native_hut_alt_get_image_id();
     int grid_offset = map_data.start_offset;
     for (int y = 0; y < map_data.height; y++, grid_offset += map_data.border_size) {
         for (int x = 0; x < map_data.width; x++, grid_offset++) {
@@ -117,12 +117,12 @@ void map_natives_init(void)
             } else if (image_id == image_hut + 1) {
                 type = BUILDING_NATIVE_HUT;
                 map_image_set(grid_offset, native_image + 1);
-            } else if (image_alt_hut != 0 && image_id == image_alt_hut) {
+            } else if (scenario_image_alt_hut != 0 && image_id == scenario_image_alt_hut) {
                 type = BUILDING_NATIVE_HUT_ALT;
-                map_image_set(grid_offset, alt_native_image);
-            } else if (image_alt_hut != 0 && image_id == image_alt_hut + 1) {
+                map_image_set(grid_offset, native_hut_alt_image);
+            } else if (scenario_image_alt_hut != 0 && image_id == scenario_image_alt_hut + 1) {
                 type = BUILDING_NATIVE_HUT_ALT;
-                map_image_set(grid_offset, alt_native_image + 1);
+                map_image_set(grid_offset, native_hut_alt_image + 1);
             } else if (image_id == image_meeting) {
                 type = BUILDING_NATIVE_MEETING;
                 map_image_set(grid_offset, native_image + 2);
@@ -166,11 +166,11 @@ void map_natives_init(void)
 void map_natives_init_editor(void)
 {
     int image_hut = scenario_building_image_native_hut();
-    int image_alt_hut = scenario_building_image_alt_native_hut();
+    int scenario_image_alt_hut = scenario_building_image_alt_native_hut();
     int image_meeting = scenario_building_image_native_meeting();
     int image_crops = scenario_building_image_native_crops();
     int native_image = image_group(GROUP_EDITOR_BUILDING_NATIVE);
-    int alt_native_image = alt_native_image_id();
+    int native_hut_alt_image = native_hut_alt_get_image_id();
     int grid_offset = map_data.start_offset;
     for (int y = 0; y < map_data.height; y++, grid_offset += map_data.border_size) {
         for (int x = 0; x < map_data.width; x++, grid_offset++) {
@@ -186,12 +186,12 @@ void map_natives_init_editor(void)
             } else if (image_id == image_hut + 1) {
                 type = BUILDING_NATIVE_HUT;
                 map_image_set(grid_offset, native_image + 1);
-            } else if (image_alt_hut != 0 && image_id == image_alt_hut) {
+            } else if (scenario_image_alt_hut != 0 && image_id == scenario_image_alt_hut) {
                 type = BUILDING_NATIVE_HUT_ALT;
-                map_image_set(grid_offset, alt_native_image);
-            } else if (image_alt_hut != 0 && image_id == image_alt_hut + 1) {
+                map_image_set(grid_offset, native_hut_alt_image);
+            } else if (scenario_image_alt_hut != 0 && image_id == scenario_image_alt_hut + 1) {
                 type = BUILDING_NATIVE_HUT_ALT;
-                map_image_set(grid_offset, alt_native_image + 1);
+                map_image_set(grid_offset, native_hut_alt_image + 1);
             } else if (image_id == image_meeting) {
                 type = BUILDING_NATIVE_MEETING;
                 map_image_set(grid_offset, native_image + 2);

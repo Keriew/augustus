@@ -74,7 +74,16 @@ static void draw_building(const map_tile *tile, int x_view, int y_view, building
         if (type == BUILDING_NATIVE_CROPS) {
             image_id = image_group(GROUP_EDITOR_BUILDING_CROPS);
         } else if (type == BUILDING_NATIVE_HUT_ALT) {
-            image_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Central_01");
+            switch (scenario_property_climate()) {
+                case CLIMATE_NORTHERN:
+                    image_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Northern_01");
+                    break;
+                case CLIMATE_DESERT:
+                    image_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Southern_01");
+                    break;
+                default:
+                    image_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Central_01");
+            };
         } else {
             image_id = image_group(props->image_group) + props->image_offset;
         }

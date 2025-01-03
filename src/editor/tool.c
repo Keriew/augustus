@@ -348,9 +348,11 @@ static void place_building(const map_tile *tile)
             type = BUILDING_NATIVE_HUT_ALT;
             switch (scenario_property_climate()) {
                 case CLIMATE_NORTHERN:
-                    // TODO: add nothern native hut asset
+                    image_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Northern_01") + (random_byte() & 1);
+                    break;
                 case CLIMATE_DESERT:
-                    // TODO: add desert native hut asset
+                    image_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Southern_01") + (random_byte() & 1);
+                    break;
                 default:
                     image_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Central_01") + (random_byte() & 1);
             }

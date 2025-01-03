@@ -566,9 +566,9 @@ int building_image_get(const building *b)
         case BUILDING_NATIVE_HUT_ALT:
             switch (scenario_property_climate()) {
                 case CLIMATE_NORTHERN:
-                    // TODO: add nothern native hut asset
+                    return assets_get_image_id("Terrain_Maps", "Native_Hut_Northern_01") + (random_byte() & 1);
                 case CLIMATE_DESERT:
-                    // TODO: add desert native hut asset
+                    return assets_get_image_id("Terrain_Maps", "Native_Hut_Southern_01") + (random_byte() & 1);
                 default:
                     return assets_get_image_id("Terrain_Maps", "Native_Hut_Central_01") + (random_byte() & 1);
             }

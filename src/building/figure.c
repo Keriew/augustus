@@ -1511,12 +1511,14 @@ static void spawn_figure_native_hut(building *b)
         int image_group_id;
         switch (scenario_property_climate()) {
             case CLIMATE_NORTHERN:
-                // TODO: add nothern native hut asset
+                image_group_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Northern_01");
+                break;
             case CLIMATE_DESERT:
-                // TODO: add desert native hut asset
+                image_group_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Southern_01");
+                break;
             default:
                 image_group_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Central_01");
-        };
+        }
         map_image_set(b->grid_offset, image_group_id + (map_random_get(b->grid_offset) & 1));
     }
 
