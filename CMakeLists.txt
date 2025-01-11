@@ -721,7 +721,7 @@ set(TRANSLATION_FILES
 )
 
 set(MACOSX_FILES "")
-if(APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "ios")
+if(APPLE)
     function(resource VAR SOURCE_PATH DESTINATION PATTERN)
     file(GLOB_RECURSE _LIST CONFIGURE_DEPENDS ${SOURCE_PATH}/${PATTERN})
     foreach (RESOURCE ${_LIST})
@@ -737,6 +737,9 @@ if(APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "ios")
     set(${VAR} ${_LIST} PARENT_SCOPE)
     endfunction()
     resource(ASSET_SOURCES ${ASSETS_DIR} Resources/assets *)
+endif()
+
+if(APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "ios")
     set(MACOSX_FILES
         ${PROJECT_SOURCE_DIR}/res/augustus.icns
         ${ASSET_SOURCES}
@@ -748,6 +751,7 @@ set(IOS_FILES "")
 if(${TARGET_PLATFORM} STREQUAL "ios")
     set(IOS_FILES 
         ${PROJECT_SOURCE_DIR}/res/ios/Assets.xcassets
+        ${ASSET_SOURCES}
     )
 
 endif()
