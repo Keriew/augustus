@@ -114,6 +114,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_DRAW_WEATHER, "날씨 효과 활성화"},
     {TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE, "파일을 덮어쓰기 전에 물어보기"},
     {TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, "정원 출입문의 초기 설정을 '모든 보행자 통행 가능'으로 설정"},
+    {TR_CONFIG_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION, "고급 세금 및 임금 감정 기여 논리"},
     {TR_HOTKEY_TITLE, "Augustus 단축키 설정"},
     {TR_HOTKEY_LABEL, "기본"},
     {TR_HOTKEY_ALTERNATIVE_LABEL, "보조"},
