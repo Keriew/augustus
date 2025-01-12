@@ -168,8 +168,30 @@ static int get_games_bonus(void)
 
 static int get_wage_sentiment_modifier(void)
 {
+    const int wage_interval = 8;
     int wage_differential = city_data.labor.wages - city_data.labor.wages_rome;
-    return wage_differential * (wage_differential > 0 ? WAGE_POSITIVE_MODIFIER : WAGE_NEGATIVE_MODIFIER);
+    if (wage_differential > wage_interval && config_get(CONFIG_GP_CH_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION)) {
+        // Precomputed wage sentiment contributions by intervals. Each next interval gives twice less
+        // contribution in compare to previous, making it inefficient to set wages much higher than Rome.
+        // When wages differential is more than 32 percent points, it stops contributing to sentiment.
+        const int contribution_div[4] = { 1, 2, 4, 8 }; // Divisors for the remainder
+        const int contribution[4] = { 8, 12, 14, 15 };  // Precomputed results for full wage intervals
+        const int max_interval_idx = sizeof(contribution) / sizeof(contribution[0]);
+
+        // Determine the interval index and remainder contribution
+        int interval_idx = wage_differential / wage_interval;
+        if (interval_idx >= max_interval_idx) {
+            // Stop contributing if wage diff value is 32 or higher
+            wage_differential = contribution[max_interval_idx - 1] * WAGE_POSITIVE_MODIFIER;
+        } else {
+            // For better int precision, we multiply the reminder by wage modifier before division
+            int remainder = (wage_differential % wage_interval) * WAGE_POSITIVE_MODIFIER / contribution_div[interval_idx];
+            wage_differential = contribution[interval_idx - 1] * WAGE_POSITIVE_MODIFIER + remainder;
+        }
+    } else {
+        wage_differential *= (wage_differential > 0 ? WAGE_POSITIVE_MODIFIER : WAGE_NEGATIVE_MODIFIER);
+    }
+    return wage_differential;
 }
 
 static int get_unemployment_sentiment_modifier(void)
@@ -186,6 +208,21 @@ static int get_sentiment_modifier_for_tax_rate(int tax)
     int base_tax = difficulty_base_tax_rate();
     int tax_differential = base_tax - tax;
     tax_differential *= tax_differential < 0 ? (MAX_TAX_MULTIPLIER - base_tax) : (base_tax / 2);
+    if (tax_differential < 0 && config_get(CONFIG_GP_CH_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION)) {
+        // Extra sentiment punishment applies when player sets higher taxes.
+        // Multiplier is a power of 2, where exponent is doubled after tax difference
+        // reaches next interval, which is half of base tax rate.
+        // Example:
+        // In very hard mode the base tax rate is 6%. Player sets current tax level to 15%.
+        // Tax difference is 9%. The interval is 6% / 2 = 3%. It means that for every next 3% of tax
+        // higher than 6% the tax sentiment multiplier will be doubled. This gives us a tax differential
+        // value (6% - 15%) * (12% - 6%) * 2^(9% / 3%) = -9% * 6% * 8 = -432 (original value was -54).
+        int interval = calc_bound(base_tax / 2, 2, 8);
+        int tax_diff = tax - base_tax;
+        if (tax_diff >= interval) {
+            tax_differential *= 2 << calc_bound(tax_diff / interval - 1, 0, 8);
+        }
+    }
     return tax_differential;
 }
 
