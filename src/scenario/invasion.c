@@ -677,7 +677,7 @@ void scenario_invasion_warning_save_state(buffer *invasion_id, buffer *warnings)
 {
     buffer_write_u16(invasion_id, data.last_internal_invasion_id);
 
-    buffer_init_dynamic_array(warnings, data.warnings.size, WARNINGS_STRUCT_SIZE_CURRENT);
+    buffer_init_dynamic_array(warnings, INVASIONS_CURRENT_VERSION, data.warnings.size, WARNINGS_STRUCT_SIZE_CURRENT);
 
     const invasion_warning *w;
     array_foreach(data.warnings, w) {
@@ -730,7 +730,7 @@ void scenario_invasion_warning_load_state(buffer *invasion_id, buffer *warnings,
 
 void scenario_invasion_save_state(buffer *buf)
 {
-    buffer_init_dynamic_array(buf, data.invasions.size, INVASIONS_STRUCT_SIZE_CURRENT);
+    buffer_init_dynamic_array(buf, INVASIONS_CURRENT_VERSION, data.invasions.size, INVASIONS_STRUCT_SIZE_CURRENT);
 
     const invasion_t *invasion;
     array_foreach(data.invasions, invasion) {
