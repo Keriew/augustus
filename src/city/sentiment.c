@@ -169,11 +169,12 @@ static int get_games_bonus(void)
 static int get_wage_sentiment_modifier(void)
 {
     const int wage_interval = 8;
+    int use_advanced_sentiment_contribution = config_get(CONFIG_GP_CH_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION);
     int wage_differential = city_data.labor.wages - city_data.labor.wages_rome;
-    if (wage_differential > wage_interval && config_get(CONFIG_GP_CH_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION)) {
+    if (use_advanced_sentiment_contribution && wage_differential > wage_interval) {
         // Precomputed wage sentiment contributions by intervals. Each next interval gives twice less
         // contribution in compare to previous, making it inefficient to set wages much higher than Rome.
-        // When wages differential is more than 32 percent points, it stops contributing to sentiment.
+        // When wages differential is more than 32 dn, it stops contributing to sentiment.
         const int contribution_div[4] = { 1, 2, 4, 8 }; // Divisors for the remainder
         const int contribution[4] = { 8, 12, 14, 15 };  // Precomputed results for full wage intervals
         const int max_interval_idx = sizeof(contribution) / sizeof(contribution[0]);
@@ -187,6 +188,24 @@ static int get_wage_sentiment_modifier(void)
             // For better int precision, we multiply the reminder by wage modifier before division
             int remainder = (wage_differential % wage_interval) * WAGE_POSITIVE_MODIFIER / contribution_div[interval_idx];
             wage_differential = contribution[interval_idx - 1] * WAGE_POSITIVE_MODIFIER + remainder;
+        }
+    } else if (use_advanced_sentiment_contribution && wage_differential < -wage_interval) {
+        int abs_wage_differential = abs(wage_differential);
+        // Precomputed wage sentiment punishment by intervals. Each next interval gives doubled
+        // punishment in compare to previous, making it inefficient to set wages much lower than Rome.
+        // When wages differential is less than -48 dn, the punishment for every next denarii is at fixed rate
+        const int punishment[6] = { -8, -24, -56, -120, -248, -504 };  // Precomputed results for full wage intervals
+        const int max_interval_idx = sizeof(punishment) / sizeof(punishment[0]);
+
+        // Determine the interval index and remainder punishment
+        int interval_idx = abs_wage_differential / wage_interval;
+        if (interval_idx >= max_interval_idx) {
+            // Use the fixed punishment modifier for values out of pre-computed intervals range.
+            int remainder = (abs_wage_differential - (max_interval_idx * wage_interval)) << max_interval_idx;
+            wage_differential = (punishment[max_interval_idx - 1] - remainder) * WAGE_NEGATIVE_MODIFIER;
+        } else {
+            int remainder = (abs_wage_differential % wage_interval) * (2 << (interval_idx - 1));
+            wage_differential = (punishment[interval_idx - 1] - remainder) * WAGE_NEGATIVE_MODIFIER;
         }
     } else {
         wage_differential *= (wage_differential > 0 ? WAGE_POSITIVE_MODIFIER : WAGE_NEGATIVE_MODIFIER);
@@ -206,24 +225,32 @@ static int get_unemployment_sentiment_modifier(void)
 static int get_sentiment_modifier_for_tax_rate(int tax)
 {
     int base_tax = difficulty_base_tax_rate();
-    int tax_differential = base_tax - tax;
-    tax_differential *= tax_differential < 0 ? (MAX_TAX_MULTIPLIER - base_tax) : (base_tax / 2);
-    if (tax_differential < 0 && config_get(CONFIG_GP_CH_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION)) {
-        // Extra sentiment punishment applies when player sets higher taxes.
-        // Multiplier is a power of 2, where exponent is doubled after tax difference
-        // reaches next interval, which is half of base tax rate.
+    int interval = calc_bound(base_tax / 2, 1, 8); // Calculate the tax interval length based on difficulty
+    int sentiment_modifier = base_tax - tax; // The original base sentiment modifier if advanced logic isn't enabled
+    if (sentiment_modifier < -interval && config_get(CONFIG_GP_CH_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION)) {
+        // Extra sentiment punishment modifier applies when player sets higher taxes. Tax range is 
+        // divided by intervals which length is half of base tax rate based on difficulty settings.
+        // For every next tax interval the modifier is doubled. 
         // Example:
-        // In very hard mode the base tax rate is 6%. Player sets current tax level to 15%.
-        // Tax difference is 9%. The interval is 6% / 2 = 3%. It means that for every next 3% of tax
-        // higher than 6% the tax sentiment multiplier will be doubled. This gives us a tax differential
-        // value (6% - 15%) * (12% - 6%) * 2^(9% / 3%) = -9% * 6% * 8 = -432 (original value was -54).
-        int interval = calc_bound(base_tax / 2, 2, 8);
-        int tax_diff = tax - base_tax;
-        if (tax_diff >= interval) {
-            tax_differential *= 2 << calc_bound(tax_diff / interval - 1, 0, 8);
+        // In very hard mode the base tax rate is 6%. Player sets current tax level to 16%.
+        // Tax difference will be 10% and the interval length is 3% (half of base tax rate 6%).
+        // Punishment modifier will be set for every tax interval to values [1, 2, 4, 8].
+        // The final modifier: -(3% * 1 + 3% * 2 + 3% * 4 + 1% * 8) * (12% - 6%) = -174 (original value was -60).
+        int remaining = abs(sentiment_modifier);
+        sentiment_modifier = 0;
+
+        int modifier = 1;
+        while (remaining > 0) {
+            int diff = calc_bound(remaining, 1, interval);
+            sentiment_modifier -= diff * modifier;
+            remaining -= diff;
+            if (modifier < 512) {
+                modifier <<= 1; // Multiply by 2
+            }
         }
     }
-    return tax_differential;
+    sentiment_modifier *= sentiment_modifier < 0 ? (MAX_TAX_MULTIPLIER - base_tax) : (base_tax / 2);
+    return sentiment_modifier;
 }
 
 static int get_average_housing_level(void)
@@ -358,9 +385,23 @@ void city_sentiment_update(void)
 
             sentiment += blessing_festival_boost;
 
+            sentiment = calc_bound(sentiment, 0, 100); // new sentiment value should be in range of 0..100
+
             // Change sentiment gradually to the new value
             int sentiment_delta = sentiment - b->sentiment.house_happiness;
-            sentiment_delta = calc_bound(sentiment_delta, -MAX_SENTIMENT_CHANGE, MAX_SENTIMENT_CHANGE);
+            if (sentiment_delta < 0 && config_get(CONFIG_GP_CH_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION)) {
+                // With new advanced logic we introduce faster sentiment drop when the target value is
+                // much lower than current happiness level. The final sentiment change is a half of the 
+                // percent difference between current happiness level and the target.
+                // Example:
+                // Current house happiness level is 82, the new sentiment value is 10 and the delta is -72.
+                // The delta percent relative to the current happiness level is 87% (72 * 100% / 82).
+                // The final happiness change will be -30 (43% of -72, which is half of delta percent above).
+                int delta_percent = abs(sentiment_delta) * 100 / b->sentiment.house_happiness;
+                sentiment_delta = calc_bound(sentiment_delta * delta_percent / 200, -100, -1);
+            } else {
+                sentiment_delta = calc_bound(sentiment_delta, -MAX_SENTIMENT_CHANGE, MAX_SENTIMENT_CHANGE);
+            }
             b->sentiment.house_happiness = calc_bound(b->sentiment.house_happiness + sentiment_delta, 0, 100);
             houses_calculated++;
 
