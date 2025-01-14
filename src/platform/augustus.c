@@ -1,4 +1,6 @@
+#if (defined(_WIN32) || defined(_WIN64)) && !defined(_MSC_VER)
 #define SDL_MAIN_HANDLED
+#endif
 #include "SDL.h"
 
 #include "core/config.h"
@@ -702,8 +704,10 @@ int main() {
     SDL_SetMainReady();
     return SDL_main(__argc, __argv);
 }
-#endif
 int SDL_main(int argc, char **argv)
+#else
+int main(int argc, char **argv)
+#endif
 {
     augustus_args args;
     if (!platform_parse_arguments(argc, argv, &args)) {
