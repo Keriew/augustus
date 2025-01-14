@@ -1,3 +1,4 @@
+#define SDL_MAIN_HANDLED
 #include "SDL.h"
 
 #include "core/config.h"
@@ -694,6 +695,14 @@ static void setup(const augustus_args *args)
     data.active = 1;
 }
 
+#if (defined(_WIN32) || defined(_WIN64)) && !defined(_MSC_VER)
+extern int __argc;
+extern char ** __argv;
+int main() {
+    SDL_SetMainReady();
+    return SDL_main(__argc, __argv);
+}
+#endif
 int main(int argc, char **argv)
 {
     augustus_args args;
