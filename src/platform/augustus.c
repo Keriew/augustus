@@ -703,7 +703,7 @@ int main() {
     return SDL_main(__argc, __argv);
 }
 #endif
-int main(int argc, char **argv)
+int SDL_main(int argc, char **argv)
 {
     augustus_args args;
     if (!platform_parse_arguments(argc, argv, &args)) {
