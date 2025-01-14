@@ -13,6 +13,7 @@
 #include "core/config.h"
 #include "core/random.h"
 #include "game/difficulty.h"
+#include "game/time.h"
 #include "game/tutorial.h"
 
 #include <math.h>
@@ -34,6 +35,11 @@
 #define EXECUTIONS_GAMES_SENTIMENT_BONUS 20
 #define IMPERIAL_GAMES_SENTIMENT_BONUS 15
 #define POP_STEP_FOR_BASE_AVERAGE_HOUSE_LEVEL 625
+
+// New advanced sentiment change calculation applies only after configured months
+// of gameplay has passed. This is required to prevent very fast sentiment drop 
+// by high unemployment at very early game
+#define ADVANCED_SENTIMENT_CHANGE_APPLY_AFTER_MONTHS 30
 
 int city_sentiment(void)
 {
@@ -389,16 +395,30 @@ void city_sentiment_update(void)
 
             // Change sentiment gradually to the new value
             int sentiment_delta = sentiment - b->sentiment.house_happiness;
-            if (sentiment_delta < 0 && config_get(CONFIG_GP_CH_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION)) {
-                // With new advanced logic we introduce faster sentiment drop when the target value is
-                // much lower than current happiness level. The final sentiment change is a half of the 
-                // percent difference between current happiness level and the target.
-                // Example:
+            if (sentiment_delta != 0 &&
+                game_time_total_months() >= ADVANCED_SENTIMENT_CHANGE_APPLY_AFTER_MONTHS &&
+                config_get(CONFIG_GP_CH_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION)) {
+                // With new advanced logic we introduce faster sentiment change when the target value is
+                // far away from current happiness level. For the negative delta the final 
+                // sentiment change is a half of the delta difference percent. For the positive delta
+                // the final sentiment change is 1/8 of the delta difference percent.
+                // Example #1:
                 // Current house happiness level is 82, the new sentiment value is 10 and the delta is -72.
                 // The delta percent relative to the current happiness level is 87% (72 * 100% / 82).
                 // The final happiness change will be -30 (43% of -72, which is half of delta percent above).
-                int delta_percent = abs(sentiment_delta) * 100 / b->sentiment.house_happiness;
-                sentiment_delta = calc_bound(sentiment_delta * delta_percent / 200, -100, -1);
+                // Example #2:
+                // Current house happiness level is 20, the new sentiment value is 77 and the delta is 57.
+                // The delta percent relative to the current happiness level is 74% (57 * 100% / 77).
+                // The final happiness change will be 5 (9% of 57).
+                if (sentiment_delta > 0) {
+                    int happiness_target = calc_bound(b->sentiment.house_happiness + sentiment_delta, 1, 100);
+                    int delta_percent = sentiment_delta * 100 / happiness_target;
+                    sentiment_delta = calc_bound(sentiment_delta * delta_percent / 800, 1, 100);
+                } else {
+                    int delta_percent = b->sentiment.house_happiness == 0 ?
+                        100 : (-sentiment_delta * 100 / b->sentiment.house_happiness);
+                    sentiment_delta = calc_bound(sentiment_delta * delta_percent / 200, -100, -1);
+                }
             } else {
                 sentiment_delta = calc_bound(sentiment_delta, -MAX_SENTIMENT_CHANGE, MAX_SENTIMENT_CHANGE);
             }
