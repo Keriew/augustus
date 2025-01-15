@@ -20,7 +20,7 @@
 #include "window/editor/edit_request.h"
 #include "window/editor/map.h"
 
-static void button_edit_request(unsigned int id, unsigned int mouse_x, unsigned int mouse_y);
+static void button_edit_request(const grid_box_item *item);
 static void button_new_request(const generic_button *button);
 static void draw_request_button(const grid_box_item *item);
 
@@ -168,16 +168,16 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 }
 
-static void button_edit_request(unsigned int id, unsigned int mouse_x, unsigned int mouse_y)
+static void button_edit_request(const grid_box_item *item)
 {
     if (!data.on_select) {
-        window_editor_edit_request_show(data.requests[id]->id);
+        window_editor_edit_request_show(data.requests[item->index]->id);
         return;
     }
-    if (data.requests[id]->resource == RESOURCE_NONE) {
+    if (data.requests[item->index]->resource == RESOURCE_NONE) {
         return;
     }
-    data.on_select(data.requests[id]->id);
+    data.on_select(data.requests[item->index]->id);
     window_go_back();
 }
 

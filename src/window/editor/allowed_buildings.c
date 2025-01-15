@@ -13,7 +13,7 @@
 #include "window/editor/map.h"
 
 static void draw_allowed_building(const grid_box_item *item);
-static void toggle_building(unsigned int id, unsigned int mouse_x, unsigned int mouse_y);
+static void toggle_building(const grid_box_item *item);
 
 static grid_box_type allowed_building_list = {
     .x = 25,
@@ -74,9 +74,9 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 }
 
-void toggle_building(unsigned int id, unsigned int mouse_x, unsigned int mouse_y)
+void toggle_building(const grid_box_item *item)
 {
-    scenario_editor_toggle_building_allowed(id + 1);
+    scenario_editor_toggle_building_allowed(item->index + 1);
     window_request_refresh();
 }
 

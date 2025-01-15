@@ -22,7 +22,7 @@
 
 #include <stdlib.h>
 
-static void button_demand_change(unsigned int id, unsigned int mouse_x, unsigned int mouse_y);
+static void button_demand_change(const grid_box_item *item);
 static void button_new_demand_change(const generic_button *button);
 static void draw_demand_change_button(const grid_box_item *item);
 
@@ -209,9 +209,9 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 }
 
-static void button_demand_change(unsigned int id, unsigned int mouse_x, unsigned int mouse_y)
+static void button_demand_change(const grid_box_item *item)
 {
-    window_editor_edit_demand_change_show(data.demand_changes[id]->id);
+    window_editor_edit_demand_change_show(data.demand_changes[item->index]->id);
 }
 
 static void button_new_demand_change(const generic_button *button)

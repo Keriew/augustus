@@ -21,7 +21,7 @@
 
 #include <stdlib.h>
 
-static void button_price_change(unsigned int id, unsigned int mouse_x, unsigned int mouse_y);
+static void button_price_change(const grid_box_item *item);
 static void button_new_price_change(const generic_button *button);
 static void draw_price_change_button(const grid_box_item *item);
 
@@ -161,9 +161,9 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 }
 
-static void button_price_change(unsigned int id, unsigned int mouse_x, unsigned int mouse_y)
+static void button_price_change(const grid_box_item *item)
 {
-    window_editor_edit_price_change_show(id);
+    window_editor_edit_price_change_show(item->index);
 }
 
 static void button_new_price_change(const generic_button *button)

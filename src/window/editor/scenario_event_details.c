@@ -77,8 +77,8 @@ static void button_ok(const generic_button *button);
 
 static void draw_condition_button(const grid_box_item *item);
 static void draw_action_button(const grid_box_item *item);
-static void click_condition_button(unsigned int index, unsigned int mouse_x, unsigned int mouse_y);
-static void click_action_button(unsigned int index, unsigned int mouse_x, unsigned int mouse_y);
+static void click_condition_button(const grid_box_item *item);
+static void click_action_button(const grid_box_item *item);
 static void handle_condition_tooltip(const grid_box_item *item, tooltip_context *c);
 static void handle_action_tooltip(const grid_box_item *item, tooltip_context *c);
 
@@ -928,17 +928,17 @@ static void update_actions_selection_type(void)
     data.actions.selection_type = some_selected ? CHECKBOX_ALL_SELECTED : CHECKBOX_NO_SELECTION;
 }
 
-static void click_condition_button(unsigned int index, unsigned int mouse_x, unsigned int mouse_y)
+static void click_condition_button(const grid_box_item *item)
 {
-    const condition_list_item *list_item = &data.conditions.list[index];
+    const condition_list_item *list_item = &data.conditions.list[item->index];
     if (!list_item->condition) {
         return;
     }
 
     if (list_item->condition->type != CONDITION_TYPE_UNDEFINED) {
-        if (mouse_x < 20) {
+        if (item->mouse.x < 20) {
             if (data.conditions.selected) {
-                data.conditions.selected[index] ^= 1;
+                data.conditions.selected[item->index] ^= 1;
                 update_conditions_selection_type();
                 window_request_refresh();
             }
@@ -949,13 +949,13 @@ static void click_condition_button(unsigned int index, unsigned int mouse_x, uns
     }
 }
 
-static void click_action_button(unsigned int index, unsigned int mouse_x, unsigned int mouse_y)
+static void click_action_button(const grid_box_item *item)
 {
-    scenario_action_t *action = data.actions.list[index];
+    scenario_action_t *action = data.actions.list[item->index];
     if (action->type != ACTION_TYPE_UNDEFINED) {
-        if (mouse_x < 20) {
+        if (item->mouse.x < 20) {
             if (data.actions.selected) {
-                data.actions.selected[index] ^= 1;
+                data.actions.selected[item->index] ^= 1;
                 update_actions_selection_type();
                 window_request_refresh();
             }

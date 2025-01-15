@@ -17,7 +17,7 @@
 #include "window/editor/edit_invasion.h"
 #include "window/editor/map.h"
 
-static void button_invasion(unsigned int id, unsigned int mouse_x, unsigned int mouse_y);
+static void button_invasion(const grid_box_item *item);
 static void button_new_invasion(const generic_button *button);
 static void draw_invasion_button(const grid_box_item *item);
 
@@ -152,9 +152,9 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 }
 
-static void button_invasion(unsigned int id, unsigned int mouse_x, unsigned int mouse_y)
+static void button_invasion(const grid_box_item *item)
 {
-    window_editor_edit_invasion_show(data.invasions[id]->id);
+    window_editor_edit_invasion_show(data.invasions[item->index]->id);
 }
 
 static void button_new_invasion(const generic_button *button)

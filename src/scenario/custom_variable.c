@@ -52,7 +52,7 @@ unsigned int scenario_custom_variable_get_id_by_name(const uint8_t *name)
 {
     const custom_variable_t *variable;
     array_foreach(custom_variables, variable) {
-        if (variable->name && string_equals(variable->name, name)) {
+        if (name && string_equals(variable->name, name)) {
             return variable->id;
         }
     }

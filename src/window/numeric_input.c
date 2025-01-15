@@ -145,16 +145,24 @@ static void draw_foreground(void)
     draw_number_button(data.x + 21, data.y + 141, 0, data.focus_button_id == 10);
 
     if (data.min_value < 0) {
-        graphics_draw_rect(data.x + 51, data.y + 141, 25, 25, data.focus_button_id == 11 ? COLOR_FONT_BLUE : COLOR_BLACK);
-        text_draw_centered(string_from_ascii("-"), data.x + 51, data.y + 147, 25, FONT_NORMAL_PLAIN, COLOR_BLACK);
+        graphics_draw_rect(data.x + 51, data.y + 141, 25, 25,
+            data.focus_button_id == 11 ? COLOR_FONT_BLUE : COLOR_BLACK);
+        text_draw_centered(string_from_ascii("-"), data.x + 51, data.y + 147, 25, FONT_NORMAL_PLAIN,
+            data.focus_button_id == 11 ? COLOR_FONT_BLUE : COLOR_BLACK);
     }
     
     graphics_draw_rect(data.x + 51, data.y + 171, 55, 25, data.focus_button_id == 12 ? COLOR_FONT_BLUE : COLOR_BLACK);
     lang_text_draw_centered_colored(44, 16, data.x + 51, data.y + 177, 55, FONT_NORMAL_PLAIN,
-            data.focus_button_id == 11 ? COLOR_FONT_BLUE : COLOR_BLACK);
+            data.focus_button_id == 12 ? COLOR_FONT_BLUE : COLOR_BLACK);
 
-    graphics_draw_rect(data.x + 21, data.y + 201, 25, 25, data.focus_button_id == 13 ? COLOR_FONT_BLUE : COLOR_BLACK);
-    text_draw_centered(string_from_ascii("X"), data.x + 21, data.y + 207, 25, FONT_NORMAL_PLAIN, COLOR_RED);
+    if (data.focus_button_id == 13) {
+        graphics_fill_rect(data.x + 21, data.y + 201, 25, 25, COLOR_RED);
+    } else {
+        graphics_draw_rect(data.x + 21, data.y + 201, 25, 25, COLOR_BLACK);
+    }
+
+    text_draw_centered(string_from_ascii("X"), data.x + 22, data.y + 207, 25, FONT_NORMAL_PLAIN,
+        data.focus_button_id == 13 ? COLOR_WHITE : COLOR_RED);
     graphics_draw_rect(data.x + 51, data.y + 201, 55, 25, data.focus_button_id == 14 ? COLOR_FONT_BLUE : COLOR_BLACK);
     lang_text_draw_centered_colored(44, 17, data.x + 51, data.y + 207, 55, FONT_NORMAL_PLAIN,
             data.focus_button_id == 14 ? COLOR_FONT_BLUE : COLOR_BLACK);

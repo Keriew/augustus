@@ -40,7 +40,7 @@ static void resource_item_tooltip(const grid_box_item *item, tooltip_context *c)
 static void button_prices(const generic_button *button);
 static void button_empire(const generic_button *button);
 static void button_policy(const generic_button *button);
-static void button_resource(unsigned int index, unsigned int mouse_x, unsigned int mouse_y);
+static void button_resource(const grid_box_item *item);
 
 static grid_box_type resource_grid = {
     .x = 16,
@@ -320,9 +320,9 @@ static void button_policy(const generic_button *button)
     show_policy(policy_type);
 }
 
-static void button_resource(unsigned int index, unsigned int mouse_x, unsigned int mouse_y)
+static void button_resource(const grid_box_item *item)
 {
-    window_resource_settings_show(data.list.items[index]);
+    window_resource_settings_show(data.list.items[item->index]);
 }
 
 static void write_resource_storage_tooltip(tooltip_context *c, resource_type resource)
