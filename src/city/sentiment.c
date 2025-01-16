@@ -416,17 +416,16 @@ void city_sentiment_update(void)
                 game_time_total_months() >= ADVANCED_SENTIMENT_CHANGE_APPLY_AFTER_MONTHS &&
                 config_get(CONFIG_GP_CH_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION)) {
                 // With new advanced logic we introduce faster sentiment change when the target value is
-                // far away from current happiness level. For the negative delta the final 
-                // sentiment change is a half of the delta difference percent. For the positive delta
-                // the final sentiment change is 1/8 of the delta difference percent.
+                // far away from current happiness level. The final change value depends on difficulty settings.
                 // Example #1:
                 // Current house happiness level is 82, the new sentiment value is 10 and the delta is -72.
                 // The delta percent relative to the current happiness level is 87% (72 * 100% / 82).
-                // The final happiness change will be -30 (43% of -72, which is half of delta percent above).
+                // The final happiness change for VeryHard mode will be -30 (43% of -72, which is 
+                // 50% of delta percent).
                 // Example #2:
                 // Current house happiness level is 20, the new sentiment value is 77 and the delta is 57.
                 // The delta percent relative to the current happiness level is 74% (57 * 100% / 77).
-                // The final happiness change will be 5 (9% of 57).
+                // The final happiness change for Hard mode will be 5 (11% of 57, which is 15% of delta percent).
                 if (sentiment_delta > 0) {
                     int happiness_target = calc_bound(b->sentiment.house_happiness + sentiment_delta, 1, 100);
                     int delta_percent = sentiment_delta * 100 / happiness_target;
