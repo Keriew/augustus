@@ -13,6 +13,7 @@
 #include "core/config.h"
 #include "core/random.h"
 #include "game/difficulty.h"
+#include "game/settings.h"
 #include "game/time.h"
 #include "game/tutorial.h"
 
@@ -320,6 +321,22 @@ static int extra_food_bonus(int types, int required)
     return calc_bound(extra, 0, MAX_SENTIMENT_FROM_EXTRA_FOOD);
 }
 
+const advanced_sentiment_gain_modifier[5] = {
+    400, // 25%
+    463, // 21.6%
+    546, // 18.3%
+    666, // 15%
+    800  // 12.5%
+};
+
+const advanced_sentiment_drop_modifier[5] = {
+    400, // 25%
+    333, // 30%
+    285, // 35%
+    250, // 40%
+    200  // 50%
+};
+
 void city_sentiment_update(void)
 {
     city_population_check_consistency();
@@ -413,11 +430,13 @@ void city_sentiment_update(void)
                 if (sentiment_delta > 0) {
                     int happiness_target = calc_bound(b->sentiment.house_happiness + sentiment_delta, 1, 100);
                     int delta_percent = sentiment_delta * 100 / happiness_target;
-                    sentiment_delta = calc_bound(sentiment_delta * delta_percent / 800, 1, 100);
+                    int gain_modifier = advanced_sentiment_gain_modifier[setting_difficulty()];
+                    sentiment_delta = calc_bound(sentiment_delta * delta_percent / gain_modifier, 1, 100);
                 } else {
                     int delta_percent = b->sentiment.house_happiness == 0 ?
                         100 : (-sentiment_delta * 100 / b->sentiment.house_happiness);
-                    sentiment_delta = calc_bound(sentiment_delta * delta_percent / 200, -100, -1);
+                    int drop_modifier = advanced_sentiment_drop_modifier[setting_difficulty()];
+                    sentiment_delta = calc_bound(sentiment_delta * delta_percent / drop_modifier, -100, -1);
                 }
             } else {
                 sentiment_delta = calc_bound(sentiment_delta, -MAX_SENTIMENT_CHANGE, MAX_SENTIMENT_CHANGE);
