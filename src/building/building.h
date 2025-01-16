@@ -193,8 +193,8 @@ typedef struct building {
             uint8_t sentiment_cooldown_initialized: 1;
             uint8_t sentiment_cooldown: 3;
             uint8_t reserved: 4;
-        } extra_house_info;
-    };
+        } house;
+    } extra_attr;
     union {
         signed char house_happiness;
         signed char native_anger;

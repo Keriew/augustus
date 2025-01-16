@@ -162,7 +162,7 @@ void building_state_save_to_buffer(buffer *buf, const building *b)
     buffer_write_i8(buf, b->desirability);
     buffer_write_u8(buf, b->is_deleted);
     buffer_write_u8(buf, b->is_adjacent_to_water);
-    buffer_write_u8(buf, b->storage_id); // which union field we use does not matter
+    buffer_write_u8(buf, b->extra_attr.storage_id); // which union field we use does not matter
     buffer_write_i8(buf, b->sentiment.house_happiness); // which union field we use does not matter
     buffer_write_u8(buf, b->show_on_problem_overlay);
 
@@ -486,7 +486,7 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     b->desirability = buffer_read_i8(buf);
     b->is_deleted = buffer_read_u8(buf);
     b->is_adjacent_to_water = buffer_read_u8(buf);
-    b->storage_id = buffer_read_u8(buf); // which union field we use does not matter
+    b->extra_attr.storage_id = buffer_read_u8(buf); // which union field we use does not matter
     b->sentiment.house_happiness = buffer_read_i8(buf); // which union field we use does not matter
     b->show_on_problem_overlay = buffer_read_u8(buf);
 

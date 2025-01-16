@@ -41,7 +41,7 @@ static int get_amount(building *granary, int resource)
 
 static int granary_is_accepting(int resource, building *b)
 {
-    const building_storage *s = building_storage_get(b->storage_id);
+    const building_storage *s = building_storage_get(b->extra_attr.storage_id);
     int amount = get_amount(b, resource);
     if (!b->has_plague &&
         ((s->resource_state[resource] == BUILDING_STORAGE_STATE_ACCEPTING) ||
@@ -56,7 +56,7 @@ static int granary_is_accepting(int resource, building *b)
 
 int building_granary_is_getting(int resource, building *b)
 {
-    const building_storage *s = building_storage_get(b->storage_id);
+    const building_storage *s = building_storage_get(b->extra_attr.storage_id);
     int amount = get_amount(b, resource);
     return !b->has_plague &&
         ((s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING) ||
@@ -67,7 +67,7 @@ int building_granary_is_getting(int resource, building *b)
 
 static int granary_is_gettable(int resource, building *b)
 {
-    const building_storage *s = building_storage_get(b->storage_id);
+    const building_storage *s = building_storage_get(b->extra_attr.storage_id);
     return !b->has_plague &&
         ((s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING) ||
         (s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING_3QUARTERS) ||
@@ -286,7 +286,7 @@ int building_granary_maximum_receptible_amount(int resource, building *b)
     }
     int stored_amount = b->resources[resource];
     int max_amount;
-    switch (building_storage_get(b->storage_id)->resource_state[resource]) {
+    switch (building_storage_get(b->extra_attr.storage_id)->resource_state[resource]) {
         case BUILDING_STORAGE_STATE_ACCEPTING:
         case BUILDING_STORAGE_STATE_GETTING:
             max_amount = FULL_GRANARY;
@@ -350,7 +350,7 @@ int building_granary_determine_worker_task(building *granary)
     if (pct_workers < 50) {
         return GRANARY_TASK_NONE;
     }
-    const building_storage *s = building_storage_get(granary->storage_id);
+    const building_storage *s = building_storage_get(granary->extra_attr.storage_id);
     if (s->empty_all) {
         // bring food to another granary
         for (int i = RESOURCE_MIN_FOOD; i < RESOURCE_MAX_FOOD; i++) {
@@ -418,7 +418,7 @@ int building_granary_accepts_storage(building *b, int resource, int *understaffe
         }
         return 0;
     }
-    const building_storage *s = building_storage_get(b->storage_id);
+    const building_storage *s = building_storage_get(b->extra_attr.storage_id);
     if (building_granary_is_not_accepting(resource, b) || s->empty_all) {
         return 0;
     }
@@ -488,7 +488,7 @@ int building_getting_granary_for_storing(int x, int y, int resource, int road_ne
         if (pct_workers < 100) {
             continue;
         }
-        const building_storage *s = building_storage_get(b->storage_id);
+        const building_storage *s = building_storage_get(b->extra_attr.storage_id);
         if (!building_granary_is_getting(resource, b) || s->empty_all) {
             continue;
         }
@@ -520,7 +520,7 @@ int building_granary_amount_can_get_from(building *destination, building *origin
 
 int building_granary_for_getting(building *src, map_point *dst, int min_amount)
 {
-    const building_storage *s_src = building_storage_get(src->storage_id);
+    const building_storage *s_src = building_storage_get(src->extra_attr.storage_id);
     if (s_src->empty_all) {
         return 0;
     }

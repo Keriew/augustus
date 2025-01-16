@@ -173,17 +173,17 @@ static void remove_adjacent_types(building *b)
 }
 
 void initialize_sentiment_cooldown(building *b) {
-    if (b->extra_house_info.sentiment_cooldown_initialized) {
+    if (b->extra_attr.house.sentiment_cooldown_initialized) {
         return;
     }
 
-    b->extra_house_info.sentiment_cooldown_initialized = 1;
+    b->extra_attr.house.sentiment_cooldown_initialized = 1;
 
     if (b->type <= BUILDING_HOUSE_GRAND_INSULA) {
-        b->extra_house_info.sentiment_cooldown = ADVANCED_SENTIMENT_COOLDOWN_MAX_TICKS;
+        b->extra_attr.house.sentiment_cooldown = ADVANCED_SENTIMENT_COOLDOWN_MAX_TICKS;
     } else {
         // Do not apply cooldown to villas
-        b->extra_house_info.sentiment_cooldown = 0;
+        b->extra_attr.house.sentiment_cooldown = 0;
     }
 }
 
@@ -284,9 +284,9 @@ static void building_delete(building *b)
 
 void building_clear_related_data(building *b)
 {
-    if (b->storage_id) {
-        building_storage_delete(b->storage_id);
-        b->storage_id = 0;
+    if (b->extra_attr.storage_id) {
+        building_storage_delete(b->extra_attr.storage_id);
+        b->extra_attr.storage_id = 0;
     }
     if (b->type == BUILDING_FORT) {
         formation_legion_delete_for_fort(b);

@@ -140,7 +140,7 @@ int figure_trade_caravan_can_sell(figure *trader, int building_id, int city_id)
     if (!building_storage_get_permission(BUILDING_STORAGE_PERMISSION_TRADERS, b)) {
         return 0;
     }
-    if (building_storage_get(b->storage_id)->empty_all) {
+    if (building_storage_get(b->extra_attr.storage_id)->empty_all) {
         return 0;
     }
     if (b->type == BUILDING_GRANARY) {
@@ -347,7 +347,7 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
             !building_storage_get_permission(BUILDING_STORAGE_PERMISSION_TRADERS, b)) {
             continue;
         }
-        const building_storage *s = building_storage_get(b->storage_id);
+        const building_storage *s = building_storage_get(b->extra_attr.storage_id);
         int distance_penalty = 32;
         int num_imports_for_warehouse = 0;
         for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
@@ -394,7 +394,7 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
             continue;
         }
 
-        const building_storage *s = building_storage_get(b->storage_id);
+        const building_storage *s = building_storage_get(b->extra_attr.storage_id);
         int distance_penalty = 32;
         for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
             int resource = city_trade_next_caravan_import_resource();

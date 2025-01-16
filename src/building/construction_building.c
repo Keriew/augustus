@@ -106,7 +106,7 @@ static void add_warehouse(building *b)
     int y_offset[9] = { 0, 1, 0, 1, 2, 0, 2, 1, 2 };
     int corner = building_rotation_get_corner(2 * building_rotation_get_rotation());
 
-    b->storage_id = building_storage_create(b->id);
+    b->extra_attr.storage_id = building_storage_create(b->id);
     b->prev_part_building_id = 0;
     map_building_tiles_add(b->id, b->x + x_offset[corner], b->y + y_offset[corner], 1,
         image_group(GROUP_BUILDING_WAREHOUSE), TERRAIN_BUILDING);
@@ -145,7 +145,7 @@ static void add_depot(building *b)
 
 static void add_granary(building *b)
 {
-    b->storage_id = building_storage_create(b->id);
+    b->extra_attr.storage_id = building_storage_create(b->id);
     add_building(b);
     map_tiles_update_area_roads(b->x, b->y, 5);
 }

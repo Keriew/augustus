@@ -676,7 +676,7 @@ static void determine_warehouseman_destination(figure *f, int road_network_id, i
     }
 
     // priority 5: another warehouse to empty this one
-    if (building_storage_get(building_get(f->building_id)->storage_id)->empty_all) {
+    if (building_storage_get(building_get(f->building_id)->extra_attr.storage_id)->empty_all) {
         dst_building_id = building_warehouse_for_storing(f->building_id, f->x, f->y, f->resource_id, -1, 0, &dst);
 
         // deliver to another warehouse because this one is being emptied

@@ -160,7 +160,7 @@ static int get_closest_building_for_import(int x, int y, int city_id, building *
     int min_building_id = 0;
     for (building *b = building_first_of_type(BUILDING_WAREHOUSE); b; b = b->next_of_type) {
         if (is_invalid_destination(b, dock) ||
-            building_storage_get(b->storage_id)->empty_all ||
+            building_storage_get(b->extra_attr.storage_id)->empty_all ||
             building_warehouse_is_not_accepting(resource, b)) {
             continue;
         }
@@ -189,7 +189,7 @@ static int get_closest_building_for_import(int x, int y, int city_id, building *
     if (resource_is_food(resource)) {
         for (building *b = building_first_of_type(BUILDING_GRANARY); b; b = b->next_of_type) {
             if (is_invalid_destination(b, dock) ||
-                building_storage_get(b->storage_id)->empty_all ||
+                building_storage_get(b->extra_attr.storage_id)->empty_all ||
                 building_granary_is_not_accepting(resource, b) ||
                 building_granary_is_full(b)) {
                 continue;
