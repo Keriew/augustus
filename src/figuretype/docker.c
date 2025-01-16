@@ -497,7 +497,7 @@ void figure_docker_action(figure *f)
                     }
 
                     unsigned short trader_id = ship->trader_id;
-                    int storage_id = building_get(f->destination_building_id)->storage_id;
+                    int storage_id = building_get(f->destination_building_id)->extra_attr.storage_id;
                     trader_record_sold_resource(ship_id, trader_id, f->resource_id, storage_id);
                     city_health_update_sickness_level_in_building(b->id);
                     city_health_dispatch_sickness(f);
@@ -534,7 +534,7 @@ void figure_docker_action(figure *f)
                     int ship_id = b->data.dock.trade_ship_id;
                     figure *ship = figure_get(ship_id);
                     unsigned short trader_id = ship->trader_id;
-                    int storage_id = building_get(f->destination_building_id)->storage_id;
+                    int storage_id = building_get(f->destination_building_id)->extra_attr.storage_id;
                     trader_record_bought_resource(ship_id, trader_id, f->resource_id, storage_id);
                     city_health_update_sickness_level_in_building(b->id);
                     city_health_dispatch_sickness(f);
