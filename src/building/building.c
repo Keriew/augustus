@@ -284,7 +284,7 @@ static void building_delete(building *b)
 
 void building_clear_related_data(building *b)
 {
-    if (b->extra_attr.storage_id) {
+    if (is_storage_building(b) && b->extra_attr.storage_id) {
         building_storage_delete(b->extra_attr.storage_id);
         b->extra_attr.storage_id = 0;
     }

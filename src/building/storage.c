@@ -72,6 +72,11 @@ void building_storage_reset_building_ids(void)
     }
 }
 
+int is_storage_building(const building *b)
+{
+    return b->type == BUILDING_WAREHOUSE || b->type == BUILDING_GRANARY;
+}
+
 int building_storage_create(int building_id)
 {
     data_storage *storage;
