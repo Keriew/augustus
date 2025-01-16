@@ -199,7 +199,7 @@ void building_state_save_to_buffer(buffer *buf, const building *b)
     buffer_write_i8(buf, b->desirability);
     buffer_write_u8(buf, b->is_deleted);
     buffer_write_u8(buf, b->is_close_to_water);
-    buffer_write_u8(buf, b->storage_id);
+    buffer_write_u8(buf, b->storage_id); // which union field we use does not matter
     buffer_write_i8(buf, b->sentiment.house_happiness); // which union field we use does not matter
     buffer_write_u8(buf, b->has_problem);
 
@@ -553,7 +553,7 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     b->desirability = buffer_read_i8(buf);
     b->is_deleted = buffer_read_u8(buf);
     b->is_close_to_water = buffer_read_u8(buf);
-    b->storage_id = buffer_read_u8(buf);
+    b->storage_id = buffer_read_u8(buf); // which union field we use does not matter
     b->sentiment.house_happiness = buffer_read_i8(buf); // which union field we use does not matter
     b->has_problem = buffer_read_u8(buf);
 
@@ -761,6 +761,10 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     // to prevent reading bogus data for the next building
     if (building_buf_size > BUILDING_STATE_CURRENT_BUFFER_SIZE) {
         buffer_skip(buf, building_buf_size - BUILDING_STATE_CURRENT_BUFFER_SIZE);
+    }
+
+    if (building_is_house(b->type)) {
+        initialize_sentiment_cooldown(b);
     }
 }
 
