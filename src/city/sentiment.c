@@ -321,7 +321,7 @@ static int extra_food_bonus(int types, int required)
     return calc_bound(extra, 0, MAX_SENTIMENT_FROM_EXTRA_FOOD);
 }
 
-const advanced_sentiment_gain_modifier[5] = {
+const int advanced_sentiment_gain_modifier[5] = {
     400, // 25%
     463, // 21.6%
     546, // 18.3%
@@ -329,7 +329,7 @@ const advanced_sentiment_gain_modifier[5] = {
     800  // 12.5%
 };
 
-const advanced_sentiment_drop_modifier[5] = {
+const int advanced_sentiment_drop_modifier[5] = {
     400, // 25%
     333, // 30%
     285, // 35%
@@ -337,7 +337,36 @@ const advanced_sentiment_drop_modifier[5] = {
     200  // 50%
 };
 
-void city_sentiment_update(void)
+// Checks if house building still has a cooldown before apply advanced sentiment change logic
+int is_house_has_ongoing_advanced_sentiment_change_cooldown(building *b, int update_sentiment_cooldown) {
+    if (!building_is_house(b->type) || !b->extra_house_info.sentiment_cooldown_initialized) {
+        return 0;
+    }
+
+    if (b->type > BUILDING_HOUSE_GRAND_INSULA) {
+        // Reset cooldown for villas
+        b->extra_house_info.sentiment_cooldown = 0;
+    } else if (b->type == BUILDING_HOUSE_VACANT_LOT && b->extra_house_info.sentiment_cooldown == ADVANCED_SENTIMENT_COOLDOWN_MAX_TICKS) {
+        // Wait for new citizens to arrive
+        return 1;
+    }
+
+    if (update_sentiment_cooldown && 
+        b->extra_house_info.sentiment_cooldown &&
+        game_time_month() % ADVANCED_SENTIMENT_COOLDOWN_TICK_MONTHS == 0) {
+        // Decrease tick once configured amount of game months has passed.
+        b->extra_house_info.sentiment_cooldown--;
+    }
+
+    if (!b->extra_house_info.sentiment_cooldown) {
+        // Cooldown has ended
+        return 0;
+    }
+
+    return 1;
+}
+
+void city_sentiment_update(int update_sentiment_cooldown)
 {
     city_population_check_consistency();
 
@@ -356,6 +385,8 @@ void city_sentiment_update(void)
     int total_pop = 0;
     int total_houses = 0;
     int house_level_sentiment_multiplier = 3;
+    int apply_advanced_sentiment_change = config_get(CONFIG_GP_CH_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION) &&
+        game_time_total_months() >= ADVANCED_SENTIMENT_CHANGE_APPLY_AFTER_MONTHS;
 
     for (building_type type = BUILDING_HOUSE_SMALL_TENT; type <= BUILDING_HOUSE_LUXURY_PALACE; type++) {
         if (type == BUILDING_HOUSE_SMALL_SHACK) {
@@ -413,8 +444,8 @@ void city_sentiment_update(void)
             // Change sentiment gradually to the new value
             int sentiment_delta = sentiment - b->sentiment.house_happiness;
             if (sentiment_delta != 0 &&
-                game_time_total_months() >= ADVANCED_SENTIMENT_CHANGE_APPLY_AFTER_MONTHS &&
-                config_get(CONFIG_GP_CH_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION)) {
+                apply_advanced_sentiment_change &&
+                !is_house_has_ongoing_advanced_sentiment_change_cooldown(b, update_sentiment_cooldown)) {
                 // With new advanced logic we introduce faster sentiment change when the target value is
                 // far away from current happiness level. The final change value depends on difficulty settings.
                 // Example #1:

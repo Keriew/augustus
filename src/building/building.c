@@ -172,6 +172,21 @@ static void remove_adjacent_types(building *b)
     b->next_of_type = 0;
 }
 
+void initialize_sentiment_cooldown(building *b) {
+    if (b->extra_house_info.sentiment_cooldown_initialized) {
+        return;
+    }
+
+    b->extra_house_info.sentiment_cooldown_initialized = 1;
+
+    if (b->type <= BUILDING_HOUSE_GRAND_INSULA) {
+        b->extra_house_info.sentiment_cooldown = ADVANCED_SENTIMENT_COOLDOWN_MAX_TICKS;
+    } else {
+        // Do not apply cooldown to villas
+        b->extra_house_info.sentiment_cooldown = 0;
+    }
+}
+
 building *building_create(building_type type, int x, int y)
 {
     building *b;
@@ -205,6 +220,7 @@ building *building_create(building_type type, int x, int y)
 
     // subtype
     if (building_is_house(type)) {
+        initialize_sentiment_cooldown(b);
         b->subtype.house_level = type - BUILDING_HOUSE_VACANT_LOT;
     }
 
