@@ -12,6 +12,14 @@
 
 #define BUILDING_OUTSKIRTS_DESIRABILITY_MALUS -15
 
+// Ticks of cooldown before new advanced sentiment logic will be applied
+// for the house building. Each tick is equal to 3 months. That value
+// shouldn't ever exceed 7, since it takes 3 bits of data.
+// To extend or reduce the cooldown duration edit the
+// ADVANCED_SENTIMENT_COOLDOWN_TICK_MONTHS preprocessor definition.
+#define ADVANCED_SENTIMENT_COOLDOWN_MAX_TICKS   7
+#define ADVANCED_SENTIMENT_COOLDOWN_TICK_MONTHS 3
+
 typedef enum order_condition_type {
     ORDER_CONDITION_NEVER = 0,
     ORDER_CONDITION_ALWAYS,
@@ -187,7 +195,18 @@ typedef struct building {
     signed char desirability;
     unsigned char is_deleted;
     unsigned char is_close_to_water;
-    unsigned char storage_id; //player-visible ID of the storage building, e.g. Granary 7, Warehouse 33
+    union {
+        unsigned char storage_id; //player-visible ID of the storage building, e.g. Granary 7, Warehouse 33
+        // New advanced sentiment contribution logic requires cooldown for newly built houses.
+        // The new happiness gain/drop logic will not be applied until cooldown expires.
+        // Cooldown ticks get decreased every Jan/Apr/Jul/Oct, which gives 18-20 months in total.
+        // That should be enough to build new housing block and evolve it.
+        struct {
+            uint8_t sentiment_cooldown_initialized: 1;
+            uint8_t sentiment_cooldown: 3;
+            uint8_t reserved: 4;
+        } extra_house_info;
+    };
     union {
         signed char house_happiness;
         signed char native_anger;
@@ -236,6 +255,8 @@ void building_change_type(building *b, building_type type);
 building *building_main(const building *b);
 
 building *building_next(building *b);
+
+void initialize_sentiment_cooldown(building *b);
 
 building *building_create(building_type type, int x, int y);
 

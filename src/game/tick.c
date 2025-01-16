@@ -132,8 +132,9 @@ static void advance_day(void)
         advance_month();
     }
 
-    if (game_time_day() == 0 || game_time_day() == 8) {
-        city_sentiment_update();
+    int update_sentiment_cooldown = game_time_day() == 0;
+    if (update_sentiment_cooldown || game_time_day() == 8) {
+        city_sentiment_update(update_sentiment_cooldown);
     }
     if (game_time_day() == 0 || game_time_day() == 7) {
         building_lighthouse_consume_timber();
