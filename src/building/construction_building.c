@@ -301,7 +301,7 @@ static int add_warehouse_space(int x, int y, int prev_id)
 
 static void add_warehouse(building *b, int orientation)
 {
-    b->storage_id = building_storage_create(b->id);
+    b->extra_attr.storage_id = building_storage_create(b->id);
     b->prev_part_building_id = 0;
     // assert orientation. orientation points to the tower's location (0-3), out of 4 possible corners
     b->subtype.orientation = orientation;
@@ -353,7 +353,7 @@ static void add_depot(building *b)
 
 static void add_granary(building *b)
 {
-    b->storage_id = building_storage_create(b->id);
+    b->extra_attr.storage_id = building_storage_create(b->id);
     add_building(b);
     map_update_granary_internal_roads(b);
     map_tiles_update_area_roads(b->x, b->y, 5);

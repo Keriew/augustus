@@ -426,7 +426,7 @@ static building *get_next_warehouse(void)
 
 static int warehouse_allows_getting(building *b, int resource)
 {
-    const building_storage *s = building_storage_get(b->storage_id);
+    const building_storage *s = building_storage_get(b->extra_attr.storage_id);
     const resource_storage_entry *entry = &s->resource_state[resource];
 
     if (b->has_plague || (entry->state >= BUILDING_STORAGE_STATE_GETTING)) {
@@ -439,7 +439,7 @@ static int warehouse_allows_getting(building *b, int resource)
 
 static int get_acceptable_quantity(building *b, int resource)
 {
-    const building_storage *s = building_storage_get(b->storage_id);
+    const building_storage *s = building_storage_get(b->extra_attr.storage_id);
     const resource_storage_entry *entry = &s->resource_state[resource];
 
     const building_storage_state state = building_storage_get_state(b, resource, 1);
