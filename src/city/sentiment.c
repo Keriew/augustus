@@ -425,7 +425,7 @@ void city_sentiment_update(void)
                 // Example #2:
                 // Current house happiness level is 20, the new sentiment value is 77 and the delta is 57.
                 // The delta percent relative to the current happiness level is 74% (57 * 100% / 77).
-                // The final happiness change for Hard mode will be 5 (11% of 57, which is 15% of delta percent).
+                // The final happiness change for Hard mode will be 6 (11% of 57, which is 15% of delta percent).
                 if (sentiment_delta > 0) {
                     int happiness_target = calc_bound(b->sentiment.house_happiness + sentiment_delta, 1, 100);
                     int delta_percent = sentiment_delta * 100 / happiness_target;
