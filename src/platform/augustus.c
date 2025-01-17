@@ -1,3 +1,6 @@
+#if (defined(_WIN32) || defined(_WIN64)) && !defined(_MSC_VER)
+#define SDL_MAIN_HANDLED
+#endif
 #include "SDL.h"
 
 #include "core/config.h"
@@ -39,7 +42,7 @@
 #include <string.h>
 
 #ifdef _MSC_VER
-#include <Windows.h>
+#include <windows.h>
 #endif
 
 #if defined(USE_TINYFILEDIALOGS) || defined(__ANDROID__) || defined(__IPHONEOS__)
@@ -694,7 +697,17 @@ static void setup(const augustus_args *args)
     data.active = 1;
 }
 
+#if (defined(_WIN32) || defined(_WIN64)) && !defined(_MSC_VER)
+extern int __argc;
+extern char ** __argv;
+int main() {
+    SDL_SetMainReady();
+    return SDL_main(__argc, __argv);
+}
+int SDL_main(int argc, char **argv)
+#else
 int main(int argc, char **argv)
+#endif
 {
     augustus_args args;
     if (!platform_parse_arguments(argc, argv, &args)) {

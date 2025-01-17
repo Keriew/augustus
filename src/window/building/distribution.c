@@ -208,7 +208,7 @@ static int affect_all_button_distribution_state(void)
 
 static int affect_all_button_storage_state(void)
 {
-    int storage_id = building_get(data.building_id)->extra_attr.storage_id;
+    int storage_id = building_get(data.building_id)->storage_id;
     if (building_storage_check_if_accepts_nothing(storage_id)) {
         return ACCEPT_ALL;
     } else {
@@ -724,7 +724,7 @@ void window_building_draw_granary(building_info_context *c)
     c->height_blocks = 24 + y_offset_blocks;
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
 
-    text_draw_label_and_number_centered(lang_get_string(28, b->type), b->extra_attr.storage_id, "",
+    text_draw_label_and_number_centered(lang_get_string(28, b->type), b->storage_id, "",
         c->x_offset, c->y_offset + 10, 16 * c->width_blocks, FONT_LARGE_BLACK, 0);
 
     if (b->has_plague) {
@@ -938,7 +938,7 @@ static void draw_resource_orders_buttons(int x, int y, const resource_list *list
 void window_building_draw_granary_orders_foreground(building_info_context *c)
 {
     int y_offset = window_building_get_vertical_offset(c, 28);
-    const building_storage *storage = building_storage_get(building_get(c->building_id)->extra_attr.storage_id);
+    const building_storage *storage = building_storage_get(building_get(c->building_id)->storage_id);
     // empty button
     button_border_draw(c->x_offset + 80, y_offset + 404, BLOCK_SIZE * (c->width_blocks - 10), 20,
         data.orders_focus_button_id == 1 ? 1 : 0);
@@ -1021,7 +1021,7 @@ void window_building_draw_warehouse(building_info_context *c)
     c->height_blocks = 24 + y_offset_blocks;
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
 
-    text_draw_label_and_number_centered(lang_get_string(28, b->type), b->extra_attr.storage_id, "",
+    text_draw_label_and_number_centered(lang_get_string(28, b->type), b->storage_id, "",
         c->x_offset, c->y_offset + 10, 16 * c->width_blocks, FONT_LARGE_BLACK, 0);
 
     if (b->has_plague) {
@@ -1171,7 +1171,7 @@ void window_building_draw_warehouse_orders_foreground(building_info_context *c)
 {
     int y_offset = window_building_get_vertical_offset(c, 28);
 
-    const building_storage *storage = building_storage_get(building_get(c->building_id)->extra_attr.storage_id);
+    const building_storage *storage = building_storage_get(building_get(c->building_id)->storage_id);
 
     // emptying button
     button_border_draw(c->x_offset + 80, y_offset + 404, BLOCK_SIZE * (c->width_blocks - 10),
@@ -1348,7 +1348,7 @@ static void toggle_resource_state(int index, int param2)
         } else {
             resource = city_resource_get_potential_foods()->items[index];
         }
-        building_storage_cycle_resource_state(b->extra_attr.storage_id, resource);
+        building_storage_cycle_resource_state(b->storage_id, resource);
     }
     window_invalidate();
 }
@@ -1382,7 +1382,7 @@ static void toggle_partial_resource_state(int index, int param2)
     } else {
         resource = city_resource_get_potential_foods()->items[index + scrollbar.scroll_position - 1];
     }
-    building_storage_cycle_partial_resource_state(b->extra_attr.storage_id, resource);
+    building_storage_cycle_partial_resource_state(b->storage_id, resource);
     window_invalidate();
 }
 
@@ -1404,7 +1404,7 @@ static void dock_toggle_route(int route_id, int param2)
 
 static void granary_orders(int index, int param2)
 {
-    int storage_id = building_get(data.building_id)->extra_attr.storage_id;
+    int storage_id = building_get(data.building_id)->storage_id;
     if (index == 0) {
         building_storage_toggle_empty_all(storage_id);
     } else if (index == 1) {
@@ -1420,10 +1420,10 @@ static void granary_orders(int index, int param2)
 static void warehouse_orders(int index, int param2)
 {
     if (index == 0) {
-        int storage_id = building_get(data.building_id)->extra_attr.storage_id;
+        int storage_id = building_get(data.building_id)->storage_id;
         building_storage_toggle_empty_all(storage_id);
     } else if (index == 1) {
-        int storage_id = building_get(data.building_id)->extra_attr.storage_id;
+        int storage_id = building_get(data.building_id)->storage_id;
         if (affect_all_button_storage_state() == ACCEPT_ALL) {
             building_storage_accept_all(storage_id);
         } else {

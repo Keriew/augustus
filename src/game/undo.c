@@ -222,7 +222,7 @@ void game_undo_perform(void)
                         break;
                     case BUILDING_WAREHOUSE:
                     case BUILDING_GRANARY:
-                        if (!building_storage_restore(b->extra_attr.storage_id)) {
+                        if (!building_storage_restore(b->storage_id)) {
                             building_storage_reset_building_ids();
                         }
                         break;

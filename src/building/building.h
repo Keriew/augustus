@@ -183,22 +183,20 @@ typedef struct building {
     signed char desirability;
     unsigned char is_deleted;
     unsigned char is_adjacent_to_water;
-    union {
-        unsigned char storage_id;
-        // New advanced sentiment contribution logic requires cooldown for newly built houses.
-        // The new happiness gain/drop logic will not be applied until cooldown expires.
-        // Cooldown ticks get decreased every Jan/Apr/Jul/Oct, which gives 18-20 months in total.
-        // That should be enough to build new housing block and evolve it.
-        struct {
-            uint8_t sentiment_cooldown_initialized: 1;
-            uint8_t sentiment_cooldown: 3;
-            uint8_t reserved: 4;
-        } house;
-    } extra_attr;
+    unsigned char storage_id;
     union {
         signed char house_happiness;
         signed char native_anger;
     } sentiment;
+    // New advanced sentiment contribution logic requires cooldown for newly built houses.
+    // The new happiness gain/drop logic will not be applied until cooldown expires.
+    // Cooldown ticks get decreased every Jan/Apr/Jul/Oct, which gives 18-20 months in total.
+    // That should be enough to build new housing block and evolve it.
+    struct {
+        uint8_t cooldown_initialized: 1;
+        uint8_t cooldown: 3;
+        uint8_t reserved: 4;
+    } house_adv_sentiment;
     unsigned char show_on_problem_overlay;
     unsigned char house_tavern_wine_access;
     unsigned char house_tavern_food_access;
@@ -252,6 +250,11 @@ void building_trim(void);
 void building_update_state(void);
 
 void building_update_desirability(void);
+
+/**
+ * Checks if building can store goods
+ */
+int building_is_storage_kind(building_type type);
 
 int building_is_house(building_type type);
 

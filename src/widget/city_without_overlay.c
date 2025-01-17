@@ -592,7 +592,7 @@ static void draw_permissions_flag(building *b, int x, int y, color_t color_mask)
         base_permission_image[6] = assets_get_image_id("UI", "Warehouse_Flag_Land_Sea");
         base_permission_image[7] = assets_get_image_id("UI", "Warehouse_Flag_All");
     }
-    const building_storage *storage = building_storage_get(b->extra_attr.storage_id);
+    const building_storage *storage = building_storage_get(b->storage_id);
     int flag_permission_mask = 0x7;
     int permissions = (~storage->permissions) & flag_permission_mask;
     if (!permissions) {

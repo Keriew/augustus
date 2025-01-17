@@ -173,17 +173,17 @@ static void remove_adjacent_types(building *b)
 }
 
 void initialize_sentiment_cooldown(building *b) {
-    if (b->extra_attr.house.sentiment_cooldown_initialized) {
+    if (b->house_adv_sentiment.cooldown_initialized) {
         return;
     }
 
-    b->extra_attr.house.sentiment_cooldown_initialized = 1;
+    b->house_adv_sentiment.cooldown_initialized = 1;
 
     if (b->type <= BUILDING_HOUSE_GRAND_INSULA) {
-        b->extra_attr.house.sentiment_cooldown = ADVANCED_SENTIMENT_COOLDOWN_MAX_TICKS;
+        b->house_adv_sentiment.cooldown = ADVANCED_SENTIMENT_COOLDOWN_MAX_TICKS;
     } else {
         // Do not apply cooldown to villas
-        b->extra_attr.house.sentiment_cooldown = 0;
+        b->house_adv_sentiment.cooldown = 0;
     }
 }
 
@@ -284,9 +284,9 @@ static void building_delete(building *b)
 
 void building_clear_related_data(building *b)
 {
-    if (is_storage_building(b) && b->extra_attr.storage_id) {
-        building_storage_delete(b->extra_attr.storage_id);
-        b->extra_attr.storage_id = 0;
+    if (building_is_storage_kind(b->type) && b->storage_id) {
+        building_storage_delete(b->storage_id);
+        b->storage_id = 0;
     }
     if (b->type == BUILDING_FORT) {
         formation_legion_delete_for_fort(b);
@@ -438,6 +438,11 @@ int building_is_primary_product_producer(building_type type)
 int building_is_house(building_type type)
 {
     return type >= BUILDING_HOUSE_VACANT_LOT && type <= BUILDING_HOUSE_LUXURY_PALACE;
+}
+
+int building_is_storage_kind(building_type type)
+{
+    return type == BUILDING_WAREHOUSE || type == BUILDING_GRANARY;
 }
 
 // For Venus GT base bonus

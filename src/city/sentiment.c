@@ -339,26 +339,26 @@ const int advanced_sentiment_drop_modifier[5] = {
 
 // Checks if house building still has a cooldown before apply advanced sentiment change logic
 int is_house_has_ongoing_advanced_sentiment_change_cooldown(building *b, int update_sentiment_cooldown) {
-    if (!building_is_house(b->type) || !b->extra_attr.house.sentiment_cooldown_initialized) {
+    if (!building_is_house(b->type) || !b->house_adv_sentiment.cooldown_initialized) {
         return 0;
     }
 
     if (b->type > BUILDING_HOUSE_GRAND_INSULA) {
         // Reset cooldown for villas
-        b->extra_attr.house.sentiment_cooldown = 0;
-    } else if (b->type == BUILDING_HOUSE_VACANT_LOT && b->extra_attr.house.sentiment_cooldown == ADVANCED_SENTIMENT_COOLDOWN_MAX_TICKS) {
+        b->house_adv_sentiment.cooldown = 0;
+    } else if (b->type == BUILDING_HOUSE_VACANT_LOT && b->house_adv_sentiment.cooldown == ADVANCED_SENTIMENT_COOLDOWN_MAX_TICKS) {
         // Wait for new citizens to arrive
         return 1;
     }
 
     if (update_sentiment_cooldown && 
-        b->extra_attr.house.sentiment_cooldown &&
+        b->house_adv_sentiment.cooldown &&
         game_time_month() % ADVANCED_SENTIMENT_COOLDOWN_TICK_MONTHS == 0) {
         // Decrease tick once configured amount of game months has passed.
-        b->extra_attr.house.sentiment_cooldown--;
+        b->house_adv_sentiment.cooldown--;
     }
 
-    if (!b->extra_attr.house.sentiment_cooldown) {
+    if (!b->house_adv_sentiment.cooldown) {
         // Cooldown has ended
         return 0;
     }

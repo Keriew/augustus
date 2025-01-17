@@ -67,11 +67,6 @@ typedef struct {
 void building_storage_clear_all(void);
 
 /**
- * Checks if building can store goods
- */
-int is_storage_building(const building *b);
-
-/**
  * Creates a building storage
  * @param building_id The id of the building this is a storage for
  * @return storage id, 0 when creation failed

@@ -116,7 +116,7 @@ static int show_building_logistics(const building *b)
 static int show_building_storages(const building *b)
 {
     b = building_main((building *) b);
-    return is_storage_building(b) && b->extra_attr.storage_id > 0 && building_storage_get(b->extra_attr.storage_id);
+    return building_is_storage_kind(b->type) && b->storage_id > 0 && building_storage_get(b->storage_id);
 }
 
 static int show_building_none(const building *b)
@@ -915,12 +915,12 @@ static void draw_storage_ids(int x, int y, float scale, int grid_offset)
     }
     int building_id = map_building_at(grid_offset);
     building *b = building_get(building_id);
-    if (!b || !is_storage_building(b) || b->is_deleted || map_property_is_deleted(b->grid_offset) ||
-        !b->extra_attr.storage_id || !map_property_is_draw_tile(grid_offset)) {
+    if (!b || !building_is_storage_kind(b->type) || b->is_deleted || map_property_is_deleted(b->grid_offset) ||
+        !b->storage_id || !map_property_is_draw_tile(grid_offset)) {
         return;
     }
     uint8_t number[10];
-    string_from_int(number, b->extra_attr.storage_id, 0);
+    string_from_int(number, b->storage_id, 0);
     int text_width = text_get_width(number, FONT_SMALL_PLAIN);
     int box_width = text_width + 10;
     int box_height = 22;

@@ -60,21 +60,16 @@ void building_storage_reset_building_ids(void)
             if (b->state == BUILDING_STATE_UNUSED) {
                 continue;
             }
-            if (b->extra_attr.storage_id) {
-                if (array_item(storages, b->extra_attr.storage_id)->building_id) {
+            if (b->storage_id) {
+                if (array_item(storages, b->storage_id)->building_id) {
                     // storage is already connected to a building: corrupt, create new
-                    b->extra_attr.storage_id = building_storage_create(b->id);
+                    b->storage_id = building_storage_create(b->id);
                 } else {
-                    array_item(storages, b->extra_attr.storage_id)->building_id = b->id;
+                    array_item(storages, b->storage_id)->building_id = b->id;
                 }
             }
         }
     }
-}
-
-int is_storage_building(const building *b)
-{
-    return b->type == BUILDING_WAREHOUSE || b->type == BUILDING_GRANARY;
 }
 
 int building_storage_create(int building_id)
@@ -165,12 +160,12 @@ void building_storage_cycle_resource_state(int storage_id, resource_type resourc
 void building_storage_set_permission(building_storage_permission_states p, building *b)
 {
     int permission_bit = 1 << p;
-    array_item(storages, b->extra_attr.storage_id)->storage.permissions ^= permission_bit;
+    array_item(storages, b->storage_id)->storage.permissions ^= permission_bit;
 }
 
 int building_storage_get_permission(building_storage_permission_states p, building *b)
 {
-    const building_storage *s = building_storage_get(b->extra_attr.storage_id);
+    const building_storage *s = building_storage_get(b->storage_id);
     int permission_bit = 1 << p;
     return !(s->permissions & permission_bit);
 }
@@ -234,7 +229,7 @@ int building_storage_resource_max_storable(building *b, resource_type resource_i
         return 0;
     }
 
-    const building_storage *s = building_storage_get(b->extra_attr.storage_id);
+    const building_storage *s = building_storage_get(b->storage_id);
     switch (s->resource_state[resource_id]) {
         case BUILDING_STORAGE_STATE_ACCEPTING:
         case BUILDING_STORAGE_STATE_GETTING:

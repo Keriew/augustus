@@ -209,7 +209,7 @@ static int check_valid_storages(order *current_order, int action_state)
 {
     int valid_storages = 1;
     building *src = building_get(current_order->src_storage_id);
-    if (!src || !src->extra_attr.storage_id || src->state != BUILDING_STATE_IN_USE) {
+    if (!src || !src->storage_id || src->state != BUILDING_STATE_IN_USE) {
         if (action_state == FIGURE_ACTION_239_DEPOT_CART_PUSHER_HEADING_TO_SOURCE ||
             action_state == FIGURE_ACTION_240_DEPOT_CART_PUSHER_AT_SOURCE) {
             valid_storages = 0;
@@ -217,7 +217,7 @@ static int check_valid_storages(order *current_order, int action_state)
         current_order->src_storage_id = 0;
     }
     building *dst = building_get(current_order->dst_storage_id);
-    if (!dst || !dst->extra_attr.storage_id || dst->state != BUILDING_STATE_IN_USE) {
+    if (!dst || !dst->storage_id || dst->state != BUILDING_STATE_IN_USE) {
         valid_storages = 0;
         current_order->dst_storage_id = 0;
     }

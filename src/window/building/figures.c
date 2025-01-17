@@ -430,12 +430,12 @@ static void draw_depot_cartpusher(building_info_context *c, figure *f)
         c->x_offset + 40 + width, c->y_offset + 194, COLOR_MASK_NONE, SCALE_NONE);
     int y_offset = 0;
 
-    if (source->extra_attr.storage_id) {
+    if (source->storage_id) {
         y_offset = 16;
         width = text_draw(translation_for(TR_FIGURE_INFO_DEPOT_FROM), c->x_offset + 40, c->y_offset + 200 + y_offset,
             FONT_NORMAL_BROWN, 0);
         width += text_draw_label_and_number(lang_get_string(28, source->type),
-            source->extra_attr.storage_id, "",
+            source->storage_id, "",
             c->x_offset + 40 + width, c->y_offset + 200 + y_offset, FONT_NORMAL_BROWN, 0);
     } else {
         width += image_get(resource_get_data(resource)->image.icon)->original.width;
@@ -443,7 +443,7 @@ static void draw_depot_cartpusher(building_info_context *c, figure *f)
     width += text_draw(translation_for(TR_FIGURE_INFO_DEPOT_TO),
         c->x_offset + 40 + width, c->y_offset + 200 + y_offset, FONT_NORMAL_BROWN, 0);
     text_draw_label_and_number(lang_get_string(28, destination->type),
-        destination->extra_attr.storage_id, "",
+        destination->storage_id, "",
         c->x_offset + 40 + width, c->y_offset + 200 + y_offset, FONT_NORMAL_BROWN, 0);
 }
 
