@@ -300,7 +300,7 @@ static int affect_all_button_distribution_state(void)
 
 static int affect_all_button_storage_state(void)
 {
-    int storage_id = building_get(data.building_id)->extra_attr.storage_id;
+    int storage_id = building_get(data.building_id)->storage_id;
     if (building_storage_check_if_accepts_nothing(storage_id)) {
         return ACCEPT_ALL;
     } else {
@@ -1569,7 +1569,7 @@ static void toggle_resource_state(const generic_button *button, int reverse_orde
         } else {
             resource = city_resource_get_potential_foods()->items[index];
         }
-        building_storage_cycle_resource_state(b->extra_attr.storage_id, resource, reverse_order);
+        building_storage_cycle_resource_state(b->storage_id, resource, reverse_order);
     }
     window_invalidate();
 }
@@ -1613,7 +1613,7 @@ static void toggle_partial_resource_state(const generic_button *button, int reve
     } else {
         resource = city_resource_get_potential_foods()->items[index + scrollbar.scroll_position - 1];
     }
-    building_storage_cycle_partial_resource_state(b->extra_attr.storage_id, resource, reverse_order);
+    building_storage_cycle_partial_resource_state(b->storage_id, resource, reverse_order);
     window_invalidate();
 }
 
@@ -1646,7 +1646,7 @@ static void dock_toggle_route(const generic_button *button)
 
 static void storage_empty_all(const generic_button *button)
 {
-    int storage_id = building_get(data.building_id)->extra_attr.storage_id;
+    int storage_id = building_get(data.building_id)->storage_id;
     building_storage_toggle_empty_all(storage_id);
     window_invalidate();
 }
@@ -1654,7 +1654,7 @@ static void storage_empty_all(const generic_button *button)
 static void storage_toggle_all_states(int param1, int param2)
 {
 
-    int storage_id = building_get(data.building_id)->extra_attr.storage_id;
+    int storage_id = building_get(data.building_id)->storage_id;
     if (param1 == 0) {
         building_storage_accept_all(storage_id);
     } else {

@@ -92,12 +92,12 @@ int building_data_transfer_copy(building *b, int supress_warnings)
             memcpy(data.resource, b->accepted_goods, sizeof(unsigned char) * RESOURCE_MAX);
             break;
         case DATA_TYPE_GRANARY:
-            storage = building_storage_get(b->extra_attr.storage_id);
+            storage = building_storage_get(b->storage_id);
             data.storage = *storage;
             data.i16 = b->data.roadblock.exceptions;
             break;
         case DATA_TYPE_WAREHOUSE:
-            storage = building_storage_get(b->extra_attr.storage_id);
+            storage = building_storage_get(b->storage_id);
             data.storage = *storage;
             break;
         case DATA_TYPE_DOCK:
@@ -139,7 +139,7 @@ int building_data_transfer_paste(building *b, int supress_warnings)
             break;
         case DATA_TYPE_GRANARY:
         case DATA_TYPE_WAREHOUSE:
-            building_storage_set_data(b->extra_attr.storage_id, data.storage);
+            building_storage_set_data(b->storage_id, data.storage);
             b->data.roadblock.exceptions = data.i16;
             break;
         case DATA_TYPE_DOCK:
