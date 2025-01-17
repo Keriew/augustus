@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "state.h"
 
 #include "assets/assets.h"
@@ -199,8 +200,16 @@ void building_state_save_to_buffer(buffer *buf, const building *b)
     buffer_write_i8(buf, b->desirability);
     buffer_write_u8(buf, b->is_deleted);
     buffer_write_u8(buf, b->is_close_to_water);
-    buffer_write_u8(buf, b->extra_attr.storage_id); // which union field we use does not matter
+    buffer_write_u8(buf, b->storage_id);
     buffer_write_i8(buf, b->sentiment.house_happiness); // which union field we use does not matter
+    
+    assert (sizeof(b->house_adv_sentiment) == sizeof(uint8_t));
+    if (building_is_house(b->type)) {
+        buffer_write_raw(buf, &b->house_adv_sentiment, sizeof(b->house_adv_sentiment));
+    } else {
+        buffer_skip(buf, sizeof(b->house_adv_sentiment));
+    }
+
     buffer_write_u8(buf, b->has_problem);
 
     // expanded building data
@@ -553,7 +562,19 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     b->desirability = buffer_read_i8(buf);
     b->is_deleted = buffer_read_u8(buf);
     b->is_close_to_water = buffer_read_u8(buf);
-    b->extra_attr.storage_id = buffer_read_u8(buf); // which union field we use does not matter
+    if (building_is_storage_kind(b->type)) {
+        b->storage_id = buffer_read_u8(buf);
+    } else {
+        b->storage_id = 0;
+        buffer_skip(buf, 1); // do not load storage_id for non-storage buildings
+    }
+    if (save_version >= SAVE_GAME_LAST_ADVANCED_SENTIMENT) {
+        if (building_is_house(b->type)) {
+            buffer_read_raw(buf, &b->house_adv_sentiment, sizeof(b->house_adv_sentiment));
+        } else {
+            buffer_skip(buf, sizeof(b->house_adv_sentiment));
+        }
+    }
     b->sentiment.house_happiness = buffer_read_i8(buf); // which union field we use does not matter
     b->has_problem = buffer_read_u8(buf);
 

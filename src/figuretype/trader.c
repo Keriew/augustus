@@ -182,7 +182,7 @@ int figure_trade_caravan_can_buy(figure *trader, int building_id, int city_id)
 int figure_trade_caravan_can_sell(figure *trader, int building_id, int city_id)
 {
     building *b = building_get(building_id);
-    if (!is_storage_building(b)) {
+    if (!building_is_storage_kind(b->type)) {
         return 0;
     }
     if (b->has_plague) {
@@ -194,7 +194,7 @@ int figure_trade_caravan_can_sell(figure *trader, int building_id, int city_id)
     if (!building_storage_get_permission(BUILDING_STORAGE_PERMISSION_TRADERS, b)) {
         return 0;
     }
-    if (building_storage_get(b->extra_attr.storage_id)->empty_all) {
+    if (building_storage_get(b->storage_id)->empty_all) {
         return 0;
     }
     return 1;
@@ -510,7 +510,7 @@ void figure_trade_caravan_action(figure *f)
             if (f->wait_ticks > 10) {
                 f->wait_ticks = 0;
                 int move_on = 0;
-                int storage_id = building_get(f->destination_building_id)->extra_attr.storage_id;
+                int storage_id = building_get(f->destination_building_id)->storage_id;
                 if (figure_trade_caravan_can_buy(f, f->destination_building_id, f->empire_city_id)) {
                     int resource = trader_get_buy_resource(f->destination_building_id, f->empire_city_id);
                     if (resource) {
@@ -665,7 +665,7 @@ void figure_native_trader_action(figure *f)
             if (f->wait_ticks > 10) {
                 f->wait_ticks = 0;
                 building *b = building_get(f->destination_building_id);
-                int storage_id = b->extra_attr.storage_id;
+                int storage_id = b->storage_id;
                 int resource = get_native_trader_buy_resource(b); // preemptive check of resource to avoid standing idle
                 if (building_storage_get_permission(BUILDING_STORAGE_PERMISSION_NATIVES, b) &&
                     f->trader_amount_bought < figure_trade_land_trade_units() && resource != RESOURCE_NONE) {

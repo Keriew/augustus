@@ -376,7 +376,7 @@ int building_granary_determine_worker_task(building *granary)
     if (pct_workers < 50) {
         return GRANARY_TASK_NONE;
     }
-    const building_storage *s = building_storage_get(granary->extra_attr.storage_id);
+    const building_storage *s = building_storage_get(granary->storage_id);
     if (s->empty_all) {
         // bring food to another granary
         for (int i = RESOURCE_MIN_FOOD; i < RESOURCE_MAX_FOOD; i++) {
@@ -539,7 +539,7 @@ int building_getting_granary_for_storing(int x, int y, int resource, int road_ne
         if (pct_workers < 100) {
             continue;
         }
-        const building_storage *s = building_storage_get(b->extra_attr.storage_id);
+        const building_storage *s = building_storage_get(b->storage_id);
         if (!building_granary_maximum_receptible_amount(b, resource) || s->empty_all) {
             continue;
         } else {
@@ -571,7 +571,7 @@ int building_granary_amount_can_get_from(building *destination, building *origin
 
 int building_granary_for_getting(building *src, map_point *dst, int min_amount)
 {
-    const building_storage *s_src = building_storage_get(src->extra_attr.storage_id);
+    const building_storage *s_src = building_storage_get(src->storage_id);
     if (s_src->empty_all) {
         return 0;
     }

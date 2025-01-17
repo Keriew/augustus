@@ -221,7 +221,7 @@ static void setup_buttons_for_selected_depot(void)
         // Only include inactive storages that have a valid storage_id and weren't already counted in first pass
         int max_storable = building_storage_resource_max_storable(store_building, data.target_resource_id);
         if ((max_storable == 0 || store_building->state == BUILDING_STATE_MOTHBALLED) &&
-            store_building->extra_attr.storage_id > 0 && store_building->state != BUILDING_STATE_RUBBLE) {
+            store_building->storage_id > 0 && store_building->state != BUILDING_STATE_RUBBLE) {
             row_count++;
             if (row_count <= scrollbar.scroll_position || drawn_rows >= MAX_VISIBLE_ROWS) {
                 continue;
@@ -272,7 +272,7 @@ static void calculate_available_storages(int building_id)
         }
         if (active && max_storable > 0) {
             data.available_storages++;
-        } else if ((!active || max_storable == 0) && store->extra_attr.storage_id > 0) {
+        } else if ((!active || max_storable == 0) && store->storage_id > 0) {
             if (data.advanced_mode) {
                 data.secondary_storages++;  // advanced orders: allow inactive/non-used storages
             }
@@ -513,9 +513,9 @@ void window_building_draw_depot_foreground(building_info_context *c)
     int focus_border = data.focus_button_id == 2 && total_storages() > 1;
     button_border_draw(x_offset + depot_order_buttons[1].x, y_offset + depot_order_buttons[1].y,
         depot_order_buttons[1].width, depot_order_buttons[1].height, focus_border);
-    if (src->extra_attr.storage_id) {
+    if (src->storage_id) {
         text_draw_label_and_number_centered(lang_get_string(28, src->type),
-            src->extra_attr.storage_id, "", x_offset + depot_order_buttons[1].x, y_offset + depot_order_buttons[1].y + 6,
+            src->storage_id, "", x_offset + depot_order_buttons[1].x, y_offset + depot_order_buttons[1].y + 6,
             depot_order_buttons[1].width, FONT_NORMAL_BLACK, 0);
         button_border_draw(x_offset + depot_order_buttons[5].x, y_offset + depot_order_buttons[5].y,
             depot_order_buttons[5].width, depot_order_buttons[5].height, data.focus_button_id == 6);
@@ -539,9 +539,9 @@ void window_building_draw_depot_foreground(building_info_context *c)
     button_border_draw(x_offset + depot_order_buttons[2].x, y_offset + depot_order_buttons[2].y,
         depot_order_buttons[2].width, depot_order_buttons[2].height,
         data.focus_button_id == 3 && total_storages() > 1);
-    if (dst->extra_attr.storage_id) {
+    if (dst->storage_id) {
         text_draw_label_and_number_centered(lang_get_string(28, dst->type),
-            dst->extra_attr.storage_id, "", x_offset + depot_order_buttons[2].x, y_offset + depot_order_buttons[2].y + 6,
+            dst->storage_id, "", x_offset + depot_order_buttons[2].x, y_offset + depot_order_buttons[2].y + 6,
             depot_order_buttons[2].width, FONT_NORMAL_BLACK, 0);
         button_border_draw(x_offset + depot_order_buttons[6].x, y_offset + depot_order_buttons[6].y,
             depot_order_buttons[6].width, depot_order_buttons[6].height, data.focus_button_id == 7);
@@ -697,7 +697,7 @@ void window_building_draw_depot_select_source_destination(building_info_context 
             button_border_draw(c->x_offset + 18 + BLOCK_SIZE * 2, y_offset + 46 + ROW_HEIGHT * drawn_rows, base_width,
                 22, data.storage_building_focus_button_id == drawn_rows + 1);
             text_draw_label_and_number_centered(
-                lang_get_string(28, bld->type), bld->extra_attr.storage_id, "", c->x_offset + 18 + BLOCK_SIZE * 2,
+                lang_get_string(28, bld->type), bld->storage_id, "", c->x_offset + 18 + BLOCK_SIZE * 2,
                 y_offset + 52 + ROW_HEIGHT * drawn_rows, base_width, FONT_NORMAL_WHITE, 0);
 
             // Right button - view storage
@@ -749,7 +749,7 @@ void window_building_draw_depot_select_source_destination(building_info_context 
         // Only include inactive storages that have a valid storage_id and weren't already counted in first pass
         int max_storable = building_storage_resource_max_storable(store_building, data.target_resource_id);
         if ((max_storable == 0 || store_building->state == BUILDING_STATE_MOTHBALLED)
-            && store_building->extra_attr.storage_id > 0 && store_building->state != BUILDING_STATE_RUBBLE) {
+            && store_building->storage_id > 0 && store_building->state != BUILDING_STATE_RUBBLE) {
             row_count++;
             if (row_count <= scrollbar.scroll_position) {
                 continue;
@@ -767,7 +767,7 @@ void window_building_draw_depot_select_source_destination(building_info_context 
             // Middle button - select storage (disabled for inactive storages)
             button_border_draw(c->x_offset + 18 + BLOCK_SIZE * 2, y_offset + 46 + ROW_HEIGHT * drawn_rows,
                 base_width, 22, 0);
-            text_draw_label_and_number_centered(lang_get_string(28, bld->type), bld->extra_attr.storage_id, "",
+            text_draw_label_and_number_centered(lang_get_string(28, bld->type), bld->storage_id, "",
                 c->x_offset + 18 + BLOCK_SIZE * 2, y_offset + 52 + ROW_HEIGHT * drawn_rows, base_width,
                 FONT_NORMAL_BLACK, COLOR_FONT_LIGHT_GRAY);
 
