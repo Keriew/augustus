@@ -26,6 +26,7 @@
 #include "window/editor/map.h"
 #include "window/numeric_input.h"
 #include "window/plain_message_dialog.h"
+#include "window/popup_dialog.h"
 #include "window/text_input.h"
 
 #define CHECKBOX_ROW_WIDTH 25
@@ -48,9 +49,12 @@ static void button_edit_variable_name(const generic_button *button);
 static void button_edit_variable_value(const generic_button *button);
 
 static void button_select_all_none(const generic_button *button);
-static void button_edit_variable(const grid_box_item *item);
+static void button_delete_selected(const generic_button *button);
 static void button_new_variable(const generic_button *button);
-static void draw_variable_button(const grid_box_item *item);
+static void button_ok(const generic_button *button);
+
+static void variable_item_click(const grid_box_item *item);
+static void draw_variable_item(const grid_box_item *item);
 
 static struct {
     unsigned int constant_button_focus_id;
@@ -64,6 +68,7 @@ static struct {
 
     uint8_t *selected;
     checkbox_selection_type selection_type;
+    int do_not_ask_again_for_delete;
 
     void (*callback)(unsigned int id);
 } data;
@@ -76,21 +81,23 @@ static generic_button item_buttons[] = {
 
 static generic_button constant_buttons[] = {
     { 32, 91, 20, 20, button_select_all_none },
-    { 195, 418, 250, 25, button_new_variable }
+    { 32, 454, 200, 30, button_delete_selected, 0 },
+    { 237, 454, 200, 30, button_new_variable },
+    { 442, 454, 200, 30, button_ok }
 };
 
 static grid_box_type variable_buttons = {
     .x = 26,
     .y = 116,
     .width = 38 * BLOCK_SIZE,
-    .height = 19 * BLOCK_SIZE,
+    .height = 21 * BLOCK_SIZE,
     .num_columns = 1,
     .item_height = 30,
     .item_margin.horizontal = 10,
     .item_margin.vertical = 5,
     .extend_to_hidden_scrollbar = 1,
-    .on_click = button_edit_variable,
-    .draw_item = draw_variable_button
+    .on_click = variable_item_click,
+    .draw_item = draw_variable_item
 };
 
 static void select_all_to(uint8_t value)
@@ -175,11 +182,10 @@ static void draw_background(void)
 
     int base_x_offset = variable_buttons.x + variable_buttons.item_margin.horizontal / 2;
 
-    text_draw_centered(string_from_ascii("ID"), variable_buttons.x + (data.callback ? 0 : CHECKBOX_ROW_WIDTH), 96, 40,
-        FONT_SMALL_PLAIN, 0);
-    text_draw(string_from_ascii("Name"), base_x_offset + item_buttons[1].x, 96, FONT_SMALL_PLAIN, 0);
-
-    lang_text_draw_centered(13, 3, 48, 450, 640, FONT_NORMAL_BLACK);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_ID,
+        variable_buttons.x + (data.callback ? 0 : CHECKBOX_ROW_WIDTH), 96, 40, FONT_SMALL_PLAIN);
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_NAME, base_x_offset + item_buttons[1].x, 96,
+        FONT_SMALL_PLAIN);
 
     grid_box_request_refresh(&variable_buttons);
 
@@ -200,17 +206,25 @@ static void draw_background(void)
              select_all_none_button->y + (20 - img->original.height) / 2, COLOR_MASK_NONE, SCALE_NONE);
     }
 
-    text_draw(string_from_ascii("Initial value"), base_x_offset + item_buttons[2].x, 96, FONT_SMALL_PLAIN, 0);
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_VALUE, base_x_offset + item_buttons[2].x, 96,
+        FONT_SMALL_PLAIN);
 
-    const generic_button *new_variable_button = &constant_buttons[1];
-
-    text_draw_centered(string_from_ascii("New custom variable"), new_variable_button->x, new_variable_button->y + 8,
-        new_variable_button->width, FONT_NORMAL_BLACK, 0);
+    // Bottom buttons
+    const generic_button *delete_selected_button = &constant_buttons[1];
+    color_t color = data.selection_type == CHECKBOX_NO_SELECTION ? COLOR_FONT_LIGHT_GRAY : COLOR_RED;
+    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED,
+        delete_selected_button->x, delete_selected_button->y + 9, delete_selected_button->width,
+        FONT_NORMAL_PLAIN, color);
+    const generic_button *new_variable_button = &constant_buttons[2];
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_NEW,
+        new_variable_button->x, new_variable_button->y + 9, new_variable_button->width, FONT_NORMAL_BLACK);
+    lang_text_draw_centered(18, 3, constant_buttons[3].x, constant_buttons[3].y + 9, constant_buttons[3].width,
+        FONT_NORMAL_BLACK);
 
     graphics_reset_dialog();
 }
 
-static void draw_variable_button(const grid_box_item *item)
+static void draw_variable_item(const grid_box_item *item)
 {
     unsigned int id = data.custom_variable_ids[item->index];
     const uint8_t *name = scenario_custom_variable_get_name(id);
@@ -259,7 +273,7 @@ static void draw_foreground(void)
 
     for (unsigned int i = 0; i < NUM_CONSTANT_BUTTONS; i++) {
         int focus = data.constant_button_focus_id == i + 1;
-        if (i == 0 && data.custom_variables_in_use == 0) {
+        if ((i == 0 && data.custom_variables_in_use == 0) || (i == 1 && data.selection_type == CHECKBOX_NO_SELECTION)) {
             focus = 0;
         }
         button_border_draw(constant_buttons[i].x, constant_buttons[i].y, constant_buttons[i].width,
@@ -307,22 +321,78 @@ static void button_variable_checkbox(const generic_button *button)
     window_request_refresh();
 }
 
-static void set_variable_name(const uint8_t *value)
+static void create_new_variable(const uint8_t *name)
 {
-    scenario_custom_variable_rename(data.custom_variable_ids[data.target_index], value);
+    unsigned int id = scenario_custom_variable_create(name, 0);
+    if (!id) {
+        log_error("There was an error creating the new variable - out of memory", 0, 0);
+        return;
+    }
+    populate_list();
+    grid_box_update_total_items(&variable_buttons, data.custom_variables_in_use);
+    for (unsigned int i = 0; i < data.custom_variables_in_use; i++) {
+        if (data.custom_variable_ids[i] == id) {
+            grid_box_show_index(&variable_buttons, i);
+            break;
+        }
+    }
+    window_request_refresh();
+}
+
+static int check_valid_name(const uint8_t *name)
+{
+    if (!name || !*name) {
+        return 0;
+    }
+    for (unsigned int i = 0; i < data.custom_variables_in_use; i++) {
+        if (data.target_index == i) {
+            continue;
+        }
+        if (string_equals(name, scenario_custom_variable_get_name(data.custom_variable_ids[i]))) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static void set_variable_name(const uint8_t *name)
+{
+    if (!check_valid_name(name)) {
+        window_plain_message_dialog_show(TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_SET_NAME_TITLE,
+            TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_SET_NAME_TEXT, 1);
+        return;
+    }
+    // New variable
+    if (data.target_index == NO_SELECTION) {
+        create_new_variable(name);
+        return;
+    }
+    scenario_custom_variable_rename(data.custom_variable_ids[data.target_index], name);
     data.target_index = NO_SELECTION;
+}
+
+static void show_name_edit_popup(void)
+{
+    const uint8_t *title;
+    const uint8_t *name = 0;
+    if (data.target_index != NO_SELECTION) {
+        static uint8_t text_input_title[100];
+        uint8_t *cursor = string_copy(translation_for(TR_PARAMETER_TYPE_CUSTOM_VARIABLE), text_input_title, 100);
+        cursor = string_copy(string_from_ascii(" "), cursor, 100 - (cursor - text_input_title));
+        unsigned int id = data.custom_variable_ids[data.target_index];
+        string_from_int(cursor, id, 0);
+        title = text_input_title;
+        name = scenario_custom_variable_get_name(id);
+    } else {
+        title = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_NEW);
+    }
+
+    window_text_input_show(title, 0, name, CUSTOM_VARIABLE_NAME_LENGTH, set_variable_name);
 }
 
 static void button_edit_variable_name(const generic_button *button)
 {
-    static uint8_t text_input_title[100];
-    uint8_t *cursor = string_copy(translation_for(TR_PARAMETER_TYPE_CUSTOM_VARIABLE), text_input_title, 100);
-    cursor = string_copy(string_from_ascii(" "), cursor, 100 - (cursor - text_input_title));
-    unsigned int id = data.custom_variable_ids[data.target_index];
-    string_from_int(cursor, id, 0);
-
-    window_text_input_show(text_input_title, 0, scenario_custom_variable_get_name(id),
-        CUSTOM_VARIABLE_NAME_LENGTH, set_variable_name);
+    show_name_edit_popup();
 }
 
 static void set_variable_value(int value)
@@ -337,7 +407,7 @@ static void button_edit_variable_value(const generic_button *button)
         9, -1000000000, 1000000000, set_variable_value);
 }
 
-static void button_edit_variable(const grid_box_item *item)
+static void variable_item_click(const grid_box_item *item)
 {
     unsigned int id = data.custom_variable_ids[item->index];
 
@@ -350,7 +420,7 @@ static void button_edit_variable(const grid_box_item *item)
     data.target_index = item->index;
 }
 
-static void show_used_event_popup_dialog(const scenario_event_t *event)
+static void show_used_event_sigle_variable_popup_dialog(const scenario_event_t *event)
 {
     static uint8_t event_id_text[50];
     uint8_t *cursor = string_copy(translation_for(TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_CHANGE_EVENT_ID),
@@ -360,45 +430,110 @@ static void show_used_event_popup_dialog(const scenario_event_t *event)
         TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_CHANGE_TEXT, 0, event_id_text);
 }
 
-/***
-static void button_delete_variable(const generic_button *button)
+static void show_multiple_variables_in_use_popup_dialog(unsigned int *variables_in_use, unsigned int total)
 {
-    int button_index = button->parameter1;
+    static uint8_t event_id_text[200];
+    uint8_t *cursor = string_copy(translation_for(TR_EDITOR_CUSTOM_VARIABLES_IN_USE),
+        event_id_text, 200);
+    cursor += string_from_int(cursor, variables_in_use[0], 0);
+    for (unsigned int i = 1; i < total; i++) {
+        cursor = string_copy(string_from_ascii(", "), cursor, 200 - (cursor - event_id_text));
+        if (cursor - event_id_text > 188) {
+            cursor = string_copy(string_from_ascii("..."), cursor, 200 - (cursor - event_id_text));
+            break;
+        }
+        cursor += string_from_int(cursor, variables_in_use[i], 0);
+    }
+    window_plain_message_dialog_show_with_extra(TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_CHANGE_TITLE,
+        TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_CHANGE_TEXT, 0, event_id_text);
+}
 
-    if (data.callback) {
+static void delete_selected(int is_ok, int checked)
+{
+    if (!is_ok) {
         return;
     }
-    if (!data.list[button_index]) {
-        return;
-    };
-    scenario_event_t *event = scenario_events_get_using_custom_variable(data.list[button_index]->id);
-    if (event) {
-        show_used_event_popup_dialog(event);
+    if (checked) {
+        data.do_not_ask_again_for_delete = 1;
+    }
+
+    for (unsigned int i = 0; i < data.custom_variables_in_use; i++) {
+        if (!data.selected[i]) {
+            continue;
+        }
+        unsigned int id = data.custom_variable_ids[i];
+        if (scenario_custom_variable_exists(id)) {
+            scenario_custom_variable_delete(id);
+        }
+    }
+    populate_list();
+    grid_box_update_total_items(&variable_buttons, data.custom_variables_in_use);
+    window_request_refresh();
+}
+
+static void button_delete_selected(const generic_button *button)
+{
+    if (data.callback || !data.selected || data.selection_type == CHECKBOX_NO_SELECTION) {
         return;
     }
-    const uint8_t empty_name[2] = "";
-    scenario_custom_variable_rename(data.list[button_index]->id, empty_name);
-}***/
 
+    unsigned int *variables_in_use = calloc(data.custom_variables_in_use, sizeof(unsigned int));
+    if (!variables_in_use) {
+        log_error("Failed to allocate memory for custom variable list", 0, 0);
+        return;
+    }
+    unsigned int total_variables_in_use = 0;
+    const scenario_event_t *event = 0;
+
+    // Step 1: Check if any of the selected variables are used in events
+    for (unsigned int i = 0; i < data.custom_variables_in_use; i++) {
+        if (!data.selected[i]) {
+            continue;
+        }
+        event = scenario_events_get_using_custom_variable(data.custom_variable_ids[i]);
+        if (!event) {
+            continue;
+        }
+        variables_in_use[total_variables_in_use] = data.custom_variable_ids[i];
+        total_variables_in_use++;
+    }
+
+    // If any variables are in use, alert user and abort
+    if (total_variables_in_use) {
+        if (total_variables_in_use == 1) {
+            show_used_event_sigle_variable_popup_dialog(event);
+        } else {
+            show_multiple_variables_in_use_popup_dialog(variables_in_use, total_variables_in_use);
+        }
+        free(variables_in_use);
+        return;
+    }
+
+    free(variables_in_use);
+
+    // Step 2: Request confirmation
+    if (!data.do_not_ask_again_for_delete) {
+        const uint8_t *title = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED_CONFIRM_TITLE);
+        const uint8_t *text = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED_CONFIRM_TEXT);
+        const uint8_t *check_text = lang_get_string(CUSTOM_TRANSLATION, TR_SAVE_DIALOG_OVERWRITE_FILE_DO_NOT_ASK_AGAIN);
+        window_popup_dialog_show_confirmation(title, text, check_text, delete_selected);
+    } else {
+        delete_selected(1, 1);
+    }
+}
 
 static void button_new_variable(const generic_button *button)
 {
     if (data.callback) {
         return;
     }
-    unsigned int id = scenario_custom_variable_create(0, 0);
-    if (!id) {
-        return;
-    }
-    populate_list();
-    grid_box_update_total_items(&variable_buttons, data.custom_variables_in_use);
-    for (unsigned int i = 0; i < data.custom_variables_in_use; i++) {
-        if (data.custom_variable_ids[i] == id) {
-            grid_box_show_index(&variable_buttons, i);
-            break;
-        }
-    }
-    window_request_refresh();
+    data.target_index = NO_SELECTION;
+    show_name_edit_popup();
+}
+
+static void button_ok(const generic_button *button)
+{
+    window_go_back();
 }
 
 static void handle_input(const mouse *m, const hotkeys *h)
