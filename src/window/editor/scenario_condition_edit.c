@@ -321,7 +321,6 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             window_numeric_input_bound_show(BUTTON_WIDTH / 2, 0, button, 9, parameter->min_limit, parameter->max_limit,
                 set_param_value);
             return;
-        case PARAMETER_TYPE_ALLOWED_BUILDING:
         case PARAMETER_TYPE_BOOLEAN:
         case PARAMETER_TYPE_BUILDING:
         case PARAMETER_TYPE_BUILDING_COUNTING:

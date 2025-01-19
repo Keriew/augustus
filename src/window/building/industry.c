@@ -20,7 +20,7 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/mouse.h"
-#include "scenario/building.h"
+#include "scenario/allowed_building.h"
 #include "scenario/property.h"
 #include "translation/translation.h"
 #include "window/popup_dialog.h"
@@ -369,8 +369,8 @@ void window_building_draw_concrete_maker(building_info_context *c)
 
 static int governor_palace_is_allowed(void)
 {
-    return scenario_building_allowed(BUILDING_GOVERNORS_HOUSE) || scenario_building_allowed(BUILDING_GOVERNORS_VILLA) ||
-        scenario_building_allowed(BUILDING_GOVERNORS_PALACE);
+    return scenario_allowed_building(BUILDING_GOVERNORS_HOUSE) || scenario_allowed_building(BUILDING_GOVERNORS_VILLA) ||
+        scenario_allowed_building(BUILDING_GOVERNORS_PALACE);
 }
 
 void window_building_draw_city_mint(building_info_context *c)

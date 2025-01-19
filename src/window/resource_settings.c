@@ -15,7 +15,6 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
-#include "scenario/building.h"
 #include "translation/translation.h"
 #include "window/advisor/trade.h"
 #include "window/message_dialog.h"

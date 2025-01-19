@@ -9,7 +9,6 @@
 #include "empire/type.h"
 #include "game/animation.h"
 #include "game/save_version.h"
-#include "scenario/building.h"
 #include "scenario/data.h"
 #include "scenario/empire.h"
 

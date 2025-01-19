@@ -6,7 +6,6 @@
 #include "core/io.h"
 #include "core/log.h"
 #include "core/string.h"
-#include "scenario/building.h"
 #include "translation/translation.h"
 
 #include <stdlib.h>

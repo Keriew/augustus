@@ -1,5 +1,7 @@
 #include "allowed_buildings.h"
 
+#include "building/type.h"
+#include "core/lang.h"
 #include "graphics/button.h"
 #include "graphics/color.h"
 #include "graphics/graphics.h"
@@ -8,6 +10,7 @@
 #include "graphics/panel.h"
 #include "graphics/window.h"
 #include "input/input.h"
+#include "scenario/allowed_building.h"
 #include "scenario/editor.h"
 #include "window/editor/attributes.h"
 #include "window/editor/map.h"
@@ -47,10 +50,11 @@ static void draw_background(void)
 static void draw_allowed_building(const grid_box_item *item)
 {
     button_border_draw(item->x, item->y, item->width, item->height, item->is_focused);
-    if (scenario_editor_is_building_allowed(item->index + 1)) {
-        lang_text_draw_centered(67, item->index + 1, item->x, item->y + 4, item->width, FONT_NORMAL_BLACK);
+    uint8_t *name = lang_get_building_type_string(item->index + 1);
+    if (scenario_allowed_building(item->index + 1)) {
+        text_draw_centered(name, item->x, item->y + 4, item->width, FONT_NORMAL_BLACK, 0);
     } else {
-        lang_text_draw_centered_colored(67, item->index + 1, item->x, item->y + 4, item->width,
+        text_draw_centered(name, item->x, item->y + 4, item->width,
             FONT_NORMAL_PLAIN, COLOR_FONT_RED);
     }
 }
@@ -76,7 +80,9 @@ static void handle_input(const mouse *m, const hotkeys *h)
 
 void toggle_building(const grid_box_item *item)
 {
-    scenario_editor_toggle_building_allowed(item->index + 1);
+    int allowed = scenario_allowed_building(item->index + 1);
+    scenario_allowed_building_set(item->index + 1, allowed ^ 1);
+    scenario_editor_set_as_unsaved();
     window_request_refresh();
 }
 
@@ -88,6 +94,6 @@ void window_editor_allowed_buildings_show(void)
         draw_foreground,
         handle_input
     };
-    grid_box_init(&allowed_building_list, 48);
+    grid_box_init(&allowed_building_list, BUILDING_TYPE_MAX - 1);
     window_show(&window);
 }

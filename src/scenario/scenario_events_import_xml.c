@@ -390,7 +390,6 @@ static int xml_import_special_parse_type(xml_data_attribute_t *attr, parameter_t
 static int xml_import_special_parse_attribute(xml_data_attribute_t *attr, int *target)
 {
     switch (attr->type) {
-        case PARAMETER_TYPE_ALLOWED_BUILDING:
         case PARAMETER_TYPE_INVASION_TYPE:
         case PARAMETER_TYPE_BOOLEAN:
         case PARAMETER_TYPE_BUILDING:

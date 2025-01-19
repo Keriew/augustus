@@ -23,10 +23,6 @@ void scenario_editor_change_empire(int change);
 void scenario_editor_set_custom_empire(const char *file_name);
 void scenario_editor_unset_custom_empire(void);
 
-int scenario_editor_is_building_allowed(int id);
-
-void scenario_editor_toggle_building_allowed(int id);
-
 void scenario_editor_set_player_rank(int rank);
 void scenario_editor_set_caesar_salary(int salary);
 

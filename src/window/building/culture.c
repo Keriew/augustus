@@ -16,7 +16,7 @@
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
 #include "graphics/text.h"
-#include "scenario/building.h"
+#include "scenario/allowed_building.h"
 #include "sound/speech.h"
 #include "translation/translation.h"
 #include "window/advisor/entertainment.h"
@@ -1460,12 +1460,12 @@ static void button_add_module_prompt(const generic_button *button)
 
     static option_menu_item options[2];
 
-    if (scenario_building_allowed(temple_module_options[option_id].required_building)) {
+    if (scenario_allowed_building(temple_module_options[option_id].required_building)) {
         generate_module_image_id(option_id);
         data.module_choices[num_options] = 1;
         options[num_options++] = temple_module_options[option_id].option;
     }
-    if (scenario_building_allowed(temple_module_options[option_id + 1].required_building)) {
+    if (scenario_allowed_building(temple_module_options[option_id + 1].required_building)) {
         generate_module_image_id(option_id + 1);
         data.module_choices[num_options] = 2;
         options[num_options++] = temple_module_options[option_id + 1].option;

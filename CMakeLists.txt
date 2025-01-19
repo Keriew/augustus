@@ -474,7 +474,7 @@ set(ASSETS_FILES
     ${PROJECT_SOURCE_DIR}/src/assets/xml.c
 )
 set(SCENARIO_FILES
-    ${PROJECT_SOURCE_DIR}/src/scenario/building.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/allowed_building.c
     ${PROJECT_SOURCE_DIR}/src/scenario/criteria.c
     ${PROJECT_SOURCE_DIR}/src/scenario/custom_media.c
     ${PROJECT_SOURCE_DIR}/src/scenario/custom_messages_export_xml.c

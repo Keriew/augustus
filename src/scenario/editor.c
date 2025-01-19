@@ -70,9 +70,6 @@ void scenario_editor_create(int map_size)
     scenario.win_criteria.milestone50_year = 20;
     scenario.win_criteria.milestone75_year = 30;
 
-    for (int i = 0; i < MAX_ALLOWED_BUILDINGS; i++) {
-        scenario.allowed_buildings[i] = 1;
-    }
     scenario.rome_supplies_wheat = 0;
 
     scenario.win_criteria.culture.goal = 10;
@@ -113,6 +110,7 @@ void scenario_editor_create(int map_size)
     scenario_invasion_clear();
     scenario_demand_change_clear_all();
     scenario_custom_variable_delete_all();
+    scenario_allowed_building_enable_all();
 
     scenario.random_events.max_wages = 45;
     scenario.random_events.min_wages = 5;
@@ -196,17 +194,6 @@ void scenario_editor_unset_custom_empire(void)
     }
     scenario.empire.id = 0;
     scenario.empire.custom_name[0] = 0;
-}
-
-int scenario_editor_is_building_allowed(int id)
-{
-    return scenario.allowed_buildings[id];
-}
-
-void scenario_editor_toggle_building_allowed(int id)
-{
-    scenario.allowed_buildings[id] = scenario.allowed_buildings[id] ? 0 : 1;
-    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_set_player_rank(int rank)

@@ -224,7 +224,7 @@ static void load_link_action(scenario_action_t *action, int link_type, int32_t l
     }
 }
 
-static void actions_load_state(buffer *buf)
+static void actions_load_state(buffer *buf, int is_new_version)
 {
     unsigned int array_size = buffer_load_dynamic_array(buf);
 
@@ -232,8 +232,12 @@ static void actions_load_state(buffer *buf)
     int32_t link_id = 0;
     for (unsigned int i = 0; i < array_size; i++) {
         scenario_action_t action;
-        scenario_action_type_load_state(buf, &action, &link_type, &link_id);
+        unsigned int next = scenario_action_type_load_state(buf, &action, &link_type, &link_id, is_new_version);
         load_link_action(&action, link_type, link_id);
+        while (next) {
+            next = scenario_action_type_load_more(next, &action);
+            load_link_action(&action, link_type, link_id);
+        }
     }
 }
 
@@ -246,7 +250,7 @@ void scenario_events_load_state(buffer *buf_events,  buffer *buf_conditions, buf
     } else {
         conditions_load_state_old_version(buf_conditions);
     }
-    actions_load_state(buf_actions);
+    actions_load_state(buf_actions, is_new_version);
 
     scenario_event_t *current;
     array_foreach(scenario_events, current) {

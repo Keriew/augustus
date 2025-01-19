@@ -8,6 +8,7 @@
 #include "game/difficulty.h"
 #include "game/save_version.h"
 #include "game/settings.h"
+#include "scenario/allowed_building.h"
 #include "scenario/custom_variable.h"
 #include "scenario/data.h"
 #include "scenario/demand_change.h"
@@ -140,7 +141,7 @@ static void calculate_buffer_offsets(int scenario_version)
 
     if (scenario_version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
         buffer_offsets.allowed_buildings = next_start_offset;
-        next_start_offset = buffer_offsets.allowed_buildings + MAX_ALLOWED_BUILDINGS * 2;
+        next_start_offset = buffer_offsets.allowed_buildings + MAX_ORIGINAL_ALLOWED_BUILDINGS * 2;
     }
 
     buffer_offsets.win_criteria = next_start_offset;
@@ -332,17 +333,6 @@ void scenario_save_state(buffer *buf)
     buffer_write_u8(buf, scenario.open_play_scenario_id);
 
     buffer_write_i32(buf, scenario.intro_custom_message_id);
-/***
-    for (int i = 0; i < MAX_CUSTOM_VARIABLES; i++) {
-        buffer_write_u8(buf, scenario.custom_variables[i].in_use);
-        buffer_write_i32(buf, scenario.custom_variables[i].value);
-        if (scenario.custom_variables[i].linked_uid) {
-            buffer_write_i32(buf, scenario.custom_variables[i].linked_uid->id);
-        } else {
-            buffer_write_i32(buf, 0);
-        }
-    }
-***/
 
     buffer_write_raw(buf, scenario.empire.custom_name, sizeof(scenario.empire.custom_name));
     buffer_write_u8(buf, 0);
@@ -440,9 +430,7 @@ void scenario_load_state(buffer *buf, int version)
     scenario.rome_supplies_wheat = buffer_read_i32(buf);
 
     if (version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
-        for (int i = 0; i < MAX_ALLOWED_BUILDINGS; i++) {
-            scenario.allowed_buildings[i] = buffer_read_i16(buf);
-        }
+        scenario_allowed_building_load_state_old_version(buf);
     }
 
     scenario.win_criteria.culture.goal = buffer_read_i32(buf);
@@ -667,9 +655,7 @@ void scenario_settings_init_favor(void)
 
 void scenario_unlock_all_buildings(void)
 {
-    for (int i = 0; i < MAX_ALLOWED_BUILDINGS; i++) {
-        scenario.allowed_buildings[i] = 1;
-    }
+    scenario_allowed_building_enable_all();
 }
 
 void scenario_settings_save_state(buffer *part1, buffer *part2, buffer *part3,

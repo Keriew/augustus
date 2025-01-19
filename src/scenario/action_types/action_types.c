@@ -22,6 +22,7 @@
 #include "game/resource.h"
 #include "map/building.h"
 #include "map/grid.h"
+#include "scenario/allowed_building.h"
 #include "scenario/custom_variable.h"
 #include "scenario/gladiator_revolt.h"
 #include "scenario/custom_messages.h"
@@ -34,10 +35,10 @@
 
 int scenario_action_type_change_allowed_buildings_execute(scenario_action_t *action)
 {
-    int allowed_id = action->parameter1;
+    int building_id = action->parameter1;
     int allowed = action->parameter2;
 
-    scenario.allowed_buildings[allowed_id] = allowed;
+    scenario_allowed_building_set(building_id, allowed);
     building_menu_update();
     
     return 1;

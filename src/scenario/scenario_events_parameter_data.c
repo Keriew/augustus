@@ -179,7 +179,7 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm2 =    { .name = "produced",       .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,           .max_limit = 1,      .key = TR_PARAMETER_PRODUCED }, },
     [ACTION_TYPE_CHANGE_ALLOWED_BUILDINGS]     = { .type = ACTION_TYPE_CHANGE_ALLOWED_BUILDINGS,
                                         .xml_attr =     { .name = "change_allowed_buildings",    .type = PARAMETER_TYPE_TEXT,     .key = TR_ACTION_TYPE_CHANGE_ALLOWED_BUILDINGS },
-                                        .xml_parm1 =    { .name = "building",       .type = PARAMETER_TYPE_ALLOWED_BUILDING,      .key = TR_PARAMETER_TYPE_ALLOWED_BUILDING },
+                                        .xml_parm1 =    { .name = "building",       .type = PARAMETER_TYPE_BUILDING,      .key = TR_PARAMETER_TYPE_ALLOWED_BUILDING },
                                         .xml_parm2 =    { .name = "allowed",        .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,           .max_limit = 1,      .key = TR_PARAMETER_ALLOWED }, },
     [ACTION_TYPE_SEND_STANDARD_MESSAGE]     = { .type = ACTION_TYPE_SEND_STANDARD_MESSAGE,
                                         .xml_attr =     { .name = "send_standard_message",    .type = PARAMETER_TYPE_TEXT,     .key = TR_ACTION_TYPE_SEND_STANDARD_MESSAGE },
@@ -568,59 +568,6 @@ static special_attribute_mapping_t special_attribute_mappings_buildings[] = {
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_BUILDING_TYPE_SIZE (sizeof(special_attribute_mappings_buildings) / sizeof(special_attribute_mapping_t))
 
-static special_attribute_mapping_t special_attribute_mappings_allowed_buildings[] = {
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "farms",                 .value = ALLOWED_BUILDING_FARMS,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "raw_materials",         .value = ALLOWED_BUILDING_RAW_MATERIALS,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "workshops",             .value = ALLOWED_BUILDING_WORKSHOPS,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "road",                  .value = ALLOWED_BUILDING_ROAD,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "wall",                  .value = ALLOWED_BUILDING_WALL,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "aqueduct",              .value = ALLOWED_BUILDING_AQUEDUCT,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "housing",               .value = ALLOWED_BUILDING_HOUSING,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "amphitheater",          .value = ALLOWED_BUILDING_AMPHITHEATER,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "theater",               .value = ALLOWED_BUILDING_THEATER,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "hippodrome",            .value = ALLOWED_BUILDING_HIPPODROME,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "colosseum",             .value = ALLOWED_BUILDING_COLOSSEUM,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "gladiator_school",      .value = ALLOWED_BUILDING_GLADIATOR_SCHOOL,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "lion_house",            .value = ALLOWED_BUILDING_LION_HOUSE,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "actor_colony",          .value = ALLOWED_BUILDING_ACTOR_COLONY,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "chariot_maker",         .value = ALLOWED_BUILDING_CHARIOT_MAKER,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "gardens",               .value = ALLOWED_BUILDING_GARDENS,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "plaza",                 .value = ALLOWED_BUILDING_PLAZA,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "statues",               .value = ALLOWED_BUILDING_STATUES,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "doctor",                .value = ALLOWED_BUILDING_DOCTOR,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "hospital",              .value = ALLOWED_BUILDING_HOSPITAL,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "bathhouse",             .value = ALLOWED_BUILDING_BATHHOUSE,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "barber",                .value = ALLOWED_BUILDING_BARBER,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "school",                .value = ALLOWED_BUILDING_SCHOOL,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "academy",               .value = ALLOWED_BUILDING_ACADEMY,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "library",               .value = ALLOWED_BUILDING_LIBRARY,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "prefecture",            .value = ALLOWED_BUILDING_PREFECTURE,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "fort",                  .value = ALLOWED_BUILDING_FORT,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "gatehouse",             .value = ALLOWED_BUILDING_GATEHOUSE,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "tower",                 .value = ALLOWED_BUILDING_TOWER,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "small_temples",         .value = ALLOWED_BUILDING_SMALL_TEMPLES,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "large_temples",         .value = ALLOWED_BUILDING_LARGE_TEMPLES,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "market",                .value = ALLOWED_BUILDING_MARKET,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "granary",               .value = ALLOWED_BUILDING_GRANARY,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "warehouse",             .value = ALLOWED_BUILDING_WAREHOUSE,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "triumphal_arch",        .value = ALLOWED_BUILDING_TRIUMPHAL_ARCH,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "dock",                  .value = ALLOWED_BUILDING_DOCK,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "wharf",                 .value = ALLOWED_BUILDING_WHARF,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "governor_home",         .value = ALLOWED_BUILDING_GOVERNOR_HOME,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "engineers_post",        .value = ALLOWED_BUILDING_ENGINEERS_POST,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "senate",                .value = ALLOWED_BUILDING_SENATE,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "forum",                 .value = ALLOWED_BUILDING_FORUM,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "well",                  .value = ALLOWED_BUILDING_WELL,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "oracle",                .value = ALLOWED_BUILDING_ORACLE,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "mission_post",          .value = ALLOWED_BUILDING_MISSION_POST,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "bridge",                .value = ALLOWED_BUILDING_BRIDGE,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "barracks",              .value = ALLOWED_BUILDING_BARRACKS,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "military_academy",      .value = ALLOWED_BUILDING_MILITARY_ACADEMY,                    .key = TR_PARAMETER_VALUE_DYNAMIC_RESOLVE },
-    { .type = PARAMETER_TYPE_ALLOWED_BUILDING,            .text = "monuments",             .value = ALLOWED_BUILDING_MONUMENTS,                    .key = TR_EDITOR_ALLOWED_BUILDINGS_MONUMENTS },
-};
-
-#define SPECIAL_ATTRIBUTE_MAPPINGS_ALLOWED_BUILDINGS_SIZE (sizeof(special_attribute_mappings_allowed_buildings) / sizeof(special_attribute_mapping_t))
-
 static special_attribute_mapping_t special_attribute_mappings_standard_message[] = {
     { .type = PARAMETER_TYPE_STANDARD_MESSAGE,            .text = "none",                      .value = 0,                    .key = TR_PARAMETER_VALUE_NONE },
     { .type = PARAMETER_TYPE_STANDARD_MESSAGE,            .text = "caesar_debt",               .value = MESSAGE_CITY_IN_DEBT,                    .key = TR_PARAMETER_VALUE_MESSAGE_CITY_IN_DEBT },
@@ -791,8 +738,6 @@ special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mappin
         case PARAMETER_TYPE_BUILDING:
         case PARAMETER_TYPE_BUILDING_COUNTING:
             return &special_attribute_mappings_buildings[index];
-        case PARAMETER_TYPE_ALLOWED_BUILDING:
-            return &special_attribute_mappings_allowed_buildings[index];
         case PARAMETER_TYPE_STANDARD_MESSAGE:
             return &special_attribute_mappings_standard_message[index];
         case PARAMETER_TYPE_MEDIA_TYPE:
@@ -830,8 +775,6 @@ int scenario_events_parameter_data_get_mappings_size(parameter_type type)
         case PARAMETER_TYPE_BUILDING:
         case PARAMETER_TYPE_BUILDING_COUNTING:
             return SPECIAL_ATTRIBUTE_MAPPINGS_BUILDING_TYPE_SIZE;
-        case PARAMETER_TYPE_ALLOWED_BUILDING:
-            return SPECIAL_ATTRIBUTE_MAPPINGS_ALLOWED_BUILDINGS_SIZE;
         case PARAMETER_TYPE_STANDARD_MESSAGE:
             return SPECIAL_ATTRIBUTE_MAPPINGS_STANDARD_MESSAGE_SIZE;
         case PARAMETER_TYPE_MEDIA_TYPE:
@@ -907,8 +850,6 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
             return BUILDING_WELL;
         case PARAMETER_TYPE_BUILDING_COUNTING:
             return BUILDING_WELL;
-        case PARAMETER_TYPE_ALLOWED_BUILDING:
-            return ALLOWED_BUILDING_FARMS;
         case PARAMETER_TYPE_STANDARD_MESSAGE:
             return MESSAGE_CAESAR_WRATH;
         case PARAMETER_TYPE_RATING_TYPE:
@@ -933,13 +874,6 @@ const uint8_t *scenario_events_parameter_data_get_display_string(special_attribu
         case PARAMETER_TYPE_BUILDING_COUNTING:
             if (entry->key == TR_PARAMETER_VALUE_DYNAMIC_RESOLVE) {
                 return lang_get_building_type_string(entry->value);
-            } else {
-                return translation_for(entry->key);
-            }
-            break;
-        case PARAMETER_TYPE_ALLOWED_BUILDING:
-            if (entry->key == TR_PARAMETER_VALUE_DYNAMIC_RESOLVE) {
-                return lang_get_string(67, entry->value);
             } else {
                 return translation_for(entry->key);
             }
@@ -1193,7 +1127,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
             }
         case ACTION_TYPE_CHANGE_ALLOWED_BUILDINGS:
             {
-                result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ALLOWED_BUILDING, action->parameter1, result_text, &maxlength);
+                result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_BUILDING, action->parameter1, result_text, &maxlength);
                 result_text = translation_for_boolean_text(action->parameter2, TR_PARAMETER_DISPLAY_ALLOWED, TR_PARAMETER_DISPLAY_DISALLOWED, result_text, &maxlength);
                 return;
             }

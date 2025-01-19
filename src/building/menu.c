@@ -5,7 +5,7 @@
 #include "core/config.h"
 #include "empire/city.h"
 #include "game/tutorial.h"
-#include "scenario/building.h"
+#include "scenario/allowed_building.h"
 #include "scenario/property.h"
 
 #define BUILD_MENU_ITEM_MAX 30
@@ -133,7 +133,7 @@ static int can_get_required_resource(building_type type)
 
 static int is_building_type_allowed(building_type type)
 {
-    return scenario_building_allowed(type) && can_get_required_resource(type);
+    return scenario_allowed_building(type) && can_get_required_resource(type);
 }
 
 static void enable_if_allowed(int *enabled, building_type menu_building_type, building_type type)

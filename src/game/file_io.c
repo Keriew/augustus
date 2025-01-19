@@ -46,9 +46,11 @@
 #include "map/sprite.h"
 #include "map/terrain.h"
 #include "map/tiles.h"
+#include "scenario/allowed_building.h"
 #include "scenario/criteria.h"
 #include "scenario/custom_media.h"
 #include "scenario/custom_messages.h"
+#include "scenario/custom_variable.h"
 #include "scenario/demand_change.h"
 #include "scenario/earthquake.h"
 #include "scenario/emperor_change.h"
@@ -683,8 +685,8 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
         scenario_invasion_load_state(file->invasions);
         scenario_demand_change_load_state(file->demand_changes);
         scenario_price_change_load_state(file->price_changes);
-    //    scenario_building_load_state(file->allowed_buildings);
-    //    scenario_custom_variable_load_state(file->custom_variables);
+        scenario_allowed_building_load_state(file->allowed_buildings);
+        scenario_custom_variable_load_state(file->custom_variables);
     }
     if (version > SCENARIO_LAST_NO_EVENTS) {
         scenario_events_load_state(file->scenario_events, file->scenario_conditions, file->scenario_actions,
@@ -719,8 +721,8 @@ static void scenario_save_to_state(scenario_state *file)
     scenario_invasion_save_state(file->invasions);
     scenario_demand_change_save_state(file->demand_changes);
     scenario_price_change_save_state(file->price_changes);
-    // scenario_building_save_state(file->allowed_buildings);
-    // scenario_custom_variable_save_state(file->custom_variables);
+    scenario_allowed_building_save_state(file->allowed_buildings);
+    scenario_custom_variable_save_state(file->custom_variables);
     scenario_events_save_state(file->scenario_events, file->scenario_conditions, file->scenario_actions);
     custom_messages_save_state(file->custom_messages);
     custom_media_save_state(file->custom_media);
@@ -769,8 +771,8 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
         scenario_invasion_load_state(state->invasions);
         scenario_demand_change_load_state(state->demand_changes);
         scenario_price_change_load_state(state->price_changes);
-    //    scenario_building_load_state(state->allowed_buildings);
-    //    scenario_custom_variable_load_state(state->custom_variables);
+        scenario_allowed_building_load_state(state->allowed_buildings);
+        scenario_custom_variable_load_state(state->custom_variables);
     }
 
     if (scenario_version > SCENARIO_LAST_NO_EVENTS) {
@@ -916,8 +918,8 @@ static void savegame_save_to_state(savegame_state *state)
     scenario_invasion_save_state(state->invasions);
     scenario_demand_change_save_state(state->demand_changes);
     scenario_price_change_save_state(state->price_changes);
-    // scenario_building_save_state(state->allowed_buildings);
-    // scenario_custom_variable_save_state(state->custom_variables);
+    scenario_allowed_building_save_state(state->allowed_buildings);
+    scenario_custom_variable_save_state(state->custom_variables);
     scenario_events_save_state(state->scenario_events, state->scenario_conditions, state->scenario_actions);
     custom_messages_save_state(state->custom_messages);
     custom_media_save_state(state->custom_media);

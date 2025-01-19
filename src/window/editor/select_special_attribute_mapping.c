@@ -84,13 +84,6 @@ static const uint8_t *get_display_string(special_attribute_mapping_t *entry)
                 return translation_for(entry->key);
             }
             break;
-        case PARAMETER_TYPE_ALLOWED_BUILDING:
-            if (entry->key == TR_PARAMETER_VALUE_DYNAMIC_RESOLVE) {
-                return lang_get_string(67, entry->value);
-            } else {
-                return translation_for(entry->key);
-            }
-            break;
         default:
             return translation_for(entry->key);
     }
