@@ -61,7 +61,7 @@ void scenario_event_save_state(buffer *buf, scenario_event_t *event)
     buffer_write_i32(buf, event->execution_count);
     buffer_write_u16(buf, event->actions.size);
     buffer_write_u16(buf, event->condition_groups.size);
-    char name_utf8[EVENT_NAME_LENGTH * 2];
+    char name_utf8[EVENT_NAME_LENGTH * 2] = { 0 };
     encoding_to_utf8(event->name, name_utf8, EVENT_NAME_LENGTH * 2, 0);
     buffer_write_raw(buf, name_utf8, EVENT_NAME_LENGTH * 2);
 }
