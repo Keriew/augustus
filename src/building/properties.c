@@ -9,6 +9,7 @@
 static building_properties properties[BUILDING_TYPE_MAX] = {
     [BUILDING_ROAD] = {
         .size = 1,
+        .disallowable = 1,
         .image_group = 112
     },
     [BUILDING_WALL] = {
@@ -18,7 +19,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .image_offset = 26
     },
     [BUILDING_DRAGGABLE_RESERVOIR] = {
-        .size = 1
+        .size = 1,
+        .disallowable = 1,
     },
     [BUILDING_AQUEDUCT] = {
         .size = 1,
@@ -27,7 +29,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .image_offset = 2
     },
     [BUILDING_HOUSE_SMALL_TENT] = {
-        .size = 1
+        .size = 1,
+        .disallowable = 1
     },
     [BUILDING_HOUSE_LARGE_TENT] = {
         .size = 1

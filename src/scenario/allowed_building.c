@@ -64,7 +64,7 @@ static uint8_t allowed_buildings[BUILDING_TYPE_MAX];
 
 int scenario_allowed_building(building_type type)
 {
-    return allowed_buildings[type];
+    return !building_properties_for_type(type)->disallowable || allowed_buildings[type];
 }
 
 void scenario_allowed_building_set(building_type type, int allowed)
