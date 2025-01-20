@@ -2,6 +2,7 @@
 
 #include "game/resource.h"
 #include "scenario/action_types/action_types.h"
+#include "scenario/allowed_building.h"
 
 void scenario_action_type_init(scenario_action_t *action)
 {

@@ -3,6 +3,7 @@
 #include "core/lang.h"
 #include "core/string.h"
 #include "map/grid.h"
+#include "scenario/allowed_building.h"
 #include "scenario/criteria.h"
 #include "scenario/custom_variable.h"
 #include "scenario/demand_change.h"

@@ -8,6 +8,7 @@
 #include "graphics/grid_box.h"
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
+#include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
 #include "scenario/allowed_building.h"
@@ -50,7 +51,7 @@ static void draw_background(void)
 static void draw_allowed_building(const grid_box_item *item)
 {
     button_border_draw(item->x, item->y, item->width, item->height, item->is_focused);
-    uint8_t *name = lang_get_building_type_string(item->index + 1);
+    const uint8_t *name = lang_get_building_type_string(item->index + 1);
     if (scenario_allowed_building(item->index + 1)) {
         text_draw_centered(name, item->x, item->y + 4, item->width, FONT_NORMAL_BLACK, 0);
     } else {
