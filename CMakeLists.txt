@@ -801,12 +801,6 @@ if(MSVC)
     set_source_files_properties(${SOURCE_FILES} PROPERTIES COMPILE_FLAGS "/W4")
     set_source_files_properties(${PROJECT_SOURCE_DIR}/res/augustus.rc PROPERTIES COMPILE_FLAGS "")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /utf-8 /wd4100 /wd4244 /we4013")
-  #  message("${CMAKE_MSVC_DEBUG_INFORMATION_FORMAT}")
-   # message("CMAKE_C_FLAGS: ${CMAKE_C_FLAGS_DEBUG}")
-    #   set(CMAKE_C_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
-     #   set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "/SAFESEH:NO /debug /INCREMENTAL /LTCG:OFF")
-      #  set(CMAKE_EXE_LINKER_FLAGS_DEBUG "/SAFESEH:NO /debug /INCREMENTAL /LTCG:OFF")
-      #  set(CMAKE_MODULE_LINKER_FLAGS_DEBUG "/SAFESEH:NO /debug /INCREMENTAL /LTCG:OFF")
 endif()
 
 # Show debug info on crash on 32 bit builds compiled with MinGW

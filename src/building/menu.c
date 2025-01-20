@@ -457,6 +457,17 @@ int building_menu_count_items(int submenu)
     return count;
 }
 
+int building_menu_count_all_items(int submenu)
+{
+    int count = 0;
+    for (int item = 0; item < BUILD_MENU_ITEM_MAX; item++) {
+        if (MENU_BUILDING_TYPE[submenu][item] > 0) {
+            count++;
+        }
+    }
+    return count;
+}
+
 int building_menu_next_index(int submenu, int current_index)
 {
     for (int i = current_index + 1; i < BUILD_MENU_ITEM_MAX; i++) {
@@ -484,7 +495,7 @@ build_menu_group building_menu_for_type(building_type type)
             }
         }
     }
-    return -1;
+    return SUBMENU_NONE;
 }
 
 int building_menu_is_enabled(building_type type)
@@ -514,6 +525,11 @@ int building_menu_has_changed(void)
         return 1;
     }
     return 0;
+}
+
+int building_menu_is_submenu(build_menu_group menu)
+{
+    return BUILD_MENU_TYPE_TO_BUILDING_TYPE[menu] != BUILDING_NONE;
 }
 
 int building_menu_get_submenu_for_type(building_type type)

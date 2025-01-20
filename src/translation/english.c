@@ -1578,6 +1578,8 @@ static translation_string all_strings[] = {
     {TR_EDITOR_EDIT_INVASION_SET_YEAR, "Invasion cannot start on the first year"},
     {TR_EDITOR_EDIT_DEMAND_CHANGE_NO_YEAR, "The change cannot occour on the first year"},
     {TR_EDITOR_EDIT_DEMAND_CHANGE_INVALID_ROUTE_SET, "Invalid route set"},
+    {TR_EDITOR_ALLOWED_BUILDINGS_ALLOWED, "Allowed"},
+    {TR_EDITOR_ALLOWED_BUILDINGS_NOT_ALLOWED, "Not allowed"},
     {TR_SELECT_NONE, "Select None"},
     {TR_SELECT_ALL, "Select All"}
 };

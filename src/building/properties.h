@@ -6,20 +6,17 @@
 typedef struct {
     int size;
     int fire_proof;
+    int disallowable;
     int image_group;
     int image_offset;
     int rotation_offset;
+    struct {
+        const char *group;
+        const char *id;
+    } custom_asset;
 } building_properties;
 
-typedef struct {
-    building_type type;
-    building_properties properties;
-    const char* asset_name;
-    const char* asset_image_id;
-} augustus_building_properties_mapping;
-
+void building_properties_init(void);
 const building_properties *building_properties_for_type(building_type type);
-
-void init_augustus_building_properties(void);
 
 #endif // BUILDING_PROPERTIES_H
