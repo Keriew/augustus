@@ -923,9 +923,15 @@ static uint8_t *translation_for_request_value(int value, uint8_t *result_text, i
     cursor = string_from_year(cursor, scenario_property_start_year() + request->year, maxlength);
     cursor = string_copy(string_from_ascii(", "), cursor, *maxlength);
     *maxlength -= 2;
-    int numbers = string_from_int(cursor, request->amount, 0);
+    int numbers = string_from_int(cursor, request->amount.min, 0);
     *maxlength -= numbers;
     cursor += numbers;
+    if (request->amount.min < request->amount.max) {
+        cursor = string_copy(string_from_ascii("-"), cursor, *maxlength);
+        numbers = string_from_int(cursor, request->amount.max, 0);
+        *maxlength -= numbers;
+        cursor += numbers;
+    }
     cursor = string_copy(string_from_ascii(" "), cursor, *maxlength);
     *maxlength -= 1;
     cursor = string_copy(resource_get_data(request->resource)->text, cursor, *maxlength);

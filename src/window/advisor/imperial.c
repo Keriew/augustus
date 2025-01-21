@@ -60,7 +60,7 @@ static void draw_request(int index, const scenario_request *request)
     }
 
     button_border_draw(38, 96 + 42 * index, 560, 40, 0);
-    text_draw_number(request->amount, '@', " ", 40, 102 + 42 * index, FONT_NORMAL_WHITE, 0);
+    text_draw_number(request->amount.requested, '@', " ", 40, 102 + 42 * index, FONT_NORMAL_WHITE, 0);
     image_draw(resource_get_data(request->resource)->image.icon, 110, 100 + 42 * index, COLOR_MASK_NONE, SCALE_NONE);
     text_draw(resource_get_data(request->resource)->text, 150, 102 + 42 * index, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
 
@@ -72,7 +72,7 @@ static void draw_request(int index, const scenario_request *request)
         int treasury = city_finance_treasury();
         width = text_draw_number(treasury, '@', " ", 40, 120 + 42 * index, FONT_NORMAL_WHITE, 0);
         width += lang_text_draw(52, 44, 40 + width, 120 + 42 * index, FONT_NORMAL_WHITE);
-        if (treasury < request->amount) {
+        if (treasury < request->amount.requested) {
             lang_text_draw(52, 48, 80 + width, 120 + 42 * index, FONT_NORMAL_WHITE);
         } else {
             lang_text_draw(52, 47, 80 + width, 120 + 42 * index, FONT_NORMAL_WHITE);
@@ -81,7 +81,7 @@ static void draw_request(int index, const scenario_request *request)
         // normal goods request
         int using_granaries;
         int amount_stored = city_resource_get_amount_including_granaries(request->resource,
-            request->amount, &using_granaries);
+            request->amount.requested, &using_granaries);
         int y_offset = 120 + 42 * index;
         width = text_draw_number(amount_stored, '@', " ", 40, y_offset, FONT_NORMAL_WHITE, 0);
         if (using_granaries) {
@@ -89,7 +89,7 @@ static void draw_request(int index, const scenario_request *request)
         } else {
             width += lang_text_draw(52, 43, 40 + width, y_offset, FONT_NORMAL_WHITE);
         }
-        if (amount_stored < request->amount) {
+        if (amount_stored < request->amount.requested) {
             lang_text_draw(52, 48, 80 + width, y_offset, FONT_NORMAL_WHITE);
         } else {
             lang_text_draw(52, 47, 80 + width, y_offset, FONT_NORMAL_WHITE);
@@ -308,7 +308,7 @@ static void get_tooltip_text(advisor_tooltip_result *r)
         if (request_status == CITY_REQUEST_STATUS_NOT_ENOUGH_RESOURCES || request_status >= CITY_REQUEST_STATUS_MAX) {
             const scenario_request *request = scenario_request_get_visible(index - city_request_has_troop_request());
             int using_granaries;
-            city_resource_get_amount_including_granaries(request->resource, request->amount, &using_granaries);
+            city_resource_get_amount_including_granaries(request->resource, request->amount.requested, &using_granaries);
             if (using_granaries) {
                 write_resource_storage_tooltip(r, request->resource);
             }

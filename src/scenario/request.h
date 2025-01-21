@@ -10,6 +10,7 @@
 #define REQUESTS_DEFAULT_IGNORED_DISFAVOUR 5
 
 #define MAX_ORIGINAL_REQUESTS 20
+#define REQUESTS_REPEAT_INFINITE -1
 
 typedef enum {
     REQUEST_STATE_NORMAL= 0,
@@ -24,7 +25,11 @@ typedef struct {
     unsigned int id;
     int year;
     int resource;
-    int amount;
+    struct {
+        unsigned int min;
+        unsigned int max;
+        unsigned int requested;
+    } amount;
     int deadline_years;
     int can_comply_dialog_shown;
     int favor;
@@ -35,6 +40,13 @@ typedef struct {
     int extension_months_to_comply;
     int extension_disfavor;
     int ignored_disfavor;
+    struct {
+        int times;
+        struct {
+            unsigned int min;
+            unsigned int max;
+        } interval; // in years
+    } repeat;
 } scenario_request;
 
 typedef enum {

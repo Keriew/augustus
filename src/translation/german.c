@@ -192,7 +192,7 @@ static translation_string all_strings[] = {
         "Sie können Ihre Einstellungen später im Optionsmenü ändern."},
     {TR_USER_DIRECTORIES_NOT_WRITEABLE_TITLE, "Benutzerverzeichnis nicht überschreibbar."},
     {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT, "Das ausgewählte Benutzerverzeichnis ist nicht überschreibbar.\n\nBitte wählen Sie ein anderes Benutzerverzeichnis."},
-    {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT_DETAILED, "Das gewählte Benutzerverzeichnis ist nicht überschreibbar.\n\Sie können Ihre Spiele nicht speichern.\nBitte wählen Sie im Optionsmenü ein anderes Benutzerverzeichnis aus."},
+    {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT_DETAILED, "Das gewählte Benutzerverzeichnis ist nicht überschreibbar.\nSie können Ihre Spiele nicht speichern.\nBitte wählen Sie im Optionsmenü ein anderes Benutzerverzeichnis aus."},
     {TR_USER_DIRECTORIES_WINDOW_TITLE, "Benutzerverzeichnis festlegen"},
     {TR_USER_DIRETORIES_WINDOW_USER_PATH, "Benutzerverzeichnis:" },
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TITLE, "Benutzerpfad geändert"},

@@ -27,7 +27,7 @@
 #define INVASIONS_ARRAY_SIZE_STEP 16
 #define WARNINGS_ARRAY_SIZE_STEP 32
 
-#define INVASIONS_STRUCT_SIZE_CURRENT (9 * sizeof(int16_t) + 1 * sizeof(uint8_t))
+#define INVASIONS_STRUCT_SIZE_CURRENT (5 * sizeof(int16_t) + 4 * sizeof(uint16_t) + 1 * sizeof(uint8_t))
 #define WARNINGS_STRUCT_SIZE_CURRENT (1 * sizeof(int32_t) + 6 * sizeof(int16_t) + 5 * sizeof(uint8_t))
 
 #define BARBARIAN_ENEMY_TYPE_MAX 4
@@ -736,14 +736,14 @@ void scenario_invasion_save_state(buffer *buf)
     array_foreach(data.invasions, invasion) {
         buffer_write_i16(buf, invasion->type);
         buffer_write_i16(buf, invasion->year);
-        buffer_write_i16(buf, invasion->amount.min);
-        buffer_write_i16(buf, invasion->amount.max);
+        buffer_write_u16(buf, invasion->amount.min);
+        buffer_write_u16(buf, invasion->amount.max);
         buffer_write_i16(buf, invasion->from);
         buffer_write_i16(buf, invasion->attack_type);
         buffer_write_u8(buf, invasion->month);
         buffer_write_i16(buf, invasion->repeat.times);
-        buffer_write_i16(buf, invasion->repeat.interval.min);
-        buffer_write_i16(buf, invasion->repeat.interval.max);
+        buffer_write_u16(buf, invasion->repeat.interval.min);
+        buffer_write_u16(buf, invasion->repeat.interval.max);
     }
 }
 
@@ -760,14 +760,14 @@ void scenario_invasion_load_state(buffer *buf)
         invasion_t *invasion = array_next(data.invasions);
         invasion->type = buffer_read_i16(buf);
         invasion->year = buffer_read_i16(buf);
-        invasion->amount.min = buffer_read_i16(buf);
-        invasion->amount.max = buffer_read_i16(buf);
+        invasion->amount.min = buffer_read_u16(buf);
+        invasion->amount.max = buffer_read_u16(buf);
         invasion->from = buffer_read_i16(buf);
         invasion->attack_type = buffer_read_i16(buf);
         invasion->month = buffer_read_u8(buf);
         invasion->repeat.times = buffer_read_i16(buf);
-        invasion->repeat.interval.min = buffer_read_i16(buf);
-        invasion->repeat.interval.max = buffer_read_i16(buf);
+        invasion->repeat.interval.min = buffer_read_u16(buf);
+        invasion->repeat.interval.max = buffer_read_u16(buf);
     }
     array_trim(data.invasions);
 }

@@ -349,12 +349,12 @@ static int update_extra_info(int is_background)
                 must_resort = 1;
             }
             changed |= update_extra_info_value(r->months_to_comply, &slot->time);
-            changed |= update_extra_info_value(r->amount, &slot->amount);
+            changed |= update_extra_info_value(r->amount.requested, &slot->amount);
             if (r->resource == RESOURCE_DENARII) {
                 changed |= update_extra_info_value(city_finance_treasury(), &slot->available);
             } else {
                 changed |= update_extra_info_value(city_resource_get_amount_including_granaries(r->resource,
-                    r->amount, 0), &slot->available);
+                    r->amount.requested, 0), &slot->available);
             }
 
             changed |= update_extra_info_value(is_stockpiled_changed(r->resource), &slot->stockpiled);

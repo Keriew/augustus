@@ -83,7 +83,7 @@ static void draw_background(void)
     lang_text_draw_year(scenario_property_start_year() + data.request.year, 110, 192, FONT_NORMAL_BLACK);
 
     lang_text_draw(44, 72, 250, 192, FONT_NORMAL_BLACK);
-    text_draw_number_centered(data.request.amount, 330, 192, 80, FONT_NORMAL_BLACK);
+    text_draw_number_centered(data.request.amount.min, 330, 192, 80, FONT_NORMAL_BLACK);
 
     text_draw_centered(resource_get_data(data.request.resource)->text, 430, 192, 100, FONT_NORMAL_BLACK,
         COLOR_MASK_NONE);
@@ -154,7 +154,8 @@ static void button_year(const generic_button *button)
 
 static void set_amount(int value)
 {
-    data.request.amount = value;
+    data.request.amount.min = value;
+    data.request.amount.max = value;
 }
 
 static void button_amount(const generic_button *button)
@@ -171,8 +172,9 @@ static void button_amount(const generic_button *button)
 static void set_resource(int value)
 {
     data.request.resource = data.avaialble_resources[value];
-    if (data.request.amount > 999) {
-        data.request.amount = 999;
+    if (data.request.amount.min > 999) {
+        data.request.amount.min = 999;
+        data.request.amount.max = 999;
     }
 }
 
@@ -270,7 +272,7 @@ static unsigned int validate(void)
     if (data.request.resource == RESOURCE_NONE) {
         data.errors[num_errors++] = translation_for(TR_EDITOR_EDIT_REQUEST_NO_RESOURCE);
     }
-    if (data.request.amount <= 0) {
+    if (data.request.amount.min <= 0) {
         data.errors[num_errors++] = translation_for(TR_EDITOR_EDIT_REQUEST_NO_AMOUNT);
     }
     if (data.request.deadline_years == 0) {

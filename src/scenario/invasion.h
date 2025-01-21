@@ -18,8 +18,8 @@ typedef struct {
     int year;
     int type;
     struct {
-        int min;
-        int max;
+        unsigned int min;
+        unsigned int max;
     } amount;
     int from;
     int attack_type;
@@ -27,8 +27,8 @@ typedef struct {
     struct {
         int times;
         struct {
-            int min;
-            int max;
+            unsigned int min;
+            unsigned int max;
         } interval; // in years
     } repeat;
 } invasion_t;
