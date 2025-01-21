@@ -502,6 +502,7 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
         b->storage_id = 0;
         buffer_skip(buf, 1); // do not load storage_id for non-storage buildings
     }
+    b->sentiment.house_happiness = buffer_read_i8(buf); // which union field we use does not matter
     if (save_version >= SAVE_GAME_LAST_ADVANCED_SENTIMENT) {
         if (building_is_house(b->type)) {
             buffer_read_raw(buf, &b->house_adv_sentiment, sizeof(b->house_adv_sentiment));
@@ -509,7 +510,6 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
             buffer_skip(buf, sizeof(b->house_adv_sentiment));
         }
     }
-    b->sentiment.house_happiness = buffer_read_i8(buf); // which union field we use does not matter
     b->show_on_problem_overlay = buffer_read_u8(buf);
 
     // Wharves produce fish and don't need any progress
