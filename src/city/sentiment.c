@@ -338,7 +338,7 @@ const int advanced_sentiment_drop_modifier[5] = {
 };
 
 // Checks if house building still has a cooldown before apply advanced sentiment change logic
-int is_house_has_ongoing_advanced_sentiment_change_cooldown(building *b, int update_sentiment_cooldown) {
+int check_house_advanced_sentiment_change_cooldown(building *b, int update_sentiment_cooldown) {
     if (!building_is_house(b->type) || !b->house_adv_sentiment.cooldown_initialized) {
         return 0;
     }
@@ -445,7 +445,7 @@ void city_sentiment_update(int update_sentiment_cooldown)
             int sentiment_delta = sentiment - b->sentiment.house_happiness;
             if (sentiment_delta != 0 &&
                 apply_advanced_sentiment_change &&
-                !is_house_has_ongoing_advanced_sentiment_change_cooldown(b, update_sentiment_cooldown)) {
+                !check_house_advanced_sentiment_change_cooldown(b, update_sentiment_cooldown)) {
                 // With new advanced logic we introduce faster sentiment change when the target value is
                 // far away from current happiness level. The final change value depends on difficulty settings.
                 // Example #1:

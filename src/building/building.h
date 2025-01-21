@@ -22,6 +22,12 @@ typedef enum order_condition_type {
     ORDER_CONDITION_DESTINATION_HAS_LESS_THAN
 } order_condition_type;
 
+typedef struct advanced_sentiment {
+    uint8_t cooldown_initialized: 1;
+    uint8_t cooldown: 3;
+    uint8_t reserved: 4;
+} advanced_sentiment;
+
 typedef struct order {
     resource_type resource_type;
     int src_storage_id;
@@ -192,11 +198,7 @@ typedef struct building {
     // The new happiness gain/drop logic will not be applied until cooldown expires.
     // Cooldown ticks get decreased every Jan/Apr/Jul/Oct, which gives 18-20 months in total.
     // That should be enough to build new housing block and evolve it.
-    struct {
-        uint8_t cooldown_initialized: 1;
-        uint8_t cooldown: 3;
-        uint8_t reserved: 4;
-    } house_adv_sentiment;
+    struct advanced_sentiment house_adv_sentiment;
     unsigned char show_on_problem_overlay;
     unsigned char house_tavern_wine_access;
     unsigned char house_tavern_food_access;
