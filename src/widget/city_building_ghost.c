@@ -472,6 +472,8 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
         draw_mausoleum_desirability_range(tile, type, building_size);
     }
 
+    int check_figure = ((type != BUILDING_PLAZA && type != BUILDING_ROADBLOCK) || props->size != 1) ? 1 : 0;
+
     for (int i = 0; i < num_tiles; i++) {
         int tile_offset = grid_offset + tile_grid_offset(orientation_index, i);
         int forbidden_terrain = map_terrain_get(tile_offset) & TERRAIN_NOT_CLEAR;
@@ -489,7 +491,7 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
 
         if (fully_blocked || forbidden_terrain) {
             blocked_tiles[i] = 1;
-        } else if (map_has_figure_at(tile_offset) && type != BUILDING_PLAZA) {
+        } else if (check_figure && map_has_figure_at(tile_offset)) {
             blocked_tiles[i] = 1;
             figure_animal_try_nudge_at(grid_offset, tile_offset, building_size);
         } else {
@@ -576,7 +578,7 @@ static void draw_draggable_reservoir(const map_tile *tile, int x, int y)
     } else {
         if (map_building_is_reservoir(map_x, map_y)) {
             blocked = 0;
-        } else if (!map_tiles_are_clear(map_x, map_y, 3, TERRAIN_ALL)) {
+        } else if (!map_tiles_are_clear(map_x, map_y, 3, TERRAIN_ALL, 1)) {
             blocked = 1;
         }
     }
@@ -1203,8 +1205,11 @@ static void draw_grand_temple_neptune(const map_tile *tile, int x, int y)
     if (city_finance_out_of_money() || is_blocked_for_building(tile->grid_offset, props->size, blocked)) {
         image_blend_footprint_color(x, y, COLOR_MASK_RED, data.scale);
     }
+    int radius = map_water_supply_reservoir_radius();
     // need to add 2 for the bonus the Neptune GT will add
-    int radius = map_water_supply_reservoir_radius() + 2;
+    if (!building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE)) {
+         radius += 2;
+    }
     city_view_foreach_tile_in_range(tile->grid_offset, props->size, radius, draw_grand_temple_neptune_range);
     int image_id = get_new_building_image_id(tile->grid_offset, BUILDING_GRAND_TEMPLE_NEPTUNE);
     draw_regular_building(BUILDING_GRAND_TEMPLE_NEPTUNE, image_id, x, y, tile->grid_offset, num_tiles, blocked);
