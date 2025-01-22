@@ -454,13 +454,10 @@ void city_sentiment_update(int update_sentiment_cooldown)
                 // far away from current happiness level. The final change value depends on difficulty settings.
                 // Example #1:
                 // Current house happiness level is 82, the new sentiment value is 10 and the delta is -72.
-                // The delta percent relative to the current happiness level is 87% (72 * 100% / 82).
-                // The final happiness change for VeryHard mode will be -30 (43% of -72, which is 
-                // 50% of delta percent).
+                // The final happiness change for VeryHard mode will be -28 (40% of -72).
                 // Example #2:
                 // Current house happiness level is 20, the new sentiment value is 77 and the delta is 57.
-                // The delta percent relative to the current happiness level is 74% (57 * 100% / 77).
-                // The final happiness change for Hard mode will be 6 (11% of 57, which is 15% of delta percent).
+                // The final happiness change for Hard mode will be 9 (17% of 57).
                 if (sentiment_delta > 0) {
                     int gain_modifier = advanced_sentiment_gain_modifier[setting_difficulty()];
                     sentiment_delta = calc_bound(sentiment_delta * gain_modifier / 100, 1, 100);
