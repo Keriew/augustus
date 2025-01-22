@@ -1039,7 +1039,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_CHECK_LOG_MESSAGE, "Por favor, consulte augustus-log.txt en su directorio de Augustus para más detalles."},
     {TR_EDITOR_UNABLE_TO_SAVE_EVENTS_TITLE, "No se pueden guardar los eventos del escenario"},
     {TR_EDITOR_IMPORT_LINE, "Linea: "},
-    {TR_EDITOR_SCENARIO_EVENT_ID, "ID: "},
+    {TR_EDITOR_ID, "ID: "},
     {TR_EDITOR_SCENARIO_EVENT_STATE_UNDEFINED, "Indefinido"},
     {TR_EDITOR_SCENARIO_EVENT_STATE_DISABLED, "Desactivado"},
     {TR_EDITOR_SCENARIO_EVENT_STATE_ACTIVE, "Activo"},

@@ -1015,7 +1015,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_CHECK_LOG_MESSAGE, "자세한 내용은 Augustus 경로의 augustus-log.txt 파일을 확인해 주세요."},
     {TR_EDITOR_UNABLE_TO_SAVE_EVENTS_TITLE, "시나리오 이벤트를 저장할 수 없습니다"},
     {TR_EDITOR_IMPORT_LINE, "줄: "},
-    {TR_EDITOR_SCENARIO_EVENT_ID, "ID: "},
+    {TR_EDITOR_ID, "ID: "},
     {TR_EDITOR_SCENARIO_EVENT_STATE_UNDEFINED, "정의되지 않음"},
     {TR_EDITOR_SCENARIO_EVENT_STATE_DISABLED, "가동 중지"},
     {TR_EDITOR_SCENARIO_EVENT_STATE_ACTIVE, "가동 중"},

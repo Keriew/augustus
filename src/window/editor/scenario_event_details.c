@@ -402,7 +402,7 @@ static void draw_background(void)
 
     // Title and ID
     text_draw_centered(translation_for(TR_EDITOR_SCENARIO_EVENTS_TITLE), 0, 16, 640, FONT_LARGE_BLACK, 0);
-    text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENT_ID),
+    text_draw_label_and_number(translation_for(TR_EDITOR_ID),
         data.event->id, "", 16, 24, FONT_NORMAL_PLAIN, COLOR_BLACK);
 
     // "Name" string
@@ -445,11 +445,11 @@ static void draw_background(void)
     btn = &top_buttons[4];
     lang_text_draw_right_aligned(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY, 0, btn->y + 6, top_buttons[0].x - 16,
         FONT_NORMAL_BLACK);
-    lang_text_draw_colored(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_BETWEEN, top_buttons[0].x, btn->y + 6,
+    lang_text_draw_colored(CUSTOM_TRANSLATION, TR_EDITOR_BETWEEN, top_buttons[0].x, btn->y + 6,
         enabled_font, enabled_color);
     text_draw_number_centered_colored(data.event->repeat_months_min, btn->x, btn->y + 6,
         btn->width, enabled_font, enabled_color);
-    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_AND, btn->x + btn->width,
+    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_AND, btn->x + btn->width,
         btn->y + 6, btn[1].x - (btn->x + btn->width), enabled_font, enabled_color);
     btn = &top_buttons[5];
     text_draw_number_centered_colored(data.event->repeat_months_max, btn->x, btn->y + 6,

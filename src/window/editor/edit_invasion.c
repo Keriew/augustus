@@ -175,16 +175,16 @@ static void draw_background(void)
 
     // Invasion size text
     btn = &edit_buttons[1];
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_BETWEEN, x_offset, BASE_Y_OFFSET + btn->y + 6,
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_BETWEEN, x_offset, BASE_Y_OFFSET + btn->y + 6,
         FONT_NORMAL_BLACK);
     text_draw_number_centered(data.invasion.amount.min, x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6, btn->width,
         FONT_NORMAL_BLACK);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_AND, x_offset + btn->x + btn->width,
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_AND, x_offset + btn->x + btn->width,
         BASE_Y_OFFSET + btn->y + 6, btn[1].x - (btn->x + btn->width), FONT_NORMAL_BLACK);
     btn = &edit_buttons[2];
     text_draw_number_centered(data.invasion.amount.max, x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6, btn->width,
         FONT_NORMAL_BLACK);
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_SIZE_UNITS, x_offset + btn->x + btn->width + 10,
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_UNITS, x_offset + btn->x + btn->width + 10,
         BASE_Y_OFFSET + btn->y + 6, FONT_NORMAL_BLACK);
 
     // Invasion type text
@@ -236,11 +236,11 @@ static void draw_background(void)
     enabled_color = data.repeat_type == INVASION_REPEAT_NEVER ? COLOR_FONT_LIGHT_GRAY : COLOR_MASK_NONE;
 
     btn = &edit_buttons[10];
-    lang_text_draw_colored(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_BETWEEN, x_offset, BASE_Y_OFFSET + btn->y + 6,
+    lang_text_draw_colored(CUSTOM_TRANSLATION, TR_EDITOR_BETWEEN, x_offset, BASE_Y_OFFSET + btn->y + 6,
         enabled_font, enabled_color);
     text_draw_number_centered_colored(data.invasion.repeat.interval.min, x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6,
         btn->width, enabled_font, enabled_color);
-    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_AND, x_offset + btn->x + btn->width,
+    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_AND, x_offset + btn->x + btn->width,
         BASE_Y_OFFSET + btn->y + 6, btn[1].x - (btn->x + btn->width), enabled_font, enabled_color);
     btn = &edit_buttons[11];
     text_draw_number_centered_colored(data.invasion.repeat.interval.max, x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6,
