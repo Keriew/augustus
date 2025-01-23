@@ -232,6 +232,11 @@ static void enable_tutorial1_after_senate(int *enabled, building_type type)
 {
     enable_tutorial1_after_collapse(enabled, type);
     enable_if_allowed(enabled, type, BUILDING_MENU_SMALL_TEMPLES);
+    enable_if_allowed(enabled, type, BUILDING_SMALL_TEMPLE_CERES);
+    enable_if_allowed(enabled, type, BUILDING_SMALL_TEMPLE_NEPTUNE);
+    enable_if_allowed(enabled, type, BUILDING_SMALL_TEMPLE_MERCURY);
+    enable_if_allowed(enabled, type, BUILDING_SMALL_TEMPLE_MARS);
+    enable_if_allowed(enabled, type, BUILDING_SMALL_TEMPLE_VENUS);
 }
 
 static void enable_tutorial2_start(int *enabled, building_type type)
@@ -247,7 +252,16 @@ static void enable_tutorial2_start(int *enabled, building_type type)
     enable_if_allowed(enabled, type, BUILDING_MARKET);
     enable_if_allowed(enabled, type, BUILDING_GRANARY);
     enable_if_allowed(enabled, type, BUILDING_MENU_FARMS);
+    enable_if_allowed(enabled, type, BUILDING_WHEAT_FARM);
+    enable_if_allowed(enabled, type, BUILDING_VEGETABLE_FARM);
+    enable_if_allowed(enabled, type, BUILDING_FRUIT_FARM);
+    enable_if_allowed(enabled, type, BUILDING_PIG_FARM);
     enable_if_allowed(enabled, type, BUILDING_MENU_SMALL_TEMPLES);
+    enable_if_allowed(enabled, type, BUILDING_SMALL_TEMPLE_CERES);
+    enable_if_allowed(enabled, type, BUILDING_SMALL_TEMPLE_NEPTUNE);
+    enable_if_allowed(enabled, type, BUILDING_SMALL_TEMPLE_MERCURY);
+    enable_if_allowed(enabled, type, BUILDING_SMALL_TEMPLE_MARS);
+    enable_if_allowed(enabled, type, BUILDING_SMALL_TEMPLE_VENUS);
 }
 
 static void enable_tutorial2_up_to_250(int *enabled, building_type type)
@@ -274,7 +288,21 @@ static void enable_tutorial2_after_450(int *enabled, building_type type)
 {
     enable_tutorial2_up_to_450(enabled, type);
     enable_if_allowed(enabled, type, BUILDING_MENU_RAW_MATERIALS);
+    enable_if_allowed(enabled, type, BUILDING_CLAY_PIT);
+    enable_if_allowed(enabled, type, BUILDING_MARBLE_QUARRY);
+    enable_if_allowed(enabled, type, BUILDING_IRON_MINE);
+    enable_if_allowed(enabled, type, BUILDING_TIMBER_YARD);
+    enable_if_allowed(enabled, type, BUILDING_GOLD_MINE);
+    enable_if_allowed(enabled, type, BUILDING_STONE_QUARRY);
+    enable_if_allowed(enabled, type, BUILDING_SAND_PIT);
     enable_if_allowed(enabled, type, BUILDING_MENU_WORKSHOPS);
+    enable_if_allowed(enabled, type, BUILDING_WINE_WORKSHOP);
+    enable_if_allowed(enabled, type, BUILDING_OIL_WORKSHOP);
+    enable_if_allowed(enabled, type, BUILDING_WEAPONS_WORKSHOP);
+    enable_if_allowed(enabled, type, BUILDING_FURNITURE_WORKSHOP);
+    enable_if_allowed(enabled, type, BUILDING_POTTERY_WORKSHOP);
+    enable_if_allowed(enabled, type, BUILDING_BRICKWORKS);
+    enable_if_allowed(enabled, type, BUILDING_CONCRETE_MAKER);
     enable_if_allowed(enabled, type, BUILDING_WAREHOUSE);
     enable_if_allowed(enabled, type, BUILDING_FORUM);
     enable_if_allowed(enabled, type, BUILDING_AMPHITHEATER);
