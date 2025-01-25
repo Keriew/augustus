@@ -351,7 +351,9 @@ void scenario_load_state(buffer *buf, int version)
     buffer_skip(buf, 8);
 
     if (version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
-        scenario_request_load_state_old_version(buf, REQUESTS_OLD_STATE_SECTIONS_TARGET);
+        if (version <= SCENARIO_LAST_NO_EXTENDED_REQUESTS) {
+            scenario_request_load_state_old_version(buf, REQUESTS_OLD_STATE_SECTIONS_TARGET);
+        }
         scenario_invasion_load_state_old_version(buf, INVASION_OLD_STATE_FIRST_SECTION);
     }
 
@@ -369,7 +371,7 @@ void scenario_load_state(buffer *buf, int version)
     buffer_read_raw(buf, scenario.brief_description, MAX_BRIEF_DESCRIPTION);
     buffer_read_raw(buf, scenario.briefing, MAX_BRIEFING);
 
-    if (version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
+    if (version <= SCENARIO_LAST_NO_EXTENDED_REQUESTS) {
         scenario_request_load_state_old_version(buf, REQUESTS_OLD_STATE_SECTIONS_CAN_COMPLY);
     }
 
@@ -422,9 +424,13 @@ void scenario_load_state(buffer *buf, int version)
     }
 
     if (version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
-        scenario_request_load_state_old_version(buf, REQUESTS_OLD_STATE_SECTIONS_FAVOR_REWARD);
+        if (version <= SCENARIO_LAST_NO_EXTENDED_REQUESTS) {
+            scenario_request_load_state_old_version(buf, REQUESTS_OLD_STATE_SECTIONS_FAVOR_REWARD);
+        }
         scenario_invasion_load_state_old_version(buf, INVASION_OLD_STATE_LAST_SECTION);
-        scenario_request_load_state_old_version(buf, REQUESTS_OLD_STATE_SECTIONS_ONGOING_INFO);
+        if (version <= SCENARIO_LAST_NO_EXTENDED_REQUESTS) {
+            scenario_request_load_state_old_version(buf, REQUESTS_OLD_STATE_SECTIONS_ONGOING_INFO);
+        }
     }
 
     scenario.rome_supplies_wheat = buffer_read_i32(buf);

@@ -679,7 +679,7 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
     }
     scenario_load_state(file->scenario, version);
     if (version > SCENARIO_LAST_NO_EXTENDED_REQUESTS) {
-        scenario_request_load_state(file->requests);
+        scenario_request_load_state(file->requests, version);
     }
     if (version > SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
         scenario_invasion_load_state(file->invasions);
@@ -690,7 +690,7 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
     }
     if (version > SCENARIO_LAST_NO_EVENTS) {
         scenario_events_load_state(file->scenario_events, file->scenario_conditions, file->scenario_actions,
-            version >= SCENARIO_LAST_STATIC_ORIGINAL_DATA);
+            version > SCENARIO_LAST_STATIC_ORIGINAL_DATA);
     } else {
         scenario_events_clear();
     }
@@ -764,7 +764,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     scenario_load_state(state->scenario, scenario_version);
 
     if (scenario_version > SCENARIO_LAST_NO_EXTENDED_REQUESTS) {
-        scenario_request_load_state(state->requests);
+        scenario_request_load_state(state->requests, scenario_version);
     }
 
     if (scenario_version > SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
@@ -777,7 +777,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
 
     if (scenario_version > SCENARIO_LAST_NO_EVENTS) {
         scenario_events_load_state(state->scenario_events, state->scenario_conditions, state->scenario_actions,
-            scenario_version >= SCENARIO_LAST_STATIC_ORIGINAL_DATA);
+            scenario_version > SCENARIO_LAST_STATIC_ORIGINAL_DATA);
     } else {
         scenario_events_clear();
     }

@@ -372,13 +372,18 @@ void scenario_request_save_state(buffer *list)
     }
 }
 
-static void request_load(buffer *list, scenario_request *request)
+static void request_load(buffer *list, scenario_request *request, int version)
 {
     request->year = buffer_read_i16(list);
     request->resource = resource_remap(buffer_read_i16(list));
     request->amount.min = buffer_read_u16(list);
-    request->amount.max = buffer_read_u16(list);
-    request->amount.requested = buffer_read_u16(list);
+    if (version > SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
+        request->amount.max = buffer_read_u16(list);
+        request->amount.requested = buffer_read_u16(list);
+    } else {
+        request->amount.max = request->amount.min;
+        request->amount.requested = request->amount.min;
+    }
     request->deadline_years = buffer_read_i16(list);
 
     request->can_comply_dialog_shown = buffer_read_u8(list);
@@ -393,12 +398,18 @@ static void request_load(buffer *list, scenario_request *request)
     request->extension_disfavor = buffer_read_i16(list);
     request->ignored_disfavor = buffer_read_i16(list);
 
-    request->repeat.times = buffer_read_i16(list);
-    request->repeat.interval.min = buffer_read_u16(list);
-    request->repeat.interval.max = buffer_read_u16(list);
+    if (version > SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
+        request->repeat.times = buffer_read_i16(list);
+        request->repeat.interval.min = buffer_read_u16(list);
+        request->repeat.interval.max = buffer_read_u16(list);
+    } else {
+        request->repeat.times = 0;
+        request->repeat.interval.min = 0;
+        request->repeat.interval.max = 0;
+    }
 }
 
-void scenario_request_load_state(buffer *list)
+void scenario_request_load_state(buffer *list, int version)
 {
     unsigned int array_size = buffer_load_dynamic_array(list);
 
@@ -409,7 +420,7 @@ void scenario_request_load_state(buffer *list)
 
     for (unsigned int i = 0; i < array_size; i++) {
         scenario_request *request = array_next(requests);
-        request_load(list, request);
+        request_load(list, request, version);
     }
 
     array_trim(requests);

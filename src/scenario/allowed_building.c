@@ -67,9 +67,56 @@ int scenario_allowed_building(building_type type)
     return !building_properties_for_type(type)->disallowable || allowed_buildings[type];
 }
 
+static void set_group(unsigned int id, int allowed)
+{
+    const building_type *group = CONVERSION_FROM_ORIGINAL[id];
+    unsigned int index = 0;
+    while (group[index]) {
+        allowed_buildings[group[index]] = allowed;
+        index++;
+    }
+}
+
 void scenario_allowed_building_set(building_type type, int allowed)
 {
-    allowed_buildings[type] = allowed;
+    switch (type) {
+        case BUILDING_MENU_FARMS:
+            set_group(1, allowed);
+            return;
+        case BUILDING_MENU_RAW_MATERIALS:
+            set_group(2, allowed);
+            return;
+        case BUILDING_MENU_WORKSHOPS:
+            set_group(3, allowed);
+            return;
+        case BUILDING_MENU_SMALL_TEMPLES:
+            set_group(30, allowed);
+            return;
+        case BUILDING_MENU_LARGE_TEMPLES:
+            set_group(31, allowed);
+            return;
+        case BUILDING_MENU_GRAND_TEMPLES:
+            set_group(48, allowed);
+            return;
+        case BUILDING_MENU_TREES:
+            set_group(16, allowed);
+            return;
+        case BUILDING_MENU_PATHS:
+            set_group(16, allowed);
+            return;
+        case BUILDING_MENU_PARKS:
+            set_group(16, allowed);
+            return;
+        case BUILDING_MENU_STATUES:
+            set_group(18, allowed);
+            return;
+        case BUILDING_MENU_GOV_RES:
+            set_group(38, allowed);
+            return;
+        default:
+            allowed_buildings[type] = allowed;
+            return;
+    }
 }
 
 void scenario_allowed_building_enable_all(void)

@@ -176,7 +176,8 @@ static void conditions_load_state_old_version(buffer *buf)
         } else {
             group = array_item(event->condition_groups, 0);
         }
-        scenario_condition_t *condition = array_next(group->conditions);
+        scenario_condition_t *condition;
+        array_new_item(group->conditions, condition);
         scenario_condition_load_state(buf, group, condition);
     }
 }
@@ -232,10 +233,11 @@ static void actions_load_state(buffer *buf, int is_new_version)
     int32_t link_id = 0;
     for (unsigned int i = 0; i < array_size; i++) {
         scenario_action_t action = { 0 };
-        unsigned int next = scenario_action_type_load_state(buf, &action, &link_type, &link_id, is_new_version);
+        int original_id = scenario_action_type_load_state(buf, &action, &link_type, &link_id, is_new_version);
         load_link_action(&action, link_type, link_id);
-        while (next) {
-            next = scenario_action_type_load_more(next, &action);
+        unsigned int index = 1;
+        while (index) {
+            index = scenario_action_type_load_allowed_building(&action, original_id, index);
             load_link_action(&action, link_type, link_id);
         }
     }

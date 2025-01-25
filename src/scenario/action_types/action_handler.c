@@ -141,19 +141,20 @@ unsigned int scenario_action_type_load_state(buffer *buf, scenario_action_t *act
     } else if (action->type == ACTION_TYPE_TRADE_SET_SELL_PRICE_ONLY) {
         action->parameter1 = resource_remap(action->parameter1);        
     } else if (action->type == ACTION_TYPE_CHANGE_ALLOWED_BUILDINGS) {
-        const building_type *building_list = scenario_allowed_building_get_buildings_from_original_id(action->parameter1);
-        action->parameter1 = building_list[0];
-        return building_list[1] != BUILDING_NONE;
+        if (!is_new_version) {
+            int original_id = action->parameter1;
+            return scenario_action_type_load_allowed_building(action, original_id, 0) ? original_id : 0;
+        }
     }
     return 0;
 }
 
-unsigned int scenario_action_type_load_more(unsigned int index, scenario_action_t *action)
+unsigned int scenario_action_type_load_allowed_building(scenario_action_t *action, int original_id, unsigned int index)
 {
-    if (!index || action->type != ACTION_TYPE_CHANGE_ALLOWED_BUILDINGS) {
+    if (action->type != ACTION_TYPE_CHANGE_ALLOWED_BUILDINGS || !original_id) {
         return 0;
     }
-    const building_type *building_list = scenario_allowed_building_get_buildings_from_original_id(action->parameter1);
+    const building_type *building_list = scenario_allowed_building_get_buildings_from_original_id(original_id);
     action->parameter1 = building_list[index];
     return building_list[index + 1] != BUILDING_NONE ? index + 1 : 0;
 }
