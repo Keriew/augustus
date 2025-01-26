@@ -383,6 +383,14 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .fire_proof = 1,
         .image_group = 81
     },
+    [BUILDING_LOW_BRIDGE] = {
+        .size = 1,
+        .fire_proof = 1
+    },
+    [BUILDING_SHIP_BRIDGE] = {
+        .size = 1,
+        .fire_proof = 1
+    },
     [BUILDING_SENATE] = {
         .size = 5,
         .disallowable = 1,
@@ -442,6 +450,10 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .disallowable = 1,
         .fire_proof = 1,
         .image_group = 76
+    },
+    [BUILDING_BURNING_RUIN] = {
+        .size = 1,
+        .fire_proof = 1
     },
     [BUILDING_WHEAT_FARM] = {
         .size = 3,
