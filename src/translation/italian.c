@@ -112,6 +112,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_DRAW_CLOUD_SHADOWS, "Disegna le ombre delle nuvole"},
     {TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE, "Chiedi conferma alla sovrascrittura di un file"},
     {TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, "I portali civili fanno passare tutti i passeggiatori di default"},	
+    {TR_CONFIG_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION, "Logica avanzata di contributo al sentimento fiscale e salariale"},
     {TR_HOTKEY_TITLE, "Configura scorciatoie da tastiera Augustus"},
     {TR_HOTKEY_LABEL, "Tasto"},
     {TR_HOTKEY_ALTERNATIVE_LABEL, "Alternativa"},

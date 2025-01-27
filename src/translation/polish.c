@@ -1017,6 +1017,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_AUTO_KILL_ANIMALS, "Obywatele będą automatycznie zabijać nieszkodliwe zwierzęta"},
     {TR_CONFIG_DRAW_CLOUD_SHADOWS, "Narysuj cienie chmur"},
     {TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, "Bramy niemilitarne domyślnie przepuszczają wszystkich obywateli"},
+    {TR_CONFIG_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION, "Zaawansowana logika wliczania podatków i nastrojów płacowych"},
     {TR_CONFIG_SHOW_MARKET_RANGE, "Pokaż zasięg przy budowie nowych targów"},
     {TR_CONFIG_SHOW_ROAMING_PATH, "Podgląd ścieżek przebytych przez wędrujących obywateli"},
     {TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE_HOUSES, "Pokaż zasięg fontann i studni podczas budowy domów"},
