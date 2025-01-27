@@ -897,33 +897,33 @@ void window_building_draw_pantheon(building_info_context *c)
 void window_building_draw_work_camp(building_info_context *c)
 {
     window_building_play_sound(c, "wavs/tower4.wav");
-    if (!c->has_road_access) {
-        window_building_draw_description_at(c, 96, 69, 25);
-    }
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     inner_panel_draw(c->x_offset + 16, c->y_offset + 136, c->width_blocks - 2, 4);
-    text_draw_centered(translation_for(TR_BUILDING_WORK_CAMP),
-        c->x_offset, c->y_offset + 12, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK, 0);
-    text_draw_multiline(translation_for(TR_BUILDING_WORK_CAMP_DESC),
-        c->x_offset + 32, c->y_offset + 76, BLOCK_SIZE * (c->width_blocks - 4), 0, FONT_NORMAL_BLACK, 0);
     window_building_draw_employment(c, 138);
     window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 144);
+    text_draw_centered(translation_for(TR_BUILDING_WORK_CAMP),
+        c->x_offset, c->y_offset + 12, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK, 0);
+    if (!c->has_road_access) {
+        window_building_draw_description_at(c, 76, 69, 25);
+    } else
+    text_draw_multiline(translation_for(TR_BUILDING_WORK_CAMP_DESC),
+        c->x_offset + 32, c->y_offset + 76, BLOCK_SIZE * (c->width_blocks - 4), 0, FONT_NORMAL_BLACK, 0);
 }
 
 void window_building_draw_architect_guild(building_info_context *c)
 {
     window_building_play_sound(c, "wavs/eng_post.wav");
-    if (!c->has_road_access) {
-        window_building_draw_description_at(c, 96, 69, 25);
-    }
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     inner_panel_draw(c->x_offset + 16, c->y_offset + 136, c->width_blocks - 2, 4);
-    text_draw_centered(translation_for(TR_BUILDING_ARCHITECT_GUILD),
-        c->x_offset, c->y_offset + 12, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK, 0);
-    text_draw_multiline(translation_for(TR_BUILDING_ARCHITECT_GUILD_DESC),
-        c->x_offset + 32, c->y_offset + 76, BLOCK_SIZE * (c->width_blocks - 4), 0, FONT_NORMAL_BLACK, 0);
     window_building_draw_employment(c, 138);
     window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 144);
+    text_draw_centered(translation_for(TR_BUILDING_ARCHITECT_GUILD),
+        c->x_offset, c->y_offset + 12, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK, 0);
+    if (!c->has_road_access) {
+        window_building_draw_description_at(c, 76, 69, 25);
+    } else
+    text_draw_multiline(translation_for(TR_BUILDING_ARCHITECT_GUILD_DESC),
+        c->x_offset + 32, c->y_offset + 76, BLOCK_SIZE * (c->width_blocks - 4), 0, FONT_NORMAL_BLACK, 0);
 }
 
 void window_building_draw_tavern(building_info_context *c)
@@ -1202,23 +1202,27 @@ void window_building_draw_lighthouse(building_info_context *c)
     building *b = building_get(c->building_id);
     if (b->monument.phase == MONUMENT_FINISHED) {
         c->advisor_button = ADVISOR_TRADE;
+        window_building_play_sound(c, "wavs/lighthouse.wav");
         outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
 
-        image_draw(resource_get_data(RESOURCE_TIMBER)->image.icon, c->x_offset + 22, c->y_offset + 46,
+        image_draw(resource_get_data(RESOURCE_TIMBER)->image.icon, c->x_offset + 32, c->y_offset + 46,
             COLOR_MASK_NONE, SCALE_NONE);
-        int width = lang_text_draw(125, 12, c->x_offset + 50, c->y_offset + 50, FONT_NORMAL_BLACK);
+        int width = lang_text_draw(125, 12, c->x_offset + 60, c->y_offset + 50, FONT_NORMAL_BLACK);
         if (b->resources[RESOURCE_TIMBER] < 1) {
-            lang_text_draw_amount(8, 10, 0, c->x_offset + 50 + width, c->y_offset + 50, FONT_NORMAL_BLACK);
+            lang_text_draw_amount(8, 10, 0, c->x_offset + 60 + width, c->y_offset + 50, FONT_NORMAL_BLACK);
         } else {
-            lang_text_draw_amount(8, 10, b->resources[RESOURCE_TIMBER], c->x_offset + 50 + width, c->y_offset + 50, FONT_NORMAL_BLACK);
+            lang_text_draw_amount(8, 10, b->resources[RESOURCE_TIMBER], c->x_offset + 60 + width, c->y_offset + 50, FONT_NORMAL_BLACK);
         }
 
-        if (building_monument_has_labour_problems(b)) {
+        if (!c->has_road_access) {
+            window_building_draw_description_at(c, 80, 69, 25);
+        }
+        else if (building_monument_has_labour_problems(b)) {
             text_draw_multiline(translation_for(TR_BUILDING_LIGHTHOUSE_NEEDS_WORKERS),
-                c->x_offset + 22, c->y_offset + 70, 15 * c->width_blocks, 0, FONT_NORMAL_BLACK, 0);
+                c->x_offset + 32, c->y_offset + 80, 15 * c->width_blocks, 0, FONT_NORMAL_BLACK, 0);
         } else {
             text_draw_multiline(translation_for(TR_BUILDING_LIGHTHOUSE_BONUS_DESC),
-                c->x_offset + 22, c->y_offset + 70, 15 * c->width_blocks, 0, FONT_NORMAL_BLACK, 0);
+                c->x_offset + 32, c->y_offset + 80, 15 * c->width_blocks, 0, FONT_NORMAL_BLACK, 0);
         }
 
         if (!sea_trade_policy.items[0].image_id) {
