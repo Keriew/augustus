@@ -3,6 +3,8 @@
 
 int scenario_building_allowed(int type);
 
+int scenario_building_image_alt_native_hut(void);
+
 int scenario_building_image_native_hut(void);
 
 int scenario_building_image_native_meeting(void);

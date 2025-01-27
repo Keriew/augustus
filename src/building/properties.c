@@ -91,7 +91,8 @@ augustus_building_properties_mapping augustus_building_properties[] = {
     {BUILDING_OVERGROWN_GARDENS, {1, 1, 0, 0, 0}, "Aesthetics", "Overgrown_Garden_01"},
     {BUILDING_FORT_AUXILIA_INFANTRY, {3,1,0,0,0}, "Military", 0},
     {BUILDING_FORT_ARCHERS, {3,1,0,0,0}, "Military", 0},
-    {BUILDING_ARMOURY, {2,0,0,0,0}, "Military", "Armoury_OFF_C"}
+    {BUILDING_ARMOURY, {2,0,0,0,0}, "Military", "Armoury_OFF_C"},
+    {BUILDING_NATIVE_HUT_ALT, {1,1,0,0,0}, "Terrain_Maps", "Native_Hut_Central_01"},
 };
 
 #define AUGUSTUS_BUILDINGS (sizeof(augustus_building_properties) / sizeof(augustus_building_properties_mapping))

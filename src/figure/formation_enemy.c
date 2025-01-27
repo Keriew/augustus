@@ -272,7 +272,7 @@ static int get_structures_on_native_land(int *dst_x, int *dst_y)
     int meeting_x, meeting_y;
     city_buildings_main_native_meeting_center(&meeting_x, &meeting_y);
 
-    building_type native_buildings[] = { BUILDING_NATIVE_MEETING, BUILDING_NATIVE_HUT };
+    building_type native_buildings[] = { BUILDING_NATIVE_MEETING, BUILDING_NATIVE_HUT, BUILDING_NATIVE_HUT_ALT };
     int min_distance = INFINITE;
 
     for (int i = 0; i < 2 && min_distance == INFINITE; i++) {
@@ -316,6 +316,7 @@ static void set_native_target_building(formation *m)
         switch (b->type) {
             case BUILDING_MISSION_POST:
             case BUILDING_NATIVE_HUT:
+            case BUILDING_NATIVE_HUT_ALT:
             case BUILDING_NATIVE_CROPS:
             case BUILDING_NATIVE_MEETING:
             case BUILDING_WAREHOUSE:

@@ -39,6 +39,7 @@ static building_type get_clone_type_from_building(building *b, building_type clo
             return BUILDING_NONE;
         case BUILDING_NATIVE_CROPS:
         case BUILDING_NATIVE_HUT:
+        case BUILDING_NATIVE_HUT_ALT:
         case BUILDING_NATIVE_MEETING:
             return BUILDING_NONE;
         case BUILDING_BURNING_RUIN:
