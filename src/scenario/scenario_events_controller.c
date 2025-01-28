@@ -235,10 +235,12 @@ static void actions_load_state(buffer *buf, int is_new_version)
         scenario_action_t action = { 0 };
         int original_id = scenario_action_type_load_state(buf, &action, &link_type, &link_id, is_new_version);
         load_link_action(&action, link_type, link_id);
-        unsigned int index = 1;
-        while (index) {
-            index = scenario_action_type_load_allowed_building(&action, original_id, index);
-            load_link_action(&action, link_type, link_id);
+        if (original_id) {
+            unsigned int index = 1;
+            while (index) {
+                index = scenario_action_type_load_allowed_building(&action, original_id, index);
+                load_link_action(&action, link_type, link_id);
+            }
         }
     }
 }
