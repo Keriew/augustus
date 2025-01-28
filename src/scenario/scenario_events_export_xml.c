@@ -138,6 +138,7 @@ static int export_parse_attribute(xml_data_attribute_t *attr, int target)
         case PARAMETER_TYPE_CLIMATE:
             return export_attribute_by_type(attr, attr->type, target);
         case PARAMETER_TYPE_BUILDING_COUNTING:
+        case PARAMETER_TYPE_ALLOWED_BUILDING:
             return export_attribute_by_type(attr, PARAMETER_TYPE_BUILDING, target);
         case PARAMETER_TYPE_FUTURE_CITY:
             return export_attribute_future_city(attr, target);

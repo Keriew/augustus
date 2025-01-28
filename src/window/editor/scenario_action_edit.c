@@ -13,6 +13,7 @@
 #include "input/input.h"
 #include "scenario/scenario_events_parameter_data.h"
 #include "scenario/action_types/action_handler.h"
+#include "window/editor/allowed_buildings.h"
 #include "window/editor/custom_variables.h"
 #include "window/editor/map.h"
 #include "window/editor/requests.h"
@@ -313,6 +314,29 @@ static void custom_variable_selection(void)
     window_editor_custom_variables_show(set_param_custom_variable);
 }
 
+static void set_param_allowed_building(int type)
+{
+    switch (data.parameter_being_edited) {
+        case 1:
+            data.action->parameter1 = type;
+            return;
+        case 2:
+            data.action->parameter2 = type;
+            return;
+        case 3:
+            data.action->parameter3 = type;
+            return;
+        case 4:
+            data.action->parameter4 = type;
+            return;
+        case 5:
+            data.action->parameter5 = type;
+            return;
+        default:
+            return;
+    }
+}
+
 static void change_parameter(xml_data_attribute_t *parameter, const generic_button *button)
 {
     set_parameter_being_edited(button->parameter1);
@@ -337,6 +361,9 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
         case PARAMETER_TYPE_GOD:
         case PARAMETER_TYPE_CLIMATE:
             window_editor_select_special_attribute_mapping_show(parameter->type, set_param_value, data.parameter_being_edited_current_value);
+            return;
+        case PARAMETER_TYPE_ALLOWED_BUILDING:
+            window_editor_allowed_buildings_select(set_param_allowed_building, data.parameter_being_edited_current_value);
             return;
         case PARAMETER_TYPE_REQUEST:
             window_editor_requests_show_with_callback(set_param_value);

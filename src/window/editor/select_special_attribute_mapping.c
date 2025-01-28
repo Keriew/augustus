@@ -73,6 +73,17 @@ static void populate_list(int offset)
     }
 }
 
+static const uint8_t *get_allowed_building_name(building_type type)
+{
+    if (type == BUILDING_HOUSE_VACANT_LOT) {
+        return lang_get_string(68, 20);
+    }
+    if (type == BUILDING_CLEAR_LAND) {
+        return lang_get_string(68, 21);
+    }
+    return lang_get_building_type_string(type);
+}
+
 static const uint8_t *get_display_string(special_attribute_mapping_t *entry)
 {
     switch (entry->type) {
@@ -80,6 +91,13 @@ static const uint8_t *get_display_string(special_attribute_mapping_t *entry)
         case PARAMETER_TYPE_BUILDING_COUNTING:
             if (entry->key == TR_PARAMETER_VALUE_DYNAMIC_RESOLVE) {
                 return lang_get_building_type_string(entry->value);
+            } else {
+                return translation_for(entry->key);
+            }
+            break;
+        case PARAMETER_TYPE_ALLOWED_BUILDING:
+            if (entry->key == TR_PARAMETER_VALUE_DYNAMIC_RESOLVE) {
+                return get_allowed_building_name(entry->value);
             } else {
                 return translation_for(entry->key);
             }

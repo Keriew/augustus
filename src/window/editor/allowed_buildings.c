@@ -51,6 +51,8 @@ static grid_box_type allowed_building_list = {
 static struct {
     menu_item items[BUILD_MENU_MAX + BUILDING_TYPE_MAX];
     unsigned int total_items;
+    void (*select_callback)(int);
+    building_type selected_building;
 } data;
 
 static unsigned int count_menu_items(build_menu_group menu)
@@ -125,8 +127,10 @@ static void populate_items(void)
     }
 }
 
-static void init(void)
+static void init(void (*on_select_callback)(int), int selected)
 {
+    data.select_callback = on_select_callback;
+    data.selected_building = selected;
     populate_items();
     grid_box_init(&allowed_building_list, data.total_items);
 }
@@ -146,16 +150,26 @@ static void draw_background(void)
     grid_box_request_refresh(&allowed_building_list);
 }
 
+static int should_be_red(building_type type)
+{
+    if (data.select_callback) {
+        return type == data.selected_building;
+    }
+    return !scenario_allowed_building(type);
+}
+
 static void draw_button(const uint8_t *name, building_type type, int x, int y, int width, int height, int is_focused)
 {
     button_border_draw(x, y, width, height, is_focused);
-    int allowed = scenario_allowed_building(type);
-    font_t font = allowed ? FONT_NORMAL_BLACK : FONT_NORMAL_PLAIN;
-    color_t color = allowed ? 0 : COLOR_FONT_RED;
-    const uint8_t *text = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_ALLOWED_BUILDINGS_NOT_ALLOWED - allowed);
+    int red_color = should_be_red(type);
+    font_t font = red_color ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK;
+    color_t color = red_color ? COLOR_FONT_RED : 0;
+    const uint8_t *text = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_ALLOWED_BUILDINGS_ALLOWED + red_color);
 
     text_draw(name, x + 8, y + 8, font, color);
-    text_draw_right_aligned(text, x, y + 8, width - 8, font, color);
+    if (!data.select_callback) {
+        text_draw_right_aligned(text, x, y + 8, width - 8, font, color);
+    }
 }
 
 static void draw_allowed_building(const grid_box_item *item)
@@ -202,7 +216,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         return;
     }
     if (input_go_back_requested(m, h)) {
-        window_editor_attributes_show();
+        window_go_back();
     }
 }
 
@@ -220,6 +234,11 @@ void toggle_building(const grid_box_item *item)
     if (!can_toggle_item(current_menu)) {
         return;
     }
+    if (data.select_callback) {
+        data.select_callback(current_menu->building);
+        window_go_back();
+        return;
+    }
     int allowed = scenario_allowed_building(current_menu->building);
     scenario_allowed_building_set(current_menu->building, allowed ^ 1);
     scenario_editor_set_as_unsaved();
@@ -228,7 +247,19 @@ void toggle_building(const grid_box_item *item)
 
 void window_editor_allowed_buildings_show(void)
 {
-    init();
+    init(0, 0);
+    window_type window = {
+        WINDOW_EDITOR_ALLOWED_BUILDINGS,
+        draw_background,
+        draw_foreground,
+        handle_input
+    };
+    window_show(&window);
+}
+
+void window_editor_allowed_buildings_select(void (*on_select_callback)(int), int selected)
+{
+    init(on_select_callback, selected);
     window_type window = {
         WINDOW_EDITOR_ALLOWED_BUILDINGS,
         draw_background,

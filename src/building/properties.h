@@ -13,6 +13,11 @@ typedef struct {
         const char *group;
         const char *id;
     } custom_asset;
+    struct {
+        const char *attr;
+        int key;
+        int cannot_count;
+    } event_data;
 } building_properties;
 
 void building_properties_init(void);
