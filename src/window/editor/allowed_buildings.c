@@ -53,7 +53,7 @@ static struct {
     unsigned int total_items;
 } data;
 
-static unsigned int count_menu_disallowable_items(build_menu_group menu)
+static unsigned int count_menu_items(build_menu_group menu)
 {
     unsigned int count = 0;
     unsigned int menu_items = building_menu_count_all_items(menu);
@@ -65,8 +65,8 @@ static unsigned int count_menu_disallowable_items(build_menu_group menu)
             if (submenu == menu) {
                 continue;
             }
-            count += count_menu_disallowable_items(submenu);
-        } else if (building_properties_for_type(type)->disallowable) {
+            count += count_menu_items(submenu);
+        } else {
             count++;
         }
     }
@@ -75,11 +75,20 @@ static unsigned int count_menu_disallowable_items(build_menu_group menu)
 
 static void populate_menu_items(build_menu_group menu)
 {
-    if (!count_menu_disallowable_items(menu)) {
+    unsigned int count = count_menu_items(menu);
+    if (!count) {
         return;
     }
     data.items[data.total_items].type = ITEM_TYPE_MENU;
     data.items[data.total_items].menu = menu;
+
+    // Top menu with single element - show the element directly
+    if (count == 1 && !data.items[data.total_items].parent) {
+        data.items[data.total_items].building = building_menu_type(menu, 0);
+        data.total_items++;
+        return;
+    }
+
     data.total_items++;
 
     unsigned int menu_items = building_menu_count_all_items(menu);
@@ -93,7 +102,7 @@ static void populate_menu_items(build_menu_group menu)
             data.items[data.total_items].parent = menu;
             data.items[data.total_items].building = type;
             populate_menu_items(submenu);
-        } else if (building_properties_for_type(type)->disallowable) {
+        } else {
             data.items[data.total_items].parent = menu;
             data.items[data.total_items].type = ITEM_TYPE_BUILDING;
             data.items[data.total_items].building = type;
@@ -137,6 +146,18 @@ static void draw_background(void)
     grid_box_request_refresh(&allowed_building_list);
 }
 
+static void draw_button(const uint8_t *name, building_type type, int x, int y, int width, int height, int is_focused)
+{
+    button_border_draw(x, y, width, height, is_focused);
+    int allowed = scenario_allowed_building(type);
+    font_t font = allowed ? FONT_NORMAL_BLACK : FONT_NORMAL_PLAIN;
+    color_t color = allowed ? 0 : COLOR_FONT_RED;
+    const uint8_t *text = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_ALLOWED_BUILDINGS_NOT_ALLOWED - allowed);
+
+    text_draw(name, x + 8, y + 8, font, color);
+    text_draw_right_aligned(text, x, y + 8, width - 8, font, color);
+}
+
 static void draw_allowed_building(const grid_box_item *item)
 {
     const menu_item *current_menu = &data.items[item->index];
@@ -147,27 +168,22 @@ static void draw_allowed_building(const grid_box_item *item)
             x_offset = 20;
             y_offset = -4;
         }
-        button_border_draw(item->x + x_offset, item->y + y_offset, item->width - x_offset, item->height, item->is_focused);
-        building_type type = current_menu->building;
-        const uint8_t *name = lang_get_building_type_string(type);
-        int allowed = scenario_allowed_building(type);
-        font_t font = allowed ? FONT_NORMAL_BLACK : FONT_NORMAL_PLAIN;
-        color_t color = allowed ? 0 : COLOR_FONT_RED;
-        const uint8_t *text = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_ALLOWED_BUILDINGS_NOT_ALLOWED - allowed);
-
-        text_draw(name, item->x + x_offset + 8, item->y + y_offset + 8, font, color);
-        text_draw_right_aligned(text, item->x, item->y + y_offset + 8, item->width - 8, font, color);
+        draw_button(lang_get_building_type_string(current_menu->building), current_menu->building,
+            item->x + x_offset, item->y + y_offset, item->width - x_offset, item->height, item->is_focused);
     } else if (current_menu->type == ITEM_TYPE_MENU) {
-        int width = 0;
-        int y_offset = 0;
         if (building_menu_is_submenu(current_menu->menu)) {
-            width = text_draw(string_from_ascii(" -"), item->x + 4, item->y + 8, FONT_NORMAL_BLACK, 0);
+            int width = text_draw(string_from_ascii(" -"), item->x + 4, item->y + 8, FONT_NORMAL_BLACK, 0);
             width += lang_text_draw(28, current_menu->building, item->x + 4 + width, item->y + 8, FONT_NORMAL_BLACK);
+            text_draw(string_from_ascii(":"), item->x + 4 + width - 6, item->y + 8, FONT_NORMAL_BLACK, 0);
         } else {
-            width = lang_text_draw(68, current_menu->menu + 20, item->x + 4, item->y + 12, FONT_NORMAL_BLACK);
-            y_offset = 4;
+            if (current_menu->building == BUILDING_NONE) {
+                int width = lang_text_draw(68, current_menu->menu + 20, item->x + 4, item->y + 12, FONT_NORMAL_BLACK);
+                text_draw(string_from_ascii(":"), item->x + 4 + width - 6, item->y + 12, FONT_NORMAL_BLACK, 0);
+            } else {
+                draw_button(lang_get_string(68, current_menu->menu + 20), current_menu->building,
+                    item->x, item->y, item->width, item->height, item->is_focused);
+            }
         }
-        text_draw(string_from_ascii(":"), item->x + 4 + width - 6, item->y + 8 + y_offset, FONT_NORMAL_BLACK, 0);
     }
 }
 
@@ -190,10 +206,18 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 }
 
+static int can_toggle_item(const menu_item *item)
+{
+    if (item->type == ITEM_TYPE_BUILDING) {
+        return 1;
+    }
+    return item->type == ITEM_TYPE_MENU && !item->parent && item->building != BUILDING_NONE;
+}
+
 void toggle_building(const grid_box_item *item)
 {
     const menu_item *current_menu = &data.items[item->index];
-    if (current_menu->type != ITEM_TYPE_BUILDING) {
+    if (!can_toggle_item(current_menu)) {
         return;
     }
     int allowed = scenario_allowed_building(current_menu->building);

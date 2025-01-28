@@ -145,13 +145,11 @@ static void enable_if_allowed(int *enabled, building_type menu_building_type, bu
     if (menu_building_type != type) {
         return;
     }
-    if (building_properties_for_type(type)->disallowable) {
-        *enabled = is_building_type_allowed(type);
-    } else {
+    if (type == BUILDING_MENU_SMALL_TEMPLES || type == BUILDING_MENU_LARGE_TEMPLES) {
         *enabled = 1;
-        if (type == BUILDING_MENU_SMALL_TEMPLES || type == BUILDING_MENU_LARGE_TEMPLES) {
-            enable_cycling_temples_if_allowed(type);
-        }
+        enable_cycling_temples_if_allowed(type);
+    } else {
+        *enabled = is_building_type_allowed(type);
     }
 }
 
