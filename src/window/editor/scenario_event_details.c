@@ -35,7 +35,7 @@
 #define DETAILS_Y_OFFSET 192
 #define DETAILS_ROW_HEIGHT 32
 #define MAX_VISIBLE_ROWS 10
-#define MAX_TEXT_LENGTH 75
+#define MAX_TEXT_LENGTH 120
 
 enum {
     REPEAT_MIN = 0,

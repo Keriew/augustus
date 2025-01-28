@@ -170,12 +170,7 @@ static void conditions_load_state_old_version(buffer *buf)
         buffer_skip(buf, 2); // Skip the link type
         int event_id = buffer_read_i32(buf);
         scenario_event_t *event = scenario_event_get(event_id);
-        scenario_condition_group_t *group;
-        if (event->condition_groups.size == 0) {
-            array_new_item(event->condition_groups, group);
-        } else {
-            group = array_item(event->condition_groups, 0);
-        }
+        scenario_condition_group_t *group = array_item(event->condition_groups, 0);
         scenario_condition_t *condition;
         array_new_item(group->conditions, condition);
         scenario_condition_load_state(buf, group, condition);
