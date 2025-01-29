@@ -172,6 +172,21 @@ static void remove_adjacent_types(building *b)
     b->next_of_type = 0;
 }
 
+void initialize_sentiment_cooldown(building *b) {
+    if (b->house_adv_sentiment.cooldown_initialized) {
+        return;
+    }
+
+    b->house_adv_sentiment.cooldown_initialized = 1;
+
+    if (b->type <= BUILDING_HOUSE_GRAND_INSULA) {
+        b->house_adv_sentiment.cooldown = ADVANCED_SENTIMENT_COOLDOWN_MAX_TICKS;
+    } else {
+        // Do not apply cooldown to villas
+        b->house_adv_sentiment.cooldown = 0;
+    }
+}
+
 building *building_create(building_type type, int x, int y)
 {
     building *b;
@@ -205,6 +220,7 @@ building *building_create(building_type type, int x, int y)
 
     // subtype
     if (building_is_house(type)) {
+        initialize_sentiment_cooldown(b);
         b->subtype.house_level = type - BUILDING_HOUSE_VACANT_LOT;
     }
 
@@ -268,7 +284,7 @@ static void building_delete(building *b)
 
 void building_clear_related_data(building *b)
 {
-    if (b->storage_id) {
+    if (building_is_storage_kind(b->type) && b->storage_id) {
         building_storage_delete(b->storage_id);
         b->storage_id = 0;
     }
@@ -422,6 +438,11 @@ int building_is_primary_product_producer(building_type type)
 int building_is_house(building_type type)
 {
     return type >= BUILDING_HOUSE_VACANT_LOT && type <= BUILDING_HOUSE_LUXURY_PALACE;
+}
+
+int building_is_storage_kind(building_type type)
+{
+    return type == BUILDING_WAREHOUSE || type == BUILDING_GRANARY;
 }
 
 // For Venus GT base bonus

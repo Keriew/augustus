@@ -25,6 +25,6 @@ void city_sentiment_reduce_crime_cooldown(void);
 int city_sentiment_get_blessing_festival_boost(void);
 void city_sentiment_decrement_blessing_boost(void);
 
-void city_sentiment_update(void);
+void city_sentiment_update(int update_sentiment_cooldown);
 
 #endif // CITY_SENTIMENT_H
