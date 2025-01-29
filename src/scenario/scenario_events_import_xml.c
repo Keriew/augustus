@@ -393,6 +393,7 @@ static int xml_import_special_parse_attribute(xml_data_attribute_t *attr, int *t
         case PARAMETER_TYPE_INVASION_TYPE:
         case PARAMETER_TYPE_BOOLEAN:
         case PARAMETER_TYPE_BUILDING:
+        case PARAMETER_TYPE_ALLOWED_BUILDING:
         case PARAMETER_TYPE_CHECK:
         case PARAMETER_TYPE_DIFFICULTY:
         case PARAMETER_TYPE_ENEMY_TYPE:

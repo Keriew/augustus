@@ -126,6 +126,7 @@ static int export_parse_attribute(xml_data_attribute_t *attr, int target)
         case PARAMETER_TYPE_INVASION_TYPE:
         case PARAMETER_TYPE_BOOLEAN:
         case PARAMETER_TYPE_BUILDING:
+        case PARAMETER_TYPE_ALLOWED_BUILDING:
         case PARAMETER_TYPE_CHECK:
         case PARAMETER_TYPE_DIFFICULTY:
         case PARAMETER_TYPE_ENEMY_TYPE:
@@ -138,7 +139,6 @@ static int export_parse_attribute(xml_data_attribute_t *attr, int target)
         case PARAMETER_TYPE_CLIMATE:
             return export_attribute_by_type(attr, attr->type, target);
         case PARAMETER_TYPE_BUILDING_COUNTING:
-        case PARAMETER_TYPE_ALLOWED_BUILDING:
             return export_attribute_by_type(attr, PARAMETER_TYPE_BUILDING, target);
         case PARAMETER_TYPE_FUTURE_CITY:
             return export_attribute_future_city(attr, target);
