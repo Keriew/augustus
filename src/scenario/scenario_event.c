@@ -98,7 +98,7 @@ void scenario_event_load_state(buffer *buf, scenario_event_t *event, int is_new_
     }
     // Add the condition group
     if (!is_new_version) {
-        array_next(event->condition_groups);
+        array_advance(event->condition_groups);
     }
     if (event->id != saved_id) {
         log_error("Loaded event id does not match what it was saved with. The game will likely crash. event->id: ",

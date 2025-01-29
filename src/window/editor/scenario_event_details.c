@@ -653,7 +653,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         return;
     }
     if (input_go_back_requested(m, h)) {
-        window_go_back();
+        button_ok(0);
     }
 }
 

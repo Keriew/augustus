@@ -21,6 +21,7 @@
 #include "scenario/criteria.h"
 #include "scenario/property.h"
 #include "scenario/scenario.h"
+#include "scenario/scenario_events_controller.h"
 #include "sound/channel.h"
 #include "sound/device.h"
 #include "sound/music.h"
@@ -416,6 +417,7 @@ static void button_start_mission(int param1, int param2)
     if (data.back_action != BUTTON_GO_BACK_NONE) {
         city_mission_reset_save_start();
     }
+    scenario_events_process_all();
 }
 
 static void show(void)
