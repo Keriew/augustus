@@ -1,10 +1,10 @@
-#include "scenario_event.h"
+#include "event.h"
 
 #include "core/encoding.h"
 #include "core/log.h"
 #include "core/random.h"
-#include "scenario/action_types/action_handler.h"
-#include "scenario/condition_types/condition_handler.h"
+#include "scenario/event/action_handler.h"
+#include "scenario/event/condition_handler.h"
 
 #define SCENARIO_ACTIONS_ARRAY_SIZE_STEP 20
 #define SCENARIO_CONDITIONS_ARRAY_SIZE_STEP 20

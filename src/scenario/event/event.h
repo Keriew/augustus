@@ -2,7 +2,7 @@
 #define SCENARIO_EVENT_H
 
 #include "core/buffer.h"
-#include "scenario/scenario_event_data.h"
+#include "scenario/event/data.h"
 
 void scenario_event_new(scenario_event_t *event, unsigned int position);
 int scenario_event_is_active(const scenario_event_t *event);

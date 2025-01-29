@@ -55,6 +55,7 @@
 #include "scenario/earthquake.h"
 #include "scenario/emperor_change.h"
 #include "scenario/empire.h"
+#include "scenario/event/controller.h"
 #include "scenario/gladiator_revolt.h"
 #include "scenario/invasion.h"
 #include "scenario/map.h"
@@ -62,7 +63,6 @@
 #include "scenario/price_change.h"
 #include "scenario/request.h"
 #include "scenario/scenario.h"
-#include "scenario/scenario_events_controller.h"
 #include "sound/city.h"
 #include "widget/minimap.h"
 

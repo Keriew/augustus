@@ -1,4 +1,4 @@
-#include "scenario_events_import_xml.h"
+#include "import_xml.h"
 
 #include "core/encoding.h"
 #include "core/file.h"
@@ -10,10 +10,10 @@
 #include "empire/type.h"
 #include "scenario/custom_messages.h"
 #include "scenario/custom_variable.h"
-#include "scenario/scenario_event.h"
-#include "scenario/scenario_event_data.h"
-#include "scenario/scenario_events_controller.h"
-#include "scenario/scenario_events_parameter_data.h"
+#include "scenario/event/controller.h"
+#include "scenario/event/data.h"
+#include "scenario/event/event.h"
+#include "scenario/event/parameter_data.h"
 #include "window/plain_message_dialog.h"
 
 #include <math.h>

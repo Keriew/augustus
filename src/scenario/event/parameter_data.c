@@ -1,4 +1,4 @@
-#include "scenario_events_parameter_data.h"
+#include "parameter_data.h"
 
 #include "building/menu.h"
 #include "building/properties.h"

@@ -1,4 +1,4 @@
-#include "scenario_events_export_xml.h"
+#include "export_xml.h"
 
 #include "core/buffer.h"
 #include "core/io.h"
@@ -8,8 +8,8 @@
 #include "empire/city.h"
 #include "scenario/custom_messages.h"
 #include "scenario/custom_variable.h"
-#include "scenario/scenario_events_controller.h"
-#include "scenario/scenario_events_parameter_data.h"
+#include "scenario/event/controller.h"
+#include "scenario/event/parameter_data.h"
 #include "window/plain_message_dialog.h"
 
 #include <stdio.h>

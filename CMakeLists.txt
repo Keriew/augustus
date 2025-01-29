@@ -532,16 +532,16 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/random_event.c
     ${PROJECT_SOURCE_DIR}/src/scenario/request.c
     ${PROJECT_SOURCE_DIR}/src/scenario/scenario.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/scenario_event.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/scenario_events_import_xml.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/scenario_events_export_xml.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/scenario_events_controller.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/scenario_events_parameter_data.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/action_types/action_handler.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/action_types/action_types.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/comparison_helper.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/condition_handler.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/condition_types.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/event.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/import_xml.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/export_xml.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/controller.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/parameter_data.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/action_handler.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/action_types.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/condition_comparison_helper.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/condition_handler.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/condition_types.c
 )
 set(GRAPHICS_FILES
     ${PROJECT_SOURCE_DIR}/src/graphics/arrow_button.c

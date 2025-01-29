@@ -1,11 +1,11 @@
-#include "scenario_events_controller.h"
+#include "controller.h"
 
 #include "core/log.h"
 #include "game/save_version.h"
-#include "scenario/action_types/action_handler.h"
-#include "scenario/condition_types/condition_handler.h"
+#include "scenario/event/action_handler.h"
+#include "scenario/event/condition_handler.h"
+#include "scenario/event/event.h"
 #include "scenario/scenario.h"
-#include "scenario/scenario_event.h"
 
 #define SCENARIO_EVENTS_SIZE_STEP 50
 

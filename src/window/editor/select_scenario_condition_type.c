@@ -11,7 +11,7 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
-#include "scenario/scenario_events_parameter_data.h"
+#include "scenario/event/parameter_data.h"
 #include "window/editor/map.h"
 #include "window/numeric_input.h"
 

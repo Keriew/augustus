@@ -2,7 +2,7 @@
 #define SCENARIO_EVENTS_CONTOLLER_H
 
 #include "core/buffer.h"
-#include "scenario/scenario_event_data.h"
+#include "scenario/event/data.h"
 
 typedef enum {
     SCENARIO_EVENTS_VERSION = 1,

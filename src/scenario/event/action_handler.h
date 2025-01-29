@@ -2,7 +2,7 @@
 #define ACTION_HANDLER_H
 
 #include "core/buffer.h"
-#include "scenario/scenario_event_data.h"
+#include "scenario/event/data.h"
 
 void scenario_action_type_init(scenario_action_t *action);
 int scenario_action_type_execute(scenario_action_t *action);

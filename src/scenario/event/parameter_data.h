@@ -5,7 +5,7 @@
 #include "city/message.h"
 #include "game/settings.h"
 #include "scenario/data.h"
-#include "scenario/scenario_event_data.h"
+#include "scenario/event/data.h"
 #include "translation/translation.h"
 
 typedef enum {

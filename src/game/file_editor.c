@@ -43,10 +43,10 @@
 #include "scenario/distant_battle.h"
 #include "scenario/editor.h"
 #include "scenario/empire.h"
+#include "scenario/event/controller.h"
 #include "scenario/invasion.h"
 #include "scenario/map.h"
 #include "scenario/property.h"
-#include "scenario/scenario_events_controller.h"
 #include "sound/city.h"
 #include "sound/music.h"
 
