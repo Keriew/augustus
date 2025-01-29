@@ -150,25 +150,18 @@ static void draw_background(void)
     grid_box_request_refresh(&allowed_building_list);
 }
 
-static int should_be_red(building_type type)
-{
-    if (data.select_callback) {
-        return type == data.selected_building;
-    }
-    return !scenario_allowed_building(type);
-}
-
 static void draw_button(const uint8_t *name, building_type type, int x, int y, int width, int height, int is_focused)
 {
     button_border_draw(x, y, width, height, is_focused);
-    int red_color = should_be_red(type);
-    font_t font = red_color ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK;
-    color_t color = red_color ? COLOR_FONT_RED : 0;
-    const uint8_t *text = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_ALLOWED_BUILDINGS_ALLOWED + red_color);
-
+    int allowed = scenario_allowed_building(type);
+    font_t font = allowed || data.select_callback ? FONT_NORMAL_BLACK : FONT_NORMAL_PLAIN;
+    color_t color = allowed || data.select_callback ? 0 : COLOR_FONT_RED;
     text_draw(name, x + 8, y + 8, font, color);
     if (!data.select_callback) {
+        const uint8_t *text = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_ALLOWED_BUILDINGS_NOT_ALLOWED - allowed);
         text_draw_right_aligned(text, x, y + 8, width - 8, font, color);
+    } else if (type == data.selected_building) {
+        lang_text_draw_right_aligned(CUSTOM_TRANSLATION, TR_SELECTED, x, y + 8, width - 8, FONT_NORMAL_BLACK);
     }
 }
 

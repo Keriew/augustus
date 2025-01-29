@@ -1579,6 +1579,7 @@ typedef enum {
     TR_EDITOR_ALLOWED_BUILDINGS_NOT_ALLOWED,
     TR_SELECT_NONE,
     TR_SELECT_ALL,
+    TR_SELECTED,
     TRANSLATION_MAX_KEY
 } translation_key;
 
