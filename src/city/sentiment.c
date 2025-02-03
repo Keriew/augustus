@@ -186,6 +186,9 @@ static int get_games_bonus(void)
 
 static int get_wage_sentiment_modifier(void)
 {
+    if (city_data.labor.wages == city_data.labor.wages_rome) {
+        return 0;
+    }
     const int wage_interval = WAGE_SENTIMENT_CHANGE_INTERVAL;
     int use_advanced_sentiment_contribution = config_get(CONFIG_GP_CH_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION);
     int wage_differential = city_data.labor.wages - city_data.labor.wages_rome;
