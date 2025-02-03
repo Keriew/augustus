@@ -49,6 +49,10 @@
 // by high unemployment at very early game
 #define ADVANCED_SENTIMENT_CHANGE_APPLY_AFTER_POPULATION 1000
 
+// The effect from wages setting is divided by 8dn intervals. Each next interval
+// reduces or increases modifier for every denarii set above or below Rome pays.
+#define WAGE_SENTIMENT_CHANGE_INTERVAL 8
+
 int city_sentiment(void)
 {
     return city_data.sentiment.value;
@@ -182,7 +186,7 @@ static int get_games_bonus(void)
 
 static int get_wage_sentiment_modifier(void)
 {
-    const int wage_interval = 8;
+    const int wage_interval = WAGE_SENTIMENT_CHANGE_INTERVAL;
     int use_advanced_sentiment_contribution = config_get(CONFIG_GP_CH_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION);
     int wage_differential = city_data.labor.wages - city_data.labor.wages_rome;
     if (use_advanced_sentiment_contribution && wage_differential > wage_interval) {
