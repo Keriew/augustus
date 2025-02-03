@@ -208,7 +208,7 @@ static int get_wage_sentiment_modifier(void)
             int diff = calc_bound(remaining, 1, wage_interval);
             wage_differential += diff * modifier;
             remaining -= diff;
-            modifier >>= 1; // reduces sentiment bonus modifier by 50%
+            modifier /= 2;
         }
         wage_differential /= 100;
     } else if (use_advanced_sentiment_contribution && wage_differential < -wage_interval) {
