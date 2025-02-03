@@ -7,6 +7,7 @@
 #include "city/resource.h"
 #include "core/lang.h"
 #include "core/string.h"
+#include "core/xml_parser.h"
 #include "empire/city.h"
 #include "figure/formation.h"
 #include "game/resource.h"
@@ -692,7 +693,7 @@ special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mappin
     int array_size = scenario_events_parameter_data_get_mappings_size(type);
     for (int i = 0; i < array_size; i++) {
         special_attribute_mapping_t *current = scenario_events_parameter_data_get_attribute_mapping(type, i);
-        if (strcmp(value, current->text) == 0) {
+        if (xml_parser_compare_multiple(current->text, value)) {
             return current;
         }
     }
@@ -789,7 +790,7 @@ static uint8_t *string_from_year(uint8_t *dst, int year, int *maxlength)
             cursor++;
             cursor = string_copy(lang_get_string(20, 1), cursor, *maxlength - 10);
         } else {
-            string_copy(lang_get_string(20, 1), cursor, *maxlength - 10);
+            cursor = string_copy(lang_get_string(20, 1), cursor, *maxlength - 10);
             *cursor = ' ';
             cursor++;
             cursor += string_from_int(cursor, year, 0);
