@@ -167,11 +167,10 @@ void building_state_save_to_buffer(buffer *buf, const building *b)
     buffer_write_u8(buf, b->storage_id);
     buffer_write_i8(buf, b->sentiment.house_happiness); // which union field we use does not matter
 
-    assert (sizeof(b->house_adv_sentiment) == sizeof(uint8_t));
     if (building_is_house(b->type)) {
-        buffer_write_raw(buf, &b->house_adv_sentiment, sizeof(b->house_adv_sentiment));
+        buffer_write_u8(buf, b->cooldown_advanced_sentiment);
     } else {
-        buffer_skip(buf, sizeof(b->house_adv_sentiment));
+        buffer_skip(buf, sizeof(b->cooldown_advanced_sentiment));
     }
 
     buffer_write_u8(buf, b->show_on_problem_overlay);
@@ -505,9 +504,9 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     b->sentiment.house_happiness = buffer_read_i8(buf); // which union field we use does not matter
     if (save_version >= SAVE_GAME_LAST_ADVANCED_SENTIMENT) {
         if (building_is_house(b->type)) {
-            buffer_read_raw(buf, &b->house_adv_sentiment, sizeof(b->house_adv_sentiment));
+            b->cooldown_advanced_sentiment = buffer_read_u8(buf);
         } else {
-            buffer_skip(buf, sizeof(b->house_adv_sentiment));
+            buffer_skip(buf, sizeof(b->cooldown_advanced_sentiment));
         }
     }
     b->show_on_problem_overlay = buffer_read_u8(buf);
@@ -708,9 +707,5 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     // to prevent reading bogus data for the next building
     if (building_buf_size > BUILDING_STATE_CURRENT_BUFFER_SIZE) {
         buffer_skip(buf, building_buf_size - BUILDING_STATE_CURRENT_BUFFER_SIZE);
-    }
-
-    if (building_is_house(b->type)) {
-        initialize_sentiment_cooldown(b);
     }
 }

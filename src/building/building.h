@@ -8,12 +8,8 @@
 #include "translation/translation.h"
 
 // Ticks of cooldown before new advanced sentiment logic will be applied
-// for the house building. Each tick is equal to 3 months. That value
-// shouldn't ever exceed 7, since it takes 3 bits of data.
-// To extend or reduce the cooldown duration edit the
-// ADVANCED_SENTIMENT_COOLDOWN_TICK_MONTHS preprocessor definition.
-#define ADVANCED_SENTIMENT_COOLDOWN_MAX_TICKS   7
-#define ADVANCED_SENTIMENT_COOLDOWN_TICK_MONTHS 3
+// for the house building. Each tick is equal to 8 days (half of month).
+#define ADVANCED_SENTIMENT_COOLDOWN_TICKS 36
 
 typedef enum order_condition_type {
     ORDER_CONDITION_NEVER = 0,
@@ -21,12 +17,6 @@ typedef enum order_condition_type {
     ORDER_CONDITION_SOURCE_HAS_MORE_THAN,
     ORDER_CONDITION_DESTINATION_HAS_LESS_THAN
 } order_condition_type;
-
-typedef struct advanced_sentiment {
-    uint8_t cooldown_initialized: 1;
-    uint8_t cooldown: 3;
-    uint8_t reserved: 4;
-} advanced_sentiment;
 
 typedef struct order {
     resource_type resource_type;
@@ -194,11 +184,7 @@ typedef struct building {
         signed char house_happiness;
         signed char native_anger;
     } sentiment;
-    // New advanced sentiment contribution logic requires cooldown for newly built houses.
-    // The new happiness gain/drop logic will not be applied until cooldown expires.
-    // Cooldown ticks get decreased every Jan/Apr/Jul/Oct, which gives 18-20 months in total.
-    // That should be enough to build new housing block and evolve it.
-    struct advanced_sentiment house_adv_sentiment;
+    uint8_t cooldown_advanced_sentiment;
     unsigned char show_on_problem_overlay;
     unsigned char house_tavern_wine_access;
     unsigned char house_tavern_food_access;
@@ -238,8 +224,6 @@ void building_change_type(building *b, building_type type);
 building *building_main(building *b);
 
 building *building_next(building *b);
-
-void initialize_sentiment_cooldown(building *b);
 
 building *building_create(building_type type, int x, int y);
 

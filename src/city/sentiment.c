@@ -37,6 +37,13 @@
 #define IMPERIAL_GAMES_SENTIMENT_BONUS 15
 #define POP_STEP_FOR_BASE_AVERAGE_HOUSE_LEVEL 625
 
+#define min(a,b)             \
+({                           \
+    __typeof__ (a) _a = (a); \
+    __typeof__ (b) _b = (b); \
+    _a < _b ? _a : _b;       \
+})
+
 // New advanced sentiment change calculation applies only after configured months
 // of gameplay has passed. This is required to prevent very fast sentiment drop 
 // by high unemployment at very early game
@@ -341,36 +348,34 @@ const int advanced_sentiment_drop_modifier[5] = {
     50  // Very Hard
 };
 
-// Checks if house building still has a cooldown before apply advanced sentiment change logic
-int check_house_advanced_sentiment_change_cooldown(building *b, int update_sentiment_cooldown) {
-    if (!building_is_house(b->type) || !b->house_adv_sentiment.cooldown_initialized) {
+// Updates house building sentiment cooldown by delta value.
+// Returns 1 if advanced sentiment logic should be applied to house and 0 if not
+int update_house_advanced_sentiment_cooldown(building *b, int sentiment_cooldown_delta) {
+    if (!building_is_house(b->type)) {
         return 0;
     }
 
-    if (b->type > BUILDING_HOUSE_GRAND_INSULA) {
+    if (b->type >= BUILDING_HOUSE_SMALL_VILLA) {
         // Reset cooldown for villas
-        b->house_adv_sentiment.cooldown = 0;
-    } else if (b->type == BUILDING_HOUSE_VACANT_LOT && b->house_adv_sentiment.cooldown == ADVANCED_SENTIMENT_COOLDOWN_MAX_TICKS) {
+        b->cooldown_advanced_sentiment = 0;
+    } else if (b->type == BUILDING_HOUSE_VACANT_LOT) {
         // Wait for new citizens to arrive
+        return 0;
+    }
+
+    if (sentiment_cooldown_delta > 0 && b->cooldown_advanced_sentiment > 0) {
+        b->cooldown_advanced_sentiment -= min(sentiment_cooldown_delta, b->cooldown_advanced_sentiment);
+    }
+
+    if (!b->cooldown_advanced_sentiment) {
+        // Cooldown has ended
         return 1;
     }
 
-    if (update_sentiment_cooldown && 
-        b->house_adv_sentiment.cooldown &&
-        game_time_month() % ADVANCED_SENTIMENT_COOLDOWN_TICK_MONTHS == 0) {
-        // Decrease tick once configured amount of game months has passed.
-        b->house_adv_sentiment.cooldown--;
-    }
-
-    if (!b->house_adv_sentiment.cooldown) {
-        // Cooldown has ended
-        return 0;
-    }
-
-    return 1;
+    return 0;
 }
 
-void city_sentiment_update(int update_sentiment_cooldown)
+void city_sentiment_update(int sentiment_cooldown_delta)
 {
     city_population_check_consistency();
 
@@ -448,13 +453,14 @@ void city_sentiment_update(int update_sentiment_cooldown)
             // Change sentiment gradually to the new value
             int sentiment_delta = sentiment - b->sentiment.house_happiness;
             if (sentiment_delta != 0 &&
-                apply_advanced_sentiment_change &&
-                !check_house_advanced_sentiment_change_cooldown(b, update_sentiment_cooldown)) {
+                update_house_advanced_sentiment_cooldown(b, sentiment_cooldown_delta) &&
+                apply_advanced_sentiment_change
+            ) {
                 // With new advanced logic we introduce faster sentiment change when the target value is
                 // far away from current happiness level. The final change value depends on difficulty settings.
                 // Example #1:
                 // Current house happiness level is 82, the new sentiment value is 10 and the delta is -72.
-                // The final happiness change for VeryHard mode will be -28 (40% of -72).
+                // The final happiness change for VeryHard mode will be -36 (50% of -72).
                 // Example #2:
                 // Current house happiness level is 20, the new sentiment value is 77 and the delta is 57.
                 // The final happiness change for Hard mode will be 9 (17% of 57).
