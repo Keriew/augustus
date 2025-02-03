@@ -279,7 +279,7 @@ int building_get_elevation_desirability_bonus(int grid_offset);
 /**
  * Checks if building can store goods
  */
-int building_is_storage_kind(building_type type);
+int building_uses_storage(building_type type);
 
 int building_is_house(building_type type);
 

@@ -221,7 +221,7 @@ static void setup_buttons_for_selected_depot(void)
         // Only include inactive storages that have a valid storage_id and weren't already counted in first pass
         int max_storable = building_storage_resource_max_storable(store_building, data.target_resource_id);
         if ((max_storable == 0 || store_building->state == BUILDING_STATE_MOTHBALLED) &&
-            store_building->storage_id > 0 && store_building->state != BUILDING_STATE_RUBBLE) {
+            building_uses_storage(store_building->type) && store_building->storage_id > 0 && store_building->state != BUILDING_STATE_RUBBLE) {
             row_count++;
             if (row_count <= scrollbar.scroll_position || drawn_rows >= MAX_VISIBLE_ROWS) {
                 continue;
@@ -272,7 +272,7 @@ static void calculate_available_storages(int building_id)
         }
         if (active && max_storable > 0) {
             data.available_storages++;
-        } else if ((!active || max_storable == 0) && store->storage_id > 0) {
+        } else if ((!active || max_storable == 0) && building_uses_storage(store->type) && store->storage_id > 0) {
             if (data.advanced_mode) {
                 data.secondary_storages++;  // advanced orders: allow inactive/non-used storages
             }
@@ -749,7 +749,7 @@ void window_building_draw_depot_select_source_destination(building_info_context 
         // Only include inactive storages that have a valid storage_id and weren't already counted in first pass
         int max_storable = building_storage_resource_max_storable(store_building, data.target_resource_id);
         if ((max_storable == 0 || store_building->state == BUILDING_STATE_MOTHBALLED)
-            && store_building->storage_id > 0 && store_building->state != BUILDING_STATE_RUBBLE) {
+            && building_uses_storage(store_building->type) && store_building->storage_id > 0 && store_building->state != BUILDING_STATE_RUBBLE) {
             row_count++;
             if (row_count <= scrollbar.scroll_position) {
                 continue;
