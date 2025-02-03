@@ -44,10 +44,10 @@
     _a < _b ? _a : _b;       \
 })
 
-// New advanced sentiment change calculation applies only after configured months
-// of gameplay has passed. This is required to prevent very fast sentiment drop 
+// New advanced sentiment change calculation applies only after city reaches
+// population of 1000. This is required to prevent very fast sentiment drop 
 // by high unemployment at very early game
-#define ADVANCED_SENTIMENT_CHANGE_APPLY_AFTER_MONTHS 30
+#define ADVANCED_SENTIMENT_CHANGE_APPLY_AFTER_POPULATION 1000
 
 int city_sentiment(void)
 {
@@ -395,7 +395,7 @@ void city_sentiment_update(int sentiment_cooldown_delta)
     int total_houses = 0;
     int house_level_sentiment_multiplier = 3;
     int apply_advanced_sentiment_change = config_get(CONFIG_GP_CH_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION) &&
-        game_time_total_months() >= ADVANCED_SENTIMENT_CHANGE_APPLY_AFTER_MONTHS;
+        city_data.population.population >= ADVANCED_SENTIMENT_CHANGE_APPLY_AFTER_POPULATION;
 
     for (building_type type = BUILDING_HOUSE_SMALL_TENT; type <= BUILDING_HOUSE_LUXURY_PALACE; type++) {
         if (type == BUILDING_HOUSE_SMALL_SHACK) {
