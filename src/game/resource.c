@@ -6,7 +6,7 @@
 #include "core/image.h"
 #include "core/image_group_editor.h"
 #include "game/save_version.h"
-#include "scenario/building.h"
+#include "scenario/allowed_building.h"
 #include "scenario/property.h"
 #include "translation/translation.h"
 
@@ -260,10 +260,9 @@ const resource_data *resource_get_data(resource_type resource)
     return &resource_info[resource];
 }
 
-void resource_set_mapping(int version)
+void resource_set_mapping(resource_version_t version)
 {
     mapping.version = version;
-    mapping.joined_meat_and_fish = version < RESOURCE_SEPARATE_FISH_AND_MEAT_VERSION;
     switch (version) {
         case RESOURCE_ORIGINAL_VERSION:
             mapping.resources = resource_mappings[0];
@@ -314,13 +313,13 @@ void resource_set_mapping(int version)
 resource_type resource_map_legacy_inventory(int id)
 {
     resource_type resource = mapping.inventory ? mapping.inventory[id] : id;
-    if (mapping.joined_meat_and_fish && resource == RESOURCE_MEAT && scenario_building_allowed(BUILDING_WHARF)) {
+    if (mapping.joined_meat_and_fish && resource == RESOURCE_MEAT && scenario_allowed_building(BUILDING_WHARF)) {
         return RESOURCE_FISH;
     }
     return resource;
 }
 
-int resource_mapping_get_version(void)
+resource_version_t resource_mapping_get_version(void)
 {
     return mapping.version;
 }
@@ -337,7 +336,7 @@ int resource_production_per_month(resource_type resource)
 resource_type resource_remap(int id)
 {
     resource_type resource = mapping.resources ? mapping.resources[id] : id;
-    if (mapping.joined_meat_and_fish && resource == RESOURCE_MEAT && scenario_building_allowed(BUILDING_WHARF)) {
+    if (mapping.joined_meat_and_fish && resource == RESOURCE_MEAT && scenario_allowed_building(BUILDING_WHARF)) {
         return RESOURCE_FISH;
     }
     return resource;

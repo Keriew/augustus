@@ -21,6 +21,7 @@
 #include "empire/object.h"
 #include "empire/trade_route.h"
 #include "figure/figure.h"
+#include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/image_button.h"
@@ -37,80 +38,81 @@
 
 #include <math.h>
 
-static void go_to_orders(int param1, int param2);
-static void toggle_resource_state(int index, int param2);
-static void toggle_partial_resource_state(int index, int param2);
-static void granary_orders(int index, int param2);
-static void dock_toggle_route(int route_id, int param2);
-static void warehouse_orders(int index, int param2);
-static void market_orders(int index, int param2);
-static void storage_toggle_permissions(int index, int param2);
-static void button_stockpiling(int param1, int param2);
+static void go_to_orders(const generic_button *button);
+static void toggle_resource_state(const generic_button *button);
+static void toggle_partial_resource_state(const generic_button *button);
+static void granary_orders(const generic_button *button);
+static void dock_toggle_route(const generic_button *button);
+static void warehouse_orders(const generic_button *button);
+static void market_orders(const generic_button *button);
+static void storage_toggle_permissions(const generic_button *button);
+static void button_stockpiling(const generic_button *button);
+static void toggle_mantain(int param1, int param2);
 static void init_dock_permission_buttons(void);
 static void draw_dock_permission_buttons(int x_offset, int y_offset, int dock_id);
 static void on_scroll(void);
 
-static void button_caravanserai_policy(int param1, int param2);
+static void button_caravanserai_policy(const generic_button *button);
 
 static generic_button go_to_orders_button[] = {
-    {0, 0, 304, 20, go_to_orders, button_none, 0, 0}
+    {0, 0, 304, 20, go_to_orders}
 };
 
 static generic_button orders_resource_buttons[] = {
-    {0, 0, 210, 22, toggle_resource_state, button_none, 1, 0},
-    {0, 22, 210, 22, toggle_resource_state, button_none, 2, 0},
-    {0, 44, 210, 22, toggle_resource_state, button_none, 3, 0},
-    {0, 66, 210, 22, toggle_resource_state, button_none, 4, 0},
-    {0, 88, 210, 22, toggle_resource_state, button_none, 5, 0},
-    {0, 110, 210, 22, toggle_resource_state, button_none, 6, 0},
-    {0, 132, 210, 22, toggle_resource_state, button_none, 7, 0},
-    {0, 154, 210, 22, toggle_resource_state, button_none, 8, 0},
-    {0, 176, 210, 22, toggle_resource_state, button_none, 9, 0},
-    {0, 198, 210, 22, toggle_resource_state, button_none, 10, 0},
-    {0, 220, 210, 22, toggle_resource_state, button_none, 11, 0},
-    {0, 242, 210, 22, toggle_resource_state, button_none, 12, 0},
-    {0, 264, 210, 22, toggle_resource_state, button_none, 13, 0},
-    {0, 286, 210, 22, toggle_resource_state, button_none, 14, 0},
-    {0, 308, 210, 22, toggle_resource_state, button_none, 15, 0},
-    {0, 330, 210, 22, toggle_resource_state, button_none, 16, 0},
+    {0, 0, 210, 22, toggle_resource_state, 0, 1},
+    {0, 22, 210, 22, toggle_resource_state, 0, 2},
+    {0, 44, 210, 22, toggle_resource_state, 0, 3},
+    {0, 66, 210, 22, toggle_resource_state, 0, 4},
+    {0, 88, 210, 22, toggle_resource_state, 0, 5},
+    {0, 110, 210, 22, toggle_resource_state, 0, 6},
+    {0, 132, 210, 22, toggle_resource_state, 0, 7},
+    {0, 154, 210, 22, toggle_resource_state, 0, 8},
+    {0, 176, 210, 22, toggle_resource_state, 0, 9},
+    {0, 198, 210, 22, toggle_resource_state, 0, 10},
+    {0, 220, 210, 22, toggle_resource_state, 0, 11},
+    {0, 242, 210, 22, toggle_resource_state, 0, 12},
+    {0, 264, 210, 22, toggle_resource_state, 0, 13},
+    {0, 286, 210, 22, toggle_resource_state, 0, 14},
+    {0, 308, 210, 22, toggle_resource_state, 0, 15},
+    {0, 330, 210, 22, toggle_resource_state, 0, 16},
 };
 
 static generic_button orders_partial_resource_buttons[] = {
-    {210, 0, 28, 22, toggle_partial_resource_state, button_none, 1, 0},
-    {210, 22, 28, 22, toggle_partial_resource_state, button_none, 2, 0},
-    {210, 44, 28, 22, toggle_partial_resource_state, button_none, 3, 0},
-    {210, 66, 28, 22, toggle_partial_resource_state, button_none, 4, 0},
-    {210, 88, 28, 22, toggle_partial_resource_state, button_none, 5, 0},
-    {210, 110, 28, 22, toggle_partial_resource_state, button_none, 6, 0},
-    {210, 132, 28, 22, toggle_partial_resource_state, button_none, 7, 0},
-    {210, 154, 28, 22, toggle_partial_resource_state, button_none, 8, 0},
-    {210, 176, 28, 22, toggle_partial_resource_state, button_none, 9, 0},
-    {210, 198, 28, 22, toggle_partial_resource_state, button_none, 10, 0},
-    {210, 220, 28, 22, toggle_partial_resource_state, button_none, 11, 0},
-    {210, 242, 28, 22, toggle_partial_resource_state, button_none, 12, 0},
-    {210, 264, 28, 22, toggle_partial_resource_state, button_none, 13, 0},
-    {210, 286, 28, 22, toggle_partial_resource_state, button_none, 14, 0},
-    {210, 308, 28, 22, toggle_partial_resource_state, button_none, 15, 0},
-    {210, 330, 28, 22, toggle_partial_resource_state, button_none, 16, 0},
+    {210, 0, 28, 22, toggle_partial_resource_state, 0, 1},
+    {210, 22, 28, 22, toggle_partial_resource_state, 0, 2},
+    {210, 44, 28, 22, toggle_partial_resource_state, 0, 3},
+    {210, 66, 28, 22, toggle_partial_resource_state, 0, 4},
+    {210, 88, 28, 22, toggle_partial_resource_state, 0, 5},
+    {210, 110, 28, 22, toggle_partial_resource_state, 0, 6},
+    {210, 132, 28, 22, toggle_partial_resource_state, 0, 7},
+    {210, 154, 28, 22, toggle_partial_resource_state, 0, 8},
+    {210, 176, 28, 22, toggle_partial_resource_state, 0, 9},
+    {210, 198, 28, 22, toggle_partial_resource_state, 0, 10},
+    {210, 220, 28, 22, toggle_partial_resource_state, 0, 11},
+    {210, 242, 28, 22, toggle_partial_resource_state, 0, 12},
+    {210, 264, 28, 22, toggle_partial_resource_state, 0, 13},
+    {210, 286, 28, 22, toggle_partial_resource_state, 0, 14},
+    {210, 308, 28, 22, toggle_partial_resource_state, 0, 15},
+    {210, 330, 28, 22, toggle_partial_resource_state, 0, 16},
 };
 
 static generic_button warehouse_distribution_permissions_buttons[] = {
-     {0, 0, 52, 52, storage_toggle_permissions, button_none, BUILDING_STORAGE_PERMISSION_MARKET, 0},
-     {62, 0, 52, 52, storage_toggle_permissions, button_none, BUILDING_STORAGE_PERMISSION_TRADERS, 0},
-     {124, 0, 52, 52, storage_toggle_permissions, button_none, BUILDING_STORAGE_PERMISSION_DOCK, 0},
-     {186, 0, 52, 52, storage_toggle_permissions, button_none, BUILDING_STORAGE_PERMISSION_BARKEEP, 0},
-     {248, 0, 52, 52, storage_toggle_permissions, button_none, BUILDING_STORAGE_PERMISSION_WORKCAMP, 0},
-     {310, 0, 52, 52, storage_toggle_permissions, button_none, BUILDING_STORAGE_PERMISSION_ARMOURY, 0},
-     {372, 0, 52, 52, storage_toggle_permissions, button_none, BUILDING_STORAGE_PERMISSION_LIGHTHOUSE, 0},
+     {0, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_MARKET},
+     {62, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_TRADERS},
+     {124, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_DOCK},
+     {186, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_BARKEEP},
+     {248, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_WORKCAMP},
+     {310, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_ARMOURY},
+     {372, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_LIGHTHOUSE},
 };
 
 static generic_button granary_distribution_permissions_buttons[] = {
-     {0, 0, 52, 52, storage_toggle_permissions, button_none, BUILDING_STORAGE_PERMISSION_MARKET, 0},
-     {76, 0, 52, 52, storage_toggle_permissions, button_none, BUILDING_STORAGE_PERMISSION_TRADERS, 0},
-     {152, 0, 52, 52, storage_toggle_permissions, button_none, BUILDING_STORAGE_PERMISSION_DOCK, 0},
-     {228, 0, 52, 52, storage_toggle_permissions, button_none, BUILDING_STORAGE_PERMISSION_BARKEEP, 0},
-     {304, 0, 52, 52, storage_toggle_permissions, button_none, BUILDING_STORAGE_PERMISSION_QUARTERMASTER, 0},
-     {380, 0, 52, 52, storage_toggle_permissions, button_none, BUILDING_STORAGE_PERMISSION_CARAVANSERAI, 0},
+     {0, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_MARKET},
+     {76, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_TRADERS},
+     {152, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_DOCK},
+     {228, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_BARKEEP},
+     {304, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_QUARTERMASTER},
+     {380, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_CARAVANSERAI},
 };
 
 static generic_button dock_distribution_permissions_buttons[20];
@@ -120,26 +122,26 @@ static unsigned int dock_distribution_permissions_buttons_count;
 static scrollbar_type scrollbar = { .on_scroll_callback = on_scroll };
 
 static generic_button granary_order_buttons[] = {
-    {0, 0, 304, 20, granary_orders, button_none, 0, 0},
-    {314, 0, 20, 20, granary_orders, button_none, 1, 0},
+    {0, 0, 304, 20, granary_orders},
+    {314, 0, 20, 20, granary_orders, 0, 1},
 };
 
 static generic_button market_order_buttons[] = {
-    {314, 0, 20, 20, market_orders, button_none, 0, 0},
+    {314, 0, 20, 20, market_orders},
 };
 
 static generic_button warehouse_order_buttons[] = {
-    {0, 0, 304, 20, warehouse_orders, button_none, 0, 0},
-    {314, 0, 20, 20, warehouse_orders, button_none, 1, 0},
+    {0, 0, 304, 20, warehouse_orders},
+    {314, 0, 20, 20, warehouse_orders, 0, 1},
 };
 
 static generic_button go_to_caravanserai_action_button[] = {
-    {0, 0, 400, 100, button_caravanserai_policy, button_none, 0, 0}
+    {0, 0, 400, 100, button_caravanserai_policy}
 };
 
 static image_button image_buttons_maintain[] = {
-    {0, 0, 30, 19, IB_NORMAL, 0, 0, storage_toggle_permissions, button_none, BUILDING_STORAGE_PERMISSION_WORKER, 0, 1, "UI", "Maintain_1"},
-    {0, 0, 30, 19, IB_NORMAL, 0, 0, storage_toggle_permissions, button_none, BUILDING_STORAGE_PERMISSION_WORKER, 0, 1, "UI", "Stop_Maintain_1"},
+    {0, 0, 30, 19, IB_NORMAL, 0, 0, toggle_mantain, button_none, 0, 0, 1, "UI", "Maintain_1"},
+    {0, 0, 30, 19, IB_NORMAL, 0, 0, toggle_mantain, button_none, 0, 0, 1, "UI", "Stop_Maintain_1"},
 };
 
 static struct {
@@ -162,7 +164,7 @@ static struct {
 };
 
 static generic_button primary_product_producer_button_stockpiling[] = {
-    {0, 0, 24, 24, button_stockpiling, button_none, 0, 0}
+    {0, 0, 24, 24, button_stockpiling, 0, 0, 0}
 };
 
 static struct {
@@ -221,7 +223,7 @@ static void draw_accept_none_button(int x, int y, int focused, affect_all_button
 {
     button_border_draw(x, y, 20, 20, focused ? 1 : 0);
     if (state == ACCEPT_ALL) {
-        image_draw(assets_get_image_id("UI", "Allowed_Walker_Check"), x + 4, y + 4, COLOR_MASK_NONE, SCALE_NONE);
+        image_draw(assets_lookup_image_id(ASSET_UI_SELECTION_CHECKMARK), x + 4, y + 4, COLOR_MASK_NONE, SCALE_NONE);
     } else {
         image_draw(assets_get_image_id("UI", "Denied_Walker_Checkmark"), x + 4, y + 4, COLOR_MASK_NONE, SCALE_NONE);
     }
@@ -319,7 +321,7 @@ static void init_dock_permission_buttons(void)
         if (is_sea_trade_route(route_id) && empire_city_is_trade_route_open(route_id)) {
             city_id = empire_city_get_for_trade_route(route_id);
             if (city_id != -1) {
-                generic_button button = { 0, 0, 210, 22, dock_toggle_route, button_none, route_id, city_id };
+                generic_button button = { 0, 0, 210, 22, dock_toggle_route, 0, route_id, city_id };
                 dock_distribution_permissions_buttons[dock_distribution_permissions_buttons_count] = button;
                 dock_distribution_permissions_buttons_count++;
             }
@@ -1329,13 +1331,14 @@ static void on_scroll(void)
     window_invalidate();
 }
 
-static void go_to_orders(int param1, int param2)
+static void go_to_orders(const generic_button *button)
 {
     window_building_info_show_storage_orders();
 }
 
-static void toggle_resource_state(int index, int param2)
+static void toggle_resource_state(const generic_button *button)
 {
+    int index = button->parameter1;
     building *b = building_get(data.building_id);
     index += scrollbar.scroll_position - 1;
     resource_type resource;
@@ -1353,8 +1356,9 @@ static void toggle_resource_state(int index, int param2)
     window_invalidate();
 }
 
-static void market_orders(int index, int param2)
+static void market_orders(const generic_button *button)
 {
+    int index = button->parameter1;
     building *b = building_get(data.building_id);
     if (index == 0) {
         if (affect_all_button_distribution_state() == ACCEPT_ALL) {
@@ -1366,15 +1370,24 @@ static void market_orders(int index, int param2)
     window_invalidate();
 }
 
-static void storage_toggle_permissions(int index, int param2)
+static void storage_toggle_permissions(const generic_button *button)
 {
+    int index = button->parameter1;
     building *b = building_get(data.building_id);
     building_storage_set_permission(index, b);
     window_invalidate();
 }
 
-static void toggle_partial_resource_state(int index, int param2)
+static void toggle_mantain(int param1, int param2)
 {
+    building *b = building_get(data.building_id);
+    building_storage_set_permission(BUILDING_STORAGE_PERMISSION_WORKER, b);
+    window_invalidate();
+}
+
+static void toggle_partial_resource_state(const generic_button *button)
+{
+    int index = button->parameter1;
     building *b = building_get(data.building_id);
     int resource;
     if (b->type == BUILDING_WAREHOUSE) {
@@ -1386,7 +1399,7 @@ static void toggle_partial_resource_state(int index, int param2)
     window_invalidate();
 }
 
-static void button_stockpiling(int param1, int param2)
+static void button_stockpiling(const generic_button *button)
 {
     building *b = building_get(data.building_id);
     if (building_is_primary_product_producer(b->type)) {
@@ -1395,15 +1408,17 @@ static void button_stockpiling(int param1, int param2)
     window_invalidate();
 }
 
-static void dock_toggle_route(int route_id, int param2)
+static void dock_toggle_route(const generic_button *button)
 {
+    int route_id = button->parameter1;
     int can_trade = building_dock_can_trade_with_route(route_id, data.building_id);
     building_dock_set_can_trade_with_route(route_id, data.building_id, !can_trade);
     window_invalidate();
 }
 
-static void granary_orders(int index, int param2)
+static void granary_orders(const generic_button *button)
 {
+    int index = button->parameter1;
     int storage_id = building_get(data.building_id)->storage_id;
     if (index == 0) {
         building_storage_toggle_empty_all(storage_id);
@@ -1417,8 +1432,9 @@ static void granary_orders(int index, int param2)
     window_invalidate();
 }
 
-static void warehouse_orders(int index, int param2)
+static void warehouse_orders(const generic_button *button)
 {
+    int index = button->parameter1;
     if (index == 0) {
         int storage_id = building_get(data.building_id)->storage_id;
         building_storage_toggle_empty_all(storage_id);
@@ -1453,7 +1469,7 @@ void window_building_draw_mess_hall(building_info_context *c)
         c->x_offset, c->y_offset + 12, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK, 0);
     if (b->num_workers <= 0 && food_types <= 0) {
         window_building_draw_description_at(c, 64, CUSTOM_TRANSLATION, TR_BUILDING_MESS_HALL_NO_EMPLOYEES);
-    } else if (b->num_workers > 0 && food_types <= 0) {    
+    } else if (b->num_workers > 0 && food_types <= 0) {
         window_building_draw_description_at(c, 64, CUSTOM_TRANSLATION, TR_BUILDING_MESS_HALL_NO_FOOD);
     } else {
         draw_food_stocks(c, b, 64);
@@ -1535,7 +1551,7 @@ static void apply_policy(int selected_policy)
     city_finance_process_sundry(TRADE_POLICY_COST);
 }
 
-static void button_caravanserai_policy(int param1, int param2)
+static void button_caravanserai_policy(const generic_button *button)
 {
     if (building_monument_working(BUILDING_CARAVANSERAI)) {
         window_option_popup_show(land_trade_policy.title, land_trade_policy.subtitle,
@@ -1560,18 +1576,22 @@ void window_building_draw_caravanserai(building_info_context *c)
 
         if (b->num_workers <= 0 && food_types <= 0) {
             window_building_draw_description_at(c, 44, CUSTOM_TRANSLATION, TR_BUILDING_CARAVANSERAI_NO_EMPLOYEES);
-        } else if (b->num_workers > 0 && food_types <= 0) {    
+        } else if (b->num_workers > 0 && food_types <= 0) {
             window_building_draw_description_at(c, 44, CUSTOM_TRANSLATION, TR_BUILDING_CARAVANSERAI_NO_FOOD);
         } else {
             draw_food_stocks(c, b, 44);
         }
-        if (building_monument_has_labour_problems(b)) {
+
+        if (!c->has_road_access) {
+            window_building_draw_description_at(c, 100, 69, 25);
+        } else if (building_monument_has_labour_problems(b)) {
             text_draw_multiline(translation_for(TR_BUILDING_CARAVANSERAI_NEEDS_WORKERS),
-                c->x_offset + 22, c->y_offset + 80 + y_offset, 15 * c->width_blocks, 0, FONT_NORMAL_BLACK, 0);
+                c->x_offset + 32, c->y_offset + 80 + y_offset, 15 * c->width_blocks, 0, FONT_NORMAL_BLACK, 0);
         } else {
-            text_draw_multiline(translation_for(TR_BUILDING_CARAVANSERAI_DESC), c->x_offset + 32,
-                c->y_offset + 80 + y_offset, BLOCK_SIZE * (c->width_blocks - 4), 0, FONT_NORMAL_BLACK, 0);
+            text_draw_multiline(translation_for(TR_BUILDING_CARAVANSERAI_DESC),
+                c->x_offset + 32, c->y_offset + 80 + y_offset, BLOCK_SIZE * (c->width_blocks - 4), 0, FONT_NORMAL_BLACK, 0);
         }
+
         if (!land_trade_policy.items[0].image_id) {
             int base_policy_image = assets_get_image_id("UI",
                 land_trade_policy.base_image_name);
