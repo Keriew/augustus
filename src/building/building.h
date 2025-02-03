@@ -240,7 +240,7 @@ void building_update_desirability(void);
 /**
  * Checks if building can store goods
  */
-int building_is_storage_kind(building_type type);
+int building_uses_storage(building_type type);
 
 int building_is_house(building_type type);
 

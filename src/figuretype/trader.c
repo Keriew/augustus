@@ -128,7 +128,7 @@ int figure_trade_caravan_can_buy(figure *trader, int building_id, int city_id)
 int figure_trade_caravan_can_sell(figure *trader, int building_id, int city_id)
 {
     building *b = building_get(building_id);
-    if (!building_is_storage_kind(b->type)) {
+    if (!building_uses_storage(b->type)) {
         return 0;
     }
     if (b->has_plague) {
