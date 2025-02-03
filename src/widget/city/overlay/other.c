@@ -122,7 +122,7 @@ static int show_building_logistics(const building *b)
 static int show_building_storages(const building *b)
 {
     b = building_main((building *) b);
-    return (b->storage_id > 0 && building_storage_get(b->storage_id))
+    return (building_uses_storage(b->type) && b->storage_id > 0 && building_storage_get(b->storage_id))
         || b->type == BUILDING_DEPOT || b->type == BUILDING_DOCK;
 }
 
