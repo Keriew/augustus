@@ -1115,7 +1115,7 @@ void window_building_draw_arena(building_info_context *c)
     c->help_id = 73;
     building *b = building_get(c->building_id);
 
-    window_building_play_sound(c, ASSETS_DIRECTORY "/Sounds/Arena.wav");
+    window_building_play_sound(c, "wavs/colloseum.wav");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     inner_panel_draw(c->x_offset + 16, c->y_offset + 168, c->width_blocks - 2, 7);
     window_building_draw_employment(c, 170);
