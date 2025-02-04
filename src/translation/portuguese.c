@@ -1093,7 +1093,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_EVENT_DELETED, "Eventos apagados"},
     {TR_EDITOR_SCENARIO_EVENT_EXECUTION_COUNT, "Número de repetições: "},
     {TR_EDITOR_ID, "ID: "},
-    {TR_EDITOR_SCENARIO_EVENT_MONTHS_UNTIL_ACTIVE, "Meses até a ativação: "},
     {TR_EDITOR_SCENARIO_EVENT_STATE_ACTIVE, "Ativo"},
     {TR_EDITOR_SCENARIO_EVENT_STATE_DISABLED, "Desativado"},
     {TR_EDITOR_SCENARIO_EVENT_STATE_PAUSED, "Interrompido"},

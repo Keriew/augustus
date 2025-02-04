@@ -1,9 +1,10 @@
 #include "controller.h"
 
+#include "building/type.h"
 #include "core/log.h"
 #include "game/save_version.h"
 #include "scenario/event/action_handler.h"
-#include "scenario/event/condition_handler.h"
+#include "scenario/event/conditions/handler.h"
 #include "scenario/event/event.h"
 #include "scenario/scenario.h"
 
@@ -11,12 +12,17 @@
 
 static array(scenario_event_t) scenario_events;
 
+static scenario_event_context_t scenario_events_context;
+
 void scenario_events_init(void)
 {
     scenario_event_t *current;
     array_foreach(scenario_events, current) {
         scenario_event_init(current);
     }
+
+    scenario_events_context.cause_of_context = EVENT_TRIGGER_UNDEFINED;
+    scenario_events_context.related_building_type = BUILDING_NONE;
 }
 
 void scenario_events_clear(void)
@@ -36,7 +42,7 @@ scenario_event_t *scenario_event_get(int event_id)
     return array_item(scenario_events, event_id);
 }
 
-scenario_event_t *scenario_event_create(int repeat_min, int repeat_max, int max_repeats)
+scenario_event_t *scenario_event_create(int repeat_min, int repeat_max, int max_repeats, int trigger_type)
 {
     if (repeat_min < 0) {
         log_error("Event minimum repeat is less than 0.", 0, 0);
@@ -60,9 +66,10 @@ scenario_event_t *scenario_event_create(int repeat_min, int repeat_max, int max_
         return 0;
     }
     event->state = EVENT_STATE_ACTIVE;
-    event->repeat_months_min = repeat_min;
-    event->repeat_months_max = repeat_max;
+    event->repeat_triggers_min = repeat_min;
+    event->repeat_triggers_max = repeat_max;
     event->max_number_of_repeats = max_repeats;
+    event->trigger = trigger_type;
 
     return event;
 }
@@ -89,7 +96,7 @@ static void info_save_state(buffer *buf)
 {
     uint32_t array_size = scenario_events.size;
     uint32_t struct_size = (6 * sizeof(int32_t)) + (3 * sizeof(int16_t)) + EVENT_NAME_LENGTH * 2 * sizeof(char);
-    buffer_init_dynamic_array(buf, array_size, struct_size);
+    buffer_init_dynamic_array(buf, SCENARIO_EVENTS_VERSION, array_size, struct_size);
 
     scenario_event_t *current;
     array_foreach(scenario_events, current) {
@@ -132,7 +139,7 @@ static void actions_save_state(buffer *buf)
     }
 
     int struct_size = (2 * sizeof(int16_t)) + (6 * sizeof(int32_t));
-    buffer_init_dynamic_array(buf, array_size, struct_size);
+    buffer_init_dynamic_array(buf, SCENARIO_EVENTS_VERSION, array_size, struct_size);
 
     for (int i = 0; i < scenario_events.size; i++) {
         current_event = array_item(scenario_events, i);
@@ -152,29 +159,18 @@ void scenario_events_save_state(buffer *buf_events, buffer *buf_conditions,  buf
     actions_save_state(buf_actions);
 }
 
-static void info_load_state(buffer *buf, int is_new_version)
+static int info_load_state(buffer *buf)
 {
-    unsigned int array_size = buffer_load_dynamic_array(buf);
+    int version;
+    uint32_t element_size;
+    unsigned int array_size = buffer_load_dynamic_array_all_headers(buf, &version, &element_size);
 
     for (unsigned int i = 0; i < array_size; i++) {
-        scenario_event_t *event = scenario_event_create(0, 0, 0);
-        scenario_event_load_state(buf, event, is_new_version);
+        scenario_event_t *event = scenario_event_create(0, 0, 0, EVENT_TRIGGER_MONTH_START);
+        scenario_event_load_state(buf, event, version, SCENARIO_EVENTS_VERSION);
     }
-}
 
-static void conditions_load_state_old_version(buffer *buf)
-{
-    unsigned int total_conditions = buffer_load_dynamic_array(buf);
-
-    for (unsigned int i = 0; i < total_conditions; i++) {
-        buffer_skip(buf, 2); // Skip the link type
-        int event_id = buffer_read_i32(buf);
-        scenario_event_t *event = scenario_event_get(event_id);
-        scenario_condition_group_t *group = array_item(event->condition_groups, 0);
-        scenario_condition_t *condition;
-        array_new_item(group->conditions, condition);
-        scenario_condition_load_state(buf, group, condition);
-    }
+    return version;
 }
 
 static void load_link_condition_group(scenario_condition_group_t *condition_group, int link_type, int32_t link_id)
@@ -192,8 +188,28 @@ static void load_link_condition_group(scenario_condition_group_t *condition_grou
     }
 }
 
-static void conditions_load_state(buffer *buf)
+static void conditions_load_state_pre_groups(buffer *buf)
 {
+    unsigned int total_conditions = buffer_load_dynamic_array(buf);
+
+    for (unsigned int i = 0; i < total_conditions; i++) {
+        buffer_skip(buf, 2); // Skip the link type. Conditions on requests, invasions and victory not yet implemented.
+        int event_id = buffer_read_i32(buf);
+        scenario_event_t *event = scenario_event_get(event_id);
+        scenario_condition_group_t *group = array_item(event->condition_groups, 0);
+        scenario_condition_t *condition;
+        array_new_item(group->conditions, condition);
+        scenario_condition_load_state(buf, group, condition);
+    }
+}
+
+static void conditions_load_state(buffer *buf, int version)
+{
+    if (version < SCENARIO_EVENTS_CONDITION_GROUPS) {
+        conditions_load_state_pre_groups(buf);
+        return;
+    }
+
     buffer_load_dynamic(buf);
 
     int link_type = 0;
@@ -220,7 +236,7 @@ static void load_link_action(scenario_action_t *action, int link_type, int32_t l
     }
 }
 
-static void actions_load_state(buffer *buf, int is_new_version)
+static void actions_load_state(buffer *buf, int version)
 {
     unsigned int array_size = buffer_load_dynamic_array(buf);
 
@@ -228,9 +244,11 @@ static void actions_load_state(buffer *buf, int is_new_version)
     int32_t link_id = 0;
     for (unsigned int i = 0; i < array_size; i++) {
         scenario_action_t action = { 0 };
-        int original_id = scenario_action_type_load_state(buf, &action, &link_type, &link_id, is_new_version);
+        int original_id = scenario_action_type_load_state(buf, &action, &link_type, &link_id, version);
         load_link_action(&action, link_type, link_id);
+        
         if (original_id) {
+            // Expand the building category into individual actions for each building type
             unsigned int index = 1;
             while (index) {
                 index = scenario_action_type_load_allowed_building(&action, original_id, index);
@@ -240,16 +258,22 @@ static void actions_load_state(buffer *buf, int is_new_version)
     }
 }
 
-void scenario_events_load_state(buffer *buf_events, buffer *buf_conditions, buffer *buf_actions, int is_new_version)
+static void scenario_events_progress_paused(event_trigger type_to_progress, int count)
+{
+    scenario_event_t *current;
+    array_foreach(scenario_events, current) {
+        if (current->trigger == type_to_progress) {
+            scenario_event_decrease_pause_count(current, count);
+        }
+    }
+}
+
+void scenario_events_load_state(buffer *buf_events, buffer *buf_conditions, buffer *buf_actions)
 {
     scenario_events_clear();
-    info_load_state(buf_events, is_new_version);
-    if (is_new_version) {
-        conditions_load_state(buf_conditions);
-    } else {
-        conditions_load_state_old_version(buf_conditions);
-    }
-    actions_load_state(buf_actions, is_new_version);
+    int version = info_load_state(buf_events);
+    conditions_load_state(buf_conditions, version);
+    actions_load_state(buf_actions, version);
 
     scenario_event_t *current;
     array_foreach(scenario_events, current) {
@@ -259,12 +283,27 @@ void scenario_events_load_state(buffer *buf_events, buffer *buf_conditions, buff
     }
 }
 
-void scenario_events_process_all(void)
+void scenario_events_set_context(event_trigger cause, building_type b_type)
+{
+    scenario_events_context.cause_of_context = cause;
+    scenario_events_context.related_building_type = b_type;
+}
+
+void scenario_events_process_by_trigger_type(event_trigger type_to_process)
 {
     scenario_event_t *current;
     array_foreach(scenario_events, current) {
-        scenario_event_conditional_execute(current);
+        if (current->trigger == type_to_process) {
+            scenario_event_conditional_execute(current);
+        }
     }
+}
+
+void scenario_events_full_process(event_trigger cause, int progress_count, building_type b_type)
+{
+    scenario_events_set_context(cause, b_type);
+    scenario_events_progress_paused(cause, progress_count);
+    scenario_events_process_by_trigger_type(cause);
 }
 
 scenario_event_t *scenario_events_get_using_custom_variable(int custom_variable_id)
@@ -278,10 +317,7 @@ scenario_event_t *scenario_events_get_using_custom_variable(int custom_variable_
     return 0;
 }
 
-void scenario_events_progress_paused(int months_passed)
+scenario_event_context_t *scenario_events_get_context(void)
 {
-    scenario_event_t *current;
-    array_foreach(scenario_events, current) {
-        scenario_event_decrease_pause_time(current, months_passed);
-    }
+    return &scenario_events_context;
 }

@@ -126,7 +126,7 @@ int scenario_demand_change_count_total(void)
 
 void scenario_demand_change_save_state(buffer *buf)
 {
-    buffer_init_dynamic_array(buf, demand_changes.size, DEMAND_CHANGES_STRUCT_SIZE_CURRENT);
+    buffer_init_dynamic_array(buf, DEMAND_CHANGE_CURRENT_VERSION, demand_changes.size, DEMAND_CHANGES_STRUCT_SIZE_CURRENT);
 
     const demand_change_t *demand_change;
     array_foreach(demand_changes, demand_change) {
@@ -140,6 +140,7 @@ void scenario_demand_change_save_state(buffer *buf)
 
 void scenario_demand_change_load_state(buffer *buf)
 {
+    // Initial version (as its own buffer), so version in buffer is not used, since no backwards compatibility is needed
     unsigned int size = buffer_load_dynamic_array(buf);
 
     if (!array_init(demand_changes, DEMAND_CHANGES_ARRAY_SIZE_STEP, new_demand_change, demand_change_in_use) ||
