@@ -7,6 +7,10 @@
 #include "game/resource.h"
 #include "translation/translation.h"
 
+// Ticks of cooldown before new advanced sentiment logic will be applied
+// for the house building. Each tick is equal to 8 days (half of month).
+#define ADVANCED_SENTIMENT_COOLDOWN_TICKS 36
+
 typedef enum order_condition_type {
     ORDER_CONDITION_NEVER = 0,
     ORDER_CONDITION_ALWAYS,
@@ -180,6 +184,7 @@ typedef struct building {
         signed char house_happiness;
         signed char native_anger;
     } sentiment;
+    uint8_t cooldown_advanced_sentiment;
     unsigned char show_on_problem_overlay;
     unsigned char house_tavern_wine_access;
     unsigned char house_tavern_food_access;
@@ -231,6 +236,11 @@ void building_trim(void);
 void building_update_state(void);
 
 void building_update_desirability(void);
+
+/**
+ * Checks if building can store goods
+ */
+int building_uses_storage(building_type type);
 
 int building_is_house(building_type type);
 
