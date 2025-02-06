@@ -17,11 +17,26 @@
 #define CONSTRUCTION_SITE_CHANNEL 64
 
 enum {
-    SOUND_CHANNEL_CITY_HOUSE_SLUM = 30,
-    SOUND_CHANNEL_CITY_HOUSE_POOR = 34,
-    SOUND_CHANNEL_CITY_HOUSE_MEDIUM = 38,
-    SOUND_CHANNEL_CITY_HOUSE_GOOD = 42,
-    SOUND_CHANNEL_CITY_HOUSE_POSH = 46,
+    SOUND_CHANNEL_CITY_HOUSE_SLUM1 = 30,
+    SOUND_CHANNEL_CITY_HOUSE_SLUM2 = 31,
+    SOUND_CHANNEL_CITY_HOUSE_SLUM3 = 32,
+    SOUND_CHANNEL_CITY_HOUSE_SLUM4 = 33,
+    SOUND_CHANNEL_CITY_HOUSE_POOR1 = 34,
+    SOUND_CHANNEL_CITY_HOUSE_POOR2 = 35,
+    SOUND_CHANNEL_CITY_HOUSE_POOR3 = 36,
+    SOUND_CHANNEL_CITY_HOUSE_POOR4 = 37,
+    SOUND_CHANNEL_CITY_HOUSE_MEDIUM1 = 38,
+    SOUND_CHANNEL_CITY_HOUSE_MEDIUM2 = 39,
+    SOUND_CHANNEL_CITY_HOUSE_MEDIUM3 = 40,
+    SOUND_CHANNEL_CITY_HOUSE_MEDIUM4 = 41,
+    SOUND_CHANNEL_CITY_HOUSE_GOOD1 = 42,
+    SOUND_CHANNEL_CITY_HOUSE_GOOD2 = 43,
+    SOUND_CHANNEL_CITY_HOUSE_GOOD3 = 44,
+    SOUND_CHANNEL_CITY_HOUSE_GOOD4 = 45,
+    SOUND_CHANNEL_CITY_HOUSE_POSH1 = 46,
+    SOUND_CHANNEL_CITY_HOUSE_POSH2 = 47,
+    SOUND_CHANNEL_CITY_HOUSE_POSH3 = 48,
+    SOUND_CHANNEL_CITY_HOUSE_POSH4 = 49,
     SOUND_CHANNEL_CITY_AMPHITHEATER = 50,
     SOUND_CHANNEL_CITY_THEATER = 51,
     SOUND_CHANNEL_CITY_HIPPODROME = 52,
@@ -94,7 +109,10 @@ enum {
     SOUND_CHANNEL_CITY_LIGHTHOUSE = 136,
     SOUND_CHANNEL_CITY_DEPOT = 137,
     SOUND_CHANNEL_CITY_CONCRETE_MAKER = 138,
-    SOUND_CHANNEL_CITY_CONSTRUCTION_SITE = 139,
+    SOUND_CHANNEL_CITY_NATIVE_HUT = 139,
+    SOUND_CHANNEL_CITY_TERRAIN01 = 140,
+    SOUND_CHANNEL_CITY_TERRAIN02 = 141,
+    SOUND_CHANNEL_CITY_CONSTRUCTION_SITE = 142,
 };
 
 typedef struct {
@@ -111,30 +129,34 @@ typedef struct {
 } city_channel;
 
 static city_channel channels[MAX_CHANNELS];
-static int ambient_channels[] = { 61, 74, 75, 62};    // turn on "empty land" and river sound
-static int ambient_channels_number = 4;
+static int ambient_channels[] = { 61, 74, 75, 95, 96 }; // "empty land" "terrain"
+static int ambient_channels_number = 5;
 
 static const int BUILDING_TYPE_TO_CHANNEL_ID[] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //0-9
-    1, 1, 1, 1, 1, 1, 2, 2, 2, 2, //10-19
-    3, 3, 3, 3, 4, 4, 4, 4, 5, 5, //20-29
+    1, 79, 80, 81, 2, 82, 83, 84, 3, 85, //10-19     (SLUM) S_TENT 10[1], L_TENT 11[79], S_SHACK 12[80], L_SHACK 13[81],
+                                         //          (POOR) S_HOVEL 14[2], L_HOVEL 15[82], S_CASA 16[83], L_CASA 17[84]
+                                         //          (MEDIUM) S_INSULA 18[3], M_INSULA 19[85],
+    86, 87, 4, 88, 89, 90, 5, 91, 92, 93, //20-29    (MEDIUM) L_INSULA 20[86], G_INSULA 21[87]
+                                          //         (GOOD) S_VILLA 22[4], M_VILLA 23[88], L_VILLA 24[89], G_VILLA 25[90],
+                                          //         (POSH) SMALL_PALACE 26[5], MED_PALACE 27[91], LARG_PALACE 28[92], LUX_PALACE 29[93]
     6, 7, 8, 9, 10, 11, 12, 13, 0, 14, //30-39
     0, 0, 0, 0, 0, 0, 15, 16, 17, 18, //40-49
     0, 19, 20, 21, 0, 22, 0, 23, 24, 24, //50-59
     25, 26, 27, 28, 29, 25, 26, 27, 28, 29, //60-69
     30, 31, 32, 0, 33, 34, 35, 36, 36, 36, //70-79
-    63, 37, 0, 0, 38, 38, 39, 39, 0, 0, // 80-89
-    40, 0, 0, 0, 43, 0, 0, 0, 44, 45, //90-99
+    63, 37, 0, 0, 38, 38, 39, 39, 94, 94, // 80-89    NATIVE_HUT 88[94], NATIVE_MEETING 89[94]
+    40, 0, 0, 0, 43, 0, 0, 0, 44, 45, //90-99         NATIVE_CROPS 93[-]
     46, 47, 48, 49, 50, 51, 52, 53, 54, 55, //100-109
-    56, 57, 58, 59, 60, 0, 70, 25, 26, 27, //110-119    WORKCAMP = 116[70]
+    56, 57, 58, 59, 60, 0, 70, 25, 26, 27, //110-119  WORKCAMP 116[70]
     28, 29, 0, 0, 0, 0, 0, 0, 0, 0, //120-129
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //130-139
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //140-149
-    0, 0, 44, 37, 68, 69, 0, 0, 66, 0, //150-159        MESS_HALL = 154[68], LIGHTHOUSE = 155[69], TAVERN = 158[66]
-    9, 0, 0, 0, 0, 0, 0, 0, 0, 0, //160-169
-    44, 44, 44, 71, 0, 0, 67, 0, 0, 0, //170-179        WATCHTOWER = 173[71], CARAVANSERAI = 176[67]
-    0, 0, 0, 0, 53, 72, 73, 55, 52, 78, //180-189       CITY_MINT = 185[72], DEPOT = 186[73], CONCRETE_MAKER = 189[78]
-    77, 0, 0, 0, 0, 0, 0, 0, 0, 0, //190-199            BRICKWORKS = 190[77]
+    0, 0, 44, 37, 68, 69, 0, 0, 66, 0, //150-159      MESS_HALL 154[68], LIGHTHOUSE 155[69], TAVERN 158[66]
+    9, 0, 0, 0, 0, 0, 0, 0, 0, 0, //160-169          ARENA 160[9]
+    44, 44, 44, 71, 0, 0, 67, 0, 0, 0, //170-179      WATCHTOWER 173[71], CARAVANSERAI 176[67]
+    0, 0, 0, 0, 53, 72, 73, 55, 52, 78, //180-189     CITY_MINT 185[72], DEPOT 186[73], CONCRETE_MAKER 189[78]
+    77, 0, 0, 0, 0, 0, 0, 0, 0, 0, //190-199          BRICKWORKS 190[77]
     0, 0, 0, 65, 0, 0, 0, 0, 0, 0, //200-209
 };
 
@@ -147,16 +169,16 @@ void sound_city_init(void)
     for (int i = 0; i < MAX_CHANNELS; i++) {
         channels[i].last_played_time = last_update_time;
     }
-    for (int i = 1; i < 80; i++) {
+    for (int i = 1; i < 100; i++) {
         channels[i].in_use = 1;
         channels[i].views_threshold = 200;
         channels[i].delay_millis = 30000;
     }
-    channels[1].channel = SOUND_CHANNEL_CITY_HOUSE_SLUM;
-    channels[2].channel = SOUND_CHANNEL_CITY_HOUSE_POOR;
-    channels[3].channel = SOUND_CHANNEL_CITY_HOUSE_MEDIUM;
-    channels[4].channel = SOUND_CHANNEL_CITY_HOUSE_GOOD;
-    channels[5].channel = SOUND_CHANNEL_CITY_HOUSE_POSH;
+    channels[1].channel = SOUND_CHANNEL_CITY_HOUSE_SLUM1;
+    channels[2].channel = SOUND_CHANNEL_CITY_HOUSE_POOR1;
+    channels[3].channel = SOUND_CHANNEL_CITY_HOUSE_MEDIUM1;
+    channels[4].channel = SOUND_CHANNEL_CITY_HOUSE_GOOD1;
+    channels[5].channel = SOUND_CHANNEL_CITY_HOUSE_POSH1;
     channels[6].channel = SOUND_CHANNEL_CITY_AMPHITHEATER;
     channels[7].channel = SOUND_CHANNEL_CITY_THEATER;
     channels[8].channel = SOUND_CHANNEL_CITY_HIPPODROME;
@@ -230,6 +252,24 @@ void sound_city_init(void)
     //channels[76].channel = SOUND_CHANNEL_CITY_EMPTY_LAND4;
     channels[77].channel = SOUND_CHANNEL_CITY_BRICKWORKS;
     channels[78].channel = SOUND_CHANNEL_CITY_CONCRETE_MAKER;
+    channels[79].channel = SOUND_CHANNEL_CITY_HOUSE_SLUM2;
+    channels[80].channel = SOUND_CHANNEL_CITY_HOUSE_SLUM3;
+    channels[81].channel = SOUND_CHANNEL_CITY_HOUSE_SLUM4;
+    channels[82].channel = SOUND_CHANNEL_CITY_HOUSE_POOR2;
+    channels[83].channel = SOUND_CHANNEL_CITY_HOUSE_POOR3;
+    channels[84].channel = SOUND_CHANNEL_CITY_HOUSE_POOR4;
+    channels[85].channel = SOUND_CHANNEL_CITY_HOUSE_MEDIUM2;
+    channels[86].channel = SOUND_CHANNEL_CITY_HOUSE_MEDIUM3;
+    channels[87].channel = SOUND_CHANNEL_CITY_HOUSE_MEDIUM4;
+    channels[88].channel = SOUND_CHANNEL_CITY_HOUSE_GOOD2;
+    channels[89].channel = SOUND_CHANNEL_CITY_HOUSE_GOOD3;
+    channels[90].channel = SOUND_CHANNEL_CITY_HOUSE_GOOD4;
+    channels[91].channel = SOUND_CHANNEL_CITY_HOUSE_POSH2;
+    channels[92].channel = SOUND_CHANNEL_CITY_HOUSE_POSH3;
+    channels[93].channel = SOUND_CHANNEL_CITY_HOUSE_POSH4;
+    channels[94].channel = SOUND_CHANNEL_CITY_NATIVE_HUT;
+    channels[95].channel = SOUND_CHANNEL_CITY_TERRAIN01;
+    channels[96].channel = SOUND_CHANNEL_CITY_TERRAIN02;
 }
 
 void sound_city_set_volume(int percentage)
