@@ -261,8 +261,7 @@ static void update_visible_conditions_and_actions(void)
     data.actions.active = 0;
     if (data.actions.available) {
         scenario_action_t *action;
-        array_foreach(data.event->actions, action)
-        {
+        array_foreach(data.event->actions, action) {
             if (action->type != ACTION_TYPE_UNDEFINED) {
                 data.actions.list[data.actions.active] = action;
                 data.actions.active++;
