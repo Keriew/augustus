@@ -219,8 +219,7 @@ static void update_visible_conditions_and_actions(void)
             if (group->conditions.size > 0) {
                 data.conditions.list[data.conditions.active].group_id = i;
                 data.conditions.active++;
-                array_foreach(group->conditions, condition)
-                {
+                array_foreach(group->conditions, condition) {
                     if (condition->type != CONDITION_TYPE_UNDEFINED) {
                         data.conditions.list[data.conditions.active].group_id = i;
                         data.conditions.list[data.conditions.active].condition = condition;
