@@ -185,8 +185,7 @@ static unsigned int count_maximum_needed_list_items(void)
 {
     unsigned int total_items = 0;
     scenario_condition_group_t *group;
-    array_foreach(data.event->condition_groups, group)
-    {
+    array_foreach(data.event->condition_groups, group) {
         if (group->conditions.size > 0) {
             total_items += group->conditions.size + 1;
         }
