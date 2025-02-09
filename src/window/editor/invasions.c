@@ -1,5 +1,6 @@
 #include "invasions.h"
 
+#include "core/string.h"
 #include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
@@ -30,18 +31,18 @@ static struct {
 } data;
 
 static generic_button new_invasion_button = {
-    195, 340, 250, 25, button_new_invasion
+    195, 350, 250, 25, button_new_invasion
 };
 
 static grid_box_type invasion_buttons = {
     .x = 10,
-    .y = 40,
+    .y = 65,
     .width = 38 * BLOCK_SIZE,
     .height = 19 * BLOCK_SIZE,
-    .num_columns = 2,
-    .item_height = 30,
+    .num_columns = 1,
+    .item_height = 28,
     .item_margin.horizontal = 10,
-    .item_margin.vertical = 5,
+    .item_margin.vertical = 4,
     .extend_to_hidden_scrollbar = 1,
     .on_click = button_invasion,
     .draw_item = draw_invasion_button
@@ -102,8 +103,15 @@ static void draw_background(void)
 
     outer_panel_draw(0, 0, 40, 30);
     lang_text_draw(44, 15, 20, 12, FONT_LARGE_BLACK);
+
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_DATE, 30, 50, FONT_SMALL_PLAIN); // Invasion date:
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_SIZE, 170, 50, FONT_SMALL_PLAIN); // Invasion size:
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_ENEMY_TYPE, 305, 50, FONT_SMALL_PLAIN); // Enemy type:
+    lang_text_draw(CUSTOM_TRANSLATION, TR_PARAMETER_TYPE_INVASION_POINT, 420, 50, FONT_SMALL_PLAIN); // Invasion point
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT, 535, 50, FONT_SMALL_PLAIN); // "Repeat:
+
     lang_text_draw_centered(13, 3, 0, 456, 640, FONT_NORMAL_BLACK);
-    lang_text_draw_multiline(152, 2, 32, 376, 576, FONT_NORMAL_BLACK);
+    lang_text_draw_multiline(152, 2, 20, 380, 600, FONT_NORMAL_BLACK);
 
     if (!data.invasions_in_use) {
         lang_text_draw_centered(44, 20, 0, 165, 640, FONT_LARGE_BLACK);
@@ -122,9 +130,35 @@ static void draw_invasion_button(const grid_box_item *item)
     button_border_draw(item->x, item->y, item->width, item->height, item->is_focused);
     const invasion_t *invasion = data.invasions[item->index];
     text_draw_number(invasion->year, '+', " ", item->x + 10, item->y + 7, FONT_NORMAL_BLACK, 0);
-    lang_text_draw_year(scenario_property_start_year() + invasion->year, item->x + 45, item->y + 7, FONT_NORMAL_BLACK);
-    int width = text_draw_number(invasion->amount.min, '@', " ", item->x + 120, item->y + 7, FONT_NORMAL_BLACK, 0);
-    lang_text_draw(34, invasion->type, item->x + 115 + width, item->y + 7, FONT_NORMAL_BLACK);
+    lang_text_draw_year(scenario_property_start_year() + invasion->year, item->x + 50, item->y + 7, FONT_NORMAL_BLACK);
+    int width = text_draw_number(invasion->amount.min, '@', " ", item->x + 160, item->y + 7, FONT_NORMAL_BLACK, 0);
+    if (invasion->amount.max > invasion->amount.min) {
+        width += text_draw(string_from_ascii("-"), item->x + 155 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+        width += text_draw_number(invasion->amount.max, '@', " ", item->x + 150 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+    }
+
+    if (invasion->type == INVASION_TYPE_DISTANT_BATTLE) {
+        lang_text_draw(34, invasion->type, item->x + 280, item->y + 7, FONT_NORMAL_BLACK);
+    } else {
+        lang_text_draw(34, invasion->type, item->x + 280, item->y + 7, FONT_NORMAL_BLACK);
+        //lang_text_draw(44, 27, item->x + 460, item->y + 7, FONT_NORMAL_BLACK); // from
+    }
+
+    if (invasion->type != INVASION_TYPE_DISTANT_BATTLE) {
+        if (invasion->from + 1 == 9) {
+            width += text_draw(string_from_ascii("RND"), item->x + 434, item->y + 7, FONT_NORMAL_BLACK, 0);
+        } else {
+            text_draw_number(invasion->from + 1, '@', " ", item->x + 440, item->y + 7, FONT_NORMAL_BLACK, 0);
+        }
+    }
+
+    if (invasion->repeat.times == INVASIONS_REPEAT_INFINITE) {
+        width += text_draw(string_from_ascii("INF"), 545, item->y + 7, FONT_NORMAL_BLACK, 0);
+    } else if (invasion->repeat.times == 0) {
+        width += text_draw(string_from_ascii("-"), 555, item->y + 7, FONT_NORMAL_BLACK, 0);
+    } else {
+        text_draw_number(invasion->repeat.times, '@', " ", 538, item->y + 7, FONT_NORMAL_BLACK, 0);
+    }
 }
 
 static void draw_foreground(void)
@@ -136,7 +170,7 @@ static void draw_foreground(void)
     }
     button_border_draw(new_invasion_button.x, new_invasion_button.y,
         new_invasion_button.width, new_invasion_button.height, data.new_invasion_button_focused);
-    
+
     graphics_reset_dialog();
 }
 
