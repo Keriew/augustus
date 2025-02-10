@@ -53,102 +53,102 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
     },
     [BUILDING_HOUSE_SMALL_TENT] = {
         .size = 1,
-        .sound_id = SOUND_CITY_HOUSE_SLUM1,
+        .sound_id = SOUND_CITY_HOUSE_SLUM,
         .event_data.attr = "vacant_lot|house_small_tent|housing"
     },
     [BUILDING_HOUSE_LARGE_TENT] = {
         .size = 1,
-        .sound_id = SOUND_CITY_HOUSE_SLUM2,
+        .sound_id = SOUND_CITY_HOUSE_SLUM,
         .event_data.attr = "house_large_tent"
     },
     [BUILDING_HOUSE_SMALL_SHACK] = {
         .size = 1,
-        .sound_id = SOUND_CITY_HOUSE_SLUM3,
+        .sound_id = SOUND_CITY_HOUSE_SLUM,
         .event_data.attr = "house_small_shack"
     },
     [BUILDING_HOUSE_LARGE_SHACK] = {
         .size = 1,
-        .sound_id = SOUND_CITY_HOUSE_SLUM4,
+        .sound_id = SOUND_CITY_HOUSE_SLUM,
         .event_data.attr = "house_large_shack"
     },
     [BUILDING_HOUSE_SMALL_HOVEL] = {
         .size = 1,
-        .sound_id = SOUND_CITY_HOUSE_POOR1,
+        .sound_id = SOUND_CITY_HOUSE_POOR,
         .event_data.attr = "house_small_hovel"
     },
     [BUILDING_HOUSE_LARGE_HOVEL] = {
         .size = 1,
-        .sound_id = SOUND_CITY_HOUSE_POOR2,
+        .sound_id = SOUND_CITY_HOUSE_POOR,
         .event_data.attr = "house_large_hovel"
     },
     [BUILDING_HOUSE_SMALL_CASA] = {
         .size = 1,
-        .sound_id = SOUND_CITY_HOUSE_POOR3,
+        .sound_id = SOUND_CITY_HOUSE_POOR,
         .event_data.attr = "house_small_casa"
     },
     [BUILDING_HOUSE_LARGE_CASA] = {
         .size = 1,
-        .sound_id = SOUND_CITY_HOUSE_POOR4,
+        .sound_id = SOUND_CITY_HOUSE_POOR,
         .event_data.attr = "house_large_casa"
     },
     [BUILDING_HOUSE_SMALL_INSULA] = {
         .size = 1,
-        .sound_id = SOUND_CITY_HOUSE_MEDIUM1,
+        .sound_id = SOUND_CITY_HOUSE_MEDIUM,
         .event_data.attr = "house_small_insula"
     },
     [BUILDING_HOUSE_MEDIUM_INSULA] = {
         .size = 1,
-        .sound_id = SOUND_CITY_HOUSE_MEDIUM2,
+        .sound_id = SOUND_CITY_HOUSE_MEDIUM,
         .event_data.attr = "house_medium_insula"
     },
     [BUILDING_HOUSE_LARGE_INSULA] = {
         .size = 2,
-        .sound_id = SOUND_CITY_HOUSE_MEDIUM3,
+        .sound_id = SOUND_CITY_HOUSE_MEDIUM,
         .event_data.attr = "house_large_insula"
     },
     [BUILDING_HOUSE_GRAND_INSULA] = {
         .size = 2,
-        .sound_id = SOUND_CITY_HOUSE_MEDIUM4,
+        .sound_id = SOUND_CITY_HOUSE_MEDIUM,
         .event_data.attr = "house_grand_insula"
     },
     [BUILDING_HOUSE_SMALL_VILLA] = {
         .size = 2,
-        .sound_id = SOUND_CITY_HOUSE_GOOD1,
+        .sound_id = SOUND_CITY_HOUSE_GOOD,
         .event_data.attr = "house_small_villa"
     },
     [BUILDING_HOUSE_MEDIUM_VILLA] = {
         .size = 2,
-        .sound_id = SOUND_CITY_HOUSE_GOOD2,
+        .sound_id = SOUND_CITY_HOUSE_GOOD,
         .event_data.attr = "house_medium_villa"
     },
     [BUILDING_HOUSE_LARGE_VILLA] = {
         .size = 3,
-        .sound_id = SOUND_CITY_HOUSE_GOOD3,
+        .sound_id = SOUND_CITY_HOUSE_GOOD,
         .event_data.attr = "house_large_villa"
     },
     [BUILDING_HOUSE_GRAND_VILLA] = {
         .size = 3,
-        .sound_id = SOUND_CITY_HOUSE_GOOD4,
+        .sound_id = SOUND_CITY_HOUSE_GOOD,
         .event_data.attr = "house_grand_villa"
     },
     [BUILDING_HOUSE_SMALL_PALACE] = {
         .size = 3,
-        .sound_id = SOUND_CITY_HOUSE_POSH1,
+        .sound_id = SOUND_CITY_HOUSE_POSH,
         .event_data.attr = "house_small_palace"
     },
     [BUILDING_HOUSE_MEDIUM_PALACE] = {
         .size = 3,
-        .sound_id = SOUND_CITY_HOUSE_POSH2,
+        .sound_id = SOUND_CITY_HOUSE_POSH,
         .event_data.attr = "house_medium_palace"
     },
     [BUILDING_HOUSE_LARGE_PALACE] = {
         .size = 4,
-        .sound_id = SOUND_CITY_HOUSE_POSH3,
+        .sound_id = SOUND_CITY_HOUSE_POSH,
         .event_data.attr = "house_large_palace"
     },
     [BUILDING_HOUSE_LUXURY_PALACE] = {
         .size = 4,
-        .sound_id = SOUND_CITY_HOUSE_POSH4,
+        .sound_id = SOUND_CITY_HOUSE_POSH,
         .event_data.attr = "house_luxury_palace"
     },
     [BUILDING_AMPHITHEATER] = {
