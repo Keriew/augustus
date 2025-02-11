@@ -112,6 +112,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_DRAW_CLOUD_SHADOWS, "구름 그림자 표시"},
     {TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE, "파일을 덮어쓰기 전에 물어보기"},
     {TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, "비군사형 문이 모든 시민이 통과 가능하도록 초기 설정됨"},
+    {TR_CONFIG_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION, "고급 세금 및 임금 감정 기여 논리"},
     {TR_HOTKEY_TITLE, "Augustus 단축키 설정"},
     {TR_HOTKEY_LABEL, "단축키"},
     {TR_HOTKEY_ALTERNATIVE_LABEL, "대체"},
