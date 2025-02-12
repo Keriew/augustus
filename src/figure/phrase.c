@@ -18,232 +18,232 @@
 
 #include <stdio.h>
 
-#define SOUND_FILENAME_MAX 32
+#define SOUND_FILENAME_MAX 64
 
 static const char FIGURE_SOUNDS[32][20][SOUND_FILENAME_MAX] = {
     { // 0
-        "vigils_starv1.wav", "vigils_nojob1.wav", "vigils_needjob1.wav", "vigils_nofun1.wav",
-        "vigils_relig1.wav", "vigils_great1.wav", "vigils_great2.wav", "vigils_exact1.wav",
-        "vigils_exact2.wav", "vigils_exact3.wav", "vigils_exact4.wav", "vigils_exact5.wav",
-        "vigils_exact6.wav", "vigils_exact7.wav", "vigils_exact8.wav", "vigils_exact9.wav",
-        "vigils_exact10.wav", "vigils_free1.wav", "vigils_free2.wav", "vigils_free3.wav"
+        "wavs/vigils_starv1.wav", "wavs/vigils_nojob1.wav", "wavs/vigils_needjob1.wav", "wavs/vigils_nofun1.wav",
+        "wavs/vigils_relig1.wav", "wavs/vigils_great1.wav", "wavs/vigils_great2.wav", "wavs/vigils_exact1.wav",
+        "wavs/vigils_exact2.wav", "wavs/vigils_exact3.wav", "wavs/vigils_exact4.wav", "wavs/vigils_exact5.wav",
+        "wavs/vigils_exact6.wav", "wavs/vigils_exact7.wav", "wavs/vigils_exact8.wav", "wavs/vigils_exact9.wav",
+        "wavs/vigils_exact10.wav", "wavs/vigils_free1.wav", "wavs/vigils_free2.wav", "wavs/vigils_free3.wav"
     },
     { // 1
-        "wallguard_starv1.wav", "wallguard_nojob1.wav", "wallguard_needjob1.wav", "wallguard_nofun1.wav",
-        "wallguard_relig1.wav", "wallguard_great1.wav", "wallguard_great2.wav", "wallguard_exact1.wav",
-        "wallguard_exact2.wav", "wallguard_exact3.wav", "wallguard_exact4.wav", "wallguard_exact5.wav",
-        "wallguard_exact6.wav", "wallguard_exact7.wav", "wallguard_exact8.wav", "wallguard_exact9.wav",
-        "wallguard_exact0.wav", "wallguard_free1.wav", "wallguard_free2.wav", "wallguard_free3.wav"
+        "wavs/wallguard_starv1.wav", "wavs/wallguard_nojob1.wav", "wavs/wallguard_needjob1.wav", "wavs/wallguard_nofun1.wav",
+        "wavs/wallguard_relig1.wav", "wavs/wallguard_great1.wav", "wavs/wallguard_great2.wav", "wavs/wallguard_exact1.wav",
+        "wavs/wallguard_exact2.wav", "wavs/wallguard_exact3.wav", "wavs/wallguard_exact4.wav", "wavs/wallguard_exact5.wav",
+        "wavs/wallguard_exact6.wav", "wavs/wallguard_exact7.wav", "wavs/wallguard_exact8.wav", "wavs/wallguard_exact9.wav",
+        "wavs/wallguard_exact0.wav", "wavs/wallguard_free1.wav", "wavs/wallguard_free2.wav", "wavs/wallguard_free3.wav"
     },
     { // 2
-        "engine_starv1.wav", "engine_nojob1.wav", "engine_needjob1.wav", "engine_nofun1.wav",
-        "engine_relig1.wav", "engine_great1.wav", "engine_great2.wav", "engine_exact1.wav",
-        "engine_exact2.wav", "engine_exact3.wav", "engine_exact4.wav", "engine_exact5.wav",
-        "engine_exact6.wav", "engine_exact7.wav", "engine_exact8.wav", "engine_exact9.wav",
-        "engine_exact0.wav", "engine_free1.wav", "engine_free2.wav", "engine_free3.wav"
+        "wavs/engine_starv1.wav", "wavs/engine_nojob1.wav", "wavs/engine_needjob1.wav", "wavs/engine_nofun1.wav",
+        "wavs/engine_relig1.wav", "wavs/engine_great1.wav", "wavs/engine_great2.wav", "wavs/engine_exact1.wav",
+        "wavs/engine_exact2.wav", "wavs/engine_exact3.wav", "wavs/engine_exact4.wav", "wavs/engine_exact5.wav",
+        "wavs/engine_exact6.wav", "wavs/engine_exact7.wav", "wavs/engine_exact8.wav", "wavs/engine_exact9.wav",
+        "wavs/engine_exact0.wav", "wavs/engine_free1.wav", "wavs/engine_free2.wav", "wavs/engine_free3.wav"
     },
     { // 3
-        "taxman_starv1.wav", "taxman_nojob1.wav", "taxman_needjob1.wav", "taxman_nofun1.wav",
-        "taxman_relig1.wav", "taxman_great1.wav", "taxman_great2.wav", "taxman_exact1.wav",
-        "taxman_exact2.wav", "taxman_exact3.wav", "taxman_exact4.wav", "taxman_exact5.wav",
-        "taxman_exact6.wav", "taxman_exact7.wav", "taxman_exact8.wav", "taxman_exact9.wav",
-        "taxman_exact0.wav", "taxman_free1.wav", "taxman_free2.wav", "taxman_free3.wav"
+        "wavs/taxman_starv1.wav", "wavs/taxman_nojob1.wav", "wavs/taxman_needjob1.wav", "wavs/taxman_nofun1.wav",
+        "wavs/taxman_relig1.wav", "wavs/taxman_great1.wav", "wavs/taxman_great2.wav", "wavs/taxman_exact1.wav",
+        "wavs/taxman_exact2.wav", "wavs/taxman_exact3.wav", "wavs/taxman_exact4.wav", "wavs/taxman_exact5.wav",
+        "wavs/taxman_exact6.wav", "wavs/taxman_exact7.wav", "wavs/taxman_exact8.wav", "wavs/taxman_exact9.wav",
+        "wavs/taxman_exact0.wav", "wavs/taxman_free1.wav", "wavs/taxman_free2.wav", "wavs/taxman_free3.wav"
     },
     { // 4
-        "market_starv1.wav", "market_nojob1.wav", "market_needjob1.wav", "market_nofun1.wav",
-        "market_relig1.wav", "market_great1.wav", "market_great2.wav", "market_exact2.wav",
-        "market_exact1.wav", "market_exact3.wav", "market_exact4.wav", "market_exact5.wav",
-        "market_exact6.wav", "market_exact7.wav", "market_exact8.wav", "market_exact9.wav",
-        "market_exact0.wav", "market_free1.wav", "market_free2.wav", "market_free3.wav"
+        "wavs/market_starv1.wav", "wavs/market_nojob1.wav", "wavs/market_needjob1.wav", "wavs/market_nofun1.wav",
+        "wavs/market_relig1.wav", "wavs/market_great1.wav", "wavs/market_great2.wav", "wavs/market_exact2.wav",
+        "wavs/market_exact1.wav", "wavs/market_exact3.wav", "wavs/market_exact4.wav", "wavs/market_exact5.wav",
+        "wavs/market_exact6.wav", "wavs/market_exact7.wav", "wavs/market_exact8.wav", "wavs/market_exact9.wav",
+        "wavs/market_exact0.wav", "wavs/market_free1.wav", "wavs/market_free2.wav", "wavs/market_free3.wav"
     },
     { // 5
-        "crtpsh_starv1.wav", "crtpsh_nojob1.wav", "crtpsh_needjob1.wav", "crtpsh_nofun1.wav",
-        "crtpsh_relig1.wav", "crtpsh_great1.wav", "crtpsh_great2.wav", "crtpsh_exact1.wav",
-        "crtpsh_exact2.wav", "crtpsh_exact3.wav", "crtpsh_exact4.wav", "crtpsh_exact5.wav",
-        "crtpsh_exact6.wav", "crtpsh_exact7.wav", "crtpsh_exact8.wav", "crtpsh_exact9.wav",
-        "crtpsh_exact0.wav", "crtpsh_free1.wav", "crtpsh_free2.wav", "crtpsh_free3.wav"
+        "wavs/crtpsh_starv1.wav", "wavs/crtpsh_nojob1.wav", "wavs/crtpsh_needjob1.wav", "wavs/crtpsh_nofun1.wav",
+        "wavs/crtpsh_relig1.wav", "wavs/crtpsh_great1.wav", "wavs/crtpsh_great2.wav", "wavs/crtpsh_exact1.wav",
+        "wavs/crtpsh_exact2.wav", "wavs/crtpsh_exact3.wav", "wavs/crtpsh_exact4.wav", "wavs/crtpsh_exact5.wav",
+        "wavs/crtpsh_exact6.wav", "wavs/crtpsh_exact7.wav", "wavs/crtpsh_exact8.wav", "wavs/crtpsh_exact9.wav",
+        "wavs/crtpsh_exact0.wav", "wavs/crtpsh_free1.wav", "wavs/crtpsh_free2.wav", "wavs/crtpsh_free3.wav"
     },
     { // 6
-        "donkey_starv1.wav", "donkey_nojob1.wav", "donkey_needjob1.wav", "donkey_nofun1.wav",
-        "donkey_relig1.wav", "donkey_great1.wav", "donkey_great2.wav", "donkey_exact1.wav",
-        "donkey_exact2.wav", "donkey_exact3.wav", "donkey_exact4.wav", "donkey_exact5.wav",
-        "donkey_exact6.wav", "donkey_exact7.wav", "donkey_exact8.wav", "donkey_exact9.wav",
-        "donkey_exact0.wav", "donkey_free1.wav", "donkey_free2.wav", "donkey_free3.wav"
+        "wavs/donkey_starv1.wav", "wavs/donkey_nojob1.wav", "wavs/donkey_needjob1.wav", "wavs/donkey_nofun1.wav",
+        "wavs/donkey_relig1.wav", "wavs/donkey_great1.wav", "wavs/donkey_great2.wav", "wavs/donkey_exact1.wav",
+        "wavs/donkey_exact2.wav", "wavs/donkey_exact3.wav", "wavs/donkey_exact4.wav", "wavs/donkey_exact5.wav",
+        "wavs/donkey_exact6.wav", "wavs/donkey_exact7.wav", "wavs/donkey_exact8.wav", "wavs/donkey_exact9.wav",
+        "wavs/donkey_exact0.wav", "wavs/donkey_free1.wav", "wavs/donkey_free2.wav", "wavs/donkey_free3.wav"
     },
     { // 7
-        "boats_starv1.wav", "boats_nojob1.wav", "boats_needjob1.wav", "boats_nofun1.wav",
-        "boats_relig1.wav", "boats_great1.wav", "boats_great2.wav", "boats_exact2.wav",
-        "boats_exact1.wav", "boats_exact3.wav", "boats_exact4.wav", "boats_exact5.wav",
-        "boats_exact6.wav", "boats_exact7.wav", "boats_exact8.wav", "boats_exact9.wav",
-        "boats_exact0.wav", "boats_free1.wav", "boats_free2.wav", "boats_free3.wav"
+        "wavs/boats_starv1.wav", "wavs/boats_nojob1.wav", "wavs/boats_needjob1.wav", "wavs/boats_nofun1.wav",
+        "wavs/boats_relig1.wav", "wavs/boats_great1.wav", "wavs/boats_great2.wav", "wavs/boats_exact2.wav",
+        "wavs/boats_exact1.wav", "wavs/boats_exact3.wav", "wavs/boats_exact4.wav", "wavs/boats_exact5.wav",
+        "wavs/boats_exact6.wav", "wavs/boats_exact7.wav", "wavs/boats_exact8.wav", "wavs/boats_exact9.wav",
+        "wavs/boats_exact0.wav", "wavs/boats_free1.wav", "wavs/boats_free2.wav", "wavs/boats_free3.wav"
     },
     { // 8
-        "priest_starv1.wav", "priest_nojob1.wav", "priest_needjob1.wav", "priest_nofun1.wav",
-        "priest_relig1.wav", "priest_great1.wav", "priest_great2.wav", "priest_exact1.wav",
-        "priest_exact2.wav", "priest_exact3.wav", "priest_exact4.wav", "priest_exact5.wav",
-        "priest_exact6.wav", "priest_exact7.wav", "priest_exact8.wav", "priest_exact9.wav",
-        "priest_exact0.wav", "priest_free1.wav", "priest_free2.wav", "priest_free3.wav"
+        "wavs/priest_starv1.wav", "wavs/priest_nojob1.wav", "wavs/priest_needjob1.wav", "wavs/priest_nofun1.wav",
+        "wavs/priest_relig1.wav", "wavs/priest_great1.wav", "wavs/priest_great2.wav", "wavs/priest_exact1.wav",
+        "wavs/priest_exact2.wav", "wavs/priest_exact3.wav", "wavs/priest_exact4.wav", "wavs/priest_exact5.wav",
+        "wavs/priest_exact6.wav", "wavs/priest_exact7.wav", "wavs/priest_exact8.wav", "wavs/priest_exact9.wav",
+        "wavs/priest_exact0.wav", "wavs/priest_free1.wav", "wavs/priest_free2.wav", "wavs/priest_free3.wav"
     },
     { // 9
-        "teach_starv1.wav", "teach_nojob1.wav", "teach_needjob1.wav", "teach_nofun1.wav",
-        "teach_relig1.wav", "teach_great1.wav", "teach_great2.wav", "teach_exact1.wav",
-        "teach_exact2.wav", "teach_exact3.wav", "teach_exact4.wav", "teach_exact5.wav",
-        "teach_exact6.wav", "teach_exact7.wav", "teach_exact8.wav", "teach_exact9.wav",
-        "teach_exact0.wav", "teach_free1.wav", "teach_free2.wav", "teach_free3.wav"
+        "wavs/teach_starv1.wav", "wavs/teach_nojob1.wav", "wavs/teach_needjob1.wav", "wavs/teach_nofun1.wav",
+        "wavs/teach_relig1.wav", "wavs/teach_great1.wav", "wavs/teach_great2.wav", "wavs/teach_exact1.wav",
+        "wavs/teach_exact2.wav", "wavs/teach_exact3.wav", "wavs/teach_exact4.wav", "wavs/teach_exact5.wav",
+        "wavs/teach_exact6.wav", "wavs/teach_exact7.wav", "wavs/teach_exact8.wav", "wavs/teach_exact9.wav",
+        "wavs/teach_exact0.wav", "wavs/teach_free1.wav", "wavs/teach_free2.wav", "wavs/teach_free3.wav"
     },
     { // 10
-        "pupils_starv1.wav", "pupils_nojob1.wav", "pupils_needjob1.wav", "pupils_nofun1.wav",
-        "pupils_relig1.wav", "pupils_great1.wav", "pupils_great2.wav", "pupils_exact1.wav",
-        "pupils_exact2.wav", "pupils_exact3.wav", "pupils_exact4.wav", "pupils_exact5.wav",
-        "pupils_exact6.wav", "pupils_exact7.wav", "pupils_exact8.wav", "pupils_exact9.wav",
-        "pupils_exact0.wav", "pupils_free1.wav", "pupils_free2.wav", "pupils_free3.wav"
+        "wavs/pupils_starv1.wav", "wavs/pupils_nojob1.wav", "wavs/pupils_needjob1.wav", "wavs/pupils_nofun1.wav",
+        "wavs/pupils_relig1.wav", "wavs/pupils_great1.wav", "wavs/pupils_great2.wav", "wavs/pupils_exact1.wav",
+        "wavs/pupils_exact2.wav", "wavs/pupils_exact3.wav", "wavs/pupils_exact4.wav", "wavs/pupils_exact5.wav",
+        "wavs/pupils_exact6.wav", "wavs/pupils_exact7.wav", "wavs/pupils_exact8.wav", "wavs/pupils_exact9.wav",
+        "wavs/pupils_exact0.wav", "wavs/pupils_free1.wav", "wavs/pupils_free2.wav", "wavs/pupils_free3.wav"
     },
     { // 11
-        "bather_starv1.wav", "bather_nojob1.wav", "bather_needjob1.wav", "bather_nofun1.wav",
-        "bather_relig1.wav", "bather_great1.wav", "bather_great2.wav", "bather_exact1.wav",
-        "bather_exact2.wav", "bather_exact3.wav", "bather_exact4.wav", "bather_exact5.wav",
-        "bather_exact6.wav", "bather_exact7.wav", "bather_exact8.wav", "bather_exact9.wav",
-        "bather_exact0.wav", "bather_free1.wav", "bather_free2.wav", "bather_free3.wav"
+        "wavs/bather_starv1.wav", "wavs/bather_nojob1.wav", "wavs/bather_needjob1.wav", "wavs/bather_nofun1.wav",
+        "wavs/bather_relig1.wav", "wavs/bather_great1.wav", "wavs/bather_great2.wav", "wavs/bather_exact1.wav",
+        "wavs/bather_exact2.wav", "wavs/bather_exact3.wav", "wavs/bather_exact4.wav", "wavs/bather_exact5.wav",
+        "wavs/bather_exact6.wav", "wavs/bather_exact7.wav", "wavs/bather_exact8.wav", "wavs/bather_exact9.wav",
+        "wavs/bather_exact0.wav", "wavs/bather_free1.wav", "wavs/bather_free2.wav", "wavs/bather_free3.wav"
     },
     { // 12
-        "doctor_starv1.wav", "doctor_nojob1.wav", "doctor_needjob1.wav", "doctor_nofun1.wav",
-        "doctor_relig1.wav", "doctor_great1.wav", "doctor_great2.wav", "doctor_exact1.wav",
-        "doctor_exact2.wav", "doctor_exact3.wav", "doctor_exact4.wav", "doctor_exact5.wav",
-        "doctor_exact6.wav", "doctor_exact7.wav", "doctor_exact8.wav", "doctor_exact9.wav",
-        "doctor_exact0.wav", "doctor_free1.wav", "doctor_free2.wav", "doctor_free3.wav"
+        "wavs/doctor_starv1.wav", "wavs/doctor_nojob1.wav", "wavs/doctor_needjob1.wav", "wavs/doctor_nofun1.wav",
+        "wavs/doctor_relig1.wav", "wavs/doctor_great1.wav", "wavs/doctor_great2.wav", "wavs/doctor_exact1.wav",
+        "wavs/doctor_exact2.wav", "wavs/doctor_exact3.wav", "wavs/doctor_exact4.wav", "wavs/doctor_exact5.wav",
+        "wavs/doctor_exact6.wav", "wavs/doctor_exact7.wav", "wavs/doctor_exact8.wav", "wavs/doctor_exact9.wav",
+        "wavs/doctor_exact0.wav", "wavs/doctor_free1.wav", "wavs/doctor_free2.wav", "wavs/doctor_free3.wav"
     },
     { // 13
-        "barber_starv1.wav", "barber_nojob1.wav", "barber_needjob1.wav", "barber_nofun1.wav",
-        "barber_relig1.wav", "barber_great1.wav", "barber_great2.wav", "barber_exact1.wav",
-        "barber_exact2.wav", "barber_exact3.wav", "barber_exact4.wav", "barber_exact5.wav",
-        "barber_exact6.wav", "barber_exact7.wav", "barber_exact8.wav", "barber_exact9.wav",
-        "barber_exact0.wav", "barber_free1.wav", "barber_free2.wav", "barber_free3.wav"
+        "wavs/barber_starv1.wav", "wavs/barber_nojob1.wav", "wavs/barber_needjob1.wav", "wavs/barber_nofun1.wav",
+        "wavs/barber_relig1.wav", "wavs/barber_great1.wav", "wavs/barber_great2.wav", "wavs/barber_exact1.wav",
+        "wavs/barber_exact2.wav", "wavs/barber_exact3.wav", "wavs/barber_exact4.wav", "wavs/barber_exact5.wav",
+        "wavs/barber_exact6.wav", "wavs/barber_exact7.wav", "wavs/barber_exact8.wav", "wavs/barber_exact9.wav",
+        "wavs/barber_exact0.wav", "wavs/barber_free1.wav", "wavs/barber_free2.wav", "wavs/barber_free3.wav"
     },
     { // 14
-        "actors_starv1.wav", "actors_nojob1.wav", "actors_needjob1.wav", "actors_nofun1.wav",
-        "actors_relig1.wav", "actors_great1.wav", "actors_great2.wav", "actors_exact1.wav",
-        "actors_exact2.wav", "actors_exact3.wav", "actors_exact4.wav", "actors_exact5.wav",
-        "actors_exact6.wav", "actors_exact7.wav", "actors_exact8.wav", "actors_exact9.wav",
-        "actors_exact0.wav", "actors_free1.wav", "actors_free2.wav", "actors_free3.wav"
+        "wavs/actors_starv1.wav", "wavs/actors_nojob1.wav", "wavs/actors_needjob1.wav", "wavs/actors_nofun1.wav",
+        "wavs/actors_relig1.wav", "wavs/actors_great1.wav", "wavs/actors_great2.wav", "wavs/actors_exact1.wav",
+        "wavs/actors_exact2.wav", "wavs/actors_exact3.wav", "wavs/actors_exact4.wav", "wavs/actors_exact5.wav",
+        "wavs/actors_exact6.wav", "wavs/actors_exact7.wav", "wavs/actors_exact8.wav", "wavs/actors_exact9.wav",
+        "wavs/actors_exact0.wav", "wavs/actors_free1.wav", "wavs/actors_free2.wav", "wavs/actors_free3.wav"
     },
     { // 15
-        "gladtr_starv1.wav", "gladtr_nojob1.wav", "gladtr_needjob1.wav", "gladtr_nofun1.wav",
-        "gladtr_relig1.wav", "gladtr_great1.wav", "gladtr_great2.wav", "gladtr_exact1.wav",
-        "gladtr_exact2.wav", "gladtr_exact3.wav", "gladtr_exact4.wav", "gladtr_exact5.wav",
-        "gladtr_exact6.wav", "gladtr_exact7.wav", "gladtr_exact8.wav", "gladtr_exact9.wav",
-        "gladtr_exact0.wav", "gladtr_free1.wav", "gladtr_free2.wav", "gladtr_free3.wav"
+        "wavs/gladtr_starv1.wav", "wavs/gladtr_nojob1.wav", "wavs/gladtr_needjob1.wav", "wavs/gladtr_nofun1.wav",
+        "wavs/gladtr_relig1.wav", "wavs/gladtr_great1.wav", "wavs/gladtr_great2.wav", "wavs/gladtr_exact1.wav",
+        "wavs/gladtr_exact2.wav", "wavs/gladtr_exact3.wav", "wavs/gladtr_exact4.wav", "wavs/gladtr_exact5.wav",
+        "wavs/gladtr_exact6.wav", "wavs/gladtr_exact7.wav", "wavs/gladtr_exact8.wav", "wavs/gladtr_exact9.wav",
+        "wavs/gladtr_exact0.wav", "wavs/gladtr_free1.wav", "wavs/gladtr_free2.wav", "wavs/gladtr_free3.wav"
     },
     { // 16
-        "liontr_starv1.wav", "liontr_nojob1.wav", "liontr_needjob1.wav", "liontr_nofun1.wav",
-        "liontr_relig1.wav", "liontr_great1.wav", "liontr_great2.wav", "liontr_exact1.wav",
-        "liontr_exact2.wav", "liontr_exact3.wav", "liontr_exact4.wav", "liontr_exact5.wav",
-        "liontr_exact6.wav", "liontr_exact7.wav", "liontr_exact8.wav", "liontr_exact9.wav",
-        "liontr_exact0.wav", "liontr_free1.wav", "liontr_free2.wav", "liontr_free3.wav"
+        "wavs/liontr_starv1.wav", "wavs/liontr_nojob1.wav", "wavs/liontr_needjob1.wav", "wavs/liontr_nofun1.wav",
+        "wavs/liontr_relig1.wav", "wavs/liontr_great1.wav", "wavs/liontr_great2.wav", "wavs/liontr_exact1.wav",
+        "wavs/liontr_exact2.wav", "wavs/liontr_exact3.wav", "wavs/liontr_exact4.wav", "wavs/liontr_exact5.wav",
+        "wavs/liontr_exact6.wav", "wavs/liontr_exact7.wav", "wavs/liontr_exact8.wav", "wavs/liontr_exact9.wav",
+        "wavs/liontr_exact0.wav", "wavs/liontr_free1.wav", "wavs/liontr_free2.wav", "wavs/liontr_free3.wav"
     },
     { // 17
-        "charot_starv1.wav", "charot_nojob1.wav", "charot_needjob1.wav", "charot_nofun1.wav",
-        "charot_relig1.wav", "charot_great1.wav", "charot_great2.wav", "charot_exact1.wav",
-        "charot_exact2.wav", "charot_exact3.wav", "charot_exact4.wav", "charot_exact5.wav",
-        "charot_exact6.wav", "charot_exact7.wav", "charot_exact8.wav", "charot_exact9.wav",
-        "charot_exact0.wav", "charot_free1.wav", "charot_free2.wav", "charot_free3.wav"
+        "wavs/charot_starv1.wav", "wavs/charot_nojob1.wav", "wavs/charot_needjob1.wav", "wavs/charot_nofun1.wav",
+        "wavs/charot_relig1.wav", "wavs/charot_great1.wav", "wavs/charot_great2.wav", "wavs/charot_exact1.wav",
+        "wavs/charot_exact2.wav", "wavs/charot_exact3.wav", "wavs/charot_exact4.wav", "wavs/charot_exact5.wav",
+        "wavs/charot_exact6.wav", "wavs/charot_exact7.wav", "wavs/charot_exact8.wav", "wavs/charot_exact9.wav",
+        "wavs/charot_exact0.wav", "wavs/charot_free1.wav", "wavs/charot_free2.wav", "wavs/charot_free3.wav"
     },
     { // 18
-        "patric_starv1.wav", "patric_nojob1.wav", "patric_needjob1.wav", "patric_nofun1.wav",
-        "patric_relig1.wav", "patric_great1.wav", "patric_great2.wav", "patric_exact1.wav",
-        "patric_exact2.wav", "patric_exact3.wav", "patric_exact4.wav", "patric_exact5.wav",
-        "patric_exact6.wav", "patric_exact7.wav", "patric_exact8.wav", "patric_exact9.wav",
-        "patric_exact0.wav", "patric_free1.wav", "patric_free2.wav", "patric_free3.wav"
+        "wavs/patric_starv1.wav", "wavs/patric_nojob1.wav", "wavs/patric_needjob1.wav", "wavs/patric_nofun1.wav",
+        "wavs/patric_relig1.wav", "wavs/patric_great1.wav", "wavs/patric_great2.wav", "wavs/patric_exact1.wav",
+        "wavs/patric_exact2.wav", "wavs/patric_exact3.wav", "wavs/patric_exact4.wav", "wavs/patric_exact5.wav",
+        "wavs/patric_exact6.wav", "wavs/patric_exact7.wav", "wavs/patric_exact8.wav", "wavs/patric_exact9.wav",
+        "wavs/patric_exact0.wav", "wavs/patric_free1.wav", "wavs/patric_free2.wav", "wavs/patric_free3.wav"
     },
     { // 19
-        "pleb_starv1.wav", "pleb_nojob1.wav", "pleb_needjob1.wav", "pleb_nofun1.wav",
-        "pleb_relig1.wav", "pleb_great1.wav", "pleb_great2.wav", "pleb_exact1.wav",
-        "pleb_exact2.wav", "pleb_exact3.wav", "pleb_exact4.wav", "pleb_exact5.wav",
-        "pleb_exact6.wav", "pleb_exact7.wav", "pleb_exact8.wav", "pleb_exact9.wav",
-        "pleb_exact0.wav", "pleb_free1.wav", "pleb_free2.wav", "pleb_free3.wav"
+        "wavs/pleb_starv1.wav", "wavs/pleb_nojob1.wav", "wavs/pleb_needjob1.wav", "wavs/pleb_nofun1.wav",
+        "wavs/pleb_relig1.wav", "wavs/pleb_great1.wav", "wavs/pleb_great2.wav", "wavs/pleb_exact1.wav",
+        "wavs/pleb_exact2.wav", "wavs/pleb_exact3.wav", "wavs/pleb_exact4.wav", "wavs/pleb_exact5.wav",
+        "wavs/pleb_exact6.wav", "wavs/pleb_exact7.wav", "wavs/pleb_exact8.wav", "wavs/pleb_exact9.wav",
+        "wavs/pleb_exact0.wav", "wavs/pleb_free1.wav", "wavs/pleb_free2.wav", "wavs/pleb_free3.wav"
     },
     { // 20
-        "rioter_starv1.wav", "rioter_nojob1.wav", "rioter_needjob1.wav", "rioter_nofun1.wav",
-        "rioter_relig1.wav", "rioter_great1.wav", "rioter_great2.wav", "rioter_exact1.wav",
-        "rioter_exact2.wav", "rioter_exact3.wav", "rioter_exact4.wav", "rioter_exact5.wav",
-        "rioter_exact6.wav", "rioter_exact7.wav", "rioter_exact8.wav", "rioter_exact9.wav",
-        "rioter_exact0.wav", "rioter_free1.wav", "rioter_free2.wav", "rioter_free3.wav"
+        "wavs/rioter_starv1.wav", "wavs/rioter_nojob1.wav", "wavs/rioter_needjob1.wav", "wavs/rioter_nofun1.wav",
+        "wavs/rioter_relig1.wav", "wavs/rioter_great1.wav", "wavs/rioter_great2.wav", "wavs/rioter_exact1.wav",
+        "wavs/rioter_exact2.wav", "wavs/rioter_exact3.wav", "wavs/rioter_exact4.wav", "wavs/rioter_exact5.wav",
+        "wavs/rioter_exact6.wav", "wavs/rioter_exact7.wav", "wavs/rioter_exact8.wav", "wavs/rioter_exact9.wav",
+        "wavs/rioter_exact0.wav", "wavs/rioter_free1.wav", "wavs/rioter_free2.wav", "wavs/rioter_free3.wav"
     },
     { // 21
-        "homeless_starv1.wav", "homeless_nojob1.wav", "homeless_needjob1.wav", "homeless_nofun1.wav",
-        "homeless_relig1.wav", "homeless_great1.wav", "homeless_great2.wav", "homeless_exact1.wav",
-        "homeless_exact2.wav", "homeless_exact3.wav", "homeless_exact4.wav", "homeless_exact5.wav",
-        "homeless_exact6.wav", "homeless_exact7.wav", "homeless_exact8.wav", "homeless_exact9.wav",
-        "homeless_exact0.wav", "homeless_free1.wav", "homeless_free2.wav", "homeless_free3.wav"
+        "wavs/homeless_starv1.wav", "wavs/homeless_nojob1.wav", "wavs/homeless_needjob1.wav", "wavs/homeless_nofun1.wav",
+        "wavs/homeless_relig1.wav", "wavs/homeless_great1.wav", "wavs/homeless_great2.wav", "wavs/homeless_exact1.wav",
+        "wavs/homeless_exact2.wav", "wavs/homeless_exact3.wav", "wavs/homeless_exact4.wav", "wavs/homeless_exact5.wav",
+        "wavs/homeless_exact6.wav", "wavs/homeless_exact7.wav", "wavs/homeless_exact8.wav", "wavs/homeless_exact9.wav",
+        "wavs/homeless_exact0.wav", "wavs/homeless_free1.wav", "wavs/homeless_free2.wav", "wavs/homeless_free3.wav"
     },
     { // 22
-        "unemploy_starv1.wav", "unemploy_nojob1.wav", "unemploy_needjob1.wav", "unemploy_nofun1.wav",
-        "unemploy_relig1.wav", "unemploy_great1.wav", "unemploy_great2.wav", "unemploy_exact1.wav",
-        "unemploy_exact2.wav", "unemploy_exact3.wav", "unemploy_exact4.wav", "unemploy_exact5.wav",
-        "unemploy_exact6.wav", "unemploy_exact7.wav", "unemploy_exact8.wav", "unemploy_exact9.wav",
-        "unemploy_exact0.wav", "unemploy_free1.wav", "unemploy_free2.wav", "unemploy_free3.wav"
+        "wavs/unemploy_starv1.wav", "wavs/unemploy_nojob1.wav", "wavs/unemploy_needjob1.wav", "wavs/unemploy_nofun1.wav",
+        "wavs/unemploy_relig1.wav", "wavs/unemploy_great1.wav", "wavs/unemploy_great2.wav", "wavs/unemploy_exact1.wav",
+        "wavs/unemploy_exact2.wav", "wavs/unemploy_exact3.wav", "wavs/unemploy_exact4.wav", "wavs/unemploy_exact5.wav",
+        "wavs/unemploy_exact6.wav", "wavs/unemploy_exact7.wav", "wavs/unemploy_exact8.wav", "wavs/unemploy_exact9.wav",
+        "wavs/unemploy_exact0.wav", "wavs/unemploy_free1.wav", "wavs/unemploy_free2.wav", "wavs/unemploy_free3.wav"
     },
     { // 23
-        "emigrate_starv1.wav", "emigrate_nojob1.wav", "emigrate_needjob1.wav", "emigrate_nofun1.wav",
-        "emigrate_relig1.wav", "emigrate_great1.wav", "emigrate_great2.wav", "emigrate_exact1.wav",
-        "emigrate_exact2.wav", "emigrate_exact3.wav", "emigrate_exact4.wav", "emigrate_exact5.wav",
-        "emigrate_exact6.wav", "emigrate_exact7.wav", "emigrate_exact8.wav", "emigrate_exact9.wav",
-        "emigrate_exact0.wav", "emigrate_free1.wav", "emigrate_free2.wav", "emigrate_free3.wav"
+        "wavs/emigrate_starv1.wav", "wavs/emigrate_nojob1.wav", "wavs/emigrate_needjob1.wav", "wavs/emigrate_nofun1.wav",
+        "wavs/emigrate_relig1.wav", "wavs/emigrate_great1.wav", "wavs/emigrate_great2.wav", "wavs/emigrate_exact1.wav",
+        "wavs/emigrate_exact2.wav", "wavs/emigrate_exact3.wav", "wavs/emigrate_exact4.wav", "wavs/emigrate_exact5.wav",
+        "wavs/emigrate_exact6.wav", "wavs/emigrate_exact7.wav", "wavs/emigrate_exact8.wav", "wavs/emigrate_exact9.wav",
+        "wavs/emigrate_exact0.wav", "wavs/emigrate_free1.wav", "wavs/emigrate_free2.wav", "wavs/emigrate_free3.wav"
     },
     { // 24
-        "immigrant_starv1.wav", "immigrant_nojob1.wav", "immigrant_needjob1.wav", "immigrant_nofun1.wav",
-        "immigrant_relig1.wav", "immigrant_great1.wav", "immigrant_great2.wav", "immigrant_exact1.wav",
-        "immigrant_exact2.wav", "immigrant_exact3.wav", "immigrant_exact4.wav", "immigrant_exact5.wav",
-        "immigrant_exact6.wav", "immigrant_exact7.wav", "immigrant_exact8.wav", "immigrant_exact9.wav",
-        "immigrant_exact0.wav", "immigrant_free1.wav", "immigrant_free2.wav", "immigrant_free3.wav"
+        "wavs/immigrant_starv1.wav", "wavs/immigrant_nojob1.wav", "wavs/immigrant_needjob1.wav", "wavs/immigrant_nofun1.wav",
+        "wavs/immigrant_relig1.wav", "wavs/immigrant_great1.wav", "wavs/immigrant_great2.wav", "wavs/immigrant_exact1.wav",
+        "wavs/immigrant_exact2.wav", "wavs/immigrant_exact3.wav", "wavs/immigrant_exact4.wav", "wavs/immigrant_exact5.wav",
+        "wavs/immigrant_exact6.wav", "wavs/immigrant_exact7.wav", "wavs/immigrant_exact8.wav", "wavs/immigrant_exact9.wav",
+        "wavs/immigrant_exact0.wav", "wavs/immigrant_free1.wav", "wavs/immigrant_free2.wav", "wavs/immigrant_free3.wav"
     },
     { // 25
-        "enemy_starv1.wav", "enemy_nojob1.wav", "enemy_needjob1.wav", "enemy_nofun1.wav",
-        "enemy_relig1.wav", "enemy_great1.wav", "enemy_great2.wav", "enemy_exact1.wav",
-        "enemy_exact2.wav", "enemy_exact3.wav", "enemy_exact4.wav", "enemy_exact5.wav",
-        "enemy_exact6.wav", "enemy_exact7.wav", "enemy_exact8.wav", "enemy_exact9.wav",
-        "enemy_exact0.wav", "enemy_free1.wav", "enemy_free2.wav", "enemy_free3.wav"
+        "wavs/enemy_starv1.wav", "wavs/enemy_nojob1.wav", "wavs/enemy_needjob1.wav", "wavs/enemy_nofun1.wav",
+        "wavs/enemy_relig1.wav", "wavs/enemy_great1.wav", "wavs/enemy_great2.wav", "wavs/enemy_exact1.wav",
+        "wavs/enemy_exact2.wav", "wavs/enemy_exact3.wav", "wavs/enemy_exact4.wav", "wavs/enemy_exact5.wav",
+        "wavs/enemy_exact6.wav", "wavs/enemy_exact7.wav", "wavs/enemy_exact8.wav", "wavs/enemy_exact9.wav",
+        "wavs/enemy_exact0.wav", "wavs/enemy_free1.wav", "wavs/enemy_free2.wav", "wavs/enemy_free3.wav"
     },
     { // 26
-        "local_starv1.wav", "local_nojob1.wav", "local_needjob1.wav", "local_nofun1.wav",
-        "local_relig1.wav", "local_great1.wav", "local_great2.wav", "local_exact1.wav",
-        "local_exact2.wav", "local_exact3.wav", "local_exact4.wav", "local_exact5.wav",
-        "local_exact6.wav", "local_exact7.wav", "local_exact8.wav", "local_exact9.wav",
-        "local_exact0.wav", "local_free1.wav", "local_free2.wav", "local_free3.wav"
+        "wavs/local_starv1.wav", "wavs/local_nojob1.wav", "wavs/local_needjob1.wav", "wavs/local_nofun1.wav",
+        "wavs/local_relig1.wav", "wavs/local_great1.wav", "wavs/local_great2.wav", "wavs/local_exact1.wav",
+        "wavs/local_exact2.wav", "wavs/local_exact3.wav", "wavs/local_exact4.wav", "wavs/local_exact5.wav",
+        "wavs/local_exact6.wav", "wavs/local_exact7.wav", "wavs/local_exact8.wav", "wavs/local_exact9.wav",
+        "wavs/local_exact0.wav", "wavs/local_free1.wav", "wavs/local_free2.wav", "wavs/local_free3.wav"
     },
     { // 27
-        "libary_starv1.wav", "libary_nojob1.wav", "libary_needjob1.wav", "libary_nofun1.wav",
-        "libary_relig1.wav", "libary_great1.wav", "libary_great2.wav", "libary_exact1.wav",
-        "libary_exact2.wav", "libary_exact3.wav", "libary_exact4.wav", "libary_exact5.wav",
-        "libary_exact6.wav", "libary_exact7.wav", "libary_exact8.wav", "libary_exact9.wav",
-        "libary_exact0.wav", "libary_free1.wav", "libary_free2.wav", "libary_free3.wav"
+        "wavs/libary_starv1.wav", "wavs/libary_nojob1.wav", "wavs/libary_needjob1.wav", "wavs/libary_nofun1.wav",
+        "wavs/libary_relig1.wav", "wavs/libary_great1.wav", "wavs/libary_great2.wav", "wavs/libary_exact1.wav",
+        "wavs/libary_exact2.wav", "wavs/libary_exact3.wav", "wavs/libary_exact4.wav", "wavs/libary_exact5.wav",
+        "wavs/libary_exact6.wav", "wavs/libary_exact7.wav", "wavs/libary_exact8.wav", "wavs/libary_exact9.wav",
+        "wavs/libary_exact0.wav", "wavs/libary_free1.wav", "wavs/libary_free2.wav", "wavs/libary_free3.wav"
     },
     { // 28
-        "srgeon_starv1.wav", "srgeon_nojob1.wav", "srgeon_needjob1.wav", "srgeon_nofun1.wav",
-        "srgeon_relig1.wav", "srgeon_great1.wav", "srgeon_great2.wav", "srgeon_exact1.wav",
-        "srgeon_exact2.wav", "srgeon_exact3.wav", "srgeon_exact4.wav", "srgeon_exact5.wav",
-        "srgeon_exact6.wav", "srgeon_exact7.wav", "srgeon_exact8.wav", "srgeon_exact9.wav",
-        "srgeon_exact0.wav", "srgeon_free1.wav", "srgeon_free2.wav", "srgeon_free3.wav"
+        "wavs/srgeon_starv1.wav", "wavs/srgeon_nojob1.wav", "wavs/srgeon_needjob1.wav", "wavs/srgeon_nofun1.wav",
+        "wavs/srgeon_relig1.wav", "wavs/srgeon_great1.wav", "wavs/srgeon_great2.wav", "wavs/srgeon_exact1.wav",
+        "wavs/srgeon_exact2.wav", "wavs/srgeon_exact3.wav", "wavs/srgeon_exact4.wav", "wavs/srgeon_exact5.wav",
+        "wavs/srgeon_exact6.wav", "wavs/srgeon_exact7.wav", "wavs/srgeon_exact8.wav", "wavs/srgeon_exact9.wav",
+        "wavs/srgeon_exact0.wav", "wavs/srgeon_free1.wav", "wavs/srgeon_free2.wav", "wavs/srgeon_free3.wav"
     },
     { // 29
-        "docker_starv1.wav", "docker_nojob1.wav", "docker_needjob1.wav", "docker_nofun1.wav",
-        "docker_relig1.wav", "docker_great1.wav", "docker_great2.wav", "docker_exact1.wav",
-        "docker_exact2.wav", "docker_exact3.wav", "docker_exact4.wav", "docker_exact5.wav",
-        "docker_exact6.wav", "docker_exact7.wav", "docker_exact8.wav", "docker_exact9.wav",
-        "docker_exact0.wav", "docker_free1.wav", "docker_free2.wav", "docker_free3.wav"
+        "wavs/docker_starv1.wav", "wavs/docker_nojob1.wav", "wavs/docker_needjob1.wav", "wavs/docker_nofun1.wav",
+        "wavs/docker_relig1.wav", "wavs/docker_great1.wav", "wavs/docker_great2.wav", "wavs/docker_exact1.wav",
+        "wavs/docker_exact2.wav", "wavs/docker_exact3.wav", "wavs/docker_exact4.wav", "wavs/docker_exact5.wav",
+        "wavs/docker_exact6.wav", "wavs/docker_exact7.wav", "wavs/docker_exact8.wav", "wavs/docker_exact9.wav",
+        "wavs/docker_exact0.wav", "wavs/docker_free1.wav", "wavs/docker_free2.wav", "wavs/docker_free3.wav"
     },
     { // 30
-        "missionary_starv1.wav", "missionary_nojob1.wav", "missionary_needjob1.wav", "missionary_nofun1.wav",
-        "missionary_relig1.wav", "missionary_great1.wav", "missionary_great2.wav", "missionary_exact1.wav",
-        "missionary_exact2.wav", "missionary_exact3.wav", "mission_exact4.wav", "missionary_exact5.wav",
-        "missionary_exact6.wav", "missionary_exact7.wav", "missionary_exact8.wav", "missionary_exact9.wav",
-        "missionary_exact0.wav", "missionary_free1.wav", "missionary_free2.wav", "missionary_free3.wav"
+        "wavs/missionary_starv1.wav", "wavs/missionary_nojob1.wav", "wavs/missionary_needjob1.wav", "wavs/missionary_nofun1.wav",
+        "wavs/missionary_relig1.wav", "wavs/missionary_great1.wav", "wavs/missionary_great2.wav", "wavs/missionary_exact1.wav",
+        "wavs/missionary_exact2.wav", "wavs/missionary_exact3.wav", "wavs/mission_exact4.wav", "wavs/missionary_exact5.wav",
+        "wavs/missionary_exact6.wav", "wavs/missionary_exact7.wav", "wavs/missionary_exact8.wav", "wavs/missionary_exact9.wav",
+        "wavs/missionary_exact0.wav", "wavs/missionary_free1.wav", "wavs/missionary_free2.wav", "wavs/missionary_free3.wav"
     },
     { // 31
-        "granboy_starv1.wav", "granboy_nojob1.wav", "granboy_needjob1.wav", "granboy_nofun1.wav",
-        "granboy_relig1.wav", "granboy_great1.wav", "granboy_great2.wav", "granboy_exact1.wav",
-        "granboy_exact2.wav", "granboy_exact3.wav", "granboy_exact4.wav", "granboy_exact5.wav",
-        "granboy_exact6.wav", "granboy_exact7.wav", "granboy_exact8.wav", "granboy_exact9.wav",
-        "granboy_exact0.wav", "granboy_free1.wav", "granboy_free2.wav", "granboy_free3.wav"
+        "wavs/granboy_starv1.wav", "wavs/granboy_nojob1.wav", "wavs/granboy_needjob1.wav", "wavs/granboy_nofun1.wav",
+        "wavs/granboy_relig1.wav", "wavs/granboy_great1.wav", "wavs/granboy_great2.wav", "wavs/granboy_exact1.wav",
+        "wavs/granboy_exact2.wav", "wavs/granboy_exact3.wav", "wavs/granboy_exact4.wav", "wavs/granboy_exact5.wav",
+        "wavs/granboy_exact6.wav", "wavs/granboy_exact7.wav", "wavs/granboy_exact8.wav", "wavs/granboy_exact9.wav",
+        "wavs/granboy_exact0.wav", "wavs/granboy_free1.wav", "wavs/granboy_free2.wav", "wavs/granboy_free3.wav"
     }
 };
 
@@ -269,9 +269,7 @@ enum {
 static void play_sound_file(int sound_id, int phrase_id)
 {
     if (sound_id >= 0 && phrase_id >= 0) {
-        char path[FILE_NAME_MAX];
-        snprintf(path, FILE_NAME_MAX, "wavs/%s", FIGURE_SOUNDS[sound_id][phrase_id]);
-        sound_speech_play_file(path);
+        sound_speech_play_file(FIGURE_SOUNDS[sound_id][phrase_id]);
     }
 }
 
