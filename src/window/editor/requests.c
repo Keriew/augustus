@@ -113,7 +113,7 @@ static void draw_background(void)
     lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_DEADLINE, 380, 50, FONT_SMALL_PLAIN); // Deadline:
     //lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT, 530, 50, FONT_SMALL_PLAIN); // Repeat:
     lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY, 450, 30, FONT_SMALL_PLAIN); // Repeat frequency:
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_TEXT, 460, 50, FONT_SMALL_PLAIN); // Repeat
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_TIMES, 460, 50, FONT_SMALL_PLAIN); // times
     lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_YEARS, 532, 50, FONT_SMALL_PLAIN); // years
 
     if (!data.requests_in_use) {
