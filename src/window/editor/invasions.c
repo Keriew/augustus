@@ -105,10 +105,12 @@ static void draw_background(void)
     lang_text_draw(44, 15, 20, 12, FONT_LARGE_BLACK);
 
     lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_DATE, 30, 50, FONT_SMALL_PLAIN); // Invasion date:
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_SIZE, 170, 50, FONT_SMALL_PLAIN); // Invasion size:
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_ENEMY_TYPE, 305, 50, FONT_SMALL_PLAIN); // Enemy type:
-    lang_text_draw(CUSTOM_TRANSLATION, TR_PARAMETER_TYPE_INVASION_POINT, 420, 50, FONT_SMALL_PLAIN); // Invasion point
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT, 535, 50, FONT_SMALL_PLAIN); // "Repeat:
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_SIZE, 160, 50, FONT_SMALL_PLAIN); // Invasion size:
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_ENEMY_TYPE, 280, 50, FONT_SMALL_PLAIN); // Enemy type:
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_FROM, 398, 50, FONT_SMALL_PLAIN); // From:
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY, 450, 30, FONT_SMALL_PLAIN); // Repeat frequency:
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_TEXT, 460, 50, FONT_SMALL_PLAIN); // Repeat
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_YEARS, 532, 50, FONT_SMALL_PLAIN); // years
 
     lang_text_draw_centered(13, 3, 0, 456, 640, FONT_NORMAL_BLACK);
     lang_text_draw_multiline(152, 2, 20, 380, 600, FONT_NORMAL_BLACK);
@@ -131,33 +133,42 @@ static void draw_invasion_button(const grid_box_item *item)
     const invasion_t *invasion = data.invasions[item->index];
     text_draw_number(invasion->year, '+', " ", item->x + 10, item->y + 7, FONT_NORMAL_BLACK, 0);
     lang_text_draw_year(scenario_property_start_year() + invasion->year, item->x + 50, item->y + 7, FONT_NORMAL_BLACK);
-    int width = text_draw_number(invasion->amount.min, '@', " ", item->x + 160, item->y + 7, FONT_NORMAL_BLACK, 0);
+    int width = text_draw_number(invasion->amount.min, '@', " ", item->x + 155, item->y + 7, FONT_NORMAL_BLACK, 0);
     if (invasion->amount.max > invasion->amount.min) {
-        width += text_draw(string_from_ascii("-"), item->x + 155 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
-        width += text_draw_number(invasion->amount.max, '@', " ", item->x + 150 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+        width += text_draw(string_from_ascii("-"), item->x + 150 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+        width += text_draw_number(invasion->amount.max, '@', " ", item->x + 145 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
     }
 
     if (invasion->type == INVASION_TYPE_DISTANT_BATTLE) {
-        lang_text_draw(34, invasion->type, item->x + 280, item->y + 7, FONT_NORMAL_BLACK);
+        lang_text_draw(34, invasion->type, item->x + 255, item->y + 7, FONT_NORMAL_BLACK);
     } else {
-        lang_text_draw(34, invasion->type, item->x + 280, item->y + 7, FONT_NORMAL_BLACK);
-        //lang_text_draw(44, 27, item->x + 460, item->y + 7, FONT_NORMAL_BLACK); // from
+        lang_text_draw(34, invasion->type, item->x + 255, item->y + 7, FONT_NORMAL_BLACK);
     }
 
     if (invasion->type != INVASION_TYPE_DISTANT_BATTLE) {
         if (invasion->from + 1 == 9) {
-            width += text_draw(string_from_ascii("RND"), item->x + 434, item->y + 7, FONT_NORMAL_BLACK, 0);
+            width += text_draw(string_from_ascii("RND"), item->x + 385, item->y + 7, FONT_NORMAL_BLACK, 0);
         } else {
-            text_draw_number(invasion->from + 1, '@', " ", item->x + 440, item->y + 7, FONT_NORMAL_BLACK, 0);
+            text_draw_number(invasion->from + 1, '@', " ", item->x + 391, item->y + 7, FONT_NORMAL_BLACK, 0);
         }
     }
 
     if (invasion->repeat.times == INVASIONS_REPEAT_INFINITE) {
-        width += text_draw(string_from_ascii("INF"), 545, item->y + 7, FONT_NORMAL_BLACK, 0);
+        width += text_draw(string_from_ascii("INF"), 470, item->y + 7, FONT_NORMAL_BLACK, 0);
     } else if (invasion->repeat.times == 0) {
-        width += text_draw(string_from_ascii("-"), 555, item->y + 7, FONT_NORMAL_BLACK, 0);
+        width += text_draw(string_from_ascii("-"), 480, item->y + 7, FONT_NORMAL_BLACK, 0);
     } else {
-        text_draw_number(invasion->repeat.times, '@', " ", 538, item->y + 7, FONT_NORMAL_BLACK, 0);
+        text_draw_number(invasion->repeat.times, '@', " ", 465, item->y + 7, FONT_NORMAL_BLACK, 0);
+    }
+
+    if (invasion->repeat.times == 0) {
+        width += text_draw(string_from_ascii(" "), item->x + 500, item->y + 7, FONT_NORMAL_BLACK, 0);
+    } else if (invasion->repeat.times > 0 || invasion->repeat.times == INVASIONS_REPEAT_INFINITE) {
+        int width = text_draw_number(invasion->repeat.interval.min, '@', " ", item->x + 510, item->y + 7, FONT_NORMAL_BLACK, 0);
+        if (invasion->repeat.interval.max > invasion->repeat.interval.min) {
+            width += text_draw(string_from_ascii("-"), item->x + 500 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+            width += text_draw_number(invasion->repeat.interval.max, '@', " ", item->x + 490 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+        }
     }
 }
 

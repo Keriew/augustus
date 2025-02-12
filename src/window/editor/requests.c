@@ -108,11 +108,13 @@ static void draw_background(void)
     lang_text_draw(44, 14, 20, 12, FONT_LARGE_BLACK);
 
     lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_DATE, 30, 50, FONT_SMALL_PLAIN); // Request date:
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_AMOUNT, 180, 50, FONT_SMALL_PLAIN); // Amount:
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_RESOURCE, 310, 50, FONT_SMALL_PLAIN); // Resource:
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_DEADLINE, 440, 50, FONT_SMALL_PLAIN); // Deadline:
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT, 530, 50, FONT_SMALL_PLAIN); // Repeat:
-
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_AMOUNT, 150, 50, FONT_SMALL_PLAIN); // Amount:
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_RESOURCE, 270, 50, FONT_SMALL_PLAIN); // Resource:
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_DEADLINE, 380, 50, FONT_SMALL_PLAIN); // Deadline:
+    //lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT, 530, 50, FONT_SMALL_PLAIN); // Repeat:
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY, 450, 30, FONT_SMALL_PLAIN); // Repeat frequency:
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_TEXT, 460, 50, FONT_SMALL_PLAIN); // Repeat
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_YEARS, 532, 50, FONT_SMALL_PLAIN); // years
 
     if (!data.requests_in_use) {
         lang_text_draw_centered(44, 19, 0, 165, 640, FONT_LARGE_BLACK);
@@ -136,27 +138,37 @@ static void draw_request_button(const grid_box_item *item)
     const scenario_request *request = data.requests[item->index];
     text_draw_number(request->year, '+', " ", item->x + 10, item->y + 7, FONT_NORMAL_BLACK, 0);
     lang_text_draw_year(scenario_property_start_year() + request->year, item->x + 50, item->y + 7, FONT_NORMAL_BLACK);
-    int width = text_draw_number(request->amount.min, '@', " ", item->x + 160, item->y + 7, FONT_NORMAL_BLACK, 0);
+    int width = text_draw_number(request->amount.min, '@', " ", item->x + 135, item->y + 7, FONT_NORMAL_BLACK, 0);
     if (request->amount.max > request->amount.min) {
-        width += text_draw(string_from_ascii("-"), item->x + 155 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
-        width += text_draw_number(request->amount.max, '@', " ", item->x + 150 + width, item->y + 7,
+        width += text_draw(string_from_ascii("-"), item->x + 130 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+        width += text_draw_number(request->amount.max, '@', " ", item->x + 125 + width, item->y + 7,
             FONT_NORMAL_BLACK, 0);
     }
     int image_id = resource_get_data(request->resource)->image.editor.icon;
     const image *img = image_get(image_id);
     int base_height = (item->height - img->original.height) / 2;
-    image_draw(image_id, item->x + 290, item->y + base_height, COLOR_MASK_NONE, SCALE_NONE);
-    text_draw(resource_get_data(request->resource)->text, item->x + 320, item->y + 7,
+    image_draw(image_id, item->x + 260, item->y + base_height, COLOR_MASK_NONE, SCALE_NONE);
+    text_draw(resource_get_data(request->resource)->text, item->x + 290, item->y + 7,
         FONT_NORMAL_BLACK, 0);
 
-    text_draw_number(request->deadline_years, '@', " ", 460, item->y + 7, FONT_NORMAL_BLACK, 0);
+    text_draw_number(request->deadline_years, '@', " ", 400, item->y + 7, FONT_NORMAL_BLACK, 0);
 
     if (request->repeat.times == REQUESTS_REPEAT_INFINITE) {
-        width += text_draw(string_from_ascii("INF"), 545, item->y + 7, FONT_NORMAL_BLACK, 0);
+        width += text_draw(string_from_ascii("INF"), 470, item->y + 7, FONT_NORMAL_BLACK, 0);
     } else if (request->repeat.times == 0) {
-        width += text_draw(string_from_ascii("-"), 555, item->y + 7, FONT_NORMAL_BLACK, 0);
+        width += text_draw(string_from_ascii("-"), 480, item->y + 7, FONT_NORMAL_BLACK, 0);
     } else {
-        text_draw_number(request->repeat.times, '@', " ", 538, item->y + 7, FONT_NORMAL_BLACK, 0);
+        text_draw_number(request->repeat.times, '@', " ", 465, item->y + 7, FONT_NORMAL_BLACK, 0);
+    }
+
+    if (request->repeat.times == 0) {
+        width += text_draw(string_from_ascii(" "), item->x + 500, item->y + 7, FONT_NORMAL_BLACK, 0);
+    } else if (request->repeat.times > 0 || request->repeat.times == REQUESTS_REPEAT_INFINITE) {
+        int width = text_draw_number(request->repeat.interval.min, '@', " ", item->x + 510, item->y + 7, FONT_NORMAL_BLACK, 0);
+        if (request->repeat.interval.max > request->repeat.interval.min) {
+            width += text_draw(string_from_ascii("-"), item->x + 500 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+            width += text_draw_number(request->repeat.interval.max, '@', " ", item->x + 490 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+        }
     }
 
 }
