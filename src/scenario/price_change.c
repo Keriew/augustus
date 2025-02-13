@@ -109,7 +109,7 @@ int scenario_price_change_count_total(void)
 
 void scenario_price_change_save_state(buffer *buf)
 {
-    buffer_init_dynamic_array(buf, price_changes.size, PRICE_CHANGES_STRUCT_SIZE_CURRENT);
+    buffer_init_dynamic_array(buf, PRICE_CHANGE_VERSION, price_changes.size, PRICE_CHANGES_STRUCT_SIZE_CURRENT);
 
     const price_change_t *price_change;
     array_foreach(price_changes, price_change) {
@@ -123,6 +123,7 @@ void scenario_price_change_save_state(buffer *buf)
 
 void scenario_price_change_load_state(buffer *buf)
 {
+    // Initial version (as its own buffer), so version in buffer is not used, since no backwards compatibility is needed
     unsigned int size = buffer_load_dynamic_array(buf);
 
     if (!array_init(price_changes, PRICE_CHANGES_ARRAY_SIZE_STEP, new_price_change, price_change_in_use) ||
