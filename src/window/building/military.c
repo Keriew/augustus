@@ -9,6 +9,7 @@
 #include "city/military.h"
 #include "city/view.h"
 #include "core/calc.h"
+#include "core/dir.h"
 #include "core/log.h"
 #include "core/string.h"
 #include "figure/formation_legion.h"
@@ -123,7 +124,8 @@ void window_building_draw_wall(building_info_context *c)
 void window_building_draw_gatehouse(building_info_context *c)
 {
     c->help_id = 85;
-    window_building_play_sound(c, "wavs/gatehouse.wav");
+    window_building_play_sound(c, ASSETS_DIRECTORY "/Sounds/Road.ogg");
+    //window_building_play_sound(c, "wavs/gatehouse.wav");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(90, 0, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
     window_building_draw_description_at(c, BLOCK_SIZE * c->height_blocks - 158, 90, 1);
