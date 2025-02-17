@@ -48,7 +48,7 @@ static generic_button buttons[] = {
     {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (2 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_amount, 0, 3},
     {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (3 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_amount, 0, 4},
     {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (4 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_amount, 0, 5},
-    {288, 32, 64, 14, button_delete},
+    {288, 32, 80, 25, button_delete},
     {32, 64, BUTTON_WIDTH, 32, button_change_type}
 };
 
@@ -93,7 +93,7 @@ static void draw_foreground(void)
         large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / 16, data.focus_button_id == i + 1 ? 1 : 0);
     }
 
-    text_draw_centered(translation_for(TR_EDITOR_DELETE), 288, 40, 72, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+    text_draw_centered(translation_for(TR_EDITOR_DELETE), 288, 40, 80, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
 
     text_draw_centered(translation_for(data.xml_info->xml_attr.key), 32, 72, BUTTON_WIDTH, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
 

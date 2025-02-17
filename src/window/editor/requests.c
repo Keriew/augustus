@@ -138,10 +138,10 @@ static void draw_request_button(const grid_box_item *item)
     const scenario_request *request = data.requests[item->index];
     text_draw_number(request->year, '+', " ", item->x + 10, item->y + 7, FONT_NORMAL_BLACK, 0);
     lang_text_draw_year(scenario_property_start_year() + request->year, item->x + 50, item->y + 7, FONT_NORMAL_BLACK);
-    int width = text_draw_number(request->amount.min, '@', " ", item->x + 135, item->y + 7, FONT_NORMAL_BLACK, 0);
+    int width = text_draw_number(request->amount.min, '@', " ", item->x + 140, item->y + 7, FONT_NORMAL_BLACK, 0);
     if (request->amount.max > request->amount.min) {
-        width += text_draw(string_from_ascii("-"), item->x + 130 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
-        width += text_draw_number(request->amount.max, '@', " ", item->x + 125 + width, item->y + 7,
+        width += text_draw(string_from_ascii("-"), item->x + 135 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+        width += text_draw_number(request->amount.max, '@', " ", item->x + 130 + width, item->y + 7,
             FONT_NORMAL_BLACK, 0);
     }
     int image_id = resource_get_data(request->resource)->image.editor.icon;
