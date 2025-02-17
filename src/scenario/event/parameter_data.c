@@ -1096,7 +1096,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         case ACTION_TYPE_REQUEST_IMMEDIATELY_START:
         case ACTION_TYPE_TAX_RATE_SET:
             {
-                result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+                result_text = append_text(string_from_ascii(""), result_text, &maxlength);
                 result_text = translation_for_number_value(action->parameter1, result_text, &maxlength);
                 return;
             }
