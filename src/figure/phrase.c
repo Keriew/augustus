@@ -20,7 +20,7 @@
 
 #define SOUND_FILENAME_MAX 64
 
-static const char FIGURE_SOUNDS[32][20][SOUND_FILENAME_MAX] = {
+static const char FIGURE_SOUNDS[33][20][SOUND_FILENAME_MAX] = {
     { // 0
         "wavs/vigils_starv1.wav", "wavs/vigils_nojob1.wav", "wavs/vigils_needjob1.wav", "wavs/vigils_nofun1.wav",
         "wavs/vigils_relig1.wav", "wavs/vigils_great1.wav", "wavs/vigils_great2.wav", "wavs/vigils_exact1.wav",
@@ -244,7 +244,14 @@ static const char FIGURE_SOUNDS[32][20][SOUND_FILENAME_MAX] = {
         "wavs/granboy_exact2.wav", "wavs/granboy_exact3.wav", "wavs/granboy_exact4.wav", "wavs/granboy_exact5.wav",
         "wavs/granboy_exact6.wav", "wavs/granboy_exact7.wav", "wavs/granboy_exact8.wav", "wavs/granboy_exact9.wav",
         "wavs/granboy_exact0.wav", "wavs/granboy_free1.wav", "wavs/granboy_free2.wav", "wavs/granboy_free3.wav"
-    }
+    },
+    { // 32 FIGURE_DEPOT_CART_PUSHER = 91
+        "wavs/ox_starv1.wav", "wavs/ox_nojob1.wav", "wavs/ox_needjob1.wav", "wavs/ox_nofun1.wav",
+        "wavs/ox_relig1.wav", "wavs/ox_great1.wav", "wavs/ox_great2.wav", ASSETS_DIRECTORY "/Sounds/Ox.ogg",
+        "wavs/ox_exact2.wav", "wavs/ox_exact3.wav", "wavs/ox_exact4.wav", "wavs/ox_exact5.wav",
+        "wavs/ox_exact6.wav", "wavs/ox_exact7.wav", "wavs/ox_exact8.wav", "wavs/ox_exact9.wav",
+        "wavs/ox_exact0.wav", "wavs/ox_free1.wav", "wavs/ox_free2.wav", "wavs/ox_free3.wav"
+    },
 };
 
 static const int FIGURE_TYPE_TO_SOUND_TYPE[] = {
@@ -257,7 +264,7 @@ static const int FIGURE_TYPE_TO_SOUND_TYPE[] = {
     -1, -1, -1, -1, 30, -1, 31, -1, -1, -1, // 60-69
     -1, -1, -1, 19, 19, 2, 1, 19, 8, 11,  // 70-79
     11, -1, 1, -1, -1, 19, 20, 20, 19, 19,  // 80-89
-    19, -1, -1, 22, 25, -1, -1, -1, -1, -1, // 90-99
+    19, 32, -1, 22, 25, -1, -1, -1, -1, -1, // 90-99
 };
 
 enum {
@@ -420,6 +427,14 @@ static int citizen_phrase(figure *f)
 static int missionary_phrase(figure *f)
 {
     if (++f->phrase_sequence_exact >= 4) {
+        f->phrase_sequence_exact = 0;
+    }
+    return 7 + f->phrase_sequence_exact;
+}
+
+static int ox_phrase(figure *f)
+{
+    if (++f->phrase_sequence_exact >= 1) {
         f->phrase_sequence_exact = 0;
     }
     return 7 + f->phrase_sequence_exact;
@@ -641,6 +656,8 @@ static int phrase_based_on_figure_state(figure *f)
             return citizen_phrase(f);
         case FIGURE_MISSIONARY:
             return missionary_phrase(f);
+        case FIGURE_DEPOT_CART_PUSHER:
+            return ox_phrase(f);
         case FIGURE_HOMELESS:
             return homeless_phrase(f);
         case FIGURE_IMMIGRANT:
