@@ -191,12 +191,12 @@ uint32_t buffer_load_dynamic(buffer *buf)
     return size;
 }
 
-void buffer_init_dynamic_array(buffer *buf, uint32_t array_size, uint32_t element_size)
+void buffer_init_dynamic_array(buffer *buf, int32_t version, uint32_t array_size, uint32_t element_size)
 {
     uint32_t buf_size = (3 * sizeof(uint32_t)) + (array_size * element_size);
     buffer_init_dynamic(buf, buf_size);
 
-    buffer_write_i32(buf, 0); // Skip
+    buffer_write_i32(buf, version);
     buffer_write_u32(buf, array_size);
     buffer_write_u32(buf, element_size);
 }
@@ -207,5 +207,15 @@ uint32_t buffer_load_dynamic_array(buffer *buf)
     buffer_skip(buf, 8); // Skip the buffer size and version
     uint32_t array_size = buffer_read_u32(buf);
     buffer_skip(buf, 4); // Skip the element size
+    return array_size;
+}
+
+uint32_t buffer_load_dynamic_array_all_headers(buffer *buf, int32_t *version, uint32_t *element_size)
+{
+    buffer_set(buf, 0);
+    buffer_skip(buf, 4); // Skip the buffer size
+    *version = buffer_read_i32(buf);
+    uint32_t array_size = buffer_read_u32(buf);
+    *element_size = buffer_read_u32(buf);
     return array_size;
 }

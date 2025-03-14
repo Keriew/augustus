@@ -79,8 +79,8 @@ Every time the month ticks over (changes to the next month).
 There are a few settings we can set on the event itself.
 
 Making the event repeat
-+ "repeat_months_min" = If this is greater than 0, and max is equal or greater than min, then this event will repeat (it becomes paused instead of disabled after running.)
-+ "repeat_months_max" = The event will become active again after a random number of months between min and max (if the two are equal, then the number is not random).
++ "repeat_triggers_min" = If this is greater than 0, and max is equal or greater than min, then this event will repeat (it becomes paused instead of disabled after running.)
++ "repeat_triggers_max" = The event will become active again after a random number of triggers between min and max (if the two are equal, then the number is not random).
 + "max_number_of_repeats" = This is the maximum number of times the event is allowed to trigger. Settings this to 0 will allow the event to trigger infinitely.
 
 

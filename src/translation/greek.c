@@ -1023,7 +1023,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_EVENT_STATE_ACTIVE, "Ενεργό"},
     {TR_EDITOR_SCENARIO_EVENT_STATE_PAUSED, "Διακόπηκε"},
     {TR_EDITOR_SCENARIO_EVENT_EXECUTION_COUNT, "Αριθμός εκτελέσεων: "},
-    {TR_EDITOR_SCENARIO_EVENT_MONTHS_UNTIL_ACTIVE, "Μήνες μέχρι να ενεργοποιηθεί: "},
     {TR_EDITOR_SCENARIO_CONDITION, "Κατάσταση"},
     {TR_EDITOR_SCENARIO_ACTION, "Ενέργεια"},
     {TR_EDITOR_SCENARIO_EVENTS_ADD, "Προσθήκη νέου συμβάντος"},
