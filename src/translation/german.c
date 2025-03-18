@@ -1349,7 +1349,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_EVENT_DELETED, "Gelöschtes Ereigniss"},
     {TR_EDITOR_SCENARIO_EVENT_EXECUTION_COUNT, "Ausführungsanzahl: "},
     {TR_EDITOR_ID, "ID: "},
-    {TR_EDITOR_SCENARIO_EVENT_MONTHS_UNTIL_ACTIVE, "Monate bis aktiv: "},
     {TR_EDITOR_SCENARIO_EVENT_STATE_ACTIVE, "Aktiv"},
     {TR_EDITOR_SCENARIO_EVENT_STATE_DISABLED, "Deaktiviert"},
     {TR_EDITOR_SCENARIO_EVENT_STATE_PAUSED, "Pausiert"},

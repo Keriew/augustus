@@ -115,6 +115,7 @@ void scenario_allowed_building_load_state(buffer *buf)
 {
     scenario_allowed_building_enable_all();
 
+    // Initial version (as its own buffer), so version in buffer is not used, since no backwards compatibility is needed
     unsigned int buildings = buffer_load_dynamic_array(buf);
 
     for (unsigned int i = 0; i < buildings; i++) {
@@ -142,7 +143,7 @@ void scenario_allowed_building_load_state_old_version(buffer *buf)
 
 void scenario_allowed_building_save_state(buffer *buf)
 {
-    buffer_init_dynamic_array(buf, BUILDING_TYPE_MAX, sizeof(int8_t));
+    buffer_init_dynamic_array(buf, ALLOWED_BUILDINGS_CURRENT_VERSION, BUILDING_TYPE_MAX, sizeof(int8_t));
 
     for (unsigned int i = 0; i < BUILDING_TYPE_MAX; i++) {
         buffer_write_i8(buf, allowed_buildings[i]);
