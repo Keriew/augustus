@@ -33,14 +33,14 @@ static image_button image_buttons_bottom[] = {
 };
 
 static generic_button buttons_gods_size[] = {
-    {70, 96, 80, 90, button_god},
-    {170, 96, 80, 90, button_god, 0, 1},
-    {270, 96, 80, 90, button_god, 0, 2},
-    {370, 96, 80, 90, button_god, 0, 3},
-    {470, 96, 80, 90, button_god, 0, 4},
-    {102, 216, 430, 26, button_size, 0, 1},
-    {102, 246, 430, 26, button_size, 0, 2},
-    {102, 276, 430, 26, button_size, 0, 3},
+    {80, 96, 80, 90, button_god},
+    {180, 96, 80, 90, button_god, 0, 1},
+    {280, 96, 80, 90, button_god, 0, 2},
+    {380, 96, 80, 90, button_god, 0, 3},
+    {480, 96, 80, 90, button_god, 0, 4},
+    {82, 216, 477, 26, button_size, 0, 1},
+    {82, 246, 477, 26, button_size, 0, 2},
+    {82, 276, 477, 26, button_size, 0, 3},
 };
 
 static unsigned int focus_button_id;
@@ -63,27 +63,27 @@ static void draw_buttons(void)
         wine_image_id = resource_get_data(RESOURCE_WINE)->image.icon;
     }
     // small festival
-    button_border_draw(102, 216, 430, 26, color == COLOR_MASK_NONE && focus_button_id == 6);
-    int width = lang_text_draw_colored(58, 31, 110, 224, font, color);
-    lang_text_draw_amount_colored(8, 0, city_festival_small_cost(), 110 + width, 224, font, color);
+    button_border_draw(82, 216, 477, 26, color == COLOR_MASK_NONE && focus_button_id == 6);
+    int width = lang_text_draw_colored(58, 31, 92, 224, font, color);
+    lang_text_draw_amount_colored(8, 0, city_festival_small_cost(), 92 + width, 224, font, color);
 
     // large festival
-    button_border_draw(102, 246, 430, 26, color == COLOR_MASK_NONE && focus_button_id == 7);
-    width = lang_text_draw_colored(58, 32, 110, 254, font, color);
-    lang_text_draw_amount_colored(8, 0, city_festival_large_cost(), 110 + width, 254, font, color);
+    button_border_draw(82, 246, 477, 26, color == COLOR_MASK_NONE && focus_button_id == 7);
+    width = lang_text_draw_colored(58, 32, 92, 254, font, color);
+    lang_text_draw_amount_colored(8, 0, city_festival_large_cost(), 92 + width, 254, font, color);
 
     if (city_festival_out_of_wine() && !city_finance_out_of_money()) {
         font = FONT_NORMAL_PLAIN;
         color = COLOR_FONT_LIGHT_GRAY;
-        wine_image_id = assets_get_image_id("UI", "Grand Festival Wine Disabled");        
+        wine_image_id = assets_get_image_id("UI", "Grand Festival Wine Disabled");
     }
 
     // grand festival
-    button_border_draw(102, 276, 430, 26, color == COLOR_MASK_NONE && focus_button_id == 8);
-    width = lang_text_draw_colored(58, 33, 110, 284, font, color);
-    width += lang_text_draw_amount_colored(8, 0, city_festival_grand_cost(), 110 + width, 284, font, color);
-    width += lang_text_draw_amount_colored(8, 10, city_festival_grand_wine(), 120 + width, 284, font, color);
-    image_draw(wine_image_id, 120 + width, 279, COLOR_MASK_NONE, SCALE_NONE);
+    button_border_draw(82, 276, 477, 26, color == COLOR_MASK_NONE && focus_button_id == 8);
+    width = lang_text_draw_colored(58, 33, 92, 284, font, color);
+    width += lang_text_draw_amount_colored(8, 0, city_festival_grand_cost(), 92 + width, 284, font, color);
+    width += lang_text_draw_amount_colored(8, 10, city_festival_grand_wine(), 97 + width, 284, font, color);
+    image_draw(wine_image_id, 97 + width, 279, COLOR_MASK_NONE, SCALE_NONE);
 }
 
 static void draw_background(void)
@@ -96,10 +96,10 @@ static void draw_background(void)
     lang_text_draw_centered(58, 25 + city_festival_selected_god(), 48, 60, 544, FONT_LARGE_BLACK);
     for (int god = 0; god < MAX_GODS; god++) {
         if (god == city_festival_selected_god()) {
-            button_border_draw(100 * god + 66, 92, 90, 100, 1);
-            image_draw(image_group(GROUP_PANEL_WINDOWS) + god + 21, 100 * god + 70, 96, COLOR_MASK_NONE, SCALE_NONE);
+            button_border_draw(100 * god + 75, 91, 91, 101, 1);
+            image_draw(image_group(GROUP_PANEL_WINDOWS) + god + 21, 100 * god + 80, 96, COLOR_MASK_NONE, SCALE_NONE);
         } else {
-            image_draw(image_group(GROUP_PANEL_WINDOWS) + god + 16, 100 * god + 70, 96, COLOR_MASK_NONE, SCALE_NONE);
+            image_draw(image_group(GROUP_PANEL_WINDOWS) + god + 16, 100 * god + 80, 96, COLOR_MASK_NONE, SCALE_NONE);
         }
     }
     draw_buttons();
@@ -122,10 +122,10 @@ static void draw_foreground(void)
 {
     graphics_in_dialog();
     if (!city_finance_out_of_money()) {
-        button_border_draw(102, 216, 430, 26, focus_button_id == 6);
-        button_border_draw(102, 246, 430, 26, focus_button_id == 7);
+        button_border_draw(82, 216, 477, 26, focus_button_id == 6);
+        button_border_draw(82, 246, 477, 26, focus_button_id == 7);
         if (!city_festival_out_of_wine()) {
-            button_border_draw(102, 276, 430, 26, focus_button_id == 8);
+            button_border_draw(82, 276, 477, 26, focus_button_id == 8);
         }
     }
     image_buttons_draw(0, 0, image_buttons_bottom, active_image_buttons());
