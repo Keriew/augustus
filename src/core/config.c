@@ -99,6 +99,7 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_SCREEN_CURSOR_SCALE] = 100,
     [CONFIG_GP_CH_MAX_GRAND_TEMPLES] = 2,    
     [CONFIG_UI_SHOW_DESIRABILITY_RANGE] = 0,
+    [CONFIG_UI_RESIZABLE_MISSION_DIALOG] = 0,
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };

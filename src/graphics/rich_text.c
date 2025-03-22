@@ -530,6 +530,10 @@ static int draw_text(const uint8_t *text, int x_offset, int y_offset,
     return num_lines;
 }
 
+int rich_text_get_line_height() {
+    return data.line_height;
+}
+
 int rich_text_draw(const uint8_t *text, int x_offset, int y_offset, int box_width, int height_lines, int measure_only)
 {
     return draw_text(text, x_offset, y_offset, box_width, height_lines, 0, measure_only);
