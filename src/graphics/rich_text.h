@@ -97,4 +97,9 @@ int rich_text_handle_mouse(const mouse *m);
  */
 int rich_text_scroll_position(void);
 
+/**
+* Gets the line height
+*/
+int rich_text_get_line_height(void);
+
 #endif // GRAPHICS_RICH_TEXT_H
