@@ -71,7 +71,6 @@ static struct {
         int margin_y; // In blocks
         int min_blocks_width;
         int min_blocks_height;
-        int resizable;
     } layout;
 } data;
 
@@ -86,7 +85,6 @@ static void init(void)
     data.layout.margin_y = 10;
     data.layout.min_blocks_width = 40; // 640px
     data.layout.min_blocks_height = 30; //480 px
-    data.layout.resizable = config_get(CONFIG_UI_RESIZABLE_MISSION_DIALOG);
     rich_text_reset(0);
 }
 
@@ -256,9 +254,6 @@ static int can_go_back(void)
 
 static int get_width_in_blocks(void)
 {
-    if(!data.layout.resizable) {
-        return data.layout.min_blocks_width;
-    }
     int current_screen_width = screen_width();
     int min_blocks_width = data.layout.min_blocks_width; // Use 40 blocks as minimum width (40 blocks = 640px)
     int width = (current_screen_width / BLOCK_SIZE) - data.layout.margin_x;
@@ -267,9 +262,6 @@ static int get_width_in_blocks(void)
 
 static int get_height_in_blocks(void)
 {
-    if(!data.layout.resizable) {
-        return data.layout.min_blocks_height;
-    }
     int current_screen_height = screen_height();
     int min_blocks_height = data.layout.min_blocks_height; // Use 30 blocks as minimum height (30 blocks = 480px)
     int height = (current_screen_height / BLOCK_SIZE) - data.layout.margin_y;
