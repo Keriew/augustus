@@ -106,8 +106,7 @@ static int show_building_enemy(const building *b)
     return b->type == BUILDING_PREFECTURE
         || b->type == BUILDING_WATCHTOWER || b->type == BUILDING_TOWER
         || b->type == BUILDING_FORT || b->type == BUILDING_FORT_GROUND
-        || b->type == BUILDING_GATEHOUSE || b->type == BUILDING_PALISADE_GATE || b->type == BUILDING_PALISADE
-        || b->type == BUILDING_WALL; // The wall is not displayed! Why?
+        || b->type == BUILDING_GATEHOUSE || b->type == BUILDING_PALISADE_GATE || b->type == BUILDING_PALISADE;
 }
 
 static int show_figure_fire(const figure *f)
@@ -472,7 +471,6 @@ const city_overlay *city_overlay_for_enemy(void)
     static city_overlay overlay = {
         OVERLAY_ENEMY,
         COLUMN_COLOR_RED,
-        //show_building_none,
         show_building_enemy,
         show_figure_enemy,
         get_column_height_none,
