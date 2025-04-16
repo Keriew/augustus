@@ -13,13 +13,14 @@
 #include "scenario/event/controller.h"
 #include "scenario/event/data.h"
 #include "scenario/event/event.h"
+#include "scenario/event/export_xml.h"
 #include "scenario/event/parameter_data.h"
 #include "window/plain_message_dialog.h"
 
 #include <math.h>
 #include <stdio.h>
 
-#define XML_TOTAL_ELEMENTS 63
+#define XML_TOTAL_ELEMENTS 64
 #define ERROR_MESSAGE_LENGTH 200
 
 static struct {
@@ -123,7 +124,8 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "cause_blessing", xml_import_create_action, 0, "actions" },
     { "cause_minor_curse", xml_import_create_action, 0, "actions" }, // 60
     { "cause_major_curse", xml_import_create_action, 0, "actions" },
-    { "change_climate", xml_import_create_action, 0, "actions"}
+    { "change_climate", xml_import_create_action, 0, "actions"},
+    { "context_building_type", xml_import_create_condition, 0, "conditions|group" }
 };
 
 static int xml_import_start_scenario_events(void)
@@ -198,22 +200,41 @@ static int xml_import_start_event(void)
         return 0;
     }
 
-    int min = xml_parser_get_attribute_int("repeat_months_min");
+    int min = 0;
+    if (data.version >= SCENARIO_EVENTS_XML_TRIGGER_TYPES_ADDED) {
+        min = xml_parser_get_attribute_int("repeat_triggers_min");
+    } else {
+        min = xml_parser_get_attribute_int("repeat_months_min");
+    }
     if (!min) {
         min = 0;
     }
 
-    int max = xml_parser_get_attribute_int("repeat_months_max");
+    int max = 0;
+    if (data.version >= SCENARIO_EVENTS_XML_TRIGGER_TYPES_ADDED) {
+        min = xml_parser_get_attribute_int("repeat_triggers_max");
+    } else {
+        min = xml_parser_get_attribute_int("repeat_months_max");
+    }
     if (!max) {
         max = min;
     }
-
+    
     int max_repeats = xml_parser_get_attribute_int("max_number_of_repeats");
     if (!max_repeats) {
         max_repeats = 0;
     }
 
-    data.current_event = scenario_event_create(min, max, max_repeats);
+    int trigger_type = EVENT_TRIGGER_MONTH_START;
+    if (data.version >= SCENARIO_EVENTS_XML_TRIGGER_TYPES_ADDED && xml_parser_has_attribute("check_trigger_when")) {
+        const char *value = xml_parser_get_attribute_string("check_trigger_when");
+        special_attribute_mapping_t *found = scenario_events_parameter_data_get_attribute_mapping_by_text(PARAMETER_TYPE_EVENT_TRIGGER_TYPE, value);
+        if (found) {
+            trigger_type = found->value;
+        }
+    }
+
+    data.current_event = scenario_event_create(min, max, max_repeats, trigger_type);
 
     if (!data.current_event) {
         data.success = 0;
@@ -412,6 +433,7 @@ static int xml_import_special_parse_attribute(xml_data_attribute_t *attr, int *t
         case PARAMETER_TYPE_TARGET_TYPE:
         case PARAMETER_TYPE_GOD:
         case PARAMETER_TYPE_CLIMATE:
+        case PARAMETER_TYPE_EVENT_TRIGGER_TYPE:
             return xml_import_special_parse_type(attr, attr->type, target);
         case PARAMETER_TYPE_BUILDING_COUNTING:
             return xml_import_special_parse_building_counting(attr, target);

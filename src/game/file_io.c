@@ -689,8 +689,7 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
         scenario_custom_variable_load_state(file->custom_variables);
     }
     if (version > SCENARIO_LAST_NO_EVENTS) {
-        scenario_events_load_state(file->scenario_events, file->scenario_conditions, file->scenario_actions,
-            version > SCENARIO_LAST_STATIC_ORIGINAL_DATA);
+        scenario_events_load_state(file->scenario_events, file->scenario_conditions, file->scenario_actions);
     } else {
         scenario_events_clear();
     }
@@ -779,8 +778,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     }
 
     if (scenario_version > SCENARIO_LAST_NO_EVENTS) {
-        scenario_events_load_state(state->scenario_events, state->scenario_conditions, state->scenario_actions,
-            scenario_version > SCENARIO_LAST_STATIC_ORIGINAL_DATA);
+        scenario_events_load_state(state->scenario_events, state->scenario_conditions, state->scenario_actions);
     } else {
         scenario_events_clear();
     }
