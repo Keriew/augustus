@@ -1021,6 +1021,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
                 result_text = append_text(translation_for(TR_PARAMETER_RADIUS), result_text, &maxlength);
                 result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
                 if (action->parameter4) {
+                    result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
                     result_text = append_text(translation_for(TR_PARAMETER_DISPLAY_DESTROY_ALL_TYPES), result_text, &maxlength);
                 } else {
                     result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_BUILDING, action->parameter3, result_text, &maxlength);
@@ -1096,7 +1097,6 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         case ACTION_TYPE_REQUEST_IMMEDIATELY_START:
         case ACTION_TYPE_TAX_RATE_SET:
             {
-                result_text = append_text(string_from_ascii(""), result_text, &maxlength);
                 result_text = translation_for_number_value(action->parameter1, result_text, &maxlength);
                 return;
             }
@@ -1215,7 +1215,6 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
             }
         case CONDITION_TYPE_COUNT_OWN_TROOPS:
             {
-                result_text = append_text(string_from_ascii(""), result_text, &maxlength);
                 result_text = translation_for_boolean_text(condition->parameter3, TR_PARAMETER_DISPLAY_IN_CITY, TR_PARAMETER_DISPLAY_ANYWHERE, result_text, &maxlength);
                 result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
                 result_text = translation_for_number_value(condition->parameter2, result_text, &maxlength);
@@ -1302,7 +1301,6 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
             }
         case CONDITION_TYPE_TIME_PASSED:
             {
-                result_text = append_text(string_from_ascii(""), result_text, &maxlength);
                 result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
                 result_text = translation_for_min_max_values(condition->parameter2, condition->parameter3, result_text, &maxlength);
                 return;
@@ -1310,14 +1308,12 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
         case CONDITION_TYPE_TRADE_ROUTE_OPEN:
             {
                 result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, condition->parameter1, result_text, &maxlength);
-                result_text = append_text(string_from_ascii(""), result_text, &maxlength);
                 result_text = translation_for_boolean_text(condition->parameter2, TR_PARAMETER_DISPLAY_ROUTE_OPEN, TR_PARAMETER_DISPLAY_ROUTE_CLOSED, result_text, &maxlength);
                 return;
             }
         case CONDITION_TYPE_TRADE_ROUTE_PRICE:
             {
                 result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, condition->parameter1, result_text, &maxlength);
-                result_text = append_text(string_from_ascii(""), result_text, &maxlength);
                 result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
                 result_text = translation_for_number_value(condition->parameter3, result_text, &maxlength);
                 return;
@@ -1325,7 +1321,6 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
         case CONDITION_TYPE_TRADE_SELL_PRICE:
             {
                 result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, condition->parameter1, result_text, &maxlength);
-                result_text = append_text(string_from_ascii(""), result_text, &maxlength);
                 result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
                 result_text = translation_for_number_value(condition->parameter3, result_text, &maxlength);
                 return;
