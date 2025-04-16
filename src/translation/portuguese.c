@@ -1063,6 +1063,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE, "Solicitar confirmação para substituir arquivo"},
     {TR_CONFIG_DRAW_CLOUD_SHADOWS, "Desenhar sombras de nuvens"},
     {TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, "Sincronizar portões não militares para permitir todo tipo de trabalhador"},
+    {TR_CONFIG_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION, "Lógica avançada de contribuição de sentimento fiscal e salarial"},
     {TR_EDITOR_CHECK_LOG_MESSAGE, "Por favor, confira augustus-log.txt no seu diretório do Augustus para detalhes."},
     {TR_EDITOR_CUSTOM_MESSAGES_CLEAR, "Apagar mensagens" },
     {TR_EDITOR_CUSTOM_MESSAGES_COUNT, "Total de mensagens" },

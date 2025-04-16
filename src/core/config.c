@@ -72,6 +72,7 @@ static const char *ini_keys[] = {
     "gameplay_change_yearly_autosave",
     "gameplay_change_auto_kill_animals",
     "gameplay_change_nonmilitary_gates_allow_walkers",
+    "gameplay_change_advanced_tax_wage_sentiment_contribution",
     "ui_show_speedrun_info",
     "ui_show_desirability_range",
 };

@@ -112,6 +112,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_DRAW_CLOUD_SHADOWS, "Simuler l'ombre des nuages"},
     {TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE, "Demander confirmation pour écraser un fichier"},
     {TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, "Les arches non-militaires autorisent par défaut tous les marcheurs"},
+    {TR_CONFIG_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION, "Logique avancée de contribution au sentiment fiscal et salarial"},
     {TR_HOTKEY_TITLE, "Configuration raccourcis clavier"},
     {TR_HOTKEY_LABEL, "Touche"},
     {TR_HOTKEY_ALTERNATIVE_LABEL, "Alternative"},

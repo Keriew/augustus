@@ -112,6 +112,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_DRAW_CLOUD_SHADOWS, "Показать тени облаков"},
     {TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE, "Запрашивать подтверждение при перезаписи файла"},
     {TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, "Невоенные ворота по умолчанию пропускают всех пешеходов"},
+    {TR_CONFIG_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION, "Расширенная логика подсчета влияния налогов & жалований на настроение жителей"},
     {TR_HOTKEY_TITLE, "Настройки горячих клавиш Augustus"},
     {TR_HOTKEY_LABEL, "Основная"},
     {TR_HOTKEY_ALTERNATIVE_LABEL, "Альтернативная"},

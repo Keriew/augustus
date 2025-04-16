@@ -13,6 +13,8 @@
 #include "core/config.h"
 #include "core/random.h"
 #include "game/difficulty.h"
+#include "game/settings.h"
+#include "game/time.h"
 #include "game/tutorial.h"
 
 #include <math.h>
@@ -34,6 +36,22 @@
 #define EXECUTIONS_GAMES_SENTIMENT_BONUS 20
 #define IMPERIAL_GAMES_SENTIMENT_BONUS 15
 #define POP_STEP_FOR_BASE_AVERAGE_HOUSE_LEVEL 625
+
+#define min(a,b)             \
+({                           \
+    __typeof__ (a) _a = (a); \
+    __typeof__ (b) _b = (b); \
+    _a < _b ? _a : _b;       \
+})
+
+// New advanced sentiment change calculation applies only after city reaches
+// population of 1000. This is required to prevent very fast sentiment drop 
+// by high unemployment at very early game
+#define ADVANCED_SENTIMENT_CHANGE_APPLY_AFTER_POPULATION 1000
+
+// The effect from wages setting is divided by 8dn intervals. Each next interval
+// reduces or increases modifier for every denarii set above or below Rome pays.
+#define WAGE_SENTIMENT_CHANGE_INTERVAL 8
 
 int city_sentiment(void)
 {
@@ -168,8 +186,54 @@ static int get_games_bonus(void)
 
 static int get_wage_sentiment_modifier(void)
 {
+    if (city_data.labor.wages == city_data.labor.wages_rome) {
+        return 0;
+    }
+    const int wage_interval = WAGE_SENTIMENT_CHANGE_INTERVAL;
+    int use_advanced_sentiment_contribution = config_get(CONFIG_GP_CH_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION);
     int wage_differential = city_data.labor.wages - city_data.labor.wages_rome;
-    return wage_differential * (wage_differential > 0 ? WAGE_POSITIVE_MODIFIER : WAGE_NEGATIVE_MODIFIER);
+    if (use_advanced_sentiment_contribution && wage_differential > wage_interval) {
+        // Extra sentiment bonus modifier applies when player sets higher wages than Rome. Wage range is 
+        // divided by 8dn intervals. For every next wage interval the modifier is decreased by 1/2. 
+        // Example:
+        // Rome pays 30dn, player sets current wage level to 55dn. Wage difference will be 25dn and
+        // the interval length is 8dn. Base bonus modifier is 2. Modifier will be set for every 
+        // wage interval to values [2, 1, 0.5, 0.25].
+        // The final modifier: 8 * 2 + 8 * 1 + 8 * 0.5 + 1 * 0.25) = 28 (original value was 50).
+        int remaining = abs(wage_differential);
+        wage_differential = 0;
+
+        int modifier = 100 * WAGE_POSITIVE_MODIFIER;
+        while (remaining > 0) {
+            int diff = calc_bound(remaining, 1, wage_interval);
+            wage_differential += diff * modifier;
+            remaining -= diff;
+            modifier /= 2;
+        }
+        wage_differential /= 100;
+    } else if (use_advanced_sentiment_contribution && wage_differential < -wage_interval) {
+        // Extra sentiment punishment modifier applies when player sets lower wages than Rome. Wage range is 
+        // divided by 8dn intervals. For every next wage interval the modifier is increased by 1/2. 
+        // Example:
+        // Rome pays 40dn, player sets current wage level to 15dn. Wage difference will be -25dn and
+        // the interval length is 8dn. Base punishment modifier is 3. Modifier will be set for every 
+        // wage interval to values [3, 4.5, 6.75, 10.125].
+        // The final modifier: -(8 * 3 + 8 * 4.5 + 8 * 6.75 + 1 * 10.125) = -124 (original value was -75).
+        int remaining = abs(wage_differential);
+        wage_differential = 0;
+
+        int modifier = 100 * WAGE_NEGATIVE_MODIFIER;
+        while (remaining > 0) {
+            int diff = calc_bound(remaining, 1, wage_interval);
+            wage_differential -= diff * modifier;
+            remaining -= diff;
+            modifier += modifier / 2; // adds 50% sentiment points reduction
+        }
+        wage_differential /= 100;
+    } else {
+        wage_differential *= (wage_differential > 0 ? WAGE_POSITIVE_MODIFIER : WAGE_NEGATIVE_MODIFIER);
+    }
+    return wage_differential;
 }
 
 static int get_unemployment_sentiment_modifier(void)
@@ -184,9 +248,34 @@ static int get_unemployment_sentiment_modifier(void)
 static int get_sentiment_modifier_for_tax_rate(int tax)
 {
     int base_tax = difficulty_base_tax_rate();
-    int tax_differential = base_tax - tax;
-    tax_differential *= tax_differential < 0 ? (MAX_TAX_MULTIPLIER - base_tax) : (base_tax / 2);
-    return tax_differential;
+    int interval = calc_bound(base_tax / 2, 1, 8); // Calculate the tax interval length based on difficulty
+    int sentiment_modifier = base_tax - tax; // The original base sentiment modifier if advanced logic isn't enabled
+    if (sentiment_modifier < -interval && config_get(CONFIG_GP_CH_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION)) {
+        // Extra sentiment punishment modifier applies when player sets higher taxes. Tax range is 
+        // divided by intervals which length is half of base tax rate based on difficulty settings.
+        // For every next tax interval the modifier is increased by 1/3. 
+        // Example:
+        // In very hard mode the base tax rate is 6%. Player sets current tax level to 16%.
+        // Tax difference will be 10% and the interval length is 3% (half of base tax rate 6%).
+        // Base punishment modifier is a diff between 12% and base tax rate (6%).
+        // Modifier will be set for every tax interval to values [6, 8, 10.66, 14.2].
+        // The final modifier: -(3% * 6 + 3% * 8 + 3% * 10.66 + 1% * 14.2) = -88 (original value was -60).
+        int remaining = abs(sentiment_modifier);
+        sentiment_modifier = 0;
+
+        int modifier = 100 * (MAX_TAX_MULTIPLIER - base_tax);
+        while (remaining > 0) {
+            int diff = calc_bound(remaining, 1, interval);
+            sentiment_modifier -= diff * modifier;
+            remaining -= diff;
+            modifier += modifier / 3; // adds 33% sentiment points reduction
+        }
+        sentiment_modifier /= 100;
+    } else {
+        sentiment_modifier *= sentiment_modifier < 0 ? (MAX_TAX_MULTIPLIER - base_tax) : (base_tax / 2);
+    }
+
+    return sentiment_modifier;
 }
 
 static int get_average_housing_level(void)
@@ -250,7 +339,50 @@ static int extra_food_bonus(int types, int required)
     return calc_bound(extra, 0, MAX_SENTIMENT_FROM_EXTRA_FOOD);
 }
 
-void city_sentiment_update(void)
+const int advanced_sentiment_gain_modifier[5] = {
+    30, // Very Easy
+    25, // Easy
+    20, // Normal
+    17, // Hard
+    15  // Very Hard
+};
+
+const int advanced_sentiment_drop_modifier[5] = {
+    30, // Very Easy
+    35, // Easy
+    40, // Normal
+    45, // Hard
+    50  // Very Hard
+};
+
+// Updates house building sentiment cooldown by delta value.
+// Returns 1 if advanced sentiment logic should be applied to house and 0 if not
+int update_house_advanced_sentiment_cooldown(building *b, int sentiment_cooldown_delta) {
+    if (!building_is_house(b->type)) {
+        return 0;
+    }
+
+    if (b->type >= BUILDING_HOUSE_SMALL_VILLA) {
+        // Reset cooldown for villas
+        b->cooldown_advanced_sentiment = 0;
+    } else if (b->type == BUILDING_HOUSE_VACANT_LOT) {
+        // Wait for new citizens to arrive
+        return 0;
+    }
+
+    if (sentiment_cooldown_delta > 0 && b->cooldown_advanced_sentiment > 0) {
+        b->cooldown_advanced_sentiment -= min(sentiment_cooldown_delta, b->cooldown_advanced_sentiment);
+    }
+
+    if (!b->cooldown_advanced_sentiment) {
+        // Cooldown has ended
+        return 1;
+    }
+
+    return 0;
+}
+
+void city_sentiment_update(int sentiment_cooldown_delta)
 {
     city_population_check_consistency();
 
@@ -269,6 +401,8 @@ void city_sentiment_update(void)
     int total_pop = 0;
     int total_houses = 0;
     int house_level_sentiment_multiplier = 3;
+    int apply_advanced_sentiment_change = config_get(CONFIG_GP_CH_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION) &&
+        city_data.population.population >= ADVANCED_SENTIMENT_CHANGE_APPLY_AFTER_POPULATION;
 
     for (building_type type = BUILDING_HOUSE_SMALL_TENT; type <= BUILDING_HOUSE_LUXURY_PALACE; type++) {
         if (type == BUILDING_HOUSE_SMALL_SHACK) {
@@ -288,11 +422,11 @@ void city_sentiment_update(void)
             }
 
             int sentiment = default_sentiment;
-
-            if (b->house_tax_coverage) {
-                sentiment += sentiment_contribution_taxes;
+            if (b->subtype.house_level > HOUSE_GRAND_INSULA) {
+                // Reduce sentiment contribution from taxes for villas by 20%
+                sentiment += (b->house_tax_coverage ? sentiment_contribution_taxes : sentiment_contribution_no_tax) * 8 / 10;
             } else {
-                sentiment += sentiment_contribution_no_tax;
+                sentiment += b->house_tax_coverage ? sentiment_contribution_taxes : sentiment_contribution_no_tax;
             }
 
             if (b->subtype.house_level <= HOUSE_GRAND_INSULA) {
@@ -321,9 +455,32 @@ void city_sentiment_update(void)
 
             sentiment += blessing_festival_boost;
 
+            sentiment = calc_bound(sentiment, 0, 100); // new sentiment value should be in range of 0..100
+
             // Change sentiment gradually to the new value
             int sentiment_delta = sentiment - b->sentiment.house_happiness;
-            sentiment_delta = calc_bound(sentiment_delta, -MAX_SENTIMENT_CHANGE, MAX_SENTIMENT_CHANGE);
+            if (sentiment_delta != 0 &&
+                update_house_advanced_sentiment_cooldown(b, sentiment_cooldown_delta) &&
+                apply_advanced_sentiment_change
+            ) {
+                // With new advanced logic we introduce faster sentiment change when the target value is
+                // far away from current happiness level. The final change value depends on difficulty settings.
+                // Example #1:
+                // Current house happiness level is 82, the new sentiment value is 10 and the delta is -72.
+                // The final happiness change for VeryHard mode will be -36 (50% of -72).
+                // Example #2:
+                // Current house happiness level is 20, the new sentiment value is 77 and the delta is 57.
+                // The final happiness change for Hard mode will be 9 (17% of 57).
+                if (sentiment_delta > 0) {
+                    int gain_modifier = advanced_sentiment_gain_modifier[setting_difficulty()];
+                    sentiment_delta = calc_bound(sentiment_delta * gain_modifier / 100, 1, 100);
+                } else {
+                    int drop_modifier = advanced_sentiment_drop_modifier[setting_difficulty()];
+                    sentiment_delta = calc_bound(sentiment_delta * drop_modifier / 100, -100, -1);
+                }
+            } else {
+                sentiment_delta = calc_bound(sentiment_delta, -MAX_SENTIMENT_CHANGE, MAX_SENTIMENT_CHANGE);
+            }
             b->sentiment.house_happiness = calc_bound(b->sentiment.house_happiness + sentiment_delta, 0, 100);
             houses_calculated++;
 

@@ -119,6 +119,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_FULLSCREEN, "Vollbild"},
     {TR_CONFIG_GAME_SPEED, "Spielgeschwindigkeit:"},
     {TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, "Nicht-militärische Tore lassen standardmäßig alle Fußgänger zu"},
+    {TR_CONFIG_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION, "Erweiterte Steuer- und Lohnstimmungsbeitragslogik"},
     {TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD, "Karrenschieber fordernder Silos laufen auch abseits der Straße"},
     {TR_CONFIG_GLOBAL_LABOUR, "Aktiviere globalen Arbeiterpool"},
     {TR_CONFIG_GODS_EFFECTS, "Götterflüche/-segnungen aktivieren"},

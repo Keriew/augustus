@@ -1,5 +1,7 @@
 #include "state.h"
 
+#include <assert.h>
+
 #include "building/industry.h"
 #include "building/monument.h"
 #include "building/roadblock.h"
@@ -164,6 +166,13 @@ void building_state_save_to_buffer(buffer *buf, const building *b)
     buffer_write_u8(buf, b->is_adjacent_to_water);
     buffer_write_u8(buf, b->storage_id);
     buffer_write_i8(buf, b->sentiment.house_happiness); // which union field we use does not matter
+
+    if (building_is_house(b->type)) {
+        buffer_write_u8(buf, b->cooldown_advanced_sentiment);
+    } else {
+        buffer_skip(buf, sizeof(b->cooldown_advanced_sentiment));
+    }
+
     buffer_write_u8(buf, b->show_on_problem_overlay);
 
     // expanded building data
@@ -486,8 +495,20 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     b->desirability = buffer_read_i8(buf);
     b->is_deleted = buffer_read_u8(buf);
     b->is_adjacent_to_water = buffer_read_u8(buf);
-    b->storage_id = buffer_read_u8(buf);
+    if (building_uses_storage(b->type)) {
+        b->storage_id = buffer_read_u8(buf);
+    } else {
+        b->storage_id = 0;
+        buffer_skip(buf, 1);
+    }
     b->sentiment.house_happiness = buffer_read_i8(buf); // which union field we use does not matter
+    if (save_version >= SAVE_GAME_LAST_ADVANCED_SENTIMENT) {
+        if (building_is_house(b->type)) {
+            b->cooldown_advanced_sentiment = buffer_read_u8(buf);
+        } else {
+            buffer_skip(buf, sizeof(b->cooldown_advanced_sentiment));
+        }
+    }
     b->show_on_problem_overlay = buffer_read_u8(buf);
 
     // Wharves produce fish and don't need any progress

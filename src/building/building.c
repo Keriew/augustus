@@ -205,6 +205,7 @@ building *building_create(building_type type, int x, int y)
 
     // subtype
     if (building_is_house(type)) {
+        b->cooldown_advanced_sentiment = type < BUILDING_HOUSE_SMALL_VILLA ? ADVANCED_SENTIMENT_COOLDOWN_TICKS : 0;
         b->subtype.house_level = type - BUILDING_HOUSE_VACANT_LOT;
     }
 
@@ -268,7 +269,7 @@ static void building_delete(building *b)
 
 void building_clear_related_data(building *b)
 {
-    if (b->storage_id) {
+    if (building_uses_storage(b->type) && b->storage_id) {
         building_storage_delete(b->storage_id);
         b->storage_id = 0;
     }
@@ -422,6 +423,11 @@ int building_is_primary_product_producer(building_type type)
 int building_is_house(building_type type)
 {
     return type >= BUILDING_HOUSE_VACANT_LOT && type <= BUILDING_HOUSE_LUXURY_PALACE;
+}
+
+int building_uses_storage(building_type type)
+{
+    return type == BUILDING_WAREHOUSE || type == BUILDING_GRANARY;
 }
 
 // For Venus GT base bonus
