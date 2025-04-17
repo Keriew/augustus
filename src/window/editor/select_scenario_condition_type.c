@@ -15,12 +15,12 @@
 #include "window/editor/map.h"
 #include "window/numeric_input.h"
 
-#define MAX_BUTTONS 15
+#define MAX_BUTTONS 14
 #define BUTTON_LEFT_PADDING 32
 #define BUTTON_WIDTH 608
-#define DETAILS_Y_OFFSET 32
+#define DETAILS_Y_OFFSET 64
 #define DETAILS_ROW_HEIGHT 31
-#define MAX_VISIBLE_ROWS 15
+#define MAX_VISIBLE_ROWS 14
 
 static void init(scenario_condition_t *condition);
 static void on_scroll(void);
@@ -46,7 +46,6 @@ static generic_button buttons[] = {
     {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (11 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, 0, 11},
     {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (12 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, 0, 12},
     {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (13 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, 0, 13},
-    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (14 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, 0, 14}
 };
 
 static struct {
@@ -107,6 +106,7 @@ static void draw_foreground(void)
         y_offset += DETAILS_ROW_HEIGHT;
     }
 
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_SELECT_CONDITION, 30, 30, FONT_LARGE_BLACK);
     lang_text_draw_centered(13, 3, 48, 32 + 16 * 30, BUTTON_WIDTH, FONT_NORMAL_BLACK);
 
     scrollbar_draw(&scrollbar);
