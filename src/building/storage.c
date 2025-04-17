@@ -22,7 +22,7 @@
 
 static array(data_storage) storages;
 
-static void storage_create(data_storage *storage, int position)
+static void storage_create(data_storage *storage, unsigned int position)
 {
     storage->id = position;
 }
@@ -75,7 +75,7 @@ void building_storage_reset_building_ids(void)
 int building_storage_create(int building_id)
 {
     data_storage *storage;
-    array_new_item(storages, 1, storage);
+    array_new_item_after_index(storages, 1, storage);
     if (!storage) {
         return 0;
     }
@@ -200,6 +200,27 @@ void building_storage_accept_none(int storage_id)
     for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
         s->storage.resource_state[r] = BUILDING_STORAGE_STATE_NOT_ACCEPTING;
     }
+}
+
+void building_storage_accept_all(int storage_id)
+{
+    data_storage *s = array_item(storages, storage_id);
+    for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+        s->storage.resource_state[r] = BUILDING_STORAGE_STATE_ACCEPTING;
+    }
+}
+
+int building_storage_check_if_accepts_nothing(int storage_id)
+{
+    data_storage *s = array_item(storages, storage_id);
+    for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+        building_storage_state state = s->storage.resource_state[r];
+        if (state != BUILDING_STORAGE_STATE_NOT_ACCEPTING
+            && (state < BUILDING_STORAGE_STATE_NOT_ACCEPTING_HALF)) {
+            return 0;
+        }
+    }
+    return 1;
 }
 
 int building_storage_resource_max_storable(building *b, resource_type resource_id)

@@ -161,7 +161,7 @@ void building_state_save_to_buffer(buffer *buf, const building *b)
     buffer_write_u8(buf, b->has_plague);
     buffer_write_i8(buf, b->desirability);
     buffer_write_u8(buf, b->is_deleted);
-    buffer_write_u8(buf, b->is_adjacent_to_water);
+    buffer_write_u8(buf, b->is_close_to_water);
     buffer_write_u8(buf, b->storage_id);
     buffer_write_i8(buf, b->sentiment.house_happiness); // which union field we use does not matter
     buffer_write_u8(buf, b->show_on_problem_overlay);
@@ -485,7 +485,7 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     b->has_plague = buffer_read_u8(buf);
     b->desirability = buffer_read_i8(buf);
     b->is_deleted = buffer_read_u8(buf);
-    b->is_adjacent_to_water = buffer_read_u8(buf);
+    b->is_close_to_water = buffer_read_u8(buf);
     b->storage_id = buffer_read_u8(buf);
     b->sentiment.house_happiness = buffer_read_i8(buf); // which union field we use does not matter
     b->show_on_problem_overlay = buffer_read_u8(buf);
@@ -671,6 +671,14 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     ) {
         b->figure_id = b->figure_id2;
         b->figure_id2 = 0;
+    }
+
+    // Old save barracks and temple of mars should accept weapons by default
+    if (b->type == BUILDING_BARRACKS || b->type == BUILDING_GRAND_TEMPLE_MARS) {
+        if (!b->accepted_goods[RESOURCE_NONE]) {
+            b->accepted_goods[RESOURCE_NONE] = 1; // set RESOURCE_NONE to 1 to mark this as a new save compatibility
+            b->accepted_goods[RESOURCE_WEAPONS] = 1;
+        }
     }
 
     // The following code should only be executed if the savegame includes building information that is not 

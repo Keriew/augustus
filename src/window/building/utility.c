@@ -1,9 +1,13 @@
 #include "utility.h"
 
+#include "assets/assets.h"
 #include "building/building.h"
 #include "building/roadblock.h"
+#include "city/constants.h"
 #include "city/finance.h"
+#include "core/dir.h"
 #include "core/image.h"
+#include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
@@ -15,35 +19,33 @@
 #include "window/building_info.h"
 #include "window/building/figures.h"
 
-static void go_to_orders(int param1, int param2);
-static void toggle_figure_state(int index, int param2);
-static void roadblock_orders(int index, int param2);
-
-
+static void button_go_to_orders(const generic_button *button);
+static void button_toggle_figure_state(const generic_button *button);
+static void button_roadblock_orders(const generic_button *button);
 
 static struct {
-    int focus_button_id;
-    int orders_focus_button_id;
-    int figure_focus_button_id;
+    unsigned int focus_button_id;
+    unsigned int orders_focus_button_id;
+    unsigned int figure_focus_button_id;
     int building_id;
     int tooltip_id;
 } data = { 0, 0, 0, 0, 0 };
 
 static generic_button go_to_orders_button[] = {
-    {0, 0, 304, 20, go_to_orders, button_none, 0, 0}
+    {0, 0, 304, 20, button_go_to_orders},
 };
 
 static generic_button orders_permission_buttons[] = {
-    {0, 4, 210, 22, toggle_figure_state, button_none, PERMISSION_MAINTENANCE, 0},
-    {0, 36, 210, 22, toggle_figure_state, button_none, PERMISSION_PRIEST, 0},
-    {0, 68, 210, 22, toggle_figure_state, button_none, PERMISSION_MARKET, 0},
-    {0, 100, 210, 22, toggle_figure_state, button_none, PERMISSION_ENTERTAINER, 0},
-    {0, 132, 210, 22, toggle_figure_state, button_none, PERMISSION_EDUCATION, 0},
-    {0, 164, 210, 22, toggle_figure_state, button_none, PERMISSION_MEDICINE, 0},
-    {0, 192, 210, 22, toggle_figure_state, button_none, PERMISSION_TAX_COLLECTOR, 0},
-    {0, 224, 210, 22, toggle_figure_state, button_none, PERMISSION_LABOR_SEEKER, 0},
-    {0, 256, 210, 22, toggle_figure_state, button_none, PERMISSION_MISSIONARY, 0},
-    {0, 288, 210, 22, toggle_figure_state, button_none, PERMISSION_WATCHMAN, 0},
+    {0, 4, 210, 22, button_toggle_figure_state, 0, PERMISSION_MAINTENANCE},
+    {0, 36, 210, 22, button_toggle_figure_state, 0, PERMISSION_PRIEST},
+    {0, 68, 210, 22, button_toggle_figure_state, 0, PERMISSION_MARKET},
+    {0, 100, 210, 22, button_toggle_figure_state, 0, PERMISSION_ENTERTAINER},
+    {0, 132, 210, 22, button_toggle_figure_state, 0, PERMISSION_EDUCATION},
+    {0, 164, 210, 22, button_toggle_figure_state, 0, PERMISSION_MEDICINE},
+    {0, 192, 210, 22, button_toggle_figure_state, 0, PERMISSION_TAX_COLLECTOR},
+    {0, 224, 210, 22, button_toggle_figure_state, 0, PERMISSION_LABOR_SEEKER},
+    {0, 256, 210, 22, button_toggle_figure_state, 0, PERMISSION_MISSIONARY},
+    {0, 288, 210, 22, button_toggle_figure_state, 0, PERMISSION_WATCHMAN},
 };
 
 static int permission_tooltip_translations[] = { 0,
@@ -54,18 +56,25 @@ TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_TAX_COLLECTOR, TR_TOOLTIP_BUTTON_ROADBLOC
 TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_MISSIONARY, TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_WATCHMAN,
 };
 
-static int size_of_orders_permission_buttons = sizeof(orders_permission_buttons) / sizeof(*orders_permission_buttons);
+static int permission_orders_tooltip_translations[] = {
+    TR_TOOLTIP_BUTTON_ROADBLOCK_ORDER_REJECT_ALL, TR_TOOLTIP_BUTTON_ROADBLOCK_ORDER_ACCEPT_ALL };
 
-static generic_button roadblock_order_buttons[] = {
-    {314, 0, 20, 20, roadblock_orders, button_none, 0, 0},
+static generic_button roadblock_orders_buttons[] = {
+    {309, 0, 20, 20, button_roadblock_orders},
 };
 
+static unsigned int size_of_orders_permission_buttons = sizeof(orders_permission_buttons) / sizeof(*orders_permission_buttons);
 
+typedef enum {
+    REJECT_ALL = 0,
+    ACCEPT_ALL = 1,
+} affect_all_button_current_state;
 
 void window_building_draw_engineers_post(building_info_context *c)
 {
+    c->advisor_button = ADVISOR_CHIEF;
     c->help_id = 81;
-    window_building_play_sound(c, "wavs/eng_post.wav");
+    window_building_play_sound(c, ASSETS_DIRECTORY "/Sounds/Engineer.ogg");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(104, 0, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
 
@@ -101,8 +110,9 @@ void window_building_draw_engineers_post(building_info_context *c)
 
 void window_building_draw_prefect(building_info_context *c)
 {
+    c->advisor_button = ADVISOR_CHIEF;
     c->help_id = 86;
-    window_building_play_sound(c, "wavs/prefecture.wav");
+    window_building_play_sound(c, ASSETS_DIRECTORY "/Sounds/Prefect.ogg");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(88, 0, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
 
@@ -135,10 +145,31 @@ void window_building_draw_prefect(building_info_context *c)
     window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 144);
 }
 
+static int affect_all_button_state(void)
+{
+    building *b = building_get(data.building_id);
+    if (b->data.roadblock.exceptions) {
+        return REJECT_ALL;
+    } else {
+        return ACCEPT_ALL;
+    }
+}
+
+static void draw_roadblock_orders_buttons(int x, int y, int focused)
+{
+   if (affect_all_button_state() == ACCEPT_ALL) {
+       image_draw(assets_lookup_image_id(ASSET_UI_SELECTION_CHECKMARK), x + 29, y + 4, COLOR_MASK_NONE, SCALE_NONE);
+   } else {
+       image_draw(assets_get_image_id("UI", "Denied_Walker_Checkmark"), x + 29, y + 4, COLOR_MASK_NONE, SCALE_NONE);
+   }
+    button_border_draw(x+25, y, 20, 20, data.orders_focus_button_id == 1);
+}
+
+
 void window_building_draw_roadblock(building_info_context *c)
 {
     c->help_id = 0;
-    window_building_play_sound(c, "wavs/prefecture.wav");
+    window_building_play_sound(c, ASSETS_DIRECTORY "/Sounds/Road.ogg");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(28, 115, c->x_offset, c->y_offset + 10, 16 * c->width_blocks, FONT_LARGE_BLACK);
     window_building_draw_description_at(c, 96, CUSTOM_TRANSLATION, TR_BUILDING_ROADBLOCK_DESC);
@@ -148,8 +179,8 @@ void window_building_draw_roadblock_button(building_info_context *c)
 {
     button_border_draw(c->x_offset + 80, c->y_offset + BLOCK_SIZE * c->height_blocks - 34,
         BLOCK_SIZE * (c->width_blocks - 10), 20, data.focus_button_id == 1 ? 1 : 0);
-    lang_text_draw_centered(98, 5, c->x_offset + 80, c->y_offset + BLOCK_SIZE * c->height_blocks - 30,
-        BLOCK_SIZE * (c->width_blocks - 10), FONT_NORMAL_BLACK);
+    text_draw_centered(translation_for(TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION), c->x_offset + 80, c->y_offset + BLOCK_SIZE * c->height_blocks - 30,
+        BLOCK_SIZE * (c->width_blocks - 10), FONT_NORMAL_BLACK, 0);
 }
 
 void window_building_draw_roadblock_orders(building_info_context *c)
@@ -157,7 +188,7 @@ void window_building_draw_roadblock_orders(building_info_context *c)
     c->help_id = 3;
     int y_offset = window_building_get_vertical_offset(c, 28);
     outer_panel_draw(c->x_offset, y_offset, 29, 28);
-    text_draw_centered(translation_for(TR_BUILDING_ROADBLOCK), c->x_offset, y_offset + 10, 16 * c->width_blocks, FONT_LARGE_BLACK, 0);
+    text_draw_centered(translation_for(TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION), c->x_offset, y_offset + 10, 16 * c->width_blocks, FONT_LARGE_BLACK, 0);
     inner_panel_draw(c->x_offset + 16, y_offset + 42, c->width_blocks - 2, 21);
 }
 
@@ -172,8 +203,9 @@ void window_building_draw_roadblock_orders_foreground(building_info_context *c)
     };
     building *b = building_get(c->building_id);
     data.building_id = b->id;
+    draw_roadblock_orders_buttons(c->x_offset + 365, y_offset + 404, data.orders_focus_button_id == 1);
 
-    for (int i = 0; i < size_of_orders_permission_buttons; i++) {
+    for (unsigned int i = 0; i < size_of_orders_permission_buttons; i++) {
         image_draw(image_group(ids[i * 2]) + 4, c->x_offset + 32, y_offset + 46 + 32 * i, COLOR_MASK_NONE, SCALE_NONE);
         image_draw(image_group(ids[i * 2 + 1]) + 4, c->x_offset + 64, y_offset + 46 + 32 * i,
             COLOR_MASK_NONE, SCALE_NONE);
@@ -191,6 +223,8 @@ void window_building_roadblock_get_tooltip_walker_permissions(int *translation)
 {
     if (data.figure_focus_button_id) {
         *translation = permission_tooltip_translations[data.figure_focus_button_id];
+    } else if (data.orders_focus_button_id) {
+        *translation = permission_orders_tooltip_translations[affect_all_button_state()];
     } else {
         *translation = 0;
     }
@@ -199,7 +233,8 @@ void window_building_roadblock_get_tooltip_walker_permissions(int *translation)
 void window_building_draw_garden_gate(building_info_context *c)
 {
     c->help_id = 0;
-    window_building_play_sound(c, "wavs/garden.wav");
+    window_building_play_sound(c, ASSETS_DIRECTORY "/Sounds/Road.ogg");
+    //window_building_play_sound(c, "wavs/garden.wav");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     text_draw_centered(translation_for(TR_BUILDING_GARDEN_WALL_GATE), c->x_offset, c->y_offset + 10, 16 * c->width_blocks, FONT_LARGE_BLACK, 0);
     window_building_draw_description_at(c, 96, CUSTOM_TRANSLATION, TR_BUILDING_GARDEN_WALL_GATE_DESC);
@@ -208,7 +243,8 @@ void window_building_draw_garden_gate(building_info_context *c)
 void window_building_draw_palisade_gate(building_info_context *c)
 {
     c->help_id = 0;
-    window_building_play_sound(c, "wavs/gatehouse.wav");
+    window_building_play_sound(c, ASSETS_DIRECTORY "/Sounds/Road.ogg");
+    //window_building_play_sound(c, "wavs/gatehouse.wav");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     text_draw_centered(translation_for(TR_BUILDING_PALISADE_GATE), c->x_offset, c->y_offset + 10, 16 * c->width_blocks, FONT_LARGE_BLACK, 0);
     window_building_draw_description_at(c, 96, CUSTOM_TRANSLATION, TR_BUILDING_PALISADE_GATE_DESC);
@@ -280,6 +316,7 @@ void window_building_draw_fountain(building_info_context *c)
     }
     window_building_draw_description(c, 108, text_id);
     inner_panel_draw(c->x_offset + 16, c->y_offset + 166, c->width_blocks - 2, 4);
+    window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 174);
     window_building_draw_employment_without_house_cover(c, 172);
 }
 
@@ -301,15 +338,22 @@ void window_building_draw_well(building_info_context *c)
     if (text_id) {
         window_building_draw_description_at(c, BLOCK_SIZE * c->height_blocks - 160, 109, text_id);
     }
+    inner_panel_draw(c->x_offset + 16, c->y_offset + 116, c->width_blocks - 2, 4);
+    window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 124);
 }
 
 void window_building_draw_mission_post(building_info_context *c)
 {
+    c->advisor_button = ADVISOR_EDUCATION;
     c->help_id = 8;
-    window_building_play_sound(c, "wavs/mission.wav");
+    window_building_play_sound(c, ASSETS_DIRECTORY "/Sounds/MissionPost.ogg");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(134, 0, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
-    window_building_draw_description(c, 134, 1);
+    if (!c->has_road_access) {
+        window_building_draw_description(c, 69, 25);
+    } else {
+        window_building_draw_description(c, 134, 1);
+    }
     inner_panel_draw(c->x_offset + 16, c->y_offset + 136, c->width_blocks - 2, 4);
     window_building_draw_employment_without_house_cover(c, 142);
     window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 144);
@@ -318,7 +362,7 @@ void window_building_draw_mission_post(building_info_context *c)
 static void draw_native(building_info_context *c, int group_id)
 {
     c->help_id = 0;
-    window_building_play_sound(c, "wavs/empty_land.wav");
+    //window_building_play_sound(c, "wavs/empty_land.wav");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(group_id, 0, c->x_offset, c->y_offset + 10,
         BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
@@ -328,22 +372,25 @@ static void draw_native(building_info_context *c, int group_id)
 void window_building_draw_native_hut(building_info_context *c)
 {
     draw_native(c, 131);
+    window_building_play_sound(c, ASSETS_DIRECTORY "/Sounds/NativeHut.ogg");
 }
 
 void window_building_draw_native_meeting(building_info_context *c)
 {
     draw_native(c, 132);
+    window_building_play_sound(c, ASSETS_DIRECTORY "/Sounds/NativeHut.ogg");
 }
 
 void window_building_draw_native_crops(building_info_context *c)
 {
     draw_native(c, 133);
+    window_building_play_sound(c, "wavs/wheat_farm.wav");
 }
 
 void window_building_draw_highway(building_info_context *c)
 {
     //c->help_id = 0;
-    //window_building_play_sound(c, "wavs/aquaduct.wav");
+    window_building_play_sound(c, ASSETS_DIRECTORY "/Sounds/Road.ogg");
     window_building_prepare_figure_list(c);
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_HIGHWAY, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
@@ -352,8 +399,9 @@ void window_building_draw_highway(building_info_context *c)
     window_building_draw_levy(HIGHWAY_LEVY_MONTHLY, c->x_offset + 30, c->y_offset + BLOCK_SIZE * c->height_blocks - 110);
 }
 
-static void toggle_figure_state(int index, int param2)
+static void button_toggle_figure_state(const generic_button *button)
 {
+    int index = button->parameter1;
     building *b = building_get(data.building_id);
     if (building_type_is_roadblock(b->type)) {
         building_roadblock_set_permission(index, b);
@@ -361,10 +409,21 @@ static void toggle_figure_state(int index, int param2)
     window_invalidate();
 }
 
-static void roadblock_orders(int param1, int param2)
-{}
 
-static void go_to_orders(int param1, int param2)
+
+static void button_roadblock_orders(const generic_button *button)
+{
+    building *b = building_get(data.building_id);
+    if (affect_all_button_state() == REJECT_ALL) {
+        building_roadblock_accept_none(b);
+    } else {
+        building_roadblock_accept_all(b);
+    }
+    window_invalidate();
+
+}
+
+static void button_go_to_orders(const generic_button *button)
 {
     window_building_info_show_storage_orders();
 }
@@ -387,5 +446,6 @@ int window_building_handle_mouse_roadblock_orders(const mouse *m, building_info_
         return 1;
     }
 
-    return generic_buttons_handle_mouse(m, c->x_offset + 80, y_offset + 404, roadblock_order_buttons, 1, &data.orders_focus_button_id);
+    return generic_buttons_handle_mouse(m, c->x_offset + 80, y_offset + 404, roadblock_orders_buttons,
+        1, &data.orders_focus_button_id);
 }

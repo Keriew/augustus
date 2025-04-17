@@ -567,7 +567,7 @@ int building_warehouse_for_getting(building *src, int resource, map_point *dst)
     }
 }
 
-int building_warehouse_with_resource(int x, int y, int resource, int road_network_id, int *understaffed, map_point *dst)
+int building_warehouse_with_resource(int x, int y, int resource, int road_network_id, int *understaffed, map_point *dst, building_storage_permission_states p)
 {
     int min_dist = INFINITE;
     building *min_building = 0;
@@ -576,6 +576,9 @@ int building_warehouse_with_resource(int x, int y, int resource, int road_networ
             continue;
         }
         if (!b->has_road_access || b->distance_from_entry <= 0 || b->road_network_id != road_network_id) {
+            continue;
+        }
+        if (!building_storage_get_permission(p, b)) {
             continue;
         }
 
@@ -596,7 +599,7 @@ int building_warehouse_with_resource(int x, int y, int resource, int road_networ
         }
         if (loads_stored > 0) {
             int dist = calc_maximum_distance(b->x, b->y, x, y);
-            dist -= 4 * loads_stored;
+            dist -= 2 * loads_stored;
             if (dist < min_dist) {
                 min_dist = dist;
                 min_building = b;
@@ -732,24 +735,6 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
     }
     if (!building_storage_get_permission(BUILDING_STORAGE_PERMISSION_WORKER, warehouse)) {
         return WAREHOUSE_TASK_NONE;
-    }
-    // deliver weapons to barracks
-    if ((building_count_active(BUILDING_BARRACKS) || building_count_active(BUILDING_GRAND_TEMPLE_MARS)) &&
-        !city_resource_is_stockpiled(RESOURCE_WEAPONS)) {
-        building *barracks = building_get(building_get_barracks_for_weapon(warehouse->x, warehouse->y, RESOURCE_WEAPONS,
-            warehouse->road_network_id, 0));
-        if (barracks->resources[RESOURCE_WEAPONS] < MAX_WEAPONS_BARRACKS &&
-            warehouse->road_network_id == barracks->road_network_id) {
-            space = warehouse;
-            for (int i = 0; i < 8; i++) {
-                space = building_next(space);
-                if (space->id > 0 && space->resources[RESOURCE_WEAPONS] > 0 &&
-                    space->subtype.warehouse_resource_id == RESOURCE_WEAPONS) {
-                    *resource = RESOURCE_WEAPONS;
-                    return WAREHOUSE_TASK_DELIVERING;
-                }
-            }
-        }
     }
     // deliver raw materials to workshops
     space = warehouse;

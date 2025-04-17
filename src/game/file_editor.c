@@ -43,10 +43,10 @@
 #include "scenario/distant_battle.h"
 #include "scenario/editor.h"
 #include "scenario/empire.h"
+#include "scenario/event/controller.h"
 #include "scenario/invasion.h"
 #include "scenario/map.h"
 #include "scenario/property.h"
-#include "scenario/scenario_events_controller.h"
 #include "sound/city.h"
 #include "sound/music.h"
 
@@ -73,6 +73,8 @@ void game_file_editor_clear_data(void)
     scenario_invasion_clear();
     scenario_events_clear();
     custom_messages_clear_all();
+    scenario_editor_set_custom_message_introduction(0);
+    scenario_editor_set_custom_victory_message(0);
 }
 
 static void clear_map_data(void)
@@ -101,6 +103,7 @@ static void create_blank_map(int size)
     scenario_editor_create(size);
     scenario_map_init();
     clear_map_data();
+    empire_reset_map();
     map_image_init_edges();
     city_view_set_scale(100);
     city_view_set_camera(76, 152);
@@ -133,6 +136,8 @@ static void prepare_map_for_editing(void)
     map_natives_init_editor();
     map_routing_update_all();
 
+    scenario_editor_set_as_saved();
+
     city_view_init();
     game_state_unpause();
 }
@@ -142,6 +147,7 @@ void game_file_editor_create_scenario(int size)
     create_blank_map(size);
     prepare_map_for_editing();
     scenario_editor_set_custom_message_introduction(0);
+    scenario_editor_set_custom_victory_message(0);
 }
 
 int game_file_editor_load_scenario(const char *scenario_file)
@@ -166,5 +172,9 @@ int game_file_editor_write_scenario(const char *scenario_file)
     scenario_distant_battle_set_roman_travel_months();
     scenario_distant_battle_set_enemy_travel_months();
 
-    return game_file_io_write_scenario(scenario_file);
+    if (game_file_io_write_scenario(scenario_file)) {
+        scenario_editor_set_as_saved();
+        return 1;
+    }
+    return 0;
 }

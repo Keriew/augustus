@@ -95,36 +95,40 @@ int building_image_get(const building *b)
                 return image_id;
             }
         case BUILDING_AMPHITHEATER:
-            return image_group(GROUP_BUILDING_AMPHITHEATER);
+            if (!b->upgrade_level) {
+                return assets_get_image_id("Health_Culture", "Amphitheatre ON");
+            } else {
+                return assets_get_image_id("Health_Culture", "Amphitheatre Upgrade ON");
+            }
         case BUILDING_THEATER:
             if (!b->upgrade_level) {
-                return assets_get_image_id("Entertainment", "Theatre ON");
+                return assets_get_image_id("Health_Culture", "Theatre ON");
             } else {
-                return assets_get_image_id("Entertainment", "Theatre Upgrade ON");
+                return assets_get_image_id("Health_Culture", "Theatre Upgrade ON");
             }
         case BUILDING_COLOSSEUM:
             switch (b->monument.phase) {
                 case MONUMENT_START:
-                    return assets_get_image_id("Entertainment", "Coloseum Cons 01");
+                    return assets_get_image_id("Monuments", "Colosseum_Construction_01");
                 case 2:
-                    return assets_get_image_id("Entertainment", "Coloseum Cons 02");
+                    return assets_get_image_id("Monuments", "Colosseum_Construction_02");
                 case 3:
-                    return assets_get_image_id("Entertainment", "Coloseum Cons 03");
+                    return assets_get_image_id("Monuments", "Colosseum_Construction_03");
                 case 4:
-                    return assets_get_image_id("Entertainment", "Coloseum Cons 04");
+                    return assets_get_image_id("Monuments", "Colosseum_Construction_04");
                 default:
                     switch (city_festival_games_active()) {
                         case 1:
-                            return assets_get_image_id("Entertainment", "Col Naumachia");
+                            return assets_get_image_id("Monuments", "Col Naumachia");
                             break;
                         case 2:
-                            return assets_get_image_id("Entertainment", "Col Imp Games");
+                            return assets_get_image_id("Monuments", "Col Imp Games");
                             break;
                         case 3:
-                            return assets_get_image_id("Entertainment", "Col Exec");
+                            return assets_get_image_id("Monuments", "Col Exec");
                             break;
                         default:
-                            return assets_get_image_id("Entertainment", "Col Glad Fight");
+                            return assets_get_image_id("Monuments", "Col Glad Fight");
                     }
             }
         case BUILDING_GLADIATOR_SCHOOL:
@@ -207,17 +211,17 @@ int building_image_get(const building *b)
             if (!b->upgrade_level) {
                 return image_group(GROUP_BUILDING_SCHOOL);
             } else {
-                return assets_get_image_id("Health_Education", "Upgraded_School");
+                return assets_get_image_id("Health_Culture", "Upgraded_School");
             }
         case BUILDING_ACADEMY:
             if (!b->upgrade_level) {
-                return assets_get_image_id("Health_Education", "Academy_Fix");
+                return assets_get_image_id("Health_Culture", "Academy_Fix");
             } else {
-                return assets_get_image_id("Health_Education", "Upgraded_Academy");
+                return assets_get_image_id("Health_Culture", "Upgraded_Academy");
             }
         case BUILDING_LIBRARY:
             if (!b->upgrade_level) {
-                return assets_get_image_id("Health_Education", "Downgraded_Library");
+                return assets_get_image_id("Health_Culture", "Downgraded_Library");
             } else {
                 return image_group(GROUP_BUILDING_LIBRARY);
             }
@@ -273,7 +277,9 @@ int building_image_get(const building *b)
         case BUILDING_CITY_MINT:
             switch (b->monument.phase) {
                 case MONUMENT_START:
-                    return assets_get_image_id("Logistics", "Lighthouse Const 01");
+                    return assets_get_image_id("Monuments", "City_Mint_Construction_01");
+                case 2:
+                    return assets_get_image_id("Monuments", "City_Mint_Construction_02");
                 default:
                     return building_variant_get_image_id_with_rotation(b->type, b->variant);
             }
@@ -312,11 +318,15 @@ int building_image_get(const building *b)
         case BUILDING_ENGINEERS_POST:
             return image_group(GROUP_BUILDING_ENGINEERS_POST);
         case BUILDING_FORUM:
-            return image_group(GROUP_BUILDING_FORUM);
+            if (!b->upgrade_level) {
+                return image_group(GROUP_BUILDING_FORUM);
+            } else {
+                return assets_get_image_id("Admin_Logistics", "Upgraded_Forum");
+            }
         case BUILDING_FOUNTAIN:
             if (b->upgrade_level == 3) {
                 return scenario_property_climate() == CLIMATE_DESERT ?
-                    assets_get_image_id("Logistics", "Fountain_Desert_Fix") :
+                    assets_get_image_id("Admin_Logistics", "Fountain_Desert_Fix") :
                     image_group(GROUP_BUILDING_FOUNTAIN_4);
             } else if (b->upgrade_level == 2) {
                 return image_group(GROUP_BUILDING_FOUNTAIN_3);
@@ -344,47 +354,59 @@ int building_image_get(const building *b)
         case BUILDING_LARGE_TEMPLE_CERES:
             switch (b->monument.phase) {
                 case MONUMENT_START:
-                    return assets_get_image_id("Religion", "Ceres_LT_0");
+                    return assets_get_image_id("Monuments", "Ceres_LT_0");
+                case 2:
+                    return assets_get_image_id("Monuments", "Ceres_LT_50");
                 default:
                     return image_group(GROUP_BUILDING_TEMPLE_CERES) + 1;
             }
         case BUILDING_LARGE_TEMPLE_NEPTUNE:
             switch (b->monument.phase) {
                 case MONUMENT_START:
-                    return assets_get_image_id("Religion", "Neptune_LT_0");
+                    return assets_get_image_id("Monuments", "Neptune_LT_0");
+                case 2:
+                    return assets_get_image_id("Monuments", "Neptune_LT_50");
                 default:
                     return image_group(GROUP_BUILDING_TEMPLE_NEPTUNE) + 1;
             }
         case BUILDING_LARGE_TEMPLE_MERCURY:
             switch (b->monument.phase) {
                 case MONUMENT_START:
-                    return assets_get_image_id("Religion", "Mercury_LT_0");
+                    return assets_get_image_id("Monuments", "Mercury_LT_0");
+                case 2:
+                    return assets_get_image_id("Monuments", "Mercury_LT_50");
                 default:
                     return image_group(GROUP_BUILDING_TEMPLE_MERCURY) + 1;
             }
         case BUILDING_LARGE_TEMPLE_MARS:
             switch (b->monument.phase) {
                 case MONUMENT_START:
-                    return assets_get_image_id("Religion", "Mars_LT_0");
+                    return assets_get_image_id("Monuments", "Mars_LT_0");
+                case 2:
+                    return assets_get_image_id("Monuments", "Mars_LT_50");
                 default:
                     return image_group(GROUP_BUILDING_TEMPLE_MARS) + 1;
             }
         case BUILDING_LARGE_TEMPLE_VENUS:
             switch (b->monument.phase) {
                 case MONUMENT_START:
-                    return assets_get_image_id("Religion", "Venus_LT_0");
+                    return assets_get_image_id("Monuments", "Venus_LT_0");
+                case 2:
+                    return assets_get_image_id("Monuments", "Venus_LT_50");
                 default:
                     return image_group(GROUP_BUILDING_TEMPLE_VENUS) + 1;
             }
         case BUILDING_ORACLE:
             switch (b->monument.phase) {
                 case MONUMENT_START:
-                    return assets_get_image_id("Religion", "Oracle_Construction_01");
+                    return assets_get_image_id("Monuments", "Oracle_Construction_01");
+                case 2:
+                    return assets_get_image_id("Monuments", "Oracle_Construction_02");
                 default:
                     return image_group(GROUP_BUILDING_ORACLE);
             }
         case BUILDING_LARARIUM:
-            return assets_get_image_id("Religion", "Lararium 01");
+            return assets_get_image_id("Health_Culture", "Lararium 01");
         case BUILDING_ROADBLOCK:
         case BUILDING_DECORATIVE_COLUMN:
             return building_variant_get_image_id_with_rotation(b->type, b->variant);
@@ -480,10 +502,10 @@ int building_image_get(const building *b)
                     }
                 } else {
                     if (orientation == DIR_0_TOP || orientation == DIR_4_BOTTOM) {
-                        image_id = assets_get_image_id("Entertainment", "Circus NWSE 01") +
+                        image_id = assets_get_image_id("Monuments", "Circus NWSE 01") +
                             ((phase - 1) * phase_offset);
                     } else {
-                        image_id = assets_get_image_id("Entertainment", "Circus NESW 01") +
+                        image_id = assets_get_image_id("Monuments", "Circus NESW 01") +
                             ((phase - 1) * phase_offset);
                     }
                 }
@@ -527,6 +549,8 @@ int building_image_get(const building *b)
         case BUILDING_FORT_JAVELIN:
         case BUILDING_FORT_LEGIONARIES:
         case BUILDING_FORT_MOUNTED:
+        case BUILDING_FORT_AUXILIA_INFANTRY:
+        case BUILDING_FORT_ARCHERS:
             switch (scenario_property_climate()) {
                 case CLIMATE_NORTHERN:
                     return assets_get_image_id("Military", "Fort_Main_North");
@@ -546,163 +570,163 @@ int building_image_get(const building *b)
         case BUILDING_GRAND_TEMPLE_CERES:
             switch (b->monument.phase) {
                 case MONUMENT_START:
-                    return assets_get_image_id("Religion", "Ceres Complex Const 01");
+                    return assets_get_image_id("Monuments", "Ceres Complex Const 01");
                 case 2:
-                    return assets_get_image_id("Religion", "Ceres Complex Const 02");
+                    return assets_get_image_id("Monuments", "Ceres Complex Const 02");
                 case 3:
-                    return assets_get_image_id("Religion", "Ceres Complex Const 03");
+                    return assets_get_image_id("Monuments", "Ceres Complex Const 03");
                 case 4:
-                    return assets_get_image_id("Religion", "Ceres Complex Const 04");
+                    return assets_get_image_id("Monuments", "Ceres Complex Const 04");
                 case 5:
-                    return assets_get_image_id("Religion", "Ceres Complex Const 05");
+                    return assets_get_image_id("Monuments", "Ceres Complex Const 05");
                 default:
                     switch (b->monument.upgrades) {
                         case 1:
-                            return assets_get_image_id("Religion", "Ceres Complex Module");
+                            return assets_get_image_id("Monuments", "Ceres Complex Module");
                         case 2:
-                            return assets_get_image_id("Religion", "Ceres Complex Module2");
+                            return assets_get_image_id("Monuments", "Ceres Complex Module2");
                         default:
-                            return assets_get_image_id("Religion", "Ceres Complex On");
+                            return assets_get_image_id("Monuments", "Ceres Complex On");
                     }
             }
         case BUILDING_GRAND_TEMPLE_NEPTUNE:
             switch (b->monument.phase) {
                 case MONUMENT_START:
-                    return assets_get_image_id("Religion", "Neptune Complex Const 01");
+                    return assets_get_image_id("Monuments", "Neptune Complex Const 01");
                 case 2:
-                    return assets_get_image_id("Religion", "Neptune Complex Const 02");
+                    return assets_get_image_id("Monuments", "Neptune Complex Const 02");
                 case 3:
-                    return assets_get_image_id("Religion", "Neptune Complex Const 03");
+                    return assets_get_image_id("Monuments", "Neptune Complex Const 03");
                 case 4:
-                    return assets_get_image_id("Religion", "Neptune Complex Const 04");
+                    return assets_get_image_id("Monuments", "Neptune Complex Const 04");
                 case 5:
-                    return assets_get_image_id("Religion", "Neptune Complex Const 05");
+                    return assets_get_image_id("Monuments", "Neptune Complex Const 05");
                 default:
                     switch (b->monument.upgrades) {
                         case 1:
-                            return assets_get_image_id("Religion", "Neptune Complex Module");
+                            return assets_get_image_id("Monuments", "Neptune Complex Module");
                         case 2:
-                            return assets_get_image_id("Religion", "Neptune Complex Module2");
+                            return assets_get_image_id("Monuments", "Neptune Complex Module2");
                         default:
-                            return assets_get_image_id("Religion", "Neptune Complex On");
+                            return assets_get_image_id("Monuments", "Neptune Complex On");
                     }
             }
         case BUILDING_GRAND_TEMPLE_MERCURY:
             switch (b->monument.phase) {
                 case MONUMENT_START:
-                    return assets_get_image_id("Religion", "Mercury Complex Const 01");
+                    return assets_get_image_id("Monuments", "Mercury Complex Const 01");
                 case 2:
-                    return assets_get_image_id("Religion", "Mercury Complex Const 02");
+                    return assets_get_image_id("Monuments", "Mercury Complex Const 02");
                 case 3:
-                    return assets_get_image_id("Religion", "Mercury Complex Const 03");
+                    return assets_get_image_id("Monuments", "Mercury Complex Const 03");
                 case 4:
-                    return assets_get_image_id("Religion", "Mercury Complex Const 04");
+                    return assets_get_image_id("Monuments", "Mercury Complex Const 04");
                 case 5:
-                    return assets_get_image_id("Religion", "Mercury Complex Const 05");
+                    return assets_get_image_id("Monuments", "Mercury Complex Const 05");
                 default:
                     switch (b->monument.upgrades) {
                         case 1:
-                            return assets_get_image_id("Religion", "Mercury Complex Module");
+                            return assets_get_image_id("Monuments", "Mercury Complex Module");
                         case 2:
-                            return assets_get_image_id("Religion", "Mercury Complex Module2");
+                            return assets_get_image_id("Monuments", "Mercury Complex Module2");
                         default:
-                            return assets_get_image_id("Religion", "Mercury Complex On");
+                            return assets_get_image_id("Monuments", "Mercury Complex On");
                     }
             }
         case BUILDING_GRAND_TEMPLE_MARS:
             switch (b->monument.phase) {
                 case MONUMENT_START:
-                    return assets_get_image_id("Religion", "Mars Complex Const 01");
+                    return assets_get_image_id("Monuments", "Mars Complex Const 01");
                 case 2:
-                    return assets_get_image_id("Religion", "Mars Complex Const 02");
+                    return assets_get_image_id("Monuments", "Mars Complex Const 02");
                 case 3:
-                    return assets_get_image_id("Religion", "Mars Complex Const 03");
+                    return assets_get_image_id("Monuments", "Mars Complex Const 03");
                 case 4:
-                    return assets_get_image_id("Religion", "Mars Complex Const 04");
+                    return assets_get_image_id("Monuments", "Mars Complex Const 04");
                 case 5:
-                    return assets_get_image_id("Religion", "Mars Complex Const 05");
+                    return assets_get_image_id("Monuments", "Mars Complex Const 05");
                 default:
                     switch (b->monument.upgrades) {
                         case 1:
-                            return assets_get_image_id("Religion", "Mars Complex Module");
+                            return assets_get_image_id("Monuments", "Mars Complex Module");
                         case 2:
-                            return assets_get_image_id("Religion", "Mars Complex Module2");
+                            return assets_get_image_id("Monuments", "Mars Complex Module2");
                         default:
-                            return assets_get_image_id("Religion", "Mars Complex On");
+                            return assets_get_image_id("Monuments", "Mars Complex On");
                     }
             }
         case BUILDING_GRAND_TEMPLE_VENUS:
             switch (b->monument.phase) {
                 case MONUMENT_START:
-                    return assets_get_image_id("Religion", "Venus Complex Const 01");
+                    return assets_get_image_id("Monuments", "Venus Complex Const 01");
                 case 2:
-                    return assets_get_image_id("Religion", "Venus Complex Const 02");
+                    return assets_get_image_id("Monuments", "Venus Complex Const 02");
                 case 3:
-                    return assets_get_image_id("Religion", "Venus Complex Const 03");
+                    return assets_get_image_id("Monuments", "Venus Complex Const 03");
                 case 4:
-                    return assets_get_image_id("Religion", "Venus Complex Const 04");
+                    return assets_get_image_id("Monuments", "Venus Complex Const 04");
                 case 5:
-                    return assets_get_image_id("Religion", "Venus Complex Const 05");
+                    return assets_get_image_id("Monuments", "Venus Complex Const 05");
                 default:
                     switch (b->monument.upgrades) {
                         case 1:
-                            return assets_get_image_id("Religion", "Venus Complex Module");
+                            return assets_get_image_id("Monuments", "Venus Complex Module");
                         case 2:
-                            return assets_get_image_id("Religion", "Venus Complex Module2");
+                            return assets_get_image_id("Monuments", "Venus Complex Module2");
                         default:
-                            return assets_get_image_id("Religion", "Venus Complex On");
+                            return assets_get_image_id("Monuments", "Venus Complex On");
                     }
             }
         case BUILDING_PANTHEON:
             switch (b->monument.phase) {
                 case MONUMENT_START:
-                    return assets_get_image_id("Religion", "Pantheon Const 01");
+                    return assets_get_image_id("Monuments", "Pantheon Const 01");
                 case 2:
-                    return assets_get_image_id("Religion", "Pantheon Const 02");
+                    return assets_get_image_id("Monuments", "Pantheon Const 02");
                 case 3:
-                    return assets_get_image_id("Religion", "Pantheon Const 03");
+                    return assets_get_image_id("Monuments", "Pantheon Const 03");
                 case 4:
-                    return assets_get_image_id("Religion", "Pantheon Const 04");
+                    return assets_get_image_id("Monuments", "Pantheon Const 04");
                 case 5:
-                    return assets_get_image_id("Religion", "Pantheon Const 05");
+                    return assets_get_image_id("Monuments", "Pantheon Const 05");
                 default:
                     switch (b->monument.upgrades) {
                         case 1:
-                            return assets_get_image_id("Religion", "Pantheon Module");
+                            return assets_get_image_id("Monuments", "Pantheon Module");
                         case 2:
-                            return assets_get_image_id("Religion", "Pantheon Module2");
+                            return assets_get_image_id("Monuments", "Pantheon Module2");
                         default:
-                            return assets_get_image_id("Religion", "Pantheon On");
+                            return assets_get_image_id("Monuments", "Pantheon On");
                     }
             }
         case BUILDING_LIGHTHOUSE:
             switch (b->monument.phase) {
                 case MONUMENT_START:
-                    return assets_get_image_id("Logistics", "Lighthouse Const 01");
+                    return assets_get_image_id("Monuments", "Lighthouse_Construction_01");
                 case 2:
-                    return assets_get_image_id("Logistics", "Lighthouse Const 02");
+                    return assets_get_image_id("Monuments", "Lighthouse_Construction_02");
                 case 3:
-                    return assets_get_image_id("Logistics", "Lighthouse Const 03");
+                    return assets_get_image_id("Monuments", "Lighthouse_Construction_03");
                 case 4:
-                    return assets_get_image_id("Logistics", "Lighthouse Const 04");
+                    return assets_get_image_id("Monuments", "Lighthouse_Construction_04");
                 default:
                     if (b->resources[RESOURCE_TIMBER] > 0 && b->num_workers > 0) {
-                        return assets_get_image_id("Logistics", "Lighthouse ON");
+                        return assets_get_image_id("Monuments", "Lighthouse ON");
                     } else {
-                        return assets_get_image_id("Logistics", "Lighthouse OFF");
+                        return assets_get_image_id("Monuments", "Lighthouse OFF");
                     }
             }
         case BUILDING_WORKCAMP:
             switch (scenario_property_climate()) {
                 case CLIMATE_NORTHERN:
-                    return assets_get_image_id("Logistics", "Workcamp North");
+                    return assets_get_image_id("Admin_Logistics", "Workcamp North");
                 case CLIMATE_DESERT:
-                    return assets_get_image_id("Logistics", "Workcamp South");
+                    return assets_get_image_id("Admin_Logistics", "Workcamp South");
                 default:
-                    return assets_get_image_id("Logistics", "Workcamp Central");
+                    return assets_get_image_id("Admin_Logistics", "Workcamp Central");
             }
         case BUILDING_ARCHITECT_GUILD:
-            return assets_get_image_id("Logistics", "Arch Guild ON");
+            return assets_get_image_id("Admin_Logistics", "Arch Guild ON");
         case BUILDING_MESS_HALL:
             switch (scenario_property_climate()) {
                 case CLIMATE_NORTHERN:
@@ -713,11 +737,19 @@ int building_image_get(const building *b)
                     return assets_get_image_id("Military", "Mess ON Central");
             }
         case BUILDING_TAVERN:
-            return assets_get_image_id("Entertainment", "Tavern ON");
+            if (!b->upgrade_level) {
+                return assets_get_image_id("Health_Culture", "Tavern ON");
+            } else {
+                return assets_get_image_id("Health_Culture", "Tavern Upgrade ON");
+            }
         case BUILDING_GRAND_GARDEN:
             return assets_get_image_id("Engineer", "Eng Guild ON");
         case BUILDING_ARENA:
-            return assets_get_image_id("Entertainment", "Arena ON");
+            if (!b->upgrade_level) {
+                return assets_get_image_id("Health_Culture", "Arena ON");
+            } else {
+                return assets_get_image_id("Health_Culture", "Arena Upgrade ON");
+            }
         case BUILDING_HORSE_STATUE:
         {
             int orientation = building_rotation_get_building_orientation(b->subtype.orientation) / 2;
@@ -749,48 +781,51 @@ int building_image_get(const building *b)
             int offset = building_variant_get_offset_with_rotation(b->type, b->variant);
             return image_id + offset;
         }
-        case BUILDING_SMALL_MAUSOLEUM:
+        case BUILDING_SMALL_MAUSOLEUM: {
+            int orientation = building_rotation_get_building_orientation(b->subtype.orientation) / 2;
             switch (b->monument.phase) {
                 case MONUMENT_START:
-                    return assets_get_image_id("Religion", "Mausoleum S Cons");
+                    return assets_get_image_id("Monuments", "Mausoleum_Small_Construction_01");
+                case 2:
+                    return assets_get_image_id("Monuments", "Mausoleum_Small_Construction_02") + orientation % 2;
                 default:
-                {
-                    int orientation = building_rotation_get_building_orientation(b->subtype.orientation) / 2;
-                    return assets_get_image_id("Religion", "Mausoleum S") + orientation % 2;
+                    return assets_get_image_id("Monuments", "Mausoleum S") + orientation % 2;
                 }
             }
         case BUILDING_LARGE_MAUSOLEUM: {
             int offset = building_variant_get_offset_with_rotation(b->type, b->variant);
             switch (b->monument.phase) {
                 case MONUMENT_START:
-                    return assets_get_image_id("Religion", "Mausoleum L Cons");
+                    return assets_get_image_id("Monuments", "Mausoleum L Cons");
                 case 2:
-                    return assets_get_image_id("Religion", "Mausoleum_Large_Construction_02") + offset;
+                    return assets_get_image_id("Monuments", "Mausoleum_Large_Construction_02") + offset;
                 default:
-                    return assets_get_image_id("Religion", "Mausoleum L") + offset;
+                    return assets_get_image_id("Monuments", "Mausoleum L") + offset;
             }
         }
         case BUILDING_NYMPHAEUM:
             switch (b->monument.phase) {
                 case MONUMENT_START:
-                    return assets_get_image_id("Religion", "Pantheon_Const_00");
+                    return assets_get_image_id("Monuments", "Pantheon_Const_00");
+                case 2:
+                    return assets_get_image_id("Monuments", "Nymphaeum_Construction_02");
                 default:
-                    return assets_get_image_id("Religion", "Nymphaeum ON");
+                    return assets_get_image_id("Monuments", "Nymphaeum ON");
             }
         case BUILDING_CARAVANSERAI:
             switch (b->monument.phase) {
                 case MONUMENT_START:
-                    return assets_get_image_id("Logistics", "Caravanserai_Construction_01");
+                    return assets_get_image_id("Monuments", "Caravanserai_Construction_01");
                 case 2:
-                    return assets_get_image_id("Logistics", "Caravanserai_Construction_02");
+                    return assets_get_image_id("Monuments", "Caravanserai_Construction_02");
                 default:
                     switch (scenario_property_climate()) {
                         case CLIMATE_DESERT:
-                            return assets_get_image_id("Logistics", "Caravanserai_S_ON");
+                            return assets_get_image_id("Monuments", "Caravanserai_S_ON");
                         case CLIMATE_NORTHERN:
-                            return assets_get_image_id("Logistics", "Caravanserai_N_ON");
+                            return assets_get_image_id("Monuments", "Caravanserai_N_ON");
                         default:
-                            return assets_get_image_id("Logistics", "Caravanserai_C_ON");
+                            return assets_get_image_id("Monuments", "Caravanserai_C_ON");
                     }
             }
         case BUILDING_PINE_TREE:
@@ -802,12 +837,12 @@ int building_image_get(const building *b)
         case BUILDING_PALM_TREE:
         case BUILDING_DATE_TREE:
             return assets_get_group_id("Aesthetics") + (b->type - BUILDING_PINE_TREE);
-        case BUILDING_SMALL_STATUE_ALT:
-        case BUILDING_SMALL_STATUE_ALT_B:
+        case BUILDING_GODDESS_STATUE:
+        case BUILDING_SENATOR_STATUE:
         {
             int orientation = building_rotation_get_building_orientation(b->subtype.orientation) / 2;
             return assets_get_image_id("Aesthetics", "sml statue 2") +
-                (b->type - BUILDING_SMALL_STATUE_ALT) + (orientation % 2) *
+                (b->type - BUILDING_GODDESS_STATUE) + (orientation % 2) *
                 building_properties_for_type(b->type)->rotation_offset;
         }
         case BUILDING_HEDGE_DARK:
@@ -912,43 +947,53 @@ int building_image_get(const building *b)
                 (orientation % 2) * building_properties_for_type(b->type)->rotation_offset;
         }
         case BUILDING_HIGHWAY:
-            return assets_get_image_id("Logistics", "Highway_Placement");
+            return assets_get_image_id("Admin_Logistics", "Highway_Placement");
         case BUILDING_DEPOT:
             switch (scenario_property_climate()) {
                 case CLIMATE_NORTHERN:
-                    return assets_get_image_id("Logistics", "Cart Depot N ON");
+                    return assets_get_image_id("Admin_Logistics", "Cart Depot N ON");
                 case CLIMATE_DESERT:
-                    return assets_get_image_id("Logistics", "Cart Depot S ON");
+                    return assets_get_image_id("Admin_Logistics", "Cart Depot S ON");
                 default:
-                    return assets_get_image_id("Logistics", "Cart Depot C ON");
+                    return assets_get_image_id("Admin_Logistics", "Cart Depot C ON");
             }
         case BUILDING_SHRINE_CERES:
         {
             int orientation = building_rotation_get_building_orientation(b->subtype.orientation) / 2;
-            return assets_get_image_id("Religion", "Altar_Ceres") + orientation % 2;
+            return assets_get_image_id("Health_Culture", "Altar_Ceres") + orientation % 2;
         }
         case BUILDING_SHRINE_MARS:
         {
             int orientation = building_rotation_get_building_orientation(b->subtype.orientation) / 2;
-            return assets_get_image_id("Religion", "Altar_Mars") + orientation % 2;
+            return assets_get_image_id("Health_Culture", "Altar_Mars") + orientation % 2;
         }
         case BUILDING_SHRINE_MERCURY:
         {
             int orientation = building_rotation_get_building_orientation(b->subtype.orientation) / 2;
-            return assets_get_image_id("Religion", "Altar_Mercury") + orientation % 2;
+            return assets_get_image_id("Health_Culture", "Altar_Mercury") + orientation % 2;
         }
         case BUILDING_SHRINE_NEPTUNE:
         {
             int orientation = building_rotation_get_building_orientation(b->subtype.orientation) / 2;
-            return assets_get_image_id("Religion", "Altar_Neptune") + orientation % 2;
+            return assets_get_image_id("Health_Culture", "Altar_Neptune") + orientation % 2;
         }
         case BUILDING_SHRINE_VENUS:
         {
             int orientation = building_rotation_get_building_orientation(b->subtype.orientation) / 2;
-            return assets_get_image_id("Religion", "Altar_Venus") + orientation % 2;
+            return assets_get_image_id("Health_Culture", "Altar_Venus") + orientation % 2;
         }
         case BUILDING_OVERGROWN_GARDENS:
             return building_properties_for_type(BUILDING_OVERGROWN_GARDENS)->image_group;
+
+        case BUILDING_ARMOURY:
+            switch (scenario_property_climate()) {
+                case CLIMATE_NORTHERN:
+                    return assets_get_image_id("Military", "Armoury_ON_N");
+                case CLIMATE_DESERT:
+                    return assets_get_image_id("Military", "Armoury_ON_S");
+                default:
+                    return assets_get_image_id("Military", "Armoury_ON_C");
+            }
 
         default:
             return 0;

@@ -20,7 +20,7 @@
 #define PROCEED_TEXT 5
 #define CHECKBOX_CHECK_SIZE 20
 
-static void button_checkbox(int param1, int param2);
+static void button_checkbox(const generic_button *button);
 static void button_ok(int param1, int param2);
 static void button_cancel(int param1, int param2);
 static void confirm(void);
@@ -30,7 +30,7 @@ static image_button buttons[] = {
     {256, 100, 39, 26, IB_NORMAL, GROUP_OK_CANCEL_SCROLL_BUTTONS, 4, button_cancel, button_none, 0, 0, 1},
 };
 
-static generic_button checkbox = { 160, 180, 360, 20, button_checkbox, button_none };
+static generic_button checkbox = { 160, 180, 360, 20, button_checkbox };
 
 static struct {
     int ok_clicked;
@@ -38,7 +38,7 @@ static struct {
     int has_buttons;
     int translation_key;
     int checked;
-    int has_focus;
+    unsigned int has_focus;
     int checkbox_start_width;
     const uint8_t *custom_title;
     const uint8_t *custom_text;
@@ -77,7 +77,7 @@ static void draw_background(void)
         text_draw_centered(data.custom_title, 80, 100, 480, FONT_LARGE_BLACK, 0);
     }
     if (text_get_width(data.custom_text, FONT_NORMAL_BLACK) >= 420) {
-        text_draw_multiline(data.custom_text, 110, 140, 420, FONT_NORMAL_BLACK, 0);
+        text_draw_multiline(data.custom_text, 110, 140, 420, 0, FONT_NORMAL_BLACK, 0);
     } else {
         text_draw_centered(data.custom_text, 80, 140, 480, FONT_NORMAL_BLACK, 0);
     }
@@ -97,7 +97,7 @@ static void draw_foreground(void)
         button_border_draw(data.checkbox_start_width, 180, CHECKBOX_CHECK_SIZE, CHECKBOX_CHECK_SIZE, data.has_focus);
     }
     if (data.has_buttons) {
-        image_buttons_draw(80, data.checkbox_text ? 110 : 80, buttons, 2);
+        image_buttons_draw(80, data.checkbox_text ? 110 : 90, buttons, 2);
     } else {
         lang_text_draw_centered(13, 1, 80, 208, 480, FONT_NORMAL_BLACK);
     }
@@ -110,12 +110,12 @@ static void handle_input(const mouse *m, const hotkeys *h)
         return;
     }
     if (data.has_buttons && image_buttons_handle_mouse(mouse_in_dialog(m), 80,
-        data.checkbox_text ? 110 : 80, buttons, 2, 0)) {
+        data.checkbox_text ? 110 : 90, buttons, 2, 0)) {
         return;
     }
     if (input_go_back_requested(m, h)) {
-        data.close_func(0, 0);
         window_go_back();
+        data.close_func(0, 0);
     }
     if (h->enter_pressed) {
         confirm();
@@ -133,7 +133,7 @@ static void button_cancel(int param1, int param2)
     data.close_func(0, 0);
 }
 
-static void button_checkbox(int param1, int param2)
+static void button_checkbox(const generic_button *button)
 {
     data.checked ^= 1;
     window_request_refresh();

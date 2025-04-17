@@ -64,6 +64,11 @@ function install_sdl_macos {
   mkdir -p ~/Library/Frameworks
   echo "Installing framework:" "/Volumes/SDL2"/*.framework
   cp -rp "$VOLUME"/*.framework ~/Library/Frameworks
+  if [ -d "$VOLUME/optional" ]
+  then
+    echo "Installing optional framework:" "/Volumes/SDL2/optional"/*.framework
+    cp -rp "$VOLUME"/optional/*.framework ~/Library/Frameworks
+  fi
   hdiutil detach "$VOLUME"
 }
 
@@ -77,10 +82,29 @@ function install_sdl_android {
   rm $FILENAME
 }
 
+function install_sdl_ios {
+  local MODULE=$1
+  local VERSION=$2
+  local DIRNAME=deps/$MODULE-$VERSION
+  local FILENAME=$DIRNAME.tar.gz
+  if [ ! -f "$FILENAME" ]
+  then
+    get_sdl_lib_url $MODULE $VERSION "tar.gz"
+    curl -o "$FILENAME" "$SDL_LIB_URL"
+  fi
+  tar -zxf $FILENAME -C ext/SDL2
+}
+
 mkdir -p deps
 if [ "$BUILD_TARGET" == "appimage" ] || [ "$BUILD_TARGET" == "codeql-cpp" ]
 then
   sudo add-apt-repository universe && sudo add-apt-repository ppa:savoury1/multimedia && sudo apt-get update && sudo apt-get -y install libgl1-mesa-dev libsdl2-dev libsdl2-mixer-dev libfuse2
+elif [ "$BUILD_TARGET" == "flatpak" ]
+then
+  sudo apt-get update && sudo apt-get -y install flatpak-builder
+  sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+  sudo flatpak-builder repo res/com.github.keriew.augustus.json --install-deps-from=flathub --install-deps-only --delete-build-dirs
+  sudo rm -R .flatpak-builder
 elif [ ! -z "$SDL_VERSION" ] && [ ! -z "$SDL_MIXER_VERSION" ]
 then
   if [ "$BUILD_TARGET" == "mac" ]
@@ -103,6 +127,10 @@ then
       mkdir android/augustus/libs
       cp deps/SDL2-$BUILDTYPE.aar android/augustus/libs/SDL2-$BUILDTYPE.aar
     fi
+  elif [ "$BUILD_TARGET" == "ios" ]
+  then
+    install_sdl_ios "SDL2" $SDL_VERSION
+    install_sdl_ios "SDL2_mixer" $SDL_MIXER_VERSION
   else
     if [ "$BUILD_TARGET" == "emscripten" ]
     then

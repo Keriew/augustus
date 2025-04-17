@@ -11,6 +11,7 @@
 #include "core/string.h"
 #include "empire/city.h"
 #include "figure/formation_legion.h"
+#include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
@@ -30,26 +31,26 @@
 #define ADVISOR_HEIGHT 27
 #define RESOURCE_INFO_MAX_TEXT 200
 
-static void button_donate_to_city(int param1, int param2);
-static void button_set_salary(int param1, int param2);
-static void button_gift_to_emperor(int param1, int param2);
-static void button_request(int index, int param2);
-static void button_request_resource(int index, int param2);
+static void button_donate_to_city(const generic_button *button);
+static void button_set_salary(const generic_button *button);
+static void button_gift_to_emperor(const generic_button *button);
+static void button_request(const generic_button *button);
+static void button_request_resource(const generic_button *button);
 
 static generic_button imperial_buttons[] = {
-    {320, 367, 250, 20, button_donate_to_city, button_none, 0, 0},
-    {70, 393, 500, 20, button_set_salary, button_none, 0, 0},
-    {320, 341, 250, 20, button_gift_to_emperor, button_none, 0, 0},
-    {38, 96, 560, 40, button_request, button_request_resource, 0, 0},
-    {38, 138, 560, 40, button_request, button_request_resource, 1, 0},
-    {38, 180, 560, 40, button_request, button_request_resource, 2, 0},
-    {38, 222, 560, 40, button_request, button_request_resource, 3, 0},
-    {38, 264, 560, 40, button_request, button_request_resource, 4, 0},
+    {320, 367, 250, 20, button_donate_to_city},
+    {70, 393, 500, 20, button_set_salary},
+    {320, 341, 250, 20, button_gift_to_emperor},
+    {38, 96, 560, 40, button_request, button_request_resource, 0},
+    {38, 138, 560, 40, button_request, button_request_resource, 1},
+    {38, 180, 560, 40, button_request, button_request_resource, 2},
+    {38, 222, 560, 40, button_request, button_request_resource, 3},
+    {38, 264, 560, 40, button_request, button_request_resource, 4},
 };
 
-static int focus_button_id;
-static int selected_request_id;
-static int selected_resource;
+static unsigned int focus_button_id;
+static unsigned int selected_request_id;
+static unsigned int selected_resource;
 static uint8_t tooltip_resource_info[RESOURCE_INFO_MAX_TEXT];
 
 static void draw_request(int index, const scenario_request *request)
@@ -59,7 +60,7 @@ static void draw_request(int index, const scenario_request *request)
     }
 
     button_border_draw(38, 96 + 42 * index, 560, 40, 0);
-    text_draw_number(request->amount, '@', " ", 40, 102 + 42 * index, FONT_NORMAL_WHITE, 0);
+    text_draw_number(request->amount.requested, '@', " ", 40, 102 + 42 * index, FONT_NORMAL_WHITE, 0);
     image_draw(resource_get_data(request->resource)->image.icon, 110, 100 + 42 * index, COLOR_MASK_NONE, SCALE_NONE);
     text_draw(resource_get_data(request->resource)->text, 150, 102 + 42 * index, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
 
@@ -71,7 +72,7 @@ static void draw_request(int index, const scenario_request *request)
         int treasury = city_finance_treasury();
         width = text_draw_number(treasury, '@', " ", 40, 120 + 42 * index, FONT_NORMAL_WHITE, 0);
         width += lang_text_draw(52, 44, 40 + width, 120 + 42 * index, FONT_NORMAL_WHITE);
-        if (treasury < request->amount) {
+        if (treasury < request->amount.requested) {
             lang_text_draw(52, 48, 80 + width, 120 + 42 * index, FONT_NORMAL_WHITE);
         } else {
             lang_text_draw(52, 47, 80 + width, 120 + 42 * index, FONT_NORMAL_WHITE);
@@ -80,7 +81,7 @@ static void draw_request(int index, const scenario_request *request)
         // normal goods request
         int using_granaries;
         int amount_stored = city_resource_get_amount_including_granaries(request->resource,
-            request->amount, &using_granaries);
+            request->amount.requested, &using_granaries);
         int y_offset = 120 + 42 * index;
         width = text_draw_number(amount_stored, '@', " ", 40, y_offset, FONT_NORMAL_WHITE, 0);
         if (using_granaries) {
@@ -88,7 +89,7 @@ static void draw_request(int index, const scenario_request *request)
         } else {
             width += lang_text_draw(52, 43, 40 + width, y_offset, FONT_NORMAL_WHITE);
         }
-        if (amount_stored < request->amount) {
+        if (amount_stored < request->amount.requested) {
             lang_text_draw(52, 48, 80 + width, y_offset, FONT_NORMAL_WHITE);
         } else {
             lang_text_draw(52, 47, 80 + width, y_offset, FONT_NORMAL_WHITE);
@@ -103,7 +104,7 @@ static int draw_background(void)
     outer_panel_draw(0, 0, 40, ADVISOR_HEIGHT);
     image_draw(image_group(GROUP_ADVISOR_ICONS) + 2, 10, 10, COLOR_MASK_NONE, SCALE_NONE);
 
-    text_draw(scenario_player_name(), 60, 12, FONT_LARGE_BLACK, 0);
+    text_draw_ellipsized(scenario_player_name(), 60, 12, 564, FONT_LARGE_BLACK, 0);
 
     int width = lang_text_draw(52, 0, 60, 44, FONT_NORMAL_BLACK);
     text_draw_number(city_rating_favor(), '@', " ", 60 + width, 44, FONT_NORMAL_BLACK, 0);
@@ -163,7 +164,7 @@ static void draw_foreground(void)
     lang_text_draw_centered(52, 49, 320, 346, 250, FONT_NORMAL_WHITE);
 
     // Request buttons
-    for (int i = 0; i < CITY_REQUEST_MAX_ACTIVE; i++) {
+    for (unsigned int i = 0; i < CITY_REQUEST_MAX_ACTIVE; i++) {
         if (city_request_get_status(i)) {
             button_border_draw(38, 96 + i * 42, 560, 40, focus_button_id == i + 4);
         }
@@ -177,17 +178,17 @@ static int handle_mouse(const mouse *m)
     return generic_buttons_handle_mouse(m, 0, 0, imperial_buttons, 3 + request_count, &focus_button_id);
 }
 
-static void button_donate_to_city(int param1, int param2)
+static void button_donate_to_city(const generic_button *button)
 {
     window_donate_to_city_show();
 }
 
-static void button_set_salary(int param1, int param2)
+static void button_set_salary(const generic_button *button)
 {
     window_set_salary_show();
 }
 
-static void button_gift_to_emperor(int param1, int param2)
+static void button_gift_to_emperor(const generic_button *button)
 {
     window_gift_to_emperor_show();
 }
@@ -213,8 +214,9 @@ static void confirm_send_goods(int accepted, int checked)
     }
 }
 
-void button_request(int index, int param2)
+void button_request(const generic_button *button)
 {
+    int index = button->parameter1;
     int status = city_request_get_status(index);
     if (!status) {
         return;
@@ -254,8 +256,9 @@ void button_request(int index, int param2)
 }
 
 // Used for showing the resource settings window on right click
-void button_request_resource(int index, int param2)
+void button_request_resource(const generic_button *button)
 {
+    int index = button->parameter1;
     // Make sure there's a request pending at this index
     if (!city_request_get_status(index)) {
         return;
@@ -305,7 +308,7 @@ static void get_tooltip_text(advisor_tooltip_result *r)
         if (request_status == CITY_REQUEST_STATUS_NOT_ENOUGH_RESOURCES || request_status >= CITY_REQUEST_STATUS_MAX) {
             const scenario_request *request = scenario_request_get_visible(index - city_request_has_troop_request());
             int using_granaries;
-            city_resource_get_amount_including_granaries(request->resource, request->amount, &using_granaries);
+            city_resource_get_amount_including_granaries(request->resource, request->amount.requested, &using_granaries);
             if (using_granaries) {
                 write_resource_storage_tooltip(r, request->resource);
             }

@@ -1,6 +1,9 @@
 #include "property.h"
 
+#include "core/calc.h"
 #include "core/string.h"
+#include "game/campaign.h"
+#include "graphics/image.h"
 #include "scenario/data.h"
 
 int scenario_is_custom(void)
@@ -15,37 +18,37 @@ void scenario_set_custom(int custom)
 
 int scenario_campaign_rank(void)
 {
-    return scenario.settings.campaign_rank;
+    return scenario.campaign.rank;
 }
 
 void scenario_set_campaign_rank(int rank)
 {
-    scenario.settings.campaign_rank = rank;
+    scenario.campaign.rank = rank;
 }
 
 int scenario_campaign_mission(void)
 {
-    return scenario.settings.campaign_mission;
+    return scenario.campaign.mission;
 }
 
 void scenario_set_campaign_mission(int mission)
 {
-    scenario.settings.campaign_mission = mission;
+    scenario.campaign.mission = mission;
 }
 
 int scenario_is_tutorial_1(void)
 {
-    return !scenario.settings.is_custom && scenario.settings.campaign_rank == 0;
+    return game_campaign_is_original() && scenario.campaign.rank == 0;
 }
 
 int scenario_is_tutorial_2(void)
 {
-    return !scenario.settings.is_custom && scenario.settings.campaign_rank == 1;
+    return game_campaign_is_original() && scenario.campaign.rank == 1;
 }
 
 int scenario_is_tutorial_3(void)
 {
-    return !scenario.settings.is_custom && scenario.settings.campaign_rank == 2;
+    return game_campaign_is_original() && scenario.campaign.rank == 2;
 }
 
 int scenario_starting_favor(void)
@@ -56,6 +59,11 @@ int scenario_starting_favor(void)
 int scenario_starting_personal_savings(void)
 {
     return scenario.settings.starting_personal_savings;
+}
+
+void scenario_set_starting_personal_savings(int personal_savings)
+{
+    scenario.settings.starting_personal_savings = personal_savings;
 }
 
 const uint8_t *scenario_name(void)
@@ -80,12 +88,12 @@ void scenario_set_player_name(const uint8_t *name)
 
 void scenario_save_campaign_player_name(void)
 {
-    string_copy(scenario.settings.player_name, scenario.settings.campaign_player_name, MAX_PLAYER_NAME);
+    string_copy(scenario.settings.player_name, scenario.campaign.player_name, MAX_PLAYER_NAME);
 }
 
 void scenario_restore_campaign_player_name(void)
 {
-    string_copy(scenario.settings.campaign_player_name, scenario.settings.player_name, MAX_PLAYER_NAME);
+    string_copy(scenario.campaign.player_name, scenario.settings.player_name, MAX_PLAYER_NAME);
 }
 
 int scenario_is_open_play(void)
@@ -123,6 +131,11 @@ int scenario_property_player_rank(void)
     return scenario.player_rank;
 }
 
+int scenario_property_caesar_salary(void)
+{
+    return scenario.caesar_salary;
+}
+
 int scenario_image_id(void)
 {
     return scenario.image_id;
@@ -146,4 +159,16 @@ int scenario_rescue_loan(void)
 int scenario_intro_message(void)
 {
     return scenario.intro_custom_message_id;
+}
+
+int scenario_victory_message(void)
+{
+    return scenario.victory_custom_message_id;
+}
+
+void scenario_change_climate(scenario_climate climate)
+{
+    climate = calc_bound(climate, CLIMATE_CENTRAL, CLIMATE_DESERT);
+    scenario.climate = climate;
+    image_load_climate(scenario_property_climate(), 0, 0, 0);
 }

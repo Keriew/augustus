@@ -42,8 +42,10 @@ static int take_food_from_granary(figure *f, int market_id, int granary_id)
     if (!resource_is_food(resource)) {
         return 0;
     }
+
     building *granary = building_get(granary_id);
     building *market = building_get(market_id);
+
     int market_units = market->resources[resource];
     int max_units = 0;
     int granary_units = granary->resources[resource];
@@ -292,7 +294,24 @@ void figure_supplier_action(figure *f)
             break;
     }
     if (f->type == FIGURE_MESS_HALL_SUPPLIER) {
-        figure_tower_sentry_set_image(f);
+        int dir = figure_image_normalize_direction(f->direction < 8 ? f->direction : f->previous_tile_direction);
+        switch (f->action_state) {
+            case FIGURE_ACTION_150_ATTACK:
+                if (f->attack_image_offset < 14) {
+                    f->image_id = assets_get_image_id("Walkers", "quartermaster_f_ne_01") + dir * 6;
+                } else {
+                    f->image_id = assets_get_image_id("Walkers", "quartermaster_f_ne_01") + dir * 6 + ((f->attack_image_offset - 14) / 2);
+                }
+                break;
+            case FIGURE_ACTION_149_CORPSE:
+                f->image_id = assets_get_image_id("Walkers", "quartermaster_death_01") +
+                    figure_image_corpse_offset(f);
+                break;
+            default:
+                f->image_id = assets_get_image_id("Walkers", "quartermaster_ne_01") +
+                    dir * 12 + f->image_offset;
+                break;
+        }
     } else if (f->type == FIGURE_PRIEST_SUPPLIER) {
         figure_image_update(f, image_group(GROUP_FIGURE_PRIEST));
     } else if (f->type == FIGURE_BARKEEP_SUPPLIER) {
@@ -304,13 +323,30 @@ void figure_supplier_action(figure *f)
             f->image_id = assets_get_image_id("Walkers", "Barkeep NE 01") +
                 dir * 12 + f->image_offset;
         }
-    } else if (f->type == FIGURE_LIGHTHOUSE_SUPPLIER || f->type == FIGURE_CARAVANSERAI_SUPPLIER) {
+    } else if (f->type == FIGURE_LIGHTHOUSE_SUPPLIER) {
+        if (f->action_state == FIGURE_ACTION_146_SUPPLIER_RETURNING) {
+            f->cart_image_id = resource_get_data(f->collecting_item_id)->image.cart.single_load;
+        } else {
+            f->cart_image_id = image_group(GROUP_FIGURE_CARTPUSHER_CART);
+        }
         int dir = figure_image_normalize_direction(f->direction < 8 ? f->direction : f->previous_tile_direction);
         if (f->action_state == FIGURE_ACTION_149_CORPSE) {
-            f->image_id = assets_get_image_id("Walkers", "Slave death 01") +
+            f->image_id = image_group(GROUP_FIGURE_CARTPUSHER) + figure_image_corpse_offset(f) + 96;
+            f->cart_image_id = 0;
+        } else {
+            f->image_id = image_group(GROUP_FIGURE_CARTPUSHER) + dir + 8 * f->image_offset;
+        }
+        if (f->cart_image_id) {
+            f->cart_image_id += dir;
+            figure_image_set_cart_offset(f, dir);
+        }
+    } else if (f->type == FIGURE_CARAVANSERAI_SUPPLIER) {
+        int dir = figure_image_normalize_direction(f->direction < 8 ? f->direction : f->previous_tile_direction);
+        if (f->action_state == FIGURE_ACTION_149_CORPSE) {
+            f->image_id = assets_get_image_id("Walkers", "caravanserai_overseer_death_01") +
                 figure_image_corpse_offset(f);
         } else {
-            f->image_id = assets_get_image_id("Walkers", "Slave NE 01") +
+            f->image_id = assets_get_image_id("Walkers", "caravanserai_overseer_ne_01") +
                 dir * 12 + f->image_offset;
         }
     } else {
@@ -366,9 +402,9 @@ void figure_delivery_boy_action(figure *f)
         }
     } else if (f->type == FIGURE_CARAVANSERAI_COLLECTOR) {
         if (f->action_state == FIGURE_ACTION_149_CORPSE) {
-            f->image_id = assets_get_image_id("Walkers", "Slave death 01") + figure_image_corpse_offset(f);
+            f->image_id = assets_get_image_id("Walkers", "caravanserai_walker_death_01") + figure_image_corpse_offset(f);
         } else {
-            f->image_id = assets_get_image_id("Walkers", "Slave NE 01")
+            f->image_id = assets_get_image_id("Walkers", "caravanserai_walker_ne_01")
                 + dir * 12 + f->image_offset;
         }
     } else {

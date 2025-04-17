@@ -24,9 +24,10 @@ int xml_parser_compare_multiple(const char *string, const char *match);
  * 
  * @param elements A list of xml_parser_element structures, indicating the format of the xml file. This will be used for error checking.
  * @param total_elements The total number of elements passed.
+ * @param stop_on_invalid_xml Whether the parser should stop when it finds an invalid xml element.
  * @return 1 if init was successful, 0 otherwise.
  */
-int xml_parser_init(const xml_parser_element *elements, int total_elements);
+int xml_parser_init(const xml_parser_element *elements, int total_elements, int stop_on_invalid_xml);
 
 /**
  * @brief Parses a chunk of a xml file. 
@@ -37,14 +38,6 @@ int xml_parser_init(const xml_parser_element *elements, int total_elements);
  * @return 1 if parsing was successful, 0 otherwise.
  */
 int xml_parser_parse(const char *buffer, unsigned int buffer_size, int is_final);
-
-/**
- * @brief Get the total number of attributes for the current element.
- * 
- * @return int The total number of attributes for the current element.
- * Note that both keys and values are considered attributes, so if you just want to find the number of keys you should divide the result by 2.
- */
-int xml_parser_get_total_attributes(void);
 
 /**
  * @brief Whether an element has a specific attribute.
@@ -89,7 +82,7 @@ char *xml_parser_copy_attribute_string(const char *key);
 int xml_parser_get_attribute_bool(const char *key);
 
 /**
- * @brief 
+ * @brief Gets an attribute as an enumeration
  * 
  * @param key The key to obtain.
  * @param values The possibe values for the enum, as an array of strings. You can have multiple values per index by separating them with "|".
@@ -113,6 +106,13 @@ int xml_parser_get_current_line_number(void);
  * @return Name of the current element.
  */
 const char *xml_parser_get_current_element_name(void);
+
+/**
+ * @brief Returns the name of the parent xml element that the parser is busy with.
+ * 
+ * @return Name of the parent element, or NULL if root element..
+ */
+const char *xml_parser_get_parent_element_name(void);
 
 /**
  * @brief Resets the parser, allowing it to be used with another file that has the same element structure.

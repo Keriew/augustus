@@ -6,6 +6,7 @@
 #include "core/image_packer.h"
 #include "core/log.h"
 #include "core/png_read.h"
+#include "game/campaign.h"
 #include "graphics/color.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
@@ -464,7 +465,7 @@ void asset_image_unload(asset_image *img)
     memset(&img->img, 0, sizeof(image));
 }
 
-static void new_image(asset_image *img, int index)
+static void new_image(asset_image *img, unsigned int index)
 {
     img->index = index;
     img->active = 1;
@@ -488,7 +489,7 @@ int asset_image_init_array(void)
 asset_image *asset_image_create(void)
 {
     asset_image *result;
-    array_new_item(data.asset_images, 1, result);
+    array_new_item_after_index(data.asset_images, 1, result);
     return result;
 }
 
@@ -660,5 +661,64 @@ void asset_image_check_and_handle_reference(asset_image *img)
             translate_reference_position(img);
         }
     }
+#endif
+}
+
+const asset_image *asset_image_create_external(const char *filename)
+{
+#ifndef BUILDING_ASSET_PACKER
+    asset_image *img = asset_image_create();
+    if (!img) {
+        return 0;
+    }
+    size_t size;
+    uint8_t *png = game_campaign_load_file(filename, &size);
+    if (png) {
+        if (!png_load_from_buffer(png, size)) {
+            free(png);
+            asset_image_unload(img);
+            return 0;
+        }
+    } else if (!png_load_from_file(filename, 0)) {
+        asset_image_unload(img);
+        return 0;
+    }
+    if (!png_get_image_size(&img->img.width, &img->img.height)) {
+        free(png);
+        png_unload();
+        asset_image_unload(img);
+        return 0;
+    }
+    img->img.original.width = img->img.width;
+    img->img.original.height = img->img.height;
+
+    color_t *pixels = malloc(sizeof(color_t) * img->img.width * img->img.height);
+    if (!pixels) {
+        free(png);
+        png_unload();
+        asset_image_unload(img);
+        return 0;
+    }
+    if (!png_read(pixels, 0, 0, img->img.width, img->img.height, 0, 0, img->img.width, 0)) {
+        free(png);
+        png_unload();
+        asset_image_unload(img);
+        return 0;
+    }
+    img->data = pixels;
+    free(png);
+    png_unload();
+    char *id = malloc(sizeof(char) * (strlen(filename) + 1));
+    if (!id) {
+        asset_image_unload(img);
+        return 0;
+    }
+    memcpy(id, filename, sizeof(char) * (strlen(filename) + 1));
+    img->id = id;
+    img->img.atlas.id = ATLAS_UNPACKED_EXTRA_ASSET << IMAGE_ATLAS_BIT_OFFSET;
+    img->img.atlas.id += img->index;
+    return img;
+#else
+    return 0;
 #endif
 }

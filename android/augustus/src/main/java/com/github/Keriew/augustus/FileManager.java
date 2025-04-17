@@ -16,6 +16,7 @@ public class FileManager {
 
     private static final int FILE_TYPE_DIR = 1;
     private static final int FILE_TYPE_FILE = 2;
+    private static final int DIRECTORY_EXISTS = -1;
 
     @SuppressWarnings("unused")
     public static String getC3Path() {
@@ -82,15 +83,24 @@ public class FileManager {
     }
 
     private static FileInfo getDirectoryFromPath(Activity activity, String[] path) {
-        FileInfo currentDir = FileInfo.base;
+        ArrayList<FileInfo> dirList = new ArrayList<>();
+        dirList.add(FileInfo.base);
 
         for (int i = 0; i < path.length - 1; ++i) {
-            currentDir = findFile(activity, currentDir, path[i]);
-            if (currentDir == null || !currentDir.isDirectory()) {
-                return null;
+            if (path[i].equals("..")) {
+                if (dirList.size() == 1) {
+                    return null;
+                }
+                dirList.remove(dirList.size() - 1);
+            } else if (!path[i].isEmpty() && !path[i].equals(".")) {
+                FileInfo currentDir = findFile(activity, dirList.get(dirList.size() - 1), path[i]);
+                if (currentDir == null || !currentDir.isDirectory()) {
+                    return null;
+                }
+                dirList.add(currentDir);
             }
         }
-        return currentDir;
+        return dirList.get(dirList.size() - 1);
     }
 
     private static FileInfo getFileFromPath(AugustusMainActivity activity, String filePath) {
@@ -98,7 +108,7 @@ public class FileManager {
             if (baseUri == Uri.EMPTY) {
                 return null;
             }
-            String[] filePart = filePath.split("(\\|/)");
+            String[] filePart = filePath.split("[\\\\/]");
             FileInfo dirInfo = getDirectoryFromPath(activity, filePart);
             if (dirInfo == null) {
                 return null;
@@ -145,6 +155,7 @@ public class FileManager {
         return fileList.toArray(result);
     }
 
+    @SuppressWarnings("unused")
     public static boolean deleteFile(AugustusMainActivity activity, String filePath) {
         try {
             FileInfo fileInfo = getFileFromPath(activity, filePath);
@@ -211,12 +222,52 @@ public class FileManager {
                     fileInfo.updateModifiedTime();
                 }
             }
-            ParcelFileDescriptor pfd = activity.getContentResolver().openFileDescriptor(fileUri, internalMode);
-            return (pfd == null) ? 0 : pfd.detachFd();
+            try (ParcelFileDescriptor pfd = activity.getContentResolver().openFileDescriptor(fileUri, internalMode)) {
+                return (pfd == null) ? 0 : pfd.detachFd();
+            }
         } catch (Exception e) {
             Log.e("augustus", "Error in openFileDescriptor: " + e);
             return 0;
         }
+    }
+    
+    @SuppressWarnings("unused")
+    public static int createFolder(AugustusMainActivity activity, String folderPath) {
+        try {
+            if (baseUri == Uri.EMPTY) {
+                return 0;
+            }
+            if (folderPath.startsWith("./")) {
+                folderPath = folderPath.substring(2);
+            }
+
+            String[] folderParts = folderPath.split("[\\\\/]");
+            String folderName = folderParts[folderParts.length - 1];
+            FileInfo folderInfo = getDirectoryFromPath(activity, folderParts);
+            if (folderInfo == null) {
+                return 0;
+            }
+            FileInfo newFolderInfo = findFile(activity, folderInfo, folderName);
+            if (newFolderInfo != null) {
+                return newFolderInfo.isDirectory() ? DIRECTORY_EXISTS : 0;
+            }
+            Uri folderUri = DocumentsContract.createDocument(activity.getContentResolver(),
+                folderInfo.getUri(), DocumentsContract.Document.MIME_TYPE_DIR, folderName);
+            if (folderUri == null) {
+                return 0;
+            }
+            HashMap<String, FileInfo> dirCache = directoryStructureCache.get(folderInfo.getUri());
+            if (dirCache != null) {
+                newFolderInfo = new FileInfo(DocumentsContract.getDocumentId(folderUri),
+                    folderName, DocumentsContract.Document.MIME_TYPE_DIR,
+                    System.currentTimeMillis(), folderInfo.getUri());
+                dirCache.put(folderName.toLowerCase(), newFolderInfo);
+            }
+        } catch (Exception e) {
+            Log.e("augustus", "Error in createFolder: " + e);
+            return 0;
+        }
+        return 1;
     }
 
     @SuppressWarnings("unused")

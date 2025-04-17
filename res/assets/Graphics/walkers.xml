@@ -430,35 +430,35 @@
 	</image>
 	<!-- Note: Barracks Cart Pusher Death animation frames 01-08 -->
 	<image id="barracks_worker_death_01">
-		<layer group="108 " image="102"/>
+		<layer group="108 " image="96"/>
 		<layer src="barracks_worker_death_01"/>
 	</image>
 	<image id="barracks_worker_death_02">
-		<layer group="108 " image="103"/>
+		<layer group="108 " image="97"/>
 		<layer src="barracks_worker_death_02"/>
 	</image>
 	<image id="barracks_worker_death_03">
-		<layer group="108 " image="104"/>
+		<layer group="108 " image="98"/>
 		<layer src="barracks_worker_death_03"/>
 	</image>
 	<image id="barracks_worker_death_04">
-		<layer group="108 " image="105"/>
+		<layer group="108 " image="99"/>
 		<layer src="barracks_worker_death_04"/>
 	</image>
 	<image id="barracks_worker_death_05">
-		<layer group="108 " image="106"/>
+		<layer group="108 " image="100"/>
 		<layer src="barracks_worker_death_05"/>
 	</image>
 	<image id="barracks_worker_death_06">
-		<layer group="108 " image="107"/>
+		<layer group="108 " image="101"/>
 		<layer src="barracks_worker_death_06"/>
 	</image>
 	<image id="barracks_worker_death_07">
-		<layer group="108 " image="108"/>
+		<layer group="108 " image="102"/>
 		<layer src="barracks_worker_death_07"/>
 	</image>
 	<image id="barracks_worker_death_08">
-		<layer group="108 " image="109"/>
+		<layer group="108 " image="103"/>
 		<layer src="barracks_worker_death_08"/>
 	</image>
 	<!-- Note: Barracks Cart Pusher Walking animation frames NORTH-EAST DIRECTION 01-12 -->
@@ -856,121 +856,434 @@
 	<!-- Note: Mess Hall Walker Portrait -->
 	<image id="M Hall Portrait">
 		<layer group="190" image="14"/>
-		<layer src="mess_walker_portrait_overlay"/>
+		<layer src="slave_portrait_overlay"/>
+		<layer src="mess_walker_portrait_overlay" x="17" y="13"/>
 	</image>
 	<!-- Note: Mess Hall Walker Death animation frames 01-08 -->
-	<image id="M Hall death 01" src="mess_walker_death_01"/>
-	<image id="M Hall death 02" src="mess_walker_death_02"/>
-	<image id="M Hall death 03" src="mess_walker_death_03"/>
-	<image id="M Hall death 04" src="mess_walker_death_04"/>
-	<image id="M Hall death 05" src="mess_walker_death_05"/>
-	<image id="M Hall death 06" src="mess_walker_death_06"/>
-	<image id="M Hall death 07" src="mess_walker_death_07"/>
-	<image id="M Hall death 08" src="mess_walker_death_08"/>
+	<image id="M Hall death 01">
+		<layer src="slave_death_01"/>
+		<layer src="mess_walker_death_01" x="7" y="6"/>
+	</image>
+	<image id="M Hall death 02">
+		<layer src="slave_death_02"/>
+		<layer src="mess_walker_death_02" x="4" y="4"/>
+	</image>
+	<image id="M Hall death 03">
+		<layer src="slave_death_03"/>
+		<layer src="mess_walker_death_03" x="0" y="6"/>
+	</image>
+	<image id="M Hall death 04">
+		<layer src="slave_death_04"/>
+		<layer src="mess_walker_death_04" x="0" y="12"/>
+	</image>
+	<image id="M Hall death 05">
+		<layer src="slave_death_05"/>
+		<layer src="mess_walker_death_05" x="0" y="16"/>
+	</image>
+	<image id="M Hall death 06">
+		<layer src="slave_death_06"/>
+		<layer src="mess_walker_death_06" x="0" y="16"/>
+	</image>
+	<image id="M Hall death 07">
+		<layer src="slave_death_07"/>
+		<layer src="mess_walker_death_07" x="0" y="16"/>
+	</image>
+	<image id="M Hall death 08">
+		<layer src="slave_death_08"/>
+		<layer src="mess_walker_death_08" x="0" y="16"/>
+	</image>
 	<!-- Note: Mess Hall Walker Walking animation frames NORTH-EAST DIRECTION 01-12 -->
-	<image id="M Hall NE 01" src="mess_walker_ne_01"/>
-	<image id="M Hall NE 02" src="mess_walker_ne_02"/>
-	<image id="M Hall NE 03" src="mess_walker_ne_03"/>
-	<image id="M Hall NE 04" src="mess_walker_ne_04"/>
-	<image id="M Hall NE 05" src="mess_walker_ne_05"/>
-	<image id="M Hall NE 06" src="mess_walker_ne_06"/>
-	<image id="M Hall NE 07" src="mess_walker_ne_07"/>
-	<image id="M Hall NE 08" src="mess_walker_ne_08"/>
-	<image id="M Hall NE 09" src="mess_walker_ne_09"/>
-	<image id="M Hall NE 10" src="mess_walker_ne_10"/>
-	<image id="M Hall NE 11" src="mess_walker_ne_11"/>
-	<image id="M Hall NE 12" src="mess_walker_ne_12"/>
+	<image id="M Hall NE 01">
+		<layer src="slave_ne_01"/>
+		<layer src="mess_walker_ne_01"/>
+	</image>
+	<image id="M Hall NE 02">
+		<layer src="slave_ne_02"/>
+		<layer src="mess_walker_ne_02"/>
+	</image>
+	<image id="M Hall NE 03">
+		<layer src="slave_ne_03"/>
+		<layer src="mess_walker_ne_03"/>
+	</image>
+	<image id="M Hall NE 04">
+		<layer src="slave_ne_04"/>
+		<layer src="mess_walker_ne_04"/>
+	</image>
+	<image id="M Hall NE 05">
+		<layer src="slave_ne_05"/>
+		<layer src="mess_walker_ne_05"/>
+	</image>
+	<image id="M Hall NE 06">
+		<layer src="slave_ne_06"/>
+		<layer src="mess_walker_ne_06"/>
+	</image>
+	<image id="M Hall NE 07">
+		<layer src="slave_ne_07"/>
+		<layer src="mess_walker_ne_07"/>
+	</image>
+	<image id="M Hall NE 08">
+		<layer src="slave_ne_08"/>
+		<layer src="mess_walker_ne_08"/>
+	</image>
+	<image id="M Hall NE 09">
+		<layer src="slave_ne_09"/>
+		<layer src="mess_walker_ne_09"/>
+	</image>
+	<image id="M Hall NE 10">
+		<layer src="slave_ne_10"/>
+		<layer src="mess_walker_ne_10"/>
+	</image>
+	<image id="M Hall NE 11">
+		<layer src="slave_ne_11"/>
+		<layer src="mess_walker_ne_11"/>
+	</image>
+	<image id="M Hall NE 12">
+		<layer src="slave_ne_12"/>
+		<layer src="mess_walker_ne_12"/>
+	</image>
 	<!-- Note: Mess Hall Walker Walking animation frames EAST DIRECTION 01-12 -->
-	<image id="M Hall E 01" src="mess_walker_e_01"/>
-	<image id="M Hall E 02" src="mess_walker_e_02"/>
-	<image id="M Hall E 03" src="mess_walker_e_03"/>
-	<image id="M Hall E 04" src="mess_walker_e_04"/>
-	<image id="M Hall E 05" src="mess_walker_e_05"/>
-	<image id="M Hall E 06" src="mess_walker_e_06"/>
-	<image id="M Hall E 07" src="mess_walker_e_07"/>
-	<image id="M Hall E 08" src="mess_walker_e_08"/>
-	<image id="M Hall E 09" src="mess_walker_e_09"/>
-	<image id="M Hall E 10" src="mess_walker_e_10"/>
-	<image id="M Hall E 11" src="mess_walker_e_11"/>
-	<image id="M Hall E 12" src="mess_walker_e_12"/>
+	<image id="M Hall E 01">
+		<layer src="slave_e_01"/>
+		<layer src="mess_walker_e_01"/>
+	</image>
+	<image id="M Hall E 02">
+		<layer src="slave_e_02"/>
+		<layer src="mess_walker_e_02"/>
+	</image>
+	<image id="M Hall E 03">
+		<layer src="slave_e_03"/>
+		<layer src="mess_walker_e_03"/>
+	</image>
+	<image id="M Hall E 04">
+		<layer src="slave_e_04"/>
+		<layer src="mess_walker_e_04"/>
+	</image>
+	<image id="M Hall E 05">
+		<layer src="slave_e_05"/>
+		<layer src="mess_walker_e_05"/>
+	</image>
+	<image id="M Hall E 06">
+		<layer src="slave_e_06"/>
+		<layer src="mess_walker_e_06"/>
+	</image>
+	<image id="M Hall E 07">
+		<layer src="slave_e_07"/>
+		<layer src="mess_walker_e_07"/>
+	</image>
+	<image id="M Hall E 08">
+		<layer src="slave_e_08"/>
+		<layer src="mess_walker_e_08"/>
+	</image>
+	<image id="M Hall E 09">
+		<layer src="slave_e_09"/>
+		<layer src="mess_walker_e_09"/>
+	</image>
+	<image id="M Hall E 10">
+		<layer src="slave_e_10"/>
+		<layer src="mess_walker_e_10"/>
+	</image>
+	<image id="M Hall E 11">
+		<layer src="slave_e_11"/>
+		<layer src="mess_walker_e_11"/>
+	</image>
+	<image id="M Hall E 12">
+		<layer src="slave_e_12"/>
+		<layer src="mess_walker_e_12"/>
+	</image>
 	<!-- Note: Mess Hall Walker Walking animation frames SOUTH-EAST DIRECTION 01-12 -->
-	<image id="M Hall SE 01" src="mess_walker_se_01"/>
-	<image id="M Hall SE 02" src="mess_walker_se_02"/>
-	<image id="M Hall SE 03" src="mess_walker_se_03"/>
-	<image id="M Hall SE 04" src="mess_walker_se_04"/>
-	<image id="M Hall SE 05" src="mess_walker_se_05"/>
-	<image id="M Hall SE 06" src="mess_walker_se_06"/>
-	<image id="M Hall SE 07" src="mess_walker_se_07"/>
-	<image id="M Hall SE 08" src="mess_walker_se_08"/>
-	<image id="M Hall SE 09" src="mess_walker_se_09"/>
-	<image id="M Hall SE 10" src="mess_walker_se_10"/>
-	<image id="M Hall SE 11" src="mess_walker_se_11"/>
-	<image id="M Hall SE 12" src="mess_walker_se_12"/>
+	<image id="M Hall SE 01">
+		<layer src="slave_se_01"/>
+		<layer src="mess_walker_se_01"/>
+	</image>
+	<image id="M Hall SE 02">
+		<layer src="slave_se_02"/>
+		<layer src="mess_walker_se_02"/>
+	</image>
+	<image id="M Hall SE 03">
+		<layer src="slave_se_03"/>
+		<layer src="mess_walker_se_03"/>
+	</image>
+	<image id="M Hall SE 04">
+		<layer src="slave_se_04"/>
+		<layer src="mess_walker_se_04"/>
+	</image>
+	<image id="M Hall SE 05">
+		<layer src="slave_se_05"/>
+		<layer src="mess_walker_se_05"/>
+	</image>
+	<image id="M Hall SE 06">
+		<layer src="slave_se_06"/>
+		<layer src="mess_walker_se_06"/>
+	</image>
+	<image id="M Hall SE 07">
+		<layer src="slave_se_07"/>
+		<layer src="mess_walker_se_07"/>
+	</image>
+	<image id="M Hall SE 08">
+		<layer src="slave_se_08"/>
+		<layer src="mess_walker_se_08"/>
+	</image>
+	<image id="M Hall SE 09">
+		<layer src="slave_se_09"/>
+		<layer src="mess_walker_se_09"/>
+	</image>
+	<image id="M Hall SE 10">
+		<layer src="slave_se_10"/>
+		<layer src="mess_walker_se_10"/>
+	</image>
+	<image id="M Hall SE 11">
+		<layer src="slave_se_11"/>
+		<layer src="mess_walker_se_11"/>
+	</image>
+	<image id="M Hall SE 12">
+		<layer src="slave_se_12"/>
+		<layer src="mess_walker_se_12"/>
+	</image>
 	<!-- Note: Mess Hall Walker Walking animation frames SOUTH DIRECTION 01-12 -->
-	<image id="M Hall S 01" src="mess_walker_s_01"/>
-	<image id="M Hall S 02" src="mess_walker_s_02"/>
-	<image id="M Hall S 03" src="mess_walker_s_03"/>
-	<image id="M Hall S 04" src="mess_walker_s_04"/>
-	<image id="M Hall S 05" src="mess_walker_s_05"/>
-	<image id="M Hall S 06" src="mess_walker_s_06"/>
-	<image id="M Hall S 07" src="mess_walker_s_07"/>
-	<image id="M Hall S 08" src="mess_walker_s_08"/>
-	<image id="M Hall S 09" src="mess_walker_s_09"/>
-	<image id="M Hall S 10" src="mess_walker_s_10"/>
-	<image id="M Hall S 11" src="mess_walker_s_11"/>
-	<image id="M Hall S 12" src="mess_walker_s_12"/>
+	<image id="M Hall S 01">
+		<layer src="slave_s_01"/>
+		<layer src="mess_walker_s_01"/>
+	</image>
+	<image id="M Hall S 02">
+		<layer src="slave_s_02"/>
+		<layer src="mess_walker_s_02"/>
+	</image>
+	<image id="M Hall S 03">
+		<layer src="slave_s_03"/>
+		<layer src="mess_walker_s_03"/>
+	</image>
+	<image id="M Hall S 04">
+		<layer src="slave_s_04"/>
+		<layer src="mess_walker_s_04"/>
+	</image>
+	<image id="M Hall S 05">
+		<layer src="slave_s_05"/>
+		<layer src="mess_walker_s_05"/>
+	</image>
+	<image id="M Hall S 06">
+		<layer src="slave_s_06"/>
+		<layer src="mess_walker_s_06"/>
+	</image>
+	<image id="M Hall S 07">
+		<layer src="slave_s_07"/>
+		<layer src="mess_walker_s_07"/>
+	</image>
+	<image id="M Hall S 08">
+		<layer src="slave_s_08"/>
+		<layer src="mess_walker_s_08"/>
+	</image>
+	<image id="M Hall S 09">
+		<layer src="slave_s_09"/>
+		<layer src="mess_walker_s_09"/>
+	</image>
+	<image id="M Hall S 10">
+		<layer src="slave_s_10"/>
+		<layer src="mess_walker_s_10"/>
+	</image>
+	<image id="M Hall S 11">
+		<layer src="slave_s_11"/>
+		<layer src="mess_walker_s_11"/>
+	</image>
+	<image id="M Hall S 12">
+		<layer src="slave_s_12"/>
+		<layer src="mess_walker_s_12"/>
+	</image>
 	<!-- Note: Mess Hall Walker Walking animation frames SOUTH-WEST DIRECTION 01-12 -->
-	<image id="M Hall SW 01" src="mess_walker_sw_01"/>
-	<image id="M Hall SW 02" src="mess_walker_sw_02"/>
-	<image id="M Hall SW 03" src="mess_walker_sw_03"/>
-	<image id="M Hall SW 04" src="mess_walker_sw_04"/>
-	<image id="M Hall SW 05" src="mess_walker_sw_05"/>
-	<image id="M Hall SW 06" src="mess_walker_sw_06"/>
-	<image id="M Hall SW 07" src="mess_walker_sw_07"/>
-	<image id="M Hall SW 08" src="mess_walker_sw_08"/>
-	<image id="M Hall SW 09" src="mess_walker_sw_09"/>
-	<image id="M Hall SW 10" src="mess_walker_sw_10"/>
-	<image id="M Hall SW 11" src="mess_walker_sw_11"/>
-	<image id="M Hall SW 12" src="mess_walker_sw_12"/>
+	<image id="M Hall SW 01">
+		<layer src="slave_sw_01"/>
+		<layer src="mess_walker_sw_01"/>
+	</image>
+	<image id="M Hall SW 02">
+		<layer src="slave_sw_02"/>
+		<layer src="mess_walker_sw_02"/>
+	</image>
+	<image id="M Hall SW 03">
+		<layer src="slave_sw_03"/>
+		<layer src="mess_walker_sw_03"/>
+	</image>
+	<image id="M Hall SW 04">
+		<layer src="slave_sw_04"/>
+		<layer src="mess_walker_sw_04"/>
+	</image>
+	<image id="M Hall SW 05">
+		<layer src="slave_sw_05"/>
+		<layer src="mess_walker_sw_05"/>
+	</image>
+	<image id="M Hall SW 06">
+		<layer src="slave_sw_06"/>
+		<layer src="mess_walker_sw_06"/>
+	</image>
+	<image id="M Hall SW 07">
+		<layer src="slave_sw_07"/>
+		<layer src="mess_walker_sw_07"/>
+	</image>
+	<image id="M Hall SW 08">
+		<layer src="slave_sw_08"/>
+		<layer src="mess_walker_sw_08"/>
+	</image>
+	<image id="M Hall SW 09">
+		<layer src="slave_sw_09"/>
+		<layer src="mess_walker_sw_09"/>
+	</image>
+	<image id="M Hall SW 10">
+		<layer src="slave_sw_10"/>
+		<layer src="mess_walker_sw_10"/>
+	</image>
+	<image id="M Hall SW 11">
+		<layer src="slave_sw_11"/>
+		<layer src="mess_walker_sw_11"/>
+	</image>
+	<image id="M Hall SW 12">
+		<layer src="slave_sw_12"/>
+		<layer src="mess_walker_sw_12"/>
+	</image>
 	<!-- Note: Mess Hall Walker Walking animation frames WEST DIRECTION 01-12 -->
-	<image id="M Hall W 01" src="mess_walker_w_01"/>
-	<image id="M Hall W 02" src="mess_walker_w_02"/>
-	<image id="M Hall W 03" src="mess_walker_w_03"/>
-	<image id="M Hall W 04" src="mess_walker_w_04"/>
-	<image id="M Hall W 05" src="mess_walker_w_05"/>
-	<image id="M Hall W 06" src="mess_walker_w_06"/>
-	<image id="M Hall W 07" src="mess_walker_w_07"/>
-	<image id="M Hall W 08" src="mess_walker_w_08"/>
-	<image id="M Hall W 09" src="mess_walker_w_09"/>
-	<image id="M Hall W 10" src="mess_walker_w_10"/>
-	<image id="M Hall W 11" src="mess_walker_w_11"/>
-	<image id="M Hall W 12" src="mess_walker_w_12"/>
+	<image id="M Hall W 01">
+		<layer src="slave_w_01"/>
+		<layer src="mess_walker_w_01"/>
+	</image>
+	<image id="M Hall W 02">
+		<layer src="slave_w_02"/>
+		<layer src="mess_walker_w_02"/>
+	</image>
+	<image id="M Hall W 03">
+		<layer src="slave_w_03"/>
+		<layer src="mess_walker_w_03"/>
+	</image>
+	<image id="M Hall W 04">
+		<layer src="slave_w_04"/>
+		<layer src="mess_walker_w_04"/>
+	</image>
+	<image id="M Hall W 05">
+		<layer src="slave_w_05"/>
+		<layer src="mess_walker_w_05"/>
+	</image>
+	<image id="M Hall W 06">
+		<layer src="slave_w_06"/>
+		<layer src="mess_walker_w_06"/>
+	</image>
+	<image id="M Hall W 07">
+		<layer src="slave_w_07"/>
+		<layer src="mess_walker_w_07"/>
+	</image>
+	<image id="M Hall W 08">
+		<layer src="slave_w_08"/>
+		<layer src="mess_walker_w_08"/>
+	</image>
+	<image id="M Hall W 09">
+		<layer src="slave_w_09"/>
+		<layer src="mess_walker_w_09"/>
+	</image>
+	<image id="M Hall W 10">
+		<layer src="slave_w_10"/>
+		<layer src="mess_walker_w_10"/>
+	</image>
+	<image id="M Hall W 11">
+		<layer src="slave_w_11"/>
+		<layer src="mess_walker_w_11"/>
+	</image>
+	<image id="M Hall W 12">
+		<layer src="slave_w_12"/>
+		<layer src="mess_walker_w_12"/>
+	</image>
 	<!-- Note: Mess Hall Walker Walking animation frames NORTH-WEST DIRECTION 01-12 -->
-	<image id="M Hall NW 01" src="mess_walker_nw_01"/>
-	<image id="M Hall NW 02" src="mess_walker_nw_02"/>
-	<image id="M Hall NW 03" src="mess_walker_nw_03"/>
-	<image id="M Hall NW 04" src="mess_walker_nw_04"/>
-	<image id="M Hall NW 05" src="mess_walker_nw_05"/>
-	<image id="M Hall NW 06" src="mess_walker_nw_06"/>
-	<image id="M Hall NW 07" src="mess_walker_nw_07"/>
-	<image id="M Hall NW 08" src="mess_walker_nw_08"/>
-	<image id="M Hall NW 09" src="mess_walker_nw_09"/>
-	<image id="M Hall NW 10" src="mess_walker_nw_10"/>
-	<image id="M Hall NW 11" src="mess_walker_nw_11"/>
-	<image id="M Hall NW 12" src="mess_walker_nw_12"/>
+	<image id="M Hall NW 01">
+		<layer src="slave_nw_01"/>
+		<layer src="mess_walker_nw_01"/>
+	</image>
+	<image id="M Hall NW 02">
+		<layer src="slave_nw_02"/>
+		<layer src="mess_walker_nw_02"/>
+	</image>
+	<image id="M Hall NW 03">
+		<layer src="slave_nw_03"/>
+		<layer src="mess_walker_nw_03"/>
+	</image>
+	<image id="M Hall NW 04">
+		<layer src="slave_nw_04"/>
+		<layer src="mess_walker_nw_04"/>
+	</image>
+	<image id="M Hall NW 05">
+		<layer src="slave_nw_05"/>
+		<layer src="mess_walker_nw_05"/>
+	</image>
+	<image id="M Hall NW 06">
+		<layer src="slave_nw_06"/>
+		<layer src="mess_walker_nw_06"/>
+	</image>
+	<image id="M Hall NW 07">
+		<layer src="slave_nw_07"/>
+		<layer src="mess_walker_nw_07"/>
+	</image>
+	<image id="M Hall NW 08">
+		<layer src="slave_nw_08"/>
+		<layer src="mess_walker_nw_08"/>
+	</image>
+	<image id="M Hall NW 09">
+		<layer src="slave_nw_09"/>
+		<layer src="mess_walker_nw_09"/>
+	</image>
+	<image id="M Hall NW 10">
+		<layer src="slave_nw_10"/>
+		<layer src="mess_walker_nw_10"/>
+	</image>
+	<image id="M Hall NW 11">
+		<layer src="slave_nw_11"/>
+		<layer src="mess_walker_nw_11"/>
+	</image>
+	<image id="M Hall NW 12">
+		<layer src="slave_nw_12"/>
+		<layer src="mess_walker_nw_12"/>
+	</image>
 	<!-- Note: Mess Hall Walker Walking animation frames NORTH DIRECTION 01-12 -->
-	<image id="M Hall N 01" src="mess_walker_n_01"/>
-	<image id="M Hall N 02" src="mess_walker_n_02"/>
-	<image id="M Hall N 03" src="mess_walker_n_03"/>
-	<image id="M Hall N 04" src="mess_walker_n_04"/>
-	<image id="M Hall N 05" src="mess_walker_n_05"/>
-	<image id="M Hall N 06" src="mess_walker_n_06"/>
-	<image id="M Hall N 07" src="mess_walker_n_07"/>
-	<image id="M Hall N 08" src="mess_walker_n_08"/>
-	<image id="M Hall N 09" src="mess_walker_n_09"/>
-	<image id="M Hall N 10" src="mess_walker_n_10"/>
-	<image id="M Hall N 11" src="mess_walker_n_11"/>
-	<image id="M Hall N 12" src="mess_walker_n_12"/>
+	<image id="M Hall N 01">
+		<layer src="slave_n_01"/>
+		<layer src="mess_walker_n_01"/>
+	</image>
+	<image id="M Hall N 02">
+		<layer src="slave_n_02"/>
+		<layer src="mess_walker_n_02"/>
+	</image>
+	<image id="M Hall N 03">
+		<layer src="slave_n_03"/>
+		<layer src="mess_walker_n_03"/>
+	</image>
+	<image id="M Hall N 04">
+		<layer src="slave_n_04"/>
+		<layer src="mess_walker_n_04"/>
+	</image>
+	<image id="M Hall N 05">
+		<layer src="slave_n_05"/>
+		<layer src="mess_walker_n_05"/>
+	</image>
+	<image id="M Hall N 06">
+		<layer src="slave_n_06"/>
+		<layer src="mess_walker_n_06"/>
+	</image>
+	<image id="M Hall N 07">
+		<layer src="slave_n_07"/>
+		<layer src="mess_walker_n_07"/>
+	</image>
+	<image id="M Hall N 08">
+		<layer src="slave_n_08"/>
+		<layer src="mess_walker_n_08"/>
+	</image>
+	<image id="M Hall N 09">
+		<layer src="slave_n_09"/>
+		<layer src="mess_walker_n_09"/>
+	</image>
+	<image id="M Hall N 10">
+		<layer src="slave_n_10"/>
+		<layer src="mess_walker_n_10"/>
+	</image>
+	<image id="M Hall N 11">
+		<layer src="slave_n_11"/>
+		<layer src="mess_walker_n_11"/>
+	</image>
+	<image id="M Hall N 12">
+		<layer src="slave_n_12"/>
+		<layer src="mess_walker_n_12"/>
+	</image>
 	<!-- Note: Ox Portrait (Assets created by marwana) -->
 	<image id="Ox_Portrait">
 		<layer group="190" image="7"/>
@@ -1208,7 +1521,7 @@
 	<image id="Slave N 11" src="slave_n_11"/>
 	<image id="Slave N 12" src="slave_n_12"/>
 	<!-- Note: Orange Market Lady Portrait -->
-	<image id="marketbuyer_portrait_overlay">
+	<image id="marketbuyer_portrait">
 		<layer group="190" image="11"/>
 		<layer src="marketbuyer_portrait_overlay"/>
 	</image>
@@ -1634,4 +1947,3054 @@
 		<layer group="106" image="95"/>
 		<layer src="marketbuyer_n_12"/>
 	</image>
+	<!-- Note: Architect Portrait -->
+	<image id="architect_portrait">
+		<layer group="190" image="7"/>
+		<layer src="architect_portrait"/>
+	</image>
+	<!-- Note: Architect Death animation frames 01-08 -->
+	<image id="architect_death_01">
+		<layer group="110" image="96"/>
+		<layer src="architect_death_01"/>
+	</image>
+	<image id="architect_death_02">
+		<layer group="110" image="97"/>
+		<layer src="architect_death_02"/>
+	</image>
+	<image id="architect_death_03">
+		<layer group="110" image="98"/>
+		<layer src="architect_death_03"/>
+	</image>
+	<image id="architect_death_04">
+		<layer group="110" image="99"/>
+		<layer src="architect_death_04"/>
+	</image>
+	<image id="architect_death_05">
+		<layer group="110" image="100"/>
+		<layer src="architect_death_05"/>
+	</image>
+	<image id="architect_death_06">
+		<layer group="110" image="101"/>
+	</image>
+	<image id="architect_death_07">
+		<layer group="110" image="102"/>
+	</image>
+	<image id="architect_death_08">
+		<layer group="110" image="103"/>
+	</image>
+	<!-- Note: Architect Walking animation frames NORTH-EAST DIRECTION 01-12 -->
+	<image id="architect_ne_01">
+		<layer group="110" image="0"/>
+		<layer src="architect_ne_01"/>
+	</image>
+	<image id="architect_ne_02">
+		<layer group="110" image="8"/>
+		<layer src="architect_ne_02"/>
+	</image>
+	<image id="architect_ne_03">
+		<layer group="110" image="16"/>
+		<layer src="architect_ne_03"/>
+	</image>
+	<image id="architect_ne_04">
+		<layer group="110" image="24"/>
+		<layer src="architect_ne_04"/>
+	</image>
+	<image id="architect_ne_05">
+		<layer group="110" image="32"/>
+		<layer src="architect_ne_05"/>
+	</image>
+	<image id="architect_ne_06">
+		<layer group="110" image="40"/>
+		<layer src="architect_ne_06"/>
+	</image>
+	<image id="architect_ne_07">
+		<layer group="110" image="48"/>
+		<layer src="architect_ne_07"/>
+	</image>
+	<image id="architect_ne_08">
+		<layer group="110" image="56"/>
+		<layer src="architect_ne_08"/>
+	</image>
+	<image id="architect_ne_09">
+		<layer group="110" image="64"/>
+		<layer src="architect_ne_09"/>
+	</image>
+	<image id="architect_ne_10">
+		<layer group="110" image="72"/>
+		<layer src="architect_ne_10"/>
+	</image>
+	<image id="architect_ne_11">
+		<layer group="110" image="80"/>
+		<layer src="architect_ne_11"/>
+	</image>
+	<image id="architect_ne_12">
+		<layer group="110" image="88"/>
+		<layer src="architect_ne_12"/>
+	</image>
+	<!-- Note: Architect Walking animation frames EAST DIRECTION 01-12 -->
+	<image id="architect_e_01">
+		<layer group="110" image="1"/>
+		<layer src="architect_e_01"/>
+	</image>
+	<image id="architect_e_02">
+		<layer group="110" image="9"/>
+		<layer src="architect_e_02"/>
+	</image>
+	<image id="architect_e_03">
+		<layer group="110" image="17"/>
+		<layer src="architect_e_03"/>
+	</image>
+	<image id="architect_e_04">
+		<layer group="110" image="25"/>
+		<layer src="architect_e_04"/>
+	</image>
+	<image id="architect_e_05">
+		<layer group="110" image="33"/>
+		<layer src="architect_e_05"/>
+	</image>
+	<image id="architect_e_06">
+		<layer group="110" image="41"/>
+		<layer src="architect_e_06"/>
+	</image>
+	<image id="architect_e_07">
+		<layer group="110" image="49"/>
+		<layer src="architect_e_07"/>
+	</image>
+	<image id="architect_e_08">
+		<layer group="110" image="57"/>
+		<layer src="architect_e_08"/>
+	</image>
+	<image id="architect_e_09">
+		<layer group="110" image="65"/>
+		<layer src="architect_e_09"/>
+	</image>
+	<image id="architect_e_10">
+		<layer group="110" image="73"/>
+		<layer src="architect_e_10"/>
+	</image>
+	<image id="architect_e_11">
+		<layer group="110" image="81"/>
+		<layer src="architect_e_11"/>
+	</image>
+	<image id="architect_e_12">
+		<layer group="110" image="89"/>
+		<layer src="architect_e_12"/>
+	</image>
+	<!-- Note: Architect Walking animation frames SOUTH-EAST DIRECTION 01-12 -->
+	<image id="architect_se_01">
+		<layer group="110" image="2"/>
+		<layer src="architect_se_01"/>
+	</image>
+	<image id="architect_se_02">
+		<layer group="110" image="10"/>
+		<layer src="architect_se_02"/>
+	</image>
+	<image id="architect_se_03">
+		<layer group="110" image="18"/>
+		<layer src="architect_se_03"/>
+	</image>
+	<image id="architect_se_04">
+		<layer group="110" image="26"/>
+		<layer src="architect_se_04"/>
+	</image>
+	<image id="architect_se_05">
+		<layer group="110" image="34"/>
+		<layer src="architect_se_05"/>
+	</image>
+	<image id="architect_se_06">
+		<layer group="110" image="42"/>
+		<layer src="architect_se_06"/>
+	</image>
+	<image id="architect_se_07">
+		<layer group="110" image="50"/>
+		<layer src="architect_se_07"/>
+	</image>
+	<image id="architect_se_08">
+		<layer group="110" image="58"/>
+		<layer src="architect_se_08"/>
+	</image>
+	<image id="architect_se_09">
+		<layer group="110" image="66"/>
+		<layer src="architect_se_09"/>
+	</image>
+	<image id="architect_se_10">
+		<layer group="110" image="74"/>
+		<layer src="architect_se_10"/>
+	</image>
+	<image id="architect_se_11">
+		<layer group="110" image="82"/>
+		<layer src="architect_se_11"/>
+	</image>
+	<image id="architect_se_12">
+		<layer group="110" image="90"/>
+		<layer src="architect_se_12"/>
+	</image>
+	<!-- Note: Architect Walking animation frames SOUTH DIRECTION 01-12 -->
+	<image id="architect_s_01">
+		<layer group="110" image="3"/>
+		<layer src="architect_s_01"/>
+	</image>
+	<image id="architect_s_02">
+		<layer group="110" image="11"/>
+		<layer src="architect_s_02"/>
+	</image>
+	<image id="architect_s_03">
+		<layer group="110" image="19"/>
+		<layer src="architect_s_03"/>
+	</image>
+	<image id="architect_s_04">
+		<layer group="110" image="27"/>
+		<layer src="architect_s_04"/>
+	</image>
+	<image id="architect_s_05">
+		<layer group="110" image="35"/>
+		<layer src="architect_s_05"/>
+	</image>
+	<image id="architect_s_06">
+		<layer group="110" image="43"/>
+		<layer src="architect_s_06"/>
+	</image>
+	<image id="architect_s_07">
+		<layer group="110" image="51"/>
+		<layer src="architect_s_07"/>
+	</image>
+	<image id="architect_s_08">
+		<layer group="110" image="59"/>
+		<layer src="architect_s_08"/>
+	</image>
+	<image id="architect_s_09">
+		<layer group="110" image="67"/>
+		<layer src="architect_s_09"/>
+	</image>
+	<image id="architect_s_10">
+		<layer group="110" image="75"/>
+		<layer src="architect_s_10"/>
+	</image>
+	<image id="architect_s_11">
+		<layer group="110" image="83"/>
+		<layer src="architect_s_11"/>
+	</image>
+	<image id="architect_s_12">
+		<layer group="110" image="91"/>
+		<layer src="architect_s_12"/>
+	</image>
+	<!-- Note: Architect Walking animation frames SOUTH-WEST DIRECTION 01-12 -->
+	<image id="architect_sw_01">
+		<layer group="110" image="4"/>
+		<layer src="architect_sw_01"/>
+	</image>
+	<image id="architect_sw_02">
+		<layer group="110" image="12"/>
+		<layer src="architect_sw_02"/>
+	</image>
+	<image id="architect_sw_03">
+		<layer group="110" image="20"/>
+		<layer src="architect_sw_03"/>
+	</image>
+	<image id="architect_sw_04">
+		<layer group="110" image="28"/>
+		<layer src="architect_sw_04"/>
+	</image>
+	<image id="architect_sw_05">
+		<layer group="110" image="36"/>
+		<layer src="architect_sw_05"/>
+	</image>
+	<image id="architect_sw_06">
+		<layer group="110" image="44"/>
+		<layer src="architect_sw_06"/>
+	</image>
+	<image id="architect_sw_07">
+		<layer group="110" image="52"/>
+		<layer src="architect_sw_07"/>
+	</image>
+	<image id="architect_sw_08">
+		<layer group="110" image="60"/>
+		<layer src="architect_sw_08"/>
+	</image>
+	<image id="architect_sw_09">
+		<layer group="110" image="68"/>
+		<layer src="architect_sw_09"/>
+	</image>
+	<image id="architect_sw_10">
+		<layer group="110" image="76"/>
+		<layer src="architect_sw_10"/>
+	</image>
+	<image id="architect_sw_11">
+		<layer group="110" image="84"/>
+		<layer src="architect_sw_11"/>
+	</image>
+	<image id="architect_sw_12">
+		<layer group="110" image="92"/>
+		<layer src="architect_sw_12"/>
+	</image>
+	<!-- Note: Architect Walking animation frames WEST DIRECTION 01-12 -->
+	<image id="architect_w_01">
+		<layer group="110" image="5"/>
+		<layer src="architect_w_01"/>
+	</image>
+	<image id="architect_w_02">
+		<layer group="110" image="13"/>
+		<layer src="architect_w_02"/>
+	</image>
+	<image id="architect_w_03">
+		<layer group="110" image="21"/>
+		<layer src="architect_w_03"/>
+	</image>
+	<image id="architect_w_04">
+		<layer group="110" image="29"/>
+		<layer src="architect_w_04"/>
+	</image>
+	<image id="architect_w_05">
+		<layer group="110" image="37"/>
+		<layer src="architect_w_05"/>
+	</image>
+	<image id="architect_w_06">
+		<layer group="110" image="45"/>
+		<layer src="architect_w_06"/>
+	</image>
+	<image id="architect_w_07">
+		<layer group="110" image="53"/>
+		<layer src="architect_w_07"/>
+	</image>
+	<image id="architect_w_08">
+		<layer group="110" image="61"/>
+		<layer src="architect_w_08"/>
+	</image>
+	<image id="architect_w_09">
+		<layer group="110" image="69"/>
+		<layer src="architect_w_09"/>
+	</image>
+	<image id="architect_w_10">
+		<layer group="110" image="77"/>
+		<layer src="architect_w_10"/>
+	</image>
+	<image id="architect_w_11">
+		<layer group="110" image="85"/>
+		<layer src="architect_w_11"/>
+	</image>
+	<image id="architect_w_12">
+		<layer group="110" image="93"/>
+		<layer src="architect_w_12"/>
+	</image>
+	<!-- Note: Architect Walking animation frames NORTH-WEST DIRECTION 01-12 -->
+	<image id="architect_nw_01">
+		<layer group="110" image="6"/>
+		<layer src="architect_nw_01"/>
+	</image>
+	<image id="architect_nw_02">
+		<layer group="110" image="14"/>
+		<layer src="architect_nw_02"/>
+	</image>
+	<image id="architect_nw_03">
+		<layer group="110" image="22"/>
+		<layer src="architect_nw_03"/>
+	</image>
+	<image id="architect_nw_04">
+		<layer group="110" image="30"/>
+		<layer src="architect_nw_04"/>
+	</image>
+	<image id="architect_nw_05">
+		<layer group="110" image="38"/>
+		<layer src="architect_nw_05"/>
+	</image>
+	<image id="architect_nw_06">
+		<layer group="110" image="46"/>
+		<layer src="architect_nw_06"/>
+	</image>
+	<image id="architect_nw_07">
+		<layer group="110" image="54"/>
+		<layer src="architect_nw_07"/>
+	</image>
+	<image id="architect_nw_08">
+		<layer group="110" image="62"/>
+		<layer src="architect_nw_08"/>
+	</image>
+	<image id="architect_nw_09">
+		<layer group="110" image="70"/>
+		<layer src="architect_nw_09"/>
+	</image>
+	<image id="architect_nw_10">
+		<layer group="110" image="78"/>
+		<layer src="architect_nw_10"/>
+	</image>
+	<image id="architect_nw_11">
+		<layer group="110" image="86"/>
+		<layer src="architect_nw_11"/>
+	</image>
+	<image id="architect_nw_12">
+		<layer group="110" image="94"/>
+		<layer src="architect_nw_12"/>
+	</image>
+	<!-- Note: Architect Walking animation frames NORTH DIRECTION 01-12 -->
+	<image id="architect_n_01">
+		<layer group="110" image="7"/>
+		<layer src="architect_n_01"/>
+	</image>
+	<image id="architect_n_02">
+		<layer group="110" image="15"/>
+		<layer src="architect_n_02"/>
+	</image>
+	<image id="architect_n_03">
+		<layer group="110" image="23"/>
+		<layer src="architect_n_03"/>
+	</image>
+	<image id="architect_n_04">
+		<layer group="110" image="31"/>
+		<layer src="architect_n_04"/>
+	</image>
+	<image id="architect_n_05">
+		<layer group="110" image="39"/>
+		<layer src="architect_n_05"/>
+	</image>
+	<image id="architect_n_06">
+		<layer group="110" image="47"/>
+		<layer src="architect_n_06"/>
+	</image>
+	<image id="architect_n_07">
+		<layer group="110" image="55"/>
+		<layer src="architect_n_07"/>
+	</image>
+	<image id="architect_n_08">
+		<layer group="110" image="63"/>
+		<layer src="architect_n_08"/>
+	</image>
+	<image id="architect_n_09">
+		<layer group="110" image="71"/>
+		<layer src="architect_n_09"/>
+	</image>
+	<image id="architect_n_10">
+		<layer group="110" image="79"/>
+		<layer src="architect_n_10"/>
+	</image>
+	<image id="architect_n_11">
+		<layer group="110" image="87"/>
+		<layer src="architect_n_11"/>
+	</image>
+	<image id="architect_n_12">
+		<layer group="110" image="95"/>
+		<layer src="architect_n_12"/>
+	</image>
+	<!-- Note: Architect working animation frames 01-12 -->
+	<image id="Architect 01" src="architect_01"/>
+	<image id="Architect 02" src="architect_02"/>
+	<image id="Architect 03" src="architect_03"/>
+	<image id="Architect 04" src="architect_04"/>
+	<image id="Architect 05" src="architect_05"/>
+	<image id="Architect 06" src="architect_06"/>
+	<image id="Architect 07" src="architect_07"/>
+	<image id="Architect 08" src="architect_08"/>
+	<image id="Architect 09" src="architect_09"/>
+	<image id="Architect 10" src="architect_10"/>
+	<image id="Architect 11" src="architect_11"/>
+	<image id="Architect 12" src="architect_12"/>
+	<!-- Note: Caravanserai walker portrait -->
+	<image id="caravanserai_walker_portrait">
+		<layer group="190" image="14"/>
+		<layer src="slave_portrait_overlay"/>
+		<layer src="mess_walker_portrait_overlay" x="17" y="13"/>
+		<layer src="caravanserai_walker_portrait_overlay" x="17" y="13"/>
+	</image>
+	<!-- Note: Caravanserai walker death animation frames 01-08 -->
+	<image id="caravanserai_walker_death_01">
+		<layer src="slave_death_01"/>
+		<layer src="mess_walker_death_01" x="7" y="6"/>
+		<layer src="caravanserai_walker_death_01" x="7" y="6"/>
+	</image>
+	<image id="caravanserai_walker_death_02">
+		<layer src="slave_death_02"/>
+		<layer src="mess_walker_death_02" x="4" y="4"/>
+		<layer src="caravanserai_walker_death_02" x="4" y="4"/>
+	</image>
+	<image id="caravanserai_walker_death_03">
+		<layer src="slave_death_03"/>
+		<layer src="mess_walker_death_03" x="0" y="6"/>
+		<layer src="caravanserai_walker_death_03" x="0" y="6"/>
+	</image>
+	<image id="caravanserai_walker_death_04">
+		<layer src="slave_death_04"/>
+		<layer src="mess_walker_death_04" x="0" y="12"/>
+		<layer src="caravanserai_walker_death_04" x="0" y="12"/>
+	</image>
+	<image id="caravanserai_walker_death_05">
+		<layer src="slave_death_05"/>
+		<layer src="mess_walker_death_05" x="0" y="16"/>
+		<layer src="caravanserai_walker_death_05" x="0" y="16"/>
+	</image>
+	<image id="caravanserai_walker_death_06">
+		<layer src="slave_death_06"/>
+		<layer src="mess_walker_death_06" x="0" y="16"/>
+		<layer src="caravanserai_walker_death_06" x="0" y="16"/>
+	</image>
+	<image id="caravanserai_walker_death_07">
+		<layer src="slave_death_07"/>
+		<layer src="mess_walker_death_07" x="0" y="16"/>
+		<layer src="caravanserai_walker_death_07" x="0" y="16"/>
+	</image>
+	<image id="caravanserai_walker_death_08">
+		<layer src="slave_death_08"/>
+		<layer src="mess_walker_death_08" x="0" y="16"/>
+		<layer src="caravanserai_walker_death_08" x="0" y="16"/>
+	</image>
+	<!-- Note: Caravanserai walker walking animation frames NORTH-EAST DIRECTION 01-12 -->
+	<image id="caravanserai_walker_ne_01">
+		<layer src="slave_ne_01"/>
+		<layer src="mess_walker_ne_01"/>
+		<layer src="caravanserai_walker_ne_01"/>
+	</image>
+	<image id="caravanserai_walker_ne_02">
+		<layer src="slave_ne_02"/>
+		<layer src="mess_walker_ne_02"/>
+		<layer src="caravanserai_walker_ne_02"/>
+	</image>
+	<image id="caravanserai_walker_ne_03">
+		<layer src="slave_ne_03"/>
+		<layer src="mess_walker_ne_03"/>
+		<layer src="caravanserai_walker_ne_03"/>
+	</image>
+	<image id="caravanserai_walker_ne_04">
+		<layer src="slave_ne_04"/>
+		<layer src="mess_walker_ne_04"/>
+		<layer src="caravanserai_walker_ne_04"/>
+	</image>
+	<image id="caravanserai_walker_ne_05">
+		<layer src="slave_ne_05"/>
+		<layer src="mess_walker_ne_05"/>
+		<layer src="caravanserai_walker_ne_05"/>
+	</image>
+	<image id="caravanserai_walker_ne_06">
+		<layer src="slave_ne_06"/>
+		<layer src="mess_walker_ne_06"/>
+		<layer src="caravanserai_walker_ne_06"/>
+	</image>
+	<image id="caravanserai_walker_ne_07">
+		<layer src="slave_ne_07"/>
+		<layer src="mess_walker_ne_07"/>
+		<layer src="caravanserai_walker_ne_07"/>
+	</image>
+	<image id="caravanserai_walker_ne_08">
+		<layer src="slave_ne_08"/>
+		<layer src="mess_walker_ne_08"/>
+		<layer src="caravanserai_walker_ne_08"/>
+	</image>
+	<image id="caravanserai_walker_ne_09">
+		<layer src="slave_ne_09"/>
+		<layer src="mess_walker_ne_09"/>
+		<layer src="caravanserai_walker_ne_09"/>
+	</image>
+	<image id="caravanserai_walker_ne_10">
+		<layer src="slave_ne_10"/>
+		<layer src="mess_walker_ne_10"/>
+		<layer src="caravanserai_walker_ne_10"/>
+	</image>
+	<image id="caravanserai_walker_ne_11">
+		<layer src="slave_ne_11"/>
+		<layer src="mess_walker_ne_11"/>
+		<layer src="caravanserai_walker_ne_11"/>
+	</image>
+	<image id="caravanserai_walker_ne_12">
+		<layer src="slave_ne_12"/>
+		<layer src="mess_walker_ne_12"/>
+		<layer src="caravanserai_walker_ne_12"/>
+	</image>
+	<!-- Note: Caravanserai Walker Walking animation frames EAST DIRECTION 01-12 -->
+	<image id="caravanserai_walker_e_01">
+		<layer src="slave_e_01"/>
+		<layer src="mess_walker_e_01"/>
+		<layer src="caravanserai_walker_e_01"/>
+	</image>
+	<image id="caravanserai_walker_e_02">
+		<layer src="slave_e_02"/>
+		<layer src="mess_walker_e_02"/>
+		<layer src="caravanserai_walker_e_02"/>
+	</image>
+	<image id="caravanserai_walker_e_03">
+		<layer src="slave_e_03"/>
+		<layer src="mess_walker_e_03"/>
+		<layer src="caravanserai_walker_e_03"/>
+	</image>
+	<image id="caravanserai_walker_e_04">
+		<layer src="slave_e_04"/>
+		<layer src="mess_walker_e_04"/>
+		<layer src="caravanserai_walker_e_04"/>
+	</image>
+	<image id="caravanserai_walker_e_05">
+		<layer src="slave_e_05"/>
+		<layer src="mess_walker_e_05"/>
+		<layer src="caravanserai_walker_e_05"/>
+	</image>
+	<image id="caravanserai_walker_e_06">
+		<layer src="slave_e_06"/>
+		<layer src="mess_walker_e_06"/>
+		<layer src="caravanserai_walker_e_06"/>
+	</image>
+	<image id="caravanserai_walker_e_07">
+		<layer src="slave_e_07"/>
+		<layer src="mess_walker_e_07"/>
+		<layer src="caravanserai_walker_e_07"/>
+	</image>
+	<image id="caravanserai_walker_e_08">
+		<layer src="slave_e_08"/>
+		<layer src="mess_walker_e_08"/>
+		<layer src="caravanserai_walker_e_08"/>
+	</image>
+	<image id="caravanserai_walker_e_09">
+		<layer src="slave_e_09"/>
+		<layer src="mess_walker_e_09"/>
+		<layer src="caravanserai_walker_e_09"/>
+	</image>
+	<image id="caravanserai_walker_e_10">
+		<layer src="slave_e_10"/>
+		<layer src="mess_walker_e_10"/>
+		<layer src="caravanserai_walker_e_10"/>
+	</image>
+	<image id="caravanserai_walker_e_11">
+		<layer src="slave_e_11"/>
+		<layer src="mess_walker_e_11"/>
+		<layer src="caravanserai_walker_e_11"/>
+	</image>
+	<image id="caravanserai_walker_e_12">
+		<layer src="slave_e_12"/>
+		<layer src="mess_walker_e_12"/>
+		<layer src="caravanserai_walker_e_12"/>
+	</image>
+	<!-- Note: Caravanserai walker walking animation frames SOUTH-EAST DIRECTION 01-12 -->
+	<image id="caravanserai_walker_se_01">
+		<layer src="slave_se_01"/>
+		<layer src="mess_walker_se_01"/>
+		<layer src="caravanserai_walker_se_01"/>
+	</image>
+	<image id="caravanserai_walker_se_02">
+		<layer src="slave_se_02"/>
+		<layer src="mess_walker_se_02"/>
+		<layer src="caravanserai_walker_se_02"/>
+	</image>
+	<image id="caravanserai_walker_se_03">
+		<layer src="slave_se_03"/>
+		<layer src="mess_walker_se_03"/>
+		<layer src="caravanserai_walker_se_03"/>
+	</image>
+	<image id="caravanserai_walker_se_04">
+		<layer src="slave_se_04"/>
+		<layer src="mess_walker_se_04"/>
+		<layer src="caravanserai_walker_se_04"/>
+	</image>
+	<image id="caravanserai_walker_se_05">
+		<layer src="slave_se_05"/>
+		<layer src="mess_walker_se_05"/>
+		<layer src="caravanserai_walker_se_05"/>
+	</image>
+	<image id="caravanserai_walker_se_06">
+		<layer src="slave_se_06"/>
+		<layer src="mess_walker_se_06"/>
+		<layer src="caravanserai_walker_se_06"/>
+	</image>
+	<image id="caravanserai_walker_se_07">
+		<layer src="slave_se_07"/>
+		<layer src="mess_walker_se_07"/>
+		<layer src="caravanserai_walker_se_07"/>
+	</image>
+	<image id="caravanserai_walker_se_08">
+		<layer src="slave_se_08"/>
+		<layer src="mess_walker_se_08"/>
+		<layer src="caravanserai_walker_se_08"/>
+	</image>
+	<image id="caravanserai_walker_se_09">
+		<layer src="slave_se_09"/>
+		<layer src="mess_walker_se_09"/>
+		<layer src="caravanserai_walker_se_09"/>
+	</image>
+	<image id="caravanserai_walker_se_10">
+		<layer src="slave_se_10"/>
+		<layer src="mess_walker_se_10"/>
+		<layer src="caravanserai_walker_se_10"/>
+	</image>
+	<image id="caravanserai_walker_se_11">
+		<layer src="slave_se_11"/>
+		<layer src="mess_walker_se_11"/>
+		<layer src="caravanserai_walker_se_11"/>
+	</image>
+	<image id="caravanserai_walker_se_12">
+		<layer src="slave_se_12"/>
+		<layer src="mess_walker_se_12"/>
+		<layer src="caravanserai_walker_se_12"/>
+	</image>
+	<!-- Note: Caravanserai walker walking animation frames SOUTH DIRECTION 01-12 -->
+	<image id="caravanserai_walker_s_01">
+		<layer src="slave_s_01"/>
+		<layer src="mess_walker_s_01"/>
+		<layer src="caravanserai_walker_s_01"/>
+	</image>
+	<image id="caravanserai_walker_s_02">
+		<layer src="slave_s_02"/>
+		<layer src="mess_walker_s_02"/>
+		<layer src="caravanserai_walker_s_02"/>
+	</image>
+	<image id="caravanserai_walker_s_03">
+		<layer src="slave_s_03"/>
+		<layer src="mess_walker_s_03"/>
+		<layer src="caravanserai_walker_s_03"/>
+	</image>
+	<image id="caravanserai_walker_s_04">
+		<layer src="slave_s_04"/>
+		<layer src="mess_walker_s_04"/>
+		<layer src="caravanserai_walker_s_04"/>
+	</image>
+	<image id="caravanserai_walker_s_05">
+		<layer src="slave_s_05"/>
+		<layer src="mess_walker_s_05"/>
+		<layer src="caravanserai_walker_s_05"/>
+	</image>
+	<image id="caravanserai_walker_s_06">
+		<layer src="slave_s_06"/>
+		<layer src="mess_walker_s_06"/>
+		<layer src="caravanserai_walker_s_06"/>
+	</image>
+	<image id="caravanserai_walker_s_07">
+		<layer src="slave_s_07"/>
+		<layer src="mess_walker_s_07"/>
+		<layer src="caravanserai_walker_s_07"/>
+	</image>
+	<image id="caravanserai_walker_s_08">
+		<layer src="slave_s_08"/>
+		<layer src="mess_walker_s_08"/>
+		<layer src="caravanserai_walker_s_08"/>
+	</image>
+	<image id="caravanserai_walker_s_09">
+		<layer src="slave_s_09"/>
+		<layer src="mess_walker_s_09"/>
+		<layer src="caravanserai_walker_s_09"/>
+	</image>
+	<image id="caravanserai_walker_s_10">
+		<layer src="slave_s_10"/>
+		<layer src="mess_walker_s_10"/>
+		<layer src="caravanserai_walker_s_10"/>
+	</image>
+	<image id="caravanserai_walker_s_11">
+		<layer src="slave_s_11"/>
+		<layer src="mess_walker_s_11"/>
+		<layer src="caravanserai_walker_s_11"/>
+	</image>
+	<image id="caravanserai_walker_s_12">
+		<layer src="slave_s_12"/>
+		<layer src="mess_walker_s_12"/>
+		<layer src="caravanserai_walker_s_12"/>
+	</image>
+	<!-- Note: Caravanserai walker walking animation frames SOUTH-WEST DIRECTION 01-12 -->
+	<image id="caravanserai_walker_sw_01">
+		<layer src="slave_sw_01"/>
+		<layer src="mess_walker_sw_01"/>
+		<layer src="caravanserai_walker_sw_01"/>
+	</image>
+	<image id="caravanserai_walker_sw_02">
+		<layer src="slave_sw_02"/>
+		<layer src="mess_walker_sw_02"/>
+		<layer src="caravanserai_walker_sw_02"/>
+	</image>
+	<image id="caravanserai_walker_sw_03">
+		<layer src="slave_sw_03"/>
+		<layer src="mess_walker_sw_03"/>
+		<layer src="caravanserai_walker_sw_03"/>
+	</image>
+	<image id="caravanserai_walker_sw_04">
+		<layer src="slave_sw_04"/>
+		<layer src="mess_walker_sw_04"/>
+		<layer src="caravanserai_walker_sw_04"/>
+	</image>
+	<image id="caravanserai_walker_sw_05">
+		<layer src="slave_sw_05"/>
+		<layer src="mess_walker_sw_05"/>
+		<layer src="caravanserai_walker_sw_05"/>
+	</image>
+	<image id="caravanserai_walker_sw_06">
+		<layer src="slave_sw_06"/>
+		<layer src="mess_walker_sw_06"/>
+		<layer src="caravanserai_walker_sw_06"/>
+	</image>
+	<image id="caravanserai_walker_sw_07">
+		<layer src="slave_sw_07"/>
+		<layer src="mess_walker_sw_07"/>
+		<layer src="caravanserai_walker_sw_07"/>
+	</image>
+	<image id="caravanserai_walker_sw_08">
+		<layer src="slave_sw_08"/>
+		<layer src="mess_walker_sw_08"/>
+		<layer src="caravanserai_walker_sw_08"/>
+	</image>
+	<image id="caravanserai_walker_sw_09">
+		<layer src="slave_sw_09"/>
+		<layer src="mess_walker_sw_09"/>
+		<layer src="caravanserai_walker_sw_09"/>
+	</image>
+	<image id="caravanserai_walker_sw_10">
+		<layer src="slave_sw_10"/>
+		<layer src="mess_walker_sw_10"/>
+		<layer src="caravanserai_walker_sw_10"/>
+	</image>
+	<image id="caravanserai_walker_sw_11">
+		<layer src="slave_sw_11"/>
+		<layer src="mess_walker_sw_11"/>
+		<layer src="caravanserai_walker_sw_11"/>
+	</image>
+	<image id="caravanserai_walker_sw_12">
+		<layer src="slave_sw_12"/>
+		<layer src="mess_walker_sw_12"/>
+		<layer src="caravanserai_walker_sw_12"/>
+	</image>
+	<!-- Note: Caravanserai walker walking animation frames WEST DIRECTION 01-12 -->
+	<image id="caravanserai_walker_w_01">
+		<layer src="slave_w_01"/>
+		<layer src="mess_walker_w_01"/>
+		<layer src="caravanserai_walker_w_01"/>
+	</image>
+	<image id="caravanserai_walker_w_02">
+		<layer src="slave_w_02"/>
+		<layer src="mess_walker_w_02"/>
+		<layer src="caravanserai_walker_w_02"/>
+	</image>
+	<image id="caravanserai_walker_w_03">
+		<layer src="slave_w_03"/>
+		<layer src="mess_walker_w_03"/>
+		<layer src="caravanserai_walker_w_03"/>
+	</image>
+	<image id="caravanserai_walker_w_04">
+		<layer src="slave_w_04"/>
+		<layer src="mess_walker_w_04"/>
+		<layer src="caravanserai_walker_w_04"/>
+	</image>
+	<image id="caravanserai_walker_w_05">
+		<layer src="slave_w_05"/>
+		<layer src="mess_walker_w_05"/>
+		<layer src="caravanserai_walker_w_05"/>
+	</image>
+	<image id="caravanserai_walker_w_06">
+		<layer src="slave_w_06"/>
+		<layer src="mess_walker_w_06"/>
+		<layer src="caravanserai_walker_w_06"/>
+	</image>
+	<image id="caravanserai_walker_w_07">
+		<layer src="slave_w_07"/>
+		<layer src="mess_walker_w_07"/>
+		<layer src="caravanserai_walker_w_07"/>
+	</image>
+	<image id="caravanserai_walker_w_08">
+		<layer src="slave_w_08"/>
+		<layer src="mess_walker_w_08"/>
+		<layer src="caravanserai_walker_w_08"/>
+	</image>
+	<image id="caravanserai_walker_w_09">
+		<layer src="slave_w_09"/>
+		<layer src="mess_walker_w_09"/>
+		<layer src="caravanserai_walker_w_09"/>
+	</image>
+	<image id="caravanserai_walker_w_10">
+		<layer src="slave_w_10"/>
+		<layer src="mess_walker_w_10"/>
+		<layer src="caravanserai_walker_w_10"/>
+	</image>
+	<image id="caravanserai_walker_w_11">
+		<layer src="slave_w_11"/>
+		<layer src="mess_walker_w_11"/>
+		<layer src="caravanserai_walker_w_11"/>
+	</image>
+	<image id="caravanserai_walker_w_12">
+		<layer src="slave_w_12"/>
+		<layer src="mess_walker_w_12"/>
+		<layer src="caravanserai_walker_w_12"/>
+	</image>
+	<!-- Note: Caravanserai walker walking animation frames NORTH-WEST DIRECTION 01-12 -->
+	<image id="caravanserai_walker_nw_01">
+		<layer src="slave_nw_01"/>
+		<layer src="mess_walker_nw_01"/>
+		<layer src="caravanserai_walker_nw_01"/>
+	</image>
+	<image id="caravanserai_walker_nw_02">
+		<layer src="slave_nw_02"/>
+		<layer src="mess_walker_nw_02"/>
+		<layer src="caravanserai_walker_nw_02"/>
+	</image>
+	<image id="caravanserai_walker_nw_03">
+		<layer src="slave_nw_03"/>
+		<layer src="mess_walker_nw_03"/>
+		<layer src="caravanserai_walker_nw_03"/>
+	</image>
+	<image id="caravanserai_walker_nw_04">
+		<layer src="slave_nw_04"/>
+		<layer src="mess_walker_nw_04"/>
+		<layer src="caravanserai_walker_nw_04"/>
+	</image>
+	<image id="caravanserai_walker_nw_05">
+		<layer src="slave_nw_05"/>
+		<layer src="mess_walker_nw_05"/>
+		<layer src="caravanserai_walker_nw_05"/>
+	</image>
+	<image id="caravanserai_walker_nw_06">
+		<layer src="slave_nw_06"/>
+		<layer src="mess_walker_nw_06"/>
+		<layer src="caravanserai_walker_nw_06"/>
+	</image>
+	<image id="caravanserai_walker_nw_07">
+		<layer src="slave_nw_07"/>
+		<layer src="mess_walker_nw_07"/>
+		<layer src="caravanserai_walker_nw_07"/>
+	</image>
+	<image id="caravanserai_walker_nw_08">
+		<layer src="slave_nw_08"/>
+		<layer src="mess_walker_nw_08"/>
+		<layer src="caravanserai_walker_nw_08"/>
+	</image>
+	<image id="caravanserai_walker_nw_09">
+		<layer src="slave_nw_09"/>
+		<layer src="mess_walker_nw_09"/>
+		<layer src="caravanserai_walker_nw_09"/>
+	</image>
+	<image id="caravanserai_walker_nw_10">
+		<layer src="slave_nw_10"/>
+		<layer src="mess_walker_nw_10"/>
+		<layer src="caravanserai_walker_nw_10"/>
+	</image>
+	<image id="caravanserai_walker_nw_11">
+		<layer src="slave_nw_11"/>
+		<layer src="mess_walker_nw_11"/>
+		<layer src="caravanserai_walker_nw_11"/>
+	</image>
+	<image id="caravanserai_walker_nw_12">
+		<layer src="slave_nw_12"/>
+		<layer src="mess_walker_nw_12"/>
+		<layer src="caravanserai_walker_nw_12"/>
+	</image>
+	<!-- Note: Caravanserai walker walking animation frames NORTH DIRECTION 01-12 -->
+	<image id="caravanserai_walker_n_01">
+		<layer src="slave_n_01"/>
+		<layer src="mess_walker_n_01"/>
+		<layer src="caravanserai_walker_n_01"/>
+	</image>
+	<image id="caravanserai_walker_n_02">
+		<layer src="slave_n_02"/>
+		<layer src="mess_walker_n_02"/>
+		<layer src="caravanserai_walker_n_02"/>
+	</image>
+	<image id="caravanserai_walker_n_03">
+		<layer src="slave_n_03"/>
+		<layer src="mess_walker_n_03"/>
+		<layer src="caravanserai_walker_n_03"/>
+	</image>
+	<image id="caravanserai_walker_n_04">
+		<layer src="slave_n_04"/>
+		<layer src="mess_walker_n_04"/>
+		<layer src="caravanserai_walker_n_04"/>
+	</image>
+	<image id="caravanserai_walker_n_05">
+		<layer src="slave_n_05"/>
+		<layer src="mess_walker_n_05"/>
+		<layer src="caravanserai_walker_n_05"/>
+	</image>
+	<image id="caravanserai_walker_n_06">
+		<layer src="slave_n_06"/>
+		<layer src="mess_walker_n_06"/>
+		<layer src="caravanserai_walker_n_06"/>
+	</image>
+	<image id="caravanserai_walker_n_07">
+		<layer src="slave_n_07"/>
+		<layer src="mess_walker_n_07"/>
+		<layer src="caravanserai_walker_n_07"/>
+	</image>
+	<image id="caravanserai_walker_n_08">
+		<layer src="slave_n_08"/>
+		<layer src="mess_walker_n_08"/>
+		<layer src="caravanserai_walker_n_08"/>
+	</image>
+	<image id="caravanserai_walker_n_09">
+		<layer src="slave_n_09"/>
+		<layer src="mess_walker_n_09"/>
+		<layer src="caravanserai_walker_n_09"/>
+	</image>
+	<image id="caravanserai_walker_n_10">
+		<layer src="slave_n_10"/>
+		<layer src="mess_walker_n_10"/>
+		<layer src="caravanserai_walker_n_10"/>
+	</image>
+	<image id="caravanserai_walker_n_11">
+		<layer src="slave_n_11"/>
+		<layer src="mess_walker_n_11"/>
+		<layer src="caravanserai_walker_n_11"/>
+	</image>
+	<image id="caravanserai_walker_n_12">
+		<layer src="slave_n_12"/>
+		<layer src="mess_walker_n_12"/>
+		<layer src="caravanserai_walker_n_12"/>
+	</image>
+	<!-- Note: Work camp Overseer Portrait -->
+	<image id="overseer_portrait">
+		<layer group="190" image="57"/>
+		<layer src="overseer_portrait_overlay"/>
+	</image>
+	<!-- Note: Work camp Overseer Death animation frames 01-08 -->
+	<image id="overseer_death_01">
+		<layer group="229" image="96"/>
+		<layer src="overseer_death_01"/>
+	</image>
+	<image id="overseer_death_02">
+		<layer group="229" image="97"/>
+		<layer src="overseer_death_02"/>
+	</image>
+	<image id="overseer_death_03">
+		<layer group="229" image="98"/>
+		<layer src="overseer_death_03"/>
+	</image>
+	<image id="overseer_death_04">
+		<layer group="229" image="99"/>
+		<layer src="overseer_death_04"/>
+	</image>
+	<image id="overseer_death_05">
+		<layer group="229" image="100"/>
+		<layer src="overseer_death_05"/>
+	</image>
+	<image id="overseer_death_06">
+		<layer group="229" image="101"/>
+	</image>
+	<image id="overseer_death_07">
+		<layer group="229" image="102"/>
+	</image>
+	<image id="overseer_death_08">
+		<layer group="229" image="103"/>
+	</image>
+	<!-- Note: Work camp Overseer Walking animation frames NORTH-EAST DIRECTION 01-12 -->
+	<image id="overseer_ne_01">
+		<layer group="229" image="0"/>
+		<layer src="overseer_ne_01"/>
+	</image>
+	<image id="overseer_ne_02">
+		<layer group="229" image="8"/>
+		<layer src="overseer_ne_02"/>
+	</image>
+	<image id="overseer_ne_03">
+		<layer group="229" image="16"/>
+		<layer src="overseer_ne_03"/>
+	</image>
+	<image id="overseer_ne_04">
+		<layer group="229" image="24"/>
+		<layer src="overseer_ne_04"/>
+	</image>
+	<image id="overseer_ne_05">
+		<layer group="229" image="32"/>
+		<layer src="overseer_ne_05"/>
+	</image>
+	<image id="overseer_ne_06">
+		<layer group="229" image="40"/>
+		<layer src="overseer_ne_06"/>
+	</image>
+	<image id="overseer_ne_07">
+		<layer group="229" image="48"/>
+		<layer src="overseer_ne_07"/>
+	</image>
+	<image id="overseer_ne_08">
+		<layer group="229" image="56"/>
+		<layer src="overseer_ne_08"/>
+	</image>
+	<image id="overseer_ne_09">
+		<layer group="229" image="64"/>
+		<layer src="overseer_ne_09"/>
+	</image>
+	<image id="overseer_ne_10">
+		<layer group="229" image="72"/>
+		<layer src="overseer_ne_10"/>
+	</image>
+	<image id="overseer_ne_11">
+		<layer group="229" image="80"/>
+		<layer src="overseer_ne_11"/>
+	</image>
+	<image id="overseer_ne_12">
+		<layer group="229" image="88"/>
+		<layer src="overseer_ne_12"/>
+	</image>
+	<!-- Note: Work camp Overseer Walking animation frames EAST DIRECTION 01-12 -->
+	<image id="overseer_e_01">
+		<layer group="229" image="1"/>
+		<layer src="overseer_e_01"/>
+	</image>
+	<image id="overseer_e_02">
+		<layer group="229" image="9"/>
+		<layer src="overseer_e_02"/>
+	</image>
+	<image id="overseer_e_03">
+		<layer group="229" image="17"/>
+		<layer src="overseer_e_03"/>
+	</image>
+	<image id="overseer_e_04">
+		<layer group="229" image="25"/>
+		<layer src="overseer_e_04"/>
+	</image>
+	<image id="overseer_e_05">
+		<layer group="229" image="33"/>
+		<layer src="overseer_e_05"/>
+	</image>
+	<image id="overseer_e_06">
+		<layer group="229" image="41"/>
+		<layer src="overseer_e_06"/>
+	</image>
+	<image id="overseer_e_07">
+		<layer group="229" image="49"/>
+		<layer src="overseer_e_07"/>
+	</image>
+	<image id="overseer_e_08">
+		<layer group="229" image="57"/>
+		<layer src="overseer_e_08"/>
+	</image>
+	<image id="overseer_e_09">
+		<layer group="229" image="65"/>
+		<layer src="overseer_e_09"/>
+	</image>
+	<image id="overseer_e_10">
+		<layer group="229" image="73"/>
+		<layer src="overseer_e_10"/>
+	</image>
+	<image id="overseer_e_11">
+		<layer group="229" image="81"/>
+		<layer src="overseer_e_11"/>
+	</image>
+	<image id="overseer_e_12">
+		<layer group="229" image="89"/>
+		<layer src="overseer_e_12"/>
+	</image>
+	<!-- Note: Work camp Overseer Walking animation frames SOUTH-EAST DIRECTION 01-12 -->
+	<image id="overseer_se_01">
+		<layer group="229" image="2"/>
+		<layer src="overseer_se_01"/>
+	</image>
+	<image id="overseer_se_02">
+		<layer group="229" image="10"/>
+		<layer src="overseer_se_02"/>
+	</image>
+	<image id="overseer_se_03">
+		<layer group="229" image="18"/>
+		<layer src="overseer_se_03"/>
+	</image>
+	<image id="overseer_se_04">
+		<layer group="229" image="26"/>
+		<layer src="overseer_se_04"/>
+	</image>
+	<image id="overseer_se_05">
+		<layer group="229" image="34"/>
+		<layer src="overseer_se_05"/>
+	</image>
+	<image id="overseer_se_06">
+		<layer group="229" image="42"/>
+		<layer src="overseer_se_06"/>
+	</image>
+	<image id="overseer_se_07">
+		<layer group="229" image="50"/>
+		<layer src="overseer_se_07"/>
+	</image>
+	<image id="overseer_se_08">
+		<layer group="229" image="58"/>
+		<layer src="overseer_se_08"/>
+	</image>
+	<image id="overseer_se_09">
+		<layer group="229" image="66"/>
+		<layer src="overseer_se_09"/>
+	</image>
+	<image id="overseer_se_10">
+		<layer group="229" image="74"/>
+		<layer src="overseer_se_10"/>
+	</image>
+	<image id="overseer_se_11">
+		<layer group="229" image="82"/>
+		<layer src="overseer_se_11"/>
+	</image>
+	<image id="overseer_se_12">
+		<layer group="229" image="90"/>
+		<layer src="overseer_se_12"/>
+	</image>
+	<!-- Note: Work camp Overseer Walking animation frames SOUTH DIRECTION 01-12 -->
+	<image id="overseer_s_01">
+		<layer group="229" image="3"/>
+		<layer src="overseer_s_01"/>
+	</image>
+	<image id="overseer_s_02">
+		<layer group="229" image="11"/>
+		<layer src="overseer_s_02"/>
+	</image>
+	<image id="overseer_s_03">
+		<layer group="229" image="19"/>
+		<layer src="overseer_s_03"/>
+	</image>
+	<image id="overseer_s_04">
+		<layer group="229" image="27"/>
+		<layer src="overseer_s_04"/>
+	</image>
+	<image id="overseer_s_05">
+		<layer group="229" image="35"/>
+		<layer src="overseer_s_05"/>
+	</image>
+	<image id="overseer_s_06">
+		<layer group="229" image="43"/>
+		<layer src="overseer_s_06"/>
+	</image>
+	<image id="overseer_s_07">
+		<layer group="229" image="51"/>
+		<layer src="overseer_s_07"/>
+	</image>
+	<image id="overseer_s_08">
+		<layer group="229" image="59"/>
+		<layer src="overseer_s_08"/>
+	</image>
+	<image id="overseer_s_09">
+		<layer group="229" image="67"/>
+		<layer src="overseer_s_09"/>
+	</image>
+	<image id="overseer_s_10">
+		<layer group="229" image="75"/>
+		<layer src="overseer_s_10"/>
+	</image>
+	<image id="overseer_s_11">
+		<layer group="229" image="83"/>
+		<layer src="overseer_s_11"/>
+	</image>
+	<image id="overseer_s_12">
+		<layer group="229" image="91"/>
+		<layer src="overseer_s_12"/>
+	</image>
+	<!-- Note: Work camp Overseer Walking animation frames SOUTH-WEST DIRECTION 01-12 -->
+	<image id="overseer_sw_01">
+		<layer group="229" image="4"/>
+		<layer src="overseer_sw_01"/>
+	</image>
+	<image id="overseer_sw_02">
+		<layer group="229" image="12"/>
+		<layer src="overseer_sw_02"/>
+	</image>
+	<image id="overseer_sw_03">
+		<layer group="229" image="20"/>
+		<layer src="overseer_sw_03"/>
+	</image>
+	<image id="overseer_sw_04">
+		<layer group="229" image="28"/>
+		<layer src="overseer_sw_04"/>
+	</image>
+	<image id="overseer_sw_05">
+		<layer group="229" image="36"/>
+		<layer src="overseer_sw_05"/>
+	</image>
+	<image id="overseer_sw_06">
+		<layer group="229" image="44"/>
+		<layer src="overseer_sw_06"/>
+	</image>
+	<image id="overseer_sw_07">
+		<layer group="229" image="52"/>
+		<layer src="overseer_sw_07"/>
+	</image>
+	<image id="overseer_sw_08">
+		<layer group="229" image="60"/>
+		<layer src="overseer_sw_08"/>
+	</image>
+	<image id="overseer_sw_09">
+		<layer group="229" image="68"/>
+		<layer src="overseer_sw_09"/>
+	</image>
+	<image id="overseer_sw_10">
+		<layer group="229" image="76"/>
+		<layer src="overseer_sw_10"/>
+	</image>
+	<image id="overseer_sw_11">
+		<layer group="229" image="84"/>
+		<layer src="overseer_sw_11"/>
+	</image>
+	<image id="overseer_sw_12">
+		<layer group="229" image="92"/>
+		<layer src="overseer_sw_12"/>
+	</image>
+	<!-- Note: Work camp Overseer Walking animation frames WEST DIRECTION 01-12 -->
+	<image id="overseer_w_01">
+		<layer group="229" image="5"/>
+		<layer src="overseer_w_01"/>
+	</image>
+	<image id="overseer_w_02">
+		<layer group="229" image="13"/>
+		<layer src="overseer_w_02"/>
+	</image>
+	<image id="overseer_w_03">
+		<layer group="229" image="21"/>
+		<layer src="overseer_w_03"/>
+	</image>
+	<image id="overseer_w_04">
+		<layer group="229" image="29"/>
+		<layer src="overseer_w_04"/>
+	</image>
+	<image id="overseer_w_05">
+		<layer group="229" image="37"/>
+		<layer src="overseer_w_05"/>
+	</image>
+	<image id="overseer_w_06">
+		<layer group="229" image="45"/>
+		<layer src="overseer_w_06"/>
+	</image>
+	<image id="overseer_w_07">
+		<layer group="229" image="53"/>
+		<layer src="overseer_w_07"/>
+	</image>
+	<image id="overseer_w_08">
+		<layer group="229" image="61"/>
+		<layer src="overseer_w_08"/>
+	</image>
+	<image id="overseer_w_09">
+		<layer group="229" image="69"/>
+		<layer src="overseer_w_09"/>
+	</image>
+	<image id="overseer_w_10">
+		<layer group="229" image="77"/>
+		<layer src="overseer_w_10"/>
+	</image>
+	<image id="overseer_w_11">
+		<layer group="229" image="85"/>
+		<layer src="overseer_w_11"/>
+	</image>
+	<image id="overseer_w_12">
+		<layer group="229" image="93"/>
+		<layer src="overseer_w_12"/>
+	</image>
+	<!-- Note: Work camp Overseer Walking animation frames NORTH-WEST DIRECTION 01-12 -->
+	<image id="overseer_nw_01">
+		<layer group="229" image="6"/>
+		<layer src="overseer_nw_01"/>
+	</image>
+	<image id="overseer_nw_02">
+		<layer group="229" image="14"/>
+		<layer src="overseer_nw_02"/>
+	</image>
+	<image id="overseer_nw_03">
+		<layer group="229" image="22"/>
+		<layer src="overseer_nw_03"/>
+	</image>
+	<image id="overseer_nw_04">
+		<layer group="229" image="30"/>
+		<layer src="overseer_nw_04"/>
+	</image>
+	<image id="overseer_nw_05">
+		<layer group="229" image="38"/>
+		<layer src="overseer_nw_05"/>
+	</image>
+	<image id="overseer_nw_06">
+		<layer group="229" image="46"/>
+		<layer src="overseer_nw_06"/>
+	</image>
+	<image id="overseer_nw_07">
+		<layer group="229" image="54"/>
+		<layer src="overseer_nw_07"/>
+	</image>
+	<image id="overseer_nw_08">
+		<layer group="229" image="62"/>
+		<layer src="overseer_nw_08"/>
+	</image>
+	<image id="overseer_nw_09">
+		<layer group="229" image="70"/>
+		<layer src="overseer_nw_09"/>
+	</image>
+	<image id="overseer_nw_10">
+		<layer group="229" image="78"/>
+		<layer src="overseer_nw_10"/>
+	</image>
+	<image id="overseer_nw_11">
+		<layer group="229" image="86"/>
+		<layer src="overseer_nw_11"/>
+	</image>
+	<image id="overseer_nw_12">
+		<layer group="229" image="94"/>
+		<layer src="overseer_nw_12"/>
+	</image>
+	<!-- Note: Work camp Overseer Walking animation frames NORTH DIRECTION 01-12 -->
+	<image id="overseer_n_01">
+		<layer group="229" image="7"/>
+		<layer src="overseer_n_01"/>
+	</image>
+	<image id="overseer_n_02">
+		<layer group="229" image="15"/>
+		<layer src="overseer_n_02"/>
+	</image>
+	<image id="overseer_n_03">
+		<layer group="229" image="23"/>
+		<layer src="overseer_n_03"/>
+	</image>
+	<image id="overseer_n_04">
+		<layer group="229" image="31"/>
+		<layer src="overseer_n_04"/>
+	</image>
+	<image id="overseer_n_05">
+		<layer group="229" image="39"/>
+		<layer src="overseer_n_05"/>
+	</image>
+	<image id="overseer_n_06">
+		<layer group="229" image="47"/>
+		<layer src="overseer_n_06"/>
+	</image>
+	<image id="overseer_n_07">
+		<layer group="229" image="55"/>
+		<layer src="overseer_n_07"/>
+	</image>
+	<image id="overseer_n_08">
+		<layer group="229" image="63"/>
+		<layer src="overseer_n_08"/>
+	</image>
+	<image id="overseer_n_09">
+		<layer group="229" image="71"/>
+		<layer src="overseer_n_09"/>
+	</image>
+	<image id="overseer_n_10">
+		<layer group="229" image="79"/>
+		<layer src="overseer_n_10"/>
+	</image>
+	<image id="overseer_n_11">
+		<layer group="229" image="87"/>
+		<layer src="overseer_n_11"/>
+	</image>
+	<image id="overseer_n_12">
+		<layer group="229" image="95"/>
+		<layer src="overseer_n_12"/>
+	</image>
+	<!-- Note: Magistrate Portrait -->
+	<image id="magistrate_portrait_overlay">
+		<layer group="190" image="52"/>
+		<layer src="magistrate_portrait_overlay"/>
+	</image>
+	<!-- Note: Magistrate Death animation frames 01-08 -->
+	<image id="magistrate_death_01">
+		<layer group="230" image="96"/>
+		<layer src="magistrate_death_01"/>
+	</image>
+	<image id="magistrate_death_02">
+		<layer group="230" image="97"/>
+		<layer src="magistrate_death_02"/>
+	</image>
+	<image id="magistrate_death_03">
+		<layer group="230" image="98"/>
+		<layer src="magistrate_death_03"/>
+	</image>
+	<image id="magistrate_death_04">
+		<layer group="230" image="99"/>
+		<layer src="magistrate_death_04"/>
+	</image>
+	<image id="magistrate_death_05">
+		<layer group="230" image="100"/>
+		<layer src="magistrate_death_05"/>
+	</image>
+	<image id="magistrate_death_06">
+		<layer group="230" image="101"/>
+	</image>
+	<image id="magistrate_death_07">
+		<layer group="230" image="102"/>
+	</image>
+	<image id="magistrate_death_08">
+		<layer group="230" image="103"/>
+	</image>
+	<!-- Note: Magistrate Walking animation frames NORTH-EAST DIRECTION 01-12 -->
+	<image id="magistrate_ne_01">
+		<layer group="230" image="0"/>
+		<layer src="magistrate_ne_01"/>
+	</image>
+	<image id="magistrate_ne_02">
+		<layer group="230" image="8"/>
+		<layer src="magistrate_ne_02"/>
+	</image>
+	<image id="magistrate_ne_03">
+		<layer group="230" image="16"/>
+		<layer src="magistrate_ne_03"/>
+	</image>
+	<image id="magistrate_ne_04">
+		<layer group="230" image="24"/>
+		<layer src="magistrate_ne_04"/>
+	</image>
+	<image id="magistrate_ne_05">
+		<layer group="230" image="32"/>
+		<layer src="magistrate_ne_05"/>
+	</image>
+	<image id="magistrate_ne_06">
+		<layer group="230" image="40"/>
+		<layer src="magistrate_ne_06"/>
+	</image>
+	<image id="magistrate_ne_07">
+		<layer group="230" image="48"/>
+		<layer src="magistrate_ne_07"/>
+	</image>
+	<image id="magistrate_ne_08">
+		<layer group="230" image="56"/>
+		<layer src="magistrate_ne_08"/>
+	</image>
+	<image id="magistrate_ne_09">
+		<layer group="230" image="64"/>
+		<layer src="magistrate_ne_09"/>
+	</image>
+	<image id="magistrate_ne_10">
+		<layer group="230" image="72"/>
+		<layer src="magistrate_ne_10"/>
+	</image>
+	<image id="magistrate_ne_11">
+		<layer group="230" image="80"/>
+		<layer src="magistrate_ne_11"/>
+	</image>
+	<image id="magistrate_ne_12">
+		<layer group="230" image="88"/>
+		<layer src="magistrate_ne_12"/>
+	</image>
+	<!-- Note: Magistrate Walking animation frames EAST DIRECTION 01-12 -->
+	<image id="magistrate_e_01">
+		<layer group="230" image="1"/>
+		<layer src="magistrate_e_01"/>
+	</image>
+	<image id="magistrate_e_02">
+		<layer group="230" image="9"/>
+		<layer src="magistrate_e_02"/>
+	</image>
+	<image id="magistrate_e_03">
+		<layer group="230" image="17"/>
+		<layer src="magistrate_e_03"/>
+	</image>
+	<image id="magistrate_e_04">
+		<layer group="230" image="25"/>
+		<layer src="magistrate_e_04"/>
+	</image>
+	<image id="magistrate_e_05">
+		<layer group="230" image="33"/>
+		<layer src="magistrate_e_05"/>
+	</image>
+	<image id="magistrate_e_06">
+		<layer group="230" image="41"/>
+		<layer src="magistrate_e_06"/>
+	</image>
+	<image id="magistrate_e_07">
+		<layer group="230" image="49"/>
+		<layer src="magistrate_e_07"/>
+	</image>
+	<image id="magistrate_e_08">
+		<layer group="230" image="57"/>
+		<layer src="magistrate_e_08"/>
+	</image>
+	<image id="magistrate_e_09">
+		<layer group="230" image="65"/>
+		<layer src="magistrate_e_09"/>
+	</image>
+	<image id="magistrate_e_10">
+		<layer group="230" image="73"/>
+		<layer src="magistrate_e_10"/>
+	</image>
+	<image id="magistrate_e_11">
+		<layer group="230" image="81"/>
+		<layer src="magistrate_e_11"/>
+	</image>
+	<image id="magistrate_e_12">
+		<layer group="230" image="89"/>
+		<layer src="magistrate_e_12"/>
+	</image>
+	<!-- Note: Magistrate Walking animation frames SOUTH-EAST DIRECTION 01-12 -->
+	<image id="magistrate_se_01">
+		<layer group="230" image="2"/>
+		<layer src="magistrate_se_01"/>
+	</image>
+	<image id="magistrate_se_02">
+		<layer group="230" image="10"/>
+		<layer src="magistrate_se_02"/>
+	</image>
+	<image id="magistrate_se_03">
+		<layer group="230" image="18"/>
+		<layer src="magistrate_se_03"/>
+	</image>
+	<image id="magistrate_se_04">
+		<layer group="230" image="26"/>
+		<layer src="magistrate_se_04"/>
+	</image>
+	<image id="magistrate_se_05">
+		<layer group="230" image="34"/>
+		<layer src="magistrate_se_05"/>
+	</image>
+	<image id="magistrate_se_06">
+		<layer group="230" image="42"/>
+		<layer src="magistrate_se_06"/>
+	</image>
+	<image id="magistrate_se_07">
+		<layer group="230" image="50"/>
+		<layer src="magistrate_se_07"/>
+	</image>
+	<image id="magistrate_se_08">
+		<layer group="230" image="58"/>
+		<layer src="magistrate_se_08"/>
+	</image>
+	<image id="magistrate_se_09">
+		<layer group="230" image="66"/>
+		<layer src="magistrate_se_09"/>
+	</image>
+	<image id="magistrate_se_10">
+		<layer group="230" image="74"/>
+		<layer src="magistrate_se_10"/>
+	</image>
+	<image id="magistrate_se_11">
+		<layer group="230" image="82"/>
+		<layer src="magistrate_se_11"/>
+	</image>
+	<image id="magistrate_se_12">
+		<layer group="230" image="90"/>
+		<layer src="magistrate_se_12"/>
+	</image>
+	<!-- Note: Magistrate Walking animation frames SOUTH DIRECTION 01-12 -->
+	<image id="magistrate_s_01">
+		<layer group="230" image="3"/>
+		<layer src="magistrate_s_01"/>
+	</image>
+	<image id="magistrate_s_02">
+		<layer group="230" image="11"/>
+		<layer src="magistrate_s_02"/>
+	</image>
+	<image id="magistrate_s_03">
+		<layer group="230" image="19"/>
+		<layer src="magistrate_s_03"/>
+	</image>
+	<image id="magistrate_s_04">
+		<layer group="230" image="27"/>
+		<layer src="magistrate_s_04"/>
+	</image>
+	<image id="magistrate_s_05">
+		<layer group="230" image="35"/>
+		<layer src="magistrate_s_05"/>
+	</image>
+	<image id="magistrate_s_06">
+		<layer group="230" image="43"/>
+		<layer src="magistrate_s_06"/>
+	</image>
+	<image id="magistrate_s_07">
+		<layer group="230" image="51"/>
+		<layer src="magistrate_s_07"/>
+	</image>
+	<image id="magistrate_s_08">
+		<layer group="230" image="59"/>
+		<layer src="magistrate_s_08"/>
+	</image>
+	<image id="magistrate_s_09">
+		<layer group="230" image="67"/>
+		<layer src="magistrate_s_09"/>
+	</image>
+	<image id="magistrate_s_10">
+		<layer group="230" image="75"/>
+		<layer src="magistrate_s_10"/>
+	</image>
+	<image id="magistrate_s_11">
+		<layer group="230" image="83"/>
+		<layer src="magistrate_s_11"/>
+	</image>
+	<image id="magistrate_s_12">
+		<layer group="230" image="91"/>
+		<layer src="magistrate_s_12"/>
+	</image>
+	<!-- Note: Magistrate Walking animation frames SOUTH-WEST DIRECTION 01-12 -->
+	<image id="magistrate_sw_01">
+		<layer group="230" image="4"/>
+		<layer src="magistrate_sw_01"/>
+	</image>
+	<image id="magistrate_sw_02">
+		<layer group="230" image="12"/>
+		<layer src="magistrate_sw_02"/>
+	</image>
+	<image id="magistrate_sw_03">
+		<layer group="230" image="20"/>
+		<layer src="magistrate_sw_03"/>
+	</image>
+	<image id="magistrate_sw_04">
+		<layer group="230" image="28"/>
+		<layer src="magistrate_sw_04"/>
+	</image>
+	<image id="magistrate_sw_05">
+		<layer group="230" image="36"/>
+		<layer src="magistrate_sw_05"/>
+	</image>
+	<image id="magistrate_sw_06">
+		<layer group="230" image="44"/>
+		<layer src="magistrate_sw_06"/>
+	</image>
+	<image id="magistrate_sw_07">
+		<layer group="230" image="52"/>
+		<layer src="magistrate_sw_07"/>
+	</image>
+	<image id="magistrate_sw_08">
+		<layer group="230" image="60"/>
+		<layer src="magistrate_sw_08"/>
+	</image>
+	<image id="magistrate_sw_09">
+		<layer group="230" image="68"/>
+		<layer src="magistrate_sw_09"/>
+	</image>
+	<image id="magistrate_sw_10">
+		<layer group="230" image="76"/>
+		<layer src="magistrate_sw_10"/>
+	</image>
+	<image id="magistrate_sw_11">
+		<layer group="230" image="84"/>
+		<layer src="magistrate_sw_11"/>
+	</image>
+	<image id="magistrate_sw_12">
+		<layer group="230" image="92"/>
+		<layer src="magistrate_sw_12"/>
+	</image>
+	<!-- Note: Magistrate Walking animation frames WEST DIRECTION 01-12 -->
+	<image id="magistrate_w_01">
+		<layer group="230" image="5"/>
+		<layer src="magistrate_w_01"/>
+	</image>
+	<image id="magistrate_w_02">
+		<layer group="230" image="13"/>
+		<layer src="magistrate_w_02"/>
+	</image>
+	<image id="magistrate_w_03">
+		<layer group="230" image="21"/>
+		<layer src="magistrate_w_03"/>
+	</image>
+	<image id="magistrate_w_04">
+		<layer group="230" image="29"/>
+		<layer src="magistrate_w_04"/>
+	</image>
+	<image id="magistrate_w_05">
+		<layer group="230" image="37"/>
+		<layer src="magistrate_w_05"/>
+	</image>
+	<image id="magistrate_w_06">
+		<layer group="230" image="45"/>
+		<layer src="magistrate_w_06"/>
+	</image>
+	<image id="magistrate_w_07">
+		<layer group="230" image="53"/>
+		<layer src="magistrate_w_07"/>
+	</image>
+	<image id="magistrate_w_08">
+		<layer group="230" image="61"/>
+		<layer src="magistrate_w_08"/>
+	</image>
+	<image id="magistrate_w_09">
+		<layer group="230" image="69"/>
+		<layer src="magistrate_w_09"/>
+	</image>
+	<image id="magistrate_w_10">
+		<layer group="230" image="77"/>
+		<layer src="magistrate_w_10"/>
+	</image>
+	<image id="magistrate_w_11">
+		<layer group="230" image="85"/>
+		<layer src="magistrate_w_11"/>
+	</image>
+	<image id="magistrate_w_12">
+		<layer group="230" image="93"/>
+		<layer src="magistrate_w_12"/>
+	</image>
+	<!-- Note: Magistrate Walking animation frames NORTH-WEST DIRECTION 01-12 -->
+	<image id="magistrate_nw_01">
+		<layer group="230" image="6"/>
+		<layer src="magistrate_nw_01"/>
+	</image>
+	<image id="magistrate_nw_02">
+		<layer group="230" image="14"/>
+		<layer src="magistrate_nw_02"/>
+	</image>
+	<image id="magistrate_nw_03">
+		<layer group="230" image="22"/>
+		<layer src="magistrate_nw_03"/>
+	</image>
+	<image id="magistrate_nw_04">
+		<layer group="230" image="30"/>
+		<layer src="magistrate_nw_04"/>
+	</image>
+	<image id="magistrate_nw_05">
+		<layer group="230" image="38"/>
+		<layer src="magistrate_nw_05"/>
+	</image>
+	<image id="magistrate_nw_06">
+		<layer group="230" image="46"/>
+		<layer src="magistrate_nw_06"/>
+	</image>
+	<image id="magistrate_nw_07">
+		<layer group="230" image="54"/>
+		<layer src="magistrate_nw_07"/>
+	</image>
+	<image id="magistrate_nw_08">
+		<layer group="230" image="62"/>
+		<layer src="magistrate_nw_08"/>
+	</image>
+	<image id="magistrate_nw_09">
+		<layer group="230" image="70"/>
+		<layer src="magistrate_nw_09"/>
+	</image>
+	<image id="magistrate_nw_10">
+		<layer group="230" image="78"/>
+		<layer src="magistrate_nw_10"/>
+	</image>
+	<image id="magistrate_nw_11">
+		<layer group="230" image="86"/>
+		<layer src="magistrate_nw_11"/>
+	</image>
+	<image id="magistrate_nw_12">
+		<layer group="230" image="94"/>
+		<layer src="magistrate_nw_12"/>
+	</image>
+	<!-- Note: Magistrate Walking animation frames NORTH DIRECTION 01-12 -->
+	<image id="magistrate_n_01">
+		<layer group="230" image="7"/>
+		<layer src="magistrate_n_01"/>
+	</image>
+	<image id="magistrate_n_02">
+		<layer group="230" image="15"/>
+		<layer src="magistrate_n_02"/>
+	</image>
+	<image id="magistrate_n_03">
+		<layer group="230" image="23"/>
+		<layer src="magistrate_n_03"/>
+	</image>
+	<image id="magistrate_n_04">
+		<layer group="230" image="31"/>
+		<layer src="magistrate_n_04"/>
+	</image>
+	<image id="magistrate_n_05">
+		<layer group="230" image="39"/>
+		<layer src="magistrate_n_05"/>
+	</image>
+	<image id="magistrate_n_06">
+		<layer group="230" image="47"/>
+		<layer src="magistrate_n_06"/>
+	</image>
+	<image id="magistrate_n_07">
+		<layer group="230" image="55"/>
+		<layer src="magistrate_n_07"/>
+	</image>
+	<image id="magistrate_n_08">
+		<layer group="230" image="63"/>
+		<layer src="magistrate_n_08"/>
+	</image>
+	<image id="magistrate_n_09">
+		<layer group="230" image="71"/>
+		<layer src="magistrate_n_09"/>
+	</image>
+	<image id="magistrate_n_10">
+		<layer group="230" image="79"/>
+		<layer src="magistrate_n_10"/>
+	</image>
+	<image id="magistrate_n_11">
+		<layer group="230" image="87"/>
+		<layer src="magistrate_n_11"/>
+	</image>
+	<image id="magistrate_n_12">
+		<layer group="230" image="95"/>
+		<layer src="magistrate_n_12"/>
+	</image>
+	<!-- Note: Caravanserai Overseer Portrait -->
+	<image id="caravanserai_overseer_portrait">
+		<layer group="190" image="57"/>
+		<layer src="caravanserai_overseer_portrait_overlay"/>
+	</image>
+	<!-- Note: Caravanserai Overseer Death animation frames 01-08 -->
+	<image id="caravanserai_overseer_death_01">
+		<layer group="229" image="96"/>
+		<layer src="caravanserai_overseer_death_01"/>
+	</image>
+	<image id="caravanserai_overseer_death_02">
+		<layer group="229" image="97"/>
+		<layer src="caravanserai_overseer_death_02"/>
+	</image>
+	<image id="caravanserai_overseer_death_03">
+		<layer group="229" image="98"/>
+		<layer src="caravanserai_overseer_death_03"/>
+	</image>
+	<image id="caravanserai_overseer_death_04">
+		<layer group="229" image="99"/>
+		<layer src="caravanserai_overseer_death_04"/>
+	</image>
+	<image id="caravanserai_overseer_death_05">
+		<layer group="229" image="100"/>
+		<layer src="caravanserai_overseer_death_05"/>
+	</image>
+	<image id="caravanserai_overseer_death_06">
+		<layer group="229" image="101"/>
+	</image>
+	<image id="caravanserai_overseer_death_07">
+		<layer group="229" image="102"/>
+	</image>
+	<image id="caravanserai_overseer_death_08">
+		<layer group="229" image="103"/>
+	</image>
+	<!-- Note: Caravanserai Overseer Walking animation frames NORTH-EAST DIRECTION 01-12 -->
+	<image id="caravanserai_overseer_ne_01">
+		<layer group="229" image="0"/>
+		<layer src="caravanserai_overseer_ne_01"/>
+	</image>
+	<image id="caravanserai_overseer_ne_02">
+		<layer group="229" image="8"/>
+		<layer src="caravanserai_overseer_ne_02"/>
+	</image>
+	<image id="caravanserai_overseer_ne_03">
+		<layer group="229" image="16"/>
+		<layer src="caravanserai_overseer_ne_03"/>
+	</image>
+	<image id="caravanserai_overseer_ne_04">
+		<layer group="229" image="24"/>
+		<layer src="caravanserai_overseer_ne_04"/>
+	</image>
+	<image id="caravanserai_overseer_ne_05">
+		<layer group="229" image="32"/>
+		<layer src="caravanserai_overseer_ne_05"/>
+	</image>
+	<image id="caravanserai_overseer_ne_06">
+		<layer group="229" image="40"/>
+		<layer src="caravanserai_overseer_ne_06"/>
+	</image>
+	<image id="caravanserai_overseer_ne_07">
+		<layer group="229" image="48"/>
+		<layer src="caravanserai_overseer_ne_07"/>
+	</image>
+	<image id="caravanserai_overseer_ne_08">
+		<layer group="229" image="56"/>
+		<layer src="caravanserai_overseer_ne_08"/>
+	</image>
+	<image id="caravanserai_overseer_ne_09">
+		<layer group="229" image="64"/>
+		<layer src="caravanserai_overseer_ne_09"/>
+	</image>
+	<image id="caravanserai_overseer_ne_10">
+		<layer group="229" image="72"/>
+		<layer src="caravanserai_overseer_ne_10"/>
+	</image>
+	<image id="caravanserai_overseer_ne_11">
+		<layer group="229" image="80"/>
+		<layer src="caravanserai_overseer_ne_11"/>
+	</image>
+	<image id="caravanserai_overseer_ne_12">
+		<layer group="229" image="88"/>
+		<layer src="caravanserai_overseer_ne_12"/>
+	</image>
+	<!-- Note: Caravanserai Overseer Walking animation frames EAST DIRECTION 01-12 -->
+	<image id="caravanserai_overseer_e_01">
+		<layer group="229" image="1"/>
+		<layer src="caravanserai_overseer_e_01"/>
+	</image>
+	<image id="caravanserai_overseer_e_02">
+		<layer group="229" image="9"/>
+		<layer src="caravanserai_overseer_e_02"/>
+	</image>
+	<image id="caravanserai_overseer_e_03">
+		<layer group="229" image="17"/>
+		<layer src="caravanserai_overseer_e_03"/>
+	</image>
+	<image id="caravanserai_overseer_e_04">
+		<layer group="229" image="25"/>
+		<layer src="caravanserai_overseer_e_04"/>
+	</image>
+	<image id="caravanserai_overseer_e_05">
+		<layer group="229" image="33"/>
+		<layer src="caravanserai_overseer_e_05"/>
+	</image>
+	<image id="caravanserai_overseer_e_06">
+		<layer group="229" image="41"/>
+		<layer src="caravanserai_overseer_e_06"/>
+	</image>
+	<image id="caravanserai_overseer_e_07">
+		<layer group="229" image="49"/>
+		<layer src="caravanserai_overseer_e_07"/>
+	</image>
+	<image id="caravanserai_overseer_e_08">
+		<layer group="229" image="57"/>
+		<layer src="caravanserai_overseer_e_08"/>
+	</image>
+	<image id="caravanserai_overseer_e_09">
+		<layer group="229" image="65"/>
+		<layer src="caravanserai_overseer_e_09"/>
+	</image>
+	<image id="caravanserai_overseer_e_10">
+		<layer group="229" image="73"/>
+		<layer src="caravanserai_overseer_e_10"/>
+	</image>
+	<image id="caravanserai_overseer_e_11">
+		<layer group="229" image="81"/>
+		<layer src="caravanserai_overseer_e_11"/>
+	</image>
+	<image id="caravanserai_overseer_e_12">
+		<layer group="229" image="89"/>
+		<layer src="caravanserai_overseer_e_12"/>
+	</image>
+	<!-- Note: Caravanserai Overseer Walking animation frames SOUTH-EAST DIRECTION 01-12 -->
+	<image id="caravanserai_overseer_se_01">
+		<layer group="229" image="2"/>
+		<layer src="caravanserai_overseer_se_01"/>
+	</image>
+	<image id="caravanserai_overseer_se_02">
+		<layer group="229" image="10"/>
+		<layer src="caravanserai_overseer_se_02"/>
+	</image>
+	<image id="caravanserai_overseer_se_03">
+		<layer group="229" image="18"/>
+		<layer src="caravanserai_overseer_se_03"/>
+	</image>
+	<image id="caravanserai_overseer_se_04">
+		<layer group="229" image="26"/>
+		<layer src="caravanserai_overseer_se_04"/>
+	</image>
+	<image id="caravanserai_overseer_se_05">
+		<layer group="229" image="34"/>
+		<layer src="caravanserai_overseer_se_05"/>
+	</image>
+	<image id="caravanserai_overseer_se_06">
+		<layer group="229" image="42"/>
+		<layer src="caravanserai_overseer_se_06"/>
+	</image>
+	<image id="caravanserai_overseer_se_07">
+		<layer group="229" image="50"/>
+		<layer src="caravanserai_overseer_se_07"/>
+	</image>
+	<image id="caravanserai_overseer_se_08">
+		<layer group="229" image="58"/>
+		<layer src="caravanserai_overseer_se_08"/>
+	</image>
+	<image id="caravanserai_overseer_se_09">
+		<layer group="229" image="66"/>
+		<layer src="caravanserai_overseer_se_09"/>
+	</image>
+	<image id="caravanserai_overseer_se_10">
+		<layer group="229" image="74"/>
+		<layer src="caravanserai_overseer_se_10"/>
+	</image>
+	<image id="caravanserai_overseer_se_11">
+		<layer group="229" image="82"/>
+		<layer src="caravanserai_overseer_se_11"/>
+	</image>
+	<image id="caravanserai_overseer_se_12">
+		<layer group="229" image="90"/>
+		<layer src="caravanserai_overseer_se_12"/>
+	</image>
+	<!-- Note: Caravanserai Overseer Walking animation frames SOUTH DIRECTION 01-12 -->
+	<image id="caravanserai_overseer_s_01">
+		<layer group="229" image="3"/>
+		<layer src="caravanserai_overseer_s_01"/>
+	</image>
+	<image id="caravanserai_overseer_s_02">
+		<layer group="229" image="11"/>
+		<layer src="caravanserai_overseer_s_02"/>
+	</image>
+	<image id="caravanserai_overseer_s_03">
+		<layer group="229" image="19"/>
+		<layer src="caravanserai_overseer_s_03"/>
+	</image>
+	<image id="caravanserai_overseer_s_04">
+		<layer group="229" image="27"/>
+		<layer src="caravanserai_overseer_s_04"/>
+	</image>
+	<image id="caravanserai_overseer_s_05">
+		<layer group="229" image="35"/>
+		<layer src="caravanserai_overseer_s_05"/>
+	</image>
+	<image id="caravanserai_overseer_s_06">
+		<layer group="229" image="43"/>
+		<layer src="caravanserai_overseer_s_06"/>
+	</image>
+	<image id="caravanserai_overseer_s_07">
+		<layer group="229" image="51"/>
+		<layer src="caravanserai_overseer_s_07"/>
+	</image>
+	<image id="caravanserai_overseer_s_08">
+		<layer group="229" image="59"/>
+		<layer src="caravanserai_overseer_s_08"/>
+	</image>
+	<image id="caravanserai_overseer_s_09">
+		<layer group="229" image="67"/>
+		<layer src="caravanserai_overseer_s_09"/>
+	</image>
+	<image id="caravanserai_overseer_s_10">
+		<layer group="229" image="75"/>
+		<layer src="caravanserai_overseer_s_10"/>
+	</image>
+	<image id="caravanserai_overseer_s_11">
+		<layer group="229" image="83"/>
+		<layer src="caravanserai_overseer_s_11"/>
+	</image>
+	<image id="caravanserai_overseer_s_12">
+		<layer group="229" image="91"/>
+		<layer src="caravanserai_overseer_s_12"/>
+	</image>
+	<!-- Note: Caravanserai Overseer Walking animation frames SOUTH-WEST DIRECTION 01-12 -->
+	<image id="caravanserai_overseer_sw_01">
+		<layer group="229" image="4"/>
+		<layer src="caravanserai_overseer_sw_01"/>
+	</image>
+	<image id="caravanserai_overseer_sw_02">
+		<layer group="229" image="12"/>
+		<layer src="caravanserai_overseer_sw_02"/>
+	</image>
+	<image id="caravanserai_overseer_sw_03">
+		<layer group="229" image="20"/>
+		<layer src="caravanserai_overseer_sw_03"/>
+	</image>
+	<image id="caravanserai_overseer_sw_04">
+		<layer group="229" image="28"/>
+		<layer src="caravanserai_overseer_sw_04"/>
+	</image>
+	<image id="caravanserai_overseer_sw_05">
+		<layer group="229" image="36"/>
+		<layer src="caravanserai_overseer_sw_05"/>
+	</image>
+	<image id="caravanserai_overseer_sw_06">
+		<layer group="229" image="44"/>
+		<layer src="caravanserai_overseer_sw_06"/>
+	</image>
+	<image id="caravanserai_overseer_sw_07">
+		<layer group="229" image="52"/>
+		<layer src="caravanserai_overseer_sw_07"/>
+	</image>
+	<image id="caravanserai_overseer_sw_08">
+		<layer group="229" image="60"/>
+		<layer src="caravanserai_overseer_sw_08"/>
+	</image>
+	<image id="caravanserai_overseer_sw_09">
+		<layer group="229" image="68"/>
+		<layer src="caravanserai_overseer_sw_09"/>
+	</image>
+	<image id="caravanserai_overseer_sw_10">
+		<layer group="229" image="76"/>
+		<layer src="caravanserai_overseer_sw_10"/>
+	</image>
+	<image id="caravanserai_overseer_sw_11">
+		<layer group="229" image="84"/>
+		<layer src="caravanserai_overseer_sw_11"/>
+	</image>
+	<image id="caravanserai_overseer_sw_12">
+		<layer group="229" image="92"/>
+		<layer src="caravanserai_overseer_sw_12"/>
+	</image>
+	<!-- Note: Caravanserai Overseer Walking animation frames WEST DIRECTION 01-12 -->
+	<image id="caravanserai_overseer_w_01">
+		<layer group="229" image="5"/>
+		<layer src="caravanserai_overseer_w_01"/>
+	</image>
+	<image id="caravanserai_overseer_w_02">
+		<layer group="229" image="13"/>
+		<layer src="caravanserai_overseer_w_02"/>
+	</image>
+	<image id="caravanserai_overseer_w_03">
+		<layer group="229" image="21"/>
+		<layer src="caravanserai_overseer_w_03"/>
+	</image>
+	<image id="caravanserai_overseer_w_04">
+		<layer group="229" image="29"/>
+		<layer src="caravanserai_overseer_w_04"/>
+	</image>
+	<image id="caravanserai_overseer_w_05">
+		<layer group="229" image="37"/>
+		<layer src="caravanserai_overseer_w_05"/>
+	</image>
+	<image id="caravanserai_overseer_w_06">
+		<layer group="229" image="45"/>
+		<layer src="caravanserai_overseer_w_06"/>
+	</image>
+	<image id="caravanserai_overseer_w_07">
+		<layer group="229" image="53"/>
+		<layer src="caravanserai_overseer_w_07"/>
+	</image>
+	<image id="caravanserai_overseer_w_08">
+		<layer group="229" image="61"/>
+		<layer src="caravanserai_overseer_w_08"/>
+	</image>
+	<image id="caravanserai_overseer_w_09">
+		<layer group="229" image="69"/>
+		<layer src="caravanserai_overseer_w_09"/>
+	</image>
+	<image id="caravanserai_overseer_w_10">
+		<layer group="229" image="77"/>
+		<layer src="caravanserai_overseer_w_10"/>
+	</image>
+	<image id="caravanserai_overseer_w_11">
+		<layer group="229" image="85"/>
+		<layer src="caravanserai_overseer_w_11"/>
+	</image>
+	<image id="caravanserai_overseer_w_12">
+		<layer group="229" image="93"/>
+		<layer src="caravanserai_overseer_w_12"/>
+	</image>
+	<!-- Note: Caravanserai Overseer Walking animation frames NORTH-WEST DIRECTION 01-12 -->
+	<image id="caravanserai_overseer_nw_01">
+		<layer group="229" image="6"/>
+		<layer src="caravanserai_overseer_nw_01"/>
+	</image>
+	<image id="caravanserai_overseer_nw_02">
+		<layer group="229" image="14"/>
+		<layer src="caravanserai_overseer_nw_02"/>
+	</image>
+	<image id="caravanserai_overseer_nw_03">
+		<layer group="229" image="22"/>
+		<layer src="caravanserai_overseer_nw_03"/>
+	</image>
+	<image id="caravanserai_overseer_nw_04">
+		<layer group="229" image="30"/>
+		<layer src="caravanserai_overseer_nw_04"/>
+	</image>
+	<image id="caravanserai_overseer_nw_05">
+		<layer group="229" image="38"/>
+		<layer src="caravanserai_overseer_nw_05"/>
+	</image>
+	<image id="caravanserai_overseer_nw_06">
+		<layer group="229" image="46"/>
+		<layer src="caravanserai_overseer_nw_06"/>
+	</image>
+	<image id="caravanserai_overseer_nw_07">
+		<layer group="229" image="54"/>
+		<layer src="caravanserai_overseer_nw_07"/>
+	</image>
+	<image id="caravanserai_overseer_nw_08">
+		<layer group="229" image="62"/>
+		<layer src="caravanserai_overseer_nw_08"/>
+	</image>
+	<image id="caravanserai_overseer_nw_09">
+		<layer group="229" image="70"/>
+		<layer src="caravanserai_overseer_nw_09"/>
+	</image>
+	<image id="caravanserai_overseer_nw_10">
+		<layer group="229" image="78"/>
+		<layer src="caravanserai_overseer_nw_10"/>
+	</image>
+	<image id="caravanserai_overseer_nw_11">
+		<layer group="229" image="86"/>
+		<layer src="caravanserai_overseer_nw_11"/>
+	</image>
+	<image id="caravanserai_overseer_nw_12">
+		<layer group="229" image="94"/>
+		<layer src="caravanserai_overseer_nw_12"/>
+	</image>
+	<!-- Note: Caravanserai Overseer Walking animation frames NORTH DIRECTION 01-12 -->
+	<image id="caravanserai_overseer_n_01">
+		<layer group="229" image="7"/>
+		<layer src="caravanserai_overseer_n_01"/>
+	</image>
+	<image id="caravanserai_overseer_n_02">
+		<layer group="229" image="15"/>
+		<layer src="caravanserai_overseer_n_02"/>
+	</image>
+	<image id="caravanserai_overseer_n_03">
+		<layer group="229" image="23"/>
+		<layer src="caravanserai_overseer_n_03"/>
+	</image>
+	<image id="caravanserai_overseer_n_04">
+		<layer group="229" image="31"/>
+		<layer src="caravanserai_overseer_n_04"/>
+	</image>
+	<image id="caravanserai_overseer_n_05">
+		<layer group="229" image="39"/>
+		<layer src="caravanserai_overseer_n_05"/>
+	</image>
+	<image id="caravanserai_overseer_n_06">
+		<layer group="229" image="47"/>
+		<layer src="caravanserai_overseer_n_06"/>
+	</image>
+	<image id="caravanserai_overseer_n_07">
+		<layer group="229" image="55"/>
+		<layer src="caravanserai_overseer_n_07"/>
+	</image>
+	<image id="caravanserai_overseer_n_08">
+		<layer group="229" image="63"/>
+		<layer src="caravanserai_overseer_n_08"/>
+	</image>
+	<image id="caravanserai_overseer_n_09">
+		<layer group="229" image="71"/>
+		<layer src="caravanserai_overseer_n_09"/>
+	</image>
+	<image id="caravanserai_overseer_n_10">
+		<layer group="229" image="79"/>
+		<layer src="caravanserai_overseer_n_10"/>
+	</image>
+	<image id="caravanserai_overseer_n_11">
+		<layer group="229" image="87"/>
+		<layer src="caravanserai_overseer_n_11"/>
+	</image>
+	<image id="caravanserai_overseer_n_12">
+		<layer group="229" image="95"/>
+		<layer src="caravanserai_overseer_n_12"/>
+	</image>
+	<!-- Note: Supply Post Quartermaster Portrait -->
+	<image id="quartermaster_portrait">
+		<layer group="190" image="7"/>
+		<layer src="quartermaster_portrait_overlay"/>
+	</image>
+	<!-- Note: Supply Post Quartermaster Death animation frames 01-08 -->
+	<image id="quartermaster_death_01">
+		<layer group="117" image="96"/>
+		<layer src="quartermaster_death_01"/>
+	</image>
+	<image id="quartermaster_death_02">
+		<layer group="117" image="97"/>
+		<layer src="quartermaster_death_02"/>
+	</image>
+	<image id="quartermaster_death_03">
+		<layer group="117" image="98"/>
+		<layer src="quartermaster_death_03"/>
+	</image>
+	<image id="quartermaster_death_04">
+		<layer group="117" image="99"/>
+		<layer src="quartermaster_death_04"/>
+	</image>
+	<image id="quartermaster_death_05">
+		<layer group="117" image="100"/>
+		<layer src="quartermaster_death_05"/>
+	</image>
+	<image id="quartermaster_death_06">
+		<layer group="117" image="101"/>
+	</image>
+	<image id="quartermaster_death_07">
+		<layer group="117" image="102"/>
+	</image>
+	<image id="quartermaster_death_08">
+		<layer group="117" image="103"/>
+	</image>
+	<!-- Note: Supply Post Quartermaster Walking animation frames NORTH-EAST DIRECTION 01-12 -->
+	<image id="quartermaster_ne_01">
+		<layer group="117" image="0"/>
+		<layer src="quartermaster_ne_01"/>
+	</image>
+	<image id="quartermaster_ne_02">
+		<layer group="117" image="8"/>
+		<layer src="quartermaster_ne_02"/>
+	</image>
+	<image id="quartermaster_ne_03">
+		<layer group="117" image="16"/>
+		<layer src="quartermaster_ne_03"/>
+	</image>
+	<image id="quartermaster_ne_04">
+		<layer group="117" image="24"/>
+		<layer src="quartermaster_ne_04"/>
+	</image>
+	<image id="quartermaster_ne_05">
+		<layer group="117" image="32"/>
+		<layer src="quartermaster_ne_05"/>
+	</image>
+	<image id="quartermaster_ne_06">
+		<layer group="117" image="40"/>
+		<layer src="quartermaster_ne_06"/>
+	</image>
+	<image id="quartermaster_ne_07">
+		<layer group="117" image="48"/>
+		<layer src="quartermaster_ne_07"/>
+	</image>
+	<image id="quartermaster_ne_08">
+		<layer group="117" image="56"/>
+		<layer src="quartermaster_ne_08"/>
+	</image>
+	<image id="quartermaster_ne_09">
+		<layer group="117" image="64"/>
+		<layer src="quartermaster_ne_09"/>
+	</image>
+	<image id="quartermaster_ne_10">
+		<layer group="117" image="72"/>
+		<layer src="quartermaster_ne_10"/>
+	</image>
+	<image id="quartermaster_ne_11">
+		<layer group="117" image="80"/>
+		<layer src="quartermaster_ne_11"/>
+	</image>
+	<image id="quartermaster_ne_12">
+		<layer group="117" image="88"/>
+		<layer src="quartermaster_ne_12"/>
+	</image>
+	<!-- Note: Supply Post Quartermaster Walking animation frames EAST DIRECTION 01-12 -->
+	<image id="quartermaster_e_01">
+		<layer group="117" image="1"/>
+		<layer src="quartermaster_e_01"/>
+	</image>
+	<image id="quartermaster_e_02">
+		<layer group="117" image="9"/>
+		<layer src="quartermaster_e_02"/>
+	</image>
+	<image id="quartermaster_e_03">
+		<layer group="117" image="17"/>
+		<layer src="quartermaster_e_03"/>
+	</image>
+	<image id="quartermaster_e_04">
+		<layer group="117" image="25"/>
+		<layer src="quartermaster_e_04"/>
+	</image>
+	<image id="quartermaster_e_05">
+		<layer group="117" image="33"/>
+		<layer src="quartermaster_e_05"/>
+	</image>
+	<image id="quartermaster_e_06">
+		<layer group="117" image="41"/>
+		<layer src="quartermaster_e_06"/>
+	</image>
+	<image id="quartermaster_e_07">
+		<layer group="117" image="49"/>
+		<layer src="quartermaster_e_07"/>
+	</image>
+	<image id="quartermaster_e_08">
+		<layer group="117" image="57"/>
+		<layer src="quartermaster_e_08"/>
+	</image>
+	<image id="quartermaster_e_09">
+		<layer group="117" image="65"/>
+		<layer src="quartermaster_e_09"/>
+	</image>
+	<image id="quartermaster_e_10">
+		<layer group="117" image="73"/>
+		<layer src="quartermaster_e_10"/>
+	</image>
+	<image id="quartermaster_e_11">
+		<layer group="117" image="81"/>
+		<layer src="quartermaster_e_11"/>
+	</image>
+	<image id="quartermaster_e_12">
+		<layer group="117" image="89"/>
+		<layer src="quartermaster_e_12"/>
+	</image>
+	<!-- Note: Supply Post Quartermaster Walking animation frames SOUTH-EAST DIRECTION 01-12 -->
+	<image id="quartermaster_se_01">
+		<layer group="117" image="2"/>
+		<layer src="quartermaster_se_01"/>
+	</image>
+	<image id="quartermaster_se_02">
+		<layer group="117" image="10"/>
+		<layer src="quartermaster_se_02"/>
+	</image>
+	<image id="quartermaster_se_03">
+		<layer group="117" image="18"/>
+		<layer src="quartermaster_se_03"/>
+	</image>
+	<image id="quartermaster_se_04">
+		<layer group="117" image="26"/>
+		<layer src="quartermaster_se_04"/>
+	</image>
+	<image id="quartermaster_se_05">
+		<layer group="117" image="34"/>
+		<layer src="quartermaster_se_05"/>
+	</image>
+	<image id="quartermaster_se_06">
+		<layer group="117" image="42"/>
+		<layer src="quartermaster_se_06"/>
+	</image>
+	<image id="quartermaster_se_07">
+		<layer group="117" image="50"/>
+		<layer src="quartermaster_se_07"/>
+	</image>
+	<image id="quartermaster_se_08">
+		<layer group="117" image="58"/>
+		<layer src="quartermaster_se_08"/>
+	</image>
+	<image id="quartermaster_se_09">
+		<layer group="117" image="66"/>
+		<layer src="quartermaster_se_09"/>
+	</image>
+	<image id="quartermaster_se_10">
+		<layer group="117" image="74"/>
+		<layer src="quartermaster_se_10"/>
+	</image>
+	<image id="quartermaster_se_11">
+		<layer group="117" image="82"/>
+		<layer src="quartermaster_se_11"/>
+	</image>
+	<image id="quartermaster_se_12">
+		<layer group="117" image="90"/>
+		<layer src="quartermaster_se_12"/>
+	</image>
+	<!-- Note: Supply Post Quartermaster Walking animation frames SOUTH DIRECTION 01-12 -->
+	<image id="quartermaster_s_01">
+		<layer group="117" image="3"/>
+		<layer src="quartermaster_s_01"/>
+	</image>
+	<image id="quartermaster_s_02">
+		<layer group="117" image="11"/>
+		<layer src="quartermaster_s_02"/>
+	</image>
+	<image id="quartermaster_s_03">
+		<layer group="117" image="19"/>
+		<layer src="quartermaster_s_03"/>
+	</image>
+	<image id="quartermaster_s_04">
+		<layer group="117" image="27"/>
+		<layer src="quartermaster_s_04"/>
+	</image>
+	<image id="quartermaster_s_05">
+		<layer group="117" image="35"/>
+		<layer src="quartermaster_s_05"/>
+	</image>
+	<image id="quartermaster_s_06">
+		<layer group="117" image="43"/>
+		<layer src="quartermaster_s_06"/>
+	</image>
+	<image id="quartermaster_s_07">
+		<layer group="117" image="51"/>
+		<layer src="quartermaster_s_07"/>
+	</image>
+	<image id="quartermaster_s_08">
+		<layer group="117" image="59"/>
+		<layer src="quartermaster_s_08"/>
+	</image>
+	<image id="quartermaster_s_09">
+		<layer group="117" image="67"/>
+		<layer src="quartermaster_s_09"/>
+	</image>
+	<image id="quartermaster_s_10">
+		<layer group="117" image="75"/>
+		<layer src="quartermaster_s_10"/>
+	</image>
+	<image id="quartermaster_s_11">
+		<layer group="117" image="83"/>
+		<layer src="quartermaster_s_11"/>
+	</image>
+	<image id="quartermaster_s_12">
+		<layer group="117" image="91"/>
+		<layer src="quartermaster_s_12"/>
+	</image>
+	<!-- Note: Supply Post Quartermaster Walking animation frames SOUTH-WEST DIRECTION 01-12 -->
+	<image id="quartermaster_sw_01">
+		<layer group="117" image="4"/>
+		<layer src="quartermaster_sw_01"/>
+	</image>
+	<image id="quartermaster_sw_02">
+		<layer group="117" image="12"/>
+		<layer src="quartermaster_sw_02"/>
+	</image>
+	<image id="quartermaster_sw_03">
+		<layer group="117" image="20"/>
+		<layer src="quartermaster_sw_03"/>
+	</image>
+	<image id="quartermaster_sw_04">
+		<layer group="117" image="28"/>
+		<layer src="quartermaster_sw_04"/>
+	</image>
+	<image id="quartermaster_sw_05">
+		<layer group="117" image="36"/>
+		<layer src="quartermaster_sw_05"/>
+	</image>
+	<image id="quartermaster_sw_06">
+		<layer group="117" image="44"/>
+		<layer src="quartermaster_sw_06"/>
+	</image>
+	<image id="quartermaster_sw_07">
+		<layer group="117" image="52"/>
+		<layer src="quartermaster_sw_07"/>
+	</image>
+	<image id="quartermaster_sw_08">
+		<layer group="117" image="60"/>
+		<layer src="quartermaster_sw_08"/>
+	</image>
+	<image id="quartermaster_sw_09">
+		<layer group="117" image="68"/>
+		<layer src="quartermaster_sw_09"/>
+	</image>
+	<image id="quartermaster_sw_10">
+		<layer group="117" image="76"/>
+		<layer src="quartermaster_sw_10"/>
+	</image>
+	<image id="quartermaster_sw_11">
+		<layer group="117" image="84"/>
+		<layer src="quartermaster_sw_11"/>
+	</image>
+	<image id="quartermaster_sw_12">
+		<layer group="117" image="92"/>
+		<layer src="quartermaster_sw_12"/>
+	</image>
+	<!-- Note: Supply Post Quartermaster Walking animation frames WEST DIRECTION 01-12 -->
+	<image id="quartermaster_w_01">
+		<layer group="117" image="5"/>
+		<layer src="quartermaster_w_01"/>
+	</image>
+	<image id="quartermaster_w_02">
+		<layer group="117" image="13"/>
+		<layer src="quartermaster_w_02"/>
+	</image>
+	<image id="quartermaster_w_03">
+		<layer group="117" image="21"/>
+		<layer src="quartermaster_w_03"/>
+	</image>
+	<image id="quartermaster_w_04">
+		<layer group="117" image="29"/>
+		<layer src="quartermaster_w_04"/>
+	</image>
+	<image id="quartermaster_w_05">
+		<layer group="117" image="37"/>
+		<layer src="quartermaster_w_05"/>
+	</image>
+	<image id="quartermaster_w_06">
+		<layer group="117" image="45"/>
+		<layer src="quartermaster_w_06"/>
+	</image>
+	<image id="quartermaster_w_07">
+		<layer group="117" image="53"/>
+		<layer src="quartermaster_w_07"/>
+	</image>
+	<image id="quartermaster_w_08">
+		<layer group="117" image="61"/>
+		<layer src="quartermaster_w_08"/>
+	</image>
+	<image id="quartermaster_w_09">
+		<layer group="117" image="69"/>
+		<layer src="quartermaster_w_09"/>
+	</image>
+	<image id="quartermaster_w_10">
+		<layer group="117" image="77"/>
+		<layer src="quartermaster_w_10"/>
+	</image>
+	<image id="quartermaster_w_11">
+		<layer group="117" image="85"/>
+		<layer src="quartermaster_w_11"/>
+	</image>
+	<image id="quartermaster_w_12">
+		<layer group="117" image="93"/>
+		<layer src="quartermaster_w_12"/>
+	</image>
+	<!-- Note: Supply Post Quartermaster Walking animation frames NORTH-WEST DIRECTION 01-12 -->
+	<image id="quartermaster_nw_01">
+		<layer group="117" image="6"/>
+		<layer src="quartermaster_nw_01"/>
+	</image>
+	<image id="quartermaster_nw_02">
+		<layer group="117" image="14"/>
+		<layer src="quartermaster_nw_02"/>
+	</image>
+	<image id="quartermaster_nw_03">
+		<layer group="117" image="22"/>
+		<layer src="quartermaster_nw_03"/>
+	</image>
+	<image id="quartermaster_nw_04">
+		<layer group="117" image="30"/>
+		<layer src="quartermaster_nw_04"/>
+	</image>
+	<image id="quartermaster_nw_05">
+		<layer group="117" image="38"/>
+		<layer src="quartermaster_nw_05"/>
+	</image>
+	<image id="quartermaster_nw_06">
+		<layer group="117" image="46"/>
+		<layer src="quartermaster_nw_06"/>
+	</image>
+	<image id="quartermaster_nw_07">
+		<layer group="117" image="54"/>
+		<layer src="quartermaster_nw_07"/>
+	</image>
+	<image id="quartermaster_nw_08">
+		<layer group="117" image="62"/>
+		<layer src="quartermaster_nw_08"/>
+	</image>
+	<image id="quartermaster_nw_09">
+		<layer group="117" image="70"/>
+		<layer src="quartermaster_nw_09"/>
+	</image>
+	<image id="quartermaster_nw_10">
+		<layer group="117" image="78"/>
+		<layer src="quartermaster_nw_10"/>
+	</image>
+	<image id="quartermaster_nw_11">
+		<layer group="117" image="86"/>
+		<layer src="quartermaster_nw_11"/>
+	</image>
+	<image id="quartermaster_nw_12">
+		<layer group="117" image="94"/>
+		<layer src="quartermaster_nw_12"/>
+	</image>
+	<!-- Note: Supply Post Quartermaster Walking animation frames NORTH DIRECTION 01-12 -->
+	<image id="quartermaster_n_01">
+		<layer group="117" image="7"/>
+		<layer src="quartermaster_n_01"/>
+	</image>
+	<image id="quartermaster_n_02">
+		<layer group="117" image="15"/>
+		<layer src="quartermaster_n_02"/>
+	</image>
+	<image id="quartermaster_n_03">
+		<layer group="117" image="23"/>
+		<layer src="quartermaster_n_03"/>
+	</image>
+	<image id="quartermaster_n_04">
+		<layer group="117" image="31"/>
+		<layer src="quartermaster_n_04"/>
+	</image>
+	<image id="quartermaster_n_05">
+		<layer group="117" image="39"/>
+		<layer src="quartermaster_n_05"/>
+	</image>
+	<image id="quartermaster_n_06">
+		<layer group="117" image="47"/>
+		<layer src="quartermaster_n_06"/>
+	</image>
+	<image id="quartermaster_n_07">
+		<layer group="117" image="55"/>
+		<layer src="quartermaster_n_07"/>
+	</image>
+	<image id="quartermaster_n_08">
+		<layer group="117" image="63"/>
+		<layer src="quartermaster_n_08"/>
+	</image>
+	<image id="quartermaster_n_09">
+		<layer group="117" image="71"/>
+		<layer src="quartermaster_n_09"/>
+	</image>
+	<image id="quartermaster_n_10">
+		<layer group="117" image="79"/>
+		<layer src="quartermaster_n_10"/>
+	</image>
+	<image id="quartermaster_n_11">
+		<layer group="117" image="87"/>
+		<layer src="quartermaster_n_11"/>
+	</image>
+	<image id="quartermaster_n_12">
+		<layer group="117" image="95"/>
+		<layer src="quartermaster_n_12"/>
+	</image>
+	<!-- Note: Supply Post Quartermaster Fighting animation frames NORTH-EAST DIRECTION 01-06 -->
+	<image id="quartermaster_f_ne_01">
+		<layer group="117" image="104"/>
+		<layer src="quartermaster_f_ne_01"/>
+	</image>
+	<image id="quartermaster_f_ne_02">
+		<layer group="117" image="112"/>
+		<layer src="quartermaster_f_ne_02"/>
+	</image>
+	<image id="quartermaster_f_ne_03">
+		<layer group="117" image="120"/>
+		<layer src="quartermaster_f_ne_03"/>
+	</image>
+	<image id="quartermaster_f_ne_04">
+		<layer group="117" image="128"/>
+		<layer src="quartermaster_f_ne_04"/>
+	</image>
+	<image id="quartermaster_f_ne_05">
+		<layer group="117" image="136"/>
+		<layer src="quartermaster_f_ne_05"/>
+	</image>
+	<image id="quartermaster_f_ne_06">
+		<layer group="117" image="144"/>
+		<layer src="quartermaster_f_ne_06"/>
+	</image>
+	<!-- Note: Supply Post Quartermaster Fighting animation frames EAST DIRECTION 01-06 -->
+	<image id="quartermaster_f_e_01">
+		<layer group="117" image="105"/>
+		<layer src="quartermaster_f_e_01"/>
+	</image>
+	<image id="quartermaster_f_e_02">
+		<layer group="117" image="113"/>
+		<layer src="quartermaster_f_e_02"/>
+	</image>
+	<image id="quartermaster_f_e_03">
+		<layer group="117" image="121"/>
+		<layer src="quartermaster_f_e_03"/>
+	</image>
+	<image id="quartermaster_f_e_04">
+		<layer group="117" image="129"/>
+		<layer src="quartermaster_f_e_04"/>
+	</image>
+	<image id="quartermaster_f_e_05">
+		<layer group="117" image="137"/>
+		<layer src="quartermaster_f_e_05"/>
+	</image>
+	<image id="quartermaster_f_e_06">
+		<layer group="117" image="145"/>
+		<layer src="quartermaster_f_e_06"/>
+	</image>
+	<!-- Note: Supply Post Quartermaster Fighting animation frames SOUTH-EAST DIRECTION 01-06 -->
+	<image id="quartermaster_f_se_01">
+		<layer group="117" image="106"/>
+		<layer src="quartermaster_f_se_01"/>
+	</image>
+	<image id="quartermaster_f_se_02">
+		<layer group="117" image="114"/>
+		<layer src="quartermaster_f_se_02"/>
+	</image>
+	<image id="quartermaster_f_se_03">
+		<layer group="117" image="122"/>
+		<layer src="quartermaster_f_se_03"/>
+	</image>
+	<image id="quartermaster_f_se_04">
+		<layer group="117" image="130"/>
+		<layer src="quartermaster_f_se_04"/>
+	</image>
+	<image id="quartermaster_f_se_05">
+		<layer group="117" image="138"/>
+		<layer src="quartermaster_f_se_05"/>
+	</image>
+	<image id="quartermaster_f_se_06">
+		<layer group="117" image="146"/>
+		<layer src="quartermaster_f_se_06"/>
+	</image>
+	<!-- Note: Supply Post Quartermaster Fighting animation frames SOUTH DIRECTION 01-06 -->
+	<image id="quartermaster_f_s_01">
+		<layer group="117" image="107"/>
+		<layer src="quartermaster_f_s_01"/>
+	</image>
+	<image id="quartermaster_f_s_02">
+		<layer group="117" image="115"/>
+		<layer src="quartermaster_f_s_02"/>
+	</image>
+	<image id="quartermaster_f_s_03">
+		<layer group="117" image="123"/>
+		<layer src="quartermaster_f_s_03"/>
+	</image>
+	<image id="quartermaster_f_s_04">
+		<layer group="117" image="131"/>
+		<layer src="quartermaster_f_s_04"/>
+	</image>
+	<image id="quartermaster_f_s_05">
+		<layer group="117" image="139"/>
+		<layer src="quartermaster_f_s_05"/>
+	</image>
+	<image id="quartermaster_f_s_06">
+		<layer group="117" image="147"/>
+		<layer src="quartermaster_f_s_06"/>
+	</image>
+	<!-- Note: Supply Post Quartermaster Fighting animation frames SOUTH-WEST DIRECTION 01-06 -->
+	<image id="quartermaster_f_sw_01">
+		<layer group="117" image="108"/>
+		<layer src="quartermaster_f_sw_01"/>
+	</image>
+	<image id="quartermaster_f_sw_02">
+		<layer group="117" image="116"/>
+		<layer src="quartermaster_f_sw_02"/>
+	</image>
+	<image id="quartermaster_f_sw_03">
+		<layer group="117" image="124"/>
+		<layer src="quartermaster_f_sw_03"/>
+	</image>
+	<image id="quartermaster_f_sw_04">
+		<layer group="117" image="132"/>
+		<layer src="quartermaster_f_sw_04"/>
+	</image>
+	<image id="quartermaster_f_sw_05">
+		<layer group="117" image="140"/>
+		<layer src="quartermaster_f_sw_05"/>
+	</image>
+	<image id="quartermaster_f_sw_06">
+		<layer group="117" image="148"/>
+		<layer src="quartermaster_f_sw_06"/>
+	</image>
+	<!-- Note: Supply Post Quartermaster Fighting animation frames WEST DIRECTION 01-06 -->
+	<image id="quartermaster_f_w_01">
+		<layer group="117" image="109"/>
+		<layer src="quartermaster_f_w_01"/>
+	</image>
+	<image id="quartermaster_f_w_02">
+		<layer group="117" image="117"/>
+		<layer src="quartermaster_f_w_02"/>
+	</image>
+	<image id="quartermaster_f_w_03">
+		<layer group="117" image="125"/>
+		<layer src="quartermaster_f_w_03"/>
+	</image>
+	<image id="quartermaster_f_w_04">
+		<layer group="117" image="133"/>
+		<layer src="quartermaster_f_w_04"/>
+	</image>
+	<image id="quartermaster_f_w_05">
+		<layer group="117" image="141"/>
+		<layer src="quartermaster_f_w_05"/>
+	</image>
+	<image id="quartermaster_f_w_06">
+		<layer group="117" image="149"/>
+		<layer src="quartermaster_f_w_06"/>
+	</image>
+	<!-- Note: Supply Post Quartermaster Fighting animation frames NORTH-WEST DIRECTION 01-06 -->
+	<image id="quartermaster_f_nw_01">
+		<layer group="117" image="110"/>
+		<layer src="quartermaster_f_nw_01"/>
+	</image>
+	<image id="quartermaster_f_nw_02">
+		<layer group="117" image="118"/>
+		<layer src="quartermaster_f_nw_02"/>
+	</image>
+	<image id="quartermaster_f_nw_03">
+		<layer group="117" image="126"/>
+		<layer src="quartermaster_f_nw_03"/>
+	</image>
+	<image id="quartermaster_f_nw_04">
+		<layer group="117" image="134"/>
+		<layer src="quartermaster_f_nw_04"/>
+	</image>
+	<image id="quartermaster_f_nw_05">
+		<layer group="117" image="142"/>
+		<layer src="quartermaster_f_nw_05"/>
+	</image>
+	<image id="quartermaster_f_nw_06">
+		<layer group="117" image="150"/>
+		<layer src="quartermaster_f_nw_06"/>
+	</image>
+	<!-- Note: Supply Post Quartermaster Fighting animation frames NORTH DIRECTION 01-06 -->
+	<image id="quartermaster_f_n_01">
+		<layer group="117" image="111"/>
+		<layer src="quartermaster_f_n_01"/>
+	</image>
+	<image id="quartermaster_f_n_02">
+		<layer group="117" image="119"/>
+		<layer src="quartermaster_f_n_02"/>
+	</image>
+	<image id="quartermaster_f_n_03">
+		<layer group="117" image="127"/>
+		<layer src="quartermaster_f_n_03"/>
+	</image>
+	<image id="quartermaster_f_n_04">
+		<layer group="117" image="135"/>
+		<layer src="quartermaster_f_n_04"/>
+	</image>
+	<image id="quartermaster_f_n_05">
+		<layer group="117" image="143"/>
+		<layer src="quartermaster_f_n_05"/>
+	</image>
+	<image id="quartermaster_f_n_06">
+		<layer group="117" image="151"/>
+		<layer src="quartermaster_f_n_06"/>
+	</image>
+	<!-- Note: Deer Portrait (Assets created by marwana) -->
+	<!--image id="deer_portrait">
+		<layer group="190" image="7"/>
+		<layer src="deer_portrait_overlay"/>
+	</image-->
+	<!-- Note: Deer Death animation frames 01-08 -->
+	<!--image id="deer_death_01" src="deer_death_01"/>
+	<image id="deer_death_02" src="deer_death_02"/>
+	<image id="deer_death_03" src="deer_death_03"/>
+	<image id="deer_death_04" src="deer_death_04"/>
+	<image id="deer_death_05" src="deer_death_05"/>
+	<image id="deer_death_06" src="deer_death_06"/>
+	<image id="deer_death_07" src="deer_death_07"/>
+	<image id="deer_death_08" src="deer_death_08"/-->
+	<!-- Note: Deer Walking animation frames NORTH-EAST DIRECTION 01-12 -->
+	<!--image id="deer_ne_01" src="deer_ne_01"/>
+	<image id="deer_ne_02" src="deer_ne_02"/>
+	<image id="deer_ne_03" src="deer_ne_03"/>
+	<image id="deer_ne_04" src="deer_ne_04"/>
+	<image id="deer_ne_05" src="deer_ne_05"/>
+	<image id="deer_ne_06" src="deer_ne_06"/>
+	<image id="deer_ne_07" src="deer_ne_07"/>
+	<image id="deer_ne_08" src="deer_ne_08"/>
+	<image id="deer_ne_09" src="deer_ne_09"/>
+	<image id="deer_ne_10" src="deer_ne_10"/>
+	<image id="deer_ne_11" src="deer_ne_11"/>
+	<image id="deer_ne_12" src="deer_ne_12"/-->
+	<!-- Note: Deer Walking animation frames EAST DIRECTION 01-12 -->
+	<!--image id="deer_e_01" src="deer_e_01"/>
+	<image id="deer_e_02" src="deer_e_02"/>
+	<image id="deer_e_03" src="deer_e_03"/>
+	<image id="deer_e_04" src="deer_e_04"/>
+	<image id="deer_e_05" src="deer_e_05"/>
+	<image id="deer_e_06" src="deer_e_06"/>
+	<image id="deer_e_07" src="deer_e_07"/>
+	<image id="deer_e_08" src="deer_e_08"/>
+	<image id="deer_e_09" src="deer_e_09"/>
+	<image id="deer_e_10" src="deer_e_10"/>
+	<image id="deer_e_11" src="deer_e_11"/>
+	<image id="deer_e_12" src="deer_e_12"/-->
+	<!-- Note: Deer Walking animation frames SOUTH-EAST DIRECTION 01-12 -->
+	<!--image id="deer_se_01" src="deer_se_01"/>
+	<image id="deer_se_02" src="deer_se_02"/>
+	<image id="deer_se_03" src="deer_se_03"/>
+	<image id="deer_se_04" src="deer_se_04"/>
+	<image id="deer_se_05" src="deer_se_05"/>
+	<image id="deer_se_06" src="deer_se_06"/>
+	<image id="deer_se_07" src="deer_se_07"/>
+	<image id="deer_se_08" src="deer_se_08"/>
+	<image id="deer_se_09" src="deer_se_09"/>
+	<image id="deer_se_10" src="deer_se_10"/>
+	<image id="deer_se_11" src="deer_se_11"/>
+	<image id="deer_se_12" src="deer_se_12"/-->
+	<!-- Note: Deer Walking animation frames SOUTH DIRECTION 01-12 -->
+	<!--image id="deer_s_01" src="deer_s_01"/>
+	<image id="deer_s_02" src="deer_s_02"/>
+	<image id="deer_s_03" src="deer_s_03"/>
+	<image id="deer_s_04" src="deer_s_04"/>
+	<image id="deer_s_05" src="deer_s_05"/>
+	<image id="deer_s_06" src="deer_s_06"/>
+	<image id="deer_s_07" src="deer_s_07"/>
+	<image id="deer_s_08" src="deer_s_08"/>
+	<image id="deer_s_09" src="deer_s_09"/>
+	<image id="deer_s_10" src="deer_s_10"/>
+	<image id="deer_s_11" src="deer_s_11"/>
+	<image id="deer_s_12" src="deer_s_12"/-->
+	<!-- Note: Deer Walking animation frames SOUTH-WEST DIRECTION 01-12 -->
+	<!--image id="deer_sw_01" src="deer_sw_01"/>
+	<image id="deer_sw_02" src="deer_sw_02"/>
+	<image id="deer_sw_03" src="deer_sw_03"/>
+	<image id="deer_sw_04" src="deer_sw_04"/>
+	<image id="deer_sw_05" src="deer_sw_05"/>
+	<image id="deer_sw_06" src="deer_sw_06"/>
+	<image id="deer_sw_07" src="deer_sw_07"/>
+	<image id="deer_sw_08" src="deer_sw_08"/>
+	<image id="deer_sw_09" src="deer_sw_09"/>
+	<image id="deer_sw_10" src="deer_sw_10"/>
+	<image id="deer_sw_11" src="deer_sw_11"/>
+	<image id="deer_sw_12" src="deer_sw_12"/-->
+	<!-- Note: Deer Walking animation frames WEST DIRECTION 01-12 -->
+	<!--image id="deer_w_01" src="deer_w_01"/>
+	<image id="deer_w_02" src="deer_w_02"/>
+	<image id="deer_w_03" src="deer_w_03"/>
+	<image id="deer_w_04" src="deer_w_04"/>
+	<image id="deer_w_05" src="deer_w_05"/>
+	<image id="deer_w_06" src="deer_w_06"/>
+	<image id="deer_w_07" src="deer_w_07"/>
+	<image id="deer_w_08" src="deer_w_08"/>
+	<image id="deer_w_09" src="deer_w_09"/>
+	<image id="deer_w_10" src="deer_w_10"/>
+	<image id="deer_w_11" src="deer_w_11"/>
+	<image id="deer_w_12" src="deer_w_12"/-->
+	<!-- Note: Deer Walking animation frames NORTH-WEST DIRECTION 01-12 -->
+	<!--image id="deer_nw_01" src="deer_nw_01"/>
+	<image id="deer_nw_02" src="deer_nw_02"/>
+	<image id="deer_nw_03" src="deer_nw_03"/>
+	<image id="deer_nw_04" src="deer_nw_04"/>
+	<image id="deer_nw_05" src="deer_nw_05"/>
+	<image id="deer_nw_06" src="deer_nw_06"/>
+	<image id="deer_nw_07" src="deer_nw_07"/>
+	<image id="deer_nw_08" src="deer_nw_08"/>
+	<image id="deer_nw_09" src="deer_nw_09"/>
+	<image id="deer_nw_10" src="deer_nw_10"/>
+	<image id="deer_nw_11" src="deer_nw_11"/>
+	<image id="deer_nw_12" src="deer_nw_12"/-->
+	<!-- Note: Deer Walking animation frames NORTH DIRECTION 01-12 -->
+	<!--image id="deer_n_01" src="deer_n_01"/>
+	<image id="deer_n_02" src="deer_n_02"/>
+	<image id="deer_n_03" src="deer_n_03"/>
+	<image id="deer_n_04" src="deer_n_04"/>
+	<image id="deer_n_05" src="deer_n_05"/>
+	<image id="deer_n_06" src="deer_n_06"/>
+	<image id="deer_n_07" src="deer_n_07"/>
+	<image id="deer_n_08" src="deer_n_08"/>
+	<image id="deer_n_09" src="deer_n_09"/>
+	<image id="deer_n_10" src="deer_n_10"/>
+	<image id="deer_n_11" src="deer_n_11"/>
+	<image id="deer_n_12" src="deer_n_12"/-->
+	<!-- Note: Deer Eating animation frames NORTH-EAST DIRECTION 01-05 -->
+	<!--image id="deer_eat_ne_01" src="deer_eat_ne_01"/>
+	<image id="deer_eat_ne_02" src="deer_eat_ne_02"/>
+	<image id="deer_eat_ne_03" src="deer_eat_ne_03"/>
+	<image id="deer_eat_ne_04" src="deer_eat_ne_04"/>
+	<image id="deer_eat_ne_05" src="deer_eat_ne_05"/-->
+	<!-- Note: Deer Eating animation frames EAST DIRECTION 01-05 -->
+	<!--image id="deer_eat_e_01" src="deer_eat_e_01"/>
+	<image id="deer_eat_e_02" src="deer_eat_e_02"/>
+	<image id="deer_eat_e_03" src="deer_eat_e_03"/>
+	<image id="deer_eat_e_04" src="deer_eat_e_04"/>
+	<image id="deer_eat_e_05" src="deer_eat_e_05"/-->
+	<!-- Note: Deer Eating animation frames SOUTH-EAST DIRECTION 01-05 -->
+	<!--image id="deer_eat_se_01" src="deer_eat_se_01"/>
+	<image id="deer_eat_se_02" src="deer_eat_se_02"/>
+	<image id="deer_eat_se_03" src="deer_eat_se_03"/>
+	<image id="deer_eat_se_04" src="deer_eat_se_04"/>
+	<image id="deer_eat_se_05" src="deer_eat_se_05"/-->
+	<!-- Note: Deer Eating animation frames SOUTH DIRECTION 01-05 -->
+	<!--image id="deer_eat_s_01" src="deer_eat_s_01"/>
+	<image id="deer_eat_s_02" src="deer_eat_s_02"/>
+	<image id="deer_eat_s_03" src="deer_eat_s_03"/>
+	<image id="deer_eat_s_04" src="deer_eat_s_04"/>
+	<image id="deer_eat_s_05" src="deer_eat_s_05"/-->
+	<!-- Note: Deer Eating animation frames SOUTH-WEST DIRECTION 01-05 -->
+	<!--image id="deer_eat_sw_01" src="deer_eat_sw_01"/>
+	<image id="deer_eat_sw_02" src="deer_eat_sw_02"/>
+	<image id="deer_eat_sw_03" src="deer_eat_sw_03"/>
+	<image id="deer_eat_sw_04" src="deer_eat_sw_04"/>
+	<image id="deer_eat_sw_05" src="deer_eat_sw_05"/-->
+	<!-- Note: Deer Eating animation frames WEST DIRECTION 01-05 -->
+	<!--image id="deer_eat_w_01" src="deer_eat_w_01"/>
+	<image id="deer_eat_w_02" src="deer_eat_w_02"/>
+	<image id="deer_eat_w_03" src="deer_eat_w_03"/>
+	<image id="deer_eat_w_04" src="deer_eat_w_04"/>
+	<image id="deer_eat_w_05" src="deer_eat_w_05"/-->
+	<!-- Note: Deer Eating animation frames NORTH-WEST DIRECTION 01-05 -->
+	<!--image id="deer_eat_nw_01" src="deer_eat_nw_01"/>
+	<image id="deer_eat_nw_02" src="deer_eat_nw_02"/>
+	<image id="deer_eat_nw_03" src="deer_eat_nw_03"/>
+	<image id="deer_eat_nw_04" src="deer_eat_nw_04"/>
+	<image id="deer_eat_nw_05" src="deer_eat_nw_05"/-->
+	<!-- Note: Deer Eating animation frames NORTH DIRECTION 01-05 -->
+	<!--image id="deer_eat_n_01" src="deer_eat_n_01"/>
+	<image id="deer_eat_n_02" src="deer_eat_n_02"/>
+	<image id="deer_eat_n_03" src="deer_eat_n_03"/>
+	<image id="deer_eat_n_04" src="deer_eat_n_04"/>
+	<image id="deer_eat_n_05" src="deer_eat_n_05"/-->
 </assetlist>

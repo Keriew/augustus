@@ -11,7 +11,8 @@ typedef enum {
     WINDOW_CONFIG,
     WINDOW_HOTKEY_CONFIG,
     WINDOW_HOTKEY_EDITOR,
-    WINDOW_NEW_CAREER,
+    WINDOW_SELECT_CAMPAIGN,
+    WINDOW_MISSION_LIST,
     WINDOW_CCK_SELECTION,
     WINDOW_FILE_DIALOG,
     WINDOW_POPUP_DIALOG,
@@ -22,7 +23,7 @@ typedef enum {
     WINDOW_MISSION_SELECTION,
     WINDOW_MISSION_BRIEFING,
     WINDOW_VICTORY_DIALOG,
-    WINDOW_VICTORY_VIDEO,
+    WINDOW_VIDEO,
     WINDOW_MISSION_END,
     // city
     WINDOW_CITY,
@@ -91,7 +92,9 @@ typedef enum {
     WINDOW_EDITOR_CUSTOM_VARIABLES,
     // New window types
     WINDOW_ASSET_PREVIEWER,
-    WINDOW_CUSTOM_MESSAGE
+    WINDOW_CUSTOM_MESSAGE,
+    WINDOW_TEXT_INPUT,
+    WINDOW_USER_PATH_SETUP
 } window_id;
 
 typedef struct {
@@ -100,6 +103,7 @@ typedef struct {
     void (*draw_foreground)(void);
     void (*handle_input)(const mouse *m, const hotkeys *h);
     void (*get_tooltip)(tooltip_context *c);
+    void (*on_return)(window_id from);
 } window_type;
 
 /**

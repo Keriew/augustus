@@ -1,8 +1,10 @@
 #include "xml_exporter.h"
 
+#include "core/encoding.h"
 #include "core/string.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define WHITESPACES_PER_TAB 4
@@ -37,61 +39,54 @@ static int decrease_depth(void)
     return data.current_element_depth;
 }
 
-static int ascii_as_string(buffer *buf, const char *text_out)
-{
-    const uint8_t *converted = string_from_ascii(text_out);
-    buffer_write_raw(buf, converted, string_length(converted));
-    return 1;
-}
-
-static int ascii_as_const_string(buffer *buf, const char *text_out)
-{
-    const uint8_t *converted = string_from_ascii(text_out);
-    buffer_write_raw(buf, converted, string_length(converted));
-    return 1;
-}
-
 static void export_declaration_doctype(const char *type)
 {
     buffer_write_raw(data.output_buf, "<?xml version=\"1.0\"?>", 21);
     xml_exporter_newline();
     buffer_write_raw(data.output_buf, "<!DOCTYPE ", 10);
-    ascii_as_const_string(data.output_buf, type);
+    buffer_write_raw(data.output_buf, type, strlen(type));
     buffer_write_raw(data.output_buf, ">", 1);
     xml_exporter_newline();
 }
 
-static void finish_start_tag(int has_children, int add_newline_for_children)
+static void finish_start_tag(void)
 {
-    if (data.current_element->start_tag_done == 1) {
+    if (data.current_element->start_tag_done) {
         return;
     }
 
     data.current_element->start_tag_done = 1;
-    if (has_children) {
-        buffer_write_raw(data.output_buf, ">", 1);
-        if (add_newline_for_children) {
-            xml_exporter_newline();
-        }
-    } else {
-        buffer_write_raw(data.output_buf, "/>", 2);
-        xml_exporter_newline();
+    buffer_write_raw(data.output_buf, ">", 1);
+    xml_exporter_newline();
+}
 
-        data.current_element->element_closed_off = 1;
-        decrease_depth();
+
+static void add_whitespaces(int count)
+{
+    for (int i = 0; i < count; i++) {
+        buffer_write_raw(data.output_buf, " ", 1);
     }
 }
 
-static void create_end_tag(int keep_inline)
+static void create_end_tag(void)
 {
+    if (data.current_element->element_closed_off) {
+        return;
+    }
+
+    if (!data.current_element->start_tag_done) {
+        buffer_write_raw(data.output_buf, "/>", 2);
+        data.current_element->start_tag_done = 1;
+    } else {
+        add_whitespaces(data.current_element_depth * WHITESPACES_PER_TAB);
+
+        buffer_write_raw(data.output_buf, "</", 2);
+        buffer_write_raw(data.output_buf, data.current_element->name, strlen(data.current_element->name));
+        buffer_write_raw(data.output_buf, ">", 1);
+    }
+
     data.current_element->element_closed_off = 1;
     
-    if (!keep_inline) {
-        xml_exporter_whitespaces(data.current_element_depth * WHITESPACES_PER_TAB);
-    }
-    buffer_write_raw(data.output_buf, "</", 2);
-    ascii_as_const_string(data.output_buf, data.current_element->name);
-    buffer_write_raw(data.output_buf, ">", 1);
     xml_exporter_newline();
 
     decrease_depth();
@@ -114,31 +109,72 @@ void xml_exporter_init(buffer *buf, const char *type)
     export_declaration_doctype(type);
 }
 
-void xml_exporter_new_element(const char *name, int is_child)
+void xml_exporter_new_element(const char *name)
 {
-    if (is_child) {
-        finish_start_tag(1, 1);
-        increase_depth();
+    if (data.current_element) {
+        if (!data.current_element->element_closed_off) {
+            finish_start_tag();
+            increase_depth();
+        } else {
+            xml_exporter_close_element();
+            same_depth_new_element();
+        }
     } else {
-        xml_exporter_close_element(0);
-        same_depth_new_element();
+        same_depth_new_element(); 
     }
     data.current_element->name = name;
     
-    xml_exporter_whitespaces(data.current_element_depth * WHITESPACES_PER_TAB);
+    add_whitespaces(data.current_element_depth * WHITESPACES_PER_TAB);
     buffer_write_raw(data.output_buf, "<", 1);
-    ascii_as_const_string(data.output_buf, data.current_element->name);
+    buffer_write_raw(data.output_buf, data.current_element->name, strlen(data.current_element->name));
 }
 
-void xml_exporter_add_attribute_text(const char *name, const uint8_t *value)
+static size_t get_attribute_length(const char *attribute)
 {
-    xml_exporter_whitespaces(1);
-    ascii_as_const_string(data.output_buf, name);
-    char text_out[] = "=\"";
-    ascii_as_string(data.output_buf, text_out);
-    buffer_write_raw(data.output_buf, value, string_length(value));
-    char text_out_2[] = "\"";
-    ascii_as_string(data.output_buf, text_out_2);
+    const char *pos = strchr(attribute, '|');
+    if (pos) {
+        return pos - attribute;
+    } else {
+        return strlen(attribute);
+    }
+}
+
+void xml_exporter_add_attribute_text(const char *name, const char *value)
+{
+    add_whitespaces(1);
+    buffer_write_raw(data.output_buf, name, strlen(name));
+    buffer_write_raw(data.output_buf, "=\"", 2);
+    buffer_write_raw(data.output_buf, value, get_attribute_length(value));
+    buffer_write_raw(data.output_buf, "\"", 1);
+}
+
+static const char *value_to_utf8(const uint8_t *value)
+{
+#ifndef BUILDING_ASSET_PACKER
+    static int length;
+    static char *value_utf8;
+    int value_size = string_length(value) + 1;
+    if (value_size > length) {
+        char *new_temp_value = realloc(value_utf8, value_size);
+        if (new_temp_value) {
+            length = value_size;
+            value_utf8 = new_temp_value;
+        }
+    }
+    if (value_utf8) {
+        encoding_to_utf8(value, value_utf8, length, 0);
+        return value_utf8;
+    } else {
+        return (char *) value;
+    }
+#else
+    return (char *) value;
+#endif
+}
+
+void xml_exporter_add_attribute_encoded_text(const char *name, const uint8_t *value)
+{
+    xml_exporter_add_attribute_text(name, value_to_utf8(value));
 }
 
 void xml_exporter_add_attribute_int(const char *name, int value)
@@ -146,47 +182,46 @@ void xml_exporter_add_attribute_int(const char *name, int value)
     uint8_t attr_value[200];
     int value_length = string_from_int(attr_value, value, 0);
 
-    xml_exporter_whitespaces(1);
-    ascii_as_const_string(data.output_buf, name);
-    const uint8_t text_out[] = "=\"";
-    buffer_write_raw(data.output_buf, text_out, 2);
+    add_whitespaces(1);
+    buffer_write_raw(data.output_buf, name, strlen(name));
+    buffer_write_raw(data.output_buf, "=\"", 2);
     buffer_write_raw(data.output_buf, attr_value, value_length);
-    const uint8_t text_out_2[] = "\"";
-    buffer_write_raw(data.output_buf, text_out_2, 1);
+    buffer_write_raw(data.output_buf, "\"", 1);
 }
 
-void xml_exporter_add_text(const uint8_t *value)
+void xml_exporter_add_text(const char *value)
 {
-    buffer_write_raw(data.output_buf, value, string_length(value));
+    buffer_write_raw(data.output_buf, value, strlen(value));
 }
 
-void xml_exporter_add_element_text(const uint8_t *value)
+void xml_exporter_add_element_text(const char *value)
 {
     if (data.current_element->start_tag_done == 0) {
-        finish_start_tag(1, 0);
+        finish_start_tag();
+    }
+    int single_line = !strchr(value, '\n');
+    if (single_line) {
+        add_whitespaces((data.current_element_depth + 1) * WHITESPACES_PER_TAB);
     }
     xml_exporter_add_text(value);
-}
-
-void xml_exporter_close_element(int keep_inline)
-{
-    if (data.current_element) {
-        if (data.current_element->start_tag_done == 0) {
-            finish_start_tag(0, 1);
-        } else if (data.current_element->element_closed_off == 0) {
-            create_end_tag(keep_inline);
-        }
+    if (single_line) {
+        xml_exporter_newline();
     }
 }
 
-void xml_exporter_whitespaces(int count)
+void xml_exporter_add_element_encoded_text(const uint8_t *value)
 {
-    for (int i = 0; i < count; i++) {
-        buffer_write_raw(data.output_buf, " ", 1);
+    xml_exporter_add_element_text(value_to_utf8(value));
+}
+
+void xml_exporter_close_element(void)
+{
+    if (data.current_element) {
+        create_end_tag();
     }
 }
 
 void xml_exporter_newline(void)
 {
-    ascii_as_string(data.output_buf, "\n");
+    buffer_write_raw(data.output_buf, "\n", 1);
 }

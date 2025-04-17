@@ -2,6 +2,7 @@
 
 #include "assets/assets.h"
 #include "city/victory.h"
+#include "game/campaign.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
@@ -15,31 +16,16 @@
 
 #define MAX_RANK 10
 
-static void button_accept(int param1, int param2);
-static void button_continue_governing(int months, int param2);
+static void button_accept(const generic_button *button);
+static void button_continue_governing(const generic_button *button);
 
 static generic_button victory_buttons[] = {
-    {32, 112, 480, 20, button_accept, button_none, 0, 0},
-    {32, 144, 480, 20, button_continue_governing, button_none, 24, 0},
-    {32, 176, 480, 20, button_continue_governing, button_none, 60, 0},
+    {32, 112, 480, 20, button_accept},
+    {32, 144, 480, 20, button_continue_governing, 0, 24, 0},
+    {32, 176, 480, 20, button_continue_governing, 0, 60, 0},
 };
 
-static int focus_button_id = 0;
-
-static int get_next_rank(void)
-{
-    int current_rank = 0;
-    if (scenario_is_custom()) {
-        current_rank = scenario_property_player_rank();
-    } else {
-        current_rank = scenario_campaign_rank();
-    }
-    if (current_rank < MAX_RANK) {
-        return current_rank + 1;
-    } else {
-        return MAX_RANK;
-    }
-}
+static unsigned int focus_button_id = 0;
 
 static void draw_background(void)
 {
@@ -47,14 +33,21 @@ static void draw_background(void)
     graphics_in_dialog();
 
     outer_panel_draw(48, 128, 34, 15);
-    if (scenario_campaign_rank() < 10 || scenario_is_custom()) {
-        lang_text_draw_centered(62, 0, 48, 144, 544, FONT_LARGE_BLACK);
-        lang_text_draw_centered(62, 2, 48, 175, 544, FONT_NORMAL_BLACK);
-        lang_text_draw_centered(32, get_next_rank(), 48, 194, 544, FONT_LARGE_BLACK);
+    const campaign_mission_info *mission = game_campaign_get_current_mission(scenario_campaign_mission());
+
+    if (!mission || mission->next_rank <= CAMPAIGN_NO_RANK || mission->next_rank == scenario_campaign_rank()) {
+        lang_text_draw_centered(62, 0, 48, 159, 544, FONT_LARGE_BLACK);
     } else {
-        text_draw_centered(scenario_player_name(), 48, 144, 512, FONT_LARGE_BLACK, 0);
-        lang_text_draw_multiline(62, 26, 140, 175, 360, FONT_NORMAL_BLACK);
+        if (mission->next_rank < 10) {
+            lang_text_draw_centered(62, 0, 48, 144, 544, FONT_LARGE_BLACK);
+            lang_text_draw_centered(62, 2, 48, 175, 544, FONT_NORMAL_BLACK);
+            lang_text_draw_centered(32, mission->next_rank, 48, 194, 544, FONT_LARGE_BLACK);
+        } else {
+            text_draw_centered(scenario_player_name(), 48, 144, 512, FONT_LARGE_BLACK, 0);
+            lang_text_draw_multiline(62, 26, 140, 175, 360, FONT_NORMAL_BLACK);
+        }
     }
+
     graphics_reset_dialog();
 }
 
@@ -66,14 +59,18 @@ static void draw_foreground(void)
         int image_id = assets_get_image_id("UI", "Victory_Banner");
         image_draw(image_id, 88, 137, COLOR_MASK_NONE, SCALE_NONE);
         image_draw(image_id, 512, 137, COLOR_MASK_NONE, SCALE_NONE);
-
         large_label_draw(80, 240, 30, focus_button_id == 1);
-        if (scenario_campaign_rank() < 10 || scenario_is_custom()) {
-            lang_text_draw_centered(62, 3, 80, 246, 480, FONT_NORMAL_GREEN);
+        const campaign_mission_info *mission = game_campaign_get_current_mission(scenario_campaign_mission());
+        if (!mission || mission->next_rank <= CAMPAIGN_NO_RANK || mission->next_rank == scenario_campaign_rank()) {
+            lang_text_draw_centered(44, 16, 80, 246, 480, FONT_NORMAL_GREEN);
         } else {
-            lang_text_draw_centered(62, 27, 80, 246, 480, FONT_NORMAL_GREEN);
+            if (mission->next_rank < 10) {
+                lang_text_draw_centered(62, 3, 80, 246, 480, FONT_NORMAL_GREEN);
+            } else {
+                lang_text_draw_centered(62, 27, 80, 246, 480, FONT_NORMAL_GREEN);
+            }
         }
-        if (scenario_campaign_rank() >= 2 || scenario_is_custom()) {
+        if (!game_campaign_is_original() || scenario_campaign_rank() >= 2) {
             // Continue for 2/5 years
             large_label_draw(80, 272, 30, focus_button_id == 2);
             lang_text_draw_centered(62, 4, 80, 278, 480, FONT_NORMAL_GREEN);
@@ -92,7 +89,7 @@ static void draw_foreground(void)
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     int num_buttons;
-    if (scenario_campaign_rank() >= 2 || scenario_is_custom()) {
+    if (scenario_campaign_rank() >= 2 || !game_campaign_is_original()) {
         num_buttons = 3;
     } else {
         num_buttons = 1;
@@ -100,13 +97,14 @@ static void handle_input(const mouse *m, const hotkeys *h)
     generic_buttons_handle_mouse(mouse_in_dialog(m), 48, 128, victory_buttons, num_buttons, &focus_button_id);
 }
 
-static void button_accept(int param1, int param2)
+static void button_accept(const generic_button *button)
 {
     window_city_show();
 }
 
-static void button_continue_governing(int months, int param2)
+static void button_continue_governing(const generic_button *button)
 {
+    int months = button->parameter1;
     city_victory_continue_governing(months);
     window_city_show();
     city_victory_reset();

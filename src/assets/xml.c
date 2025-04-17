@@ -27,8 +27,7 @@ static void xml_end_image_element(void);
 static void xml_end_animation_element(void);
 
 static struct {
-    char file_name[FILE_NAME_MAX];
-    size_t file_name_position;
+    char base_path[FILE_NAME_MAX];
     int finished;
     int in_animation;
     image_groups *current_group;
@@ -49,15 +48,15 @@ static const char *ROTATE_VALUES[3] = { "90", "180", "270" };
 
 static void set_asset_image_base_path(const char *name)
 {
-    snprintf(data.file_name, FILE_NAME_MAX, "%s/%s/", ASSETS_IMAGE_PATH, name);
-    data.file_name_position = strlen(data.file_name);
+    snprintf(data.base_path, FILE_NAME_MAX, "%s/%s", ASSETS_IMAGE_PATH, name);
 }
 
 static int xml_start_assetlist_element(void)
 {
     data.current_group = group_get_new();
-    const char *name = xml_parser_copy_attribute_string("name");
+    char *name = xml_parser_copy_attribute_string("name");
     if (!name || *name == '\0') {
+        free(name);
         return 0;
     }
     data.current_group->name = name;
@@ -68,10 +67,6 @@ static int xml_start_assetlist_element(void)
 
 static int xml_start_image_element(void)
 {
-    if (xml_parser_get_total_attributes() > 12) {
-        return 0;
-    }
-
     asset_image *img = asset_image_create();
     if (!img) {
         return 0;
@@ -108,11 +103,6 @@ static int xml_start_image_element(void)
 
 static int xml_start_layer_element(void)
 {
-    int total_attributes = xml_parser_get_total_attributes();
-    if (total_attributes < 2 || total_attributes > 24) {
-        return 0;
-    }
-
     asset_image *img = data.current_image;
     static const char *part_values[2] = { "footprint", "top" };
     static const char *mask_values[2] = { "grayscale", "alpha" };
@@ -164,7 +154,7 @@ static int xml_start_animation_element(void)
 
 static int xml_start_frame_element(void)
 {
-    if (!data.in_animation || xml_parser_get_total_attributes() < 2) {
+    if (!data.in_animation) {
         return 1;
     }
     asset_image *img = asset_image_create();
@@ -177,6 +167,8 @@ static int xml_start_frame_element(void)
     const char *image_id = xml_parser_get_attribute_string("image");
     int src_x = xml_parser_get_attribute_int("src_x");
     int src_y = xml_parser_get_attribute_int("src_y");
+    int offset_x = xml_parser_get_attribute_int("x");
+    int offset_y = xml_parser_get_attribute_int("y");
     int width = xml_parser_get_attribute_int("width");
     int height = xml_parser_get_attribute_int("height");
     layer_invert_type invert = xml_parser_get_attribute_enum("invert", INVERT_VALUES, 3, INVERT_HORIZONTAL);
@@ -184,7 +176,7 @@ static int xml_start_frame_element(void)
 
     img->last_layer = &img->first_layer;
     if (!asset_image_add_layer(img, path, group, image_id, src_x, src_y,
-        0, 0, width, height, invert, rotate, PART_BOTH, 0)) {
+        offset_x, offset_y, width, height, invert, rotate, PART_BOTH, 0)) {
         img->active = 0;
         return 1;
     }
@@ -193,6 +185,8 @@ static int xml_start_frame_element(void)
         asset_image_unload(img);
         return 1;
     }
+    img->img.width += offset_x;
+    img->img.height += offset_y;
     asset_image_check_and_handle_reference(img);
 #else
     data.current_image->has_frame_elements = 1;
@@ -235,7 +229,7 @@ static void xml_end_animation_element(void)
 void xml_init(void)
 {
     if (!data.initialized) {
-        xml_parser_init(xml_elements, XML_TOTAL_ELEMENTS);
+        xml_parser_init(xml_elements, XML_TOTAL_ELEMENTS, 0);
         data.initialized = 1;
     }
 }
@@ -275,13 +269,13 @@ int xml_process_assetlist_file(const char *xml_file_name)
     }
 #ifdef BUILDING_ASSET_PACKER
     else {
-        size_t xml_file_name_length = strlen(xml_file_name);
-        char *path = malloc(sizeof(char *) * (xml_file_name_length + 1));
+        size_t buf_size = sizeof(char *) * (strlen(xml_file_name) + 1);
+        char *path = malloc(buf_size);
         if (!path) {
             error = 1;
             group_unload_current();
         } else {
-            strcpy(path, xml_file_name);
+            memcpy(path, xml_file_name, buf_size);
             group_get_current()->path = path;
         }
     }
@@ -302,9 +296,7 @@ void xml_finish(void)
 
 void xml_get_full_image_path(char *full_path, const char *image_file_name)
 {
-    strncpy(full_path, data.file_name, data.file_name_position);
-    size_t file_name_size = strlen(image_file_name);
-    strncpy(full_path + data.file_name_position, image_file_name, FILE_NAME_MAX - data.file_name_position);
-    strncpy(full_path + data.file_name_position + file_name_size, ".png",
-        FILE_NAME_MAX - data.file_name_position - file_name_size);
+    if (snprintf(full_path, FILE_NAME_MAX, "%s/%s.png", data.base_path, image_file_name) > FILE_NAME_MAX) {
+        log_error("Image path too long", image_file_name, 0);
+    }
 }

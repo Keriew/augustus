@@ -1,6 +1,7 @@
 #include "building/figure.h"
 
 #include "assets/assets.h"
+#include "building/armoury.h"
 #include "building/barracks.h"
 #include "building/caravanserai.h"
 #include "building/granary.h"
@@ -34,6 +35,15 @@
 #include "map/road_access.h"
 #include "map/terrain.h"
 #include "map/water.h"
+
+
+
+#define BEGGAR_UNEMPLOYMENT_THRESHOLD 6
+
+static struct {
+    int beggar_counter;
+    int houses_needed_per_beggar;
+} data;
 
 static int worker_percentage(const building *b)
 {
@@ -134,6 +144,47 @@ static void create_roaming_figure(building *b, int x, int y, figure_type type)
     b->figure_id = f->id;
     figure_movement_init_roaming(f);
 }
+
+static void calculate_houses_needed_per_beggar(void)
+{
+    int unemployed_percentage = city_labor_unemployment_percentage();
+    int houses_needed = 100;
+    if (unemployed_percentage < 9) {
+        houses_needed = 40-unemployed_percentage;
+    } else if (unemployed_percentage < 12) {
+        houses_needed = 30-unemployed_percentage;
+    } else if (unemployed_percentage < 15) {
+        houses_needed = 25-unemployed_percentage;
+    } else if (unemployed_percentage < 18) {
+        houses_needed = 24-unemployed_percentage;
+    } else if (unemployed_percentage < 21) {
+        houses_needed = 23-unemployed_percentage;
+    } else {
+        houses_needed = 3;
+    }
+    data.houses_needed_per_beggar = houses_needed;
+
+}
+
+static void spawn_beggar(building *b)
+{
+    map_point road;
+    if (map_has_road_access(b->x, b->y, b->size, &road)) {
+        b->figure_spawn_delay++;
+        if (b->figure_spawn_delay > 16) {
+            b->figure_spawn_delay = 0;
+            if (data.beggar_counter > data.houses_needed_per_beggar) {
+                data.beggar_counter = 0;
+            } else {
+                data.beggar_counter++;
+                return;
+            }
+            figure *f = figure_create(FIGURE_BEGGAR, road.x, road.y, DIR_4_BOTTOM);
+            f->building_id = b->id;
+        }
+    }
+}
+
 
 static int spawn_patrician(building *b, int spawned)
 {
@@ -410,6 +461,15 @@ static void spawn_figure_chariot_maker(building *b)
     }
 }
 
+static void set_amphitheater_graphic(building *b)
+{
+    if (b->state != BUILDING_STATE_IN_USE) {
+        return;
+    }
+    b->upgrade_level = b->desirability > 45;
+    map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
+}
+
 static void spawn_figure_amphitheater(building *b)
 {
     check_labor_problem(b);
@@ -439,6 +499,7 @@ static void spawn_figure_amphitheater(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
+            set_amphitheater_graphic(b);
             figure *f;
             if (b->data.entertainment.days1 > 0) {
                 f = figure_create(FIGURE_GLADIATOR, road.x, road.y, DIR_0_TOP);
@@ -559,6 +620,16 @@ static void spawn_figure_hippodrome(building *b)
     }
 }
 
+static void set_arena_graphic(building *b)
+{
+    if (b->state != BUILDING_STATE_IN_USE) {
+        return;
+    }
+    b->upgrade_level = b->desirability > 45;
+    map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
+}
+
+
 static void spawn_figure_colosseum(building *b)
 {
     check_labor_problem(b);
@@ -588,6 +659,11 @@ static void spawn_figure_colosseum(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
+
+            if (b->type == BUILDING_ARENA) {
+                set_arena_graphic(b);
+            }
+
             figure *f;
             if (b->data.entertainment.days1 > 0) {
                 f = figure_create(FIGURE_LION_TAMER, road.x, road.y, DIR_0_TOP);
@@ -1054,7 +1130,11 @@ static void spawn_figure_grand_temple_mars(building *b)
             b->figure_spawn_delay = 0;
             map_has_road_access(b->x, b->y, b->size, &road);
             switch (b->subtype.barracks_priority) {
-                case PRIORITY_FORT:
+                case PRIORITY_FORT:                
+                case PRIORITY_FORT_JAVELIN:
+                case PRIORITY_FORT_MOUNTED:
+                case PRIORITY_FORT_AUXILIA_INFANTRY:
+                case PRIORITY_FORT_AUXILIA_ARCHERY:
                     if (!building_barracks_create_soldier(b, road.x, road.y)) {
                         building_barracks_create_tower_sentry(b, road.x, road.y);
                     }
@@ -1081,6 +1161,16 @@ static void spawn_figure_grand_temple_mars(building *b)
     }
 }
 
+static void set_tavern_graphic(building *b)
+{
+    if (b->state != BUILDING_STATE_IN_USE) {
+        return;
+    }
+    b->upgrade_level = b->desirability > 45;
+    map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
+}
+
+
 static void spawn_figure_tavern(building *b)
 {
     check_labor_problem(b);
@@ -1096,6 +1186,7 @@ static void spawn_figure_tavern(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
+            set_tavern_graphic(b);
             if (!has_figure_of_type(b, FIGURE_BARKEEP) && b->resources[RESOURCE_WINE] >= 20) {
                 b->resources[RESOURCE_WINE] -= 20;
                 int resource_decay = b->resources[RESOURCE_MEAT] && b->resources[RESOURCE_FISH] ? 20 : 40;
@@ -1201,10 +1292,22 @@ static void set_senate_graphic(building *b)
     map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
 }
 
+static void set_forum_graphic(building *b)
+{
+    if (b->state != BUILDING_STATE_IN_USE) {
+        return;
+    }
+    b->upgrade_level = b->desirability > 30;
+    map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
+}
+
 static void spawn_figure_senate_forum(building *b)
 {
     if (b->type == BUILDING_SENATE) {
         set_senate_graphic(b);
+    }
+    if (b->type == BUILDING_FORUM) {
+        set_forum_graphic(b);
     }
     check_labor_problem(b);
     if (has_figure_of_type(b, FIGURE_TAX_COLLECTOR)) {
@@ -1471,6 +1574,10 @@ static void spawn_figure_barracks(building *b)
             map_has_road_access(b->x, b->y, b->size, &road);
             switch (b->subtype.barracks_priority) {
                 case PRIORITY_FORT:
+                case PRIORITY_FORT_JAVELIN:
+                case PRIORITY_FORT_MOUNTED:
+                case PRIORITY_FORT_AUXILIA_INFANTRY:
+                case PRIORITY_FORT_AUXILIA_ARCHERY:
                     if (!building_barracks_create_soldier(b, road.x, road.y)) {
                         building_barracks_create_tower_sentry(b, road.x, road.y);
                     }
@@ -1761,6 +1868,62 @@ static void spawn_figure_depot(building* b)
     }
 }
 
+static void spawn_figure_armoury(building *b)
+{
+    check_labor_problem(b);
+
+    map_point road;
+    if (map_has_road_access(b->x, b->y, b->size, &road)) {
+        spawn_labor_seeker(b, road.x, road.y, 50);
+        int pct_workers = worker_percentage(b);
+        int spawn_delay;
+        int carts_available = 1;
+        if (pct_workers >= 100) {
+            spawn_delay = 3;
+            carts_available = 2;
+        } else if (pct_workers >= 75) {
+            spawn_delay = 8;
+        } else if (pct_workers >= 50) {
+            spawn_delay = 16;
+        } else if (pct_workers >= 25) {
+            spawn_delay = 24;
+        } else if (pct_workers >= 1) {
+            spawn_delay = 48;
+        } else {
+            return;
+        }
+
+        if (b->figure_id && carts_available == 1) {
+            return;
+        }
+
+        if (b->figure_id && b->figure_id4) {
+            return;
+        }
+
+        int figure_id_to_use = 1;
+        if (b->figure_id) {
+            figure_id_to_use = 4;
+        }
+
+        b->figure_spawn_delay++;
+        if (b->figure_spawn_delay > spawn_delay) {
+            b->figure_spawn_delay = 0;
+            if (building_armoury_is_needed(b)) {
+                figure *f = figure_create(FIGURE_WAREHOUSEMAN, road.x, road.y, DIR_4_BOTTOM);
+                f->action_state = FIGURE_ACTION_50_WAREHOUSEMAN_CREATED;
+                f->collecting_item_id = RESOURCE_WEAPONS;
+                if (figure_id_to_use == 1) {
+                    b->figure_id = f->id;
+                } else {
+                    b->figure_id4 = f->id;
+                }
+                f->building_id = b->id;
+            }
+        }
+    }
+}
+
 static void update_native_crop_progress(building *b)
 {
     b->data.industry.progress++;
@@ -1773,6 +1936,7 @@ static void update_native_crop_progress(building *b)
 void building_figure_generate(void)
 {
     int patrician_generated = 0;
+    calculate_houses_needed_per_beggar();
     for (int i = 1; i < building_count(); i++) {
         building *b = building_get(i);
         if (b->state != BUILDING_STATE_IN_USE) {
@@ -1786,7 +1950,11 @@ void building_figure_generate(void)
 
         b->show_on_problem_overlay = 0;
         // range of building types
-        if (b->type >= BUILDING_HOUSE_SMALL_VILLA && b->type <= BUILDING_HOUSE_LUXURY_PALACE) {
+        if (b->type >= BUILDING_HOUSE_SMALL_TENT && b->type <= BUILDING_HOUSE_GRAND_INSULA) {
+            if (city_labor_unemployment_percentage() > BEGGAR_UNEMPLOYMENT_THRESHOLD) {
+                spawn_beggar(b);
+            }
+        } else if (b->type >= BUILDING_HOUSE_SMALL_VILLA && b->type <= BUILDING_HOUSE_LUXURY_PALACE) {
             patrician_generated = spawn_patrician(b, patrician_generated);
         } else if (building_is_raw_resource_producer(b->type) ||
             building_is_farm(b->type) || building_is_workshop(b->type)) {
@@ -1931,6 +2099,9 @@ void building_figure_generate(void)
                     break;
                 case BUILDING_DEPOT:
                     spawn_figure_depot(b);
+                    break;
+                case BUILDING_ARMOURY:
+                    spawn_figure_armoury(b);
                     break;
             }
         }

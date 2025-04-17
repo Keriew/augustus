@@ -2,6 +2,7 @@
 
 #include "assets/assets.h"
 #include "core/image_group.h"
+#include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
@@ -24,14 +25,14 @@ static int border_image_ids[2];
 
 static void on_scroll(void);
 
-static void button_select_option(int option, int param2);
+static void button_select_option(const generic_button *button);
 
 static generic_button buttons[] = {
-    {40, 0, 180, 20, button_select_option, button_none, CANCEL_BUTTON, 0},
-    {260, 0, 180, 20, button_select_option, button_none, CONFIRM_BUTTON, 0},
-    {20, 0, 0, 0, button_select_option, button_none, 2, 0},
-    {20, 0, 0, 0, button_select_option, button_none, 3, 0},
-    {20, 0, 0, 0, button_select_option, button_none, 4, 0}
+    {40, 0, 180, 20, button_select_option, 0, CANCEL_BUTTON},
+    {260, 0, 180, 20, button_select_option, 0, CONFIRM_BUTTON},
+    {20, 0, 0, 0, button_select_option, 0, 2},
+    {20, 0, 0, 0, button_select_option, 0, 3},
+    {20, 0, 0, 0, button_select_option, 0, 4}
 };
 
 static scrollbar_type scrollbar = { 420, START_Y_OFFSET + 40, 0, 400, 0, on_scroll, 0, 4 };
@@ -40,16 +41,16 @@ static struct {
     int title;
     int subtitle;
     option_menu_item *options;
-    int num_options;
+    unsigned int num_options;
     int width_blocks;
     int height_blocks;
     void (*close_func)(int selection);
-    int focus_button_id;
-    int original_option;
-    int selected_option;
+    unsigned int focus_button_id;
+    unsigned int original_option;
+    unsigned int selected_option;
     int price;
-    int visible_options;
-    int scroll_position;
+    unsigned int visible_options;
+    unsigned int scroll_position;
     int height;
     option_menu_row_size row_size;
 } data;
@@ -129,7 +130,7 @@ static void draw_background(void)
     outer_panel_draw(0, 0, data.width_blocks, data.height_blocks);
 
     text_draw_centered(translation_for(data.title), 0, 20, 480, FONT_LARGE_BLACK, 0);
-    text_draw_multiline(translation_for(data.subtitle), 20, 60, 440, FONT_NORMAL_BLACK, 0);
+    text_draw_multiline(translation_for(data.subtitle), 20, 60, 440, 0, FONT_NORMAL_BLACK, 0);
     if (data.price) {
         text_draw_with_money(translation_for(TR_OPTION_MENU_COST), data.price, " ", ".",
             20, 110, 0, FONT_NORMAL_BLACK, 0);
@@ -137,7 +138,7 @@ static void draw_background(void)
 
     int y_offset = START_Y_OFFSET;
 
-    for (int i = 0; i < data.visible_options; i++) {
+    for (unsigned int i = 0; i < data.visible_options; i++) {
         int text_width = data.num_options == data.visible_options ? 448 : 400;
         int text_x = 20;
 
@@ -154,10 +155,10 @@ static void draw_background(void)
                 Y_OFFSET_PER_OPTION[data.row_size] / 16 - 1);
         }
         text_draw_multiline(translation_for(data.options[i + scrollbar.scroll_position].header),
-            text_x, y_offset + 49, text_width - 8,
+            text_x, y_offset + 49, text_width - 8, 0,
             data.selected_option == i + scrollbar.scroll_position + 1 ? FONT_NORMAL_WHITE : FONT_NORMAL_BLACK, 0);
         text_draw_multiline(translation_for(data.options[i + scrollbar.scroll_position].desc),
-            text_x, y_offset + 69, text_width - 8,
+            text_x, y_offset + 69, text_width - 8, 0,
             data.selected_option == i + scrollbar.scroll_position + 1 ? FONT_NORMAL_WHITE : FONT_NORMAL_BLACK, 0);
 
 
@@ -174,7 +175,7 @@ static void draw_background(void)
 static void draw_foreground(void)
 {
     graphics_in_dialog_with_size(16 * data.width_blocks, 16 * data.height_blocks);
-    for (int i = 0; i < data.visible_options; i++) {
+    for (unsigned int i = 0; i < data.visible_options; i++) {
         if (data.options[i + scrollbar.scroll_position].image_id) {
             color_t color = data.focus_button_id == i + 3 ? COLOR_BORDER_RED : COLOR_BORDER_GREEN;
             image_draw_border(border_image_ids[data.row_size], 20, buttons[i + 2].y + 2, color);
@@ -214,8 +215,10 @@ static void on_scroll(void)
     window_invalidate();
 }
 
-static void button_select_option(int option, int param2)
+static void button_select_option(const generic_button *button)
 {
+    int option = button->parameter1;
+
     switch (option) {
         case CANCEL_BUTTON:
             data.close_func(0);

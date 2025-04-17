@@ -132,6 +132,7 @@ int figure_name_get(figure_type type, enemy_type_t enemy)
 
     case FIGURE_FORT_JAVELIN:
     case FIGURE_ENEMY_CAESAR_JAVELIN:
+    case FIGURE_FORT_ARCHER:
         return get_next_name(&data.javelin_thrower, 231, 32);
 
     case FIGURE_FORT_MOUNTED:
@@ -141,6 +142,7 @@ int figure_name_get(figure_type type, enemy_type_t enemy)
     case FIGURE_FORT_LEGIONARY:
     case FIGURE_ENEMY_CAESAR_LEGIONARY:
     case FIGURE_MESS_HALL_SUPPLIER:
+    case FIGURE_FORT_INFANTRY:
         return get_next_name(&data.legionary, 297, 32);
 
     case FIGURE_INDIGENOUS_NATIVE:
@@ -159,6 +161,7 @@ int figure_name_get(figure_type type, enemy_type_t enemy)
     case FIGURE_ENEMY51_SPEAR:
     case FIGURE_ENEMY52_MOUNTED_ARCHER:
     case FIGURE_ENEMY53_AXE:
+    case FIGURE_ENEMY_CATAPULT:
         switch (enemy) {
         case ENEMY_8_GREEK:
             return get_next_name(&data.enemy_greek, 463, 32);

@@ -11,6 +11,7 @@
 #include "city/ratings.h"
 #include "city/resource.h"
 #include "game/time.h"
+#include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
@@ -23,14 +24,14 @@
 
 #define ADVISOR_HEIGHT 27
 
-static void button_graph(int param1, int param2);
+static void button_graph(const generic_button *button);
 
 static generic_button graph_buttons[] = {
-    { 509,  61, 104, 55, button_graph, button_none, 0, 0 },
-    { 509, 161, 104, 55, button_graph, button_none, 1, 0 }
+    { 509,  61, 104, 55, button_graph},
+    { 509, 161, 104, 55, button_graph, 0, 1 }
 };
 
-static int focus_button_id;
+static unsigned int focus_button_id;
 
 static void get_y_axis(int max_value, int *y_max, int *y_shift)
 {
@@ -54,13 +55,13 @@ static void get_min_max_month_year(int max_months, int *start_month, int *start_
         if (*end_month < 0) {
             *end_year -= 1;
         }
-        *start_month = 11 - (max_months % 12);
-        *start_year = *end_year - max_months / 12;
+        *start_month = 11 - (max_months % GAME_TIME_MONTHS_PER_YEAR);
+        *start_year = *end_year - max_months / GAME_TIME_MONTHS_PER_YEAR;
     } else {
         *start_month = 0;
         *start_year = scenario_property_start_year();
-        *end_month = (max_months + *start_month) % 12;
-        *end_year = (max_months + *start_month) / 12 + *start_year;
+        *end_month = (max_months + *start_month) % GAME_TIME_MONTHS_PER_YEAR;
+        *end_year = (max_months + *start_month) / GAME_TIME_MONTHS_PER_YEAR + *start_year;
     }
 }
 
@@ -68,8 +69,8 @@ static void get_current_month_year_from_months(int month, int max_months, int *c
 {
     int start_month, start_year, end_month, end_year;
     get_min_max_month_year(max_months, &start_month, &start_year, &end_month, &end_year);
-    *current_month = (start_month + month) % 12;
-    *current_year = start_year + month / 12 + (start_month + (month % 12) > 11 ? 1 : 0);
+    *current_month = (start_month + month) % GAME_TIME_MONTHS_PER_YEAR;
+    *current_year = start_year + month / GAME_TIME_MONTHS_PER_YEAR + (start_month + (month % GAME_TIME_MONTHS_PER_YEAR) > 11 ? 1 : 0);
 }
 
 static void draw_history_graph(int full_size, int x, int y)
@@ -392,8 +393,12 @@ static int draw_background(void)
 
     image_draw(image_group(GROUP_PANEL_WINDOWS) + 14, 62, 60, COLOR_MASK_NONE, SCALE_NONE);
 
-    width = text_draw_number(city_population(), '@', " ", 450, 25, FONT_NORMAL_BLACK, 0);
-    text_draw(translation_for(TR_ADVISOR_TOTAL_POPULATION), 450 + width, 25, FONT_NORMAL_BLACK, 0);
+    int x_offset = text_get_number_width(city_population(), 0, "", FONT_NORMAL_BLACK);
+    x_offset += lang_text_get_width(CUSTOM_TRANSLATION, TR_ADVISOR_TOTAL_POPULATION, FONT_NORMAL_BLACK);
+    x_offset = 620 - x_offset;
+
+    width = text_draw_number(city_population(), 0, "", x_offset, 25, FONT_NORMAL_BLACK, 0);
+    text_draw(translation_for(TR_ADVISOR_TOTAL_POPULATION), x_offset + width, 25, FONT_NORMAL_BLACK, 0);
 
     int big_text, top_text, bot_text;
     void (*big_graph)(int, int, int);
@@ -501,29 +506,30 @@ static int handle_mouse(const mouse *m)
     return generic_buttons_handle_mouse(m, 0, 0, graph_buttons, 2, &focus_button_id);
 }
 
-static void button_graph(int param1, int param2)
+static void button_graph(const generic_button *button)
 {
+    int button_id = button->parameter1;
     int new_order;
-
+    
     switch (city_population_graph_order()) {
         default:
         case 0:
-            new_order = param1 ? 5 : 2;
+            new_order = button_id ? 5 : 2;
             break;
         case 1:
-            new_order = param1 ? 3 : 4;
+            new_order = button_id ? 3 : 4;
             break;
         case 2:
-            new_order = param1 ? 4 : 0;
+            new_order = button_id ? 4 : 0;
             break;
         case 3:
-            new_order = param1 ? 1 : 5;
+            new_order = button_id ? 1 : 5;
             break;
         case 4:
-            new_order = param1 ? 2 : 1;
+            new_order = button_id ? 2 : 1;
             break;
         case 5:
-            new_order = param1 ? 0 : 3;
+            new_order = button_id ? 0 : 3;
             break;
     }
     city_population_set_graph_order(new_order);

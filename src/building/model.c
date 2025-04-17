@@ -201,7 +201,7 @@ const model_building MODEL_GRAND_TEMPLE_MERCURY = { 2500,20,2,-4,5,50 };
 const model_building MODEL_GRAND_TEMPLE_MARS = { 2500,20,2,-4,5,50 };
 const model_building MODEL_GRAND_TEMPLE_VENUS = { 2500,20,2,-4,5,50 };
 const model_building MODEL_PANTHEON = { 3500,20,2,-4,5,50 };
-const model_building MODEL_LIGHTHOUSE = { 1250,6,1,-1,4,20 };
+const model_building MODEL_LIGHTHOUSE = { 1000,6,1,-1,4,20 };
 const model_building MODEL_MESS_HALL = { 100,-8,1,2,4,10 };
 const model_building MODEL_TAVERN = { 40,-2,1,1,6,8 };
 const model_building MODEL_GRAND_GARDEN = { 400,0,0,0,0,0 };
@@ -210,9 +210,9 @@ const model_building MODEL_COLOSSEUM = { 1500,-3,1,1,3,100 };
 const model_building MODEL_HIPPODROME = { 3500,-3,1,1,3,150 };
 const model_building MODEL_NULL = { 0,0,0,0,0 };
 const model_building MODEL_LARARIUM = { 45, 4, 1, -1, 3, 0 };
-const model_building MODEL_NYMPHAEUM = { 250,12,2,-1,6,0 };
-const model_building MODEL_SMALL_MAUSOLEUM = { 300,-8,1,3,5,0 };
-const model_building MODEL_LARGE_MAUSOLEUM = { 750,-10,1,3,6,0 };
+const model_building MODEL_NYMPHAEUM = { 400,12,2,-1,6,0 };
+const model_building MODEL_SMALL_MAUSOLEUM = { 250,-8,1,3,5,0 };
+const model_building MODEL_LARGE_MAUSOLEUM = { 500,-10,1,3,6,0 };
 const model_building MODEL_WATCHTOWER = { 100,-6,1,2,3,8, };
 const model_building MODEL_CARAVANSERAI = { 500,-10,2,3,4,20 };
 const model_building MODEL_PALISADE = { 6,0,0,0,0,0 };
@@ -224,6 +224,7 @@ const model_building MODEL_BRICKWORKS = { 80,-3,1,1,4,10 };
 const model_building MODEL_CONCRETE_MAKER = { 60,-3,1,1,4,10 };
 const model_building MODEL_CITY_MINT = { 250,-3,1,1,3,40 };
 const model_building MODEL_DEPOT = { 100,-3,1,1,2,15 };
+const model_building MODEL_ARMOURY = { 50,-5,1,1,4,6 };
 
 const model_building *model_get_building(building_type type)
 {
@@ -303,11 +304,13 @@ const model_building *model_get_building(building_type type)
             return &MODEL_DEPOT;
         case BUILDING_OVERGROWN_GARDENS:
             return &buildings[BUILDING_GARDENS];
+        case BUILDING_ARMOURY:
+            return &MODEL_ARMOURY;
         default:
             break;
     }
 
-    if ((type >= BUILDING_PINE_TREE && type <= BUILDING_SMALL_STATUE_ALT_B) ||
+    if ((type >= BUILDING_PINE_TREE && type <= BUILDING_SENATOR_STATUE) ||
         type == BUILDING_HEDGE_DARK || type == BUILDING_HEDGE_LIGHT ||
         type == BUILDING_DECORATIVE_COLUMN || type == BUILDING_LOOPED_GARDEN_WALL ||
         type == BUILDING_COLONNADE || type == BUILDING_LOOPED_GARDEN_WALL || 
@@ -323,6 +326,10 @@ const model_building *model_get_building(building_type type)
 
     if (type == BUILDING_LARGE_POND || type == BUILDING_HORSE_STATUE) {
         return &buildings[BUILDING_LARGE_STATUE];
+    }
+
+    if (type == BUILDING_FORT_AUXILIA_INFANTRY || type == BUILDING_FORT_ARCHERS) {
+        return &buildings[BUILDING_FORT_LEGIONARIES];
     }
 
     if (type > 129) {

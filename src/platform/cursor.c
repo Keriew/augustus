@@ -19,6 +19,7 @@ static struct {
     cursor_shape current_shape;
     cursor_scale current_scale;
     int disabled;
+    int software_cursor;
 } data;
 
 static const color_t mouse_colors[] = {
@@ -37,7 +38,7 @@ static const cursor *get_valid_cursor(const cursor *c)
     const cursor *current = c;
     for (int i = 0; i < CURSOR_TYPE_MAX; i++, current++) {
         if (current->type == CURSOR_TYPE_PNG &&
-            (!config_get(CONFIG_SCREEN_COLOR_CURSORS) || !png_load(current->data))) {
+            (!config_get(CONFIG_SCREEN_COLOR_CURSORS) || !png_load_from_file(current->data, 1))) {
             continue;
         }
         return current;
@@ -57,9 +58,9 @@ static SDL_Surface *generate_cursor_surface(const cursor *c)
     color_t *pixels = cursor_surface->pixels;
     SDL_memset(pixels, 0, sizeof(color_t) * size * size);
     if (c->type == CURSOR_TYPE_PNG) {
-        if (!png_read(c->data, pixels, c->offset_x, c->offset_y,
-                c->width, c->height, 0, 0, size, c->rotated)) {
+        if (!png_read(pixels, c->offset_x, c->offset_y, c->width, c->height, 0, 0, size, c->rotated)) {
             SDL_FreeSurface(cursor_surface);
+            cursor_surface = 0;
         }
     } else {
         for (int y = 0; y < c->height; y++) {
@@ -96,35 +97,53 @@ void system_init_cursors(int scale_percentage)
         }
         const cursor *c = get_valid_cursor(list);
         data.surfaces[i] = generate_cursor_surface(c);
-#ifndef PLATFORM_USE_SOFTWARE_CURSOR
-        data.cursors[i] = SDL_CreateColorCursor(data.surfaces[i], c->hotspot_x, c->hotspot_y);
-#else
-        SDL_ShowCursor(SDL_DISABLE);
-        platform_renderer_generate_mouse_cursor_texture(i, data.surfaces[i]->w, data.surfaces[i]->pixels,
-            c->hotspot_x, c->hotspot_y);
-#endif
+
+        if (platform_cursor_is_software()) {
+            SDL_ShowCursor(SDL_DISABLE);
+            platform_renderer_generate_mouse_cursor_texture(i, data.surfaces[i]->w, data.surfaces[i]->pixels,
+                c->hotspot_x, c->hotspot_y);
+        } else {
+            data.cursors[i] = SDL_CreateColorCursor(data.surfaces[i], c->hotspot_x, c->hotspot_y);
+        }
     }
+    png_unload();
     system_set_cursor(data.current_shape);
 }
 
 void system_set_cursor(int cursor_id)
 {
     data.current_shape = cursor_id;
-#ifndef PLATFORM_USE_SOFTWARE_CURSOR
-    SDL_SetCursor(data.cursors[cursor_id]);
-#endif
+    if (!platform_cursor_is_software()) {
+        SDL_SetCursor(data.cursors[cursor_id]);
+    }
 }
 
 void system_show_cursor(void)
 {
     data.disabled = 0;
-    SDL_ShowCursor(SDL_ENABLE);
+    if (!platform_cursor_is_software()) {
+        SDL_ShowCursor(SDL_ENABLE);
+    }
 }
 
 void system_hide_cursor(void)
 {
     data.disabled = 1;
     SDL_ShowCursor(SDL_DISABLE);
+}
+
+void platform_cursor_force_software_mode(void)
+{
+    data.software_cursor = 1;
+}
+
+int platform_cursor_is_software(void)
+{
+#ifdef PLATFORM_USE_SOFTWARE_CURSOR
+    return 1;
+#else
+    return data.software_cursor;
+#endif
 }
 
 cursor_shape platform_cursor_get_current_shape(void)

@@ -50,7 +50,7 @@ typedef struct {
     int warehouse_space_text;
     building_info_type type;
     terrain_info_type terrain_type;
-    int can_go_to_advisor;
+    int advisor_button;
     int rubble_building_type;
     int show_special_orders;
     struct {

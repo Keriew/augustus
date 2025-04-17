@@ -4,13 +4,33 @@
     <!-- All messages must have a unique identifier (uid) that can be used to reference them.
         Unique identifiers must be unique, there cannot be duplicates -->
     <message uid="scenario briefing">
-        <!-- This is the text that will be displayed when the message is shown. Note that text uses Rich Text formatting, so it is possible to define new lines, paragraphs or built-in images.
-        @L will start a new line.
-        @P will start a new paragraph.
-        @G### will show an image where ### is the id of the image.-->
+        <!--
+            This is the text that will be displayed when the message is shown. Note that text uses Rich Text formatting,
+            so it is possible to define new lines, paragraphs or built-in images.
+
+            - @H will start a new heading. It will be centered, on its own line, and in green color. You must use @P or
+              @L to start a new paragraph after a heading.
+            - @L will start a new line (line break).
+            - @P will start a new paragraph, identing the next line.
+            - @G### will show an image where ### is the id of the image.
+              The id of the image can be different depending on what you write:
+
+              * @G<image index>, with <image index> being a number, will fetch that image index from the messages group;
+              * @G<group number>:<image index>, with each being a number, will fetch the image index from the set group
+                number. This effectively allows you to display any original asset on the custom messages.
+              * @G[<asset group id>:<asset image id>], with both being strings, will fetch the image from the asset group
+                with the given id and the image with the given id. This allows you to display any custom asset image on
+                the custom messages. Note that you MUST use the [ and ] brackets, otherwise the game will not recognize
+                that you want to fetch a custom asset.
+              * @G[<png file path>], with the <png file path> being a string, will fetch the image from the given file
+                path. The file will be searched inside the "image" directory of the campaign directory if one is currently
+                loaded, otherwise it will search inside "community/image". Only PNG files are supported.
+
+              Note that no scaling will be done on the images. If they are too large they will be cropped at the sides.
+        -->
         <title>Toga puer iratus est</title>
         <subtitle>An assignment from a slightly fuming Caesar</subtitle>
-        <text>I am most displeased.@L
+        <text>@HI am most displeased.@L
         I ask you to give me a prosperous city, and what did you give me? A single palace and tent squalor as far as the eye can see.@L
         I expected defending legions and you gave me winding roads and lion tamers running marathons.@L
         I requested wheat and wine to test your industry, but you tore it down the day after.@P
@@ -20,9 +40,18 @@
 
         My dearest governor.@L
 		My most beloved governor.@L
-		I am most displeased... and my wrath is palpable.@L
-		@G1</text>
+		I am most displeased... and my wrath is palpable.@L@L
+        The next image is one in the message dialog group.@L
+		@G1
+        The next image is a different original image from another group.@L
+        @G10:5
+        The next image is a custom asset image.@L
+        @G[UI:Happy God Icon]
+        The next image is a custom image from a file. To see it, place a PNG file on "community/image" and rename it.@L
+        @G[augustus_48.png]
+        </text>
         <!-- For sound files, it will look for the file in the following directories (in order):
+	        <current campaign>/audio/
             ./community/audio/
             ./mp3/
             ./wavs/
@@ -30,7 +59,52 @@
             It will play the file that matches the filename as soon as it finds it.
             If it cannot find it at all, then it will simply not play anything. -->
         <media type="sound" filename="fanfare_nu3.wav"/>
+        <!-- For speech files, it will look for the file in the following directories (in order):
+	        <current campaign>/audio/
+            ./community/audio/
+            ./mp3/
+            ./wavs/
+        
+            It will play the file that matches the filename as soon as it finds it.
+            If it cannot find it at all, then it will simply not play anything.
+            
+            Speech files are special in two ways:
+
+            - If a speech file exists, the background music will be tied to it. That means that the background music will
+              only start playing when the speech file starts playing. Aditionally, when the speech file finishes playing,
+              the background music will fade out and stop. This allows you to mimic the original game's behaviour whithout
+              having to provide the background music yourself.
+
+            - Aditionally, if there's a sound file and a speech file, the speech file only starts playing after the sound
+              file finishes playing. -->
+        <media type="speech" filename="caesar_1.wav"/>
+        <!--
+             Background images behave similarly to the "@G" parameter on rich text, except you don't need to prefix
+             the string with the @G.
+             
+             For example: <media type="background_image" location="[UI:Happy God Icon]" /> is a valid image.
+
+             Note above that instead of the "filename" attribute, you can also use the "location" attribute. One is an
+             alias of the other and both behave similarly, but "location" is provided as it's a technically more correct
+             term for ID's and extra assets.
+
+             As an alternative, you can directly indicate the filename without the square brackets. The four lines below
+             are exactly the same:
+
+             <media type="background_image" filename="my image.png" />
+             <media type="background_image" filename="[my image.png]" />
+             <media type="background_image" location="my image.png" />
+             <media type="background_image" location="[my image.png]" />
+
+             Another important difference is that if you only set an id, such as:
+
+             <media type="background_image" location="5" />
+
+             The default group will point to the fullscreen background intermezzo images instead of the message images.
+        -->
+        <media type="background_image" filename="image.png"/>
         <!-- For background music files, it will look for the file in the following directories (in order):
+	        <current campaign>/audio/
             ./community/audio/
             ./mp3/
             ./wavs/
@@ -47,8 +121,10 @@
         I shall not warn you again.@L
         My anger is growing, and the whips sing the songs of rowing.</text>
         <!-- For video files, it will look for the file in the following directories (in order):
+	    <current campaign>/video/
             ./community/video/
             ./smk/
+	    ./mpg/
         
             It will play the file that matches the filename as soon as it finds it.
             If it cannot find it at all, then it will simply not play anything. -->

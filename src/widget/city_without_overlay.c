@@ -26,6 +26,7 @@
 #include "figure/formation_legion.h"
 #include "figure/roamer_preview.h"
 #include "game/resource.h"
+#include "game/state.h"
 #include "graphics/clouds.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
@@ -273,9 +274,6 @@ static void draw_hippodrome_spectators(const building *b, int x, int y, color_t 
 
 static void draw_entertainment_spectators(building *b, int x, int y, color_t color_mask)
 {
-    if (b->type == BUILDING_AMPHITHEATER && b->num_workers > 0) {
-        image_draw(image_group(GROUP_BUILDING_AMPHITHEATER_SHOW), x + 36, y - 47, color_mask, draw_context.scale);
-    }
     if (b->type == BUILDING_HIPPODROME && building_main(b)->num_workers > 0
         && city_entertainment_hippodrome_has_race()) {
         draw_hippodrome_spectators(b, x, y, color_mask);
@@ -474,6 +472,80 @@ static void draw_plague(building *b, int x, int y, color_t color_mask)
     }
 }
 
+static void draw_depot_resource(building *b, int x, int y, color_t color_mask)
+{
+    int img_id;
+
+    if (b->num_workers > 0) {
+        switch(b->data.depot.current_order.resource_type) {
+            case RESOURCE_VEGETABLES:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Vegetables");
+                break;
+            case RESOURCE_FRUIT:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Fruit");
+                break;
+            case RESOURCE_MEAT:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Meat");
+                break;
+            case RESOURCE_FISH:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Fish");
+                break;
+            case RESOURCE_VINES:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Grapes");
+                break;
+            case RESOURCE_POTTERY:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Pottery");
+                break;
+            case RESOURCE_FURNITURE:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Furniture");
+                break;
+            case RESOURCE_OIL:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Oil");
+                break;
+            case RESOURCE_WINE:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Wine");
+                break;
+            case RESOURCE_MARBLE:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Marble");
+                break;
+            case RESOURCE_WEAPONS:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Weapons");
+                break;
+            case RESOURCE_CLAY:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Clay");
+                break;
+            case RESOURCE_TIMBER:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Timber");
+                break;
+            case RESOURCE_OLIVES:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Olives");
+                break;
+            case RESOURCE_IRON:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Iron");
+                break;
+            case RESOURCE_GOLD:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Gold");
+                break;
+            case RESOURCE_SAND:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Sand");
+                break;
+            case RESOURCE_STONE:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Stone");
+                break;
+            case RESOURCE_BRICKS:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Bricks");
+                break;
+            case RESOURCE_WHEAT:
+            default:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Wheat");
+                break;
+        }        
+    } else {
+        img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Cat");
+    }
+    image_draw(img_id, x + 11, y, COLOR_MASK_NONE, draw_context.scale);
+}
+
 static void draw_dock_workers(const building *b, int x, int y, color_t color_mask)
 {
     if (!b->has_plague) {
@@ -504,67 +576,31 @@ static void draw_dock_workers(const building *b, int x, int y, color_t color_mas
     }
 }
 
-static int get_warehouse_flag_image_id(const building *b)
+static void draw_permissions_flag(building *b, int x, int y, color_t color_mask)
 {
+    if (b->has_plague) {
+        return;
+    }
+    static int base_permission_image[8];
+    if (!base_permission_image[0]) {
+        base_permission_image[0] = 0xdeadbeef; // Invalid image ID, just to confirm the other values have been set
+        base_permission_image[1] = assets_get_image_id("UI", "Warehouse_Flag_Market");
+        base_permission_image[2] = assets_get_image_id("UI", "Warehouse_Flag_Land");
+        base_permission_image[3] = assets_get_image_id("UI", "Warehouse_Flag_Market_Land");
+        base_permission_image[4] = assets_get_image_id("UI", "Warehouse_Flag_Sea");
+        base_permission_image[5] = assets_get_image_id("UI", "Warehouse_Flag_Market_Sea");
+        base_permission_image[6] = assets_get_image_id("UI", "Warehouse_Flag_Land_Sea");
+        base_permission_image[7] = assets_get_image_id("UI", "Warehouse_Flag_All");
+    }
     const building_storage *storage = building_storage_get(b->storage_id);
-    int permission_mask = 0x7;
-    int permissions = (~storage->permissions) & permission_mask;
+    int flag_permission_mask = 0x7;
+    int permissions = (~storage->permissions) & flag_permission_mask;
     if (!permissions) {
-        return 0;
+        return;
     }
-    int image_offset = (permissions - 1) * WAREHOUSE_FLAG_FRAMES;
-    int image_id = assets_get_image_id("Flags", "Warehouse_Flag_Market") + image_offset;
-    return image_id;
-}
+    image_draw(base_permission_image[permissions] + b->data.warehouse.flag_frame, x, y, color_mask, draw_context.scale);
 
-static void draw_warehouse_flag(const building *b, int x, int y, color_t color_mask)
-{
-    if (!b->has_plague) {
-        int image_id = get_warehouse_flag_image_id(b);
-        if (!image_id) {
-            return;
-        }
-        image_id += b->data.warehouse.flag_frame;
-        image_draw(image_id, x + 19, y - 56, color_mask, draw_context.scale);
-    }
-}
-
-static int get_granary_flag_image_id(const building *b)
-{
-    const building_storage *storage = building_storage_get(b->storage_id);
-    int permission_mask = 0xf;
-    int warehouse_permission_mask = 0x7;
-    int permissions = (~storage->permissions) & permission_mask;
-    if (!permissions) {
-        return 0;
-    }
-
-    // Can mostly reuse the flags used for Warehouses, with two exceptions
-    // With all granary permissions, use reuse warehouse flag for all permissions
-    if (permissions == permission_mask) {
-        int image_id = assets_get_image_id("Flags", "Warehouse_Flag_All");
-        return image_id;
-    }
-    // Different flag for all permissions except mess hall
-    if (permissions == warehouse_permission_mask) {
-        int image_id = assets_get_image_id("Flags", "Granary_Flag_Market_Both_Traders");
-        return image_id;
-    }
-    int image_offset = (permissions - 1) * WAREHOUSE_FLAG_FRAMES;
-    int image_id = assets_get_image_id("Flags", "Warehouse_Flag_Market") + image_offset;
-    return image_id;
-}
-
-static void draw_granary_flag(const building *b, int x, int y, color_t color_mask)
-{
-    if (!b->has_plague) {
-        int image_id = get_granary_flag_image_id(b);
-        if (!image_id) {
-            return;
-        }
-        image_id += b->data.warehouse.flag_frame;
-        image_draw(image_id, x + 81, y - 101, color_mask, draw_context.scale);
-    }
+    building_animation_advance_storage_flag(b, base_permission_image[permissions]);
 }
 
 static void draw_warehouse_ornaments(int x, int y, color_t color_mask)
@@ -596,13 +632,13 @@ static void draw_granary_stores(const image *img, const building *b, int x, int 
 
 static void draw_ceres_module_crops(int x, int y, int image_offset, color_t color_mask)
 {
-    int image_id = assets_get_image_id("Religion", "Ceres Module 1 Crop");
+    int image_id = assets_get_image_id("Monuments", "Ceres Module 1 Crop");
     image_draw(image_id + image_offset, x, y, color_mask, draw_context.scale);
 }
 
 static void draw_neptune_fountain(int x, int y, int image_offset, color_t color_mask)
 {
-    int image_id = assets_get_image_id("Religion", "Neptune Module 2 Fountain");
+    int image_id = assets_get_image_id("Monuments", "Neptune Module 2 Fountain");
     image_draw(image_id + image_offset, x, y, color_mask, draw_context.scale);
 }
 
@@ -622,12 +658,10 @@ static void draw_animation(int x, int y, int grid_offset)
                 draw_dock_workers(b, x, y, color_mask);
             } else if (b->type == BUILDING_WAREHOUSE) {
                 draw_warehouse_ornaments(x, y, color_mask);
-                draw_warehouse_flag(b, x, y, color_mask);
-                building_animation_advance_storage_flag(b, get_warehouse_flag_image_id(b));
+                draw_permissions_flag(b, x + 19, y - 56, color_mask);
             } else if (b->type == BUILDING_GRANARY) {
                 draw_granary_stores(img, b, x, y, color_mask);
-                draw_granary_flag(b, x, y, color_mask);
-                building_animation_advance_storage_flag(b, get_granary_flag_image_id(b));
+                draw_permissions_flag(b, x + 81, y - 101, color_mask);
             } else if (b->type == BUILDING_BURNING_RUIN && b->has_plague) {
                 image_draw(image_group(GROUP_PLAGUE_SKULL), x + 18, y - 32, color_mask, draw_context.scale);
             }
@@ -656,19 +690,22 @@ static void draw_animation(int x, int y, int grid_offset)
                     int festival_id = calc_bound(city_festival_games_active(), 0, 4);
                     int extra_x = festival_id ? 57 : 127;
                     int extra_y = festival_id ? 12 : 93;
-                    int overlay_id = assets_get_image_id("Entertainment", "Col Base Overlay") + festival_id;
+                    int overlay_id = assets_get_image_id("Monuments", "Col Base Overlay") + festival_id;
                     image_draw(overlay_id, x + extra_x, y + extra_y - y_offset, color_mask, draw_context.scale);
                 }
             }
             if (b->has_plague) {
                 draw_plague(b, x, y, color_mask);
             }
+            if (b->type == BUILDING_DEPOT) {
+                draw_depot_resource(b, x, y, color_mask);
+            }
         }
     } else if (map_property_is_draw_tile(grid_offset) && building_id && b->has_plague) {
         draw_plague(b, x, y, color_mask);
     } else if (map_sprite_bridge_at(grid_offset)) {
         city_draw_bridge(x, y, draw_context.scale, grid_offset);
-    } else if (building_get(map_building_at(grid_offset))->type == BUILDING_FORT) {
+    } else if (b->type == BUILDING_FORT) {
         if (map_property_is_draw_tile(grid_offset)) {
             building *fort = building_get(map_building_at(grid_offset));
             image_id = assets_get_image_id("Military", "Fort_Jav_Flag_Central");
@@ -682,10 +719,26 @@ static void draw_animation(int x, int y, int grid_offset)
                 case CLIMATE_NORTHERN: image_id += 6; break;
                 default: break;
             }
+            if (fort->subtype.fort_figure_type == FIGURE_FORT_INFANTRY) {
+                image_id = assets_get_image_id("Military", "fort_aux_inf_flag_central");
+                switch (scenario_property_climate()) {
+                    case CLIMATE_DESERT: image_id += 2; break;
+                    case CLIMATE_NORTHERN: image_id += 1; break;
+                    default: break;
+                }
+            }
+            if (fort->subtype.fort_figure_type == FIGURE_FORT_ARCHER) {
+                image_id = assets_get_image_id("Military", "fort_aux_arch_flag_central");
+                switch (scenario_property_climate()) {
+                    case CLIMATE_DESERT: image_id += 2; break;
+                    case CLIMATE_NORTHERN: image_id += 1; break;
+                    default: break;
+                }
+            }
             image_draw(image_id, x + 81, y + 5,
                 draw_building_as_deleted(fort) ? COLOR_MASK_RED : COLOR_MASK_NONE, draw_context.scale);
         }
-    } else if (building_get(map_building_at(grid_offset))->type == BUILDING_GATEHOUSE) {
+    } else if (b->type == BUILDING_GATEHOUSE) {
         int xy = map_property_multi_tile_xy(grid_offset);
         int orientation = city_view_orientation();
         if ((orientation == DIR_0_TOP && xy == EDGE_X1Y1) ||
@@ -819,10 +872,10 @@ static int get_highlighted_formation_id(const map_tile *tile)
 
 static void update_clouds(void)
 {
-    if (!window_is(WINDOW_CITY) && !window_is(WINDOW_CITY_MILITARY)) {
+    int camera_x, camera_y;
+    if (game_state_is_paused() || (!window_is(WINDOW_CITY) && !window_is(WINDOW_CITY_MILITARY))) {
         clouds_pause();
     }
-    int camera_x, camera_y;
     city_view_get_camera_in_pixels(&camera_x, &camera_y);
     clouds_draw(camera_x, camera_y, GRID_SIZE * 60, GRID_SIZE * 30, draw_context.scale);
 }

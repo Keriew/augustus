@@ -1,5 +1,6 @@
 #include "industry.h"
 
+#include "assets/assets.h"
 #include "building/building.h"
 #include "building/count.h"
 #include "building/industry.h"
@@ -19,27 +20,28 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/mouse.h"
-#include "scenario/building.h"
+#include "scenario/allowed_building.h"
 #include "scenario/property.h"
 #include "translation/translation.h"
 #include "window/popup_dialog.h"
 
 #include <stdio.h>
 
-static void set_city_mint_conversion(int resource, int param2);
+static void set_city_mint_conversion(const generic_button *button);
 
 static generic_button mint_conversion_buttons[] = {
-    {0, 0, 432, 24, set_city_mint_conversion, button_none, RESOURCE_DENARII},
-    {0, 24, 432, 24, set_city_mint_conversion, button_none, RESOURCE_GOLD},
+    {0, 0, 432, 24, set_city_mint_conversion, 0, RESOURCE_DENARII},
+    {0, 24, 432, 24, set_city_mint_conversion, 0, RESOURCE_GOLD},
 };
 
 static struct {
     int city_mint_id;
-    int focus_button_id;
+    unsigned int focus_button_id;
 } data;
 
 static void draw_farm(building_info_context *c, int help_id, const char *sound_file, int group_id, int resource)
 {
+    c->advisor_button = ADVISOR_TRADE;
     c->help_id = help_id;
     window_building_play_sound(c, sound_file);
 
@@ -127,6 +129,7 @@ void window_building_draw_pig_farm(building_info_context *c)
 static void draw_raw_material(
     building_info_context *c, int help_id, const char *sound_file, int group_id, int text_offset, int resource)
 {
+    c->advisor_button = ADVISOR_TRADE;
     c->help_id = help_id;
     window_building_play_sound(c, sound_file);
 
@@ -198,7 +201,7 @@ void window_building_draw_gold_mine(building_info_context *c)
 
 void window_building_draw_stone_quarry(building_info_context *c)
 {
-    draw_raw_material(c, 93, "wavs/mine.wav", CUSTOM_TRANSLATION, TR_BUILDING_STONE_QUARRY, RESOURCE_STONE);
+    draw_raw_material(c, 93, "wavs/quarry.wav", CUSTOM_TRANSLATION, TR_BUILDING_STONE_QUARRY, RESOURCE_STONE);
 }
 
 void window_building_draw_sand_pit(building_info_context *c)
@@ -226,6 +229,7 @@ static int no_target_for_resource(const building *b, resource_type resource)
 static void draw_workshop(
     building_info_context *c, int help_id, const char *sound_file, int group_id, int text_offset, resource_type resource)
 {
+    c->advisor_button = ADVISOR_TRADE;
     c->help_id = help_id;
     window_building_play_sound(c, sound_file);
 
@@ -315,6 +319,11 @@ static void draw_workshop(
         window_building_draw_description_at(c, 96 + resources_y_offset, group_id, text_offset + 6);
     }
 
+    if (b->type == BUILDING_CONCRETE_MAKER) {
+        // Concrete maker needs more text space
+        resources_y_offset += 2 * BLOCK_SIZE;
+    }
+
     inner_panel_draw(c->x_offset + 16, c->y_offset + 146 + resources_y_offset, c->width_blocks - 2, 4);
     window_building_draw_employment(c, 152 + resources_y_offset);
     window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76,
@@ -350,26 +359,29 @@ void window_building_draw_pottery_workshop(building_info_context *c)
 
 void window_building_draw_brickworks(building_info_context *c)
 {
-    draw_workshop(c, 1, "wavs/pottery_workshop.wav", CUSTOM_TRANSLATION, TR_BUILDING_BRICKWORKS, RESOURCE_BRICKS);
+    draw_workshop(c, 1, ASSETS_DIRECTORY "/Sounds/Brickworks.ogg", CUSTOM_TRANSLATION,
+        TR_BUILDING_BRICKWORKS, RESOURCE_BRICKS);
 }
 
 void window_building_draw_concrete_maker(building_info_context *c)
 {
-    draw_workshop(c, 1, "wavs/pottery_workshop.wav", CUSTOM_TRANSLATION, TR_BUILDING_CONCRETE_MAKER, RESOURCE_CONCRETE);
+    draw_workshop(c, 1, ASSETS_DIRECTORY "/Sounds/ConcreteMaker.ogg", CUSTOM_TRANSLATION, TR_BUILDING_CONCRETE_MAKER, RESOURCE_CONCRETE);
 }
 
 static int governor_palace_is_allowed(void)
 {
-    return scenario_building_allowed(BUILDING_GOVERNORS_HOUSE) || scenario_building_allowed(BUILDING_GOVERNORS_VILLA) ||
-        scenario_building_allowed(BUILDING_GOVERNORS_PALACE);
+    return scenario_allowed_building(BUILDING_GOVERNORS_HOUSE) || scenario_allowed_building(BUILDING_GOVERNORS_VILLA) ||
+        scenario_allowed_building(BUILDING_GOVERNORS_PALACE);
 }
 
 void window_building_draw_city_mint(building_info_context *c)
 {
     c->help_id = 0;
+    window_building_play_sound(c, "wavs/coin.wav");
     building *b = building_get(c->building_id);
     data.city_mint_id = 0;
     if (b->monument.phase == MONUMENT_FINISHED) {
+        c->advisor_button = ADVISOR_FINANCIAL;
         outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
         image_draw(resource_get_data(RESOURCE_DENARII)->image.icon, c->x_offset + 10, c->y_offset + 10,
             COLOR_MASK_NONE, SCALE_NONE);
@@ -458,7 +470,7 @@ void window_building_draw_city_mint_foreground(building_info_context *c)
     button_border_draw(x, y, 20, 20, data.focus_button_id == 1);
     button_border_draw(x, y + 24, 20, 20, data.focus_button_id == 2);
     int selected_offset = building_get(data.city_mint_id)->output_resource_id == RESOURCE_DENARII ? 0 : 24;
-    text_draw_centered(string_from_ascii("x"), x + 1, y + selected_offset + 4, 20, FONT_NORMAL_BLACK, 0);
+    image_draw(assets_get_image_id("UI", "Denied_Walker_Checkmark"), x + 4, y + 4 + selected_offset, COLOR_MASK_NONE, SCALE_NONE);
 }
 
 static int shipyard_boats_needed(void)
@@ -504,6 +516,7 @@ void window_building_draw_shipyard(building_info_context *c)
 void window_building_draw_wharf(building_info_context *c)
 {
     c->help_id = 84;
+	c->advisor_button = ADVISOR_TRADE;
     window_building_play_sound(c, "wavs/wharf.wav");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(102, 0, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
@@ -560,8 +573,9 @@ static void city_mint_conversion_changed(int accepted, int checked)
     city_mint->data.industry.production_current_month = 0;
 }
 
-static void set_city_mint_conversion(int resource, int param2)
+static void set_city_mint_conversion(const generic_button *button)
 {
+    resource_type resource = button->parameter1;
     if (building_get(data.city_mint_id)->output_resource_id != resource) {
         window_popup_dialog_show_confirmation(translation_for(TR_BUILDING_CITY_MINT_CHANGE_PRODUCTION),
             translation_for(TR_BUILDING_CITY_MINT_PROGRESS_WILL_BE_LOST), 0, city_mint_conversion_changed);

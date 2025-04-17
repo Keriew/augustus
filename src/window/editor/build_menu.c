@@ -17,24 +17,24 @@
 #define MENU_ITEM_WIDTH 160
 #define MENU_CLICK_MARGIN 20
 
-static void button_menu_item(int index, int param2);
+static void button_menu_item(const generic_button *button);
 
 static generic_button build_menu_buttons[] = {
-    {0, 0, 160, 20, button_menu_item, button_none, 0, 0},
-    {0, 24, 160, 20, button_menu_item, button_none, 1, 0},
-    {0, 48, 160, 20, button_menu_item, button_none, 2, 0},
-    {0, 72, 160, 20, button_menu_item, button_none, 3, 0},
-    {0, 96, 160, 20, button_menu_item, button_none, 4, 0},
-    {0, 120, 160, 20, button_menu_item, button_none, 5, 0},
-    {0, 144, 160, 20, button_menu_item, button_none, 6, 0},
-    {0, 168, 160, 20, button_menu_item, button_none, 7, 0},
-    {0, 192, 160, 20, button_menu_item, button_none, 8, 0},
-    {0, 216, 160, 20, button_menu_item, button_none, 9, 0},
-    {0, 240, 160, 20, button_menu_item, button_none, 10, 0},
-    {0, 264, 160, 20, button_menu_item, button_none, 11, 0},
-    {0, 288, 160, 20, button_menu_item, button_none, 12, 0},
-    {0, 312, 160, 20, button_menu_item, button_none, 13, 0},
-    {0, 336, 160, 20, button_menu_item, button_none, 14, 0}
+    {0, 0, 160, 20, button_menu_item},
+    {0, 24, 160, 20, button_menu_item, 0, 1},
+    {0, 48, 160, 20, button_menu_item, 0, 2},
+    {0, 72, 160, 20, button_menu_item, 0, 3},
+    {0, 96, 160, 20, button_menu_item, 0, 4},
+    {0, 120, 160, 20, button_menu_item, 0, 5},
+    {0, 144, 160, 20, button_menu_item, 0, 6},
+    {0, 168, 160, 20, button_menu_item, 0, 7},
+    {0, 192, 160, 20, button_menu_item, 0, 8},
+    {0, 216, 160, 20, button_menu_item, 0, 9},
+    {0, 240, 160, 20, button_menu_item, 0, 10},
+    {0, 264, 160, 20, button_menu_item, 0, 11},
+    {0, 288, 160, 20, button_menu_item, 0, 12},
+    {0, 312, 160, 20, button_menu_item, 0, 13},
+    {0, 336, 160, 20, button_menu_item, 0, 14}
 };
 
 static const int Y_MENU_OFFSETS[16] = {
@@ -55,16 +55,15 @@ static const int MENU_TYPES[MENU_NUM_ITEMS][MAX_ITEMS_PER_MENU] = {
 
 static struct {
     int selected_submenu;
-    int num_items;
+    unsigned int num_items;
     int y_offset;
-
-    int focus_button_id;
+    unsigned int focus_button_id;
 } data = {MENU_NONE};
 
 static int count_items(int submenu)
 {
     int count = 0;
-    for (int i = 0; i < MAX_ITEMS_PER_MENU && MENU_TYPES[submenu][i] >= 0; i++) {
+    for (unsigned int i = 0; i < MAX_ITEMS_PER_MENU && MENU_TYPES[submenu][i] >= 0; i++) {
         count++;
     }
     return count;
@@ -92,7 +91,7 @@ static int get_sidebar_x_offset(void)
 static void draw_menu_buttons(void)
 {
     int x_offset = get_sidebar_x_offset();
-    for (int i = 0; i < data.num_items; i++) {
+    for (unsigned int i = 0; i < data.num_items; i++) {
         label_draw(x_offset - MENU_X_OFFSET, data.y_offset + MENU_Y_OFFSET + MENU_ITEM_HEIGHT * i, 10,
             data.focus_button_id == i + 1 ? 1 : 2);
         lang_text_draw_centered(48, MENU_TYPES[data.selected_submenu][i], x_offset - MENU_X_OFFSET,
@@ -113,7 +112,7 @@ static int click_outside_menu(const mouse *m, int x_offset)
         (m->x < x_offset - MENU_X_OFFSET - MENU_CLICK_MARGIN ||
             m->x > x_offset + MENU_CLICK_MARGIN ||
             m->y < data.y_offset + MENU_Y_OFFSET - MENU_CLICK_MARGIN ||
-            m->y > data.y_offset + MENU_Y_OFFSET + MENU_CLICK_MARGIN + MENU_ITEM_HEIGHT * data.num_items);
+            m->y > data.y_offset + MENU_Y_OFFSET + MENU_CLICK_MARGIN + MENU_ITEM_HEIGHT * (int) data.num_items);
 }
 
 static int handle_build_submenu(const mouse *m)
@@ -135,8 +134,10 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 }
 
-static void button_menu_item(int index, int param2)
+static void button_menu_item(const generic_button *button)
 {
+    int index = button->parameter1;
+
     widget_map_editor_clear_current_tile();
 
     switch (data.selected_submenu) {

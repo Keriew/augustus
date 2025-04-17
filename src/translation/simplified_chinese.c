@@ -175,7 +175,7 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_EDITOR_TOGGLE_BATTLE_INFO, "战斗信息切换"},
     {TR_HOTKEY_EDIT_TITLE, "按下新热键"},
     {TR_BUILDING_ROADBLOCK, "路   障"},
-    {TR_BUILDING_ROADBLOCK_DESC, "路障可拦住四处游走的行人。"},
+    {TR_BUILDING_ROADBLOCK_DESC, "路障可阻止四处游走的行人。"},
     {TR_BUILDING_ARCHITECT_GUILD, "建筑师协会"},
     {TR_BUILDING_ARCHITECT_GUILD_DESC, "建筑师们在此不辞辛劳地为罗马的荣耀建造纪念馆。"},
     {TR_BUILDING_GRAND_TEMPLE_ADD_MODULE, "授予神庙名号"},

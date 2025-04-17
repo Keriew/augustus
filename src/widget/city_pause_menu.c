@@ -2,10 +2,12 @@
 
 #include "building/construction.h"
 #include "core/lang.h"
+#include "game/campaign.h"
 #include "game/file.h"
-#include "game/undo.h"
+#include "game/settings.h"
 #include "game/state.h"
 #include "game/system.h"
+#include "game/undo.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/lang_text.h"
@@ -19,20 +21,21 @@
 #include "window/popup_dialog.h"
 #include "window/city.h"
 #include "window/main_menu.h"
-#include "window/mission_briefing.h"
+#include "window/mission_selection.h"
+#include "window/plain_message_dialog.h"
 
-static void button_click(int type, int param2);
+static void button_click(const generic_button *button);
 
-static int focus_button_id;
+static unsigned int focus_button_id;
 
 static generic_button buttons[] = {
-        {192, 100, 192, 25, button_click, button_none, 1, 0},
-        {192, 140, 192, 25, button_click, button_none, 2, 0},
-        {192, 180, 192, 25, button_click, button_none, 3, 0},
-        {192, 220, 192, 25, button_click, button_none, 4, 0},
-        {192, 260, 192, 25, button_click, button_none, 5, 0},
-        {192, 300, 192, 25, button_click, button_none, 6, 0},
-        {192, 340, 192, 25, button_click, button_none, 7, 0},
+        {192, 100, 192, 25, button_click, 0, 1},
+        {192, 140, 192, 25, button_click, 0, 2},
+        {192, 180, 192, 25, button_click, 0, 3},
+        {192, 220, 192, 25, button_click, 0, 4},
+        {192, 260, 192, 25, button_click, 0, 5},
+        {192, 300, 192, 25, button_click, 0, 6},
+        {192, 340, 192, 25, button_click, 0, 7},
 };
 
 #define MAX_BUTTONS (sizeof(buttons) / sizeof(generic_button))
@@ -48,13 +51,13 @@ static void draw_foreground(void)
     }
 
     text_draw_centered(translation_for(TR_LABEL_PAUSE_MENU), 192, 58, 192, FONT_LARGE_BLACK, 0);
-    lang_text_draw_centered(13, 5, 192, 106, 192, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(1, 2, 192, 146, 192, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(1, 3, 192, 186, 192, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(1, 4, 192, 226, 192, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(1, 6, 192, 266, 192, FONT_NORMAL_GREEN);
-    text_draw_centered(translation_for(TR_BUTTON_BACK_TO_MAIN_MENU), 192, 306, 192, FONT_NORMAL_GREEN, 0);
-    lang_text_draw_centered(1, 5, 192, 346, 192, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(13, 5, 192, 108, 192, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(1, 2, 192, 148, 192, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(1, 3, 192, 188, 192, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(1, 4, 192, 228, 192, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(1, 6, 192, 268, 192, FONT_NORMAL_GREEN);
+    text_draw_centered(translation_for(TR_BUTTON_BACK_TO_MAIN_MENU), 192, 308, 192, FONT_NORMAL_GREEN, 0);
+    lang_text_draw_centered(1, 5, 192, 348, 192, FONT_NORMAL_GREEN);
 
     graphics_reset_dialog();
 }
@@ -78,14 +81,21 @@ static void handle_input(const mouse *m, const hotkeys *h)
 
 static void replay_map_confirmed(int confirmed, int checked)
 {
-    if (confirmed) {
-        if (scenario_is_custom()) {
-            game_file_start_scenario_by_name(scenario_name());
-            window_city_show();
+    if (!confirmed) {
+        return;
+    }
+    if (!game_campaign_is_active()) {
+        if (!game_file_start_scenario_by_name(scenario_name())) {
+            window_plain_message_dialog_show_with_extra(TR_REPLAY_MAP_NOT_FOUND_TITLE,
+                TR_REPLAY_MAP_NOT_FOUND_MESSAGE, 0, scenario_name());
         } else {
-            scenario_save_campaign_player_name();
-            window_mission_briefing_show();
+            window_city_show();
         }
+    } else {
+        int mission_id = game_campaign_is_original() ? scenario_campaign_mission() : 0;
+        setting_set_personal_savings_for_mission(mission_id, scenario_starting_personal_savings());
+        scenario_save_campaign_player_name();
+        window_mission_selection_show_again();
     }
 }
 
@@ -106,8 +116,9 @@ static void confirm_exit(int accepted, int checked)
     }
 }
 
-static void button_click(int type, int param2)
+static void button_click(const generic_button *button)
 {
+    int type = button->parameter1;
     if (type == 1) {
         window_go_back();
     } else if (type == 2) {

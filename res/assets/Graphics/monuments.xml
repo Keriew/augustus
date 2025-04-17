@@ -1,0 +1,1454 @@
+<?xml version="1.0"?>
+<!DOCTYPE assetlist>
+<!-- Unless specifically mentioned, all assets created by Areldir -->
+<assetlist name="Monuments">
+	<!-- Note: 1x1 construction site sand footprints -->
+	<image id="Construction_Footprint_01" src="Construction_Footprint_01" isometric="true"/>
+	<image id="Construction_Footprint_02" src="Construction_Footprint_02" isometric="true"/>
+	<image id="Construction_Footprint_03" src="Construction_Footprint_03" isometric="true"/>
+	<image id="Construction_Footprint_04" src="Construction_Footprint_04" isometric="true"/>
+	<image id="Construction_Footprint_05" src="Construction_Footprint_05" isometric="true"/>
+	<image id="Construction_Footprint_06" src="Construction_Footprint_06" isometric="true"/>
+	<image id="Construction_Footprint_07" src="Construction_Footprint_07" isometric="true"/>
+	<image id="Construction_Footprint_08" src="Construction_Footprint_08" isometric="true"/>
+	<image id="Construction_Footprint_09" src="Construction_Footprint_09" isometric="true"/>
+	<!-- Note: 2x2 construction site sand footprint -->
+	<image id="2x2_Construction_Footprint" width="118" height="60" isometric="true">
+		<layer group="this" image="Construction_Footprint_01" x="0" y="15"/>
+		<layer group="this" image="Construction_Footprint_02" x="30" y="0"/>
+		<layer group="this" image="Construction_Footprint_03" x="30" y="30" invert="horizontal"/>
+		<layer group="this" image="Construction_Footprint_04" x="60" y="15"/>
+	</image>
+	<!-- Note: 3x3 construction site sand footprint -->
+	<image id="3x3_Construction_Footprint" width="178" height="90" isometric="true">
+		<layer group="this" image="Construction_Footprint_01" x="0" y="30" invert="horizontal"/>
+		<layer group="this" image="Construction_Footprint_02" x="30" y="15"/>
+		<layer group="this" image="Construction_Footprint_04" x="30" y="45"/>
+		<layer group="this" image="Construction_Footprint_03" x="60" y="0" invert="horizontal"/>
+		<layer group="this" image="Construction_Footprint_05" x="60" y="30"/>
+		<layer group="this" image="Construction_Footprint_06" x="60" y="60"/>
+		<layer group="this" image="Construction_Footprint_07" x="90" y="15" invert="horizontal"/>
+		<layer group="this" image="Construction_Footprint_09" x="90" y="45"/>
+		<layer group="this" image="Construction_Footprint_08" x="120" y="30"/>
+	</image>
+	<!-- Note: 3x3 construction site cobblestone footprint -->
+	<image id="3x3_Cobblestone_Footprint" width="178" height="90" isometric="true">
+		<layer group="112" image="17" x="0" y="30" invert="horizontal"/>
+		<layer group="112" image="34" x="30" y="15"/>
+		<layer group="112" image="17" x="30" y="45"/>
+		<layer group="112" image="34" x="60" y="0" invert="horizontal"/>
+		<layer group="112" image="17" x="60" y="30"/>
+		<layer group="112" image="34" x="60" y="60"/>
+		<layer group="112" image="17" x="90" y="15" invert="horizontal"/>
+		<layer group="112" image="34" x="90" y="45"/>
+		<layer group="112" image="17" x="120" y="30"/>
+	</image>
+	<!-- Note: 4x4 construction site sand footprint -->
+	<image id="4x4_Construction_Footprint" width="238" height="120" isometric="true">
+		<layer group="this" image="3x3_Construction_Footprint" x="0" y="15"/>
+		<layer group="this" image="3x3_Construction_Footprint" x="30" y="30"/>
+		<layer group="this" image="2x2_Construction_Footprint" x="60" y="0" invert="horizontal"/>
+		<layer group="this" image="2x2_Construction_Footprint" x="120" y="30"/>
+	</image>
+	<!-- Note: 5x5 construction site sand footprint -->
+	<image id="5x5_Construction_Footprint" width="298" height="150" isometric="true">
+		<layer group="this" image="3x3_Construction_Footprint" x="0" y="30" invert="horizontal"/>
+		<layer group="this" image="4x4_Construction_Footprint" x="60" y="15"/>
+		<layer group="this" image="2x2_Construction_Footprint" x="90" y="0"/>
+		<layer group="this" image="2x2_Construction_Footprint" x="90" y="90"/>
+	</image>
+	<!-- Note: 7x7 construction site sand footprint -->
+	<image id="7x7_Construction_Footprint" width="418" height="210" isometric="true">
+		<layer group="this" image="5x5_Construction_Footprint" x="0" y="30" invert="horizontal"/>
+		<layer group="this" image="3x3_Construction_Footprint" x="120" y="0"/>
+		<layer group="this" image="3x3_Construction_Footprint" x="120" y="120"/>
+		<layer group="this" image="4x4_Construction_Footprint" x="180" y="45" invert="horizontal"/>
+	</image>
+	<!-- Note: 1x1 construction site timber pad -->
+	<image id="Construction_Part_TimberPad" src="Construction_Part_TimberPad" isometric="true"/>
+	<!-- Note: Construction site corner pillars -->
+	<image id="Construction_Part_Pillar" src="Construction_Part_Pillar"/>
+	<image id="Construction_Part_Pillar_B" width="11" height="12">
+		<layer src="Construction_Part_Shadow_B"/>
+		<layer group="this" image="Construction_Part_Pillar"/>
+	</image>
+	<image id="Construction_Part_Pillar_L" width="8" height="12">
+		<layer src="Construction_Part_Shadow_L"/>
+		<layer group="this" image="Construction_Part_Pillar"/>
+	</image>
+	<!-- Note: Administration Monument/s -->
+	<!-- Note: City Mint 0% and 50% construction phases -->
+	<image id="City_Mint_Construction_01" width="178" height="99" isometric="true">
+		<layer group="this" image="3x3_Construction_Footprint" x="0" y="9"/>
+		<layer src="3x3_Construction_Borders" x="0" y="9"/>
+		<layer group="this" image="Construction_Part_TimberPad_Shadow" x="59" y="53"/>
+		<layer group="this" image="Construction_Part_Pillar" x="88" y="0"/>
+		<layer group="this" image="Construction_Part_Pillar" x="174" y="43"/>
+		<layer group="this" image="Construction_Part_Pillar_L" x="1" y="44"/>
+		<layer group="this" image="Construction_Part_Pillar_B" x="87" y="87"/>
+		<layer src="City_Mint_Construction_01" x="49" y="21"/>
+		<layer group="this" image="Construction_Part_TimberPad" x="31" y="53"/>
+		<layer src="Construction_Part_Groma" x="88" y="29"/>
+		<layer src="Construction_Part_Cart" x="113" y="42"/>
+	</image>
+	<image id="City_Mint_Construction_02" src="City_Mint_Construction_02" width="178" height="117" isometric="true"/>
+	<!-- Note: City Mint OFF -->
+	<image id="City_Mint_OFF" src="City_Mint_OFF" width="178" height="117" isometric="true"/>
+	<!-- Note: City Mint OFF - Alternative red-roofed asset -->
+	<image id="City_Mint_OFF_Alt" width="178" height="117" isometric="true">
+		<layer group="this" image="City_Mint_OFF" x="0" y="0"/>
+		<layer src="City_Mint_OFF_Alt" x="13" y="0"/>
+	</image>
+	<!-- Note: City Mint ON animation reference DO NOT USE! -->
+	<image id="City_Mint_ON_01" width="178" height="117">
+		<layer src="City_Mint_ON_Base" x="54" y="46"/>
+		<layer src="City_Mint_ON_01" x="59" y="78"/>
+	</image>
+	<image id="City_Mint_ON_02" width="178" height="117">
+		<layer src="City_Mint_ON_Base" x="54" y="46"/>
+		<layer src="City_Mint_ON_02" x="59" y="78"/>
+	</image>
+	<image id="City_Mint_ON_03" width="178" height="117">
+		<layer src="City_Mint_ON_Base" x="54" y="46"/>
+		<layer src="City_Mint_ON_03" x="59" y="78"/>
+	</image>
+	<image id="City_Mint_ON_04" width="178" height="117">
+		<layer src="City_Mint_ON_Base" x="54" y="46"/>
+		<layer src="City_Mint_ON_04" x="59" y="78"/>
+	</image>
+	<image id="City_Mint_ON_05" width="178" height="117">
+		<layer src="City_Mint_ON_Base" x="54" y="46"/>
+		<layer src="City_Mint_ON_05" x="59" y="78"/>
+	</image>
+	<!-- Note: City Mint ON -->
+	<image id="City_Mint_ON" width="178" height="117" isometric="true">
+		<layer group="this" image="City_Mint_OFF"/>
+		<animation speed="6" x="0" y="0" reversible="false">
+			<frame group="this" image="City_Mint_ON_01"/>
+			<frame group="this" image="City_Mint_ON_02"/>
+			<frame group="this" image="City_Mint_ON_03"/>
+			<frame group="this" image="City_Mint_ON_04"/>
+			<frame group="this" image="City_Mint_ON_05"/>
+		</animation>
+	</image>
+	<!-- Note: City Mint ON - Alternative red-roofed asset -->
+	<image id="City_Mint_ON_Alt" width="178" height="117" isometric="true">
+		<layer group="this" image="City_Mint_OFF_Alt"/>
+		<animation speed="6" x="0" y="0" reversible="false">
+			<frame group="this" image="City_Mint_ON_01"/>
+			<frame group="this" image="City_Mint_ON_02"/>
+			<frame group="this" image="City_Mint_ON_03"/>
+			<frame group="this" image="City_Mint_ON_04"/>
+			<frame group="this" image="City_Mint_ON_05"/>
+		</animation>
+	</image>
+	<!-- Note: Education Monument/s -->
+	<!-- Note: Great Library 0%, 25%, 50%, and 75% construction phases -->
+	<!--image id="Great_Library_Construction_01" width="238" height="129" isometric="true">
+		<layer group="this" image="4x4_Construction_Footprint" x="0" y="9"/>
+		<layer src="4x4_Construction_Borders" x="0" y="9"/>
+		<layer group="this" image="Construction_Part_TimberPad" x="45" y="75"/>
+		<layer group="this" image="Construction_Part_TimberPad" x="45" y="32"/>
+		<layer group="this" image="Construction_Part_TimberPad" x="134" y="32"/>
+		<layer group="this" image="Construction_Part_TimberPad" x="134" y="75"/>
+		<layer src="Great_Library_Construction_01" x="0" y="0"/>
+		<layer src="Construction_Part_Cart" x="176" y="61"/>
+		<layer src="Construction_Part_Pots_01" x="73" y="55"/>
+	</image>
+	<image id="Great_Library_Construction_02" src="Great_Library_Construction_02" isometric="true"/>
+	<image id="Great_Library_Construction_03" src="Great_Library_Construction_03" isometric="true"/>
+	<image id="Great_Library_Construction_04" src="Great_Library_Construction_04" isometric="true"/-->
+	<!-- Note: Great Library Building Asset -->
+	<!--image id="Great_Library" src="Great_Library" isometric="true"/-->
+	<!-- Note: Entertainment Monument/s -->
+	<!-- Note: Circus 0% construction phases -->
+	<image id="Circus NESW 01" width="298" height="159" isometric="true">
+		<layer group="this" image="5x5_Construction_Footprint" x="0" y="9"/>
+		<layer src="Circus_Construction_01_Back_Part" x="0" y="0"/>
+		<layer group="this" image="Construction_Part_TimberPad" x="180" y="40"/>
+	</image>
+	<image id="Circus NWSE 01" width="298" height="159" isometric="true">
+		<layer group="this" image="5x5_Construction_Footprint" x="0" y="9"/>
+		<layer src="Circus_Construction_01_R_Back_Part" x="0" y="0"/>
+	</image>
+	<image id="Circus NESW 02" isometric="true">
+		<layer group="this" image="5x5_Construction_Footprint" x="0" y="0"/>
+		<layer src="Circus_Construction_01_Middle_Part" x="0" y="0"/>
+	</image>
+	<image id="Circus NWSE 02" isometric="true">
+		<layer group="this" image="5x5_Construction_Footprint" x="0" y="0"/>
+		<layer src="Circus_Construction_01_R_Middle_Part" x="0" y="0"/>
+	</image>
+	<image id="Circus NESW 03" isometric="true">
+		<layer group="this" image="5x5_Construction_Footprint" x="0" y="0"/>
+		<layer src="Circus_Construction_01_Front_Part" x="0" y="0"/>
+		<layer group="this" image="Construction_Part_TimberPad" x="61" y="89"/>
+		<layer src="Construction_Part_Cart" x="111" y="104"/>
+	</image>
+	<image id="Circus NWSE 03" isometric="true">
+		<layer group="this" image="5x5_Construction_Footprint" x="0" y="0"/>
+		<layer src="Circus_Construction_01_R_Front_Part" x="0" y="0"/>
+		<layer src="Construction_Part_Cart" x="152" y="104"/>
+	</image>
+	<!-- Note: Circus 25% construction phases -->
+	<image id="Circus NESW 13" width="298" height="156" isometric="true">
+		<layer group="213" image="0" part="footprint" x="0" y="-79"/>
+		<layer src="Circus_Construction_02_Back_Part"/>
+	</image>
+	<image id="Circus NWSE 13" width="298" height="155" isometric="true">
+		<layer group="214" image="0" part="footprint" x="0" y="-79"/>
+		<layer src="Circus_Construction_02_R_Back_Part"/>
+		<layer src="Construction_Part_Cart" x="125" y="77"/>
+	</image>
+	<image id="Circus NESW 12" width="298" height="150" isometric="true">
+		<layer group="213" image="2" part="footprint" x="0" y="-31"/>
+		<layer src="Circus_Construction_02_Middle_Part"/>
+		<layer src="Construction_Part_Cart" x="44" y="72"/>
+	</image>
+	<image id="Circus NWSE 12" width="298" height="150" isometric="true">
+		<layer group="214" image="2" part="footprint" x="0" y="-31"/>
+		<layer src="Circus_Construction_02_R_Middle_Part"/>
+	</image>
+	<image id="Circus NESW 11" width="298" height="150" isometric="true">
+		<layer group="213" image="4" part="footprint" x="0" y="-31"/>
+		<layer src="Circus_Construction_02_Front_Part"/>
+	</image>
+	<image id="Circus NWSE 11" width="298" height="150" isometric="true">
+		<layer group="214" image="4" part="footprint" x="0" y="-32"/>
+		<layer src="Circus_Construction_02_R_Front_Part"/>
+	</image>
+	<!-- Note: Circus 50% construction phases  -->
+	<image id="Circus NESW 23" width="298" height="179" isometric="true">
+		<layer group="213" image="0" part="footprint" x="0" y="-56"/>
+		<layer src="Circus_Construction_03_Back_Part"/>
+		<layer src="Construction_Part_Cart" x="128" y="97"/>
+	</image>
+	<image id="Circus NWSE 23" width="298" height="178" isometric="true">
+		<layer group="214" image="0" part="footprint" x="0" y="-56"/>
+		<layer src="Circus_Construction_03_R_Back_Part"/>
+		<layer src="Construction_Part_Cart" x="114" y="83"/>
+	</image>
+	<image id="Circus NESW 22" width="298" height="164" isometric="true">
+		<layer group="213" image="2" part="footprint" x="0" y="-17"/>
+		<layer src="Circus_Construction_03_Middle_Part"/>
+	</image>
+	<image id="Circus NWSE 22" width="298" height="164" isometric="true">
+		<layer group="214" image="2" part="footprint" x="0" y="-17"/>
+		<layer src="Circus_Construction_03_R_Middle_Part"/>
+	</image>
+	<image id="Circus NESW 21" width="298" height="165" isometric="true">
+		<layer group="213" image="4" part="footprint" x="0" y="-16"/>
+		<layer src="Circus_Construction_03_Front_Part"/>
+	</image>
+	<image id="Circus NWSE 21" width="298" height="165" isometric="true">
+		<layer group="214" image="4" part="footprint" x="0" y="-17"/>
+		<layer src="Circus_Construction_03_R_Front_Part"/>
+	</image>
+	<!-- Note: Circus 75% construction phases -->
+	<image id="Circus NESW 33" width="298" height="210" isometric="true">
+		<layer group="213" image="0" part="footprint" x="0" y="-25"/>
+		<layer src="Circus_Construction_04_Back_Part"/>
+	</image>
+	<image id="Circus NWSE 33" width="298" height="208" isometric="true">
+		<layer group="214" image="0" part="footprint" x="0" y="-26"/>
+		<layer src="Circus_Construction_04_R_Back_Part"/>
+	</image>
+	<image id="Circus NESW 32" width="298" height="181" isometric="true">
+		<layer group="213" image="2" x="0" y="0"/>
+		<layer src="Circus_Construction_04_Middle_Part" y="2"/>
+		<layer src="Construction_Part_Cart" x="101" y="73"/>
+	</image>
+	<image id="Circus NWSE 32" width="298" height="181" isometric="true">
+		<layer group="214" image="2" part="footprint" x="0" y="0"/>
+		<layer src="Circus_Construction_04_R_Middle_Part"/>
+		<layer src="Construction_Part_Cart" x="162" y="75"/>
+	</image>
+	<image id="Circus NESW 31" width="298" height="181" isometric="true">
+		<layer group="213" image="4" part="footprint" x="0" y="0"/>
+		<layer src="Circus_Construction_04_Front_Part"/>
+	</image>
+	<image id="Circus NWSE 31" width="298" height="181" isometric="true">
+		<layer group="214" image="4" part="footprint" x="0" y="-1"/>
+		<layer src="Circus_Construction_04_R_Front_Part"/>
+	</image>
+	<!-- Note: Circus 100% construction phases -->
+	<image id="Circus NESW 41" isometric="true">
+		<layer group="213" image="0" x="0" y="0"/>
+	</image>
+	<image id="Circus NWSE 41" isometric="true">
+		<layer group="214" image="0" x="0" y="0"/>
+	</image>
+	<image id="Circus NESW 42" isometric="true">
+		<layer group="213" image="2" x="0" y="0"/>
+	</image>
+	<image id="Circus NWSE 42" isometric="true">
+		<layer group="214" image="2" x="0" y="0"/>
+	</image>
+	<image id="Circus NESW 43" isometric="true">
+		<layer group="213" image="4" x="0" y="0"/>
+	</image>
+	<image id="Circus NWSE 43" isometric="true">
+		<layer group="214" image="4" x="0" y="0"/>
+	</image>
+	<!-- Note: Colosseum 0%, 25%, 50% and 75% construction phases respectively -->
+	<image id="Colosseum_Construction_01" width="298" height="159" isometric="true">
+		<layer group="this" image="5x5_Construction_Footprint" x="0" y="9"/>
+		<layer src="5x5_Construction_Borders" x="0" y="9"/>
+		<layer group="this" image="Construction_Part_TimberPad" x="60" y="39"/>
+		<layer src="Colosseum_Construction_01" x="0" y="0"/>
+		<layer group="this" image="Construction_Part_TimberPad" x="61" y="98"/>
+		<layer group="this" image="Construction_Part_TimberPad" x="179" y="98"/>
+		<layer group="this" image="Construction_Part_TimberPad" x="176" y="38"/>
+		<layer src="Construction_Part_Cart" x="111" y="113"/>
+		<layer src="Construction_Part_Pots_01" x="206" y="62"/>
+	</image>
+	<image id="Colosseum_Construction_02" width="298" height="154" isometric="true">
+		<layer group="48" image="0" part="footprint" x="0" y="-59"/>
+		<layer src="Colosseum_Construction_02" x="0" y="0"/>
+	</image>
+	<image id="Colosseum_Construction_03" width="298" height="173" isometric="true">
+		<layer group="48" image="0" part="footprint" x="0" y="-40"/>
+		<layer src="Colosseum_Construction_03" x="0" y="0"/>
+	</image>
+	<image id="Colosseum_Construction_04" width="298" height="186" isometric="true">
+		<layer group="48" image="0" part="footprint" x="0" y="-27"/>
+		<layer src="Colosseum_Construction_04" x="0" y="0"/>
+	</image>
+	<!-- Note: Colosseum ON state -->
+	<image id="Coloseum ON" width="298" height="213" isometric="true">
+		<layer group="48" y="0"/>
+		<layer group="48" image="14" x="70" y="33"/>
+		<layer src="Colosseum_ON_Overlay" x="70" y="33"/>
+	</image>
+	<!-- Note: Colosseum Gladiator Fight animations (Fixed vanilla ON state) -->
+	<image id="Col Glad Fight" width="298" height="213" isometric="true">
+		<layer group="this" image="Coloseum ON"/>
+		<animation speed="5" x="122" y="57" reversible="false">
+			<frame group="48" image="1"/>
+			<frame group="48" image="2"/>
+			<frame group="48" image="3"/>
+			<frame group="48" image="4"/>
+			<frame group="48" image="5"/>
+			<frame group="48" image="6"/>
+			<frame group="48" image="7"/>
+			<frame group="48" image="8"/>
+			<frame group="48" image="9"/>
+			<frame group="48" image="10"/>
+			<frame group="48" image="11"/>
+			<frame group="48" image="12"/>
+			<frame group="48" image="13"/>
+		</animation>
+	</image>
+	<!-- Note: Colosseum 'Naumachia' games animations -->
+	<image id="Col Naumachia" width="298" height="213" isometric="true">
+		<layer group="this" image="Coloseum ON"/>
+		<animation speed="9" x="100" y="58" reversible="false">
+			<frame src="Naumachia_01"/>
+			<frame src="Naumachia_02"/>
+			<frame src="Naumachia_03"/>
+			<frame src="Naumachia_04"/>
+			<frame src="Naumachia_05"/>
+			<frame src="Naumachia_06"/>
+			<frame src="Naumachia_07"/>
+			<frame src="Naumachia_08"/>
+			<frame src="Naumachia_09"/>
+			<frame src="Naumachia_10"/>
+			<frame src="Naumachia_11"/>
+			<frame src="Naumachia_12"/>
+		</animation>
+	</image>
+	<!-- Note: Colosseum 'Imperial Games' animation frames: DO NOT USE!  -->
+	<image id="Imperial_Games_01" width="110" height="67">
+		<layer src="Imperial_Games_Base" x="0" y="0"/>
+		<layer src="Imperial_Games_01" x="38" y="38"/>
+	</image>
+	<image id="Imperial_Games_02" width="110" height="67">
+		<layer src="Imperial_Games_Base" x="0" y="0"/>
+		<layer src="Imperial_Games_02" x="38" y="38"/>
+	</image>
+	<image id="Imperial_Games_03" width="110" height="67">
+		<layer src="Imperial_Games_Base" x="0" y="0"/>
+		<layer src="Imperial_Games_03" x="38" y="38"/>
+	</image>
+	<image id="Imperial_Games_04" width="110" height="67">
+		<layer src="Imperial_Games_Base" x="0" y="0"/>
+		<layer src="Imperial_Games_04" x="38" y="38"/>
+	</image>
+	<image id="Imperial_Games_05" width="110" height="67">
+		<layer src="Imperial_Games_Base" x="0" y="0"/>
+		<layer src="Imperial_Games_05" x="38" y="38"/>
+	</image>
+	<image id="Imperial_Games_06" width="110" height="67">
+		<layer src="Imperial_Games_Base" x="0" y="0"/>
+		<layer src="Imperial_Games_06" x="38" y="38"/>
+	</image>
+	<!-- Note: Colosseum 'Imperial Games' animations -->
+	<image id="Col Imp Games" width="298" height="213" isometric="true">
+		<layer group="this" image="Coloseum ON"/>
+		<animation speed="9" x="90" y="34" reversible="false">
+			<frame group="this" image="Imperial_Games_01"/>
+			<frame group="this" image="Imperial_Games_02"/>
+			<frame group="this" image="Imperial_Games_03"/>
+			<frame group="this" image="Imperial_Games_04"/>
+			<frame group="this" image="Imperial_Games_05"/>
+			<frame group="this" image="Imperial_Games_06"/>
+		</animation>
+	</image>
+	<!-- Note: Colosseum 'Executions' animation frames: DO NOT USE!  -->
+	<image id="Executions_01" width="102" height="60">
+		<layer src="Executions_Base" x="0" y="0"/>
+		<layer src="Executions_01" x="19" y="16"/>
+	</image>
+	<image id="Executions_02" width="102" height="60">
+		<layer src="Executions_Base" x="0" y="0"/>
+		<layer src="Executions_02" x="19" y="16"/>
+	</image>
+	<image id="Executions_03" width="102" height="60">
+		<layer src="Executions_Base" x="0" y="0"/>
+		<layer src="Executions_03" x="19" y="16"/>
+	</image>
+	<image id="Executions_04" width="102" height="60">
+		<layer src="Executions_Base" x="0" y="0"/>
+		<layer src="Executions_04" x="19" y="16"/>
+	</image>
+	<image id="Executions_05" width="102" height="60">
+		<layer src="Executions_Base" x="0" y="0"/>
+		<layer src="Executions_05" x="19" y="16"/>
+	</image>
+	<image id="Executions_06" width="102" height="60">
+		<layer src="Executions_Base" x="0" y="0"/>
+		<layer src="Executions_06" x="19" y="16"/>
+	</image>
+	<!-- Note: Colosseum 'Executions' animations -->
+	<image id="Col Exec" width="298" height="213" isometric="true">
+		<layer group="this" image="Coloseum ON"/>
+		<animation speed="9" x="100" y="43" reversible="false">
+			<frame group="this" image="Executions_01"/>
+			<frame group="this" image="Executions_02"/>
+			<frame group="this" image="Executions_03"/>
+			<frame group="this" image="Executions_04"/>
+			<frame group="this" image="Executions_05"/>
+			<frame group="this" image="Executions_06"/>
+		</animation>
+	</image>
+	<!-- Note: Colosseum Overlays -->
+	<image src="Colosseum_Fight_Overlay" id="Col Base Overlay"/>
+	<image src="Naumachia_Overlay"/>
+	<image src="Imperial_Games_Overlay"/>
+	<image src="Executions_Overlay"/>
+	<!-- Note: Logistics Monument/s -->
+	<!-- Note: Caravanserai 0% and 50% construction phases -->
+	<image id="Caravanserai_Construction_01" width="238" height="129" isometric="true">
+		<layer group="this" image="4x4_Construction_Footprint" x="0" y="9"/>
+		<layer src="4x4_Construction_Borders" x="0" y="9"/>
+		<layer group="this" image="Construction_Part_TimberPad" x="134" y="75"/>
+		<layer src="Caravanserai_Construction_01" x="0" y="0"/>
+		<layer src="Construction_Part_Cart" x="41" y="56"/>
+		<layer src="Construction_Part_Pots_01" x="175" y="53"/>
+	</image>
+	<image id="Caravanserai_Construction_02" src="Caravanserai_Construction_02" isometric="true"/>
+	<!-- Note: Caravanserai ON animation references DO NOT USE! -->
+	<image id="Caravanserai_CN_On_01" width="238" height="155">
+		<layer src="Caravanserai_ON_Base" x="47" y="55"/>
+		<layer src="Caravanserai_CN_ON_01" x="86" y="46"/>
+	</image>
+	<image id="Caravanserai_CN_On_02" width="238" height="155">
+		<layer src="Caravanserai_ON_Base" x="47" y="55"/>
+		<layer src="Caravanserai_CN_ON_02" x="86" y="46"/>
+	</image>
+	<image id="Caravanserai_CN_On_03" width="238" height="155">
+		<layer src="Caravanserai_ON_Base" x="47" y="55"/>
+		<layer src="Caravanserai_CN_ON_03" x="86" y="46"/>
+	</image>
+	<image id="Caravanserai_S_On_01" width="238" height="155">
+		<layer src="Caravanserai_ON_Base" x="47" y="55"/>
+		<layer src="Caravanserai_S_ON_01" x="79" y="37"/>
+	</image>
+	<image id="Caravanserai_S_On_02" width="238" height="155">
+		<layer src="Caravanserai_ON_Base" x="47" y="55"/>
+		<layer src="Caravanserai_S_On_02" x="79" y="37"/>
+	</image>
+	<image id="Caravanserai_S_On_03" width="238" height="155">
+		<layer src="Caravanserai_ON_Base" x="47" y="55"/>
+		<layer src="Caravanserai_S_On_03" x="79" y="37"/>
+	</image>
+	<!-- Note: Caravanserai OFF Variant for Central, Northern and Southern Climates Respectively -->
+	<image id="Caravanserai_C_OFF" width="238" height="155" isometric="true">
+		<layer src="Caravanserai_Construction_02" x="0" y="12"/>
+		<layer src="Caravanserai_Base" x="4" y="13"/>
+		<layer src="Caravanserai_C_Top" x="18" y="7"/>
+	</image>
+	<image id="Caravanserai_N_OFF" width="238" height="155" isometric="true">
+		<layer src="Caravanserai_Construction_02" x="0" y="12"/>
+		<layer src="Caravanserai_Base" x="4" y="13"/>
+		<layer src="Caravanserai_N_Top" x="18" y="0"/>
+	</image>
+	<image id="Caravanserai_S_OFF" width="238" height="155" isometric="true">
+		<layer src="Caravanserai_Construction_02" x="0" y="12"/>
+		<layer src="Caravanserai_Base" x="4" y="13"/>
+		<layer src="Caravanserai_S_Top" x="15" y="7"/>
+	</image>
+	<!-- Note: Caravanserai ON Variant for Central Climate -->
+	<image id="Caravanserai_C_ON" width="238" height="155" isometric="true">
+		<layer group="this" image="Caravanserai_C_OFF"/>
+		<animation speed="8" x="0" y="0" reversible="true">
+			<frame group="this" image="Caravanserai_CN_On_01"/>
+			<frame group="this" image="Caravanserai_CN_On_02"/>
+			<frame group="this" image="Caravanserai_CN_On_03"/>
+		</animation>
+	</image>
+	<!-- Note: Caravanserai ON Variant for Northern Climate -->
+	<image id="Caravanserai_N_ON" width="238" height="155" isometric="true">
+		<layer group="this" image="Caravanserai_N_OFF"/>
+		<animation speed="8" x="0" y="0" reversible="true">
+			<frame group="this" image="Caravanserai_CN_On_01"/>
+			<frame group="this" image="Caravanserai_CN_On_02"/>
+			<frame group="this" image="Caravanserai_CN_On_03"/>
+		</animation>
+	</image>
+	<!-- Note: Caravanserai ON Variant for Southern Climate -->
+	<image id="Caravanserai_S_ON" width="238" height="155" isometric="true">
+		<layer group="this" image="Caravanserai_S_OFF"/>
+		<animation speed="8" x="0" y="0" reversible="true">
+			<frame group="this" image="Caravanserai_S_On_01"/>
+			<frame group="this" image="Caravanserai_S_On_02"/>
+			<frame group="this" image="Caravanserai_S_On_03"/>
+		</animation>
+	</image>
+	<!-- Note: Lighthouse 0%, 25%, 50%, and 75% construction phases -->
+	<image id="Lighthouse_Construction_01" width="178" height="99" isometric="true">
+		<layer group="this" image="3x3_Construction_Footprint" x="0" y="9"/>
+		<layer src="3x3_Construction_Borders" x="0" y="9"/>
+		<layer group="this" image="Construction_Part_TimberPad_Shadow" x="59" y="53"/>
+		<layer group="this" image="Construction_Part_Pillar" x="88" y="0"/>
+		<layer group="this" image="Construction_Part_Pillar" x="174" y="43"/>
+		<layer group="this" image="Construction_Part_Pillar_L" x="1" y="44"/>
+		<layer group="this" image="Construction_Part_Pillar_B" x="87" y="87"/>
+		<layer group="this" image="Construction_Part_TimberPad" x="31" y="53"/>
+		<layer src="Construction_Part_Cart" x="70" y="66"/>
+		<layer src="Construction_Part_Groma" x="88" y="29"/>
+		<layer src="Lighthouse_Construction_01" x="31" y="27"/>
+	</image>
+	<image id="Lighthouse_Construction_02" src="Lighthouse_Construction_02" isometric="true"/>
+	<image id="Lighthouse_Construction_03" width="178" height="139" isometric="true">
+		<layer group="this" image="Lighthouse_Construction_02" x="0" y="34"/>
+		<layer src="Lighthouse_Construction_03" x="55" y="0"/>
+	</image>
+	<image id="Lighthouse_Construction_04" width="178" height="198" isometric="true">
+		<layer group="this" image="Lighthouse_Construction_03" x="0" y="59"/>
+		<layer src="Lighthouse_Construction_04" x="18" y="0"/>
+	</image>
+	<!-- Note: Lighthouse OFF Variant -->
+	<image id="Lighthouse OFF" src="Lighthouse_OFF" isometric="true"/>
+	<!-- Note: Lighthouse ON Variant -->
+	<image id="Lighthouse ON" isometric="true">
+		<layer group="this" image="Lighthouse OFF"/>
+		<animation speed="5" x="78" y="17" reversible="false">
+			<frame src="Lighthouse_ON_01"/>
+			<frame src="Lighthouse_ON_02"/>
+			<frame src="Lighthouse_ON_03"/>
+			<frame src="Lighthouse_ON_04"/>
+			<frame src="Lighthouse_ON_05"/>
+		</animation>
+	</image>
+	<!-- Note: Religion Monument/s -->
+	<!-- Note: Grand Temple construction footprints -->
+	<image id="Grand_Temple_Construction_Base_01" width="418" height="219" isometric="true">
+		<layer group="this" image="7x7_Construction_Footprint" x="0" y="9"/>
+		<layer src="7x7_Construction_Borders" x="0" y="9"/>
+		<layer group="this" image="Construction_Part_Pillar" x="207" y="0"/>
+		<layer group="this" image="Construction_Part_Pillar" x="414" y="103"/>
+		<layer group="this" image="Construction_Part_Pillar_L" x="1" y="104"/>
+		<layer group="this" image="Construction_Part_Pillar_B" x="207" y="207"/>
+		<layer src="Construction_Part_TimberPad_Shadow" x="298" y="142"/>
+		<layer group="this" image="Construction_Part_TimberPad" x="268" y="142" invert="horizontal"/>
+		<layer src="Construction_Part_Cart" x="256" y="158"/>
+	</image>
+	<image id="Grand_Temple_Construction_Base_02" width="418" height="219" isometric="true">
+		<layer group="this" image="7x7_Construction_Footprint" x="0" y="9"/>
+		<layer src="7x7_Construction_Borders" x="0" y="9"/>
+		<layer group="this" image="Construction_Part_Pillar" x="207" y="0"/>
+		<layer group="this" image="Construction_Part_Pillar" x="414" y="103"/>
+		<layer group="this" image="Construction_Part_Pillar_L" x="1" y="104"/>
+		<layer group="this" image="Construction_Part_Pillar_B" x="207" y="207"/>
+		<layer src="Construction_Part_TimberPad_Shadow" x="120" y="143"/>
+		<layer group="this" image="Construction_Part_TimberPad" x="91" y="143"/>
+		<layer src="Construction_Part_Cart" x="130" y="156"/>
+	</image>
+	<!-- Note: Ceres Large Temple 0%, 25%, 50% and 75% construction phases -->
+	<image id="Ceres_LT_0" width="178" height="99" isometric="true">
+		<layer group="this" image="3x3_Construction_Footprint" x="0" y="9"/>
+		<layer src="3x3_Construction_Borders" x="0" y="9"/>
+		<layer group="this" image="Construction_Part_Pillar" x="88" y="0"/>
+		<layer group="this" image="Construction_Part_Pillar" x="174" y="43"/>
+		<layer group="this" image="Construction_Part_Pillar_L" x="1" y="44"/>
+		<layer group="this" image="Construction_Part_Pillar_B" x="87" y="87"/>
+		<layer src="Ceres_Temple_Construction_01" x="36" y="41"/>
+		<layer src="Construction_Part_Groma" x="84" y="22"/>
+		<layer src="Construction_Part_Cart" x="68" y="59"/>
+	</image>
+	<image id="Ceres_LT_25" width="178" height="159" isometric="true">
+		<layer group="71" image="1" part="footprint" x="0" y="0"/>
+		<layer src="Ceres_Temple_Construction_02" x="0" y="59"/>
+	</image>
+	<image id="Ceres_LT_50" width="178" height="159" isometric="true">
+		<layer group="71" image="1" part="footprint" x="0" y="0"/>
+		<layer src="Ceres_Temple_Construction_03" x="0" y="26"/>
+	</image>
+	<image id="Ceres_LT_75" width="178" height="159" isometric="true">
+		<layer group="this" image="Ceres_LT_50" x="0" y="0"/>
+		<layer src="Ceres_Temple_Construction_04" x="44" y="8"/>
+	</image>
+	<!-- Note: Ceres Grand Temple construction 01-05 are the 0%, 25%, 50%, 75% and 100% construction phases respectively -->
+	<image id="Ceres Complex Const 01" width="418" height="234" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_01" x="0" y="15"/>
+		<layer group="this" image="Ceres_LT_0" x="90" y="60"/>
+	</image>
+	<image id="Ceres Complex Const 02" width="418" height="234" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_01" x="0" y="15"/>
+		<layer src="Ceres_GT_Construction_Shadow_01" x="166" y="41"/>
+		<layer group="this" image="Ceres_LT_25" x="90" y="0"/>
+	</image>
+	<image id="Ceres Complex Const 03" width="418" height="234" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_01" x="0" y="15"/>
+		<layer src="Ceres_GT_Construction_Shadow_01" x="166" y="41"/>
+		<layer group="this" image="Ceres_LT_50" x="90" y="0"/>
+	</image>
+	<image id="Ceres Complex Const 04" width="418" height="234" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_01" x="0" y="15"/>
+		<layer src="Ceres_GT_Construction_Shadow_02" x="166" y="41"/>
+		<layer group="this" image="Ceres_LT_75" x="90" y="0"/>
+	</image>
+	<image id="Ceres Complex Const 05" width="418" height="234" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_01" x="0" y="15"/>
+		<layer src="Ceres_GT_Construction_Shadow_02" x="166" y="41"/>
+		<layer group="71" image="1" x="90" y="0"/>
+	</image>
+	<!-- Note: Ceres Complex ON/OFF States -->
+	<image id="Ceres Complex Off" width="418" height="234" isometric="true">
+		<layer src="Ceres_Temple_Complex_Base_Layer" x="0" y="3"/>
+		<layer group="71" image="1" x="90" y="0"/>
+		<layer src="Ceres_Temple_Complex_Top_Layer" x="59" y="87"/>
+	</image>
+	<image id="Ceres Complex On" width="418" height="234" isometric="true">
+		<layer src="Ceres_Temple_Complex_Base_Layer" x="0" y="3"/>
+		<layer group="71" image="1" x="90" y="0"/>
+		<layer src="Ceres_Temple_Complex_On_Layer" x="199" y="125"/>
+		<layer src="Ceres_Temple_Complex_Top_Layer" x="59" y="87"/>
+	</image>
+	<!-- Note: Ceres Complex Module Animation (Priests collect/dristribute food)(USE THIS ONE!!) -->
+	<image id="Ceres Complex Module" width="418" height="234" isometric="true">
+		<layer group="this" image="Ceres Complex Off"/>
+		<animation speed="6" x="230" y="110" reversible="false">
+			<frame src="farmer_01"/>
+			<frame src="farmer_02"/>
+			<frame src="farmer_03"/>
+			<frame src="farmer_04"/>
+			<frame src="farmer_05"/>
+			<frame src="farmer_06"/>
+			<frame src="farmer_07"/>
+			<frame src="farmer_08"/>
+			<frame src="farmer_09"/>
+			<frame src="farmer_10"/>
+			<frame src="farmer_11"/>
+		</animation>
+	</image>
+	<!-- Note: Ceres Complex Module Extra Animation (Priests collect/dristribute food)(USE THIS ONE!!) -->
+	<image src="Ceres_Temple_Complex_Module_01" id="Ceres Module 1 Crop"/>
+	<image>
+		<layer src="Ceres_Temple_Complex_Module_01"/>
+		<layer src="Ceres_Temple_Complex_Module_02" x="6" y="23"/>
+	</image>
+	<image>
+		<layer src="Ceres_Temple_Complex_Module_01"/>
+		<layer src="Ceres_Temple_Complex_Module_03" x="5" y="17"/>
+	</image>
+	<image>
+		<layer src="Ceres_Temple_Complex_Module_01"/>
+		<layer src="Ceres_Temple_Complex_Module_04" x="5" y="5"/>
+	</image>
+	<image>
+		<layer src="Ceres_Temple_Complex_Module_01"/>
+		<layer src="Ceres_Temple_Complex_Module_05" x="5" y="5"/>
+	</image>
+	<!-- Note: Ceres Complex Module2 Animation Reference Assets (DO NOT USE!!) -->
+	<image id="Ceres_Temple_Complex_Module2_01" width="146" height="95">
+		<layer src="Ceres_Temple_Complex_Module2_Base" x="0" y="0"/>
+		<layer src="Ceres_Temple_Complex_Module2_01" x="45" y="24"/>
+	</image>
+	<image id="Ceres_Temple_Complex_Module2_02" width="146" height="95">
+		<layer src="Ceres_Temple_Complex_Module2_Base" x="0" y="0"/>
+		<layer src="Ceres_Temple_Complex_Module2_02" x="45" y="24"/>
+	</image>
+	<image id="Ceres_Temple_Complex_Module2_03" width="146" height="95">
+		<layer src="Ceres_Temple_Complex_Module2_Base" x="0" y="0"/>
+		<layer src="Ceres_Temple_Complex_Module2_03" x="45" y="24"/>
+	</image>
+	<!-- Note: Ceres Complex Module2 Animation (Priests reduce food consumption) -->
+	<image id="Ceres Complex Module2" width="418" height="234" isometric="true">
+		<layer group="this" image="Ceres Complex Off"/>
+		<animation speed="6" x="190" y="95" reversible="true">
+			<frame group="this" image="Ceres_Temple_Complex_Module2_01"/>
+			<frame group="this" image="Ceres_Temple_Complex_Module2_02"/>
+			<frame group="this" image="Ceres_Temple_Complex_Module2_03"/>
+		</animation>
+	</image>
+	<!-- Note: Mars Large Temple 0%, 25%, 50% and 75% construction phases -->
+	<image id="Mars_LT_0" width="178" height="99" isometric="true">
+		<layer group="this" image="3x3_Construction_Footprint" x="0" y="9"/>
+		<layer src="3x3_Construction_Borders" x="0" y="9"/>
+		<layer group="this" image="Construction_Part_Pillar" x="88" y="0"/>
+		<layer group="this" image="Construction_Part_Pillar" x="174" y="43"/>
+		<layer group="this" image="Construction_Part_Pillar_L" x="1" y="44"/>
+		<layer group="this" image="Construction_Part_Pillar_B" x="87" y="87"/>
+		<layer src="Mars_Temple_Construction_01" x="36" y="37"/>
+		<layer src="Construction_Part_Pots_01" x="83" y="64"/>
+		<layer src="Construction_Part_Groma" x="84" y="22"/>
+	</image>
+	<image id="Mars_LT_25" width="178" height="148" isometric="true">
+		<layer group="74" image="1" part="footprint" x="0" y="0"/>
+		<layer src="Mars_Temple_Construction_02" x="0" y="44"/>
+	</image>
+	<image id="Mars_LT_50" width="178" height="148" isometric="true">
+		<layer group="74" image="1" part="footprint" x="0" y="0"/>
+		<layer src="Mars_Temple_Construction_03" x="0" y="27"/>
+	</image>
+	<image id="Mars_LT_75" width="178" height="148" isometric="true">
+		<layer group="this" image="Mars_LT_50" x="0" y="0"/>
+		<layer src="Mars_Temple_Construction_04" x="27" y="7"/>
+	</image>
+	<!-- Note: Mars Grand Temple construction 01-05 are the 0%, 25%, 50%, 75% and 100% construction phases respectively -->
+	<image id="Mars Complex Const 01" width="418" height="223" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_01" x="0" y="4"/>
+		<layer group="this" image="Mars_LT_0" x="90" y="49"/>
+	</image>
+	<image id="Mars Complex Const 02" width="418" height="223" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_01" x="0" y="4"/>
+		<layer src="Mars_GT_Construction_Shadow_01" x="163" y="22"/>
+		<layer group="this" image="Mars_LT_25" x="90" y="0"/>
+	</image>
+	<image id="Mars Complex Const 03" width="418" height="223" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_01" x="0" y="4"/>
+		<layer src="Mars_GT_Construction_Shadow_02" x="163" y="22"/>
+		<layer group="this" image="Mars_LT_50" x="90" y="0"/>
+	</image>
+	<image id="Mars Complex Const 04" width="418" height="223" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_01" x="0" y="4"/>
+		<layer src="Mars_GT_Construction_Shadow_02" x="163" y="22"/>
+		<layer group="this" image="Mars_LT_75" x="90" y="0"/>
+	</image>
+	<image id="Mars Complex Const 05" width="418" height="223" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_01" x="0" y="4"/>
+		<layer src="Mars_GT_Construction_Shadow_03" x="163" y="22"/>
+		<layer group="74" image="1" x="90" y="0"/>
+	</image>
+	<!-- Note: Mars Complex ON/OFF States -->
+	<image id="Mars Complex Off" width="418" height="231" isometric="true">
+		<layer src="Mars_Temple_Complex_Base_Layer"/>
+		<layer group="74" image="1" x="90" y="8"/>
+		<layer src="Ceres_Temple_Complex_Top_Layer" x="59" y="83"/>
+		<layer src="Mars_Temple_Complex_Top_Layer" x="213" y="153"/>
+	</image>
+	<image id="Mars Complex On" width="418" height="231" isometric="true">
+		<layer group="this" image="Mars Complex Off"/>
+		<layer src="Mars_Temple_Complex_On_Layer" x="199" y="121"/>
+	</image>
+	<!-- Note: Mars Complex Module Animation Reference Assets (DO NOT USE!!) -->
+	<image id="Mars_Temple_Complex_Module2_01" width="140" height="80">
+		<layer src="Mars_Temple_Complex_Module2_Base" x="0" y="0"/>
+		<layer src="Construction_Part_Cart" x="60" y="25"/>
+		<layer src="Construction_Part_Pots_01" x="111" y="20"/>
+		<layer src="Mars_Temple_Complex_Module2_01" x="40" y="19"/>
+	</image>
+	<image id="Mars_Temple_Complex_Module2_02" width="140" height="80">
+		<layer src="Mars_Temple_Complex_Module2_Base" x="0" y="0"/>
+		<layer src="Construction_Part_Cart" x="60" y="25"/>
+		<layer src="Construction_Part_Pots_01" x="111" y="20"/>
+		<layer src="Mars_Temple_Complex_Module2_02" x="40" y="19"/>
+	</image>
+	<image id="Mars_Temple_Complex_Module2_03" width="140" height="80">
+		<layer src="Mars_Temple_Complex_Module2_Base" x="0" y="0"/>
+		<layer src="Construction_Part_Cart" x="60" y="25"/>
+		<layer src="Construction_Part_Pots_01" x="111" y="20"/>
+		<layer src="Mars_Temple_Complex_Module2_03" x="40" y="19"/>
+	</image>
+	<!-- Note: Mars Complex Module Animation (Priests buff Mess Hall) -->
+	<image id="Mars Complex Module" width="418" height="231" isometric="true">
+		<layer group="this" image="Mars Complex Off"/>
+		<animation speed="6" x="191" y="97" reversible="true">
+			<frame group="this" image="Mars_Temple_Complex_Module2_01"/>
+			<frame group="this" image="Mars_Temple_Complex_Module2_02"/>
+			<frame group="this" image="Mars_Temple_Complex_Module2_03"/>
+		</animation>
+	</image>
+	<!-- Note: Mars Complex Module Animation Reference Assets (DO NOT USE!!) -->
+	<image id="Mars_Temple_Complex_Module_01" width="100" height="73">
+		<layer src="Mars_Temple_Complex_Module_Base" x="0" y="0"/>
+		<layer src="Mars_Temple_Complex_Module_01" x="22" y="0"/>
+	</image>
+	<image id="Mars_Temple_Complex_Module_02" width="100" height="73">
+		<layer src="Mars_Temple_Complex_Module_Base" x="0" y="0"/>
+		<layer src="Mars_Temple_Complex_Module_02" x="22" y="0"/>
+	</image>
+	<image id="Mars_Temple_Complex_Module_03" width="100" height="73">
+		<layer src="Mars_Temple_Complex_Module_Base" x="0" y="0"/>
+		<layer src="Mars_Temple_Complex_Module_03" x="22" y="0"/>
+	</image>
+	<image id="Mars_Temple_Complex_Module_04" width="100" height="73">
+		<layer src="Mars_Temple_Complex_Module_Base" x="0" y="0"/>
+		<layer src="Mars_Temple_Complex_Module_04" x="22" y="0"/>
+	</image>
+	<image id="Mars_Temple_Complex_Module_05" width="100" height="73">
+		<layer src="Mars_Temple_Complex_Module_Base" x="0" y="0"/>
+		<layer src="Mars_Temple_Complex_Module_05" x="22" y="0"/>
+	</image>
+	<!-- Note: Mars Complex Module2 Animation (Priests reduce goods consumption) -->
+	<image id="Mars Complex Module2" width="418" height="231" isometric="true">
+		<layer group="this" image="Mars Complex Off"/>
+		<animation speed="6" x="211" y="105" reversible="false">
+			<frame group="this" image="Mars_Temple_Complex_Module_01"/>
+			<frame group="this" image="Mars_Temple_Complex_Module_02"/>
+			<frame group="this" image="Mars_Temple_Complex_Module_03"/>
+			<frame group="this" image="Mars_Temple_Complex_Module_04"/>
+			<frame group="this" image="Mars_Temple_Complex_Module_05"/>
+		</animation>
+	</image>
+	<!-- Note: Mercury Large Temple 0%, 25%, 50% and 75% construction phases -->
+	<image id="Mercury_LT_0" width="178" height="99" isometric="true">
+		<layer group="this" image="3x3_Construction_Footprint" x="0" y="9"/>
+		<layer src="3x3_Construction_Borders" x="0" y="9"/>
+		<layer src="Mercury_Temple_Construction_01" x="0" y="0"/>
+		<layer src="Construction_Part_Pots_01" x="83" y="64"/>
+	</image>
+	<image id="Mercury_LT_25" width="178" height="148" isometric="true">
+		<layer group="73" image="1" part="footprint" x="0" y="0"/>
+		<layer src="Mercury_Temple_Construction_02" x="0" y="41"/>
+	</image>
+	<image id="Mercury_LT_50" width="178" height="148" isometric="true">
+		<layer group="73" image="1" part="footprint" x="0" y="0"/>
+		<layer src="Mercury_Temple_Construction_03" x="0" y="16"/>
+	</image>
+	<image id="Mercury_LT_75" width="178" height="148" isometric="true">
+		<layer group="this" image="Mercury_LT_50" x="0" y="0"/>
+		<layer src="Mercury_Temple_Construction_04" x="51" y="8"/>
+	</image>
+	<!-- Note: Mercury Grand Temple construction 01-05 are the 0%, 25%, 50%, 75% and 100% construction phases respectively -->
+	<image id="Mercury Complex Const 01" width="418" height="223" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_02" x="0" y="4"/>
+		<layer group="this" image="Mercury_LT_0" x="150" y="49"/>
+	</image>
+	<image id="Mercury Complex Const 02" width="418" height="223" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_02" x="0" y="4"/>
+		<layer src="Mercury_GT_Construction_Shadow_01" x="237" y="37"/>
+		<layer group="this" image="Mercury_LT_25" x="150" y="0"/>
+	</image>
+	<image id="Mercury Complex Const 03" width="418" height="223" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_02" x="0" y="4"/>
+		<layer src="Mercury_GT_Construction_Shadow_02" x="311" y="65"/>
+		<layer group="this" image="Mercury_LT_50" x="150" y="0"/>
+	</image>
+	<image id="Mercury Complex Const 04" width="418" height="223" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_02" x="0" y="4"/>
+		<layer src="Mercury_GT_Construction_Shadow_02" x="311" y="65"/>
+		<layer group="this" image="Mercury_LT_75" x="150" y="0"/>
+	</image>
+	<image id="Mercury Complex Const 05" width="418" height="223" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_02" x="0" y="4"/>
+		<layer src="Mercury_GT_Construction_Shadow_02" x="311" y="65"/>
+		<layer group="73" image="1" x="150" y="0"/>
+	</image>
+	<!-- Note: Mercury Complex ON/OFF States -->
+	<image id="Mercury Complex Off" width="418" height="231" isometric="true">
+		<layer src="Mercury_Temple_Complex_Base_Layer"/>
+		<layer group="73" image="1" x="150" y="8"/>
+		<layer src="Mercury_Temple_Complex_Top_Layer" x="199" y="79"/>
+	</image>
+	<image id="Mercury Complex On" width="418" height="231" isometric="true">
+		<layer group="this" image="Mercury Complex Off"/>
+		<layer src="Mercury_Temple_Complex_On_Layer" x="135" y="117"/>
+	</image>
+	<!-- Note: Mercury Complex Module Animation Reference Assets (DO NOT USE!!) -->
+	<image id="Mercury_Temple_Complex_Module_01" width="118" height="77">
+		<layer src="Construction_Part_Pots_01" x="19" y="1"/>
+		<layer src="Mercury_Temple_Complex_Module_Base" x="0" y="0"/>
+		<layer src="Mercury_Temple_Complex_Module_01" x="49" y="5"/>
+	</image>
+	<image id="Mercury_Temple_Complex_Module_02" width="118" height="77">
+		<layer src="Construction_Part_Pots_01" x="19" y="1"/>
+		<layer src="Mercury_Temple_Complex_Module_Base" x="0" y="0"/>
+		<layer src="Mercury_Temple_Complex_Module_02" x="49" y="5"/>
+	</image>
+	<image id="Mercury_Temple_Complex_Module_03" width="118" height="77">
+		<layer src="Construction_Part_Pots_01" x="19" y="1"/>
+		<layer src="Mercury_Temple_Complex_Module_Base" x="0" y="0"/>
+		<layer src="Mercury_Temple_Complex_Module_03" x="49" y="5"/>
+	</image>
+	<!-- Note: Mercury Complex Module Animation (Priests reduce Oil/Wine consumption) -->
+	<image id="Mercury Complex Module" width="418" height="231" isometric="true">
+		<layer group="this" image="Mercury Complex Off"/>
+		<animation speed="5" x="115" y="105" reversible="true">
+			<frame group="this" image="Mercury_Temple_Complex_Module_01"/>
+			<frame group="this" image="Mercury_Temple_Complex_Module_02"/>
+			<frame group="this" image="Mercury_Temple_Complex_Module_03"/>
+		</animation>
+	</image>
+	<!-- Note: Mercury Complex Module2 Animation Reference Assets (DO NOT USE!!) -->
+	<image id="Mercury_Temple_Complex_Module2_01" width="137" height="76">
+		<layer src="Mercury_Temple_Complex_Module2_Base" x="0" y="0"/>
+		<layer src="Mercury_Temple_Complex_Module_01" x="67" y="15"/>
+	</image>
+	<image id="Mercury_Temple_Complex_Module2_02" width="137" height="76">
+		<layer src="Mercury_Temple_Complex_Module2_Base" x="0" y="0"/>
+		<layer src="Mercury_Temple_Complex_Module_02" x="67" y="15"/>
+	</image>
+	<image id="Mercury_Temple_Complex_Module2_03" width="137" height="76">
+		<layer src="Mercury_Temple_Complex_Module2_Base" x="0" y="0"/>
+		<layer src="Mercury_Temple_Complex_Module_03" x="67" y="15"/>
+	</image>
+	<!-- Note: Mercury Complex Module2 Animation (Priests reduce Pottery/Furniture consumption) -->
+	<image id="Mercury Complex Module2" width="418" height="231" isometric="true">
+		<layer group="this" image="Mercury Complex Off"/>
+		<animation speed="5" x="94" y="103" reversible="true">
+			<frame group="this" image="Mercury_Temple_Complex_Module2_01"/>
+			<frame group="this" image="Mercury_Temple_Complex_Module2_02"/>
+			<frame group="this" image="Mercury_Temple_Complex_Module2_03"/>
+		</animation>
+	</image>
+	<!-- Note: Neptune Large Temple 0%, 25%, 50% and 75% construction phases -->
+	<image id="Neptune_LT_0" width="178" height="99" isometric="true">
+		<layer group="this" image="3x3_Construction_Footprint" x="0" y="9"/>
+		<layer src="3x3_Construction_Borders" x="0" y="9"/>
+		<layer group="this" image="Construction_Part_Pillar" x="88" y="0"/>
+		<layer group="this" image="Construction_Part_Pillar" x="174" y="43"/>
+		<layer group="this" image="Construction_Part_Pillar_L" x="1" y="44"/>
+		<layer group="this" image="Construction_Part_Pillar_B" x="87" y="87"/>
+		<layer src="Neptune_Temple_Construction_01" x="47" y="40"/>
+		<layer src="Construction_Part_Groma" x="84" y="22"/>
+		<layer src="Construction_Part_Pots_01" x="83" y="64"/>
+	</image>
+	<image id="Neptune_LT_25" width="178" height="154" isometric="true">
+		<layer group="72" image="1" part="footprint" x="0" y="0"/>
+		<layer src="Neptune_Temple_Ponds_Off" x="21" y="55"/>
+		<layer src="Neptune_Temple_Construction_02" x="0" y="50"/>
+	</image>
+	<image id="Neptune_LT_50" width="178" height="154" isometric="true">
+		<layer group="72" image="1" part="footprint" x="0" y="0"/>
+		<layer src="Neptune_Temple_Ponds_Off" x="21" y="55"/>
+		<layer src="Neptune_Temple_Construction_03" x="0" y="29"/>
+	</image>
+	<image id="Neptune_LT_75" width="178" height="154" isometric="true">
+		<layer group="72" image="1" part="footprint" x="0" y="0"/>
+		<layer src="Neptune_Temple_Ponds_Off" x="21" y="55"/>
+		<layer src="Neptune_Temple_Construction_04" x="0" y="8"/>
+	</image>
+	<!-- Note: Neptune Large Temple Off state for NO Reservoir Access -->
+	<image id="Neptune LTemple Off" width="178" height="154">
+		<layer group="72" image="1" y="0"/>
+		<layer src="Neptune_Temple_Ponds_Off" x="21" y="55"/>
+	</image>
+	<!-- Note: Neptune Grand Temple construction 01-05 are the 0%, 25%, 50%, 75% and 100% construction phases respectively -->
+	<image id="Neptune Complex Const 01" width="418" height="229" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_02" x="0" y="10"/>
+		<layer group="this" image="Neptune_LT_0" x="150" y="55"/>
+	</image>
+	<image id="Neptune Complex Const 02" width="418" height="229" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_02" x="0" y="10"/>
+		<layer src="Neptune_GT_Construction_Shadow_01" x="224" y="41"/>
+		<layer group="this" image="Neptune_LT_25" x="150" y="0"/>
+	</image>
+	<image id="Neptune Complex Const 03" width="418" height="229" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_02" x="0" y="10"/>
+		<layer src="Neptune_GT_Construction_Shadow_02" x="284" y="57"/>
+		<layer group="this" image="Neptune_LT_50" x="150" y="0"/>
+	</image>
+	<image id="Neptune Complex Const 04" width="418" height="229" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_02" x="0" y="10"/>
+		<layer src="Neptune_GT_Construction_Shadow_02" x="284" y="57"/>
+		<layer group="this" image="Neptune_LT_75" x="150" y="0"/>
+	</image>
+	<image id="Neptune Complex Const 05" width="418" height="229" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_02" x="0" y="10"/>
+		<layer src="Neptune_GT_Construction_Shadow_02" x="284" y="57"/>
+		<layer group="this" image="Neptune LTemple Off" x="150" y="0"/>
+	</image>
+	<!-- Note: Neptune Complex ON/OFF States -->
+	<image id="Neptune Complex Off" width="418" height="231" isometric="true">
+		<layer src="Neptune_Temple_Complex_Base_Layer"/>
+		<layer group="this" image="Neptune LTemple Off" x="150" y="2"/>
+		<layer src="Ceres_Temple_Complex_Top_Layer" x="189" y="84" invert="horizontal"/>
+	</image>
+	<image id="Neptune Complex On" width="418" height="231" isometric="true">
+		<layer src="Neptune_Temple_Complex_Base_Layer"/>
+		<layer group="72" image="1" x="150" y="2"/>
+		<layer src="Mercury_Temple_Complex_On_Layer" x="135" y="117"/>
+		<layer src="Neptune_Temple_Complex_On_Layer" x="135" y="117"/>
+		<layer src="Ceres_Temple_Complex_Top_Layer" x="189" y="84" invert="horizontal"/>
+	</image>
+	<!-- Note: Neptune Complex Module Animation Reference Assets (DO NOT USE!!) -->
+	<image id="Neptune_Temple_Complex_Module2_01" width="125" height="80">
+		<layer src="Construction_Part_Pots_01" x="34" y="1"/>
+		<layer src="Neptune_Temple_Complex_Module2_Base" x="0" y="0"/>
+		<layer src="Neptune_Temple_Complex_Module2_01" x="57" y="13"/>
+	</image>
+	<image id="Neptune_Temple_Complex_Module2_02" width="125" height="80">
+		<layer src="Neptune_Temple_Complex_Module2_Base" x="0" y="0"/>
+		<layer src="Neptune_Temple_Complex_Module2_02" x="57" y="13"/>
+	</image>
+	<image id="Neptune_Temple_Complex_Module2_03" width="125" height="80">
+		<layer src="Neptune_Temple_Complex_Module2_Base" x="0" y="0"/>
+		<layer src="Neptune_Temple_Complex_Module2_03" x="57" y="13"/>
+	</image>
+	<!-- Note: Neptune Complex Module Animation (Chariot Walkers) -->
+	<image id="Neptune Complex Module" width="418" height="231" isometric="true">
+		<layer group="this" image="Neptune Complex On"/>
+		<animation speed="6" x="102" y="98" reversible="true">
+			<frame group="this" image="Neptune_Temple_Complex_Module2_01"/>
+			<frame group="this" image="Neptune_Temple_Complex_Module2_02"/>
+			<frame group="this" image="Neptune_Temple_Complex_Module2_03"/>
+		</animation>
+	</image>
+	<!-- Note: Neptune Complex Module2 Animation ON (Fountain ON)(USE THIS ONE!!) -->
+	<image id="Neptune Complex Module2" width="418" height="231" isometric="true">
+		<layer group="this" image="Neptune Complex On"/>
+		<animation speed="5" x="143" y="57" reversible="false">
+			<frame group="206" image="0"/>
+			<frame group="206" image="1"/>
+			<frame group="206" image="2"/>
+			<frame group="206" image="3"/>
+			<frame group="206" image="4"/>
+			<frame group="206" image="5"/>
+			<frame group="206" image="6"/>
+			<frame group="206" image="7"/>
+			<frame group="206" image="8"/>
+			<frame group="206" image="9"/>
+			<frame group="206" image="10"/>
+			<frame group="206" image="11"/>
+			<frame group="206" image="12"/>
+			<frame group="206" image="13"/>
+			<frame group="206" image="14"/>
+			<frame group="206" image="15"/>
+			<frame group="206" image="16"/>
+			<frame group="206" image="17"/>
+		</animation>
+	</image>
+	<!-- Note: Neptune Complex Module2 Extra Animation (Fountain ON)(USE THIS ONE!!) -->
+	<image id="Neptune Module 2 Fountain">
+		<layer src="Neptune_Temple_Complex_Module_OFF"/>
+		<layer src="Neptune_Temple_Complex_Module_01" x="39" y="47"/>
+	</image>
+	<image>
+		<layer src="Neptune_Temple_Complex_Module_OFF"/>
+		<layer src="Neptune_Temple_Complex_Module_01" x="39" y="47"/>
+		<layer src="Neptune_Temple_Complex_Module_02" x="50" y="47"/>
+	</image>
+	<image>
+		<layer src="Neptune_Temple_Complex_Module_OFF"/>
+		<layer src="Neptune_Temple_Complex_Module_01" x="39" y="47"/>
+		<layer src="Neptune_Temple_Complex_Module_03" x="50" y="47"/>
+	</image>
+	<image>
+		<layer src="Neptune_Temple_Complex_Module_OFF"/>
+		<layer src="Neptune_Temple_Complex_Module_01" x="39" y="47"/>
+		<layer src="Neptune_Temple_Complex_Module_04" x="50" y="47"/>
+	</image>
+	<image>
+		<layer src="Neptune_Temple_Complex_Module_OFF"/>
+		<layer src="Neptune_Temple_Complex_Module_01" x="39" y="47"/>
+		<layer src="Neptune_Temple_Complex_Module_05" x="50" y="47"/>
+	</image>
+	<!-- Note: Neptune Complex Module2 Animation OFF (Fountain OFF) -->
+	<image id="Neptune Complex Module 2 Off" width="418" height="231" isometric="true">
+		<layer group="this" image="Neptune Complex Off" x="0" y="0"/>
+		<layer src="Neptune_Temple_Complex_Module_OFF" x="98" y="27"/>
+	</image>
+	<!-- Note: Pantheon Reference Assets DO NOT USE -->
+	<image id="Pantheon_Const_00" width="178" height="99" isometric="true">
+		<layer group="this" image="3x3_Construction_Footprint" x="0" y="9"/>
+		<layer src="3x3_Construction_Borders" x="0" y="9"/>
+		<layer src="Pantheon_Construction_01" x="0" y="0"/>
+		<layer src="Construction_Part_Pots_01" x="83" y="64"/>
+	</image>
+	<!-- Note: Pantheon Construction 01-05 are the 0%, 25%, 50%, 75% and 100% construction phases respectively -->
+	<image id="Pantheon Const 01" width="418" height="231" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_02" x="0" y="12"/>
+		<layer group="this" image="Pantheon_Const_00" x="150" y="57"/>
+	</image>
+	<image id="Pantheon Const 02" width="418" height="231" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_02" x="0" y="12"/>
+		<layer src="Pantheon_Construction_Shadow_01" x="309" y="71"/>
+		<layer src="Pantheon_Construction_Base" x="150" y="55"/>
+		<layer src="Pantheon_Construction_02" x="178" y="53"/>
+	</image>
+	<image id="Pantheon Const 03" width="418" height="231" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_02" x="0" y="12"/>
+		<layer src="Pantheon_Construction_Shadow_01" x="309" y="71"/>
+		<layer src="Pantheon_Construction_Base" x="150" y="55"/>
+		<layer src="Pantheon_Construction_03" x="169" y="27"/>
+	</image>
+	<image id="Pantheon Const 04" width="418" height="231" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_02" x="0" y="12"/>
+		<layer src="Pantheon_Construction_Shadow_01" x="309" y="71"/>
+		<layer src="Pantheon_Construction_Base" x="150" y="55"/>
+		<layer src="Pantheon_Construction_04" x="172" y="14"/>
+	</image>
+	<image id="Pantheon Const 05" width="418" height="231" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_02" x="0" y="12"/>
+		<layer src="Pantheon_Construction_Shadow_01" x="309" y="71"/>
+		<layer src="Pantheon_Construction_05" x="150" y="14"/>
+	</image>
+	<!-- Note: Pantheon Complex ON/OFF States -->
+	<image id="Pantheon Off" width="418" height="231" isometric="true">
+		<layer src="Pantheon_Temple_Complex_Off" x="0" y="0"/>
+		<layer src="Pantheon_Construction_05" x="150" y="14"/>
+		<layer src="Mercury_Temple_Complex_Top_Layer" x="201" y="79"/>
+	</image>
+	<image id="Pantheon On" width="418" height="231" isometric="true">
+		<layer group="this" image="Pantheon Off" x="0" y="0"/>
+		<layer src="Mercury_Temple_Complex_On_Layer" x="138" y="120"/>
+		<layer src="Pantheon_Temple_Complex_On" x="138" y="120"/>
+	</image>
+	<!-- Note: Pantheon Complex Module Animation Reference Assets (DO NOT USE!!) -->
+	<image id="Pantheon_Temple_Complex_Module_01" width="118" height="123">
+		<layer src="Pantheon_Temple_Complex_Module_Base" x="0" y="0"/>
+		<layer src="Pantheon_Temple_Complex_Module_01" x="30" y="57"/>
+		<layer src="Pantheon_Temple_Complex_Module_01" x="71" y="77"/>
+	</image>
+	<image id="Pantheon_Temple_Complex_Module_02" width="118" height="123">
+		<layer src="Pantheon_Temple_Complex_Module_Base" x="0" y="0"/>
+		<layer src="Pantheon_Temple_Complex_Module_02" x="30" y="57"/>
+		<layer src="Pantheon_Temple_Complex_Module_02" x="71" y="77"/>
+	</image>
+	<image id="Pantheon_Temple_Complex_Module_03" width="118" height="123">
+		<layer src="Pantheon_Temple_Complex_Module_Base" x="0" y="0"/>
+		<layer src="Pantheon_Temple_Complex_Module_03" x="30" y="57"/>
+		<layer src="Pantheon_Temple_Complex_Module_03" x="71" y="77"/>
+	</image>
+	<!-- Note: Pantheon Complex Module Animation (Bonus destination walkers) -->
+	<image id="Pantheon Module" width="418" height="231" isometric="true">
+		<layer group="this" image="Pantheon Off"/>
+		<animation speed="5" x="105" y="53" reversible="true">
+			<frame group="this" image="Pantheon_Temple_Complex_Module_01"/>
+			<frame group="this" image="Pantheon_Temple_Complex_Module_02"/>
+			<frame group="this" image="Pantheon_Temple_Complex_Module_03"/>
+		</animation>
+	</image>
+	<!-- Note: Pantheon Complex Module2 Animation Reference Assets (DO NOT USE!!) -->
+	<image id="Pantheon_Temple_Complex_Module2_01" width="145" height="72">
+		<layer src="Pantheon_Temple_Complex_Module2_Base" x="0" y="0"/>
+		<layer src="Pantheon_Temple_Complex_Module_01" x="64" y="17"/>
+	</image>
+	<image id="Pantheon_Temple_Complex_Module2_02" width="145" height="72">
+		<layer src="Pantheon_Temple_Complex_Module2_Base" x="0" y="0"/>
+		<layer src="Pantheon_Temple_Complex_Module_02" x="64" y="17"/>
+	</image>
+	<image id="Pantheon_Temple_Complex_Module2_03" width="145" height="72">
+		<layer src="Pantheon_Temple_Complex_Module2_Base" x="0" y="0"/>
+		<layer src="Pantheon_Temple_Complex_Module_03" x="64" y="17"/>
+	</image>
+	<!-- Note: Pantheon Complex Module2 Animation (Oracles spawn walkers) -->
+	<image id="Pantheon Module2" width="418" height="231" isometric="true">
+		<layer group="this" image="Pantheon Off"/>
+		<animation speed="5" x="86" y="104" reversible="true">
+			<frame group="this" image="Pantheon_Temple_Complex_Module2_01"/>
+			<frame group="this" image="Pantheon_Temple_Complex_Module2_02"/>
+			<frame group="this" image="Pantheon_Temple_Complex_Module2_03"/>
+		</animation>
+	</image>
+	<!-- Note: Venus Large Temple 0%, 25%, 50% and 75% construction phases -->
+	<image id="Venus_LT_0" width="178" height="99" isometric="true">
+		<layer group="this" image="3x3_Construction_Footprint" x="0" y="9"/>
+		<layer src="3x3_Construction_Borders" x="0" y="9"/>
+		<layer group="this" image="Construction_Part_Pillar" x="88" y="0"/>
+		<layer group="this" image="Construction_Part_Pillar" x="174" y="43"/>
+		<layer group="this" image="Construction_Part_Pillar_L" x="1" y="44"/>
+		<layer group="this" image="Construction_Part_Pillar_B" x="87" y="87"/>
+		<layer src="Venus_Temple_Construction_01" x="36" y="41"/>
+		<layer src="Construction_Part_Groma" x="84" y="22"/>
+		<layer src="Construction_Part_Pots_01" x="68" y="59"/>
+	</image>
+	<image id="Venus_LT_25" width="178" height="142" isometric="true">
+		<layer group="75" image="1" part="footprint" x="0" y="0"/>
+		<layer src="Venus_Temple_Construction_02" x="0" y="34"/>
+	</image>
+	<image id="Venus_LT_50" width="178" height="142" isometric="true">
+		<layer group="75" image="1" part="footprint" x="0" y="0"/>
+		<layer src="Venus_Temple_Construction_03" x="0" y="20"/>
+	</image>
+	<image id="Venus_LT_75" width="178" height="142" isometric="true">
+		<layer group="75" image="1" part="footprint" x="0" y="0"/>
+		<layer src="Venus_Temple_Construction_04" x="0" y="0"/>
+	</image>
+	<!-- Note: Venus Grand Temple construction 01-05 are the 0%, 25%, 50%, 75% and 100% construction phases respectively -->
+	<image id="Venus Complex Const 01" width="418" height="219" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_01" x="0" y="0"/>
+		<layer group="this" image="Venus_LT_0" x="90" y="45"/>
+	</image>
+	<image id="Venus Complex Const 02" width="418" height="219" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_01" x="0" y="0"/>
+		<layer src="Venus_GT_Construction_Shadow_01" x="172" y="28"/>
+		<layer group="this" image="Venus_LT_25" x="90" y="2"/>
+	</image>
+	<image id="Venus Complex Const 03" width="418" height="219" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_01" x="0" y="0"/>
+		<layer src="Venus_GT_Construction_Shadow_01" x="172" y="28"/>
+		<layer group="this" image="Venus_LT_50" x="90" y="2"/>
+	</image>
+	<image id="Venus Complex Const 04" width="418" height="219" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_01" x="0" y="0"/>
+		<layer src="Venus_GT_Construction_Shadow_02" x="172" y="28"/>
+		<layer group="this" image="Venus_LT_75" x="90" y="2"/>
+	</image>
+	<image id="Venus Complex Const 05" width="418" height="219" isometric="true">
+		<layer group="this" image="Grand_Temple_Construction_Base_01" x="0" y="0"/>
+		<layer src="Venus_GT_Construction_Shadow_02" x="172" y="28"/>
+		<layer group="75" image="1" x="90" y="2"/>
+	</image>
+	<!-- Note: Venus Complex ON/OFF States -->
+	<image id="Venus Complex Off" width="418" height="231" isometric="true">
+		<layer src="Venus_Temple_Complex_Base_Layer"/>
+		<layer group="75" image="1" x="90" y="14"/>
+		<layer src="Mercury_Temple_Complex_Top_Layer" x="71" y="79" invert="horizontal"/>
+	</image>
+	<image id="Venus Complex On" width="418" height="231" isometric="true">
+		<layer group="this" image="Venus Complex Off"/>
+		<layer src="Venus_Temple_Complex_On_Layer" x="198" y="121"/>
+	</image>
+	<!-- Note: Venus Complex Module Animation (Priests bless schools, baths & hospitals) -->
+	<image id="Venus Complex Module" width="418" height="231" isometric="true">
+		<layer group="this" image="Venus Complex Off"/>
+		<layer src="Venus_Temple_Complex_Module_Layer" x="185" y="92"/>
+		<animation speed="8" x="225" y="114" reversible="false">
+			<frame group="105"/>
+			<frame group="105" image="1"/>
+			<frame group="105" image="10"/>
+			<frame group="105" image="11"/>
+			<frame group="105" image="19"/>
+			<frame group="105" image="20"/>
+			<frame group="105" image="28"/>
+			<frame group="105" image="29"/>
+			<frame group="105" image="37"/>
+			<frame group="105" image="38"/>
+			<frame group="105" image="46"/>
+			<frame group="105" image="47"/>
+			<frame group="105" image="55"/>
+			<frame group="105" image="64"/>
+			<frame group="105" image="65"/>
+		</animation>
+	</image>
+	<!-- Note: Venus Complex Module2 Animation Reference Assets (DO NOT USE!!) -->
+	<image id="Venus_Temple_Complex_Module2_01" width="150" height="95">
+		<layer src="Venus_Temple_Complex_Module2_Base" x="0" y="0"/>
+		<layer src="Venus_Temple_Complex_Module2_01" x="54" y="22"/>
+	</image>
+	<image id="Venus_Temple_Complex_Module2_02" width="150" height="95">
+		<layer src="Venus_Temple_Complex_Module2_Base" x="0" y="0"/>
+		<layer src="Venus_Temple_Complex_Module2_02" x="54" y="22"/>
+	</image>
+	<image id="Venus_Temple_Complex_Module2_03" width="150" height="95">
+		<layer src="Venus_Temple_Complex_Module2_Base" x="0" y="0"/>
+		<layer src="Venus_Temple_Complex_Module2_03" x="54" y="22"/>
+	</image>
+	<!-- Note: Venus Complex Module2 Animation (Priests buff desirability & entertainment) -->
+	<image id="Venus Complex Module2" width="418" height="231" isometric="true">
+		<layer group="this" image="Venus Complex Off"/>
+		<animation speed="6" x="184" y="92" reversible="true">
+			<frame group="this" image="Venus_Temple_Complex_Module2_01"/>
+			<frame group="this" image="Venus_Temple_Complex_Module2_02"/>
+			<frame group="this" image="Venus_Temple_Complex_Module2_03"/>
+		</animation>
+	</image>
+	<!-- Note: Large Temple and Oracle Construction Phases -->
+	<image id="Oracle_Construction_01" isometric="true" width="118" height="69">
+		<layer group="this" image="2x2_Construction_Footprint" y="9"/>
+		<layer src="2x2_Construction_Borders" y="9"/>
+		<layer src="Oracle_Construction_01"/>
+		<layer src="Construction_Part_Cart" x="13" y="21"/>
+	</image>
+	<image id="Oracle_Construction_02" isometric="true" width="118" height="77">
+		<layer group="76" image="0" part="footprint" y="-10"/>
+		<layer src="Oracle_Construction_02"/>
+		<layer src="Construction_Part_Cart" x="1" y="29"/>
+	</image>
+	<!-- Note: Nymphaeum Construction Phases -->
+	<image id="Nymphaeum_Construction_02" isometric="true" width="178" height="113">
+		<layer group="this" image="3x3_Cobblestone_Footprint" y="23"/>
+		<layer src="Nymphaeum_Construction_02"/>
+		<layer src="Construction_Part_Cart" x="9" y="50"/>
+		<layer src="Construction_Part_Pots_01" x="73" y="80"/>
+	</image>
+	<!-- Note: Nymphaeum OFF asset -->
+	<image id="Nymphaeum OFF" src="Nymphaeum_OFF" isometric="true"/>
+	<!-- Note: Nymphaeum ON Animation -->
+	<image id="Nymphaeum ON" width="178" height="158" isometric="true">
+		<layer group="this" image="Nymphaeum OFF"/>
+		<animation speed="5" x="84" y="96" reversible="false">
+			<frame src="Nymphaeum_ON_01"/>
+			<frame src="Nymphaeum_ON_02"/>
+			<frame src="Nymphaeum_ON_03"/>
+			<frame src="Nymphaeum_ON_04"/>
+			<frame src="Nymphaeum_ON_05"/>
+			<frame src="Nymphaeum_ON_06"/>
+		</animation>
+	</image>
+	<!-- Note: Large Mausoleum Construction Phases -->
+	<image id="Mausoleum L Cons" width="178" height="99" isometric="true">
+		<layer group="this" image="3x3_Construction_Footprint" x="0" y="9"/>
+		<layer src="3x3_Construction_Borders" x="0" y="9"/>
+		<layer group="this" image="Construction_Part_Pillar" x="88" y="0"/>
+		<layer group="this" image="Construction_Part_Pillar" x="174" y="43"/>
+		<layer group="this" image="Construction_Part_Pillar_L" x="1" y="44"/>
+		<layer group="this" image="Construction_Part_Pillar_B" x="87" y="87"/>
+		<layer src="Mausoleum_Large_Construction_01" x="69" y="17"/>
+		<layer src="Construction_Part_Groma" x="88" y="43"/>
+		<layer src="Construction_Part_Cart" x="41" y="41"/>
+		<layer src="Construction_Part_Pots_01" x="116" y="40"/>
+	</image>
+	<image id="Mausoleum_Large_Construction_02" src="Mausoleum_Large_Construction_02" isometric="true"/>
+	<!-- Note: Large Mausoleum variant asset construction 02 phase, with rotation -->
+	<image id="Mausoleum_Large_Alt_Construction_02" isometric="true" width="178" height="109">
+		<layer group="this" image="3x3_Cobblestone_Footprint" y="19"/>
+		<layer src="3x3_Construction_Borders" x="0" y="19"/>
+		<layer src="Construction_Part_Cart" x="3" y="46"/>
+		<layer src="Mausoleum_Large_Alt_Construction_02" x="0" y="0"/>
+	</image>
+	<image id="Mausoleum_Large_Alt_Construction_02_R" isometric="true" width="178" height="109">
+		<layer group="this" image="3x3_Cobblestone_Footprint" y="19"/>
+		<layer src="3x3_Construction_Borders" x="0" y="19"/>
+		<layer src="Mausoleum_Large_Alt_Construction_02_R" x="0" y="0"/>
+	</image>
+	<!-- Note: Large Mausoleum asset -->
+	<image id="Mausoleum L" src="Mausoleum_Large" isometric="true"/>
+	<!-- Note: Large Mausoleum variant asset with rotation -->
+	<image id="Mausoleum_L_Alt" src="Mausoleum_Large_Alt" isometric="true"/>
+	<image id="Mausoleum_L_Alt_R" isometric="true">
+		<layer src="Mausoleum_Large_Alt" x="0" y="0"/>
+		<layer src="Mausoleum_Large_Alt_R" x="31" y="87"/>
+	</image>
+	<!-- Note: Small Mausoleum Construction 01 Phase -->
+	<image id="Mausoleum_Small_Construction_01" width="118" height="69" isometric="true">
+		<layer group="this" image="2x2_Construction_Footprint" y="9"/>
+		<layer src="2x2_Construction_Borders" y="9"/>
+		<layer src="Construction_Part_Cart" x="40" y="36"/>
+		<layer src="Mausoleum_Small_Construction_01"/>
+	</image>
+	<image id="Mausoleum_Small_Construction_02" width="118" height="71" isometric="true">
+		<layer group="this" image="2x2_Construction_Footprint" y="11"/>
+		<layer src="2x2_Construction_Borders" y="11"/>
+		<layer src="Construction_Part_Cart" x="38" y="6"/>
+		<layer src="Mausoleum_Small_Construction_02"/>
+	</image>
+	<image id="Mausoleum_Small_R_Construction_02" width="118" height="71" isometric="true">
+		<layer group="this" image="2x2_Construction_Footprint" y="11"/>
+		<layer src="2x2_Construction_Borders" y="11"/>
+		<layer src="Construction_Part_Cart" x="3" y="21"/>
+		<layer src="Mausoleum_Small_R_Construction_02"/>
+	</image>
+	<!-- Note: Small Mausoleum asset -->
+	<image id="Mausoleum S" src="Mausoleum_Small" isometric="true"/>
+	<!-- Note: Small Mausoleum asset (Rotation Variant) -->
+	<image id="Mausoleum S R" isometric="true">
+		<layer group="this" image="Mausoleum S" part="footprint"/>
+		<layer src="Mausoleum_Small_R" x="0" y="0"/>
+	</image>
+	<!-- Note: Triumphal Arch reference assets with rotation (DO NOT USE!!) -->
+	<image id="Triumphal_Arch_Base" width="178" height="161" isometric="true">
+		<layer group="205" image="0"/>
+		<layer group="205" image="1" x="63" y="19"/>
+	</image>
+	<image id="Triumphal_Arch_Base_R" width="178" height="163" isometric="true">
+		<layer group="205" image="2"/>
+		<layer group="205" image="3" x="27" y="17"/>
+	</image>
+	<image id="Triumphal_Arch_Overlay_Half" width="67" height="56">
+		<layer group="205" image="1" x="-19" y="-76"/>
+	</image>
+	<image id="Triumphal_Arch_Overlay_Half_R" width="67" height="54">
+		<layer group="205" image="3" x="0" y="-80"/>
+	</image>
+	<image id="Triumphal_Arch_Overlay" width="178" height="137">
+		<layer group="this" image="Triumphal_Arch_Overlay_Half" x="82" y="71"/>
+		<layer src="Triumphal_Arch_Construction_02_Top" x="89" y="30"/>
+	</image>
+	<image id="Triumphal_Arch_Overlay_R" width="178" height="137">
+		<layer group="this" image="Triumphal_Arch_Overlay_Half_R" x="27" y="71"/>
+		<layer src="Triumphal_Arch_Construction_02_Top_R" x="33" y="30"/>
+	</image>
+	<!-- Note: Triumphal Arch completed assets with rotation -->
+	<image id="Triumphal_Arch" width="178" height="161" isometric="true">
+		<layer group="this" image="Triumphal_Arch_Base"/>
+		<animation speed="1" x="63" y="19" reversible="false">
+			<frame group="205" image="1"/>
+		</animation>
+	</image>
+	<image id="Triumphal_Arch_R" width="178" height="163" isometric="true">
+		<layer group="this" image="Triumphal_Arch_Base_R"/>
+		<animation speed="1" x="27" y="17" reversible="false">
+			<frame group="205" image="3"/>
+		</animation>
+	</image>
+	<!-- Note: Triumphal Arch construction phases with rotation -->
+	<image id="Triumphal_Arch_Construction_01" width="178" height="99" isometric="true">
+		<layer group="this" image="3x3_Construction_Footprint" x="0" y="9"/>
+		<layer src="3x3_Construction_Borders" x="0" y="9"/>
+		<layer group="this" image="Construction_Part_Pillar" x="88" y="0"/>
+		<layer group="this" image="Construction_Part_Pillar" x="174" y="43"/>
+		<layer group="this" image="Construction_Part_Pillar_L" x="1" y="44"/>
+		<layer group="this" image="Construction_Part_Pillar_B" x="87" y="87"/>
+		<layer group="112" image="0" x="51" y="43"/>
+		<layer group="112" image="0" x="30" y="54"/>
+		<layer group="112" image="0" x="63" y="37"/>
+		<layer group="112" image="0" x="91" y="23"/>
+		<layer group="this" image="Construction_Part_TimberPad" x="91" y="52"/>
+		<layer group="this" image="Construction_Part_TimberPad" x="34" y="22"/>
+		<layer src="Triumphal_Arch_Construction_01" x="16" y="22"/>
+		<layer src="Construction_Part_Groma" x="86" y="15"/>
+		<layer src="Construction_Part_Cart" x="132" y="38"/>
+	</image>
+	<image id="Triumphal_Arch_Construction_01_R" width="178" height="99" isometric="true">
+		<layer group="this" image="3x3_Construction_Footprint" x="0" y="9"/>
+		<layer src="3x3_Construction_Borders" x="0" y="9"/>
+		<layer src="Triumphal_Arch_Construction_01_R" x="0" y="0"/>
+	</image>
+	<image id="Triumphal_Arch_Construction_02" width="178" height="137" isometric="true">
+		<layer group="this" image="Triumphal_Arch_Base" y="-24" part="footprint"/>
+		<layer src="Triumphal_Arch_Construction_02"/>
+		<layer src="Construction_Part_Cart" x="65" y="106"/>
+		<animation speed="1" x="0" y="0" reversible="false">
+			<frame group="this" image="Triumphal_Arch_Overlay"/>
+		</animation>
+	</image>
+	<image id="Triumphal_Arch_Construction_02_R" width="178" height="137" isometric="true">
+		<layer group="this" image="Triumphal_Arch_Base_R" y="-26" part="footprint"/>
+		<layer src="Triumphal_Arch_Construction_02_R"/>
+		<layer src="Construction_Part_Cart" x="78" y="106"/>
+		<animation speed="1" x="0" y="0" reversible="false">
+			<frame group="this" image="Triumphal_Arch_Overlay_R"/>
+		</animation>
+	</image>
+	<!-- Note: Senate 2nd upgrade tier 25%, 50% and 75% construction phases -->
+	<image id="Senate_T2_Construction_02" width="298" height="181" isometric="true">
+		<layer group="62" image="0" x="0" y="0" part="footprint"/>
+		<layer src="Senate_T2_Construction_Base_01" x="20" y="68"/>
+		<layer src="Senate_T2_Construction_02" x="69" y="31"/>
+		<layer src="Senate_T2_Construction_02_Top" x="38" y="67"/>
+		<layer src="Construction_Part_Pots_01" x="123" y="135"/>
+		<layer src="Construction_Part_Cart" x="130" y="68"/>
+	</image>
+	<image id="Senate_T2_Construction_03" width="298" height="181" isometric="true">
+		<layer group="62" image="0" x="0" y="0" part="footprint"/>
+		<layer src="Senate_T2_Construction_Base_01" x="20" y="68"/>
+		<layer src="Senate_T2_Construction_02" x="69" y="31"/>
+		<layer src="Senate_T2_Construction_03" x="69" y="23"/>
+		<layer src="Senate_T2_Construction_03_Top" x="36" y="55"/>
+		<layer src="Construction_Part_Pots_01" x="123" y="136"/>
+		<layer src="Construction_Part_Cart" x="239" y="90"/>
+	</image>
+	<image id="Senate_T2_Construction_04" width="298" height="181" isometric="true">
+		<layer group="62" image="0" x="0" y="0" part="footprint"/>
+		<layer src="Senate_T2_Construction_Base_01" x="20" y="68"/>
+		<layer src="Senate_T2_Construction_04" x="43" y="4"/>
+		<layer src="Senate_T2_Construction_04_Top" x="23" y="77"/>
+		<layer src="Construction_Part_Pots_01" x="62" y="112"/>
+		<layer src="Construction_Part_Cart" x="131" y="139"/>
+	</image>
+</assetlist>

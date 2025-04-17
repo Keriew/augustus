@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.1...3.27.0)
 include(CMakeDependentOption)
 
-set(TARGET_PLATFORM "default" CACHE STRING "Platform to cross-compile for. Options: vita switch android emscripten. Leave blank for no cross compilation")
-set_property(CACHE TARGET_PLATFORM PROPERTY STRINGS default vita switch android emscripten)
+set(TARGET_PLATFORM "default" CACHE STRING "Platform to cross-compile for. Options: vita switch android ios emscripten. Leave blank for no cross compilation")
+set_property(CACHE TARGET_PLATFORM PROPERTY STRINGS default vita switch android ios emscripten)
 
 string(TOLOWER ${TARGET_PLATFORM} TARGET_PLATFORM)
 
@@ -11,7 +11,6 @@ option(DRAW_ROUTING "Draw routing debug information." OFF)
 option(DRAW_HIGHWAY_TERRAIN "Draw highway debug information." OFF)
 option(DRAW_ROAD_NETWORK_IDS "Draw road network IDs for debugging." OFF)
 option(DRAW_TILE_COORDS "Draw tile coordinates." OFF)
-option(SYSTEM_LIBS "Use system libraries when available." ON)
 
 if(${TARGET_PLATFORM} STREQUAL "vita" AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if(DEFINED ENV{VITASDK})
@@ -33,6 +32,40 @@ if(${TARGET_PLATFORM} STREQUAL "emscripten" AND NOT DEFINED CMAKE_TOOLCHAIN_FILE
         message(FATAL_ERROR "Please define EMSDK to point to your Emscripten SDK path!")
     endif()
 endif()
+    
+if(${TARGET_PLATFORM} STREQUAL "ios")
+
+    set(CMAKE_SYSTEM_NAME "iOS")
+
+    set(SYSTEM_LIBS OFF)
+
+    # Build SDL2 as static library
+    set(SDL_SHARED_ENABLED_BY_DEFAULT OFF)
+    set(SDL_SHARED OFF)
+    set(SDL_STATIC ON)
+
+    # Build SDL2_mixer as static library
+    set(BUILD_SHARED_LIBS OFF)
+
+    # Disable stuff that breaks the build and we don't need.
+    set(SDL2MIXER_WAVPACK OFF) 
+    set(SDL2MIXER_OPUS OFF) 
+    set(SDL2MIXER_MIDI OFF) 
+    set(SDL2MIXER_MOD OFF) 
+
+    # Explicitly set SDKROOT (called Base SDK in Xcode), otherwise it is set incorrectly.
+    set(CMAKE_XCODE_ATTRIBUTE_SDKROOT iphoneos)
+
+    # Support iPhone (1) and iPad (2) Destinations
+    set(CMAKE_XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2")
+endif()
+
+
+# Enable "Edit and Continue" for MSVC
+if (POLICY CMP0141)
+    cmake_policy(SET CMP0141 NEW)
+    set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>")
+endif()
 
 set(SHORT_NAME augustus)
 set(USER_FRIENDLY_NAME Augustus)
@@ -51,9 +84,9 @@ set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake/")
 
 set(CMAKE_C_STANDARD 99)
 
-if(CMAKE_COMPILER_IS_GNUCC)
+if(CMAKE_COMPILER_IS_GNUCC OR MINGW)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-missing-field-initializers -Wno-sign-compare -Werror=implicit-function-declaration")
-    if(CMAKE_C_COMPILER_VERSION VERSION_GREATER 5.0)
+    if(CMAKE_COMPILER_IS_GNUCC AND CMAKE_C_COMPILER_VERSION VERSION_GREATER 5.0)
         set(CMAKE_C_FLAGS "-Werror=incompatible-pointer-types -Werror=int-conversion -Wstrict-prototypes ${CMAKE_C_FLAGS}")
     endif()
 
@@ -61,13 +94,13 @@ if(CMAKE_COMPILER_IS_GNUCC)
         set_source_files_properties(${SOURCE_FILES} PROPERTIES COMPILE_FLAGS "-Walloc-zero -Wdouble-promotion -Wduplicated-branches -Wduplicated-cond -Wformat=2 -Wformat-signedness -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-prototypes -Wshadow -Wundef -Wunused-macros -Wwrite-strings")
     endif()
 elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND "${CMAKE_BUILD_TYPE}" MATCHES "Debug" AND NOT ${TARGET_PLATFORM} STREQUAL "android")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=undefined")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=undefined -Wall -Wextra -Wpedantic -Wdocumentation -Wno-unused-parameter -Wno-missing-field-initializers -Wno-sign-compare -Wno-unused-but-set-variable")
 endif()
 
 set(PROJECT_VERSION_MAJOR 4)
 set(PROJECT_VERSION_MINOR 0)
 set(PROJECT_VERSION_PATCH 0)
-set(IS_RELEASE_VERSION TRUE)
+set(IS_RELEASE_VERSION FALSE)
 
 if(IS_RELEASE_VERSION)
     set(PROJECT_VERSION_TWEAK 0)
@@ -89,7 +122,7 @@ elseif (EXISTS "${CMAKE_SOURCE_DIR}/.git")
             OUTPUT_STRIP_TRAILING_WHITESPACE
         )
         execute_process(
-            COMMAND git diff-index --quiet HEAD --
+            COMMAND git diff --quiet HEAD --
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             RESULT_VARIABLE VERSION_COMMIT_DIRTY
         )
@@ -170,43 +203,20 @@ if (EXISTS ${PROJECT_SOURCE_DIR}/res/packed_assets)
     set(ASSETS_DIR ${PROJECT_SOURCE_DIR}/res/packed_assets)
 endif()
 
-set(EXPAT_FILES
-    ext/expat/xmlparse.c
-    ext/expat/xmlrole.c
-    ext/expat/xmltok.c
-)
-
 set(TINYFD_FILES
-    ext/tinyfiledialogs/tinyfiledialogs.c
+    ${PROJECT_SOURCE_DIR}/ext/tinyfiledialogs/tinyfiledialogs.c
 )
 
-set(PNG_FILES
-    ext/png/png.c
-    ext/png/pngerror.c
-    ext/png/pngget.c
-    ext/png/pngmem.c
-    ext/png/pngpread.c
-    ext/png/pngread.c
-    ext/png/pngrio.c
-    ext/png/pngrtran.c
-    ext/png/pngrutil.c
-    ext/png/pngset.c
-    ext/png/pngtrans.c
-    ext/png/pngwio.c
-    ext/png/pngwrite.c
-    ext/png/pngwtran.c
-    ext/png/pngwutil.c
+set(SPNG_FILES
+    ${PROJECT_SOURCE_DIR}/ext/spng/spng.c
 )
 
-set(ZLIB_FILES
-    ext/zlib/adler32.c
-    ext/zlib/crc32.c
-    ext/zlib/deflate.c
-    ext/zlib/inffast.c
-    ext/zlib/inflate.c
-    ext/zlib/inftrees.c
-    ext/zlib/trees.c
-    ext/zlib/zutil.c
+set(SXML_FILES
+    ${PROJECT_SOURCE_DIR}/ext/sxml/sxml.c
+)
+
+set(ZIP_FILES
+    ${PROJECT_SOURCE_DIR}/ext/zip/zip.c
 )
 
 set(PLATFORM_FILES
@@ -226,6 +236,7 @@ set(PLATFORM_FILES
     ${PROJECT_SOURCE_DIR}/src/platform/screen.c
     ${PROJECT_SOURCE_DIR}/src/platform/sound_device.c
     ${PROJECT_SOURCE_DIR}/src/platform/touch.c
+    ${PROJECT_SOURCE_DIR}/src/platform/user_path.c
     ${PROJECT_SOURCE_DIR}/src/platform/version.c
     ${PROJECT_SOURCE_DIR}/src/platform/virtual_keyboard.c
 )
@@ -249,6 +260,12 @@ elseif (${TARGET_PLATFORM} STREQUAL "android")
         ${PROJECT_SOURCE_DIR}/src/platform/android/android.c
         ${PROJECT_SOURCE_DIR}/src/platform/android/asset_handler.c
         ${PROJECT_SOURCE_DIR}/src/platform/android/jni.c
+    )
+elseif (${TARGET_PLATFORM} STREQUAL "ios")
+    set(PLATFORM_FILES
+        ${PLATFORM_FILES}
+        ${PROJECT_SOURCE_DIR}/src/platform/ios/ios.m
+        ${PROJECT_SOURCE_DIR}/src/platform/ios/GameDataPickerController.m
     )
 endif()
 
@@ -285,6 +302,7 @@ set(CORE_FILES
 
 set(BUILDING_FILES
     ${PROJECT_SOURCE_DIR}/src/building/animation.c
+    ${PROJECT_SOURCE_DIR}/src/building/armoury.c
     ${PROJECT_SOURCE_DIR}/src/building/barracks.c
     ${PROJECT_SOURCE_DIR}/src/building/building.c
     ${PROJECT_SOURCE_DIR}/src/building/caravanserai.c
@@ -328,6 +346,7 @@ set(BUILDING_FILES
     ${PROJECT_SOURCE_DIR}/src/building/variant.c
     ${PROJECT_SOURCE_DIR}/src/building/warehouse.c
 )
+
 set(CITY_FILES
     ${PROJECT_SOURCE_DIR}/src/city/buildings.c
     ${PROJECT_SOURCE_DIR}/src/city/culture.c
@@ -413,6 +432,12 @@ set(FIGURETYPE_FILES
     ${PROJECT_SOURCE_DIR}/src/figuretype/workcamp.c
 )
 set(GAME_FILES
+    ${PROJECT_SOURCE_DIR}/src/game/campaign/campaign.c
+    ${PROJECT_SOURCE_DIR}/src/game/campaign/file.c
+    ${PROJECT_SOURCE_DIR}/src/game/campaign/mission.c
+    ${PROJECT_SOURCE_DIR}/src/game/campaign/original.c
+    ${PROJECT_SOURCE_DIR}/src/game/campaign/player_data.c
+    ${PROJECT_SOURCE_DIR}/src/game/campaign/xml.c
     ${PROJECT_SOURCE_DIR}/src/game/animation.c
     ${PROJECT_SOURCE_DIR}/src/game/cheats.c
     ${PROJECT_SOURCE_DIR}/src/game/difficulty.c
@@ -483,12 +508,13 @@ set(ASSETS_FILES
     ${PROJECT_SOURCE_DIR}/src/assets/xml.c
 )
 set(SCENARIO_FILES
-    ${PROJECT_SOURCE_DIR}/src/scenario/building.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/allowed_building.c
     ${PROJECT_SOURCE_DIR}/src/scenario/criteria.c
     ${PROJECT_SOURCE_DIR}/src/scenario/custom_media.c
     ${PROJECT_SOURCE_DIR}/src/scenario/custom_messages_export_xml.c
     ${PROJECT_SOURCE_DIR}/src/scenario/custom_messages_import_xml.c
     ${PROJECT_SOURCE_DIR}/src/scenario/custom_messages.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/custom_variable.c
     ${PROJECT_SOURCE_DIR}/src/scenario/demand_change.c
     ${PROJECT_SOURCE_DIR}/src/scenario/distant_battle.c
     ${PROJECT_SOURCE_DIR}/src/scenario/earthquake.c
@@ -506,16 +532,16 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/random_event.c
     ${PROJECT_SOURCE_DIR}/src/scenario/request.c
     ${PROJECT_SOURCE_DIR}/src/scenario/scenario.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/scenario_event.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/scenario_events_import_xml.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/scenario_events_export_xml.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/scenario_events_controller.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/scenario_events_parameter_data.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/action_types/action_handler.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/action_types/action_types.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/comparison_helper.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/condition_handler.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/condition_types.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/event.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/import_xml.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/export_xml.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/controller.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/parameter_data.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/action_handler.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/action_types.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/condition_comparison_helper.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/condition_handler.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/condition_types.c
 )
 set(GRAPHICS_FILES
     ${PROJECT_SOURCE_DIR}/src/graphics/arrow_button.c
@@ -524,9 +550,11 @@ set(GRAPHICS_FILES
     ${PROJECT_SOURCE_DIR}/src/graphics/font.c
     ${PROJECT_SOURCE_DIR}/src/graphics/generic_button.c
     ${PROJECT_SOURCE_DIR}/src/graphics/graphics.c
+    ${PROJECT_SOURCE_DIR}/src/graphics/grid_box.c
     ${PROJECT_SOURCE_DIR}/src/graphics/image.c
     ${PROJECT_SOURCE_DIR}/src/graphics/image_button.c
     ${PROJECT_SOURCE_DIR}/src/graphics/lang_text.c
+    ${PROJECT_SOURCE_DIR}/src/graphics/list_box.c
     ${PROJECT_SOURCE_DIR}/src/graphics/menu.c
     ${PROJECT_SOURCE_DIR}/src/graphics/panel.c
     ${PROJECT_SOURCE_DIR}/src/graphics/rich_text.c
@@ -656,8 +684,8 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/military_menu.c
     ${PROJECT_SOURCE_DIR}/src/window/mission_briefing.c
     ${PROJECT_SOURCE_DIR}/src/window/mission_end.c
+    ${PROJECT_SOURCE_DIR}/src/window/mission_list.c
     ${PROJECT_SOURCE_DIR}/src/window/mission_selection.c
-    ${PROJECT_SOURCE_DIR}/src/window/new_career.c
     ${PROJECT_SOURCE_DIR}/src/window/numeric_input.c
     ${PROJECT_SOURCE_DIR}/src/window/option_popup.c
     ${PROJECT_SOURCE_DIR}/src/window/overlay_menu.c
@@ -665,13 +693,15 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/popup_dialog.c
     ${PROJECT_SOURCE_DIR}/src/window/race_bet.c
     ${PROJECT_SOURCE_DIR}/src/window/resource_settings.c
+    ${PROJECT_SOURCE_DIR}/src/window/select_campaign.c
     ${PROJECT_SOURCE_DIR}/src/window/select_list.c
     ${PROJECT_SOURCE_DIR}/src/window/set_salary.c
     ${PROJECT_SOURCE_DIR}/src/window/text_input.c
     ${PROJECT_SOURCE_DIR}/src/window/trade_opened.c
     ${PROJECT_SOURCE_DIR}/src/window/trade_prices.c
+    ${PROJECT_SOURCE_DIR}/src/window/user_path_setup.c
     ${PROJECT_SOURCE_DIR}/src/window/victory_dialog.c
-    ${PROJECT_SOURCE_DIR}/src/window/victory_video.c
+    ${PROJECT_SOURCE_DIR}/src/window/video.c
 )
 set(EDITOR_FILES
     ${PROJECT_SOURCE_DIR}/src/editor/editor.c
@@ -714,11 +744,25 @@ if(APPLE)
     set(${VAR} ${_LIST} PARENT_SCOPE)
     endfunction()
     resource(ASSET_SOURCES ${ASSETS_DIR} Resources/assets *)
+endif()
+
+if(APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "ios")
     set(MACOSX_FILES
         ${PROJECT_SOURCE_DIR}/res/augustus.icns
         ${ASSET_SOURCES}
     )
 endif()
+
+
+set(IOS_FILES "")
+if(${TARGET_PLATFORM} STREQUAL "ios")
+    set(IOS_FILES 
+        ${PROJECT_SOURCE_DIR}/res/ios/Assets.xcassets
+        ${ASSET_SOURCES}
+    )
+
+endif()
+
 
 set(EMSCRIPTEN_FILES "")
 if(${TARGET_PLATFORM} STREQUAL "emscripten")
@@ -745,8 +789,13 @@ set(SOURCE_FILES
     ${EDITOR_FILES}
     ${TRANSLATION_FILES}
     ${TINYFD_FILES}
+    ${SPNG_FILES}
+    ${SXML_FILES}
+    ${ZIP_FILES}
     ${PROJECT_SOURCE_DIR}/res/augustus.rc
     ${MACOSX_FILES}
+    ${IOS_FILES}
+    ${EMSCRIPTEN_FILES}
 )
 
 function(GET_SDL_EXT_DIR result module)
@@ -779,6 +828,20 @@ elseif(${TARGET_PLATFORM} STREQUAL "android")
     string(TOLOWER ${CMAKE_BUILD_TYPE} ANDROID_BUILD_DIR)
     set(SDL2_LIBRARY SDL2::SDL2)
     set(SDL2_MIXER_LIBRARY SDL2::SDL2_mixer)
+elseif(${TARGET_PLATFORM} STREQUAL "ios")
+    GET_SDL_EXT_DIR(SDL_EXT_DIR "")
+    add_subdirectory(${SDL_EXT_DIR})
+    find_library(SDL2 NAMES SDL2-static SDL2main)
+    list(APPEND SDL2_LIBRARY
+        # We don't need to add SDL2-static here because SDL2_mixer will include it
+        SDL2main
+    )
+    GET_SDL_EXT_DIR(SDL_MIXER_EXT_DIR "mixer")
+    add_subdirectory(${SDL_MIXER_EXT_DIR})
+    find_library(SDL2_mixer NAMES SDL2_mixer-static)
+    list(APPEND SDL2_MIXER_LIBRARY
+        SDL2_mixer
+    )
 else()
     find_package(SDL2 REQUIRED)
     find_package(SDL2_mixer REQUIRED)
@@ -786,24 +849,24 @@ endif()
 
 if(${TARGET_PLATFORM} STREQUAL "android")
     add_library(${SHORT_NAME} SHARED ${SOURCE_FILES})
+elseif(${TARGET_PLATFORM} STREQUAL "ios")
+    add_executable(${SHORT_NAME} MACOSX_BUNDLE ${SOURCE_FILES})
 else()
     add_executable(${SHORT_NAME} WIN32 ${SOURCE_FILES})
 endif()
 
 if(${TARGET_PLATFORM} STREQUAL "emscripten")
     set(CMAKE_EXECUTABLE_SUFFIX .html)
-    set_target_properties(${SHORT_NAME} PROPERTIES LINK_FLAGS "-lidbfs.js -s SINGLE_FILE=1 -s DEMANGLE_SUPPORT=1 -s DYNCALLS=1 --shell-file ${PROJECT_SOURCE_DIR}/res/shell.html --embed-file ${ASSETS_DIR}@/assets -s INITIAL_MEMORY=268435456 -s ALLOW_MEMORY_GROWTH=1 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 -s SAFE_HEAP=1 -s INVOKE_RUN=0 -s EXPORTED_FUNCTIONS=[\"_main\"] -s EXPORTED_RUNTIME_METHODS=[\"callMain\",\"FS\"] -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=[\"$autoResumeAudioContext\"] --bind")
+    set_target_properties(${SHORT_NAME} PROPERTIES LINK_FLAGS "-lidbfs.js -s SINGLE_FILE=1 -s DYNCALLS=1 --shell-file ${PROJECT_SOURCE_DIR}/res/shell.html --embed-file ${ASSETS_DIR}@/assets -s INITIAL_MEMORY=268435456 -s ALLOW_MEMORY_GROWTH=1 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 -s SAFE_HEAP=1 -s INVOKE_RUN=0 -s EXPORTED_FUNCTIONS=[\"_main\"] -s EXPORTED_RUNTIME_METHODS=[\"callMain\",\"FS\"] -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=[\"$autoResumeAudioContext\"] --bind")
 endif()
 
 if(MSVC)
     add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
     string(REGEX REPLACE "/W3" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
     set_source_files_properties(${EXPAT_FILES} PROPERTIES COMPILE_FLAGS "/W3")
-    set_source_files_properties(${PNG_FILES} PROPERTIES COMPILE_FLAGS "/W3")
-    set_source_files_properties(${ZLIB_FILES} PROPERTIES COMPILE_FLAGS "/W3")
     set_source_files_properties(${SOURCE_FILES} PROPERTIES COMPILE_FLAGS "/W4")
     set_source_files_properties(${PROJECT_SOURCE_DIR}/res/augustus.rc PROPERTIES COMPILE_FLAGS "")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /utf-8 /wd4100 /wd4244")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /utf-8 /wd4100 /wd4244 /we4013")
 endif()
 
 # Show debug info on crash on 32 bit builds compiled with MinGW
@@ -815,7 +878,7 @@ if(CMAKE_INSTALL_DATADIR)
     add_compile_definitions(CUSTOM_ASSETS_DIR="${CMAKE_INSTALL_DATADIR}")
 endif()
 
-if(APPLE)
+if(APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "ios")
     # generating a macOS icns file (see https://stackoverflow.com/a/20703594)
     add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/res/augustus.icns
         COMMAND mkdir -p augustus.iconset
@@ -836,7 +899,7 @@ if(APPLE)
     # setting variables that will populate Info.plist
     set(MACOSX_BUNDLE_GUI_IDENTIFIER "pl.Keriew.augustus")
     set(MACOSX_BUNDLE_BUNDLE_NAME ${USER_FRIENDLY_NAME})
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.11" CACHE STRING "Minimum OS X deployment version" FORCE)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum OS X deployment version" FORCE)
     set(MACOSX_BUNDLE_ICON_FILE "augustus.icns")
     set(MACOSX_BUNDLE_BUNDLE_VERSION
         "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}${VERSION_REVISION}")
@@ -882,47 +945,31 @@ if(APPLE)
 	")
 endif()
 
+if(${TARGET_PLATFORM} STREQUAL "ios")
+    # setting variables that will populate Info.plist
+    set_target_properties(${SHORT_NAME} PROPERTIES
+
+        MACOSX_BUNDLE_BUNDLE_NAME  ${USER_FRIENDLY_NAME}
+        MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}${VERSION_REVISION}"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.github.keriew.augustus"
+        MACOSX_BUNDLE_INFO_PLIST "${PROJECT_SOURCE_DIR}/res/ios/Info.plist"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
+        MACOSX_BUNDLE_UI_LAUNCH_STORYBOARD_NAME "LaunchScreen"
+        OUTPUT_NAME "${PROJECT_NAME}"
+        XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
+        XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY 1,2
+        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.github.keriew.augustus"
+    )
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "14.0" CACHE STRING "Minimum OS X deployment version" FORCE)
+    set_source_files_properties(${PROJECT_SOURCE_DIR}/res/ios/Assets.xcassets PROPERTIES
+        MACOSX_PACKAGE_LOCATION Resources)
+endif()
+
 if(SDL2_INCLUDE_DIR)
     include_directories(SYSTEM ${SDL2_INCLUDE_DIR})
 endif()
 if(SDL2_MIXER_INCLUDE_DIR)
     include_directories(SYSTEM ${SDL2_MIXER_INCLUDE_DIR})
-endif()
-
-if(SYSTEM_LIBS)
-    find_package(ZLIB)
-    find_package(PNG)
-    find_package(EXPAT)
-endif()
-
-if(ZLIB_FOUND)
-    include_directories(${ZLIB_INCLUDE_DIRS})
-    target_link_libraries(${SHORT_NAME} ${ZLIB_LIBRARIES})
-else()
-    include_directories("ext/zlib")
-    target_sources(${SHORT_NAME} PRIVATE "${ZLIB_FILES}")
-endif()
-
-if(PNG_FOUND)
-    include_directories(SYSTEM ${PNG_INCLUDE_DIRS})
-    target_link_libraries(${SHORT_NAME} ${PNG_LIBRARIES})
-else()
-    if(SYSTEM_LIBS)
-        message(STATUS "PNG was not found but that's ok: falling back to internal version")
-    endif()
-    include_directories("ext/png")
-    target_sources(${SHORT_NAME} PRIVATE "${PNG_FILES}")
-endif()
-
-if(EXPAT_FOUND)
-    include_directories(${EXPAT_INCLUDE_DIRS})
-    target_link_libraries(${SHORT_NAME} ${EXPAT_LIBRARIES})
-else()
-    include_directories("ext/expat")
-    target_sources(${SHORT_NAME} PRIVATE "${EXPAT_FILES}")
-    if(NOT WIN32)
-        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DXML_DEV_URANDOM")
-    endif()
 endif()
 
 if(${TARGET_PLATFORM} STREQUAL "vita")
@@ -971,7 +1018,7 @@ if(${TARGET_PLATFORM} STREQUAL "vita")
         ScePgf_stub
         SceAppMgr_stub
     )
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D__vita__ -DPNG_ARM_NEON_OPT=0")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D__vita__")
     # this setting enables larger heap memory sizes on Vita, up to ~330 MB
     # useful for pre-loading videos into memory
     set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -d ATTRIBUTE2=12")
@@ -1007,12 +1054,28 @@ else()
         target_link_libraries(${SHORT_NAME} m)
     endif()
     if(${TARGET_PLATFORM} STREQUAL "android")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DPNG_ARM_NEON_OPT=0 -D_BSD_SOURCE")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_BSD_SOURCE")
         find_library(log-lib log)
         find_library(android-lib android)
         target_link_libraries(${SHORT_NAME} ${log-lib} ${android-lib})
     endif()
-    target_link_libraries(${SHORT_NAME} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY})
+
+    if(${TARGET_PLATFORM} STREQUAL "ios")
+        set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -DUSE_SDL_MAIN")
+        # Add SDL2 and SDL_Mixer headers, or they won't be found
+        target_include_directories(${SHORT_NAME} PRIVATE "${SDL_EXT_DIR}/include")
+        target_include_directories(${SHORT_NAME} PRIVATE "${SDL_MIXER_EXT_DIR}/include")
+
+        # Add UniformTypeIdentifiers to the list of linked frameworks
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-framework,UniformTypeIdentifiers")
+
+        set_target_properties(${SHORT_NAME}  PROPERTIES
+            XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
+            XCODE_ATTRIBUTE_SKIP_INSTALL "No"
+        )
+    endif()
+
+    target_link_libraries(${SHORT_NAME} ${SDL2MAIN_LIBRARY} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY})
     if(NOT APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "android")
         install(TARGETS ${SHORT_NAME} RUNTIME DESTINATION bin)
     endif()

@@ -13,7 +13,9 @@ enum {
     LEGION_RECRUIT_NONE = 0,
     LEGION_RECRUIT_MOUNTED = 1,
     LEGION_RECRUIT_JAVELIN = 2,
-    LEGION_RECRUIT_LEGIONARY = 3
+    LEGION_RECRUIT_LEGIONARY = 3,
+    LEGION_RECRUIT_INFANTRY = 4,
+    LEGION_RECRUIT_ARCHER = 5,
 };
 
 typedef enum {
@@ -51,7 +53,7 @@ typedef struct {
  * Formation data
  */
 typedef struct {
-    int id; /**< ID of the formation */
+    unsigned int id; /**< ID of the formation */
     int faction_id; /**< 1 = player, 0 = everyone else */
 
     /* General variables */

@@ -6,6 +6,7 @@
 #include "city/view.h"
 #include "core/calc.h"
 #include "figure/formation_legion.h"
+#include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
@@ -24,42 +25,42 @@
 
 #define MAX_VISIBLE_LEGIONS 6
 
-static void button_go_to_legion(int legion_id, int param2);
-static void button_return_to_fort(int legion_id, int param2);
-static void button_empire_service(int legion_id, int param2);
-static void button_return_all_to_fort(int param1, int param2);
+static void button_go_to_legion(const generic_button *button);
+static void button_return_to_fort(const generic_button *button);
+static void button_empire_service(const generic_button *button);
+static void button_return_all_to_fort(const generic_button *button);
 static void on_scroll(void);
 
 static scrollbar_type scrollbar = { 592, 70, 272, 576, MAX_VISIBLE_LEGIONS, on_scroll };
 
 static generic_button fort_buttons[] = {
-    {384, 83, 30, 30, button_go_to_legion, button_none, 1, 0},
-    {464, 83, 30, 30, button_return_to_fort, button_none, 1, 0},
-    {544, 83, 30, 30, button_empire_service, button_none, 1, 0},
-    {384, 127, 30, 30, button_go_to_legion, button_none, 2, 0},
-    {464, 127, 30, 30, button_return_to_fort, button_none, 2, 0},
-    {544, 127, 30, 30, button_empire_service, button_none, 2, 0},
-    {384, 171, 30, 30, button_go_to_legion, button_none, 3, 0},
-    {464, 171, 30, 30, button_return_to_fort, button_none, 3, 0},
-    {544, 171, 30, 30, button_empire_service, button_none, 3, 0},
-    {384, 215, 30, 30, button_go_to_legion, button_none, 4, 0},
-    {464, 215, 30, 30, button_return_to_fort, button_none, 4, 0},
-    {544, 215, 30, 30, button_empire_service, button_none, 4, 0},
-    {384, 259, 30, 30, button_go_to_legion, button_none, 5, 0},
-    {464, 259, 30, 30, button_return_to_fort, button_none, 5, 0},
-    {544, 259, 30, 30, button_empire_service, button_none, 5, 0},
-    {384, 303, 30, 30, button_go_to_legion, button_none, 6, 0},
-    {464, 303, 30, 30, button_return_to_fort, button_none, 6, 0},
-    {544, 303, 30, 30, button_empire_service, button_none, 6, 0},
+    {384, 83, 30, 30, button_go_to_legion, 0, 1},
+    {464, 83, 30, 30, button_return_to_fort, 0, 1},
+    {544, 83, 30, 30, button_empire_service, 0, 1},
+    {384, 127, 30, 30, button_go_to_legion, 0, 2},
+    {464, 127, 30, 30, button_return_to_fort, 0, 2},
+    {544, 127, 30, 30, button_empire_service, 0, 2},
+    {384, 171, 30, 30, button_go_to_legion, 0, 3},
+    {464, 171, 30, 30, button_return_to_fort, 0, 3},
+    {544, 171, 30, 30, button_empire_service, 0, 3},
+    {384, 215, 30, 30, button_go_to_legion, 0, 4},
+    {464, 215, 30, 30, button_return_to_fort, 0, 4},
+    {544, 215, 30, 30, button_empire_service, 0, 4},
+    {384, 259, 30, 30, button_go_to_legion, 0, 5},
+    {464, 259, 30, 30, button_return_to_fort, 0, 5},
+    {544, 259, 30, 30, button_empire_service, 0, 5},
+    {384, 303, 30, 30, button_go_to_legion, 0, 6},
+    {464, 303, 30, 30, button_return_to_fort, 0, 6},
+    {544, 303, 30, 30, button_empire_service, 0, 6},
 };
 
 static generic_button additional_buttons[] = {
-    {445, 28, 60, 40, button_return_all_to_fort, button_none, 0, 0}
+    {445, 28, 60, 40, button_return_all_to_fort}
 };
 
-static int focus_button_id;
-static int focus_additional_button_id;
-static int num_legions;
+static unsigned int focus_button_id;
+static unsigned int focus_additional_button_id;
+static unsigned int num_legions;
 
 static void init(void)
 {
@@ -73,12 +74,12 @@ static int draw_background(void)
     image_draw(image_group(GROUP_ADVISOR_ICONS) + 1, 10, 10, COLOR_MASK_NONE, SCALE_NONE);
     lang_text_draw(51, 0, 60, 12, FONT_LARGE_BLACK);
 
-    lang_text_draw(51, 1, 374, 35, FONT_SMALL_PLAIN);
-    lang_text_draw(51, 2, 374, 50, FONT_SMALL_PLAIN);
-    lang_text_draw(51, 3, 454, 35, FONT_SMALL_PLAIN);
-    lang_text_draw(51, 4, 454, 50, FONT_SMALL_PLAIN);
-    lang_text_draw(51, 5, 534, 35, FONT_SMALL_PLAIN);
-    lang_text_draw(51, 6, 534, 50, FONT_SMALL_PLAIN);
+    lang_text_draw(51, 1, 380, 35, FONT_SMALL_PLAIN);
+    lang_text_draw(51, 2, 380, 50, FONT_SMALL_PLAIN);
+    lang_text_draw(51, 3, 455, 35, FONT_SMALL_PLAIN);
+    lang_text_draw(51, 4, 455, 50, FONT_SMALL_PLAIN);
+    lang_text_draw(51, 5, 535, 35, FONT_SMALL_PLAIN);
+    lang_text_draw(51, 6, 535, 50, FONT_SMALL_PLAIN);
     lang_text_draw(138, 36, 274, 50, FONT_SMALL_PLAIN);
 
     int enemy_text_id;
@@ -147,7 +148,7 @@ static int draw_background(void)
         lang_text_draw_multiline(51, 16, 64, 200, 496, FONT_NORMAL_GREEN);
         return ADVISOR_HEIGHT;
     }
-    for (int i = 0; i < 6 && i < num_legions; i++) {
+    for (unsigned int i = 0; i < 6 && i < num_legions; i++) {
         const formation *m = formation_get(formation_for_legion(i + 1 + scrollbar.scroll_position));
         button_border_draw(22, 77 + 44 * i, 560, 40, 0);
         image_draw(image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + m->legion_id, 32, 82 + 44 * i,
@@ -156,14 +157,19 @@ static int draw_background(void)
         int width = text_draw_number(m->num_figures, '@', " ", 84, 100 + 44 * i, FONT_NORMAL_GREEN, 0);
         switch (m->figure_type) {
             case FIGURE_FORT_LEGIONARY:
-                lang_text_draw(138, 33, 84 + width, 100 + 44 * i, FONT_NORMAL_GREEN);
+                text_draw(translation_for(TR_WINDOW_ADVISOR_LEGIONARIES), 84 + width, 100 + 44 * i, FONT_NORMAL_GREEN, 0);
                 break;
             case FIGURE_FORT_MOUNTED:
-                lang_text_draw(138, 34, 84 + width, 100 + 44 * i, FONT_NORMAL_GREEN);
+                text_draw(translation_for(TR_WINDOW_ADVISOR_MOUNTED), 84 + width, 100 + 44 * i, FONT_NORMAL_GREEN, 0);
                 break;
             case FIGURE_FORT_JAVELIN:
-                lang_text_draw(138, 35, 84 + width, 100 + 44 * i, FONT_NORMAL_GREEN);
+                text_draw(translation_for(TR_WINDOW_ADVISOR_JAVELIN), 84 + width, 100 + 44 * i, FONT_NORMAL_GREEN, 0);
                 break;
+            case FIGURE_FORT_INFANTRY:
+                text_draw(translation_for(TR_WINDOW_ADVISOR_MILITARY_INFANTRY), 84 + width, 100 + 44 * i, FONT_NORMAL_GREEN, 0);
+                break;
+            case FIGURE_FORT_ARCHER:
+                text_draw(translation_for(TR_WINDOW_ADVISOR_MILITARY_ARCHER), 84 + width, 100 + 44 * i, FONT_NORMAL_GREEN, 0);
         }
         int morale_offset = m->morale / 5;
         if (morale_offset > 20) {
@@ -193,10 +199,10 @@ static int draw_background(void)
     return ADVISOR_HEIGHT;
 }
 
-static int get_num_legions_not_at_fort(void)
+static unsigned int get_num_legions_not_at_fort(void)
 {
-    int num_legions_not_at_fort = 0;
-    for (int i = 0; i < num_legions; i++) {
+    unsigned int num_legions_not_at_fort = 0;
+    for (unsigned int i = 0; i < num_legions; i++) {
         const formation* m = formation_get(formation_for_legion(i + 1));
         if (!m->in_distant_battle && !m->is_at_fort) {
             num_legions_not_at_fort++;
@@ -209,7 +215,7 @@ static void draw_foreground(void)
 {
     scrollbar_draw(&scrollbar);
     num_legions = formation_get_num_legions();
-    for (int i = 0; i < 6 && i < num_legions; i++) {
+    for (unsigned int i = 0; i < 6 && i < num_legions; i++) {
         button_border_draw(384, 83 + 44 * i, 30, 30, focus_button_id == 3 * i + 1);
         button_border_draw(464, 83 + 44 * i, 30, 30, focus_button_id == 3 * i + 2);
         button_border_draw(544, 83 + 44 * i, 30, 30, focus_button_id == 3 * i + 3);
@@ -228,7 +234,7 @@ static int handle_mouse(const mouse *m)
         focus_button_id = 0;
         return 1;
     }
-    int buttons = 3 * num_legions;
+    unsigned int buttons = 3 * num_legions;
     if (buttons > MAX_BUTTONS) {
         buttons = MAX_BUTTONS;
     }
@@ -242,9 +248,10 @@ static int handle_mouse(const mouse *m)
     return result;
 }
 
-static void button_go_to_legion(int legion_id, int param2)
+static void button_go_to_legion(const generic_button *button)
 {
-    const formation *m = formation_get(formation_for_legion(legion_id+scrollbar.scroll_position));
+    int legion_id = button->parameter1;
+    const formation *m = formation_get(formation_for_legion(legion_id + scrollbar.scroll_position));
     city_view_go_to_grid_offset(map_grid_offset(m->x_home, m->y_home));
     window_city_show();
 }
@@ -258,24 +265,26 @@ static void return_legion_to_fort(int legion_id)
     }
 }
 
-static void button_return_to_fort(int legion_id, int param2)
+static void button_return_to_fort(const generic_button *button)
 {
+    int legion_id = button->parameter1;
     return_legion_to_fort(legion_id + scrollbar.scroll_position);
 }
 
-static void button_empire_service(int legion_id, int param2)
+static void button_empire_service(const generic_button *button)
 {
+    int legion_id = button->parameter1;
     int formation_id = formation_for_legion(legion_id + scrollbar.scroll_position);
     formation_toggle_empire_service(formation_id);
     formation_calculate_figures();
     window_invalidate();
 }
 
-static void button_return_all_to_fort(int param1, int param2)
+static void button_return_all_to_fort(const generic_button *button)
 {
-    int num_legions_not_at_fort = get_num_legions_not_at_fort();
+    unsigned int num_legions_not_at_fort = get_num_legions_not_at_fort();
     if (num_legions_not_at_fort > 0) {
-        for (int i = 0; i < num_legions; i++) {
+        for (unsigned int i = 0; i < num_legions; i++) {
             return_legion_to_fort(i + 1);
         }
     }

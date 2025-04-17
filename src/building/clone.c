@@ -13,8 +13,8 @@
  * For example, given a fort, return the enumaration value corresponding to
  * the specific type of fort rather than the general value
  *
- * @param building Building to examine (can be null for destroyed building)
- * @param building_type Type of the building to clone (can be original building type before a fire)
+ * @param b Building to examine (can be null for destroyed building)
+ * @param clone_type Type of the building to clone (can be original building type before a fire)
  * @return the building_type value to clone, or BUILDING_NONE if not cloneable
  */
 static building_type get_clone_type_from_building(building *b, building_type clone_type)
@@ -32,6 +32,8 @@ static building_type get_clone_type_from_building(building *b, building_type clo
                     case FIGURE_FORT_LEGIONARY: return BUILDING_FORT_LEGIONARIES;
                     case FIGURE_FORT_JAVELIN: return BUILDING_FORT_JAVELIN;
                     case FIGURE_FORT_MOUNTED: return BUILDING_FORT_MOUNTED;
+                    case FIGURE_FORT_INFANTRY: return BUILDING_FORT_AUXILIA_INFANTRY;
+                    case FIGURE_FORT_ARCHER: return BUILDING_FORT_ARCHERS;
                 }
             }
             return BUILDING_NONE;

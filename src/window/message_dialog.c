@@ -97,7 +97,9 @@ static struct {
     void (*background_callback)(void);
     int show_video;
     int should_play_audio;
+    int should_play_speech;
     int should_play_background_music;
+    int background_image_id;
 
     int x;
     int y;
@@ -105,7 +107,7 @@ static struct {
     int y_text;
     int text_height_blocks;
     int text_width_blocks;
-    int focus_button_id;
+    unsigned int focus_button_id;
 
     lang_message custom_lang_message;
     custom_message_t *custom_msg;
@@ -151,18 +153,26 @@ static void setup_custom_lang_message(int text_id)
     data.custom_lang_message.subtitle.text = custom_messages_get_subtitle(data.custom_msg);
     data.custom_lang_message.content.text = custom_messages_get_text(data.custom_msg);
 
-    if (custom_messages_get_video(data.custom_msg)) {
-        data.custom_lang_message.video.text = (uint8_t *) string_from_ascii(custom_messages_get_video(data.custom_msg));
-    }
+    data.custom_lang_message.video.text = custom_messages_get_video(data.custom_msg);
 
     data.should_play_audio = 0;
     if (custom_messages_get_audio(data.custom_msg)) {
         data.should_play_audio = 1;
     }
 
+    data.should_play_speech = 0;
+    if (custom_messages_get_speech(data.custom_msg)) {
+        data.should_play_speech = 1;
+    }
+
     data.should_play_background_music = 0;
     if (custom_messages_get_background_music(data.custom_msg)) {
         data.should_play_background_music = 1;
+    }
+
+    const uint8_t *background_image_text = custom_messages_get_background_image(data.custom_msg);
+    if (background_image_text) {
+        data.background_image_id = rich_text_parse_image_id(&background_image_text, GROUP_INTERMEZZO_BACKGROUND, 1);
     }
 }
 
@@ -174,19 +184,57 @@ static void clear_custom_lang_message(void)
     data.custom_lang_message.content.text = 0;
     data.custom_lang_message.video.text = 0;
     data.should_play_audio = 0;
+    data.should_play_speech = 0;
     data.should_play_background_music = 0;
+    data.background_image_id = 0;
+}
+
+static void fadeout_music(sound_type unused)
+{
+    sound_device_fadeout_music(5000);
+    sound_device_on_audio_finished(0);
+}
+
+static void init_speech(sound_type type)
+{
+    if (type != SOUND_TYPE_SPEECH) {
+        return;
+    }
+    int has_speech = data.should_play_speech && data.should_play_background_music;
+    if (data.should_play_speech) {
+        has_speech &= sound_device_play_file_on_channel(custom_messages_get_speech(data.custom_msg),
+                SOUND_TYPE_SPEECH, setting_sound(SOUND_TYPE_SPEECH)->volume);
+    }
+    if (data.should_play_background_music) {
+        int volume = 100;
+        if (has_speech) {
+            volume = setting_sound(SOUND_TYPE_SPEECH)->volume / 3;
+        }
+        if (volume > setting_sound(SOUND_TYPE_MUSIC)->volume) {
+            volume = setting_sound(SOUND_TYPE_MUSIC)->volume;
+        }
+        has_speech &= sound_device_play_music(custom_messages_get_background_music(data.custom_msg), volume, 0);
+    }
+    sound_device_on_audio_finished(has_speech ? fadeout_music : 0);
 }
 
 static void init_audio(void)
 {
     if (!data.show_video) {
+        int playing_audio = 0;
         if (data.should_play_audio) {
-            sound_speech_play_file(custom_messages_get_audio(data.custom_msg));
+            playing_audio = sound_device_play_file_on_channel(custom_messages_get_audio(data.custom_msg),
+                SOUND_TYPE_SPEECH, setting_sound(SOUND_TYPE_SPEECH)->volume);
         }
-        if (data.should_play_background_music) {
-            sound_device_stop_music();
-            int volume = setting_sound(SOUND_MUSIC)->volume;
-            sound_device_play_music(custom_messages_get_background_music(data.custom_msg), volume, 0);
+        if (data.should_play_speech) {
+            if (!playing_audio) {
+                init_speech(SOUND_TYPE_SPEECH);
+            } else {
+                sound_device_on_audio_finished(init_speech);
+            }
+        } else if (data.should_play_background_music) {
+            sound_device_play_music(custom_messages_get_background_music(data.custom_msg),
+                setting_sound(SOUND_TYPE_MUSIC)->volume, 0);
         }
     }
 }
@@ -235,7 +283,8 @@ static void init(int text_id, int is_custom_message, void (*background_callback)
         data.show_video = 0;
     }
     if (data.show_video) {
-        video_init(1);
+        int restart_music = !data.should_play_audio && !data.should_play_speech && !data.should_play_background_music;
+        video_init(restart_music);
     }
     init_audio();
 }
@@ -349,7 +398,7 @@ static void draw_city_message_text(const lang_message *msg)
         {
             rich_text_draw(msg->content.text,
                 data.x_text + 8, data.y_text + 56, BLOCK_SIZE * (data.text_width_blocks - 1),
-                data.text_height_blocks - 1, 0);
+                data.text_height_blocks - 4, 0);
         }
         break;
 
@@ -361,7 +410,7 @@ static void draw_city_message_text(const lang_message *msg)
             if (msg->message_type == MESSAGE_TYPE_IMPERIAL) {
                 const scenario_request *request = scenario_request_get(player_message.param1);
                 int y_offset = data.y_text + 86 + lines * 16;
-                text_draw_number(request->amount, '@', " ", data.x_text + 8, y_offset, FONT_NORMAL_WHITE, 0);
+                text_draw_number(request->amount.requested, '@', " ", data.x_text + 8, y_offset, FONT_NORMAL_WHITE, 0);
                 image_draw(resource_image(request->resource), data.x_text + 70, y_offset - 5,
                     COLOR_MASK_NONE, SCALE_NONE);
                 text_draw(resource_get_data(request->resource)->text,
@@ -425,7 +474,7 @@ static void draw_subtitle(const lang_message *msg)
     if (msg->subtitle.x && msg->subtitle.text) {
         int width = BLOCK_SIZE * (msg->width_blocks - 1) - msg->subtitle.x;
         int height = text_draw_multiline(msg->subtitle.text,
-            data.x + msg->subtitle.x, data.y + msg->subtitle.y, width, FONT_NORMAL_BLACK, 0);
+            data.x + msg->subtitle.x, data.y + msg->subtitle.y, width, 0, FONT_NORMAL_BLACK, 0);
         if (data.y + msg->subtitle.y + height > data.y_text) {
             data.y_text = data.y + msg->subtitle.y + height;
         }
@@ -441,7 +490,7 @@ static void draw_content(const lang_message *msg)
         data.y_text += 128;
     }
 
-    rich_text_set_fonts(FONT_NORMAL_WHITE, FONT_NORMAL_RED, 5);
+    rich_text_set_fonts(FONT_NORMAL_WHITE, FONT_NORMAL_GREEN, FONT_NORMAL_RED, 5);
     int header_offset = msg->type == TYPE_MANUAL ? 48 : 32;
     data.text_height_blocks = msg->height_blocks - 1 - (header_offset + data.y_text - data.y) / BLOCK_SIZE;
     data.text_width_blocks = rich_text_init(msg->content.text,
@@ -449,8 +498,6 @@ static void draw_content(const lang_message *msg)
 
     // content!
     inner_panel_draw(data.x_text, data.y_text, data.text_width_blocks, data.text_height_blocks);
-    graphics_set_clip_rectangle(data.x_text + 3, data.y_text + 3,
-        BLOCK_SIZE * data.text_width_blocks - 6, BLOCK_SIZE * data.text_height_blocks - 6);
     rich_text_clear_links();
 
     if (msg->type == TYPE_MESSAGE) {
@@ -460,7 +507,6 @@ static void draw_content(const lang_message *msg)
             data.x_text + 8, data.y_text + 6, BLOCK_SIZE * (data.text_width_blocks - 1),
             data.text_height_blocks - 1, 0);
     }
-    graphics_reset_clip_rectangle();
 }
 
 static void draw_background_normal(void)
@@ -494,13 +540,13 @@ static void draw_background_video(void)
     if (msg->type == TYPE_MESSAGE && msg->message_type == MESSAGE_TYPE_IMPERIAL) {
         lines_available = 3;
     }
-    rich_text_set_fonts(FONT_NORMAL_WHITE, FONT_NORMAL_RED, 5);
+    rich_text_set_fonts(FONT_NORMAL_WHITE, FONT_NORMAL_GREEN, FONT_NORMAL_RED, 5);
     rich_text_clear_links();
     if (msg->message_type != MESSAGE_TYPE_CUSTOM) {
         lines_required = rich_text_draw(msg->content.text, 0, 0, 384, lines_available, 1);
         if (lines_required > lines_available) {
             small_font = 1;
-            rich_text_set_fonts(FONT_SMALL_PLAIN, FONT_SMALL_PLAIN, 7);
+            rich_text_set_fonts(FONT_SMALL_PLAIN, FONT_SMALL_PLAIN, FONT_SMALL_PLAIN, 7);
             lines_required = rich_text_draw(msg->content.text, 0, 0, 384, lines_available, 1);
         }
     }
@@ -552,7 +598,7 @@ static void draw_background_video(void)
             y_text += 8;
         }
         const scenario_request *request = scenario_request_get(player_message.param1);
-        text_draw_number(request->amount, '@', " ", data.x + 8, y_text, FONT_NORMAL_WHITE, 0);
+        text_draw_number(request->amount.requested, '@', " ", data.x + 8, y_text, FONT_NORMAL_WHITE, 0);
         image_draw(resource_get_data(request->resource)->image.icon,
             data.x + 70, y_text - 5, COLOR_MASK_NONE, SCALE_NONE);
         text_draw(resource_get_data(request->resource)->text, data.x + 100, y_text, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
@@ -569,7 +615,9 @@ static void draw_background(void)
 {
     data.x_text = 0;
     data.y_text = 0;
-    if (data.background_callback) {
+    if (data.background_image_id && !editor_is_active()) {
+        image_draw_fullscreen_background(data.background_image_id);
+    } else if (data.background_callback) {
         data.background_callback();
     } else {
         window_draw_underlying_window();
@@ -762,12 +810,13 @@ static void cleanup(void)
         data.show_video = 0;
     }
     player_message.message_advisor = 0;
-    if (data.should_play_audio) {
+    if (data.should_play_audio || data.should_play_speech) {
         sound_speech_stop();
     }
     if (data.should_play_background_music) {
         sound_music_stop();
     }
+    sound_music_update(1);
 }
 
 static void button_close(int param1, int param2)

@@ -35,6 +35,9 @@
 
 #define BUILDING_ARRAY_SIZE_STEP 2000
 
+#define WATER_DESIRABILITY_RANGE 3
+#define WATER_DESIRABILITY_BONUS 10
+
 static struct {
     array(building) buildings;
     building *first_of_type[BUILDING_TYPE_MAX];
@@ -175,7 +178,7 @@ static void remove_adjacent_types(building *b)
 building *building_create(building_type type, int x, int y)
 {
     building *b;
-    array_new_item(data.buildings, 1, b);
+    array_new_item_after_index(data.buildings, 1, b);
     if (!b) {
         city_warning_show(WARNING_DATA_LIMIT_REACHED, NEW_WARNING_SLOT);
         return array_first(data.buildings);
@@ -240,7 +243,7 @@ building *building_create(building_type type, int x, int y)
     b->house_figure_generation_delay = map_random_get(b->grid_offset) & 0x7f;
     b->figure_roam_direction = b->house_figure_generation_delay & 6;
     b->fire_proof = props->fire_proof;
-    b->is_adjacent_to_water = map_terrain_is_adjacent_to_water(x, y, b->size);
+    b->is_close_to_water = building_is_close_to_water(b);
 
     return b;
 }
@@ -371,7 +374,7 @@ void building_update_desirability(void)
             continue;
         }
         b->desirability = map_desirability_get_max(b->x, b->y, b->size);
-        if (b->is_adjacent_to_water) {
+        if (b->is_close_to_water) {
             b->desirability += 10;
         }
         switch (map_elevation_at(b->grid_offset)) {
@@ -481,7 +484,9 @@ int building_is_fort(building_type type)
 {
     return type == BUILDING_FORT_LEGIONARIES ||
         type == BUILDING_FORT_JAVELIN ||
-        type == BUILDING_FORT_MOUNTED;
+        type == BUILDING_FORT_MOUNTED ||
+        type == BUILDING_FORT_AUXILIA_INFANTRY ||
+        type == BUILDING_FORT_ARCHERS;
 }
 
 int building_mothball_toggle(building *b)
@@ -582,7 +587,7 @@ void building_totals_add_corrupted_house(int unfixable)
     }
 }
 
-static void initialize_new_building(building *b, int position)
+static void initialize_new_building(building *b, unsigned int position)
 {
     b->id = position;
 }
@@ -605,6 +610,19 @@ void building_clear_all(void)
     extra.created_sequence = 0;
     extra.incorrect_houses = 0;
     extra.unfixable_houses = 0;
+}
+
+void building_make_immune_cheat(void)
+{
+    building *b;
+    array_foreach(data.buildings, b) {
+        b->fire_proof = 1;
+    }
+}
+
+int building_is_close_to_water(const building *b)
+{
+    return map_terrain_exists_tile_in_radius_with_type(b->x, b->y, b->size, WATER_DESIRABILITY_RANGE, TERRAIN_WATER);
 }
 
 void building_save_state(buffer *buf, buffer *highest_id, buffer *highest_id_ever,

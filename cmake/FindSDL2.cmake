@@ -108,7 +108,26 @@ ELSE()
         $ENV{SDL2_DIR}
         PATH_SUFFIXES include/SDL2 include SDL2
         PATHS ${SDL2_SEARCH_PATHS}
+        NO_DEFAULT_PATH
+    )
+
+    FIND_PATH(SDL2_INCLUDE_DIR SDL_log.h
+        HINTS
+        $ENV{SDL2DIR}
+        $ENV{SDL2_DIR}
+        PATH_SUFFIXES include/SDL2 include SDL2
+        PATHS ${SDL2_SEARCH_PATHS}
         NO_CMAKE_FIND_ROOT_PATH
+    )
+
+    FIND_LIBRARY(SDL2_LIBRARY_TEMP
+        NAMES SDL2
+        HINTS
+        $ENV{SDL2DIR}
+        $ENV{SDL2_DIR}
+        PATH_SUFFIXES lib64 lib lib/${SDL2_PROCESSOR_ARCH}
+        PATHS ${SDL2_SEARCH_PATHS}
+        NO_DEFAULT_PATH
     )
 
     FIND_LIBRARY(SDL2_LIBRARY_TEMP
@@ -134,6 +153,17 @@ ELSE()
                 $ENV{SDL2_DIR}
                 PATH_SUFFIXES lib64 lib lib/${SDL2_PROCESSOR_ARCH}
                 PATHS ${SDL2_SEARCH_PATHS}
+                NO_DEFAULT_PATH
+            )
+
+            FIND_LIBRARY(SDL2MAIN_LIBRARY
+                NAMES SDL2main
+                HINTS
+                $ENV{SDL2DIR}
+                $ENV{SDL2_DIR}
+                PATH_SUFFIXES lib64 lib lib/${SDL2_PROCESSOR_ARCH}
+                PATHS ${SDL2_SEARCH_PATHS}
+                NO_CMAKE_FIND_ROOT_PATH
             )
         ENDIF(NOT ${SDL2_INCLUDE_DIR} MATCHES ".framework")
     ENDIF(NOT SDL2_BUILDING_LIBRARY)

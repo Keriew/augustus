@@ -4,6 +4,7 @@
 #include "core/calc.h"
 #include "core/string.h"
 #include "editor/editor.h"
+#include "game/campaign.h"
 #include "game/game.h"
 #include "game/system.h"
 #include "graphics/generic_button.h"
@@ -19,26 +20,26 @@
 #include "window/cck_selection.h"
 #include "window/config.h"
 #include "window/file_dialog.h"
-#include "window/new_career.h"
 #include "window/plain_message_dialog.h"
 #include "window/popup_dialog.h"
+#include "window/select_campaign.h"
 
 #define MAX_BUTTONS 6
 
-static void button_click(int type, int param2);
+static void button_click(const generic_button *button);
 
 static struct {
-    int focus_button_id;
+    unsigned int focus_button_id;
     int logo_image_id;
 } data;
 
 static generic_button buttons[] = {
-    {192, 130, 256, 25, button_click, button_none, 1, 0},
-    {192, 170, 256, 25, button_click, button_none, 2, 0},
-    {192, 210, 256, 25, button_click, button_none, 3, 0},
-    {192, 250, 256, 25, button_click, button_none, 4, 0},
-    {192, 290, 256, 25, button_click, button_none, 5, 0},
-    {192, 330, 256, 25, button_click, button_none, 6, 0},
+    {192, 130, 256, 25, button_click, 0, 1},
+    {192, 170, 256, 25, button_click, 0, 2},
+    {192, 210, 256, 25, button_click, 0, 3},
+    {192, 250, 256, 25, button_click, 0, 4},
+    {192, 290, 256, 25, button_click, 0, 5},
+    {192, 330, 256, 25, button_click, 0, 6},
 };
 
 static void draw_version_string(void)
@@ -78,11 +79,12 @@ static void draw_foreground(void)
 {
     graphics_in_dialog();
 
-    for (int i = 0; i < MAX_BUTTONS; i++) {
-        large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / BLOCK_SIZE, data.focus_button_id == i + 1 ? 1 : 0);
+    for (unsigned int i = 0; i < MAX_BUTTONS; i++) {
+        large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / BLOCK_SIZE,
+            data.focus_button_id == i + 1 ? 1 : 0);
     }
 
-    lang_text_draw_centered(30, 1, 192, 137, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_MAIN_MENU_SELECT_CAMPAIGN, 192, 137, 256, FONT_NORMAL_GREEN);
     lang_text_draw_centered(30, 2, 192, 177, 256, FONT_NORMAL_GREEN);
     lang_text_draw_centered(30, 3, 192, 217, 256, FONT_NORMAL_GREEN);
     lang_text_draw_centered(9, 8, 192, 257, 256, FONT_NORMAL_GREEN);
@@ -113,10 +115,12 @@ static void confirm_exit(int accepted, int checked)
     }
 }
 
-static void button_click(int type, int param2)
+static void button_click(const generic_button *button)
 {
+    int type = button->parameter1;
+
     if (type == 1) {
-        window_new_career_show();
+        window_select_campaign_show();
     } else if (type == 2) {
         window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_LOAD);
     } else if (type == 3) {
@@ -140,6 +144,7 @@ void window_main_menu_show(int restart_music)
     if (restart_music) {
         sound_music_play_intro();
     }
+    game_campaign_clear();
     window_type window = {
         WINDOW_MAIN_MENU,
         draw_background,

@@ -21,10 +21,11 @@ int rich_text_init(
 /**
  * Sets fonts to use
  * @param normal_font Normal text
+ * @param heading_font Heading text
  * @param link_font Link text
  * @param line_spacing Spacing between lines
  */
-void rich_text_set_fonts(font_t normal_font, font_t link_font, int line_spacing);
+void rich_text_set_fonts(font_t normal_font, font_t heading_font, font_t link_font, int line_spacing);
 
 /**
  * Resets the text to the specified scroll position and forces recalculation of lines
@@ -55,6 +56,16 @@ int rich_text_get_clicked_link(const mouse *m);
  */
 int rich_text_draw(const uint8_t *text, int x_offset, int y_offset,
                    int box_width, int height_lines, int measure_only);
+
+/**
+ * Parses rich text to obtain an image ID
+ * @param position Expects the current position of the text and returns the position at the end of parsing, on 0 if
+ *                 there was a parse error.
+ * @param default_image_group Indicates the default image group in none is provided and an image ID is set
+ * @param can_be_filepath Indicates whether the string can simply be an unformatted filepath that does not need parsing.
+ * @return The image ID of the parsed text or 0 if no image was found or if there was an error.
+ */
+int rich_text_parse_image_id(const uint8_t **position, int default_image_group, int can_be_filepath);
 
 /**
  * Draws rich text with specified color

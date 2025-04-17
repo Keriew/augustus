@@ -1,6 +1,7 @@
 #include "city_overlay_other.h"
 
 #include "building/animation.h"
+#include "building/building.h"
 #include "building/industry.h"
 #include "building/model.h"
 #include "building/monument.h"
@@ -47,7 +48,8 @@ static int show_building_religion(const building *b)
 
 static int show_building_food_stocks(const building *b)
 {
-    return b->type == BUILDING_MARKET || b->type == BUILDING_WHARF || b->type == BUILDING_GRANARY;
+    return b->type == BUILDING_MARKET || b->type == BUILDING_WHARF || b->type == BUILDING_GRANARY ||
+           b->type == BUILDING_CARAVANSERAI || b->type == BUILDING_MESS_HALL;
 }
 
 static int show_building_tax_income(const building *b)
@@ -105,9 +107,10 @@ static int show_building_mothball(const building *b)
     return b->state == BUILDING_STATE_MOTHBALLED;
 }
 
-static int show_building_warehouses(const building *b)
+static int show_building_logistics(const building *b)
 {
-    return b->type == BUILDING_WAREHOUSE || b->type == BUILDING_WAREHOUSE_SPACE;
+    return b->type == BUILDING_WAREHOUSE || b->type == BUILDING_WAREHOUSE_SPACE ||
+           b->type == BUILDING_GRANARY || b->type == BUILDING_DEPOT;
 }
 
 static int show_building_storages(const building *b)
@@ -135,6 +138,8 @@ static int show_figure_efficiency(const figure *f)
 static int show_figure_food_stocks(const figure *f)
 {
     if (f->type == FIGURE_MARKET_SUPPLIER || f->type == FIGURE_MARKET_TRADER ||
+        f->type == FIGURE_CARAVANSERAI_SUPPLIER || f->type == FIGURE_CARAVANSERAI_COLLECTOR ||
+        f->type == FIGURE_MESS_HALL_SUPPLIER || f->type == FIGURE_MESS_HALL_FORT_SUPPLIER || f->type == FIGURE_MESS_HALL_COLLECTOR ||
         f->type == FIGURE_DELIVERY_BOY || f->type == FIGURE_FISHING_BOAT) {
         return 1;
     } else if (f->type == FIGURE_CART_PUSHER) {
@@ -151,13 +156,14 @@ static int show_figure_tax_income(const figure *f)
     return f->type == FIGURE_TAX_COLLECTOR;
 }
 
-static int show_figure_warehouses(const figure *f)
+static int show_figure_logistics(const figure *f)
 {
-    if (f->type != FIGURE_WAREHOUSEMAN) {
-        return 0;
-    }
-    building *b = building_get(f->building_id);
-    return b->type == BUILDING_WAREHOUSE;
+    return f->type == FIGURE_WAREHOUSEMAN || f->type == FIGURE_DEPOT_CART_PUSHER;
+}
+
+static int show_figure_employment(const figure *f)
+{
+    return f->type == FIGURE_LABOR_SEEKER;
 }
 
 static int show_figure_none(const figure *f)
@@ -218,6 +224,18 @@ static int get_column_height_tax_income(const building *b)
         }
     }
     return NO_COLUMN;
+}
+
+static int get_column_height_employment(const building *b)
+{
+    int full_staff = building_get_laborers(b->type);
+    int pct_staff = calc_percentage(b->num_workers, full_staff);
+
+    int height = 100 - pct_staff;
+    if (height == 0) {
+        return NO_COLUMN;
+    }
+    return full_staff ? height / 10 : NO_COLUMN;
 }
 
 static int get_column_height_none(const building *b)
@@ -340,6 +358,34 @@ static int get_tooltip_tax_income(tooltip_context *c, const building *b)
     } else {
         return 43;
     }
+}
+
+static int get_tooltip_employment(tooltip_context *c, const building *b)
+{
+    int full = building_get_laborers(b->type);
+    int missing = full - b->num_workers;
+    
+    if (full >= 1) {
+        if (missing == 0) {
+            c->translation_key = TR_TOOLTIP_OVERLAY_EMPLOYMENT_FULL;
+        } else if (missing <= 1) {
+            c->has_numeric_prefix = 1;
+            c->numeric_prefix = missing;
+            c->translation_key = TR_TOOLTIP_OVERLAY_EMPLOYMENT_MISSING_1;
+            return 1;
+        } else if (missing >= 2 && b->state == BUILDING_STATE_MOTHBALLED) {
+            c->has_numeric_prefix = 1;
+            c->numeric_prefix = missing;
+            c->translation_key = TR_TOOLTIP_OVERLAY_EMPLOYMENT_MOTHBALL;
+            return 1;
+        } else {
+            c->has_numeric_prefix = 1;
+            c->numeric_prefix = missing;
+            c->translation_key = TR_TOOLTIP_OVERLAY_EMPLOYMENT_MISSING_2;
+            return 1;
+        }
+    }
+    return 0;
 }
 
 static int get_tooltip_water(tooltip_context *c, int grid_offset)
@@ -470,6 +516,22 @@ const city_overlay *city_overlay_for_tax_income(void)
         get_column_height_tax_income,
         0,
         get_tooltip_tax_income,
+        0,
+        0
+    };
+    return &overlay;
+}
+
+const city_overlay *city_overlay_for_employment(void)
+{
+    static city_overlay overlay = {
+        OVERLAY_EMPLOYMENT,
+        COLUMN_COLOR_RED_TO_GREEN,
+        show_building_none,
+        show_figure_employment,
+        get_column_height_employment,
+        0,
+        get_tooltip_employment,
         0,
         0
     };
@@ -830,13 +892,13 @@ const city_overlay *city_overlay_for_mothball(void)
     return &overlay;
 }
 
-const city_overlay *city_overlay_for_warehouses(void)
+const city_overlay *city_overlay_for_logistics(void)
 {
     static city_overlay overlay = {
-        OVERLAY_WAREHOUSE,
+        OVERLAY_LOGISTICS,
         COLUMN_COLOR_GREEN,
-        show_building_warehouses,
-        show_figure_warehouses,
+        show_building_logistics,
+        show_figure_logistics,
         get_column_height_none,
         get_tooltip_none,
         0,

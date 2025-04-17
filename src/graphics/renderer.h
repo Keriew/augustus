@@ -70,6 +70,12 @@ typedef struct {
     void (*draw_custom_image)(custom_image_type type, int x, int y, float scale, int disable_filtering);
     int (*supports_yuv_image_format)(void);
 
+    int (*start_tooltip_creation)(int width, int height);
+    void (*finish_tooltip_creation)(void);
+    int (*has_tooltip)(void);
+    void (*set_tooltip_position)(int x, int y);
+    void (*set_tooltip_opacity)(int opacity);
+
     int (*save_image_from_screen)(int image_id, int x, int y, int width, int height);
     void (*draw_image_to_screen)(int image_id, int x, int y);
     int (*save_screen_buffer)(color_t *pixels, int x, int y, int width, int height, int row_width);
@@ -83,6 +89,7 @@ typedef struct {
     void (*free_image_atlas)(atlas_type type);
 
     void (*load_unpacked_image)(const image *img, const color_t *pixels);
+    void (*free_unpacked_image)(const image *img);
 
     int (*should_pack_image)(int width, int height);
 

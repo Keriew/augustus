@@ -1,15 +1,22 @@
 #include "rich_text.h"
 
+#include "assets/assets.h"
 #include "core/calc.h"
+#include "core/file.h"
 #include "core/image.h"
 #include "core/image_group.h"
 #include "core/locale.h"
 #include "core/string.h"
+#include "game/campaign.h"
+#include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/image_button.h"
 #include "graphics/panel.h"
 #include "graphics/scrollbar.h"
 #include "graphics/window.h"
+
+#include <stdlib.h>
+#include <string.h>
 
 #define MAX_LINKS 50
 #define TEMP_LINE_SIZE 200
@@ -34,6 +41,7 @@ static uint8_t tmp_line[TEMP_LINE_SIZE];
 static struct {
     const font_definition *normal_font;
     const font_definition *link_font;
+    const font_definition *heading_font;
     int line_height;
     int paragraph_indent;
 
@@ -74,9 +82,10 @@ int rich_text_init(
     return data.text_width_blocks;
 }
 
-void rich_text_set_fonts(font_t normal_font, font_t link_font, int line_spacing)
+void rich_text_set_fonts(font_t normal_font, font_t heading_font, font_t link_font, int line_spacing)
 {
     data.normal_font = font_definition_for(normal_font);
+    data.heading_font = font_definition_for(heading_font);
     data.link_font = font_definition_for(link_font);
     data.line_height = data.normal_font->line_height + line_spacing;
     data.paragraph_indent = locale_paragraph_indent();
@@ -126,7 +135,7 @@ static void add_link(int message_id, int x_start, int x_end, int y)
     }
 }
 
-static int get_word_width(const uint8_t *str, int in_link, int *num_chars)
+static int get_word_width(const uint8_t *str, const font_definition *def, int in_link, int *num_chars, int line_start)
 {
     int width = 0;
     int guard = 0;
@@ -136,29 +145,17 @@ static int get_word_width(const uint8_t *str, int in_link, int *num_chars)
     while (*str && ++guard < 2000) {
         if (*str == '@') {
             str++;
-            if (!word_char_seen) {
-                if (*str == 'P' || *str == 'L') {
-                    *num_chars += 2;
-                    width = 0;
-                    break;
-                } else if (*str == 'G') {
-                    // skip graphic
-                    *num_chars += 2;
-                    while (*str >= '0' && *str <= '9') {
-                        str++;
-                        (*num_chars)++;
-                    }
-                    width = 0;
-                    break;
-                } else {
+            if (*str == 'P' || *str == 'L' || *str == 'G' || *str == 'H') {
+                *num_chars += 2;
+                break;
+            } else if (!word_char_seen) {
+                (*num_chars)++;
+                while (*str >= '0' && *str <= '9') {
+                    str++;
                     (*num_chars)++;
-                    while (*str >= '0' && *str <= '9') {
-                        str++;
-                        (*num_chars)++;
-                    }
-                    in_link = 1;
-                    start_link = 1;
                 }
+                in_link = 1;
+                start_link = 1;
             }
         }
         int num_bytes = 1;
@@ -166,10 +163,12 @@ static int get_word_width(const uint8_t *str, int in_link, int *num_chars)
             if (word_char_seen) {
                 break;
             }
-            width += 4;
+            if (!line_start) {
+                width += 4;
+            }
         } else if (*str > ' ') {
             // normal char
-            int letter_id = font_letter_id(data.normal_font, str, &num_bytes);
+            int letter_id = font_letter_id(def, str, &num_bytes);
             if (letter_id >= 0) {
                 width += 1 + image_letter(letter_id)->original.width;
             }
@@ -192,26 +191,23 @@ static int get_word_width(const uint8_t *str, int in_link, int *num_chars)
     return width;
 }
 
-static void draw_line(const uint8_t *str, int x, int y, color_t color, int measure_only)
+static void draw_line(const uint8_t *str, const font_definition *font, int x, int y, color_t color, int measure_only)
 {
     int start_link = 0;
     int num_link_chars = 0;
+    const font_definition *def = font;
     while (*str) {
         if (*str == '@') {
             int message_id = string_to_int(++str);
             while (*str >= '0' && *str <= '9') {
                 str++;
             }
-            int width = get_word_width(str, 1, &num_link_chars);
+            int width = get_word_width(str, data.link_font, 1, &num_link_chars, 0);
             add_link(message_id, x, x + width, y);
             start_link = 1;
         }
         if (*str >= ' ') {
-            const font_definition *def = data.normal_font;
-            if (num_link_chars > 0) {
-                def = data.link_font;
-            }
-
+            def = num_link_chars > 0 ? data.link_font : font;
             int num_bytes = 1;
             int letter_id = font_letter_id(def, str, &num_bytes);
             if (letter_id < 0) {
@@ -254,19 +250,117 @@ static int get_raw_text_width(const uint8_t *str)
     return width;
 }
 
-static int draw_text(const uint8_t *text, int x_offset, int y_offset,
-                     int box_width, int height_lines, color_t color, int measure_only)
+static int get_external_image_id(const char *filename)
 {
-    int image_height_lines = 0;
+    char full_path[FILE_NAME_MAX];
+    char *paths[] = { CAMPAIGNS_DIRECTORY "/image", "image" };
+    const char *found_path = 0;
+    for (int i = 0; i < 2 && !found_path; i++) {
+        snprintf(full_path, FILE_NAME_MAX, "%s/%s", paths[i], filename);
+        if (game_campaign_has_file(full_path)) {
+            found_path = full_path;
+        } else {
+            found_path = dir_get_file_at_location(full_path, PATH_LOCATION_COMMUNITY);
+        }
+    }
+    if (!found_path) {
+        return 0;
+    }
+    return assets_get_external_image(found_path, 0);
+}
+
+int rich_text_parse_image_id(const uint8_t **position, int default_image_group, int can_be_filepath)
+{
+    int image_id = 0;
+
+    if (can_be_filepath) {
+        int length = string_length(*position) + 1;
+        char *location = malloc(length * sizeof(char));
+        if (location) {
+            encoding_to_utf8(*position, location, length, encoding_system_uses_decomposed());
+            image_id = get_external_image_id(location);
+            free(location);
+        }
+        if (image_id) {
+            return image_id;
+        }
+    }
+    const uint8_t *cursor = *position;
+    if (*cursor == '[') {
+        cursor++; // skip '['
+        const char *begin = (const char *) cursor;
+        const char *end = strchr(begin, ']');
+        if (!end) {
+            *position = 0;
+            return 0;
+        }
+        size_t length = end - begin;
+        cursor += length + 1;
+        char *location = malloc((length + 1) * sizeof(char));
+        if (location) {
+            snprintf(location, length + 1, "%s", begin);
+            char *divider = strchr(location, ':');
+            // "[<asset group name>:<asset image name>]"
+            if (divider) {
+                *divider = 0;
+                const char *group_name = location;
+                const char *image_name = divider + 1;
+                image_id = assets_get_image_id(group_name, image_name);
+                // "[<asset png path>]"
+            } else {
+                image_id = get_external_image_id(location);
+            }
+            free(location);
+        }
+    } else {
+        int custom_group = default_image_group;
+        image_id = string_to_int(cursor);
+        char c = *cursor++;
+        if (image_id || c == '0') {
+            while (c >= '0' && c <= '9') {
+                c = *cursor++;
+            }
+            if (c == ':') {
+                int actual_image_id = string_to_int(cursor);
+                c = *cursor++;
+                if (actual_image_id || c == '0') {
+                    while (c >= '0' && c <= '9') {
+                        c = *cursor++;
+                    }
+                    if (actual_image_id) {
+                        custom_group = image_id;
+                        image_id = actual_image_id;
+                    }
+                }
+            }
+            image_id += image_group(custom_group) - 1;
+        }
+    }
+    *position = cursor;
+    return image_id;
+}
+
+static int draw_text(const uint8_t *text, int x_offset, int y_offset,
+                     int box_width, unsigned int height_lines, color_t color, int measure_only)
+{
+    if (!measure_only) {
+        graphics_set_clip_rectangle(x_offset, y_offset, box_width, data.line_height * height_lines);
+        if (height_lines != scrollbar.elements_in_view) {
+            scrollbar.elements_in_view = height_lines;
+            scrollbar_update_total_elements(&scrollbar, data.num_lines);
+        }
+    }
+    int lines_to_skip = 0;
     int image_id = 0;
     int lines_before_image = 0;
     int paragraph = 0;
     int has_more_characters = 1;
     int y = y_offset;
     int guard = 0;
-    int line = 0;
-    int num_lines = 0;
-    while (has_more_characters || image_height_lines) {
+    unsigned int line = 0;
+    unsigned int num_lines = 0;
+    int heading = 0;
+    while (has_more_characters || lines_to_skip) {
         if (++guard >= 1000) {
             break;
         }
@@ -275,16 +369,19 @@ static int draw_text(const uint8_t *text, int x_offset, int y_offset,
             tmp_line[i] = 0;
         }
         int line_index = 0;
-        int current_width, x_line_offset;
-        current_width = x_line_offset = paragraph ? data.paragraph_indent : 0;
+        int line_break = 0;
+        int x_line_offset = paragraph ? data.paragraph_indent : 0;
+        int current_width = x_line_offset;
+        const font_definition *def = heading ? data.heading_font : data.normal_font;
         paragraph = 0;
-        while ((has_more_characters || image_height_lines) && current_width < box_width) {
-            if (image_height_lines) {
-                image_height_lines--;
+        int centered = heading;
+        while (!line_break && (has_more_characters || lines_to_skip)) {
+            if (lines_to_skip) {
+                lines_to_skip--;
                 break;
             }
             int word_num_chars;
-            int word_width = get_word_width(text, 0, &word_num_chars);
+            int word_width = get_word_width(text, def, 0, &word_num_chars, line_index == 0);
             if (word_width >= box_width) {
                 // Word too long to fit on a line, so cut it into smaller pieces.
                 int can_cut_more = 1;
@@ -299,38 +396,73 @@ static int draw_text(const uint8_t *text, int x_offset, int y_offset,
                     can_cut_more = (temp_width < box_width);
                 }
             }
-            current_width += word_width;
-            if (current_width >= box_width) {
+            if (current_width + word_width >= box_width) {
+                line_break = 1;
                 if (current_width == 0) {
                     has_more_characters = 0;
                 }
             } else {
+                current_width += word_width;
                 for (int i = 0; i < word_num_chars; i++) {
                     char c = *text++;
                     if (c == '@') {
-                        if (*text == 'P') {
-                            paragraph = 1;
+                        // Heading
+                        if (*text == 'H') {
+                            heading = 1;
+                            if (line_index) {
+                                line_break = 1;
+                            }
+                            if (line > 0) {
+                                lines_to_skip = 1;
+                            } else {
+                                def = data.heading_font;
+                                centered = 1;
+                            }
                             text++;
-                            current_width = box_width;
                             break;
+                        // Paragraph
+                        } else if (*text == 'P') {
+                            paragraph = 1;
+                            if (heading) {
+                                heading = 0;
+                                lines_to_skip = 1;
+                            }
+                            text++;
+                            line_break = 1;
+                            break;
+                        // Line break
                         } else if (*text == 'L') {
                             text++;
-                            current_width = box_width;
+                            line_break = 1;
+                            if (heading) {
+                                heading = 0;
+                                lines_to_skip = 1;
+                            }
                             break;
+                            // Image
                         } else if (*text == 'G') {
+                            heading = 0;
                             if (line_index) {
                                 num_lines++;
                             }
                             text++; // skip 'G'
-                            current_width = box_width;
-                            image_id = string_to_int(text);
-                            c = *text++;
-                            while (c >= '0' && c <= '9') {
-                                c = *text++;
+                            line_break = 1;
+                            // "@G[...]"
+                            image_id = rich_text_parse_image_id(&text, GROUP_MESSAGE_IMAGES, 0);
+                            if (!text) {
+                                has_more_characters = 0;
+                                break;
                             }
-                            image_id += image_group(GROUP_MESSAGE_IMAGES) - 1;
-                            image_height_lines = image_get(image_id)->height / data.line_height + 2;
-                            if (line > 0) {
+                            const image *img = image_get(image_id);
+                            int height = img->original.height;
+                            if (img->top) {
+                                height += img->top->original.height - height / 2;
+                            }
+                            lines_to_skip = height / data.line_height;
+                            if ((height % data.line_height) > data.line_height / 2) {
+                                lines_to_skip++;
+                            }
+                            if (line > 0 || line_index) {
                                 lines_before_image = 1;
                             }
                             break;
@@ -353,7 +485,10 @@ static int draw_text(const uint8_t *text, int x_offset, int y_offset,
             }
         }
         if (!outside_viewport) {
-            draw_line(tmp_line, x_line_offset + x_offset, y, color, measure_only);
+            if (centered) {
+                x_line_offset = (box_width - current_width) / 2;
+            }
+            draw_line(tmp_line, def, x_line_offset + x_offset, y, color, measure_only);
         }
         if (!measure_only) {
             if (image_id) {
@@ -361,7 +496,14 @@ static int draw_text(const uint8_t *text, int x_offset, int y_offset,
                     lines_before_image--;
                 } else {
                     const image *img = image_get(image_id);
-                    image_height_lines = img->height / data.line_height + 2;
+                    int height = img->original.height;
+                    if (img->top) {
+                        height += img->top->original.height - height / 2;
+                    }
+                    lines_to_skip = height / data.line_height;
+                    if ((height % data.line_height) > data.line_height / 2) {
+                        lines_to_skip++;
+                    }
                     int image_offset_x = x_offset + (box_width - img->original.width) / 2 - 4;
                     if (line < height_lines + scrollbar.scroll_position) {
                         if (line >= scrollbar.scroll_position) {
@@ -381,6 +523,9 @@ static int draw_text(const uint8_t *text, int x_offset, int y_offset,
         if (!outside_viewport) {
             y += data.line_height;
         }
+    }
+    if (!measure_only) {
+        graphics_reset_clip_rectangle();
     }
     return num_lines;
 }

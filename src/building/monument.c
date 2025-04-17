@@ -92,18 +92,38 @@ static const monument_type hippodrome = {
     }
 };
 
-static const monument_type oracle_and_small_mausoleum = {
-    .phases    = 2,
+static const monument_type oracle = {
+    .phases    = 3,
     .resources = {
+        { [ARCHITECTS] = 1, [RESOURCE_CONCRETE] = 2, [RESOURCE_MARBLE] = 2 },
+        { [ARCHITECTS] = 1 },
+        { NOTHING }
+    }
+};
+
+static const monument_type small_mausoleum = {
+    .phases    = 3,
+    .resources = {
+        { [ARCHITECTS] = 1, [RESOURCE_STONE] = 2, [RESOURCE_CONCRETE] = 4 },
         { [ARCHITECTS] = 1, [RESOURCE_MARBLE] = 2 },
         { NOTHING }
     }
 };
 
-static const monument_type large_temple_and_nymphaeum = {
-    .phases    = 2,
+static const monument_type large_temple = {
+    .phases    = 3,
     .resources = {
-        { [ARCHITECTS] = 1, [RESOURCE_MARBLE] = 4 },
+        { [ARCHITECTS] = 1, [RESOURCE_STONE] = 4, [RESOURCE_CONCRETE] = 4 },
+        { [ARCHITECTS] = 1, [RESOURCE_MARBLE] = 2 },
+        { NOTHING }
+    }
+};
+
+static const monument_type nymphaeum = {
+    .phases    = 3,
+    .resources = {
+        { [ARCHITECTS] = 1, [RESOURCE_STONE] = 12, [RESOURCE_CONCRETE] = 4 },
+        { [ARCHITECTS] = 1, [RESOURCE_MARBLE] = 2 },
         { NOTHING }
     }
 };
@@ -127,9 +147,10 @@ static const monument_type caravanserai = {
 };
 
 static const monument_type city_mint = {
-    .phases    = 2,
+    .phases    = 3,
     .resources = {
-        { [ARCHITECTS] = 2, [RESOURCE_TIMBER] = 6, [RESOURCE_CLAY] = 8, [RESOURCE_IRON] = 4 },
+        { [ARCHITECTS] = 1, [RESOURCE_STONE] = 8 },
+        { [ARCHITECTS] = 1, [RESOURCE_BRICKS] = 4, [RESOURCE_IRON] = 4, [RESOURCE_TIMBER] = 4 },
         { NOTHING }
     }
 };
@@ -141,18 +162,18 @@ static const monument_type *MONUMENT_TYPES[BUILDING_TYPE_MAX] = {
     [BUILDING_GRAND_TEMPLE_MARS]    = &grand_temple,
     [BUILDING_GRAND_TEMPLE_VENUS]   = &grand_temple,
     [BUILDING_PANTHEON]             = &pantheon,
-    [BUILDING_ORACLE]               = &oracle_and_small_mausoleum,
-    [BUILDING_LARGE_TEMPLE_CERES]   = &large_temple_and_nymphaeum,
-    [BUILDING_LARGE_TEMPLE_NEPTUNE] = &large_temple_and_nymphaeum,
-    [BUILDING_LARGE_TEMPLE_MERCURY] = &large_temple_and_nymphaeum,
-    [BUILDING_LARGE_TEMPLE_MARS]    = &large_temple_and_nymphaeum,
-    [BUILDING_LARGE_TEMPLE_VENUS]   = &large_temple_and_nymphaeum,
+    [BUILDING_ORACLE]               = &oracle,
+    [BUILDING_LARGE_TEMPLE_CERES]   = &large_temple,
+    [BUILDING_LARGE_TEMPLE_NEPTUNE] = &large_temple,
+    [BUILDING_LARGE_TEMPLE_MERCURY] = &large_temple,
+    [BUILDING_LARGE_TEMPLE_MARS]    = &large_temple,
+    [BUILDING_LARGE_TEMPLE_VENUS]   = &large_temple,
     [BUILDING_LIGHTHOUSE]           = &lighthouse,
     [BUILDING_COLOSSEUM]            = &colosseum,
     [BUILDING_HIPPODROME]           = &hippodrome,
-    [BUILDING_NYMPHAEUM]            = &large_temple_and_nymphaeum,
+    [BUILDING_NYMPHAEUM]            = &nymphaeum,
     [BUILDING_LARGE_MAUSOLEUM]      = &large_mausoleum,
-    [BUILDING_SMALL_MAUSOLEUM]      = &oracle_and_small_mausoleum,
+    [BUILDING_SMALL_MAUSOLEUM]      = &small_mausoleum,
     [BUILDING_CARAVANSERAI]         = &caravanserai,
     [BUILDING_CITY_MINT]            = &city_mint
 };
@@ -460,6 +481,8 @@ int building_monument_progress(building *b)
             city_message_post(1, MESSAGE_COLOSSEUM_COMPLETE, 0, b->grid_offset);
         } else if (b->type == BUILDING_HIPPODROME) {
             city_message_post(1, MESSAGE_HIPPODROME_COMPLETE, 0, b->grid_offset);
+        } else if (b->type == BUILDING_CARAVANSERAI) {
+            city_message_post(1, MESSAGE_CARAVANSERAI_COMPLETE, 0, b->grid_offset);
         }
     }
     return 1;
@@ -480,7 +503,7 @@ void building_monument_initialize_deliveries(void)
 void building_monument_add_delivery(int monument_id, int figure_id, int resource_id, int num_loads)
 {
     monument_delivery *delivery;
-    array_new_item(monument_deliveries, 0, delivery);
+    array_new_item(monument_deliveries, delivery);
     if (!delivery) {
         log_error("Failed to create a new monument delivery. The game may be running out of memory", 0, 0);
         return;

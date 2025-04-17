@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<!DOCTYPE assetlist>
+<!-- Unless specifically mentioned, all assets created by Areldir -->
+<assetlist name="Terrain_Maps">
+	<!-- Note: Native Hut variants (Assets created by Aster/Hyuukin) -->
+	<image id="Native_Hut_Central_01" src="Native_Hut_Central_01" isometric="true"/>
+	<image id="Native_Hut_Central_02" src="Native_Hut_Central_02" isometric="true"/>
+	<image id="Native_Hut_Northern_01" src="Native_Hut_Northern_01" isometric="true"/>
+	<image id="Native_Hut_Northern_02" src="Native_Hut_Northern_02" isometric="true"/>
+	<image id="Native_Hut_Southern_01" src="Native_Hut_Southern_01" isometric="true"/>
+	<image id="Native_Hut_Southern_02" src="Native_Hut_Southern_02" isometric="true"/>
+	<!-- Note: Native Meeting Hut variants (Assets created by Aster/Hyuukin) -->
+	<image id="Native_Meeting_Hut_Central_01" isometric="true" width="118" height="69">
+		<layer group="159" image="112" x="-30" y="-10"/>
+		<layer src="Native_Meeting_Hut_Central_01_Mask" mask="alpha"/>
+	</image>
+	<image id="Native_Meeting_Hut_Northern_01" src="Native_Meeting_Hut_Northern_01" isometric="true"/>
+	<image id="Native_Meeting_Hut_Southern_01" src="Native_Meeting_Hut_Southern_01" isometric="true"/>
+	<!-- Note: Low Bridge (for editor use) -->
+	<image id="Low_Bridge_Back" src="Low_Bridge_Back" isometric="true"/>
+	<image id="Low_Bridge_Middle" src="Low_Bridge_Middle" isometric="true"/>
+	<image id="Low_Bridge_Front" src="Low_Bridge_Front" isometric="true"/>
+	<image id="Low_Bridge_R_Back" src="Low_Bridge_R_Back" isometric="true"/>
+	<image id="Low_Bridge_R_Middle" src="Low_Bridge_R_Middle" isometric="true"/>
+	<image id="Low_Bridge_R_Front" src="Low_Bridge_R_Front" isometric="true"/>
+	<!-- Note: Ship Bridge (for editor use) -->
+	<image id="Ship_Bridge_Back" src="Ship_Bridge_Back" isometric="true"/>
+	<image id="Ship_Bridge_Middle_01" src="Ship_Bridge_Middle_01" isometric="true"/>
+	<image id="Ship_Bridge_Middle_02" src="Ship_Bridge_Middle_02" isometric="true"/>
+	<image id="Ship_Bridge_Front" src="Ship_Bridge_Front" isometric="true"/>
+	<image id="Ship_Bridge_R_Back" src="Ship_Bridge_R_Back" isometric="true"/>
+	<image id="Ship_Bridge_R_Middle_01" src="Ship_Bridge_R_Middle_01" isometric="true"/>
+	<image id="Ship_Bridge_R_Middle_02" src="Ship_Bridge_R_Middle_02" isometric="true"/>
+	<image id="Ship_Bridge_R_Front" src="Ship_Bridge_R_Front" isometric="true"/>
+	<!-- Note: Native Towers (Assets created by Areldir) -->
+	<image id="Native_Watchtower_Central_01" src="Native_Watchtower_Central_01" isometric="true"/>
+	<image id="Native_Watchtower_Northern_01" src="Native_Watchtower_Northern_01" isometric="true"/>
+	<image id="Native_Watchtower_Southern_01" src="Native_Watchtower_Southern_01" isometric="true"/>
+	<!-- Note: Small Native Decorations -->
+	<image id="Native_Decoration_Central_01" src="Native_Decoration_Central_01" isometric="true"/>
+	<image id="Native_Decoration_Northern_01" src="Native_Decoration_Northern_01" isometric="true"/>
+	<image id="Native_Decoration_Southern_01" src="Native_Decoration_Southern_01" isometric="true"/>
+	<!-- Note: Native Monument (Central climate variant made with assistance of Hyuukin) -->
+	<image id="Native_L_Monument_Central_01" src="Native_L_Monument_Central_01" isometric="true"/>
+	<image id="Native_L_Monument_Northern_01" src="Native_L_Monument_Northern_01" isometric="true"/>
+	<image id="Native_L_Monument_Southern_01" src="Native_L_Monument_Southern_01" isometric="true"/>
+	<!-- Note: Hellenised Native Hut variants (Assets created by Areldir) -->
+	<image id="Hellenised_Hut_Central_01" src="Hellenised_Hut_Central_01" isometric="true"/>
+	<image id="Hellenised_Hut_Central_02" src="Hellenised_Hut_Central_02" isometric="true"/>
+	<image id="Hellenised_Hut_Central_03" src="Hellenised_Hut_Central_03" isometric="true"/>
+	<image id="Hellenised_Hut_Northern_01" isometric="true">
+		<layer group="this" image="Hellenised_Hut_Central_01"/>
+		<layer src="Hellenised_Hut_Northern_01" x="0" y="23"/>
+	</image>
+	<image id="Hellenised_Hut_Northern_02" isometric="true">
+		<layer group="this" image="Hellenised_Hut_Central_02"/>
+		<layer src="Hellenised_Hut_Northern_02" x="0" y="25"/>
+	</image>
+	<image id="Hellenised_Hut_Northern_03" isometric="true">
+		<layer group="this" image="Hellenised_Hut_Central_03"/>
+		<layer src="Hellenised_Hut_Northern_03" x="0" y="28"/>
+	</image>
+	<image id="Hellenised_Hut_Southern_01" isometric="true">
+		<layer group="this" image="Hellenised_Hut_Central_01"/>
+		<layer src="Hellenised_Hut_Southern_01" x="0" y="23"/>
+	</image>
+	<image id="Hellenised_Hut_Southern_02" isometric="true">
+		<layer group="this" image="Hellenised_Hut_Central_02"/>
+		<layer src="Hellenised_Hut_Southern_02" x="0" y="25"/>
+	</image>
+	<image id="Hellenised_Hut_Southern_03" isometric="true">
+		<layer group="this" image="Hellenised_Hut_Central_03"/>
+		<layer src="Hellenised_Hut_Southern_03" x="0" y="28"/>
+	</image>
+	<!-- Note: Hellenised Native Meeting Hut variants -->
+	<image id="Hellenised_Meeting_Hut_Central_01" src="Hellenised_Meeting_Hut_Central_01" isometric="true"/>
+	<image id="Hellenised_Meeting_Hut_Northern_01" isometric="true">
+		<layer group="this" image="Hellenised_Meeting_Hut_Central_01"/>
+		<layer src="Hellenised_Meeting_Hut_Northern_01" x="0" y="40"/>
+	</image>
+	<image id="Hellenised_Meeting_Hut_Southern_01" isometric="true">
+		<layer group="this" image="Hellenised_Meeting_Hut_Central_01"/>
+		<layer src="Hellenised_Meeting_Hut_Southern_01" x="0" y="40"/>
+	</image>
+</assetlist>

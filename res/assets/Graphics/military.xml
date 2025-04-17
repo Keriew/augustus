@@ -15,31 +15,26 @@
 	<!-- Note: Mess Hall ON animation reference DO NOT USE! -->
 	<image id="Mess_Hall_Anim_01" width="178" height="121">
 		<layer src="Mess_Hall_ON" x="12" y="62"/>
-		<layer src="Mess_Hall_Anim_01" x="70" y="48"/>
 		<layer src="Watchtower_ON_01" x="129" y="67"/>
 		<layer src="Watchtower_ON_01" x="169" y="48"/>
 	</image>
 	<image id="Mess_Hall_Anim_02" width="178" height="121">
 		<layer src="Mess_Hall_ON" x="12" y="62"/>
-		<layer src="Mess_Hall_Anim_02" x="70" y="48"/>
 		<layer src="Watchtower_ON_02" x="129" y="67"/>
 		<layer src="Watchtower_ON_02" x="169" y="48"/>
 	</image>
 	<image id="Mess_Hall_Anim_03" width="178" height="121">
 		<layer src="Mess_Hall_ON" x="12" y="62"/>
-		<layer src="Mess_Hall_Anim_03" x="70" y="48"/>
 		<layer src="Watchtower_ON_03" x="129" y="67"/>
 		<layer src="Watchtower_ON_03" x="169" y="48"/>
 	</image>
 	<image id="Mess_Hall_Anim_04" width="178" height="121">
 		<layer src="Mess_Hall_ON" x="12" y="62"/>
-		<layer src="Mess_Hall_Anim_04" x="70" y="48"/>
 		<layer src="Watchtower_ON_04" x="129" y="67"/>
 		<layer src="Watchtower_ON_04" x="169" y="48"/>
 	</image>
 	<image id="Mess_Hall_Anim_05" width="178" height="121">
 		<layer src="Mess_Hall_ON" x="12" y="62"/>
-		<layer src="Mess_Hall_Anim_05" x="70" y="48"/>
 		<layer src="Watchtower_ON_05" x="129" y="67"/>
 		<layer src="Watchtower_ON_05" x="169" y="48"/>
 	</image>
@@ -637,7 +632,7 @@
 		</animation>
 	</image>
 	<!-- Note: Assets for 'Palisade tower' with rotation and climate variants -->
-	<image id="Palisade_Tower_C" width="58" height="75" isometric="true">
+	<!--image id="Palisade_Tower_C" width="58" height="75" isometric="true">
 		<layer src="Palisade_Terrain_C" x="0" y="45"/>
 		<layer src="Palisade_Tower" x="0" y="0"/>
 	</image>
@@ -663,7 +658,7 @@
 		<layer src="Palisade_Terrain_S" x="0" y="45"/>
 		<layer src="Palisade_Tower" x="0" y="0"/>
 		<layer src="Palisade_Tower_R" x="12" y="41"/>
-	</image>
+	</image-->
 	<!-- Note: Fort climate variants -->
 	<image id="Fort_Main_Central" isometric="true">
 		<layer group="66" image="0" x="0" y="0"/>
@@ -724,33 +719,28 @@
 	<!-- Note: Armoury ON animation reference DO NOT USE! -->
 	<image id="Armoury_Anim_01" width="118" height="83">
 		<layer src="Armoury_Top" x="1" y="25"/>
-		<layer src="Armoury_ON_01" x="44" y="35"/>
 		<layer src="Watchtower_ON_01" x="102" y="15"/>
 	</image>
 	<image id="Armoury_Anim_02" width="118" height="83">
 		<layer src="Armoury_Top" x="1" y="25"/>
-		<layer src="Armoury_ON_02" x="44" y="35"/>
 		<layer src="Watchtower_ON_02" x="102" y="15"/>
 	</image>
 	<image id="Armoury_Anim_03" width="118" height="83">
 		<layer src="Armoury_Top" x="1" y="25"/>
-		<layer src="Armoury_ON_03" x="44" y="35"/>
 		<layer src="Watchtower_ON_03" x="102" y="15"/>
 	</image>
 	<image id="Armoury_Anim_04" width="118" height="83">
 		<layer src="Armoury_Top" x="1" y="25"/>
-		<layer src="Armoury_ON_02" x="44" y="35"/>
 		<layer src="Watchtower_ON_04" x="102" y="15"/>
 	</image>
 	<image id="Armoury_Anim_05" width="118" height="83">
 		<layer src="Armoury_Top" x="1" y="25"/>
-		<layer src="Armoury_ON_01" x="44" y="35"/>
 		<layer src="Watchtower_ON_05" x="102" y="15"/>
 	</image>
-	<!-- Note: Armoury ON Animations for Central, North and South Climates Respectively -->
+	<!-- Note: Armoury ON Animations for Central, North and South Climates respectively -->
 	<image id="Armoury_ON_C" isometric="true">
 		<layer group="this" image="Armoury_OFF_C"/>
-		<animation speed="6" x="0" y="0" reversible="false">
+		<animation speed="8" x="0" y="0" reversible="false">
 			<frame group="this" image="Armoury_Anim_01"/>
 			<frame group="this" image="Armoury_Anim_02"/>
 			<frame group="this" image="Armoury_Anim_03"/>
@@ -760,7 +750,7 @@
 	</image>
 	<image id="Armoury_ON_N" isometric="true">
 		<layer group="this" image="Armoury_OFF_N"/>
-		<animation speed="6" x="0" y="0" reversible="false">
+		<animation speed="8" x="0" y="0" reversible="false">
 			<frame group="this" image="Armoury_Anim_01"/>
 			<frame group="this" image="Armoury_Anim_02"/>
 			<frame group="this" image="Armoury_Anim_03"/>
@@ -770,12 +760,42 @@
 	</image>
 	<image id="Armoury_ON_S" isometric="true">
 		<layer group="this" image="Armoury_OFF_S"/>
-		<animation speed="6" x="0" y="0" reversible="false">
+		<animation speed="8" x="0" y="0" reversible="false">
 			<frame group="this" image="Armoury_Anim_01"/>
 			<frame group="this" image="Armoury_Anim_02"/>
 			<frame group="this" image="Armoury_Anim_03"/>
 			<frame group="this" image="Armoury_Anim_04"/>
 			<frame group="this" image="Armoury_Anim_05"/>
 		</animation>
+	</image>
+	<!-- Note: Auxiliary Infantry Fort flag climate variants for Central, North and South Climates respectively. Assets by CaesarZX -->
+	<image id="fort_aux_inf_flag_central">
+		<layer group="66" image="2"/>
+		<layer src="auxinf_fort_flag" x="10" y="4"/>
+	</image>
+	<image id="fort_aux_inf_flag_north">
+		<layer group="66" image="2"/>
+		<layer src="Fort_Flag_Layer_North"/>
+		<layer src="auxinf_fort_flag" x="10" y="4"/>
+	</image>
+	<image id="fort_aux_inf_flag_south">
+		<layer group="66" image="2"/>
+		<layer src="Fort_Flag_Layer_South"/>
+		<layer src="auxinf_fort_flag" x="10" y="4"/>
+	</image>
+	<!-- Note: Auxiliary Archer Fort flag climate variants for Central, North and South Climates respectively. Assets by CaesarZX -->
+	<image id="fort_aux_arch_flag_central">
+		<layer group="66" image="2"/>
+		<layer src="auxarch_fort_flag" x="10" y="4"/>
+	</image>
+	<image id="fort_aux_arch_flag_north">
+		<layer group="66" image="2"/>
+		<layer src="Fort_Flag_Layer_North"/>
+		<layer src="auxarch_fort_flag" x="10" y="4"/>
+	</image>
+	<image id="fort_aux_arch_flag_south">
+		<layer group="66" image="2"/>
+		<layer src="Fort_Flag_Layer_South"/>
+		<layer src="auxarch_fort_flag" x="10" y="4"/>
 	</image>
 </assetlist>

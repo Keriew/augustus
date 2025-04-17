@@ -46,22 +46,25 @@
 #include "map/sprite.h"
 #include "map/terrain.h"
 #include "map/tiles.h"
+#include "scenario/allowed_building.h"
 #include "scenario/criteria.h"
 #include "scenario/custom_media.h"
 #include "scenario/custom_messages.h"
+#include "scenario/custom_variable.h"
+#include "scenario/demand_change.h"
 #include "scenario/earthquake.h"
 #include "scenario/emperor_change.h"
 #include "scenario/empire.h"
+#include "scenario/event/controller.h"
 #include "scenario/gladiator_revolt.h"
 #include "scenario/invasion.h"
 #include "scenario/map.h"
 #include "scenario/message_media_text_blob.h"
+#include "scenario/price_change.h"
+#include "scenario/request.h"
 #include "scenario/scenario.h"
-#include "scenario/scenario_events_controller.h"
 #include "sound/city.h"
 #include "widget/minimap.h"
-
-#include "zlib.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -88,22 +91,28 @@ typedef struct {
     buffer *random_iv;
     buffer *camera;
     buffer *scenario;
-    buffer *scenario_requests;
     buffer *scenario_events;
     buffer *scenario_conditions;
     buffer *scenario_actions;
     buffer *custom_messages;
     buffer *custom_media;
+    buffer *requests;
+    buffer *invasions;
+    buffer *demand_changes;
+    buffer *price_changes;
+    buffer *allowed_buildings;
+    buffer *custom_variables;
     buffer *message_media_text_blob;
     buffer *message_media_metadata;
     buffer *empire;
+    buffer *empire_map;
     buffer *end_marker;
 } scenario_state;
 
 static struct {
     scenario_version_t version;
     int num_pieces;
-    file_piece pieces[20];
+    file_piece pieces[sizeof(scenario_state) / sizeof(buffer *) + 1];
     scenario_state state;
 } scenario_data;
 
@@ -145,18 +154,24 @@ typedef struct {
     buffer *city_graph_order;
     buffer *emperor_change_time;
     buffer *empire;
+    buffer *empire_map;
     buffer *empire_cities;
     buffer *building_count_industry;
     buffer *trade_prices;
     buffer *figure_names;
     buffer *culture_coverage;
     buffer *scenario;
-    buffer *scenario_requests;
     buffer *scenario_events;
     buffer *scenario_conditions;
     buffer *scenario_actions;
     buffer *custom_messages;
     buffer *custom_media;
+    buffer *requests;
+    buffer *invasions;
+    buffer *demand_changes;
+    buffer *price_changes;
+    buffer *allowed_buildings;
+    buffer *custom_variables;
     buffer *message_media_text_blob;
     buffer *message_media_metadata;
     buffer *max_game_year;
@@ -200,6 +215,7 @@ typedef struct {
     buffer *bookmarks;
     buffer *tutorial_part3;
     buffer *city_entry_exit_grid_offset;
+    buffer *campaign_name;
     buffer *end_marker;
     buffer *deliveries;
     buffer *custom_empire;
@@ -223,7 +239,6 @@ typedef struct {
         int monument_deliveries;
         int enemy_armies;
         int scenario;
-        int scenario_requests;
         int graph_order;
         int city_data;
         int empire_cities;
@@ -231,6 +246,7 @@ typedef struct {
         int trade_route_limit;
         int trade_route_traded;
         int figure_traders;
+        int invasion_warnings;
     } piece_sizes;
     struct {
         int culture1;
@@ -245,8 +261,9 @@ typedef struct {
         int monument_deliveries;
         int barracks_tower_sentry_request;
         int custom_empires;
+        int custom_empire_map_image;
         int scenario_version;
-        int scenario_requests;
+        int requests;
         int scenario_events;
         int scenario_conditions;
         int scenario_actions;
@@ -255,12 +272,14 @@ typedef struct {
         int resource_version;
         int static_building_counts;
         int visited_buildings;
+        int custom_campaigns;
+        int dynamic_scenario_objects;
     } features;
 } savegame_version_data;
 
 static struct {
     int num_pieces;
-    file_piece pieces[100];
+    file_piece pieces[sizeof(savegame_state) / sizeof(buffer *) + 1];
     savegame_state state;
 } savegame_data;
 
@@ -305,6 +324,7 @@ static void clear_savegame_pieces(void)
     for (int i = 0; i < savegame_data.num_pieces; i++) {
         buffer_reset(&savegame_data.pieces[i].buf);
         free(savegame_data.pieces[i].buf.data);
+        savegame_data.pieces[i].buf.data = 0;
     }
     savegame_data.num_pieces = 0;
 }
@@ -339,7 +359,14 @@ static void init_scenario_data(scenario_version_t version)
     int scenario_piece_size = scenario_get_state_buffer_size_by_scenario_version(version);
     state->scenario = create_scenario_piece(scenario_piece_size, 0);
     if (version > SCENARIO_LAST_NO_EXTENDED_REQUESTS) {
-        state->scenario_requests = create_scenario_piece(PIECE_SIZE_DYNAMIC, 1);
+        state->requests = create_scenario_piece(PIECE_SIZE_DYNAMIC, 1);
+    }
+    if (version > SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
+        state->invasions = create_scenario_piece(PIECE_SIZE_DYNAMIC, 1);
+        state->demand_changes = create_scenario_piece(PIECE_SIZE_DYNAMIC, 1);
+        state->price_changes = create_scenario_piece(PIECE_SIZE_DYNAMIC, 1);
+        state->allowed_buildings = create_scenario_piece(PIECE_SIZE_DYNAMIC, 1);
+        state->custom_variables = create_scenario_piece(PIECE_SIZE_DYNAMIC, 1);
     }
     if (version > SCENARIO_LAST_NO_EVENTS) {
         state->scenario_events = create_scenario_piece(PIECE_SIZE_DYNAMIC, 1);
@@ -354,6 +381,9 @@ static void init_scenario_data(scenario_version_t version)
     }
     if (version > SCENARIO_LAST_UNVERSIONED) {
         state->empire = create_scenario_piece(PIECE_SIZE_DYNAMIC, 1);
+    }
+    if (version > SCENARIO_LAST_NO_CUSTOM_EMPIRE_MAP_IMAGE) {
+        state->empire_map = create_scenario_piece(PIECE_SIZE_DYNAMIC, 0);
     }
     state->end_marker = create_scenario_piece(4, 0);
 }
@@ -419,6 +449,12 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
     }
     version_data->piece_sizes.figure_traders = 1604 + 100 * 2 * resource_total_mapped();
 
+    if (version > SAVE_GAME_LAST_STATIC_SCENARIO_ORIGINAL_DATA) {
+        version_data->piece_sizes.invasion_warnings = PIECE_SIZE_DYNAMIC;
+    } else {
+        version_data->piece_sizes.invasion_warnings = 3232;
+    }
+
     version_data->building_counts.culture1 = 132 * count_multiplier;
     version_data->building_counts.culture2 = 32 * count_multiplier;
     version_data->building_counts.culture3 = 40 * count_multiplier;
@@ -436,14 +472,7 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
     } else {
         version_data->features.custom_empires = 1;
     }
-
-    if (version > SAVE_GAME_LAST_NO_EXTENDED_REQUESTS) {
-        version_data->piece_sizes.scenario_requests = PIECE_SIZE_DYNAMIC;
-        version_data->features.scenario_requests = 1;
-    } else {
-        version_data->piece_sizes.scenario_requests = 1;
-        version_data->features.scenario_requests = 0;
-    }
+    version_data->features.requests = version > SAVE_GAME_LAST_NO_EXTENDED_REQUESTS;
 
     if (version > SAVE_GAME_LAST_NO_EVENTS) {
         version_data->features.scenario_events = 1;
@@ -461,11 +490,14 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
         version_data->features.custom_messages_and_media = 0;
     }
 
+    version_data->features.custom_empire_map_image = version > SAVE_GAME_LAST_NO_CUSTOM_EMPIRE_MAP_IMAGE; 
     version_data->features.scenario_version = version > SAVE_GAME_LAST_NO_SCENARIO_VERSION;
     version_data->features.city_faction_info = version <= SAVE_GAME_LAST_UNKNOWN_UNUSED_CITY_DATA;
     version_data->features.resource_version = version > SAVE_GAME_LAST_STATIC_RESOURCES;
     version_data->features.static_building_counts = version <= SAVE_GAME_LAST_GLOBAL_BUILDING_INFO;
     version_data->features.visited_buildings = version > SAVE_GAME_LAST_GLOBAL_BUILDING_INFO;
+    version_data->features.custom_campaigns = version > SAVE_GAME_LAST_NO_CUSTOM_CAMPAIGNS;
+    version_data->features.dynamic_scenario_objects = version > SAVE_GAME_LAST_STATIC_SCENARIO_ORIGINAL_DATA;
 }
 
 static void init_savegame_data(savegame_version_t version)
@@ -525,6 +557,9 @@ static void init_savegame_data(savegame_version_t version)
     state->city_graph_order = create_savegame_piece(version_data.piece_sizes.graph_order, 0);
     state->emperor_change_time = create_savegame_piece(8, 0);
     state->empire = create_savegame_piece(12, 0);
+    if (version_data.features.custom_empire_map_image) {
+        state->empire_map = create_savegame_piece(PIECE_SIZE_DYNAMIC, 0);
+    }
     state->empire_cities = create_savegame_piece(version_data.piece_sizes.empire_cities, 1);
     if (version_data.features.static_building_counts) {
         state->building_count_industry = create_savegame_piece(version_data.building_counts.industry, 0);
@@ -533,8 +568,15 @@ static void init_savegame_data(savegame_version_t version)
     state->figure_names = create_savegame_piece(84, 0);
     state->culture_coverage = create_savegame_piece(60, 0);
     state->scenario = create_savegame_piece(version_data.piece_sizes.scenario, 0);
-    if (version_data.features.scenario_requests) {
-        state->scenario_requests = create_savegame_piece(version_data.piece_sizes.scenario_requests, 0);
+    if (version_data.features.requests) {
+        state->requests = create_savegame_piece(PIECE_SIZE_DYNAMIC, 0);
+    }
+    if (version_data.features.dynamic_scenario_objects) {
+        state->invasions = create_savegame_piece(PIECE_SIZE_DYNAMIC, 1);
+        state->demand_changes = create_savegame_piece(PIECE_SIZE_DYNAMIC, 1);
+        state->price_changes = create_savegame_piece(PIECE_SIZE_DYNAMIC, 1);
+        state->allowed_buildings = create_savegame_piece(PIECE_SIZE_DYNAMIC, 1);
+        state->custom_variables = create_savegame_piece(PIECE_SIZE_DYNAMIC, 1);
     }
     if (version_data.features.scenario_events) {
         state->scenario_events = create_savegame_piece(PIECE_SIZE_DYNAMIC, 0);
@@ -562,7 +604,7 @@ static void init_savegame_data(savegame_version_t version)
     state->building_list_burning_totals = create_savegame_piece(version_data.piece_sizes.burning_totals, 0);
     state->figure_sequence = create_savegame_piece(4, 0);
     state->scenario_settings = create_savegame_piece(12, 0);
-    state->invasion_warnings = create_savegame_piece(3232, 1);
+    state->invasion_warnings = create_savegame_piece(version_data.piece_sizes.invasion_warnings, 1);
     state->scenario_is_custom = create_savegame_piece(4, 0);
     state->city_sounds = create_savegame_piece(8960, 0);
     state->building_extra_highest_id = create_savegame_piece(4, 0);
@@ -600,6 +642,9 @@ static void init_savegame_data(savegame_version_t version)
     state->bookmarks = create_savegame_piece(32, 0);
     state->tutorial_part3 = create_savegame_piece(4, 0);
     state->city_entry_exit_grid_offset = create_savegame_piece(8, 0);
+    if (version_data.features.custom_campaigns) {
+        state->campaign_name = create_savegame_piece(PIECE_SIZE_DYNAMIC, 0);
+    }
     state->end_marker = create_savegame_piece(284, 0); // 71x 4-bytes emptiness
     if (version_data.features.monument_deliveries) {
         state->deliveries = create_savegame_piece(version_data.piece_sizes.monument_deliveries, 0);
@@ -632,15 +677,33 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
         message_media_text_blob_load_state(file->message_media_text_blob, file->message_media_metadata);
         custom_messages_load_state(file->custom_messages, file->custom_media);
     }
-    scenario_load_state(file->scenario, file->scenario_requests, version);
+    scenario_load_state(file->scenario, version);
+    if (version > SCENARIO_LAST_NO_EXTENDED_REQUESTS) {
+        scenario_request_load_state(file->requests, version);
+    }
+    if (version > SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
+        scenario_invasion_load_state(file->invasions);
+        scenario_demand_change_load_state(file->demand_changes);
+        scenario_price_change_load_state(file->price_changes);
+        scenario_allowed_building_load_state(file->allowed_buildings);
+        scenario_custom_variable_load_state(file->custom_variables);
+    }
     if (version > SCENARIO_LAST_NO_EVENTS) {
-        scenario_events_load_state(file->scenario_events, file->scenario_conditions, file->scenario_actions);
+        scenario_events_load_state(file->scenario_events, file->scenario_conditions, file->scenario_actions,
+            version > SCENARIO_LAST_STATIC_ORIGINAL_DATA);
     } else {
         scenario_events_clear();
     }
     if (version > SCENARIO_LAST_UNVERSIONED) {
         empire_object_load(file->empire, version);
+        if (resource_mapping_get_version() < RESOURCE_SEPARATE_FISH_AND_MEAT_VERSION) {
+            empire_city_update_our_fish_and_meat_production();
+        }
         empire_city_update_trading_data(scenario_empire_id());
+    }
+    empire_reset_map();
+    if (version > SCENARIO_LAST_NO_CUSTOM_EMPIRE_MAP_IMAGE) {
+        empire_load_custom_map(file->empire_map);
     }
     buffer_skip(file->end_marker, 4);
 }
@@ -657,12 +720,18 @@ static void scenario_save_to_state(scenario_state *file)
     city_view_save_scenario_state(file->camera);
     random_save_state(file->random_iv);
     scenario_save_state(file->scenario);
-    scenario_requests_save_state(file->scenario_requests);
+    scenario_request_save_state(file->requests);
+    scenario_invasion_save_state(file->invasions);
+    scenario_demand_change_save_state(file->demand_changes);
+    scenario_price_change_save_state(file->price_changes);
+    scenario_allowed_building_save_state(file->allowed_buildings);
+    scenario_custom_variable_save_state(file->custom_variables);
     scenario_events_save_state(file->scenario_events, file->scenario_conditions, file->scenario_actions);
     custom_messages_save_state(file->custom_messages);
     custom_media_save_state(file->custom_media);
     message_media_text_blob_save_state(file->message_media_text_blob, file->message_media_metadata);
     empire_object_save(file->empire);
+    empire_save_custom_map(file->empire_map);
     buffer_skip(file->end_marker, 4);
 }
 
@@ -687,16 +756,31 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
         state->scenario_settings,
         state->scenario_is_custom,
         state->player_name,
-        state->scenario_name);
+        state->scenario_name,
+        version > SAVE_GAME_LAST_NO_CUSTOM_CAMPAIGNS ? state->campaign_name : 0);
 
     custom_messages_clear_all();
     if (scenario_version > SCENARIO_LAST_NO_CUSTOM_MESSAGES) {
         message_media_text_blob_load_state(state->message_media_text_blob, state->message_media_metadata);
         custom_messages_load_state(state->custom_messages, state->custom_media);
     }
-    scenario_load_state(state->scenario, state->scenario_requests, scenario_version);
+    scenario_load_state(state->scenario, scenario_version);
+
+    if (scenario_version > SCENARIO_LAST_NO_EXTENDED_REQUESTS) {
+        scenario_request_load_state(state->requests, scenario_version);
+    }
+
+    if (scenario_version > SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
+        scenario_invasion_load_state(state->invasions);
+        scenario_demand_change_load_state(state->demand_changes);
+        scenario_price_change_load_state(state->price_changes);
+        scenario_allowed_building_load_state(state->allowed_buildings);
+        scenario_custom_variable_load_state(state->custom_variables);
+    }
+
     if (scenario_version > SCENARIO_LAST_NO_EVENTS) {
-        scenario_events_load_state(state->scenario_events, state->scenario_conditions, state->scenario_actions);
+        scenario_events_load_state(state->scenario_events, state->scenario_conditions, state->scenario_actions,
+            scenario_version > SCENARIO_LAST_STATIC_ORIGINAL_DATA);
     } else {
         scenario_events_clear();
     }
@@ -730,6 +814,10 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
 
     scenario_emperor_change_load_state(state->emperor_change_time, state->emperor_change_state);
     empire_load_state(state->empire);
+    empire_reset_map();
+    if (version > SAVE_GAME_LAST_NO_CUSTOM_EMPIRE_MAP_IMAGE) {
+        empire_load_custom_map(state->empire_map);
+    }
     empire_city_load_state(state->empire_cities, version);
     trade_prices_load_state(state->trade_prices);
     figure_name_load_state(state->figure_names);
@@ -740,7 +828,6 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     city_message_load_state(state->messages, state->message_extra,
         state->message_counts, state->message_delays,
         state->population_messages);
-    sound_city_load_state(state->city_sounds);
     traders_load_state(state->figure_traders);
 
     building_list_load_state(state->building_list_small, state->building_list_large,
@@ -754,7 +841,8 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     trade_routes_load_state(state->trade_route_limit, state->trade_route_traded, version);
     map_routing_load_state(state->routing_counters);
     enemy_armies_load_state(state->enemy_armies, state->enemy_army_totals);
-    scenario_invasion_load_state(state->last_invasion_id, state->invasion_warnings);
+    scenario_invasion_warning_load_state(state->last_invasion_id, state->invasion_warnings,
+        version > SAVE_GAME_LAST_STATIC_SCENARIO_ORIGINAL_DATA);
     map_bookmark_load_state(state->bookmarks);
 
     buffer_skip(state->end_marker, 284);
@@ -769,6 +857,9 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     }
     if (version > SAVE_GAME_LAST_UNVERSIONED_SCENARIOS) {
         empire_object_load(state->custom_empire, scenario_version);
+        if (resource_mapping_get_version() < RESOURCE_SEPARATE_FISH_AND_MEAT_VERSION) {
+            empire_city_update_our_fish_and_meat_production();
+        }
         empire_city_update_trading_data(scenario_empire_id());
     }
     if (version <= SAVE_GAME_LAST_GLOBAL_BUILDING_INFO) {
@@ -788,7 +879,8 @@ static void savegame_save_to_state(savegame_state *state)
         state->scenario_settings,
         state->scenario_is_custom,
         state->player_name,
-        state->scenario_name);
+        state->scenario_name,
+        state->campaign_name);
 
     map_building_save_state(state->building_grid, state->building_damage_grid);
     map_terrain_save_state(state->terrain_grid);
@@ -820,13 +912,19 @@ static void savegame_save_to_state(savegame_state *state)
 
     scenario_emperor_change_save_state(state->emperor_change_time, state->emperor_change_state);
     empire_save_state(state->empire);
+    empire_save_custom_map(state->empire_map);
     empire_city_save_state(state->empire_cities);
     trade_prices_save_state(state->trade_prices);
     figure_name_save_state(state->figure_names);
     city_culture_save_state(state->culture_coverage);
 
     scenario_save_state(state->scenario);
-    scenario_requests_save_state(state->scenario_requests);
+    scenario_request_save_state(state->requests);
+    scenario_invasion_save_state(state->invasions);
+    scenario_demand_change_save_state(state->demand_changes);
+    scenario_price_change_save_state(state->price_changes);
+    scenario_allowed_building_save_state(state->allowed_buildings);
+    scenario_custom_variable_save_state(state->custom_variables);
     scenario_events_save_state(state->scenario_events, state->scenario_conditions, state->scenario_actions);
     custom_messages_save_state(state->custom_messages);
     custom_media_save_state(state->custom_media);
@@ -837,7 +935,6 @@ static void savegame_save_to_state(savegame_state *state)
     city_message_save_state(state->messages, state->message_extra,
         state->message_counts, state->message_delays,
         state->population_messages);
-    sound_city_save_state(state->city_sounds);
     traders_save_state(state->figure_traders);
 
     building_list_save_state(state->building_list_small, state->building_list_large,
@@ -850,7 +947,7 @@ static void savegame_save_to_state(savegame_state *state)
     trade_routes_save_state(state->trade_route_limit, state->trade_route_traded);
     map_routing_save_state(state->routing_counters);
     enemy_armies_save_state(state->enemy_armies, state->enemy_army_totals);
-    scenario_invasion_save_state(state->last_invasion_id, state->invasion_warnings);
+    scenario_invasion_warning_save_state(state->last_invasion_id, state->invasion_warnings);
     map_bookmark_save_state(state->bookmarks);
 
     buffer_skip(state->end_marker, 284);
@@ -904,24 +1001,48 @@ static void write_int32(FILE *fp, int value)
     fwrite(&data, 1, 4, fp);
 }
 
-static int read_compressed_chunk(FILE *fp, void *buf, size_t bytes_to_read, int read_as_zlib, memory_block *compress_buffer)
+static int read_compressed_chunk_from_buffer(buffer *buf, void *dst, size_t bytes_to_read, int read_as_zlib,
+    memory_block *compress_buffer)
 {
-    if (!core_memory_block_ensure_size(compress_buffer, bytes_to_read)) {
-        return 0;
+    int input_size = buffer_read_i32(buf);
+    if ((unsigned int) input_size == UNCOMPRESSED) {
+        return buffer_read_raw(buf, dst, (int) bytes_to_read) == bytes_to_read;
+    } else {
+        if (!core_memory_block_ensure_size(compress_buffer, input_size)) {
+            return 0;
+        }
+        if (buffer_read_raw(buf, compress_buffer->memory, input_size) != input_size) {
+            return 0;
+        }
+
+        if (!read_as_zlib) {
+            return zip_decompress(compress_buffer->memory, input_size, dst, (int) bytes_to_read);
+        } else {
+            int output_size = 0;
+            return zlib_helper_decompress(compress_buffer->memory, input_size, dst, (int) bytes_to_read, &output_size);
+        }
     }
+}
+
+static int read_compressed_chunk(FILE *fp, void *dst, size_t bytes_to_read, int read_as_zlib,
+    memory_block *compress_buffer)
+{
     int input_size = read_int32(fp);
     if ((unsigned int) input_size == UNCOMPRESSED) {
-        return fread(buf, 1, bytes_to_read, fp) == bytes_to_read;
+        return fread(dst, 1, bytes_to_read, fp) == bytes_to_read;
     } else {
+        if (!core_memory_block_ensure_size(compress_buffer, input_size)) {
+            return 0;
+        }
         if (fread(compress_buffer->memory, 1, input_size, fp) != input_size) {
             return 0;
         }
 
         if (!read_as_zlib) {
-            return zip_decompress(compress_buffer->memory, input_size, buf, (int) bytes_to_read);
+            return zip_decompress(compress_buffer->memory, input_size, dst, (int) bytes_to_read);
         } else {
             int output_size = 0;
-            return zlib_helper_decompress(compress_buffer->memory, input_size, buf, (int) bytes_to_read, &output_size);
+            return zlib_helper_decompress(compress_buffer->memory, input_size, dst, (int) bytes_to_read, &output_size);
         }
     }
 }
@@ -950,7 +1071,7 @@ static int write_compressed_chunk(FILE *fp, void *buf, size_t bytes_to_write, me
     return 1;
 }
 
-static int prepare_dynamic_piece(FILE *fp, file_piece *piece)
+static int prepare_dynamic_piece_from_file(FILE *fp, file_piece *piece)
 {
     if (piece->dynamic) {
         int size = read_int32(fp);
@@ -964,16 +1085,42 @@ static int prepare_dynamic_piece(FILE *fp, file_piece *piece)
     return 1;
 }
 
-static int load_scenario_to_buffers(const char *filename, scenario_version_t *version)
+static int prepare_dynamic_piece_from_buffer(buffer *buf, file_piece *piece)
 {
-    FILE *fp = file_open(dir_get_file(filename, NOT_LOCALIZED), "rb");
-    if (!fp) {
+    if (piece->dynamic) {
+        int size = buffer_read_i32(buf);
+        if (!size) {
+            return 0;
+        }
+        uint8_t *data = malloc(size);
+        memset(data, 0, size);
+        buffer_init(&piece->buf, data, size);
+    }
+    return 1;
+}
+
+static int get_scenario_version_from_buffer(buffer *buf)
+{
+    char version_magic[8];
+    size_t read = buffer_read_raw(buf, version_magic, 8);
+    if (read != sizeof(version_magic)) {
+        log_error("Unable to read version header from file", 0, 0);
         return 0;
     }
-    *version = get_scenario_version(fp);
-    init_scenario_data(*version);
-    if (*version > SCENARIO_CURRENT_VERSION) {
-        log_error("Scenario version incompatible with current version, got version", 0, *version);
+    if (strcmp(version_magic, "VERSION") != 0) {
+        buffer_reset(buf);
+        return SCENARIO_LAST_UNVERSIONED;
+    }
+
+    return buffer_read_i32(buf);
+}
+
+static int load_scenario_from_buffer(buffer *buf)
+{
+    scenario_version_t version = get_scenario_version_from_buffer(buf);
+    init_scenario_data(version);
+    if (version > SCENARIO_CURRENT_VERSION) {
+        log_error("Scenario version incompatible with current version, got version", 0, version);
         return 0;
     }
     memory_block compress_buffer;
@@ -981,7 +1128,43 @@ static int load_scenario_to_buffers(const char *filename, scenario_version_t *ve
     for (int i = 0; i < scenario_data.num_pieces; i++) {
         file_piece *piece = &scenario_data.pieces[i];
         int result = 0;
-        if (!prepare_dynamic_piece(fp, piece)) {
+        if (!prepare_dynamic_piece_from_buffer(buf, piece)) {
+            continue;
+        }
+        if (piece->compressed) {
+            result = read_compressed_chunk_from_buffer(buf, piece->buf.data, piece->buf.size, 1, &compress_buffer);
+        } else {
+            result = buffer_read_raw(buf, piece->buf.data, piece->buf.size) == piece->buf.size;
+        }
+        if (!result) {
+            log_info("Incorrect buffer size, got", 0, result);
+            log_info("Incorrect buffer size, expected", 0, (int) piece->buf.size);
+            core_memory_block_free(&compress_buffer);
+            return 0;
+        }
+    }
+    core_memory_block_free(&compress_buffer);
+    return 1;
+}
+
+static int load_scenario_to_buffers(const char *filename)
+{
+    FILE *fp = file_open(filename, "rb");
+    if (!fp) {
+        return 0;
+    }
+    scenario_version_t version = get_scenario_version(fp);
+    init_scenario_data(version);
+    if (version > SCENARIO_CURRENT_VERSION) {
+        log_error("Scenario version incompatible with current version, got version", 0, version);
+        return 0;
+    }
+    memory_block compress_buffer;
+    core_memory_block_init(&compress_buffer, COMPRESS_BUFFER_INITIAL_SIZE);
+    for (int i = 0; i < scenario_data.num_pieces; i++) {
+        file_piece *piece = &scenario_data.pieces[i];
+        int result = 0;
+        if (!prepare_dynamic_piece_from_file(fp, piece)) {
             continue;
         }
         if (piece->compressed) {
@@ -994,6 +1177,7 @@ static int load_scenario_to_buffers(const char *filename, scenario_version_t *ve
             log_info("Incorrect buffer size, got", 0, result);
             log_info("Incorrect buffer size, expected", 0, (int) piece->buf.size);
             file_close(fp);
+            core_memory_block_free(&compress_buffer);
             return 0;
         }
     }
@@ -1002,11 +1186,19 @@ static int load_scenario_to_buffers(const char *filename, scenario_version_t *ve
     return 1;
 }
 
+int game_file_io_read_scenario_from_buffer(buffer *buf)
+{
+    if (!load_scenario_from_buffer(buf)) {
+        return 0;
+    }
+    scenario_load_from_state(&scenario_data.state, scenario_data.version);
+    return 1;
+}
+
 int game_file_io_read_scenario(const char *filename)
 {
     log_info("Loading scenario", filename, 0);
-    scenario_version_t version = SCENARIO_VERSION_NONE;
-    if (!load_scenario_to_buffers(filename, &version)) {
+    if (!load_scenario_to_buffers(filename)) {
         return 0;
     }
     scenario_load_from_state(&scenario_data.state, scenario_data.version);
@@ -1056,31 +1248,31 @@ static void set_viewport(int *x, int *y, int *width, int *height)
     *height = minimap_data.city_height;
 }
 
-int game_file_io_read_scenario_info(const char *filename, scenario_info *info)
+static int read_scenario_info(saved_game_info *info)
 {
-    scenario_version_t version = 0;
-    if (!load_scenario_to_buffers(filename, &version)) {
-        return (version > SCENARIO_CURRENT_VERSION) ? SAVEGAME_STATUS_NEWER_VERSION : SAVEGAME_STATUS_INVALID;
-    }
-
     const scenario_state *state = &scenario_data.state;
 
-    scenario_description_from_buffer(state->scenario, info->description, version);
-    info->image_id = scenario_image_id_from_buffer(state->scenario, version);
-    info->climate = scenario_climate_from_buffer(state->scenario, version);
-    info->total_invasions = scenario_invasions_from_buffer(state->scenario, version);
-    info->player_rank = scenario_rank_from_buffer(state->scenario, version);
-    info->start_year = scenario_start_year_from_buffer(state->scenario, version);
-    scenario_open_play_info_from_buffer(state->scenario, version, &info->is_open_play, &info->open_play_id);
+    scenario_description_from_buffer(state->scenario, info->description, scenario_data.version);
+    info->image_id = scenario_image_id_from_buffer(state->scenario, scenario_data.version);
+    info->climate = scenario_climate_from_buffer(state->scenario, scenario_data.version);
+    if (scenario_data.version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
+        info->total_invasions = scenario_invasions_from_buffer(state->scenario, scenario_data.version);
+    } else {
+        info->total_invasions = scenario_invasions_from_buffer(state->invasions, scenario_data.version);
+    }
+    info->player_rank = scenario_rank_from_buffer(state->scenario, scenario_data.version);
+    info->start_year = scenario_start_year_from_buffer(state->scenario, scenario_data.version);
+    scenario_open_play_info_from_buffer(state->scenario, scenario_data.version,
+        &info->is_open_play, &info->open_play_id);
 
     if (!info->is_open_play) {
-        scenario_objectives_from_buffer(state->scenario, version, &info->win_criteria);
+        scenario_objectives_from_buffer(state->scenario, scenario_data.version, &info->win_criteria);
     }
     int grid_start;
     int grid_border_size;
 
     scenario_map_data_from_buffer(state->scenario, &minimap_data.city_width, &minimap_data.city_height,
-        &grid_start, &grid_border_size, version);
+        &grid_start, &grid_border_size, scenario_data.version);
     info->map_size = minimap_data.city_width;
     minimap_data.version = 0;
     minimap_data.climate = info->climate;
@@ -1103,6 +1295,40 @@ int game_file_io_read_scenario_info(const char *filename, scenario_info *info)
     clear_scenario_pieces();
 
     return SAVEGAME_STATUS_OK;
+}
+
+int game_file_io_read_scenario_info(const char *filename, saved_game_info *info)
+{
+    memset(info, 0, sizeof(saved_game_info));
+
+    if (!info) {
+        return SAVEGAME_STATUS_INVALID;
+    }
+
+    if (!load_scenario_to_buffers(filename)) {
+        if (scenario_data.version > SCENARIO_CURRENT_VERSION) {
+            return SAVEGAME_STATUS_NEWER_VERSION;
+        }
+        return game_file_io_read_saved_game_info(filename, 0, info);
+    }
+
+    return read_scenario_info(info);
+}
+
+int game_file_io_read_scenario_info_from_buffer(buffer *buf, saved_game_info *info)
+{
+    memset(info, 0, sizeof(saved_game_info));
+
+    if (!info) {
+        return SAVEGAME_STATUS_INVALID;
+    }
+    if (!load_scenario_from_buffer(buf)) {
+        if (scenario_data.version > SCENARIO_CURRENT_VERSION) {
+            return SAVEGAME_STATUS_NEWER_VERSION;
+        }
+        return game_file_io_read_saved_game_info_from_buffer(buf, info);
+    }
+    return read_scenario_info(info);
 }
 
 int game_file_io_write_scenario(const char *filename)
@@ -1142,6 +1368,34 @@ int game_file_io_write_scenario(const char *filename)
     return 1;
 }
 
+static int savegame_read_from_buffer(buffer *buf, savegame_version_t version)
+{
+    memory_block compress_buffer;
+    core_memory_block_init(&compress_buffer, COMPRESS_BUFFER_INITIAL_SIZE);
+    for (int i = 0; i < savegame_data.num_pieces; i++) {
+        file_piece *piece = &savegame_data.pieces[i];
+        size_t result = 0;
+        if (!prepare_dynamic_piece_from_buffer(buf, piece)) {
+            continue;
+        }
+        if (piece->compressed) {
+            result = read_compressed_chunk_from_buffer(buf, piece->buf.data, piece->buf.size,
+                version > SAVE_GAME_LAST_ZIP_COMPRESSION, &compress_buffer);
+        } else {
+            result = buffer_read_raw(buf, piece->buf.data, piece->buf.size) == piece->buf.size;
+        }
+        // The last piece may be smaller than buf.size
+        if (!result && i != (savegame_data.num_pieces - 1)) {
+            log_info("Incorrect buffer size, got", 0, (int) result);
+            log_info("Incorrect buffer size, expected", 0, (int) piece->buf.size);
+            core_memory_block_free(&compress_buffer);
+            return 0;
+        }
+    }
+    core_memory_block_free(&compress_buffer);
+    return 1;
+}
+
 static int savegame_read_from_file(FILE *fp, savegame_version_t version)
 {
     memory_block compress_buffer;
@@ -1149,7 +1403,7 @@ static int savegame_read_from_file(FILE *fp, savegame_version_t version)
     for (int i = 0; i < savegame_data.num_pieces; i++) {
         file_piece *piece = &savegame_data.pieces[i];
         int result = 0;
-        if (!prepare_dynamic_piece(fp, piece)) {
+        if (!prepare_dynamic_piece_from_file(fp, piece)) {
             continue;
         }
         if (piece->compressed) {
@@ -1161,6 +1415,7 @@ static int savegame_read_from_file(FILE *fp, savegame_version_t version)
         if (!result && i != (savegame_data.num_pieces - 1)) {
             log_info("Incorrect buffer size, got", 0, result);
             log_info("Incorrect buffer size, expected", 0, (int) piece->buf.size);
+            core_memory_block_free(&compress_buffer);
             return 0;
         }
     }
@@ -1184,6 +1439,20 @@ static void savegame_write_to_file(FILE *fp, memory_block *compress_buffer)
             fwrite(piece->buf.data, 1, piece->buf.size, fp);
         }
     }
+}
+
+static int get_savegame_versions_from_buffer(buffer *buf, savegame_version_t *save_version,
+    resource_version_t *resource_version)
+{
+    buffer_skip(buf, 4);
+    *save_version = buffer_read_i32(buf);
+    if (*save_version > SAVE_GAME_LAST_STATIC_RESOURCES) {
+        *resource_version = buffer_read_i32(buf);
+    } else {
+        *resource_version = RESOURCE_ORIGINAL_VERSION;
+    }
+    buffer_reset(buf);
+    return *save_version != 0;
 }
 
 static int get_savegame_versions(FILE *fp, savegame_version_t *save_version, resource_version_t *resource_version)
@@ -1213,10 +1482,34 @@ static int get_savegame_versions(FILE *fp, savegame_version_t *save_version, res
     return 1;
 }
 
+int game_file_io_read_save_game_from_buffer(buffer *buf)
+{
+    int result = 0;
+    savegame_version_t save_version;
+    resource_version_t resource_version;
+    if (get_savegame_versions_from_buffer(buf, &save_version, &resource_version)) {
+        if (save_version > SAVE_GAME_CURRENT_VERSION || resource_version > RESOURCE_CURRENT_VERSION) {
+            log_error("Newer save game version than supported. Please update Augustus. Version:", 0, save_version);
+            return FILE_LOAD_INCOMPATIBLE_VERSION;
+        }
+        log_info("Savegame version", 0, save_version);
+        resource_set_mapping(resource_version);
+        init_savegame_data(save_version);
+        result = savegame_read_from_buffer(buf, save_version);
+    }
+    if (!result) {
+        log_error("Unable to load game, incompatible savefile.", 0, 0);
+        return FILE_LOAD_WRONG_FILE_FORMAT;
+    }
+    savegame_load_from_state(&savegame_data.state, save_version);
+    clear_savegame_pieces();
+    return FILE_LOAD_SUCCESS;
+}
+
 int game_file_io_read_saved_game(const char *filename, int offset)
 {
     log_info("Loading saved game", filename, 0);
-    FILE *fp = file_open(dir_get_file(filename, NOT_LOCALIZED), "rb");
+    FILE *fp = file_open(filename, "rb");
     if (!fp) {
         log_error("Unable to load game, unable to open file.", 0, 0);
         return FILE_LOAD_DOES_NOT_EXIST;
@@ -1244,31 +1537,8 @@ int game_file_io_read_saved_game(const char *filename, int offset)
         return FILE_LOAD_WRONG_FILE_FORMAT;
     }
     savegame_load_from_state(&savegame_data.state, save_version);
+    clear_savegame_pieces();
     return 1;
-}
-
-static int skip_piece(FILE *fp, int size, int compressed)
-{
-    if (size == PIECE_SIZE_DYNAMIC) {
-        size = read_int32(fp);
-        if (!size) {
-            return 1;
-        }
-    }
-    if (!compressed) {
-        return fseek(fp, size, SEEK_CUR) == 0;
-    }
-    int input_size = read_int32(fp);
-    if ((unsigned int) input_size == UNCOMPRESSED) {
-        return fseek(fp, size, SEEK_CUR) == 0;
-    }
-    return fseek(fp, input_size, SEEK_CUR) == 0;
-}
-
-static void free_file_piece(file_piece *piece)
-{
-    buffer_reset(&piece->buf);
-    free(piece->buf.data);
 }
 
 static int savegame_terrain_at(int grid_offset)
@@ -1312,175 +1582,71 @@ static building *savegame_building(int id)
     return &b;
 }
 
-static savegame_load_status savegame_read_file_info(FILE *fp, saved_game_info *info,
-    savegame_version_t version, memory_block *compress_buffer)
+static void get_saved_game_origin(saved_game_info *info, const savegame_state *state)
 {
-    clear_savegame_pieces();
+    info->origin.mission = buffer_read_i32(state->scenario_campaign_mission);
+    int scenario_is_custom = buffer_read_i32(state->scenario_is_custom);
+    int version = buffer_read_i32(state->file_version);
 
-    savegame_version_data version_data;
-    get_version_data(&version_data, version);
+    info->origin.campaign_name[0] = 0;
 
-    file_piece scenario_version_data;
-    file_piece city_data, game_time, terrain_grid, random_grid, scenario_piece;
-    file_piece bitfields_grid, edge_grid, building_grid, buildings;
-
-    savegame_state *state = &savegame_data.state;
-
-    init_file_piece(&scenario_version_data, 4, 0);
-    init_file_piece(&city_data, version_data.piece_sizes.city_data, 0);
-    init_file_piece(&game_time, 20, 0);
-    init_file_piece(&terrain_grid, version_data.piece_sizes.terrain_grid, 0);
-    init_file_piece(&random_grid, 26244, 0);
-    init_file_piece(&edge_grid, 26244, 0);
-    init_file_piece(&bitfields_grid, 26244, 0);
-    init_file_piece(&scenario_piece, version_data.piece_sizes.scenario, 0);
-    init_file_piece(&building_grid, 52488, 0);
-    init_file_piece(&buildings, version_data.piece_sizes.buildings, 0);
-
-    state->terrain_grid = &terrain_grid.buf;
-    state->random_grid = &random_grid.buf;
-    state->edge_grid = &edge_grid.buf;
-    state->bitfields_grid = &bitfields_grid.buf;
-    state->building_grid = &building_grid.buf;
-    state->buildings = &buildings.buf;
-
-    info->mission = read_int32(fp);
-    skip_piece(fp, 4, 0); // file version
-    if (version_data.features.resource_version) {
-        skip_piece(fp, 4, 0);
-    }
-    if (version_data.features.scenario_version) {
-        if (fread(scenario_version_data.buf.data, 1, 4, fp) != 4) {
-            return SAVEGAME_STATUS_INVALID;
-        }
+    if (!scenario_is_custom) {
+        info->origin.type = SAVEGAME_FROM_ORIGINAL_CAMPAIGN;
+        info->origin.scenario_name[0] = 0;
+        return;
     }
 
-    int scenario_version = save_version_to_scenario_version(version, &scenario_version_data.buf);
-    if (version_data.features.image_grid) {
-        skip_piece(fp, version_data.piece_sizes.image_grid, 1);
+    buffer_read_raw(state->scenario_name, info->origin.scenario_name, MAX_SCENARIO_NAME);
+    file_remove_extension(info->origin.scenario_name);
+
+    if (version <= SAVE_GAME_LAST_NO_CUSTOM_CAMPAIGNS) {
+        return;
     }
 
-    if (!read_compressed_savegame_chunk(fp, edge_grid.buf.data, edge_grid.buf.size, version, compress_buffer)) {
-        return SAVEGAME_STATUS_INVALID;
+    int campaign_name_length = buffer_read_i32(state->campaign_name);
+    if (campaign_name_length <= 1) {
+        return;
     }
 
-    if (!read_compressed_savegame_chunk(fp, building_grid.buf.data, building_grid.buf.size, version, compress_buffer)) {
-        return SAVEGAME_STATUS_INVALID;
+    info->origin.type = SAVEGAME_FROM_CUSTOM_CAMPAIGN;
+    buffer_read_raw(state->campaign_name, info->origin.campaign_name, campaign_name_length);
+    file_remove_extension(info->origin.campaign_name);
+}
+
+static savegame_load_status savegame_read_file_info(saved_game_info *info, savegame_version_t version)
+{
+    const savegame_state *state = &savegame_data.state;
+    scenario_version_t scenario_version = save_version_to_scenario_version(version, state->scenario_version);
+
+    city_data_load_basic_info(state->city_data, &info->population, &info->treasury, &minimap_data.caravanserai_id, version);
+    game_time_load_basic_info(state->game_time, &info->month, &info->year);
+
+    scenario_description_from_buffer(state->scenario, info->description, version);
+    info->image_id = scenario_image_id_from_buffer(state->scenario, version);
+    info->climate = scenario_climate_from_buffer(state->scenario, version);
+    if (scenario_version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
+        info->total_invasions = scenario_invasions_from_buffer(state->scenario, scenario_version);
+    } else {
+        info->total_invasions = scenario_invasions_from_buffer(state->invasions, scenario_version);
+    }
+    info->player_rank = scenario_rank_from_buffer(state->scenario, version);
+    info->start_year = scenario_start_year_from_buffer(state->scenario, version);
+    scenario_open_play_info_from_buffer(state->scenario, version, &info->is_open_play, &info->open_play_id);
+
+    if (!info->is_open_play) {
+        scenario_objectives_from_buffer(state->scenario, version, &info->win_criteria);
     }
 
-    if (!read_compressed_savegame_chunk(fp, terrain_grid.buf.data, terrain_grid.buf.size, version, compress_buffer)) {
-        return SAVEGAME_STATUS_INVALID;
-    }
-
-    skip_piece(fp, 26244, 1);
-    skip_piece(fp, 52488, 1);
-
-    if (!read_compressed_savegame_chunk(fp, bitfields_grid.buf.data, bitfields_grid.buf.size, version, compress_buffer)) {
-        return SAVEGAME_STATUS_INVALID;
-    }
-
-    skip_piece(fp, 26244, 1);
-
-    if (fread(random_grid.buf.data, 1, random_grid.buf.size, fp) != random_grid.buf.size) {
-        return SAVEGAME_STATUS_INVALID;
-    }
-
-    skip_piece(fp, 26244, 1);
-    skip_piece(fp, 26244, 1);
-    skip_piece(fp, 26244, 1);
-    skip_piece(fp, 26244, 1);
-    skip_piece(fp, 26244, 1);
-    skip_piece(fp, version_data.piece_sizes.figures, 1);
-    skip_piece(fp, version_data.piece_sizes.route_figures, 1);
-    skip_piece(fp, version_data.piece_sizes.route_paths, 1);
-    skip_piece(fp, version_data.piece_sizes.formations, 1);
-    skip_piece(fp, 12, 0);
-
-    if (!read_compressed_savegame_chunk(fp, city_data.buf.data, city_data.buf.size, version, compress_buffer)) {
-        return SAVEGAME_STATUS_INVALID;
-    }
-
-    if (version_data.features.city_faction_info) {
-        skip_piece(fp, 2, 0);
-    }
-    skip_piece(fp, 64, 0);
-    if (version_data.features.city_faction_info) {
-        skip_piece(fp, 4, 0);
-    }
-
-    if (!prepare_dynamic_piece(fp, &buildings) || !read_compressed_savegame_chunk(fp, buildings.buf.data, buildings.buf.size, version, compress_buffer)) {
-        return SAVEGAME_STATUS_INVALID;
-    }
-
-    skip_piece(fp, 4, 0);
-
-    if (fread(game_time.buf.data, 1, game_time.buf.size, fp) != game_time.buf.size) {
-        return SAVEGAME_STATUS_INVALID;
-    }
-
-    skip_piece(fp, 8, 0);
-    skip_piece(fp, 8, 0);
-    skip_piece(fp, 8, 0);
-    if (version_data.features.static_building_counts) {
-        skip_piece(fp, version_data.building_counts.culture1, 0);
-    }
-    skip_piece(fp, version_data.piece_sizes.graph_order, 0);
-    skip_piece(fp, 8, 0);
-    skip_piece(fp, 12, 0);
-    skip_piece(fp, version_data.piece_sizes.empire_cities, 1);
-    if (version_data.features.static_building_counts) {
-        skip_piece(fp, version_data.building_counts.industry, 0);
-    }
-    skip_piece(fp, version_data.piece_sizes.trade_prices, 0);
-    skip_piece(fp, 84, 0);
-    skip_piece(fp, 60, 0);
-
-    if (fread(scenario_piece.buf.data, 1, scenario_piece.buf.size, fp) != scenario_piece.buf.size) {
-        return SAVEGAME_STATUS_INVALID;
-    }
-    if (version_data.features.scenario_requests) {
-        skip_piece(fp, version_data.piece_sizes.scenario_requests, 0);
-    }
-    if (version_data.features.scenario_events) {
-        skip_piece(fp, PIECE_SIZE_DYNAMIC, 0);
-    }
-    if (version_data.features.scenario_conditions) {
-        skip_piece(fp, PIECE_SIZE_DYNAMIC, 0);
-    }
-    if (version_data.features.scenario_actions) {
-        skip_piece(fp, PIECE_SIZE_DYNAMIC, 0);
-    }
-    if (version_data.features.custom_messages_and_media) {
-        skip_piece(fp, PIECE_SIZE_DYNAMIC, 0);
-        skip_piece(fp, PIECE_SIZE_DYNAMIC, 0);
-        skip_piece(fp, PIECE_SIZE_DYNAMIC, 0);
-        skip_piece(fp, PIECE_SIZE_DYNAMIC, 0);
-    }
-    skip_piece(fp, 4, 0);
-    skip_piece(fp, 60, 0);
-    skip_piece(fp, 4, 0);
-    skip_piece(fp, 16000, 1);
-    skip_piece(fp, 12, 0);
-    skip_piece(fp, 10, 0);
-    skip_piece(fp, 80, 0);
-    skip_piece(fp, 80, 0);
-    skip_piece(fp, version_data.piece_sizes.burning_totals, 0);
-    skip_piece(fp, 4, 0);
-    skip_piece(fp, 12, 0);
-    skip_piece(fp, 3232, 1);
-
-    info->custom_mission = read_int32(fp);
-
-    city_data_load_basic_info(&city_data.buf, &info->population, &info->treasury, &minimap_data.caravanserai_id, version);
-    game_time_load_basic_info(&game_time.buf, &info->month, &info->year);
+    get_saved_game_origin(info, state);
 
     int grid_start;
     int grid_border_size;
 
     minimap_data.version = version;
-    scenario_map_data_from_buffer(&scenario_piece.buf, &minimap_data.city_width, &minimap_data.city_height,
+    scenario_map_data_from_buffer(state->scenario, &minimap_data.city_width, &minimap_data.city_height,
         &grid_start, &grid_border_size, scenario_version);
-    minimap_data.climate = scenario_climate_from_buffer(&scenario_piece.buf, scenario_version);
+    info->map_size = minimap_data.city_width;
+    minimap_data.climate = scenario_climate_from_buffer(state->scenario, scenario_version);
     minimap_data.functions.building = savegame_building;
     minimap_data.functions.climate = get_climate;
     minimap_data.functions.map.width = map_width;
@@ -1497,30 +1663,29 @@ static savegame_load_status savegame_read_file_info(FILE *fp, saved_game_info *i
     widget_minimap_update(&minimap_data.functions);
     city_view_restore_lookup();
 
-    free_file_piece(&scenario_version_data);
-    free_file_piece(&city_data);
-    free_file_piece(&game_time);
-    free_file_piece(&terrain_grid);
-    free_file_piece(&scenario_piece);
-    free_file_piece(&random_grid);
-    free_file_piece(&edge_grid);
-    free_file_piece(&bitfields_grid);
-    free_file_piece(&building_grid);
-    free_file_piece(&buildings);
+    clear_savegame_pieces();
 
     return SAVEGAME_STATUS_OK;
 }
 
-int game_file_io_read_saved_game_info(const char *filename, saved_game_info *info)
+int game_file_io_read_saved_game_info(const char *filename, int offset, saved_game_info *info)
 {
-    FILE *fp = file_open(dir_get_file(filename, NOT_LOCALIZED), "rb");
+    memset(info, 0, sizeof(saved_game_info));
+
+    if (!info) {
+        return SAVEGAME_STATUS_INVALID;
+    }
+    memset(info, 0, sizeof(saved_game_info));
+    FILE *fp = file_open(filename, "rb");
     if (!fp) {
         return SAVEGAME_STATUS_INVALID;
+    }
+    if (offset) {
+        fseek(fp, offset, SEEK_SET);
     }
     savegame_load_status result = SAVEGAME_STATUS_INVALID;
     savegame_version_t save_version;
     resource_version_t resource_version;
-
     if (!get_savegame_versions(fp, &save_version, &resource_version)) {
         file_close(fp);
         return SAVEGAME_STATUS_INVALID;
@@ -1530,12 +1695,40 @@ int game_file_io_read_saved_game_info(const char *filename, saved_game_info *inf
         return SAVEGAME_STATUS_NEWER_VERSION;
     }
     resource_set_mapping(resource_version);
-    memory_block compress_buffer;
-    core_memory_block_init(&compress_buffer, COMPRESS_BUFFER_INITIAL_SIZE);
-    result = savegame_read_file_info(fp, info, save_version, &compress_buffer);
-    core_memory_block_free(&compress_buffer);
+    init_savegame_data(save_version);
+    result = savegame_read_from_file(fp, save_version);
     file_close(fp);
-    return result;
+    if (result != SAVEGAME_STATUS_OK) {
+        return FILE_LOAD_WRONG_FILE_FORMAT;
+    }
+    return savegame_read_file_info(info, save_version);
+}
+
+int game_file_io_read_saved_game_info_from_buffer(buffer *buf, saved_game_info *info)
+{
+    memset(info, 0, sizeof(saved_game_info));
+
+    if (!info) {
+        return SAVEGAME_STATUS_INVALID;
+    }
+    int result = 0;
+    savegame_version_t save_version;
+    resource_version_t resource_version;
+    if (get_savegame_versions_from_buffer(buf, &save_version, &resource_version)) {
+        if (save_version > SAVE_GAME_CURRENT_VERSION || resource_version > RESOURCE_CURRENT_VERSION) {
+            log_error("Newer save game version than supported. Please update Augustus. Version:", 0, save_version);
+            return FILE_LOAD_INCOMPATIBLE_VERSION;
+        }
+        log_info("Savegame version", 0, save_version);
+        resource_set_mapping(resource_version);
+        init_savegame_data(save_version);
+        result = savegame_read_from_buffer(buf, save_version);
+    }
+    if (!result) {
+        log_error("Unable to load game, incompatible savefile.", 0, 0);
+        return FILE_LOAD_WRONG_FILE_FORMAT;
+    }
+    return savegame_read_file_info(info, save_version);
 }
 
 int game_file_io_write_saved_game(const char *filename)
@@ -1555,6 +1748,7 @@ int game_file_io_write_saved_game(const char *filename)
     core_memory_block_init(&compress_buffer, COMPRESS_BUFFER_INITIAL_SIZE);
     savegame_write_to_file(fp, &compress_buffer);
     core_memory_block_free(&compress_buffer);
+    clear_savegame_pieces();
     file_close(fp);
     return 1;
 }

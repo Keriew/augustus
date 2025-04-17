@@ -17,9 +17,10 @@
 #include "empire/trade_route.h"
 #include "empire/type.h"
 #include "figuretype/trader.h"
+#include "game/campaign.h"
 #include "game/resource.h"
 #include "game/save_version.h"
-#include "scenario/building.h"
+#include "scenario/allowed_building.h"
 #include "scenario/empire.h"
 #include "scenario/map.h"
 #include "scenario/property.h"
@@ -69,6 +70,9 @@ int empire_city_get_id_by_name(const uint8_t *city_name)
 {
     empire_city *city;
     array_foreach(cities, city) {
+        if (!city->in_use) {
+            continue;
+        }
         const uint8_t *current_name = empire_city_get_name(city);
         if (string_equals(current_name, city_name)) {
             return array_index;
@@ -153,14 +157,14 @@ int empire_can_produce_resource_locally(int resource)
     // Wine can also be produced via Venus Grand Temple
     if (resource == RESOURCE_WINE) {
         return !building_monument_requires_resource(BUILDING_GRAND_TEMPLE_VENUS, RESOURCE_WINE) &&
-            scenario_building_allowed(BUILDING_MENU_GRAND_TEMPLES) &&
-            scenario_building_allowed(BUILDING_GRAND_TEMPLE_VENUS) &&
+            scenario_allowed_building(BUILDING_MENU_GRAND_TEMPLES) &&
+            scenario_allowed_building(BUILDING_GRAND_TEMPLE_VENUS) &&
             building_monument_has_required_resources_to_build(BUILDING_GRAND_TEMPLE_VENUS);
     }
     // Gold can also be produced via City Mint
     if (resource == RESOURCE_GOLD) {
         return !building_monument_requires_resource(BUILDING_CITY_MINT, RESOURCE_GOLD) &&
-            scenario_building_allowed(BUILDING_CITY_MINT) &&
+            scenario_allowed_building(BUILDING_CITY_MINT) &&
             building_monument_has_required_resources_to_build(BUILDING_CITY_MINT);
     }
     return 0;
@@ -560,7 +564,7 @@ static void set_new_monument_elements_production(int empire_id, empire_city *cit
 {
     int damascus_empire_id;
     int caesarea_empire_id;
-    if (scenario_is_custom() || editor_is_active()) {
+    if (!game_campaign_is_original() || editor_is_active()) {
         damascus_empire_id = 37;
         caesarea_empire_id = 34;
     } else {
@@ -600,28 +604,32 @@ static void set_new_monument_elements_production(int empire_id, empire_city *cit
     }
 }
 
-static void update_trading_data(int empire_id, empire_city *city)
+void empire_city_update_our_fish_and_meat_production(void)
 {
-    set_gold_production(city);
-    set_new_monument_elements_production(empire_id, city);
+    empire_city *city;
+
+    array_foreach(cities, city) {
+        if (city->type != EMPIRE_CITY_OURS) {
+            continue;
+        }
+        if (city->sells_resource[RESOURCE_FISH]) {
+            empire_city_change_selling_of_resource(city, RESOURCE_MEAT, !NOT_SELLING);
+        } else if (scenario_allowed_building(BUILDING_WHARF)) {
+            empire_city_change_selling_of_resource(city, RESOURCE_FISH, !NOT_SELLING);
+        }
+        return;
+    }
 }
 
 void empire_city_update_trading_data(int empire_id)
 {
+    if (empire_id == SCENARIO_CUSTOM_EMPIRE) {
+        return;
+    }
     empire_city *city;
     array_foreach(cities, city) {
-        if (resource_mapping_get_version() < RESOURCE_SEPARATE_FISH_AND_MEAT_VERSION) {
-            if (city->type == EMPIRE_CITY_OURS) {
-                if (city->sells_resource[RESOURCE_FISH]) {
-                    empire_city_change_selling_of_resource(city, RESOURCE_MEAT, !NOT_SELLING);
-                } else if (scenario_building_allowed(BUILDING_WHARF)) {
-                    empire_city_change_selling_of_resource(city, RESOURCE_FISH, !NOT_SELLING);
-                }
-            }
-        }
-        if (empire_id != SCENARIO_CUSTOM_EMPIRE) {
-            update_trading_data(empire_id, city);
-        }
+        set_gold_production(city);
+        set_new_monument_elements_production(empire_id, city);
     }
 }
 

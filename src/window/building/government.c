@@ -1,6 +1,9 @@
 #include "government.h"
 
+#include "assets/assets.h"
 #include "building/building.h"
+#include "city/constants.h"
+#include "core/dir.h"
 #include "game/resource.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
@@ -11,6 +14,7 @@
 
 void window_building_draw_forum(building_info_context *c)
 {
+    c->advisor_button = ADVISOR_FINANCIAL;
     c->help_id = 76;
     window_building_play_sound(c, "wavs/forum.wav");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
@@ -24,7 +28,7 @@ void window_building_draw_forum(building_info_context *c)
         c->x_offset + 44 + width, c->y_offset + 43, FONT_NORMAL_BLACK);
 
     if (!c->has_road_access) {
-        window_building_draw_description(c, 69, 25);
+        window_building_draw_description_at(c, 72, 69, 25);
     } else if (b->num_workers <= 0) {
         window_building_draw_description_at(c, 72, 106, 10);
     } else if (c->worker_percentage >= 100) {
@@ -46,7 +50,7 @@ void window_building_draw_forum(building_info_context *c)
 
 void window_building_draw_senate(building_info_context *c)
 {
-    c->can_go_to_advisor = 1;
+    c->advisor_button = ADVISOR_RATINGS;
     c->help_id = 77;
     window_building_play_sound(c, "wavs/senate.wav");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
@@ -60,7 +64,7 @@ void window_building_draw_senate(building_info_context *c)
         c->x_offset + 44 + width, c->y_offset + 43, FONT_NORMAL_BLACK);
 
     if (!c->has_road_access) {
-        window_building_draw_description(c, 69, 25);
+        window_building_draw_description_at(c, 72, 69, 25);
     } else if (b->num_workers <= 0) {
         window_building_draw_description_at(c, 72, 106, 10);
     } else if (c->worker_percentage >= 100) {
@@ -78,8 +82,6 @@ void window_building_draw_senate(building_info_context *c)
     inner_panel_draw(c->x_offset + 16, c->y_offset + 136, c->width_blocks - 2, 4);
     window_building_draw_employment(c, 142);
     window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 144);
-
-    lang_text_draw(105, 3, c->x_offset + 60, c->y_offset + 220, FONT_NORMAL_BLACK);
 }
 
 void window_building_draw_governor_home(building_info_context *c)
@@ -104,7 +106,7 @@ void window_building_draw_garden(building_info_context *c)
 void window_building_draw_plaza(building_info_context *c)
 {
     c->help_id = 80;
-    window_building_play_sound(c, "wavs/plaza.wav");
+    window_building_play_sound(c, ASSETS_DIRECTORY "/Sounds/Road.ogg");
     window_building_prepare_figure_list(c);
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(137, 0, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
@@ -137,7 +139,11 @@ void window_building_draw_triumphal_arch(building_info_context* c)
     window_building_play_sound(c, "wavs/statue.wav");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(80, 2, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
-    window_building_draw_description_at(c, BLOCK_SIZE * c->height_blocks - 158, 80, 3);
+    window_building_draw_description_at(c, BLOCK_SIZE * c->height_blocks - 328, 80, 3);
+    image_draw(assets_get_image_id("UI", "Triumphal_Arch_Banner"),
+        c->x_offset + 37, c->y_offset + 125, COLOR_MASK_NONE, SCALE_NONE);
+    image_draw_border(assets_get_image_id("UI", "Large_Banner_Border"),
+        c->x_offset + 32, c->y_offset + 120 , COLOR_MASK_NONE);
 }
 
 void window_building_draw_pond(building_info_context * c)

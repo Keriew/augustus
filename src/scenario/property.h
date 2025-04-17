@@ -23,6 +23,8 @@ int scenario_is_tutorial_3(void);
 int scenario_starting_favor(void);
 int scenario_starting_personal_savings(void);
 
+void scenario_set_starting_personal_savings(int personal_savings);
+
 const uint8_t *scenario_name(void);
 void scenario_set_name(const uint8_t *name);
 
@@ -53,6 +55,8 @@ int scenario_property_enemy(void);
 
 int scenario_property_player_rank(void);
 
+int scenario_property_caesar_salary(void);
+
 int scenario_image_id(void);
 
 const uint8_t *scenario_brief_description(void);
@@ -62,5 +66,9 @@ int scenario_initial_funds(void);
 int scenario_rescue_loan(void);
 
 int scenario_intro_message(void);
+
+int scenario_victory_message(void);
+
+void scenario_change_climate(scenario_climate climate);
 
 #endif // SCENARIO_PROPERTY_H

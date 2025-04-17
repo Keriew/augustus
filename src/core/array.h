@@ -11,13 +11,23 @@
 #define array(T) \
 struct { \
     T **items; \
-    int size; \
-    int blocks; \
-    int block_offset; \
-    int bit_offset; \
-    void (*constructor)(T *, int); \
+    unsigned int size; \
+    unsigned int blocks; \
+    unsigned int block_offset; \
+    unsigned int bit_offset; \
+    void (*constructor)(T *, unsigned int); \
     int (*in_use)(const T *); \
 }
+
+/**
+ * Clears an array
+ * @param a The array structure
+ */
+#define array_clear(a) \
+( \
+    array_free((void **)(a).items, (a).blocks), \
+    memset(&(a), 0, sizeof(a)) \
+)
 
 /**
  * Initiates an array
@@ -35,8 +45,7 @@ struct { \
  */
 #define array_init(a, size, new_item_callback, in_use_callback) \
 ( \
-    array_free((void **)(a).items, (a).blocks), \
-    memset(&(a), 0, sizeof(a)), \
+    array_clear(a), \
     (a).constructor = new_item_callback, \
     (a).in_use = in_use_callback, \
     (a).block_offset = array_next_power_of_two(size) - 1, \
@@ -47,22 +56,14 @@ struct { \
 /**
  * Creates a new item for the array, either by finding an available empty item or by expanding the array.
  * @param a The array structure
- * @param index The index upon which to start searching for a free slot. If index is greater than the arrray size,
- *        the array will be expanded.
  * @param ptr A pointer that will get the new item. Will be null if there was a memory allocation error.
  */
-#define array_new_item(a, index, ptr) \
+#define array_new_item(a, ptr) \
 { \
     ptr = 0; \
     int error = 0; \
-    while ((a).size < index) { \
-        if (!array_advance(a)) { \
-            error = 1; \
-            break; \
-        } \
-    } \
-    if (!error && (a).in_use) { \
-        for (int array_index = index; array_index < (a).size; array_index++) { \
+    if ((a).in_use) { \
+        for (unsigned int array_index = 0; array_index < (a).size; array_index++) { \
             if (!(a).in_use(array_item(a, array_index))) { \
                 ptr = array_item(a, array_index); \
                 memset(ptr, 0, sizeof(**(a).items)); \
@@ -75,6 +76,59 @@ struct { \
     } \
     if (!error && !ptr) { \
         ptr = array_advance(a); \
+    } \
+}
+
+/**
+ * Creates a new item for the array, either by finding an available empty item or by expanding the array.
+ * @param a The array structure
+ * @param index The index upon which to start searching for a free slot. If index is greater than the array size,
+ *        the array will be expanded.
+ * @param ptr A pointer that will get the new item. Will be null if there was a memory allocation error.
+ */
+#define array_new_item_after_index(a, index, ptr) \
+{ \
+    ptr = 0; \
+    int error = 0; \
+    while (index > (a).size) { \
+        if (!array_advance(a)) { \
+            error = 1; \
+            break; \
+        } \
+    } \
+    if (!error && (a).in_use) { \
+        for (unsigned int array_index = index; array_index < (a).size; array_index++) { \
+            if (!(a).in_use(array_item(a, array_index))) { \
+                ptr = array_item(a, array_index); \
+                memset(ptr, 0, sizeof(**(a).items)); \
+                if ((a).constructor) { \
+                    (a).constructor(ptr, array_index); \
+                } \
+                break; \
+            } \
+        } \
+    } \
+    if (!error && !ptr) { \
+        ptr = array_advance(a); \
+    } \
+}
+
+/**
+ * Removes an item from an array, moving the other items left and calling their constructors if applicable
+ * @param a The array structure
+ * @param index The array index to remove
+ */
+#define array_remove_item(a, index) \
+{ \
+    for (unsigned int array_index = index; array_index + 1 < (a).size; array_index++) { \
+        memcpy(array_item(a, array_index), array_item(a, array_index + 1), sizeof(**(a).items)); \
+        if ((a).constructor && (!(a).in_use || (a).in_use(array_item(a, array_index)))) { \
+            (a).constructor(array_item(a, array_index), array_index); \
+        } \
+    } \
+    if (index < (a).size) { \
+        memset(array_item(a, (a).size - 1), 0, sizeof(**(a).items)); \
+        (a).size--; \
     } \
 }
 
@@ -124,7 +178,18 @@ struct { \
  * @note You can use the array_index parameter to retrieve the index of the current item
  */
 #define array_foreach(a, item) \
-    for(int array_index = 0; array_index < (a).size && ((item) = array_item(a, array_index)) != 0; array_index++)
+    for(unsigned int array_index = 0; array_index < (a).size && ((item) = array_item(a, array_index)) != 0; array_index++)
+
+/**
+ * Iterates through an array, calling the callback function for each item
+ * @param a The array structure
+ * @param callback The function callback to call for each item, in the format "callback(T *item, unsigned int array_index)"
+ * @note You can use the array_index parameter to retrieve the index of the current item
+ */
+#define array_foreach_callback(a, callback) \
+    for(unsigned int array_index = 0; array_index < (a).size && array_item(a, array_index) != 0; array_index++) { \
+        callback(array_item(a, array_index)); \
+    }
 
 /**
  * Trims an array, removing its latest items that aren't being used until the first one is used.
@@ -136,6 +201,39 @@ struct { \
     if ((a).size > 1 && (a).in_use) { \
         while ((a).size - 1 && !(a).in_use(array_item(a, (a).size - 1))) { \
             (a).size--; \
+        } \
+    } \
+}
+
+/**
+ * Packs an array, making all used elements of an array contiguous
+ * Moved elements call their constructors
+ * This function only does anything if the array has an in_use callback
+ * @param a The array structure
+ */
+#define array_pack(a) \
+{ \
+    if ((a).in_use) { \
+        unsigned int items_to_move = 0; \
+        for (unsigned int array_index = 0; array_index < (a).size; array_index++) { \
+            if (!(a).in_use(array_item(a, array_index))) { \
+                items_to_move++; \
+                continue; \
+            } \
+            if (!items_to_move) { \
+                continue; \
+            } \
+            unsigned int new_index = array_index - items_to_move; \
+            memcpy(array_item(a, new_index), array_item(a, array_index), sizeof(**(a).items)); \
+            if ((a).constructor) { \
+                (a).constructor(array_item(a, new_index), new_index); \
+            } \
+        } \
+        if (items_to_move) { \
+            for (unsigned int array_index = (a).size - items_to_move; array_index < (a).size; array_index++) { \
+                memset(array_item(a, array_index), 0, sizeof(**(a).items)); \
+            } \
+            (a).size -= items_to_move; \
         } \
     } \
 }
@@ -176,12 +274,12 @@ struct { \
 /**
  * This function is private and should not be used
  */
-int array_add_blocks(void ***data, int *blocks, int items_per_block, int item_size, int num_blocks);
+int array_add_blocks(void ***data, unsigned int *blocks, unsigned int items_per_block, unsigned int item_size, unsigned int num_blocks);
 
 /**
  * This function is private and should not be used
  */
-void array_free(void **data, int blocks);
+void array_free(void **data, unsigned int blocks);
 
 /**
  * Private helper compile-time functions for finding the next power of two into which a number fits

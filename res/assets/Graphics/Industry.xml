@@ -3,29 +3,29 @@
 <!-- Unless specifically mentioned, all assets created by Areldir -->
 <assetlist name="Industry">
 	<!-- Note: Brickworks ON animation reference DO NOT USE! -->
-	<image id="Brickworks_On_01" width="86" height="26">
+	<image id="Brickworks_On_01" width="84" height="29">
 		<layer src="Brickworks_ON_Static" x="0" y="0"/>
-		<layer src="Brickworks_ON_01" x="69" y="0"/>
+		<layer src="Brickworks_ON_01" x="67" y="0"/>
 	</image>
-	<image id="Brickworks_On_02" width="86" height="26">
+	<image id="Brickworks_On_02" width="84" height="29">
 		<layer src="Brickworks_ON_Static" x="0" y="0"/>
-		<layer src="Brickworks_ON_02" x="69" y="0"/>
+		<layer src="Brickworks_ON_02" x="67" y="0"/>
 	</image>
-	<image id="Brickworks_On_03" width="86" height="26">
+	<image id="Brickworks_On_03" width="84" height="29">
 		<layer src="Brickworks_ON_Static" x="0" y="0"/>
-		<layer src="Brickworks_ON_03" x="69" y="0"/>
+		<layer src="Brickworks_ON_03" x="67" y="0"/>
 	</image>
-	<image id="Brickworks_On_04" width="86" height="26">
+	<image id="Brickworks_On_04" width="84" height="29">
 		<layer src="Brickworks_ON_Static" x="0" y="0"/>
-		<layer src="Brickworks_ON_04" x="69" y="0"/>
+		<layer src="Brickworks_ON_04" x="67" y="0"/>
 	</image>
-	<image id="Brickworks_On_05" width="86" height="26">
+	<image id="Brickworks_On_05" width="84" height="29">
 		<layer src="Brickworks_ON_Static" x="0" y="0"/>
-		<layer src="Brickworks_ON_05" x="69" y="0"/>
+		<layer src="Brickworks_ON_05" x="67" y="0"/>
 	</image>
-	<image id="Brickworks_On_06" width="86" height="26">
+	<image id="Brickworks_On_06" width="84" height="29">
 		<layer src="Brickworks_ON_Static" x="0" y="0"/>
-		<layer src="Brickworks_ON_06" x="69" y="0"/>
+		<layer src="Brickworks_ON_06" x="67" y="0"/>
 	</image>
 	<!-- Note: Brickworks OFF Variant -->
 	<image id="Brickworks_C_OFF" src="Brickworks_c_OFF" width="118" height="80" isometric="true"/>
@@ -40,7 +40,7 @@
 	<!-- Note: Brickworks ON Variant -->
 	<image id="Brickworks_C_ON" width="118" height="80" isometric="true">
 		<layer group="this" image="Brickworks_C_OFF"/>
-		<animation speed="6" x="10" y="35" reversible="false">
+		<animation speed="6" x="11" y="34" reversible="false">
 			<frame group="this" image="Brickworks_On_01"/>
 			<frame group="this" image="Brickworks_On_02"/>
 			<frame group="this" image="Brickworks_On_03"/>
@@ -51,7 +51,7 @@
 	</image>
 	<image id="Brickworks_N_ON" width="118" height="80" isometric="true">
 		<layer group="this" image="Brickworks_N_OFF"/>
-		<animation speed="6" x="10" y="35" reversible="false">
+		<animation speed="6" x="11" y="34" reversible="false">
 			<frame group="this" image="Brickworks_On_01"/>
 			<frame group="this" image="Brickworks_On_02"/>
 			<frame group="this" image="Brickworks_On_03"/>
@@ -62,7 +62,7 @@
 	</image>
 	<image id="Brickworks_S_ON" width="118" height="80" isometric="true">
 		<layer group="this" image="Brickworks_S_OFF"/>
-		<animation speed="6" x="10" y="35" reversible="false">
+		<animation speed="6" x="11" y="34" reversible="false">
 			<frame group="this" image="Brickworks_On_01"/>
 			<frame group="this" image="Brickworks_On_02"/>
 			<frame group="this" image="Brickworks_On_03"/>
@@ -138,20 +138,20 @@
 		<layer src="Brick_Cart_Getting_N" x="0" y="0"/>
 	</image>
 	<!-- Note: Bricks Warehouse Tiles -->
-	<image id="Warehouse_Bricks_01" width="58" height="46" isometric="true">
-		<layer group="83" image="0" x="0" y="5"/>
-		<layer src="Warehouse_Bricks_01" x="27" y="12"/>
+	<image id="Warehouse_Bricks_01" width="58" height="49" isometric="true">
+		<layer group="83" image="0" x="0" y="8"/>
+		<layer src="Warehouse_Bricks_01" x="26" y="12"/>
 	</image>
-	<image id="Warehouse_Bricks_02" width="58" height="46" isometric="true">
-		<layer group="83" image="0" x="0" y="5"/>
-		<layer src="Warehouse_Bricks_02" x="14" y="0"/>
+	<image id="Warehouse_Bricks_02" width="58" height="49" isometric="true">
+		<layer group="83" image="0" x="0" y="8"/>
+		<layer src="Warehouse_Bricks_02" x="13" y="0"/>
 	</image>
-	<image id="Warehouse_Bricks_03" width="58" height="46" isometric="true">
-		<layer group="83" image="0" x="0" y="5"/>
+	<image id="Warehouse_Bricks_03" width="58" height="49" isometric="true">
+		<layer group="83" image="0" x="0" y="8"/>
 		<layer src="Warehouse_Bricks_03" x="3" y="0"/>
 	</image>
-	<image id="Warehouse_Bricks_04" width="58" height="46" isometric="true">
-		<layer group="83" image="0" x="0" y="5"/>
+	<image id="Warehouse_Bricks_04" width="58" height="49" isometric="true">
+		<layer group="83" image="0" x="0" y="8"/>
 		<layer src="Warehouse_Bricks_04" x="3" y="0"/>
 	</image>
 	<!-- Note: Concrete Maker OFF Variant -->
@@ -269,10 +269,12 @@
 		<layer src="Gold_Mine_C_OFF" x="0" y="0"/>
 	</image>
 	<image id="Gold_Mine_N_OFF" width="118" height="67" isometric="true">
-		<layer src="Gold_Mine_N_OFF" x="0" y="0"/>
+		<layer src="Gold_Mine_C_OFF" x="0" y="0"/>
+		<layer src="Gold_Mine_N_OFF" x="0" y="22"/>
 	</image>
 	<image id="Gold_Mine_S_OFF" width="118" height="67" isometric="true">
-		<layer src="Gold_Mine_S_OFF" x="0" y="0"/>
+		<layer src="Gold_Mine_C_OFF" x="0" y="0"/>
+		<layer src="Gold_Mine_S_OFF" x="0" y="22"/>
 	</image>
 	<!-- Note: Gold Mine ON - Climate Variants -->
 	<image id="Gold_Mine_C_ON" width="118" height="67" isometric="true">
@@ -391,8 +393,14 @@
 	<!-- Assets created by Areldir, with tweaks from Ouaz -->
 	<!-- Note: Sand Pit OFF - Climate Variants -->
 	<image id="Sand_Pit_C_OFF" src="Sand_Pit_C_OFF" width="118" height="60" isometric="true"/>
-	<image id="Sand_Pit_N_OFF" src="Sand_Pit_N_OFF" width="118" height="60" isometric="true"/>
-	<image id="Sand_Pit_S_OFF" src="Sand_Pit_S_OFF" width="118" height="60" isometric="true"/>
+	<image id="Sand_Pit_N_OFF" width="118" height="60" isometric="true">
+		<layer group="this" image="Sand_Pit_C_OFF"/>
+		<layer src="Sand_Pit_N_OFF"/>
+	</image>
+	<image id="Sand_Pit_S_OFF" width="118" height="60" isometric="true">
+		<layer group="this" image="Sand_Pit_C_OFF"/>
+		<layer src="Sand_Pit_S_OFF"/>
+	</image>
 	<!-- Assets created by Areldir -->
 	<!-- Note: Sand Pit ON - Climate Variants -->
 	<image id="Sand_Pit_C_ON" width="118" height="60" isometric="true">
@@ -514,7 +522,7 @@
 	<!-- Note: Sand Overlay for Supplied Workshop -->
 	<image id="Sand_Supplied_Workshop" src="Sand_Supplied_Workshop" width="25" height="21"/>
 	<!-- Note: Silver Cart -->
-	<image id="Silver_Cart_NE" width="39" height="39">
+	<!--image id="Silver_Cart_NE" width="39" height="39">
 		<layer group="97" image="0" x="0" y="0"/>
 		<layer src="Silver_Cart_NE" x="0" y="0"/>
 	</image>
@@ -545,9 +553,9 @@
 	<image id="Silver_Cart_N" width="39" height="39">
 		<layer group="97" image="7" x="0" y="0"/>
 		<layer src="Silver_Cart_N" x="0" y="0"/>
-	</image>
+	</image-->
 	<!-- Note: Silver Getting Cart -->
-	<image id="Silver_Cart_Getting_NE" width="39" height="39">
+	<!--image id="Silver_Cart_Getting_NE" width="39" height="39">
 		<layer group="97" image="0" x="0" y="0"/>
 		<layer src="Silver_Cart_Getting_NE" x="15" y="4"/>
 	</image>
@@ -578,9 +586,9 @@
 	<image id="Silver_Cart_Getting_N" width="39" height="39">
 		<layer group="97" image="7" x="0" y="0"/>
 		<layer src="Silver_Cart_Getting_N" x="15" y="4"/>
-	</image>
+	</image-->
 	<!-- Note: Silver Warehouse Tiles -->
-	<image id="Warehouse_Silver_01" isometric="true">
+	<!--image id="Warehouse_Silver_01" isometric="true">
 		<layer group="83" image="0" x="0" y="0"/>
 		<layer src="Warehouse_Silver_01" x="20" y="14"/>
 	</image>
@@ -595,11 +603,17 @@
 	<image id="Warehouse_Silver_04" isometric="true">
 		<layer group="83" image="0" x="0" y="0"/>
 		<layer src="Warehouse_Silver_04" x="9" y="1"/>
-	</image>
+	</image-->
 	<!-- Note: Plain Stone Quarry OFF - Climate Variants -->
 	<image id="Stone_Quarry_C_OFF" src="Stone_Quarry_C_OFF" width="118" height="60" isometric="true"/>
-	<image id="Stone_Quarry_N_OFF" src="Stone_Quarry_N_OFF" width="118" height="60" isometric="true"/>
-	<image id="Stone_Quarry_S_OFF" src="Stone_Quarry_S_OFF" width="118" height="60" isometric="true"/>
+	<image id="Stone_Quarry_N_OFF" width="118" height="60" isometric="true">
+		<layer group="this" image="Stone_Quarry_C_OFF"/>
+		<layer src="Stone_Quarry_N_OFF"/>
+	</image>
+	<image id="Stone_Quarry_S_OFF" width="118" height="60" isometric="true">
+		<layer group="this" image="Stone_Quarry_C_OFF"/>
+		<layer src="Stone_Quarry_S_OFF"/>
+	</image>
 	<!-- Note: Plain Stone Quarry ON animation reference DO NOT USE! -->
 	<image id="Stone_Quarry_ON_01" width="48" height="49">
 		<layer src="Stone_Quarry_ON_Base" x="0" y="0"/>
@@ -750,10 +764,10 @@
 		<layer src="Warehouse_Stone_04" x="4" y="0"/>
 	</image>
 	<!-- Note: Smoke Animation Frames -->
-	<image src="Smoke_Anim_01" id="Smoke_Anim"/>
+	<!--image src="Smoke_Anim_01" id="Smoke_Anim"/>
 	<image src="Smoke_Anim_02"/>
 	<image src="Smoke_Anim_03"/>
 	<image src="Smoke_Anim_04"/>
 	<image src="Smoke_Anim_05"/>
-	<image src="Smoke_Anim_06"/>
+	<image src="Smoke_Anim_06"/-->
 </assetlist>

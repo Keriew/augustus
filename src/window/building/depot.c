@@ -8,6 +8,7 @@
 #include "city/resource.h"
 #include "city/view.h"
 #include "figure/figure.h"
+#include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
@@ -19,13 +20,13 @@
 #include "translation/translation.h"
 #include "window/building_info.h"
 
-static void order_set_source(int param1, int param2);
-static void order_set_destination(int param1, int param2);
-static void order_set_resource(int param1, int param2);
-static void order_set_condition_type(int param1, int param2);
-static void order_set_condition_threshold(int param1, int param2);
-static void set_order_resource(int depot_building_id, int resource_id);
-static void set_camera_position(int building_id, int param2);
+static void order_set_source(const generic_button *button);
+static void order_set_destination(const generic_button *button);
+static void order_set_resource(const generic_button *button);
+static void order_set_condition_type(const generic_button *button);
+static void order_set_condition_threshold(const generic_button *button);
+static void set_order_resource(const generic_button *button);
+static void set_camera_position(const generic_button *button);
 
 #define DEPOT_BUTTONS_X_OFFSET 32
 #define DEPOT_BUTTONS_Y_OFFSET 204
@@ -36,14 +37,14 @@ static void set_camera_position(int building_id, int param2);
 #define MAX_RESOURCE_ROWS 24
 
 static struct {
-    int focus_button_id;
-    int orders_focus_button_id;
-    int resource_focus_button_id;
-    int storage_building_focus_button_id;
-    int storage_building_view_focus_button_id;
-    int depot_resource_focus_button_id;
+    unsigned int focus_button_id;
+    unsigned int orders_focus_button_id;
+    unsigned int resource_focus_button_id;
+    unsigned int storage_building_focus_button_id;
+    unsigned int storage_building_view_focus_button_id;
+    unsigned int depot_resource_focus_button_id;
     int depot_building_id;
-    int available_storages;
+    unsigned int available_storages;
     resource_type target_resource_id;
     pixel_area window_area;
 } data;
@@ -52,82 +53,67 @@ static void on_scroll(void);
 static scrollbar_type scrollbar = { 0, 0, ROW_HEIGHT * MAX_VISIBLE_ROWS, 432, MAX_VISIBLE_ROWS, on_scroll, 0, 4 };
 
 // field values will be overwritten in window_building_draw_depot_select_source_destination
-static generic_button depot_select_storage_buttons[] = {
-    {0, 0, 0, ROW_HEIGHT, button_none, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, button_none, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, button_none, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, button_none, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, button_none, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, button_none, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, button_none, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, button_none, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, button_none, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, button_none, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, button_none, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, button_none, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, button_none, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, button_none, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, button_none, button_none, 0, 0},
-};
+static generic_button depot_select_storage_buttons[MAX_VISIBLE_ROWS];
 
 static generic_button depot_view_storage_buttons[] = {
-    {0, 0, 0, ROW_HEIGHT, set_camera_position, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, set_camera_position, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, set_camera_position, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, set_camera_position, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, set_camera_position, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, set_camera_position, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, set_camera_position, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, set_camera_position, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, set_camera_position, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, set_camera_position, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, set_camera_position, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, set_camera_position, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, set_camera_position, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, set_camera_position, button_none, 0, 0},
-    {0, 0, 0, ROW_HEIGHT, set_camera_position, button_none, 0, 0},
+    {0, 0, 0, ROW_HEIGHT, set_camera_position},
+    {0, 0, 0, ROW_HEIGHT, set_camera_position},
+    {0, 0, 0, ROW_HEIGHT, set_camera_position},
+    {0, 0, 0, ROW_HEIGHT, set_camera_position},
+    {0, 0, 0, ROW_HEIGHT, set_camera_position},
+    {0, 0, 0, ROW_HEIGHT, set_camera_position},
+    {0, 0, 0, ROW_HEIGHT, set_camera_position},
+    {0, 0, 0, ROW_HEIGHT, set_camera_position},
+    {0, 0, 0, ROW_HEIGHT, set_camera_position},
+    {0, 0, 0, ROW_HEIGHT, set_camera_position},
+    {0, 0, 0, ROW_HEIGHT, set_camera_position},
+    {0, 0, 0, ROW_HEIGHT, set_camera_position},
+    {0, 0, 0, ROW_HEIGHT, set_camera_position},
+    {0, 0, 0, ROW_HEIGHT, set_camera_position},
+    {0, 0, 0, ROW_HEIGHT, set_camera_position},
 };
 
 static generic_button depot_select_resource_buttons[] = {
-    {18, 0, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18 + ROW_WIDTH_RESOURCE, 0, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18, ROW_HEIGHT_RESOURCE * 1, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 1, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18, ROW_HEIGHT_RESOURCE * 2, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 2, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18, ROW_HEIGHT_RESOURCE * 3, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 3, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18, ROW_HEIGHT_RESOURCE * 4, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 4, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18, ROW_HEIGHT_RESOURCE * 5, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 5, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18, ROW_HEIGHT_RESOURCE * 6, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 6, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18, ROW_HEIGHT_RESOURCE * 7, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 7, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18, ROW_HEIGHT_RESOURCE * 8, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 8, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18, ROW_HEIGHT_RESOURCE * 9, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 9, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18, ROW_HEIGHT_RESOURCE * 10, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 10, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18, ROW_HEIGHT_RESOURCE * 11, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
-    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 11, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource, button_none, 0, 0},
+    {18, 0, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18 + ROW_WIDTH_RESOURCE, 0, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18, ROW_HEIGHT_RESOURCE * 1, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 1, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18, ROW_HEIGHT_RESOURCE * 2, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 2, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18, ROW_HEIGHT_RESOURCE * 3, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 3, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18, ROW_HEIGHT_RESOURCE * 4, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 4, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18, ROW_HEIGHT_RESOURCE * 5, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 5, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18, ROW_HEIGHT_RESOURCE * 6, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 6, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18, ROW_HEIGHT_RESOURCE * 7, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 7, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18, ROW_HEIGHT_RESOURCE * 8, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 8, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18, ROW_HEIGHT_RESOURCE * 9, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 9, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18, ROW_HEIGHT_RESOURCE * 10, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 10, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18, ROW_HEIGHT_RESOURCE * 11, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
+    {18 + ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE * 11, ROW_WIDTH_RESOURCE, ROW_HEIGHT_RESOURCE, set_order_resource},
 };
 
 static generic_button depot_order_buttons[] = {
-    {100, 0, 284, 26, order_set_resource, button_none, 1, 0},
-    {100, 56, 284, 22, order_set_source, button_none, 2, 0},
-    {100, 82, 284, 22, order_set_destination, button_none, 3, 0},
-    {100, 30, 284, 22, order_set_condition_type, button_none, 4, 0},
-    {384, 30, 32, 22, order_set_condition_threshold, button_none, 5, 0},
-    {384, 56, 32, 22, set_camera_position, button_none, 0, 0},
-    {384, 82, 32, 22, set_camera_position, button_none, 0, 0},
+    {100, 0, 284, 26, order_set_resource, 0, 1},
+    {100, 56, 284, 22, order_set_source, 0, 2},
+    {100, 82, 284, 22, order_set_destination, 0, 3},
+    {100, 30, 284, 22, order_set_condition_type, 0, 4},
+    {384, 30, 32, 22, order_set_condition_threshold, 0, 5},
+    {384, 56, 32, 22, set_camera_position},
+    {384, 82, 32, 22, set_camera_position},
 };
 
 static void setup_buttons_for_selected_depot(void)
 {
     for (int i = 0; i < MAX_VISIBLE_ROWS; i++) {
+        depot_select_storage_buttons[i].height = ROW_HEIGHT;
         depot_select_storage_buttons[i].parameter1 = data.depot_building_id;
         depot_select_storage_buttons[i].parameter2 = 0;
         depot_view_storage_buttons[i].parameter1 = 0;
@@ -135,7 +121,7 @@ static void setup_buttons_for_selected_depot(void)
 
     int button_index = 0;
     int storage_array_size = building_storage_get_array_size();
-    int current_storage_offset = 0;
+    unsigned int current_storage_offset = 0;
     for (int i = 0; i < storage_array_size; i++) {
         if (current_storage_offset >= data.available_storages || button_index >= MAX_VISIBLE_ROWS) {
             break;
@@ -229,13 +215,15 @@ static void on_scroll(void)
 
 void window_building_draw_depot(building_info_context *c)
 {
+    c->advisor_button = ADVISOR_TRADE;
+    window_building_play_sound(c, "wavs/granary2.wav");
     setup_buttons_for_selected_depot();
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     inner_panel_draw(c->x_offset + 16, c->y_offset + 136, c->width_blocks - 2, 4);
     window_building_draw_employment(c, 138);
     window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 144);
     const building *b = building_get(data.depot_building_id);
-    translation_key depot_name_key = b->num_workers <= 0 && b->has_road_access ?
+    translation_key depot_name_key = b->num_workers <= 0 && c->has_road_access ?
         TR_BUILDING_CAT_DEPOT : TR_BUILDING_DEPOT;
     text_draw_centered(translation_for(depot_name_key),
         c->x_offset, c->y_offset + 12, 16 * c->width_blocks, FONT_LARGE_BLACK, 0);
@@ -251,7 +239,7 @@ void window_building_draw_depot_foreground(building_info_context *c)
     building *src = building_get(b->data.depot.current_order.src_storage_id);
     building *dst = building_get(b->data.depot.current_order.dst_storage_id);
 
-    if (!b->has_road_access) {
+    if (!c->has_road_access) {
         window_building_draw_description(c, 69, 25);
     } else if (b->num_workers <= 0) {
         window_building_draw_description(c, CUSTOM_TRANSLATION, TR_BUILDING_DEPOT_NO_EMPLOYEES);
@@ -271,7 +259,7 @@ void window_building_draw_depot_foreground(building_info_context *c)
     int x_offset = c->x_offset + DEPOT_BUTTONS_X_OFFSET;
     int y_offset = c->y_offset + DEPOT_BUTTONS_Y_OFFSET;
 
-    text_draw(translation_for(TR_FIGURE_INFO_DEPOT_DELIVER), x_offset, y_offset + 8, FONT_SMALL_PLAIN, 0);
+    text_draw(translation_for(TR_FIGURE_INFO_DEPOT_DELIVER), x_offset, y_offset + 8, FONT_NORMAL_BLACK, 0);
     depot_order_buttons[0].x = 100;
     int image_id = resource_get_data(resource)->image.icon;
     const image *img = image_get(image_id);
@@ -282,32 +270,32 @@ void window_building_draw_depot_foreground(building_info_context *c)
         y_offset + depot_order_buttons[0].y + (26 - img->original.height) / 2, COLOR_MASK_NONE, SCALE_NONE);
     text_draw_centered(resource_get_data(resource)->text,
         x_offset + depot_order_buttons[0].x, y_offset + depot_order_buttons[0].y + 8, depot_order_buttons[0].width,
-        FONT_SMALL_PLAIN, 0);
+        FONT_NORMAL_BLACK, 0);
     image_draw(image_id,
         x_offset + depot_order_buttons[0].x + depot_order_buttons[0].width - 26 + (26 - img->original.width) / 2,
         y_offset + depot_order_buttons[0].y + (26 - img->original.height) / 2, COLOR_MASK_NONE, SCALE_NONE);
 
     order_condition_type condition_type = b->data.depot.current_order.condition.condition_type;
-    text_draw(translation_for(TR_BUILDING_INFO_DEPOT_CONDITION), x_offset, y_offset + depot_order_buttons[3].y + 6, FONT_SMALL_PLAIN, 0);
+    text_draw(translation_for(TR_BUILDING_INFO_DEPOT_CONDITION), x_offset, y_offset + depot_order_buttons[3].y + 6, FONT_NORMAL_BLACK, 0);
     button_border_draw(x_offset + depot_order_buttons[3].x, y_offset + depot_order_buttons[3].y,
         depot_order_buttons[3].width, depot_order_buttons[3].height, data.focus_button_id == 4);
     text_draw_centered(translation_for(TR_ORDER_CONDITION_NEVER + condition_type),
-        x_offset + depot_order_buttons[3].x, y_offset + depot_order_buttons[3].y + 6, depot_order_buttons[3].width, FONT_SMALL_PLAIN, 0);
+        x_offset + depot_order_buttons[3].x, y_offset + depot_order_buttons[3].y + 6, depot_order_buttons[3].width, FONT_NORMAL_BLACK, 0);
     if (condition_type != ORDER_CONDITION_ALWAYS && condition_type != ORDER_CONDITION_NEVER) {
         button_border_draw(x_offset + depot_order_buttons[4].x, y_offset + depot_order_buttons[4].y,
             depot_order_buttons[4].width, depot_order_buttons[4].height, data.focus_button_id == 5);
         text_draw_number_centered(b->data.depot.current_order.condition.threshold,
-            x_offset + depot_order_buttons[4].x, y_offset + depot_order_buttons[4].y + 6, depot_order_buttons[4].width, FONT_SMALL_PLAIN);
+            x_offset + depot_order_buttons[4].x, y_offset + depot_order_buttons[4].y + 6, depot_order_buttons[4].width, FONT_NORMAL_BLACK);
     }
 
-    text_draw(translation_for(TR_BUILDING_INFO_DEPOT_SOURCE), x_offset, y_offset + depot_order_buttons[1].y + 6, FONT_SMALL_PLAIN, 0);
+    text_draw(translation_for(TR_BUILDING_INFO_DEPOT_SOURCE), x_offset, y_offset + depot_order_buttons[1].y + 6, FONT_NORMAL_BLACK, 0);
     button_border_draw(x_offset + depot_order_buttons[1].x, y_offset + depot_order_buttons[1].y,
         depot_order_buttons[1].width, depot_order_buttons[1].height,
         data.focus_button_id == 2 && data.available_storages > 1);
     if (src->storage_id) {
         text_draw_label_and_number_centered(lang_get_string(28, src->type),
             src->storage_id, "", x_offset + depot_order_buttons[1].x, y_offset + depot_order_buttons[1].y + 6,
-            depot_order_buttons[1].width, FONT_SMALL_PLAIN, 0);
+            depot_order_buttons[1].width, FONT_NORMAL_BLACK, 0);
         button_border_draw(x_offset + depot_order_buttons[5].x, y_offset + depot_order_buttons[5].y,
             depot_order_buttons[5].width, depot_order_buttons[5].height, data.focus_button_id == 6);
         image_draw(assets_lookup_image_id(ASSET_CENTER_CAMERA_ON_BUILDING), x_offset + depot_order_buttons[5].x + 3,
@@ -316,23 +304,23 @@ void window_building_draw_depot_foreground(building_info_context *c)
     } else if (data.available_storages > 1) {
         lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_INFO_DEPOT_SELECT_SOURCE,
             x_offset + depot_order_buttons[1].x, y_offset + depot_order_buttons[1].y + 6,
-            depot_order_buttons[1].width, FONT_SMALL_PLAIN);
+            depot_order_buttons[1].width, FONT_NORMAL_BLACK);
     } else {
         translation_key translation = data.available_storages == 1 ? TR_BUILDING_INFO_DEPOT_ONE_BUILDING_FOR_RESOURCE :
             TR_BUILDING_INFO_DEPOT_NO_SOURCE_AVAILABLE;
         text_draw_centered(lang_get_string(CUSTOM_TRANSLATION, translation),
             x_offset + depot_order_buttons[1].x, y_offset + depot_order_buttons[1].y + 6,
-            depot_order_buttons[1].width, FONT_SMALL_PLAIN, COLOR_FONT_GRAY);
+            depot_order_buttons[1].width, FONT_NORMAL_PLAIN, COLOR_FONT_GRAY);
     }
 
-    text_draw(translation_for(TR_BUILDING_INFO_DEPOT_DESTINATION), x_offset, y_offset + depot_order_buttons[2].y + 6, FONT_SMALL_PLAIN, 0);
+    text_draw(translation_for(TR_BUILDING_INFO_DEPOT_DESTINATION), x_offset, y_offset + depot_order_buttons[2].y + 6, FONT_NORMAL_BLACK, 0);
     button_border_draw(x_offset + depot_order_buttons[2].x, y_offset + depot_order_buttons[2].y,
         depot_order_buttons[2].width, depot_order_buttons[2].height,
         data.focus_button_id == 3 && data.available_storages > 1);
     if (dst->storage_id) {
         text_draw_label_and_number_centered(lang_get_string(28, dst->type),
             dst->storage_id, "", x_offset + depot_order_buttons[2].x, y_offset + depot_order_buttons[2].y + 6,
-            depot_order_buttons[2].width, FONT_SMALL_PLAIN, 0);
+            depot_order_buttons[2].width, FONT_NORMAL_BLACK, 0);
         button_border_draw(x_offset + depot_order_buttons[6].x, y_offset + depot_order_buttons[6].y,
             depot_order_buttons[6].width, depot_order_buttons[6].height, data.focus_button_id == 7);
         image_draw(assets_lookup_image_id(ASSET_CENTER_CAMERA_ON_BUILDING), x_offset + depot_order_buttons[6].x + 3,
@@ -341,13 +329,13 @@ void window_building_draw_depot_foreground(building_info_context *c)
     } else if (data.available_storages > 1) {
         lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_INFO_DEPOT_SELECT_DESTINATION,
             x_offset + depot_order_buttons[2].x, y_offset + depot_order_buttons[2].y + 6,
-            depot_order_buttons[2].width, FONT_SMALL_PLAIN);
+            depot_order_buttons[2].width, FONT_NORMAL_BLACK);
     } else {
         translation_key translation = data.available_storages == 1 ? TR_BUILDING_INFO_DEPOT_ONE_BUILDING_FOR_RESOURCE :
             TR_BUILDING_INFO_DEPOT_NO_DESTINATION_AVAILABLE;
         text_draw_centered(lang_get_string(CUSTOM_TRANSLATION, translation),
             x_offset + depot_order_buttons[2].x, y_offset + depot_order_buttons[2].y + 6,
-            depot_order_buttons[1].width, FONT_SMALL_PLAIN, COLOR_FONT_GRAY);
+            depot_order_buttons[1].width, FONT_NORMAL_PLAIN, COLOR_FONT_GRAY);
     }
 }
 
@@ -357,26 +345,26 @@ int window_building_handle_mouse_depot(const mouse *m, building_info_context *c)
         depot_order_buttons, 7, &data.focus_button_id);
 }
 
-static void order_set_source(int param1, int param2)
+static void order_set_source(const generic_button *button)
 {
     if (data.available_storages > 1) {
         window_building_info_depot_select_source();
     }
 }
 
-static void order_set_destination(int param1, int param2)
+static void order_set_destination(const generic_button *button)
 {
     if (data.available_storages > 1) {
         window_building_info_depot_select_destination();
     }
 }
 
-static void order_set_condition_type(int param1, int param2)
+static void order_set_condition_type(const generic_button *button)
 {
     window_building_info_depot_toggle_condition_type();
 }
 
-static void order_set_condition_threshold(int param1, int param2)
+static void order_set_condition_threshold(const generic_button *button)
 {
     window_building_info_depot_toggle_condition_threshold();
 }
@@ -385,7 +373,7 @@ void window_building_draw_depot_order_source_destination_background(building_inf
 {
     setup_buttons_for_selected_depot();
 
-    uint8_t *title = translation_for(TR_BUILDING_INFO_DEPOT_SELECT_SOURCE_TITLE);
+    const uint8_t *title = translation_for(TR_BUILDING_INFO_DEPOT_SELECT_SOURCE_TITLE);
     if (is_select_destination) {
         title = translation_for(TR_BUILDING_INFO_DEPOT_SELECT_DESTINATION_TITLE);
     }
@@ -408,7 +396,7 @@ void window_building_draw_depot_select_source_destination(building_info_context 
     scrollbar.y = y_offset + 46;
     scrollbar_draw(&scrollbar);
 
-    int index = 0;
+    unsigned int index = 0;
     int base_width = BLOCK_SIZE * (c->width_blocks - 4) - 4 - (scrollbar.max_scroll_position > 0 ? 39 : 0);
 
     for (index = 0; index < MAX_VISIBLE_ROWS; index++) {
@@ -423,15 +411,16 @@ void window_building_draw_depot_select_source_destination(building_info_context 
             image_draw(assets_lookup_image_id(ASSET_CENTER_CAMERA_ON_BUILDING),
                 c->x_offset + 21 + base_width, y_offset + 49 + ROW_HEIGHT * index, COLOR_MASK_NONE, SCALE_NONE);
             text_draw_label_and_number_centered(lang_get_string(28, bld->type), bld->storage_id, "",
-                c->x_offset + 33, y_offset + 53 + ROW_HEIGHT * index, base_width, FONT_SMALL_PLAIN, COLOR_FONT_PLAIN);
-            text_draw_label_and_number_centered(lang_get_string(28, bld->type), bld->storage_id, "",
-                c->x_offset + 32, y_offset + 52 + ROW_HEIGHT * index, base_width, FONT_SMALL_PLAIN, COLOR_WHITE);
+                c->x_offset + 32, y_offset + 52 + ROW_HEIGHT * index, base_width, FONT_NORMAL_WHITE, 0);
         }
     }
 }
 
-static void set_order_source(int depot_building_id, int building_id)
+static void set_order_source(const generic_button *button)
 {
+    int depot_building_id = button->parameter1;
+    int building_id = button->parameter2;
+
     if (!building_id) {
         return;
     }
@@ -443,8 +432,11 @@ static void set_order_source(int depot_building_id, int building_id)
     window_building_info_depot_return_to_main_window();
 }
 
-static void set_order_destination(int depot_building_id, int building_id)
+static void set_order_destination(const generic_button *button)
 {
+    int depot_building_id = button->parameter1;
+    int building_id = button->parameter2;
+
     if (!building_id) {
         return;
     }
@@ -456,8 +448,9 @@ static void set_order_destination(int depot_building_id, int building_id)
     window_building_info_depot_return_to_main_window();
 }
 
-static void set_camera_position(int building_id, int param2)
+static void set_camera_position(const generic_button *button)
 {
+    int building_id = button->parameter1;
     const building *b = building_get(building_id);
     if (!b || b->id == 0) {
         return;
@@ -503,7 +496,7 @@ int window_building_handle_mouse_depot_select_destination(const mouse *m, buildi
     return handle_mouse_depot_select_source_destination(m, c, 0);
 }
 
-static void order_set_resource(int param1, int param2)
+static void order_set_resource(const generic_button *button)
 {
     window_building_info_depot_select_resource();
 }
@@ -531,8 +524,10 @@ void window_building_depot_get_tooltip_source_destination(int *translation)
     }
 }
 
-static void set_order_resource(int depot_building_id, int resource_id)
+static void set_order_resource(const generic_button *button)
 {
+    int depot_building_id = button->parameter1;
+    resource_type resource_id = button->parameter2;
     if (resource_id >= RESOURCE_MIN && resource_id < RESOURCE_MAX && resource_is_storable(resource_id)) {
         building *b = building_get(depot_building_id);
         b->data.depot.current_order.resource_type = resource_id;
@@ -568,9 +563,9 @@ void window_building_draw_depot_select_resource_foreground(building_info_context
     }
 
     const resource_list *list = city_resource_get_potential();
-    int list_index = scrollbar.scroll_position * 2; // Two items per scroll bar step
+    unsigned int list_index = scrollbar.scroll_position * 2; // Two items per scroll bar step
 
-    for (int i = 0; i < MAX_RESOURCE_ROWS && list_index < list->size; i++, list_index++) {
+    for (unsigned int i = 0; i < MAX_RESOURCE_ROWS && list_index < list->size; i++, list_index++) {
         resource_type resource_id = list->items[list_index];
         int image_id = resource_get_data(resource_id)->image.icon;
         const uint8_t *str = resource_get_data(resource_id)->text;
@@ -581,10 +576,8 @@ void window_building_draw_depot_select_resource_foreground(building_info_context
             data.depot_resource_focus_button_id == i + 1);
         image_draw(image_id, c->x_offset + depot_select_resource_buttons[i].x + 3,
             y_offset + 46 + depot_select_resource_buttons[i].y + 3, COLOR_MASK_NONE, SCALE_NONE);
-        text_draw(str, c->x_offset + depot_select_resource_buttons[i].x + 34,
-            y_offset + 46 + depot_select_resource_buttons[i].y + 11, FONT_SMALL_PLAIN, COLOR_FONT_PLAIN);
         text_draw(str, c->x_offset + depot_select_resource_buttons[i].x + 33,
-            y_offset + 46 + depot_select_resource_buttons[i].y + 10, FONT_SMALL_PLAIN, COLOR_WHITE);
+            y_offset + 46 + depot_select_resource_buttons[i].y + 8, FONT_NORMAL_WHITE, 0);
     }
 }
 

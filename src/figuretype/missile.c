@@ -1,5 +1,6 @@
 #include "missile.h"
 
+#include "assets/assets.h"
 #include "city/view.h"
 #include "core/image.h"
 #include "figure/formation.h"
@@ -50,16 +51,17 @@ void figure_create_explosion_cloud(int x, int y, int size)
     sound_effect_play(SOUND_EFFECT_EXPLOSION);
 }
 
-void figure_create_missile(int building_id, int x, int y, int x_dst, int y_dst, figure_type type)
+void figure_create_missile(int figure_id, int x, int y, int x_dst, int y_dst, figure_type type)
 {
     figure *f = figure_create(type, x, y, DIR_0_TOP);
+    figure *launcher = figure_get(figure_id);
     if (f->id) {
-        if (type == FIGURE_BOLT || type == FIGURE_FRIENDLY_ARROW) {
-            f->missile_damage = 60;
+        if (launcher->type == FIGURE_BALLISTA || launcher->type == FIGURE_WATCHTOWER_ARCHER) {
+            f->missile_height = 60;
         } else {
-            f->missile_damage = 10;
+            f->missile_height = 10;
         }
-        f->building_id = building_id;
+        f->building_id = figure_id;
         f->destination_x = x_dst;
         f->destination_y = y_dst;
         figure_movement_set_cross_country_direction(
@@ -70,9 +72,10 @@ void figure_create_missile(int building_id, int x, int y, int x_dst, int y_dst, 
 
 static int is_citizen(figure *f)
 {
+    const figure_properties *target_props = figure_properties_for_type(f->type);
+    const figure_category category = target_props->category;
     if (f->action_state != FIGURE_ACTION_149_CORPSE) {
-        if (f->type && f->type != FIGURE_EXPLOSION && f->type != FIGURE_FORT_STANDARD &&
-            f->type != FIGURE_MAP_FLAG && f->type != FIGURE_FLOTSAM && (f->type < FIGURE_INDIGENOUS_NATIVE || f->type == FIGURE_TOWER_SENTRY)) {
+        if (category == FIGURE_CATEGORY_CITIZEN || category == FIGURE_CATEGORY_ARMED || category == FIGURE_CATEGORY_CRIMINAL) {
             return f->id;
         }
     }
@@ -131,6 +134,11 @@ static void missile_hit_target(figure *f, int target_id, figure_type legionary_t
         figure_properties_for_type(f->type)->missile_attack_value -
         target_props->missile_defense_value;
     formation *m = formation_get(target->formation_id);
+    // Archer and javelin defense bonus
+    if ((target->type == FIGURE_FORT_ARCHER || target->type == FIGURE_FORT_JAVELIN) &&
+        (m->layout == FORMATION_SINGLE_LINE_1 || m->layout == FORMATION_SINGLE_LINE_2)) {
+        damage_inflicted -= 2;
+    }
     if (damage_inflicted < 0) {
         damage_inflicted = 0;
     }
@@ -269,3 +277,23 @@ void figure_bolt_action(figure *f)
     int dir = (16 + f->direction - 2 * city_view_orientation()) % 16;
     f->image_id = image_group(GROUP_FIGURE_MISSILE) + 32 + dir;
 }
+
+void figure_catapult_missile_action(figure *f)
+{
+    f->use_cross_country = 1;
+    f->progress_on_tile++;
+    if (f->progress_on_tile > 120) {
+        f->state = FIGURE_STATE_DEAD;
+    }
+    int should_die = figure_movement_move_ticks_cross_country(f, 4);
+    int target_id = get_citizen_on_tile(f->grid_offset);
+    if (target_id) {
+        missile_hit_target(f, target_id, FIGURE_NONE);
+        sound_effect_play(SOUND_EFFECT_BALLISTA_HIT_GROUND);
+    } else if (should_die) {
+        f->state = FIGURE_STATE_DEAD;
+    }
+    int dir = (16 + f->direction - 2 * city_view_orientation()) % 16;
+    f->image_id = assets_get_image_id("Warriors", "catapult_rock_ne_01") + dir;
+}
+

@@ -38,8 +38,12 @@ typedef enum {
     BUILDING_STORAGE_PERMISSION_DOCK = 2,
     BUILDING_STORAGE_PERMISSION_QUARTERMASTER = 3,
     BUILDING_STORAGE_PERMISSION_WORKER = 4,
+    BUILDING_STORAGE_PERMISSION_BARKEEP = 5,
+    BUILDING_STORAGE_PERMISSION_CARAVANSERAI = 6,
+    BUILDING_STORAGE_PERMISSION_LIGHTHOUSE = 7,
+    BUILDING_STORAGE_PERMISSION_ARMOURY = 8,
+    BUILDING_STORAGE_PERMISSION_WORKCAMP = 9,
 } building_storage_permission_states;
-
 
 /**
  * Building storage struct
@@ -51,7 +55,7 @@ typedef struct {
 } building_storage;
 
 typedef struct {
-    int id;
+    unsigned int id;
     int in_use;
     int building_id;
     building_storage storage;
@@ -124,6 +128,19 @@ void building_storage_cycle_partial_resource_state(int storage_id, resource_type
 void building_storage_accept_none(int storage_id);
 
 /**
+ * Sets all goods to 'accepting'
+ * @param storage_id Storage id
+ */
+void building_storage_accept_all(int storage_id);
+
+/**
+ * Checks if all goods are set to 'not accepting'
+ * Returns 1 if they are and 0 otherwise
+ * @param storage_id Storage id
+ */
+int building_storage_check_if_accepts_nothing(int storage_id);
+
+/**
  * Toggles the empty all flag for the storage
  * @param storage_id Storage id
  */
@@ -136,7 +153,7 @@ void building_storage_reset_building_ids(void);
 
 /**
  * Gets the maximum (in full units) a given storage will store of a given resource
- * @param storage_id Storage id
+ * @param b The building to check
  * @param resource_id Resource id
  * @return Max amount that can be stored, 0 if it does not accept the resource at all.
  */

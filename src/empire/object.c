@@ -9,7 +9,6 @@
 #include "empire/type.h"
 #include "game/animation.h"
 #include "game/save_version.h"
-#include "scenario/building.h"
 #include "scenario/data.h"
 #include "scenario/empire.h"
 
@@ -35,9 +34,6 @@ static void fix_image_ids(void)
         // empire map uses old version of graphics: increase every graphic id
         int offset = image_group(GROUP_EMPIRE_CITY) - image_id;
         array_foreach(objects, obj) {
-            if (!obj->in_use) {
-                continue;
-            }
             if (obj->obj.image_id > 0 && obj->obj.image_id < IMAGE_MAIN_ENTRIES) {
                 obj->obj.image_id += offset;
                 if (obj->obj.expanded.image_id) {
@@ -48,7 +44,7 @@ static void fix_image_ids(void)
     }
 }
 
-static void new_empire_object(full_empire_object *obj, int position)
+static void new_empire_object(full_empire_object *obj, unsigned int position)
 {
     obj->obj.id = position;
 }
@@ -78,6 +74,8 @@ void empire_object_load(buffer *buf, int version)
         empire_object_clear();
         return;
     }
+
+    resource_version_t resource_version = resource_mapping_get_version();
 
     if (version <= SCENARIO_LAST_UNVERSIONED) {
         resource_set_mapping(RESOURCE_ORIGINAL_VERSION);
@@ -205,6 +203,7 @@ void empire_object_load(buffer *buf, int version)
     }
     objects.size = highest_id_in_use + 1;
     fix_image_ids();
+    resource_set_mapping(resource_version);
 }
 
 void empire_object_save(buffer *buf)
@@ -352,6 +351,9 @@ void empire_object_init_cities(int empire_id)
         city->trader_figure_ids[2] = 0;
         city->empire_object_id = array_index;
     }
+    if (empire_id != SCENARIO_CUSTOM_EMPIRE) {
+        empire_city_update_our_fish_and_meat_production();
+    }
     empire_city_update_trading_data(empire_id);
 }
 
@@ -376,7 +378,7 @@ full_empire_object *empire_object_get_full(int object_id)
 full_empire_object *empire_object_get_new(void)
 {
     full_empire_object *obj;
-    array_new_item(objects, 1, obj);
+    array_new_item_after_index(objects, 1, obj);
     return obj;
 }
 
@@ -453,10 +455,15 @@ int empire_object_get_closest(int x, int y)
 {
     int min_dist = 10000;
     int min_obj_id = 0;
+    int city_is_selected = 0;
     full_empire_object *full;
     array_foreach(objects, full) {
         const empire_object *obj = &full->obj;
         int obj_x, obj_y;
+        if (city_is_selected && obj->type != EMPIRE_OBJECT_CITY) {
+            //Prioritize selecting cities if available
+            continue;
+        }
         if (scenario_empire_is_expanded()) {
             obj_x = obj->expanded.x;
             obj_y = obj->expanded.y;
@@ -472,6 +479,9 @@ int empire_object_get_closest(int x, int y)
         }
         int dist = calc_maximum_distance(x, y, obj_x + obj->width / 2, obj_y + obj->height / 2);
         if (dist < min_dist) {
+            if (obj->type == EMPIRE_OBJECT_CITY) {
+                city_is_selected = 1;
+            }
             min_dist = dist;
             min_obj_id = array_index + 1;
         }

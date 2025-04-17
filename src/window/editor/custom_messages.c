@@ -17,6 +17,7 @@
 #include "scenario/custom_media.h"
 #include "scenario/custom_messages_import_xml.h"
 #include "scenario/custom_messages.h"
+#include "scenario/editor.h"
 #include "scenario/message_media_text_blob.h"
 #include "window/city.h"
 #include "window/editor/attributes.h"
@@ -25,41 +26,46 @@
 #include "window/file_dialog.h"
 #include "window/numeric_input.h"
 
-#define MESSAGES_Y_OFFSET 146
-#define MESSAGES_ROW_HEIGHT 32
-#define MAX_VISIBLE_ROWS 8
+#define MESSAGES_Y_OFFSET 100
+#define MESSAGES_ROW_HEIGHT 31
+#define MAX_VISIBLE_ROWS 12
 #define BUTTON_WIDTH 320
 
 
 static void on_scroll(void);
-static void button_click(int type, int param2);
-static void button_event(int button_index, int param2);
+static void button_click(const generic_button *button);
+static void button_event(const generic_button *button);
 static void populate_list(int offset);
 
 static scrollbar_type scrollbar = {
-    368, MESSAGES_Y_OFFSET, MESSAGES_ROW_HEIGHT * MAX_VISIBLE_ROWS, BUTTON_WIDTH - 16, MAX_VISIBLE_ROWS, on_scroll, 0, 4
+    375, MESSAGES_Y_OFFSET, MESSAGES_ROW_HEIGHT * MAX_VISIBLE_ROWS, BUTTON_WIDTH - 17, MAX_VISIBLE_ROWS, on_scroll, 0, 4
 };
 
 static generic_button buttons[] = {
-    {48, MESSAGES_Y_OFFSET + (0 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, button_none, 1, 0},
-    {48, MESSAGES_Y_OFFSET + (1 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, button_none, 2, 0},
-    {48, MESSAGES_Y_OFFSET + (2 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, button_none, 3, 0},
-    {48, MESSAGES_Y_OFFSET + (3 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, button_none, 4, 0},
-    {48, MESSAGES_Y_OFFSET + (4 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, button_none, 5, 0},
-    {48, MESSAGES_Y_OFFSET + (5 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, button_none, 6, 0},
-    {48, MESSAGES_Y_OFFSET + (6 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, button_none, 7, 0},
-    {48, MESSAGES_Y_OFFSET + (7 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, button_none, 8, 0},
-    {48, MESSAGES_Y_OFFSET + (9 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_click, button_none, 9, 0},
-    {48, MESSAGES_Y_OFFSET + (10 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_click, button_none, 10, 0},
-    {48, MESSAGES_Y_OFFSET + (11 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_click, button_none, 11, 0}
+    {48, MESSAGES_Y_OFFSET + (0 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, 0, 1},
+    {48, MESSAGES_Y_OFFSET + (1 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, 0, 2},
+    {48, MESSAGES_Y_OFFSET + (2 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, 0, 3},
+    {48, MESSAGES_Y_OFFSET + (3 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, 0, 4},
+    {48, MESSAGES_Y_OFFSET + (4 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, 0, 5},
+    {48, MESSAGES_Y_OFFSET + (5 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, 0, 6},
+    {48, MESSAGES_Y_OFFSET + (6 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, 0, 7},
+    {48, MESSAGES_Y_OFFSET + (7 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, 0, 8},
+
+    {48, MESSAGES_Y_OFFSET + (8 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, 0, 9},
+    {48, MESSAGES_Y_OFFSET + (9 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, 0, 10},
+    {48, MESSAGES_Y_OFFSET + (10 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, 0, 11},
+    {48, MESSAGES_Y_OFFSET + (11 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, 0, 12},
+
+    {48, MESSAGES_Y_OFFSET + (13 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_click, 0, 13}, // import
+    {48, MESSAGES_Y_OFFSET + (14 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_click, 0, 14}, // export
+    {48, MESSAGES_Y_OFFSET + (15 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_click, 0, 15} // clear
 };
 
 #define MAX_BUTTONS (sizeof(buttons) / sizeof(generic_button))
 
 static struct {
-    int focus_button_id;
-
-    int total_messages;
+    unsigned int focus_button_id;
+    unsigned int total_messages;
     custom_message_t *list[MAX_VISIBLE_ROWS];
 } data;
 
@@ -80,7 +86,7 @@ static void populate_list(int offset)
         offset = 0;
     }
     for (int i = 0; i < MAX_VISIBLE_ROWS; i++) {
-        int target_id = i + offset + 1; // Skip entry zero custom message
+        unsigned int target_id = i + offset + 1; // Skip entry zero custom message
         if (target_id <= data.total_messages) {
             data.list[i] = custom_messages_get(target_id);
         } else {
@@ -100,11 +106,11 @@ static void draw_foreground(void)
 
     outer_panel_draw(16, 16, 26, 38);
 
-    text_draw_centered(translation_for(TR_EDITOR_CUSTOM_MESSAGES_TITLE), 48, 58, BUTTON_WIDTH, FONT_LARGE_BLACK, 0);
-    text_draw_label_and_number(translation_for(TR_EDITOR_CUSTOM_MESSAGES_COUNT), data.total_messages, "", 48, 106, FONT_NORMAL_PLAIN, COLOR_BLACK);
+    text_draw_centered(translation_for(TR_EDITOR_CUSTOM_MESSAGES_TITLE), 48, 30, BUTTON_WIDTH, FONT_LARGE_BLACK, 0);
+    text_draw_label_and_number(translation_for(TR_EDITOR_CUSTOM_MESSAGES_COUNT), data.total_messages, "", 48, 70, FONT_NORMAL_PLAIN, COLOR_BLACK);
 
     int y_offset = MESSAGES_Y_OFFSET;
-    for (int i = 0; i < MAX_VISIBLE_ROWS; i++) {
+    for (unsigned int i = 0; i < MAX_VISIBLE_ROWS; i++) {
         if (data.list[i]) {
             large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / BLOCK_SIZE,
                 data.focus_button_id == i + 1 ? 1 : 0);
@@ -118,7 +124,7 @@ static void draw_foreground(void)
         y_offset += MESSAGES_ROW_HEIGHT;
     }
 
-    for (size_t i = 8; i < MAX_BUTTONS; i++) {
+    for (size_t i = 12; i < MAX_BUTTONS; i++) {
         large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / BLOCK_SIZE,
             data.focus_button_id == i + 1 ? 1 : 0);
     }
@@ -132,34 +138,25 @@ static void draw_foreground(void)
     y_offset += MESSAGES_ROW_HEIGHT;
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_MESSAGES_CLEAR, 48, y_offset + 8, BUTTON_WIDTH, FONT_NORMAL_GREEN);
 
-    y_offset += MESSAGES_ROW_HEIGHT;
-    lang_text_draw_centered(13, 3, 48, y_offset, BUTTON_WIDTH, FONT_NORMAL_BLACK);
+    //y_offset += MESSAGES_ROW_HEIGHT;
+    lang_text_draw_centered(13, 3, 48, 600, BUTTON_WIDTH, FONT_NORMAL_BLACK); // Right-click to Continue
 
     scrollbar_draw(&scrollbar);
     graphics_reset_dialog();
 }
 
-static void button_event(int button_index, int param2)
+static void button_event(const generic_button *button)
 {
-    int target_index = button_index - 1;
-    if (!data.list[target_index]) {
+    int index = button->parameter1 - 1;
+    if (!data.list[index]) {
         return;
     };
-    window_message_dialog_show_custom_message(data.list[target_index]->id, 0, 0);
+    window_message_dialog_show_custom_message(data.list[index]->id, 0, 0);
 }
 
 static void on_scroll(void)
 {
     window_request_refresh();
-}
-
-static void close_window(void)
-{
-    if (editor_is_active()) {
-        window_editor_attributes_show();
-    } else {
-        window_city_show();
-    }
 }
 
 static void handle_input(const mouse *m, const hotkeys *h)
@@ -170,19 +167,23 @@ static void handle_input(const mouse *m, const hotkeys *h)
         return;
     }
     if (input_go_back_requested(m, h)) {
-        close_window();
+        window_editor_attributes_show();
     }
     populate_list(scrollbar.scroll_position);
 }
 
-static void button_click(int type, int param2)
+static void button_click(const generic_button *button)
 {
-    if (type == 9) {
+    int type = button->parameter1;
+
+    if (type == 13) {
         window_file_dialog_show(FILE_TYPE_CUSTOM_MESSAGES, FILE_DIALOG_LOAD);
-    } else if (type == 10) {
+    } else if (type == 14) {
         window_file_dialog_show(FILE_TYPE_CUSTOM_MESSAGES, FILE_DIALOG_SAVE);
-    } else if (type == 11) {
+    } else if (type == 15) {
         custom_messages_clear_all();
+        scenario_editor_set_custom_message_introduction(0);
+        scenario_editor_set_custom_victory_message(0);
         init();
     }
 }

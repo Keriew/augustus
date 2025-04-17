@@ -5,6 +5,7 @@
 #include "core/image_group.h"
 #include "core/lang.h"
 #include "core/string.h"
+#include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
@@ -27,9 +28,9 @@
 
 static void on_scroll(void);
 
-static void button_hotkey(int row, int is_alternative);
-static void button_reset_defaults(int param1, int param2);
-static void button_close(int save, int param2);
+static void button_hotkey(const generic_button *button);
+static void button_reset_defaults(const generic_button *button);
+static void button_close(const generic_button *button);
 
 static scrollbar_type scrollbar = {580, 72, 352, 560, NUM_VISIBLE_OPTIONS, on_scroll, 1};
 
@@ -121,26 +122,29 @@ static hotkey_widget hotkey_widgets[] = {
     {HOTKEY_SHOW_OVERLAY_FIRE, TR_HOTKEY_SHOW_OVERLAY_FIRE},
     {HOTKEY_SHOW_OVERLAY_DAMAGE, TR_HOTKEY_SHOW_OVERLAY_DAMAGE},
     {HOTKEY_SHOW_OVERLAY_CRIME, TR_HOTKEY_SHOW_OVERLAY_CRIME},
+    {HOTKEY_SHOW_OVERLAY_RISKS_NATIVE, TR_HOTKEY_SHOW_OVERLAY_RISKS_NATIVE},
     {HOTKEY_SHOW_OVERLAY_PROBLEMS, TR_HOTKEY_SHOW_OVERLAY_PROBLEMS},
-    {HOTKEY_SHOW_OVERLAY_FOOD_STOCKS, TR_HOTKEY_SHOW_OVERLAY_FOOD_STOCKS},
     {HOTKEY_SHOW_OVERLAY_ENTERTAINMENT, TR_HOTKEY_SHOW_OVERLAY_ENTERTAINMENT},
     {HOTKEY_SHOW_OVERLAY_EDUCATION, TR_HOTKEY_SHOW_OVERLAY_EDUCATION},
     {HOTKEY_SHOW_OVERLAY_SCHOOL, TR_HOTKEY_SHOW_OVERLAY_SCHOOL},
     {HOTKEY_SHOW_OVERLAY_LIBRARY, TR_HOTKEY_SHOW_OVERLAY_LIBRARY},
     {HOTKEY_SHOW_OVERLAY_ACADEMY, TR_HOTKEY_SHOW_OVERLAY_ACADEMY},
+    {HOTKEY_SHOW_OVERLAY_HEALTH, TR_HOTKEY_SHOW_OVERLAY_HEALTH},
     {HOTKEY_SHOW_OVERLAY_BARBER, TR_HOTKEY_SHOW_OVERLAY_BARBER},
     {HOTKEY_SHOW_OVERLAY_BATHHOUSE, TR_HOTKEY_SHOW_OVERLAY_BATHHOUSE},
     {HOTKEY_SHOW_OVERLAY_CLINIC, TR_HOTKEY_SHOW_OVERLAY_CLINIC},
     {HOTKEY_SHOW_OVERLAY_HOSPITAL, TR_HOTKEY_SHOW_OVERLAY_HOSPITAL},
     {HOTKEY_SHOW_OVERLAY_SICKNESS, TR_HOTKEY_SHOW_OVERLAY_SICKNESS},
+    {HOTKEY_SHOW_OVERLAY_LOGISTICS, TR_HOTKEY_SHOW_OVERLAY_LOGISTICS},
+    {HOTKEY_SHOW_OVERLAY_FOOD_STOCKS, TR_HOTKEY_SHOW_OVERLAY_FOOD_STOCKS},
+    {HOTKEY_SHOW_OVERLAY_MOTHBALL, TR_HOTKEY_SHOW_OVERLAY_MOTHBALL},
     {HOTKEY_SHOW_OVERLAY_TAX_INCOME, TR_HOTKEY_SHOW_OVERLAY_TAX_INCOME},
+    {HOTKEY_SHOW_OVERLAY_LEVY, TR_HOTKEY_SHOW_OVERLAY_LEVY},
+    {HOTKEY_SHOW_OVERLAY_EMPLOYMENT, TR_HOTKEY_SHOW_OVERLAY_EMPLOYMENT},
+    {HOTKEY_SHOW_OVERLAY_RELIGION, TR_HOTKEY_SHOW_OVERLAY_RELIGION},
     {HOTKEY_SHOW_OVERLAY_DESIRABILITY, TR_HOTKEY_SHOW_OVERLAY_DESIRABILITY},
     {HOTKEY_SHOW_OVERLAY_SENTIMENT, TR_HOTKEY_SHOW_OVERLAY_SENTIMENT},
-    {HOTKEY_SHOW_OVERLAY_MOTHBALL, TR_HOTKEY_SHOW_OVERLAY_MOTHBALL},
-    {HOTKEY_SHOW_OVERLAY_RELIGION, TR_HOTKEY_SHOW_OVERLAY_RELIGION},
     {HOTKEY_SHOW_OVERLAY_ROADS, TR_HOTKEY_SHOW_OVERLAY_ROADS},
-    {HOTKEY_SHOW_OVERLAY_LEVY, TR_HOTKEY_SHOW_OVERLAY_LEVY},
-    {HOTKEY_SHOW_OVERLAY_RISKS_NATIVE, TR_HOTKEY_SHOW_OVERLAY_RISKS_NATIVE},
     {HOTKEY_HEADER, TR_HOTKEY_HEADER_BOOKMARKS},
     {HOTKEY_GO_TO_BOOKMARK_1, TR_HOTKEY_GO_TO_BOOKMARK_1},
     {HOTKEY_GO_TO_BOOKMARK_2, TR_HOTKEY_GO_TO_BOOKMARK_2},
@@ -160,40 +164,40 @@ static hotkey_widget hotkey_widgets[] = {
 #define HOTKEY_BTN_HEIGHT 22
 
 static generic_button hotkey_buttons[] = {
-    {HOTKEY_X_OFFSET_1, 80 + 24 * 0, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 0, 0},
-    {HOTKEY_X_OFFSET_2, 80 + 24 * 0, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 0, 1},
-    {HOTKEY_X_OFFSET_1, 80 + 24 * 1, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 1, 0},
-    {HOTKEY_X_OFFSET_2, 80 + 24 * 1, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 1, 1},
-    {HOTKEY_X_OFFSET_1, 80 + 24 * 2, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 2, 0},
-    {HOTKEY_X_OFFSET_2, 80 + 24 * 2, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 2, 1},
-    {HOTKEY_X_OFFSET_1, 80 + 24 * 3, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 3, 0},
-    {HOTKEY_X_OFFSET_2, 80 + 24 * 3, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 3, 1},
-    {HOTKEY_X_OFFSET_1, 80 + 24 * 4, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 4, 0},
-    {HOTKEY_X_OFFSET_2, 80 + 24 * 4, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 4, 1},
-    {HOTKEY_X_OFFSET_1, 80 + 24 * 5, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 5, 0},
-    {HOTKEY_X_OFFSET_2, 80 + 24 * 5, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 5, 1},
-    {HOTKEY_X_OFFSET_1, 80 + 24 * 6, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 6, 0},
-    {HOTKEY_X_OFFSET_2, 80 + 24 * 6, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 6, 1},
-    {HOTKEY_X_OFFSET_1, 80 + 24 * 7, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 7, 0},
-    {HOTKEY_X_OFFSET_2, 80 + 24 * 7, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 7, 1},
-    {HOTKEY_X_OFFSET_1, 80 + 24 * 8, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 8, 0},
-    {HOTKEY_X_OFFSET_2, 80 + 24 * 8, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 8, 1},
-    {HOTKEY_X_OFFSET_1, 80 + 24 * 9, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 9, 0},
-    {HOTKEY_X_OFFSET_2, 80 + 24 * 9, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 9, 1},
-    {HOTKEY_X_OFFSET_1, 80 + 24 * 10, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 10, 0},
-    {HOTKEY_X_OFFSET_2, 80 + 24 * 10, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 10, 1},
-    {HOTKEY_X_OFFSET_1, 80 + 24 * 11, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 11, 0},
-    {HOTKEY_X_OFFSET_2, 80 + 24 * 11, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 11, 1},
-    {HOTKEY_X_OFFSET_1, 80 + 24 * 12, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 12, 0},
-    {HOTKEY_X_OFFSET_2, 80 + 24 * 12, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 12, 1},
-    {HOTKEY_X_OFFSET_1, 80 + 24 * 13, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 13, 0},
-    {HOTKEY_X_OFFSET_2, 80 + 24 * 13, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, button_none, 13, 1},
+    {HOTKEY_X_OFFSET_1, 80 + 24 * 0, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 0, 0},
+    {HOTKEY_X_OFFSET_2, 80 + 24 * 0, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 0, 1},
+    {HOTKEY_X_OFFSET_1, 80 + 24 * 1, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 1, 0},
+    {HOTKEY_X_OFFSET_2, 80 + 24 * 1, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 1, 1},
+    {HOTKEY_X_OFFSET_1, 80 + 24 * 2, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 2, 0},
+    {HOTKEY_X_OFFSET_2, 80 + 24 * 2, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 2, 1},
+    {HOTKEY_X_OFFSET_1, 80 + 24 * 3, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 3, 0},
+    {HOTKEY_X_OFFSET_2, 80 + 24 * 3, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 3, 1},
+    {HOTKEY_X_OFFSET_1, 80 + 24 * 4, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 4, 0},
+    {HOTKEY_X_OFFSET_2, 80 + 24 * 4, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 4, 1},
+    {HOTKEY_X_OFFSET_1, 80 + 24 * 5, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 5, 0},
+    {HOTKEY_X_OFFSET_2, 80 + 24 * 5, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 5, 1},
+    {HOTKEY_X_OFFSET_1, 80 + 24 * 6, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 6, 0},
+    {HOTKEY_X_OFFSET_2, 80 + 24 * 6, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 6, 1},
+    {HOTKEY_X_OFFSET_1, 80 + 24 * 7, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 7, 0},
+    {HOTKEY_X_OFFSET_2, 80 + 24 * 7, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 7, 1},
+    {HOTKEY_X_OFFSET_1, 80 + 24 * 8, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 8, 0},
+    {HOTKEY_X_OFFSET_2, 80 + 24 * 8, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 8, 1},
+    {HOTKEY_X_OFFSET_1, 80 + 24 * 9, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 9, 0},
+    {HOTKEY_X_OFFSET_2, 80 + 24 * 9, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 9, 1},
+    {HOTKEY_X_OFFSET_1, 80 + 24 * 10, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 10, 0},
+    {HOTKEY_X_OFFSET_2, 80 + 24 * 10, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 10, 1},
+    {HOTKEY_X_OFFSET_1, 80 + 24 * 11, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 11, 0},
+    {HOTKEY_X_OFFSET_2, 80 + 24 * 11, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 11, 1},
+    {HOTKEY_X_OFFSET_1, 80 + 24 * 12, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 12, 0},
+    {HOTKEY_X_OFFSET_2, 80 + 24 * 12, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 12, 1},
+    {HOTKEY_X_OFFSET_1, 80 + 24 * 13, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 13, 0},
+    {HOTKEY_X_OFFSET_2, 80 + 24 * 13, HOTKEY_BTN_WIDTH, HOTKEY_BTN_HEIGHT, button_hotkey, 0, 13, 1},
 };
 
 static generic_button bottom_buttons[] = {
-    {230, 430, 180, 30, button_reset_defaults, button_none},
-    {415, 430, 100, 30, button_close, button_none, 0},
-    {520, 430, 100, 30, button_close, button_none, 1},
+    {230, 430, 180, 30, button_reset_defaults},
+    {415, 430, 100, 30, button_close},
+    {520, 430, 100, 30, button_close, 0, 1},
 };
 
 static translation_key bottom_button_texts[] = {
@@ -203,8 +207,8 @@ static translation_key bottom_button_texts[] = {
 };
 
 static struct {
-    int focus_button;
-    int bottom_focus_button;
+    unsigned int focus_button;
+    unsigned int bottom_focus_button;
     hotkey_mapping mappings[HOTKEY_MAX_ITEMS][2];
 } data;
 
@@ -290,7 +294,7 @@ static void draw_foreground(void)
 
     scrollbar_draw(&scrollbar);
 
-    for (int i = 0; i < NUM_VISIBLE_OPTIONS; i++) {
+    for (unsigned int i = 0; i < NUM_VISIBLE_OPTIONS; i++) {
         hotkey_widget *widget = &hotkey_widgets[i + scrollbar.scroll_position];
         if (widget->action != HOTKEY_HEADER) {
             generic_button *btn = &hotkey_buttons[2 * i];
@@ -300,7 +304,7 @@ static void draw_foreground(void)
         }
     }
 
-    for (int i = 0; i < NUM_BOTTOM_BUTTONS; i++) {
+    for (unsigned int i = 0; i < NUM_BOTTOM_BUTTONS; i++) {
         button_border_draw(bottom_buttons[i].x, bottom_buttons[i].y,
             bottom_buttons[i].width, bottom_buttons[i].height,
             data.bottom_focus_button == i + 1);
@@ -330,7 +334,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
 static const uint8_t *hotkey_action_name_for(hotkey_action action)
 {
     const uint8_t *name = 0;
-    for (int i = 0; i < NUM_VISIBLE_OPTIONS + scrollbar.max_scroll_position; i++) {
+    for (unsigned int i = 0; i < NUM_VISIBLE_OPTIONS + scrollbar.max_scroll_position; i++) {
         hotkey_widget *widget = &hotkey_widgets[i];
         if (widget->action == action) {
             if (widget->name_translation != TR_NONE) {
@@ -376,8 +380,10 @@ static void set_hotkey(hotkey_action action, int index, key_type key, key_modifi
     }
 }
 
-static void button_hotkey(int row, int is_alternative)
+static void button_hotkey(const generic_button *button)
 {
+    int row = button->parameter1;
+    int is_alternative = button->parameter2;
     hotkey_widget *widget = &hotkey_widgets[row + scrollbar.scroll_position];
     if (widget->action == HOTKEY_HEADER) {
         return;
@@ -385,7 +391,7 @@ static void button_hotkey(int row, int is_alternative)
     window_hotkey_editor_show(widget->action, is_alternative, set_hotkey);
 }
 
-static void button_reset_defaults(int param1, int param2)
+static void button_reset_defaults(const generic_button *button)
 {
     for (int action = 0; action < HOTKEY_MAX_ITEMS; action++) {
         for (int index = 0; index < 2; index++) {
@@ -400,8 +406,10 @@ static void on_scroll(void)
     window_invalidate();
 }
 
-static void button_close(int save, int param2)
+static void button_close(const generic_button *button)
 {
+    int save = button->parameter1;
+
     if (!save) {
         window_go_back();
         return;

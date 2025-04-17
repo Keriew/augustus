@@ -2,6 +2,7 @@
 
 #include "building/connectable.h"
 #include "building/construction.h"
+#include "building/menu.h"
 #include "building/properties.h"
 #include "building/variant.h"
 #include "city/view.h"
@@ -49,6 +50,8 @@ static int get_num_rotations(building_type type)
         case BUILDING_FORT_JAVELIN:
         case BUILDING_FORT_LEGIONARIES:
         case BUILDING_FORT_MOUNTED:
+        case BUILDING_FORT_AUXILIA_INFANTRY:
+        case BUILDING_FORT_ARCHERS:
         case BUILDING_WAREHOUSE:
             return 4;
         case BUILDING_HIPPODROME:
@@ -110,8 +113,13 @@ int building_rotation_get_road_orientation(void)
 void building_rotation_force_two_orientations(void)
 {
     // for composite buildings like hippodrome
-    if (data.rotation == 1 || data.rotation == 2) {
+    if (data.rotation == 1) {
         data.rotation = 3;
+        return;
+    }
+    if (data.rotation == 2) {
+        data.rotation = 0;
+        return;
     }
 }
 
@@ -216,24 +224,40 @@ int building_rotation_get_corner(int rotation)
     }
 }
 
+static int menu_has_buildings_with_cycles(build_menu_group menu, building_type type)
+{
+    int num_items = building_menu_count_items(menu);
+    int item_index = -1;
+    for (int i = 0; i < num_items; i++) {
+        item_index = building_menu_next_index(menu, item_index);
+        building_type item_type = building_menu_type(menu, item_index);
+        if (item_type != type && building_construction_type_can_cycle(item_type)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 int building_rotation_type_has_rotations(building_type type)
 {
     if (building_variant_has_variants(type) || building_properties_for_type(type)->rotation_offset ||
-     /*   building_is_connectable(type) || */ building_construction_type_can_cycle(type)) {
+        building_construction_type_can_cycle(type)) {
         return 1;
+    }
+    build_menu_group menu = building_menu_get_submenu_for_type(type);
+    if (menu) {
+        return menu_has_buildings_with_cycles(menu, type);
     }
     switch (type) {
         case BUILDING_FORT_JAVELIN:
         case BUILDING_FORT_LEGIONARIES:
         case BUILDING_FORT_MOUNTED:
+        case BUILDING_FORT_AUXILIA_INFANTRY:
+        case BUILDING_FORT_ARCHERS:
         case BUILDING_WAREHOUSE:
         case BUILDING_HIPPODROME:
         case BUILDING_GATEHOUSE:
         case BUILDING_TRIUMPHAL_ARCH:
-        case BUILDING_MENU_LARGE_TEMPLES:
-        case BUILDING_MENU_SMALL_TEMPLES:
-        case BUILDING_MENU_SHRINES:
-        case BUILDING_MENU_GARDENS:
             return 1;
         default:
             return 0;

@@ -46,8 +46,8 @@
 	<image id="Venus M Icon" src="Venus_Temple_Complex_Module_Banner"/>
 	<image id="Venus M2 Icon" src="Venus_Temple_Complex_Module2_Banner"/>
 	<!-- Note: Banner images for Construction Sites -->
-	<image id="Const. Banner 01" src="Construction_Banner_01"/>
-	<image id="Const. Banner 02" src="Construction_Banner_02"/>
+	<image id="Construction_Banner_01" src="Construction_Banner_01"/>
+	<image id="Construction_Banner_02" src="Construction_Banner_02"/>
 	<!-- Note: Banner with Augustus Logo for Main Menu  -->
 	<image id="Main Menu Banner" src="Augustus_Main_Menu_Banner_Sml"/>
 	<!-- Note: Border for Campaign Map Selection Screen  -->
@@ -89,11 +89,11 @@
 	<!-- Note: Blank advisor buttons for use as templates -->
 	<image id="Adv_B_Blank_UH" width="40" height="40">
 		<layer group="128" image="9" x="0" y="0"/>
-		<layer src="Advisor_Button_UH" x="0" y="0"/>
+		<layer src="Advisor_Button_UH" x="5" y="4"/>
 	</image>
 	<image id="Adv_B_Blank_H" width="40" height="40">
 		<layer group="128" image="22" x="0" y="0"/>
-		<layer src="Advisor_Button_H" x="0" y="0"/>
+		<layer src="Advisor_Button_H" x="5" y="4"/>
 	</image>
 	<!-- Note: Rotation and Monument icons for building buttons respectively -->
 	<image id="Monument Build Icon" src="Monument_Panel"/>
@@ -129,29 +129,19 @@
 	<image id="Village" src="Housing_Advisor_UH" width="40" height="40"/>
 	<image id="Housing Advisor Button" width="40" height="40">
 		<layer group="128" image="9" x="0" y="0"/>
-		<layer src="Advisor_Button_UH" x="0" y="0"/>
+		<layer src="Advisor_Button_UH" x="5" y="4"/>
 		<layer src="Housing_Advisor_UH" x="0" y="0"/>
 	</image>
 	<image id="Housing Advisor Button Selected" width="40" height="40">
 		<layer group="128" image="22" x="0" y="0"/>
-		<layer src="Advisor_Button_H" x="0" y="0"/>
+		<layer src="Advisor_Button_H" x="5" y="4"/>
 		<layer src="Housing_Advisor_H" x="0" y="0"/>
 	</image>
-	<!-- Note: Button for Building Mothball -->
-	<!-- Button assets created by MSTVD -->
-	<image id="Mothball_1" src="Mothball_1"/>
-	<image id="Mothball_2" src="Mothball_2"/>
-	<image id="Mothball_3" src="Mothball_3"/>
-	<image id="Mothball_4" src="Mothball_4"/>
-	<image id="Unmothball_1" src="Unmothball_1"/>
-	<image id="Unmothball_2" src="Unmothball_2"/>
-	<image id="Unmothball_3" src="Unmothball_3"/>
-	<image id="Unmothball_4" src="Unmothball_4"/>
-	<!-- Note: Checkmark toggle for allowed walkers -->
+	<!-- Note: Selected Item Toggle Icon -->
 	<!-- Image created by Ouaz -->
-	<image id="Allowed_Walker_Check" src="Allowed_Walker_Checkmark"/>
+	<image id="Selection_Checkmark" src="Selection_Checkmark"/>
 	<!-- Warehousing icon by Ouaz -->
-	<image id="Warehousing" src="Warehousing"/>
+	<image id="Warehousing_off" src="Warehousing_off"/>
 	<image id="Maintain_1" src="Maintain_1"/>
 	<!-- Normal -->
 	<image id="Maintain_2" src="Maintain_2"/>
@@ -226,12 +216,13 @@
 	<image id="Panelling_Stone_02" src="Panelling_Stone_02"/>
 	<image id="Panelling_Concrete_01" src="Panelling_Concrete_01"/>
 	<image id="Panelling_Concrete_02" src="Panelling_Concrete_02"/>
-	<!-- Note: Standards for custom legions -->
+	<!-- Note: Standards for custom legions by MSTVD -->
 	<image id="11Legion_Elephants" src="11Legion_Elephants"/>
 	<image id="12Legion_Thunder_Bolts" src="12Legion_Thunder_Bolts"/>
 	<image id="13Legion_Bulls" src="13Legion_Bulls"/>
 	<image id="14Legion_Centaurs" src="14Legion_Centaurs"/>
 	<image id="15Legion_Octopi" src="15Legion_Octopi"/>
+	<image id="16Legion_Bears" src="16Legion_Bears"/>
 	<image id="LandRouteDot" width="5" height="5">
 		<layer group="181" image="7"/>
 	</image>
@@ -249,4 +240,956 @@
 	<image id="Risk_Widget_Fire" src="Risk_Widget_Fire"/>
 	<image id="Risk_Widget_Health" src="Risk_Widget_Health"/>
 	<image id="Risk_Widget_Cross" src="Risk_Widget_Cross"/>
+	<!-- Note: Checkmark toggle for denied walkers -->
+	<image id="Denied_Walker_Checkmark" src="Denied_Walker_Checkmark"/>
+	<!-- Note: UI button for accessing Housing Advisor -->
+	<image id="Housing_Advisor_S_UH" width="28" height="28">
+		<layer group="199" image="12"/>
+		<layer src="Housing_Advisor_S" x="3" y="3"/>
+	</image>
+	<image id="Housing_Advisor_S_H" width="28" height="28">
+		<layer group="199" image="13"/>
+		<layer src="Housing_Advisor_S" x="3" y="3"/>
+	</image>
+	<!-- Note: Empire map icons for Roman trade towns and non-trade towns respectively -->
+	<image id="Empire_Icon_Roman_01" src="Empire_Icon_Roman_01"/>
+	<image id="Empire_Icon_Roman_02" src="Empire_Icon_Roman_02"/>
+	<!-- Note: Empire map icons for Roman trade villages and non-trade villages respectively -->
+	<image id="Empire_Icon_Roman_03" src="Empire_Icon_Roman_03"/>
+	<image id="Empire_Icon_Roman_04" src="Empire_Icon_Roman_04"/>
+	<!-- Note: Empire map icon for the City of Rome -->
+	<image id="Empire_Icon_Roman_05" src="Empire_Icon_Roman_05"/>
+	<!-- Note: Empire map icons for distant towns -->
+	<image id="Empire_Icon_Distant_01" src="Empire_Icon_Distant_01"/>
+	<!-- Note: Empire map icons for distant villages -->
+	<image id="Empire_Icon_Distant_02" src="Empire_Icon_Distant_02"/>
+	<!-- Note: Empire map icon for construction site -->
+	<image id="Empire_Icon_Construction_01" src="Empire_Icon_Construction_01"/>
+	<!-- Note: Empire map icon for farm and quarry resource nodes respectively -->
+	<image id="Empire_Icon_Resource_01" src="Empire_Icon_Resource_01"/>
+	<image id="Empire_Icon_Resource_02" src="Empire_Icon_Resource_02"/>
+	<!-- Note: Empire map icon for off-map trade emporium water and land variants respectively -->
+	<image id="Empire_Icon_Trade_01" src="Empire_Icon_Trade_01"/>
+	<image id="Empire_Icon_Trade_02" src="Empire_Icon_Trade_02"/>
+	<!-- Note: Empire map flag for the City of Rome -->
+	<image id="Empire_Icon_Flag_01">
+		<layer group="174" image="1"/>
+		<layer src="Empire_Icon_Flag_01"/>
+	</image>
+	<image id="Empire_Icon_Flag_02">
+		<layer group="174" image="2"/>
+		<layer src="Empire_Icon_Flag_02"/>
+	</image>
+	<image id="Empire_Icon_Flag_03">
+		<layer group="174" image="3"/>
+		<layer src="Empire_Icon_Flag_03"/>
+	</image>
+	<image id="Empire_Icon_Flag_04">
+		<layer group="174" image="4"/>
+		<layer src="Empire_Icon_Flag_04"/>
+	</image>
+	<image id="Empire_Icon_Flag_05">
+		<layer group="174" image="5"/>
+		<layer src="Empire_Icon_Flag_05"/>
+	</image>
+	<image id="Empire_Icon_Flag_06">
+		<layer group="174" image="6"/>
+		<layer src="Empire_Icon_Flag_06"/>
+	</image>
+	<!-- Note: Legion banner base -->
+	<image id="Legion_Banner_Base" width="32" height="29">
+		<layer group="126" image="8"/>
+		<layer src="Legion_Banner_Base" x="0" y="0"/>
+	</image>
+	<!-- Note: Auxiliary Infantry banner static. Asset by CaesarZX -->
+	<image id="auxinf_banner_0" width="32" height="29">
+		<layer group="this" image="Legion_Banner_Base"/>
+		<layer src="auxinf_banner_0" x="0" y="0"/>
+	</image>
+	<!-- Note: Auxiliary Infantry banner animation frames. Assets by CaesarZX -->
+	<image id="auxinf_banner_01">
+		<layer src="auxinf_banner_base"/>
+		<layer src="auxinf_banner_01" x="4" y="3"/>
+	</image>
+	<image id="auxinf_banner_02">
+		<layer src="auxinf_banner_base"/>
+		<layer src="auxinf_banner_02" x="4" y="3"/>
+	</image>
+	<image id="auxinf_banner_03">
+		<layer src="auxinf_banner_base"/>
+		<layer src="auxinf_banner_03" x="4" y="3"/>
+	</image>
+	<image id="auxinf_banner_04">
+		<layer src="auxinf_banner_base"/>
+		<layer src="auxinf_banner_04" x="4" y="3"/>
+	</image>
+	<image id="auxinf_banner_05">
+		<layer src="auxinf_banner_base"/>
+		<layer src="auxinf_banner_05" x="4" y="3"/>
+	</image>
+	<image id="auxinf_banner_06">
+		<layer src="auxinf_banner_base"/>
+		<layer src="auxinf_banner_06" x="4" y="3"/>
+	</image>
+	<image id="auxinf_banner_07">
+		<layer src="auxinf_banner_base"/>
+		<layer src="auxinf_banner_07" x="4" y="3"/>
+	</image>
+	<image id="auxinf_banner_08">
+		<layer src="auxinf_banner_base"/>
+		<layer src="auxinf_banner_08" x="4" y="3"/>
+	</image>
+	<!-- Note: Auxiliary Archer banner static. Asset by CaesarZX -->
+	<image id="auxarch_banner_0" width="32" height="29">
+		<layer group="this" image="Legion_Banner_Base"/>
+		<layer src="auxarch_banner_0" x="0" y="0"/>
+	</image>
+	<!-- Note: Auxiliary Archer banner animation frames. Assets by CaesarZX -->
+	<image id="auxarch_banner_01">
+		<layer src="auxinf_banner_base"/>
+		<layer src="auxarch_banner_01" x="4" y="3"/>
+	</image>
+	<image id="auxarch_banner_02">
+		<layer src="auxinf_banner_base"/>
+		<layer src="auxarch_banner_02" x="4" y="3"/>
+	</image>
+	<image id="auxarch_banner_03">
+		<layer src="auxinf_banner_base"/>
+		<layer src="auxarch_banner_03" x="4" y="3"/>
+	</image>
+	<image id="auxarch_banner_04">
+		<layer src="auxinf_banner_base"/>
+		<layer src="auxarch_banner_04" x="4" y="3"/>
+	</image>
+	<image id="auxarch_banner_05">
+		<layer src="auxinf_banner_base"/>
+		<layer src="auxarch_banner_05" x="4" y="3"/>
+	</image>
+	<image id="auxarch_banner_06">
+		<layer src="auxinf_banner_base"/>
+		<layer src="auxarch_banner_06" x="4" y="3"/>
+	</image>
+	<image id="auxarch_banner_07">
+		<layer src="auxinf_banner_base"/>
+		<layer src="auxarch_banner_07" x="4" y="3"/>
+	</image>
+	<image id="auxarch_banner_08">
+		<layer src="auxinf_banner_base"/>
+		<layer src="auxarch_banner_08" x="4" y="3"/>
+	</image>
+	<!-- Note: Unit flags for Tower and Watchtower Sentries -->
+	<image id="tower_banner_0" width="32" height="29">
+		<layer group="this" image="Legion_Banner_Base"/>
+		<layer src="tower_banner_0" x="0" y="0"/>
+	</image>
+	<image id="watchtower_banner_0" width="32" height="29">
+		<layer group="this" image="Legion_Banner_Base"/>
+		<layer src="watchtower_banner_0" x="0" y="0"/>
+	</image>
+	<!-- Note: Barracks UI buttons -->
+	<image id="Barracks_Priority_Legionaries_OFF" width="40" height="40">
+		<layer src="Barracks_Priority_Base" x="5" y="4"/>
+		<layer group="126" image="8" x="4" y="6"/>
+		<layer src="Barracks_Priority_OFF" x="0" y="0"/>
+	</image>
+	<image id="Barracks_Priority_Legionaries_ON" width="40" height="40">
+		<layer group="this" image="Barracks_Priority_Legionaries_OFF"/>
+		<layer src="Barracks_Priority_ON" x="0" y="0"/>
+	</image>
+	<image id="Barracks_Priority_Javelin_OFF" width="40" height="40">
+		<layer src="Barracks_Priority_Base" x="5" y="4"/>
+		<layer group="126" image="17" x="4" y="6"/>
+		<layer src="Barracks_Priority_OFF" x="0" y="0"/>
+	</image>
+	<image id="Barracks_Priority_Javelin_ON" width="40" height="40">
+		<layer group="this" image="Barracks_Priority_Javelin_OFF"/>
+		<layer src="Barracks_Priority_ON" x="0" y="0"/>
+	</image>
+	<image id="Barracks_Priority_Mounted_OFF" width="40" height="40">
+		<layer src="Barracks_Priority_Base" x="5" y="4"/>
+		<layer group="126" image="26" x="4" y="6"/>
+		<layer src="Barracks_Priority_OFF" x="0" y="0"/>
+	</image>
+	<image id="Barracks_Priority_Mounted_ON" width="40" height="40">
+		<layer group="this" image="Barracks_Priority_Mounted_OFF"/>
+		<layer src="Barracks_Priority_ON" x="0" y="0"/>
+	</image>
+	<image id="Barracks_Priority_Auxinf_OFF" width="40" height="40">
+		<layer src="Barracks_Priority_Base" x="5" y="4"/>
+		<layer group="this" image="auxinf_banner_0" x="4" y="6"/>
+		<layer src="Barracks_Priority_OFF" x="0" y="0"/>
+	</image>
+	<image id="Barracks_Priority_Auxinf_ON" width="40" height="40">
+		<layer group="this" image="Barracks_Priority_Auxinf_OFF"/>
+		<layer src="Barracks_Priority_ON" x="0" y="0"/>
+	</image>
+	<image id="Barracks_Priority_Auxarch_OFF" width="40" height="40">
+		<layer src="Barracks_Priority_Base" x="5" y="4"/>
+		<layer group="this" image="auxarch_banner_0" x="4" y="6"/>
+		<layer src="Barracks_Priority_OFF" x="0" y="0"/>
+	</image>
+	<image id="Barracks_Priority_Auxarch_ON" width="40" height="40">
+		<layer group="this" image="Barracks_Priority_Auxarch_OFF"/>
+		<layer src="Barracks_Priority_ON" x="0" y="0"/>
+	</image>
+	<image id="Barracks_Priority_Tower_OFF" width="40" height="40">
+		<layer src="Barracks_Priority_Base" x="5" y="4"/>
+		<layer group="this" image="tower_banner_0" x="4" y="6"/>
+		<layer src="Barracks_Priority_OFF" x="0" y="0"/>
+	</image>
+	<image id="Barracks_Priority_Tower_ON" width="40" height="40">
+		<layer group="this" image="Barracks_Priority_Tower_OFF"/>
+		<layer src="Barracks_Priority_ON" x="0" y="0"/>
+	</image>
+	<image id="Barracks_Priority_Watchtower_OFF" width="40" height="40">
+		<layer src="Barracks_Priority_Base" x="5" y="4"/>
+		<layer group="this" image="watchtower_banner_0" x="4" y="6"/>
+		<layer src="Barracks_Priority_OFF" x="0" y="0"/>
+	</image>
+	<image id="Barracks_Priority_Watchtower_ON" width="40" height="40">
+		<layer group="this" image="Barracks_Priority_Watchtower_OFF"/>
+		<layer src="Barracks_Priority_ON" x="0" y="0"/>
+	</image>
+	<!-- Note: Pantheon portrait for Epithet Advisor descriptions. Draw image borders and vignette in the same way as the Colosseum game selection buttons -->
+	<image id="Pantheon_Epithet_Button_01" src="Pantheon_Epithet_Button_01"/>
+	<!-- Note: Large cross widget, for use in walker exception buttons -->
+	<image id="Large_Widget_Cross" src="Large_Widget_Cross"/>
+	<!-- Note: Buttons for Building Mothball -->
+	<!-- Button assets created by MSTVD -->
+	<image id="Unmothball_1" src="Unmothball_1"/>
+	<image id="Unmothball_2" src="Unmothball_2"/>
+	<image id="Unmothball_3" src="Unmothball_3"/>
+	<image id="Unmothball_4" src="Unmothball_4"/>
+	<image id="Mothball_1" src="Mothball_1">
+		<layer group="this" image="Unmothball_1"/>
+		<layer src="Risk_Widget_Cross" x="1" y="2"/>
+	</image>
+	<image id="Mothball_2" src="Mothball_2">
+		<layer group="this" image="Unmothball_2"/>
+		<layer src="Risk_Widget_Cross" x="1" y="2"/>
+	</image>
+	<image id="Mothball_3" src="Mothball_3">
+		<layer group="this" image="Unmothball_3"/>
+		<layer src="Risk_Widget_Cross" x="1" y="2"/>
+	</image>
+	<image id="Mothball_4" src="Mothball_4">
+		<layer group="this" image="Unmothball_4"/>
+		<layer src="Risk_Widget_Cross" x="1" y="2"/>
+	</image>
+	<!-- Warehouse and Granary Flags (Assets created by Ouaz, with adjustments by Areldir) -->
+	<!-- Note: Flag for market and both traders -->
+	<image id="Warehouse_Flag_All_1" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a1" x="1" y="1"/>
+		<layer src="flag_icon_traders_a1-2" x="3" y="2"/>
+	</image>
+	<image id="Warehouse_Flag_All_2" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a2" x="1" y="1"/>
+		<layer src="flag_icon_traders_a1-2" x="3" y="2"/>
+	</image>
+	<image id="Warehouse_Flag_All_3" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a3" x="0" y="1"/>
+		<layer src="flag_icon_traders_a3" x="3" y="2"/>
+	</image>
+	<image id="Warehouse_Flag_All_4" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a4" x="1" y="1"/>
+		<layer src="flag_icon_traders_a4" x="3" y="2"/>
+	</image>
+	<image id="Warehouse_Flag_All_5" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a5" x="1" y="1"/>
+		<layer src="flag_icon_traders_a5" x="3" y="2"/>
+	</image>
+	<image id="Warehouse_Flag_All_6" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a6" x="1" y="1"/>
+		<layer src="flag_icon_traders_a1-2" x="3" y="2"/>
+		<layer src="flag_icon_traders_a6-8" x="4" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_All_7" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a7" x="1" y="1"/>
+		<layer src="flag_icon_traders_a1-2" x="3" y="2"/>
+		<layer src="flag_icon_traders_a6-8" x="4" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_All_8" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a8" x="1" y="1"/>
+		<layer src="flag_icon_traders_a1-2" x="3" y="2"/>
+		<layer src="flag_icon_traders_a6-8" x="4" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_All" width="21" height="24">
+		<layer group="this" image="Warehouse_Flag_All_1"/>
+		<animation speed="6" reversible="false">
+			<frame group="this" image="Warehouse_Flag_All_2"/>
+			<frame group="this" image="Warehouse_Flag_All_3"/>
+			<frame group="this" image="Warehouse_Flag_All_4"/>
+			<frame group="this" image="Warehouse_Flag_All_5"/>
+			<frame group="this" image="Warehouse_Flag_All_6"/>
+			<frame group="this" image="Warehouse_Flag_All_7"/>
+			<frame group="this" image="Warehouse_Flag_All_8"/>
+		</animation>
+	</image>
+	<!-- Note: Flag for both traders, no market -->
+	<image id="Warehouse_Flag_Land_Sea_1" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_purple_a1" x="1" y="1"/>
+		<layer src="flag_icon_traders_a1-2" x="3" y="2"/>
+	</image>
+	<image id="Warehouse_Flag_Land_Sea_2" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_purple_a2" x="1" y="1"/>
+		<layer src="flag_icon_traders_a1-2" x="3" y="2"/>
+	</image>
+	<image id="Warehouse_Flag_Land_Sea_3" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_purple_a3" x="0" y="1"/>
+		<layer src="flag_icon_traders_a3" x="3" y="2"/>
+	</image>
+	<image id="Warehouse_Flag_Land_Sea_4" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_purple_a4" x="1" y="1"/>
+		<layer src="flag_icon_traders_a4" x="3" y="2"/>
+	</image>
+	<image id="Warehouse_Flag_Land_Sea_5" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_purple_a5" x="1" y="1"/>
+		<layer src="flag_icon_traders_a5" x="3" y="2"/>
+	</image>
+	<image id="Warehouse_Flag_Land_Sea_6" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_purple_a6" x="1" y="1"/>
+		<layer src="flag_icon_traders_a1-2" x="3" y="2"/>
+		<layer src="flag_icon_traders_a6-8" x="4" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_Land_Sea_7" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_purple_a7" x="1" y="1"/>
+		<layer src="flag_icon_traders_a1-2" x="3" y="2"/>
+		<layer src="flag_icon_traders_a6-8" x="4" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_Land_Sea_8" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_purple_a8" x="1" y="1"/>
+		<layer src="flag_icon_traders_a1-2" x="3" y="2"/>
+		<layer src="flag_icon_traders_a6-8" x="4" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_Land_Sea" width="21" height="24">
+		<layer group="this" image="Warehouse_Flag_Land_Sea_1"/>
+		<animation speed="6" reversible="false">
+			<frame group="this" image="Warehouse_Flag_Land_Sea_2"/>
+			<frame group="this" image="Warehouse_Flag_Land_Sea_3"/>
+			<frame group="this" image="Warehouse_Flag_Land_Sea_4"/>
+			<frame group="this" image="Warehouse_Flag_Land_Sea_5"/>
+			<frame group="this" image="Warehouse_Flag_Land_Sea_6"/>
+			<frame group="this" image="Warehouse_Flag_Land_Sea_7"/>
+			<frame group="this" image="Warehouse_Flag_Land_Sea_8"/>
+		</animation>
+	</image>
+	<!-- Note: Warehouse flag for market, no traders -->
+	<image id="Warehouse_Flag_Market_1" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a1" x="1" y="1"/>
+		<layer src="flag_icon_market_a3" x="5" y="2"/>
+		<layer src="flag_icon_market_a5" x="13" y="8"/>
+		<layer src="flag_icon_market_a1" x="12" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_Market_2" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a2" x="1" y="1"/>
+		<layer src="flag_icon_market_a3" x="5" y="2"/>
+		<layer src="flag_icon_market_a5" x="13" y="8"/>
+		<layer src="flag_icon_market_a1" x="12" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_Market_3" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a3" x="0" y="1"/>
+		<layer src="flag_icon_market_a3" x="5" y="2"/>
+	</image>
+	<image id="Warehouse_Flag_Market_4" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a4" x="1" y="1"/>
+		<layer src="flag_icon_market_a3" x="5" y="2"/>
+		<layer src="flag_icon_market_a4" x="12" y="11"/>
+	</image>
+	<image id="Warehouse_Flag_Market_5" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a5" x="1" y="1"/>
+		<layer src="flag_icon_market_a3" x="5" y="2"/>
+		<layer src="flag_icon_market_a5" x="13" y="8"/>
+	</image>
+	<image id="Warehouse_Flag_Market_6" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a6" x="1" y="1"/>
+		<layer src="flag_icon_market_a3" x="5" y="2"/>
+		<layer src="flag_icon_market_a5" x="13" y="8"/>
+		<layer src="flag_icon_market_a1" x="12" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_Market_7" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a7" x="1" y="1"/>
+		<layer src="flag_icon_market_a3" x="5" y="2"/>
+		<layer src="flag_icon_market_a5" x="13" y="8"/>
+		<layer src="flag_icon_market_a1" x="12" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_Market_8" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a8" x="1" y="1"/>
+		<layer src="flag_icon_market_a3" x="5" y="2"/>
+		<layer src="flag_icon_market_a5" x="13" y="8"/>
+		<layer src="flag_icon_market_a1" x="12" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_Market" width="21" height="24">
+		<layer group="this" image="Warehouse_Flag_Market_1"/>
+		<animation speed="6" reversible="false">
+			<frame group="this" image="Warehouse_Flag_Market_2"/>
+			<frame group="this" image="Warehouse_Flag_Market_3"/>
+			<frame group="this" image="Warehouse_Flag_Market_4"/>
+			<frame group="this" image="Warehouse_Flag_Market_5"/>
+			<frame group="this" image="Warehouse_Flag_Market_6"/>
+			<frame group="this" image="Warehouse_Flag_Market_7"/>
+			<frame group="this" image="Warehouse_Flag_Market_8"/>
+		</animation>
+	</image>
+	<!-- Note: Flag for land traders only -->
+	<image id="Warehouse_Flag_Land_1" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_blue_a1" x="1" y="1"/>
+		<layer src="flag_icon_land_a3" x="3" y="2"/>
+		<layer src="flag_icon_land_a4" x="11" y="3"/>
+		<layer src="flag_icon_land_a5" x="11" y="3"/>
+	</image>
+	<image id="Warehouse_Flag_Land_2" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_blue_a2" x="1" y="1"/>
+		<layer src="flag_icon_land_a3" x="3" y="2"/>
+		<layer src="flag_icon_land_a4" x="11" y="3"/>
+		<layer src="flag_icon_land_a5" x="11" y="3"/>
+	</image>
+	<image id="Warehouse_Flag_Land_3" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_blue_a3" x="0" y="1"/>
+		<layer src="flag_icon_land_a3" x="3" y="2"/>
+	</image>
+	<image id="Warehouse_Flag_Land_4" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_blue_a4" x="1" y="1"/>
+		<layer src="flag_icon_land_a3" x="3" y="2"/>
+		<layer src="flag_icon_land_a4" x="11" y="3"/>
+	</image>
+	<image id="Warehouse_Flag_Land_5" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_blue_a5" x="1" y="1"/>
+		<layer src="flag_icon_land_a3" x="3" y="2"/>
+		<layer src="flag_icon_land_a5" x="11" y="3"/>
+	</image>
+	<image id="Warehouse_Flag_Land_6" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_blue_a6" x="1" y="1"/>
+		<layer src="flag_icon_land_a3" x="3" y="2"/>
+		<layer src="flag_icon_land_a4" x="11" y="3"/>
+		<layer src="flag_icon_land_a5" x="11" y="3"/>
+	</image>
+	<image id="Warehouse_Flag_Land_7" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_blue_a7" x="1" y="1"/>
+		<layer src="flag_icon_land_a3" x="3" y="2"/>
+		<layer src="flag_icon_land_a4" x="11" y="3"/>
+		<layer src="flag_icon_land_a5" x="11" y="3"/>
+	</image>
+	<image id="Warehouse_Flag_Land_8" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_blue_a8" x="1" y="1"/>
+		<layer src="flag_icon_land_a3" x="3" y="2"/>
+		<layer src="flag_icon_land_a4" x="11" y="3"/>
+		<layer src="flag_icon_land_a5" x="11" y="3"/>
+	</image>
+	<image id="Warehouse_Flag_Land" width="21" height="24">
+		<layer group="this" image="Warehouse_Flag_Land_1"/>
+		<animation speed="6" reversible="false">
+			<frame group="this" image="Warehouse_Flag_Land_2"/>
+			<frame group="this" image="Warehouse_Flag_Land_3"/>
+			<frame group="this" image="Warehouse_Flag_Land_4"/>
+			<frame group="this" image="Warehouse_Flag_Land_5"/>
+			<frame group="this" image="Warehouse_Flag_Land_6"/>
+			<frame group="this" image="Warehouse_Flag_Land_7"/>
+			<frame group="this" image="Warehouse_Flag_Land_8"/>
+		</animation>
+	</image>
+	<!-- Note: Flag for market and land traders -->
+	<image id="Warehouse_Flag_Market_Land_1" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a1" x="1" y="1"/>
+		<layer src="flag_icon_land_a3" x="3" y="2"/>
+		<layer src="flag_icon_land_a4" x="11" y="3"/>
+		<layer src="flag_icon_land_a5" x="11" y="3"/>
+	</image>
+	<image id="Warehouse_Flag_Market_Land_2" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a2" x="1" y="1"/>
+		<layer src="flag_icon_land_a3" x="3" y="2"/>
+		<layer src="flag_icon_land_a4" x="11" y="3"/>
+		<layer src="flag_icon_land_a5" x="11" y="3"/>
+	</image>
+	<image id="Warehouse_Flag_Market_Land_3" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a3" x="0" y="1"/>
+		<layer src="flag_icon_land_a3" x="3" y="2"/>
+	</image>
+	<image id="Warehouse_Flag_Market_Land_4" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a4" x="1" y="1"/>
+		<layer src="flag_icon_land_a3" x="3" y="2"/>
+		<layer src="flag_icon_land_a4" x="11" y="3"/>
+	</image>
+	<image id="Warehouse_Flag_Market_Land_5" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a5" x="1" y="1"/>
+		<layer src="flag_icon_land_a3" x="3" y="2"/>
+		<layer src="flag_icon_land_a4" x="11" y="3"/>
+		<layer src="flag_icon_land_a5" x="11" y="3"/>
+	</image>
+	<image id="Warehouse_Flag_Market_Land_6" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a6" x="1" y="1"/>
+		<layer src="flag_icon_land_a3" x="3" y="2"/>
+		<layer src="flag_icon_land_a4" x="11" y="3"/>
+		<layer src="flag_icon_land_a5" x="11" y="3"/>
+	</image>
+	<image id="Warehouse_Flag_Market_Land_7" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a7" x="1" y="1"/>
+		<layer src="flag_icon_land_a3" x="3" y="2"/>
+		<layer src="flag_icon_land_a4" x="11" y="3"/>
+		<layer src="flag_icon_land_a5" x="11" y="3"/>
+	</image>
+	<image id="Warehouse_Flag_Market_Land_8" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a8" x="1" y="1"/>
+		<layer src="flag_icon_land_a3" x="3" y="2"/>
+		<layer src="flag_icon_land_a4" x="11" y="3"/>
+		<layer src="flag_icon_land_a5" x="11" y="3"/>
+	</image>
+	<image id="Warehouse_Flag_Market_Land" width="21" height="24">
+		<layer group="this" image="Warehouse_Flag_Market_Land_1"/>
+		<animation speed="6" reversible="false">
+			<frame group="this" image="Warehouse_Flag_Market_Land_2"/>
+			<frame group="this" image="Warehouse_Flag_Market_Land_3"/>
+			<frame group="this" image="Warehouse_Flag_Market_Land_4"/>
+			<frame group="this" image="Warehouse_Flag_Market_Land_5"/>
+			<frame group="this" image="Warehouse_Flag_Market_Land_6"/>
+			<frame group="this" image="Warehouse_Flag_Market_Land_7"/>
+			<frame group="this" image="Warehouse_Flag_Market_Land_8"/>
+		</animation>
+	</image>
+	<!-- Note: Flag for sea traders only -->
+	<image id="Warehouse_Flag_Sea_1" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_blue_a1" x="1" y="1"/>
+		<layer src="flag_icon_sea_a3" x="4" y="2"/>
+		<layer src="flag_icon_sea_a4" x="12" y="10"/>
+		<layer src="flag_icon_sea_a5" x="14" y="7"/>
+		<layer src="flag_icon_sea_a1_2_6_8" x="13" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_Sea_2" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_blue_a2" x="1" y="1"/>
+		<layer src="flag_icon_sea_a3" x="4" y="2"/>
+		<layer src="flag_icon_sea_a4" x="12" y="10"/>
+		<layer src="flag_icon_sea_a5" x="14" y="7"/>
+		<layer src="flag_icon_sea_a1_2_6_8" x="13" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_Sea_3" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_blue_a3" x="0" y="1"/>
+		<layer src="flag_icon_sea_a3" x="4" y="2"/>
+	</image>
+	<image id="Warehouse_Flag_Sea_4" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_blue_a4" x="1" y="1"/>
+		<layer src="flag_icon_sea_a3" x="4" y="2"/>
+		<layer src="flag_icon_sea_a4" x="12" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_Sea_5" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_blue_a5" x="1" y="1"/>
+		<layer src="flag_icon_sea_a3" x="4" y="2"/>
+		<layer src="flag_icon_sea_a5" x="14" y="7"/>
+	</image>
+	<image id="Warehouse_Flag_Sea_6" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_blue_a6" x="1" y="1"/>
+		<layer src="flag_icon_sea_a3" x="4" y="2"/>
+		<layer src="flag_icon_sea_a4" x="12" y="10"/>
+		<layer src="flag_icon_sea_a5" x="14" y="7"/>
+		<layer src="flag_icon_sea_a1_2_6_8" x="13" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_Sea_7" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_blue_a7" x="1" y="1"/>
+		<layer src="flag_icon_sea_a3" x="4" y="2"/>
+		<layer src="flag_icon_sea_a4" x="12" y="10"/>
+		<layer src="flag_icon_sea_a5" x="14" y="7"/>
+		<layer src="flag_icon_sea_a1_2_6_8" x="13" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_Sea_8" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_blue_a8" x="1" y="1"/>
+		<layer src="flag_icon_sea_a3" x="4" y="2"/>
+		<layer src="flag_icon_sea_a4" x="12" y="10"/>
+		<layer src="flag_icon_sea_a5" x="14" y="7"/>
+		<layer src="flag_icon_sea_a1_2_6_8" x="13" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_Sea" width="21" height="24">
+		<layer group="this" image="Warehouse_Flag_Sea_1"/>
+		<animation speed="6" reversible="false">
+			<frame group="this" image="Warehouse_Flag_Sea_2"/>
+			<frame group="this" image="Warehouse_Flag_Sea_3"/>
+			<frame group="this" image="Warehouse_Flag_Sea_4"/>
+			<frame group="this" image="Warehouse_Flag_Sea_5"/>
+			<frame group="this" image="Warehouse_Flag_Sea_6"/>
+			<frame group="this" image="Warehouse_Flag_Sea_7"/>
+			<frame group="this" image="Warehouse_Flag_Sea_8"/>
+		</animation>
+	</image>
+	<!-- Note: Warehouse flag for market and sea traders -->
+	<image id="Warehouse_Flag_Market_Sea_1" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a1" x="1" y="1"/>
+		<layer src="flag_icon_sea_a3" x="4" y="2"/>
+		<layer src="flag_icon_sea_a4" x="12" y="10"/>
+		<layer src="flag_icon_sea_a5" x="14" y="7"/>
+		<layer src="flag_icon_sea_a1_2_6_8" x="13" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_Market_Sea_2" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a2" x="1" y="1"/>
+		<layer src="flag_icon_sea_a3" x="4" y="2"/>
+		<layer src="flag_icon_sea_a4" x="12" y="10"/>
+		<layer src="flag_icon_sea_a5" x="14" y="7"/>
+		<layer src="flag_icon_sea_a1_2_6_8" x="13" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_Market_Sea_3" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a3" x="0" y="1"/>
+		<layer src="flag_icon_sea_a3" x="4" y="2"/>
+	</image>
+	<image id="Warehouse_Flag_Market_Sea_4" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a4" x="1" y="1"/>
+		<layer src="flag_icon_sea_a3" x="4" y="2"/>
+		<layer src="flag_icon_sea_a4" x="12" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_Market_Sea_5" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a5" x="1" y="1"/>
+		<layer src="flag_icon_sea_a3" x="4" y="2"/>
+		<layer src="flag_icon_sea_a5" x="14" y="7"/>
+	</image>
+	<image id="Warehouse_Flag_Market_Sea_6" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a6" x="1" y="1"/>
+		<layer src="flag_icon_sea_a3" x="4" y="2"/>
+		<layer src="flag_icon_sea_a4" x="12" y="10"/>
+		<layer src="flag_icon_sea_a5" x="14" y="7"/>
+		<layer src="flag_icon_sea_a1_2_6_8" x="13" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_Market_Sea_7" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a7" x="1" y="1"/>
+		<layer src="flag_icon_sea_a3" x="4" y="2"/>
+		<layer src="flag_icon_sea_a4" x="12" y="10"/>
+		<layer src="flag_icon_sea_a5" x="14" y="7"/>
+		<layer src="flag_icon_sea_a1_2_6_8" x="13" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_Market_Sea_8" width="21" height="24">
+		<layer src="flag_layer_base"/>
+		<layer src="flag_red_a8" x="1" y="1"/>
+		<layer src="flag_icon_sea_a3" x="4" y="2"/>
+		<layer src="flag_icon_sea_a4" x="12" y="10"/>
+		<layer src="flag_icon_sea_a5" x="14" y="7"/>
+		<layer src="flag_icon_sea_a1_2_6_8" x="13" y="10"/>
+	</image>
+	<image id="Warehouse_Flag_Market_Sea" width="21" height="24">
+		<layer group="this" image="Warehouse_Flag_Market_Sea_1"/>
+		<animation speed="6" reversible="false">
+			<frame group="this" image="Warehouse_Flag_Market_Sea_2"/>
+			<frame group="this" image="Warehouse_Flag_Market_Sea_3"/>
+			<frame group="this" image="Warehouse_Flag_Market_Sea_4"/>
+			<frame group="this" image="Warehouse_Flag_Market_Sea_5"/>
+			<frame group="this" image="Warehouse_Flag_Market_Sea_6"/>
+			<frame group="this" image="Warehouse_Flag_Market_Sea_7"/>
+			<frame group="this" image="Warehouse_Flag_Market_Sea_8"/>
+		</animation>
+	</image>
+	<!-- Note: Blank UI button for military formations -->
+	<image id="Formation_UI_Blank" width="81" height="80">
+		<layer group="197" image="6"/>
+		<layer src="Formation_UI_Overlay" x="9" y="8"/>
+	</image>
+	<!-- Note: Reference asset for UI military formation helmet icon - DO NOT USE -->
+	<image id="Formation_UI_Helmet" width="22" height="16">
+		<layer group="197" image="0" x="-9" y="-11"/>
+		<layer src="Formation_UI_Helmet_Mask" mask="alpha"/>
+	</image>
+	<!-- Note: UI button for wedge formation -->
+	<image id="Formation_UI_Wedge" width="81" height="80">
+		<layer group="this" image="Formation_UI_Blank"/>
+		<layer group="this" image="Formation_UI_Helmet" x="29" y="11"/>
+		<layer group="this" image="Formation_UI_Helmet" x="20" y="30"/>
+		<layer group="this" image="Formation_UI_Helmet" x="40" y="30"/>
+		<layer group="this" image="Formation_UI_Helmet" x="9" y="49"/>
+		<layer group="this" image="Formation_UI_Helmet" x="29" y="49"/>
+		<layer group="this" image="Formation_UI_Helmet" x="49" y="49"/>
+	</image>
+	<!-- Note: Banner image for Forts -->
+	<image id="Fort_Banner_01" src="Fort_Banner_01"/>
+	<!-- Note: Banner image for Triumphal arch -->
+	<image id="Triumphal_Arch_Banner" src="Triumphal_Arch_Banner"/>
+	<!-- Note: Advisor building window button borders -->
+	<image id="Advisor_Building_Window_Border_1" width="24" height="24">
+		<layer group="this" image="Unmothball_1"/>
+		<layer src="Advisor_Building_Window_Mask" mask="alpha"/>
+	</image>
+	<image id="Advisor_Building_Window_Border_2" width="24" height="24">
+		<layer group="this" image="Unmothball_2"/>
+		<layer src="Advisor_Building_Window_Mask" mask="alpha"/>
+	</image>
+	<image id="Advisor_Building_Window_Border_3" width="24" height="24">
+		<layer group="this" image="Unmothball_3"/>
+		<layer src="Advisor_Building_Window_Mask" mask="alpha"/>
+	</image>
+	<image id="Advisor_Building_Window_Border_4" width="24" height="24">
+		<layer group="this" image="Unmothball_4"/>
+		<layer src="Advisor_Building_Window_Mask" mask="alpha"/>
+	</image>
+	<!-- Note: Advisor building window button - Labor -->
+	<image id="Advisor_Building_Window_Labor_1" width="24" height="24">
+		<layer group="199" image="0" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_1"/>
+	</image>
+	<image id="Advisor_Building_Window_Labor_2" width="24" height="24">
+		<layer group="199" image="2" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_2"/>
+	</image>
+	<image id="Advisor_Building_Window_Labor_3" width="24" height="24">
+		<layer group="199" image="1" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_3"/>
+	</image>
+	<image id="Advisor_Building_Window_Labor_4" width="24" height="24">
+		<layer group="199" image="0" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_4"/>
+	</image>
+	<!-- Note: Advisor building window button - Military -->
+	<image id="Advisor_Building_Window_Military_1" width="24" height="24">
+		<layer group="199" image="3" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_1"/>
+	</image>
+	<image id="Advisor_Building_Window_Military_2" width="24" height="24">
+		<layer group="199" image="4" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_2"/>
+	</image>
+	<image id="Advisor_Building_Window_Military_3" width="24" height="24">
+		<layer group="199" image="4" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_3"/>
+	</image>
+	<image id="Advisor_Building_Window_Military_4" width="24" height="24">
+		<layer group="199" image="3" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_4"/>
+	</image>
+	<!-- Note: Advisor building window button - Imperial -->
+	<image id="Advisor_Building_Window_Imperial_1" width="24" height="24">
+		<layer group="199" image="6" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_1"/>
+	</image>
+	<image id="Advisor_Building_Window_Imperial_2" width="24" height="24">
+		<layer group="199" image="7" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_2"/>
+	</image>
+	<image id="Advisor_Building_Window_Imperial_3" width="24" height="24">
+		<layer group="199" image="7" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_3"/>
+	</image>
+	<image id="Advisor_Building_Window_Imperial_4" width="24" height="24">
+		<layer group="199" image="6" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_4"/>
+	</image>
+	<!-- Note: Advisor building window button - Ratings -->
+	<image id="Advisor_Building_Window_Ratings_1" width="24" height="24">
+		<layer group="199" image="9" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_1"/>
+	</image>
+	<image id="Advisor_Building_Window_Ratings_2" width="24" height="24">
+		<layer group="199" image="10" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_2"/>
+	</image>
+	<image id="Advisor_Building_Window_Ratings_3" width="24" height="24">
+		<layer group="199" image="10" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_3"/>
+	</image>
+	<image id="Advisor_Building_Window_Ratings_4" width="24" height="24">
+		<layer group="199" image="9" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_4"/>
+	</image>
+	<!-- Note: Advisor building window button - Trade -->
+	<image id="Advisor_Building_Window_Trade_1" width="24" height="24">
+		<layer group="199" image="12" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_1"/>
+	</image>
+	<image id="Advisor_Building_Window_Trade_2" width="24" height="24">
+		<layer group="199" image="13" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_2"/>
+	</image>
+	<image id="Advisor_Building_Window_Trade_3" width="24" height="24">
+		<layer group="199" image="13" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_3"/>
+	</image>
+	<image id="Advisor_Building_Window_Trade_4" width="24" height="24">
+		<layer group="199" image="12" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_4"/>
+	</image>
+	<!-- Note: Advisor building window button - Population -->
+	<image id="Advisor_Building_Window_Population_1" width="24" height="24">
+		<layer group="199" image="15" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_1"/>
+	</image>
+	<image id="Advisor_Building_Window_Population_2" width="24" height="24">
+		<layer group="199" image="16" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_2"/>
+	</image>
+	<image id="Advisor_Building_Window_Population_3" width="24" height="24">
+		<layer group="199" image="16" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_3"/>
+	</image>
+	<image id="Advisor_Building_Window_Population_4" width="24" height="24">
+		<layer group="199" image="15" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_4"/>
+	</image>
+	<!-- Note: Advisor building window button - Housing -->
+	<image id="Advisor_Building_Window_Housing_1" width="24" height="24">
+		<layer group="this" image="Housing_Advisor_S_UH" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_1"/>
+	</image>
+	<image id="Advisor_Building_Window_Housing_2" width="24" height="24">
+		<layer group="this" image="Housing_Advisor_S_H" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_2"/>
+	</image>
+	<image id="Advisor_Building_Window_Housing_3" width="24" height="24">
+		<layer group="this" image="Housing_Advisor_S_H" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_3"/>
+	</image>
+	<image id="Advisor_Building_Window_Housing_4" width="24" height="24">
+		<layer group="this" image="Housing_Advisor_S_UH" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_4"/>
+	</image>
+	<!-- Note: Advisor building window button - Health -->
+	<image id="Advisor_Building_Window_Health_1" width="24" height="24">
+		<layer group="199" image="18" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_1"/>
+	</image>
+	<image id="Advisor_Building_Window_Health_2" width="24" height="24">
+		<layer group="199" image="19" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_2"/>
+	</image>
+	<image id="Advisor_Building_Window_Health_3" width="24" height="24">
+		<layer group="199" image="19" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_3"/>
+	</image>
+	<image id="Advisor_Building_Window_Health_4" width="24" height="24">
+		<layer group="199" image="18" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_4"/>
+	</image>
+	<!-- Note: Advisor building window button - Education -->
+	<image id="Advisor_Building_Window_Education_1" width="24" height="24">
+		<layer group="199" image="21" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_1"/>
+	</image>
+	<image id="Advisor_Building_Window_Education_2" width="24" height="24">
+		<layer group="199" image="22" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_2"/>
+	</image>
+	<image id="Advisor_Building_Window_Education_3" width="24" height="24">
+		<layer group="199" image="22" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_3"/>
+	</image>
+	<image id="Advisor_Building_Window_Education_4" width="24" height="24">
+		<layer group="199" image="21" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_4"/>
+	</image>
+	<!-- Note: Advisor building window button - Entertainment -->
+	<image id="Advisor_Building_Window_Entertainment_1" width="24" height="24">
+		<layer group="199" image="24" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_1"/>
+	</image>
+	<image id="Advisor_Building_Window_Entertainment_2" width="24" height="24">
+		<layer group="199" image="25" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_2"/>
+	</image>
+	<image id="Advisor_Building_Window_Entertainment_3" width="24" height="24">
+		<layer group="199" image="25" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_3"/>
+	</image>
+	<image id="Advisor_Building_Window_Entertainment_4" width="24" height="24">
+		<layer group="199" image="24" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_4"/>
+	</image>
+	<!-- Note: Advisor building window button - Religion -->
+	<image id="Advisor_Building_Window_Religion_1" width="24" height="24">
+		<layer group="199" image="27" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_1"/>
+	</image>
+	<image id="Advisor_Building_Window_Religion_2" width="24" height="24">
+		<layer group="199" image="28" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_2"/>
+	</image>
+	<image id="Advisor_Building_Window_Religion_3" width="24" height="24">
+		<layer group="199" image="28" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_3"/>
+	</image>
+	<image id="Advisor_Building_Window_Religion_4" width="24" height="24">
+		<layer group="199" image="27" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_4"/>
+	</image>
+	<!-- Note: Advisor building window button - Financial -->
+	<image id="Advisor_Building_Window_Financial_1" width="24" height="24">
+		<layer group="199" image="30" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_1"/>
+	</image>
+	<image id="Advisor_Building_Window_Financial_2" width="24" height="24">
+		<layer group="199" image="31" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_2"/>
+	</image>
+	<image id="Advisor_Building_Window_Financial_3" width="24" height="24">
+		<layer group="199" image="31" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_3"/>
+	</image>
+	<image id="Advisor_Building_Window_Financial_4" width="24" height="24">
+		<layer group="199" image="30" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_4"/>
+	</image>
+	<!-- Note: Advisor building window button - Chief -->
+	<image id="Advisor_Building_Window_Chief_1" width="24" height="24">
+		<layer group="199" image="33" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_1"/>
+	</image>
+	<image id="Advisor_Building_Window_Chief_2" width="24" height="24">
+		<layer group="199" image="34" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_2"/>
+	</image>
+	<image id="Advisor_Building_Window_Chief_3" width="24" height="24">
+		<layer group="199" image="34" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_3"/>
+	</image>
+	<image id="Advisor_Building_Window_Chief_4" width="24" height="24">
+		<layer group="199" image="33" x="-2" y="-2"/>
+		<layer group="this" image="Advisor_Building_Window_Border_4"/>
+	</image>
+	<!-- Note: More standards for custom legions by MSTVD -->
+	<image id="17Legion_Scorpions" src="17Legion_Scorpions"/>
+	<image id="18Legion_Camels" src="18Legion_Camels"/>
+	<image id="19Legion_Dolphins" src="19Legion_Dolphins"/>
+	<image id="20Legion_Sea_Goats" src="20Legion_Sea_Goats"/>
 </assetlist>

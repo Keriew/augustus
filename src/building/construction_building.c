@@ -43,6 +43,10 @@ static void add_fort(int type, building *fort)
         fort->subtype.fort_figure_type = FIGURE_FORT_JAVELIN;
     } else if (type == BUILDING_FORT_MOUNTED) {
         fort->subtype.fort_figure_type = FIGURE_FORT_MOUNTED;
+    } else if (type == BUILDING_FORT_AUXILIA_INFANTRY) {
+        fort->subtype.fort_figure_type = FIGURE_FORT_INFANTRY;
+    } else if (type == BUILDING_FORT_ARCHERS) {
+        fort->subtype.fort_figure_type = FIGURE_FORT_ARCHER;
     }
 
     // create parade ground
@@ -139,6 +143,13 @@ static void add_depot(building *b)
     add_building(b);
 }
 
+static void add_granary(building *b)
+{
+    b->storage_id = building_storage_create(b->id);
+    add_building(b);
+    map_tiles_update_area_roads(b->x, b->y, 5);
+}
+
 static void add_to_map(int type, building *b, int size, int orientation, int waterside_orientation_abs)
 {
     if (building_variant_has_variants(b->type)) {
@@ -164,9 +175,7 @@ static void add_to_map(int type, building *b, int size, int orientation, int wat
             break;
         // distribution
         case BUILDING_GRANARY:
-            b->storage_id = building_storage_create(b->id);
-            add_building(b);
-            map_tiles_update_area_roads(b->x, b->y, 5);
+            add_granary(b);
             break;
         // Don't autodistribute wine for new Venus temples
         case BUILDING_SMALL_TEMPLE_VENUS:
@@ -247,6 +256,8 @@ static void add_to_map(int type, building *b, int size, int orientation, int wat
         case BUILDING_FORT_LEGIONARIES:
         case BUILDING_FORT_JAVELIN:
         case BUILDING_FORT_MOUNTED:
+        case BUILDING_FORT_AUXILIA_INFANTRY:
+        case BUILDING_FORT_ARCHERS:
             add_fort(type, b);
             break;
         case BUILDING_GRAND_TEMPLE_CERES:
@@ -257,6 +268,10 @@ static void add_to_map(int type, building *b, int size, int orientation, int wat
         case BUILDING_PANTHEON:
             map_tiles_update_area_roads(b->x, b->y, 9);
             building_monument_set_phase(b, MONUMENT_START);
+            if (type == BUILDING_GRAND_TEMPLE_MARS) {
+                b->accepted_goods[RESOURCE_WEAPONS] = 1;
+                b->accepted_goods[RESOURCE_NONE] = 1;
+            }
             break;
         case BUILDING_MESS_HALL:
             b->data.market.is_mess_hall = 1;
@@ -292,6 +307,11 @@ static void add_to_map(int type, building *b, int size, int orientation, int wat
         case BUILDING_SHRINE_VENUS:
             b->subtype.orientation = building_rotation_get_rotation();
             add_building(b);
+            break;            
+        case BUILDING_BARRACKS:
+            b->accepted_goods[RESOURCE_WEAPONS] = 1;
+            b->accepted_goods[RESOURCE_NONE] = 1;
+            add_building(b);
             break;
 
     }
@@ -311,6 +331,8 @@ int building_construction_place_building(building_type type, int x, int y)
     if (type == BUILDING_WAREHOUSE) {
         size = 3;
     }
+    // Do not check for a figure when build a roadblock of single tile size
+    int check_figure = type == BUILDING_ROADBLOCK && size == 1 ? 0 : 1;
     int building_orientation = 0;
     if (type == BUILDING_GATEHOUSE) {
         building_orientation = map_orientation_for_gatehouse(x, y);
@@ -320,7 +342,7 @@ int building_construction_place_building(building_type type, int x, int y)
     building_construction_offset_start_from_orientation(&x, &y, size);
     // extra checks
     if (type == BUILDING_GATEHOUSE) {
-        if (!map_tiles_are_clear(x, y, size, terrain_mask)) {
+        if (!map_tiles_are_clear(x, y, size, terrain_mask, check_figure)) {
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return 0;
         }
@@ -333,12 +355,12 @@ int building_construction_place_building(building_type type, int x, int y)
         }
     }
     if (type == BUILDING_ROADBLOCK) {
-        if (map_tiles_are_clear(x, y, size, TERRAIN_ROAD)) {
+        if (map_tiles_are_clear(x, y, size, TERRAIN_ROAD, check_figure)) {
             return 0;
         }
     }
     if (type == BUILDING_TRIUMPHAL_ARCH) {
-        if (!map_tiles_are_clear(x, y, size, terrain_mask)) {
+        if (!map_tiles_are_clear(x, y, size, terrain_mask, check_figure)) {
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return 0;
         }
@@ -362,7 +384,7 @@ int building_construction_place_building(building_type type, int x, int y)
             return 0;
         }
     } else {
-        if (!map_tiles_are_clear(x, y, size, terrain_mask)) {
+        if (!map_tiles_are_clear(x, y, size, terrain_mask, check_figure)) {
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return 0;
         }
@@ -378,7 +400,7 @@ int building_construction_place_building(building_type type, int x, int y)
         int orient_index = building_rotation_get_rotation();
         int x_offset = offsets_x[orient_index];
         int y_offset = offsets_y[orient_index];
-        if (!map_tiles_are_clear(x + x_offset, y + y_offset, 4, terrain_mask)) {
+        if (!map_tiles_are_clear(x + x_offset, y + y_offset, 4, terrain_mask, check_figure)) {
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return 0;
         }
@@ -422,8 +444,8 @@ int building_construction_place_building(building_type type, int x, int y)
         building_rotation_get_offset_with_rotation(5, building_rotation_get_rotation(), &x_offset_1, &y_offset_1);
         int x_offset_2, y_offset_2;
         building_rotation_get_offset_with_rotation(10, building_rotation_get_rotation(), &x_offset_2, &y_offset_2);
-        if (!map_tiles_are_clear(x + x_offset_1, y + y_offset_1, 5, terrain_mask) ||
-            !map_tiles_are_clear(x + x_offset_2, y + y_offset_2, 5, terrain_mask)) {
+        if (!map_tiles_are_clear(x + x_offset_1, y + y_offset_1, 5, terrain_mask, check_figure) ||
+            !map_tiles_are_clear(x + x_offset_2, y + y_offset_2, 5, terrain_mask, check_figure)) {
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return 0;
         }

@@ -39,7 +39,7 @@ int figure_count(void)
 figure *figure_create(figure_type type, int x, int y, direction_type dir)
 {
     figure *f = 0;
-    array_new_item(data.figures, 1, f);
+    array_new_item_after_index(data.figures, 1, f);
     if (!f) {
         return array_first(data.figures);
     }
@@ -137,6 +137,7 @@ void figure_delete(figure *f)
         case FIGURE_JAVELIN:
         case FIGURE_FRIENDLY_ARROW:
         case FIGURE_BOLT:
+        case FIGURE_CATAPULT_MISSILE:
         case FIGURE_SPEAR:
         case FIGURE_FISH_GULLS:
         case FIGURE_SHEEP:
@@ -168,6 +169,13 @@ void figure_delete(figure *f)
                 if (b->data.distribution.cartpusher_ids[i] == f->id) {
                     b->data.distribution.cartpusher_ids[i] = 0;
                 }
+            }
+            break;
+        case FIGURE_WAREHOUSEMAN:
+            if (f->id == b->figure_id4) {
+                b->figure_id4 = 0;
+            } else if (f->id == b->figure_id) {
+                b->figure_id = 0;
             }
             break;
         case FIGURE_CART_PUSHER:
@@ -206,12 +214,12 @@ int figure_is_dead(const figure *f)
 
 int figure_is_enemy(const figure *f)
 {
-    return f->type >= FIGURE_ENEMY43_SPEAR && f->type <= FIGURE_ENEMY_CAESAR_LEGIONARY;
+    return (f->type >= FIGURE_ENEMY43_SPEAR && f->type <= FIGURE_ENEMY_CAESAR_LEGIONARY) || f->type == FIGURE_ENEMY_CATAPULT;
 }
 
 int figure_is_legion(const figure *f)
 {
-    return f->type >= FIGURE_FORT_JAVELIN && f->type <= FIGURE_FORT_LEGIONARY;
+    return (f->type >= FIGURE_FORT_JAVELIN && f->type <= FIGURE_FORT_LEGIONARY) || f->type == FIGURE_FORT_INFANTRY || f->type == FIGURE_FORT_ARCHER;
 }
 
 int figure_is_herd(const figure *f)
@@ -219,7 +227,7 @@ int figure_is_herd(const figure *f)
     return f->type >= FIGURE_SHEEP && f->type <= FIGURE_ZEBRA;
 }
 
-static void initialize_new_figure(figure *f, int position)
+static void initialize_new_figure(figure *f, unsigned int position)
 {
     f->id = position;
 }
@@ -291,7 +299,7 @@ static void figure_save(buffer *buf, const figure *f)
     buffer_write_u8(buf, f->y);
     buffer_write_u8(buf, f->previous_tile_x);
     buffer_write_u8(buf, f->previous_tile_y);
-    buffer_write_u8(buf, f->missile_damage);
+    buffer_write_u8(buf, f->missile_height);
     buffer_write_u8(buf, f->damage);
     buffer_write_i16(buf, f->grid_offset);
     buffer_write_u8(buf, f->destination_x);
@@ -416,7 +424,7 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     f->y = buffer_read_u8(buf);
     f->previous_tile_x = buffer_read_u8(buf);
     f->previous_tile_y = buffer_read_u8(buf);
-    f->missile_damage = buffer_read_u8(buf);
+    f->missile_height = buffer_read_u8(buf);
     f->damage = buffer_read_u8(buf);
     f->grid_offset = buffer_read_i16(buf);
     f->destination_x = buffer_read_u8(buf);

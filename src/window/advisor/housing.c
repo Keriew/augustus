@@ -48,7 +48,7 @@ static void draw_housing_table(void)
         }
         total_residences += residences_at_level;
 
-        for (int i = 0; i < list.size; i++) {
+        for (unsigned int i = 0; i < list.size; i++) {
             if (model_house_uses_inventory(level, list.items[i])) {
                 houses_using_goods[list.items[i]] += residences_at_level;
             }
@@ -73,12 +73,12 @@ static void draw_housing_table(void)
     text_draw(translation_for(TR_ADVISOR_TOTAL_HOUSING_CAPACITY), 320, y_offset + 220, FONT_NORMAL_GREEN, 0);
     text_draw_number(city_population_total_housing_capacity(), '@', " ", 500, y_offset + 220, FONT_NORMAL_WHITE, 0);
 
-    for (int i = 0; i < list.size; i++) {
+    for (unsigned int i = 0; i < list.size; i++) {
         image_draw(resource_get_data(list.items[i])->image.icon, 54, y_offset + 260 + (23 * i),
             COLOR_MASK_NONE, SCALE_NONE);
         text_draw(translation_for(TR_ADVISOR_RESIDENCES_USING_POTTERY + i), 90, y_offset + 263 + (23 * i),
             FONT_NORMAL_BLACK, 0);
-        text_draw_number(houses_using_goods[list.items[i]], '@', " ", 450, y_offset + 263 + (23 * i),
+        text_draw_number(houses_using_goods[list.items[i]], '@', " ", 499, y_offset + 263 + (23 * i),
             FONT_NORMAL_BLACK, 0);
     }
 }
@@ -95,11 +95,7 @@ static int draw_background(void)
     text_draw(translation_for(TR_HEADER_HOUSING), 60, 12, FONT_LARGE_BLACK, 0);
     image_draw(housing_advisor_image, 10, 10, COLOR_MASK_NONE, SCALE_NONE);
 
-    static uint8_t pop[32];
-    pop[0] = ' ';
-    string_from_int(pop + 1, city_population(), 0);
-
-    int x_offset = text_get_width(pop, FONT_NORMAL_BLACK);
+    int x_offset = text_get_number_width(city_population(), 0, "", FONT_NORMAL_BLACK);
     x_offset += lang_text_get_width(CUSTOM_TRANSLATION, TR_ADVISOR_TOTAL_POPULATION, FONT_NORMAL_BLACK);
     x_offset = 620 - x_offset;
 

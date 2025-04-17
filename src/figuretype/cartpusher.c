@@ -1,5 +1,6 @@
 #include "cartpusher.h"
 
+#include "assets/assets.h"
 #include "building/barracks.h"
 #include "building/granary.h"
 #include "building/industry.h"
@@ -182,10 +183,10 @@ static void determine_cartpusher_destination(figure *f, building *b, int road_ne
         dst_building_id = building_monument_get_monument(f->x, f->y, b->output_resource_id, road_network_id, &dst);
         if (dst_building_id) {
             f->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
-            set_destination(f, FIGURE_ACTION_239_CARTPUSHER_DELIVERING_TO_MONUMENT, dst_building_id, dst.x, dst.y);
+            set_destination(f, FIGURE_ACTION_246_CARTPUSHER_DELIVERING_TO_MONUMENT, dst_building_id, dst.x, dst.y);
             building_monument_add_delivery(dst_building_id, f->id, b->output_resource_id, 1);
         } else {
-            f->action_state = FIGURE_ACTION_238_CARTPUSHER_WAITING_FOR_DESTINATION;
+            f->action_state = FIGURE_ACTION_245_CARTPUSHER_WAITING_FOR_DESTINATION;
         }
         return;
     }
@@ -264,13 +265,21 @@ static void update_image(figure *f)
     int dir = figure_image_normalize_direction(
         f->direction < 8 ? f->direction : f->previous_tile_direction);
 
-    int base_group = f->type == FIGURE_CART_PUSHER ? GROUP_FIGURE_CARTPUSHER : GROUP_FIGURE_MIGRANT;
-
-    if (f->action_state == FIGURE_ACTION_149_CORPSE) {
-        f->image_id = image_group(base_group) + figure_image_corpse_offset(f) + 96;
-        f->cart_image_id = 0;
+    if (building_get(f->building_id)->type == BUILDING_ARMOURY) {
+        if (f->action_state == FIGURE_ACTION_149_CORPSE) {
+            f->image_id = assets_get_image_id("Walkers", "barracks_worker_death_01") + figure_image_corpse_offset(f);
+        } else {
+            f->image_id = assets_get_image_id("Walkers", "barracks_worker_ne_01") + dir * 12 + f->image_offset;
+        }
     } else {
-        f->image_id = image_group(base_group) + dir + 8 * f->image_offset;
+        int base_group = f->type == FIGURE_CART_PUSHER ? GROUP_FIGURE_CARTPUSHER : GROUP_FIGURE_MIGRANT;
+
+        if (f->action_state == FIGURE_ACTION_149_CORPSE) {
+            f->image_id = image_group(base_group) + figure_image_corpse_offset(f) + 96;
+            f->cart_image_id = 0;
+        } else {
+            f->image_id = image_group(base_group) + dir + 8 * f->image_offset;
+        }
     }
     if (f->cart_image_id) {
         f->cart_image_id += dir;
@@ -339,7 +348,7 @@ void figure_cartpusher_action(figure *f)
             }
             f->image_offset = 0;
             break;
-        case FIGURE_ACTION_238_CARTPUSHER_WAITING_FOR_DESTINATION:
+        case FIGURE_ACTION_245_CARTPUSHER_WAITING_FOR_DESTINATION:
             set_cart_graphic(f, 1);
             f->wait_ticks++;
             if (f->wait_ticks > NON_STORABLE_RESOURCE_CARTPUSHER_MAX_WAIT_TICKS) {
@@ -401,7 +410,7 @@ void figure_cartpusher_action(figure *f)
                 f->state = FIGURE_STATE_DEAD;
             }
             break;
-        case FIGURE_ACTION_239_CARTPUSHER_DELIVERING_TO_MONUMENT:
+        case FIGURE_ACTION_246_CARTPUSHER_DELIVERING_TO_MONUMENT:
             if (f->wait_ticks++ >= VALID_MONUMENT_RECHECK_TICKS) {
                 if (!building_monument_has_delivery_for_worker(f->id)) {
                     f->state = FIGURE_STATE_DEAD;
@@ -412,7 +421,7 @@ void figure_cartpusher_action(figure *f)
             set_cart_graphic(f, 1);
             figure_movement_move_ticks_with_percentage(f, 1, percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
-                f->action_state = FIGURE_ACTION_240_CARTPUSHER_AT_MONUMENT;
+                f->action_state = FIGURE_ACTION_247_CARTPUSHER_AT_MONUMENT;
                 f->wait_ticks = 0;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
                 reroute_cartpusher(f);
@@ -464,7 +473,7 @@ void figure_cartpusher_action(figure *f)
             }
             f->image_offset = 0;
             break;
-        case FIGURE_ACTION_240_CARTPUSHER_AT_MONUMENT:
+        case FIGURE_ACTION_247_CARTPUSHER_AT_MONUMENT:
             f->wait_ticks++;
             if (f->wait_ticks > 5) {
                 if (!building_monument_has_delivery_for_worker(f->id)) {
@@ -566,6 +575,35 @@ static void determine_granaryman_destination(figure *f, int road_network_id, int
     }
     // no one will accept, stand idle
     f->wait_ticks = 2;
+}
+
+static void determine_armoury_supplier_destination(figure *f, int road_network_id)
+{
+    f->is_ghost = 0;
+
+    map_point dst;
+    building *armoury = building_get(f->building_id);
+    int dst_building_id;
+
+    // Has weapons, deliver to barracks
+    if (f->resource_id) { 
+        dst_building_id = building_get_barracks_for_weapon(armoury->x, armoury->y, RESOURCE_WEAPONS,
+            armoury->road_network_id, &dst);
+        if (dst_building_id) {
+            set_destination(f, FIGURE_ACTION_51_WAREHOUSEMAN_DELIVERING_RESOURCE, dst_building_id, dst.x, dst.y);
+            return;
+        }
+    } else {
+        // Go grab weapons
+        dst_building_id = building_warehouse_with_resource(armoury->x, armoury->y, RESOURCE_WEAPONS, armoury->road_network_id, 0, &dst, BUILDING_STORAGE_PERMISSION_ARMOURY);
+        if (dst_building_id) {
+            set_destination(f, FIGURE_ACTION_248_ARMOURY_SUPPLIER_GETTING_WEAPONS, dst_building_id, dst.x, dst.y);
+            return;
+        }
+    }
+
+    // no one will accept, stand idle
+    f->wait_ticks = 5;
 }
 
 static void remove_resource_from_warehouse(figure *f)
@@ -685,6 +723,8 @@ static void warehouseman_initial_action(figure *f, int road_network_id, int remo
         f->wait_ticks = 0;
         if (b->type == BUILDING_GRANARY) {
             determine_granaryman_destination(f, road_network_id, remove_resources);
+        } else if (b->type == BUILDING_ARMOURY) {
+            determine_armoury_supplier_destination(f, road_network_id);
         } else {
             determine_warehouseman_destination(f, road_network_id, remove_resources);
         }
@@ -700,7 +740,8 @@ void figure_warehouseman_action(figure *f)
     int percentage_speed = cartpusher_percentage_speed(f);
     building *b = building_get(f->building_id);
 
-    if (b->state != BUILDING_STATE_IN_USE || b->figure_id != f->id) {
+    if (b->state != BUILDING_STATE_IN_USE || 
+        (b->figure_id != f->id && b->figure_id4 != f->id)) {
         f->state = FIGURE_STATE_DEAD;
     }
 
@@ -892,6 +933,38 @@ void figure_warehouseman_action(figure *f)
             } else if (f->direction == DIR_FIGURE_LOST) {
                 f->state = FIGURE_STATE_DEAD;
             }
+            break;
+        case FIGURE_ACTION_248_ARMOURY_SUPPLIER_GETTING_WEAPONS:
+            f->cart_image_id = image_group(GROUP_FIGURE_CARTPUSHER_CART); // empty
+            figure_movement_move_ticks_with_percentage(f, 1, percentage_speed);
+            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+                f->action_state = FIGURE_ACTION_249_ARMOURY_SUPPLIER_AT_WAREHOUSE;
+                f->wait_ticks = 0;
+            } else if (f->direction == DIR_FIGURE_REROUTE) {
+                figure_route_remove(f);
+            } else if (f->direction == DIR_FIGURE_LOST) {
+                f->state = FIGURE_STATE_DEAD;
+            } else if (f->wait_ticks++ > FIGURE_REROUTE_DESTINATION_TICKS) {
+                f->action_state = FIGURE_ACTION_233_WAREHOUSEMAN_RECONSIDER_TARGET;
+                figure_warehouseman_action(f);
+                return;
+            }
+            break;
+        case FIGURE_ACTION_249_ARMOURY_SUPPLIER_AT_WAREHOUSE:
+            f->wait_ticks++;
+            if (f->wait_ticks > 4) {
+                f->loads_sold_or_carrying = 0;
+                city_health_dispatch_sickness(f);
+                if (0 == building_warehouse_remove_resource(building_get(f->destination_building_id), 
+                    f->collecting_item_id, 1)) {
+                    f->loads_sold_or_carrying++;
+                    f->resource_id = f->collecting_item_id;
+                    f->destination_building_id = 0;
+                    figure_route_remove(f);
+                }
+                warehouseman_initial_action(f, road_network_id, 0);
+            }
+            f->image_offset = 0;
             break;
         case FIGURE_ACTION_233_WAREHOUSEMAN_RECONSIDER_TARGET:
             warehouseman_initial_action(f, road_network_id, 0);

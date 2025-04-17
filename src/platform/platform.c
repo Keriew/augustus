@@ -58,7 +58,7 @@ const char *system_architecture(void)
 }
 
 #if defined(_WIN32) || defined(_WIN64)
-#include <Windows.h>
+#include <windows.h>
 #elif defined (__GNUC__) && !defined (__SWITCH__)
 #include <sys/utsname.h>
 #endif
@@ -134,6 +134,16 @@ int platform_sdl_version_at_least(int major, int minor, int patch)
         SDL_GetVersion(&version);
     }
     return SDL_VERSIONNUM(version.major, version.minor, version.patch) >= SDL_VERSIONNUM(major, minor, patch);
+}
+
+char *platform_get_pref_path(void)
+{
+#if SDL_VERSION_ATLEAST(2, 0, 1)
+    if (platform_sdl_version_at_least(2, 0, 1)) {
+        return SDL_GetPrefPath("augustus", "augustus");
+    }
+#endif
+    return 0;
 }
 
 void exit_with_status(int status)

@@ -36,7 +36,7 @@
 #include "map/grid.h"
 #include "map/property.h"
 #include "map/terrain.h"
-#include "scenario/building.h"
+#include "scenario/allowed_building.h"
 #include "scenario/criteria.h"
 #include "widget/city.h"
 #include "widget/city_with_overlay.h"
@@ -439,6 +439,8 @@ static void show_overlay_from_grid_offset(int grid_offset)
             break;
         case BUILDING_MARKET:
         case BUILDING_GRANARY:
+        case BUILDING_CARAVANSERAI:
+        case BUILDING_MESS_HALL:
         case BUILDING_FRUIT_FARM:
         case BUILDING_OLIVE_FARM:
         case BUILDING_PIG_FARM:
@@ -503,8 +505,8 @@ static void show_overlay_from_grid_offset(int grid_offset)
         case BUILDING_PAVILION_ORANGE:
         case BUILDING_PAVILION_YELLOW:
         case BUILDING_PAVILION_GREEN:
-        case BUILDING_SMALL_STATUE_ALT:
-        case BUILDING_SMALL_STATUE_ALT_B:
+        case BUILDING_GODDESS_STATUE:
+        case BUILDING_SENATOR_STATUE:
         case BUILDING_OBELISK:
         case BUILDING_HORSE_STATUE:
         case BUILDING_LEGION_STATUE:
@@ -519,7 +521,8 @@ static void show_overlay_from_grid_offset(int grid_offset)
             break;
         case BUILDING_WAREHOUSE:
         case BUILDING_WAREHOUSE_SPACE:
-            overlay = OVERLAY_WAREHOUSE;
+        case BUILDING_DEPOT:
+            overlay = OVERLAY_LOGISTICS;
             break;
         case BUILDING_DOCK:
             overlay = OVERLAY_SICKNESS;
@@ -595,7 +598,7 @@ static void toggle_pause(void)
 
 static void set_construction_building_type(building_type type)
 {
-    if (scenario_building_allowed(type) && building_menu_is_enabled(type)) {
+    if (scenario_allowed_building(type) && building_menu_is_enabled(type)) {
         building_construction_cancel();
         building_construction_set_type(type);
         window_request_refresh();

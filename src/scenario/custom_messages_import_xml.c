@@ -6,16 +6,19 @@
 #include "core/string.h"
 #include "core/xml_parser.h"
 #include "scenario/custom_messages.h"
-#include "scenario/scenario_events_parameter_data.h"
+#include "scenario/editor.h"
+#include "scenario/event/parameter_data.h"
 #include "window/plain_message_dialog.h"
 
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
 
+#define ERROR_MESSAGE_LENGTH 200
+
 static struct {
     int success;
-    char error_message[200];
+    char error_message[ERROR_MESSAGE_LENGTH];
     int error_line_number;
     uint8_t error_line_number_text[50];
     int version;
@@ -119,13 +122,21 @@ static int xml_start_media(void)
 
     const char *value = xml_parser_get_attribute_string("type");
     special_attribute_mapping_t *found = scenario_events_parameter_data_get_attribute_mapping_by_text(PARAMETER_TYPE_MEDIA_TYPE, value);
-    if (found == 0) {
+    if (!found) {
         display_and_log_error("Media type invalid");
         return 0;
     }
 
-    const char *media_filename = xml_parser_get_attribute_string("filename");
-    data.current_message->linked_media = custom_media_create(found->value, string_from_ascii(media_filename), CUSTOM_MEDIA_LINK_TYPE_CUSTOM_MESSAGE_AS_MAIN, data.current_message->id);
+    const char *media_location = xml_parser_get_attribute_string("filename");
+    if (!media_location) {
+        media_location = xml_parser_get_attribute_string("location");
+    }
+    if (!media_location) {
+        display_and_log_error("No media location provided");
+        return 0;
+    }
+    data.current_message->linked_media[found->value] = custom_media_create(found->value,
+        string_from_ascii(media_location), CUSTOM_MEDIA_LINK_TYPE_CUSTOM_MESSAGE_AS_MAIN, data.current_message->id);
     return 1;
 }
 
@@ -137,7 +148,8 @@ static int xml_start_background_music(void)
     }
 
     const char *media_filename = xml_parser_get_attribute_string("filename");
-    data.current_message->linked_background_music = custom_media_create(1, string_from_ascii(media_filename), CUSTOM_MEDIA_LINK_TYPE_CUSTOM_MESSAGE_AS_BACKGROUND_MUSIC, data.current_message->id);
+    data.current_message->linked_background_music = custom_media_create(1, string_from_ascii(media_filename),
+        CUSTOM_MEDIA_LINK_TYPE_CUSTOM_MESSAGE_AS_BACKGROUND_MUSIC, data.current_message->id);
     return 1;
 }
 
@@ -145,7 +157,7 @@ static void display_and_log_error(const char *msg)
 {
     data.success = 0;
     data.error_line_number = xml_parser_get_current_line_number();
-    strcpy(data.error_message, msg);
+    snprintf(data.error_message, ERROR_MESSAGE_LENGTH, "%s", msg);
     log_error("Error while importing custom messages from XML. ", data.error_message, 0);
     log_error("Line:", 0, data.error_line_number);
 
@@ -174,7 +186,7 @@ static int parse_xml(char *buf, int buffer_length)
     reset_data();
     custom_messages_clear_all();
     data.success = 1;
-    if (!xml_parser_init(xml_elements, XML_TOTAL_ELEMENTS)) {
+    if (!xml_parser_init(xml_elements, XML_TOTAL_ELEMENTS, 0)) {
         data.success = 0;
     }
     if (data.success) {
@@ -184,6 +196,16 @@ static int parse_xml(char *buf, int buffer_length)
         }
     }
     xml_parser_free();
+
+    int message_id = scenario_intro_message();
+
+    if (message_id > custom_messages_count() || !custom_messages_get(message_id)->in_use) {
+        scenario_editor_set_custom_message_introduction(0);
+    }
+    message_id = scenario_victory_message();
+        if (message_id > custom_messages_count() || !custom_messages_get(message_id)->in_use) {
+        scenario_editor_set_custom_victory_message(0);
+    }
 
     return data.success;
 }

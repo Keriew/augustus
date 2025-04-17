@@ -1,5 +1,6 @@
 #include "enemy.h"
 
+#include "assets/assets.h"
 #include "city/figures.h"
 #include "city/sound.h"
 #include "core/calc.h"
@@ -46,7 +47,8 @@ static void enemy_initial(figure *f, formation *m)
         }
     }
     if (f->type == FIGURE_ENEMY43_SPEAR || f->type == FIGURE_ENEMY46_CAMEL ||
-        f->type == FIGURE_ENEMY51_SPEAR || f->type == FIGURE_ENEMY52_MOUNTED_ARCHER) {
+        f->type == FIGURE_ENEMY51_SPEAR || f->type == FIGURE_ENEMY52_MOUNTED_ARCHER ||
+        f->type == FIGURE_ENEMY_CATAPULT) {
         // missile throwers
         f->wait_ticks_missile++;
         map_point tile = { 0, 0 };
@@ -67,6 +69,9 @@ static void enemy_initial(figure *f, formation *m)
                 case ENEMY_9_EGYPTIAN:
                 case ENEMY_10_CARTHAGINIAN:
                     missile_type = FIGURE_ARROW;
+                    break;
+                case FIGURE_ENEMY_CATAPULT:
+                    missile_type = FIGURE_CATAPULT_MISSILE;
                     break;
                 default:
                     missile_type = FIGURE_SPEAR;
@@ -347,14 +352,14 @@ void figure_enemy_camel_action(figure *f)
 
     f->is_enemy_image = 1;
 
-    if (f->direction == DIR_FIGURE_ATTACK) {
+    if (f->action_state == FIGURE_ACTION_149_CORPSE) {
+        f->image_id = 745 + figure_image_corpse_offset(f);
+    } else if (f->direction == DIR_FIGURE_ATTACK) {
         f->image_id = 601 + dir + 8 * f->image_offset;
     } else if (f->action_state == FIGURE_ACTION_150_ATTACK) {
         f->image_id = 601 + dir;
     } else if (f->action_state == FIGURE_ACTION_151_ENEMY_INITIAL) {
         f->image_id = 697 + dir + 8 * figure_image_missile_launcher_offset(f);
-    } else if (f->action_state == FIGURE_ACTION_149_CORPSE) {
-        f->image_id = 745 + figure_image_corpse_offset(f);
     } else {
         f->image_id = 601 + dir + 8 * f->image_offset;
     }
@@ -371,10 +376,12 @@ void figure_enemy_elephant_action(figure *f)
 
     f->is_enemy_image = 1;
 
-    if (f->direction == DIR_FIGURE_ATTACK || f->action_state == FIGURE_ACTION_150_ATTACK) {
+    if (f->action_state == FIGURE_ACTION_150_ATTACK) {
         f->image_id = 601 + dir + 8 * f->image_offset;
     } else if (f->action_state == FIGURE_ACTION_149_CORPSE) {
         f->image_id = 705 + figure_image_corpse_offset(f);
+    } else if (f->direction == DIR_FIGURE_ATTACK) {
+        f->image_id = 601 + dir + 8 * f->image_offset;
     } else {
         f->image_id = 601 + dir + 8 * f->image_offset;
     }
@@ -391,10 +398,12 @@ void figure_enemy_chariot_action(figure *f)
 
     f->is_enemy_image = 1;
 
-    if (f->direction == DIR_FIGURE_ATTACK || f->action_state == FIGURE_ACTION_150_ATTACK) {
+    if (f->action_state == FIGURE_ACTION_150_ATTACK) {
         f->image_id = 697 + dir + 8 * (f->image_offset / 2);
     } else if (f->action_state == FIGURE_ACTION_149_CORPSE) {
         f->image_id = 745 + figure_image_corpse_offset(f);
+    } else if (f->direction == DIR_FIGURE_ATTACK) {
+        f->image_id = 697 + dir + 8 * (f->image_offset / 2);
     } else {
         f->image_id = 601 + dir + 8 * f->image_offset;
     }
@@ -521,15 +530,14 @@ void figure_enemy52_mounted_archer_action(figure *f)
     int dir = get_missile_direction(f, m);
 
     f->is_enemy_image = 1;
-
-    if (f->direction == DIR_FIGURE_ATTACK) {
+    if (f->action_state == FIGURE_ACTION_149_CORPSE) {
+        f->image_id = 745 + figure_image_corpse_offset(f);
+    } else if (f->direction == DIR_FIGURE_ATTACK) {
         f->image_id = 601 + dir + 8 * f->image_offset;
     } else if (f->action_state == FIGURE_ACTION_150_ATTACK) {
         f->image_id = 601 + dir;
     } else if (f->action_state == FIGURE_ACTION_151_ENEMY_INITIAL) {
         f->image_id = 697 + dir + 8 * figure_image_missile_launcher_offset(f);
-    } else if (f->action_state == FIGURE_ACTION_149_CORPSE) {
-        f->image_id = 745 + figure_image_corpse_offset(f);
     } else {
         f->image_id = 601 + dir + 8 * f->image_offset;
     }
@@ -569,6 +577,7 @@ void figure_enemy_gladiator_action(figure *f)
 {
     f->terrain_usage = TERRAIN_USAGE_ANY;
     f->use_cross_country = 0;
+    f->is_ghost = 0;
     figure_image_increase_offset(f, 12);
     if (scenario_gladiator_revolt_is_finished()) {
         // end of gladiator revolt: kill gladiators
@@ -625,11 +634,11 @@ void figure_enemy_gladiator_action(figure *f)
     }
     dir = figure_image_normalize_direction(dir);
 
-    if (f->action_state == FIGURE_ACTION_150_ATTACK || f->direction == DIR_FIGURE_ATTACK) {
-        f->image_id = image_group(GROUP_FIGURE_GLADIATOR) + dir + 104 + 8 * (f->image_offset / 2);
-    } else if (f->action_state == FIGURE_ACTION_149_CORPSE) {
+    if (f->action_state == FIGURE_ACTION_149_CORPSE) {
         f->image_id = image_group(GROUP_FIGURE_GLADIATOR) + 96 + figure_image_corpse_offset(f);
-    } else {
+    } else if (f->action_state == FIGURE_ACTION_150_ATTACK || f->direction == DIR_FIGURE_ATTACK) {
+        f->image_id = image_group(GROUP_FIGURE_GLADIATOR) + dir + 104 + 8 * (f->image_offset / 2);
+    }  else {
         f->image_id = image_group(GROUP_FIGURE_GLADIATOR) + dir + 8 * f->image_offset;
     }
 }
@@ -674,4 +683,27 @@ void figure_enemy_caesar_legionary_action(figure *f)
             }
             break;
     }
+}
+
+void figure_enemy_catapult_action(figure *f)
+{
+    formation *m = formation_get(f->formation_id);
+    figure_image_increase_offset(f, 12);
+    f->cart_image_id = 0;
+    enemy_action(f, m);
+
+    int dir = get_missile_direction(f, m);
+
+    if (f->action_state == FIGURE_ACTION_149_CORPSE) {
+        f->image_id = assets_get_image_id("Warriors", "catapult_death_01") + figure_image_corpse_offset(f);
+    } else if (f->direction == DIR_FIGURE_ATTACK) {
+        f->image_id = assets_get_image_id("Warriors", "catapult_ne_01") + dir;
+    } else if (f->action_state == FIGURE_ACTION_150_ATTACK) {
+        f->image_id = assets_get_image_id("Warriors", "catapult_ne_01") + dir;
+    } else if (f->action_state == FIGURE_ACTION_151_ENEMY_INITIAL) {
+        f->image_id = assets_get_image_id("Warriors", "catapult_fe_e_01") + dir * 8 + figure_image_missile_launcher_offset(f);
+    } else {
+        f->image_id = assets_get_image_id("Warriors", "catapult_ne_01") + dir;
+    }
+
 }
