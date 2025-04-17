@@ -106,7 +106,7 @@ static void draw_foreground(void)
         y_offset += DETAILS_ROW_HEIGHT;
     }
 
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_SELECT_CONDITION, 30, 30, FONT_LARGE_BLACK);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_SELECT_CONDITION, 35, 30, BUTTON_WIDTH, FONT_LARGE_BLACK);
     lang_text_draw_centered(13, 3, 48, 32 + 16 * 30, BUTTON_WIDTH, FONT_NORMAL_BLACK);
 
     scrollbar_draw(&scrollbar);
