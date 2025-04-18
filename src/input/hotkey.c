@@ -436,7 +436,10 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
             def->action = &data.hotkey_state.building;
             def->value = BUILDING_HIGHWAY;
             break;
-
+        case HOTKEY_SHOW_OVERLAY_ENEMY:
+            def->action = &data.hotkey_state.show_overlay;
+            def->value = OVERLAY_ENEMY;
+            break;
         default:
             def->action = 0;
     }
