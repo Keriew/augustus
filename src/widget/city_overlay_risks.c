@@ -152,7 +152,8 @@ static int show_figure_enemy(const figure *f)
         || props->category == FIGURE_CATEGORY_ARMED
         || f->type == FIGURE_BALLISTA
         || f->type == FIGURE_ARROW || f->type == FIGURE_JAVELIN || f->type == FIGURE_BOLT
-        || f->type == FIGURE_CATAPULT_MISSILE;
+        || f->type == FIGURE_CATAPULT_MISSILE
+        || GROUP_FIGURE_FORT_STANDARD_ICONS;
 }
 
 static int get_column_height_fire(const building *b)
