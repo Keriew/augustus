@@ -162,38 +162,38 @@ static void draw_invasion_button(const grid_box_item *item)
 
     if (invasion->type != INVASION_TYPE_DISTANT_BATTLE)
         if (invasion->attack_type == FORMATION_ATTACK_FOOD_CHAIN) {
-            text_draw(string_from_ascii("F"), 420, item->y + 7, FONT_SMALL_PLAIN, 0);
+            text_draw(string_from_ascii("F"), 420, item->y + 7, FONT_SMALL_PLAIN, COLOR_FONT_BLUE);
         } else if (invasion->attack_type == FORMATION_ATTACK_GOLD_STORES) {
-            text_draw(string_from_ascii("G"), 420, item->y + 7, FONT_SMALL_PLAIN, 0);
+            text_draw(string_from_ascii("G"), 420, item->y + 7, FONT_SMALL_PLAIN, COLOR_FONT_GRAY);
         } else if (invasion->attack_type == FORMATION_ATTACK_BEST_BUILDINGS) {
             text_draw(string_from_ascii("B"), 420, item->y + 7, FONT_SMALL_PLAIN, 0);
         } else if (invasion->attack_type == FORMATION_ATTACK_TROOPS) {
-            text_draw(string_from_ascii("T"), 420, item->y + 7, FONT_SMALL_PLAIN, 0);
+            text_draw(string_from_ascii("T"), 419, item->y + 7, FONT_SMALL_PLAIN, COLOR_FONT_RED);
         } else if (invasion->attack_type == FORMATION_ATTACK_RANDOM) {
-            text_draw(string_from_ascii("R"), 420, item->y + 7, FONT_SMALL_PLAIN, 0);
+            text_draw(string_from_ascii("RND"), 410, item->y + 7, FONT_SMALL_PLAIN, 0);
         }
 
-    if (invasion->repeat.times == INVASIONS_REPEAT_INFINITE) {
-        text_draw(string_from_ascii("INF"), 470, item->y + 7, FONT_SMALL_PLAIN, 0);
-    } else if (invasion->repeat.times == 0) {
-        text_draw(string_from_ascii("-"), 480, item->y + 7, FONT_NORMAL_BLACK, 0);
-    } else {
-        int width = text_get_number_width(invasion->repeat.times, '@', " ", FONT_NORMAL_BLACK);
-        text_draw_number(invasion->repeat.times, '@', " ", 480 - (width / 2), item->y + 7, FONT_NORMAL_BLACK, 0);
-    }
-
-    if (invasion->repeat.times == 0) {
-        text_draw(string_from_ascii(" "), 480, item->y + 7, FONT_NORMAL_BLACK, 0);
-    } else if (invasion->repeat.times > 0 || invasion->repeat.times == INVASIONS_REPEAT_INFINITE) {
-        int width2 = text_get_number_width(invasion->repeat.interval.min, '@', " ", FONT_NORMAL_BLACK);
-        if (invasion->repeat.interval.min == invasion->repeat.interval.max) {
-            text_draw_number(invasion->repeat.interval.min, '@', " ", 550 - (width2 / 2), item->y + 7, FONT_NORMAL_BLACK, 0);
-        } else if (invasion->repeat.interval.max > invasion->repeat.interval.min) {
-            text_draw_number(invasion->repeat.interval.min, '@', " ", 545 - width2, item->y + 7, FONT_NORMAL_BLACK, 0);
-            text_draw(string_from_ascii("-"), 550, item->y + 7, FONT_NORMAL_BLACK, 0);
-            text_draw_number(invasion->repeat.interval.max, '@', " ", 555, item->y + 7, FONT_NORMAL_BLACK, 0);
+        if (invasion->repeat.times == INVASIONS_REPEAT_INFINITE) {
+            text_draw(string_from_ascii("INF"), 470, item->y + 7, FONT_SMALL_PLAIN, 0);
+        } else if (invasion->repeat.times == 0) {
+            text_draw(string_from_ascii("-"), 480, item->y + 7, FONT_NORMAL_BLACK, 0);
+        } else {
+            int width = text_get_number_width(invasion->repeat.times, '@', " ", FONT_NORMAL_BLACK);
+            text_draw_number(invasion->repeat.times, '@', " ", 480 - (width / 2), item->y + 7, FONT_NORMAL_BLACK, 0);
         }
-    }
+
+        if (invasion->repeat.times == 0) {
+            text_draw(string_from_ascii(" "), 480, item->y + 7, FONT_NORMAL_BLACK, 0);
+        } else if (invasion->repeat.times > 0 || invasion->repeat.times == INVASIONS_REPEAT_INFINITE) {
+            int width2 = text_get_number_width(invasion->repeat.interval.min, '@', " ", FONT_NORMAL_BLACK);
+            if (invasion->repeat.interval.min == invasion->repeat.interval.max) {
+                text_draw_number(invasion->repeat.interval.min, '@', " ", 550 - (width2 / 2), item->y + 7, FONT_NORMAL_BLACK, 0);
+            } else if (invasion->repeat.interval.max > invasion->repeat.interval.min) {
+                text_draw_number(invasion->repeat.interval.min, '@', " ", 545 - width2, item->y + 7, FONT_NORMAL_BLACK, 0);
+                text_draw(string_from_ascii("-"), 550, item->y + 7, FONT_NORMAL_BLACK, 0);
+                text_draw_number(invasion->repeat.interval.max, '@', " ", 555, item->y + 7, FONT_NORMAL_BLACK, 0);
+            }
+        }
 }
 
 static void draw_foreground(void)
