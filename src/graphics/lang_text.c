@@ -93,14 +93,14 @@ int lang_text_draw_year(int year, int x_offset, int y_offset, font_t font)
     if (year >= 0) {
         int use_year_ad = locale_year_before_ad();
         if (use_year_ad) {
-            width += text_draw_number(year, ' ', " ", x_offset + width, y_offset, font, 0);
+            width += text_draw_number(year, ' ', "", x_offset + width, y_offset, font, 0);
             width += lang_text_draw(20, 1, x_offset + width, y_offset, font);
         } else {
             width += lang_text_draw(20, 1, x_offset + width, y_offset, font);
-            width += text_draw_number(year, ' ', " ", x_offset + width, y_offset, font, 0);
+            width += text_draw_number(year, ' ', "", x_offset + width, y_offset, font, 0);
         }
     } else {
-        width += text_draw_number(-year, ' ', " ", x_offset + width, y_offset, font, 0);
+        width += text_draw_number(-year, ' ', "", x_offset + width, y_offset, font, 0);
         width += lang_text_draw(20, 0, x_offset + width, y_offset, font);
     }
     return width;
