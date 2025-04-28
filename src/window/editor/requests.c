@@ -139,11 +139,11 @@ static void draw_request_button(const grid_box_item *item)
     text_draw_number(request->year, '+', " ", item->x + 5, item->y + 7, FONT_NORMAL_BLACK, 0);
     lang_text_draw_year(scenario_property_start_year() + request->year, item->x + 40, item->y + 7, FONT_NORMAL_BLACK);
 
-    int width = text_get_number_width(request->amount.min, '@', " ", FONT_NORMAL_BLACK, 0);
+    int width1 = text_get_number_width(request->amount.min, '@', " ", FONT_NORMAL_BLACK);
     if (request->amount.min == request->amount.max) {
-        text_draw_number(request->amount.min, '@', " ", 165 - (width / 2), item->y + 7, FONT_NORMAL_BLACK, 0);
+        text_draw_number(request->amount.min, '@', " ", 165 - (width1 / 2), item->y + 7, FONT_NORMAL_BLACK, 0);
     } else if (request->amount.max > request->amount.min) {
-        text_draw_number(request->amount.min, '@', " ", 165 - width, item->y + 7, FONT_NORMAL_BLACK, 0);
+        text_draw_number(request->amount.min, '@', " ", 165 - width1, item->y + 7, FONT_NORMAL_BLACK, 0);
         text_draw(string_from_ascii("-"), 170, item->y + 7, FONT_NORMAL_BLACK, 0);
         text_draw_number(request->amount.max, '@', " ", 175, item->y + 7, FONT_NORMAL_BLACK, 0);
     }
@@ -165,11 +165,11 @@ static void draw_request_button(const grid_box_item *item)
     } else if (request->repeat.times == 0) {
         text_draw(string_from_ascii("-"), 480, item->y + 7, FONT_NORMAL_BLACK, 0);
     } else {
-        int width = text_get_number_width(request->repeat.times, '@', " ", FONT_NORMAL_BLACK, 0);
+        int width = text_get_number_width(request->repeat.times, '@', " ", FONT_NORMAL_BLACK);
         text_draw_number(request->repeat.times, '@', " ", 480 - (width / 2), item->y + 7, FONT_NORMAL_BLACK, 0);
     }
 
-    int width3 = text_get_number_width(request->repeat.interval.min, '@', " ", FONT_NORMAL_BLACK, 0);
+    int width3 = text_get_number_width(request->repeat.interval.min, '@', " ", FONT_NORMAL_BLACK);
     if (request->repeat.times == 0) {
         text_draw(string_from_ascii(" "), 525, item->y + 7, FONT_NORMAL_BLACK, 0);
     } else if (request->repeat.times > 0 || request->repeat.times == REQUESTS_REPEAT_INFINITE) {
