@@ -107,11 +107,11 @@ static void draw_background(void)
     outer_panel_draw(0, 0, 40, 30);
     lang_text_draw(44, 14, 20, 12, FONT_LARGE_BLACK);
 
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_DATE, 25, 50, FONT_SMALL_PLAIN); // Request date:
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_DATE, 20, 50, FONT_SMALL_PLAIN); // Request date:
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_AMOUNT, 120, 50, 105, FONT_SMALL_PLAIN); // Amount:
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_RESOURCE, 230, 50, FONT_SMALL_PLAIN); // Resource:
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_RESOURCE, 240, 50, FONT_SMALL_PLAIN); // Resource:
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_DEADLINE, 315, 50, 65, FONT_SMALL_PLAIN); // Deadline:
-    lang_text_draw_centered(53, 4, 370, 50, 85, FONT_SMALL_PLAIN); // Favor:
+    lang_text_draw_centered(53, 4, 375, 50, 85, FONT_SMALL_PLAIN); // Favor:
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY2, 460, 30, 120, FONT_SMALL_PLAIN); // Repeat frequency
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_TIMES2, 460, 50, 45, FONT_SMALL_PLAIN); // Times:
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_YEARS2, 520, 50, 60, FONT_SMALL_PLAIN); // Years:
