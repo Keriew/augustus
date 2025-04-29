@@ -109,12 +109,12 @@ static void draw_background(void)
 
     lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_DATE, 20, 50, FONT_SMALL_PLAIN); // Request date:
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_AMOUNT, 120, 50, 105, FONT_SMALL_PLAIN); // Amount:
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_RESOURCE, 240, 50, FONT_SMALL_PLAIN); // Resource:
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_RESOURCE, 235, 50, FONT_SMALL_PLAIN); // Resource:
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_DEADLINE, 315, 50, 65, FONT_SMALL_PLAIN); // Deadline:
-    lang_text_draw_centered(53, 4, 375, 50, 85, FONT_SMALL_PLAIN); // Favor:
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY2, 460, 30, 120, FONT_SMALL_PLAIN); // Repeat frequency
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_TIMES2, 460, 50, 45, FONT_SMALL_PLAIN); // Times:
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_YEARS2, 520, 50, 60, FONT_SMALL_PLAIN); // Years:
+    lang_text_draw_centered(53, 4, 372, 50, 110, FONT_SMALL_PLAIN); // Favor:
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY2, 465, 30, 120, FONT_SMALL_PLAIN); // Repeat frequency
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_TIMES2, 480, 50, 45, FONT_SMALL_PLAIN); // Times:
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_YEARS2, 525, 50, 60, FONT_SMALL_PLAIN); // Years:
 
     if (!data.requests_in_use) {
         lang_text_draw_centered(44, 19, 0, 165, 640, FONT_LARGE_BLACK);
@@ -156,17 +156,18 @@ static void draw_request_button(const grid_box_item *item)
 
     text_draw_number(request->deadline_years, '@', " ", 340, item->y + 7, FONT_NORMAL_BLACK, 0);
 
-    int width2 = text_draw_number(request->favor, '@', " ", 380, item->y + 7, FONT_NORMAL_BLACK, 0);
-    width2 += text_draw_number(-abs(request->extension_disfavor), '@', " ", 370 + width2, item->y + 7, FONT_NORMAL_BLACK, 0);
-    width2 += text_draw_number(-abs(request->ignored_disfavor), '@', " ", 360 + width2, item->y + 7, FONT_NORMAL_BLACK, 0);
+    int width2 = text_draw_number(request->favor, '@', " ", 373, item->y + 7, FONT_NORMAL_BLACK, 0);
+    width2 += text_draw_number(request->extension_months_to_comply, '@', " ", 365 + width2, item->y + 7, FONT_NORMAL_RED, COLOR_MASK_NONE);
+    width2 += text_draw_number(-abs(request->extension_disfavor), '@', " ", 352 + width2, item->y + 7, FONT_NORMAL_BLACK, 0);
+    width2 += text_draw_number(-abs(request->ignored_disfavor), '@', " ", 340 + width2, item->y + 7, FONT_NORMAL_BLACK, 0);
 
     if (request->repeat.times == REQUESTS_REPEAT_INFINITE) {
-        text_draw(string_from_ascii("INF"), 475, item->y + 7, FONT_SMALL_PLAIN, 0);
+        text_draw(string_from_ascii("INF"), 493, item->y + 7, FONT_SMALL_PLAIN, 0);
     } else if (request->repeat.times == 0) {
-        text_draw(string_from_ascii("-"), 480, item->y + 7, FONT_NORMAL_BLACK, 0);
+        text_draw(string_from_ascii("-"), 500, item->y + 7, FONT_NORMAL_BLACK, 0);
     } else {
         int width = text_get_number_width(request->repeat.times, '@', " ", FONT_NORMAL_BLACK);
-        text_draw_number(request->repeat.times, '@', " ", 480 - (width / 2), item->y + 7, FONT_NORMAL_BLACK, 0);
+        text_draw_number(request->repeat.times, '@', " ", 500 - (width / 2), item->y + 7, FONT_NORMAL_BLACK, 0);
     }
 
     int width3 = text_get_number_width(request->repeat.interval.min, '@', " ", FONT_NORMAL_BLACK);
