@@ -1593,7 +1593,15 @@ static translation_string all_strings[] = {
     {TR_SELECTED, "Selected"},
     {TR_WINDOW_MESSAGE_LIST_SELECTED_ALL, "All messages"},
     {TR_WINDOW_MESSAGE_LIST_SELECTED_COMMON, "Common messages" },
-    {TR_WINDOW_MESSAGE_LIST_SELECTED_CUSTOM, "Custom messages" }
+    {TR_WINDOW_MESSAGE_LIST_SELECTED_CUSTOM, "Custom messages" },
+    {TR_WINDOW_ADVISOR_EPITHETS, "Gods Epithets"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP, "What the gods can grant you"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_CERES, "Ceres gifts"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_NEPTUNE, "Neptune gifts"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_MERCURY, "Mercury gifts"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_MARS, "Mars gifts"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_VENUS, "Venus gifts"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_JUPITER, "Jupiter gifts"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

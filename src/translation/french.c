@@ -1590,7 +1590,15 @@ static translation_string all_strings[] = {
     {TR_SELECTED, "Sélectionné"},
     {TR_WINDOW_MESSAGE_LIST_SELECTED_ALL, "Tous les messages"},
     {TR_WINDOW_MESSAGE_LIST_SELECTED_COMMON, "Messages communs" },
-    {TR_WINDOW_MESSAGE_LIST_SELECTED_CUSTOM, "Messages personnalisés" }
+    {TR_WINDOW_MESSAGE_LIST_SELECTED_CUSTOM, "Messages personnalisés" },
+    {TR_WINDOW_ADVISOR_EPITHETS, "Epithètes des dieux"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP, "Ce que les dieux peuvent vous accorder"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_CERES, "Dons de Ceres"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_NEPTUNE, "Dons de Neptune"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_MERCURY, "Dons de Mercury"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_MARS, "Dons de Mars"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_VENUS, "Dons de Venus"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_JUPITER, "Dons de Jupiter"},
 };
 
 void translation_french(const translation_string **strings, int *num_strings)
