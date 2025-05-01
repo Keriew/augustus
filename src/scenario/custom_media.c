@@ -59,7 +59,7 @@ void custom_media_save_state(buffer *buf)
 {
     uint32_t array_size = custom_media.size;
     uint32_t struct_size = (4 * sizeof(int32_t)) + (1 * sizeof(int16_t));
-    buffer_init_dynamic_array(buf, array_size, struct_size);
+    buffer_init_dynamic_array(buf, CUSTOM_MEDIA_CURRENT_VERSION, array_size, struct_size);
 
     custom_media_t *entry;
     array_foreach(custom_media, entry) {

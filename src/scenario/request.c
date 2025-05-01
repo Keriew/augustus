@@ -364,7 +364,7 @@ static void request_save(buffer *list, const scenario_request *request)
 void scenario_request_save_state(buffer *list)
 {
     uint32_t struct_size = REQUESTS_STRUCT_SIZE_CURRENT;
-    buffer_init_dynamic_array(list, requests.size, struct_size);
+    buffer_init_dynamic_array(list, SCENARIO_REQUEST_VERSION, requests.size, struct_size);
 
     const scenario_request *request;
     array_foreach(requests, request) {
@@ -411,6 +411,7 @@ static void request_load(buffer *list, scenario_request *request, int version)
 
 void scenario_request_load_state(buffer *list, int version)
 {
+    // Initial version (as its own buffer), so version in buffer is not used, since no backwards compatibility is needed
     unsigned int array_size = buffer_load_dynamic_array(list);
 
     if (!array_init(requests, REQUESTS_ARRAY_SIZE_STEP, new_request, request_in_use) ||

@@ -9,6 +9,13 @@
 #define INVASIONS_REPEAT_INFINITE -1
 
 typedef enum {
+    INVASIONS_CURRENT_VERSION = 1,
+
+    INVASIONS_VERSION_NONE = 0,
+    INVASIONS_VERSION_INITIAL = 1,
+} invasions_version;
+
+typedef enum {
     INVASION_OLD_STATE_FIRST_SECTION = 0,
     INVASION_OLD_STATE_LAST_SECTION = 1
 } invasion_old_state_sections;
