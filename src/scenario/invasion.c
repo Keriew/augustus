@@ -111,6 +111,11 @@ static struct {
 static void new_invasion(invasion_t *invasion, unsigned int index)
 {
     invasion->id = index;
+    invasion->amount.min = INVASION_DEFAULT_AMOUNT_MIN;
+    invasion->amount.max = INVASION_DEFAULT_AMOUNT_MAX;
+    invasion->type = INVASION_DEFAULT_TYPE;
+    invasion->from = INVASION_DEFAULT_FROM;
+    invasion->attack_type = INVASION_DEFAULT_ATTACK_TYPE;
 }
 
 static int invasion_in_use(const invasion_t *invasion)

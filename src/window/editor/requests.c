@@ -149,9 +149,9 @@ static void draw_request_button(const grid_box_item *item)
     }
     int image_id = resource_get_data(request->resource)->image.editor.icon;
     const image *img = image_get(image_id);
-    int base_width = (item->width - img->original.width) / 2;   //centering resource image
+    int base_width = (25 - img->original.width) / 2;   //centering resource image
     int base_height = (item->height - img->original.height) / 2;
-    image_draw(image_id, base_width - 120, item->y + base_height, COLOR_MASK_NONE, SCALE_NONE);
+    image_draw(image_id, 150 + base_width, item->y + base_height, COLOR_MASK_NONE, SCALE_NONE);
     //text_draw(resource_get_data(request->resource)->text, item->x + 235, item->y + 7, FONT_NORMAL_BLACK, 0);
 
     text_draw_number(request->deadline_years, '@', " ", 310, item->y + 7, FONT_NORMAL_BLACK, 0);
