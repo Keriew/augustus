@@ -99,6 +99,7 @@ static const int CATEGORY_FOR_BUILDING_TYPE[BUILDING_TYPE_MAX] = {
     [BUILDING_ACADEMY]      = LABOR_CATEGORY_HEALTH_EDUCATION,
     [BUILDING_LIBRARY]      = LABOR_CATEGORY_HEALTH_EDUCATION,
     [BUILDING_MISSION_POST] = LABOR_CATEGORY_HEALTH_EDUCATION,
+    [BUILDING_LATRINES]     = LABOR_CATEGORY_HEALTH_EDUCATION,
     
     [BUILDING_SMALL_TEMPLE_CERES]   = LABOR_CATEGORY_GOVERNANCE_RELIGION,
     [BUILDING_SMALL_TEMPLE_NEPTUNE] = LABOR_CATEGORY_GOVERNANCE_RELIGION,
@@ -235,9 +236,13 @@ static int is_industry_disabled(building *b)
 }
 
 static int should_have_workers(building *b, int category, int check_access)
-{
+{    
     if (category == LABOR_CATEGORY_NONE) {
         return 0;
+    }
+
+    if (b->type == BUILDING_LATRINES) {
+        return 1;
     }
 
     if (category == LABOR_CATEGORY_ENTERTAINMENT) {
@@ -253,6 +258,7 @@ static int should_have_workers(building *b, int category, int check_access)
     if (category == LABOR_CATEGORY_ENGINEERING || category == LABOR_CATEGORY_WATER) {
         return 1;
     }
+
     if (check_access) {
         return b->houses_covered > 0 ? 1 : 0;
     }
@@ -396,6 +402,7 @@ static void set_building_worker_weight(void)
                 b->percentage_houses_covered = water_per_10k_per_building;
             } else {
                 b->percentage_houses_covered = 0;
+                
                 if (b->houses_covered) {
                     b->percentage_houses_covered =
                         calc_percentage(100 * b->houses_covered,
@@ -474,9 +481,10 @@ static void allocate_workers_to_non_water_buildings(void)
                 continue;
             }
             b->num_workers = 0;
-            if (!should_have_workers(b, cat, 0) || b->percentage_houses_covered <= 0) {
+            if (b->type != BUILDING_LATRINES && (!should_have_workers(b, cat, 0) || b->percentage_houses_covered <= 0)) {
                 continue;
             }
+            
             int required_workers = model_get_building(b->type)->laborers;
             if (category_workers_needed[cat - 1]) {
                 int num_workers = calc_adjust_with_percentage(

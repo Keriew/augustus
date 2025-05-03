@@ -185,8 +185,9 @@ static int get_height_id(void)
             case BUILDING_SMALL_MAUSOLEUM:
             case BUILDING_LARGE_MAUSOLEUM:
             case BUILDING_TRIUMPHAL_ARCH:
+            case BUILDING_LATRINES:
                 return 5;
-
+                
             case BUILDING_DOCK:
             case BUILDING_LIGHTHOUSE:
             case BUILDING_CARAVANSERAI:
@@ -760,6 +761,8 @@ static void draw_background(void)
             window_building_draw_shrine_venus(&context);
         } else if (btype == BUILDING_ARMOURY) {
             window_building_draw_armoury(&context);
+        }  else if (btype == BUILDING_LATRINES) {
+            window_building_draw_latrines(&context);
         }
     } else if (context.type == BUILDING_INFO_LEGION) {
         window_building_draw_legion_info(&context);

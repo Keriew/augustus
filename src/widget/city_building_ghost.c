@@ -211,6 +211,11 @@ void city_building_ghost_draw_fountain_range(int x, int y, int grid_offset)
     image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_BLUE, data.scale);
 }
 
+void city_building_ghost_draw_latrines_range(int x, int y, int grid_offset)
+{
+    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_DARK_GREEN & ALPHA_FONT_SEMI_TRANSPARENT, data.scale);
+}
+
 static void image_draw_warehouse(int image_id, int x, int y, color_t color)
 {
     int image_id_space = image_group(GROUP_BUILDING_WAREHOUSE_STORAGE_EMPTY);
@@ -762,6 +767,39 @@ static void draw_well(const map_tile *tile, int x, int y)
         city_water_ghost_draw_water_structure_ranges();
         city_view_foreach_tile_in_range(tile->grid_offset, 1, map_water_supply_well_radius(), city_building_ghost_draw_well_range);
     }
+    draw_building(image_id, x, y, color_mask);
+    draw_building_tiles(x, y, 1, &blocked);
+}
+
+static void draw_latrines(const map_tile *tile, int x, int y)
+{
+    color_t color_mask;
+    int blocked = 0;
+    if (city_finance_out_of_money() || is_blocked_for_building(tile->grid_offset, 1, &blocked)) {
+        image_blend_footprint_color(x, y, COLOR_MASK_RED, data.scale);
+        color_mask = COLOR_MASK_BUILDING_GHOST_RED;
+    } else {
+        color_mask = COLOR_MASK_BUILDING_GHOST;
+    }
+
+    int image_id;
+    switch (scenario_property_climate()) {
+        case CLIMATE_NORTHERN:
+            image_id = assets_get_image_id("Health_Culture", "Latrine_N");
+            break;
+        case CLIMATE_DESERT:
+            image_id = assets_get_image_id("Health_Culture", "Latrine_S");
+            break;
+        default:
+            image_id = assets_get_image_id("Health_Culture", "Latrine_C");
+            break;
+    }
+
+    for (building *b = building_first_of_type(BUILDING_LATRINES); b; b = b->next_of_type) {
+        city_view_foreach_tile_in_range(b->grid_offset, 1, map_water_supply_latrines_radius(), city_building_ghost_draw_latrines_range);
+    }
+    city_view_foreach_tile_in_range(tile->grid_offset, 1, map_water_supply_latrines_radius(), city_building_ghost_draw_latrines_range);
+
     draw_building(image_id, x, y, color_mask);
     draw_building_tiles(x, y, 1, &blocked);
 }
@@ -1459,6 +1497,9 @@ void city_building_ghost_draw(const map_tile *tile)
             break;
         case BUILDING_GRAND_TEMPLE_NEPTUNE:
             draw_grand_temple_neptune(tile, x, y);
+            break;
+        case BUILDING_LATRINES:
+            draw_latrines(tile, x, y);
             break;
         default:
             draw_default(tile, x, y, type);
