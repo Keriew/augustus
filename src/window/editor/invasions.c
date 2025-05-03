@@ -105,9 +105,9 @@ static void draw_background(void)
     lang_text_draw(44, 15, 20, 12, FONT_LARGE_BLACK);
 
     lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_DATE, 20, 50, FONT_SMALL_PLAIN); // Invasion date:
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_SIZE, 120, 50, 105, FONT_SMALL_PLAIN); // Invasion size:
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_SIZE, 130, 50, 105, FONT_SMALL_PLAIN); // Invasion size:
     lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_ENEMY_TYPE, 240, 50, FONT_SMALL_PLAIN); // Enemy type:
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_FROM, 330, 50, 65, FONT_SMALL_PLAIN); // From:
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_FROM, 330, 50, 70, FONT_SMALL_PLAIN); // From:
     lang_text_draw_centered(50, 21, 380, 50, 85, FONT_SMALL_PLAIN); // Priority
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY2, 460, 30, 120, FONT_SMALL_PLAIN); // Repeat frequency
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_TIMES2, 460, 50, 45, FONT_SMALL_PLAIN); // Times:
@@ -137,11 +137,11 @@ static void draw_invasion_button(const grid_box_item *item)
 
     int width1 = text_get_number_width(invasion->amount.min, '@', " ", FONT_NORMAL_BLACK);
     if (invasion->amount.min == invasion->amount.max) {
-        text_draw_number(invasion->amount.min, '@', " ", 165 - (width1 / 2), item->y + 7, FONT_NORMAL_BLACK, 0);
+        text_draw_number(invasion->amount.min, '@', " ", 175 - (width1 / 2), item->y + 7, FONT_NORMAL_BLACK, 0);
     } else if (invasion->amount.max > invasion->amount.min) {
-        text_draw_number(invasion->amount.min, '@', " ", 165 - width1, item->y + 7, FONT_NORMAL_BLACK, 0);
-        text_draw(string_from_ascii("-"), 170, item->y + 7, FONT_NORMAL_BLACK, 0);
-        text_draw_number(invasion->amount.max, '@', " ", 175, item->y + 7, FONT_NORMAL_BLACK, 0);
+        text_draw_number(invasion->amount.min, '@', " ", 175 - width1, item->y + 7, FONT_NORMAL_BLACK, 0);
+        text_draw(string_from_ascii("-"), 180, item->y + 7, FONT_NORMAL_BLACK, 0);
+        text_draw_number(invasion->amount.max, '@', " ", 185, item->y + 7, FONT_NORMAL_BLACK, 0);
     }
 
     lang_text_draw(34, invasion->type, 230, item->y + 7, FONT_NORMAL_BLACK);
