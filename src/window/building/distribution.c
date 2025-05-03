@@ -924,8 +924,13 @@ static void draw_resource_orders_buttons(int x, int y, const resource_list *list
     for (unsigned int i = 0; i < scrollbar.elements_in_view && i < list->size - scrollbar.scroll_position; i++) {
         resource_type resource = list->items[i + scrollbar.scroll_position];
         int image_id = resource_get_data(resource)->image.icon;
+
+        const image *img = image_get(image_id);
+        int base_width = (25 - img->original.width) / 2;
+        int base_height = (25 - img->original.height) / 2;
+
         int y_offset = y + 22 * i;
-        image_draw(image_id, x, y_offset, COLOR_MASK_NONE, SCALE_NONE);
+        image_draw(image_id, x + base_width, y_offset - 2 + base_height, COLOR_MASK_NONE, SCALE_NONE);
         if (!scrollbar_shown) {
             image_draw(image_id, x + 396, y_offset, COLOR_MASK_NONE, SCALE_NONE);
         }

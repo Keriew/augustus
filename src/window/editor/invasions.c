@@ -137,7 +137,7 @@ static void draw_invasion_button(const grid_box_item *item)
 
     int width1 = text_get_number_width(invasion->amount.min, '@', " ", FONT_NORMAL_BLACK);
     if (invasion->amount.min == invasion->amount.max) {
-        text_draw_number(invasion->amount.min, '@', " ", 175 - (width1 / 2), item->y + 7, FONT_NORMAL_BLACK, 0);
+        text_draw_number(invasion->amount.min, '@', " ", 180 - (width1 / 2), item->y + 7, FONT_NORMAL_BLACK, 0);
     } else if (invasion->amount.max > invasion->amount.min) {
         text_draw_number(invasion->amount.min, '@', " ", 175 - width1, item->y + 7, FONT_NORMAL_BLACK, 0);
         text_draw(string_from_ascii("-"), 180, item->y + 7, FONT_NORMAL_BLACK, 0);
