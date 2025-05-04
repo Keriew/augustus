@@ -937,7 +937,7 @@ static void draw_resource_orders_buttons(int x, int y, const resource_list *list
         int y_offset = y + 22 * i;
         image_draw(image_id, x + base_width, y_offset - 2 + base_height, COLOR_MASK_NONE, SCALE_NONE);
         if (!scrollbar_shown) {
-            image_draw(image_id, x + 396, y_offset, COLOR_MASK_NONE, SCALE_NONE);
+            image_draw(image_id, x + 396, y_offset - 2 + base_height, COLOR_MASK_NONE, SCALE_NONE);
         }
         text_draw(resource_get_data(resource)->text, x + 40, y_offset + 4, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
         button_border_draw(x + 148, y_offset, 210, 22, data.resource_focus_button_id == i + 1);
