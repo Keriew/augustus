@@ -873,7 +873,7 @@ static void draw_button_from_state(int state, int x, int y, building_type type, 
         case BUILDING_STORAGE_STATE_GETTING_HALF:
         case BUILDING_STORAGE_STATE_GETTING_QUARTER:
         {
-            int image_width = image_get(image_group(GROUP_CONTEXT_ICONS) + 12)->width + 5;
+            int image_width = image_get(image_group(GROUP_CONTEXT_ICONS) + 12)->width + 10;
             int group_number;
             if (resource_is_food(resource)) {
                 // Check whether to use "getting goods" or "getting food"
@@ -882,7 +882,7 @@ static void draw_button_from_state(int state, int x, int y, building_type type, 
                 group_number = 9;
             }
             int text_width = lang_text_get_width(99, group_number, FONT_NORMAL_WHITE);
-            int start_x = x - 20 + (230 - image_width - text_width) / 2;
+            int start_x = x + (210 - image_width - text_width) / 2;
             image_draw(image_group(GROUP_CONTEXT_ICONS) + 12, start_x, y - 2, COLOR_MASK_NONE, SCALE_NONE);
             lang_text_draw(99, group_number, start_x + image_width, y, FONT_NORMAL_WHITE);
             break;
