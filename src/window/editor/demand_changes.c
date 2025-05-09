@@ -181,10 +181,13 @@ static void draw_demand_change_button(const grid_box_item *item)
     get_change_amount(item->index, &amount);
     width += text_draw_number(amount.value, '@', " ", item->x + 75 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
     if (amount.difference > 0) {
-        width += text_draw(string_from_ascii("("), item->x + 70 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
-        width += text_draw_number(amount.difference, '+', ")", item->x + 70 + width - 5, item->y + 7, FONT_NORMAL_BLACK, 0);
+        width += text_draw(string_from_ascii("("), item->x + 70 + width, item->y + 7,
+            FONT_NORMAL_PLAIN, 0xff085908);
+        width += text_draw_number(amount.difference, '+', ")", item->x + 70 + width - 5, item->y + 7,
+            FONT_NORMAL_PLAIN, 0xff085908);
     } else {
-        width += text_draw_number(amount.difference, '(', ")", item->x + 70 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+        width += text_draw_number(amount.difference, '(', ")", item->x + 70 + width, item->y + 7,
+            FONT_NORMAL_PLAIN, 0xffc70000);
     }
 }
 

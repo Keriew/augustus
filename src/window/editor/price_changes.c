@@ -131,11 +131,15 @@ static void draw_price_change_button(const grid_box_item *item)
     const image *img = image_get(image_id);
     int base_height = (item->height - img->original.height) / 2;
     image_draw(image_id, item->x + 45 + width, item->y + base_height, COLOR_MASK_NONE, SCALE_NONE);
-    width += lang_text_draw(44, price_change->is_rise ? 104 : 103, item->x + 75 + width, item->y + 7, FONT_NORMAL_BLACK);
+    //width += lang_text_draw(44, price_change->is_rise ? 104 : 103, item->x + 75 + width, item->y + 7, FONT_NORMAL_BLACK);
     if (price_change->is_rise) {
-        width += text_draw_number(price_change->amount, '+', " ", item->x + 75 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+        width += lang_text_draw_colored(44, 104, item->x + 75 + width, item->y + 7, FONT_NORMAL_PLAIN, 0xff085908);
+        width += text_draw_number(price_change->amount, '+', " ", item->x + 75 + width, item->y + 7,
+            FONT_NORMAL_PLAIN, 0xff085908);
     } else {
-        width += text_draw_number(price_change->amount, '-', " ", item->x + 75 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+        width += lang_text_draw_colored(44, 103, item->x + 75 + width, item->y + 7, FONT_NORMAL_PLAIN, 0xffc70000);
+        width += text_draw_number(price_change->amount, '-', " ", item->x + 75 + width, item->y + 7,
+            FONT_NORMAL_PLAIN, 0xffc70000);
     }
 }
 
