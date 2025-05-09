@@ -111,8 +111,12 @@ static void draw_background(void)
 
     for (unsigned int i = 0; i < list->size; i++) {
         resource_type r = list->items[i];
-        image_draw(resource_get_data(r)->image.icon, icon_shift + i * resource_offset,
-            50, COLOR_MASK_NONE, SCALE_NONE);
+        int image_id = resource_get_data(r)->image.icon;
+        const image *img = image_get(image_id);
+        int base_width = (25 - img->original.width) / 2;
+        int base_height = (25 - img->original.height) / 2;
+        image_draw(resource_get_data(r)->image.icon, icon_shift + base_width - 4 + i * resource_offset,
+            50 + base_height, COLOR_MASK_NONE, SCALE_NONE);
 
         if (!data.four_line || no_policy) {
             if (no_policy) {

@@ -40,8 +40,8 @@ static void button_year(const generic_button *button);
 static void button_amount(const generic_button *button);
 static void button_resource(const generic_button *button);
 static void button_deadline_years(const generic_button *button);
-static void button_favor(const generic_button *button);
 static void button_extension_months(const generic_button *button);
+static void button_favor(const generic_button *button);
 static void button_extension_disfavor(const generic_button *button);
 static void button_ignored_disfavor(const generic_button *button);
 static void button_repeat_type(const generic_button *button);
@@ -74,8 +74,8 @@ static generic_button request_buttons[] = {
     {80, 114, 50, 25, button_amount, 0, AMOUNT_MIN},
     {170, 114, 50, 25, button_amount, 0, AMOUNT_MAX},
     {0, 150, 140, 25, button_deadline_years},
-    {0, 184, 80, 25, button_favor},
-    {0, 218, 80, 25, button_extension_months},
+    {0, 184, 80, 25, button_extension_months},
+    {0, 218, 80, 25, button_favor},
     {0, 252, 80, 25, button_extension_disfavor},
     {0, 286, 80, 25, button_ignored_disfavor},
     {0, 320, 20, 20, button_repeat_type, 0, REQUEST_REPEAT_NEVER},
@@ -102,8 +102,8 @@ static const struct {
     {TR_EDITOR_REQUEST_RESOURCE, 34 },
     {TR_EDITOR_REQUEST_AMOUNT, 34 },
     {TR_EDITOR_REQUEST_DEADLINE, 34 },
-    {TR_EDITOR_REQUEST_FAVOR_GAINED, 34 },
     {TR_EDITOR_FAVOUR_EXTENSION_MONTHS, 34 },
+    {TR_EDITOR_REQUEST_FAVOR_GAINED, 34 },
     {TR_EDITOR_FAVOUR_DISFAVOR, 34 },
     {TR_EDITOR_FAVOUR_IGNORED, 34 },
     {TR_EDITOR_REPEAT, 90 },
@@ -206,14 +206,14 @@ static void draw_background(void)
     lang_text_draw_amount_centered(8, 8, data.request.deadline_years, x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6,
         btn->width, FONT_NORMAL_BLACK);
 
-    // Favor gained
+    // Extension months
     btn = &request_buttons[5];
-    text_draw_number_centered_prefix(data.request.favor, '+', x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6,
+    text_draw_number_centered_prefix(data.request.extension_months_to_comply, '+', x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6,
         btn->width, FONT_NORMAL_BLACK);
 
-    // Extension months
+    // Favor gained
     btn = &request_buttons[6];
-    text_draw_number_centered_prefix(data.request.extension_months_to_comply, '+', x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6,
+    text_draw_number_centered_prefix(data.request.favor, '+', x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6,
         btn->width, FONT_NORMAL_BLACK);
 
     // Favor lost if extenstion needed

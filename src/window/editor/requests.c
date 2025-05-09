@@ -156,10 +156,8 @@ static void draw_request_button(const grid_box_item *item)
 
     text_draw_number(request->extension_months_to_comply, '@', " ", 365, item->y + 7, FONT_NORMAL_RED, COLOR_MASK_NONE);
     text_draw_number(request->favor, '@', " ", 395, item->y + 7, FONT_NORMAL_BLACK, 0);
-    text_draw(string_from_ascii("-"), 425, item->y + 7, FONT_NORMAL_BLACK, 0);
-    text_draw_number(request->extension_disfavor, '@', " ", 425, item->y + 7, FONT_NORMAL_BLACK, 0);
-    text_draw(string_from_ascii("-"), 455, item->y + 7, FONT_NORMAL_BLACK, 0);
-    text_draw_number(request->ignored_disfavor, '@', " ", 455, item->y + 7, FONT_NORMAL_BLACK, 0);
+    text_draw_number(request->extension_disfavor, '-', " ", 425, item->y + 7, FONT_NORMAL_BLACK, 0);
+    text_draw_number(request->ignored_disfavor, '-', " ", 455, item->y + 7, FONT_NORMAL_BLACK, 0);
 
     if (request->repeat.times == REQUESTS_REPEAT_INFINITE) {
         text_draw(string_from_ascii("INF"), 493, item->y + 7, FONT_SMALL_PLAIN, 0);
