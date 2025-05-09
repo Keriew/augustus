@@ -132,7 +132,11 @@ static void draw_price_change_button(const grid_box_item *item)
     int base_height = (item->height - img->original.height) / 2;
     image_draw(image_id, item->x + 45 + width, item->y + base_height, COLOR_MASK_NONE, SCALE_NONE);
     width += lang_text_draw(44, price_change->is_rise ? 104 : 103, item->x + 75 + width, item->y + 7, FONT_NORMAL_BLACK);
-    width += text_draw_number(price_change->amount, '@', " ", item->x + 75 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+    if (price_change->is_rise) {
+        width += text_draw_number(price_change->amount, '+', " ", item->x + 75 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+    } else {
+        width += text_draw_number(price_change->amount, '-', " ", item->x + 75 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+    }
 }
 
 static void draw_foreground(void)
