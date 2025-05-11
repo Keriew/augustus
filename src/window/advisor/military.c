@@ -55,7 +55,7 @@ static generic_button fort_buttons[] = {
 };
 
 static generic_button additional_buttons[] = {
-    {445, 28, 60, 40, button_return_all_to_fort}
+    {443, 27, 70, 40, button_return_all_to_fort}
 };
 
 static unsigned int focus_button_id;
@@ -72,15 +72,15 @@ static int draw_background(void)
 {
     outer_panel_draw(0, 0, 40, ADVISOR_HEIGHT);
     image_draw(image_group(GROUP_ADVISOR_ICONS) + 1, 10, 10, COLOR_MASK_NONE, SCALE_NONE);
-    lang_text_draw(51, 0, 60, 12, FONT_LARGE_BLACK);
+    lang_text_draw(51, 0, 60, 12, FONT_LARGE_BLACK);                  // Legion status
 
-    lang_text_draw(51, 1, 380, 35, FONT_SMALL_PLAIN);
-    lang_text_draw(51, 2, 380, 50, FONT_SMALL_PLAIN);
-    lang_text_draw(51, 3, 455, 35, FONT_SMALL_PLAIN);
-    lang_text_draw(51, 4, 455, 50, FONT_SMALL_PLAIN);
-    lang_text_draw(51, 5, 535, 35, FONT_SMALL_PLAIN);
-    lang_text_draw(51, 6, 535, 50, FONT_SMALL_PLAIN);
-    lang_text_draw(138, 36, 274, 50, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(138, 36, 224, 50, 150, FONT_SMALL_PLAIN); // Morale
+    lang_text_draw_centered(51, 1, 370, 35, 60, FONT_SMALL_PLAIN);    // Go to
+    lang_text_draw_centered(51, 2, 370, 50, 60, FONT_SMALL_PLAIN);    // legion
+    lang_text_draw_centered(51, 3, 444, 35, 70, FONT_SMALL_PLAIN);    // Return
+    lang_text_draw_centered(51, 4, 444, 50, 70, FONT_SMALL_PLAIN);    // to fort
+    lang_text_draw_centered(51, 5, 524, 35, 70, FONT_SMALL_PLAIN);    // Empire
+    lang_text_draw_centered(51, 6, 524, 50, 70, FONT_SMALL_PLAIN);    // service
 
     int enemy_text_id;
     if (city_figures_enemies()) {
@@ -223,7 +223,7 @@ static void draw_foreground(void)
 
     int num_legions_not_at_fort = get_num_legions_not_at_fort();
     if (num_legions_not_at_fort > 0) {
-        button_border_draw(445, 28, 60, 40, focus_additional_button_id == 1);
+        button_border_draw(443, 27, 70, 40, focus_additional_button_id == 1);
     }
 }
 

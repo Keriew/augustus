@@ -57,7 +57,7 @@ static int draw_background(void)
 {
     outer_panel_draw(0, 0, 40, ADVISOR_HEIGHT);
     image_draw(image_group(GROUP_ADVISOR_ICONS) + 7, 10, 10, COLOR_MASK_NONE, SCALE_NONE);
-    lang_text_draw(57, 0, 60, 12, FONT_LARGE_BLACK);
+    lang_text_draw(57, 0, 60, 12, FONT_LARGE_BLACK); // Education
 
     // x population, y school age, z academy age
     int width = text_draw_number(city_population(), '@', " ", 60, 50, FONT_NORMAL_BLACK, 0);
@@ -68,15 +68,15 @@ static int draw_background(void)
     lang_text_draw(57, 3, 60 + width, 50, FONT_NORMAL_BLACK);
 
     // table headers
-    lang_text_draw(57, 4, 180, 86, FONT_SMALL_PLAIN);
-    lang_text_draw(57, 5, 300, 86, FONT_SMALL_PLAIN);
-    lang_text_draw(57, 6, 475, 86, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(57, 4, 139, 86, 160, FONT_SMALL_PLAIN); // Working
+    lang_text_draw(57, 5, 287, 86, FONT_SMALL_PLAIN);               // Can educate
+    lang_text_draw_centered(57, 6, 440, 86, 160, FONT_SMALL_PLAIN); // City coverage
 
     inner_panel_draw(32, 100, 36, 5);
 
     // schools
     lang_text_draw_amount(8, 18, building_count_total(BUILDING_SCHOOL), 40, 105, FONT_NORMAL_WHITE);
-    text_draw_number_centered(building_count_active(BUILDING_SCHOOL), 155, 105, 100, FONT_NORMAL_WHITE);
+    text_draw_number_centered(building_count_active(BUILDING_SCHOOL), 170, 105, 100, FONT_NORMAL_WHITE);
 
     width = text_draw_number(city_culture_get_school_person_coverage(), '@', " ", 280, 105, FONT_NORMAL_WHITE, 0);
     lang_text_draw(57, 7, 280 + width, 105, FONT_NORMAL_WHITE);
@@ -92,7 +92,7 @@ static int draw_background(void)
 
     // academies
     lang_text_draw_amount(8, 20, building_count_total(BUILDING_ACADEMY), 40, 125, FONT_NORMAL_WHITE);
-    text_draw_number_centered(building_count_active(BUILDING_ACADEMY), 155, 125, 100, FONT_NORMAL_WHITE);
+    text_draw_number_centered(building_count_active(BUILDING_ACADEMY), 170, 125, 100, FONT_NORMAL_WHITE);
 
     width = text_draw_number(city_culture_get_academy_person_coverage(), '@', " ", 280, 125, FONT_NORMAL_WHITE, 0);
     lang_text_draw(57, 8, 280 + width, 125, FONT_NORMAL_WHITE);
@@ -108,7 +108,7 @@ static int draw_background(void)
 
     // libraries
     lang_text_draw_amount(8, 22, building_count_total(BUILDING_LIBRARY), 40, 145, FONT_NORMAL_WHITE);
-    text_draw_number_centered(building_count_active(BUILDING_LIBRARY), 155, 145, 100, FONT_NORMAL_WHITE);
+    text_draw_number_centered(building_count_active(BUILDING_LIBRARY), 170, 145, 100, FONT_NORMAL_WHITE);
 
     width = text_draw_number(city_culture_get_library_person_coverage(), '@', " ", 280, 145, FONT_NORMAL_WHITE, 0);
     lang_text_draw(57, 9, 280 + width, 145, FONT_NORMAL_WHITE);
@@ -132,7 +132,7 @@ static int draw_background(void)
         text_draw(translation_for(TR_WINDOW_ADVISOR_EDUCATION_MISSION_POSTS), 40 + width, 165, FONT_NORMAL_WHITE, 0);
     }
 
-    text_draw_number_centered(building_count_active(BUILDING_MISSION_POST), 155, 165, 100, FONT_NORMAL_WHITE);
+    text_draw_number_centered(building_count_active(BUILDING_MISSION_POST), 170, 165, 100, FONT_NORMAL_WHITE);
 
 
     lang_text_draw_multiline(57, 22 + get_education_advice(), 45, 195, 560, FONT_NORMAL_BLACK);
