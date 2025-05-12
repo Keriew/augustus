@@ -230,6 +230,12 @@ static void update_image_mounted(figure *f, int dir)
     }
 }
 
+static int legionary_can_throw_javelin(figure *f)
+{
+    formation *m = formation_get(f->formation_id);
+    return m->layout == FORMATION_DOUBLE_LINE_1 || m->layout == FORMATION_DOUBLE_LINE_2;
+}
+
 static void update_image_legionary(figure *f, const formation *m, int dir)
 {
     int image_id = image_group(GROUP_BUILDING_FORT_LEGIONARY);
@@ -245,7 +251,7 @@ static void update_image_legionary(figure *f, const formation *m, int dir)
         int missile_offset = figure_image_missile_launcher_offset(f);
         if (m->is_halted && m->layout == FORMATION_COLUMN && m->missile_attack_timeout) {
             f->image_id = image_id + dir + 144;
-        } else if (missile_offset >= 0 && dir < DIR_8_NONE) {
+        } else if (legionary_can_throw_javelin(f) && missile_offset >= 0 && dir < DIR_8_NONE) {
             f->image_id = assets_get_image_id("Warriors", "legionary_fr_ne_01") + dir * 5 + missile_offset;
         } else {
             f->image_id = image_id + dir;
@@ -466,7 +472,7 @@ void figure_soldier_action(figure *f)
                     f = soldier_launch_missile(f);
                 } else if (f->type == FIGURE_FORT_LEGIONARY) {
                     legionary_attack_adjacent_enemy(f);
-                    if (m->layout == FORMATION_DOUBLE_LINE_1 || m->layout == FORMATION_DOUBLE_LINE_2) {
+                    if (legionary_can_throw_javelin(f)) {
                         f = soldier_launch_missile(f);
                     }
                 } else if (f->type == FIGURE_FORT_INFANTRY || f->type == FIGURE_FORT_MOUNTED) {
