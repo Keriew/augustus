@@ -105,7 +105,7 @@ static int draw_background(void)
 
     lang_text_draw(58, 0, 60, 12, FONT_LARGE_BLACK); // Entertainment
 
-    lang_text_draw_centered(58, 1, 151, 46, 100, FONT_SMALL_PLAIN); // Working
+    lang_text_draw_centered(58, 1, 149, 46, 100, FONT_SMALL_PLAIN); // Working
     lang_text_draw_centered(58, 2, 231, 46, 100, FONT_SMALL_PLAIN); // Shows
     lang_text_draw(58, 3, 336, 46, FONT_SMALL_PLAIN);               // Can entertain
     lang_text_draw_centered(58, 4, 465, 46, 140, FONT_SMALL_PLAIN); // City coverage

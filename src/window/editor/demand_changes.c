@@ -182,12 +182,12 @@ static void draw_demand_change_button(const grid_box_item *item)
     width += text_draw_number(amount.value, '@', " ", item->x + 75 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
     if (amount.difference > 0) {
         width += text_draw(string_from_ascii("("), item->x + 70 + width, item->y + 7,
-            FONT_NORMAL_PLAIN, 0xff085908);
+            FONT_NORMAL_PLAIN, COLOR_MASK_DARK_GREEN);
         width += text_draw_number(amount.difference, '+', ")", item->x + 70 + width - 5, item->y + 7,
-            FONT_NORMAL_PLAIN, 0xff085908);
+            FONT_NORMAL_PLAIN, COLOR_MASK_DARK_GREEN);
     } else {
         width += text_draw_number(amount.difference, '(', ")", item->x + 70 + width, item->y + 7,
-            FONT_NORMAL_PLAIN, 0xffc70000);
+            FONT_NORMAL_PLAIN, COLOR_MASK_PURPLE);
     }
 }
 

@@ -72,7 +72,7 @@ static int draw_background(void)
     } else {
         lang_text_draw_multiline(56, 15, 60, 65, 560, FONT_NORMAL_BLACK);
     }
-    lang_text_draw_centered(56, 3, 166, 110, 130, FONT_SMALL_PLAIN);    // Working
+    lang_text_draw_centered(56, 3, 165, 110, 130, FONT_SMALL_PLAIN);    // Working
     lang_text_draw(56, 4, 312, 110, FONT_SMALL_PLAIN);                  // Care for
     lang_text_draw_centered(56, 5, 441, 110, 160, FONT_SMALL_PLAIN);    // City coverage
 
