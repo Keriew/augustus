@@ -356,6 +356,53 @@ int sound_device_play_music(const char *filename, int volume_pct, int loop)
     }
     return 0;
 }
+static void (*track_finished_callback)(void) = NULL;
+
+static void internal_on_track_finished(void)
+{
+    if (track_finished_callback) {
+        track_finished_callback();
+    }
+}
+
+int sound_device_play_track(const char *filename, int volume_pct, void (*on_finish)(void))
+{
+    if (!data.initialized || !config_get(CONFIG_GENERAL_ENABLE_AUDIO)) {
+        return 0;
+    }
+
+    sound_device_stop_music();  // stop any current track
+
+    if (!filename) {
+        return 0;
+    }
+
+    size_t size;
+    data.custom_music = game_campaign_load_file(filename, &size);
+    if (data.custom_music) {
+        SDL_RWops *sdl_music = SDL_RWFromMem(data.custom_music, (int) size);
+        data.music = Mix_LoadMUS_RW(sdl_music, SDL_TRUE);
+    } else {
+        data.music = Mix_LoadMUS(filename);
+    }
+
+    if (!data.music) {
+        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Error opening music file '%s'. Reason: %s", filename, Mix_GetError());
+        return 0;
+    }
+
+    track_finished_callback = on_finish;
+    Mix_HookMusicFinished(internal_on_track_finished);
+
+    if (Mix_PlayMusic(data.music, 0) == -1) {
+        data.music = 0;
+        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Error playing music file '%s'. Reason: %s", filename, Mix_GetError());
+        return 0;
+    }
+
+    sound_device_set_music_volume(volume_pct);
+    return 1;
+}
 
 static int get_available_channel(sound_type type)
 {
@@ -421,6 +468,26 @@ void sound_device_fadeout_music(int milisseconds)
     }
     Mix_FadeOutMusic(milisseconds);
 }
+
+int sound_device_pause_music(void)
+{
+    if (data.initialized && Mix_PlayingMusic()) {
+        Mix_PauseMusic();
+        return 1;
+    }
+    return 0;
+}
+
+int sound_device_resume_music(void)
+{
+    if (data.initialized && Mix_PausedMusic()) {
+        Mix_ResumeMusic();
+        SDL_Log("Resuming paused music.");
+        return 1;
+    }
+    return 0;
+}
+
 
 void sound_device_stop_music(void)
 {
