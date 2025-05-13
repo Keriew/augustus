@@ -225,6 +225,7 @@ const model_building MODEL_CONCRETE_MAKER = { 60,-3,1,1,4,10 };
 const model_building MODEL_CITY_MINT = { 250,-3,1,1,3,40 };
 const model_building MODEL_DEPOT = { 100,-3,1,1,2,15 };
 const model_building MODEL_ARMOURY = { 50,-5,1,1,4,6 };
+const model_building MODEL_LATRINE = { 15,0,0,0,0,2 };
 
 const model_building *model_get_building(building_type type)
 {
@@ -305,7 +306,9 @@ const model_building *model_get_building(building_type type)
         case BUILDING_OVERGROWN_GARDENS:
             return &buildings[BUILDING_GARDENS];
         case BUILDING_ARMOURY:
-            return &MODEL_ARMOURY;
+            return &MODEL_ARMOURY;  
+        case BUILDING_LATRINES:
+            return &MODEL_LATRINE;
         default:
             break;
     }

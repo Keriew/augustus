@@ -197,6 +197,7 @@ typedef struct building {
     unsigned char sickness_doctor_cure;
     unsigned char fumigation_frame;
     unsigned char fumigation_direction;
+    unsigned char has_latrines_access;
     short resources[RESOURCE_MAX];
     unsigned char accepted_goods[RESOURCE_MAX];
 } building;
