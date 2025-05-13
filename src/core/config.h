@@ -62,8 +62,9 @@ typedef enum {
     CONFIG_GP_CH_YEARLY_AUTOSAVE,
     CONFIG_GP_CH_AUTO_KILL_ANIMALS,
     CONFIG_GP_CH_GATES_DEFAULT_TO_PASS_ALL_WALKERS,
-    CONFIG_UI_SHOW_SPEEDRUN_INFO,    
+    CONFIG_UI_SHOW_SPEEDRUN_INFO,
     CONFIG_UI_SHOW_DESIRABILITY_RANGE,
+    CONFIG_UI_ENABLE_BUILD_MENU_INDEX_HOTKEYS,
     CONFIG_MAX_ENTRIES
 } config_key;
 
@@ -121,7 +122,7 @@ void config_load(void);
 
 /**
  * Whether the user directory must be configured
- * 
+ *
  * @return 1 If the user directory still needs to be set, 0 otherwise
  */
 int config_must_configure_user_directory(void);
