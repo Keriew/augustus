@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <!DOCTYPE events>
-<events version="1">
+<events version="3">
     <!-- This event is setup to repeat randomly every 1 to 4 months.
          How many months it takes before repeating is randomly chosen between min and max each time it triggers. -->
-    <event repeat_months_min="1" repeat_months_max="4">
+    <event repeat_triggers_min="1" repeat_triggers_max="4">
         <!-- Even though the event can repeat 1 to 4 months, we also have a time check here.
              This is checking that the months passed since the start of the game is equal or greater than a random number between 4 and 6.
              Once the scenario starts, this number will be determined (say it picks 5), and it will then start checking if that number of months have passed.
@@ -62,7 +62,7 @@
         </actions>
     </event>
     <!-- Every month, if the player's city has less than 2000 money in its coffers, give money but reduce favour. -->
-    <event repeat_months_min="1" repeat_months_max="1" max_number_of_repeats="2">
+    <event repeat_triggers_min="1" repeat_triggers_max="1" max_number_of_repeats="2">
         <conditions>
             <money check="lte" value="0"/>
         </conditions>
@@ -82,7 +82,7 @@
         </actions>
     </event>
     <!-- ... this second event runs randomly every (4 to 7) months while the wheat price is above 28, decreasing it by 2 each time. -->
-    <event repeat_months_min="4" repeat_months_max="7">
+    <event repeat_triggers_min="4" repeat_triggers_max="7">
         <conditions>
             <trade_sell_price resource="wheat" check="gte" value="28"/>
         </conditions>
@@ -91,7 +91,7 @@
         </actions>
     </event>
     <!-- While Caesar loves us, and the trade price of wine is below 270, slowly increase it silently (no message shown) -->
-    <event repeat_months_min="1" repeat_months_max="6">
+    <event repeat_triggers_min="1" repeat_triggers_max="6">
         <conditions>
             <stats_favor check="gte" value="80"/>
         </conditions>
@@ -127,7 +127,7 @@
         </actions>
     </event>
     <!-- For the first two years Rome lowers wages consistently until it gets as low as 15. -->
-    <event repeat_months_min="1" repeat_months_max="1">
+    <event repeat_triggers_min="1" repeat_triggers_max="1">
         <conditions>
             <time check="lte" amount="24"/>
             <rome_wages check="gte" value="15"/>
@@ -137,7 +137,7 @@
         </actions>
     </event>
     <!-- After two years, Rome's wages rises until it hits about 37. -->
-    <event repeat_months_min="1" repeat_months_max="5">
+    <event repeat_triggers_min="1" repeat_triggers_max="5">
         <conditions>
             <time check="gte" amount="24"/>
             <rome_wages check="lte" value="37"/>
@@ -147,7 +147,7 @@
         </actions>
     </event>
     <!-- Once we have more than 1000 patricians, then we get start receiving some personal gifts. Totally legit. -->
-    <event repeat_months_min="7" repeat_months_max="12">
+    <event repeat_triggers_min="7" repeat_triggers_max="12">
         <conditions>
             <city_population check="gte" value="1000" class="patrician"/>
         </conditions>
@@ -247,7 +247,7 @@
     </event>
     <!-- After 2 months, force start the first request (which we will use as a repeating request).
         And about every 9 months, try and start the request again (will do nothing if already active.) -->
-    <event repeat_months_min="7" repeat_months_max="11">
+    <event repeat_triggers_min="7" repeat_triggers_max="11">
         <conditions>
             <time check="gte" amount="2"/>
         </conditions>
@@ -263,7 +263,7 @@
         Note: For an request like this that repeat quickly, you probably want the request itself to have
         a long leeway in its deadline, so that the player can leave it be for a bit and not get constant
         request spam. -->
-    <event repeat_months_min="1" repeat_months_max="1" max_number_of_repeats="4">
+    <event repeat_triggers_min="1" repeat_triggers_max="1" max_number_of_repeats="4">
         <conditions>
             <request_is_ongoing request_id="1" check_for_ongoing="false"/>
         </conditions>

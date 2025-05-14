@@ -1082,7 +1082,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_EVENT_STATE_ACTIVE, "Актив."},
     {TR_EDITOR_SCENARIO_EVENT_STATE_PAUSED, "В паузе"},
     {TR_EDITOR_SCENARIO_EVENT_EXECUTION_COUNT, "Кол. исполнений: "},
-    {TR_EDITOR_SCENARIO_EVENT_MONTHS_UNTIL_ACTIVE, "Месяцев до активации: "},
     {TR_EDITOR_SCENARIO_EVENT_NAME, "Имя: "},
     {TR_EDITOR_SCENARIO_CONDITION, "Условия:"},
     {TR_EDITOR_SCENARIO_ACTION, "Действия:"},

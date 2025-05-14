@@ -3,6 +3,7 @@
 #include "game/resource.h"
 #include "scenario/allowed_building.h"
 #include "scenario/event/action_types.h"
+#include "scenario/event/controller.h"
 
 void scenario_action_type_init(scenario_action_t *action)
 {
@@ -115,7 +116,7 @@ void scenario_action_type_save_state(buffer *buf, const scenario_action_t *actio
 }
 
 unsigned int scenario_action_type_load_state(buffer *buf, scenario_action_t *action, int *link_type, int32_t *link_id,
-    int is_new_version)
+    int version)
 {
     *link_type = buffer_read_i16(buf);
     *link_id = buffer_read_i32(buf);
@@ -141,7 +142,7 @@ unsigned int scenario_action_type_load_state(buffer *buf, scenario_action_t *act
     } else if (action->type == ACTION_TYPE_TRADE_SET_SELL_PRICE_ONLY) {
         action->parameter1 = resource_remap(action->parameter1);        
     } else if (action->type == ACTION_TYPE_CHANGE_ALLOWED_BUILDINGS) {
-        if (!is_new_version) {
+        if (version < SCENARIO_EVENTS_CONDITION_GROUPS) {
             int original_id = action->parameter1;
             return scenario_action_type_load_allowed_building(action, original_id, 0) ? original_id : 0;
         }
