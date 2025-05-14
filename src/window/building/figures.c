@@ -177,7 +177,9 @@ static void draw_trader(building_info_context *c, figure *f)
                 width += text_draw_number(trader_bought_resources(trader_id, r),
                     '@', " ", c->x_offset + 40 + width, y_base, FONT_NORMAL_BROWN, 0);
                 int image_id = resource_get_data(r)->image.icon;
-                image_draw(image_id, c->x_offset + 40 + width, y_base - 3, COLOR_MASK_NONE, SCALE_NONE);
+                const image *img = image_get(image_id);
+                int base_height = (25 - img->original.height) / 2;
+                image_draw(image_id, c->x_offset + 35 + width, y_base - 7 + base_height, COLOR_MASK_NONE, SCALE_NONE);
                 width += 25;
             }
         }
@@ -189,7 +191,9 @@ static void draw_trader(building_info_context *c, figure *f)
                 width += text_draw_number(trader_sold_resources(trader_id, r),
                     '@', " ", c->x_offset + 40 + width, y_base, FONT_NORMAL_BROWN, 0);
                 int image_id = resource_get_data(r)->image.icon;
-                image_draw(image_id, c->x_offset + 40 + width, y_base - 3, COLOR_MASK_NONE, SCALE_NONE);
+                const image *img = image_get(image_id);
+                int base_height = (25 - img->original.height) / 2;
+                image_draw(image_id, c->x_offset + 35 + width, y_base - 7 + base_height, COLOR_MASK_NONE, SCALE_NONE);
                 width += 25;
             }
         }
@@ -200,7 +204,10 @@ static void draw_trader(building_info_context *c, figure *f)
         for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
             if (city->buys_resource[r] && resource_is_storable(r)) {
                 int image_id = resource_get_data(r)->image.icon;
-                image_draw(image_id, c->x_offset + 40 + width, y_base - 3, COLOR_MASK_NONE, SCALE_NONE);
+                const image *img = image_get(image_id);
+                int base_width = (25 - img->original.width) / 2;
+                int base_height = (25 - img->original.height) / 2;
+                image_draw(image_id, c->x_offset + 40 + width + base_width, y_base - 7 + base_height, COLOR_MASK_NONE, SCALE_NONE);
                 width += 25;
             }
         }
@@ -210,7 +217,10 @@ static void draw_trader(building_info_context *c, figure *f)
         for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
             if (city->sells_resource[r] && resource_is_storable(r)) {
                 int image_id = resource_get_data(r)->image.icon;
-                image_draw(image_id, c->x_offset + 40 + width, y_base - 3, COLOR_MASK_NONE, SCALE_NONE);
+                const image *img = image_get(image_id);
+                int base_width = (25 - img->original.width) / 2;
+                int base_height = (25 - img->original.height) / 2;
+                image_draw(image_id, c->x_offset + 40 + width + base_width, y_base - 7 + base_height, COLOR_MASK_NONE, SCALE_NONE);
                 width += 25;
             }
         }
