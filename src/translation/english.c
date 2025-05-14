@@ -49,6 +49,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_VOLUME, "Volume"},
     {TR_CONFIG_ENABLE_AUDIO, "Enable audio"},
     {TR_CONFIG_MUSIC, "Enable music"},
+    {TR_CONFIG_RANDOMISE_MUSIC, "Randomise city music"},
     {TR_CONFIG_SPEECH, "Enable speech"},
     {TR_CONFIG_EFFECTS, "Enable sound effects"},
     {TR_CONFIG_CITY_SOUNDS, "Enable city sounds"},

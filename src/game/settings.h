@@ -36,6 +36,9 @@ int setting_sound_is_enabled(int type);
 void setting_toggle_sound_enabled(int type);
 void setting_set_sound_volume(int type, int volume);
 void setting_reset_sound(int type, int enabled, int volume);
+int setting_music_randomised(void);
+void setting_set_music_randomised(int value);
+
 
 int setting_game_speed(void);
 void setting_increase_game_speed(void);
