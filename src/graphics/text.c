@@ -74,7 +74,7 @@ void text_draw_cursor(int x_offset, int y_offset, int is_insert)
                 x_offset + input_cursor.x_offset - 3, x_offset + input_cursor.x_offset + 1,
                 y_offset + input_cursor.y_offset - 3, y_offset + input_cursor.y_offset - 3, COLOR_WHITE);
             graphics_draw_line(
-                x_offset + input_cursor.x_offset - 1, x_offset + input_cursor.x_offset - 1, 
+                x_offset + input_cursor.x_offset - 1, x_offset + input_cursor.x_offset - 1,
                 y_offset + input_cursor.y_offset - 3, y_offset + input_cursor.y_offset + 13, COLOR_WHITE);
             graphics_draw_line(
                 x_offset + input_cursor.x_offset - 3, x_offset + input_cursor.x_offset + 1,
@@ -656,4 +656,21 @@ int text_measure_multiline(const uint8_t *str, int box_width, font_t font, int *
         num_lines += 1;
     }
     return num_lines;
+}
+
+int text_draw_centered_with_index(const uint8_t *str, int index, int x_offset, int y_offset, int box_width, font_t font, color_t color)
+{
+    uint8_t strx[NUMBER_BUFFER_LENGTH];
+    int offset = 0;
+    while (*str) {
+        strx[offset++] = *str;
+        str++;
+    }
+    strx[offset++] = '(';
+    offset += string_from_int(&strx[offset], index, 0);
+    strx[offset++] = ')';
+
+    strx[offset] = 0;
+    text_draw_centered(strx, x_offset, y_offset, box_width, font, color);
+    return offset;
 }

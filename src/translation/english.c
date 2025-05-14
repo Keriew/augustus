@@ -1592,6 +1592,7 @@ static translation_string all_strings[] = {
     {TR_SELECT_ALL, "Select All"},
     {TR_SELECTED, "Selected"},
     {TR_WINDOW_MESSAGE_LIST_SELECTED_ALL, "All messages"},
+    {TR_CONFIG_ENABLE_BUILD_MENU_INDEX_HOTKEYS, "Enable build menu index hotkeys"}
     {TR_WINDOW_MESSAGE_LIST_SELECTED_COMMON, "Common messages"},
     {TR_WINDOW_MESSAGE_LIST_SELECTED_CUSTOM, "Custom messages"},
     {TR_BUILDING_LATRINES, "Latrines"},
