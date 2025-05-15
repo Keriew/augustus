@@ -1592,8 +1592,14 @@ static translation_string all_strings[] = {
     {TR_SELECT_ALL, "Select All"},
     {TR_SELECTED, "Selected"},
     {TR_WINDOW_MESSAGE_LIST_SELECTED_ALL, "All messages"},
-    {TR_WINDOW_MESSAGE_LIST_SELECTED_COMMON, "Common messages" },
-    {TR_WINDOW_MESSAGE_LIST_SELECTED_CUSTOM, "Custom messages" }
+    {TR_WINDOW_MESSAGE_LIST_SELECTED_COMMON, "Common messages"},
+    {TR_WINDOW_MESSAGE_LIST_SELECTED_CUSTOM, "Custom messages"},
+    {TR_BUILDING_LATRINES, "Latrines"},
+    {TR_BUILDING_LATRINES_DESC_1, "A place of comfort appreciated by the population to talk about the news of the day or their business."},
+    {TR_BUILDING_LATRINES_DESC_2, "Latrines are used by citizens having only access to a well, and help to slightly improve the housing and health levels. Houses in range of a fountain won't make use of public latrines."},
+    {TR_BUILDING_LATRINES_MISSING_EVOLVE, "This house cannot evolve, as it does not have access to a latrine or a clean water supply from a fountain."},
+    {TR_BUILDING_LATRINES_MISSING_DEVOLVE, "This house will devolve soon, as it does not have access to a latrine or a clean water from a fountain."},
+    {TR_BUILDING_LATRINES_NO_WORKERS, "Without employees to maintain the latrines, citizens avoid coming to relax there."},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

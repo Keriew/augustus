@@ -1590,7 +1590,13 @@ static translation_string all_strings[] = {
     {TR_SELECTED, "Выбранное"},
     {TR_WINDOW_MESSAGE_LIST_SELECTED_ALL, "Все сообщения"},
     {TR_WINDOW_MESSAGE_LIST_SELECTED_COMMON, "Стандартные сообщения"},
-    {TR_WINDOW_MESSAGE_LIST_SELECTED_CUSTOM, "Пользовательские сообщения"}
+    {TR_WINDOW_MESSAGE_LIST_SELECTED_CUSTOM, "Пользовательские сообщения"},
+    {TR_BUILDING_LATRINES, "Латрины"},
+    {TR_BUILDING_LATRINES_DESC_1, "Уютное место, где жители могут обсуждать новости дня или свои дела."},
+    {TR_BUILDING_LATRINES_DESC_2, "Латрины используются гражданами, имеющими доступ только к колодцу, и помогают немного улучшить жилищные условия и уровень здоровья. Дома, расположенные вблизи фонтана, не пользуются общественными уборными."},
+    {TR_BUILDING_LATRINES_MISSING_EVOLVE, "Этот дом не может развиваться, поскольку у него нет доступа к латринам или чистой воде из фонтана."},
+    {TR_BUILDING_LATRINES_MISSING_DEVOLVE, "Этот дом скоро исчезнет, потому что у него нет доступа ни к латринам, ни к чистой воде из фонтана."},
+    {TR_BUILDING_LATRINES_NO_WORKERS, "Без работников, обслуживающих латрины, граждане избегают приходить сюда отдыхать."},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
