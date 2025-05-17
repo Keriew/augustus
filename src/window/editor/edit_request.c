@@ -40,8 +40,8 @@ static void button_year(const generic_button *button);
 static void button_amount(const generic_button *button);
 static void button_resource(const generic_button *button);
 static void button_deadline_years(const generic_button *button);
-static void button_favor(const generic_button *button);
 static void button_extension_months(const generic_button *button);
+static void button_favor(const generic_button *button);
 static void button_extension_disfavor(const generic_button *button);
 static void button_ignored_disfavor(const generic_button *button);
 static void button_repeat_type(const generic_button *button);
@@ -52,7 +52,7 @@ static void button_cancel(const generic_button *button);
 static void button_save(const generic_button *button);
 
 #define BASE_Y_OFFSET 0
-#define SECTION_CONTENT_LEFT_OFFSET 60
+#define SECTION_CONTENT_LEFT_OFFSET 45
 #define MAX_POSSIBLE_ERRORS 3
 #define NUMBER_OF_REQUEST_BUTTONS (sizeof(request_buttons) / sizeof(generic_button))
 #define NUMBER_OF_BOTTOM_BUTTONS (sizeof(bottom_buttons) / sizeof(generic_button))
@@ -69,13 +69,13 @@ static struct {
 } data;
 
 static generic_button request_buttons[] = {
-    {0, 48, 60, 25, button_year},
-    {0, 82, 100, 25, button_resource},
+    {0, 48, 80, 25, button_year},
+    {0, 82, 140, 25, button_resource},
     {80, 114, 50, 25, button_amount, 0, AMOUNT_MIN},
     {170, 114, 50, 25, button_amount, 0, AMOUNT_MAX},
     {0, 150, 140, 25, button_deadline_years},
-    {0, 184, 80, 25, button_favor},
-    {0, 218, 80, 25, button_extension_months},
+    {0, 184, 80, 25, button_extension_months},
+    {0, 218, 80, 25, button_favor},
     {0, 252, 80, 25, button_extension_disfavor},
     {0, 286, 80, 25, button_ignored_disfavor},
     {0, 320, 20, 20, button_repeat_type, 0, REQUEST_REPEAT_NEVER},
@@ -102,8 +102,8 @@ static const struct {
     {TR_EDITOR_REQUEST_RESOURCE, 34 },
     {TR_EDITOR_REQUEST_AMOUNT, 34 },
     {TR_EDITOR_REQUEST_DEADLINE, 34 },
-    {TR_EDITOR_REQUEST_FAVOR_GAINED, 34 },
     {TR_EDITOR_FAVOUR_EXTENSION_MONTHS, 34 },
+    {TR_EDITOR_REQUEST_FAVOR_GAINED, 34 },
     {TR_EDITOR_FAVOUR_DISFAVOR, 34 },
     {TR_EDITOR_FAVOUR_IGNORED, 34 },
     {TR_EDITOR_REPEAT, 90 },
@@ -167,7 +167,7 @@ static void draw_background(void)
 
     // Section names
     for (size_t i = 0; i < NUMBER_OF_SECTIONS; i++) {
-        lang_text_draw_right_aligned(CUSTOM_TRANSLATION, sections[i].title, 26, y_offset,
+        lang_text_draw_right_aligned(CUSTOM_TRANSLATION, sections[i].title, 26, y_offset + 3,
             data.section_title_width, FONT_NORMAL_BLACK);
         y_offset += sections[i].height;
     }
@@ -177,53 +177,53 @@ static void draw_background(void)
 
     // Year text
     btn = &request_buttons[0];
-    text_draw_number_centered_prefix(data.request.year, '+', x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6, btn->width,
+    text_draw_number_centered_prefix(data.request.year, '+', x_offset + btn->x, BASE_Y_OFFSET + btn->y + 7, btn->width,
         FONT_NORMAL_BLACK);
-    lang_text_draw_year(scenario_property_start_year() + data.request.year, x_offset + btn->x + btn->width + 20,
-        BASE_Y_OFFSET + btn->y + 6, FONT_NORMAL_BLACK);
+    lang_text_draw_year(scenario_property_start_year() + data.request.year, x_offset + btn->x + btn->width + 10,
+        BASE_Y_OFFSET + btn->y + 7, FONT_NORMAL_BLACK);
 
     // Resource type
     btn = &request_buttons[1];
-    text_draw_centered(resource_get_data(data.request.resource)->text, x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6, btn->width,
+    text_draw_centered(resource_get_data(data.request.resource)->text, x_offset + btn->x, BASE_Y_OFFSET + btn->y + 7, btn->width,
         FONT_NORMAL_BLACK, 0);
 
     // Amount
     btn = &request_buttons[2];
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_BETWEEN, x_offset, BASE_Y_OFFSET + btn->y + 6,
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_BETWEEN, x_offset, BASE_Y_OFFSET + btn->y + 9,
         FONT_NORMAL_BLACK);
-    text_draw_number_centered(data.request.amount.min, x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6, btn->width,
+    text_draw_number_centered(data.request.amount.min, x_offset + btn->x, BASE_Y_OFFSET + btn->y + 7, btn->width,
         FONT_NORMAL_BLACK);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_AND, x_offset + btn->x + btn->width,
-        BASE_Y_OFFSET + btn->y + 6, btn[1].x - (btn->x + btn->width), FONT_NORMAL_BLACK);
+        BASE_Y_OFFSET + btn->y + 9, btn[1].x - (btn->x + btn->width), FONT_NORMAL_BLACK);
     btn = &request_buttons[3];
-    text_draw_number_centered(data.request.amount.max, x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6, btn->width,
+    text_draw_number_centered(data.request.amount.max, x_offset + btn->x, BASE_Y_OFFSET + btn->y + 7, btn->width,
         FONT_NORMAL_BLACK);
     lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_UNITS, x_offset + btn->x + btn->width + 10,
-        BASE_Y_OFFSET + btn->y + 6, FONT_NORMAL_BLACK);
+        BASE_Y_OFFSET + btn->y + 9, FONT_NORMAL_BLACK);
 
     // Deadline
     btn = &request_buttons[4];
-    lang_text_draw_amount_centered(8, 8, data.request.deadline_years, x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6,
-        btn->width, FONT_NORMAL_BLACK);
-
-    // Favor gained
-    btn = &request_buttons[5];
-    text_draw_number_centered_prefix(data.request.favor, '+', x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6,
+    lang_text_draw_amount_centered(8, 8, data.request.deadline_years, x_offset + btn->x, BASE_Y_OFFSET + btn->y + 7,
         btn->width, FONT_NORMAL_BLACK);
 
     // Extension months
+    btn = &request_buttons[5];
+    text_draw_number_centered_prefix(data.request.extension_months_to_comply, '+', x_offset + btn->x, BASE_Y_OFFSET + btn->y + 7,
+        btn->width, FONT_NORMAL_RED);
+
+    // Favor gained
     btn = &request_buttons[6];
-    text_draw_number_centered_prefix(data.request.extension_months_to_comply, '+', x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6,
+    text_draw_number_centered_prefix(data.request.favor, '+', x_offset + btn->x, BASE_Y_OFFSET + btn->y + 7,
         btn->width, FONT_NORMAL_BLACK);
 
     // Favor lost if extenstion needed
     btn = &request_buttons[7];
-    text_draw_number_centered_prefix(data.request.extension_disfavor, '-', x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6,
+    text_draw_number_centered_prefix(data.request.extension_disfavor, '-', x_offset + btn->x, BASE_Y_OFFSET + btn->y + 7,
         btn->width, FONT_NORMAL_BLACK);
 
     // Favor lost if request ignored
     btn = &request_buttons[8];
-    text_draw_number_centered_prefix(data.request.ignored_disfavor, '-', x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6,
+    text_draw_number_centered_prefix(data.request.ignored_disfavor, '-', x_offset + btn->x, BASE_Y_OFFSET + btn->y + 7,
         btn->width, FONT_NORMAL_BLACK);
 
     // Repeat type selected checkbox
@@ -233,12 +233,12 @@ static void draw_background(void)
     // Never repeat
     btn = &request_buttons[9];
     lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_DO_NOT_REPEAT, x_offset + btn->x + 30,
-        BASE_Y_OFFSET + btn->y + 3, FONT_NORMAL_BLACK);
+        BASE_Y_OFFSET + btn->y + 5, FONT_NORMAL_BLACK);
 
     // Repeat forever
     btn = &request_buttons[10];
     lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FOREVER, x_offset + btn->x + 30,
-        BASE_Y_OFFSET + btn->y + 3, FONT_NORMAL_BLACK);
+        BASE_Y_OFFSET + btn->y + 5, FONT_NORMAL_BLACK);
 
     // Repeat N times
     btn = &request_buttons[12];
@@ -246,28 +246,28 @@ static void draw_background(void)
         text_draw_label_and_number_centered(lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_TEXT),
             data.request.repeat.times,
             (const char *) lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_TIMES),
-            x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6, btn->width, FONT_NORMAL_BLACK, 0);
+            x_offset + btn->x, BASE_Y_OFFSET + btn->y + 7, btn->width, FONT_NORMAL_BLACK, 0);
     } else {
         lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_ONCE + data.request.repeat.times - 1,
-            x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6, btn->width, FONT_NORMAL_BLACK);
+            x_offset + btn->x, BASE_Y_OFFSET + btn->y + 7, btn->width, FONT_NORMAL_BLACK);
     }
 
-    // Invasion interval text
+    // Request interval text
     font_t enabled_font = data.repeat_type == REQUEST_REPEAT_NEVER ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK;
     color_t enabled_color = data.repeat_type == REQUEST_REPEAT_NEVER ? COLOR_FONT_LIGHT_GRAY : COLOR_MASK_NONE;
 
     btn = &request_buttons[13];
-    lang_text_draw_colored(CUSTOM_TRANSLATION, TR_EDITOR_BETWEEN, x_offset, BASE_Y_OFFSET + btn->y + 6,
+    lang_text_draw_colored(CUSTOM_TRANSLATION, TR_EDITOR_BETWEEN, x_offset, BASE_Y_OFFSET + btn->y + 9,
         enabled_font, enabled_color);
-    text_draw_number_centered_colored(data.request.repeat.interval.min, x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6,
+    text_draw_number_centered_colored(data.request.repeat.interval.min, x_offset + btn->x, BASE_Y_OFFSET + btn->y + 7,
         btn->width, enabled_font, enabled_color);
     lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_AND, x_offset + btn->x + btn->width,
-        BASE_Y_OFFSET + btn->y + 6, btn[1].x - (btn->x + btn->width), enabled_font, enabled_color);
+        BASE_Y_OFFSET + btn->y + 9, btn[1].x - (btn->x + btn->width), enabled_font, enabled_color);
     btn = &request_buttons[14];
-    text_draw_number_centered_colored(data.request.repeat.interval.max, x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6,
+    text_draw_number_centered_colored(data.request.repeat.interval.max, x_offset + btn->x, BASE_Y_OFFSET + btn->y + 7,
         btn->width, enabled_font, enabled_color);
     lang_text_draw_colored(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_YEARS, x_offset + btn->x + btn->width + 10,
-        BASE_Y_OFFSET + btn->y + 6, enabled_font, enabled_color);
+        BASE_Y_OFFSET + btn->y + 9, enabled_font, enabled_color);
 
 
     // Bottom button labels

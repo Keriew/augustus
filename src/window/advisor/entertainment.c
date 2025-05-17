@@ -103,12 +103,12 @@ static int draw_background(void)
     outer_panel_draw(0, 0, 40, ADVISOR_HEIGHT);
     image_draw(image_group(GROUP_ADVISOR_ICONS) + 8, 10, 10, COLOR_MASK_NONE, SCALE_NONE);
 
-    lang_text_draw(58, 0, 60, 12, FONT_LARGE_BLACK);
+    lang_text_draw(58, 0, 60, 12, FONT_LARGE_BLACK); // Entertainment
 
-    lang_text_draw(58, 1, 173, 46, FONT_SMALL_PLAIN);
-    lang_text_draw(58, 2, 260, 46, FONT_SMALL_PLAIN);
-    lang_text_draw(58, 3, PEOPLE_OFFSET + 20, 46, FONT_SMALL_PLAIN); // can entertain
-    lang_text_draw_centered(58, 4, COVERAGE_OFFSET, 46, COVERAGE_WIDTH, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(58, 1, 149, 46, 100, FONT_SMALL_PLAIN); // Working
+    lang_text_draw_centered(58, 2, 231, 46, 100, FONT_SMALL_PLAIN); // Shows
+    lang_text_draw(58, 3, 336, 46, FONT_SMALL_PLAIN);               // Can entertain
+    lang_text_draw_centered(58, 4, 465, 46, 140, FONT_SMALL_PLAIN); // City coverage
 
     inner_panel_draw(32, 60, 36, 8);
 

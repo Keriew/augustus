@@ -1,6 +1,7 @@
 #include "demand_changes.h"
 
 #include "core/image_group_editor.h"
+#include "core/string.h"
 #include "empire/trade_route.h"
 #include "game/resource.h"
 #include "graphics/button.h"
@@ -165,28 +166,35 @@ static void draw_demand_change_button(const grid_box_item *item)
 {
     button_border_draw(item->x, item->y, item->width, item->height, item->is_focused);
     const demand_change_t *demand_change = data.demand_changes[item->index];
-    text_draw_number(demand_change->year, '+', " ", item->x + 10, item->y + 7, FONT_NORMAL_BLACK, 0);
-    lang_text_draw_year(scenario_property_start_year() + demand_change->year, item->x + 35, item->y + 7,
+    text_draw_number(demand_change->year, '+', " ", item->x + 5, item->y + 7, FONT_NORMAL_BLACK, 0);
+    int width = lang_text_draw_year(scenario_property_start_year() + demand_change->year, item->x + 40, item->y + 7,
         FONT_NORMAL_BLACK);
     int image_id = resource_get_data(demand_change->resource)->image.editor.icon;
     const image *img = image_get(image_id);
     int base_height = (item->height - img->original.height) / 2;
-    image_draw(image_id, item->x + 115, item->y + base_height, COLOR_MASK_NONE, SCALE_NONE);
-    int width = lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_SHORT_ROUTE_TEXT, item->x + 140, item->y + 7,
+    image_draw(image_id, item->x + 45 + width, item->y + base_height, COLOR_MASK_NONE, SCALE_NONE);
+    width += lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_SHORT_ROUTE_TEXT, item->x + 75 + width, item->y + 7,
         FONT_NORMAL_BLACK);
-    width += text_draw_number(demand_change->route_id, '@', " ", item->x + 140 + width, item->y + 7,
+    width += text_draw_number(demand_change->route_id, '@', " ", item->x + 75 + width, item->y + 7,
         FONT_NORMAL_BLACK, 0);
     demand_change_amount_t amount;
     get_change_amount(item->index, &amount);
-    width += text_draw_number(amount.value, '@', " ", item->x + 140 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
-    width += text_draw_number(amount.difference, '(', ")", item->x + 140 + width, item->y + 7,
-        FONT_NORMAL_BLACK, 0);
+    width += text_draw_number(amount.value, '@', " ", item->x + 75 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+    if (amount.difference > 0) {
+        width += text_draw(string_from_ascii("("), item->x + 70 + width, item->y + 7,
+            FONT_NORMAL_PLAIN, COLOR_MASK_DARK_GREEN);
+        width += text_draw_number(amount.difference, '+', ")", item->x + 70 + width - 5, item->y + 7,
+            FONT_NORMAL_PLAIN, COLOR_MASK_DARK_GREEN);
+    } else {
+        width += text_draw_number(amount.difference, '(', ")", item->x + 70 + width, item->y + 7,
+            FONT_NORMAL_PLAIN, COLOR_MASK_PURPLE);
+    }
 }
 
 static void draw_foreground(void)
 {
     graphics_in_dialog();
-    
+
     if (data.demand_changes_in_use) {
         grid_box_draw(&demand_change_buttons);
     }
