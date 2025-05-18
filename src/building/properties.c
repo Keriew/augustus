@@ -1290,6 +1290,13 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .custom_asset.group = "Military",
         .custom_asset.id = "Armoury_OFF_C",
         .event_data.attr = "armoury"
+    },
+    [BUILDING_LATRINES] = {
+        .size = 1,
+        .fire_proof = 1,
+        .custom_asset.group = "Health_Culture",
+        .custom_asset.id = "Latrine_N",
+        .event_data.attr = "latrines"
     }
 };
 

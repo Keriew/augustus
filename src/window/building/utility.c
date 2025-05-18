@@ -19,6 +19,8 @@
 #include "window/building_info.h"
 #include "window/building/figures.h"
 
+#include <stdlib.h>
+
 static void button_go_to_orders(const generic_button *button);
 static void button_toggle_figure_state(const generic_button *button);
 static void button_roadblock_orders(const generic_button *button);
@@ -340,6 +342,29 @@ void window_building_draw_well(building_info_context *c)
     }
     inner_panel_draw(c->x_offset + 16, c->y_offset + 116, c->width_blocks - 2, 4);
     window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 124);
+}
+
+void window_building_draw_latrines(building_info_context *c)
+{
+    if (rand() % 10 == 0) {
+        window_building_play_sound(c, ASSETS_DIRECTORY "/Sounds/Latrine.mp3");
+    } else {
+        window_building_play_sound(c, "wavs/well.wav");
+    }
+    outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_LATRINES, c->x_offset, c->y_offset + 10,
+        BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);   
+    window_building_draw_description(c, CUSTOM_TRANSLATION, TR_BUILDING_LATRINES_DESC_1);  
+    inner_panel_draw(c->x_offset + 16, c->y_offset + 136, c->width_blocks - 2, 4);
+    window_building_draw_employment_without_house_cover(c, 142);
+    window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 144);
+
+    building *b = building_get(c->building_id);
+    if (b->num_workers > 0) {
+        window_building_draw_description_at(c, BLOCK_SIZE * c->height_blocks - 136, CUSTOM_TRANSLATION, TR_BUILDING_LATRINES_DESC_2); 
+    } else {        
+        window_building_draw_description_at(c, BLOCK_SIZE * c->height_blocks - 136, CUSTOM_TRANSLATION, TR_BUILDING_LATRINES_NO_WORKERS); 
+    }
 }
 
 void window_building_draw_mission_post(building_info_context *c)
