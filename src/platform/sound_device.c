@@ -250,7 +250,7 @@ static int get_channel_for_filename(const char *filename, sound_type type)
 
 int sound_device_is_file_playing_on_channel(const char *filename, sound_type type)
 {
-    if (!filename) {
+    if (!data.initialized || !filename) {
         return 0;
     }
     int channel = get_channel_for_filename(filename, type);
@@ -262,11 +262,17 @@ int sound_device_is_file_playing_on_channel(const char *filename, sound_type typ
 
 void sound_device_set_music_volume(int volume_pct)
 {
+    if (!data.initialized) {
+        return;
+    }
     Mix_VolumeMusic(percentage_to_volume(volume_pct));
 }
 
 void sound_device_set_volume_for_type(sound_type type, int volume_pct)
 {
+    if (!data.initialized) {
+        return;
+    }
     for (int i = 0; i < sound_type_to_channels[type].total; i++) {
         int channel = i + sound_type_to_channels[type].start;
         if (data.channels[channel].chunk) {
@@ -402,11 +408,17 @@ int sound_device_play_file_on_channel(const char *filename, sound_type type, int
 
 void sound_device_on_audio_finished(void (*callback)(sound_type))
 {
+    if (!data.initialized) {
+        return;
+    }
     data.sound_finished_callback = callback;
 }
 
 void sound_device_fadeout_music(int milisseconds)
 {
+    if (!data.initialized) {
+        return;
+    }
     Mix_FadeOutMusic(milisseconds);
 }
 
@@ -592,6 +604,9 @@ static void custom_music_callback(void *dummy, Uint8 *dst, int len)
 
 void sound_device_use_custom_music_player(int bitdepth, int num_channels, int rate, const void *audio_data, int len)
 {
+    if (!data.initialized) {
+        return;
+    }
     SDL_AudioFormat format;
     if (bitdepth == 8) {
         format = AUDIO_U8;
@@ -624,7 +639,7 @@ void sound_device_use_custom_music_player(int bitdepth, int num_channels, int ra
 
 void sound_device_write_custom_music_data(const void *audio_data, int len)
 {
-    if (!audio_data || len <= 0 || !custom_audio_stream_active()) {
+    if (!data.initialized || !audio_data || len <= 0 || !custom_audio_stream_active()) {
         return;
     }
     put_custom_audio_stream(audio_data, len);
@@ -632,6 +647,9 @@ void sound_device_write_custom_music_data(const void *audio_data, int len)
 
 void sound_device_use_default_music_player(void)
 {
+    if (!data.initialized) {
+        return;
+    }
     Mix_HookMusic(0, 0);
     free_custom_audio_stream();
 }

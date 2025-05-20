@@ -240,12 +240,12 @@ static void draw_resource_info(const grid_box_item *item)
         if (resource_is_food(resource)) {
             amount += city_resource_count_food_on_granaries(resource) / 100;
         }
-        text_draw_number_centered(amount, item->x + 140, item->y + 15, 60, FONT_NORMAL_WHITE);
+        text_draw_number_centered(amount, item->x + 130, item->y + 15, 60, FONT_NORMAL_WHITE);
     } else {
-        lang_text_draw_centered(56, 2, item->x + 140, item->y + 15, 60, FONT_NORMAL_WHITE);
+        lang_text_draw_centered(56, 2, item->x + 130, item->y + 15, 60, FONT_NORMAL_WHITE);
     }
     if (city_resource_is_mothballed(resource)) {
-        lang_text_draw_centered(18, 5, item->x + 180, item->y + 15, 100, FONT_NORMAL_WHITE);
+        lang_text_draw_centered(18, 5, item->x + 160, item->y + 15, 100, FONT_NORMAL_WHITE);
     }
     draw_resource_status_text(resource, item->x + 176, item->y + 5, item->width - 206);
 

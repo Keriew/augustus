@@ -101,6 +101,14 @@ static int show_building_none(const building *b)
     return 0;
 }
 
+static int show_building_enemy(const building *b)
+{
+    return b->type == BUILDING_PREFECTURE
+        || b->type == BUILDING_WATCHTOWER || b->type == BUILDING_TOWER
+        || b->type == BUILDING_FORT || b->type == BUILDING_FORT_GROUND
+        || b->type == BUILDING_GATEHOUSE || b->type == BUILDING_PALISADE_GATE || b->type == BUILDING_PALISADE;
+}
+
 static int show_figure_fire(const figure *f)
 {
     return f->type == FIGURE_PREFECT;
@@ -113,9 +121,9 @@ static int show_figure_damage(const figure *f)
 
 static int show_figure_crime(const figure *f)
 {
-    return f->type == FIGURE_PREFECT ||
-        f->type == FIGURE_CRIMINAL || f->type == FIGURE_RIOTER || f->type == FIGURE_PROTESTER
-        || f->type == FIGURE_CRIMINAL_LOOTER || f->type == FIGURE_CRIMINAL_ROBBER;
+    const figure_properties *props = figure_properties_for_type(f->type);
+    return props->category == FIGURE_CATEGORY_ARMED || props->category == FIGURE_CATEGORY_CRIMINAL
+        || f->type == FIGURE_ARROW || f->type == FIGURE_JAVELIN || f->type == FIGURE_BOLT;
 }
 
 static int show_figure_problems(const figure *f)
@@ -139,7 +147,12 @@ static int show_figure_native(const figure *f)
 static int show_figure_enemy(const figure *f)
 {
     const figure_properties *props = figure_properties_for_type(f->type);
-    return props->category == FIGURE_CATEGORY_HOSTILE || props->category == FIGURE_CATEGORY_NATIVE || props->category == FIGURE_CATEGORY_AGGRESSIVE_ANIMAL;
+    return props->category == FIGURE_CATEGORY_HOSTILE || props->category == FIGURE_CATEGORY_NATIVE
+        || props->category == FIGURE_CATEGORY_AGGRESSIVE_ANIMAL
+        || props->category == FIGURE_CATEGORY_ARMED
+        || f->type == FIGURE_BALLISTA
+        || f->type == FIGURE_ARROW || f->type == FIGURE_JAVELIN || f->type == FIGURE_BOLT
+        || f->type == FIGURE_CATAPULT_MISSILE;
 }
 
 static int get_column_height_fire(const building *b)
@@ -458,7 +471,7 @@ const city_overlay *city_overlay_for_enemy(void)
     static city_overlay overlay = {
         OVERLAY_ENEMY,
         COLUMN_COLOR_RED,
-        show_building_none,
+        show_building_enemy,
         show_figure_enemy,
         get_column_height_none,
         0,

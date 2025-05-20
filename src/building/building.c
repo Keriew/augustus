@@ -35,6 +35,9 @@
 
 #define BUILDING_ARRAY_SIZE_STEP 2000
 
+#define WATER_DESIRABILITY_RANGE 3
+#define WATER_DESIRABILITY_BONUS 15
+
 static struct {
     array(building) buildings;
     building *first_of_type[BUILDING_TYPE_MAX];
@@ -240,7 +243,7 @@ building *building_create(building_type type, int x, int y)
     b->house_figure_generation_delay = map_random_get(b->grid_offset) & 0x7f;
     b->figure_roam_direction = b->house_figure_generation_delay & 6;
     b->fire_proof = props->fire_proof;
-    b->is_adjacent_to_water = map_terrain_is_adjacent_to_water(x, y, b->size);
+    b->is_close_to_water = building_is_close_to_water(b);
 
     return b;
 }
@@ -371,7 +374,7 @@ void building_update_desirability(void)
             continue;
         }
         b->desirability = map_desirability_get_max(b->x, b->y, b->size);
-        if (b->is_adjacent_to_water) {
+        if (b->is_close_to_water) {
             b->desirability += 10;
         }
         switch (map_elevation_at(b->grid_offset)) {
@@ -615,6 +618,11 @@ void building_make_immune_cheat(void)
     array_foreach(data.buildings, b) {
         b->fire_proof = 1;
     }
+}
+
+int building_is_close_to_water(const building *b)
+{
+    return map_terrain_exists_tile_in_radius_with_type(b->x, b->y, b->size, WATER_DESIRABILITY_RANGE, TERRAIN_WATER);
 }
 
 void building_save_state(buffer *buf, buffer *highest_id, buffer *highest_id_ever,

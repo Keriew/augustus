@@ -26,9 +26,9 @@
 #include "window/file_dialog.h"
 #include "window/numeric_input.h"
 
-#define MESSAGES_Y_OFFSET 146
-#define MESSAGES_ROW_HEIGHT 32
-#define MAX_VISIBLE_ROWS 8
+#define MESSAGES_Y_OFFSET 100
+#define MESSAGES_ROW_HEIGHT 31
+#define MAX_VISIBLE_ROWS 12
 #define BUTTON_WIDTH 320
 
 
@@ -38,7 +38,7 @@ static void button_event(const generic_button *button);
 static void populate_list(int offset);
 
 static scrollbar_type scrollbar = {
-    368, MESSAGES_Y_OFFSET, MESSAGES_ROW_HEIGHT * MAX_VISIBLE_ROWS, BUTTON_WIDTH - 16, MAX_VISIBLE_ROWS, on_scroll, 0, 4
+    375, MESSAGES_Y_OFFSET, MESSAGES_ROW_HEIGHT * MAX_VISIBLE_ROWS, BUTTON_WIDTH - 17, MAX_VISIBLE_ROWS, on_scroll, 0, 4
 };
 
 static generic_button buttons[] = {
@@ -50,9 +50,15 @@ static generic_button buttons[] = {
     {48, MESSAGES_Y_OFFSET + (5 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, 0, 6},
     {48, MESSAGES_Y_OFFSET + (6 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, 0, 7},
     {48, MESSAGES_Y_OFFSET + (7 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, 0, 8},
-    {48, MESSAGES_Y_OFFSET + (9 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_click, 0, 9},
-    {48, MESSAGES_Y_OFFSET + (10 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_click, 0, 10},
-    {48, MESSAGES_Y_OFFSET + (11 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_click, 0, 11}
+
+    {48, MESSAGES_Y_OFFSET + (8 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, 0, 9},
+    {48, MESSAGES_Y_OFFSET + (9 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, 0, 10},
+    {48, MESSAGES_Y_OFFSET + (10 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, 0, 11},
+    {48, MESSAGES_Y_OFFSET + (11 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_event, 0, 12},
+
+    {48, MESSAGES_Y_OFFSET + (13 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_click, 0, 13}, // import
+    {48, MESSAGES_Y_OFFSET + (14 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_click, 0, 14}, // export
+    {48, MESSAGES_Y_OFFSET + (15 * MESSAGES_ROW_HEIGHT), BUTTON_WIDTH, MESSAGES_ROW_HEIGHT - 2, button_click, 0, 15} // clear
 };
 
 #define MAX_BUTTONS (sizeof(buttons) / sizeof(generic_button))
@@ -100,8 +106,8 @@ static void draw_foreground(void)
 
     outer_panel_draw(16, 16, 26, 38);
 
-    text_draw_centered(translation_for(TR_EDITOR_CUSTOM_MESSAGES_TITLE), 48, 58, BUTTON_WIDTH, FONT_LARGE_BLACK, 0);
-    text_draw_label_and_number(translation_for(TR_EDITOR_CUSTOM_MESSAGES_COUNT), data.total_messages, "", 48, 106, FONT_NORMAL_PLAIN, COLOR_BLACK);
+    text_draw_centered(translation_for(TR_EDITOR_CUSTOM_MESSAGES_TITLE), 48, 30, BUTTON_WIDTH, FONT_LARGE_BLACK, 0);
+    text_draw_label_and_number(translation_for(TR_EDITOR_CUSTOM_MESSAGES_COUNT), data.total_messages, "", 48, 70, FONT_NORMAL_PLAIN, COLOR_BLACK);
 
     int y_offset = MESSAGES_Y_OFFSET;
     for (unsigned int i = 0; i < MAX_VISIBLE_ROWS; i++) {
@@ -118,7 +124,7 @@ static void draw_foreground(void)
         y_offset += MESSAGES_ROW_HEIGHT;
     }
 
-    for (size_t i = 8; i < MAX_BUTTONS; i++) {
+    for (size_t i = 12; i < MAX_BUTTONS; i++) {
         large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / BLOCK_SIZE,
             data.focus_button_id == i + 1 ? 1 : 0);
     }
@@ -132,8 +138,8 @@ static void draw_foreground(void)
     y_offset += MESSAGES_ROW_HEIGHT;
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_MESSAGES_CLEAR, 48, y_offset + 8, BUTTON_WIDTH, FONT_NORMAL_GREEN);
 
-    y_offset += MESSAGES_ROW_HEIGHT;
-    lang_text_draw_centered(13, 3, 48, y_offset, BUTTON_WIDTH, FONT_NORMAL_BLACK);
+    //y_offset += MESSAGES_ROW_HEIGHT;
+    lang_text_draw_centered(13, 3, 48, 600, BUTTON_WIDTH, FONT_NORMAL_BLACK); // Right-click to Continue
 
     scrollbar_draw(&scrollbar);
     graphics_reset_dialog();
@@ -170,11 +176,11 @@ static void button_click(const generic_button *button)
 {
     int type = button->parameter1;
 
-    if (type == 9) {
+    if (type == 13) {
         window_file_dialog_show(FILE_TYPE_CUSTOM_MESSAGES, FILE_DIALOG_LOAD);
-    } else if (type == 10) {
+    } else if (type == 14) {
         window_file_dialog_show(FILE_TYPE_CUSTOM_MESSAGES, FILE_DIALOG_SAVE);
-    } else if (type == 11) {
+    } else if (type == 15) {
         custom_messages_clear_all();
         scenario_editor_set_custom_message_introduction(0);
         scenario_editor_set_custom_victory_message(0);

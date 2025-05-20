@@ -34,18 +34,18 @@ static struct {
 } data;
 
 static generic_button new_request_button = {
-    195, 340, 250, 25, button_new_request
+    195, 350, 250, 25, button_new_request
 };
 
 static grid_box_type request_buttons = {
     .x = 10,
-    .y = 40,
+    .y = 65,
     .width = 38 * BLOCK_SIZE,
     .height = 19 * BLOCK_SIZE,
-    .num_columns = 2,
-    .item_height = 30,
+    .num_columns = 1,
+    .item_height = 28,
     .item_margin.horizontal = 10,
-    .item_margin.vertical = 5,
+    .item_margin.vertical = 4,
     .extend_to_hidden_scrollbar = 1,
     .on_click = button_edit_request,
     .draw_item = draw_request_button
@@ -107,13 +107,21 @@ static void draw_background(void)
     outer_panel_draw(0, 0, 40, 30);
     lang_text_draw(44, 14, 20, 12, FONT_LARGE_BLACK);
 
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_DATE, 30, 50, FONT_SMALL_PLAIN); // Request date:
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_AMOUNT, 160, 50, FONT_SMALL_PLAIN); // Amount:
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_RESOURCE, 275, 50, FONT_SMALL_PLAIN); // Resource:
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST_DEADLINE, 380, 50, FONT_SMALL_PLAIN); // Deadline:
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY2, 461, 30, FONT_SMALL_PLAIN); // Repeat frequency
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_TIMES2, 460, 50, FONT_SMALL_PLAIN); // Times:
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_YEARS2, 532, 50, FONT_SMALL_PLAIN); // Years:
+
     if (!data.requests_in_use) {
         lang_text_draw_centered(44, 19, 0, 165, 640, FONT_LARGE_BLACK);
     }
 
     if (!data.on_select) {
         lang_text_draw_centered(13, 3, 0, 456, 640, FONT_NORMAL_BLACK);
-        lang_text_draw_multiline(152, 1, 32, 376, 576, FONT_NORMAL_BLACK);
+        lang_text_draw_multiline(152, 1, 20, 380, 600, FONT_NORMAL_BLACK);
         lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_NEW_REQUEST, new_request_button.x + 8,
             new_request_button.y + 8, new_request_button.width - 16, FONT_NORMAL_BLACK);
     }
@@ -127,20 +135,41 @@ static void draw_request_button(const grid_box_item *item)
 {
     button_border_draw(item->x, item->y, item->width, item->height, item->is_focused);
     const scenario_request *request = data.requests[item->index];
-    lang_text_draw_year(scenario_property_start_year() + request->year, item->x + 10, item->y + 7,
-        FONT_NORMAL_BLACK);
-    int width = text_draw_number(request->amount.min, '@', " ", item->x + 110, item->y + 7, FONT_NORMAL_BLACK, 0);
+    text_draw_number(request->year, '+', " ", item->x + 10, item->y + 7, FONT_NORMAL_BLACK, 0);
+    lang_text_draw_year(scenario_property_start_year() + request->year, item->x + 50, item->y + 7, FONT_NORMAL_BLACK);
+    int width = text_draw_number(request->amount.min, '@', " ", item->x + 140, item->y + 7, FONT_NORMAL_BLACK, 0);
     if (request->amount.max > request->amount.min) {
-        width += text_draw(string_from_ascii("-"), item->x + 110 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
-        width += text_draw_number(request->amount.max, '@', " ", item->x + 110 + width, item->y + 7,
+        width += text_draw(string_from_ascii("-"), item->x + 135 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+        width += text_draw_number(request->amount.max, '@', " ", item->x + 130 + width, item->y + 7,
             FONT_NORMAL_BLACK, 0);
     }
     int image_id = resource_get_data(request->resource)->image.editor.icon;
     const image *img = image_get(image_id);
     int base_height = (item->height - img->original.height) / 2;
-    image_draw(image_id, item->x + 110 + width, item->y + base_height, COLOR_MASK_NONE, SCALE_NONE);
-    text_draw(resource_get_data(request->resource)->text, item->x + 110 + width + img->width + 10, item->y + 7,
+    image_draw(image_id, item->x + 260, item->y + base_height, COLOR_MASK_NONE, SCALE_NONE);
+    text_draw(resource_get_data(request->resource)->text, item->x + 290, item->y + 7,
         FONT_NORMAL_BLACK, 0);
+
+    text_draw_number(request->deadline_years, '@', " ", 400, item->y + 7, FONT_NORMAL_BLACK, 0);
+
+    if (request->repeat.times == REQUESTS_REPEAT_INFINITE) {
+        width += text_draw(string_from_ascii("INF"), 470, item->y + 7, FONT_NORMAL_BLACK, 0);
+    } else if (request->repeat.times == 0) {
+        width += text_draw(string_from_ascii("-"), 480, item->y + 7, FONT_NORMAL_BLACK, 0);
+    } else {
+        text_draw_number(request->repeat.times, '@', " ", 465, item->y + 7, FONT_NORMAL_BLACK, 0);
+    }
+
+    if (request->repeat.times == 0) {
+        width += text_draw(string_from_ascii(" "), item->x + 500, item->y + 7, FONT_NORMAL_BLACK, 0);
+    } else if (request->repeat.times > 0 || request->repeat.times == REQUESTS_REPEAT_INFINITE) {
+        int width = text_draw_number(request->repeat.interval.min, '@', " ", item->x + 510, item->y + 7, FONT_NORMAL_BLACK, 0);
+        if (request->repeat.interval.max > request->repeat.interval.min) {
+            width += text_draw(string_from_ascii("-"), item->x + 500 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+            width += text_draw_number(request->repeat.interval.max, '@', " ", item->x + 490 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+        }
+    }
+
 }
 
 static void draw_foreground(void)

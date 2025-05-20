@@ -25,6 +25,7 @@
 #define MAX_QUEUE 1000
 #define RESERVOIR_RADIUS 10
 #define WELL_RADIUS 2
+#define LATRINES_RADIUS 3
 #define FOUNTAIN_RADIUS 4
 
 static const int ADJACENT_OFFSETS[] = { -GRID_SIZE, 1, GRID_SIZE, -1 };
@@ -52,6 +53,22 @@ static void mark_well_access(int well_id, int radius)
     }
 }
 
+static void mark_latrines_access(int latrines_id, int radius)
+{
+    building *latrines = building_get(latrines_id);
+    int x_min, y_min, x_max, y_max;
+    map_grid_get_area(latrines->x, latrines->y, 1, radius, &x_min, &y_min, &x_max, &y_max);
+
+    for (int yy = y_min; yy <= y_max; yy++) {
+        for (int xx = x_min; xx <= x_max; xx++) {
+            int building_id = map_building_at(map_grid_offset(xx, yy));
+            if (building_id && latrines->num_workers > 0) {
+                building_get(building_id)->has_latrines_access = 1;
+            }
+        }
+    }
+}
+
 void map_water_supply_update_buildings(void)
 {
     for (building_type type = BUILDING_HOUSE_SMALL_TENT; type <= BUILDING_HOUSE_LUXURY_PALACE; type++) {
@@ -61,6 +78,7 @@ void map_water_supply_update_buildings(void)
             }
             b->has_water_access = 0;
             b->has_well_access = 0;
+            b->has_latrines_access = 0;
             if (map_terrain_exists_tile_in_area_with_type(
                 b->x, b->y, b->size, TERRAIN_FOUNTAIN_RANGE)) {
                 b->has_water_access = 1;
@@ -75,6 +93,12 @@ void map_water_supply_update_buildings(void)
     for (building *b = building_first_of_type(BUILDING_WELL); b; b = b->next_of_type) {
         if (b->state == BUILDING_STATE_IN_USE) {
             mark_well_access(b->id, map_water_supply_well_radius());
+        }
+    }
+
+    for (building *b = building_first_of_type(BUILDING_LATRINES); b; b = b->next_of_type) {
+        if (b->state == BUILDING_STATE_IN_USE) {
+            mark_latrines_access(b->id, map_water_supply_latrines_radius());
         }
     }
 }
@@ -347,4 +371,9 @@ int map_water_supply_well_radius(void)
     }
 
     return radius;
+}
+
+int map_water_supply_latrines_radius(void)
+{
+    return LATRINES_RADIUS;
 }

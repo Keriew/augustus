@@ -174,7 +174,7 @@ typedef struct building {
     unsigned char has_plague;
     signed char desirability;
     unsigned char is_deleted;
-    unsigned char is_adjacent_to_water;
+    unsigned char is_close_to_water;
     unsigned char storage_id;
     union {
         signed char house_happiness;
@@ -197,6 +197,7 @@ typedef struct building {
     unsigned char sickness_doctor_cure;
     unsigned char fumigation_frame;
     unsigned char fumigation_direction;
+    unsigned char has_latrines_access;
     short resources[RESOURCE_MAX];
     unsigned char accepted_goods[RESOURCE_MAX];
 } building;
@@ -273,6 +274,8 @@ void building_totals_add_corrupted_house(int unfixable);
 void building_clear_all(void);
 
 void building_make_immune_cheat(void);
+
+int building_is_close_to_water(const building *b);
 
 void building_save_state(buffer *buf, buffer *highest_id, buffer *highest_id_ever,
                          buffer *sequence, buffer *corrupt_houses);
