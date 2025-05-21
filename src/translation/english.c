@@ -1594,6 +1594,7 @@ static translation_string all_strings[] = {
     {TR_WINDOW_MESSAGE_LIST_SELECTED_ALL, "All messages"},
     {TR_WINDOW_MESSAGE_LIST_SELECTED_COMMON, "Common messages"},
     {TR_WINDOW_MESSAGE_LIST_SELECTED_CUSTOM, "Custom messages"},
+    {TR_CONFIG_ENABLE_BUILD_MENU_INDEX_HOTKEYS, "Enable build menu index hotkeys"},
     {TR_BUILDING_LATRINES, "Latrines"},
     {TR_BUILDING_LATRINES_DESC_1, "A place of comfort appreciated by the population to talk about the news of the day or their business."},
     {TR_BUILDING_LATRINES_DESC_2, "Latrines are used by citizens having only access to a well, and help to slightly improve the housing and health levels. Houses in range of a fountain won't make use of public latrines."},
