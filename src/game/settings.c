@@ -19,7 +19,6 @@ static struct {
     int window_height;
     // sound settings
     set_sound sound_settings[SOUND_TYPE_MAX];
-    int music_randomised;
     // speed settings
     int game_speed;
     int scroll_speed;
@@ -53,7 +52,6 @@ static void load_default_settings(void)
     data.sound_settings[SOUND_TYPE_SPEECH].volume = 100;
     data.sound_settings[SOUND_TYPE_CITY].enabled = 1;
     data.sound_settings[SOUND_TYPE_CITY].volume = 100;
-    data.music_randomised = 0;
 
     data.game_speed = 90;
     data.scroll_speed = 70;
@@ -94,10 +92,6 @@ static void load_settings(buffer *buf)
     buffer_skip(buf, 1); //unsigned char autoclear_enabled;
     data.sound_settings[SOUND_TYPE_EFFECTS].volume = buffer_read_i32(buf);
     data.sound_settings[SOUND_TYPE_MUSIC].volume = buffer_read_i32(buf);
-    data.music_randomised = 0;
-    if (!buffer_at_end(buf)) {
-        data.music_randomised = buffer_read_i32(buf);
-    }
     data.sound_settings[SOUND_TYPE_SPEECH].volume = buffer_read_i32(buf);
     data.sound_settings[SOUND_TYPE_CITY].volume = buffer_read_i32(buf);
     buffer_skip(buf, 8); // ram
@@ -187,9 +181,6 @@ void settings_save(void)
     buffer_skip(buf, 1); //unsigned char autoclear_enabled;
     buffer_write_i32(buf, data.sound_settings[SOUND_TYPE_EFFECTS].volume);
     buffer_write_i32(buf, data.sound_settings[SOUND_TYPE_MUSIC].volume);
-    buffer_write_i32(buf, data.sound_settings[SOUND_TYPE_MUSIC].volume);
-    buffer_write_i32(buf, data.music_randomised);
-
     buffer_write_i32(buf, data.sound_settings[SOUND_TYPE_SPEECH].volume);
     buffer_write_i32(buf, data.sound_settings[SOUND_TYPE_CITY].volume);
     buffer_skip(buf, 8); // ram
@@ -249,16 +240,6 @@ void setting_toggle_sound_enabled(int type)
         return;
     }
     data.sound_settings[type].enabled = data.sound_settings[type].enabled ? 0 : 1;
-}
-
-int setting_music_randomised(void)
-{
-    return data.music_randomised;
-}
-
-void setting_set_music_randomised(int value)
-{
-    data.music_randomised = value ? 1 : 0;
 }
 
 void setting_set_sound_volume(int type, int volume)
