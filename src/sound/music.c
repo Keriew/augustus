@@ -1,5 +1,3 @@
-#include <stdlib.h>
-
 #include "music.h"
 
 #include "core/dir.h"
@@ -8,7 +6,7 @@
 #include "city/population.h"
 #include "game/settings.h"
 #include "sound/device.h"
-
+#include <stdlib.h>
 #define TRACK_RANDOM_MIN TRACK_CITY_1
 #define TRACK_RANDOM_MAX TRACK_CITY_5
 
