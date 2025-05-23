@@ -103,7 +103,7 @@ void sound_music_play_editor(void)
 
 void sound_music_update(int force)
 {
-    int randomise = setting_music_randomised();
+    int randomise = config_get(CONFIG_GENERAL_ENABLE_MUSIC_RANDOMISE);
     if (sound_device_resume_music()) {
     
         data.next_check = 10;
