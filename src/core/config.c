@@ -16,6 +16,7 @@ static int needs_user_directory_setup;
 static const char *ini_keys[] = {
     "enable_audio",
     "master_volume",
+    "enable_music_randomise",
     "enable_audio_in_videos",
     "video_volume",
     "has_set_user_directories",
@@ -86,6 +87,7 @@ static char string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX];
 static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_GENERAL_ENABLE_AUDIO] = 1,
     [CONFIG_GENERAL_MASTER_VOLUME] = 100,
+    [CONFIG_GENERAL_ENABLE_MUSIC_RANDOMISE] = 0,
     [CONFIG_GENERAL_ENABLE_VIDEO_SOUND] = 1,
     [CONFIG_GENERAL_VIDEO_VOLUME] = 100,
     [CONFIG_GENERAL_HAS_SET_USER_DIRECTORIES] = 1,

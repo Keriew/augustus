@@ -36,7 +36,7 @@
 #include <string.h>
 
 #define MAX_LANGUAGE_DIRS 20
-#define MAX_WIDGETS 32
+#define MAX_WIDGETS 33
 
 #define NUM_VISIBLE_ITEMS 13
 
@@ -134,7 +134,7 @@ enum {
     CONFIG_ORIGINAL_SCROLL_SPEED,
     CONFIG_ORIGINAL_DIFFICULTY,
     CONFIG_ORIGINAL_GODS_EFFECTS,
-    CONFIG_MAX_ALL
+    CONFIG_MAX_ALL    
 };
 
 enum {
@@ -190,6 +190,7 @@ static config_widget all_widgets[CONFIG_PAGES][MAX_WIDGETS] = {
         {TYPE_CHECKBOX, CONFIG_GENERAL_ENABLE_AUDIO, TR_CONFIG_ENABLE_AUDIO, 0, 5},
         {TYPE_NUMERICAL_RANGE, RANGE_MASTER_VOLUME, 0, display_text_master_volume, 1},
         {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_MUSIC, TR_CONFIG_MUSIC, 0, 5},
+        {TYPE_CHECKBOX, CONFIG_GENERAL_ENABLE_MUSIC_RANDOMISE, TR_CONFIG_RANDOMISE_MUSIC, 0, 5},
         {TYPE_NUMERICAL_RANGE, RANGE_MUSIC_VOLUME, 0, display_text_music_volume, 1},
         {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_SPEECH, TR_CONFIG_SPEECH, 0, 5},
         {TYPE_NUMERICAL_RANGE, RANGE_SPEECH_VOLUME, 0, display_text_speech_volume, 1},
@@ -368,6 +369,7 @@ static int config_change_cursors(int key);
 static int config_enable_audio(int key);
 static int config_set_master_volume(int key);
 static int config_enable_music(int key);
+static int config_enable_music_randomise(int key);
 static int config_set_music_volume(int key);
 static int config_enable_speech(int key);
 static int config_set_speech_volume(int key);
@@ -396,6 +398,7 @@ static inline void set_custom_config_changes(void)
     data.config_values[CONFIG_GENERAL_ENABLE_AUDIO].change_action = config_enable_audio;
     data.config_values[CONFIG_GENERAL_MASTER_VOLUME].change_action = config_set_master_volume;
     data.config_values[CONFIG_ORIGINAL_ENABLE_MUSIC].change_action = config_enable_music;
+    data.config_values[CONFIG_GENERAL_ENABLE_MUSIC_RANDOMISE].change_action = config_enable_music_randomise;
     data.config_values[CONFIG_ORIGINAL_MUSIC_VOLUME].change_action = config_set_music_volume;
     data.config_values[CONFIG_ORIGINAL_ENABLE_SPEECH].change_action = config_enable_speech;
     data.config_values[CONFIG_ORIGINAL_SPEECH_VOLUME].change_action = config_set_speech_volume;
@@ -1273,6 +1276,11 @@ static int config_enable_music(int key)
     } else {
         sound_music_stop();
     }
+    return 1;
+}
+static int config_enable_music_randomise(int key)
+{
+    config_change_basic(key);
     return 1;
 }
 
