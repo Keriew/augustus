@@ -105,7 +105,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_ROAMERS_DONT_SKIP_CORNERS, "间接目标行人不会跳过角落"},
     {TR_CONFIG_SHOW_MAX_POSSIBLE_PROSPERITY, "显示当前住房可获得的最高繁荣评比"},
     {TR_CONFIG_AUTO_KILL_ANIMALS, "开启自动捕杀动物"},
-    {TR_CONFIG_SHOW_ROAMING_PATH, "预览漫游行者的行走路线"},
+    {TR_CONFIG_SHOW_ROAMING_PATH, "预览行人的行走路线"},
     {TR_CONFIG_DRAW_CLOUD_SHADOWS, "绘制云层暗影"},
     {TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE, "在覆盖文件时请求确认操作"},
     {TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, "非军事区的入口通道默认允许所有行人通行"},
@@ -1422,11 +1422,11 @@ static translation_string all_strings[] = {
     {TR_BUILDING_PANELLED_GARDEN_WALL_GATE_DESC, "这座小小的城门控制着进出城市那些最隐蔽区域的人群流动情况。"},
     {TR_HOTKEY_BUILD_HIGHWAY, "高速公路"},
     {TR_BUILDING_SHRINE_DESC, "神像不仅受到当地居民的赞赏，同时也受到其所属神灵的青睐。"},
-    {TR_BUILDING_SHRINE_CERES, "塞丽丝（农业之神）神像"},
-    {TR_BUILDING_SHRINE_MARS, "马尔斯（战争之神）神像"},
-    {TR_BUILDING_SHRINE_MERCURY, "莫丘里（商业之神）神像"},
-    {TR_BUILDING_SHRINE_NEPTUNE, "纳普敦（海洋之神）神像"},
-    {TR_BUILDING_SHRINE_VENUS, "维纳斯（爱情之神）神像"},
+    {TR_BUILDING_SHRINE_CERES, "塞丽丝（农业之神）"},
+    {TR_BUILDING_SHRINE_MARS, "马尔斯（战争之神）"},
+    {TR_BUILDING_SHRINE_MERCURY, "莫丘里（商业之神）"},
+    {TR_BUILDING_SHRINE_NEPTUNE, "纳普敦（海洋之神）"},
+    {TR_BUILDING_SHRINE_VENUS, "维纳斯（爱情之神）"},
     {TR_BUILDING_MENU_SHRINES, "神   像"},
     {TR_BUILDING_INFO_TOTAL_FOOD, "食物总量："},
     {TR_BUILDING_FORMAL_GARDENS, "整齐的花园"},
@@ -1493,7 +1493,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_BARRACKS_PRIORITY_WATCHTOWER, "哨塔优先"},
     {TR_TOOLTIP_BUTTON_REJECT_DELIVERY, "不允许军工厂运送武器到这里"},
     {TR_TOOLTIP_BUTTON_ACCEPT_DELIVERY, "允许军工厂运送武器到这里"},
-    {TR_CONFIG_SHOW_DESIRABILITY_RANGE, "建造宁芙神庙或墓园时现实需求范围"},
+    {TR_CONFIG_SHOW_DESIRABILITY_RANGE, "建造宁芙神庙或墓园时显示需求范围"},
     {TR_BUILDING_FORT_LEGIONARIES, "主力 - 步兵营"},
     {TR_BUILDING_FORT_JAVELIN, "生力军 - 标枪营"},
     {TR_BUILDING_FORT_MOUNTED, "生力军 - 骑兵营"},
@@ -1590,7 +1590,7 @@ static translation_string all_strings[] = {
     {TR_SELECTED, "已选择"},
     {TR_WINDOW_MESSAGE_LIST_SELECTED_ALL, "所有讯息"},
     {TR_WINDOW_MESSAGE_LIST_SELECTED_COMMON, "普通讯息"},
-};
+    {TR_CONFIG_ENABLE_BUILD_MENU_INDEX_HOTKEYS, "开启建造菜单数字热键"}};
 
 void translation_simplified_chinese(const translation_string **strings, int *num_strings)
 {
