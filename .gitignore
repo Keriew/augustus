@@ -55,6 +55,3 @@ ext/SDL2/*.zip
 ext/SDL2/*.tar.gz
 
 res/augustus.icns
-build_full.ps1
-build_mini.ps1
-CMakeLists.txt
