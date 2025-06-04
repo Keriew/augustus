@@ -9,6 +9,10 @@ void sound_music_play_editor(void);
 
 void sound_music_update(int force);
 
+void sound_music_pause(void);
+
+void sound_music_resume(void);
+
 void sound_music_stop(void);
 
 #endif // SOUND_MUSIC_H

@@ -20,9 +20,12 @@ void sound_device_set_music_volume(int volume_pct);
 void sound_device_set_volume_for_type(sound_type type, int volume_pct);
 
 int sound_device_play_music(const char *filename, int volume_pct, int loop);
+int sound_device_play_track(const char *filename, int volume_pct, void (*on_finish)(void));
 int sound_device_play_file_on_channel_panned(const char *filename, sound_type type,
     int volume_pct, int left_pct, int right_pct);
 int sound_device_play_file_on_channel(const char *filename, sound_type type, int volume_pct);
+int sound_device_pause_music(void);
+int sound_device_resume_music(void);
 void sound_device_stop_music(void);
 void sound_device_stop_type(sound_type type);
 

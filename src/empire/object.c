@@ -478,7 +478,9 @@ int empire_object_get_closest(int x, int y)
             continue;
         }
         int dist = calc_maximum_distance(x, y, obj_x + obj->width / 2, obj_y + obj->height / 2);
-        if (dist < min_dist) {
+
+        // Prioritize selecting cities
+        if ((dist < min_dist) || (obj->type == EMPIRE_OBJECT_CITY && !city_is_selected)) {
             if (obj->type == EMPIRE_OBJECT_CITY) {
                 city_is_selected = 1;
             }
