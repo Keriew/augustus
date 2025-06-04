@@ -10,6 +10,7 @@
 #include "city/warning.h"
 #include "core/lang.h"
 #include "core/string.h"
+#include "core/config.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
@@ -184,6 +185,7 @@ static int is_auto_cycle_button(building_type type)
         (type == BUILDING_MENU_GARDENS && data.selected_submenu == BUILD_MENU_GARDENS);
 }
 
+
 static void draw_menu_buttons(void)
 {
     int x_offset = get_sidebar_x_offset();
@@ -195,18 +197,38 @@ static void draw_menu_buttons(void)
             data.focus_button_id == i + 1 ? 1 : 2);
         int type = building_menu_type(data.selected_submenu, item_index);
 
+        // hotkey index: 1, 2, ... 9, 10(hotkey: 0)
+        int index = 0;
+        if (config_get(CONFIG_UI_ENABLE_BUILD_MENU_INDEX_HOTKEYS) && i < 10) {
+            index = i + 1;
+        }
+
         if (is_auto_cycle_button(type)) {
-            text_draw_centered(translation_for(TR_AUTO_CYCLE_TEMPLES),
-                item_x_align + MENU_TEXT_X_OFFSET, data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
-                MENU_ITEM_WIDTH, FONT_NORMAL_GREEN, 0);
+            const uint8_t *name = translation_for(TR_AUTO_CYCLE_TEMPLES);
+            if (index > 0) {
+                text_draw_centered_with_index(name, index % 10, item_x_align + MENU_TEXT_X_OFFSET, data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
+                    MENU_ITEM_WIDTH, FONT_NORMAL_GREEN, 0);
+            } else {
+                text_draw_centered(name, item_x_align + MENU_TEXT_X_OFFSET, data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
+                    MENU_ITEM_WIDTH, FONT_NORMAL_GREEN, 0);
+            }
+
             lang_text_draw_centered(18, 5 - building_construction_is_auto_cycling(), x_offset - MENU_ITEM_MONEY_OFFSET,
                 data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i, MENU_ITEM_MONEY_OFFSET,
                 FONT_NORMAL_GREEN);
             continue;
         }
-        
-        lang_text_draw_centered(28, type, item_x_align + MENU_TEXT_X_OFFSET, data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
-                MENU_ITEM_WIDTH, FONT_NORMAL_GREEN);
+
+
+        const uint8_t *name = lang_get_string(28, type);
+        if (index > 0) {
+            text_draw_centered_with_index(name, index % 10, item_x_align + MENU_TEXT_X_OFFSET, data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
+                MENU_ITEM_WIDTH, FONT_NORMAL_GREEN, 0);
+        } else {
+            text_draw_centered(name, item_x_align + MENU_TEXT_X_OFFSET, data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
+                MENU_ITEM_WIDTH, FONT_NORMAL_GREEN, 0);
+        }
+
         if (type == BUILDING_DRAGGABLE_RESERVOIR) {
             type = BUILDING_RESERVOIR;
         }
@@ -217,6 +239,7 @@ static void draw_menu_buttons(void)
         if (type == BUILDING_MENU_GRAND_TEMPLES) {
             cost = 0;
         }
+
         if (cost) {
             text_draw_money(cost, x_offset - MENU_ITEM_MONEY_OFFSET,
                 data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
@@ -262,19 +285,6 @@ static int handle_build_submenu(const mouse *m)
         build_menu_buttons, data.num_items, &data.focus_button_id);
 }
 
-static void handle_input(const mouse *m, const hotkeys *h)
-{
-    if (handle_build_submenu(m) ||
-        widget_sidebar_city_handle_mouse_build_menu(m)) {
-        return;
-    }
-    if (input_go_back_requested(m, h) || click_outside_menu(m, get_sidebar_x_offset())) {
-        data.selected_submenu = SUBMENU_NONE;
-        window_city_show();
-        return;
-    }
-}
-
 static int button_index_to_submenu_item(int index)
 {
     int item = -1;
@@ -288,6 +298,29 @@ static void button_menu_index(const generic_button *button)
 {
     int index = button->parameter1 - 1;
     button_menu_item(button_index_to_submenu_item(index));
+}
+
+static int handle_input_build_menu_index(const hotkeys *h)
+{
+    if (config_get(CONFIG_UI_ENABLE_BUILD_MENU_INDEX_HOTKEYS) && h->build_menu_index_num && h->build_menu_index_num <= data.num_items) {
+        button_menu_item(button_index_to_submenu_item(h->build_menu_index_num - 1));
+        return h->build_menu_index_num;
+    }
+    return 0;
+}
+
+static void handle_input(const mouse *m, const hotkeys *h)
+{
+    if (handle_build_submenu(m) ||
+        widget_sidebar_city_handle_mouse_build_menu(m) ||
+        handle_input_build_menu_index(h)) {
+        return;
+    }
+    if (input_go_back_requested(m, h) || click_outside_menu(m, get_sidebar_x_offset())) {
+        data.selected_submenu = SUBMENU_NONE;
+        window_city_show();
+        return;
+    }
 }
 
 static int set_submenu_for_type(building_type type)
@@ -399,3 +432,4 @@ void window_build_menu_hide(void)
     data.selected_submenu = SUBMENU_NONE;
     window_city_show();
 }
+
