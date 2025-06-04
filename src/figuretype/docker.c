@@ -496,8 +496,12 @@ void figure_docker_action(figure *f)
             }
             break;
         case FIGURE_ACTION_138_DOCKER_IMPORT_RETURNING:
-            set_cart_graphic(f);
-            figure_movement_move_ticks(f, 100);
+            if (f->resource_id != RESOURCE_NONE) {
+                set_cart_graphic(f); // cart with a resource if imports failed
+            } else {
+                f->cart_image_id = image_group(GROUP_FIGURE_CARTPUSHER_CART); // empty cart
+            }
+            figure_movement_move_ticks(f, 1);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 set_docker_as_idle(f);
             } else if (f->direction == DIR_FIGURE_REROUTE) {
