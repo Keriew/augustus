@@ -72,7 +72,7 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
                     if (b) {
                         items_placed++;
                     }
-                } else if (map_terrain_is(grid_offset, TERRAIN_ROCK | TERRAIN_ELEVATION)) {
+                } else if (map_terrain_is(grid_offset, TERRAIN_ROCK | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP)) {
                     continue;
                 } else if (map_terrain_is(grid_offset, TERRAIN_WATER)) { // keep the "bridge is free" bug from C3
                     continue;
@@ -87,7 +87,7 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
                 }
                 continue;
             }
-            if (map_terrain_is(grid_offset, TERRAIN_ROCK | TERRAIN_ELEVATION)) {
+            if (map_terrain_is(grid_offset, TERRAIN_ROCK | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP)) {
                 continue;
             }
             if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
