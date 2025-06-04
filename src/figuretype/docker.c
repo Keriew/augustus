@@ -403,7 +403,7 @@ void figure_docker_action(figure *f)
             if (b->data.dock.queued_docker_id == f->id) {
                 b->data.dock.num_ships = 120;
                 f->wait_ticks++;
-                if (f->wait_ticks >= 15) {
+                if (f->wait_ticks >= 0) {
                     f->action_state = FIGURE_ACTION_135_DOCKER_IMPORT_GOING_TO_STORAGE;
                     f->wait_ticks = 0;
                     set_cart_graphic(f);
