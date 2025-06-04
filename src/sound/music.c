@@ -1,10 +1,16 @@
 #include "music.h"
 
 #include "core/dir.h"
+#include "core/config.h"
 #include "city/figures.h"
 #include "city/population.h"
 #include "game/settings.h"
 #include "sound/device.h"
+
+#include <stdlib.h>
+
+#define TRACK_RANDOM_MIN TRACK_CITY_1
+#define TRACK_RANDOM_MAX TRACK_CITY_5
 
 enum {
     TRACK_NONE = 0,
@@ -52,6 +58,11 @@ void sound_music_set_volume(int percentage)
 {
     sound_device_set_music_volume(percentage);
 }
+static void on_music_finished(void)
+{
+    data.current_track = TRACK_NONE; // Reset track to none
+    sound_music_update(1); // Force track selection again
+}
 
 static void play_track(int track)
 {
@@ -64,6 +75,16 @@ static void play_track(int track)
     int volume = setting_sound(SOUND_TYPE_MUSIC)->volume;
     if (!mp3_track || !sound_device_play_music(mp3_track, volume, 1)) {
         sound_device_play_music(dir_get_file(tracks[track], NOT_LOCALIZED), volume, 1);
+    }
+    data.current_track = track;
+}
+static void play_randomised_track(int track)
+{
+    const char *filename = dir_get_file(mp3_tracks[track], NOT_LOCALIZED);
+    int volume = setting_sound(SOUND_TYPE_MUSIC)->volume;
+
+    if (!filename || !sound_device_play_track(filename, volume, on_music_finished)) {
+        sound_device_play_track(dir_get_file(tracks[track], NOT_LOCALIZED), volume, on_music_finished);
     }
     data.current_track = track;
 }
@@ -84,6 +105,13 @@ void sound_music_play_editor(void)
 
 void sound_music_update(int force)
 {
+    int randomise = config_get(CONFIG_GENERAL_ENABLE_MUSIC_RANDOMISE);
+    if (sound_device_resume_music()) {
+    
+        data.next_check = 10;
+        return;
+    }
+
     if (data.next_check && !force) {
         --data.next_check;
         return;
@@ -91,6 +119,8 @@ void sound_music_update(int force)
     if (!setting_sound(SOUND_TYPE_MUSIC)->enabled) {
         return;
     }
+
+
     int track;
     int population = city_population();
     int total_enemies = city_figures_total_invading_enemies();
@@ -98,6 +128,9 @@ void sound_music_update(int force)
         track = TRACK_COMBAT_LONG;
     } else if (total_enemies > 0) {
         track = TRACK_COMBAT_SHORT;
+    } else if (randomise) {
+        int range = TRACK_RANDOM_MAX - TRACK_RANDOM_MIN + 1;
+        track = TRACK_CITY_1 + (rand() % range);
     } else if (population < 1000) {
         track = TRACK_CITY_1;
     } else if (population < 2000) {
@@ -110,14 +143,40 @@ void sound_music_update(int force)
         track = TRACK_CITY_5;
     }
 
+    // Case 1: exactly same track — maybe paused, try to resume
     if (track == data.current_track) {
+        if (sound_device_resume_music()) {
+            data.next_check = 10;
+        }
         return;
     }
 
-    play_track(track);
+    // Case 2: both tracks are in randomised pool — don't switch
+    if (randomise &&
+        track >= TRACK_RANDOM_MIN && track <= TRACK_RANDOM_MAX &&
+        data.current_track >= TRACK_RANDOM_MIN && data.current_track <= TRACK_RANDOM_MAX)
+    {
+        data.next_check = 10;
+        return;
+    }
+
+    if (randomise) {
+        play_randomised_track(track);
+    } else {
+        play_track(track);
+    }
+    
     data.next_check = 10;
 }
-
+void sound_music_pause(void)
+{
+    sound_device_pause_music();
+}
+void sound_music_resume(void)
+{
+    sound_device_resume_music();
+    data.next_check = 10;
+}        
 void sound_music_stop(void)
 {
     sound_device_stop_music();
