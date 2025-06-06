@@ -43,13 +43,13 @@ static int draw_background(void)
     outer_panel_draw(0, 0, 40, ADVISOR_HEIGHT);
     image_draw(image_group(GROUP_ADVISOR_ICONS), 10, 10, COLOR_MASK_NONE, SCALE_NONE);
 
-    lang_text_draw(50, 0, 60, 12, FONT_LARGE_BLACK);
+    lang_text_draw(50, 0, 60, 12, FONT_LARGE_BLACK);   // Labor Allocation
 
     // table headers
-    lang_text_draw(50, 21, 60, 56, FONT_SMALL_PLAIN);
-    lang_text_draw(50, 22, 172, 56, FONT_SMALL_PLAIN);
-    lang_text_draw(50, 23, 416, 56, FONT_SMALL_PLAIN);
-    lang_text_draw(50, 24, 516, 56, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(50, 21, 32, 56, 100, FONT_SMALL_PLAIN);  // Priority
+    lang_text_draw(50, 22, 172, 56, FONT_SMALL_PLAIN); // Sector
+    lang_text_draw_centered(50, 23, 383, 56, 100, FONT_SMALL_PLAIN); // Need
+    lang_text_draw_centered(50, 24, 483, 56, 100, FONT_SMALL_PLAIN); // Have
 
     // xx employed, yy unemployed
     int width = text_draw_number(city_labor_workers_employed(), '@', " ", 32, 320, FONT_NORMAL_BLACK, 0);

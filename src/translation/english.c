@@ -1097,6 +1097,8 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_EVENTS_ADD, "Add new event"},
     {TR_EDITOR_SCENARIO_CONDITION_ADD, "New condition"},
     {TR_EDITOR_SCENARIO_ACTION_ADD, "New action"},
+    {TR_EDITOR_SCENARIO_SELECT_CONDITION, "Select condition"},
+    {TR_EDITOR_SCENARIO_SELECT_ACTION, "Select action"},
     {TR_EDITOR_DELETE, "Delete"},
     {TR_EDITOR_DELETED, "Deleted"},
     {TR_EDITOR_SCENARIO_EVENT_DELETED, "Deleted event"},

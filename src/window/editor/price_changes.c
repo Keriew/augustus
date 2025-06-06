@@ -113,7 +113,7 @@ static void draw_background(void)
         new_price_change_button.y + 8, new_price_change_button.width - 16, FONT_NORMAL_BLACK);
 
     lang_text_draw_centered(13, 3, 0, 456, 640, FONT_NORMAL_BLACK);
-    lang_text_draw_multiline(152, 3, 32, 376, 576, FONT_NORMAL_BLACK);
+    lang_text_draw_multiline(152, 3, 20, 376, 605, FONT_NORMAL_BLACK);
 
     graphics_reset_dialog();
 
@@ -124,15 +124,23 @@ static void draw_price_change_button(const grid_box_item *item)
 {
     button_border_draw(item->x, item->y, item->width, item->height, item->is_focused);
     const price_change_t *price_change = data.price_changes[item->index];
-    text_draw_number(price_change->year, '+', " ", item->x + 10, item->y + 7, FONT_NORMAL_BLACK, 0);
-    lang_text_draw_year(scenario_property_start_year() + price_change->year, item->x + 65, item->y + 7,
+    text_draw_number(price_change->year, '+', " ", item->x + 5, item->y + 7, FONT_NORMAL_BLACK, 0);
+    int width = lang_text_draw_year(scenario_property_start_year() + price_change->year, item->x + 40, item->y + 7,
         FONT_NORMAL_BLACK);
     int image_id = resource_get_data(price_change->resource)->image.editor.icon;
     const image *img = image_get(image_id);
     int base_height = (item->height - img->original.height) / 2;
-    image_draw(image_id, item->x + 140, item->y + base_height, COLOR_MASK_NONE, SCALE_NONE);
-    int width = lang_text_draw(44, price_change->is_rise ? 104 : 103, item->x + 170, item->y + 7, FONT_NORMAL_BLACK);
-    text_draw_number(price_change->amount, '@', " ", item->x + 170 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+    image_draw(image_id, item->x + 45 + width, item->y + base_height, COLOR_MASK_NONE, SCALE_NONE);
+    //width += lang_text_draw(44, price_change->is_rise ? 104 : 103, item->x + 75 + width, item->y + 7, FONT_NORMAL_BLACK);
+    if (price_change->is_rise) {
+        width += lang_text_draw_colored(44, 104, item->x + 75 + width, item->y + 7, FONT_NORMAL_PLAIN, COLOR_MASK_DARK_GREEN);
+        width += text_draw_number(price_change->amount, '+', " ", item->x + 75 + width, item->y + 7,
+            FONT_NORMAL_PLAIN, COLOR_MASK_DARK_GREEN);
+    } else {
+        width += lang_text_draw_colored(44, 103, item->x + 75 + width, item->y + 7, FONT_NORMAL_PLAIN, COLOR_MASK_PURPLE);
+        width += text_draw_number(price_change->amount, '-', " ", item->x + 75 + width, item->y + 7,
+            FONT_NORMAL_PLAIN, COLOR_MASK_PURPLE);
+    }
 }
 
 static void draw_foreground(void)

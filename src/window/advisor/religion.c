@@ -56,7 +56,7 @@ static void draw_god_row(god_type god, int y_offset, building_type altar, buildi
     } else {
         text_draw_number_centered(building_count_active(large_temple), 310, y_offset + 2, 50, FONT_NORMAL_WHITE);
     }
-    text_draw_number_centered(city_god_months_since_festival(god), 380, y_offset + 2, 50, FONT_NORMAL_WHITE);
+    text_draw_number_centered(city_god_months_since_festival(god), 375, y_offset + 2, 50, FONT_NORMAL_WHITE);
     int width = lang_text_draw(59, 32 + city_god_happiness(god) / 10, 450, y_offset + 2, FONT_NORMAL_WHITE);
     int bolts = city_god_wrath_bolts(god);
     for (int i = 0; i < bolts / 10; i++) {
@@ -128,17 +128,16 @@ static int draw_background(void)
 
     image_draw(image_group(GROUP_ADVISOR_ICONS) + 9, 10, 10, COLOR_MASK_NONE, SCALE_NONE);
 
-    lang_text_draw(59, 0, 60, 12, FONT_LARGE_BLACK);
+    lang_text_draw(59, 0, 60, 12, FONT_LARGE_BLACK); // Religion
 
-    // table header
-    text_draw(translation_for(TR_WINDOW_ADVISOR_RELIGION_ALTARS_HEADER), 195, 46, FONT_SMALL_PLAIN, 0);
-    lang_text_draw(59, 5, 277, 32, FONT_SMALL_PLAIN); //Temples
-    lang_text_draw(59, 1, 255, 46, FONT_SMALL_PLAIN); //Small
-    lang_text_draw(59, 2, 320, 46, FONT_SMALL_PLAIN); //large
-    lang_text_draw(59, 6, 385, 18, FONT_SMALL_PLAIN); //Months
-    lang_text_draw(59, 9, 385, 32, FONT_SMALL_PLAIN); //since
-    lang_text_draw(59, 7, 385, 46, FONT_SMALL_PLAIN); //Festival
-    lang_text_draw(59, 3, 470, 46, FONT_SMALL_PLAIN); //The gods are
+    text_draw_centered(translation_for(TR_WINDOW_ADVISOR_RELIGION_ALTARS_HEADER), 165, 46, 100, FONT_SMALL_PLAIN, 0); // Altars
+    lang_text_draw_centered(59, 5, 256, 32, 100, FONT_SMALL_PLAIN); // Temples
+    lang_text_draw_centered(59, 1, 226, 46, 100, FONT_SMALL_PLAIN); // Small
+    lang_text_draw_centered(59, 2, 285, 46, 100, FONT_SMALL_PLAIN); // large
+    lang_text_draw_centered(59, 6, 350, 18, 100, FONT_SMALL_PLAIN); // Months
+    lang_text_draw_centered(59, 9, 350, 32, 100, FONT_SMALL_PLAIN); // since
+    lang_text_draw_centered(59, 7, 350, 46, 100, FONT_SMALL_PLAIN); // Festival
+    lang_text_draw_centered(59, 3, 449, 46, 100, FONT_SMALL_PLAIN); // The gods are
 
     inner_panel_draw(16, 60, 38, 8);
 

@@ -272,22 +272,22 @@ static void draw_permissions_buttons(int x, int y, unsigned int buttons, buildin
     for (unsigned int i = 0; i < buttons; i++) {
         int permission = warehouse_distribution_permissions_buttons[i].parameter1;
         int is_sea_trade_route = permission == BUILDING_STORAGE_PERMISSION_DOCK;
-        
+
         int permission_state = building_storage_get_permission(permission, building_get(data.building_id));
-        
+
         if (!permission_state) {
             inner_panel_draw(x + 2, y + 2, 3, 3);
         }
         image_offset_x = is_sea_trade_route ? 12 : 7;
         image_offset_y = is_sea_trade_route ? 16 : 7;
-        
+
         image_draw(images_permission[i], x + image_offset_x, y + image_offset_y, COLOR_MASK_NONE, SCALE_NONE);
 
         if (!permission_state) {
             image_draw(assets_get_image_id("UI", "Large_Widget_Cross"), x + 15, y + 15,
             COLOR_MASK_NONE, SCALE_NONE);
         }
-        
+
         button_border_draw(x, y, 52, 52, data.permission_focus_button_id == i + 1 || !permission_state);
 
         x += 62;
@@ -302,7 +302,7 @@ static void draw_permissions_buttons(int x, int y, unsigned int buttons, buildin
 }
 
 static void draw_granary_permissions_buttons(int x, int y, unsigned int buttons)
-{   
+{
     static int images_permission[6];
     if (!images_permission[0]) {
         images_permission[0] = assets_get_image_id("Walkers", "marketbuyer_sw_01");
@@ -319,20 +319,20 @@ static void draw_granary_permissions_buttons(int x, int y, unsigned int buttons)
         int permission = granary_distribution_permissions_buttons[i].parameter1;
         int is_sea_trade_route = permission == BUILDING_STORAGE_PERMISSION_DOCK;
         int permission_state = building_storage_get_permission(permission, building_get(data.building_id));
-        
+
         if (!permission_state) {
             inner_panel_draw(x + 2, y + 2, 3, 3);
         }
         image_offset_x = is_sea_trade_route ? 12 : 7;
         image_offset_y = is_sea_trade_route ? 16 : 7;
-        
+
         image_draw(images_permission[i], x + image_offset_x, y + image_offset_y, COLOR_MASK_NONE, SCALE_NONE);
 
         if (!permission_state) {
             image_draw(assets_get_image_id("UI", "Large_Widget_Cross"), x + 15, y + 15,
             COLOR_MASK_NONE, SCALE_NONE);
         }
-        
+
         button_border_draw(x, y, 52, 52, data.permission_focus_button_id == i + 1 || !permission_state);
 
         x += 76;
@@ -541,7 +541,7 @@ void window_building_draw_market(building_info_context *c)
     c->help_id = 2;
     data.showing_special_orders = 0;
 
-    int food_types = 0; 
+    int food_types = 0;
     int y_offset = 0;
     building *b = building_get(c->building_id);
 
@@ -667,9 +667,14 @@ void window_building_draw_distributor_orders_foreground(building_info_context *c
     for (unsigned int i = 0; i < scrollbar.elements_in_view && i < data.stored_resources.size; i++) {
         resource_type resource = data.stored_resources.items[i + scrollbar.scroll_position];
         int image_id = resource_get_data(resource)->image.icon;
-        image_draw(image_id, c->x_offset + 32, y_offset + 46 + 22 * i, COLOR_MASK_NONE, SCALE_NONE);
+
+        const image *img = image_get(image_id);
+        int base_width = (25 - img->original.width) / 2;
+        int base_height = (25 - img->original.height) / 2;
+
+        image_draw(image_id, c->x_offset + 32 + base_width, y_offset + 43 + 22 * i + base_height, COLOR_MASK_NONE, SCALE_NONE);
         if (!scrollbar_shown) {
-            image_draw(image_id, c->x_offset + 408, y_offset + 46 + 22 * i, COLOR_MASK_NONE, SCALE_NONE);
+            image_draw(image_id, c->x_offset + 408 + base_width, y_offset + 43 + 22 * i + base_height, COLOR_MASK_NONE, SCALE_NONE);
         }
         text_draw(resource_get_data(resource)->text, c->x_offset + 72, y_offset + 50 + 22 * i,
             FONT_NORMAL_WHITE, COLOR_MASK_NONE);
@@ -894,7 +899,7 @@ static void draw_button_from_state(int state, int x, int y, building_type type, 
         case BUILDING_STORAGE_STATE_GETTING_HALF:
         case BUILDING_STORAGE_STATE_GETTING_QUARTER:
         {
-            int image_width = image_get(image_group(GROUP_CONTEXT_ICONS) + 12)->width + 15;
+            int image_width = image_get(image_group(GROUP_CONTEXT_ICONS) + 12)->width + 10;
             int group_number;
             if (resource_is_food(resource)) {
                 // Check whether to use "getting goods" or "getting food"
@@ -950,16 +955,30 @@ static void draw_resource_orders_buttons(int x, int y, const resource_list *list
     for (unsigned int i = 0; i < scrollbar.elements_in_view && i < list->size - scrollbar.scroll_position; i++) {
         resource_type resource = list->items[i + scrollbar.scroll_position];
         int image_id = resource_get_data(resource)->image.icon;
-        int y_offset = y + 22 * i;
-        image_draw(image_id, x, y_offset, COLOR_MASK_NONE, SCALE_NONE);
-        if (!scrollbar_shown) {
-            image_draw(image_id, x + 396, y_offset, COLOR_MASK_NONE, SCALE_NONE);
-        }
-        text_draw(resource_get_data(resource)->text, x + 40, y_offset + 4, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
-        button_border_draw(x + 148, y_offset, 210, 22, data.resource_focus_button_id == i + 1);
-        button_border_draw(x + 358, y_offset, 28, 22, data.partial_resource_focus_button_id == i + 1);
 
-        draw_button_from_state(storage->resource_state[resource], x + 148, y_offset + 5, type, resource);
+        const image *img = image_get(image_id);
+        int base_width = (25 - img->original.width) / 2;
+        int base_height = (25 - img->original.height) / 2;
+
+        int y_offset = y + 22 * i;
+        image_draw(image_id, x + base_width, y_offset - 2 + base_height, COLOR_MASK_NONE, SCALE_NONE);
+        if (!scrollbar_shown) {
+            image_draw(image_id, x + 390 + base_width, y_offset - 2 + base_height, COLOR_MASK_NONE, SCALE_NONE);
+            text_draw(resource_get_data(resource)->text, x + 30, y_offset + 4, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
+            button_border_draw(x + 148, y_offset, 210, 22, data.resource_focus_button_id == i + 1);
+            button_border_draw(x + 358, y_offset, 28, 22, data.partial_resource_focus_button_id == i + 1);
+
+            draw_button_from_state(storage->resource_state[resource], x + 148, y_offset + 5, type, resource);
+        }
+        if (scrollbar_shown) {
+            image_draw(image_id, x + 360 + base_width, y_offset - 2 + base_height, COLOR_MASK_NONE, SCALE_NONE);
+            text_draw(resource_get_data(resource)->text, x + 30, y_offset + 4, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
+            button_border_draw(x + 118, y_offset, 210, 22, data.resource_focus_button_id == i + 1);
+            button_border_draw(x + 328, y_offset, 28, 22, data.partial_resource_focus_button_id == i + 1);
+
+            draw_button_from_state(storage->resource_state[resource], x + 118, y_offset + 5, type, resource);;
+        }
+
     }
 }
 
@@ -1231,14 +1250,25 @@ int window_building_handle_mouse_warehouse_orders(const mouse *m, building_info_
 
     unsigned int buttons_to_show = city_resource_get_potential()->size < scrollbar.elements_in_view ?
         city_resource_get_potential()->size : scrollbar.elements_in_view;
-
-    return scrollbar_handle_mouse(&scrollbar, m, 1) ||
-        generic_buttons_handle_mouse(m, c->x_offset + 172, y_offset + 46, orders_resource_buttons, buttons_to_show,
-            &data.resource_focus_button_id) ||
-        generic_buttons_handle_mouse(m, c->x_offset + 172, y_offset + 46, orders_partial_resource_buttons,
-            buttons_to_show, &data.partial_resource_focus_button_id) ||
-        generic_buttons_handle_mouse(m, c->x_offset + 80, y_offset + 404,
-            warehouse_order_buttons, 2, &data.orders_focus_button_id);
+    int scrollbar_shown = scrollbar.max_scroll_position > 0;
+    if (scrollbar_shown) {
+        return scrollbar_handle_mouse(&scrollbar, m, 1) ||
+            generic_buttons_handle_mouse(m, c->x_offset + 142, y_offset + 46, orders_resource_buttons,
+                buttons_to_show, &data.resource_focus_button_id) ||
+            generic_buttons_handle_mouse(m, c->x_offset + 142, y_offset + 46, orders_partial_resource_buttons,
+                buttons_to_show, &data.partial_resource_focus_button_id) ||
+            generic_buttons_handle_mouse(m, c->x_offset + 80, y_offset + 404,
+                warehouse_order_buttons, 2, &data.orders_focus_button_id);
+    }
+    if (!scrollbar_shown) {
+        return scrollbar_handle_mouse(&scrollbar, m, 1) ||
+            generic_buttons_handle_mouse(m, c->x_offset + 172, y_offset + 46, orders_resource_buttons,
+                buttons_to_show, &data.resource_focus_button_id) ||
+            generic_buttons_handle_mouse(m, c->x_offset + 172, y_offset + 46, orders_partial_resource_buttons,
+                buttons_to_show, &data.partial_resource_focus_button_id) ||
+            generic_buttons_handle_mouse(m, c->x_offset + 80, y_offset + 404,
+                warehouse_order_buttons, 2, &data.orders_focus_button_id);
+    }
 }
 
 void window_building_warehouse_get_tooltip_distribution_permissions(int *translation)

@@ -552,7 +552,7 @@ static void draw_background_video(void)
         lines_required = rich_text_draw(msg->content.text, 0, 0, 384, lines_available, 1);
         if (lines_required > lines_available) {
             small_font = 1;
-            rich_text_set_fonts(FONT_SMALL_PLAIN, FONT_SMALL_PLAIN, FONT_SMALL_PLAIN, 7);
+            rich_text_set_fonts(FONT_SMALL_PLAIN, FONT_SMALL_PLAIN, FONT_SMALL_PLAIN, 5);
             lines_required = rich_text_draw(msg->content.text, 0, 0, 384, lines_available, 1);
         }
     }
@@ -589,10 +589,10 @@ static void draw_background_video(void)
     if (msg->message_type != MESSAGE_TYPE_CUSTOM) {
         if (small_font) {
             // Draw in black and then white to create shadow effect
+           // rich_text_draw_colored(msg->content.text,
+           //     data.x + 16 + 1, y_base + 24 + 1, 384, data.text_height_blocks - 1, COLOR_BLACK);
             rich_text_draw_colored(msg->content.text,
-                data.x + 16 + 1, y_base + 24 + 1, 384, data.text_height_blocks - 1, COLOR_BLACK);
-            rich_text_draw_colored(msg->content.text,
-                data.x + 16, y_base + 24, 384, data.text_height_blocks - 1, COLOR_WHITE);
+                data.x + 16, y_base + 24, 384, data.text_height_blocks - 1, 0); //COLOR_WHITE
         } else {
             rich_text_draw(msg->content.text, data.x + 16, y_base + 24, 384, data.text_height_blocks - 1, 0);
         }
@@ -604,13 +604,13 @@ static void draw_background_video(void)
             y_text += 8;
         }
         const scenario_request *request = scenario_request_get(player_message.param1);
-        text_draw_number(request->amount.requested, '@', " ", data.x + 8, y_text, FONT_NORMAL_WHITE, 0);
+        width = text_draw_number(request->amount.requested, '@', " ", data.x + 8, y_text, FONT_NORMAL_WHITE, 0);
         image_draw(resource_get_data(request->resource)->image.icon,
-            data.x + 70, y_text - 5, COLOR_MASK_NONE, SCALE_NONE);
-        text_draw(resource_get_data(request->resource)->text, data.x + 100, y_text, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
+            data.x + 5 + width, y_text - 5, COLOR_MASK_NONE, SCALE_NONE);
+        width += text_draw(resource_get_data(request->resource)->text, data.x + 30 + width, y_text, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
         if (request->state == REQUEST_STATE_NORMAL || request->state == REQUEST_STATE_OVERDUE) {
-            width = lang_text_draw_amount(8, 4, request->months_to_comply, data.x + 200, y_text, FONT_NORMAL_WHITE);
-            lang_text_draw(12, 2, data.x + 200 + width, y_text, FONT_NORMAL_WHITE);
+            width += lang_text_draw_amount(8, 4, request->months_to_comply, data.x + 45 + width, y_text, FONT_NORMAL_WHITE);
+            width += lang_text_draw(12, 2, data.x + 45 + width, y_text, FONT_NORMAL_WHITE);
         }
     }
 

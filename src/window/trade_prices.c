@@ -36,7 +36,7 @@ static color_t get_price_color(int land_trader, int is_sell) {
         return COLOR_BLACK; // No change
     }
     if (is_sell) { // Higher sell price - green
-        return trade_factor > 0 ? COLOR_MASK_DARK_GREEN : COLOR_MASK_PURPLE; 
+        return trade_factor > 0 ? COLOR_MASK_DARK_GREEN : COLOR_MASK_PURPLE;
     } else { // Higher buy price - red 
         return trade_factor > 0 ? COLOR_MASK_PURPLE : COLOR_MASK_DARK_GREEN;
     }
@@ -61,7 +61,7 @@ static void init(int shade_x, int shade_y, int shade_width, int shade_height)
     int same_policy = land_policy == sea_policy;
     data.four_line = ((has_sea_trade_policy && !has_land_trade_policy) ||
         (!has_sea_trade_policy && has_land_trade_policy) ||
-        (has_sea_trade_policy && has_land_trade_policy && !same_policy)); 
+        (has_sea_trade_policy && has_land_trade_policy && !same_policy));
 
     city_resource_determine_available(1);
     data.window_width = (data.four_line ? 4 : 9) + city_resource_get_potential()->size * 2;
@@ -92,7 +92,7 @@ static void draw_background(void)
     int icon_shift = 142;
     int price_shift = 136;
     int no_policy = !has_land_trade_policy && !has_sea_trade_policy;
-    
+
     if (data.four_line) {
         window_height = 17;
         line_sell_position = 161;
@@ -121,8 +121,14 @@ static void draw_background(void)
 
     for (unsigned int i = 0; i < list->size; i++) {
         resource_type r = list->items[i];
-        image_draw(resource_get_data(r)->image.icon, icon_shift + i * resource_offset,
-            50, COLOR_MASK_NONE, SCALE_NONE);
+
+        int image_id = resource_get_data(r)->image.icon;
+        const image *img = image_get(image_id);
+        int base_width = (25 - img->original.width) / 2;
+        int base_height = (25 - img->original.height) / 2;
+
+        image_draw(resource_get_data(r)->image.icon, icon_shift + base_width - 4 + i * resource_offset,
+            50 + base_height, COLOR_MASK_NONE, SCALE_NONE);
 
         if (!data.four_line || no_policy) {//same price on land and sea
             if (no_policy) {
@@ -131,29 +137,29 @@ static void draw_background(void)
                 text_draw_number_centered(trade_price_sell(r, 0),
                     price_shift + i * resource_offset, line_sell_position, 30, FONT_SMALL_PLAIN);
             } else {
-                
+
                 text_draw_number_centered_colored(trade_price_buy(r, 1), //buy
                     price_shift + i * resource_offset, line_buy_position, 30, FONT_SMALL_PLAIN,
-                    get_price_color(1,0)); // land or trade doesnt matter - already established that it's same price
+                    get_price_color(1, 0)); // land or trade doesnt matter - already established that it's same price
                 text_draw_number_centered_colored(trade_price_sell(r, 1), //sell
                     price_shift + i * resource_offset, line_sell_position, 30, FONT_SMALL_PLAIN,
-                    get_price_color(1,1)); //if trade_policy1 , then RED. Change this
+                    get_price_color(1, 1)); //if trade_policy1 , then RED. Change this
             }
         } else { //price difference between land and sea
-            
+
             if (has_land_trade_policy) {
-                
+
                 text_draw_number_centered_colored(trade_price_buy(r, 1), // land route buy
                     price_shift + i * resource_offset, line_buy_position + number_margin, 30, FONT_SMALL_PLAIN,
-                    get_price_color(1,0));
-                if(land_policy == TRADE_POLICY_2) { // land route sell 
-                        text_draw_number_centered(trade_price_sell(r, 1), 
-                        price_shift + i * resource_offset, line_sell_position + number_margin, 30, FONT_SMALL_PLAIN);
-                    } else {
-                        text_draw_number_centered_colored(trade_price_sell(r, 1), 
-                        price_shift + i * resource_offset, line_sell_position + number_margin, 30, FONT_SMALL_PLAIN,
-                        get_price_color(1,1));
-                    }
+                    get_price_color(1, 0));
+                if (land_policy == TRADE_POLICY_2) { // land route sell 
+                    text_draw_number_centered(trade_price_sell(r, 1),
+                    price_shift + i * resource_offset, line_sell_position + number_margin, 30, FONT_SMALL_PLAIN);
+                } else {
+                    text_draw_number_centered_colored(trade_price_sell(r, 1),
+                    price_shift + i * resource_offset, line_sell_position + number_margin, 30, FONT_SMALL_PLAIN,
+                    get_price_color(1, 1));
+                }
             } else {
                 text_draw_number_centered(trade_price_buy(r, 1), //buy
                     price_shift + i * resource_offset, line_buy_position + number_margin, 30, FONT_SMALL_PLAIN);
@@ -163,14 +169,15 @@ static void draw_background(void)
             if (has_sea_trade_policy) {
                 text_draw_number_centered_colored(trade_price_buy(r, 0), // sea route
                     price_shift + i * resource_offset, line_buy_position + 2 * number_margin, 30, FONT_SMALL_PLAIN,
-                    get_price_color(0,0));
-                if(sea_policy == TRADE_POLICY_2){
-                        text_draw_number_centered(trade_price_sell(r, 0),
-                        price_shift + i * resource_offset, line_sell_position + 2 * number_margin, 30, FONT_SMALL_PLAIN);
-                    }else{
-                        text_draw_number_centered_colored(trade_price_sell(r, 0),
-                    price_shift + i * resource_offset, line_sell_position + 2 * number_margin, 30, FONT_SMALL_PLAIN,
-                    get_price_color(0,1));}
+                    get_price_color(0, 0));
+                if (sea_policy == TRADE_POLICY_2) {
+                    text_draw_number_centered(trade_price_sell(r, 0),
+                    price_shift + i * resource_offset, line_sell_position + 2 * number_margin, 30, FONT_SMALL_PLAIN);
+                } else {
+                    text_draw_number_centered_colored(trade_price_sell(r, 0),
+                price_shift + i * resource_offset, line_sell_position + 2 * number_margin, 30, FONT_SMALL_PLAIN,
+                get_price_color(0, 1));
+                }
 
             } else {
                 text_draw_number_centered(trade_price_buy(r, 0), // sea route
@@ -190,17 +197,17 @@ static void draw_background(void)
         };
 
         int image_id_land = image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE) + 1;
-        int image_id_sea  = image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE);
+        int image_id_sea = image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE);
 
         // Land route icons
-        image_draw(image_id_land, 16, y_positions[0] - 5, COLOR_MASK_NONE, SCALE_NONE); // land buy
-        image_draw(image_id_land, 16, y_positions[2] - 5, COLOR_MASK_NONE, SCALE_NONE); // land sell
+        image_draw(image_id_land, 13, y_positions[0] - 10, COLOR_MASK_NONE, SCALE_NONE); // land buy
+        image_draw(image_id_land, 13, y_positions[2] - 10, COLOR_MASK_NONE, SCALE_NONE); // land sell
 
         // Sea route icons
-        image_draw(image_id_sea, 16, y_positions[1] - 5, COLOR_MASK_NONE, SCALE_NONE);  // sea buy
-        image_draw(image_id_sea, 16, y_positions[3] - 5, COLOR_MASK_NONE, SCALE_NONE);  // sea sell
+        image_draw(image_id_sea, 10, y_positions[1] - 5, COLOR_MASK_NONE, SCALE_NONE);  // sea buy
+        image_draw(image_id_sea, 10, y_positions[3] - 5, COLOR_MASK_NONE, SCALE_NONE);  // sea sell
     }
-        
+
     lang_text_draw_centered(13, 1, 0, button_position, data.window_width * BLOCK_SIZE, FONT_NORMAL_BLACK);
     graphics_reset_dialog();
 
