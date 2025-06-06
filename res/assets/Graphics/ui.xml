@@ -1192,4 +1192,9 @@
 	<image id="18Legion_Camels" src="18Legion_Camels"/>
 	<image id="19Legion_Dolphins" src="19Legion_Dolphins"/>
 	<image id="20Legion_Sea_Goats" src="20Legion_Sea_Goats"/>
+
+	<image src="Button_Asclepius_Idle" id="Asclepius Button"/>
+	<image src="Button_Asclepius_Hover"/>
+	<image src="Button_Asclepius_Click"/>
+	<image src="Button_Asclepius_Disable"/>
 </assetlist>

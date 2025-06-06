@@ -314,8 +314,9 @@ int city_health_get_house_health_level(const building *b, int update_city_data)
                 city_data.health.population_access.clinic += b->house_population;
             }
         }
+        
         if (b->data.house.bathhouse) {
-            house_health += 20;
+            house_health += 15;
             if (update_city_data) {
                 city_data.health.population_access.baths += b->house_population;
             }
@@ -326,10 +327,13 @@ int city_health_get_house_health_level(const building *b, int update_city_data)
                 city_data.health.population_access.barber += b->house_population;
             }
         }
-        house_health += b->data.house.num_foods * 15;
+        if (b->has_latrines_access || b->has_water_access) {
+            house_health += 10;
+        }
+        house_health += b->data.house.num_foods * 10;
 
-        int mausoleum_health = building_count_active(BUILDING_SMALL_MAUSOLEUM);
-        mausoleum_health += building_count_active(BUILDING_LARGE_MAUSOLEUM) * 2;
+        int mausoleum_health = building_count_active(BUILDING_SMALL_MAUSOLEUM) * 2;
+        mausoleum_health += building_count_active(BUILDING_LARGE_MAUSOLEUM) * 5;
 
         house_health += calc_bound(mausoleum_health, 0, 10);
 

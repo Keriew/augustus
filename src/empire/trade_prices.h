@@ -41,6 +41,18 @@ int trade_price_base_sell(resource_type resource);
 int trade_price_sell(resource_type resource, int land_trader);
 
 /**
+ * Determine the direction of price change for a resource trade route.
+ * Returns -1 if the price has decreased, 1 if it has increased, or 0 if unchanged,
+ * based on the trade factor relative to the base price.
+ *
+ * @param land_trader 1 if the trade route is land-based, 0 for sea-based
+ * @param is_sell 1 if checking the sell price, 0 for buy price
+ * @return -1 if price decreased, 1 if price increased, 0 if no change
+ */
+
+int trade_factor_sign(int land_trader, int is_sell);
+
+/**
  * Change the trade price for resource by amount
  * @param resource Resource to change
  * @param amount Amount to change, can be positive or negative

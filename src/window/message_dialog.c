@@ -33,6 +33,7 @@
 #include "window/editor/map.h"
 
 #define MAX_HISTORY 200
+#define POPUP_PROTECTION_MILIS 400
 
 static void draw_foreground_video(void);
 
@@ -100,6 +101,7 @@ static struct {
     int should_play_speech;
     int should_play_background_music;
     int background_image_id;
+    time_millis time_message_displayed;
 
     int x;
     int y;
@@ -132,6 +134,10 @@ static void set_city_message(int year, int month,
     player_message.param2 = param2;
     player_message.message_advisor = advisor;
     player_message.use_popup = use_popup;
+
+    if (use_popup) {
+        data.time_message_displayed = time_get_millis();
+    }
 }
 
 static void setup_custom_lang_message(int text_id)
@@ -775,6 +781,15 @@ static int handle_input_normal(const mouse *m_dialog, const lang_message *msg)
     return 0;
 }
 
+static int can_skip_popup(void)
+{
+    if (time_get_millis() > (data.time_message_displayed + POPUP_PROTECTION_MILIS)) {
+        return 1;
+    }
+
+    return 0;
+}
+
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     data.focus_button_id = 0;
@@ -786,7 +801,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
     } else {
         handled = handle_input_normal(m_dialog, msg);
     }
-    if (!handled && input_go_back_requested(m, h)) {
+    if (!handled && input_go_back_requested(m, h) && can_skip_popup()) {
         button_close(0, 0);
     }
 

@@ -5,6 +5,7 @@
 #include "building/construction.h"
 #include "building/granary.h"
 #include "building/industry.h"
+#include "building/storage.h"
 #include "city/view.h"
 #include "core/config.h"
 #include "core/log.h"
@@ -459,6 +460,110 @@ static void draw_overlay_column(int x, int y, int height, column_color_type colo
         image_draw(image_id, x + 5, y - 8 - capital_height - 10 * (height - 1) + 13, 0, scale);
     }
 }
+static void draw_depot_resource(building *b, int x, int y, color_t color_mask)
+{
+    int img_id;
+
+    if (b->num_workers > 0) {
+        switch(b->data.depot.current_order.resource_type) {
+            case RESOURCE_VEGETABLES:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Vegetables");
+                break;
+            case RESOURCE_FRUIT:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Fruit");
+                break;
+            case RESOURCE_MEAT:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Meat");
+                break;
+            case RESOURCE_FISH:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Fish");
+                break;
+            case RESOURCE_VINES:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Grapes");
+                break;
+            case RESOURCE_POTTERY:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Pottery");
+                break;
+            case RESOURCE_FURNITURE:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Furniture");
+                break;
+            case RESOURCE_OIL:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Oil");
+                break;
+            case RESOURCE_WINE:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Wine");
+                break;
+            case RESOURCE_MARBLE:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Marble");
+                break;
+            case RESOURCE_WEAPONS:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Weapons");
+                break;
+            case RESOURCE_CLAY:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Clay");
+                break;
+            case RESOURCE_TIMBER:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Timber");
+                break;
+            case RESOURCE_OLIVES:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Olives");
+                break;
+            case RESOURCE_IRON:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Iron");
+                break;
+            case RESOURCE_GOLD:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Gold");
+                break;
+            case RESOURCE_SAND:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Sand");
+                break;
+            case RESOURCE_STONE:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Stone");
+                break;
+            case RESOURCE_BRICKS:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Bricks");
+                break;
+            case RESOURCE_WHEAT:
+            default:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Wheat");
+                break;
+        }        
+    } else {
+        img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Cat");
+    }
+    image_draw(img_id, x + 11, y, COLOR_MASK_NONE, scale);
+}
+static void draw_permissions_flag(building *b, int x, int y, color_t color_mask)
+{
+    if (b->has_plague) {
+        return;
+    }
+    static int base_permission_image[8];
+    if (!base_permission_image[0]) {
+        base_permission_image[0] = 0xdeadbeef; // Invalid image ID, just to confirm the other values have been set
+        base_permission_image[1] = assets_get_image_id("UI", "Warehouse_Flag_Market");
+        base_permission_image[2] = assets_get_image_id("UI", "Warehouse_Flag_Land");
+        base_permission_image[3] = assets_get_image_id("UI", "Warehouse_Flag_Market_Land");
+        base_permission_image[4] = assets_get_image_id("UI", "Warehouse_Flag_Sea");
+        base_permission_image[5] = assets_get_image_id("UI", "Warehouse_Flag_Market_Sea");
+        base_permission_image[6] = assets_get_image_id("UI", "Warehouse_Flag_Land_Sea");
+        base_permission_image[7] = assets_get_image_id("UI", "Warehouse_Flag_All");
+    }
+    const building_storage *storage = building_storage_get(b->storage_id);
+    int flag_permission_mask = 0x7;
+    int permissions = (~storage->permissions) & flag_permission_mask;
+    if (!permissions) {
+        return;
+    }
+    image_draw(base_permission_image[permissions] + b->data.warehouse.flag_frame, x, y, color_mask,scale);
+
+    building_animation_advance_storage_flag(b, base_permission_image[permissions]);
+}
+
+static void draw_warehouse_ornaments(int x, int y, color_t color_mask)
+{
+    image_draw(image_group(GROUP_BUILDING_WAREHOUSE) + 17, x - 4, y - 42, color_mask,scale);
+}
 
 static void draw_building_top(int grid_offset, building *b, int x, int y)
 {
@@ -490,9 +595,15 @@ static void draw_building_top(int grid_offset, building *b, int x, int y)
                 image_draw(image_group(GROUP_BUILDING_GRANARY) + 5, x + 117, y - 62, color_mask, scale);
             }
         }
+        draw_permissions_flag(b, x + 81, y - 101, color_mask);
     }
     if (b->type == BUILDING_WAREHOUSE) {
         image_draw(image_group(GROUP_BUILDING_WAREHOUSE) + 17, x - 4, y - 42, color_mask, scale);
+        draw_warehouse_ornaments(x, y, color_mask);
+        draw_permissions_flag(b, x + 19, y - 56, color_mask);
+    }
+    if (b->type == BUILDING_DEPOT) {
+        draw_depot_resource(b, x, y, color_mask);
     }
 
     image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);

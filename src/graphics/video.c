@@ -207,7 +207,7 @@ int video_start(const char *filename)
     data.is_ended = 0;
 
     if (load_mpg(filename) || load_smk(filename)) {
-        sound_music_stop();
+        sound_music_pause();
         sound_speech_stop();
         int is_yuv = data.type == VIDEO_TYPE_MPG && graphics_renderer()->supports_yuv_image_format();
         graphics_renderer()->create_custom_image(CUSTOM_IMAGE_VIDEO, data.video.width, data.video.height, is_yuv);

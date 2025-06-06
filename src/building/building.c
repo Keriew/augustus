@@ -36,7 +36,7 @@
 #define BUILDING_ARRAY_SIZE_STEP 2000
 
 #define WATER_DESIRABILITY_RANGE 3
-#define WATER_DESIRABILITY_BONUS 10
+#define WATER_DESIRABILITY_BONUS 15
 
 static struct {
     array(building) buildings;
