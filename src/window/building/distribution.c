@@ -939,7 +939,7 @@ static void draw_resource_orders_buttons(int x, int y, const resource_list *list
         if (!scrollbar_shown) {
             image_draw(image_id, x + 390 + base_width, y_offset - 2 + base_height, COLOR_MASK_NONE, SCALE_NONE);
             text_draw(resource_get_data(resource)->text, x + 30, y_offset + 4, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
-            button_border_draw(x + 128, y_offset, 230, 22, data.resource_focus_button_id == i + 1);
+            button_border_draw(x + 148, y_offset, 210, 22, data.resource_focus_button_id == i + 1);
             button_border_draw(x + 358, y_offset, 28, 22, data.partial_resource_focus_button_id == i + 1);
 
             draw_button_from_state(storage->resource_state[resource], x + 148, y_offset + 5, type, resource);
@@ -1224,14 +1224,25 @@ int window_building_handle_mouse_warehouse_orders(const mouse *m, building_info_
 
     unsigned int buttons_to_show = city_resource_get_potential()->size < scrollbar.elements_in_view ?
         city_resource_get_potential()->size : scrollbar.elements_in_view;
-
-    return scrollbar_handle_mouse(&scrollbar, m, 1) ||
-        generic_buttons_handle_mouse(m, c->x_offset + 142, y_offset + 46, orders_resource_buttons, buttons_to_show,
-            &data.resource_focus_button_id) ||
-        generic_buttons_handle_mouse(m, c->x_offset + 142, y_offset + 46, orders_partial_resource_buttons,
-            buttons_to_show, &data.partial_resource_focus_button_id) ||
-        generic_buttons_handle_mouse(m, c->x_offset + 80, y_offset + 404,
-            warehouse_order_buttons, 2, &data.orders_focus_button_id);
+    int scrollbar_shown = scrollbar.max_scroll_position > 0;
+    if (scrollbar_shown) {
+        return scrollbar_handle_mouse(&scrollbar, m, 1) ||
+            generic_buttons_handle_mouse(m, c->x_offset + 142, y_offset + 46, orders_resource_buttons,
+                buttons_to_show, &data.resource_focus_button_id) ||
+            generic_buttons_handle_mouse(m, c->x_offset + 142, y_offset + 46, orders_partial_resource_buttons,
+                buttons_to_show, &data.partial_resource_focus_button_id) ||
+            generic_buttons_handle_mouse(m, c->x_offset + 80, y_offset + 404,
+                warehouse_order_buttons, 2, &data.orders_focus_button_id);
+    }
+    if (!scrollbar_shown) {
+        return scrollbar_handle_mouse(&scrollbar, m, 1) ||
+            generic_buttons_handle_mouse(m, c->x_offset + 172, y_offset + 46, orders_resource_buttons,
+                buttons_to_show, &data.resource_focus_button_id) ||
+            generic_buttons_handle_mouse(m, c->x_offset + 172, y_offset + 46, orders_partial_resource_buttons,
+                buttons_to_show, &data.partial_resource_focus_button_id) ||
+            generic_buttons_handle_mouse(m, c->x_offset + 80, y_offset + 404,
+                warehouse_order_buttons, 2, &data.orders_focus_button_id);
+    }
 }
 
 void window_building_warehouse_get_tooltip_distribution_permissions(int *translation)
