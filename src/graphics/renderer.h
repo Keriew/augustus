@@ -41,6 +41,11 @@ typedef struct {
 } image_atlas_data;
 
 typedef struct {
+    int x1, y1;
+    int x2, y2;
+} line_segment;
+
+typedef struct {
     void (*clear_screen)(void);
 
     void (*set_viewport)(int x, int y, int width, int height);
@@ -50,6 +55,7 @@ typedef struct {
     void (*reset_clip_rectangle)(void);
 
     void (*draw_line)(int x_start, int x_end, int y_start, int y_end, color_t color);
+    void (*draw_lines)(line_segment* segments, int count, color_t color);
     void (*draw_rect)(int x_start, int x_end, int y_start, int y_end, color_t color);
     void (*fill_rect)(int x_start, int x_end, int y_start, int y_end, color_t color);
 

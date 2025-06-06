@@ -43,6 +43,7 @@
 #include "game/time.h"
 #include "game/tutorial.h"
 #include "game/undo.h"
+#include "graphics/weather.h"
 #include "map/desirability.h"
 #include "map/natives.h"
 #include "map/road_network.h"
@@ -123,6 +124,8 @@ static void advance_month(void)
     if (new_year && config_get(CONFIG_GP_CH_YEARLY_AUTOSAVE)) {
         game_file_write_saved_game(dir_append_location("autosave-year.svx", PATH_LOCATION_SAVEGAME));
     }
+
+    city_weather_update(game_time_month());
 }
 
 static void advance_day(void)

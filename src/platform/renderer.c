@@ -143,6 +143,22 @@ static void draw_line(int x_start, int x_end, int y_start, int y_end, color_t co
     SDL_RenderDrawLine(data.renderer, x_start, y_start, x_end, y_end);
 }
 
+static void draw_lines(line_segment* segments, int count, color_t color) {
+    if (data.paused || count <= 0 || segments == NULL) {
+        return;
+    }
+
+    SDL_SetRenderDrawColor(data.renderer,
+        (color & COLOR_CHANNEL_RED) >> COLOR_BITSHIFT_RED,
+        (color & COLOR_CHANNEL_GREEN) >> COLOR_BITSHIFT_GREEN,
+        (color & COLOR_CHANNEL_BLUE) >> COLOR_BITSHIFT_BLUE,
+        (color & COLOR_CHANNEL_ALPHA) >> COLOR_BITSHIFT_ALPHA);
+
+    for (int i = 0; i < count; ++i) {
+        SDL_RenderDrawLine(data.renderer, segments[i].x1, segments[i].y1, segments[i].x2, segments[i].y2);
+    }
+}
+
 static void draw_rect(int x_start, int x_end, int y_start, int y_end, color_t color)
 {
     if (data.paused) {
@@ -1150,6 +1166,7 @@ static void create_renderer_interface(void)
     data.renderer_interface.set_clip_rectangle = set_clip_rectangle;
     data.renderer_interface.reset_clip_rectangle = reset_clip_rectangle;
     data.renderer_interface.draw_line = draw_line;
+    data.renderer_interface.draw_lines = draw_lines;
     data.renderer_interface.draw_rect = draw_rect;
     data.renderer_interface.fill_rect = fill_rect;
     data.renderer_interface.draw_image = draw_texture;

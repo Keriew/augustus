@@ -110,6 +110,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_AUTO_KILL_ANIMALS, "Les citoyens abattent automatiquement les animaux inoffensifs"},
     {TR_CONFIG_SHOW_ROAMING_PATH, "Visualiser les chemins empruntés par les marcheurs aléatoires"},
     {TR_CONFIG_DRAW_CLOUD_SHADOWS, "Simuler l'ombre des nuages"},
+    {TR_CONFIG_DRAW_WEATHER, "Activer la météo dynamique"},
     {TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE, "Demander confirmation pour écraser un fichier"},
     {TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, "Les arches non-militaires autorisent par défaut tous les marcheurs"},
     {TR_HOTKEY_TITLE, "Configuration raccourcis clavier"},

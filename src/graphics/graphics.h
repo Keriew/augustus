@@ -2,6 +2,7 @@
 #define GRAPHICS_GRAPHICS_H
 
 #include "graphics/color.h"
+#include "graphics/renderer.h"
 
 void graphics_in_dialog(void);
 void graphics_in_dialog_with_size(int width, int height);
@@ -13,6 +14,7 @@ void graphics_reset_clip_rectangle(void);
 void graphics_clear_screen(void);
 
 void graphics_draw_line(int x_start, int x_end, int y_start, int y_end, color_t color);
+void graphics_draw_lines(line_segment* segments, int count, color_t color);
 
 void graphics_draw_rect(int x, int y, int width, int height, color_t color);
 void graphics_draw_inset_rect(int x, int y, int width, int height, color_t color_dark, color_t color_light);

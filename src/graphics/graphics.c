@@ -48,6 +48,11 @@ void graphics_draw_line(int x_start, int x_end, int y_start, int y_end, color_t 
     graphics_renderer()->draw_line(x_start, x_end, y_start, y_end, color);
 }
 
+void graphics_draw_lines(line_segment* segments, int count, color_t color)
+{
+    graphics_renderer()->draw_lines(segments, count, color);
+}
+
 void graphics_draw_rect(int x, int y, int width, int height, color_t color)
 {
     graphics_renderer()->draw_rect(x, width, y, height, color);
