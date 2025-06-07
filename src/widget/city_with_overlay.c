@@ -657,6 +657,7 @@ static void draw_animation(int x, int y, int grid_offset)
         switch (overlay->type) {
             case OVERLAY_FIRE:
             case OVERLAY_CRIME:
+            case OVERLAY_ENEMY:
                 if (btype == BUILDING_PREFECTURE || btype == BUILDING_BURNING_RUIN) {
                     draw = 1;
                 }

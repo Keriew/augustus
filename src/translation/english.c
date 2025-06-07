@@ -167,6 +167,7 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_SHOW_OVERLAY_FIRE, "Fire overlay"},
     {TR_HOTKEY_SHOW_OVERLAY_DAMAGE, "Damage overlay"},
     {TR_HOTKEY_SHOW_OVERLAY_CRIME, "Crime overlay"},
+    {TR_HOTKEY_SHOW_OVERLAY_ENEMY, "Enemy overlay"},
     {TR_HOTKEY_ROTATE_BUILDING, "Next building rotation"},
     {TR_HOTKEY_ROTATE_BUILDING_BACK, "Previous building rotation"},
     {TR_HOTKEY_SHOW_OVERLAY_PROBLEMS, "Problems overlay"},
