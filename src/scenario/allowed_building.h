@@ -6,6 +6,13 @@
 
 #define MAX_ORIGINAL_ALLOWED_BUILDINGS 50
 
+typedef enum {
+    ALLOWED_BUILDINGS_CURRENT_VERSION = 1,
+
+    ALLOWED_BUILDINGS_VERSION_NONE = 0,
+    ALLOWED_BUILDINGS_VERSION_INITIAL = 1,
+} allowed_buildings_version;
+
 int scenario_allowed_building(building_type type);
 void scenario_allowed_building_set(building_type type, int allowed);
 

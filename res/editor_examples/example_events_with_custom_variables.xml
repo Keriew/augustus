@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <!DOCTYPE events>
-<events version="2">
+<events version="3">
     <variables>
         <variable uid="ConsecutiveMonthsNotInDebt" initial_value="0"/>
         <variable uid="TotalMonthsInDebt" initial_value="0"/>
     </variables>
     <!-- Repeats forever -->
-    <event repeat_months_min="1" repeat_months_max="1">
+    <event repeat_triggers_min="1" repeat_triggers_max="1">
         <conditions>
             <money check="gte" min="0" max="0"/>
         </conditions>
@@ -16,7 +16,7 @@
         </actions>
     </event>
     <!-- Repeats forever -->
-    <event repeat_months_min="1" repeat_months_max="1">
+    <event repeat_triggers_min="1" repeat_triggers_max="1">
         <conditions>
             <money check="lt" min="0" max="0"/>
         </conditions>
@@ -27,7 +27,7 @@
         </actions>
     </event>
     <!-- Repeats forever -->
-    <event repeat_months_min="1" repeat_months_max="1">
+    <event repeat_triggers_min="1" repeat_triggers_max="1">
         <conditions>
             <!-- 5 years of no debt -->
             <variable_check variable_uid="ConsecutiveMonthsNotInDebt" check="gte" value="60"/>
