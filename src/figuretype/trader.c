@@ -640,6 +640,9 @@ void figure_native_trader_action(figure *f)
         case FIGURE_ACTION_162_NATIVE_TRADER_CREATED:
             f->is_ghost = 1;
             f->wait_ticks++;
+            if (f->wait_ticks == 1) {
+                f->trader_id = trader_create();   //clear bought information
+            }
             if (f->wait_ticks > 10) {
                 f->wait_ticks = 0;
                 map_point tile;
@@ -816,7 +819,7 @@ void figure_trade_ship_action(figure *f)
                     figure_route_remove(f);
                 }
                 if ((dock_id = building_dock_get_closer_free_destination(f->id,
-                        SHIP_DOCK_REQUEST_2_FIRST_QUEUE, &tile)) != 0) {
+                    SHIP_DOCK_REQUEST_2_FIRST_QUEUE, &tile)) != 0) {
                     f->action_state = FIGURE_ACTION_113_TRADE_SHIP_GOING_TO_DOCK_QUEUE;
                     f->destination_building_id = dock_id;
                     f->destination_x = tile.x;
