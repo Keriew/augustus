@@ -288,7 +288,6 @@ static int has_figure_color(figure *f)
         return FIGURE_COLOR_WOLF;
     }
 
-
     if (type == FIGURE_TRADE_CARAVAN) {
         return FIGURE_COLOR_TRADE_CARAVAN;
     }
