@@ -195,12 +195,12 @@ int model_load(void)
 const model_building MODEL_ROADBLOCK = { 12,0,0,0,0 };
 const model_building MODEL_WORK_CAMP = { 150,-10,2,3,4,20 };
 const model_building MODEL_ARCHITECT_GUILD = { 200,-8,1,2,4,12 };
-const model_building MODEL_GRAND_TEMPLE_CERES = { 2500,20,2,-4,5,50 };
-const model_building MODEL_GRAND_TEMPLE_NEPTUNE = { 2500,20,2,-4,5,50 };
-const model_building MODEL_GRAND_TEMPLE_MERCURY = { 2500,20,2,-4,5,50 };
-const model_building MODEL_GRAND_TEMPLE_MARS = { 2500,20,2,-4,5,50 };
-const model_building MODEL_GRAND_TEMPLE_VENUS = { 2500,20,2,-4,5,50 };
-const model_building MODEL_PANTHEON = { 3500,20,2,-4,5,50 };
+const model_building MODEL_GRAND_TEMPLE_CERES = { 2500,20,2,-4,8,50 };
+const model_building MODEL_GRAND_TEMPLE_NEPTUNE = { 2500,20,2,-4,8,50 };
+const model_building MODEL_GRAND_TEMPLE_MERCURY = { 2500,20,2,-4,8,50 };
+const model_building MODEL_GRAND_TEMPLE_MARS = { 2500,20,2,-4,8,50 };
+const model_building MODEL_GRAND_TEMPLE_VENUS = { 2500,20,2,-4,8,50 };
+const model_building MODEL_PANTHEON = { 3500,20,2,-4,8,50 };
 const model_building MODEL_LIGHTHOUSE = { 1000,6,1,-1,4,20 };
 const model_building MODEL_MESS_HALL = { 100,-8,1,2,4,10 };
 const model_building MODEL_TAVERN = { 40,-2,1,1,6,8 };
@@ -306,7 +306,7 @@ const model_building *model_get_building(building_type type)
         case BUILDING_OVERGROWN_GARDENS:
             return &buildings[BUILDING_GARDENS];
         case BUILDING_ARMOURY:
-            return &MODEL_ARMOURY;  
+            return &MODEL_ARMOURY;
         case BUILDING_LATRINES:
             return &MODEL_LATRINE;
         default:
@@ -316,7 +316,7 @@ const model_building *model_get_building(building_type type)
     if ((type >= BUILDING_PINE_TREE && type <= BUILDING_SENATOR_STATUE) ||
         type == BUILDING_HEDGE_DARK || type == BUILDING_HEDGE_LIGHT ||
         type == BUILDING_DECORATIVE_COLUMN || type == BUILDING_LOOPED_GARDEN_WALL ||
-        type == BUILDING_COLONNADE || type == BUILDING_LOOPED_GARDEN_WALL || 
+        type == BUILDING_COLONNADE || type == BUILDING_LOOPED_GARDEN_WALL ||
         type == BUILDING_ROOFED_GARDEN_WALL || type == BUILDING_GARDEN_PATH ||
         type == BUILDING_PANELLED_GARDEN_WALL || type == BUILDING_GLADIATOR_STATUE) {
         return &buildings[BUILDING_SMALL_STATUE];

@@ -50,8 +50,8 @@ static void add_desirability_at_distance(int x, int y, int size, int distance, i
 static void add_to_terrain(int x, int y, int size, int desirability, int step, int step_size, int range)
 {
     if (size > 0) {
-        if (range > 6) {
-            range = 6;
+        if (range > 8) {
+            range = 8;
         }
         int tiles_within_step = 0;
         int distance = 1;

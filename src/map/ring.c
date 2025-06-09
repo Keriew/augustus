@@ -4,8 +4,8 @@
 #include "map/grid.h"
 
 static struct {
-    ring_tile tiles[1700];
-    int index[8][7];
+    ring_tile tiles[3000];
+    int index[8][9];
 } data;
 
 void map_ring_init(void)
@@ -13,7 +13,7 @@ void map_ring_init(void)
     int index = 0;
     int x, y;
     for (int size = 1; size <= 7; size++) {
-        for (int dist = 1; dist <= 6; dist++) {
+        for (int dist = 1; dist <= 8; dist++) {
             data.index[size][dist] = index;
             // top row, from x=0
             for (y = -dist, x = 0; x < size + dist; x++, index++) {
