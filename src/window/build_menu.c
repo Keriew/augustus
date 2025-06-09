@@ -221,6 +221,10 @@ static void draw_menu_buttons(void)
             text_draw_money(cost, x_offset - MENU_ITEM_MONEY_OFFSET,
                 data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
                 FONT_NORMAL_GREEN);
+        } else {
+            int image_id = assets_get_image_id("UI", "Expand Menu Icon");
+            image_draw(image_id, item_x_align + MENU_ICON_X_OFFSET + 268,
+                data.y_offset + MENU_Y_OFFSET + MENU_ICON_Y_OFFSET + MENU_ITEM_HEIGHT * i, COLOR_MASK_NONE, SCALE_NONE);
         }
 
         int icons_drawn = 0;
