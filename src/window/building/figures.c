@@ -153,9 +153,8 @@ static void draw_trader(building_info_context *c, figure *f)
     int width = lang_text_draw(64, f->type, c->x_offset + 90, c->y_offset + 110, FONT_NORMAL_BROWN);
     const uint8_t *city_name = empire_city_get_name(city);
 
-    if (f->type == FIGURE_NATIVE_TRADER) {
-    } else {
-    text_draw(city_name, c->x_offset + 90 + width, c->y_offset + 110, FONT_NORMAL_BROWN, 0);
+    if (f->type != FIGURE_NATIVE_TRADER) {
+        text_draw(city_name, c->x_offset + 90 + width, c->y_offset + 110, FONT_NORMAL_BROWN, 0);
     }
     width = lang_text_draw(129, 1, c->x_offset + 90, c->y_offset + 130, FONT_NORMAL_BROWN);
     lang_text_draw_amount(8, 10, f->type == FIGURE_TRADE_SHIP ? figure_trade_sea_trade_units() : figure_trade_land_trade_units(), c->x_offset + 90 + width, c->y_offset + 130, FONT_NORMAL_BROWN);
