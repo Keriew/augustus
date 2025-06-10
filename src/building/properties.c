@@ -43,6 +43,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
     },
     [BUILDING_DRAGGABLE_RESERVOIR] = {
         .size = 1,
+        .sound_id = SOUND_CITY_RESERVOIR,
         .event_data.attr = "reservoir"
     },
     [BUILDING_AQUEDUCT] = {
@@ -545,7 +546,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .size = 1,
         .fire_proof = 1,
         .image_group = 54,
-       // .sound_id = SOUND_CITY_FOUNTAIN, // Disabled in original
+        .sound_id = SOUND_CITY_FOUNTAIN, // Disabled in original
         .event_data.attr = "fountain"
     },
     [BUILDING_WELL] = {
@@ -1166,7 +1167,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
     [BUILDING_GOLD_MINE] = {
         .size = 2,
         .custom_asset.group = "Industry",
-        .custom_asset.id = "gold_mine"
+        .custom_asset.id = "Gold_Mine_C_OFF",
+        .event_data.attr = "gold_mine"
     },
     [BUILDING_STONE_QUARRY] = {
         .size = 2,
