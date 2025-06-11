@@ -12,10 +12,11 @@
 #define INFINITE 10000
 #define MAX_TIMBER 500
 #define TIMBER_CONSUMPTION 20
+#define TIMBER_LOW 100
 
 int building_lighthouse_enough_timber(building *lighthouse)
 {
-    return lighthouse->resources[RESOURCE_TIMBER] > TIMBER_CONSUMPTION;
+    return lighthouse->resources[RESOURCE_TIMBER] > TIMBER_LOW;
 }
 
 int building_lighthouse_get_storage_destination(building *lighthouse)
