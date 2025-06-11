@@ -328,13 +328,13 @@ void window_building_draw_well(building_info_context *c)
     window_building_play_sound(c, "wavs/well.wav");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(109, 0, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
-    int well_necessity = map_water_supply_is_well_unnecessary(c->building_id, 2);
+    int well_necessity = map_water_supply_is_building_unnecessary(c->building_id, 2);
     int text_id = 0;
-    if (well_necessity == WELL_NECESSARY) { // well is OK
+    if (well_necessity == BUILDING_NECESSARY) { // well is OK
         text_id = 1;
-    } else if (well_necessity == WELL_UNNECESSARY_FOUNTAIN) { // all houses have fountain
+    } else if (well_necessity == BUILDING_UNNECESSARY_FOUNTAIN) { // all houses have fountain
         text_id = 2;
-    } else if (well_necessity == WELL_UNNECESSARY_NO_HOUSES) { // no houses around
+    } else if (well_necessity == BUILDING_UNNECESSARY_NO_HOUSES) { // no houses around
         text_id = 3;
     }
     if (text_id) {
@@ -353,18 +353,23 @@ void window_building_draw_latrines(building_info_context *c)
     }
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_LATRINES, c->x_offset, c->y_offset + 10,
-        BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);   
-    window_building_draw_description(c, CUSTOM_TRANSLATION, TR_BUILDING_LATRINES_DESC_1);  
+        BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
+    
+    int latrines_necessity = map_water_supply_is_building_unnecessary(c->building_id, 3);
+    building *b = building_get(c->building_id);
+    if (b->num_workers <= 0) {
+        window_building_draw_description(c, CUSTOM_TRANSLATION, TR_BUILDING_LATRINES_NO_WORKERS); 
+    } else if (latrines_necessity == BUILDING_NECESSARY) { // latrines cover at least one house with well access
+        window_building_draw_description(c, CUSTOM_TRANSLATION, TR_BUILDING_LATRINES_DESC_1);
+    } else if (latrines_necessity == BUILDING_UNNECESSARY_FOUNTAIN) { // latrines cover houses having all fountain access
+        window_building_draw_description(c, CUSTOM_TRANSLATION, TR_BUILDING_LATRINES_UNNECESSARY);
+    } else if (latrines_necessity == BUILDING_UNNECESSARY_NO_HOUSES) { // no houses around
+        window_building_draw_description(c, CUSTOM_TRANSLATION, TR_BUILDING_LATRINES_NO_HOUSES);   
+    }  
     inner_panel_draw(c->x_offset + 16, c->y_offset + 136, c->width_blocks - 2, 4);
     window_building_draw_employment_without_house_cover(c, 142);
-    window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 144);
-
-    building *b = building_get(c->building_id);
-    if (b->num_workers > 0) {
-        window_building_draw_description_at(c, BLOCK_SIZE * c->height_blocks - 136, CUSTOM_TRANSLATION, TR_BUILDING_LATRINES_DESC_2); 
-    } else {        
-        window_building_draw_description_at(c, BLOCK_SIZE * c->height_blocks - 136, CUSTOM_TRANSLATION, TR_BUILDING_LATRINES_NO_WORKERS); 
-    }
+    window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 144);     
+    window_building_draw_description_at(c, BLOCK_SIZE * c->height_blocks - 136, CUSTOM_TRANSLATION, TR_BUILDING_LATRINES_DESC_2); 
 }
 
 void window_building_draw_mission_post(building_info_context *c)

@@ -321,12 +321,12 @@ int map_water_supply_has_aqueduct_access(int grid_offset)
     return 0;
 }
 
-int map_water_supply_is_well_unnecessary(int well_id, int radius)
+int map_water_supply_is_building_unnecessary(int building_id, int radius)
 {
-    building *well = building_get(well_id);
+    building *b = building_get(building_id);
     int num_houses = 0;
     int x_min, y_min, x_max, y_max;
-    map_grid_get_area(well->x, well->y, 1, radius, &x_min, &y_min, &x_max, &y_max);
+    map_grid_get_area(b->x, b->y, 1, radius, &x_min, &y_min, &x_max, &y_max);
 
     for (int yy = y_min; yy <= y_max; yy++) {
         for (int xx = x_min; xx <= x_max; xx++) {
@@ -335,12 +335,12 @@ int map_water_supply_is_well_unnecessary(int well_id, int radius)
             if (building_id && building_get(building_id)->house_size) {
                 num_houses++;
                 if (!map_terrain_is(grid_offset, TERRAIN_FOUNTAIN_RANGE)) {
-                    return WELL_NECESSARY;
+                    return BUILDING_NECESSARY;
                 }
             }
         }
     }
-    return num_houses ? WELL_UNNECESSARY_FOUNTAIN : WELL_UNNECESSARY_NO_HOUSES;
+    return num_houses ? BUILDING_UNNECESSARY_FOUNTAIN : BUILDING_UNNECESSARY_NO_HOUSES;
 }
 
 int map_water_supply_fountain_radius(void)

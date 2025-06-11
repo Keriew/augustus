@@ -1592,11 +1592,13 @@ static translation_string all_strings[] = {
     {TR_WINDOW_MESSAGE_LIST_SELECTED_COMMON, "Messages communs"},
     {TR_WINDOW_MESSAGE_LIST_SELECTED_CUSTOM, "Messages personnalisés"},
     {TR_BUILDING_LATRINES, "Latrines"},
-    {TR_BUILDING_LATRINES_DESC_1, "Lieu d'aisance apprécié de la population pour parler des nouvelles du jour ou de leurs affaires."},    
-    {TR_BUILDING_LATRINES_DESC_2, "Les latrines sont utilisées par les citoyens n'ayant accès qu'à un puits, et améliorent légèrement le rang de logement et l'hygiène. Les maisons avec accès à une fontaine ne feront pas usage des latrines publiques."},
+    {TR_BUILDING_LATRINES_DESC_1, "Lieu d'aisance apprécié de la population pour discuter des nouvelles du jour ou de leurs affaires."},    
+    {TR_BUILDING_LATRINES_DESC_2, "Les latrines sont utilisées par les citoyens n'ayant accès qu'à un puits, et améliorent le rang et l'hygiène de leur logement. Les citoyens ayant accès à une fontaine ne font pas usage des latrines publiques."},
     {TR_BUILDING_LATRINES_MISSING_EVOLVE, "Cette maison ne peut pas évoluer, car elle n'a pas accès à des latrines ou à l'eau propre d'une fontaine."},
     {TR_BUILDING_LATRINES_MISSING_DEVOLVE, "Cette maison va bientôt régresser, car elle n'a pas accès à des latrines ou à l'eau propre d'une fontaine."},
     {TR_BUILDING_LATRINES_NO_WORKERS, "Sans employés pour entretenir les latrines, les citoyens évitent de venir s'y relaxer."},
+    {TR_BUILDING_LATRINES_UNNECESSARY, "Ces latrines sont superflues, car aucun logement à proximité n'en a l'utilité."},
+    {TR_BUILDING_LATRINES_NO_HOUSES, "Ces latrines sont actuellement inutiles, car aucun logement ne se trouve à proximité."},
     {TR_CONFIG_DRAW_ASCLEPIUS, "Afficher le Bâton d'Asclépios pour le menu d'hygiène"},
 };
 

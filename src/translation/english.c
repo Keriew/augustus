@@ -1606,6 +1606,8 @@ static translation_string all_strings[] = {
     {TR_BUILDING_LATRINES_MISSING_EVOLVE, "This house cannot evolve, as it does not have access to a latrine or a clean water supply from a fountain."},
     {TR_BUILDING_LATRINES_MISSING_DEVOLVE, "This house will devolve soon, as it does not have access to a latrine or a clean water from a fountain."},
     {TR_BUILDING_LATRINES_NO_WORKERS, "Without employees to maintain the latrines, citizens avoid coming to relax there."},
+    {TR_BUILDING_LATRINES_UNNECESSARY, "These latrines have no purpose here, as there are no houses in range needing them."},
+    {TR_BUILDING_LATRINES_NO_HOUSES, "These latrines are unnecessary at the moment, as there are no houses within its service range."},
     {TR_CONFIG_DRAW_ASCLEPIUS, "Draw Rod of Asclepius for health menu"},
 };
 
