@@ -65,7 +65,7 @@ static int has_required_goods_and_services(building *house, int for_upgrade, int
     int water = model->water;
     if (!house->has_water_access) {
         if (water >= 2) {
-            if (level > HOUSE_SMALL_CASA) {                
+            if (level > HOUSE_SMALL_CASA) {
                 ++demands->missing.fountain;
                 return  0;
             } else if (!house->has_well_access) {
@@ -624,7 +624,7 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
 
     if (water == 2 && !house->has_water_access) {
         if (!house->has_latrines_access) {
-            house->data.house.evolve_text_id = 67;        
+            house->data.house.evolve_text_id = 67;
             return;
         } else if (level >= HOUSE_LARGE_CASA) {
             house->data.house.evolve_text_id = 2;
@@ -777,9 +777,9 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
             house->data.house.evolve_text_id = 31;
             return;
         } else if (!house->has_latrines_access) {
-            house->data.house.evolve_text_id = 68;        
+            house->data.house.evolve_text_id = 68;
             return;
-        }        
+        }
     }
 
     if (water == 2 && !house->has_water_access) {
@@ -789,7 +789,7 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
         }
     }
 
-    
+
     // entertainment
     entertainment = model->entertainment;
     if (house->data.house.entertainment < entertainment) {
@@ -939,7 +939,7 @@ building_type building_house_determine_worst_desirability_building_type(const bu
     int lowest_desirability = 0;
     building_type lowest_building_type = BUILDING_NONE;
     int x_min, y_min, x_max, y_max;
-    map_grid_get_area(house->x, house->y, 1, 6, &x_min, &y_min, &x_max, &y_max);
+    map_grid_get_area(house->x, house->y, 1, 8, &x_min, &y_min, &x_max, &y_max);
 
     for (int y = y_min; y <= y_max; y++) {
         for (int x = x_min; x <= x_max; x++) {
