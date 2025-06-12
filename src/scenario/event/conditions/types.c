@@ -1,4 +1,4 @@
-#include "condition_types.h"
+#include "types.h"
 
 #include "building/count.h"
 #include "building/type.h"
@@ -17,9 +17,10 @@
 #include "game/time.h"
 #include "map/grid.h"
 #include "scenario/custom_variable.h"
-#include "scenario/event/condition_comparison_helper.h"
 #include "scenario/request.h"
 #include "scenario/scenario.h"
+#include "scenario/event/controller.h"
+#include "scenario/event/conditions/comparison_helper.h"
 
 int scenario_condition_type_building_count_active_met(const scenario_condition_t *condition)
 {
@@ -209,6 +210,18 @@ int scenario_condition_type_city_population_met(const scenario_condition_t *cond
     }
 
     return comparison_helper_compare_values(comparison, population_value_to_use, value);
+}
+
+int scenario_condition_type_context_building_type_met(const scenario_condition_t *condition)
+{
+    int building_type = condition->parameter1;
+
+    scenario_event_context_t *context = scenario_events_get_context();
+    if (!context) {
+        return 0;
+    }
+
+    return (building_type == BUILDING_ANY) || (building_type == context->related_building_type);
 }
 
 int scenario_condition_type_count_own_troops_met(const scenario_condition_t *condition)
