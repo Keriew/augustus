@@ -1454,8 +1454,8 @@ void city_building_ghost_draw(const map_tile *tile)
             || type == BUILDING_PALISADE || type == BUILDING_WATCHTOWER || type == BUILDING_PALISADE_GATE
             || type == BUILDING_MESS_HALL || type == BUILDING_ARMOURY
             ))
-        )
-    {int building_size = (type == BUILDING_WAREHOUSE) ? 3 : props->size;
+        ) {
+        int building_size = (type == BUILDING_WAREHOUSE) ? 3 : props->size;
         draw_desirability_range(tile, type, building_size);
     }
 
