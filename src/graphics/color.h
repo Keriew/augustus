@@ -16,7 +16,7 @@ typedef uint32_t color_t;
 #define COLOR_TOOLTIP 0xff424242
 #define COLOR_SIDEBAR 0xffbdb592
 
-#define COLOR_BORDER_GREEN 0xfffae094
+#define COLOR_BORDER_GREEN 0xfffae094   //light yellow
 #define COLOR_BORDER_RED 0xffac5446
 
 #define COLOR_FONT_RED COLOR_RED
@@ -51,6 +51,10 @@ typedef uint32_t color_t;
 #define COLOR_MASK_FOOTPRINT_GHOST 0x22ffffff
 #define COLOR_MASK_BUILDING_GHOST 0xa7ffffff
 #define COLOR_MASK_BUILDING_GHOST_RED 0xa7ff8878
+#define COLOR_MASK_TYRIAN_PURPLE 0xff66023C
+#define COLOR_MASK_LIGHT_BLUE 0xff3552ff
+#define COLOR_MASK_POSITIVE_RANGE 0x80005100    //50% transparent DARK_GREEN
+#define COLOR_MASK_NEGATIVE_RANGE 0x40ff0000    //25% transparent COLOR_RED
 
 #define COLOR_MINIMAP_VIEWPORT 0xffe7e75a
 #define COLOR_MINIMAP_DARK 0xff424242
