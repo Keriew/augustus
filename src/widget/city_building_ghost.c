@@ -1438,23 +1438,9 @@ void city_building_ghost_draw(const map_tile *tile)
 
     const building_properties *props = building_properties_for_type(type);
     if ((config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL) &&
-        type >= BUILDING_ANY && type <= BUILDING_TYPE_MAX)
-        || (config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE) && (
-               type == BUILDING_ORACLE
-            || type >= BUILDING_LARARIUM && type <= BUILDING_LARGE_MAUSOLEUM
-            || type >= BUILDING_SMALL_TEMPLE_CERES && type <= BUILDING_LARGE_TEMPLE_VENUS
-            || type >= BUILDING_GRAND_TEMPLE_CERES && type <= BUILDING_GRAND_TEMPLE_VENUS
-            || type == BUILDING_PANTHEON
-            || type >= BUILDING_SHRINE_CERES && type <= BUILDING_SHRINE_VENUS
-            || type == BUILDING_PREFECTURE
-            || type == BUILDING_FORT_LEGIONARIES || type == BUILDING_FORT_JAVELIN || type == BUILDING_FORT_MOUNTED
-            || type == BUILDING_FORT_AUXILIA_INFANTRY || type == BUILDING_FORT_ARCHERS
-            || type == BUILDING_MILITARY_ACADEMY || type == BUILDING_BARRACKS
-            || type == BUILDING_WALL || type == BUILDING_TOWER || type == BUILDING_GATEHOUSE
-            || type == BUILDING_PALISADE || type == BUILDING_WATCHTOWER || type == BUILDING_PALISADE_GATE
-            || type == BUILDING_MESS_HALL || type == BUILDING_ARMOURY
-            ))
-        ) {
+            type >= BUILDING_ANY && type <= BUILDING_TYPE_MAX) ||
+        (config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE) &&
+            building_properties_for_type(type)->draw_desirability_range)) {
         int building_size = (type == BUILDING_WAREHOUSE) ? 3 : props->size;
         draw_desirability_range(tile, type, building_size);
     }
