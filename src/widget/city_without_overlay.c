@@ -30,6 +30,7 @@
 #include "graphics/clouds.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
+#include "graphics/weather.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
 #include "map/building.h"
@@ -477,7 +478,7 @@ static void draw_depot_resource(building *b, int x, int y, color_t color_mask)
     int img_id;
 
     if (b->num_workers > 0) {
-        switch(b->data.depot.current_order.resource_type) {
+        switch (b->data.depot.current_order.resource_type) {
             case RESOURCE_VEGETABLES:
                 img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Vegetables");
                 break;
@@ -539,7 +540,7 @@ static void draw_depot_resource(building *b, int x, int y, color_t color_mask)
             default:
                 img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Wheat");
                 break;
-        }        
+        }
     } else {
         img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Cat");
     }
@@ -985,4 +986,5 @@ void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_
         city_view_foreach_valid_map_tile(deletion_draw_remaining);
     }
     update_clouds();
+    update_weather();
 }

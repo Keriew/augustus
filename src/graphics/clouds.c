@@ -286,7 +286,9 @@ void clouds_draw(int x_offset, int y_offset, int x_limit, int y_limit, float bas
         speed_set_target(&cloud->speed.y, cloud_speed / 2, SPEED_CHANGE_IMMEDIATE, 1);
 
         graphics_renderer()->draw_image_advanced(&cloud->img,
-            (cloud->x - x_offset) / base_scale, (cloud->y - y_offset) / base_scale, COLOR_MASK_NONE,
+            (cloud->x - x_offset) / base_scale,
+            (cloud->y - y_offset) / base_scale,
+            COLOR_MASK_NONE,
             cloud->scale_x * base_scale, cloud->scale_y * base_scale, cloud->angle, 1);
 
         cloud->x += speed_get_delta(&cloud->speed.x);
