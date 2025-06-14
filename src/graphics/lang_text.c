@@ -53,6 +53,19 @@ int lang_text_draw_amount(int group, int number, int amount, int x_offset, int y
     return lang_text_draw_amount_colored(group, number, amount, x_offset, y_offset, font, COLOR_MASK_NONE);
 }
 
+int lang_text_get_amount_width(int group, int number, int amount, font_t font)
+{
+    int amount_offset = (amount == 1 || amount == -1) ? 0 : 1;
+    int width;
+    if (amount >= 0) {
+        width = text_get_number_width(amount, ' ', " ", font);
+    } else {
+        width = text_get_number_width(-amount, '-', " ", font);
+    }
+    width += lang_text_get_width(group, number + amount_offset, font);
+    return width;
+}
+
 int lang_text_draw_amount_centered(int group, int number, int amount, int x_offset, int y_offset, int box_width,
     font_t font)
 {

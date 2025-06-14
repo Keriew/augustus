@@ -1193,7 +1193,20 @@
 	<image id="18Legion_Camels" src="18Legion_Camels"/>
 	<image id="19Legion_Dolphins" src="19Legion_Dolphins"/>
 	<image id="20Legion_Sea_Goats" src="20Legion_Sea_Goats"/>
-
+	<!-- Note: Empire background texture, vertical version -->
+	<image id="Empire_panel_texture_vertical">
+		<layer group="172" image="3" rotate="90" x="0" y="0" width="70" height="40"/>
+	</image>
+	<image id="Empire_sidebar_city_badge_corner" width="12" height="33">
+		<layer group="172" image="8" invert="horizontal" y="-59"/>
+	</image>
+	<image id="Empire_sidebar_city_badge_rest" width="250" height="33">
+		<layer group="172" image="8" x="-82" y="-59"/>
+	</image>
+	<image id="Empire_sidebar_city_badge" width="262" height="33">
+		<layer group="this" image="Empire_sidebar_city_badge_corner"/>
+		<layer group="this" image="Empire_sidebar_city_badge_rest" x="12"/>
+	</image>
 	<image src="Button_Asclepius_Idle" id="Asclepius Button"/>
 	<image src="Button_Asclepius_Hover"/>
 	<image src="Button_Asclepius_Click"/>
