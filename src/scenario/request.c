@@ -25,9 +25,12 @@ static array(scenario_request) requests;
 static void new_request(scenario_request *request, unsigned int index)
 {
     request->id = index;
+    request->resource = REQUESTS_DEFAULT_RESOURCE;
+    request->amount.min = REQUESTS_DEFAULT_AMOUNT_MIN;
+    request->amount.max = REQUESTS_DEFAULT_AMOUNT_MAX;
     request->deadline_years = REQUESTS_DEFAULT_DEADLINE_YEARS;
-    request->favor = REQUESTS_DEFAULT_FAVOUR;
     request->extension_months_to_comply = REQUESTS_DEFAULT_MONTHS_TO_COMPLY;
+    request->favor = REQUESTS_DEFAULT_FAVOUR;
     request->extension_disfavor = REQUESTS_DEFAULT_EXTENSION_DISFAVOUR;
     request->ignored_disfavor = REQUESTS_DEFAULT_IGNORED_DISFAVOUR;
 }
@@ -290,7 +293,7 @@ int scenario_request_is_ongoing(int id)
     if (!request->resource) {
         return 0;
     }
-    
+
     if (request->visible
         && (request->state == REQUEST_STATE_NORMAL
             || request->state == REQUEST_STATE_OVERDUE)
@@ -313,7 +316,7 @@ int scenario_request_force_start(int id)
     if (id < 0 || id >= requests.size) {
         return 0;
     }
-    
+
     scenario_request *request = array_item(requests, id);
 
     if (!request->resource) {
@@ -329,7 +332,7 @@ int scenario_request_force_start(int id)
     request->year = game_time_year();
     request->month = game_time_month();
     request->can_comply_dialog_shown = 0;
-    
+
     make_request_visible_and_send_message(request);
 
     return 1;
