@@ -111,6 +111,7 @@ static struct {
 static void new_invasion(invasion_t *invasion, unsigned int index)
 {
     invasion->id = index;
+    invasion->year = INVASION_DEFAULT_START_YEAR;
     invasion->amount.min = INVASION_DEFAULT_AMOUNT_MIN;
     invasion->amount.max = INVASION_DEFAULT_AMOUNT_MAX;
     invasion->type = INVASION_DEFAULT_TYPE;
@@ -252,7 +253,7 @@ int scenario_invasion_get_years_remaining(void)
 {
     int years_until_invasion = 4;
     const invasion_warning *warning;
-    array_foreach(data.warnings, warning){
+    array_foreach(data.warnings, warning) {
         if (warning->in_use && warning->handled && warning->warning_years < years_until_invasion) {
             years_until_invasion = warning->warning_years;
         }
@@ -538,7 +539,7 @@ void scenario_invasion_process(void)
     }
     // local uprisings
     invasion_t *invasion;
-    array_foreach(data.invasions, invasion){
+    array_foreach(data.invasions, invasion) {
         if (invasion->type == INVASION_TYPE_LOCAL_UPRISING) {
             if (game_time_year() == scenario.start_year + invasion->year && game_time_month() == invasion->month) {
                 int grid_offset = start_invasion(ENEMY_0_BARBARIAN,

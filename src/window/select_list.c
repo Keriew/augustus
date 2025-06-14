@@ -165,11 +165,11 @@ static void draw_item(int item_id, int x, int y, int selected)
 {
     color_t color = selected ? COLOR_FONT_BLUE : COLOR_BLACK;
     if (data.mode == MODE_GROUP) {
-        lang_text_draw_centered_colored(data.group, item_id, data.x + x, data.y + y, data.width - 10,
+        lang_text_draw_centered_colored(data.group, item_id, data.x + x, data.y + y, data.width,
             FONT_NORMAL_PLAIN, color);
     } else {
         if (data.width == BASE_LIST_WIDTH) {
-            text_draw_centered(data.items[item_id], data.x + x, data.y + y, BASE_LIST_WIDTH - 10, FONT_NORMAL_PLAIN, color);
+            text_draw_centered(data.items[item_id], data.x + x, data.y + y, BASE_LIST_WIDTH, FONT_NORMAL_PLAIN, color);
         } else {
             text_draw_ellipsized(data.items[item_id], data.x + x + 5, data.y + y,
                 data.width - 10, FONT_NORMAL_PLAIN, color);

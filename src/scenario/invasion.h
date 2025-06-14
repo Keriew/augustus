@@ -5,6 +5,7 @@
 #include "figure/formation.h"
 #include "scenario/types.h"
 
+#define INVASION_DEFAULT_START_YEAR 1
 #define INVASION_DEFAULT_AMOUNT_MIN 1
 #define INVASION_DEFAULT_AMOUNT_MAX 1
 #define INVASION_DEFAULT_TYPE 2

@@ -139,8 +139,12 @@ static void draw_number_of_messages(int x_offset)
     buttons_build_expanded[13].enabled = show_messages;
     buttons_build_expanded[14].enabled = city_message_problem_area_count();
     if (show_messages) {
-        text_draw_number_centered_colored(messages, x_offset + 74, 452, 32, FONT_SMALL_PLAIN, COLOR_BLACK);
-        text_draw_number_centered_colored(messages, x_offset + 73, 453, 32, FONT_SMALL_PLAIN, COLOR_WHITE);
+        int width = text_get_number_width(messages, '@', "", FONT_SMALL_PLAIN);
+        text_draw_number(messages, '@', "", (x_offset + 100) - width, 452, FONT_SMALL_PLAIN, COLOR_BLACK); //top
+        text_draw_number(messages, '@', "", (x_offset + 100) - width, 454, FONT_SMALL_PLAIN, COLOR_BLACK); //bottom
+        text_draw_number(messages, '@', "", (x_offset + 99) - width, 453, FONT_SMALL_PLAIN, COLOR_BLACK); //left
+        text_draw_number(messages, '@', "", (x_offset + 101) - width, 453, FONT_SMALL_PLAIN, COLOR_BLACK); //right
+        text_draw_number(messages, '@', "", (x_offset + 100) - width, 453, FONT_SMALL_PLAIN, COLOR_WHITE);
     }
 }
 
@@ -333,8 +337,7 @@ static void button_go_to_problem(int param1, int param2)
     if (grid_offset) {
         city_view_go_to_grid_offset(grid_offset);
         window_city_show();
-    }
-    else {
+    } else {
         window_invalidate();
     }
 }
@@ -364,8 +367,7 @@ static void button_rotate(int clockwise, int param2)
 {
     if (clockwise) {
         game_orientation_rotate_right();
-    }
-    else {
+    } else {
         game_orientation_rotate_left();
     }
     window_invalidate();
