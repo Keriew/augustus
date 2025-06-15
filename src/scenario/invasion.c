@@ -401,7 +401,7 @@ static int start_invasion(int enemy_type, int amount, int invasion_point, format
         return -1;
     }
     if (map_terrain_is(grid_offset, TERRAIN_WATER)) {
-        if (!map_terrain_is(grid_offset, TERRAIN_ROAD)) { // bridge
+        if (!map_terrain_is(grid_offset, TERRAIN_ROAD)) { // bridge - any changes to bridge behaviour will need to ensure that invasion doesnt target it 
             return -1;
         }
     } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING | TERRAIN_AQUEDUCT | TERRAIN_GATEHOUSE | TERRAIN_WALL)) {

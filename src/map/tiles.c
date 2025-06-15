@@ -7,6 +7,7 @@
 #include "core/direction.h"
 #include "core/image.h"
 #include "map/aqueduct.h"
+#include "map/bridge.h"
 #include "map/building.h"
 #include "map/building_tiles.h"
 #include "map/data.h"
@@ -20,6 +21,8 @@
 #include "map/random.h"
 #include "map/terrain.h"
 #include "scenario/map.h"
+
+
 
 #define OFFSET(x,y) (x + GRID_SIZE * y)
 
@@ -1011,26 +1014,29 @@ void map_tiles_update_region_meadow(int x_min, int y_min, int x_max, int y_max)
 
 static void set_water_image(int x, int y, int grid_offset)
 {
-    if ((map_terrain_get(grid_offset) & (TERRAIN_WATER | TERRAIN_BUILDING)) == TERRAIN_WATER) {
+    if (((map_terrain_get(grid_offset) & (TERRAIN_WATER | TERRAIN_BUILDING)) == TERRAIN_WATER) || map_is_bridge(grid_offset))   {
         const terrain_image *img = map_image_context_get_shore(grid_offset);
         int image_id = image_group(GROUP_TERRAIN_WATER) + img->group_offset + img->item_offset;
         if (map_terrain_exists_tile_in_radius_with_type(x, y, 1, 2, TERRAIN_BUILDING)) {
             // fortified shore
-            int base = image_group(GROUP_TERRAIN_WATER_SHORE);
-            switch (img->group_offset) {
-                case 8: image_id = base + 10; break;
-                case 12: image_id = base + 11; break;
-                case 16: image_id = base + 9; break;
-                case 20: image_id = base + 8; break;
-                case 24: image_id = base + 18; break;
-                case 28: image_id = base + 16; break;
-                case 32: image_id = base + 19; break;
-                case 36: image_id = base + 17; break;
-                case 50: image_id = base + 12; break;
-                case 51: image_id = base + 14; break;
-                case 52: image_id = base + 13; break;
-                case 53: image_id = base + 15; break;
+            if (!map_is_bridge(grid_offset)){ //no fortification right under the bridge
+                int base = image_group(GROUP_TERRAIN_WATER_SHORE);
+                switch (img->group_offset) {
+                    case 8: image_id = base + 10; break;
+                    case 12: image_id = base + 11; break;
+                    case 16: image_id = base + 9; break;
+                    case 20: image_id = base + 8; break;
+                    case 24: image_id = base + 18; break;
+                    case 28: image_id = base + 16; break;
+                    case 32: image_id = base + 19; break;
+                    case 36: image_id = base + 17; break;
+                    case 50: image_id = base + 12; break;
+                    case 51: image_id = base + 14; break;
+                    case 52: image_id = base + 13; break;
+                    case 53: image_id = base + 15; break;
+                }
             }
+
         }
         map_image_set(grid_offset, image_id);
         map_property_set_multi_tile_size(grid_offset, 1);

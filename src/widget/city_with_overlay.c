@@ -222,7 +222,10 @@ static void draw_flattened_building_footprint(const building *b, int x, int y, i
     if (b->house_size) {
         image_base += 4;
     }
-    if (b->size == 1) {
+    if (building_type_is_bridge(b->type)){//dont draw bridges
+        return;
+    }
+    if (b->size == 1)  {
         image_draw_isometric_footprint_from_draw_tile(image_base, x, y, color_mask, scale);
     } else if (b->size == 2) {
         const int x_tile_offset[] = { 30, 0, 60, 30 };
@@ -411,7 +414,7 @@ static void draw_footprint(int x, int y, int grid_offset)
             }
         } else if ((terrain & TERRAIN_ROAD) && !(terrain & TERRAIN_BUILDING)) {
             image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, 0, scale);
-        } else if (terrain & TERRAIN_BUILDING) {
+        } else if ((terrain & TERRAIN_BUILDING) && !map_is_bridge(grid_offset) ) {
             city_with_overlay_draw_building_footprint(x, y, grid_offset, 0);
         } else {
             image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, 0, scale);
@@ -682,7 +685,9 @@ static void draw_animation(int x, int y, int grid_offset)
 
     int image_id = map_image_at(grid_offset);
     const image *img = image_get(image_id);
-    if (img->animation && draw) {
+    if (map_is_bridge(grid_offset)) {
+        city_draw_bridge(x, y, scale, grid_offset);
+    } else if (img->animation && draw) {
         if (map_property_is_draw_tile(grid_offset)) {
             building *b = building_get(map_building_at(grid_offset));
             int color_mask = draw_building_as_deleted(b) ? COLOR_MASK_RED : 0;
@@ -719,8 +724,6 @@ static void draw_animation(int x, int y, int grid_offset)
                 }
             }
         }
-    } else if (map_is_bridge(grid_offset)) {
-        city_draw_bridge(x, y, scale, grid_offset);
     }
 }
 

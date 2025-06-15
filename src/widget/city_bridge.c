@@ -1,9 +1,12 @@
 #include "city_bridge.h"
 
 #include "graphics/image.h"
+#include "map/bridge.h"
 #include "map/property.h"
 #include "map/sprite.h"
 #include "map/terrain.h"
+
+
 
 void city_draw_bridge(int x, int y, float scale, int grid_offset)
 {
@@ -11,7 +14,7 @@ void city_draw_bridge(int x, int y, float scale, int grid_offset)
         map_sprite_clear_tile(grid_offset);
         return;
     }
-    if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+    if (map_terrain_is(grid_offset, TERRAIN_BUILDING) && !map_is_bridge(grid_offset)) {
         return;
     }
     color_t color_mask = 0;

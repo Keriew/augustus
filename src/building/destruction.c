@@ -93,7 +93,7 @@ static void destroy_on_fire(building *b, int plagued)
 static void destroy_linked_parts(building *b, int on_fire, int plagued)
 {
     building *part = b;
-    for (int i = 0; i < 9; i++) {
+    for (int i = 0; i < 64; i++) { //updated from 9 to fit new bridges
         if (part->prev_part_building_id <= 0) {
             break;
         }

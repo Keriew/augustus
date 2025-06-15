@@ -1,10 +1,14 @@
 #include "terrain.h"
 
+#include "building/building.h"
 #include "city/map.h"
 #include "core/image.h"
+#include "map/bridge.h"
+#include "map/building.h"
 #include "map/grid.h"
 #include "map/ring.h"
 #include "map/routing.h"
+#include "map/sprite.h"
 
 static grid_u32 terrain_grid;
 static grid_u32 terrain_grid_backup;
@@ -468,6 +472,44 @@ static void determine_original_trees(buffer *images, int legacy_buffer)
         }
     }
 }
+
+static int legacy_map_is_bridge(int grid_offset){ 
+    //old way for checking for bridges - check if it's sprite, and check if it's on water
+    //checking just for sprites is misleading, as on land buildings also have sprites - it's their animation frame
+    return (map_sprite_bridge_at(grid_offset)) && map_terrain_is(grid_offset, TERRAIN_WATER);
+}
+
+void map_terrain_migrate_old_bridges(void){
+    for (int y = 0; y < GRID_SIZE; y++) {
+        for (int x = 0; x < GRID_SIZE; x++) {
+            int grid_offset = map_grid_offset(x,y);
+            if (legacy_map_is_bridge(grid_offset) && !map_is_bridge(grid_offset)){ //old bridge but not new bridge
+                //convert to new bridge
+                int tiles_x = get_x_bridge_tiles(grid_offset);
+                int tiles_y = get_y_bridge_tiles(grid_offset);
+
+                int offset_up = tiles_x > tiles_y ? map_grid_delta(1, 0) : map_grid_delta(0, 1);
+                // find lower end of the bridge
+                while (legacy_map_is_bridge(grid_offset - offset_up)) {
+                    grid_offset -= offset_up;
+                }
+                int is_ship_bridge = map_sprite_bridge_at(grid_offset) > 6 ? 1 : 0;
+                // 6 and less is low bridge
+                int bridge_type = !is_ship_bridge ? BUILDING_LOW_BRIDGE : BUILDING_SHIP_BRIDGE;
+                building *b = building_create(bridge_type, x, y);
+                map_terrain_add(grid_offset, TERRAIN_BUILDING);
+                map_building_set(grid_offset,b->id);
+
+                while (legacy_map_is_bridge(grid_offset + offset_up)) {
+                    grid_offset += offset_up;
+                    map_terrain_add(grid_offset, TERRAIN_BUILDING);
+                    map_building_set(grid_offset,b->id);
+                }
+            }
+        }
+    }
+}
+
 
 void map_terrain_load_state(buffer *buf, int expanded_terrain_data, buffer *images, int legacy_image_buffer)
 {

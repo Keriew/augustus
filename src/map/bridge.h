@@ -1,7 +1,10 @@
 #ifndef MAP_BRIDGE_H
 #define MAP_BRIDGE_H
+#include "building/type.h"
 
 int map_bridge_building_length(void);
+
+int building_type_is_bridge(building_type type);
 
 void map_bridge_reset_building_length(void);
 
@@ -16,6 +19,10 @@ int map_bridge_get_sprite_id(int index, int length, int direction, int is_ship_b
  * @return Length of the bridge
  */
 int map_bridge_add(int x, int y, int is_ship_bridge);
+
+int get_y_bridge_tiles(int grid_offset);
+
+int get_x_bridge_tiles(int grid_offset);
 
 void map_bridge_remove(int grid_offset, int mark_deleted);
 

@@ -1,7 +1,12 @@
 #include "bridge.h"
 
+#include "building/building.h"
+#include "building/type.h"
 #include "city/view.h"
 #include "core/direction.h"
+#include "game/undo.h"
+#include "map/building.h"
+#include "map/building_tiles.h"
 #include "map/data.h"
 #include "map/figure.h"
 #include "map/grid.h"
@@ -9,6 +14,7 @@
 #include "map/routing_terrain.h"
 #include "map/sprite.h"
 #include "map/terrain.h"
+#include "map/tiles.h"
 
 #define MAX_DISTANCE_BETWEEN_PILLARS 12
 #define MINIMUM_DISTANCE_FOR_PILLARS 9
@@ -23,6 +29,10 @@ static struct {
 int map_bridge_building_length(void)
 {
     return bridge.length;
+}
+
+int building_type_is_bridge(building_type type){
+    return type == BUILDING_LOW_BRIDGE || type== BUILDING_SHIP_BRIDGE;
 }
 
 void map_bridge_reset_building_length(void)
@@ -64,7 +74,7 @@ int map_bridge_calculate_length_direction(int x, int y, int *length, int *direct
     }
     *direction = bridge.direction;
     bridge.length = 1;
-    for (int i = 0; i < 40; i++) {
+    for (int i = 0; i < 64; i++) { //longer bridges
         grid_offset += bridge.direction_grid_delta;
         bridge.length++;
         int next_offset = grid_offset + bridge.direction_grid_delta;
@@ -223,25 +233,33 @@ int map_bridge_add(int x, int y, int is_ship_bridge)
     }
 
     int grid_offset = map_grid_offset(x, y);
+    int bridge_type = !is_ship_bridge ? BUILDING_LOW_BRIDGE : BUILDING_SHIP_BRIDGE;
+
+    building *b = building_create(bridge_type, x, y); 
+    //int prev_part = 0;
     for (int i = 0; i < bridge.length; i++) {
         map_terrain_add(grid_offset, TERRAIN_ROAD);
+        map_terrain_add(grid_offset, TERRAIN_BUILDING);
+        map_building_set(grid_offset, b->id);
         int value = map_bridge_get_sprite_id(i, bridge.length, bridge.direction, is_ship_bridge);
         map_sprite_bridge_set(grid_offset, value);
+
         grid_offset += bridge.direction_grid_delta;
     }
 
+
     map_routing_update_land();
     map_routing_update_water();
-
+    game_undo_disable();
     return bridge.length;
 }
 
 int map_is_bridge(int grid_offset)
 {
-    return map_terrain_is(grid_offset, TERRAIN_WATER) && map_sprite_bridge_at(grid_offset);
+    return map_terrain_is(grid_offset, TERRAIN_WATER) && map_terrain_is(grid_offset, TERRAIN_ROAD) && map_terrain_is(grid_offset, TERRAIN_BUILDING);
 }
 
-static int get_y_bridge_tiles(int grid_offset)
+int get_y_bridge_tiles(int grid_offset)
 {
     int tiles = 0;
     if (map_is_bridge(grid_offset + map_grid_delta(0, -1))) {
@@ -259,7 +277,7 @@ static int get_y_bridge_tiles(int grid_offset)
     return tiles;
 }
 
-static int get_x_bridge_tiles(int grid_offset)
+int get_x_bridge_tiles(int grid_offset)
 {
     int tiles = 0;
     if (map_is_bridge(grid_offset + map_grid_delta(-1, 0))) {
@@ -291,22 +309,36 @@ void map_bridge_remove(int grid_offset, int mark_deleted)
     while (map_is_bridge(grid_offset - offset_up)) {
         grid_offset -= offset_up;
     }
-
+    int bridge_x_start = map_grid_offset_to_x(grid_offset);
+    int bridge_y_start = map_grid_offset_to_y(grid_offset);
     if (mark_deleted) {
         map_property_mark_deleted(grid_offset);
     } else {
         map_sprite_clear_tile(grid_offset);
+
+        int building_id = map_building_at(grid_offset);
+        building *b = building_get(building_id);
+        b->state = BUILDING_STATE_DELETED_BY_PLAYER;
+        map_building_set(grid_offset,0);
         map_terrain_remove(grid_offset, TERRAIN_ROAD);
+        map_terrain_remove(grid_offset, TERRAIN_BUILDING);
     }
     while (map_is_bridge(grid_offset + offset_up)) {
         grid_offset += offset_up;
         if (mark_deleted) {
             map_property_mark_deleted(grid_offset);
         } else {
+
             map_sprite_clear_tile(grid_offset);
             map_terrain_remove(grid_offset, TERRAIN_ROAD);
+            map_terrain_remove(grid_offset, TERRAIN_BUILDING);
+            map_building_set(grid_offset,0);
         }
     }
+    int bridge_x_end = map_grid_offset_to_x(grid_offset -offset_up);
+    int bridge_y_end = map_grid_offset_to_y(grid_offset -offset_up);
+    game_undo_disable();
+    map_tiles_update_region_water(bridge_x_start,bridge_y_start,bridge_x_end, bridge_y_end);
 }
 
 int map_bridge_count_figures(int grid_offset)

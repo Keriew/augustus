@@ -7,6 +7,7 @@
 #include "city/finance.h"
 #include "core/dir.h"
 #include "core/image.h"
+#include "figure/figure.h"
 #include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
@@ -15,9 +16,11 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "map/water_supply.h"
+#include "sound/speech.h"
 #include "translation/translation.h"
 #include "window/building_info.h"
 #include "window/building/figures.h"
+
 
 #include <stdlib.h>
 
@@ -252,6 +255,42 @@ void window_building_draw_palisade_gate(building_info_context *c)
     window_building_draw_description_at(c, 96, CUSTOM_TRANSLATION, TR_BUILDING_PALISADE_GATE_DESC);
 }
 
+void window_building_draw_bridge_roadblock(building_info_context *c)
+{
+    c->help_id = 58;
+    if (c->can_play_sound) {
+        c->can_play_sound = 0;
+        if (c->figure.count > 0) {
+            window_building_play_figure_phrase(c);
+        } else {
+            sound_speech_play_file("wavs/empty_land.wav");
+        }
+    }
+    if (c->figure.count > 0 && c->figure.figure_ids[c->figure.selected_index]) {
+        figure *f = figure_get(c->figure.figure_ids[c->figure.selected_index]);
+        if (f->type < FIGURE_SHIPWRECK || (f->type >= FIGURE_NEW_TYPES && f->type < FIGURE_TYPE_MAX)) {
+            c->help_id = 42;
+        } else {
+            c->help_id = 330;
+        }
+    }
+
+    window_building_prepare_figure_list(c);
+    outer_panel_draw(c->x_offset, c->y_offset,
+        c->width_blocks, c->height_blocks);
+    if (!c->figure.count) {
+        lang_text_draw_centered(70, 21,  // draw 21 instead of c->terrain_type + 10,
+            c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
+    }
+    if (c->terrain_type != TERRAIN_INFO_ROAD && c->terrain_type != TERRAIN_INFO_PLAZA && c->terrain_type != TERRAIN_INFO_HIGHWAY) {
+        lang_text_draw_multiline(70, c->terrain_type + 25,
+            c->x_offset + 40, c->y_offset + BLOCK_SIZE * c->height_blocks - 113,
+            BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_BLACK);
+    }
+    window_building_draw_figure_list(c);
+
+}
+
 void window_building_draw_burning_ruin(building_info_context *c)
 {
     c->help_id = 0;
@@ -479,3 +518,19 @@ int window_building_handle_mouse_roadblock_orders(const mouse *m, building_info_
     return generic_buttons_handle_mouse(m, c->x_offset + 80, y_offset + 404, roadblock_orders_buttons,
         1, &data.orders_focus_button_id);
 }
+
+int window_building_handle_mouse_bridge(const mouse *m, building_info_context *c){
+
+    if (window_building_handle_mouse_figure_list(m,c)){
+        return 1;
+    }
+
+    if (c->show_special_orders) {
+            return window_building_handle_mouse_roadblock_orders(m, c);
+        } else {
+            return window_building_handle_mouse_roadblock_button(m, c);
+        }
+
+}
+
+

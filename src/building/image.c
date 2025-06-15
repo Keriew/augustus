@@ -14,6 +14,8 @@
 #include "core/random.h"
 #include "game/resource.h"
 #include "map/random.h"
+#include "map/sprite.h"
+#include "map/grid.h"
 #include "scenario/property.h"
 
 static const struct {
@@ -32,6 +34,31 @@ static const struct {
     {GROUP_BUILDING_HOUSE_PALACE_1, 0, 1}, {GROUP_BUILDING_HOUSE_PALACE_1, 1, 1},
     {GROUP_BUILDING_HOUSE_PALACE_2, 0, 1}, {GROUP_BUILDING_HOUSE_PALACE_2, 1, 1},
 };
+
+int building_image_get_bridge(const building *b){
+    int grid_offset = map_grid_offset(b->x,b->y);
+    int bridge_sprite_id = map_sprite_bridge_at(grid_offset);
+    int base_id = image_group(GROUP_BUILDING_BRIDGE);
+    switch (bridge_sprite_id) {
+        case 1:  return base_id + 5;
+        case 2:  return base_id + 0;
+        case 3:  return base_id + 3;
+        case 4:  return base_id + 2;
+        case 5:  return base_id + 4;
+        case 6:  return base_id + 1;
+        case 7:  return base_id + 11;
+        case 8:  return base_id + 6;
+        case 9:  return base_id + 9;
+        case 10: return base_id + 8;
+        case 11: return base_id + 10;
+        case 12: return base_id + 7;
+        case 14: return base_id + 13;
+        case 15: return base_id + 12;
+        default: return -1;  // invalid or unsupported sprite ID
+    }
+
+}
+
 
 int building_image_get_base_farm_crop(building_type type)
 {
@@ -410,6 +437,9 @@ int building_image_get(const building *b)
         case BUILDING_ROADBLOCK:
         case BUILDING_DECORATIVE_COLUMN:
             return building_variant_get_image_id_with_rotation(b->type, b->variant);
+        case BUILDING_LOW_BRIDGE:
+        case BUILDING_SHIP_BRIDGE:
+             return building_image_get_bridge(b);
         case BUILDING_SHIPYARD:
             return image_group(GROUP_BUILDING_SHIPYARD) +
                 ((4 + b->data.industry.orientation - city_view_orientation() / 2) % 4);
