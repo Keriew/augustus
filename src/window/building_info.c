@@ -140,6 +140,7 @@ static int get_height_id(void)
             case BUILDING_PALISADE:
             case BUILDING_GLADIATOR_STATUE:
                 return 1;
+
             //288px
             case BUILDING_FOUNTAIN:
             case BUILDING_GLADIATOR_SCHOOL:
