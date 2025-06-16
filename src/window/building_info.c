@@ -421,7 +421,6 @@ static void init(int grid_offset)
                     case FIGURE_FRIENDLY_ARROW:
                     case FIGURE_WATCHTOWER_ARCHER:
                         break;
-                        // intentional fallthrough
                     default:
                         context.figure.figure_ids[context.figure.count++] = figure_id;
                         figure_phrase_determine(f);
