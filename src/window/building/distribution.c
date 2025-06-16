@@ -935,7 +935,7 @@ static void draw_button_from_state(int state, int x, int y, building_type type, 
         case BUILDING_STORAGE_STATE_NOT_ACCEPTING_QUARTER:
             lang_text_draw_centered(99, 8, x, y, 210, FONT_NORMAL_RED);
             break;
-        default:
+        default: 
             lang_text_draw_centered(99, 7, x, y, 210, FONT_NORMAL_WHITE);
             break;
     }
@@ -956,6 +956,8 @@ static void draw_button_from_state(int state, int x, int y, building_type type, 
         case BUILDING_STORAGE_STATE_ACCEPTING_QUARTER:
         case BUILDING_STORAGE_STATE_GETTING_QUARTER:
             button_text = type == BUILDING_GRANARY ? granary_quarter_button_text : warehouse_quarter_button_text;
+            break;
+        default:
             break;
     }
     text_draw_centered(button_text, x + 214, y, 20, FONT_NORMAL_BLACK, 0);
@@ -1534,9 +1536,6 @@ void window_building_draw_mess_hall(building_info_context *c)
     int hunger_text;
     int y_offset = 0;
     int food_types = count_food_types_in_stock(b);
-    //int y_offset = ((food_types - 1) / 4) * BLOCK_SIZE * 2;
-
-    //c->height_blocks = 28 + y_offset / BLOCK_SIZE;
 
     window_building_play_sound(c, "wavs/warehouse2.wav");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
@@ -1651,7 +1650,6 @@ void window_building_draw_caravanserai(building_info_context *c)
         window_building_play_sound(c, "wavs/market2.wav");
         int food_types = count_food_types_in_stock(b);
         int y_offset = 0;
-        //int y_offset = ((food_types - 1) / 4) * BLOCK_SIZE * 2;
         data.caravanserai_button_y_offset = y_offset;
         c->height_blocks = (c->height_blocks < 30 ? 26 : 38) + y_offset / BLOCK_SIZE;
 

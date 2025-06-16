@@ -88,8 +88,6 @@ static int get_height_id(void)
             case TERRAIN_INFO_WALL:
             case TERRAIN_INFO_GARDEN:
                 return 1;
-            //case TERRAIN_INFO_HIGHWAY:
-            //    return 7;
             default:
                 return 5;
         }
@@ -109,7 +107,7 @@ static int get_height_id(void)
         }
 
         switch (b->type) {
-//256px
+            //256px
             case BUILDING_SMALL_STATUE:
             case BUILDING_MEDIUM_STATUE:
             case BUILDING_LARGE_STATUE:
@@ -142,15 +140,15 @@ static int get_height_id(void)
             case BUILDING_PALISADE:
             case BUILDING_GLADIATOR_STATUE:
                 return 1;
-//288px
+            //288px
             case BUILDING_FOUNTAIN:
             case BUILDING_GLADIATOR_SCHOOL:
             case BUILDING_LION_HOUSE:
             case BUILDING_ACTOR_COLONY:
             case BUILDING_CHARIOT_MAKER:
-
                 return 2;
-//(new 320px for description)
+
+            //(new 320px for description)
             case BUILDING_PREFECTURE:
             case BUILDING_ENGINEERS_POST:
             case BUILDING_BARBER:
@@ -162,7 +160,8 @@ static int get_height_id(void)
             case BUILDING_WHARF:
             case BUILDING_SHIPYARD:
                 return 3;
-//224px
+
+            //224px
             case BUILDING_WELL:
             case BUILDING_ROADBLOCK:
             case BUILDING_HEDGE_GATE_DARK:
@@ -172,21 +171,21 @@ static int get_height_id(void)
             case BUILDING_ROOFED_GARDEN_WALL_GATE:
             case BUILDING_PANELLED_GARDEN_GATE:
                 return 4;
-//384px
+
+            //384px
             case BUILDING_TAVERN:
             case BUILDING_AMPHITHEATER:
             case BUILDING_ARENA:
             case BUILDING_TRIUMPHAL_ARCH:
                 return 5;
-//608px
+
+            //608px
             case BUILDING_DOCK:
             case BUILDING_LIGHTHOUSE:
             case BUILDING_CARAVANSERAI:
                 return 6;
-//416px
 
-                //return 7;
-//640px
+            //640px
             case BUILDING_GRAND_TEMPLE_CERES:
             case BUILDING_GRAND_TEMPLE_NEPTUNE:
             case BUILDING_GRAND_TEMPLE_MERCURY:
@@ -195,16 +194,19 @@ static int get_height_id(void)
             case BUILDING_HIPPODROME:
             case BUILDING_COLOSSEUM:
                 return 8;
-//736px
+
+            //736px
             case BUILDING_GRAND_TEMPLE_MARS:
                 return 10;
-//448px
+
+            //448px
             case BUILDING_FORT:
             case BUILDING_MESS_HALL:
             case BUILDING_CITY_MINT:
             case BUILDING_BARRACKS:
                 return 11;
-//272px (new 336px for description)
+
+            //272px (new 336px for description)
             case BUILDING_SHRINE_CERES:
             case BUILDING_SHRINE_NEPTUNE:
             case BUILDING_SHRINE_MERCURY:
@@ -221,11 +223,13 @@ static int get_height_id(void)
             case BUILDING_LARGE_TEMPLE_MARS:
             case BUILDING_LARGE_TEMPLE_VENUS:
                 return 12;
-//240px
+
+            //240px
             case BUILDING_LARARIUM:
             case BUILDING_ARMOURY:
                 return 13;
-//352px
+
+            //352px
             default:
                 return 0;
         }
@@ -434,8 +438,6 @@ static void init(int grid_offset)
             continue;
         }
         figure *f = figure_get(figure_id);
-        //If you want to see the names and portraits of the soldiers
-                                   //remove || figure_is_legion(f)
         if (f->type == FIGURE_FORT_STANDARD || figure_is_legion(f)) {
             context.type = BUILDING_INFO_LEGION;
             context.formation_id = f->formation_id;
@@ -460,7 +462,7 @@ static void init(int grid_offset)
         case 4: context.height_blocks = 14; break;
         case 5: context.height_blocks = 24; break;
         case 6: context.height_blocks = 38; break;
-        case 7: context.height_blocks = 26; break;
+        case 7: context.height_blocks = 26; break; //416px
         case 8: context.height_blocks = 40; break;
         case 10: context.height_blocks = 46; break;
         case 11: context.height_blocks = 28; break;
