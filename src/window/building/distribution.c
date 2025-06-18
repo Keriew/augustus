@@ -1648,10 +1648,10 @@ void window_building_draw_caravanserai(building_info_context *c)
             window_building_draw_description_at(c, 100, 69, 25);
         } else if (building_monument_has_labour_problems(b)) {
             text_draw_multiline(translation_for(TR_BUILDING_CARAVANSERAI_NEEDS_WORKERS),
-                c->x_offset + 32, c->y_offset + 80 + y_offset, 15 * c->width_blocks, 0, FONT_NORMAL_BLACK, 0);
+                c->x_offset + 32, c->y_offset + 80 + y_offset, BLOCK_SIZE * (c->width_blocks - 4), 0, FONT_NORMAL_BLACK, 0);
         } else if (!building_caravanserai_enough_foods(b) && food_types >= 0){
                 text_draw_multiline(translation_for(TR_BUILDING_CARAVANSERAI_FOOD_SHORTAGE),
-                c->x_offset + 32, c->y_offset + 80 + y_offset, 15 * c->width_blocks, 0, FONT_NORMAL_BLACK, 0);
+                c->x_offset + 32, c->y_offset + 80 + y_offset, BLOCK_SIZE * (c->width_blocks - 4), 0, FONT_NORMAL_BLACK, 0);
         } else {
             text_draw_multiline(translation_for(TR_BUILDING_CARAVANSERAI_DESC),
                 c->x_offset + 32, c->y_offset + 80 + y_offset, BLOCK_SIZE * (c->width_blocks - 4), 0, FONT_NORMAL_BLACK, 0);
