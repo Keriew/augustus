@@ -102,7 +102,7 @@ static void populate_list(int offset)
 
 static void add_new_event(void)
 {
-    scenario_event_t *event = scenario_event_create(0, 0, 0);
+    scenario_event_t *event = scenario_event_create(0, 0, 0, EVENT_TRIGGER_MONTH_START);
     array_advance(event->condition_groups);
 
     init_list();

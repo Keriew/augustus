@@ -6,6 +6,13 @@
 #define MAX_ORIGINAL_CUSTOM_VARIABLES 100
 #define CUSTOM_VARIABLE_NAME_LENGTH 64
 
+typedef enum {
+    CUSTOM_VARIABLE_CURRENT_VERSION = 1,
+
+    CUSTOM_VARIABLE_VERSION_NONE = 0,
+    CUSTOM_VARIABLE_VERSION_INITIAL = 1,
+} custom_variable_version;
+
 unsigned int scenario_custom_variable_create(const uint8_t *name, int initial_value);
 
 void scenario_custom_variable_delete(unsigned int id);

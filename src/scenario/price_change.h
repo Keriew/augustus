@@ -5,6 +5,13 @@
 
 #define MAX_ORIGINAL_PRICE_CHANGES 20
 
+typedef enum {
+    PRICE_CHANGE_VERSION = 1,
+
+    PRICE_CHANGE_VERSION_NONE = 0,
+    PRICE_CHANGE_VERSION_INITIAL = 1,
+} price_change_version;
+
 typedef struct {
     unsigned int id;
     int year;

@@ -178,16 +178,26 @@ uint32_t buffer_load_dynamic(buffer *buf);
  * Also stored the standard info of the piece at the start of the buffer.
  * Size of the piece in bytes will be calculated as (Standard header size + (array_size * struct_size))
  * @param buf Buffer
+ * @param version Version of the piece being saved. Used for backwards compatibility when loading.
  * @param array_size Number of elements in the array. If you are saving only a single struct, then this must be 1.
  * @param element_size Size in bytes of a single entry of the array.
  */
-void buffer_init_dynamic_array(buffer *buf, uint32_t array_size, uint32_t element_size);
+void buffer_init_dynamic_array(buffer *buf, int32_t version, uint32_t array_size, uint32_t element_size);
 
 /**
- * Reads the size, version, array_size and struct_size headers from the piece buffer.
+ * Reads the array_size header from the piece buffer.
  * @param buf Buffer
  * @return Number of array items.
  */
 uint32_t buffer_load_dynamic_array(buffer *buf);
+
+/**
+ * Reads the array_size, version and element_size headers from the piece buffer.
+ * @param buf Buffer
+ * @param version Version of the piece.
+ * @param element_size Version of the piece.
+ * @return Number of array items.
+ */
+uint32_t buffer_load_dynamic_array_all_headers(buffer *buf, int32_t *version, uint32_t *element_size);
 
 #endif // CORE_BUFFER_H

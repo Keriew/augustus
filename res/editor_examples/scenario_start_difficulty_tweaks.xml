@@ -3,7 +3,7 @@
 <!-- This example document can be used for adjusting various things (money, favor, Rome wages, trade prices) at the start of the scenario based on the difficulty the player is playing on. 
     Keep in mind the money and favour changes happen over and above what the game will already adjust based on difficulty. 
     But you can also put in other changes, like trade price changes, or how much certain trade routes demand / supply for each difficulty. -->
-<events version="1">
+<events version="3">
     <!-- Very easy -->
     <event>
         <conditions>

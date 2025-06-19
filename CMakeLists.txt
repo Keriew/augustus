@@ -539,9 +539,9 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/event/parameter_data.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/action_handler.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/action_types.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/event/condition_comparison_helper.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/event/condition_handler.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/event/condition_types.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/conditions/comparison_helper.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/conditions/handler.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/conditions/types.c
 )
 set(GRAPHICS_FILES
     ${PROJECT_SOURCE_DIR}/src/graphics/arrow_button.c

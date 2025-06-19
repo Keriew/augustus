@@ -8,6 +8,13 @@
 
 #define MAX_ORIGINAL_DEMAND_CHANGES 20
 
+typedef enum {
+    DEMAND_CHANGE_CURRENT_VERSION = 1,
+
+    DEMAND_CHANGE_VERSION_NONE = 0,
+    DEMAND_CHANGE_VERSION_INITIAL = 1,
+} demand_change_version;
+
 typedef struct {
     unsigned int id;
     int year;

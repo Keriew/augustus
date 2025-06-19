@@ -416,7 +416,8 @@ static void button_start_mission(int param1, int param2)
     if (data.back_action != BUTTON_GO_BACK_NONE) {
         city_mission_reset_save_start();
     }
-    scenario_events_process_all();
+    // Process month start events, since the first day of a new scenario does not trigger them
+    scenario_events_process_by_trigger_type(EVENT_TRIGGER_MONTH_START);
 }
 
 static void show(void)

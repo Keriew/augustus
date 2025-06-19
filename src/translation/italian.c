@@ -1048,7 +1048,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_EVENT_STATE_ACTIVE, "Attivo"},
     {TR_EDITOR_SCENARIO_EVENT_STATE_PAUSED, "In pausa"},
     {TR_EDITOR_SCENARIO_EVENT_EXECUTION_COUNT, "Conteggio Esecuzioni: "},
-    {TR_EDITOR_SCENARIO_EVENT_MONTHS_UNTIL_ACTIVE, "Mesi fino a che attivo: "},
     {TR_EDITOR_SCENARIO_CONDITION, "Condizione"},
     {TR_EDITOR_SCENARIO_ACTION, "Azione"},
     {TR_EDITOR_SCENARIO_EVENTS_ADD, "Aggiungi evento"},

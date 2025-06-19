@@ -1021,7 +1021,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_EVENT_STATE_ACTIVE, "가동 중"},
     {TR_EDITOR_SCENARIO_EVENT_STATE_PAUSED, "일시정지됨"},
     {TR_EDITOR_SCENARIO_EVENT_EXECUTION_COUNT, "Execution count: "},
-    {TR_EDITOR_SCENARIO_EVENT_MONTHS_UNTIL_ACTIVE, "Months until active: "},
     {TR_EDITOR_SCENARIO_CONDITION, "Condition"},
     {TR_EDITOR_SCENARIO_ACTION, "Action"},
     {TR_EDITOR_SCENARIO_EVENTS_ADD, "Add new event"},

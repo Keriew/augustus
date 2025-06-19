@@ -1,4 +1,4 @@
-#include "condition_comparison_helper.h"
+#include "comparison_helper.h"
 
 #include "scenario/event/data.h"
 
