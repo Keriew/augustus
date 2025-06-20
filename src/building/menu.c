@@ -369,6 +369,12 @@ void building_menu_update(void)
             }
         }
     }
+    enable_cycling_temples_if_allowed(BUILDING_MENU_SMALL_TEMPLES);
+    enable_cycling_temples_if_allowed(BUILDING_MENU_LARGE_TEMPLES);
+    enable_cycling_temples_if_allowed(BUILDING_MENU_SHRINES);
+    enable_cycling_temples_if_allowed(BUILDING_MENU_TREES);
+    enable_cycling_temples_if_allowed(BUILDING_MENU_PATHS);
+    enable_cycling_temples_if_allowed(BUILDING_MENU_GARDENS);
     changed = 1;
 }
 

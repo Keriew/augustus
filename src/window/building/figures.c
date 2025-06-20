@@ -30,6 +30,7 @@
 #include "translation/translation.h"
 #include "widget/city.h"
 #include "window/city.h"
+#include "window/building/utility.h"
 
 #define CAMEL_PORTRAIT 59
 
@@ -372,6 +373,22 @@ static void draw_animal(building_info_context *c, figure *f)
     lang_text_draw(64, f->type, c->x_offset + 92, c->y_offset + 139, FONT_NORMAL_BROWN);
 }
 
+static void draw_boat(building_info_context *c, figure *f)
+{
+    image_draw(big_people_image(f->type), c->x_offset + 28, c->y_offset + 112, COLOR_MASK_NONE, SCALE_NONE);
+    lang_text_draw(65, f->name, c->x_offset + 90, c->y_offset + 108, FONT_LARGE_BROWN);
+    lang_text_draw(64, f->type, c->x_offset + 92, c->y_offset + 139, FONT_NORMAL_BROWN);
+    int text_id;
+    switch (f->action_state) {
+        case FIGURE_ACTION_191_FISHING_BOAT_GOING_TO_FISH: text_id = 3; break;
+        case FIGURE_ACTION_192_FISHING_BOAT_FISHING: text_id = 4; break;
+        case FIGURE_ACTION_194_FISHING_BOAT_AT_WHARF: text_id = 6; break;
+        case FIGURE_ACTION_195_FISHING_BOAT_RETURNING_WITH_FISH: text_id = 7; break;
+        default: text_id = 5; break;//GOING_TO_WHARF
+    }
+    lang_text_draw_multiline(102, text_id, c->x_offset + 92, c->y_offset + 155, 340, FONT_NORMAL_BROWN);
+}
+
 static void draw_cartpusher(building_info_context *c, figure *f)
 {
     if (building_get(f->building_id)->type == BUILDING_ARMOURY) {
@@ -599,7 +616,9 @@ static void draw_figure_info(building_info_context *c, int figure_id)
         draw_trader(c, f);
     } else if (type >= FIGURE_ENEMY43_SPEAR && type <= FIGURE_ENEMY53_AXE) {
         draw_enemy(c, f);
-    } else if (type == FIGURE_FISHING_BOAT || type == FIGURE_SHIPWRECK || figure_is_herd(f)) {
+    } else if (type == FIGURE_FISHING_BOAT) {
+        draw_boat(c, f);
+    } else if (type == FIGURE_SHIPWRECK || figure_is_herd(f)) {
         draw_animal(c, f);
     } else if (type == FIGURE_CART_PUSHER || type == FIGURE_WAREHOUSEMAN || type == FIGURE_DOCKER) {
         draw_cartpusher(c, f);
@@ -709,6 +728,14 @@ int window_building_handle_mouse_figure_list(const mouse *m, building_info_conte
         generic_buttons_handle_mouse(m, c->x_offset, c->y_offset, depot_figure_buttons, 1, &data.depot_focus_button_id);
         if (focus_id != data.depot_focus_button_id) {
             window_request_refresh();
+        }
+    }
+
+    if (c->terrain_type == TERRAIN_INFO_BRIDGE) {
+        if (c->show_special_orders) {
+            return window_building_handle_mouse_roadblock_orders(m, c);
+        } else {
+            return window_building_handle_mouse_roadblock_button(m, c);
         }
     }
     return handled;

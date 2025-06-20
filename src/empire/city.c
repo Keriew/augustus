@@ -424,7 +424,7 @@ void empire_city_open_trade(int city_id, int apply_cost)
 {
     empire_city *city = array_item(cities, city_id);
     if (apply_cost) {
-        city_finance_process_construction(city->cost_to_open);
+        city_finance_process_sundry(city->cost_to_open);
     }
     city->is_open = 1;
 }

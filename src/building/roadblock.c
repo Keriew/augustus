@@ -32,6 +32,8 @@ int building_type_is_roadblock(building_type type)
         case BUILDING_PALISADE_GATE:
         case BUILDING_GATEHOUSE:
         case BUILDING_TRIUMPHAL_ARCH:
+        case BUILDING_SHIP_BRIDGE:
+        case BUILDING_LOW_BRIDGE:
             return 1;
         default:
             return 0;

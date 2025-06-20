@@ -69,5 +69,15 @@ void window_building_draw_terrain(building_info_context *c)
                 BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_BLACK);
         }
         window_building_draw_figure_list(c);
+        // add roadblock buttons and roadblock functionality 
+        // TODO: add to stairs later
+
+        if (c->terrain_type == TERRAIN_INFO_BRIDGE) {
+            if (c->show_special_orders) {
+                window_building_draw_roadblock_orders(c);
+            } else
+                window_building_draw_roadblock_button(c);
+        }
+
     }
 }

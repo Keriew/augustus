@@ -137,7 +137,7 @@ static void missile_hit_target(figure *f, int target_id, figure_type legionary_t
     // Archer and javelin defense bonus
     if ((target->type == FIGURE_FORT_ARCHER || target->type == FIGURE_FORT_JAVELIN) &&
         (m->layout == FORMATION_SINGLE_LINE_1 || m->layout == FORMATION_SINGLE_LINE_2)) {
-        damage_inflicted -= 2;
+        damage_inflicted -= 4;
     }
     if (damage_inflicted < 0) {
         damage_inflicted = 0;

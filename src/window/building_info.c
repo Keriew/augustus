@@ -29,6 +29,7 @@
 #include "graphics/window.h"
 #include "input/input.h"
 #include "map/aqueduct.h"
+#include "map/bridge.h"
 #include "map/building.h"
 #include "map/figure.h"
 #include "map/grid.h"
@@ -48,6 +49,8 @@
 #include "window/building/military.h"
 #include "window/building/terrain.h"
 #include "window/building/utility.h"
+
+
 
 #define OFFSET(x,y) (x + GRID_SIZE * y)
 
@@ -178,9 +181,12 @@ static int get_height_id(void)
             case BUILDING_AMPHITHEATER:
             case BUILDING_ARENA:
             case BUILDING_TRIUMPHAL_ARCH:
+            case BUILDING_SHIP_BRIDGE:
+            case BUILDING_LOW_BRIDGE:
                 return 5;
 
             //608px
+
             case BUILDING_DOCK:
             case BUILDING_LIGHTHOUSE:
             case BUILDING_CARAVANSERAI:
@@ -289,7 +295,7 @@ static void init(int grid_offset)
     city_resource_determine_available(1);
     context.type = BUILDING_INFO_TERRAIN;
     context.figure.drawn = 0;
-    if (!context.building_id && map_sprite_bridge_at(grid_offset) > 0) {
+    if (map_is_bridge(grid_offset)) {
         if (map_terrain_is(grid_offset, TERRAIN_WATER)) {
             context.terrain_type = TERRAIN_INFO_BRIDGE;
         } else {
@@ -878,6 +884,12 @@ static void draw_foreground(void)
         }
     } else if (context.type == BUILDING_INFO_LEGION) {
         window_building_draw_legion_info_foreground(&context);
+    } else if (context.terrain_type == TERRAIN_INFO_BRIDGE) {
+        if (context.show_special_orders) {
+            window_building_draw_roadblock_orders_foreground(&context);
+        } else {
+            window_building_draw_roadblock_button(&context);
+        }
     }
 
     // general buttons

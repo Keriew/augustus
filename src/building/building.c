@@ -25,6 +25,7 @@
 #include "game/save_version.h"
 #include "game/undo.h"
 #include "map/building_tiles.h"
+#include "map/bridge.h"
 #include "map/desirability.h"
 #include "map/elevation.h"
 #include "map/grid.h"
@@ -32,6 +33,8 @@
 #include "map/routing_terrain.h"
 #include "map/terrain.h"
 #include "map/tiles.h"
+
+
 
 #define BUILDING_ARRAY_SIZE_STEP 2000
 
@@ -236,6 +239,9 @@ building *building_create(building_type type, int x, int y)
         b->type != BUILDING_PALISADE_GATE && config_get(CONFIG_GP_CH_GATES_DEFAULT_TO_PASS_ALL_WALKERS)) {
         b->data.roadblock.exceptions = ROADBLOCK_PERMISSION_ALL;
     }
+    if (building_type_is_bridge(b->type)) { //bridges always allow everyone by default
+        b->data.roadblock.exceptions = ROADBLOCK_PERMISSION_ALL;
+    }
 
     b->x = x;
     b->y = y;
@@ -310,7 +316,8 @@ void building_update_state(void)
     int road_recalc = 0;
     int aqueduct_recalc = 0;
     building *b;
-    array_foreach(data.buildings, b) {
+    array_foreach(data.buildings, b)
+    {
         if (b->state == BUILDING_STATE_CREATED) {
             b->state = BUILDING_STATE_IN_USE;
         }
@@ -318,7 +325,7 @@ void building_update_state(void)
             continue;
         }
         if (b->state == BUILDING_STATE_UNDO || b->state == BUILDING_STATE_DELETED_BY_PLAYER) {
-            if (b->type == BUILDING_TOWER || b->type == BUILDING_GATEHOUSE) {
+            if (b->type == BUILDING_TOWER || b->type == BUILDING_GATEHOUSE || b->type == BUILDING_SHIP_BRIDGE || b->type == BUILDING_LOW_BRIDGE) {
                 wall_recalc = 1;
                 road_recalc = 1;
             } else if (b->type == BUILDING_RESERVOIR) {
@@ -330,8 +337,9 @@ void building_update_state(void)
                 road_recalc = 1;
             }
             map_building_tiles_remove(b->id, b->x, b->y);
-            if (building_type_is_roadblock(b->type) && b->size == 1) {
+            if (building_type_is_roadblock(b->type) && b->size == 1 && !building_type_is_bridge(b->type)) {
                 // Leave the road behind the deleted roadblock
+                // except for bridges - they are coded as size 1 too
                 map_terrain_add(b->grid_offset, TERRAIN_ROAD);
                 road_recalc = 1;
             }
@@ -369,7 +377,8 @@ void building_update_state(void)
 void building_update_desirability(void)
 {
     building *b;
-    array_foreach(data.buildings, b) {
+    array_foreach(data.buildings, b)
+    {
         if (b->state != BUILDING_STATE_IN_USE) {
             continue;
         }
@@ -540,9 +549,9 @@ int building_get_levy(const building *b)
     // Pantheon base bonus
     if (building_monument_working(BUILDING_PANTHEON) &&
         ((b->type >= BUILDING_SMALL_TEMPLE_CERES && b->type <= BUILDING_LARGE_TEMPLE_VENUS) ||
-        (b->type >= BUILDING_GRAND_TEMPLE_CERES && b->type <= BUILDING_GRAND_TEMPLE_VENUS) ||
-        b->type == BUILDING_ORACLE || b->type == BUILDING_NYMPHAEUM || b->type == BUILDING_SMALL_MAUSOLEUM ||
-        b->type == BUILDING_LARGE_MAUSOLEUM)) {
+            (b->type >= BUILDING_GRAND_TEMPLE_CERES && b->type <= BUILDING_GRAND_TEMPLE_VENUS) ||
+            b->type == BUILDING_ORACLE || b->type == BUILDING_NYMPHAEUM || b->type == BUILDING_SMALL_MAUSOLEUM ||
+            b->type == BUILDING_LARGE_MAUSOLEUM)) {
         levy = (levy / 4) * 3;
     }
 
@@ -615,7 +624,8 @@ void building_clear_all(void)
 void building_make_immune_cheat(void)
 {
     building *b;
-    array_foreach(data.buildings, b) {
+    array_foreach(data.buildings, b)
+    {
         b->fire_proof = 1;
     }
 }
@@ -633,7 +643,8 @@ void building_save_state(buffer *buf, buffer *highest_id, buffer *highest_id_eve
     buffer_init(buf, buf_data, buf_size);
     buffer_write_i32(buf, BUILDING_STATE_CURRENT_BUFFER_SIZE);
     building *b;
-    array_foreach(data.buildings, b) {
+    array_foreach(data.buildings, b)
+    {
         building_state_save_to_buffer(buf, b);
     }
     buffer_write_i32(highest_id, data.buildings.size);

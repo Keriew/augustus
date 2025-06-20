@@ -184,7 +184,8 @@ void city_finance_calculate_totals(void)
     this_year->income.total =
         this_year->income.donated +
         this_year->income.taxes +
-        this_year->income.exports;
+        this_year->income.exports +
+        city_data.finance.misc_this_year;
 
     this_year->expenses.total =
         this_year->expenses.sundries +
@@ -477,7 +478,9 @@ static void pay_tribute(void)
     int income =
         last_year->income.donated +
         last_year->income.taxes +
-        last_year->income.exports;
+        last_year->income.exports +
+        city_data.finance.misc_last_year;
+
     int expenses =
         last_year->expenses.sundries +
         last_year->expenses.salary +

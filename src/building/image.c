@@ -81,19 +81,19 @@ int building_image_get(const building *b)
         case BUILDING_HOUSE_MEDIUM_PALACE:
         case BUILDING_HOUSE_LARGE_PALACE:
         case BUILDING_HOUSE_LUXURY_PALACE:
-            {
-                int image_id = image_group(HOUSE_IMAGE[b->subtype.house_level].group);
-                if (b->house_is_merged) {
-                    image_id += 4;
-                    if (HOUSE_IMAGE[b->subtype.house_level].offset) {
-                        image_id += 1;
-                    }
-                } else {
-                    image_id += HOUSE_IMAGE[b->subtype.house_level].offset;
-                    image_id += map_random_get(b->grid_offset) & (HOUSE_IMAGE[b->subtype.house_level].num_types - 1);
+        {
+            int image_id = image_group(HOUSE_IMAGE[b->subtype.house_level].group);
+            if (b->house_is_merged) {
+                image_id += 4;
+                if (HOUSE_IMAGE[b->subtype.house_level].offset) {
+                    image_id += 1;
                 }
-                return image_id;
+            } else {
+                image_id += HOUSE_IMAGE[b->subtype.house_level].offset;
+                image_id += map_random_get(b->grid_offset) & (HOUSE_IMAGE[b->subtype.house_level].num_types - 1);
             }
+            return image_id;
+        }
         case BUILDING_AMPHITHEATER:
             if (!b->upgrade_level) {
                 return assets_get_image_id("Health_Culture", "Amphitheatre ON");
@@ -158,23 +158,23 @@ int building_image_get(const building *b)
         case BUILDING_LARGE_STATUE:
             return assets_get_image_id("Aesthetics", "l statue anim");
         case BUILDING_SMALL_POND:
-            {
-                int offset = b->has_water_access;
-                if (scenario_property_climate() == CLIMATE_DESERT) {
-                    return assets_get_image_id("Aesthetics", "s pond south off") + offset;
-                } else {
-                    return assets_get_image_id("Aesthetics", "s pond north off") + offset;
-                }
+        {
+            int offset = b->has_water_access;
+            if (scenario_property_climate() == CLIMATE_DESERT) {
+                return assets_get_image_id("Aesthetics", "s pond south off") + offset;
+            } else {
+                return assets_get_image_id("Aesthetics", "s pond north off") + offset;
             }
+        }
         case BUILDING_LARGE_POND:
-            {
-                int offset = b->has_water_access;
-                if (scenario_property_climate() == CLIMATE_DESERT) {
-                    return assets_get_image_id("Aesthetics", "l pond south off") + offset;
-                } else {
-                    return assets_get_image_id("Aesthetics", "l pond north off") + offset;
-                }
+        {
+            int offset = b->has_water_access;
+            if (scenario_property_climate() == CLIMATE_DESERT) {
+                return assets_get_image_id("Aesthetics", "l pond south off") + offset;
+            } else {
+                return assets_get_image_id("Aesthetics", "l pond north off") + offset;
             }
+        }
         case BUILDING_PAVILION_BLUE:
             return building_variant_get_image_id_with_rotation(b->type, b->variant);
         case BUILDING_PAVILION_RED:
@@ -410,6 +410,9 @@ int building_image_get(const building *b)
         case BUILDING_ROADBLOCK:
         case BUILDING_DECORATIVE_COLUMN:
             return building_variant_get_image_id_with_rotation(b->type, b->variant);
+        case BUILDING_LOW_BRIDGE:
+        case BUILDING_SHIP_BRIDGE:
+            return 0; //shouldn't happen, this is just fallback
         case BUILDING_SHIPYARD:
             return image_group(GROUP_BUILDING_SHIPYARD) +
                 ((4 + b->data.industry.orientation - city_view_orientation() / 2) % 4);
@@ -430,41 +433,41 @@ int building_image_get(const building *b)
         case BUILDING_TOWER:
             return image_group(GROUP_BUILDING_TOWER);
         case BUILDING_GATEHOUSE:
-            {
-                int map_orientation = city_view_orientation();
-                int orientation_is_top_bottom = map_orientation == DIR_0_TOP || map_orientation == DIR_4_BOTTOM;
-                if (b->subtype.orientation == 1) {
-                    if (orientation_is_top_bottom) {
-                        return image_group(GROUP_BUILDING_TOWER) + 1;
-                    } else {
-                        return image_group(GROUP_BUILDING_TOWER) + 2;
-                    }
+        {
+            int map_orientation = city_view_orientation();
+            int orientation_is_top_bottom = map_orientation == DIR_0_TOP || map_orientation == DIR_4_BOTTOM;
+            if (b->subtype.orientation == 1) {
+                if (orientation_is_top_bottom) {
+                    return image_group(GROUP_BUILDING_TOWER) + 1;
                 } else {
-                    if (orientation_is_top_bottom) {
-                        return image_group(GROUP_BUILDING_TOWER) + 2;
-                    } else {
-                        return image_group(GROUP_BUILDING_TOWER) + 1;
-                    }
+                    return image_group(GROUP_BUILDING_TOWER) + 2;
+                }
+            } else {
+                if (orientation_is_top_bottom) {
+                    return image_group(GROUP_BUILDING_TOWER) + 2;
+                } else {
+                    return image_group(GROUP_BUILDING_TOWER) + 1;
                 }
             }
+        }
         case BUILDING_TRIUMPHAL_ARCH:
-            {
-                int map_orientation = city_view_orientation();
-                int orientation_is_top_bottom = map_orientation == DIR_0_TOP || map_orientation == DIR_4_BOTTOM;
-                if (b->subtype.orientation == 1) {
-                    if (orientation_is_top_bottom) {
-                        return image_group(GROUP_BUILDING_TRIUMPHAL_ARCH);
-                    } else {
-                        return image_group(GROUP_BUILDING_TRIUMPHAL_ARCH) + 2;
-                    }
+        {
+            int map_orientation = city_view_orientation();
+            int orientation_is_top_bottom = map_orientation == DIR_0_TOP || map_orientation == DIR_4_BOTTOM;
+            if (b->subtype.orientation == 1) {
+                if (orientation_is_top_bottom) {
+                    return image_group(GROUP_BUILDING_TRIUMPHAL_ARCH);
                 } else {
-                    if (orientation_is_top_bottom) {
-                        return image_group(GROUP_BUILDING_TRIUMPHAL_ARCH) + 2;
-                    } else {
-                        return image_group(GROUP_BUILDING_TRIUMPHAL_ARCH);
-                    }
+                    return image_group(GROUP_BUILDING_TRIUMPHAL_ARCH) + 2;
+                }
+            } else {
+                if (orientation_is_top_bottom) {
+                    return image_group(GROUP_BUILDING_TRIUMPHAL_ARCH) + 2;
+                } else {
+                    return image_group(GROUP_BUILDING_TRIUMPHAL_ARCH);
                 }
             }
+        }
         case BUILDING_SENATE:
             if (!b->upgrade_level) {
                 return image_group(GROUP_BUILDING_SENATE);
@@ -485,66 +488,66 @@ int building_image_get(const building *b)
             }
         }
         case BUILDING_HIPPODROME:
-            {
-                int phase = b->monument.phase;
-                if (!phase) {
-                    phase = MONUMENT_FINISHED;
-                }
-                int phase_offset = 6;
-                int orientation = building_rotation_get_building_orientation(b->subtype.orientation);
-                int image_id;
-
-                if (phase == MONUMENT_FINISHED) {
-                    if (orientation == DIR_0_TOP || orientation == DIR_4_BOTTOM) {
-                        image_id = image_group(GROUP_BUILDING_HIPPODROME_2);
-                    } else {
-                        image_id = image_group(GROUP_BUILDING_HIPPODROME_1);
-                    }
-                } else {
-                    if (orientation == DIR_0_TOP || orientation == DIR_4_BOTTOM) {
-                        image_id = assets_get_image_id("Monuments", "Circus NWSE 01") +
-                            ((phase - 1) * phase_offset);
-                    } else {
-                        image_id = assets_get_image_id("Monuments", "Circus NESW 01") +
-                            ((phase - 1) * phase_offset);
-                    }
-                }
-                int building_part;
-                if (b->prev_part_building_id == 0) {
-                    building_part = 0; // part 1, no previous building
-                } else if (b->next_part_building_id == 0) {
-                    building_part = 2; // part 3, no next building
-                } else {
-                    building_part = 1; // part 2
-                }
-
-                if (orientation == DIR_0_TOP) {
-                    switch (building_part) {
-                        case 0: image_id += 0; break; // part 1
-                        case 1: image_id += 2; break; // part 2
-                        case 2: image_id += 4; break; // part 3, same for switch cases below
-                    }
-                } else if (orientation == DIR_4_BOTTOM) {
-                    switch (building_part) {
-                        case 0: image_id += 4; break;
-                        case 1: image_id += 2; break;
-                        case 2: image_id += 0; break;
-                    }
-                } else if (orientation == DIR_6_LEFT) {
-                    switch (building_part) {
-                        case 0: image_id += 0; break;
-                        case 1: image_id += 2; break;
-                        case 2: image_id += 4; break;
-                    }
-                } else { // DIR_2_RIGHT
-                    switch (building_part) {
-                        case 0: image_id += 4; break;
-                        case 1: image_id += 2; break;
-                        case 2: image_id += 0; break;
-                    }
-                }
-                return image_id;
+        {
+            int phase = b->monument.phase;
+            if (!phase) {
+                phase = MONUMENT_FINISHED;
             }
+            int phase_offset = 6;
+            int orientation = building_rotation_get_building_orientation(b->subtype.orientation);
+            int image_id;
+
+            if (phase == MONUMENT_FINISHED) {
+                if (orientation == DIR_0_TOP || orientation == DIR_4_BOTTOM) {
+                    image_id = image_group(GROUP_BUILDING_HIPPODROME_2);
+                } else {
+                    image_id = image_group(GROUP_BUILDING_HIPPODROME_1);
+                }
+            } else {
+                if (orientation == DIR_0_TOP || orientation == DIR_4_BOTTOM) {
+                    image_id = assets_get_image_id("Monuments", "Circus NWSE 01") +
+                        ((phase - 1) * phase_offset);
+                } else {
+                    image_id = assets_get_image_id("Monuments", "Circus NESW 01") +
+                        ((phase - 1) * phase_offset);
+                }
+            }
+            int building_part;
+            if (b->prev_part_building_id == 0) {
+                building_part = 0; // part 1, no previous building
+            } else if (b->next_part_building_id == 0) {
+                building_part = 2; // part 3, no next building
+            } else {
+                building_part = 1; // part 2
+            }
+
+            if (orientation == DIR_0_TOP) {
+                switch (building_part) {
+                    case 0: image_id += 0; break; // part 1
+                    case 1: image_id += 2; break; // part 2
+                    case 2: image_id += 4; break; // part 3, same for switch cases below
+                }
+            } else if (orientation == DIR_4_BOTTOM) {
+                switch (building_part) {
+                    case 0: image_id += 4; break;
+                    case 1: image_id += 2; break;
+                    case 2: image_id += 0; break;
+                }
+            } else if (orientation == DIR_6_LEFT) {
+                switch (building_part) {
+                    case 0: image_id += 0; break;
+                    case 1: image_id += 2; break;
+                    case 2: image_id += 4; break;
+                }
+            } else { // DIR_2_RIGHT
+                switch (building_part) {
+                    case 0: image_id += 4; break;
+                    case 1: image_id += 2; break;
+                    case 2: image_id += 0; break;
+                }
+            }
+            return image_id;
+        }
         case BUILDING_FORT:
         case BUILDING_FORT_JAVELIN:
         case BUILDING_FORT_LEGIONARIES:
@@ -777,11 +780,12 @@ int building_image_get(const building *b)
                     image_id = assets_get_image_id("Military", "Watchtower C ON");
                     break;
             }
-            
+
             int offset = building_variant_get_offset_with_rotation(b->type, b->variant);
             return image_id + offset;
         }
-        case BUILDING_SMALL_MAUSOLEUM: {
+        case BUILDING_SMALL_MAUSOLEUM:
+        {
             int orientation = building_rotation_get_building_orientation(b->subtype.orientation) / 2;
             switch (b->monument.phase) {
                 case MONUMENT_START:
@@ -790,9 +794,10 @@ int building_image_get(const building *b)
                     return assets_get_image_id("Monuments", "Mausoleum_Small_Construction_02") + orientation % 2;
                 default:
                     return assets_get_image_id("Monuments", "Mausoleum S") + orientation % 2;
-                }
             }
-        case BUILDING_LARGE_MAUSOLEUM: {
+        }
+        case BUILDING_LARGE_MAUSOLEUM:
+        {
             int offset = building_variant_get_offset_with_rotation(b->type, b->variant);
             switch (b->monument.phase) {
                 case MONUMENT_START:
@@ -872,47 +877,47 @@ int building_image_get(const building *b)
         case BUILDING_PINE_PATH:
         case BUILDING_PLUM_PATH:
         case BUILDING_GARDEN_PATH:
-            {
-                int image_offset = building_connectable_get_garden_path_offset(b->grid_offset,
-                    CONTEXT_GARDEN_PATH_INTERSECTION);
-                int image_group = assets_get_image_id("Aesthetics", "Garden Path 01");
-                // If path isn't an intersection, it's a straight path instead
-                if (image_offset == -1) {
-                    image_offset = building_connectable_get_garden_path_offset(b->grid_offset,
-                        b->type == BUILDING_GARDEN_PATH ? CONTEXT_GARDEN_TREELESS_PATH : CONTEXT_GARDEN_TREE_PATH);
+        {
+            int image_offset = building_connectable_get_garden_path_offset(b->grid_offset,
+                CONTEXT_GARDEN_PATH_INTERSECTION);
+            int image_group = assets_get_image_id("Aesthetics", "Garden Path 01");
+            // If path isn't an intersection, it's a straight path instead
+            if (image_offset == -1) {
+                image_offset = building_connectable_get_garden_path_offset(b->grid_offset,
+                    b->type == BUILDING_GARDEN_PATH ? CONTEXT_GARDEN_TREELESS_PATH : CONTEXT_GARDEN_TREE_PATH);
 
-                    switch (b->type) {
-                        case BUILDING_DATE_PATH:
-                            image_group = assets_get_image_id("Aesthetics", "path orn date");
-                            break;
-                        case BUILDING_ELM_PATH:
-                            image_group = assets_get_image_id("Aesthetics", "path orn elm");
-                            break;
-                        case BUILDING_FIG_PATH:
-                            image_group = assets_get_image_id("Aesthetics", "path orn fig");
-                            break;
-                        case BUILDING_FIR_PATH:
-                            image_group = assets_get_image_id("Aesthetics", "path orn fir");
-                            break;
-                        case BUILDING_OAK_PATH:
-                            image_group = assets_get_image_id("Aesthetics", "path orn oak");
-                            break;
-                        case BUILDING_PALM_PATH:
-                            image_group = assets_get_image_id("Aesthetics", "path orn palm");
-                            break;
-                        case BUILDING_PINE_PATH:
-                            image_group = assets_get_image_id("Aesthetics", "path orn pine");
-                            break;
-                        case BUILDING_PLUM_PATH:
-                            image_group = assets_get_image_id("Aesthetics", "path orn plum");
-                            break;
-                        default:
-                            image_group = assets_get_image_id("Aesthetics", "garden path r");
-                            break;
-                    }
+                switch (b->type) {
+                    case BUILDING_DATE_PATH:
+                        image_group = assets_get_image_id("Aesthetics", "path orn date");
+                        break;
+                    case BUILDING_ELM_PATH:
+                        image_group = assets_get_image_id("Aesthetics", "path orn elm");
+                        break;
+                    case BUILDING_FIG_PATH:
+                        image_group = assets_get_image_id("Aesthetics", "path orn fig");
+                        break;
+                    case BUILDING_FIR_PATH:
+                        image_group = assets_get_image_id("Aesthetics", "path orn fir");
+                        break;
+                    case BUILDING_OAK_PATH:
+                        image_group = assets_get_image_id("Aesthetics", "path orn oak");
+                        break;
+                    case BUILDING_PALM_PATH:
+                        image_group = assets_get_image_id("Aesthetics", "path orn palm");
+                        break;
+                    case BUILDING_PINE_PATH:
+                        image_group = assets_get_image_id("Aesthetics", "path orn pine");
+                        break;
+                    case BUILDING_PLUM_PATH:
+                        image_group = assets_get_image_id("Aesthetics", "path orn plum");
+                        break;
+                    default:
+                        image_group = assets_get_image_id("Aesthetics", "garden path r");
+                        break;
                 }
-                return image_group + image_offset;
             }
+            return image_group + image_offset;
+        }
         case BUILDING_BURNING_RUIN:
             if (b->data.rubble.was_tent) {
                 return image_group(GROUP_TERRAIN_RUBBLE_TENT);

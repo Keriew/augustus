@@ -490,7 +490,7 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
         version_data->features.custom_messages_and_media = 0;
     }
 
-    version_data->features.custom_empire_map_image = version > SAVE_GAME_LAST_NO_CUSTOM_EMPIRE_MAP_IMAGE; 
+    version_data->features.custom_empire_map_image = version > SAVE_GAME_LAST_NO_CUSTOM_EMPIRE_MAP_IMAGE;
     version_data->features.scenario_version = version > SAVE_GAME_LAST_NO_SCENARIO_VERSION;
     version_data->features.city_faction_info = version <= SAVE_GAME_LAST_UNKNOWN_UNUSED_CITY_DATA;
     version_data->features.resource_version = version > SAVE_GAME_LAST_STATIC_RESOURCES;
@@ -867,6 +867,10 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     } else {
         figure_visited_buildings_load_state(state->visited_buildings);
     }
+    if (version <= SAVE_GAME_LAST_SPRITE_BRIDGES) {
+        map_terrain_migrate_old_bridges();
+    }
+
 }
 
 static void savegame_save_to_state(savegame_state *state)
