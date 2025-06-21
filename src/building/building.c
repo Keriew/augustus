@@ -243,6 +243,7 @@ building *building_create(building_type type, int x, int y)
         b->data.roadblock.exceptions = ROADBLOCK_PERMISSION_ALL;
     }
 
+
     b->x = x;
     b->y = y;
     b->grid_offset = map_grid_offset(x, y);
