@@ -572,8 +572,9 @@ static void cycle_legion(void)
     for (int pass = 0; pass < 2 && next_legion_id == 0; pass++) {
         for (int i = 1; i < formation_count(); i++) {
             const formation *m = formation_get(i);
-            if (!m || m->in_use != 1 || !m->is_legion || m->is_herd)
+            if (!m || m->in_use != 1 || !m->is_legion || m->is_herd) {
                 continue;
+            }
             if ((pass == 0 && i > current_legion_id) || (pass == 1)) {
                 next_legion_id = i;
                 break;
