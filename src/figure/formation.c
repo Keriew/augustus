@@ -18,6 +18,9 @@
 #include "map/grid.h"
 #include "sound/effect.h"
 
+#include <stdio.h>
+
+
 #define FORMATION_ARRAY_SIZE_STEP 50
 #define ORIGINAL_BUFFER_SIZE_PER_FORMATION 128
 #define CURRENT_BUFFER_SIZE_PER_FORMATION 128
@@ -79,8 +82,8 @@ formation *formation_create_legion(int building_id, figure_type type)
         m->legion_id = 9;
     }
     building *fort_ground = building_get(building_get(building_id)->next_part_building_id);
-    m->x = m->standard_x = m->x_home = fort_ground->x;
-    m->y = m->standard_y = m->y_home = fort_ground->y;
+    m->x = m->standard_x = m->x_home = fort_ground->x; // home x = destination x = current x position of the legion = x of the fort
+    m->y = m->standard_y = m->y_home = fort_ground->y;// home y = destination y = current y position of the legion = y of the fort
     m->target_formation_id = 0;
 
     data.num_legions++;
@@ -186,10 +189,103 @@ void formation_record_fight(formation *m)
     m->recent_fight = 6;
 }
 
+int formation_is_halted(const formation *m)
+{
+    return m->is_halted;
+}
+
+int formation_is_moving(const formation *m)
+{
+    return m->is_moving;
+}
+
+int formation_is_charging(const formation *m)
+{
+    return m->is_charging;
+}
+
+int formation_update_halted_state(formation *m)
+{
+    int all_figures_idle = 1;
+
+    for (int i = 0; i < m->num_figures; i++) {
+        int figure_id = m->figures[i];
+        if (figure_id) {
+            const figure *f = figure_get(figure_id);
+            if (f->direction != DIR_8_NONE) {
+                all_figures_idle = 0;
+                break;
+            }
+        }
+    }
+
+    m->is_halted = all_figures_idle;
+    return all_figures_idle;
+}
+
+
+int formation_update_movement_state(formation *m)
+{
+    int is_moving_now = (m->standard_x != m->x_home || m->standard_y != m->y_home);
+    int current_offset = map_grid_offset(m->x_home, m->y_home);
+
+    if (is_moving_now && !m->is_moving) {
+        // Just started moving
+        m->is_moving = 1;
+        m->started_moving_from_grid_offset = current_offset;
+        m->traveled_tiles = 0;
+        return 1;
+    }
+
+    if (is_moving_now && m->is_moving) {
+        // Still moving
+        m->traveled_tiles = map_grid_chess_distance(m->started_moving_from_grid_offset, current_offset);
+        return 1;
+    }
+
+    if (!is_moving_now && m->is_moving) {
+        // Just stopped moving
+        m->traveled_tiles = map_grid_chess_distance(m->started_moving_from_grid_offset, current_offset);
+        m->halted_at_grid_offset = current_offset;
+        m->is_moving = 0;
+        return 0;
+    }
+
+    // Not moving
+    return 0;
+}
+
+int formation_update_charge_state(formation *m)
+{
+    int is_charging = 0;
+
+    if (m->is_moving) {
+        is_charging = (m->traveled_tiles >= 5);
+    } else if (m->is_halted && m->traveled_tiles >= 5) {
+        if (m->halted_for_months >= 2) {
+            is_charging = (m->recent_fight >= 4);
+        } else {
+            is_charging = 1;
+        }
+    }
+
+    m->is_charging = is_charging;
+    return is_charging;
+}
+
+void formation_update_movement_all_states(formation *m)
+{
+    formation_update_halted_state(m);
+    formation_update_movement_state(m);
+    formation_update_charge_state(m);
+}
+
+
 int formation_grid_offset_for_invasion(int invasion_sequence)
 {
     formation *m;
-    array_foreach(formations, m) {
+    array_foreach(formations, m)
+    {
         if (m->in_use == 1 && !m->is_legion && !m->is_herd && m->invasion_sequence == invasion_sequence) {
             if (m->x_home > 0 || m->y_home > 0) {
                 return map_grid_offset(m->x_home, m->y_home);
@@ -204,7 +300,8 @@ int formation_grid_offset_for_invasion(int invasion_sequence)
 void formation_caesar_pause(void)
 {
     formation *m;
-    array_foreach(formations, m) {
+    array_foreach(formations, m)
+    {
         if (m->in_use == 1 && m->figure_type == FIGURE_ENEMY_CAESAR_LEGIONARY) {
             m->wait_ticks = 20;
         }
@@ -214,7 +311,8 @@ void formation_caesar_pause(void)
 void formation_caesar_retreat(void)
 {
     formation *m;
-    array_foreach(formations, m) {
+    array_foreach(formations, m)
+    {
         if (m->in_use == 1 && m->figure_type == FIGURE_ENEMY_CAESAR_LEGIONARY) {
             m->months_low_morale = 1;
         }
@@ -260,7 +358,8 @@ int formation_get_num_legions(void)
 {
     int total = 0;
     formation *m;
-    array_foreach(formations, m) {
+    array_foreach(formations, m)
+    {
         if (m->in_use && m->is_legion) {
             total++;
         }
@@ -282,7 +381,8 @@ int formation_for_legion(int legion_index)
 {
     int index = 1;
     formation *m;
-    array_foreach(formations, m) {
+    array_foreach(formations, m)
+    {
         if (m->in_use && m->is_legion) {
             if (index++ == legion_index) {
                 return m->id;
@@ -299,7 +399,7 @@ void formation_change_morale(formation *m, int amount)
         max_morale = m->has_military_training ? 90 : 80;
     } else if (m->figure_type == FIGURE_ENEMY_CAESAR_LEGIONARY) {
         max_morale = 100;
-    } else if (m->figure_type == FIGURE_FORT_JAVELIN || m->figure_type == FIGURE_FORT_MOUNTED 
+    } else if (m->figure_type == FIGURE_FORT_JAVELIN || m->figure_type == FIGURE_FORT_MOUNTED
         || m->figure_type == FIGURE_FORT_INFANTRY || m->figure_type == FIGURE_FORT_ARCHER) {
         max_morale = m->has_military_training ? 70 : 60;
     } else {
@@ -362,7 +462,8 @@ static void change_all_morale(int legion, int enemy)
 void formation_update_monthly_morale_deployed(void)
 {
     formation *f;
-    array_foreach(formations, f) {
+    array_foreach(formations, f)
+    {
         if (f->in_use != 1 || f->is_herd) {
             continue;
         }
@@ -475,6 +576,10 @@ void formation_decrease_monthly_counters(formation *m)
     if (m->recent_fight) {
         m->recent_fight--;
     }
+    // this one increases
+    if (m->is_halted) {
+        m->halted_for_months++;
+    }
 }
 
 void formation_clear_monthly_counters(formation *m)
@@ -585,20 +690,15 @@ void formation_calculate_figures(void)
             if (m->is_legion) {
                 if (m->num_figures > 0) {
                     int was_halted = m->is_halted;
-                    m->is_halted = 1;
-                    for (int fig = 0; fig < m->num_figures; fig++) {
-                        int figure_id = m->figures[fig];
-                        if (figure_id && figure_get(figure_id)->direction != DIR_8_NONE) {
-                            m->is_halted = 0;
-                        }
+                    int was_charging = m->is_charging;
+                    formation_update_movement_all_states(m);
+                    if (!was_charging && m->is_charging) {
+                        sound_effect_play(SOUND_EFFECT_HORSE_MOVING); //CHAAARGE!
                     }
-                    int total_strength = m->num_figures;
-                    if (m->figure_type == FIGURE_FORT_LEGIONARY) {
-                        total_strength += m->num_figures / 2;
-                    }
-                    enemy_army_totals_add_legion_formation(total_strength);
-                    if (m->figure_type == FIGURE_FORT_LEGIONARY) {
-                        if (!was_halted && m->is_halted) {
+                    if (!was_halted && m->is_halted) { // formation stopped
+                        m->halted_at_grid_offset = map_grid_offset(m->x_home, m->y_home);
+                        m->started_moving_from_grid_offset = 0;
+                        if (m->figure_type == FIGURE_FORT_LEGIONARY) {
                             sound_effect_play(SOUND_EFFECT_FORMATION_SHIELD);
                         }
                     }
@@ -660,7 +760,8 @@ static void update_direction(int formation_id, int first_figure_direction)
 static void update_directions(void)
 {
     formation *m;
-    array_foreach(formations, m) {
+    array_foreach(formations, m)
+    {
         if (m->in_use && !m->is_herd) {
             update_direction(m->id, figure_get(m->figures[0])->direction);
         }
@@ -670,7 +771,8 @@ static void update_directions(void)
 static void set_legion_max_figures(void)
 {
     formation *m;
-    array_foreach(formations, m) {
+    array_foreach(formations, m)
+    {
         if (m->in_use && m->is_legion) {
             m->max_figures = MAX_FORMATION_FIGURES;
         }

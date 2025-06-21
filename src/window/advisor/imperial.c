@@ -200,6 +200,7 @@ static void confirm_send_troops(int accepted, int checked)
 {
     if (accepted) {
         formation_legions_dispatch_to_distant_battle();
+        city_military_clear_empire_service_legions();
         window_empire_show();
     }
 }
@@ -221,7 +222,6 @@ void button_request(const generic_button *button)
     if (!status) {
         return;
     }
-    city_military_clear_empire_service_legions();
     switch (status) {
         case CITY_REQUEST_STATUS_NO_LEGIONS_AVAILABLE:
             window_popup_dialog_show(POPUP_DIALOG_NO_LEGIONS_AVAILABLE, confirm_nothing, 0);

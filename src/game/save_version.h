@@ -2,7 +2,7 @@
 #define GAME_SAVE_VERSION_H
 
 typedef enum {
-    SAVE_GAME_CURRENT_VERSION = 0xa0,
+    SAVE_GAME_CURRENT_VERSION = 0xa1,
 
     SAVE_GAME_LAST_ORIGINAL_LIMITS_VERSION = 0x66,
     SAVE_GAME_LAST_SMALLER_IMAGE_ID_VERSION = 0x76,
@@ -20,7 +20,7 @@ typedef enum {
     SAVE_GAME_LAST_ZIP_COMPRESSION = 0x88,
     SAVE_GAME_LAST_ENEMY_ARMIES_BUFFER_BUG = 0x89,
     SAVE_GAME_LAST_BARRACKS_TOWER_SENTRY_REQUEST = 0x8a,
-    // SAVE_GAME_LAST_WITHOUT_HIGHWAYS = 0x8b, no actual changes to how games are saved. Crudelios just wants this here
+    // SAVE_GAME_LAST_WITHOUT_HIGHWAYS = 0x8b, no actual changes to how games are saved. Crudelios just wants this here //shoutout to Crudelios.
     SAVE_GAME_LAST_UNVERSIONED_SCENARIOS = 0x8c,
     SAVE_GAME_LAST_EMPIRE_RESOURCES_ALWAYS_WRITE = 0x8d,
     // the difference between this version and UNVERSIONED_SCENARIOS above is this one actually saves the scenario version
@@ -42,7 +42,8 @@ typedef enum {
     SAVE_GAME_LAST_NO_CUSTOM_EMPIRE_MAP_IMAGE = 0x9c,
     SAVE_GAME_LAST_NO_CUSTOM_CAMPAIGNS = 0x9d,
     SAVE_GAME_LAST_STATIC_SCENARIO_ORIGINAL_DATA = 0x9e,
-    SAVE_GAME_LAST_NO_LATRINES = 0x9f
+    SAVE_GAME_LAST_NO_LATRINES = 0x9f,
+    SAVE_GAME_LAST_SPRITE_BRIDGES = 0xa0
 } savegame_version_t;
 
 typedef enum {

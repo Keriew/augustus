@@ -770,4 +770,37 @@
 	<image src="Smoke_Anim_04"/>
 	<image src="Smoke_Anim_05"/>
 	<image src="Smoke_Anim_06"/-->
+	<!-- Note: Papyrus Maker OFF - No Climate Variants -->
+	<image id="Papyrus_Maker_OFF" src="Papyrus_Maker_OFF" width="118" height="92" isometric="true"/>
+	<!-- Note: Papyrus Maker ON Animation Frames - DO NOT USE -->
+	<image id="Papyrus_Maker_ON_01" width="118" height="92" isometric="true">
+		<layer src="Papyrus_Maker_ON_01" x="7" y="28"/>
+	</image>
+	<image id="Papyrus_Maker_ON_02" width="118" height="92" isometric="true">
+		<layer group="this" image="Papyrus_Maker_ON_01"/>
+		<layer src="Papyrus_Maker_ON_02" x="21" y="56"/>
+	</image>
+	<image id="Papyrus_Maker_ON_03" width="118" height="92" isometric="true">
+		<layer group="this" image="Papyrus_Maker_ON_02"/>
+		<layer src="Papyrus_Maker_ON_03" x="21" y="56"/>
+	</image>
+	<image id="Papyrus_Maker_ON_04" width="118" height="92" isometric="true">
+		<layer group="this" image="Papyrus_Maker_ON_03"/>
+		<layer src="Papyrus_Maker_ON_04" x="21" y="53"/>
+	</image>
+	<image id="Papyrus_Maker_ON_05" width="118" height="92" isometric="true">
+		<layer group="this" image="Papyrus_Maker_ON_04"/>
+		<layer src="Papyrus_Maker_ON_05" x="21" y="51"/>
+	</image>
+	<!-- Note: Papyrus Maker ON - No Climate Variants -->
+	<image id="Papyrus_Maker_ON" width="118" height="92" isometric="true">
+		<layer group="this" image="Papyrus_Maker_OFF"/>
+		<animation speed="16" x="0" y="0" reversible="true">
+			<frame group="this" image="Papyrus_Maker_ON_01"/>
+			<frame group="this" image="Papyrus_Maker_ON_02"/>
+			<frame group="this" image="Papyrus_Maker_ON_03"/>
+			<frame group="this" image="Papyrus_Maker_ON_04"/>
+			<frame group="this" image="Papyrus_Maker_ON_05"/>
+		</animation>
+	</image>
 </assetlist>

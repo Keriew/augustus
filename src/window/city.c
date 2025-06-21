@@ -565,31 +565,27 @@ static int has_storage_orders(building_type type)
         (type == BUILDING_SMALL_TEMPLE_VENUS && building_monument_gt_module_is_active(VENUS_MODULE_1_DISTRIBUTE_WINE)) ||
         (type == BUILDING_LARGE_TEMPLE_VENUS && building_monument_gt_module_is_active(VENUS_MODULE_1_DISTRIBUTE_WINE));
 }
-
 static void cycle_legion(void)
 {
-    static int current_legion_id = 1;
-    if (window_is(WINDOW_CITY) || window_is(WINDOW_CITY_MILITARY)) {
-        int legion_id = current_legion_id;
-        current_legion_id = 0;
+    static int current_legion_id = 0;
+    int next_legion_id = 0;
+    for (int pass = 0; pass < 2 && next_legion_id == 0; pass++) {
         for (int i = 1; i < formation_count(); i++) {
-            legion_id++;
-            if (legion_id > MAX_LEGIONS) {
-                legion_id = 1;
+            const formation *m = formation_get(i);
+            if (!m || m->in_use != 1 || !m->is_legion || m->is_herd) {
+                continue;
             }
-            const formation *m = formation_get(legion_id);
-            if (m->in_use == 1 && !m->is_herd && m->is_legion) {
-                if (current_legion_id == 0) {
-                    current_legion_id = legion_id;
-                    break;
-                }
+            if ((pass == 0 && i > current_legion_id) || (pass == 1)) {
+                next_legion_id = i;
+                break;
             }
         }
-        if (current_legion_id > 0) {
-            const formation *m = formation_get(current_legion_id);
-            city_view_go_to_grid_offset(map_grid_offset(m->x_home, m->y_home));
-            window_city_military_show(current_legion_id);
-        }
+    }
+    if (next_legion_id > 0) {
+        current_legion_id = next_legion_id;
+        const formation *m = formation_get(current_legion_id);
+        city_view_go_to_grid_offset(map_grid_offset(m->x_home, m->y_home));
+        window_city_military_show(current_legion_id);
     }
 }
 

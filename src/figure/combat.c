@@ -89,11 +89,14 @@ static void hit_opponent(figure *f)
         attack_is_same_direction(f->attack_direction, m->direction)) {
         figure_attack += 2; // coordinated formation attack bonus
     }
+    if (m->is_charging && m->figure_type == FIGURE_FORT_MOUNTED) {
+        figure_attack += 4; // charging bonus for mounted units
+    }
 
     // defense modifiers
     if (opponent_formation->is_halted &&
             (opponent_formation->figure_type == FIGURE_FORT_LEGIONARY ||
-             opponent_formation->figure_type == FIGURE_ENEMY_CAESAR_LEGIONARY)) {
+                opponent_formation->figure_type == FIGURE_ENEMY_CAESAR_LEGIONARY)) {
         if (!attack_is_same_direction(opponent->attack_direction, opponent_formation->direction)) {
             opponent_defense -= 4; // opponent not attacking in coordinated formation
         } else if (opponent_formation->layout == FORMATION_COLUMN) {
@@ -175,7 +178,7 @@ int figure_combat_get_target_for_soldier(int x, int y, int max_distance)
     int min_distance = 10000;
     for (int i = 1; i < figure_count(); i++) {
         figure *f = figure_get(i);
-        if (figure_is_dead(f) || f->is_ghost ) {
+        if (figure_is_dead(f) || f->is_ghost) {
             // Do not allow to target dead and enemies located outside of the map
             continue;
         }
@@ -318,7 +321,7 @@ int figure_combat_get_missile_target_for_soldier(figure *shooter, int max_distan
     formation *l = formation_get(shooter->formation_id);
     for (int i = 1; i < figure_count(); i++) {
         figure *f = figure_get(i);
-        if (figure_is_dead(f) || f->is_ghost ) {
+        if (figure_is_dead(f) || f->is_ghost) {
             // Do not allow to target dead and enemies located outside of the map
             continue;
         }
@@ -414,7 +417,7 @@ static int can_attack_animal(figure_category category, figure_category opponent_
 void figure_combat_attack_figure_at(figure *f, int grid_offset)
 {
     figure_category category = figure_properties_for_type(f->type)->category;
-    if (category <= FIGURE_CATEGORY_INACTIVE || 
+    if (category <= FIGURE_CATEGORY_INACTIVE ||
         (category >= FIGURE_CATEGORY_CRIMINAL && category <= FIGURE_CATEGORY_ANIMAL) ||
         f->action_state == FIGURE_ACTION_150_ATTACK) {
         return;

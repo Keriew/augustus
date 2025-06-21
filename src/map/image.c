@@ -71,6 +71,9 @@ void map_image_update_all(void)
                 calc_percentage(b->data.industry.progress, building_industry_get_max_progress(b)));
             continue;
         }
+        if (b->type == BUILDING_SHIP_BRIDGE || b->type == BUILDING_LOW_BRIDGE){
+            continue; //bridges are drawn as a part of terrain drawing, and their image shouldnt be fetched.
+        }
         int image_id = building_image_get(b);
 
         for (int dy = 0; dy < b->size; dy++) {

@@ -179,7 +179,7 @@ uint64_t system_get_ticks(void)
 {
 #if SDL_VERSION_ATLEAST(2, 0, 18)
     if (platform_sdl_version_at_least(2, 0, 18)) {
-        return SDL_GetTicks64();        
+        return SDL_GetTicks64();
     } else {
         return SDL_GetTicks();
     }
@@ -410,7 +410,7 @@ static void teardown(void)
     platform_screen_destroy();
     SDL_Quit();
     teardown_logging();
-    
+
 #ifdef __IPHONEOS__
     // iOS apps are not allowed to self-terminate. To avoid being stuck on a blank screen here, we start the game again.
     setup(&args);
@@ -524,7 +524,7 @@ static const char *ask_for_data_dir(int again)
             return NULL;
         }
     }
-    
+
     return ios_show_c3_path_dialog(again);
 #else
     return system_show_select_folder_dialog("Please select your Caesar 3 folder", 0);

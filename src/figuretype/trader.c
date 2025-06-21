@@ -640,9 +640,6 @@ void figure_native_trader_action(figure *f)
         case FIGURE_ACTION_162_NATIVE_TRADER_CREATED:
             f->is_ghost = 1;
             f->wait_ticks++;
-            if (f->wait_ticks == 1) {
-                f->trader_id = trader_create();   //clear bought information
-            }
             if (f->wait_ticks > 10) {
                 f->wait_ticks = 0;
                 map_point tile;

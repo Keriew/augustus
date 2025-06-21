@@ -43,9 +43,10 @@ void window_building_draw_forum(building_info_context *c)
         window_building_draw_description_at(c, 72, 106, 9);
     }
 
-    inner_panel_draw(c->x_offset + 16, c->y_offset + 136, c->width_blocks - 2, 4);
-    window_building_draw_employment(c, 142);
-    window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 144);
+    inner_panel_draw(c->x_offset + 16, c->y_offset + 146, c->width_blocks - 2, 4);
+    window_building_draw_employment(c, 150);
+    window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 154);
+    window_building_draw_description_at(c, 230, 106, 1);
 }
 
 void window_building_draw_senate(building_info_context *c)
@@ -79,9 +80,10 @@ void window_building_draw_senate(building_info_context *c)
         window_building_draw_description_at(c, 72, 106, 9);
     }
 
-    inner_panel_draw(c->x_offset + 16, c->y_offset + 136, c->width_blocks - 2, 4);
-    window_building_draw_employment(c, 142);
-    window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 144);
+    inner_panel_draw(c->x_offset + 16, c->y_offset + 146, c->width_blocks - 2, 4);
+    window_building_draw_employment(c, 150);
+    window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 154);
+    window_building_draw_description_at(c, 230, 105, 1);
 }
 
 void window_building_draw_governor_home(building_info_context *c)
@@ -128,12 +130,12 @@ void window_building_draw_large_statue(building_info_context *c)
     building *b = building_get(c->building_id);
     window_building_draw_statue(c);
     if (!b->has_water_access) {
-        window_building_draw_description_at(c, 48, CUSTOM_TRANSLATION,
-            TR_WINDOW_BUILDING_GOVERNMENT_LARGE_STATUE_WATER_WARNING);
+        lang_text_draw_multiline(CUSTOM_TRANSLATION, TR_WINDOW_BUILDING_GOVERNMENT_LARGE_STATUE_WATER_WARNING,
+            c->x_offset + 32, c->y_offset + 44, BLOCK_SIZE * (c->width_blocks - 3), FONT_NORMAL_GREEN);
     }
 }
 
-void window_building_draw_triumphal_arch(building_info_context* c)
+void window_building_draw_triumphal_arch(building_info_context *c)
 {
     c->help_id = 79;
     window_building_play_sound(c, "wavs/statue.wav");
@@ -143,27 +145,27 @@ void window_building_draw_triumphal_arch(building_info_context* c)
     image_draw(assets_get_image_id("UI", "Triumphal_Arch_Banner"),
         c->x_offset + 37, c->y_offset + 125, COLOR_MASK_NONE, SCALE_NONE);
     image_draw_border(assets_get_image_id("UI", "Large_Banner_Border"),
-        c->x_offset + 32, c->y_offset + 120 , COLOR_MASK_NONE);
+        c->x_offset + 32, c->y_offset + 120, COLOR_MASK_NONE);
 }
 
-void window_building_draw_pond(building_info_context * c)
+void window_building_draw_pond(building_info_context *c)
 {
     c->help_id = 80;
     window_building_play_sound(c, "wavs/fountain.wav");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
-    
+
     text_draw_centered(translation_for(TR_BUILDING_WINDOW_POND),
-        c->x_offset, c->y_offset + 25, 16 * c->width_blocks, FONT_LARGE_BLACK, 0);
+        c->x_offset, c->y_offset + 10, 16 * c->width_blocks, FONT_LARGE_BLACK, 0);
     window_building_draw_description_at(c, 96, CUSTOM_TRANSLATION, TR_BUILDING_POND_DESC);
 }
 
-void window_building_draw_obelisk(building_info_context* c)
+void window_building_draw_obelisk(building_info_context *c)
 {
     c->help_id = 79;
     window_building_play_sound(c, "wavs/statue.wav");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
 
     text_draw_centered(translation_for(TR_BUILDING_OBELISK),
-        c->x_offset, c->y_offset + 25, 16 * c->width_blocks, FONT_LARGE_BLACK, 0);
+        c->x_offset, c->y_offset + 10, 16 * c->width_blocks, FONT_LARGE_BLACK, 0);
     window_building_draw_description_at(c, 96, CUSTOM_TRANSLATION, TR_BUILDING_OBELISK_DESC);
 }

@@ -49,6 +49,8 @@ int map_grid_add_delta(int grid_offset, int x, int y);
 
 int map_grid_direction_delta(int direction);
 
+int map_grid_chess_distance(int offset1, int offset2);
+
 void map_grid_size(int *width, int *height);
 
 int map_grid_width(void);
