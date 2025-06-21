@@ -1139,29 +1139,32 @@ static int draw_images_at_interval(int image_id, int x_draw_offset, int y_draw_o
     }
     return remaining;
 }
-
 void window_empire_draw_trade_waypoints(const empire_object *trade_route, int x_offset, int y_offset)
 {
     int is_sea = trade_route->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE;
     int sea_image_id = assets_get_image_id("UI", "SeaRouteDot");
     int land_image_id = assets_get_image_id("UI", "LandRouteDot");
 
-    // Build a list of all dot positions in the correct order.
+    // Build a list of all dot positions in the correct order (now reversed)
     int dot_count = 0;
     struct { int x, y; } dot_pos[128]; // Arbitrary upper limit
 
     const empire_object *our_city = empire_object_get_our_city();
     const empire_object *trade_city = empire_object_get_trade_city(trade_route->trade_route_id);
-    int last_x = our_city->x + 25;
-    int last_y = our_city->y + 25;
+    int last_x = trade_city->x + 25;
+    int last_y = trade_city->y + 25;
     int remaining = TRADE_DOT_SPACING;
 
-    for (int i = trade_route->id + 1; i < empire_object_count(); i++) {
+    // Traverse waypoints in reverse order
+    for (int i = empire_object_count() - 1; i > trade_route->id; i--) {
         empire_object *obj = empire_object_get(i);
-        if (obj->type != EMPIRE_OBJECT_TRADE_WAYPOINT || obj->trade_route_id != trade_route->trade_route_id) break;
-        // Calculate positions at intervals
-        int dx = obj->x - last_x, dy = obj->y - last_y;
+        if (obj->type != EMPIRE_OBJECT_TRADE_WAYPOINT || obj->trade_route_id != trade_route->trade_route_id) continue;
+
+        int dx = obj->x - last_x;
+        int dy = obj->y - last_y;
         float dist = sqrtf(dx * dx + dy * dy);
+        if (dist == 0) continue;
+
         float nx = (float) dx / dist, ny = (float) dy / dist;
         float px = last_x, py = last_y, pos = remaining;
         while (pos < dist && dot_count < 128) {
@@ -1174,16 +1177,20 @@ void window_empire_draw_trade_waypoints(const empire_object *trade_route, int x_
         last_x = obj->x;
         last_y = obj->y;
     }
-    // Final leg to trade city
-    int dx = (trade_city->x + 25) - last_x, dy = (trade_city->y + 25) - last_y;
+
+    // Final leg to our city
+    int dx = (our_city->x + 25) - last_x;
+    int dy = (our_city->y + 25) - last_y;
     float dist = sqrtf(dx * dx + dy * dy);
-    float nx = (float) dx / dist, ny = (float) dy / dist;
-    float px = last_x, py = last_y, pos = remaining;
-    while (pos < dist && dot_count < 128) {
-        dot_pos[dot_count].x = (int) (px + nx * pos);
-        dot_pos[dot_count].y = (int) (py + ny * pos);
-        dot_count++;
-        pos += TRADE_DOT_SPACING;
+    if (dist > 0) {
+        float nx = (float) dx / dist, ny = (float) dy / dist;
+        float px = last_x, py = last_y, pos = remaining;
+        while (pos < dist && dot_count < 128) {
+            dot_pos[dot_count].x = (int) (px + nx * pos);
+            dot_pos[dot_count].y = (int) (py + ny * pos);
+            dot_count++;
+            pos += TRADE_DOT_SPACING;
+        }
     }
 
     int anim_dot = -1;
@@ -1192,7 +1199,6 @@ void window_empire_draw_trade_waypoints(const empire_object *trade_route, int x_
         int dot_duration = 180; // ms per dot
         anim_dot = (elapsed / dot_duration) % dot_count;
     }
-
 
     for (int i = 0; i < dot_count; i++) {
         int img;
@@ -1209,6 +1215,7 @@ void window_empire_draw_trade_waypoints(const empire_object *trade_route, int x_
         image_draw_scaled_centered(img, dot_pos[i].x + x_offset, dot_pos[i].y + y_offset, COLOR_MASK_NONE, scale);
     }
 }
+
 
 
 void window_empire_draw_border(const empire_object *border, int x_offset, int y_offset)
