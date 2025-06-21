@@ -7,8 +7,6 @@
 #include "graphics/window.h"
 #include "input/scroll.h"
 
-#include "core/log.h"
-
 #define NO_POSITION ((unsigned int) -1)
 
 static unsigned int calculate_scrollable_items(const grid_box_type *grid_box)
