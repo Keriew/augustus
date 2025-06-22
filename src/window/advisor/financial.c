@@ -17,22 +17,22 @@
 static void button_change_taxes(int is_down, int param2);
 
 static arrow_button arrow_buttons_taxes[] = {
-    {180, 75, 17, 24, button_change_taxes, 1, 0},
-    {204, 75, 15, 24, button_change_taxes, 0, 0}
+    {75, 77, 17, 24, button_change_taxes, 1, 0},
+    {99, 77, 15, 24, button_change_taxes, 0, 0}
 };
 
 static unsigned int arrow_button_focus;
 
 static void draw_row(int group, int number, int y, int value_last_year, int value_this_year)
 {
-    lang_text_draw(group, number, 80, y, FONT_NORMAL_BLACK);
+    lang_text_draw(group, number, 75, y, FONT_NORMAL_BLACK);
     text_draw_number_finances(value_last_year, 350, y, FONT_NORMAL_BLACK, 0);
     text_draw_number_finances(value_this_year, 490, y, FONT_NORMAL_BLACK, 0);
 }
 
 static void draw_tr_row(int tr_string, int y, int value_last_year, int value_this_year)
 {
-    text_draw(translation_for(tr_string), 80, y, FONT_NORMAL_BLACK, 0);
+    text_draw(translation_for(tr_string), 75, y, FONT_NORMAL_BLACK, 0);
     text_draw_number_finances(value_last_year, 350, y, FONT_NORMAL_BLACK, 0);
     text_draw_number_finances(value_this_year, 490, y, FONT_NORMAL_BLACK, 0);
 }
@@ -51,22 +51,22 @@ static int draw_background(void)
 
     int width;
     if (treasury < 0) {
-        width = lang_text_draw(60, 3, 70, 58, FONT_NORMAL_RED);
-        lang_text_draw_amount(8, 0, -treasury, 72 + width, 58, FONT_NORMAL_RED);
+        width = lang_text_draw(60, 3, 75, 58, FONT_NORMAL_RED);
+        lang_text_draw_amount(8, 0, -treasury, 77 + width, 58, FONT_NORMAL_RED);
     } else {
-        width = lang_text_draw(60, 2, 70, 58, FONT_NORMAL_WHITE);
-        lang_text_draw_amount(8, 0, treasury, 72 + width, 58, FONT_NORMAL_WHITE);
+        width = lang_text_draw(60, 2, 75, 58, FONT_NORMAL_WHITE);
+        lang_text_draw_amount(8, 0, treasury, 77 + width, 58, FONT_NORMAL_WHITE);
     }
 
     // tax percentage and estimated income
-    lang_text_draw(60, 1, 70, 81, FONT_NORMAL_WHITE);
-    width = text_draw_percentage(city_finance_tax_percentage(), 240, 81, FONT_NORMAL_WHITE);
-    width += lang_text_draw(60, 4, 240 + width, 81, FONT_NORMAL_WHITE);
-    lang_text_draw_amount(8, 0, city_finance_estimated_tax_income(), 240 + width, 81, FONT_NORMAL_WHITE);
+    width = text_draw_percentage(city_finance_tax_percentage(), 125, 83, FONT_NORMAL_WHITE);
+    width += lang_text_draw(60, 1, 135 + width, 83, FONT_NORMAL_WHITE);
+    width += lang_text_draw(60, 4, 135 + width, 83, FONT_NORMAL_WHITE);
+    lang_text_draw_amount(8, 0, city_finance_estimated_tax_income(), 135 + width, 83, FONT_NORMAL_WHITE);
 
     // percentage taxpayers
-    width = text_draw_percentage(city_finance_percentage_taxed_people(), 70, 103, FONT_NORMAL_WHITE);
-    lang_text_draw(60, 5, 70 + width, 103, FONT_NORMAL_WHITE);
+    width = text_draw_percentage(city_finance_percentage_taxed_people(), 75, 108, FONT_NORMAL_WHITE);
+    lang_text_draw(60, 5, 75 + width, 108, FONT_NORMAL_WHITE);
 
     // table headers
     lang_text_draw(60, 6, 270, 133, FONT_NORMAL_BLACK);
