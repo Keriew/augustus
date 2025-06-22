@@ -764,7 +764,7 @@ void window_building_draw_granary(building_info_context *c)
     if (!b->has_plague && c->has_road_access) {
         y_offset_blocks = ((stored_food_types - 1) / 2 - 3) * 2 + 2;
     }
-    c->height_blocks = 26 + y_offset_blocks;
+    c->height_blocks = 27 + y_offset_blocks;
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
 
     text_draw_label_and_number_centered(lang_get_string(28, b->type), b->storage_id, "",
@@ -827,10 +827,10 @@ void window_building_draw_granary(building_info_context *c)
     }
     int y_offset = 150 + y_offset_blocks * BLOCK_SIZE;
 
-    inner_panel_draw(c->x_offset + 16, c->y_offset + y_offset + 8, c->width_blocks - 2, 5);
+    inner_panel_draw(c->x_offset + 16, c->y_offset + y_offset + 8, c->width_blocks - 2, 6);
     window_building_draw_employment(c, y_offset + 12);
     window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 16 + y_offset);
-    lang_text_draw_multiline(98, 1, c->x_offset + 32, c->y_offset + y_offset + 165,
+    lang_text_draw_multiline(98, 1, c->x_offset + 32, c->y_offset + y_offset + 180,
         BLOCK_SIZE * (c->width_blocks - 3), FONT_NORMAL_BLACK);
 
     // cartpusher state
@@ -1081,7 +1081,7 @@ void window_building_draw_warehouse(building_info_context *c)
         generate_warehouse_resource_list(b);
         y_offset_blocks = ((data.stored_resources.size - 1) / 2 - 3) * 2 + 2;
     }
-    c->height_blocks = 26 + y_offset_blocks;
+    c->height_blocks = 27 + y_offset_blocks;
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
 
     text_draw_label_and_number_centered(lang_get_string(28, b->type), b->storage_id, "",
@@ -1137,10 +1137,10 @@ void window_building_draw_warehouse(building_info_context *c)
         }
     }
     int y_offset = 150 + y_offset_blocks * BLOCK_SIZE;
-    inner_panel_draw(c->x_offset + 16, c->y_offset + y_offset + 8, c->width_blocks - 2, 5);
+    inner_panel_draw(c->x_offset + 16, c->y_offset + y_offset + 8, c->width_blocks - 2, 6);
     window_building_draw_employment(c, y_offset + 12);
     window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 16 + y_offset);
-    lang_text_draw_multiline(99, 1, c->x_offset + 32, c->y_offset + y_offset + 165,
+    lang_text_draw_multiline(99, 1, c->x_offset + 32, c->y_offset + y_offset + 180,
         BLOCK_SIZE * (c->width_blocks - 3), FONT_NORMAL_BLACK);
 
     // cartpusher state

@@ -180,13 +180,16 @@ static int get_height_id(void)
             case BUILDING_TAVERN:
             case BUILDING_AMPHITHEATER:
             case BUILDING_ARENA:
+            case BUILDING_ORACLE:
+            case BUILDING_NYMPHAEUM:
+            case BUILDING_SMALL_MAUSOLEUM:
+            case BUILDING_LARGE_MAUSOLEUM:
             case BUILDING_TRIUMPHAL_ARCH:
             case BUILDING_SHIP_BRIDGE:
             case BUILDING_LOW_BRIDGE:
                 return 5;
 
                 //608px
-
             case BUILDING_DOCK:
             case BUILDING_LIGHTHOUSE:
             case BUILDING_CARAVANSERAI:
