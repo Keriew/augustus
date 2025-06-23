@@ -83,6 +83,9 @@ endif()
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake/" "${CMAKE_SOURCE_DIR}/ext/easyav1/cmake/")
 
+set(EASYAV1_BUILD_TOOLS OFF)
+set(EASYAV1_USE_SANITIZERS OFF)
+
 add_subdirectory("ext/easyav1")
 
 set(CMAKE_C_STANDARD 99)
