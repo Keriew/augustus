@@ -39,7 +39,7 @@ tasks.register('findSDL2Mixer') {
 
 android {
     compileSdk 35
-    ndkVersion "29.0.13599879"
+    ndkVersion "28.1.13356709"
 
     defaultConfig {
         compileSdk 35
