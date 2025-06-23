@@ -6,7 +6,7 @@ case "$BUILD_TARGET" in
 	# You can update the tag by obtaining a recent one from here: https://hub.docker.com/r/gnuton/vitasdk-docker/tags
 	# Make sure that it compiles correctly and runs on a Vita prior to pushing the change
 	docker run -d --name vitasdk --workdir /build/git -v "${PWD}:/build/git" gnuton/vitasdk-docker:20250623 tail -f /dev/null
-	docker exec switchdev /bin/bash -c "sudo apt install --only-upgrade libc6 -y"
+	docker exec vitasdk /bin/bash -c "sudo apt install --only-upgrade libc6 -y"
 	;;
 "switch")
 	# You can obtain a recent devkitA64 image from https://hub.docker.com/repository/docker/devkitpro/devkita64/general
