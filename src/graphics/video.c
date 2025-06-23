@@ -13,6 +13,7 @@
 #include "sound/music.h"
 #include "sound/speech.h"
 
+#include "easyav1/src/easyav1.h"
 #include "pl_mpeg/pl_mpeg.h"
 
 #include <string.h>
@@ -22,7 +23,8 @@
 typedef enum {
     VIDEO_TYPE_NONE = 0,
     VIDEO_TYPE_SMK = 1,
-    VIDEO_TYPE_MPG = 2
+    VIDEO_TYPE_MPG = 2,
+    VIDEO_TYPE_AV1 = 3
 } video_type;
 
 static struct {
@@ -31,6 +33,7 @@ static struct {
 
     smacker s;
     plm_t *plm;
+    easyav1_t *easyav1;
 
     video_type type;
 
@@ -68,12 +71,18 @@ static void close_decoder(void)
         data.plm = 0;
         data.type = VIDEO_TYPE_NONE;
     }
+    if (data.easyav1) {
+        easyav1_stop(data.easyav1);
+        easyav1_destroy(&data.easyav1);
+        data.type = VIDEO_TYPE_NONE;
+    }
     data.type = VIDEO_TYPE_NONE;
 }
 
 static void update_mpg_video(plm_t *plm, plm_frame_t *frame, void *user)
 {
-	data.video.draw_frame = 1;
+    data.video.draw_frame = 1;
+    data.video.current_frame++;
     data.video.mpg_frame = frame;
 }
 
@@ -82,9 +91,102 @@ static void update_mpg_audio(plm_t *mpeg, plm_samples_t *samples, void *user)
     sound_device_write_custom_music_data(samples->interleaved, sizeof(float) * samples->count * 2);
 }
 
-static int load_mpg(const char *filename)
+static const char *get_filename_from_path(const char *filename)
 {
     if (data.type == VIDEO_TYPE_SMK) {
+        return filename;
+    } else if (data.type == VIDEO_TYPE_AV1) {
+        return filename;
+    } else if (data.type == VIDEO_TYPE_MPG) {
+        return filename;
+    }
+    return NULL;
+}
+
+static int load_av1(const char *filename)
+{
+    if (data.type == VIDEO_TYPE_SMK || data.type == VIDEO_TYPE_MPG) {
+        return 0;
+    }
+    char av1_filename[FILE_NAME_MAX];
+    int position = 0;
+
+    // Copy filename and change "smk/" to "av1/"
+    if (strncmp(filename, "smk/", 4) == 0) {
+        position = snprintf(av1_filename, FILE_NAME_MAX, "av1/%s", file_remove_path(filename));
+    } else if (strncmp(filename, "smk\\", 4) == 0) {
+        position = snprintf(av1_filename, FILE_NAME_MAX, "av1\\%s", file_remove_path(filename));
+    } else {
+        position = snprintf(av1_filename, FILE_NAME_MAX, "%s", filename);
+    }
+
+    if (position + 5 >= FILE_NAME_MAX) {
+        return 0; // Not enough space for the new extension
+    }
+
+    // We cannot use file_change_extension here because it can only replace 3 characters
+    filename = strrchr(av1_filename, '.');
+    if (filename) {
+        position = filename - av1_filename; // Get the position of the last dot
+    }
+
+    snprintf(av1_filename + position, FILE_NAME_MAX - position, ".webm");
+
+    data.easyav1 = 0;
+    size_t length;
+    uint8_t *video_buffer = game_campaign_load_file(av1_filename, &length);
+    if (video_buffer) {
+        data.easyav1 = easyav1_init_from_memory(video_buffer, length, 0);
+    }
+    if (!data.easyav1) {
+        const char *path;
+        const char *community_location = platform_file_manager_get_directory_for_location(PATH_LOCATION_COMMUNITY, 0);
+        if (strncmp(community_location, av1_filename, strlen(community_location)) == 0) {
+            path = filename;
+        } else {
+            path = dir_get_file(av1_filename, MAY_BE_LOCALIZED);
+        }
+        if (!path) {
+            return 0;
+        }
+        FILE *av1 = file_open(path, "rb");
+        if (!av1) {
+            return 0;
+        }
+        easyav1_settings settings = easyav1_default_settings();
+        settings.close_handle_on_destroy = EASYAV1_TRUE;
+
+        if (!config_get(CONFIG_GENERAL_ENABLE_VIDEO_SOUND)) {
+            settings.enable_audio = EASYAV1_FALSE;
+        }
+        data.easyav1 = easyav1_init_from_file(av1, &settings);
+    }
+
+    if (!data.easyav1) {
+        return 0;
+    }
+    data.video.width = easyav1_get_video_width(data.easyav1);
+    data.video.height =  easyav1_get_video_height(data.easyav1);
+    data.video.y_scale = SMACKER_Y_SCALE_NONE;
+    data.video.current_frame = 0;
+    data.video.micros_per_frame = 1000000 / easyav1_get_video_fps(data.easyav1);
+
+    data.audio.has_audio = 0;
+
+    if (easyav1_has_audio_track(data.easyav1)) {
+        data.audio.has_audio = 1;
+        data.audio.bitdepth = 32;
+        data.audio.channels = easyav1_get_audio_channels(data.easyav1);
+        data.audio.rate = easyav1_get_audio_sample_rate(data.easyav1);
+    }
+
+    data.type = VIDEO_TYPE_AV1;
+    return 1;
+}
+
+static int load_mpg(const char *filename)
+{
+    if (data.type == VIDEO_TYPE_SMK || data.type == VIDEO_TYPE_AV1) {
         return 0;
     }
     char mpg_filename[FILE_NAME_MAX];
@@ -148,7 +250,7 @@ static int load_mpg(const char *filename)
 
 static int load_smk(const char *filename)
 {
-    if (data.type == VIDEO_TYPE_MPG) {
+    if (data.type == VIDEO_TYPE_MPG || data.type == VIDEO_TYPE_AV1) {
         return 0;
     }
     const char *path = dir_get_file(filename, MAY_BE_LOCALIZED);
@@ -206,13 +308,16 @@ int video_start(const char *filename)
     data.is_playing = 0;
     data.is_ended = 0;
 
-    if (load_mpg(filename) || load_smk(filename)) {
+    if (load_av1(filename) || load_mpg(filename) || load_smk(filename)) {
         sound_music_pause();
         sound_speech_stop();
-        int is_yuv = data.type == VIDEO_TYPE_MPG && graphics_renderer()->supports_yuv_image_format();
+        int is_yuv = data.type != VIDEO_TYPE_SMK && graphics_renderer()->supports_yuv_image_format();
         graphics_renderer()->create_custom_image(CUSTOM_IMAGE_VIDEO, data.video.width, data.video.height, is_yuv);
         if (!is_yuv) {
             data.buffer.pixels = graphics_renderer()->get_custom_image_buffer(CUSTOM_IMAGE_VIDEO, &data.buffer.width);
+        }
+        if (data.type == VIDEO_TYPE_AV1) {
+            easyav1_play(data.easyav1);
         }
         data.is_playing = 1;
         return 1;
@@ -277,7 +382,8 @@ void video_shutdown(void)
 static void get_next_frame(void)
 {
     if (data.type == VIDEO_TYPE_NONE || (data.type == VIDEO_TYPE_SMK && !data.s) ||
-        (data.type == VIDEO_TYPE_MPG && !data.plm)) {
+        (data.type == VIDEO_TYPE_MPG && !data.plm) ||
+        (data.type == VIDEO_TYPE_AV1 && !data.easyav1)) {
         return;
     }
     time_millis now_millis = system_get_ticks();
@@ -304,7 +410,7 @@ static void get_next_frame(void)
                 }
             }
         }
-    } else {
+    } else if (data.type == VIDEO_TYPE_MPG) {
         double elapsed_time = (now_millis - data.video.start_render_millis) / 1000.0;
         if (elapsed_time > MAX_FRAME_TIME_ADVANCE_MS) {
             elapsed_time = MAX_FRAME_TIME_ADVANCE_MS;
@@ -312,6 +418,27 @@ static void get_next_frame(void)
         plm_decode(data.plm, elapsed_time);
         data.video.start_render_millis = now_millis;
         if (plm_has_ended(data.plm)) {
+            close_decoder();
+            data.is_ended = 1;
+            data.is_playing = 0;
+            end_video();
+        }
+    } else if (data.type == VIDEO_TYPE_AV1) {
+        if (data.audio.has_audio) {
+            const easyav1_audio_frame *audio_frame = easyav1_get_audio_frame(data.easyav1);
+            if (audio_frame) {
+                sound_device_write_custom_music_data(audio_frame->pcm.interlaced, (int) audio_frame->bytes);
+            }
+        }
+
+        if (easyav1_has_video_frame(data.easyav1)) {
+            data.video.draw_frame = 1;
+            data.video.current_frame++;
+        } else {
+            data.video.draw_frame = 0;
+        }
+
+        if (easyav1_is_finished(data.easyav1)) {
             close_decoder();
             data.is_ended = 1;
             data.is_playing = 0;
@@ -347,6 +474,17 @@ static void update_video_frame(void)
             return;
         }
         plm_frame_to_bgra(data.video.mpg_frame, (uint8_t *) data.buffer.pixels, data.buffer.width * 4);
+    } else if (data.type == VIDEO_TYPE_AV1) {
+        if (!data.easyav1) {
+            return;
+        }
+        const easyav1_video_frame *frame = easyav1_get_video_frame(data.easyav1);
+        if (!frame || !graphics_renderer()->supports_yuv_image_format()) {
+            return;
+        }
+        graphics_renderer()->update_custom_image_yuv(CUSTOM_IMAGE_VIDEO, frame->data[0], (int) frame->stride[0],
+            frame->data[1], (int) frame->stride[1], frame->data[2], (int) frame->stride[2]);
+        return;
     }
     graphics_renderer()->update_custom_image(CUSTOM_IMAGE_VIDEO);
 }
@@ -373,5 +511,8 @@ void video_draw(int x_offset, int y_offset, int width, int height)
             y_offset += (int) ((height - data.video.height / scale) / 2 * scale);
         }
     }
-    graphics_renderer()->draw_custom_image(CUSTOM_IMAGE_VIDEO, x_offset, y_offset, scale, 0);
+    // Only draw the video if it has frames to show, otherwise it may display garbage
+    if (data.video.current_frame != 0) {
+        graphics_renderer()->draw_custom_image(CUSTOM_IMAGE_VIDEO, x_offset, y_offset, scale, 0);
+    }
 }
