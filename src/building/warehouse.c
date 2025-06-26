@@ -279,9 +279,13 @@ int building_warehouse_is_accepting(int resource, building *b)
     int amount = building_warehouse_get_amount(b, resource);
     if (!b->has_plague &&
         ((s->resource_state[resource] == BUILDING_STORAGE_STATE_ACCEPTING) ||
+            (s->resource_state[resource] == BUILDING_STORAGE_STATE_ACCEPTING_28 && amount < WAREHOUSE_28) ||
             (s->resource_state[resource] == BUILDING_STORAGE_STATE_ACCEPTING_3QUARTERS && amount < THREEQ_WAREHOUSE) ||
+            (s->resource_state[resource] == BUILDING_STORAGE_STATE_ACCEPTING_20 && amount < WAREHOUSE_20) ||
             (s->resource_state[resource] == BUILDING_STORAGE_STATE_ACCEPTING_HALF && amount < HALF_WAREHOUSE) ||
-            (s->resource_state[resource] == BUILDING_STORAGE_STATE_ACCEPTING_QUARTER && amount < QUARTER_WAREHOUSE))) {
+            (s->resource_state[resource] == BUILDING_STORAGE_STATE_ACCEPTING_12 && amount < WAREHOUSE_12) ||
+            (s->resource_state[resource] == BUILDING_STORAGE_STATE_ACCEPTING_QUARTER && amount < QUARTER_WAREHOUSE) ||
+            (s->resource_state[resource] == BUILDING_STORAGE_STATE_ACCEPTING_4 && amount < WAREHOUSE_4))) {
         return 1;
     } else {
         return 0;
@@ -294,9 +298,13 @@ int building_warehouse_is_getting(int resource, building *b)
     int amount = building_warehouse_get_amount(b, resource);
     if (!b->has_plague &&
         ((s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING) ||
+            (s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING_28 && amount < WAREHOUSE_28) ||
             (s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING_3QUARTERS && amount < THREEQ_WAREHOUSE) ||
+            (s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING_20 && amount < WAREHOUSE_20) ||
             (s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING_HALF && amount < HALF_WAREHOUSE) ||
-            (s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING_QUARTER && amount < QUARTER_WAREHOUSE))) {
+            (s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING_12 && amount < WAREHOUSE_12) ||
+            (s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING_QUARTER && amount < QUARTER_WAREHOUSE) ||
+            (s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING_4 && amount < WAREHOUSE_4))) {
         return 1;
     } else {
         return 0;
@@ -308,9 +316,13 @@ static int warehouse_is_gettable(int resource, building *b)
     const building_storage *s = building_storage_get(b->storage_id);
     if (!b->has_plague &&
         ((s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING) ||
-            (s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING_HALF) ||
+            (s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING_28) ||
             (s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING_3QUARTERS) ||
-            (s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING_QUARTER))) {
+            (s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING_20) ||
+            (s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING_HALF) ||
+            (s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING_12) ||
+            (s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING_QUARTER) ||
+            (s->resource_state[resource] == BUILDING_STORAGE_STATE_GETTING_4))) {
         return 1;
     } else {
         return 0;
@@ -330,17 +342,33 @@ static int get_acceptable_quantity(resource_type resource, building *b)
         case BUILDING_STORAGE_STATE_GETTING:
             return FULL_WAREHOUSE;
             break;
+        case BUILDING_STORAGE_STATE_ACCEPTING_28:
+        case BUILDING_STORAGE_STATE_GETTING_28:
+            return WAREHOUSE_28;
+            break;
         case BUILDING_STORAGE_STATE_ACCEPTING_3QUARTERS:
         case BUILDING_STORAGE_STATE_GETTING_3QUARTERS:
             return THREEQ_WAREHOUSE;
+            break;
+        case BUILDING_STORAGE_STATE_ACCEPTING_20:
+        case BUILDING_STORAGE_STATE_GETTING_20:
+            return WAREHOUSE_20;
             break;
         case BUILDING_STORAGE_STATE_ACCEPTING_HALF:
         case BUILDING_STORAGE_STATE_GETTING_HALF:
             return HALF_WAREHOUSE;
             break;
+        case BUILDING_STORAGE_STATE_ACCEPTING_12:
+        case BUILDING_STORAGE_STATE_GETTING_12:
+            return WAREHOUSE_12;
+            break;
         case BUILDING_STORAGE_STATE_ACCEPTING_QUARTER:
         case BUILDING_STORAGE_STATE_GETTING_QUARTER:
             return QUARTER_WAREHOUSE;
+            break;
+        case BUILDING_STORAGE_STATE_ACCEPTING_4:
+        case BUILDING_STORAGE_STATE_GETTING_4:
+            return WAREHOUSE_4;
             break;
         default:
             return 0;
