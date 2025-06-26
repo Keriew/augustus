@@ -420,7 +420,7 @@ static int draw_text(const uint8_t *text, int x_offset, int y_offset,
                             }
                             text++;
                             break;
-                        // Paragraph
+                            // Paragraph
                         } else if (*text == 'P') {
                             paragraph = 1;
                             if (heading) {
@@ -430,7 +430,7 @@ static int draw_text(const uint8_t *text, int x_offset, int y_offset,
                             text++;
                             line_break = 1;
                             break;
-                        // Line break
+                            // Line break
                         } else if (*text == 'L') {
                             text++;
                             line_break = 1;
@@ -530,7 +530,8 @@ static int draw_text(const uint8_t *text, int x_offset, int y_offset,
     return num_lines;
 }
 
-int rich_text_get_line_height() {
+int rich_text_get_line_height(void)
+{
     return data.line_height;
 }
 

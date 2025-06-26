@@ -1,5 +1,6 @@
 #include "mission_briefing.h"
 #include "city/mission.h"
+#include "core/config.h"
 #include "core/image_group.h"
 #include "core/lang.h"
 #include "game/campaign.h"
@@ -13,6 +14,7 @@
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
 #include "graphics/rich_text.h"
+#include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "scenario/custom_messages.h"
@@ -31,8 +33,9 @@
 #include "window/mission_selection.h"
 #include "window/plain_message_dialog.h"
 #include "window/video.h"
-#include <core/config.h>
-#include <graphics/screen.h>
+
+#define MISSION_BRIEFING_WINDOW_BLOCKS_MIN_WIDTH 40 // 640px
+#define MISSION_BRIEFING_WINDOW_BLOCKS_MIN_HEIGHT 30 // 480px
 
 typedef enum {
     BUTTON_GO_BACK_NONE = 0,
@@ -44,8 +47,8 @@ static void show(void);
 static void button_back(int param1, int param2);
 static void button_start_mission(int param1, int param2);
 
-static const int GOAL_OFFSETS_X[] = {32, 288, 32, 288, 288, 288};
-static const int GOAL_OFFSETS_Y[] = {95, 95, 117, 117, 73, 135};
+static const int GOAL_OFFSETS_X[] = { 32, 288, 32, 288, 288, 288 };
+static const int GOAL_OFFSETS_Y[] = { 95, 95, 117, 117, 73, 135 };
 
 static image_button image_button_back = {
     0, 0, 31, 20, IB_NORMAL, GROUP_MESSAGE_ICON, 8, button_back, button_none, 0, 0, 1
@@ -83,8 +86,8 @@ static void init(void)
     data.paths.background_music[0] = 0;
     data.layout.margin_x = 40;
     data.layout.margin_y = 10;
-    data.layout.min_blocks_width = 40; // 640px
-    data.layout.min_blocks_height = 30; //480 px
+    data.layout.min_blocks_width = MISSION_BRIEFING_WINDOW_BLOCKS_MIN_WIDTH;
+    data.layout.min_blocks_height = MISSION_BRIEFING_WINDOW_BLOCKS_MIN_HEIGHT;
     rich_text_reset(0);
 }
 
@@ -255,7 +258,7 @@ static int can_go_back(void)
 static int get_width_in_blocks(void)
 {
     int current_screen_width = screen_width();
-    int min_blocks_width = data.layout.min_blocks_width; // Use 40 blocks as minimum width (40 blocks = 640px)
+    int min_blocks_width = data.layout.min_blocks_width;
     int width = (current_screen_width / BLOCK_SIZE) - data.layout.margin_x;
     return width >= min_blocks_width ? width : min_blocks_width;
 }
@@ -263,7 +266,7 @@ static int get_width_in_blocks(void)
 static int get_height_in_blocks(void)
 {
     int current_screen_height = screen_height();
-    int min_blocks_height = data.layout.min_blocks_height; // Use 30 blocks as minimum height (30 blocks = 480px)
+    int min_blocks_height = data.layout.min_blocks_height;
     int height = (current_screen_height / BLOCK_SIZE) - data.layout.margin_y;
     return height >= min_blocks_height ? height : min_blocks_height;
 }
@@ -326,7 +329,7 @@ static void draw_background(void)
         lang_text_draw(13, 4, 66, dialog_height - 45, FONT_NORMAL_BLACK);
     }
 
-    inner_panel_draw(32, 96, width_in_blocks - 7, 5);
+    inner_panel_draw(32, 96, width_in_blocks - 6, 5);
     lang_text_draw(62, 10, 48, 104, FONT_NORMAL_WHITE);
     int goal_index = 0;
     if (scenario_criteria_population_enabled()) {
@@ -377,13 +380,13 @@ static void draw_background(void)
         lang_text_draw(62, immediate_goal_text, 16 + x + 8, 32 + y + 3, FONT_NORMAL_RED);
     }
 
-    inner_panel_draw(32, 184, width_in_blocks - 7, height_in_blocks - 15);
+    inner_panel_draw(32, 184, width_in_blocks - 6, height_in_blocks - 15);
 
     if (content) {
         rich_text_set_fonts(FONT_NORMAL_WHITE, FONT_NORMAL_GREEN, FONT_NORMAL_RED, 5);
-        rich_text_init(content, 64, 184, width_in_blocks - 9, height_in_blocks - 15, 0);
+        rich_text_init(content, 64, 184, width_in_blocks - 8, height_in_blocks - 15, 0);
         int height_lines = (height_in_blocks - 15 - 1) * BLOCK_SIZE / rich_text_get_line_height();
-        rich_text_draw(content, 48, 196, dialog_width - 144, height_lines, 0);
+        rich_text_draw(content, BLOCK_SIZE * 3, 196, dialog_width - 6 * BLOCK_SIZE, height_lines, 0);
     }
 
     graphics_reset_dialog();
