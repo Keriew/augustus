@@ -482,8 +482,9 @@ static int legacy_map_is_bridge(int grid_offset)
 
 int map_bridge_find_start_and_direction_legacy(int grid_offset, int *axis, int *axis_direction)
 {
-    if (!legacy_map_is_bridge(grid_offset))
+    if (!legacy_map_is_bridge(grid_offset)) {
         return -1;
+    }
 
     static const int dirs[4][2] = {
         {  0, -1 }, // north
@@ -491,33 +492,37 @@ int map_bridge_find_start_and_direction_legacy(int grid_offset, int *axis, int *
         {  0, +1 }, // south
         { -1,  0 }  // west
     };
-
     // Scan in all 4 directions until we find a ramp
-    for (int test_axis = 0; test_axis < 2; ++test_axis) {
-        for (int dir = -1; dir <= 1; dir += 2) {
-            int dx = (test_axis == 0) ? dir : 0;
-            int dy = (test_axis == 1) ? dir : 0;
-            int delta = map_grid_delta(dx, dy);
+    for (int i = 0; i < 4; ++i) {
+        int dx = dirs[i][0];
+        int dy = dirs[i][1];
+        int delta = map_grid_delta(dx, dy);
 
-            int current = grid_offset;
-            while (legacy_map_is_bridge(current)) {
-                int sprite = map_sprite_bridge_at(current);
-                if (map_bridge_is_ramp_sprite(sprite)) {
-                    int next = current + delta;
-                    int next_sprite = map_sprite_bridge_at(next);
+        int current = grid_offset;
+        while (legacy_map_is_bridge(current)) {
+            int sprite = map_sprite_bridge_at(current);
+            if (map_bridge_is_ramp_sprite(sprite)) {
+                int next = current + delta;
+                int next_sprite = map_sprite_bridge_at(next);
 
-                    // Don't treat it as a bridge start if another ramp follows (likely wrong end)
-                    if (map_bridge_is_ramp_sprite(next_sprite)) break;
-
-                    // Check for mid-bridge sprite next (sprite 5–6, 11–12, 13–15)
-                    if (next_sprite >= 5 && next_sprite <= 15 && !map_bridge_is_ramp_sprite(next_sprite)) {
-                        *axis = test_axis;
-                        *axis_direction = dir;
+                if (map_bridge_is_ramp_sprite(next_sprite)) {
+                    // If both are ramps, check for low bridge
+                    if (sprite <= 6 && next_sprite <= 6) { // ship bridge sprites > 6
+                        *axis = (dx != 0) ? 0 : 1;
+                        *axis_direction = (dx + dy);
                         return current;
                     }
+                    break; // invalid for ship bridge
                 }
-                current -= delta;
+
+                if (next_sprite >= 5 && next_sprite <= 15 && !map_bridge_is_ramp_sprite(next_sprite)) {
+                    *axis = (dx != 0) ? 0 : 1;
+                    *axis_direction = (dx + dy);
+                    return current;
+                }
             }
+
+            current -= delta;
         }
     }
 
@@ -529,7 +534,9 @@ void map_terrain_migrate_old_bridges(void)
     for (int y = 0; y < GRID_SIZE; y++) {
         for (int x = 0; x < GRID_SIZE; x++) {
             int grid_offset = map_grid_offset(x, y);
-
+            if (!map_grid_is_valid_offset(grid_offset)) {
+                continue;
+            }
             if (legacy_map_is_bridge(grid_offset) && !map_is_bridge(grid_offset)) {
                 // Find true start of the old bridge
                 // Only process tiles that are part of a legacy bridge and haven't been upgraded yet 
