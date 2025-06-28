@@ -142,7 +142,8 @@ static int show_figure_problems(const figure *f)
 
 static int show_figure_native(const figure *f)
 {
-    return f->type == FIGURE_INDIGENOUS_NATIVE || f->type == FIGURE_MISSIONARY;
+    return f->type == FIGURE_INDIGENOUS_NATIVE || f->type == FIGURE_MISSIONARY ||
+           f->type == FIGURE_NATIVE_TRADER;
 }
 
 static int show_figure_enemy(const figure *f)

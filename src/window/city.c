@@ -522,10 +522,10 @@ static void show_overlay_from_grid_offset(int grid_offset)
         case BUILDING_WAREHOUSE:
         case BUILDING_WAREHOUSE_SPACE:
         case BUILDING_DEPOT:
-            overlay = OVERLAY_LOGISTICS;
-            break;
         case BUILDING_DOCK:
-            overlay = OVERLAY_SICKNESS;
+        case BUILDING_LIGHTHOUSE:
+        case BUILDING_ARMOURY:
+            overlay = OVERLAY_LOGISTICS;
             break;
         case BUILDING_LATRINES:
             overlay = OVERLAY_HEALTH;
