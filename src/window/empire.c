@@ -10,6 +10,7 @@
 #include "empire/empire.h"
 #include "empire/object.h"
 #include "empire/trade_route.h"
+#include "empire/trade_prices.h"
 #include "empire/type.h"
 #include "game/tutorial.h"
 #include "graphics/generic_button.h"
@@ -85,10 +86,10 @@ typedef enum {
 
 typedef enum {
     SORT_BY_NAME,
-    SORT_BY_QUOTA_FILL,
+    SORT_BY_QUOTA_FILL_EXPORT,
+    SORT_BY_QUOTA_FILL_IMPORT,
     SORT_BY_ROUTE_COST,
     SORT_BY_PROFIT,
-    SORT_BY_RESOURCE_COUNT,
     MAX_SORTING_KEY
 } sort_method;
 
@@ -282,6 +283,7 @@ static struct {
         filter_method current_filtering;
         int hovered_sorting_button;
         int expanded_main;
+        int sorting_reversed; // 1 if sorting is reversed, 0 if not
     } sidebar;
     int trade_route_anim_start;
 } data = { 0, 1 , 0 };
@@ -439,6 +441,107 @@ static int count_trade_resources(const empire_city *city, int is_sell)
         }
     }
     return count;
+}
+
+static int get_city_trade_quota_fill(const empire_city *city, int is_sell)
+{
+    int total_now = 0;
+    int total_max = 0;
+
+    for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+        if (!resource_is_storable(r)) continue;
+
+        if ((is_sell && !city->sells_resource[r]) || (!is_sell && !city->buys_resource[r])) continue;
+
+        int max = trade_route_limit(city->route_id, r);
+        int now = trade_route_traded(city->route_id, r);
+
+        total_max += max;
+        total_now += now;
+    }
+
+    if (total_max == 0) return 0;
+    return (100 * total_now) / total_max;
+}
+
+static int sidebar_city_sorter(const void *a, const void *b)
+{
+    const sidebar_city_entry *entry_a = (const sidebar_city_entry *) a;
+    const sidebar_city_entry *entry_b = (const sidebar_city_entry *) b;
+
+    const empire_city *city_a = empire_city_get(entry_a->city_id);
+    const empire_city *city_b = empire_city_get(entry_b->city_id);
+
+    int result = 0;
+
+    switch (data.sidebar.current_sorting) {
+        case SORT_BY_NAME:
+        {
+            const char *name_a = (const char *) empire_city_get_name(city_a);
+            const char *name_b = (const char *) empire_city_get_name(city_b);
+            result = strcmp(name_a, name_b);
+            break;
+        }
+
+        case SORT_BY_QUOTA_FILL_EXPORT:
+        case SORT_BY_QUOTA_FILL_IMPORT:
+        {
+            int is_sell = (data.sidebar.current_sorting == SORT_BY_QUOTA_FILL_EXPORT);
+            int quota_a = get_city_trade_quota_fill(city_a, is_sell);
+            int quota_b = get_city_trade_quota_fill(city_b, is_sell);
+            result = (quota_a > quota_b) - (quota_a < quota_b);
+            break;
+        }
+
+        case SORT_BY_ROUTE_COST:
+        {
+            int cost_a = city_a->cost_to_open;
+            int cost_b = city_b->cost_to_open;
+            result = (cost_a > cost_b) - (cost_a < cost_b);
+            break;
+        }
+
+        case SORT_BY_PROFIT:
+        {
+            int profit_a = -city_a->cost_to_open;
+            int profit_b = -city_b->cost_to_open;
+
+            for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+                if (!resource_is_storable(r)) continue;
+
+                if (city_a->sells_resource[r]) {
+                    int amount = trade_route_traded(city_a->route_id, r);
+                    int price = trade_price_sell(r, !city_a->is_sea_trade);
+                    profit_a += amount * price;
+                }
+                if (city_a->buys_resource[r]) {
+                    int amount = trade_route_traded(city_a->route_id, r);
+                    int price = trade_price_buy(r, !city_a->is_sea_trade);
+                    profit_a -= amount * price;
+                }
+
+                if (city_b->sells_resource[r]) {
+                    int amount = trade_route_traded(city_b->route_id, r);
+                    int price = trade_price_sell(r, !city_b->is_sea_trade);
+                    profit_b += amount * price;
+                }
+                if (city_b->buys_resource[r]) {
+                    int amount = trade_route_traded(city_b->route_id, r);
+                    int price = trade_price_buy(r, !city_b->is_sea_trade);
+                    profit_b -= amount * price;
+                }
+            }
+
+            result = (profit_a > profit_b) - (profit_a < profit_b);
+            break;
+        }
+        // add more cases here
+    }
+
+    if (data.sidebar.sorting_reversed)
+        result = -result;
+
+    return result;
 }
 
 static void setup_sidebar(void)
