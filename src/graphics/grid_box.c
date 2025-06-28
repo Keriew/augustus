@@ -82,7 +82,7 @@ static void draw_scrollbar(grid_box_type *grid_box)
 {
     scrollbar_type *scrollbar = &grid_box->scrollbar;
     scrollbar->x = grid_box->x + grid_box->width + 4 - 2 * BLOCK_SIZE + grid_box->offset_scrollbar_x;
-    scrollbar->y = grid_box->y;
+    scrollbar->y = grid_box->y + grid_box->offset_scrollbar_y;
     scrollbar->on_scroll_callback = window_request_refresh;
     scrollbar->has_y_margin = 1;
     scrollbar->dot_padding = grid_box->decorate_scrollbar ? 8 : 0;

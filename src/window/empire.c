@@ -62,6 +62,9 @@
 
 
 #define FONT_SPACE_WIDTH font_definition_for(FONT_NORMAL_GREEN)->space_width
+#define FONT_HEIGHT_NORMAL font_definition_for(FONT_NORMAL_GREEN)->line_height
+#define FONT_HEIGHT_LARGE font_definition_for(FONT_LARGE_BLACK)->line_height
+
 #define NO_POSITION ((unsigned int) -1) //used as an alterntive to 0 for some of new pointers, to avoid confusion with when relying on external indexing, which can be 0-based
 
 float sidebar_width_percent = 0.25f; //default sidebar width
@@ -365,38 +368,51 @@ static void handle_sidebar_border(const mouse *m)
         }
     }
 }
-static void handle_expanding_buttons_input(const mouse *m)
+static int handle_expanding_buttons_input(const mouse *m)
 {
     data.sidebar.hovered_sorting_button = NO_POSITION; // Reset hovered button
-    for (int i = 0; i <= sorting_button_count; ++i) {
+
+    // If right-clicked and something is expanded: collapse it and exit
+    if (m->right.went_up && data.sidebar.expanded_main != NO_POSITION) {
+        data.sidebar.expanded_main = NO_POSITION;
+        return 1; // Block further input
+    }
+
+    for (int i = 0; i < sorting_button_count; ++i) {
         const sorting_button *btn = &sorting_buttons[i];
 
         if (m->x >= btn->x && m->x < btn->x + btn->width &&
             m->y >= btn->y && m->y < btn->y + btn->height) {
 
-            data.sidebar.hovered_sorting_button = btn->button_type; // FIXED
+            data.sidebar.hovered_sorting_button = btn->button_type;
 
-            // Click handling
+            // Only handle left clicks here
             if (m->left.went_up) {
                 if (btn->button_type == BUTTON_INDEX_SORT_MAIN) {
-                    data.sidebar.expanded_main = (data.sidebar.expanded_main == 0) ? -1 : 0;
+                    data.sidebar.expanded_main = (data.sidebar.expanded_main == BUTTON_INDEX_SORT_MAIN) ? NO_POSITION : BUTTON_INDEX_SORT_MAIN;
+                    return 1;
                 } else if (btn->button_type == BUTTON_INDEX_FILTER_MAIN) {
-                    data.sidebar.expanded_main = (data.sidebar.expanded_main == 1) ? -1 : 1;
+                    data.sidebar.expanded_main = (data.sidebar.expanded_main == BUTTON_INDEX_FILTER_MAIN) ? NO_POSITION : BUTTON_INDEX_FILTER_MAIN;
+                    return 1;
                 } else if (btn->button_type >= BUTTON_INDEX_FIRST_SORT_METHOD &&
                            btn->button_type < BUTTON_INDEX_FIRST_FILTER_METHOD) {
                     data.sidebar.current_sorting = btn->button_type - BUTTON_INDEX_FIRST_SORT_METHOD;
-                    data.sidebar.expanded_main = -1;
+                    data.sidebar.expanded_main = NO_POSITION;
+                    return 1;
                 } else if (btn->button_type >= BUTTON_INDEX_FIRST_FILTER_METHOD) {
                     data.sidebar.current_filtering = btn->button_type - BUTTON_INDEX_FIRST_FILTER_METHOD;
-                    data.sidebar.expanded_main = -1;
+                    data.sidebar.expanded_main = NO_POSITION;
+                    return 1;
                 }
-
             }
 
             break;
         }
     }
+
+    return (data.sidebar.expanded_main != NO_POSITION) ? 1 : 0;
 }
+
 
 static void sidebar_collapse(void)
 {
@@ -816,7 +832,8 @@ static void draw_simple_button(int x, int y, int width, int height, int is_focus
     unbordered_panel_draw(x, y, width / BLOCK_SIZE + 1, height_blocks);
     graphics_reset_clip_rectangle();
     button_border_draw(x, y, width, height, is_focused);
-
+    int font_height = font_definition_for(FONT_NORMAL_BLACK)->line_height;
+    int y_text_offset = y + (height / 2) - (font_height / 2);
     // Optional image placeholder
     int image_id = -1;
     if (image_id > 0) {
@@ -824,19 +841,20 @@ static void draw_simple_button(int x, int y, int width, int height, int is_focus
     }
 
     // Draw text vertically centered
-    lang_text_draw_centered(group, number, x, y + height / 2, width, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(group, number, x, y_text_offset, width, FONT_NORMAL_BLACK);
     register_sorting_button(x, y, width, height, button_type);
 }
 
 static void draw_expanding_buttons(void)
 {
     int button_height = 2 * BLOCK_SIZE;
-    int button_v_spacing = button_height + 4; // 4px standard spacing
+    int v_margin = 4; // 4px universal vertical margin 
+    int button_v_spacing = button_height + v_margin; // 4px standard spacing
     int button_h_spacing = 10; // 10px horizontal spacing between buttons
-    int available_width = data.sidebar.width - (grid_box_has_scrollbar(&sidebar_grid_box) ? 4 * BLOCK_SIZE : 0); // 4 * blocksize for scrollbar
+    int available_width = data.sidebar.width - (grid_box_has_scrollbar(&sidebar_grid_box) ? 4 * BLOCK_SIZE : WIDTH_BORDER); // 4 * blocksize for scrollbar
     int button_width = (available_width - button_h_spacing) / 2; // Two buttons side by side
     int base_x = data.sidebar.x_min + button_h_spacing;
-    int base_y = data.sidebar.y_min + 4; // small margin from the top
+    int base_y = data.sidebar.y_min + v_margin; // small margin from the top
 
     // Sort main button
     int x_sort = base_x;
@@ -856,7 +874,7 @@ static void draw_expanding_buttons(void)
     if (data.sidebar.expanded_main == 0) {
         for (int i = 0; i < MAX_SORTING_KEY; ++i) {
             int button_type = BUTTON_INDEX_FIRST_SORT_METHOD + i;  // Children start at 2
-            int y = base_y + button_height + (i + 1) * button_v_spacing;
+            int y = base_y + v_margin + button_height + i * button_v_spacing;
             draw_simple_button(x_sort, y, button_width, button_height,
                 data.sidebar.hovered_sorting_button == button_type,
                 CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_SORT_BY_NAME + i,
@@ -865,7 +883,7 @@ static void draw_expanding_buttons(void)
     } else if (data.sidebar.expanded_main == 1) {
         for (int i = 0; i < MAX_FILTER_KEY; ++i) {
             int button_type = BUTTON_INDEX_FIRST_FILTER_METHOD + i;
-            int y = base_y + button_height + (i + 1) * button_v_spacing;
+            int y = base_y + v_margin + button_height + i * button_v_spacing;
             draw_simple_button(x_filter, y, button_width, button_height,
                 data.sidebar.hovered_sorting_button == button_type,
                 CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE + i,
@@ -1112,8 +1130,8 @@ static void draw_sidebar_city_item(const grid_box_item *item)
         draw_trade_row(city, 0, x_cursor, y_offset, &style_buys);
         y_offset += 35;
         //recalculate the style basing on the new y_offset
-        open_trade_button_style open_trade_style = get_open_trade_button_style(item->x, y_offset, TRADE_STYLE_SIDEBAR);
-        draw_open_trade_button(city, &open_trade_style, (trade_icon_type) (city->is_sea_trade));
+        open_trade_button_style open_trade_style_closed = get_open_trade_button_style(item->x, y_offset, TRADE_STYLE_SIDEBAR);
+        draw_open_trade_button(city, &open_trade_style_closed, (trade_icon_type) (city->is_sea_trade));
     }
     graphics_reset_clip_rectangle();
 }
@@ -1789,7 +1807,9 @@ static void handle_input(const mouse *m, const hotkeys *h)
 
     // Only let the grid‐box process clicks if the sidebar is actually expanded:
     if (!sidebar_border_btn.is_collapsed) {
-        handle_expanding_buttons_input(m);
+        if (handle_expanding_buttons_input(m)) {
+            return; //block other input handling if the expanding buttons are active
+        }
         grid_box_handle_input(&sidebar_grid_box, m, 1);
 
     }
