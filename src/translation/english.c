@@ -1610,15 +1610,15 @@ static translation_string all_strings[] = {
     {TR_BUILDING_LATRINES_UNNECESSARY, "These latrines have no purpose here, as there are no houses in range needing them."},
     {TR_BUILDING_LATRINES_NO_HOUSES, "These latrines are unnecessary at the moment, as there are no houses within its service range."},
     {TR_CONFIG_DRAW_ASCLEPIUS, "Draw Rod of Asclepius for health menu"},
-    {TR_EMPIRE_SIDE_BAR_SORT, "Sort"},
-    {TR_EMPIRE_SIDE_BAR_FILTER, "Filter"},
+    {TR_EMPIRE_SIDE_BAR_SORT, "Sort by:"},
+    {TR_EMPIRE_SIDE_BAR_FILTER, "Filter by:"},
     {TR_EMPIRE_SIDE_BAR_SORT_BY_NAME, "By name"},
-    {TR_EMPIRE_SIDE_BAR_SORT_BY_QUOTA_FILL_EXPORT, "By Export Quota fill"},
-    {TR_EMPIRE_SIDE_BAR_SORT_BY_QUOTA_FILL_IMPORT, "By Import Quota fill"},
-    {TR_EMPIRE_SIDE_BAR_SORT_BY_ROUTE_COST, "By Route Cost"},
-    {TR_EMPIRE_SIDE_BAR_SORT_BY_PROFIT, "By Profit"},
-    {TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE, "By Resource"},
-    {TR_EMPIRE_SIDE_BAR_FILTER_BY_OPEN, "By Open Routes"},
+    {TR_EMPIRE_SIDE_BAR_SORT_BY_QUOTA_FILL_EXPORT, "Export Quota"},
+    {TR_EMPIRE_SIDE_BAR_SORT_BY_QUOTA_FILL_IMPORT, "Import Quota"},
+    {TR_EMPIRE_SIDE_BAR_SORT_BY_ROUTE_COST, "Route Cost"},
+    {TR_EMPIRE_SIDE_BAR_SORT_BY_PROFIT, "Profit"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE, "Resource"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_OPEN, "Open Routes"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

@@ -13,6 +13,7 @@
 #include "empire/trade_prices.h"
 #include "empire/type.h"
 #include "game/tutorial.h"
+#include "graphics/arrow_button.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/grid_box.h"
@@ -38,6 +39,8 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>  
+#include <string.h>  
 
 #define WIDTH_BORDER 16 //dimensions the border image in px, informative only
 #define HEIGHT_BORDER 136 
@@ -207,9 +210,10 @@ static int is_map(const mouse *m);
 static void handle_sidebar_border(const mouse *m);
 
 //buttons position registrators to enable dynamic positioning
-void register_resource_button(int x, int y, int width, int height, resource_type r, int highlight);
-void register_open_trade_button(int x, int y, int width, int height, int route_id, int highlight);
-void register_sorting_button(int x, int y, int width, int height, int button_type);
+static void register_resource_button(int x, int y, int width, int height, resource_type r, int highlight);
+static void register_open_trade_button(int x, int y, int width, int height, int route_id, int highlight);
+static void register_sorting_button(int x, int y, int width, int height, int button_type);
+static void sorting_order(int is_down, int param2);
 
 //arrays and counts for sidebar trade, resource and sorting buttons
 static trade_open_button trade_open_buttons[MAX_TRADE_OPEN_BUTTONS];
@@ -237,6 +241,10 @@ static image_button image_button_advisor[] = {
 };
 static image_button image_button_show_prices[] = {
     {-4, 0, 24, 24, IB_NORMAL, GROUP_MESSAGE_ADVISOR_BUTTONS, 30, button_show_prices, button_none, 0, 0, 1}
+};
+static arrow_button arrow_buttons_sorting[] = {
+    { 20, 4, 17, 24, sorting_order, 1, 0 },
+    { 20, 4, 15, 24, sorting_order, 0, 0 }
 };
 
 static struct {
@@ -966,7 +974,7 @@ static void draw_expanding_buttons(void)
     draw_simple_button(x_sort, base_y, button_width, button_height,
         data.sidebar.hovered_sorting_button == BUTTON_INDEX_SORT_MAIN,
         CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_SORT, 0);
-
+    arrow_buttons_draw(x_sort, base_y, arrow_buttons_sorting, 2);
     // Filter main button
     int x_filter = base_x + button_width + button_h_spacing;
 
@@ -1281,6 +1289,7 @@ static void setup_sidebar_gridbox(void)
         y += SIDEBAR_ENTRY_HEIGHT;
         sidebar_city_count++;
     }
+    qsort(sidebar_cities, sidebar_city_count, sizeof(sidebar_city_entry), sidebar_city_sorter);
     sidebar_grid_box.x = data.sidebar.x_min + data.sidebar.margin_left;
     sidebar_grid_box.y = data.sidebar.y_min + data.sidebar.margin_top;
     sidebar_grid_box.width = data.sidebar.width - data.sidebar.margin_right - data.sidebar.margin_left;
@@ -2094,7 +2103,10 @@ static void button_return_to_city(int param1, int param2)
 {
     window_city_show();
 }
-
+static void sorting_order(int is_down, int param2)
+{
+    data.sidebar.sorting_reversed = is_down;
+}
 static void button_advisor(int advisor, int param2)
 {
     window_advisors_show_advisor(advisor);
