@@ -143,6 +143,11 @@ typedef struct {
     int do_highlight;
 } resource_button;
 
+typedef struct {
+    int x, y, width, height;
+    int sort_type;
+} sorting_button;
+
 // measurements and scales helper functions
 static int measure_trade_row_width(const empire_city *city, int is_sell, const trade_row_style *style); // ???
 static void image_draw_silh_scaled_centered(int image_id, int x, int y, color_t color, int draw_scale_percent);
@@ -179,11 +184,12 @@ static void handle_sidebar_border(const mouse *m);
 void register_resource_button(int x, int y, int width, int height, resource_type r, int highlight);
 void register_open_trade_button(int x, int y, int width, int height, int route_id, int highlight);
 
-//arrays and counts for sidebar trade and resource buttons
+//arrays and counts for sidebar trade, resource and sorting buttons
 static trade_open_button trade_open_buttons[MAX_TRADE_OPEN_BUTTONS];
 static int trade_open_button_count = 0;
 static resource_button resource_buttons[MAX_RESOURCE_BUTTONS];
 static int resource_button_count = 0;
+static sorting_button sorting_buttons[MAX_RESOURCE_BUTTONS];
 
 //sidebar-related arrays and variables
 static scrollbar_type sidebar_scrollbar;
@@ -378,7 +384,7 @@ static void setup_sidebar(void)
 
     data.sidebar.margin_left = 3; //margins betwene sidebar and gridbox
     data.sidebar.margin_right = 3;
-    data.sidebar.margin_top = 6;
+    data.sidebar.margin_top = 2 * BLOCK_SIZE + 6; //space for sorting buttons
     data.sidebar.margin_bottom = 6;
 
     int usable_map_width = map_draw_x_max - map_draw_x_min;
