@@ -8,6 +8,7 @@
 #include "scenario/custom_variable.h"
 #include "scenario/demand_change.h"
 #include "scenario/empire.h"
+#include "scenario/price_change.h"
 #include "scenario/property.h"
 #include "scenario/request.h"
 #include "scenario/invasion.h"
@@ -110,6 +111,7 @@ void scenario_editor_create(int map_size)
     scenario_request_clear_all();
     scenario_invasion_clear();
     scenario_demand_change_clear_all();
+    scenario_price_change_clear_all();
     scenario_custom_variable_delete_all();
     scenario_allowed_building_enable_all();
 
