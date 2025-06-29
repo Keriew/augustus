@@ -211,9 +211,13 @@ static struct {
 } data;
 
 uint8_t warehouse_full_button_text[] = "32";
+uint8_t warehouse_28_button_text[] = "28";
 uint8_t warehouse_3quarters_button_text[] = "24";
+uint8_t warehouse_20_button_text[] = "20";
 uint8_t warehouse_half_button_text[] = "16";
+uint8_t warehouse_12_button_text[] = "12";
 uint8_t warehouse_quarter_button_text[] = "8";
+uint8_t warehouse_4_button_text[] = "4";
 uint8_t granary_full_button_text[] = "32";
 uint8_t granary_3quarters_button_text[] = "24";
 uint8_t granary_half_button_text[] = "16";
@@ -910,9 +914,13 @@ static void draw_button_from_state(int state, int x, int y, building_type type, 
 {
     switch (state) {
         case BUILDING_STORAGE_STATE_GETTING:
+        case BUILDING_STORAGE_STATE_GETTING_28:
         case BUILDING_STORAGE_STATE_GETTING_3QUARTERS:
+        case BUILDING_STORAGE_STATE_GETTING_20:
         case BUILDING_STORAGE_STATE_GETTING_HALF:
+        case BUILDING_STORAGE_STATE_GETTING_12:
         case BUILDING_STORAGE_STATE_GETTING_QUARTER:
+        case BUILDING_STORAGE_STATE_GETTING_4:
         {
             int image_width = image_get(image_group(GROUP_CONTEXT_ICONS) + 12)->width + 10;
             int group_number;
@@ -929,9 +937,13 @@ static void draw_button_from_state(int state, int x, int y, building_type type, 
             break;
         }
         case BUILDING_STORAGE_STATE_NOT_ACCEPTING:
+        case BUILDING_STORAGE_STATE_NOT_ACCEPTING_28:
         case BUILDING_STORAGE_STATE_NOT_ACCEPTING_3QUARTERS:
+        case BUILDING_STORAGE_STATE_NOT_ACCEPTING_20:
         case BUILDING_STORAGE_STATE_NOT_ACCEPTING_HALF:
+        case BUILDING_STORAGE_STATE_NOT_ACCEPTING_12:
         case BUILDING_STORAGE_STATE_NOT_ACCEPTING_QUARTER:
+        case BUILDING_STORAGE_STATE_NOT_ACCEPTING_4:
             lang_text_draw_centered(99, 8, x, y, 210, FONT_NORMAL_RED);
             break;
         default:
@@ -944,17 +956,41 @@ static void draw_button_from_state(int state, int x, int y, building_type type, 
         case BUILDING_STORAGE_STATE_GETTING:
             button_text = type == BUILDING_GRANARY ? granary_full_button_text : warehouse_full_button_text;
             break;
+        case BUILDING_STORAGE_STATE_ACCEPTING_28:
+        case BUILDING_STORAGE_STATE_GETTING_28:
+            if (type == BUILDING_WAREHOUSE) {
+                button_text = warehouse_28_button_text;
+            }
+            break;
         case BUILDING_STORAGE_STATE_ACCEPTING_3QUARTERS:
         case BUILDING_STORAGE_STATE_GETTING_3QUARTERS:
             button_text = type == BUILDING_GRANARY ? granary_3quarters_button_text : warehouse_3quarters_button_text;
+            break;
+        case BUILDING_STORAGE_STATE_ACCEPTING_20:
+        case BUILDING_STORAGE_STATE_GETTING_20:
+            if (type == BUILDING_WAREHOUSE) {
+                button_text = warehouse_20_button_text;
+            }
             break;
         case BUILDING_STORAGE_STATE_ACCEPTING_HALF:
         case BUILDING_STORAGE_STATE_GETTING_HALF:
             button_text = type == BUILDING_GRANARY ? granary_half_button_text : warehouse_half_button_text;
             break;
+        case BUILDING_STORAGE_STATE_ACCEPTING_12:
+        case BUILDING_STORAGE_STATE_GETTING_12:
+            if (type == BUILDING_WAREHOUSE) {
+                button_text = warehouse_12_button_text;
+            }
+            break;
         case BUILDING_STORAGE_STATE_ACCEPTING_QUARTER:
         case BUILDING_STORAGE_STATE_GETTING_QUARTER:
             button_text = type == BUILDING_GRANARY ? granary_quarter_button_text : warehouse_quarter_button_text;
+            break;
+        case BUILDING_STORAGE_STATE_ACCEPTING_4:
+        case BUILDING_STORAGE_STATE_GETTING_4:
+            if (type == BUILDING_WAREHOUSE) {
+                button_text = warehouse_4_button_text;
+            }
             break;
         default:
             break;
