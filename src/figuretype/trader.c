@@ -798,11 +798,26 @@ void figure_trade_ship_action(figure *f)
                 f->wait_ticks = 0;
                 f->action_state = FIGURE_ACTION_114_TRADE_SHIP_ANCHORED;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
+                f->trade_ship_failed_dock_attempts++; //try to re-route to a different dock
                 f->wait_ticks = 0;
                 figure_route_remove(f);
-            } else if (f->direction == DIR_FIGURE_LOST) {
-                f->wait_ticks = 0;
-                f->state = FIGURE_STATE_DEAD;
+            } else if (f->direction == DIR_FIGURE_LOST) { // ship is lost
+                if (f->trade_ship_failed_dock_attempts < 10) {
+                    f->trade_ship_failed_dock_attempts++;
+                    f->wait_ticks = 0;
+                    figure_route_remove(f);
+                } else {
+                    f->wait_ticks = 0;
+                    f->state = FIGURE_STATE_DEAD;
+                    if (!f->last_visited_index) { //if the ship got lost before visiting any dock
+                        if (!city_message_get_category_count(MESSAGE_CAT_BLOCKED_DOCK)) { //inform player about lost ship
+                            city_message_post(1, MESSAGE_NAVIGATION_IMPOSSIBLE, 0, 0);
+                            city_message_increase_category_count(MESSAGE_CAT_BLOCKED_DOCK);
+                        }
+                    }
+                }
+
+
             } else if (f->wait_ticks++ >= FIGURE_REROUTE_DESTINATION_TICKS) {
                 f->wait_ticks = 0;
                 map_point tile;
