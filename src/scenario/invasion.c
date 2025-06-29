@@ -462,20 +462,60 @@ static void repeat_invasion_with_warnings(invasion_t *invasion)
 {
     repeat_invasion_without_warnings(invasion);
 
-    invasion_warning *warning;
-    array_foreach(data.warnings, warning) {
-        if (warning->invasion_id != invasion->id) {
+    int path_max = empire_object_get_max_invasion_path();
+    if (path_max == 0) {
+        return;
+    }
+
+    // Clear all old warnings related to this invasion
+    invasion_warning *w;
+    array_foreach(data.warnings, w) {
+        if (w->invasion_id == invasion->id) {
+            w->in_use = 0;
+            w->handled = 0;
+        }
+    }
+
+    // Calculate the invasion path similarly to init_warnings
+    int path = invasion->id % path_max + 1;
+
+    for (int year = 1; year < 8; year++) {
+        const empire_object *obj = empire_object_get_battle_icon(path, year);
+        if (!obj) {
             continue;
         }
+
+        invasion_warning *warning = array_advance(data.warnings);
+        if (!warning) {
+            log_error("Error expanding warning array - not enough memory. The game will probably crash.", 0, 0);
+            return;
+        }
+
         warning->in_use = 1;
         warning->handled = 0;
+        warning->invasion_path_id = obj->invasion_path_id;
+        warning->warning_years = obj->invasion_years;
+        warning->x = obj->x;
+        warning->y = obj->y;
+        warning->image_id = obj->image_id;
+        warning->invasion_id = invasion->id;
+        warning->empire_object_id = obj->id;
         warning->month_notified = 0;
         warning->year_notified = 0;
-        warning->months_to_go = 12 * invasion->year;
-        warning->months_to_go += invasion->month;
-        warning->months_to_go -= 12 * warning->warning_years;
+
+        // Calculate how many months remain until the invasion
+        int current_month = game_time_year() * 12 + game_time_month();
+        int invasion_month = (scenario.start_year + invasion->year) * 12 + invasion->month;
+        int warning_month_offset = warning->warning_years * 12;
+
+        warning->months_to_go = invasion_month - warning_month_offset - current_month;
+
+        // Adjustment for warnings spanning multiple years
         if (warning->warning_years > 1) {
-            warning->months_to_go++;  // later warnings haven't been handled by scenario_invasion_process, so we need to add a month
+            warning->months_to_go++;
+        }
+        if (warning->months_to_go < 0) {
+            warning->months_to_go = 0;
         }
     }
 }
@@ -550,10 +590,16 @@ void scenario_invasion_process(void)
                 }
             }
             if (invasion->repeat.times != 0) {
-                repeat_invasion_without_warnings(invasion);
+                //Fixing instant invasions
+                int current_month = game_time_year() * 12 + game_time_month();
+                int scheduled_month = (scenario.start_year + invasion->year) * 12 + invasion->month;
+                if (current_month >= scheduled_month) {
+                    repeat_invasion_without_warnings(invasion);
+                }
             }
         }
     }
+
 }
 
 int scenario_invasion_start_from_mars(void)
