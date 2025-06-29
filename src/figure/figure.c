@@ -39,7 +39,7 @@ int figure_count(void)
 figure *figure_create(figure_type type, int x, int y, direction_type dir)
 {
     figure *f = 0;
-    array_new_item(data.figures, 1, f);
+    array_new_item_after_index(data.figures, 1, f);
     if (!f) {
         return array_first(data.figures);
     }
@@ -67,7 +67,7 @@ figure *figure_create(figure_type type, int x, int y, direction_type dir)
     f->phrase_sequence_city = f->phrase_sequence_exact = random_byte() & 3;
     f->name = figure_name_get(type, 0);
     map_figure_add(f);
-    if (type == FIGURE_TRADE_CARAVAN || type == FIGURE_TRADE_SHIP) {
+    if (type == FIGURE_TRADE_CARAVAN || type == FIGURE_TRADE_SHIP || type == FIGURE_NATIVE_TRADER) {
         f->trader_id = trader_create();
     }
     return f;
@@ -137,6 +137,7 @@ void figure_delete(figure *f)
         case FIGURE_JAVELIN:
         case FIGURE_FRIENDLY_ARROW:
         case FIGURE_BOLT:
+        case FIGURE_CATAPULT_MISSILE:
         case FIGURE_SPEAR:
         case FIGURE_FISH_GULLS:
         case FIGURE_SHEEP:
@@ -213,7 +214,7 @@ int figure_is_dead(const figure *f)
 
 int figure_is_enemy(const figure *f)
 {
-    return f->type >= FIGURE_ENEMY43_SPEAR && f->type <= FIGURE_ENEMY_CAESAR_LEGIONARY;
+    return (f->type >= FIGURE_ENEMY43_SPEAR && f->type <= FIGURE_ENEMY_CAESAR_LEGIONARY) || f->type == FIGURE_ENEMY_CATAPULT;
 }
 
 int figure_is_legion(const figure *f)
@@ -226,7 +227,7 @@ int figure_is_herd(const figure *f)
     return f->type >= FIGURE_SHEEP && f->type <= FIGURE_ZEBRA;
 }
 
-static void initialize_new_figure(figure *f, int position)
+static void initialize_new_figure(figure *f, unsigned int position)
 {
     f->id = position;
 }

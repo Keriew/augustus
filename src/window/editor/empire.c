@@ -10,6 +10,7 @@
 #include "empire/type.h"
 #include "empire/xml.h"
 #include "graphics/arrow_button.h"
+#include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
@@ -31,36 +32,36 @@
 
 #define OUR_CITY -1
 
-static void button_change_empire(int is_up, int param2);
-static void button_ok(int param1, int param2);
-static void button_toggle_invasions(int param1, int param2);
-static void button_refresh(int param1, int param2);
-static void button_cycle_preview(int param1, int param2);
+static void button_change_empire(int is_down, int param2);
+static void button_ok(const generic_button *button);
+static void button_toggle_invasions(const generic_button *button);
+static void button_refresh(const generic_button *button);
+static void button_cycle_preview(const generic_button *button);
 
 static arrow_button arrow_buttons_empire[] = {
-    {8, 48, 17, 24, button_change_empire, 1, 0},
-    {32, 48, 15, 24, button_change_empire, 0, 0}
+    {8, 48, 17, 24, button_change_empire, 1},
+    {32, 48, 15, 24, button_change_empire}
 };
 static generic_button generic_buttons[] = {
-    {4, 48, 100, 24, button_ok, button_none, 0, 0},
-    {124, 48, 150, 24, button_toggle_invasions, button_none, 0, 0},
-    {294, 48, 150, 24, button_refresh, button_none, 0, 0},
+    {4, 48, 100, 24, button_ok},
+    {124, 48, 150, 24, button_toggle_invasions},
+    {294, 48, 150, 24, button_refresh},
 };
 static generic_button preview_button[] = {
-    {0, 0, 72, 72, button_cycle_preview, button_none, 0, 0},
+    {0, 0, 72, 72, button_cycle_preview},
 };
 
 static struct {
-    int selected_button;
+    unsigned int selected_button;
     int selected_city;
     int x_min, x_max, y_min, y_max;
     int x_draw_offset, y_draw_offset;
-    int focus_button_id;
+    unsigned int focus_button_id;
     int is_scrolling;
     int finished_scroll;
     int show_battle_objects;
     int preview_image_group;
-    int preview_button_focused;
+    unsigned int preview_button_focused;
     struct {
         int x;
         int y;
@@ -508,7 +509,11 @@ static void refresh_empire(void)
     if (scenario.empire.id != SCENARIO_CUSTOM_EMPIRE) {
         return;
     }
-    empire_xml_parse_file(scenario.empire.custom_name);
+    const char *filename = dir_get_file_at_location(scenario.empire.custom_name, PATH_LOCATION_EDITOR_CUSTOM_EMPIRES);
+    if (!filename) {
+        return;
+    }
+    empire_xml_parse_file(filename);
     window_invalidate();
 }
 
@@ -592,17 +597,17 @@ static void button_change_empire(int is_down, int param2)
     window_request_refresh();
 }
 
-static void button_ok(int param1, int param2)
+static void button_ok(const generic_button *button)
 {
     window_editor_map_show();
 }
 
-static void button_toggle_invasions(int param1, int param2)
+static void button_toggle_invasions(const generic_button *button)
 {
     data.show_battle_objects = !data.show_battle_objects;
 }
 
-static void button_cycle_preview(int param1, int param2)
+static void button_cycle_preview(const generic_button *button)
 {
     switch (data.preview_image_group) {
         case GROUP_EMPIRE_CITY:
@@ -624,7 +629,7 @@ static void button_cycle_preview(int param1, int param2)
     window_request_refresh();
 }
 
-static void button_refresh(int param1, int param2)
+static void button_refresh(const generic_button *button)
 {
     refresh_empire();
 }

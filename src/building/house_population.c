@@ -57,14 +57,14 @@ int house_population_get_capacity(building *house)
 {
     int max_pop = model_get_house(house->subtype.house_level)->max_people;
 
-    // Neptune module 2 bonus
-    if (building_monument_gt_module_is_active(NEPTUNE_MODULE_2_CAPACITY_AND_WATER) && house->data.house.temple_neptune) {
-        // add one so bonus affects large casa and up
-        max_pop += (max_pop + 1) / 20;
-    }
-
     if (house->house_is_merged) {
         max_pop *= 4;
+    }
+
+    // Neptune module 2 bonus
+    if (building_monument_gt_module_is_active(NEPTUNE_MODULE_2_CAPACITY_AND_WATER) &&
+        house->data.house.temple_neptune) {
+        max_pop += (max_pop + 1) / 20;
     }
     return max_pop;
 }

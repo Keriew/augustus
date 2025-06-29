@@ -95,7 +95,7 @@ int map_terrain_count_directly_adjacent_with_type(int grid_offset, int terrain);
 /**
  * Check orthogonal neighbours of a tile if they contain a terrain.
  * @param grid_offset Tile which neighbours will be checked.
- * @param terrain Terrain bitmask to be checked for.
+ * @param terrain_sum Terrain bitmask to be checked for.
  * @return 1 if any orthogonal tiles matches all terrains from the bitmask, 0 otherwise.
  */
 int map_terrain_count_directly_adjacent_with_types(int grid_offset, int terrain_sum);
@@ -143,6 +143,8 @@ void map_terrain_init_outside_map(void);
 
 void map_terrain_save_state(buffer *buf);
 void map_terrain_save_state_legacy(buffer *buf);
+
+void map_terrain_migrate_old_bridges(void);
 
 void map_terrain_load_state(buffer *buf, int expanded_terrain_data, buffer *images, int legacy_image_buffer);
 

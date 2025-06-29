@@ -50,6 +50,9 @@ int building_data_transfer_copy(building *b)
         case DATA_TYPE_MARKET:
             memcpy(data.resource, b->accepted_goods, sizeof(unsigned char) * RESOURCE_MAX);
             break;
+        case DATA_TYPE_TAVERN:
+            memcpy(data.resource, b->accepted_goods, sizeof(unsigned char) * RESOURCE_MAX);
+            break;
         case DATA_TYPE_GRANARY:
             storage = building_storage_get(b->storage_id);
             data.storage = *storage;
@@ -90,6 +93,7 @@ int building_data_transfer_paste(building *b)
             b->data.roadblock.exceptions = data.i16;
             break;
         case DATA_TYPE_MARKET:
+        case DATA_TYPE_TAVERN:
             memcpy(b->accepted_goods, data.resource, sizeof(unsigned char) * RESOURCE_MAX);
             break;
         case DATA_TYPE_GRANARY:
@@ -135,6 +139,8 @@ building_data_type building_data_transfer_data_type_from_building_type(building_
             return DATA_TYPE_WAREHOUSE;
         case BUILDING_MARKET:
             return DATA_TYPE_MARKET;
+        case BUILDING_TAVERN:
+            return DATA_TYPE_TAVERN;
         case BUILDING_DEPOT:
             return DATA_TYPE_DEPOT;
         default:

@@ -2,10 +2,12 @@
 
 #include "building/construction.h"
 #include "core/lang.h"
+#include "game/campaign.h"
 #include "game/file.h"
-#include "game/undo.h"
+#include "game/settings.h"
 #include "game/state.h"
 #include "game/system.h"
+#include "game/undo.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/lang_text.h"
@@ -19,21 +21,21 @@
 #include "window/popup_dialog.h"
 #include "window/city.h"
 #include "window/main_menu.h"
-#include "window/mission_briefing.h"
+#include "window/mission_selection.h"
 #include "window/plain_message_dialog.h"
 
-static void button_click(int type, int param2);
+static void button_click(const generic_button *button);
 
-static int focus_button_id;
+static unsigned int focus_button_id;
 
 static generic_button buttons[] = {
-        {192, 100, 192, 25, button_click, button_none, 1, 0},
-        {192, 140, 192, 25, button_click, button_none, 2, 0},
-        {192, 180, 192, 25, button_click, button_none, 3, 0},
-        {192, 220, 192, 25, button_click, button_none, 4, 0},
-        {192, 260, 192, 25, button_click, button_none, 5, 0},
-        {192, 300, 192, 25, button_click, button_none, 6, 0},
-        {192, 340, 192, 25, button_click, button_none, 7, 0},
+        {192, 100, 192, 25, button_click, 0, 1},
+        {192, 140, 192, 25, button_click, 0, 2},
+        {192, 180, 192, 25, button_click, 0, 3},
+        {192, 220, 192, 25, button_click, 0, 4},
+        {192, 260, 192, 25, button_click, 0, 5},
+        {192, 300, 192, 25, button_click, 0, 6},
+        {192, 340, 192, 25, button_click, 0, 7},
 };
 
 #define MAX_BUTTONS (sizeof(buttons) / sizeof(generic_button))
@@ -82,7 +84,7 @@ static void replay_map_confirmed(int confirmed, int checked)
     if (!confirmed) {
         return;
     }
-    if (scenario_is_custom()) {
+    if (!game_campaign_is_active()) {
         if (!game_file_start_scenario_by_name(scenario_name())) {
             window_plain_message_dialog_show_with_extra(TR_REPLAY_MAP_NOT_FOUND_TITLE,
                 TR_REPLAY_MAP_NOT_FOUND_MESSAGE, 0, scenario_name());
@@ -90,8 +92,10 @@ static void replay_map_confirmed(int confirmed, int checked)
             window_city_show();
         }
     } else {
+        int mission_id = game_campaign_is_original() ? scenario_campaign_mission() : 0;
+        setting_set_personal_savings_for_mission(mission_id, scenario_starting_personal_savings());
         scenario_save_campaign_player_name();
-        window_mission_briefing_show();
+        window_mission_selection_show_again();
     }
 }
 
@@ -112,8 +116,9 @@ static void confirm_exit(int accepted, int checked)
     }
 }
 
-static void button_click(int type, int param2)
+static void button_click(const generic_button *button)
 {
+    int type = button->parameter1;
     if (type == 1) {
         window_go_back();
     } else if (type == 2) {

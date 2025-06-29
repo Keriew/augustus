@@ -11,7 +11,8 @@ typedef enum {
     WINDOW_CONFIG,
     WINDOW_HOTKEY_CONFIG,
     WINDOW_HOTKEY_EDITOR,
-    WINDOW_NEW_CAMPAIGN,
+    WINDOW_SELECT_CAMPAIGN,
+    WINDOW_MISSION_LIST,
     WINDOW_CCK_SELECTION,
     WINDOW_FILE_DIALOG,
     WINDOW_POPUP_DIALOG,
@@ -102,6 +103,7 @@ typedef struct {
     void (*draw_foreground)(void);
     void (*handle_input)(const mouse *m, const hotkeys *h);
     void (*get_tooltip)(tooltip_context *c);
+    void (*on_return)(window_id from);
 } window_type;
 
 /**

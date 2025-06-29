@@ -1,8 +1,8 @@
 #include "property.h"
 
-#include "campaign/campaign.h"
 #include "core/calc.h"
 #include "core/string.h"
+#include "game/campaign.h"
 #include "graphics/image.h"
 #include "scenario/data.h"
 
@@ -38,17 +38,17 @@ void scenario_set_campaign_mission(int mission)
 
 int scenario_is_tutorial_1(void)
 {
-    return !scenario.settings.is_custom && scenario.campaign.rank == 0 && !campaign_is_active();
+    return game_campaign_is_original() && scenario.campaign.rank == 0;
 }
 
 int scenario_is_tutorial_2(void)
 {
-    return !scenario.settings.is_custom && scenario.campaign.rank == 1 && !campaign_is_active();
+    return game_campaign_is_original() && scenario.campaign.rank == 1;
 }
 
 int scenario_is_tutorial_3(void)
 {
-    return !scenario.settings.is_custom && scenario.campaign.rank == 2 && !campaign_is_active();
+    return game_campaign_is_original() && scenario.campaign.rank == 2;
 }
 
 int scenario_starting_favor(void)
@@ -166,7 +166,7 @@ int scenario_victory_message(void)
     return scenario.victory_custom_message_id;
 }
 
-void scenario_change_climate_cheat(scenario_climate climate)
+void scenario_change_climate(scenario_climate climate)
 {
     climate = calc_bound(climate, CLIMATE_CENTRAL, CLIMATE_DESERT);
     scenario.climate = climate;

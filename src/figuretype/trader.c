@@ -816,7 +816,7 @@ void figure_trade_ship_action(figure *f)
                     figure_route_remove(f);
                 }
                 if ((dock_id = building_dock_get_closer_free_destination(f->id,
-                        SHIP_DOCK_REQUEST_2_FIRST_QUEUE, &tile)) != 0) {
+                    SHIP_DOCK_REQUEST_2_FIRST_QUEUE, &tile)) != 0) {
                     f->action_state = FIGURE_ACTION_113_TRADE_SHIP_GOING_TO_DOCK_QUEUE;
                     f->destination_building_id = dock_id;
                     f->destination_x = tile.x;

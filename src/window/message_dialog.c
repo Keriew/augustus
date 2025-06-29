@@ -24,7 +24,6 @@
 #include "scenario/custom_messages.h"
 #include "scenario/property.h"
 #include "scenario/request.h"
-#include "sound/channel.h"
 #include "sound/device.h"
 #include "sound/music.h"
 #include "sound/speech.h"
@@ -34,6 +33,7 @@
 #include "window/editor/map.h"
 
 #define MAX_HISTORY 200
+#define POPUP_PROTECTION_MILIS 400
 
 static void draw_foreground_video(void);
 
@@ -101,6 +101,7 @@ static struct {
     int should_play_speech;
     int should_play_background_music;
     int background_image_id;
+    time_millis time_message_displayed;
 
     int x;
     int y;
@@ -108,7 +109,7 @@ static struct {
     int y_text;
     int text_height_blocks;
     int text_width_blocks;
-    int focus_button_id;
+    unsigned int focus_button_id;
 
     lang_message custom_lang_message;
     custom_message_t *custom_msg;
@@ -133,6 +134,10 @@ static void set_city_message(int year, int month,
     player_message.param2 = param2;
     player_message.message_advisor = advisor;
     player_message.use_popup = use_popup;
+
+    if (use_popup) {
+        data.time_message_displayed = time_get_millis();
+    }
 }
 
 static void setup_custom_lang_message(int text_id)
@@ -185,33 +190,34 @@ static void clear_custom_lang_message(void)
     data.custom_lang_message.content.text = 0;
     data.custom_lang_message.video.text = 0;
     data.should_play_audio = 0;
+    data.should_play_speech = 0;
     data.should_play_background_music = 0;
     data.background_image_id = 0;
 }
 
-static void fadeout_music(int unused)
+static void fadeout_music(sound_type unused)
 {
     sound_device_fadeout_music(5000);
     sound_device_on_audio_finished(0);
 }
 
-static void init_speech(int channel)
+static void init_speech(sound_type type)
 {
-    if (channel != SOUND_CHANNEL_SPEECH) {
+    if (type != SOUND_TYPE_SPEECH) {
         return;
     }
     int has_speech = data.should_play_speech && data.should_play_background_music;
     if (data.should_play_speech) {
         has_speech &= sound_device_play_file_on_channel(custom_messages_get_speech(data.custom_msg),
-                SOUND_CHANNEL_SPEECH, setting_sound(SOUND_SPEECH)->volume);
+                SOUND_TYPE_SPEECH, setting_sound(SOUND_TYPE_SPEECH)->volume);
     }
     if (data.should_play_background_music) {
         int volume = 100;
         if (has_speech) {
-            volume = setting_sound(SOUND_SPEECH)->volume / 3;
+            volume = setting_sound(SOUND_TYPE_SPEECH)->volume / 3;
         }
-        if (volume > setting_sound(SOUND_MUSIC)->volume) {
-            volume = setting_sound(SOUND_MUSIC)->volume;
+        if (volume > setting_sound(SOUND_TYPE_MUSIC)->volume) {
+            volume = setting_sound(SOUND_TYPE_MUSIC)->volume;
         }
         has_speech &= sound_device_play_music(custom_messages_get_background_music(data.custom_msg), volume, 0);
     }
@@ -224,17 +230,17 @@ static void init_audio(void)
         int playing_audio = 0;
         if (data.should_play_audio) {
             playing_audio = sound_device_play_file_on_channel(custom_messages_get_audio(data.custom_msg),
-                SOUND_CHANNEL_SPEECH, setting_sound(SOUND_SPEECH)->volume);
+                SOUND_TYPE_SPEECH, setting_sound(SOUND_TYPE_SPEECH)->volume);
         }
         if (data.should_play_speech) {
             if (!playing_audio) {
-                init_speech(SOUND_CHANNEL_SPEECH);
+                init_speech(SOUND_TYPE_SPEECH);
             } else {
                 sound_device_on_audio_finished(init_speech);
             }
         } else if (data.should_play_background_music) {
             sound_device_play_music(custom_messages_get_background_music(data.custom_msg),
-                setting_sound(SOUND_MUSIC)->volume, 0);
+                setting_sound(SOUND_TYPE_MUSIC)->volume, 0);
         }
     }
 }
@@ -410,7 +416,7 @@ static void draw_city_message_text(const lang_message *msg)
             if (msg->message_type == MESSAGE_TYPE_IMPERIAL) {
                 const scenario_request *request = scenario_request_get(player_message.param1);
                 int y_offset = data.y_text + 86 + lines * 16;
-                text_draw_number(request->amount, '@', " ", data.x_text + 8, y_offset, FONT_NORMAL_WHITE, 0);
+                text_draw_number(request->amount.requested, '@', " ", data.x_text + 8, y_offset, FONT_NORMAL_WHITE, 0);
                 image_draw(resource_image(request->resource), data.x_text + 70, y_offset - 5,
                     COLOR_MASK_NONE, SCALE_NONE);
                 text_draw(resource_get_data(request->resource)->text,
@@ -546,7 +552,7 @@ static void draw_background_video(void)
         lines_required = rich_text_draw(msg->content.text, 0, 0, 384, lines_available, 1);
         if (lines_required > lines_available) {
             small_font = 1;
-            rich_text_set_fonts(FONT_SMALL_PLAIN, FONT_SMALL_PLAIN, FONT_SMALL_PLAIN, 7);
+            rich_text_set_fonts(FONT_SMALL_PLAIN, FONT_SMALL_PLAIN, FONT_SMALL_PLAIN, 5);
             lines_required = rich_text_draw(msg->content.text, 0, 0, 384, lines_available, 1);
         }
     }
@@ -583,10 +589,10 @@ static void draw_background_video(void)
     if (msg->message_type != MESSAGE_TYPE_CUSTOM) {
         if (small_font) {
             // Draw in black and then white to create shadow effect
+           // rich_text_draw_colored(msg->content.text,
+           //     data.x + 16 + 1, y_base + 24 + 1, 384, data.text_height_blocks - 1, COLOR_BLACK);
             rich_text_draw_colored(msg->content.text,
-                data.x + 16 + 1, y_base + 24 + 1, 384, data.text_height_blocks - 1, COLOR_BLACK);
-            rich_text_draw_colored(msg->content.text,
-                data.x + 16, y_base + 24, 384, data.text_height_blocks - 1, COLOR_WHITE);
+                data.x + 16, y_base + 24, 384, data.text_height_blocks - 1, 0); //COLOR_WHITE
         } else {
             rich_text_draw(msg->content.text, data.x + 16, y_base + 24, 384, data.text_height_blocks - 1, 0);
         }
@@ -598,13 +604,13 @@ static void draw_background_video(void)
             y_text += 8;
         }
         const scenario_request *request = scenario_request_get(player_message.param1);
-        text_draw_number(request->amount, '@', " ", data.x + 8, y_text, FONT_NORMAL_WHITE, 0);
+        width = text_draw_number(request->amount.requested, '@', " ", data.x + 8, y_text, FONT_NORMAL_WHITE, 0);
         image_draw(resource_get_data(request->resource)->image.icon,
-            data.x + 70, y_text - 5, COLOR_MASK_NONE, SCALE_NONE);
-        text_draw(resource_get_data(request->resource)->text, data.x + 100, y_text, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
+            data.x + 5 + width, y_text - 5, COLOR_MASK_NONE, SCALE_NONE);
+        width += text_draw(resource_get_data(request->resource)->text, data.x + 30 + width, y_text, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
         if (request->state == REQUEST_STATE_NORMAL || request->state == REQUEST_STATE_OVERDUE) {
-            width = lang_text_draw_amount(8, 4, request->months_to_comply, data.x + 200, y_text, FONT_NORMAL_WHITE);
-            lang_text_draw(12, 2, data.x + 200 + width, y_text, FONT_NORMAL_WHITE);
+            width += lang_text_draw_amount(8, 4, request->months_to_comply, data.x + 45 + width, y_text, FONT_NORMAL_WHITE);
+            width += lang_text_draw(12, 2, data.x + 45 + width, y_text, FONT_NORMAL_WHITE);
         }
     }
 
@@ -775,6 +781,15 @@ static int handle_input_normal(const mouse *m_dialog, const lang_message *msg)
     return 0;
 }
 
+static int can_skip_popup(void)
+{
+    if (time_get_millis() > (data.time_message_displayed + POPUP_PROTECTION_MILIS)) {
+        return 1;
+    }
+
+    return 0;
+}
+
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     data.focus_button_id = 0;
@@ -786,7 +801,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
     } else {
         handled = handle_input_normal(m_dialog, msg);
     }
-    if (!handled && input_go_back_requested(m, h)) {
+    if (!handled && input_go_back_requested(m, h) && can_skip_popup()) {
         button_close(0, 0);
     }
 

@@ -16,15 +16,15 @@
 #include "translation/translation.h"
 
 static void arrow_button_bet(int is_down, int param2);
-static void button_horse_selection(int option, int param2);
-static void button_confirm(int option, int param2);
+static void button_horse_selection(const generic_button *button);
+static void button_confirm(const generic_button *button);
 static void button_close(int param1, int param2);
 
 static generic_button buttons[] = {
-        {34, 145, 81, 91, button_horse_selection, button_none, BLUE_HORSE, 0},
-        {144, 145, 81, 91, button_horse_selection, button_none, RED_HORSE, 0},
-        {254, 145, 81, 91, button_horse_selection, button_none, WHITE_HORSE, 0},
-        {364, 145, 81, 91, button_horse_selection, button_none, GREEN_HORSE, 0}
+        {34, 145, 81, 91, button_horse_selection, 0, BLUE_HORSE},
+        {144, 145, 81, 91, button_horse_selection, 0, RED_HORSE},
+        {254, 145, 81, 91, button_horse_selection, 0, WHITE_HORSE},
+        {364, 145, 81, 91, button_horse_selection, 0, GREEN_HORSE}
 };
 
 static arrow_button amount_buttons[] = {
@@ -32,7 +32,7 @@ static arrow_button amount_buttons[] = {
         {130, 306, 15, 24, arrow_button_bet, 0, 0}
 };
 static generic_button bet_buttons[] = {
-        {90, 354, 300, 20, button_confirm, button_none, 1, 0},
+        {90, 354, 300, 20, button_confirm},
 };
 
 static image_button image_button_close[] = {
@@ -41,13 +41,13 @@ static image_button image_button_close[] = {
 
 
 static struct {
-    int chosen_horse;
-    int bet_amount;
+    unsigned int chosen_horse;
+    unsigned int bet_amount;
     int in_progress_bet;
-    int focus_button_id;
-    int focus_button_id2;
-    int focus_button_id3;
-    int focus_image_button_id;
+    unsigned int focus_button_id;
+    unsigned int focus_button_id2;
+    unsigned int focus_button_id3;
+    unsigned int focus_image_button_id;
     int width_blocks;
     int height_blocks;
 } data;
@@ -119,7 +119,7 @@ static void draw_foreground(void)
 
     int border_id = assets_get_image_id("UI", "Image Border Small");
 
-    for (int i = 0; i < 4; i++) {
+    for (unsigned int i = 0; i < 4; i++) {
         color_t color = data.focus_button_id == (i + 1) || data.chosen_horse == (i + 1) ?
             COLOR_BORDER_RED : COLOR_BORDER_GREEN;
         image_draw_border(border_id, 34 + i * 110, 145, color);
@@ -166,15 +166,16 @@ static void arrow_button_bet(int is_down, int param2)
     }
 }
 
-static void button_horse_selection(int option, int param2)
+static void button_horse_selection(const generic_button *button)
 {
+    int option = button->parameter1;
     if (!data.in_progress_bet) {
         data.chosen_horse = option;
         window_request_refresh();
     }
 }
 
-static void button_confirm(int option, int param2)
+static void button_confirm(const generic_button *button)
 {
     // save bet and go back
     if (!city_data.games.chosen_horse && data.chosen_horse && data.bet_amount) {

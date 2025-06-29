@@ -82,6 +82,19 @@ function install_sdl_android {
   rm $FILENAME
 }
 
+function install_sdl_ios {
+  local MODULE=$1
+  local VERSION=$2
+  local DIRNAME=deps/$MODULE-$VERSION
+  local FILENAME=$DIRNAME.tar.gz
+  if [ ! -f "$FILENAME" ]
+  then
+    get_sdl_lib_url $MODULE $VERSION "tar.gz"
+    curl -o "$FILENAME" "$SDL_LIB_URL"
+  fi
+  tar -zxf $FILENAME -C ext/SDL2
+}
+
 mkdir -p deps
 if [ "$BUILD_TARGET" == "appimage" ] || [ "$BUILD_TARGET" == "codeql-cpp" ]
 then
@@ -90,7 +103,7 @@ elif [ "$BUILD_TARGET" == "flatpak" ]
 then
   sudo apt-get update && sudo apt-get -y install flatpak-builder
   sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-  sudo flatpak-builder repo com.github.keriew.augustus.json --install-deps-from=flathub --install-deps-only --delete-build-dirs
+  sudo flatpak-builder repo res/com.github.keriew.augustus.json --install-deps-from=flathub --install-deps-only --delete-build-dirs
   sudo rm -R .flatpak-builder
 elif [ ! -z "$SDL_VERSION" ] && [ ! -z "$SDL_MIXER_VERSION" ]
 then
@@ -114,6 +127,10 @@ then
       mkdir android/augustus/libs
       cp deps/SDL2-$BUILDTYPE.aar android/augustus/libs/SDL2-$BUILDTYPE.aar
     fi
+  elif [ "$BUILD_TARGET" == "ios" ]
+  then
+    install_sdl_ios "SDL2" $SDL_VERSION
+    install_sdl_ios "SDL2_mixer" $SDL_MIXER_VERSION
   else
     if [ "$BUILD_TARGET" == "emscripten" ]
     then

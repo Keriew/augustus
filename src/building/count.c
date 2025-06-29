@@ -68,7 +68,7 @@ static const building_type building_set_deco_paths[] = {
 
 static const building_type building_set_deco_statues[] = {
     BUILDING_GARDENS, BUILDING_GRAND_GARDEN, BUILDING_SMALL_STATUE, BUILDING_MEDIUM_STATUE,
-    BUILDING_LARGE_STATUE, BUILDING_SMALL_STATUE_ALT, BUILDING_SMALL_STATUE_ALT_B, BUILDING_LEGION_STATUE,
+    BUILDING_LARGE_STATUE, BUILDING_GODDESS_STATUE, BUILDING_SENATOR_STATUE, BUILDING_LEGION_STATUE,
     BUILDING_GLADIATOR_STATUE, BUILDING_SMALL_POND, BUILDING_LARGE_POND, BUILDING_DOLPHIN_FOUNTAIN
 };
 
@@ -149,9 +149,10 @@ int building_count_upgraded(building_type type)
 
 int building_count_in_area(building_type type, int minx, int miny, int maxx, int maxy)
 {
-    int grid_area = abs((maxx - minx) * (maxy - miny));
+    int grid_area = (abs(maxx - minx) + 1) * (abs(maxy - miny) + 1);
     int array_size = grid_area < building_count() ? grid_area : building_count();
-    int *found_buildings = (int *) malloc(array_size * sizeof(int));
+    unsigned int *found_buildings = (unsigned int *) malloc(array_size * sizeof(unsigned int));
+    memset(found_buildings, 0, array_size * sizeof(unsigned int));
 
     int total = 0;
     for (int x = minx; x <= maxx; x++) {
@@ -167,10 +168,17 @@ int building_count_in_area(building_type type, int minx, int miny, int maxx, int
                     continue;
                 }
 
+                int building_already_counted = 0;
+
                 for (int i = 0; i < total; i++) {
                     if (found_buildings[i] == b->id) {
-                        continue;
+                        building_already_counted = 1;
+                        break;
                     }
+                }
+
+                if (building_already_counted) {
+                    continue;
                 }
 
                 found_buildings[total] = b->id;
@@ -203,10 +211,17 @@ int building_count_fort_type_in_area(int minx, int miny, int maxx, int maxy, fig
                     continue;
                 }
 
+                int building_already_counted = 0;
+
                 for (int i = 0; i < total; i++) {
                     if (found_buildings[i] == b->id) {
-                        continue;
+                        building_already_counted = 1;
+                        break;
                     }
+                }
+
+                if (building_already_counted) {
+                    continue;
                 }
 
                 found_buildings[total] = b->id;

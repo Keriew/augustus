@@ -5,6 +5,7 @@
 #include "building/construction.h"
 #include "building/granary.h"
 #include "building/industry.h"
+#include "building/storage.h"
 #include "city/view.h"
 #include "core/config.h"
 #include "core/log.h"
@@ -221,7 +222,10 @@ static void draw_flattened_building_footprint(const building *b, int x, int y, i
     if (b->house_size) {
         image_base += 4;
     }
-    if (b->size == 1) {
+    if (building_type_is_bridge(b->type)){//dont draw bridges
+        return;
+    }
+    if (b->size == 1)  {
         image_draw_isometric_footprint_from_draw_tile(image_base, x, y, color_mask, scale);
     } else if (b->size == 2) {
         const int x_tile_offset[] = { 30, 0, 60, 30 };
@@ -410,7 +414,7 @@ static void draw_footprint(int x, int y, int grid_offset)
             }
         } else if ((terrain & TERRAIN_ROAD) && !(terrain & TERRAIN_BUILDING)) {
             image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, 0, scale);
-        } else if (terrain & TERRAIN_BUILDING) {
+        } else if ((terrain & TERRAIN_BUILDING) && !map_is_bridge(grid_offset) ) {
             city_with_overlay_draw_building_footprint(x, y, grid_offset, 0);
         } else {
             image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, 0, scale);
@@ -459,6 +463,110 @@ static void draw_overlay_column(int x, int y, int height, column_color_type colo
         image_draw(image_id, x + 5, y - 8 - capital_height - 10 * (height - 1) + 13, 0, scale);
     }
 }
+static void draw_depot_resource(building *b, int x, int y, color_t color_mask)
+{
+    int img_id;
+
+    if (b->num_workers > 0) {
+        switch(b->data.depot.current_order.resource_type) {
+            case RESOURCE_VEGETABLES:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Vegetables");
+                break;
+            case RESOURCE_FRUIT:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Fruit");
+                break;
+            case RESOURCE_MEAT:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Meat");
+                break;
+            case RESOURCE_FISH:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Fish");
+                break;
+            case RESOURCE_VINES:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Grapes");
+                break;
+            case RESOURCE_POTTERY:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Pottery");
+                break;
+            case RESOURCE_FURNITURE:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Furniture");
+                break;
+            case RESOURCE_OIL:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Oil");
+                break;
+            case RESOURCE_WINE:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Wine");
+                break;
+            case RESOURCE_MARBLE:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Marble");
+                break;
+            case RESOURCE_WEAPONS:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Weapons");
+                break;
+            case RESOURCE_CLAY:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Clay");
+                break;
+            case RESOURCE_TIMBER:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Timber");
+                break;
+            case RESOURCE_OLIVES:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Olives");
+                break;
+            case RESOURCE_IRON:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Iron");
+                break;
+            case RESOURCE_GOLD:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Gold");
+                break;
+            case RESOURCE_SAND:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Sand");
+                break;
+            case RESOURCE_STONE:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Stone");
+                break;
+            case RESOURCE_BRICKS:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Bricks");
+                break;
+            case RESOURCE_WHEAT:
+            default:
+                img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Wheat");
+                break;
+        }        
+    } else {
+        img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Cat");
+    }
+    image_draw(img_id, x + 11, y, COLOR_MASK_NONE, scale);
+}
+static void draw_permissions_flag(building *b, int x, int y, color_t color_mask)
+{
+    if (b->has_plague) {
+        return;
+    }
+    static int base_permission_image[8];
+    if (!base_permission_image[0]) {
+        base_permission_image[0] = 0xdeadbeef; // Invalid image ID, just to confirm the other values have been set
+        base_permission_image[1] = assets_get_image_id("UI", "Warehouse_Flag_Market");
+        base_permission_image[2] = assets_get_image_id("UI", "Warehouse_Flag_Land");
+        base_permission_image[3] = assets_get_image_id("UI", "Warehouse_Flag_Market_Land");
+        base_permission_image[4] = assets_get_image_id("UI", "Warehouse_Flag_Sea");
+        base_permission_image[5] = assets_get_image_id("UI", "Warehouse_Flag_Market_Sea");
+        base_permission_image[6] = assets_get_image_id("UI", "Warehouse_Flag_Land_Sea");
+        base_permission_image[7] = assets_get_image_id("UI", "Warehouse_Flag_All");
+    }
+    const building_storage *storage = building_storage_get(b->storage_id);
+    int flag_permission_mask = 0x7;
+    int permissions = (~storage->permissions) & flag_permission_mask;
+    if (!permissions) {
+        return;
+    }
+    image_draw(base_permission_image[permissions] + b->data.warehouse.flag_frame, x, y, color_mask,scale);
+
+    building_animation_advance_storage_flag(b, base_permission_image[permissions]);
+}
+
+static void draw_warehouse_ornaments(int x, int y, color_t color_mask)
+{
+    image_draw(image_group(GROUP_BUILDING_WAREHOUSE) + 17, x - 4, y - 42, color_mask,scale);
+}
 
 static void draw_building_top(int grid_offset, building *b, int x, int y)
 {
@@ -490,9 +598,15 @@ static void draw_building_top(int grid_offset, building *b, int x, int y)
                 image_draw(image_group(GROUP_BUILDING_GRANARY) + 5, x + 117, y - 62, color_mask, scale);
             }
         }
+        draw_permissions_flag(b, x + 81, y - 101, color_mask);
     }
     if (b->type == BUILDING_WAREHOUSE) {
         image_draw(image_group(GROUP_BUILDING_WAREHOUSE) + 17, x - 4, y - 42, color_mask, scale);
+        draw_warehouse_ornaments(x, y, color_mask);
+        draw_permissions_flag(b, x + 19, y - 56, color_mask);
+    }
+    if (b->type == BUILDING_DEPOT) {
+        draw_depot_resource(b, x, y, color_mask);
     }
 
     image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
@@ -546,6 +660,7 @@ static void draw_animation(int x, int y, int grid_offset)
         switch (overlay->type) {
             case OVERLAY_FIRE:
             case OVERLAY_CRIME:
+            case OVERLAY_ENEMY:
                 if (btype == BUILDING_PREFECTURE || btype == BUILDING_BURNING_RUIN) {
                     draw = 1;
                 }
@@ -570,7 +685,9 @@ static void draw_animation(int x, int y, int grid_offset)
 
     int image_id = map_image_at(grid_offset);
     const image *img = image_get(image_id);
-    if (img->animation && draw) {
+    if (map_is_bridge(grid_offset)) {
+        city_draw_bridge(x, y, scale, grid_offset);
+    } else if (img->animation && draw) {
         if (map_property_is_draw_tile(grid_offset)) {
             building *b = building_get(map_building_at(grid_offset));
             int color_mask = draw_building_as_deleted(b) ? COLOR_MASK_RED : 0;
@@ -607,8 +724,6 @@ static void draw_animation(int x, int y, int grid_offset)
                 }
             }
         }
-    } else if (map_is_bridge(grid_offset)) {
-        city_draw_bridge(x, y, scale, grid_offset);
     }
 }
 

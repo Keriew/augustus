@@ -1,13 +1,13 @@
 #include "rich_text.h"
 
 #include "assets/assets.h"
-#include "campaign/campaign.h"
 #include "core/calc.h"
 #include "core/file.h"
 #include "core/image.h"
 #include "core/image_group.h"
 #include "core/locale.h"
 #include "core/string.h"
+#include "game/campaign.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/image_button.h"
@@ -257,7 +257,7 @@ static int get_external_image_id(const char *filename)
     const char *found_path = 0;
     for (int i = 0; i < 2 && !found_path; i++) {
         snprintf(full_path, FILE_NAME_MAX, "%s/%s", paths[i], filename);
-        if (campaign_has_file(full_path)) {
+        if (game_campaign_has_file(full_path)) {
             found_path = full_path;
         } else {
             found_path = dir_get_file_at_location(full_path, PATH_LOCATION_COMMUNITY);
@@ -341,7 +341,7 @@ int rich_text_parse_image_id(const uint8_t **position, int default_image_group, 
 }
 
 static int draw_text(const uint8_t *text, int x_offset, int y_offset,
-                     int box_width, int height_lines, color_t color, int measure_only)
+                     int box_width, unsigned int height_lines, color_t color, int measure_only)
 {
     if (!measure_only) {
         graphics_set_clip_rectangle(x_offset, y_offset, box_width, data.line_height * height_lines);
@@ -357,8 +357,8 @@ static int draw_text(const uint8_t *text, int x_offset, int y_offset,
     int has_more_characters = 1;
     int y = y_offset;
     int guard = 0;
-    int line = 0;
-    int num_lines = 0;
+    unsigned int line = 0;
+    unsigned int num_lines = 0;
     int heading = 0;
     while (has_more_characters || lines_to_skip) {
         if (++guard >= 1000) {

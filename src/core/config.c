@@ -16,6 +16,7 @@ static int needs_user_directory_setup;
 static const char *ini_keys[] = {
     "enable_audio",
     "master_volume",
+    "enable_music_randomise",
     "enable_audio_in_videos",
     "video_volume",
     "has_set_user_directories",
@@ -74,6 +75,8 @@ static const char *ini_keys[] = {
     "gameplay_change_nonmilitary_gates_allow_walkers",
     "ui_show_speedrun_info",
     "ui_show_desirability_range",
+    "ui_draw_asclepius",
+    "ui_show_desirability_range_all",
 };
 
 static const char *ini_string_keys[] = {
@@ -86,6 +89,7 @@ static char string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX];
 static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_GENERAL_ENABLE_AUDIO] = 1,
     [CONFIG_GENERAL_MASTER_VOLUME] = 100,
+    [CONFIG_GENERAL_ENABLE_MUSIC_RANDOMISE] = 0,
     [CONFIG_GENERAL_ENABLE_VIDEO_SOUND] = 1,
     [CONFIG_GENERAL_VIDEO_VOLUME] = 100,
     [CONFIG_GENERAL_HAS_SET_USER_DIRECTORIES] = 1,
@@ -97,11 +101,12 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_UI_ASK_CONFIRMATION_ON_FILE_OVERWRITE] = 1,
     [CONFIG_SCREEN_DISPLAY_SCALE] = 100,
     [CONFIG_SCREEN_CURSOR_SCALE] = 100,
-    [CONFIG_GP_CH_MAX_GRAND_TEMPLES] = 2,    
+    [CONFIG_GP_CH_MAX_GRAND_TEMPLES] = 2,
     [CONFIG_UI_SHOW_DESIRABILITY_RANGE] = 0,
+    [CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL] = 0,
 };
 
-static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX];
+static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };
 
 int config_get(config_key key)
 {
@@ -149,9 +154,7 @@ static void set_defaults(void)
 void config_load(void)
 {
     set_defaults();
-    // Override default, if value is the same at end, then we never setup the directories
-    needs_user_directory_setup = 0;
-    values[CONFIG_GENERAL_HAS_SET_USER_DIRECTORIES] = -1;
+    needs_user_directory_setup = 1;
     const char *file_name = dir_get_file_at_location(INI_FILENAME, PATH_LOCATION_CONFIG);
     if (!file_name) {
         return;
@@ -160,6 +163,10 @@ void config_load(void)
     if (!fp) {
         return;
     }
+    // Override default, if value is the same at end, then we never setup the directories
+    needs_user_directory_setup = 0;
+    values[CONFIG_GENERAL_HAS_SET_USER_DIRECTORIES] = -1;
+
     char line_buffer[MAX_LINE];
     char *line;
     while ((line = fgets(line_buffer, MAX_LINE, fp)) != 0) {

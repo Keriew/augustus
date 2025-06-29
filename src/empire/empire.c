@@ -2,7 +2,6 @@
 
 #include "assets/assets.h"
 #include "building/count.h"
-#include "campaign/campaign.h"
 #include "city/constants.h"
 #include "city/population.h"
 #include "city/resource.h"
@@ -18,6 +17,7 @@
 #include "empire/city.h"
 #include "empire/object.h"
 #include "empire/trade_route.h"
+#include "game/campaign.h"
 #include "game/save_version.h"
 #include "scenario/empire.h"
 
@@ -67,7 +67,7 @@ static void set_image_id(const char *path)
         char full_path[FILE_NAME_MAX];
         const char *found_path = 0;
         snprintf(full_path, FILE_NAME_MAX, "%s/%s", paths[i], path);
-        if (campaign_has_file(full_path)) {
+        if (game_campaign_has_file(full_path)) {
             found_path = full_path;
         } else {
             found_path = dir_get_file_at_location(full_path, PATH_LOCATION_COMMUNITY);
@@ -280,6 +280,33 @@ void empire_select_object(int x, int y)
 
     data.selected_object = empire_object_get_closest(map_x, map_y);
 }
+int empire_get_hovered_object(int x, int y)
+{
+    int map_x = x + data.scroll_x;
+    int map_y = y + data.scroll_y;
+
+    return empire_object_get_closest(map_x, map_y);
+}
+void empire_select_object_by_id(int object_id)
+{
+    object_id +=1 ;// index 0 means no selection, so increase by 1
+    if (object_id <= 0) {
+        data.selected_object = 0;
+        return;
+    }
+
+    const empire_object *obj = empire_object_get(object_id);
+    if (!obj) {
+        data.selected_object = 0;
+        return;
+    }
+
+    // In the empire view, objects are indexed starting from 1
+    // because 0 means "no selection"
+    data.selected_object = object_id;
+}
+
+
 
 int empire_can_export_resource_to_city(int city_id, int resource)
 {

@@ -1,12 +1,12 @@
 #include "emperor.h"
 
-#include "campaign/campaign.h"
 #include "city/data_private.h"
 #include "city/finance.h"
 #include "city/message.h"
 #include "city/ratings.h"
 #include "core/calc.h"
 #include "figure/formation.h"
+#include "game/campaign.h"
 #include "game/difficulty.h"
 #include "game/time.h"
 #include "scenario/property.h"
@@ -15,6 +15,15 @@
 #define RANKS 11
 
 static const int SALARY_PERCENTAGE_FOR_RANK[11] = {0, 2, 5, 8, 12, 20, 30, 40, 60, 80, 100};
+
+static const struct {
+    int base;
+    int savings_divisor ;
+} GIFT_DATA[GIFT_MAX] = {
+    {20, 8},
+    {50, 4},
+    {100, 2}
+};
 
 static int cheated_invasion = 0;
 
@@ -28,7 +37,7 @@ void city_emperor_init_scenario(int rank)
         city_data.emperor.caesar_salary = 100;
     }
     int salary_rank = rank;
-    if (scenario_is_custom() && !campaign_is_active()) {
+    if (!game_campaign_is_active()) {
         city_data.emperor.personal_savings = 0;
         city_data.emperor.player_rank = scenario_property_player_rank();
         salary_rank = scenario_property_player_rank();
@@ -207,9 +216,9 @@ int city_emperor_can_send_gift(int size)
 void city_emperor_calculate_gift_costs(void)
 {
     int savings = city_data.emperor.personal_savings;
-    city_data.emperor.gifts[GIFT_MODEST].cost = calc_adjust_with_percentage(savings / 8 + 20, city_data.emperor.caesar_salary);
-    city_data.emperor.gifts[GIFT_GENEROUS].cost = calc_adjust_with_percentage(savings / 4 + 50, city_data.emperor.caesar_salary);
-    city_data.emperor.gifts[GIFT_LAVISH].cost = calc_adjust_with_percentage(savings / 2 + 100, city_data.emperor.caesar_salary);
+    city_data.emperor.gifts[GIFT_MODEST].cost = savings/ GIFT_DATA[GIFT_MODEST].savings_divisor + calc_adjust_with_percentage(GIFT_DATA[GIFT_MODEST].base, city_data.emperor.caesar_salary);
+    city_data.emperor.gifts[GIFT_GENEROUS].cost = savings / GIFT_DATA[GIFT_GENEROUS].savings_divisor + calc_adjust_with_percentage(GIFT_DATA[GIFT_GENEROUS].base, city_data.emperor.caesar_salary);
+    city_data.emperor.gifts[GIFT_LAVISH].cost = savings / GIFT_DATA[GIFT_LAVISH].savings_divisor + calc_adjust_with_percentage(GIFT_DATA[GIFT_LAVISH].base, city_data.emperor.caesar_salary);
 }
 
 void city_emperor_send_gift(void)

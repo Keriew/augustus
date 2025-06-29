@@ -1,125 +1,258 @@
 #include "allowed_buildings.h"
 
+#include "building/menu.h"
+#include "building/properties.h"
+#include "building/type.h"
+#include "core/lang.h"
+#include "core/string.h"
 #include "graphics/button.h"
 #include "graphics/color.h"
-#include "graphics/generic_button.h"
 #include "graphics/graphics.h"
+#include "graphics/grid_box.h"
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
+#include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
+#include "scenario/allowed_building.h"
 #include "scenario/editor.h"
 #include "window/editor/attributes.h"
 #include "window/editor/map.h"
 
-static void toggle_building(int id, int param2);
+static void draw_allowed_building(const grid_box_item *item);
+static void toggle_building(const grid_box_item *item);
 
-static generic_button buttons[] = {
-    {25, 82, 190, 18, toggle_building, button_none, 1, 0},
-    {25, 102, 190, 18, toggle_building, button_none, 2, 0},
-    {25, 122, 190, 18, toggle_building, button_none, 3, 0},
-    {25, 142, 190, 18, toggle_building, button_none, 4, 0},
-    {25, 162, 190, 18, toggle_building, button_none, 5, 0},
-    {25, 182, 190, 18, toggle_building, button_none, 6, 0},
-    {25, 202, 190, 18, toggle_building, button_none, 7, 0},
-    {25, 222, 190, 18, toggle_building, button_none, 8, 0},
-    {25, 242, 190, 18, toggle_building, button_none, 9, 0},
-    {25, 262, 190, 18, toggle_building, button_none, 10, 0},
-    {25, 282, 190, 18, toggle_building, button_none, 11, 0},
-    {25, 302, 190, 18, toggle_building, button_none, 12, 0},
-    {25, 322, 190, 18, toggle_building, button_none, 13, 0},
-    {25, 342, 190, 18, toggle_building, button_none, 14, 0},
-    {25, 362, 190, 18, toggle_building, button_none, 15, 0},
-    {25, 382, 190, 18, toggle_building, button_none, 16, 0},
-    {224, 82, 190, 18, toggle_building, button_none, 17, 0},
-    {224, 102, 190, 18, toggle_building, button_none, 18, 0},
-    {224, 122, 190, 18, toggle_building, button_none, 19, 0},
-    {224, 142, 190, 18, toggle_building, button_none, 20, 0},
-    {224, 162, 190, 18, toggle_building, button_none, 21, 0},
-    {224, 182, 190, 18, toggle_building, button_none, 22, 0},
-    {224, 202, 190, 18, toggle_building, button_none, 23, 0},
-    {224, 222, 190, 18, toggle_building, button_none, 24, 0},
-    {224, 242, 190, 18, toggle_building, button_none, 25, 0},
-    {224, 262, 190, 18, toggle_building, button_none, 26, 0},
-    {224, 282, 190, 18, toggle_building, button_none, 27, 0},
-    {224, 302, 190, 18, toggle_building, button_none, 28, 0},
-    {224, 322, 190, 18, toggle_building, button_none, 29, 0},
-    {224, 342, 190, 18, toggle_building, button_none, 30, 0},
-    {224, 362, 190, 18, toggle_building, button_none, 31, 0},
-    {224, 382, 190, 18, toggle_building, button_none, 32, 0},
-    {423, 82, 190, 18, toggle_building, button_none, 33, 0},
-    {423, 102, 190, 18, toggle_building, button_none, 34, 0},
-    {423, 122, 190, 18, toggle_building, button_none, 35, 0},
-    {423, 142, 190, 18, toggle_building, button_none, 36, 0},
-    {423, 162, 190, 18, toggle_building, button_none, 37, 0},
-    {423, 182, 190, 18, toggle_building, button_none, 38, 0},
-    {423, 202, 190, 18, toggle_building, button_none, 39, 0},
-    {423, 222, 190, 18, toggle_building, button_none, 40, 0},
-    {423, 242, 190, 18, toggle_building, button_none, 41, 0},
-    {423, 262, 190, 18, toggle_building, button_none, 42, 0},
-    {423, 282, 190, 18, toggle_building, button_none, 43, 0},
-    {423, 302, 190, 18, toggle_building, button_none, 44, 0},
-    {423, 322, 190, 18, toggle_building, button_none, 45, 0},
-    {423, 342, 190, 18, toggle_building, button_none, 46, 0},
-    {423, 362, 190, 18, toggle_building, button_none, 47, 0},
-    {423, 382, 190, 18, toggle_building, button_none, 48, 0},
+typedef enum {
+    ITEM_TYPE_NONE = 0,
+    ITEM_TYPE_MENU = 1,
+    ITEM_TYPE_BUILDING = 2
+} item_type;
+
+typedef struct {
+    item_type type;
+    build_menu_group parent;
+    build_menu_group menu;
+    building_type building;
+} menu_item;
+
+static grid_box_type allowed_building_list = {
+    .x = 25,
+    .y = 82,
+    .width = 36 * BLOCK_SIZE,
+    .height = 20 * BLOCK_SIZE,
+    .item_height = 28,
+    .item_margin.horizontal = 8,
+    .item_margin.vertical = 2,
+    .extend_to_hidden_scrollbar = 1,
+    .draw_item = draw_allowed_building,
+    .on_click = toggle_building
 };
 
-static int focus_button_id;
+static struct {
+    menu_item items[BUILD_MENU_MAX + BUILDING_TYPE_MAX];
+    unsigned int total_items;
+    void (*select_callback)(int);
+    building_type selected_building;
+} data;
+
+static unsigned int count_menu_items(build_menu_group menu)
+{
+    unsigned int count = 0;
+    unsigned int menu_items = building_menu_count_all_items(menu);
+
+    for (unsigned int i = 0; i < menu_items; i++) {
+        building_type type = building_menu_type(menu, i);
+        build_menu_group submenu = building_menu_get_submenu_for_type(type);
+        if (submenu) {
+            if (submenu == menu) {
+                continue;
+            }
+            count += count_menu_items(submenu);
+        } else {
+            count++;
+        }
+    }
+    return count;
+}
+
+static void populate_menu_items(build_menu_group menu)
+{
+    unsigned int count = count_menu_items(menu);
+    if (!count) {
+        return;
+    }
+    data.items[data.total_items].type = ITEM_TYPE_MENU;
+    data.items[data.total_items].menu = menu;
+
+    // Top menu with single element - show the element directly
+    if (count == 1 && !data.items[data.total_items].parent) {
+        data.items[data.total_items].building = building_menu_type(menu, 0);
+        data.total_items++;
+        return;
+    }
+
+    data.total_items++;
+
+    unsigned int menu_items = building_menu_count_all_items(menu);
+    for (unsigned int i = 0; i < menu_items; i++) {
+        building_type type = building_menu_type(menu, i);
+        build_menu_group submenu = building_menu_get_submenu_for_type(type);
+        if (submenu) {
+            if (submenu == menu) {
+                continue;
+            }
+            data.items[data.total_items].parent = menu;
+            data.items[data.total_items].building = type;
+            populate_menu_items(submenu);
+        } else {
+            data.items[data.total_items].parent = menu;
+            data.items[data.total_items].type = ITEM_TYPE_BUILDING;
+            data.items[data.total_items].building = type;
+            data.total_items++;
+        }
+    }
+}
+
+static void populate_items(void)
+{
+    if (data.total_items) {
+        return;
+    }
+    for (build_menu_group group = 0; group < BUILD_MENU_MAX; group++) {
+        // Top level function: main menus only
+        if (building_menu_is_submenu(group)) {
+            break;
+        }
+        populate_menu_items(group);
+    }
+}
+
+static void init(void (*on_select_callback)(int), int selected)
+{
+    data.select_callback = on_select_callback;
+    data.selected_building = selected;
+    populate_items();
+    grid_box_init(&allowed_building_list, data.total_items);
+}
 
 static void draw_background(void)
 {
     window_editor_map_draw_all();
+
+    graphics_in_dialog();
+
+    outer_panel_draw(16, 32, 38, 26);
+    lang_text_draw_centered(44, 47, 26, 42, 608, FONT_LARGE_BLACK);
+    lang_text_draw_centered(13, 3, 16, 424, 608, FONT_NORMAL_BLACK);
+
+    graphics_reset_dialog();
+
+    grid_box_request_refresh(&allowed_building_list);
+}
+
+static void draw_button(const uint8_t *name, building_type type, int x, int y, int width, int height, int is_focused)
+{
+    button_border_draw(x, y, width, height, is_focused);
+    int allowed = scenario_allowed_building(type);
+    font_t font = allowed || data.select_callback ? FONT_NORMAL_BLACK : FONT_NORMAL_PLAIN;
+    color_t color = allowed || data.select_callback ? 0 : COLOR_FONT_RED;
+    text_draw(name, x + 8, y + 8, font, color);
+    if (!data.select_callback) {
+        const uint8_t *text = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_ALLOWED_BUILDINGS_NOT_ALLOWED - allowed);
+        text_draw_right_aligned(text, x, y + 8, width - 8, font, color);
+    } else if (type == data.selected_building) {
+        lang_text_draw_right_aligned(CUSTOM_TRANSLATION, TR_SELECTED, x, y + 8, width - 8, FONT_NORMAL_BLACK);
+    }
+}
+
+static void draw_allowed_building(const grid_box_item *item)
+{
+    const menu_item *current_menu = &data.items[item->index];
+    if (current_menu->type == ITEM_TYPE_BUILDING) {
+        int x_offset = 0;
+        int y_offset = 0;
+        if (building_menu_is_submenu(current_menu->parent)) {
+            x_offset = 20;
+            y_offset = -4;
+        }
+        draw_button(lang_get_building_type_string(current_menu->building), current_menu->building,
+            item->x + x_offset, item->y + y_offset, item->width - x_offset, item->height, item->is_focused);
+    } else if (current_menu->type == ITEM_TYPE_MENU) {
+        if (building_menu_is_submenu(current_menu->menu)) {
+            int width = text_draw(string_from_ascii(" -"), item->x + 4, item->y + 8, FONT_NORMAL_BLACK, 0);
+            width += lang_text_draw(28, current_menu->building, item->x + 4 + width, item->y + 8, FONT_NORMAL_BLACK);
+            text_draw(string_from_ascii(":"), item->x + 4 + width - 6, item->y + 8, FONT_NORMAL_BLACK, 0);
+        } else {
+            if (current_menu->building == BUILDING_NONE) {
+                int width = lang_text_draw(68, current_menu->menu + 20, item->x + 4, item->y + 12, FONT_NORMAL_BLACK);
+                text_draw(string_from_ascii(":"), item->x + 4 + width - 6, item->y + 12, FONT_NORMAL_BLACK, 0);
+            } else {
+                draw_button(lang_get_string(68, current_menu->menu + 20), current_menu->building,
+                    item->x, item->y, item->width, item->height, item->is_focused);
+            }
+        }
+    }
 }
 
 static void draw_foreground(void)
 {
     graphics_in_dialog();
 
-    outer_panel_draw(16, 32, 38, 26);
-
-    lang_text_draw(44, 47, 26, 42, FONT_LARGE_BLACK);
-    lang_text_draw_centered(13, 3, 16, 424, 608, FONT_NORMAL_BLACK);
-    for (int i = 1; i <= 48; i++) {
-        int x, y;
-        if (i <= 16) {
-            x = 25;
-            y = 82 + 20 * (i - 1);
-        } else if (i <= 32) {
-            x = 224;
-            y = 82 + 20 * (i - 17);
-        } else {
-            x = 423;
-            y = 82 + 20 * (i - 33);
-        }
-        button_border_draw(x, y, 190, 18, focus_button_id == i);
-        if (scenario_editor_is_building_allowed(i)) {
-            lang_text_draw_centered(67, i, x, y + 4, 190, FONT_NORMAL_BLACK);
-        } else {
-            lang_text_draw_centered_colored(67, i, x, y + 4, 190, FONT_NORMAL_PLAIN, COLOR_FONT_RED);
-        }
-    }
+    grid_box_draw(&allowed_building_list);
 
     graphics_reset_dialog();
 }
 
 static void handle_input(const mouse *m, const hotkeys *h)
 {
-    if (generic_buttons_handle_mouse(mouse_in_dialog(m), 0, 0, buttons, 48, &focus_button_id)) {
+    if (grid_box_handle_input(&allowed_building_list, mouse_in_dialog(m), 1)) {
         return;
     }
     if (input_go_back_requested(m, h)) {
-        window_editor_attributes_show();
+        window_go_back();
     }
 }
 
-void toggle_building(int id, int param2)
+static int can_toggle_item(const menu_item *item)
 {
-    scenario_editor_toggle_building_allowed(id);
+    if (item->type == ITEM_TYPE_BUILDING) {
+        return 1;
+    }
+    return item->type == ITEM_TYPE_MENU && !item->parent && item->building != BUILDING_NONE;
+}
+
+void toggle_building(const grid_box_item *item)
+{
+    const menu_item *current_menu = &data.items[item->index];
+    if (!can_toggle_item(current_menu)) {
+        return;
+    }
+    if (data.select_callback) {
+        data.select_callback(current_menu->building);
+        window_go_back();
+        return;
+    }
+    int allowed = scenario_allowed_building(current_menu->building);
+    scenario_allowed_building_set(current_menu->building, allowed ^ 1);
+    scenario_editor_set_as_unsaved();
+    window_request_refresh();
 }
 
 void window_editor_allowed_buildings_show(void)
 {
+    init(0, 0);
+    window_type window = {
+        WINDOW_EDITOR_ALLOWED_BUILDINGS,
+        draw_background,
+        draw_foreground,
+        handle_input
+    };
+    window_show(&window);
+}
+
+void window_editor_allowed_buildings_select(void (*on_select_callback)(int), int selected)
+{
+    init(on_select_callback, selected);
     window_type window = {
         WINDOW_EDITOR_ALLOWED_BUILDINGS,
         draw_background,

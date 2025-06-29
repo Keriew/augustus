@@ -65,14 +65,22 @@ static int has_required_goods_and_services(building *house, int for_upgrade, int
     int water = model->water;
     if (!house->has_water_access) {
         if (water >= 2) {
-            ++demands->missing.fountain;
-            return 0;
+            if (level > HOUSE_SMALL_CASA) {
+                ++demands->missing.fountain;
+                return  0;
+            } else if (!house->has_well_access) {
+                ++demands->missing.well;
+                return 0;
+            } else if (level > HOUSE_LARGE_SHACK && !house->has_latrines_access) {
+                return 0;
+            }
         }
         if (water == 1 && !house->has_well_access) {
             ++demands->missing.well;
             return 0;
         }
     }
+
     // entertainment
     int entertainment = model->entertainment;
     if (house->data.house.entertainment < entertainment) {
@@ -534,10 +542,6 @@ static void consume_resources(building *b)
         if (!resource_is_inventory(r)) {
             continue;
         }
-        // mars module 2 - all goods reduced by 10% 
-        if (b->data.house.temple_mars && building_monument_gt_module_is_active(MARS_MODULE_2_ALL_GOODS)) {
-            consumption_reduction[r] += 10;
-        }
         if (!consumption_reduction[r] ||
             (game_time_total_months() % (100 / consumption_reduction[r]))) {
             consume_resource(b, r, model_house_uses_inventory(b->subtype.house_level, r));
@@ -608,14 +612,26 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
     }
     // water
     int water = model->water;
-    if (water == 1 && !house->has_water_access && !house->has_well_access) {
-        house->data.house.evolve_text_id = 1;
-        return;
+    if (water == 1 && !house->has_water_access) {
+        if (!house->has_well_access) {
+            house->data.house.evolve_text_id = 1;
+            return;
+        } else if (!house->has_latrines_access) {
+            house->data.house.evolve_text_id = 68;
+            return;
+        }
     }
+
     if (water == 2 && !house->has_water_access) {
-        house->data.house.evolve_text_id = 2;
-        return;
+        if (!house->has_latrines_access) {
+            house->data.house.evolve_text_id = 67;
+            return;
+        } else if (level >= HOUSE_LARGE_CASA) {
+            house->data.house.evolve_text_id = 2;
+            return;
+        }
     }
+
     // entertainment
     int entertainment = model->entertainment;
     if (house->data.house.entertainment < entertainment) {
@@ -756,14 +772,24 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
     model = model_get_house(++level);
     // water
     water = model->water;
-    if (water == 1 && !house->has_water_access && !house->has_well_access) {
-        house->data.house.evolve_text_id = 31;
-        return;
+    if (water == 1 && !house->has_water_access) {
+        if (!house->has_well_access) {
+            house->data.house.evolve_text_id = 31;
+            return;
+        } else if (!house->has_latrines_access) {
+            house->data.house.evolve_text_id = 68;
+            return;
+        }
     }
+
     if (water == 2 && !house->has_water_access) {
-        house->data.house.evolve_text_id = 32;
-        return;
+        if (level >= HOUSE_LARGE_CASA && house->has_well_access && house->has_latrines_access) {
+            house->data.house.evolve_text_id = 32;
+            return;
+        }
     }
+
+
     // entertainment
     entertainment = model->entertainment;
     if (house->data.house.entertainment < entertainment) {
@@ -913,7 +939,7 @@ building_type building_house_determine_worst_desirability_building_type(const bu
     int lowest_desirability = 0;
     building_type lowest_building_type = BUILDING_NONE;
     int x_min, y_min, x_max, y_max;
-    map_grid_get_area(house->x, house->y, 1, 6, &x_min, &y_min, &x_max, &y_max);
+    map_grid_get_area(house->x, house->y, 1, 8, &x_min, &y_min, &x_max, &y_max);
 
     for (int y = y_min; y <= y_max; y++) {
         for (int x = x_min; x <= x_max; x++) {

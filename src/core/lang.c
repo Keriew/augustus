@@ -6,7 +6,6 @@
 #include "core/io.h"
 #include "core/log.h"
 #include "core/string.h"
-#include "scenario/building.h"
 #include "translation/translation.h"
 
 #include <stdlib.h>
@@ -30,6 +29,8 @@
 #define FILE_MM_RUS "c3_mm.rus"
 #define FILE_EDITOR_TEXT_ENG "c3_map.eng"
 #define FILE_EDITOR_MM_ENG "c3_map_mm.eng"
+#define FILE_EDITOR_TEXT_RUS "c3_map.rus"
+#define FILE_EDITOR_MM_RUS "c3_map_mm.rus"
 
 static struct {
     struct {
@@ -334,7 +335,9 @@ static int load_files(const char *text_filename, const char *message_filename, i
 int lang_load(int is_editor)
 {
     if (is_editor) {
-        return load_files(FILE_EDITOR_TEXT_ENG, FILE_EDITOR_MM_ENG, MAY_BE_LOCALIZED);
+        return
+            load_files(FILE_EDITOR_TEXT_RUS, FILE_EDITOR_MM_RUS, MAY_BE_LOCALIZED) ||
+            load_files(FILE_EDITOR_TEXT_ENG, FILE_EDITOR_MM_ENG, MAY_BE_LOCALIZED);
     }
     // Prefer language files from localized dir, fall back to main dir
     return
@@ -455,9 +458,9 @@ const uint8_t *lang_get_string(int group, int index)
                 return translation_for(TR_BUILDING_YELLOW_PAVILION);
             case BUILDING_PAVILION_GREEN:
                 return translation_for(TR_BUILDING_GREEN_PAVILION);
-            case BUILDING_SMALL_STATUE_ALT:
+            case BUILDING_GODDESS_STATUE:
                 return translation_for(TR_BUILDING_SMALL_STATUE_ALT);
-            case BUILDING_SMALL_STATUE_ALT_B:
+            case BUILDING_SENATOR_STATUE:
                 return translation_for(TR_BUILDING_SMALL_STATUE_ALT_B);
             case BUILDING_OBELISK:
                 return translation_for(TR_BUILDING_OBELISK);
@@ -556,7 +559,7 @@ const uint8_t *lang_get_string(int group, int index)
                 }
                 break;
             case BUILDING_OVERGROWN_GARDENS:
-                return translation_for(TR_BUILDING_OVERGROWN_GARDENS);
+                return translation_for(TR_BUILDING_OVERGROWN_GARDENS);                
             case BUILDING_FORT_AUXILIA_INFANTRY:
                 return translation_for(TR_BUILDING_FORT_AUXILIA_INFANTRY);
             case BUILDING_ARMOURY:
@@ -569,6 +572,14 @@ const uint8_t *lang_get_string(int group, int index)
                 return translation_for(TR_BUILDING_FORT_MOUNTED);
             case BUILDING_FORT_JAVELIN:
                 return translation_for(TR_BUILDING_FORT_JAVELIN);
+            case BUILDING_HEDGE_GATE_DARK:
+                return translation_for(TR_BUILDING_HEDGE_DARK);
+            case BUILDING_HEDGE_GATE_LIGHT:
+                return translation_for(TR_BUILDING_HEDGE_LIGHT);
+            case BUILDING_PALISADE_GATE:
+                return translation_for(TR_BUILDING_PALISADE_GATE);
+            case BUILDING_LATRINES:
+                return translation_for(TR_BUILDING_LATRINES);
             default:
                 break;
         }

@@ -25,7 +25,9 @@ enum {
     FIGURE_COLOR_SOLDIER = 1,
     FIGURE_COLOR_SELECTED_SOLDIER = 2,
     FIGURE_COLOR_ENEMY = 3,
-    FIGURE_COLOR_WOLF = 4
+    FIGURE_COLOR_WOLF = 4,
+    FIGURE_COLOR_TRADE_CARAVAN = 5,
+    FIGURE_COLOR_TRADE_SHIP = 6,
 };
 
 typedef struct {
@@ -114,6 +116,8 @@ static struct {
     color_t selected_soldier;
     color_t enemy;
     color_t wolf;
+    color_t trade_caravan;
+    color_t trade_ship;
     const tile_color_climate_variants *climate;
     tile_color wall;
     tile_color aqueduct;
@@ -129,6 +133,8 @@ static struct {
     .soldier = COLOR_MINIMAP_SOLDIER,
     .selected_soldier = COLOR_MINIMAP_SELECTED_SOLDIER,
     .wolf = COLOR_MINIMAP_WOLF,
+    .trade_caravan = COLOR_MINIMAP_TRADE_CARAVAN,
+    .trade_ship = COLOR_MINIMAP_TRADE_SHIP,
     .wall = {0xffd6d3c6, 0xfff7f3de},
     .aqueduct = {0xff84baff, 0xff5282bd},
     .water_structure = { .edges = {0xff5282bd, 0xff5282bd}, .center = {0xff84baff, 0xff84baff} },
@@ -281,6 +287,14 @@ static int has_figure_color(figure *f)
     if (type == FIGURE_WOLF) {
         return FIGURE_COLOR_WOLF;
     }
+
+    if (type == FIGURE_TRADE_CARAVAN || type == FIGURE_NATIVE_TRADER) {
+        return FIGURE_COLOR_TRADE_CARAVAN;
+    }
+    if (type == FIGURE_TRADE_SHIP) {
+        return FIGURE_COLOR_TRADE_SHIP;
+    }
+
     return FIGURE_COLOR_NONE;
 }
 
@@ -311,7 +325,12 @@ static int draw_figure(int x_view, int y_view, int grid_offset)
         color = minimap_colors.selected_soldier;
     } else if (color_type == FIGURE_COLOR_ENEMY) {
         color = minimap_colors.climate->enemy;
+    } else if (color_type == FIGURE_COLOR_TRADE_CARAVAN) {
+        color = minimap_colors.trade_caravan;
+    } else if (color_type == FIGURE_COLOR_TRADE_SHIP) {
+        color = minimap_colors.trade_ship;
     }
+
     draw_pixel(x_view, y_view, color);
     draw_pixel(x_view + 1, y_view, color);
     return 1;
@@ -374,7 +393,7 @@ static void draw_building(int x_offset, int y_offset, int grid_offset)
             colors = &minimap_colors.military;
         } else if (building_is_aesthetic(b->type)) {
             colors = &minimap_colors.aesthetics;
-        } 
+        }
     }
     if (size == 1) {
         // The 1x1 house image is inverted for some reason

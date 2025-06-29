@@ -1,13 +1,14 @@
 #include "video.h"
 
-#include "campaign/campaign.h"
 #include "core/config.h"
 #include "core/dir.h"
 #include "core/file.h"
 #include "core/smacker.h"
 #include "core/time.h"
+#include "game/campaign.h"
 #include "game/system.h"
 #include "graphics/renderer.h"
+#include "platform/file_manager.h"
 #include "sound/device.h"
 #include "sound/music.h"
 #include "sound/speech.h"
@@ -96,12 +97,18 @@ static int load_mpg(const char *filename)
     }
     data.plm = 0;
     size_t length;
-    uint8_t *video_buffer = campaign_load_file(mpg_filename, &length);
+    uint8_t *video_buffer = game_campaign_load_file(mpg_filename, &length);
     if (video_buffer) {
         data.plm = plm_create_with_memory(video_buffer, length, 1);
     }
     if (!data.plm) {
-        const char *path = dir_get_file(mpg_filename, MAY_BE_LOCALIZED);
+        const char *path;
+        const char *community_location = platform_file_manager_get_directory_for_location(PATH_LOCATION_COMMUNITY, 0);
+        if (strncmp(community_location, mpg_filename, strlen(community_location)) == 0) {
+            path = filename;
+        } else {
+            path = dir_get_file(mpg_filename, MAY_BE_LOCALIZED);
+        }
         if (!path) {
             return 0;
         }
@@ -200,7 +207,7 @@ int video_start(const char *filename)
     data.is_ended = 0;
 
     if (load_mpg(filename) || load_smk(filename)) {
-        sound_music_stop();
+        sound_music_pause();
         sound_speech_stop();
         int is_yuv = data.type == VIDEO_TYPE_MPG && graphics_renderer()->supports_yuv_image_format();
         graphics_renderer()->create_custom_image(CUSTOM_IMAGE_VIDEO, data.video.width, data.video.height, is_yuv);

@@ -14,52 +14,67 @@ jobs:
       matrix:
         include:
           - name: Linux Flatpak
-            os: ubuntu-20.04
+            os: ubuntu-22.04
             BUILD_TARGET: flatpak
             DEPLOY: flatpak
           - name: Linux AppImage
-            os: ubuntu-20.04
+            os: ubuntu-22.04
             BUILD_TARGET: appimage
             DEPLOY: appimage
           - name: Linux x64
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             cache-key: linux-x64
-            SDL_VERSION: 2.30.2
-            SDL_MIXER_VERSION: 2.8.0
+            SDL_VERSION: 2.32.4
+            SDL_MIXER_VERSION: 2.8.1
             BUILD_TARGET: linux
             DEPLOY: linux
           - name: Linux x64 (old SDL versions)
-            os: ubuntu-20.04
+            os: ubuntu-22.04
             cache-key: linux-x64
             SDL_VERSION: 2.0.0
             SDL_MIXER_VERSION: 2.0.0
             BUILD_TARGET: linux
             DEPLOY: linux
             SKIP_UPLOAD: true
+          - name: Linux arm64
+            os: ubuntu-24.04-arm
+            cache-key: linux-arm64
+            SDL_VERSION: 2.32.4
+            SDL_MIXER_VERSION: 2.8.1
+            BUILD_TARGET: linux
+            DEPLOY: linux
+            SKIP_UPLOAD: true
           - name: macOS
             os: macos-latest
             cache-key: macos
-            SDL_VERSION: 2.30.2
-            SDL_MIXER_VERSION: 2.8.0
+            SDL_VERSION: 2.32.4
+            SDL_MIXER_VERSION: 2.8.1
             BUILD_TARGET: mac
             DEPLOY: mac
-          - name: PS Vita
-            os: ubuntu-20.04
-            BUILD_TARGET: vita
-            DEPLOY: vita
+          - name: iOS
+            os: macos-latest
+            cache-key: ios
+            SDL_VERSION: 2.32.4
+            SDL_MIXER_VERSION: 2.8.1
+            BUILD_TARGET: ios
+            DEPLOY: ios
           - name: Nintendo Switch
-            os: ubuntu-20.04
+            os: ubuntu-24.04
             BUILD_TARGET: switch
             DEPLOY: switch
+          - name: PS Vita
+            os: ubuntu-24.04
+            BUILD_TARGET: vita
+            DEPLOY: vita
           - name: Android
-            os: ubuntu-20.04
+            os: ubuntu-24.04
             cache-key: android
-            SDL_VERSION: 2.30.2
-            SDL_MIXER_VERSION: 2.8.0
+            SDL_VERSION: 2.32.4
+            SDL_MIXER_VERSION: 2.8.1
             BUILD_TARGET: android
             DEPLOY: android
           - name: Emscripten
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             cache-key: emscripten
             BUILD_TARGET: emscripten
             DEPLOY: emscripten
@@ -136,8 +151,8 @@ jobs:
     name: ${{ matrix.name }}
     runs-on: windows-latest
     env:
-      SDL_VERSION: 2.28.5
-      SDL_MIXER_VERSION: 2.8.0
+      SDL_VERSION: 2.32.4
+      SDL_MIXER_VERSION: 2.8.1
       COMPILER: ${{ matrix.COMPILER }}
       SKIP_UPLOAD: ${{ matrix.SKIP_UPLOAD }}
     steps:
@@ -163,8 +178,8 @@ jobs:
         uses: robinraju/release-downloader@v1.8
         with:
           repository: "rainers/cv2pdb"
-          tag: "v0.52"
-          fileName: "cv2pdb-0.52.zip"
+          tag: "v0.53"
+          fileName: "cv2pdb-0.53.zip"
           out-file-path: "build"
           extract: true
       - name: Set up environment

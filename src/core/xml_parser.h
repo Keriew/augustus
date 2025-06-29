@@ -24,9 +24,10 @@ int xml_parser_compare_multiple(const char *string, const char *match);
  * 
  * @param elements A list of xml_parser_element structures, indicating the format of the xml file. This will be used for error checking.
  * @param total_elements The total number of elements passed.
+ * @param stop_on_invalid_xml Whether the parser should stop when it finds an invalid xml element.
  * @return 1 if init was successful, 0 otherwise.
  */
-int xml_parser_init(const xml_parser_element *elements, int total_elements);
+int xml_parser_init(const xml_parser_element *elements, int total_elements, int stop_on_invalid_xml);
 
 /**
  * @brief Parses a chunk of a xml file. 
@@ -81,7 +82,7 @@ char *xml_parser_copy_attribute_string(const char *key);
 int xml_parser_get_attribute_bool(const char *key);
 
 /**
- * @brief 
+ * @brief Gets an attribute as an enumeration
  * 
  * @param key The key to obtain.
  * @param values The possibe values for the enum, as an array of strings. You can have multiple values per index by separating them with "|".

@@ -26,6 +26,7 @@ void window_building_draw_reservoir(building_info_context *c);
 void window_building_draw_aqueduct(building_info_context *c);
 void window_building_draw_fountain(building_info_context *c);
 void window_building_draw_well(building_info_context *c);
+void window_building_draw_latrines(building_info_context *c);
 
 void window_building_draw_mission_post(building_info_context *c);
 void window_building_draw_native_hut(building_info_context *c);

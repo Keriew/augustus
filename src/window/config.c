@@ -20,6 +20,7 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "sound/city.h"
+#include "sound/device.h"
 #include "sound/effect.h"
 #include "sound/music.h"
 #include "sound/speech.h"
@@ -35,7 +36,7 @@
 #include <string.h>
 
 #define MAX_LANGUAGE_DIRS 20
-#define MAX_WIDGETS 32
+#define MAX_WIDGETS 33
 
 #define NUM_VISIBLE_ITEMS 13
 
@@ -57,13 +58,13 @@
 static void on_scroll(void);
 
 static void toggle_switch(int key);
-static void button_language_select(int height, int param2);
-static void button_edit_player_name(int param1, int param2);
-static void button_change_user_directory(int param1, int param2);
-static void button_reset_defaults(int param1, int param2);
-static void button_hotkeys(int param1, int param2);
-static void button_close(int save, int param2);
-static void button_page(int page, int param2);
+static void button_language_select(const generic_button *button);
+static void button_edit_player_name(const generic_button *button);
+static void button_change_user_directory(const generic_button *button);
+static void button_reset_defaults(const generic_button *button);
+static void button_hotkeys(const generic_button *button);
+static void button_close(const generic_button *button);
+static void button_page(const generic_button *button);
 
 static const uint8_t *display_text_language(void);
 static const uint8_t *display_text_user_directory(void);
@@ -133,7 +134,7 @@ enum {
     CONFIG_ORIGINAL_SCROLL_SPEED,
     CONFIG_ORIGINAL_DIFFICULTY,
     CONFIG_ORIGINAL_GODS_EFFECTS,
-    CONFIG_MAX_ALL
+    CONFIG_MAX_ALL    
 };
 
 enum {
@@ -189,6 +190,7 @@ static config_widget all_widgets[CONFIG_PAGES][MAX_WIDGETS] = {
         {TYPE_CHECKBOX, CONFIG_GENERAL_ENABLE_AUDIO, TR_CONFIG_ENABLE_AUDIO, 0, 5},
         {TYPE_NUMERICAL_RANGE, RANGE_MASTER_VOLUME, 0, display_text_master_volume, 1},
         {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_MUSIC, TR_CONFIG_MUSIC, 0, 5},
+        {TYPE_CHECKBOX, CONFIG_GENERAL_ENABLE_MUSIC_RANDOMISE, TR_CONFIG_RANDOMISE_MUSIC, 0, 5},
         {TYPE_NUMERICAL_RANGE, RANGE_MUSIC_VOLUME, 0, display_text_music_volume, 1},
         {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_SPEECH, TR_CONFIG_SPEECH, 0, 5},
         {TYPE_NUMERICAL_RANGE, RANGE_SPEECH_VOLUME, 0, display_text_speech_volume, 1},
@@ -223,8 +225,10 @@ static config_widget all_widgets[CONFIG_PAGES][MAX_WIDGETS] = {
         {TYPE_CHECKBOX, CONFIG_UI_SHOW_PARTIAL_GRID_AROUND_CONSTRUCTION, TR_CONFIG_UI_SHOW_PARTIAL_GRID_AROUND_CONSTRUCTION},
         {TYPE_CHECKBOX, CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS, TR_CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS},
         {TYPE_CHECKBOX, CONFIG_UI_SHOW_ROAMING_PATH, TR_CONFIG_SHOW_ROAMING_PATH },
-        {TYPE_CHECKBOX, CONFIG_UI_DRAW_CLOUD_SHADOWS, TR_CONFIG_DRAW_CLOUD_SHADOWS },        
+        {TYPE_CHECKBOX, CONFIG_UI_DRAW_CLOUD_SHADOWS, TR_CONFIG_DRAW_CLOUD_SHADOWS },
         {TYPE_CHECKBOX, CONFIG_UI_SHOW_DESIRABILITY_RANGE, TR_CONFIG_SHOW_DESIRABILITY_RANGE},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL, TR_CONFIG_SHOW_DESIRABILITY_RANGE_ALL},
+        {TYPE_CHECKBOX, CONFIG_UI_DRAW_ASCLEPIUS, TR_CONFIG_DRAW_ASCLEPIUS },
     },
     { // Difficulty
         {TYPE_NUMERICAL_DESC, RANGE_DIFFICULTY, TR_CONFIG_DIFFICULTY},
@@ -242,18 +246,18 @@ static config_widget all_widgets[CONFIG_PAGES][MAX_WIDGETS] = {
         {TYPE_NUMERICAL_RANGE, RANGE_MAX_GRAND_TEMPLES, 0, display_text_max_grand_temples},
     },
     { // City Management
-        {TYPE_CHECKBOX, CONFIG_GP_CH_NO_SUPPLIER_DISTRIBUTION, TR_CONFIG_NO_SUPPLIER_DISTRIBUTION },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_GETTING_GRANARIES_GO_OFFROAD, TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_GRANARIES_GET_DOUBLE, TR_CONFIG_GRANARIES_GET_DOUBLE },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_ALLOW_EXPORTING_FROM_GRANARIES, TR_CONFIG_ALLOW_EXPORTING_FROM_GRANARIES },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_TOWER_SENTRIES_GO_OFFROAD, TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_FARMS_DELIVER_CLOSE, TR_CONFIG_FARMS_DELIVER_CLOSE },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_DELIVER_ONLY_TO_ACCEPTING_GRANARIES, TR_CONFIG_DELIVER_ONLY_TO_ACCEPTING_GRANARIES },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_ALL_HOUSES_MERGE, TR_CONFIG_ALL_HOUSES_MERGE },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_RANDOM_COLLAPSES_TAKE_MONEY, TR_CONFIG_RANDOM_COLLAPSES_TAKE_MONEY },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_WAREHOUSES_DONT_ACCEPT, TR_CONFIG_NOT_ACCEPTING_WAREHOUSES },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_HOUSES_DONT_EXPAND_INTO_GARDENS, TR_CONFIG_HOUSES_DONT_EXPAND_INTO_GARDENS },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_ROAMERS_DONT_SKIP_CORNERS, TR_CONFIG_ROAMERS_DONT_SKIP_CORNERS },
+        {TYPE_CHECKBOX, CONFIG_GP_CH_NO_SUPPLIER_DISTRIBUTION, TR_CONFIG_NO_SUPPLIER_DISTRIBUTION},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_GETTING_GRANARIES_GO_OFFROAD, TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_GRANARIES_GET_DOUBLE, TR_CONFIG_GRANARIES_GET_DOUBLE},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_DELIVER_ONLY_TO_ACCEPTING_GRANARIES, TR_CONFIG_DELIVER_ONLY_TO_ACCEPTING_GRANARIES},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_FARMS_DELIVER_CLOSE, TR_CONFIG_FARMS_DELIVER_CLOSE},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_WAREHOUSES_DONT_ACCEPT, TR_CONFIG_NOT_ACCEPTING_WAREHOUSES},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_ALLOW_EXPORTING_FROM_GRANARIES, TR_CONFIG_ALLOW_EXPORTING_FROM_GRANARIES},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_TOWER_SENTRIES_GO_OFFROAD, TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_ALL_HOUSES_MERGE, TR_CONFIG_ALL_HOUSES_MERGE},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_RANDOM_COLLAPSES_TAKE_MONEY, TR_CONFIG_RANDOM_COLLAPSES_TAKE_MONEY},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_HOUSES_DONT_EXPAND_INTO_GARDENS, TR_CONFIG_HOUSES_DONT_EXPAND_INTO_GARDENS},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_ROAMERS_DONT_SKIP_CORNERS, TR_CONFIG_ROAMERS_DONT_SKIP_CORNERS},
         {TYPE_CHECKBOX, CONFIG_GP_CH_AUTO_KILL_ANIMALS, TR_CONFIG_AUTO_KILL_ANIMALS},
         {TYPE_CHECKBOX, CONFIG_GP_CH_GATES_DEFAULT_TO_PASS_ALL_WALKERS, TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS},
     }
@@ -272,9 +276,9 @@ static const int game_speeds[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200,
 static resolution available_resolutions[sizeof(resolutions) / sizeof(resolution) + 2];
 
 static generic_button select_buttons[] = {
-    {225, 0, 200, 24, button_language_select, button_none},
-    {225, 0, 200, 24, button_edit_player_name, button_none},
-    {225, 0, 200, 24, button_change_user_directory, button_none},
+    {225, 0, 200, 24, button_language_select},
+    {225, 0, 200, 24, button_edit_player_name},
+    {225, 0, 200, 24, button_change_user_directory},
 };
 
 static numerical_range_widget ranges[] = {
@@ -294,18 +298,18 @@ static numerical_range_widget ranges[] = {
 };
 
 static generic_button bottom_buttons[NUM_BOTTOM_BUTTONS] = {
-    {  20, 436,  120, 30, button_hotkeys, button_none, 0, TR_BUTTON_CONFIGURE_HOTKEYS },
-    { 170, 436, 150, 30, button_reset_defaults, button_none, 0, TR_BUTTON_RESET_DEFAULTS },
-    { 330, 436,  90, 30, button_close, button_none, 0, TR_BUTTON_CANCEL },
-    { 430, 436,  90, 30, button_close, button_none, 1, TR_BUTTON_OK },
-    { 530, 436,  90, 30, button_close, button_none, 2, TR_OPTION_MENU_APPLY }
+    {  20, 436,  120, 30, button_hotkeys, 0, 0, TR_BUTTON_CONFIGURE_HOTKEYS },
+    { 170, 436, 150, 30, button_reset_defaults, 0, 0, TR_BUTTON_RESET_DEFAULTS },
+    { 330, 436,  90, 30, button_close, 0, 0, TR_BUTTON_CANCEL },
+    { 430, 436,  90, 30, button_close, 0, 1, TR_BUTTON_OK },
+    { 530, 436,  90, 30, button_close, 0, 2, TR_OPTION_MENU_APPLY }
 };
 
 static generic_button page_buttons[] = {
-    { 0, 48, 0, 30, button_page, button_none, 0 },
-    { 0, 48, 0, 30, button_page, button_none, 1 },
-    { 0, 48, 0, 30, button_page, button_none, 2 },
-    { 0, 48, 0, 30, button_page, button_none, 3 },
+    { 0, 48, 0, 30, button_page, 0, 0 },
+    { 0, 48, 0, 30, button_page, 0, 1 },
+    { 0, 48, 0, 30, button_page, 0, 2 },
+    { 0, 48, 0, 30, button_page, 0, 3 },
 };
 
 static translation_key page_names[CONFIG_PAGES] = {
@@ -317,12 +321,12 @@ static translation_key page_names[CONFIG_PAGES] = {
 
 static struct {
     config_widget *widgets[MAX_WIDGETS * CONFIG_PAGES];
-    int num_widgets;
-    int focus_button;
-    int bottom_focus_button;
-    int page_focus_button;
-    int page;
-    int widgets_per_page[CONFIG_PAGES];
+    unsigned int num_widgets;
+    unsigned int focus_button;
+    unsigned int bottom_focus_button;
+    unsigned int page_focus_button;
+    unsigned int page;
+    unsigned int widgets_per_page[CONFIG_PAGES];
     int starting_option;
     struct {
         int original_value;
@@ -367,6 +371,7 @@ static int config_change_cursors(int key);
 static int config_enable_audio(int key);
 static int config_set_master_volume(int key);
 static int config_enable_music(int key);
+static int config_enable_music_randomise(int key);
 static int config_set_music_volume(int key);
 static int config_enable_speech(int key);
 static int config_set_speech_volume(int key);
@@ -395,6 +400,7 @@ static inline void set_custom_config_changes(void)
     data.config_values[CONFIG_GENERAL_ENABLE_AUDIO].change_action = config_enable_audio;
     data.config_values[CONFIG_GENERAL_MASTER_VOLUME].change_action = config_set_master_volume;
     data.config_values[CONFIG_ORIGINAL_ENABLE_MUSIC].change_action = config_enable_music;
+    data.config_values[CONFIG_GENERAL_ENABLE_MUSIC_RANDOMISE].change_action = config_enable_music_randomise;
     data.config_values[CONFIG_ORIGINAL_MUSIC_VOLUME].change_action = config_set_music_volume;
     data.config_values[CONFIG_ORIGINAL_ENABLE_SPEECH].change_action = config_enable_speech;
     data.config_values[CONFIG_ORIGINAL_SPEECH_VOLUME].change_action = config_set_speech_volume;
@@ -453,25 +459,25 @@ static void fetch_original_config_values(void)
     data.config_values[CONFIG_ORIGINAL_GAME_SPEED].original_value = (int) game_speed_index;
     data.config_values[CONFIG_ORIGINAL_GAME_SPEED].new_value = (int) game_speed_index;
 
-    data.config_values[CONFIG_ORIGINAL_ENABLE_MUSIC].original_value = setting_sound(SOUND_MUSIC)->enabled;
-    data.config_values[CONFIG_ORIGINAL_ENABLE_MUSIC].new_value = setting_sound(SOUND_MUSIC)->enabled;
-    data.config_values[CONFIG_ORIGINAL_MUSIC_VOLUME].original_value = setting_sound(SOUND_MUSIC)->volume;
-    data.config_values[CONFIG_ORIGINAL_MUSIC_VOLUME].new_value = setting_sound(SOUND_MUSIC)->volume;
+    data.config_values[CONFIG_ORIGINAL_ENABLE_MUSIC].original_value = setting_sound(SOUND_TYPE_MUSIC)->enabled;
+    data.config_values[CONFIG_ORIGINAL_ENABLE_MUSIC].new_value = setting_sound(SOUND_TYPE_MUSIC)->enabled;
+    data.config_values[CONFIG_ORIGINAL_MUSIC_VOLUME].original_value = setting_sound(SOUND_TYPE_MUSIC)->volume;
+    data.config_values[CONFIG_ORIGINAL_MUSIC_VOLUME].new_value = setting_sound(SOUND_TYPE_MUSIC)->volume;
 
-    data.config_values[CONFIG_ORIGINAL_ENABLE_SPEECH].original_value = setting_sound(SOUND_SPEECH)->enabled;
-    data.config_values[CONFIG_ORIGINAL_ENABLE_SPEECH].new_value = setting_sound(SOUND_SPEECH)->enabled;
-    data.config_values[CONFIG_ORIGINAL_SPEECH_VOLUME].original_value = setting_sound(SOUND_SPEECH)->volume;
-    data.config_values[CONFIG_ORIGINAL_SPEECH_VOLUME].new_value = setting_sound(SOUND_SPEECH)->volume;
+    data.config_values[CONFIG_ORIGINAL_ENABLE_SPEECH].original_value = setting_sound(SOUND_TYPE_SPEECH)->enabled;
+    data.config_values[CONFIG_ORIGINAL_ENABLE_SPEECH].new_value = setting_sound(SOUND_TYPE_SPEECH)->enabled;
+    data.config_values[CONFIG_ORIGINAL_SPEECH_VOLUME].original_value = setting_sound(SOUND_TYPE_SPEECH)->volume;
+    data.config_values[CONFIG_ORIGINAL_SPEECH_VOLUME].new_value = setting_sound(SOUND_TYPE_SPEECH)->volume;
 
-    data.config_values[CONFIG_ORIGINAL_ENABLE_SOUND_EFFECTS].original_value = setting_sound(SOUND_EFFECTS)->enabled;
-    data.config_values[CONFIG_ORIGINAL_ENABLE_SOUND_EFFECTS].new_value = setting_sound(SOUND_EFFECTS)->enabled;
-    data.config_values[CONFIG_ORIGINAL_SOUND_EFFECTS_VOLUME].original_value = setting_sound(SOUND_EFFECTS)->volume;
-    data.config_values[CONFIG_ORIGINAL_SOUND_EFFECTS_VOLUME].new_value = setting_sound(SOUND_EFFECTS)->volume;
+    data.config_values[CONFIG_ORIGINAL_ENABLE_SOUND_EFFECTS].original_value = setting_sound(SOUND_TYPE_EFFECTS)->enabled;
+    data.config_values[CONFIG_ORIGINAL_ENABLE_SOUND_EFFECTS].new_value = setting_sound(SOUND_TYPE_EFFECTS)->enabled;
+    data.config_values[CONFIG_ORIGINAL_SOUND_EFFECTS_VOLUME].original_value = setting_sound(SOUND_TYPE_EFFECTS)->volume;
+    data.config_values[CONFIG_ORIGINAL_SOUND_EFFECTS_VOLUME].new_value = setting_sound(SOUND_TYPE_EFFECTS)->volume;
 
-    data.config_values[CONFIG_ORIGINAL_ENABLE_CITY_SOUNDS].original_value = setting_sound(SOUND_CITY)->enabled;
-    data.config_values[CONFIG_ORIGINAL_ENABLE_CITY_SOUNDS].new_value = setting_sound(SOUND_CITY)->enabled;
-    data.config_values[CONFIG_ORIGINAL_CITY_SOUNDS_VOLUME].original_value = setting_sound(SOUND_CITY)->volume;
-    data.config_values[CONFIG_ORIGINAL_CITY_SOUNDS_VOLUME].new_value = setting_sound(SOUND_CITY)->volume;
+    data.config_values[CONFIG_ORIGINAL_ENABLE_CITY_SOUNDS].original_value = setting_sound(SOUND_TYPE_CITY)->enabled;
+    data.config_values[CONFIG_ORIGINAL_ENABLE_CITY_SOUNDS].new_value = setting_sound(SOUND_TYPE_CITY)->enabled;
+    data.config_values[CONFIG_ORIGINAL_CITY_SOUNDS_VOLUME].original_value = setting_sound(SOUND_TYPE_CITY)->volume;
+    data.config_values[CONFIG_ORIGINAL_CITY_SOUNDS_VOLUME].new_value = setting_sound(SOUND_TYPE_CITY)->volume;
 
     data.config_values[CONFIG_ORIGINAL_SCROLL_SPEED].original_value = setting_scroll_speed();
     data.config_values[CONFIG_ORIGINAL_SCROLL_SPEED].new_value = setting_scroll_speed();
@@ -547,7 +553,7 @@ static void set_page(int page)
 {
     data.page = page;
     data.starting_option = 0;
-    for (int i = 0; i < data.page; i++) {
+    for (unsigned int i = 0; i < data.page; i++) {
         data.starting_option += data.widgets_per_page[i];
     }
     scrollbar_init(&scrollbar, 0, data.widgets_per_page[page]);
@@ -861,7 +867,7 @@ static void draw_background(void)
     int page_x_offset = 30;
     int open_tab_width = text_get_width(translation_for(page_names[data.page]), FONT_NORMAL_BLACK) + 6;
     int max_closed_tab_width = (600 - page_x_offset * CONFIG_PAGES - open_tab_width) / (CONFIG_PAGES - 1);
-    for (int i = 0; i < CONFIG_PAGES; ++i) {
+    for (unsigned int i = 0; i < CONFIG_PAGES; ++i) {
         page_x_offset += 15;
         int width = 0;
         if (data.page == i) {
@@ -879,7 +885,7 @@ static void draw_background(void)
 
     button_border_draw(10, 75, 620, 355, 0);
 
-    for (int i = 0; i < NUM_VISIBLE_ITEMS && i < data.widgets_per_page[data.page]; i++) {
+    for (unsigned int i = 0; i < NUM_VISIBLE_ITEMS && i < data.widgets_per_page[data.page]; i++) {
         config_widget *w = data.widgets[i + data.starting_option + scrollbar.scroll_position];
         int y = ITEM_Y_OFFSET + ITEM_HEIGHT * i;
         if (w->type == TYPE_HEADER) {
@@ -914,7 +920,7 @@ static void draw_foreground(void)
 {
     graphics_in_dialog();
 
-    for (int i = 0; i < CONFIG_PAGES; ++i) {
+    for (unsigned int i = 0; i < CONFIG_PAGES; ++i) {
         button_border_draw(page_buttons[i].x, page_buttons[i].y,
             page_buttons[i].width, page_buttons[i].height,
             data.page_focus_button == i + 1);
@@ -925,7 +931,7 @@ static void draw_foreground(void)
         }
     }
 
-    for (int i = 0; i < NUM_VISIBLE_ITEMS && i < data.widgets_per_page[data.page]; i++) {
+    for (unsigned int i = 0; i < NUM_VISIBLE_ITEMS && i < data.widgets_per_page[data.page]; i++) {
         config_widget *w = data.widgets[i + data.starting_option + scrollbar.scroll_position];
         int y = ITEM_Y_OFFSET + ITEM_HEIGHT * i;
         if (w->type == TYPE_CHECKBOX) {
@@ -958,7 +964,7 @@ static int is_checkbox(const mouse *m, int x, int y)
     return 0;
 }
 
-static int checkbox_handle_mouse(const mouse *m, int x, int y, int value_key, int *focus)
+static int checkbox_handle_mouse(const mouse *m, int x, int y, int value_key, unsigned int *focus)
 {
     if (!is_checkbox(m, x, y)) {
         return 0;
@@ -1035,11 +1041,11 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 
     int handled = 0;
-    for (int i = 0; i < NUM_VISIBLE_ITEMS && i < data.widgets_per_page[data.page]; i++) {
+    for (unsigned int i = 0; i < NUM_VISIBLE_ITEMS && i < data.widgets_per_page[data.page]; i++) {
         config_widget *w = data.widgets[i + data.starting_option + scrollbar.scroll_position];
         int y = ITEM_Y_OFFSET + ITEM_HEIGHT * i;
         if (w->type == TYPE_CHECKBOX) {
-            int focus = 0;
+            unsigned int focus = 0;
             handled |= checkbox_handle_mouse(m_dialog, 20, y + w->y_offset, w->subtype, &focus);
             if (focus) {
                 data.focus_button = i + 1;
@@ -1047,7 +1053,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         } else if (w->type == TYPE_SELECT) {
             generic_button *btn = &select_buttons[w->subtype];
             btn->parameter1 = y + w->y_offset;
-            int focus = 0;
+            unsigned int focus = 0;
             handled |= generic_buttons_handle_mouse(m_dialog, 0, y + w->y_offset, btn, 1, &focus);
             if (focus) {
                 data.focus_button = i + 1;
@@ -1086,17 +1092,16 @@ static void set_language(int index)
     data.language_options.selected = index;
 }
 
-static void button_hotkeys(int param1, int param2)
+static void button_hotkeys(const generic_button *button)
 {
     window_hotkey_config_show();
 }
 
-static void button_language_select(int height, int param2)
+static void button_language_select(const generic_button *button)
 {
-    const generic_button *btn = &select_buttons[SELECT_LANGUAGE];
-    window_select_list_show_text(
-        screen_dialog_offset_x() + btn->x,
-        screen_dialog_offset_y() + height + btn->height,
+    int height = button->parameter1;
+
+    window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y() + height, button,
         data.language_options.options, data.language_options.total, set_language
     );
 }
@@ -1113,7 +1118,7 @@ static void set_player_name(const uint8_t *name)
     window_invalidate();
 }
 
-static void button_edit_player_name(int param1, int param2)
+static void button_edit_player_name(const generic_button *button)
 {
     uint8_t player_name[PLAYER_NAME_LENGTH];
     encoding_from_utf8(data.config_string_values[CONFIG_STRING_ORIGINAL_PLAYER_NAME].new_value,
@@ -1122,12 +1127,12 @@ static void button_edit_player_name(int param1, int param2)
         PLAYER_NAME_LENGTH, set_player_name);
 }
 
-static void button_change_user_directory(int param1, int param2)
+static void button_change_user_directory(const generic_button *button)
 {
     window_user_path_setup_show(0);
 }
 
-static void button_reset_defaults(int param1, int param2)
+static void button_reset_defaults(const generic_button *button)
 {
     for (int i = 0; i < CONFIG_MAX_ENTRIES; ++i) {
         data.config_values[i].new_value = config_get_default_value(i);
@@ -1249,10 +1254,10 @@ static int config_enable_audio(int key)
 static int config_set_master_volume(int key)
 {
     config_change_basic(key);
-    sound_music_set_volume(setting_sound(SOUND_MUSIC)->volume);
-    sound_speech_set_volume(setting_sound(SOUND_SPEECH)->volume);
-    sound_effect_set_volume(setting_sound(SOUND_EFFECTS)->volume);
-    sound_city_set_volume(setting_sound(SOUND_CITY)->volume);
+    sound_music_set_volume(setting_sound(SOUND_TYPE_MUSIC)->volume);
+    sound_speech_set_volume(setting_sound(SOUND_TYPE_SPEECH)->volume);
+    sound_effect_set_volume(setting_sound(SOUND_TYPE_EFFECTS)->volume);
+    sound_city_set_volume(setting_sound(SOUND_TYPE_CITY)->volume);
     return 1;
 }
 
@@ -1260,8 +1265,8 @@ static int config_enable_music(int key)
 {
     config_change_basic(key);
 
-    if (setting_sound_is_enabled(SOUND_MUSIC) != data.config_values[key].new_value) {
-        setting_toggle_sound_enabled(SOUND_MUSIC);
+    if (setting_sound_is_enabled(SOUND_TYPE_MUSIC) != data.config_values[key].new_value) {
+        setting_toggle_sound_enabled(SOUND_TYPE_MUSIC);
     }
     if (data.config_values[key].new_value) {
         if (data.show_background_image) {
@@ -1275,12 +1280,17 @@ static int config_enable_music(int key)
     }
     return 1;
 }
+static int config_enable_music_randomise(int key)
+{
+    config_change_basic(key);
+    return 1;
+}
 
 static int config_set_music_volume(int key)
 {
     config_change_basic(key);
-    setting_set_sound_volume(SOUND_MUSIC, data.config_values[key].new_value);
-    sound_music_set_volume(setting_sound(SOUND_MUSIC)->volume);
+    setting_set_sound_volume(SOUND_TYPE_MUSIC, data.config_values[key].new_value);
+    sound_music_set_volume(setting_sound(SOUND_TYPE_MUSIC)->volume);
     return 1;
 }
 
@@ -1288,8 +1298,8 @@ static int config_enable_speech(int key)
 {
     config_change_basic(key);
 
-    if (setting_sound_is_enabled(SOUND_SPEECH) != data.config_values[key].new_value) {
-        setting_toggle_sound_enabled(SOUND_SPEECH);
+    if (setting_sound_is_enabled(SOUND_TYPE_SPEECH) != data.config_values[key].new_value) {
+        setting_toggle_sound_enabled(SOUND_TYPE_SPEECH);
     }
     if (!data.config_values[key].new_value) {
         sound_speech_stop();
@@ -1300,8 +1310,8 @@ static int config_enable_speech(int key)
 static int config_set_speech_volume(int key)
 {
     config_change_basic(key);
-    setting_set_sound_volume(SOUND_SPEECH, data.config_values[key].new_value);
-    sound_speech_set_volume(setting_sound(SOUND_SPEECH)->volume);
+    setting_set_sound_volume(SOUND_TYPE_SPEECH, data.config_values[key].new_value);
+    sound_speech_set_volume(setting_sound(SOUND_TYPE_SPEECH)->volume);
     return 1;
 }
 
@@ -1309,8 +1319,8 @@ static int config_enable_effects(int key)
 {
     config_change_basic(key);
 
-    if (setting_sound_is_enabled(SOUND_EFFECTS) != data.config_values[key].new_value) {
-        setting_toggle_sound_enabled(SOUND_EFFECTS);
+    if (setting_sound_is_enabled(SOUND_TYPE_EFFECTS) != data.config_values[key].new_value) {
+        setting_toggle_sound_enabled(SOUND_TYPE_EFFECTS);
     }
     return 1;
 }
@@ -1318,8 +1328,8 @@ static int config_enable_effects(int key)
 static int config_set_effects_volume(int key)
 {
     config_change_basic(key);
-    setting_set_sound_volume(SOUND_EFFECTS, data.config_values[key].new_value);
-    sound_effect_set_volume(setting_sound(SOUND_EFFECTS)->volume);
+    setting_set_sound_volume(SOUND_TYPE_EFFECTS, data.config_values[key].new_value);
+    sound_effect_set_volume(setting_sound(SOUND_TYPE_EFFECTS)->volume);
     return 1;
 }
 
@@ -1327,8 +1337,8 @@ static int config_enable_city_sounds(int key)
 {
     config_change_basic(key);
 
-    if (setting_sound_is_enabled(SOUND_CITY) != data.config_values[key].new_value) {
-        setting_toggle_sound_enabled(SOUND_CITY);
+    if (setting_sound_is_enabled(SOUND_TYPE_CITY) != data.config_values[key].new_value) {
+        setting_toggle_sound_enabled(SOUND_TYPE_CITY);
     }
     return 1;
 }
@@ -1336,8 +1346,8 @@ static int config_enable_city_sounds(int key)
 static int config_set_city_sounds_volume(int key)
 {
     config_change_basic(key);
-    setting_set_sound_volume(SOUND_CITY, data.config_values[key].new_value);
-    sound_city_set_volume(setting_sound(SOUND_CITY)->volume);
+    setting_set_sound_volume(SOUND_TYPE_CITY, data.config_values[key].new_value);
+    sound_city_set_volume(setting_sound(SOUND_TYPE_CITY)->volume);
     return 1;
 }
 
@@ -1443,8 +1453,10 @@ static int apply_changed_configs(void)
     return 1;
 }
 
-static void button_close(int save, int param2)
+static void button_close(const generic_button *button)
 {
+    int save = button->parameter1;
+
     if (!save) {
         cancel_values();
         window_go_back();
@@ -1458,8 +1470,9 @@ static void button_close(int save, int param2)
     window_request_refresh();
 }
 
-static void button_page(int page, int param2)
+static void button_page(const generic_button *button)
 {
+    int page = button->parameter1;
     set_page(page);
     window_invalidate();
 }
@@ -1467,7 +1480,7 @@ static void button_page(int page, int param2)
 static void get_tooltip(tooltip_context *c)
 {
     if (data.page_focus_button) {
-        int page = data.page_focus_button - 1;
+        unsigned int page = data.page_focus_button - 1;
         if (page == data.page) {
             return;
         }

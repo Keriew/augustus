@@ -397,13 +397,18 @@ void building_bless_industry(void)
             if (b->state != BUILDING_STATE_IN_USE || b->output_resource_id != r) {
                 continue;
             }
+            if (b->num_workers <= 0) {
+                continue;
+            }
             for (int i = 0; i < num_resources; i++) {
                 if (b->resources[chain[i].raw_material] > 0 &&
                     b->resources[chain[i].raw_material] < MERCURY_BLESSING_LOADS * chain[i].raw_amount) {
                     b->resources[chain[i].raw_material] = MERCURY_BLESSING_LOADS * chain[i].raw_amount;
                 }
             }
-            b->data.industry.progress = building_industry_get_max_progress(b);
+            if (b->data.industry.progress) {
+                b->data.industry.progress = building_industry_get_max_progress(b);
+            }
         }
     }
 }

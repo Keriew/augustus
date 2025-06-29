@@ -15,6 +15,7 @@
 #include "game/file_editor.h"
 #include "game/file_io.h"
 #include "game/save_version.h"
+#include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
@@ -29,8 +30,8 @@
 #include "scenario/editor.h"
 #include "scenario/custom_messages_export_xml.h"
 #include "scenario/custom_messages_import_xml.h"
-#include "scenario/scenario_events_export_xml.h"
-#include "scenario/scenario_events_import_xml.h"
+#include "scenario/event/export_xml.h"
+#include "scenario/event/import_xml.h"
 #include "translation/translation.h"
 #include "widget/input_box.h"
 #include "window/city.h"
@@ -48,11 +49,11 @@
 #define FILTER_TEXT_SIZE 16
 #define MIN_FILTER_SIZE 2
 
-static void button_toggle_sort_type(int param1, int param2);
+static void button_toggle_sort_type(const generic_button *button);
 static void button_ok_cancel(int is_ok, int param2);
 static void input_box_changed(int is_addition_at_end);
 static void draw_file(const list_box_item *item);
-static void select_file(int index, int is_double_click);
+static void select_file(unsigned int index, int is_double_click);
 static void file_tooltip(const list_box_item *item, tooltip_context *c);  
 
 static image_button image_buttons[] = {
@@ -61,7 +62,7 @@ static image_button image_buttons[] = {
 };
 
 static generic_button sort_by_button[] = {
-    {16, 437, 288, 26, button_toggle_sort_type, button_none, 0, 0}
+    {16, 437, 288, 26, button_toggle_sort_type}
 };
 
 typedef struct {
@@ -81,7 +82,7 @@ static struct {
         SORT_BY_NAME,
         SORT_BY_DATE
     } sort_type;
-    int sort_by_button_focused;
+    unsigned int sort_by_button_focused;
 
     file_type_data *file_data;
     char selected_file[FILE_NAME_MAX];
@@ -275,28 +276,44 @@ static void init(file_type type, file_dialog_type dialog_type)
 
 static void draw_mission_info(int x_offset, int y_offset, int box_size)
 {
-    if (data.info.custom_mission) {
-        text_draw_centered(translation_for(TR_SAVE_DIALOG_CUSTOM_SCENARIO),
-            x_offset, y_offset, box_size, FONT_NORMAL_BLACK, 0);
-        return;
-    }
-    if (data.info.mission == 0) {
-        text_draw_centered(translation_for(TR_SAVE_DIALOG_FIRST_MISSION),
-            x_offset, y_offset, box_size, FONT_NORMAL_BLACK, 0);
-        return;
-    }
-    translation_key mission_type;
-    if (data.info.mission == 1) {
-        mission_type = TR_SAVE_DIALOG_MISSION;
-    } else if (data.info.mission % 2) {
-        mission_type = TR_SAVE_DIALOG_MILITARY;
+    uint8_t text[FILE_NAME_MAX];
+    uint8_t *cursor = text;
+
+    if (data.info.origin.type == SAVEGAME_FROM_CUSTOM_SCENARIO) {
+        cursor = string_copy(translation_for(TR_SAVE_DIALOG_CUSTOM_SCENARIO), cursor, FILE_NAME_MAX);
+        cursor = string_copy(string_from_ascii(" - "), cursor, FILE_NAME_MAX - (int) (cursor - text));
+        encoding_from_utf8(data.info.origin.scenario_name, cursor, FILE_NAME_MAX - (int) (cursor - text));
+    } else if (data.info.origin.type == SAVEGAME_FROM_ORIGINAL_CAMPAIGN) {
+        if (data.info.origin.mission == 0) {
+            text_draw_centered(translation_for(TR_SAVE_DIALOG_FIRST_MISSION),
+                x_offset, y_offset, box_size, FONT_NORMAL_BLACK, 0);
+            return;
+        } else {
+            translation_key mission_type;
+            if (data.info.origin.mission == 1) {
+                mission_type = TR_SAVE_DIALOG_MISSION;
+            } else if (data.info.origin.mission % 2) {
+                mission_type = TR_SAVE_DIALOG_MILITARY;
+            } else {
+                mission_type = TR_SAVE_DIALOG_PEACEFUL;
+            }
+            cursor = string_copy(translation_for(mission_type), cursor, FILE_NAME_MAX);
+            cursor = string_copy(string_from_ascii(" "), cursor, FILE_NAME_MAX - (int) (cursor - text));            
+            cursor += string_from_int(cursor, (data.info.origin.mission + 4) / 2, 0);
+            cursor = string_copy(string_from_ascii(" - "), cursor, FILE_NAME_MAX - (int) (cursor - text));
+            string_copy(lang_get_string(21, MISSION_ID_TO_CITY_ID[data.info.origin.mission]), cursor,
+                FILE_NAME_MAX - (int) (cursor - text));
+        }
     } else {
-        mission_type = TR_SAVE_DIALOG_PEACEFUL;
+        encoding_from_utf8(data.info.origin.campaign_name, cursor, FILE_NAME_MAX);
+        cursor += string_length(text);
+        cursor = string_copy(string_from_ascii(" - "), cursor, FILE_NAME_MAX - (int) (cursor - text));
+        cursor += string_from_int(cursor, data.info.origin.mission + 1, 0);
+        cursor = string_copy(string_from_ascii(" - "), cursor, FILE_NAME_MAX - (int) (cursor - text));
+        encoding_from_utf8(data.info.origin.scenario_name, cursor, FILE_NAME_MAX - (int) (cursor - text));
     }
-    int width = text_draw(translation_for(mission_type), x_offset, y_offset, FONT_NORMAL_BLACK, 0);
-    width += text_draw_number(data.info.mission / 2 + 2, '\0', " -", x_offset + width, y_offset,
-        FONT_NORMAL_BLACK, COLOR_MASK_NONE);
-    lang_text_draw(21, MISSION_ID_TO_CITY_ID[data.info.mission], x_offset + width, y_offset, FONT_NORMAL_BLACK);
+
+    text_draw_ellipsized(text, x_offset, y_offset, box_size, FONT_NORMAL_BLACK, 0);
 }
 
 static void draw_background(void)
@@ -306,7 +323,7 @@ static void draw_background(void)
         const char *filename = dir_get_file_at_location(data.selected_file, data.file_data->location);
         if (filename) {
             if (data.type == FILE_TYPE_SAVED_GAME) {
-                data.savegame_info_status = game_file_io_read_saved_game_info(filename, &data.info);
+                data.savegame_info_status = game_file_io_read_saved_game_info(filename, 0, &data.info);
             } else {
                 data.savegame_info_status = game_file_io_read_scenario_info(filename, &data.info);
             }
@@ -513,7 +530,7 @@ static void input_box_changed(int is_addition_at_end)
             scroll_index = find_first_file_with_prefix(data.selected_file);
         }
         file_append_extension(data.selected_file, data.file_data->extension, FILE_NAME_MAX);
-        if (scroll_index >= 0 &&
+        if (scroll_index >= 0 && data.filtered_file_list.num_files > scroll_index &&
             platform_file_manager_compare_filename(data.selected_file,
                 data.filtered_file_list.files[scroll_index].name) == 0) {
             list_box_select_index(&list_box, scroll_index);
@@ -669,7 +686,7 @@ static void button_ok_cancel(int is_ok, int param2)
     }
 }
 
-static void button_toggle_sort_type(int param1, int param2)
+static void button_toggle_sort_type(const generic_button *button)
 {
     if (data.sort_type == SORT_BY_NAME) {
         data.sort_type = SORT_BY_DATE;
@@ -682,7 +699,7 @@ static void button_toggle_sort_type(int param1, int param2)
     data.redraw_full_window = 1;
 }
 
-static void select_file(int index, int is_double_click)
+static void select_file(unsigned int index, int is_double_click)
 {
     if (index == LIST_BOX_NO_SELECTION) {
         return;

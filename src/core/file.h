@@ -28,7 +28,7 @@ FILE *file_open(const char *filename, const char *mode);
 
 /**
  * Wrapper for fopen converting filename to path in asset directory
- * @param filename Asset filename
+ * @param asset Asset filename
  * @param mode Mode to open the asset file (e.g. "wb").
  * @return FILE
  */
@@ -72,11 +72,11 @@ void file_append_extension(char *filename, const char *extension, size_t length)
 void file_remove_extension(char *filename);
 
 /**
- * Removes the directory from the filename
+ * Removes the path from the filename
  * @param filename Filename to change
- * @return Filename without directory
+ * @return Filename without path
  */
-const char *file_remove_directory(const char *filename);
+const char *file_remove_path(const char *filename);
 
 /**
  * Check if file exists

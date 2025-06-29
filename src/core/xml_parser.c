@@ -23,10 +23,11 @@ static struct {
     int error_depth;
     int total_elements;
     int error;
+    int stop_on_invalid_xml;
     struct {
         sxml_t context;
         sxmltok_t *tokens;
-        int num_tokens;
+        unsigned int num_tokens;
         int line_number;
         unsigned int current_position;
     } parser;
@@ -43,7 +44,7 @@ static struct {
     element_text *texts;
 } data;
 
-static const char EMPTY_STRING;
+static const char EMPTY_STRING = 0;
 
 static int dummy_element_on_enter(void)
 {
@@ -163,7 +164,7 @@ static int handle_attributes(const sxmltok_t *first, unsigned int size)
         return 1;
     }
     data.attributes.first = first;
-    for (int i = 0; i < size; i++) {
+    for (unsigned int i = 0; i < size; i++) {
         data.buffer.data[first[i].endpos] = 0;
         i += handle_attribute_value(first + i + 1, size - i - 1);
     }
@@ -186,6 +187,9 @@ static void start_element(const sxmltok_t *token)
     if (!element) {
         data.error_depth = data.depth;
         log_error("Invalid XML element name", name, 0);
+        if (data.stop_on_invalid_xml) {
+            data.error = 1;
+        }
         return;
     }
     data.current_element = element;
@@ -198,6 +202,8 @@ static void start_element(const sxmltok_t *token)
     }
     if (!data.error_depth) {
         data.parents[data.depth - 1] = element;
+    } else if (data.stop_on_invalid_xml) {
+        data.error = 1;
     }
 }
 
@@ -243,6 +249,9 @@ static void end_element(const sxmltok_t *token)
 
 static void handle_element_text(const sxmltok_t *token)
 {
+    if (data.error_depth) {
+        return;
+    }
     if (data.current_element && data.current_element->on_text) {
         const char *text = data.buffer.data + token->startpos;
         int length = token->endpos - token->startpos;
@@ -263,7 +272,7 @@ static void handle_element_text(const sxmltok_t *token)
 
 static int expand_xml_token_array(void)
 {
-    size_t expanded_size = data.parser.num_tokens + XML_TOKENS_SIZE_STEP;
+    unsigned int expanded_size = data.parser.num_tokens + XML_TOKENS_SIZE_STEP;
     sxmltok_t *expanded_tokens = realloc(data.parser.tokens, sizeof(sxmltok_t) * expanded_size);
     if (!expanded_tokens) {
         return 0;
@@ -273,7 +282,7 @@ static int expand_xml_token_array(void)
     return 1;
 }
 
-int xml_parser_init(const xml_parser_element *elements, int total_elements)
+int xml_parser_init(const xml_parser_element *elements, int total_elements, int stop_on_invalid_xml)
 {
     xml_parser_free();
 
@@ -281,6 +290,7 @@ int xml_parser_init(const xml_parser_element *elements, int total_elements)
     data.elements = malloc(elements_size);
     data.parents = malloc(sizeof(xml_parser_element *) * total_elements);
     data.texts = malloc(sizeof(element_text) * total_elements);
+    data.stop_on_invalid_xml = stop_on_invalid_xml;
     
     if (!data.elements || !data.parents || !data.texts || !expand_xml_token_array()) {
         xml_parser_free();

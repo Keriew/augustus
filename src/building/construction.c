@@ -40,6 +40,7 @@
 #include "map/tiles.h"
 #include "map/water.h"
 #include "map/water_supply.h"
+#include "scenario/allowed_building.h"
 
 #define MAX_CYCLE_SIZE 10
 
@@ -50,8 +51,8 @@ struct reservoir_info {
 };
 
 struct cycle {
-    int size;
-    int rotations_to_next;
+    unsigned int size;
+    unsigned int rotations_to_next;
     building_type array[MAX_CYCLE_SIZE];
 };
 
@@ -104,12 +105,23 @@ static const struct cycle building_cycles[] = {
 
 #define BUILDING_CYCLES (sizeof(building_cycles) / sizeof(struct cycle))
 
+static unsigned int count_enabled_buildings_for_cycling(unsigned int cycle_index)
+{
+    unsigned int count = 0;
+    for (int i = 0; i < building_cycles[cycle_index].size; i++) {
+        if (scenario_allowed_building(building_cycles[cycle_index].array[i])) {
+            count++;
+        }
+    }
+    return count;
+}
+
 int building_construction_type_can_cycle(building_type type)
 {
-    for (int i = 0; i < BUILDING_CYCLES; i++) {
-        int size = building_cycles[i].size;
-        for (int j = 0; j < size; j++) {
-            if (building_cycles[i].array[j] == type) {
+    for (unsigned int i = 0; i < BUILDING_CYCLES; i++) {
+        unsigned int size = building_cycles[i].size;
+        for (unsigned int j = 0; j < size; j++) {
+            if (building_cycles[i].array[j] == type && count_enabled_buildings_for_cycling(i) > 1) {
                 return 1;
             }
         }
@@ -123,7 +135,7 @@ int building_construction_type_num_cycles(building_type type)
         int size = building_cycles[i].size;
         for (int j = 0; j < size; j++) {
             if (building_cycles[i].array[j] == type) {
-                return size * building_cycles[i].rotations_to_next;
+                return count_enabled_buildings_for_cycling(i) * building_cycles[i].rotations_to_next;
             }
         }
     }
@@ -159,11 +171,17 @@ int building_construction_cycle_forward(void)
                 }
                 data.cycle_step = 0;
                 int new_type;
-                if (j + 1 >= size) { // If last element of the list, the next one is the first one
-                    new_type = building_cycles[i].array[0];
-                } else { // Otherwise pick the first one
-                    new_type = building_cycles[i].array[j + 1];
-                }
+                do {
+                    if (j + 1 >= size) { // If last element of the list, the next one is the first one
+                        j = 0;
+                    } else { // Otherwise pick the first one
+                        j++;
+                    }
+                    new_type = building_cycles[i].array[j];
+                    if (scenario_allowed_building(new_type)) {
+                        break;
+                    }
+                } while (data.type != new_type);
                 data.type = new_type;
 
                 return 1;
@@ -189,11 +207,17 @@ int building_construction_cycle_back(void)
                 }
                 data.cycle_step = building_cycles[i].rotations_to_next - 1;
                 int new_type;
-                if (j - 1 < 0) { // If first element of the list, pick the last element
-                    new_type = building_cycles[i].array[size - 1];
-                } else { // Otherwise pick the previous element
-                    new_type = building_cycles[i].array[j - 1];
-                }
+                do {
+                    if (j - 1 < 0) { // If first element of the list, pick the last element
+                        j = size - 1;
+                    } else { // Otherwise pick the previous element
+                        j--;
+                    }
+                    new_type = building_cycles[i].array[j];
+                    if (scenario_allowed_building(new_type)) {
+                        break;
+                    }
+                } while (data.type != new_type);
                 data.type = new_type;
 
                 return 1;
@@ -432,7 +456,7 @@ static int place_reservoir_and_aqueducts(int measure_only, int x_start, int y_st
     if (distance > 0) {
         if (map_building_is_reservoir(x_start - 1, y_start - 1)) {
             info->place_reservoir_at_start = PLACE_RESERVOIR_EXISTS;
-        } else if (map_tiles_are_clear(x_start - 1, y_start - 1, 3, TERRAIN_ALL)) {
+        } else if (map_tiles_are_clear(x_start - 1, y_start - 1, 3, TERRAIN_ALL, 1)) {
             info->place_reservoir_at_start = PLACE_RESERVOIR_YES;
         } else {
             info->place_reservoir_at_start = PLACE_RESERVOIR_BLOCKED;
@@ -440,7 +464,7 @@ static int place_reservoir_and_aqueducts(int measure_only, int x_start, int y_st
     }
     if (map_building_is_reservoir(x_end - 1, y_end - 1)) {
         info->place_reservoir_at_end = PLACE_RESERVOIR_EXISTS;
-    } else if (map_tiles_are_clear(x_end - 1, y_end - 1, 3, TERRAIN_ALL)) {
+    } else if (map_tiles_are_clear(x_end - 1, y_end - 1, 3, TERRAIN_ALL, 1)) {
         info->place_reservoir_at_end = PLACE_RESERVOIR_YES;
     } else {
         info->place_reservoir_at_end = PLACE_RESERVOIR_BLOCKED;
@@ -815,7 +839,7 @@ void building_construction_update(int x, int y, int grid_offset)
         if (items_placed >= 0) {
             current_cost *= items_placed;
         }
-    } else if (type >= BUILDING_SMALL_STATUE_ALT && type <= BUILDING_SMALL_STATUE_ALT_B) {
+    } else if (type >= BUILDING_GODDESS_STATUE && type <= BUILDING_SENATOR_STATUE) {
         int items_placed = plot_draggable_building(data.start.x, data.start.y, x, y, 0);
         if (items_placed >= 0) {
             current_cost *= items_placed;
@@ -1081,7 +1105,7 @@ void building_construction_place(void)
     } else if (type >= BUILDING_PINE_PATH && type <= BUILDING_DATE_PATH) {
         int rotation = building_rotation_get_rotation_with_limit(BUILDING_CONNECTABLE_ROTATION_LIMIT_PATHS);
         placement_cost *= place_draggable_building(x_start, y_start, x_end, y_end, type, rotation);
-    } else if (type >= BUILDING_SMALL_STATUE_ALT && type <= BUILDING_SMALL_STATUE_ALT_B) {
+    } else if (type >= BUILDING_GODDESS_STATUE && type <= BUILDING_SENATOR_STATUE) {
         int rotation = building_rotation_get_rotation();
         placement_cost *= place_draggable_building(x_start, y_start, x_end, y_end, type, rotation % 2);
     } else if (type >= BUILDING_HEDGE_DARK && type <= BUILDING_HEDGE_LIGHT) {

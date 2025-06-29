@@ -12,6 +12,9 @@ FILE *file_open(const char *filename, const char *mode)
     if (!filename) {
         return 0;
     }
+    if (strncmp(filename, ASSETS_DIRECTORY, sizeof(ASSETS_DIRECTORY) - 1) == 0) {
+        return platform_file_manager_open_asset(filename + sizeof(ASSETS_DIRECTORY), mode);
+    }
     return platform_file_manager_open_file(filename, mode);
 }
 
@@ -67,7 +70,7 @@ void file_remove_extension(char *filename)
     }
 }
 
-const char *file_remove_directory(const char *filename)
+const char *file_remove_path(const char *filename)
 {
     char *filename_without_directory = strrchr(filename, '/');
     if (filename_without_directory) {

@@ -154,13 +154,13 @@ void game_cheat_victory(void)
     }
 }
 
-void game_cheat_breakpoint()
+void game_cheat_breakpoint(void)
 {
     if (data.is_cheating) {
     }
 }
 
-void game_cheat_console()
+void game_cheat_console(void)
 {
     if (data.is_cheating) {
         building_construction_clear_type();
@@ -229,7 +229,7 @@ static void game_cheat_change_climate(uint8_t *args)
 {
     int climate = 0;
     parse_integer(args, &climate);
-    scenario_change_climate_cheat(climate);
+    scenario_change_climate(climate);
     show_warning(TR_CHEAT_CLIMATE_CHANGE);
 }
 

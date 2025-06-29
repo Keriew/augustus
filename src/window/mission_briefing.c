@@ -1,10 +1,10 @@
 #include "mission_briefing.h"
 
 #include "assets/assets.h"
-#include "campaign/campaign.h"
 #include "city/mission.h"
 #include "core/image_group.h"
 #include "core/lang.h"
+#include "game/campaign.h"
 #include "game/file.h"
 #include "game/mission.h"
 #include "game/settings.h"
@@ -19,9 +19,9 @@
 #include "graphics/window.h"
 #include "scenario/custom_messages.h"
 #include "scenario/criteria.h"
+#include "scenario/event/controller.h"
 #include "scenario/property.h"
 #include "scenario/scenario.h"
-#include "sound/channel.h"
 #include "sound/device.h"
 #include "sound/music.h"
 #include "sound/speech.h"
@@ -29,11 +29,18 @@
 #include "window/city.h"
 #include "window/intermezzo.h"
 #include "window/main_menu.h"
+#include "window/mission_list.h"
 #include "window/mission_selection.h"
 #include "window/plain_message_dialog.h"
 #include "window/video.h"
 
 #include <string.h>
+
+typedef enum {
+    BUTTON_GO_BACK_NONE = 0,
+    BUTTON_GO_BACK_MISSION_SELECTION = 1,
+    BUTTON_GO_BACK_SCENARIO_SELECTION
+} button_go_back_action;
 
 static void show(void);
 static void button_back(int param1, int param2);
@@ -50,7 +57,7 @@ static image_button image_button_start_mission = {
 };
 
 static struct {
-    int is_review;
+    button_go_back_action back_action;
     int video_played;
     int audio_played;
     int focus_button;
@@ -75,16 +82,16 @@ static void init(void)
 
 static int load_scenario_file(void)
 {
-    if (!campaign_is_active()) {
+    if (!game_campaign_is_active()) {
         return game_file_start_scenario_by_name(scenario_name());
     } else {
-        return campaign_load_scenario(scenario_campaign_mission());
+        return game_campaign_load_scenario(scenario_campaign_mission());
     }
 }
 
 static int has_briefing_message(void)
 {
-    if (!scenario_is_custom()) {
+    if (game_campaign_is_original()) {
         return 1;
     }
     if (!scenario_intro_message()) {
@@ -100,7 +107,7 @@ static int has_briefing_message(void)
 
 static int play_video(void)
 {
-    if (!scenario_is_custom() || data.is_review || data.video_played) {
+    if (game_campaign_is_original() || data.back_action == BUTTON_GO_BACK_NONE || data.video_played) {
         return 0;
     }
     data.video_played = 1;
@@ -114,30 +121,30 @@ static int play_video(void)
     return 0;
 }
 
-static void fadeout_music(int unused)
+static void fadeout_music(sound_type unused)
 {
     sound_device_fadeout_music(5000);
     sound_device_on_audio_finished(0);
 }
 
-static void init_speech(int channel)
+static void init_speech(sound_type type)
 {
-    if (channel != SOUND_CHANNEL_SPEECH) {
+    if (type != SOUND_TYPE_SPEECH) {
         return;
     }
 
     int has_speech = *data.paths.speech && *data.paths.background_music;
     if (*data.paths.speech) {
         has_speech &= sound_device_play_file_on_channel(data.paths.speech,
-            SOUND_CHANNEL_SPEECH, setting_sound(SOUND_SPEECH)->volume);
+            SOUND_TYPE_SPEECH, setting_sound(SOUND_TYPE_SPEECH)->volume);
     }
     if (*data.paths.background_music) {
         int volume = 100;
         if (has_speech) {
-            volume = setting_sound(SOUND_SPEECH)->volume / 3;
+            volume = setting_sound(SOUND_TYPE_SPEECH)->volume / 3;
         }
-        if (volume > setting_sound(SOUND_MUSIC)->volume) {
-            volume = setting_sound(SOUND_MUSIC)->volume;
+        if (volume > setting_sound(SOUND_TYPE_MUSIC)->volume) {
+            volume = setting_sound(SOUND_TYPE_MUSIC)->volume;
         }
         has_speech &= sound_device_play_music(data.paths.background_music, volume, 0);
     }
@@ -146,7 +153,8 @@ static void init_speech(int channel)
 
 static void play_audio(void)
 {
-    if (!scenario_is_custom() || data.audio_played) {
+    if (game_campaign_is_original() || data.audio_played) {
+        data.audio_played = 1;
         return;
     }
     data.audio_played = 1;
@@ -167,6 +175,7 @@ static void play_audio(void)
     }
 
     if (!audio_file && !speech_file && !background_music) {
+        data.audio_played = 0;
         return;
     }
 
@@ -175,23 +184,23 @@ static void play_audio(void)
     sound_music_stop();
 
     if (audio_file) {
-        playing_audio = sound_device_play_file_on_channel(data.paths.audio, SOUND_CHANNEL_SPEECH,
-            setting_sound(SOUND_SPEECH)->volume);
+        playing_audio = sound_device_play_file_on_channel(data.paths.audio, SOUND_TYPE_SPEECH,
+            setting_sound(SOUND_TYPE_SPEECH)->volume);
     }
     if (speech_file) {
         if (!playing_audio) {
-            init_speech(SOUND_CHANNEL_SPEECH);
+            init_speech(SOUND_TYPE_SPEECH);
         } else {
             sound_device_on_audio_finished(init_speech);
         }
     } else if (background_music) {
-        sound_device_play_music(data.paths.background_music, setting_sound(SOUND_MUSIC)->volume, 0);
+        sound_device_play_music(data.paths.background_music, setting_sound(SOUND_TYPE_MUSIC)->volume, 0);
     }
 }
 
 static void draw_background_image(void)
 {
-    if (!scenario_is_custom()) {
+    if (game_campaign_is_original()) {
         window_draw_underlying_window();
         return;
     }
@@ -215,7 +224,7 @@ static void draw_background_image(void)
 
 static void get_briefing_texts(const uint8_t **title, const uint8_t **subtitle, const uint8_t **content)
 {
-    if (!scenario_is_custom()) {
+    if (game_campaign_is_original()) {
         int text_id = 200 + scenario_campaign_mission();
         const lang_message *msg = lang_get_message(text_id);
         *title = msg->title.text;
@@ -227,6 +236,12 @@ static void get_briefing_texts(const uint8_t **title, const uint8_t **subtitle, 
         *subtitle = custom_messages_get_subtitle(custom_message);
         *content = custom_messages_get_text(custom_message);
     }
+}
+
+static int can_go_back(void)
+{
+    return data.back_action == BUTTON_GO_BACK_SCENARIO_SELECTION ||
+        (data.back_action == BUTTON_GO_BACK_MISSION_SELECTION && game_mission_has_choice());
 }
 
 static void draw_background(void)
@@ -279,7 +294,7 @@ static void draw_background(void)
     }
 
     lang_text_draw(62, 7, 376, 433, FONT_NORMAL_BLACK);
-    if (!data.is_review && game_mission_has_choice()) {
+    if (can_go_back()) {
         lang_text_draw(13, 4, 66, 435, FONT_NORMAL_BLACK);
     }
 
@@ -351,7 +366,7 @@ static void draw_foreground(void)
 
     rich_text_draw_scrollbar();
     image_buttons_draw(516, 426, &image_button_start_mission, 1);
-    if (!data.is_review && game_mission_has_choice()) {
+    if (can_go_back()) {
         image_buttons_draw(26, 428, &image_button_back, 1);
     }
 
@@ -368,7 +383,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
     if (image_buttons_handle_mouse(m_dialog, 516, 426, &image_button_start_mission, 1, 0)) {
         return;
     }
-    if (!data.is_review && game_mission_has_choice()) {
+    if (can_go_back()) {
         if (image_buttons_handle_mouse(m_dialog, 26, 428, &image_button_back, 1, 0)) {
             return;
         }
@@ -377,24 +392,31 @@ static void handle_input(const mouse *m, const hotkeys *h)
 
 static void button_back(int param1, int param2)
 {
-    if (!data.is_review) {
-        sound_music_stop();
-        sound_speech_stop();
+    if (data.back_action == BUTTON_GO_BACK_NONE) {
+        return;
+    }
+    sound_music_stop();
+    sound_speech_stop();
+    if (data.back_action == BUTTON_GO_BACK_MISSION_SELECTION) {
         window_mission_selection_show_again();
+    } else {
+        window_mission_list_show_again();
+        sound_music_play_intro();
     }
 }
 
 static void button_start_mission(int param1, int param2)
 {
-    if (!data.is_review || data.audio_played) {
+    if (data.back_action != BUTTON_GO_BACK_NONE || data.audio_played) {
         sound_music_stop();
         sound_speech_stop();
     }
     sound_music_update(1);
     window_city_show();
-    if (!data.is_review) {
+    if (data.back_action != BUTTON_GO_BACK_NONE) {
         city_mission_reset_save_start();
     }
+    scenario_events_process_all();
 }
 
 static void show(void)
@@ -411,17 +433,26 @@ static void show(void)
 
 void window_mission_briefing_show(void)
 {
-    data.is_review = 0;
+    data.back_action = BUTTON_GO_BACK_MISSION_SELECTION;
     data.video_played = 0;
     data.file_loaded = 0;
     data.background_image_id = 0;
-    scenario_is_custom() ? show() : window_intermezzo_show(INTERMEZZO_MISSION_BRIEFING, show);
+    game_campaign_is_original() ? window_intermezzo_show(INTERMEZZO_MISSION_BRIEFING, show) : show();
 }
 
 void window_mission_briefing_show_review(void)
 {
-    data.is_review = 1;
+    data.back_action = BUTTON_GO_BACK_NONE;
     data.file_loaded = 1;
     data.background_image_id = 0;
-    scenario_is_custom() ? show() : window_intermezzo_show(INTERMEZZO_MISSION_BRIEFING, show);
+    game_campaign_is_original() ? window_intermezzo_show(INTERMEZZO_MISSION_BRIEFING, show) : show();
+}
+
+void window_mission_briefing_show_from_scenario_selection(void)
+{
+    data.back_action = BUTTON_GO_BACK_SCENARIO_SELECTION;
+    data.video_played = 0;
+    data.file_loaded = 0;
+    data.background_image_id = 0;
+    game_campaign_is_original() ? window_intermezzo_show(INTERMEZZO_MISSION_BRIEFING, show) : show();
 }
