@@ -466,7 +466,6 @@ void building_dock_get_ship_request_tile(const building *dock, ship_dock_request
                     case 2: dx = 1; dy = 4; break;
                     default: dx = -2; dy = 1; break;
                 }
-                grid_offset = map_grid_offset(dock->x + dx, dock->y + dy);
             }
             break;
         case SHIP_DOCK_REQUEST_4_SECOND_QUEUE:
@@ -496,7 +495,6 @@ void building_dock_get_ship_request_tile(const building *dock, ship_dock_request
                     case 2: dx = 0; dy = 4; break;
                     default: dx = -1; dy = 0; break;
                 }
-                grid_offset = map_grid_offset(dock->x + dx, dock->y + dy);
             }
             break;
     }
