@@ -26,7 +26,7 @@ typedef enum {
 static const int ROUTE_OFFSETS[] = { -162, 1, 162, -1, -161, 163, 161, -163 };
 static const int ROUTE_OFFSETS_X[] = { 0, 1, 0, -1,  1, 1, -1, -1 };
 static const int ROUTE_OFFSETS_Y[] = { -1, 0, 1,  0, -1, 1,  1, -1 };
-static const int HIGHWAY_DIRECTIONS[] = {
+static const int HIGHWAY_DIRECTIONS[] = { 
     TERRAIN_HIGHWAY_TOP_RIGHT | TERRAIN_HIGHWAY_BOTTOM_RIGHT, // up
     TERRAIN_HIGHWAY_BOTTOM_LEFT | TERRAIN_HIGHWAY_BOTTOM_RIGHT, // right
     TERRAIN_HIGHWAY_TOP_LEFT | TERRAIN_HIGHWAY_BOTTOM_LEFT, // down
@@ -296,7 +296,7 @@ void map_routing_calculate_distances_water_boat(int x, int y)
     if (terrain_water.items[grid_offset] == WATER_N1_BLOCKED) {
         clear_data();
     } else {
-        route_queue_all_from(grid_offset, DIRECTIONS_DIAGONALS, callback_calc_distance_water_boat, 1);
+        route_queue_all_from(grid_offset, DIRECTIONS_NO_DIAGONALS, callback_calc_distance_water_boat, 1);
     }
 }
 
