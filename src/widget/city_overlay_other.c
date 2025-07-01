@@ -1,5 +1,6 @@
 #include "city_overlay_other.h"
 
+#include "assets/assets.h"
 #include "building/animation.h"
 #include "building/building.h"
 #include "building/industry.h"
@@ -18,6 +19,7 @@
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/text.h"
+#include "map/bridge.h"
 #include "map/building.h"
 #include "map/desirability.h"
 #include "map/image.h"
@@ -558,6 +560,13 @@ static int draw_footprint_water(int x, int y, float scale, int grid_offset)
     if (!map_property_is_draw_tile(grid_offset)) {
         return 1;
     }
+    if (map_is_bridge(grid_offset)) {
+        int water_image = map_image_at(grid_offset);  // Get the water image for the bridge
+        if (!water_image) {
+            water_image = image_group(GROUP_TERRAIN_WATER);  // fallback - first image in water group
+        }
+        image_draw_isometric_footprint_from_draw_tile(water_image, x, y, 0, scale);
+    }
     int is_building = map_terrain_is(grid_offset, TERRAIN_BUILDING);
     if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY) && !map_terrain_is(grid_offset, TERRAIN_GATEHOUSE)) {
         city_draw_highway_footprint(x, y, scale, grid_offset);
@@ -778,7 +787,7 @@ static int draw_footprint_desirability(int x, int y, float scale, int grid_offse
     if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY) && !map_terrain_is(grid_offset, TERRAIN_GATEHOUSE)) {
         city_draw_highway_footprint(x, y, scale, grid_offset);
     } else if (map_terrain_is(grid_offset, terrain_on_desirability_overlay())
-        && !map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+        && !map_terrain_is(grid_offset, TERRAIN_BUILDING) || map_is_bridge(grid_offset)) {
         // display normal tile
         if (map_property_is_draw_tile(grid_offset)) {
             image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
@@ -818,14 +827,14 @@ static int draw_top_desirability(int x, int y, float scale, int grid_offset)
 {
     color_t color_mask = map_property_is_deleted(grid_offset) ? COLOR_MASK_RED : 0;
     if (map_terrain_is(grid_offset, terrain_on_desirability_overlay())
-        && !map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+        && !map_terrain_is(grid_offset, TERRAIN_BUILDING) || map_is_bridge(grid_offset)) {
         // display normal tile
         if (map_property_is_draw_tile(grid_offset)) {
             image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
         }
     } else if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT | TERRAIN_WALL)) {
         // grass, no top needed
-    } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+    } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING) && !map_is_bridge(grid_offset)) {
         if (has_deleted_building(grid_offset)) {
             color_mask = COLOR_MASK_RED;
         }
