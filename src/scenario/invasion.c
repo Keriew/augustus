@@ -447,15 +447,15 @@ static void repeat_invasion_without_warnings(invasion_t *invasion)
     }
     int years = random_between_from_stdlib(invasion->repeat.interval.min, invasion->repeat.interval.max);
 
+    // If enemies retreated in previous repeating attack, reset this behavior
+    int invasion_id = invasion->id;
+    enemy_army *army = enemy_army_get_editable(invasion_id);
+    if (army) {
+        army->started_retreating = 0;
+    }
+
     invasion->year += years;
     invasion->month = 2 + (random_from_stdlib() & 7);
-
-    int grid_offset = start_invasion(ENEMY_ID_TO_ENEMY_TYPE[invasion->from],
-        random_between_from_stdlib(invasion->amount.min, invasion->amount.max),
-        invasion->from, invasion->attack_type, invasion->id);
-    if (grid_offset > 0) {
-        city_message_post(1, MESSAGE_ENEMY_ARMY_ATTACK, data.last_internal_invasion_id, grid_offset);
-    }
 }
 
 static void repeat_invasion_with_warnings(invasion_t *invasion)
@@ -467,7 +467,24 @@ static void repeat_invasion_with_warnings(invasion_t *invasion)
         return;
     }
 
-    // Clear all old warnings related to this invasion
+    // way number invasion
+    int path_current = 1;
+    const invasion_t *inv_it;
+    array_foreach(data.invasions, inv_it) {
+        if (!inv_it->type ||
+            inv_it->type == INVASION_TYPE_LOCAL_UPRISING ||
+            inv_it->type == INVASION_TYPE_DISTANT_BATTLE) {
+            continue;
+        }
+        if (inv_it == invasion) {
+            break;
+        }
+        if (++path_current > path_max) {
+            path_current = 1;
+        }
+    }
+
+    // clear old warning
     invasion_warning *w;
     array_foreach(data.warnings, w) {
         if (w->invasion_id == invasion->id) {
@@ -476,11 +493,12 @@ static void repeat_invasion_with_warnings(invasion_t *invasion)
         }
     }
 
-    // Calculate the invasion path similarly to init_warnings
-    int path = invasion->id % path_max + 1;
+    const int game_month = game_time_year() * 12 + game_time_month();
+    const int invasion_month = (scenario.start_year + invasion->year) * 12 + invasion->month;
 
+    // new warning
     for (int year = 1; year < 8; year++) {
-        const empire_object *obj = empire_object_get_battle_icon(path, year);
+        const empire_object *obj = empire_object_get_battle_icon(path_current, year);
         if (!obj) {
             continue;
         }
@@ -503,20 +521,11 @@ static void repeat_invasion_with_warnings(invasion_t *invasion)
         warning->month_notified = 0;
         warning->year_notified = 0;
 
-        // Calculate how many months remain until the invasion
-        int current_month = game_time_year() * 12 + game_time_month();
-        int invasion_month = (scenario.start_year + invasion->year) * 12 + invasion->month;
-        int warning_month_offset = warning->warning_years * 12;
-
-        warning->months_to_go = invasion_month - warning_month_offset - current_month;
-
-        // Adjustment for warnings spanning multiple years
-        if (warning->warning_years > 1) {
-            warning->months_to_go++;
+        int months_to_go = invasion_month - obj->invasion_years * 12 - game_month;
+        if (obj->invasion_years > 1) {
+            months_to_go += 1;
         }
-        if (warning->months_to_go < 0) {
-            warning->months_to_go = 0;
-        }
+        warning->months_to_go = months_to_go < 0 ? 0 : months_to_go;
     }
 }
 
@@ -588,12 +597,7 @@ void scenario_invasion_process(void)
                 if (grid_offset > 0) {
                     city_message_post(1, MESSAGE_LOCAL_UPRISING, data.last_internal_invasion_id, grid_offset);
                 }
-            }
-            if (invasion->repeat.times != 0) {
-                //Fixing instant invasions
-                int current_month = game_time_year() * 12 + game_time_month();
-                int scheduled_month = (scenario.start_year + invasion->year) * 12 + invasion->month;
-                if (current_month >= scheduled_month) {
+                if (invasion->repeat.times != 0) {
                     repeat_invasion_without_warnings(invasion);
                 }
             }
