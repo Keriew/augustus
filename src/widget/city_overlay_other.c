@@ -49,7 +49,7 @@ static int show_building_religion(const building *b)
 static int show_building_food_stocks(const building *b)
 {
     return b->type == BUILDING_MARKET || b->type == BUILDING_WHARF || b->type == BUILDING_GRANARY ||
-           b->type == BUILDING_CARAVANSERAI || b->type == BUILDING_MESS_HALL;
+        b->type == BUILDING_CARAVANSERAI || b->type == BUILDING_MESS_HALL;
 }
 
 static int show_building_tax_income(const building *b)
@@ -110,9 +110,9 @@ static int show_building_mothball(const building *b)
 static int show_building_logistics(const building *b)
 {
     return b->type == BUILDING_WAREHOUSE || b->type == BUILDING_WAREHOUSE_SPACE ||
-           b->type == BUILDING_GRANARY || b->type == BUILDING_DOCK ||
-           b->type == BUILDING_DEPOT || b->type == BUILDING_LIGHTHOUSE ||
-           b->type == BUILDING_ARMOURY;
+        b->type == BUILDING_GRANARY || b->type == BUILDING_DOCK ||
+        b->type == BUILDING_DEPOT || b->type == BUILDING_LIGHTHOUSE ||
+        b->type == BUILDING_ARMOURY;
 }
 
 static int show_building_storages(const building *b)
@@ -161,9 +161,9 @@ static int show_figure_tax_income(const figure *f)
 static int show_figure_logistics(const figure *f)
 {
     return f->type == FIGURE_WAREHOUSEMAN || f->type == FIGURE_DEPOT_CART_PUSHER ||
-           f->type == FIGURE_DOCKER || f->type == FIGURE_LIGHTHOUSE_SUPPLIER ||
-           f->type == FIGURE_TRADE_CARAVAN || f->type == FIGURE_TRADE_CARAVAN_DONKEY ||
-           f->type == FIGURE_TRADE_SHIP || f->type == FIGURE_NATIVE_TRADER;
+        f->type == FIGURE_DOCKER || f->type == FIGURE_LIGHTHOUSE_SUPPLIER ||
+        f->type == FIGURE_TRADE_CARAVAN || f->type == FIGURE_TRADE_CARAVAN_DONKEY ||
+        f->type == FIGURE_TRADE_SHIP || f->type == FIGURE_NATIVE_TRADER;
 }
 
 static int show_figure_employment(const figure *f)
@@ -305,20 +305,15 @@ static int get_tooltip_efficiency(tooltip_context *c, const building *b)
     }
     if (efficiency == 0) {
         c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_0;
-    }
-    else if (efficiency < 25) {
+    } else if (efficiency < 25) {
         c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_1;
-    }
-    else if (efficiency < 50) {
+    } else if (efficiency < 50) {
         c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_2;
-    }
-    else if (efficiency < 80) {
+    } else if (efficiency < 80) {
         c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_3;
-    }
-    else if (efficiency < 95) {
+    } else if (efficiency < 95) {
         c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_4;
-    }
-    else {
+    } else {
         c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_5;
     }
     return 0;
@@ -369,7 +364,7 @@ static int get_tooltip_employment(tooltip_context *c, const building *b)
 {
     int full = building_get_laborers(b->type);
     int missing = full - b->num_workers;
-    
+
     if (full >= 1) {
         if (missing == 0) {
             c->translation_key = TR_TOOLTIP_OVERLAY_EMPLOYMENT_FULL;
@@ -612,6 +607,14 @@ static int draw_footprint_water(int x, int y, float scale, int grid_offset)
         }
         image_draw_isometric_footprint_from_draw_tile(image_id, x, y, 0, scale);
     }
+    if (config_get(CONFIG_UI_SHOW_GRID) && map_property_is_draw_tile(grid_offset)
+                                    && !map_building_at(grid_offset) && scale <= 2.0f) {
+        static int grid_id = 0;
+        if (!grid_id) {
+            grid_id = assets_get_image_id("UI", "Grid_Full");
+        }
+        image_draw(grid_id, x, y, COLOR_GRID, scale);
+    }
     return 1;
 }
 
@@ -799,6 +802,14 @@ static int draw_footprint_desirability(int x, int y, float scale, int grid_offse
             image_group(GROUP_TERRAIN_DESIRABILITY) + offset, x, y, color_mask, scale);
     } else {
         image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
+    }
+    if (config_get(CONFIG_UI_SHOW_GRID) && map_property_is_draw_tile(grid_offset)
+                                    && !map_building_at(grid_offset) && scale <= 2.0f) {
+        static int grid_id = 0;
+        if (!grid_id) {
+            grid_id = assets_get_image_id("UI", "Grid_Full");
+        }
+        image_draw(grid_id, x, y, COLOR_GRID, scale);
     }
     return 1;
 }
