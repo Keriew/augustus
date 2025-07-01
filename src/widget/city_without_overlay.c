@@ -197,6 +197,7 @@ static void draw_footprint(int x, int y, int grid_offset)
         image_draw_isometric_footprint_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
     }
     if (!building_id && config_get(CONFIG_UI_SHOW_GRID) && draw_context.scale <= 2.0f) {
+        //grid is drawn by the renderer directly at zoom > 200%
         static int grid_id = 0;
         if (!grid_id) {
             grid_id = assets_get_image_id("UI", "Grid_Full");
@@ -477,7 +478,7 @@ static void draw_depot_resource(building *b, int x, int y, color_t color_mask)
     int img_id;
 
     if (b->num_workers > 0) {
-        switch(b->data.depot.current_order.resource_type) {
+        switch (b->data.depot.current_order.resource_type) {
             case RESOURCE_VEGETABLES:
                 img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Vegetables");
                 break;
@@ -539,7 +540,7 @@ static void draw_depot_resource(building *b, int x, int y, color_t color_mask)
             default:
                 img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Wheat");
                 break;
-        }        
+        }
     } else {
         img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Cat");
     }
