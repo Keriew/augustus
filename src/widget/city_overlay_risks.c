@@ -5,6 +5,7 @@
 #include "game/state.h"
 #include "graphics/image.h"
 #include "map/building.h"
+#include "map/bridge.h"
 #include "map/image.h"
 #include "map/property.h"
 #include "map/random.h"
@@ -144,7 +145,7 @@ static int show_figure_problems(const figure *f)
 static int show_figure_native(const figure *f)
 {
     return f->type == FIGURE_INDIGENOUS_NATIVE || f->type == FIGURE_MISSIONARY ||
-           f->type == FIGURE_NATIVE_TRADER;
+        f->type == FIGURE_NATIVE_TRADER;
 }
 
 static int show_figure_enemy(const figure *f)
@@ -445,6 +446,13 @@ static int draw_top_native(int x, int y, float scale, int grid_offset)
                 color_mask = COLOR_MASK_RED;
             }
             image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
+        }
+        if (map_is_bridge(grid_offset)) {
+            int water_image = map_image_at(grid_offset);  // Get the water image for the bridge
+            if (!water_image) {
+                water_image = image_group(GROUP_TERRAIN_WATER);  // fallback - first image in water group
+            }
+            image_draw_isometric_footprint_from_draw_tile(water_image, x, y, 0, scale);
         }
     } else if (map_building_at(grid_offset)) {
         city_with_overlay_draw_building_top(x, y, grid_offset);
