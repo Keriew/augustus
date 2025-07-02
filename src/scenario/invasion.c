@@ -440,7 +440,7 @@ static int start_invasion(int enemy_type, int amount, int invasion_point, format
     return grid_offset;
 }
 
-static void repeat_invasion_without_warnings(invasion_t *invasion)
+void repeat_invasion_without_warnings(invasion_t *invasion)
 {
     if (invasion->repeat.times != INVASIONS_REPEAT_INFINITE) {
         invasion->repeat.times--;
