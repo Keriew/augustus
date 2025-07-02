@@ -140,19 +140,23 @@ jobs:
           - name: Windows MinGW x86
             cache-key: mingw
             COMPILER: mingw-32
+            os: windows-latest
           - name: Windows MinGW x64
             cache-key: mingw
             COMPILER: mingw-64
             SKIP_UPLOAD: true
+            os: windows-latest
           - name: Windows MSVC x64
             cache-key: msvc
             COMPILER: msvc
             SKIP_UPLOAD: true
+            os: windows-latest
           - name: Windows MSVC ARM64
             cache-key: msvc-arm64
             COMPILER: msvc-arm64
+            os: windows-11-arm
     name: ${{ matrix.name }}
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
     env:
       SDL_VERSION: 2.32.4
       SDL_MIXER_VERSION: 2.8.1

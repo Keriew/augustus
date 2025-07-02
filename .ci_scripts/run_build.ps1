@@ -4,7 +4,7 @@ if ("${env:COMPILER}" -eq "msvc") {
     cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
     cmake --build . -j 4 --config RelWithDebInfo
 } elseif ("${env:COMPILER}" -eq "msvc-arm64") {
-    cmake -G "Visual Studio 17 2022" -A ARM64 -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+    cmake -G "Ninja" -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
     cmake --build . -j 4 --config RelWithDebInfo
 } elseif ("${env:COMPILER}" -eq "mingw-32") {
     $env:path = "D:\msys64\mingw32\bin;${env:path}"
