@@ -140,23 +140,19 @@ jobs:
           - name: Windows MinGW x86
             cache-key: mingw
             COMPILER: mingw-32
-            os: windows-latest
           - name: Windows MinGW x64
             cache-key: mingw
             COMPILER: mingw-64
             SKIP_UPLOAD: true
-            os: windows-latest
           - name: Windows MSVC x64
             cache-key: msvc
             COMPILER: msvc
             SKIP_UPLOAD: true
-            os: windows-latest
           - name: Windows MSVC ARM64
             cache-key: msvc-arm64
             COMPILER: msvc-arm64
-            os: windows-11-arm
     name: ${{ matrix.name }}
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
     env:
       SDL_VERSION: 2.32.4
       SDL_MIXER_VERSION: 2.8.1
@@ -192,18 +188,11 @@ jobs:
           fileName: "cv2pdb-0.53.zip"
           out-file-path: "build"
           extract: true
-      - name: Setup Ninja for Windows ARM64
-        if: matrix.COMPILER == 'msvc-arm64'
-        uses: robinraju/release-downloader@v1.8
-        with:
-          repository: "ninja-build/ninja"
-          tag: "v1.13.0"
-          fileName: "ninja-winarm64.zip"
-          out-file-path: "build"
-          extract: true
       - name: Setup MSVC build tools for Windows ARM64
         if: matrix.COMPILER == 'msvc-arm64'
-        uses: ilammy/msvc-dev-cmd@v1.3.0
+        uses: ilammy/msvc-dev-cmd@v1.13.0
+        with:
+          arch: amd64_arm64
       - name: Set up environment
         run: ./.ci_scripts/install_sdl.ps1
       - name: Build and test
