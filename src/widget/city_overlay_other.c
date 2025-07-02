@@ -1,5 +1,6 @@
 #include "city_overlay_other.h"
 
+#include "assets/assets.h"
 #include "building/animation.h"
 #include "building/building.h"
 #include "building/industry.h"
@@ -18,6 +19,7 @@
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/text.h"
+#include "map/bridge.h"
 #include "map/building.h"
 #include "map/desirability.h"
 #include "map/image.h"
@@ -49,7 +51,7 @@ static int show_building_religion(const building *b)
 static int show_building_food_stocks(const building *b)
 {
     return b->type == BUILDING_MARKET || b->type == BUILDING_WHARF || b->type == BUILDING_GRANARY ||
-           b->type == BUILDING_CARAVANSERAI || b->type == BUILDING_MESS_HALL;
+        b->type == BUILDING_CARAVANSERAI || b->type == BUILDING_MESS_HALL;
 }
 
 static int show_building_tax_income(const building *b)
@@ -110,9 +112,9 @@ static int show_building_mothball(const building *b)
 static int show_building_logistics(const building *b)
 {
     return b->type == BUILDING_WAREHOUSE || b->type == BUILDING_WAREHOUSE_SPACE ||
-           b->type == BUILDING_GRANARY || b->type == BUILDING_DOCK ||
-           b->type == BUILDING_DEPOT || b->type == BUILDING_LIGHTHOUSE ||
-           b->type == BUILDING_ARMOURY;
+        b->type == BUILDING_GRANARY || b->type == BUILDING_DOCK ||
+        b->type == BUILDING_DEPOT || b->type == BUILDING_LIGHTHOUSE ||
+        b->type == BUILDING_ARMOURY;
 }
 
 static int show_building_storages(const building *b)
@@ -161,9 +163,9 @@ static int show_figure_tax_income(const figure *f)
 static int show_figure_logistics(const figure *f)
 {
     return f->type == FIGURE_WAREHOUSEMAN || f->type == FIGURE_DEPOT_CART_PUSHER ||
-           f->type == FIGURE_DOCKER || f->type == FIGURE_LIGHTHOUSE_SUPPLIER ||
-           f->type == FIGURE_TRADE_CARAVAN || f->type == FIGURE_TRADE_CARAVAN_DONKEY ||
-           f->type == FIGURE_TRADE_SHIP || f->type == FIGURE_NATIVE_TRADER;
+        f->type == FIGURE_DOCKER || f->type == FIGURE_LIGHTHOUSE_SUPPLIER ||
+        f->type == FIGURE_TRADE_CARAVAN || f->type == FIGURE_TRADE_CARAVAN_DONKEY ||
+        f->type == FIGURE_TRADE_SHIP || f->type == FIGURE_NATIVE_TRADER;
 }
 
 static int show_figure_employment(const figure *f)
@@ -305,20 +307,15 @@ static int get_tooltip_efficiency(tooltip_context *c, const building *b)
     }
     if (efficiency == 0) {
         c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_0;
-    }
-    else if (efficiency < 25) {
+    } else if (efficiency < 25) {
         c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_1;
-    }
-    else if (efficiency < 50) {
+    } else if (efficiency < 50) {
         c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_2;
-    }
-    else if (efficiency < 80) {
+    } else if (efficiency < 80) {
         c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_3;
-    }
-    else if (efficiency < 95) {
+    } else if (efficiency < 95) {
         c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_4;
-    }
-    else {
+    } else {
         c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_5;
     }
     return 0;
@@ -369,7 +366,7 @@ static int get_tooltip_employment(tooltip_context *c, const building *b)
 {
     int full = building_get_laborers(b->type);
     int missing = full - b->num_workers;
-    
+
     if (full >= 1) {
         if (missing == 0) {
             c->translation_key = TR_TOOLTIP_OVERLAY_EMPLOYMENT_FULL;
@@ -563,6 +560,13 @@ static int draw_footprint_water(int x, int y, float scale, int grid_offset)
     if (!map_property_is_draw_tile(grid_offset)) {
         return 1;
     }
+    if (map_is_bridge(grid_offset)) {
+        int water_image = map_image_at(grid_offset);  // Get the water image for the bridge
+        if (!water_image) {
+            water_image = image_group(GROUP_TERRAIN_WATER);  // fallback - first image in water group
+        }
+        image_draw_isometric_footprint_from_draw_tile(water_image, x, y, 0, scale);
+    }
     int is_building = map_terrain_is(grid_offset, TERRAIN_BUILDING);
     if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY) && !map_terrain_is(grid_offset, TERRAIN_GATEHOUSE)) {
         city_draw_highway_footprint(x, y, scale, grid_offset);
@@ -611,6 +615,15 @@ static int draw_footprint_water(int x, int y, float scale, int grid_offset)
                 break;
         }
         image_draw_isometric_footprint_from_draw_tile(image_id, x, y, 0, scale);
+    }
+    if (config_get(CONFIG_UI_SHOW_GRID) && map_property_is_draw_tile(grid_offset)
+                                    && !map_building_at(grid_offset) && scale <= 2.0f) {
+        //grid is drawn by the renderer directly at zoom > 200%
+        static int grid_id = 0;
+        if (!grid_id) {
+            grid_id = assets_get_image_id("UI", "Grid_Full");
+        }
+        image_draw(grid_id, x, y, COLOR_GRID, scale);
     }
     return 1;
 }
@@ -775,7 +788,7 @@ static int draw_footprint_desirability(int x, int y, float scale, int grid_offse
     if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY) && !map_terrain_is(grid_offset, TERRAIN_GATEHOUSE)) {
         city_draw_highway_footprint(x, y, scale, grid_offset);
     } else if (map_terrain_is(grid_offset, terrain_on_desirability_overlay())
-        && !map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+        && !map_terrain_is(grid_offset, TERRAIN_BUILDING) || map_is_bridge(grid_offset)) {
         // display normal tile
         if (map_property_is_draw_tile(grid_offset)) {
             image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
@@ -800,6 +813,15 @@ static int draw_footprint_desirability(int x, int y, float scale, int grid_offse
     } else {
         image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
     }
+    if (config_get(CONFIG_UI_SHOW_GRID) && map_property_is_draw_tile(grid_offset)
+                                    && !map_building_at(grid_offset) && scale <= 2.0f) {
+        //grid is drawn by the renderer directly at zoom > 200%
+        static int grid_id = 0;
+        if (!grid_id) {
+            grid_id = assets_get_image_id("UI", "Grid_Full");
+        }
+        image_draw(grid_id, x, y, COLOR_GRID, scale);
+    }
     return 1;
 }
 
@@ -807,14 +829,14 @@ static int draw_top_desirability(int x, int y, float scale, int grid_offset)
 {
     color_t color_mask = map_property_is_deleted(grid_offset) ? COLOR_MASK_RED : 0;
     if (map_terrain_is(grid_offset, terrain_on_desirability_overlay())
-        && !map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+        && !map_terrain_is(grid_offset, TERRAIN_BUILDING) || map_is_bridge(grid_offset)) {
         // display normal tile
         if (map_property_is_draw_tile(grid_offset)) {
             image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
         }
     } else if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT | TERRAIN_WALL)) {
         // grass, no top needed
-    } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+    } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING) && !map_is_bridge(grid_offset)) {
         if (has_deleted_building(grid_offset)) {
             color_mask = COLOR_MASK_RED;
         }
