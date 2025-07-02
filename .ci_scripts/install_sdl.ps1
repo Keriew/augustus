@@ -43,11 +43,11 @@ if ("${env:COMPILER}" -eq "msvc") {
         mkdir build
         cd build
 
-        cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release ..
+        cmake -G "Ninja" -DCMAKE_C_COMPILER=cl.exe -DCMAKE_BUILD_TYPE=Release ..
         cmake --build . -j 4 --config Release
         mv include-config-release\SDL2\*.h include\SDL2
         mv include\SDL2 $Env:SDL2_DIR
-        mv Release\SDL2* $Env:SDL2_DIR
+        mv SDL2* $Env:SDL2_DIR
 
         CheckSuccess("Build SDL")
 
@@ -56,7 +56,7 @@ if ("${env:COMPILER}" -eq "msvc") {
         mkdir build
         cd build
           
-        cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DSDL2MIXER_MP3=ON -DSDL2MIXER_MP3_MINIMP3=ON -DSDL2MIXER_VENDORED=OFF -DSDL2MIXER_SAMPLES=OFF -DSDL2MIXER_FLAC=OFF -DSDL2MIXER_CMD=OFF -DSDL2MIXER_MOD=OFF -DSDL2MIXER_MIDI=OFF -DSDL2MIXER_MIDI_TIMIDITY=OFF -DSDL2MIXER_OPUS=OFF -DSDL2MIXER_VORBIS=STB -DSDL2MIXER_WAVPACK=OFF ..
+        cmake -G "Ninja" -DCMAKE_C_COMPILER=cl.exe -DCMAKE_BUILD_TYPE=Release -DSDL2MIXER_MP3=ON -DSDL2MIXER_MP3_MINIMP3=ON -DSDL2MIXER_VENDORED=OFF -DSDL2MIXER_SAMPLES=OFF -DSDL2MIXER_FLAC=OFF -DSDL2MIXER_CMD=OFF -DSDL2MIXER_MOD=OFF -DSDL2MIXER_MIDI=OFF -DSDL2MIXER_MIDI_TIMIDITY=OFF -DSDL2MIXER_OPUS=OFF -DSDL2MIXER_VORBIS=STB -DSDL2MIXER_WAVPACK=OFF ..
         cmake --build . -j 4 --config Release
 
         mv ..\include $Env:SDL2_MIXER_DIR
