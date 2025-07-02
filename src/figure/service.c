@@ -208,7 +208,8 @@ static int provide_missionary_coverage(int x, int y)
             int building_id = map_building_at(map_grid_offset(xx, yy));
             if (building_id) {
                 building *b = building_get(building_id);
-                if (b->type == BUILDING_NATIVE_HUT || b->type == BUILDING_NATIVE_MEETING) {
+                if (b->type == BUILDING_NATIVE_HUT || b->type == BUILDING_NATIVE_HUT_ALT ||
+                    b->type == BUILDING_NATIVE_MEETING) {
                     b->sentiment.native_anger = 0;
                 }
             }
@@ -561,6 +562,8 @@ int figure_service_provide_coverage(figure *f)
         case FIGURE_DOCKER:
         case FIGURE_CART_PUSHER:
         case FIGURE_DEPOT_CART_PUSHER:
+        case FIGURE_NATIVE_TRADER:
+        case FIGURE_LIGHTHOUSE_SUPPLIER:
             b = building_get(f->building_id);
             building *dest_b = building_get(f->destination_building_id);
 

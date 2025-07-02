@@ -59,6 +59,7 @@ void assets_init(int force_reload, color_t **main_images, int *main_image_widths
     data.asset_lookup[ASSET_OX] = assets_get_image_id("Walkers", "Ox_Portrait");
     data.asset_lookup[ASSET_UI_RISKS] = assets_get_image_id("UI", "Risk_Widget_Collapse");
     data.asset_lookup[ASSET_UI_SELECTION_CHECKMARK] = assets_get_image_id("UI", "Selection_Checkmark");
+    data.asset_lookup[ASSET_UI_VERTICAL_EMPIRE_PANEL] = assets_get_image_id("UI", "Empire_panel_texture_vertical");
 }
 
 int assets_load_single_group(const char *file_name, color_t **main_images, int *main_image_widths)

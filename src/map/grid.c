@@ -2,7 +2,9 @@
 
 #include "map/data.h"
 
+#include <stdlib.h>
 #include <string.h>
+
 
 #define OFFSET(x,y) (x + GRID_SIZE * y)
 
@@ -94,6 +96,19 @@ int map_grid_direction_delta(int direction)
     } else {
         return 0;
     }
+}
+
+int map_grid_chess_distance(int offset1, int offset2)
+{
+    int x1 = map_grid_offset_to_x(offset1);
+    int y1 = map_grid_offset_to_y(offset1);
+    int x2 = map_grid_offset_to_x(offset2);
+    int y2 = map_grid_offset_to_y(offset2);
+
+    int dx = abs(x2 - x1);
+    int dy = abs(y2 - y1);
+
+    return dx > dy ? dx : dy;
 }
 
 void map_grid_size(int *width, int *height)

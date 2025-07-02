@@ -1601,9 +1601,27 @@ static translation_string all_strings[] = {
     {TR_WINDOW_MISSION_LIST_SCENARIOS, "cenários"},
     {TR_WINDOW_ORIGINAL_CAMPAIGN_DESC, "A campanha original de Caesar 3, de 1998, em toda a sua antiga glória."},
     {TR_WINDOW_ORIGINAL_CAMPAIGN_NAME, "Campanha original" },
-    {TR_WINDOW_SELECT_CAMPAIGN, "Selecionar campanha"},
-
-
+    {TR_WINDOW_SELECT_CAMPAIGN, "Selecionar campanha" },
+    {TR_BUILDING_CARAVANSERAI_FOOD_SHORTAGE, "Neste Caravançará há trabalhadores e comida, mas os estoques estão muito baixos par abastecer as caravanas." },
+    {TR_BUILDING_LATRINES, "Latrinas"},
+    {TR_BUILDING_LATRINES_DESC_1, "Um local de conforto, apreciado pela população, onde se vem para conversar sobre as notícias do dia ou obre negócios."},
+    {TR_BUILDING_LATRINES_DESC_2, "As latrinas são usadas pelos cidadãos que só têm cesso a poços e ajudam a melhorar levemente o nível das moradias e a saúde local. Mordias dentro o raio de fontes ativas não usarão latinas publicas."},
+    {TR_BUILDING_LATRINES_MISSING_DEVOLVE, "Esta casa irá regredir logo já que não tem acesso a uma latrina ou à água limpa de uma fonte."},
+    {TR_BUILDING_LATRINES_MISSING_EVOLVE, "Esta casa não pode evoluir, já que não tem acesso  uma latrina ou à água limpa de uma fonte."},
+    {TR_BUILDING_LATRINES_NO_HOUSES, "Estas latrinas são desnecessárias no momento, já que não há moradias dentro de seu raio de serviço."},
+    {TR_BUILDING_LATRINES_NO_WORKERS, "Sem trabalhadores para fazer a manutenção destas latrinas, os cidadãos evitam vir relaxar aqui."},
+    {TR_BUILDING_LATRINES_UNNECESSARY, "Estas latrinas não têm propósito, já que as moradias próximas não precisam delas."},
+    {TR_BUILDING_LIGHTHOUSE_NO_TIMBER, "Os faroleiros têm dificuldade para encontrar lenha para manter a chama do Farol acesa. Os navios que se aproximam da costa mal conseguem enxergar a luz tênue da pira."},
+    {TR_CONFIG_DRAW_ASCLEPIUS, "Mostrar o Bastão de Esculápio no menu de saúde"},
+    {TR_CONFIG_RANDOMISE_MUSIC, "Randomizar música da cidade"},
+    {TR_CONFIG_SHOW_DESIRABILITY_RANGE_ALL, "Mostrar atratividade ao construir edifícios"},
+    {TR_EDITOR_REPEAT_FREQUENCY2, "Repetir frequência"},
+    {TR_EDITOR_REPEAT_FREQUENCY_YEARS2, "Anos:"},
+    {TR_EDITOR_REPEAT_TIMES2, "Vezes:"},
+    {TR_EDITOR_SCENARIO_SELECT_ACTION, "Selecionar ação"},
+    {TR_EDITOR_SCENARIO_SELECT_CONDITION, "Selecionar condição"},
+    {TR_HOTKEY_SHOW_OVERLAY_ENEMY, "Visão de inimigos"},
+    {TR_PARAMETER_TYPE_REQUEST, "Solicitação"}
 };
 
 void translation_portuguese(const translation_string **strings, int *num_strings)

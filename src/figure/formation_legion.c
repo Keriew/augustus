@@ -143,7 +143,7 @@ void formation_legion_move_to(formation *m, const map_tile *tile)
                 break;
             }
         }
-        
+
         figure_id = f->next_figure_id_on_same_tile;
     }
 

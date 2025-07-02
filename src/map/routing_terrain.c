@@ -146,6 +146,7 @@ static int get_land_type_noncitizen(int grid_offset)
             break;
         case BUILDING_BURNING_RUIN:
         case BUILDING_NATIVE_HUT:
+        case BUILDING_NATIVE_HUT_ALT:
         case BUILDING_NATIVE_MEETING:
         case BUILDING_NATIVE_CROPS:
             type = NONCITIZEN_N1_BLOCKED;
@@ -170,6 +171,8 @@ static int get_land_type_noncitizen(int grid_offset)
         case BUILDING_ROADBLOCK:
         case BUILDING_HEDGE_GATE_DARK:
         case BUILDING_HEDGE_GATE_LIGHT:
+        case BUILDING_SHIP_BRIDGE:
+        case BUILDING_LOW_BRIDGE:
             type = NONCITIZEN_0_PASSABLE;
             break;
     }

@@ -1502,7 +1502,8 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_BARRACKS_PRIORITY_WATCHTOWER, "Приоритет вербовки часовых для сторожевых башен"},
     {TR_TOOLTIP_BUTTON_REJECT_DELIVERY, "Запретить доставку оружия из оружейной"},
     {TR_TOOLTIP_BUTTON_ACCEPT_DELIVERY, "Разрешить доставку оружия из оружейной"},
-    {TR_CONFIG_SHOW_DESIRABILITY_RANGE, "Показывать привлекательность при постройке мавзолеев и нимфеев"},
+    {TR_CONFIG_SHOW_DESIRABILITY_RANGE, "Показать привлекательность религиозных и военных зданий"},
+    {TR_CONFIG_SHOW_DESIRABILITY_RANGE_ALL, "Показать привлекательность всех зданий при строительстве"},
     {TR_BUILDING_FORT_LEGIONARIES, "Легионеры"},
     {TR_BUILDING_FORT_JAVELIN, "Ауксиларии - Метатели"},
     {TR_BUILDING_FORT_MOUNTED, "Ауксиларии - Всадники"},
@@ -1609,6 +1610,8 @@ static translation_string all_strings[] = {
     {TR_BUILDING_LATRINES_UNNECESSARY, "Эта латрина бесполезна, так как поблизости нет домов, которым она была бы нужна."},
     {TR_BUILDING_LATRINES_NO_HOUSES, "Эта латрина сейчас не нужна, так как в пределах зоны обслуживания нет домов."},
     {TR_CONFIG_DRAW_ASCLEPIUS, "Заменить стандартную иконку на жезл Асклепия в меню здоровья"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT, "Хижина туземцев 2"}, // Имя в меню редактора карт
+    {TR_BUILDING_NATIVE_HUT_ALT, "Хижина туземцев alt"}, // Имя в окне Тип здания для подсчета редактора карт
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

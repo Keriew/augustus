@@ -288,7 +288,7 @@ static int has_figure_color(figure *f)
         return FIGURE_COLOR_WOLF;
     }
 
-    if (type == FIGURE_TRADE_CARAVAN) {
+    if (type == FIGURE_TRADE_CARAVAN || type == FIGURE_NATIVE_TRADER) {
         return FIGURE_COLOR_TRADE_CARAVAN;
     }
     if (type == FIGURE_TRADE_SHIP) {

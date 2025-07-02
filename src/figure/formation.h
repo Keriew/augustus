@@ -79,26 +79,33 @@ typedef struct {
     int max_total_damage; /**< Maximum total damage of all figures added */
 
     /* Position */
-    int x;
-    int y;
-    int x_home;
-    int y_home;
-    int building_id;
-    int standard_x;
-    int standard_y;
+    int x; // legions - x position of the fort
+    int y; // legions - y position of the fort
+    int x_home; // legions - x position of the formation RIGHT NOW
+    int y_home; // legions - y position of the formation RIGHT NOW
+    int building_id; // legions - Building ID of home fort
+    int standard_x; //  legions - x position of the DESTINATION
+    int standard_y; // legions - y position of the DESTINATION
     int standard_figure_id;
-    int destination_x;
-    int destination_y;
+    int destination_x; //for enemy and animals
+    int destination_y; //for enemy and animals
     int destination_building_id;
 
     /* Movement */
     int wait_ticks;
     int is_halted;
+    int is_moving;
+    int is_charging; //state of moving for at least 4 tiles
     int recent_fight;
     int unknown_fired;
     int missile_fired;
     int missile_attack_timeout;
     int missile_attack_formation_id;
+    int started_moving_from_grid_offset;
+    int halted_at_grid_offset;
+    int traveled_tiles;
+    int halted_for_months;
+
 
     /* Legion-related */
     int empire_service; /**< Flag to indicate this legion is selected for empire service */
@@ -128,6 +135,7 @@ typedef struct {
     } prev;
 
     int target_formation_id;
+
 } formation;
 
 void formations_clear(void);
@@ -144,6 +152,16 @@ int formation_count(void);
 
 int formation_get_selected(void);
 void formation_set_selected(int formation_id);
+
+int formation_update_halted_state(formation *m);
+int formation_update_movement_state(formation *m);
+int formation_update_charge_state(formation *m);
+
+void formation_update_movement_all_states(formation *m);
+
+int formation_is_halted(const formation *m);
+int formation_is_moving(const formation *m);
+int formation_is_charging(const formation *m);
 
 void formation_toggle_empire_service(int formation_id);
 

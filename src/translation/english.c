@@ -1502,7 +1502,8 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_BARRACKS_PRIORITY_WATCHTOWER, "Prioritize training of watchtower watchmen"},
     {TR_TOOLTIP_BUTTON_REJECT_DELIVERY, "Don't allow armories to deliver weapons here"},
     {TR_TOOLTIP_BUTTON_ACCEPT_DELIVERY, "Allow armories to deliver weapons here"},
-    {TR_CONFIG_SHOW_DESIRABILITY_RANGE, "Show desirability when building a Nymphaeum or Mausoleum"},
+    {TR_CONFIG_SHOW_DESIRABILITY_RANGE, "Show desirability when building religious or military structures"},
+    {TR_CONFIG_SHOW_DESIRABILITY_RANGE_ALL, "Show desirability when building any structures"},
     {TR_BUILDING_FORT_LEGIONARIES, "Legionaries" },
     {TR_BUILDING_FORT_JAVELIN, "Auxiliaries - Javelins" },
     {TR_BUILDING_FORT_MOUNTED, "Auxiliaries - Horses" },
@@ -1609,7 +1610,10 @@ static translation_string all_strings[] = {
     {TR_BUILDING_LATRINES_UNNECESSARY, "These latrines have no purpose here, as there are no houses in range needing them."},
     {TR_BUILDING_LATRINES_NO_HOUSES, "These latrines are unnecessary at the moment, as there are no houses within its service range."},
     {TR_CONFIG_DRAW_ASCLEPIUS, "Draw Rod of Asclepius for health menu"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT, "Native hut alt" },
+    {TR_BUILDING_NATIVE_HUT_ALT, "Alternate native hut"},
     {TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, "Warehouses and granaries can be built over any roads."}
+
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

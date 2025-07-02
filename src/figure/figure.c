@@ -67,7 +67,7 @@ figure *figure_create(figure_type type, int x, int y, direction_type dir)
     f->phrase_sequence_city = f->phrase_sequence_exact = random_byte() & 3;
     f->name = figure_name_get(type, 0);
     map_figure_add(f);
-    if (type == FIGURE_TRADE_CARAVAN || type == FIGURE_TRADE_SHIP) {
+    if (type == FIGURE_TRADE_CARAVAN || type == FIGURE_TRADE_SHIP || type == FIGURE_NATIVE_TRADER) {
         f->trader_id = trader_create();
     }
     return f;

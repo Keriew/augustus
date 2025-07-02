@@ -111,6 +111,7 @@ static struct {
 static void new_invasion(invasion_t *invasion, unsigned int index)
 {
     invasion->id = index;
+    invasion->year = INVASION_DEFAULT_START_YEAR;
     invasion->amount.min = INVASION_DEFAULT_AMOUNT_MIN;
     invasion->amount.max = INVASION_DEFAULT_AMOUNT_MAX;
     invasion->type = INVASION_DEFAULT_TYPE;
@@ -252,7 +253,7 @@ int scenario_invasion_get_years_remaining(void)
 {
     int years_until_invasion = 4;
     const invasion_warning *warning;
-    array_foreach(data.warnings, warning){
+    array_foreach(data.warnings, warning) {
         if (warning->in_use && warning->handled && warning->warning_years < years_until_invasion) {
             years_until_invasion = warning->warning_years;
         }
@@ -401,7 +402,7 @@ static int start_invasion(int enemy_type, int amount, int invasion_point, format
         return -1;
     }
     if (map_terrain_is(grid_offset, TERRAIN_WATER)) {
-        if (!map_terrain_is(grid_offset, TERRAIN_ROAD)) { // bridge
+        if (!map_terrain_is(grid_offset, TERRAIN_ROAD)) { // bridge - any changes to bridge behaviour will need to ensure that invasion doesnt target it 
             return -1;
         }
     } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING | TERRAIN_AQUEDUCT | TERRAIN_GATEHOUSE | TERRAIN_WALL)) {
@@ -461,20 +462,60 @@ static void repeat_invasion_with_warnings(invasion_t *invasion)
 {
     repeat_invasion_without_warnings(invasion);
 
-    invasion_warning *warning;
-    array_foreach(data.warnings, warning) {
-        if (warning->invasion_id != invasion->id) {
+    int path_max = empire_object_get_max_invasion_path();
+    if (path_max == 0) {
+        return;
+    }
+
+    // Clear all old warnings related to this invasion
+    invasion_warning *w;
+    array_foreach(data.warnings, w) {
+        if (w->invasion_id == invasion->id) {
+            w->in_use = 0;
+            w->handled = 0;
+        }
+    }
+
+    // Calculate the invasion path similarly to init_warnings
+    int path = invasion->id % path_max + 1;
+
+    for (int year = 1; year < 8; year++) {
+        const empire_object *obj = empire_object_get_battle_icon(path, year);
+        if (!obj) {
             continue;
         }
+
+        invasion_warning *warning = array_advance(data.warnings);
+        if (!warning) {
+            log_error("Error expanding warning array - not enough memory. The game will probably crash.", 0, 0);
+            return;
+        }
+
         warning->in_use = 1;
         warning->handled = 0;
+        warning->invasion_path_id = obj->invasion_path_id;
+        warning->warning_years = obj->invasion_years;
+        warning->x = obj->x;
+        warning->y = obj->y;
+        warning->image_id = obj->image_id;
+        warning->invasion_id = invasion->id;
+        warning->empire_object_id = obj->id;
         warning->month_notified = 0;
         warning->year_notified = 0;
-        warning->months_to_go = 12 * invasion->year;
-        warning->months_to_go += invasion->month;
-        warning->months_to_go -= 12 * warning->warning_years;
+
+        // Calculate how many months remain until the invasion
+        int current_month = game_time_year() * 12 + game_time_month();
+        int invasion_month = (scenario.start_year + invasion->year) * 12 + invasion->month;
+        int warning_month_offset = warning->warning_years * 12;
+
+        warning->months_to_go = invasion_month - warning_month_offset - current_month;
+
+        // Adjustment for warnings spanning multiple years
         if (warning->warning_years > 1) {
-            warning->months_to_go++;  // later warnings haven't been handled by scenario_invasion_process, so we need to add a month
+            warning->months_to_go++;
+        }
+        if (warning->months_to_go < 0) {
+            warning->months_to_go = 0;
         }
     }
 }
@@ -538,7 +579,7 @@ void scenario_invasion_process(void)
     }
     // local uprisings
     invasion_t *invasion;
-    array_foreach(data.invasions, invasion){
+    array_foreach(data.invasions, invasion) {
         if (invasion->type == INVASION_TYPE_LOCAL_UPRISING) {
             if (game_time_year() == scenario.start_year + invasion->year && game_time_month() == invasion->month) {
                 int grid_offset = start_invasion(ENEMY_0_BARBARIAN,
@@ -549,10 +590,16 @@ void scenario_invasion_process(void)
                 }
             }
             if (invasion->repeat.times != 0) {
-                repeat_invasion_without_warnings(invasion);
+                //Fixing instant invasions
+                int current_month = game_time_year() * 12 + game_time_month();
+                int scheduled_month = (scenario.start_year + invasion->year) * 12 + invasion->month;
+                if (current_month >= scheduled_month) {
+                    repeat_invasion_without_warnings(invasion);
+                }
             }
         }
     }
+
 }
 
 int scenario_invasion_start_from_mars(void)

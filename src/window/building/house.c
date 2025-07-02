@@ -141,16 +141,16 @@ void window_building_draw_house(building_info_context *c)
     int level = b->type - 10;
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(29, level, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
-    inner_panel_draw(c->x_offset + 16, c->y_offset + 148, c->width_blocks - 2, 13);
-    window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 156);
+    inner_panel_draw(c->x_offset + 16, c->y_offset + 128, c->width_blocks - 2, 13);
+    window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 136);
 
-    draw_population_info(c, c->y_offset + 154);
-    draw_tax_info(c, c->y_offset + 194);
-    draw_happiness_info(c, c->y_offset + 214);
+    draw_population_info(c, c->y_offset + 134);
+    draw_tax_info(c, c->y_offset + 174);
+    draw_happiness_info(c, c->y_offset + 194);
 
     int x_offset = 32;
-    int y_content = 279;
-    int y_amount = 283;
+    int y_content = 259;
+    int y_amount = 263;
 
     // food inventory
     if (model_get_house(b->subtype.house_level)->food_types) {
@@ -166,7 +166,7 @@ void window_building_draw_house(building_info_context *c)
                 }
             }
         }
-        if (total_food_types > 4) {
+        if (total_food_types > 5) {
             x_offset += lang_text_draw(CUSTOM_TRANSLATION, TR_BUILDING_INFO_TOTAL_FOOD,
                 c->x_offset + x_offset, c->y_offset + y_content, FONT_NORMAL_BROWN);
             x_offset += text_draw_number(total_food_amount, '@', " ", c->x_offset + x_offset, c->y_offset + y_content,
@@ -180,12 +180,13 @@ void window_building_draw_house(building_info_context *c)
                 }
                 int image_id = resource_get_data(r)->image.icon;
                 const image *img = image_get(image_id);
-                int image_height_offset = (14 - img->original.height) / 2;
-                image_draw(image_id, c->x_offset + x_offset, c->y_offset + y_content + image_height_offset,
+                int base_width = (25 - img->original.width) / 2;
+                int base_height = (25 - img->original.height) / 2;
+                image_draw(image_id, c->x_offset + x_offset + base_width, c->y_offset + y_content + base_height,
                     COLOR_MASK_NONE, SCALE_NONE);
                 x_offset += img->original.width + 6;
             }
-            text_draw(string_from_ascii(")"), c->x_offset + x_offset, c->y_offset + y_content,
+            text_draw(string_from_ascii(")"), c->x_offset + x_offset, c->y_offset + y_content + 2,
                 FONT_NORMAL_BROWN, 0);
         } else {
             for (unsigned int i = 0; i < list->size; i++) {
@@ -193,11 +194,15 @@ void window_building_draw_house(building_info_context *c)
                 if (!resource_is_inventory(r) || (list->size > 4 && !b->resources[r])) {
                     continue;
                 }
-                image_draw(resource_get_data(r)->image.icon, c->x_offset + x_offset, c->y_offset + y_content,
+                int image_id = resource_get_data(r)->image.icon;
+                const image *img = image_get(image_id);
+                int base_width = (25 - img->original.width) / 2;
+                int base_height = (25 - img->original.height) / 2;
+                image_draw(resource_get_data(r)->image.icon, c->x_offset + x_offset + base_width, c->y_offset + y_content + base_height,
                     COLOR_MASK_NONE, SCALE_NONE);
                 text_draw_number(b->resources[r], '@', " ",
-                    c->x_offset + x_offset + 32, c->y_offset + y_amount, FONT_NORMAL_BROWN, 0);
-                x_offset += 110;
+                    c->x_offset + x_offset + 25, c->y_offset + y_amount + 2, FONT_NORMAL_BROWN, 0);
+                x_offset += 85;
             }
         }
     } else {
@@ -214,33 +219,37 @@ void window_building_draw_house(building_info_context *c)
         if (!resource_is_inventory(r)) {
             continue;
         }
-        image_draw(resource_get_data(r)->image.icon, c->x_offset + x_offset, c->y_offset + y_content,
+        int image_id = resource_get_data(r)->image.icon;
+        const image *img = image_get(image_id);
+        int base_width = (25 - img->original.width) / 2;
+        int base_height = (25 - img->original.height) / 2;
+        image_draw(resource_get_data(r)->image.icon, c->x_offset + x_offset + base_width, c->y_offset + y_content + base_height,
             COLOR_MASK_NONE, SCALE_NONE);
         text_draw_number(b->resources[r], '@', " ",
-            c->x_offset + x_offset + 32, c->y_offset + y_amount, FONT_NORMAL_BROWN, 0);
-        x_offset += 110;
+            c->x_offset + x_offset + 25, c->y_offset + y_amount + 2, FONT_NORMAL_BROWN, 0);
+        x_offset += 85;
     }
 
     if (b->has_plague) {
         lang_text_draw_multiline(CUSTOM_TRANSLATION, TR_BUILDING_HOUSE_DISEASE_DESC,
-            c->x_offset + 32, c->y_offset + 70, BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_BLACK);
+            c->x_offset + 32, c->y_offset + 56, BLOCK_SIZE * (c->width_blocks - 3), FONT_NORMAL_BLACK);
     } else if (b->data.house.evolve_text_id == 62) {
         int width = lang_text_draw(127, 40 + b->data.house.evolve_text_id,
-            c->x_offset + 32, c->y_offset + 60, FONT_NORMAL_BLACK);
+            c->x_offset + 32, c->y_offset + 56, FONT_NORMAL_BLACK);
         width += lang_text_draw_colored(41, c->worst_desirability_building_type,
-            c->x_offset + 32 + width, c->y_offset + 60, FONT_NORMAL_PLAIN, COLOR_FONT_RED);
-        text_draw((uint8_t *) ")", c->x_offset + 32 + width, c->y_offset + 60, FONT_NORMAL_BLACK, 0);
+            c->x_offset + 32 + width, c->y_offset + 56, FONT_NORMAL_PLAIN, COLOR_FONT_RED);
+        text_draw((uint8_t *) ")", c->x_offset + 32 + width, c->y_offset + 56, FONT_NORMAL_BLACK, 0);
         lang_text_draw_multiline(127, 41 + b->data.house.evolve_text_id,
-            c->x_offset + 32, c->y_offset + 76, BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_BLACK);
+            c->x_offset + 32, c->y_offset + 72, BLOCK_SIZE * (c->width_blocks - 3), FONT_NORMAL_BLACK);
     } else if (b->data.house.evolve_text_id == 67) { // latrine devolve
         lang_text_draw_multiline(CUSTOM_TRANSLATION, TR_BUILDING_LATRINES_MISSING_DEVOLVE,
-            c->x_offset + 32, c->y_offset + 70, BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_BLACK);
+            c->x_offset + 32, c->y_offset + 56, BLOCK_SIZE * (c->width_blocks - 3), FONT_NORMAL_BLACK);
     } else if (b->data.house.evolve_text_id == 68) { // latrine evolve
         lang_text_draw_multiline(CUSTOM_TRANSLATION, TR_BUILDING_LATRINES_MISSING_EVOLVE,
-            c->x_offset + 32, c->y_offset + 70, BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_BLACK);
+            c->x_offset + 32, c->y_offset + 56, BLOCK_SIZE * (c->width_blocks - 3), FONT_NORMAL_BLACK);
     } else {
         lang_text_draw_multiline(127, 40 + b->data.house.evolve_text_id,
-            c->x_offset + 32, c->y_offset + 70, BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_BLACK);
+            c->x_offset + 32, c->y_offset + 56, BLOCK_SIZE * (c->width_blocks - 3), FONT_NORMAL_BLACK);
     }
 }
 

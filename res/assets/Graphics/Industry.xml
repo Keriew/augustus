@@ -770,4 +770,120 @@
 	<image src="Smoke_Anim_04"/>
 	<image src="Smoke_Anim_05"/>
 	<image src="Smoke_Anim_06"/-->
+	<!-- Note: Papyrus Maker OFF - No Climate Variants -->
+	<image id="Papyrus_Maker_OFF" src="Papyrus_Maker_OFF" width="118" height="92" isometric="true"/>
+	<!-- Note: Papyrus Maker ON Animation Frames - DO NOT USE -->
+	<image id="Papyrus_Maker_ON_01" width="118" height="92">
+		<layer src="Papyrus_Maker_ON_01" x="7" y="28"/>
+	</image>
+	<image id="Papyrus_Maker_ON_02" width="118" height="92">
+		<layer group="this" image="Papyrus_Maker_ON_01"/>
+		<layer src="Papyrus_Maker_ON_02" x="21" y="56"/>
+	</image>
+	<image id="Papyrus_Maker_ON_03" width="118" height="92">
+		<layer group="this" image="Papyrus_Maker_ON_02"/>
+		<layer src="Papyrus_Maker_ON_03" x="21" y="56"/>
+	</image>
+	<image id="Papyrus_Maker_ON_04" width="118" height="92">
+		<layer group="this" image="Papyrus_Maker_ON_03"/>
+		<layer src="Papyrus_Maker_ON_04" x="21" y="53"/>
+	</image>
+	<image id="Papyrus_Maker_ON_05" width="118" height="92">
+		<layer group="this" image="Papyrus_Maker_ON_04"/>
+		<layer src="Papyrus_Maker_ON_05" x="21" y="51"/>
+	</image>
+	<!-- Note: Papyrus Maker ON - No Climate Variants -->
+	<image id="Papyrus_Maker_ON" width="118" height="92" isometric="true">
+		<layer group="this" image="Papyrus_Maker_OFF"/>
+		<animation speed="16" x="0" y="0" reversible="true">
+			<frame group="this" image="Papyrus_Maker_ON_01"/>
+			<frame group="this" image="Papyrus_Maker_ON_02"/>
+			<frame group="this" image="Papyrus_Maker_ON_03"/>
+			<frame group="this" image="Papyrus_Maker_ON_04"/>
+			<frame group="this" image="Papyrus_Maker_ON_05"/>
+		</animation>
+	</image>
+	<!-- Note: Papyrus Cart -->
+	<image id="Papyrus_Cart_NE" width="39" height="39">
+		<layer group="97" image="0" x="0" y="0"/>
+		<layer src="Papyrus_Cart_NE" x="0" y="0"/>
+	</image>
+	<image id="Papyrus_Cart_E" width="39" height="39">
+		<layer group="97" image="1" x="0" y="0"/>
+		<layer src="Papyrus_Cart_E" x="0" y="0"/>
+	</image>
+	<image id="Papyrus_Cart_SE" width="39" height="39">
+		<layer group="97" image="2" x="0" y="0"/>
+		<layer src="Papyrus_Cart_SE" x="0" y="0"/>
+	</image>
+	<image id="Papyrus_Cart_S" width="39" height="39">
+		<layer group="97" image="3" x="0" y="0"/>
+		<layer src="Papyrus_Cart_S" x="0" y="0"/>
+	</image>
+	<image id="Papyrus_Cart_SW" width="39" height="39">
+		<layer group="97" image="4" x="0" y="0"/>
+		<layer src="Papyrus_Cart_SW" x="0" y="0"/>
+	</image>
+	<image id="Papyrus_Cart_W" width="39" height="39">
+		<layer group="97" image="5" x="0" y="0"/>
+		<layer src="Papyrus_Cart_W" x="0" y="0"/>
+	</image>
+	<image id="Papyrus_Cart_NW" width="39" height="39">
+		<layer group="97" image="6" x="0" y="0"/>
+		<layer src="Papyrus_Cart_NW" x="0" y="0"/>
+	</image>
+	<image id="Papyrus_Cart_N" width="39" height="39">
+		<layer group="97" image="7" x="0" y="0"/>
+		<layer src="Papyrus_Cart_N" x="0" y="0"/>
+	</image>
+	<!-- Note: Papyrus Getting Cart -->
+	<image id="Papyrus_Cart_Getting_NE" width="39" height="39">
+		<layer group="97" image="0" x="0" y="0"/>
+		<layer src="Papyrus_Cart_Getting_NE" x="0" y="0"/>
+	</image>
+	<image id="Papyrus_Cart_Getting_E" width="39" height="39">
+		<layer group="97" image="1" x="0" y="0"/>
+		<layer src="Papyrus_Cart_Getting_E" x="0" y="0"/>
+	</image>
+	<image id="Papyrus_Cart_Getting_SE" width="39" height="39">
+		<layer group="97" image="2" x="0" y="0"/>
+		<layer src="Papyrus_Cart_Getting_SE" x="0" y="0"/>
+	</image>
+	<image id="Papyrus_Cart_Getting_S" width="39" height="39">
+		<layer group="97" image="3" x="0" y="0"/>
+		<layer src="Papyrus_Cart_Getting_S" x="0" y="0"/>
+	</image>
+	<image id="Papyrus_Cart_Getting_SW" width="39" height="39">
+		<layer group="97" image="4" x="0" y="0"/>
+		<layer src="Papyrus_Cart_Getting_SW" x="0" y="0"/>
+	</image>
+	<image id="Papyrus_Cart_Getting_W" width="39" height="39">
+		<layer group="97" image="5" x="0" y="0"/>
+		<layer src="Papyrus_Cart_Getting_W" x="0" y="0"/>
+	</image>
+	<image id="Papyrus_Cart_Getting_NW" width="39" height="39">
+		<layer group="97" image="6" x="0" y="0"/>
+		<layer src="Papyrus_Cart_Getting_NW" x="0" y="0"/>
+	</image>
+	<image id="Papyrus_Cart_Getting_N" width="39" height="39">
+		<layer group="97" image="7" x="0" y="0"/>
+		<layer src="Papyrus_Cart_Getting_N" x="0" y="0"/>
+	</image>
+	<!-- Note: Papyrus Warehouse Tiles -->
+	<image id="Warehouse_Papyrus_01" width="58" height="44" isometric="true">
+		<layer group="83" image="0" x="0" y="3"/>
+		<layer src="Warehouse_Papyrus_01" x="14" y="0"/>
+	</image>
+	<image id="Warehouse_Papyrus_02" width="58" height="49" isometric="true">
+		<layer group="83" image="0" x="0" y="8"/>
+		<layer src="Warehouse_Papyrus_02" x="11" y="0"/>
+	</image>
+	<image id="Warehouse_Papyrus_03" width="58" height="49" isometric="true">
+		<layer group="83" image="0" x="0" y="8"/>
+		<layer src="Warehouse_Papyrus_03" x="0" y="0"/>
+	</image>
+	<image id="Warehouse_Papyrus_04" width="58" height="49" isometric="true">
+		<layer group="83" image="0" x="0" y="8"/>
+		<layer src="Warehouse_Papyrus_04" x="0" y="0"/>
+	</image>
 </assetlist>

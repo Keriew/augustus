@@ -35,6 +35,7 @@
 #include "map/road_access.h"
 #include "map/terrain.h"
 #include "map/water.h"
+#include "scenario/scenario.h"
 
 
 
@@ -1504,7 +1505,23 @@ static void spawn_figure_dock(building *b)
 
 static void spawn_figure_native_hut(building *b)
 {
-    map_image_set(b->grid_offset, image_group(GROUP_BUILDING_NATIVE) + (map_random_get(b->grid_offset) & 1));
+    if (b->type == BUILDING_NATIVE_HUT) {
+        map_image_set(b->grid_offset, image_group(GROUP_BUILDING_NATIVE) + (map_random_get(b->grid_offset) & 1));
+    } else {
+        int image_group_id;
+        switch (scenario_property_climate()) {
+            case CLIMATE_NORTHERN:
+                image_group_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Northern_01");
+                break;
+            case CLIMATE_DESERT:
+                image_group_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Southern_01");
+                break;
+            default:
+                image_group_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Central_01");
+        }
+        map_image_set(b->grid_offset, image_group_id + (map_random_get(b->grid_offset) & 1));
+    }
+
     if (has_figure_of_type(b, FIGURE_INDIGENOUS_NATIVE)) {
         return;
     }
@@ -2048,6 +2065,7 @@ void building_figure_generate(void)
                     spawn_figure_shipyard(b);
                     break;
                 case BUILDING_NATIVE_HUT:
+                case BUILDING_NATIVE_HUT_ALT:
                     spawn_figure_native_hut(b);
                     break;
                 case BUILDING_NATIVE_MEETING:

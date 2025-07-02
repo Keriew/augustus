@@ -255,8 +255,9 @@ int empire_city_get_for_trade_route(int route_id)
             return array_index;
         }
     }
-    return -1;
+    return -1; //should this be 0 for consitency? I think -1 can cause overflow?
 }
+
 
 int empire_city_is_trade_route_open(int route_id)
 {
@@ -424,7 +425,7 @@ void empire_city_open_trade(int city_id, int apply_cost)
 {
     empire_city *city = array_item(cities, city_id);
     if (apply_cost) {
-        city_finance_process_construction(city->cost_to_open);
+        city_finance_process_sundry(city->cost_to_open);
     }
     city->is_open = 1;
 }
