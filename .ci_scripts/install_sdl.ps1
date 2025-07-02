@@ -42,7 +42,7 @@ if ("${env:COMPILER}" -eq "msvc") {
         mkdir build
         cd build
 
-        cmake -G "Ninja" -DCMAKE_C_COMPILER=cl.exe -DCMAKE_BUILD_TYPE=Release ..
+        cmake -G "Ninja" -DCMAKE_C_COMPILER=cl.exe -DSDL_LIBC=ON -DCMAKE_BUILD_TYPE=Release ..
         cmake --build . -j 4 --config Release
         mv include-config-release\SDL2\*.h include\SDL2
         mv include\SDL2 $Env:SDL2_DIR
