@@ -31,8 +31,8 @@ if ("${env:COMPILER}" -eq "msvc") {
     CopyFile ext\SDL2\SDL2_mixer-${env:SDL_MIXER_VERSION}\lib\x64\SDL2_mixer.dll .
 } elseif ("${env:COMPILER}" -eq "msvc-arm64") {
     $suffix = "windows-arm64"
-    CopyFile build/RelWithDebInfo/augustus.exe .
-    CopyFile build/RelWithDebInfo/augustus.pdb .
+    CopyFile build/augustus.exe .
+    CopyFile build/augustus.pdb .
     CopyFile ext\SDL2\SDL2\SDL2.dll .
     CopyFile ext\SDL2\SDL2_mixer\SDL2_mixer.dll .
 } elseif ("${env:COMPILER}" -eq "mingw-32") {
