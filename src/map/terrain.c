@@ -247,7 +247,7 @@ int map_terrain_has_only_rocks_trees_in_ring(int x, int y, int distance)
         const ring_tile *tile = map_ring_tile(i);
         if (map_ring_is_inside_map(x + tile->x, y + tile->y)) {
             if (!map_terrain_is(base_offset + tile->grid_offset,
-                    TERRAIN_ROCK | TERRAIN_TREE | TERRAIN_ORIGINALLY_TREE)) {
+                TERRAIN_ROCK | TERRAIN_TREE | TERRAIN_ORIGINALLY_TREE)) {
                 return 0;
             }
         }
@@ -337,6 +337,12 @@ static void add_road_if_clear(int grid_offset)
 void map_terrain_add_roadblock_road(int x, int y)
 {
     // roads under roadblock
+    map_terrain_add(map_grid_offset(x, y), TERRAIN_ROAD);
+}
+
+void map_terrain_add_warehouse_road(int x, int y)
+{
+    //road under central warehouse part
     map_terrain_add(map_grid_offset(x, y), TERRAIN_ROAD);
 }
 

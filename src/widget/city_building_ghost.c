@@ -68,6 +68,12 @@ enum farm_ghost_object {
     FARM_GHOST_CROP
 };
 
+static enum {
+    TILE_FORBIDDEN = 1,
+    TILE_ALLOWED = 0,
+    TILE_DISCOURAGED = -1
+};
+
 static const int FORT_GROUND_GRID_OFFSETS[4][4] = {
     { GRID_OFFSET(3, -1),  GRID_OFFSET(4, -1), GRID_OFFSET(4, 0),  GRID_OFFSET(3, 0)   },
     { GRID_OFFSET(-1, -4), GRID_OFFSET(0, -4), GRID_OFFSET(0, -3), GRID_OFFSET(-1, -3) },
@@ -165,7 +171,8 @@ static int is_blocked_for_building(int grid_offset, int building_size, int *bloc
 static int has_blocked_tiles(int num_tiles, int *blocked_tiles)
 {
     for (int i = 0; i < num_tiles; i++) {
-        if (blocked_tiles[i] == 1) { //-1 shouldnt trigger this condition - these are discouraged, not blocked tiles.
+        if (blocked_tiles[i] == TILE_FORBIDDEN) {
+            //TILE_DISCOURAGED shouldnt trigger this condition - these are discouraged, not blocked tiles.
             return 1;
         }
     }
@@ -177,7 +184,8 @@ static void draw_building_tiles(int x, int y, int num_tiles, int *blocked_tiles)
     for (int i = 0; i < num_tiles; i++) {
         int x_offset = x + view_offset_x(i);
         int y_offset = y + view_offset_y(i);
-        if (blocked_tiles[i] == 1 || blocked_tiles[i] == -1) { //1 means real problem, -1 means suggested problem, like a road that will disappear.
+        if (blocked_tiles[i] == TILE_FORBIDDEN || blocked_tiles[i] == TILE_DISCOURAGED) {
+            //FORBIDDEN means real problem, DISCOURAGED means suggested problem, like a road that will disappear.
             image_blend_footprint_color(x_offset, y_offset, COLOR_MASK_RED, data.scale);
         } else {
             image_draw_isometric_footprint(image_group(GROUP_TERRAIN_FLAT_TILE),
@@ -489,39 +497,40 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
         if (!fully_blocked) {
             if (type == BUILDING_PLAZA || building_type_is_roadblock(type)) {
                 forbidden_terrain &= ~TERRAIN_ROAD;
+                discouraged_terrain &= ~TERRAIN_ROAD;
             }
             if (type == BUILDING_GATEHOUSE) {
-                forbidden_terrain &= ~TERRAIN_HIGHWAY;
-                forbidden_terrain &= ~TERRAIN_WALL;
-                forbidden_terrain &= ~TERRAIN_ROAD;
+                forbidden_terrain &= ~(TERRAIN_HIGHWAY | TERRAIN_WALL | TERRAIN_ROAD);
+                discouraged_terrain &= ~(TERRAIN_HIGHWAY | TERRAIN_WALL | TERRAIN_ROAD);
             }
             if (type == BUILDING_TOWER) {
                 forbidden_terrain &= ~TERRAIN_WALL;
             }
-            if (type == BUILDING_WAREHOUSE) {
-                int corner = building_rotation_get_corner(2 * building_rotation_get_rotation()); // corner tile of a warehouse - the exchange platz
-                forbidden_terrain &= ~TERRAIN_ROAD; //every tile is allowed over roads
-                if (i == corner) {
-                    discouraged_terrain &= ~TERRAIN_ROAD; //corner tile isnt even discouraged over roads
-                }
-            }
-            if (type == BUILDING_GRANARY) { // Allow roads under granary's cross shape
-                forbidden_terrain &= ~TERRAIN_ROAD;
-                if (is_granary_cross_tile(i)) {
-                    discouraged_terrain &= ~TERRAIN_ROAD;
+            if (config_get(CONFIG_GP_CH_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT)) {
+                if (type == BUILDING_WAREHOUSE) {
+                    forbidden_terrain &= ~TERRAIN_ROAD; //every tile is allowed over roads
+                    if (is_warehouse_corner(i)) {
+                        discouraged_terrain &= ~TERRAIN_ROAD; //corner tile isnt even discouraged over roads
+                    }
+                } else if (type == BUILDING_GRANARY) { // Allow roads under granary's cross shape
+                    forbidden_terrain &= ~TERRAIN_ROAD;
+                    if (is_granary_cross_tile(i)) {
+                        discouraged_terrain &= ~TERRAIN_ROAD;
+                    }
                 }
             }
         }
+
         if (fully_blocked || forbidden_terrain) {
-            blocked_tiles[i] = 1;
+            blocked_tiles[i] = TILE_FORBIDDEN;
         } else if (check_figure && map_has_figure_at(tile_offset)) {
-            blocked_tiles[i] = 1;
+            blocked_tiles[i] = TILE_FORBIDDEN;
             figure_animal_try_nudge_at(grid_offset, tile_offset, building_size);
         } else {
             if (discouraged_terrain) { //allow some leeway
-                blocked_tiles[i] = -1;
+                blocked_tiles[i] = TILE_DISCOURAGED;
             } else {
-                blocked_tiles[i] = 0;
+                blocked_tiles[i] = TILE_ALLOWED;
             }
 
         }

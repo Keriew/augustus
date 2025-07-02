@@ -5,5 +5,6 @@
 
 int building_construction_place_building(building_type type, int x, int y);
 int is_granary_cross_tile(int tile_no);
+int is_warehouse_corner(int tile_no);
 
 #endif // BUILDING_CONSTRUCTION_BUILDING_H
