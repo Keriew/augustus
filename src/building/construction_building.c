@@ -334,17 +334,19 @@ int is_granary_cross_tile(int tile_no)
 
 int is_warehouse_corner(int tile_no)
 {
-    int corner = building_rotation_get_corner(2 * building_rotation_get_rotation());
-    for (int i = 0; i < 9; i++) {
-        if (i == corner) {
-            if (tile_no == corner) {
-                return 1;
-            }
+    // Get the building rotation (0-3)
+    int building_rot = building_rotation_get_rotation();
+    // Get the city view orientation (0-3)
+    int view_rot = city_view_orientation() / 2;
 
-        }
-    }
+    // Combine them to get the effective rotation (modulo 4)
+    int effective_rot = (building_rot + view_rot) % 4;
+
+    // The warehouse corner is determined by 2 * rotation
+    int corner = building_rotation_get_corner(2 * effective_rot);
+
+    return tile_no == corner;
 }
-
 
 int building_construction_place_building(building_type type, int x, int y)
 {
