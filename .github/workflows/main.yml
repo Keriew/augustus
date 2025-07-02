@@ -192,6 +192,15 @@ jobs:
           fileName: "cv2pdb-0.53.zip"
           out-file-path: "build"
           extract: true
+      - name: Install Ninja on Windows ARM64
+        if: matrix.COMPILER == 'msvc-arm64'
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: "ninja-build/ninja"
+          tag: "v1.13.0"
+          fileName: "ninja-winarm64.zip"
+          out-file-path: "build"
+          extract: true
       - name: Set up environment
         run: ./.ci_scripts/install_sdl.ps1
       - name: Build and test
