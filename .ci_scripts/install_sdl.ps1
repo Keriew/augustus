@@ -20,7 +20,6 @@ if ("${env:COMPILER}" -eq "msvc") {
     7z x deps\SDL_mixer.zip -oext\SDL2
     CheckSuccess("Unpack SDL mixer")
 } elseif ("${env:COMPILER}" -eq "msvc-arm64") {
-    mv build\ninja.exe C:\npm\prefix\ninja.exe
     $Env:SDL2_DIR = $PWD.Path + "\deps\SDL2"
     mkdir -Force $Env:SDL2_DIR
     $Env:SDL2_MIXER_DIR = $PWD.Path + "\deps\SDL2_mixer"
