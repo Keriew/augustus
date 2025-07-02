@@ -188,13 +188,13 @@ jobs:
           fileName: "cv2pdb-0.53.zip"
           out-file-path: "build"
           extract: true
+      - name: Set up environment
+        run: ./.ci_scripts/install_sdl.ps1
       - name: Setup MSVC build tools for Windows ARM64
         if: matrix.COMPILER == 'msvc-arm64'
         uses: ilammy/msvc-dev-cmd@v1.13.0
         with:
           arch: amd64_arm64
-      - name: Set up environment
-        run: ./.ci_scripts/install_sdl.ps1
       - name: Build and test
         run: ./.ci_scripts/run_build.ps1
       - name: Upload development artifacts
