@@ -323,7 +323,7 @@ static void add_to_map(int type, building *b, int size, int orientation, int wat
     map_routing_update_walls();
 }
 
-int is_granary_cross_tile(int tile_no)
+int building_construction_is_granary_cross_tile(int tile_no)
 {
     return  tile_no == 1 ||
         tile_no == 2 ||
@@ -332,13 +332,13 @@ int is_granary_cross_tile(int tile_no)
         tile_no == 7;
 }
 
-int is_warehouse_corner(int tile_no)
+int building_construction_is_warehouse_corner(int tile_no)
 {
 
-    int building_rot = building_rotation_get_rotation();
-    int view_rot = city_view_orientation() / 2;
-    int effective_rot = (building_rot + view_rot) % 4;
-    int corner = building_rotation_get_corner(2 * effective_rot);
+    int building_rotation = building_rotation_get_rotation();
+    int view_rotation = city_view_orientation() / 2;
+    int effective_rotation = (building_rotation + view_rotation) % 4;
+    int corner = building_rotation_get_corner(2 * effective_rotation);
 
     return tile_no == corner;
 }
