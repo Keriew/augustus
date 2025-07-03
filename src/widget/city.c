@@ -43,6 +43,8 @@
 #include "window/building_info.h"
 #include "window/city.h"
 
+#define NO_POSITION ((unsigned int)-1)
+
 static struct {
     map_tile current_tile;
     map_tile selected_tile;
@@ -91,7 +93,7 @@ void widget_city_draw(void)
     update_zoom_level();
     set_city_clip_rectangle();
     if (game_state_overlay()) {
-        city_with_overlay_draw(&data.current_tile);
+        city_with_overlay_draw(&data.current_tile, data.selected_building_id);
     } else {
         city_without_overlay_draw(0, 0, &data.current_tile, data.selected_building_id);
     }
@@ -651,6 +653,8 @@ static void handle_mouse(const mouse *m)
             return;
         }
         if (handle_right_click_allow_building_info(tile)) {
+            int building_id = map_building_at(tile->grid_offset);
+            data.selected_building_id = building_id ? building_id : NO_POSITION; //no position if selected 0
             window_building_info_show(tile->grid_offset);
             return;
         }
@@ -793,11 +797,14 @@ void widget_city_clear_current_tile(void)
     data.selected_tile.grid_offset = 0;
     data.current_tile.grid_offset = 0;
     data.routing_grid_offset = 0;
+    data.selected_building_id = NO_POSITION;
+
 }
 
 void widget_city_clear_routing_grid_offset(void)
 {
     data.routing_grid_offset = 0;
+    data.selected_building_id = NO_POSITION;
 }
 
 void widget_city_setup_routing_preview(void)
@@ -808,13 +815,14 @@ void widget_city_setup_routing_preview(void)
     }
 
     int building_id = map_building_at(data.routing_grid_offset);
-    data.selected_building_id = building_id;
+
     if (building_id) {
+        data.selected_building_id = building_id;
         building *b = building_main(building_get(building_id));
         figure_roamer_preview_reset(b->type);
         figure_roamer_preview_create(b->type, b->x, b->y);
     } else {
-        data.selected_building_id = 0;
+        data.selected_building_id = NO_POSITION;
         figure_roamer_preview_reset(building_construction_type());
     }
 }

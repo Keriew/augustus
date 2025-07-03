@@ -39,7 +39,9 @@
 
 static const city_overlay *overlay = 0;
 static float scale = SCALE_NONE;
+static unsigned int city_roamer_preview_selected_building_id = ((unsigned int) -1); //NO_POSITION default
 
+#define SELECTED_BUILDING_COLOR_MASK COLOR_MASK_SKY_BLUE
 #define OFFSET(x,y) (x + GRID_SIZE * y)
 
 static const int ADJACENT_OFFSETS[2][4][7] = {
@@ -341,18 +343,22 @@ void city_with_overlay_draw_building_footprint(int x, int y, int grid_offset, in
         return;
     }
     building *b = building_get(building_id);
+    color_t color_mask = 0;
     if (overlay->type == OVERLAY_PROBLEMS) {
         city_overlay_problems_prepare_building(b);
     }
     if (overlay->show_building(b)) {
+        if (b->id == city_roamer_preview_selected_building_id) {
+            color_mask = SELECTED_BUILDING_COLOR_MASK;
+        }
         if (building_is_farm(b->type)) {
             if (is_drawable_farmhouse(grid_offset, city_view_orientation())) {
-                image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, 0, scale);
+                image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
             } else if (map_property_is_draw_tile(grid_offset)) {
-                image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, 0, scale);
+                image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
             }
         } else {
-            image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, 0, scale);
+            image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
         }
     } else {
         int draw = 1;
@@ -360,7 +366,7 @@ void city_with_overlay_draw_building_footprint(int x, int y, int grid_offset, in
             draw = is_drawable_farm_corner(grid_offset);
         }
         if (draw) {
-            draw_flattened_building_footprint(b, x, y, image_offset, 0);
+            draw_flattened_building_footprint(b, x, y, image_offset, color_mask);
         }
     }
 }
@@ -572,6 +578,9 @@ static void draw_warehouse_ornaments(int x, int y, color_t color_mask)
 static void draw_building_top(int grid_offset, building *b, int x, int y)
 {
     color_t color_mask = draw_building_as_deleted(b) ? COLOR_MASK_RED : 0;
+    if (b->id == city_roamer_preview_selected_building_id) {
+        color_mask = SELECTED_BUILDING_COLOR_MASK;
+    }
     if (building_is_farm(b->type)) {
         if (is_drawable_farmhouse(grid_offset, city_view_orientation())) {
             image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
@@ -692,6 +701,9 @@ static void draw_animation(int x, int y, int grid_offset)
         if (map_property_is_draw_tile(grid_offset)) {
             building *b = building_get(map_building_at(grid_offset));
             int color_mask = draw_building_as_deleted(b) ? COLOR_MASK_RED : 0;
+            if (b->id == city_roamer_preview_selected_building_id) {
+                color_mask = SELECTED_BUILDING_COLOR_MASK;
+            }
             if (b->type == BUILDING_GRANARY) {
                 if (img->animation) {
                     image_draw(image_group(GROUP_BUILDING_GRANARY) + 1,
@@ -747,6 +759,15 @@ static void draw_elevated_figures(int x, int y, int grid_offset)
         figure *f = figure_get(figure_id);
         if (((f->use_cross_country && !f->is_ghost && !f->dont_draw_elevated) || f->height_adjusted_ticks) && overlay->show_figure(f)) {
             city_draw_figure(f, x, y, scale, 0);
+        } else if (f->building_id == city_roamer_preview_selected_building_id) { //figure from selected building
+            if (config_get(CONFIG_UI_SHOW_ROAMING_PATH)) {
+                int highlight = FIGURE_HIGHLIGHT_GREEN;
+                if (f->type == FIGURE_MARKET_SUPPLIER || f->type == FIGURE_DELIVERY_BOY) {
+                    highlight = FIGURE_HIGHLIGHT_RED; //green highlight makes market supplier look indistinguishable
+                }
+                city_draw_figure(f, x, y, scale, highlight);
+            }
+
         }
         figure_id = f->next_figure_id_on_same_tile;
     }
@@ -780,14 +801,14 @@ static void draw_custom_layer(int x, int y, int grid_offset)
     overlay->draw_custom_layer(x, y, scale, grid_offset);
 }
 
-void city_with_overlay_draw(const map_tile *tile)
+void city_with_overlay_draw(const map_tile *tile, unsigned int roamer_preview_building_id)
 {
     if (!select_city_overlay()) {
         return;
     }
 
     scale = city_view_get_scale() / 100.0f;
-
+    city_roamer_preview_selected_building_id = roamer_preview_building_id;
     int x, y, width, height;
     city_view_get_viewport(&x, &y, &width, &height);
     graphics_fill_rect(x, y, width, height, COLOR_BLACK);

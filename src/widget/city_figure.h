@@ -8,7 +8,7 @@ enum {
     FIGURE_HIGHLIGHT_NONE = 0,
     FIGURE_HIGHLIGHT_RED = 1,
     FIGURE_HIGHLIGHT_GREEN = 2,
-}highlight_mask;
+};
 
 void city_draw_figure(const figure *f, int x, int y, float scale, int highlight);
 

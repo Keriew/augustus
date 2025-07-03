@@ -16,17 +16,19 @@ static color_t get_highlight_mask(int highlight_mask)
             return COLOR_MASK_LEGION_HIGHLIGHT;
         case FIGURE_HIGHLIGHT_GREEN:
             return COLOR_MASK_GREEN;
+        default:
+            return COLOR_MASK_NONE;
     }
 }
 
 static void draw_figure_with_cart(const figure *f, int x, int y, color_t color_mask, float scale)
 {
     if (f->y_offset_cart >= 0) {
-        image_draw(f->image_id, x, y, COLOR_MASK_NONE, scale);
-        image_draw(f->cart_image_id, x + f->x_offset_cart, y + f->y_offset_cart, COLOR_MASK_NONE, scale);
+        image_draw(f->image_id, x, y, color_mask, scale);
+        image_draw(f->cart_image_id, x + f->x_offset_cart, y + f->y_offset_cart, color_mask, scale);
     } else {
-        image_draw(f->cart_image_id, x + f->x_offset_cart, y + f->y_offset_cart, COLOR_MASK_NONE, scale);
-        image_draw(f->image_id, x, y, COLOR_MASK_NONE, scale);
+        image_draw(f->cart_image_id, x + f->x_offset_cart, y + f->y_offset_cart, color_mask, scale);
+        image_draw(f->image_id, x, y, color_mask, scale);
     }
 }
 
