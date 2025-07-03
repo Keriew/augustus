@@ -485,7 +485,8 @@ static void repeat_invasion_with_warnings(invasion_t *invasion)
         if (inv_it == invasion) {
             break;
         } // Cycle the path number if it exceeds the maximum — loop back to 1.
-        if (++path_current > path_max) {
+        path_current++;
+        if (path_current > path_max) {
             path_current = 1;
         }
     }
