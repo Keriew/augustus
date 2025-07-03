@@ -511,12 +511,12 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
             if (config_get(CONFIG_GP_CH_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT)) {
                 if (type == BUILDING_WAREHOUSE) {
                     forbidden_terrain &= ~TERRAIN_ROAD; //every tile is allowed over roads
-                    if (is_warehouse_corner(i)) {
+                    if (construction_building_is_warehouse_corner(i)) {
                         discouraged_terrain &= ~TERRAIN_ROAD; //corner tile isnt even discouraged over roads
                     }
                 } else if (type == BUILDING_GRANARY) { // Allow roads under granary's cross shape
                     forbidden_terrain &= ~TERRAIN_ROAD;
-                    if (is_granary_cross_tile(i)) {
+                    if (construction_building_is_granary_cross_tile(i)) {
                         discouraged_terrain &= ~TERRAIN_ROAD;
                     }
                 }
