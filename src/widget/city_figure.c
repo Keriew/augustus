@@ -19,7 +19,7 @@ static color_t get_highlight_mask(int highlight_mask)
     }
 }
 
-static void draw_figure_with_cart(const figure *f, int x, int y, float scale)
+static void draw_figure_with_cart(const figure *f, int x, int y, color_t color_mask, float scale)
 {
     if (f->y_offset_cart >= 0) {
         image_draw(f->image_id, x, y, COLOR_MASK_NONE, scale);
@@ -30,7 +30,7 @@ static void draw_figure_with_cart(const figure *f, int x, int y, float scale)
     }
 }
 
-static void draw_hippodrome_horse(const figure *f, int x, int y, float scale)
+static void draw_hippodrome_horse(const figure *f, int x, int y, color_t color_mask, float scale)
 {
     int val = f->wait_ticks_missile;
     switch (city_view_orientation()) {
@@ -110,7 +110,7 @@ static void draw_hippodrome_horse(const figure *f, int x, int y, float scale)
             }
             break;
     }
-    draw_figure_with_cart(f, x, y, scale);
+    draw_figure_with_cart(f, x, y, color_mask, scale);
 }
 
 static void draw_fort_standard(const figure *f, int x, int y, float scale)
@@ -259,6 +259,7 @@ static void adjust_pixel_offset(const figure *f, int *pixel_x, int *pixel_y)
 
 static void draw_figure(const figure *f, int x, int y, float scale, int highlight)
 {
+    color_t color_mask = get_highlight_mask(highlight);
     if (f->cart_image_id) {
         switch (f->type) {
             case FIGURE_CART_PUSHER:
@@ -270,10 +271,10 @@ static void draw_figure(const figure *f, int x, int y, float scale, int highligh
             case FIGURE_IMMIGRANT:
             case FIGURE_EMIGRANT:
             case FIGURE_LIGHTHOUSE_SUPPLIER:
-                draw_figure_with_cart(f, x, y, scale);
+                draw_figure_with_cart(f, x, y, color_mask, scale);
                 break;
             case FIGURE_HIPPODROME_HORSES:
-                draw_hippodrome_horse(f, x, y, scale);
+                draw_hippodrome_horse(f, x, y, color_mask, scale);
                 break;
             case FIGURE_FORT_STANDARD:
                 draw_fort_standard(f, x, y, scale);
@@ -282,14 +283,14 @@ static void draw_figure(const figure *f, int x, int y, float scale, int highligh
                 draw_map_flag(f, x, y, scale);
                 break;
             default:
-                image_draw(f->image_id, x, y, 0, scale);
+                image_draw(f->image_id, x, y, color_mask, scale);
                 break;
         }
     } else {
         if (f->is_enemy_image) {
             image_draw_enemy(f->image_id, x, y, scale);
         } else {
-            color_t color_mask = get_highlight_mask(highlight);
+
             image_draw(f->image_id, x, y, color_mask, scale);
         }
     }

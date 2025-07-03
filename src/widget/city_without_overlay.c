@@ -374,7 +374,10 @@ static void draw_top(int x, int y, int grid_offset)
     color_t color_mask = 0;
     if (draw_building_as_deleted(b) || (map_property_is_deleted(grid_offset) && !is_multi_tile_terrain(grid_offset))) {
         color_mask = COLOR_MASK_RED;
+    } else if (b->id == draw_context.selected_building_id) {
+        color_mask = COLOR_MASK_GREEN;
     }
+
     image_draw_isometric_top_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
     // specific buildings
     draw_senate_rating_flags(b, x, y, color_mask);
