@@ -539,7 +539,7 @@ static void repeat_invasion_with_warnings(invasion_t *invasion)
         // Sometimes 1 is added to move the warning a little later.
         int months_to_go = invasion_month - obj->invasion_years * 12 - game_month;
         if (obj->invasion_years > 1) {
-            months_to_go += 1;
+            months_to_go ++;
         }
         // Set final delay value. If it's negative, set to 0 (trigger immediately).
         warning->months_to_go = months_to_go < 0 ? 0 : months_to_go;
