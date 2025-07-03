@@ -1,7 +1,6 @@
 #include "mission_briefing.h"
-
-#include "assets/assets.h"
 #include "city/mission.h"
+#include "core/config.h"
 #include "core/image_group.h"
 #include "core/lang.h"
 #include "game/campaign.h"
@@ -15,6 +14,7 @@
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
 #include "graphics/rich_text.h"
+#include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "scenario/custom_messages.h"
@@ -34,7 +34,8 @@
 #include "window/plain_message_dialog.h"
 #include "window/video.h"
 
-#include <string.h>
+#define MISSION_BRIEFING_WINDOW_BLOCKS_MIN_WIDTH 40 // 640px
+#define MISSION_BRIEFING_WINDOW_BLOCKS_MIN_HEIGHT 30 // 480px
 
 typedef enum {
     BUTTON_GO_BACK_NONE = 0,
@@ -46,8 +47,8 @@ static void show(void);
 static void button_back(int param1, int param2);
 static void button_start_mission(int param1, int param2);
 
-static const int GOAL_OFFSETS_X[] = {32, 288, 32, 288, 288, 288};
-static const int GOAL_OFFSETS_Y[] = {95, 95, 117, 117, 73, 135};
+static const int GOAL_OFFSETS_X[] = { 32, 288, 32, 288, 288, 288 };
+static const int GOAL_OFFSETS_Y[] = { 95, 95, 117, 117, 73, 135 };
 
 static image_button image_button_back = {
     0, 0, 31, 20, IB_NORMAL, GROUP_MESSAGE_ICON, 8, button_back, button_none, 0, 0, 1
@@ -68,6 +69,12 @@ static struct {
         char background_music[FILE_NAME_MAX];
     } paths;
     int file_loaded;
+    struct {
+        int margin_x; // In blocks
+        int margin_y; // In blocks
+        int min_blocks_width;
+        int min_blocks_height;
+    } layout;
 } data;
 
 static void init(void)
@@ -77,6 +84,10 @@ static void init(void)
     data.paths.audio[0] = 0;
     data.paths.speech[0] = 0;
     data.paths.background_music[0] = 0;
+    data.layout.margin_x = 40;
+    data.layout.margin_y = 10;
+    data.layout.min_blocks_width = MISSION_BRIEFING_WINDOW_BLOCKS_MIN_WIDTH;
+    data.layout.min_blocks_height = MISSION_BRIEFING_WINDOW_BLOCKS_MIN_HEIGHT;
     rich_text_reset(0);
 }
 
@@ -244,6 +255,22 @@ static int can_go_back(void)
         (data.back_action == BUTTON_GO_BACK_MISSION_SELECTION && game_mission_has_choice());
 }
 
+static int get_width_in_blocks(void)
+{
+    int current_screen_width = screen_width();
+    int min_blocks_width = data.layout.min_blocks_width;
+    int width = (current_screen_width / BLOCK_SIZE) - data.layout.margin_x;
+    return width >= min_blocks_width ? width : min_blocks_width;
+}
+
+static int get_height_in_blocks(void)
+{
+    int current_screen_height = screen_height();
+    int min_blocks_height = data.layout.min_blocks_height;
+    int height = (current_screen_height / BLOCK_SIZE) - data.layout.margin_y;
+    return height >= min_blocks_height ? height : min_blocks_height;
+}
+
 static void draw_background(void)
 {
     if (!data.file_loaded) {
@@ -282,9 +309,14 @@ static void draw_background(void)
     play_audio();
     draw_background_image();
 
-    graphics_in_dialog();
+    int width_in_blocks = get_width_in_blocks();
+    int height_in_blocks = get_height_in_blocks();
+    int dialog_width = width_in_blocks * BLOCK_SIZE;
+    int dialog_height = height_in_blocks * BLOCK_SIZE;
 
-    outer_panel_draw(16, 32, 38, 27);
+    graphics_in_dialog_with_size(dialog_width, dialog_height);
+
+    outer_panel_draw(16, 32, width_in_blocks - 2, height_in_blocks - 3);
 
     if (title) {
         text_draw(title, 32, 48, FONT_LARGE_BLACK, 0);
@@ -292,13 +324,12 @@ static void draw_background(void)
     if (subtitle) {
         text_draw(subtitle, 32, 78, FONT_NORMAL_BLACK, 0);
     }
-
-    lang_text_draw(62, 7, 376, 433, FONT_NORMAL_BLACK);
+    lang_text_draw(62, 7, dialog_width - 264, dialog_height - 47, FONT_NORMAL_BLACK);
     if (can_go_back()) {
-        lang_text_draw(13, 4, 66, 435, FONT_NORMAL_BLACK);
+        lang_text_draw(13, 4, 66, dialog_height - 45, FONT_NORMAL_BLACK);
     }
 
-    inner_panel_draw(32, 96, 33, 5);
+    inner_panel_draw(32, 96, width_in_blocks - 6, 5);
     lang_text_draw(62, 10, 48, 104, FONT_NORMAL_WHITE);
     int goal_index = 0;
     if (scenario_criteria_population_enabled()) {
@@ -349,12 +380,13 @@ static void draw_background(void)
         lang_text_draw(62, immediate_goal_text, 16 + x + 8, 32 + y + 3, FONT_NORMAL_RED);
     }
 
-    inner_panel_draw(32, 184, 33, 15);
+    inner_panel_draw(32, 184, width_in_blocks - 6, height_in_blocks - 15);
 
     if (content) {
         rich_text_set_fonts(FONT_NORMAL_WHITE, FONT_NORMAL_GREEN, FONT_NORMAL_RED, 5);
-        rich_text_init(content, 64, 184, 31, 15, 0);
-        rich_text_draw(content, 48, 196, 496, 14, 0);
+        rich_text_init(content, 64, 184, width_in_blocks - 8, height_in_blocks - 15, 0);
+        int height_lines = (height_in_blocks - 15 - 1) * BLOCK_SIZE / rich_text_get_line_height();
+        rich_text_draw(content, BLOCK_SIZE * 3, 196, dialog_width - 6 * BLOCK_SIZE, height_lines, 0);
     }
 
     graphics_reset_dialog();
@@ -362,12 +394,19 @@ static void draw_background(void)
 
 static void draw_foreground(void)
 {
-    graphics_in_dialog();
+    int width_in_blocks = get_width_in_blocks();
+    int height_in_blocks = get_height_in_blocks();
+    int dialog_width = width_in_blocks * BLOCK_SIZE;
+    int dialog_height = height_in_blocks * BLOCK_SIZE;
+
+    graphics_in_dialog_with_size(dialog_width, dialog_height);
+    rich_text_reset(rich_text_scroll_position());
 
     rich_text_draw_scrollbar();
-    image_buttons_draw(516, 426, &image_button_start_mission, 1);
+
+    image_buttons_draw(dialog_width - 124, dialog_height - 54, &image_button_start_mission, 1);
     if (can_go_back()) {
-        image_buttons_draw(26, 428, &image_button_back, 1);
+        image_buttons_draw(26, dialog_height - 52, &image_button_back, 1);
     }
 
     graphics_reset_dialog();
@@ -376,15 +415,19 @@ static void draw_foreground(void)
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
+    int width_in_blocks = get_width_in_blocks();
+    int height_in_blocks = get_height_in_blocks();
+    int dialog_width = width_in_blocks * BLOCK_SIZE;
+    int dialog_height = height_in_blocks * BLOCK_SIZE;
 
     if (rich_text_handle_mouse(m_dialog)) {
         return;
     }
-    if (image_buttons_handle_mouse(m_dialog, 516, 426, &image_button_start_mission, 1, 0)) {
+    if (image_buttons_handle_mouse(m_dialog, dialog_width - 124, dialog_height - 54, &image_button_start_mission, 1, 0)) {
         return;
     }
     if (can_go_back()) {
-        if (image_buttons_handle_mouse(m_dialog, 26, 428, &image_button_back, 1, 0)) {
+        if (image_buttons_handle_mouse(m_dialog, 26, dialog_height - 52, &image_button_back, 1, 0)) {
             return;
         }
     }

@@ -108,7 +108,7 @@ int building_dock_can_import_from_ship(const building *dock, int ship_id)
         if (building_distribution_is_good_accepted(r, dock)) {
             return 1;
         }
-    }   
+    }
     return 0;
 }
 
@@ -130,6 +130,13 @@ int building_dock_can_export_to_ship(const building *dock, int ship_id)
         }
     }
     return 0;
+}
+
+void building_dock_enable_resource_in_all_docks(resource_type resource)
+{
+    for (building *b = building_first_of_type(BUILDING_DOCK); b; b = b->next_of_type) {
+        b->accepted_goods[resource] = 1;
+    }
 }
 
 // returns a list of goods that have been "handled" (i.e. the dock allowed for it to be traded)
@@ -449,14 +456,17 @@ void building_dock_get_ship_request_tile(const building *dock, ship_dock_request
             }
             grid_offset = map_grid_offset(dock->x + dx, dock->y + dy);
             if (!map_terrain_is(grid_offset, TERRAIN_WATER) || terrain_water.items[grid_offset] == WATER_N1_BLOCKED) {
+                // fallback 1
                 switch (dock->data.dock.orientation) {
                     case 0: dx = 0; dy = -1; break;
                     case 1: dx = 3; dy = 0; break;
                     case 2: dx = 2; dy = 3; break;
                     default: dx = -1; dy = 2; break;
                 }
+                grid_offset = map_grid_offset(dock->x + dx, dock->y + dy);
             }
             if (!map_terrain_is(grid_offset, TERRAIN_WATER) || terrain_water.items[grid_offset] == WATER_N1_BLOCKED) {
+                // fallback 2
                 switch (dock->data.dock.orientation) {
                     case 0: dx = 1; dy = 0; break;
                     case 1: dx = 2; dy = 1; break;
@@ -475,14 +485,17 @@ void building_dock_get_ship_request_tile(const building *dock, ship_dock_request
             }
             grid_offset = map_grid_offset(dock->x + dx, dock->y + dy);
             if (!map_terrain_is(grid_offset, TERRAIN_WATER) || terrain_water.items[grid_offset] == WATER_N1_BLOCKED) {
+                // fallback 1
                 switch (dock->data.dock.orientation) {
                     case 0: dx = 2; dy = -1; break;
                     case 1: dx = 3; dy = 2; break;
                     case 2: dx = 0; dy = 3; break;
                     default: dx = -1; dy = 0; break;
                 }
+                grid_offset = map_grid_offset(dock->x + dx, dock->y + dy);
             }
             if (!map_terrain_is(grid_offset, TERRAIN_WATER) || terrain_water.items[grid_offset] == WATER_N1_BLOCKED) {
+                // fallback 2
                 switch (dock->data.dock.orientation) {
                     case 0: dx = 0; dy = -3; break;
                     case 1: dx = 5; dy = 0; break;

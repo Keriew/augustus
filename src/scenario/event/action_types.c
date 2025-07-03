@@ -1,6 +1,7 @@
 #include "action_types.h"
 
 #include "building/destruction.h"
+#include "building/dock.h"
 #include "building/granary.h"
 #include "building/menu.h"
 #include "building/warehouse.h"
@@ -40,7 +41,7 @@ int scenario_action_type_change_allowed_buildings_execute(scenario_action_t *act
 
     scenario_allowed_building_set(building_id, allowed);
     building_menu_update();
-    
+
     return 1;
 }
 
@@ -83,7 +84,7 @@ int scenario_action_type_change_custom_variable_execute(scenario_action_t *actio
     }
 
     scenario_custom_variable_set_value(variable_id, value);
-    
+
     return 1;
 }
 
@@ -94,7 +95,8 @@ int scenario_action_type_change_resource_produced_execute(scenario_action_t *act
 
     int successfully_changed = empire_city_change_own_resource_availability(resource, new_state);
     building_menu_update();
-    
+    building_dock_enable_resource_in_all_docks(resource);
+
     return successfully_changed;
 }
 
@@ -104,7 +106,7 @@ int scenario_action_type_change_resource_stockpiles_execute(scenario_action_t *a
     int amount = action->parameter2;
     storage_types storage_type = action->parameter3;
     int respect_settings = action->parameter4;
-    
+
     if (resource < RESOURCE_MIN || resource > RESOURCE_MAX) {
         return 0;
     }
@@ -114,7 +116,7 @@ int scenario_action_type_change_resource_stockpiles_execute(scenario_action_t *a
 
     int remaining = abs(amount);
     int to_remove = (amount < 0);
-    switch(storage_type) {
+    switch (storage_type) {
         case STORAGE_TYPE_ALL:
             if (to_remove) {
                 remaining = building_warehouses_remove_resource(resource, remaining);
@@ -154,7 +156,7 @@ int scenario_action_type_city_health_execute(scenario_action_t *action)
 {
     int is_hard_set = action->parameter3;
     int adjustment = action->parameter4;
-    
+
     if (is_hard_set) {
         city_health_set(adjustment);
     } else {
@@ -282,7 +284,7 @@ int scenario_action_type_rome_wages_execute(scenario_action_t *action)
         if (adjustment == 0) {
             return 1;
         }
-    
+
         city_data.labor.wages_rome += adjustment;
         if (adjustment > 0) {
             city_message_post(1, MESSAGE_ROME_RAISES_WAGES, 0, 0);
@@ -344,7 +346,7 @@ int scenario_action_type_building_force_collapse_execute(scenario_action_t *acti
             }
         }
     }
-    
+
     return 1;
 }
 
@@ -366,7 +368,7 @@ int scenario_action_type_trade_price_set_execute(scenario_action_t *action)
     int amount = action->parameter2;
     int set_buy_price = action->parameter3;
     int show_message = action->parameter4;
-    
+
     if (resource < RESOURCE_MIN || resource > RESOURCE_MAX) {
         return 0;
     }
@@ -386,7 +388,7 @@ int scenario_action_type_trade_price_set_execute(scenario_action_t *action)
     }
 
     int successfully_changed = trade_price_change(resource, adjustment);
-    
+
     if (successfully_changed && show_message) {
         if (adjustment >= 0) {
             city_message_post(1, MESSAGE_PRICE_INCREASED, adjustment, resource);
@@ -402,7 +404,7 @@ int scenario_action_type_trade_set_buy_price_execute(scenario_action_t *action)
 {
     int resource = action->parameter1;
     int amount = action->parameter2;
-    
+
     if (resource < RESOURCE_MIN || resource > RESOURCE_MAX) {
         return 0;
     }
@@ -414,7 +416,7 @@ int scenario_action_type_trade_set_sell_price_execute(scenario_action_t *action)
 {
     int resource = action->parameter1;
     int amount = action->parameter2;
-    
+
     if (resource < RESOURCE_MIN || resource > RESOURCE_MAX) {
         return 0;
     }
@@ -455,6 +457,7 @@ int scenario_action_type_trade_add_new_resource_execute(scenario_action_t *actio
         empire_city_change_selling_of_resource(empire_city, resource, amount);
         building_menu_update();
     }
+    building_dock_enable_resource_in_all_docks(resource);
 
     return 1;
 }
@@ -474,7 +477,7 @@ int scenario_action_type_trade_price_adjust_execute(scenario_action_t *action)
     }
 
     int successfully_changed = trade_price_change(resource, adjustment);
-    
+
     if (successfully_changed && show_message) {
         if (adjustment >= 0) {
             city_message_post(1, MESSAGE_PRICE_INCREASED, adjustment, resource);
@@ -631,7 +634,7 @@ int scenario_action_type_minor_curse_execute(scenario_action_t *action)
 {
     int god = action->parameter1;
 
-    city_god_curse(god,0);
+    city_god_curse(god, 0);
 
     return 1;
 }

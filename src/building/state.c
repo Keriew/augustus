@@ -653,7 +653,7 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
             case BUILDING_LIGHTHOUSE:
                 b->resources[RESOURCE_TIMBER] = loads_stored;
                 break;
-            case TR_BUILDING_GRAND_TEMPLE_VENUS:
+            case BUILDING_GRAND_TEMPLE_VENUS:
                 b->resources[RESOURCE_WINE] = loads_stored;
                 break;
             default:

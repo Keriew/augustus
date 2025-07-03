@@ -120,6 +120,7 @@ static int get_height_id(void)
             case BUILDING_BURNING_RUIN:
             case BUILDING_RESERVOIR:
             case BUILDING_NATIVE_HUT:
+            case BUILDING_NATIVE_HUT_ALT:
             case BUILDING_NATIVE_MEETING:
             case BUILDING_NATIVE_CROPS:
             case BUILDING_MISSION_POST:
@@ -736,7 +737,7 @@ static void draw_background(void)
             window_building_draw_fort(&context);
         } else if (btype == BUILDING_BURNING_RUIN) {
             window_building_draw_burning_ruin(&context);
-        } else if (btype == BUILDING_NATIVE_HUT) {
+        } else if (btype == BUILDING_NATIVE_HUT || btype == BUILDING_NATIVE_HUT_ALT) {
             window_building_draw_native_hut(&context);
         } else if (btype == BUILDING_NATIVE_MEETING) {
             window_building_draw_native_meeting(&context);

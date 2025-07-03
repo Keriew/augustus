@@ -867,7 +867,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     } else {
         figure_visited_buildings_load_state(state->visited_buildings);
     }
-    if (version <= SAVE_GAME_LAST_SPRITE_BRIDGES) {
+    if (version <= SAVE_GAME_LAST_SPRITE_BRIDGES_MIGRATION_FIX) {
         map_terrain_migrate_old_bridges();
     }
 
