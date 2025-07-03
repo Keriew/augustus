@@ -123,9 +123,17 @@ static void bound_invasion_values(void)
     } else {
         data.repeat_type = INVASION_REPEAT_TIMES;
     }
-    if (data.invasion.repeat.interval.min < 1) {
-        data.invasion.repeat.interval.min = 1;
+
+    if (data.invasion.type == INVASION_TYPE_DISTANT_BATTLE) {
+        if (data.invasion.repeat.interval.min < 5) {
+            data.invasion.repeat.interval.min = 5;
+        }
+    } else {
+        if (data.invasion.repeat.interval.min < 1) {
+            data.invasion.repeat.interval.min = 1;
+        }
     }
+
     if (data.invasion.repeat.interval.max > 50) {
         data.invasion.repeat.interval.max = 50;
     }
@@ -270,7 +278,7 @@ static void draw_foreground(void)
     for (size_t i = 0; i < NUMBER_OF_EDIT_BUTTONS; i++) {
         int focus = data.focus_button_id == i + 1;
         if ((edit_buttons[i].parameter2 == DISABLE_ON_DISTANT_BATTLE &&
-                data.invasion.type == INVASION_TYPE_DISTANT_BATTLE) ||
+            data.invasion.type == INVASION_TYPE_DISTANT_BATTLE) ||
             (edit_buttons[i].parameter2 == DISABLE_ON_NO_REPEAT && data.repeat_type == INVASION_REPEAT_NEVER)) {
             focus = 0;
         }
@@ -295,7 +303,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
     if (generic_buttons_handle_mouse(m_dialog, data.section_title_width + SECTION_CONTENT_LEFT_OFFSET,
-            BASE_Y_OFFSET, edit_buttons, NUMBER_OF_EDIT_BUTTONS, &data.focus_button_id) ||
+        BASE_Y_OFFSET, edit_buttons, NUMBER_OF_EDIT_BUTTONS, &data.focus_button_id) ||
         generic_buttons_handle_mouse(m_dialog, 0, BASE_Y_OFFSET, bottom_buttons, NUMBER_OF_BOTTOM_BUTTONS,
             &data.bottom_button_focus_id)) {
         return;
@@ -347,6 +355,8 @@ static void button_amount(const generic_button *button)
 static void set_type(int value)
 {
     data.invasion.type = value == 3 ? 4 : value;
+    bound_invasion_values();    // force update values
+    window_request_refresh();   // redrawing to be updated on the screen
 }
 
 static void button_type(const generic_button *button)
@@ -417,6 +427,9 @@ static void button_repeat_times(const generic_button *button)
 
 static void set_repeat_interval_min(int value)
 {
+    if (data.invasion.type == INVASION_TYPE_DISTANT_BATTLE && value < 5) {
+        value = 5;
+    }
     data.invasion.repeat.interval.min = value;
     if (data.invasion.repeat.interval.max < value) {
         data.invasion.repeat.interval.max = value;
