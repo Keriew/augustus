@@ -73,6 +73,7 @@ static struct {
     int image_id_water_last;
     int selected_figure_id;
     int highlighted_formation;
+    int selected_building_id;
     pixel_coordinate *selected_figure_coord;
 
     float scale;
@@ -769,11 +770,20 @@ static void draw_animation(int x, int y, int grid_offset)
 static void draw_elevated_figures(int x, int y, int grid_offset)
 {
     int figure_id = map_figure_at(grid_offset);
+
+
     while (figure_id > 0) {
         figure *f = figure_get(figure_id);
+
         if ((f->use_cross_country && !f->is_ghost && !f->dont_draw_elevated) || f->height_adjusted_ticks) {
             int highlight = f->formation_id > 0 && f->formation_id == draw_context.highlighted_formation;
             city_draw_figure(f, x, y, draw_context.scale, highlight);
+        } else if (f->building_id == draw_context.selected_building_id) { //figure originates from selected building
+            if (config_get(CONFIG_UI_SHOW_ROAMING_PATH)) {
+                int highlight = FIGURE_HIGHLIGHT_GREEN;
+                city_draw_figure(f, x, y, draw_context.scale, highlight);
+            }
+
         }
         figure_id = f->next_figure_id_on_same_tile;
     }
@@ -954,10 +964,13 @@ static void update_clouds(void)
  }
  ***/
 
-void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_coord, const map_tile *tile)
+void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_coord, const map_tile *tile, int roamer_preview_building_id)
 {
     int highlighted_formation_id = get_highlighted_formation_id(tile);
     init_draw_context(selected_figure_id, figure_coord, highlighted_formation_id);
+    if (roamer_preview_building_id) {
+        draw_context.selected_building_id = roamer_preview_building_id;//store the clicked building id
+    }
     int x, y, width, height;
     city_view_get_viewport(&x, &y, &width, &height);
     graphics_fill_rect(x, y, width, height, COLOR_BLACK);

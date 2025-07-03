@@ -7,6 +7,18 @@
 #include "graphics/image.h"
 #include "graphics/text.h"
 
+static color_t get_highlight_mask(int highlight_mask)
+{
+    switch (highlight_mask) {
+        case FIGURE_HIGHLIGHT_NONE:
+            return COLOR_MASK_NONE;
+        case FIGURE_HIGHLIGHT_RED:
+            return COLOR_MASK_LEGION_HIGHLIGHT;
+        case FIGURE_HIGHLIGHT_GREEN:
+            return COLOR_MASK_GREEN;
+    }
+}
+
 static void draw_figure_with_cart(const figure *f, int x, int y, float scale)
 {
     if (f->y_offset_cart >= 0) {
@@ -277,7 +289,8 @@ static void draw_figure(const figure *f, int x, int y, float scale, int highligh
         if (f->is_enemy_image) {
             image_draw_enemy(f->image_id, x, y, scale);
         } else {
-            image_draw(f->image_id, x, y, highlight ? COLOR_MASK_LEGION_HIGHLIGHT : COLOR_MASK_NONE, scale);
+            color_t color_mask = get_highlight_mask(highlight);
+            image_draw(f->image_id, x, y, color_mask, scale);
         }
     }
 }
