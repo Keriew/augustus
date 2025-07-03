@@ -132,6 +132,13 @@ int building_dock_can_export_to_ship(const building *dock, int ship_id)
     return 0;
 }
 
+void building_dock_enable_resource_in_all_docks(resource_type resource)
+{
+    for (building *b = building_first_of_type(BUILDING_DOCK); b; b = b->next_of_type) {
+        b->accepted_goods[resource] = 1;
+    }
+}
+
 // returns a list of goods that have been "handled" (i.e. the dock allowed for it to be traded)
 // for each road network a ship has visited
 static void get_already_handled_goods(handled_goods *handled, int ship_id)
