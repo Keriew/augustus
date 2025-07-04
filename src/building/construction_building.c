@@ -33,6 +33,7 @@
 #include "map/water.h"
 #include "scenario/property.h"
 
+
 static void add_fort(int type, building *fort)
 {
     fort->prev_part_building_id = 0;
@@ -110,7 +111,8 @@ static void add_warehouse(building *b)
     b->prev_part_building_id = 0;
     map_building_tiles_add(b->id, b->x + x_offset[corner], b->y + y_offset[corner], 1,
         image_group(GROUP_BUILDING_WAREHOUSE), TERRAIN_BUILDING);
-
+    map_terrain_add_warehouse_road(b->x, b->y);
+    map_tiles_set_road(b->x, b->y);
     int id = b->id;
     int prev = id;
     for (int i = 0; i < 9; i++) {
@@ -159,12 +161,12 @@ static void add_to_map(int type, building *b, int size, int orientation, int wat
         default:
             add_building(b);
             break;
-        // entertainment
+            // entertainment
         case BUILDING_COLOSSEUM:
             map_tiles_update_area_roads(b->x, b->y, 5);
             building_monument_set_phase(b, MONUMENT_START);
             break;
-        // farms
+            // farms
         case BUILDING_WHEAT_FARM:
         case BUILDING_VEGETABLE_FARM:
         case BUILDING_FRUIT_FARM:
@@ -173,11 +175,11 @@ static void add_to_map(int type, building *b, int size, int orientation, int wat
         case BUILDING_PIG_FARM:
             map_building_tiles_add_farm(b->id, b->x, b->y, building_image_get_base_farm_crop(type), 0);
             break;
-        // distribution
+            // distribution
         case BUILDING_GRANARY:
             add_granary(b);
             break;
-        // Don't autodistribute wine for new Venus temples
+            // Don't autodistribute wine for new Venus temples
         case BUILDING_SMALL_TEMPLE_VENUS:
             add_building(b);
             building_distribution_unaccept_all_goods(b);
@@ -307,12 +309,12 @@ static void add_to_map(int type, building *b, int size, int orientation, int wat
         case BUILDING_SHRINE_VENUS:
             b->subtype.orientation = building_rotation_get_rotation();
             add_building(b);
-            break;            
+            break;
         case BUILDING_BARRACKS:
             b->accepted_goods[RESOURCE_WEAPONS] = 1;
             b->accepted_goods[RESOURCE_NONE] = 1;
             add_building(b);
-            break;            
+            break;
         case BUILDING_LATRINES:
             add_building(b);
             break;
@@ -321,14 +323,43 @@ static void add_to_map(int type, building *b, int size, int orientation, int wat
     map_routing_update_walls();
 }
 
+int building_construction_is_granary_cross_tile(int tile_no)
+{
+    return  tile_no == 1 ||
+        tile_no == 2 ||
+        tile_no == 3 ||
+        tile_no == 6 ||
+        tile_no == 7;
+}
+
+int building_construction_is_warehouse_corner(int tile_no)
+{
+
+    int building_rotation = building_rotation_get_rotation();
+    int view_rotation = city_view_orientation() / 2;
+    int effective_rotation = (building_rotation + view_rotation) % 4;
+    int corner = building_rotation_get_corner(2 * effective_rotation);
+
+    return tile_no == corner;
+}
+
 int building_construction_place_building(building_type type, int x, int y)
 {
     int terrain_mask = TERRAIN_ALL;
     if (building_type_is_roadblock(type)) {
-        terrain_mask = ~TERRAIN_ROAD & ~TERRAIN_HIGHWAY;
+        terrain_mask = type == BUILDING_GATEHOUSE ? ~TERRAIN_WALL & ~TERRAIN_ROAD : ~TERRAIN_ROAD & ~TERRAIN_HIGHWAY;
+        //allow building gatehouses over walls and roads, other non-bridge roadblocks over roads and highways
     } else if (type == BUILDING_TOWER) {
         terrain_mask = ~TERRAIN_WALL;
     }
+    if (config_get(CONFIG_GP_CH_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT)) {
+        if (type == BUILDING_GRANARY || type == BUILDING_WAREHOUSE) {
+            terrain_mask = ~TERRAIN_ROAD;
+        }
+    }
+    //allow building granaries and warehouses over all road, BUT, 
+    //the building ghost is set up to SUGGEST placing it over crossroads only
+
     int size = building_properties_for_type(type)->size;
     if (type == BUILDING_WAREHOUSE) {
         size = 3;
@@ -375,9 +406,10 @@ int building_construction_place_building(building_type type, int x, int y)
         }
     }
     int waterside_orientation_abs = 0, waterside_orientation_rel = 0;
+
     if (type == BUILDING_SHIPYARD || type == BUILDING_WHARF || type == BUILDING_DOCK) {
         if (map_water_determine_orientation(x, y, building_properties_for_type(type)->size, 0,
-                &waterside_orientation_abs, &waterside_orientation_rel, 1, 0)) {
+            &waterside_orientation_abs, &waterside_orientation_rel, 1, 0)) {
             city_warning_show(WARNING_SHORE_NEEDED, NEW_WARNING_SLOT);
             return 0;
         }

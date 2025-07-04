@@ -7,6 +7,7 @@
 #include "graphics/panel.h"
 #include "graphics/window.h"
 #include "input/input.h"
+#include "translation/translation.h"
 #include "widget/map_editor.h"
 #include "widget/sidebar/editor.h"
 #include "window/editor/map.h"
@@ -49,7 +50,7 @@ static const int MENU_TYPES[MENU_NUM_ITEMS][MAX_ITEMS_PER_MENU] = {
     {7, 8, 9, -1},
     {10, 11, 12, 13, 14, 15, 16, 17, -1},
     {18, 19, -1},
-    {20, 21, 22, -1},
+    {20, TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT, 21, 22, -1},
     {23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, -1},
 };
 
@@ -166,8 +167,9 @@ static void button_menu_item(const generic_button *button)
         case MENU_NATIVE_BUILDINGS:
             switch (index) {
                 case 0: editor_tool_set_type(TOOL_NATIVE_HUT); break;
-                case 1: editor_tool_set_type(TOOL_NATIVE_CENTER); break;
-                case 2: editor_tool_set_type(TOOL_NATIVE_FIELD); break;
+                case 1: editor_tool_set_type(TOOL_NATIVE_HUT_ALT); break;
+                case 2: editor_tool_set_type(TOOL_NATIVE_CENTER); break;
+                case 3: editor_tool_set_type(TOOL_NATIVE_FIELD); break;
             }
             break;
         case MENU_INVASION_POINTS:

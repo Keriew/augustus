@@ -56,6 +56,7 @@ typedef enum {
     CONFIG_GP_CH_RANDOM_COLLAPSES_TAKE_MONEY,
     CONFIG_GP_CH_MULTIPLE_BARRACKS,
     CONFIG_GP_CH_WAREHOUSES_DONT_ACCEPT,
+    CONFIG_GP_CH_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT,
     CONFIG_GP_CH_HOUSES_DONT_EXPAND_INTO_GARDENS,
     CONFIG_GP_CH_MONUMENTS_BOOST_CULTURE_RATING,
     CONFIG_GP_CH_DISABLE_INFINITE_WOLVES_SPAWNING,
@@ -124,7 +125,7 @@ void config_load(void);
 
 /**
  * Whether the user directory must be configured
- * 
+ *
  * @return 1 If the user directory still needs to be set, 0 otherwise
  */
 int config_must_configure_user_directory(void);

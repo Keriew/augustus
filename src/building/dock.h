@@ -36,6 +36,8 @@ int building_dock_can_import_from_ship(const building *dock, int ship_id);
 
 int building_dock_can_export_to_ship(const building *dock, int ship_id);
 
+void building_dock_enable_resource_in_all_docks(resource_type resource);
+
 int building_dock_can_trade_with_route(int route_id, int dock_id);
 
 void building_dock_set_can_trade_with_route(int route_id, int dock_id, int can_trade);

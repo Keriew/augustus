@@ -93,7 +93,7 @@ static const city_overlay *get_city_overlay(void)
         case OVERLAY_ACADEMY:
             return city_overlay_for_academy();
         case OVERLAY_HEALTH:
-            return city_overlay_for_health();        
+            return city_overlay_for_health();
         case OVERLAY_BARBER:
             return city_overlay_for_barber();
         case OVERLAY_BATHHOUSE:
@@ -222,10 +222,10 @@ static void draw_flattened_building_footprint(const building *b, int x, int y, i
     if (b->house_size) {
         image_base += 4;
     }
-    if (building_type_is_bridge(b->type)){//dont draw bridges
+    if (building_type_is_bridge(b->type)) {//dont draw bridges
         return;
     }
-    if (b->size == 1)  {
+    if (b->size == 1) {
         image_draw_isometric_footprint_from_draw_tile(image_base, x, y, color_mask, scale);
     } else if (b->size == 2) {
         const int x_tile_offset[] = { 30, 0, 60, 30 };
@@ -407,21 +407,22 @@ static void draw_footprint(int x, int y, int grid_offset)
                     image_id += img->group_offset + img->item_offset + 49;
                 }
                 image_draw_isometric_footprint_from_draw_tile(image_id, x, y, 0, scale);
-            } else {    
+            } else {
                 // display grass
                 int image_id = image_group(GROUP_TERRAIN_GRASS_1) + (map_random_get(grid_offset) & 7);
                 image_draw_isometric_footprint_from_draw_tile(image_id, x, y, 0, scale);
             }
         } else if ((terrain & TERRAIN_ROAD) && !(terrain & TERRAIN_BUILDING)) {
             image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, 0, scale);
-        } else if ((terrain & TERRAIN_BUILDING) && !map_is_bridge(grid_offset) ) {
+        } else if ((terrain & TERRAIN_BUILDING) && !map_is_bridge(grid_offset)) {
             city_with_overlay_draw_building_footprint(x, y, grid_offset, 0);
         } else {
             image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, 0, scale);
         }
     }
-    if (config_get(CONFIG_UI_SHOW_GRID) && map_property_is_draw_tile(grid_offset) && !map_building_at(grid_offset) &&
-        scale <= 2.0f) {
+    if (config_get(CONFIG_UI_SHOW_GRID) && map_property_is_draw_tile(grid_offset)
+                                        && !map_building_at(grid_offset) && scale <= 2.0f) {
+        //grid is drawn by the renderer directly at zoom > 200%
         static int grid_id = 0;
         if (!grid_id) {
             grid_id = assets_get_image_id("UI", "Grid_Full");
@@ -468,7 +469,7 @@ static void draw_depot_resource(building *b, int x, int y, color_t color_mask)
     int img_id;
 
     if (b->num_workers > 0) {
-        switch(b->data.depot.current_order.resource_type) {
+        switch (b->data.depot.current_order.resource_type) {
             case RESOURCE_VEGETABLES:
                 img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Vegetables");
                 break;
@@ -530,7 +531,7 @@ static void draw_depot_resource(building *b, int x, int y, color_t color_mask)
             default:
                 img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Wheat");
                 break;
-        }        
+        }
     } else {
         img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Cat");
     }
@@ -558,14 +559,14 @@ static void draw_permissions_flag(building *b, int x, int y, color_t color_mask)
     if (!permissions) {
         return;
     }
-    image_draw(base_permission_image[permissions] + b->data.warehouse.flag_frame, x, y, color_mask,scale);
+    image_draw(base_permission_image[permissions] + b->data.warehouse.flag_frame, x, y, color_mask, scale);
 
     building_animation_advance_storage_flag(b, base_permission_image[permissions]);
 }
 
 static void draw_warehouse_ornaments(int x, int y, color_t color_mask)
 {
-    image_draw(image_group(GROUP_BUILDING_WAREHOUSE) + 17, x - 4, y - 42, color_mask,scale);
+    image_draw(image_group(GROUP_BUILDING_WAREHOUSE) + 17, x - 4, y - 42, color_mask, scale);
 }
 
 static void draw_building_top(int grid_offset, building *b, int x, int y)
