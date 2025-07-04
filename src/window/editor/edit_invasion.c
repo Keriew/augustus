@@ -210,8 +210,11 @@ static void draw_background(void)
     text_draw_centered(lang_get_string(CUSTOM_TRANSLATION, invasion_type_strings[data.invasion.type]),
         x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6, btn->width, FONT_NORMAL_BLACK, 0);
 
-    font_t enabled_font = data.invasion.type == INVASION_TYPE_DISTANT_BATTLE ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK;
-    color_t enabled_color = data.invasion.type == INVASION_TYPE_DISTANT_BATTLE ? COLOR_FONT_LIGHT_GRAY : COLOR_MASK_NONE;
+    font_t enabled_font = (data.invasion.type == INVASION_TYPE_DISTANT_BATTLE ||
+        data.invasion.type == INVASION_TYPE_CAESAR) ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK;
+
+    color_t enabled_color = (data.invasion.type == INVASION_TYPE_DISTANT_BATTLE ||
+        data.invasion.type == INVASION_TYPE_CAESAR) ? COLOR_FONT_LIGHT_GRAY : COLOR_MASK_NONE;
 
     // Invasion from text
     btn = &edit_buttons[4];
@@ -387,7 +390,7 @@ static void set_from(int value)
 
 static void button_from(const generic_button *button)
 {
-    if (data.invasion.type == INVASION_TYPE_DISTANT_BATTLE) {
+    if (data.invasion.type == INVASION_TYPE_DISTANT_BATTLE || data.invasion.type == INVASION_TYPE_CAESAR) {
         return;
     }
     int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET;
@@ -403,7 +406,7 @@ static void set_attack(int value)
 
 static void button_attack(const generic_button *button)
 {
-    if (data.invasion.type == INVASION_TYPE_DISTANT_BATTLE) {
+    if (data.invasion.type == INVASION_TYPE_DISTANT_BATTLE || data.invasion.type == INVASION_TYPE_CAESAR) {
         return;
     }
     int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET;
