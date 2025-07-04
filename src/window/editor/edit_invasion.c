@@ -103,6 +103,14 @@ static const struct {
     { TR_EDITOR_REPEAT_FREQUENCY, 38 }
 };
 
+static const translation_key invasion_type_strings[] = {
+    TR_SELECT_NONE,
+    TR_PARAMETER_VALUE_INVASION_TYPE_NATIVES,
+    TR_PARAMETER_VALUE_INVASION_TYPE_ENEMY_ARMY,
+    TR_PARAMETER_VALUE_INVASION_TYPE_CAESAR,
+    TR_PARAMETER_VALUE_MESSAGE_DISTANT_BATTLE,
+};
+
 static int get_largest_section_title_width(void)
 {
     int largest_width = 0;
@@ -199,8 +207,8 @@ static void draw_background(void)
 
     // Invasion type text
     btn = &edit_buttons[3];
-    lang_text_draw_centered(34, data.invasion.type, x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6, btn->width,
-        FONT_NORMAL_BLACK);
+    text_draw_centered(lang_get_string(CUSTOM_TRANSLATION, invasion_type_strings[data.invasion.type]),
+        x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6, btn->width, FONT_NORMAL_BLACK, 0);
 
     font_t enabled_font = data.invasion.type == INVASION_TYPE_DISTANT_BATTLE ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK;
     color_t enabled_color = data.invasion.type == INVASION_TYPE_DISTANT_BATTLE ? COLOR_FONT_LIGHT_GRAY : COLOR_MASK_NONE;
@@ -354,7 +362,7 @@ static void button_amount(const generic_button *button)
 
 static void set_type(int value)
 {
-    data.invasion.type = value == 3 ? 4 : value;
+    data.invasion.type = value;
     bound_invasion_values();    // force update values
     window_request_refresh();   // redrawing to be updated on the screen
 }
@@ -364,7 +372,12 @@ static void button_type(const generic_button *button)
     int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET;
     int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET;
 
-    window_select_list_show(x_offset, y_offset, button, 34, 4, set_type);
+    static const uint8_t *invasion_type_labels[5];
+    for (int i = 0; i < 5; i++) {
+        invasion_type_labels[i] = lang_get_string(CUSTOM_TRANSLATION, invasion_type_strings[i]);
+    }
+
+    window_select_list_show_text(x_offset, y_offset, button, invasion_type_labels, 5, set_type);
 }
 
 static void set_from(int value)

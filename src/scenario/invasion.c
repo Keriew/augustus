@@ -593,11 +593,7 @@ void scenario_invasion_process(void)
                 }
             }
             if (invasion->type == INVASION_TYPE_CAESAR) {
-                int grid_offset = start_invasion(ENEMY_11_CAESAR,
-                    random_amount, invasion->from, invasion->attack_type, warning->invasion_id);
-                if (grid_offset > 0) {
-                    city_message_post(1, MESSAGE_CAESAR_ARMY_ATTACK, data.last_internal_invasion_id, grid_offset);
-                }
+                city_emperor_force_attack(random_amount);
             }
             if (invasion->repeat.times != 0) {
                 repeat_invasion_with_warnings(invasion);
