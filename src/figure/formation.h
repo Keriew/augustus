@@ -60,7 +60,7 @@ typedef struct {
     int in_use; /**< Flag whether this entry is in use */
     int is_herd; /**< Flag to indicate herd */
     int is_legion; /**< Flag to indicate (own) legion */
-    int legion_id; /**< Legion ID (0-5 for own troops) */
+    int legion_id; /**< Legion ID > 0 for own troops */
     int layout;
     int direction;
     int orientation;
@@ -84,9 +84,9 @@ typedef struct {
     int x_home; // legions - x position of the formation RIGHT NOW
     int y_home; // legions - y position of the formation RIGHT NOW
     int building_id; // legions - Building ID of home fort
-    int standard_x; //  legions - x position of the DESTINATION
-    int standard_y; // legions - y position of the DESTINATION
-    int standard_figure_id;
+    int standard_x; // legions - x position of the DESTINATION. Standard means 'flag' in this case
+    int standard_y; // legions - y position of the DESTINATION. Standard means 'flag' in this case
+    int standard_figure_id; // Figure id of the standard slag - position in the array of figures
     int destination_x; //for enemy and animals
     int destination_y; //for enemy and animals
     int destination_building_id;
@@ -115,6 +115,9 @@ typedef struct {
     int legion_recruit_type; /**< Recruit type: none if this legion is fully occupied */
     int is_at_fort; /**< Flag to indicate this legion is resting at the fort */
     int mess_hall_max_morale_modifier; /**< Mess hall bonus */
+    int legion_flag_id; //image id connecting the legion to their unique symbol
+    int legion_name_id; //text id connecting the legion to their unique name
+    int legion_name_group; //text id for the group
 
     /* Enemy-related */
     int enemy_type;

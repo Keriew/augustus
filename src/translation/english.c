@@ -1613,7 +1613,18 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT, "Native hut alt" },
     {TR_BUILDING_NATIVE_HUT_ALT, "Alternate native hut"},
     {TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, "Warehouses and granaries can be built over any roads"},
-    {TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, "Highlight selected building"}
+    {TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, "Highlight selected building"},
+    {TR_CHEAT_UNLOCK_LEGIONS, "Allowed legions: 20"},
+    {TR_BUILDING_FORT_STANDARD_ELEPHANTS, "Elephants"},
+    {TR_BUILDING_FORT_STANDARD_THUNDER_BOLTS, "Thunder Bolts"},
+    {TR_BUILDING_FORT_STANDARD_BULLS, "Bulls"},
+    {TR_BUILDING_FORT_STANDARD_CENTAURS, "Centaurs"},
+    {TR_BUILDING_FORT_STANDARD_OCTOPI, "Octopi"},
+    {TR_BUILDING_FORT_STANDARD_BEARS, "Bears"},
+    {TR_BUILDING_FORT_STANDARD_SCORPIONS, "Scorpions"},
+    {TR_BUILDING_FORT_STANDARD_CAMELS, "Camels"},
+    {TR_BUILDING_FORT_STANDARD_DOLPHINS, "Dolphins"},
+    {TR_BUILDING_FORT_STANDARD_SEA_GOATS, "Sea Goats"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

@@ -7,6 +7,10 @@
 int widget_sidebar_military_enter(int formation_id);
 int widget_sidebar_military_exit(void);
 
+int widget_sidebar_military_get_standard_image(int legion_id);
+int widget_sidebar_military_get_legion_name_id(int legion_id);
+int widget_sidebar_military_get_legion_name_group(int legion_id);
+
 void widget_sidebar_military_draw_background(void);
 void widget_sidebar_military_draw_foreground(void);
 

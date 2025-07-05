@@ -20,6 +20,8 @@ void game_cheat_breakpoint(void);
 
 void game_cheat_console(void);
 
-void game_cheat_parse_command(uint8_t * command);
+void game_cheat_parse_command(uint8_t *command);
+
+int game_cheat_extra_legions(void);
 
 #endif // GAME_CHEATS_H

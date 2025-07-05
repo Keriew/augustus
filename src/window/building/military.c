@@ -315,11 +315,11 @@ void window_building_draw_legion_info(building_info_context *c)
     const formation *m = formation_get(c->formation_id);
     c->help_id = 87;
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
-    lang_text_draw_centered(138, m->legion_id, c->x_offset, c->y_offset + 10,
-        BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
+    lang_text_draw_centered(m->legion_name_group, m->legion_name_id, c->x_offset, c->y_offset + 10,
+        BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK); //name of the legion
 
     // standard icon at the top
-    int icon_image_id = image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + m->legion_id;
+    int icon_image_id = m->legion_flag_id;
     const image *icon_image = image_get(icon_image_id);
     int icon_height = icon_image->height;
     image_draw(icon_image_id, c->x_offset + 16 + (40 - icon_image->width - icon_image->x_offset) / 2, c->y_offset + 16,
