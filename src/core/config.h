@@ -1,7 +1,7 @@
 #ifndef CORE_CONFIG_H
 #define CORE_CONFIG_H
 
-#define CONFIG_STRING_VALUE_MAX 65
+#define CONFIG_STRING_VALUE_MAX 64
 
 typedef enum {
     CONFIG_GENERAL_ENABLE_AUDIO,
