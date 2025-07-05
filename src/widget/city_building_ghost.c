@@ -473,7 +473,9 @@ static void draw_desirability_range(const map_tile *tile, building_type type, in
 static void draw_default(const map_tile *tile, int x_view, int y_view, building_type type)
 {
     const building_properties *props = building_properties_for_type(type);
-    int building_size = type == BUILDING_WAREHOUSE ? 3 : props->size; //BUILDING_WAREHOUSE is size 1, since it's only the corner tile. It's manually adjusted for sizing purposes that should affect entire 3x3 building.
+    int building_size = type == BUILDING_WAREHOUSE ? 3 : props->size;
+    //BUILDING_WAREHOUSE is size 1, since it's only the corner tile. 
+    //It's manually adjusted for sizing purposes that should affect entire 3x3 building.
     int image_id = 0;
 
     // check if we can place building
@@ -495,7 +497,8 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
         int forbidden_terrain = map_terrain_get(tile_offset) & TERRAIN_NOT_CLEAR;
         int discouraged_terrain = map_terrain_get(tile_offset) & TERRAIN_NOT_CLEAR;
         // forbidden terrain cannot be built on
-        // discouraged terrain can be built on, but is still highlighted red, to suggest e.g. that it will become unusable/be overwritten
+        // discouraged terrain can be built on, but is still highlighted red,
+        // to suggest e.g. that it will become unusable/be overwritten
         if (!fully_blocked) {
             if (type == BUILDING_PLAZA || building_type_is_roadblock(type)) {
                 forbidden_terrain &= ~TERRAIN_ROAD;
@@ -538,7 +541,10 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
 
         }
     }
-    if (type >= BUILDING_ROADBLOCK || type == BUILDING_LIBRARY || type == BUILDING_SMALL_STATUE || type == BUILDING_MEDIUM_STATUE) {
+    if (type >= BUILDING_ROADBLOCK ||
+        type == BUILDING_LIBRARY ||
+        type == BUILDING_SMALL_STATUE ||
+        type == BUILDING_MEDIUM_STATUE) {
         image_id = get_new_building_image_id(grid_offset, type);
         draw_regular_building(type, image_id, x_view, y_view, grid_offset, num_tiles, blocked_tiles);
     } else {
@@ -617,7 +623,8 @@ static void draw_draggable_reservoir(const map_tile *tile, int x, int y)
     } else {
         if (map_building_is_reservoir(map_x, map_y)) {
             blocked = 0;
-        } else if (!map_tiles_are_clear(map_x, map_y, 3, TERRAIN_ALL, 1)) {
+        } else if (!map_tiles_are_clear(map_x, map_y, 3, TERRAIN_ALL & ~TERRAIN_AQUEDUCT, 1)) {
+            //reservoir allowed over aqueducts
             blocked = 1;
         }
     }
@@ -682,17 +689,34 @@ static void draw_draggable_reservoir(const map_tile *tile, int x, int y)
     if (!drawing_two_reservoirs) {
         data.reservoir_range.last_grid_offset = -1;
         data.reservoir_range.total = 0;
-        if (blocked) {
-            int grid_offset = tile->grid_offset + RESERVOIR_GRID_OFFSETS[orientation_index];
-            for (int i = 0; i < 9; i++) {
-                int tile_offset = grid_offset + tile_grid_offset(orientation_index, i);
-                blocked_tiles[i] = map_terrain_is(tile_offset, TERRAIN_NOT_CLEAR) || map_has_figure_at(tile_offset);
+        int grid_offset = tile->grid_offset + RESERVOIR_GRID_OFFSETS[orientation_index];
+        for (int i = 0; i < 9; i++) {
+            int tile_offset = grid_offset + tile_grid_offset(orientation_index, i);
+            int terrain = map_terrain_get(tile_offset);
+
+            int forbidden_terrain = terrain & TERRAIN_NOT_CLEAR;
+            int discouraged_terrain = terrain & TERRAIN_NOT_CLEAR;
+
+            // Reservoir is allowed over aqueducts
+            forbidden_terrain &= ~TERRAIN_AQUEDUCT;
+
+            // Allow discouraged placement over aqueduct tiles on the aqueduct-connector corners
+            if (building_construction_is_granary_cross_tile(i)) {
+                discouraged_terrain &= ~TERRAIN_AQUEDUCT;
             }
-        } else {
-            for (int i = 0; i < 9; i++) {
-                blocked_tiles[i] = 0;
+
+            if (blocked || forbidden_terrain) {
+                blocked_tiles[i] = TILE_FORBIDDEN;
+            } else if (map_has_figure_at(tile_offset)) {
+                blocked_tiles[i] = TILE_FORBIDDEN;
+                figure_animal_try_nudge_at(grid_offset, tile_offset, 3);
+            } else if (discouraged_terrain) {
+                blocked_tiles[i] = TILE_DISCOURAGED;
+            } else {
+                blocked_tiles[i] = TILE_ALLOWED;
             }
         }
+
     }
     // mouse pointer = center tile of reservoir instead of north, correct here:
     y -= 30;

@@ -448,7 +448,7 @@ static int place_reservoir_and_aqueducts(int measure_only, int x_start, int y_st
     info->place_reservoir_at_end = PLACE_RESERVOIR_NO;
 
     game_undo_restore_map(0);
-
+    int terrain_mask = TERRAIN_NOT_CLEAR & ~TERRAIN_AQUEDUCT; //allow reservoir over aqueducts
     int distance = calc_maximum_distance(x_start, y_start, x_end, y_end);
     if (measure_only && !data.in_progress) {
         distance = 0;
@@ -456,7 +456,7 @@ static int place_reservoir_and_aqueducts(int measure_only, int x_start, int y_st
     if (distance > 0) {
         if (map_building_is_reservoir(x_start - 1, y_start - 1)) {
             info->place_reservoir_at_start = PLACE_RESERVOIR_EXISTS;
-        } else if (map_tiles_are_clear(x_start - 1, y_start - 1, 3, TERRAIN_ALL, 1)) {
+        } else if (map_tiles_are_clear(x_start - 1, y_start - 1, 3, terrain_mask, 1)) {
             info->place_reservoir_at_start = PLACE_RESERVOIR_YES;
         } else {
             info->place_reservoir_at_start = PLACE_RESERVOIR_BLOCKED;
@@ -464,7 +464,7 @@ static int place_reservoir_and_aqueducts(int measure_only, int x_start, int y_st
     }
     if (map_building_is_reservoir(x_end - 1, y_end - 1)) {
         info->place_reservoir_at_end = PLACE_RESERVOIR_EXISTS;
-    } else if (map_tiles_are_clear(x_end - 1, y_end - 1, 3, TERRAIN_ALL, 1)) {
+    } else if (map_tiles_are_clear(x_end - 1, y_end - 1, 3, terrain_mask, 1)) {
         info->place_reservoir_at_end = PLACE_RESERVOIR_YES;
     } else {
         info->place_reservoir_at_end = PLACE_RESERVOIR_BLOCKED;
@@ -488,11 +488,11 @@ static int place_reservoir_and_aqueducts(int measure_only, int x_start, int y_st
     }
     if (info->place_reservoir_at_start != PLACE_RESERVOIR_NO) {
         map_routing_block(x_start - 1, y_start - 1, 3);
-        mark_construction(x_start - 1, y_start - 1, 3, TERRAIN_ALL, 1);
+        mark_construction(x_start - 1, y_start - 1, 3, terrain_mask, 1);
     }
     if (info->place_reservoir_at_end != PLACE_RESERVOIR_NO) {
         map_routing_block(x_end - 1, y_end - 1, 3);
-        mark_construction(x_end - 1, y_end - 1, 3, TERRAIN_ALL, 1);
+        mark_construction(x_end - 1, y_end - 1, 3, terrain_mask, 1);
     }
     const int aqueduct_offsets_x[] = { 0, 2, 0, -2 };
     const int aqueduct_offsets_y[] = { -2, 0, 2, 0 };
@@ -669,10 +669,12 @@ void building_construction_start(int x, int y, int grid_offset)
                     ROUTED_BUILDING_ROAD, data.start.x, data.start.y);
                 break;
             case BUILDING_AQUEDUCT:
-            case BUILDING_DRAGGABLE_RESERVOIR:
                 can_start = map_routing_calculate_distances_for_building(
                     ROUTED_BUILDING_AQUEDUCT, data.start.x, data.start.y);
                 break;
+            case BUILDING_DRAGGABLE_RESERVOIR:
+                can_start = map_routing_calculate_distances_for_building(
+                BUILDING_DRAGGABLE_RESERVOIR, data.start.x, data.start.y);
             case BUILDING_WALL:
                 can_start = map_routing_calculate_distances_for_building(
                     ROUTED_BUILDING_WALL, data.start.x, data.start.y);
@@ -753,7 +755,7 @@ static int should_mark_for_construction(building_type type)
         return 0;
     } else if (type == BUILDING_CITY_MINT && (city_buildings_has_city_mint() || !city_buildings_has_senate())) {
         return 0;
-    } else if (type == BUILDING_BARRACKS && city_buildings_has_barracks() && 
+    } else if (type == BUILDING_BARRACKS && city_buildings_has_barracks() &&
         !config_get(CONFIG_GP_CH_MULTIPLE_BARRACKS)) {
         return 0;
     } else if (type == BUILDING_MESS_HALL && city_buildings_has_mess_hall()) {
@@ -876,9 +878,9 @@ void building_construction_update(int x, int y, int grid_offset)
         }
     } else if (type == BUILDING_DECORATIVE_COLUMN) {
         int items_placed = plot_draggable_building(data.start.x, data.start.y, x, y, 0);
-            if (items_placed >= 0) {
-                current_cost *= items_placed;
-            }
+        if (items_placed >= 0) {
+            current_cost *= items_placed;
+        }
     } else if (type == BUILDING_PALISADE) {
         int items_placed = plot_draggable_building(data.start.x, data.start.y, x, y, 1);
         if (items_placed >= 0) {
