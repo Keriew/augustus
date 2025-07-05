@@ -6,9 +6,13 @@
 #include "map/point.h"
 
 #define FULL_WAREHOUSE 32
+#define WAREHOUSE_28 28
 #define THREEQ_WAREHOUSE 24
+#define WAREHOUSE_20 20
 #define HALF_WAREHOUSE 16
+#define WAREHOUSE_12 12
 #define QUARTER_WAREHOUSE 8
+#define WAREHOUSE_4 4
 
 enum {
     WAREHOUSE_ROOM = 0,
@@ -61,7 +65,7 @@ int building_warehouse_amount_can_get_from(building *destination, int resource);
 
 int building_warehouse_for_getting(building *src, int resource, map_point *dst);
 
-int building_warehouse_with_resource(int x, int y, int resource, int road_network_id, int* understaffed, map_point* dst, building_storage_permission_states p);
+int building_warehouse_with_resource(int x, int y, int resource, int road_network_id, int *understaffed, map_point *dst, building_storage_permission_states p);
 
 int building_warehouse_determine_worker_task(building *warehouse, int *resource);
 

@@ -16,9 +16,13 @@
 #define STORAGE_CURRENT_BUFFER_SIZE (STORAGE_STATIC_BUFFER_SIZE + RESOURCE_MAX)
 
 #define FULL_STORAGE 32
+#define STORAGE_28 28
 #define THREE_QUARTERS_STORAGE 24
+#define STORAGE_20 20
 #define HALF_STORAGE 16
+#define STORAGE_12 12
 #define QUARTER_STORAGE 8
+#define STORAGE_4 4
 
 static array(data_storage) storages;
 
@@ -135,24 +139,56 @@ void building_storage_cycle_resource_state(int storage_id, resource_type resourc
         state = BUILDING_STORAGE_STATE_NOT_ACCEPTING;
     } else if (state == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
         state = BUILDING_STORAGE_STATE_ACCEPTING;
+
+    } else if (state == BUILDING_STORAGE_STATE_ACCEPTING_28) {
+        state = BUILDING_STORAGE_STATE_GETTING_28;
+    } else if (state == BUILDING_STORAGE_STATE_GETTING_28) {
+        state = BUILDING_STORAGE_STATE_NOT_ACCEPTING_28;
+    } else if (state == BUILDING_STORAGE_STATE_NOT_ACCEPTING_28) {
+        state = BUILDING_STORAGE_STATE_ACCEPTING_28;
+
     } else if (state == BUILDING_STORAGE_STATE_ACCEPTING_3QUARTERS) {
         state = BUILDING_STORAGE_STATE_GETTING_3QUARTERS;
     } else if (state == BUILDING_STORAGE_STATE_GETTING_3QUARTERS) {
         state = BUILDING_STORAGE_STATE_NOT_ACCEPTING_3QUARTERS;
     } else if (state == BUILDING_STORAGE_STATE_NOT_ACCEPTING_3QUARTERS) {
         state = BUILDING_STORAGE_STATE_ACCEPTING_3QUARTERS;
+
+    } else if (state == BUILDING_STORAGE_STATE_ACCEPTING_20) {
+        state = BUILDING_STORAGE_STATE_GETTING_20;
+    } else if (state == BUILDING_STORAGE_STATE_GETTING_20) {
+        state = BUILDING_STORAGE_STATE_NOT_ACCEPTING_20;
+    } else if (state == BUILDING_STORAGE_STATE_NOT_ACCEPTING_20) {
+        state = BUILDING_STORAGE_STATE_ACCEPTING_20;
+
     } else if (state == BUILDING_STORAGE_STATE_ACCEPTING_HALF) {
         state = BUILDING_STORAGE_STATE_GETTING_HALF;
     } else if (state == BUILDING_STORAGE_STATE_GETTING_HALF) {
         state = BUILDING_STORAGE_STATE_NOT_ACCEPTING_HALF;
     } else if (state == BUILDING_STORAGE_STATE_NOT_ACCEPTING_HALF) {
         state = BUILDING_STORAGE_STATE_ACCEPTING_HALF;
+
+    } else if (state == BUILDING_STORAGE_STATE_ACCEPTING_12) {
+        state = BUILDING_STORAGE_STATE_GETTING_12;
+    } else if (state == BUILDING_STORAGE_STATE_GETTING_12) {
+        state = BUILDING_STORAGE_STATE_NOT_ACCEPTING_12;
+    } else if (state == BUILDING_STORAGE_STATE_NOT_ACCEPTING_12) {
+        state = BUILDING_STORAGE_STATE_ACCEPTING_12;
+
     } else if (state == BUILDING_STORAGE_STATE_ACCEPTING_QUARTER) {
         state = BUILDING_STORAGE_STATE_GETTING_QUARTER;
     } else if (state == BUILDING_STORAGE_STATE_GETTING_QUARTER) {
         state = BUILDING_STORAGE_STATE_NOT_ACCEPTING_QUARTER;
     } else if (state == BUILDING_STORAGE_STATE_NOT_ACCEPTING_QUARTER) {
         state = BUILDING_STORAGE_STATE_ACCEPTING_QUARTER;
+
+    } else if (state == BUILDING_STORAGE_STATE_ACCEPTING_4) {
+        state = BUILDING_STORAGE_STATE_GETTING_4;
+    } else if (state == BUILDING_STORAGE_STATE_GETTING_4) {
+        state = BUILDING_STORAGE_STATE_NOT_ACCEPTING_4;
+    } else if (state == BUILDING_STORAGE_STATE_NOT_ACCEPTING_4) {
+        state = BUILDING_STORAGE_STATE_ACCEPTING_4;
+
     }
     array_item(storages, storage_id)->storage.resource_state[resource_id] = state;
 }
@@ -170,25 +206,43 @@ int building_storage_get_permission(building_storage_permission_states p, buildi
     return !(s->permissions & permission_bit);
 }
 
+//sorting in ascending order of digits
 void building_storage_cycle_partial_resource_state(int storage_id, resource_type resource_id)
 {
     int state = array_item(storages, storage_id)->storage.resource_state[resource_id];
     if (state == BUILDING_STORAGE_STATE_ACCEPTING) {
-        state = BUILDING_STORAGE_STATE_ACCEPTING_3QUARTERS;
-    } else if (state == BUILDING_STORAGE_STATE_ACCEPTING_3QUARTERS) {
-        state = BUILDING_STORAGE_STATE_ACCEPTING_HALF;
-    } else if (state == BUILDING_STORAGE_STATE_ACCEPTING_HALF) {
+        state = BUILDING_STORAGE_STATE_ACCEPTING_4;
+    } else if (state == BUILDING_STORAGE_STATE_ACCEPTING_4) {
         state = BUILDING_STORAGE_STATE_ACCEPTING_QUARTER;
     } else if (state == BUILDING_STORAGE_STATE_ACCEPTING_QUARTER) {
+        state = BUILDING_STORAGE_STATE_ACCEPTING_12;
+    } else if (state == BUILDING_STORAGE_STATE_ACCEPTING_12) {
+        state = BUILDING_STORAGE_STATE_ACCEPTING_HALF;
+    } else if (state == BUILDING_STORAGE_STATE_ACCEPTING_HALF) {
+        state = BUILDING_STORAGE_STATE_ACCEPTING_20;
+    } else if (state == BUILDING_STORAGE_STATE_ACCEPTING_20) {
+        state = BUILDING_STORAGE_STATE_ACCEPTING_3QUARTERS;
+    } else if (state == BUILDING_STORAGE_STATE_ACCEPTING_3QUARTERS) {
+        state = BUILDING_STORAGE_STATE_ACCEPTING_28;
+    } else if (state == BUILDING_STORAGE_STATE_ACCEPTING_28) {
         state = BUILDING_STORAGE_STATE_ACCEPTING;
     }
+
     if (state == BUILDING_STORAGE_STATE_GETTING) {
-        state = BUILDING_STORAGE_STATE_GETTING_3QUARTERS;
-    } else if (state == BUILDING_STORAGE_STATE_GETTING_3QUARTERS) {
-        state = BUILDING_STORAGE_STATE_GETTING_HALF;
-    } else if (state == BUILDING_STORAGE_STATE_GETTING_HALF) {
+        state = BUILDING_STORAGE_STATE_GETTING_4;
+    } else if (state == BUILDING_STORAGE_STATE_GETTING_4) {
         state = BUILDING_STORAGE_STATE_GETTING_QUARTER;
     } else if (state == BUILDING_STORAGE_STATE_GETTING_QUARTER) {
+        state = BUILDING_STORAGE_STATE_GETTING_12;
+    } else if (state == BUILDING_STORAGE_STATE_GETTING_12) {
+        state = BUILDING_STORAGE_STATE_GETTING_HALF;
+    } else if (state == BUILDING_STORAGE_STATE_GETTING_HALF) {
+        state = BUILDING_STORAGE_STATE_GETTING_20;
+    } else if (state == BUILDING_STORAGE_STATE_GETTING_20) {
+        state = BUILDING_STORAGE_STATE_GETTING_3QUARTERS;
+    } else if (state == BUILDING_STORAGE_STATE_GETTING_3QUARTERS) {
+        state = BUILDING_STORAGE_STATE_GETTING_28;
+    } else if (state == BUILDING_STORAGE_STATE_GETTING_28) {
         state = BUILDING_STORAGE_STATE_GETTING;
     }
     array_item(storages, storage_id)->storage.resource_state[resource_id] = state;
@@ -235,17 +289,33 @@ int building_storage_resource_max_storable(building *b, resource_type resource_i
         case BUILDING_STORAGE_STATE_GETTING:
             return FULL_STORAGE;
             break;
+        case BUILDING_STORAGE_STATE_ACCEPTING_28:
+        case BUILDING_STORAGE_STATE_GETTING_28:
+            return STORAGE_28;
+            break;
         case BUILDING_STORAGE_STATE_ACCEPTING_3QUARTERS:
         case BUILDING_STORAGE_STATE_GETTING_3QUARTERS:
             return THREE_QUARTERS_STORAGE;
+            break;
+        case BUILDING_STORAGE_STATE_ACCEPTING_20:
+        case BUILDING_STORAGE_STATE_GETTING_20:
+            return STORAGE_20;
             break;
         case BUILDING_STORAGE_STATE_ACCEPTING_HALF:
         case BUILDING_STORAGE_STATE_GETTING_HALF:
             return HALF_STORAGE;
             break;
+        case BUILDING_STORAGE_STATE_ACCEPTING_12:
+        case BUILDING_STORAGE_STATE_GETTING_12:
+            return STORAGE_12;
+            break;
         case BUILDING_STORAGE_STATE_ACCEPTING_QUARTER:
         case BUILDING_STORAGE_STATE_GETTING_QUARTER:
             return QUARTER_STORAGE;
+            break;
+        case BUILDING_STORAGE_STATE_ACCEPTING_4:
+        case BUILDING_STORAGE_STATE_GETTING_4:
+            return STORAGE_4;
             break;
         default:
             return 0;
