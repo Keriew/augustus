@@ -111,8 +111,7 @@ static void add_warehouse(building *b)
     b->prev_part_building_id = 0;
     map_building_tiles_add(b->id, b->x + x_offset[corner], b->y + y_offset[corner], 1,
         image_group(GROUP_BUILDING_WAREHOUSE), TERRAIN_BUILDING);
-    map_terrain_add_warehouse_road(b->x + x_offset[corner], b->y + y_offset[corner]);
-    map_tiles_set_road(b->x + x_offset[corner], b->y + y_offset[corner]);
+    map_tiles_update_area_roads(b->x + x_offset[corner], b->y + y_offset[corner], 3);
     int id = b->id;
     int prev = id;
     for (int i = 0; i < 9; i++) {

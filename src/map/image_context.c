@@ -396,7 +396,7 @@ const terrain_image *map_image_context_get_wall(int grid_offset)
 
 const terrain_image *map_image_context_get_wall_gatehouse(int grid_offset)
 {
-    int tiles[MAX_TILES] = {0,0,0,0,0,0,0,0};
+    int tiles[MAX_TILES] = { 0,0,0,0,0,0,0,0 };
     for (int i = 0; i < MAX_TILES; i += 2) {
         tiles[i] = map_terrain_is(grid_offset + map_grid_direction_delta(i), TERRAIN_WALL_OR_GATEHOUSE) ? 1 : 0;
     }
@@ -419,13 +419,19 @@ static void set_tiles_road(int grid_offset, int tiles[MAX_TILES])
         } else if (map_terrain_is(offset, TERRAIN_BUILDING)) {
             building *b = building_get(map_building_at(offset));
             if (b->type == BUILDING_GRANARY) {
-                tiles[i]  = (offset == b->grid_offset + map_grid_delta(1, 0)) ? 1 : 0;
+                tiles[i] = (offset == b->grid_offset + map_grid_delta(1, 0)) ? 1 : 0;
                 tiles[i] |= (offset == b->grid_offset + map_grid_delta(0, 1)) ? 1 : 0;
                 tiles[i] |= (offset == b->grid_offset + map_grid_delta(2, 1)) ? 1 : 0;
                 tiles[i] |= (offset == b->grid_offset + map_grid_delta(1, 2)) ? 1 : 0;
             }
+            if (b->type == BUILDING_WAREHOUSE) {
+                building *b_main = building_main(b);
+                if (!b_main) continue; //fallback
+                int base = b_main->grid_offset;
+                tiles[i] = (offset == base) ? 1 : 0;
+            }
             if ((b->type >= BUILDING_GRAND_TEMPLE_CERES && b->type <= BUILDING_GRAND_TEMPLE_VENUS) || (b->type == BUILDING_PANTHEON)) {
-                tiles[i]  = (offset == b->grid_offset + map_grid_delta(3, 0)) ? 1 : 0;
+                tiles[i] = (offset == b->grid_offset + map_grid_delta(3, 0)) ? 1 : 0;
                 tiles[i] |= (offset == b->grid_offset + map_grid_delta(0, 3)) ? 1 : 0;
                 tiles[i] |= (offset == b->grid_offset + map_grid_delta(6, 3)) ? 1 : 0;
                 tiles[i] |= (offset == b->grid_offset + map_grid_delta(3, 6)) ? 1 : 0;
@@ -496,7 +502,7 @@ static void set_terrain_reservoir(
 
 const terrain_image *map_image_context_get_aqueduct(int grid_offset, int include_construction)
 {
-    int tiles[MAX_TILES] = {0,0,0,0,0,0,0,0};
+    int tiles[MAX_TILES] = { 0,0,0,0,0,0,0,0 };
     int has_road = map_terrain_is(grid_offset, TERRAIN_ROAD) ? 1 : 0;
     for (int i = 0; i < MAX_TILES; i += 2) {
         int offset = grid_offset + map_grid_direction_delta(i);

@@ -344,12 +344,6 @@ void map_terrain_add_roadblock_road(int x, int y)
     map_terrain_add(map_grid_offset(x, y), TERRAIN_ROAD);
 }
 
-void map_terrain_add_warehouse_road(int x, int y)
-{
-    //road under central warehouse part
-    map_terrain_add(map_grid_offset(x, y), TERRAIN_ROAD);
-}
-
 void map_terrain_add_gatehouse_roads(int x, int y, int orientation)
 {
     // roads under gatehouse

@@ -8,6 +8,7 @@
 #include "building/granary.h"
 #include "building/image.h"
 #include "building/industry.h"
+#include "building/model.h"
 #include "building/monument.h"
 #include "building/properties.h"
 #include "building/rotation.h"
@@ -142,6 +143,43 @@ static void draw_roamer_frequency(int x, int y, int grid_offset)
     }
 }
 
+static color_t get_building_color_mask(const building *b)
+{
+    color_t color_mask = COLOR_MASK_NONE;
+    const model_building *model = model_get_building(b->type);
+    int labor_needed = model->laborers;
+    if (!labor_needed && b->type != BUILDING_WAREHOUSE_SPACE) {
+        // account for warehouse case
+        color_mask = COLOR_MASK_NONE;
+    } else {
+        switch (b->type) {
+            //buildings that have labor but no walkers
+            case BUILDING_LATRINES:
+            case BUILDING_WELL:
+                color_mask = COLOR_MASK_NONE;
+                //all other buildings
+            default:
+                color_mask = SELECTED_BUILDING_COLOR_MASK;
+        }
+    }
+    return color_mask;
+}
+
+static int is_building_selected(const building *b)
+{
+    if (!config_get(CONFIG_UI_HIGHLIGHT_SELECTED_BUILDING)) {
+        return 0;
+    }
+    building *main_building = building_main(b);
+    unsigned int main_part_id = main_building->id;
+    if (b->id == draw_context.selected_building_id || main_part_id == draw_context.selected_building_id) {
+        return 1;
+    } else {
+        return 0;
+    }
+
+}
+
 static void draw_footprint(int x, int y, int grid_offset)
 {
     sound_city_progress_ambient();
@@ -156,9 +194,8 @@ static void draw_footprint(int x, int y, int grid_offset)
         building *b = building_get(building_id);
         if (draw_building_as_deleted(b)) {
             color_mask = COLOR_MASK_RED;
-        }
-        if (b->id == draw_context.selected_building_id) {
-            color_mask = SELECTED_BUILDING_COLOR_MASK;
+        } else if (is_building_selected(b)) {
+            color_mask = get_building_color_mask(b);
         }
         int view_x, view_y, view_width, view_height;
         city_view_get_viewport(&view_x, &view_y, &view_width, &view_height);
@@ -378,8 +415,8 @@ static void draw_top(int x, int y, int grid_offset)
     color_t color_mask = 0;
     if (draw_building_as_deleted(b) || (map_property_is_deleted(grid_offset) && !is_multi_tile_terrain(grid_offset))) {
         color_mask = COLOR_MASK_RED;
-    } else if (b->id == draw_context.selected_building_id) {
-        color_mask = SELECTED_BUILDING_COLOR_MASK;
+    } else if (is_building_selected(b)) {
+        color_mask = get_building_color_mask(b);
     }
 
     image_draw_isometric_top_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
@@ -660,8 +697,8 @@ static void draw_animation(int x, int y, int grid_offset)
     color_t color_mask = 0;
     if (draw_building_as_deleted(b) || map_property_is_deleted(grid_offset)) {
         color_mask = COLOR_MASK_RED;
-    } else if (b->id == draw_context.selected_building_id) {
-        color_mask = SELECTED_BUILDING_COLOR_MASK;
+    } else if (is_building_selected(b)) {
+        color_mask = get_building_color_mask(b);
     }
     if (img->animation) {
         if (map_property_is_draw_tile(grid_offset)) {

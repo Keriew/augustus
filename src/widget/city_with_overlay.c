@@ -5,7 +5,11 @@
 #include "building/construction.h"
 #include "building/granary.h"
 #include "building/industry.h"
+#include "building/model.h"
 #include "building/storage.h"
+#include "building/roadblock.h"
+#include "building/type.h"
+#include "city/labor.h"
 #include "city/view.h"
 #include "core/config.h"
 #include "core/log.h"
@@ -150,6 +154,42 @@ static int select_city_overlay(void)
 void city_with_overlay_update(void)
 {
     select_city_overlay();
+}
+
+static color_t get_building_color_mask(const building *b)
+{
+    color_t color_mask = COLOR_MASK_NONE;
+    const model_building *model = model_get_building(b->type);
+    int labor_needed = model->laborers;
+    if (!labor_needed && b->type != BUILDING_WAREHOUSE_SPACE) {
+        // account for warehouse case
+        color_mask = COLOR_MASK_NONE;
+    } else {
+        switch (b->type) {
+            //buildings that have labor but no walkers
+            case BUILDING_LATRINES:
+            case BUILDING_WELL:
+                color_mask = COLOR_MASK_NONE;
+                //all other buildings
+            default:
+                color_mask = SELECTED_BUILDING_COLOR_MASK;
+        }
+    }
+    return color_mask;
+}
+
+static int is_building_selected(const building *b)
+{
+    if (!config_get(CONFIG_UI_HIGHLIGHT_SELECTED_BUILDING)) { // if option not selected in config, abandon
+        return 0;
+    }
+    int main_part_id = building_main(b)->id; //check if side or main part is selected
+    if (b->id == city_roamer_preview_selected_building_id || main_part_id == city_roamer_preview_selected_building_id) {
+        return 1;
+    } else {
+        return 0;
+    }
+
 }
 
 static int is_drawable_farmhouse(int grid_offset, int map_orientation)
@@ -348,8 +388,8 @@ void city_with_overlay_draw_building_footprint(int x, int y, int grid_offset, in
         city_overlay_problems_prepare_building(b);
     }
     if (overlay->show_building(b)) {
-        if (b->id == city_roamer_preview_selected_building_id) {
-            color_mask = SELECTED_BUILDING_COLOR_MASK;
+        if (is_building_selected(b)) {
+            color_mask = get_building_color_mask(b);
         }
         if (building_is_farm(b->type)) {
             if (is_drawable_farmhouse(grid_offset, city_view_orientation())) {
@@ -578,9 +618,10 @@ static void draw_warehouse_ornaments(int x, int y, color_t color_mask)
 static void draw_building_top(int grid_offset, building *b, int x, int y)
 {
     color_t color_mask = draw_building_as_deleted(b) ? COLOR_MASK_RED : 0;
-    if (b->id == city_roamer_preview_selected_building_id) {
-        color_mask = SELECTED_BUILDING_COLOR_MASK;
+    if (is_building_selected(b)) {
+        color_mask = get_building_color_mask(b);
     }
+
     if (building_is_farm(b->type)) {
         if (is_drawable_farmhouse(grid_offset, city_view_orientation())) {
             image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
@@ -701,8 +742,8 @@ static void draw_animation(int x, int y, int grid_offset)
         if (map_property_is_draw_tile(grid_offset)) {
             building *b = building_get(map_building_at(grid_offset));
             int color_mask = draw_building_as_deleted(b) ? COLOR_MASK_RED : 0;
-            if (b->id == city_roamer_preview_selected_building_id) {
-                color_mask = SELECTED_BUILDING_COLOR_MASK;
+            if (is_building_selected(b)) {
+                color_mask = get_building_color_mask(b);
             }
             if (b->type == BUILDING_GRANARY) {
                 if (img->animation) {
