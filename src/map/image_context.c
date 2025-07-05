@@ -417,6 +417,9 @@ static void set_tiles_road(int grid_offset, int tiles[MAX_TILES])
         } else if (map_terrain_is(offset, TERRAIN_ACCESS_RAMP)) {
             tiles[i] = 1;
         } else if (map_terrain_is(offset, TERRAIN_BUILDING)) {
+            // The below part is responsible for connecting buildings to roads, without making them passable or roads
+            // Any buildings that should visually connect to the road due to passability or other interactions should 
+            // receive relevant treatment in the section below
             building *b = building_get(map_building_at(offset));
             if (b->type == BUILDING_GRANARY) {
                 tiles[i] = (offset == b->grid_offset + map_grid_delta(1, 0)) ? 1 : 0;
