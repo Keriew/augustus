@@ -65,21 +65,21 @@ tasks.register('getVersion') {
 }
 
 android {
-    compileSdk 34
-    ndkVersion "26.3.11579264"
+    compileSdk 35
+    ndkVersion "28.1.13356709"
 
     defaultConfig {
-        compileSdk 34
+        compileSdk 35
         applicationId "com.github.Keriew.augustus"
         minSdkVersion 21
-        targetSdkVersion 34
+        targetSdkVersion 35
 
         versionName getVersion.versionName
         versionCode getVersion.versionCode
 
         externalNativeBuild {
             cmake {
-                version "3.22.1"
+                version "3.31.5"
                 arguments "-DTARGET_PLATFORM=android", "-DSYSTEM_LIBS=OFF","-DANDROID_STL=c++_shared"
             }
         }
@@ -136,7 +136,7 @@ android {
     }
     externalNativeBuild {
         cmake {
-            version "3.22.1"
+            version "3.31.5"
             path "../../CMakeLists.txt"
         }
     }

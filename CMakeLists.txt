@@ -80,7 +80,13 @@ if (${TARGET_PLATFORM} STREQUAL "vita")
     set(VITA_TITLEID  "AUGUSTUS1")
 endif()
 
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake/")
+
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake/" "${CMAKE_SOURCE_DIR}/ext/easyav1/cmake/")
+
+set(EASYAV1_BUILD_TOOLS OFF)
+set(EASYAV1_USE_SANITIZERS OFF)
+
+add_subdirectory("ext/easyav1")
 
 set(CMAKE_C_STANDARD 99)
 
@@ -989,6 +995,7 @@ if(${TARGET_PLATFORM} STREQUAL "vita")
     target_link_libraries(${SHORT_NAME}
         ${SDL2_MIXER_LIBRARY}
         ${SDL2_LIBRARY}
+        easyav1
         vorbisfile
         vorbis
         mikmod
@@ -1036,7 +1043,7 @@ if(${TARGET_PLATFORM} STREQUAL "vita")
 elseif(NINTENDO_SWITCH)
 
     pkg_check_modules(SDL2 REQUIRED IMPORTED_TARGET sdl2 SDL2_mixer)
-    target_link_libraries(${SHORT_NAME} PkgConfig::SDL2)
+    target_link_libraries(${SHORT_NAME} PkgConfig::SDL2 easyav1)
 
 nx_generate_nacp (${PROJECT_NAME}.nacp
     NAME   "Augustus"
@@ -1075,7 +1082,7 @@ else()
         )
     endif()
 
-    target_link_libraries(${SHORT_NAME} ${SDL2MAIN_LIBRARY} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY})
+    target_link_libraries(${SHORT_NAME} ${SDL2MAIN_LIBRARY} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY} easyav1)
     if(NOT APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "android")
         install(TARGETS ${SHORT_NAME} RUNTIME DESTINATION bin)
     endif()

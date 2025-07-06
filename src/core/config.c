@@ -78,6 +78,7 @@ static const char *ini_keys[] = {
     "ui_show_desirability_range",
     "ui_draw_asclepius",
     "ui_show_desirability_range_all",
+    "ui_highlight_selected_building"
 };
 
 static const char *ini_string_keys[] = {
@@ -105,6 +106,7 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_GP_CH_MAX_GRAND_TEMPLES] = 2,
     [CONFIG_UI_SHOW_DESIRABILITY_RANGE] = 0,
     [CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL] = 0,
+    [CONFIG_UI_HIGHLIGHT_SELECTED_BUILDING] = 1,
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };

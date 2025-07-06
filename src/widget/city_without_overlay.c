@@ -8,6 +8,7 @@
 #include "building/granary.h"
 #include "building/image.h"
 #include "building/industry.h"
+#include "building/model.h"
 #include "building/monument.h"
 #include "building/properties.h"
 #include "building/rotation.h"
@@ -49,6 +50,7 @@
 #define OFFSET(x,y) (x + GRID_SIZE * y)
 
 #define WAREHOUSE_FLAG_FRAMES 9
+#define SELECTED_BUILDING_COLOR_MASK COLOR_MASK_SKY_BLUE
 
 static const int ADJACENT_OFFSETS[2][4][7] = {
     {
@@ -73,6 +75,7 @@ static struct {
     int image_id_water_last;
     int selected_figure_id;
     int highlighted_formation;
+    unsigned int selected_building_id;
     pixel_coordinate *selected_figure_coord;
 
     float scale;
@@ -140,6 +143,43 @@ static void draw_roamer_frequency(int x, int y, int grid_offset)
     }
 }
 
+static color_t get_building_color_mask(const building *b)
+{
+    color_t color_mask = COLOR_MASK_NONE;
+    const model_building *model = model_get_building(b->type);
+    int labor_needed = model->laborers;
+    if (!labor_needed && b->type != BUILDING_WAREHOUSE_SPACE) {
+        // account for warehouse case
+        color_mask = COLOR_MASK_NONE;
+    } else {
+        switch (b->type) {
+            //buildings that have labor but no walkers
+            case BUILDING_LATRINES:
+            case BUILDING_WELL:
+                color_mask = COLOR_MASK_NONE;
+                //all other buildings
+            default:
+                color_mask = SELECTED_BUILDING_COLOR_MASK;
+        }
+    }
+    return color_mask;
+}
+
+static int is_building_selected(const building *b)
+{
+    if (!config_get(CONFIG_UI_HIGHLIGHT_SELECTED_BUILDING)) {
+        return 0;
+    }
+    building *main_building = building_main(b);
+    unsigned int main_part_id = main_building->id;
+    if (b->id == draw_context.selected_building_id || main_part_id == draw_context.selected_building_id) {
+        return 1;
+    } else {
+        return 0;
+    }
+
+}
+
 static void draw_footprint(int x, int y, int grid_offset)
 {
     sound_city_progress_ambient();
@@ -154,6 +194,8 @@ static void draw_footprint(int x, int y, int grid_offset)
         building *b = building_get(building_id);
         if (draw_building_as_deleted(b)) {
             color_mask = COLOR_MASK_RED;
+        } else if (is_building_selected(b)) {
+            color_mask = get_building_color_mask(b);
         }
         int view_x, view_y, view_width, view_height;
         city_view_get_viewport(&view_x, &view_y, &view_width, &view_height);
@@ -373,7 +415,10 @@ static void draw_top(int x, int y, int grid_offset)
     color_t color_mask = 0;
     if (draw_building_as_deleted(b) || (map_property_is_deleted(grid_offset) && !is_multi_tile_terrain(grid_offset))) {
         color_mask = COLOR_MASK_RED;
+    } else if (is_building_selected(b)) {
+        color_mask = get_building_color_mask(b);
     }
+
     image_draw_isometric_top_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
     // specific buildings
     draw_senate_rating_flags(b, x, y, color_mask);
@@ -652,6 +697,8 @@ static void draw_animation(int x, int y, int grid_offset)
     color_t color_mask = 0;
     if (draw_building_as_deleted(b) || map_property_is_deleted(grid_offset)) {
         color_mask = COLOR_MASK_RED;
+    } else if (is_building_selected(b)) {
+        color_mask = get_building_color_mask(b);
     }
     if (img->animation) {
         if (map_property_is_draw_tile(grid_offset)) {
@@ -769,11 +816,23 @@ static void draw_animation(int x, int y, int grid_offset)
 static void draw_elevated_figures(int x, int y, int grid_offset)
 {
     int figure_id = map_figure_at(grid_offset);
+
+
     while (figure_id > 0) {
         figure *f = figure_get(figure_id);
+
         if ((f->use_cross_country && !f->is_ghost && !f->dont_draw_elevated) || f->height_adjusted_ticks) {
             int highlight = f->formation_id > 0 && f->formation_id == draw_context.highlighted_formation;
             city_draw_figure(f, x, y, draw_context.scale, highlight);
+        } else if (f->building_id == draw_context.selected_building_id) { //figure originates from selected building
+            if (config_get(CONFIG_UI_SHOW_ROAMING_PATH)) {
+                int highlight = FIGURE_HIGHLIGHT_GREEN;
+                if (f->type == FIGURE_MARKET_SUPPLIER || f->type == FIGURE_DELIVERY_BOY) {
+                    highlight = FIGURE_HIGHLIGHT_RED; //green highlight makes market supplier look indistinguishable
+                }
+                city_draw_figure(f, x, y, draw_context.scale, highlight);
+            }
+
         }
         figure_id = f->next_figure_id_on_same_tile;
     }
@@ -954,10 +1013,13 @@ static void update_clouds(void)
  }
  ***/
 
-void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_coord, const map_tile *tile)
+void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_coord, const map_tile *tile, unsigned int roamer_preview_building_id)
 {
     int highlighted_formation_id = get_highlighted_formation_id(tile);
     init_draw_context(selected_figure_id, figure_coord, highlighted_formation_id);
+    if (roamer_preview_building_id) {
+        draw_context.selected_building_id = roamer_preview_building_id;//store the clicked building id
+    }
     int x, y, width, height;
     city_view_get_viewport(&x, &y, &width, &height);
     graphics_fill_rect(x, y, width, height, COLOR_BLACK);

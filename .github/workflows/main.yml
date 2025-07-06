@@ -63,7 +63,7 @@ jobs:
             BUILD_TARGET: switch
             DEPLOY: switch
           - name: PS Vita
-            os: ubuntu-24.04
+            os: ubuntu-22.04
             BUILD_TARGET: vita
             DEPLOY: vita
           - name: Android
@@ -91,6 +91,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          submodules: recursive
       - name: Cache dependencies
         uses: actions/cache@v4
         if: ${{ matrix.cache-key }}
@@ -103,6 +104,8 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      - name: Setup NASM
+        uses: ilammy/setup-nasm@v1
       - name: Set up environment
         env:
           FILE_ENCRYPTION_IV: ${{ secrets.FILE_ENCRYPTION_IV }}
@@ -160,6 +163,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          submodules: recursive
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
@@ -173,6 +177,8 @@ jobs:
           location: D:\
           install: mingw-w64-i686-gcc
           update: true
+      - name: Setup NASM
+        uses: ilammy/setup-nasm@v1
       - name: Install cv2pdb
         if: matrix.COMPILER == 'mingw-32' || matrix.COMPILER == 'mingw-64'
         uses: robinraju/release-downloader@v1.8
@@ -184,6 +190,11 @@ jobs:
           extract: true
       - name: Set up environment
         run: ./.ci_scripts/install_sdl.ps1
+      - name: Setup MSVC build tools for Windows ARM64
+        if: matrix.COMPILER == 'msvc-arm64'
+        uses: ilammy/msvc-dev-cmd@v1.13.0
+        with:
+          arch: amd64_arm64
       - name: Build and test
         run: ./.ci_scripts/run_build.ps1
       - name: Upload development artifacts

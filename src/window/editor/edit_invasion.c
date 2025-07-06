@@ -103,6 +103,14 @@ static const struct {
     { TR_EDITOR_REPEAT_FREQUENCY, 38 }
 };
 
+static const translation_key invasion_type_strings[] = {
+    TR_SELECT_NONE,
+    TR_PARAMETER_VALUE_INVASION_TYPE_NATIVES,
+    TR_PARAMETER_VALUE_INVASION_TYPE_ENEMY_ARMY,
+    TR_PARAMETER_VALUE_INVASION_TYPE_CAESAR,
+    TR_PARAMETER_VALUE_MESSAGE_DISTANT_BATTLE,
+};
+
 static int get_largest_section_title_width(void)
 {
     int largest_width = 0;
@@ -123,9 +131,17 @@ static void bound_invasion_values(void)
     } else {
         data.repeat_type = INVASION_REPEAT_TIMES;
     }
-    if (data.invasion.repeat.interval.min < 1) {
-        data.invasion.repeat.interval.min = 1;
+
+    if (data.invasion.type == INVASION_TYPE_DISTANT_BATTLE) {
+        if (data.invasion.repeat.interval.min < 5) {
+            data.invasion.repeat.interval.min = 5;
+        }
+    } else {
+        if (data.invasion.repeat.interval.min < 1) {
+            data.invasion.repeat.interval.min = 1;
+        }
     }
+
     if (data.invasion.repeat.interval.max > 50) {
         data.invasion.repeat.interval.max = 50;
     }
@@ -191,11 +207,14 @@ static void draw_background(void)
 
     // Invasion type text
     btn = &edit_buttons[3];
-    lang_text_draw_centered(34, data.invasion.type, x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6, btn->width,
-        FONT_NORMAL_BLACK);
+    text_draw_centered(lang_get_string(CUSTOM_TRANSLATION, invasion_type_strings[data.invasion.type]),
+        x_offset + btn->x, BASE_Y_OFFSET + btn->y + 6, btn->width, FONT_NORMAL_BLACK, 0);
 
-    font_t enabled_font = data.invasion.type == INVASION_TYPE_DISTANT_BATTLE ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK;
-    color_t enabled_color = data.invasion.type == INVASION_TYPE_DISTANT_BATTLE ? COLOR_FONT_LIGHT_GRAY : COLOR_MASK_NONE;
+    font_t enabled_font = (data.invasion.type == INVASION_TYPE_DISTANT_BATTLE ||
+        data.invasion.type == INVASION_TYPE_CAESAR) ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK;
+
+    color_t enabled_color = (data.invasion.type == INVASION_TYPE_DISTANT_BATTLE ||
+        data.invasion.type == INVASION_TYPE_CAESAR) ? COLOR_FONT_LIGHT_GRAY : COLOR_MASK_NONE;
 
     // Invasion from text
     btn = &edit_buttons[4];
@@ -270,7 +289,7 @@ static void draw_foreground(void)
     for (size_t i = 0; i < NUMBER_OF_EDIT_BUTTONS; i++) {
         int focus = data.focus_button_id == i + 1;
         if ((edit_buttons[i].parameter2 == DISABLE_ON_DISTANT_BATTLE &&
-                data.invasion.type == INVASION_TYPE_DISTANT_BATTLE) ||
+            data.invasion.type == INVASION_TYPE_DISTANT_BATTLE) ||
             (edit_buttons[i].parameter2 == DISABLE_ON_NO_REPEAT && data.repeat_type == INVASION_REPEAT_NEVER)) {
             focus = 0;
         }
@@ -295,7 +314,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
     if (generic_buttons_handle_mouse(m_dialog, data.section_title_width + SECTION_CONTENT_LEFT_OFFSET,
-            BASE_Y_OFFSET, edit_buttons, NUMBER_OF_EDIT_BUTTONS, &data.focus_button_id) ||
+        BASE_Y_OFFSET, edit_buttons, NUMBER_OF_EDIT_BUTTONS, &data.focus_button_id) ||
         generic_buttons_handle_mouse(m_dialog, 0, BASE_Y_OFFSET, bottom_buttons, NUMBER_OF_BOTTOM_BUTTONS,
             &data.bottom_button_focus_id)) {
         return;
@@ -346,7 +365,9 @@ static void button_amount(const generic_button *button)
 
 static void set_type(int value)
 {
-    data.invasion.type = value == 3 ? 4 : value;
+    data.invasion.type = value;
+    bound_invasion_values();    // force update values
+    window_request_refresh();   // redrawing to be updated on the screen
 }
 
 static void button_type(const generic_button *button)
@@ -354,7 +375,12 @@ static void button_type(const generic_button *button)
     int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET;
     int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET;
 
-    window_select_list_show(x_offset, y_offset, button, 34, 4, set_type);
+    static const uint8_t *invasion_type_labels[5];
+    for (int i = 0; i < 5; i++) {
+        invasion_type_labels[i] = lang_get_string(CUSTOM_TRANSLATION, invasion_type_strings[i]);
+    }
+
+    window_select_list_show_text(x_offset, y_offset, button, invasion_type_labels, 5, set_type);
 }
 
 static void set_from(int value)
@@ -364,7 +390,7 @@ static void set_from(int value)
 
 static void button_from(const generic_button *button)
 {
-    if (data.invasion.type == INVASION_TYPE_DISTANT_BATTLE) {
+    if (data.invasion.type == INVASION_TYPE_DISTANT_BATTLE || data.invasion.type == INVASION_TYPE_CAESAR) {
         return;
     }
     int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET;
@@ -380,7 +406,7 @@ static void set_attack(int value)
 
 static void button_attack(const generic_button *button)
 {
-    if (data.invasion.type == INVASION_TYPE_DISTANT_BATTLE) {
+    if (data.invasion.type == INVASION_TYPE_DISTANT_BATTLE || data.invasion.type == INVASION_TYPE_CAESAR) {
         return;
     }
     int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET;
@@ -417,6 +443,9 @@ static void button_repeat_times(const generic_button *button)
 
 static void set_repeat_interval_min(int value)
 {
+    if (data.invasion.type == INVASION_TYPE_DISTANT_BATTLE && value < 5) {
+        value = 5;
+    }
     data.invasion.repeat.interval.min = value;
     if (data.invasion.repeat.interval.max < value) {
         data.invasion.repeat.interval.max = value;

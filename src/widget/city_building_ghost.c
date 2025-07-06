@@ -507,6 +507,7 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
             }
             if (type == BUILDING_TOWER) {
                 forbidden_terrain &= ~TERRAIN_WALL;
+                discouraged_terrain &= ~TERRAIN_WALL;
             }
             if (config_get(CONFIG_GP_CH_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT)) {
                 if (type == BUILDING_WAREHOUSE) {

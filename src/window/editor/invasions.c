@@ -30,6 +30,14 @@ static struct {
     void (*on_select)(int);
 } data;
 
+static const translation_key invasion_type_strings[] = {
+    TR_SELECT_NONE,
+    TR_PARAMETER_VALUE_INVASION_TYPE_NATIVES,
+    TR_PARAMETER_VALUE_INVASION_TYPE_ENEMY_ARMY,
+    TR_PARAMETER_VALUE_INVASION_TYPE_CAESAR,
+    TR_PARAMETER_VALUE_MESSAGE_DISTANT_BATTLE,
+};
+
 static generic_button new_invasion_button = {
     195, 350, 250, 25, button_new_invasion
 };
@@ -144,9 +152,9 @@ static void draw_invasion_button(const grid_box_item *item)
         text_draw_number(invasion->amount.max, '@', " ", 185, item->y + 7, FONT_NORMAL_BLACK, 0);
     }
 
-    lang_text_draw(34, invasion->type, 230, item->y + 7, FONT_NORMAL_BLACK);
+    lang_text_draw(CUSTOM_TRANSLATION, invasion_type_strings[invasion->type], 230, item->y + 7, FONT_NORMAL_BLACK);
 
-    if (invasion->type != INVASION_TYPE_DISTANT_BATTLE) {
+    if (invasion->type != INVASION_TYPE_DISTANT_BATTLE && invasion->type != INVASION_TYPE_CAESAR) {
         if (invasion->from + 1 == 9) {
             text_draw(string_from_ascii("RND"), 352, item->y + 7, FONT_SMALL_PLAIN, 0);
         } else {
@@ -154,7 +162,7 @@ static void draw_invasion_button(const grid_box_item *item)
         }
     }
 
-    if (invasion->type != INVASION_TYPE_DISTANT_BATTLE) {
+    if (invasion->type != INVASION_TYPE_DISTANT_BATTLE && invasion->type != INVASION_TYPE_CAESAR) {
         if (invasion->attack_type == FORMATION_ATTACK_FOOD_CHAIN) {
             text_draw(string_from_ascii("F"), 420, item->y + 7, FONT_SMALL_PLAIN, COLOR_FONT_BLUE);
         } else if (invasion->attack_type == FORMATION_ATTACK_GOLD_STORES) {
