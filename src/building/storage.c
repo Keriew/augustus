@@ -209,6 +209,34 @@ int building_storage_get_permission(building_storage_permission_states p, buildi
 //sorting in ascending order of digits
 void building_storage_cycle_partial_resource_state(int storage_id, resource_type resource_id)
 {
+
+    // Granary
+    if (building_get(array_item(storages, storage_id)->building_id)->type == BUILDING_GRANARY) {
+        int state = array_item(storages, storage_id)->storage.resource_state[resource_id];
+
+        if (state == BUILDING_STORAGE_STATE_ACCEPTING)
+            state = BUILDING_STORAGE_STATE_ACCEPTING_QUARTER;
+        else if (state == BUILDING_STORAGE_STATE_ACCEPTING_QUARTER)
+            state = BUILDING_STORAGE_STATE_ACCEPTING_HALF;
+        else if (state == BUILDING_STORAGE_STATE_ACCEPTING_HALF)
+            state = BUILDING_STORAGE_STATE_ACCEPTING_3QUARTERS;
+        else if (state == BUILDING_STORAGE_STATE_ACCEPTING_3QUARTERS)
+            state = BUILDING_STORAGE_STATE_ACCEPTING;
+
+        else if (state == BUILDING_STORAGE_STATE_GETTING)
+            state = BUILDING_STORAGE_STATE_GETTING_QUARTER;
+        else if (state == BUILDING_STORAGE_STATE_GETTING_QUARTER)
+            state = BUILDING_STORAGE_STATE_GETTING_HALF;
+        else if (state == BUILDING_STORAGE_STATE_GETTING_HALF)
+            state = BUILDING_STORAGE_STATE_GETTING_3QUARTERS;
+        else if (state == BUILDING_STORAGE_STATE_GETTING_3QUARTERS)
+            state = BUILDING_STORAGE_STATE_GETTING;
+
+        array_item(storages, storage_id)->storage.resource_state[resource_id] = state;
+        return;
+    }
+
+    // Warehouse
     int state = array_item(storages, storage_id)->storage.resource_state[resource_id];
     if (state == BUILDING_STORAGE_STATE_ACCEPTING) {
         state = BUILDING_STORAGE_STATE_ACCEPTING_4;
