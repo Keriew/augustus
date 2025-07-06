@@ -751,9 +751,12 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
                 }
             }
         }
-        if (room >= MAX_CARTLOADS_PER_SPACE && (loads_stored <= MAX_CARTLOADS_PER_SPACE ||
-            ((get_acceptable_quantity(r, warehouse) - loads_stored) >= MAX_CARTLOADS_PER_SPACE)) &&
-            city_resource_count(r) - loads_stored >= MAX_CARTLOADS_PER_SPACE) {
+        int target = get_acceptable_quantity(r, warehouse);
+        int remaining_needed = target - loads_stored;
+
+        if (remaining_needed >= MAX_CARTLOADS_PER_SPACE &&
+            room >= MAX_CARTLOADS_PER_SPACE &&
+            city_resource_count(r) >= MAX_CARTLOADS_PER_SPACE) {
             if (!building_warehouse_for_getting(warehouse, r, 0)) {
                 continue;
             }
