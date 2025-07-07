@@ -908,6 +908,7 @@ static void draw_button_from_state(resource_storage_entry entry, int x, int y, b
     snprintf(text, sizeof(text), "%d", BUILDING_STORAGE_QUANTITY_MAX);
     switch (entry.state) {
         case BUILDING_STORAGE_STATE_GETTING:
+        {
             image_width = image_get(image_group(GROUP_CONTEXT_ICONS) + 12)->width + 10;
             int group_number = resource_is_food(resource) ? 10 : 9;  // 10 = "getting food", 9 = "getting goods"
             text_width = lang_text_get_width(99, group_number, FONT_NORMAL_WHITE);
@@ -916,10 +917,12 @@ static void draw_button_from_state(resource_storage_entry entry, int x, int y, b
             lang_text_draw(99, group_number, start_x + image_width, y, FONT_NORMAL_WHITE);
             snprintf(text, sizeof(text), "%d", entry.quantity);
             break;
+        }
         case BUILDING_STORAGE_STATE_NOT_ACCEPTING:
             lang_text_draw_centered(99, 8, x, y, 210, FONT_NORMAL_RED); // lang ID 8 = "Not accepting"
             break;
         case BUILDING_STORAGE_STATE_MAINTAINING:
+        {
             int maintain_goods_icon_id = assets_get_image_id("UI", "Maintain_Goods_Icon_2");
             image_width = image_get(maintain_goods_icon_id)->width + 10;
             text_width = lang_text_get_width(CUSTOM_TRANSLATION, TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING,
@@ -931,6 +934,7 @@ static void draw_button_from_state(resource_storage_entry entry, int x, int y, b
                 start_x + image_width, y, FONT_NORMAL_WHITE);
             snprintf(text, sizeof(text), "%d", entry.quantity);
             break;
+        }
         default: // ACCEPTING
             lang_text_draw_centered(99, 7, x, y, 210, FONT_NORMAL_WHITE); // lang ID 7 = "Accepting"
             snprintf(text, sizeof(text), "%d", entry.quantity);
