@@ -1613,7 +1613,8 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT, "Native hut alt" },
     {TR_BUILDING_NATIVE_HUT_ALT, "Alternate native hut"},
     {TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, "Warehouses and granaries can be built over any roads"},
-    {TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, "Highlight selected building"}
+    {TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, "Highlight selected building"},
+    {TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING, "Maintaining"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
