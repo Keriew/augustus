@@ -904,15 +904,15 @@ static void draw_button_from_state(resource_storage_entry entry, int x, int y, b
 {
     // Draw storage state label or icon
     char text[4];
-
+    int image_width, text_width, start_x;
     snprintf(text, sizeof(text), "%d", BUILDING_STORAGE_QUANTITY_MAX);
     switch (entry.state) {
         case BUILDING_STORAGE_STATE_GETTING:
         {
-            int image_width = image_get(image_group(GROUP_CONTEXT_ICONS) + 12)->width + 10;
+            image_width = image_get(image_group(GROUP_CONTEXT_ICONS) + 12)->width + 10;
             int group_number = resource_is_food(resource) ? 10 : 9;  // 10 = "getting food", 9 = "getting goods"
-            int text_width = lang_text_get_width(99, group_number, FONT_NORMAL_WHITE);
-            int start_x = x + (210 - image_width - text_width) / 2;
+            text_width = lang_text_get_width(99, group_number, FONT_NORMAL_WHITE);
+            start_x = x + (210 - image_width - text_width) / 2;
             image_draw(image_group(GROUP_CONTEXT_ICONS) + 12, start_x, y - 2, COLOR_MASK_NONE, SCALE_NONE);
             lang_text_draw(99, group_number, start_x + image_width, y, FONT_NORMAL_WHITE);
             snprintf(text, sizeof(text), "%d", entry.quantity);
@@ -923,10 +923,10 @@ static void draw_button_from_state(resource_storage_entry entry, int x, int y, b
             break;
         case BUILDING_STORAGE_STATE_MAINTAINING:
             int maintain_goods_icon_id = assets_get_image_id("UI", "Maintain_Goods_Icon_2");
-            int image_width = image_get(maintain_goods_icon_id)->width + 10;
-            int text_width = lang_text_get_width(CUSTOM_TRANSLATION, TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING,
+            image_width = image_get(maintain_goods_icon_id)->width + 10;
+            text_width = lang_text_get_width(CUSTOM_TRANSLATION, TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING,
                  FONT_NORMAL_WHITE);
-            int start_x = x + (210 - image_width - text_width) / 2;
+            start_x = x + (210 - image_width - text_width) / 2;
             image_draw(maintain_goods_icon_id, start_x, y - 2, COLOR_MAINTAIN_ICON, SCALE_NONE);
             // this icon needs scaling to be similar to getting goods - draw at 80% scale
             lang_text_draw(CUSTOM_TRANSLATION, TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING,
