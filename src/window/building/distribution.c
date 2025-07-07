@@ -40,6 +40,7 @@
 #include "window/option_popup.h"
 
 #include <math.h>
+#include <stdio.h>
 
 static void go_to_orders(const generic_button *button);
 static void toggle_resource_state(const generic_button *button);
@@ -210,14 +211,7 @@ static struct {
     resource_list stored_resources;
 } data;
 
-uint8_t warehouse_full_button_text[] = "32";
-uint8_t warehouse_3quarters_button_text[] = "24";
-uint8_t warehouse_half_button_text[] = "16";
-uint8_t warehouse_quarter_button_text[] = "8";
-uint8_t granary_full_button_text[] = "32";
-uint8_t granary_3quarters_button_text[] = "24";
-uint8_t granary_half_button_text[] = "16";
-uint8_t granary_quarter_button_text[] = "8";
+uint8_t quantity_full_button_text[] = "32";
 
 typedef enum {
     REJECT_ALL = 0,
@@ -906,60 +900,48 @@ void window_building_draw_granary_orders(building_info_context *c)
     inner_panel_draw(c->x_offset + 16, y_offset + 42, c->width_blocks - (scrollbar_shown ? 4 : 2), 21);
 }
 
-static void draw_button_from_state(int state, int x, int y, building_type type, resource_type resource)
+static void draw_button_from_state(resource_storage_entry entry, int x, int y, building_type type, resource_type resource)
 {
-    switch (state) {
+    // Draw storage state label or icon
+    char text[4];
+
+    snprintf(text, sizeof(text), "%d", BUILDING_STORAGE_QUANTITY_MAX);
+    switch (entry.state) {
         case BUILDING_STORAGE_STATE_GETTING:
-        case BUILDING_STORAGE_STATE_GETTING_3QUARTERS:
-        case BUILDING_STORAGE_STATE_GETTING_HALF:
-        case BUILDING_STORAGE_STATE_GETTING_QUARTER:
         {
             int image_width = image_get(image_group(GROUP_CONTEXT_ICONS) + 12)->width + 10;
-            int group_number;
-            if (resource_is_food(resource)) {
-                // Check whether to use "getting goods" or "getting food"
-                group_number = 10;
-            } else {
-                group_number = 9;
-            }
+            int group_number = resource_is_food(resource) ? 10 : 9;  // 10 = "getting food", 9 = "getting goods"
             int text_width = lang_text_get_width(99, group_number, FONT_NORMAL_WHITE);
             int start_x = x + (210 - image_width - text_width) / 2;
             image_draw(image_group(GROUP_CONTEXT_ICONS) + 12, start_x, y - 2, COLOR_MASK_NONE, SCALE_NONE);
             lang_text_draw(99, group_number, start_x + image_width, y, FONT_NORMAL_WHITE);
+            snprintf(text, sizeof(text), "%d", entry.quantity);
             break;
         }
         case BUILDING_STORAGE_STATE_NOT_ACCEPTING:
-        case BUILDING_STORAGE_STATE_NOT_ACCEPTING_3QUARTERS:
-        case BUILDING_STORAGE_STATE_NOT_ACCEPTING_HALF:
-        case BUILDING_STORAGE_STATE_NOT_ACCEPTING_QUARTER:
-            lang_text_draw_centered(99, 8, x, y, 210, FONT_NORMAL_RED);
+            lang_text_draw_centered(99, 8, x, y, 210, FONT_NORMAL_RED); // lang ID 8 = "Not accepting"
             break;
-        default:
-            lang_text_draw_centered(99, 7, x, y, 210, FONT_NORMAL_WHITE);
+        case BUILDING_STORAGE_STATE_MAINTAINING:
+            int maintain_goods_icon_id = assets_get_image_id("UI", "Maintain_Goods_Icon_2");
+            int image_width = image_get(maintain_goods_icon_id)->width + 10;
+            int text_width = lang_text_get_width(CUSTOM_TRANSLATION, TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING,
+                 FONT_NORMAL_WHITE);
+            int start_x = x + (210 - image_width - text_width) / 2;
+            image_draw(maintain_goods_icon_id, start_x, y - 2, COLOR_MAINTAIN_ICON2, SCALE_NONE);
+            // this icon needs scaling to be similar to getting goods - draw at 80% scale
+            lang_text_draw(CUSTOM_TRANSLATION, TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING,
+                start_x + image_width, y, FONT_NORMAL_WHITE);
+            snprintf(text, sizeof(text), "%d", entry.quantity);
             break;
-    }
-    uint8_t *button_text = warehouse_full_button_text;
-    switch (state) {
-        case BUILDING_STORAGE_STATE_ACCEPTING:
-        case BUILDING_STORAGE_STATE_GETTING:
-            button_text = type == BUILDING_GRANARY ? granary_full_button_text : warehouse_full_button_text;
-            break;
-        case BUILDING_STORAGE_STATE_ACCEPTING_3QUARTERS:
-        case BUILDING_STORAGE_STATE_GETTING_3QUARTERS:
-            button_text = type == BUILDING_GRANARY ? granary_3quarters_button_text : warehouse_3quarters_button_text;
-            break;
-        case BUILDING_STORAGE_STATE_ACCEPTING_HALF:
-        case BUILDING_STORAGE_STATE_GETTING_HALF:
-            button_text = type == BUILDING_GRANARY ? granary_half_button_text : warehouse_half_button_text;
-            break;
-        case BUILDING_STORAGE_STATE_ACCEPTING_QUARTER:
-        case BUILDING_STORAGE_STATE_GETTING_QUARTER:
-            button_text = type == BUILDING_GRANARY ? granary_quarter_button_text : warehouse_quarter_button_text;
-            break;
-        default:
+        default: // ACCEPTING
+            lang_text_draw_centered(99, 7, x, y, 210, FONT_NORMAL_WHITE); // lang ID 7 = "Accepting"
+            snprintf(text, sizeof(text), "%d", entry.quantity);
             break;
     }
-    text_draw_centered(button_text, x + 214, y, 20, FONT_NORMAL_BLACK, 0);
+
+    // Determined capacity text
+    text_draw_centered((uint8_t *) text, x + 214, y, 20, FONT_NORMAL_BLACK, 0);
+
 }
 
 static void draw_resource_orders_buttons(int x, int y, const resource_list *list, building_type type,
