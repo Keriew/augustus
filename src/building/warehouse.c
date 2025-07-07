@@ -740,6 +740,7 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
     building *space;
     // get resources
     for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+        //determine if any of the resources need to be fetched becasuse of 'getting'
         if (!building_warehouse_is_getting(r, warehouse) || city_resource_is_stockpiled(r) || !resource_is_storable(r)) {
             continue;
         }
@@ -775,7 +776,7 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
         }
     }
     if (!building_storage_get_permission(BUILDING_STORAGE_PERMISSION_WORKER, warehouse)) {
-        return WAREHOUSE_TASK_NONE;
+        return WAREHOUSE_TASK_NONE; //halt resource delivery to workshops and granaries
     }
     // deliver raw materials to workshops
     space = warehouse;
@@ -784,7 +785,9 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
         if (space->id > 0 && space->resources[space->subtype.warehouse_resource_id] > 0 &&
             !city_resource_is_stockpiled(space->subtype.warehouse_resource_id) &&
             building_has_workshop_for_raw_material_with_room(space->subtype.warehouse_resource_id,
-                warehouse->road_network_id)) {
+                warehouse->road_network_id) &&
+            !building_warehouse_is_maintaining(space->subtype.warehouse_resource_id, warehouse)) {
+
             *resource = space->subtype.warehouse_resource_id;
             return WAREHOUSE_TASK_DELIVERING;
         }
@@ -795,18 +798,21 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
         space = warehouse;
         for (int i = 0; i < 8; i++) {
             space = building_next(space);
-            if (contains_non_stockpiled_food(space, granary_resources)) {
+            if (contains_non_stockpiled_food(space, granary_resources)
+            && !building_warehouse_is_maintaining(space->subtype.warehouse_resource_id, warehouse)) {
                 *resource = space->subtype.warehouse_resource_id;
                 return WAREHOUSE_TASK_DELIVERING;
             }
         }
     }
     // deliver food to accepting granary
-    if (determine_granary_accept_foods(granary_resources, warehouse->road_network_id) && !scenario_property_rome_supplies_wheat()) {
+    if (determine_granary_accept_foods(granary_resources, warehouse->road_network_id)
+    && !scenario_property_rome_supplies_wheat()) {
         space = warehouse;
         for (int i = 0; i < 8; i++) {
             space = building_next(space);
-            if (contains_non_stockpiled_food(space, granary_resources)) {
+            if (contains_non_stockpiled_food(space, granary_resources)
+            && !building_warehouse_is_maintaining(space->subtype.warehouse_resource_id, warehouse)) {
                 *resource = space->subtype.warehouse_resource_id;
                 return WAREHOUSE_TASK_DELIVERING;
             }
@@ -817,7 +823,8 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
         space = warehouse;
         for (int i = 0; i < 8; i++) {
             space = building_next(space);
-            if (space->id > 0 && space->resources[space->subtype.warehouse_resource_id] > 0) {
+            if (space->id > 0 && space->resources[space->subtype.warehouse_resource_id] > 0
+            && !building_warehouse_is_maintaining(space->subtype.warehouse_resource_id, warehouse)) {
                 *resource = space->subtype.warehouse_resource_id;
                 return WAREHOUSE_TASK_DELIVERING;
             }
