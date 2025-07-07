@@ -1455,17 +1455,6 @@ static void image_draw_silh_scaled_centered(int image_id, int x, int y, color_t 
     image_draw_silhouette(image_id, scaled_x, scaled_y, color, obj_draw_scale);
 }
 
-static void image_draw_scaled_centered(int image_id, int x, int y, color_t color, int draw_scale_percent)
-{
-    float obj_draw_scale = 100.0f / draw_scale_percent;
-    const image *img = image_get(image_id);
-
-    float scaled_x = (((x) +img->width / 2.0f) - (img->width / obj_draw_scale) / 2.0f) * obj_draw_scale;
-    float scaled_y = (((y) +img->height / 2.0f) - (img->height / obj_draw_scale) / 2.0f) * obj_draw_scale;
-
-    image_draw(image_id, scaled_x, scaled_y, color, obj_draw_scale);
-}
-
 static void draw_invasion_warning(int x, int y, int image_id)
 {
     image_draw(image_id, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, SCALE_NONE);
