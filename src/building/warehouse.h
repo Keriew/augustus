@@ -51,6 +51,8 @@ void building_warehouse_space_remove_export(building *space, int resource, int l
 
 int building_warehouses_remove_resource(int resource, int amount);
 
+int building_warehouses_count_available_resource(int resource);
+
 int building_warehouses_send_resources_to_rome(int resource, int amount);
 
 int building_warehouse_accepts_storage(building *b, int resource, int *understaffed);

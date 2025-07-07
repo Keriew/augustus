@@ -31,6 +31,8 @@ int building_granary_try_fullload_remove_resource(building *granary, int resourc
 
 int building_granaries_remove_resource(int resource, int amount);
 
+int building_granaries_count_available_resource(int resource);
+
 int building_granaries_send_resources_to_rome(int resource, int amount);
 
 int building_granary_remove_for_getting_deliveryman(building *src, building *dst, int *resource);

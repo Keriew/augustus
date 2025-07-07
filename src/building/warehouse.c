@@ -397,6 +397,26 @@ int building_warehouse_max_space_for_resource(resource_type resource, building *
     return max_storable;
 }
 
+int building_warehouses_count_available_resource(int resource)
+{
+    int total = 0;
+    building *b = get_next_warehouse();
+    if (!b) {
+        return 0;
+    }
+    building *initial_warehouse = b;
+
+    do {
+        if (b->state == BUILDING_STATE_IN_USE && !building_warehouse_is_maintaining(resource, b)) {
+            total += building_warehouse_get_amount(b, resource);
+        }
+        b = b->next_of_type ? b->next_of_type : building_first_of_type(BUILDING_WAREHOUSE);
+    } while (b != initial_warehouse);
+
+    return total;
+}
+
+
 int building_warehouses_send_resources_to_rome(int resource, int amount)
 {
     building *b = get_next_warehouse();

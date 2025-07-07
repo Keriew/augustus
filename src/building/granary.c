@@ -271,6 +271,20 @@ int building_granaries_remove_resource(int resource, int amount)
     return amount;
 }
 
+int building_granaries_count_available_resource(int resource)
+{
+    int total = 0;
+
+    for (building *b = building_first_of_type(BUILDING_GRANARY); b; b = b->next_of_type) {
+        if (b->state == BUILDING_STATE_IN_USE && !building_granary_is_maintaining(resource, b)) {
+            total += building_granary_resource_amount(resource, b);
+        }
+    }
+
+    return total;
+}
+
+
 int building_granaries_send_resources_to_rome(int resource, int amount)
 {
     // first go for non-getting, non-maintaining granaries

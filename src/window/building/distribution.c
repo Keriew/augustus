@@ -927,7 +927,7 @@ static void draw_button_from_state(resource_storage_entry entry, int x, int y, b
             int text_width = lang_text_get_width(CUSTOM_TRANSLATION, TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING,
                  FONT_NORMAL_WHITE);
             int start_x = x + (210 - image_width - text_width) / 2;
-            image_draw(maintain_goods_icon_id, start_x, y - 2, COLOR_MAINTAIN_ICON2, SCALE_NONE);
+            image_draw(maintain_goods_icon_id, start_x, y - 2, COLOR_MAINTAIN_ICON, SCALE_NONE);
             // this icon needs scaling to be similar to getting goods - draw at 80% scale
             lang_text_draw(CUSTOM_TRANSLATION, TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING,
                 start_x + image_width, y, FONT_NORMAL_WHITE);
