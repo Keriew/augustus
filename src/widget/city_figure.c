@@ -124,7 +124,7 @@ static void draw_fort_standard(const figure *f, int x, int y, float scale)
         int flag_height = image_get(f->cart_image_id)->height;
         image_draw(f->cart_image_id, x, y - flag_height, COLOR_MASK_NONE, scale);
         // top icon
-        int icon_image_id = image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + formation_get(f->formation_id)->legion_id;
+        int icon_image_id = formation_get(f->formation_id)->legion_flag_id;
         image_draw(icon_image_id, x, y - image_get(icon_image_id)->height - flag_height, COLOR_MASK_NONE, scale);
     }
 }

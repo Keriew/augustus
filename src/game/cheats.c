@@ -34,6 +34,7 @@
 #include <string.h>
 
 static int map_editor_warning_shown;
+static int extra_legions_unlocked;
 
 static void game_cheat_add_money(uint8_t *);
 static void game_cheat_start_invasion(uint8_t *);
@@ -50,6 +51,7 @@ static void game_cheat_show_editor(uint8_t *);
 static void game_cheat_cast_curse(uint8_t *);
 static void game_cheat_make_buildings_invincible(uint8_t *);
 static void game_cheat_change_climate(uint8_t *);
+static void game_cheat_unlock_legions(uint8_t *);
 
 static void (*const execute_command[])(uint8_t *args) = {
     game_cheat_add_money,
@@ -66,7 +68,8 @@ static void (*const execute_command[])(uint8_t *args) = {
     game_cheat_show_editor,
     game_cheat_cast_curse,
     game_cheat_make_buildings_invincible,
-    game_cheat_change_climate
+    game_cheat_change_climate,
+    game_cheat_unlock_legions
 };
 
 static const char *commands[] = {
@@ -84,7 +87,8 @@ static const char *commands[] = {
     "debug.showeditor",
     "curse",
     "romanconcrete",
-    "globalwarming"
+    "globalwarming",
+    "ihaveanarmy"
 };
 
 #define NUMBER_OF_COMMANDS sizeof (commands) / sizeof (commands[0])
@@ -171,7 +175,7 @@ void game_cheat_console(void)
 
 static void show_warning(translation_key key)
 {
-    city_warning_show_custom(lang_get_string(CUSTOM_TRANSLATION, key), NEW_WARNING_SLOT);    
+    city_warning_show_custom(lang_get_string(CUSTOM_TRANSLATION, key), NEW_WARNING_SLOT);
 }
 
 static void game_cheat_add_money(uint8_t *args)
@@ -267,6 +271,12 @@ static void game_cheat_unlock_all_buildings(uint8_t *args)
     show_warning(TR_CHEAT_UNLOCKED_ALL_BUILDINGS);
 }
 
+static void game_cheat_unlock_legions(uint8_t *args)
+{
+    extra_legions_unlocked = 1;
+    show_warning(TR_CHEAT_UNLOCK_LEGIONS);
+}
+
 static void game_cheat_incite_riot(uint8_t *args)
 {
     city_data.sentiment.value = 0;
@@ -300,4 +310,8 @@ void game_cheat_parse_command(uint8_t *command)
             (*execute_command[i])(command + next_arg);
         }
     }
+}
+int game_cheat_extra_legions(void)
+{
+    return extra_legions_unlocked;
 }

@@ -109,11 +109,9 @@ static int draw_background(void)
 
     if (food_stress > 50 && !city_mess_hall_months_food_stored()) {
         food_text = TR_ADVISOR_LEGION_FOOD_CRITICAL;
-    }
-    else if (food_stress > 20 && !city_mess_hall_months_food_stored()) {
+    } else if (food_stress > 20 && !city_mess_hall_months_food_stored()) {
         food_text = TR_ADVISOR_LEGION_FOOD_NEEDED;
-    }
-    else {
+    } else {
         food_text = TR_ADVISOR_LEGION_MONTHS_FOOD_STORED;
     }
 
@@ -151,9 +149,9 @@ static int draw_background(void)
     for (unsigned int i = 0; i < 6 && i < num_legions; i++) {
         const formation *m = formation_get(formation_for_legion(i + 1 + scrollbar.scroll_position));
         button_border_draw(22, 77 + 44 * i, 560, 40, 0);
-        image_draw(image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + m->legion_id, 32, 82 + 44 * i,
+        image_draw(m->legion_flag_id, 32, 82 + 44 * i,
             COLOR_MASK_NONE, SCALE_NONE);
-        lang_text_draw(138, m->legion_id, 84, 83 + 44 * i, FONT_NORMAL_WHITE);
+        lang_text_draw(m->legion_name_group, m->legion_name_id, 84, 83 + 44 * i, FONT_NORMAL_WHITE);
         int width = text_draw_number(m->num_figures, '@', " ", 84, 100 + 44 * i, FONT_NORMAL_GREEN, 0);
         switch (m->figure_type) {
             case FIGURE_FORT_LEGIONARY:
@@ -203,7 +201,7 @@ static unsigned int get_num_legions_not_at_fort(void)
 {
     unsigned int num_legions_not_at_fort = 0;
     for (unsigned int i = 0; i < num_legions; i++) {
-        const formation* m = formation_get(formation_for_legion(i + 1));
+        const formation *m = formation_get(formation_for_legion(i + 1));
         if (!m->in_distant_battle && !m->is_at_fort) {
             num_legions_not_at_fort++;
         }
@@ -256,7 +254,7 @@ static void button_go_to_legion(const generic_button *button)
     window_city_show();
 }
 
-static void return_legion_to_fort(int legion_id) 
+static void return_legion_to_fort(int legion_id)
 {
     formation *m = formation_get(formation_for_legion(legion_id));
     if (!m->in_distant_battle && !m->is_at_fort) {
