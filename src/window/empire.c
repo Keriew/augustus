@@ -146,7 +146,6 @@ typedef struct {
 // measurements and scales helper functions
 static int measure_trade_row_width(const empire_city *city, int is_sell, const trade_row_style *style); // ???
 static void image_draw_silh_scaled_centered(int image_id, int x, int y, color_t color, int draw_scale_percent);
-static void image_draw_scaled_centered(int image_id, int x, int y, color_t color, int draw_scale_percent);
 static void animation_draw_scaled(const image *img, int image_id, int new_animation, int x, int y, color_t color, int draw_scale_percent);
 static int open_trade_button_icon_fits(const empire_city *city, const open_trade_button_style *style, trade_icon_type icon_type);
 

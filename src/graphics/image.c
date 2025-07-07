@@ -27,6 +27,7 @@ void image_draw_silhouette(int image_id, int x, int y, color_t color, float scal
     graphics_renderer()->draw_silhouette(img, x, y, color, scale);
 
 }
+
 void image_draw_scaled_centered(int image_id, int x, int y, color_t color, int draw_scale_percent)
 {
     float obj_draw_scale = 100.0f / draw_scale_percent;
