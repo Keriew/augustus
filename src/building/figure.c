@@ -226,6 +226,7 @@ static void spawn_figure_warehouse(building *b)
         if (task != WAREHOUSE_TASK_NONE) {
             figure *f = figure_create(FIGURE_WAREHOUSEMAN, road.x, road.y, DIR_4_BOTTOM);
             f->action_state = FIGURE_ACTION_50_WAREHOUSEMAN_CREATED;
+            f->loads_sold_or_carrying = 1;
             if (task == WAREHOUSE_TASK_GETTING) {
                 f->resource_id = RESOURCE_NONE;
                 f->collecting_item_id = resource;
@@ -251,6 +252,7 @@ static void spawn_figure_granary(building *b)
         if (task != GRANARY_TASK_NONE) {
             figure *f = figure_create(FIGURE_WAREHOUSEMAN, road.x, road.y, DIR_4_BOTTOM);
             f->action_state = FIGURE_ACTION_50_WAREHOUSEMAN_CREATED;
+            f->loads_sold_or_carrying = 1;
             f->resource_id = task;
             b->figure_id = f->id;
             f->building_id = b->id;
