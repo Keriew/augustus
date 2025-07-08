@@ -389,6 +389,18 @@ static void draw_boat(building_info_context *c, figure *f)
     lang_text_draw_multiline(102, text_id, c->x_offset + 92, c->y_offset + 155, 340, FONT_NORMAL_BROWN);
 }
 
+static int cartpusher_returning_empty(figure *f)
+{
+    switch (f->action_state) {
+        case FIGURE_ACTION_27_CARTPUSHER_RETURNING:
+        case FIGURE_ACTION_53_WAREHOUSEMAN_RETURNING_EMPTY:
+        case FIGURE_ACTION_138_DOCKER_IMPORT_RETURNING:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
 static void draw_cartpusher(building_info_context *c, figure *f)
 {
     if (building_get(f->building_id)->type == BUILDING_ARMOURY) {
@@ -403,10 +415,16 @@ static void draw_cartpusher(building_info_context *c, figure *f)
     } else {
         width = lang_text_draw(64, f->type, c->x_offset + 92, c->y_offset + 139, FONT_NORMAL_BROWN);
     }
-    if (f->action_state != FIGURE_ACTION_132_DOCKER_IDLING && f->resource_id) {
-        int resource = f->resource_id;
-        image_draw(resource_get_data(resource)->image.icon,
+
+    if (f->resource_id != RESOURCE_NONE) {
+        image_draw(resource_get_data(f->resource_id)->image.icon,
             c->x_offset + 92 + width, c->y_offset + 135, COLOR_MASK_NONE, SCALE_NONE);
+    }
+
+    if (f->loads_sold_or_carrying > 0 && f->resource_id != RESOURCE_NONE &&
+        !cartpusher_returning_empty(f)) {
+        text_draw_number(f->loads_sold_or_carrying, 'x', "",
+            c->x_offset + 118 + width, c->y_offset + 139, FONT_NORMAL_BROWN, COLOR_MASK_NONE);
     }
 
     int phrase_height = lang_text_draw_multiline(130, 21 * c->figure.sound_id + c->figure.phrase_id + 1,
