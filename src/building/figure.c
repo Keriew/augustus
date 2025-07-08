@@ -151,15 +151,15 @@ static void calculate_houses_needed_per_beggar(void)
     int unemployed_percentage = city_labor_unemployment_percentage();
     int houses_needed = 100;
     if (unemployed_percentage < 9) {
-        houses_needed = 40-unemployed_percentage;
+        houses_needed = 40 - unemployed_percentage;
     } else if (unemployed_percentage < 12) {
-        houses_needed = 30-unemployed_percentage;
+        houses_needed = 30 - unemployed_percentage;
     } else if (unemployed_percentage < 15) {
-        houses_needed = 25-unemployed_percentage;
+        houses_needed = 25 - unemployed_percentage;
     } else if (unemployed_percentage < 18) {
-        houses_needed = 24-unemployed_percentage;
+        houses_needed = 24 - unemployed_percentage;
     } else if (unemployed_percentage < 21) {
-        houses_needed = 23-unemployed_percentage;
+        houses_needed = 23 - unemployed_percentage;
     } else {
         houses_needed = 3;
     }
@@ -1133,7 +1133,7 @@ static void spawn_figure_grand_temple_mars(building *b)
             b->figure_spawn_delay = 0;
             map_has_road_access(b->x, b->y, b->size, &road);
             switch (b->subtype.barracks_priority) {
-                case PRIORITY_FORT:                
+                case PRIORITY_FORT:
                 case PRIORITY_FORT_JAVELIN:
                 case PRIORITY_FORT_MOUNTED:
                 case PRIORITY_FORT_AUXILIA_INFANTRY:
@@ -1389,6 +1389,7 @@ static void spawn_figure_industry(building *b)
             f->building_id = b->id;
             b->figure_id = f->id;
             f->wait_ticks = 30;
+            f->loads_sold_or_carrying = 1;
         }
     }
 }
@@ -1417,6 +1418,7 @@ static void spawn_figure_wharf(building *b)
             f->building_id = b->id;
             b->figure_id = f->id;
             f->wait_ticks = 30;
+            f->loads_sold_or_carrying = 1;
         }
     }
 }
@@ -1681,7 +1683,7 @@ static void spawn_figure_fort_supplier(building *fort)
     if (supply_post->state != BUILDING_STATE_IN_USE) {
         return;
     }
-    
+
     int total_food_in_mess_hall = 0;
 
     for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
@@ -1735,7 +1737,7 @@ static void spawn_figure_mess_hall(building *b)
         } else {
             return;
         }
-        
+
         spawn_mess_hall_supplier(b, road.x, road.y, 1);
         if (b->figure_id) {
             b->figure_spawn_delay++;
@@ -1834,7 +1836,7 @@ static void spawn_figure_watchtower(building *b)
     }
 }
 
-static void spawn_figure_depot(building* b)
+static void spawn_figure_depot(building *b)
 {
     check_labor_problem(b);
 
@@ -1855,7 +1857,7 @@ static void spawn_figure_depot(building* b)
         int existing_carts = 0;
         for (int i = 0; i < 3; i++) {
             if (b->data.distribution.cartpusher_ids[i]) {
-                figure* f = figure_get(b->data.distribution.cartpusher_ids[i]);
+                figure *f = figure_get(b->data.distribution.cartpusher_ids[i]);
                 if (f->type == FIGURE_DEPOT_CART_PUSHER &&
                     f->building_id == b->id) {
                     existing_carts++;
@@ -1873,7 +1875,7 @@ static void spawn_figure_depot(building* b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
-            figure* f = figure_create(FIGURE_DEPOT_CART_PUSHER, road.x, road.y, DIR_0_TOP);
+            figure *f = figure_create(FIGURE_DEPOT_CART_PUSHER, road.x, road.y, DIR_0_TOP);
             f->action_state = FIGURE_ACTION_238_DEPOT_CART_PUSHER_INITIAL;
             f->building_id = b->id;
 
