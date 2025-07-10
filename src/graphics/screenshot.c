@@ -107,7 +107,7 @@ static const char *generate_filename(screenshot_type type)
         default:
             strftime(filename, FILE_NAME_MAX, "city %Y-%m-%d %H.%M.%S.png", loctime);
             break;
-    }    
+    }
     return dir_append_location(filename, PATH_LOCATION_SCREENSHOT);
 }
 
@@ -292,7 +292,7 @@ static void create_full_city_screenshot(void)
     int min_width = (GRID_SIZE * TILE_X_SIZE - city_width_pixels) / 2 + TILE_X_SIZE;
     int max_height = (GRID_SIZE * TILE_Y_SIZE + city_height_pixels) / 2;
     int min_height = max_height - city_height_pixels - TILE_Y_SIZE;
-    map_tile dummy_tile = {0, 0, 0};
+    map_tile dummy_tile = { 0, 0, 0 };
     int error = 0;
     int base_height = image_set_loop_height_limits(min_height, max_height);
     int size;
@@ -305,7 +305,7 @@ static void create_full_city_screenshot(void)
     int current_height = base_height;
     while ((size = image_request_rows()) != 0) {
         int y_offset = current_height + IMAGE_HEIGHT_CHUNK > max_height ?
-            IMAGE_HEIGHT_CHUNK - (max_height - current_height) - TILE_Y_SIZE: 0;
+            IMAGE_HEIGHT_CHUNK - (max_height - current_height) - TILE_Y_SIZE : 0;
         for (int width = 0; width < city_width_pixels; width += canvas_width) {
             int image_section_width = canvas_width;
             int x_offset = 0;
@@ -314,7 +314,7 @@ static void create_full_city_screenshot(void)
                 x_offset = canvas_width - image_section_width - TILE_X_SIZE * 2;
             }
             city_view_set_camera_from_pixel_position(min_width + width, current_height);
-            city_without_overlay_draw(0, 0, &dummy_tile);
+            city_without_overlay_draw(0, 0, &dummy_tile, 0);
             graphics_renderer()->save_screen_buffer(&canvas[width], x_offset, TOP_MENU_HEIGHT + y_offset,
                 image_section_width, IMAGE_HEIGHT_CHUNK - y_offset, city_width_pixels);
         }

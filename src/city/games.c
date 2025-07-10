@@ -29,11 +29,11 @@ static void imperial_games_start(void);
 games_type ALL_GAMES[MAX_GAMES] = {
     {
         1, TR_WINDOW_GAMES_OPTION_1, TR_WINDOW_GAMES_OPTION_1_DESC, MESSAGE_NG_GAMES_PLANNED, 1500, 100, 1, 32, 12,
-        BUILDING_COLOSSEUM, 1, { [RESOURCE_WINE] = 1, [RESOURCE_TIMBER] = 1 }, naval_battle_start
+        BUILDING_COLOSSEUM, 1, { [RESOURCE_WINE] = 1,[RESOURCE_TIMBER] = 1 }, naval_battle_start
     },
     {
         2, TR_WINDOW_GAMES_OPTION_5, TR_WINDOW_GAMES_OPTION_5_DESC, MESSAGE_IG_GAMES_PLANNED, 800, 150, 1, 32, 12,
-        BUILDING_COLOSSEUM, 0, { [RESOURCE_WHEAT] = 2, [RESOURCE_OIL] = 1 }, imperial_games_start
+        BUILDING_COLOSSEUM, 0, { [RESOURCE_WHEAT] = 2,[RESOURCE_OIL] = 1 }, imperial_games_start
     },
     {
         3, TR_WINDOW_GAMES_OPTION_2, TR_WINDOW_GAMES_OPTION_2_DESC, MESSAGE_AN_GAMES_PLANNED, 800, 150, 1, 32, 12,
@@ -68,7 +68,19 @@ int city_games_resource_cost(int game_type_id, resource_type resource)
     if (!game) {
         return 0;
     }
+    if (game_type_id == 3) { //for animal games, check if player has more fish or meat
+        int player_meat_count = city_resource_get_amount_including_granaries(RESOURCE_MEAT, 2, 0);
+        int player_fish_count = city_resource_get_amount_including_granaries(RESOURCE_FISH, 2, 0);
+
+        int dominant_resource = (player_meat_count >= player_fish_count) ? RESOURCE_MEAT : RESOURCE_FISH;
+        for (int i = 0; i < RESOURCE_MAX; ++i) {
+            // Reset all costs to 0 before reassigignment
+            game->resource_cost[i] = 0;
+        }
+        game->resource_cost[dominant_resource] = 2;
+    }
     int cost = game->resource_cost[resource] * (BASE_RESOURCE_REQUIREMENT + city_data.population.population / POPULATION_SCALING_FACTOR);
+
     return cost;
 }
 

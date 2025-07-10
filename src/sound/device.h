@@ -34,7 +34,8 @@ void sound_device_fadeout_music(int milisseconds);
 
 /**
  * Use a custom music player, for external music data (e.g. videos)
- * @param bitdepth Bitdepth, either 8 or 16
+ * @param bitdepth Bitdepth, either 8, 16 or 32
+ *                 (8 = unsigned 8-bit, 16 = signed 16-bit, 32 = signed 32-bit float)
  * @param num_channels Number of channels, 1 = mono, 2 = stereo
  * @param rate Frequency, usually 22050 or 44100
  * @param audio_data First chunk of music data

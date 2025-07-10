@@ -1341,6 +1341,13 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .custom_asset.group = "Health_Culture",
         .custom_asset.id = "Latrine_N",
         .event_data.attr = "latrines"
+    },
+    [BUILDING_NATIVE_HUT_ALT] = {
+        .size = 1,
+        .fire_proof = 1,
+        .custom_asset.group = "Terrain_Maps",
+        .custom_asset.id = "Native_Hut_Central_01",
+        .event_data.attr = "native_hut_alt"
     }
 };
 

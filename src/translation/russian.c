@@ -1610,6 +1610,11 @@ static translation_string all_strings[] = {
     {TR_BUILDING_LATRINES_UNNECESSARY, "Эта латрина бесполезна, так как поблизости нет домов, которым она была бы нужна."},
     {TR_BUILDING_LATRINES_NO_HOUSES, "Эта латрина сейчас не нужна, так как в пределах зоны обслуживания нет домов."},
     {TR_CONFIG_DRAW_ASCLEPIUS, "Заменить стандартную иконку на жезл Асклепия в меню здоровья"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT, "Хижина туземцев 2"}, // Имя в меню редактора карт
+    {TR_BUILDING_NATIVE_HUT_ALT, "Хижина туземцев alt"}, // Имя в окне Тип здания для подсчета сценария событий
+    {TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, "Склады и амбары можно строить поверх дорог"},
+    {TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, "Подсвечивать выбранное здание"},
+    {TR_CONFIG_MAX_AUTOSAVE_SLOTS, "Максимальное количество ежегодных автосохранений:"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

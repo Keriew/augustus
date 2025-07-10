@@ -123,6 +123,7 @@ extern struct scenario_t {
     map_point invasion_points[MAX_INVASION_POINTS];
 
     struct {
+        int alt_hut;
         int hut;
         int meeting;
         int crops;

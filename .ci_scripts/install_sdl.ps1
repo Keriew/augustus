@@ -42,7 +42,7 @@ if ("${env:COMPILER}" -eq "msvc") {
         mkdir build
         cd build
 
-        cmake -G "Visual Studio 17 2022" -A ARM64 -DCMAKE_BUILD_TYPE=Release ..
+        cmake -G "Visual Studio 17 2022" -A ARM64  -DSDL_LIBC=ON -DCMAKE_BUILD_TYPE=Release ..
         cmake --build . -j 4 --config Release
         mv include-config-release\SDL2\*.h include\SDL2
         mv include\SDL2 $Env:SDL2_DIR

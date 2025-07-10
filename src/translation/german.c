@@ -1661,6 +1661,8 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_VALUE_STORAGE_TYPE_ALL, "Alle"},
     {TR_PARAMETER_VALUE_STORAGE_TYPE_GRANARIES, "Silos"},
     {TR_PARAMETER_VALUE_STORAGE_TYPE_WAREHOUSES, "Lagerhäuser"},
+    {TR_FIX_GERMAN_CITY_RETAKEN, "Die zuvor von Roms Feinden eingenommene Stadt wurde von den Legionen eines anderen Statthalters zurückerobert. Er hatte in Rom einen Triumph errungen und seiner Stadt das Recht, einen Triumphbogen zu errichten."}
+    //Bitte ersetze obigen Google-Translate-Platzhalter
 	/* Neu Übersetzen & sortieren */
 };
 

@@ -65,6 +65,7 @@ typedef uint32_t color_t;
 
 #define COLOR_MASK_TYRIAN_PURPLE 0xff66023C
 #define COLOR_MASK_LIGHT_BLUE 0xff3552ff
+#define COLOR_MASK_SKY_BLUE 0xff90aaff
 #define COLOR_MASK_POSITIVE_RANGE 0x80005100    //50% transparent DARK_GREEN
 #define COLOR_MASK_NEGATIVE_RANGE 0x40ff0000    //25% transparent COLOR_RED
 

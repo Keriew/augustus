@@ -353,6 +353,7 @@ static void set_docker_as_idle(figure *f)
     f->resource_id = RESOURCE_NONE;
     f->destination_building_id = 0;
     f->wait_ticks = 0;
+    f->loads_sold_or_carrying = 0;
 }
 
 void figure_docker_action(figure *f)
@@ -452,6 +453,7 @@ void figure_docker_action(figure *f)
         case FIGURE_ACTION_135_DOCKER_IMPORT_GOING_TO_STORAGE:
             set_cart_graphic(f);
             figure_movement_move_ticks(f, 1);
+            f->loads_sold_or_carrying = 1;
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_139_DOCKER_IMPORT_AT_STORAGE;
                 f->wait_ticks = 0;
@@ -483,6 +485,7 @@ void figure_docker_action(figure *f)
         case FIGURE_ACTION_137_DOCKER_EXPORT_RETURNING:
             set_cart_graphic(f);
             figure_movement_move_ticks(f, 1);
+            f->loads_sold_or_carrying = 1;
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_134_DOCKER_EXPORT_QUEUE;
                 f->wait_ticks = 0;

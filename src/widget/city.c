@@ -43,9 +43,12 @@
 #include "window/building_info.h"
 #include "window/city.h"
 
+#define NO_POSITION ((unsigned int)-1)
+
 static struct {
     map_tile current_tile;
     map_tile selected_tile;
+    int selected_building_id;
     int new_start_grid_offset;
     int capture_input;
     int routing_grid_offset;
@@ -90,9 +93,9 @@ void widget_city_draw(void)
     update_zoom_level();
     set_city_clip_rectangle();
     if (game_state_overlay()) {
-        city_with_overlay_draw(&data.current_tile);
+        city_with_overlay_draw(&data.current_tile, data.selected_building_id);
     } else {
-        city_without_overlay_draw(0, 0, &data.current_tile);
+        city_without_overlay_draw(0, 0, &data.current_tile, data.selected_building_id);
     }
     graphics_reset_clip_rectangle();
 }
@@ -101,7 +104,7 @@ void widget_city_draw_for_figure(int figure_id, pixel_coordinate *coord)
 {
     set_city_clip_rectangle();
 
-    city_without_overlay_draw(figure_id, coord, &data.current_tile);
+    city_without_overlay_draw(figure_id, coord, &data.current_tile, 0);
 
     graphics_reset_clip_rectangle();
 }
@@ -266,7 +269,7 @@ static int is_rotate_forward_button(int x, int y)
     city_view_get_viewport(&city_x, &city_y, &width, &height);
 
     int sidebar_pause_button = sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED);
-    int x_offset = sidebar_pause_button ? 4 * BLOCK_SIZE + 4: 7 * BLOCK_SIZE + 4;
+    int x_offset = sidebar_pause_button ? 4 * BLOCK_SIZE + 4 : 7 * BLOCK_SIZE + 4;
     int y_offset = sidebar_pause_button && width < 680 && game_state_is_paused() ? 84 : 24;
     return x >= x_offset && x < x_offset + 3 * BLOCK_SIZE &&
         y >= y_offset && y < y_offset + 4 * BLOCK_SIZE;
@@ -396,7 +399,7 @@ static int input_coords_in_city(int x, int y)
     x -= x_offset;
     y -= y_offset;
 
-    return (x >= 0 && x < width &&y >= 0 && y < height);
+    return (x >= 0 && x < width && y >= 0 && y < height);
 }
 
 static void handle_touch_scroll(const touch *t)
@@ -650,6 +653,8 @@ static void handle_mouse(const mouse *m)
             return;
         }
         if (handle_right_click_allow_building_info(tile)) {
+            int building_id = map_building_at(tile->grid_offset);
+            data.selected_building_id = building_id ? building_id : NO_POSITION; //no position if selected 0
             window_building_info_show(tile->grid_offset);
             return;
         }
@@ -725,7 +730,7 @@ void widget_city_handle_input_military(const mouse *m, const hotkeys *h, int leg
             data.capture_input = 0;
         }
     } else {
-        zoom_map(m, h, city_view_get_scale());        
+        zoom_map(m, h, city_view_get_scale());
     }
 
     if ((!m->is_touch && m->left.went_down)
@@ -792,11 +797,14 @@ void widget_city_clear_current_tile(void)
     data.selected_tile.grid_offset = 0;
     data.current_tile.grid_offset = 0;
     data.routing_grid_offset = 0;
+    data.selected_building_id = NO_POSITION;
+
 }
 
 void widget_city_clear_routing_grid_offset(void)
 {
-    data.routing_grid_offset = 0;    
+    data.routing_grid_offset = 0;
+    data.selected_building_id = NO_POSITION;
 }
 
 void widget_city_setup_routing_preview(void)
@@ -805,13 +813,16 @@ void widget_city_setup_routing_preview(void)
         figure_roamer_preview_reset_building_types();
         return;
     }
-    
+
     int building_id = map_building_at(data.routing_grid_offset);
+
     if (building_id) {
+        data.selected_building_id = building_id;
         building *b = building_main(building_get(building_id));
         figure_roamer_preview_reset(b->type);
         figure_roamer_preview_create(b->type, b->x, b->y);
     } else {
-        figure_roamer_preview_reset(building_construction_type());        
+        data.selected_building_id = NO_POSITION;
+        figure_roamer_preview_reset(building_construction_type());
     }
 }

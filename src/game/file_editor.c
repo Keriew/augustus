@@ -1,5 +1,6 @@
 #include "file_editor.h"
 
+#include "assets/assets.h"
 #include "building/construction.h"
 #include "building/menu.h"
 #include "building/storage.h"
@@ -164,7 +165,20 @@ int game_file_editor_load_scenario(const char *scenario_file)
 
 int game_file_editor_write_scenario(const char *scenario_file)
 {
+    int image_alt_hut;
+    switch (scenario_property_climate()) {
+        case CLIMATE_NORTHERN:
+            image_alt_hut = assets_get_image_id("Terrain_Maps", "Native_Hut_Northern_01");
+            break;
+        case CLIMATE_DESERT:
+            image_alt_hut = assets_get_image_id("Terrain_Maps", "Native_Hut_Southern_01");
+            break;
+        default:
+            image_alt_hut = assets_get_image_id("Terrain_Maps", "Native_Hut_Central_01");
+    }
+
     scenario_editor_set_native_images(
+        image_alt_hut,
         image_group(GROUP_EDITOR_BUILDING_NATIVE),
         image_group(GROUP_EDITOR_BUILDING_NATIVE) + 2,
         image_group(GROUP_EDITOR_BUILDING_CROPS)

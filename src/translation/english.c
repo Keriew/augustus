@@ -1610,6 +1610,11 @@ static translation_string all_strings[] = {
     {TR_BUILDING_LATRINES_UNNECESSARY, "These latrines have no purpose here, as there are no houses in range needing them."},
     {TR_BUILDING_LATRINES_NO_HOUSES, "These latrines are unnecessary at the moment, as there are no houses within its service range."},
     {TR_CONFIG_DRAW_ASCLEPIUS, "Draw Rod of Asclepius for health menu"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT, "Native hut alt" },
+    {TR_BUILDING_NATIVE_HUT_ALT, "Alternate native hut"},
+    {TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, "Warehouses and granaries can be built over any roads"},
+    {TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, "Highlight selected building"},
+    {TR_CONFIG_MAX_AUTOSAVE_SLOTS, "Maximum number of yearly autosave slots:" },
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
