@@ -88,6 +88,11 @@ static uint8_t *get_message_text(int32_t offset)
     if (!offset) {
         return 0;
     }
+    //locale-dependent fixes
+    lang_type l_type = locale_determine_language();
+    if (l_type == LANGUAGE_GERMAN && offset == 289) {
+        return (uint8_t *) translation_for(TR_FIX_GERMAN_CITY_RETAKEN);
+    }
     return &data.message_data[offset];
 }
 
@@ -349,9 +354,16 @@ int lang_load(int is_editor)
 
 const uint8_t *lang_get_string(int group, int index)
 {
+    //locale-dependent fixes
+    language_type l_type = locale_determine_language();
+    if (l_type == LANGUAGE_KOREAN && group == 28 && index == 46) {
+        return translation_for(TR_FIX_KOREAN_BUILDING_DOCTORS_CLINIC);
+    }
+    //Custom translations
     if (group == CUSTOM_TRANSLATION) {
         return translation_for(index);
     }
+    //Augustus overrrides of original strings
     if (group == 92 && !index) {
         return translation_for(TR_BUILDING_SMALL_TEMPLE_CERES_NAME);
     }
@@ -559,7 +571,7 @@ const uint8_t *lang_get_string(int group, int index)
                 }
                 break;
             case BUILDING_OVERGROWN_GARDENS:
-                return translation_for(TR_BUILDING_OVERGROWN_GARDENS);                
+                return translation_for(TR_BUILDING_OVERGROWN_GARDENS);
             case BUILDING_FORT_AUXILIA_INFANTRY:
                 return translation_for(TR_BUILDING_FORT_AUXILIA_INFANTRY);
             case BUILDING_ARMOURY:

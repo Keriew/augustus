@@ -466,7 +466,7 @@ static translation_string all_strings[] = {
     {TR_BUTTON_BACK_TO_MAIN_MENU, "메인 메뉴로 돌아가기" },
     {TR_LABEL_PAUSE_MENU, "일시정지" },
     {TR_OVERLAY_LEVY, "유지비" },
-    {TR_TOOLTIP_OVERLAY_LEVY, " 자금이 다달이 유지비로 들어감." }, 
+    {TR_TOOLTIP_OVERLAY_LEVY, " 자금이 다달이 유지비로 들어감." },
     {TR_MAP_EDITOR_OPTIONS, "시나리오 설정" },
     {TR_BUILDING_TAVERN, "선술집" },
     {TR_BUILDING_GRAND_GARDEN, "화려한 정원" },
@@ -1518,6 +1518,7 @@ static translation_string all_strings[] = {
     { TR_WINDOW_ORIGINAL_CAMPAIGN_DESC, "1998년의 근본 Caesar3 캠페인. 그 모든 고대의 영광을 담고 있습니다."},
     { TR_WINDOW_ORIGINAL_CAMPAIGN_NAME, "오리지날 캠페인" },
     { TR_WINDOW_SELECT_CAMPAIGN, "캠페인을 선택하세요"},
+    { TR_FIX_KOREAN_BUILDING_DOCTORS_CLINIC, "진료소"},
 
 };
 
