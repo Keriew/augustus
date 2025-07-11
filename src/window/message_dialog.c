@@ -416,7 +416,8 @@ static void draw_city_message_text(const lang_message *msg)
             if (msg->message_type == MESSAGE_TYPE_IMPERIAL) {
                 const scenario_request *request = scenario_request_get(player_message.param1);
                 int y_offset = data.y_text + 86 + lines * 16;
-                text_draw_number(request->amount.requested, '@', " ", data.x_text + 8, y_offset, FONT_NORMAL_WHITE, 0);
+                int requested_amount = player_message.param2 ? player_message.param2 : request->amount.requested;
+                text_draw_number(requested_amount, '@', " ", data.x_text + 8, y_offset, FONT_NORMAL_WHITE, 0);
                 image_draw(resource_image(request->resource), data.x_text + 70, y_offset - 5,
                     COLOR_MASK_NONE, SCALE_NONE);
                 text_draw(resource_get_data(request->resource)->text,

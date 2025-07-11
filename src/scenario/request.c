@@ -109,11 +109,12 @@ static void process_request(scenario_request *request)
     if (state == REQUEST_STATE_DISPATCHED || state == REQUEST_STATE_DISPATCHED_LATE) {
         --request->months_to_comply;
         if (request->months_to_comply <= 0) {
+            int requested_amount = request->amount.requested; // Save until reset
             if (state == REQUEST_STATE_DISPATCHED) {
-                city_message_post(1, MESSAGE_REQUEST_RECEIVED, request->id, 0);
+                city_message_post(1, MESSAGE_REQUEST_RECEIVED, request->id, requested_amount);
                 city_ratings_change_favor(request->favor);
             } else {
-                city_message_post(1, MESSAGE_REQUEST_RECEIVED_LATE, request->id, 0);
+                city_message_post(1, MESSAGE_REQUEST_RECEIVED_LATE, request->id, requested_amount);
                 city_ratings_change_favor(request->favor / 2);
             }
             request->state = REQUEST_STATE_RECEIVED;
