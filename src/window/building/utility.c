@@ -419,6 +419,35 @@ void window_building_draw_native_crops(building_info_context *c)
     window_building_play_sound(c, "wavs/wheat_farm.wav");
 }
 
+void window_building_draw_native_decoration(building_info_context *c)
+{
+    c->help_id = 0;
+    window_building_play_sound(c, "wavs/park.wav");
+    outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_NATIVE_DECORATION, c->x_offset,
+        c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
+    window_building_draw_description_at(c, 96, CUSTOM_TRANSLATION, TR_BUILDING_NATIVE_DECORATION_DESC);
+}
+void window_building_draw_native_monument(building_info_context *c)
+{
+    c->help_id = 0;
+    window_building_play_sound(c, "wavs/park.wav");
+    outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_NATIVE_MONUMENT, c->x_offset,
+        c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
+    window_building_draw_description_at(c, 96, CUSTOM_TRANSLATION, TR_BUILDING_NATIVE_MONUMENT_DESC);
+}
+void window_building_draw_native_watchtower(building_info_context *c)
+{
+    c->help_id = 0;
+    window_building_play_sound(c, "wavs/tower2.wav");
+    outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_NATIVE_WATCHTOWER, c->x_offset,
+        c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
+    window_building_draw_description_at(c, 96, CUSTOM_TRANSLATION, TR_BUILDING_NATIVE_WATCHTOWER_DESC);
+}
+
+
 void window_building_draw_highway(building_info_context *c)
 {
     //c->help_id = 0;

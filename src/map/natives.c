@@ -2,6 +2,7 @@
 
 #include "assets/assets.h"
 #include "building/building.h"
+#include "building/image.h"
 #include "building/list.h"
 #include "building/properties.h"
 #include "building/roadblock.h"
@@ -46,6 +47,9 @@ static int has_building_on_native_land(int x, int y, int size, int radius)
                     type != BUILDING_NATIVE_HUT_ALT &&
                     type != BUILDING_NATIVE_MEETING &&
                     type != BUILDING_NATIVE_CROPS &&
+                    type != BUILDING_NATIVE_DECORATION &&
+                    type != BUILDING_NATIVE_MONUMENT &&
+                    type != BUILDING_NATIVE_WATCHTOWER &&
                     (!building_type_is_roadblock(type) || type == BUILDING_PALISADE_GATE ||
                         type == BUILDING_TRIUMPHAL_ARCH || type == BUILDING_GATEHOUSE)) {
                     return 1;
@@ -99,6 +103,9 @@ void map_natives_init(void)
     int image_meeting = scenario.native_images.meeting;
     int image_crops = scenario.native_images.crops;
     int scenario_image_alt_hut = scenario.native_images.alt_hut;
+    int scenario_image_decoration = scenario.native_images.decoration;
+    int scenario_image_monument = scenario.native_images.monument;
+    int scenario_image_watchtower = scenario.native_images.watchtower;
     int native_image = image_group(GROUP_BUILDING_NATIVE);
     int native_hut_alt_image = native_hut_alt_get_image_id();
     int grid_offset = map_data.start_offset;
@@ -123,6 +130,15 @@ void map_natives_init(void)
             } else if (scenario_image_alt_hut != 0 && image_id == scenario_image_alt_hut + 1) {
                 type = BUILDING_NATIVE_HUT_ALT;
                 map_image_set(grid_offset, native_hut_alt_image + 1);
+            } else if (scenario_image_decoration != 0 && image_id == scenario_image_decoration) {
+                type = BUILDING_NATIVE_DECORATION;
+                map_image_set(grid_offset, building_image_get_for_type(type));
+            } else if (scenario_image_monument != 0 && image_id == scenario_image_monument) {
+                type = BUILDING_NATIVE_MONUMENT;
+                map_image_set(grid_offset, building_image_get_for_type(type));
+            } else if (scenario_image_watchtower != 0 && image_id == scenario_image_watchtower) {
+                type = BUILDING_NATIVE_WATCHTOWER;
+                map_image_set(grid_offset, building_image_get_for_type(type));
             } else if (image_id == image_meeting) {
                 type = BUILDING_NATIVE_MEETING;
                 map_image_set(grid_offset, native_image + 2);
@@ -152,9 +168,13 @@ void map_natives_init(void)
                     break;
                 case BUILDING_NATIVE_HUT:
                 case BUILDING_NATIVE_HUT_ALT:
+                case BUILDING_NATIVE_WATCHTOWER:
                     b->sentiment.native_anger = 100;
                     b->figure_spawn_delay = random_bit;
                     mark_native_land(b->x, b->y, 1, 3);
+                    break;
+                case BUILDING_NATIVE_MONUMENT:
+                    map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get_for_type(type), TERRAIN_BUILDING);
                     break;
             }
         }
@@ -171,6 +191,10 @@ void map_natives_init_editor(void)
     int native_image = image_group(GROUP_EDITOR_BUILDING_NATIVE);
     int native_hut_alt_image = native_hut_alt_get_image_id();
     int scenario_image_alt_hut = scenario.native_images.alt_hut;
+    int scenario_image_decoration = scenario.native_images.decoration;
+    int scenario_image_monument = scenario.native_images.monument;
+    int scenario_image_watchtower = scenario.native_images.watchtower;
+
     int grid_offset = map_data.start_offset;
     for (int y = 0; y < map_data.height; y++, grid_offset += map_data.border_size) {
         for (int x = 0; x < map_data.width; x++, grid_offset++) {
@@ -192,6 +216,15 @@ void map_natives_init_editor(void)
             } else if (scenario_image_alt_hut != 0 && image_id == scenario_image_alt_hut + 1) {
                 type = BUILDING_NATIVE_HUT_ALT;
                 map_image_set(grid_offset, native_hut_alt_image + 1);
+            } else if (scenario_image_decoration != 0 && image_id == scenario_image_decoration) {
+                type = BUILDING_NATIVE_DECORATION;
+                map_image_set(grid_offset, building_image_get_for_type(type));
+            } else if (scenario_image_monument != 0 && image_id == scenario_image_monument) {
+                type = BUILDING_NATIVE_MONUMENT;
+                map_image_set(grid_offset, building_image_get_for_type(type));
+            } else if (scenario_image_watchtower != 0 && image_id == scenario_image_watchtower) {
+                type = BUILDING_NATIVE_WATCHTOWER;
+                map_image_set(grid_offset, building_image_get_for_type(type));
             } else if (image_id == image_meeting) {
                 type = BUILDING_NATIVE_MEETING;
                 map_image_set(grid_offset, native_image + 2);
@@ -213,6 +246,9 @@ void map_natives_init_editor(void)
                 map_building_set(grid_offset + map_grid_delta(0, 1), b->id);
                 map_building_set(grid_offset + map_grid_delta(1, 1), b->id);
             }
+            if (type == BUILDING_NATIVE_MONUMENT) {
+                map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get_for_type(type), TERRAIN_BUILDING);
+            }
         }
     }
 }
@@ -224,7 +260,8 @@ void map_natives_check_land(int update_behavior)
         city_military_decrease_native_attack_duration();
     }
 
-    building_type native_buildings[] = { BUILDING_NATIVE_HUT, BUILDING_NATIVE_HUT_ALT, BUILDING_NATIVE_MEETING };
+    building_type native_buildings[] = { BUILDING_NATIVE_HUT, BUILDING_NATIVE_HUT_ALT,
+        BUILDING_NATIVE_MEETING, BUILDING_NATIVE_WATCHTOWER };
 
     for (int i = 0; i < sizeof(native_buildings) / sizeof(native_buildings[0]); i++) {
         building_type type = native_buildings[i];
@@ -236,7 +273,8 @@ void map_natives_check_land(int update_behavior)
             }
             if (b->sentiment.native_anger >= 100) {
                 mark_native_land(b->x, b->y, size, radius);
-                if (!city_military_natives_are_retreating() && update_behavior && has_building_on_native_land(b->x, b->y, size, radius)) {
+                if (!city_military_natives_are_retreating() && update_behavior && 
+                    has_building_on_native_land(b->x, b->y, size, radius)) {
                     city_military_start_native_attack();
                 }
             } else if (update_behavior) {

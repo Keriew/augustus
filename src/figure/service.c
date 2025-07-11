@@ -209,7 +209,7 @@ static int provide_missionary_coverage(int x, int y)
             if (building_id) {
                 building *b = building_get(building_id);
                 if (b->type == BUILDING_NATIVE_HUT || b->type == BUILDING_NATIVE_HUT_ALT ||
-                    b->type == BUILDING_NATIVE_MEETING) {
+                    b->type == BUILDING_NATIVE_MEETING || b->type == BUILDING_NATIVE_WATCHTOWER) {
                     b->sentiment.native_anger = 0;
                 }
             }

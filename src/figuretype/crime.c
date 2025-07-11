@@ -506,6 +506,9 @@ int figure_rioter_collapse_building(figure *f)
             case BUILDING_NATIVE_HUT:
             case BUILDING_NATIVE_HUT_ALT:
             case BUILDING_NATIVE_MEETING:
+            case BUILDING_NATIVE_DECORATION:
+            case BUILDING_NATIVE_WATCHTOWER:
+            case BUILDING_NATIVE_MONUMENT:
             case BUILDING_RESERVOIR:
             case BUILDING_FOUNTAIN:
             case BUILDING_WELL:
