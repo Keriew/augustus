@@ -1661,7 +1661,7 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_VALUE_STORAGE_TYPE_ALL, "Alle"},
     {TR_PARAMETER_VALUE_STORAGE_TYPE_GRANARIES, "Silos"},
     {TR_PARAMETER_VALUE_STORAGE_TYPE_WAREHOUSES, "Lagerhäuser"},
-    {TR_FIX_GERMAN_CITY_RETAKEN, "Die zuvor von Roms Feinden eingenommene Stadt wurde von den Legionen eines anderen Gouvaneurs zurückerobert. Er hatte in Rom einen Triumph errungen und seiner Stadt das Recht, einen Triumphbogen zu errichten."}
+    {TR_FIX_GERMAN_CITY_RETAKEN, "Die zuvor von Roms Feinden eingenommene Stadt wurde von den Legionen eines anderen Gouvaneurs zurückerobert. Er hatte in Rom einen Triumph errungen und seiner Stadt das Recht, einen Triumphbogen zu errichten."},
 	/* Neu Übersetzen & sortieren */
 	{TR_BUILDING_LATRINES, "Latrinen"},
     {TR_BUILDING_LATRINES_DESC_1, "Ein Komfortabler Platz, der vom Volk beliebt ist, um über Neuigkeiten oder ihre Geschäfte zu reden."},
