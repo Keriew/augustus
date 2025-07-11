@@ -1615,6 +1615,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, "Warehouses and granaries can be built over any roads"},
     {TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, "Highlight selected building"},
     {TR_CONFIG_MAX_AUTOSAVE_SLOTS, "Maximum number of yearly autosave slots:" },
+    {TR_TOOLTIP_PERSONAL_SAVINGS, "Your private savings!"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
