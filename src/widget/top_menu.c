@@ -364,38 +364,47 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
     int w_rating = rating_one_block_w * 4.5f;  //half block for health
 
     // decide BASIC vs FULL
-    int min_basic = w_funds + w_population + w_date + PANEL_MARGIN * 4;
+    int min_basic = w_funds + w_population + w_date - 4 * PANEL_MARGIN; // relax the rules a bit
     int min_full = w_funds + w_savings + w_population + DATE_FIELD_WIDTH + w_rating + PANEL_MARGIN * 6;
 
     widget_layout_case_t layout;
+    int basic_margin = PANEL_MARGIN;
+
     if (available_width >= min_full) {
         layout = WIDGET_LAYOUT_FULL;
+        if (available_width < min_full * 1.2f) {
+            basic_margin = 0;
+        }
     } else if (available_width >= min_basic) {
         layout = WIDGET_LAYOUT_BASIC;
+        if (available_width < min_basic * 1.2f) {
+            basic_margin = 0;
+        }
     } else {
         layout = WIDGET_LAYOUT_NONE;
     }
+
     // GROUP 1:
-    int current_x = data.menu_end + PANEL_MARGIN;
+    int current_x = data.menu_end + basic_margin;
     data.funds.start = current_x;
     data.funds.end = current_x + w_funds;
-    current_x += w_funds + PANEL_MARGIN;
+    current_x += w_funds + basic_margin;
 
     if (layout == WIDGET_LAYOUT_FULL && !data.savings_on_right) {
         data.personal.start = current_x;
         data.personal.end = current_x + w_savings;
-        current_x += w_savings + PANEL_MARGIN;
+        current_x += w_savings + basic_margin;
     }
 
     data.population.start = current_x;
     data.population.end = current_x + w_population;
-    current_x += w_population + PANEL_MARGIN;
+    current_x += w_population + basic_margin;
     int group1_end_x = current_x;
 
     // precompute some values
     float avail_w = (float) available_width;
     int group1_span = group1_end_x - data.menu_end;
-    int group3_min_w = w_rating + (data.savings_on_right ? (PANEL_MARGIN + w_savings) : PANEL_MARGIN);
+    int group3_min_w = w_rating + (data.savings_on_right ? (basic_margin + w_savings) : basic_margin);
     int bar_right_edge = data.menu_end + available_width - BLACK_PANEL_BLOCK_WIDTH;
 
     // GROUP 2: date and  45% / 80% checks + OOB guard
@@ -406,7 +415,7 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
 
         int center_pos_x = data.menu_end + (available_width - DATE_FIELD_WIDTH) / 2 - BLACK_PANEL_BLOCK_WIDTH;
         unsigned char center_breaks_g3 =
-            (center_pos_x + DATE_FIELD_WIDTH + PANEL_MARGIN + group3_min_w) > bar_right_edge;
+            (center_pos_x + DATE_FIELD_WIDTH + basic_margin + group3_min_w) > bar_right_edge;
 
         if (g1_too_big || g1g3_too_big || center_breaks_g3) {
             date_start_x = group1_end_x;
@@ -430,12 +439,12 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
             || (group3_min_w > (0.5f * avail_w - DATE_FIELD_WIDTH));
 
         if (force_sequence || too_big_overall) {
-            group3_start_x = data.date.end + PANEL_MARGIN;
+            group3_start_x = data.date.end + PANEL_MARGIN; // force Panel margin here for visual consistency
         } else {
             // anchor to right edge
-            group3_start_x = bar_right_edge - w_rating - PANEL_MARGIN;
+            group3_start_x = bar_right_edge - w_rating - basic_margin;
             if (data.savings_on_right) {
-                group3_start_x -= (PANEL_MARGIN + w_savings);
+                group3_start_x -= (basic_margin + w_savings);
             }
         }
         // clamp so group3 never overruns
@@ -448,7 +457,7 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
         if (data.savings_on_right) {
             data.personal.start = x3;
             data.personal.end = x3 + w_savings;
-            x3 += w_savings + PANEL_MARGIN;
+            x3 += w_savings + basic_margin;
         }
         data.ratings.start = x3;
     }
