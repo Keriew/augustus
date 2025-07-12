@@ -47,12 +47,13 @@ static void make_request_visible_and_send_message(scenario_request *request)
     if (city_resource_count(request->resource) >= request->amount.requested) {
         request->can_comply_dialog_shown = 1;
     }
+    int requested = request->amount.requested;
     if (request->resource == RESOURCE_DENARII) {
-        city_message_post(1, MESSAGE_CAESAR_REQUESTS_MONEY, request->id, 0);
+        city_message_post(1, MESSAGE_CAESAR_REQUESTS_MONEY, request->id, requested);
     } else if (request->resource == RESOURCE_TROOPS) {
-        city_message_post(1, MESSAGE_CAESAR_REQUESTS_ARMY, request->id, 0);
+        city_message_post(1, MESSAGE_CAESAR_REQUESTS_ARMY, request->id, requested);
     } else {
-        city_message_post(1, MESSAGE_CAESAR_REQUESTS_GOODS, request->id, 0);
+        city_message_post(1, MESSAGE_CAESAR_REQUESTS_GOODS, request->id, requested);
     }
 }
 
