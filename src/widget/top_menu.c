@@ -350,7 +350,7 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
 
     // measure each widget
     char tmp[32];
-    sprintf(tmp, "%d (%d)", 999, 999); // max rating string
+    sprintf(tmp, "%d (%d)", 99, 99); // max rating string
     int rating_one_block_w = text_get_width((const uint8_t *) tmp, font);
     int w_funds = get_black_panel_total_width_for_text_id(
         6, 0, (city_finance_treasury() > 99999 ? 99999999 : 99999), font);
@@ -363,8 +363,8 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
     int w_rating = rating_one_block_w * 4.5f + BLACK_PANEL_BLOCK_WIDTH * 2; //half block for health
 
     // decide BASIC vs FULL
-    int min_basic = w_funds + w_population + DATE_FIELD_WIDTH + PANEL_MARGIN * 2;
-    int min_full = w_funds + w_savings + w_population + DATE_FIELD_WIDTH + w_rating + PANEL_MARGIN * 4;
+    int min_basic = w_funds + w_population + DATE_FIELD_WIDTH + PANEL_MARGIN * 4;
+    int min_full = w_funds + w_savings + w_population + DATE_FIELD_WIDTH + w_rating + PANEL_MARGIN * 6;
 
     widget_layout_case_t layout;
     if (available_width >= min_full) {
@@ -432,7 +432,7 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
             group3_start_x = data.date.end + PANEL_MARGIN;
         } else {
             // anchor to right edge
-            group3_start_x = bar_right_edge - w_rating;
+            group3_start_x = bar_right_edge - w_rating - PANEL_MARGIN;
             if (data.savings_on_right) {
                 group3_start_x -= (PANEL_MARGIN + w_savings);
             }
@@ -634,7 +634,7 @@ void widget_top_menu_draw(int force)
         draw_panel_with_text_and_number(data.personal.start, 6, 0, city_emperor_personal_savings(), 3, font, savings_color, savings_color);
 
         char rating_buf[20];
-        sprintf(rating_buf, "%d (%d)", 999, 999);
+        sprintf(rating_buf, "%d (%d)", 99, 99);
         int label_w = text_get_width((const uint8_t *) rating_buf, font);
         int block_w = label_w * 4 + label_w / 2; //half for health rating
         int slot_w = (block_w - (label_w / 2)) / 4;
