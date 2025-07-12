@@ -40,10 +40,19 @@ void platform_touch_start(SDL_TouchFingerEvent *event)
         return;
     }
 #elif defined(__vita__)
+
+#if SDL_VERSION_ATLEAST(2, 30, 7)
+#define FRONT_PANEL_TOUCH_ID 1
+#else
+#define FRONT_PANEL_TOUCH_ID 0
+#endif
+
     // Only use main screen for vita
-    if (event->touchId == 1) {
+    if (event->touchId != FRONT_PANEL_TOUCH_ID) {
         return;
     }
+
+#undef FRONT_PANEL_TOUCH_ID
 #endif
     int index = touch_create(get_touch_coordinates(event->x, event->y), event->timestamp);
     if (index != MAX_ACTIVE_TOUCHES) {
