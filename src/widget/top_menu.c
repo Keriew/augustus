@@ -55,8 +55,7 @@ enum {
 typedef enum {
     WIDGET_LAYOUT_NONE = 0,   // fits nothing (unlikely)
     WIDGET_LAYOUT_BASIC = 1,   // treasury, population, date
-    WIDGET_LAYOUT_BASIC_SAV = 2,   // + savings
-    WIDGET_LAYOUT_FULL = 3    // + ratings
+    WIDGET_LAYOUT_FULL = 2    // + ratings
 } widget_layout_case_t;
 
 #define BLACK_PANEL_BLOCK_WIDTH 20
@@ -328,9 +327,16 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
     // measure each widget
     char tmp[32];
     sprintf(tmp, "%d (%d)", 999, 999); // max rating string
-    int w_funds = get_black_panel_total_width_for_text_id(6, 0, city_finance_treasury(), font);
-    int w_savings = get_black_panel_total_width_for_text_id(52, 1, city_emperor_personal_savings(), font);
-    int w_population = get_black_panel_total_width_for_text_id(6, 1, city_population(), font);
+
+    int w_funds = get_black_panel_total_width_for_text_id(
+        6, 0, (city_finance_treasury() > 99999 ? 99999999 : city_finance_treasury()), font);
+    int w_savings = get_black_panel_total_width_for_text_id(
+        52, 1, (city_emperor_personal_savings() > 10000 ? 100000 : city_emperor_personal_savings()), font);
+    int w_population = get_black_panel_total_width_for_text_id(
+        6, 1, (city_population() > 10000 ? 100000 : city_population()), font);
+    // use bounds instead of live, to avoid frequent changes
+
+
     int w_rating = text_get_width((const uint8_t *) tmp, font) * 4
         + BLACK_PANEL_BLOCK_WIDTH * 2;
 
@@ -439,7 +445,6 @@ static int draw_panel_with_text_and_number(int offset, int lang_section, int lan
     int draw_x = offset + BLACK_PANEL_BLOCK_WIDTH + (usable_width / 2) - text_width / 2;
     // Draw label
     lang_text_draw_colored(lang_section, lang_index, draw_x, 5, font, label_color);
-
     // Draw number right after label
     text_draw_number(number, '@', " ", draw_x + label_width, 5, font, num_color);
 
@@ -501,6 +506,24 @@ static int draw_rating_with_goal(int offset, int value, int goal,
 
     return box_width;
 }
+
+static color_t get_savings_color_mask(void)
+{
+    city_emperor_calculate_gift_costs(); //update gift costs before checking affordability
+    if (city_emperor_can_send_gift(GIFT_LAVISH)) {
+        return COLOR_MASK_GREEN;
+    }
+    if (city_emperor_can_send_gift(GIFT_GENEROUS)) {
+        return COLOR_WHITE;
+    }
+    if (city_emperor_can_send_gift(GIFT_MODEST)) {
+        return COLOR_FONT_ORANGE;
+    }
+    // cant afford even the modest gift -> red
+    return COLOR_FONT_RED;
+}
+
+
 void widget_top_menu_draw(int force)
 {
     // Skip redraw if nothing changed
@@ -540,13 +563,16 @@ void widget_top_menu_draw(int force)
                                             DATE_FIELD_WIDTH, font, date_color);
     }
 
-    // --- Draw Savings (if visible) ---
-    if (layout >= WIDGET_LAYOUT_BASIC_SAV) {
-        draw_panel_with_text_and_number(data.personal.start, 52, 1, city_emperor_personal_savings(), 3, font, date_color, date_color);
+
+    if (layout >= WIDGET_LAYOUT_FULL) {
     }
 
     // --- Group 2: Ratings (if enabled and space allows) ---
     if (layout == WIDGET_LAYOUT_FULL && s_width >= 1024) {
+        // Draw Savings 
+        color_t savings_color = get_savings_color_mask();
+        draw_panel_with_text_and_number(data.personal.start, 6, 0, city_emperor_personal_savings(), 3, font, savings_color, savings_color);
+
         char rating_buf[20];
         sprintf(rating_buf, "%d (%d)", 999, 999);
         int label_w = text_get_width((const uint8_t *) rating_buf, font);
