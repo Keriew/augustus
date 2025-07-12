@@ -64,7 +64,7 @@ typedef enum {
 #define BLACK_PANEL_TOTAL_BLOCKS 6
 
 #define PANEL_MARGIN 10
-#define START_MARGIN 10
+#define DATE_FIELD_WIDTH 100
 #define MAX_SCREEN_WIDTH 1280
 
 static void menu_file_replay_map(int param);
@@ -144,6 +144,7 @@ typedef struct {
     int start;
     int end;
 }top_menu_tooltip_range;
+
 static struct {
     top_menu_tooltip_range funds;
     top_menu_tooltip_range population;
@@ -153,9 +154,9 @@ static struct {
     top_menu_tooltip_range prosperity;
     top_menu_tooltip_range peace;
     top_menu_tooltip_range favor;
+    top_menu_tooltip_range ratings;
     unsigned char hovered_widget; // group var for all ratings
     int menu_end;
-    int ratings_start;
     int open_sub_menu;
     int focus_menu_id;
     int focus_sub_menu_id;
@@ -318,116 +319,106 @@ int get_black_panel_total_width_for_text_id(int group, int id, int number, font_
 
     return total_width;
 }
+
 static widget_layout_case_t widget_top_menu_measure_layout(int available_width, font_t font)
 {
-    char dummy_rating[20];
-    sprintf(dummy_rating, "%d (%d)", 999, 999);
 
-    // Element widths
-    int treasury_w = get_black_panel_total_width_for_text_id(6, 0, city_finance_treasury(), font);
-    int savings_w = get_black_panel_total_width_for_text_id(52, 1, city_emperor_personal_savings(), font);
-    int population_w = get_black_panel_total_width_for_text_id(6, 1, city_population(), font);
-    int date_w = 100;
-    int rating_w = text_get_width((const uint8_t *) dummy_rating, font) * 4 + BLACK_PANEL_BLOCK_WIDTH * 2;
+    unsigned char alternative_layout = config_get(CONFIG_UI_MOVE_SAVINGS_TO_RIGHT);
 
-    const int side_margin = available_width * 0.05;
-    int base_left = data.menu_end + side_margin;
-    int base_right = data.menu_end + available_width - side_margin;
-    int center = data.menu_end + available_width / 2;
-    const int margin = PANEL_MARGIN;
+    // measure each widget
+    char tmp[32];
+    sprintf(tmp, "%d (%d)", 999, 999); // max rating string
+    int w_funds = get_black_panel_total_width_for_text_id(6, 0, city_finance_treasury(), font);
+    int w_savings = get_black_panel_total_width_for_text_id(52, 1, city_emperor_personal_savings(), font);
+    int w_population = get_black_panel_total_width_for_text_id(6, 1, city_population(), font);
+    int w_rating = text_get_width((const uint8_t *) tmp, font) * 4
+        + BLACK_PANEL_BLOCK_WIDTH * 2;
 
-    // Decide layout type simply
-    widget_layout_case_t layout = WIDGET_LAYOUT_FULL;
+    // decide BASIC vs FULL
+    int min_basic = w_funds + w_population + DATE_FIELD_WIDTH + PANEL_MARGIN * 4;
+    int min_full = w_funds + w_savings + w_population + DATE_FIELD_WIDTH + w_rating + PANEL_MARGIN * 6;
 
-    int left_group_w = treasury_w + margin + savings_w + margin + population_w;
-    int right_group_w = rating_w;
+    widget_layout_case_t layout;
+    if (available_width >= min_full)  layout = WIDGET_LAYOUT_FULL;
+    else if (available_width >= min_basic) layout = WIDGET_LAYOUT_BASIC;
+    else                                   layout = WIDGET_LAYOUT_NONE;
 
-    // Check fits
-    int available_left = (center - date_w / 2) - base_left - margin;
-    int available_right = base_right - (center + date_w / 2) - margin;
+    // GROUP 1:
+    int current_x = data.menu_end + PANEL_MARGIN;
+    data.funds.start = current_x;
+    data.funds.end = current_x + w_funds;
+    current_x += w_funds + PANEL_MARGIN;
 
-    if (left_group_w > available_left) {
-        layout = WIDGET_LAYOUT_BASIC_SAV;
-        left_group_w = treasury_w + margin + population_w;
-        if (left_group_w > available_left) {
-            layout = WIDGET_LAYOUT_BASIC;
-            left_group_w = treasury_w;
-            if (left_group_w > available_left) {
-                layout = WIDGET_LAYOUT_NONE;
+    if (layout == WIDGET_LAYOUT_FULL && !alternative_layout) {
+        data.personal.start = current_x;
+        data.personal.end = current_x + w_savings;
+        current_x += w_savings + PANEL_MARGIN;
+    }
+
+    data.population.start = current_x;
+    data.population.end = current_x + w_population;
+    current_x += w_population + PANEL_MARGIN;
+    int group1_end_x = current_x;
+
+    // precompute some values
+    float avail_w = (float) available_width;
+    int group1_span = group1_end_x - data.menu_end;
+    int group3_min_w = w_rating + (alternative_layout ? (PANEL_MARGIN + w_savings) : PANEL_MARGIN);
+    int bar_right_edge = data.menu_end + available_width - PANEL_MARGIN;
+
+    // GROUP 2: date and  45% / 80% checks + OOB guard
+    int date_start_x;
+    if (layout == WIDGET_LAYOUT_FULL) {
+        unsigned char g1_too_big = (group1_span >= 0.45f * avail_w);
+        unsigned char g1g3_too_big = (group1_span + group3_min_w >= 0.80f * avail_w);
+
+        int center_pos_x = data.menu_end + (available_width - DATE_FIELD_WIDTH) / 2;
+        unsigned char center_breaks_g3 =
+            (center_pos_x + DATE_FIELD_WIDTH + PANEL_MARGIN + group3_min_w) > bar_right_edge;
+
+        if (g1_too_big || g1g3_too_big || center_breaks_g3) {
+            date_start_x = group1_end_x;
+        } else {
+            date_start_x = center_pos_x;
+        }
+    } else {
+        date_start_x = group1_end_x;
+    }
+    data.date.start = date_start_x;
+    data.date.end = date_start_x + DATE_FIELD_WIDTH + PANEL_MARGIN;
+
+    // GROUP 3
+    if (layout == WIDGET_LAYOUT_FULL) {
+        int group3_start_x;
+        unsigned char force_sequence = (group1_span + group3_min_w >= 0.80f * avail_w);
+        // if >80%, force sequentional drawing
+        unsigned char too_big_overall =
+            (group3_min_w > 0.45f * avail_w)
+            || (group3_min_w > 0.90f * (available_width - group1_span - DATE_FIELD_WIDTH))
+            || (group3_min_w > (0.5f * avail_w - DATE_FIELD_WIDTH));
+
+        if (force_sequence || too_big_overall) {
+            group3_start_x = data.date.end + PANEL_MARGIN;
+        } else {
+            // anchor to right edge
+            group3_start_x = bar_right_edge - w_rating;
+            if (alternative_layout) {
+                group3_start_x -= (PANEL_MARGIN + w_savings);
             }
         }
-    }
-
-    if (right_group_w > available_right && layout == WIDGET_LAYOUT_FULL) {
-        layout = WIDGET_LAYOUT_BASIC_SAV;
-    }
-
-    // Position LEFT elements
-    int x_left = base_left;
-    data.funds.start = x_left;
-    data.funds.end = x_left + treasury_w;
-    x_left = data.funds.end + margin;
-
-    if (layout == WIDGET_LAYOUT_FULL || layout == WIDGET_LAYOUT_BASIC_SAV) {
-        if (!config_get(CONFIG_UI_MOVE_SAVINGS_TO_RIGHT)) {
-            data.personal.start = x_left;
-            data.personal.end = x_left + savings_w;
-            x_left = data.personal.end + margin;
+        // clamp so group3 never overruns
+        int group3_end_x = group3_start_x + group3_min_w;
+        if (group3_end_x > bar_right_edge) {
+            group3_start_x -= (group3_end_x - bar_right_edge);
         }
-    }
 
-    if (layout != WIDGET_LAYOUT_BASIC) {
-        data.population.start = x_left;
-        data.population.end = x_left + population_w;
-    }
-
-    // Position RIGHT elements
-    int x_right = base_right;
-    if (layout == WIDGET_LAYOUT_FULL) {
-        data.ratings_start = x_right - rating_w;
-        x_right = data.ratings_start - margin;
-
-        if (config_get(CONFIG_UI_MOVE_SAVINGS_TO_RIGHT)) {
-            data.personal.end = x_right;
-            data.personal.start = data.personal.end - savings_w;
+        int x3 = group3_start_x;
+        if (alternative_layout) {
+            data.personal.start = x3;
+            data.personal.end = x3 + w_savings;
+            x3 += w_savings + PANEL_MARGIN;
         }
-    } else if (layout == WIDGET_LAYOUT_BASIC_SAV && config_get(CONFIG_UI_MOVE_SAVINGS_TO_RIGHT)) {
-        data.personal.end = x_right;
-        data.personal.start = data.personal.end - savings_w;
-    }
-
-    // Center date
-    data.date.start = center - date_w / 2;
-    data.date.end = center + date_w / 2;
-
-    // Simple overlap safeguards
-    // Left side overlap
-    int left_end = (layout != WIDGET_LAYOUT_BASIC) ? data.population.end : data.funds.end;
-    if (left_end + margin > data.date.start) {
-        int shift = (left_end + margin) - data.date.start;
-        data.date.start += shift;
-        data.date.end += shift;
-    }
-
-    // Right side overlap
-    int right_start = base_right;
-    if (layout == WIDGET_LAYOUT_FULL) {
-        right_start = (config_get(CONFIG_UI_MOVE_SAVINGS_TO_RIGHT))
-            ? data.personal.start : data.ratings_start;
-    } else if (layout == WIDGET_LAYOUT_BASIC_SAV && config_get(CONFIG_UI_MOVE_SAVINGS_TO_RIGHT)) {
-        right_start = data.personal.start;
-    }
-
-    if (data.date.end + margin > right_start) {
-        int shift = (data.date.end + margin) - right_start;
-        data.date.start -= shift;
-        data.date.end -= shift;
-
-        // clamp again left if needed
-        if (data.date.start < left_end + margin) {
-            data.date.start = left_end + margin;
-            data.date.end = data.date.start + date_w;
-        }
+        data.ratings.start = x3;
     }
 
     return layout;
@@ -544,10 +535,9 @@ void widget_top_menu_draw(int force)
         draw_panel_with_text_and_number(data.population.start, 6, 1, city_population(), 3, font, pop_color, pop_color);
         // --- Draw Date ---
         int date_x = data.date.start;
-        int date_w = data.date.end - data.date.start;
-        draw_black_panel(date_x, 0, date_w);
+        draw_black_panel(date_x, 0, DATE_FIELD_WIDTH);
         lang_text_draw_month_year_max_width(game_time_month(), game_time_year(), date_x + BLACK_PANEL_BLOCK_WIDTH, 5,
-                                            date_w, font, date_color);
+                                            DATE_FIELD_WIDTH, font, date_color);
     }
 
     // --- Draw Savings (if visible) ---
@@ -562,7 +552,7 @@ void widget_top_menu_draw(int force)
         int label_w = text_get_width((const uint8_t *) rating_buf, font);
         int block_w = label_w * 4;
         int slot_w = block_w / 4;
-        int x = data.ratings_start;
+        int x = data.ratings.start;
 
 
         draw_black_panel(x, 0, block_w);
