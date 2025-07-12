@@ -1672,12 +1672,21 @@ static translation_string all_strings[] = {
     {TR_BUILDING_LATRINES_UNNECESSARY, "Diese Latrinen sind unnötig, da es in ihrer Reichweite keine Häuser mit Bedarf gibt."},
     {TR_BUILDING_LATRINES_NO_HOUSES, "Diese Latrinen sind unnötig, denn es gibt keine Häuser in ihrer Reichweite."},
     {TR_CONFIG_DRAW_ASCLEPIUS, "Male die Rute des Asklepius für das Gesungheitsmenü"},
-    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT, "Alternative Eingeborenen Hütte"},
-    {TR_BUILDING_NATIVE_HUT_ALT, "Alternative Eingeborenen Hütte"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT, "Einheimischenhütte 2"},
+    {TR_BUILDING_NATIVE_HUT_ALT, "Einheimischenhütte 2"},
     {TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, "Lagerhäuser und Silos können auf Straßen gebaut werden"},
     {TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, "Hebe ausgewählte Gebäude hervor"},
     {TR_CONFIG_MAX_AUTOSAVE_SLOTS, "Maximale jährliche automatische Speicherungen:"},
     {TR_CONFIG_SHOW_DESIRABILITY_RANGE_ALL, "Zeige Attraktivität beim Bau eines Gebäudes"},
+	{TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION, "Dekoration"},
+	{TR_EDITOR_SCENARIO_BUILDING_NATIVE_MONUMENT, "Monument"},
+	{TR_EDITOR_SCENARIO_BUILDING_NATIVE_WATCHTOWER, "Wachturm"},
+	{TR_BUILDING_NATIVE_DECORATION, "Einheimischendekoration"},
+	{TR_BUILDING_NATIVE_MONUMENT, "Einheimischenmonument"},
+	{TR_BUILDING_NATIVE_WATCHTOWER, "Einheimischenwachturm"},
+	{TR_BUILDING_NATIVE_DECORATION_DESC, "Das Produkt der lokalen Künstler, welches unter beiden, Einheimischen und Römern, sehr geschätzt wird. Trotz der fehlenden Feinheiten, finden es viele Bürger dennoch provozierend."},
+	{TR_BUILDING_NATIVE_MONUMENT_DESC, "Diese bedeutungsvolle Struktur beweist, dass die Einheimischen, trotz dem fehlenden Wissen über Architektur und Ingeneurskunst, durch harte Arbeit und Einfallsreichtum großartige Dinge erschaffen können. Obwohl einige Skeptiker spekulieren ob es nicht doch ein Wunder, von den Göttern gebracht oder ein Überrest einer längst vergessenen aber hoch entwickelten Zivilisation ist."},
+	{TR_BUILDING_NATIVE_WATCHTOWER_DESC, "Mit diesen Vorrichtungen beobachten die Einheimischen jeden noch so kleinen Schritt und erfahren unsere Schwächen. Wenn wir sie nicht friedlich zivilisieren, werden diese Türme uns davon abhalten in ihr Gebiet vorzudringen."},
 };
 
 void translation_german(const translation_string **strings, int *num_strings)
