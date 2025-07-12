@@ -350,20 +350,21 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
 
     // measure each widget
     char tmp[32];
-    sprintf(tmp, "%d (%d)", 99, 99); // max rating string
+    sprintf(tmp, "%d(%d)", 999, 999); // max rating string
     int rating_one_block_w = text_get_width((const uint8_t *) tmp, font);
     int w_funds = get_black_panel_total_width_for_text_id(
         6, 0, (city_finance_treasury() > 99999 ? 99999999 : 99999), font);
     int w_savings = get_black_panel_total_width_for_text_id(
-        52, 1, (city_emperor_personal_savings() > 10000 ? 100000 : 10000), font);
+        6, 0, (city_emperor_personal_savings() > 10000 ? 100000 : 10000), font);
     int w_population = get_black_panel_total_width_for_text_id(
         6, 1, (city_population() > 10000 ? 100000 : 10000), font);
+    int w_date = DATE_FIELD_WIDTH + BLACK_PANEL_BLOCK_WIDTH; // returned block is longer
     // use bounds instead of live, to avoid frequent changes
 
-    int w_rating = rating_one_block_w * 4.5f + BLACK_PANEL_BLOCK_WIDTH * 2; //half block for health
+    int w_rating = rating_one_block_w * 4.5f;  //half block for health
 
     // decide BASIC vs FULL
-    int min_basic = w_funds + w_population + DATE_FIELD_WIDTH + PANEL_MARGIN * 4;
+    int min_basic = w_funds + w_population + w_date + PANEL_MARGIN * 4;
     int min_full = w_funds + w_savings + w_population + DATE_FIELD_WIDTH + w_rating + PANEL_MARGIN * 6;
 
     widget_layout_case_t layout;
@@ -395,7 +396,7 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
     float avail_w = (float) available_width;
     int group1_span = group1_end_x - data.menu_end;
     int group3_min_w = w_rating + (data.savings_on_right ? (PANEL_MARGIN + w_savings) : PANEL_MARGIN);
-    int bar_right_edge = data.menu_end + available_width - PANEL_MARGIN;
+    int bar_right_edge = data.menu_end + available_width - BLACK_PANEL_BLOCK_WIDTH;
 
     // GROUP 2: date and  45% / 80% checks + OOB guard
     int date_start_x;
@@ -403,7 +404,7 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
         unsigned char g1_too_big = (group1_span >= 0.45f * avail_w);
         unsigned char g1g3_too_big = (group1_span + group3_min_w >= 0.80f * avail_w);
 
-        int center_pos_x = data.menu_end + (available_width - DATE_FIELD_WIDTH) / 2;
+        int center_pos_x = data.menu_end + (available_width - DATE_FIELD_WIDTH) / 2 - BLACK_PANEL_BLOCK_WIDTH;
         unsigned char center_breaks_g3 =
             (center_pos_x + DATE_FIELD_WIDTH + PANEL_MARGIN + group3_min_w) > bar_right_edge;
 
@@ -416,7 +417,7 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
         date_start_x = group1_end_x;
     }
     data.date.start = date_start_x;
-    data.date.end = date_start_x + DATE_FIELD_WIDTH + PANEL_MARGIN;
+    data.date.end = date_start_x + DATE_FIELD_WIDTH + BLACK_PANEL_BLOCK_WIDTH;
 
     // GROUP 3
     if (layout == WIDGET_LAYOUT_FULL) {
@@ -634,7 +635,7 @@ void widget_top_menu_draw(int force)
         draw_panel_with_text_and_number(data.personal.start, 6, 0, city_emperor_personal_savings(), 3, font, savings_color, savings_color);
 
         char rating_buf[20];
-        sprintf(rating_buf, "%d (%d)", 99, 99);
+        sprintf(rating_buf, "%d(%d)", 999, 999);
         int label_w = text_get_width((const uint8_t *) rating_buf, font);
         int block_w = label_w * 4 + label_w / 2; //half for health rating
         int slot_w = (block_w - (label_w / 2)) / 4;
