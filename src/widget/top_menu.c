@@ -154,6 +154,8 @@ static struct {
     top_menu_tooltip_range peace;
     top_menu_tooltip_range favor;
     unsigned char hovered_widget; // group var for all ratings
+    int menu_end;
+    int ratings_start;
     int open_sub_menu;
     int focus_menu_id;
     int focus_sub_menu_id;
@@ -290,48 +292,147 @@ static int draw_black_panel(int x, int y, int width)
     return x_offset + BLACK_PANEL_BLOCK_WIDTH;
 }
 
-static int get_black_panel_usable_width(int desired_width)
+// Correctly calculate the actual drawn width of the black panel given a desired width
+static int get_black_panel_actual_width(int desired_width)
 {
-    int blocks = desired_width / BLACK_PANEL_BLOCK_WIDTH;
-    if (desired_width % BLACK_PANEL_BLOCK_WIDTH > 0) {
+    int blocks = (desired_width / BLACK_PANEL_BLOCK_WIDTH) - 1;
+    if ((desired_width % BLACK_PANEL_BLOCK_WIDTH) > 0) {
         blocks++;
     }
-    int usable_blocks = (blocks - 2) < 0 ? 0 : (blocks - 2); // subtract left + right caps, no negatives
-    return usable_blocks * BLACK_PANEL_BLOCK_WIDTH;
+
+    if (blocks < BLACK_PANEL_MIDDLE_BLOCKS) {
+        blocks = BLACK_PANEL_MIDDLE_BLOCKS; // ensure at least minimal middle blocks
+    }
+
+    // actual width = left cap + middle blocks + right cap
+    return (blocks + 2) * BLACK_PANEL_BLOCK_WIDTH;
 }
 
+// Corrected version for getting the total width for a label + number
 int get_black_panel_total_width_for_text_id(int group, int id, int number, font_t font)
 {
     int label_width = lang_text_get_width(group, id, font);
     int number_width = text_get_number_width(number, '@', " ", font);
-    int text_width = label_width + number_width;
-    int usable_width = get_black_panel_usable_width(text_width);
-    return usable_width + 2 * BLACK_PANEL_BLOCK_WIDTH;
-}
+    int text_width = label_width + number_width + BLACK_PANEL_BLOCK_WIDTH * 2; // add padding
+    int total_width = get_black_panel_actual_width(text_width);
 
+    return total_width;
+}
 static widget_layout_case_t widget_top_menu_measure_layout(int available_width, font_t font)
 {
     char dummy_rating[20];
     sprintf(dummy_rating, "%d (%d)", 999, 999);
 
+    // Element widths
     int treasury_w = get_black_panel_total_width_for_text_id(6, 0, city_finance_treasury(), font);
     int savings_w = get_black_panel_total_width_for_text_id(52, 1, city_emperor_personal_savings(), font);
     int population_w = get_black_panel_total_width_for_text_id(6, 1, city_population(), font);
-    int date_w = 100;  // fixed width
-    int rating_w = text_get_width((const uint8_t *) dummy_rating, font) * 4 + BLACK_PANEL_BLOCK_WIDTH;
+    int date_w = 100;
+    int rating_w = text_get_width((const uint8_t *) dummy_rating, font) * 4 + BLACK_PANEL_BLOCK_WIDTH * 2;
 
-    int group1 = treasury_w + PANEL_MARGIN + population_w + PANEL_MARGIN + date_w;
-    int group2 = savings_w + PANEL_MARGIN;
-    int group3 = rating_w;
+    const int side_margin = available_width * 0.05;
+    int base_left = data.menu_end + side_margin;
+    int base_right = data.menu_end + available_width - side_margin;
+    int center = data.menu_end + available_width / 2;
+    const int margin = PANEL_MARGIN;
 
-    if (group1 > available_width)
-        return WIDGET_LAYOUT_NONE;
-    if (group1 + group2 > available_width)
-        return WIDGET_LAYOUT_BASIC;
-    if (group1 + group2 + group3 > available_width)
-        return WIDGET_LAYOUT_BASIC_SAV;
-    return WIDGET_LAYOUT_FULL;
+    // Decide layout type simply
+    widget_layout_case_t layout = WIDGET_LAYOUT_FULL;
+
+    int left_group_w = treasury_w + margin + savings_w + margin + population_w;
+    int right_group_w = rating_w;
+
+    // Check fits
+    int available_left = (center - date_w / 2) - base_left - margin;
+    int available_right = base_right - (center + date_w / 2) - margin;
+
+    if (left_group_w > available_left) {
+        layout = WIDGET_LAYOUT_BASIC_SAV;
+        left_group_w = treasury_w + margin + population_w;
+        if (left_group_w > available_left) {
+            layout = WIDGET_LAYOUT_BASIC;
+            left_group_w = treasury_w;
+            if (left_group_w > available_left) {
+                layout = WIDGET_LAYOUT_NONE;
+            }
+        }
+    }
+
+    if (right_group_w > available_right && layout == WIDGET_LAYOUT_FULL) {
+        layout = WIDGET_LAYOUT_BASIC_SAV;
+    }
+
+    // Position LEFT elements
+    int x_left = base_left;
+    data.funds.start = x_left;
+    data.funds.end = x_left + treasury_w;
+    x_left = data.funds.end + margin;
+
+    if (layout == WIDGET_LAYOUT_FULL || layout == WIDGET_LAYOUT_BASIC_SAV) {
+        if (!config_get(CONFIG_UI_MOVE_SAVINGS_TO_RIGHT)) {
+            data.personal.start = x_left;
+            data.personal.end = x_left + savings_w;
+            x_left = data.personal.end + margin;
+        }
+    }
+
+    if (layout != WIDGET_LAYOUT_BASIC) {
+        data.population.start = x_left;
+        data.population.end = x_left + population_w;
+    }
+
+    // Position RIGHT elements
+    int x_right = base_right;
+    if (layout == WIDGET_LAYOUT_FULL) {
+        data.ratings_start = x_right - rating_w;
+        x_right = data.ratings_start - margin;
+
+        if (config_get(CONFIG_UI_MOVE_SAVINGS_TO_RIGHT)) {
+            data.personal.end = x_right;
+            data.personal.start = data.personal.end - savings_w;
+        }
+    } else if (layout == WIDGET_LAYOUT_BASIC_SAV && config_get(CONFIG_UI_MOVE_SAVINGS_TO_RIGHT)) {
+        data.personal.end = x_right;
+        data.personal.start = data.personal.end - savings_w;
+    }
+
+    // Center date
+    data.date.start = center - date_w / 2;
+    data.date.end = center + date_w / 2;
+
+    // Simple overlap safeguards
+    // Left side overlap
+    int left_end = (layout != WIDGET_LAYOUT_BASIC) ? data.population.end : data.funds.end;
+    if (left_end + margin > data.date.start) {
+        int shift = (left_end + margin) - data.date.start;
+        data.date.start += shift;
+        data.date.end += shift;
+    }
+
+    // Right side overlap
+    int right_start = base_right;
+    if (layout == WIDGET_LAYOUT_FULL) {
+        right_start = (config_get(CONFIG_UI_MOVE_SAVINGS_TO_RIGHT))
+            ? data.personal.start : data.ratings_start;
+    } else if (layout == WIDGET_LAYOUT_BASIC_SAV && config_get(CONFIG_UI_MOVE_SAVINGS_TO_RIGHT)) {
+        right_start = data.personal.start;
+    }
+
+    if (data.date.end + margin > right_start) {
+        int shift = (data.date.end + margin) - right_start;
+        data.date.start -= shift;
+        data.date.end -= shift;
+
+        // clamp again left if needed
+        if (data.date.start < left_end + margin) {
+            data.date.start = left_end + margin;
+            data.date.end = data.date.start + date_w;
+        }
+    }
+
+    return layout;
 }
+
 
 static int draw_panel_with_text_and_number(int offset, int lang_section, int lang_index,
                                            int number, int margin, font_t font, color_t label_color, color_t num_color)
@@ -345,8 +446,6 @@ static int draw_panel_with_text_and_number(int offset, int lang_section, int lan
     int end_of_panel = offset + panel_width;
     int usable_width = end_of_panel - offset - 2 * BLACK_PANEL_BLOCK_WIDTH;
     int draw_x = offset + BLACK_PANEL_BLOCK_WIDTH + (usable_width / 2) - text_width / 2;
-
-
     // Draw label
     lang_text_draw_colored(lang_section, lang_index, draw_x, 5, font, label_color);
 
@@ -390,7 +489,6 @@ static int draw_rating_panel(int offset, int info_id, int box_width,
     int x = offset + (box_width - total_width) / 2;
     text_draw_number(value, '@', " ", x, 5, font, val_color);
     text_draw_number(goal, '(', ")", x + value_width + gap_length, 5, font, goal_color);
-
     return box_width;
 }
 
@@ -434,42 +532,27 @@ void widget_top_menu_draw(int force)
     color_t date_color = (s_width < 800) ? COLOR_MASK_NONE : COLOR_FONT_YELLOW;
 
     refresh_background();
-    int menu_end = menu_bar_draw(menu, 4, s_width < 1024 ? 338 : 493);
-    int available_width = s_width - menu_end;
-    int center_x = menu_end + (available_width * 0.50);
-    int right_anchor = s_width - (available_width * 0.05);
-    int base_x = menu_end + (available_width * 0.05);
+    data.menu_end = menu_bar_draw(menu, 4, s_width < 1024 ? 338 : 493);
+    widget_layout_case_t layout = widget_top_menu_measure_layout(s_width - data.menu_end, font);
 
-    widget_layout_case_t layout = widget_top_menu_measure_layout(available_width, font);
-
-    // --- Group 1: Treasury + Population + Date ---
+    // --- Draw Treasury ---
+    int treasury = city_finance_treasury();
+    color_t treasury_color = (treasury < 0) ? COLOR_FONT_RED : COLOR_WHITE;
     if (layout >= WIDGET_LAYOUT_BASIC) {
-        int treasury = city_finance_treasury();
-        color_t t_color = (treasury < 0) ? COLOR_FONT_RED : COLOR_WHITE;
-        data.funds.start = base_x;
-        base_x += draw_panel_with_text_and_number(base_x, 6, 0, treasury, 3, font, t_color, t_color);
-        data.funds.end = base_x;
-        base_x += PANEL_MARGIN;
-
-        if (layout >= WIDGET_LAYOUT_BASIC_SAV) {
-            data.personal.start = base_x;
-            base_x += draw_panel_with_text_and_number(base_x, 6, 0, city_emperor_personal_savings(), 3, font, date_color, date_color);
-            data.personal.end = base_x;
-            base_x += PANEL_MARGIN * 3;
-
-        }
-        data.population.start = base_x;
-        base_x += draw_panel_with_text_and_number(base_x, 6, 1, city_population(), 3, font, pop_color, pop_color);
-        data.population.end = base_x;
-
-        int date_w = 100;
-        int date_x = center_x - (date_w / 2);
+        draw_panel_with_text_and_number(data.funds.start, 6, 0, treasury, 3, font, treasury_color, treasury_color);
+        // --- Draw Population ---
+        draw_panel_with_text_and_number(data.population.start, 6, 1, city_population(), 3, font, pop_color, pop_color);
+        // --- Draw Date ---
+        int date_x = data.date.start;
+        int date_w = data.date.end - data.date.start;
         draw_black_panel(date_x, 0, date_w);
-        data.date.start = date_x;
-        data.date.end = date_x + date_w;
         lang_text_draw_month_year_max_width(game_time_month(), game_time_year(), date_x + BLACK_PANEL_BLOCK_WIDTH, 5,
                                             date_w, font, date_color);
+    }
 
+    // --- Draw Savings (if visible) ---
+    if (layout >= WIDGET_LAYOUT_BASIC_SAV) {
+        draw_panel_with_text_and_number(data.personal.start, 52, 1, city_emperor_personal_savings(), 3, font, date_color, date_color);
     }
 
     // --- Group 2: Ratings (if enabled and space allows) ---
@@ -479,7 +562,7 @@ void widget_top_menu_draw(int force)
         int label_w = text_get_width((const uint8_t *) rating_buf, font);
         int block_w = label_w * 4;
         int slot_w = block_w / 4;
-        int x = right_anchor - block_w;
+        int x = data.ratings_start;
 
 
         draw_black_panel(x, 0, block_w);
@@ -492,11 +575,10 @@ void widget_top_menu_draw(int force)
             targets[i]->start = x_offset;
             targets[i]->end = x_offset + draw_rating_panel(x_offset, rating_ids[i], slot_w, font, pop_color, date_color);
         }
-
     }
 
     // --- Cache current state ---
-    drawn.treasury = city_finance_treasury();
+    drawn.treasury = treasury;
     drawn.population = city_population();
     drawn.month = game_time_month();
     drawn.personal = city_emperor_personal_savings();

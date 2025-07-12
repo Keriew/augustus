@@ -80,7 +80,8 @@ static const char *ini_keys[] = {
     "ui_show_desirability_range",
     "ui_draw_asclepius",
     "ui_show_desirability_range_all",
-    "ui_highlight_selected_building"
+    "ui_highlight_selected_building",
+    "ui_move_savings_to_right"
 };
 
 static const char *ini_string_keys[] = {
@@ -111,6 +112,7 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_UI_HIGHLIGHT_SELECTED_BUILDING] = 1,
     [CONFIG_GP_CH_MAX_AUTOSAVE_SLOTS] = 10,
     [CONFIG_GENERAL_NEXT_AUTOSAVE_SLOT] = 0,
+    [CONFIG_UI_MOVE_SAVINGS_TO_RIGHT] = 0,
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };
