@@ -94,6 +94,7 @@ static struct {
     int y_offset;
     int width;
     int height;
+    int available_height;
     int is_collapsed;
     sidebar_extra_display info_to_display;
     int game_speed;
@@ -416,7 +417,9 @@ static int draw_request_buttons(int y_offset)
         const request *r = &data.requests[i];
         int base_button_y_offset = i * EXTRA_INFO_HEIGHT_REQUESTS_PANEL;
 
-        if (data.visible_requests < data.active_requests && i == data.visible_requests - 1) {
+        if (data.visible_requests + 1 == data.active_requests &&
+            data.height + EXTRA_INFO_HEIGHT_REQUESTS_PANEL > data.available_height) {
+
             buttons_emperor_requests[i].y = base_button_y_offset + 9;
             buttons_emperor_requests[i].height = 30;
 
@@ -616,6 +619,7 @@ int sidebar_extra_draw_background(int x_offset, int y_offset, int width, int ava
     data.y_offset = y_offset;
     data.width = width;
     data.info_to_display = calculate_displayable_info(info_to_display, available_height);
+    data.available_height = available_height;
     data.height = calculate_extra_info_height(available_height);
 
     if (data.info_to_display != SIDEBAR_EXTRA_DISPLAY_NONE) {
