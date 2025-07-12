@@ -363,8 +363,8 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
     int w_rating = rating_one_block_w * 4.5f + BLACK_PANEL_BLOCK_WIDTH * 2; //half block for health
 
     // decide BASIC vs FULL
-    int min_basic = w_funds + w_population + DATE_FIELD_WIDTH + PANEL_MARGIN * 4;
-    int min_full = w_funds + w_savings + w_population + DATE_FIELD_WIDTH + w_rating + PANEL_MARGIN * 6;
+    int min_basic = w_funds + w_population + DATE_FIELD_WIDTH + PANEL_MARGIN * 2;
+    int min_full = w_funds + w_savings + w_population + DATE_FIELD_WIDTH + w_rating + PANEL_MARGIN * 4;
 
     widget_layout_case_t layout;
     if (available_width >= min_full) {
@@ -553,16 +553,33 @@ static color_t get_savings_color_mask(void)
     return COLOR_FONT_RED;
 }
 
-static signed char get_cosmetic_day_of_month(void)
+static char get_cosmetic_day_of_month(void)
 {
-    int total_ticks = game_time_day() * GAME_TIME_TICKS_PER_DAY + game_time_tick();
+    static const char days_in_month[] = {
+        31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+    };
 
-    // Spread 800 ticks evenly across 28 cosmetic days
-    // Each cosmetic day gets roughly 28.57 ticks
-    // Multiply by 28 and divide by 800, then add 1 for 1-based indexing
-    short cosmetic_day = (total_ticks * 28) / 800 + 1;
-    // Clamp in case of rounding issues
-    if (cosmetic_day > 28) cosmetic_day = 28;
+    int year = game_time_year();
+    int month = game_time_month();
+    int day = game_time_day();
+    int tick = game_time_tick();
+
+    int is_leap = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
+    //extra points for leap years
+    int days_this_month = days_in_month[month];
+    if (month == 1 && is_leap) {
+        days_this_month = 29;
+    }
+
+    // Total ticks into the current in-game month (0 to 799)
+    int total_ticks = day * 50 + tick;
+    // Scale to real calendar day, add 1 to offset 0-based indexing
+    char cosmetic_day = (total_ticks * days_this_month) / 800 + 1;
+
+    if (cosmetic_day > days_this_month) {
+        cosmetic_day = days_this_month;
+    }
+
     return cosmetic_day;
 }
 
