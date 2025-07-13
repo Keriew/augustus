@@ -1433,7 +1433,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_EDIT_REQUEST_SET_DEADLINE, "Frist muss mindestens ein Jahr sein"},
     {TR_EDITOR_EDIT_INVASION_NO_TYPE, "Kein Feind-Typ"},
     {TR_EDITOR_EDIT_INVASION_NO_SOLDIERS, "Keine Soldaten für Invasion gewählt"},
-    {TR_EDITOR_EDIT_INVASION_SET_YEAR, "nvasion kann nicht im ersten Jahr beginnen"},
+    {TR_EDITOR_EDIT_INVASION_SET_YEAR, "Invasion kann nicht im ersten Jahr beginnen"},
     {TR_EDITOR_EDIT_DEMAND_CHANGE_NO_YEAR, "Änderung kann nicht im ersten Jahr erfolgen"},
     {TR_EDITOR_EDIT_DEMAND_CHANGE_INVALID_ROUTE_SET, "Ungültige Route gesetzt"},
     {TR_EDITOR_ALLOWED_BUILDINGS_ALLOWED, "Erlaubt"},
