@@ -607,11 +607,11 @@ static void draw_background_video(void)
         const scenario_request *request = scenario_request_get(player_message.param1);
         width = text_draw_number(request->amount.requested, '@', " ", data.x + 8, y_text, FONT_NORMAL_WHITE, 0);
         image_draw(resource_get_data(request->resource)->image.icon,
-            data.x + 5 + width, y_text - 5, COLOR_MASK_NONE, SCALE_NONE);
-        width += text_draw(resource_get_data(request->resource)->text, data.x + 30 + width, y_text, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
+            data.x + 15 + width, y_text - 5, COLOR_MASK_NONE, SCALE_NONE);
+        width += text_draw(resource_get_data(request->resource)->text, data.x + 40 + width, y_text, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
         if (request->state == REQUEST_STATE_NORMAL || request->state == REQUEST_STATE_OVERDUE) {
-            width += lang_text_draw_amount(8, 4, request->months_to_comply, data.x + 45 + width, y_text, FONT_NORMAL_WHITE);
-            width += lang_text_draw(12, 2, data.x + 45 + width, y_text, FONT_NORMAL_WHITE);
+            width += lang_text_draw_amount(8, 4, request->months_to_comply, data.x + 60 + width, y_text, FONT_NORMAL_WHITE);
+            width += lang_text_draw(12, 2, data.x + 60 + width, y_text, FONT_NORMAL_WHITE);
         }
     }
 
