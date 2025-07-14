@@ -1051,11 +1051,13 @@ void window_building_get_tooltip_granary_orders(int *group_id, int *text_id, int
         }
     } else {
         if (data.resource_focus_button_id) {
-            int building_id = data.building_id;
+            int building_id = data.building_id; //currently viewed building
             building *b = building_get(building_id);
-
-            const building_storage *s = building_storage_get(b->storage_id);
-            const resource_storage_entry *entry = &s->resource_state[data.resource_focus_button_id];
+            const building_storage *s = building_storage_get(b->storage_id); //get storage details
+            //resource_focus_button_id corresponds to the index of currently highlighted state button
+            // it's not directly corelated to the resource id, which is stored in parameter1
+            int resource_number = orders_resource_buttons[data.resource_focus_button_id].parameter1;
+            const resource_storage_entry *entry = &s->resource_state[resource_number];
             if (entry->state == BUILDING_STORAGE_STATE_MAINTAINING) {
                 *translation = TR_TOOLTIP_BUILDING_DISTRIBUTION_MAINTAINING;
             }
@@ -1417,11 +1419,13 @@ void window_building_get_tooltip_warehouse_orders(int *group_id, int *text_id, i
         }
     } else {
         if (data.resource_focus_button_id) {
-            int building_id = data.building_id;
+            int building_id = data.building_id; //currently viewed building
             building *b = building_get(building_id);
-
-            const building_storage *s = building_storage_get(b->storage_id);
-            const resource_storage_entry *entry = &s->resource_state[data.resource_focus_button_id];
+            const building_storage *s = building_storage_get(b->storage_id); //get storage details
+            //resource_focus_button_id corresponds to the index of currently highlighted state button
+            // it's not directly corelated to the resource id, which is stored in parameter1
+            int resource_number = orders_resource_buttons[data.resource_focus_button_id].parameter1;
+            const resource_storage_entry *entry = &s->resource_state[resource_number];
             if (entry->state == BUILDING_STORAGE_STATE_MAINTAINING) {
                 *translation = TR_TOOLTIP_BUILDING_DISTRIBUTION_MAINTAINING;
             }
