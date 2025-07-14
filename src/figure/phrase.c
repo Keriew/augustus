@@ -15,6 +15,7 @@
 #include "figure/trader.h"
 #include "figuretype/trader.h"
 #include "sound/speech.h"
+#include "sound/effect.h"
 
 #include <stdio.h>
 
@@ -286,6 +287,13 @@ int figure_phrase_play(figure *f)
         return 0;
     }
     int sound_id = FIGURE_TYPE_TO_SOUND_TYPE[f->type];
+    if (f->type == FIGURE_ZEBRA) {
+        sound_effect_play(SOUND_EFFECT_ZEBRA_DIE);
+        return -1; //default behaviour
+    } else if (f->type == FIGURE_SHEEP) {
+        sound_effect_play(SOUND_EFFECT_SHEEP_BAA);
+        return -1; //default behaviour
+    }
     play_sound_file(sound_id, f->phrase_id);
     return sound_id;
 }
