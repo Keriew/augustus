@@ -1625,6 +1625,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_NATIVE_MONUMENT_DESC,"This magnificent structure proves that locals' ingenuity and hard work allows them to achieve great things, despite their inferior knowledge of engineering. Though some sceptics speculate that it's perhaps a miracle delivered by gods or a remain of a former ancient, but extremely advanced civilization."},
     {TR_BUILDING_NATIVE_WATCHTOWER_DESC,"Using these structures, the natives observe our every movement and exploit our weak points. Unless we manage to deal with the locals, the guards watching us from the towers will prevent us from expanding into this area."},
     {TR_BUILDING_INFO_CARAVANSERAI_MONTHLY_CONSUMPTION, "Monthly food consumption:"},
+    {TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, "Trade caravans do not prioritise road networks"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
