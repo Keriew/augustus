@@ -19,7 +19,7 @@
 
 #define MAX_GRANARIES 100
 #define UNITS_PER_LOAD 100
-#define CURSE_LOADS 16
+#define CURSE_LOADS BUILDING_STORAGE_QUANTITY_MAX / 2
 #define INFINITE 10000
 
 static struct {
@@ -71,7 +71,7 @@ int building_granary_is_getting(int resource, building *b)
     if (entry->state != BUILDING_STORAGE_STATE_GETTING) {
         return 0;
     }
-    if (amount < entry->quantity) {
+    if (amount < entry->quantity * UNITS_PER_LOAD) {
         return 1;
     }
 
@@ -102,7 +102,8 @@ static int granary_allows_getting(int resource, building *b)
     const building_storage *s = building_storage_get(b->storage_id);
     const resource_storage_entry *entry = &s->resource_state[resource];
 
-    if (b->has_plague || (entry->state == BUILDING_STORAGE_STATE_GETTING || entry->state == BUILDING_STORAGE_STATE_MAINTAINING)) {
+    if (b->has_plague || (entry->state == BUILDING_STORAGE_STATE_GETTING ||
+        entry->state == BUILDING_STORAGE_STATE_MAINTAINING)) {
         return 0;
         //if the building has plague or gets or maintains resource - it doesnt allow getting
     }
@@ -156,7 +157,7 @@ int building_granary_add_resource(building *granary, int resource, int is_produc
     if (granary->type != BUILDING_GRANARY) {
         return 0;
     }
-    if (granary->resources[RESOURCE_NONE] <= 0) {
+    if (building_granary_is_full(granary)) {
         return 0; // no space
     }
     if (building_granary_is_not_accepting(resource, granary)) {
@@ -343,7 +344,7 @@ int building_granary_maximum_receptible_amount(int resource, building *b)
     }
 
     int stored_amount = b->resources[resource];
-    int max_amount = quantity;  // Since quantity is already a direct value like 32, 28, etc.
+    int max_amount = quantity * UNITS_PER_LOAD;  // Since quantity is a direct value like 32, 28, etc.
 
     return (max_amount > stored_amount) ? (max_amount - stored_amount) : 0;
 }
@@ -360,6 +361,7 @@ int building_granary_remove_for_getting_deliveryman(building *src, building *dst
             if (src->resources[food] > max_amount) {
                 max_amount = src->resources[food];
                 max_resource = food;
+                continue; //only one resource per deliveryman, once found, exit loop
             }
         }
     }
@@ -432,7 +434,7 @@ void building_granaries_calculate_stocks(void)
         int total_non_getting = 0;
 
         for (resource_type food = RESOURCE_MIN_FOOD; food < RESOURCE_MAX_FOOD; food++) {
-            if (granary_allows_getting(food, b)) {
+            if (granary_allows_getting(food, b)) { //if it allows getting, it means its not getting or maintaining
                 total_non_getting += b->resources[food];
                 non_getting_granaries.total_storage[food] += b->resources[food];
             }
@@ -551,8 +553,8 @@ int building_granary_amount_can_get_from(building *destination, building *origin
 {
     int amount_gettable = 0;
     for (resource_type food = RESOURCE_MIN_FOOD; food < RESOURCE_MAX_FOOD; food++) {
-        if (building_granary_is_getting(food, origin) &&
-            granary_allows_getting(food, destination)) {
+        if (building_granary_is_getting(food, origin) && //if origin is getting
+            granary_allows_getting(food, destination)) { // and destination allows getting
             amount_gettable += destination->resources[food];
         }
     }
@@ -688,8 +690,8 @@ void building_granary_update_built_granaries_capacity(void)
         }
         total_units += b->resources[RESOURCE_NONE];
 
-        if (total_units < 3200) {
-            b->resources[RESOURCE_NONE] += 3200 - total_units;
+        if (total_units < BUILDING_STORAGE_QUANTITY_MAX * UNITS_PER_LOAD) {
+            b->resources[RESOURCE_NONE] += BUILDING_STORAGE_QUANTITY_MAX * UNITS_PER_LOAD - total_units;
         }
         // for now, we don't handle the case where we decrease granary capacity
     }
