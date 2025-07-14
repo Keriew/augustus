@@ -1614,7 +1614,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_NATIVE_HUT_ALT, "Alternate native hut"},
     {TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, "Warehouses and granaries can be built over any roads"},
     {TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, "Highlight selected building"},
-    {TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING, "Stockpiling"},
+    {TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING, "Retaining"},
     {TR_CONFIG_MAX_AUTOSAVE_SLOTS, "Maximum number of yearly autosave slots:" },
     {TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION, "Decoration"},
     {TR_EDITOR_SCENARIO_BUILDING_NATIVE_MONUMENT, "Monument"},
@@ -1627,6 +1627,8 @@ static translation_string all_strings[] = {
     {TR_BUILDING_NATIVE_WATCHTOWER_DESC,"Using these structures, the natives observe our every movement and exploit our weak points. Unless we manage to deal with the locals, the guards watching us from the towers will prevent us from expanding into this area."},
     {TR_BUILDING_INFO_CARAVANSERAI_MONTHLY_CONSUMPTION, "Monthly food consumption:"},
     {TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, "Trade caravans do not prioritise road networks"},
+    {TR_TOOLTIP_BUILDING_DISTRIBUTION_MAINTAINING, "Prevents everyone except cart depots from moving or taking the resource."},
+    {TR_CONFIG_STORAGE_STEP_4,"Use multiples of 4 in granary and warehouse storage" }
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

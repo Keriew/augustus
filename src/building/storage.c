@@ -174,7 +174,6 @@ void building_storage_cycle_partial_resource_state(int storage_id, resource_type
 
     int step = config_get(CONFIG_GP_STORAGE_INCREMENT_4) ? 4 : 8;
 
-    int step = 4;
     int current = entry->quantity;
 
     // If current quantity is out of bounds, reset it.

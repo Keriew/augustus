@@ -743,7 +743,6 @@ void window_building_get_tooltip_distribution_orders(int *group_id, int *text_id
         }
     }
 }
-
 int window_building_handle_mouse_primary_product_producer(const mouse *m, building_info_context *c)
 {
     data.building_id = c->building_id;
@@ -1049,6 +1048,18 @@ void window_building_get_tooltip_granary_orders(int *group_id, int *text_id, int
             *translation = TR_TOOLTIP_BUTTON_STORAGE_ORDER_ACCEPT_ALL;
         } else {
             *translation = TR_TOOLTIP_BUTTON_STORAGE_ORDER_REJECT_ALL;
+        }
+    } else {
+        if (data.resource_focus_button_id) {
+            int building_id = data.building_id;
+            building *b = building_get(building_id);
+
+            const building_storage *s = building_storage_get(b->storage_id);
+            const resource_storage_entry *entry = &s->resource_state[data.resource_focus_button_id];
+            if (entry->state == BUILDING_STORAGE_STATE_MAINTAINING) {
+                *translation = TR_TOOLTIP_BUILDING_DISTRIBUTION_MAINTAINING;
+            }
+
         }
     }
 }
@@ -1403,6 +1414,18 @@ void window_building_get_tooltip_warehouse_orders(int *group_id, int *text_id, i
             *translation = TR_TOOLTIP_BUTTON_STORAGE_ORDER_ACCEPT_ALL;
         } else {
             *translation = TR_TOOLTIP_BUTTON_STORAGE_ORDER_REJECT_ALL;
+        }
+    } else {
+        if (data.resource_focus_button_id) {
+            int building_id = data.building_id;
+            building *b = building_get(building_id);
+
+            const building_storage *s = building_storage_get(b->storage_id);
+            const resource_storage_entry *entry = &s->resource_state[data.resource_focus_button_id];
+            if (entry->state == BUILDING_STORAGE_STATE_MAINTAINING) {
+                *translation = TR_TOOLTIP_BUILDING_DISTRIBUTION_MAINTAINING;
+            }
+
         }
     }
 }

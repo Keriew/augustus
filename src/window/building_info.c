@@ -12,6 +12,7 @@
 #include "city/map.h"
 #include "city/view.h"
 #include "core/calc.h"
+#include "core/config.h"
 #include "core/image_group.h"
 #include "figure/figure.h"
 #include "figure/formation_legion.h"
