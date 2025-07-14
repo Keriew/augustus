@@ -26,7 +26,7 @@ case "$BUILD_TARGET" in
 	;;
 "emscripten")
 	export EMSDK=${PWD}/emsdk
-	mkdir build && cd build && cmake -DAV1_VIDEO_SUPPORT=ON -DCMAKE_BUILD_TYPE=Release -DTARGET_PLATFORM=emscripten ..
+	mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DTARGET_PLATFORM=emscripten ..
 	;;
 *)
 	mkdir build && cd build && cmake -DAV1_VIDEO_SUPPORT=ON ..

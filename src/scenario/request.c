@@ -224,8 +224,7 @@ void scenario_request_delete(int id)
 void scenario_request_remap_resource(void)
 {
     scenario_request *request;
-    array_foreach(requests, request)
-    {
+    array_foreach(requests, request) {
         request->resource = resource_remap(request->resource);
     }
 }
@@ -239,8 +238,7 @@ int scenario_request_count_active(void)
 {
     int num_requests = 0;
     const scenario_request *request;
-    array_foreach(requests, request)
-    {
+    array_foreach(requests, request) {
         if (request->resource) {
             num_requests++;
         }
@@ -252,8 +250,7 @@ int scenario_request_count_visible(void)
 {
     int count = 0;
     const scenario_request *request;
-    array_foreach(requests, request)
-    {
+    array_foreach(requests, request) {
         if (request->resource && request->visible) {
             count++;
         }
@@ -265,8 +262,7 @@ int scenario_request_foreach_visible(int start_index, void (*callback)(int index
 {
     int index = start_index;
     const scenario_request *request;
-    array_foreach(requests, request)
-    {
+    array_foreach(requests, request) {
         if (request->resource && request->visible) {
             callback(index, scenario_request_get(request->id));
             index++;
@@ -278,8 +274,7 @@ int scenario_request_foreach_visible(int start_index, void (*callback)(int index
 const scenario_request *scenario_request_get_visible(int index)
 {
     const scenario_request *request;
-    array_foreach(requests, request)
-    {
+    array_foreach(requests, request) {
         if (request->resource && request->visible && request->state <= 1) {
             if (index == 0) {
                 return scenario_request_get(request->id);
