@@ -44,7 +44,7 @@
 
 static void go_to_orders(const generic_button *button);
 static void toggle_resource_state(const generic_button *button);
-static void toggle_partial_resource_state(const generic_button *button);
+static void toggle_partial_resource_state(const generic_button *button, int reverse_order);
 static void toggle_partial_resource_state_reverse(const generic_button *button);
 static void toggle_partial_resource_state_forward(const generic_button *button);
 static void granary_orders(const generic_button *button);
