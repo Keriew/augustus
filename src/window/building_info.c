@@ -59,7 +59,7 @@ enum {
     HEIGHT_5_24_BLOCKS = 5,
     HEIGHT_6_38_BLOCKS = 6,
     HEIGHT_7_48_BLOCKS = 7,
-    HEIGHT_8_SCALING   = 8,
+    HEIGHT_8_SCALING = 8,
     HEIGHT_10_46_BLOCKS = 10,
     HEIGHT_11_28_BLOCKS = 11,
     HEIGHT_12_21_BLOCKS = 12,
@@ -1253,6 +1253,7 @@ void window_building_info_depot_toggle_condition_type(void)
 void window_building_info_depot_toggle_condition_threshold(void)
 {
     building *b = building_get(context.building_id);
+    int step = config_get(CONFIG_GP_STORAGE_INCREMENT_4) ? 4 : 8;
     b->data.depot.current_order.condition.threshold = (b->data.depot.current_order.condition.threshold + 4) % 36;
     window_invalidate();
 }

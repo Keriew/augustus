@@ -15,11 +15,6 @@
 #define STORAGE_STATIC_BUFFER_SIZE 10
 #define STORAGE_CURRENT_BUFFER_SIZE (STORAGE_STATIC_BUFFER_SIZE + RESOURCE_MAX * 2)
 
-//#define FULL_STORAGE 32
-//#define THREE_QUARTERS_STORAGE 24
-//#define HALF_STORAGE 16
-//#define QUARTER_STORAGE 8
-
 static array(data_storage) storages;
 
 static void storage_create(data_storage *storage, unsigned int position)
@@ -177,7 +172,7 @@ void building_storage_cycle_partial_resource_state(int storage_id, resource_type
         return; // not accepting is always MAX
     }
 
-    //int step = config_get(CONFIG_OPTION_STORAGE_INCREMENT_4) ? 4 : 8;
+    int step = config_get(CONFIG_GP_STORAGE_INCREMENT_4) ? 4 : 8;
 
     int step = 4;
     int current = entry->quantity;
