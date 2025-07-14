@@ -990,7 +990,7 @@ static void draw_resource_orders_buttons(int x, int y, const resource_list *list
             button_border_draw(x + 118, y_offset, 210, 22, data.resource_focus_button_id == i + 1);
             button_border_draw(x + 328, y_offset, 28, 22, data.partial_resource_focus_button_id == i + 1);
 
-            draw_button_from_state(storage->resource_state[resource], x + 118, y_offset + 5, type, resource);;
+            draw_button_from_state(storage->resource_state[resource], x + 118, y_offset + 5, type, resource);
         }
 
     }
@@ -1041,7 +1041,7 @@ int window_building_handle_mouse_granary_orders(const mouse *m, building_info_co
             granary_order_buttons, 2, &data.orders_focus_button_id);
 }
 
-void window_building_get_tooltip_granary_orders(int *group_id, int *text_id, int *translation)
+void window_building_get_tooltip_storage_orders(int *group_id, int *text_id, int *translation)
 {
     if (data.orders_focus_button_id == 2) {
         if (affect_all_button_storage_state() == ACCEPT_ALL) {
@@ -1051,17 +1051,24 @@ void window_building_get_tooltip_granary_orders(int *group_id, int *text_id, int
         }
     } else {
         if (data.resource_focus_button_id) {
-            int building_id = data.building_id; //currently viewed building
+            int building_id = data.building_id;
             building *b = building_get(building_id);
-            const building_storage *s = building_storage_get(b->storage_id); //get storage details
-            //resource_focus_button_id corresponds to the index of currently highlighted state button
-            // it's not directly corelated to the resource id, which is stored in parameter1
-            int resource_number = orders_resource_buttons[data.resource_focus_button_id].parameter1;
-            const resource_storage_entry *entry = &s->resource_state[resource_number];
-            if (entry->state == BUILDING_STORAGE_STATE_MAINTAINING) {
-                *translation = TR_TOOLTIP_BUILDING_DISTRIBUTION_MAINTAINING;
-            }
+            const building_storage *s = building_storage_get(b->storage_id);
+            // Convert 1-based focus ID to 0-based and apply scroll offset
+            int index = data.resource_focus_button_id - 1 + scrollbar.scroll_position;
+            // Choose the correct resource list based on building type
+            const resource_list *list = (b->type == BUILDING_GRANARY) ?
+                city_resource_get_potential_foods() : city_resource_get_potential();
 
+            // Ensure valid index
+            if (index >= 0 && index < list->size) {
+                resource_type resource = list->items[index];
+                const resource_storage_entry *entry = &s->resource_state[resource];
+
+                if (entry->state == BUILDING_STORAGE_STATE_MAINTAINING) {
+                    *translation = TR_TOOLTIP_BUILDING_DISTRIBUTION_MAINTAINING;
+                }
+            }
         }
     }
 }
@@ -1405,31 +1412,6 @@ void window_building_primary_product_producer_stockpiling_tooltip(int *translati
             *translation = TR_TOOLTIP_BUTTON_STOCKPILING_OFF;
         } else {
             *translation = TR_TOOLTIP_BUTTON_STOCKPILING_ON;
-        }
-    }
-}
-
-void window_building_get_tooltip_warehouse_orders(int *group_id, int *text_id, int *translation)
-{
-    if (data.orders_focus_button_id == 2) {
-        if (affect_all_button_storage_state() == ACCEPT_ALL) {
-            *translation = TR_TOOLTIP_BUTTON_STORAGE_ORDER_ACCEPT_ALL;
-        } else {
-            *translation = TR_TOOLTIP_BUTTON_STORAGE_ORDER_REJECT_ALL;
-        }
-    } else {
-        if (data.resource_focus_button_id) {
-            int building_id = data.building_id; //currently viewed building
-            building *b = building_get(building_id);
-            const building_storage *s = building_storage_get(b->storage_id); //get storage details
-            //resource_focus_button_id corresponds to the index of currently highlighted state button
-            // it's not directly corelated to the resource id, which is stored in parameter1
-            int resource_number = orders_resource_buttons[data.resource_focus_button_id].parameter1;
-            const resource_storage_entry *entry = &s->resource_state[resource_number];
-            if (entry->state == BUILDING_STORAGE_STATE_MAINTAINING) {
-                *translation = TR_TOOLTIP_BUILDING_DISTRIBUTION_MAINTAINING;
-            }
-
         }
     }
 }
