@@ -472,7 +472,7 @@ void figure_trade_caravan_action(figure *f)
 
     f->is_ghost = 0;
 
-    if (config_get(CONFIG_UI_CARAVANS_MOVE_OFF_ROAD)) {
+    if (config_get(CONFIG_GP_CARAVANS_MOVE_OFF_ROAD)) {
         f->terrain_usage = TERRAIN_USAGE_ANY;
     } else {
         f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS_HIGHWAY;
@@ -580,7 +580,7 @@ void figure_trade_caravan_donkey_action(figure *f)
 
     f->is_ghost = 0;
 
-    if (config_get(CONFIG_UI_CARAVANS_MOVE_OFF_ROAD)) {
+    if (config_get(CONFIG_GP_CARAVANS_MOVE_OFF_ROAD)) {
         f->terrain_usage = TERRAIN_USAGE_ANY;
     } else {
         f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS_HIGHWAY;
