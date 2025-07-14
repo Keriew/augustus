@@ -67,8 +67,7 @@ void scenario_request_clear_all(void)
 void scenario_request_init(void)
 {
     scenario_request *request;
-    array_foreach(requests, request)
-    {
+    array_foreach(requests, request) {
         random_generate_next();
         if (request->resource != RESOURCE_NONE) {
             request->month = (random_byte() & 7) + 2;

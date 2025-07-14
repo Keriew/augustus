@@ -47,11 +47,6 @@ int city_resource_count(resource_type resource)
     return city_data.resource.stored_in_warehouses[resource];
 }
 
-int city_resource_count_for_request(resource_type resource)
-{
-
-}
-
 int city_resource_get_amount_including_granaries(resource_type resource, int amount, int *checked_granaries)
 {
     if (checked_granaries) {
