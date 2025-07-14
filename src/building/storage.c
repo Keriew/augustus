@@ -167,32 +167,40 @@ int building_storage_get_permission(building_storage_permission_states p, buildi
     return !(s->permissions & permission_bit);
 }
 
-void building_storage_cycle_partial_resource_state(int storage_id, resource_type resource_id)
+void building_storage_cycle_partial_resource_state(int storage_id, resource_type resource_id, int reverse_order)
 {
     resource_storage_entry *entry = &array_item(storages, storage_id)->storage.resource_state[resource_id];
 
     if (entry->state == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
-        return; // not accepting is always 32
+        return; // not accepting is always MAX
     }
 
     //int step = config_get(CONFIG_OPTION_STORAGE_INCREMENT_4) ? 4 : 8;
+
     int step = 4;
     int current = entry->quantity;
 
     // If current quantity is out of bounds, reset it.
-    if (current > 32 || current < step) {
+    if (current > BUILDING_STORAGE_QUANTITY_MAX || current < step) {
         entry->quantity = BUILDING_STORAGE_QUANTITY_MAX;
         return;
     }
 
-    // Cycle to next lower quantity
-    current -= step;
-    if (current < step) {
-        current = 32;
+    if (reverse_order) {
+        current -= step;
+        if (current < step) {
+            current = BUILDING_STORAGE_QUANTITY_MAX;
+        }
+    } else {
+        current += step;
+        if (current > BUILDING_STORAGE_QUANTITY_MAX) {
+            current = step;
+        }
     }
 
     entry->quantity = (building_storage_quantity) current;
 }
+
 
 
 void building_storage_accept_none(int storage_id)

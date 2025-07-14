@@ -128,7 +128,7 @@ void building_storage_set_data(int storage_id, building_storage new_data);
  */
 void building_storage_cycle_resource_state(int storage_id, resource_type resource_id);
 
-void building_storage_cycle_partial_resource_state(int storage_id, resource_type resource_id);
+void building_storage_cycle_partial_resource_state(int storage_id, resource_type resource_id, int reverse_order);
 /**
  * Sets all goods to 'not accepting'
  * @param storage_id Storage id

@@ -765,15 +765,20 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
                 }
             }
         }
-        if (room >= MAX_CARTLOADS_PER_SPACE && (loads_stored <= MAX_CARTLOADS_PER_SPACE ||
-            ((get_acceptable_quantity(r, warehouse) - loads_stored) >= MAX_CARTLOADS_PER_SPACE)) &&
-            city_resource_count(r) - loads_stored >= MAX_CARTLOADS_PER_SPACE) {
+        int needed = get_acceptable_quantity(r, warehouse) - loads_stored;
+        int available = city_resource_count(r) - loads_stored;
+        int fetch_amount = needed < available ? needed : available;
+        fetch_amount = fetch_amount < MAX_CARTLOADS_PER_SPACE ? fetch_amount : MAX_CARTLOADS_PER_SPACE;
+
+
+        if (room >= fetch_amount && fetch_amount > 0) {
             if (!building_warehouse_for_getting(warehouse, r, 0)) {
                 continue;
             }
             *resource = r;
             return WAREHOUSE_TASK_GETTING;
         }
+
     }
     if (!building_storage_get_permission(BUILDING_STORAGE_PERMISSION_WORKER, warehouse)) {
         return WAREHOUSE_TASK_NONE; //halt resource delivery to workshops and granaries
