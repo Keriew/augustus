@@ -273,10 +273,6 @@ int scenario_request_foreach_visible(int start_index, void (*callback)(int index
 const scenario_request *scenario_request_get_visible(int index)
 {
     const scenario_request *request;
-    if (!index){
-        //fallback
-        return 0;
-    }
     array_foreach(requests, request) {
         if (request->resource && request->visible && request->state <= 1) {
             if (index == 0) {
