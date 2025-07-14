@@ -1662,8 +1662,8 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_VALUE_STORAGE_TYPE_GRANARIES, "Silos"},
     {TR_PARAMETER_VALUE_STORAGE_TYPE_WAREHOUSES, "Lagerhäuser"},
     {TR_FIX_GERMAN_CITY_RETAKEN, "Die zuvor von Roms Feinden eingenommene Stadt wurde von den Legionen eines anderen Gouvaneurs zurückerobert. Er hatte in Rom einen Triumph errungen und seiner Stadt das Recht, einen Triumphbogen zu errichten."},
-	/* Neu Übersetzen & sortieren */
-	{TR_BUILDING_LATRINES, "Latrinen"},
+        /* Neu Übersetzen & sortieren */
+    {TR_BUILDING_LATRINES, "Latrinen"},
     {TR_BUILDING_LATRINES_DESC_1, "Ein Komfortabler Platz, der vom Volk beliebt ist, um über Neuigkeiten oder ihre Geschäfte zu reden."},
     {TR_BUILDING_LATRINES_DESC_2, "Latrinen werden von den Leuten benutzt, die nur Zugang zu einem Ziehbrunnen haben und steigern die Gesundheit ein bisschen. Häuser, die das klare Wassser eines Brunnens genießen, nutzen sie nicht."},
     {TR_BUILDING_LATRINES_MISSING_EVOLVE, "Dieses Haus kann nicht erweitert werden, da es weder in der Reichweite einer Latrine noch der eines Brunnens ist."},
@@ -1678,15 +1678,16 @@ static translation_string all_strings[] = {
     {TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, "Hebe ausgewählte Gebäude hervor"},
     {TR_CONFIG_MAX_AUTOSAVE_SLOTS, "Maximale jährliche automatische Speicherungen:"},
     {TR_CONFIG_SHOW_DESIRABILITY_RANGE_ALL, "Zeige Attraktivität beim Bau eines Gebäudes"},
-	{TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION, "Dekoration"},
-	{TR_EDITOR_SCENARIO_BUILDING_NATIVE_MONUMENT, "Monument"},
-	{TR_EDITOR_SCENARIO_BUILDING_NATIVE_WATCHTOWER, "Wachturm"},
-	{TR_BUILDING_NATIVE_DECORATION, "Einheimischendekoration"},
-	{TR_BUILDING_NATIVE_MONUMENT, "Einheimischenmonument"},
-	{TR_BUILDING_NATIVE_WATCHTOWER, "Einheimischenwachturm"},
-	{TR_BUILDING_NATIVE_DECORATION_DESC, "Das Produkt der lokalen Künstler, welches unter beiden, Einheimischen und Römern, sehr geschätzt wird. Trotz der fehlenden Feinheiten, finden es viele Bürger dennoch provozierend."},
-	{TR_BUILDING_NATIVE_MONUMENT_DESC, "Diese bedeutungsvolle Struktur beweist, dass die Einheimischen, trotz dem fehlenden Wissen über Architektur und Ingeneurskunst, durch harte Arbeit und Einfallsreichtum großartige Dinge erschaffen können. Obwohl einige Skeptiker spekulieren ob es nicht doch ein Wunder, von den Göttern gebracht oder ein Überrest einer längst vergessenen aber hoch entwickelten Zivilisation ist."},
-	{TR_BUILDING_NATIVE_WATCHTOWER_DESC, "Mit diesen Vorrichtungen beobachten die Einheimischen jeden noch so kleinen Schritt und erfahren unsere Schwächen. Wenn wir sie nicht friedlich zivilisieren, werden diese Türme uns davon abhalten in ihr Gebiet vorzudringen."},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION, "Dekoration"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_MONUMENT, "Monument"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_WATCHTOWER, "Wachturm"},
+    {TR_BUILDING_NATIVE_DECORATION, "Einheimischendekoration"},
+    {TR_BUILDING_NATIVE_MONUMENT, "Einheimischenmonument"},
+    {TR_BUILDING_NATIVE_WATCHTOWER, "Einheimischenwachturm"},
+    {TR_BUILDING_NATIVE_DECORATION_DESC, "Das Produkt der lokalen Künstler, welches unter beiden, Einheimischen und Römern, sehr geschätzt wird. Trotz der fehlenden Feinheiten, finden es viele Bürger dennoch provozierend."},
+    {TR_BUILDING_NATIVE_MONUMENT_DESC, "Diese bedeutungsvolle Struktur beweist, dass die Einheimischen, trotz dem fehlenden Wissen über Architektur und Ingeneurskunst, durch harte Arbeit und Einfallsreichtum großartige Dinge erschaffen können. Obwohl einige Skeptiker spekulieren ob es nicht doch ein Wunder, von den Göttern gebracht oder ein Überrest einer längst vergessenen aber hoch entwickelten Zivilisation ist."},
+    {TR_BUILDING_NATIVE_WATCHTOWER_DESC, "Mit diesen Vorrichtungen beobachten die Einheimischen jeden noch so kleinen Schritt und erfahren unsere Schwächen. Wenn wir sie nicht friedlich zivilisieren, werden diese Türme uns davon abhalten in ihr Gebiet vorzudringen."},
+    {TR_BUILDING_INFO_CARAVANSERAI_MONTHLY_CONSUMPTION, "Monatlicher Essens Konsum:"},
 };
 
 void translation_german(const translation_string **strings, int *num_strings)
