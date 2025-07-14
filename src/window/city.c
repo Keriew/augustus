@@ -566,6 +566,7 @@ static int has_storage_orders(building_type type)
         (type == BUILDING_SMALL_TEMPLE_VENUS && building_monument_gt_module_is_active(VENUS_MODULE_1_DISTRIBUTE_WINE)) ||
         (type == BUILDING_LARGE_TEMPLE_VENUS && building_monument_gt_module_is_active(VENUS_MODULE_1_DISTRIBUTE_WINE));
 }
+
 static void cycle_legion(void)
 {
     static int current_legion_id = 0;
