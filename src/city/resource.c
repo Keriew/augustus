@@ -1,6 +1,7 @@
 #include "resource.h"
 
 #include "building/building.h"
+#include "building/caravanserai.h"
 #include "building/count.h"
 #include "building/granary.h"
 #include "building/industry.h"
@@ -564,7 +565,7 @@ static int caravanserai_consume_food(void)
     if (!building_monument_working(BUILDING_CARAVANSERAI)) {
         return 0;
     }
-    int food_required = trade_caravan_count() * FOOD_PER_TRADER_MONTHLY;
+    int food_required = building_caravanserai_food_required_monthly();
 
     trade_policy policy = city_trade_policy_get(LAND_TRADE_POLICY);
 

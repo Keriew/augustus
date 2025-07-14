@@ -344,7 +344,7 @@ static void init_dock_permission_buttons(void)
     dock_distribution_permissions_buttons_count = 0;
     for (int route_id = 0; route_id < trade_route_count(); route_id++) {
         int city_id = -1;
-        if (is_sea_trade_route(route_id) && empire_city_is_trade_route_open(route_id)) {
+        if (empire_object_is_sea_trade_route(route_id) && empire_city_is_trade_route_open(route_id)) {
             city_id = empire_city_get_for_trade_route(route_id);
             if (city_id != -1) {
                 generic_button button = { 0, 0, 210, 22, dock_toggle_route, 0, route_id, city_id };
@@ -493,6 +493,19 @@ static int count_food_types_in_stock(building *b)
         }
     }
     return count;
+}
+
+static void draw_caravanserai_food_per_month(building_info_context *c, int y_offset)
+{
+    int x_offset = c->x_offset + 32;
+
+    y_offset = c->y_offset + y_offset;
+    font_t font = FONT_NORMAL_BLACK;
+    x_offset += lang_text_draw(CUSTOM_TRANSLATION,
+        TR_BUILDING_INFO_CARAVANSERAI_MONTHLY_CONSUMPTION, x_offset, y_offset, font);
+    int food_required_monthly = building_caravanserai_food_required_monthly();
+    x_offset += text_draw_number(food_required_monthly, '\0', "\0", x_offset, y_offset, font, COLOR_MASK_NONE);
+    x_offset += lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_UNITS, x_offset, y_offset, font);
 }
 
 static void draw_food_stocks(building_info_context *c, building *b, int y_offset)
@@ -1663,7 +1676,8 @@ void window_building_draw_caravanserai(building_info_context *c)
         } else if (b->num_workers > 0 && food_types <= 0) {
             window_building_draw_description_at(c, 50, CUSTOM_TRANSLATION, TR_BUILDING_CARAVANSERAI_NO_FOOD);
         } else {
-            draw_food_stocks(c, b, 50);
+            draw_food_stocks(c, b, 38);
+            draw_caravanserai_food_per_month(c, 70);
         }
 
         if (!c->has_road_access) {

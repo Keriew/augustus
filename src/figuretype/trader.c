@@ -1072,7 +1072,7 @@ int figure_trader_ship_get_distance_to_dock(const figure *ship, int dock_id)
 int figure_trader_ship_other_ship_closer_to_dock(int dock_id, int distance)
 {
     for (int route_id = 0; route_id < 20; route_id++) {
-        if (is_sea_trade_route(route_id) && empire_city_is_trade_route_open(route_id)) {
+        if (empire_object_is_sea_trade_route(route_id) && empire_city_is_trade_route_open(route_id)) {
             int city_id = empire_city_get_for_trade_route(route_id);
             if (city_id != -1) {
                 empire_city *city = empire_city_get(city_id);

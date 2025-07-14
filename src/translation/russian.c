@@ -1615,6 +1615,15 @@ static translation_string all_strings[] = {
     {TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, "Склады и амбары можно строить поверх дорог"},
     {TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, "Подсвечивать выбранное здание"},
     {TR_CONFIG_MAX_AUTOSAVE_SLOTS, "Максимальное количество ежегодных автосохранений:"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION, "Декор туземцев"}, // Имя в меню редактора карт
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_MONUMENT, "Монумент туземцев"}, // Имя в меню редактора карт
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_WATCHTOWER, "Сторожевая башня"}, // Имя в меню редактора карт
+    {TR_BUILDING_NATIVE_DECORATION, "Украшение туземцев"},
+    {TR_BUILDING_NATIVE_MONUMENT, "Монумент туземцев"},
+    {TR_BUILDING_NATIVE_WATCHTOWER, "Сторожевая башня туземцев"},
+    {TR_BUILDING_NATIVE_DECORATION_DESC, "Плод труда местных художников, он ценится как римлянами, так и местными жителями. И пусть в нем нет изысканности - многие находят в нем глубину и повод задуматься."},
+    {TR_BUILDING_NATIVE_MONUMENT_DESC, "Это великолепное сооружение доказывает, что изобретательность и трудолюбие туземцев позволяют им достигать великих целей, несмотря на их слабые знания в инженерии. Хотя некоторые скептики полагают, что это, возможно, чудо, ниспосланное богами, или же остаток древней, но крайне развитой цивилизации."},
+    {TR_BUILDING_NATIVE_WATCHTOWER_DESC, "Туземцы используют данные конструкции для слежки за нашими действиями и выявления уязвимостей. Пока мы не устраним угрозу, охрана на башнях будет мешать нам расширяться на этой территории."},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
