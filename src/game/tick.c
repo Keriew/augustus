@@ -121,7 +121,7 @@ static void advance_month(void)
         game_file_write_saved_game(dir_append_location("autosave.svx", PATH_LOCATION_SAVEGAME));
     }
     if (new_year && config_get(CONFIG_GP_CH_YEARLY_AUTOSAVE)) {
-        game_file_write_saved_game(dir_append_location("autosave-year.svx", PATH_LOCATION_SAVEGAME));
+        game_file_make_yearly_autosave();
     }
 }
 

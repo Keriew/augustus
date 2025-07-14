@@ -1614,7 +1614,19 @@ static translation_string all_strings[] = {
     {TR_BUILDING_NATIVE_HUT_ALT, "Alternate native hut"},
     {TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, "Warehouses and granaries can be built over any roads"},
     {TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, "Highlight selected building"},
-    {TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING, "Maintaining"}
+    {TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING, "Maintaining"},
+    {TR_CONFIG_MAX_AUTOSAVE_SLOTS, "Maximum number of yearly autosave slots:" },
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION, "Decoration"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_MONUMENT, "Monument"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_WATCHTOWER, "Watchtower"},
+    {TR_BUILDING_NATIVE_DECORATION,"Native Decoration" },
+    {TR_BUILDING_NATIVE_MONUMENT,"Native Monument" },
+    {TR_BUILDING_NATIVE_WATCHTOWER,"Native Watchtower"},
+    {TR_BUILDING_NATIVE_DECORATION_DESC,"The product of local artists' work, it proves to be very valued among the locals and Romans alike. Despite lacking refinement, many citizens find it thought provoking."},
+    {TR_BUILDING_NATIVE_MONUMENT_DESC,"This magnificent structure proves that locals' ingenuity and hard work allows them to achieve great things, despite their inferior knowledge of engineering. Though some sceptics speculate that it's perhaps a miracle delivered by gods or a remain of a former ancient, but extremely advanced civilization."},
+    {TR_BUILDING_NATIVE_WATCHTOWER_DESC,"Using these structures, the natives observe our every movement and exploit our weak points. Unless we manage to deal with the locals, the guards watching us from the towers will prevent us from expanding into this area."},
+    {TR_BUILDING_INFO_CARAVANSERAI_MONTHLY_CONSUMPTION, "Monthly food consumption:"},
+    {TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, "Trade caravans do not prioritise road networks"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

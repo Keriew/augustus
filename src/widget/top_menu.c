@@ -559,6 +559,7 @@ static void menu_options_monthly_autosave(int param)
 static void menu_options_yearly_autosave(int param)
 {
     config_set(CONFIG_GP_CH_YEARLY_AUTOSAVE, !config_get(CONFIG_GP_CH_YEARLY_AUTOSAVE));
+    config_save();
     set_text_for_yearly_autosave();
 }
 

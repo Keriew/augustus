@@ -124,6 +124,9 @@ extern struct scenario_t {
 
     struct {
         int alt_hut;
+        int decoration;
+        int monument;
+        int watchtower;
         int hut;
         int meeting;
         int crops;

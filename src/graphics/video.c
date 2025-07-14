@@ -13,7 +13,7 @@
 #include "sound/music.h"
 #include "sound/speech.h"
 
-#include "easyav1/src/easyav1.h"
+#include "easyav1.h"
 #include "pl_mpeg/pl_mpeg.h"
 
 #include <string.h>

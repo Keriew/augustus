@@ -471,7 +471,13 @@ void figure_trade_caravan_action(figure *f)
     int move_speed = trader_bonus_speed();
 
     f->is_ghost = 0;
-    f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS_HIGHWAY;
+
+    if (config_get(CONFIG_GP_CARAVANS_MOVE_OFF_ROAD)) {
+        f->terrain_usage = TERRAIN_USAGE_ANY;
+    } else {
+        f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS_HIGHWAY;
+    }
+
     figure_image_increase_offset(f, 12);
     f->cart_image_id = 0;
     switch (f->action_state) {
@@ -573,7 +579,13 @@ void figure_trade_caravan_donkey_action(figure *f)
     int move_speed = trader_bonus_speed();
 
     f->is_ghost = 0;
-    f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS_HIGHWAY;
+
+    if (config_get(CONFIG_GP_CARAVANS_MOVE_OFF_ROAD)) {
+        f->terrain_usage = TERRAIN_USAGE_ANY;
+    } else {
+        f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS_HIGHWAY;
+    }
+
     figure_image_increase_offset(f, 12);
     f->cart_image_id = 0;
 
@@ -727,7 +739,8 @@ int figure_trade_ship_is_trading(figure *ship)
 static int trade_dock_ignoring_ship(figure *f)
 {
     building *b = building_get(f->destination_building_id);
-    if (b->state == BUILDING_STATE_IN_USE && b->type == BUILDING_DOCK && b->num_workers > 0 && b->data.dock.trade_ship_id == f->id) {
+    if (b->state == BUILDING_STATE_IN_USE && b->type == BUILDING_DOCK && b->num_workers > 0 &&
+        b->data.dock.trade_ship_id == f->id) {
         for (int i = 0; i < 3; i++) {
             if (b->data.distribution.cartpusher_ids[i]) {
                 figure *docker = figure_get(b->data.distribution.cartpusher_ids[i]);
@@ -1072,7 +1085,7 @@ int figure_trader_ship_get_distance_to_dock(const figure *ship, int dock_id)
 int figure_trader_ship_other_ship_closer_to_dock(int dock_id, int distance)
 {
     for (int route_id = 0; route_id < 20; route_id++) {
-        if (is_sea_trade_route(route_id) && empire_city_is_trade_route_open(route_id)) {
+        if (empire_object_is_sea_trade_route(route_id) && empire_city_is_trade_route_open(route_id)) {
             int city_id = empire_city_get_for_trade_route(route_id);
             if (city_id != -1) {
                 empire_city *city = empire_city_get(city_id);

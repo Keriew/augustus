@@ -350,6 +350,8 @@ int building_construction_place_building(building_type type, int x, int y)
         //allow building gatehouses over walls and roads, other non-bridge roadblocks over roads and highways
     } else if (type == BUILDING_TOWER) {
         terrain_mask = ~TERRAIN_WALL;
+    } else if (type == BUILDING_RESERVOIR || type == BUILDING_DRAGGABLE_RESERVOIR) {
+        terrain_mask = ~TERRAIN_AQUEDUCT;
     }
     if (config_get(CONFIG_GP_CH_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT)) {
         if (type == BUILDING_GRANARY || type == BUILDING_WAREHOUSE) {

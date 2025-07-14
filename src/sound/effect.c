@@ -52,6 +52,7 @@ static char effect_filenames[SOUND_EFFECT_MAX][FILE_NAME_MAX] = {
     "wavs/wolf_howl.wav",
     "wavs/fire_splash.wav",
     "wavs/formation_shield.wav",
+    "wavs/sheep_baa.wav"
 };
 
 void sound_effect_set_volume(int percentage)

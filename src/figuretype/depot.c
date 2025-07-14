@@ -303,6 +303,15 @@ void figure_depot_cartpusher_action(figure *f)
             if (f->wait_ticks > DEPOT_CART_LOAD_OFFLOAD_DELAY) {
                 building *src = building_get(b->data.depot.current_order.src_storage_id);
 
+                // Depot cartpusher waits if not enough goods
+                int src_amount = src->type == BUILDING_GRANARY ?
+                    building_granary_resource_amount(b->data.depot.current_order.resource_type, src) / RESOURCE_ONE_LOAD :
+                    building_warehouse_get_amount(src, b->data.depot.current_order.resource_type);
+                if (b->data.depot.current_order.condition.condition_type == ORDER_CONDITION_SOURCE_HAS_MORE_THAN &&
+                    src_amount < b->data.depot.current_order.condition.threshold) {
+                    break;
+                }
+                
                 // TODO upgradable?
                 int capacity = resource_is_food(b->data.depot.current_order.resource_type) ? DEPOT_CART_PUSHER_FOOD_CAPACITY : DEPOT_CART_PUSHER_OTHER_CAPACITY;
                 int amount_loaded = storage_remove_resource(src, b->data.depot.current_order.resource_type, capacity);
