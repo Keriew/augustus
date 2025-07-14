@@ -148,6 +148,8 @@ void building_storage_cycle_resource_state(int storage_id, resource_type resourc
             entry->state = BUILDING_STORAGE_STATE_NOT_ACCEPTING;
             break;
         case BUILDING_STORAGE_STATE_NOT_ACCEPTING:
+            entry->state = BUILDING_STORAGE_STATE_ACCEPTING;
+            break;
         default:
             entry->state = BUILDING_STORAGE_STATE_ACCEPTING;
             break;
@@ -394,6 +396,16 @@ void building_storage_load_state(buffer *buf, int version)
         if (s->in_use) {
             highest_id_in_use = i;
         }
+    }
+
+    // fix granary storage
+    for (building *b = building_first_of_type(BUILDING_GRANARY); b; b = b->next_of_type) {
+        int granary_free_space = BUILDING_STORAGE_QUANTITY_MAX;
+        for (int r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+            b->resources[r] /= 100;
+            granary_free_space -= b->resources[r];
+        }
+        b->resources[RESOURCE_NONE] = granary_free_space;
     }
 
     storages.size = highest_id_in_use + 1;

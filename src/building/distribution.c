@@ -125,6 +125,8 @@ resource_type building_distribution_fetch(const building *b, const resource_stor
     resource_type resource = RESOURCE_NONE;
     if (!min_stock) {
         min_stock = 1;
+    } else if (min_stock % 100 == 0) { //handle stocks in units rather than cartloads
+        min_stock /= 100;
     }
     for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
         if (info[r].needed && info[r].building_id && b->resources[r] < min_stock) {

@@ -48,8 +48,8 @@ static int take_food_from_granary(figure *f, int market_id, int granary_id)
 
     int market_units = market->resources[resource];
     int max_units = 0;
-    int granary_units = granary->resources[resource];
-    int num_loads;
+    int granary_loads_stored = granary->resources[resource];
+    int granary_loads_take;
 
     if (market->type == BUILDING_MESS_HALL) {
         max_units = MAX_FOOD_STOCKED_MESS_HALL - market_units;
@@ -58,32 +58,15 @@ static int take_food_from_granary(figure *f, int market_id, int granary_id)
     } else {
         max_units = MAX_FOOD_STOCKED_MARKET - market_units;
     }
-    if (granary_units >= 800) {
-        num_loads = 8;
-    } else if (granary_units >= 700) {
-        num_loads = 7;
-    } else if (granary_units >= 600) {
-        num_loads = 6;
-    } else if (granary_units >= 500) {
-        num_loads = 5;
-    } else if (granary_units >= 400) {
-        num_loads = 4;
-    } else if (granary_units >= 300) {
-        num_loads = 3;
-    } else if (granary_units >= 200) {
-        num_loads = 2;
-    } else if (granary_units >= 100) {
-        num_loads = 1;
+    if (granary_loads_stored > max_units / RESOURCE_ONE_LOAD) {
+        granary_loads_take = max_units / RESOURCE_ONE_LOAD;
     } else {
-        num_loads = 0;
+        granary_loads_take = granary_loads_stored;
     }
-    if (num_loads > max_units / 100) {
-        num_loads = max_units / 100;
-    }
-    if (num_loads <= 0) {
+    if (granary_loads_take <= 0) {
         return 0;
     }
-    building_granary_remove_resource(granary, resource, 100 * num_loads);
+    building_granary_remove_resource(granary, resource, granary_loads_take);
 
     // create delivery boys
     int type = FIGURE_DELIVERY_BOY;
@@ -94,7 +77,7 @@ static int take_food_from_granary(figure *f, int market_id, int granary_id)
     }
     int leader_id = f->id;
     int previous_boy = f->id;
-    for (int i = 0; i < num_loads; i++) {
+    for (int i = 0; i < granary_loads_take; i++) {
         previous_boy = figure_supplier_create_delivery_boy(previous_boy, leader_id, type);
     }
     return 1;

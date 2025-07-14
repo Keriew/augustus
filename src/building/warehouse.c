@@ -62,6 +62,20 @@ int building_warehouse_get_amount(building *warehouse, int resource)
     return loads;
 }
 
+int building_warehouse_get_available_amount(building *warehouse, int resource)
+{
+    if (warehouse->state != BUILDING_STATE_IN_USE || warehouse->has_plague) {
+        return 0;
+    }
+
+    if (building_warehouse_is_maintaining(resource, warehouse)) {
+        return 0;
+    }
+
+    return building_warehouse_get_amount(warehouse, resource);
+}
+
+
 int building_warehouse_add_resource(building *b, int resource, int respect_settings)
 {
     if (b->id <= 0) {
@@ -397,7 +411,7 @@ int building_warehouse_max_space_for_resource(resource_type resource, building *
     return max_storable;
 }
 
-int building_warehouses_count_available_resource(int resource)
+int building_warehouses_count_available_resource(int resource, int respect_maintaining)
 {
     int total = 0;
     building *b = get_next_warehouse();
@@ -407,14 +421,17 @@ int building_warehouses_count_available_resource(int resource)
     building *initial_warehouse = b;
 
     do {
-        if (b->state == BUILDING_STATE_IN_USE && !building_warehouse_is_maintaining(resource, b)) {
-            total += building_warehouse_get_amount(b, resource);
+        if (b->state == BUILDING_STATE_IN_USE) {
+            if (!respect_maintaining || !building_warehouse_is_maintaining(resource, b)) {
+                total += building_warehouse_get_amount(b, resource);
+            }
         }
         b = b->next_of_type ? b->next_of_type : building_first_of_type(BUILDING_WAREHOUSE);
     } while (b != initial_warehouse);
 
     return total;
 }
+
 
 
 int building_warehouses_send_resources_to_rome(int resource, int amount)

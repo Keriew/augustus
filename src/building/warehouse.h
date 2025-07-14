@@ -25,11 +25,9 @@ enum {
 int building_warehouse_get_space_info(building *warehouse);
 
 int building_warehouse_get_amount(building *warehouse, int resource);
-
+int building_warehouse_get_available_amount(building *warehouse, int resource);
 int building_warehouse_add_resource(building *b, int resource, int respect_settings);
-
 int building_warehouses_add_resource(int resource, int amount, int respect_settings);
-
 int building_warehouse_is_accepting(int resource, building *b);
 int building_warehouse_is_getting(int resource, building *b);
 int building_warehouse_is_maintaining(int resourece, building *b);
@@ -51,7 +49,7 @@ void building_warehouse_space_remove_export(building *space, int resource, int l
 
 int building_warehouses_remove_resource(int resource, int amount);
 
-int building_warehouses_count_available_resource(int resource);
+int building_warehouses_count_available_resource(int resource, int respect_maintaining);
 
 int building_warehouses_send_resources_to_rome(int resource, int amount);
 
