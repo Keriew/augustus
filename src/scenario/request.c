@@ -66,8 +66,7 @@ void scenario_request_clear_all(void)
 void scenario_request_init(void)
 {
     scenario_request *request;
-    array_foreach(requests, request)
-    {
+    array_foreach(requests, request) {
         random_generate_next();
         if (request->resource != RESOURCE_NONE) {
             request->month = (random_byte() & 7) + 2;
@@ -222,8 +221,7 @@ void scenario_request_delete(int id)
 void scenario_request_remap_resource(void)
 {
     scenario_request *request;
-    array_foreach(requests, request)
-    {
+    array_foreach(requests, request) {
         request->resource = resource_remap(request->resource);
     }
 }
@@ -237,8 +235,7 @@ int scenario_request_count_active(void)
 {
     int num_requests = 0;
     const scenario_request *request;
-    array_foreach(requests, request)
-    {
+    array_foreach(requests, request) {
         if (request->resource) {
             num_requests++;
         }
@@ -250,8 +247,7 @@ int scenario_request_count_visible(void)
 {
     int count = 0;
     const scenario_request *request;
-    array_foreach(requests, request)
-    {
+    array_foreach(requests, request) {
         if (request->resource && request->visible) {
             count++;
         }
@@ -263,8 +259,7 @@ int scenario_request_foreach_visible(int start_index, void (*callback)(int index
 {
     int index = start_index;
     const scenario_request *request;
-    array_foreach(requests, request)
-    {
+    array_foreach(requests, request) {
         if (request->resource && request->visible) {
             callback(index, scenario_request_get(request->id));
             index++;
@@ -276,12 +271,11 @@ int scenario_request_foreach_visible(int start_index, void (*callback)(int index
 const scenario_request *scenario_request_get_visible(int index)
 {
     const scenario_request *request;
-    if (!index) {
+    if (!index){
         //fallback
         return 0;
     }
-    array_foreach(requests, request)
-    {
+    array_foreach(requests, request) {
         if (request->resource && request->visible && request->state <= 1) {
             if (index == 0) {
                 return scenario_request_get(request->id);
@@ -380,8 +374,7 @@ void scenario_request_save_state(buffer *list)
     buffer_init_dynamic_array(list, requests.size, struct_size);
 
     const scenario_request *request;
-    array_foreach(requests, request)
-    {
+    array_foreach(requests, request) {
         request_save(list, request);
     }
 }
@@ -454,54 +447,43 @@ void scenario_request_load_state_old_version(buffer *list, requests_old_state_se
         for (size_t i = 0; i < MAX_ORIGINAL_REQUESTS; i++) {
             array_advance(requests);
         }
-        array_foreach(requests, request)
-        {
+        array_foreach(requests, request) {
             request->year = buffer_read_i16(list);
         }
-        array_foreach(requests, request)
-        {
+        array_foreach(requests, request) {
             request->resource = buffer_read_i16(list);
         }
-        array_foreach(requests, request)
-        {
+        array_foreach(requests, request) {
             request->amount.min = buffer_read_i16(list);
             request->amount.max = request->amount.min;
             request->amount.requested = request->amount.min;
         }
-        array_foreach(requests, request)
-        {
+        array_foreach(requests, request) {
             request->deadline_years = buffer_read_i16(list);
         }
     } else if (section == REQUESTS_OLD_STATE_SECTIONS_CAN_COMPLY) {
-        array_foreach(requests, request)
-        {
+        array_foreach(requests, request) {
             request->can_comply_dialog_shown = buffer_read_u8(list);
         }
     } else if (section == REQUESTS_OLD_STATE_SECTIONS_FAVOR_REWARD) {
-        array_foreach(requests, request)
-        {
+        array_foreach(requests, request) {
             request->favor = buffer_read_u8(list);
         }
     } else if (section == REQUESTS_OLD_STATE_SECTIONS_ONGOING_INFO) {
-        array_foreach(requests, request)
-        {
+        array_foreach(requests, request) {
             request->month = buffer_read_u8(list);
         }
-        array_foreach(requests, request)
-        {
+        array_foreach(requests, request) {
             request->state = buffer_read_u8(list);
         }
-        array_foreach(requests, request)
-        {
+        array_foreach(requests, request) {
             request->visible = buffer_read_u8(list);
         }
-        array_foreach(requests, request)
-        {
+        array_foreach(requests, request) {
             request->months_to_comply = buffer_read_u8(list);
         }
         // Setup any default values we need for values that didn't exist in old versions.
-        array_foreach(requests, request)
-        {
+        array_foreach(requests, request) {
             request->extension_months_to_comply = REQUESTS_DEFAULT_MONTHS_TO_COMPLY;
             request->extension_disfavor = REQUESTS_DEFAULT_EXTENSION_DISFAVOUR;
             request->ignored_disfavor = REQUESTS_DEFAULT_IGNORED_DISFAVOUR;
