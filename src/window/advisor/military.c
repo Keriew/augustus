@@ -31,7 +31,7 @@ static void button_empire_service(const generic_button *button);
 static void button_return_all_to_fort(const generic_button *button);
 static void on_scroll(void);
 
-static scrollbar_type scrollbar = { 592, 70, 272, 576, MAX_VISIBLE_LEGIONS, on_scroll };
+static scrollbar_type scrollbar = { 592, 70, 270, 576, MAX_VISIBLE_LEGIONS, on_scroll,  0, 4};
 
 static generic_button fort_buttons[] = {
     {384, 83, 30, 30, button_go_to_legion, 0, 1},

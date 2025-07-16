@@ -1610,6 +1610,14 @@ static translation_string all_strings[] = {
     {TR_BUILDING_LATRINES_UNNECESSARY, "Ces latrines sont superflues, car aucun logement à proximité n'en a l'utilité."},
     {TR_BUILDING_LATRINES_NO_HOUSES, "Ces latrines sont actuellement inutiles, car aucun logement ne se trouve à proximité."},
     {TR_CONFIG_DRAW_ASCLEPIUS, "Afficher le Bâton d'Asclépios pour le menu d'hygiène"},
+    {TR_WINDOW_ADVISOR_EPITHETS, "Pouvoirs des Dieux"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP, "Pouvoirs divins conférés par les Temples monumentaux"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_CERES, "Pouvoirs divins de Cérès"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_NEPTUNE, "Pouvoirs divins de Neptune"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_MERCURY, "Pouvoirs divins de Mercure"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_MARS, "Pouvoirs divins de Mars"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_VENUS, "Pouvoirs divins de Vénus"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_PANTHEON, "Pouvoirs divins du Panthéon"},
 };
 
 void translation_french(const translation_string **strings, int *num_strings)

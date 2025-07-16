@@ -13,11 +13,14 @@
 #include "graphics/panel.h"
 #include "graphics/text.h"
 #include "window/hold_festival.h"
+#include "window/epithets.h"
 
 static void button_hold_festival(const generic_button *button);
+static void button_epithets(const generic_button *button);
 
 static generic_button hold_festival_button[] = {
     {102, 340, 300, 20, button_hold_festival},
+    {590, 20, 32, 24, button_epithets}
 };
 
 static unsigned int focus_button_id;
@@ -170,11 +173,15 @@ static void draw_foreground(void)
     if (!city_festival_is_planned()) {
         button_border_draw(102, 335, 300, 20, focus_button_id == 1);
     }
+
+    button_border_draw(590, 20, 32, 24, focus_button_id == 2);
+
+    image_draw(982, 594, 24, COLOR_MASK_NONE, SCALE_NONE);
 }
 
 static int handle_mouse(const mouse *m)
 {
-    return generic_buttons_handle_mouse(m, 0, 0, hold_festival_button, 1, &focus_button_id);
+    return generic_buttons_handle_mouse(m, 0, 0, hold_festival_button, 2, &focus_button_id);
 }
 
 static void button_hold_festival(const generic_button *button)
@@ -184,10 +191,17 @@ static void button_hold_festival(const generic_button *button)
     }
 }
 
+static void button_epithets(const generic_button *button)
+{
+    window_epithets_show();
+}
+
 static void get_tooltip_text(advisor_tooltip_result *r)
 {
-    if (focus_button_id) {
+    if (focus_button_id == 1) {
         r->text_id = 112;
+    } else if (focus_button_id == 2) {
+        r->translation_key = TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP;
     }
 }
 

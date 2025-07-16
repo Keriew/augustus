@@ -1626,6 +1626,14 @@ static translation_string all_strings[] = {
     {TR_BUILDING_NATIVE_WATCHTOWER_DESC,"Using these structures, the natives observe our every movement and exploit our weak points. Unless we manage to deal with the locals, the guards watching us from the towers will prevent us from expanding into this area."},
     {TR_BUILDING_INFO_CARAVANSERAI_MONTHLY_CONSUMPTION, "Monthly food consumption:"},
     {TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, "Trade caravans do not prioritise road networks"},
+    {TR_WINDOW_ADVISOR_EPITHETS, "Powers of the Gods"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP, "Divine powers granted by Great Temples"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_CERES, "Ceres divine powers"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_NEPTUNE, "Neptune divine powers"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_MERCURY, "Mercury divine powers"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_MARS, "Mars divine powers"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_VENUS, "Venus divine powers"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_PANTHEON, "Pantheon divine powers"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
