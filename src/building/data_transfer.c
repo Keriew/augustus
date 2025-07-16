@@ -75,7 +75,7 @@ int building_data_transfer_copy(building *b)
             data.i8 = b->data.industry.is_stockpiling;
             break;
         default:
-            return 0;
+            break;
 
     }
     city_warning_show(WARNING_DATA_COPY_SUCCESS, NEW_WARNING_SLOT);
@@ -117,7 +117,7 @@ int building_data_transfer_paste(building *b)
             b->data.industry.is_stockpiling = data.i8;
             break;
         default:
-            return 0;
+            break;
     }
     city_warning_show(WARNING_DATA_PASTE_SUCCESS, NEW_WARNING_SLOT);
     return 1;
@@ -149,6 +149,6 @@ building_data_type building_data_transfer_data_type_from_building_type(building_
         case BUILDING_DEPOT:
             return DATA_TYPE_DEPOT;
         default:
-            return DATA_TYPE_NOT_SUPPORTED;
+            return (building_data_type) type;
     }
 }
