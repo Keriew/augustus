@@ -15,6 +15,7 @@ static struct {
     char i8;
     short i16;
     int i32;
+    unsigned char mothball_state;
 } data;
 
 int building_data_transfer_possible(building *b)
@@ -39,6 +40,7 @@ int building_data_transfer_copy(building *b)
     } else {
         memset(&data, 0, sizeof(data));
         data.data_type = data_type;
+        data.mothball_state = b->state;
     }
 
     const building_storage *storage;
@@ -87,6 +89,9 @@ int building_data_transfer_paste(building *b)
     if (!building_data_transfer_possible(b)) {
         return 0;
     }
+
+    building_mothball_set(b, data.mothball_state);
+    b->state = data.mothball_state;
 
     switch (data_type) {
         case DATA_TYPE_ROADBLOCK:
