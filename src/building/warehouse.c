@@ -338,7 +338,7 @@ int building_warehouse_is_maintaining(int resource, building *b)
     if (entry->state != BUILDING_STORAGE_STATE_MAINTAINING) {
         return 0;
     }
-    if (amount < entry->quantity) {
+    if (amount <= entry->quantity) {
         return 1;
     }
 
