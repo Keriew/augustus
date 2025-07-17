@@ -15,7 +15,7 @@ static struct {
     char i8;
     short i16;
     int i32;
-    unsigned char mothball_state;
+    unsigned char building_is_mothballed;
 } data;
 
 int building_data_transfer_possible(building *b)
@@ -40,7 +40,9 @@ int building_data_transfer_copy(building *b)
     } else {
         memset(&data, 0, sizeof(data));
         data.data_type = data_type;
-        data.mothball_state = b->state;
+
+        data.building_is_mothballed = (b->state == BUILDING_STATE_MOTHBALLED) ? 1 : 0;
+
     }
 
     const building_storage *storage;
@@ -90,8 +92,11 @@ int building_data_transfer_paste(building *b)
         return 0;
     }
 
-    building_mothball_set(b, data.mothball_state);
-    b->state = data.mothball_state;
+    if (data.building_is_mothballed) {
+        building_mothball_set(b, BUILDING_STATE_MOTHBALLED);
+    } else {
+        b->state = BUILDING_STATE_IN_USE;
+    }
 
     switch (data_type) {
         case DATA_TYPE_ROADBLOCK:
