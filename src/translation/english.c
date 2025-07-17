@@ -1591,7 +1591,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_EDIT_INVASION_NO_TYPE, "No enemy type set"},
     {TR_EDITOR_EDIT_INVASION_NO_SOLDIERS, "No soldiers set for invasion"},
     {TR_EDITOR_EDIT_INVASION_SET_YEAR, "Invasion cannot start on the first year"},
-    {TR_EDITOR_EDIT_DEMAND_CHANGE_NO_YEAR, "The change cannot occour on the first year"},
+    {TR_EDITOR_EDIT_DEMAND_CHANGE_NO_YEAR, "The change cannot occur on the first year"},
     {TR_EDITOR_EDIT_DEMAND_CHANGE_INVALID_ROUTE_SET, "Invalid route set"},
     {TR_EDITOR_ALLOWED_BUILDINGS_ALLOWED, "Allowed"},
     {TR_EDITOR_ALLOWED_BUILDINGS_NOT_ALLOWED, "Not allowed"},
@@ -1619,16 +1619,16 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION, "Decoration"},
     {TR_EDITOR_SCENARIO_BUILDING_NATIVE_MONUMENT, "Monument"},
     {TR_EDITOR_SCENARIO_BUILDING_NATIVE_WATCHTOWER, "Watchtower"},
-    {TR_BUILDING_NATIVE_DECORATION,"Native Decoration" },
-    {TR_BUILDING_NATIVE_MONUMENT,"Native Monument" },
-    {TR_BUILDING_NATIVE_WATCHTOWER,"Native Watchtower"},
-    {TR_BUILDING_NATIVE_DECORATION_DESC,"The product of local artists' work, it proves to be very valued among the locals and Romans alike. Despite lacking refinement, many citizens find it thought provoking."},
-    {TR_BUILDING_NATIVE_MONUMENT_DESC,"This magnificent structure proves that locals' ingenuity and hard work allows them to achieve great things, despite their inferior knowledge of engineering. Though some sceptics speculate that it's perhaps a miracle delivered by gods or a remain of a former ancient, but extremely advanced civilization."},
-    {TR_BUILDING_NATIVE_WATCHTOWER_DESC,"Using these structures, the natives observe our every movement and exploit our weak points. Unless we manage to deal with the locals, the guards watching us from the towers will prevent us from expanding into this area."},
+    {TR_BUILDING_NATIVE_DECORATION, "Native Decoration" },
+    {TR_BUILDING_NATIVE_MONUMENT, "Native Monument" },
+    {TR_BUILDING_NATIVE_WATCHTOWER, "Native Watchtower"},
+    {TR_BUILDING_NATIVE_DECORATION_DESC, "The product of local artisans, this decorative edifice proves to be highly valued by both locals and Romans alike. Despite lacking refinement, many citizens find it thought provoking."},
+    {TR_BUILDING_NATIVE_MONUMENT_DESC, "This magnificent structure has stood vigil over these lands since time immemorial. Some claim it proves that, with ingenuity and hard work, the local people may achieve great things, despite their inferior knowledge of engineering. Other, more skeptical people speculate that it is, perhaps, a miracle delivered by gods or a remnant from an ancient, extremely advanced civilization."},
+    {TR_BUILDING_NATIVE_WATCHTOWER_DESC, "Using these structures, the natives observe every movement in your city, ever ready to exploit signs of weakness. Unless the locals are taught the benefits of Roman civilization, the guards watching from the tower will prevent expansion into this area."},
     {TR_BUILDING_INFO_CARAVANSERAI_MONTHLY_CONSUMPTION, "Monthly food consumption:"},
     {TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, "Trade caravans do not prioritise road networks"},
     {TR_TOOLTIP_BUILDING_DISTRIBUTION_MAINTAINING, "Prevents everyone except cart depots from moving or taking the resource."},
-    {TR_CONFIG_STORAGE_STEP_4,"Use multiples of 4 in granary and warehouse storage" }
+    {TR_CONFIG_STORAGE_STEP_4,"Use multiples of 4 for granary, warehouse and cart depots quantity" }
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
