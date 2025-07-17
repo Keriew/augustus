@@ -425,6 +425,11 @@ int sound_device_play_file_on_channel_panned(const char *filename, sound_type ty
     if (!data.initialized || !config_get(CONFIG_GENERAL_ENABLE_AUDIO)) {
         return 0;
     }
+
+    if (!setting_sound_is_enabled(type)) {
+        return 0;
+    }
+    
     int channel = get_channel_for_filename(filename, type);
     if (channel == NO_CHANNEL) {
         channel = get_available_channel(type);
