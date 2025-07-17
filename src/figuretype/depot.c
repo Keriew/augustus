@@ -230,7 +230,13 @@ void figure_depot_cartpusher_action(figure *f)
     f->cart_image_id = 0;
     int speed_factor = DEPOT_CART_PUSHER_SPEED;
     int percentage_speed = 0;
-    f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS_HIGHWAY;
+    
+    if (config_get(CONFIG_GP_CARAVANS_MOVE_OFF_ROAD)) {
+        f->terrain_usage = TERRAIN_USAGE_ANY;
+    } else {
+        f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS_HIGHWAY;
+    }
+    
     building *b = building_get(f->building_id);
 
     if (!b || b->type != BUILDING_DEPOT || b->state != BUILDING_STATE_IN_USE) {

@@ -1213,4 +1213,5 @@
 	<image src="Button_Asclepius_Hover"/>
 	<image src="Button_Asclepius_Click"/>
 	<image src="Button_Asclepius_Disable"/>
+	<image id="Mothball_Sprite" src="Mothball_Sprite"/>
 </assetlist>
