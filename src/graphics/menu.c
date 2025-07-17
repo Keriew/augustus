@@ -9,7 +9,7 @@
 #define MENU_BASE_TEXT_Y_OFFSET 6
 #define MENU_ITEM_HEIGHT 20
 
-void menu_bar_draw(menu_bar_item *items, int num_items, int max_width)
+int menu_bar_draw(menu_bar_item *items, int num_items, int max_width)
 {
     int total_text_width = 0;
     for (int i = 0; i < num_items; i++) {
@@ -25,6 +25,8 @@ void menu_bar_draw(menu_bar_item *items, int num_items, int max_width)
         items[i].x_end = x_offset;
         x_offset += spacing_width;
     }
+
+    return x_offset;
 }
 
 static int get_menu_bar_item(const mouse *m, menu_bar_item *items, int num_items)
@@ -115,7 +117,7 @@ int menu_handle_mouse(const mouse *m, menu_bar_item *menu, int *focus_item_id)
         return 0;
     }
     if (m->left.went_up) {
-        menu_item *item = &menu->items[item_id -1];
+        menu_item *item = &menu->items[item_id - 1];
         item->left_click_handler(item->parameter);
     }
     return item_id;

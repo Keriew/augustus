@@ -27,6 +27,7 @@ typedef uint32_t color_t;
 #define COLOR_FONT_LIGHT_GRAY 0xffb3b3b3
 #define COLOR_FONT_GRAY 0xff888888
 #define COLOR_FONT_PLAIN 0xff180800
+#define COLOR_FONT_GREEN 0xff00cc00
 
 #define COLOR_INSET_LIGHT 0xffffffff
 #define COLOR_INSET_DARK 0xff848484
