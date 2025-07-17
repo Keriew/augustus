@@ -1219,4 +1219,5 @@
 	<image id="Maintain_Goods_Icon_2" width ="27" height="16">
 		<layer group="134" image="9" x="-1" y="-2"/>
 	</image>
+	<image id="Mothball_Sprite" src="Mothball_Sprite"/>
 </assetlist>
