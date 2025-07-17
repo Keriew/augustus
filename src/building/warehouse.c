@@ -784,11 +784,10 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
         }
         int needed = get_acceptable_quantity(r, warehouse) - loads_stored;
         int available = city_resource_count(r) - loads_stored;
-        int fetch_amount = needed < available ? needed : available;
-        fetch_amount = fetch_amount < MAX_CARTLOADS_PER_SPACE ? fetch_amount : MAX_CARTLOADS_PER_SPACE;
+        int fetch_amount = MAX_CARTLOADS_PER_SPACE;
 
 
-        if (room >= fetch_amount && fetch_amount > 0) {
+        if (available > needed && needed >= fetch_amount && fetch_amount > 0) {
             if (!building_warehouse_for_getting(warehouse, r, 0)) {
                 continue;
             }
