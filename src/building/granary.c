@@ -18,7 +18,6 @@
 #include "sound/effect.h"
 
 #define MAX_GRANARIES 100
-#define UNITS_PER_LOAD 100 //retired for granaries, keeping for legacy 
 #define CURSE_LOADS BUILDING_STORAGE_QUANTITY_MAX / 2
 #define INFINITE 10000
 

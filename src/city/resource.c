@@ -247,7 +247,8 @@ void city_resource_toggle_mothballed(resource_type resource)
 
 void city_resource_add_produced_to_granary(int amount)
 {
-    city_data.resource.food_produced_this_month += amount;
+    city_data.resource.food_produced_this_month += amount * UNITS_PER_LOAD;
+    //food produced is counted in units, so convert from cartloads
 }
 
 void city_resource_add_to_granary(resource_type food, int amount)
@@ -417,9 +418,9 @@ static void calculate_available_food(void)
             } else {
                 city_data.resource.granaries.operating++;
                 for (int r = 0; r < RESOURCE_MAX_FOOD; r++) {
-                    city_data.resource.granary_food_stored[r] += b->resources[r];
+                    city_data.resource.granary_food_stored[r] += b->resources[r] * UNITS_PER_LOAD;
                 }
-                if (amount_stored > 400) {
+                if (amount_stored > 4 * UNITS_PER_LOAD) {
                     tutorial_on_filled_granary();
                 }
             }

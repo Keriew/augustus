@@ -9,6 +9,7 @@
 #define THREEQUARTERS_GRANARY 24
 #define HALF_GRANARY 16
 #define QUARTER_GRANARY 8
+#define UNITS_PER_LOAD 100 //retired for granary storage, used in food stocks calculations
 
 enum {
     GRANARY_TASK_NONE = -1,

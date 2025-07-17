@@ -688,7 +688,7 @@ static int determine_granary_accept_foods(int resources[RESOURCE_MAX_FOOD], int 
             continue;
         }
         int pct_workers = calc_percentage(b->num_workers, model_get_building(b->type)->laborers);
-        if (pct_workers >= 100 && b->resources[RESOURCE_NONE] >= 100) {
+        if (pct_workers >= 100 && b->resources[RESOURCE_NONE] >= 1) {
             const building_storage *s = building_storage_get(b->storage_id);
             if (!s->empty_all) {
                 for (int r = 0; r < RESOURCE_MAX_FOOD; r++) {
@@ -717,7 +717,7 @@ static int determine_granary_get_foods(int resources[RESOURCE_MAX_FOOD], int roa
             continue;
         }
         int pct_workers = calc_percentage(b->num_workers, model_get_building(b->type)->laborers);
-        if (pct_workers >= 100 && b->resources[RESOURCE_NONE] > 100) {
+        if (pct_workers >= 100 && b->resources[RESOURCE_NONE] > 1) {
             const building_storage *s = building_storage_get(b->storage_id);
             if (!s->empty_all) {
                 for (int r = 0; r < RESOURCE_MAX_FOOD; r++) {
