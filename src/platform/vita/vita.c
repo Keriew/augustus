@@ -11,6 +11,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <malloc.h>
+
+#include <psp2/power.h>
+
 #include "SDL.h"
 
 // max heap size is approx. 330 MB with -d ATTRIBUTE2=12, otherwise max is 192
@@ -30,6 +33,12 @@ void platform_init_callback(void)
 {
     touch_set_mode(TOUCH_MODE_TOUCHPAD);
     center_mouse_cursor();
+
+    // Use maximum clocks
+    scePowerSetArmClockFrequency(444);
+    scePowerSetBusClockFrequency(222);
+    scePowerSetGpuClockFrequency(222);
+    scePowerSetGpuXbarClockFrequency(166);
 }
 
 static void vita_start_text_input(void)

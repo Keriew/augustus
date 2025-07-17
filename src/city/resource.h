@@ -5,7 +5,7 @@
 #include "game/resource.h"
 
 #define FOOD_PER_SOLDIER_MONTHLY 4
-#define FOOD_PER_TRADER_MONTHLY 10
+#define FOOD_PER_LAND_ROUTE_MONTHLY 30
 
 typedef struct {
     unsigned int size;
