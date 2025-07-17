@@ -1628,7 +1628,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_INFO_CARAVANSERAI_MONTHLY_CONSUMPTION, "Monthly food consumption:"},
     {TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, "Trade caravans do not prioritise road networks"},
     {TR_TOOLTIP_BUILDING_DISTRIBUTION_MAINTAINING, "Prevents everyone except cart depots from moving or taking the resource."},
-    {TR_CONFIG_STORAGE_STEP_4,"Use multiples of 4 for granary, warehouse and cart depots quantity" }
+    {TR_CONFIG_STORAGE_STEP_4, "Use multiples of 4 for granary, warehouse and cart depots quantity" }
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
