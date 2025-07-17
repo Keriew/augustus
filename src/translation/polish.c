@@ -1408,7 +1408,7 @@ static translation_string all_strings[] = {
     {TR_CHEAT_CLIMATE_CHANGE, "Klimat zmieniony"},
     {TR_CHEAT_EDITOR_WARNING_TITLE, "Warning"},
     {TR_CITY_MESSAGE_TEXT_CARAVANSERAI_COMPLETE, "Caravanserai została ukończona i nowe sposobności handlowe z pewnościa wkrótce się pojawią. Karawany z całego świata zapewniają, że nie mogą się doczekać przybycia i handlu z twoim miastem."},
-    {TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, "Karawany handlowe nie priorytetyzują sieci dróg. Trade caravans do not prioritize road networks"},
+    {TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, "Karawany handlowe nie priorytetyzują sieci dróg."},
     {TR_CONFIG_DEFAULT_PLAYER_NAME, "Domyślna nazwa gracza:"},
     {TR_CONFIG_DRAW_ASCLEPIUS, "Berło Ascelpiusa dla menu zdrowia"},
 };
