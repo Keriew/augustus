@@ -81,7 +81,8 @@ static const char *ini_keys[] = {
     "ui_draw_asclepius",
     "ui_show_desirability_range_all",
     "ui_highlight_selected_building",
-    "gameplay_change_caravans_move_off_road"
+    "gameplay_change_caravans_move_off_road",
+    "ui_draw_weather"
 };
 
 static const char *ini_string_keys[] = {
@@ -113,6 +114,7 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_GP_CH_MAX_AUTOSAVE_SLOTS] = 10,
     [CONFIG_GENERAL_NEXT_AUTOSAVE_SLOT] = 0,
     [CONFIG_GP_CARAVANS_MOVE_OFF_ROAD] = 0,
+    [CONFIG_UI_DRAW_WEATHER] = 0,
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };
