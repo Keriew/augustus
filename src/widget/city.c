@@ -653,7 +653,7 @@ static void handle_mouse(const mouse *m)
             return;
         }
         if (handle_right_click_allow_building_info(tile)) {
-            int building_id = map_building_at(tile->grid_offset);
+            int building_id = building_main(building_get(map_building_at(tile->grid_offset)))->id; //building inception!
             data.selected_building_id = building_id ? building_id : NO_POSITION; //no position if selected 0
             window_building_info_show(tile->grid_offset);
             return;

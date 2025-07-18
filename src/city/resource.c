@@ -47,20 +47,31 @@ int city_resource_count(resource_type resource)
     return city_data.resource.stored_in_warehouses[resource];
 }
 
-int city_resource_get_amount_including_granaries(resource_type resource, int amount, int *checked_granaries)
+
+int city_resource_get_amount_including_granaries(resource_type resource, int amount, int *checked_granaries,
+    int respect_maintaining)
 {
     if (checked_granaries) {
         *checked_granaries = 0;
     }
-    int amount_stored = city_data.resource.stored_in_warehouses[resource];
-    if (amount_stored < amount && resource_is_food(resource)) {
-        amount_stored += city_data.resource.granary_food_stored[resource] / 100;
+
+    int total = building_warehouses_count_available_resource(resource, respect_maintaining);
+    if (total >= amount) {
+        return total;
+    }
+
+    if (resource_is_food(resource)) {
+        int granary_total = building_granaries_count_available_resource(resource, respect_maintaining);
+        total += granary_total;
+
         if (checked_granaries) {
             *checked_granaries = 1;
         }
     }
-    return amount_stored;
+
+    return total;
 }
+
 
 int city_resource_get_available_empty_space_granaries(resource_type food, int respect_settings)
 {
@@ -236,7 +247,8 @@ void city_resource_toggle_mothballed(resource_type resource)
 
 void city_resource_add_produced_to_granary(int amount)
 {
-    city_data.resource.food_produced_this_month += amount;
+    city_data.resource.food_produced_this_month += amount * RESOURCE_ONE_LOAD;
+    //food produced is counted in units, so convert from cartloads
 }
 
 void city_resource_add_to_granary(resource_type food, int amount)
@@ -406,9 +418,9 @@ static void calculate_available_food(void)
             } else {
                 city_data.resource.granaries.operating++;
                 for (int r = 0; r < RESOURCE_MAX_FOOD; r++) {
-                    city_data.resource.granary_food_stored[r] += b->resources[r];
+                    city_data.resource.granary_food_stored[r] += b->resources[r] * RESOURCE_ONE_LOAD;
                 }
-                if (amount_stored > 400) {
+                if (amount_stored > 4 * RESOURCE_ONE_LOAD) {
                     tutorial_on_filled_granary();
                 }
             }

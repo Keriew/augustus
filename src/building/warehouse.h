@@ -25,13 +25,12 @@ enum {
 int building_warehouse_get_space_info(building *warehouse);
 
 int building_warehouse_get_amount(building *warehouse, int resource);
-
+int building_warehouse_get_available_amount(building *warehouse, int resource);
 int building_warehouse_add_resource(building *b, int resource, int respect_settings);
-
 int building_warehouses_add_resource(int resource, int amount, int respect_settings);
-
 int building_warehouse_is_accepting(int resource, building *b);
 int building_warehouse_is_getting(int resource, building *b);
+int building_warehouse_is_maintaining(int resourece, building *b);
 int building_warehouse_is_not_accepting(int resource, building *b);
 int building_warehouse_maximum_receptible_amount(resource_type resource, building *b);
 int building_warehouse_max_space_for_resource(resource_type resource, building *b);
@@ -50,6 +49,8 @@ void building_warehouse_space_remove_export(building *space, int resource, int l
 
 int building_warehouses_remove_resource(int resource, int amount);
 
+int building_warehouses_count_available_resource(int resource, int respect_maintaining);
+
 int building_warehouses_send_resources_to_rome(int resource, int amount);
 
 int building_warehouse_accepts_storage(building *b, int resource, int *understaffed);
@@ -61,7 +62,7 @@ int building_warehouse_amount_can_get_from(building *destination, int resource);
 
 int building_warehouse_for_getting(building *src, int resource, map_point *dst);
 
-int building_warehouse_with_resource(int x, int y, int resource, int road_network_id, int* understaffed, map_point* dst, building_storage_permission_states p);
+int building_warehouse_with_resource(int x, int y, int resource, int road_network_id, int *understaffed, map_point *dst, building_storage_permission_states p);
 
 int building_warehouse_determine_worker_task(building *warehouse, int *resource);
 

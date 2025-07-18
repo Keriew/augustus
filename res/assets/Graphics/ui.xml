@@ -1213,5 +1213,11 @@
 	<image src="Button_Asclepius_Hover"/>
 	<image src="Button_Asclepius_Click"/>
 	<image src="Button_Asclepius_Disable"/>
+	<image id="Maintain_Goods_Icon" width ="27" height="16">
+		<layer group="134" image="8" x="-1" y="-2"/>
+	</image>
+	<image id="Maintain_Goods_Icon_2" width ="27" height="16">
+		<layer group="134" image="9" x="-1" y="-2"/>
+	</image>
 	<image id="Mothball_Sprite" src="Mothball_Sprite"/>
 </assetlist>

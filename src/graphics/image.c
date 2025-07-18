@@ -28,6 +28,16 @@ void image_draw_silhouette(int image_id, int x, int y, color_t color, float scal
 
 }
 
+void image_draw_scaled_centered(int image_id, int x, int y, color_t color, int draw_scale_percent)
+{
+    float obj_draw_scale = 100.0f / draw_scale_percent;
+    const image *img = image_get(image_id);
+
+    float scaled_x = (((x) +img->width / 2.0f) - (img->width / obj_draw_scale) / 2.0f) * obj_draw_scale;
+    float scaled_y = (((y) +img->height / 2.0f) - (img->height / obj_draw_scale) / 2.0f) * obj_draw_scale;
+
+    image_draw(image_id, scaled_x, scaled_y, color, obj_draw_scale);
+}
 
 void image_draw_enemy(int image_id, int x, int y, float scale)
 {

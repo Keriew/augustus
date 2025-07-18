@@ -175,7 +175,7 @@ typedef struct building {
     signed char desirability;
     unsigned char is_deleted;
     unsigned char is_close_to_water;
-    unsigned char storage_id;
+    unsigned char storage_id; //player-visible ID of the storage building, e.g. Granary 7, Warehouse 33
     union {
         signed char house_happiness;
         signed char native_anger;
@@ -265,7 +265,7 @@ int building_get_laborers(building_type type);
 
 unsigned char building_stockpiling_toggle(building *b);
 
-int building_get_tourism(const building* b);
+int building_get_tourism(const building *b);
 
 int building_get_levy(const building *b);
 

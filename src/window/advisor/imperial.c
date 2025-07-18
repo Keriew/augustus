@@ -81,7 +81,7 @@ static void draw_request(int index, const scenario_request *request)
         // normal goods request
         int using_granaries;
         int amount_stored = city_resource_get_amount_including_granaries(request->resource,
-            request->amount.requested, &using_granaries);
+            request->amount.requested, &using_granaries, 1);
         int y_offset = 120 + 42 * index;
         width = text_draw_number(amount_stored, '@', " ", 40, y_offset, FONT_NORMAL_WHITE, 0);
         if (using_granaries) {
@@ -269,7 +269,7 @@ void button_request_resource(const generic_button *button)
         return;
     }
     selected_resource = city_get_request_resource(index);
-    
+
     // we can't manage money with the resource settings window
     if (selected_resource == RESOURCE_DENARII) {
         return;
@@ -308,7 +308,7 @@ static void get_tooltip_text(advisor_tooltip_result *r)
         if (request_status == CITY_REQUEST_STATUS_NOT_ENOUGH_RESOURCES || request_status >= CITY_REQUEST_STATUS_MAX) {
             const scenario_request *request = scenario_request_get_visible(index - city_request_has_troop_request());
             int using_granaries;
-            city_resource_get_amount_including_granaries(request->resource, request->amount.requested, &using_granaries);
+            city_resource_get_amount_including_granaries(request->resource, request->amount.requested, &using_granaries, 1);
             if (using_granaries) {
                 write_resource_storage_tooltip(r, request->resource);
             }
