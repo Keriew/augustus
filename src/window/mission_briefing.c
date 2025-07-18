@@ -36,6 +36,7 @@
 
 #define MISSION_BRIEFING_WINDOW_BLOCKS_MIN_WIDTH 40 // 640px
 #define MISSION_BRIEFING_WINDOW_BLOCKS_MIN_HEIGHT 30 // 480px
+#define MISSION_BRIEFING_WINDOW_BLOCKS_MAX_WIDTH 120 // 1920px
 
 typedef enum {
     BUTTON_GO_BACK_NONE = 0,
@@ -74,6 +75,7 @@ static struct {
         int margin_y; // In blocks
         int min_blocks_width;
         int min_blocks_height;
+        int max_blocks_width;
     } layout;
 } data;
 
@@ -88,6 +90,7 @@ static void init(void)
     data.layout.margin_y = 10;
     data.layout.min_blocks_width = MISSION_BRIEFING_WINDOW_BLOCKS_MIN_WIDTH;
     data.layout.min_blocks_height = MISSION_BRIEFING_WINDOW_BLOCKS_MIN_HEIGHT;
+    data.layout.max_blocks_width = MISSION_BRIEFING_WINDOW_BLOCKS_MAX_WIDTH;
     rich_text_reset(0);
 }
 
@@ -259,8 +262,11 @@ static int get_width_in_blocks(void)
 {
     int current_screen_width = screen_width();
     int min_blocks_width = data.layout.min_blocks_width;
+    int max_blocks_width = data.layout.max_blocks_width;
     int width = (current_screen_width / BLOCK_SIZE) - data.layout.margin_x;
-    return width >= min_blocks_width ? width : min_blocks_width;
+    return width < min_blocks_width ? min_blocks_width :
+       width > max_blocks_width ? max_blocks_width :
+       width;
 }
 
 static int get_height_in_blocks(void)
