@@ -1689,6 +1689,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_NATIVE_WATCHTOWER_DESC, "Mit diesen Vorrichtungen beobachten die Einheimischen jeden noch so kleinen Schritt und erfahren unsere Schwächen. Wenn wir sie nicht friedlich zivilisieren, werden diese Türme uns davon abhalten in ihr Gebiet vorzudringen."},
     {TR_BUILDING_INFO_CARAVANSERAI_MONTHLY_CONSUMPTION, "Monatlicher Essens Konsum:"},
     {TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, "Karawanen und Oxen priorisieren Staßen nicht"},
+    {TR_CONFIG_DRAW_WEATHER, "Dynamisches Wetter AN"}
 };
 
 void translation_german(const translation_string **strings, int *num_strings)
