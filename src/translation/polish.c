@@ -1415,7 +1415,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_MAX_AUTOSAVE_SLOTS, "Maksymalna liczba rocznych autozapisów:"},
     {TR_CONFIG_RANDOMISE_MUSIC, "Losowa kolejność muzyki miasta"},
     {TR_CONFIG_SHOW_DESIRABILITY_RANGE, "Pokaż atrakcyjność podczas budowania religijnych i wojskowych budynków."},
-    {TR_CONFIG_SHOW_DESIRABILITY_RANGE_ALL, "Pokaż atrakcyjność poczas budowania wszystkich budynków.",
+    {TR_CONFIG_SHOW_DESIRABILITY_RANGE_ALL, "Pokaż atrakcyjność poczas budowania wszystkich budynków."},
     {TR_CONFIG_USER_PATH_CUSTOM, "Ustaw niestandardowy folder."},
     {TR_CONFIG_USER_PATH_DEFAULT, "Domyślny (folder instalacyjny Cezara III, bez podfolderów)"},
     {TR_CONFIG_USER_PATH_RECOMMENDED, "Rekomendowany ("},
