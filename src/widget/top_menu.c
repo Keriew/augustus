@@ -1,15 +1,13 @@
 #include "top_menu.h"
 
-#include "city/emperor.h"
-#include "city/health.h"
-#include "city/ratings.h"
-#include "scenario/criteria.h"
-
 #include "assets/assets.h"
 #include "building/construction.h"
 #include "city/constants.h"
+#include "city/emperor.h"
 #include "city/finance.h"
+#include "city/health.h"
 #include "city/population.h"
+#include "city/ratings.h"
 #include "core/calc.h"
 #include "core/config.h"
 #include "core/lang.h"
@@ -27,6 +25,7 @@
 #include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
+#include "scenario/criteria.h"
 #include "scenario/property.h"
 #include "widget/city.h"
 #include "window/advisors.h"
@@ -198,7 +197,6 @@ static void set_text_for_yearly_autosave(void)
         config_get(CONFIG_GP_CH_YEARLY_AUTOSAVE) ? TR_BUTTON_YEARLY_AUTOSAVE_ON : TR_BUTTON_YEARLY_AUTOSAVE_OFF);
 }
 
-
 static void set_text_for_tooltips(void)
 {
     int new_text;
@@ -315,7 +313,7 @@ static int get_black_panel_actual_width(int desired_width)
     return (blocks + 2) * BLACK_PANEL_BLOCK_WIDTH;
 }
 
-int get_black_panel_total_width_for_text_id(int group, int id, int number, font_t font)
+static int get_black_panel_total_width_for_text_id(int group, int id, int number, font_t font)
 {
     int label_width = lang_text_get_width(group, id, font);
     int number_width = text_get_number_width(number, '@', " ", font);
@@ -465,7 +463,6 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
     return layout;
 }
 
-
 static int draw_panel_with_text_and_number(int offset, int lang_section, int lang_index,
                                            int number, int margin, font_t font, color_t label_color, color_t num_color)
 {
@@ -544,8 +541,6 @@ static int draw_health_panel(int offset, int box_width, font_t font)
 
     return box_width;
 }
-
-
 
 static color_t get_savings_color_mask(void)
 {
@@ -677,7 +672,6 @@ void widget_top_menu_draw(int force)
     drawn.favor = city_rating_favor();
     drawn.health = city_health();
 }
-
 
 static int handle_input_submenu(const mouse *m, const hotkeys *h)
 {
