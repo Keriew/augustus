@@ -827,10 +827,10 @@ void window_building_draw_granary(building_info_context *c)
                 text_draw(resource_get_data(r)->text, x + 32 + width, y + 12, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
             }
             int width = lang_text_draw(98, 2, c->x_offset + 16, c->y_offset + 40, FONT_NORMAL_BLACK);
-            lang_text_draw_amount(8, 16, total_stored, c->x_offset + 16 + width, c->y_offset + 40, FONT_NORMAL_BLACK);
+            lang_text_draw_amount(CUSTOM_TRANSLATION, TR_BUILDING_INFO_CARTLOAD, total_stored, c->x_offset + 16 + width, c->y_offset + 40, FONT_NORMAL_BLACK);
 
             width = lang_text_draw(98, 3, c->x_offset + 220, c->y_offset + 40, FONT_NORMAL_BLACK);
-            lang_text_draw_amount(8, 16, b->resources[RESOURCE_NONE],
+            lang_text_draw_amount(CUSTOM_TRANSLATION, TR_BUILDING_INFO_CARTLOAD, b->resources[RESOURCE_NONE],
                 c->x_offset + 220 + width, c->y_offset + 40, FONT_NORMAL_BLACK);
         }
     }
