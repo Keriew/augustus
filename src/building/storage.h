@@ -21,16 +21,24 @@ typedef enum {
     BUILDING_STORAGE_STATE_ACCEPTING = 0,
     BUILDING_STORAGE_STATE_NOT_ACCEPTING = 1,
     BUILDING_STORAGE_STATE_GETTING = 2,
-    BUILDING_STORAGE_STATE_ACCEPTING_HALF = 3,
-    BUILDING_STORAGE_STATE_ACCEPTING_QUARTER = 4,
-    BUILDING_STORAGE_STATE_GETTING_HALF = 5,
-    BUILDING_STORAGE_STATE_GETTING_QUARTER = 6,
-    BUILDING_STORAGE_STATE_GETTING_3QUARTERS = 7,
-    BUILDING_STORAGE_STATE_ACCEPTING_3QUARTERS = 8,
-    BUILDING_STORAGE_STATE_NOT_ACCEPTING_HALF = 9,
-    BUILDING_STORAGE_STATE_NOT_ACCEPTING_QUARTER = 10,
-    BUILDING_STORAGE_STATE_NOT_ACCEPTING_3QUARTERS = 11,
+    BUILDING_STORAGE_STATE_MAINTAINING = 3,
 } building_storage_state;
+
+typedef enum {
+    BUILDING_STORAGE_QUANTITY_MAX = 32,
+    BUILDING_STORAGE_QUANTITY_28 = 28,
+    BUILDING_STORAGE_QUANTITY_24 = 24,
+    BUILDING_STORAGE_QUANTITY_20 = 20,
+    BUILDING_STORAGE_QUANTITY_16 = 16,
+    BUILDING_STORAGE_QUANTITY_12 = 12,
+    BUILDING_STORAGE_QUANTITY_8 = 8,
+    BUILDING_STORAGE_QUANTITY_4 = 4,
+} building_storage_quantity;
+
+typedef struct {
+    building_storage_state state;
+    building_storage_quantity quantity;
+} resource_storage_entry;
 
 typedef enum {
     BUILDING_STORAGE_PERMISSION_MARKET = 0,
@@ -50,7 +58,7 @@ typedef enum {
  */
 typedef struct {
     int empty_all;
-    building_storage_state resource_state[RESOURCE_MAX];
+    resource_storage_entry resource_state[RESOURCE_MAX];
     int permissions;
 } building_storage;
 
@@ -120,7 +128,7 @@ void building_storage_set_data(int storage_id, building_storage new_data);
  */
 void building_storage_cycle_resource_state(int storage_id, resource_type resource_id);
 
-void building_storage_cycle_partial_resource_state(int storage_id, resource_type resource_id);
+void building_storage_cycle_partial_resource_state(int storage_id, resource_type resource_id, int reverse_order);
 /**
  * Sets all goods to 'not accepting'
  * @param storage_id Storage id

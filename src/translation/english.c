@@ -111,6 +111,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_AUTO_KILL_ANIMALS, "Citizens will automatically kill harmless animals"},
     {TR_CONFIG_SHOW_ROAMING_PATH, "Preview paths traveled by roaming walkers"},
     {TR_CONFIG_DRAW_CLOUD_SHADOWS, "Draw cloud shadows"},
+    {TR_CONFIG_DRAW_WEATHER, "Enable dynamic weather"},
     {TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE, "Ask for confirmation when overwriting a file"},
     {TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, "Non-military gates default to allowing all walkers"},
     {TR_HOTKEY_TITLE, "Augustus hotkey configuration"},
@@ -1614,6 +1615,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_NATIVE_HUT_ALT, "Alternate native hut"},
     {TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, "Warehouses and granaries can be built over any roads"},
     {TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, "Highlight selected building"},
+    {TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING, "Retaining"},
     {TR_CONFIG_MAX_AUTOSAVE_SLOTS, "Maximum number of yearly autosave slots:" },
     {TR_TOOLTIP_PERSONAL_SAVINGS, "Your private savings!"},
     {TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION, "Decoration"},
@@ -1625,8 +1627,11 @@ static translation_string all_strings[] = {
     {TR_BUILDING_NATIVE_DECORATION_DESC, "The product of local artisans, this decorative edifice proves to be highly valued by both locals and Romans alike. Despite lacking refinement, many citizens find it thought provoking."},
     {TR_BUILDING_NATIVE_MONUMENT_DESC, "This magnificent structure has stood vigil over these lands since time immemorial. Some claim it proves that, with ingenuity and hard work, the local people may achieve great things, despite their inferior knowledge of engineering. Other, more skeptical people speculate that it is, perhaps, a miracle delivered by gods or a remnant from an ancient, extremely advanced civilization."},
     {TR_BUILDING_NATIVE_WATCHTOWER_DESC, "Using these structures, the natives observe every movement in your city, ever ready to exploit signs of weakness. Unless the locals are taught the benefits of Roman civilization, the guards watching from the tower will prevent expansion into this area."},
-    {TR_BUILDING_INFO_CARAVANSERAI_MONTHLY_CONSUMPTION, "Monthly food consumption:"},
-    {TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, "Trade caravans do not prioritize road networks"},
+    {TR_BUILDING_INFO_CARAVANSERAI_MONTHLY_CONSUMPTION, "Monthly food consumption:" },
+    {TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, "Trade caravans do not prioritise road networks" },
+    {TR_TOOLTIP_BUILDING_DISTRIBUTION_MAINTAINING, "Prevents everyone except cart depots from moving or taking the resource." },
+    {TR_CONFIG_STORAGE_STEP_4, "Use multiples of 4 for granary, warehouse and cart depot quantity" },
+    {TR_CONFIG_MOVE_SAVINGS_TO_THE_RIGHT, "Original top bar items order" },
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

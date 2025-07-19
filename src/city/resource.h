@@ -21,7 +21,8 @@ typedef enum {
 
 int city_resource_count_food_on_granaries(resource_type food);
 int city_resource_count(resource_type resource);
-int city_resource_get_amount_including_granaries(resource_type resource, int amount, int *checked_granaries);
+int city_resource_get_amount_including_granaries(resource_type resource, int amount, int *checked_granaries,
+     int respect_stockpiling);
 
 int city_resource_get_available_empty_space_granaries(resource_type food, int respect_settings);
 int city_resource_get_available_empty_space_warehouses(resource_type resource, int respect_settings);

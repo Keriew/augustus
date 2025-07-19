@@ -31,6 +31,7 @@
 #include "graphics/clouds.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
+#include "graphics/weather.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
 #include "map/building.h"
@@ -1048,4 +1049,5 @@ void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_
         city_view_foreach_valid_map_tile(deletion_draw_remaining);
     }
     update_clouds();
+    update_weather();
 }

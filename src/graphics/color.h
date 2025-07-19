@@ -39,6 +39,8 @@ typedef uint32_t color_t;
 #define COLOR_RISK_ICON_HIGH 0xfff7a142
 #define COLOR_RISK_ICON_EXTREME 0xffff603a
 
+#define COLOR_MAINTAIN_ICON 0xfffbf0f5
+
 #define COLOR_MASK_NONE 0xffffffff
 #define COLOR_MASK_RED 0xffff0818
 #define COLOR_MASK_GREEN 0xff18ff18
@@ -99,6 +101,13 @@ typedef uint32_t color_t;
 #define COLOR_BITSHIFT_RED 16
 #define COLOR_BITSHIFT_GREEN 8
 #define COLOR_BITSHIFT_BLUE 0
+
+#define COLOR_WEATHER_SAND 0xffe6b85c
+#define COLOR_WEATHER_SNOW 0xffddeeff
+#define COLOR_WEATHER_RAIN 0xff000000
+#define COLOR_WEATHER_SNOWFLAKE 0x88ffffff
+#define COLOR_WEATHER_SAND_PARTICLE 0xe1a65e2e
+#define COLOR_WEATHER_DROPS 0xccffffff
 
 #define COLOR_CHANNEL_ALPHA 0xff000000
 #define COLOR_CHANNEL_RED 0x00ff0000

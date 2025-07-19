@@ -347,7 +347,7 @@ static int update_extra_info(int is_background)
                 changed |= update_extra_info_value(city_finance_treasury(), &slot->available);
             } else {
                 changed |= update_extra_info_value(city_resource_get_amount_including_granaries(r->resource,
-                    r->amount.requested, 0), &slot->available);
+                    r->amount.requested, 0, 1), &slot->available);
             }
 
             changed |= update_extra_info_value(is_stockpiled_changed(r->resource), &slot->stockpiled);

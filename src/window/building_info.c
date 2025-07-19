@@ -12,6 +12,7 @@
 #include "city/map.h"
 #include "city/view.h"
 #include "core/calc.h"
+#include "core/config.h"
 #include "core/image_group.h"
 #include "figure/figure.h"
 #include "figure/formation_legion.h"
@@ -59,7 +60,7 @@ enum {
     HEIGHT_5_24_BLOCKS = 5,
     HEIGHT_6_38_BLOCKS = 6,
     HEIGHT_7_48_BLOCKS = 7,
-    HEIGHT_8_SCALING   = 8,
+    HEIGHT_8_SCALING = 8,
     HEIGHT_10_46_BLOCKS = 10,
     HEIGHT_11_28_BLOCKS = 11,
     HEIGHT_12_21_BLOCKS = 12,
@@ -1106,11 +1107,10 @@ static void get_tooltip(tooltip_context *c)
         window_building_primary_product_producer_stockpiling_tooltip(&translation);
     } else if (context.type == BUILDING_INFO_LEGION) {
         text_id = window_building_get_legion_info_tooltip_text(&context);
-    } else if ((context.type == BUILDING_INFO_BUILDING && context.show_special_orders) || building_type_is_bridge(btype)) { //bridges are technically terrain, but they have special orders
-        if (btype == BUILDING_GRANARY) {
-            window_building_get_tooltip_granary_orders(&group_id, &text_id, &translation);
-        } else if (btype == BUILDING_WAREHOUSE) {
-            window_building_get_tooltip_warehouse_orders(&group_id, &text_id, &translation);
+    } else if ((context.type == BUILDING_INFO_BUILDING && context.show_special_orders) || building_type_is_bridge(btype)) {
+        //bridges are technically terrain, but they have special orders
+        if (btype == BUILDING_GRANARY || btype == BUILDING_WAREHOUSE) {
+            window_building_get_tooltip_storage_orders(&group_id, &text_id, &translation);
         } else if (building_type_is_roadblock(btype)) {
             window_building_roadblock_get_tooltip_walker_permissions(&translation);
         } else if (building_type_is_distributor(btype)) {
@@ -1253,6 +1253,7 @@ void window_building_info_depot_toggle_condition_type(void)
 void window_building_info_depot_toggle_condition_threshold(void)
 {
     building *b = building_get(context.building_id);
+    int step = config_get(CONFIG_GP_STORAGE_INCREMENT_4) ? 4 : 8;
     b->data.depot.current_order.condition.threshold = (b->data.depot.current_order.condition.threshold + 4) % 36;
     window_invalidate();
 }

@@ -111,6 +111,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_AUTO_KILL_ANIMALS, "Граждане будут автоматически убивать безобидных животных"},
     {TR_CONFIG_SHOW_ROAMING_PATH, "Предварительный просмотр маршрутов бродячих граждан"},
     {TR_CONFIG_DRAW_CLOUD_SHADOWS, "Отображать тени облаков"},
+    {TR_CONFIG_DRAW_WEATHER, "ВКЛ смену погоды"},
     {TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE, "Запрашивать подтверждение при перезаписи файла"},
     {TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, "Невоенные ворота по умолчанию пропускают всех пешеходов"},
     {TR_HOTKEY_TITLE, "Настройки горячих клавиш Augustus"},
@@ -1420,7 +1421,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_DEPOT_SOME_EMPLOYEES, "На этой станции работает слишком мало работников. В результате отправка телег идет крайне медленно."},
     {TR_BUILDING_DEPOT_HALF_EMPLOYEES, "Этой станции нужно больше работников, чтобы ускорить отправку телег."},
     {TR_BUILDING_DEPOT_MANY_EMPLOYEES, "Станция работает не на полную мощность, поэтому отправка телег идет чуть медленнее, чем следовало бы."},
-    {TR_BUILDING_INFO_MOTHBALL_WARNING, "Это здание отключено"},
+    {TR_BUILDING_INFO_MOTHBALL_WARNING, "Это здание ЗАКОНСЕРВИРОВАНО"},
     {TR_BUILDING_INFO_CARTLOAD, "тележка."},
     {TR_BUILDING_INFO_CARTLOADS, "тележек."},
     {TR_HOTKEY_SHOW_OVERLAY_RISKS_NATIVE, "Слой туземцев"},
@@ -1621,11 +1622,12 @@ static translation_string all_strings[] = {
     {TR_BUILDING_NATIVE_DECORATION, "Украшение туземцев"},
     {TR_BUILDING_NATIVE_MONUMENT, "Монумент туземцев"},
     {TR_BUILDING_NATIVE_WATCHTOWER, "Сторожевая башня туземцев"},
-    {TR_BUILDING_NATIVE_DECORATION_DESC, "Плод труда местных мастеров, он ценится как римлянами, так и местными жителями. И пусть в нем нет изысканности - многие находят в нем глубину и повод задуматься."},
+    {TR_BUILDING_NATIVE_DECORATION_DESC, "Плод труда местных мастеров, он ценится как римлянами, так и местными жителями. И пусть в нем нет изысканности, многие находят в нем глубину и повод задуматься."},
     {TR_BUILDING_NATIVE_MONUMENT_DESC, "Это великолепное сооружение доказывает, что изобретательность и трудолюбие туземцев позволяют им достигать великих целей, несмотря на их слабые знания в инженерии. Хотя некоторые скептики полагают, что это, возможно, чудо, ниспосланное богами, или же остаток древней, но крайне развитой цивилизации."},
     {TR_BUILDING_NATIVE_WATCHTOWER_DESC, "Туземцы используют данные конструкции для слежки за нашими действиями и выявления уязвимостей. Пока мы не устраним угрозу, охрана на башнях будет мешать нам расширяться на этой территории."},
     {TR_BUILDING_INFO_CARAVANSERAI_MONTHLY_CONSUMPTION, "Ежемесячный расход еды:"},
-    {TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, "Торговые караваны игнорируют обычные дороги"},
+    {TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, "Торговые караваны и телеги с волами игнорируют обычные дороги"},
+
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

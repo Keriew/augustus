@@ -40,10 +40,13 @@
 #include "window/option_popup.h"
 
 #include <math.h>
+#include <stdio.h>
 
 static void go_to_orders(const generic_button *button);
 static void toggle_resource_state(const generic_button *button);
-static void toggle_partial_resource_state(const generic_button *button);
+static void toggle_partial_resource_state(const generic_button *button, int reverse_order);
+static void toggle_partial_resource_state_reverse(const generic_button *button);
+static void toggle_partial_resource_state_forward(const generic_button *button);
 static void granary_orders(const generic_button *button);
 static void dock_toggle_route(const generic_button *button);
 static void warehouse_orders(const generic_button *button);
@@ -54,6 +57,7 @@ static void toggle_mantain(int param1, int param2);
 static void init_dock_permission_buttons(void);
 static void draw_dock_permission_buttons(int x_offset, int y_offset, int dock_id);
 static void on_scroll(void);
+
 
 static void button_caravanserai_policy(const generic_button *button);
 static void button_lighthouse_policy(const generic_button *button);
@@ -85,22 +89,22 @@ static generic_button orders_resource_buttons[] = {
 };
 
 static generic_button orders_partial_resource_buttons[] = {
-    {210, 0, 28, 22, toggle_partial_resource_state, 0, 1},
-    {210, 22, 28, 22, toggle_partial_resource_state, 0, 2},
-    {210, 44, 28, 22, toggle_partial_resource_state, 0, 3},
-    {210, 66, 28, 22, toggle_partial_resource_state, 0, 4},
-    {210, 88, 28, 22, toggle_partial_resource_state, 0, 5},
-    {210, 110, 28, 22, toggle_partial_resource_state, 0, 6},
-    {210, 132, 28, 22, toggle_partial_resource_state, 0, 7},
-    {210, 154, 28, 22, toggle_partial_resource_state, 0, 8},
-    {210, 176, 28, 22, toggle_partial_resource_state, 0, 9},
-    {210, 198, 28, 22, toggle_partial_resource_state, 0, 10},
-    {210, 220, 28, 22, toggle_partial_resource_state, 0, 11},
-    {210, 242, 28, 22, toggle_partial_resource_state, 0, 12},
-    {210, 264, 28, 22, toggle_partial_resource_state, 0, 13},
-    {210, 286, 28, 22, toggle_partial_resource_state, 0, 14},
-    {210, 308, 28, 22, toggle_partial_resource_state, 0, 15},
-    {210, 330, 28, 22, toggle_partial_resource_state, 0, 16},
+    {210, 0, 28, 22, toggle_partial_resource_state_forward, toggle_partial_resource_state_reverse, 1,0},
+    {210, 22, 28, 22, toggle_partial_resource_state_forward, toggle_partial_resource_state_reverse, 2,0},
+    {210, 44, 28, 22, toggle_partial_resource_state_forward, toggle_partial_resource_state_reverse, 3,0},
+    {210, 66, 28, 22, toggle_partial_resource_state_forward, toggle_partial_resource_state_reverse, 4,0},
+    {210, 88, 28, 22, toggle_partial_resource_state_forward, toggle_partial_resource_state_reverse, 5,0},
+    {210, 110, 28, 22, toggle_partial_resource_state_forward, toggle_partial_resource_state_reverse, 6,0},
+    {210, 132, 28, 22, toggle_partial_resource_state_forward, toggle_partial_resource_state_reverse, 7,0},
+    {210, 154, 28, 22, toggle_partial_resource_state_forward, toggle_partial_resource_state_reverse, 8,0},
+    {210, 176, 28, 22, toggle_partial_resource_state_forward, toggle_partial_resource_state_reverse, 9,0},
+    {210, 198, 28, 22, toggle_partial_resource_state_forward, toggle_partial_resource_state_reverse, 10,0},
+    {210, 220, 28, 22, toggle_partial_resource_state_forward, toggle_partial_resource_state_reverse, 11,0},
+    {210, 242, 28, 22, toggle_partial_resource_state_forward, toggle_partial_resource_state_reverse, 12,0},
+    {210, 264, 28, 22, toggle_partial_resource_state_forward, toggle_partial_resource_state_reverse, 13,0},
+    {210, 286, 28, 22, toggle_partial_resource_state_forward, toggle_partial_resource_state_reverse, 14,0},
+    {210, 308, 28, 22, toggle_partial_resource_state_forward, toggle_partial_resource_state_reverse, 15,0},
+    {210, 330, 28, 22, toggle_partial_resource_state_forward, toggle_partial_resource_state_reverse, 16,0},
 };
 
 static generic_button warehouse_distribution_permissions_buttons[] = {
@@ -210,14 +214,7 @@ static struct {
     resource_list stored_resources;
 } data;
 
-uint8_t warehouse_full_button_text[] = "32";
-uint8_t warehouse_3quarters_button_text[] = "24";
-uint8_t warehouse_half_button_text[] = "16";
-uint8_t warehouse_quarter_button_text[] = "8";
-uint8_t granary_full_button_text[] = "32";
-uint8_t granary_3quarters_button_text[] = "24";
-uint8_t granary_half_button_text[] = "16";
-uint8_t granary_quarter_button_text[] = "8";
+uint8_t quantity_full_button_text[] = "32";
 
 typedef enum {
     REJECT_ALL = 0,
@@ -746,7 +743,6 @@ void window_building_get_tooltip_distribution_orders(int *group_id, int *text_id
         }
     }
 }
-
 int window_building_handle_mouse_primary_product_producer(const mouse *m, building_info_context *c)
 {
     data.building_id = c->building_id;
@@ -831,10 +827,10 @@ void window_building_draw_granary(building_info_context *c)
                 text_draw(resource_get_data(r)->text, x + 32 + width, y + 12, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
             }
             int width = lang_text_draw(98, 2, c->x_offset + 16, c->y_offset + 40, FONT_NORMAL_BLACK);
-            lang_text_draw_amount(8, 16, total_stored, c->x_offset + 16 + width, c->y_offset + 40, FONT_NORMAL_BLACK);
+            lang_text_draw_amount(CUSTOM_TRANSLATION, TR_BUILDING_INFO_CARTLOAD, total_stored, c->x_offset + 16 + width, c->y_offset + 40, FONT_NORMAL_BLACK);
 
             width = lang_text_draw(98, 3, c->x_offset + 220, c->y_offset + 40, FONT_NORMAL_BLACK);
-            lang_text_draw_amount(8, 16, b->resources[RESOURCE_NONE],
+            lang_text_draw_amount(CUSTOM_TRANSLATION, TR_BUILDING_INFO_CARTLOAD, b->resources[RESOURCE_NONE],
                 c->x_offset + 220 + width, c->y_offset + 40, FONT_NORMAL_BLACK);
         }
     }
@@ -919,60 +915,50 @@ void window_building_draw_granary_orders(building_info_context *c)
     inner_panel_draw(c->x_offset + 16, y_offset + 42, c->width_blocks - (scrollbar_shown ? 4 : 2), 21);
 }
 
-static void draw_button_from_state(int state, int x, int y, building_type type, resource_type resource)
+static void draw_button_from_state(resource_storage_entry entry, int x, int y, building_type type, resource_type resource)
 {
-    switch (state) {
+    // Draw storage state label or icon
+    char text[4];
+    int image_width, text_width, start_x;
+    snprintf(text, sizeof(text), "%d", BUILDING_STORAGE_QUANTITY_MAX);
+    switch (entry.state) {
         case BUILDING_STORAGE_STATE_GETTING:
-        case BUILDING_STORAGE_STATE_GETTING_3QUARTERS:
-        case BUILDING_STORAGE_STATE_GETTING_HALF:
-        case BUILDING_STORAGE_STATE_GETTING_QUARTER:
         {
-            int image_width = image_get(image_group(GROUP_CONTEXT_ICONS) + 12)->width + 10;
-            int group_number;
-            if (resource_is_food(resource)) {
-                // Check whether to use "getting goods" or "getting food"
-                group_number = 10;
-            } else {
-                group_number = 9;
-            }
-            int text_width = lang_text_get_width(99, group_number, FONT_NORMAL_WHITE);
-            int start_x = x + (210 - image_width - text_width) / 2;
+            image_width = image_get(image_group(GROUP_CONTEXT_ICONS) + 12)->width + 10;
+            int group_number = resource_is_food(resource) ? 10 : 9;  // 10 = "getting food", 9 = "getting goods"
+            text_width = lang_text_get_width(99, group_number, FONT_NORMAL_WHITE);
+            start_x = x + (210 - image_width - text_width) / 2;
             image_draw(image_group(GROUP_CONTEXT_ICONS) + 12, start_x, y - 2, COLOR_MASK_NONE, SCALE_NONE);
             lang_text_draw(99, group_number, start_x + image_width, y, FONT_NORMAL_WHITE);
+            snprintf(text, sizeof(text), "%d", entry.quantity);
             break;
         }
         case BUILDING_STORAGE_STATE_NOT_ACCEPTING:
-        case BUILDING_STORAGE_STATE_NOT_ACCEPTING_3QUARTERS:
-        case BUILDING_STORAGE_STATE_NOT_ACCEPTING_HALF:
-        case BUILDING_STORAGE_STATE_NOT_ACCEPTING_QUARTER:
-            lang_text_draw_centered(99, 8, x, y, 210, FONT_NORMAL_RED);
+            lang_text_draw_centered(99, 8, x, y, 210, FONT_NORMAL_RED); // lang ID 8 = "Not accepting"
             break;
-        default:
-            lang_text_draw_centered(99, 7, x, y, 210, FONT_NORMAL_WHITE);
+        case BUILDING_STORAGE_STATE_MAINTAINING:
+        {
+            int maintain_goods_icon_id = assets_get_image_id("UI", "Maintain_Goods_Icon_2");
+            image_width = image_get(maintain_goods_icon_id)->width + 10;
+            text_width = lang_text_get_width(CUSTOM_TRANSLATION, TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING,
+                 FONT_NORMAL_WHITE);
+            start_x = x + (210 - image_width - text_width) / 2;
+            image_draw(maintain_goods_icon_id, start_x, y - 2, COLOR_MAINTAIN_ICON, SCALE_NONE);
+            // this icon needs scaling to be similar to getting goods - draw at 80% scale
+            lang_text_draw(CUSTOM_TRANSLATION, TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING,
+                start_x + image_width, y, FONT_NORMAL_WHITE);
+            snprintf(text, sizeof(text), "%d", entry.quantity);
             break;
-    }
-    uint8_t *button_text = warehouse_full_button_text;
-    switch (state) {
-        case BUILDING_STORAGE_STATE_ACCEPTING:
-        case BUILDING_STORAGE_STATE_GETTING:
-            button_text = type == BUILDING_GRANARY ? granary_full_button_text : warehouse_full_button_text;
-            break;
-        case BUILDING_STORAGE_STATE_ACCEPTING_3QUARTERS:
-        case BUILDING_STORAGE_STATE_GETTING_3QUARTERS:
-            button_text = type == BUILDING_GRANARY ? granary_3quarters_button_text : warehouse_3quarters_button_text;
-            break;
-        case BUILDING_STORAGE_STATE_ACCEPTING_HALF:
-        case BUILDING_STORAGE_STATE_GETTING_HALF:
-            button_text = type == BUILDING_GRANARY ? granary_half_button_text : warehouse_half_button_text;
-            break;
-        case BUILDING_STORAGE_STATE_ACCEPTING_QUARTER:
-        case BUILDING_STORAGE_STATE_GETTING_QUARTER:
-            button_text = type == BUILDING_GRANARY ? granary_quarter_button_text : warehouse_quarter_button_text;
-            break;
-        default:
+        }
+        default: // ACCEPTING
+            lang_text_draw_centered(99, 7, x, y, 210, FONT_NORMAL_WHITE); // lang ID 7 = "Accepting"
+            snprintf(text, sizeof(text), "%d", entry.quantity);
             break;
     }
-    text_draw_centered(button_text, x + 214, y, 20, FONT_NORMAL_BLACK, 0);
+
+    // Determined capacity text
+    text_draw_centered((uint8_t *) text, x + 214, y, 20, FONT_NORMAL_BLACK, 0);
+
 }
 
 static void draw_resource_orders_buttons(int x, int y, const resource_list *list, building_type type,
@@ -1004,7 +990,7 @@ static void draw_resource_orders_buttons(int x, int y, const resource_list *list
             button_border_draw(x + 118, y_offset, 210, 22, data.resource_focus_button_id == i + 1);
             button_border_draw(x + 328, y_offset, 28, 22, data.partial_resource_focus_button_id == i + 1);
 
-            draw_button_from_state(storage->resource_state[resource], x + 118, y_offset + 5, type, resource);;
+            draw_button_from_state(storage->resource_state[resource], x + 118, y_offset + 5, type, resource);
         }
 
     }
@@ -1055,13 +1041,34 @@ int window_building_handle_mouse_granary_orders(const mouse *m, building_info_co
             granary_order_buttons, 2, &data.orders_focus_button_id);
 }
 
-void window_building_get_tooltip_granary_orders(int *group_id, int *text_id, int *translation)
+void window_building_get_tooltip_storage_orders(int *group_id, int *text_id, int *translation)
 {
     if (data.orders_focus_button_id == 2) {
         if (affect_all_button_storage_state() == ACCEPT_ALL) {
             *translation = TR_TOOLTIP_BUTTON_STORAGE_ORDER_ACCEPT_ALL;
         } else {
             *translation = TR_TOOLTIP_BUTTON_STORAGE_ORDER_REJECT_ALL;
+        }
+    } else {
+        if (data.resource_focus_button_id) {
+            int building_id = data.building_id;
+            building *b = building_get(building_id);
+            const building_storage *s = building_storage_get(b->storage_id);
+            // Convert 1-based focus ID to 0-based and apply scroll offset
+            int index = data.resource_focus_button_id - 1 + scrollbar.scroll_position;
+            // Choose the correct resource list based on building type
+            const resource_list *list = (b->type == BUILDING_GRANARY) ?
+                city_resource_get_potential_foods() : city_resource_get_potential();
+
+            // Ensure valid index
+            if (index >= 0 && index < list->size) {
+                resource_type resource = list->items[index];
+                const resource_storage_entry *entry = &s->resource_state[resource];
+
+                if (entry->state == BUILDING_STORAGE_STATE_MAINTAINING) {
+                    *translation = TR_TOOLTIP_BUILDING_DISTRIBUTION_MAINTAINING;
+                }
+            }
         }
     }
 }
@@ -1409,17 +1416,6 @@ void window_building_primary_product_producer_stockpiling_tooltip(int *translati
     }
 }
 
-void window_building_get_tooltip_warehouse_orders(int *group_id, int *text_id, int *translation)
-{
-    if (data.orders_focus_button_id == 2) {
-        if (affect_all_button_storage_state() == ACCEPT_ALL) {
-            *translation = TR_TOOLTIP_BUTTON_STORAGE_ORDER_ACCEPT_ALL;
-        } else {
-            *translation = TR_TOOLTIP_BUTTON_STORAGE_ORDER_REJECT_ALL;
-        }
-    }
-}
-
 static void on_scroll(void)
 {
     window_invalidate();
@@ -1479,7 +1475,7 @@ static void toggle_mantain(int param1, int param2)
     window_invalidate();
 }
 
-static void toggle_partial_resource_state(const generic_button *button)
+static void toggle_partial_resource_state(const generic_button *button, int reverse_order)
 {
     int index = button->parameter1;
     building *b = building_get(data.building_id);
@@ -1489,9 +1485,20 @@ static void toggle_partial_resource_state(const generic_button *button)
     } else {
         resource = city_resource_get_potential_foods()->items[index + scrollbar.scroll_position - 1];
     }
-    building_storage_cycle_partial_resource_state(b->storage_id, resource);
+    building_storage_cycle_partial_resource_state(b->storage_id, resource, reverse_order);
     window_invalidate();
 }
+
+static void toggle_partial_resource_state_forward(const generic_button *button)
+{
+    toggle_partial_resource_state(button, 0);
+}
+
+static void toggle_partial_resource_state_reverse(const generic_button *button)
+{
+    toggle_partial_resource_state(button, 1);
+}
+
 
 static void button_stockpiling(const generic_button *button)
 {
