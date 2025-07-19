@@ -777,7 +777,7 @@ void window_building_draw_granary(building_info_context *c)
     if (!b->has_plague && c->has_road_access) {
         y_offset_blocks = ((stored_food_types - 1) / 2 - 3) * 2 + 2;
     }
-    c->height_blocks = 27 + y_offset_blocks;
+    c->height_blocks = 28 + y_offset_blocks;
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
 
     text_draw_label_and_number_centered(lang_get_string(28, b->type), b->storage_id, "",
@@ -879,7 +879,7 @@ void window_building_draw_granary(building_info_context *c)
 void window_building_draw_granary_foreground(building_info_context *c)
 {
     // Permissions buttons
-    draw_granary_permissions_buttons(c->x_offset + 16, c->y_offset + BLOCK_SIZE * c->height_blocks - 170, 6);
+    draw_granary_permissions_buttons(c->x_offset + 16, c->y_offset + BLOCK_SIZE * c->height_blocks - 186, 6);
 
     // special orders
     button_border_draw(c->x_offset + 80, c->y_offset + BLOCK_SIZE * c->height_blocks - 34,
@@ -891,7 +891,7 @@ void window_building_draw_granary_foreground(building_info_context *c)
 int window_building_handle_mouse_granary(const mouse *m, building_info_context *c)
 {
     data.building_id = c->building_id;
-    if (generic_buttons_handle_mouse(m, c->x_offset + 16, c->y_offset + BLOCK_SIZE * c->height_blocks - 170,
+    if (generic_buttons_handle_mouse(m, c->x_offset + 16, c->y_offset + BLOCK_SIZE * c->height_blocks - 186,
         granary_distribution_permissions_buttons, 6, &data.permission_focus_button_id)) {
     }
     return generic_buttons_handle_mouse(
@@ -1096,7 +1096,7 @@ void window_building_draw_warehouse(building_info_context *c)
             y_offset_blocks += 2;  // Add 2 empty lines to match Granary window size
         }
     }
-    c->height_blocks = 27 + y_offset_blocks;
+    c->height_blocks = 28 + y_offset_blocks;
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
 
     text_draw_label_and_number_centered(lang_get_string(28, b->type), b->storage_id, "",
@@ -1195,7 +1195,7 @@ void window_building_draw_warehouse(building_info_context *c)
 void window_building_draw_warehouse_foreground(building_info_context *c)
 {
     // permissions
-    draw_permissions_buttons(c->x_offset + 20, c->y_offset + BLOCK_SIZE * c->height_blocks - 170, 7, c);
+    draw_permissions_buttons(c->x_offset + 20, c->y_offset + BLOCK_SIZE * c->height_blocks - 186, 7, c);
 
     // special orders
     button_border_draw(c->x_offset + 80, c->y_offset + BLOCK_SIZE * c->height_blocks - 34,
@@ -1211,7 +1211,7 @@ int window_building_handle_mouse_warehouse(const mouse *m, building_info_context
     if (generic_buttons_handle_mouse(m, c->x_offset + 80, c->y_offset + BLOCK_SIZE * c->height_blocks - 34,
         go_to_orders_button, 1, &data.focus_button_id)) {
     }
-    if (generic_buttons_handle_mouse(m, c->x_offset + 20, c->y_offset + BLOCK_SIZE * c->height_blocks - 170,
+    if (generic_buttons_handle_mouse(m, c->x_offset + 20, c->y_offset + BLOCK_SIZE * c->height_blocks - 186,
         warehouse_distribution_permissions_buttons, 7, &data.permission_focus_button_id)) {
     }
 
