@@ -91,7 +91,10 @@ static uint8_t *get_message_text(int32_t offset)
     //locale-dependent fixes
     language_type l_type = locale_last_determined_language();
     if (l_type == LANGUAGE_GERMAN && offset == 289) {
-        return (uint8_t *) translation_for(TR_FIX_GERMAN_CITY_RETAKEN);
+        const uint8_t *try_translation = translation_for(TR_FIX_GERMAN_CITY_RETAKEN);
+        if (try_translation) {
+            return try_translation;
+        }
     }
     return &data.message_data[offset];
 }
@@ -357,7 +360,10 @@ const uint8_t *lang_get_string(int group, int index)
     //locale-dependent fixes
     language_type l_type = locale_last_determined_language();
     if (l_type == LANGUAGE_KOREAN && group == 28 && index == 46) {
-        return translation_for(TR_FIX_KOREAN_BUILDING_DOCTORS_CLINIC);
+        const uint8_t *try_translation = translation_for(TR_FIX_KOREAN_BUILDING_DOCTORS_CLINIC);
+        if (try_translation) {
+            return try_translation;
+        }
     }
     //Custom translations
     if (group == CUSTOM_TRANSLATION) {
@@ -594,6 +600,13 @@ const uint8_t *lang_get_string(int group, int index)
                 return translation_for(TR_BUILDING_LATRINES);
             case BUILDING_NATIVE_HUT_ALT:
                 return translation_for(TR_BUILDING_NATIVE_HUT_ALT);
+            case BUILDING_NATIVE_DECORATION:
+                return translation_for(TR_BUILDING_NATIVE_DECORATION);
+            case BUILDING_NATIVE_MONUMENT:
+                return translation_for(TR_BUILDING_NATIVE_MONUMENT);
+            case BUILDING_NATIVE_WATCHTOWER:
+                return translation_for(TR_BUILDING_NATIVE_WATCHTOWER);
+
             default:
                 break;
         }
@@ -603,6 +616,12 @@ const uint8_t *lang_get_string(int group, int index)
         switch (index) {
             case TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT:
                 return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT);
+            case TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION);
+            case TR_EDITOR_SCENARIO_BUILDING_NATIVE_MONUMENT:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_MONUMENT);
+            case TR_EDITOR_SCENARIO_BUILDING_NATIVE_WATCHTOWER:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_WATCHTOWER);
             default:
                 break;
         }

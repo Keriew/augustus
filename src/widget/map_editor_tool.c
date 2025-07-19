@@ -1,6 +1,7 @@
 #include "map_editor_tool.h"
 
 #include "assets/assets.h"
+#include "building/image.h"
 #include "building/properties.h"
 #include "core/image_group_editor.h"
 #include "editor/tool.h"
@@ -10,10 +11,10 @@
 #include "map/terrain.h"
 #include "scenario/property.h"
 
-#define MAX_TILES 4
+#define MAX_TILES 16
 
-static const int X_VIEW_OFFSETS[MAX_TILES] = {0, -30, 30, 0};
-static const int Y_VIEW_OFFSETS[MAX_TILES] = {0, 15, 15, 30};
+static const int X_VIEW_OFFSETS[MAX_TILES] = {0, -30, 30, 0, -60, 60, -30, 30, 0, -90, 90, -60, 60, -30, 30, 0 };
+static const int Y_VIEW_OFFSETS[MAX_TILES] = {0, 15, 15, 30, 30, 30, 45, 45, 60, 45, 45, 60, 60, 75, 75, 90 };
 
 static float scale = SCALE_NONE;
 
@@ -84,6 +85,9 @@ static void draw_building(const map_tile *tile, int x_view, int y_view, building
                 default:
                     image_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Central_01");
             };
+        } else if (type == BUILDING_NATIVE_DECORATION || type == BUILDING_NATIVE_MONUMENT ||
+            type == BUILDING_NATIVE_WATCHTOWER) {
+            image_id = building_image_get_for_type(type);
         } else {
             image_id = image_group(props->image_group) + props->image_offset;
         }
@@ -166,7 +170,15 @@ void map_editor_tool_draw(const map_tile *tile)
         case TOOL_NATIVE_FIELD:
             draw_building(tile, x, y, BUILDING_NATIVE_CROPS);
             break;
-
+        case TOOL_NATIVE_DECORATION:
+            draw_building(tile, x, y, BUILDING_NATIVE_DECORATION);
+            break;
+        case TOOL_NATIVE_MONUMENT:
+            draw_building(tile, x, y, BUILDING_NATIVE_MONUMENT);
+            break;
+        case TOOL_NATIVE_WATCHTOWER:
+            draw_building(tile, x, y, BUILDING_NATIVE_WATCHTOWER);
+            break;
         case TOOL_EARTHQUAKE_POINT:
         case TOOL_ENTRY_POINT:
         case TOOL_EXIT_POINT:

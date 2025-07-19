@@ -35,7 +35,7 @@ static struct {
 
 static int xml_import_start_scenario_events(void);
 static int xml_import_start_event(void);
-static void xml_import_end_conditions(void);
+static void xml_import_end_event(void);
 static int xml_import_start_group(void);
 static void xml_import_end_group(void);
 static int xml_import_create_condition(void);
@@ -62,8 +62,8 @@ static int action_populate_parameters(scenario_action_t *action);
 
 static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "events", xml_import_start_scenario_events },
-    { "event", xml_import_start_event, 0, "events" },
-    { "conditions", 0, xml_import_end_conditions, "event" },
+    { "event", xml_import_start_event, xml_import_end_event, "events" },
+    { "conditions", 0, 0, "event" },
     { "group", xml_import_start_group, xml_import_end_group, "conditions" },
     { "actions", 0, 0, "event" },
     { "time", xml_import_create_condition, 0, "conditions|group" },
@@ -226,7 +226,7 @@ static int xml_import_start_event(void)
     return 1;
 }
 
-static void xml_import_end_conditions(void)
+static void xml_import_end_event(void)
 {
     if (data.current_event->condition_groups.size == 0) {
         array_advance(data.current_event->condition_groups);

@@ -258,6 +258,16 @@ int empire_city_get_for_trade_route(int route_id)
     return -1; //should this be 0 for consitency? I think -1 can cause overflow?
 }
 
+int empire_city_get_trade_routes_count(int is_sea_trade, int is_route_open){
+    const empire_city *city;
+    int count = 0;
+    array_foreach(cities, city) {
+        if (city->in_use && city->is_sea_trade == is_sea_trade && city->is_open == is_route_open){
+            count++;
+        }
+    }
+    return count;
+}
 
 int empire_city_is_trade_route_open(int route_id)
 {
@@ -269,6 +279,17 @@ int empire_city_is_trade_route_open(int route_id)
     }
     return 0;
 }
+
+int empire_city_is_trade_route_sea(int route_id)
+{
+    int city_id = empire_city_get_for_trade_route(route_id);
+    if (!city_id){
+        return -1;
+    }
+    empire_city *city = empire_city_get(city_id);
+    return city->is_sea_trade;
+}
+
 
 int empire_city_get_trade_route_cost(int route_id)
 {

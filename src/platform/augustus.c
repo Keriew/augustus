@@ -93,20 +93,28 @@ static void write_log(void *userdata, int category, SDL_LogPriority priority, co
 #endif
 }
 
-static void backup_log(void)
+static void backup_log(const char *filename, const char *filename_old)
 {
     // On some platforms (vita, android), not removing the file will not empty it when reopening for writing
-    file_remove("augustus-log-backup.txt");
-    platform_file_manager_copy_file("augustus-log.txt", "augustus-log-backup.txt");
+    file_remove(filename_old);
+    platform_file_manager_copy_file(filename, filename_old);
 }
 
 static void setup_logging(void)
 {
-    backup_log();
+    const char *filename = "augustus-log.txt";
+    const char *backup_filename = "augustus-log-backup.txt";
+    char log_file[FILE_NAME_MAX];
+    char log_file_old[FILE_NAME_MAX];
+    char *pref_dir = platform_get_logging_path();
+    snprintf(log_file, FILE_NAME_MAX, "%s%s", pref_dir ? pref_dir : "", filename);
+    snprintf(log_file_old, FILE_NAME_MAX, "%s%s", pref_dir ? pref_dir : "", backup_filename);
+    SDL_free(pref_dir);
+    backup_log(log_file, log_file_old);
 
     // On some platforms (vita, android), not removing the file will not empty it when reopening for writing
-    file_remove("augustus-log.txt");
-    data.log_file = file_open("augustus-log.txt", "wt");
+    file_remove(log_file);
+    data.log_file = file_open(log_file, "wt");
     SDL_LogSetOutputFunction(write_log, NULL);
 }
 

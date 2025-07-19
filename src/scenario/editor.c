@@ -119,9 +119,13 @@ void scenario_editor_create(int map_size)
     scenario.random_events.min_wages = 5;
 }
 
-void scenario_editor_set_native_images(int image_alt_hut, int image_hut, int image_meeting, int image_crops)
+void scenario_editor_set_native_images(int image_alt_hut, int image_native_decoration, 
+    int image_native_monument, int image_native_watchtower, int image_hut, int image_meeting, int image_crops)
 {
     scenario.native_images.alt_hut = image_alt_hut;
+    scenario.native_images.decoration = image_native_decoration;
+    scenario.native_images.monument = image_native_monument;
+    scenario.native_images.watchtower = image_native_watchtower;
     scenario.native_images.hut = image_hut;
     scenario.native_images.meeting = image_meeting;
     scenario.native_images.crops = image_crops;

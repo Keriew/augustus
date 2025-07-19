@@ -2,6 +2,7 @@
 
 #include "assets/assets.h"
 #include "building/construction.h"
+#include "building/image.h"
 #include "building/menu.h"
 #include "building/storage.h"
 #include "city/data.h"
@@ -176,9 +177,15 @@ int game_file_editor_write_scenario(const char *scenario_file)
         default:
             image_alt_hut = assets_get_image_id("Terrain_Maps", "Native_Hut_Central_01");
     }
+    int image_native_decoration = building_image_get_for_type(BUILDING_NATIVE_DECORATION);
+    int image_native_monument = building_image_get_for_type(BUILDING_NATIVE_MONUMENT);
+    int image_native_watchtower = building_image_get_for_type(BUILDING_NATIVE_WATCHTOWER);
 
     scenario_editor_set_native_images(
         image_alt_hut,
+        image_native_decoration,
+        image_native_monument,
+        image_native_watchtower,
         image_group(GROUP_EDITOR_BUILDING_NATIVE),
         image_group(GROUP_EDITOR_BUILDING_NATIVE) + 2,
         image_group(GROUP_EDITOR_BUILDING_CROPS)

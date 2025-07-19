@@ -47,6 +47,7 @@ static struct {
     size_t invasion_points;
     size_t misc;
     size_t alt_huts;
+    size_t native_buildings;
     size_t introduction;
     size_t custom_variables;
     size_t custom_name;
@@ -162,6 +163,11 @@ static void calculate_buffer_offsets(int scenario_version)
         next_start_offset = buffer_offsets.alt_huts + 4;
     }
 
+    if (scenario_version > SCENARIO_LAST_NO_EXTRA_NATIVE_BUILDINGS) {
+        buffer_offsets.native_buildings = next_start_offset;
+        next_start_offset = buffer_offsets.native_buildings + 12;
+    }
+
     if (scenario_version > SCENARIO_LAST_NO_CUSTOM_MESSAGES) {
         buffer_offsets.introduction = next_start_offset;
         next_start_offset = buffer_offsets.introduction + 4;
@@ -197,6 +203,8 @@ int scenario_get_state_buffer_size_by_savegame_version(int savegame_version)
         calculate_buffer_offsets(SCENARIO_LAST_STATIC_ORIGINAL_DATA);
     } else if (savegame_version <= SAVE_GAME_LAST_NO_ALT_NATIVE_HUTS) {
         calculate_buffer_offsets(SCENARIO_LAST_NO_ALT_NATIVE_HUTS);
+    } else if (savegame_version <= SAVE_GAME_LAST_NO_EXTRA_NATIVE_BUILDINGS) {
+        calculate_buffer_offsets(SCENARIO_LAST_NO_EXTRA_NATIVE_BUILDINGS);
     } else {
         calculate_buffer_offsets(SCENARIO_CURRENT_VERSION);
     }
@@ -341,6 +349,10 @@ void scenario_save_state(buffer *buf)
     buffer_write_u8(buf, scenario.open_play_scenario_id);
 
     buffer_write_i32(buf, scenario.native_images.alt_hut);
+    buffer_write_i32(buf, scenario.native_images.decoration);
+    buffer_write_i32(buf, scenario.native_images.monument);
+    buffer_write_i32(buf, scenario.native_images.watchtower);
+
 
     buffer_write_i32(buf, scenario.intro_custom_message_id);
 
@@ -510,6 +522,11 @@ void scenario_load_state(buffer *buf, int version)
 
     if (version > SCENARIO_LAST_NO_ALT_NATIVE_HUTS) {
         scenario.native_images.alt_hut = buffer_read_i32(buf);
+    }
+    if (version > SCENARIO_LAST_NO_EXTRA_NATIVE_BUILDINGS) {
+        scenario.native_images.decoration = buffer_read_i32(buf);
+        scenario.native_images.monument = buffer_read_i32(buf);
+        scenario.native_images.watchtower = buffer_read_i32(buf);
     }
 
     scenario.intro_custom_message_id = 0;

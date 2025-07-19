@@ -396,7 +396,8 @@ static int draw_text(const uint8_t *text, int x_offset, int y_offset,
                     can_cut_more = (temp_width < box_width);
                 }
             }
-            if (current_width + word_width >= box_width) {
+            if (current_width + word_width >= box_width ||
+                line_index + word_num_chars >= TEMP_LINE_SIZE - 1) {
                 line_break = 1;
                 if (current_width == 0) {
                     has_more_characters = 0;

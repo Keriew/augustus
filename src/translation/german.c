@@ -1661,9 +1661,23 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_VALUE_STORAGE_TYPE_ALL, "Alle"},
     {TR_PARAMETER_VALUE_STORAGE_TYPE_GRANARIES, "Silos"},
     {TR_PARAMETER_VALUE_STORAGE_TYPE_WAREHOUSES, "Lagerhäuser"},
-    {TR_FIX_GERMAN_CITY_RETAKEN, "Die zuvor von Roms Feinden eingenommene Stadt wurde von den Legionen eines anderen Statthalters zurückerobert. Er hatte in Rom einen Triumph errungen und seiner Stadt das Recht, einen Triumphbogen zu errichten."}
-    //Bitte ersetze obigen Google-Translate-Platzhalter
+    {TR_FIX_GERMAN_CITY_RETAKEN, "Die zuvor von Roms Feinden eingenommene Stadt wurde von den Legionen eines anderen Gouvaneurs zurückerobert. Er hatte in Rom einen Triumph errungen und seiner Stadt das Recht, einen Triumphbogen zu errichten."},
 	/* Neu Übersetzen & sortieren */
+	{TR_BUILDING_LATRINES, "Latrinen"},
+    {TR_BUILDING_LATRINES_DESC_1, "Ein Komfortabler Platz, der vom Volk beliebt ist, um über Neuigkeiten oder ihre Geschäfte zu reden."},
+    {TR_BUILDING_LATRINES_DESC_2, "Latrinen werden von den Leuten benutzt, die nur Zugang zu einem Ziehbrunnen haben und steigern die Gesundheit ein bisschen. Häuser, die das klare Wassser eines Brunnens genießen, nutzen sie nicht."},
+    {TR_BUILDING_LATRINES_MISSING_EVOLVE, "Dieses Haus kann nicht erweitert werden, da es weder in der Reichweite einer Latrine noch der eines Brunnens ist."},
+    {TR_BUILDING_LATRINES_MISSING_DEVOLVE, "Dieses Haus wird bald zusammenfallen, da es weder in der Reichweite einer Latrine noch der eines Brunnens ist."},
+    {TR_BUILDING_LATRINES_NO_WORKERS, "Ohne Arbeiter wollen die Leute ihre Geschäfte hier nicht erledigen."},
+    {TR_BUILDING_LATRINES_UNNECESSARY, "Diese Latrinen sind unnötig, da es in ihrer Reichweite keine Häuser mit Bedarf gibt."},
+    {TR_BUILDING_LATRINES_NO_HOUSES, "Diese Latrinen sind unnötig, denn es gibt keine Häuser in ihrer Reichweite."},
+    {TR_CONFIG_DRAW_ASCLEPIUS, "Male die Rute des Asklepius für das Gesungheitsmenü"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT, "Alternative Eingeborenen Hütte"},
+    {TR_BUILDING_NATIVE_HUT_ALT, "Alternative Eingeborenen Hütte"},
+    {TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, "Lagerhäuser und Silos können auf Straßen gebaut werden"},
+    {TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, "Hebe ausgewählte Gebäude hervor"},
+    {TR_CONFIG_MAX_AUTOSAVE_SLOTS, "Maximale jährliche automatische Speicherungen:"},
+    {TR_CONFIG_SHOW_DESIRABILITY_RANGE_ALL, "Zeige Attraktivität beim Bau eines Gebäudes"},
 };
 
 void translation_german(const translation_string **strings, int *num_strings)

@@ -1018,7 +1018,41 @@ int building_image_get(const building *b)
                 default:
                     return assets_get_image_id("Health_Culture", "Latrine_C");
             }
+        case BUILDING_NATIVE_DECORATION:
+            switch (scenario_property_climate()) {
+                case CLIMATE_NORTHERN:
+                    return assets_get_image_id("Terrain_Maps", "Native_Decoration_Northern_01");
+                case CLIMATE_DESERT:
+                    return assets_get_image_id("Terrain_Maps", "Native_Decoration_Southern_01");
+                default:
+                    return assets_get_image_id("Terrain_Maps", "Native_Decoration_Central_01");
+            }
+        case BUILDING_NATIVE_WATCHTOWER:
+            switch (scenario_property_climate()) {
+                case CLIMATE_NORTHERN:
+                    return assets_get_image_id("Terrain_Maps", "Native_Watchtower_Northern_01");
+                case CLIMATE_DESERT:
+                    return assets_get_image_id("Terrain_Maps", "Native_Watchtower_Southern_01");
+                default:
+                    return assets_get_image_id("Terrain_Maps", "Native_Watchtower_Central_01");
+            }
+        case BUILDING_NATIVE_MONUMENT:
+            switch (scenario_property_climate()) {
+                case CLIMATE_NORTHERN:
+                    return assets_get_image_id("Terrain_Maps", "Native_L_Monument_Northern_01");
+                case CLIMATE_DESERT:
+                    return assets_get_image_id("Terrain_Maps", "Native_L_Monument_Southern_01");
+                default:
+                    return assets_get_image_id("Terrain_Maps", "Native_L_Monument_Central_01");
+            }
         default:
             return 0;
     }
+}
+
+int building_image_get_for_type(building_type type)
+{
+    building b;
+    b.type = type;
+    return building_image_get(&b);
 }

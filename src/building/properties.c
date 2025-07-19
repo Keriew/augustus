@@ -1348,7 +1348,28 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .custom_asset.group = "Terrain_Maps",
         .custom_asset.id = "Native_Hut_Central_01",
         .event_data.attr = "native_hut_alt"
-    }
+    },
+    [BUILDING_NATIVE_DECORATION] = {
+    .size = 1,
+    .fire_proof = 1,
+    .custom_asset.group = "Terrain_Maps",
+    .custom_asset.id = "Native_Decoration_Central_01",
+    .event_data.attr = "native_decor"
+    },
+    [BUILDING_NATIVE_MONUMENT] = {
+    .size = 4,
+    .fire_proof = 1,
+    .custom_asset.group = "Terrain_Maps",
+    .custom_asset.id = "Native_Monument_Central_01",
+    .event_data.attr = "native_monument"
+    },
+    [BUILDING_NATIVE_WATCHTOWER] = {
+    .size = 1,
+    .fire_proof = 1,
+    .custom_asset.group = "Terrain_Maps",
+    .custom_asset.id = "Native_Watchtower_Central_01",
+    .event_data.attr = "native_watchtower"
+    },
 };
 
 void building_properties_init(void)
