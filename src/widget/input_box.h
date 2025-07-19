@@ -13,6 +13,10 @@ typedef struct {
     int allow_punctuation;
     uint8_t *text;
     int text_length;
+    int put_clear_button_outside_box;
+    const uint8_t *placeholder;
+    void (*on_change)(int is_addition_at_end);
+    uint8_t *old_text;
 } input_box;
 
 /**
@@ -21,12 +25,10 @@ typedef struct {
  * @param box Input box
  */
 void input_box_start(input_box *box);
-void input_box_pause(input_box *box);
-void input_box_resume(input_box *box);
 void input_box_stop(input_box *box);
 
 void input_box_refresh_text(input_box *box);
-int input_box_is_accepted(input_box *box);
+int input_box_is_accepted(void);
 
 int input_box_handle_mouse(const mouse *m, const input_box *box);
 void input_box_draw(const input_box *box);

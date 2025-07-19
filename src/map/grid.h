@@ -49,6 +49,8 @@ int map_grid_add_delta(int grid_offset, int x, int y);
 
 int map_grid_direction_delta(int direction);
 
+int map_grid_chess_distance(int offset1, int offset2);
+
 void map_grid_size(int *width, int *height);
 
 int map_grid_width(void);
@@ -68,6 +70,8 @@ void map_grid_start_end_to_area(int x_start, int y_start, int x_end, int y_end,
 int map_grid_is_inside(int x, int y, int size);
 
 const int *map_grid_adjacent_offsets(int size);
+
+void map_grid_get_corner_tiles(int start_x, int start_y, int x, int y, int *c1x, int *c1y, int *c2x, int *c2y);
 
 void map_grid_clear_u8(uint8_t *grid);
 

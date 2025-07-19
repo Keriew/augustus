@@ -1,6 +1,8 @@
 #include "file_editor.h"
 
+#include "assets/assets.h"
 #include "building/construction.h"
+#include "building/image.h"
 #include "building/menu.h"
 #include "building/storage.h"
 #include "city/data.h"
@@ -39,9 +41,11 @@
 #include "map/sprite.h"
 #include "map/terrain.h"
 #include "map/tiles.h"
+#include "scenario/custom_messages.h"
 #include "scenario/distant_battle.h"
 #include "scenario/editor.h"
 #include "scenario/empire.h"
+#include "scenario/event/controller.h"
 #include "scenario/invasion.h"
 #include "scenario/map.h"
 #include "scenario/property.h"
@@ -69,6 +73,10 @@ void game_file_editor_clear_data(void)
     traders_clear();
     game_time_init(2098);
     scenario_invasion_clear();
+    scenario_events_clear();
+    custom_messages_clear_all();
+    scenario_editor_set_custom_message_introduction(0);
+    scenario_editor_set_custom_victory_message(0);
 }
 
 static void clear_map_data(void)
@@ -97,6 +105,7 @@ static void create_blank_map(int size)
     scenario_editor_create(size);
     scenario_map_init();
     clear_map_data();
+    empire_reset_map();
     map_image_init_edges();
     city_view_set_scale(100);
     city_view_set_camera(76, 152);
@@ -107,14 +116,15 @@ static void prepare_map_for_editing(void)
 {
     image_load_climate(scenario_property_climate(), 1, 0, 0);
 
-    empire_load(1, scenario_empire_id());
-    empire_object_init_cities();
+    int empire_id = scenario_empire_id();
+    empire_load(1, empire_id);
+    empire_object_init_cities(empire_id);
 
     figure_init_scenario();
     figure_create_editor_flags();
     figure_create_flotsam();
 
-    map_tiles_update_all_elevation();
+    map_tiles_update_all_elevation_editor();
     map_tiles_update_all_water();
     map_tiles_update_all_earthquake();
     map_tiles_update_all_rocks();
@@ -128,6 +138,8 @@ static void prepare_map_for_editing(void)
     map_natives_init_editor();
     map_routing_update_all();
 
+    scenario_editor_set_as_saved();
+
     city_view_init();
     game_state_unpause();
 }
@@ -136,6 +148,8 @@ void game_file_editor_create_scenario(int size)
 {
     create_blank_map(size);
     prepare_map_for_editing();
+    scenario_editor_set_custom_message_introduction(0);
+    scenario_editor_set_custom_victory_message(0);
 }
 
 int game_file_editor_load_scenario(const char *scenario_file)
@@ -152,7 +166,26 @@ int game_file_editor_load_scenario(const char *scenario_file)
 
 int game_file_editor_write_scenario(const char *scenario_file)
 {
+    int image_alt_hut;
+    switch (scenario_property_climate()) {
+        case CLIMATE_NORTHERN:
+            image_alt_hut = assets_get_image_id("Terrain_Maps", "Native_Hut_Northern_01");
+            break;
+        case CLIMATE_DESERT:
+            image_alt_hut = assets_get_image_id("Terrain_Maps", "Native_Hut_Southern_01");
+            break;
+        default:
+            image_alt_hut = assets_get_image_id("Terrain_Maps", "Native_Hut_Central_01");
+    }
+    int image_native_decoration = building_image_get_for_type(BUILDING_NATIVE_DECORATION);
+    int image_native_monument = building_image_get_for_type(BUILDING_NATIVE_MONUMENT);
+    int image_native_watchtower = building_image_get_for_type(BUILDING_NATIVE_WATCHTOWER);
+
     scenario_editor_set_native_images(
+        image_alt_hut,
+        image_native_decoration,
+        image_native_monument,
+        image_native_watchtower,
         image_group(GROUP_EDITOR_BUILDING_NATIVE),
         image_group(GROUP_EDITOR_BUILDING_NATIVE) + 2,
         image_group(GROUP_EDITOR_BUILDING_CROPS)
@@ -160,5 +193,9 @@ int game_file_editor_write_scenario(const char *scenario_file)
     scenario_distant_battle_set_roman_travel_months();
     scenario_distant_battle_set_enemy_travel_months();
 
-    return game_file_io_write_scenario(scenario_file);
+    if (game_file_io_write_scenario(scenario_file)) {
+        scenario_editor_set_as_saved();
+        return 1;
+    }
+    return 0;
 }

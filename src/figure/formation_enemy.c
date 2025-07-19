@@ -1,10 +1,12 @@
 #include "formation_enemy.h"
 
 #include "building/building.h"
+#include "building/properties.h"
 #include "city/buildings.h"
 #include "city/figures.h"
 #include "city/gods.h"
 #include "city/message.h"
+#include "city/military.h"
 #include "core/calc.h"
 #include "core/random.h"
 #include "figure/enemy_army.h"
@@ -28,8 +30,8 @@ static const int ENEMY_ATTACK_PRIORITY[4][100] = {
         BUILDING_OLIVE_FARM, BUILDING_VINES_FARM, BUILDING_PIG_FARM, 0
     },
     {
-        BUILDING_SENATE_UPGRADED, BUILDING_SENATE,
-        BUILDING_FORUM_UPGRADED, BUILDING_FORUM, 0
+        BUILDING_SENATE, BUILDING_SENATE_1_UNUSED,
+        BUILDING_FORUM_2_UNUSED, BUILDING_FORUM, 0
     },
     {
         BUILDING_GOVERNORS_PALACE, BUILDING_GOVERNORS_VILLA, BUILDING_GOVERNORS_HOUSE,
@@ -81,7 +83,8 @@ static const int RIOTER_ATTACK_PRIORITY[29] = {
     BUILDING_HOUSE_LARGE_VILLA,
 };
 
-static const int LAYOUT_ORIENTATION_OFFSETS[13][4][40] = {
+#define NUM_LAYOUT_FORMATIONS 40
+static const int LAYOUT_ORIENTATION_OFFSETS[13][4][NUM_LAYOUT_FORMATIONS] = {
     {
         {0, 0, -3, 0, 3, 0, -8, 0, 8, 0, -3, 8, 3, 8, 0},
         {0, 0, 0, -3, 0, 3, 0, -8, 0, 8, 8, -3, 8, 3, 0},
@@ -263,6 +266,43 @@ static int set_enemy_target_building(formation *m)
     return best_building != 0;
 }
 
+
+static int get_structures_on_native_land(int *dst_x, int *dst_y)
+{
+    int meeting_x, meeting_y;
+    city_buildings_main_native_meeting_center(&meeting_x, &meeting_y);
+
+    building_type native_buildings[] = { BUILDING_NATIVE_MEETING, BUILDING_NATIVE_WATCHTOWER, 
+        BUILDING_NATIVE_HUT, BUILDING_NATIVE_HUT_ALT };
+    int min_distance = INFINITE;
+
+    for (int i = 0; i < sizeof(native_buildings) / sizeof(native_buildings[0]) && min_distance == INFINITE; i++) {
+        building_type type = native_buildings[i];
+        int size = building_properties_for_type(type)->size;
+        int radius = size * 2;
+        for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
+            if (b->state != BUILDING_STATE_IN_USE) {
+                continue;
+            }
+            int x_min, y_min, x_max, y_max;
+            map_grid_get_area(b->x, b->y, size, radius, &x_min, &y_min, &x_max, &y_max);
+            for (int yy = y_min; yy <= y_max; yy++) {
+                for (int xx = x_min; xx <= x_max; xx++) {
+                    if (map_terrain_is(map_grid_offset(xx, yy), TERRAIN_AQUEDUCT | TERRAIN_WALL | TERRAIN_GARDEN)) {
+                        int distance = calc_maximum_distance(meeting_x, meeting_y, xx, yy);
+                        if (distance < min_distance) {
+                            min_distance = distance;
+                            *dst_x = xx;
+                            *dst_y = yy;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return min_distance < INFINITE;
+}
+
 static void set_native_target_building(formation *m)
 {
     int meeting_x, meeting_y;
@@ -277,13 +317,19 @@ static void set_native_target_building(formation *m)
         switch (b->type) {
             case BUILDING_MISSION_POST:
             case BUILDING_NATIVE_HUT:
+            case BUILDING_NATIVE_HUT_ALT:
             case BUILDING_NATIVE_CROPS:
             case BUILDING_NATIVE_MEETING:
+            case BUILDING_NATIVE_MONUMENT:
+            case BUILDING_NATIVE_WATCHTOWER:
+            case BUILDING_NATIVE_DECORATION:
             case BUILDING_WAREHOUSE:
             case BUILDING_FORT:
             case BUILDING_FORT_GROUND:
             case BUILDING_ROADBLOCK:
-            case BUILDING_GARDEN_WALL_GATE:
+            case BUILDING_ROOFED_GARDEN_WALL_GATE:
+            case BUILDING_PANELLED_GARDEN_GATE:
+            case BUILDING_LOOPED_GARDEN_GATE:
             case BUILDING_HEDGE_GATE_DARK:
             case BUILDING_HEDGE_GATE_LIGHT:
                 break;
@@ -301,7 +347,14 @@ static void set_native_target_building(formation *m)
     if (min_building) {
         formation_set_destination_building(m, min_building->x, min_building->y, min_building->id);
     } else {
-        formation_retreat(m);
+        int dst_x = 0;
+        int dst_y = 0;
+        int has_target = get_structures_on_native_land(&dst_x, &dst_y);
+        if (has_target) {
+            formation_set_destination_building(m, dst_x, dst_y, 0);
+        } else {
+            formation_retreat(m);
+        }
     }
 }
 
@@ -319,24 +372,16 @@ static void set_figures_to_initial(const formation *m)
     }
 }
 
-int formation_enemy_move_formation_to(const formation *m, int x, int y, int *x_tile, int *y_tile)
-{
-    int base_offset = map_grid_offset(
-        formation_layout_position_x(m->layout, 0),
-        formation_layout_position_y(m->layout, 0));
-    int figure_offsets[50];
-    figure_offsets[0] = 0;
-    for (int i = 1; i < m->num_figures; i++) {
-        figure_offsets[i] = map_grid_offset(
-            formation_layout_position_x(m->layout, i),
-            formation_layout_position_y(m->layout, i)) - base_offset;
-    }
-    map_routing_noncitizen_can_travel_over_land(x, y, -1, -1, 0, 600);
+int formation_enemy_next_formation_move(const formation *m, int* figure_offsets, int from_x, int from_y, int to_x, int to_y, int check_depth, int *x_tile, int *y_tile) {
     for (int r = 0; r <= 10; r++) {
         int x_min, y_min, x_max, y_max;
-        map_grid_get_area(x, y, 1, r, &x_min, &y_min, &x_max, &y_max);
+        map_grid_get_area(to_x, to_y, 1, r, &x_min, &y_min, &x_max, &y_max);
         for (int yy = y_min; yy <= y_max; yy++) {
             for (int xx = x_min; xx <= x_max; xx++) {
+                if (from_x == xx && from_y == yy) {
+                    // Do not check place where we are coming from
+                    continue;
+                }
                 int can_move = 1;
                 for (int fig = 0; fig < m->num_figures; fig++) {
                     int grid_offset = map_grid_offset(xx, yy) + figure_offsets[fig];
@@ -359,6 +404,17 @@ int formation_enemy_move_formation_to(const formation *m, int x, int y, int *x_t
                     }
                 }
                 if (can_move) {
+                    int x_next, y_next;
+                    if (check_depth > 0) {
+                        // Check if next move is possible
+                        if (!formation_enemy_next_formation_move(m, figure_offsets, xx, yy, to_x, to_y, check_depth - 1, &x_next, &y_next)) {
+                            continue;
+                        }
+                        // Do not allow to return on previous position
+                        if (x_next == from_x && y_next == from_y) {
+                            continue;
+                        }
+                    }
                     *x_tile = xx;
                     *y_tile = yy;
                     return 1;
@@ -367,6 +423,25 @@ int formation_enemy_move_formation_to(const formation *m, int x, int y, int *x_t
         }
     }
     return 0;
+}
+
+int formation_enemy_move_formation_to(const formation *m, int x, int y, int *x_tile, int *y_tile)
+{
+    int base_offset = map_grid_offset(
+        formation_layout_position_x(m->layout, 0),
+        formation_layout_position_y(m->layout, 0));
+    int figure_offsets[50];
+    figure_offsets[0] = 0;
+    for (int i = 1; i < m->num_figures; i++) {
+        figure_offsets[i] = map_grid_offset(
+            formation_layout_position_x(m->layout, i),
+            formation_layout_position_y(m->layout, i)) - base_offset;
+    }
+    map_routing_noncitizen_can_travel_over_land(x, y, -1, -1, 8, 0, 600);
+
+    // Find next move position and check if we will not stay
+    // on the same place or return to previous position afterwards
+    return formation_enemy_next_formation_move(m, figure_offsets, m->x_home, m->y_home, x, y, 1, x_tile, y_tile);
 }
 
 static void mars_kill_enemies(void)
@@ -391,6 +466,14 @@ static void mars_kill_enemies(void)
     }
     city_god_spirit_of_mars_mark_used();
     city_message_post(1, MESSAGE_SPIRIT_OF_MARS, 0, grid_offset);
+}
+
+static void get_layout_orientation_offset(const enemy_army *army, const formation *m, int *x_offset, int *y_offset)
+{
+    int layout = army->layout;
+    int legion_index_offset = (2 * m->enemy_legion_index) % NUM_LAYOUT_FORMATIONS;
+    *x_offset = LAYOUT_ORIENTATION_OFFSETS[layout][m->orientation / 2][legion_index_offset];
+    *y_offset = LAYOUT_ORIENTATION_OFFSETS[layout][m->orientation / 2][legion_index_offset + 1];
 }
 
 static void update_enemy_movement(formation *m, int roman_distance)
@@ -503,21 +586,21 @@ static void update_enemy_movement(formation *m, int roman_distance)
             formation_set_destination(m, army->destination_x, army->destination_y);
         }
     } else if (regroup) {
-        int layout = army->layout;
-        int x_offset = LAYOUT_ORIENTATION_OFFSETS[layout][m->orientation / 2][2 * m->enemy_legion_index] +
-            army->home_x;
-        int y_offset = LAYOUT_ORIENTATION_OFFSETS[layout][m->orientation / 2][2 * m->enemy_legion_index + 1] +
-            army->home_y;
+        int x_offset, y_offset;
+        get_layout_orientation_offset(army, m, &x_offset, &y_offset);
+        x_offset += army->home_x;
+        y_offset += army->home_y;
+        map_grid_bound(&x_offset, &y_offset);
         int x_tile, y_tile;
         if (formation_enemy_move_formation_to(m, x_offset, y_offset, &x_tile, &y_tile)) {
             formation_set_destination(m, x_tile, y_tile);
         }
     } else if (advance) {
-        int layout = army->layout;
-        int x_offset = LAYOUT_ORIENTATION_OFFSETS[layout][m->orientation / 2][2 * m->enemy_legion_index] +
-            army->destination_x;
-        int y_offset = LAYOUT_ORIENTATION_OFFSETS[layout][m->orientation / 2][2 * m->enemy_legion_index + 1] +
-            army->destination_y;
+        int x_offset, y_offset;
+        get_layout_orientation_offset(army, m, &x_offset, &y_offset);
+        x_offset += army->destination_x;
+        y_offset += army->destination_y;
+        map_grid_bound(&x_offset, &y_offset);
         int x_tile, y_tile;
         if (formation_enemy_move_formation_to(m, x_offset, y_offset, &x_tile, &y_tile)) {
             formation_set_destination(m, x_tile, y_tile);
@@ -581,7 +664,7 @@ static void update_enemy_formation(formation *m, int *roman_distance)
         army->home_y = m->y_home;
         army->layout = m->layout;
         *roman_distance = 0;
-        map_routing_noncitizen_can_travel_over_land(m->x_home, m->y_home, -2, -2, 100000, 300);
+        map_routing_noncitizen_can_travel_over_land(m->x_home, m->y_home, -1, -1, 8, 100000, 300);
         int x_tile, y_tile;
         if (map_soldier_strength_get_max(m->x_home, m->y_home, 16, &x_tile, &y_tile)) {
             *roman_distance = 1;
@@ -632,5 +715,7 @@ void formation_enemy_update(void)
             }
         }
     }
-    set_native_target_building(formation_get(0));
+    if (city_military_is_native_attack_active()) {
+        set_native_target_building(formation_get(NATIVE_FORMATION));
+    }
 }

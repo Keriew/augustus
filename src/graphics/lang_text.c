@@ -25,14 +25,20 @@ int lang_text_draw_colored(int group, int number, int x_offset, int y_offset, fo
 
 void lang_text_draw_centered(int group, int number, int x_offset, int y_offset, int box_width, font_t font)
 {
-    const uint8_t* str = lang_get_string(group, number);
+    const uint8_t *str = lang_get_string(group, number);
     text_draw_centered(str, x_offset, y_offset, box_width, font, 0);
+}
+
+void lang_text_draw_right_aligned(int group, int number, int x_offset, int y_offset, int box_width, font_t font)
+{
+    const uint8_t *str = lang_get_string(group, number);
+    text_draw_right_aligned(str, x_offset, y_offset, box_width, font, 0);
 }
 
 void lang_text_draw_centered_colored(
     int group, int number, int x_offset, int y_offset, int box_width, font_t font, color_t color)
 {
-    const uint8_t* str = lang_get_string(group, number);
+    const uint8_t *str = lang_get_string(group, number);
     text_draw_centered(str, x_offset, y_offset, box_width, font, color);
 }
 
@@ -45,6 +51,34 @@ void lang_text_draw_ellipsized(int group, int number, int x_offset, int y_offset
 int lang_text_draw_amount(int group, int number, int amount, int x_offset, int y_offset, font_t font)
 {
     return lang_text_draw_amount_colored(group, number, amount, x_offset, y_offset, font, COLOR_MASK_NONE);
+}
+
+int lang_text_get_amount_width(int group, int number, int amount, font_t font)
+{
+    int amount_offset = (amount == 1 || amount == -1) ? 0 : 1;
+    int width;
+    if (amount >= 0) {
+        width = text_get_number_width(amount, ' ', " ", font);
+    } else {
+        width = text_get_number_width(-amount, '-', " ", font);
+    }
+    width += lang_text_get_width(group, number + amount_offset, font);
+    return width;
+}
+
+int lang_text_draw_amount_centered(int group, int number, int amount, int x_offset, int y_offset, int box_width,
+    font_t font)
+{
+    int width;
+    if (amount >= 0) {
+        width = text_get_number_width(amount, ' ', " ", font);
+    } else {
+        width = text_get_number_width(-amount, '-', " ", font);
+    }
+    int text_offset = (amount == 1 || amount == -1) ? 0 : 1;
+    width += lang_text_get_width(group, number + text_offset, font);
+    return lang_text_draw_amount_colored(group, number, amount, x_offset + (box_width - width) / 2, y_offset,
+        font, COLOR_MASK_NONE);
 }
 
 int lang_text_draw_amount_colored(int group, int number, int amount, int x_offset, int y_offset,
@@ -72,14 +106,14 @@ int lang_text_draw_year(int year, int x_offset, int y_offset, font_t font)
     if (year >= 0) {
         int use_year_ad = locale_year_before_ad();
         if (use_year_ad) {
-            width += text_draw_number(year, ' ', " ", x_offset + width, y_offset, font, 0);
+            width += text_draw_number(year, ' ', "", x_offset + width, y_offset, font, 0);
             width += lang_text_draw(20, 1, x_offset + width, y_offset, font);
         } else {
             width += lang_text_draw(20, 1, x_offset + width, y_offset, font);
-            width += text_draw_number(year, ' ', " ", x_offset + width, y_offset, font, 0);
+            width += text_draw_number(year, ' ', "", x_offset + width, y_offset, font, 0);
         }
     } else {
-        width += text_draw_number(-year, ' ', " ", x_offset + width, y_offset, font, 0);
+        width += text_draw_number(-year, ' ', "", x_offset + width, y_offset, font, 0);
         width += lang_text_draw(20, 0, x_offset + width, y_offset, font);
     }
     return width;
@@ -125,5 +159,5 @@ void lang_text_draw_month_year_max_width(
 int lang_text_draw_multiline(int group, int number, int x_offset, int y_offset, int box_width, font_t font)
 {
     const uint8_t *str = lang_get_string(group, number);
-    return text_draw_multiline(str, x_offset, y_offset, box_width, font, 0);
+    return text_draw_multiline(str, x_offset, y_offset, box_width, 0, font, 0);
 }

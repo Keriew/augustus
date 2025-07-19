@@ -51,7 +51,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         image_buttons_handle_mouse(m_dialog, 159, 249, image_buttons, 2, 0)) {
         return;
     }
-    if (input_box_is_accepted(&command_input)) {
+    if (input_box_is_accepted()) {
         send_command(0, 0);
         return;
     }
@@ -76,7 +76,7 @@ static void send_command(int param1, int param2)
     game_cheat_parse_command(command_copy);
 }
 
-void window_console_show()
+void window_console_show(void)
 {
     window_type window = {
         WINDOW_FILE_DIALOG,

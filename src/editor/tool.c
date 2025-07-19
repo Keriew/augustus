@@ -1,5 +1,7 @@
 #include "tool.h"
 
+#include "assets/assets.h"
+#include "building/image.h"
 #include "building/construction_routed.h"
 #include "core/image.h"
 #include "core/image_group_editor.h"
@@ -15,6 +17,7 @@
 #include "map/routing_terrain.h"
 #include "map/tiles.h"
 #include "map/terrain.h"
+#include "scenario/editor.h"
 #include "scenario/editor_events.h"
 #include "scenario/editor_map.h"
 #include "city/warning.h"
@@ -78,8 +81,8 @@ void editor_tool_set_brush_size(int size)
 void editor_tool_foreach_brush_tile(void (*callback)(const void *user_data, int dx, int dy), const void *user_data)
 {
     if (data.type == TOOL_RAISE_LAND || data.type == TOOL_LOWER_LAND) {
-        for (int dy = -1; dy <= 1; dy++) {
-            for (int dx = -1; dx <= 1; dx++) {
+        for (int dy = -data.brush_size + 1; dy < data.brush_size; dy++) {
+            for (int dx = -data.brush_size + 1; dx < data.brush_size; dx++) {
                 callback(user_data, dx, dy);
             }
         }
@@ -282,7 +285,7 @@ void editor_tool_update_use(const map_tile *tile)
         case TOOL_LOWER_LAND:
             map_image_context_reset_water();
             map_image_context_reset_elevation();
-            map_tiles_update_all_elevation();
+            map_tiles_update_all_elevation_editor();
             map_tiles_update_region_water(x_min, y_min, x_max, y_max);
             map_tiles_update_region_trees(x_min, y_min, x_max, y_max);
             map_tiles_update_region_shrub(x_min, y_min, x_max, y_max);
@@ -294,7 +297,7 @@ void editor_tool_update_use(const map_tile *tile)
             break;
     }
 
-    scenario_editor_updated_terrain();
+    scenario_editor_set_as_unsaved();
     widget_minimap_invalidate();
 }
 
@@ -343,6 +346,20 @@ static void place_building(const map_tile *tile)
             image_id = image_group(GROUP_EDITOR_BUILDING_NATIVE) + (random_byte() & 1);
             size = 1;
             break;
+        case TOOL_NATIVE_HUT_ALT:
+            type = BUILDING_NATIVE_HUT_ALT;
+            switch (scenario_property_climate()) {
+                case CLIMATE_NORTHERN:
+                    image_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Northern_01") + (random_byte() & 1);
+                    break;
+                case CLIMATE_DESERT:
+                    image_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Southern_01") + (random_byte() & 1);
+                    break;
+                default:
+                    image_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Central_01") + (random_byte() & 1);
+            }
+            size = 1;
+            break;
         case TOOL_NATIVE_CENTER:
             type = BUILDING_NATIVE_MEETING;
             image_id = image_group(GROUP_EDITOR_BUILDING_NATIVE) + 2;
@@ -353,6 +370,21 @@ static void place_building(const map_tile *tile)
             image_id = image_group(GROUP_EDITOR_BUILDING_CROPS);
             size = 1;
             break;
+        case TOOL_NATIVE_DECORATION:
+            type = BUILDING_NATIVE_DECORATION;
+            size = 1;
+            image_id = building_image_get_for_type(type);
+            break;
+        case TOOL_NATIVE_MONUMENT:
+            type = BUILDING_NATIVE_MONUMENT;
+            size = 4;
+            image_id = building_image_get_for_type(type);
+            break;
+        case TOOL_NATIVE_WATCHTOWER:
+            type = BUILDING_NATIVE_WATCHTOWER;
+            size = 1;
+            image_id = building_image_get_for_type(type);
+            break;
         default:
             return;
     }
@@ -360,7 +392,7 @@ static void place_building(const map_tile *tile)
     if (editor_tool_can_place_building(tile, size * size, 0)) {
         building *b = building_create(type, tile->x, tile->y);
         map_building_tiles_add(b->id, tile->x, tile->y, size, image_id, TERRAIN_BUILDING);
-        scenario_editor_updated_terrain();
+        scenario_editor_set_as_unsaved();
     } else {
         city_warning_show(WARNING_EDITOR_CANNOT_PLACE, NEW_WARNING_SLOT);
     }
@@ -371,14 +403,13 @@ static void update_terrain_after_elevation_changes(void)
     map_elevation_remove_cliffs();
     map_image_context_reset_water();
     map_image_context_reset_elevation();
-    map_tiles_update_all_elevation();
+    map_tiles_update_all_elevation_editor();
     map_tiles_update_all_rocks();
     map_tiles_update_all_empty_land();
     map_tiles_update_all_meadow();
     map_tiles_update_all_water();
 
-
-    scenario_editor_updated_terrain();
+    scenario_editor_set_as_unsaved();
 }
 
 static void place_access_ramp(const map_tile *tile)
@@ -396,7 +427,7 @@ static void place_access_ramp(const map_tile *tile)
             image_group(GROUP_TERRAIN_ACCESS_RAMP) + orientation, TERRAIN_ACCESS_RAMP);
 
         update_terrain_after_elevation_changes();
-        scenario_editor_updated_terrain();
+        scenario_editor_set_as_unsaved();
     } else {
         city_warning_show(WARNING_EDITOR_CANNOT_PLACE, NEW_WARNING_SLOT);
     }
@@ -405,7 +436,7 @@ static void place_access_ramp(const map_tile *tile)
 static void place_road(const map_tile *start_tile, const map_tile *end_tile)
 {
     if (building_construction_place_road(0, start_tile->x, start_tile->y, end_tile->x, end_tile->y)) {
-        scenario_editor_updated_terrain();
+        scenario_editor_set_as_unsaved();
     }
 }
 
@@ -446,6 +477,10 @@ void editor_tool_end_use(const map_tile *tile)
         case TOOL_NATIVE_CENTER:
         case TOOL_NATIVE_FIELD:
         case TOOL_NATIVE_HUT:
+        case TOOL_NATIVE_HUT_ALT:
+        case TOOL_NATIVE_MONUMENT:
+        case TOOL_NATIVE_WATCHTOWER:
+        case TOOL_NATIVE_DECORATION:
             place_building(tile);
             break;
         case TOOL_RAISE_LAND:

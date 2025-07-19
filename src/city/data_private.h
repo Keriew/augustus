@@ -18,40 +18,13 @@ typedef struct {
     int8_t small_curse_done;
     int32_t months_since_festival;
     int8_t happy_bolts;
-    int8_t unused2;
-    int8_t unused3;
 } god_status;
 
 extern struct city_data_t {
     struct {
-        int16_t senate_placed;
-        uint8_t senate_x;
-        uint8_t senate_y;
-        int16_t senate_grid_offset;
-        int32_t senate_building_id;
-        int32_t hippodrome_placed;
-        int8_t barracks_x;
-        int8_t barracks_y;
-        int16_t barracks_grid_offset;
-        int32_t barracks_building_id;
-        int32_t barracks_placed;
-        int8_t distribution_center_x;
-        int8_t distribution_center_y;
-        int16_t distribution_center_grid_offset;
-        int32_t distribution_center_building_id;
-        int32_t distribution_center_placed;
-        int32_t trade_center_building_id;
         int8_t triumphal_arches_available;
         int8_t triumphal_arches_placed;
-        int16_t working_wharfs;
-        int32_t caravanserai_building_id;
-        int32_t shipyard_boats_requested;
-        int16_t working_docks;
-        int16_t working_dock_ids[10];
-        int32_t mission_post_operational;
-        map_point main_native_meeting;
-        int8_t unknown_value;
-        int32_t mess_hall_building_id;
+        int16_t legacy_working_dock_ids[10];
         int32_t num_striking_industries;
         uint16_t months_since_last_destroyed_iron_mine;
         uint16_t months_since_last_flooded_clay_pit;
@@ -83,6 +56,7 @@ extern struct city_data_t {
         int32_t salary_amount;
         int32_t donate_amount;
         int32_t personal_savings;
+        uint16_t caesar_salary;
         struct {
             int32_t count;
             int32_t size;
@@ -135,8 +109,8 @@ extern struct city_data_t {
         int32_t tourism_rating;
         int32_t tourism_last_month;
         int32_t tourism_lowest_factor;
-        int32_t tourism_last_year;
-        int16_t tourism_this_year;
+        int32_t misc_last_year;
+        int16_t misc_this_year;
         int16_t tourist_spawn_delay;
     } finance;
     struct {
@@ -241,7 +215,6 @@ extern struct city_data_t {
         int8_t crime_cooldown;
     } sentiment;
     struct {
-        int32_t num_hospital_workers;
         int32_t target_value;
         int32_t value;
         int32_t months_since_last_contaminated_water;
@@ -297,7 +270,7 @@ extern struct city_data_t {
         int32_t angry_message_delay;
         int32_t venus_curse_active;
         int32_t venus_blessing_months_left;
-        int32_t neptune_double_trade_active;
+        int32_t neptune_trade_bonus_active;
         int32_t neptune_sank_ships;
         int32_t mars_spirit_power;
     } religion;
@@ -354,8 +327,6 @@ extern struct city_data_t {
     struct {
         int16_t space_in_warehouses[RESOURCE_MAX];
         int16_t stored_in_warehouses[RESOURCE_MAX];
-        int32_t space_in_workshops[6];
-        int32_t stored_in_workshops[6];
         int16_t trade_status[RESOURCE_MAX];
         int16_t export_status_before_stockpiling[RESOURCE_MAX];
         int16_t import_over[RESOURCE_MAX];
@@ -440,49 +411,6 @@ extern struct city_data_t {
     struct {
         int32_t total_food;
     } caravanserai;
-    struct {
-        int8_t other_player[18068];
-        int8_t unknown_00a0;
-        int8_t unknown_00a1;
-        int8_t unknown_00a2;
-        int8_t unknown_00a3;
-        int8_t unknown_00a4;
-        int8_t unknown_00a6;
-        int8_t unknown_00a7;
-        int32_t unknown_00c0;
-        int32_t unused_27d0;
-        int32_t unknown_27e0[4];
-        int16_t unknown_27f0;
-        int16_t unknown_27f4[18];
-        int16_t unknown_2828;
-        int16_t unused_28ca;
-        int8_t unknown_2924[272];
-        int32_t unknown_2b6c;
-        int32_t unknown_2c20[1400];
-        int32_t houses_requiring_unknown_to_evolve[8];
-        int32_t unknown_4238[4];
-        int32_t unknown_4284;
-        int32_t unknown_4294[2];
-        int32_t unknown_4334;
-        int32_t unknown_4374[2];
-        int16_t unknown_439c[3];
-        int8_t padding_43b2[2];
-        int32_t unknown_43d8[5];
-        int32_t unknown_43f0;
-        int32_t unused_4454;
-        int32_t unknown_446c[4];
-        int32_t unused_4488;
-        int32_t unused_native_force_attack;
-        int32_t unused_44e0[2];
-        int32_t unused_44f8;
-        int32_t unused_4524[11];
-        uint8_t unknown_458e;
-        int8_t unused_45a5[6];
-        int8_t unknown_464c[232];
-        int32_t unknown_order;
-        int32_t faction_id;
-        uint8_t faction_bytes[2];
-    } unused;
 } city_data;
 
 #endif // CITY_DATA_PRIVATE_H

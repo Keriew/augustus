@@ -72,10 +72,10 @@ void city_finance_treasury_add(int amount)
     city_data.finance.treasury += amount;
 }
 
-void city_finance_treasury_add_tourism(int amount)
+void city_finance_treasury_add_miscellaneous(int amount)
 {
     city_finance_treasury_add(amount);
-    city_data.finance.tourism_this_year += amount;
+    city_data.finance.misc_this_year += amount;
 }
 
 
@@ -91,7 +91,12 @@ int city_finance_tax_percentage(void)
 
 void city_finance_change_tax_percentage(int change)
 {
-    city_data.finance.tax_percentage = calc_bound(city_data.finance.tax_percentage + change, 0, 25);
+    city_finance_set_tax_percentage(city_data.finance.tax_percentage + change);
+}
+
+void city_finance_set_tax_percentage(int new_rate)
+{
+    city_data.finance.tax_percentage = calc_bound(new_rate, 0, 25);
 }
 
 int city_finance_percentage_taxed_people(void)
@@ -119,7 +124,7 @@ void city_finance_process_export(int price)
 {
     city_data.finance.treasury += price;
     city_data.finance.this_year.income.exports += price;
-    if (city_data.religion.neptune_double_trade_active) {
+    if (city_data.religion.neptune_trade_bonus_active) {
         city_data.finance.treasury += price / 2;
         city_data.finance.this_year.income.exports += price / 2;
     }
@@ -179,7 +184,8 @@ void city_finance_calculate_totals(void)
     this_year->income.total =
         this_year->income.donated +
         this_year->income.taxes +
-        this_year->income.exports;
+        this_year->income.exports +
+        city_data.finance.misc_this_year;
 
     this_year->expenses.total =
         this_year->expenses.sundries +
@@ -348,14 +354,17 @@ static void pay_monthly_building_levies(void)
         }
     }
 
+    int num_highway_tiles = 0;
     int grid_offset = map_data.start_offset;
     for (int y = 0; y < map_data.height; y++, grid_offset += map_data.border_size) {
         for (int x = 0; x < map_data.width; x++, grid_offset++) {
-            if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY_TOP_LEFT)) {
-                levies += HIGHWAY_LEVY_MONTHLY;
+            if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+                num_highway_tiles++;
             }
         }
     }
+    int highway_tax = num_highway_tiles / 4 * HIGHWAY_LEVY_MONTHLY;
+    levies += highway_tax;
 
     city_data.finance.treasury -= levies;
     city_data.finance.this_year.expenses.levies += levies;
@@ -459,8 +468,8 @@ static void copy_amounts_to_last_year(void)
     this_year->income.donated = 0;
 
     //tourism 
-    city_data.finance.tourism_last_year = city_data.finance.tourism_this_year;
-    city_data.finance.tourism_this_year = 0;
+    city_data.finance.misc_last_year = city_data.finance.misc_this_year;
+    city_data.finance.misc_this_year = 0;
 }
 
 static void pay_tribute(void)
@@ -469,7 +478,9 @@ static void pay_tribute(void)
     int income =
         last_year->income.donated +
         last_year->income.taxes +
-        last_year->income.exports;
+        last_year->income.exports +
+        city_data.finance.misc_last_year;
+
     int expenses =
         last_year->expenses.sundries +
         last_year->expenses.salary +
@@ -541,7 +552,6 @@ int city_finance_tourism_lowest_factor(void)
 {
     return city_data.finance.tourism_lowest_factor;
 }
-
 
 const finance_overview *city_finance_overview_last_year(void)
 {

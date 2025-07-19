@@ -2,7 +2,9 @@
 
 #include "map/data.h"
 
+#include <stdlib.h>
 #include <string.h>
+
 
 #define OFFSET(x,y) (x + GRID_SIZE * y)
 
@@ -96,6 +98,19 @@ int map_grid_direction_delta(int direction)
     }
 }
 
+int map_grid_chess_distance(int offset1, int offset2)
+{
+    int x1 = map_grid_offset_to_x(offset1);
+    int y1 = map_grid_offset_to_y(offset1);
+    int x2 = map_grid_offset_to_x(offset2);
+    int y2 = map_grid_offset_to_y(offset2);
+
+    int dx = abs(x2 - x1);
+    int dy = abs(y2 - y1);
+
+    return dx > dy ? dx : dy;
+}
+
 void map_grid_size(int *width, int *height)
 {
     *width = map_data.width;
@@ -182,6 +197,21 @@ int map_grid_is_inside(int x, int y, int size)
 const int *map_grid_adjacent_offsets(int size)
 {
     return ADJACENT_OFFSETS[size];
+}
+
+void map_grid_get_corner_tiles(int start_x, int start_y, int x, int y, int *c1x, int *c1y, int *c2x, int *c2y)
+{
+    if (x - start_x != 0) {
+        *c1x = x;
+        *c1y = y - 1;
+        *c2x = x;
+        *c2y = y + 1;
+    } else {
+        *c1x = x - 1;
+        *c1y = y;
+        *c2x = x + 1;
+        *c2y = y;
+    }
 }
 
 void map_grid_clear_i8(int8_t *grid)

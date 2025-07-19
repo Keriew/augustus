@@ -3,9 +3,10 @@
 
 #include "building/building.h"
 
-#define MAX_FOOD 1200
+#define MAX_FOOD 1600
 
 int building_caravanserai_enough_foods(building *caravanserai);
+int building_caravanserai_food_required_monthly(void);
 int building_caravanserai_get_storage_destination(building *caravanserai);
 int building_caravanserai_is_fully_functional(void);
 

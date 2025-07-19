@@ -4,23 +4,25 @@
 #include "city/resource.h"
 #include "core/array.h"
 #include "core/calc.h"
+#include "core/config.h"
 #include "core/log.h"
+#include "game/resource.h"
+#include "game/save_version.h"
 
 #define STORAGE_ARRAY_SIZE_STEP 200
 
 #define STORAGE_ORIGINAL_BUFFER_SIZE 32
-#define STORAGE_CURRENT_BUFFER_SIZE 26
+#define STORAGE_STATIC_BUFFER_SIZE 10
+#define STORAGE_CURRENT_BUFFER_SIZE (STORAGE_STATIC_BUFFER_SIZE + RESOURCE_MAX)
 
-typedef struct {
-    int id;
-    int in_use;
-    int building_id;
-    building_storage storage;
-} data_storage;
+#define FULL_STORAGE 32
+#define THREE_QUARTERS_STORAGE 24
+#define HALF_STORAGE 16
+#define QUARTER_STORAGE 8
 
 static array(data_storage) storages;
 
-static void storage_create(data_storage *storage, int position)
+static void storage_create(data_storage *storage, unsigned int position)
 {
     storage->id = position;
 }
@@ -38,11 +40,15 @@ void building_storage_clear_all(void)
     }
 }
 
+int building_storage_get_array_size(void)
+{
+    return storages.size;
+}
+
 void building_storage_reset_building_ids(void)
 {
     data_storage *storage;
-    array_foreach(storages, storage)
-    {
+    array_foreach(storages, storage) {
         storage->building_id = 0;
     }
 
@@ -57,23 +63,27 @@ void building_storage_reset_building_ids(void)
             if (b->storage_id) {
                 if (array_item(storages, b->storage_id)->building_id) {
                     // storage is already connected to a building: corrupt, create new
-                    b->storage_id = building_storage_create();
+                    b->storage_id = building_storage_create(b->id);
                 } else {
-                    array_item(storages, b->storage_id)->building_id = i;
+                    array_item(storages, b->storage_id)->building_id = b->id;
                 }
             }
         }
     }
 }
 
-int building_storage_create(void)
+int building_storage_create(int building_id)
 {
     data_storage *storage;
-    array_new_item(storages, 1, storage);
+    array_new_item_after_index(storages, 1, storage);
     if (!storage) {
         return 0;
     }
     storage->in_use = 1;
+    storage->building_id = building_id;
+    if (config_get(CONFIG_GP_CH_WAREHOUSES_DONT_ACCEPT)) {
+        building_storage_accept_none(storage->id);
+    }
     return storage->id;
 }
 
@@ -100,6 +110,11 @@ const building_storage *building_storage_get(int storage_id)
     return &array_item(storages, storage_id)->storage;
 }
 
+const data_storage *building_storage_get_array_entry(int storage_id)
+{
+    return array_item(storages, storage_id);
+}
+
 void building_storage_set_data(int storage_id, building_storage new_data)
 {
     array_item(storages, storage_id)->storage = new_data;
@@ -115,29 +130,29 @@ void building_storage_cycle_resource_state(int storage_id, resource_type resourc
 {
     int state = array_item(storages, storage_id)->storage.resource_state[resource_id];
     if (state == BUILDING_STORAGE_STATE_ACCEPTING) {
-        state = BUILDING_STORAGE_STATE_NOT_ACCEPTING;
-    } else if (state == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
         state = BUILDING_STORAGE_STATE_GETTING;
     } else if (state == BUILDING_STORAGE_STATE_GETTING) {
+        state = BUILDING_STORAGE_STATE_NOT_ACCEPTING;
+    } else if (state == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
         state = BUILDING_STORAGE_STATE_ACCEPTING;
-    } else if (state == BUILDING_STORAGE_STATE_ACCEPTING_HALF) {
-        state = BUILDING_STORAGE_STATE_NOT_ACCEPTING_HALF;
     } else if (state == BUILDING_STORAGE_STATE_ACCEPTING_3QUARTERS) {
-        state = BUILDING_STORAGE_STATE_NOT_ACCEPTING_3QUARTERS;
-    } else if (state == BUILDING_STORAGE_STATE_ACCEPTING_QUARTER) {
-        state = BUILDING_STORAGE_STATE_NOT_ACCEPTING_QUARTER;
-    } else if (state == BUILDING_STORAGE_STATE_GETTING_3QUARTERS) {
-        state = BUILDING_STORAGE_STATE_ACCEPTING_3QUARTERS;
-    } else if (state == BUILDING_STORAGE_STATE_GETTING_HALF) {
-        state = BUILDING_STORAGE_STATE_ACCEPTING_HALF;
-    } else if (state == BUILDING_STORAGE_STATE_GETTING_QUARTER) {
-        state = BUILDING_STORAGE_STATE_ACCEPTING_QUARTER;
-    } else if (state == BUILDING_STORAGE_STATE_NOT_ACCEPTING_HALF) {
-        state = BUILDING_STORAGE_STATE_GETTING_HALF;
-    } else if (state == BUILDING_STORAGE_STATE_NOT_ACCEPTING_QUARTER) {
-        state = BUILDING_STORAGE_STATE_GETTING_QUARTER;
-    } else if (state == BUILDING_STORAGE_STATE_NOT_ACCEPTING_3QUARTERS) {
         state = BUILDING_STORAGE_STATE_GETTING_3QUARTERS;
+    } else if (state == BUILDING_STORAGE_STATE_GETTING_3QUARTERS) {
+        state = BUILDING_STORAGE_STATE_NOT_ACCEPTING_3QUARTERS;
+    } else if (state == BUILDING_STORAGE_STATE_NOT_ACCEPTING_3QUARTERS) {
+        state = BUILDING_STORAGE_STATE_ACCEPTING_3QUARTERS;
+    } else if (state == BUILDING_STORAGE_STATE_ACCEPTING_HALF) {
+        state = BUILDING_STORAGE_STATE_GETTING_HALF;
+    } else if (state == BUILDING_STORAGE_STATE_GETTING_HALF) {
+        state = BUILDING_STORAGE_STATE_NOT_ACCEPTING_HALF;
+    } else if (state == BUILDING_STORAGE_STATE_NOT_ACCEPTING_HALF) {
+        state = BUILDING_STORAGE_STATE_ACCEPTING_HALF;
+    } else if (state == BUILDING_STORAGE_STATE_ACCEPTING_QUARTER) {
+        state = BUILDING_STORAGE_STATE_GETTING_QUARTER;
+    } else if (state == BUILDING_STORAGE_STATE_GETTING_QUARTER) {
+        state = BUILDING_STORAGE_STATE_NOT_ACCEPTING_QUARTER;
+    } else if (state == BUILDING_STORAGE_STATE_NOT_ACCEPTING_QUARTER) {
+        state = BUILDING_STORAGE_STATE_ACCEPTING_QUARTER;
     }
     array_item(storages, storage_id)->storage.resource_state[resource_id] = state;
 }
@@ -178,11 +193,62 @@ void building_storage_cycle_partial_resource_state(int storage_id, resource_type
     }
     array_item(storages, storage_id)->storage.resource_state[resource_id] = state;
 }
+
 void building_storage_accept_none(int storage_id)
 {
     data_storage *s = array_item(storages, storage_id);
     for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
         s->storage.resource_state[r] = BUILDING_STORAGE_STATE_NOT_ACCEPTING;
+    }
+}
+
+void building_storage_accept_all(int storage_id)
+{
+    data_storage *s = array_item(storages, storage_id);
+    for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+        s->storage.resource_state[r] = BUILDING_STORAGE_STATE_ACCEPTING;
+    }
+}
+
+int building_storage_check_if_accepts_nothing(int storage_id)
+{
+    data_storage *s = array_item(storages, storage_id);
+    for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+        building_storage_state state = s->storage.resource_state[r];
+        if (state != BUILDING_STORAGE_STATE_NOT_ACCEPTING
+            && (state < BUILDING_STORAGE_STATE_NOT_ACCEPTING_HALF)) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+int building_storage_resource_max_storable(building *b, resource_type resource_id)
+{
+    if (b->type == BUILDING_GRANARY && resource_id >= RESOURCE_MIN_NON_FOOD) {
+        return 0;
+    }
+
+    const building_storage *s = building_storage_get(b->storage_id);
+    switch (s->resource_state[resource_id]) {
+        case BUILDING_STORAGE_STATE_ACCEPTING:
+        case BUILDING_STORAGE_STATE_GETTING:
+            return FULL_STORAGE;
+            break;
+        case BUILDING_STORAGE_STATE_ACCEPTING_3QUARTERS:
+        case BUILDING_STORAGE_STATE_GETTING_3QUARTERS:
+            return THREE_QUARTERS_STORAGE;
+            break;
+        case BUILDING_STORAGE_STATE_ACCEPTING_HALF:
+        case BUILDING_STORAGE_STATE_GETTING_HALF:
+            return HALF_STORAGE;
+            break;
+        case BUILDING_STORAGE_STATE_ACCEPTING_QUARTER:
+        case BUILDING_STORAGE_STATE_GETTING_QUARTER:
+            return QUARTER_STORAGE;
+            break;
+        default:
+            return 0;
     }
 }
 
@@ -194,8 +260,7 @@ void building_storage_save_state(buffer *buf)
     buffer_write_i32(buf, STORAGE_CURRENT_BUFFER_SIZE);
 
     data_storage *s;
-    array_foreach(storages, s)
-    {
+    array_foreach(storages, s) {
         buffer_write_i32(buf, s->storage.permissions); // Originally unused
         buffer_write_i32(buf, s->building_id);
         buffer_write_u8(buf, (uint8_t) s->in_use);
@@ -206,17 +271,20 @@ void building_storage_save_state(buffer *buf)
     }
 }
 
-void building_storage_load_state(buffer *buf, int includes_storage_size)
+void building_storage_load_state(buffer *buf, int version)
 {
     int storage_buf_size = STORAGE_ORIGINAL_BUFFER_SIZE;
-    int buf_size = buf->size;
+    size_t buf_size = buf->size;
+    int includes_storage_size = version > SAVE_GAME_LAST_STATIC_VERSION;
+    int num_resources = RESOURCE_MAX_LEGACY;
 
     if (includes_storage_size) {
         storage_buf_size = buffer_read_i32(buf);
         buf_size -= 4;
+        num_resources = storage_buf_size - STORAGE_STATIC_BUFFER_SIZE;
     }
 
-    int storages_to_load = buf_size / storage_buf_size;
+    int storages_to_load = (int) buf_size / storage_buf_size;
 
     if (!array_init(storages, STORAGE_ARRAY_SIZE_STEP, storage_create, storage_in_use) ||
         !array_expand(storages, storages_to_load)) {
@@ -231,8 +299,11 @@ void building_storage_load_state(buffer *buf, int includes_storage_size)
         s->building_id = buffer_read_i32(buf);
         s->in_use = buffer_read_u8(buf);
         s->storage.empty_all = buffer_read_u8(buf);
-        for (int r = 0; r < RESOURCE_MAX; r++) {
-            s->storage.resource_state[r] = buffer_read_u8(buf);
+        if (config_get(CONFIG_GP_CH_WAREHOUSES_DONT_ACCEPT)) {
+            building_storage_accept_none(s->id);
+        }
+        for (int r = 0; r < num_resources; r++) {
+            s->storage.resource_state[resource_remap(r)] = buffer_read_u8(buf);
         }
         if (!includes_storage_size) {
             buffer_skip(buf, 6); // unused resource states

@@ -31,9 +31,14 @@ void city_health_change(int amount)
     city_data.health.value = calc_bound(city_data.health.value + amount, 0, 100);
 }
 
+void city_health_set(int new_value)
+{
+    city_data.health.value = calc_bound(new_value, 0, 100);
+}
+
 static int is_plague_building(building_type type)
 {
-    for (int i = 0; i < NUM_PLAGUE_BUILDINGS; i++) {
+    for (size_t i = 0; i < NUM_PLAGUE_BUILDINGS; i++) {
         if (type == PLAGUE_BUILDINGS[i]) {
             return 1;
         }
@@ -152,7 +157,7 @@ static int cause_disease(void)
         city_message_post_with_popup_delay(MESSAGE_CAT_ILLNESS, MESSAGE_SICKNESS, sick_building_type, grid_offset);
     }
 
-    for (int i = 0; i < NUM_PLAGUE_BUILDINGS; i++) {
+    for (size_t i = 0; i < NUM_PLAGUE_BUILDINGS; i++) {
         building_type type = PLAGUE_BUILDINGS[i];
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
             if (b->sickness_level >= MAX_SICKNESS_LEVEL) {
@@ -162,6 +167,17 @@ static int cause_disease(void)
     }
 
     return sick_people;
+}
+
+static int count_hospital_workers(void)
+{
+    int total_workers = 0;
+    for (const building *b = building_first_of_type(BUILDING_HOSPITAL); b; b = b->next_of_type) {
+        if (b->state == BUILDING_STATE_IN_USE) {
+            total_workers += b->num_workers;
+        }
+    }
+    return total_workers;
 }
 
 static void cause_plague(int total_people)
@@ -188,12 +204,13 @@ static void cause_plague(int total_people)
         return;
     }
     city_health_change(10);
-    int people_to_kill = sick_people - city_data.health.num_hospital_workers;
+    int num_hospital_workers = count_hospital_workers();
+    int people_to_kill = sick_people - num_hospital_workers;
     if (people_to_kill <= 0) {
         city_message_post(1, MESSAGE_HEALTH_ILLNESS, 0, 0);
         return;
     }
-    if (city_data.health.num_hospital_workers > 0) {
+    if (num_hospital_workers > 0) {
         city_message_post(1, MESSAGE_HEALTH_DISEASE, 0, 0);
     } else {
         city_message_post(1, MESSAGE_HEALTH_PESTILENCE, 0, 0);
@@ -262,7 +279,7 @@ static void adjust_sickness_level_in_house(building *b, int health, int populati
 
 static void adjust_sickness_level_in_plague_buildings(int hospital_coverage_bonus)
 {
-    for (int i = 0; i < NUM_PLAGUE_BUILDINGS; i++) {
+    for (size_t i = 0; i < NUM_PLAGUE_BUILDINGS; i++) {
         building_type type = PLAGUE_BUILDINGS[i];
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
             if (b->has_plague || !b->sickness_level) {
@@ -276,6 +293,55 @@ static void adjust_sickness_level_in_plague_buildings(int hospital_coverage_bonu
             b->sickness_level -= calc_adjust_with_percentage(b->sickness_level, decrease_percentage);
         }
     }
+}
+
+int city_health_get_house_health_level(const building *b, int update_city_data) 
+{
+    int house_health = 0;
+
+    if (building_is_house(b->type)) {
+        house_health = calc_bound(b->subtype.house_level, 0, 10);
+        if (b->data.house.clinic && b->data.house.hospital) {
+            house_health += 50;
+            if (update_city_data) {
+                city_data.health.population_access.clinic += b->house_population;
+            }
+        } else if (b->data.house.hospital) {
+            house_health += 40;
+        } else if (b->data.house.clinic) {
+            house_health += 30;
+            if (update_city_data) {
+                city_data.health.population_access.clinic += b->house_population;
+            }
+        }
+        
+        if (b->data.house.bathhouse) {
+            house_health += 15;
+            if (update_city_data) {
+                city_data.health.population_access.baths += b->house_population;
+            }
+        }
+        if (b->data.house.barber) {
+            house_health += 10;
+            if (update_city_data) {
+                city_data.health.population_access.barber += b->house_population;
+            }
+        }
+        if (b->has_latrines_access || b->has_water_access) {
+            house_health += 10;
+        }
+        house_health += b->data.house.num_foods * 10;
+
+        int mausoleum_health = building_count_active(BUILDING_SMALL_MAUSOLEUM) * 2;
+        mausoleum_health += building_count_active(BUILDING_LARGE_MAUSOLEUM) * 5;
+
+        house_health += calc_bound(mausoleum_health, 0, 10);
+
+        int health_cap = (model_get_house(b->subtype.house_level)->food_types && !b->data.house.num_foods) ?
+            40 : 100;
+        house_health = calc_bound(house_health, 0, health_cap);
+    }
+    return house_health;
 }
 
 void city_health_update(void)
@@ -302,34 +368,8 @@ void city_health_update(void)
                 b->sickness_level = 0;
                 continue;
             }
-            int house_health = calc_bound(b->subtype.house_level, 0, 10);
-            if (b->data.house.clinic && b->data.house.hospital) {
-                house_health += 50;
-                city_data.health.population_access.clinic += b->house_population;
-            } else if (b->data.house.hospital) {
-                house_health += 40;
-            } else if (b->data.house.clinic) {
-                house_health += 30;
-                city_data.health.population_access.clinic += b->house_population;
-            }
-            if (b->data.house.bathhouse) {
-                house_health += 20;
-                city_data.health.population_access.baths += b->house_population;
-            }
-            if (b->data.house.barber) {
-                house_health += 10;
-                city_data.health.population_access.barber += b->house_population;
-            }
-            house_health += b->data.house.num_foods * 15;
+            int house_health = city_health_get_house_health_level(b, 1);
 
-            int mausuleum_health = building_count_active(BUILDING_SMALL_MAUSOLEUM);
-            mausuleum_health += building_count_active(BUILDING_LARGE_MAUSOLEUM) * 2;
-
-            house_health += calc_bound(mausuleum_health, 0, 10);
-
-            int health_cap = (model_get_house(b->subtype.house_level)->food_types && !b->data.house.num_foods) ?
-                40 : 100;
-            house_health = calc_bound(house_health, 0, health_cap);
             total_population += b->house_population;
             healthy_population += calc_adjust_with_percentage(b->house_population, house_health);
             adjust_sickness_level_in_house(b, house_health, population_health_offset, hospital_coverage_bonus);
@@ -354,16 +394,6 @@ void city_health_update(void)
     cause_plague(total_population);
 }
 
-void city_health_reset_hospital_workers(void)
-{
-    city_data.health.num_hospital_workers = 0;
-}
-
-void city_health_add_hospital_workers(int amount)
-{
-    city_data.health.num_hospital_workers += amount;
-}
-
 int city_health_get_global_sickness_level(void)
 {
     int building_number = 0;
@@ -385,7 +415,7 @@ int city_health_get_global_sickness_level(void)
         }
     }
 
-    for (int i = 0; i < NUM_PLAGUE_BUILDINGS; i++) {
+    for (size_t i = 0; i < NUM_PLAGUE_BUILDINGS; i++) {
         building_type type = PLAGUE_BUILDINGS[i];
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
             building_number++;

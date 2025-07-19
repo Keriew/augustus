@@ -22,15 +22,23 @@ typedef enum {
     G_ENDING
 } games_messages;
 
-static void naval_battle_start(int id);
-static void executions_start(int id);
-static void imperial_games_start(int id);
+static void naval_battle_start(void);
+static void executions_start(void);
+static void imperial_games_start(void);
 
 games_type ALL_GAMES[MAX_GAMES] = {
-    {1, TR_WINDOW_GAMES_OPTION_1, TR_WINDOW_GAMES_OPTION_1_DESC, MESSAGE_NG_GAMES_PLANNED, 1500, 100, 1, 32, 12, BUILDING_COLOSSEUM, 1, {0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,}, naval_battle_start},
-    {2, TR_WINDOW_GAMES_OPTION_5, TR_WINDOW_GAMES_OPTION_5_DESC, MESSAGE_IG_GAMES_PLANNED, 800, 150, 1, 32, 12, BUILDING_COLOSSEUM, 0, {0,2,0,0,0,0,0,0,1,0,0,0,0,0,0,0,}, imperial_games_start},
-    {3, TR_WINDOW_GAMES_OPTION_2, TR_WINDOW_GAMES_OPTION_2_DESC, MESSAGE_AN_GAMES_PLANNED, 800, 150, 1, 32, 12, BUILDING_COLOSSEUM, 0, {0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,}, executions_start},
-    //{4, TR_WINDOW_GAMES_OPTION_4, TR_WINDOW_GAMES_OPTION_4_DESC, 100, 1, 32, 120, BUILDING_HIPPODROME, {0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,}}
+    {
+        1, TR_WINDOW_GAMES_OPTION_1, TR_WINDOW_GAMES_OPTION_1_DESC, MESSAGE_NG_GAMES_PLANNED, 1500, 100, 1, 32, 12,
+        BUILDING_COLOSSEUM, 1, { [RESOURCE_WINE] = 1,[RESOURCE_TIMBER] = 1 }, naval_battle_start
+    },
+    {
+        2, TR_WINDOW_GAMES_OPTION_5, TR_WINDOW_GAMES_OPTION_5_DESC, MESSAGE_IG_GAMES_PLANNED, 800, 150, 1, 32, 12,
+        BUILDING_COLOSSEUM, 0, { [RESOURCE_WHEAT] = 2,[RESOURCE_OIL] = 1 }, imperial_games_start
+    },
+    {
+        3, TR_WINDOW_GAMES_OPTION_2, TR_WINDOW_GAMES_OPTION_2_DESC, MESSAGE_AN_GAMES_PLANNED, 800, 150, 1, 32, 12,
+        BUILDING_COLOSSEUM, 0, { [RESOURCE_MEAT] = 2 }, executions_start
+    }
 };
 
 
@@ -60,7 +68,19 @@ int city_games_resource_cost(int game_type_id, resource_type resource)
     if (!game) {
         return 0;
     }
+    if (game_type_id == 3) { //for animal games, check if player has more fish or meat
+        int player_meat_count = city_resource_get_amount_including_granaries(RESOURCE_MEAT, 2, 0);
+        int player_fish_count = city_resource_get_amount_including_granaries(RESOURCE_FISH, 2, 0);
+
+        int dominant_resource = (player_meat_count >= player_fish_count) ? RESOURCE_MEAT : RESOURCE_FISH;
+        for (int i = 0; i < RESOURCE_MAX; ++i) {
+            // Reset all costs to 0 before reassigignment
+            game->resource_cost[i] = 0;
+        }
+        game->resource_cost[dominant_resource] = 2;
+    }
     int cost = game->resource_cost[resource] * (BASE_RESOURCE_REQUIREMENT + city_data.population.population / POPULATION_SCALING_FACTOR);
+
     return cost;
 }
 
@@ -78,7 +98,7 @@ static void begin_games(void)
     city_data.games.months_to_go = 0;
     city_data.games.games_is_active = 1;
     city_data.games.remaining_duration = game->duration_days;
-    game->games_start_function(city_data.games.selected_games_id);
+    game->games_start_function();
 
     post_games_message(G_STARTING);
 }
@@ -103,9 +123,8 @@ void city_games_schedule(int game_id)
         if (resource_cost) {
             resource_cost = building_warehouses_remove_resource(resource, resource_cost);
             if (resource_cost > 0 && resource_is_food(resource)) {
-                building_granaries_remove_resource(resource, resource_cost * RESOURCE_GRANARY_ONE_LOAD);
+                building_granaries_remove_resource(resource, resource_cost * RESOURCE_ONE_LOAD);
             }
-
         }
     }
 
@@ -172,20 +191,20 @@ void city_games_remove_naval_battle_distant_battle_bonus(void)
     city_data.games.naval_battle_distant_battle_bonus = 0;
 }
 
-static void naval_battle_start(int id)
+static void naval_battle_start(void)
 {
     games_type *game = city_games_get_game_type(city_data.games.selected_games_id);
     city_data.games.naval_battle_bonus_months = game->bonus_duration;
     city_data.games.naval_battle_distant_battle_bonus = 1;
 }
 
-static void executions_start(int id)
+static void executions_start(void)
 {
     games_type *game = city_games_get_game_type(city_data.games.selected_games_id);
     city_data.games.executions_bonus_months = game->bonus_duration;
 }
 
-static void imperial_games_start(int id)
+static void imperial_games_start(void)
 {
     games_type *game = city_games_get_game_type(city_data.games.selected_games_id);
     city_data.games.imperial_games_bonus_months = game->bonus_duration;

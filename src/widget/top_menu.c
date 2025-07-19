@@ -8,6 +8,7 @@
 #include "core/calc.h"
 #include "core/config.h"
 #include "core/lang.h"
+#include "game/campaign.h"
 #include "game/file.h"
 #include "game/settings.h"
 #include "game/state.h"
@@ -30,7 +31,8 @@
 #include "window/hotkey_config.h"
 #include "window/main_menu.h"
 #include "window/message_dialog.h"
-#include "window/mission_briefing.h"
+#include "window/mission_selection.h"
+#include "window/plain_message_dialog.h"
 #include "window/popup_dialog.h"
 
 enum {
@@ -311,7 +313,7 @@ void widget_top_menu_draw(int force)
     text_draw_number(treasury, '@', " ", data.offset_funds - 6 + x_offset + width, 5, FONT_NORMAL_PLAIN, treasure_color);
 
     if (draw_panel_pop_date) {
-        int text_width = text_get_width(lang_get_string(6, 1), pop_date_font);
+        text_width = text_get_width(lang_get_string(6, 1), pop_date_font);
         text_width += calc_digits_in_number(city_population()) * 11;
         panel_width = draw_black_panel(data.offset_population, 0, text_width);
         x_offset = (panel_width - text_width) / 2;
@@ -436,12 +438,17 @@ static void replay_map_confirmed(int confirmed, int checked)
         window_city_show();
         return;
     }
-    if (scenario_is_custom()) {
-        game_file_start_scenario_by_name(scenario_name());
+    if (!game_campaign_is_active()) {
         window_city_show();
+        if (!game_file_start_scenario_by_name(scenario_name())) {
+            window_plain_message_dialog_show_with_extra(TR_REPLAY_MAP_NOT_FOUND_TITLE,
+                TR_REPLAY_MAP_NOT_FOUND_MESSAGE, 0, scenario_name());
+        }
     } else {
+        int mission_id = game_campaign_is_original() ? scenario_campaign_mission() : 0;
+        setting_set_personal_savings_for_mission(mission_id, scenario_starting_personal_savings());
         scenario_save_campaign_player_name();
-        window_mission_briefing_show();
+        window_mission_selection_show_again();
     }
 }
 
@@ -552,6 +559,7 @@ static void menu_options_monthly_autosave(int param)
 static void menu_options_yearly_autosave(int param)
 {
     config_set(CONFIG_GP_CH_YEARLY_AUTOSAVE, !config_get(CONFIG_GP_CH_YEARLY_AUTOSAVE));
+    config_save();
     set_text_for_yearly_autosave();
 }
 

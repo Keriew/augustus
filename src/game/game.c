@@ -11,9 +11,11 @@
 #include "core/locale.h"
 #include "core/log.h"
 #include "core/random.h"
+#include "core/string.h"
 #include "editor/editor.h"
 #include "figure/type.h"
 #include "game/animation.h"
+#include "game/campaign.h"
 #include "game/file.h"
 #include "game/file_editor.h"
 #include "game/settings.h"
@@ -21,8 +23,13 @@
 #include "game/state.h"
 #include "game/tick.h"
 #include "graphics/font.h"
+#include "graphics/graphics.h"
+#include "graphics/text.h"
 #include "graphics/video.h"
 #include "graphics/window.h"
+#include "platform/file_manager.h"
+#include "platform/prefs.h"
+#include "platform/user_path.h"
 #include "scenario/property.h"
 #include "scenario/scenario.h"
 #include "sound/city.h"
@@ -53,6 +60,7 @@ int game_pre_init(void)
     config_load();
     hotkey_config_load();
     scenario_settings_init();
+    game_campaign_clear();
     game_state_unpause();
 
     if (!lang_load(0)) {
@@ -101,12 +109,34 @@ int game_init(void)
         return 0;
     }
 
-    init_augustus_building_properties();
-    load_custom_messages();
+    building_properties_init();
+    load_augustus_messages();
     sound_system_init();
     game_state_init();
-    int missing_assets = !assets_get_image_id("Logistics", "roadblock"); // If can't find roadblocks asset, extra assets not installed properly
-    window_logo_show(missing_fonts ? MESSAGE_MISSING_FONTS : (is_unpatched() ? MESSAGE_MISSING_PATCH : (missing_assets ? MESSAGE_MISSING_EXTRA_ASSETS : MESSAGE_NONE)));
+    resource_init();
+    int actions = ACTION_NONE;
+    if (missing_fonts) {
+        actions |= ACTION_SHOW_MESSAGE_MISSING_FONTS;
+    }
+    if (is_unpatched()) {
+        actions |= ACTION_SHOW_MESSAGE_MISSING_PATCH;
+    }
+    int missing_assets = !assets_get_image_id("Admin_Logistics", "roadblock"); // If can't find roadblocks asset, extra assets not installed properly
+    if (missing_assets) {
+        actions |= ACTION_SHOW_MESSAGE_MISSING_EXTRA_ASSETS;
+    }
+    if (config_must_configure_user_directory()) {
+        actions |= ACTION_SETUP_USER_DIR;
+    } else if (!platform_file_manager_is_directory_writeable(pref_user_dir())) {
+        actions |= ACTION_SHOW_MESSAGE_USER_DIR_NOT_WRITABLE;
+    } else {
+        platform_user_path_create_subdirectories();
+    }
+    if (config_get(CONFIG_UI_SHOW_INTRO_VIDEO)) {
+        actions |= ACTION_SHOW_INTRO_VIDEOS;
+    }
+
+    window_logo_show(actions);
     return 1;
 }
 
@@ -122,7 +152,7 @@ static int reload_language(int is_editor, int reload_images)
     }
     encoding_type encoding = update_encoding();
     if (!is_editor) {
-        load_custom_messages();
+        load_augustus_messages();
     }
 
     if (!image_load_fonts(encoding)) {
@@ -133,6 +163,9 @@ static int reload_language(int is_editor, int reload_images)
         errlog("unable to load main graphics");
         return 0;
     }
+
+    resource_init();
+
     return 1;
 }
 
@@ -165,7 +198,7 @@ void game_exit_editor(void)
 
 int game_reload_language(void)
 {
-    return reload_language(0, 1);
+    return reload_language(editor_is_active(), 1);
 }
 
 void game_run(void)
@@ -186,6 +219,17 @@ void game_draw(void)
 {
     window_draw(0);
     sound_city_play();
+}
+
+void game_display_fps(int fps)
+{
+    int x_offset = 8;
+    int y_offset = 24;
+    int width = 24;
+    int height = 20;
+    graphics_draw_rect(x_offset, y_offset, width + 2, height + 2, COLOR_BLACK);
+    graphics_fill_rect(x_offset + 1, y_offset + 1, width, height, COLOR_WHITE);
+    text_draw_number_centered_colored(fps, x_offset, y_offset + 6, width, FONT_SMALL_PLAIN, COLOR_BLACK);
 }
 
 void game_exit(void)

@@ -33,6 +33,7 @@ static struct {
     int selected_grid_offset;
     int new_start_grid_offset;
     int capture_input;
+    int cursor_grid_offset;
 } data;
 
 static struct {
@@ -76,6 +77,7 @@ static void draw_footprint(int x, int y, int grid_offset)
     }
     image_draw_isometric_footprint_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
     if (config_get(CONFIG_UI_SHOW_GRID) && draw_context.scale <= 2.0f) {
+        //grid is drawn by the renderer directly at zoom > 200%
         static int grid_id = 0;
         if (!grid_id) {
             grid_id = assets_get_image_id("UI", "Grid_Full");
@@ -137,13 +139,13 @@ void widget_map_editor_draw(void)
 {
     update_zoom_level();
     set_city_clip_rectangle();
-    
+
     init_draw_context();
     int x, y, width, height;
     city_view_get_viewport(&x, &y, &width, &height);
     graphics_fill_rect(x, y, width, height, COLOR_BLACK);
-    city_view_foreach_map_tile(draw_footprint);
-    city_view_foreach_valid_map_tile(draw_flags, draw_top, 0);
+    city_view_foreach_valid_map_tile(draw_footprint);
+    city_view_foreach_valid_map_tile_row(draw_flags, draw_top, 0);
     map_editor_tool_draw(&data.current_tile);
     graphics_reset_clip_rectangle();
 }
@@ -159,6 +161,7 @@ static void update_city_view_coords(int x, int y, map_tile *tile)
     } else {
         tile->grid_offset = tile->x = tile->y = 0;
     }
+    data.cursor_grid_offset = tile->grid_offset;
 }
 
 static void scroll_map(const mouse *m)
@@ -178,7 +181,7 @@ static int input_coords_in_map(int x, int y)
     x -= x_offset;
     y -= y_offset;
 
-    return (x >= 0 && x < width &&y >= 0 && y < height);
+    return (x >= 0 && x < width && y >= 0 && y < height);
 }
 
 static void handle_touch_scroll(const touch *t)
@@ -359,7 +362,6 @@ void widget_map_editor_handle_input(const mouse *m, const hotkeys *h)
     scroll_map(m);
 
     if (m->is_touch) {
-        zoom_map(m, city_view_get_scale());
         handle_touch();
     } else {
         if (m->right.went_down && input_coords_in_map(m->x, m->y) && !editor_tool_is_active()) {
@@ -388,7 +390,7 @@ void widget_map_editor_handle_input(const mouse *m, const hotkeys *h)
 
     map_tile *tile = &data.current_tile;
     update_city_view_coords(m->x, m->y, tile);
-    zoom_map(m, city_view_get_scale());
+    zoom_map(m, h, city_view_get_scale());
 
     if (tile->grid_offset) {
         if (m->left.went_down) {
@@ -410,4 +412,9 @@ void widget_map_editor_clear_current_tile(void)
 {
     data.selected_grid_offset = 0;
     data.current_tile.grid_offset = 0;
+}
+
+int widget_map_editor_get_grid_offset(void)
+{
+    return data.cursor_grid_offset;
 }

@@ -4,6 +4,7 @@
 #include "building/building.h"
 #include "building/model.h"
 #include "building/monument.h"
+#include "building/storage.h"
 #include "building/warehouse.h"
 #include "city/gods.h"
 #include "city/resource.h"
@@ -18,6 +19,8 @@
 #include "map/figure.h"
 #include "map/grid.h"
 
+#define VALID_MONUMENT_RECHECK_TICKS 60
+
 static int create_slave_workers(int leader_id, int first_figure_id)
 {
     figure *f = figure_get(first_figure_id);
@@ -30,7 +33,8 @@ static int create_slave_workers(int leader_id, int first_figure_id)
     slave->destination_x = f->destination_x;
     slave->destination_y = f->destination_y;
     slave->action_state = FIGURE_ACTION_209_WORK_CAMP_SLAVE_FOLLOWING;
-    building_monument_add_delivery(slave->destination_building_id, f->id, f->collecting_item_id, 1);
+    slave->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
+    building_monument_add_delivery(slave->destination_building_id, slave->id, slave->collecting_item_id, 1);
     return slave->id;
 }
 
@@ -39,7 +43,7 @@ static int take_resource_from_warehouse(figure *f, int warehouse_id)
     int resource = f->collecting_item_id;
     building *warehouse = building_get(warehouse_id);
     building *monument = building_get(f->destination_building_id);
-    int resources_needed = monument->data.monument.resources_needed[resource] - building_monument_resource_in_delivery(monument, resource);
+    int resources_needed = monument->resources[resource] - building_monument_resource_in_delivery(monument, resource);
     int num_loads;
     int stored = building_warehouse_get_amount(warehouse, resource);
     if (stored <= CARTLOADS_PER_MONUMENT_DELIVERY) {
@@ -65,6 +69,28 @@ static int take_resource_from_warehouse(figure *f, int warehouse_id)
     return 1;
 }
 
+static int has_valid_monument_destination(figure *f)
+{
+    if (f->wait_ticks++ >= VALID_MONUMENT_RECHECK_TICKS) {
+        if (!building_monument_has_delivery_for_worker(f->id)) {
+            return 0;
+        }
+        f->wait_ticks = 0;
+    }
+    return 1;
+}
+
+static void workcamp_worker_image_update(figure *f)
+{
+    int dir = figure_image_normalize_direction(f->direction < 8 ? f->direction : f->previous_tile_direction);
+    if (f->action_state == FIGURE_ACTION_149_CORPSE) {
+        f->image_id = assets_get_image_id("Walkers", "overseer_death_01") +
+            figure_image_corpse_offset(f);
+    } else {
+        f->image_id = assets_get_image_id("Walkers", "overseer_ne_01") + dir * 12 + f->image_offset;
+    }
+}
+
 void figure_workcamp_worker_action(figure *f)
 {
     f->terrain_usage = TERRAIN_USAGE_ROADS_HIGHWAY;
@@ -75,6 +101,7 @@ void figure_workcamp_worker_action(figure *f)
     if (b->state != BUILDING_STATE_IN_USE || b->figure_id != f->id) {
         f->state = FIGURE_STATE_DEAD;
     }
+
     figure_image_increase_offset(f, 12);
     switch (f->action_state) {
         case FIGURE_ACTION_150_ATTACK:
@@ -86,27 +113,29 @@ void figure_workcamp_worker_action(figure *f)
         case FIGURE_ACTION_203_WORK_CAMP_WORKER_CREATED:
             if (!building_monument_has_unfinished_monuments()) {
                 f->state = FIGURE_STATE_DEAD;
+                break;
             }
             for (int resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
-                if (city_resource_is_stockpiled(resource)) {
+                if (city_resource_is_stockpiled(resource) || !resource_is_storable(resource)) {
                     continue;
                 }
-                monument_id = building_monument_get_monument(b->x, b->y, resource, b->road_network_id, b->distance_from_entry, 0);
+                monument_id = building_monument_get_monument(b->x, b->y, resource, b->road_network_id, 0);
                 if (!monument_id) {
                     continue;
                 }
-                warehouse_id = building_warehouse_with_resource(f->building_id, f->x, f->y, resource,
-                    b->distance_from_entry, b->road_network_id, 0, &dst);
+                warehouse_id = building_warehouse_with_resource(f->x, f->y, resource, b->road_network_id, 0, &dst, BUILDING_STORAGE_PERMISSION_WORKCAMP);
                 if (!warehouse_id) {
                     continue;
                 }
+
                 f->collecting_item_id = resource;
                 f->destination_building_id = warehouse_id;
                 f->destination_x = dst.x;
                 f->destination_y = dst.y;
+                f->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
                 f->action_state = FIGURE_ACTION_204_WORK_CAMP_WORKER_GETTING_RESOURCES;
                 building *monument = building_get(monument_id);
-                int resources_needed = monument->data.monument.resources_needed[resource] - building_monument_resource_in_delivery(monument, resource);
+                int resources_needed = monument->resources[resource] - building_monument_resource_in_delivery(monument, resource);
                 resources_needed = calc_bound(resources_needed, 0, CARTLOADS_PER_MONUMENT_DELIVERY);
                 building_monument_add_delivery(monument_id, f->id, resource, resources_needed);
                 break;
@@ -117,31 +146,43 @@ void figure_workcamp_worker_action(figure *f)
             break;
 
         case FIGURE_ACTION_204_WORK_CAMP_WORKER_GETTING_RESOURCES:
+            if (!has_valid_monument_destination(f)) {
+                f->state = FIGURE_STATE_DEAD;
+                break;
+            }
             figure_movement_move_ticks(f, 1);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 building_monument_remove_delivery(f->id);
                 warehouse_id = f->destination_building_id;
-                monument_id = building_monument_get_monument(b->x, b->y, f->collecting_item_id, b->road_network_id, b->distance_from_entry, &dst);
+                monument_id = building_monument_get_monument(b->x, b->y, f->collecting_item_id, b->road_network_id, &dst);
                 f->action_state = FIGURE_ACTION_205_WORK_CAMP_WORKER_GOING_TO_MONUMENT;
                 f->destination_building_id = monument_id;
                 f->destination_x = dst.x;
                 f->destination_y = dst.y;
                 f->previous_tile_x = f->x;
                 f->previous_tile_y = f->y;
-                int figure_id = f->id;
+                f->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
                 if (!monument_id) {
                     f->state = FIGURE_STATE_DEAD;
                 } else if (!take_resource_from_warehouse(f, warehouse_id)) {
                     f->state = FIGURE_STATE_DEAD;
+                } else {
+                    // Placeholder delivery
+                    building_monument_add_delivery(monument_id, f->id, f->collecting_item_id, 0);
                 }
-                f = figure_get(figure_id);
             } else if (f->direction == DIR_FIGURE_REROUTE || f->direction == DIR_FIGURE_LOST) {
                 f->state = FIGURE_STATE_DEAD;
             }
             break;
+
         case FIGURE_ACTION_205_WORK_CAMP_WORKER_GOING_TO_MONUMENT:
+            if (!has_valid_monument_destination(f)) {
+                f->state = FIGURE_STATE_DEAD;
+                break;
+            }
             figure_movement_move_ticks(f, 1);
             if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
+                f->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
                 f->action_state = FIGURE_ACTION_216_WORK_CAMP_WORKER_ENTERING_MONUMENT;
                 building *monument = building_get(f->destination_building_id);
                 if (!building_monument_access_point(monument, &dst)) {
@@ -152,7 +193,12 @@ void figure_workcamp_worker_action(figure *f)
                 figure_route_remove(f);
             }
             break;
+
         case FIGURE_ACTION_216_WORK_CAMP_WORKER_ENTERING_MONUMENT:
+            if (!has_valid_monument_destination(f)) {
+                f->state = FIGURE_STATE_DEAD;
+                break;
+            }
             f->terrain_usage = TERRAIN_USAGE_ANY;
             f->use_cross_country = 1;
             f->dont_draw_elevated = 1;
@@ -163,14 +209,11 @@ void figure_workcamp_worker_action(figure *f)
                     figure_route_remove(f);
                 }
             }
+            break;
     }
 
-    figure_image_update(f, image_group(GROUP_FIGURE_PATRICIAN));
-    if (f->state == FIGURE_STATE_DEAD) {
-        building_monument_remove_delivery(f->id);
-    }
+    workcamp_worker_image_update(f);
 }
-
 
 void figure_workcamp_slave_action(figure *f)
 {
@@ -188,27 +231,39 @@ void figure_workcamp_slave_action(figure *f)
             figure_combat_handle_corpse(f);
             break;
         case FIGURE_ACTION_209_WORK_CAMP_SLAVE_FOLLOWING:
+            if (!has_valid_monument_destination(f)) {
+                f->state = FIGURE_STATE_DEAD;
+                break;
+            }
             if (f->leading_figure_id <= 0 || leader->action_state == FIGURE_ACTION_149_CORPSE) {
                 f->state = FIGURE_STATE_DEAD;
             } else {
                 if (leader->state == FIGURE_STATE_ALIVE) {
                     if (leader->type == FIGURE_WORK_CAMP_WORKER || leader->type == FIGURE_WORK_CAMP_SLAVE) {
                         figure_movement_follow_ticks(f, 1);
-                        if (leader->action_state == FIGURE_ACTION_210_WORK_CAMP_SLAVE_GOING_TO_MONUMENT || leader->action_state == FIGURE_ACTION_216_WORK_CAMP_WORKER_ENTERING_MONUMENT) {
+                        if (leader->action_state == FIGURE_ACTION_210_WORK_CAMP_SLAVE_GOING_TO_MONUMENT ||
+                            leader->action_state == FIGURE_ACTION_216_WORK_CAMP_WORKER_ENTERING_MONUMENT) {
                             f->action_state = FIGURE_ACTION_210_WORK_CAMP_SLAVE_GOING_TO_MONUMENT;
+                            f->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
                         }
                     } else {
                         f->state = FIGURE_STATE_DEAD;
                     }
                 } else { // leader arrived at the monument, continue on your own
                     f->action_state = FIGURE_ACTION_210_WORK_CAMP_SLAVE_GOING_TO_MONUMENT;
+                    f->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
                 }
             }
             if (leader->is_ghost && !leader->height_adjusted_ticks) {
                 f->is_ghost = 1;
             }
             break;
+
         case FIGURE_ACTION_210_WORK_CAMP_SLAVE_GOING_TO_MONUMENT:
+            if (!has_valid_monument_destination(f)) {
+                f->state = FIGURE_STATE_DEAD;
+                break;
+            }
             figure_movement_move_ticks(f, 1);
             if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                 f->action_state = FIGURE_ACTION_211_WORK_CAMP_SLAVE_DELIVERING_RESOURCES;
@@ -216,12 +271,18 @@ void figure_workcamp_slave_action(figure *f)
                 if (!building_monument_access_point(monument, &dst)) {
                     f->state = FIGURE_STATE_DEAD;
                 }
+                f->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
                 figure_movement_set_cross_country_destination(f, dst.x, dst.y);
             } else if (f->direction == DIR_FIGURE_REROUTE) {
                 figure_route_remove(f);
             }
             break;
+
         case FIGURE_ACTION_211_WORK_CAMP_SLAVE_DELIVERING_RESOURCES:
+            if (!has_valid_monument_destination(f)) {
+                f->state = FIGURE_STATE_DEAD;
+                break;
+            }
             f->terrain_usage = TERRAIN_USAGE_ANY;
             f->use_cross_country = 1;
             f->dont_draw_elevated = 1;
@@ -239,19 +300,32 @@ void figure_workcamp_slave_action(figure *f)
 
     int dir = figure_image_normalize_direction(f->direction < 8 ? f->direction : f->previous_tile_direction);
     if (f->action_state == FIGURE_ACTION_149_CORPSE) {
-        f->image_id = assets_get_image_id("Logistics", "Slave death 01") +
+        f->image_id = assets_get_image_id("Walkers", "Slave death 01") +
             figure_image_corpse_offset(f);
     } else {
-        f->image_id = assets_get_image_id("Logistics", "Slave NE 01") + dir * 12 +
+        f->image_id = assets_get_image_id("Walkers", "Slave NE 01") + dir * 12 +
             f->image_offset;
-    }
-    if (f->state == FIGURE_STATE_DEAD) {
-        building_monument_remove_delivery(f->id);
     }
 }
 
-void figure_workcamp_engineer_action(figure *f)
+static void set_architect_graphic(figure *f, int working)
 {
+    int dir = figure_image_normalize_direction(f->direction < 8 ? f->direction : f->previous_tile_direction);
+
+    if (f->action_state == FIGURE_ACTION_149_CORPSE) {
+        f->image_id = assets_get_image_id("Walkers", "architect_death_01") +
+            figure_image_corpse_offset(f);
+    } else if (working) {
+        f->image_id = assets_get_image_id("Walkers", "Architect 01") + f->image_offset;
+    } else {
+        f->image_id = assets_get_image_id("Walkers", "architect_ne_01") + dir * 12 +
+            f->image_offset;
+    }
+}
+
+void figure_workcamp_architect_action(figure *f)
+{
+    int working = 0;
     f->terrain_usage = TERRAIN_USAGE_ROADS_HIGHWAY;
     building *b = building_get(f->building_id);
     building *monument;
@@ -271,39 +345,43 @@ void figure_workcamp_engineer_action(figure *f)
             if (!building_monument_has_unfinished_monuments()) {
                 f->state = FIGURE_STATE_DEAD;
             } else {
-                int monument_id = building_monument_get_monument(b->x, b->y, RESOURCE_NONE,
-                    b->road_network_id, b->distance_from_entry, &dst);
+                int monument_id = building_monument_get_monument(b->x, b->y, RESOURCE_NONE, b->road_network_id, &dst);
                 if (monument_id && !building_monument_is_construction_halted(building_get(monument_id))) {
                     f->destination_building_id = monument_id;
                     f->destination_x = dst.x;
                     f->destination_y = dst.y;
-                    // Only send 1 engineer
+                    // Only send 1 architect
                     building_monument_add_delivery(f->destination_building_id, f->id, RESOURCE_NONE, 10);
                     f->action_state = FIGURE_ACTION_207_WORK_CAMP_ARCHITECT_GOING_TO_MONUMENT;
+                    f->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
                     break;
                 } else {
                     f->state = FIGURE_STATE_DEAD;
                 }
             }
-            figure_image_update(f, image_group(GROUP_FIGURE_ENGINEER));
             break;
+
         case FIGURE_ACTION_207_WORK_CAMP_ARCHITECT_GOING_TO_MONUMENT:
-            figure_movement_move_ticks(f, 1);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
-                f->action_state = FIGURE_ACTION_208_WORK_CAMP_ARCHITECT_WORKING_ON_MONUMENT;
-                monument = building_get(f->destination_building_id);
-                if (!building_monument_access_point(monument, &dst) || b->data.monument.phase == MONUMENT_FINISHED) {
-                    f->state = FIGURE_STATE_DEAD;
-                }
-                figure_movement_set_cross_country_destination(f, dst.x, dst.y);
-                f->wait_ticks = 1;
-            } else if (f->direction == DIR_FIGURE_REROUTE) {
-                figure_route_remove(f);
+            if (!has_valid_monument_destination(f)) {
+                f->state = FIGURE_STATE_DEAD;
+                break;
             }
-            figure_image_update(f, image_group(GROUP_FIGURE_ENGINEER));
+            figure_movement_move_ticks(f, 1);
+            monument = building_get(f->destination_building_id);
+            if (monument->state == BUILDING_STATE_UNUSED || !building_monument_access_point(monument, &dst) ||
+                b->monument.phase == MONUMENT_FINISHED) {
+                f->state = FIGURE_STATE_DEAD;
+            } else {
+                if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
+                    f->action_state = FIGURE_ACTION_208_WORK_CAMP_ARCHITECT_WORKING_ON_MONUMENT;
+                    figure_movement_set_cross_country_destination(f, dst.x, dst.y);
+                    f->wait_ticks = 1;
+                } else if (f->direction == DIR_FIGURE_REROUTE) {
+                    figure_route_remove(f);
+                }
+            }
             break;
         case FIGURE_ACTION_208_WORK_CAMP_ARCHITECT_WORKING_ON_MONUMENT:
-            figure_image_update(f, image_group(GROUP_FIGURE_ENGINEER));
             f->terrain_usage = TERRAIN_USAGE_ANY;
             f->use_cross_country = 1;
             f->dont_draw_elevated = 1;
@@ -311,23 +389,21 @@ void figure_workcamp_engineer_action(figure *f)
                 if (f->wait_ticks >= 384) {
                     f->state = FIGURE_STATE_DEAD;
                     monument = building_get(f->destination_building_id);
-                    monument->data.monument.resources_needed[RESOURCE_NONE]--;
-                    if (monument->data.monument.resources_needed[RESOURCE_NONE] <= 0) {
+                    monument->resources[RESOURCE_NONE]--;
+                    if (monument->resources[RESOURCE_NONE] <= 0) {
                         building_monument_progress(monument);
                     }
                 } else {
                     f->wait_ticks++;
-                    f->image_id = assets_get_image_id("Logistics", "Architect 01") + f->image_offset;
+                    working = 1;
                 }
             } else {
                 if (f->direction == DIR_FIGURE_REROUTE) {
                     figure_route_remove(f);
                 }
-                figure_image_update(f, image_group(GROUP_FIGURE_ENGINEER));
             }
             break;
     }
-    if (f->state == FIGURE_STATE_DEAD) {
-        building_monument_remove_delivery(f->id);
-    }
+
+    set_architect_graphic(f, working);
 }

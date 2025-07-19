@@ -38,8 +38,10 @@ static int count_archived_message(void)
     if (old_message_index == MAX_OLD_MESSAGES) {
         log_repeated_messages();
     }
-    strncpy(previous_log_messages[old_message_index++].buffer, log_buffer, MSG_SIZE);
-    previous_log_messages[old_message_index].count = 0;
+    snprintf(previous_log_messages[old_message_index++].buffer, MSG_SIZE, "%s", log_buffer);
+    if (old_message_index < MAX_OLD_MESSAGES) {
+        previous_log_messages[old_message_index].count = 0;
+    }
     return 0;
 }
 

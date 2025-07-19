@@ -13,8 +13,8 @@
  * For example, given a fort, return the enumaration value corresponding to
  * the specific type of fort rather than the general value
  *
- * @param building Building to examine (can be null for destroyed building)
- * @param building_type Type of the building to clone (can be original building type before a fire)
+ * @param b Building to examine (can be null for destroyed building)
+ * @param clone_type Type of the building to clone (can be original building type before a fire)
  * @return the building_type value to clone, or BUILDING_NONE if not cloneable
  */
 static building_type get_clone_type_from_building(building *b, building_type clone_type)
@@ -32,12 +32,18 @@ static building_type get_clone_type_from_building(building *b, building_type clo
                     case FIGURE_FORT_LEGIONARY: return BUILDING_FORT_LEGIONARIES;
                     case FIGURE_FORT_JAVELIN: return BUILDING_FORT_JAVELIN;
                     case FIGURE_FORT_MOUNTED: return BUILDING_FORT_MOUNTED;
+                    case FIGURE_FORT_INFANTRY: return BUILDING_FORT_AUXILIA_INFANTRY;
+                    case FIGURE_FORT_ARCHER: return BUILDING_FORT_ARCHERS;
                 }
             }
             return BUILDING_NONE;
         case BUILDING_NATIVE_CROPS:
         case BUILDING_NATIVE_HUT:
+        case BUILDING_NATIVE_HUT_ALT:
         case BUILDING_NATIVE_MEETING:
+        case BUILDING_NATIVE_DECORATION:
+        case BUILDING_NATIVE_MONUMENT:
+        case BUILDING_NATIVE_WATCHTOWER:
             return BUILDING_NONE;
         case BUILDING_BURNING_RUIN:
             if (b) {
@@ -45,21 +51,12 @@ static building_type get_clone_type_from_building(building *b, building_type clo
             } else {
                 return BUILDING_NONE;
             }
-        case BUILDING_GARDEN_WALL_GATE:
-        // Check neighbouring tiles to see if it's a part of garden wall.
-        // If it is, return that garden wall type, otherwise return default garden wall type.
-        {
-            if (b) {
-                int grid_offset = b->grid_offset;
-                for (const int *tile_delta = map_grid_adjacent_offsets(b->size); *tile_delta; tile_delta++) {
-                    building *neighbour = building_get(map_building_at(grid_offset + *tile_delta));
-                    if (neighbour->type == BUILDING_ROOFED_GARDEN_WALL || neighbour->type == BUILDING_GARDEN_WALL) {
-                        return neighbour->type;
-                    }
-                }
-            }
-            return BUILDING_GARDEN_WALL;
-        }
+        case BUILDING_ROOFED_GARDEN_WALL_GATE:
+            return BUILDING_ROOFED_GARDEN_WALL;
+        case BUILDING_PANELLED_GARDEN_GATE:
+            return BUILDING_PANELLED_GARDEN_WALL;
+        case BUILDING_LOOPED_GARDEN_GATE:
+            return BUILDING_LOOPED_GARDEN_WALL;
         case BUILDING_HEDGE_GATE_LIGHT:
             return BUILDING_HEDGE_LIGHT;
         case BUILDING_HEDGE_GATE_DARK:
@@ -94,14 +91,15 @@ building_type building_clone_type_from_grid_offset(int grid_offset)
     } else if (terrain & TERRAIN_WALL) {
         return BUILDING_WALL;
     } else if (terrain & TERRAIN_GARDEN) {
-        return BUILDING_GARDENS;
+        return map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset) ?
+            BUILDING_OVERGROWN_GARDENS : BUILDING_GARDENS;
     } else if (terrain & TERRAIN_ROAD) {
         if (terrain & TERRAIN_WATER) {
             if (map_sprite_bridge_at(grid_offset) > 6) {
                 return BUILDING_SHIP_BRIDGE;
             }
             return BUILDING_LOW_BRIDGE;
-        } else if (map_property_is_plaza_or_earthquake(grid_offset)) {
+        } else if (map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset)) {
             return BUILDING_PLAZA;
         }
         return BUILDING_ROAD;

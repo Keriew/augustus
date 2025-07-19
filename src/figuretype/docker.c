@@ -19,6 +19,7 @@
 #include "figure/route.h"
 #include "figure/trader.h"
 #include "figuretype/trader.h"
+#include "game/resource.h"
 #include "map/road_access.h"
 
 #define INFINITE 10000
@@ -55,7 +56,8 @@ static int try_import_resource(int building_id, int resource, int city_id)
     for (int i = 0; i < 8; i++) {
         space = building_next(space);
         if (space->id > 0) {
-            if (space->loads_stored && space->loads_stored < 4 && space->subtype.warehouse_resource_id == resource) {
+            if (space->resources[resource] > 0 && space->resources[resource] < 4 &&
+                space->subtype.warehouse_resource_id == resource) {
                 trade_route_increase_traded(route_id, resource);
                 building_warehouse_space_add_import(space, resource, 0);
                 return 1;
@@ -100,7 +102,7 @@ static int try_export_resource(int building_id, int resource, int city_id)
     for (int i = 0; i < 8; i++) {
         space = building_next(space);
         if (space->id > 0) {
-            if (space->loads_stored && space->subtype.warehouse_resource_id == resource) {
+            if (space->resources[resource] > 0) {
                 trade_route_increase_traded(empire_city_get_route_id(city_id), resource);
                 building_warehouse_space_remove_export(space, resource, 0);
                 return 1;
@@ -140,10 +142,10 @@ static int get_closest_building_for_import(int x, int y, int city_id, building *
 {
     int resource = *import_resource;
     if (resource == RESOURCE_NONE) {
-        int importable[16];
+        int importable[RESOURCE_MAX];
         importable[RESOURCE_NONE] = 0;
         for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-            importable[r] = building_distribution_is_good_accepted(r - 1, dock) &&
+            importable[r] = building_distribution_is_good_accepted(r, dock) &&
                 empire_can_import_resource_from_city(city_id, r);
         }
         resource = city_trade_next_docker_import_resource();
@@ -169,7 +171,7 @@ static int get_closest_building_for_import(int x, int y, int city_id, building *
             if (space->id && space->subtype.warehouse_resource_id == RESOURCE_NONE) {
                 distance_penalty -= 8;
             }
-            if (space->id && space->subtype.warehouse_resource_id == resource && space->loads_stored < 4) {
+            if (space->id && space->subtype.warehouse_resource_id == resource && space->resources[resource] < 4) {
                 distance_penalty -= 4;
             }
         }
@@ -189,7 +191,7 @@ static int get_closest_building_for_import(int x, int y, int city_id, building *
             if (is_invalid_destination(b, dock) ||
                 building_storage_get(b->storage_id)->empty_all ||
                 building_granary_is_not_accepting(resource, b) ||
-                building_granary_is_full(resource, b)) {
+                building_granary_is_full(b)) {
                 continue;
             }
             // always prefer granary
@@ -212,10 +214,10 @@ static int get_closest_building_for_export(int x, int y, int city_id, building *
 {
     int resource = *export_resource;
     if (resource == RESOURCE_NONE) {
-        int exportable[16];
+        int exportable[RESOURCE_MAX];
         exportable[RESOURCE_NONE] = 0;
         for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-            exportable[r] = building_distribution_is_good_accepted(r - 1, dock) &&
+            exportable[r] = building_distribution_is_good_accepted(r, dock) &&
                 empire_can_export_resource_to_city(city_id, r);
         }
         resource = city_trade_next_docker_export_resource();
@@ -236,7 +238,7 @@ static int get_closest_building_for_export(int x, int y, int city_id, building *
         building *space = b;
         for (int s = 0; s < 8; s++) {
             space = building_next(space);
-            if (space->id && space->subtype.warehouse_resource_id == resource && space->loads_stored > 0) {
+            if (space->id && space->subtype.warehouse_resource_id == resource && space->resources[resource] > 0) {
                 distance_penalty--;
             }
         }
@@ -342,8 +344,7 @@ static int fetch_export_resource(figure *f, building *dock, int add_to_bought)
 
 static void set_cart_graphic(figure *f)
 {
-    f->cart_image_id = image_group(GROUP_FIGURE_CARTPUSHER_CART) + 8 * f->resource_id;
-    f->cart_image_id += resource_image_offset(f->resource_id, RESOURCE_IMAGE_CART);
+    f->cart_image_id = resource_get_data(f->resource_id)->image.cart.single_load;
 }
 
 static void set_docker_as_idle(figure *f)
@@ -352,6 +353,7 @@ static void set_docker_as_idle(figure *f)
     f->resource_id = RESOURCE_NONE;
     f->destination_building_id = 0;
     f->wait_ticks = 0;
+    f->loads_sold_or_carrying = 0;
 }
 
 void figure_docker_action(figure *f)
@@ -402,7 +404,7 @@ void figure_docker_action(figure *f)
             if (b->data.dock.queued_docker_id == f->id) {
                 b->data.dock.num_ships = 120;
                 f->wait_ticks++;
-                if (f->wait_ticks >= 80) {
+                if (f->wait_ticks >= 0) {
                     f->action_state = FIGURE_ACTION_135_DOCKER_IMPORT_GOING_TO_STORAGE;
                     f->wait_ticks = 0;
                     set_cart_graphic(f);
@@ -411,8 +413,8 @@ void figure_docker_action(figure *f)
             } else {
                 int has_queued_docker = 0;
                 for (int i = 0; i < 3; i++) {
-                    if (b->data.dock.docker_ids[i]) {
-                        figure *docker = figure_get(b->data.dock.docker_ids[i]);
+                    if (b->data.distribution.cartpusher_ids[i]) {
+                        figure *docker = figure_get(b->data.distribution.cartpusher_ids[i]);
                         if (docker->id == b->data.dock.queued_docker_id && docker->state == FIGURE_STATE_ALIVE) {
                             if (docker->action_state == FIGURE_ACTION_133_DOCKER_IMPORT_QUEUE ||
                                 docker->action_state == FIGURE_ACTION_134_DOCKER_EXPORT_QUEUE) {
@@ -451,6 +453,7 @@ void figure_docker_action(figure *f)
         case FIGURE_ACTION_135_DOCKER_IMPORT_GOING_TO_STORAGE:
             set_cart_graphic(f);
             figure_movement_move_ticks(f, 1);
+            f->loads_sold_or_carrying = 1;
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_139_DOCKER_IMPORT_AT_STORAGE;
                 f->wait_ticks = 0;
@@ -458,10 +461,6 @@ void figure_docker_action(figure *f)
                 figure_route_remove(f);
             } else if (f->direction == DIR_FIGURE_LOST) {
                 f->state = FIGURE_STATE_DEAD;
-            } else if (f->wait_ticks++ > FIGURE_REROUTE_DESTINATION_TICKS) {
-                if (!deliver_import_resource(f, b)) {
-                    f->state = FIGURE_STATE_DEAD;
-                }
             }
             if (building_get(f->destination_building_id)->state != BUILDING_STATE_IN_USE &&
                 !deliver_import_resource(f, b)) {
@@ -477,10 +476,6 @@ void figure_docker_action(figure *f)
                 figure_route_remove(f);
             } else if (f->direction == DIR_FIGURE_LOST) {
                 f->state = FIGURE_STATE_DEAD;
-            } else if (f->wait_ticks++ > FIGURE_REROUTE_DESTINATION_TICKS) {
-                if (!fetch_export_resource(f, b, 0)) {
-                    f->state = FIGURE_STATE_DEAD;
-                }
             }
             if (building_get(f->destination_building_id)->state != BUILDING_STATE_IN_USE &&
                 !fetch_export_resource(f, b, 0)) {
@@ -490,6 +485,7 @@ void figure_docker_action(figure *f)
         case FIGURE_ACTION_137_DOCKER_EXPORT_RETURNING:
             set_cart_graphic(f);
             figure_movement_move_ticks(f, 1);
+            f->loads_sold_or_carrying = 1;
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_134_DOCKER_EXPORT_QUEUE;
                 f->wait_ticks = 0;
@@ -503,7 +499,11 @@ void figure_docker_action(figure *f)
             }
             break;
         case FIGURE_ACTION_138_DOCKER_IMPORT_RETURNING:
-            set_cart_graphic(f);
+            if (f->resource_id != RESOURCE_NONE) {
+                set_cart_graphic(f); // cart with a resource if imports failed
+            } else {
+                f->cart_image_id = image_group(GROUP_FIGURE_CARTPUSHER_CART); // empty cart
+            }
             figure_movement_move_ticks(f, 1);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 set_docker_as_idle(f);

@@ -8,6 +8,7 @@ Chat: [Discord](http://www.discord.gg/GamerZakh) (kindly hosted by GamerZakh)
 |----------|----------------|----------------|
 | Windows  | [![Download](https://augustus.josecadete.net/badge/release/windows.svg)](https://augustus.josecadete.net/download/latest/release/windows) | [![Download](https://augustus.josecadete.net/badge/development/windows.svg)](https://augustus.josecadete.net/download/latest/development/windows)  [(Download development assets)](https://augustus.josecadete.net/download/latest/development/assets) | 
 | Linux AppImage | [![Download](https://augustus.josecadete.net/badge/release/linux-appimage.svg)](https://augustus.josecadete.net/download/latest/release/linux-appimage) | [![Download](https://augustus.josecadete.net/badge/development/linux-appimage.svg)](https://augustus.josecadete.net/download/latest/development/linux-appimage)
+| Linux Flatpak | Next release! | [![Download](https://augustus.josecadete.net/badge/development/linux-flatpak.svg)](https://augustus.josecadete.net/download/latest/development/linux-flatpak)
 | Mac | [![Download](https://augustus.josecadete.net/badge/release/mac.svg)](https://augustus.josecadete.net/download/latest/release/mac) | [![Download](https://augustus.josecadete.net/badge/development/mac.svg)](https://augustus.josecadete.net/download/latest/development/mac) |
 | PS Vita | [![Download](https://augustus.josecadete.net/badge/release/vita.svg)](https://augustus.josecadete.net/download/latest/release/vita)| [![Download](https://augustus.josecadete.net/badge/development/vita.svg)](https://augustus.josecadete.net/download/latest/development/vita) |
 | Switch |  [![Download](https://augustus.josecadete.net/badge/release/switch.svg)](https://augustus.josecadete.net/download/latest/release/switch) | [![Download](https://augustus.josecadete.net/badge/development/switch.svg)](https://augustus.josecadete.net/download/latest/development/switch) |
@@ -60,9 +61,9 @@ Augustus changes are explained in detail in the comprehensive manual. Below you 
 
 | Language | Manual |
 |----------|--------|
-|English   |[Download](https://github.com/Keriew/augustus/raw/master/res/manual/augustus_manual_en_3_2.pdf)|
+|English   |[Download](https://github.com/Keriew/augustus/raw/master/res/manual/augustus_manual_en_4_0.pdf)|
 |Chinese   |[Download](https://github.com/Keriew/augustus/raw/master/res/translated_manuals/augustus_manual_chinese_3.0.pdf)|
-|French   |[Download](https://github.com/Keriew/augustus/raw/master/res/translated_manuals/augustus_manual_french_3.2.pdf)|
+|French   |[Download](https://github.com/Keriew/augustus/raw/master/res/translated_manuals/augustus_manual_fr_4_0.pdf)|
 |Polish   |[Download](https://github.com/Keriew/augustus/raw/master/res/translated_manuals/augustus_manual_polish_3.0.pdf)|
 |Russian   |[Download](https://github.com/Keriew/augustus/raw/master/res/translated_manuals/augustus_manual_russian_3.0.pdf)|
 

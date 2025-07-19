@@ -7,20 +7,24 @@
 #define MAX_LEGIONS 6
 #define MAX_FORMATION_FIGURES 16
 
+#define NATIVE_FORMATION 0
+
 enum {
     LEGION_RECRUIT_NONE = 0,
     LEGION_RECRUIT_MOUNTED = 1,
     LEGION_RECRUIT_JAVELIN = 2,
-    LEGION_RECRUIT_LEGIONARY = 3
+    LEGION_RECRUIT_LEGIONARY = 3,
+    LEGION_RECRUIT_INFANTRY = 4,
+    LEGION_RECRUIT_ARCHER = 5,
 };
 
-enum {
+typedef enum {
     FORMATION_ATTACK_FOOD_CHAIN = 0,
     FORMATION_ATTACK_GOLD_STORES = 1,
     FORMATION_ATTACK_BEST_BUILDINGS = 2,
     FORMATION_ATTACK_TROOPS = 3,
     FORMATION_ATTACK_RANDOM = 4
-};
+} formation_attack_enum;
 
 enum {
     FORMATION_COLUMN = 0,
@@ -49,7 +53,7 @@ typedef struct {
  * Formation data
  */
 typedef struct {
-    int id; /**< ID of the formation */
+    unsigned int id; /**< ID of the formation */
     int faction_id; /**< 1 = player, 0 = everyone else */
 
     /* General variables */
@@ -75,26 +79,33 @@ typedef struct {
     int max_total_damage; /**< Maximum total damage of all figures added */
 
     /* Position */
-    int x;
-    int y;
-    int x_home;
-    int y_home;
-    int building_id;
-    int standard_x;
-    int standard_y;
+    int x; // legions - x position of the fort
+    int y; // legions - y position of the fort
+    int x_home; // legions - x position of the formation RIGHT NOW
+    int y_home; // legions - y position of the formation RIGHT NOW
+    int building_id; // legions - Building ID of home fort
+    int standard_x; //  legions - x position of the DESTINATION
+    int standard_y; // legions - y position of the DESTINATION
     int standard_figure_id;
-    int destination_x;
-    int destination_y;
+    int destination_x; //for enemy and animals
+    int destination_y; //for enemy and animals
     int destination_building_id;
 
     /* Movement */
     int wait_ticks;
     int is_halted;
+    int is_moving;
+    int is_charging; //state of moving for at least 4 tiles
     int recent_fight;
     int unknown_fired;
     int missile_fired;
     int missile_attack_timeout;
     int missile_attack_formation_id;
+    int started_moving_from_grid_offset;
+    int halted_at_grid_offset;
+    int traveled_tiles;
+    int halted_for_months;
+
 
     /* Legion-related */
     int empire_service; /**< Flag to indicate this legion is selected for empire service */
@@ -124,15 +135,16 @@ typedef struct {
     } prev;
 
     int target_formation_id;
+
 } formation;
 
 void formations_clear(void);
 
 void formation_clear(int formation_id);
 
-formation *formation_create_legion(int building_id, int x, int y, figure_type type);
-int formation_create_herd(int figure_type, int x, int y, int num_animals);
-int formation_create_enemy(int figure_type, int x, int y, int layout, int orientation,
+formation *formation_create_legion(int building_id, figure_type type);
+int formation_create_herd(figure_type type, int x, int y, int num_animals);
+int formation_create_enemy(figure_type type, int x, int y, int layout, int orientation,
                            int enemy_type, int attack_type, int invasion_id, int invasion_sequence);
 
 formation *formation_get(int formation_id);
@@ -140,6 +152,16 @@ int formation_count(void);
 
 int formation_get_selected(void);
 void formation_set_selected(int formation_id);
+
+int formation_update_halted_state(formation *m);
+int formation_update_movement_state(formation *m);
+int formation_update_charge_state(formation *m);
+
+void formation_update_movement_all_states(formation *m);
+
+int formation_is_halted(const formation *m);
+int formation_is_moving(const formation *m);
+int formation_is_charging(const formation *m);
 
 void formation_toggle_empire_service(int formation_id);
 

@@ -14,6 +14,24 @@ static struct {
     int state;
 } data;
 
+static int start_revolt(void)
+{
+    if (building_count_active(BUILDING_GLADIATOR_SCHOOL) > 0 && !city_games_executions_active()) {
+        data.state = EVENT_IN_PROGRESS;
+        city_message_post(1, MESSAGE_GLADIATOR_REVOLT, 0, 0);
+    } else {
+        data.state = EVENT_FINISHED;
+    }
+    return data.state;
+}
+
+static void check_and_fix_end_month(void)
+{
+    if (data.end_month >= GAME_TIME_MONTHS_PER_YEAR) {
+        data.end_month -= GAME_TIME_MONTHS_PER_YEAR;
+    }
+}
+
 void scenario_gladiator_revolt_init(void)
 {
     data.game_year = scenario.start_year + scenario.gladiator_revolt.year;
@@ -30,14 +48,10 @@ void scenario_gladiator_revolt_process(void)
 
     if (data.state == EVENT_NOT_STARTED) {
         if (game_time_year() == data.game_year && game_time_month() == data.month) {
-            if (building_count_active(BUILDING_GLADIATOR_SCHOOL) > 0 && !city_games_executions_active()) {
-                data.state = EVENT_IN_PROGRESS;
-                city_message_post(1, MESSAGE_GLADIATOR_REVOLT, 0, 0);
-            } else {
-                data.state = EVENT_FINISHED;
-            }
+            start_revolt();
         }
     } else if (data.state == EVENT_IN_PROGRESS) {
+        check_and_fix_end_month();
         if (data.end_month == game_time_month()) {
             data.state = EVENT_FINISHED;
             city_message_post(1, MESSAGE_GLADIATOR_REVOLT_FINISHED, 0, 0);
@@ -53,6 +67,24 @@ int scenario_gladiator_revolt_is_in_progress(void)
 int scenario_gladiator_revolt_is_finished(void)
 {
     return data.state == EVENT_FINISHED;
+}
+
+void scenario_gladiator_revolt_start_new(void)
+{
+    if (data.state == EVENT_IN_PROGRESS) {
+        return;
+    }
+
+    if (!scenario.gladiator_revolt.enabled) {
+        scenario.gladiator_revolt.enabled = 1;
+    }
+
+    data.game_year = game_time_year();
+    data.month = game_time_month();
+    data.end_month = 3 + data.month;
+    check_and_fix_end_month();
+
+    start_revolt();
 }
 
 void scenario_gladiator_revolt_save_state(buffer *buf)

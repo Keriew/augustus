@@ -21,15 +21,19 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "scenario/invasion.h"
+#include "scenario/property.h"
 #include "scenario/scenario.h"
 #include "translation/translation.h"
 #include "window/building_info.h"
 #include "window/city.h"
 #include "window/console.h"
+#include "window/editor/attributes.h"
+#include "window/editor/scenario_events.h"
+#include "window/plain_message_dialog.h"
 
 #include <string.h>
 
-#define NUMBER_OF_COMMANDS 10
+static int map_editor_warning_shown;
 
 static void game_cheat_add_money(uint8_t *);
 static void game_cheat_start_invasion(uint8_t *);
@@ -41,6 +45,11 @@ static void game_cheat_finish_monuments(uint8_t *);
 static void game_cheat_set_monument_phase(uint8_t *);
 static void game_cheat_unlock_all_buildings(uint8_t *);
 static void game_cheat_incite_riot(uint8_t *);
+static void game_cheat_show_custom_events(uint8_t *);
+static void game_cheat_show_editor(uint8_t *);
+static void game_cheat_cast_curse(uint8_t *);
+static void game_cheat_make_buildings_invincible(uint8_t *);
+static void game_cheat_change_climate(uint8_t *);
 
 static void (*const execute_command[])(uint8_t *args) = {
     game_cheat_add_money,
@@ -52,7 +61,12 @@ static void (*const execute_command[])(uint8_t *args) = {
     game_cheat_finish_monuments,
     game_cheat_set_monument_phase,
     game_cheat_unlock_all_buildings,
-    game_cheat_incite_riot
+    game_cheat_incite_riot,
+    game_cheat_show_custom_events,
+    game_cheat_show_editor,
+    game_cheat_cast_curse,
+    game_cheat_make_buildings_invincible,
+    game_cheat_change_climate
 };
 
 static const char *commands[] = {
@@ -65,8 +79,15 @@ static const char *commands[] = {
     "finishmonuments",
     "monumentphase",
     "whathaveromansdoneforus",
-    "nike"
+    "nike",
+    "debug.customevents",
+    "debug.showeditor",
+    "curse",
+    "romanconcrete",
+    "globalwarming"
 };
+
+#define NUMBER_OF_COMMANDS sizeof (commands) / sizeof (commands[0])
 
 static struct {
     int is_cheating;
@@ -133,13 +154,13 @@ void game_cheat_victory(void)
     }
 }
 
-void game_cheat_breakpoint()
+void game_cheat_breakpoint(void)
 {
     if (data.is_cheating) {
     }
 }
 
-void game_cheat_console()
+void game_cheat_console(void)
 {
     if (data.is_cheating) {
         building_construction_clear_type();
@@ -164,13 +185,13 @@ static void game_cheat_add_money(uint8_t *args)
 
 static void game_cheat_start_invasion(uint8_t *args)
 {
-    int attack_type = 0;
+    int invasion_type = 0;
     int size = 0;
     int invasion_point = 0;
-    int index = parse_integer(args, &attack_type); // 0 barbarians, 1 caesar, 2 mars natives
+    int index = parse_integer(args, &invasion_type);
     index = parse_integer(args + index, &size);
     parse_integer(args + index, &invasion_point);
-    scenario_invasion_start_from_console(attack_type, size, invasion_point);
+    scenario_invasion_start_from_console(invasion_type, size, invasion_point);
     show_warning(TR_CHEAT_STARTED_INVASION);
 }
 
@@ -184,8 +205,32 @@ static void game_cheat_cast_blessing(uint8_t *args)
 {
     int god_id = 0;
     parse_integer(args, &god_id);
-    city_god_blessing_cheat(god_id);
+    city_god_blessing(god_id);
     show_warning(TR_CHEAT_CASTED_BLESSING);
+}
+
+static void game_cheat_cast_curse(uint8_t *args)
+{
+    int god_id = 0;
+    int is_major = 0;
+    int index = parse_integer(args, &god_id);
+    parse_integer(args + index, &is_major);
+    city_god_curse(god_id, is_major);
+    show_warning(TR_CHEAT_CASTED_CURSE);
+}
+
+static void game_cheat_make_buildings_invincible(uint8_t *args)
+{
+    building_make_immune_cheat();
+    show_warning(TR_CHEAT_BUILDINGS_INVINCIBLE);
+}
+
+static void game_cheat_change_climate(uint8_t *args)
+{
+    int climate = 0;
+    parse_integer(args, &climate);
+    scenario_change_climate(climate);
+    show_warning(TR_CHEAT_CLIMATE_CHANGE);
 }
 
 static void game_cheat_show_tooltip(uint8_t *args)
@@ -230,6 +275,20 @@ static void game_cheat_incite_riot(uint8_t *args)
     show_warning(TR_CHEAT_INCITED_RIOT);
     city_data.sentiment.value = 50;
     city_sentiment_change_happiness(50);
+}
+
+static void game_cheat_show_custom_events(uint8_t *args)
+{
+    window_editor_scenario_events_show();
+}
+
+static void game_cheat_show_editor(uint8_t *args)
+{
+    window_editor_attributes_show();
+    if (!map_editor_warning_shown) {
+        window_plain_message_dialog_show(TR_CHEAT_EDITOR_WARNING_TITLE, TR_CHEAT_EDITOR_WARNING_TEXT, 1);
+        map_editor_warning_shown = 1;
+    }
 }
 
 void game_cheat_parse_command(uint8_t *command)

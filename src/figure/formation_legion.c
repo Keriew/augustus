@@ -18,7 +18,7 @@ int formation_legion_create_for_fort(building *fort)
 {
     formation_calculate_legion_totals();
 
-    formation *m = formation_create_legion(fort->id, fort->x, fort->y, fort->subtype.fort_figure_type);
+    formation *m = formation_create_legion(fort->id, fort->subtype.fort_figure_type);
     if (!m->id) {
         return 0;
     }
@@ -73,6 +73,10 @@ void formation_legion_update_recruit_status(building *fort)
             m->legion_recruit_type = LEGION_RECRUIT_JAVELIN;
         } else if (type == FIGURE_FORT_MOUNTED) {
             m->legion_recruit_type = LEGION_RECRUIT_MOUNTED;
+        } else if (type == FIGURE_FORT_INFANTRY) {
+            m->legion_recruit_type = LEGION_RECRUIT_INFANTRY;
+        } else if (type == FIGURE_FORT_ARCHER) {
+            m->legion_recruit_type = LEGION_RECRUIT_ARCHER;
         }
     } else { // too many figures
         int too_many = m->num_figures - m->max_figures;
@@ -133,13 +137,13 @@ void formation_legion_move_to(formation *m, const map_tile *tile)
     while (figure_id) {
         figure *f = figure_get(figure_id);
         if (f->formation_id) {
-            formation *formation = formation_get(f->formation_id);
-            if (!formation->is_legion) {
-                m->target_formation_id = formation->id;
+            formation *l = formation_get(f->formation_id);
+            if (!l->is_legion) {
+                m->target_formation_id = l->id;
                 break;
             }
         }
-        
+
         figure_id = f->next_figure_id_on_same_tile;
     }
 

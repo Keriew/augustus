@@ -16,6 +16,24 @@
 const char *system_version(void);
 
 /**
+ * Gets the current processor architecture
+ * @return Processor architecture
+ */
+const char *system_architecture(void);
+
+/**
+ * Gets the current operating system
+ * @return Operating system
+ */
+const char *system_OS(void);
+
+/**
+ * Gets the current number of ticks in milisseconds since the game started
+ * @return Number of ticks
+ */
+uint64_t system_get_ticks(void);
+
+/**
  * Resize window
  * @param width New width
  * @param height New height
@@ -46,6 +64,12 @@ int system_is_fullscreen_only(void);
 void system_set_fullscreen(int fullscreen);
 
 /**
+ * Changes the window title
+ * @param title The new window title
+ */
+void system_change_window_title(const char *title);
+
+/**
  * Set display scale to the given percentage
  * @param scale_percentage Scale percentage to set, 100% is normal
  * @return The actual scale percentage that was set, which may be different to respect minimum resolution
@@ -53,10 +77,12 @@ void system_set_fullscreen(int fullscreen);
 int system_scale_display(int scale_percentage);
 
 /**
- * Gets maximum display scale for the current display
- * @return Maximum scale percentage
+ * Checks whether the display can be scaled. If true, min_scale and max_scale indicate by how much.
+ * @param min_scale Minimum scale that can be applied
+ * @param max_scale Maximum scale that can be applied
+ * @return True if the display can be scaled
  */
-int system_get_max_display_scale(void);
+int system_can_scale_display(int *min_scale, int *max_scale);
 
 /**
  * (Re-)Initialize cursors with the specified scale percentage
@@ -165,6 +191,20 @@ void system_set_mouse_position(int *x, int *y);
  * Sets up the crash handler
  */
 void system_setup_crash_handler(void);
+
+/**
+ * Indicates whether the current platform supports a "selct folder" dialog
+ * @return 1 if it supports displaying a folder dialog, 0 otherwise 
+ */
+int system_supports_select_folder_dialog(void);
+
+/**
+ * Shows a "select folder" dialog
+ * @param title Title of the dialog
+ * @param default_path Default path to show
+ * @return The selected folder, or 0 if the dialog was cancelled
+ */
+const char *system_show_select_folder_dialog(const char *title, const char *default_path);
 
 /**
  * Exit the game

@@ -1,6 +1,7 @@
 #ifndef CORE_BUFFER_H
 #define CORE_BUFFER_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 /**
@@ -13,8 +14,8 @@
 */
 typedef struct {
     uint8_t *data; /**< Read-only: data */
-    int size; /**< Read-only: size of the data */
-    int index; /**< Read-only: bytes read/written so far */
+    size_t size; /**< Read-only: size of the data */
+    size_t index; /**< Read-only: bytes read/written so far */
     int overflow; /**< Read-only: indicates attempt to read/write beyond end of buffer */
 } buffer;
 
@@ -87,7 +88,7 @@ void buffer_write_i32(buffer *buffer, int32_t value);
  * @param value Value to write
  * @param size Size in bytes
  */
-void buffer_write_raw(buffer *buffer, const void *value, int size);
+void buffer_write_raw(buffer *buffer, const void *value, size_t size);
 
 /**
  * Reads an unsigned 8-bit integer
@@ -138,14 +139,14 @@ int32_t buffer_read_i32(buffer *buffer);
  * @param max_size Size of the value, max bytes to read
  * @return Bytes read
  */
-int buffer_read_raw(buffer *buffer, void *value, int max_size);
+size_t buffer_read_raw(buffer *buffer, void *value, size_t max_size);
 
 /**
  * Skip data in the buffer
  * @param buffer Buffer
  * @param size Bytes to skip
  */
-void buffer_skip(buffer *buffer, int size);
+void buffer_skip(buffer *buffer, size_t size);
 
 /**
  * Returns whether the pointer of this buffer is at the end of the buffer
@@ -153,5 +154,40 @@ void buffer_skip(buffer *buffer, int size);
  * @return True if pointer is at end of buffer, false otherwise
  */
 int buffer_at_end(buffer *buffer);
+
+/**
+ * Initializes a buffer for saving a dynamic state piece / file piece.
+ * Also stored the actual buffer size at the start of the buffer.
+ *
+ * @param buf Buffer
+ * @param size Size in bytes of the buffer to be saved
+ */
+void buffer_init_dynamic(buffer *buf, uint32_t size);
+
+/**
+ * Initializes a buffer for saving a dynamic state piece / file piece.
+ * Also stored the actual buffer size at the start of the buffer.
+ *
+ * @param buf Buffer
+ * @return The size of the buffer in bytes.
+ */
+uint32_t buffer_load_dynamic(buffer *buf);
+
+/**
+ * Initializes a buffer for saving a dynamic state piece / file piece.
+ * Also stored the standard info of the piece at the start of the buffer.
+ * Size of the piece in bytes will be calculated as (Standard header size + (array_size * struct_size))
+ * @param buf Buffer
+ * @param array_size Number of elements in the array. If you are saving only a single struct, then this must be 1.
+ * @param element_size Size in bytes of a single entry of the array.
+ */
+void buffer_init_dynamic_array(buffer *buf, uint32_t array_size, uint32_t element_size);
+
+/**
+ * Reads the size, version, array_size and struct_size headers from the piece buffer.
+ * @param buf Buffer
+ * @return Number of array items.
+ */
+uint32_t buffer_load_dynamic_array(buffer *buf);
 
 #endif // CORE_BUFFER_H

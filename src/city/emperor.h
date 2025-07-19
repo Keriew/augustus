@@ -4,7 +4,8 @@
 enum {
     GIFT_MODEST = 0,
     GIFT_GENEROUS = 1,
-    GIFT_LAVISH = 2
+    GIFT_LAVISH = 2,
+    GIFT_MAX = 3,
 };
 
 typedef struct {
@@ -42,6 +43,7 @@ int city_emperor_salary_rank(void);
 int city_emperor_salary_amount(void);
 
 int city_emperor_personal_savings(void);
+void city_emperor_add_personal_savings(int amount);
 
 void city_emperor_init_donation_amount(void);
 void city_emperor_set_donation_amount(int amount);

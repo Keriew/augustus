@@ -11,9 +11,11 @@ case "$BUILD_TARGET" in
 	;;
 "mac")
 	cp -r res/maps ./build	
-	cp -r res/manual ./build	
-	cd build && make -j4 && make install && \
-	echo "Creating disk image" && \
+	cp -r res/manual ./build
+	cd build
+	make -j4
+	make install
+	echo "Creating disk image"
 	hdiutil create -volname Augustus -srcfolder augustus.app -ov -format UDZO augustus.dmg
 	if [[ "$GITHUB_REF" =~ ^refs/tags/v ]]
 	then
@@ -22,12 +24,21 @@ case "$BUILD_TARGET" in
 		zip -r augustus.zip augustus.dmg 	
 	fi
 	;;
-"appimage")	
+"ios")
+	cd build
+	xcodebuild clean build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO -scheme augustus
+	;;
+"flatpak")
+	flatpak-builder repo res/com.github.keriew.augustus.json --install-deps-from=flathub --keep-build-dirs
+	cp .flatpak-builder/build/augustus/res/version.txt res/version.txt
+	;;
+"appimage")
 	cp -r res/maps ./build	
 	cp -r res/manual ./build	
-	cd build && make -j4 && \
-	make DESTDIR=AppDir install && \
-	cd .. && \
+	cd build
+	make -j4
+	make DESTDIR=AppDir install
+	cd ..
 	./.ci_scripts/package_appimage.sh
 	if [[ "$GITHUB_REF" =~ ^refs/tags/v ]]	
 	then
@@ -58,14 +69,21 @@ case "$BUILD_TARGET" in
 	if [ ! -f augustus.keystore ]
 	then
 		COMMAND=assembleDebug
+		BUILDTYPE=debug
 	else
 		COMMAND=assembleRelease
+		BUILDTYPE=release
 	fi
 	echo "Running ./gradlew $COMMAND"
 	TERM=dumb ./gradlew $COMMAND
 	if [ -f augustus/build/outputs/apk/release/augustus-release.apk ]
 	then
 		cp augustus/build/outputs/apk/release/augustus-release.apk ../build/augustus.apk
+	fi
+	cd ..
+	if [ ! -f "deps/SDL2-$BUILDTYPE.aar" ]
+        then
+		cp android/SDL2/build/outputs/aar/SDL2-$BUILDTYPE.aar deps/SDL2-$BUILDTYPE.aar
 	fi
 	;;
 "emscripten")

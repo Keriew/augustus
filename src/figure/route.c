@@ -9,14 +9,14 @@
 #define MAX_PATH_LENGTH 500
 
 typedef struct {
-    int id;
+    unsigned int id;
     int figure_id;
     uint8_t directions[MAX_PATH_LENGTH];
 } figure_path_data;
 
 static array(figure_path_data) paths;
 
-static void create_new_path(figure_path_data *path, int position)
+static void create_new_path(figure_path_data *path, unsigned int position)
 {
     path->id = position;
 }
@@ -35,12 +35,11 @@ void figure_route_clear_all(void)
 void figure_route_clean(void)
 {
     figure_path_data *path;
-    array_foreach(paths, path)
-    {
+    array_foreach(paths, path) {
         int figure_id = path->figure_id;
         if (figure_id > 0 && figure_id < figure_count()) {
             const figure *f = figure_get(figure_id);
-            if (f->state != FIGURE_STATE_ALIVE || f->routing_path_id != i) {
+            if (f->state != FIGURE_STATE_ALIVE || f->routing_path_id != array_index) {
                 path->figure_id = 0;
             }
         }
@@ -62,7 +61,7 @@ void figure_route_add(figure *f)
         return;
     }
     figure_path_data *path;
-    array_new_item(paths, 0, path);
+    array_new_item_after_index(paths, 1, path);
     if (!path) {
         return;
     }
@@ -84,63 +83,62 @@ void figure_route_add(figure *f)
             case TERRAIN_USAGE_ENEMY:
                 // check to see if we can reach our destination by going around the city walls
                 can_travel = map_routing_noncitizen_can_travel_over_land(f->x, f->y,
-                    f->destination_x, f->destination_y, f->destination_building_id, 5000);
+                    f->destination_x, f->destination_y, direction_limit, f->destination_building_id, 5000);
                 if (!can_travel) {
                     can_travel = map_routing_noncitizen_can_travel_over_land(f->x, f->y,
-                        f->destination_x, f->destination_y, 0, 25000);
+                        f->destination_x, f->destination_y, direction_limit, 0, 25000);
                     if (!can_travel) {
                         can_travel = map_routing_noncitizen_can_travel_through_everything(
-                            f->x, f->y, f->destination_x, f->destination_y);
+                            f->x, f->y, f->destination_x, f->destination_y, direction_limit);
                     }
                 }
                 break;
             case TERRAIN_USAGE_WALLS:
                 can_travel = map_routing_can_travel_over_walls(f->x, f->y,
-                    f->destination_x, f->destination_y);
+                    f->destination_x, f->destination_y, 4);
                 break;
             case TERRAIN_USAGE_ANIMAL:
                 can_travel = map_routing_noncitizen_can_travel_over_land(f->x, f->y,
-                    f->destination_x, f->destination_y, -1, 5000);
+                    f->destination_x, f->destination_y, direction_limit, -1, 5000);
                 break;
             case TERRAIN_USAGE_PREFER_ROADS:
                 can_travel = map_routing_citizen_can_travel_over_road_garden(f->x, f->y,
-                    f->destination_x, f->destination_y);
+                    f->destination_x, f->destination_y, direction_limit);
                 if (!can_travel) {
                     can_travel = map_routing_citizen_can_travel_over_land(f->x, f->y,
-                        f->destination_x, f->destination_y);
+                        f->destination_x, f->destination_y, direction_limit);
                 }
                 break;
             case TERRAIN_USAGE_ROADS:
                 can_travel = map_routing_citizen_can_travel_over_road_garden(f->x, f->y,
-                    f->destination_x, f->destination_y);
+                    f->destination_x, f->destination_y, direction_limit);
                 break;
             case TERRAIN_USAGE_PREFER_ROADS_HIGHWAY:
                 can_travel = map_routing_citizen_can_travel_over_road_garden_highway(f->x, f->y,
-                    f->destination_x, f->destination_y);
+                    f->destination_x, f->destination_y, direction_limit);
                 if (!can_travel) {
                     can_travel = map_routing_citizen_can_travel_over_land(f->x, f->y,
-                        f->destination_x, f->destination_y);
+                        f->destination_x, f->destination_y, direction_limit);
                 }
                 break;
             case TERRAIN_USAGE_ROADS_HIGHWAY:
                 can_travel = map_routing_citizen_can_travel_over_road_garden_highway(f->x, f->y,
-                    f->destination_x, f->destination_y);
+                    f->destination_x, f->destination_y, direction_limit);
                 break;
             default:
                 can_travel = map_routing_citizen_can_travel_over_land(f->x, f->y,
-                    f->destination_x, f->destination_y);
+                    f->destination_x, f->destination_y, direction_limit);
                 break;
         }
         if (can_travel) {
             if (f->terrain_usage == TERRAIN_USAGE_WALLS) {
-                path_length = map_routing_get_path(path->directions, f->x, f->y,
-                    f->destination_x, f->destination_y, 4);
+                path_length = map_routing_get_path(path->directions, f->destination_x, f->destination_y, 4);
                 if (path_length <= 0) {
-                    path_length = map_routing_get_path(path->directions, f->x, f->y,
+                    path_length = map_routing_get_path(path->directions,
                         f->destination_x, f->destination_y, direction_limit);
                 }
             } else {
-                path_length = map_routing_get_path(path->directions, f->x, f->y,
+                path_length = map_routing_get_path(path->directions,
                     f->destination_x, f->destination_y, direction_limit);
             }
         } else { // cannot travel
@@ -181,8 +179,7 @@ void figure_route_save_state(buffer *figures, buffer *buf_paths)
     buffer_init(buf_paths, buf_data, size);
 
     figure_path_data *path;
-    array_foreach(paths, path)
-    {
+    array_foreach(paths, path) {
         buffer_write_i16(figures, path->figure_id);
         buffer_write_raw(buf_paths, path->directions, MAX_PATH_LENGTH);
     }
@@ -190,7 +187,7 @@ void figure_route_save_state(buffer *figures, buffer *buf_paths)
 
 void figure_route_load_state(buffer *figures, buffer *buf_paths)
 {
-    int elements_to_load = buf_paths->size / MAX_PATH_LENGTH;
+    int elements_to_load = (int) buf_paths->size / MAX_PATH_LENGTH;
 
     if (!array_init(paths, ARRAY_SIZE_STEP, create_new_path, path_is_used) ||
         !array_expand(paths, elements_to_load)) {

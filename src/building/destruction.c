@@ -11,6 +11,7 @@
 #include "map/building.h"
 #include "map/building_tiles.h"
 #include "map/grid.h"
+#include "map/property.h"
 #include "map/random.h"
 #include "map/routing_terrain.h"
 #include "map/terrain.h"
@@ -89,17 +90,17 @@ static void destroy_on_fire(building *b, int plagued)
     }
 }
 
-static void destroy_linked_parts(building *b, int on_fire)
+static void destroy_linked_parts(building *b, int on_fire, int plagued)
 {
     building *part = b;
-    for (int i = 0; i < 9; i++) {
+    for (int i = 0; i < 64; i++) { //updated from 9 to fit new bridges
         if (part->prev_part_building_id <= 0) {
             break;
         }
         int part_id = part->prev_part_building_id;
         part = building_get(part_id);
         if (on_fire) {
-            destroy_on_fire(part, 0);
+            destroy_on_fire(part, plagued);
         } else {
             map_building_tiles_set_rubble(part_id, part->x, part->y, part->size);
             part->state = BUILDING_STATE_RUBBLE;
@@ -114,7 +115,7 @@ static void destroy_linked_parts(building *b, int on_fire)
             break;
         }
         if (on_fire) {
-            destroy_on_fire(part, 0);
+            destroy_on_fire(part, plagued);
         } else {
             map_building_tiles_set_rubble(part->id, part->x, part->y, part->size);
             part->state = BUILDING_STATE_RUBBLE;
@@ -136,38 +137,40 @@ void building_destroy_by_collapse(building *b)
     b->state = BUILDING_STATE_RUBBLE;
     map_building_tiles_set_rubble(b->id, b->x, b->y, b->size);
     figure_create_explosion_cloud(b->x, b->y, b->size);
-    destroy_linked_parts(b, 0);
+    destroy_linked_parts(b, 0, 0);
 }
 
 void building_destroy_by_fire(building *b)
 {
     destroy_on_fire(b, 0);
-    destroy_linked_parts(b, 1);
+    destroy_linked_parts(b, 1, 0);
 }
 
 void building_destroy_by_plague(building *b)
 {
     destroy_on_fire(b, 1);
+    destroy_linked_parts(b, 1, 1);
 }
 
 void building_destroy_by_rioter(building *b)
 {
     destroy_on_fire(b, 0);
+    destroy_linked_parts(b, 1, 0);
 }
 
 int building_destroy_first_of_type(building_type type)
 {
-    building *b = building_first_of_type(type);
-    if (!b) {
-        return 0;
+    for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
+        if (b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_MOTHBALLED) {
+            continue;
+        }
+        int grid_offset = b->grid_offset;
+        game_undo_disable();
+        building_destroy_by_collapse(b);
+        map_routing_update_land();
+        return grid_offset;
     }
-    int grid_offset = b->grid_offset;
-    game_undo_disable();
-    b->state = BUILDING_STATE_RUBBLE;
-    map_building_tiles_set_rubble(b->id, b->x, b->y, b->size);
-    sound_effect_play(SOUND_EFFECT_EXPLOSION);
-    map_routing_update_land();
-    return grid_offset;
+    return 0;
 }
 
 void building_destroy_last_placed(void)
@@ -212,7 +215,14 @@ void building_destroy_by_enemy(int x, int y, int grid_offset)
         if (map_terrain_is(grid_offset, TERRAIN_WALL)) {
             figure_kill_tower_sentries_at(x, y);
         }
-        map_building_tiles_set_rubble(0, x, y, 1);
+        if (map_terrain_is(grid_offset, TERRAIN_GARDEN)) {
+            map_terrain_remove(grid_offset, TERRAIN_CLEARABLE);
+            map_tiles_update_region_empty_land(x, y, x, y);
+            map_property_clear_plaza_earthquake_or_overgrown_garden(grid_offset);
+            map_tiles_update_all_gardens();
+        } else {
+            map_building_tiles_set_rubble(0, x, y, 1);
+        }
     }
     figure_tower_sentry_reroute();
     map_tiles_update_area_walls(x, y, 3);

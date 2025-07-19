@@ -42,6 +42,13 @@ static const int SHEEP_IMAGE_OFFSETS[] = {
     3,  3,  3,  3,  4,  4,  5,  5, -1, -1, -1, -1, -1, -1, -1, -1
 };
 
+static const int ZEBRA_IMAGE_OFFSETS[] = {
+    0,  0,  1,  1,  2,  2,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,
+    3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,
+    3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,
+    3,  3,  3,  3,  4,  4,  4,  4, -13, -13, -13, -13, -13, -13, -13, -13
+};
+
 enum {
     HORSE_CREATED = 0,
     HORSE_RACING = 1,
@@ -124,6 +131,17 @@ void figure_seagulls_action(figure *f)
     }
 }
 
+static void herd_get_destination(int index, const formation *m, uint8_t *x, uint8_t *y)
+{
+    int offset_x = formation_layout_position_x(FORMATION_HERD, index);
+    int offset_y = formation_layout_position_y(FORMATION_HERD, index);
+    int destination_x = m->destination_x + offset_x;
+    int destination_y = m->destination_y + offset_y;
+    map_grid_bound(&destination_x, &destination_y);
+    *x = destination_x;
+    *y = destination_y;
+}
+
 void figure_sheep_action(figure *f)
 {
     const formation *m = formation_get(f->formation_id);
@@ -145,10 +163,7 @@ void figure_sheep_action(figure *f)
             if (f->wait_ticks > 400) {
                 f->wait_ticks = f->id & 0x1f;
                 f->action_state = FIGURE_ACTION_197_HERD_ANIMAL_MOVING;
-                f->destination_x = m->destination_x
-                    + formation_layout_position_x(FORMATION_HERD, f->index_in_formation);
-                f->destination_y = m->destination_y
-                    + formation_layout_position_y(FORMATION_HERD, f->index_in_formation);
+                herd_get_destination(f->index_in_formation, m, &f->destination_x, &f->destination_y);
                 f->roam_length = 0;
             }
             break;
@@ -200,10 +215,7 @@ void figure_wolf_action(figure *f)
             if (f->wait_ticks > 400) {
                 f->wait_ticks = f->id & 0x1f;
                 f->action_state = FIGURE_ACTION_197_HERD_ANIMAL_MOVING;
-                f->destination_x = m->destination_x
-                    + formation_layout_position_x(FORMATION_HERD, f->index_in_formation);
-                f->destination_y = m->destination_y
-                    + formation_layout_position_y(FORMATION_HERD, f->index_in_formation);
+                herd_get_destination(f->index_in_formation, m, &f->destination_x, &f->destination_y);
                 f->roam_length = 0;
             }
             break;
@@ -307,10 +319,7 @@ void figure_zebra_action(figure *f)
             if (f->wait_ticks > 200) {
                 f->wait_ticks = f->id & 0x1f;
                 f->action_state = FIGURE_ACTION_197_HERD_ANIMAL_MOVING;
-                f->destination_x = m->destination_x
-                    + formation_layout_position_x(FORMATION_HERD, f->index_in_formation);
-                f->destination_y = m->destination_y
-                    + formation_layout_position_y(FORMATION_HERD, f->index_in_formation);
+                herd_get_destination(f->index_in_formation, m, &f->destination_x, &f->destination_y);
                 f->roam_length = 0;
             }
             break;
@@ -329,7 +338,12 @@ void figure_zebra_action(figure *f)
     if (f->action_state == FIGURE_ACTION_149_CORPSE) {
         f->image_id = image_group(GROUP_FIGURE_ZEBRA) + 96 + figure_image_corpse_offset(f);
     } else if (f->action_state == FIGURE_ACTION_196_HERD_ANIMAL_AT_REST) {
-        f->image_id = image_group(GROUP_FIGURE_ZEBRA) + dir;
+        if (f->id & 3) {
+            f->image_id = image_group(GROUP_FIGURE_ZEBRA) + 104 + dir +
+                8 * ZEBRA_IMAGE_OFFSETS[f->wait_ticks & 0x3f];
+        } else {
+            f->image_id = image_group(GROUP_FIGURE_ZEBRA) + dir;
+        }
     } else {
         f->image_id = image_group(GROUP_FIGURE_ZEBRA) + dir + 8 * f->image_offset;
     }

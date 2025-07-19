@@ -112,7 +112,7 @@ void map_building_tiles_add_farm(int building_id, int x, int y, int crop_image_i
                 dx == x_leftmost && dy == y_leftmost);
         }
     }
-    int growth = progress / 10;
+    int growth = progress / 5;
     int growth_per_tile = growth / 5;
     int growth_remaining = growth % 5;
 
@@ -182,7 +182,7 @@ void map_building_tiles_remove(int building_id, int x, int y)
             map_property_set_multi_tile_size(grid_offset, 1);
             map_property_clear_multi_tile_xy(grid_offset);
             map_property_mark_draw_tile(grid_offset);
-            map_aqueduct_set(grid_offset, 0);
+            map_aqueduct_remove(grid_offset);
             map_building_set(grid_offset, 0);
             map_building_damage_clear(grid_offset);
             map_sprite_clear_tile(grid_offset);
@@ -193,7 +193,7 @@ void map_building_tiles_remove(int building_id, int x, int y)
                 map_image_set(grid_offset,
                     image_group(GROUP_TERRAIN_UGLY_GRASS) +
                     (map_random_get(grid_offset) & 7));
-                map_terrain_remove(grid_offset, TERRAIN_CLEARABLE);
+                map_terrain_remove(grid_offset, TERRAIN_CLEARABLE & ~TERRAIN_HIGHWAY);
             }
         }
     }
@@ -221,7 +221,7 @@ void map_building_tiles_set_rubble(int building_id, int x, int y, int size)
             }
             map_property_clear_constructing(grid_offset);
             map_property_set_multi_tile_size(grid_offset, 1);
-            map_aqueduct_set(grid_offset, 0);
+            map_aqueduct_remove(grid_offset);
             map_building_set(grid_offset, 0);
             map_building_damage_clear(grid_offset);
             map_sprite_clear_tile(grid_offset);
@@ -282,9 +282,9 @@ int map_building_tiles_mark_construction(int x, int y, int size, int terrain, in
 void map_building_tiles_mark_deleting(int grid_offset)
 {
     int building_id = map_building_at(grid_offset);
-    if (!building_id) {
+    if (map_is_bridge(grid_offset)) { // previous version triggered map_bridge_remove with an early exit condition for regular terrain.
         map_bridge_remove(grid_offset, 1);
-    } else {
+    } else if (building_id) {
         grid_offset = building_main(building_get(building_id))->grid_offset;
     }
     map_property_mark_deleted(grid_offset);

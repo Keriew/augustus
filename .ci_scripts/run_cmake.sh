@@ -2,32 +2,33 @@
 
 case "$BUILD_TARGET" in
 "vita")
-	docker exec vitasdk /bin/bash -c "git config --global --add safe.directory /build/git && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DTARGET_PLATFORM=vita .."
+	docker exec vitasdk /bin/bash -c "git config --global --add safe.directory /build/git && mkdir build && cd build && cmake -DAV1_VIDEO_SUPPORT=ON -DCMAKE_BUILD_TYPE=Release -DTARGET_PLATFORM=vita .."
 	;;
 "switch")
-	docker exec switchdev /bin/bash -c "mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DTARGET_PLATFORM=switch .."
+	docker exec switchdev /bin/bash -c "git config --global --add safe.directory /build/git && /opt/devkitpro/portlibs/switch/bin/aarch64-none-elf-cmake -DAV1_VIDEO_SUPPORT=ON -DCMAKE_BUILD_TYPE=Release -DTARGET_PLATFORM=switch -B build -S ."
 	;;
 "mac")
-	mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DSYSTEM_LIBS=OFF ..
+	mkdir build && cd build && cmake -DAV1_VIDEO_SUPPORT=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" ..
+	;;
+"ios")
+	mkdir build && cd build && cmake -DAV1_VIDEO_SUPPORT=ON -DTARGET_PLATFORM=ios -G Xcode ..
+	;;
+"flatpak")
 	;;
 "appimage")
-	mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DSYSTEM_LIBS=OFF -DCMAKE_INSTALL_PREFIX=/usr ..
+	mkdir build && cd build && cmake -DAV1_VIDEO_SUPPORT=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr ..
 	;;
 "linux")
-    if [ ! -z "$MPG123_VERSION" ]
-    then
-		MPG123_OPT="-DLINK_MPG123=ON"
-	fi
-	mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DSYSTEM_LIBS=OFF $MPG123_OPT ..
+	mkdir build && cd build && cmake -DAV1_VIDEO_SUPPORT=ON -DCMAKE_BUILD_TYPE=Release ..
 	;;
 "android")
 	mkdir build
 	;;
 "emscripten")
 	export EMSDK=${PWD}/emsdk
-	mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DSYSTEM_LIBS=OFF -DTARGET_PLATFORM=emscripten -DEMSCRIPTEN_LOAD_SDL_PORTS=1 ..
+	mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DTARGET_PLATFORM=emscripten ..
 	;;
 *)
-	mkdir build && cd build && cmake ..
+	mkdir build && cd build && cmake -DAV1_VIDEO_SUPPORT=ON ..
 	;;
 esac

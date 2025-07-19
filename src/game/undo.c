@@ -1,7 +1,8 @@
 #include "undo.h"
 
-#include "building/house.h"
 #include "building/construction.h"
+#include "building/house.h"
+#include "building/image.h"
 #include "building/industry.h"
 #include "building/menu.h"
 #include "building/monument.h"
@@ -11,7 +12,9 @@
 #include "building/storage.h"
 #include "city/buildings.h"
 #include "city/finance.h"
+#include "core/calc.h"
 #include "core/image.h"
+#include "figure/roamer_preview.h"
 #include "game/resource.h"
 #include "graphics/window.h"
 #include "map/aqueduct.h"
@@ -188,18 +191,8 @@ static void add_building_to_terrain(building *b)
         return;
     }
     if (building_is_farm(b->type)) {
-        int image_offset;
-        switch (b->type) {
-            default:
-            case BUILDING_WHEAT_FARM: image_offset = 0; break;
-            case BUILDING_VEGETABLE_FARM: image_offset = 5; break;
-            case BUILDING_FRUIT_FARM: image_offset = 10; break;
-            case BUILDING_OLIVE_FARM: image_offset = 15; break;
-            case BUILDING_VINES_FARM: image_offset = 20; break;
-            case BUILDING_PIG_FARM: image_offset = 25; break;
-        }
-        map_building_tiles_add_farm(b->id, b->x, b->y,
-            image_group(GROUP_BUILDING_FARM_CROPS) + image_offset, 0);
+        map_building_tiles_add_farm(b->id, b->x, b->y, building_image_get_base_farm_crop(b->type),
+            calc_percentage(b->data.industry.progress, building_industry_get_max_progress(b)));
     } else {
         int size = building_properties_for_type(b->type)->size;
         if (building_is_house(b->type) && b->house_is_merged) {
@@ -233,30 +226,13 @@ void game_undo_perform(void)
                             building_storage_reset_building_ids();
                         }
                         break;
-                    case BUILDING_SENATE_UPGRADED:
-                        city_buildings_add_senate(b);
-                        break;
-                    case BUILDING_DOCK:
-                        city_buildings_add_dock();
-                        break;
-                    case BUILDING_BARRACKS:
-                        city_buildings_add_barracks(b);
-                        break;
-                    case BUILDING_DISTRIBUTION_CENTER_UNUSED:
-                        city_buildings_add_distribution_center(b);
-                        break;
-                    case BUILDING_HIPPODROME:
-                        city_buildings_add_hippodrome();
-                        break;
                     case BUILDING_TRIUMPHAL_ARCH:
                         city_buildings_build_triumphal_arch();
                         building_menu_update();
-                        if (building_construction_type() == BUILDING_TRIUMPHAL_ARCH && !building_menu_is_enabled(BUILDING_TRIUMPHAL_ARCH)) {
+                        if (building_construction_type() == BUILDING_TRIUMPHAL_ARCH &&
+                            !building_menu_is_enabled(BUILDING_TRIUMPHAL_ARCH)) {
                             building_construction_clear_type();
                         }
-                        break;
-                    case BUILDING_MESS_HALL:
-                        city_buildings_add_mess_hall(b);
                         break;
                 }
                 if (building_is_house(b->type)) {
@@ -272,7 +248,7 @@ void game_undo_perform(void)
         map_property_restore();
         map_property_clear_constructing_and_deleted();
     } else if (data.type == BUILDING_AQUEDUCT || data.type == BUILDING_ROAD ||
-        data.type == BUILDING_WALL) {
+        data.type == BUILDING_WALL || data.type == BUILDING_HIGHWAY) {
         map_terrain_restore();
         map_aqueduct_restore();
         restore_map_images();
@@ -280,7 +256,8 @@ void game_undo_perform(void)
         map_terrain_restore();
         map_sprite_restore();
         restore_map_images();
-    } else if (data.type == BUILDING_PLAZA || data.type == BUILDING_GARDENS) {
+    } else if (data.type == BUILDING_PLAZA || data.type == BUILDING_GARDENS ||
+        data.type == BUILDING_OVERGROWN_GARDENS) {
         map_terrain_restore();
         map_aqueduct_restore();
         map_property_restore();
@@ -296,9 +273,11 @@ void game_undo_perform(void)
                 building_get(data.buildings[i].id)->state = BUILDING_STATE_UNDO;
             }
         }
+        building_update_state();
     }
     map_routing_update_land();
     map_routing_update_walls();
+    figure_roamer_preview_reset(building_construction_type());
     data.num_buildings = 0;
 }
 
@@ -318,11 +297,13 @@ void game_undo_reduce_time_available(void)
         case BUILDING_CLEAR_LAND:
         case BUILDING_AQUEDUCT:
         case BUILDING_ROAD:
+        case BUILDING_HIGHWAY:
         case BUILDING_WALL:
         case BUILDING_LOW_BRIDGE:
         case BUILDING_SHIP_BRIDGE:
         case BUILDING_PLAZA:
         case BUILDING_GARDENS:
+        case BUILDING_OVERGROWN_GARDENS:
             return;
         default: break;
     }

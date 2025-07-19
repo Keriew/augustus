@@ -1,11 +1,14 @@
 #ifndef PLATFORM_SCREEN_H
 #define PLATFORM_SCREEN_H
 
-int platform_screen_create(const char *title, int dispay_scale_percentage);
+int platform_screen_get_scale(void);
+int platform_screen_create(const char *title, int dispay_scale_percentage, int display_id);
 void platform_screen_destroy(void);
 
 int platform_screen_resize(int pixel_width, int pixel_height, int save);
 void platform_screen_move(int x, int y);
+
+int platform_screen_get_scale(void);
 
 void platform_screen_set_fullscreen(void);
 void platform_screen_set_windowed(void);

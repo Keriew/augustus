@@ -8,16 +8,11 @@
 #include "core/calc.h"
 #include "trade_prices.h"
 
+#define MIN_PRICE 1
+
 struct trade_price {
     int32_t buy;
     int32_t sell;
-};
-
-static const struct trade_price DEFAULT_PRICES[RESOURCE_MAX] = {
-    {0, 0}, {28, 22}, {38, 30}, {38, 30}, // wheat, vegetables, fruit
-    {42, 34}, {44, 36}, {44, 36}, {215, 160}, // olives, vines, meat, wine
-    {180, 140}, {60, 40}, {50, 35}, {40, 30}, // oil, iron, timber, clay
-    {200, 140}, {250, 180}, {200, 150}, {180, 140} // marble, weapons, furniture, pottery
 };
 
 static struct trade_price prices[RESOURCE_MAX];
@@ -39,7 +34,7 @@ static int trade_get_caravanserai_factor(int percent)
 {
     int caravanserai_percent = 0;
     if (building_caravanserai_is_fully_functional()) {
-        building *b = building_get(city_buildings_get_caravanserai());
+        building *b = building_get(building_find(BUILDING_CARAVANSERAI));
         caravanserai_percent = trade_percentage_from_laborers(percent, b);
     }
     return caravanserai_percent;
@@ -59,13 +54,13 @@ static int trade_get_lighthouse_factor(int percent)
 static int trade_factor_sell(int land_trader)
 {
     int percent = 0;
-    if (land_trader && city_buildings_has_caravanserai()) {
+    if (land_trader && building_find(BUILDING_CARAVANSERAI)) {
         trade_policy policy = city_trade_policy_get(LAND_TRADE_POLICY);
 
         if (policy == TRADE_POLICY_1) {
             percent = trade_get_caravanserai_factor(POLICY_1_BONUS_PERCENT); // trader buy 20% more
         } else if (policy == TRADE_POLICY_2) {
-            percent -= trade_get_caravanserai_factor(POLICY_2_MALUS_PERCENT); // trader buy 10% less
+            percent -= trade_get_caravanserai_factor(POLICY_2_MALUS_PERCENT); // trader buy 0% less
         }
     } else if (!land_trader && building_find(BUILDING_LIGHTHOUSE)) {
         trade_policy policy = city_trade_policy_get(SEA_TRADE_POLICY);
@@ -73,7 +68,7 @@ static int trade_factor_sell(int land_trader)
         if (policy == TRADE_POLICY_1) {
             percent = trade_get_lighthouse_factor(POLICY_1_BONUS_PERCENT); // trader buy 20% more
         } else if (policy == TRADE_POLICY_2) {
-            percent -= trade_get_lighthouse_factor(POLICY_2_MALUS_PERCENT); // trader buy 10% less
+            percent -= trade_get_lighthouse_factor(POLICY_2_MALUS_PERCENT); // trader buy 0% less
         }
     }
     return percent;
@@ -105,8 +100,14 @@ static int trade_factor_buy(int land_trader)
 void trade_prices_reset(void)
 {
     for (int i = 0; i < RESOURCE_MAX; i++) {
-        prices[i] = DEFAULT_PRICES[i];
+        prices[i].buy = resource_get_data(i)->default_trade_price.buy;
+        prices[i].sell = resource_get_data(i)->default_trade_price.sell;
     }
+}
+
+int trade_price_base_buy(resource_type resource)
+{
+    return prices[resource].buy;
 }
 
 int trade_price_buy(resource_type resource, int land_trader)
@@ -114,10 +115,28 @@ int trade_price_buy(resource_type resource, int land_trader)
     return calc_adjust_with_percentage(prices[resource].buy, 100 + trade_factor_buy(land_trader));
 }
 
+int trade_price_base_sell(resource_type resource)
+{
+    return prices[resource].sell;
+}
+
 int trade_price_sell(resource_type resource, int land_trader)
 {
     return calc_adjust_with_percentage(prices[resource].sell, 100 + trade_factor_sell(land_trader));
 }
+
+int trade_factor_sign(int land_trader, int is_sell) { //return sign of price compared to base
+    int factor = is_sell ? trade_factor_sell(land_trader) : trade_factor_buy(land_trader);
+
+    if (factor > 0) {
+        return 1;
+    } else if (factor < 0) {
+        return -1;
+    } else {
+        return 0;
+    }
+}
+
 
 int trade_price_change(resource_type resource, int amount)
 {
@@ -135,6 +154,28 @@ int trade_price_change(resource_type resource, int amount)
     return 1;
 }
 
+int trade_price_set_buy(resource_type resource, int new_price)
+{
+    if (new_price < MIN_PRICE) {
+        prices[resource].buy = MIN_PRICE;
+    } else {
+        prices[resource].buy = new_price;
+    }
+
+    return 1;
+}
+
+int trade_price_set_sell(resource_type resource, int new_price)
+{
+    if (new_price < MIN_PRICE) {
+        prices[resource].sell = MIN_PRICE;
+    } else {
+        prices[resource].sell = new_price;
+    }
+    
+    return 1;
+}
+
 void trade_prices_save_state(buffer *buf)
 {
     for (int i = 0; i < RESOURCE_MAX; i++) {
@@ -145,8 +186,9 @@ void trade_prices_save_state(buffer *buf)
 
 void trade_prices_load_state(buffer *buf)
 {
-    for (int i = 0; i < RESOURCE_MAX; i++) {
-        prices[i].buy = buffer_read_i32(buf);
-        prices[i].sell = buffer_read_i32(buf);
+    trade_prices_reset();
+    for (int i = 0; i < resource_total_mapped(); i++) {
+        prices[resource_remap(i)].buy = buffer_read_i32(buf);
+        prices[resource_remap(i)].sell = buffer_read_i32(buf);
     }
 }

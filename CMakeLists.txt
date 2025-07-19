@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.1...3.27.0)
 include(CMakeDependentOption)
 
-set(TARGET_PLATFORM "default" CACHE STRING "Platform to cross-compile for. Options: vita switch android emscripten. Leave blank for no cross compilation")
-set_property(CACHE TARGET_PLATFORM PROPERTY STRINGS default vita switch android emscripten)
+set(TARGET_PLATFORM "default" CACHE STRING "Platform to cross-compile for. Options: vita switch android ios emscripten. Leave blank for no cross compilation")
+set_property(CACHE TARGET_PLATFORM PROPERTY STRINGS default vita switch android ios emscripten)
 
 string(TOLOWER ${TARGET_PLATFORM} TARGET_PLATFORM)
 
@@ -11,9 +11,7 @@ option(DRAW_ROUTING "Draw routing debug information." OFF)
 option(DRAW_HIGHWAY_TERRAIN "Draw highway debug information." OFF)
 option(DRAW_ROAD_NETWORK_IDS "Draw road network IDs for debugging." OFF)
 option(DRAW_TILE_COORDS "Draw tile coordinates." OFF)
-option(SYSTEM_LIBS "Use system libraries when available." ON)
-option(EMSCRIPTEN_LOAD_SDL_PORTS "Load SDL and SDL_mixer emscripten ports instead of compiling them" OFF)
-option(LINK_MPG123 "Link mpg123 statically to Julius instead of relying on a library." OFF)
+option(AV1_VIDEO_SUPPORT "Enable AV1 video support." OFF)
 
 if(${TARGET_PLATFORM} STREQUAL "vita" AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if(DEFINED ENV{VITASDK})
@@ -24,12 +22,7 @@ if(${TARGET_PLATFORM} STREQUAL "vita" AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 endif()
 
 if(${TARGET_PLATFORM} STREQUAL "switch" AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-    if(DEFINED ENV{DEVKITPRO})
-        set(DEVKITPRO $ENV{DEVKITPRO})
-        set(CMAKE_TOOLCHAIN_FILE "./cmake/switch.cmake" CACHE PATH "toolchain file")
-    else()
-        message(FATAL_ERROR "Please define DEVKITPRO to point to your SDK path!")
-    endif()
+    message(FATAL_ERROR "Please use /opt/devkitpro/portlibs/switch/bin/aarch64-none-elf-cmake to configure")
 endif()
 
 if(${TARGET_PLATFORM} STREQUAL "emscripten" AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
@@ -40,40 +33,85 @@ if(${TARGET_PLATFORM} STREQUAL "emscripten" AND NOT DEFINED CMAKE_TOOLCHAIN_FILE
         message(FATAL_ERROR "Please define EMSDK to point to your Emscripten SDK path!")
     endif()
 endif()
+    
+if(${TARGET_PLATFORM} STREQUAL "ios")
+
+    set(CMAKE_SYSTEM_NAME "iOS")
+
+    set(SYSTEM_LIBS OFF)
+
+    # Build SDL2 as static library
+    set(SDL_SHARED_ENABLED_BY_DEFAULT OFF)
+    set(SDL_SHARED OFF)
+    set(SDL_STATIC ON)
+
+    # Build SDL2_mixer as static library
+    set(BUILD_SHARED_LIBS OFF)
+
+    # Disable stuff that breaks the build and we don't need.
+    set(SDL2MIXER_WAVPACK OFF) 
+    set(SDL2MIXER_OPUS OFF) 
+    set(SDL2MIXER_MIDI OFF) 
+    set(SDL2MIXER_MOD OFF) 
+
+    # Explicitly set SDKROOT (called Base SDK in Xcode), otherwise it is set incorrectly.
+    set(CMAKE_XCODE_ATTRIBUTE_SDKROOT iphoneos)
+
+    # Support iPhone (1) and iPad (2) Destinations
+    set(CMAKE_XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2")
+endif()
+
+
+# Enable "Edit and Continue" for MSVC
+if (POLICY CMP0141)
+    cmake_policy(SET CMP0141 NEW)
+    set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>")
+endif()
 
 set(SHORT_NAME augustus)
 set(USER_FRIENDLY_NAME Augustus)
 project(${SHORT_NAME} C)
+
+if (NINTENDO_SWITCH)
+    find_package(PkgConfig REQUIRED)
+endif()
 
 if (${TARGET_PLATFORM} STREQUAL "vita")
     include("${VITASDK}/share/vita.cmake" REQUIRED)
     set(VITA_TITLEID  "AUGUSTUS1")
 endif()
 
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake/")
+if (AV1_VIDEO_SUPPORT)
+    set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake/" "${CMAKE_SOURCE_DIR}/ext/easyav1/cmake/")
 
-if (CMAKE_VERSION VERSION_LESS 3.1)
-    if (CMAKE_COMPILER_IS_GNUCC)
-        set(CMAKE_C_FLAGS "-std=gnu99 ${CMAKE_C_FLAGS}")
-    endif()
+    set(EASYAV1_BUILD_TOOLS OFF)
+    set(EASYAV1_USE_SANITIZERS OFF)
+
+    add_subdirectory("ext/easyav1")
+
+    include_directories(${SHORT_NAME} SYSTEM "ext/easyav1/src")
 else()
-    set(CMAKE_C_STANDARD 99)
+    set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake/")
+    include_directories(${SHORT_NAME} SYSTEM "ext/easyav1_dummy")
 endif()
 
-if (CMAKE_COMPILER_IS_GNUCC)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror=implicit-function-declaration")
-    if(CMAKE_C_COMPILER_VERSION VERSION_GREATER 5.0)
+set(CMAKE_C_STANDARD 99)
+
+if(CMAKE_COMPILER_IS_GNUCC OR MINGW)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-missing-field-initializers -Wno-sign-compare -Werror=implicit-function-declaration")
+    if(CMAKE_COMPILER_IS_GNUCC AND CMAKE_C_COMPILER_VERSION VERSION_GREATER 5.0)
         set(CMAKE_C_FLAGS "-Werror=incompatible-pointer-types -Werror=int-conversion -Wstrict-prototypes ${CMAKE_C_FLAGS}")
     endif()
+
+    if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 7.0)
+        set_source_files_properties(${SOURCE_FILES} PROPERTIES COMPILE_FLAGS "-Walloc-zero -Wdouble-promotion -Wduplicated-branches -Wduplicated-cond -Wformat=2 -Wformat-signedness -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-prototypes -Wshadow -Wundef -Wunused-macros -Wwrite-strings")
+    endif()
+elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND "${CMAKE_BUILD_TYPE}" MATCHES "Debug" AND NOT ${TARGET_PLATFORM} STREQUAL "android")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=undefined -Wall -Wextra -Wpedantic -Wdocumentation -Wno-unused-parameter -Wno-missing-field-initializers -Wno-sign-compare -Wno-unused-but-set-variable")
 endif()
 
-# Fix bug in cmake 3.24.0 that expects the resource compiler for mingw to have the toolchain prefix in the name
-if (CMAKE_VERSION VERSION_EQUAL 3.24.0 AND MINGW)
-    set(CMAKE_RC_COMPILER "windres")
-endif()
-
-set(PROJECT_VERSION_MAJOR 3)
-set(PROJECT_VERSION_MINOR 2)
+set(PROJECT_VERSION_MAJOR 4)
+set(PROJECT_VERSION_MINOR 0)
 set(PROJECT_VERSION_PATCH 0)
 set(IS_RELEASE_VERSION FALSE)
 
@@ -97,7 +135,7 @@ elseif (EXISTS "${CMAKE_SOURCE_DIR}/.git")
             OUTPUT_STRIP_TRAILING_WHITESPACE
         )
         execute_process(
-            COMMAND git diff-index --quiet HEAD --
+            COMMAND git diff --quiet HEAD --
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             RESULT_VARIABLE VERSION_COMMIT_DIRTY
         )
@@ -145,7 +183,7 @@ if(${TARGET_PLATFORM} STREQUAL "vita")
     set(VITA_VERSION "${VITA_VERSION_MAJOR}.${VITA_VERSION_MINOR}")
 endif()
 
-if (${TARGET_PLATFORM} STREQUAL "switch")
+if (NINTENDO_SWITCH)
     string(SUBSTRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}${VERSION_REVISION}" 0 15 SWITCH_VERSION)
 endif()
 
@@ -178,43 +216,20 @@ if (EXISTS ${PROJECT_SOURCE_DIR}/res/packed_assets)
     set(ASSETS_DIR ${PROJECT_SOURCE_DIR}/res/packed_assets)
 endif()
 
-set(EXPAT_FILES
-    ext/expat/xmlparse.c
-    ext/expat/xmlrole.c
-    ext/expat/xmltok.c
-)
-
 set(TINYFD_FILES
-    ext/tinyfiledialogs/tinyfiledialogs.c
+    ${PROJECT_SOURCE_DIR}/ext/tinyfiledialogs/tinyfiledialogs.c
 )
 
-set(PNG_FILES
-    ext/png/png.c
-    ext/png/pngerror.c
-    ext/png/pngget.c
-    ext/png/pngmem.c
-    ext/png/pngpread.c
-    ext/png/pngread.c
-    ext/png/pngrio.c
-    ext/png/pngrtran.c
-    ext/png/pngrutil.c
-    ext/png/pngset.c
-    ext/png/pngtrans.c
-    ext/png/pngwio.c
-    ext/png/pngwrite.c
-    ext/png/pngwtran.c
-    ext/png/pngwutil.c
+set(SPNG_FILES
+    ${PROJECT_SOURCE_DIR}/ext/spng/spng.c
 )
 
-set(ZLIB_FILES
-    ext/zlib/adler32.c
-    ext/zlib/crc32.c
-    ext/zlib/deflate.c
-    ext/zlib/inffast.c
-    ext/zlib/inflate.c
-    ext/zlib/inftrees.c
-    ext/zlib/trees.c
-    ext/zlib/zutil.c
+set(SXML_FILES
+    ${PROJECT_SOURCE_DIR}/ext/sxml/sxml.c
+)
+
+set(ZIP_FILES
+    ${PROJECT_SOURCE_DIR}/ext/zip/zip.c
 )
 
 set(PLATFORM_FILES
@@ -223,7 +238,6 @@ set(PLATFORM_FILES
     ${PROJECT_SOURCE_DIR}/src/platform/crash_handler.c
     ${PROJECT_SOURCE_DIR}/src/platform/cursor.c
     ${PROJECT_SOURCE_DIR}/src/platform/file_manager.c
-    ${PROJECT_SOURCE_DIR}/src/platform/file_manager_cache.c
     ${PROJECT_SOURCE_DIR}/src/platform/icon.c
     ${PROJECT_SOURCE_DIR}/src/platform/joystick.c
     ${PROJECT_SOURCE_DIR}/src/platform/keyboard_input.c
@@ -235,22 +249,22 @@ set(PLATFORM_FILES
     ${PROJECT_SOURCE_DIR}/src/platform/screen.c
     ${PROJECT_SOURCE_DIR}/src/platform/sound_device.c
     ${PROJECT_SOURCE_DIR}/src/platform/touch.c
+    ${PROJECT_SOURCE_DIR}/src/platform/user_path.c
     ${PROJECT_SOURCE_DIR}/src/platform/version.c
     ${PROJECT_SOURCE_DIR}/src/platform/virtual_keyboard.c
 )
 
-if("${CMAKE_BUILD_TYPE}" MATCHES "Debug")
-    list(APPEND PLATFORM_FILES ${PROJECT_SOURCE_DIR}/src/platform/debug.c)
-endif()
 if (${TARGET_PLATFORM} STREQUAL "vita")
     set(PLATFORM_FILES
         ${PLATFORM_FILES}
+        ${PROJECT_SOURCE_DIR}/src/platform/file_manager_cache.c
         ${PROJECT_SOURCE_DIR}/src/platform/vita/vita.c
         ${PROJECT_SOURCE_DIR}/src/platform/vita/vita_keyboard.c
     )
-elseif (${TARGET_PLATFORM} STREQUAL "switch")
+elseif (NINTENDO_SWITCH)
     set(PLATFORM_FILES
         ${PLATFORM_FILES}
+        ${PROJECT_SOURCE_DIR}/src/platform/file_manager_cache.c
         ${PROJECT_SOURCE_DIR}/src/platform/switch/switch.c
     )
 elseif (${TARGET_PLATFORM} STREQUAL "android")
@@ -259,6 +273,12 @@ elseif (${TARGET_PLATFORM} STREQUAL "android")
         ${PROJECT_SOURCE_DIR}/src/platform/android/android.c
         ${PROJECT_SOURCE_DIR}/src/platform/android/asset_handler.c
         ${PROJECT_SOURCE_DIR}/src/platform/android/jni.c
+    )
+elseif (${TARGET_PLATFORM} STREQUAL "ios")
+    set(PLATFORM_FILES
+        ${PLATFORM_FILES}
+        ${PROJECT_SOURCE_DIR}/src/platform/ios/ios.m
+        ${PROJECT_SOURCE_DIR}/src/platform/ios/GameDataPickerController.m
     )
 endif()
 
@@ -280,21 +300,24 @@ set(CORE_FILES
     ${PROJECT_SOURCE_DIR}/src/core/io.c
     ${PROJECT_SOURCE_DIR}/src/core/lang.c
     ${PROJECT_SOURCE_DIR}/src/core/locale.c
+    ${PROJECT_SOURCE_DIR}/src/core/memory_block.c
     ${PROJECT_SOURCE_DIR}/src/core/png_read.c
     ${PROJECT_SOURCE_DIR}/src/core/random.c
     ${PROJECT_SOURCE_DIR}/src/core/smacker.c
     ${PROJECT_SOURCE_DIR}/src/core/speed.c
     ${PROJECT_SOURCE_DIR}/src/core/string.c
     ${PROJECT_SOURCE_DIR}/src/core/time.c
+    ${PROJECT_SOURCE_DIR}/src/core/xml_parser.c
+    ${PROJECT_SOURCE_DIR}/src/core/xml_exporter.c
     ${PROJECT_SOURCE_DIR}/src/core/zip.c
+    ${PROJECT_SOURCE_DIR}/src/core/zlib_helper.c
 )
 
 set(BUILDING_FILES
     ${PROJECT_SOURCE_DIR}/src/building/animation.c
+    ${PROJECT_SOURCE_DIR}/src/building/armoury.c
     ${PROJECT_SOURCE_DIR}/src/building/barracks.c
     ${PROJECT_SOURCE_DIR}/src/building/building.c
-    ${PROJECT_SOURCE_DIR}/src/building/building_state.c
-    ${PROJECT_SOURCE_DIR}/src/building/building_variant.c
     ${PROJECT_SOURCE_DIR}/src/building/caravanserai.c
     ${PROJECT_SOURCE_DIR}/src/building/clone.c
     ${PROJECT_SOURCE_DIR}/src/building/connectable.c
@@ -308,6 +331,7 @@ set(BUILDING_FILES
     ${PROJECT_SOURCE_DIR}/src/building/destruction.c
     ${PROJECT_SOURCE_DIR}/src/building/distribution.c
     ${PROJECT_SOURCE_DIR}/src/building/dock.c
+    ${PROJECT_SOURCE_DIR}/src/building/entertainment.c
     ${PROJECT_SOURCE_DIR}/src/building/figure.c
     ${PROJECT_SOURCE_DIR}/src/building/government.c
     ${PROJECT_SOURCE_DIR}/src/building/granary.c
@@ -328,11 +352,14 @@ set(BUILDING_FILES
     ${PROJECT_SOURCE_DIR}/src/building/properties.c
     ${PROJECT_SOURCE_DIR}/src/building/roadblock.c
     ${PROJECT_SOURCE_DIR}/src/building/rotation.c
+    ${PROJECT_SOURCE_DIR}/src/building/state.c
     ${PROJECT_SOURCE_DIR}/src/building/storage.c
     ${PROJECT_SOURCE_DIR}/src/building/tavern.c
     ${PROJECT_SOURCE_DIR}/src/building/temple.c
+    ${PROJECT_SOURCE_DIR}/src/building/variant.c
     ${PROJECT_SOURCE_DIR}/src/building/warehouse.c
 )
+
 set(CITY_FILES
     ${PROJECT_SOURCE_DIR}/src/city/buildings.c
     ${PROJECT_SOURCE_DIR}/src/city/culture.c
@@ -369,6 +396,7 @@ set(CITY_FILES
 set(EMPIRE_FILES
     ${PROJECT_SOURCE_DIR}/src/empire/city.c
     ${PROJECT_SOURCE_DIR}/src/empire/empire.c
+    ${PROJECT_SOURCE_DIR}/src/empire/xml.c
     ${PROJECT_SOURCE_DIR}/src/empire/object.c
     ${PROJECT_SOURCE_DIR}/src/empire/trade_prices.c
     ${PROJECT_SOURCE_DIR}/src/empire/trade_route.c
@@ -388,10 +416,12 @@ set(FIGURE_FILES
     ${PROJECT_SOURCE_DIR}/src/figure/name.c
     ${PROJECT_SOURCE_DIR}/src/figure/phrase.c
     ${PROJECT_SOURCE_DIR}/src/figure/properties.c
+    ${PROJECT_SOURCE_DIR}/src/figure/roamer_preview.c
     ${PROJECT_SOURCE_DIR}/src/figure/route.c
     ${PROJECT_SOURCE_DIR}/src/figure/service.c
     ${PROJECT_SOURCE_DIR}/src/figure/sound.c
     ${PROJECT_SOURCE_DIR}/src/figure/trader.c
+    ${PROJECT_SOURCE_DIR}/src/figure/visited_buildings.c
 )
 set(FIGURETYPE_FILES
     ${PROJECT_SOURCE_DIR}/src/figuretype/animal.c
@@ -401,6 +431,7 @@ set(FIGURETYPE_FILES
     ${PROJECT_SOURCE_DIR}/src/figuretype/editor.c
     ${PROJECT_SOURCE_DIR}/src/figuretype/enemy.c
     ${PROJECT_SOURCE_DIR}/src/figuretype/entertainer.c
+    ${PROJECT_SOURCE_DIR}/src/figuretype/depot.c
     ${PROJECT_SOURCE_DIR}/src/figuretype/maintenance.c
     ${PROJECT_SOURCE_DIR}/src/figuretype/migrant.c
     ${PROJECT_SOURCE_DIR}/src/figuretype/missile.c
@@ -414,6 +445,12 @@ set(FIGURETYPE_FILES
     ${PROJECT_SOURCE_DIR}/src/figuretype/workcamp.c
 )
 set(GAME_FILES
+    ${PROJECT_SOURCE_DIR}/src/game/campaign/campaign.c
+    ${PROJECT_SOURCE_DIR}/src/game/campaign/file.c
+    ${PROJECT_SOURCE_DIR}/src/game/campaign/mission.c
+    ${PROJECT_SOURCE_DIR}/src/game/campaign/original.c
+    ${PROJECT_SOURCE_DIR}/src/game/campaign/player_data.c
+    ${PROJECT_SOURCE_DIR}/src/game/campaign/xml.c
     ${PROJECT_SOURCE_DIR}/src/game/animation.c
     ${PROJECT_SOURCE_DIR}/src/game/cheats.c
     ${PROJECT_SOURCE_DIR}/src/game/difficulty.c
@@ -484,8 +521,13 @@ set(ASSETS_FILES
     ${PROJECT_SOURCE_DIR}/src/assets/xml.c
 )
 set(SCENARIO_FILES
-    ${PROJECT_SOURCE_DIR}/src/scenario/building.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/allowed_building.c
     ${PROJECT_SOURCE_DIR}/src/scenario/criteria.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/custom_media.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/custom_messages_export_xml.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/custom_messages_import_xml.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/custom_messages.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/custom_variable.c
     ${PROJECT_SOURCE_DIR}/src/scenario/demand_change.c
     ${PROJECT_SOURCE_DIR}/src/scenario/distant_battle.c
     ${PROJECT_SOURCE_DIR}/src/scenario/earthquake.c
@@ -497,21 +539,36 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/gladiator_revolt.c
     ${PROJECT_SOURCE_DIR}/src/scenario/invasion.c
     ${PROJECT_SOURCE_DIR}/src/scenario/map.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/message_media_text_blob.c
     ${PROJECT_SOURCE_DIR}/src/scenario/price_change.c
     ${PROJECT_SOURCE_DIR}/src/scenario/property.c
     ${PROJECT_SOURCE_DIR}/src/scenario/random_event.c
     ${PROJECT_SOURCE_DIR}/src/scenario/request.c
     ${PROJECT_SOURCE_DIR}/src/scenario/scenario.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/event.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/import_xml.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/export_xml.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/controller.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/parameter_data.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/action_handler.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/action_types.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/condition_comparison_helper.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/condition_handler.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/condition_types.c
 )
 set(GRAPHICS_FILES
     ${PROJECT_SOURCE_DIR}/src/graphics/arrow_button.c
     ${PROJECT_SOURCE_DIR}/src/graphics/button.c
+    ${PROJECT_SOURCE_DIR}/src/graphics/clouds.c
+    ${PROJECT_SOURCE_DIR}/src/graphics/weather.c
     ${PROJECT_SOURCE_DIR}/src/graphics/font.c
     ${PROJECT_SOURCE_DIR}/src/graphics/generic_button.c
     ${PROJECT_SOURCE_DIR}/src/graphics/graphics.c
+    ${PROJECT_SOURCE_DIR}/src/graphics/grid_box.c
     ${PROJECT_SOURCE_DIR}/src/graphics/image.c
     ${PROJECT_SOURCE_DIR}/src/graphics/image_button.c
     ${PROJECT_SOURCE_DIR}/src/graphics/lang_text.c
+    ${PROJECT_SOURCE_DIR}/src/graphics/list_box.c
     ${PROJECT_SOURCE_DIR}/src/graphics/menu.c
     ${PROJECT_SOURCE_DIR}/src/graphics/panel.c
     ${PROJECT_SOURCE_DIR}/src/graphics/rich_text.c
@@ -537,6 +594,7 @@ set(WIDGET_FILES
     ${PROJECT_SOURCE_DIR}/src/widget/city_bridge.c
     ${PROJECT_SOURCE_DIR}/src/widget/city_building_ghost.c
     ${PROJECT_SOURCE_DIR}/src/widget/city_figure.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city_draw_highway.c
     ${PROJECT_SOURCE_DIR}/src/widget/city_overlay_education.c
     ${PROJECT_SOURCE_DIR}/src/widget/city_overlay_entertainment.c
     ${PROJECT_SOURCE_DIR}/src/widget/city_overlay_health.c
@@ -581,6 +639,7 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/building/common.c
     ${PROJECT_SOURCE_DIR}/src/window/building/culture.c
     ${PROJECT_SOURCE_DIR}/src/window/building/distribution.c
+    ${PROJECT_SOURCE_DIR}/src/window/building/depot.c
     ${PROJECT_SOURCE_DIR}/src/window/building/figures.c
     ${PROJECT_SOURCE_DIR}/src/window/building/government.c
     ${PROJECT_SOURCE_DIR}/src/window/building/house.c
@@ -591,6 +650,8 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/editor/allowed_buildings.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/attributes.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/build_menu.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/custom_messages.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/custom_variables.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/demand_changes.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/edit_demand_change.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/edit_invasion.c
@@ -601,6 +662,16 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/editor/map.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/price_changes.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/requests.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/scenario_events.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/scenario_event_details.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/scenario_action_edit.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/scenario_condition_edit.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/select_city_by_type.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/select_city_trade_route.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/select_custom_message.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/select_scenario_action_type.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/select_scenario_condition_type.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/select_special_attribute_mapping.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/special_events.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/start_year.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/starting_conditions.c
@@ -627,8 +698,8 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/military_menu.c
     ${PROJECT_SOURCE_DIR}/src/window/mission_briefing.c
     ${PROJECT_SOURCE_DIR}/src/window/mission_end.c
+    ${PROJECT_SOURCE_DIR}/src/window/mission_list.c
     ${PROJECT_SOURCE_DIR}/src/window/mission_selection.c
-    ${PROJECT_SOURCE_DIR}/src/window/new_career.c
     ${PROJECT_SOURCE_DIR}/src/window/numeric_input.c
     ${PROJECT_SOURCE_DIR}/src/window/option_popup.c
     ${PROJECT_SOURCE_DIR}/src/window/overlay_menu.c
@@ -636,12 +707,15 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/popup_dialog.c
     ${PROJECT_SOURCE_DIR}/src/window/race_bet.c
     ${PROJECT_SOURCE_DIR}/src/window/resource_settings.c
+    ${PROJECT_SOURCE_DIR}/src/window/select_campaign.c
     ${PROJECT_SOURCE_DIR}/src/window/select_list.c
     ${PROJECT_SOURCE_DIR}/src/window/set_salary.c
+    ${PROJECT_SOURCE_DIR}/src/window/text_input.c
     ${PROJECT_SOURCE_DIR}/src/window/trade_opened.c
     ${PROJECT_SOURCE_DIR}/src/window/trade_prices.c
+    ${PROJECT_SOURCE_DIR}/src/window/user_path_setup.c
     ${PROJECT_SOURCE_DIR}/src/window/victory_dialog.c
-    ${PROJECT_SOURCE_DIR}/src/window/victory_video.c
+    ${PROJECT_SOURCE_DIR}/src/window/video.c
 )
 set(EDITOR_FILES
     ${PROJECT_SOURCE_DIR}/src/editor/editor.c
@@ -649,9 +723,11 @@ set(EDITOR_FILES
     ${PROJECT_SOURCE_DIR}/src/editor/tool_restriction.c
 )
 set(TRANSLATION_FILES
+    ${PROJECT_SOURCE_DIR}/src/translation/czech.c
     ${PROJECT_SOURCE_DIR}/src/translation/english.c
     ${PROJECT_SOURCE_DIR}/src/translation/french.c
     ${PROJECT_SOURCE_DIR}/src/translation/german.c
+    ${PROJECT_SOURCE_DIR}/src/translation/greek.c
     ${PROJECT_SOURCE_DIR}/src/translation/italian.c
     ${PROJECT_SOURCE_DIR}/src/translation/japanese.c
     ${PROJECT_SOURCE_DIR}/src/translation/korean.c
@@ -682,11 +758,25 @@ if(APPLE)
     set(${VAR} ${_LIST} PARENT_SCOPE)
     endfunction()
     resource(ASSET_SOURCES ${ASSETS_DIR} Resources/assets *)
+endif()
+
+if(APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "ios")
     set(MACOSX_FILES
         ${PROJECT_SOURCE_DIR}/res/augustus.icns
         ${ASSET_SOURCES}
     )
 endif()
+
+
+set(IOS_FILES "")
+if(${TARGET_PLATFORM} STREQUAL "ios")
+    set(IOS_FILES 
+        ${PROJECT_SOURCE_DIR}/res/ios/Assets.xcassets
+        ${ASSET_SOURCES}
+    )
+
+endif()
+
 
 set(EMSCRIPTEN_FILES "")
 if(${TARGET_PLATFORM} STREQUAL "emscripten")
@@ -713,67 +803,96 @@ set(SOURCE_FILES
     ${EDITOR_FILES}
     ${TRANSLATION_FILES}
     ${TINYFD_FILES}
+    ${SPNG_FILES}
+    ${SXML_FILES}
+    ${ZIP_FILES}
     ${PROJECT_SOURCE_DIR}/res/augustus.rc
     ${MACOSX_FILES}
+    ${IOS_FILES}
+    ${EMSCRIPTEN_FILES}
 )
 
-if(${TARGET_PLATFORM} STREQUAL "emscripten" AND EMSCRIPTEN_LOAD_SDL_PORTS)
+function(GET_SDL_EXT_DIR result module)
+    if(NOT module STREQUAL "")
+        set(module "_${module}")
+    endif()
+    set(SDL_LOCATION ${PROJECT_SOURCE_DIR}/ext/SDL2)
+    file(GLOB children
+        RELATIVE ${SDL_LOCATION}
+        CONFIGURE_DEPENDS
+        ${SDL_LOCATION}/SDL${module}
+        ${SDL_LOCATION}/SDL2${module}
+        ${SDL_LOCATION}/SDL${module}-*
+        ${SDL_LOCATION}/SDL2${module}-*
+    )
+    foreach(child ${children})
+        if(IS_DIRECTORY "${SDL_LOCATION}/${child}")
+            set(${result} "${SDL_LOCATION}/${child}" PARENT_SCOPE)
+            break()
+        endif()
+    endforeach()
+endfunction()
+
+if(${TARGET_PLATFORM} STREQUAL "emscripten")
     set(USE_FLAGS "-s USE_SDL=2 -s USE_SDL_MIXER=2 -s SDL2_MIXER_FORMATS=[\"mp3\"] -s USE_MPG123=1")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${USE_FLAGS}")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${USE_FLAGS}")
+elseif(${TARGET_PLATFORM} STREQUAL "android")
+    find_package(SDL2 REQUIRED CONFIG)
+    string(TOLOWER ${CMAKE_BUILD_TYPE} ANDROID_BUILD_DIR)
+    set(SDL2_LIBRARY SDL2::SDL2)
+    set(SDL2_MIXER_LIBRARY SDL2::SDL2_mixer)
+elseif(${TARGET_PLATFORM} STREQUAL "ios")
+    GET_SDL_EXT_DIR(SDL_EXT_DIR "")
+    add_subdirectory(${SDL_EXT_DIR})
+    find_library(SDL2 NAMES SDL2-static SDL2main)
+    list(APPEND SDL2_LIBRARY
+        # We don't need to add SDL2-static here because SDL2_mixer will include it
+        SDL2main
+    )
+    GET_SDL_EXT_DIR(SDL_MIXER_EXT_DIR "mixer")
+    add_subdirectory(${SDL_MIXER_EXT_DIR})
+    find_library(SDL2_mixer NAMES SDL2_mixer-static)
+    list(APPEND SDL2_MIXER_LIBRARY
+        SDL2_mixer
+    )
 else()
-    function(GET_SDL_EXT_DIR result module)
-        if(NOT module STREQUAL "")
-            set(module "_${module}")
-        endif()
-        set(SDL_LOCATION ${PROJECT_SOURCE_DIR}/ext/SDL2)
-        file(GLOB children
-            RELATIVE ${SDL_LOCATION}
-            CONFIGURE_DEPENDS
-            ${SDL_LOCATION}/SDL${module}
-            ${SDL_LOCATION}/SDL2${module}
-            ${SDL_LOCATION}/SDL${module}-*
-            ${SDL_LOCATION}/SDL2${module}-*
-        )
-        foreach(child ${children})
-            if(IS_DIRECTORY "${SDL_LOCATION}/${child}")
-                set(${result} "${SDL_LOCATION}/${child}" PARENT_SCOPE)
-                break()
-            endif()
-        endforeach()
-    endfunction()
-
     find_package(SDL2 REQUIRED)
     find_package(SDL2_mixer REQUIRED)
-    if(${TARGET_PLATFORM} STREQUAL "emscripten")
-        set(LINK_MPG123 true)
-    endif()
-endif()
-
-if(LINK_MPG123)
-    find_package(MPG123 REQUIRED)
 endif()
 
 if(${TARGET_PLATFORM} STREQUAL "android")
-    add_library(${SHORT_NAME} SHARED ${SDL2_ANDROID_HOOK} ${SOURCE_FILES})
+    add_library(${SHORT_NAME} SHARED ${SOURCE_FILES})
+elseif(${TARGET_PLATFORM} STREQUAL "ios")
+    add_executable(${SHORT_NAME} MACOSX_BUNDLE ${SOURCE_FILES})
 else()
     add_executable(${SHORT_NAME} WIN32 ${SOURCE_FILES})
 endif()
 
 if(${TARGET_PLATFORM} STREQUAL "emscripten")
     set(CMAKE_EXECUTABLE_SUFFIX .html)
-    set_target_properties(${SHORT_NAME} PROPERTIES LINK_FLAGS "-lidbfs.js -s SINGLE_FILE=1 -s DEMANGLE_SUPPORT=1 -s DYNCALLS=1 --shell-file ${PROJECT_SOURCE_DIR}/res/shell.html --embed-file ${ASSETS_DIR}@/assets -s INITIAL_MEMORY=268435456 -s ALLOW_MEMORY_GROWTH=1 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 -s SAFE_HEAP=1 -s INVOKE_RUN=0 -s EXPORTED_FUNCTIONS=[\"_main\"] -s EXPORTED_RUNTIME_METHODS=[\"callMain\",\"FS\"] -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=[\"$autoResumeAudioContext\"] --bind")
+    set_target_properties(${SHORT_NAME} PROPERTIES LINK_FLAGS "-lidbfs.js -s SINGLE_FILE=1 -s DYNCALLS=1 --shell-file ${PROJECT_SOURCE_DIR}/res/shell.html --embed-file ${ASSETS_DIR}@/assets -s INITIAL_MEMORY=268435456 -s ALLOW_MEMORY_GROWTH=1 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 -s SAFE_HEAP=1 -s INVOKE_RUN=0 -s EXPORTED_FUNCTIONS=[\"_main\"] -s EXPORTED_RUNTIME_METHODS=[\"callMain\",\"FS\"] -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=[\"$autoResumeAudioContext\"] --bind")
 endif()
 
 if(MSVC)
     add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+    string(REGEX REPLACE "/W3" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    set_source_files_properties(${EXPAT_FILES} PROPERTIES COMPILE_FLAGS "/W3")
+    set_source_files_properties(${SOURCE_FILES} PROPERTIES COMPILE_FLAGS "/W4")
+    set_source_files_properties(${PROJECT_SOURCE_DIR}/res/augustus.rc PROPERTIES COMPILE_FLAGS "")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /utf-8 /wd4100 /wd4244 /we4013")
+endif()
+
+# Show debug info on crash on 32 bit builds compiled with MinGW
+if(MINGW AND CMAKE_SIZEOF_VOID_P EQUAL 4 AND CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-omit-frame-pointer")
 endif()
 
 if(CMAKE_INSTALL_DATADIR)
     add_compile_definitions(CUSTOM_ASSETS_DIR="${CMAKE_INSTALL_DATADIR}")
 endif()
 
-if(APPLE)
+if(APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "ios")
     # generating a macOS icns file (see https://stackoverflow.com/a/20703594)
     add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/res/augustus.icns
         COMMAND mkdir -p augustus.iconset
@@ -794,7 +913,7 @@ if(APPLE)
     # setting variables that will populate Info.plist
     set(MACOSX_BUNDLE_GUI_IDENTIFIER "pl.Keriew.augustus")
     set(MACOSX_BUNDLE_BUNDLE_NAME ${USER_FRIENDLY_NAME})
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.10" CACHE STRING "Minimum OS X deployment version" FORCE)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum OS X deployment version" FORCE)
     set(MACOSX_BUNDLE_ICON_FILE "augustus.icns")
     set(MACOSX_BUNDLE_BUNDLE_VERSION
         "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}${VERSION_REVISION}")
@@ -803,7 +922,7 @@ if(APPLE)
 
     set_target_properties(${SHORT_NAME} PROPERTIES
         MACOSX_BUNDLE TRUE
-        MACOSX_BUNDLE_INFO_PLIST "${PROJECT_SOURCE_DIR}/res/Info.plist")
+        MACOSX_BUNDLE_INFO_PLIST "${PROJECT_SOURCE_DIR}/res/macos/Info.plist")
 
     set(DIRS "")
     set(LIBS "")
@@ -829,81 +948,77 @@ if(APPLE)
         include(BundleUtilities)
         fixup_bundle(${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app \"${LIBS}\" \"${DIRS}\")
     " BUNDLE DESTINATION ${CMAKE_BINARY_DIR})
+
+    # perform ad-hoc codesigning
+	set(codesignCommand "codesign --verbose=4 --force --deep --options=runtime --timestamp=none --sign -")
+	set(codesignCommandWithEntitlements "${codesignCommand} --entitlements \"${PROJECT_SOURCE_DIR}/res/macos/Entitlements.plist\"")
+	install(CODE "
+		execute_process(COMMAND
+			${codesignCommandWithEntitlements} \"${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/${PROJECT_NAME}\"
+		)
+	")
+endif()
+
+if(${TARGET_PLATFORM} STREQUAL "ios")
+    # setting variables that will populate Info.plist
+    set_target_properties(${SHORT_NAME} PROPERTIES
+
+        MACOSX_BUNDLE_BUNDLE_NAME  ${USER_FRIENDLY_NAME}
+        MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}${VERSION_REVISION}"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.github.keriew.augustus"
+        MACOSX_BUNDLE_INFO_PLIST "${PROJECT_SOURCE_DIR}/res/ios/Info.plist"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
+        MACOSX_BUNDLE_UI_LAUNCH_STORYBOARD_NAME "LaunchScreen"
+        OUTPUT_NAME "${PROJECT_NAME}"
+        XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
+        XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY 1,2
+        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.github.keriew.augustus"
+    )
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "14.0" CACHE STRING "Minimum OS X deployment version" FORCE)
+    set_source_files_properties(${PROJECT_SOURCE_DIR}/res/ios/Assets.xcassets PROPERTIES
+        MACOSX_PACKAGE_LOCATION Resources)
 endif()
 
 if(SDL2_INCLUDE_DIR)
-    include_directories(${SDL2_INCLUDE_DIR})
+    include_directories(SYSTEM ${SDL2_INCLUDE_DIR})
 endif()
 if(SDL2_MIXER_INCLUDE_DIR)
-    include_directories(${SDL2_MIXER_INCLUDE_DIR})
-endif()
-
-if(SYSTEM_LIBS)
-    find_package(ZLIB)
-    find_package(PNG)
-    find_package(EXPAT)
-endif()
-
-if(ZLIB_FOUND)
-    include_directories(${ZLIB_INCLUDE_DIRS})
-    target_link_libraries(${SHORT_NAME} ${ZLIB_LIBRARIES})
-else()
-    include_directories("ext/zlib")
-    target_sources(${SHORT_NAME} PRIVATE "${ZLIB_FILES}")
-endif()
-
-if(PNG_FOUND)
-    include_directories(${PNG_INCLUDE_DIRS})
-    target_link_libraries(${SHORT_NAME} ${PNG_LIBRARIES})
-else()
-    if(SYSTEM_LIBS)
-        message(STATUS "PNG was not found but that's ok: falling back to internal version")
-    endif()
-    include_directories("ext/png")
-    target_sources(${SHORT_NAME} PRIVATE "${PNG_FILES}")
-endif()
-
-if(EXPAT_FOUND)
-    include_directories(${EXPAT_INCLUDE_DIRS})
-    target_link_libraries(${SHORT_NAME} ${EXPAT_LIBRARIES})
-else()
-    include_directories("ext/expat")
-    target_sources(${SHORT_NAME} PRIVATE "${EXPAT_FILES}")
-    if(NOT WIN32)
-        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DXML_DEV_URANDOM")
-    endif()
+    include_directories(SYSTEM ${SDL2_MIXER_INCLUDE_DIR})
 endif()
 
 if(${TARGET_PLATFORM} STREQUAL "vita")
-    include_directories(
+    include_directories(SYSTEM
         $ENV{VITASDK}/arm-vita-eabi/include
         ${CMAKE_CURRENT_SOURCE_DIR}
     )
-elseif (${TARGET_PLATFORM} STREQUAL "switch")
-    include_directories(
-        ${DEVKITPRO}/portlibs/switch/include/SDL2
-        ${DEVKITPRO}/libnx/include
-        ${DEVKITPRO}/portlibs/switch/include
-        ${CMAKE_CURRENT_SOURCE_DIR}
-    )
 endif()
 
-include_directories(ext)
+include_directories(SYSTEM ext)
 include_directories(src)
 if(MSVC)
-    include_directories(ext/dirent)
+    include_directories(SYSTEM ext/dirent)
+endif()
+
+if (AV1_VIDEO_SUPPORT)
+    set(EASYAV1_LIBRARY easyav1)
 endif()
 
 if(${TARGET_PLATFORM} STREQUAL "vita")
-    target_link_libraries (${SHORT_NAME}
+    target_link_libraries(${SHORT_NAME}
         ${SDL2_MIXER_LIBRARY}
         ${SDL2_LIBRARY}
+        ${EASYAV1_LIBRARY}
         vorbisfile
         vorbis
         mikmod
+        xmp
+        modplug
         mpg123
         FLAC
         ogg
+        opusfile
+        opus
+        stdc++
         m
         SceAppUtil_stub
         SceAudio_stub
@@ -922,7 +1037,7 @@ if(${TARGET_PLATFORM} STREQUAL "vita")
         ScePgf_stub
         SceAppMgr_stub
     )
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D__vita__ -DPNG_ARM_NEON_OPT=0")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D__vita__")
     # this setting enables larger heap memory sizes on Vita, up to ~330 MB
     # useful for pre-loading videos into memory
     set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -d ATTRIBUTE2=12")
@@ -931,65 +1046,55 @@ if(${TARGET_PLATFORM} STREQUAL "vita")
         VERSION ${VITA_VERSION}
         NAME ${SHORT_NAME}
         FILE res/vita/icon0.png sce_sys/icon0.png
+        FILE res/vita/pic0.png sce_sys/pic0.png
         FILE res/vita/bg.png sce_sys/livearea/contents/bg.png
         FILE res/vita/startup.png sce_sys/livearea/contents/startup.png
         FILE res/vita/template.xml sce_sys/livearea/contents/template.xml
         FILE ${ASSETS_DIR} assets
     )
-elseif (${TARGET_PLATFORM} STREQUAL "switch")
-    target_link_libraries (${SHORT_NAME}
-        SDL2_mixer
-        SDL2
-        EGL
-        GLESv2
-        glapi
-        drm_nouveau
-        vorbisidec
-        modplug
-        mpg123
-        FLAC
-        opusfile
-        opus
-        ogg
-        m
-        z
-        nx
-        stdc++
-    )
+elseif(NINTENDO_SWITCH)
 
-    set(FLAGS
-         -DPNG_ARM_NEON_OPT=0
-        -fPIE
-        -L${DEVKITPRO}/portlibs/switch/lib
-        -L${DEVKITPRO}/libnx/lib
-    )
+    pkg_check_modules(SDL2 REQUIRED IMPORTED_TARGET sdl2 SDL2_mixer)
+    target_link_libraries(${SHORT_NAME} PkgConfig::SDL2 ${EASYAV1_LIBRARY})
 
-    foreach(flag ${FLAGS})
-        set(FLAGS_GENERAL "${FLAGS_GENERAL} ${flag}")
-    endforeach(flag ${FLAGS})
+nx_generate_nacp (${PROJECT_NAME}.nacp
+    NAME   "Augustus"
+    AUTHOR "Keriew"
+)
 
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${FLAGS_GENERAL}")
+nx_create_nro (${PROJECT_NAME}
+    NACP  ${PROJECT_NAME}.nacp
+    ICON  ${CMAKE_SOURCE_DIR}/res/switch/icon0.jpg
+    ROMFS ${ASSETS_DIR}
+)
 
-    target_compile_options(${SHORT_NAME} PRIVATE ${FLAGS})
-    add_custom_command(TARGET ${SHORT_NAME}
-        POST_BUILD
-        COMMAND ${DEVKITPRO}/tools/bin/nacptool --create "${SHORT_NAME}" "rsn8887" ${SWITCH_VERSION} ${SHORT_NAME}.nacp
-        COMMAND ${DEVKITPRO}/tools/bin/elf2nro ${SHORT_NAME} ${SHORT_NAME}.nro --icon=${CMAKE_SOURCE_DIR}/res/switch/icon0.jpg --nacp=${SHORT_NAME}.nacp --romfsdir="${ASSETS_DIR}"
-    )
 else()
     if (UNIX AND NOT APPLE AND (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang"))
         target_link_libraries(${SHORT_NAME} m)
     endif()
     if(${TARGET_PLATFORM} STREQUAL "android")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DPNG_ARM_NEON_OPT=0 -D_BSD_SOURCE")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_BSD_SOURCE")
         find_library(log-lib log)
         find_library(android-lib android)
         target_link_libraries(${SHORT_NAME} ${log-lib} ${android-lib})
     endif()
-    if(LINK_MPG123)
-        target_link_libraries(${SHORT_NAME} ${MPG123_LIBRARY})
+
+    if(${TARGET_PLATFORM} STREQUAL "ios")
+        set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -DUSE_SDL_MAIN")
+        # Add SDL2 and SDL_Mixer headers, or they won't be found
+        target_include_directories(${SHORT_NAME} PRIVATE "${SDL_EXT_DIR}/include")
+        target_include_directories(${SHORT_NAME} PRIVATE "${SDL_MIXER_EXT_DIR}/include")
+
+        # Add UniformTypeIdentifiers to the list of linked frameworks
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-framework,UniformTypeIdentifiers")
+
+        set_target_properties(${SHORT_NAME}  PROPERTIES
+            XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
+            XCODE_ATTRIBUTE_SKIP_INSTALL "No"
+        )
     endif()
-    target_link_libraries (${SHORT_NAME} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY})
+
+    target_link_libraries(${SHORT_NAME} ${SDL2MAIN_LIBRARY} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY} ${EASYAV1_LIBRARY})
     if(NOT APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "android")
         install(TARGETS ${SHORT_NAME} RUNTIME DESTINATION bin)
     endif()

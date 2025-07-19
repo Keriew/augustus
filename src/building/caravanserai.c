@@ -5,70 +5,56 @@
 #include "city/buildings.h"
 #include "city/trade.h"
 #include "city/resource.h"
+#include "empire/city.h"
 
 #define INFINITE 10000
 
-static int get_needed_food(building *caravanserai)
-{
-    int food_needed = INVENTORY_FLAG_NONE;
-
-    if (building_distribution_is_good_accepted(INVENTORY_WHEAT, caravanserai)) {
-        inventory_set(&food_needed, INVENTORY_WHEAT);
-    }
-    if (building_distribution_is_good_accepted(INVENTORY_VEGETABLES, caravanserai)) {
-        inventory_set(&food_needed, INVENTORY_VEGETABLES);
-    }
-    if (building_distribution_is_good_accepted(INVENTORY_FRUIT, caravanserai)) {
-        inventory_set(&food_needed, INVENTORY_FRUIT);
-    }
-    if (building_distribution_is_good_accepted(INVENTORY_MEAT, caravanserai)) {
-        inventory_set(&food_needed, INVENTORY_MEAT);
-    }
-
-    return food_needed;
-}
-
 int building_caravanserai_enough_foods(building *caravanserai)
 {
-    int food_required_monthly = trade_caravan_count() * FOOD_PER_TRADER_MONTHLY;
+    int food_required_monthly = building_caravanserai_food_required_monthly();
     int total_food_in_caravanserai = 0;
 
-    for (int i = INVENTORY_MIN_FOOD; i < INVENTORY_MAX_FOOD; ++i) {
-        total_food_in_caravanserai += caravanserai->data.market.inventory[i];
+    for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+        total_food_in_caravanserai += caravanserai->resources[r];
     }
 
     return total_food_in_caravanserai >= food_required_monthly;
 }
 
+int building_caravanserai_food_required_monthly(void)
+{
+    int is_sea_trade = 0;
+    int is_route_open = 1;
+    int open_land_routes = empire_city_get_trade_routes_count(is_sea_trade, is_route_open);
+    return open_land_routes * FOOD_PER_LAND_ROUTE_MONTHLY;
+
+}
+
 int building_caravanserai_get_storage_destination(building *caravanserai)
 {
-    int food_needed = get_needed_food(caravanserai);
+    resource_storage_info info[RESOURCE_MAX] = { 0 };
 
-    if (food_needed == INVENTORY_FLAG_NONE) {
-        return 0;
-    }
-    inventory_storage_info data[INVENTORY_MAX];
-    if (!building_distribution_get_inventory_storages(data, BUILDING_CARAVANSERAI,
-                                                      caravanserai->road_network_id, caravanserai->road_access_x, caravanserai->road_access_y, INFINITE)) {
+    if (!building_distribution_get_handled_resources_for_building(caravanserai, info) ||
+        !building_distribution_get_resource_storages_for_building(info, caravanserai, INFINITE)) {
         return 0;
     }
     // Prefer whichever food we don't have
-    int fetch_inventory = building_distribution_fetch(caravanserai, data, 0, 1, food_needed);
-    if (fetch_inventory != INVENTORY_NONE) {
+    int fetch_inventory = building_distribution_fetch(caravanserai, info, 0, 1);
+    if (fetch_inventory != RESOURCE_NONE) {
         caravanserai->data.market.fetch_inventory_id = fetch_inventory;
-        return data[fetch_inventory].building_id;
+        return info[fetch_inventory].building_id;
     }
     // Then prefer smallest stock below baseline stock
-    fetch_inventory = building_distribution_fetch(caravanserai, data, BASELINE_STOCK, 0, food_needed);
-    if (fetch_inventory != INVENTORY_NONE) {
+    fetch_inventory = building_distribution_fetch(caravanserai, info, BASELINE_STOCK, 0);
+    if (fetch_inventory != RESOURCE_NONE) {
         caravanserai->data.market.fetch_inventory_id = fetch_inventory;
-        return data[fetch_inventory].building_id;
+        return info[fetch_inventory].building_id;
     }
     // All items well stocked: pick food below threshold
-    fetch_inventory = building_distribution_fetch(caravanserai, data, MAX_FOOD, 0, food_needed);
-    if (fetch_inventory != INVENTORY_NONE) {
+    fetch_inventory = building_distribution_fetch(caravanserai, info, MAX_FOOD, 0);
+    if (fetch_inventory != RESOURCE_NONE) {
         caravanserai->data.market.fetch_inventory_id = fetch_inventory;
-        return data[fetch_inventory].building_id;
+        return info[fetch_inventory].building_id;
     }
     return 0;
 }

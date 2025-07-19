@@ -1,5 +1,7 @@
 #include "top_menu_editor.h"
 
+#include "empire/empire.h"
+#include "empire/object.h"
 #include "game/file_editor.h"
 #include "game/game.h"
 #include "game/system.h"
@@ -7,7 +9,9 @@
 #include "graphics/menu.h"
 #include "graphics/screen.h"
 #include "graphics/window.h"
+#include "scenario/editor.h"
 #include "scenario/editor_map.h"
+#include "scenario/empire.h"
 #include "scenario/scenario.h"
 #include "translation/translation.h"
 #include "window/config.h"
@@ -37,6 +41,7 @@ static void menu_resets_fish(int param);
 static void menu_resets_invasions(int param);
 
 static void menu_empire_choose(int param);
+static void menu_empire_custom(int param);
 
 static menu_item menu_file[] = {
     {7, 1, menu_file_new_map, 0},
@@ -65,6 +70,7 @@ static menu_item menu_resets[] = {
 
 static menu_item menu_empire[] = {
     {149, 1, menu_empire_choose, 0},
+    {CUSTOM_TRANSLATION, TR_EDITOR_CHOOSE_CUSTOM_EMPIRE, menu_empire_custom, 0},
 };
 
 static menu_bar_item menu[] = {
@@ -72,10 +78,8 @@ static menu_bar_item menu[] = {
     {2, menu_options, 3},
     {3, menu_help, 2},
     {10, menu_resets, 3},
-    {149, menu_empire, 1},
+    {149, menu_empire, 2},
 };
-
-#define INDEX_OPTIONS 1
 
 static struct {
     int open_sub_menu;
@@ -186,7 +190,7 @@ void menu_file_new_map(int centered)
         x += 325;
         y += 200;
     }
-    window_select_list_show(x, y, 33, 7, map_size_selected);
+    window_select_list_show(x, y, 0, 33, 7, map_size_selected);
 }
 
 static void menu_file_load_map(int param)
@@ -216,7 +220,7 @@ static void menu_file_exit_to_menu(int param)
 {
     clear_state();
     window_editor_map_show();
-    if (scenario_is_saved()) {
+    if (scenario_editor_is_saved()) {
         game_exit_editor();
     } else {
         window_popup_dialog_show(POPUP_DIALOG_EDITOR_QUIT_WITHOUT_SAVING, menu_file_confirm_exit_to_menu, 1);
@@ -298,5 +302,17 @@ static void menu_empire_choose(int param)
 {
     clear_state();
     window_go_back();
+    scenario_editor_unset_custom_empire();
+    resource_set_mapping(RESOURCE_ORIGINAL_VERSION);
+    empire_load(1, scenario_empire_id());
+    empire_object_init_cities(scenario_empire_id());
     window_editor_empire_show();
+}
+
+static void menu_empire_custom(int param)
+{
+    clear_state();
+    window_go_back();
+    resource_set_mapping(RESOURCE_CURRENT_VERSION);
+    window_file_dialog_show(FILE_TYPE_EMPIRE, FILE_DIALOG_LOAD);
 }

@@ -85,19 +85,41 @@ static void hit_opponent(figure *f)
             attack_is_same_direction(f->attack_direction, m->direction)) {
         figure_attack += 4; // coordinated formation attack bonus
     }
+    if (m->is_halted && m->figure_type == FIGURE_FORT_INFANTRY &&
+        attack_is_same_direction(f->attack_direction, m->direction)) {
+        figure_attack += 2; // coordinated formation attack bonus
+    }
+    if (m->is_charging && m->figure_type == FIGURE_FORT_MOUNTED) {
+        figure_attack += 4; // charging bonus for mounted units
+    }
+
     // defense modifiers
     if (opponent_formation->is_halted &&
             (opponent_formation->figure_type == FIGURE_FORT_LEGIONARY ||
-             opponent_formation->figure_type == FIGURE_ENEMY_CAESAR_LEGIONARY)) {
+                opponent_formation->figure_type == FIGURE_ENEMY_CAESAR_LEGIONARY)) {
         if (!attack_is_same_direction(opponent->attack_direction, opponent_formation->direction)) {
             opponent_defense -= 4; // opponent not attacking in coordinated formation
         } else if (opponent_formation->layout == FORMATION_COLUMN) {
-            opponent_defense += 7;
+            opponent_defense += 5;
         } else if (opponent_formation->layout == FORMATION_DOUBLE_LINE_1 ||
                    opponent_formation->layout == FORMATION_DOUBLE_LINE_2) {
-            opponent_defense += 4;
+            opponent_defense += 2;
         }
     }
+
+    // defense modifiers
+    if (opponent_formation->is_halted &&
+            (opponent_formation->figure_type == FIGURE_FORT_INFANTRY)) {
+        if (!attack_is_same_direction(opponent->attack_direction, opponent_formation->direction)) {
+            opponent_defense -= 2; // opponent not attacking in coordinated formation
+        } else if (opponent_formation->layout == FORMATION_COLUMN) {
+            opponent_defense += 3;
+        } else if (opponent_formation->layout == FORMATION_DOUBLE_LINE_1 ||
+                   opponent_formation->layout == FORMATION_DOUBLE_LINE_2) {
+            opponent_defense += 1;
+        }
+    }
+
 
     int max_damage = opponent_props->max_damage;
     int net_attack = figure_attack - opponent_defense;
@@ -156,7 +178,8 @@ int figure_combat_get_target_for_soldier(int x, int y, int max_distance)
     int min_distance = 10000;
     for (int i = 1; i < figure_count(); i++) {
         figure *f = figure_get(i);
-        if (figure_is_dead(f)) {
+        if (figure_is_dead(f) || f->is_ghost) {
+            // Do not allow to target dead and enemies located outside of the map
             continue;
         }
         if (figure_is_enemy(f) || f->type == FIGURE_RIOTER || is_attacking_native(f)) {
@@ -211,12 +234,13 @@ int figure_combat_get_target_for_wolf(int x, int y, int max_distance)
             case FIGURE_JAVELIN:
             case FIGURE_BOLT:
             case FIGURE_BALLISTA:
+            case FIGURE_CATAPULT_MISSILE:
             case FIGURE_FRIENDLY_ARROW:
             case FIGURE_WATCHTOWER_ARCHER:
             case FIGURE_CREATURE:
                 continue;
         }
-        if (figure_is_enemy(f) || figure_is_herd(f)) {
+        if (figure_is_herd(f)) {
             continue;
         }
         if (figure_is_legion(f) && f->action_state == FIGURE_ACTION_80_SOLDIER_AT_REST) {
@@ -270,7 +294,7 @@ int figure_combat_get_target_for_enemy(int x, int y)
     return 0;
 }
 
-static int is_valid_missile_target(figure *f, formation *formation)
+static int is_valid_missile_target(figure *f, formation *l)
 {
     if (figure_is_enemy(f) || is_attacking_native(f)) {
         return 1;
@@ -281,7 +305,7 @@ static int is_valid_missile_target(figure *f, formation *formation)
     if (f->type == FIGURE_WOLF || config_get(CONFIG_GP_CH_AUTO_KILL_ANIMALS)) {
         return 1;
     }
-    if (formation->target_formation_id && formation->target_formation_id == f->formation_id) {
+    if (l->target_formation_id && l->target_formation_id == f->formation_id) {
         return 1;
     }
     return 0;
@@ -294,13 +318,14 @@ int figure_combat_get_missile_target_for_soldier(figure *shooter, int max_distan
 
     int min_distance = max_distance;
     figure *min_figure = 0;
-    formation *formation = formation_get(shooter->formation_id);
+    formation *l = formation_get(shooter->formation_id);
     for (int i = 1; i < figure_count(); i++) {
         figure *f = figure_get(i);
-        if (figure_is_dead(f)) {
+        if (figure_is_dead(f) || f->is_ghost) {
+            // Do not allow to target dead and enemies located outside of the map
             continue;
         }
-        if (is_valid_missile_target(f, formation)) {
+        if (is_valid_missile_target(f, l)) {
             int distance = calc_maximum_distance(x, y, f->x, f->y);
             if (distance < min_distance && figure_movement_can_launch_cross_country_missile(x, y, f->x, f->y)) {
                 min_distance = distance;
@@ -318,6 +343,10 @@ int figure_combat_get_missile_target_for_soldier(figure *shooter, int max_distan
 int figure_combat_get_missile_target_for_enemy(figure *enemy, int max_distance, int attack_citizens,
                                                map_point *tile)
 {
+    if (enemy->is_ghost) {
+        // Do not allow enemies to attack from outside of the map
+        return 0;
+    }
     int x = enemy->x;
     int y = enemy->y;
 
@@ -340,6 +369,7 @@ int figure_combat_get_missile_target_for_enemy(figure *enemy, int max_distance, 
             case FIGURE_BOLT:
             case FIGURE_BALLISTA:
             case FIGURE_FRIENDLY_ARROW:
+            case FIGURE_CATAPULT_MISSILE:
             case FIGURE_WATCHTOWER_ARCHER:
             case FIGURE_CREATURE:
             case FIGURE_FISH_GULLS:
@@ -370,15 +400,15 @@ int figure_combat_get_missile_target_for_enemy(figure *enemy, int max_distance, 
     return 0;
 }
 
-static int can_attack_animal(int figure_category, int opponent_category, formation *formation, figure *opponent)
+static int can_attack_animal(figure_category category, figure_category opponent_category, formation *l, figure *opponent)
 {
-    if (figure_category != FIGURE_CATEGORY_ARMED || opponent_category != FIGURE_CATEGORY_ANIMAL) {
+    if (category != FIGURE_CATEGORY_ARMED || opponent_category != FIGURE_CATEGORY_ANIMAL) {
         return 0;
     }
     if (config_get(CONFIG_GP_CH_AUTO_KILL_ANIMALS)) {
         return 1;
     }
-    if (formation->target_formation_id && formation->target_formation_id == opponent->formation_id) {
+    if (l->target_formation_id && l->target_formation_id == opponent->formation_id) {
         return 1;
     }
     return 0;
@@ -386,12 +416,13 @@ static int can_attack_animal(int figure_category, int opponent_category, formati
 
 void figure_combat_attack_figure_at(figure *f, int grid_offset)
 {
-    int figure_category = figure_properties_for_type(f->type)->category;
-    if (figure_category <= FIGURE_CATEGORY_INACTIVE || figure_category >= FIGURE_CATEGORY_CRIMINAL ||
-            f->action_state == FIGURE_ACTION_150_ATTACK) {
+    figure_category category = figure_properties_for_type(f->type)->category;
+    if (category <= FIGURE_CATEGORY_INACTIVE ||
+        (category >= FIGURE_CATEGORY_CRIMINAL && category <= FIGURE_CATEGORY_ANIMAL) ||
+        f->action_state == FIGURE_ACTION_150_ATTACK) {
         return;
     }
-    formation *formation = formation_get(f->formation_id);
+    formation *l = formation_get(f->formation_id);
     int guard = 0;
     int opponent_id = map_figure_at(grid_offset);
     while (1) {
@@ -399,7 +430,8 @@ void figure_combat_attack_figure_at(figure *f, int grid_offset)
             break;
         }
         figure *opponent = figure_get(opponent_id);
-        if (opponent_id == f->id) {
+        if (opponent_id == f->id || opponent->is_ghost) {
+            // Do not allow troops to attack themselves or enemies located outside of the map
             opponent_id = opponent->next_figure_id_on_same_tile;
             continue;
         }
@@ -410,23 +442,37 @@ void figure_combat_attack_figure_at(figure *f, int grid_offset)
             attack = 0;
         } else if (opponent->action_state == FIGURE_ACTION_149_CORPSE) {
             attack = 0;
-        } else if (figure_category == FIGURE_CATEGORY_ARMED && opponent_category == FIGURE_CATEGORY_NATIVE) {
+        } else if (category == FIGURE_CATEGORY_ARMED && opponent_category == FIGURE_CATEGORY_NATIVE) {
             if (opponent->action_state == FIGURE_ACTION_159_NATIVE_ATTACKING) {
                 attack = 1;
             }
-        } else if (figure_category == FIGURE_CATEGORY_ARMED && opponent_category == FIGURE_CATEGORY_CRIMINAL) {
+        } else if (category == FIGURE_CATEGORY_ARMED && opponent_category == FIGURE_CATEGORY_CRIMINAL) {
             attack = 1;
-        } else if (figure_category == FIGURE_CATEGORY_ARMED && opponent_category == FIGURE_CATEGORY_HOSTILE) {
+        } else if (category == FIGURE_CATEGORY_ARMED && opponent_category == FIGURE_CATEGORY_HOSTILE) {
             attack = 1;
-        } else if (figure_category == FIGURE_CATEGORY_HOSTILE && opponent_category == FIGURE_CATEGORY_CITIZEN) {
+        } else if (category == FIGURE_CATEGORY_ARMED && opponent_category == FIGURE_CATEGORY_AGGRESSIVE_ANIMAL) {
             attack = 1;
-        } else if (figure_category == FIGURE_CATEGORY_HOSTILE && opponent_category == FIGURE_CATEGORY_ARMED) {
+        } else if (category == FIGURE_CATEGORY_HOSTILE && opponent_category == FIGURE_CATEGORY_CITIZEN) {
             attack = 1;
-        } else if (figure_category == FIGURE_CATEGORY_HOSTILE && opponent_category == FIGURE_CATEGORY_CRIMINAL) {
+        } else if (category == FIGURE_CATEGORY_HOSTILE && opponent_category == FIGURE_CATEGORY_ARMED) {
             attack = 1;
-        } else if (can_attack_animal(figure_category, opponent_category, formation, opponent)) {
+        } else if (category == FIGURE_CATEGORY_HOSTILE && opponent_category == FIGURE_CATEGORY_CRIMINAL) {
             attack = 1;
-        } else if (figure_category == FIGURE_CATEGORY_HOSTILE && opponent_category == FIGURE_CATEGORY_ANIMAL) {
+        } else if (category == FIGURE_CATEGORY_HOSTILE && opponent_category == FIGURE_CATEGORY_ANIMAL) {
+            attack = 1;
+        } else if (category == FIGURE_CATEGORY_HOSTILE && opponent_category == FIGURE_CATEGORY_AGGRESSIVE_ANIMAL) {
+            attack = 1;
+        } else if (category == FIGURE_CATEGORY_AGGRESSIVE_ANIMAL && opponent_category == FIGURE_CATEGORY_CITIZEN) {
+            attack = 1;
+        } else if (category == FIGURE_CATEGORY_AGGRESSIVE_ANIMAL && opponent_category == FIGURE_CATEGORY_ARMED) {
+            attack = 1;
+        } else if (category == FIGURE_CATEGORY_AGGRESSIVE_ANIMAL && opponent_category == FIGURE_CATEGORY_CRIMINAL) {
+            attack = 1;
+        } else if (category == FIGURE_CATEGORY_AGGRESSIVE_ANIMAL && opponent_category == FIGURE_CATEGORY_ANIMAL) {
+            attack = 1;
+        } else if (category == FIGURE_CATEGORY_AGGRESSIVE_ANIMAL && opponent_category == FIGURE_CATEGORY_HOSTILE) {
+            attack = 1;
+        } else if (can_attack_animal(category, opponent_category, l, opponent)) {
             attack = 1;
         }
         if (attack && opponent->action_state == FIGURE_ACTION_150_ATTACK && opponent->num_attackers >= 2) {

@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <time.h>
 
 enum {
     STAT_DOESNT_WORK = -1,
@@ -44,13 +45,17 @@ const dir_info *platform_file_manager_cache_get_dir_info(const char *dir)
         info->next = malloc(sizeof(dir_info));
         info = info->next;
     }
-    strncpy(info->name, dir, FILE_NAME_MAX - 1);
-    info->name[FILE_NAME_MAX - 1] = 0;
+    snprintf(info->name, FILE_NAME_MAX, "%s", dir);
     info->first_file = 0;
     info->next = 0;
     struct dirent *entry;
     file_info *file_item = 0;
-    int dir_name_offset = 0;
+    char full_name[FILE_NAME_MAX];
+    size_t dir_name_offset = 0;
+    if (*info->name) {
+        dir_name_offset = snprintf(full_name, FILE_NAME_MAX, "%s/", info->name);
+    }
+
     while ((entry = readdir(d))) {
         const char *name = entry->d_name;
         if (name[0] == '.') {
@@ -67,50 +72,46 @@ const dir_info *platform_file_manager_cache_get_dir_info(const char *dir)
         file_item->next = 0;
 
         // Copy name
-        strncpy(file_item->name, name, FILE_NAME_MAX - 1);
-        file_item->name[FILE_NAME_MAX - 1] = 0;
+        snprintf(file_item->name, FILE_NAME_MAX, "%s", name);
+        snprintf(&full_name[dir_name_offset], FILE_NAME_MAX - dir_name_offset, "%s", name);
 
         // Copy extension
-        char c;
-        const char *extension = file_item->name;
-        do {
-            c = *extension;
-            extension++;
-        } while (c != '.' && c);
-        file_item->extension = extension;
+        file_item->extension = strrchr(file_item->name, '.');
+        if (!file_item->extension) {
+            file_item->extension = file_item->name + strlen(file_item->name);
+        } else {
+            file_item->extension++;
+        }
 
         // Check type
         int type = TYPE_FILE;
-        struct stat file_info;
+        struct stat current_file_info;
+
+        int has_stat = 0;
 
         if (stat_status == STAT_UNTESTED) {
-            stat_status = stat(file_item->name, &file_info) == STAT_DOESNT_WORK ? STAT_DOESNT_WORK : STAT_WORKS;
+            stat_status = stat(full_name, &current_file_info) == 0 ? STAT_WORKS : STAT_DOESNT_WORK;
+            has_stat = stat_status == STAT_WORKS;
+        } else if (stat_status == STAT_WORKS) {
+            has_stat = stat(full_name, &current_file_info) == 0;
         }
-        if (stat_status == STAT_WORKS) {
-            stat(file_item->name, &file_info);
-            if (S_ISDIR(file_info.st_mode)) {
+        if (has_stat) {
+            if (S_ISDIR(current_file_info.st_mode)) {
                 type = TYPE_DIR;
             }
+            file_item->modified_time = current_file_info.st_mtime;
         } else {
             // When stat does not work, we check if a file is a directory by trying to open it as a dir
             // For performance reasons, we only check for a directory if the name has no extension
             // This is effectively a hack, and definitely not full-proof, but the performance gains are well worth it
             if (!*file_item->extension) {
-                static char full_name[FILE_NAME_MAX];
-                if (!dir_name_offset) {
-                    strncpy(full_name, info->name, FILE_NAME_MAX);
-                    dir_name_offset = strlen(info->name);
-                    if(full_name[dir_name_offset - 1] != '/') {
-                        full_name[dir_name_offset++] = '/';
-                    }
-                }
-                strncpy(full_name + dir_name_offset, name, FILE_NAME_MAX - 1 - dir_name_offset);
                 DIR *file_d = opendir(full_name);
                 if (file_d) {
                     type = TYPE_DIR;
                     closedir(file_d);
                 }
             }
+            file_item->modified_time = 0;
         }
         file_item->type = type;
     }
@@ -118,45 +119,53 @@ const dir_info *platform_file_manager_cache_get_dir_info(const char *dir)
     return info;
 }
 
-void platform_file_manager_cache_add_file_info(const char *filename)
+void platform_file_manager_cache_update_file_info(const char *filename)
 {
-    // Julius only creates files in the base dir
+    // Augustus only modifies files in the base dir
     if (!base_dir_info) {
         return;
     }
-    file_info *f = malloc(sizeof(file_info));
-    strncpy(f->name, filename, FILE_NAME_MAX - 1);
-    f->name[FILE_NAME_MAX - 1] = 0;
-    f->type = TYPE_FILE;
-    char c;
-    const char *name = f->name;
-    do {
-        c = *name;
-        name++;
-    } while (c != '.' && c);
-    f->extension = name;
-    f->next = base_dir_info->first_file;
-    base_dir_info->first_file = f;
+    file_info *current_file = 0;
+    for (current_file = base_dir_info->first_file; current_file; current_file = current_file->next) {
+        if (strcmp(filename, current_file->name) == 0) {
+            break;
+        }
+    }
+    if (!current_file) {
+        current_file = malloc(sizeof(file_info));
+        snprintf(current_file->name, FILE_NAME_MAX, "%s", filename);
+        current_file->type = TYPE_FILE;
+        char c;
+        const char *name = current_file->name;
+        do {
+            c = *name;
+            name++;
+        } while (c != '.' && c);
+        current_file->extension = name;
+        current_file->next = base_dir_info->first_file;
+        base_dir_info->first_file = current_file;
+    }
+    current_file->modified_time = time(0);
 }
 
 void platform_file_manager_cache_delete_file_info(const char *filename)
 {
-    // Julius only deletes files from the base dir
+    // Augustus only deletes files from the base dir
     if (!base_dir_info) {
         return;
     }
     file_info *prev = 0;
-    for (file_info *f = base_dir_info->first_file; f; f = f->next) {
-        if (strcmp(filename, f->name) == 0) {
+    for (file_info *current_file = base_dir_info->first_file; current_file; current_file = current_file->next) {
+        if (strcmp(filename, current_file->name) == 0) {
             if (prev) {
-                prev->next = f->next;
+                prev->next = current_file->next;
             } else {
-                base_dir_info->first_file = f->next;
+                base_dir_info->first_file = current_file->next;
             }
-            free(f);
+            free(current_file);
             return;
         }
-        prev = f;
+        prev = current_file;
     }
 }
 
@@ -168,4 +177,21 @@ int platform_file_manager_cache_file_has_extension(const file_info *f, const cha
     return platform_file_manager_compare_filename(f->extension, extension) == 0;
 }
 
-#endif // __vita__
+void platform_file_manager_cache_invalidate(void)
+{
+    dir_info *info = base_dir_info;
+    while (info) {
+        file_info *file_item = info->first_file;
+        while (file_item) {
+            file_info *old_file_item = file_item;
+            file_item = file_item->next;
+            free(old_file_item);
+        }
+        dir_info *old_info = info;
+        info = info->next;
+        free(old_info);
+    }
+    base_dir_info = 0;
+}
+
+#endif // USE_FILE_CACHE

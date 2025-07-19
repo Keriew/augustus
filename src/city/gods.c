@@ -15,6 +15,7 @@
 #include "core/random.h"
 #include "figure/formation_legion.h"
 #include "figuretype/water.h"
+#include "game/campaign.h"
 #include "game/settings.h"
 #include "game/time.h"
 #include "scenario/property.h"
@@ -38,8 +39,6 @@ void city_gods_reset(void)
         god->blessing_done = 0;
         god->small_curse_done = 0;
         god->happy_bolts = 0;
-        god->unused2 = 0;
-        god->unused3 = 0;
         god->months_since_festival = 0;
     }
     city_data.religion.angry_message_delay = 0;
@@ -47,13 +46,13 @@ void city_gods_reset(void)
 
 void city_gods_reset_neptune_blessing(void)
 {
-    city_data.religion.neptune_double_trade_active = 0;
+    city_data.religion.neptune_trade_bonus_active = 0;
 }
 
 void city_gods_update_blessings(void)
 {
-    if (city_data.religion.neptune_double_trade_active > 0) {
-        city_data.religion.neptune_double_trade_active--;
+    if (city_data.religion.neptune_trade_bonus_active > 0) {
+        city_data.religion.neptune_trade_bonus_active--;
     }
 
     if (city_data.religion.venus_blessing_months_left > 0) {
@@ -70,7 +69,7 @@ static void perform_blessing(god_type god)
             break;
         case GOD_NEPTUNE:
             city_message_post(1, MESSAGE_BLESSING_FROM_NEPTUNE_ALTERNATE, 0, 0);
-            city_data.religion.neptune_double_trade_active = NEPTUNE_BLESSING_MONTHS;
+            city_data.religion.neptune_trade_bonus_active = NEPTUNE_BLESSING_MONTHS;
             break;
         case GOD_MERCURY:
             city_message_post(1, MESSAGE_BLESSING_FROM_MERCURY_ALTERNATE, 0, 0);
@@ -244,7 +243,7 @@ static void update_god_moods(void)
 
     if (god_id < MAX_GODS) {
         god_status *god = &city_data.religion.gods[god_id];
-        if (god->happiness >= 50 && god->happy_bolts >= 5) {
+        if (god->happiness >= 50 && god->happy_bolts >= BLESSING_BOLTS_NEEDED_FOR_BLESSING) {
             god->blessing_done = 1;
             god->happy_bolts = 0;
             perform_blessing(god_id);
@@ -254,8 +253,8 @@ static void update_god_moods(void)
             god->happiness += 12;
             perform_small_curse(god_id);
         } else if (god->wrath_bolts >= 50 && god->months_since_festival > 3) {
-            if (scenario_campaign_rank() < 4 && !scenario_is_custom()) {
-                // no large curses in early scenarios
+            if (scenario_campaign_rank() < 4 && game_campaign_is_original()) {
+                // no large curses in early original scenarios
                 god->small_curse_done = 0;
                 return;
             }
@@ -451,7 +450,16 @@ int city_god_venus_bonus_employment(void)
     }
 }
 
-void city_god_blessing_cheat(int god_id)
+void city_god_blessing(int god_id)
 {
     perform_blessing(god_id);
+}
+
+void city_god_curse(int god_id, int is_major)
+{
+    if (is_major) {
+        perform_large_curse(god_id);
+    } else {
+        perform_small_curse(god_id);
+    }
 }

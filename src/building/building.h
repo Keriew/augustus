@@ -4,9 +4,28 @@
 #include "building/type.h"
 #include "core/buffer.h"
 #include "core/time.h"
+#include "game/resource.h"
+#include "translation/translation.h"
+
+typedef enum order_condition_type {
+    ORDER_CONDITION_NEVER = 0,
+    ORDER_CONDITION_ALWAYS,
+    ORDER_CONDITION_SOURCE_HAS_MORE_THAN,
+    ORDER_CONDITION_DESTINATION_HAS_LESS_THAN
+} order_condition_type;
+
+typedef struct order {
+    resource_type resource_type;
+    int src_storage_id;
+    int dst_storage_id;
+    struct {
+        order_condition_type condition_type;
+        int threshold;
+    } condition;
+} order;
 
 typedef struct building {
-    int id;
+    unsigned int id;
 
     struct building *prev_of_type;
     struct building *next_of_type;
@@ -26,11 +45,9 @@ typedef struct building {
     union {
         short house_level;
         short warehouse_resource_id;
-        short workshop_type;
         short orientation;
         short fort_figure_type;
         short native_meeting_center_id;
-        short market_goods;
         short barracks_priority;
     } subtype;
     unsigned char road_network_id;
@@ -54,7 +71,6 @@ typedef struct building {
     unsigned char has_water_access;
     short prev_part_building_id;
     short next_part_building_id;
-    short loads_stored;
     unsigned char house_sentiment_message;
     unsigned char has_well_access;
     short num_workers;
@@ -71,28 +87,22 @@ typedef struct building {
     unsigned char house_pantheon_access;
     short formation_id;
     signed char monthly_levy;
-    union {
+    struct {
         struct {
             short queued_docker_id;
             unsigned char num_ships;
             signed char orientation;
-            short docker_ids[3];
             short trade_ship_id;
             unsigned char has_accepted_route_ids;
             int accepted_route_ids;
         } dock;
         struct {
-            short inventory[8];
-            short pottery_demand;
-            short furniture_demand;
-            short oil_demand;
-            short wine_demand;
+            short cartpusher_ids[3];
+        } distribution;
+        struct {
             unsigned char fetch_inventory_id;
             unsigned char is_mess_hall;
         } market;
-        struct {
-            short resource_stored[16];
-        } granary;
         struct {
             short progress;
             unsigned char blessing_days_left;
@@ -113,7 +123,6 @@ typedef struct building {
             unsigned char play;
         } entertainment;
         struct {
-            short inventory[8];
             unsigned char theater;
             unsigned char amphitheater_actor;
             unsigned char amphitheater_gladiator;
@@ -142,28 +151,30 @@ typedef struct building {
             unsigned char evolve_text_id;
         } house;
         struct {
-            short resources_needed[16];
-            int upgrades;
-            short progress;
-            short phase;
-            short secondary_frame;
-        } monument;
-        struct {
             unsigned char was_tent;
         } rubble;
         struct {
-            short exceptions;
+            unsigned short exceptions;
         } roadblock;
         struct {
             short flag_frame;
         } warehouse;
+        struct {
+            order current_order;
+        } depot;
     } data;
+    struct {
+        int upgrades;
+        short progress;
+        short phase;
+        short secondary_frame;
+    } monument;
     int tax_income_or_storage;
     unsigned char house_days_without_food;
     unsigned char has_plague;
     signed char desirability;
     unsigned char is_deleted;
-    unsigned char is_adjacent_to_water;
+    unsigned char is_close_to_water;
     unsigned char storage_id;
     union {
         signed char house_happiness;
@@ -171,7 +182,7 @@ typedef struct building {
     } sentiment;
     unsigned char show_on_problem_overlay;
     unsigned char house_tavern_wine_access;
-    unsigned char house_tavern_meat_access;
+    unsigned char house_tavern_food_access;
     unsigned char house_arena_gladiator;
     unsigned char house_arena_lion;
     unsigned char is_tourism_venue;
@@ -186,9 +197,14 @@ typedef struct building {
     unsigned char sickness_doctor_cure;
     unsigned char fumigation_frame;
     unsigned char fumigation_direction;
+    unsigned char has_latrines_access;
+    short resources[RESOURCE_MAX];
+    unsigned char accepted_goods[RESOURCE_MAX];
 } building;
 
 building *building_get(int id);
+
+int building_dist(int x, int y, int w, int h, building *b);
 
 void building_get_from_buffer(buffer *buf, int id, building *b, int includes_building_size, int save_version,
     int buffer_offset);
@@ -235,6 +251,8 @@ int building_is_statue_garden_temple(building_type type);
 
 int building_is_fort(building_type type);
 
+int building_is_active(const building *b);
+
 int building_is_primary_product_producer(building_type type);
 
 int building_mothball_toggle(building *b);
@@ -255,9 +273,13 @@ void building_totals_add_corrupted_house(int unfixable);
 
 void building_clear_all(void);
 
+void building_make_immune_cheat(void);
+
+int building_is_close_to_water(const building *b);
+
 void building_save_state(buffer *buf, buffer *highest_id, buffer *highest_id_ever,
                          buffer *sequence, buffer *corrupt_houses);
 
-void building_load_state(buffer *buf, buffer *sequence, buffer *corrupt_houses, int includes_building_size, int save_version);
+void building_load_state(buffer *buf, buffer *sequence, buffer *corrupt_houses, int save_version);
 
 #endif // BUILDING_BUILDING_H

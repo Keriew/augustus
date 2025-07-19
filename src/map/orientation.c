@@ -1,10 +1,10 @@
 #include "orientation.h"
 
 #include "assets/assets.h"
-#include "building/building_variant.h"
 #include "building/connectable.h"
 #include "building/image.h"
 #include "building/properties.h"
+#include "building/variant.h"
 #include "city/view.h"
 #include "core/direction.h"
 #include "core/image.h"
@@ -250,7 +250,8 @@ void map_orientation_update_buildings(void)
 {
     for (int i = 1; i < building_count(); i++) {
         building *b = building_get(i);
-        if (b->state == BUILDING_STATE_UNUSED || b->state == BUILDING_STATE_DELETED_BY_GAME) {
+        if (b->state == BUILDING_STATE_UNUSED || b->state == BUILDING_STATE_DELETED_BY_GAME ||
+            b->state == BUILDING_STATE_RUBBLE) {
             continue;
         }
         switch (b->type) {
@@ -274,8 +275,8 @@ void map_orientation_update_buildings(void)
                 map_water_add_building(i, b->x, b->y, b->size);
                 break;
             case BUILDING_SMALL_STATUE:
-            case BUILDING_SMALL_STATUE_ALT:
-            case BUILDING_SMALL_STATUE_ALT_B:
+            case BUILDING_GODDESS_STATUE:
+            case BUILDING_SENATOR_STATUE:
             case BUILDING_GLADIATOR_STATUE:
             case BUILDING_MEDIUM_STATUE:
             case BUILDING_LEGION_STATUE:

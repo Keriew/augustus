@@ -14,12 +14,13 @@ static void set_translation(int x, int y)
 
 void graphics_in_dialog(void)
 {
-    set_translation(screen_dialog_offset_x(), screen_dialog_offset_y());
+    graphics_in_dialog_with_size(640, 480);
 }
 
 void graphics_in_dialog_with_size(int width, int height)
 {
     set_translation((screen_width() - width) / 2, (screen_height() - height) / 2);
+    screen_set_dialog_offset(width, height);
 }
 
 void graphics_reset_dialog(void)
@@ -52,14 +53,14 @@ void graphics_draw_rect(int x, int y, int width, int height, color_t color)
     graphics_renderer()->draw_rect(x, width, y, height, color);
 }
 
-void graphics_draw_inset_rect(int x, int y, int width, int height)
+void graphics_draw_inset_rect(int x, int y, int width, int height, color_t color_dark, color_t color_light)
 {
     int x_end = x + width - 1;
     int y_end = y + height - 1;
-    graphics_renderer()->draw_line(x, x_end, y, y, COLOR_INSET_DARK);
-    graphics_renderer()->draw_line(x_end, x_end, y, y_end, COLOR_INSET_LIGHT);
-    graphics_renderer()->draw_line(x, x_end, y_end, y_end, COLOR_INSET_LIGHT);
-    graphics_renderer()->draw_line(x, x, y, y_end, COLOR_INSET_DARK);
+    graphics_renderer()->draw_line(x, x_end, y, y, color_dark);
+    graphics_renderer()->draw_line(x_end, x_end, y, y_end, color_light);
+    graphics_renderer()->draw_line(x, x_end, y_end, y_end, color_light);
+    graphics_renderer()->draw_line(x, x, y, y_end, color_dark);
 }
 
 void graphics_fill_rect(int x, int y, int width, int height, color_t color)
@@ -71,6 +72,12 @@ void graphics_shade_rect(int x, int y, int width, int height, int darkness)
 {
     color_t alpha = (0x11 * darkness) << COLOR_BITSHIFT_ALPHA;
     graphics_renderer()->fill_rect(x, width, y, height, alpha);
+}
+
+void graphics_tint_rect(int x, int y, int width, int height, color_t rgb, int alpha_level)
+{
+    color_t tinted = (alpha_level << COLOR_BITSHIFT_ALPHA) | (rgb & 0xFFFFFF);
+    graphics_renderer()->fill_rect(x, width, y, height, tinted);
 }
 
 int graphics_save_to_image(int image_id, int x, int y, int width, int height)

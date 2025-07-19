@@ -3,6 +3,7 @@
 #include "building/connectable.h"
 #include "building/count.h"
 #include "building/dock.h"
+#include "building/entertainment.h"
 #include "building/figure.h"
 #include "building/government.h"
 #include "building/granary.h"
@@ -31,6 +32,7 @@
 #include "city/trade.h"
 #include "city/victory.h"
 #include "core/config.h"
+#include "core/dir.h"
 #include "core/random.h"
 #include "editor/editor.h"
 #include "empire/city.h"
@@ -41,6 +43,7 @@
 #include "game/time.h"
 #include "game/tutorial.h"
 #include "game/undo.h"
+#include "graphics/weather.h"
 #include "map/desirability.h"
 #include "map/natives.h"
 #include "map/road_network.h"
@@ -52,6 +55,7 @@
 #include "scenario/earthquake.h"
 #include "scenario/emperor_change.h"
 #include "scenario/empire.h"
+#include "scenario/event/controller.h"
 #include "scenario/gladiator_revolt.h"
 #include "scenario/invasion.h"
 #include "scenario/price_change.h"
@@ -69,7 +73,7 @@ static void advance_year(void)
     city_finance_handle_year_change();
     empire_city_reset_yearly_trade_amounts();
     building_maintenance_update_fire_direction();
-    city_ratings_update(1,0);
+    city_ratings_update(1, 0);
 }
 
 static void advance_month(void)
@@ -104,7 +108,7 @@ static void advance_month(void)
         advance_year();
         new_year = 1;
     } else {
-        city_ratings_update(0,1);
+        city_ratings_update(0, 1);
     }
 
     city_population_record_monthly();
@@ -112,12 +116,16 @@ static void advance_month(void)
     city_games_decrement_month_counts();
     city_gods_update_blessings();
     tutorial_on_month_tick();
+    scenario_events_progress_paused(1);
+    scenario_events_process_all();
     if (setting_monthly_autosave()) {
-        game_file_write_saved_game("autosave.svx");
+        game_file_write_saved_game(dir_append_location("autosave.svx", PATH_LOCATION_SAVEGAME));
     }
     if (new_year && config_get(CONFIG_GP_CH_YEARLY_AUTOSAVE)) {
-        game_file_write_saved_game("autosave-year.svx");
+        game_file_make_yearly_autosave();
     }
+
+    city_weather_update(game_time_month());
 }
 
 static void advance_day(void)
@@ -137,7 +145,7 @@ static void advance_day(void)
 static void advance_tick(void)
 {
     // NB: these ticks are noop:
-    // 0, 10, 11, 13, 14, 15, 26, 41
+    // 0, 10, 11, 13, 14, 15, 18, 26, 41
     // max is 49
     switch (game_time_tick()) {
         case 1: city_gods_calculate_moods(1); break;
@@ -152,21 +160,20 @@ static void advance_tick(void)
         case 12: house_service_decay_houses_covered(); break;
         case 16: city_resource_calculate_warehouse_stocks(); break;
         case 17: city_resource_calculate_food_stocks_and_supply_wheat(); break;
-        case 18: city_resource_calculate_workshop_stocks(); break;
         case 19: building_dock_update_open_water_access(); break;
-        case 20: building_industry_update_production(); break;
+        case 20: building_industry_update_production(1); break;
         case 21: building_maintenance_check_rome_access(); break;
         case 22: house_population_update_room(); break;
         case 23: house_population_update_migration(); break;
         case 24: house_population_evict_overcrowded(); break;
         case 25: city_labor_update(); break;
         case 27: map_water_supply_update_reservoir_fountain(); break;
-        case 28: map_water_supply_update_houses(); break;
+        case 28: map_water_supply_update_buildings(); break;
         case 29: formation_update_all(1); break;
         case 30: widget_minimap_invalidate(); break;
         case 31: building_figure_generate(); break;
         case 32: city_trade_update(); break;
-        case 33: building_count_update(); city_culture_update_coverage(); break;
+        case 33: building_entertainment_run_shows(); city_culture_update_coverage(); break;
         case 34: building_government_distribute_treasury(); break;
         case 35: house_service_decay_culture(); break;
         case 36: house_service_calculate_culture_aggregates(); break;
@@ -178,7 +185,7 @@ static void advance_tick(void)
         case 43: building_maintenance_update_burning_ruins(); break;
         case 44: building_maintenance_check_fire_collapse(); break;
         case 45: figure_generate_criminals(); break;
-        case 46: building_industry_update_wheat_production(); break;
+        case 46: building_industry_update_production(0); break;
         case 47: city_games_decrement_duration(); break;
         case 48: house_service_decay_tax_collector(); break;
         case 49: city_culture_calculate(); break;

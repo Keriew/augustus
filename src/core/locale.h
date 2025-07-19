@@ -23,6 +23,9 @@ typedef enum {
     LANGUAGE_SWEDISH,
     LANGUAGE_SIMPLIFIED_CHINESE,
     LANGUAGE_TRADITIONAL_CHINESE,
+    // Fan translations
+    LANGUAGE_CZECH,
+    LANGUAGE_GREEK,
     LANGUAGE_MAX_ITEMS
 } language_type;
 
@@ -31,6 +34,12 @@ typedef enum {
  * @return Guessed language
  */
 language_type locale_determine_language(void);
+
+/**
+ * if no language set before, returns LANGUAGE_UNKNOWN
+ * @return Last determined language
+ */
+language_type locale_last_determined_language(void);
 
 /**
  * Check whether to write the year before the 'AD' part or the other way around

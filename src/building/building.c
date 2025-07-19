@@ -1,7 +1,6 @@
 #include "building.h"
 
-#include "building/building_state.h"
-#include "building/building_variant.h"
+#include "building/distribution.h"
 #include "building/industry.h"
 #include "building/granary.h"
 #include "building/menu.h"
@@ -9,18 +8,24 @@
 #include "building/monument.h"
 #include "building/properties.h"
 #include "building/rotation.h"
+#include "building/state.h"
 #include "building/storage.h"
+#include "building/variant.h"
 #include "city/buildings.h"
 #include "city/finance.h"
 #include "city/population.h"
 #include "city/warning.h"
 #include "core/array.h"
+#include "core/calc.h"
+#include "core/config.h"
 #include "core/log.h"
+#include "figure/figure.h"
 #include "figure/formation_legion.h"
 #include "game/difficulty.h"
-#include "game/resource.h"
+#include "game/save_version.h"
 #include "game/undo.h"
 #include "map/building_tiles.h"
+#include "map/bridge.h"
 #include "map/desirability.h"
 #include "map/elevation.h"
 #include "map/grid.h"
@@ -29,7 +34,12 @@
 #include "map/terrain.h"
 #include "map/tiles.h"
 
+
+
 #define BUILDING_ARRAY_SIZE_STEP 2000
+
+#define WATER_DESIRABILITY_RANGE 3
+#define WATER_DESIRABILITY_BONUS 15
 
 static struct {
     array(building) buildings;
@@ -46,6 +56,13 @@ static struct {
 building *building_get(int id)
 {
     return array_item(data.buildings, id);
+}
+
+int building_dist(int x, int y, int w, int h, building *b)
+{
+    int size = building_properties_for_type(b->type)->size;
+    int dist = calc_box_distance(x, y, w, h, b->x, b->y, size, size);
+    return dist;
 }
 
 void building_get_from_buffer(buffer *buf, int id, building *b, int includes_building_size, int save_version,
@@ -164,7 +181,7 @@ static void remove_adjacent_types(building *b)
 building *building_create(building_type type, int x, int y)
 {
     building *b;
-    array_new_item(data.buildings, 1, b);
+    array_new_item_after_index(data.buildings, 1, b);
     if (!b) {
         city_warning_show(WARNING_DATA_LIMIT_REACHED, NEW_WARNING_SLOT);
         return array_first(data.buildings);
@@ -172,21 +189,16 @@ building *building_create(building_type type, int x, int y)
 
     const building_properties *props = building_properties_for_type(type);
 
-    memset(&(b->data), 0, sizeof(b->data));
-
     b->state = BUILDING_STATE_CREATED;
     b->faction_id = 1;
-    b->unknown_value = city_buildings_unknown_value();
     b->type = type;
     b->size = props->size;
     b->created_sequence = extra.created_sequence++;
     b->sentiment.house_happiness = 100;
-    b->distance_from_entry = 0;
 
     fill_adjacent_types(b);
 
     // house size
-    b->house_size = 0;
     if (type >= BUILDING_HOUSE_SMALL_TENT && type <= BUILDING_HOUSE_MEDIUM_INSULA) {
         b->house_size = 1;
     } else if (type >= BUILDING_HOUSE_LARGE_INSULA && type <= BUILDING_HOUSE_MEDIUM_VILLA) {
@@ -200,84 +212,35 @@ building *building_create(building_type type, int x, int y)
     // subtype
     if (building_is_house(type)) {
         b->subtype.house_level = type - BUILDING_HOUSE_VACANT_LOT;
-    } else {
-        b->subtype.house_level = 0;
     }
 
-    // input/output resources
-    switch (type) {
-        case BUILDING_WHEAT_FARM:
-            b->output_resource_id = RESOURCE_WHEAT;
-            break;
-        case BUILDING_VEGETABLE_FARM:
-            b->output_resource_id = RESOURCE_VEGETABLES;
-            break;
-        case BUILDING_FRUIT_FARM:
-            b->output_resource_id = RESOURCE_FRUIT;
-            break;
-        case BUILDING_OLIVE_FARM:
-            b->output_resource_id = RESOURCE_OLIVES;
-            break;
-        case BUILDING_VINES_FARM:
-            b->output_resource_id = RESOURCE_VINES;
-            break;
-        case BUILDING_PIG_FARM:
-            b->output_resource_id = RESOURCE_MEAT;
-            break;
-        case BUILDING_MARBLE_QUARRY:
-            b->output_resource_id = RESOURCE_MARBLE;
-            break;
-        case BUILDING_IRON_MINE:
-            b->output_resource_id = RESOURCE_IRON;
-            break;
-        case BUILDING_TIMBER_YARD:
-            b->output_resource_id = RESOURCE_TIMBER;
-            break;
-        case BUILDING_CLAY_PIT:
-            b->output_resource_id = RESOURCE_CLAY;
-            break;
-        case BUILDING_WINE_WORKSHOP:
-            b->output_resource_id = RESOURCE_WINE;
-            b->subtype.workshop_type = WORKSHOP_VINES_TO_WINE;
-            break;
-        case BUILDING_OIL_WORKSHOP:
-            b->output_resource_id = RESOURCE_OIL;
-            b->subtype.workshop_type = WORKSHOP_OLIVES_TO_OIL;
-            break;
-        case BUILDING_WEAPONS_WORKSHOP:
-            b->output_resource_id = RESOURCE_WEAPONS;
-            b->subtype.workshop_type = WORKSHOP_IRON_TO_WEAPONS;
-            break;
-        case BUILDING_FURNITURE_WORKSHOP:
-            b->output_resource_id = RESOURCE_FURNITURE;
-            b->subtype.workshop_type = WORKSHOP_TIMBER_TO_FURNITURE;
-            break;
-        case BUILDING_POTTERY_WORKSHOP:
-            b->output_resource_id = RESOURCE_POTTERY;
-            b->subtype.workshop_type = WORKSHOP_CLAY_TO_POTTERY;
-            break;
-        case BUILDING_GRAND_TEMPLE_VENUS:
-            b->output_resource_id = RESOURCE_WINE;
-            break;
-        case BUILDING_WHARF:
-            b->output_resource_id = RESOURCE_MEAT;
-            break;
-        default:
-            b->output_resource_id = RESOURCE_NONE;
-            break;
-    }
+    b->output_resource_id = resource_get_from_industry(type);
 
     if (type == BUILDING_GRANARY) {
-        b->data.granary.resource_stored[RESOURCE_NONE] = FULL_GRANARY;
+        b->resources[RESOURCE_NONE] = FULL_GRANARY;
     }
 
-    if (type == BUILDING_MARKET) {
-        // Set it as accepting all goods
-        b->subtype.market_goods = 0x0000;
+    // Set it as accepting all available goods
+    for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+        b->accepted_goods[r] = building_distribution_resource_is_handled(r, type);
+    }
+
+    // Exception for Venus temples which should never accept wine by default to prevent unwanted evolutions
+    if (type == BUILDING_SMALL_TEMPLE_VENUS || type == BUILDING_LARGE_TEMPLE_VENUS) {
+        b->accepted_goods[RESOURCE_WINE] = 0;
     }
 
     if (type == BUILDING_WAREHOUSE || type == BUILDING_HIPPODROME) {
         b->subtype.orientation = building_rotation_get_rotation();
+    }
+
+    // Most roadblock-like buildings should allow everything by default
+    if (building_type_is_roadblock(b->type) && b->type != BUILDING_ROADBLOCK && b->type != BUILDING_GATEHOUSE &&
+        b->type != BUILDING_PALISADE_GATE && config_get(CONFIG_GP_CH_GATES_DEFAULT_TO_PASS_ALL_WALKERS)) {
+        b->data.roadblock.exceptions = ROADBLOCK_PERMISSION_ALL;
+    }
+    if (building_type_is_bridge(b->type)) { //bridges always allow everyone by default
+        b->data.roadblock.exceptions = ROADBLOCK_PERMISSION_ALL;
     }
 
     b->x = x;
@@ -286,24 +249,8 @@ building *building_create(building_type type, int x, int y)
     b->house_figure_generation_delay = map_random_get(b->grid_offset) & 0x7f;
     b->figure_roam_direction = b->house_figure_generation_delay & 6;
     b->fire_proof = props->fire_proof;
-    b->is_adjacent_to_water = map_terrain_is_adjacent_to_water(x, y, b->size);
+    b->is_close_to_water = building_is_close_to_water(b);
 
-    // init expanded data
-    b->house_tavern_wine_access = 0;
-    b->house_tavern_meat_access = 0;
-    b->house_arena_gladiator = 0;
-    b->house_arena_lion = 0;
-    b->is_tourism_venue = 0;
-    b->tourism_disabled = 0;
-    b->tourism_income = 0;
-    b->tourism_income_this_year = 0;
-    b->upgrade_level = 0;
-    b->variant = 0;
-    b->sickness_level = 0;
-    b->sickness_duration = 0;
-    b->sickness_doctor_cure = 0;
-    b->fumigation_frame = 0;
-    b->fumigation_direction = 0;
     return b;
 }
 
@@ -334,33 +281,15 @@ void building_clear_related_data(building *b)
         building_storage_delete(b->storage_id);
         b->storage_id = 0;
     }
-    if (b->type == BUILDING_SENATE_UPGRADED) {
-        city_buildings_remove_senate(b);
-    }
-    if (b->type == BUILDING_DOCK) {
-        city_buildings_remove_dock();
-    }
-    if (b->type == BUILDING_BARRACKS) {
-        city_buildings_remove_barracks(b);
-    }
-    if (b->type == BUILDING_DISTRIBUTION_CENTER_UNUSED) {
-        city_buildings_remove_distribution_center(b);
-    }
     if (b->type == BUILDING_FORT) {
         formation_legion_delete_for_fort(b);
-    }
-    if (b->type == BUILDING_HIPPODROME) {
-        city_buildings_remove_hippodrome();
-    }
-    if (b->type == BUILDING_CARAVANSERAI) {
-        city_buildings_remove_caravanserai();
     }
     if (b->type == BUILDING_TRIUMPHAL_ARCH) {
         city_buildings_remove_triumphal_arch();
         building_menu_update();
     }
-    if (b->type == BUILDING_MESS_HALL) {
-        city_buildings_remove_mess_hall();
+    if (building_monument_is_unfinished_monument(b)) {
+        building_monument_remove_all_deliveries(b->id);
     }
 }
 
@@ -396,19 +325,21 @@ void building_update_state(void)
             continue;
         }
         if (b->state == BUILDING_STATE_UNDO || b->state == BUILDING_STATE_DELETED_BY_PLAYER) {
-            if (b->type == BUILDING_TOWER || b->type == BUILDING_GATEHOUSE) {
+            if (b->type == BUILDING_TOWER || b->type == BUILDING_GATEHOUSE || b->type == BUILDING_SHIP_BRIDGE || b->type == BUILDING_LOW_BRIDGE) {
                 wall_recalc = 1;
                 road_recalc = 1;
             } else if (b->type == BUILDING_RESERVOIR) {
                 aqueduct_recalc = 1;
             } else if (b->type == BUILDING_GRANARY) {
                 road_recalc = 1;
-            } else if ((b->type >= BUILDING_GRAND_TEMPLE_CERES && b->type <= BUILDING_GRAND_TEMPLE_VENUS) || b->type == BUILDING_PANTHEON || b->type == BUILDING_LIGHTHOUSE) {
+            } else if ((b->type >= BUILDING_GRAND_TEMPLE_CERES && b->type <= BUILDING_GRAND_TEMPLE_VENUS) ||
+                b->type == BUILDING_PANTHEON || b->type == BUILDING_LIGHTHOUSE) {
                 road_recalc = 1;
             }
-            map_building_tiles_remove(i, b->x, b->y);
-            if (building_type_is_roadblock(b->type)) {
+            map_building_tiles_remove(b->id, b->x, b->y);
+            if (building_type_is_roadblock(b->type) && b->size == 1 && !building_type_is_bridge(b->type)) {
                 // Leave the road behind the deleted roadblock
+                // except for bridges - they are coded as size 1 too
                 map_terrain_add(b->grid_offset, TERRAIN_ROAD);
                 road_recalc = 1;
             }
@@ -421,6 +352,11 @@ void building_update_state(void)
             building_delete(b);
         } else if (b->state == BUILDING_STATE_DELETED_BY_GAME) {
             building_delete(b);
+        } else if (b->immigrant_figure_id) {
+            const figure *f = figure_get(b->immigrant_figure_id);
+            if (f->state != FIGURE_STATE_ALIVE || f->destination_building_id != array_index) {
+                b->immigrant_figure_id = 0;
+            }
         }
     }
     if (wall_recalc) {
@@ -434,6 +370,7 @@ void building_update_state(void)
     }
     if (road_recalc) {
         map_tiles_update_all_roads();
+        map_tiles_update_all_highways();
     }
 }
 
@@ -446,7 +383,7 @@ void building_update_desirability(void)
             continue;
         }
         b->desirability = map_desirability_get_max(b->x, b->y, b->size);
-        if (b->is_adjacent_to_water) {
+        if (b->is_close_to_water) {
             b->desirability += 10;
         }
         switch (map_elevation_at(b->grid_offset)) {
@@ -457,6 +394,35 @@ void building_update_desirability(void)
             case 4: b->desirability += 16; break;
             default: b->desirability += 18; break;
         }
+    }
+}
+
+int building_is_active(const building *b)
+{
+    if (b->state != BUILDING_STATE_IN_USE) {
+        return 0;
+    }
+    if (building_is_house(b->type)) {
+        return b->house_size > 0 && b->house_population > 0;
+    }
+    if (building_monument_is_unfinished_monument(b)) {
+        return 0;
+    }
+    switch (b->type) {
+        case BUILDING_RESERVOIR:
+        case BUILDING_FOUNTAIN:
+            return b->has_water_access;
+        case BUILDING_ORACLE:
+        case BUILDING_NYMPHAEUM:
+        case BUILDING_SMALL_MAUSOLEUM:
+        case BUILDING_LARGE_MAUSOLEUM:
+            return b->monument.phase == MONUMENT_FINISHED;
+        case BUILDING_WHARF:
+            return b->num_workers > 0 && b->data.industry.fishing_boat_id;
+        case BUILDING_DOCK:
+            return b->num_workers > 0 && b->has_water_access;
+        default:
+            return b->num_workers > 0;
     }
 }
 
@@ -479,7 +445,9 @@ int building_is_statue_garden_temple(building_type type)
         (type >= BUILDING_SMALL_POND && type <= BUILDING_PANTHEON) ||
         (type == BUILDING_GARDENS) || (type == BUILDING_GARDEN_PATH) ||
         (type >= BUILDING_HORSE_STATUE && type <= BUILDING_LARGE_MAUSOLEUM) ||
-        type == BUILDING_GARDEN_WALL || type == BUILDING_GLADIATOR_STATUE
+        (type >= BUILDING_SHRINE_CERES && type <= BUILDING_SHRINE_VENUS) ||
+        type == BUILDING_LOOPED_GARDEN_WALL || type == BUILDING_GLADIATOR_STATUE ||
+        type == BUILDING_PANELLED_GARDEN_WALL || type == BUILDING_ROOFED_GARDEN_WALL
         );
 }
 
@@ -525,7 +493,9 @@ int building_is_fort(building_type type)
 {
     return type == BUILDING_FORT_LEGIONARIES ||
         type == BUILDING_FORT_JAVELIN ||
-        type == BUILDING_FORT_MOUNTED;
+        type == BUILDING_FORT_MOUNTED ||
+        type == BUILDING_FORT_AUXILIA_INFANTRY ||
+        type == BUILDING_FORT_ARCHERS;
 }
 
 int building_mothball_toggle(building *b)
@@ -565,7 +535,7 @@ int building_get_levy(const building *b)
     if (levy <= 0) {
         return 0;
     }
-    if (building_monument_type_is_monument(b->type) && b->data.monument.phase != MONUMENT_FINISHED) {
+    if (building_monument_type_is_monument(b->type) && b->monument.phase != MONUMENT_FINISHED) {
         return 0;
     }
     if (b->state != BUILDING_STATE_IN_USE && levy && !b->prev_part_building_id) {
@@ -579,9 +549,9 @@ int building_get_levy(const building *b)
     // Pantheon base bonus
     if (building_monument_working(BUILDING_PANTHEON) &&
         ((b->type >= BUILDING_SMALL_TEMPLE_CERES && b->type <= BUILDING_LARGE_TEMPLE_VENUS) ||
-        (b->type >= BUILDING_GRAND_TEMPLE_CERES && b->type <= BUILDING_GRAND_TEMPLE_VENUS) ||
-        b->type == BUILDING_ORACLE || b->type == BUILDING_NYMPHAEUM || b->type == BUILDING_SMALL_MAUSOLEUM ||
-        b->type == BUILDING_LARGE_MAUSOLEUM)) {
+            (b->type >= BUILDING_GRAND_TEMPLE_CERES && b->type <= BUILDING_GRAND_TEMPLE_VENUS) ||
+            b->type == BUILDING_ORACLE || b->type == BUILDING_NYMPHAEUM || b->type == BUILDING_SMALL_MAUSOLEUM ||
+            b->type == BUILDING_LARGE_MAUSOLEUM)) {
         levy = (levy / 4) * 3;
     }
 
@@ -611,6 +581,9 @@ int building_get_laborers(building_type type)
     // Neptune GT bonus
     if (type == BUILDING_FOUNTAIN && building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE)) {
         workers /= 2;
+        if (workers == 0) {
+            workers = 1;
+        }
     }
     return workers;
 }
@@ -623,7 +596,7 @@ void building_totals_add_corrupted_house(int unfixable)
     }
 }
 
-static void initialize_new_building(building *b, int position)
+static void initialize_new_building(building *b, unsigned int position)
 {
     b->id = position;
 }
@@ -648,10 +621,24 @@ void building_clear_all(void)
     extra.unfixable_houses = 0;
 }
 
+void building_make_immune_cheat(void)
+{
+    building *b;
+    array_foreach(data.buildings, b)
+    {
+        b->fire_proof = 1;
+    }
+}
+
+int building_is_close_to_water(const building *b)
+{
+    return map_terrain_exists_tile_in_radius_with_type(b->x, b->y, b->size, WATER_DESIRABILITY_RANGE, TERRAIN_WATER);
+}
+
 void building_save_state(buffer *buf, buffer *highest_id, buffer *highest_id_ever,
     buffer *sequence, buffer *corrupt_houses)
 {
-    int buf_size = 4 + data.buildings.size * BUILDING_STATE_CURRENT_BUFFER_SIZE;
+    int buf_size = sizeof(int32_t) + data.buildings.size * BUILDING_STATE_CURRENT_BUFFER_SIZE;
     uint8_t *buf_data = malloc(buf_size);
     buffer_init(buf, buf_data, buf_size);
     buffer_write_i32(buf, BUILDING_STATE_CURRENT_BUFFER_SIZE);
@@ -669,21 +656,21 @@ void building_save_state(buffer *buf, buffer *highest_id, buffer *highest_id_eve
     buffer_write_i32(corrupt_houses, extra.unfixable_houses);
 }
 
-void building_load_state(buffer *buf, buffer *sequence, buffer *corrupt_houses, int includes_building_size, int save_version)
+void building_load_state(buffer *buf, buffer *sequence, buffer *corrupt_houses, int save_version)
 {
     int building_buf_size = BUILDING_STATE_ORIGINAL_BUFFER_SIZE;
-    int buf_size = buf->size;
+    size_t buf_size = buf->size;
 
-    if (includes_building_size) {
+    if (save_version > SAVE_GAME_LAST_STATIC_VERSION) {
         building_buf_size = buffer_read_i32(buf);
         buf_size -= 4;
     }
 
-    int buildings_to_load = buf_size / building_buf_size;
+    int buildings_to_load = (int) buf_size / building_buf_size;
 
     if (!array_init(data.buildings, BUILDING_ARRAY_SIZE_STEP, initialize_new_building, building_in_use) ||
         !array_expand(data.buildings, buildings_to_load)) {
-        log_error("Unable to allocate enought memory for the building array. The game will now crash.", 0, 0);
+        log_error("Unable to allocate enough memory for the building array. The game will now crash.", 0, 0);
     }
 
     memset(data.first_of_type, 0, sizeof(data.first_of_type));

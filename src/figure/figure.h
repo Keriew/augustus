@@ -6,8 +6,10 @@
 #include "figure/action.h"
 #include "figure/type.h"
 
+#define FIGURE_FACTION_ROAMER_PREVIEW 2
+
 typedef struct {
-    int id;
+    unsigned int id;
 
     unsigned int image_id;
     unsigned int cart_image_id;
@@ -22,7 +24,7 @@ typedef struct {
     unsigned char use_cross_country;
     unsigned char is_friendly;
     unsigned char state;
-    unsigned char faction_id; // 1 = city, 0 = enemy
+    unsigned char faction_id; // 2 = roamer preview, 1 = city, 0 = enemy
     unsigned char action_state_before_attack;
     signed char direction;
     signed char previous_tile_direction;
@@ -31,7 +33,7 @@ typedef struct {
     unsigned char y;
     unsigned char previous_tile_x;
     unsigned char previous_tile_y;
-    unsigned char missile_damage;
+    unsigned char missile_height;
     unsigned char damage;
     short grid_offset;
     unsigned char destination_x;
@@ -112,6 +114,7 @@ typedef struct {
     short attacker_id1;
     short attacker_id2;
     short opponent_id;
+    short last_visited_index;
     struct {
         unsigned short tourist_money_spent;
         unsigned short ticks_since_last_visited_id[12];
@@ -152,6 +155,6 @@ int figure_target_is_alive(const figure *f);
 
 void figure_save_state(buffer *list, buffer *seq);
 
-void figure_load_state(buffer *list, buffer *seq, int includes_figure_size);
+void figure_load_state(buffer *list, buffer *seq, int version);
 
 #endif // FIGURE_FIGURE_H

@@ -1,8 +1,11 @@
 #include "building_info.h"
 
+#include "assets/assets.h"
 #include "building/barracks.h"
 #include "building/culture.h"
+#include "../building/distribution.h"
 #include "building/house_evolution.h"
+#include "../building/industry.h"
 #include "building/model.h"
 #include "building/monument.h"
 #include "building/warehouse.h"
@@ -12,7 +15,10 @@
 #include "core/image_group.h"
 #include "figure/figure.h"
 #include "figure/formation_legion.h"
+#include "figure/roamer_preview.h"
 #include "figure/phrase.h"
+#include "game/state.h"
+#include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/image_button.h"
@@ -23,6 +29,7 @@
 #include "graphics/window.h"
 #include "input/input.h"
 #include "map/aqueduct.h"
+#include "map/bridge.h"
 #include "map/building.h"
 #include "map/figure.h"
 #include "map/grid.h"
@@ -33,6 +40,7 @@
 #include "window/advisors.h"
 #include "window/city.h"
 #include "window/message_dialog.h"
+#include "window/building/depot.h"
 #include "window/building/distribution.h"
 #include "window/building/figures.h"
 #include "window/building/government.h"
@@ -42,21 +50,34 @@
 #include "window/building/terrain.h"
 #include "window/building/utility.h"
 
+enum {
+    HEIGHT_0_22_BLOCKS = 0,
+    HEIGHT_1_16_BLOCKS = 1,
+    HEIGHT_2_18_BLOCKS = 2,
+    HEIGHT_3_20_BLOCKS = 3,
+    HEIGHT_4_14_BLOCKS = 4,
+    HEIGHT_5_24_BLOCKS = 5,
+    HEIGHT_6_38_BLOCKS = 6,
+    HEIGHT_7_48_BLOCKS = 7,
+    HEIGHT_8_SCALING   = 8,
+    HEIGHT_10_46_BLOCKS = 10,
+    HEIGHT_11_28_BLOCKS = 11,
+    HEIGHT_12_21_BLOCKS = 12,
+    HEIGHT_13_15_BLOCKS = 13,
+};
+
 #define OFFSET(x,y) (x + GRID_SIZE * y)
 
 static void button_help(int param1, int param2);
 static void button_close(int param1, int param2);
 static void button_advisor(int advisor, int param2);
 static void button_mothball(int mothball, int param2);
-static void button_monument_construction(int param1, int param2);
+static void button_monument_construction(const generic_button *button);
 
-static image_button image_buttons_help_close[] = {
-    {14, 0, 27, 27, IB_NORMAL, GROUP_CONTEXT_ICONS, 0, button_help, button_none, 0, 0, 1},
-    {424, 3, 24, 24, IB_NORMAL, GROUP_CONTEXT_ICONS, 4, button_close, button_none, 0, 0, 1}
-};
-
-static image_button image_buttons_advisor[] = {
-    {350, -38, 28, 28, IB_NORMAL, GROUP_MESSAGE_ADVISOR_BUTTONS, 9, button_advisor, button_none, ADVISOR_RATINGS, 0, 1}
+static image_button image_buttons_help_advisor_close[] = {
+    {14, 3, 24, 24, IB_NORMAL, GROUP_CONTEXT_ICONS, 0, button_help, button_none, 0, 0, 1},
+    {424, 3, 24, 24, IB_NORMAL, GROUP_CONTEXT_ICONS, 4, button_close, button_none, 0, 0, 1},
+    {38, 3, 24, 24, IB_NORMAL, 0, 0, button_advisor, button_none, 0, 0, 1}
 };
 
 static image_button image_button_mothball[] = {
@@ -65,146 +86,182 @@ static image_button image_button_mothball[] = {
 };
 
 static generic_button generic_button_monument_construction[] = {
-    {80, 3, 304, 24, button_monument_construction, button_none, 0, 0}
+    {80, 3, 304, 24, button_monument_construction}
 };
 
 static building_info_context context;
-static int focus_image_button_id;
-static int focus_mothball_image_button_id;
-static int focus_monument_construction_button_id;
+static unsigned int focus_image_button_id;
+static unsigned int focus_mothball_image_button_id;
+static unsigned int focus_monument_construction_button_id;
+static int original_overlay;
 
 static int get_height_id(void)
 {
     if (context.type == BUILDING_INFO_TERRAIN) {
         switch (context.terrain_type) {
             case TERRAIN_INFO_AQUEDUCT:
-                return 4;
+                return HEIGHT_4_14_BLOCKS;
             case TERRAIN_INFO_RUBBLE:
             case TERRAIN_INFO_WALL:
             case TERRAIN_INFO_GARDEN:
-                return 1;
-            case TERRAIN_INFO_HIGHWAY:
-                return 7;
+                return HEIGHT_1_16_BLOCKS;
             default:
-                return 5;
+                return HEIGHT_5_24_BLOCKS;
         }
     } else if (context.type == BUILDING_INFO_LEGION) {
         return 7;
     } else if (context.type == BUILDING_INFO_BUILDING) {
         const building *b = building_get(context.building_id);
         if (building_is_house(b->type) && b->house_population <= 0) {
-            return 5;
+            return HEIGHT_5_24_BLOCKS;
         }
         if (building_is_house(b->type) && b->house_population > 0) {
-            return 7;
+            return HEIGHT_5_24_BLOCKS;
         }
 
-        if (b->type >= BUILDING_SMALL_POND && b->type <= BUILDING_SMALL_STATUE_ALT_B) {
-            return 1;
+        if (b->type >= BUILDING_SMALL_POND && b->type <= BUILDING_SENATOR_STATUE) {
+            return HEIGHT_1_16_BLOCKS;
         }
 
         switch (b->type) {
-            case BUILDING_SMALL_TEMPLE_CERES:
-            case BUILDING_SMALL_TEMPLE_NEPTUNE:
-            case BUILDING_SMALL_TEMPLE_MERCURY:
-            case BUILDING_SMALL_TEMPLE_MARS:
-            case BUILDING_SMALL_TEMPLE_VENUS:
+            //256px
             case BUILDING_SMALL_STATUE:
             case BUILDING_MEDIUM_STATUE:
             case BUILDING_LARGE_STATUE:
             case BUILDING_LEGION_STATUE:
             case BUILDING_DECORATIVE_COLUMN:
             case BUILDING_HORSE_STATUE:
-            case BUILDING_GLADIATOR_SCHOOL:
-            case BUILDING_LION_HOUSE:
-            case BUILDING_ACTOR_COLONY:
-            case BUILDING_CHARIOT_MAKER:
             case BUILDING_BURNING_RUIN:
             case BUILDING_RESERVOIR:
             case BUILDING_NATIVE_HUT:
+            case BUILDING_NATIVE_HUT_ALT:
             case BUILDING_NATIVE_MEETING:
             case BUILDING_NATIVE_CROPS:
+            case BUILDING_NATIVE_DECORATION:
+            case BUILDING_NATIVE_MONUMENT:
+            case BUILDING_NATIVE_WATCHTOWER:
             case BUILDING_MISSION_POST:
-            case BUILDING_PREFECTURE:
-            case BUILDING_ENGINEERS_POST:
             case BUILDING_GATEHOUSE:
             case BUILDING_TOWER:
-            case BUILDING_FORT:
             case BUILDING_MILITARY_ACADEMY:
-            case BUILDING_MARKET:
-            case BUILDING_SHIPYARD:
-            case BUILDING_WHARF:
             case BUILDING_GOVERNORS_HOUSE:
             case BUILDING_GOVERNORS_VILLA:
             case BUILDING_GOVERNORS_PALACE:
-            case BUILDING_FORUM:
-            case BUILDING_ROADBLOCK:
-            case BUILDING_FORUM_UPGRADED:
             case BUILDING_WORKCAMP:
             case BUILDING_ARCHITECT_GUILD:
             case BUILDING_OBELISK:
             case BUILDING_HEDGE_DARK:
             case BUILDING_HEDGE_LIGHT:
-            case BUILDING_LARARIUM:
             case BUILDING_COLONNADE:
             case BUILDING_GARDEN_PATH:
             case BUILDING_WATCHTOWER:
-            case BUILDING_GARDEN_WALL:
+            case BUILDING_LOOPED_GARDEN_WALL:
             case BUILDING_ROOFED_GARDEN_WALL:
-            case BUILDING_GARDEN_WALL_GATE:
+            case BUILDING_PANELLED_GARDEN_WALL:
             case BUILDING_PALISADE:
+            case BUILDING_GLADIATOR_STATUE:
+                return HEIGHT_1_16_BLOCKS;
+                //288px
+            case BUILDING_FOUNTAIN:
+            case BUILDING_GLADIATOR_SCHOOL:
+            case BUILDING_LION_HOUSE:
+            case BUILDING_ACTOR_COLONY:
+            case BUILDING_CHARIOT_MAKER:
+                return HEIGHT_2_18_BLOCKS;
+
+                //(new 320px for description)
+            case BUILDING_PREFECTURE:
+            case BUILDING_ENGINEERS_POST:
+            case BUILDING_BARBER:
+            case BUILDING_BATHHOUSE:
+            case BUILDING_DOCTOR:
+            case BUILDING_HOSPITAL:
+            case BUILDING_MARKET:
+            case BUILDING_LATRINES:
+            case BUILDING_WHARF:
+            case BUILDING_SHIPYARD:
+                return HEIGHT_3_20_BLOCKS;
+
+                //224px
+            case BUILDING_WELL:
+            case BUILDING_ROADBLOCK:
             case BUILDING_HEDGE_GATE_DARK:
             case BUILDING_HEDGE_GATE_LIGHT:
             case BUILDING_PALISADE_GATE:
-            case BUILDING_GLADIATOR_STATUE:
-                return 1;
+            case BUILDING_LOOPED_GARDEN_GATE:
+            case BUILDING_ROOFED_GARDEN_WALL_GATE:
+            case BUILDING_PANELLED_GARDEN_GATE:
+                return HEIGHT_4_14_BLOCKS;
 
-            case BUILDING_SENATE:
-            case BUILDING_SENATE_UPGRADED:
-            case BUILDING_FOUNTAIN:
-                return 2;
+                //384px
+            case BUILDING_TAVERN:
+            case BUILDING_AMPHITHEATER:
+            case BUILDING_ARENA:
+            case BUILDING_ORACLE:
+            case BUILDING_NYMPHAEUM:
+            case BUILDING_SMALL_MAUSOLEUM:
+            case BUILDING_LARGE_MAUSOLEUM:
+            case BUILDING_TRIUMPHAL_ARCH:
+            case BUILDING_SHIP_BRIDGE:
+            case BUILDING_LOW_BRIDGE:
+                return HEIGHT_5_24_BLOCKS;
 
+                //608px
+            case BUILDING_DOCK:
+            case BUILDING_LIGHTHOUSE:
+            case BUILDING_CARAVANSERAI:
+                return HEIGHT_6_38_BLOCKS;
+
+                //640px
+            case BUILDING_GRAND_TEMPLE_CERES:
+            case BUILDING_GRAND_TEMPLE_NEPTUNE:
+            case BUILDING_GRAND_TEMPLE_MERCURY:
+            case BUILDING_GRAND_TEMPLE_VENUS:
+            case BUILDING_PANTHEON:
+            case BUILDING_HIPPODROME:
+            case BUILDING_COLOSSEUM:
+                return HEIGHT_8_SCALING;
+
+                //736px
+            case BUILDING_GRAND_TEMPLE_MARS:
+                return HEIGHT_10_46_BLOCKS;
+
+                //448px
+            case BUILDING_FORT:
+            case BUILDING_MESS_HALL:
+            case BUILDING_CITY_MINT:
             case BUILDING_BARRACKS:
+                return HEIGHT_11_28_BLOCKS;
+
+                //272px (new 336px for description)
+            case BUILDING_SHRINE_CERES:
+            case BUILDING_SHRINE_NEPTUNE:
+            case BUILDING_SHRINE_MERCURY:
+            case BUILDING_SHRINE_MARS:
+            case BUILDING_SHRINE_VENUS:
+            case BUILDING_SMALL_TEMPLE_CERES:
+            case BUILDING_SMALL_TEMPLE_NEPTUNE:
+            case BUILDING_SMALL_TEMPLE_MERCURY:
+            case BUILDING_SMALL_TEMPLE_MARS:
+            case BUILDING_SMALL_TEMPLE_VENUS:
             case BUILDING_LARGE_TEMPLE_CERES:
             case BUILDING_LARGE_TEMPLE_NEPTUNE:
             case BUILDING_LARGE_TEMPLE_MERCURY:
             case BUILDING_LARGE_TEMPLE_MARS:
             case BUILDING_LARGE_TEMPLE_VENUS:
-            case BUILDING_ORACLE:
-            case BUILDING_NYMPHAEUM:
-            case BUILDING_SMALL_MAUSOLEUM:
-            case BUILDING_LARGE_MAUSOLEUM:
-                return 3;
+                return HEIGHT_12_21_BLOCKS;
 
-            case BUILDING_WELL:
-                return 4;
+                //240px
+            case BUILDING_LARARIUM:
+            case BUILDING_ARMOURY:
+                return HEIGHT_13_15_BLOCKS;
 
-            case BUILDING_DOCK:
-            case BUILDING_LIGHTHOUSE:
-            case BUILDING_CARAVANSERAI:
-                return 6;
-
-            case BUILDING_MESS_HALL:
-                return 7;
-
-            case BUILDING_GRAND_TEMPLE_CERES:
-            case BUILDING_GRAND_TEMPLE_NEPTUNE:
-            case BUILDING_GRAND_TEMPLE_MERCURY:
-            case BUILDING_GRAND_TEMPLE_MARS:
-            case BUILDING_GRAND_TEMPLE_VENUS:
-            case BUILDING_PANTHEON:
-            case BUILDING_HIPPODROME:
-            case BUILDING_COLOSSEUM:
-                return 8;
-
-            case BUILDING_GRANARY:
-                return 9;
-
+                //352px
             default:
-                return 0;
+                return HEIGHT_0_22_BLOCKS;
         }
     }
-    return 0;
+    return HEIGHT_0_22_BLOCKS;
 }
 
 static int has_mothball_button(void)
@@ -241,62 +298,38 @@ static int center_in_city(int element_width_pixels)
     return x + margin;
 }
 
-void highlight_waypoints(building *b) // highlight the 4 routing tiles for roams from this building
-{
-    map_clear_highlights();
-    if (b->type == BUILDING_FORT || b->house_size) { // building doesn't send roamers
-        return;
-    }
-    int hx, hy, roadx, roady;
-    hx = b->x; hy = b->y - 8;
-    map_grid_bound(&hx, &hy);
-    if (map_closest_road_within_radius(hx, hy, 1, 6, &roadx, &roady)) {
-        map_highlight_set(map_grid_offset(roadx, roady));
-    }
-    hx = b->x + 8; hy = b->y;
-    map_grid_bound(&hx, &hy);
-    if (map_closest_road_within_radius(hx, hy, 1, 6, &roadx, &roady)) {
-        map_highlight_set(map_grid_offset(roadx, roady));
-    }
-    hx = b->x; hy = b->y + 8;
-    map_grid_bound(&hx, &hy);
-    if (map_closest_road_within_radius(hx, hy, 1, 6, &roadx, &roady)) {
-        map_highlight_set(map_grid_offset(roadx, roady));
-    }
-    hx = b->x - 8; hy = b->y;
-    map_grid_bound(&hx, &hy);
-    if (map_closest_road_within_radius(hx, hy, 1, 6, &roadx, &roady)) {
-        map_highlight_set(map_grid_offset(roadx, roady));
-    }
-    window_invalidate();
-}
-
 static void init(int grid_offset)
 {
+    original_overlay = game_state_overlay();
     context.can_play_sound = 1;
-    context.storage_show_special_orders = 0;
-    context.can_go_to_advisor = 0;
+    context.show_special_orders = 0;
+    context.depot_selection.destination = 0;
+    context.depot_selection.source = 0;
+    context.depot_selection.resource = 0;
+    context.advisor_button = ADVISOR_NONE;
     context.building_id = map_building_at(grid_offset);
     context.rubble_building_type = map_rubble_building_type(grid_offset);
     context.has_reservoir_pipes = map_terrain_is(grid_offset, TERRAIN_RESERVOIR_RANGE);
-    context.aqueduct_has_water = map_aqueduct_at(grid_offset)
-        && map_image_at(grid_offset) - image_group(GROUP_BUILDING_AQUEDUCT) < 15;
+    context.aqueduct_has_water = map_aqueduct_has_water_access_at(grid_offset);
 
-    city_resource_determine_available();
+    city_resource_determine_available(1);
     context.type = BUILDING_INFO_TERRAIN;
     context.figure.drawn = 0;
-    if (!context.building_id && map_sprite_bridge_at(grid_offset) > 0) {
+    if (map_is_bridge(grid_offset)) {
         if (map_terrain_is(grid_offset, TERRAIN_WATER)) {
             context.terrain_type = TERRAIN_INFO_BRIDGE;
         } else {
             context.terrain_type = TERRAIN_INFO_EMPTY;
         }
-    } else if (map_property_is_plaza_or_earthquake(grid_offset)) {
+    } else if (map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset)) {
         if (map_terrain_is(grid_offset, TERRAIN_ROAD)) {
             context.terrain_type = TERRAIN_INFO_PLAZA;
         }
         if (map_terrain_is(grid_offset, TERRAIN_ROCK)) {
             context.terrain_type = TERRAIN_INFO_EARTHQUAKE;
+        }
+        if (map_terrain_is(grid_offset, TERRAIN_GARDEN)) {
+            context.terrain_type = TERRAIN_INFO_GARDEN;
         }
     } else if (map_terrain_is(grid_offset, TERRAIN_TREE)) {
         context.terrain_type = TERRAIN_INFO_TREE;
@@ -330,8 +363,6 @@ static void init(int grid_offset)
         building *b = building_get(context.building_id);
         context.type = BUILDING_INFO_BUILDING;
         context.worker_percentage = calc_percentage(b->num_workers, model_get_building(b->type)->laborers);
-        highlight_waypoints(b);
-
         switch (b->type) {
             case BUILDING_FORT_GROUND:
                 context.building_id = b->prev_part_building_id;
@@ -357,60 +388,32 @@ static void init(int grid_offset)
                 }
                 break;
         }
-        context.has_road_access = 0;
         switch (b->type) {
             case BUILDING_GRANARY:
-                if (map_has_road_access_granary(b->x, b->y, 0)) {
-                    context.has_road_access = 1;
-                }
+                context.has_road_access = map_has_road_access_granary(b->x, b->y, 0);
                 break;
             case BUILDING_HIPPODROME:
-                if (map_has_road_access_hippodrome_rotation(b->x, b->y, 0, b->subtype.orientation)) {
-                    context.has_road_access = 1;
-                }
+                context.has_road_access = map_has_road_access_hippodrome_rotation(b->x, b->y, 0, b->subtype.orientation);
                 break;
             case BUILDING_WAREHOUSE:
-                if (map_has_road_access_rotation(b->subtype.orientation, b->x, b->y, 3, 0)) {
-                    context.has_road_access = 1;
-                }
+                context.has_road_access = map_has_road_access_rotation(b->subtype.orientation, b->x, b->y, 3, 0);
                 context.warehouse_space_text = building_warehouse_get_space_info(b);
                 break;
-            case BUILDING_GRAND_TEMPLE_CERES:
-            case BUILDING_GRAND_TEMPLE_NEPTUNE:
-            case BUILDING_GRAND_TEMPLE_MERCURY:
-            case BUILDING_GRAND_TEMPLE_MARS:
-            case BUILDING_GRAND_TEMPLE_VENUS:
-            case BUILDING_PANTHEON:
-                if (map_has_road_access_monument_size7(b->x, b->y, 0)) {
-                    context.has_road_access = 1;
-                }
-                break;
-            case BUILDING_COLOSSEUM:
-                if (map_has_road_access_monument_size5(b->x, b->y, 0)) {
-                    context.has_road_access = 1;
-                }
-                break;
-            case BUILDING_LIGHTHOUSE:
-            case BUILDING_LARGE_TEMPLE_CERES:
-            case BUILDING_LARGE_TEMPLE_MARS:
-            case BUILDING_LARGE_TEMPLE_MERCURY:
-            case BUILDING_LARGE_TEMPLE_NEPTUNE:
-            case BUILDING_LARGE_TEMPLE_VENUS:
-                if (map_has_road_access_monument_size3(b->x, b->y, 0)) {
-                    context.has_road_access = 1;
-                }
-                break;
-            case BUILDING_CARAVANSERAI:
-                if (map_has_road_access_monument_size4(b->x, b->y, 0)) {
-                    context.has_road_access = 1;
-                }
+            case BUILDING_DEPOT:
+                context.has_road_access = map_has_road_access(b->x, b->y, b->size, 0);
+                game_state_set_overlay(OVERLAY_STORAGES);
+                window_building_depot_init_main(b->id);
                 break;
             default:
-                if (map_has_road_access(b->x, b->y, b->size, 0)) {
-                    context.has_road_access = 1;
+                if (building_monument_is_unfinished_monument(b)) {
+                    context.has_road_access = map_has_road_access_monument_construction(b->x, b->y, b->size);
+                } else {
+                    context.has_road_access = map_has_road_access(b->x, b->y, b->size, 0);
                 }
                 break;
         }
+        figure_roamer_preview_reset(b->type);
+        figure_roamer_preview_create(b->type, b->x, b->y);
     }
     // figures
     context.figure.selected_index = 0;
@@ -437,6 +440,7 @@ static void init(int grid_offset)
                     case FIGURE_JAVELIN:
                     case FIGURE_BOLT:
                     case FIGURE_BALLISTA:
+                    case FIGURE_CATAPULT_MISSILE:
                     case FIGURE_CREATURE:
                     case FIGURE_FISH_GULLS:
                     case FIGURE_SPEAR:
@@ -464,7 +468,7 @@ static void init(int grid_offset)
             context.type = BUILDING_INFO_LEGION;
             context.formation_id = f->formation_id;
             const formation *m = formation_get(context.formation_id);
-            if (m->figure_type != FIGURE_FORT_LEGIONARY) {
+            if (m->figure_type != FIGURE_FORT_LEGIONARY && m->figure_type != FIGURE_FORT_INFANTRY) {
                 context.formation_types = 5;
             } else if (m->has_military_training) {
                 context.formation_types = 4;
@@ -480,13 +484,16 @@ static void init(int grid_offset)
     switch (get_height_id()) {
         case 1: context.height_blocks = 16; break;
         case 2: context.height_blocks = 18; break;
-        case 3: context.height_blocks = 19; break;
+        case 3: context.height_blocks = 20; break;
         case 4: context.height_blocks = 14; break;
         case 5: context.height_blocks = 24; break;
         case 6: context.height_blocks = 38; break;
-        case 7: context.height_blocks = 26; break;
-        case 8: context.height_blocks = 40; context.width_blocks = 30; break;
-        case 9: context.height_blocks = 20; break;
+        case 7: context.height_blocks = 26; break; //416px
+        case 8: context.height_blocks = 40; break;
+        case 10: context.height_blocks = 46; break;
+        case 11: context.height_blocks = 28; break;
+        case 12: context.height_blocks = 21; break;
+        case 13: context.height_blocks = 15; break;
         default: context.height_blocks = 22; break;
     }
     if (screen_height() <= 600) {
@@ -512,12 +519,13 @@ static void draw_background(void)
 {
     window_city_draw_panels();
     window_city_draw();
+    context.risk_icons.active = 0;
     if (context.type == BUILDING_INFO_NONE) {
         window_building_draw_no_people(&context);
     } else if (context.type == BUILDING_INFO_TERRAIN) {
         window_building_draw_terrain(&context);
     } else if (context.type == BUILDING_INFO_BUILDING) {
-        int btype = building_get(context.building_id)->type;
+        building_type btype = building_get(context.building_id)->type;
         if (building_is_house(btype)) {
             window_building_draw_house(&context);
         } else if (btype == BUILDING_WHEAT_FARM) {
@@ -540,6 +548,12 @@ static void draw_background(void)
             window_building_draw_timber_yard(&context);
         } else if (btype == BUILDING_CLAY_PIT) {
             window_building_draw_clay_pit(&context);
+        } else if (btype == BUILDING_GOLD_MINE) {
+            window_building_draw_gold_mine(&context);
+        } else if (btype == BUILDING_STONE_QUARRY) {
+            window_building_draw_stone_quarry(&context);
+        } else if (btype == BUILDING_SAND_PIT) {
+            window_building_draw_sand_pit(&context);
         } else if (btype == BUILDING_WINE_WORKSHOP) {
             window_building_draw_wine_workshop(&context);
         } else if (btype == BUILDING_OIL_WORKSHOP) {
@@ -550,29 +564,45 @@ static void draw_background(void)
             window_building_draw_furniture_workshop(&context);
         } else if (btype == BUILDING_POTTERY_WORKSHOP) {
             window_building_draw_pottery_workshop(&context);
+        } else if (btype == BUILDING_BRICKWORKS) {
+            window_building_draw_brickworks(&context);
+        } else if (btype == BUILDING_CONCRETE_MAKER) {
+            window_building_draw_concrete_maker(&context);
+        } else if (btype == BUILDING_CITY_MINT) {
+            window_building_draw_city_mint(&context);
         } else if (btype == BUILDING_MARKET) {
-            if (context.storage_show_special_orders) {
-                window_building_draw_supplier_orders(&context, translation_for(TR_MARKET_SPECIAL_ORDERS_HEADER));
+            if (context.show_special_orders) {
+                window_building_draw_distributor_orders(&context, translation_for(TR_MARKET_SPECIAL_ORDERS_HEADER));
             } else {
                 window_building_draw_market(&context);
             }
         } else if (btype == BUILDING_MESS_HALL) {
-            if (context.storage_show_special_orders) {
-                window_building_draw_supplier_orders(&context, translation_for(TR_MESS_HALL_SPECIAL_ORDERS_HEADER));
+            if (context.show_special_orders) {
+                window_building_draw_distributor_orders(&context, translation_for(TR_MESS_HALL_SPECIAL_ORDERS_HEADER));
             } else {
                 window_building_draw_mess_hall(&context);
             }
         } else if (btype == BUILDING_GRANARY) {
-            if (context.storage_show_special_orders) {
+            if (context.show_special_orders) {
                 window_building_draw_granary_orders(&context);
             } else {
                 window_building_draw_granary(&context);
             }
         } else if (btype == BUILDING_WAREHOUSE) {
-            if (context.storage_show_special_orders) {
+            if (context.show_special_orders) {
                 window_building_draw_warehouse_orders(&context);
             } else {
                 window_building_draw_warehouse(&context);
+            }
+        } else if (btype == BUILDING_DEPOT) {
+            if (context.depot_selection.source) {
+                window_building_draw_depot_order_source_destination_background(&context, 0);
+            } else if (context.depot_selection.destination) {
+                window_building_draw_depot_order_source_destination_background(&context, 1);
+            } else if (context.depot_selection.resource) {
+                window_building_draw_depot_select_resource(&context);
+            } else {
+                window_building_draw_depot(&context);
             }
         } else if (btype == BUILDING_AMPHITHEATER) {
             window_building_draw_amphitheater(&context);
@@ -607,8 +637,8 @@ static void draw_background(void)
         } else if (btype == BUILDING_LIBRARY) {
             window_building_draw_library(&context);
         } else if (btype == BUILDING_SMALL_TEMPLE_CERES || btype == BUILDING_LARGE_TEMPLE_CERES) {
-            if (context.storage_show_special_orders) {
-                window_building_draw_supplier_orders(&context, translation_for(TR_TEMPLE_SPECIAL_ORDERS_HEADER));
+            if (context.show_special_orders) {
+                window_building_draw_distributor_orders(&context, translation_for(TR_TEMPLE_SPECIAL_ORDERS_HEADER));
             } else {
                 window_building_draw_temple_ceres(&context);
             }
@@ -619,8 +649,8 @@ static void draw_background(void)
         } else if (btype == BUILDING_SMALL_TEMPLE_MARS || btype == BUILDING_LARGE_TEMPLE_MARS) {
             window_building_draw_temple_mars(&context);
         } else if (btype == BUILDING_SMALL_TEMPLE_VENUS || btype == BUILDING_LARGE_TEMPLE_VENUS) {
-            if (context.storage_show_special_orders) {
-                window_building_draw_supplier_orders(&context, translation_for(TR_TEMPLE_SPECIAL_ORDERS_HEADER));
+            if (context.show_special_orders) {
+                window_building_draw_distributor_orders(&context, translation_for(TR_TEMPLE_SPECIAL_ORDERS_HEADER));
             } else {
                 window_building_draw_temple_venus(&context);
             }
@@ -638,11 +668,9 @@ static void draw_background(void)
             window_building_draw_work_camp(&context);
         } else if (btype == BUILDING_ARCHITECT_GUILD) {
             window_building_draw_architect_guild(&context);
-        } else if (btype == BUILDING_MESS_HALL) {
-            window_building_draw_mess_hall(&context);
         } else if (btype == BUILDING_TAVERN) {
-            if (context.storage_show_special_orders) {
-                window_building_draw_supplier_orders(&context, translation_for(TR_TAVERN_SPECIAL_ORDERS_HEADER));
+            if (context.show_special_orders) {
+                window_building_draw_distributor_orders(&context, translation_for(TR_TAVERN_SPECIAL_ORDERS_HEADER));
             } else {
                 window_building_draw_tavern(&context);
             }
@@ -663,17 +691,17 @@ static void draw_background(void)
         } else if (btype == BUILDING_GOVERNORS_HOUSE || btype == BUILDING_GOVERNORS_VILLA ||
             btype == BUILDING_GOVERNORS_PALACE) {
             window_building_draw_governor_home(&context);
-        } else if (btype == BUILDING_FORUM || btype == BUILDING_FORUM_UPGRADED) {
+        } else if (btype == BUILDING_FORUM || btype == BUILDING_FORUM_2_UNUSED) {
             window_building_draw_forum(&context);
-        } else if (btype == BUILDING_SENATE || btype == BUILDING_SENATE_UPGRADED) {
+        } else if (btype == BUILDING_SENATE_1_UNUSED || btype == BUILDING_SENATE) {
             window_building_draw_senate(&context);
         } else if (btype == BUILDING_ENGINEERS_POST) {
             window_building_draw_engineers_post(&context);
         } else if (btype == BUILDING_SHIPYARD) {
             window_building_draw_shipyard(&context);
         } else if (btype == BUILDING_DOCK) {
-            if (context.storage_show_special_orders) {
-                window_building_draw_dock_orders(&context);
+            if (context.show_special_orders) {
+                window_building_draw_distributor_orders(&context, translation_for(TR_DOCK_SPECIAL_ORDERS_HEADER));
             } else {
                 window_building_draw_dock(&context);
             }
@@ -687,8 +715,8 @@ static void draw_background(void)
             window_building_draw_well(&context);
         } else if (btype == BUILDING_SMALL_STATUE ||
             btype == BUILDING_MEDIUM_STATUE ||
-            btype == BUILDING_SMALL_STATUE_ALT ||
-            btype == BUILDING_SMALL_STATUE_ALT_B ||
+            btype == BUILDING_GODDESS_STATUE ||
+            btype == BUILDING_SENATOR_STATUE ||
             btype == BUILDING_LEGION_STATUE ||
             btype == BUILDING_DECORATIVE_COLUMN ||
             btype == BUILDING_HORSE_STATUE ||
@@ -700,21 +728,19 @@ static void draw_background(void)
             window_building_draw_pond(&context);
         } else if ((btype >= BUILDING_PINE_TREE && btype <= BUILDING_PAVILION_GREEN) ||
             (btype >= BUILDING_HEDGE_DARK && btype <= BUILDING_HEDGE_LIGHT) ||
-            btype == BUILDING_COLONNADE || btype == BUILDING_GARDEN_PATH || btype == BUILDING_GARDEN_WALL ||
-            btype == BUILDING_ROOFED_GARDEN_WALL) {
+            btype == BUILDING_COLONNADE || btype == BUILDING_GARDEN_PATH || btype == BUILDING_LOOPED_GARDEN_WALL ||
+            btype == BUILDING_ROOFED_GARDEN_WALL || btype == BUILDING_PANELLED_GARDEN_WALL) {
             window_building_draw_garden(&context);
-        } else if (btype == BUILDING_TRIUMPHAL_ARCH) {
-            window_building_draw_triumphal_arch(&context);
         } else if (btype == BUILDING_PREFECTURE) {
             window_building_draw_prefect(&context);
         } else if (btype == BUILDING_OBELISK) {
             window_building_draw_obelisk(&context);
+        } else if (building_type_is_roadblock(btype) && context.show_special_orders) {
+            window_building_draw_roadblock_orders(&context);
         } else if (btype == BUILDING_ROADBLOCK) {
-            if (context.storage_show_special_orders) {
-                window_building_draw_roadblock_orders(&context);
-            } else {
-                window_building_draw_roadblock(&context);
-            }
+            window_building_draw_roadblock(&context);
+        } else if (btype == BUILDING_TRIUMPHAL_ARCH) {
+            window_building_draw_triumphal_arch(&context);
         } else if (btype == BUILDING_GATEHOUSE) {
             window_building_draw_gatehouse(&context);
         } else if (btype == BUILDING_TOWER) {
@@ -727,36 +753,50 @@ static void draw_background(void)
             window_building_draw_fort(&context);
         } else if (btype == BUILDING_BURNING_RUIN) {
             window_building_draw_burning_ruin(&context);
-        } else if (btype == BUILDING_NATIVE_HUT) {
+        } else if (btype == BUILDING_NATIVE_HUT || btype == BUILDING_NATIVE_HUT_ALT) {
             window_building_draw_native_hut(&context);
         } else if (btype == BUILDING_NATIVE_MEETING) {
             window_building_draw_native_meeting(&context);
         } else if (btype == BUILDING_NATIVE_CROPS) {
             window_building_draw_native_crops(&context);
+        } else if (btype == BUILDING_NATIVE_DECORATION) {
+            window_building_draw_native_decoration(&context);
+        } else if (btype == BUILDING_NATIVE_MONUMENT) {
+            window_building_draw_native_monument(&context);
+        } else if (btype == BUILDING_NATIVE_WATCHTOWER) {
+            window_building_draw_native_watchtower(&context);
         } else if (btype == BUILDING_MISSION_POST) {
             window_building_draw_mission_post(&context);
         } else if (btype == BUILDING_WATCHTOWER) {
             window_building_draw_watchtower(&context);
         } else if (btype == BUILDING_CARAVANSERAI) {
-            if (context.storage_show_special_orders) {
-                window_building_draw_supplier_orders(&context, translation_for(TR_CARAVANSERAI_SPECIAL_ORDERS_HEADER));
+            if (context.show_special_orders) {
+                window_building_draw_distributor_orders(&context,
+                    translation_for(TR_CARAVANSERAI_SPECIAL_ORDERS_HEADER));
             } else {
                 window_building_draw_caravanserai(&context);
             }
-        } else if (btype == BUILDING_GARDEN_WALL_GATE || btype == BUILDING_HEDGE_GATE_DARK || btype == BUILDING_HEDGE_GATE_LIGHT) {
-            if (context.storage_show_special_orders) {
-                window_building_draw_roadblock_orders(&context);
-            } else {
-                window_building_draw_garden_gate(&context);
-            }
+        } else if (btype == BUILDING_ROOFED_GARDEN_WALL_GATE || btype == BUILDING_HEDGE_GATE_DARK ||
+            btype == BUILDING_HEDGE_GATE_LIGHT || btype == BUILDING_LOOPED_GARDEN_GATE || btype == BUILDING_PANELLED_GARDEN_GATE) {
+            window_building_draw_garden_gate(&context);
         } else if (btype == BUILDING_PALISADE) {
             window_building_draw_palisade(&context);
         } else if (btype == BUILDING_PALISADE_GATE) {
-            if (context.storage_show_special_orders) {
-                window_building_draw_roadblock_orders(&context);
-            } else {
-                window_building_draw_palisade_gate(&context);
-            }
+            window_building_draw_palisade_gate(&context);
+        } else if (btype == BUILDING_SHRINE_CERES) {
+            window_building_draw_shrine_ceres(&context);
+        } else if (btype == BUILDING_SHRINE_NEPTUNE) {
+            window_building_draw_shrine_neptune(&context);
+        } else if (btype == BUILDING_SHRINE_MERCURY) {
+            window_building_draw_shrine_mercury(&context);
+        } else if (btype == BUILDING_SHRINE_MARS) {
+            window_building_draw_shrine_mars(&context);
+        } else if (btype == BUILDING_SHRINE_VENUS) {
+            window_building_draw_shrine_venus(&context);
+        } else if (btype == BUILDING_ARMOURY) {
+            window_building_draw_armoury(&context);
+        } else if (btype == BUILDING_LATRINES) {
+            window_building_draw_latrines(&context);
         }
     } else if (context.type == BUILDING_INFO_LEGION) {
         window_building_draw_legion_info(&context);
@@ -774,61 +814,71 @@ static void draw_foreground(void)
             window_building_draw_primary_product_stockpiling(&context);
         }
 
-        if (btype == BUILDING_LIGHTHOUSE && b->data.monument.phase == MONUMENT_FINISHED) {
+        if (btype == BUILDING_LIGHTHOUSE && b->monument.phase == MONUMENT_FINISHED) {
             window_building_draw_lighthouse_foreground(&context);
         } else if (btype == BUILDING_GRANARY) {
-            if (context.storage_show_special_orders) {
+            if (context.show_special_orders) {
                 window_building_draw_granary_orders_foreground(&context);
             } else {
                 window_building_draw_granary_foreground(&context);
             }
         } else if (btype == BUILDING_WAREHOUSE) {
-            if (context.storage_show_special_orders) {
+            if (context.show_special_orders) {
                 window_building_draw_warehouse_orders_foreground(&context);
             } else {
                 window_building_draw_warehouse_foreground(&context);
             }
-        } else if (btype == BUILDING_MARKET) {
-            if (context.storage_show_special_orders) {
-                window_building_draw_supplier_orders_foreground(&context);
+        } else if (btype == BUILDING_DEPOT) {
+            if (context.depot_selection.source) {
+                window_building_draw_depot_select_source_destination(&context);
+            } else if (context.depot_selection.destination) {
+                window_building_draw_depot_select_source_destination(&context);
+            } else if (context.depot_selection.resource) {
+                window_building_draw_depot_select_resource_foreground(&context);
             } else {
-                window_building_supplier_draw_foreground(&context);
+                window_building_draw_depot_foreground(&context);
+            }
+        } else if (btype == BUILDING_MARKET) {
+            if (context.show_special_orders) {
+                window_building_draw_distributor_orders_foreground(&context);
+            } else {
+                window_building_distributor_draw_foreground(&context);
             }
         } else if (btype == BUILDING_TAVERN) {
-            if (context.storage_show_special_orders) {
-                window_building_draw_supplier_orders_foreground(&context);
+            if (context.show_special_orders) {
+                window_building_draw_distributor_orders_foreground(&context);
             } else {
-                window_building_supplier_draw_foreground(&context);
+                window_building_distributor_draw_foreground(&context);
             }
         } else if (btype == BUILDING_MESS_HALL) {
-            if (context.storage_show_special_orders) {
-                window_building_draw_supplier_orders_foreground(&context);
+            if (context.show_special_orders) {
+                window_building_draw_distributor_orders_foreground(&context);
             } else {
-                window_building_supplier_draw_foreground(&context);
+                window_building_distributor_draw_foreground(&context);
             }
-        } else if (building_is_venus_temple(btype) && b->data.monument.phase <= 0 &&
+        } else if (building_is_venus_temple(btype) && b->monument.phase <= 0 &&
             building_monument_gt_module_is_active(VENUS_MODULE_1_DISTRIBUTE_WINE)) {
-            if (context.storage_show_special_orders) {
-                window_building_draw_supplier_orders_foreground(&context);
+            if (context.show_special_orders) {
+                window_building_draw_distributor_orders_foreground(&context);
             } else {
-                window_building_supplier_draw_foreground(&context);
+                window_building_distributor_draw_foreground(&context);
             }
-        } else if (building_is_ceres_temple(btype) && b->data.monument.phase <= 0 &&
+        } else if (building_is_ceres_temple(btype) && b->monument.phase <= 0 &&
             building_monument_gt_module_is_active(CERES_MODULE_2_DISTRIBUTE_FOOD)) {
-            if (context.storage_show_special_orders) {
-                window_building_draw_supplier_orders_foreground(&context);
+            if (context.show_special_orders) {
+                window_building_draw_distributor_orders_foreground(&context);
             } else {
-                window_building_supplier_draw_foreground(&context);
+                window_building_distributor_draw_foreground(&context);
             }
-        } else if (btype == BUILDING_ROADBLOCK) {
-            if (context.storage_show_special_orders) {
+        } else if (building_type_is_roadblock(btype)) {
+            if (context.show_special_orders) {
                 window_building_draw_roadblock_orders_foreground(&context);
             } else {
-                window_building_draw_roadblock_foreground(&context);
+                window_building_draw_roadblock_button(&context);
             }
         } else if (btype == BUILDING_DOCK) {
-            if (context.storage_show_special_orders) {
-                window_building_draw_dock_orders_foreground(&context);
+            if (context.show_special_orders) {
+                window_building_draw_distributor_orders_foreground(&context);
             } else {
                 window_building_draw_dock_foreground(&context);
             }
@@ -838,23 +888,19 @@ static void draw_foreground(void)
             btype == BUILDING_PANTHEON) {
             window_building_draw_grand_temple_foreground(&context);
         } else if (btype == BUILDING_CARAVANSERAI &&
-            b->data.monument.phase == MONUMENT_FINISHED) {
-            if (context.storage_show_special_orders) {
-                window_building_draw_supplier_orders_foreground(&context);
+            b->monument.phase == MONUMENT_FINISHED) {
+            if (context.show_special_orders) {
+                window_building_draw_distributor_orders_foreground(&context);
             } else {
-                window_building_supplier_draw_foreground(&context);
+                window_building_distributor_draw_foreground(&context);
                 window_building_draw_caravanserai_foreground(&context);
             }
         } else if (btype == BUILDING_COLOSSEUM) {
             window_building_draw_colosseum_foreground(&context);
         } else if (btype == BUILDING_HIPPODROME) {
             window_building_draw_hippodrome_foreground(&context);
-        } else if (btype == BUILDING_GARDEN_WALL_GATE || btype == BUILDING_HEDGE_GATE_DARK || btype == BUILDING_HEDGE_GATE_LIGHT || btype == BUILDING_PALISADE_GATE) {
-            if (context.storage_show_special_orders) {
-                window_building_draw_roadblock_orders_foreground(&context);
-            } else {
-                window_building_draw_garden_gate_foreground(&context);
-            }
+        } else if (btype == BUILDING_CITY_MINT) {
+            window_building_draw_city_mint_foreground(&context);
         }
 
         if (building_monument_is_unfinished_monument(b)) {
@@ -864,21 +910,47 @@ static void draw_foreground(void)
         }
     } else if (context.type == BUILDING_INFO_LEGION) {
         window_building_draw_legion_info_foreground(&context);
+    } else if (context.terrain_type == TERRAIN_INFO_BRIDGE) {
+        if (context.show_special_orders) {
+            window_building_draw_roadblock_orders_foreground(&context);
+        } else {
+            window_building_draw_roadblock_button(&context);
+        }
     }
+
     // general buttons
-    if (context.storage_show_special_orders) {
-        int y_offset = window_building_get_vertical_offset(&context, 28);
-        image_buttons_draw(context.x_offset, y_offset + 400, image_buttons_help_close, 2);
+    if (context.show_special_orders ||
+        context.depot_selection.source ||
+        context.depot_selection.destination ||
+        context.depot_selection.resource) {
+        int y_offset = window_building_get_vertical_offset(&context, 28) + 400;
+        image_buttons_draw(context.x_offset, y_offset, image_buttons_help_advisor_close, 2);
     } else {
+        int image_id = assets_get_image_id("UI", "Advisor_Building_Window_Border_1");
+        image_buttons_help_advisor_close[2].image_offset = image_id + context.advisor_button * 4;
+        image_buttons_help_advisor_close[2].parameter1 = context.advisor_button;
+
         image_buttons_draw(context.x_offset, context.y_offset + BLOCK_SIZE * context.height_blocks - 40,
-            image_buttons_help_close, 2);
+            image_buttons_help_advisor_close, context.advisor_button ? 3 : 2);
     }
-    if (context.can_go_to_advisor) {
-        image_buttons_draw(context.x_offset, context.y_offset + BLOCK_SIZE * context.height_blocks - 40,
-            image_buttons_advisor, 1);
+
+    if (!context.show_special_orders &&
+        !context.depot_selection.source &&
+        !context.depot_selection.destination &&
+        !context.depot_selection.resource &&
+        !building_monument_is_unfinished_monument(b) &&
+        has_mothball_button()) {
+        draw_mothball_button(context.x_offset, context.y_offset + BLOCK_SIZE * context.height_blocks - 40);
     }
-    if (!context.storage_show_special_orders && !building_monument_is_unfinished_monument(b) && has_mothball_button()) {
+    if (!context.show_special_orders &&
+        !context.depot_selection.source &&
+        !context.depot_selection.destination &&
+        !context.depot_selection.resource &&
+        !building_monument_is_unfinished_monument(b)) {
+        int workers_needed = model_get_building(building_get(context.building_id)->type)->laborers;
+        if (workers_needed) {
             draw_mothball_button(context.x_offset, context.y_offset + BLOCK_SIZE * context.height_blocks - 40);
+        }
     }
 }
 
@@ -897,59 +969,67 @@ static int handle_specific_building_info_mouse(const mouse *m)
         int btype = building_get(context.building_id)->type;
 
         if (building_has_supplier_inventory(btype)) {
-            if (context.storage_show_special_orders) {
-                window_building_handle_mouse_supplier_orders(m, &context);
+            if (context.show_special_orders) {
+                return window_building_handle_mouse_distributor_orders(m, &context);
             } else {
                 if (btype == BUILDING_CARAVANSERAI) {
-                    window_building_handle_mouse_caravanserai(m, &context);
+                    if (window_building_handle_mouse_caravanserai(m, &context)) {
+                        return 1;
+                    }
                 }
-                window_building_handle_mouse_supplier(m, &context);
+                return window_building_handle_mouse_distributor(m, &context);
             }
-        } else if (btype == BUILDING_ROADBLOCK) {
-            if (context.storage_show_special_orders) {
+        } else if (building_type_is_roadblock(btype)) {
+            if (context.show_special_orders) {
                 return window_building_handle_mouse_roadblock_orders(m, &context);
             } else {
-                return window_building_handle_mouse_roadblock(m, &context);
+                return window_building_handle_mouse_roadblock_button(m, &context);
             }
         } else if (btype == BUILDING_DOCK) {
-            if (context.storage_show_special_orders) {
-                return window_building_handle_mouse_dock_orders(m, &context);
+            if (context.show_special_orders) {
+                return window_building_handle_mouse_distributor_orders(m, &context);
             } else {
                 return window_building_handle_mouse_dock(m, &context);
             }
         } else if (btype == BUILDING_BARRACKS) {
             return window_building_handle_mouse_barracks(m, &context);
         } else if (btype == BUILDING_GRAND_TEMPLE_MARS) {
-            window_building_handle_mouse_grand_temple_mars(m, &context);
+            return window_building_handle_mouse_grand_temple_mars(m, &context);
         } else if (btype == BUILDING_GRANARY) {
-            if (context.storage_show_special_orders) {
+            if (context.show_special_orders) {
                 return window_building_handle_mouse_granary_orders(m, &context);
             } else {
                 return window_building_handle_mouse_granary(m, &context);
             }
         } else if (btype == BUILDING_WAREHOUSE) {
-            if (context.storage_show_special_orders) {
-                window_building_handle_mouse_warehouse_orders(m, &context);
+            if (context.show_special_orders) {
+                return window_building_handle_mouse_warehouse_orders(m, &context);
             } else {
-                window_building_handle_mouse_warehouse(m, &context);
+                return window_building_handle_mouse_warehouse(m, &context);
             }
         } else if ((btype >= BUILDING_GRAND_TEMPLE_CERES && btype <= BUILDING_GRAND_TEMPLE_VENUS) ||
             btype == BUILDING_PANTHEON) {
-            window_building_handle_mouse_grand_temple(m, &context);
-        } else if (btype == BUILDING_LIGHTHOUSE) {
-            window_building_handle_mouse_lighthouse(m, &context);
-        } else if (btype == BUILDING_COLOSSEUM) {
-            window_building_handle_mouse_colosseum(m, &context);
-        } else if (btype == BUILDING_HIPPODROME) {
-            window_building_handle_mouse_hippodrome(m, &context);
-        } else if (btype == BUILDING_GARDEN_WALL_GATE || btype == BUILDING_HEDGE_GATE_DARK || btype == BUILDING_HEDGE_GATE_LIGHT || btype == BUILDING_PALISADE_GATE) {
-            if (context.storage_show_special_orders) {
-                return window_building_handle_mouse_roadblock_orders(m, &context);
+            return window_building_handle_mouse_grand_temple(m, &context);
+        } else if (btype == BUILDING_DEPOT) {
+            if (context.depot_selection.source) {
+                window_building_handle_mouse_depot_select_source(m, &context);
+            } else if (context.depot_selection.destination) {
+                window_building_handle_mouse_depot_select_destination(m, &context);
+            } else if (context.depot_selection.resource) {
+                window_building_handle_mouse_depot_select_resource(m, &context);
             } else {
-                return window_building_handle_mouse_garden_gate(m, &context);
+                window_building_handle_mouse_depot(m, &context);
             }
+        } else if (btype == BUILDING_LIGHTHOUSE) {
+            return window_building_handle_mouse_lighthouse(m, &context);
+        } else if (btype == BUILDING_COLOSSEUM) {
+            return window_building_handle_mouse_colosseum(m, &context);
+        } else if (btype == BUILDING_HIPPODROME) {
+            return window_building_handle_mouse_hippodrome(m, &context);
+        } else if (btype == BUILDING_CITY_MINT) {
+            return window_building_handle_mouse_city_mint(m, &context);
         } else if (building_is_primary_product_producer(btype)) {
-            window_building_handle_mouse_primary_product_producer(m, &context);
+            return window_building_handle_mouse_primary_product_producer(m, &context);
         }
     }
     return 0;
@@ -959,14 +1039,17 @@ static void handle_input(const mouse *m, const hotkeys *h)
 {
     int handled = 0;
     // general buttons
-    if (context.storage_show_special_orders) {
+    if (context.show_special_orders ||
+        context.depot_selection.destination ||
+        context.depot_selection.source ||
+        context.depot_selection.resource) {
         int y_offset = window_building_get_vertical_offset(&context, 28);
         handled |= image_buttons_handle_mouse(m, context.x_offset, y_offset + 400,
-            image_buttons_help_close, 2, &focus_image_button_id);
+            image_buttons_help_advisor_close, 2, &focus_image_button_id);
     } else {
         handled |= image_buttons_handle_mouse(
             m, context.x_offset, context.y_offset + BLOCK_SIZE * context.height_blocks - 40,
-            image_buttons_help_close, 2, &focus_image_button_id);
+            image_buttons_help_advisor_close, context.advisor_button ? 3 : 2, &focus_image_button_id);
         building *b = building_get(context.building_id);
         if (building_monument_is_unfinished_monument(b)) {
             handled = generic_buttons_handle_mouse(
@@ -984,16 +1067,12 @@ static void handle_input(const mouse *m, const hotkeys *h)
             }
         }
     }
-    if (context.can_go_to_advisor) {
-        handled |= image_buttons_handle_mouse(
-            m, context.x_offset, context.y_offset + BLOCK_SIZE * context.height_blocks - 40,
-            image_buttons_advisor, 1, 0);
-    }
 
     if (!handled) {
         handled |= handle_specific_building_info_mouse(m);
     }
     if (!handled && input_go_back_requested(m, h)) {
+        game_state_set_overlay(original_overlay);
         window_city_show();
     }
 }
@@ -1005,7 +1084,16 @@ static void get_tooltip(tooltip_context *c)
     building *b = building_get(context.building_id);
     int btype = b->type;
     if (focus_image_button_id) {
-        text_id = focus_image_button_id;
+        if (focus_image_button_id == 3) {
+            int advisor = image_buttons_help_advisor_close[2].parameter1;
+            if (advisor == ADVISOR_HOUSING) {
+                translation = TR_TOOLTIP_ADVISOR_POPULATION_HOUSING_BUTTON;
+            } else {
+                text_id = 69 + advisor - (advisor >= ADVISOR_HOUSING ? 1 : 0);
+            }
+        } else {
+            text_id = focus_image_button_id;
+        }
     } else if (focus_mothball_image_button_id && has_mothball_button()) {
         if (!building_monument_is_unfinished_monument(b)) {
             if (building_get(context.building_id)->state == BUILDING_STATE_MOTHBALLED) {
@@ -1018,24 +1106,39 @@ static void get_tooltip(tooltip_context *c)
         window_building_primary_product_producer_stockpiling_tooltip(&translation);
     } else if (context.type == BUILDING_INFO_LEGION) {
         text_id = window_building_get_legion_info_tooltip_text(&context);
-    } else if (context.type == BUILDING_INFO_BUILDING && context.storage_show_special_orders) {
+    } else if ((context.type == BUILDING_INFO_BUILDING && context.show_special_orders) || building_type_is_bridge(btype)) { //bridges are technically terrain, but they have special orders
         if (btype == BUILDING_GRANARY) {
             window_building_get_tooltip_granary_orders(&group_id, &text_id, &translation);
         } else if (btype == BUILDING_WAREHOUSE) {
             window_building_get_tooltip_warehouse_orders(&group_id, &text_id, &translation);
-        } else if (btype == BUILDING_ROADBLOCK || btype == BUILDING_GARDEN_WALL_GATE || btype == BUILDING_HEDGE_GATE_DARK || btype == BUILDING_HEDGE_GATE_LIGHT) {
+        } else if (building_type_is_roadblock(btype)) {
             window_building_roadblock_get_tooltip_walker_permissions(&translation);
+        } else if (building_type_is_distributor(btype)) {
+            window_building_get_tooltip_distribution_orders(&group_id, &text_id, &translation);
         }
+    } else if (building_is_house(btype)) {
+        precomposed_text = window_building_house_get_tooltip(&context);
     } else if (btype == BUILDING_GRANARY) {
         window_building_granary_get_tooltip_distribution_permissions(&translation);
     } else if (btype == BUILDING_WAREHOUSE) {
         window_building_warehouse_get_tooltip_distribution_permissions(&translation);
     } else if (btype == BUILDING_DOCK) {
-        precomposed_text = window_building_dock_get_tooltip(&context);        
+        precomposed_text = window_building_dock_get_tooltip(&context);
+    } else if (context.type == BUILDING_INFO_BUILDING && btype == BUILDING_DEPOT) {
+        if (context.depot_selection.source || context.depot_selection.destination) {
+            window_building_depot_get_tooltip_source_destination(&translation);
+        } else if (!context.depot_selection.resource) {
+            window_building_depot_get_tooltip_main(&translation);
+        }
+    } else if (btype == BUILDING_BARRACKS || btype == BUILDING_GRAND_TEMPLE_MARS) {
+        window_building_barracks_get_tooltip_priority(&translation);
     }
-    if (!text_id && !group_id && !translation) {
-        if (btype >= BUILDING_WHEAT_FARM && btype <= BUILDING_POTTERY_WORKSHOP) {
+    if (!text_id && !group_id && !translation && !precomposed_text) {
+        if (building_is_farm(btype) || building_is_raw_resource_producer(btype) || building_is_workshop(btype)) {
             window_building_industry_get_tooltip(&context, &translation);
+        }
+        if (!translation) {
+            window_building_get_risks_tooltip(&context, &group_id, &text_id);
         }
     }
     if (text_id || group_id || translation || precomposed_text) {
@@ -1061,10 +1164,11 @@ static void button_help(int param1, int param2)
 
 static void button_close(int param1, int param2)
 {
-    if (context.storage_show_special_orders) {
-        context.storage_show_special_orders = 0;
+    if (context.show_special_orders) {
+        context.show_special_orders = 0;
         window_invalidate();
     } else {
+        game_state_set_overlay(original_overlay);
         window_city_show();
     }
 }
@@ -1074,7 +1178,7 @@ static void button_advisor(int advisor, int param2)
     window_advisors_show_advisor(advisor);
 }
 
-static void button_mothball(int mothball, int param2)
+static void button_mothball(int param1, int param2)
 {
     building *b = building_get(context.building_id);
     int workers_needed = model_get_building(b->type)->laborers;
@@ -1084,7 +1188,7 @@ static void button_mothball(int mothball, int param2)
     }
 }
 
-static void button_monument_construction(int param1, int param2)
+static void button_monument_construction(const generic_button *button)
 {
     building *b = building_get(context.building_id);
     building_monument_toggle_construction_halted(b);
@@ -1114,6 +1218,49 @@ int window_building_info_get_building_type(void)
 
 void window_building_info_show_storage_orders(void)
 {
-    context.storage_show_special_orders = 1;
+    context.show_special_orders = 1;
+    window_invalidate();
+}
+
+void window_building_info_depot_select_source(void)
+{
+    window_building_depot_init_storage_selection();
+    context.depot_selection.source = 1;
+    window_invalidate();
+}
+
+void window_building_info_depot_select_destination(void)
+{
+    window_building_depot_init_storage_selection();
+    context.depot_selection.destination = 1;
+    window_invalidate();
+}
+
+void window_building_info_depot_select_resource(void)
+{
+    window_building_depot_init_resource_selection();
+    context.depot_selection.resource = 1;
+    window_invalidate();
+}
+
+void window_building_info_depot_toggle_condition_type(void)
+{
+    building *b = building_get(context.building_id);
+    b->data.depot.current_order.condition.condition_type = (b->data.depot.current_order.condition.condition_type + 1) % 4;
+    window_invalidate();
+}
+
+void window_building_info_depot_toggle_condition_threshold(void)
+{
+    building *b = building_get(context.building_id);
+    b->data.depot.current_order.condition.threshold = (b->data.depot.current_order.condition.threshold + 4) % 36;
+    window_invalidate();
+}
+
+void window_building_info_depot_return_to_main_window(void)
+{
+    context.depot_selection.source = 0;
+    context.depot_selection.destination = 0;
+    context.depot_selection.resource = 0;
     window_invalidate();
 }

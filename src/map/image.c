@@ -2,6 +2,7 @@
 
 #include "building/image.h"
 #include "building/industry.h"
+#include "core/calc.h"
 #include "core/image.h"
 #include "core/image_group.h"
 #include "map/building_tiles.h"
@@ -66,10 +67,12 @@ void map_image_update_all(void)
             continue;
         }
         if (building_is_farm(b->type)) {
-            map_building_tiles_add_farm(b->id, b->x, b->y,
-                image_group(GROUP_BUILDING_FARM_CROPS) + 5 * (b->output_resource_id - 1),
-                b->data.industry.progress);
+            map_building_tiles_add_farm(b->id, b->x, b->y, building_image_get_base_farm_crop(b->type),
+                calc_percentage(b->data.industry.progress, building_industry_get_max_progress(b)));
             continue;
+        }
+        if (b->type == BUILDING_SHIP_BRIDGE || b->type == BUILDING_LOW_BRIDGE){
+            continue; //bridges are drawn as a part of terrain drawing, and their image shouldnt be fetched.
         }
         int image_id = building_image_get(b);
 

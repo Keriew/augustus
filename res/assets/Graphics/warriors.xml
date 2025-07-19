@@ -1,0 +1,813 @@
+<?xml version="1.0"?>
+<!DOCTYPE assetlist>
+<!-- Unless specifically mentioned, all assets created by Areldir -->
+<assetlist name="Warriors">
+	<!-- Note: Auxiliary Infantry Walker Portrait -->
+	<image id="auxinf_portrait">
+		<layer group="190" image="7"/>
+		<layer src="auxinf_portrait"/>
+	</image>
+	<!-- Note: Auxiliary Infantry Walker Death animation frames 01-08 -->
+	<image id="auxinf_death_01" src="auxinf_death_01"/>
+	<image id="auxinf_death_02" src="auxinf_death_02"/>
+	<image id="auxinf_death_03" src="auxinf_death_03"/>
+	<image id="auxinf_death_04" src="auxinf_death_04"/>
+	<image id="auxinf_death_05" src="auxinf_death_05"/>
+	<image id="auxinf_death_06">
+		<layer group="113" image="101"/>
+	</image>
+	<image id="auxinf_death_07">
+		<layer group="113" image="102"/>
+	</image>
+	<image id="auxinf_death_08">
+		<layer group="113" image="103"/>
+	</image>
+	<!-- Note: Auxiliary Infantry Walker Walking animation frames NORTH-EAST DIRECTION 01-12 -->
+	<image id="auxinf_ne_01" src="auxinf_ne_01"/>
+	<image id="auxinf_ne_02" src="auxinf_ne_02"/>
+	<image id="auxinf_ne_03" src="auxinf_ne_03"/>
+	<image id="auxinf_ne_04" src="auxinf_ne_04"/>
+	<image id="auxinf_ne_05" src="auxinf_ne_05"/>
+	<image id="auxinf_ne_06" src="auxinf_ne_06"/>
+	<image id="auxinf_ne_07" src="auxinf_ne_07"/>
+	<image id="auxinf_ne_08" src="auxinf_ne_08"/>
+	<image id="auxinf_ne_09" src="auxinf_ne_09"/>
+	<image id="auxinf_ne_10" src="auxinf_ne_10"/>
+	<image id="auxinf_ne_11" src="auxinf_ne_11"/>
+	<image id="auxinf_ne_12" src="auxinf_ne_12"/>
+	<!-- Note: Auxiliary Infantry Walker Walking animation frames EAST DIRECTION 01-12 -->
+	<image id="auxinf_e_01" src="auxinf_e_01"/>
+	<image id="auxinf_e_02" src="auxinf_e_02"/>
+	<image id="auxinf_e_03" src="auxinf_e_03"/>
+	<image id="auxinf_e_04" src="auxinf_e_04"/>
+	<image id="auxinf_e_05" src="auxinf_e_05"/>
+	<image id="auxinf_e_06" src="auxinf_e_06"/>
+	<image id="auxinf_e_07" src="auxinf_e_07"/>
+	<image id="auxinf_e_08" src="auxinf_e_08"/>
+	<image id="auxinf_e_09" src="auxinf_e_09"/>
+	<image id="auxinf_e_10" src="auxinf_e_10"/>
+	<image id="auxinf_e_11" src="auxinf_e_11"/>
+	<image id="auxinf_e_12" src="auxinf_e_12"/>
+	<!-- Note: Auxiliary Infantry Walker Walking animation frames SOUTH-EAST DIRECTION 01-12 -->
+	<image id="auxinf_se_01" src="auxinf_se_01"/>
+	<image id="auxinf_se_02" src="auxinf_se_02"/>
+	<image id="auxinf_se_03" src="auxinf_se_03"/>
+	<image id="auxinf_se_04" src="auxinf_se_04"/>
+	<image id="auxinf_se_05" src="auxinf_se_05"/>
+	<image id="auxinf_se_06" src="auxinf_se_06"/>
+	<image id="auxinf_se_07" src="auxinf_se_07"/>
+	<image id="auxinf_se_08" src="auxinf_se_08"/>
+	<image id="auxinf_se_09" src="auxinf_se_09"/>
+	<image id="auxinf_se_10" src="auxinf_se_10"/>
+	<image id="auxinf_se_11" src="auxinf_se_11"/>
+	<image id="auxinf_se_12" src="auxinf_se_12"/>
+	<!-- Note: Auxiliary Infantry Walker Walking animation frames SOUTH DIRECTION 01-12 -->
+	<image id="auxinf_s_01" src="auxinf_s_01"/>
+	<image id="auxinf_s_02" src="auxinf_s_02"/>
+	<image id="auxinf_s_03" src="auxinf_s_03"/>
+	<image id="auxinf_s_04" src="auxinf_s_04"/>
+	<image id="auxinf_s_05" src="auxinf_s_05"/>
+	<image id="auxinf_s_06" src="auxinf_s_06"/>
+	<image id="auxinf_s_07" src="auxinf_s_07"/>
+	<image id="auxinf_s_08" src="auxinf_s_08"/>
+	<image id="auxinf_s_09" src="auxinf_s_09"/>
+	<image id="auxinf_s_10" src="auxinf_s_10"/>
+	<image id="auxinf_s_11" src="auxinf_s_11"/>
+	<image id="auxinf_s_12" src="auxinf_s_12"/>
+	<!-- Note: Auxiliary Infantry Walker Walking animation frames SOUTH-WEST DIRECTION 01-12 -->
+	<image id="auxinf_sw_01" src="auxinf_sw_01"/>
+	<image id="auxinf_sw_02" src="auxinf_sw_02"/>
+	<image id="auxinf_sw_03" src="auxinf_sw_03"/>
+	<image id="auxinf_sw_04" src="auxinf_sw_04"/>
+	<image id="auxinf_sw_05" src="auxinf_sw_05"/>
+	<image id="auxinf_sw_06" src="auxinf_sw_06"/>
+	<image id="auxinf_sw_07" src="auxinf_sw_07"/>
+	<image id="auxinf_sw_08" src="auxinf_sw_08"/>
+	<image id="auxinf_sw_09" src="auxinf_sw_09"/>
+	<image id="auxinf_sw_10" src="auxinf_sw_10"/>
+	<image id="auxinf_sw_11" src="auxinf_sw_11"/>
+	<image id="auxinf_sw_12" src="auxinf_sw_12"/>
+	<!-- Note: Auxiliary Infantry Walker Walking animation frames WEST DIRECTION 01-12 -->
+	<image id="auxinf_w_01" src="auxinf_w_01"/>
+	<image id="auxinf_w_02" src="auxinf_w_02"/>
+	<image id="auxinf_w_03" src="auxinf_w_03"/>
+	<image id="auxinf_w_04" src="auxinf_w_04"/>
+	<image id="auxinf_w_05" src="auxinf_w_05"/>
+	<image id="auxinf_w_06" src="auxinf_w_06"/>
+	<image id="auxinf_w_07" src="auxinf_w_07"/>
+	<image id="auxinf_w_08" src="auxinf_w_08"/>
+	<image id="auxinf_w_09" src="auxinf_w_09"/>
+	<image id="auxinf_w_10" src="auxinf_w_10"/>
+	<image id="auxinf_w_11" src="auxinf_w_11"/>
+	<image id="auxinf_w_12" src="auxinf_w_12"/>
+	<!-- Note: Auxiliary Infantry Walker Walking animation frames NORTH-WEST DIRECTION 01-12 -->
+	<image id="auxinf_nw_01" src="auxinf_nw_01"/>
+	<image id="auxinf_nw_02" src="auxinf_nw_02"/>
+	<image id="auxinf_nw_03" src="auxinf_nw_03"/>
+	<image id="auxinf_nw_04" src="auxinf_nw_04"/>
+	<image id="auxinf_nw_05" src="auxinf_nw_05"/>
+	<image id="auxinf_nw_06" src="auxinf_nw_06"/>
+	<image id="auxinf_nw_07" src="auxinf_nw_07"/>
+	<image id="auxinf_nw_08" src="auxinf_nw_08"/>
+	<image id="auxinf_nw_09" src="auxinf_nw_09"/>
+	<image id="auxinf_nw_10" src="auxinf_nw_10"/>
+	<image id="auxinf_nw_11" src="auxinf_nw_11"/>
+	<image id="auxinf_nw_12" src="auxinf_nw_12"/>
+	<!-- Note: Auxiliary Infantry Walker Walking animation frames NORTH DIRECTION 01-12 -->
+	<image id="auxinf_n_01" src="auxinf_n_01"/>
+	<image id="auxinf_n_02" src="auxinf_n_02"/>
+	<image id="auxinf_n_03" src="auxinf_n_03"/>
+	<image id="auxinf_n_04" src="auxinf_n_04"/>
+	<image id="auxinf_n_05" src="auxinf_n_05"/>
+	<image id="auxinf_n_06" src="auxinf_n_06"/>
+	<image id="auxinf_n_07" src="auxinf_n_07"/>
+	<image id="auxinf_n_08" src="auxinf_n_08"/>
+	<image id="auxinf_n_09" src="auxinf_n_09"/>
+	<image id="auxinf_n_10" src="auxinf_n_10"/>
+	<image id="auxinf_n_11" src="auxinf_n_11"/>
+	<image id="auxinf_n_12" src="auxinf_n_12"/>
+	<!-- Note: Auxiliary Infantry Walker Fighting animation frames NORTH-EAST DIRECTION 01-05 -->
+	<image id="auxinf_f_ne_01" src="auxinf_f_ne_01"/>
+	<image id="auxinf_f_ne_02" src="auxinf_f_ne_02"/>
+	<image id="auxinf_f_ne_03" src="auxinf_f_ne_03"/>
+	<image id="auxinf_f_ne_04" src="auxinf_f_ne_04"/>
+	<image id="auxinf_f_ne_05" src="auxinf_f_ne_05"/>
+	<!-- Note: Auxiliary Infantry Walker Fighting animation frames EAST DIRECTION 01-05 -->
+	<image id="auxinf_f_e_01" src="auxinf_f_e_01"/>
+	<image id="auxinf_f_e_02" src="auxinf_f_e_02"/>
+	<image id="auxinf_f_e_03" src="auxinf_f_e_03"/>
+	<image id="auxinf_f_e_04" src="auxinf_f_e_04"/>
+	<image id="auxinf_f_e_05" src="auxinf_f_e_05"/>
+	<!-- Note: Auxiliary Infantry Walker Fighting animation frames SOUTH-EAST DIRECTION 01-05 -->
+	<image id="auxinf_f_se_01" src="auxinf_f_se_01"/>
+	<image id="auxinf_f_se_02" src="auxinf_f_se_02"/>
+	<image id="auxinf_f_se_03" src="auxinf_f_se_03"/>
+	<image id="auxinf_f_se_04" src="auxinf_f_se_04"/>
+	<image id="auxinf_f_se_05" src="auxinf_f_se_05"/>
+	<!-- Note: Auxiliary Infantry Walker Fighting animation frames SOUTH DIRECTION 01-05 -->
+	<image id="auxinf_f_s_01" src="auxinf_f_s_01"/>
+	<image id="auxinf_f_s_02" src="auxinf_f_s_02"/>
+	<image id="auxinf_f_s_03" src="auxinf_f_s_03"/>
+	<image id="auxinf_f_s_04" src="auxinf_f_s_04"/>
+	<image id="auxinf_f_s_05" src="auxinf_f_s_05"/>
+	<!-- Note: Auxiliary Infantry Walker Fighting animation frames SOUTH-WEST DIRECTION 01-05 -->
+	<image id="auxinf_f_sw_01" src="auxinf_f_sw_01"/>
+	<image id="auxinf_f_sw_02" src="auxinf_f_sw_02"/>
+	<image id="auxinf_f_sw_03" src="auxinf_f_sw_03"/>
+	<image id="auxinf_f_sw_04" src="auxinf_f_sw_04"/>
+	<image id="auxinf_f_sw_05" src="auxinf_f_sw_05"/>
+	<!-- Note: Auxiliary Infantry Walker Fighting animation frames WEST DIRECTION 01-05 -->
+	<image id="auxinf_f_w_01" src="auxinf_f_w_01"/>
+	<image id="auxinf_f_w_02" src="auxinf_f_w_02"/>
+	<image id="auxinf_f_w_03" src="auxinf_f_w_03"/>
+	<image id="auxinf_f_w_04" src="auxinf_f_w_04"/>
+	<image id="auxinf_f_w_05" src="auxinf_f_w_05"/>
+	<!-- Note: Auxiliary Infantry Walker Fighting animation frames NORTH-WEST DIRECTION 01-05 -->
+	<image id="auxinf_f_nw_01" src="auxinf_f_nw_01"/>
+	<image id="auxinf_f_nw_02" src="auxinf_f_nw_02"/>
+	<image id="auxinf_f_nw_03" src="auxinf_f_nw_03"/>
+	<image id="auxinf_f_nw_04" src="auxinf_f_nw_04"/>
+	<image id="auxinf_f_nw_05" src="auxinf_f_nw_05"/>
+	<!-- Note: Auxiliary Infantry Walker Fighting animation frames NORTH DIRECTION 01-05 -->
+	<image id="auxinf_f_n_01" src="auxinf_f_n_01"/>
+	<image id="auxinf_f_n_02" src="auxinf_f_n_02"/>
+	<image id="auxinf_f_n_03" src="auxinf_f_n_03"/>
+	<image id="auxinf_f_n_04" src="auxinf_f_n_04"/>
+	<image id="auxinf_f_n_05" src="auxinf_f_n_05"/>
+	<!-- Note: Caesar's Auxiliary Infantry Walker Portrait -->
+	<image id="auxinf_portrait_blue">
+		<layer group="190" image="7"/>
+		<layer src="auxinf_portrait"/>
+		<layer src="auxinf_blue_portrait"/>
+	</image>
+	<!-- Note: Auxiliary Archer Walker Portrait -->
+	<image id="auxarch_portrait">
+		<layer group="190" image="7"/>
+		<layer src="auxarch_portrait"/>
+	</image>
+	<!-- Note: Auxiliary Archer Walker Death animation frames 01-08 -->
+	<image id="auxarch_death_01" src="auxarch_death_01"/>
+	<image id="auxarch_death_02" src="auxarch_death_02"/>
+	<image id="auxarch_death_03" src="auxarch_death_03"/>
+	<image id="auxarch_death_04" src="auxarch_death_04"/>
+	<image id="auxarch_death_05" src="auxarch_death_05"/>
+	<image id="auxarch_death_06" src="auxarch_death_06"/>
+	<image id="auxarch_death_07" src="auxarch_death_07"/>
+	<image id="auxarch_death_08" src="auxarch_death_08"/>
+	<!-- Note: Auxiliary Archer Walker Walking animation frames NORTH-EAST DIRECTION 01-12 -->
+	<image id="auxarch_ne_01" src="auxarch_ne_01"/>
+	<image id="auxarch_ne_02" src="auxarch_ne_02"/>
+	<image id="auxarch_ne_03" src="auxarch_ne_03"/>
+	<image id="auxarch_ne_04" src="auxarch_ne_04"/>
+	<image id="auxarch_ne_05" src="auxarch_ne_05"/>
+	<image id="auxarch_ne_06" src="auxarch_ne_06"/>
+	<image id="auxarch_ne_07" src="auxarch_ne_07"/>
+	<image id="auxarch_ne_08" src="auxarch_ne_08"/>
+	<image id="auxarch_ne_09" src="auxarch_ne_09"/>
+	<image id="auxarch_ne_10" src="auxarch_ne_10"/>
+	<image id="auxarch_ne_11" src="auxarch_ne_11"/>
+	<image id="auxarch_ne_12" src="auxarch_ne_12"/>
+	<!-- Note: Auxiliary Archer Walker Walking animation frames EAST DIRECTION 01-12 -->
+	<image id="auxarch_e_01" src="auxarch_e_01"/>
+	<image id="auxarch_e_02" src="auxarch_e_02"/>
+	<image id="auxarch_e_03" src="auxarch_e_03"/>
+	<image id="auxarch_e_04" src="auxarch_e_04"/>
+	<image id="auxarch_e_05" src="auxarch_e_05"/>
+	<image id="auxarch_e_06" src="auxarch_e_06"/>
+	<image id="auxarch_e_07" src="auxarch_e_07"/>
+	<image id="auxarch_e_08" src="auxarch_e_08"/>
+	<image id="auxarch_e_09" src="auxarch_e_09"/>
+	<image id="auxarch_e_10" src="auxarch_e_10"/>
+	<image id="auxarch_e_11" src="auxarch_e_11"/>
+	<image id="auxarch_e_12" src="auxarch_e_12"/>
+	<!-- Note: Auxiliary Archer Walker Walking animation frames SOUTH-EAST DIRECTION 01-12 -->
+	<image id="auxarch_se_01" src="auxarch_se_01"/>
+	<image id="auxarch_se_02" src="auxarch_se_02"/>
+	<image id="auxarch_se_03" src="auxarch_se_03"/>
+	<image id="auxarch_se_04" src="auxarch_se_04"/>
+	<image id="auxarch_se_05" src="auxarch_se_05"/>
+	<image id="auxarch_se_06" src="auxarch_se_06"/>
+	<image id="auxarch_se_07" src="auxarch_se_07"/>
+	<image id="auxarch_se_08" src="auxarch_se_08"/>
+	<image id="auxarch_se_09" src="auxarch_se_09"/>
+	<image id="auxarch_se_10" src="auxarch_se_10"/>
+	<image id="auxarch_se_11" src="auxarch_se_11"/>
+	<image id="auxarch_se_12" src="auxarch_se_12"/>
+	<!-- Note: Auxiliary Archer Walker Walking animation frames SOUTH DIRECTION 01-12 -->
+	<image id="auxarch_s_01" src="auxarch_s_01"/>
+	<image id="auxarch_s_02" src="auxarch_s_02"/>
+	<image id="auxarch_s_03" src="auxarch_s_03"/>
+	<image id="auxarch_s_04" src="auxarch_s_04"/>
+	<image id="auxarch_s_05" src="auxarch_s_05"/>
+	<image id="auxarch_s_06" src="auxarch_s_06"/>
+	<image id="auxarch_s_07" src="auxarch_s_07"/>
+	<image id="auxarch_s_08" src="auxarch_s_08"/>
+	<image id="auxarch_s_09" src="auxarch_s_09"/>
+	<image id="auxarch_s_10" src="auxarch_s_10"/>
+	<image id="auxarch_s_11" src="auxarch_s_11"/>
+	<image id="auxarch_s_12" src="auxarch_s_12"/>
+	<!-- Note: Auxiliary Archer Walker Walking animation frames SOUTH-WEST DIRECTION 01-12 -->
+	<image id="auxarch_sw_01" src="auxarch_sw_01"/>
+	<image id="auxarch_sw_02" src="auxarch_sw_02"/>
+	<image id="auxarch_sw_03" src="auxarch_sw_03"/>
+	<image id="auxarch_sw_04" src="auxarch_sw_04"/>
+	<image id="auxarch_sw_05" src="auxarch_sw_05"/>
+	<image id="auxarch_sw_06" src="auxarch_sw_06"/>
+	<image id="auxarch_sw_07" src="auxarch_sw_07"/>
+	<image id="auxarch_sw_08" src="auxarch_sw_08"/>
+	<image id="auxarch_sw_09" src="auxarch_sw_09"/>
+	<image id="auxarch_sw_10" src="auxarch_sw_10"/>
+	<image id="auxarch_sw_11" src="auxarch_sw_11"/>
+	<image id="auxarch_sw_12" src="auxarch_sw_12"/>
+	<!-- Note: Auxiliary Archer Walker Walking animation frames WEST DIRECTION 01-12 -->
+	<image id="auxarch_w_01" src="auxarch_w_01"/>
+	<image id="auxarch_w_02" src="auxarch_w_02"/>
+	<image id="auxarch_w_03" src="auxarch_w_03"/>
+	<image id="auxarch_w_04" src="auxarch_w_04"/>
+	<image id="auxarch_w_05" src="auxarch_w_05"/>
+	<image id="auxarch_w_06" src="auxarch_w_06"/>
+	<image id="auxarch_w_07" src="auxarch_w_07"/>
+	<image id="auxarch_w_08" src="auxarch_w_08"/>
+	<image id="auxarch_w_09" src="auxarch_w_09"/>
+	<image id="auxarch_w_10" src="auxarch_w_10"/>
+	<image id="auxarch_w_11" src="auxarch_w_11"/>
+	<image id="auxarch_w_12" src="auxarch_w_12"/>
+	<!-- Note: Auxiliary Archer Walker Walking animation frames NORTH-WEST DIRECTION 01-12 -->
+	<image id="auxarch_nw_01" src="auxarch_nw_01"/>
+	<image id="auxarch_nw_02" src="auxarch_nw_02"/>
+	<image id="auxarch_nw_03" src="auxarch_nw_03"/>
+	<image id="auxarch_nw_04" src="auxarch_nw_04"/>
+	<image id="auxarch_nw_05" src="auxarch_nw_05"/>
+	<image id="auxarch_nw_06" src="auxarch_nw_06"/>
+	<image id="auxarch_nw_07" src="auxarch_nw_07"/>
+	<image id="auxarch_nw_08" src="auxarch_nw_08"/>
+	<image id="auxarch_nw_09" src="auxarch_nw_09"/>
+	<image id="auxarch_nw_10" src="auxarch_nw_10"/>
+	<image id="auxarch_nw_11" src="auxarch_nw_11"/>
+	<image id="auxarch_nw_12" src="auxarch_nw_12"/>
+	<!-- Note: Auxiliary Archer Walker Walking animation frames NORTH DIRECTION 01-12 -->
+	<image id="auxarch_n_01" src="auxarch_n_01"/>
+	<image id="auxarch_n_02" src="auxarch_n_02"/>
+	<image id="auxarch_n_03" src="auxarch_n_03"/>
+	<image id="auxarch_n_04" src="auxarch_n_04"/>
+	<image id="auxarch_n_05" src="auxarch_n_05"/>
+	<image id="auxarch_n_06" src="auxarch_n_06"/>
+	<image id="auxarch_n_07" src="auxarch_n_07"/>
+	<image id="auxarch_n_08" src="auxarch_n_08"/>
+	<image id="auxarch_n_09" src="auxarch_n_09"/>
+	<image id="auxarch_n_10" src="auxarch_n_10"/>
+	<image id="auxarch_n_11" src="auxarch_n_11"/>
+	<image id="auxarch_n_12" src="auxarch_n_12"/>
+	<!-- Note: Auxiliary Archer Walker Ranged Fighting animation frames NORTH-EAST DIRECTION 01-05 -->
+	<image id="auxarch_fr_ne_01" src="auxarch_fr_ne_01"/>
+	<image id="auxarch_fr_ne_02" src="auxarch_fr_ne_02"/>
+	<image id="auxarch_fr_ne_03" src="auxarch_fr_ne_03"/>
+	<image id="auxarch_fr_ne_04" src="auxarch_fr_ne_04"/>
+	<image id="auxarch_fr_ne_05" src="auxarch_fr_ne_05"/>
+	<!-- Note: Auxiliary Archer Walker Ranged Fighting animation frames EAST DIRECTION 01-05 -->
+	<image id="auxarch_fr_e_01" src="auxarch_fr_e_01"/>
+	<image id="auxarch_fr_e_02" src="auxarch_fr_e_02"/>
+	<image id="auxarch_fr_e_03" src="auxarch_fr_e_03"/>
+	<image id="auxarch_fr_e_04" src="auxarch_fr_e_04"/>
+	<image id="auxarch_fr_e_05" src="auxarch_fr_e_05"/>
+	<!-- Note: Auxiliary Archer Walker Ranged Fighting animation frames SOUTH-EAST DIRECTION 01-05 -->
+	<image id="auxarch_fr_se_01" src="auxarch_fr_se_01"/>
+	<image id="auxarch_fr_se_02" src="auxarch_fr_se_02"/>
+	<image id="auxarch_fr_se_03" src="auxarch_fr_se_03"/>
+	<image id="auxarch_fr_se_04" src="auxarch_fr_se_04"/>
+	<image id="auxarch_fr_se_05" src="auxarch_fr_se_05"/>
+	<!-- Note: Auxiliary Archer Walker Ranged Fighting animation frames SOUTH DIRECTION 01-05 -->
+	<image id="auxarch_fr_s_01" src="auxarch_fr_s_01"/>
+	<image id="auxarch_fr_s_02" src="auxarch_fr_s_02"/>
+	<image id="auxarch_fr_s_03" src="auxarch_fr_s_03"/>
+	<image id="auxarch_fr_s_04" src="auxarch_fr_s_04"/>
+	<image id="auxarch_fr_s_05" src="auxarch_fr_s_05"/>
+	<!-- Note: Auxiliary Archer Walker Ranged Fighting animation frames SOUTH-WEST DIRECTION 01-05 -->
+	<image id="auxarch_fr_sw_01" src="auxarch_fr_sw_01"/>
+	<image id="auxarch_fr_sw_02" src="auxarch_fr_sw_02"/>
+	<image id="auxarch_fr_sw_03" src="auxarch_fr_sw_03"/>
+	<image id="auxarch_fr_sw_04" src="auxarch_fr_sw_04"/>
+	<image id="auxarch_fr_sw_05" src="auxarch_fr_sw_05"/>
+	<!-- Note: Auxiliary Archer Walker Ranged Fighting animation frames WEST DIRECTION 01-05 -->
+	<image id="auxarch_fr_w_01" src="auxarch_fr_w_01"/>
+	<image id="auxarch_fr_w_02" src="auxarch_fr_w_02"/>
+	<image id="auxarch_fr_w_03" src="auxarch_fr_w_03"/>
+	<image id="auxarch_fr_w_04" src="auxarch_fr_w_04"/>
+	<image id="auxarch_fr_w_05" src="auxarch_fr_w_05"/>
+	<!-- Note: Auxiliary Archer Walker Ranged Fighting animation frames NORTH-WEST DIRECTION 01-05 -->
+	<image id="auxarch_fr_nw_01" src="auxarch_fr_nw_01"/>
+	<image id="auxarch_fr_nw_02" src="auxarch_fr_nw_02"/>
+	<image id="auxarch_fr_nw_03" src="auxarch_fr_nw_03"/>
+	<image id="auxarch_fr_nw_04" src="auxarch_fr_nw_04"/>
+	<image id="auxarch_fr_nw_05" src="auxarch_fr_nw_05"/>
+	<!-- Note: Auxiliary Archer Walker Ranged Fighting animation frames NORTH DIRECTION 01-05 -->
+	<image id="auxarch_fr_n_01" src="auxarch_fr_n_01"/>
+	<image id="auxarch_fr_n_02" src="auxarch_fr_n_02"/>
+	<image id="auxarch_fr_n_03" src="auxarch_fr_n_03"/>
+	<image id="auxarch_fr_n_04" src="auxarch_fr_n_04"/>
+	<image id="auxarch_fr_n_05" src="auxarch_fr_n_05"/>
+	<!-- Note: Auxiliary Archer Walker Melee Fighting animation frames NORTH-EAST DIRECTION 01-05 -->
+	<image id="auxarch_fm_ne_01" src="auxarch_fm_ne_01"/>
+	<image id="auxarch_fm_ne_02" src="auxarch_fm_ne_02"/>
+	<image id="auxarch_fm_ne_03" src="auxarch_fm_ne_03"/>
+	<image id="auxarch_fm_ne_04" src="auxarch_fm_ne_04"/>
+	<image id="auxarch_fm_ne_05" src="auxarch_fm_ne_05"/>
+	<!-- Note: Auxiliary Archer Walker Melee Fighting animation frames EAST DIRECTION 01-05 -->
+	<image id="auxarch_fm_e_01" src="auxarch_fm_e_01"/>
+	<image id="auxarch_fm_e_02" src="auxarch_fm_e_02"/>
+	<image id="auxarch_fm_e_03" src="auxarch_fm_e_03"/>
+	<image id="auxarch_fm_e_04" src="auxarch_fm_e_04"/>
+	<image id="auxarch_fm_e_05" src="auxarch_fm_e_05"/>
+	<!-- Note: Auxiliary Archer Walker Melee Fighting animation frames SOUTH-EAST DIRECTION 01-05 -->
+	<image id="auxarch_fm_se_01" src="auxarch_fm_se_01"/>
+	<image id="auxarch_fm_se_02" src="auxarch_fm_se_02"/>
+	<image id="auxarch_fm_se_03" src="auxarch_fm_se_03"/>
+	<image id="auxarch_fm_se_04" src="auxarch_fm_se_04"/>
+	<image id="auxarch_fm_se_05" src="auxarch_fm_se_05"/>
+	<!-- Note: Auxiliary Archer Walker Melee Fighting animation frames SOUTH DIRECTION 01-05 -->
+	<image id="auxarch_fm_s_01" src="auxarch_fm_s_01"/>
+	<image id="auxarch_fm_s_02" src="auxarch_fm_s_02"/>
+	<image id="auxarch_fm_s_03" src="auxarch_fm_s_03"/>
+	<image id="auxarch_fm_s_04" src="auxarch_fm_s_04"/>
+	<image id="auxarch_fm_s_05" src="auxarch_fm_s_05"/>
+	<!-- Note: Auxiliary Archer Walker Melee Fighting animation frames SOUTH-WEST DIRECTION 01-05 -->
+	<image id="auxarch_fm_sw_01" src="auxarch_fm_sw_01"/>
+	<image id="auxarch_fm_sw_02" src="auxarch_fm_sw_02"/>
+	<image id="auxarch_fm_sw_03" src="auxarch_fm_sw_03"/>
+	<image id="auxarch_fm_sw_04" src="auxarch_fm_sw_04"/>
+	<image id="auxarch_fm_sw_05" src="auxarch_fm_sw_05"/>
+	<!-- Note: Auxiliary Archer Walker Melee Fighting animation frames WEST DIRECTION 01-05 -->
+	<image id="auxarch_fm_w_01" src="auxarch_fm_w_01"/>
+	<image id="auxarch_fm_w_02" src="auxarch_fm_w_02"/>
+	<image id="auxarch_fm_w_03" src="auxarch_fm_w_03"/>
+	<image id="auxarch_fm_w_04" src="auxarch_fm_w_04"/>
+	<image id="auxarch_fm_w_05" src="auxarch_fm_w_05"/>
+	<!-- Note: Auxiliary Archer Walker Melee Fighting animation frames NORTH-WEST DIRECTION 01-05 -->
+	<image id="auxarch_fm_nw_01" src="auxarch_fm_nw_01"/>
+	<image id="auxarch_fm_nw_02" src="auxarch_fm_nw_02"/>
+	<image id="auxarch_fm_nw_03" src="auxarch_fm_nw_03"/>
+	<image id="auxarch_fm_nw_04" src="auxarch_fm_nw_04"/>
+	<image id="auxarch_fm_nw_05" src="auxarch_fm_nw_05"/>
+	<!-- Note: Auxiliary Archer Walker Melee Fighting animation frames NORTH DIRECTION 01-05 -->
+	<image id="auxarch_fm_n_01" src="auxarch_fm_n_01"/>
+	<image id="auxarch_fm_n_02" src="auxarch_fm_n_02"/>
+	<image id="auxarch_fm_n_03" src="auxarch_fm_n_03"/>
+	<image id="auxarch_fm_n_04" src="auxarch_fm_n_04"/>
+	<image id="auxarch_fm_n_05" src="auxarch_fm_n_05"/>
+	<!-- Note: Legionary Walker Ranged Fighting animation frames NORTH-EAST DIRECTION 01-05 -->
+	<image id="legionary_fr_ne_01" src="legionary_fr_ne_01"/>
+	<image id="legionary_fr_ne_02" src="legionary_fr_ne_02"/>
+	<image id="legionary_fr_ne_03" src="legionary_fr_ne_03"/>
+	<image id="legionary_fr_ne_04" src="legionary_fr_ne_04"/>
+	<image id="legionary_fr_ne_05" src="legionary_fr_ne_05"/>
+	<!-- Note: Legionary Walker Ranged Fighting animation frames EAST DIRECTION 01-05 -->
+	<image id="legionary_fr_e_01" src="legionary_fr_e_01"/>
+	<image id="legionary_fr_e_02" src="legionary_fr_e_02"/>
+	<image id="legionary_fr_e_03" src="legionary_fr_e_03"/>
+	<image id="legionary_fr_e_04" src="legionary_fr_e_04"/>
+	<image id="legionary_fr_e_05" src="legionary_fr_e_05"/>
+	<!-- Note: Legionary Walker Ranged Fighting animation frames SOUTH-EAST DIRECTION 01-05 -->
+	<image id="legionary_fr_se_01" src="legionary_fr_se_01"/>
+	<image id="legionary_fr_se_02" src="legionary_fr_se_02"/>
+	<image id="legionary_fr_se_03" src="legionary_fr_se_03"/>
+	<image id="legionary_fr_se_04" src="legionary_fr_se_04"/>
+	<image id="legionary_fr_se_05" src="legionary_fr_se_05"/>
+	<!-- Note: Legionary Walker Ranged Fighting animation frames SOUTH DIRECTION 01-05 -->
+	<image id="legionary_fr_s_01" src="legionary_fr_s_01"/>
+	<image id="legionary_fr_s_02" src="legionary_fr_s_02"/>
+	<image id="legionary_fr_s_03" src="legionary_fr_s_03"/>
+	<image id="legionary_fr_s_04" src="legionary_fr_s_04"/>
+	<image id="legionary_fr_s_05" src="legionary_fr_s_05"/>
+	<!-- Note: Legionary Walker Ranged Fighting animation frames SOUTH-WEST DIRECTION 01-05 -->
+	<image id="legionary_fr_sw_01" src="legionary_fr_sw_01"/>
+	<image id="legionary_fr_sw_02" src="legionary_fr_sw_02"/>
+	<image id="legionary_fr_sw_03" src="legionary_fr_sw_03"/>
+	<image id="legionary_fr_sw_04" src="legionary_fr_sw_04"/>
+	<image id="legionary_fr_sw_05" src="legionary_fr_sw_05"/>
+	<!-- Note: Legionary Walker Ranged Fighting animation frames WEST DIRECTION 01-05 -->
+	<image id="legionary_fr_w_01" src="legionary_fr_w_01"/>
+	<image id="legionary_fr_w_02" src="legionary_fr_w_02"/>
+	<image id="legionary_fr_w_03" src="legionary_fr_w_03"/>
+	<image id="legionary_fr_w_04" src="legionary_fr_w_04"/>
+	<image id="legionary_fr_w_05" src="legionary_fr_w_05"/>
+	<!-- Note: Legionary Walker Ranged Fighting animation frames NORTH-WEST DIRECTION 01-05 -->
+	<image id="legionary_fr_nw_01" src="legionary_fr_nw_01"/>
+	<image id="legionary_fr_nw_02" src="legionary_fr_nw_02"/>
+	<image id="legionary_fr_nw_03" src="legionary_fr_nw_03"/>
+	<image id="legionary_fr_nw_04" src="legionary_fr_nw_04"/>
+	<image id="legionary_fr_nw_05" src="legionary_fr_nw_05"/>
+	<!-- Note: Legionary Walker Ranged Fighting animation frames NORTH DIRECTION 01-05 -->
+	<image id="legionary_fr_n_01" src="legionary_fr_n_01"/>
+	<image id="legionary_fr_n_02" src="legionary_fr_n_02"/>
+	<image id="legionary_fr_n_03" src="legionary_fr_n_03"/>
+	<image id="legionary_fr_n_04" src="legionary_fr_n_04"/>
+	<image id="legionary_fr_n_05" src="legionary_fr_n_05"/>
+	<!-- Note: Caesar Legionary Walker Ranged Fighting animation frames NORTH-EAST DIRECTION 01-05 -->
+	<image id="caesar_legionary_fr_ne_01">
+		<layer group="this" image="legionary_fr_ne_01"/>
+		<layer src="caesar_legionary_fr_ne_01"/>
+	</image>
+	<image id="caesar_legionary_fr_ne_02">
+		<layer group="this" image="legionary_fr_ne_02"/>
+		<layer src="caesar_legionary_fr_ne_02"/>
+	</image>
+	<image id="caesar_legionary_fr_ne_03">
+		<layer group="this" image="legionary_fr_ne_03"/>
+		<layer src="caesar_legionary_fr_ne_03"/>
+	</image>
+	<image id="caesar_legionary_fr_ne_04">
+		<layer group="this" image="legionary_fr_ne_04"/>
+		<layer src="caesar_legionary_fr_ne_04"/>
+	</image>
+	<image id="caesar_legionary_fr_ne_05">
+		<layer group="this" image="legionary_fr_ne_05"/>
+		<layer src="caesar_legionary_fr_ne_05"/>
+	</image>
+	<!-- Note: Caesar Legionary Walker Ranged Fighting animation frames EAST DIRECTION 01-05 -->
+	<image id="caesar_legionary_fr_e_01">
+		<layer group="this" image="legionary_fr_e_01"/>
+		<layer src="caesar_legionary_fr_e_01"/>
+	</image>
+	<image id="caesar_legionary_fr_e_02">
+		<layer group="this" image="legionary_fr_e_02"/>
+		<layer src="caesar_legionary_fr_e_02"/>
+	</image>
+	<image id="caesar_legionary_fr_e_03">
+		<layer group="this" image="legionary_fr_e_03"/>
+		<layer src="caesar_legionary_fr_e_03"/>
+	</image>
+	<image id="caesar_legionary_fr_e_04">
+		<layer group="this" image="legionary_fr_e_04"/>
+		<layer src="caesar_legionary_fr_e_04"/>
+	</image>
+	<image id="caesar_legionary_fr_e_05">
+		<layer group="this" image="legionary_fr_e_05"/>
+		<layer src="caesar_legionary_fr_e_05"/>
+	</image>
+	<!-- Note: Caesar Legionary Walker Ranged Fighting animation frames SOUTH-EAST DIRECTION 01-05 -->
+	<image id="caesar_legionary_fr_se_01">
+		<layer group="this" image="legionary_fr_se_01"/>
+		<layer src="caesar_legionary_fr_se_01"/>
+	</image>
+	<image id="caesar_legionary_fr_se_02">
+		<layer group="this" image="legionary_fr_se_02"/>
+		<layer src="caesar_legionary_fr_se_02"/>
+	</image>
+	<image id="caesar_legionary_fr_se_03">
+		<layer group="this" image="legionary_fr_se_03"/>
+		<layer src="caesar_legionary_fr_se_03"/>
+	</image>
+	<image id="caesar_legionary_fr_se_04">
+		<layer group="this" image="legionary_fr_se_04"/>
+		<layer src="caesar_legionary_fr_se_04"/>
+	</image>
+	<image id="caesar_legionary_fr_se_05">
+		<layer group="this" image="legionary_fr_se_05"/>
+		<layer src="caesar_legionary_fr_se_05"/>
+	</image>
+	<!-- Note: Caesar Legionary Walker Ranged Fighting animation frames SOUTH DIRECTION 01-05 -->
+	<image id="caesar_legionary_fr_s_01">
+		<layer group="this" image="legionary_fr_s_01"/>
+		<layer src="caesar_legionary_fr_s_01"/>
+	</image>
+	<image id="caesar_legionary_fr_s_02">
+		<layer group="this" image="legionary_fr_s_02"/>
+		<layer src="caesar_legionary_fr_s_02"/>
+	</image>
+	<image id="caesar_legionary_fr_s_03">
+		<layer group="this" image="legionary_fr_s_03"/>
+		<layer src="caesar_legionary_fr_s_03"/>
+	</image>
+	<image id="caesar_legionary_fr_s_04">
+		<layer group="this" image="legionary_fr_s_04"/>
+		<layer src="caesar_legionary_fr_s_04"/>
+	</image>
+	<image id="caesar_legionary_fr_s_05">
+		<layer group="this" image="legionary_fr_s_05"/>
+		<layer src="caesar_legionary_fr_s_05"/>
+	</image>
+	<!-- Note: Caesar Legionary Walker Ranged Fighting animation frames SOUTH-WEST DIRECTION 01-05 -->
+	<image id="caesar_legionary_fr_sw_01">
+		<layer group="this" image="legionary_fr_sw_01"/>
+		<layer src="caesar_legionary_fr_sw_01"/>
+	</image>
+	<image id="caesar_legionary_fr_sw_02">
+		<layer group="this" image="legionary_fr_sw_02"/>
+		<layer src="caesar_legionary_fr_sw_02"/>
+	</image>
+	<image id="caesar_legionary_fr_sw_03">
+		<layer group="this" image="legionary_fr_sw_03"/>
+		<layer src="caesar_legionary_fr_sw_03"/>
+	</image>
+	<image id="caesar_legionary_fr_sw_04">
+		<layer group="this" image="legionary_fr_sw_04"/>
+		<layer src="caesar_legionary_fr_sw_04"/>
+	</image>
+	<image id="caesar_legionary_fr_sw_05">
+		<layer group="this" image="legionary_fr_sw_05"/>
+		<layer src="caesar_legionary_fr_sw_05"/>
+	</image>
+	<!-- Note: Caesar Legionary Walker Ranged Fighting animation frames WEST DIRECTION 01-05 -->
+	<image id="caesar_legionary_fr_w_01">
+		<layer group="this" image="legionary_fr_w_01"/>
+		<layer src="caesar_legionary_fr_w_01"/>
+	</image>
+	<image id="caesar_legionary_fr_w_02">
+		<layer group="this" image="legionary_fr_w_02"/>
+		<layer src="caesar_legionary_fr_w_02"/>
+	</image>
+	<image id="caesar_legionary_fr_w_03">
+		<layer group="this" image="legionary_fr_w_03"/>
+		<layer src="caesar_legionary_fr_w_03"/>
+	</image>
+	<image id="caesar_legionary_fr_w_04">
+		<layer group="this" image="legionary_fr_w_04"/>
+		<layer src="caesar_legionary_fr_w_04"/>
+	</image>
+	<image id="caesar_legionary_fr_w_05">
+		<layer group="this" image="legionary_fr_w_05"/>
+		<layer src="caesar_legionary_fr_w_05"/>
+	</image>
+	<!-- Note: Caesar Legionary Walker Ranged Fighting animation frames NORTH-WEST DIRECTION 01-05 -->
+	<image id="caesar_legionary_fr_nw_01">
+		<layer group="this" image="legionary_fr_nw_01"/>
+		<layer src="caesar_legionary_fr_nw_01"/>
+	</image>
+	<image id="caesar_legionary_fr_nw_02">
+		<layer group="this" image="legionary_fr_nw_02"/>
+		<layer src="caesar_legionary_fr_nw_02"/>
+	</image>
+	<image id="caesar_legionary_fr_nw_03">
+		<layer group="this" image="legionary_fr_nw_03"/>
+		<layer src="caesar_legionary_fr_nw_03"/>
+	</image>
+	<image id="caesar_legionary_fr_nw_04">
+		<layer group="this" image="legionary_fr_nw_04"/>
+		<layer src="caesar_legionary_fr_nw_04"/>
+	</image>
+	<image id="caesar_legionary_fr_nw_05">
+		<layer group="this" image="legionary_fr_nw_05"/>
+		<layer src="caesar_legionary_fr_nw_05"/>
+	</image>
+	<!-- Note: Caesar Legionary Walker Ranged Fighting animation frames NORTH DIRECTION 01-05 -->
+	<image id="caesar_legionary_fr_n_01">
+		<layer group="this" image="legionary_fr_n_01"/>
+		<layer src="caesar_legionary_fr_n_01"/>
+	</image>
+	<image id="caesar_legionary_fr_n_02">
+		<layer group="this" image="legionary_fr_n_02"/>
+		<layer src="caesar_legionary_fr_n_02"/>
+	</image>
+	<image id="caesar_legionary_fr_n_03">
+		<layer group="this" image="legionary_fr_n_03"/>
+		<layer src="caesar_legionary_fr_n_03"/>
+	</image>
+	<image id="caesar_legionary_fr_n_04">
+		<layer group="this" image="legionary_fr_n_04"/>
+		<layer src="caesar_legionary_fr_n_04"/>
+	</image>
+	<image id="caesar_legionary_fr_n_05">
+		<layer group="this" image="legionary_fr_n_05"/>
+		<layer src="caesar_legionary_fr_n_05"/>
+	</image>
+	<!-- Note: Enemy Catapult Walker Portrait (Assets created by Remos Turcuman - Copyright/Attribution Notice: "Bleed -http://remusprites.carbonmade.com/" - with modifications by Areldir) -->
+	<image id="catapult_portrait">
+		<layer group="190" image="7"/>
+		<layer src="catapult_portrait_overlay"/>
+	</image>
+	<!-- Note: Enemy Catapult Walker Death animation frames 01-08 -->
+	<image id="catapult_death_01" src="catapult_s_01"/>
+	<image id="catapult_death_02" src="catapult_death_02"/>
+	<image id="catapult_death_03" src="catapult_death_03"/>
+	<image id="catapult_death_04" src="catapult_death_04"/>
+	<image id="catapult_death_05" src="catapult_death_05"/>
+	<image id="catapult_death_06" src="catapult_death_06"/>
+	<image id="catapult_death_07" src="catapult_death_07"/>
+	<image id="catapult_death_08" src="catapult_death_08"/>
+	<!-- Note: Enemy Catapult Walker Walking animation frames ALL DIRECTIONS 01 -->
+	<image id="catapult_ne_01" src="catapult_ne_01"/>
+	<image id="catapult_e_01" src="catapult_e_01"/>
+	<image id="catapult_se_01" src="catapult_se_01"/>
+	<image id="catapult_s_01" src="catapult_s_01"/>
+	<image id="catapult_sw_01" src="catapult_sw_01"/>
+	<image id="catapult_w_01" src="catapult_w_01"/>
+	<image id="catapult_nw_01" src="catapult_nw_01"/>
+	<image id="catapult_n_01" src="catapult_n_01"/>
+	<!-- Note: Enemy Catapult Walker Missile Sprite ALL DIRECTIONS 01 -->
+	<image id="catapult_rock_ne_01" src="catapult_rock_ne_01"/>
+	<image id="catapult_rock_e_01" src="catapult_rock_e_01"/>
+	<image id="catapult_rock_se_01" src="catapult_rock_se_01"/>
+	<image id="catapult_rock_s_01" src="catapult_rock_s_01"/>
+	<image id="catapult_rock_sw_01" src="catapult_rock_sw_01"/>
+	<image id="catapult_rock_w_01" src="catapult_rock_w_01"/>
+	<image id="catapult_rock_nw_01" src="catapult_rock_nw_01"/>
+	<image id="catapult_rock_n_01" src="catapult_rock_n_01"/>
+	<!-- Note: Enemy Catapult Walker Ranged Fighting animation frames NORTH-EAST DIRECTION 01-08 -->
+	<image id="catapult_fe_ne_01" src="catapult_ne_01"/>
+	<image id="catapult_fr_ne_02" src="catapult_fr_ne_02"/>
+	<image id="catapult_fr_ne_03" src="catapult_fr_ne_03"/>
+	<image id="catapult_fr_ne_04" src="catapult_fr_ne_04"/>
+	<image id="catapult_fr_ne_05">
+		<layer group="this" image="catapult_fr_ne_04"/>
+		<layer group="this" image="catapult_rock_ne_01" x="14" y="41"/>
+	</image>
+	<image id="catapult_fr_ne_06">
+		<layer group="this" image="catapult_fr_ne_03"/>
+		<layer group="this" image="catapult_rock_ne_01" x="19" y="28"/>
+	</image>
+	<image id="catapult_fr_ne_07" width="80" height="80">
+		<layer group="this" image="catapult_rock_ne_01" x="26" y="16"/>
+		<layer group="this" image="catapult_fr_ne_02"/>
+	</image>
+	<image id="catapult_fr_ne_08" width="80" height="80">
+		<layer group="this" image="catapult_rock_ne_01" x="47" y="1"/>
+		<layer group="this" image="catapult_ne_01"/>
+	</image>
+	<!-- Note: Enemy Catapult Walker Ranged Fighting animation frames EAST DIRECTION 01-08 -->
+	<image id="catapult_fe_e_01" src="catapult_e_01"/>
+	<image id="catapult_fr_e_02" src="catapult_fr_e_02"/>
+	<image id="catapult_fr_e_03" src="catapult_fr_e_03"/>
+	<image id="catapult_fr_e_04" src="catapult_fr_e_04"/>
+	<image id="catapult_fr_e_05">
+		<layer group="this" image="catapult_fr_e_04"/>
+		<layer group="this" image="catapult_rock_e_01" x="5" y="31"/>
+	</image>
+	<image id="catapult_fr_e_06">
+		<layer group="this" image="catapult_fr_e_03"/>
+		<layer group="this" image="catapult_rock_e_01" x="13" y="19"/>
+	</image>
+	<image id="catapult_fr_e_07">
+		<layer group="this" image="catapult_fr_e_02"/>
+		<layer group="this" image="catapult_rock_e_01" x="25" y="11"/>
+	</image>
+	<image id="catapult_fr_e_08">
+		<layer group="this" image="catapult_e_01"/>
+		<layer group="this" image="catapult_rock_e_01" x="51" y="3"/>
+	</image>
+	<!-- Note: Enemy Catapult Walker Ranged Fighting animation frames SOUTH-EAST DIRECTION 01-08 -->
+	<image id="catapult_fe_se_01" src="catapult_se_01"/>
+	<image id="catapult_fr_se_02" src="catapult_fr_se_02"/>
+	<image id="catapult_fr_se_03" src="catapult_fr_se_03"/>
+	<image id="catapult_fr_se_04" src="catapult_fr_se_04"/>
+	<image id="catapult_fr_se_05">
+		<layer group="this" image="catapult_fr_se_04"/>
+		<layer group="this" image="catapult_rock_se_01" x="15" y="21"/>
+	</image>
+	<image id="catapult_fr_se_06">
+		<layer group="this" image="catapult_fr_se_03"/>
+		<layer group="this" image="catapult_rock_se_01" x="20" y="12"/>
+	</image>
+	<image id="catapult_fr_se_07">
+		<layer group="this" image="catapult_fr_se_02"/>
+		<layer group="this" image="catapult_rock_se_01" x="28" y="8"/>
+	</image>
+	<image id="catapult_fr_se_08">
+		<layer group="this" image="catapult_se_01"/>
+		<layer group="this" image="catapult_rock_se_01" x="50" y="8"/>
+	</image>
+	<!-- Note: Enemy Catapult Walker Ranged Fighting animation frames SOUTH DIRECTION 01-08 -->
+	<image id="catapult_fe_s_01" src="catapult_s_01"/>
+	<image id="catapult_fr_s_02" src="catapult_fr_s_02"/>
+	<image id="catapult_fr_s_03" src="catapult_fr_s_03"/>
+	<image id="catapult_fr_s_04" src="catapult_fr_s_04"/>
+	<image id="catapult_fr_s_05">
+		<layer group="this" image="catapult_fr_s_04"/>
+		<layer group="this" image="catapult_rock_s_01" x="34" y="19"/>
+	</image>
+	<image id="catapult_fr_s_06">
+		<layer group="this" image="catapult_fr_s_03"/>
+		<layer group="this" image="catapult_rock_s_01" x="34" y="11"/>
+	</image>
+	<image id="catapult_fr_s_07">
+		<layer group="this" image="catapult_fr_s_02"/>
+		<layer group="this" image="catapult_rock_s_01" x="34" y="8"/>
+	</image>
+	<image id="catapult_fr_s_08">
+		<layer group="this" image="catapult_s_01"/>
+		<layer group="this" image="catapult_rock_s_01" x="34" y="12"/>
+	</image>
+	<!-- Note: Enemy Catapult Walker Ranged Fighting animation frames SOUTH-WEST DIRECTION 01-08 -->
+	<image id="catapult_fe_sw_01" src="catapult_sw_01"/>
+	<image id="catapult_fr_sw_02" src="catapult_fr_sw_02"/>
+	<image id="catapult_fr_sw_03" src="catapult_fr_sw_03"/>
+	<image id="catapult_fr_sw_04" src="catapult_fr_sw_04"/>
+	<image id="catapult_fr_sw_05">
+		<layer group="this" image="catapult_fr_sw_04"/>
+		<layer group="this" image="catapult_rock_sw_01" x="54" y="22"/>
+	</image>
+	<image id="catapult_fr_sw_06">
+		<layer group="this" image="catapult_fr_sw_03"/>
+		<layer group="this" image="catapult_rock_sw_01" x="49" y="13"/>
+	</image>
+	<image id="catapult_fr_sw_07">
+		<layer group="this" image="catapult_fr_sw_02"/>
+		<layer group="this" image="catapult_rock_sw_01" x="42" y="8"/>
+	</image>
+	<image id="catapult_fr_sw_08">
+		<layer group="this" image="catapult_sw_01"/>
+		<layer group="this" image="catapult_rock_sw_01" x="18" y="8"/>
+	</image>
+	<!-- Note: Enemy Catapult Walker Ranged Fighting animation frames WEST DIRECTION 01-08 -->
+	<image id="catapult_fe_w_01" src="catapult_w_01"/>
+	<image id="catapult_fr_w_02" src="catapult_fr_w_02"/>
+	<image id="catapult_fr_w_03" src="catapult_fr_w_03"/>
+	<image id="catapult_fr_w_04" src="catapult_fr_w_04"/>
+	<image id="catapult_fr_w_05">
+		<layer group="this" image="catapult_fr_w_04"/>
+		<layer group="this" image="catapult_rock_w_01" x="61" y="32"/>
+	</image>
+	<image id="catapult_fr_w_06">
+		<layer group="this" image="catapult_fr_w_03"/>
+		<layer group="this" image="catapult_rock_w_01" x="53" y="20"/>
+	</image>
+	<image id="catapult_fr_w_07">
+		<layer group="this" image="catapult_fr_w_02"/>
+		<layer group="this" image="catapult_rock_w_01" x="42" y="12"/>
+	</image>
+	<image id="catapult_fr_w_08">
+		<layer group="this" image="catapult_w_01"/>
+		<layer group="this" image="catapult_rock_w_01" x="15" y="8"/>
+	</image>
+	<!-- Note: Enemy Catapult Walker Ranged Fighting animation frames NORTH-WEST DIRECTION 01-08 -->
+	<image id="catapult_fe_nw_01" src="catapult_nw_01"/>
+	<image id="catapult_fr_nw_02" src="catapult_fr_nw_02"/>
+	<image id="catapult_fr_nw_03" src="catapult_fr_nw_03"/>
+	<image id="catapult_fr_nw_04" src="catapult_fr_nw_04"/>
+	<image id="catapult_fr_nw_05">
+		<layer group="this" image="catapult_fr_nw_04"/>
+		<layer group="this" image="catapult_rock_nw_01" x="54" y="45" invert="horizontal"/>
+	</image>
+	<image id="catapult_fr_nw_06" width="80" height="80">
+		<layer group="this" image="catapult_fr_nw_03"/>
+		<layer group="this" image="catapult_fr_n_06_rock"/>
+	</image>
+	<image id="catapult_fr_nw_07" width="80" height="80">
+		<layer group="this" image="catapult_fr_nw_02"/>
+		<layer group="this" image="catapult_fr_n_07_rock"/>
+	</image>
+	<image id="catapult_fr_nw_08" width="80" height="80">
+		<layer group="this" image="catapult_nw_01"/>
+		<layer group="this" image="catapult_rock_nw_01" x="16" y="5" invert="horizontal"/>
+	</image>
+	<!-- Note: Enemy Catapult Walker Ranged Fighting animation frames NORTH DIRECTION 01-08 -->
+	<image id="catapult_fe_n_01" src="catapult_n_01"/>
+	<image id="catapult_fr_n_02" src="catapult_fr_n_02"/>
+	<image id="catapult_fr_n_03" src="catapult_fr_n_03"/>
+	<image id="catapult_fr_n_04" src="catapult_fr_n_04"/>
+	<image id="catapult_fr_n_05">
+		<layer group="this" image="catapult_fr_n_04"/>
+		<layer group="this" image="catapult_rock_n_01" x="34" y="47" invert="horizontal"/>
+	</image>
+	<image id="catapult_fr_n_06">
+		<layer group="this" image="catapult_fr_n_03"/>
+		<layer group="this" image="catapult_rock_n_01" x="34" y="31" invert="horizontal"/>
+	</image>
+	<image id="catapult_fr_n_07">
+		<layer group="this" image="catapult_fr_n_02"/>
+		<layer group="this" image="catapult_rock_n_01" x="34" y="18" invert="horizontal"/>
+	</image>
+	<image id="catapult_fr_n_08">
+		<layer group="this" image="catapult_n_01"/>
+		<layer group="this" image="catapult_rock_n_01" x="34" y="3" invert="horizontal"/>
+	</image>
+</assetlist>

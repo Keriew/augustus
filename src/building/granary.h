@@ -21,7 +21,13 @@ int building_granary_remove_export(building *granary, int resource, int land_tra
 
 int building_granary_add_resource(building *granary, int resource, int is_produced);
 
+int building_granaries_add_resource(int resource, int amount, int respect_settings);
+
 int building_granary_remove_resource(building *granary, int resource, int amount);
+
+int building_granary_try_remove_resource(building *granary, int resource, int desired_amount);
+
+int building_granary_try_fullload_remove_resource(building *granary, int resource, int desired_loads);
 
 int building_granaries_remove_resource(int resource, int amount);
 
@@ -29,9 +35,9 @@ int building_granaries_send_resources_to_rome(int resource, int amount);
 
 int building_granary_remove_for_getting_deliveryman(building *src, building *dst, int *resource);
 
-int building_granary_is_not_accepting(int resource, building* b);
+int building_granary_is_not_accepting(int resource, building *b);
 
-int building_granary_is_full(int resource, building *b);
+int building_granary_is_full(building *b);
 
 int building_granary_resource_amount(int resource, building *b);
 
@@ -54,7 +60,9 @@ void building_granary_bless(void);
 
 void building_granary_warehouse_curse(int big);
 
-int building_granary_is_getting(int resource, building* b);
+int building_granary_maximum_receptible_amount(int resource, building *b);
+
+int building_granary_is_getting(int resource, building *b);
 
 void building_granary_update_built_granaries_capacity(void);
 

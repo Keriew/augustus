@@ -44,7 +44,7 @@ static struct {
     int num_definitions;
     arrow_definition *arrows;
     int num_arrows;
-    int shift_pressed;
+    key_modifier_type modifiers;
 } data;
 
 static void set_definition_for_action(hotkey_action action, hotkey_definition *def)
@@ -74,6 +74,15 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
             break;
         case HOTKEY_ROTATE_MAP_RIGHT:
             def->action = &data.hotkey_state.rotate_map_right;
+            break;
+        case HOTKEY_ZOOM_IN:
+            def->action = &data.hotkey_state.zoom_in;
+            break;
+        case HOTKEY_ZOOM_OUT:
+            def->action = &data.hotkey_state.zoom_out;
+            break;
+        case HOTKEY_RESET_ZOOM:
+            def->action = &data.hotkey_state.reset_zoom;
             break;
         case HOTKEY_SHOW_ADVISOR_LABOR:
             def->action = &data.hotkey_state.show_advisor;
@@ -272,6 +281,10 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
             def->action = &data.hotkey_state.building;
             def->value = BUILDING_GARDENS;
             break;
+        case HOTKEY_BUILD_OVERGROWN_GARDENS:
+            def->action = &data.hotkey_state.building;
+            def->value = BUILDING_OVERGROWN_GARDENS;
+            break;
         case HOTKEY_BUILD_RESERVOIR:
             def->action = &data.hotkey_state.building;
             def->value = BUILDING_DRAGGABLE_RESERVOIR;
@@ -314,10 +327,6 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
         case HOTKEY_PASTE_BUILDING_SETTINGS:
             def->action = &data.hotkey_state.paste_building_settings;
             break;
-        case HOTKEY_SHOW_OVERLAY_FOOD_STOCKS:
-            def->action = &data.hotkey_state.show_overlay;
-            def->value = OVERLAY_FOOD_STOCKS;
-            break;
         case HOTKEY_SHOW_OVERLAY_ENTERTAINMENT:
             def->action = &data.hotkey_state.show_overlay;
             def->value = OVERLAY_ENTERTAINMENT;
@@ -337,6 +346,10 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
         case HOTKEY_SHOW_OVERLAY_ACADEMY:
             def->action = &data.hotkey_state.show_overlay;
             def->value = OVERLAY_ACADEMY;
+            break;
+        case HOTKEY_SHOW_OVERLAY_HEALTH:
+            def->action = &data.hotkey_state.show_overlay;
+            def->value = OVERLAY_HEALTH;
             break;
         case HOTKEY_SHOW_OVERLAY_BARBER:
             def->action = &data.hotkey_state.show_overlay;
@@ -358,9 +371,37 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
             def->action = &data.hotkey_state.show_overlay;
             def->value = OVERLAY_SICKNESS;
             break;
+        case HOTKEY_SHOW_OVERLAY_LOGISTICS:
+            def->action = &data.hotkey_state.show_overlay;
+            def->value = OVERLAY_LOGISTICS;
+            break;
+        case HOTKEY_SHOW_OVERLAY_FOOD_STOCKS:
+            def->action = &data.hotkey_state.show_overlay;
+            def->value = OVERLAY_FOOD_STOCKS;
+            break;
+        case HOTKEY_SHOW_OVERLAY_EFFICIENCY:
+            def->action = &data.hotkey_state.show_overlay;
+            def->value = OVERLAY_EFFICIENCY;
+            break;
+        case HOTKEY_SHOW_OVERLAY_MOTHBALL:
+            def->action = &data.hotkey_state.show_overlay;
+            def->value = OVERLAY_MOTHBALL;
+            break;
         case HOTKEY_SHOW_OVERLAY_TAX_INCOME:
             def->action = &data.hotkey_state.show_overlay;
             def->value = OVERLAY_TAX_INCOME;
+            break;
+        case HOTKEY_SHOW_OVERLAY_LEVY:
+            def->action = &data.hotkey_state.show_overlay;
+            def->value = OVERLAY_LEVY;
+            break;
+        case HOTKEY_SHOW_OVERLAY_EMPLOYMENT:
+            def->action = &data.hotkey_state.show_overlay;
+            def->value = OVERLAY_EMPLOYMENT;
+            break;
+        case HOTKEY_SHOW_OVERLAY_RELIGION:
+            def->action = &data.hotkey_state.show_overlay;
+            def->value = OVERLAY_RELIGION;
             break;
         case HOTKEY_SHOW_OVERLAY_DESIRABILITY:
             def->action = &data.hotkey_state.show_overlay;
@@ -370,21 +411,9 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
             def->action = &data.hotkey_state.show_overlay;
             def->value = OVERLAY_SENTIMENT;
             break;
-        case HOTKEY_SHOW_OVERLAY_MOTHBALL:
-            def->action = &data.hotkey_state.show_overlay;
-            def->value = OVERLAY_MOTHBALL;
-            break;
-        case HOTKEY_SHOW_OVERLAY_RELIGION:
-            def->action = &data.hotkey_state.show_overlay;
-            def->value = OVERLAY_RELIGION;
-            break;
         case HOTKEY_SHOW_OVERLAY_ROADS:
             def->action = &data.hotkey_state.show_overlay;
             def->value = OVERLAY_ROADS;
-            break;
-        case HOTKEY_SHOW_OVERLAY_LEVY:
-            def->action = &data.hotkey_state.show_overlay;
-            def->value = OVERLAY_LEVY;
             break;
         case HOTKEY_ROTATE_MAP_NORTH:
             def->action = &data.hotkey_state.rotate_map_north;
@@ -399,8 +428,19 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
         case HOTKEY_SHOW_MESSAGES:
             def->action = &data.hotkey_state.show_messages;
             break;
-
-		default:
+        case HOTKEY_SHOW_OVERLAY_RISKS_NATIVE:
+            def->action = &data.hotkey_state.show_overlay;
+            def->value = OVERLAY_NATIVE;
+            break;
+        case HOTKEY_BUILD_HIGHWAY:
+            def->action = &data.hotkey_state.building;
+            def->value = BUILDING_HIGHWAY;
+            break;
+        case HOTKEY_SHOW_OVERLAY_ENEMY:
+            def->action = &data.hotkey_state.show_overlay;
+            def->value = OVERLAY_ENEMY;
+            break;
+        default:
             def->action = 0;
     }
 }
@@ -460,7 +500,7 @@ static int allocate_mapping_memory(int total_definitions, int total_arrows)
 
 void hotkey_install_mapping(hotkey_mapping *mappings, int num_mappings)
 {
-    int total_definitions = 3; // Enter, ESC and F5 are fixed hotkeys
+    int total_definitions = 5; // Fixed keys: Enter, ESC, F5, Delete, Backspace
     int total_arrows = 0;
     for (int i = 0; i < num_mappings; i++) {
         hotkey_action action = mappings[i].action;
@@ -475,7 +515,7 @@ void hotkey_install_mapping(hotkey_mapping *mappings, int num_mappings)
         return;
     }
 
-    // Fixed keys: Escape and Enter
+    // Fixed keys: Enter, ESC, F5, Delete, Backspace -- yep they're still fixed even down here. crazy, i know
     data.definitions[0].action = &data.hotkey_state.enter_pressed;
     data.definitions[0].key = KEY_TYPE_ENTER;
     data.definitions[0].modifiers = 0;
@@ -494,7 +534,19 @@ void hotkey_install_mapping(hotkey_mapping *mappings, int num_mappings)
     data.definitions[2].repeatable = 0;
     data.definitions[2].value = 1;
 
-    data.num_definitions = 3;
+    data.definitions[3].action = &data.hotkey_state.delete_pressed;
+    data.definitions[3].key = KEY_TYPE_DELETE;
+    data.definitions[3].modifiers = 0;
+    data.definitions[3].repeatable = 0;
+    data.definitions[3].value = 1;
+
+    data.definitions[4].action = &data.hotkey_state.backspace_pressed;
+    data.definitions[4].key = KEY_TYPE_BACKSPACE;
+    data.definitions[4].modifiers = 0;
+    data.definitions[4].repeatable = 0;
+    data.definitions[4].value = 1;
+
+    data.num_definitions = 5;
 
     for (int i = 0; i < num_mappings; i++) {
         hotkey_action action = mappings[i].action;
@@ -520,7 +572,7 @@ void hotkey_reset_state(void)
 
 void hotkey_key_pressed(key_type key, key_modifier_type modifiers, int repeat)
 {
-    data.shift_pressed = modifiers == KEY_MOD_SHIFT;
+    data.modifiers = modifiers;
 
     if (window_is(WINDOW_HOTKEY_EDITOR)) {
         window_hotkey_editor_key_pressed(key, modifiers);
@@ -532,7 +584,8 @@ void hotkey_key_pressed(key_type key, key_modifier_type modifiers, int repeat)
     int found_action = 0;
     for (int i = 0; i < data.num_definitions; i++) {
         hotkey_definition *def = &data.definitions[i];
-        if (window_is(WINDOW_ASSET_PREVIEWER) && key == KEY_TYPE_F5 && def->action != &data.hotkey_state.f5_pressed) {
+        if ((window_is(WINDOW_ASSET_PREVIEWER) || window_is(WINDOW_EDITOR_EMPIRE)) &&
+            key == KEY_TYPE_F5 && def->action != &data.hotkey_state.f5_pressed) {
             continue;
         }
         if (def->key == key && def->modifiers == modifiers && (!repeat || def->repeatable)) {
@@ -553,7 +606,7 @@ void hotkey_key_pressed(key_type key, key_modifier_type modifiers, int repeat)
 
 void hotkey_key_released(key_type key, key_modifier_type modifiers)
 {
-    data.shift_pressed = modifiers == KEY_MOD_SHIFT;
+    data.modifiers = modifiers;
 
     if (window_is(WINDOW_HOTKEY_EDITOR)) {
         window_hotkey_editor_key_released(key, modifiers);
@@ -570,9 +623,9 @@ void hotkey_key_released(key_type key, key_modifier_type modifiers)
     }
 }
 
-int hotkey_shift_pressed(void)
+key_modifier_type hotkey_get_modifiers(void)
 {
-    return data.shift_pressed;
+    return data.modifiers;
 }
 
 static void confirm_exit(int accepted, int checked)

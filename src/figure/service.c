@@ -8,6 +8,7 @@
 #include "city/finance.h"
 #include "core/config.h"
 #include "core/random.h"
+#include "figure/roamer_preview.h"
 #include "figuretype/crime.h"
 #include "game/resource.h"
 #include "game/time.h"
@@ -121,7 +122,7 @@ static void tavern_coverage(building *b, int products)
     if (products) {
         b->house_tavern_wine_access = MAX_COVERAGE;
         if (products > 1) {
-            b->house_tavern_meat_access = MAX_COVERAGE;
+            b->house_tavern_food_access = MAX_COVERAGE;
         }
     }
 }
@@ -207,7 +208,8 @@ static int provide_missionary_coverage(int x, int y)
             int building_id = map_building_at(map_grid_offset(xx, yy));
             if (building_id) {
                 building *b = building_get(building_id);
-                if (b->type == BUILDING_NATIVE_HUT || b->type == BUILDING_NATIVE_MEETING) {
+                if (b->type == BUILDING_NATIVE_HUT || b->type == BUILDING_NATIVE_HUT_ALT ||
+                    b->type == BUILDING_NATIVE_MEETING || b->type == BUILDING_NATIVE_WATCHTOWER) {
                     b->sentiment.native_anger = 0;
                 }
             }
@@ -264,7 +266,7 @@ static void tourist_spend(building *b, figure *f)
         int amount = b->tourism_income;
         f->tourist.tourist_money_spent += amount;
         b->tourism_income_this_year += amount;
-        city_finance_treasury_add_tourism(amount);
+        city_finance_treasury_add_miscellaneous(amount);
     }
 }
 
@@ -322,19 +324,19 @@ static void tax_collector_coverage(building *b, int *max_tax_multiplier)
     }
 }
 
-static void distribute_good(building *b, building *market, int stock_wanted, int inventory_resource)
+static void distribute_good(building *b, building *market, int stock_wanted, resource_type resource)
 {
-    if (!building_distribution_is_good_accepted(inventory_resource, market)) {
+    if (!building_distribution_is_good_accepted(resource, market)) {
         return;
     }
-    int amount_wanted = stock_wanted - b->data.house.inventory[inventory_resource];
-    if (market->data.market.inventory[inventory_resource] > 0 && amount_wanted > 0) {
-        if (amount_wanted <= market->data.market.inventory[inventory_resource]) {
-            b->data.house.inventory[inventory_resource] += amount_wanted;
-            market->data.market.inventory[inventory_resource] -= amount_wanted;
+    int amount_wanted = stock_wanted - b->resources[resource];
+    if (market->resources[resource] > 0 && amount_wanted > 0) {
+        if (amount_wanted <= market->resources[resource]) {
+            b->resources[resource] += amount_wanted;
+            market->resources[resource] -= amount_wanted;
         } else {
-            b->data.house.inventory[inventory_resource] += market->data.market.inventory[inventory_resource];
-            market->data.market.inventory[inventory_resource] = 0;
+            b->resources[resource] += market->resources[resource];
+            market->resources[resource] = 0;
         }
     }
 }
@@ -343,16 +345,19 @@ static void collect_offerings_from_house(building *house, building *temple)
 {
     // offerings are generated, not removed from house stores    
     if (house->days_since_offering >= MARS_OFFERING_FREQUENCY) {
-        for (int i = INVENTORY_MIN_FOOD; i < INVENTORY_MAX_FOOD; i++) {
-            if (house->data.house.inventory[i]) {
+        for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+            if (!resource_is_inventory(r)) {
+                continue;
+            }
+            if (house->resources[r]) {
                 if (house->house_size == 1 && house->house_is_merged) {
-                    temple->data.market.inventory[i] += 2;
+                    temple->resources[r] += 2;
                 } else {
-                    temple->data.market.inventory[i] += house->house_size;
+                    temple->resources[r] += house->house_size;
                 }
             }
-            if (temple->data.market.inventory[i] > 400) {
-                temple->data.market.inventory[i] = 400;
+            if (temple->resources[r] > 400) {
+                temple->resources[r] = 400;
             }
         }
         house->days_since_offering = 0;
@@ -367,25 +372,28 @@ static void distribute_market_resources(building *b, building *market)
     }
     int max_food_stocks = 4 * b->house_highest_population;
     int food_types_stored_max = 0;
-    for (int i = INVENTORY_MIN_FOOD; i < INVENTORY_MAX_FOOD; i++) {
-        if (b->data.house.inventory[i] >= max_food_stocks) {
+    for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+        if (!resource_is_inventory(r)) {
+            continue;
+        }
+        if (b->resources[r] >= max_food_stocks) {
             food_types_stored_max++;
         }
     }
     const model_house *model = model_get_house(level);
     if (model->food_types) {
-        for (int i = INVENTORY_MIN_FOOD; i < INVENTORY_MAX_FOOD; i++) {
-            if (b->data.house.inventory[i] >= max_food_stocks ||
-                !building_distribution_is_good_accepted(i, market)) {
+        for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+            if (!resource_is_inventory(r) || b->resources[r] >= max_food_stocks ||
+                !building_distribution_is_good_accepted(r, market)) {
                 continue;
             }
-            if (market->data.market.inventory[i] >= max_food_stocks) {
-                b->data.house.inventory[i] += max_food_stocks;
-                market->data.market.inventory[i] -= max_food_stocks;
+            if (market->resources[r] >= max_food_stocks) {
+                b->resources[r] += max_food_stocks;
+                market->resources[r] -= max_food_stocks;
                 break;
-            } else if (market->data.market.inventory[i]) {
-                b->data.house.inventory[i] += market->data.market.inventory[i];
-                market->data.market.inventory[i] = 0;
+            } else if (market->resources[r]) {
+                b->resources[r] += market->resources[r];
+                market->resources[r] = 0;
                 break;
             }
         }
@@ -398,21 +406,21 @@ static void distribute_market_resources(building *b, building *market)
         goods_no = 12;
     }
 
-    if (model->pottery) {
-        market->data.market.pottery_demand = 10;
-        distribute_good(b, market, goods_no * model->pottery, INVENTORY_POTTERY);
+    if (model->pottery && market->accepted_goods[RESOURCE_POTTERY]) {
+        market->accepted_goods[RESOURCE_POTTERY] = 11;
+        distribute_good(b, market, goods_no * model->pottery, RESOURCE_POTTERY);
     }
-    if (model->furniture) {
-        market->data.market.furniture_demand = 10;
-        distribute_good(b, market, goods_no * model->furniture, INVENTORY_FURNITURE);
+    if (model->furniture && market->accepted_goods[RESOURCE_FURNITURE]) {
+        market->accepted_goods[RESOURCE_FURNITURE] = 11;
+        distribute_good(b, market, goods_no * model->furniture, RESOURCE_FURNITURE);
     }
-    if (model->oil) {
-        market->data.market.oil_demand = 10;
-        distribute_good(b, market, goods_no * model->oil, INVENTORY_OIL);
+    if (model->oil && market->accepted_goods[RESOURCE_OIL]) {
+        market->accepted_goods[RESOURCE_OIL] = 11;
+        distribute_good(b, market, goods_no * model->oil, RESOURCE_OIL);
     }
-    if (model->wine) {
-        market->data.market.wine_demand = 10;
-        distribute_good(b, market, goods_no * model->wine, INVENTORY_WINE);
+    if (model->wine && market->accepted_goods[RESOURCE_WINE]) {
+        market->accepted_goods[RESOURCE_WINE] = 11;
+        distribute_good(b, market, goods_no * model->wine, RESOURCE_WINE);
     }
 }
 
@@ -452,14 +460,14 @@ static int provide_venus_wine_to_taverns(int market_building_id, int x, int y)
             if (building_id) {
                 building *b = building_get(building_id);
                 if (b->type == BUILDING_TAVERN) {
-                    int amount_wanted = 200 - b->data.market.inventory[INVENTORY_WINE];
-                    if (market->data.market.inventory[INVENTORY_WINE] > 0 && amount_wanted > 0) {
-                        if (amount_wanted <= market->data.market.inventory[INVENTORY_WINE]) {
-                            b->data.market.inventory[INVENTORY_WINE] += amount_wanted;
-                            market->data.market.inventory[INVENTORY_WINE] -= amount_wanted;
+                    int amount_wanted = 200 - b->resources[RESOURCE_WINE];
+                    if (market->resources[RESOURCE_WINE] > 0 && amount_wanted > 0) {
+                        if (amount_wanted <= market->resources[RESOURCE_WINE]) {
+                            b->resources[RESOURCE_WINE] += amount_wanted;
+                            market->resources[RESOURCE_WINE] -= amount_wanted;
                         } else {
-                            b->data.market.inventory[INVENTORY_WINE] += market->data.market.inventory[INVENTORY_WINE];
-                            market->data.market.inventory[INVENTORY_WINE] = 0;
+                            b->resources[RESOURCE_WINE] += market->resources[RESOURCE_WINE];
+                            market->resources[RESOURCE_WINE] = 0;
                         }
                     }
                     serviced++;
@@ -553,6 +561,9 @@ int figure_service_provide_coverage(figure *f)
         case FIGURE_WAREHOUSEMAN:
         case FIGURE_DOCKER:
         case FIGURE_CART_PUSHER:
+        case FIGURE_DEPOT_CART_PUSHER:
+        case FIGURE_NATIVE_TRADER:
+        case FIGURE_LIGHTHOUSE_SUPPLIER:
             b = building_get(f->building_id);
             building *dest_b = building_get(f->destination_building_id);
 
@@ -652,9 +663,18 @@ int figure_service_provide_coverage(figure *f)
             houses_serviced = provide_culture(x, y, hippodrome_coverage);
             break;
         case FIGURE_BARKEEP:
+        {
             b = building_get(f->building_id);
-            houses_serviced = provide_entertainment(x, y, b->data.market.inventory[INVENTORY_WINE] ? b->data.market.inventory[INVENTORY_MEAT] ? 2 : 1 : 0, tavern_coverage);
+            int tavern_goods = 0;
+            if (b->resources[RESOURCE_WINE]) {
+                tavern_goods = 1;
+                if (b->resources[RESOURCE_MEAT] || b->resources[RESOURCE_FISH]) {
+                    tavern_goods = 2;
+                }
+            }
+            houses_serviced = provide_entertainment(x, y, tavern_goods, tavern_coverage);
             break;
+        }
         case FIGURE_ENGINEER:
         case FIGURE_WORK_CAMP_ARCHITECT:
             {

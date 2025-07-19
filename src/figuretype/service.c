@@ -15,6 +15,9 @@
 #include "map/road_access.h"
 
 static const int DOCTOR_HEALING_OFFSETS[] = { 0, 1, 2, 3, 4, 5, 4, 3, 2, 1};
+static const int BEGGAR_OFFSETS[] = { 104, 105, 106, 107, 108, 109, 110, 111};
+
+static int beggar_frame_count = sizeof(BEGGAR_OFFSETS) / sizeof(*BEGGAR_OFFSETS);
 
 static void roamer_action(figure *f, int num_ticks)
 {
@@ -71,7 +74,7 @@ void figure_destination_priest_action(figure *f)
 {
     building *b = building_get(f->building_id);
     building *destination = building_get(f->destination_building_id);
-    f->terrain_usage = TERRAIN_USAGE_ROADS;
+    f->terrain_usage = TERRAIN_USAGE_ROADS_HIGHWAY;
     if (b->state != BUILDING_STATE_IN_USE || (b->figure_id4 != f->id && b->figure_id2 != f->id) || destination->state != BUILDING_STATE_IN_USE) {
         f->state = FIGURE_STATE_DEAD;
     }
@@ -92,7 +95,7 @@ void figure_destination_priest_action(figure *f)
         case FIGURE_ACTION_214_DESTINATION_MARS_PRIEST_CREATED:
             f->destination_x = destination->road_access_x;
             f->destination_y = destination->road_access_y;
-            int market_units = b->data.market.inventory[f->collecting_item_id];
+            int market_units = b->resources[f->collecting_item_id];
             int num_loads;
             int max_units = MAX_FOOD_STOCKED_MESS_HALL - market_units;
 
@@ -122,7 +125,7 @@ void figure_destination_priest_action(figure *f)
                 return;
             }
 
-            b->data.market.inventory[f->collecting_item_id] -= (100 * num_loads);
+            b->resources[f->collecting_item_id] -= (100 * num_loads);
 
             // create delivery boys
             int priest_id = f->id;
@@ -235,52 +238,52 @@ void figure_tavern_action(figure *f)
     roamer_action(f, 1);
     int dir = figure_image_normalize_direction(f->direction < 8 ? f->direction : f->previous_tile_direction);
     if (f->action_state == FIGURE_ACTION_149_CORPSE) {
-        f->image_id = assets_get_image_id("Entertainment", "Barkeep Death 01") +
+        f->image_id = assets_get_image_id("Walkers", "Barkeep Death 01") +
             figure_image_corpse_offset(f);
     } else {
-        f->image_id = assets_get_image_id("Entertainment", "Barkeep NE 01") + dir * 12 +
+        f->image_id = assets_get_image_id("Walkers", "Barkeep NE 01") + dir * 12 +
             f->image_offset;
     }
 }
 
 static int fight_plague(figure *f, int force)
 {
-    int building_with_plague = 0;
+    int building_with_plague_id = 0;
 
     // Find in houses
     for (building_type type = BUILDING_HOUSE_SMALL_TENT; type <= BUILDING_HOUSE_LUXURY_PALACE; type++) {
         for (building *house = building_first_of_type(type); house; house = house->next_of_type) {
             if (house->has_plague) {
-                building_with_plague = house->id;
+                building_with_plague_id = house->id;
                 break;
             }
         }
     }
 
     // If no houses, find in docks
-    if (!building_with_plague) {
+    if (!building_with_plague_id) {
         for (building *dock = building_first_of_type(BUILDING_DOCK); dock; dock = dock->next_of_type) {
             if (dock->has_plague) {
-                building_with_plague = dock->id;
+                building_with_plague_id = dock->id;
                 break;
             }
         }
     }
 
     // If no docks, find in warehouses
-    if (!building_with_plague) {
+    if (!building_with_plague_id) {
         for (building *warehouse = building_first_of_type(BUILDING_WAREHOUSE); warehouse; warehouse = warehouse->next_of_type) {
             if (warehouse->has_plague) {
-                building_with_plague = warehouse->id;
+                building_with_plague_id = warehouse->id;
                 break;
             }
         }
 
         // If no warehouse, find in granaries
-        if (!building_with_plague) {
+        if (!building_with_plague_id) {
             for (building *granary = building_first_of_type(BUILDING_GRANARY); granary; granary = granary->next_of_type) {
                 if (granary->has_plague) {
-                    building_with_plague = granary->id;
+                    building_with_plague_id = granary->id;
                     break;
                 }
             }
@@ -288,7 +291,7 @@ static int fight_plague(figure *f, int force)
     }
 
     // No plague in buildings
-    if (!building_with_plague) {
+    if (!building_with_plague_id) {
         return 0;
     }
 
@@ -298,8 +301,7 @@ static int fight_plague(figure *f, int force)
             if (!force) {
                 return 0;
             }
-            building *building = building_get(f->destination_building_id);
-            if (building->has_plague) {
+            if (building_get(f->destination_building_id)->has_plague) {
                 return 1;
             }
     }
@@ -309,7 +311,7 @@ static int fight_plague(figure *f, int force)
         return 0;
     }
     int distance;
-    int building_with_plague_id = city_buildings_get_closest_plague(f->x, f->y, &distance);
+    building_with_plague_id = city_buildings_get_closest_plague(f->x, f->y, &distance);
     if (building_with_plague_id > 0 && distance <= 25) {
         building *building_with_plague = building_get(building_with_plague_id);
         f->wait_ticks_missile = 0;
@@ -393,7 +395,7 @@ void figure_doctor_action(figure *f)
             if (f->image_offset >= sizeof DOCTOR_HEALING_OFFSETS / sizeof DOCTOR_HEALING_OFFSETS[0]) {
                 f->image_offset = 0;
             }
-            f->image_id = assets_get_image_id("Health_Education", "Doctor heal") +
+            f->image_id = assets_get_image_id("Health_Culture", "Doctor heal") +
                 DOCTOR_HEALING_OFFSETS[f->image_offset];
             break;
     }
@@ -450,14 +452,7 @@ void figure_market_trader_action(figure *f)
         f->state = FIGURE_STATE_DEAD;
     }
     figure_image_increase_offset(f, 12);
-    if (f->action_state == FIGURE_ACTION_125_ROAMING) {
-        // force return on out of stock
-        int stock = building_market_get_max_food_stock(market) +
-            building_market_get_max_goods_stock(market);
-        if (f->roam_length >= 96 && stock <= 0) {
-            f->roam_length = f->max_roam_length;
-        }
-    }
+
     roamer_action(f, 1);
     figure_image_update(f, image_group(GROUP_FIGURE_MARKET_LADY));
 }
@@ -538,4 +533,26 @@ void figure_tax_collector_action(figure *f)
             break;
     }
     figure_image_update(f, image_group(GROUP_FIGURE_TAX_COLLECTOR));
+}
+
+void figure_beggar_action(figure *f)
+{
+    f->terrain_usage = TERRAIN_USAGE_ROADS_HIGHWAY;
+    figure_image_increase_offset(f, 64);
+    f->cart_image_id = 0;
+
+    if (f->action_state == FIGURE_ACTION_149_CORPSE) {
+        figure_combat_handle_corpse(f);
+    }
+    f->wait_ticks++;
+    if (f->wait_ticks > 800) {
+        f->state = FIGURE_STATE_DEAD;
+        f->image_offset = 0;
+    }
+    if (f->action_state == FIGURE_ACTION_149_CORPSE) {
+        f->image_id = image_group(GROUP_FIGURE_LABOR_SEEKER) + figure_image_corpse_offset(f) + 96;
+    } else {
+        f->image_id = image_group(GROUP_FIGURE_HOMELESS) + BEGGAR_OFFSETS[f->id % beggar_frame_count];
+    }
+
 }

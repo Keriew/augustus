@@ -1,6 +1,10 @@
 #ifndef GAME_RESOURCE_H
 #define GAME_RESOURCE_H
 
+#include "building/type.h"
+#include "city/warning.h"
+#include "core/lang.h"
+
 /**
  * @file
  * Type definitions for resources
@@ -8,86 +12,146 @@
 
 /**
  * Resource types
+ *
+ * If you add a new resource, please follow the order: food -> raw materials -> goods, as the game expects resources
+ * to be in that order.
+ *
+ * If you add a resource to the end of the food, raw materials or goods list, please update the "RESOURCE_MAX_*" value
+ * Same if you add it to the start of a food, raw materials or goods list, in which case you need to update the
+ * "RESOURCE_MIN_*" value.
  */
 typedef enum {
     RESOURCE_NONE = 0,
-    RESOURCE_WHEAT = 1,
-    RESOURCE_VEGETABLES = 2,
-    RESOURCE_FRUIT = 3,
-    RESOURCE_OLIVES = 4,
-    RESOURCE_VINES = 5,
-    RESOURCE_MEAT = 6,
-    RESOURCE_WINE = 7,
-    RESOURCE_OIL = 8,
-    RESOURCE_IRON = 9,
-    RESOURCE_TIMBER = 10,
-    RESOURCE_CLAY = 11,
-    RESOURCE_MARBLE = 12,
-    RESOURCE_WEAPONS = 13,
-    RESOURCE_FURNITURE = 14,
-    RESOURCE_POTTERY = 15,
-    RESOURCE_DENARII = 16,
-    RESOURCE_TROOPS = 17,
+    RESOURCE_WHEAT,
+    RESOURCE_VEGETABLES,
+    RESOURCE_FRUIT,
+    RESOURCE_MEAT,
+    RESOURCE_FISH,
+    RESOURCE_CLAY,
+    RESOURCE_TIMBER,
+    RESOURCE_OLIVES,
+    RESOURCE_VINES,
+    RESOURCE_IRON,
+    RESOURCE_MARBLE,
+    RESOURCE_GOLD,
+    RESOURCE_SAND,
+    RESOURCE_STONE,
+    RESOURCE_POTTERY,
+    RESOURCE_FURNITURE,
+    RESOURCE_OIL,
+    RESOURCE_WINE,
+    RESOURCE_WEAPONS,
+    RESOURCE_CONCRETE,
+    RESOURCE_BRICKS,
+    RESOURCE_DENARII,
+    RESOURCE_TROOPS,
     // helper constants
-    RESOURCE_MIN = 1,
-    RESOURCE_MAX = 16,
-    RESOURCE_MIN_FOOD = 1,
-    RESOURCE_MAX_FOOD = 7,
-    RESOURCE_MIN_RAW = 9,
-    RESOURCE_MAX_RAW = 13
+    RESOURCE_MIN_FOOD = RESOURCE_WHEAT,
+    RESOURCE_MAX_FOOD = RESOURCE_FISH + 1,
+    RESOURCE_MIN_NON_FOOD = RESOURCE_MAX_FOOD,
+    RESOURCE_MAX_NON_FOOD = RESOURCE_BRICKS + 1,
+    RESOURCE_MIN = RESOURCE_MIN_FOOD,
+    RESOURCE_MAX = RESOURCE_MAX_NON_FOOD,
+    RESOURCE_TOTAL_SPECIAL = 2,
+
+    // Values for old versions
+    RESOURCE_MAX_FOOD_LEGACY = 7,
+    RESOURCE_MAX_FOOD_REORDERED = 5,
+    RESOURCE_MAX_FOOD_WITH_FISH = 6,
+
+    RESOURCE_MAX_LEGACY = 16,
+    RESOURCE_MAX_WITH_FISH = 17,
+    RESOURCE_MAX_WITH_GOLD = 18,
+    RESOURCE_MAX_WITH_MONUMENT_RESOURCES = 22
 } resource_type;
 
-typedef enum {
-    INVENTORY_NONE = -1,
-    INVENTORY_WHEAT = 0,
-    INVENTORY_VEGETABLES = 1,
-    INVENTORY_FRUIT = 2,
-    INVENTORY_MEAT = 3,
-    INVENTORY_WINE = 4,
-    INVENTORY_OIL = 5,
-    INVENTORY_FURNITURE = 6,
-    INVENTORY_POTTERY = 7,
-    // helper constants
-    INVENTORY_MIN_FOOD = 0,
-    INVENTORY_MAX_FOOD = 4,
-    INVENTORY_MIN_GOOD = 4,
-    INVENTORY_MAX_GOOD = 8,
-    INVENTORY_MAX = 8,
-    // inventory flags
-    INVENTORY_FLAG_NONE = 0,
-    INVENTORY_FLAG_ALL_FOODS = 0x0f,
-    INVENTORY_FLAG_ALL_GOODS = 0xf0,
-    INVENTORY_FLAG_ALL = 0xff
-} inventory_type;
+#define LEGACY_INVENTORY_MAX 8
+#define RESOURCE_ONE_LOAD 100
+
+#define RESOURCE_SUPPLY_CHAIN_MAX_SIZE 10
 
 typedef enum {
-    WORKSHOP_NONE = 0,
-    WORKSHOP_OLIVES_TO_OIL = 1,
-    WORKSHOP_VINES_TO_WINE = 2,
-    WORKSHOP_IRON_TO_WEAPONS = 3,
-    WORKSHOP_TIMBER_TO_FURNITURE = 4,
-    WORKSHOP_CLAY_TO_POTTERY = 5
-} workshop_type;
+    RESOURCE_ORIGINAL_VERSION = 0,
+    RESOURCE_DYNAMIC_VERSION = 1,
+    RESOURCE_REORDERED_VERSION = 2,
+    RESOURCE_SEPARATE_FISH_AND_MEAT_VERSION = 3,
+    RESOURCE_HAS_GOLD_VERSION = 4,
+    RESOURCE_HAS_NEW_MONUMENT_ELEMENTS = 5,
+    RESOURCE_CURRENT_VERSION = RESOURCE_HAS_NEW_MONUMENT_ELEMENTS
+} resource_version_t;
 
 typedef enum {
-    RESOURCE_IMAGE_STORAGE = 0,
-    RESOURCE_IMAGE_CART = 1,
-    RESOURCE_IMAGE_FOOD_CART = 2,
-    RESOURCE_IMAGE_ICON = 3
-} resource_image_type;
+    RESOURCE_FLAG_NONE = 0,
+    RESOURCE_FLAG_FOOD = 1,
+    RESOURCE_FLAG_STORABLE = 2,
+    RESOURCE_FLAG_INVENTORY = 4 | RESOURCE_FLAG_STORABLE // Inventory goods are always storable
+} resource_flags;
 
-int resource_image_offset(resource_type resource, resource_image_type type);
+typedef struct {
+    int raw_amount;
+    resource_type raw_material;
+    resource_type good;
+} resource_supply_chain;
+
+typedef struct {
+    resource_type type;
+    resource_flags flags;
+    const uint8_t *text;
+    const char *xml_attr_name;
+    building_type industry;
+    int production_per_month;
+    struct {
+        warning_type needed;
+        warning_type create_industry;
+    } warning;
+    struct {
+        int storage;
+        struct {
+            int single_load;
+            int multiple_loads;
+            int eight_loads;
+        } cart;
+        int icon;
+        int empire;
+        struct {
+            int icon;
+            int empire;
+        } editor;
+    } image;
+    struct {
+        int buy;
+        int sell;
+    } default_trade_price;
+} resource_data;
+
+void resource_init(void);
 
 int resource_is_food(resource_type resource);
 
-workshop_type resource_to_workshop_type(resource_type resource);
+int resource_is_raw_material(resource_type resource);
 
-int inventory_is_set(int inventory, int flag);
+int resource_is_inventory(resource_type resource);
+int resource_is_storable(resource_type resource);
 
-void inventory_set(int *inventory, int flag);
+resource_type resource_get_from_industry(building_type industry);
 
-int resource_from_inventory(int inventory_id);
+int resource_get_supply_chain_for_good(resource_supply_chain *chain, resource_type good);
+int resource_get_supply_chain_for_raw_material(resource_supply_chain *chain, resource_type raw_material);
 
-int resource_to_inventory(resource_type resource);
+const resource_data *resource_get_data(resource_type resource);
+
+void resource_set_mapping(resource_version_t version);
+
+resource_version_t resource_mapping_get_version(void);
+
+resource_type resource_map_legacy_inventory(int id);
+
+int resource_production_per_month(resource_type);
+
+resource_type resource_remap(int id);
+
+int resource_total_mapped(void);
+
+int resource_total_food_mapped(void);
 
 #endif // GAME_RESOURCE_H

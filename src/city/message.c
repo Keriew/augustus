@@ -8,6 +8,7 @@
 #include "core/string.h"
 #include "core/time.h"
 #include "figure/formation.h"
+#include "game/resource.h"
 #include "game/settings.h"
 #include "game/time.h"
 #include "graphics/window.h"
@@ -156,13 +157,17 @@ static void show_message_popup(int message_id)
     city_message *msg = &data.messages[message_id];
     data.consecutive_message_delay = 5;
     msg->is_read = 1;
-    int text_id = city_message_get_text_id(msg->message_type);
-    if (!has_video(text_id)) {
-        play_sound(text_id);
+    if (msg->message_type != MESSAGE_CUSTOM_MESSAGE) {
+        int text_id = city_message_get_text_id(msg->message_type);
+        if (!has_video(text_id)) {
+            play_sound(text_id);
+        }
+        window_message_dialog_show_city_message(text_id,
+            msg->year, msg->month, msg->param1, msg->param2,
+            city_message_get_advisor(msg->message_type), 1);
+    } else {
+        window_message_dialog_show_custom_message(msg->param1, msg->year, msg->month);
     }
-    window_message_dialog_show_city_message(text_id,
-        msg->year, msg->month, msg->param1, msg->param2,
-        city_message_get_advisor(msg->message_type), 1);
 }
 
 void city_message_disable_sound_for_next_message(void)
@@ -196,7 +201,7 @@ void city_message_post(int use_popup, int message_type, int param1, int param2)
     msg->month = game_time_month();
     msg->param1 = param1;
     msg->param2 = param2;
-    msg->sequence = data.next_message_sequence++;
+    msg->sequence = ++data.next_message_sequence;
 
     int text_id = city_message_get_text_id(message_type);
     lang_message_type lang_msg_type = lang_get_message(text_id)->message_type;
@@ -205,7 +210,9 @@ void city_message_post(int use_popup, int message_type, int param1, int param2)
         window_invalidate();
     }
 
-    if (config_get(CONFIG_UI_MESSAGE_ALERTS)) {
+    // Since custom messages are scenario specific, don't show them as simple alerts at the top
+    // Also, beware: should we change this behavior, the below code will crash
+    if (message_type != MESSAGE_CUSTOM_MESSAGE && config_get(CONFIG_UI_MESSAGE_ALERTS)) {
         city_warning_show_custom(lang_get_message(text_id)->title.text, NEW_WARNING_SLOT);
         use_popup = 0;
     }
@@ -673,6 +680,21 @@ void city_message_save_state(buffer *messages, buffer *extra, buffer *counts, bu
     buffer_write_u8(population, data.population_shown.pop25000);
 }
 
+static void update_message_param_if_resource(city_message *msg)
+{
+    switch (msg->message_type) {
+        case MESSAGE_INCREASED_TRADING:
+        case MESSAGE_DECREASED_TRADING:
+        case MESSAGE_TRADE_STOPPED:
+        case MESSAGE_PRICE_INCREASED:
+        case MESSAGE_PRICE_DECREASED:
+            msg->param2 = resource_remap(msg->param2);
+            break;
+        default:
+            break;
+    }
+}
+
 void city_message_load_state(buffer *messages, buffer *extra, buffer *counts, buffer *delays, buffer *population)
 {
     for (int i = 0; i < MAX_MESSAGES; i++) {
@@ -684,6 +706,7 @@ void city_message_load_state(buffer *messages, buffer *extra, buffer *counts, bu
         msg->sequence = buffer_read_i16(messages);
         msg->is_read = buffer_read_u8(messages);
         msg->month = buffer_read_u8(messages);
+        update_message_param_if_resource(msg);
         buffer_skip(messages, 2);
     }
 

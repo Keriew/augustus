@@ -33,6 +33,16 @@ void window_building_draw_oracle(building_info_context *c);
 
 void window_building_draw_lararium(building_info_context* c);
 
+void window_building_draw_shrine_ceres(building_info_context *c);
+
+void window_building_draw_shrine_neptune(building_info_context *c);
+
+void window_building_draw_shrine_mercury(building_info_context *c);
+
+void window_building_draw_shrine_mars(building_info_context *c);
+
+void window_building_draw_shrine_venus(building_info_context *c);
+
 void window_building_draw_theater(building_info_context *c);
 
 void window_building_draw_amphitheater(building_info_context *c);
@@ -77,7 +87,7 @@ void window_building_draw_tavern(building_info_context* c);
 
 void window_building_draw_grand_garden(building_info_context* c);
 
-void window_building_handle_mouse_lighthouse(const mouse *m, building_info_context *c);
+int window_building_handle_mouse_lighthouse(const mouse *m, building_info_context *c);
 
 void window_building_draw_lighthouse_foreground(building_info_context *c);
 

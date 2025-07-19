@@ -52,25 +52,6 @@ static int get_land_type_citizen_building(int grid_offset)
         case BUILDING_FORT_GROUND:
             type = CITIZEN_2_PASSABLE_TERRAIN;
             break;
-        case BUILDING_TRIUMPHAL_ARCH:
-            if (b->subtype.orientation == 3) {
-                switch (map_property_multi_tile_xy(grid_offset)) {
-                    case EDGE_X0Y1:
-                    case EDGE_X1Y1:
-                    case EDGE_X2Y1:
-                        type = CITIZEN_0_ROAD;
-                        break;
-                }
-            } else {
-                switch (map_property_multi_tile_xy(grid_offset)) {
-                    case EDGE_X1Y0:
-                    case EDGE_X1Y1:
-                    case EDGE_X1Y2:
-                        type = CITIZEN_0_ROAD;
-                        break;
-                }
-            }
-            break;
         case BUILDING_GRANARY:
             switch (map_property_multi_tile_xy(grid_offset)) {
                 case EDGE_X1Y0:
@@ -165,8 +146,12 @@ static int get_land_type_noncitizen(int grid_offset)
             break;
         case BUILDING_BURNING_RUIN:
         case BUILDING_NATIVE_HUT:
+        case BUILDING_NATIVE_HUT_ALT:
         case BUILDING_NATIVE_MEETING:
         case BUILDING_NATIVE_CROPS:
+        case BUILDING_NATIVE_DECORATION:
+        case BUILDING_NATIVE_MONUMENT:
+        case BUILDING_WATCHTOWER:
             type = NONCITIZEN_N1_BLOCKED;
             break;
         case BUILDING_FORT:
@@ -183,10 +168,14 @@ static int get_land_type_noncitizen(int grid_offset)
                     break;
             }
             break;
-        case BUILDING_GARDEN_WALL_GATE:
+        case BUILDING_ROOFED_GARDEN_WALL_GATE:
+        case BUILDING_LOOPED_GARDEN_GATE:
+        case BUILDING_PANELLED_GARDEN_GATE:
         case BUILDING_ROADBLOCK:
         case BUILDING_HEDGE_GATE_DARK:
         case BUILDING_HEDGE_GATE_LIGHT:
+        case BUILDING_SHIP_BRIDGE:
+        case BUILDING_LOW_BRIDGE:
             type = NONCITIZEN_0_PASSABLE;
             break;
     }
@@ -351,13 +340,18 @@ int map_routing_wall_tile_in_radius(int x, int y, int radius, int *x_wall, int *
 
 int map_routing_citizen_is_passable(int grid_offset)
 {
-    return terrain_land_citizen.items[grid_offset] >= CITIZEN_0_ROAD ||
+    return terrain_land_citizen.items[grid_offset] >= CITIZEN_0_ROAD &&
         terrain_land_citizen.items[grid_offset] <= CITIZEN_2_PASSABLE_TERRAIN;
 }
 
 int map_routing_citizen_is_road(int grid_offset)
 {
     return terrain_land_citizen.items[grid_offset] == CITIZEN_0_ROAD;
+}
+
+int map_routing_citizen_is_highway(int grid_offset)
+{
+    return terrain_land_citizen.items[grid_offset] == CITIZEN_1_HIGHWAY;
 }
 
 int map_routing_citizen_is_passable_terrain(int grid_offset)

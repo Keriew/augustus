@@ -10,9 +10,9 @@
 #include <string.h>
 
 enum {
-    WATER_ACCESS_NONE = 0b00,
-    WATER_ACCESS_WELL = 0b01,
-    WATER_ACCESS_FOUNTAIN = 0b10
+    WATER_ACCESS_NONE = 0x0,
+    WATER_ACCESS_WELL = 0x1,
+    WATER_ACCESS_FOUNTAIN = 0x2
 };
 
 static uint8_t has_water_access[GRID_SIZE * GRID_SIZE];
@@ -70,5 +70,5 @@ void city_water_ghost_draw_water_structure_ranges(void)
     last_building_type = type;
     last_well_count = num_wells;
     last_fountain_count = num_fountains;
-    city_view_foreach_map_tile(draw_water_access);
+    city_view_foreach_valid_map_tile(draw_water_access);
 }

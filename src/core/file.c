@@ -5,9 +5,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 FILE *file_open(const char *filename, const char *mode)
 {
+    if (!filename) {
+        return 0;
+    }
+    if (strncmp(filename, ASSETS_DIRECTORY, sizeof(ASSETS_DIRECTORY) - 1) == 0) {
+        return platform_file_manager_open_asset(filename + sizeof(ASSETS_DIRECTORY), mode);
+    }
     return platform_file_manager_open_file(filename, mode);
 }
 
@@ -26,58 +33,54 @@ int file_has_extension(const char *filename, const char *extension)
     if (!extension || !*extension) {
         return 1;
     }
-    char c;
-    do {
-        c = *filename;
-        filename++;
-    } while (c != '.' && c);
-    if (!c) {
-        filename--;
-    }
-    return platform_file_manager_compare_filename(filename, extension) == 0;
+    filename = strrchr(filename, '.');
+    return filename ? platform_file_manager_compare_filename(filename + 1, extension) == 0 : 0;
 }
 
 void file_change_extension(char *filename, const char *new_extension)
 {
-    char c;
-    do {
-        c = *filename;
-        filename++;
-    } while (c != '.' && c);
-    if (c == '.') {
-        filename[0] = new_extension[0];
-        filename[1] = new_extension[1];
-        filename[2] = new_extension[2];
-        filename[3] = 0;
+    if (!new_extension || !*new_extension) {
+        return;
     }
+    filename = strrchr(filename, '.');
+    if (!filename) {
+        return;
+    }
+    filename++;
+    snprintf(filename, strlen(filename) + 1, "%s", new_extension);
 }
 
-void file_append_extension(char *filename, const char *extension)
+void file_append_extension(char *filename, const char *extension, size_t length)
 {
-    char c;
-    do {
-        c = *filename;
-        filename++;
-    } while (c);
-    filename--;
-    filename[0] = '.';
-    filename[1] = extension[0];
-    filename[2] = extension[1];
-    filename[3] = extension[2];
-    filename[4] = 0;
+    if (!extension || !*extension) {
+        return;
+    }
+    size_t actual_length = strlen(filename);
+    if (actual_length + strlen(extension) + 1 > length) {
+        return;
+    }
+    snprintf(filename + actual_length, length - actual_length, ".%s", extension);
 }
 
 void file_remove_extension(char *filename)
 {
-    uint8_t c;
-    do {
-        c = *filename;
-        filename++;
-    } while (c != '.' && c);
-    if (c == '.') {
-        filename--;
+    filename = strrchr(filename, '.');
+    if (filename) {
         *filename = 0;
     }
+}
+
+const char *file_remove_path(const char *filename)
+{
+    char *filename_without_directory = strrchr(filename, '/');
+    if (filename_without_directory) {
+        return filename_without_directory + 1;
+    }
+    filename_without_directory = strrchr(filename, '\\');
+    if (filename_without_directory) {
+        return filename_without_directory + 1;
+    }
+    return filename;
 }
 
 int file_exists(const char *filename, int localizable)

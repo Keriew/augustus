@@ -12,9 +12,6 @@ then
 elif [[ "$GITHUB_REF" == "refs/heads/master" ]]
 then
   REPO=development
-elif [[ "$GITHUB_REF" == "refs/heads/release" ]]
-then
-  REPO=experimental
 elif [[ "$GITHUB_REF" =~ ^refs/pull/ ]]
 then
   PR_ID=${GITHUB_REF##refs/pull/}
@@ -22,7 +19,6 @@ then
   VERSION=pr-$PR_ID-$VERSION
 else
   echo "Unknown branch type $GITHUB_REF - skipping upload"
-  exit
 fi
 
 DEPLOY_FILE=
@@ -31,6 +27,13 @@ case "$DEPLOY" in
   PACKAGE=linux
   DEPLOY_FILE=augustus-$VERSION-linux-x86_64.zip
   cp "${build_dir}/augustus.zip" "deploy/$DEPLOY_FILE"
+  ;;
+"flatpak")
+  PACKAGE=linux-flatpak
+  DEPLOY_FILE=augustus-$VERSION-linux.flatpak
+  flatpak build-export export repo
+  flatpak build-bundle export augustus.flatpak com.github.keriew.augustus --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
+  cp augustus.flatpak "deploy/$DEPLOY_FILE"
   ;;
 "vita")
   PACKAGE=vita

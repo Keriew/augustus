@@ -100,8 +100,7 @@ void building_list_save_state(buffer *small, buffer *large, buffer *burning, buf
     if (buf_size) {
         uint8_t *buf_data = malloc(buf_size);
         buffer_init(small, buf_data, buf_size);
-        array_foreach(data.small, value)
-        {
+        array_foreach(data.small, value) {
             buffer_write_i32(small, *value);
         }
     }
@@ -110,8 +109,7 @@ void building_list_save_state(buffer *small, buffer *large, buffer *burning, buf
     if (buf_size) {
         uint8_t *buf_data = malloc(buf_size);
         buffer_init(large, buf_data, buf_size);
-        array_foreach(data.large, value)
-        {
+        array_foreach(data.large, value) {
             buffer_write_i32(large, *value);
         }
     }
@@ -120,8 +118,7 @@ void building_list_save_state(buffer *small, buffer *large, buffer *burning, buf
     if (buf_size) {
         uint8_t *buf_data = malloc(buf_size);
         buffer_init(burning, buf_data, buf_size);
-        array_foreach(data.burning, value)
-        {
+        array_foreach(data.burning, value) {
             buffer_write_i32(burning, *value);
         }
     }
@@ -136,7 +133,7 @@ void building_list_load_state(buffer *small, buffer *large, buffer *burning, buf
     data.burning.size = 0;
 
     if (!is_new_version) {
-        int size = small->size / sizeof(int16_t);
+        size_t size = small->size / sizeof(int16_t);
         for (int i = 0; i < size; i++) {
             building_list_small_add(buffer_read_i16(small));
         }
@@ -151,7 +148,7 @@ void building_list_load_state(buffer *small, buffer *large, buffer *burning, buf
 
         buffer_skip(burning_totals, 4);
     } else {
-        int size = small->size / sizeof(int32_t);
+        size_t size = small->size / sizeof(int32_t);
         for (int i = 0; i < size; i++) {
             building_list_small_add(buffer_read_i32(small));
         }

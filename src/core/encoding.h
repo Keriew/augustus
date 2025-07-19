@@ -11,7 +11,9 @@
 typedef enum {
     ENCODING_WESTERN_EUROPE = 1252,
     ENCODING_EASTERN_EUROPE = 1250,
+    ENCODING_CZECH = 12502,
     ENCODING_CYRILLIC = 1251,
+    ENCODING_GREEK = 1253,
     ENCODING_TRADITIONAL_CHINESE = 950,
     ENCODING_SIMPLIFIED_CHINESE = 936,
     ENCODING_JAPANESE = 932,
@@ -61,7 +63,7 @@ int encoding_can_display(const char *utf8_char);
 void encoding_to_utf8(const uint8_t *input, char *output, int output_length, int decompose);
 
 /**
- * Converts the internally-encoded input to UTF-8 output
+ * Converts the UTF-8 to internally-encoded output
  * @param input Input to convert, UTF-8 encoded
  * @param output Output buffer to store the internally encoded input
  * @param output_length Length of the output buffer

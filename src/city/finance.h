@@ -35,13 +35,15 @@ int city_finance_treasury(void);
 
 void city_finance_treasury_add(int amount);
 
-void city_finance_treasury_add_tourism(int amount);
+void city_finance_treasury_add_miscellaneous(int amount);
 
 int city_finance_out_of_money(void);
 
 int city_finance_tax_percentage(void);
 
 void city_finance_change_tax_percentage(int change);
+
+void city_finance_set_tax_percentage(int new_rate);
 
 int city_finance_percentage_taxed_people(void);
 
@@ -103,9 +105,12 @@ typedef struct {
 
 int city_finance_tourism_income_last_month(void);
 
+int city_finance_tourism_lowest_factor(void);
+
 const finance_overview *city_finance_overview_last_year(void);
 
 const finance_overview *city_finance_overview_this_year(void);
 
 int city_finance_spawn_tourist(void);
+
 #endif // CITY_FINANCE_H

@@ -15,7 +15,7 @@
 #define MAX_TRACKS 7
 #define MAX_PALETTE 256
 
-#define FLAG_RING 0x01
+ // #define FLAG_RING 0x01 - not supported
 #define FLAG_Y_INTERLACE 0x02
 #define FLAG_Y_DOUBLE 0x04
 
@@ -27,13 +27,13 @@
 
 #define BLOCK_MONO 0
 #define BLOCK_FULL 1
-#define BLOCK_VOID 2
+// #define BLOCK_VOID 2 - not supported
 #define BLOCK_SOLID 3
 
 typedef struct {
     const uint8_t *data;
-    int length;
-    int index;
+    size_t length;
+    size_t index;
     int bit_index;
 } bitstream;
 
@@ -77,7 +77,7 @@ struct smacker_t {
     int32_t frames;
     int32_t us_per_frame;
     int32_t flags;
-    int32_t trees_size;
+    size_t trees_size;
     int32_t audio_size[7];
     int32_t audio_rate[7];
 
@@ -145,7 +145,7 @@ static int32_t read_i32(uint8_t *data)
 
 // Bitstream functions
 
-static bitstream *bitstream_init(bitstream *bs, const uint8_t *data, int len)
+static bitstream *bitstream_init(bitstream *bs, const uint8_t *data, size_t len)
 {
     bs->data = data;
     bs->length = len;
@@ -434,10 +434,20 @@ static int read_header(smacker s)
     return 1;
 }
 
+static void free_frame_info(smacker s)
+{
+    free(s->frame_sizes);
+    free(s->frame_offsets);
+    free(s->frame_types);
+    s->frame_sizes = 0;
+    s->frame_offsets = 0;
+    s->frame_types = 0;
+}
+
 static int read_frame_info(smacker s)
 {
     int sizes_length = sizeof(int32_t) * s->frames;
-    int types_length = sizeof(uint8_t) * s->frames;
+    size_t types_length = sizeof(uint8_t) * s->frames;
 
     s->frame_sizes = (int32_t *) clear_malloc(sizes_length);
     s->frame_offsets = (long *) clear_malloc(sizeof(long) * s->frames);
@@ -445,28 +455,24 @@ static int read_frame_info(smacker s)
 
     if (!s->frame_sizes || !s->frame_offsets || !s->frame_types) {
         log_error("SMK: no memory for frame info", 0, 0);
-        free(s->frame_sizes);
-        free(s->frame_offsets);
-        free(s->frame_types);
+        free_frame_info(s);
         return 0;
     }
 
     if (fread(s->frame_sizes, 1, sizes_length, s->fp) != sizes_length ||
         fread(s->frame_types, 1, types_length, s->fp) != types_length) {
         log_error("SMK: unable to read frame info from file", 0, 0);
-        free(s->frame_sizes);
-        free(s->frame_offsets);
-        free(s->frame_types);
+        free_frame_info(s);
         return 0;
     }
 
     uint8_t *data = (uint8_t *) s->frame_sizes;
-    long offset = 0;
+    int offset = 0;
     for (int i = 0; i < s->frames; i++) {
         // Clear first two flag bits in-place (and flip endian-ness if necessary)
         s->frame_sizes[i] = read_i32(&data[4 * i]) & 0xfffffffc;
         s->frame_offsets[i] = offset;
-        offset += s->frame_sizes[i];
+        offset += (long) s->frame_sizes[i];
     }
     return 1;
 }
@@ -540,9 +546,7 @@ smacker smacker_open(FILE *fp)
 void smacker_close(smacker s)
 {
     file_close(s->fp);
-    free(s->frame_offsets);
-    free(s->frame_sizes);
-    free(s->frame_types);
+    free_frame_info(s);
     free_tree16(s->mclr_tree);
     free_tree16(s->mmap_tree);
     free_tree16(s->full_tree);
@@ -707,7 +711,7 @@ static int decode_audio_track(smacker s, int track, uint8_t *data, int length)
 
 static int decode_palette(smacker s, uint8_t *data, int length)
 {
-    color_t new_palette[MAX_PALETTE];
+    color_t new_palette[MAX_PALETTE] = { 0 };
     int index = 0;
     int color_index = 0;
     while (index < length && color_index < MAX_PALETTE) {
@@ -735,9 +739,9 @@ static int decode_palette(smacker s, uint8_t *data, int length)
         } else {
             // Literal color
             new_palette[color_index] =
-                    (PALETTE_MAP[data[index] & 0x3f] << 16) |
-                    (PALETTE_MAP[data[index + 1] & 0x3f] << 8) |
-                    (PALETTE_MAP[data[index + 2] & 0x3f]);
+                (PALETTE_MAP[data[index] & 0x3f] << 16) |
+                (PALETTE_MAP[data[index + 1] & 0x3f] << 8) |
+                (PALETTE_MAP[data[index + 2] & 0x3f]);
             color_index++;
             index += 3;
         }
@@ -746,7 +750,7 @@ static int decode_palette(smacker s, uint8_t *data, int length)
     return 1;
 }
 
-static int decode_video(smacker s, uint8_t *frame_data, int length)
+static int decode_video(smacker s, uint8_t *frame_data, size_t length)
 {
     reset_escape16(s->mclr_tree);
     reset_escape16(s->mmap_tree);
@@ -810,7 +814,7 @@ static uint8_t *read_frame_data(smacker s, int frame_id)
         log_error("SMK: unable to seek to frame data", 0, frame_id);
         return NULL;
     }
-    int frame_size = s->frame_sizes[frame_id];
+    size_t frame_size = s->frame_sizes[frame_id];
     uint8_t *frame_data = (uint8_t *) clear_malloc(frame_size);
     if (!frame_data) {
         log_error("SMK: no memory for frame data", 0, frame_id);
@@ -824,7 +828,7 @@ static uint8_t *read_frame_data(smacker s, int frame_id)
     return frame_data;
 }
 
-static void free_frame_data(const smacker s, uint8_t *frame_data)
+static void free_frame_data(uint8_t *frame_data)
 {
     free(frame_data);
 }
@@ -846,7 +850,7 @@ static smacker_frame_status decode_frame(smacker s)
     if (frame_type & 0x01) {
         int palette_size = frame_data[0] * 4;
         if (!decode_palette(s, &frame_data[1], palette_size - 1)) {
-            free_frame_data(s, frame_data);
+            free_frame_data(frame_data);
             return SMACKER_FRAME_ERROR;
         }
         data_index += palette_size;
@@ -861,11 +865,11 @@ static smacker_frame_status decode_frame(smacker s)
         }
     }
     if (!decode_video(s, &frame_data[data_index], s->frame_sizes[frame_id] - data_index)) {
-        free_frame_data(s, frame_data);
+        free_frame_data(frame_data);
         return SMACKER_FRAME_ERROR;
     }
 
-    free_frame_data(s, frame_data);
+    free_frame_data(frame_data);
     return SMACKER_FRAME_OK;
 }
 

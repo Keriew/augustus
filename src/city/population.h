@@ -52,7 +52,7 @@ int city_population_at_month(int max_months, int month);
 
 int city_population_at_age(int age);
 
-int city_population_at_level(int house_level);
+int city_population_at_level(int level);
 
 void city_population_request_yearly_update(void);
 
@@ -62,19 +62,13 @@ void city_population_check_consistency(void);
 
 int city_population_graph_order(void);
 
-void city_population_set_graph_order(int order);
+void city_population_set_graph_order(int graph_order);
 
 int city_population_open_housing_capacity(void);
-
-int calculate_total_housing_buildings(void);
 
 int city_population_open_housing_capacity(void);
 
 int city_population_total_housing_capacity(void);
-
-int * calculate_number_of_each_housing_type(void);
-
-int * calculate_houses_demanding_goods(int * housing_type_counts);
 
 int city_population_yearly_deaths(void);
 
@@ -84,8 +78,8 @@ int city_population_average_age(void);
 
 int city_population_percent_in_workforce(void);
 
-int percentage_city_population_in_tents_shacks(void);
+int city_population_percentage_in_tents_shacks(void);
 
-int percentage_city_population_in_villas_palaces(void);
+int city_population_percentage_in_villas_palaces(void);
 
 #endif // CITY_POPULATION_H

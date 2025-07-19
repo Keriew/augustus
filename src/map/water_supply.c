@@ -15,6 +15,7 @@
 #include "map/image.h"
 #include "map/property.h"
 #include "map/terrain.h"
+#include "map/tiles.h"
 #include "scenario/property.h"
 
 #include <string.h>
@@ -24,26 +25,17 @@
 #define MAX_QUEUE 1000
 #define RESERVOIR_RADIUS 10
 #define WELL_RADIUS 2
+#define LATRINES_RADIUS 3
 #define FOUNTAIN_RADIUS 4
 
 static const int ADJACENT_OFFSETS[] = { -GRID_SIZE, 1, GRID_SIZE, -1 };
+static const int CONNECTOR_OFFSETS[] = { OFFSET(1,-1), OFFSET(3,1), OFFSET(1,3), OFFSET(-1,1) };
 
 static struct {
     int items[MAX_QUEUE];
     int head;
     int tail;
 } queue;
-
-static int image_without_water = 0;
-static int highway_image_with_water = 0;
-static int highway_image_without_water = 0;
-
-void map_water_supply_init(void)
-{
-    image_without_water = image_group(GROUP_BUILDING_AQUEDUCT_NO_WATER);
-    highway_image_with_water = assets_get_image_id("Logistics", "Highway_Aqueduct_Full_Start");
-    highway_image_without_water = assets_get_image_id("Logistics", "Highway_Aqueduct_Empty_Start");
-}
 
 static void mark_well_access(int well_id, int radius)
 {
@@ -61,7 +53,23 @@ static void mark_well_access(int well_id, int radius)
     }
 }
 
-void map_water_supply_update_houses(void)
+static void mark_latrines_access(int latrines_id, int radius)
+{
+    building *latrines = building_get(latrines_id);
+    int x_min, y_min, x_max, y_max;
+    map_grid_get_area(latrines->x, latrines->y, 1, radius, &x_min, &y_min, &x_max, &y_max);
+
+    for (int yy = y_min; yy <= y_max; yy++) {
+        for (int xx = x_min; xx <= x_max; xx++) {
+            int building_id = map_building_at(map_grid_offset(xx, yy));
+            if (building_id && latrines->num_workers > 0) {
+                building_get(building_id)->has_latrines_access = 1;
+            }
+        }
+    }
+}
+
+void map_water_supply_update_buildings(void)
 {
     for (building_type type = BUILDING_HOUSE_SMALL_TENT; type <= BUILDING_HOUSE_LUXURY_PALACE; type++) {
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
@@ -70,15 +78,27 @@ void map_water_supply_update_houses(void)
             }
             b->has_water_access = 0;
             b->has_well_access = 0;
+            b->has_latrines_access = 0;
             if (map_terrain_exists_tile_in_area_with_type(
                 b->x, b->y, b->size, TERRAIN_FOUNTAIN_RANGE)) {
                 b->has_water_access = 1;
             }
         }
     }
+
+    for (building *b = building_first_of_type(BUILDING_CONCRETE_MAKER); b; b = b->next_of_type) {
+        b->has_well_access = 0;
+    }
+
     for (building *b = building_first_of_type(BUILDING_WELL); b; b = b->next_of_type) {
         if (b->state == BUILDING_STATE_IN_USE) {
             mark_well_access(b->id, map_water_supply_well_radius());
+        }
+    }
+
+    for (building *b = building_first_of_type(BUILDING_LATRINES); b; b = b->next_of_type) {
+        if (b->state == BUILDING_STATE_IN_USE) {
+            mark_latrines_access(b->id, map_water_supply_latrines_radius());
         }
     }
 }
@@ -89,21 +109,34 @@ static void set_all_aqueducts_to_no_water(void)
     for (int y = 0; y < map_data.height; y++, grid_offset += map_data.border_size) {
         for (int x = 0; x < map_data.width; x++, grid_offset++) {
             if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
-                map_aqueduct_set(grid_offset, 0);
+                map_aqueduct_set_water_access(grid_offset, 0);
                 int image_id = map_image_at(grid_offset);
-                if (image_id < image_without_water) {
+                if (image_id < image_group(GROUP_BUILDING_AQUEDUCT_NO_WATER)) {
                     map_image_set(grid_offset, image_id + 15);
-                } else if (image_id >= highway_image_with_water && image_id < highway_image_without_water) {
-                    map_image_set(grid_offset, image_id + 2);
+                } else if(map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+                    image_id = map_tiles_highway_get_aqueduct_image(grid_offset);
+                    map_image_set(grid_offset, image_id);
                 }
             }
         }
     }
 }
 
+static int is_valid_reservoir_connection(int grid_offset)
+{
+    int xy = map_property_multi_tile_xy(grid_offset);
+    return xy != EDGE_X0Y0 && xy != EDGE_X2Y0 && xy != EDGE_X0Y2 && xy != EDGE_X2Y2;
+}
+
 static void fill_aqueducts_from_offset(int grid_offset)
 {
     if (!map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
+        building *b = building_get(map_building_at(grid_offset));
+        if (b->id && b->type == BUILDING_RESERVOIR) {
+            if (!b->has_water_access && is_valid_reservoir_connection(grid_offset)) {
+                b->has_water_access = 2;
+            }
+        }
         return;
     }
     memset(&queue, 0, sizeof(queue));
@@ -114,27 +147,24 @@ static void fill_aqueducts_from_offset(int grid_offset)
         if (++guard >= GRID_SIZE * GRID_SIZE) {
             break;
         }
-        map_aqueduct_set(grid_offset, 1);
+        map_aqueduct_set_water_access(grid_offset, 1);
         int image_id = map_image_at(grid_offset);
-        if (image_id >= image_without_water && image_id < highway_image_with_water) {
+        if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+            image_id = map_tiles_highway_get_aqueduct_image(grid_offset);
+            map_image_set(grid_offset, image_id);
+        } else if (image_id >= image_group(GROUP_BUILDING_AQUEDUCT_NO_WATER)) {
             map_image_set(grid_offset, image_id - 15);
-        } else if (image_id >= highway_image_without_water) {
-            map_image_set(grid_offset, image_id - 2);
         }
         next_offset = -1;
         for (int i = 0; i < 4; i++) {
             int new_offset = grid_offset + ADJACENT_OFFSETS[i];
             building *b = building_get(map_building_at(new_offset));
             if (b->id && b->type == BUILDING_RESERVOIR) {
-                // check if aqueduct connects to reservoir --> doesn't connect to corner
-                int xy = map_property_multi_tile_xy(new_offset);
-                if (xy != EDGE_X0Y0 && xy != EDGE_X2Y0 && xy != EDGE_X0Y2 && xy != EDGE_X2Y2) {
-                    if (!b->has_water_access) {
-                        b->has_water_access = 2;
-                    }
+                if (!b->has_water_access && is_valid_reservoir_connection(new_offset)) {
+                    b->has_water_access = 2;
                 }
             } else if (map_terrain_is(new_offset, TERRAIN_AQUEDUCT)) {
-                if (!map_aqueduct_at(new_offset)) {
+                if (!map_aqueduct_has_water_access_at(new_offset)) {
                     if (next_offset == -1) {
                         next_offset = new_offset;
                     } else {
@@ -176,7 +206,6 @@ void map_water_supply_update_reservoir_fountain(void)
     }
     // fill reservoirs from full ones
     int changed = 1;
-    static const int CONNECTOR_OFFSETS[] = { OFFSET(1,-1), OFFSET(3,1), OFFSET(1,3), OFFSET(-1,1) };
     while (changed == 1) {
         changed = 0;
         for (building *b = building_first_of_type(BUILDING_RESERVOIR); b; b = b->next_of_type) {
@@ -266,15 +295,38 @@ void map_water_supply_update_reservoir_fountain(void)
             b->has_water_access = 0;
         }
     }
-
 }
 
-int map_water_supply_is_well_unnecessary(int well_id, int radius)
+int map_water_supply_has_aqueduct_access(int grid_offset)
 {
-    building *well = building_get(well_id);
+    for (int i = 0; i < 4; i++) {
+        int new_offset = grid_offset + CONNECTOR_OFFSETS[i];
+        if (!map_grid_is_valid_offset(new_offset)) {
+            continue;
+        }
+        if (map_terrain_is(new_offset, TERRAIN_AQUEDUCT)) {
+            if (map_aqueduct_has_water_access_at(new_offset)) {
+                return 1;
+            }
+            continue;
+        }
+        building *b = building_get(map_building_at(new_offset));
+        if (!b->id || b->type != BUILDING_RESERVOIR || !b->has_water_access) {
+            continue;
+        }
+        if (is_valid_reservoir_connection(new_offset)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int map_water_supply_is_building_unnecessary(int building_id, int radius)
+{
+    building *b = building_get(building_id);
     int num_houses = 0;
     int x_min, y_min, x_max, y_max;
-    map_grid_get_area(well->x, well->y, 1, radius, &x_min, &y_min, &x_max, &y_max);
+    map_grid_get_area(b->x, b->y, 1, radius, &x_min, &y_min, &x_max, &y_max);
 
     for (int yy = y_min; yy <= y_max; yy++) {
         for (int xx = x_min; xx <= x_max; xx++) {
@@ -283,12 +335,12 @@ int map_water_supply_is_well_unnecessary(int well_id, int radius)
             if (building_id && building_get(building_id)->house_size) {
                 num_houses++;
                 if (!map_terrain_is(grid_offset, TERRAIN_FOUNTAIN_RANGE)) {
-                    return WELL_NECESSARY;
+                    return BUILDING_NECESSARY;
                 }
             }
         }
     }
-    return num_houses ? WELL_UNNECESSARY_FOUNTAIN : WELL_UNNECESSARY_NO_HOUSES;
+    return num_houses ? BUILDING_UNNECESSARY_FOUNTAIN : BUILDING_UNNECESSARY_NO_HOUSES;
 }
 
 int map_water_supply_fountain_radius(void)
@@ -319,4 +371,9 @@ int map_water_supply_well_radius(void)
     }
 
     return radius;
+}
+
+int map_water_supply_latrines_radius(void)
+{
+    return LATRINES_RADIUS;
 }

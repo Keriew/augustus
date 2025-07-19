@@ -7,18 +7,32 @@
 #include "graphics/image.h"
 #include "graphics/text.h"
 
-static void draw_figure_with_cart(const figure *f, int x, int y, float scale)
+static color_t get_highlight_mask(int highlight_mask)
 {
-    if (f->y_offset_cart >= 0) {
-        image_draw(f->image_id, x, y, COLOR_MASK_NONE, scale);
-        image_draw(f->cart_image_id, x + f->x_offset_cart, y + f->y_offset_cart, COLOR_MASK_NONE, scale);
-    } else {
-        image_draw(f->cart_image_id, x + f->x_offset_cart, y + f->y_offset_cart, COLOR_MASK_NONE, scale);
-        image_draw(f->image_id, x, y, COLOR_MASK_NONE, scale);
+    switch (highlight_mask) {
+        case FIGURE_HIGHLIGHT_NONE:
+            return COLOR_MASK_NONE;
+        case FIGURE_HIGHLIGHT_RED:
+            return COLOR_MASK_LEGION_HIGHLIGHT;
+        case FIGURE_HIGHLIGHT_GREEN:
+            return COLOR_MASK_GREEN;
+        default:
+            return COLOR_MASK_NONE;
     }
 }
 
-static void draw_hippodrome_horse(const figure *f, int x, int y, float scale)
+static void draw_figure_with_cart(const figure *f, int x, int y, color_t color_mask, float scale)
+{
+    if (f->y_offset_cart >= 0) {
+        image_draw(f->image_id, x, y, color_mask, scale);
+        image_draw(f->cart_image_id, x + f->x_offset_cart, y + f->y_offset_cart, color_mask, scale);
+    } else {
+        image_draw(f->cart_image_id, x + f->x_offset_cart, y + f->y_offset_cart, color_mask, scale);
+        image_draw(f->image_id, x, y, color_mask, scale);
+    }
+}
+
+static void draw_hippodrome_horse(const figure *f, int x, int y, color_t color_mask, float scale)
 {
     int val = f->wait_ticks_missile;
     switch (city_view_orientation()) {
@@ -58,7 +72,7 @@ static void draw_hippodrome_horse(const figure *f, int x, int y, float scale)
             } else {
                 y -= 12;
             }
-            // fall through
+            break;
         case DIR_4_BOTTOM:
             x += 20;
             if (val <= 9) {
@@ -98,7 +112,7 @@ static void draw_hippodrome_horse(const figure *f, int x, int y, float scale)
             }
             break;
     }
-    draw_figure_with_cart(f, x, y, scale);
+    draw_figure_with_cart(f, x, y, color_mask, scale);
 }
 
 static void draw_fort_standard(const figure *f, int x, int y, float scale)
@@ -132,7 +146,7 @@ static void draw_map_flag(const figure *f, int x, int y, float scale)
         number = id - MAP_FLAG_HERD_MIN + 1;
     }
     if (number > 0) {
-        text_draw_number_scaled(number, '@', " ", x + 6, y + 7, FONT_NORMAL_PLAIN, COLOR_WHITE, scale);
+        text_draw_number_scaled(number, '@', 0, x + 6, y + 7, FONT_NORMAL_PLAIN, COLOR_WHITE, scale);
     }
 }
 
@@ -209,7 +223,7 @@ static void adjust_pixel_offset(const figure *f, int *pixel_x, int *pixel_y)
     if (f->use_cross_country) {
         tile_cross_country_offset_to_pixel_offset(
             f->cross_country_x % 15, f->cross_country_y % 15, &x_offset, &y_offset);
-        y_offset -= f->missile_damage;
+        y_offset -= f->missile_height;
     } else {
         int direction = figure_image_normalize_direction(f->direction);
         tile_progress_to_pixel_offset(direction, f->progress_on_tile, &x_offset, &y_offset);
@@ -217,13 +231,14 @@ static void adjust_pixel_offset(const figure *f, int *pixel_x, int *pixel_y)
         if (f->figures_on_same_tile_index && f->type != FIGURE_BALLISTA) {
             // an attempt to not let people walk through each other
             static const int BUSY_ROAD_X_OFFSETS[] = {
-                0, 8, 8, -8, -8, 0, 16, 0, -16, 8, -8, 16, -16, 16, -16, 8, -8, 0, 24, 0, -24, 0, 0, 0
+                0, 8, 8, -8, -8, 0, 16, 0, -16, 8, -8, 16, -16, 16, -16, 8, -8, 0, 24, 0, -24
             };
             static const int BUSY_ROAD_Y_OFFSETS[] = {
-                0, 0, 8, 8, -8, -16, 0, 16, 0, -16, 16, 8, -8, -8, 8, 16, -16, -24, 0, 24, 0, 0, 0, 0
+                0, 0, 8, 8, -8, -16, 0, 16, 0, -16, 16, 8, -8, -8, 8, 16, -16, -24, 0, 24, 0
             };
-            x_offset += BUSY_ROAD_X_OFFSETS[f->figures_on_same_tile_index];
-            y_offset += BUSY_ROAD_Y_OFFSETS[f->figures_on_same_tile_index];
+            static const int BUSY_ROAD_OFFSET_LEN = 21;
+            x_offset += BUSY_ROAD_X_OFFSETS[f->figures_on_same_tile_index % BUSY_ROAD_OFFSET_LEN];
+            y_offset += BUSY_ROAD_Y_OFFSETS[f->figures_on_same_tile_index % BUSY_ROAD_OFFSET_LEN];
         }
     }
 
@@ -246,19 +261,22 @@ static void adjust_pixel_offset(const figure *f, int *pixel_x, int *pixel_y)
 
 static void draw_figure(const figure *f, int x, int y, float scale, int highlight)
 {
+    color_t color_mask = get_highlight_mask(highlight);
     if (f->cart_image_id) {
         switch (f->type) {
             case FIGURE_CART_PUSHER:
+            case FIGURE_DEPOT_CART_PUSHER:
             case FIGURE_WAREHOUSEMAN:
             case FIGURE_LION_TAMER:
             case FIGURE_DOCKER:
             case FIGURE_NATIVE_TRADER:
             case FIGURE_IMMIGRANT:
             case FIGURE_EMIGRANT:
-                draw_figure_with_cart(f, x, y, scale);
+            case FIGURE_LIGHTHOUSE_SUPPLIER:
+                draw_figure_with_cart(f, x, y, color_mask, scale);
                 break;
             case FIGURE_HIPPODROME_HORSES:
-                draw_hippodrome_horse(f, x, y, scale);
+                draw_hippodrome_horse(f, x, y, color_mask, scale);
                 break;
             case FIGURE_FORT_STANDARD:
                 draw_fort_standard(f, x, y, scale);
@@ -267,14 +285,15 @@ static void draw_figure(const figure *f, int x, int y, float scale, int highligh
                 draw_map_flag(f, x, y, scale);
                 break;
             default:
-                image_draw(f->image_id, x, y, 0, scale);
+                image_draw(f->image_id, x, y, color_mask, scale);
                 break;
         }
     } else {
         if (f->is_enemy_image) {
             image_draw_enemy(f->image_id, x, y, scale);
         } else {
-            image_draw(f->image_id, x, y, highlight ? COLOR_MASK_LEGION_HIGHLIGHT : COLOR_MASK_NONE, scale);
+
+            image_draw(f->image_id, x, y, color_mask, scale);
         }
     }
 }

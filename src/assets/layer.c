@@ -1,5 +1,6 @@
 #include "layer.h"
 
+#include "assets/assets.h"
 #include "assets/group.h"
 #include "assets/image.h"
 #include "assets/xml.h"
@@ -46,7 +47,7 @@ static void load_layer_from_another_image(layer *l, color_t **main_data, int *ma
         load_dummy_layer(l);
         return;
     }
-    
+
     asset_image *asset_img = 0;
 
     atlas_type type = img->atlas.id >> IMAGE_ATLAS_BIT_OFFSET;
@@ -92,7 +93,7 @@ static void load_layer_from_another_image(layer *l, color_t **main_data, int *ma
         height = l->height;
     }
 
-    int size = width * height * sizeof(color_t);
+    size_t size = sizeof(color_t) * width * height;
     color_t *data = malloc(size);
     if (!data) {
         log_error("Problem loading layer from image id - out of memory", 0, l->calculated_image_id);
@@ -141,8 +142,8 @@ static void load_layer_from_another_image(layer *l, color_t **main_data, int *ma
             load_dummy_layer(l);
             return;
         }
-        if (l->x_offset != 0 || l->y_offset != 0 || l->width != width || l->height != height) {
-            color_t *new_data = malloc(l->width * l->height * sizeof(color_t));
+        /****if (l->x_offset != 0 || l->y_offset != 0 || l->width != width || l->height != height) {
+            color_t *new_data = malloc(sizeof(color_t) * l->width * l->height);
             if (!new_data) {
                 free(data);
                 log_error("Problem loading layer from image id", 0, l->calculated_image_id);
@@ -153,7 +154,7 @@ static void load_layer_from_another_image(layer *l, color_t **main_data, int *ma
             int src_y_offset = l->y_offset < 0 ? -l->y_offset : 0;
             int rect_x_offset = l->x_offset > 0 ? l->x_offset : 0;
             int rect_y_offset = l->y_offset > 0 ? l->y_offset : 0;
-            
+
             image_copy_info copy = {
                 .src = { src_x_offset, src_y_offset, width, height, data },
                 .dst = { 0, 0, l->width, l->height, new_data },
@@ -162,7 +163,7 @@ static void load_layer_from_another_image(layer *l, color_t **main_data, int *ma
             image_copy(&copy);
             free(data);
             data = new_data;
-        }
+        }****/
     } else if (type == ATLAS_MAIN) {
         int atlas_width = main_image_widths[img->atlas.id & IMAGE_ATLAS_BIT_MASK];
         const color_t *atlas_pixels = main_data[img->atlas.id & IMAGE_ATLAS_BIT_MASK];
@@ -226,7 +227,7 @@ void layer_load(layer *l, color_t **main_data, int *main_image_widths)
         return;
     }
 
-    int size = l->width * l->height * sizeof(color_t);
+    size_t size = sizeof(color_t) * l->width * l->height;
     color_t *data = malloc(size);
     if (!data) {
         log_error("Problem loading layer - out of memory", l->asset_image_path, 0);
@@ -234,7 +235,8 @@ void layer_load(layer *l, color_t **main_data, int *main_image_widths)
         return;
     }
     memset(data, 0, size);
-    if (!png_read(l->asset_image_path, data, l->src_x, l->src_y, l->width, l->height, 0, 0, l->width, 0)) {
+    if (!png_load_from_file(l->asset_image_path, 1) ||
+        !png_read(data, l->src_x, l->src_y, l->width, l->height, 0, 0, l->width, 0)) {
         free(data);
         log_error("Problem loading layer from file", l->asset_image_path, 0);
         load_dummy_layer(l);
@@ -257,7 +259,7 @@ void layer_unload(layer *l)
     free(l->original_image_id);
 #endif
     if (!l->calculated_image_id && l->data != &DUMMY_LAYER_DATA) {
-        free((color_t *)l->data); // Freeing a const pointer. Ugly but necessary
+        free((color_t *) l->data); // Freeing a const pointer. Ugly but necessary
     }
     if (l->prev) {
         free(l);
@@ -305,13 +307,21 @@ int layer_add_from_image_path(layer *l, const char *path,
     if (path) {
         xml_get_full_image_path(l->asset_image_path, path);
     } else {
-        snprintf(l->asset_image_path, FILE_NAME_MAX, "%s.png", group_get_current()->name);
+        snprintf(l->asset_image_path, FILE_NAME_MAX, "%s/%s.png", ASSETS_IMAGE_PATH, group_get_current()->name);
     }
 #ifndef BUILDING_ASSET_PACKER
-    if ((!l->width || !l->height) && !png_get_image_size(l->asset_image_path, &l->width, &l->height)) {
-        log_info("Unable to load image", path, 0);
-        layer_unload(l);
-        return 0;
+    if (!l->width || !l->height) {
+        if (!png_load_from_file(l->asset_image_path, 1) || !png_get_image_size(&width, &height)) {
+            log_info("Unable to load image", path, 0);
+            layer_unload(l);
+            return 0;
+        }
+        if (!l->width) {
+            l->width = width;
+        }
+        if (!l->height) {
+            l->height = height;
+        }
     }
 #endif
     l->x_offset = offset_x;
@@ -325,12 +335,13 @@ static char *copy_attribute(const char *attribute)
     if (!attribute) {
         return 0;
     }
-    char *dest = malloc((strlen(attribute) + 1) * sizeof(char));
+    size_t buf_size = (strlen(attribute) + 1) * sizeof(char);
+    char *dest = malloc(buf_size);
     if (!dest) {
         log_error("There was no memory to copy the attribute", attribute, 0);
         return 0;
     }
-    strcpy(dest, attribute);
+    memcpy(dest, attribute, buf_size);
     return dest;
 }
 #endif
@@ -374,14 +385,14 @@ int layer_add_from_image_id(layer *l, const char *group_id, const char *image_id
             return 0;
         }
         const image_groups *group = group_get_current();
-        const asset_image *image = asset_image_get_from_id(group->first_image_index);
-        while (image && image->index <= group->last_image_index) {
-            if (image->id && strcmp(image->id, image_id) == 0) {
-                l->calculated_image_id = image->index + IMAGE_MAIN_ENTRIES;
-                original_image = &image->img;
+        const asset_image *img = asset_image_get_from_id(group->first_image_index);
+        while (img && img->index <= group->last_image_index) {
+            if (img->id && strcmp(img->id, image_id) == 0) {
+                l->calculated_image_id = img->index + IMAGE_MAIN_ENTRIES;
+                original_image = &img->img;
                 break;
             }
-            image = asset_image_get_from_id(image->index + 1);
+            img = asset_image_get_from_id(img->index + 1);
         }
         if (!l->calculated_image_id) {
             log_error("Unable to find image on current group with id", image_id, 0);
@@ -389,9 +400,9 @@ int layer_add_from_image_id(layer *l, const char *group_id, const char *image_id
             return 0;
         }
     } else {
-        int group = string_to_int(string_from_ascii(group_id));
+        int group = atoi(group_id);
         if (group >= 0 && group < IMAGE_MAX_GROUPS) {
-            int id = image_id ? string_to_int(string_from_ascii(image_id)) : 0;
+            int id = image_id ? atoi(image_id) : 0;
             l->calculated_image_id = image_group(group) + id;
         } else {
             log_info("Image group is out of range", group_id, 0);

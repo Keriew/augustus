@@ -16,6 +16,7 @@ static struct {
     int16_t random2_15bit;
     int pool_index;
     int32_t pool[MAX_RANDOM];
+    time_t last_seed;
 } data;
 
 void random_init(void)
@@ -97,6 +98,25 @@ void random_save_state(buffer *buf)
 
 int random_from_stdlib(void) {
     time_t t;
-    srand((unsigned)time(&t));
+    t = time(&t);
+    if (data.last_seed != t) {
+        srand((unsigned int) t);
+        data.last_seed = t;
+    }
     return rand();
+}
+
+int random_between_from_stdlib(int min, int max)
+{
+    int diff = max - min;
+    int rnd = 0;
+    if (diff > 0) {
+        rnd = random_from_stdlib() % diff;
+    }
+    return min + rnd;
+}
+
+double random_fractional_from_stdlib(void)
+{
+    return (double) random_from_stdlib() / (double) RAND_MAX;
 }

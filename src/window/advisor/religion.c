@@ -6,6 +6,7 @@
 #include "city/gods.h"
 #include "city/houses.h"
 #include "game/settings.h"
+#include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
@@ -13,13 +14,13 @@
 #include "graphics/text.h"
 #include "window/hold_festival.h"
 
-static void button_hold_festival(int param1, int param2);
+static void button_hold_festival(const generic_button *button);
 
 static generic_button hold_festival_button[] = {
-    {102, 340, 300, 20, button_hold_festival, button_none, 0, 0},
+    {102, 340, 300, 20, button_hold_festival},
 };
 
-static int focus_button_id;
+static unsigned int focus_button_id;
 
 static int get_religion_advice(void)
 {
@@ -42,28 +43,29 @@ static int get_religion_advice(void)
     }
 }
 
-static void draw_god_row(god_type god, int y_offset, building_type small_temple,
+static void draw_god_row(god_type god, int y_offset, building_type altar, building_type small_temple,
     building_type large_temple, building_type grand_temple)
 {
-    lang_text_draw(59, 11 + god, 40, y_offset, FONT_NORMAL_WHITE);
-    lang_text_draw(59, 16 + god, 120, y_offset + 1, FONT_SMALL_PLAIN);
-    text_draw_number_centered(building_count_active(small_temple), 230, y_offset, 50, FONT_NORMAL_WHITE);
+    lang_text_draw(59, 11 + god, 24, y_offset + 2, FONT_NORMAL_WHITE);
+    lang_text_draw(59, 16 + god, 104, y_offset + 3, FONT_SMALL_PLAIN);
+    text_draw_number_centered(building_count_total(altar), 190, y_offset + 2, 50, FONT_NORMAL_WHITE);
+    text_draw_number_centered(building_count_active(small_temple), 250, y_offset + 2, 50, FONT_NORMAL_WHITE);
     if (building_count_active(grand_temple)) {
         text_draw_number_centered(building_count_active(large_temple) + building_count_active(grand_temple),
-            290, y_offset, 50, FONT_NORMAL_GREEN);
+            310, y_offset + 2, 50, FONT_NORMAL_GREEN);
     } else {
-        text_draw_number_centered(building_count_active(large_temple), 290, y_offset, 50, FONT_NORMAL_WHITE);
+        text_draw_number_centered(building_count_active(large_temple), 310, y_offset + 2, 50, FONT_NORMAL_WHITE);
     }
-    text_draw_number_centered(city_god_months_since_festival(god), 360, y_offset, 50, FONT_NORMAL_WHITE);
-    int width = lang_text_draw(59, 32 + city_god_happiness(god) / 10, 460, y_offset, FONT_NORMAL_WHITE);
+    text_draw_number_centered(city_god_months_since_festival(god), 375, y_offset + 2, 50, FONT_NORMAL_WHITE);
+    int width = lang_text_draw(59, 32 + city_god_happiness(god) / 10, 450, y_offset + 2, FONT_NORMAL_WHITE);
     int bolts = city_god_wrath_bolts(god);
     for (int i = 0; i < bolts / 10; i++) {
-        image_draw(image_group(GROUP_GOD_BOLT), 10 * i + width + 460, y_offset - 4, COLOR_MASK_NONE, SCALE_NONE);
+        image_draw(image_group(GROUP_GOD_BOLT), 10 * i + width + 450, y_offset - 2, COLOR_MASK_NONE, SCALE_NONE);
     }
     int happy_bolts = city_god_happy_bolts(god);
     for (int i = 0; i < happy_bolts; i++) {
         image_draw(assets_get_image_id("UI", "Happy God Icon"),
-            10 * i + width + 460, y_offset - 4, COLOR_MASK_NONE, SCALE_NONE);
+            10 * i + width + 450, y_offset - 2, COLOR_MASK_NONE, SCALE_NONE);
     }
 }
 
@@ -72,19 +74,14 @@ static void draw_oracle_row(void)
     int oracle_count = building_count_active(BUILDING_ORACLE) + building_count_active(BUILDING_SMALL_MAUSOLEUM);
     int large_oracle_count = building_count_active(BUILDING_NYMPHAEUM) +
         building_count_active(BUILDING_PANTHEON) + building_count_active(BUILDING_LARGE_MAUSOLEUM);
-    lang_text_draw(59, 8, 40, 166, FONT_NORMAL_WHITE);
-    text_draw_number_centered(oracle_count, 230, 166, 50, FONT_NORMAL_WHITE);
+    lang_text_draw(59, 8, 24, 168, FONT_NORMAL_WHITE);
+    text_draw_number_centered(building_count_total(BUILDING_LARARIUM), 190, 168, 50, FONT_NORMAL_WHITE);
+    text_draw_number_centered(oracle_count, 250, 168, 50, FONT_NORMAL_WHITE);
     if (building_count_active(BUILDING_PANTHEON)) {
-        text_draw_number_centered(large_oracle_count, 290, 166, 50, FONT_NORMAL_GREEN);
+        text_draw_number_centered(large_oracle_count, 310, 168, 50, FONT_NORMAL_GREEN);
     } else {
-        text_draw_number_centered(large_oracle_count, 290, 166, 50, FONT_NORMAL_WHITE);
+        text_draw_number_centered(large_oracle_count, 310, 168, 50, FONT_NORMAL_WHITE);
     }
-}
-
-static void draw_lararium_row(void)
-{
-    text_draw(translation_for(TR_WINDOW_ADVISOR_RELIGION_LARARIUMS), 40, 186, FONT_NORMAL_WHITE, 0);
-    text_draw_number_centered(building_count_total(BUILDING_LARARIUM), 230, 186, 50, FONT_NORMAL_WHITE);
 }
 
 static int get_festival_advice(void)
@@ -131,40 +128,37 @@ static int draw_background(void)
 
     image_draw(image_group(GROUP_ADVISOR_ICONS) + 9, 10, 10, COLOR_MASK_NONE, SCALE_NONE);
 
-    lang_text_draw(59, 0, 60, 12, FONT_LARGE_BLACK);
+    lang_text_draw(59, 0, 60, 12, FONT_LARGE_BLACK); // Religion
 
-    // table header
-    lang_text_draw(59, 5, 270, 32, FONT_SMALL_PLAIN);
-    lang_text_draw(59, 1, 240, 46, FONT_SMALL_PLAIN);
-    lang_text_draw(59, 2, 300, 46, FONT_SMALL_PLAIN);
-    lang_text_draw(59, 3, 450, 46, FONT_SMALL_PLAIN);
-    lang_text_draw(59, 6, 370, 18, FONT_SMALL_PLAIN);
-    lang_text_draw(59, 9, 370, 32, FONT_SMALL_PLAIN);
-    lang_text_draw(59, 7, 370, 46, FONT_SMALL_PLAIN);
+    text_draw_centered(translation_for(TR_WINDOW_ADVISOR_RELIGION_ALTARS_HEADER), 165, 46, 100, FONT_SMALL_PLAIN, 0); // Altars
+    lang_text_draw_centered(59, 5, 256, 32, 100, FONT_SMALL_PLAIN); // Temples
+    lang_text_draw_centered(59, 1, 226, 46, 100, FONT_SMALL_PLAIN); // Small
+    lang_text_draw_centered(59, 2, 285, 46, 100, FONT_SMALL_PLAIN); // large
+    lang_text_draw_centered(59, 6, 350, 18, 100, FONT_SMALL_PLAIN); // Months
+    lang_text_draw_centered(59, 9, 350, 32, 100, FONT_SMALL_PLAIN); // since
+    lang_text_draw_centered(59, 7, 350, 46, 100, FONT_SMALL_PLAIN); // Festival
+    lang_text_draw_centered(59, 3, 449, 46, 100, FONT_SMALL_PLAIN); // The gods are
 
-    inner_panel_draw(32, 60, 36, 9);
+    inner_panel_draw(16, 60, 38, 8);
 
     // god rows
-    draw_god_row(GOD_CERES, 66, BUILDING_SMALL_TEMPLE_CERES,
+    draw_god_row(GOD_CERES, 66, BUILDING_SHRINE_CERES, BUILDING_SMALL_TEMPLE_CERES,
         BUILDING_LARGE_TEMPLE_CERES, BUILDING_GRAND_TEMPLE_CERES);
-    draw_god_row(GOD_NEPTUNE, 86, BUILDING_SMALL_TEMPLE_NEPTUNE,
+    draw_god_row(GOD_NEPTUNE, 86, BUILDING_SHRINE_NEPTUNE, BUILDING_SMALL_TEMPLE_NEPTUNE,
         BUILDING_LARGE_TEMPLE_NEPTUNE, BUILDING_GRAND_TEMPLE_NEPTUNE);
-    draw_god_row(GOD_MERCURY, 106, BUILDING_SMALL_TEMPLE_MERCURY,
+    draw_god_row(GOD_MERCURY, 106, BUILDING_SHRINE_MERCURY, BUILDING_SMALL_TEMPLE_MERCURY,
         BUILDING_LARGE_TEMPLE_MERCURY, BUILDING_GRAND_TEMPLE_MERCURY);
-    draw_god_row(GOD_MARS, 126, BUILDING_SMALL_TEMPLE_MARS,
+    draw_god_row(GOD_MARS, 126, BUILDING_SHRINE_MARS, BUILDING_SMALL_TEMPLE_MARS,
         BUILDING_LARGE_TEMPLE_MARS, BUILDING_GRAND_TEMPLE_MARS);
-    draw_god_row(GOD_VENUS, 146, BUILDING_SMALL_TEMPLE_VENUS,
+    draw_god_row(GOD_VENUS, 146, BUILDING_SHRINE_VENUS, BUILDING_SMALL_TEMPLE_VENUS,
         BUILDING_LARGE_TEMPLE_VENUS, BUILDING_GRAND_TEMPLE_VENUS);
 
     // oracles
     draw_oracle_row();
 
-    // larariums
-    draw_lararium_row();
-
     city_gods_calculate_least_happy();
 
-    lang_text_draw_multiline(59, 21 + get_religion_advice(), 60, 216, 512, FONT_NORMAL_BLACK);
+    lang_text_draw_multiline(59, 21 + get_religion_advice(), 52, 208, 540, FONT_NORMAL_BLACK);
 
     draw_festival_info();
 
@@ -183,7 +177,7 @@ static int handle_mouse(const mouse *m)
     return generic_buttons_handle_mouse(m, 0, 0, hold_festival_button, 1, &focus_button_id);
 }
 
-static void button_hold_festival(int param1, int param2)
+static void button_hold_festival(const generic_button *button)
 {
     if (!city_festival_is_planned()) {
         window_hold_festival_show();

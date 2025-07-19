@@ -49,6 +49,9 @@ void translation_load(language_type language)
         case LANGUAGE_GERMAN:
             translation_german(&strings, &num_strings);
             break;
+        case LANGUAGE_GREEK:
+            translation_greek(&strings, &num_strings);
+            break;
         case LANGUAGE_ITALIAN:
             translation_italian(&strings, &num_strings);
             break;
@@ -79,6 +82,9 @@ void translation_load(language_type language)
         case LANGUAGE_TRADITIONAL_CHINESE:
             translation_traditional_chinese(&strings, &num_strings);
             break;
+        case LANGUAGE_CZECH:
+            translation_czech(&strings, &num_strings);
+            break;
         default:
             log_error("Invalid translation selected", 0, 0);
     }
@@ -89,7 +95,7 @@ void translation_load(language_type language)
     set_strings(default_strings, num_default_strings, 1);
 }
 
-uint8_t *translation_for(translation_key key)
+const uint8_t *translation_for(translation_key key)
 {
     return data.strings[key];
 }

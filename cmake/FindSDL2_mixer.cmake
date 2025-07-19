@@ -70,6 +70,8 @@ ELSE()
         HINTS
           ENV SDL2MIXERDIR
           ENV SDL2DIR
+          ENV SDL2MIXER_DIR
+          ENV SDL2_DIR
         PATH_SUFFIXES include include/SDL2
         PATHS ${SDL2_SEARCH_PATHS}
       )
@@ -81,6 +83,19 @@ ELSE()
         HINTS
           ENV SDL2MIXERDIR
           ENV SDL2DIR
+          ENV SDL2MIXER_DIR
+          ENV SDL2_DIR
+        PATH_SUFFIXES include include/SDL2
+        PATHS ${SDL2_SEARCH_PATHS}
+        NO_DEFAULT_PATH
+      )
+
+      find_path(SDL2_MIXER_INCLUDE_DIR SDL_mixer.h
+        HINTS
+          ENV SDL2MIXERDIR
+          ENV SDL2DIR
+          ENV SDL2MIXER_DIR
+          ENV SDL2_DIR
         PATH_SUFFIXES include include/SDL2
         PATHS ${SDL2_SEARCH_PATHS}
         NO_CMAKE_FIND_ROOT_PATH
@@ -92,6 +107,20 @@ ELSE()
       HINTS
         ENV SDL2MIXERDIR
         ENV SDL2DIR
+        ENV SDL2MIXER_DIR
+        ENV SDL2_DIR
+      PATH_SUFFIXES lib64 lib lib/${SDL2_PROCESSOR_ARCH}
+      PATHS ${SDL2_SEARCH_PATHS}
+      NO_DEFAULT_PATH
+    )
+
+    find_library(SDL2_MIXER_LIBRARY
+      NAMES SDL2_mixer
+      HINTS
+        ENV SDL2MIXERDIR
+        ENV SDL2DIR
+        ENV SDL2MIXER_DIR
+        ENV SDL2_DIR
       PATH_SUFFIXES lib64 lib lib/${SDL2_PROCESSOR_ARCH}
       PATHS ${SDL2_SEARCH_PATHS}
       NO_CMAKE_FIND_ROOT_PATH

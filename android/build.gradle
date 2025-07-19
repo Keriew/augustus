@@ -5,12 +5,17 @@ buildscript {
         google()
         mavenCentral()
     }
+
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.0'
+        classpath 'com.android.tools.build:gradle:8.11.0'
         classpath 'com.github.triplet.gradle:play-publisher:3.7.0'
     }
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+ext {
+    usingAAR = file('augustus/libs/SDL2.aar').exists() || file('augustus/libs/SDL2-debug.aar').exists() || file('augustus/libs/SDL2-release.aar').exists()
+}
+
+tasks.register('clean', Delete) {
+    delete rootProject.layout.buildDirectory
 }

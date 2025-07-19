@@ -11,49 +11,121 @@
 #include "core/calc.h"
 #include "core/random.h"
 #include "game/time.h"
+#include "scenario/data.h"
 #include "scenario/property.h"
 
-#define MAX_CATS 10
-
 typedef enum {
-    LABOR_CATEGORY_INDUSTRY_COMMERCE = 0,
-    LABOR_CATEGORY_FOOD_PRODUCTION = 1,
-    LABOR_CATEGORY_ENGINEERING = 2,
-    LABOR_CATEGORY_WATER = 3,
-    LABOR_CATEGORY_PREFECTURES = 4,
-    LABOR_CATEGORY_MILITARY = 5,
-    LABOR_CATEGORY_ENTERTAINMENT = 6,
-    LABOR_CATEGORY_HEALTH_EDUCATION = 7,
-    LABOR_CATEGORY_GOVERNANCE_RELIGION = 8
+    LABOR_CATEGORY_NONE = 0,
+    LABOR_CATEGORY_INDUSTRY_COMMERCE,
+    LABOR_CATEGORY_FOOD_PRODUCTION,
+    LABOR_CATEGORY_ENGINEERING,
+    LABOR_CATEGORY_WATER,
+    LABOR_CATEGORY_PREFECTURES,
+    LABOR_CATEGORY_MILITARY,
+    LABOR_CATEGORY_ENTERTAINMENT,
+    LABOR_CATEGORY_HEALTH_EDUCATION,
+    LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    LABOR_CATEGORY_MAX
 } labor_category;
 
-static const int CATEGORY_FOR_BUILDING_TYPE[] = {
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 0
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 10
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 20
-    6, 6, 6, 6, 6, 6, 6, 6, -1, -1, // 30
-    -1, -1, -1, -1, -1, -1, 7, 7, 7, 7, // 40
-    0, 7, 7, 7, -1, 4, -1, 5, 5, 5, // 50
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, // 60
-    0, 1, 0, -1, 1, 0, 1, -1, -1, -1, // 70
-    7, 2, -1, -1, 8, 8, 8, 8, -1, -1, // 80
-    -1, 3, -1, -1, 5, 5, -1, -1, 8, -1, // 90
-    1, 1, 1, 0, 0, 1, 0, 0, 0, 0, // 100
-    0, 0, 0, 0, 0, -1, 2, 8, 8, 8, // 110
-    8, 8, -1, -1, -1, -1, -1, -1, -1, -1, //120
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 130
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 140
-    0, 0, 8, 2, 5, 0, 0, 0, 6, 0, // 150
-    6, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 160
-    -1, -1, -1, 5, -1, -1, 0, -1, -1, -1, // 170
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 180
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 190
+static const int CATEGORY_FOR_BUILDING_TYPE[BUILDING_TYPE_MAX] = {
+    [BUILDING_OLIVE_FARM]         = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+    [BUILDING_VINES_FARM]         = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+    [BUILDING_MARKET]             = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+    [BUILDING_WAREHOUSE]          = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+    [BUILDING_DOCK]               = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+    [BUILDING_MARBLE_QUARRY]      = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+    [BUILDING_IRON_MINE]          = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+    [BUILDING_TIMBER_YARD]        = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+    [BUILDING_CLAY_PIT]           = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+    [BUILDING_WINE_WORKSHOP]      = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+    [BUILDING_OIL_WORKSHOP]       = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+    [BUILDING_WEAPONS_WORKSHOP]   = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+    [BUILDING_FURNITURE_WORKSHOP] = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+    [BUILDING_POTTERY_WORKSHOP]   = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+    [BUILDING_GOLD_MINE]          = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+    [BUILDING_CITY_MINT]          = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+    [BUILDING_SAND_PIT]           = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+    [BUILDING_STONE_QUARRY]       = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+    [BUILDING_CONCRETE_MAKER]     = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+    [BUILDING_BRICKWORKS]         = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+    [BUILDING_DEPOT]              = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+
+    [BUILDING_DISTRIBUTION_CENTER_UNUSED] = LABOR_CATEGORY_INDUSTRY_COMMERCE,
+
+    [BUILDING_GRANARY]        = LABOR_CATEGORY_FOOD_PRODUCTION,
+    [BUILDING_SHIPYARD]       = LABOR_CATEGORY_FOOD_PRODUCTION,
+    [BUILDING_WHEAT_FARM]     = LABOR_CATEGORY_FOOD_PRODUCTION,
+    [BUILDING_VEGETABLE_FARM] = LABOR_CATEGORY_FOOD_PRODUCTION,
+    [BUILDING_FRUIT_FARM]     = LABOR_CATEGORY_FOOD_PRODUCTION,
+    [BUILDING_WHARF]          = LABOR_CATEGORY_FOOD_PRODUCTION,
+    [BUILDING_PIG_FARM]       = LABOR_CATEGORY_FOOD_PRODUCTION,
+
+    [BUILDING_ENGINEERS_POST]  = LABOR_CATEGORY_ENGINEERING,
+    [BUILDING_WORKCAMP]        = LABOR_CATEGORY_ENGINEERING,
+    [BUILDING_ARCHITECT_GUILD] = LABOR_CATEGORY_ENGINEERING,
+
+    [BUILDING_FOUNTAIN]   = LABOR_CATEGORY_WATER,
+
+    [BUILDING_PREFECTURE] = LABOR_CATEGORY_PREFECTURES,
+
+    [BUILDING_FORT]             = LABOR_CATEGORY_MILITARY,
+    [BUILDING_GATEHOUSE]        = LABOR_CATEGORY_MILITARY,
+    [BUILDING_TOWER]            = LABOR_CATEGORY_MILITARY,
+    [BUILDING_MILITARY_ACADEMY] = LABOR_CATEGORY_MILITARY,
+    [BUILDING_BARRACKS]         = LABOR_CATEGORY_MILITARY,
+    [BUILDING_MESS_HALL]        = LABOR_CATEGORY_MILITARY,
+    [BUILDING_WATCHTOWER]       = LABOR_CATEGORY_MILITARY,
+    [BUILDING_ARMOURY]          = LABOR_CATEGORY_MILITARY,
+
+    [BUILDING_AMPHITHEATER]     = LABOR_CATEGORY_ENTERTAINMENT,
+    [BUILDING_THEATER]          = LABOR_CATEGORY_ENTERTAINMENT,
+    [BUILDING_HIPPODROME]       = LABOR_CATEGORY_ENTERTAINMENT,
+    [BUILDING_COLOSSEUM]        = LABOR_CATEGORY_ENTERTAINMENT,
+    [BUILDING_GLADIATOR_SCHOOL] = LABOR_CATEGORY_ENTERTAINMENT,
+    [BUILDING_LION_HOUSE]       = LABOR_CATEGORY_ENTERTAINMENT,
+    [BUILDING_ACTOR_COLONY]     = LABOR_CATEGORY_ENTERTAINMENT,
+    [BUILDING_CHARIOT_MAKER]    = LABOR_CATEGORY_ENTERTAINMENT,
+    [BUILDING_TAVERN]           = LABOR_CATEGORY_ENTERTAINMENT,
+    [BUILDING_ARENA]            = LABOR_CATEGORY_ENTERTAINMENT,
+
+    [BUILDING_DOCTOR]       = LABOR_CATEGORY_HEALTH_EDUCATION,
+    [BUILDING_HOSPITAL]     = LABOR_CATEGORY_HEALTH_EDUCATION,
+    [BUILDING_BATHHOUSE]    = LABOR_CATEGORY_HEALTH_EDUCATION,
+    [BUILDING_BARBER]       = LABOR_CATEGORY_HEALTH_EDUCATION,
+    [BUILDING_SCHOOL]       = LABOR_CATEGORY_HEALTH_EDUCATION,
+    [BUILDING_ACADEMY]      = LABOR_CATEGORY_HEALTH_EDUCATION,
+    [BUILDING_LIBRARY]      = LABOR_CATEGORY_HEALTH_EDUCATION,
+    [BUILDING_MISSION_POST] = LABOR_CATEGORY_HEALTH_EDUCATION,
+    [BUILDING_LATRINES]     = LABOR_CATEGORY_HEALTH_EDUCATION,
+    
+    [BUILDING_SMALL_TEMPLE_CERES]   = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_SMALL_TEMPLE_NEPTUNE] = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_SMALL_TEMPLE_MERCURY] = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_SMALL_TEMPLE_MARS]    = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_SMALL_TEMPLE_VENUS]   = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_LARGE_TEMPLE_CERES]   = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_LARGE_TEMPLE_NEPTUNE] = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_LARGE_TEMPLE_MERCURY] = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_LARGE_TEMPLE_MARS]    = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_LARGE_TEMPLE_VENUS]   = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_GRAND_TEMPLE_CERES]   = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_GRAND_TEMPLE_NEPTUNE] = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_GRAND_TEMPLE_MERCURY] = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_GRAND_TEMPLE_MARS]    = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_GRAND_TEMPLE_VENUS]   = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_PANTHEON]             = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_SENATE]               = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_FORUM]                = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_ORACLE]               = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_LIGHTHOUSE]           = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_CARAVANSERAI]         = LABOR_CATEGORY_GOVERNANCE_RELIGION,
 };
 
 static struct {
     labor_category category;
     int workers;
-} DEFAULT_PRIORITY[MAX_CATS] = {
+} DEFAULT_PRIORITY[LABOR_CATEGORY_MAX] = {
     {LABOR_CATEGORY_ENGINEERING, 3},
     {LABOR_CATEGORY_WATER, 1},
     {LABOR_CATEGORY_PREFECTURES, 3},
@@ -108,22 +180,25 @@ int city_labor_wages_rome(void)
 
 int city_labor_raise_wages_rome(void)
 {
-    if (city_data.labor.wages_rome >= 45) {
+    if (city_data.labor.wages_rome >= scenario.random_events.max_wages) {
         return 0;
     }
     city_data.labor.wages_rome += 1 + (random_byte_alt() & 3);
-    if (city_data.labor.wages_rome > 45) {
-        city_data.labor.wages_rome = 45;
+    if (city_data.labor.wages_rome > scenario.random_events.max_wages) {
+        city_data.labor.wages_rome = scenario.random_events.max_wages;
     }
     return 1;
 }
 
 int city_labor_lower_wages_rome(void)
 {
-    if (city_data.labor.wages_rome <= 5) {
+    if (city_data.labor.wages_rome <= scenario.random_events.min_wages) {
         return 0;
     }
     city_data.labor.wages_rome -= 1 + (random_byte_alt() & 3);
+    if (city_data.labor.wages_rome < scenario.random_events.min_wages) {
+        city_data.labor.wages_rome = scenario.random_events.min_wages;
+    }
     return 1;
 }
 
@@ -150,8 +225,7 @@ void city_labor_calculate_workers(int num_plebs, int num_patricians)
 
 static int is_industry_disabled(building *b)
 {
-    if ((b->type < BUILDING_WHEAT_FARM || b->type > BUILDING_POTTERY_WORKSHOP) &&
-        b->type != BUILDING_WHARF) {
+    if (!b->output_resource_id || b->output_resource_id == RESOURCE_DENARII) {
         return 0;
     }
     int resource = b->output_resource_id;
@@ -162,9 +236,13 @@ static int is_industry_disabled(building *b)
 }
 
 static int should_have_workers(building *b, int category, int check_access)
-{
-    if (category < 0) {
+{    
+    if (category == LABOR_CATEGORY_NONE) {
         return 0;
+    }
+
+    if (b->type == BUILDING_LATRINES) {
+        return 1;
     }
 
     if (category == LABOR_CATEGORY_ENTERTAINMENT) {
@@ -180,6 +258,7 @@ static int should_have_workers(building *b, int category, int check_access)
     if (category == LABOR_CATEGORY_ENGINEERING || category == LABOR_CATEGORY_WATER) {
         return 1;
     }
+
     if (check_access) {
         return b->houses_covered > 0 ? 1 : 0;
     }
@@ -188,7 +267,7 @@ static int should_have_workers(building *b, int category, int check_access)
 
 static void calculate_workers_needed_per_category(void)
 {
-    for (int cat = 0; cat < MAX_CATS; cat++) {
+    for (int cat = 0; cat < LABOR_CATEGORY_MAX; cat++) {
         city_data.labor.categories[cat].buildings = 0;
         city_data.labor.categories[cat].total_houses_covered = 0;
         city_data.labor.categories[cat].workers_allocated = 0;
@@ -200,28 +279,28 @@ static void calculate_workers_needed_per_category(void)
             continue;
         }
         int category = CATEGORY_FOR_BUILDING_TYPE[b->type];
-        b->labor_category = category;
+        b->labor_category = category - 1;
         if (!should_have_workers(b, category, 1)) {
             continue;
         }
 
-        city_data.labor.categories[category].workers_needed += (building_get_laborers(b->type));
+        city_data.labor.categories[category - 1].workers_needed += building_get_laborers(b->type);
 
-        city_data.labor.categories[category].total_houses_covered += b->houses_covered;
-        city_data.labor.categories[category].buildings++;
+        city_data.labor.categories[category - 1].total_houses_covered += b->houses_covered;
+        city_data.labor.categories[category - 1].buildings++;
     }
 }
 
 static void allocate_workers_to_categories(void)
 {
     int workers_needed = 0;
-    for (int i = 0; i < MAX_CATS; i++) {
+    for (int i = 0; i < LABOR_CATEGORY_MAX; i++) {
         city_data.labor.categories[i].workers_allocated = 0;
         workers_needed += city_data.labor.categories[i].workers_needed;
     }
     city_data.labor.workers_needed = 0;
     if (workers_needed <= city_data.labor.workers_available) {
-        for (int i = 0; i < MAX_CATS; i++) {
+        for (int i = 0; i < LABOR_CATEGORY_MAX; i++) {
             city_data.labor.categories[i].workers_allocated = city_data.labor.categories[i].workers_needed;
         }
         city_data.labor.workers_employed = workers_needed;
@@ -250,7 +329,7 @@ static void allocate_workers_to_categories(void)
                 break;
             }
             for (int p = 0; p < 9; p++) {
-                int cat = DEFAULT_PRIORITY[p].category;
+                int cat = DEFAULT_PRIORITY[p].category - 1;
                 if (!city_data.labor.categories[cat].priority) {
                     int needed = city_data.labor.categories[cat].workers_needed
                         - city_data.labor.categories[cat].workers_allocated;
@@ -309,10 +388,10 @@ static void check_employment(void)
 
 static void set_building_worker_weight(void)
 {
-    int water_per_10k_per_building = calc_percentage(100, city_data.labor.categories[LABOR_CATEGORY_WATER].buildings);
+    int water_per_10k_per_building = calc_percentage(100, city_data.labor.categories[LABOR_CATEGORY_WATER - 1].buildings);
     for (building_type type = 0; type < BUILDING_TYPE_MAX; type++) {
         int cat = CATEGORY_FOR_BUILDING_TYPE[type];
-        if (cat < 0) {
+        if (cat == LABOR_CATEGORY_NONE) {
             continue;
         }
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
@@ -323,10 +402,11 @@ static void set_building_worker_weight(void)
                 b->percentage_houses_covered = water_per_10k_per_building;
             } else {
                 b->percentage_houses_covered = 0;
+                
                 if (b->houses_covered) {
                     b->percentage_houses_covered =
                         calc_percentage(100 * b->houses_covered,
-                        city_data.labor.categories[cat].total_houses_covered);
+                        city_data.labor.categories[cat - 1].total_houses_covered);
                 }
             }
         }
@@ -336,7 +416,7 @@ static void set_building_worker_weight(void)
 static void allocate_workers_to_water(void)
 {
     static int start_building_id = 1;
-    labor_category_data *water_cat = &city_data.labor.categories[LABOR_CATEGORY_WATER];
+    labor_category_data *water_cat = &city_data.labor.categories[LABOR_CATEGORY_WATER - 1];
 
     int percentage_not_filled = 100 - calc_percentage(water_cat->workers_allocated, water_cat->workers_needed);
 
@@ -382,9 +462,9 @@ static void allocate_workers_to_water(void)
 
 static void allocate_workers_to_non_water_buildings(void)
 {
-    int category_workers_needed[MAX_CATS];
-    int category_workers_allocated[MAX_CATS];
-    for (int i = 0; i < MAX_CATS; i++) {
+    int category_workers_needed[LABOR_CATEGORY_MAX];
+    int category_workers_allocated[LABOR_CATEGORY_MAX];
+    for (int i = 0; i < LABOR_CATEGORY_MAX; i++) {
         category_workers_allocated[i] = 0;
         category_workers_needed[i] =
             city_data.labor.categories[i].workers_allocated < city_data.labor.categories[i].workers_needed
@@ -392,7 +472,7 @@ static void allocate_workers_to_non_water_buildings(void)
     }
     for (building_type type = 0; type < BUILDING_TYPE_MAX; type++) {
         int cat = CATEGORY_FOR_BUILDING_TYPE[type];
-        if (cat == LABOR_CATEGORY_WATER || cat < 0) {
+        if (cat == LABOR_CATEGORY_WATER || cat == LABOR_CATEGORY_NONE) {
             // water is handled by allocate_workers_to_water(void)
             continue;
         }
@@ -401,25 +481,26 @@ static void allocate_workers_to_non_water_buildings(void)
                 continue;
             }
             b->num_workers = 0;
-            if (!should_have_workers(b, cat, 0) || b->percentage_houses_covered <= 0) {
+            if (b->type != BUILDING_LATRINES && (!should_have_workers(b, cat, 0) || b->percentage_houses_covered <= 0)) {
                 continue;
             }
+            
             int required_workers = model_get_building(b->type)->laborers;
-            if (category_workers_needed[cat]) {
+            if (category_workers_needed[cat - 1]) {
                 int num_workers = calc_adjust_with_percentage(
-                    city_data.labor.categories[cat].workers_allocated,
+                    city_data.labor.categories[cat - 1].workers_allocated,
                     b->percentage_houses_covered) / 100;
                 if (num_workers > required_workers) {
                     num_workers = required_workers;
                 }
                 b->num_workers = num_workers;
-                category_workers_allocated[cat] += num_workers;
+                category_workers_allocated[cat - 1] += num_workers;
             } else {
                 b->num_workers = required_workers;
             }
         }
     }
-    for (int i = 0; i < MAX_CATS; i++) {
+    for (int i = 0; i < LABOR_CATEGORY_MAX; i++) {
         if (category_workers_needed[i]) {
             // watch out: category_workers_needed is now reset to 'unallocated workers available'
             if (category_workers_allocated[i] >= city_data.labor.categories[i].workers_allocated) {
@@ -433,7 +514,7 @@ static void allocate_workers_to_non_water_buildings(void)
     }
     for (building_type type = 0; type < BUILDING_TYPE_MAX; type++) {
         int cat = CATEGORY_FOR_BUILDING_TYPE[type];
-        if (cat < 0 || cat == LABOR_CATEGORY_WATER || cat == LABOR_CATEGORY_MILITARY) {
+        if (cat == LABOR_CATEGORY_NONE || cat == LABOR_CATEGORY_WATER || cat == LABOR_CATEGORY_MILITARY) {
             continue;
         }
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
@@ -443,16 +524,16 @@ static void allocate_workers_to_non_water_buildings(void)
             if (!should_have_workers(b, cat, 0)) {
                 continue;
             }
-            if (b->percentage_houses_covered > 0 && category_workers_needed[cat]) {
+            if (b->percentage_houses_covered > 0 && category_workers_needed[cat - 1]) {
                 int required_workers = model_get_building(b->type)->laborers;
                 if (b->num_workers < required_workers) {
                     int needed = required_workers - b->num_workers;
-                    if (needed > category_workers_needed[cat]) {
-                        b->num_workers += category_workers_needed[cat];
-                        category_workers_needed[cat] = 0;
+                    if (needed > category_workers_needed[cat - 1]) {
+                        b->num_workers += category_workers_needed[cat - 1];
+                        category_workers_needed[cat - 1] = 0;
                     } else {
                         b->num_workers += needed;
-                        category_workers_needed[cat] -= needed;
+                        category_workers_needed[cat - 1] -= needed;
                     }
                 }
             }

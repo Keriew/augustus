@@ -4,6 +4,7 @@
 #include "core/calc.h"
 #include "core/config.h"
 #include "core/lang.h"
+#include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/image_button.h"
@@ -16,16 +17,16 @@
 
 #define ADVISOR_HEIGHT 27
 
-static void button_rating(int rating, int param2);
+static void button_rating(const generic_button *button);
 
 static generic_button rating_buttons[] = {
-    { 80, 286, 110, 66, button_rating, button_none, SELECTED_RATING_CULTURE, 0},
-    {200, 286, 110, 66, button_rating, button_none, SELECTED_RATING_PROSPERITY, 0},
-    {320, 286, 110, 66, button_rating, button_none, SELECTED_RATING_PEACE, 0},
-    {440, 286, 110, 66, button_rating, button_none, SELECTED_RATING_FAVOR, 0},
+    { 80, 286, 110, 66, button_rating, 0, SELECTED_RATING_CULTURE},
+    {200, 286, 110, 66, button_rating, 0, SELECTED_RATING_PROSPERITY},
+    {320, 286, 110, 66, button_rating, 0, SELECTED_RATING_PEACE},
+    {440, 286, 110, 66, button_rating, 0, SELECTED_RATING_FAVOR},
 };
 
-static int focus_button_id;
+static unsigned int focus_button_id;
 
 void draw_rating_column(int x_offset, int y_offset, int value, int has_reached)
 {
@@ -134,7 +135,7 @@ static int draw_background(void)
             if (config_get(CONFIG_UI_SHOW_MAX_PROSPERITY)) {
                 int max = calc_bound(city_ratings_prosperity_max(), 0, 100);
                 if (prosperity < max) {
-                    int width = lang_text_draw(CUSTOM_TRANSLATION, TR_ADVISOR_MAX_ATTAINABLE_PROSPERITY_IS, 72, 374 + line_width, FONT_NORMAL_WHITE);
+                    width = lang_text_draw(CUSTOM_TRANSLATION, TR_ADVISOR_MAX_ATTAINABLE_PROSPERITY_IS, 72, 374 + line_width, FONT_NORMAL_WHITE);
                     text_draw_number(max, 0, ".", 72 + width, 374 + line_width, FONT_NORMAL_WHITE, 0);
                 }
             }
@@ -179,8 +180,9 @@ static int handle_mouse(const mouse *m)
     return generic_buttons_handle_mouse(m, 0, 0, rating_buttons, 4, &focus_button_id);
 }
 
-static void button_rating(int rating, int param2)
+static void button_rating(const generic_button *button)
 {
+    int rating = button->parameter1;
     city_rating_select(rating);
     window_invalidate();
 }

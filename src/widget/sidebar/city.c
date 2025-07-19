@@ -6,6 +6,7 @@
 #include "city/warning.h"
 #include "core/config.h"
 #include "core/direction.h"
+#include "game/campaign.h"
 #include "game/orientation.h"
 #include "game/state.h"
 #include "game/undo.h"
@@ -62,7 +63,7 @@ static image_button buttons_build_collapsed[] = {
     {2, 67, 39, 26, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 8, button_build, button_none, BUILD_MENU_CLEAR_LAND, 0, 1},
     {2, 102, 39, 26, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 12, button_build, button_none, BUILD_MENU_ROAD, 0, 1},
     {2, 137, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 4, button_build, button_none, BUILD_MENU_WATER, 0, 1},
-    {2, 172, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 40, button_build, button_none, BUILD_MENU_HEALTH, 0, 1},
+    {2, 172, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 40, button_build, button_none, BUILD_MENU_HEALTH, 0, 1, "UI", "Asclepius Button"},
     {2, 207, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 28, button_build, button_none, BUILD_MENU_TEMPLES, 0, 1},
     {2, 242, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 24, button_build, button_none, BUILD_MENU_EDUCATION, 0, 1},
     {2, 277, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 20, button_build, button_none, BUILD_MENU_ENTERTAINMENT, 0, 1},
@@ -77,7 +78,7 @@ static image_button buttons_build_expanded[] = {
     {63, 277, 39, 26, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 8, button_build, button_none, BUILD_MENU_CLEAR_LAND, 0, 1},
     {113, 277, 39, 26, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 12, button_build, button_none, BUILD_MENU_ROAD, 0, 1},
     {13, 313, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 4, button_build, button_none, BUILD_MENU_WATER, 0, 1},
-    {63, 313, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 40, button_build, button_none, BUILD_MENU_HEALTH, 0, 1},
+    {63, 313, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 40, button_build, button_none, BUILD_MENU_HEALTH, 0, 1, "UI", "Asclepius Button"},
     {113, 313, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 28, button_build, button_none, BUILD_MENU_TEMPLES, 0, 1},
     {13, 349, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 24, button_build, button_none, BUILD_MENU_EDUCATION, 0, 1},
     {63, 349, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 20, button_build, button_none, BUILD_MENU_ENTERTAINMENT, 0, 1},
@@ -134,12 +135,16 @@ static void draw_sidebar_remainder(int x_offset, int is_collapsed)
 static void draw_number_of_messages(int x_offset)
 {
     int messages = city_message_count();
-    int show_messages = !scenario_is_custom() || messages > 0;
+    int show_messages = game_campaign_is_original() || messages > 0 || scenario_intro_message();
     buttons_build_expanded[13].enabled = show_messages;
     buttons_build_expanded[14].enabled = city_message_problem_area_count();
     if (show_messages) {
-        text_draw_number_centered_colored(messages, x_offset + 74, 452, 32, FONT_SMALL_PLAIN, COLOR_BLACK);
-        text_draw_number_centered_colored(messages, x_offset + 73, 453, 32, FONT_SMALL_PLAIN, COLOR_WHITE);
+        int width = text_get_number_width(messages, '@', "", FONT_SMALL_PLAIN);
+        text_draw_number(messages, '@', "", (x_offset + 100) - width, 452, FONT_SMALL_PLAIN, COLOR_BLACK); //top
+        text_draw_number(messages, '@', "", (x_offset + 100) - width, 454, FONT_SMALL_PLAIN, COLOR_BLACK); //bottom
+        text_draw_number(messages, '@', "", (x_offset + 99) - width, 453, FONT_SMALL_PLAIN, COLOR_BLACK); //left
+        text_draw_number(messages, '@', "", (x_offset + 101) - width, 453, FONT_SMALL_PLAIN, COLOR_BLACK); //right
+        text_draw_number(messages, '@', "", (x_offset + 100) - width, 453, FONT_SMALL_PLAIN, COLOR_WHITE);
     }
 }
 
@@ -226,7 +231,7 @@ int widget_sidebar_city_handle_mouse(const mouse *m)
         return 0;
     }
     int handled = 0;
-    int button_id;
+    unsigned int button_id;
     data.focus_button_for_tooltip = 0;
     if (city_view_is_sidebar_collapsed()) {
         int x_offset = sidebar_common_get_x_offset_collapsed();
@@ -238,8 +243,7 @@ int widget_sidebar_city_handle_mouse(const mouse *m)
         if (button_id) {
             data.focus_button_for_tooltip = button_id + 19;
         }
-    }
-    else {
+    } else {
         if (widget_minimap_handle_mouse(m)) {
             return 1;
         }
@@ -333,8 +337,7 @@ static void button_go_to_problem(int param1, int param2)
     if (grid_offset) {
         city_view_go_to_grid_offset(grid_offset);
         window_city_show();
-    }
-    else {
+    } else {
         window_invalidate();
     }
 }
@@ -364,8 +367,7 @@ static void button_rotate(int clockwise, int param2)
 {
     if (clockwise) {
         game_orientation_rotate_right();
-    }
-    else {
+    } else {
         game_orientation_rotate_left();
     }
     window_invalidate();
