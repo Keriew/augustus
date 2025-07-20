@@ -1684,12 +1684,17 @@ static translation_string all_strings[] = {
     {TR_BUILDING_NATIVE_DECORATION, "Einheimischendekoration"},
     {TR_BUILDING_NATIVE_MONUMENT, "Einheimischenmonument"},
     {TR_BUILDING_NATIVE_WATCHTOWER, "Einheimischenwachturm"},
-    {TR_BUILDING_NATIVE_DECORATION_DESC, "Das Produkt der lokalen Künstler, welches unter beiden, Einheimischen und Römern, sehr geschätzt wird. Trotz der fehlenden Feinheiten, finden es viele Bürger dennoch provozierend."},
-    {TR_BUILDING_NATIVE_MONUMENT_DESC, "Diese bedeutungsvolle Struktur beweist, dass die Einheimischen, trotz dem fehlenden Wissen über Architektur und Ingeneurskunst, durch harte Arbeit und Einfallsreichtum großartige Dinge erschaffen können. Obwohl einige Skeptiker spekulieren ob es nicht doch ein Wunder, von den Göttern gebracht oder ein Überrest einer längst vergessenen aber hoch entwickelten Zivilisation ist."},
-    {TR_BUILDING_NATIVE_WATCHTOWER_DESC, "Mit diesen Vorrichtungen beobachten die Einheimischen jeden noch so kleinen Schritt und erfahren unsere Schwächen. Wenn wir sie nicht friedlich zivilisieren, werden diese Türme uns davon abhalten in ihr Gebiet vorzudringen."},
-    {TR_BUILDING_INFO_CARAVANSERAI_MONTHLY_CONSUMPTION, "Monatlicher Essens Konsum:"},
-    {TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, "Karawanen und Oxen priorisieren Staßen nicht"},
-    {TR_CONFIG_DRAW_WEATHER, "Dynamisches Wetter AN"}
+	{TR_BUILDING_NATIVE_DECORATION_DESC, "Das Produkt der lokalen Künstler, welches unter beiden, Einheimischen und Römern, sehr geschätzt wird. Trotz der fehlenden Feinheiten, finden es viele Bürger dennoch provozierend."},
+	{TR_BUILDING_NATIVE_MONUMENT_DESC, "Diese bedeutungsvolle Struktur beweist, dass die Einheimischen, trotz dem fehlenden Wissen über Architektur und Ingeneurskunst, durch harte Arbeit und Einfallsreichtum großartige Dinge erschaffen können. Obwohl einige Skeptiker spekulieren ob es nicht doch ein Wunder, von den Göttern gebracht oder ein Überrest einer längst vergessenen aber hoch entwickelten Zivilisation ist."},
+	{TR_BUILDING_NATIVE_WATCHTOWER_DESC, "Mit diesen Vorrichtungen beobachten die Einheimischen jeden noch so kleinen Schritt und erfahren unsere Schwächen. Wenn wir sie nicht friedlich zivilisieren, werden diese Türme uns davon abhalten in ihr Gebiet vorzudringen."},
+	{TR_BUILDING_INFO_CARAVANSERAI_MONTHLY_CONSUMPTION, "Monatlicher Essens Konsum:"},
+	{TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, "Karawanen und Oxen priorisieren Staßen nicht"},
+	{TR_CONFIG_DRAW_WEATHER, "Dynamisches Wetter AN"},
+	{TR_TOOLTIP_PERSONAL_SAVINGS, "Deine Ersparnisse"},
+	{TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING, "Behalten"},
+	{TR_TOOLTIP_BUILDING_DISTRIBUTION_MAINTAINING, "Nur Karren-Depots können Waren entnehmen."},
+	{TR_CONFIG_STORAGE_STEP_4, "Nutze die Vielfachen von 4 zum Einteilen von Lagerplatz"},
+	{TR_CONFIG_MOVE_SAVINGS_TO_THE_RIGHT, "Ersparnisse neben den Wertungen anzeigen"},
 };
 
 void translation_german(const translation_string **strings, int *num_strings)
