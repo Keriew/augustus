@@ -349,7 +349,7 @@ void window_building_draw_well(building_info_context *c)
 void window_building_draw_latrines(building_info_context *c)
 {
     if (rand() % 10 == 0) {
-        window_building_play_sound(c, ASSETS_DIRECTORY "/Sounds/Latrine.mp3");
+        window_building_play_sound(c, ASSETS_DIRECTORY "/Sounds/Latrines.ogg");
     } else {
         window_building_play_sound(c, "wavs/well.wav");
     }

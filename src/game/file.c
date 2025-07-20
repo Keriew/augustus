@@ -204,7 +204,7 @@ static void initialize_scenario_data(const uint8_t *scenario_name)
     setting_set_default_game_speed();
     game_state_unpause();
 
-    weather_stop();
+    weather_reset();
 }
 
 static void load_empire_data(int is_custom_scenario, int empire_id)
@@ -309,7 +309,7 @@ static void initialize_saved_game(void)
 
     game_state_unpause();
 
-    weather_stop();
+    weather_reset();
 }
 
 static int start_scenario(const uint8_t *scenario_name, const char *scenario_file)

@@ -1615,7 +1615,9 @@ static translation_string all_strings[] = {
     {TR_BUILDING_NATIVE_HUT_ALT, "Хижина туземцев alt"}, // Имя в окне Тип здания для подсчета сценария событий
     {TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, "Склады и амбары можно строить поверх дорог"},
     {TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, "Подсветить выбранное здание"},
+    {TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING, "Хранение"},
     {TR_CONFIG_MAX_AUTOSAVE_SLOTS, "Максимальное количество ежегодных автосохранений:"},
+    {TR_TOOLTIP_PERSONAL_SAVINGS, "Ваши личные сбережения!"},
     {TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION, "Декор туземцев"}, // Имя в меню редактора карт
     {TR_EDITOR_SCENARIO_BUILDING_NATIVE_MONUMENT, "Монумент туземцев"}, // Имя в меню редактора карт
     {TR_EDITOR_SCENARIO_BUILDING_NATIVE_WATCHTOWER, "Сторожевая башня"}, // Имя в меню редактора карт
@@ -1627,7 +1629,9 @@ static translation_string all_strings[] = {
     {TR_BUILDING_NATIVE_WATCHTOWER_DESC, "Туземцы используют данные конструкции для слежки за нашими действиями и выявления уязвимостей. Пока мы не устраним угрозу, охрана на башнях будет мешать нам расширяться на этой территории."},
     {TR_BUILDING_INFO_CARAVANSERAI_MONTHLY_CONSUMPTION, "Ежемесячный расход еды:"},
     {TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, "Торговые караваны и телеги с волами игнорируют обычные дороги"},
-
+    {TR_TOOLTIP_BUILDING_DISTRIBUTION_MAINTAINING, "Запрещает всем, кроме станции повозок, перемещать или забирать ресурс."},
+    {TR_CONFIG_STORAGE_STEP_4, "Значения количества кратны 4 для амбара, склада и станции повозок"},
+    {TR_CONFIG_MOVE_SAVINGS_TO_THE_RIGHT, "Стандартный порядок элементов в верхней панели"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

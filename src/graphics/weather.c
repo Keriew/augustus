@@ -4,10 +4,12 @@
 #include "core/dir.h"
 #include "core/file.h"
 #include "core/random.h"
+#include "game/settings.h"
 #include "graphics/color.h"
 #include "graphics/graphics.h"
 #include "graphics/screen.h"
 #include "scenario/property.h"
+#include "sound/device.h"
 #include "sound/speech.h"
 #include "time.h"
 
@@ -87,13 +89,14 @@ void init_weather_element(weather_element *e, int type)
             e->drift_direction = (random_from_stdlib() % 2 == 0) ? DRIFT_DIRECTION_RIGHT : DRIFT_DIRECTION_LEFT;
             break;
         case WEATHER_SAND:
-            e->speed = 1 + (random_from_stdlib() % 2);
+            e->speed = 2 + (random_from_stdlib() % 2);
             e->offset = random_between_from_stdlib(0, 1000);
             break;
     }
 }
 
-void weather_stop(void)
+
+static void weather_stop(void)
 {
     data.weather_config.active = 0;
 
@@ -133,7 +136,7 @@ static void update_lightning(void)
     if (data.lightning_timer == 5) {
         char thunder_path[FILE_NAME_MAX];
         int thunder_num = random_between_from_stdlib(1, 2);
-        snprintf(thunder_path, sizeof(thunder_path), ASSETS_DIRECTORY "/Sounds/Thunder%d.mp3", thunder_num);
+        snprintf(thunder_path, sizeof(thunder_path), ASSETS_DIRECTORY "/Sounds/Thunder%d.ogg", thunder_num);
         sound_speech_play_file(thunder_path);
     }
 }
@@ -334,6 +337,12 @@ static void set_weather(int active, int intensity, weather_type type)
     }
 }
 
+void weather_reset(void)
+{
+    sound_device_stop_type(SOUND_TYPE_EFFECTS);
+    weather_stop();
+}
+
 void city_weather_update(int month)
 {
     static int weather_months_left = 0;
@@ -352,7 +361,7 @@ void city_weather_update(int month)
         
         if (last_type == WEATHER_RAIN && intensity < 250) {
             intensity = 250;
-        } else if (intensity < 1000) {
+        } else if (last_type != WEATHER_RAIN && intensity < 1000) {
             intensity = 1000;
         }
         
@@ -367,7 +376,7 @@ void city_weather_update(int month)
             intensity = 5000;
             type = WEATHER_SAND;
         } else {
-            if (month == 10 || month == 11 || month == 0 || month == 1 || month == 2) {
+            if (month == 10 || month == 11 || month == 0 || month == 1) {
                 type = (random_from_stdlib() % 2 == 0) ? WEATHER_RAIN : WEATHER_SNOW;
             }
             if (WEATHER_RAIN == type) {
@@ -380,8 +389,20 @@ void city_weather_update(int month)
         if (active == 0) {
             intensity = 0;
             type = WEATHER_NONE;
+            sound_device_stop_type(SOUND_TYPE_EFFECTS);
         } else {
             weather_months_left = 1;
+            if (WEATHER_RAIN == type) {
+                if (intensity > 800) {
+                    sound_device_play_file_on_channel_panned(ASSETS_DIRECTORY "/Sounds/HeavyRain.ogg", SOUND_TYPE_EFFECTS, setting_sound(SOUND_TYPE_EFFECTS)->volume, 100, 100, 1);
+                } else {
+                    sound_device_play_file_on_channel_panned(ASSETS_DIRECTORY "/Sounds/LightRain.ogg", SOUND_TYPE_EFFECTS, setting_sound(SOUND_TYPE_EFFECTS)->volume, 100, 100, 1);
+                }
+            } else if (WEATHER_SAND == type) {
+                sound_device_play_file_on_channel_panned(ASSETS_DIRECTORY "/Sounds/SandStorm.ogg", SOUND_TYPE_EFFECTS, setting_sound(SOUND_TYPE_EFFECTS)->volume, 100, 50, 1);
+            } else {
+                sound_device_play_file_on_channel_panned(ASSETS_DIRECTORY "/Sounds/Snow.ogg", SOUND_TYPE_EFFECTS, setting_sound(SOUND_TYPE_EFFECTS)->volume, 100, 100, 1);
+            }
         }
 
         last_active = active;

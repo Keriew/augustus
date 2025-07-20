@@ -79,7 +79,7 @@ void scenario_event_load_state(buffer *buf, scenario_event_t *event, int is_new_
        buffer_skip(buf, 2);
     }
     unsigned int actions_count = buffer_read_u16(buf);
-    unsigned int condition_groups_count = 1;
+    unsigned int condition_groups_count = 0;
     if (is_new_version) {
         condition_groups_count = buffer_read_u16(buf);
         char name_utf8[EVENT_NAME_LENGTH * 2];
@@ -97,7 +97,7 @@ void scenario_event_load_state(buffer *buf, scenario_event_t *event, int is_new_
         log_error("Unable to create condition groups array. The game will now crash.", 0, 0);
     }
     // Add the condition group
-    if (!is_new_version) {
+    if (condition_groups_count == 0) {
         array_advance(event->condition_groups);
     }
     if (event->id != saved_id) {

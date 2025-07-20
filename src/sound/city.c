@@ -244,7 +244,7 @@ static void play_sound(background_sound *sound, int direction)
             break;
     }
     sound_device_play_file_on_channel_panned(filename, SOUND_TYPE_CITY,
-        setting_sound(SOUND_TYPE_CITY)->volume, left_pan, right_pan);
+        setting_sound(SOUND_TYPE_CITY)->volume, left_pan, right_pan, 0);
 }
 
 void sound_city_play(void)

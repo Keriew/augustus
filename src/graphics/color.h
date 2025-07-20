@@ -27,6 +27,7 @@ typedef uint32_t color_t;
 #define COLOR_FONT_LIGHT_GRAY 0xffb3b3b3
 #define COLOR_FONT_GRAY 0xff888888
 #define COLOR_FONT_PLAIN 0xff180800
+#define COLOR_FONT_GREEN 0xff00cc00
 
 #define COLOR_INSET_LIGHT 0xffffffff
 #define COLOR_INSET_DARK 0xff848484
@@ -37,6 +38,8 @@ typedef uint32_t color_t;
 #define COLOR_RISK_ICON_MEDIUM 0xffe7b951
 #define COLOR_RISK_ICON_HIGH 0xfff7a142
 #define COLOR_RISK_ICON_EXTREME 0xffff603a
+
+#define COLOR_MAINTAIN_ICON 0xfffbf0f5
 
 #define COLOR_MASK_NONE 0xffffffff
 #define COLOR_MASK_RED 0xffff0818

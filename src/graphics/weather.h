@@ -8,7 +8,7 @@ typedef enum {
     WEATHER_SAND,
 } weather_type;
 
-void weather_stop(void);
+void weather_reset(void);
 void update_weather(void);
 void city_weather_update(int month);
 

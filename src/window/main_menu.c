@@ -145,7 +145,7 @@ void window_main_menu_show(int restart_music)
     if (restart_music) {
         sound_music_play_intro();
     }
-    weather_stop();
+    weather_reset();
     game_campaign_clear();
     window_type window = {
         WINDOW_MAIN_MENU,
