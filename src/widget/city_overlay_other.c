@@ -490,7 +490,6 @@ static int get_tooltip_depot_orders(tooltip_context *c, int grid_offset)
             (const char *) order_string, threshold_str,
             src_info, (const char *) direction_arrow, dst_info);
 
-        c->type = TOOLTIP_CART_DEPOTS;
         c->precomposed_text = (const uint8_t *) result;
 
         return 1;
