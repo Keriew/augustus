@@ -467,9 +467,9 @@ static int get_tooltip_depot_orders(tooltip_context *c, int grid_offset)
         const uint8_t *order_string = lang_get_string(CUSTOM_TRANSLATION, condition_type);
         const uint8_t *moving_resource = lang_get_string(CUSTOM_TRANSLATION, TR_TOOLTIP_DEPOT_MOVED);
         const uint8_t *resource_name = resource_get_data(depot_order.resource_type)->text;
-        char threshold_str[16] = " ";
+        char threshold_str[16] = "\n";
         if (condition_type > TR_ORDER_CONDITION_ALWAYS) {
-            snprintf(threshold_str, sizeof(threshold_str), "%d", depot_order.condition.threshold);
+            snprintf(threshold_str, sizeof(threshold_str), " %d", depot_order.condition.threshold);
         }
         building *b_src = building_get(depot_order.src_storage_id);
         building *b_dst = building_get(depot_order.dst_storage_id);
@@ -484,8 +484,8 @@ static int get_tooltip_depot_orders(tooltip_context *c, int grid_offset)
 
         snprintf((char *) result, sizeof(result),
             "%s %s\n"
-            "\n%s %s"
-            "\n%s %s %s",
+            "%s%s\n" //double \n doesnt get rendered, and neither does \n after a space. 
+            "%s %s %s",
             (const char *) moving_resource, (const char *) resource_name,
             (const char *) order_string, threshold_str,
             src_info, (const char *) direction_arrow, dst_info);

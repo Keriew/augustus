@@ -247,19 +247,14 @@ static void draw_overlay_tooltip(tooltip_context *c)
 {
     const uint8_t *text = get_tooltip_text(c);
     int width = 200;
-    int largest_width, lines;
-    if (c->type != TOOLTIP_CART_DEPOTS) {
-        lines = text_measure_multiline(text, width - 16, FONT_SMALL_PLAIN, &largest_width);
-        if (lines > 2) {
-            width = 300;
-            lines = text_measure_multiline(text, width - 16, FONT_SMALL_PLAIN, &largest_width);
-        }
-        width = largest_width + 16;
-    } else { //cart depots fixed tooltip size
-        lines = 3;
-        width = 200;
-    }
+    int largest_width;
 
+    int lines = text_measure_multiline(text, width - 16, FONT_SMALL_PLAIN, &largest_width);
+    if (lines > 2) {
+        width = 300;
+        lines = text_measure_multiline(text, width - 16, FONT_SMALL_PLAIN, &largest_width);
+    }
+    width = largest_width + 16;
     int height = 16 * lines + 10;
 
 
