@@ -66,8 +66,6 @@ typedef enum {
 #define PANEL_MARGIN 10
 #define DATE_FIELD_WIDTH 140
 #define LAYOUT_HOLD_FRAMES 20
-#define MAX_SCREEN_WIDTH 1280
-#define NO_POSITION ((unsigned int)-1) // for absent parameters, name NO_POSITION for compatibility with other files
 
 static void menu_file_replay_map(int param);
 static void menu_file_load_game(int param);
@@ -272,35 +270,6 @@ static void refresh_background(void)
     }
 }
 
-// static int draw_black_panel(int x, int y, int width)
-// {
-//     int blocks = (width / BLACK_PANEL_BLOCK_WIDTH) - 1;
-//     if ((width % BLACK_PANEL_BLOCK_WIDTH) > 0) {
-//         blocks++;
-//     }
-
-//     image_draw(image_group(GROUP_TOP_MENU) + 14, x, y, COLOR_MASK_NONE, SCALE_NONE);
-//     if (blocks <= BLACK_PANEL_MIDDLE_BLOCKS) {
-//         return BLACK_PANEL_TOTAL_BLOCKS * BLACK_PANEL_BLOCK_WIDTH;
-//     }
-//     static int black_panel_base_id;
-//     if (!black_panel_base_id) {
-//         black_panel_base_id = assets_get_image_id("UI", "Top_UI_Panel");
-//     }
-//     int x_offset = BLACK_PANEL_BLOCK_WIDTH * (BLACK_PANEL_MIDDLE_BLOCKS + 1);
-//     blocks -= BLACK_PANEL_MIDDLE_BLOCKS;
-
-//     for (int i = 0; i < blocks; i++) {
-//         image_draw(black_panel_base_id + (i % BLACK_PANEL_MIDDLE_BLOCKS) + 1, x + x_offset, y,
-//             COLOR_MASK_NONE, SCALE_NONE);
-//         x_offset += BLACK_PANEL_BLOCK_WIDTH;
-//     }
-
-//     image_draw(black_panel_base_id + 5, x + x_offset, y, COLOR_MASK_NONE, SCALE_NONE);
-
-//     return x_offset + BLACK_PANEL_BLOCK_WIDTH;
-// }
-
 static int draw_black_panel(int x, int y, int width)
 {
     if (width < BLACK_PANEL_BLOCK_WIDTH * BLACK_PANEL_TOTAL_BLOCKS) {
@@ -349,13 +318,11 @@ static int get_black_panel_actual_width(int desired_width)
 
 static int get_black_panel_total_width_for_text_id(int group, int id, int number, font_t font)
 {
-    int label_width;
-    if (group == NO_POSITION || id == NO_POSITION) {
-        label_width = 0;
-    } else {
-        label_width = lang_text_get_width(group, id, font);
-    }
-    int number_width = (number == NO_POSITION) ? 0 : text_get_number_width(number, '@', " ", font);
+
+
+    int label_width = lang_text_get_width(group, id, font);
+
+    int number_width = text_get_number_width(number, '@', " ", font);
     int text_width = label_width + number_width; // add padding
     int total_width = get_black_panel_actual_width(text_width);
 
@@ -498,8 +465,8 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
         int x3 = group3_start_x;
         if (data.savings_on_right) {
             data.personal.start = x3;
-            data.personal.end = x3 + w_savings + data.extra_space;;
-            x3 += w_savings + data.basic_margin;
+            data.personal.end = x3 + w_savings + data.extra_space;
+            x3 += w_savings + data.basic_margin + data.extra_space;
         }
         data.ratings.start = x3;
         data.ratings.end = x3 + w_rating + data.extra_space;
