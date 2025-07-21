@@ -65,7 +65,6 @@ typedef enum {
 
 #define PANEL_MARGIN 10
 #define DATE_FIELD_WIDTH 140
-#define LAYOUT_HOLD_FRAMES 20
 
 static void menu_file_replay_map(int param);
 static void menu_file_load_game(int param);
@@ -175,7 +174,6 @@ static struct {
     int peace;
     int favor;
     int health;
-    int frame_wait;
     int s_width;
     widget_layout_case_t current_layout;
 } drawn;
@@ -228,6 +226,7 @@ static void init(void)
     set_text_for_yearly_autosave();
     set_text_for_tooltips();
     set_text_for_warnings();
+    data.savings_on_right = config_get(CONFIG_UI_MOVE_SAVINGS_TO_RIGHT);
 }
 
 static void draw_background(void)
@@ -339,6 +338,7 @@ static int detect_layout_change(void)
     drawn.s_width = screen_width();
     return 1;
 }
+
 static void reset_data_states(void)
 {
     top_menu_tooltip_range *ranges[] = {
@@ -357,14 +357,6 @@ static void reset_data_states(void)
 
 static widget_layout_case_t widget_top_menu_measure_layout(int available_width, font_t font)
 {
-
-    if (drawn.frame_wait > 0 && !detect_layout_change()) { //coldown on changes
-        drawn.frame_wait--;
-        return drawn.current_layout;
-    }
-    drawn.frame_wait = LAYOUT_HOLD_FRAMES;
-
-    // measure each widget
     char tmp[32];
     sprintf(tmp, "%d(%d)", 999, 999); // max rating string
     int rating_one_block_w = text_get_width((const uint8_t *) tmp, font);
@@ -416,7 +408,7 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
     // precompute some values
     float avail_w = (float) available_width;
     int group1_span = group1_end_x - data.menu_end;
-    int group3_min_w = w_rating + (data.savings_on_right ? (data.basic_margin + w_savings) : data.basic_margin);
+    int group3_min_w = w_rating + (data.savings_on_right ? (data.basic_margin + w_savings + data.extra_space) : data.basic_margin);
     int bar_right_edge = data.menu_end + available_width - data.extra_space;
 
 
@@ -456,7 +448,7 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
             group3_start_x = data.date.end + PANEL_MARGIN; // force Panel margin here for visual consistency
         } else {
             // anchor to right edge
-            group3_start_x = bar_right_edge - w_rating - PANEL_MARGIN;
+            group3_start_x = bar_right_edge - w_rating - PANEL_MARGIN - data.extra_space;
             if (data.savings_on_right) {
                 group3_start_x -= (data.basic_margin + w_savings);
             }
