@@ -1628,7 +1628,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_NATIVE_MONUMENT_DESC, "This magnificent structure has stood vigil over these lands since time immemorial. Some claim it proves that, with ingenuity and hard work, the local people may achieve great things, despite their inferior knowledge of engineering. Other, more skeptical people speculate that it is, perhaps, a miracle delivered by gods or a remnant from an ancient, extremely advanced civilization."},
     {TR_BUILDING_NATIVE_WATCHTOWER_DESC, "Using these structures, the natives observe every movement in your city, ever ready to exploit signs of weakness. Unless the locals are taught the benefits of Roman civilization, the guards watching from the tower will prevent expansion into this area."},
     {TR_BUILDING_INFO_CARAVANSERAI_MONTHLY_CONSUMPTION, "Monthly food consumption:" },
-    {TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, "Trade caravans do not prioritise road networks" },
+    {TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, "Trade caravans and ox carts do not prioritize road networks" },
     {TR_TOOLTIP_BUILDING_DISTRIBUTION_MAINTAINING, "Prevents everyone except cart depots from moving or taking the resource." },
     {TR_CONFIG_STORAGE_STEP_4, "Use multiples of 4 for granary, warehouse and cart depot quantity" },
     {TR_CONFIG_MOVE_SAVINGS_TO_THE_RIGHT, "Original top bar items order" },

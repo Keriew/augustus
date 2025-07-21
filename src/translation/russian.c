@@ -404,7 +404,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_BUTTON_STOCKPILING_OFF, "ОТКЛ складирование ресурсов"},
     {TR_BUILDING_LIGHTHOUSE, "Маяк"},
     {TR_BUILDING_CARAVANSERAI, "Караван-сарай"},
-    {TR_BUILDING_CARAVANSERAI_DESC, "Караван-сарай полностью функционирует. Торговые караваны останавливаются здесь, чтобы отдохнуть и накормить своих животных. Перебои в сухопутной торговле длятся вдвое короче."},
+    {TR_BUILDING_CARAVANSERAI_DESC, "Торговые караваны останавливаются здесь, чтобы отдохнуть и накормить своих животных. Перебои в сухопутной торговле длятся вдвое короче."},
     {TR_CARAVANSERAI_SPECIAL_ORDERS_HEADER, "Указания караван-сараю"},
     {TR_BUILDING_CARAVANSERAI_PHASE_1, "(Фундамент)"},
     {TR_BUILDING_CARAVANSERAI_PHASE_2, "(Колоннада)"},
@@ -1630,8 +1630,10 @@ static translation_string all_strings[] = {
     {TR_BUILDING_INFO_CARAVANSERAI_MONTHLY_CONSUMPTION, "Ежемесячный расход еды:"},
     {TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, "Торговые караваны и телеги с волами игнорируют обычные дороги"},
     {TR_TOOLTIP_BUILDING_DISTRIBUTION_MAINTAINING, "Запрещает всем, кроме станции повозок, перемещать или забирать ресурс."},
-    {TR_CONFIG_STORAGE_STEP_4, "Значения количества кратны 4 для амбара, склада и станции повозок"},
+    {TR_CONFIG_STORAGE_STEP_4, "Амбары, склады и станции повозок настраиваются с шагом 4"},
     {TR_CONFIG_MOVE_SAVINGS_TO_THE_RIGHT, "Стандартный порядок элементов в верхней панели"},
+    {TR_TOOLTIP_DEPOT_MOVED, "Перемещаемый ресурс:"},
+    {TR_TOOLTIP_DEPOT_ORDER_TO, "в"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

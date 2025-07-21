@@ -318,10 +318,7 @@ static int get_black_panel_actual_width(int desired_width)
 
 static int get_black_panel_total_width_for_text_id(int group, int id, int number, font_t font)
 {
-
-
     int label_width = lang_text_get_width(group, id, font);
-
     int number_width = text_get_number_width(number, '@', " ", font);
     int text_width = label_width + number_width; // add padding
     int total_width = get_black_panel_actual_width(text_width);
@@ -375,13 +372,13 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
     int w_savings = get_black_panel_total_width_for_text_id(6, 0, 9999, font); //4 digit city treasury as base
     int w_population = get_black_panel_total_width_for_text_id(6, 1, 99999, font); //5 digit city pop as base
     int w_date = DATE_FIELD_WIDTH + BLACK_PANEL_BLOCK_WIDTH; // returned block is longer
-
     int w_rating = get_black_panel_actual_width(rating_one_block_w * 4.5f);
     // half block for health, one extra block to ensure everything fits in edge cases
 
     int min_basic = w_funds + w_population + w_date;
     int min_full = w_funds + w_savings + w_population + DATE_FIELD_WIDTH + w_rating + BLACK_PANEL_BLOCK_WIDTH;
     // decide BASIC vs FULL, no margins for minimum size
+
     widget_layout_case_t layout;
     data.basic_margin = PANEL_MARGIN;
     data.extra_space = 0;
@@ -422,6 +419,7 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
     int group3_min_w = w_rating + (data.savings_on_right ? (data.basic_margin + w_savings) : data.basic_margin);
     int bar_right_edge = data.menu_end + available_width - data.extra_space;
 
+
     // GROUP 2: date and  45% / 80% checks + OOB guard
     int date_start_x;
     if (layout == WIDGET_LAYOUT_FULL) {
@@ -442,6 +440,7 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
     }
     data.date.start = date_start_x;
     data.date.end = date_start_x + w_date + data.extra_space;
+
 
     // GROUP 3
     if (layout == WIDGET_LAYOUT_FULL) {
@@ -661,6 +660,7 @@ void widget_top_menu_draw(int force)
         draw_panel_with_text_and_number(data.funds.start, 6, 0, treasury, 3, treasury_w, font, treasury_color, treasury_color);
         // --- Draw Population ---
         int population_w = data.population.end - data.population.start;
+
         draw_panel_with_text_and_number(data.population.start, 6, 1, city_population(), 3, population_w, font, pop_color, pop_color);
         // --- Draw Date ---
         int date_x = data.date.start;
@@ -676,6 +676,7 @@ void widget_top_menu_draw(int force)
         // Draw Savings 
         color_t savings_color = get_savings_color_mask();
         int savings_w = data.personal.end - data.personal.start;
+
         draw_panel_with_text_and_number(data.personal.start, 6, 0, city_emperor_personal_savings(), 3, savings_w,
         font, savings_color, savings_color);
 
