@@ -16,8 +16,8 @@ typedef enum order_condition_type {
 
 typedef struct order {
     resource_type resource_type;
-    int src_storage_id;
-    int dst_storage_id;
+    int src_storage_id; //this is actually building_id, not storage_id
+    int dst_storage_id; //this is actually building_id, not storage_id
     struct {
         order_condition_type condition_type;
         int threshold;

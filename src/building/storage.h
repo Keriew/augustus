@@ -82,6 +82,13 @@ void building_storage_clear_all(void);
 int building_storage_create(int building_id);
 
 /**
+ * Return building id for a storage.
+ * @param storage_id Storage id
+ * @return building_id, 0 if storage is invalid.
+ */
+int building_storage_get_building_id(int storage_id);
+
+/**
  * Restores a building storage after undoing destruction.
  * @param storage_id Storage id
  * @return storage id, 0 when storage already used.

@@ -74,7 +74,7 @@ void text_draw_cursor(int x_offset, int y_offset, int is_insert)
                 x_offset + input_cursor.x_offset - 3, x_offset + input_cursor.x_offset + 1,
                 y_offset + input_cursor.y_offset - 3, y_offset + input_cursor.y_offset - 3, COLOR_WHITE);
             graphics_draw_line(
-                x_offset + input_cursor.x_offset - 1, x_offset + input_cursor.x_offset - 1, 
+                x_offset + input_cursor.x_offset - 1, x_offset + input_cursor.x_offset - 1,
                 y_offset + input_cursor.y_offset - 3, y_offset + input_cursor.y_offset + 13, COLOR_WHITE);
             graphics_draw_line(
                 x_offset + input_cursor.x_offset - 3, x_offset + input_cursor.x_offset + 1,

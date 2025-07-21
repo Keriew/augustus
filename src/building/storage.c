@@ -90,6 +90,14 @@ int building_storage_create(int building_id)
     return storage->id;
 }
 
+int building_storage_get_building_id(int storage_id)
+{
+    if (storage_id < 0 || storage_id >= storages.size) {
+        return 0;
+    }
+    return array_item(storages, storage_id)->building_id;
+}
+
 int building_storage_restore(int storage_id)
 {
     if (array_item(storages, storage_id)->in_use) {
