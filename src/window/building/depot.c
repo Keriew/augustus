@@ -369,6 +369,11 @@ static void order_set_condition_threshold(const generic_button *button)
     window_building_info_depot_toggle_condition_threshold();
 }
 
+static void order_set_condition_threshold_reverse(const generic_button *button)
+{
+    window_building_info_depot_toggle_condition_threshold_reverse();
+}
+
 void window_building_draw_depot_order_source_destination_background(building_info_context *c, int is_select_destination)
 {
     setup_buttons_for_selected_depot();
