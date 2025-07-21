@@ -25,6 +25,7 @@ static void order_set_destination(const generic_button *button);
 static void order_set_resource(const generic_button *button);
 static void order_set_condition_type(const generic_button *button);
 static void order_set_condition_threshold(const generic_button *button);
+static void order_set_condition_threshold_reverse(const generic_button *button);
 static void set_order_resource(const generic_button *button);
 static void set_camera_position(const generic_button *button);
 
@@ -105,7 +106,7 @@ static generic_button depot_order_buttons[] = {
     {100, 56, 284, 22, order_set_source, 0, 2},
     {100, 82, 284, 22, order_set_destination, 0, 3},
     {100, 30, 284, 22, order_set_condition_type, 0, 4},
-    {384, 30, 32, 22, order_set_condition_threshold, 0, 5},
+    {384, 30, 32, 22, order_set_condition_threshold, order_set_condition_threshold_reverse, 5},
     {384, 56, 32, 22, set_camera_position},
     {384, 82, 32, 22, set_camera_position},
 };
