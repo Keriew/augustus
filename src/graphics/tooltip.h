@@ -12,8 +12,7 @@ typedef enum {
     TOOLTIP_BUTTON = 1,
     TOOLTIP_OVERLAY = 2,
     TOOLTIP_SENATE = 3,
-    TOOLTIP_TILES = 4,
-    TOOLTIP_CART_DEPOTS = 5
+    TOOLTIP_TILES = 4
 } tooltip_type;
 
 typedef enum {
