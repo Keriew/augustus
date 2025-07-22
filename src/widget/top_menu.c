@@ -785,6 +785,10 @@ static int handle_mouse_menu(const mouse *m)
     int top_menu_widget = get_info_id(m->x, m->y); //hack to get mouse position over widget
 
     switch (top_menu_widget) {
+        case INFO_FUNDS:
+            if (m->left.went_up) {
+                menu_advisors_go_to(ADVISOR_FINANCIAL);
+            }
         case INFO_PERSONAL:
             if (m->left.went_up) {
                 menu_advisors_go_to(ADVISOR_IMPERIAL);
