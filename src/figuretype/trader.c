@@ -40,6 +40,26 @@
 
 #define INFINITE 10000
 #define TRADER_INITIAL_WAIT GAME_TIME_TICKS_PER_DAY
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define BASE_MULTIPLIER 100
+
+static struct {
+    int value_multiplier[RESOURCE_MAX];
+} sell_multiplier;
+
+static struct {
+    int value_multiplier[RESOURCE_MAX];
+} buy_multiplier;
+
+// Initialize all multipliers to BASE_MULTIPLIER
+static void resource_multiplier_init(void)
+{
+    for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+        sell_multiplier.value_multiplier[r] = BASE_MULTIPLIER;
+        buy_multiplier.value_multiplier[r] = BASE_MULTIPLIER;
+        // add any rules that increase priority of a resource here, e.g.: resource_is_food(r) ? 150 : 100;
+    }
+}
 
 // Mercury Grand Temple base bonus to trader speed
 static int trader_bonus_speed(void)
@@ -283,10 +303,10 @@ static int trader_sell_resource(int building_id, int city_id)
         return 0;
     }
 
-    for (for)
 
-        // add to existing bay with room
-        building *space = b;
+
+    // add to existing bay with room
+    building *space = b;
     for (int i = 0; i < 8; i++) {
         space = building_next(space);
         if (space->id > 0 && space->resources[resource_to_import] > 0 && space->resources[resource_to_import] < 4 &&
@@ -331,125 +351,125 @@ static int determine_resource_to_trade()
 
 static int get_closest_storage(const figure *f, int x, int y, int city_id, map_point *dst)
 {
-    int can_import = 0;
-    int exportable[RESOURCE_MAX];
-    int importable[RESOURCE_MAX];
-    exportable[RESOURCE_NONE] = 0;
-    importable[RESOURCE_NONE] = 0;
+    const int max_trade_units = figure_trade_land_trade_units();
+    resource_multiplier_init();
+    int sellable[RESOURCE_MAX] = { 0 };
+    int buyable[RESOURCE_MAX] = { 0 };
+    int route_id = empire_city_get_route_id(f->empire_city_id);
+    // 1. Determine what resources and how many can this caravan sell and buy
     for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-        exportable[r] = empire_can_export_resource_to_city(city_id, r);
-        if (f->trader_amount_bought >= figure_trade_land_trade_units()) {
-            exportable[r] = 0;
-        }
-        if (city_id) {
-            importable[r] = empire_can_import_resource_from_city(city_id, r);
-        } else { // Don't import goods from native traders
-            importable[r] = 0;
-        }
-        if (f->loads_sold_or_carrying >= figure_trade_land_trade_units()) {
-            importable[r] = 0;
-        }
-        can_import |= importable[r];
-    }
-    int min_distance = INFINITE;
-    building *min_building = 0;
-    for (building *b = building_first_of_type(BUILDING_WAREHOUSE); b; b = b->next_of_type) {
-        if (b->state != BUILDING_STATE_IN_USE || b->has_plague || !b->has_road_access || b->distance_from_entry <= 0 ||
-            !building_storage_get_permission(BUILDING_STORAGE_PERMISSION_TRADERS, b)) {
-            continue;
-        }
-        const building_storage *s = building_storage_get(b->storage_id);
-        int distance_penalty = 32;
-        int num_imports_for_warehouse = 0;
-        for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-            if (!building_warehouse_is_not_accepting(r, b) && empire_can_import_resource_from_city(city_id, r)) {
-                num_imports_for_warehouse++;
-            }
-        }
-        building *space = b;
-        for (int space_cnt = 0; space_cnt < 8; space_cnt++) {
-            space = building_next(space);
-            if (space->id && exportable[space->subtype.warehouse_resource_id]) {
-                distance_penalty -= 4;
-            }
-            if (can_import && num_imports_for_warehouse && !s->empty_all) {
-                for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-                    if (!building_warehouse_is_not_accepting(city_trade_next_caravan_import_resource(), b)) {
-                        break;
-                    }
+        signed char resource_sell = empire_can_import_resource_from_city(city_id, r) ? 1 : 0;
+        signed char resource_buy = empire_can_export_resource_to_city(city_id, r) ? 1 : 0;
+        if (resource_sell || resource_buy) {
+            int remaining = trade_route_limit(route_id, r) - trade_route_traded(route_id, r);
+            if (remaining > 0) {
+                if (resource_sell) {
+                    sellable[r] = remaining;
                 }
-                int resource = city_trade_current_caravan_import_resource();
-                if (!building_warehouse_is_not_accepting(resource, b)) {
-                    if (space->subtype.warehouse_resource_id == RESOURCE_NONE) {
-                        distance_penalty -= 16;
-                    }
-                    if (space->id && importable[space->subtype.warehouse_resource_id] &&
-                        space->resources[resource] < 4 && space->subtype.warehouse_resource_id == resource) {
-                        distance_penalty -= 8;
-                    }
+                if (resource_buy) {
+                    buyable[r] = remaining;
                 }
             }
         }
-        if (distance_penalty < 32) {
-            int distance = calc_maximum_distance(b->x, b->y, x, y);
-            distance += distance_penalty;
-            if (distance < min_distance) {
-                min_distance = distance;
-                min_building = b;
-            }
-        }
     }
-    for (building *b = building_first_of_type(BUILDING_GRANARY); b; b = b->next_of_type) {
-        if (b->state != BUILDING_STATE_IN_USE || b->has_plague || !b->has_road_access || b->distance_from_entry <= 0 ||
-            !building_storage_get_permission(BUILDING_STORAGE_PERMISSION_TRADERS, b)) {
-            continue;
-        }
+    // Reminder: Caravan can trade max 8 units each direction
+    int sell_capacity = max_trade_units - f->loads_sold_or_carrying;
+    int buy_capacity = max_trade_units - f->trader_amount_bought;
 
-        const building_storage *s = building_storage_get(b->storage_id);
-        int distance_penalty = 32;
-        for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-            int resource = city_trade_next_caravan_import_resource();
-            if (!resource_is_food(resource)) {
-                continue;
+    int best_score = -1;
+    building *best_building = NULL;
+
+    //DEBUG AND TESTING BLOCK ++++++ REMOVE BEFORE RELEASE ++++++
+#define MAX_STORAGE_DEBUG_ENTRIES 256
+    typedef struct {
+        int building_id;
+        int building_type;
+        int buy_score;
+        int sell_score;
+        int distance;
+        int total_score;
+    } storage_debug_entry;
+
+    storage_debug_entry debug_entries[MAX_STORAGE_DEBUG_ENTRIES];
+    int debug_entry_count = 0;
+    //DEBUG AND TESTING BLOCK ------ REMOVE BEFORE RELEASE ------
+
+    int building_types[] = { BUILDING_GRANARY, BUILDING_WAREHOUSE };
+    for (int t = 0; t < 2; t++) {
+        // Loop over all buildings of the current type (granary or warehouse)
+        for (building *b = building_first_of_type(building_types[t]); b; b = b->next_of_type) {
+
+            // Skip buildings that are not usable for trade
+            if (b->state != BUILDING_STATE_IN_USE || b->has_plague || !b->has_road_access) {
+                continue; // Not active, infected, or unreachable by road
             }
-            if (config_get(CONFIG_GP_CH_ALLOW_EXPORTING_FROM_GRANARIES) && exportable[resource] &&
-                building_granary_resource_amount(resource, b) > 0 && distance_penalty == 32) {
-                distance_penalty--;
+
+            int sell_score = 0; // Score for how many units the trader can sell to this building
+            int buy_score = 0;  // Score for how many units the trader can buy from this building
+
+            // Loop through all resource types
+            for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+
+                // Granaries only deal with food; skip non-food resources
+                if (building_types[t] == BUILDING_GRANARY && !resource_is_food(r)) {
+                    continue;
+                }
+
+                // === SELL SCORING: Trader ->Building ===
+                if (sellable[r] > 0 && sell_capacity > 0) {
+                    // Get how much of this resource the building can accept
+                    int receptable = (building_types[t] == BUILDING_GRANARY)
+                        ? building_granary_maximum_receptible_amount(r, b)
+                        : building_warehouse_maximum_receptible_amount(r, b);
+
+                    // Limit to how much can actually be sold here
+                    int can_add = MIN(MIN(sellable[r], receptable), sell_capacity);
+                    sell_score += can_add; // Add this to the total sell score
+                }
+
+                // === BUY SCORING: Building → Trader ===
+                if (buyable[r] > 0 && buy_capacity > 0) {
+                    // Get how much of this resource the building currently holds
+                    int available = (building_types[t] == BUILDING_GRANARY)
+                        ? building_granary_resource_amount(r, b)
+                        : building_warehouse_get_available_amount(b, r);
+
+                    // Limit to how much the trader can actually buy from here
+                    int can_take = MIN(MIN(buyable[r], available), buy_capacity);
+                    buy_score += can_take; // Add this to the total buy score
+                }
             }
-            if (!can_import || s->empty_all || !importable[resource] ||
-                building_granary_is_full(b) || building_granary_is_not_accepting(resource, b) ||
-                !empire_can_import_resource_from_city(city_id, resource)) {
-                continue;
+            // Calculate total value of this building to the trader
+            int total_score = sell_score + buy_score;
+            // If this building is the best candidate so far, store it
+            if (total_score > best_score) {
+                best_score = total_score;
+                best_building = b;
             }
-            if (building_granary_resource_amount(RESOURCE_NONE, b) >= 4) {
-                distance_penalty -= 32;
-            } else {
-                distance_penalty -= 16;
+
+            // DEBUG AND TESTING BLOCK ++++++ REMOVE BEFORE RELEASE ++++++
+            // Store debug info for this building to analyze scoring later
+            if (debug_entry_count < MAX_STORAGE_DEBUG_ENTRIES) {
+                debug_entries[debug_entry_count].building_id = b->id;
+                debug_entries[debug_entry_count].building_type = building_types[t];
+                debug_entries[debug_entry_count].buy_score = buy_score;
+                debug_entries[debug_entry_count].sell_score = sell_score;
+                debug_entries[debug_entry_count].total_score = total_score;
+                debug_entry_count++;
             }
+            // DEBUG AND TESTING BLOCK ------ REMOVE BEFORE RELEASE ------
         }
-        if (distance_penalty < 32) {
-            int distance = calc_maximum_distance(b->x, b->y, x, y);
-            distance += distance_penalty;
-            if (distance < min_distance) {
-                min_distance = distance;
-                min_building = b;
-            }
-        }
     }
-    if (!min_building) {
-        return 0;
+    // 5. Return result (for now just return building ID and skip distance handling)
+    if (best_building) {
+        // Destination handling will be added later
+        *dst = (map_point) { best_building->x, best_building->y };
+        return best_building->id;
     }
-    if (min_building->type == BUILDING_GRANARY) {
-        // go to center of granary
-        map_point_store_result(min_building->x + 1, min_building->y + 1, dst);
-    } else if (min_building->has_road_access == 1) {
-        map_point_store_result(min_building->x, min_building->y, dst);
-    } else if (!map_has_road_access_rotation(min_building->subtype.orientation,
-        min_building->x, min_building->y, 3, dst)) {
-        return 0;
-    }
-    return min_building->id;
+
+    return 0;
 }
+
 
 static void go_to_next_storage(figure *f)
 {
@@ -545,7 +565,7 @@ void figure_trade_caravan_action(figure *f)
                     move_on++;
                 }
                 if (figure_trade_caravan_can_sell(f, f->destination_building_id, f->empire_city_id)) {
-                    int resource = trader_get_sell_resource(f->destination_building_id, f->empire_city_id);
+                    int resource = trader_sell_resource(f->destination_building_id, f->empire_city_id);
                     if (resource) {
                         trade_route_increase_traded(empire_city_get_route_id(f->empire_city_id), resource);
                         trader_record_sold_resource(f->trader_id, resource);

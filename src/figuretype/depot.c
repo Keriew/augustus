@@ -196,7 +196,7 @@ static int storage_add_resource(building *b, int resource, int amount)
         }
     } else if (b->type == BUILDING_WAREHOUSE) {
         while (amount > 0) {
-            if (!building_warehouse_add_resource(b, resource, 1)) {
+            if (!building_warehouse_add_resource(b, resource, amount, 1)) {
                 return amount;
             }
             amount--;
@@ -230,13 +230,13 @@ void figure_depot_cartpusher_action(figure *f)
     f->cart_image_id = 0;
     int speed_factor = DEPOT_CART_PUSHER_SPEED;
     int percentage_speed = 0;
-    
+
     if (config_get(CONFIG_GP_CARAVANS_MOVE_OFF_ROAD)) {
         f->terrain_usage = TERRAIN_USAGE_ANY;
     } else {
         f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS_HIGHWAY;
     }
-    
+
     building *b = building_get(f->building_id);
 
     if (!b || b->type != BUILDING_DEPOT || b->state != BUILDING_STATE_IN_USE) {

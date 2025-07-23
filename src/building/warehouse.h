@@ -11,7 +11,7 @@
 #define QUARTER_WAREHOUSE 8
 
 enum {
-    WAREHOUSE_REMOVING_RESOURECE = 0,
+    WAREHOUSE_REMOVING_RESOURCE = 0,
     WAREHOUSE_ADDING_RESOURCE = 1
 };
 
@@ -49,6 +49,8 @@ void building_warehouse_remove_resource_curse(building *warehouse, int amount);
 void building_warehouse_space_set_image(building *space, int resource);
 
 void building_warehouse_space_add_import(building *space, int resource, int land_trader);
+
+int building_warehouse_remove_export(building *warehouse, int resource, int amount, int land_trader);
 
 void building_warehouse_space_remove_export(building *space, int resource, int land_trader);
 

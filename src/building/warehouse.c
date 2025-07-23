@@ -137,7 +137,7 @@ int building_warehouse_add_resource(building *b, int resource, int quantity, int
 
     int added = 0;
     while (added < quantity) {
-        building *space = building_warehouse_find_available_space(b, resource);
+        building *space = building_warehouse_find_space(b, resource, 1);
         if (!space) {
             break;
         }
@@ -487,8 +487,6 @@ int building_warehouses_count_available_resource(int resource, int respect_maint
 
     return total;
 }
-
-
 
 int building_warehouses_send_resources_to_rome(int resource, int amount)
 {
