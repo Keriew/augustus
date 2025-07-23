@@ -787,7 +787,7 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
         int fetch_amount = MAX_CARTLOADS_PER_SPACE;
 
 
-        if (available > needed && needed >= fetch_amount && fetch_amount > 0) {
+        if (needed >= fetch_amount && fetch_amount > 0) {
             if (!building_warehouse_for_getting(warehouse, r, 0)) {
                 continue;
             }
