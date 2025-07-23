@@ -242,12 +242,14 @@ static int trader_get_buy_resource(int building_id, int city_id)
     return RESOURCE_NONE;
 }
 
-static int trader_get_sell_resource(int building_id, int city_id)
+static int trader_sell_resource(int building_id, int city_id)
 {
+
     building *b = building_get(building_id);
     if (b->type != BUILDING_WAREHOUSE && b->type != BUILDING_GRANARY) {
         return 0;
     }
+
     if (b->type == BUILDING_GRANARY) {
         for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
             int resource = city_trade_next_caravan_import_resource();
@@ -270,6 +272,7 @@ static int trader_get_sell_resource(int building_id, int city_id)
         }
         return 0;
     }
+
     int resource_to_import = city_trade_current_caravan_import_resource();
     int imp = RESOURCE_MIN;
     while (imp < RESOURCE_MAX && !empire_can_import_resource_from_city(city_id, resource_to_import)) {
@@ -279,8 +282,11 @@ static int trader_get_sell_resource(int building_id, int city_id)
     if (imp >= RESOURCE_MAX) {
         return 0;
     }
-    // add to existing bay with room
-    building *space = b;
+
+    for (for)
+
+        // add to existing bay with room
+        building *space = b;
     for (int i = 0; i < 8; i++) {
         space = building_next(space);
         if (space->id > 0 && space->resources[resource_to_import] > 0 && space->resources[resource_to_import] < 4 &&
@@ -316,6 +322,11 @@ static int trader_get_sell_resource(int building_id, int city_id)
         }
     }
     return 0;
+}
+
+static int determine_resource_to_trade()
+{
+    // replace all of the logic from city_trade_next_caravan and stuff with a loop that determines if a resource can be traded in a given place
 }
 
 static int get_closest_storage(const figure *f, int x, int y, int city_id, map_point *dst)
