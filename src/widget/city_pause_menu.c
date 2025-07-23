@@ -17,6 +17,7 @@
 #include "input/input.h"
 #include "scenario/property.h"
 #include "translation/translation.h"
+#include "window/config.h"
 #include "window/file_dialog.h"
 #include "window/popup_dialog.h"
 #include "window/city.h"
@@ -132,9 +133,11 @@ static void button_click(const generic_button *button)
     } else if (type == 5) {
         window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_DELETE);
     } else if (type == 6) {
-        window_popup_dialog_show_confirmation(translation_for(TR_BUTTON_BACK_TO_MAIN_MENU), 0, 0, main_menu_confirmed);
+       window_popup_dialog_show_confirmation(translation_for(TR_BUTTON_BACK_TO_MAIN_MENU), 0, 0, main_menu_confirmed);
     } else if (type == 7) {
         window_popup_dialog_show(POPUP_DIALOG_QUIT, confirm_exit, 1);
+    } else if (type == 8) {
+        window_config_show(CONFIG_FIRST_PAGE, 0);
     }
 }
 
