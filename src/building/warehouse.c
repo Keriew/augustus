@@ -81,7 +81,7 @@ int building_warehouse_add_resource(building *b, int resource, int respect_setti
     if (b->id <= 0) {
         return 0;
     }
-    if (respect_settings && building_warehouse_is_not_accepting(resource, building_main(b))) {
+    if (respect_settings && building_warehouse_maximum_receptible_amount(resource, building_main(b)) <= 0) {
         return 0;
     }
     // Fill partially filled bays first
@@ -563,7 +563,8 @@ int building_warehouse_for_storing(int src_building_id, int x, int y, int resour
     int min_building_id = 0;
     for (building *b = building_first_of_type(BUILDING_WAREHOUSE); b; b = b->next_of_type) {
         if (b->id == src_building_id || (road_network_id != -1 && b->road_network_id != road_network_id) ||
-            !building_warehouse_accepts_storage(b, resource, understaffed)) {
+            !building_warehouse_accepts_storage(b, resource, understaffed) ||
+            (building_warehouse_maximum_receptible_amount(resource, b) <= 0)) {
             continue;
         }
         int dist = calc_maximum_distance(b->x, b->y, x, y);

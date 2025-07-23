@@ -509,8 +509,12 @@ static void order_set_resource(const generic_button *button)
 
 void window_building_depot_get_tooltip_main(int *translation)
 {
-    if (data.focus_button_id < 6) {
+
+    if (data.focus_button_id < 5) {
         return;
+    }
+    if (data.focus_button_id == 5) {
+        *translation = TR_TOOLTIP_RIGHT_CLICK_TO_DECREASE;
     }
     const building *depot = building_get(data.depot_building_id);
     if (!depot) {
