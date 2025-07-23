@@ -175,7 +175,8 @@ int figure_trade_caravan_can_sell(figure *trader, int building_id, int city_id)
         for (int i = RESOURCE_MIN; i < RESOURCE_MAX; i++) {
             resource = city_trade_next_caravan_import_resource();
             if (!building_warehouse_is_not_accepting(resource, b) &&
-                empire_can_import_resource_from_city(city_id, resource)) {
+                empire_can_import_resource_from_city(city_id, resource) &&
+                building_warehouse_maximum_receptible_amount(resource, b) > 0) {
                 can_import = 1;
                 break;
             }
