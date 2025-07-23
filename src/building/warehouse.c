@@ -75,59 +75,91 @@ int building_warehouse_get_available_amount(building *warehouse, int resource)
     return building_warehouse_get_amount(warehouse, resource);
 }
 
-
-int building_warehouse_add_resource(building *b, int resource, int respect_settings)
+building *building_warehouse_find_space(building *warehouse, int resource, int adding)
 {
-    if (b->id <= 0) {
+    if (!warehouse || warehouse->id <= 0) {
         return 0;
     }
-    if (respect_settings && building_warehouse_maximum_receptible_amount(resource, building_main(b)) <= 0) {
-        return 0;
-    }
-    // Fill partially filled bays first
-    int space_found = 0;
-    building *space = building_main(b);
-    for (int i = 0; i < 8; i++) {
-        space = building_next(space);
-        if (!space->id) {
-            return 0;
-        }
-        if (space->subtype.warehouse_resource_id == resource) {
-            if (space->resources[resource] < MAX_CARTLOADS_PER_SPACE) {
-                space_found = 1;
-                b = space;
-                break;
-            }
-        }
-    }
-    // Use a new bay if there aren't any partially filled
-    if (!space_found) {
-        space_found = 0;
-        space = building_main(b);
+    building *space = building_main(warehouse);
+
+    if (adding) {
+        // Step 1: Try partially filled bay
         for (int i = 0; i < 8; i++) {
             space = building_next(space);
             if (!space->id) {
                 return 0;
             }
-            if (!space->subtype.warehouse_resource_id || space->subtype.warehouse_resource_id == resource) {
-                if (space->resources[resource] < MAX_CARTLOADS_PER_SPACE) {
-                    space_found = 1;
-                    b = space;
-                    break;
-                }
+            if (space->subtype.warehouse_resource_id == resource &&
+                space->resources[resource] < MAX_CARTLOADS_PER_SPACE) {
+                return space;
             }
         }
-        if (!space_found) {
-            return 0;
+
+        // Step 2: Try empty or assignable bay
+        space = building_main(warehouse);
+        for (int i = 0; i < 8; i++) {
+            space = building_next(space);
+            if (!space->id) {
+                return 0;
+            }
+            if ((space->subtype.warehouse_resource_id == RESOURCE_NONE ||
+                space->subtype.warehouse_resource_id == resource) &&
+                space->resources[resource] < MAX_CARTLOADS_PER_SPACE) {
+                return space;
+            }
+        }
+    } else {
+        // Removing: find first bay with at least one unit of the resource
+        for (int i = 0; i < 8; i++) {
+            space = building_next(space);
+            if (!space->id) {
+                return 0;
+            }
+            if (space->subtype.warehouse_resource_id == resource &&
+                space->resources[resource] > 0) {
+                return space;
+            }
         }
     }
-    city_resource_add_to_warehouse(resource, 1);
-    b->subtype.warehouse_resource_id = resource;
-    b->resources[resource]++;
-    tutorial_on_add_to_warehouse();
-    building_warehouse_space_set_image(b, resource);
-    return 1;
+    return 0;
 }
+
+
+int building_warehouse_add_resource(building *b, int resource, int quantity, int respect_settings)
+{
+    if (!b || b->id <= 0 || quantity <= 0) {
+        return 0;
+    }
+
+    if (respect_settings && building_warehouse_maximum_receptible_amount(resource, building_main(b)) <= 0) {
+        return 0;
+    }
+
+    int added = 0;
+    while (added < quantity) {
+        building *space = building_warehouse_find_available_space(b, resource);
+        if (!space) {
+            break;
+        }
+
+        int space_remaining = MAX_CARTLOADS_PER_SPACE - space->resources[resource];
+        int to_add = (quantity - added < space_remaining) ? (quantity - added) : space_remaining;
+
+        space->resources[resource] += to_add;
+        space->subtype.warehouse_resource_id = resource;
+        added += to_add;
+
+        city_resource_add_to_warehouse(resource, to_add);
+        building_warehouse_space_set_image(space, resource);
+    }
+
+    if (added > 0) {
+        tutorial_on_add_to_warehouse();
+    }
+
+    return quantity - added; //return remainder
+}
+
 
 int building_warehouses_add_resource(int resource, int amount, int respect_settings)
 {
@@ -141,7 +173,7 @@ int building_warehouses_add_resource(int resource, int amount, int respect_setti
         }
         int keep_adding = (amount > 0);
         while (keep_adding) {
-            int was_added = building_warehouse_add_resource(b, resource, respect_settings);
+            int was_added = building_warehouse_add_resource(b, resource, 1, respect_settings);
             amount -= was_added;
             keep_adding = (amount > 0) && was_added;
         }
@@ -249,6 +281,30 @@ void building_warehouse_space_add_import(building *space, int resource, int land
     city_finance_process_import(price);
 
     building_warehouse_space_set_image(space, resource);
+}
+
+int building_warehouse_remove_export(building *warehouse, int resource, int amount, int land_trader)
+{
+    if (warehouse->type != BUILDING_WAREHOUSE) {
+        building *main_warehouse = building_main(warehouse);
+        if (main_warehouse->type == BUILDING_WAREHOUSE) {
+            warehouse = main_warehouse;
+            // account for fetched warehouse space instead of main warehouse
+        }
+    }
+    building_storage_permission_states permission = land_trader ?
+        BUILDING_STORAGE_PERMISSION_TRADERS : BUILDING_STORAGE_PERMISSION_DOCK;
+    if (!building_storage_get_permission(permission, warehouse)) {
+        return 0; // cannot export from this warehouse
+    }
+    int removed_amount = building_warehouse_try_remove_resource(warehouse, resource, amount);
+
+    int price = trade_price_sell(resource, land_trader);
+    city_finance_process_export(price * removed_amount);
+
+    building *space = building_warehouse_find_space(warehouse, resource, WAREHOUSE_REMOVING_RESOURCE);
+    building_warehouse_space_set_image(space, resource);
+    return amount - removed_amount;
 }
 
 void building_warehouse_space_remove_export(building *space, int resource, int land_trader)
@@ -626,7 +682,8 @@ int building_warehouse_for_getting(building *src, int resource, map_point *dst)
     }
 }
 
-int building_warehouse_with_resource(int x, int y, int resource, int road_network_id, int *understaffed, map_point *dst, building_storage_permission_states p)
+int building_warehouse_with_resource(int x, int y, int resource, int road_network_id,
+     int *understaffed, map_point *dst, building_storage_permission_states p)
 {
     int min_dist = INFINITE;
     building *min_building = 0;

@@ -432,7 +432,8 @@ void figure_cartpusher_action(figure *f)
         case FIGURE_ACTION_24_CARTPUSHER_AT_WAREHOUSE:
             f->wait_ticks++;
             if (f->wait_ticks > 10) {
-                if (building_warehouse_add_resource(building_get(f->destination_building_id), f->resource_id, 1)) {
+                if (building_warehouse_add_resource(
+                    building_get(f->destination_building_id), f->resource_id, f->loads_sold_or_carrying, 1)) {
                     city_health_dispatch_sickness(f);
                     f->action_state = FIGURE_ACTION_27_CARTPUSHER_RETURNING;
                     f->wait_ticks = 0;
@@ -586,7 +587,7 @@ static void determine_armoury_supplier_destination(figure *f, int road_network_i
     int dst_building_id;
 
     // Has weapons, deliver to barracks
-    if (f->resource_id) { 
+    if (f->resource_id) {
         dst_building_id = building_get_barracks_for_weapon(armoury->x, armoury->y, RESOURCE_WEAPONS,
             armoury->road_network_id, &dst);
         if (dst_building_id) {
@@ -740,7 +741,7 @@ void figure_warehouseman_action(figure *f)
     int percentage_speed = cartpusher_percentage_speed(f);
     building *b = building_get(f->building_id);
 
-    if (b->state != BUILDING_STATE_IN_USE || 
+    if (b->state != BUILDING_STATE_IN_USE ||
         (b->figure_id != f->id && b->figure_id4 != f->id)) {
         f->state = FIGURE_STATE_DEAD;
     }
@@ -796,7 +797,7 @@ void figure_warehouseman_action(figure *f)
                         break;
                     case BUILDING_WAREHOUSE:
                     case BUILDING_WAREHOUSE_SPACE:
-                        delivered = building_warehouse_add_resource(b, f->resource_id, 1);
+                        delivered = building_warehouse_add_resource(b, f->resource_id, f->loads_sold_or_carrying, 1);
                         if (delivered) {
                             city_health_dispatch_sickness(f);
                         }
@@ -924,9 +925,8 @@ void figure_warehouseman_action(figure *f)
             set_cart_graphic(f, 0);
             figure_movement_move_ticks_with_percentage(f, 1, percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
-                for (int i = 0; i < f->loads_sold_or_carrying; i++) {
-                    building_warehouse_add_resource(building_get(f->building_id), f->resource_id, 1);
-                }
+                building_warehouse_add_resource(building_get(f->building_id),
+                    f->resource_id, f->loads_sold_or_carrying, 1);
                 f->state = FIGURE_STATE_DEAD;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
                 figure_route_remove(f);
@@ -955,7 +955,7 @@ void figure_warehouseman_action(figure *f)
             if (f->wait_ticks > 4) {
                 f->loads_sold_or_carrying = 0;
                 city_health_dispatch_sickness(f);
-                if (0 == building_warehouse_remove_resource(building_get(f->destination_building_id), 
+                if (0 == building_warehouse_remove_resource(building_get(f->destination_building_id),
                     f->collecting_item_id, 1)) {
                     f->loads_sold_or_carrying++;
                     f->resource_id = f->collecting_item_id;
