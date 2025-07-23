@@ -147,7 +147,8 @@ int figure_trade_caravan_can_sell(figure *trader, int building_id, int city_id)
         for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
             int resource = city_trade_next_caravan_import_resource();
             if (resource_is_food(resource) && !building_granary_is_not_accepting(resource, b) &&
-                !building_granary_is_full(b) && empire_can_import_resource_from_city(city_id, resource)) {
+                !building_granary_is_full(b) && empire_can_import_resource_from_city(city_id, resource) &&
+                building_granary_maximum_receptible_amount(resource, b) > 0) {
                 return 1;
             }
         }
@@ -167,13 +168,15 @@ int figure_trade_caravan_can_sell(figure *trader, int building_id, int city_id)
     int can_import = 0;
     int resource = city_trade_current_caravan_import_resource();
     if (!building_warehouse_is_not_accepting(resource, b) &&
-        empire_can_import_resource_from_city(city_id, resource)) {
+        empire_can_import_resource_from_city(city_id, resource) &&
+        building_warehouse_maximum_receptible_amount(resource, b) > 0) {
         can_import = 1;
     } else {
         for (int i = RESOURCE_MIN; i < RESOURCE_MAX; i++) {
             resource = city_trade_next_caravan_import_resource();
             if (!building_warehouse_is_not_accepting(resource, b) &&
-                empire_can_import_resource_from_city(city_id, resource)) {
+                empire_can_import_resource_from_city(city_id, resource) &&
+                building_warehouse_maximum_receptible_amount(resource, b) > 0) {
                 can_import = 1;
                 break;
             }
