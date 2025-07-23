@@ -59,8 +59,9 @@ enum {
     HEIGHT_4_14_BLOCKS = 4,
     HEIGHT_5_24_BLOCKS = 5,
     HEIGHT_6_38_BLOCKS = 6,
-    HEIGHT_7_48_BLOCKS = 7,
-    HEIGHT_8_SCALING = 8,
+    HEIGHT_7_26_BLOCKS = 7,
+    HEIGHT_8_40_BLOCKS = 8,
+    HEIGHT_9_44_BLOCKS = 9,
     HEIGHT_10_46_BLOCKS = 10,
     HEIGHT_11_28_BLOCKS = 11,
     HEIGHT_12_21_BLOCKS = 12,
@@ -162,6 +163,7 @@ static int get_height_id(void)
             case BUILDING_PALISADE:
             case BUILDING_GLADIATOR_STATUE:
                 return HEIGHT_1_16_BLOCKS;
+
                 //288px
             case BUILDING_FOUNTAIN:
             case BUILDING_GLADIATOR_SCHOOL:
@@ -170,7 +172,7 @@ static int get_height_id(void)
             case BUILDING_CHARIOT_MAKER:
                 return HEIGHT_2_18_BLOCKS;
 
-                //(new 320px for description)
+                //320px
             case BUILDING_PREFECTURE:
             case BUILDING_ENGINEERS_POST:
             case BUILDING_BARBER:
@@ -218,10 +220,13 @@ static int get_height_id(void)
             case BUILDING_GRAND_TEMPLE_NEPTUNE:
             case BUILDING_GRAND_TEMPLE_MERCURY:
             case BUILDING_GRAND_TEMPLE_VENUS:
-            case BUILDING_PANTHEON:
             case BUILDING_HIPPODROME:
             case BUILDING_COLOSSEUM:
-                return HEIGHT_8_SCALING;
+                return HEIGHT_8_40_BLOCKS;
+
+                //704px
+            case BUILDING_PANTHEON:
+                return HEIGHT_9_44_BLOCKS;
 
                 //736px
             case BUILDING_GRAND_TEMPLE_MARS:
@@ -234,7 +239,7 @@ static int get_height_id(void)
             case BUILDING_BARRACKS:
                 return HEIGHT_11_28_BLOCKS;
 
-                //272px (new 336px for description)
+                //336px
             case BUILDING_SHRINE_CERES:
             case BUILDING_SHRINE_NEPTUNE:
             case BUILDING_SHRINE_MERCURY:
@@ -491,6 +496,7 @@ static void init(int grid_offset)
         case 6: context.height_blocks = 38; break;
         case 7: context.height_blocks = 26; break; //416px
         case 8: context.height_blocks = 40; break;
+        case 9: context.height_blocks = 44; break;
         case 10: context.height_blocks = 46; break;
         case 11: context.height_blocks = 28; break;
         case 12: context.height_blocks = 21; break;
