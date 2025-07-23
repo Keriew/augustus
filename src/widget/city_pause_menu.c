@@ -58,10 +58,10 @@ static void draw_foreground(void)
     lang_text_draw_centered(1, 3, 192, 188, 192, FONT_NORMAL_GREEN);
     lang_text_draw_centered(1, 4, 192, 228, 192, FONT_NORMAL_GREEN);
     lang_text_draw_centered(1, 6, 192, 268, 192, FONT_NORMAL_GREEN);
-    text_draw_centered(translation_for(TR_BUTTON_BACK_TO_MAIN_MENU), 192, 308, 192, FONT_NORMAL_GREEN, 0);
-    lang_text_draw_centered(1, 5, 192, 348, 192, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(1, 7, 192, 388, 192, FONT_NORMAL_GREEN);
-
+    lang_text_draw_centered(1, 7, 192, 308, 192, FONT_NORMAL_GREEN);
+    text_draw_centered(translation_for(TR_BUTTON_BACK_TO_MAIN_MENU), 192, 348, 192, FONT_NORMAL_GREEN, 0);
+    lang_text_draw_centered(1, 5, 192, 388, 192, FONT_NORMAL_GREEN);
+    
     graphics_reset_dialog();
 }
 
@@ -133,11 +133,11 @@ static void button_click(const generic_button *button)
     } else if (type == 5) {
         window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_DELETE);
     } else if (type == 6) {
-       window_popup_dialog_show_confirmation(translation_for(TR_BUTTON_BACK_TO_MAIN_MENU), 0, 0, main_menu_confirmed);
-    } else if (type == 7) {
-        window_popup_dialog_show(POPUP_DIALOG_QUIT, confirm_exit, 1);
-    } else if (type == 8) {
         window_config_show(CONFIG_FIRST_PAGE, 0);
+    } else if (type == 7) {
+        window_popup_dialog_show_confirmation(translation_for(TR_BUTTON_BACK_TO_MAIN_MENU), 0, 0, main_menu_confirmed);
+    } else if (type == 8) {
+        window_popup_dialog_show(POPUP_DIALOG_QUIT, confirm_exit, 1);
     }
 }
 
