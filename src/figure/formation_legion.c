@@ -237,15 +237,7 @@ void formation_legions_dispatch_to_distant_battle(void)
 static void kill_soldiers(formation *m, int kill_percentage)
 {
     formation_change_morale(m, -75);
-    int soldiers_total = 0;
-    for (int fig = 0; fig < m->num_figures; fig++) {
-        if (m->figures[fig] > 0) {
-            figure *f = figure_get(m->figures[fig]);
-            if (!figure_is_dead(f)) {
-                soldiers_total++;
-            }
-        }
-    }
+    int soldiers_total = formation_legion_count_alive_soldiers(m->id);
     int soldiers_to_kill = calc_adjust_with_percentage(soldiers_total, kill_percentage);
     if (soldiers_to_kill >= soldiers_total) {
         m->is_at_fort = 1;

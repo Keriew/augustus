@@ -232,7 +232,7 @@ static void update_legion_info(legion_info *legion, const formation *m)
     legion->health = calc_percentage(m->total_damage, m->max_total_damage);
     legion->layout = m->layout;
     legion->morale = m->morale;
-    legion->soldiers = m->num_figures;
+    legion->soldiers = formation_legion_count_alive_soldiers(m->id);
     legion->is_at_fort = m->is_at_fort;
     legion->empire_service = m->empire_service;
 }

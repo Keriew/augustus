@@ -627,6 +627,21 @@ static void clear_figures(void)
     }
 }
 
+int formation_legion_count_alive_soldiers(int formation_id)
+{
+    formation *m = formation_get(formation_id);
+    int alive_soldiers = 0;
+    for (int i = 0; i < m->num_figures; i++) {
+        if (m->figures[i]) {
+            figure *f = figure_get(m->figures[i]);
+            if (!figure_is_dead(f)) {
+                alive_soldiers++;
+            }
+        }
+    }
+    return alive_soldiers;
+}
+
 static int add_figure(int formation_id, int figure_id, int deployed, int damage, int max_damage)
 {
     formation *f = formation_get(formation_id);
