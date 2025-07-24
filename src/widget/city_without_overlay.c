@@ -171,7 +171,7 @@ static int is_building_selected(const building *b)
     if (!config_get(CONFIG_UI_HIGHLIGHT_SELECTED_BUILDING)) {
         return 0;
     }
-    building *main_building = building_main(b);
+    const building *main_building = building_main(b);
     unsigned int main_part_id = main_building->id;
     if (b->id == draw_context.selected_building_id || main_part_id == draw_context.selected_building_id) {
         return 1;
@@ -376,6 +376,52 @@ static void draw_workshop_raw_material_storage(const building *b, int x, int y, 
     }
 }
 
+static void get_mothball_icon_position(const building *b, int *x, int *y)
+{
+
+    const image *img = image_get(building_image_get(b));
+    int icon_id = assets_get_image_id("UI", "Mothball_Sprite");
+
+    switch (b->type) {
+        case BUILDING_WAREHOUSE:
+            *x += 19;
+            *y -= 76;
+            break;
+        case BUILDING_GRANARY:
+            *x += 81;
+            *y -= 101;
+            break;
+        default:
+            *x = (img->width - image_get(icon_id)->width) / 2;
+            *y = -image_get(icon_id)->height / 2;
+            break;
+    }
+    if (img->top) {
+        *y -= img->top->original.height;
+    }
+}
+
+static void draw_mothball_icon(const building *b, int x, int y, color_t color_mask, int grid_offset)
+{
+    //farms have individual top drawings, but they have one building ID, unlike warehouses
+    if (b->prev_part_building_id) {
+        return; //do not draw mothball icon for non-main
+    }
+    if (building_is_farm(b->type)) {
+        if (map_property_multi_tile_size(grid_offset) == 1) {
+            return; //crop tile
+        }
+    }
+    if (b->state == BUILDING_STATE_MOTHBALLED) {
+        int mothball_x, mothball_y;
+        get_mothball_icon_position(b, &mothball_x, &mothball_y);
+        int icon_id = assets_get_image_id("UI", "Mothball_Sprite");
+        x += mothball_x;
+        y += mothball_y;
+        image_draw(icon_id, x, y, COLOR_MASK_NONE, draw_context.scale);
+    }
+}
+
 static void draw_senate_rating_flags(const building *b, int x, int y, color_t color_mask)
 {
     if (b->type == BUILDING_SENATE) {
@@ -423,6 +469,7 @@ static void draw_top(int x, int y, int grid_offset)
     image_draw_isometric_top_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
     // specific buildings
     draw_senate_rating_flags(b, x, y, color_mask);
+    draw_mothball_icon(b, x, y, color_mask, grid_offset);
     draw_entertainment_spectators(b, x, y, color_mask);
     draw_workshop_raw_material_storage(b, x, y, color_mask);
 }
