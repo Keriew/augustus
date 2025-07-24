@@ -15,6 +15,7 @@ static struct {
     char i8;
     short i16;
     int i32;
+    unsigned char building_is_mothballed;
 } data;
 
 int building_data_transfer_possible(building *b)
@@ -39,6 +40,9 @@ int building_data_transfer_copy(building *b)
     } else {
         memset(&data, 0, sizeof(data));
         data.data_type = data_type;
+
+        data.building_is_mothballed = (b->state == BUILDING_STATE_MOTHBALLED) ? 1 : 0;
+
     }
 
     const building_storage *storage;
@@ -73,7 +77,7 @@ int building_data_transfer_copy(building *b)
             data.i8 = b->data.industry.is_stockpiling;
             break;
         default:
-            return 0;
+            break;
 
     }
     city_warning_show(WARNING_DATA_COPY_SUCCESS, NEW_WARNING_SLOT);
@@ -86,6 +90,12 @@ int building_data_transfer_paste(building *b)
 
     if (!building_data_transfer_possible(b)) {
         return 0;
+    }
+
+    if (data.building_is_mothballed) {
+        building_mothball_set(b, BUILDING_STATE_MOTHBALLED);
+    } else {
+        b->state = BUILDING_STATE_IN_USE;
     }
 
     switch (data_type) {
@@ -112,7 +122,7 @@ int building_data_transfer_paste(building *b)
             b->data.industry.is_stockpiling = data.i8;
             break;
         default:
-            return 0;
+            break;
     }
     city_warning_show(WARNING_DATA_PASTE_SUCCESS, NEW_WARNING_SLOT);
     return 1;
@@ -144,6 +154,6 @@ building_data_type building_data_transfer_data_type_from_building_type(building_
         case BUILDING_DEPOT:
             return DATA_TYPE_DEPOT;
         default:
-            return DATA_TYPE_NOT_SUPPORTED;
+            return (building_data_type) type;
     }
 }
