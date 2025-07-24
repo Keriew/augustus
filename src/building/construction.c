@@ -601,7 +601,7 @@ void building_construction_set_type(building_type type)
         }
     }
     if (building_construction_can_rotate()) {
-        building_rotation_setup_rotation();
+        building_rotation_setup_rotation(0);
     }
 }
 
