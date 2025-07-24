@@ -106,13 +106,15 @@ static int parse_word(uint8_t *string, uint8_t *word)
     *word = 0;
     return count + 1;
 }
-
 // return value is next argument index
 static int parse_integer(uint8_t *string, int *value)
 {
+    if (!string || !value) {
+        return 0;
+    }
     uint8_t copy[MAX_COMMAND_SIZE];
     int count = 0;
-    while (*string && *string != ' ') {
+    while (*string && *string != ' ' && count < MAX_COMMAND_SIZE - 1) {
         copy[count] = *string;
         count++;
         string++;
@@ -171,7 +173,7 @@ void game_cheat_console(void)
 
 static void show_warning(translation_key key)
 {
-    city_warning_show_custom(lang_get_string(CUSTOM_TRANSLATION, key), NEW_WARNING_SLOT);    
+    city_warning_show_custom(lang_get_string(CUSTOM_TRANSLATION, key), NEW_WARNING_SLOT);
 }
 
 static void game_cheat_add_money(uint8_t *args)
