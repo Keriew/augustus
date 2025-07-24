@@ -496,7 +496,6 @@ static int evolve_large_palace(building *house, house_demands *demands)
             } else {
                 building_house_devolve_from_large_palace(house);
             }
-
         }
     }
     return 0;
