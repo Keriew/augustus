@@ -105,6 +105,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_RANDOM_COLLAPSES_TAKE_MONEY, "Вместо разрушения, разрушающаяся шахта заберет часть денег"},
     {TR_CONFIG_MULTIPLE_BARRACKS, "Разрешить постройку нескольких казарм"},
     {TR_CONFIG_NOT_ACCEPTING_WAREHOUSES, "Склады и амбары ничего не принимают при постройке"},
+    {TR_CONFIG_NOT_ACCEPTING_MARKETS, "Рынки ничем не торгуют при постройке"},
     {TR_CONFIG_HOUSES_DONT_EXPAND_INTO_GARDENS, "Дома не расширяются в сады"},
     {TR_CONFIG_ROAMERS_DONT_SKIP_CORNERS, "Бродячие граждане не пропускают углы"},
     {TR_CONFIG_SHOW_MAX_POSSIBLE_PROSPERITY, "Показать макс. достижимый рейтинг процветания с текущим жильем"},
@@ -1634,6 +1635,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_MOVE_SAVINGS_TO_THE_RIGHT, "Стандартный порядок элементов в верхней панели"},
     {TR_TOOLTIP_DEPOT_MOVED, "Перемещаемый ресурс:"},
     {TR_TOOLTIP_DEPOT_ORDER_TO, "в"},
+    {TR_TOOLTIP_RIGHT_CLICK_TO_DECREASE, "Клик правой кнопкой уменьшает значения"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
