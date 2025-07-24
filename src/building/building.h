@@ -45,7 +45,7 @@ typedef struct building {
     union {
         short house_level;
         short warehouse_resource_id;
-        short orientation;
+        short orientation; // rotation of the building, in number of turns. Used for statues, warehouses, etc.
         short fort_figure_type;
         short native_meeting_center_id;
         short barracks_priority;
