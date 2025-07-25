@@ -127,7 +127,7 @@ building *building_warehouse_find_space(building *warehouse, int resource, int a
 
 int building_warehouse_add_resource(building *b, int resource, int quantity, int respect_settings)
 {
-    if (!b || b->id <= 0 || quantity <= 0) {
+    if (!b || b->id <= 0 || quantity <= 0 || !resource) {
         return 0;
     }
 
@@ -195,7 +195,7 @@ int building_warehouse_remove_resource(building *warehouse, int resource, int am
 
 int building_warehouse_try_remove_resource(building *warehouse, int resource, int desired_amount)
 {
-    if (desired_amount <= 0) {
+    if (desired_amount <= 0 || !resource) {
         return 0;
     }
     if (warehouse->has_plague) {
@@ -336,12 +336,18 @@ int building_warehouse_remove_export(building *warehouse, int resource, int amou
     city_finance_process_export(price * removed_amount);
 
     building *space = building_warehouse_find_space(warehouse, resource, WAREHOUSE_REMOVING_RESOURCE);
+    if (!space) {
+        return 0; // no valid space found
+    }
     building_warehouse_space_set_image(space, resource);
     return removed_amount;
 }
 
 void building_warehouse_space_remove_export(building *space, int resource, int land_trader)
 {
+    if (!resource) {
+        return 0; // invalid resource
+    }
     city_resource_remove_from_warehouse(resource, 1);
     space->resources[resource]--;
     if (space->resources[resource] <= 0) {

@@ -319,8 +319,9 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
         for (building *b = building_first_of_type(building_types[t]); b; b = b->next_of_type) {
             // Skip buildings
             if (b->state != BUILDING_STATE_IN_USE || b->has_plague || !b->has_road_access
-            || (f->last_visited_index == b->id) || b->id == f->destination_building_id) {
-                continue; // Not active, infected, unreachable by road, recently visited, or currently at
+            || (f->last_visited_index == b->id) || b->id == f->destination_building_id ||
+            !building_storage_get_permission(BUILDING_STORAGE_PERMISSION_TRADERS, b)) {
+                continue; // Not active, infected, unreachable by road, recently visited, currenty at, not accepted
             }
             int sell_score = 0; // Score for how many units the trader can sell to this building
             int buy_score = 0;  // Score for how many units the trader can buy from this building

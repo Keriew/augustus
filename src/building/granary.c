@@ -135,6 +135,9 @@ int building_granary_add_import(building *granary, int resource, int land_trader
 
 int building_granary_remove_export(building *granary, int resource, int land_trader)
 {
+    if (!resource) {
+        return 0; // invalid resource
+    }
     if (building_granary_remove_resource(granary, resource, STORAGE_ADDED_PER_CARTLOAD) == STORAGE_ADDED_PER_CARTLOAD) {
         return 0;
     }
