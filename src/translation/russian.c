@@ -1636,6 +1636,8 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_DEPOT_MOVED, "Перемещаемый ресурс:"},
     {TR_TOOLTIP_DEPOT_ORDER_TO, "в"},
     {TR_TOOLTIP_RIGHT_CLICK_TO_DECREASE, "Клик правой кнопкой уменьшает значения"},
+    {TR_TOOLTIP_POPULATION_GOAL, "Необходимо жителей:"},
+    {TR_CONFIG_PATRICIAN_DEVOLUTION_FIX, "При деградации резиденций патрициев не создаются дома 1х1"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
