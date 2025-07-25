@@ -243,6 +243,10 @@ building *building_create(building_type type, int x, int y)
         b->data.roadblock.exceptions = ROADBLOCK_PERMISSION_ALL;
     }
 
+    if (b->type == BUILDING_MARKET && config_get(CONFIG_GP_CH_MARKETS_DONT_ACCEPT)) {
+            building_distribution_unaccept_all_goods(b);
+    }
+
     b->x = x;
     b->y = y;
     b->grid_offset = map_grid_offset(x, y);

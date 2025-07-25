@@ -6,6 +6,7 @@
 #include "city/houses.h"
 #include "city/resource.h"
 #include "core/calc.h"
+#include "core/config.h"
 #include "core/time.h"
 #include "game/resource.h"
 #include "game/time.h"
@@ -428,7 +429,11 @@ static int evolve_large_villa(building *house, house_demands *demands)
             building_house_change_to(house, BUILDING_HOUSE_GRAND_VILLA);
         } else if (status == DEVOLVE) {
             game_undo_disable();
-            building_house_devolve_from_large_villa(house);
+            if (config_get(CONFIG_GP_CH_PATRICIAN_DEVOLUTION_FIX)) {
+                building_house_desize_patrician(house);
+            } else {
+                building_house_devolve_from_large_villa(house);
+            }
         }
     }
     return 0;
@@ -486,7 +491,11 @@ static int evolve_large_palace(building *house, house_demands *demands)
             building_house_change_to(house, BUILDING_HOUSE_LUXURY_PALACE);
         } else if (status == DEVOLVE) {
             game_undo_disable();
-            building_house_devolve_from_large_palace(house);
+            if (config_get(CONFIG_GP_CH_PATRICIAN_DEVOLUTION_FIX)) {
+                building_house_desize_patrician(house);
+            } else {
+                building_house_devolve_from_large_palace(house);
+            }
         }
     }
     return 0;
