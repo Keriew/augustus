@@ -1696,7 +1696,7 @@ static translation_string all_strings[] = {
 	{TR_CONFIG_STORAGE_STEP_4, "Nutze die Vielfachen von 4 zum Einteilen von Lagerplatz"},
 	{TR_CONFIG_MOVE_SAVINGS_TO_THE_RIGHT, "Ersparnisse neben den Wertungen anzeigen"},
     {TR_CONFIG_NOT_ACCEPTING_MARKETS, "Märkte akzeptieren nichts, wenn sie gebaut werden"},
-    {TR_CONFIG_PATRICIAN_DEVOLUTION_FIX, "Häuser der Patrizier bilden biem Zusammenbruch keine 1x1 Häuser"},
+    {TR_CONFIG_PATRICIAN_DEVOLUTION_FIX, "Häuser der Patrizier bilden beim Zusammenbruch keine 1x1 Häuser"},
 };
 
 void translation_german(const translation_string **strings, int *num_strings)
