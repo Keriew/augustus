@@ -38,28 +38,70 @@
 #include "scenario/map.h"
 #include "scenario/property.h"
 
+#include <math.h> 
+
 #define INFINITE 10000
 #define TRADER_INITIAL_WAIT GAME_TIME_TICKS_PER_DAY
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define BASE_MULTIPLIER 100
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
+#define SCORE_BASE 100 // base for scoring system, resource multipliers are in relation to this value
+#define DISTANCE_BASELINE 40 
+#define PRICE_BASELINE 100
+#define MULTIPLIER_PRICE_MIN 50 // minimum multiplier for resource basing on price
+#define MULTIPLIER_PRICE_MAX 300 // maximum multiplier for resource basing on price
+#define MULTIPLIER_DISTANCE_MIN 50
+#define MULTIPLIER_DISTANCE_MAX 300 
+
+#define LOGARITHIMIC_SCALER_DISTANCE 50 
+#define LOGARITHMIC_SCALER_SELL 0  // from perspectvie of the trader - trader sells, player buys
+#define LOGARITHMIC_SCALER_BUY 50 
+// adjustable scaling factors. Higher value = more influence.
+// 0 =  no influence. Generally, values between 20-100 are most useful.
+
+/* e.g. with buy scaler at 50 and sell scaler at 0, traders will not consider the price when selling goods to the player,
+but will consider price a factor when buying goods from the player -> the more expensive the resource, more likely
+the trader will go to the location to buy it. */
+
+typedef struct {
+    int value_multiplier[RESOURCE_MAX];
+} sell_multipliers;
+
+typedef struct {
+    int value_multiplier[RESOURCE_MAX];
+} buy_multipliers;
 
 static struct {
-    int value_multiplier[RESOURCE_MAX];
-} sell_multiplier;
+    sell_multipliers sell_multiplier;
+    buy_multipliers buy_multiplier;
+    unsigned char initialized;
+} data;
 
-static struct {
-    int value_multiplier[RESOURCE_MAX];
-} buy_multiplier;
-
-// Initialize all multipliers to BASE_MULTIPLIER
 static void resource_multiplier_init(void)
 {
     for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-        sell_multiplier.value_multiplier[r] = BASE_MULTIPLIER;
-        buy_multiplier.value_multiplier[r] = BASE_MULTIPLIER;
-        // add any rules that increase priority of a resource here, e.g.: resource_is_food(r) ? 150 : 100;
+        // player buys, traders sell
+        int price_sell_multiplier = calculate_log_multiplier(PRICE_BASELINE, MULTIPLIER_PRICE_MIN, MULTIPLIER_PRICE_MAX,
+        LOGARITHMIC_SCALER_SELL, trade_price_buy(r, 1)); //trader sells, player buys 
+        data.sell_multiplier.value_multiplier[r] = price_sell_multiplier;
+        int price_buy_multiplier = calculate_log_multiplier(PRICE_BASELINE, MULTIPLIER_PRICE_MIN, MULTIPLIER_PRICE_MAX,
+        LOGARITHMIC_SCALER_BUY, trade_price_sell(r, 1)); //trader buys, player sells 
+        data.buy_multiplier.value_multiplier[r] = price_buy_multiplier;
+        // add any other rules that increase priority of a resource here, e.g.: resource_is_food(r) ? 150 : 100;
     }
+    data.initialized = 1;
 }
+
+static int calculate_log_score(int baseline, int multiplier_min, int multiplier_max,
+     int logarithmic_scaler, int input_value)
+{
+    if (input_value <= 0) input_value = 1; // Avoid log(0) errors
+    double ratio = (double) input_value / baseline;
+    int score = (int) (SCORE_BASE + logarithmic_scaler * log10(ratio));
+    score = MIN(MAX(score, multiplier_min), multiplier_max);
+    return score;
+}
+
 
 // Mercury Grand Temple base bonus to trader speed
 static int trader_bonus_speed(void)
@@ -372,7 +414,6 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
             }
         }
     }
-    // Reminder: Caravan can trade max 8 units each direction
     int sell_capacity = max_trade_units - f->loads_sold_or_carrying;
     int buy_capacity = max_trade_units - f->trader_amount_bought;
 
@@ -424,6 +465,7 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
 
                     // Limit to how much can actually be sold here
                     int can_add = MIN(MIN(sellable[r], receptable), sell_capacity);
+                    can_add = can_add * data.sell_multiplier.value_multiplier[r]; // Apply sell multiplier
                     sell_score += can_add; // Add this to the total sell score
                 }
 
@@ -436,11 +478,12 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
 
                     // Limit to how much the trader can actually buy from here
                     int can_take = MIN(MIN(buyable[r], available), buy_capacity);
+                    can_take = can_take * data.buy_multiplier.value_multiplier[r]; // Apply buy multiplier
                     buy_score += can_take; // Add this to the total buy score
                 }
             }
             // Calculate total value of this building to the trader
-            int total_score = sell_score + buy_score;
+            int total_score = sell_score + buy_score; //total score is in 100s to avoid floating point issues
             // If this building is the best candidate so far, store it
             if (total_score > best_score) {
                 best_score = total_score;
