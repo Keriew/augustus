@@ -346,7 +346,7 @@ int building_warehouse_remove_export(building *warehouse, int resource, int amou
 void building_warehouse_space_remove_export(building *space, int resource, int land_trader)
 {
     if (!resource) {
-        return 0; // invalid resource
+        return;
     }
     city_resource_remove_from_warehouse(resource, 1);
     space->resources[resource]--;
