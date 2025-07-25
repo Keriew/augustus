@@ -2,6 +2,7 @@
 
 #include "assets/assets.h"
 #include "core/calc.h"
+#include "core/config.h"
 #include "core/string.h"
 #include "editor/editor.h"
 #include "game/campaign.h"
@@ -135,7 +136,7 @@ static void button_click(const generic_button *button)
             window_plain_message_dialog_show(
                 TR_NO_EDITOR_TITLE, TR_NO_EDITOR_MESSAGE, 1);
         } else {
-            window_video_show("map_intro.smk", window_editor_map_show);
+            if (config_get(CONFIG_UI_SHOW_INTRO_VIDEO)) window_video_show("map_intro.smk", window_editor_map_show);
             sound_music_play_editor();
         }
     } else if (type == 5) {
