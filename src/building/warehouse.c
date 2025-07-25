@@ -322,6 +322,9 @@ int building_warehouse_remove_export(building *warehouse, int resource, int amou
             // account for fetched warehouse space instead of main warehouse
         }
     }
+    if (resource == RESOURCE_NONE || amount <= 0) {
+        return 0; // invalid resource or amount
+    }
     building_storage_permission_states permission = land_trader ?
         BUILDING_STORAGE_PERMISSION_TRADERS : BUILDING_STORAGE_PERMISSION_DOCK;
     if (!building_storage_get_permission(permission, warehouse)) {
