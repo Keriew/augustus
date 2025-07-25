@@ -372,8 +372,8 @@ extern struct city_data_t {
         int16_t sea_trade_problem_duration;
         uint16_t months_since_last_land_trade_problem;
         uint16_t months_since_last_sea_trade_problem;
-        int32_t caravan_import_resource;
-        int32_t caravan_backup_import_resource;
+        int32_t caravan_import_resource; // not applicable, to be replaced
+        int32_t caravan_backup_import_resource; // not applicable, to be replaced
         int32_t docker_import_resource;
         int32_t docker_export_resource;
         uint8_t land_policy;

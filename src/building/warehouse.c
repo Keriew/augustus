@@ -160,7 +160,6 @@ int building_warehouse_add_resource(building *b, int resource, int quantity, int
     return quantity - added; //return remainder
 }
 
-
 int building_warehouses_add_resource(int resource, int amount, int respect_settings)
 {
     if (amount <= 0) {
@@ -283,6 +282,37 @@ void building_warehouse_space_add_import(building *space, int resource, int land
     building_warehouse_space_set_image(space, resource);
 }
 
+int building_warehouse_add_import(building *warehouse, int resource, int land_trader, int amount)
+{
+    if (warehouse->type != BUILDING_WAREHOUSE) {
+        building *main_warehouse = building_main(warehouse);
+        if (main_warehouse->type == BUILDING_WAREHOUSE) {
+            warehouse = main_warehouse;
+            // account for fetched warehouse space instead of main warehouse
+        }
+    }
+    building_storage_permission_states permission = land_trader ?
+        BUILDING_STORAGE_PERMISSION_TRADERS : BUILDING_STORAGE_PERMISSION_DOCK;
+    if (!building_storage_get_permission(permission, warehouse)) {
+        return 0; // cannot import to this warehouse
+    }
+    if (!building_warehouse_is_accepting(resource, warehouse)) {
+        return 0; // cannot accept this resource
+    }
+    int added_amount = building_warehouse_add_resource(warehouse, resource, 1, 1);
+    if (added_amount <= 0) {
+        return 0; // no space to add
+    }
+
+    building *space = building_warehouse_find_space(warehouse, resource, 1);
+    if (!space) {
+        return 0; // no space found
+    }
+
+    building_warehouse_space_add_import(space, resource, land_trader);
+    return 1;
+}
+
 int building_warehouse_remove_export(building *warehouse, int resource, int amount, int land_trader)
 {
     if (warehouse->type != BUILDING_WAREHOUSE) {
@@ -304,7 +334,7 @@ int building_warehouse_remove_export(building *warehouse, int resource, int amou
 
     building *space = building_warehouse_find_space(warehouse, resource, WAREHOUSE_REMOVING_RESOURCE);
     building_warehouse_space_set_image(space, resource);
-    return amount - removed_amount;
+    return removed_amount;
 }
 
 void building_warehouse_space_remove_export(building *space, int resource, int land_trader)
