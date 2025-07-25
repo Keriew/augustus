@@ -18,6 +18,8 @@ void building_house_devolve_from_large_insula(building *house);
 void building_house_devolve_from_large_villa(building *house);
 void building_house_devolve_from_large_palace(building *house);
 
+void building_house_desize_patrician(building *house);
+
 void building_house_check_for_corruption(building *house);
 
 void building_house_restore_population_after_undo(building *house);

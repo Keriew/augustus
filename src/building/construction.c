@@ -601,7 +601,7 @@ void building_construction_set_type(building_type type)
         }
     }
     if (building_construction_can_rotate()) {
-        building_rotation_setup_rotation();
+        building_rotation_setup_rotation(0);
     }
 }
 
@@ -960,7 +960,7 @@ static figure_type nearby_enemy_type(int x_start, int y_start, int x_end, int y_
             if (f->state != FIGURE_STATE_ALIVE || (!figure_is_enemy(f) && f->type != FIGURE_WOLF)) {
                 continue;
             }
-        } else if (f->state != FIGURE_STATE_ALIVE || !figure_is_enemy(f)) {
+        } else if (figure_is_dead(f) || !figure_is_enemy(f)) {
             continue;
         }
         int distance = f->type == FIGURE_WOLF ? 6 : 12;

@@ -1,6 +1,7 @@
 #include "clone.h"
 
 #include "building/building.h"
+#include "building/variant.h"
 #include "figure/type.h"
 #include "map/building.h"
 #include "map/grid.h"
@@ -62,15 +63,39 @@ static building_type get_clone_type_from_building(building *b, building_type clo
         case BUILDING_HEDGE_GATE_DARK:
             return BUILDING_HEDGE_DARK;
         case BUILDING_PAVILION_BLUE:
-        case BUILDING_PAVILION_GREEN:
-        case BUILDING_PAVILION_ORANGE:
-        case BUILDING_PAVILION_RED:
-        case BUILDING_PAVILION_YELLOW:
             return BUILDING_PAVILION_BLUE;
+        case BUILDING_PAVILION_GREEN:
+            return BUILDING_PAVILION_GREEN;
+        case BUILDING_PAVILION_ORANGE:
+            return BUILDING_PAVILION_ORANGE;
+        case BUILDING_PAVILION_RED:
+            return BUILDING_PAVILION_RED;
+        case BUILDING_PAVILION_YELLOW:
+            return BUILDING_PAVILION_YELLOW;
+
         case BUILDING_PALISADE_GATE:
             return BUILDING_PALISADE;
         default:
             return clone_type;
+    }
+}
+
+int building_clone_rotation_from_grid_offset(int grid_offset)
+{
+    int building_id = map_building_at(grid_offset);
+    if (!building_id) {
+        return 0;
+    }
+    building *b = building_main(building_get(building_id));
+    if (!b) {
+        return 0;
+    }
+    if (building_variant_has_variants(b->type)) {
+        return b->variant;
+    } else if (b->subtype.orientation) {
+        return b->subtype.orientation;
+    } else {
+        return 0;
     }
 }
 

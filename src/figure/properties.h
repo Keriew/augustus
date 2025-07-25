@@ -16,7 +16,7 @@ typedef enum {
 
 typedef struct {
     figure_category category;
-    int max_damage;
+    int max_damage; //health points - 1 (this is maximum damage that can be taken without dying)
     int attack_value;
     int defense_value;
     int missile_defense_value;

@@ -85,7 +85,8 @@ static const char *ini_keys[] = {
     "gameplay_change_caravans_move_off_road",
     "ui_draw_weather",
     "gameplay_change_storage_step_4",
-    "ui_move_savings_to_right"
+    "ui_move_savings_to_right",
+    "gameplay_patrician_devolution_fix"
 
 };
 
@@ -121,6 +122,7 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_UI_DRAW_WEATHER] = 0,
     [CONFIG_GP_STORAGE_INCREMENT_4] = 0,
     [CONFIG_UI_MOVE_SAVINGS_TO_RIGHT] = 0,
+    [CONFIG_GP_CH_PATRICIAN_DEVOLUTION_FIX] = 1,
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };

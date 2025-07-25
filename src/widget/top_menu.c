@@ -489,7 +489,7 @@ static int draw_panel_with_text_and_number(int offset, int lang_section, int lan
 }
 
 static int draw_rating_panel(int offset, int info_id, int box_width, int gap_length,
-                             font_t font, color_t val_color, color_t goal_color)
+                             font_t font, color_t goal_color)
 {
     int value = 0, goal = 0;
 
@@ -519,6 +519,7 @@ static int draw_rating_panel(int offset, int info_id, int box_width, int gap_len
     int total_width = value_width + gap_length + goal_width;
 
     int x = offset + (box_width - total_width) / 2;
+    color_t val_color = (value >= goal && goal > 0) ? COLOR_FONT_GREEN : COLOR_WHITE;
     text_draw_number(value, '@', " ", x, 5, font, val_color);
     text_draw_number(goal, '(', ")", x + value_width, 5, font, goal_color);
     return box_width;
@@ -649,16 +650,19 @@ void widget_top_menu_draw(int force)
     if (layout >= WIDGET_LAYOUT_BASIC) {
         // --- Draw Treasury ---
         int treasury_w = data.funds.end - data.funds.start;
-        draw_panel_with_text_and_number(data.funds.start, 6, 0, treasury, 3, treasury_w, font, treasury_color, treasury_color);
+        draw_panel_with_text_and_number(data.funds.start, 6, 0, treasury, 3, treasury_w, font, treasury_color,
+            treasury_color);
         // --- Draw Population ---
         int population_w = data.population.end - data.population.start;
 
-        draw_panel_with_text_and_number(data.population.start, 6, 1, city_population(), 3, population_w, font, pop_color, pop_color);
+        draw_panel_with_text_and_number(data.population.start, 6, 1, city_population(), 3, population_w, font,
+         pop_color, pop_color);
         // --- Draw Date ---
         int date_x = data.date.start;
-        draw_black_panel(date_x, 0, DATE_FIELD_WIDTH);
-        int month_offset = date_x + BLACK_PANEL_BLOCK_WIDTH + 14; // 14px is enough for day
-        text_draw_number(get_cosmetic_day_of_month(), 0, "", date_x + PANEL_MARGIN, 5, font, date_color);
+        draw_black_panel(date_x, 0, DATE_FIELD_WIDTH + data.extra_space);
+        int month_offset = date_x + data.extra_space / 2 + BLACK_PANEL_BLOCK_WIDTH + 14; // 14px is enough for day
+        text_draw_number(get_cosmetic_day_of_month(), 0, "", date_x + PANEL_MARGIN + data.extra_space / 2, 5, font,
+         date_color);
         lang_text_draw_month_year_max_width(game_time_month(), game_time_year(),
          month_offset, 5, DATE_FIELD_WIDTH - BLACK_PANEL_BLOCK_WIDTH - 14, font, date_color);
     }
@@ -688,7 +692,7 @@ void widget_top_menu_draw(int force)
         for (int i = 0; i < 4; ++i) {
             int x_offset = x + slot_w * i;
             targets[i]->start = x_offset;
-            targets[i]->end = x_offset + draw_rating_panel(x_offset, rating_ids[i], slot_w, gap_length, font, pop_color, date_color);
+            targets[i]->end = x_offset + draw_rating_panel(x_offset, rating_ids[i], slot_w, gap_length, font, date_color);
         }
         data.health.start = targets[3]->end;
         data.health.end = draw_health_panel(targets[3]->end - gap_length * 2, slot_w / 2, font) + targets[3]->end;
@@ -840,6 +844,17 @@ int widget_top_menu_get_tooltip_text(tooltip_context *c)
     }
     int button_id = get_info_id(c->mouse_x, c->mouse_y);
     if (button_id) {
+        if (button_id == INFO_POPULATION) {
+            if (scenario_criteria_population_enabled()) {
+                const uint8_t *original_tooltip = lang_get_string(68, 59 + INFO_POPULATION);
+                const uint8_t *precomposed_text = lang_get_string(CUSTOM_TRANSLATION, TR_TOOLTIP_POPULATION_GOAL);
+                int value = scenario_criteria_population();
+                static char formatted_text[128];
+                snprintf(formatted_text, sizeof(formatted_text), "%s\n%s %d", original_tooltip, precomposed_text, value);
+                const uint8_t *final_text = (const uint8_t *) formatted_text;
+                c->precomposed_text = final_text;
+            }
+        }
         if (button_id < 4) {
             return 59 + button_id;
         } else if (button_id == INFO_PERSONAL) {
