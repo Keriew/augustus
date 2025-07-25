@@ -100,7 +100,7 @@ int map_has_road_access_granary(int x, int y, map_point *road)
         rx = x + 1;
         ry = y - 1;
     } else if (map_terrain_is(map_grid_offset(x + 3, y + 1), TERRAIN_ROAD) &&
-        (!building_type_is_roadblock(building_get(map_building_at(map_grid_offset(x + 3, y + 1)))->type ))) {
+        (!building_type_is_roadblock(building_get(map_building_at(map_grid_offset(x + 3, y + 1)))->type))) {
         rx = x + 3;
         ry = y + 1;
     } else if (map_terrain_is(map_grid_offset(x + 1, y + 3), TERRAIN_ROAD) &&
@@ -310,7 +310,6 @@ static void check_road_to_largest_network_hippodrome(int x, int y, int *min_inde
     }
 }
 
-
 static void check_min_dist_hippodrome(int base_offset, int x_offset,
     int *min_dist, int *min_grid_offset, int *min_x_offset)
 {
@@ -472,6 +471,10 @@ static int get_adjacent_road_tile_for_roaming(int grid_offset, roadblock_permiss
                     tile_has_adjacent_road_tiles(grid_offset, perm) || tile_has_adjacent_granary_road(grid_offset)) {
                     is_road = 1;
                 }
+            }
+        } else if (b->type == BUILDING_WAREHOUSE) { //ideally should apply to all buildings
+            if (map_routing_citizen_is_passable_terrain(grid_offset) || map_routing_citizen_is_road(grid_offset)) {
+                is_road = 1;
             }
         }
     }

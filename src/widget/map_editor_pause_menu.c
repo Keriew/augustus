@@ -16,6 +16,7 @@
 #include "scenario/scenario.h"
 #include "translation/translation.h"
 #include "widget/top_menu_editor.h"
+#include "window/config.h"
 #include "window/editor/attributes.h"
 #include "window/editor/map.h"
 #include "window/file_dialog.h"
@@ -24,7 +25,7 @@
 #include "window/main_menu.h"
 #include "window/mission_briefing.h"
 
-#define MAX_BUTTONS 6
+#define MAX_BUTTONS 7
 
 static void menu_file_confirm_exit(int accepted, int checked)
 {
@@ -46,13 +47,14 @@ static generic_button buttons[] = {
     {192, 220, 192, 25, button_click, 0, 4},
     {192, 260, 192, 25, button_click, 0, 5},
     {192, 300, 192, 25, button_click, 0, 6},
+    {192, 340, 192, 25, button_click, 0, 7},
 };
 
 static void draw_foreground(void)
 {
     graphics_in_dialog();
 
-    outer_panel_draw(160, 44, 16, 19);
+    outer_panel_draw(160, 44, 16, 22);
 
     for (unsigned int i = 0; i < MAX_BUTTONS; i++) {
         large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / 16, focus_button_id == i + 1 ? 1 : 0);
@@ -64,7 +66,8 @@ static void draw_foreground(void)
     lang_text_draw_centered(7, 2, 192, 186, 192, FONT_NORMAL_GREEN);
     lang_text_draw_centered(7, 3, 192, 226, 192, FONT_NORMAL_GREEN);
     text_draw_centered(translation_for(TR_MAP_EDITOR_OPTIONS), 192, 266, 192, FONT_NORMAL_GREEN, 0);
-    lang_text_draw_centered(7, 4, 192, 306, 192, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(1, 7, 192, 306, 192, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(7, 4, 192, 346, 192, FONT_NORMAL_GREEN);
 
     graphics_reset_dialog();
 }
@@ -111,7 +114,9 @@ static void button_click(const generic_button *button)
     } else if (type == 5) {
         window_editor_attributes_show();
     } else if (type == 6) {
-        window_popup_dialog_show_confirmation(translation_for(TR_BUTTON_BACK_TO_MAIN_MENU), 0, 0, main_menu_confirmed);
+        window_config_show(CONFIG_FIRST_PAGE, 0);
+    } else if (type == 7) {
+        window_popup_dialog_show_confirmation(translation_for(TR_BUTTON_BACK_TO_MAIN_MENU), 0, 0, main_menu_confirmed); 
     }
 }
 

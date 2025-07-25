@@ -1049,24 +1049,28 @@ void window_building_get_tooltip_storage_orders(int *group_id, int *text_id, int
         } else {
             *translation = TR_TOOLTIP_BUTTON_STORAGE_ORDER_REJECT_ALL;
         }
-    } else if (data.partial_resource_focus_button_id) { //quantity button tooltip
-        *translation = TR_TOOLTIP_RIGHT_CLICK_TO_DECREASE;
-    } else {
-        if (data.resource_focus_button_id) {
-            int building_id = data.building_id;
-            building *b = building_get(building_id);
-            const building_storage *s = building_storage_get(b->storage_id);
-            // Convert 1-based focus ID to 0-based and apply scroll offset
-            int index = data.resource_focus_button_id - 1 + scrollbar.scroll_position;
-            // Choose the correct resource list based on building type
-            const resource_list *list = (b->type == BUILDING_GRANARY) ?
-                city_resource_get_potential_foods() : city_resource_get_potential();
+    } else if (data.resource_focus_button_id || data.partial_resource_focus_button_id) {
+        int building_id = data.building_id;
+        building *b = building_get(building_id);
+        const building_storage *s = building_storage_get(b->storage_id);
+        // Convert 1-based focus ID to 0-based and apply scroll offset
+        int index = data.resource_focus_button_id ?
+            (data.resource_focus_button_id - 1 + scrollbar.scroll_position) :
+            (data.partial_resource_focus_button_id - 1 + scrollbar.scroll_position);
+        // Choose the correct resource list based on building type
+        const resource_list *list = (b->type == BUILDING_GRANARY) ?
+            city_resource_get_potential_foods() : city_resource_get_potential();
 
-            // Ensure valid index
-            if (index >= 0 && index < list->size) {
-                resource_type resource = list->items[index];
-                const resource_storage_entry *entry = &s->resource_state[resource];
+        // Ensure valid index
+        if (index >= 0 && index < list->size) {
+            resource_type resource = list->items[index];
+            const resource_storage_entry *entry = &s->resource_state[resource];
 
+            if (data.partial_resource_focus_button_id) { //quantity button tooltip
+                if (entry->state != BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
+                    *translation = TR_TOOLTIP_RIGHT_CLICK_TO_DECREASE;
+                }
+            } else if (data.resource_focus_button_id) {
                 if (entry->state == BUILDING_STORAGE_STATE_MAINTAINING) {
                     *translation = TR_TOOLTIP_BUILDING_DISTRIBUTION_MAINTAINING;
                 }

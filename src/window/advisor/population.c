@@ -20,6 +20,7 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "scenario/property.h"
+#include "scenario/criteria.h"
 #include "window/advisors.h"
 
 #define ADVISOR_HEIGHT 27
@@ -395,11 +396,16 @@ static int draw_background(void)
 
     int x_offset = text_get_number_width(city_population(), 0, "", FONT_NORMAL_BLACK);
     x_offset += lang_text_get_width(CUSTOM_TRANSLATION, TR_ADVISOR_TOTAL_POPULATION, FONT_NORMAL_BLACK);
+    int target_width = lang_text_get_width(53, 6, FONT_NORMAL_BLACK);
+    target_width += text_get_number_width(scenario_criteria_population(), '@', " )", FONT_NORMAL_BLACK);
     x_offset = 620 - x_offset;
+    int target_offset = 620 - target_width - 12; // 12 pixels for length of @), to align with other text
 
     width = text_draw_number(city_population(), 0, "", x_offset, 25, FONT_NORMAL_BLACK, 0);
     text_draw(translation_for(TR_ADVISOR_TOTAL_POPULATION), x_offset + width, 25, FONT_NORMAL_BLACK, 0);
-
+    // (target population)
+    width = lang_text_draw(53, 6, target_offset, 40, FONT_NORMAL_BLACK);
+    text_draw_number(scenario_criteria_population(), '@', " )", target_offset + width, 40, FONT_NORMAL_BLACK, 0);
     int big_text, top_text, bot_text;
     void (*big_graph)(int, int, int);
     void (*top_graph)(int, int, int);
@@ -510,7 +516,7 @@ static void button_graph(const generic_button *button)
 {
     int button_id = button->parameter1;
     int new_order;
-    
+
     switch (city_population_graph_order()) {
         default:
         case 0:

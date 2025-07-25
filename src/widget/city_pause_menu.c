@@ -17,6 +17,7 @@
 #include "input/input.h"
 #include "scenario/property.h"
 #include "translation/translation.h"
+#include "window/config.h"
 #include "window/file_dialog.h"
 #include "window/popup_dialog.h"
 #include "window/city.h"
@@ -36,6 +37,7 @@ static generic_button buttons[] = {
         {192, 260, 192, 25, button_click, 0, 5},
         {192, 300, 192, 25, button_click, 0, 6},
         {192, 340, 192, 25, button_click, 0, 7},
+        {192, 380, 192, 25, button_click, 0, 8},
 };
 
 #define MAX_BUTTONS (sizeof(buttons) / sizeof(generic_button))
@@ -44,7 +46,7 @@ static void draw_foreground(void)
 {
     graphics_in_dialog();
 
-    outer_panel_draw(160, 44, 16, 22);
+    outer_panel_draw(160, 44, 16, 24);
 
     for (size_t i = 0; i < MAX_BUTTONS; i++) {
         large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / 16, focus_button_id == i + 1 ? 1 : 0);
@@ -56,9 +58,10 @@ static void draw_foreground(void)
     lang_text_draw_centered(1, 3, 192, 188, 192, FONT_NORMAL_GREEN);
     lang_text_draw_centered(1, 4, 192, 228, 192, FONT_NORMAL_GREEN);
     lang_text_draw_centered(1, 6, 192, 268, 192, FONT_NORMAL_GREEN);
-    text_draw_centered(translation_for(TR_BUTTON_BACK_TO_MAIN_MENU), 192, 308, 192, FONT_NORMAL_GREEN, 0);
-    lang_text_draw_centered(1, 5, 192, 348, 192, FONT_NORMAL_GREEN);
-
+    lang_text_draw_centered(1, 7, 192, 308, 192, FONT_NORMAL_GREEN);
+    text_draw_centered(translation_for(TR_BUTTON_BACK_TO_MAIN_MENU), 192, 348, 192, FONT_NORMAL_GREEN, 0);
+    lang_text_draw_centered(1, 5, 192, 388, 192, FONT_NORMAL_GREEN);
+    
     graphics_reset_dialog();
 }
 
@@ -130,8 +133,10 @@ static void button_click(const generic_button *button)
     } else if (type == 5) {
         window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_DELETE);
     } else if (type == 6) {
-        window_popup_dialog_show_confirmation(translation_for(TR_BUTTON_BACK_TO_MAIN_MENU), 0, 0, main_menu_confirmed);
+        window_config_show(CONFIG_FIRST_PAGE, 0);
     } else if (type == 7) {
+        window_popup_dialog_show_confirmation(translation_for(TR_BUTTON_BACK_TO_MAIN_MENU), 0, 0, main_menu_confirmed);
+    } else if (type == 8) {
         window_popup_dialog_show(POPUP_DIALOG_QUIT, confirm_exit, 1);
     }
 }

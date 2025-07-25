@@ -9,5 +9,6 @@
  * @return Building type to use for cloning the building
  */
 building_type building_clone_type_from_grid_offset(int grid_offset);
+int building_clone_rotation_from_grid_offset(int grid_offset);
 
 #endif

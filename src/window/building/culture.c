@@ -765,7 +765,7 @@ static void draw_grand_temple(building_info_context *c, const char *sound_file,
                 int module_desc = temple_module_options[data.god_id * 2 + (b->monument.upgrades - 1)].option.desc;
                 height += text_draw_multiline(translation_for(module_desc),
                     c->x_offset + 22, c->y_offset + 66 + height + extra_y, 15 * c->width_blocks,
-                    0, FONT_NORMAL_BLACK, 0);
+                    0, FONT_NORMAL_GREEN, 0);
             }
         }
         if (b->type == BUILDING_GRAND_TEMPLE_MARS) {
@@ -801,7 +801,7 @@ void window_building_draw_grand_temple_foreground(building_info_context *c)
             16 * (c->width_blocks - 10), 20, data.focus_button_id == 1 ? 1 : 0);
         text_draw_centered(translation_for(TR_BUILDING_GRAND_TEMPLE_ADD_MODULE),
             c->x_offset + 80, c->y_offset + BLOCK_SIZE * c->height_blocks - 33,
-            16 * (c->width_blocks - 10), FONT_NORMAL_BLACK, 0);
+            16 * (c->width_blocks - 10), FONT_NORMAL_RED, 0);
     }
     if (b->type == BUILDING_GRAND_TEMPLE_MARS) {
         window_building_draw_priority_buttons(c->x_offset + 50, c->y_offset + 135, b->id);
