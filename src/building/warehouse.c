@@ -157,7 +157,7 @@ int building_warehouse_add_resource(building *b, int resource, int quantity, int
         tutorial_on_add_to_warehouse();
     }
 
-    return quantity - added; //return remainder
+    return added;
 }
 
 int building_warehouses_add_resource(int resource, int amount, int respect_settings)

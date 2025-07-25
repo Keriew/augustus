@@ -238,9 +238,9 @@ static int trader_get_sell_resource(int building_id, int city_id)
 
     unsigned char success = 0;
     if (b->type == BUILDING_GRANARY) {
-        success = building_granary_add_import(b, resource, 1); // or whatever function you use to accept
+        success = building_granary_add_import(b, resource, 1);
     } else {
-        success = building_warehouse_add_import(b, resource, 1, 1); // similar to remove_export but inverse
+        success = building_warehouse_add_import(b, resource, 1, 1);
     }
 
     return success ? resource : RESOURCE_NONE;
@@ -255,12 +255,23 @@ static int get_least_filled_quota_resource(building *b, int city_id, signed char
     int lowest_percent = 101; // Higher than max possible fill (100%)
 
     int route_id = empire_city_get_route_id(city_id);
-
+    int available = 0;
     for (int r = r_start; r < r_end; r++) {
         // Check if resource is available
-        int available = (b->type == BUILDING_GRANARY)
-            ? building_granary_resource_amount(r, b)
-            : building_warehouse_get_available_amount(b, r);
+        if (trader_buying) {
+            if (b->type == BUILDING_GRANARY) {
+                available = building_granary_count_available_resource(r, b, 1);
+            } else {
+                available = building_warehouse_get_available_amount(b, r);
+            }
+
+        } else {
+            if (b->type == BUILDING_GRANARY) {
+                available = building_granary_maximum_receptible_amount(r, b);
+            } else {
+                available = building_warehouse_maximum_receptible_amount(r, b);
+            }
+        }
         if (available <= 0) continue;
 
         if (trader_buying) {
