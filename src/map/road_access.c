@@ -472,6 +472,10 @@ static int get_adjacent_road_tile_for_roaming(int grid_offset, roadblock_permiss
                     is_road = 1;
                 }
             }
+        } else if (b->type == BUILDING_WAREHOUSE) { //ideally should apply to all buildings
+            if (map_routing_citizen_is_passable_terrain(grid_offset) || map_routing_citizen_is_road(grid_offset)) {
+                is_road = 1;
+            }
         }
     }
     return is_road;
