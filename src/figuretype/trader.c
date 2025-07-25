@@ -284,11 +284,6 @@ static int get_least_filled_quota_resource(building *b, int city_id, signed char
     return best_resource;
 }
 
-static int determine_resource_to_trade()
-{
-    // replace all of the logic from city_trade_next_caravan and stuff with a loop that determines if a resource can be traded in a given place
-}
-
 static int get_closest_storage(const figure *f, int x, int y, int city_id, map_point *dst)
 {
     const int max_trade_units = figure_trade_land_trade_units();
