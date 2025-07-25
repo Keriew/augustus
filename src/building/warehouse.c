@@ -303,13 +303,6 @@ int building_warehouse_add_import(building *warehouse, int resource, int land_tr
     if (added_amount <= 0) {
         return 0; // no space to add
     }
-
-    building *space = building_warehouse_find_space(warehouse, resource, 1);
-    if (!space) {
-        return 0; // no space found
-    }
-
-    building_warehouse_space_add_import(space, resource, land_trader);
     return 1;
 }
 
@@ -334,12 +327,6 @@ int building_warehouse_remove_export(building *warehouse, int resource, int amou
 
     int price = trade_price_sell(resource, land_trader);
     city_finance_process_export(price * removed_amount);
-
-    building *space = building_warehouse_find_space(warehouse, resource, WAREHOUSE_REMOVING_RESOURCE);
-    if (!space) {
-        return 0; // no valid space found
-    }
-    building_warehouse_space_set_image(space, resource);
     return removed_amount;
 }
 
