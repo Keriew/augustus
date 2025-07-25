@@ -77,21 +77,6 @@ static struct {
     unsigned char initialized;
 } data;
 
-static void resource_multiplier_init(void)
-{
-    for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-        // player buys, traders sell
-        int price_sell_multiplier = calculate_log_multiplier(PRICE_BASELINE, MULTIPLIER_PRICE_MIN, MULTIPLIER_PRICE_MAX,
-        LOGARITHMIC_SCALER_SELL, trade_price_buy(r, 1)); //trader sells, player buys 
-        data.sell_multiplier.value_multiplier[r] = price_sell_multiplier;
-        int price_buy_multiplier = calculate_log_multiplier(PRICE_BASELINE, MULTIPLIER_PRICE_MIN, MULTIPLIER_PRICE_MAX,
-        LOGARITHMIC_SCALER_BUY, trade_price_sell(r, 1)); //trader buys, player sells 
-        data.buy_multiplier.value_multiplier[r] = price_buy_multiplier;
-        // add any other rules that increase priority of a resource here, e.g.: resource_is_food(r) ? 150 : 100;
-    }
-    data.initialized = 1;
-}
-
 static int calculate_log_score(int baseline, int multiplier_min, int multiplier_max,
      int logarithmic_scaler, int input_value)
 {
@@ -101,6 +86,23 @@ static int calculate_log_score(int baseline, int multiplier_min, int multiplier_
     score = MIN(MAX(score, multiplier_min), multiplier_max);
     return score;
 }
+
+static void resource_multiplier_init(void)
+{
+    for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+        // player buys, traders sell
+        int price_sell_multiplier = calculate_log_score(PRICE_BASELINE, MULTIPLIER_PRICE_MIN, MULTIPLIER_PRICE_MAX,
+        LOGARITHMIC_SCALER_SELL, trade_price_buy(r, 1)); //trader sells, player buys 
+        data.sell_multiplier.value_multiplier[r] = price_sell_multiplier;
+        int price_buy_multiplier = calculate_log_score(PRICE_BASELINE, MULTIPLIER_PRICE_MIN, MULTIPLIER_PRICE_MAX,
+        LOGARITHMIC_SCALER_BUY, trade_price_sell(r, 1)); //trader buys, player sells 
+        data.buy_multiplier.value_multiplier[r] = price_buy_multiplier;
+        // add any other rules that increase priority of a resource here, e.g.: resource_is_food(r) ? 150 : 100;
+    }
+    data.initialized = 1;
+}
+
+
 
 
 // Mercury Grand Temple base bonus to trader speed
