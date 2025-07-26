@@ -568,7 +568,7 @@ int building_warehouse_accepts_storage(building *b, int resource, int *understaf
         return 0;
     }
     const building_storage *s = building_storage_get(b->storage_id);
-    if (building_warehouse_storage_state(b, resource) != BUILDING_STORAGE_STATE_NOT_ACCEPTING || s->empty_all) {
+    if (building_warehouse_storage_state(b, resource) == BUILDING_STORAGE_STATE_NOT_ACCEPTING || s->empty_all) {
         return 0;
     }
     int pct_workers = calc_percentage(b->num_workers, model_get_building(b->type)->laborers);

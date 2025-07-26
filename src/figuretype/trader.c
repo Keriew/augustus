@@ -48,8 +48,8 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 #define SCORE_BASE 100 // base for scoring system, resource multipliers are in relation to this value
-#define DISTANCE_BASELINE 40 // baseline for chess distance - 2/3 of small province, 1/4 of enormous province
-#define PRICE_BASELINE 100
+#define DISTANCE_BASELINE 80 // baseline for chess distance - 2* (2/3 of small province, 1/4 of enormous province)
+#define PRICE_BASELINE 80
 #define MULTIPLIER_PRICE_MIN 50 // minimum multiplier for resource basing on price
 #define MULTIPLIER_PRICE_MAX 300 // maximum multiplier for resource basing on price
 #define MULTIPLIER_DISTANCE_MIN 50
@@ -364,7 +364,9 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
                     buy_score += can_take; // Add this to the total buy score
                 }
             }
+            const map_tile *exit = city_map_exit_point();
             int raw_distance = map_grid_chess_distance(f->grid_offset, b->grid_offset);
+            raw_distance += map_grid_chess_distance(b->grid_offset, exit->grid_offset);
             int distance_score = calculate_log_score(raw_distance, MULTIPLIER_DISTANCE_MIN, MULTIPLIER_DISTANCE_MAX,
                 LOGARITHIMIC_SCALER_DISTANCE, DISTANCE_BASELINE);
             //swapping the input and baseline gives inverted score: higher score for shorter distances
@@ -394,25 +396,15 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
     // 5. Return result 
     if (best_building_id) {
         const building *best_building = building_get(best_building_id);
-        map_point road_access;
-
-        // Get proper road access point based on building type
         if (best_building->type == BUILDING_GRANARY) {
-            if (map_has_road_access_granary(best_building->x, best_building->y, &road_access)) {
-                *dst = road_access;
-            } else {
-                // Fallback to granary center by offsetting by 1 tile
-                dst->x = best_building->x + 1;
-                dst->y = best_building->y + 1;
-            }
-        } else if (best_building->type == BUILDING_WAREHOUSE) {
-            if (map_has_road_access_rotation(best_building->subtype.orientation,
-                best_building->x, best_building->y, 3, &road_access)) {
-                *dst = road_access;
-            } else {
-                // Fallback to warehouse origin
-                *dst = (map_point) { best_building->x, best_building->y };
-            }
+            // go to center of granary
+            map_point_store_result(best_building->x + 1, best_building->y + 1, dst);
+        } else if (best_building->has_road_access == 1) {
+            map_point_store_result(best_building->x, best_building->y, dst);
+        } else if (!map_has_road_access_rotation(best_building->subtype.orientation,
+            best_building->x, best_building->y, 3, dst)) {
+            resource_multiplier_reset();
+            return 0; // No road access found
         }
         resource_multiplier_reset();
         return best_building->id;
@@ -491,9 +483,6 @@ void figure_trade_caravan_action(figure *f)
                     f->state = FIGURE_STATE_DEAD;
                     f->is_ghost = 1;
                     break;
-            }
-            if (building_get(f->destination_building_id)->state != BUILDING_STATE_IN_USE) {
-                f->state = FIGURE_STATE_DEAD;
             }
             break;
         case FIGURE_ACTION_102_TRADE_CARAVAN_TRADING:
