@@ -322,7 +322,7 @@ int building_warehouse_remove_export(building *warehouse, int resource, int amou
 
 static building *get_next_warehouse(void)
 {
-    int building_id = city_resource_last_used_warehouse();
+    unsigned int building_id = city_resource_last_used_warehouse();
     int wrapped_around = 0;
     building *b = building_first_of_type(BUILDING_WAREHOUSE);
     while (b) {
@@ -838,7 +838,6 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
             }
         }
         int needed = get_acceptable_quantity(warehouse, r) - loads_stored;
-        int available = city_resource_count(r) - loads_stored;
         int fetch_amount = MAX_CARTLOADS_PER_SPACE;
 
 
