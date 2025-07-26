@@ -359,8 +359,6 @@ int building_granary_maximum_receptible_amount(building *b, int resource)
     return (max_amount > stored_amount) ? (max_amount - stored_amount) : 0;
 }
 
-
-
 int building_granary_remove_for_getting_deliveryman(building *src, building *dst, int *resource)
 {
     int max_amount = 0;
