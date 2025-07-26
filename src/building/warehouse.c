@@ -437,24 +437,6 @@ static int get_acceptable_quantity(building *b, int resource)
     return 0;
 }
 
-
-int building_warehouse_maximum_receptible_amount(building *b, int resource)
-{
-    if (b->has_plague) {
-        return 0;
-    }
-
-    unsigned char stored_amount = building_warehouse_get_amount(b, resource);
-    unsigned char max_accepted_amount = get_acceptable_quantity(b, resource);
-    unsigned char available_space = building_warehouse_max_space_for_resource(b, resource);
-
-    // Max the building is allowed to receive, limited by player setting
-    unsigned char allowed_remaining = (max_accepted_amount > stored_amount) ? (max_accepted_amount - stored_amount) : 0;
-    unsigned char final_capacity = MIN(allowed_remaining, available_space);
-    // Final amount is the lesser of what's allowed and what space is available
-    return final_capacity;
-}
-
 static int building_warehouse_max_space_for_resource(building *b, int resource)
 {
     // internal function to check space with respect to tiled storage - keep static
@@ -474,6 +456,24 @@ static int building_warehouse_max_space_for_resource(building *b, int resource)
     }
     return max_storable;
 }
+
+int building_warehouse_maximum_receptible_amount(building *b, int resource)
+{
+    if (b->has_plague) {
+        return 0;
+    }
+
+    unsigned char stored_amount = building_warehouse_get_amount(b, resource);
+    unsigned char max_accepted_amount = get_acceptable_quantity(b, resource);
+    unsigned char available_space = building_warehouse_max_space_for_resource(b, resource);
+
+    // Max the building is allowed to receive, limited by player setting
+    unsigned char allowed_remaining = (max_accepted_amount > stored_amount) ? (max_accepted_amount - stored_amount) : 0;
+    unsigned char final_capacity = MIN(allowed_remaining, available_space);
+    // Final amount is the lesser of what's allowed and what space is available
+    return final_capacity;
+}
+
 
 int building_warehouses_count_available_resource(int resource, int respect_maintaining)
 {
