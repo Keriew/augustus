@@ -24,7 +24,7 @@
 
 #define INFINITE 10000
 
-static int try_import_resource(int building_id, int resource, int city_id)
+static int try_import_resource(int building_id, int resource, int city_id, int quantity)
 {
     building *b = building_get(building_id);
     if (b->type != BUILDING_WAREHOUSE &&
@@ -42,41 +42,19 @@ static int try_import_resource(int building_id, int resource, int city_id)
     }
 
     int route_id = empire_city_get_route_id(city_id);
-
+    int result = 0;
     if (b->type == BUILDING_GRANARY) {
-        int result = building_granary_add_import(b, resource, 0);
+        result = building_granary_add_import(b, resource, 0);
         if (result) {
             trade_route_increase_traded(route_id, resource);
         }
-        return result;
-    }
-
-    // try existing storage bay with the same resource
-    building *space = b;
-    for (int i = 0; i < 8; i++) {
-        space = building_next(space);
-        if (space->id > 0) {
-            if (space->resources[resource] > 0 && space->resources[resource] < 4 &&
-                space->subtype.warehouse_resource_id == resource) {
-                trade_route_increase_traded(route_id, resource);
-                building_warehouse_space_add_import(space, resource, 0);
-                return 1;
-            }
+    } else if (b->type == BUILDING_WAREHOUSE) {
+        result = building_warehouse_add_import(b, resource, 0, quantity);
+        if (result) {
+            trade_route_increase_traded(route_id, resource);
         }
     }
-    // try unused storage bay
-    space = b;
-    for (int i = 0; i < 8; i++) {
-        space = building_next(space);
-        if (space->id > 0) {
-            if (space->subtype.warehouse_resource_id == RESOURCE_NONE) {
-                trade_route_increase_traded(route_id, resource);
-                building_warehouse_space_add_import(space, resource, 0);
-                return 1;
-            }
-        }
-    }
-    return 0;
+    return result;
 }
 
 static int try_export_resource(int building_id, int resource, int city_id)
@@ -89,27 +67,19 @@ static int try_export_resource(int building_id, int resource, int city_id)
     if (!building_storage_get_permission(BUILDING_STORAGE_PERMISSION_DOCK, b)) {
         return 0;
     }
-
+    int result = 0;
     if (b->type == BUILDING_GRANARY) {
-        int result = building_granary_remove_export(b, resource, 0);
+        result = building_granary_remove_export(b, resource, 0);
         if (result) {
             trade_route_increase_traded(empire_city_get_route_id(city_id), resource);
         }
-        return result;
-    }
-
-    building *space = b;
-    for (int i = 0; i < 8; i++) {
-        space = building_next(space);
-        if (space->id > 0) {
-            if (space->resources[resource] > 0) {
-                trade_route_increase_traded(empire_city_get_route_id(city_id), resource);
-                building_warehouse_space_remove_export(space, resource, 0);
-                return 1;
-            }
+    } else if (b->type == BUILDING_WAREHOUSE) {
+        result = building_warehouse_remove_export(b, resource, 1, 0);
+        if (result) {
+            trade_route_increase_traded(empire_city_get_route_id(city_id), resource);
         }
     }
-    return 0;
+    return result;
 }
 
 static int store_destination_map_point(int building_id, map_point *dst)
@@ -523,7 +493,8 @@ void figure_docker_action(figure *f)
                 } else {
                     trade_city_id = 0;
                 }
-                if (try_import_resource(f->destination_building_id, f->resource_id, trade_city_id)) {
+                if (try_import_resource(f->destination_building_id, f->resource_id,
+                    trade_city_id, f->loads_sold_or_carrying)) {
                     int trader_id = figure_get(b->data.dock.trade_ship_id)->trader_id;
                     trader_record_sold_resource(trader_id, f->resource_id);
                     city_health_update_sickness_level_in_building(b->id);
