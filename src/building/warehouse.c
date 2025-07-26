@@ -130,20 +130,22 @@ int building_warehouse_add_resource(building *b, int resource, int quantity, int
     if (!b || b->id <= 0 || quantity <= 0 || !resource) {
         return 0;
     }
-
-    if (respect_settings && building_warehouse_maximum_receptible_amount(resource, building_main(b)) <= 0) {
+    signed short max_acceptable = building_warehouse_maximum_receptible_amount(resource, b);
+    if (respect_settings && max_acceptable <= 0) {
         return 0;
     }
-
-    int added = 0;
+    if (quantity > max_acceptable) { //iftrying to add more than acceptable, limit it
+        quantity = max_acceptable;
+    }
+    signed short added = 0;
     while (added < quantity) {
         building *space = building_warehouse_find_space(b, resource, 1);
         if (!space) {
             break;
         }
 
-        int space_remaining = MAX_CARTLOADS_PER_SPACE - space->resources[resource];
-        int to_add = (quantity - added < space_remaining) ? (quantity - added) : space_remaining;
+        signed short space_remaining = MAX_CARTLOADS_PER_SPACE - space->resources[resource];
+        signed short to_add = (quantity - added < space_remaining) ? (quantity - added) : space_remaining;
 
         space->resources[resource] += to_add;
         space->subtype.warehouse_resource_id = resource;
