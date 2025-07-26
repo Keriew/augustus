@@ -111,10 +111,8 @@ static int is_invalid_destination(building *b, building *dock)
 static int get_distance_penalty_imports(building *b, int resource)
 {
     unsigned char max_accepted = building_warehouse_maximum_receptible_amount(b, resource);
-    unsigned char currently_stored = building_warehouse_get_amount(b, resource);
-    unsigned char space_remaining = max_accepted - currently_stored;
 
-    int penalty = 32 - 2 * space_remaining;
+    int penalty = 32 - 2 * max_accepted;
     return penalty;
 }
 

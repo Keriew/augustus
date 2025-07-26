@@ -345,7 +345,7 @@ static building *get_next_warehouse(void)
 
 building_storage_state building_warehouse_storage_state(building *b, int resource)
 {
-    if (b->has_plague || b->state != BUILDING_STATE_IN_USE || b) {
+    if (b->has_plague || b->state != BUILDING_STATE_IN_USE) {
         return BUILDING_STORAGE_STATE_NOT_ACCEPTING;
     }
 
