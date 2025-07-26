@@ -197,10 +197,9 @@ static int storage_add_resource(building *b, int resource, int amount)
     } else if (b->type == BUILDING_WAREHOUSE) {
         while (amount > 0) {
             int unload_amount = (amount > 2) ? 2 : 1; // unload in 2s if possible
-            if (!building_warehouse_add_resource(b, resource, unload_amount, 1)) {
-                return amount;
-            }
-            amount -= unload_amount;
+            amount -= building_warehouse_add_resource(b, resource, unload_amount, 1);
+            return amount;
+
         }
     }
     return amount;
