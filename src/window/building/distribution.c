@@ -520,7 +520,7 @@ static void draw_food_stocks(building_info_context *c, building *b, int y_offset
             y_offset += BLOCK_SIZE * 2;
             x_offset = 32;
         }
-        font_t font = building_distribution_is_good_accepted(r, b) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
+        font_t font = building_distribution_is_good_accepted(b, r) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
         int image_id = resource_get_data(r)->image.icon;
         const image *img = image_get(image_id);
         int base_width = (25 - img->original.width) / 2;
@@ -541,7 +541,7 @@ static void draw_good_stocks(building_info_context *c, building *b, int y_offset
         if (!resource_is_inventory(r)) {
             continue;
         }
-        font_t font = building_distribution_is_good_accepted(r, b) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
+        font_t font = building_distribution_is_good_accepted(b, r) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
         int image_id = resource_get_data(r)->image.icon;
         const image *img = image_get(image_id);
         int base_width = (25 - img->original.width) / 2;

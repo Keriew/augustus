@@ -264,7 +264,7 @@ static void draw_temple_info(building_info_context *c, int image_offset)
     building *b = building_get(c->building_id);
     if (building_is_ceres_temple(b->type) && building_monument_gt_module_is_active(CERES_MODULE_2_DISTRIBUTE_FOOD)) {
         resource_type food = city_resource_ceres_temple_food();
-        font_t font = building_distribution_is_good_accepted(food, b) ?
+        font_t font = building_distribution_is_good_accepted(b, food) ?
             FONT_NORMAL_BLACK : FONT_NORMAL_RED;
         image_draw(resource_get_data(food)->image.icon, c->x_offset + 112, c->y_offset + 60,
             COLOR_MASK_NONE, SCALE_NONE);
@@ -272,7 +272,7 @@ static void draw_temple_info(building_info_context *c, int image_offset)
             c->x_offset + 132, c->y_offset + 60, font, 0);
         image_draw(resource_get_data(RESOURCE_OIL)->image.icon, c->x_offset + 202, c->y_offset + 60,
             COLOR_MASK_NONE, SCALE_NONE);
-        font = building_distribution_is_good_accepted(RESOURCE_OIL, b) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
+        font = building_distribution_is_good_accepted(b, RESOURCE_OIL) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
         text_draw_number(b->resources[RESOURCE_OIL], '@', " ",
             c->x_offset + 222, c->y_offset + 60, font, 0);
         text_draw_multiline(translation_for(TR_BUILDING_CERES_TEMPLE_MODULE_DESC),
@@ -283,7 +283,7 @@ static void draw_temple_info(building_info_context *c, int image_offset)
     }
 
     if (building_is_venus_temple(b->type) && building_monument_gt_module_is_active(VENUS_MODULE_1_DISTRIBUTE_WINE)) {
-        font_t font = building_distribution_is_good_accepted(RESOURCE_WINE, b) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
+        font_t font = building_distribution_is_good_accepted(b, RESOURCE_WINE) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
         image_draw(resource_get_data(RESOURCE_WINE)->image.icon, c->x_offset + 112, c->y_offset + 60,
             COLOR_MASK_NONE, SCALE_NONE);
         text_draw_number(b->resources[RESOURCE_WINE], '@', " ",
@@ -916,7 +916,7 @@ void window_building_draw_tavern(building_info_context *c)
     int x_offset = 32;
     image_draw(resource_get_data(RESOURCE_WINE)->image.icon, c->x_offset + x_offset, c->y_offset + 60,
         COLOR_MASK_NONE, SCALE_NONE);
-    font_t font = building_distribution_is_good_accepted(RESOURCE_WINE, b) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
+    font_t font = building_distribution_is_good_accepted(b, RESOURCE_WINE) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
 
     text_draw_number(b->resources[RESOURCE_WINE], '@', " ", c->x_offset + x_offset + 25, c->y_offset + 66, font, 0);
 
@@ -924,7 +924,7 @@ void window_building_draw_tavern(building_info_context *c)
         x_offset += 85;
         image_draw(resource_get_data(RESOURCE_MEAT)->image.icon, c->x_offset + x_offset, c->y_offset + 60,
             COLOR_MASK_NONE, SCALE_NONE);
-        font = building_distribution_is_good_accepted(RESOURCE_MEAT, b) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
+        font = building_distribution_is_good_accepted(b, RESOURCE_MEAT) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
         text_draw_number(b->resources[RESOURCE_MEAT], '@', " ", c->x_offset + x_offset + 25, c->y_offset + 66, font, 0);
     }
 
@@ -932,7 +932,7 @@ void window_building_draw_tavern(building_info_context *c)
         x_offset += 85;
         image_draw(resource_get_data(RESOURCE_FISH)->image.icon, c->x_offset + x_offset, c->y_offset + 60,
             COLOR_MASK_NONE, SCALE_NONE);
-        font = building_distribution_is_good_accepted(RESOURCE_FISH, b) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
+        font = building_distribution_is_good_accepted(b, RESOURCE_FISH) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
         text_draw_number(b->resources[RESOURCE_FISH], '@', " ", c->x_offset + x_offset + 25, c->y_offset + 66, font, 0);
     }
 

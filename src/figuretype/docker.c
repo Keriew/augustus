@@ -134,7 +134,7 @@ static int get_closest_building_for_import(int x, int y, int city_id, building *
         int importable[RESOURCE_MAX];
         importable[RESOURCE_NONE] = 0;
         for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-            importable[r] = building_distribution_is_good_accepted(r, dock) &&
+            importable[r] = building_distribution_is_good_accepted(dock, r) &&
                 empire_can_import_resource_from_city(city_id, r);
         }
         resource = city_trade_next_docker_import_resource();
@@ -196,7 +196,7 @@ static int get_closest_building_for_export(int x, int y, int city_id, building *
         int exportable[RESOURCE_MAX];
         exportable[RESOURCE_NONE] = 0;
         for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-            exportable[r] = building_distribution_is_good_accepted(r, dock) &&
+            exportable[r] = building_distribution_is_good_accepted(dock, r) &&
                 empire_can_export_resource_to_city(city_id, r);
         }
         resource = city_trade_next_docker_export_resource();
