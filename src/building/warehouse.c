@@ -862,7 +862,7 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
             !city_resource_is_stockpiled(space->subtype.warehouse_resource_id) &&
             building_has_workshop_for_raw_material_with_room(space->subtype.warehouse_resource_id,
                 warehouse->road_network_id) &&
-            !building_warehouse_is_maintaining(space->subtype.warehouse_resource_id, warehouse)) {
+            !building_warehouse_is_maintaining(warehouse, space->subtype.warehouse_resource_id)) {
 
             *resource = space->subtype.warehouse_resource_id;
             return WAREHOUSE_TASK_DELIVERING;
