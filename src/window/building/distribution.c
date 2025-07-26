@@ -700,7 +700,7 @@ void window_building_draw_distributor_orders_foreground(building_info_context *c
             FONT_NORMAL_WHITE, COLOR_MASK_NONE);
         button_border_draw(c->x_offset + 180, y_offset + 46 + 22 * i, 210, 22,
             data.resource_focus_button_id == i + 1);
-        if (building_distribution_is_good_accepted(resource, b)) {
+        if (building_distribution_is_good_accepted(b, resource)) {
             lang_text_draw_centered(lang_group, lang_active_id,
                 c->x_offset + 180, y_offset + 51 + 22 * i, 210, FONT_NORMAL_WHITE);
         } else {
@@ -1440,7 +1440,7 @@ static void toggle_resource_state(const generic_button *button)
     resource_type resource;
     if (building_has_supplier_inventory(b->type) || b->type == BUILDING_DOCK) {
         resource = data.stored_resources.items[index];
-        building_distribution_toggle_good_accepted(resource, b);
+        building_distribution_toggle_good_accepted(b, resource);
     } else {
         if (b->type == BUILDING_WAREHOUSE) {
             resource = city_resource_get_potential()->items[index];

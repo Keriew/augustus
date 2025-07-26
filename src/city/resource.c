@@ -87,7 +87,7 @@ int city_resource_get_available_empty_space_granaries(resource_type food, int re
         if (!respect_settings) {
             available_storage += b->resources[RESOURCE_NONE];
         } else {
-            available_storage += building_granary_maximum_receptible_amount(food, b);
+            available_storage += building_granary_maximum_receptible_amount(b, food);
         }
     }
 
@@ -102,9 +102,9 @@ int city_resource_get_available_empty_space_warehouses(resource_type resource, i
             continue;
         }
         if (!respect_settings) {
-            available_storage += building_warehouse_max_space_for_resource(resource, b);
+            available_storage += building_warehouse_max_space_for_resource(b, resource);
         } else {
-            available_storage += building_warehouse_maximum_receptible_amount(resource, b);
+            available_storage += building_warehouse_maximum_receptible_amount(b, resource);
         }
     }
 

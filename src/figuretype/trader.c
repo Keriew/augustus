@@ -267,9 +267,9 @@ static int get_least_filled_quota_resource(building *b, int city_id, signed char
 
         } else {
             if (b->type == BUILDING_GRANARY) {
-                available = building_granary_maximum_receptible_amount(r, b);
+                available = building_granary_maximum_receptible_amount(b, r);
             } else {
-                available = building_warehouse_maximum_receptible_amount(r, b);
+                available = building_warehouse_maximum_receptible_amount(b, r);
             }
         }
         if (available <= 0) continue;
@@ -345,8 +345,8 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
                 if (sellable[r] > 0 && sell_capacity > 0) {
                     // Get how much of this resource the building can accept
                     int receptable = (building_types[t] == BUILDING_GRANARY)
-                        ? building_granary_maximum_receptible_amount(r, b) :
-                        building_warehouse_maximum_receptible_amount(r, b);
+                        ? building_granary_maximum_receptible_amount(b, r) :
+                        building_warehouse_maximum_receptible_amount(b, r);
                     // Limit to how much can actually be sold here
                     int can_add = MIN(MIN(sellable[r], receptable), sell_capacity);
                     can_add = can_add * data.sell_multiplier.value_multiplier[r]; // Apply sell multiplier

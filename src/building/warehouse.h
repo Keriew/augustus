@@ -33,12 +33,12 @@ int building_warehouse_get_amount(building *warehouse, int resource);
 int building_warehouse_get_available_amount(building *warehouse, int resource);
 int building_warehouse_add_resource(building *b, int resource, int quantity, int respect_settings);
 int building_warehouses_add_resource(int resource, int amount, int respect_settings);
-int building_warehouse_is_accepting(int resource, building *b);
-int building_warehouse_is_getting(int resource, building *b);
-int building_warehouse_is_maintaining(int resourece, building *b);
-int building_warehouse_is_not_accepting(int resource, building *b);
-int building_warehouse_maximum_receptible_amount(resource_type resource, building *b);
-int building_warehouse_max_space_for_resource(resource_type resource, building *b);
+int building_warehouse_is_accepting(building *b, int resource);
+int building_warehouse_is_getting(building *b, int resource);
+int building_warehouse_is_maintaining(building *b, int resource);
+int building_warehouse_is_not_accepting(building *b, int resource);
+int building_warehouse_maximum_receptible_amount(building *b, int resource);
+int building_warehouse_max_space_for_resource(building *b, int resource);
 
 int building_warehouse_remove_resource(building *warehouse, int resource, int amount);
 
@@ -48,13 +48,9 @@ void building_warehouse_remove_resource_curse(building *warehouse, int amount);
 
 void building_warehouse_space_set_image(building *space, int resource);
 
-void building_warehouse_space_add_import(building *space, int resource, int land_trader);
-
 int building_warehouse_add_import(building *warehouse, int resource, int land_trader, int amount);
 
 int building_warehouse_remove_export(building *warehouse, int resource, int amount, int land_trader);
-
-void building_warehouse_space_remove_export(building *space, int resource, int land_trader);
 
 int building_warehouses_remove_resource(int resource, int amount);
 
