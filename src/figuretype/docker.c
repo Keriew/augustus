@@ -107,7 +107,7 @@ static int is_invalid_destination(building *b, building *dock)
         !building_storage_get_permission(BUILDING_STORAGE_PERMISSION_DOCK, b);
 }
 
-static int get_distance_penalty_imports(int resource, building *b)
+static int get_distance_penalty_imports(building *b, int resource)
 {
     unsigned char max_accepted = building_warehouse_maximum_receptible_amount(b, resource);
     unsigned char currently_stored = building_warehouse_get_amount(b, resource);
@@ -117,7 +117,7 @@ static int get_distance_penalty_imports(int resource, building *b)
     return penalty;
 }
 
-static int get_distance_penalty_exports(int resource, building *b)
+static int get_distance_penalty_exports(building *b, int resource)
 {
     unsigned char currently_stored = building_warehouse_get_available_amount(b, resource);
 
