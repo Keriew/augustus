@@ -118,7 +118,7 @@ int building_granary_is_full(building *b)
     return b->resources[RESOURCE_NONE] <= 0;
 }
 
-int building_granary_resource_amount(int resource, building *b)
+int building_granary_resource_amount(building *b, int resource)
 {
     return b->resources[resource];
 }

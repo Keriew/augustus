@@ -357,7 +357,7 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
                 if (buyable[r] > 0 && buy_capacity > 0) {
                     // Get how much of this resource the building currently holds
                     int available = (building_types[t] == BUILDING_GRANARY)
-                        ? building_granary_resource_amount(r, b) : building_warehouse_get_available_amount(b, r);
+                        ? building_granary_resource_amount(b, r) : building_warehouse_get_available_amount(b, r);
                     // Limit to how much the trader can actually buy from here
                     int can_take = MIN(MIN(buyable[r], available), buy_capacity);
                     can_take = can_take * data.buy_multiplier.value_multiplier[r]; // Apply buy multiplier
