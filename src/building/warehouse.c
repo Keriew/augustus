@@ -68,7 +68,7 @@ int building_warehouse_get_available_amount(building *warehouse, int resource)
         return 0;
     }
 
-    if (building_warehouse_is_maintaining(resource, warehouse)) {
+    if (building_warehouse_is_maintaining(warehouse, resource)) {
         return 0;
     }
 
@@ -286,7 +286,7 @@ int building_warehouse_add_import(building *warehouse, int resource, int land_tr
     if (!building_storage_get_permission(permission, warehouse)) {
         return 0; // cannot import to this warehouse
     }
-    if (!building_warehouse_is_accepting(resource, warehouse)) {
+    if (!building_warehouse_is_accepting(warehouse, resource)) {
         return 0; // cannot accept this resource
     }
     int added_amount = building_warehouse_add_resource(warehouse, resource, 1, 1);
@@ -875,7 +875,7 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
         for (int i = 0; i < 8; i++) {
             space = building_next(space);
             if (contains_non_stockpiled_food(space, granary_resources)
-            && !building_warehouse_is_maintaining(space->subtype.warehouse_resource_id, warehouse)) {
+            && !building_warehouse_is_maintaining(warehouse, space->subtype.warehouse_resource_id)) {
                 *resource = space->subtype.warehouse_resource_id;
                 return WAREHOUSE_TASK_DELIVERING;
             }
@@ -888,7 +888,7 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
         for (int i = 0; i < 8; i++) {
             space = building_next(space);
             if (contains_non_stockpiled_food(space, granary_resources)
-            && !building_warehouse_is_maintaining(space->subtype.warehouse_resource_id, warehouse)) {
+            && !building_warehouse_is_maintaining(warehouse, space->subtype.warehouse_resource_id)) {
                 *resource = space->subtype.warehouse_resource_id;
                 return WAREHOUSE_TASK_DELIVERING;
             }
@@ -900,7 +900,7 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
         for (int i = 0; i < 8; i++) {
             space = building_next(space);
             if (space->id > 0 && space->resources[space->subtype.warehouse_resource_id] > 0
-            && !building_warehouse_is_maintaining(space->subtype.warehouse_resource_id, warehouse)) {
+            && !building_warehouse_is_maintaining(warehouse, space->subtype.warehouse_resource_id)) {
                 *resource = space->subtype.warehouse_resource_id;
                 return WAREHOUSE_TASK_DELIVERING;
             }
