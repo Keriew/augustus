@@ -21,7 +21,7 @@ void city_trade_update(void)
     }
 
     city_data.resource.wine_types_available += empire_city_count_wine_sources();
-    
+
     // Update trade problems
     if (city_data.trade.land_trade_problem_duration > 0) {
         city_data.trade.land_trade_problem_duration--;
@@ -36,7 +36,7 @@ void city_trade_update(void)
         if (building_lighthouse_is_fully_functional()) {
             city_data.trade.sea_trade_problem_duration--;
         }
-    } 
+    }
     if (city_data.trade.sea_trade_problem_duration <= 0) {
         city_data.trade.sea_trade_problem_duration = 0;
     }
@@ -86,33 +86,6 @@ int city_trade_has_land_trade_problems(void)
 int city_trade_has_sea_trade_problems(void)
 {
     return city_data.trade.sea_trade_problem_duration > 0;
-}
-
-int city_trade_current_caravan_import_resource(void)
-{
-    return city_data.trade.caravan_import_resource;
-}
-
-int city_trade_next_caravan_import_resource(void)
-{
-    do {
-        city_data.trade.caravan_import_resource++;
-        if (city_data.trade.caravan_import_resource >= RESOURCE_MAX) {
-            city_data.trade.caravan_import_resource = RESOURCE_MIN;
-        }
-    } while (!resource_is_storable(city_data.trade.caravan_import_resource));
-    return city_data.trade.caravan_import_resource;
-}
-
-int city_trade_next_caravan_backup_import_resource(void)
-{
-    do {
-        city_data.trade.caravan_backup_import_resource++;
-        if (city_data.trade.caravan_backup_import_resource >= RESOURCE_MAX) {
-            city_data.trade.caravan_backup_import_resource = RESOURCE_MIN;
-        }
-    } while (!resource_is_storable(city_data.trade.caravan_backup_import_resource));
-    return city_data.trade.caravan_backup_import_resource;
 }
 
 int city_trade_next_docker_import_resource(void)
