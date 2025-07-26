@@ -260,7 +260,7 @@ static int get_least_filled_quota_resource(building *b, int city_id, signed char
         // Check if resource is available
         if (trader_buying) {
             if (b->type == BUILDING_GRANARY) {
-                available = building_granary_count_available_resource(r, b, 1);
+                available = building_granary_count_available_resource(b, r, 1);
             } else {
                 available = building_warehouse_get_available_amount(b, r);
             }
@@ -318,7 +318,7 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
             }
         }
     }
-    //const uint8_t *city_name = empire_city_get_name((empire_city_get(f->empire_city_id)));
+    const uint8_t *city_name = empire_city_get_name((empire_city_get(f->empire_city_id)));
     //log_info("Caravan: ", city_name, 0);
     int sell_capacity = max_trade_units - f->loads_sold_or_carrying;
     int buy_capacity = max_trade_units - f->trader_amount_bought;
@@ -393,10 +393,28 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
     }
     // 5. Return result 
     if (best_building_id) {
-        //log_info("Best storage found: ",
-           // (best_building->type == BUILDING_GRANARY) ? "Granary " : "Warehouse ", best_building->storage_id);
         const building *best_building = building_get(best_building_id);
-        *dst = (map_point) { best_building->x, best_building->y };
+        map_point road_access;
+
+        // Get proper road access point based on building type
+        if (best_building->type == BUILDING_GRANARY) {
+            if (map_has_road_access_granary(best_building->x, best_building->y, &road_access)) {
+                *dst = road_access;
+            } else {
+                // Fallback to granary center by offsetting by 1 tile
+                dst->x = best_building->x + 1;
+                dst->y = best_building->y + 1;
+            }
+        } else if (best_building->type == BUILDING_WAREHOUSE) {
+            if (map_has_road_access_rotation(best_building->subtype.orientation,
+                best_building->x, best_building->y, 3, &road_access)) {
+                *dst = road_access;
+            } else {
+                // Fallback to warehouse origin
+                *dst = (map_point) { best_building->x, best_building->y };
+            }
+        }
+        resource_multiplier_reset();
         return best_building->id;
     }
     resource_multiplier_reset();
