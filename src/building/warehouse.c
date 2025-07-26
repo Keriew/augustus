@@ -813,7 +813,7 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
     // get resources
     for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
         //determine if any of the resources need to be fetched becasuse of 'getting'
-        if (!building_warehouse_is_getting(r, warehouse) || city_resource_is_stockpiled(r) || !resource_is_storable(r)) {
+        if (!building_warehouse_is_getting(warehouse, r) || city_resource_is_stockpiled(r) || !resource_is_storable(r)) {
             continue;
         }
         int loads_stored = 0;
@@ -837,7 +837,7 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
                 }
             }
         }
-        int needed = get_acceptable_quantity(r, warehouse) - loads_stored;
+        int needed = get_acceptable_quantity(warehouse, r) - loads_stored;
         int available = city_resource_count(r) - loads_stored;
         int fetch_amount = MAX_CARTLOADS_PER_SPACE;
 
