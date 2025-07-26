@@ -378,7 +378,7 @@ int building_warehouse_is_accepting(int resource, building *b)
     if (b->has_plague) {
         return 0;
     }
-    if (entry->state != BUILDING_STORAGE_STATE_ACCEPTING) {
+    if (entry->state == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
         return 0;
     }
     if (amount < entry->quantity) {
