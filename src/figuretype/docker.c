@@ -107,6 +107,16 @@ static int is_invalid_destination(building *b, building *dock)
         !building_storage_get_permission(BUILDING_STORAGE_PERMISSION_DOCK, b);
 }
 
+static int get_distance_penalty(int resource, building *b)
+{
+    unsigned char max_accepted = building_warehouse_maximum_receptible_amount(resource, b);
+    unsigned char currently_stored = building_warehouse_get_amount(b, resource);
+    unsigned char space_remaining = max_accepted - currently_stored;
+
+    int penalty = 32 - 2 * space_remaining;
+    return penalty;
+}
+
 static int get_closest_building_for_import(int x, int y, int city_id, building *dock,
     map_point *dst, int *import_resource)
 {
@@ -134,17 +144,7 @@ static int get_closest_building_for_import(int x, int y, int city_id, building *
             building_warehouse_is_not_accepting(resource, b)) {
             continue;
         }
-        int distance_penalty = 32;
-        building *space = b;
-        for (int s = 0; s < 8; s++) {
-            space = building_next(space);
-            if (space->id && space->subtype.warehouse_resource_id == RESOURCE_NONE) {
-                distance_penalty -= 8;
-            }
-            if (space->id && space->subtype.warehouse_resource_id == resource && space->resources[resource] < 4) {
-                distance_penalty -= 4;
-            }
-        }
+        int distance_penalty = get_distance_penalty(resource, b);
         if (distance_penalty == 32) {
             continue;
         }
@@ -204,14 +204,7 @@ static int get_closest_building_for_export(int x, int y, int city_id, building *
         if (is_invalid_destination(b, dock)) {
             continue;
         }
-        int distance_penalty = 32;
-        building *space = b;
-        for (int s = 0; s < 8; s++) {
-            space = building_next(space);
-            if (space->id && space->subtype.warehouse_resource_id == resource && space->resources[resource] > 0) {
-                distance_penalty--;
-            }
-        }
+        int distance_penalty = get_distance_penalty(resource, b);
         if (distance_penalty == 32) {
             continue;
         }
