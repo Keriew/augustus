@@ -86,8 +86,14 @@ static const char *ini_keys[] = {
     "ui_draw_weather",
     "gameplay_change_storage_step_4",
     "ui_move_savings_to_right",
-    "gameplay_patrician_devolution_fix"
-
+    "gameplay_patrician_devolution_fix",
+    "weather_snow_intensity",
+    "weather_rain_intensity",
+    "weather_sandstorm_intensity",
+    "weather_rain_speed",
+    "weather_rain_length",
+    "weather_snow_speed",
+    "weather_sandastorm_speed",
 };
 
 static const char *ini_string_keys[] = {
@@ -123,6 +129,13 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_GP_STORAGE_INCREMENT_4] = 0,
     [CONFIG_UI_MOVE_SAVINGS_TO_RIGHT] = 0,
     [CONFIG_GP_CH_PATRICIAN_DEVOLUTION_FIX] = 1,
+    [CONFIG_WT_SNOW_INTENSITY] = 20,
+    [CONFIG_WT_RAIN_INTENSITY] = 20,
+    [CONFIG_WT_SANDSTORM_INTENSITY] = 40,
+    [CONFIG_WT_RAIN_SPEED] = 4,
+    [CONFIG_WT_RAIN_LENGTH] = 10,
+    [CONFIG_WT_SNOW_SPEED] = 1,
+    [CONFIG_WT_SANDSTORM_SPEED] = 2
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };
