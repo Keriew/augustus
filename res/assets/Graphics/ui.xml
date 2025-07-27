@@ -1220,4 +1220,5 @@
 		<layer group="134" image="9" x="-1" y="-2"/>
 	</image>
 	<image id="Mothball_Sprite" src="Mothball_Sprite"/>
+	<image id="Stockpile_Sprite" src="Stockpile_Sprite"/>
 </assetlist>
