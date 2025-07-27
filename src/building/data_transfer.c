@@ -1,5 +1,6 @@
 #include "data_transfer.h"
 
+#include "building/building.h"
 #include "building/industry.h"
 #include "building/roadblock.h"
 #include "building/storage.h"
@@ -112,6 +113,8 @@ int building_data_transfer_paste(building *b)
         case DATA_TYPE_RAW_RESOURCE_PRODUCER:
             b->data.industry.is_stockpiling = data.i8;
             break;
+        case DATA_TYPE_MOTHBALL_ONLY:
+            break;
         default:
             return 0;
     }
@@ -146,6 +149,11 @@ building_data_type building_data_transfer_data_type_from_building_type(building_
         case BUILDING_DEPOT:
             return DATA_TYPE_DEPOT;
         default:
-            return DATA_TYPE_NOT_SUPPORTED;
+            if (building_get_laborers(type)) {
+                return DATA_TYPE_MOTHBALL_ONLY;
+            } else {
+                return DATA_TYPE_NOT_SUPPORTED;
+            }
+
     }
 }

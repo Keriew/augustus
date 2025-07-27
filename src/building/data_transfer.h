@@ -12,7 +12,8 @@ typedef enum {
     DATA_TYPE_TAVERN,
     DATA_TYPE_ROADBLOCK,
     DATA_TYPE_DEPOT,
-    DATA_TYPE_RAW_RESOURCE_PRODUCER
+    DATA_TYPE_RAW_RESOURCE_PRODUCER,
+    DATA_TYPE_MOTHBALL_ONLY, // for buildings that can only have one setting - mothballed or not
 } building_data_type;
 
 int building_data_transfer_copy(building *b);
