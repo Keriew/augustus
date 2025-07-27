@@ -74,6 +74,9 @@ int building_data_transfer_copy(building *b)
         case DATA_TYPE_RAW_RESOURCE_PRODUCER:
             data.i8 = b->data.industry.is_stockpiling;
             break;
+        case DATA_TYPE_MOTHBALL_ONLY:
+            // Mothball state is already set in data.mothball
+            break;
         default:
             return 0;
 
