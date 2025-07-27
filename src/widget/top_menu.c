@@ -87,7 +87,7 @@ static void menu_help_warnings(int param);
 static void menu_help_about(int param);
 
 static void menu_advisors_go_to(int advisor);
-static void ratings_advisors_go_to(int advisor)
+static void ratings_advisors_go_to(int advisor);
 
 static menu_item menu_file[] = {
     {1, 2, menu_file_replay_map, 0},
