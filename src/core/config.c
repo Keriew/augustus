@@ -93,7 +93,7 @@ static const char *ini_keys[] = {
     "weather_rain_speed",
     "weather_rain_length",
     "weather_snow_speed",
-    "weather_sandastorm_speed",
+    "weather_sandstorm_speed",
 };
 
 static const char *ini_string_keys[] = {
