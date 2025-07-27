@@ -420,7 +420,7 @@ static void calculate_available_food(void)
                 for (int r = 0; r < RESOURCE_MAX_FOOD; r++) {
                     city_data.resource.granary_food_stored[r] += b->resources[r] * RESOURCE_ONE_LOAD;
                 }
-                if (amount_stored > 4 * RESOURCE_ONE_LOAD) {
+                if (amount_stored > 4) {
                     tutorial_on_filled_granary();
                 }
             }
