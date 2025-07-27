@@ -552,7 +552,7 @@ static void determine_granaryman_destination(figure *f, int road_network_id, int
     if (dst_building_id) {
         set_destination(f, FIGURE_ACTION_51_WAREHOUSEMAN_DELIVERING_RESOURCE, dst_building_id, dst.x, dst.y);
         if (remove_resources) {
-            building_granary_remove_resource(granary, f->resource_id, 100);
+            building_granary_remove_resource(granary, f->resource_id, 1);
         }
         return;
     }
@@ -561,7 +561,7 @@ static void determine_granaryman_destination(figure *f, int road_network_id, int
     if (dst_building_id) {
         set_destination(f, FIGURE_ACTION_51_WAREHOUSEMAN_DELIVERING_RESOURCE, dst_building_id, dst.x, dst.y);
         if (remove_resources) {
-            building_granary_remove_resource(granary, f->resource_id, 100);
+            building_granary_remove_resource(granary, f->resource_id, 1);
         }
         return;
     }
@@ -570,7 +570,7 @@ static void determine_granaryman_destination(figure *f, int road_network_id, int
     if (dst_building_id) {
         set_destination(f, FIGURE_ACTION_51_WAREHOUSEMAN_DELIVERING_RESOURCE, dst_building_id, dst.x, dst.y);
         if (remove_resources) {
-            building_granary_remove_resource(granary, f->resource_id, 100);
+            building_granary_remove_resource(granary, f->resource_id, 1);
         }
         return;
     }
