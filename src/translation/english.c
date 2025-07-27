@@ -1638,6 +1638,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_RIGHT_CLICK_TO_DECREASE, "Right click to decrease" },
     {TR_TOOLTIP_POPULATION_GOAL, "Population goal: "} ,
     {TR_CONFIG_PATRICIAN_DEVOLUTION_FIX, "Patrician houses maintain integrity when devolving" },
+    {TR_CONDITION_TEXT_TIME_LEFT, "Time until defeat:" },
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
