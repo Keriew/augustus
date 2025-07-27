@@ -399,12 +399,14 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
         if (best_building->type == BUILDING_GRANARY) {
             // go to center of granary
             map_point_store_result(best_building->x + 1, best_building->y + 1, dst);
-        } else if (best_building->has_road_access == 1) {
+        } else if (best_building->has_road_access >= 1) {
             map_point_store_result(best_building->x, best_building->y, dst);
         } else if (!map_has_road_access_rotation(best_building->subtype.orientation,
             best_building->x, best_building->y, 3, dst)) {
             resource_multiplier_reset();
             return 0; // No road access found
+        } else {
+            map_point_store_result(best_building->x, best_building->y, dst); //fallback
         }
         resource_multiplier_reset();
         return best_building->id;
