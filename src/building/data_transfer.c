@@ -15,6 +15,7 @@ static struct {
     char i8;
     short i16;
     int i32;
+    signed char mothball;
 } data;
 
 int building_data_transfer_possible(building *b)
@@ -42,7 +43,7 @@ int building_data_transfer_copy(building *b)
     }
 
     const building_storage *storage;
-
+    data.mothball = b->state == BUILDING_STATE_MOTHBALLED ? 1 : 0;
     switch (data_type) {
         case DATA_TYPE_ROADBLOCK:
             data.i16 = b->data.roadblock.exceptions;
@@ -114,6 +115,7 @@ int building_data_transfer_paste(building *b)
         default:
             return 0;
     }
+    building_mothball_set(b, data.mothball);
     city_warning_show(WARNING_DATA_PASTE_SUCCESS, NEW_WARNING_SLOT);
     return 1;
 

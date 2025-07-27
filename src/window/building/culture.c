@@ -801,7 +801,7 @@ void window_building_draw_grand_temple_foreground(building_info_context *c)
             16 * (c->width_blocks - 10), 20, data.focus_button_id == 1 ? 1 : 0);
         text_draw_centered(translation_for(TR_BUILDING_GRAND_TEMPLE_ADD_MODULE),
             c->x_offset + 80, c->y_offset + BLOCK_SIZE * c->height_blocks - 33,
-            16 * (c->width_blocks - 10), FONT_NORMAL_RED, 0);
+            16 * (c->width_blocks - 10), FONT_NORMAL_BLACK, 0);
     }
     if (b->type == BUILDING_GRAND_TEMPLE_MARS) {
         window_building_draw_priority_buttons(c->x_offset + 50, c->y_offset + 135, b->id);

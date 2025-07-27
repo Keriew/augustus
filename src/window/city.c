@@ -156,9 +156,24 @@ static void draw_time_left(void)
             years = scenario_criteria_max_year() - game_time_year() - 1;
         }
         int total_months = 12 - game_time_month() + 12 * years;
-        label_draw(1, 25, 15, 1);
-        int width = lang_text_draw(6, 2, 6, 29, FONT_NORMAL_BLACK);
-        text_draw_number(total_months, '@', " ", 6 + width, 29, FONT_NORMAL_BLACK, 0);
+        int years_left = total_months / 12;
+        int months_left = total_months % 12;
+        font_t font = FONT_NORMAL_WHITE; //changed font to white to match the rest of the UI
+        int label_width = lang_text_get_width(CUSTOM_TRANSLATION, TR_CONDITION_TEXT_TIME_LEFT_UNTIL_DEFEAT, font);
+        label_width += text_get_number_width(years_left, '@', "", font);
+        label_width += lang_text_get_width(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_YEARS, font);
+        label_width += text_get_number_width(months_left, '@', "", font);
+        label_width += lang_text_get_width(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_MONTHS, font);
+        int label_blocks = (label_width + 2 * BLOCK_SIZE) / BLOCK_SIZE; // 3 block sizes for nice padding
+        label_draw(1, 25, label_blocks, 1);
+        int x_offset = 6;
+        int y = 29;
+        x_offset += lang_text_draw(CUSTOM_TRANSLATION, TR_CONDITION_TEXT_TIME_LEFT_UNTIL_DEFEAT, x_offset, y, font);
+        x_offset += text_draw_number(years_left, '@', "", x_offset, y, font, 0);
+        x_offset += lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_YEARS, x_offset, y, font);
+        x_offset += text_draw_number(months_left, '@', "", x_offset, y, font, 0);
+        x_offset += lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_MONTHS, x_offset, y, font);
+
     } else if (scenario_criteria_survival_enabled() && !city_victory_has_won()) {
         int years;
         if (scenario_criteria_max_year() <= game_time_year() + 1) {
@@ -166,10 +181,27 @@ static void draw_time_left(void)
         } else {
             years = scenario_criteria_max_year() - game_time_year() - 1;
         }
+
         int total_months = 12 - game_time_month() + 12 * years;
-        label_draw(1, 25, 15, 1);
-        int width = lang_text_draw(6, 3, 6, 29, FONT_NORMAL_BLACK);
-        text_draw_number(total_months, '@', " ", 6 + width, 29, FONT_NORMAL_BLACK, 0);
+        int years_left = total_months / 12;
+        int months_left = total_months % 12;
+
+        font_t font = FONT_NORMAL_WHITE; // 
+        int label_width = lang_text_get_width(CUSTOM_TRANSLATION, TR_CONDITION_TEXT_TIME_LEFT_UNTIL_VICTORY, font);
+        label_width += text_get_number_width(years_left, '@', "", font);
+        label_width += lang_text_get_width(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_YEARS, font);
+        label_width += text_get_number_width(months_left, '@', "", font);
+        label_width += lang_text_get_width(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_MONTHS, font);
+        int label_blocks = (label_width + 2 * BLOCK_SIZE) / BLOCK_SIZE;
+
+        label_draw(1, 25, label_blocks, 1);
+        int x_offset = 6;
+        int y = 29;
+        x_offset += lang_text_draw(CUSTOM_TRANSLATION, TR_CONDITION_TEXT_TIME_LEFT_UNTIL_VICTORY, x_offset, y, font);
+        x_offset += text_draw_number(years_left, '@', "", x_offset, y, font, 0);
+        x_offset += lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_YEARS, x_offset, y, font);
+        x_offset += text_draw_number(months_left, '@', "", x_offset, y, font, 0);
+        x_offset += lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_MONTHS, x_offset, y, font);
     }
 }
 
