@@ -125,6 +125,38 @@ building *building_warehouse_find_space(building *warehouse, int resource, int a
     return 0;
 }
 
+static void building_warehouse_recount_resources(building *main)
+{
+    // static helper to reflect the resources in the main warehouse, like granary does
+    if (!main || main->type != BUILDING_WAREHOUSE) {
+        return;
+    }
+
+    // Reset all resource counters in the main warehouse
+    for (int r = 0; r < RESOURCE_MAX; r++) {
+        main->resources[r] = 0;
+    }
+
+    building *space = main;
+    for (int i = 0; i < 8; i++) {
+        space = building_next(space);
+        if (space->id <= 0) {
+            continue;
+        }
+
+        int resource = space->subtype.warehouse_resource_id;
+        if (resource > RESOURCE_NONE && resource < RESOURCE_MAX) {
+            main->resources[resource] += space->resources[resource];
+        }
+    }
+    // Total sum of all loads (regardless of type)
+    int total_loads = 0;
+    for (int r = 1; r < RESOURCE_MAX; r++) {
+        total_loads += main->resources[r];
+    }
+    main->resources[RESOURCE_NONE] = BUILDING_STORAGE_QUANTITY_MAX - total_loads;
+}
+
 
 int building_warehouse_try_add_resource(building *b, int resource, int quantity, int respect_settings)
 {
@@ -381,6 +413,7 @@ static int building_warehouse_max_space_for_resource(building *b, int resource)
 
 int building_warehouse_maximum_receptible_amount(building *b, int resource)
 {
+    building_warehouse_recount_resources(b);
     if (b->has_plague || building_storage_get_empty_all(b->id) ||
          b->state != BUILDING_STATE_IN_USE || b->resources[RESOURCE_NONE] <= 0) {
         return 0;

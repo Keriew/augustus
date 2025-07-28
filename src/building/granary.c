@@ -98,6 +98,8 @@ int building_granary_try_add_resource(building *granary, int resource, int is_pr
     int max_current_capacity = building_granary_maximum_receptible_amount(granary, resource);
     if (amount > max_current_capacity) {
         amount_added = max_current_capacity;
+    } else {
+        amount_added = amount;
     }
     if (is_produced) {
         city_resource_add_produced_to_granary(amount_added); // add to city production
