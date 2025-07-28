@@ -480,7 +480,7 @@ void figure_cartpusher_action(figure *f)
             f->wait_ticks++;
             if (f->wait_ticks > 5) {
                 if (building_granary_try_add_resource(building_get(f->destination_building_id),
-                    f->resource_id, 0, f->loads_sold_or_carrying)) {
+                    f->resource_id, f->loads_sold_or_carrying, 1)) {
                     city_health_dispatch_sickness(f);
                     cartpusher_return_to_source(f);
                 } else {
@@ -899,7 +899,8 @@ void figure_warehouseman_action(figure *f)
             figure_movement_move_ticks_with_percentage(f, 1, percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 for (int i = 0; i < f->loads_sold_or_carrying; i++) {
-                    building_granary_try_add_resource(building_get(f->building_id), f->resource_id, 0, 1);
+                    building_granary_try_add_resource(
+                        building_get(f->building_id), f->resource_id, f->loads_sold_or_carrying, 0);
                     f->loads_sold_or_carrying--;
                 }
                 f->state = FIGURE_STATE_DEAD;
