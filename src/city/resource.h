@@ -20,7 +20,9 @@ typedef enum {
 } storage_types;
 
 int city_resource_count_food_on_granaries(resource_type food);
-int city_resource_count(resource_type resource);
+
+int city_resource_count_warehouses_amount(resource_type resource);
+int city_resource_get_total_amount(resource_type resource, int respect_maintaining);
 int city_resource_get_amount_including_granaries(resource_type resource, int amount, int *checked_granaries,
      int respect_stockpiling);
 

@@ -42,11 +42,21 @@ int city_resource_count_food_on_granaries(resource_type food)
     return city_data.resource.granary_food_stored[food];
 }
 
-int city_resource_count(resource_type resource)
+int city_resource_count_warehouses_amount(resource_type resource)
 {
     return city_data.resource.stored_in_warehouses[resource];
 }
 
+int city_resource_get_total_amount(resource_type resource, int respect_maintaining)
+{
+    int total = building_warehouses_count_available_resource(resource, respect_maintaining);
+
+    if (resource_is_food(resource)) {
+        int granary_total = building_granaries_count_available_resource(resource, respect_maintaining);
+        total += granary_total;
+    }
+    return total;
+}
 
 int city_resource_get_amount_including_granaries(resource_type resource, int amount, int *checked_granaries,
     int respect_maintaining)
