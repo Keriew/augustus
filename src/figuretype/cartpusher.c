@@ -464,8 +464,10 @@ void figure_cartpusher_action(figure *f)
         case FIGURE_ACTION_24_CARTPUSHER_AT_WAREHOUSE:
             f->wait_ticks++;
             if (f->wait_ticks > 10) {
-                if (building_warehouse_try_add_resource(
-                    building_get(f->destination_building_id), f->resource_id, f->loads_sold_or_carrying)) {
+                int delivered = building_warehouse_try_add_resource(
+                    building_get(f->destination_building_id), f->resource_id, f->loads_sold_or_carrying);
+                if (delivered) {
+                    f->loads_sold_or_carrying -= delivered; //sure hope it equals 0
                     city_health_dispatch_sickness(f);
                     cartpusher_return_to_source(f);
                 } else {
@@ -479,8 +481,10 @@ void figure_cartpusher_action(figure *f)
         case FIGURE_ACTION_25_CARTPUSHER_AT_GRANARY:
             f->wait_ticks++;
             if (f->wait_ticks > 5) {
-                if (building_granary_try_add_resource(building_get(f->destination_building_id),
-                    f->resource_id, f->loads_sold_or_carrying, 1)) {
+                int delivered = building_warehouse_try_add_resource(building_get(f->destination_building_id),
+                    f->resource_id, f->loads_sold_or_carrying);
+                if (delivered) {
+                    f->loads_sold_or_carrying -= delivered; //sure hope it equals 0
                     city_health_dispatch_sickness(f);
                     cartpusher_return_to_source(f);
                 } else {
