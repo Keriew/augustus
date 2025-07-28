@@ -115,7 +115,7 @@ static int should_change_destination(const figure *f, int building_id, int x_dst
             }
             break;
         case FIGURE_ACTION_54_WAREHOUSEMAN_GETTING_FOOD:
-            if (building_granary_amount_can_get_from(current_destination, building_get(f->building_id)) == 0) {
+            if (!building_granary_amount_can_get_from(current_destination, building_get(f->building_id), f->resource_id)) {
                 return 1;
             }
             break;
@@ -560,9 +560,9 @@ static void determine_granaryman_destination(figure *f, int road_network_id, int
     int loads_to_remove = building_storage_get_empty_all(granary->id) ? GRANARY_EMPTY_ALL_CARTLOADS : 1;
     if (!f->resource_id) {
         // getting granaryman
-        dst_building_id = building_granary_for_getting(granary, &dst, 400);
+        dst_building_id = building_granary_for_getting(granary, &dst, 4);
         if (!dst_building_id) {
-            dst_building_id = building_granary_for_getting(granary, &dst, 0);
+            dst_building_id = building_granary_for_getting(granary, &dst, 1);
         }
         if (dst_building_id) {
             f->loads_sold_or_carrying = 0;

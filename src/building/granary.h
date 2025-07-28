@@ -50,7 +50,7 @@ int building_granary_for_storing(int x, int y, int resource, int road_network_id
 
 int building_getting_granary_for_storing(int x, int y, int resource, int road_network_id, map_point *dst);
 
-int building_granary_amount_can_get_from(building *destination, building *origin);
+int building_granary_amount_can_get_from(building *destination, building *origin, int resource);
 
 int building_granary_for_getting(building *src, map_point *dst, int min_amount);
 

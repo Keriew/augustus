@@ -471,14 +471,15 @@ int building_getting_granary_for_storing(int x, int y, int resource, int road_ne
     return min_building_id;
 }
 
-int building_granary_amount_can_get_from(building *destination, building *origin)
+int building_granary_amount_can_get_from(building *destination, building *origin, int resource)
 {
     int amount_gettable = 0;
-    for (resource_type food = RESOURCE_MIN_FOOD; food < RESOURCE_MAX_FOOD; food++) {
-        if (building_storage_get_state(origin, food, 1) == BUILDING_STORAGE_STATE_GETTING && //if origin is getting
-            granary_allows_getting(destination, food)) { // and destination allows getting
-            amount_gettable += destination->resources[food];
-        }
+    if (!resource_is_food(resource)) {
+        return 0; // only food resources can be gotten from granaries
+    }
+    if (building_storage_get_state(origin, resource, 1) == BUILDING_STORAGE_STATE_GETTING && //if origin is getting
+            granary_allows_getting(destination, resource)) { // and destination allows getting
+        amount_gettable = destination->resources[resource];
     }
     return amount_gettable;
 }
@@ -492,11 +493,14 @@ int building_granary_for_getting(building *src, map_point *dst, int min_amount)
     if (scenario_property_rome_supplies_wheat()) {
         return 0;
     }
-    int getting_something = 0;
-    for (resource_type food = RESOURCE_MIN_FOOD; food < RESOURCE_MAX_FOOD && !getting_something; food++) {
-        getting_something |= (building_storage_get_state(src, food, 1) == BUILDING_STORAGE_STATE_GETTING);
+    int food_to_get = RESOURCE_NONE;
+    for (resource_type food = RESOURCE_MIN_FOOD; food < RESOURCE_MAX_FOOD; food++) {
+        if (building_storage_get_state(src, food, 1) == BUILDING_STORAGE_STATE_GETTING) {
+            food_to_get = food;
+            break; // only one resource per deliveryman, once found, exit loop
+        }
     }
-    if (!getting_something) {
+    if (!food_to_get) {
         return 0;
     }
     int min_dist = INFINITE;
@@ -511,7 +515,7 @@ int building_granary_for_getting(building *src, map_point *dst, int min_amount)
         if (b->id == src->id) {
             continue; // don't get from the same granary
         }
-        if (building_granary_amount_can_get_from(b, src) >= min_amount) {
+        if (building_granary_amount_can_get_from(b, src, food_to_get) >= min_amount) {
             int dist = calc_maximum_distance(b->x + 1, b->y + 1, src->x + 1, src->y + 1);
             if (dist < min_dist) {
                 min_dist = dist;
