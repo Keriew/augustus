@@ -37,8 +37,6 @@ int building_granaries_send_resources_to_rome(int resource, int amount);
 
 int building_granary_remove_for_getting_deliveryman(building *src, building *dst, int *resource);
 
-int building_granary_is_full(building *b);
-
 int building_granary_determine_worker_task(building *granary);
 
 void building_granaries_calculate_stocks(void);

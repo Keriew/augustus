@@ -12,6 +12,7 @@
 #include "core/config.h"
 #include "empire/trade_prices.h"
 #include "figure/figure.h"
+#include "map/grid.h"
 #include "map/road_access.h"
 #include "map/routing_terrain.h"
 #include "scenario/property.h"
@@ -41,20 +42,6 @@ static int granary_allows_getting(building *b, int resource)
     }
 
     return 1;
-}
-
-// int building_granary_is_not_accepting(building *b, int resource)
-// {
-//     if (building_granary_maximum_receptible_amount(b, resource) <= 0) {
-//         return 1;
-//     } else {
-//         return 0;
-//     }
-// }
-
-int building_granary_is_full(building *b)
-{
-    return b->resources[RESOURCE_NONE] <= 0;
 }
 
 int building_granary_get_amount(building *b, int resource)
@@ -388,6 +375,28 @@ int building_granary_accepts_storage(building *b, int resource, int *understaffe
         }
     }
     return b->resources[RESOURCE_NONE] >= ONE_CARTLOAD;
+}
+
+building *building_granary_get_granary_needing_food(building *source, int resource, int getting)
+{
+
+    int max_distance = config_get(CONFIG_GP_CH_FARMS_DELIVER_CLOSE) ? 64 : INFINITE;
+
+    for (building *b = building_first_of_type(BUILDING_GRANARY); b; b = b->next_of_type) {
+        if (b->road_network_id != source->road_network_id || !building_granary_accepts_storage(b, resource, 0)) {
+            continue;
+        }
+        if ((building_storage_get_state(b, resource, 1) == BUILDING_STORAGE_STATE_GETTING) && getting ||
+            (building_storage_get_state(b, resource, 1) != BUILDING_STORAGE_STATE_GETTING && !getting)) {
+            //'not accepting' is already filtered out by building_granary_accepts_storage
+            //if getting is 1, then we are looking only for granaries that are getting the resource, otherwise only accepting
+            int dist = map_grid_chess_distance(source->grid_offset, b->grid_offset);
+            if (dist < max_distance) {
+                return b; // found a granary with right storage state and within distance
+            }
+
+        }
+    }
 }
 
 int building_granary_for_storing(int x, int y, int resource, int road_network_id,

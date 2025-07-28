@@ -103,7 +103,7 @@ typedef struct {
     signed char phrase_id;
     unsigned char phrase_sequence_city;
     unsigned char trader_id;
-    unsigned char wait_ticks_next_target;
+    unsigned char wait_ticks_next_target; //used for retargetting for fighting figures, and destination for pushers
     unsigned char dont_draw_elevated;
     short target_figure_id;
     short targeted_by_figure_id;
