@@ -130,7 +130,7 @@ static resource_type building_warehouse_get_highest_quantity_resource(building *
     unsigned char i;
     unsigned char highest_resource = RESOURCE_NONE;
 
-    for (b->resources[i] = RESOURCE_NONE + 1; i < RESOURCE_MAX; i++) { //not interested in RESOURCE_NONE
+    for (i = RESOURCE_NONE + 1; i < RESOURCE_MAX; i++) { //not interested in RESOURCE_NONE
         if (b->resources[i] > highest_resource) {
             highest_resource = i;
         }
@@ -765,9 +765,8 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource,
     unsigned char delivering_food = 0;
     for (int r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
         if (warehouse->resources[r] <= 0 || !resource_is_food(r) || city_resource_is_stockpiled(r) ||
-            building_storage_get_state(warehouse, r, 1) == BUILDING_STORAGE_STATE_MAINTAINING ||
-            !building_has_granary_for_food_with_room(r, warehouse->road_network_id)) {
-            continue; // skip if no resource, not food,maintaining, stockpiled or no granary
+            building_storage_get_state(warehouse, r, 1) == BUILDING_STORAGE_STATE_MAINTAINING) {
+            continue; // skip if no resource, not food,maintaining, stockpiled 
         }
         if (building_granary_get_granary_needing_food(warehouse, r, 1)) {
             *resource = r;

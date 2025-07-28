@@ -222,7 +222,8 @@ static void spawn_figure_warehouse(building *b)
             return;
         }
         int resource;
-        int task = building_warehouse_determine_worker_task(b, &resource);
+        int loads_carrying = 0;
+        int task = building_warehouse_determine_worker_task(b, &resource, &loads_carrying);
         if (task != WAREHOUSE_TASK_NONE) {
             figure *f = figure_create(FIGURE_WAREHOUSEMAN, road.x, road.y, DIR_4_BOTTOM);
             f->action_state = FIGURE_ACTION_50_WAREHOUSEMAN_CREATED;
