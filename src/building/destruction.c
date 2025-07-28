@@ -8,6 +8,7 @@
 #include "figuretype/missile.h"
 #include "figuretype/wall.h"
 #include "game/undo.h"
+#include "map/bridge.h"
 #include "map/building.h"
 #include "map/building_tiles.h"
 #include "map/grid.h"
@@ -19,6 +20,27 @@
 #include "sound/effect.h"
 
 #include <string.h>
+
+enum {
+    DESTROY_COLLAPSE = 0,
+    DESTROY_FIRE = 1,
+    DESTROY_NO_RUBBLE = 2,
+};
+static void destroy_without_rubble(building *b)
+{
+    game_undo_disable();
+    if (b->house_size && b->house_population) {
+        city_population_remove_home_removed(b->house_population);
+    }
+    if (b->type == BUILDING_LOW_BRIDGE || b->type == BUILDING_SHIP_BRIDGE) {
+        map_bridge_remove(b->grid_offset, 0);
+    }
+    building_clear_related_data(b);
+
+    map_building_tiles_remove(b->id, b->x, b->y);
+    b->state = BUILDING_STATE_DELETED_BY_GAME;
+}
+
 
 static void destroy_on_fire(building *b, int plagued)
 {
@@ -90,7 +112,7 @@ static void destroy_on_fire(building *b, int plagued)
     }
 }
 
-static void destroy_linked_parts(building *b, int on_fire, int plagued)
+static void destroy_linked_parts(building *b, int destruction_method, int plagued)
 {
     building *part = b;
     for (int i = 0; i < 64; i++) { //updated from 9 to fit new bridges
@@ -99,11 +121,17 @@ static void destroy_linked_parts(building *b, int on_fire, int plagued)
         }
         int part_id = part->prev_part_building_id;
         part = building_get(part_id);
-        if (on_fire) {
-            destroy_on_fire(part, plagued);
-        } else {
-            map_building_tiles_set_rubble(part_id, part->x, part->y, part->size);
-            part->state = BUILDING_STATE_RUBBLE;
+        switch (destruction_method) {
+            case DESTROY_NO_RUBBLE:
+                destroy_without_rubble(part);
+                break;
+            case DESTROY_FIRE:
+                destroy_on_fire(part, plagued);
+                break;
+            default:
+                map_building_tiles_set_rubble(part_id, part->x, part->y, part->size);
+                part->state = BUILDING_STATE_RUBBLE;
+                break;
         }
     }
 
@@ -114,11 +142,16 @@ static void destroy_linked_parts(building *b, int on_fire, int plagued)
         if (part_id <= 0) {
             break;
         }
-        if (on_fire) {
-            destroy_on_fire(part, plagued);
-        } else {
-            map_building_tiles_set_rubble(part->id, part->x, part->y, part->size);
-            part->state = BUILDING_STATE_RUBBLE;
+        switch (destruction_method) {
+            case DESTROY_NO_RUBBLE:
+                destroy_without_rubble(part);
+                break;
+            case DESTROY_FIRE:
+                destroy_on_fire(part, plagued);
+                break;
+            default:
+                map_building_tiles_set_rubble(part_id, part->x, part->y, part->size);
+                part->state = BUILDING_STATE_RUBBLE;
         }
     }
 
@@ -137,26 +170,34 @@ void building_destroy_by_collapse(building *b)
     b->state = BUILDING_STATE_RUBBLE;
     map_building_tiles_set_rubble(b->id, b->x, b->y, b->size);
     figure_create_explosion_cloud(b->x, b->y, b->size);
-    destroy_linked_parts(b, 0, 0);
+    destroy_linked_parts(b, DESTROY_COLLAPSE, 0);
 }
 
 void building_destroy_by_fire(building *b)
 {
     destroy_on_fire(b, 0);
-    destroy_linked_parts(b, 1, 0);
+    destroy_linked_parts(b, DESTROY_FIRE, 0);
 }
 
 void building_destroy_by_plague(building *b)
 {
     destroy_on_fire(b, 1);
-    destroy_linked_parts(b, 1, 1);
+    destroy_linked_parts(b, DESTROY_FIRE, 1);
 }
+
+void building_destroy_without_rubble(building *b)
+{
+    destroy_linked_parts(b, DESTROY_NO_RUBBLE, 0);
+    destroy_without_rubble(b);
+}
+
 
 void building_destroy_by_rioter(building *b)
 {
     destroy_on_fire(b, 0);
-    destroy_linked_parts(b, 1, 0);
+    destroy_linked_parts(b, DESTROY_FIRE, 0);
 }
+
 
 int building_destroy_first_of_type(building_type type)
 {

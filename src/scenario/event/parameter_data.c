@@ -11,6 +11,7 @@
 #include "empire/city.h"
 #include "figure/formation.h"
 #include "game/resource.h"
+#include "map/terrain.h"
 #include "scenario/custom_messages.h"
 #include "scenario/custom_variable.h"
 #include "scenario/invasion.h"
@@ -277,6 +278,13 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
     [ACTION_TYPE_CHANGE_CLIMATE]         = { .type = ACTION_TYPE_CHANGE_CLIMATE,
                                         .xml_attr = {.name = "change_climate",      .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_CHANGE_CLIMATE },
                                         .xml_parm1 = {.name = "climate",            .type = PARAMETER_TYPE_CLIMATE,   .key = TR_PARAMETER_TYPE_CLIMATE }, },
+    [ACTION_TYPE_CHANGE_TERRAIN]        = { .type = ACTION_TYPE_CHANGE_TERRAIN,
+                                        .xml_attr = {.name = "change_terrain",      .type = PARAMETER_TYPE_TEXT,       .key = TR_ACTION_TYPE_CHANGE_TERRAIN },
+                                        .xml_parm1 = {.name = "grid_offset",        .type = PARAMETER_TYPE_NUMBER,     .min_limit = 0,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET },
+                                        .xml_parm2 = {.name = "block_radius",       .type = PARAMETER_TYPE_NUMBER,     .min_limit = 0,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_RADIUS },
+                                        .xml_parm3 = {.name = "terrain",            .type = PARAMETER_TYPE_TERRAIN,    .key = TR_PARAMETER_TERRAIN },
+                                        .xml_parm4 = {.name = "add",                .type = PARAMETER_TYPE_BOOLEAN,    .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_ADD }, },
+
 
 };
 
@@ -531,6 +539,18 @@ special_attribute_mapping_t special_attribute_mappings_climate[] =
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_CLIMATE_SIZE (sizeof(special_attribute_mappings_climate) / sizeof(special_attribute_mapping_t))
 
+special_attribute_mapping_t special_attribute_mappings_terrain[] =
+{
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Water",            .value = TERRAIN_WATER,   .key = TR_PARAMETER_TERRAIN_WATER },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Rock",             .value = TERRAIN_ROCK,  .key = TR_PARAMETER_TERRAIN_ROCK },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Fertile Ground",   .value = TERRAIN_MEADOW,    .key = TR_PARAMETER_TERRAIN_MEADOW },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Tree",             .value = TERRAIN_TREE,    .key = TR_PARAMETER_TERRAIN_TREE },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Shrub",            .value = TERRAIN_SHRUB,    .key = TR_PARAMETER_TERRAIN_SHRUB },
+};
+
+#define SPECIAL_ATTRIBUTE_MAPPINGS_TERRAIN_SIZE (sizeof(special_attribute_mappings_terrain) / sizeof(special_attribute_mapping_t))
+
+
 static void generate_building_type_mappings(void)
 {
     if (special_attribute_mappings_building_type_size > 0) {
@@ -626,6 +646,8 @@ special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mappin
             return &special_attribute_mappings_god[index];
         case PARAMETER_TYPE_CLIMATE:
             return &special_attribute_mappings_climate[index];
+        case PARAMETER_TYPE_TERRAIN:
+            return &special_attribute_mappings_terrain[index];
         default:
             return 0;
     }
@@ -667,6 +689,8 @@ int scenario_events_parameter_data_get_mappings_size(parameter_type type)
             return SPECIAL_ATTRIBUTE_MAPPINGS_GOD_SIZE;
         case PARAMETER_TYPE_CLIMATE:
             return SPECIAL_ATTRIBUTE_MAPPINGS_CLIMATE_SIZE;
+        case PARAMETER_TYPE_TERRAIN:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_TERRAIN_SIZE;
         default:
             return 0;
     }
@@ -740,6 +764,8 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
             return GOD_CERES;
         case PARAMETER_TYPE_CLIMATE:
             return CLIMATE_CENTRAL;
+        case PARAMETER_TYPE_TERRAIN:
+            return TERRAIN_WATER;
         default:
             return 0;
     }
@@ -1183,6 +1209,23 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
                 result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_CLIMATE, action->parameter1, result_text, &maxlength);
                 return;
             }
+        case ACTION_TYPE_CHANGE_TERRAIN:
+        {
+            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+            result_text = append_text(translation_for(TR_PARAMETER_GRID_OFFSET), result_text, &maxlength);
+            result_text = translation_for_number_value(action->parameter1, result_text, &maxlength);
+            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+            result_text = append_text(translation_for(TR_PARAMETER_RADIUS), result_text, &maxlength);
+            result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+            if (action->parameter4) {
+                result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+                result_text = append_text(translation_for(TR_ACTION_TYPE_CHANGE_TERRAIN), result_text, &maxlength);
+            } else {
+                result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_TERRAIN, action->parameter3, result_text, &maxlength);
+            }
+            return;
+        }
+
         default:
             {
                 result_text = append_text(string_from_ascii(" UNHANDLED ACTION TYPE!"), result_text, &maxlength);
