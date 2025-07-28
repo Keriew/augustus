@@ -274,12 +274,17 @@ static int get_least_filled_quota_resource(building *b, int city_id, signed char
                 available = building_warehouse_maximum_receptible_amount(b, r);
             }
         }
-        if (available <= 0) continue;
-
+        if (available <= 0) {
+            continue;
+        }
         if (trader_buying) {
-            if (!empire_can_export_resource_to_city(city_id, r)) continue;
+            if (!empire_can_export_resource_to_city(city_id, r)) {
+                continue;
+            }
         } else {
-            if (!empire_can_import_resource_from_city(city_id, r)) continue;
+            if (!empire_can_import_resource_from_city(city_id, r)) {
+                continue;
+            }
         }
 
         int limit = trade_route_limit(route_id, r);

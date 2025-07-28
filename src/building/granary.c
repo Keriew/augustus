@@ -237,17 +237,19 @@ int building_granary_maximum_receptible_amount(building *b, int resource)
         return 0;
     }
 
-    int stored_amount = b->resources[resource];
-    int max_accepted_amount = s->resource_state[resource].quantity;  // Maximum set by player
-    int free_space_overall = b->resources[RESOURCE_NONE]; // Overall unallocated space
+    int max_accepted_amount = s->resource_state[resource].quantity; // max player-set limit
+    int current_stored = b->resources[resource]; // already stored
+    int remaining_for_resource = max_accepted_amount - current_stored;
 
-    int final_capacity = MIN(free_space_overall, max_accepted_amount);
+    if (remaining_for_resource <= 0) {
+        return 0;
+    }
 
-    int allowed_remaining = final_capacity - stored_amount;
-    // allowed remaining is the amount that can be added to the granary considering set limit and current storage
-    allowed_remaining = allowed_remaining < 0 ? 0 : allowed_remaining; // in case current storage exceeds limits, 0
-    return  allowed_remaining;
+    int free_space_overall = b->resources[RESOURCE_NONE]; // general free slots
+    int final_capacity = MIN(remaining_for_resource, free_space_overall);
+    return final_capacity > 0 ? final_capacity : 0;
 }
+
 
 int building_granary_remove_for_getting_deliveryman(building *src, building *dst, int *resource)
 {
