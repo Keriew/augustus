@@ -506,6 +506,9 @@ int building_granary_for_getting(building *src, map_point *dst, int min_amount)
                 continue;
             }
         }
+        if (b->id == src->id) {
+            continue; // don't get from the same granary
+        }
         if (building_granary_amount_can_get_from(b, src) >= min_amount) {
             int dist = calc_maximum_distance(b->x + 1, b->y + 1, src->x + 1, src->y + 1);
             if (dist < min_dist) {
