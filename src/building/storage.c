@@ -1,6 +1,9 @@
 #include "storage.h"
 
 #include "building/building.h"
+#include "building/granary.h"
+#include "building/warehouse.h"
+#include "building/type.h"
 #include "city/resource.h"
 #include "core/array.h"
 #include "core/calc.h"
@@ -38,6 +41,16 @@ void building_storage_clear_all(void)
 int building_storage_get_array_size(void)
 {
     return storages.size;
+}
+
+int building_storage_try_add_resource(building *b, int resource, int amount, int respect_settings)
+{
+    if (b->type == BUILDING_GRANARY) {
+        return building_granary_try_add_resource(b, resource, amount, respect_settings);
+    } else if (b->type == BUILDING_WAREHOUSE) {
+        return building_warehouse_try_add_resource(b, resource, amount, respect_settings);
+    }
+    return 0;
 }
 
 void building_storage_reset_building_ids(void)
@@ -134,6 +147,59 @@ void building_storage_set_data(int storage_id, building_storage new_data)
 void building_storage_toggle_empty_all(int storage_id)
 {
     array_item(storages, storage_id)->storage.empty_all ^= 1;
+}
+
+int building_storage_get_empty_all(int building_id)
+{
+    building *b = building_get(building_id);
+    int storage_id = b->storage_id;
+    if (storage_id < 0 || storage_id >= storages.size) {
+        return 0;
+    }
+    return array_item(storages, storage_id)->storage.empty_all;
+}
+
+const building_storage_state building_storage_get_state(building *b, int resource, int relative)
+{
+    if (b->has_plague || b->state != BUILDING_STATE_IN_USE) {
+        return BUILDING_STORAGE_STATE_NOT_ACCEPTING;
+    }
+    if (b->type != BUILDING_GRANARY && b->type != BUILDING_WAREHOUSE) { //safeguard
+        return BUILDING_STORAGE_STATE_NOT_ACCEPTING;
+    }
+    const building_storage *s = building_storage_get(b->storage_id);
+    const resource_storage_entry *entry = &s->resource_state[resource];
+
+    if (!relative) {
+        // If relative is 0, return raw state without checking amounts
+        return entry->state;
+    }
+    int amount = (b->type == BUILDING_WAREHOUSE) ?
+        building_warehouse_get_amount(b, resource) : building_granary_get_amount(b, resource);
+
+    switch (entry->state) {
+        case BUILDING_STORAGE_STATE_ACCEPTING:
+            if (amount < entry->quantity) {
+                return BUILDING_STORAGE_STATE_ACCEPTING;
+            }
+            break;
+
+        case BUILDING_STORAGE_STATE_GETTING:
+            if (amount < entry->quantity) {
+                return BUILDING_STORAGE_STATE_GETTING;
+            }
+            break;
+
+        case BUILDING_STORAGE_STATE_MAINTAINING:
+            if (amount <= entry->quantity) {
+                return BUILDING_STORAGE_STATE_MAINTAINING;
+            }
+            break;
+
+        default:
+            break;
+    }
+    return BUILDING_STORAGE_STATE_NOT_ACCEPTING;
 }
 
 void building_storage_cycle_resource_state(int storage_id, resource_type resource_id)

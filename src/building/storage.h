@@ -108,6 +108,16 @@ void building_storage_delete(int storage_id);
 int building_storage_get_array_size(void);
 
 /**
+ * Generic wrapper that allows adding resource regardless of building type. Supports granaries and warehouses.
+ * @return added resource amount
+ * @param b The building to add resource to
+ * @param resource Resource id to add
+ * @param amount Amount to add
+ * @param respect_settings If 1, respects the storage settings, otherwise ignores them. Currently this serves no purpose
+ */
+int building_storage_try_add_resource(building *b, int resource, int amount, int respect_settings);
+
+/**
  * Gets an entry from the data storage array.
  * @return Read-only data entry.
  */
@@ -119,6 +129,15 @@ const data_storage *building_storage_get_array_entry(int storage_id);
  * @return Read-only storage
  */
 const building_storage *building_storage_get(int storage_id);
+
+/**
+ * Gets a read-only building storage state for a given resource
+ * @param b building to check
+ * @param resource Resource id to check
+ * @param relative If 1, returns state relative to the amount in the building, otherwise return raw state
+ * @return Read-only storage state
+ */
+const building_storage_state building_storage_get_state(building *b, int resource, int relative);
 
 /**
  * Sets values of a building storage to that of another building storage
@@ -160,6 +179,12 @@ int building_storage_check_if_accepts_nothing(int storage_id);
  * @param storage_id Storage id
  */
 void building_storage_toggle_empty_all(int storage_id);
+
+/**
+ * Check the empty all flag for the storage
+ * @param storage_id Storage id
+ */
+int building_storage_get_empty_all(int building_id);
 
 /**
  * Resets building id's for all storages

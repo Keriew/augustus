@@ -32,9 +32,7 @@ static int try_import_resource(int building_id, int resource, int city_id, int q
         return 0;
     }
 
-    if ((b->type == BUILDING_WAREHOUSE &&
-        building_warehouse_storage_state(b, resource) == BUILDING_STORAGE_STATE_NOT_ACCEPTING) ||
-        (b->type == BUILDING_GRANARY && building_granary_is_not_accepting(b, resource))) {
+    if (building_storage_get_state(b, resource, 1) == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
         return 0;
     }
 
@@ -147,9 +145,10 @@ static int get_closest_building_for_import(int x, int y, int city_id, building *
     int min_distance = INFINITE;
     int min_building_id = 0;
     for (building *b = building_first_of_type(BUILDING_WAREHOUSE); b; b = b->next_of_type) {
+
         if (is_invalid_destination(b, dock) ||
-            building_storage_get(b->storage_id)->empty_all ||
-            building_warehouse_storage_state(b, resource) == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
+            building_storage_get_empty_all(b) ||
+            building_storage_get_state(b, resource, 1) == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
             continue;
         }
         int distance_penalty = get_distance_penalty_imports(b, resource);
@@ -167,9 +166,8 @@ static int get_closest_building_for_import(int x, int y, int city_id, building *
     if (resource_is_food(resource)) {
         for (building *b = building_first_of_type(BUILDING_GRANARY); b; b = b->next_of_type) {
             if (is_invalid_destination(b, dock) ||
-                building_storage_get(b->storage_id)->empty_all ||
-                building_granary_is_not_accepting(b, resource) ||
-                building_granary_is_full(b)) {
+                building_storage_get_empty_all(b) ||
+                building_storage_get_state(b, resource, 1) == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
                 continue;
             }
             // always prefer granary
@@ -227,7 +225,7 @@ static int get_closest_building_for_export(int x, int y, int city_id, building *
     if (resource_is_food(resource) && config_get(CONFIG_GP_CH_ALLOW_EXPORTING_FROM_GRANARIES)) {
         for (building *b = building_first_of_type(BUILDING_GRANARY); b; b = b->next_of_type) {
             if (is_invalid_destination(b, dock) ||
-                !building_granary_resource_amount(b, resource)) {
+                !building_granary_get_amount(b, resource)) {
                 continue;
             }
             int distance = calc_maximum_distance(b->x, b->y, x, y);

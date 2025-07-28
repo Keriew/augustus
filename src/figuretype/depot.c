@@ -110,11 +110,11 @@ static int is_order_condition_satisfied(const order *current_order)
     }
     building *src = building_get(current_order->src_storage_id);
     int src_amount = src->type == BUILDING_GRANARY ?
-        building_granary_resource_amount(src, current_order->resource_type) :
+        building_granary_get_amount(src, current_order->resource_type) :
         building_warehouse_get_amount(src, current_order->resource_type);
     building *dst = building_get(current_order->dst_storage_id);
     int dst_amount = dst->type == BUILDING_GRANARY ?
-        building_granary_resource_amount(dst, current_order->resource_type) :
+        building_granary_get_amount(dst, current_order->resource_type) :
         building_warehouse_get_amount(dst, current_order->resource_type);
     if (src_amount == 0) {
         return 0;
@@ -177,7 +177,7 @@ static void dump_goods(figure *f)
 static int storage_remove_resource(building *b, int resource, int amount)
 {
     if (b->type == BUILDING_GRANARY) {
-        return building_granary_try_fullload_remove_resource(b, resource, amount);
+        return building_granary_try_remove_resource(b, resource, amount);
     } else if (b->type == BUILDING_WAREHOUSE) {
         return building_warehouse_try_remove_resource(b, resource, amount);
     } else {
@@ -187,20 +187,14 @@ static int storage_remove_resource(building *b, int resource, int amount)
 
 static int storage_add_resource(building *b, int resource, int amount)
 {
-    if (b->type == BUILDING_GRANARY) {
-        while (amount > 0) {
-            if (!building_granary_add_resource(b, resource, 0)) {
-                return amount;
-            }
-            amount--;
-        }
-    } else if (b->type == BUILDING_WAREHOUSE) {
-        while (amount > 0) {
-            int unload_amount = (amount > 2) ? 2 : 1; // unload in 2s if possible
-            amount -= building_warehouse_add_resource(b, resource, unload_amount, 1);
-            return amount;
 
+    while (amount > 0) {
+        int unload_amount = (amount > 2) ? 2 : 1; // unload in 2s if possible
+        unsigned char added_amount = building_storage_try_add_resource(b, resource, unload_amount, 1);
+        if (added_amount <= 0) {
+            return amount; // not enough space
         }
+        amount -= added_amount;
     }
     return amount;
 }
@@ -311,7 +305,7 @@ void figure_depot_cartpusher_action(figure *f)
 
                 // Depot cartpusher waits if not enough goods
                 int src_amount = src->type == BUILDING_GRANARY ?
-                    building_granary_resource_amount(src, b->data.depot.current_order.resource_type) :
+                    building_granary_get_amount(src, b->data.depot.current_order.resource_type) :
                     building_warehouse_get_amount(src, b->data.depot.current_order.resource_type);
                 if (b->data.depot.current_order.condition.condition_type == ORDER_CONDITION_SOURCE_HAS_MORE_THAN &&
                     src_amount < b->data.depot.current_order.condition.threshold) {

@@ -66,7 +66,7 @@ static int take_food_from_granary(figure *f, int market_id, int granary_id)
     if (granary_loads_take <= 0) {
         return 0;
     }
-    building_granary_remove_resource(granary, resource, granary_loads_take);
+    building_granary_try_remove_resource(granary, resource, granary_loads_take);
 
     // create delivery boys
     int type = FIGURE_DELIVERY_BOY;
@@ -124,7 +124,7 @@ static int take_resource_from_warehouse(figure *f, int warehouse_id, int max_amo
     if (num_loads <= 0) {
         return 0;
     }
-    building_warehouse_remove_resource(warehouse, f->collecting_item_id, num_loads);
+    building_warehouse_try_remove_resource(warehouse, f->collecting_item_id, num_loads);
 
     // create delivery boys
     if (f->type != FIGURE_LIGHTHOUSE_SUPPLIER) {

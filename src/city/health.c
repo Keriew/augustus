@@ -54,16 +54,16 @@ static void cause_disease_in_building(int building_id)
         // Remove half the granary's food
         if (b->type == BUILDING_GRANARY) {
             for (int r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
-                building_granary_remove_resource(b, r, building_granary_resource_amount(b, r) / 2);
+                building_granary_try_remove_resource(b, r, building_granary_get_amount(b, r) / 2);
             }
         } else if (b->type == BUILDING_WAREHOUSE) {
             // Remove all food from warehouse
             for (int r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
-                building_warehouse_remove_resource(b, r, FULL_WAREHOUSE);
+                building_warehouse_try_remove_resource(b, r, FULL_WAREHOUSE);
             }
             // Remove half of oil and wine from warehouse
             for (int r = RESOURCE_WINE; r <= RESOURCE_OIL; r++) {
-                building_warehouse_remove_resource(b, r, building_warehouse_get_amount(b, r) / 2);
+                building_warehouse_try_remove_resource(b, r, building_warehouse_get_amount(b, r) / 2);
             }
         }
 

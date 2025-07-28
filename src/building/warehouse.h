@@ -31,13 +31,10 @@ int building_warehouse_get_space_info(building *warehouse);
 
 int building_warehouse_get_amount(building *warehouse, int resource);
 int building_warehouse_get_available_amount(building *warehouse, int resource);
-int building_warehouse_add_resource(building *b, int resource, int quantity, int respect_settings);
+int building_warehouse_try_add_resource(building *b, int resource, int quantity, int respect_settings);
 int building_warehouses_add_resource(int resource, int amount, int respect_settings);
 
-building_storage_state building_warehouse_storage_state(building *b, int resource);
 int building_warehouse_maximum_receptible_amount(building *b, int resource);
-
-int building_warehouse_remove_resource(building *warehouse, int resource, int amount);
 
 int building_warehouse_try_remove_resource(building *warehouse, int resource, int desired_amount);
 
