@@ -125,19 +125,6 @@ building *building_warehouse_find_space(building *warehouse, int resource, int a
     return 0;
 }
 
-static resource_type building_warehouse_get_highest_quantity_resource(building *b)
-{
-    unsigned char i;
-    unsigned char highest_resource = RESOURCE_NONE;
-
-    for (i = RESOURCE_NONE + 1; i < RESOURCE_MAX; i++) { //not interested in RESOURCE_NONE
-        if (b->resources[i] > highest_resource) {
-            highest_resource = i;
-        }
-    }
-    return highest_resource;
-}
-
 static void building_warehouse_recount_resources(building *main)
 {
     // static helper to reflect the resources in the main warehouse, like granary does
@@ -170,14 +157,26 @@ static void building_warehouse_recount_resources(building *main)
     main->resources[RESOURCE_NONE] = BUILDING_STORAGE_QUANTITY_MAX - total_loads;
 }
 
+static resource_type building_warehouse_get_highest_quantity_resource(building *b)
+{
+    unsigned char i;
+    unsigned char highest_resource = RESOURCE_NONE;
+    building_warehouse_recount_resources(b);
+    for (i = RESOURCE_NONE + 1; i < RESOURCE_MAX; i++) { //not interested in RESOURCE_NONE
+        if (b->resources[i] > highest_resource) {
+            highest_resource = i;
+        }
+    }
+    return highest_resource;
+}
 
-int building_warehouse_try_add_resource(building *b, int resource, int quantity, int respect_settings)
+int building_warehouse_try_add_resource(building *b, int resource, int quantity)
 {
     if (!b || b->id <= 0 || quantity <= 0 || !resource) {
         return 0;
     }
     signed short max_acceptable = building_warehouse_maximum_receptible_amount(b, resource);
-    if (respect_settings && max_acceptable <= 0) {
+    if (!max_acceptable) {
         return 0;
     }
     if (quantity > max_acceptable) { //if trying to add more than acceptable, limit it
@@ -189,7 +188,6 @@ int building_warehouse_try_add_resource(building *b, int resource, int quantity,
         if (!space) {
             break;
         }
-
         signed short space_remaining = MAX_CARTLOADS_PER_SPACE - space->resources[resource];
         signed short to_add = (quantity - added < space_remaining) ? (quantity - added) : space_remaining;
 
@@ -201,32 +199,25 @@ int building_warehouse_try_add_resource(building *b, int resource, int quantity,
         building_warehouse_space_set_image(space, resource);
     }
 
-    if (added > 0) {
+    if (added) {
         tutorial_on_add_to_warehouse();
     }
-
     return added;
 }
 
-int building_warehouses_add_resource(int resource, int amount, int respect_settings)
+int building_warehouses_add_resource(int resource, int amount)
 {
     if (amount <= 0) {
         return 0;
     }
 
-    for (building *b = building_first_of_type(BUILDING_WAREHOUSE); b; b = b->next_of_type) {
+    for (building *b = building_first_of_type(BUILDING_WAREHOUSE); b && amount > 0; b = b->next_of_type) {
         if (b->state != BUILDING_STATE_IN_USE) {
             continue;
         }
-        int keep_adding = (amount > 0);
-        while (keep_adding) {
-            int was_added = building_warehouse_try_add_resource(b, resource, 1, respect_settings);
-            amount -= was_added;
-            keep_adding = (amount > 0) && was_added;
-        }
-        if (amount <= 0) {
-            break;
-        }
+
+        int was_added = building_warehouse_try_add_resource(b, resource, amount);
+        amount -= was_added;
     }
 
     return amount;
@@ -326,7 +317,7 @@ int building_warehouse_add_import(building *warehouse, int resource, int land_tr
     if (building_storage_get_state(warehouse, resource, 1) == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
         return 0; // cannot accept this resource
     }
-    int added_amount = building_warehouse_try_add_resource(warehouse, resource, 1, 1);
+    int added_amount = building_warehouse_try_add_resource(warehouse, resource, 1);
     if (added_amount <= 0) {
         return 0; // no space to add
     }
@@ -702,10 +693,8 @@ int building_warehouse_with_resource(int x, int y, int resource, int road_networ
     }
 }
 
-int building_warehouse_determine_worker_task(building *warehouse, int *resource, int *loads_carrying)
+int building_warehouse_determine_worker_task(building *warehouse, int *resource)
 {
-    //TODO: this function has too many checks for warehouse space, and too complicated if statements.
-    // it should be simplified and tested with the new function for getting warehouse space
     int pct_workers = calc_percentage(warehouse->num_workers, model_get_building(warehouse->type)->laborers);
     if (pct_workers < 50) {
         return WAREHOUSE_TASK_NONE;
@@ -720,7 +709,6 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource,
 
             if (space->resources[resource_to_empty]) {
                 *resource = resource_to_empty;
-                *loads_carrying = space->resources[resource_to_empty];
                 return WAREHOUSE_TASK_DELIVERING;
             }
 
@@ -741,7 +729,6 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource,
                 continue;
             }
             *resource = r;
-            *loads_carrying = 0; // going out with an empty cart
             return WAREHOUSE_TASK_GETTING;
         }
 
@@ -758,7 +745,6 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource,
             continue; // skip if no resource, not raw material,maintaining, stockpiled or no workshop
         }
         *resource = r;
-        *loads_carrying = 1;
         return WAREHOUSE_TASK_DELIVERING;
     }
     // deliver food to granaries
@@ -779,7 +765,6 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource,
 
     }
     if (delivering_food) {
-        *loads_carrying = 1;
         return WAREHOUSE_TASK_DELIVERING;
     }
     // Idle

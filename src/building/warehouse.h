@@ -31,9 +31,8 @@ int building_warehouse_get_space_info(building *warehouse);
 
 int building_warehouse_get_amount(building *warehouse, int resource);
 int building_warehouse_get_available_amount(building *warehouse, int resource);
-int building_warehouse_try_add_resource(building *b, int resource, int quantity, int respect_settings);
-int building_warehouses_add_resource(int resource, int amount, int respect_settings);
-
+int building_warehouse_try_add_resource(building *b, int resource, int quantity);
+int building_warehouses_add_resource(int resource, int amount);
 int building_warehouse_maximum_receptible_amount(building *b, int resource);
 
 int building_warehouse_try_remove_resource(building *warehouse, int resource, int desired_amount);
@@ -63,6 +62,6 @@ int building_warehouse_for_getting(building *src, int resource, map_point *dst);
 
 int building_warehouse_with_resource(int x, int y, int resource, int road_network_id, int *understaffed, map_point *dst, building_storage_permission_states p);
 
-int building_warehouse_determine_worker_task(building *warehouse, int *resource, int *loads_carrying);
+int building_warehouse_determine_worker_task(building *warehouse, int *resource);
 
 #endif // BUILDING_WAREHOUSE_H

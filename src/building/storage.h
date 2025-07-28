@@ -113,9 +113,9 @@ int building_storage_get_array_size(void);
  * @param b The building to add resource to
  * @param resource Resource id to add
  * @param amount Amount to add
- * @param respect_settings If 1, respects the storage settings, otherwise ignores them. Currently this serves no purpose
+ * @param is_produced flag for food going to granaries
  */
-int building_storage_try_add_resource(building *b, int resource, int amount, int respect_settings);
+int building_storage_try_add_resource(building *b, int resource, int amount, int is_produced);
 
 /**
  * Gets an entry from the data storage array.

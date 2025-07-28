@@ -54,7 +54,7 @@ int building_granary_add_import(building *granary, int resource, int land_trader
     if (!resource) {
         return 0; // invalid resource
     }
-    if (building_granary_try_add_resource(granary, resource, 0, ONE_CARTLOAD) != ONE_CARTLOAD) {
+    if (building_granary_try_add_resource(granary, resource, ONE_CARTLOAD, 0) != ONE_CARTLOAD) {
         return 0;
     }
     int price = trade_price_buy(resource, land_trader);
@@ -75,7 +75,7 @@ int building_granary_remove_export(building *granary, int resource, int land_tra
     return 1;
 }
 
-int building_granary_try_add_resource(building *granary, int resource, int is_produced, int amount)
+int building_granary_try_add_resource(building *granary, int resource, int amount, int is_produced)
 {
     if (granary->id <= 0 || !resource_is_food(resource) || granary->type != BUILDING_GRANARY
     || building_storage_get_state(granary, resource, 1) == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
@@ -112,7 +112,7 @@ int building_granaries_add_resource(int resource, int amount, int respect_settin
         if (b->state != BUILDING_STATE_IN_USE || b->resources[RESOURCE_NONE] <= 0) {
             continue;
         }
-        amount -= building_granary_try_add_resource(b, resource, 0, amount);
+        amount -= building_granary_try_add_resource(b, resource, amount, 0);
         if (amount <= 0) {
             break;
         }
@@ -548,7 +548,7 @@ void building_granary_bless(void)
 
         for (unsigned int i = 0; i < list->size; i++) {
             for (int n = 0; n < 6; n++) {
-                building_granary_try_add_resource(min_building, list->items[i], 0, 1);
+                building_granary_try_add_resource(min_building, list->items[i], 1, 0);
             }
         }
     }

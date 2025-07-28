@@ -222,12 +222,12 @@ static void spawn_figure_warehouse(building *b)
             return;
         }
         int resource;
-        int loads_carrying = 0;
-        int task = building_warehouse_determine_worker_task(b, &resource, &loads_carrying);
+        int task = building_warehouse_determine_worker_task(b, &resource);
         if (task != WAREHOUSE_TASK_NONE) {
             figure *f = figure_create(FIGURE_WAREHOUSEMAN, road.x, road.y, DIR_4_BOTTOM);
             f->action_state = FIGURE_ACTION_50_WAREHOUSEMAN_CREATED;
-            f->loads_sold_or_carrying = 1; // this should be moved to warehouse.c to govern the amount and cases
+            f->loads_sold_or_carrying = 0; // spawn with 0, load is decided by the action. 
+            //this way we transfer resources from buildings to figures directly, without having to keep track
             if (task == WAREHOUSE_TASK_GETTING) {
                 f->resource_id = RESOURCE_NONE;
                 f->collecting_item_id = resource;

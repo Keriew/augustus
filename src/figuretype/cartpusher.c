@@ -28,7 +28,7 @@
 #define WAREHOUSE_EMPTY_ALL_CARTLOADS 4
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
-
+static void set_destination(figure *f, int action, int building_id, int x_dst, int y_dst);
 static int cartpusher_carries_food(figure *f)
 {
     return resource_is_food(f->resource_id);
@@ -47,16 +47,45 @@ static void set_cart_graphic(figure *f, int always_carries_resource)
         f->cart_image_id = resource_get_data(f->resource_id)->image.cart.multiple_loads;
     }
 }
-
 static void cartpusher_return_to_source(figure *f)
 {
+    building *source = building_get(f->building_id);
+
+
+    // Try to deliver back to source building
+    if (f->loads_sold_or_carrying) {
+        switch (source->type) {
+            case BUILDING_WAREHOUSE:
+            case BUILDING_WAREHOUSE_SPACE:
+            {
+                //try the original warehouse
+                if (building_warehouse_maximum_receptible_amount(source, f->resource_id) >= f->loads_sold_or_carrying) {
+                    set_destination(f, FIGURE_ACTION_21_CARTPUSHER_DELIVERING_TO_WAREHOUSE,
+                         source->id, source->road_access_x, source->road_access_y);
+                    return;
+                }
+                break;
+            }
+            case BUILDING_GRANARY:
+            {
+                if (building_granary_maximum_receptible_amount(source, f->resource_id) >= f->loads_sold_or_carrying) {
+                    set_destination(f, FIGURE_ACTION_22_CARTPUSHER_DELIVERING_TO_GRANARY,
+                         source->id, source->road_access_x, source->road_access_y);
+                    return;
+                }
+                break;
+            }
+        }
+    }
+    // no reldelivery – just returning home
     f->action_state = FIGURE_ACTION_27_CARTPUSHER_RETURNING;
     f->wait_ticks = 0;
-    f->destination_building_id = f->building_id;
+    f->destination_building_id = source->id;
     f->destination_x = f->source_x;
     f->destination_y = f->source_y;
     set_cart_graphic(f, 0);
 }
+
 
 static int should_change_destination(const figure *f, int building_id, int x_dst, int y_dst)
 {
@@ -368,7 +397,7 @@ void figure_cartpusher_action(figure *f)
             if (f->wait_ticks > NON_STORABLE_RESOURCE_CARTPUSHER_MAX_WAIT_TICKS) {
                 f->state = FIGURE_STATE_DEAD;
             } else if ((f->wait_ticks % (NON_STORABLE_RESOURCE_CARTPUSHER_MAX_WAIT_TICKS / 10) == 0)) {
-                determine_cartpusher_destination(f, b, road_network_id);
+                determine_cartpusher_destination(f, b, road_network_id); //try to find a destination every 10 ticks
             }
             break;
         case FIGURE_ACTION_21_CARTPUSHER_DELIVERING_TO_WAREHOUSE:
@@ -387,7 +416,7 @@ void figure_cartpusher_action(figure *f)
                 return;
             }
             if (building_get(f->destination_building_id)->state != BUILDING_STATE_IN_USE) {
-                f->action_state = FIGURE_ACTION_20_CARTPUSHER_INITIAL;
+                f->action_state = FIGURE_ACTION_20_CARTPUSHER_INITIAL; // this stops them in place
                 f->wait_ticks = 0;
             }
             break;
@@ -447,7 +476,7 @@ void figure_cartpusher_action(figure *f)
             f->wait_ticks++;
             if (f->wait_ticks > 10) {
                 if (building_warehouse_try_add_resource(
-                    building_get(f->destination_building_id), f->resource_id, f->loads_sold_or_carrying, 1)) {
+                    building_get(f->destination_building_id), f->resource_id, f->loads_sold_or_carrying)) {
                     city_health_dispatch_sickness(f);
                     cartpusher_return_to_source(f);
                 } else {
@@ -462,7 +491,7 @@ void figure_cartpusher_action(figure *f)
             f->wait_ticks++;
             if (f->wait_ticks > 5) {
                 if (building_granary_try_add_resource(building_get(f->destination_building_id),
-                    f->resource_id, 0, f->loads_sold_or_carrying)) {
+                    f->resource_id, f->loads_sold_or_carrying, 0)) {
                     city_health_dispatch_sickness(f);
                     cartpusher_return_to_source(f);
                 } else {
@@ -772,7 +801,7 @@ void figure_warehouseman_action(figure *f)
             f->terrain_usage = TERRAIN_USAGE_ROADS_HIGHWAY;
             warehouseman_initial_action(f, road_network_id, 1);
             f->wait_ticks_next_target++;
-            if (f->wait_ticks_next_target > 60) { //free the figure after 60 ticks
+            if (f->wait_ticks_next_target > 128) { //free the figure after 128 ticks
                 if (f->loads_sold_or_carrying > 0) {
                     // if carrying, try to return to source
                     cartpusher_return_to_source(f);
@@ -807,7 +836,9 @@ void figure_warehouseman_action(figure *f)
                 int delivered = 1;
                 switch (b->type) {
                     case BUILDING_GRANARY:
-                        delivered = building_granary_try_add_resource(b, f->resource_id, 0, f->loads_sold_or_carrying);
+                    case BUILDING_WAREHOUSE:
+                    case BUILDING_WAREHOUSE_SPACE:
+                        delivered = building_storage_try_add_resource(b, f->resource_id, 0, f->loads_sold_or_carrying);
                         if (delivered) {
                             city_health_dispatch_sickness(f);
                         }
@@ -815,13 +846,6 @@ void figure_warehouseman_action(figure *f)
                     case BUILDING_BARRACKS:
                     case BUILDING_GRAND_TEMPLE_MARS:
                         building_barracks_add_weapon(b);
-                        break;
-                    case BUILDING_WAREHOUSE:
-                    case BUILDING_WAREHOUSE_SPACE:
-                        delivered = building_warehouse_try_add_resource(b, f->resource_id, f->loads_sold_or_carrying, 1);
-                        if (delivered) {
-                            city_health_dispatch_sickness(f);
-                        }
                         break;
                     default: // workshop
                         building_workshop_add_raw_material(b, f->resource_id);
@@ -884,7 +908,7 @@ void figure_warehouseman_action(figure *f)
             figure_movement_move_ticks_with_percentage(f, 1, percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 for (int i = 0; i < f->loads_sold_or_carrying; i++) {
-                    building_granary_try_add_resource(building_get(f->building_id), f->resource_id, 0, 1);
+                    building_granary_try_add_resource(building_get(f->building_id), f->resource_id, 1, 0);
                     f->loads_sold_or_carrying--;
                 }
                 f->state = FIGURE_STATE_DEAD;
@@ -936,7 +960,7 @@ void figure_warehouseman_action(figure *f)
             figure_movement_move_ticks_with_percentage(f, 1, percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 building_warehouse_try_add_resource(building_get(f->building_id),
-                    f->resource_id, f->loads_sold_or_carrying, 1);
+                    f->resource_id, f->loads_sold_or_carrying);
                 f->state = FIGURE_STATE_DEAD;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
                 figure_route_remove(f);
