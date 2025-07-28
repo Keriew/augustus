@@ -43,6 +43,8 @@ void building_granaries_calculate_stocks(void);
 
 int building_granary_accepts_storage(building *b, int resource, int *understaffed);
 
+building *building_granary_get_granary_needing_food(building *source, int resource, int getting);
+
 int building_granary_for_storing(int x, int y, int resource, int road_network_id,
                                  int force_on_stockpile, int *understaffed, map_point *dst);
 

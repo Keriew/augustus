@@ -54,7 +54,7 @@ int building_granary_add_import(building *granary, int resource, int land_trader
     if (!resource) {
         return 0; // invalid resource
     }
-    if (!building_granary_try_add_resource(granary, resource, 0, ONE_CARTLOAD) == ONE_CARTLOAD) {
+    if (building_granary_try_add_resource(granary, resource, 0, ONE_CARTLOAD) != ONE_CARTLOAD) {
         return 0;
     }
     int price = trade_price_buy(resource, land_trader);
@@ -67,7 +67,7 @@ int building_granary_remove_export(building *granary, int resource, int land_tra
     if (!resource) {
         return 0; // invalid resource
     }
-    if (!building_granary_try_remove_resource(granary, resource, ONE_CARTLOAD) == ONE_CARTLOAD) {
+    if (building_granary_try_remove_resource(granary, resource, ONE_CARTLOAD) != ONE_CARTLOAD) {
         return 0;
     }
     int price = trade_price_sell(resource, land_trader);
@@ -248,7 +248,7 @@ int building_granary_maximum_receptible_amount(building *b, int resource)
 
     int final_capacity = MIN(free_space_overall, max_accepted_amount);
 
-    unsigned char allowed_remaining = final_capacity - stored_amount;
+    int allowed_remaining = final_capacity - stored_amount;
     // allowed remaining is the amount that can be added to the granary considering set limit and current storage
     allowed_remaining = allowed_remaining < 0 ? 0 : allowed_remaining; // in case current storage exceeds limits, 0
     return  allowed_remaining;
@@ -381,8 +381,8 @@ building *building_granary_get_granary_needing_food(building *source, int resour
 {
 
     int max_distance = config_get(CONFIG_GP_CH_FARMS_DELIVER_CLOSE) ? 64 : INFINITE;
-
-    for (building *b = building_first_of_type(BUILDING_GRANARY); b; b = b->next_of_type) {
+    building *b;
+    for (b = building_first_of_type(BUILDING_GRANARY); b; b = b->next_of_type) {
         if (b->road_network_id != source->road_network_id || !building_granary_accepts_storage(b, resource, 0)) {
             continue;
         }
@@ -397,6 +397,7 @@ building *building_granary_get_granary_needing_food(building *source, int resour
 
         }
     }
+    return b; // null
 }
 
 int building_granary_for_storing(int x, int y, int resource, int road_network_id,
