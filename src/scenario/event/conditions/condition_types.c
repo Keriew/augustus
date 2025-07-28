@@ -314,7 +314,7 @@ int scenario_condition_type_resource_stored_count_met(const scenario_condition_t
     int amount_stored = 0;
     switch (storage_type) {
         case STORAGE_TYPE_ALL:
-            amount_stored += city_resource_count(resource);
+            amount_stored += city_resource_count_warehouses_amount(resource);
             if (resource_is_food(resource)) {
                 amount_stored += city_resource_count_food_on_granaries(resource) / RESOURCE_ONE_LOAD;
             }
@@ -325,7 +325,7 @@ int scenario_condition_type_resource_stored_count_met(const scenario_condition_t
             }
             break;
         case STORAGE_TYPE_WAREHOUSES:
-            amount_stored += city_resource_count(resource);
+            amount_stored += city_resource_count_warehouses_amount(resource);
             break;
         default:
             break;
