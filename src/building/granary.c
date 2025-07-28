@@ -120,11 +120,6 @@ int building_granaries_add_resource(int resource, int amount, int respect_settin
     return amount;
 }
 
-// int building_granary_remove_resource(building *granary, int resource, int amount)
-// {
-//     return amount - building_granary_try_remove_resource(granary, resource, amount);
-// }
-
 int building_granary_try_remove_resource(building *granary, int resource, int desired_amount)
 {
     if (desired_amount <= 0 || granary->has_plague) {
@@ -166,7 +161,7 @@ int building_granary_count_available_resource(building *b, int resource, int res
     if (b->type != BUILDING_GRANARY || b->state != BUILDING_STATE_IN_USE) {
         return 0;
     }
-    if (!respect_maintaining || !(building_storage_get_state(b, resource, 1) < BUILDING_STORAGE_STATE_MAINTAINING)) {
+    if (!respect_maintaining || (building_storage_get_state(b, resource, 1) < BUILDING_STORAGE_STATE_MAINTAINING)) {
         return building_granary_get_amount(b, resource);
     } else {
         return 0;

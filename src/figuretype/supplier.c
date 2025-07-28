@@ -115,7 +115,7 @@ static int take_resource_from_warehouse(figure *f, int warehouse_id, int max_amo
         return take_resource_from_generic_building(f, warehouse_id);
     }
     int num_loads;
-    int stored = building_warehouse_get_amount(warehouse, f->collecting_item_id);
+    int stored = building_warehouse_get_available_amount(warehouse, f->collecting_item_id);
     if (stored < max_amount) {
         num_loads = stored;
     } else {
