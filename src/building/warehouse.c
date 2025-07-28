@@ -384,7 +384,7 @@ static int warehouse_allows_getting(building *b, int resource)
     const building_storage *s = building_storage_get(b->storage_id);
     const resource_storage_entry *entry = &s->resource_state[resource];
 
-    if (b->has_plague || (entry->state > BUILDING_STORAGE_STATE_GETTING)) {
+    if (b->has_plague || (entry->state >= BUILDING_STORAGE_STATE_GETTING)) {
         return 0;
         //if the building has plague or gets or maintains resource - it doesnt allow getting
     }
