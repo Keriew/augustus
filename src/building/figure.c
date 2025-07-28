@@ -251,9 +251,10 @@ static void spawn_figure_granary(building *b)
         }
         int task = building_granary_determine_worker_task(b);
         if (task != GRANARY_TASK_NONE) {
-            figure *f = figure_create(FIGURE_WAREHOUSEMAN, road.x, road.y, DIR_4_BOTTOM);
+            figure *f = figure_create(FIGURE_WAREHOUSEMAN, b->x + 1, b->y + 1, DIR_4_BOTTOM);
+            //spawn in the center of the granary
             f->action_state = FIGURE_ACTION_50_WAREHOUSEMAN_CREATED;
-            f->loads_sold_or_carrying = 1;
+            //f->loads_sold_or_carrying = 1; //set loads at action, not spawn
             f->resource_id = task;
             b->figure_id = f->id;
             f->building_id = b->id;

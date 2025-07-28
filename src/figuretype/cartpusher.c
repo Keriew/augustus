@@ -902,11 +902,9 @@ void figure_warehouseman_action(figure *f)
             set_cart_graphic(f, 0);
             figure_movement_move_ticks_with_percentage(f, 1, percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
-                for (int i = 0; i < f->loads_sold_or_carrying; i++) {
-                    building_granary_try_add_resource(
-                        building_get(f->building_id), f->resource_id, f->loads_sold_or_carrying, 0);
-                    f->loads_sold_or_carrying--;
-                }
+                int delivered_loads = building_granary_try_add_resource(
+                    building_get(f->building_id), f->resource_id, f->loads_sold_or_carrying, 0);
+                f->loads_sold_or_carrying -= delivered_loads;
                 f->state = FIGURE_STATE_DEAD;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
                 figure_route_remove(f);
