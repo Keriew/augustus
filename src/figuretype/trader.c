@@ -202,6 +202,7 @@ int figure_trade_caravan_can_sell(figure *trader, int building_id, int city_id)
 
 static int trader_get_buy_resource(int building_id, int city_id)
 {
+    unsigned char land_trader = 1; // 1 = land trader, 0 = sea trader
     building *b = building_get(building_id);
     if (!b || (b->type != BUILDING_WAREHOUSE && b->type != BUILDING_GRANARY)) {
         return RESOURCE_NONE;
@@ -216,9 +217,9 @@ static int trader_get_buy_resource(int building_id, int city_id)
     }
     unsigned char success = 0;
     if (b->type == BUILDING_GRANARY) {
-        success = building_granary_remove_export(b, resource, 1);
+        success = building_granary_remove_export(b, resource, 1, land_trader);
     } else {
-        success = building_warehouse_remove_export(b, resource, 1, 1);
+        success = building_warehouse_remove_export(b, resource, 1, land_trader);
     }
 
     return success ? resource : RESOURCE_NONE;
@@ -226,6 +227,7 @@ static int trader_get_buy_resource(int building_id, int city_id)
 
 static int trader_get_sell_resource(int building_id, int city_id)
 {
+    unsigned char land_trader = 1; // 1 = land trader, 0 = sea trader
     building *b = building_get(building_id);
     if (!b || (b->type != BUILDING_WAREHOUSE && b->type != BUILDING_GRANARY)) {
         return RESOURCE_NONE;
@@ -238,9 +240,9 @@ static int trader_get_sell_resource(int building_id, int city_id)
 
     unsigned char success = 0;
     if (b->type == BUILDING_GRANARY) {
-        success = building_granary_add_import(b, resource, 1);
+        success = building_granary_add_import(b, resource, 1, land_trader);
     } else {
-        success = building_warehouse_add_import(b, resource, 1, 1);
+        success = building_warehouse_add_import(b, resource, 1, land_trader);
     }
 
     return success ? resource : RESOURCE_NONE;

@@ -15,9 +15,9 @@ enum {
     GRANARY_TASK_GETTING = 0
 };
 
-int building_granary_add_import(building *granary, int resource, int land_trader);
+int building_granary_add_import(building *granary, int resource, int amount, int land_trader);
 
-int building_granary_remove_export(building *granary, int resource, int land_trader);
+int building_granary_remove_export(building *granary, int resource, int amount, int land_trader);
 
 int building_granary_try_add_resource(building *granary, int resource, int amount, int is_produced);
 

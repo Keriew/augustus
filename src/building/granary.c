@@ -49,12 +49,12 @@ int building_granary_get_amount(building *b, int resource)
     return b->resources[resource];
 }
 
-int building_granary_add_import(building *granary, int resource, int land_trader)
+int building_granary_add_import(building *granary, int resource, int amount, int land_trader)
 {
     if (!resource) {
         return 0; // invalid resource
     }
-    if (building_granary_try_add_resource(granary, resource, ONE_CARTLOAD, 0) != ONE_CARTLOAD) {
+    if (building_granary_try_add_resource(granary, resource, amount, 0) != amount) {
         return 0;
     }
     int price = trade_price_buy(resource, land_trader);
@@ -62,12 +62,12 @@ int building_granary_add_import(building *granary, int resource, int land_trader
     return 1;
 }
 
-int building_granary_remove_export(building *granary, int resource, int land_trader)
+int building_granary_remove_export(building *granary, int resource, int amount, int land_trader)
 {
     if (!resource) {
         return 0; // invalid resource
     }
-    if (building_granary_try_remove_resource(granary, resource, ONE_CARTLOAD) != ONE_CARTLOAD) {
+    if (building_granary_try_remove_resource(granary, resource, amount) != amount) {
         return 0;
     }
     int price = trade_price_sell(resource, land_trader);

@@ -300,7 +300,7 @@ void building_warehouse_space_set_image(building *space, int resource)
     map_image_set(space->grid_offset, image_id);
 }
 
-int building_warehouse_add_import(building *warehouse, int resource, int land_trader, int amount)
+int building_warehouse_add_import(building *warehouse, int resource, int amount, int land_trader)
 {
     if (warehouse->type != BUILDING_WAREHOUSE) {
         building *main_warehouse = building_main(warehouse);
