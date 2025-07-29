@@ -936,7 +936,7 @@ void figure_warehouseman_action(figure *f)
             if (f->wait_ticks > 4) {
                 f->loads_sold_or_carrying = 0;
                 city_health_dispatch_sickness(f);
-                while (f->loads_sold_or_carrying < 4 && 0 == building_warehouse_try_remove_resource(
+                while (f->loads_sold_or_carrying < 4 && building_warehouse_try_remove_resource(
                     building_get(f->destination_building_id), f->collecting_item_id, 1)) {
                     f->loads_sold_or_carrying++;
                 }
