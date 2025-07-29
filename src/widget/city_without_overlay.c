@@ -489,10 +489,13 @@ static void draw_top(int x, int y, int grid_offset)
 
     image_draw_isometric_top_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
     // specific buildings
-    draw_senate_rating_flags(b, x, y, color_mask);
-    draw_mothball_icon(b, x, y, color_mask, grid_offset);
-    draw_entertainment_spectators(b, x, y, color_mask);
-    draw_workshop_raw_material_storage(b, x, y, color_mask);
+    if (b->id > 0) { //dont draw or calculate for non-buildings
+        draw_senate_rating_flags(b, x, y, color_mask);
+        draw_mothball_icon(b, x, y, color_mask, grid_offset);
+        draw_entertainment_spectators(b, x, y, color_mask);
+        draw_workshop_raw_material_storage(b, x, y, color_mask);
+    }
+
 }
 
 static void draw_figures(int x, int y, int grid_offset)

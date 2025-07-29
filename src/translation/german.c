@@ -1695,6 +1695,18 @@ static translation_string all_strings[] = {
 	{TR_TOOLTIP_BUILDING_DISTRIBUTION_MAINTAINING, "Nur Karren-Depots können Waren entnehmen."},
 	{TR_CONFIG_STORAGE_STEP_4, "Nutze die Vielfachen von 4 zum Einteilen von Lagerplatz"},
 	{TR_CONFIG_MOVE_SAVINGS_TO_THE_RIGHT, "Ersparnisse neben den Wertungen anzeigen"},
+    {TR_CONFIG_NOT_ACCEPTING_MARKETS, "Märkte akzeptieren nichts, wenn sie gebaut werden"},
+    {TR_CONFIG_PATRICIAN_DEVOLUTION_FIX, "Häuser der Patrizier bilden beim Zusammenbruch keine 1x1 Häuser"},
+    {TR_ACTION_TYPE_CHANGE_TERRAIN, "Ändere Terrain"},
+    {TR_PARAMETER_TERRAIN, "Terrain"},
+    {TR_PARAMETER_ADD, "füge hinzu"},
+    {TR_PARAMETER_TERRAIN_TREE, "Baum"},
+    {TR_PARAMETER_TERRAIN_ROCK, "Felsen"},
+    {TR_PARAMETER_TERRAIN_WATER, "Wasser"},
+    {TR_PARAMETER_TERRAIN_MEADOW, "Farmland"},
+    {TR_PARAMETER_TERRAIN_SHRUB, "Busch"},
+    {TR_CONDITION_TEXT_TIME_LEFT_UNTIL_DEFEAT, "Zeit bis zur Niederlage:"},
+    {TR_CONDITION_TEXT_TIME_LEFT_UNTIL_VICTORY, "Zeit bis zum Sieg:"},
 };
 
 void translation_german(const translation_string **strings, int *num_strings)
