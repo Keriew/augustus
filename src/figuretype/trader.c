@@ -57,7 +57,7 @@
 
 #define LOGARITHIMIC_SCALER_DISTANCE 120
 #define LOGARITHMIC_SCALER_SELL 0  // from perspectvie of the trader - trader sells, player buys
-#define LOGARITHMIC_SCALER_BUY 30 
+#define LOGARITHMIC_SCALER_BUY 80
 // adjustable scaling factors. Higher value = more influence.
 // 0 =  no influence. Generally, values between 20-100 are most useful.
 
@@ -337,7 +337,7 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
         for (building *b = building_first_of_type(building_types[t]); b; b = b->next_of_type) {
             // Skip buildings
             if (b->state != BUILDING_STATE_IN_USE || b->has_plague || !b->has_road_access
-            || (f->last_visited_index == b->id) || b->id == f->destination_building_id ||
+            || (figure_visited_building_in_list(f->last_visited_index, b->id)) || b->id == f->destination_building_id ||
             !building_storage_get_permission(BUILDING_STORAGE_PERMISSION_TRADERS, b)) {
                 continue; // Not active, infected, unreachable by road, recently visited, currenty at, not accepted
             }
@@ -527,6 +527,8 @@ void figure_trade_caravan_action(figure *f)
                     move_on++;
                 }
                 if (move_on == 2) {
+                    f->last_visited_index = figure_visited_buildings_add(f->last_visited_index,
+                         f->destination_building_id);
                     go_to_next_storage(f);
                 }
             }
