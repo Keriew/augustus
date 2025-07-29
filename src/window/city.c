@@ -148,6 +148,9 @@ static void draw_paused_banner(void)
 
 static void draw_time_left(void)
 {
+
+    int fps_offset = config_get(CONFIG_UI_DISPLAY_FPS) * 2 * BLOCK_SIZE; // shift to the right if FPS is displayed
+
     if (scenario_criteria_time_limit_enabled() && !city_victory_has_won()) {
         int years;
         if (scenario_criteria_max_year() <= game_time_year() + 1) {
@@ -165,8 +168,8 @@ static void draw_time_left(void)
         label_width += text_get_number_width(months_left, '@', "", font);
         label_width += lang_text_get_width(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_MONTHS, font);
         int label_blocks = (label_width + 2 * BLOCK_SIZE) / BLOCK_SIZE; // 3 block sizes for nice padding
-        label_draw(1, 25, label_blocks, 1);
-        int x_offset = 6;
+        label_draw(1 + fps_offset, 25, label_blocks, 1);
+        int x_offset = 6 + fps_offset;
         int y = 29;
         x_offset += lang_text_draw(CUSTOM_TRANSLATION, TR_CONDITION_TEXT_TIME_LEFT_UNTIL_DEFEAT, x_offset, y, font);
         x_offset += text_draw_number(years_left, '@', "", x_offset, y, font, 0);
@@ -194,8 +197,8 @@ static void draw_time_left(void)
         label_width += lang_text_get_width(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_MONTHS, font);
         int label_blocks = (label_width + 2 * BLOCK_SIZE) / BLOCK_SIZE;
 
-        label_draw(1, 25, label_blocks, 1);
-        int x_offset = 6;
+        label_draw(1 + fps_offset, 25, label_blocks, 1);
+        int x_offset = 6 + fps_offset;
         int y = 29;
         x_offset += lang_text_draw(CUSTOM_TRANSLATION, TR_CONDITION_TEXT_TIME_LEFT_UNTIL_VICTORY, x_offset, y, font);
         x_offset += text_draw_number(years_left, '@', "", x_offset, y, font, 0);

@@ -1640,6 +1640,14 @@ static translation_string all_strings[] = {
     {TR_CONFIG_PATRICIAN_DEVOLUTION_FIX, "Patrician houses maintain integrity when devolving" },
     {TR_CONDITION_TEXT_TIME_LEFT_UNTIL_DEFEAT, "Time until defeat:" },
     {TR_CONDITION_TEXT_TIME_LEFT_UNTIL_VICTORY, "Time until victory:" },
+    {TR_ACTION_TYPE_CHANGE_TERRAIN, "Add/remove terrain" },
+    {TR_PARAMETER_TERRAIN, "Terrain" },
+    {TR_PARAMETER_ADD, "Add" },
+    {TR_PARAMETER_TERRAIN_TREE, "Tree" },
+    {TR_PARAMETER_TERRAIN_ROCK, "Rock" },
+    {TR_PARAMETER_TERRAIN_WATER, "Water" },
+    {TR_PARAMETER_TERRAIN_MEADOW, "Meadow" },
+    {TR_PARAMETER_TERRAIN_SHRUB, "Shrub" },
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
