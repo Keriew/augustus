@@ -320,7 +320,9 @@ int empire_can_export_resource_to_city(int city_id, int resource)
     }
     int in_stock = 0;
     if (!resource_is_food(resource) || config_get(CONFIG_GP_CH_ALLOW_EXPORTING_FROM_GRANARIES)) {
-        in_stock = city_resource_get_total_amount(resource, 1);
+        in_stock = city_resource_get_total_amount(resource, 1); //non food or allowed export from granaries
+    } else {
+        in_stock = city_resource_count_warehouses_amount(resource); // count warehouses only
     }
 
     if (in_stock <= city_resource_export_over(resource)) { // 0 means any amount can be exported
