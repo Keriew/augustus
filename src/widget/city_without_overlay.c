@@ -420,6 +420,9 @@ static void get_mothball_icon_position(const building *b, int *x, int *y)
 
 static void draw_mothball_icon(const building *b, int x, int y, color_t color_mask, int grid_offset)
 {
+    if (!b || (!b->data.industry.is_stockpiling && b->state != BUILDING_STATE_MOTHBALLED)) {
+        return;
+    }
     //farms have individual top drawings, but they have one building ID, unlike warehouses
     if (b->prev_part_building_id) {
         return; //do not draw mothball icon for non-main
