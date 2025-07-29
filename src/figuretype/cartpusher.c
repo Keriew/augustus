@@ -53,7 +53,8 @@ static void cartpusher_return_to_source(figure *f)
     // some fallbacks for cartpushers
     building *origin = building_get(f->building_id);
     int type = origin->type;
-    if (type == BUILDING_WAREHOUSE || type == BUILDING_WAREHOUSE_SPACE || type == BUILDING_GRANARY) {
+    if (type == BUILDING_WAREHOUSE || type == BUILDING_WAREHOUSE_SPACE
+        || type == BUILDING_GRANARY || type == BUILDING_ARMOURY) {
         if (f->loads_sold_or_carrying > 0) {
             // If the cartpusher is carrying resources, it should return with correct action state
             if (type == BUILDING_GRANARY) {
@@ -983,8 +984,8 @@ void figure_warehouseman_action(figure *f)
             if (f->wait_ticks > 4) {
                 f->loads_sold_or_carrying = 0;
                 city_health_dispatch_sickness(f);
-                if (0 == building_warehouse_try_remove_resource(building_get(f->destination_building_id),
-                    f->collecting_item_id, 1)) {
+                if (building_warehouse_try_remove_resource(building_get(f->destination_building_id),
+                    f->collecting_item_id, 1) == 1) {
                     f->loads_sold_or_carrying++;
                     f->resource_id = f->collecting_item_id;
                     f->destination_building_id = 0;
