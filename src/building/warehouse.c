@@ -388,11 +388,12 @@ static int get_acceptable_quantity(building *b, int resource)
     const building_storage *s = building_storage_get(b->storage_id);
     const resource_storage_entry *entry = &s->resource_state[resource];
 
-    if (entry->state != BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
+    const building_storage_state state = building_storage_get_state(b, resource, 1);
+    if (state == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
+        return 0; // not accepting this resource
+    } else {
         return entry->quantity;
     }
-
-    return 0;
 }
 
 static int building_warehouse_max_space_for_resource(building *b, int resource)
@@ -422,18 +423,23 @@ int building_warehouse_maximum_receptible_amount(building *b, int resource)
          b->state != BUILDING_STATE_IN_USE || b->resources[RESOURCE_NONE] <= 0) {
         return 0;
     }
+    if (building_storage_get_state(b, resource, 1) == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
+        return 0; // early check for relative state
+    }
+    unsigned char max_allowed = get_acceptable_quantity(b, resource);
+    unsigned char current_amount = building_warehouse_get_amount(b, resource);
+    unsigned char remaining_allowed = (max_allowed > current_amount) ? (max_allowed - current_amount) : 0;
 
-    unsigned char max_accepted_amount = get_acceptable_quantity(b, resource); // max set by player
-    unsigned char available_space_for_resource = building_warehouse_max_space_for_resource(b, resource); //max in context of tiled storage
-    unsigned char free_space_overall = b->resources[RESOURCE_NONE]; //total capacity - all stored goods
+    unsigned char resource_space_limit = building_warehouse_max_space_for_resource(b, resource); // max by tile layout
+    unsigned char free_space_overall = b->resources[RESOURCE_NONE]; // total free space
 
-    unsigned char final_capacity = MIN(free_space_overall, available_space_for_resource);
-    unsigned char allowed_remaining = MIN(final_capacity, max_accepted_amount);
+    unsigned char available_space = MIN(free_space_overall, resource_space_limit); // tile storage and free space
+    unsigned char max_receptible = MIN(remaining_allowed, available_space);
     // Max the building is allowed to receive, considering all limits
     // allowed remaining is the amount that can be added to the warehouse considering set limit and current storage
-    allowed_remaining = allowed_remaining < 0 ? 0 : allowed_remaining; // in case current storage exceeds limits, 0
+    max_receptible = max_receptible < 0 ? 0 : max_receptible; // in case current storage exceeds limits, 0
 
-    return  allowed_remaining;
+    return  max_receptible;
 }
 
 int building_warehouses_count_available_resource(int resource, int respect_maintaining)

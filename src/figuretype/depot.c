@@ -190,7 +190,7 @@ static int storage_add_resource(building *b, int resource, int amount)
 
     while (amount > 0) {
         int unload_amount = (amount > 2) ? 2 : 1; // unload in 2s if possible
-        unsigned char added_amount = building_storage_try_add_resource(b, resource, unload_amount, 1);
+        unsigned char added_amount = building_storage_try_add_resource(b, resource, unload_amount, 0);
         if (added_amount <= 0) {
             return amount; // not enough space
         }
