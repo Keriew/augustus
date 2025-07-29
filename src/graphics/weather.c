@@ -88,8 +88,8 @@ void init_weather_element(weather_element *e, int type)
 
     switch (type) {
         case WEATHER_RAIN:
-            e->length = 10 + random_from_stdlib() % 10;
-            e->speed = 4 + random_from_stdlib() % 5;
+            e->length = config_get(CONFIG_WT_RAIN_LENGTH) + random_from_stdlib() % 10;
+            e->speed = config_get(CONFIG_WT_RAIN_SPEED) + random_from_stdlib() % 5;
             if (data.weather_config.intensity < 600) {
                 e->wind_variation = 0;
             } else {
@@ -98,11 +98,11 @@ void init_weather_element(weather_element *e, int type)
             break;
         case WEATHER_SNOW:
             e->drift_offset = random_from_stdlib() % 100;
-            e->speed = 1 + random_from_stdlib() % 2;
+            e->speed = config_get(CONFIG_WT_SNOW_SPEED) + random_from_stdlib() % 2;
             e->drift_direction = (random_from_stdlib() % 2 == 0) ? DRIFT_DIRECTION_RIGHT : DRIFT_DIRECTION_LEFT;
             break;
         case WEATHER_SAND:
-            e->speed = 2 + (random_from_stdlib() % 2);
+            e->speed = config_get(CONFIG_WT_SANDSTORM_SPEED) + (random_from_stdlib() % 2);
             e->offset = random_between_from_stdlib(0, 1000);
             break;
     }
@@ -215,12 +215,15 @@ static void render_weather_overlay(void)
     }
 
     int alpha_factor = 40;
-    if (data.displayed_type == WEATHER_SNOW ||
-        (data.displayed_type == WEATHER_RAIN && data.last_intensity < 900)) {
-        alpha_factor = 20;
+    if (data.displayed_type == WEATHER_SNOW) {
+        alpha_factor = config_get(CONFIG_WT_SNOW_INTENSITY);
+    } else if (data.displayed_type == WEATHER_RAIN && data.last_intensity < 900) {
+        alpha_factor = config_get(CONFIG_WT_RAIN_INTENSITY);
+    } else if (data.displayed_type == WEATHER_SAND) {
+        alpha_factor = config_get(CONFIG_WT_SANDSTORM_INTENSITY);
     }
 
-    uint8_t alpha = (uint8_t)(((alpha_factor * data.overlay_alpha) / 100) * 255 / 100);
+    uint8_t alpha = (uint8_t) (((alpha_factor * data.overlay_alpha) / 100) * 255 / 100);
 
     // update overlay color based on weather type
     if (data.displayed_type == WEATHER_RAIN) {
@@ -283,7 +286,7 @@ static void draw_sandstorm(void)
     if (count > max_particles) {
         count = max_particles;
     }
-    
+
     for (int i = 0; i < count; ++i) {
         int wave = ((data.elements[i].y + data.elements[i].offset) % 10) - 5;
         data.elements[i].x += data.elements[i].speed + (wave / 10);
@@ -451,9 +454,9 @@ void city_weather_update(int month)
     int intensity;
     weather_type type;
 
-    if (weather_months_left > 0) {        
+    if (weather_months_left > 0) {
         active = data.last_active;
-        intensity = data.last_intensity;        
+        intensity = data.last_intensity;
         type = data.last_type;
         weather_months_left--;
     } else {

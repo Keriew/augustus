@@ -19,7 +19,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#define XML_TOTAL_ELEMENTS 63
+#define XML_TOTAL_ELEMENTS 64
 #define ERROR_MESSAGE_LENGTH 200
 
 static struct {
@@ -123,7 +123,8 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "cause_blessing", xml_import_create_action, 0, "actions" },
     { "cause_minor_curse", xml_import_create_action, 0, "actions" }, // 60
     { "cause_major_curse", xml_import_create_action, 0, "actions" },
-    { "change_climate", xml_import_create_action, 0, "actions"}
+    { "change_climate", xml_import_create_action, 0, "actions"},
+    { "change_terrain", xml_import_create_action, 0, "actions"},
 };
 
 static int xml_import_start_scenario_events(void)
@@ -412,6 +413,7 @@ static int xml_import_special_parse_attribute(xml_data_attribute_t *attr, int *t
         case PARAMETER_TYPE_TARGET_TYPE:
         case PARAMETER_TYPE_GOD:
         case PARAMETER_TYPE_CLIMATE:
+        case PARAMETER_TYPE_TERRAIN:
             return xml_import_special_parse_type(attr, attr->type, target);
         case PARAMETER_TYPE_BUILDING_COUNTING:
             return xml_import_special_parse_building_counting(attr, target);

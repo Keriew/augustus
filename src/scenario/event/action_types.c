@@ -23,6 +23,9 @@
 #include "game/resource.h"
 #include "map/building.h"
 #include "map/grid.h"
+#include "map/routing_terrain.h"
+#include "map/terrain.h"
+#include "map/tiles.h"
 #include "scenario/allowed_building.h"
 #include "scenario/custom_variable.h"
 #include "scenario/gladiator_revolt.h"
@@ -653,6 +656,57 @@ int scenario_action_type_change_climate_execute(scenario_action_t *action)
     int climate = action->parameter1;
 
     scenario_change_climate(climate);
+
+    return 1;
+}
+
+int scenario_action_type_change_terrain_execute(scenario_action_t *action)
+{
+    int grid_offset = action->parameter1;
+    int block_radius = action->parameter2;
+    int terrain = action->parameter3;
+    int add = action->parameter4;
+
+    if (!map_grid_is_valid_offset(grid_offset)) {
+        return 0;
+    }
+
+    for (int y = -block_radius; y <= block_radius; y++) {
+        for (int x = -block_radius; x <= block_radius; x++) {
+            int current_grid_offset = map_grid_add_delta(grid_offset, x, y);
+            if (!map_grid_is_valid_offset(current_grid_offset)) {
+                continue;
+            }
+            if (add) {
+                if (terrain & TERRAIN_NOT_CLEAR) { 
+                    // Destroy buildings if the new terrains doesn't allow for buildings
+                    int building_id = map_building_at(current_grid_offset);
+                    if (building_id) {
+                        building *b = building_main(building_get(building_id));
+                        building_destroy_without_rubble(b);
+                    }
+                    // Since the engine only supports one blocking terrain per tile, 
+                    // remove all others before adding a new one
+                    map_terrain_remove(current_grid_offset, TERRAIN_NOT_CLEAR);
+                }
+                map_terrain_add(current_grid_offset, terrain);
+            } else {
+                if (terrain == TERRAIN_WATER && map_terrain_get(current_grid_offset) & TERRAIN_WATER)  {
+                    // Destroy water buildings when removing water
+                    int building_id = map_building_at(current_grid_offset);
+                    if (building_id) {
+                        building *b = building_main(building_get(building_id));
+                        building_destroy_without_rubble(b);
+                    }
+
+                }
+                map_terrain_remove(current_grid_offset, terrain);
+            }
+        }
+    }
+
+    map_tiles_update_all();
+    map_routing_update_all();
 
     return 1;
 }

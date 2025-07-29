@@ -2,6 +2,7 @@
 
 #include "assets/assets.h"
 #include "core/calc.h"
+#include "core/config.h"
 #include "core/string.h"
 #include "editor/editor.h"
 #include "game/campaign.h"
@@ -20,12 +21,16 @@
 #include "sound/music.h"
 #include "window/cck_selection.h"
 #include "window/config.h"
+#include "window/editor/map.h"
 #include "window/file_dialog.h"
 #include "window/plain_message_dialog.h"
 #include "window/popup_dialog.h"
 #include "window/select_campaign.h"
+#include "window/video.h"
 
 #define MAX_BUTTONS 6
+
+static void show_editor(void);
 
 static void button_click(const generic_button *button);
 
@@ -131,6 +136,7 @@ static void button_click(const generic_button *button)
             window_plain_message_dialog_show(
                 TR_NO_EDITOR_TITLE, TR_NO_EDITOR_MESSAGE, 1);
         } else {
+            if (config_get(CONFIG_UI_SHOW_INTRO_VIDEO)) window_video_show("map_intro.smk", window_editor_map_show);
             sound_music_play_editor();
         }
     } else if (type == 5) {

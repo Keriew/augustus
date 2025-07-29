@@ -193,7 +193,7 @@ static struct {
 };
 
 static generic_button primary_product_producer_button_stockpiling[] = {
-    {0, 0, 24, 24, button_stockpiling, 0, 0, 0}
+    {0, 0, 30, 30, button_stockpiling, 0, 0, 0}
 };
 
 static struct {
@@ -746,16 +746,16 @@ void window_building_get_tooltip_distribution_orders(int *group_id, int *text_id
 int window_building_handle_mouse_primary_product_producer(const mouse *m, building_info_context *c)
 {
     data.building_id = c->building_id;
-    return generic_buttons_handle_mouse(m, c->x_offset + BLOCK_SIZE * c->width_blocks - 30, c->y_offset + 10,
+    return generic_buttons_handle_mouse(m, c->x_offset + BLOCK_SIZE * c->width_blocks - 40, c->y_offset + 10,
             primary_product_producer_button_stockpiling, 1, &data.primary_product_stockpiling_id);
 }
 
 void window_building_draw_primary_product_stockpiling(building_info_context *c)
 {
-    int x = c->x_offset + primary_product_producer_button_stockpiling->x + BLOCK_SIZE * c->width_blocks - 30;
+    int x = c->x_offset + primary_product_producer_button_stockpiling->x + BLOCK_SIZE * c->width_blocks - 40;
     int y = c->y_offset + primary_product_producer_button_stockpiling->y + 10;
-    button_border_draw(x, y, 20, 20, data.primary_product_stockpiling_id);
-    image_draw(assets_get_image_id("UI", "Warehousing_off"), x + 4, y + 4, building_stockpiling_enabled(building_get(c->building_id)) ?
+    button_border_draw(x, y, 30, 30, data.primary_product_stockpiling_id);
+    image_draw(assets_get_image_id("UI", "Stockpile_Sprite"), x + 4, y + 6, building_stockpiling_enabled(building_get(c->building_id)) ?
     0xfff5a46b : COLOR_MASK_NONE, SCALE_NONE);
 }
 

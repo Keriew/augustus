@@ -87,6 +87,7 @@ static void menu_help_warnings(int param);
 static void menu_help_about(int param);
 
 static void menu_advisors_go_to(int advisor);
+static void ratings_advisors_go_to(int advisor);
 
 static menu_item menu_file[] = {
     {1, 2, menu_file_replay_map, 0},
@@ -791,26 +792,26 @@ static int handle_mouse_menu(const mouse *m)
     switch (top_menu_widget) {
         case INFO_FUNDS:
             if (m->left.went_up) {
-                menu_advisors_go_to(ADVISOR_FINANCIAL);
+                ratings_advisors_go_to(ADVISOR_FINANCIAL);
             }
         case INFO_PERSONAL:
             if (m->left.went_up) {
-                menu_advisors_go_to(ADVISOR_IMPERIAL);
+                ratings_advisors_go_to(ADVISOR_IMPERIAL);
             }
         case INFO_POPULATION:
             if (m->left.went_up) {
-                menu_advisors_go_to(ADVISOR_POPULATION);
+                ratings_advisors_go_to(ADVISOR_POPULATION);
             }
         case INFO_CULTURE:
         case INFO_PROSPERITY:
         case INFO_PEACE:
         case INFO_FAVOR:
             if (m->left.went_up) {
-                menu_advisors_go_to(ADVISOR_RATINGS);
+                ratings_advisors_go_to(ADVISOR_RATINGS);
             }
         case INFO_HEALTH:
             if (m->left.went_up) {
-                menu_advisors_go_to(ADVISOR_HEALTH);
+                ratings_advisors_go_to(ADVISOR_HEALTH);
             }
     }
     if (menu_id && m->left.went_up) {
@@ -1057,5 +1058,10 @@ static void menu_advisors_go_to(int advisor)
 {
     clear_state();
     window_go_back();
+    window_advisors_show_advisor(advisor);
+}
+static void ratings_advisors_go_to(int advisor)
+{
+    clear_state();
     window_advisors_show_advisor(advisor);
 }
