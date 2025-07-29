@@ -114,7 +114,7 @@ typedef struct {
     short attacker_id1;
     short attacker_id2;
     short opponent_id;
-    short last_visited_index;
+    short last_visited_index; //can only be used if figure goes through initialization process
     struct {
         unsigned short tourist_money_spent;
         unsigned short ticks_since_last_visited_id[12];
