@@ -12,6 +12,7 @@
 #include "figure/figure.h"
 #include "figure/formation.h"
 #include "figure/name.h"
+#include "game/cheats.h"
 #include "game/difficulty.h"
 #include "game/time.h"
 #include "map/grid.h"
@@ -315,7 +316,7 @@ static void determine_formations(int num_soldiers, int *num_formations, int sold
 
 static int start_invasion(int enemy_type, int amount, int invasion_point, formation_attack_enum attack_type, int invasion_id)
 {
-    if (game_cheats_disabled_invasions()) { // invasions disabled 
+    if (game_cheat_disabled_invasions()) { // invasions disabled 
         return -1;
     }
     if (amount <= 0) {
@@ -561,6 +562,9 @@ static void repeat_invasion_with_warnings(invasion_t *invasion)
 
 void scenario_invasion_process(void)
 {
+    if (game_cheat_disabled_invasions()) { // invasions disabled 
+        return;
+    }
     int enemy_id = scenario.enemy_id;
     invasion_warning *warning;
     array_foreach(data.warnings, warning)
@@ -653,6 +657,9 @@ int scenario_invasion_start_from_mars(void)
 
 int scenario_invasion_start_from_caesar(int size)
 {
+    if (game_cheat_disabled_invasions()) { // invasions disabled 
+        return 0;
+    }
     int grid_offset = start_invasion(ENEMY_11_CAESAR, size, 0, FORMATION_ATTACK_BEST_BUILDINGS, CAESAR_ATTACK_ARMY_ID);
     if (grid_offset > 0) {
         city_message_post(1, MESSAGE_CAESAR_ARMY_ATTACK, data.last_internal_invasion_id, grid_offset);
@@ -663,6 +670,7 @@ int scenario_invasion_start_from_caesar(int size)
 
 void scenario_invasion_start_from_cheat(void)
 {
+    // leaving this one out of the disabled_invasions check - no reason for cheat to stop cheats
     int enemy_id = scenario.enemy_id;
     int grid_offset = start_invasion(ENEMY_ID_TO_ENEMY_TYPE[enemy_id], 150, 8,
         FORMATION_ATTACK_FOOD_CHAIN, CHEATED_ARMY_ID);
@@ -678,6 +686,9 @@ void scenario_invasion_start_from_cheat(void)
 void scenario_invasion_start_from_action(invasion_type_enum invasion_type, int size, int invasion_point,
     formation_attack_enum attack_type, enemy_type_t enemy_id)
 {
+    if (game_cheat_disabled_invasions()) { // invasions disabled 
+        return;
+    }
     if (attack_type > FORMATION_ATTACK_RANDOM) {
         attack_type = FORMATION_ATTACK_RANDOM;
     }

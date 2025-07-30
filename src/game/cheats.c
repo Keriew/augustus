@@ -51,6 +51,8 @@ static void game_cheat_cast_curse(uint8_t *);
 static void game_cheat_make_buildings_invincible(uint8_t *);
 static void game_cheat_change_climate(uint8_t *);
 static void game_cheat_unlock_legions(uint8_t *);
+static void game_cheat_disable_legions_consumption(uint8_t *);
+static void game_cheat_disable_invasions(uint8_t *);
 
 static void (*const execute_command[])(uint8_t *args) = {
     game_cheat_add_money,
@@ -91,7 +93,7 @@ static const char *commands[] = {
     "globalwarming",
     "ihaveanarmy",
     "breadandfish",
-    "leavemealone",
+    "leavemealone"
 };
 
 #define NUMBER_OF_COMMANDS sizeof (commands) / sizeof (commands[0])
@@ -288,13 +290,13 @@ static void game_cheat_unlock_legions(uint8_t *args)
 static void game_cheat_disable_legions_consumption(uint8_t *args)
 {
     data.disabled_legions_consumption = 1;
-    show_warning(TR_CHEAT_UNLOCK_LEGIONS);
+    show_warning(TR_CHEAT_DISABLE_LEGIONS_CONSUMPTION);
 }
 
 static void game_cheat_disable_invasions(uint8_t *args)
 {
     data.disabled_invasions = 1;
-    show_warning(TR_CHEAT_UNLOCK_LEGIONS);
+    show_warning(TR_CHEAT_DISABLE_INVASIONS);
 }
 
 static void game_cheat_incite_riot(uint8_t *args)

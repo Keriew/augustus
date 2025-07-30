@@ -528,7 +528,7 @@ static int mess_hall_consume_food(void)
     if (!b || (b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_MOTHBALLED)) {
         return 0;
     }
-    if (game_cheats_legions_consumption_disabled()) {
+    if (game_cheat_disabled_legions_consumption()) {
         return 0;
     }
 
@@ -636,13 +636,13 @@ void city_resource_consume_food(void)
     city_data.resource.food_types_eaten = 0;
 
     int total_consumed = house_consume_food() + mess_hall_consume_food() + caravanserai_consume_food();
-    if (game_cheats_legions_consumption_disabled()) {
+    if (game_cheat_disabled_legions_consumption()) {
         city_data.mess_hall.food_stress_cumulative = 0;
         city_data.mess_hall.food_percentage_missing_this_month = 0;
         city_data.mess_hall.food_types = resource_total_food_mapped(); // max i think
     }
     if (city_military_total_soldiers_in_city() > 0 && !city_buildings_has_mess_hall() &&
-        !city_data.mess_hall.missing_mess_hall_warning_shown && !game_cheats_legions_consumption_disabled()) {
+        !city_data.mess_hall.missing_mess_hall_warning_shown && !game_cheat_disabled_legions_consumption()) {
         city_data.mess_hall.food_percentage_missing_this_month = 100;
         city_message_post(1, MESSAGE_SOLDIERS_STARVING_NO_MESS_HALL, 0, 0);
         city_data.mess_hall.missing_mess_hall_warning_shown = 1;

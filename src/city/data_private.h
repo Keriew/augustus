@@ -22,8 +22,8 @@ typedef struct {
 
 extern struct city_data_t {
     struct {
-        int8_t triumphal_arches_available;
-        int8_t triumphal_arches_placed;
+        int16_t triumphal_arches_available;
+        int16_t triumphal_arches_placed;
         int16_t legacy_working_dock_ids[10];
         int32_t num_striking_industries;
         uint16_t months_since_last_destroyed_iron_mine;
