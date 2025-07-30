@@ -76,18 +76,18 @@ extern struct city_data_t {
         int32_t soldiers_in_city; // soldiers not on campaign, needing food from mess hall
     } military;
     struct {
-        uint8_t city;
-        int8_t city_foreign_months_left;
-        int8_t total_count;
-        int8_t won_count;
-        uint8_t enemy_strength;
-        uint8_t roman_strength;
-        int8_t months_until_battle;
-        int8_t roman_months_to_travel_forth;
-        int8_t roman_months_to_travel_back;
-        int8_t enemy_months_traveled;
-        int8_t roman_months_traveled;
-    } distant_battle;
+        uint16_t city;
+        int16_t city_foreign_months_left;
+        int16_t total_count;
+        int16_t won_count;
+        uint16_t enemy_strength;
+        uint16_t roman_strength;
+        int16_t months_until_battle;
+        int16_t roman_months_to_travel_forth;
+        int16_t roman_months_to_travel_back;
+        int16_t enemy_months_traveled;
+        int16_t roman_months_traveled;
+    } distant_battle; //preemptively increased to 16 bits, especially for strength values
     struct {
         int32_t treasury;
         int32_t tax_percentage;

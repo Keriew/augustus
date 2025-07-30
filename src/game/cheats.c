@@ -34,7 +34,6 @@
 #include <string.h>
 
 static int map_editor_warning_shown;
-static int extra_legions_unlocked;
 
 static void game_cheat_add_money(uint8_t *);
 static void game_cheat_start_invasion(uint8_t *);
@@ -69,7 +68,9 @@ static void (*const execute_command[])(uint8_t *args) = {
     game_cheat_cast_curse,
     game_cheat_make_buildings_invincible,
     game_cheat_change_climate,
-    game_cheat_unlock_legions
+    game_cheat_unlock_legions,
+    game_cheat_disable_legions_consumption,
+    game_cheat_disable_invasions,
 };
 
 static const char *commands[] = {
@@ -88,7 +89,9 @@ static const char *commands[] = {
     "curse",
     "romanconcrete",
     "globalwarming",
-    "ihaveanarmy"
+    "ihaveanarmy",
+    "breadandfish",
+    "leavemealone",
 };
 
 #define NUMBER_OF_COMMANDS sizeof (commands) / sizeof (commands[0])
@@ -96,6 +99,9 @@ static const char *commands[] = {
 static struct {
     int is_cheating;
     int tooltip_enabled;
+    int extra_legions_unlocked;
+    int disabled_legions_consumption;
+    int disabled_invasions;
 } data;
 
 static int parse_word(uint8_t *string, uint8_t *word)
@@ -275,7 +281,19 @@ static void game_cheat_unlock_all_buildings(uint8_t *args)
 
 static void game_cheat_unlock_legions(uint8_t *args)
 {
-    extra_legions_unlocked = 1;
+    data.extra_legions_unlocked = 1;
+    show_warning(TR_CHEAT_UNLOCK_LEGIONS);
+}
+
+static void game_cheat_disable_legions_consumption(uint8_t *args)
+{
+    data.disabled_legions_consumption = 1;
+    show_warning(TR_CHEAT_UNLOCK_LEGIONS);
+}
+
+static void game_cheat_disable_invasions(uint8_t *args)
+{
+    data.disabled_invasions = 1;
     show_warning(TR_CHEAT_UNLOCK_LEGIONS);
 }
 
@@ -315,5 +333,13 @@ void game_cheat_parse_command(uint8_t *command)
 }
 int game_cheat_extra_legions(void)
 {
-    return extra_legions_unlocked;
+    return data.extra_legions_unlocked;
+}
+int game_cheat_disabled_legions_consumption(void)
+{
+    return data.disabled_legions_consumption;
+}
+int game_cheat_disabled_invasions(void)
+{
+    return data.disabled_invasions;
 }

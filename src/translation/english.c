@@ -1659,6 +1659,8 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_TERRAIN_WATER, "Water" },
     {TR_PARAMETER_TERRAIN_MEADOW, "Meadow" },
     {TR_PARAMETER_TERRAIN_SHRUB, "Shrub" },
+    {TR_CHEAT_DISABLE_INVASIONS, "Disable invasions"},
+    {TR_CHEAT_DISABLE_LEGIONS_CONSUMPTION, "Disable soldier food consumption"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

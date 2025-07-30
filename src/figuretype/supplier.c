@@ -8,6 +8,7 @@
 #include "building/storage.h"
 #include "building/warehouse.h"
 #include "core/image.h"
+#include "city/data_private.h"
 #include "figure/combat.h"
 #include "figure/image.h"
 #include "figure/movement.h"
@@ -18,6 +19,19 @@
 #include "map/road_network.h"
 
 #define MAX_DISTANCE 40
+
+int figure_supplier_max_stocked_mess_hall_adjusted(void)
+{
+    int max_stock;
+    if (city_data.military.total_legions < 10) {
+        max_stock = MAX_FOOD_STOCKED_MESS_HALL;
+    } else if (city_data.military.total_legions == 10) {
+        max_stock = MAX_FOOD_STOCKED_MESS_HALL * 1.5f; //increase by 50% if max legions
+    } else {   //cheat code activated
+        max_stock = MAX_FOOD_STOCKED_MESS_HALL * 2; // double the possible stock
+    }
+    return max_stock;
+}
 
 int figure_supplier_create_delivery_boy(int leader_id, int first_figure_id, int type)
 {
@@ -52,7 +66,7 @@ static int take_food_from_granary(figure *f, int market_id, int granary_id)
     int granary_loads_take;
 
     if (market->type == BUILDING_MESS_HALL) {
-        max_units = MAX_FOOD_STOCKED_MESS_HALL - market_units;
+        max_units = figure_supplier_max_stocked_mess_hall_adjusted() - market_units;
     } else if (market->type == BUILDING_CARAVANSERAI) {
         max_units = MAX_FOOD_STOCKED_CARAVANSERAI - market_units;
     } else {
