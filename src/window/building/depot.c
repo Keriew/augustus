@@ -25,6 +25,7 @@ static void order_set_destination(const generic_button *button);
 static void order_set_resource(const generic_button *button);
 static void order_set_condition_type(const generic_button *button);
 static void order_set_condition_threshold(const generic_button *button);
+static void order_set_condition_threshold_reverse(const generic_button *button);
 static void set_order_resource(const generic_button *button);
 static void set_camera_position(const generic_button *button);
 
@@ -105,7 +106,7 @@ static generic_button depot_order_buttons[] = {
     {100, 56, 284, 22, order_set_source, 0, 2},
     {100, 82, 284, 22, order_set_destination, 0, 3},
     {100, 30, 284, 22, order_set_condition_type, 0, 4},
-    {384, 30, 32, 22, order_set_condition_threshold, 0, 5},
+    {384, 30, 32, 22, order_set_condition_threshold, order_set_condition_threshold_reverse, 5},
     {384, 56, 32, 22, set_camera_position},
     {384, 82, 32, 22, set_camera_position},
 };
@@ -369,6 +370,11 @@ static void order_set_condition_threshold(const generic_button *button)
     window_building_info_depot_toggle_condition_threshold();
 }
 
+static void order_set_condition_threshold_reverse(const generic_button *button)
+{
+    window_building_info_depot_toggle_condition_threshold_reverse();
+}
+
 void window_building_draw_depot_order_source_destination_background(building_info_context *c, int is_select_destination)
 {
     setup_buttons_for_selected_depot();
@@ -503,8 +509,12 @@ static void order_set_resource(const generic_button *button)
 
 void window_building_depot_get_tooltip_main(int *translation)
 {
-    if (data.focus_button_id < 6) {
+
+    if (data.focus_button_id < 5) {
         return;
+    }
+    if (data.focus_button_id == 5) {
+        *translation = TR_TOOLTIP_RIGHT_CLICK_TO_DECREASE;
     }
     const building *depot = building_get(data.depot_building_id);
     if (!depot) {

@@ -198,7 +198,11 @@ static void conditions_load_state(buffer *buf)
 
     int link_type = 0;
     int32_t link_id = 0;
-    for (unsigned int i = 0; i < scenario_events.size; i++) {
+
+    // Using `buffer_at_end` is a hackish way to load all the condition groups
+    // However, we never stored the total condition group count anywhere and, except for some sort of corruption,
+    // this should work. Regardless, this is not a good practice.
+    while (!buffer_at_end(buf)) {
         scenario_condition_group_t condition_group = { 0 };
         scenario_condition_group_load_state(buf, &condition_group, &link_type, &link_id);
         load_link_condition_group(&condition_group, link_type, link_id);

@@ -13,6 +13,7 @@
 #include "city/finance.h"
 #include "core/calc.h"
 #include "core/config.h"
+#include "core/lang.h"
 #include "core/string.h"
 #include "game/resource.h"
 #include "game/state.h"
@@ -29,6 +30,10 @@
 #include "scenario/property.h"
 #include "translation/translation.h"
 #include "widget/city_draw_highway.h"
+
+#include <stdio.h>
+
+static void draw_storage_ids(int x, int y, float scale, int grid_offset);
 
 static int show_building_religion(const building *b)
 {
@@ -120,7 +125,8 @@ static int show_building_logistics(const building *b)
 static int show_building_storages(const building *b)
 {
     b = building_main((building *) b);
-    return b->storage_id > 0 && building_storage_get(b->storage_id);
+    return (b->storage_id > 0 && building_storage_get(b->storage_id))
+        || b->type == BUILDING_DEPOT || b->type == BUILDING_DOCK;
 }
 
 static int show_building_none(const building *b)
@@ -141,18 +147,29 @@ static int show_figure_efficiency(const figure *f)
 
 static int show_figure_food_stocks(const figure *f)
 {
-    if (f->type == FIGURE_MARKET_SUPPLIER || f->type == FIGURE_MARKET_TRADER ||
-        f->type == FIGURE_CARAVANSERAI_SUPPLIER || f->type == FIGURE_CARAVANSERAI_COLLECTOR ||
-        f->type == FIGURE_MESS_HALL_SUPPLIER || f->type == FIGURE_MESS_HALL_FORT_SUPPLIER || f->type == FIGURE_MESS_HALL_COLLECTOR ||
-        f->type == FIGURE_DELIVERY_BOY || f->type == FIGURE_FISHING_BOAT) {
-        return 1;
-    } else if (f->type == FIGURE_CART_PUSHER) {
-        return resource_is_food(f->resource_id);
-    } else if (f->type == FIGURE_WAREHOUSEMAN) {
-        building *b = building_get(f->building_id);
-        return b->type == BUILDING_GRANARY;
+    switch (f->type) {
+        case FIGURE_MARKET_SUPPLIER:
+        case FIGURE_MARKET_TRADER:
+        case FIGURE_CARAVANSERAI_SUPPLIER:
+        case FIGURE_CARAVANSERAI_COLLECTOR:
+        case FIGURE_MESS_HALL_SUPPLIER:
+        case FIGURE_MESS_HALL_FORT_SUPPLIER:
+        case FIGURE_MESS_HALL_COLLECTOR:
+        case FIGURE_DELIVERY_BOY:
+        case FIGURE_FISHING_BOAT:
+            return 1;
+
+        case FIGURE_CART_PUSHER:
+            return resource_is_food(f->resource_id);
+
+        case FIGURE_WAREHOUSEMAN:
+        {
+            building *b = building_get(f->building_id);
+            return b->type == BUILDING_GRANARY;
+        }
+        default:
+            return 0;
     }
-    return 0;
 }
 
 static int show_figure_tax_income(const figure *f)
@@ -162,10 +179,21 @@ static int show_figure_tax_income(const figure *f)
 
 static int show_figure_logistics(const figure *f)
 {
-    return f->type == FIGURE_WAREHOUSEMAN || f->type == FIGURE_DEPOT_CART_PUSHER ||
-        f->type == FIGURE_DOCKER || f->type == FIGURE_LIGHTHOUSE_SUPPLIER ||
-        f->type == FIGURE_TRADE_CARAVAN || f->type == FIGURE_TRADE_CARAVAN_DONKEY ||
-        f->type == FIGURE_TRADE_SHIP || f->type == FIGURE_NATIVE_TRADER;
+    switch (f->type) {
+        case FIGURE_CART_PUSHER:
+        case FIGURE_WAREHOUSEMAN:
+        case FIGURE_DEPOT_CART_PUSHER:
+        case FIGURE_DOCKER:
+        case FIGURE_LIGHTHOUSE_SUPPLIER:
+        case FIGURE_TRADE_CARAVAN:
+        case FIGURE_TRADE_CARAVAN_DONKEY:
+        case FIGURE_TRADE_SHIP:
+        case FIGURE_NATIVE_TRADER:
+        case FIGURE_MESS_HALL_FORT_SUPPLIER:
+            return 1;
+        default:
+            return 0;
+    }
 }
 
 static int show_figure_employment(const figure *f)
@@ -425,6 +453,48 @@ static int get_tooltip_desirability(tooltip_context *c, int grid_offset)
 
 static int get_tooltip_none(tooltip_context *c, int grid_offset)
 {
+    return 0;
+}
+
+static int get_tooltip_depot_orders(tooltip_context *c, int grid_offset)
+{
+    int building_id = map_building_at(grid_offset);
+    building *b = building_get(building_id);
+    if (b->type == BUILDING_DEPOT) {
+        static uint8_t result[256];
+        order depot_order = b->data.depot.current_order;
+        int condition_type = TR_ORDER_CONDITION_NEVER + depot_order.condition.condition_type;
+        const uint8_t *order_string = lang_get_string(CUSTOM_TRANSLATION, condition_type);
+        const uint8_t *moving_resource = lang_get_string(CUSTOM_TRANSLATION, TR_TOOLTIP_DEPOT_MOVED);
+        const uint8_t *resource_name = resource_get_data(depot_order.resource_type)->text;
+        char threshold_str[16] = "\n";
+        if (condition_type > TR_ORDER_CONDITION_ALWAYS) {
+            snprintf(threshold_str, sizeof(threshold_str), " %d", depot_order.condition.threshold);
+        }
+        building *b_src = building_get(depot_order.src_storage_id);
+        building *b_dst = building_get(depot_order.dst_storage_id);
+
+        const uint8_t *src_type = lang_get_string(28, b_src->type);
+        const uint8_t *dst_type = lang_get_string(28, b_dst->type);
+        char src_info[64];
+        char dst_info[64];
+        snprintf(src_info, sizeof(src_info), "%s %d", (const char *) src_type, b_src->storage_id);
+        snprintf(dst_info, sizeof(dst_info), "%s %d", (const char *) dst_type, b_dst->storage_id);
+        const uint8_t *direction_arrow = lang_get_string(CUSTOM_TRANSLATION, TR_TOOLTIP_DEPOT_ORDER_TO);
+
+        snprintf((char *) result, sizeof(result),
+            "%s %s\n"
+            "%s%s\n" //double \n doesnt get rendered, and neither does \n after a space. 
+            "%s %s %s",
+            (const char *) moving_resource, (const char *) resource_name,
+            (const char *) order_string, threshold_str,
+            src_info, (const char *) direction_arrow, dst_info);
+
+        c->precomposed_text = (const uint8_t *) result;
+
+        return 1;
+    }
+
     return 0;
 }
 
@@ -927,10 +997,11 @@ const city_overlay *city_overlay_for_logistics(void)
         show_building_logistics,
         show_figure_logistics,
         get_column_height_none,
-        get_tooltip_none,
+        get_tooltip_depot_orders,
         0,
         0,
-        0
+        0,
+        draw_storage_ids
     };
     return &overlay;
 }

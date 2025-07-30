@@ -47,12 +47,13 @@ static void make_request_visible_and_send_message(scenario_request *request)
     if (city_resource_count(request->resource) >= request->amount.requested) {
         request->can_comply_dialog_shown = 1;
     }
+    int requested = request->amount.requested;
     if (request->resource == RESOURCE_DENARII) {
-        city_message_post(1, MESSAGE_CAESAR_REQUESTS_MONEY, request->id, 0);
+        city_message_post(1, MESSAGE_CAESAR_REQUESTS_MONEY, request->id, requested);
     } else if (request->resource == RESOURCE_TROOPS) {
-        city_message_post(1, MESSAGE_CAESAR_REQUESTS_ARMY, request->id, 0);
+        city_message_post(1, MESSAGE_CAESAR_REQUESTS_ARMY, request->id, requested);
     } else {
-        city_message_post(1, MESSAGE_CAESAR_REQUESTS_GOODS, request->id, 0);
+        city_message_post(1, MESSAGE_CAESAR_REQUESTS_GOODS, request->id, requested);
     }
 }
 
@@ -66,7 +67,8 @@ void scenario_request_clear_all(void)
 void scenario_request_init(void)
 {
     scenario_request *request;
-    array_foreach(requests, request) {
+    array_foreach(requests, request)
+    {
         random_generate_next();
         if (request->resource != RESOURCE_NONE) {
             request->month = (random_byte() & 7) + 2;
@@ -109,11 +111,12 @@ static void process_request(scenario_request *request)
     if (state == REQUEST_STATE_DISPATCHED || state == REQUEST_STATE_DISPATCHED_LATE) {
         --request->months_to_comply;
         if (request->months_to_comply <= 0) {
+            int requested_amount = request->amount.requested; // Save until reset
             if (state == REQUEST_STATE_DISPATCHED) {
-                city_message_post(1, MESSAGE_REQUEST_RECEIVED, request->id, 0);
+                city_message_post(1, MESSAGE_REQUEST_RECEIVED, request->id, requested_amount);
                 city_ratings_change_favor(request->favor);
             } else {
-                city_message_post(1, MESSAGE_REQUEST_RECEIVED_LATE, request->id, 0);
+                city_message_post(1, MESSAGE_REQUEST_RECEIVED_LATE, request->id, requested_amount);
                 city_ratings_change_favor(request->favor / 2);
             }
             request->state = REQUEST_STATE_RECEIVED;
@@ -147,9 +150,9 @@ static void process_request(scenario_request *request)
         }
         if (!request->can_comply_dialog_shown) {
             resource_type resource = request->resource;
-            int resource_amount = city_resource_count(resource);
+            int resource_amount = building_warehouses_count_available_resource(resource, 1);
             if (resource_is_food(resource)) {
-                resource_amount += city_resource_count_food_on_granaries(resource) / RESOURCE_ONE_LOAD;
+                resource_amount += building_granaries_count_available_resource(resource, 1);
             }
             if (resource_amount >= request->amount.requested) {
                 request->can_comply_dialog_shown = 1;
@@ -194,7 +197,7 @@ void scenario_request_dispatch(int id)
     } else {
         int amount_left = building_warehouses_send_resources_to_rome(request->resource, amount);
         if (amount_left > 0 && resource_is_food(request->resource)) {
-            building_granaries_send_resources_to_rome(request->resource, amount_left * RESOURCE_ONE_LOAD);
+            building_granaries_send_resources_to_rome(request->resource, amount_left);
         }
     }
 }
@@ -370,7 +373,8 @@ void scenario_request_save_state(buffer *list)
     buffer_init_dynamic_array(list, requests.size, struct_size);
 
     const scenario_request *request;
-    array_foreach(requests, request) {
+    array_foreach(requests, request)
+    {
         request_save(list, request);
     }
 }
@@ -443,43 +447,54 @@ void scenario_request_load_state_old_version(buffer *list, requests_old_state_se
         for (size_t i = 0; i < MAX_ORIGINAL_REQUESTS; i++) {
             array_advance(requests);
         }
-        array_foreach(requests, request) {
+        array_foreach(requests, request)
+        {
             request->year = buffer_read_i16(list);
         }
-        array_foreach(requests, request) {
+        array_foreach(requests, request)
+        {
             request->resource = buffer_read_i16(list);
         }
-        array_foreach(requests, request) {
+        array_foreach(requests, request)
+        {
             request->amount.min = buffer_read_i16(list);
             request->amount.max = request->amount.min;
             request->amount.requested = request->amount.min;
         }
-        array_foreach(requests, request) {
+        array_foreach(requests, request)
+        {
             request->deadline_years = buffer_read_i16(list);
         }
     } else if (section == REQUESTS_OLD_STATE_SECTIONS_CAN_COMPLY) {
-        array_foreach(requests, request) {
+        array_foreach(requests, request)
+        {
             request->can_comply_dialog_shown = buffer_read_u8(list);
         }
     } else if (section == REQUESTS_OLD_STATE_SECTIONS_FAVOR_REWARD) {
-        array_foreach(requests, request) {
+        array_foreach(requests, request)
+        {
             request->favor = buffer_read_u8(list);
         }
     } else if (section == REQUESTS_OLD_STATE_SECTIONS_ONGOING_INFO) {
-        array_foreach(requests, request) {
+        array_foreach(requests, request)
+        {
             request->month = buffer_read_u8(list);
         }
-        array_foreach(requests, request) {
+        array_foreach(requests, request)
+        {
             request->state = buffer_read_u8(list);
         }
-        array_foreach(requests, request) {
+        array_foreach(requests, request)
+        {
             request->visible = buffer_read_u8(list);
         }
-        array_foreach(requests, request) {
+        array_foreach(requests, request)
+        {
             request->months_to_comply = buffer_read_u8(list);
         }
         // Setup any default values we need for values that didn't exist in old versions.
-        array_foreach(requests, request) {
+        array_foreach(requests, request)
+        {
             request->extension_months_to_comply = REQUESTS_DEFAULT_MONTHS_TO_COMPLY;
             request->extension_disfavor = REQUESTS_DEFAULT_EXTENSION_DISFAVOUR;
             request->ignored_disfavor = REQUESTS_DEFAULT_IGNORED_DISFAVOUR;

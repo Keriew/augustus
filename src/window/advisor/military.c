@@ -151,8 +151,9 @@ static int draw_background(void)
         button_border_draw(22, 77 + 44 * i, 560, 40, 0);
         image_draw(m->legion_flag_id, 32, 82 + 44 * i,
             COLOR_MASK_NONE, SCALE_NONE);
+
         lang_text_draw(m->legion_name_group, m->legion_name_id, 84, 83 + 44 * i, FONT_NORMAL_WHITE);
-        int width = text_draw_number(m->num_figures, '@', " ", 84, 100 + 44 * i, FONT_NORMAL_GREEN, 0);
+        int width = text_draw_number(formation_legion_count_alive_soldiers(m->id), '@', " ", 84, 100 + 44 * i, FONT_NORMAL_GREEN, 0);
         switch (m->figure_type) {
             case FIGURE_FORT_LEGIONARY:
                 text_draw(translation_for(TR_WINDOW_ADVISOR_LEGIONARIES), 84 + width, 100 + 44 * i, FONT_NORMAL_GREEN, 0);

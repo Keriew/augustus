@@ -110,13 +110,15 @@ static int parse_word(uint8_t *string, uint8_t *word)
     *word = 0;
     return count + 1;
 }
-
 // return value is next argument index
 static int parse_integer(uint8_t *string, int *value)
 {
+    if (!string || !value) {
+        return 0;
+    }
     uint8_t copy[MAX_COMMAND_SIZE];
     int count = 0;
-    while (*string && *string != ' ') {
+    while (*string && *string != ' ' && count < MAX_COMMAND_SIZE - 1) {
         copy[count] = *string;
         count++;
         string++;

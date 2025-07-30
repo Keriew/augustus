@@ -89,7 +89,7 @@ static void reset_tooltip(tooltip_context *c)
 
 static const uint8_t *get_tooltip_text(const tooltip_context *c)
 {
-    const uint8_t* text;
+    const uint8_t *text;
     if (c->precomposed_text) {
         return c->precomposed_text;
     }
@@ -248,13 +248,15 @@ static void draw_overlay_tooltip(tooltip_context *c)
     const uint8_t *text = get_tooltip_text(c);
     int width = 200;
     int largest_width;
+
     int lines = text_measure_multiline(text, width - 16, FONT_SMALL_PLAIN, &largest_width);
     if (lines > 2) {
         width = 300;
         lines = text_measure_multiline(text, width - 16, FONT_SMALL_PLAIN, &largest_width);
     }
-    int height = 16 * lines + 10;
     width = largest_width + 16;
+    int height = 16 * lines + 10;
+
 
     int x, y;
     if (c->mouse_x < width + 20) {
@@ -439,7 +441,7 @@ static void draw_tile_tooltip(tooltip_context *c)
         text_draw_label_and_number(string_from_ascii("y: "), y_tile, " ", 2, 19, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
 
         graphics_renderer()->finish_tooltip_creation();
-    
+
         save_tooltip_text(0);
         tile_data.active = 1;
         tile_data.x = x_tile;
@@ -453,7 +455,7 @@ static void draw_tooltip(tooltip_context *c)
         draw_button_tooltip(c);
     } else if (c->type == TOOLTIP_OVERLAY) {
         draw_overlay_tooltip(c);
-    } else if(c->type == TOOLTIP_TILES) {
+    } else if (c->type == TOOLTIP_TILES) {
         draw_tile_tooltip(c);
     } else if (c->type == TOOLTIP_SENATE) {
         draw_senate_tooltip(c);
@@ -466,7 +468,7 @@ void tooltip_handle(const mouse *m, void (*func)(tooltip_context *))
         reset_timer();
         return;
     }
-    tooltip_context context = {m->x, m->y};
+    tooltip_context context = { m->x, m->y };
     context.text_group = DEFAULT_TEXT_GROUP;
     if (setting_tooltips() && func) {
         func(&context);

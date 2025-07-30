@@ -166,7 +166,7 @@ static color_t get_building_color_mask(const building *b)
         switch (b->type) {
             //buildings that have labor but no walkers
             case BUILDING_LATRINES:
-            case BUILDING_WELL:
+            case BUILDING_FOUNTAIN:
                 color_mask = COLOR_MASK_NONE;
                 //all other buildings
             default:
@@ -762,6 +762,7 @@ static void draw_animation(int x, int y, int grid_offset)
                 if (b->resources[RESOURCE_NONE] < QUARTER_GRANARY) {
                     image_draw(image_group(GROUP_BUILDING_GRANARY) + 5, x + 117, y - 62, color_mask, scale);
                 }
+                draw_permissions_flag(b, x + 81, y - 101, color_mask);
             } else {
                 int animation_offset = building_animation_offset(b, image_id, grid_offset);
                 if (animation_offset > 0) {

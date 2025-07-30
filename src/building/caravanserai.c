@@ -5,19 +5,29 @@
 #include "city/buildings.h"
 #include "city/trade.h"
 #include "city/resource.h"
+#include "empire/city.h"
 
 #define INFINITE 10000
 
 int building_caravanserai_enough_foods(building *caravanserai)
 {
-    int food_required_monthly = trade_caravan_count() * FOOD_PER_TRADER_MONTHLY;
+    int food_required_monthly = building_caravanserai_food_required_monthly();
     int total_food_in_caravanserai = 0;
 
     for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
-        total_food_in_caravanserai += caravanserai->resources[r];            
+        total_food_in_caravanserai += caravanserai->resources[r];
     }
 
     return total_food_in_caravanserai >= food_required_monthly;
+}
+
+int building_caravanserai_food_required_monthly(void)
+{
+    int is_sea_trade = 0;
+    int is_route_open = 1;
+    int open_land_routes = empire_city_get_trade_routes_count(is_sea_trade, is_route_open);
+    return open_land_routes * FOOD_PER_LAND_ROUTE_MONTHLY;
+
 }
 
 int building_caravanserai_get_storage_destination(building *caravanserai)

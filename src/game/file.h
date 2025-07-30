@@ -41,6 +41,8 @@ int game_file_load_saved_game(const char *filename);
  */
 int game_file_write_saved_game(const char *filename);
 
+int game_file_make_yearly_autosave(void);
+
 /**
  * Delete saved game
  * @param filename File to delete

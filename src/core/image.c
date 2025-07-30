@@ -2,6 +2,7 @@
 
 #include "assets/assets.h"
 #include "building/building.h"
+#include "building/image.h"
 #include "core/buffer.h"
 #include "core/file.h"
 #include "core/image_packer.h"
@@ -9,7 +10,9 @@
 #include "core/log.h"
 #include "graphics/font.h"
 #include "graphics/renderer.h"
+#include "map/building_tiles.h"
 #include "map/image.h"
+#include "map/terrain.h"
 #include "scenario/property.h"
 
 #include <stdlib.h>
@@ -616,7 +619,7 @@ static void release_external_buffers(void)
     }
 }
 
-static void update_native_hut_alt_images(int old_climate, int new_climate)
+static void update_native_images(int old_climate, int new_climate)
 {
     if (old_climate == new_climate) {
         return;
@@ -647,6 +650,14 @@ static void update_native_hut_alt_images(int old_climate, int new_climate)
 
     for (building *b = building_first_of_type(BUILDING_NATIVE_HUT_ALT); b; b = b->next_of_type) {
         map_image_set(b->grid_offset, alt_native_hut_new_image_id + map_image_at(b->grid_offset) - alt_native_hut_old_image_id);
+    }
+    building_type native_buildings[] = { BUILDING_NATIVE_DECORATION, BUILDING_NATIVE_MONUMENT, BUILDING_NATIVE_WATCHTOWER };
+    for (int i = 0; i < sizeof(native_buildings) / sizeof(native_buildings[0]); i++) {
+        building_type type = native_buildings[i];
+        int image_id = building_image_get_for_type(type);
+        for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
+            map_building_tiles_add(b->id, b->x, b->y, b->size, image_id, TERRAIN_BUILDING);
+        }
     }
 }
 
@@ -746,7 +757,7 @@ int image_load_climate(int climate_id, int is_editor, int force_reload, int keep
     }
 
     // Update native huts alternative images after climate change.
-    update_native_hut_alt_images(data.current_climate, climate_id);
+    update_native_images(data.current_climate, climate_id);
 
     data.current_climate = climate_id;
     data.is_editor = is_editor;

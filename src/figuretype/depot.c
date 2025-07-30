@@ -110,11 +110,11 @@ static int is_order_condition_satisfied(const order *current_order)
     }
     building *src = building_get(current_order->src_storage_id);
     int src_amount = src->type == BUILDING_GRANARY ?
-        building_granary_resource_amount(current_order->resource_type, src) / RESOURCE_ONE_LOAD :
+        building_granary_resource_amount(current_order->resource_type, src) :
         building_warehouse_get_amount(src, current_order->resource_type);
     building *dst = building_get(current_order->dst_storage_id);
     int dst_amount = dst->type == BUILDING_GRANARY ?
-        building_granary_resource_amount(current_order->resource_type, dst) / RESOURCE_ONE_LOAD :
+        building_granary_resource_amount(current_order->resource_type, dst) :
         building_warehouse_get_amount(dst, current_order->resource_type);
     if (src_amount == 0) {
         return 0;
@@ -230,7 +230,13 @@ void figure_depot_cartpusher_action(figure *f)
     f->cart_image_id = 0;
     int speed_factor = DEPOT_CART_PUSHER_SPEED;
     int percentage_speed = 0;
-    f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS_HIGHWAY;
+    
+    if (config_get(CONFIG_GP_CARAVANS_MOVE_OFF_ROAD)) {
+        f->terrain_usage = TERRAIN_USAGE_ANY;
+    } else {
+        f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS_HIGHWAY;
+    }
+    
     building *b = building_get(f->building_id);
 
     if (!b || b->type != BUILDING_DEPOT || b->state != BUILDING_STATE_IN_USE) {
@@ -302,6 +308,15 @@ void figure_depot_cartpusher_action(figure *f)
             f->wait_ticks++;
             if (f->wait_ticks > DEPOT_CART_LOAD_OFFLOAD_DELAY) {
                 building *src = building_get(b->data.depot.current_order.src_storage_id);
+
+                // Depot cartpusher waits if not enough goods
+                int src_amount = src->type == BUILDING_GRANARY ?
+                    building_granary_resource_amount(b->data.depot.current_order.resource_type, src) :
+                    building_warehouse_get_amount(src, b->data.depot.current_order.resource_type);
+                if (b->data.depot.current_order.condition.condition_type == ORDER_CONDITION_SOURCE_HAS_MORE_THAN &&
+                    src_amount < b->data.depot.current_order.condition.threshold) {
+                    break;
+                }
 
                 // TODO upgradable?
                 int capacity = resource_is_food(b->data.depot.current_order.resource_type) ? DEPOT_CART_PUSHER_FOOD_CAPACITY : DEPOT_CART_PUSHER_OTHER_CAPACITY;

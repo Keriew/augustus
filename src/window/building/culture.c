@@ -765,7 +765,7 @@ static void draw_grand_temple(building_info_context *c, const char *sound_file,
                 int module_desc = temple_module_options[data.god_id * 2 + (b->monument.upgrades - 1)].option.desc;
                 height += text_draw_multiline(translation_for(module_desc),
                     c->x_offset + 22, c->y_offset + 66 + height + extra_y, 15 * c->width_blocks,
-                    0, FONT_NORMAL_BLACK, 0);
+                    0, FONT_NORMAL_GREEN, 0);
             }
         }
         if (b->type == BUILDING_GRAND_TEMPLE_MARS) {

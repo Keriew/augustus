@@ -16,8 +16,8 @@ typedef enum order_condition_type {
 
 typedef struct order {
     resource_type resource_type;
-    int src_storage_id;
-    int dst_storage_id;
+    int src_storage_id; //this is actually building_id, not storage_id
+    int dst_storage_id; //this is actually building_id, not storage_id
     struct {
         order_condition_type condition_type;
         int threshold;
@@ -45,7 +45,7 @@ typedef struct building {
     union {
         short house_level;
         short warehouse_resource_id;
-        short orientation;
+        short orientation; // rotation of the building, in number of turns. Used for statues, warehouses, etc.
         short fort_figure_type;
         short native_meeting_center_id;
         short barracks_priority;
@@ -175,7 +175,7 @@ typedef struct building {
     signed char desirability;
     unsigned char is_deleted;
     unsigned char is_close_to_water;
-    unsigned char storage_id;
+    unsigned char storage_id; //player-visible ID of the storage building, e.g. Granary 7, Warehouse 33
     union {
         signed char house_happiness;
         signed char native_anger;
@@ -265,7 +265,7 @@ int building_get_laborers(building_type type);
 
 unsigned char building_stockpiling_toggle(building *b);
 
-int building_get_tourism(const building* b);
+int building_get_tourism(const building *b);
 
 int building_get_levy(const building *b);
 

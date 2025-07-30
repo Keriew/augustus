@@ -12,6 +12,7 @@
 #include "map/grid.h"
 #include "map/image.h"
 #include "map/random.h"
+#include "map/road_access.h"
 #include "map/terrain.h"
 
 #define MAX_DIR 4
@@ -437,6 +438,57 @@ void building_house_devolve_from_large_insula(building *house)
         house->house_is_merged = 1;
         building_house_change_to(house, BUILDING_HOUSE_MEDIUM_INSULA);
     }
+}
+
+static int find_best_corner_for_devolve(int x, int y, int old_size, int new_size)
+{
+    int max_offset = old_size - new_size;
+    int x_one_tile = -1, y_one_tile = -1;  // road found 1 tile away (radius 2)
+
+    for (int oy = 0; oy <= max_offset; oy++) {
+        for (int ox = 0; ox <= max_offset; ox++) {
+            int base_x = x + ox;
+            int base_y = y + oy;
+            int rx, ry;
+            if (map_closest_road_within_radius(base_x, base_y, new_size, 1, &rx, &ry)) {
+                return map_grid_offset(base_x, base_y);
+            }
+            // fallback: store 1 tile-away candidate if not already stored
+            if (x_one_tile == -1 &&
+                map_closest_road_within_radius(base_x, base_y, new_size, 2, &rx, &ry)) {
+                x_one_tile = base_x;
+                y_one_tile = base_y;
+            }
+        }
+    }
+
+    if (x_one_tile != -1) { //only found position 1 tile away from road
+        return map_grid_offset(x_one_tile, y_one_tile);
+    }
+    // not found
+    return map_grid_offset(x, y);
+}
+
+void building_house_desize_patrician(building *house)
+{
+    //no need to split inventory since we're keeping everything in main building
+    map_building_tiles_remove(house->id, house->x, house->y); // remove all old tiles
+    int road_tile_offset = find_best_corner_for_devolve(house->x, house->y, house->size, house->size - 1);
+
+    int new_x = map_grid_offset_to_x(road_tile_offset);
+    int new_y = map_grid_offset_to_y(road_tile_offset);
+    house->x = new_x;
+    house->y = new_y;
+    building_change_type(house, house->type - 1);
+    house->subtype.house_level = house->type - BUILDING_HOUSE_VACANT_LOT;
+    unsigned char new_size = house->size - 1;
+    house->size = house->house_size = new_size;
+    house->is_close_to_water = building_is_close_to_water(house);
+    house->house_is_merged = 0;
+    house->distance_from_entry = 0;
+
+    // Add the new smaller building tiles
+    map_building_tiles_add(house->id, house->x, house->y, house->size, building_image_get(house), TERRAIN_BUILDING);
 }
 
 void building_house_devolve_from_large_villa(building *house)

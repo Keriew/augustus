@@ -39,7 +39,7 @@ void formation_legion_delete_for_fort(building *fort)
                 figure_delete(figure_get(m->standard_figure_id));
             }
             for (int i = 0; i < m->num_figures; ++i) {
-                figure_get(m->figures[i])->action_state = FIGURE_ACTION_149_CORPSE;
+                figure_get(m->figures[i])->state = FIGURE_STATE_DEAD;
             }
             formation_clear(fort->formation_id);
             formation_calculate_legion_totals();
@@ -237,15 +237,7 @@ void formation_legions_dispatch_to_distant_battle(void)
 static void kill_soldiers(formation *m, int kill_percentage)
 {
     formation_change_morale(m, -75);
-    int soldiers_total = 0;
-    for (int fig = 0; fig < m->num_figures; fig++) {
-        if (m->figures[fig] > 0) {
-            figure *f = figure_get(m->figures[fig]);
-            if (!figure_is_dead(f)) {
-                soldiers_total++;
-            }
-        }
-    }
+    int soldiers_total = formation_legion_count_alive_soldiers(m->id);
     int soldiers_to_kill = calc_adjust_with_percentage(soldiers_total, kill_percentage);
     if (soldiers_to_kill >= soldiers_total) {
         m->is_at_fort = 1;

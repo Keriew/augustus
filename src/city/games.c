@@ -69,8 +69,8 @@ int city_games_resource_cost(int game_type_id, resource_type resource)
         return 0;
     }
     if (game_type_id == 3) { //for animal games, check if player has more fish or meat
-        int player_meat_count = city_resource_get_amount_including_granaries(RESOURCE_MEAT, 2, 0);
-        int player_fish_count = city_resource_get_amount_including_granaries(RESOURCE_FISH, 2, 0);
+        int player_meat_count = city_resource_get_amount_including_granaries(RESOURCE_MEAT, 2, 0, 1);
+        int player_fish_count = city_resource_get_amount_including_granaries(RESOURCE_FISH, 2, 0, 1);
 
         int dominant_resource = (player_meat_count >= player_fish_count) ? RESOURCE_MEAT : RESOURCE_FISH;
         for (int i = 0; i < RESOURCE_MAX; ++i) {
@@ -123,7 +123,7 @@ void city_games_schedule(int game_id)
         if (resource_cost) {
             resource_cost = building_warehouses_remove_resource(resource, resource_cost);
             if (resource_cost > 0 && resource_is_food(resource)) {
-                building_granaries_remove_resource(resource, resource_cost * RESOURCE_ONE_LOAD);
+                building_granaries_remove_resource(resource, resource_cost);
             }
         }
     }
