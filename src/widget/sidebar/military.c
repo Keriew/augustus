@@ -216,7 +216,8 @@ static int get_health_text_id(int health)
 
 int widget_sidebar_military_get_standard_image(int legion_id)
 {
-    switch (legion_id) {
+    int old_legion_id = legion_id - 1; // Legion IDs start at 1, but we used to use 0-based indexin
+    switch (old_legion_id) {
         case 0:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS + 0);
         case 1:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 1;
         case 2:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 2;
@@ -243,15 +244,15 @@ int widget_sidebar_military_get_standard_image(int legion_id)
 
 int widget_sidebar_military_get_legion_name_group(int legion_id)
 {
-    return legion_id <= 9 ? 138 : 10000;
+    return legion_id <= 10 ? 138 : 10000;
 }
 
 int widget_sidebar_military_get_legion_name_id(int legion_id)
 {
-    if (legion_id <= 9) {
+    if (legion_id <= 10) {
         return legion_id;
     } else {
-        return TR_BUILDING_FORT_STANDARD_ELEPHANTS + legion_id - 10;
+        return TR_BUILDING_FORT_STANDARD_ELEPHANTS + legion_id - 11;
     }
 }
 

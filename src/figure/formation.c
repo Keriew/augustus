@@ -25,10 +25,10 @@
 
 #define FORMATION_ARRAY_SIZE_STEP 50
 #define ORIGINAL_BUFFER_SIZE_PER_FORMATION 128
+#define BUFFER_SIZE_FOR_10_LEGIONS 128
 #define CURRENT_BUFFER_SIZE_PER_FORMATION 256
 
 static array(formation) formations;
-
 static struct {
     int id_last_in_use;
     int id_last_legion;
@@ -79,9 +79,9 @@ formation *formation_create_legion(int building_id, figure_type type)
     m->layout = FORMATION_DOUBLE_LINE_1;
     m->morale = 50;
     m->is_at_fort = 1;
-    m->legion_id = m->id - 1; //legion ids start odering at 0
-    if (m->legion_id >= 19) {
-        m->legion_id = 19;
+    m->legion_id = data.num_legions + 1; // Legion ID starts at 1
+    if (m->legion_id >= 20) {
+        m->legion_id = 20;
     }
     building *fort_ground = building_get(building_get(building_id)->next_part_building_id);
     m->x = m->standard_x = m->x_home = fort_ground->x; // home x = destination x = current x position of the legion = x of the fort
@@ -114,7 +114,7 @@ static formation *formation_create(figure_type type, int layout, int orientation
     f->in_use = 1;
     f->is_legion = 0;
     f->figure_type = type;
-    f->legion_id = f->id - 20; //weird hack
+    f->legion_id = 0; //legions created separately
     f->morale = 100;
     if (layout == FORMATION_ENEMY_DOUBLE_LINE) {
         if (orientation == DIR_0_TOP || orientation == DIR_4_BOTTOM) {
@@ -909,11 +909,14 @@ void formations_load_state(buffer *buf, buffer *totals, int version)
 
     int formation_buf_size = ORIGINAL_BUFFER_SIZE_PER_FORMATION;
     size_t buf_size = buf->size;
-
+    if (version <= SAVE_GAME_LAST_10_LEGIONS_MAX) {
+        formation_buf_size = BUFFER_SIZE_FOR_10_LEGIONS;
+    }
     if (version > SAVE_GAME_LAST_STATIC_VERSION) {
         formation_buf_size = buffer_read_i32(buf);
         buf_size -= 4;
     }
+
 
     int formations_to_load = (int) buf_size / formation_buf_size;
 
