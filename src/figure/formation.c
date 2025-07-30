@@ -955,9 +955,19 @@ void formations_load_state(buffer *buf, buffer *totals, int version)
         f->standard_figure_id = buffer_read_i16(buf);
         f->is_legion = buffer_read_u8(buf);
         f->mess_hall_max_morale_modifier = buffer_read_u8(buf);
-        f->legion_flag_id = buffer_read_i32(buf);
-        f->legion_name_id = buffer_read_i32(buf);
-        f->legion_name_group = buffer_read_i32(buf);
+        if (version <= SAVE_GAME_LAST_10_LEGIONS_MAX) {
+            if (f->is_legion) {
+                f->legion_id = f->legion_id + f->is_legion; // 1-based index for legions
+            }
+            // after increasing number of legions, switched to 1-based index
+            f->legion_flag_id = widget_sidebar_military_get_standard_image(f->legion_id);
+            f->legion_name_id = widget_sidebar_military_get_legion_name_id(f->legion_id);
+            f->legion_name_group = widget_sidebar_military_get_legion_name_group(f->legion_id);
+        } else {
+            f->legion_flag_id = buffer_read_i32(buf);
+            f->legion_name_id = buffer_read_i32(buf);
+            f->legion_name_group = buffer_read_i32(buf);
+        }
         f->attack_type = buffer_read_i16(buf);
         f->legion_recruit_type = buffer_read_i16(buf);
         f->has_military_training = buffer_read_i16(buf);

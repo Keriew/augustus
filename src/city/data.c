@@ -445,7 +445,7 @@ static void save_main_data(buffer *main)
     buffer_write_u8(main, city_data.military.total_legions);
     buffer_write_u8(main, city_data.military.empire_service_legions);
     buffer_write_u8(main, city_data.games.chosen_horse);
-    buffer_write_u8(main, city_data.military.total_soldiers);
+    buffer_write_i32(main, city_data.military.total_soldiers);
     buffer_write_i8(main, city_data.building.triumphal_arches_placed);
     buffer_write_i8(main, city_data.sound.die_citizen);
     buffer_write_i8(main, city_data.sound.die_soldier);
@@ -947,7 +947,11 @@ static void load_main_data(buffer *main, int version)
     city_data.military.total_legions = buffer_read_u8(main);
     city_data.military.empire_service_legions = buffer_read_u8(main);
     city_data.games.chosen_horse = buffer_read_u8(main);
-    city_data.military.total_soldiers = buffer_read_u8(main);
+    if (version <= SAVE_GAME_LAST_10_LEGIONS_MAX) {
+        city_data.military.total_soldiers = buffer_read_u8(main);
+    } else {
+        city_data.military.total_soldiers = buffer_read_i32(main);
+    }
     city_data.building.triumphal_arches_placed = buffer_read_i8(main);
     city_data.sound.die_citizen = buffer_read_i8(main);
     city_data.sound.die_soldier = buffer_read_i8(main);

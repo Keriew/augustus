@@ -216,28 +216,28 @@ static int get_health_text_id(int health)
 
 int widget_sidebar_military_get_standard_image(int legion_id)
 {
-    int old_legion_id = legion_id - 1; // Legion IDs start at 1, but we used to use 0-based indexin
-    switch (old_legion_id) {
-        case 0:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS + 0);
-        case 1:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 1;
-        case 2:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 2;
-        case 3:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 3;
-        case 4:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 4;
-        case 5:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 5;
-        case 6:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 6;
-        case 7:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 7;
-        case 8:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 8;
-        case 9:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 9;
-        case 10: return assets_get_image_id("UI", "11Legion_Elephants");
-        case 11: return assets_get_image_id("UI", "12Legion_Thunder_Bolts");
-        case 12: return assets_get_image_id("UI", "13Legion_Bulls");
-        case 13: return assets_get_image_id("UI", "14Legion_Centaurs");
-        case 14: return assets_get_image_id("UI", "15Legion_Octopi");
-        case 15: return assets_get_image_id("UI", "16Legion_Bears");
-        case 16: return assets_get_image_id("UI", "17Legion_Scorpions");
-        case 17: return assets_get_image_id("UI", "18Legion_Camels");
-        case 18: return assets_get_image_id("UI", "19Legion_Dolphins");
-        case 19: return assets_get_image_id("UI", "20Legion_Sea_Goats");
+    switch (legion_id) {
+        case 0: return 0; // No standard for non-legion formations;
+        case 1:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS + 0);
+        case 2:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 1;
+        case 3:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 2;
+        case 4:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 3;
+        case 5:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 4;
+        case 6:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 5;
+        case 7:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 6;
+        case 8:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 7;
+        case 9:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 8;
+        case 10:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 9;
+        case 11: return assets_get_image_id("UI", "11Legion_Elephants");
+        case 12: return assets_get_image_id("UI", "12Legion_Thunder_Bolts");
+        case 13: return assets_get_image_id("UI", "13Legion_Bulls");
+        case 14: return assets_get_image_id("UI", "14Legion_Centaurs");
+        case 15: return assets_get_image_id("UI", "15Legion_Octopi");
+        case 16: return assets_get_image_id("UI", "16Legion_Bears");
+        case 17: return assets_get_image_id("UI", "17Legion_Scorpions");
+        case 18: return assets_get_image_id("UI", "18Legion_Camels");
+        case 19: return assets_get_image_id("UI", "19Legion_Dolphins");
+        case 20: return assets_get_image_id("UI", "20Legion_Sea_Goats");
         default: return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS + 9);
     }
 }
@@ -250,7 +250,7 @@ int widget_sidebar_military_get_legion_name_group(int legion_id)
 int widget_sidebar_military_get_legion_name_id(int legion_id)
 {
     if (legion_id <= 10) {
-        return legion_id;
+        return legion_id - 1; // old index was 0-based, now 1-based
     } else {
         return TR_BUILDING_FORT_STANDARD_ELEPHANTS + legion_id - 11;
     }

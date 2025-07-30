@@ -68,9 +68,9 @@ extern struct city_data_t {
         } invasion;
     } emperor;
     struct {
-        uint8_t total_legions;
-        uint8_t total_soldiers;
-        uint8_t empire_service_legions;
+        uint8_t total_legions; // max legions 256, enforced by the data structure
+        int32_t total_soldiers;
+        uint8_t empire_service_legions;// max legions 256, enforced by the data structure
         int32_t legionary_legions;
         int32_t native_attack_duration;
         int32_t soldiers_in_city; // soldiers not on campaign, needing food from mess hall
