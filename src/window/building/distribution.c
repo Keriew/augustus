@@ -395,45 +395,6 @@ static void draw_permissions_buttons(int x, int y, int building_type, building_i
     image_buttons_draw(c->x_offset + 421, c->y_offset + 10, image_buttons_maintain, button);
 }
 
-// static void draw_granary_permissions_buttons(int x, int y, unsigned int buttons)
-// {
-//     static int images_permission[7];
-//     if (!images_permission[0]) {
-//         images_permission[0] = assets_get_image_id("Walkers", "marketbuyer_sw_01");
-//         images_permission[1] = image_group(GROUP_FIGURE_TRADE_CARAVAN) + 4;
-//         images_permission[2] = image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE);
-//         images_permission[3] = assets_get_image_id("Walkers", "Barkeep SW 01");
-//         images_permission[4] = assets_get_image_id("Walkers", "quartermaster_sw_01");
-//         images_permission[5] = assets_get_image_id("Walkers", "caravanserai_overseer_sw_01");
-//         images_permission[6] = image_group(GROUP_FIGURE_CARTPUSHER_CART) + 136;
-//     }
-
-//     int image_offset_x, image_offset_y;
-
-//     for (unsigned int i = 0; i < buttons; i++) {
-//         int permission = granary_distribution_permissions_buttons[i].parameter1;
-//         int is_sea_trade_route = permission == BUILDING_STORAGE_PERMISSION_DOCK;
-//         int permission_state = building_storage_get_permission(permission, building_get(data.building_id));
-
-//         if (!permission_state) {
-//             inner_panel_draw(x + 2, y + 2, 3, 3);
-//         }
-//         image_offset_x = is_sea_trade_route ? 12 : 7;
-//         image_offset_y = is_sea_trade_route ? 16 : 7;
-
-//         image_draw(images_permission[i], x + image_offset_x, y + image_offset_y, COLOR_MASK_NONE, SCALE_NONE);
-
-//         if (!permission_state) {
-//             image_draw(assets_get_image_id("UI", "Large_Widget_Cross"), x + 15, y + 15,
-//             COLOR_MASK_NONE, SCALE_NONE);
-//         }
-
-//         button_border_draw(x, y, 52, 52, data.permission_focus_button_id == i + 1 || !permission_state);
-
-//         x += 62;
-//     }
-// }
-
 static void init_dock_permission_buttons(void)
 {
     dock_distribution_permissions_buttons_count = 0;
