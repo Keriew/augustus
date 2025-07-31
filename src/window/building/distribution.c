@@ -26,6 +26,7 @@
 #include "figure/figure.h"
 #include "graphics/button.h"
 #include "graphics/generic_button.h"
+#include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/image_button.h"
 #include "graphics/lang_text.h"
@@ -69,6 +70,42 @@ static generic_button go_to_lighthouse_action_button[] = {
     {0, 0, 400, 100, button_lighthouse_policy}
 };
 
+typedef struct {
+    building_storage_permission_states permission;
+    int x;
+    int y;
+    int width;
+    int height;
+} permission_button_info;
+// Maximum number of permission buttons that can be displayed
+#define MAX_PERMISSION_BUTTONS 16
+#define WIDTH_WINDOW_BORDER 4
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
+// Dynamic permission button system
+static generic_button permission_buttons[MAX_PERMISSION_BUTTONS];
+static int active_permissions_count = 0;
+
+static int granary_permissions_buttons[] = {
+    BUILDING_STORAGE_PERMISSION_MARKET,
+    BUILDING_STORAGE_PERMISSION_TRADERS,
+    BUILDING_STORAGE_PERMISSION_NATIVES,
+    BUILDING_STORAGE_PERMISSION_DOCK,
+    BUILDING_STORAGE_PERMISSION_BARKEEP,
+    BUILDING_STORAGE_PERMISSION_QUARTERMASTER,
+    BUILDING_STORAGE_PERMISSION_CARAVANSERAI,
+};
+static int warehouse_permissions_buttons[] = {
+    BUILDING_STORAGE_PERMISSION_MARKET,
+    BUILDING_STORAGE_PERMISSION_TRADERS,
+    BUILDING_STORAGE_PERMISSION_NATIVES,
+    BUILDING_STORAGE_PERMISSION_DOCK,
+    // BUILDING_STORAGE_PERMISSION_BARKEEP,
+    // BUILDING_STORAGE_PERMISSION_WORKCAMP,
+    // BUILDING_STORAGE_PERMISSION_ARMOURY,
+    // BUILDING_STORAGE_PERMISSION_LIGHTHOUSE,
+};
 static generic_button orders_resource_buttons[] = {
     {0, 0, 210, 22, toggle_resource_state, 0, 1},
     {0, 22, 210, 22, toggle_resource_state, 0, 2},
@@ -88,6 +125,7 @@ static generic_button orders_resource_buttons[] = {
     {0, 330, 210, 22, toggle_resource_state, 0, 16},
 };
 
+
 static generic_button orders_partial_resource_buttons[] = {
     {210, 0, 28, 22, toggle_partial_resource_state_forward, toggle_partial_resource_state_reverse, 1,0},
     {210, 22, 28, 22, toggle_partial_resource_state_forward, toggle_partial_resource_state_reverse, 2,0},
@@ -106,26 +144,6 @@ static generic_button orders_partial_resource_buttons[] = {
     {210, 308, 28, 22, toggle_partial_resource_state_forward, toggle_partial_resource_state_reverse, 15,0},
     {210, 330, 28, 22, toggle_partial_resource_state_forward, toggle_partial_resource_state_reverse, 16,0},
 };
-
-static generic_button warehouse_distribution_permissions_buttons[] = {
-     {0, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_MARKET},
-     {62, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_TRADERS},
-     {124, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_DOCK},
-     {186, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_BARKEEP},
-     {248, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_WORKCAMP},
-     {310, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_ARMOURY},
-     {372, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_LIGHTHOUSE},
-};
-
-static generic_button granary_distribution_permissions_buttons[] = {
-     {0, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_MARKET},
-     {76, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_TRADERS},
-     {152, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_DOCK},
-     {228, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_BARKEEP},
-     {304, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_QUARTERMASTER},
-     {380, 0, 52, 52, storage_toggle_permissions, 0, BUILDING_STORAGE_PERMISSION_CARAVANSERAI},
-};
-
 static generic_button dock_distribution_permissions_buttons[20];
 
 static unsigned int dock_distribution_permissions_buttons_count;
@@ -221,6 +239,35 @@ typedef enum {
     ACCEPT_ALL = 1,
 } affect_all_button_current_state;
 
+int get_storage_permission_image(building_storage_permission_states permission)
+{
+    switch (permission) {
+        case BUILDING_STORAGE_PERMISSION_MARKET:
+            return assets_get_image_id("Walkers", "marketbuyer_sw_01");
+        case BUILDING_STORAGE_PERMISSION_TRADERS:
+            return image_group(GROUP_FIGURE_TRADE_CARAVAN) + 4;
+        case BUILDING_STORAGE_PERMISSION_DOCK:
+            return image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE);
+        case BUILDING_STORAGE_PERMISSION_BARKEEP:
+            return assets_get_image_id("Walkers", "Barkeep SW 01");
+        case BUILDING_STORAGE_PERMISSION_QUARTERMASTER:
+            return assets_get_image_id("Walkers", "quartermaster_sw_01");
+        case BUILDING_STORAGE_PERMISSION_WORKER:
+            return assets_get_image_id("Walkers", "overseer_sw_01");
+        case BUILDING_STORAGE_PERMISSION_CARAVANSERAI:
+            return assets_get_image_id("Walkers", "caravanserai_overseer_sw_01");
+        case BUILDING_STORAGE_PERMISSION_LIGHTHOUSE:
+            return image_group(GROUP_FIGURE_CARTPUSHER_CART) + 80;
+        case BUILDING_STORAGE_PERMISSION_ARMOURY:
+            return image_group(GROUP_FIGURE_CARTPUSHER_CART) + 104;
+        case BUILDING_STORAGE_PERMISSION_WORKCAMP:
+            return assets_get_image_id("Walkers", "overseer_sw_01");
+        case BUILDING_STORAGE_PERMISSION_NATIVES:
+            return image_group(GROUP_FIGURE_CARTPUSHER_CART) + 136;
+        default:
+            return -1;
+    }
+}
 
 static int affect_all_button_distribution_state(void)
 {
@@ -241,7 +288,6 @@ static int affect_all_button_storage_state(void)
     }
 }
 
-
 static void draw_accept_none_button(int x, int y, int focused, affect_all_button_current_state state)
 {
     button_border_draw(x, y, 20, 20, focused ? 1 : 0);
@@ -252,44 +298,95 @@ static void draw_accept_none_button(int x, int y, int focused, affect_all_button
     }
 }
 
-static void draw_permissions_buttons(int x, int y, unsigned int buttons, building_info_context *c)
+static void draw_permissions_buttons(int x, int y, int building_type, building_info_context *c)
 {
-    int images_permission[] = {
-        assets_get_image_id("Walkers", "marketbuyer_sw_01"),
-        image_group(GROUP_FIGURE_TRADE_CARAVAN) + 4,
-        image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE),
-        assets_get_image_id("Walkers", "Barkeep SW 01"),
-        assets_get_image_id("Walkers", "overseer_sw_01"),
-        image_group(GROUP_FIGURE_CARTPUSHER_CART) + 104,
-        image_group(GROUP_FIGURE_CARTPUSHER_CART) + 80
-    };
-
     int image_offset_x, image_offset_y;
+    int *building_permissions;
+    int number_of_permissions;
+    active_permissions_count = 0;
 
-    for (unsigned int i = 0; i < buttons; i++) {
-        int permission = warehouse_distribution_permissions_buttons[i].parameter1;
-        int is_sea_trade_route = permission == BUILDING_STORAGE_PERMISSION_DOCK;
-
-        int permission_state = building_storage_get_permission(permission, building_get(data.building_id));
-
-        if (!permission_state) {
-            inner_panel_draw(x + 2, y + 2, 3, 3);
-        }
-        image_offset_x = is_sea_trade_route ? 12 : 7;
-        image_offset_y = is_sea_trade_route ? 16 : 7;
-
-        image_draw(images_permission[i], x + image_offset_x, y + image_offset_y, COLOR_MASK_NONE, SCALE_NONE);
-
-        if (!permission_state) {
-            image_draw(assets_get_image_id("UI", "Large_Widget_Cross"), x + 15, y + 15,
-            COLOR_MASK_NONE, SCALE_NONE);
-        }
-
-        button_border_draw(x, y, 52, 52, data.permission_focus_button_id == i + 1 || !permission_state);
-
-        x += 62;
+    if (building_type == BUILDING_WAREHOUSE) {
+        building_permissions = warehouse_permissions_buttons;
+        number_of_permissions = sizeof(warehouse_permissions_buttons) / sizeof(warehouse_permissions_buttons[0]);
+    } else {
+        building_permissions = granary_permissions_buttons;
+        number_of_permissions = sizeof(granary_permissions_buttons) / sizeof(granary_permissions_buttons[0]);
     }
 
+    int default_margin = 16;
+    x += default_margin;
+    int available_width = c->width_blocks * BLOCK_SIZE - 2 * default_margin;
+
+    // Calculate button width to fill available space
+    int total_button_width = available_width - (number_of_permissions - 1); // Reserve 1px per gap minimum
+    int button_width = total_button_width / number_of_permissions;
+
+    // Apply button size constraints
+    button_width = MAX(button_width, 38); // Minimum 38px
+    button_width = MIN(button_width, 52); // Maximum 52px
+
+    float original_scaling_factor = button_width / 52.0f;
+
+    // Calculate how much space is used by buttons
+    int total_width_used_by_buttons = button_width * number_of_permissions;
+
+    // Distribute remaining space as gaps between buttons
+    int total_gap_space = available_width - total_width_used_by_buttons;
+    int base_gap = total_gap_space / (number_of_permissions - 1);
+    int gap_remainder = total_gap_space % (number_of_permissions - 1);
+
+    // Track cumulative extra pixels for gap distribution
+    int pixel_carry = 0;
+    active_permissions_count = number_of_permissions;
+
+    for (int i = 0; i < number_of_permissions; i++) {
+        int permission = building_permissions[i];
+        int is_sea_trade_route = (permission == BUILDING_STORAGE_PERMISSION_DOCK);
+        int permission_state = building_storage_get_permission(permission, building_get(data.building_id));
+
+        // Calculate extra pixel for this gap
+        pixel_carry += gap_remainder;
+        int extra_gap_pixel = pixel_carry / (number_of_permissions - 1);
+        pixel_carry %= (number_of_permissions - 1);
+
+        // Calculate actual gap for this button (only add extra pixels between buttons, not after last)
+        int actual_gap = (i < number_of_permissions - 1) ? base_gap + extra_gap_pixel : 0;
+
+        if (!permission_state) {
+            graphics_set_clip_rectangle(x, y, button_width - 2, button_width);
+            inner_panel_draw(x + 2, y + 2, (button_width) / BLOCK_SIZE + 1, (button_width) / BLOCK_SIZE + 1);
+            graphics_reset_clip_rectangle();
+        }
+
+        image_offset_x = is_sea_trade_route ? 12 * original_scaling_factor : 7 * original_scaling_factor;
+        image_offset_y = is_sea_trade_route ? 16 * original_scaling_factor : 7 * original_scaling_factor;
+        int scale = (int) (original_scaling_factor * 100);
+
+        image_draw_scaled_centered(get_storage_permission_image(permission),
+            x + image_offset_x, y + image_offset_y, COLOR_MASK_NONE, scale);
+
+        if (!permission_state) {
+            image_draw_scaled_centered(assets_get_image_id("UI", "Large_Widget_Cross"),
+            x + 15 * original_scaling_factor, y + 15 * original_scaling_factor, COLOR_MASK_NONE, scale);
+        }
+
+        button_border_draw(x, y, button_width, button_width,
+            data.permission_focus_button_id == i + 1 || !permission_state);
+
+        permission_buttons[i] = (generic_button) {
+            .x = x,
+            .y = y,
+            .width = button_width,
+            .height = button_width,
+            .left_click_handler = storage_toggle_permissions,
+            .parameter1 = permission
+        };
+
+        // Move to next button position (button width + gap with distributed remainder)
+        x += button_width + actual_gap;
+    }
+
+    // Draw maintain button
     building *b = building_get(c->building_id);
     int button = 1;
     if (building_storage_get_permission(BUILDING_STORAGE_PERMISSION_WORKER, b)) {
@@ -298,43 +395,44 @@ static void draw_permissions_buttons(int x, int y, unsigned int buttons, buildin
     image_buttons_draw(c->x_offset + 421, c->y_offset + 10, image_buttons_maintain, button);
 }
 
-static void draw_granary_permissions_buttons(int x, int y, unsigned int buttons)
-{
-    static int images_permission[6];
-    if (!images_permission[0]) {
-        images_permission[0] = assets_get_image_id("Walkers", "marketbuyer_sw_01");
-        images_permission[1] = image_group(GROUP_FIGURE_TRADE_CARAVAN) + 4;
-        images_permission[2] = image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE);
-        images_permission[3] = assets_get_image_id("Walkers", "Barkeep SW 01");
-        images_permission[4] = assets_get_image_id("Walkers", "quartermaster_sw_01");
-        images_permission[5] = assets_get_image_id("Walkers", "caravanserai_overseer_sw_01");
-    }
+// static void draw_granary_permissions_buttons(int x, int y, unsigned int buttons)
+// {
+//     static int images_permission[7];
+//     if (!images_permission[0]) {
+//         images_permission[0] = assets_get_image_id("Walkers", "marketbuyer_sw_01");
+//         images_permission[1] = image_group(GROUP_FIGURE_TRADE_CARAVAN) + 4;
+//         images_permission[2] = image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE);
+//         images_permission[3] = assets_get_image_id("Walkers", "Barkeep SW 01");
+//         images_permission[4] = assets_get_image_id("Walkers", "quartermaster_sw_01");
+//         images_permission[5] = assets_get_image_id("Walkers", "caravanserai_overseer_sw_01");
+//         images_permission[6] = image_group(GROUP_FIGURE_CARTPUSHER_CART) + 136;
+//     }
 
-    int image_offset_x, image_offset_y;
+//     int image_offset_x, image_offset_y;
 
-    for (unsigned int i = 0; i < buttons; i++) {
-        int permission = granary_distribution_permissions_buttons[i].parameter1;
-        int is_sea_trade_route = permission == BUILDING_STORAGE_PERMISSION_DOCK;
-        int permission_state = building_storage_get_permission(permission, building_get(data.building_id));
+//     for (unsigned int i = 0; i < buttons; i++) {
+//         int permission = granary_distribution_permissions_buttons[i].parameter1;
+//         int is_sea_trade_route = permission == BUILDING_STORAGE_PERMISSION_DOCK;
+//         int permission_state = building_storage_get_permission(permission, building_get(data.building_id));
 
-        if (!permission_state) {
-            inner_panel_draw(x + 2, y + 2, 3, 3);
-        }
-        image_offset_x = is_sea_trade_route ? 12 : 7;
-        image_offset_y = is_sea_trade_route ? 16 : 7;
+//         if (!permission_state) {
+//             inner_panel_draw(x + 2, y + 2, 3, 3);
+//         }
+//         image_offset_x = is_sea_trade_route ? 12 : 7;
+//         image_offset_y = is_sea_trade_route ? 16 : 7;
 
-        image_draw(images_permission[i], x + image_offset_x, y + image_offset_y, COLOR_MASK_NONE, SCALE_NONE);
+//         image_draw(images_permission[i], x + image_offset_x, y + image_offset_y, COLOR_MASK_NONE, SCALE_NONE);
 
-        if (!permission_state) {
-            image_draw(assets_get_image_id("UI", "Large_Widget_Cross"), x + 15, y + 15,
-            COLOR_MASK_NONE, SCALE_NONE);
-        }
+//         if (!permission_state) {
+//             image_draw(assets_get_image_id("UI", "Large_Widget_Cross"), x + 15, y + 15,
+//             COLOR_MASK_NONE, SCALE_NONE);
+//         }
 
-        button_border_draw(x, y, 52, 52, data.permission_focus_button_id == i + 1 || !permission_state);
+//         button_border_draw(x, y, 52, 52, data.permission_focus_button_id == i + 1 || !permission_state);
 
-        x += 76;
-    }
-}
+//         x += 62;
+//     }
+// }
 
 static void init_dock_permission_buttons(void)
 {
@@ -875,7 +973,7 @@ void window_building_draw_granary(building_info_context *c)
 void window_building_draw_granary_foreground(building_info_context *c)
 {
     // Permissions buttons
-    draw_granary_permissions_buttons(c->x_offset + 16, c->y_offset + BLOCK_SIZE * c->height_blocks - 186, 6);
+    draw_permissions_buttons(c->x_offset, c->y_offset + BLOCK_SIZE * c->height_blocks - 186, BUILDING_GRANARY, c);
 
     // special orders
     button_border_draw(c->x_offset + 80, c->y_offset + BLOCK_SIZE * c->height_blocks - 34,
@@ -887,8 +985,7 @@ void window_building_draw_granary_foreground(building_info_context *c)
 int window_building_handle_mouse_granary(const mouse *m, building_info_context *c)
 {
     data.building_id = c->building_id;
-    if (generic_buttons_handle_mouse(m, c->x_offset + 16, c->y_offset + BLOCK_SIZE * c->height_blocks - 186,
-        granary_distribution_permissions_buttons, 6, &data.permission_focus_button_id)) {
+    if (generic_buttons_handle_mouse(m, 0, 0, permission_buttons, active_permissions_count, &data.permission_focus_button_id)) {
     }
     return generic_buttons_handle_mouse(
         m, c->x_offset + 80, c->y_offset + BLOCK_SIZE * c->height_blocks - 34,
@@ -1208,7 +1305,7 @@ void window_building_draw_warehouse(building_info_context *c)
 void window_building_draw_warehouse_foreground(building_info_context *c)
 {
     // permissions
-    draw_permissions_buttons(c->x_offset + 20, c->y_offset + BLOCK_SIZE * c->height_blocks - 186, 7, c);
+    draw_permissions_buttons(c->x_offset, c->y_offset + BLOCK_SIZE * c->height_blocks - 186, BUILDING_WAREHOUSE, c);
 
     // special orders
     button_border_draw(c->x_offset + 80, c->y_offset + BLOCK_SIZE * c->height_blocks - 34,
@@ -1224,8 +1321,7 @@ int window_building_handle_mouse_warehouse(const mouse *m, building_info_context
     if (generic_buttons_handle_mouse(m, c->x_offset + 80, c->y_offset + BLOCK_SIZE * c->height_blocks - 34,
         go_to_orders_button, 1, &data.focus_button_id)) {
     }
-    if (generic_buttons_handle_mouse(m, c->x_offset + 20, c->y_offset + BLOCK_SIZE * c->height_blocks - 186,
-        warehouse_distribution_permissions_buttons, 7, &data.permission_focus_button_id)) {
+    if (generic_buttons_handle_mouse(m, 0, 0, permission_buttons, active_permissions_count, &data.permission_focus_button_id)) {
     }
 
     int button = 1;
@@ -1325,7 +1421,7 @@ int window_building_handle_mouse_warehouse_orders(const mouse *m, building_info_
 void window_building_warehouse_get_tooltip_distribution_permissions(int *translation)
 {
     if (data.permission_focus_button_id) {
-        int permission = warehouse_distribution_permissions_buttons[data.permission_focus_button_id - 1].parameter1;
+        int permission = permission_buttons[data.permission_focus_button_id - 1].parameter1;
         int show_reject_tooltip = building_storage_get_permission(permission, building_get(data.building_id)) == 1;
         *translation = TR_TOOLTIP_BUTTON_ACCEPT_MARKET_LADIES + permission * 2 + show_reject_tooltip;
     }
@@ -1341,7 +1437,7 @@ void window_building_warehouse_get_tooltip_distribution_permissions(int *transla
 void window_building_granary_get_tooltip_distribution_permissions(int *translation)
 {
     if (data.permission_focus_button_id) {
-        int permission = granary_distribution_permissions_buttons[data.permission_focus_button_id - 1].parameter1;
+        int permission = permission_buttons[data.permission_focus_button_id - 1].parameter1;
         int show_reject_tooltip = building_storage_get_permission(permission, building_get(data.building_id)) == 1;
         *translation = TR_TOOLTIP_BUTTON_ACCEPT_MARKET_LADIES + permission * 2 + show_reject_tooltip;
     }
