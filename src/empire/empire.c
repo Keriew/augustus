@@ -330,7 +330,7 @@ int empire_can_export_resource_to_city(int city_id, int resource)
         return 0;
     }
     if (city_id == 0 || city->buys_resource[resource]) {
-        return (city_resource_trade_status(resource) & TRADE_STATUS_EXPORT) == TRADE_STATUS_EXPORT;
+        return (city_resource_trade_status((resource_type) resource) & TRADE_STATUS_EXPORT) == TRADE_STATUS_EXPORT;
     } else {
         return 0;
     }

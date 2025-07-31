@@ -55,7 +55,7 @@
 #define MULTIPLIER_DISTANCE_MIN 50
 #define MULTIPLIER_DISTANCE_MAX 300
 
-#define LOGARITHIMIC_SCALER_DISTANCE 120
+#define LOGARITHIMIC_SCALER_DISTANCE 200
 #define LOGARITHMIC_SCALER_SELL 0  // from perspectvie of the trader - trader sells, player buys
 #define LOGARITHMIC_SCALER_BUY 80
 // adjustable scaling factors. Higher value = more influence.
@@ -202,6 +202,7 @@ int figure_trade_caravan_can_sell(figure *trader, int building_id, int city_id)
 
 static int trader_get_buy_resource(int building_id, int city_id)
 {
+    //TODO: get all the logic of trade happening into this function, rather than decision making in the action function
     unsigned char land_trader = 1; // 1 = land trader, 0 = sea trader
     building *b = building_get(building_id);
     if (!b || (b->type != BUILDING_WAREHOUSE && b->type != BUILDING_GRANARY)) {
@@ -212,6 +213,9 @@ static int trader_get_buy_resource(int building_id, int city_id)
         return RESOURCE_NONE;
     }
     int resource = get_least_filled_quota_resource(b, city_id, 1); // 1 = trader buying
+    if (resource == RESOURCE_NONE && city_id == 0) { //native trader
+        resource = building_storage_get_highest_quantity_resource(b);
+    }
     if (resource == RESOURCE_NONE) {
         return RESOURCE_NONE;
     }
@@ -304,7 +308,9 @@ static int get_least_filled_quota_resource(building *b, int city_id, signed char
 
 static int get_closest_storage(const figure *f, int x, int y, int city_id, map_point *dst)
 {
-    const int max_trade_units = figure_trade_land_trade_units();
+    const int max_trade_units = (!f->type == FIGURE_NATIVE_TRADER) ?
+        figure_trade_land_trade_units() : figure_trade_land_trade_units() / 3 + 1;
+
     resource_multiplier_init();
     int sellable[RESOURCE_MAX] = { 0 };
     int buyable[RESOURCE_MAX] = { 0 };
@@ -315,6 +321,9 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
         signed char resource_buy = empire_can_export_resource_to_city(city_id, r) ? 1 : 0;
         if (resource_sell || resource_buy) {
             int remaining = trade_route_limit(route_id, r) - trade_route_traded(route_id, r);
+            if (route_id == 0 && f->type == FIGURE_NATIVE_TRADER) { // no limits for native traders
+                remaining = figure_trade_land_trade_units();
+            }
             if (remaining > 0) {
                 if (resource_sell) {
                     sellable[r] = remaining;
@@ -325,8 +334,14 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
             }
         }
     }
-    const uint8_t *city_name = empire_city_get_name((empire_city_get(f->empire_city_id)));
-    //log_info("Caravan: ", city_name, 0);
+    const uint8_t *city_name;
+    if (f->type == FIGURE_NATIVE_TRADER) {
+        city_name = (const uint8_t *) "Native Trader";
+    } else {
+        city_name = empire_city_get_name(empire_city_get(f->empire_city_id));
+    }
+    log_info("Caravan: %s", city_name, 0);
+
     int sell_capacity = max_trade_units - f->loads_sold_or_carrying;
     int buy_capacity = max_trade_units - f->trader_amount_bought;
     int best_score = -1;
@@ -373,7 +388,11 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
             }
             const map_tile *exit = city_map_exit_point();
             int raw_distance = map_grid_chess_distance(f->grid_offset, b->grid_offset);
-            raw_distance += map_grid_chess_distance(b->grid_offset, exit->grid_offset);
+            if (route_id == 0 && f->type == FIGURE_NATIVE_TRADER) {
+                raw_distance += raw_distance; //native traders always return home after 1 trade, so double the distance
+            } else {
+                raw_distance += map_grid_chess_distance(b->grid_offset, exit->grid_offset);
+            }
             int distance_score = calculate_log_score(raw_distance, MULTIPLIER_DISTANCE_MIN, MULTIPLIER_DISTANCE_MAX,
                 LOGARITHIMIC_SCALER_DISTANCE, DISTANCE_BASELINE);
             //swapping the input and baseline gives inverted score: higher score for shorter distances
@@ -657,7 +676,7 @@ void figure_native_trader_action(figure *f)
                     int resource = trader_get_buy_resource(f->destination_building_id, 0);
                     trader_record_bought_resource(f->trader_id, resource);
                     city_health_update_sickness_level_in_building(f->destination_building_id);
-                    f->trader_amount_bought += 3;
+                    f->trader_amount_bought += 3; //native traders 3 times less efficient
                 } else {
                     map_point tile;
                     int building_id = get_closest_storage(f, f->x, f->y, 0, &tile);

@@ -146,6 +146,11 @@ const building_storage_state building_storage_get_state(building *b, int resourc
  */
 void building_storage_set_data(int storage_id, building_storage new_data);
 
+/**
+ * Cycles through the storage to return resource with highest count (skips RESOURCE_NONE)
+ * @param b building to check
+ */
+resource_type building_storage_get_highest_quantity_resource(building *b);
 
 /**
  * Cycles the resource state for the storage

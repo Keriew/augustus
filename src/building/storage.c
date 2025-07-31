@@ -202,6 +202,21 @@ const building_storage_state building_storage_get_state(building *b, int resourc
     return BUILDING_STORAGE_STATE_NOT_ACCEPTING;
 }
 
+resource_type building_storage_get_highest_quantity_resource(building *b)
+{
+    unsigned char i;
+    unsigned char highest_resource = RESOURCE_NONE;
+    if (b->type == BUILDING_WAREHOUSE) {
+        building_warehouse_recount_resources(b);
+    }
+    for (i = RESOURCE_NONE + 1; i < RESOURCE_MAX; i++) { //not interested in RESOURCE_NONE
+        if (b->resources[i] > highest_resource) {
+            highest_resource = i;
+        }
+    }
+    return highest_resource;
+}
+
 void building_storage_cycle_resource_state(int storage_id, resource_type resource_id)
 {
     resource_storage_entry *entry = &array_item(storages, storage_id)->storage.resource_state[resource_id];

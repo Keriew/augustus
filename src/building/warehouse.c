@@ -22,6 +22,8 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MAX_CARTLOADS_PER_SPACE 4
 
+static void building_warehouse_space_set_image(building *space, int resource);
+
 int building_warehouse_get_space_info(building *warehouse)
 {
     int total_loads = 0;
@@ -76,7 +78,7 @@ int building_warehouse_get_available_amount(building *warehouse, int resource)
     return building_warehouse_get_amount(warehouse, resource);
 }
 
-building *building_warehouse_find_space(building *warehouse, int resource, int adding)
+static building *building_warehouse_find_space(building *warehouse, int resource, int adding)
 {
     if (!warehouse || warehouse->id <= 0) {
         return 0;
@@ -125,9 +127,9 @@ building *building_warehouse_find_space(building *warehouse, int resource, int a
     return 0;
 }
 
-static void building_warehouse_recount_resources(building *main)
+void building_warehouse_recount_resources(building *main)
 {
-    // static helper to reflect the resources in the main warehouse, like granary does
+    //helper to reflect the resources in the main warehouse, like granary does
     if (!main || main->type != BUILDING_WAREHOUSE) {
         return;
     }
@@ -155,19 +157,6 @@ static void building_warehouse_recount_resources(building *main)
         total_loads += main->resources[r];
     }
     main->resources[RESOURCE_NONE] = BUILDING_STORAGE_QUANTITY_MAX - total_loads;
-}
-
-static resource_type building_warehouse_get_highest_quantity_resource(building *b)
-{
-    unsigned char i;
-    unsigned char highest_resource = RESOURCE_NONE;
-    building_warehouse_recount_resources(b);
-    for (i = RESOURCE_NONE + 1; i < RESOURCE_MAX; i++) { //not interested in RESOURCE_NONE
-        if (b->resources[i] > highest_resource) {
-            highest_resource = i;
-        }
-    }
-    return highest_resource;
 }
 
 int building_warehouse_try_add_resource(building *b, int resource, int quantity)
@@ -289,8 +278,8 @@ void building_warehouse_remove_resource_curse(building *warehouse, int amount)
     }
 }
 
-void building_warehouse_space_set_image(building *space, int resource)
-{
+static void building_warehouse_space_set_image(building *space, int resource)
+{   //keep this function static - external files should not set warehouse images directly
     int image_id;
     if (building_loads_stored(space) <= 0) {
         image_id = image_group(GROUP_BUILDING_WAREHOUSE_STORAGE_EMPTY);
@@ -709,7 +698,7 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
     building *space;
     //TASK 1: emptying takes priority
     if (building_storage_get_empty_all(warehouse->id)) {
-        resource_type resource_to_empty = building_warehouse_get_highest_quantity_resource(warehouse);
+        resource_type resource_to_empty = building_storage_get_highest_quantity_resource(warehouse);
         if (resource_to_empty) {
             space = building_warehouse_find_space(warehouse, resource_to_empty, 0);
 

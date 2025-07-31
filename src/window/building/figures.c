@@ -158,7 +158,19 @@ static void draw_trader(building_info_context *c, figure *f)
         text_draw(city_name, c->x_offset + 90 + width, c->y_offset + 110, FONT_NORMAL_BROWN, 0);
     }
     width = lang_text_draw(129, 1, c->x_offset + 90, c->y_offset + 130, FONT_NORMAL_BROWN);
-    lang_text_draw_amount(8, 10, f->type == FIGURE_TRADE_SHIP ? figure_trade_sea_trade_units() : figure_trade_land_trade_units(), c->x_offset + 90 + width, c->y_offset + 130, FONT_NORMAL_BROWN);
+    int units_capacity = 0;
+    switch (f->type) {
+        case FIGURE_TRADE_CARAVAN:
+            units_capacity = figure_trade_land_trade_units();
+            break;
+        case FIGURE_TRADE_SHIP:
+            units_capacity = figure_trade_sea_trade_units();
+            break;
+        case FIGURE_NATIVE_TRADER:
+            units_capacity = figure_trade_land_trade_units() / 3 + 1; // native traders have 3 times less capacity
+            break;
+    }
+    lang_text_draw_amount(8, 10, units_capacity, c->x_offset + 90 + width, c->y_offset + 130, FONT_NORMAL_BROWN);
 
     int trader_id = f->trader_id;
     if (f->type == FIGURE_TRADE_SHIP) {
@@ -174,9 +186,11 @@ static void draw_trader(building_info_context *c, figure *f)
         int text_id;
         switch (f->action_state) {
             case FIGURE_ACTION_101_TRADE_CARAVAN_ARRIVING:
+            case FIGURE_ACTION_160_NATIVE_TRADER_GOING_TO_STORAGE:
                 text_id = 12;
                 break;
             case FIGURE_ACTION_102_TRADE_CARAVAN_TRADING:
+            case FIGURE_ACTION_163_NATIVE_TRADER_AT_STORAGE:
                 text_id = 10;
                 break;
             case FIGURE_ACTION_103_TRADE_CARAVAN_LEAVING:
