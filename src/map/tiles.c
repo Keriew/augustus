@@ -685,6 +685,26 @@ int map_tiles_set_wall(int x, int y)
     return tile_set;
 }
 
+int map_tiles_is_adjacent_to_building_type(int grid_offset, int building_type)
+{
+    int tiles[8];
+    tiles[0] = grid_offset + map_grid_delta(0, -1);
+    tiles[1] = grid_offset + map_grid_delta(1, 0);
+    tiles[2] = grid_offset + map_grid_delta(0, 1);
+    tiles[3] = grid_offset + map_grid_delta(-1, 0);
+    tiles[4] = grid_offset + map_grid_delta(1, -1);
+    tiles[5] = grid_offset + map_grid_delta(1, 1);
+    tiles[6] = grid_offset + map_grid_delta(-1, 1);
+    tiles[7] = grid_offset + map_grid_delta(-1, -1);
+    for (int i = 0; i < 8; i++) {
+        if (map_terrain_is(tiles[i], TERRAIN_BUILDING) &&
+            building_get(map_building_at(tiles[i]))->type == building_type) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 int map_tiles_is_paved_road(int grid_offset)
 {
     int desirability = map_desirability_get(grid_offset);
@@ -692,6 +712,9 @@ int map_tiles_is_paved_road(int grid_offset)
         return 1;
     }
     if (desirability > 0 && map_terrain_is(grid_offset, TERRAIN_FOUNTAIN_RANGE)) {
+        return 1;
+    }
+    if (map_tiles_is_adjacent_to_building_type(grid_offset, BUILDING_GRANARY)) {
         return 1;
     }
     int x = map_grid_offset_to_x(grid_offset);
