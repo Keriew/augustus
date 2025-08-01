@@ -240,7 +240,7 @@ void building_storage_cycle_resource_state(int storage_id, resource_type resourc
     }
 }
 
-void building_storage_set_permission(building_storage_permission_states p, building *b)
+void building_storage_toggle_permission(building_storage_permission_states p, building *b)
 {
     int permission_bit = 1 << p;
     array_item(storages, b->storage_id)->storage.permissions ^= permission_bit;
@@ -251,6 +251,18 @@ int building_storage_get_permission(building_storage_permission_states p, buildi
     const building_storage *s = building_storage_get(b->storage_id);
     int permission_bit = 1 << p;
     return !(s->permissions & permission_bit);
+}
+
+void building_storage_set_permission(building_storage_permission_states p, building *b, int enable)
+{
+    int permission_bit = 1 << p;
+    int *permissions = &array_item(storages, b->storage_id)->storage.permissions;
+
+    if (enable) {
+        *permissions |= permission_bit;
+    } else {
+        *permissions &= ~permission_bit;
+    }
 }
 
 void building_storage_cycle_partial_resource_state(int storage_id, resource_type resource_id, int reverse_order)

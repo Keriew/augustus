@@ -584,17 +584,11 @@ static void draw_background(void)
             } else {
                 window_building_draw_mess_hall(&context);
             }
-        } else if (btype == BUILDING_GRANARY) {
+        } else if (btype == BUILDING_GRANARY || btype == BUILDING_WAREHOUSE) {
             if (context.show_special_orders) {
-                window_building_draw_granary_orders(&context);
+                window_building_draw_storage_orders(&context);
             } else {
-                window_building_draw_granary(&context);
-            }
-        } else if (btype == BUILDING_WAREHOUSE) {
-            if (context.show_special_orders) {
-                window_building_draw_warehouse_orders(&context);
-            } else {
-                window_building_draw_warehouse(&context);
+                window_building_draw_storage(&context);
             }
         } else if (btype == BUILDING_DEPOT) {
             if (context.depot_selection.source) {
@@ -818,17 +812,11 @@ static void draw_foreground(void)
 
         if (btype == BUILDING_LIGHTHOUSE && b->monument.phase == MONUMENT_FINISHED) {
             window_building_draw_lighthouse_foreground(&context);
-        } else if (btype == BUILDING_GRANARY) {
+        } else if (btype == BUILDING_GRANARY || btype == BUILDING_WAREHOUSE) {
             if (context.show_special_orders) {
-                window_building_draw_granary_orders_foreground(&context);
+                window_building_draw_storage_orders_foreground(&context);
             } else {
-                window_building_draw_granary_foreground(&context);
-            }
-        } else if (btype == BUILDING_WAREHOUSE) {
-            if (context.show_special_orders) {
-                window_building_draw_warehouse_orders_foreground(&context);
-            } else {
-                window_building_draw_warehouse_foreground(&context);
+                window_building_draw_storage_foreground(&context);
             }
         } else if (btype == BUILDING_DEPOT) {
             if (context.depot_selection.source) {
@@ -997,17 +985,11 @@ static int handle_specific_building_info_mouse(const mouse *m)
             return window_building_handle_mouse_barracks(m, &context);
         } else if (btype == BUILDING_GRAND_TEMPLE_MARS) {
             return window_building_handle_mouse_grand_temple_mars(m, &context);
-        } else if (btype == BUILDING_GRANARY) {
+        } else if (btype == BUILDING_GRANARY || btype == BUILDING_WAREHOUSE) {
             if (context.show_special_orders) {
-                return window_building_handle_mouse_granary_orders(m, &context);
+                return window_building_handle_mouse_storage_orders(m, &context);
             } else {
-                return window_building_handle_mouse_granary(m, &context);
-            }
-        } else if (btype == BUILDING_WAREHOUSE) {
-            if (context.show_special_orders) {
-                return window_building_handle_mouse_warehouse_orders(m, &context);
-            } else {
-                return window_building_handle_mouse_warehouse(m, &context);
+                return window_building_handle_mouse_storage(m, &context);
             }
         } else if ((btype >= BUILDING_GRAND_TEMPLE_CERES && btype <= BUILDING_GRAND_TEMPLE_VENUS) ||
             btype == BUILDING_PANTHEON) {
@@ -1119,10 +1101,8 @@ static void get_tooltip(tooltip_context *c)
         }
     } else if (building_is_house(btype)) {
         precomposed_text = window_building_house_get_tooltip(&context);
-    } else if (btype == BUILDING_GRANARY) {
-        window_building_granary_get_tooltip_distribution_permissions(&translation);
-    } else if (btype == BUILDING_WAREHOUSE) {
-        window_building_warehouse_get_tooltip_distribution_permissions(&translation);
+    } else if (btype == BUILDING_GRANARY || btype == BUILDING_WAREHOUSE) {
+        window_building_storage_get_tooltip_distribution_permissions(&translation);
     } else if (btype == BUILDING_DOCK) {
         precomposed_text = window_building_dock_get_tooltip(&context);
     } else if (context.type == BUILDING_INFO_BUILDING && btype == BUILDING_DEPOT) {

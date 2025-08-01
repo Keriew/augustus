@@ -220,8 +220,8 @@ void building_storage_load_state(buffer *buf, int version);
 
 
 
-void building_storage_set_permission(building_storage_permission_states p, building *b);
+void building_storage_toggle_permission(building_storage_permission_states p, building *b);
 int building_storage_get_permission(building_storage_permission_states p, building *b);
-
+void building_storage_set_permission(building_storage_permission_states p, building *b, int enable);
 
 #endif // BUILDING_STORAGE_H
