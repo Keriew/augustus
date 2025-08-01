@@ -1,5 +1,6 @@
 #include "data_transfer.h"
 
+#include "building/building.h"
 #include "building/industry.h"
 #include "building/roadblock.h"
 #include "building/storage.h"
@@ -16,6 +17,7 @@ static struct {
     short i16;
     int i32;
     signed char mothball;
+    building_type b_type;
 } data;
 
 int building_data_transfer_possible(building *b)
@@ -26,6 +28,10 @@ int building_data_transfer_possible(building *b)
         return 0;
     }
     if (data.data_type != data_type) {
+        city_warning_show(WARNING_DATA_PASTE_FAILURE, NEW_WARNING_SLOT);
+        return 0;
+    }
+    if (data.data_type == DATA_TYPE_MOTHBALL_ONLY && b->type != data.b_type) {
         city_warning_show(WARNING_DATA_PASTE_FAILURE, NEW_WARNING_SLOT);
         return 0;
     }
@@ -44,6 +50,7 @@ int building_data_transfer_copy(building *b)
 
     const building_storage *storage;
     data.mothball = b->state == BUILDING_STATE_MOTHBALLED ? 1 : 0;
+    data.b_type = b->type;
     switch (data_type) {
         case DATA_TYPE_ROADBLOCK:
             data.i16 = b->data.roadblock.exceptions;
@@ -72,6 +79,9 @@ int building_data_transfer_copy(building *b)
             break;
         case DATA_TYPE_RAW_RESOURCE_PRODUCER:
             data.i8 = b->data.industry.is_stockpiling;
+            break;
+        case DATA_TYPE_MOTHBALL_ONLY:
+            // Mothball state is already set in data.mothball
             break;
         default:
             return 0;
@@ -112,6 +122,8 @@ int building_data_transfer_paste(building *b)
         case DATA_TYPE_RAW_RESOURCE_PRODUCER:
             b->data.industry.is_stockpiling = data.i8;
             break;
+        case DATA_TYPE_MOTHBALL_ONLY:
+            break;
         default:
             return 0;
     }
@@ -146,6 +158,11 @@ building_data_type building_data_transfer_data_type_from_building_type(building_
         case BUILDING_DEPOT:
             return DATA_TYPE_DEPOT;
         default:
-            return DATA_TYPE_NOT_SUPPORTED;
+            if (building_get_laborers(type)) {
+                return DATA_TYPE_MOTHBALL_ONLY;
+            } else {
+                return DATA_TYPE_NOT_SUPPORTED;
+            }
+
     }
 }
