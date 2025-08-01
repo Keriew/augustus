@@ -191,7 +191,9 @@ static int draw_preview_image(int x, int y, int center, color_t color_mask, int 
         return 0;
     }
     
-    if (data.preview_image_group == GROUP_EMPIRE_BORDER_EDGE) draw_borders = 0;
+    if (data.preview_image_group == GROUP_EMPIRE_BORDER_EDGE) {
+        draw_borders = 0;
+    }
     
     int image_id = image_group(data.preview_image_group);
 
