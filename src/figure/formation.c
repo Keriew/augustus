@@ -15,18 +15,20 @@
 #include "figure/formation_legion.h"
 #include "figure/properties.h"
 #include "game/save_version.h"
+#include "game/cheats.h"
 #include "map/grid.h"
 #include "sound/effect.h"
+#include "widget/sidebar/military.h"
 
 #include <stdio.h>
 
 
 #define FORMATION_ARRAY_SIZE_STEP 50
 #define ORIGINAL_BUFFER_SIZE_PER_FORMATION 128
-#define CURRENT_BUFFER_SIZE_PER_FORMATION 128
+#define BUFFER_SIZE_FOR_10_LEGIONS 128
+#define CURRENT_BUFFER_SIZE_PER_FORMATION 256
 
 static array(formation) formations;
-
 static struct {
     int id_last_in_use;
     int id_last_legion;
@@ -77,9 +79,9 @@ formation *formation_create_legion(int building_id, figure_type type)
     m->layout = FORMATION_DOUBLE_LINE_1;
     m->morale = 50;
     m->is_at_fort = 1;
-    m->legion_id = m->id - 1;
-    if (m->legion_id >= 9) {
-        m->legion_id = 9;
+    m->legion_id = data.num_legions + 1; // Legion ID starts at 1
+    if (m->legion_id >= 20) {
+        m->legion_id = 20;
     }
     building *fort_ground = building_get(building_get(building_id)->next_part_building_id);
     m->x = m->standard_x = m->x_home = fort_ground->x; // home x = destination x = current x position of the legion = x of the fort
@@ -90,13 +92,19 @@ formation *formation_create_legion(int building_id, figure_type type)
     if (m->id > data.id_last_in_use) {
         data.id_last_in_use = m->id;
     }
+
+    //standards and name
+
+    m->legion_flag_id = widget_sidebar_military_get_standard_image(m->legion_id);
+    m->legion_name_id = widget_sidebar_military_get_legion_name_id(m->legion_id);
+    m->legion_name_group = widget_sidebar_military_get_legion_name_group(m->legion_id);
     return m;
 }
 
 static formation *formation_create(figure_type type, int layout, int orientation, int x, int y)
 {
     formation *f;
-    array_new_item_after_index(formations, 10, f);
+    array_new_item_after_index(formations, 20, f);
     if (!f) {
         return 0;
     }
@@ -106,7 +114,7 @@ static formation *formation_create(figure_type type, int layout, int orientation
     f->in_use = 1;
     f->is_legion = 0;
     f->figure_type = type;
-    f->legion_id = f->id - 10;
+    f->legion_id = 0; //legions created separately
     f->morale = 100;
     if (layout == FORMATION_ENEMY_DOUBLE_LINE) {
         if (orientation == DIR_0_TOP || orientation == DIR_4_BOTTOM) {
@@ -370,7 +378,9 @@ int formation_get_num_legions(void)
 int formation_get_max_legions(void)
 {
     // Mars base bonus
-    if (building_monument_working(BUILDING_GRAND_TEMPLE_MARS)) {
+    if (game_cheat_extra_legions()) {
+        return MAX_LEGIONS + 14;
+    } else if (building_monument_working(BUILDING_GRAND_TEMPLE_MARS)) {
         return MAX_LEGIONS + 4;
     } else {
         return MAX_LEGIONS;
@@ -846,6 +856,9 @@ void formations_save_state(buffer *buf, buffer *totals)
         buffer_write_i16(buf, f->standard_figure_id);
         buffer_write_u8(buf, f->is_legion);
         buffer_write_u8(buf, f->mess_hall_max_morale_modifier);
+        buffer_write_i32(buf, f->legion_flag_id);
+        buffer_write_i32(buf, f->legion_name_id);
+        buffer_write_i32(buf, f->legion_name_group);
         buffer_write_i16(buf, f->attack_type);
         buffer_write_i16(buf, f->legion_recruit_type);
         buffer_write_i16(buf, f->has_military_training);
@@ -896,11 +909,14 @@ void formations_load_state(buffer *buf, buffer *totals, int version)
 
     int formation_buf_size = ORIGINAL_BUFFER_SIZE_PER_FORMATION;
     size_t buf_size = buf->size;
-
+    if (version <= SAVE_GAME_LAST_10_LEGIONS_MAX) {
+        formation_buf_size = BUFFER_SIZE_FOR_10_LEGIONS;
+    }
     if (version > SAVE_GAME_LAST_STATIC_VERSION) {
         formation_buf_size = buffer_read_i32(buf);
         buf_size -= 4;
     }
+
 
     int formations_to_load = (int) buf_size / formation_buf_size;
 
@@ -939,6 +955,19 @@ void formations_load_state(buffer *buf, buffer *totals, int version)
         f->standard_figure_id = buffer_read_i16(buf);
         f->is_legion = buffer_read_u8(buf);
         f->mess_hall_max_morale_modifier = buffer_read_u8(buf);
+        if (version <= SAVE_GAME_LAST_10_LEGIONS_MAX) {
+            if (f->is_legion) {
+                f->legion_id = f->legion_id + f->is_legion; // 1-based index for legions
+            }
+            // after increasing number of legions, switched to 1-based index
+            f->legion_flag_id = widget_sidebar_military_get_standard_image(f->legion_id);
+            f->legion_name_id = widget_sidebar_military_get_legion_name_id(f->legion_id);
+            f->legion_name_group = widget_sidebar_military_get_legion_name_group(f->legion_id);
+        } else {
+            f->legion_flag_id = buffer_read_i32(buf);
+            f->legion_name_id = buffer_read_i32(buf);
+            f->legion_name_group = buffer_read_i32(buf);
+        }
         f->attack_type = buffer_read_i16(buf);
         f->legion_recruit_type = buffer_read_i16(buf);
         f->has_military_training = buffer_read_i16(buf);

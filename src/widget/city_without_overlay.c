@@ -420,6 +420,9 @@ static void get_mothball_icon_position(const building *b, int *x, int *y)
 
 static void draw_mothball_icon(const building *b, int x, int y, color_t color_mask, int grid_offset)
 {
+    if (!b || (!b->data.industry.is_stockpiling && b->state != BUILDING_STATE_MOTHBALLED)) {
+        return;
+    }
     //farms have individual top drawings, but they have one building ID, unlike warehouses
     if (b->prev_part_building_id) {
         return; //do not draw mothball icon for non-main
@@ -489,10 +492,13 @@ static void draw_top(int x, int y, int grid_offset)
 
     image_draw_isometric_top_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
     // specific buildings
-    draw_senate_rating_flags(b, x, y, color_mask);
-    draw_mothball_icon(b, x, y, color_mask, grid_offset);
-    draw_entertainment_spectators(b, x, y, color_mask);
-    draw_workshop_raw_material_storage(b, x, y, color_mask);
+    if (b->id > 0) { //dont draw or calculate for non-buildings
+        draw_senate_rating_flags(b, x, y, color_mask);
+        draw_mothball_icon(b, x, y, color_mask, grid_offset);
+        draw_entertainment_spectators(b, x, y, color_mask);
+        draw_workshop_raw_material_storage(b, x, y, color_mask);
+    }
+
 }
 
 static void draw_figures(int x, int y, int grid_offset)

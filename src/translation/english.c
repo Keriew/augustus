@@ -1616,6 +1616,17 @@ static translation_string all_strings[] = {
     {TR_BUILDING_NATIVE_HUT_ALT, "Alternate native hut"},
     {TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, "Warehouses and granaries can be built over any roads"},
     {TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, "Highlight selected building"},
+    {TR_CHEAT_UNLOCK_LEGIONS, "Allowed legions: 20"},
+    {TR_BUILDING_FORT_STANDARD_ELEPHANTS, "\"The Elephants\""},
+    {TR_BUILDING_FORT_STANDARD_THUNDER_BOLTS, "\"The Thunder Bolts\""},
+    {TR_BUILDING_FORT_STANDARD_BULLS, "\"The Bulls\""},
+    {TR_BUILDING_FORT_STANDARD_CENTAURS, "\"The Centaurs\""},
+    {TR_BUILDING_FORT_STANDARD_OCTOPI, "\"The Octopi\""},
+    {TR_BUILDING_FORT_STANDARD_BEARS, "\"The Bears\""},
+    {TR_BUILDING_FORT_STANDARD_SCORPIONS, "\"The Scorpions\""},
+    {TR_BUILDING_FORT_STANDARD_CAMELS, "\"The Camels\""},
+    {TR_BUILDING_FORT_STANDARD_DOLPHINS, "\"The Dolphins\""},
+    {TR_BUILDING_FORT_STANDARD_SEA_GOATS, "\"The Sea Goats\""},
     {TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING, "Retaining"},
     {TR_CONFIG_MAX_AUTOSAVE_SLOTS, "Maximum number of yearly autosave slots:" },
     {TR_TOOLTIP_PERSONAL_SAVINGS, "Your private savings!"},
@@ -1648,6 +1659,8 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_TERRAIN_WATER, "Water" },
     {TR_PARAMETER_TERRAIN_MEADOW, "Meadow" },
     {TR_PARAMETER_TERRAIN_SHRUB, "Shrub" },
+    {TR_CHEAT_DISABLE_INVASIONS, "Disable invasions"},
+    {TR_CHEAT_DISABLE_LEGIONS_CONSUMPTION, "Disable soldier food consumption"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

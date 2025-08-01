@@ -483,18 +483,25 @@ void city_weather_update(int month)
             type = WEATHER_NONE;
         } else {
             weather_months_left = 1;
-            if (WEATHER_RAIN == type) {
-                if (intensity > 800) {
-                    sound_device_play_file_on_channel_panned(ASSETS_DIRECTORY "/Sounds/HeavyRain.ogg", SOUND_TYPE_EFFECTS, setting_sound(SOUND_TYPE_EFFECTS)->volume, 100, 100, 1);
-                } else {
-                    sound_device_play_file_on_channel_panned(ASSETS_DIRECTORY "/Sounds/LightRain.ogg", SOUND_TYPE_EFFECTS, setting_sound(SOUND_TYPE_EFFECTS)->volume, 100, 100, 1);
+            // Play sounds only if weather is enabled
+            if (config_get(CONFIG_UI_DRAW_WEATHER)) {
+                if (WEATHER_RAIN == type) {
+                    if (intensity > 800) {
+                        sound_device_play_file_on_channel_panned(ASSETS_DIRECTORY "/Sounds/HeavyRain.ogg",
+                            SOUND_TYPE_EFFECTS, setting_sound(SOUND_TYPE_EFFECTS)->volume, 100, 100, 1);
+                    } else {
+                        sound_device_play_file_on_channel_panned(ASSETS_DIRECTORY "/Sounds/LightRain.ogg",
+                            SOUND_TYPE_EFFECTS, setting_sound(SOUND_TYPE_EFFECTS)->volume, 100, 100, 1);
+                    }
+                } else if (WEATHER_SAND == type) {
+                    sound_device_play_file_on_channel_panned(ASSETS_DIRECTORY "/Sounds/SandStorm.ogg",
+                        SOUND_TYPE_EFFECTS, setting_sound(SOUND_TYPE_EFFECTS)->volume, 100, 50, 1);
+                } else if (WEATHER_SNOW == type) {
+                    sound_device_play_file_on_channel_panned(ASSETS_DIRECTORY "/Sounds/Snow.ogg",
+                        SOUND_TYPE_EFFECTS, setting_sound(SOUND_TYPE_EFFECTS)->volume, 100, 100, 1);
                 }
-            } else if (WEATHER_SAND == type) {
-                sound_device_play_file_on_channel_panned(ASSETS_DIRECTORY "/Sounds/SandStorm.ogg", SOUND_TYPE_EFFECTS, setting_sound(SOUND_TYPE_EFFECTS)->volume, 100, 50, 1);
-            } else {
-                sound_device_play_file_on_channel_panned(ASSETS_DIRECTORY "/Sounds/Snow.ogg", SOUND_TYPE_EFFECTS, setting_sound(SOUND_TYPE_EFFECTS)->volume, 100, 100, 1);
+                data.is_sound_playing = 1;
             }
-            data.is_sound_playing = 1;
         }
 
         data.last_active = active;

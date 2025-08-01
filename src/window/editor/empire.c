@@ -190,8 +190,13 @@ static int draw_preview_image(int x, int y, int center, color_t color_mask, int 
     if (!data.preview_image_group) {
         return 0;
     }
-
+    
+    if (data.preview_image_group == GROUP_EMPIRE_BORDER_EDGE) {
+        draw_borders = 0;
+    }
+    
     int image_id = image_group(data.preview_image_group);
+
     const image *img = image_get(image_id);
     int x_offset = x + (center - img->width) / 2;
     int y_offset = y + (center - img->height) / 2;
@@ -620,6 +625,18 @@ static void button_cycle_preview(const generic_button *button)
             data.preview_image_group = GROUP_EMPIRE_CITY_TRADE;
             break;
         case GROUP_EMPIRE_CITY_TRADE:
+            data.preview_image_group = GROUP_EMPIRE_BATTLE;
+            break;
+        case GROUP_EMPIRE_BATTLE:
+            data.preview_image_group = GROUP_EMPIRE_ROMAN_ARMY;
+            break;
+        case GROUP_EMPIRE_ROMAN_ARMY:
+            data.preview_image_group = GROUP_EMPIRE_ENEMY_ARMY;
+            break;
+        case GROUP_EMPIRE_ENEMY_ARMY:
+            data.preview_image_group = GROUP_EMPIRE_BORDER_EDGE;
+            break;
+        case GROUP_EMPIRE_BORDER_EDGE:
             data.preview_image_group = 0;
             break;
         default:

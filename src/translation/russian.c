@@ -1615,6 +1615,17 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT, "Хижина туземцев 2"}, // Имя в меню редактора карт
     {TR_BUILDING_NATIVE_HUT_ALT, "Хижина туземцев alt"}, // Имя в окне Тип здания для подсчета сценария событий
     {TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, "Склады и амбары можно строить поверх дорог"},
+    {TR_CHEAT_UNLOCK_LEGIONS, "Доступно легионов: 20"},
+    {TR_BUILDING_FORT_STANDARD_ELEPHANTS, "\"Слоны\""},
+    {TR_BUILDING_FORT_STANDARD_THUNDER_BOLTS, "\"Молнии\""},
+    {TR_BUILDING_FORT_STANDARD_BULLS, "\"Быки\""},
+    {TR_BUILDING_FORT_STANDARD_CENTAURS, "\"Кентавры\""},
+    {TR_BUILDING_FORT_STANDARD_OCTOPI, "\"Осьминоги\""},
+    {TR_BUILDING_FORT_STANDARD_BEARS, "\"Медведи\""},
+    {TR_BUILDING_FORT_STANDARD_SCORPIONS, "\"Скорпионы\""},
+    {TR_BUILDING_FORT_STANDARD_CAMELS, "\"Верблюды\""},
+    {TR_BUILDING_FORT_STANDARD_DOLPHINS, "\"Дельфины\""},
+    {TR_BUILDING_FORT_STANDARD_SEA_GOATS, "\"Козероги\""},
     {TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, "Подсветить выбранное здание"},
     {TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING, "Хранение"},
     {TR_CONFIG_MAX_AUTOSAVE_SLOTS, "Максимальное количество ежегодных автосохранений:"},
@@ -1648,6 +1659,8 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_TERRAIN_WATER, "Вода"},
     {TR_PARAMETER_TERRAIN_MEADOW, "Луг"},
     {TR_PARAMETER_TERRAIN_SHRUB, "Кустарник"},
+    {TR_CHEAT_DISABLE_INVASIONS, "Вторжения отключены"},
+    {TR_CHEAT_DISABLE_LEGIONS_CONSUMPTION, "Отключено потребление пищи легионами"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

@@ -271,8 +271,9 @@ static void draw_foreground(void)
 static int handle_mouse(const mouse *m)
 {
     data.focus_button_id = 0;
+    int num_buttons = sizeof(resource_buttons) / sizeof(resource_buttons[0]);
     return grid_box_handle_input(&resource_grid, m, 1) ||
-        generic_buttons_handle_mouse(m, 0, 0, resource_buttons, MAX_VISIBLE_ROWS + 4, &data.focus_button_id);
+        generic_buttons_handle_mouse(m, 0, 0, resource_buttons, num_buttons, &data.focus_button_id);
 }
 
 static void apply_policy(int selected_policy)

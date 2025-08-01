@@ -12,6 +12,7 @@
 #include "figure/figure.h"
 #include "figure/formation.h"
 #include "figure/name.h"
+#include "game/cheats.h"
 #include "game/difficulty.h"
 #include "game/time.h"
 #include "map/grid.h"
@@ -159,7 +160,8 @@ static void init_warnings(void)
         return;
     }
     const invasion_t *invasion;
-    array_foreach(data.invasions, invasion) {
+    array_foreach(data.invasions, invasion)
+    {
         if (!invasion->type) {
             continue;
         }
@@ -202,7 +204,8 @@ static void init_warnings(void)
 void scenario_invasion_init(void)
 {
     invasion_t *invasion;
-    array_foreach(data.invasions, invasion) {
+    array_foreach(data.invasions, invasion)
+    {
         random_generate_next();
         if (!invasion->type) {
             continue;
@@ -241,7 +244,8 @@ void scenario_invasion_delete(int id)
 int scenario_invasion_exists_upcoming(void)
 {
     const invasion_warning *warning;
-    array_foreach(data.warnings, warning) {
+    array_foreach(data.warnings, warning)
+    {
         if (warning->in_use && !warning->handled) {
             return 1;
         }
@@ -253,7 +257,8 @@ int scenario_invasion_get_years_remaining(void)
 {
     int years_until_invasion = 4;
     const invasion_warning *warning;
-    array_foreach(data.warnings, warning) {
+    array_foreach(data.warnings, warning)
+    {
         if (warning->in_use && warning->handled && warning->warning_years < years_until_invasion) {
             years_until_invasion = warning->warning_years;
         }
@@ -264,7 +269,8 @@ int scenario_invasion_get_years_remaining(void)
 void scenario_invasion_foreach_warning(void (*callback)(int x, int y, int image_id))
 {
     const invasion_warning *warning;
-    array_foreach(data.warnings, warning) {
+    array_foreach(data.warnings, warning)
+    {
         if (warning->in_use && warning->handled) {
             callback(warning->x, warning->y, warning->image_id);
         }
@@ -280,7 +286,8 @@ int scenario_invasion_count_active(void)
 {
     int num_invasions = 0;
     const invasion_t *invasion;
-    array_foreach(data.invasions, invasion) {
+    array_foreach(data.invasions, invasion)
+    {
         if (invasion->type) {
             num_invasions++;
         }
@@ -309,6 +316,9 @@ static void determine_formations(int num_soldiers, int *num_formations, int sold
 
 static int start_invasion(int enemy_type, int amount, int invasion_point, formation_attack_enum attack_type, int invasion_id)
 {
+    if (game_cheat_disabled_invasions()) { // invasions disabled 
+        return -1;
+    }
     if (amount <= 0) {
         return -1;
     }
@@ -402,7 +412,8 @@ static int start_invasion(int enemy_type, int amount, int invasion_point, format
         return -1;
     }
     if (map_terrain_is(grid_offset, TERRAIN_WATER)) {
-        if (!map_terrain_is(grid_offset, TERRAIN_ROAD)) { // bridge - any changes to bridge behaviour will need to ensure that invasion doesnt target it 
+        if (!map_terrain_is(grid_offset, TERRAIN_ROAD)) {
+            // bridge - any changes to bridge behaviour will need to ensure that invasion doesnt target it 
             return -1;
         }
     } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING | TERRAIN_AQUEDUCT | TERRAIN_GATEHOUSE | TERRAIN_WALL)) {
@@ -475,7 +486,8 @@ static void repeat_invasion_with_warnings(invasion_t *invasion)
     int path_current = 1;
     const invasion_t *inv_it;
     // Iterate through all invasions stored in the data.invasions array
-    array_foreach(data.invasions, inv_it) {
+    array_foreach(data.invasions, inv_it)
+    {
         // Skip if the invasion has no type, or is a local uprising, or a distant battle
         if (!inv_it->type ||
             inv_it->type == INVASION_TYPE_LOCAL_UPRISING ||
@@ -494,7 +506,8 @@ static void repeat_invasion_with_warnings(invasion_t *invasion)
     // Clear old warning
     // Clear existing warnings related to this invasion: mark as not in use and not handled.
     invasion_warning *w;
-    array_foreach(data.warnings, w) {
+    array_foreach(data.warnings, w)
+    {
         if (w->invasion_id == invasion->id) {
             w->in_use = 0;
             w->handled = 0;
@@ -549,9 +562,13 @@ static void repeat_invasion_with_warnings(invasion_t *invasion)
 
 void scenario_invasion_process(void)
 {
+    if (game_cheat_disabled_invasions()) { // invasions disabled 
+        return;
+    }
     int enemy_id = scenario.enemy_id;
     invasion_warning *warning;
-    array_foreach(data.warnings, warning) {
+    array_foreach(data.warnings, warning)
+    {
         if (!warning->in_use) {
             continue;
         }
@@ -602,7 +619,8 @@ void scenario_invasion_process(void)
     }
     // local uprisings
     invasion_t *invasion;
-    array_foreach(data.invasions, invasion) {
+    array_foreach(data.invasions, invasion)
+    {
         if (invasion->type == INVASION_TYPE_LOCAL_UPRISING) {
             if (game_time_year() == scenario.start_year + invasion->year && game_time_month() == invasion->month) {
                 int grid_offset = start_invasion(ENEMY_0_BARBARIAN,
@@ -639,6 +657,9 @@ int scenario_invasion_start_from_mars(void)
 
 int scenario_invasion_start_from_caesar(int size)
 {
+    if (game_cheat_disabled_invasions()) { // invasions disabled 
+        return 0;
+    }
     int grid_offset = start_invasion(ENEMY_11_CAESAR, size, 0, FORMATION_ATTACK_BEST_BUILDINGS, CAESAR_ATTACK_ARMY_ID);
     if (grid_offset > 0) {
         city_message_post(1, MESSAGE_CAESAR_ARMY_ATTACK, data.last_internal_invasion_id, grid_offset);
@@ -649,6 +670,7 @@ int scenario_invasion_start_from_caesar(int size)
 
 void scenario_invasion_start_from_cheat(void)
 {
+    // leaving this one out of the disabled_invasions check - no reason for cheat to stop cheats
     int enemy_id = scenario.enemy_id;
     int grid_offset = start_invasion(ENEMY_ID_TO_ENEMY_TYPE[enemy_id], 150, 8,
         FORMATION_ATTACK_FOOD_CHAIN, CHEATED_ARMY_ID);
@@ -664,9 +686,13 @@ void scenario_invasion_start_from_cheat(void)
 void scenario_invasion_start_from_action(invasion_type_enum invasion_type, int size, int invasion_point,
     formation_attack_enum attack_type, enemy_type_t enemy_id)
 {
+    if (game_cheat_disabled_invasions()) { // invasions disabled 
+        return;
+    }
     if (attack_type > FORMATION_ATTACK_RANDOM) {
         attack_type = FORMATION_ATTACK_RANDOM;
     }
+
     data.last_action_army_id++;
     if (data.last_action_army_id < ACTION_ARMY_ID_START || data.last_action_army_id >= MAX_ENEMY_ARMIES) {
         data.last_action_army_id = ACTION_ARMY_ID_START;
@@ -750,7 +776,8 @@ void scenario_invasion_warning_save_state(buffer *invasion_id, buffer *warnings)
     buffer_init_dynamic_array(warnings, data.warnings.size, WARNINGS_STRUCT_SIZE_CURRENT);
 
     const invasion_warning *w;
-    array_foreach(data.warnings, w) {
+    array_foreach(data.warnings, w)
+    {
         buffer_write_u8(warnings, w->in_use);
         buffer_write_u8(warnings, w->handled);
         buffer_write_u8(warnings, w->invasion_path_id);
@@ -803,7 +830,8 @@ void scenario_invasion_save_state(buffer *buf)
     buffer_init_dynamic_array(buf, data.invasions.size, INVASIONS_STRUCT_SIZE_CURRENT);
 
     const invasion_t *invasion;
-    array_foreach(data.invasions, invasion) {
+    array_foreach(data.invasions, invasion)
+    {
         buffer_write_i16(buf, invasion->type);
         buffer_write_i16(buf, invasion->year);
         buffer_write_u16(buf, invasion->amount.min);
@@ -869,24 +897,30 @@ void scenario_invasion_load_state_old_version(buffer *buf, invasion_old_state_se
         for (size_t i = 0; i < MAX_ORIGINAL_INVASIONS; i++) {
             array_advance(data.invasions);
         }
-        array_foreach(data.invasions, invasion) {
+        array_foreach(data.invasions, invasion)
+        {
             invasion->year = buffer_read_i16(buf);
         }
-        array_foreach(data.invasions, invasion) {
+        array_foreach(data.invasions, invasion)
+        {
             invasion->type = buffer_read_i16(buf);
         }
-        array_foreach(data.invasions, invasion) {
+        array_foreach(data.invasions, invasion)
+        {
             invasion->amount.min = buffer_read_i16(buf);
             invasion->amount.max = invasion->amount.min;
         }
-        array_foreach(data.invasions, invasion) {
+        array_foreach(data.invasions, invasion)
+        {
             invasion->from = buffer_read_i16(buf);
         }
-        array_foreach(data.invasions, invasion) {
+        array_foreach(data.invasions, invasion)
+        {
             invasion->attack_type = buffer_read_i16(buf);
         }
     } else if (section == INVASION_OLD_STATE_LAST_SECTION) {
-        array_foreach(data.invasions, invasion) {
+        array_foreach(data.invasions, invasion)
+        {
             invasion->month = buffer_read_u8(buf);
         }
         array_trim(data.invasions);

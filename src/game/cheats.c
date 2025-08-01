@@ -50,6 +50,9 @@ static void game_cheat_show_editor(uint8_t *);
 static void game_cheat_cast_curse(uint8_t *);
 static void game_cheat_make_buildings_invincible(uint8_t *);
 static void game_cheat_change_climate(uint8_t *);
+static void game_cheat_unlock_legions(uint8_t *);
+static void game_cheat_disable_legions_consumption(uint8_t *);
+static void game_cheat_disable_invasions(uint8_t *);
 
 static void (*const execute_command[])(uint8_t *args) = {
     game_cheat_add_money,
@@ -66,7 +69,10 @@ static void (*const execute_command[])(uint8_t *args) = {
     game_cheat_show_editor,
     game_cheat_cast_curse,
     game_cheat_make_buildings_invincible,
-    game_cheat_change_climate
+    game_cheat_change_climate,
+    game_cheat_unlock_legions,
+    game_cheat_disable_legions_consumption,
+    game_cheat_disable_invasions,
 };
 
 static const char *commands[] = {
@@ -84,7 +90,10 @@ static const char *commands[] = {
     "debug.showeditor",
     "curse",
     "romanconcrete",
-    "globalwarming"
+    "globalwarming",
+    "ihaveanarmy",
+    "breadandfish",
+    "leavemealone"
 };
 
 #define NUMBER_OF_COMMANDS sizeof (commands) / sizeof (commands[0])
@@ -92,6 +101,9 @@ static const char *commands[] = {
 static struct {
     int is_cheating;
     int tooltip_enabled;
+    int extra_legions_unlocked;
+    int disabled_legions_consumption;
+    int disabled_invasions;
 } data;
 
 static int parse_word(uint8_t *string, uint8_t *word)
@@ -269,6 +281,25 @@ static void game_cheat_unlock_all_buildings(uint8_t *args)
     show_warning(TR_CHEAT_UNLOCKED_ALL_BUILDINGS);
 }
 
+static void game_cheat_unlock_legions(uint8_t *args)
+{
+    data.extra_legions_unlocked = 1;
+    show_warning(TR_CHEAT_UNLOCK_LEGIONS);
+}
+
+static void game_cheat_disable_legions_consumption(uint8_t *args)
+{
+    data.disabled_legions_consumption = 1;
+    show_warning(TR_CHEAT_DISABLE_LEGIONS_CONSUMPTION);
+}
+
+static void game_cheat_disable_invasions(uint8_t *args)
+{
+    data.disabled_invasions = 1;
+    scenario_invasion_clear();
+    show_warning(TR_CHEAT_DISABLE_INVASIONS);
+}
+
 static void game_cheat_incite_riot(uint8_t *args)
 {
     city_data.sentiment.value = 0;
@@ -302,4 +333,16 @@ void game_cheat_parse_command(uint8_t *command)
             (*execute_command[i])(command + next_arg);
         }
     }
+}
+int game_cheat_extra_legions(void)
+{
+    return data.extra_legions_unlocked;
+}
+int game_cheat_disabled_legions_consumption(void)
+{
+    return data.disabled_legions_consumption;
+}
+int game_cheat_disabled_invasions(void)
+{
+    return data.disabled_invasions;
 }

@@ -1,5 +1,6 @@
 #include "military.h"
 
+#include "assets/assets.h"
 #include "building/count.h"
 #include "city/view.h"
 #include "core/calc.h"
@@ -22,8 +23,10 @@
 #include "widget/sidebar/common.h"
 #include "widget/sidebar/extra.h"
 #include "widget/sidebar/slide.h"
+#include "window/building/military.h"
 #include "window/city.h"
 #include "window/military_menu.h"
+
 
 #define LAYOUTS_PER_LEGION 5
 
@@ -135,6 +138,7 @@ static generic_button buttons_bottom[] = {
 
 typedef struct {
     int formation_id;
+    int standard_id; //figure id of the standard in the figure array
     int soldiers;
     int health;
     int morale;
@@ -210,6 +214,48 @@ static int get_health_text_id(int health)
     }
 }
 
+int widget_sidebar_military_get_standard_image(int legion_id)
+{
+    switch (legion_id) {
+        case 0: return 0; // No standard for non-legion formations;
+        case 1:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS + 0);
+        case 2:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 1;
+        case 3:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 2;
+        case 4:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 3;
+        case 5:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 4;
+        case 6:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 5;
+        case 7:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 6;
+        case 8:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 7;
+        case 9:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 8;
+        case 10:  return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + 9;
+        case 11: return assets_get_image_id("UI", "11Legion_Elephants");
+        case 12: return assets_get_image_id("UI", "12Legion_Thunder_Bolts");
+        case 13: return assets_get_image_id("UI", "13Legion_Bulls");
+        case 14: return assets_get_image_id("UI", "14Legion_Centaurs");
+        case 15: return assets_get_image_id("UI", "15Legion_Octopi");
+        case 16: return assets_get_image_id("UI", "16Legion_Bears");
+        case 17: return assets_get_image_id("UI", "17Legion_Scorpions");
+        case 18: return assets_get_image_id("UI", "18Legion_Camels");
+        case 19: return assets_get_image_id("UI", "19Legion_Dolphins");
+        case 20: return assets_get_image_id("UI", "20Legion_Sea_Goats");
+        default: return image_group(GROUP_FIGURE_FORT_STANDARD_ICONS + 9);
+    }
+}
+
+int widget_sidebar_military_get_legion_name_group(int legion_id)
+{
+    return legion_id <= 10 ? 138 : 10000;
+}
+
+int widget_sidebar_military_get_legion_name_id(int legion_id)
+{
+    if (legion_id <= 10) {
+        return legion_id - 1; // old index was 0-based, now 1-based
+    } else {
+        return TR_BUILDING_FORT_STANDARD_ELEPHANTS + legion_id - 11;
+    }
+}
+
 static void clear_focus_buttons(void)
 {
     data.top_buttons_focus_id = 0;
@@ -243,14 +289,15 @@ static void draw_military_info_text(int x_offset, int y_offset)
     const formation *m = formation_get(legion->formation_id);
     update_legion_info(legion, m);
 
-    int formation_image_id = image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + m->legion_id;
+    int formation_image_id = m->legion_flag_id;
     const image *formation_image = image_get(formation_image_id);
 
     // Legion name
     image_draw(formation_image_id,
         x_offset + (CONTENT_WIDTH - formation_image->width - formation_image->x_offset) / 2, y_offset + 12,
         COLOR_MASK_NONE, SCALE_NONE);
-    lang_text_draw_centered(138, m->legion_id, x_offset, y_offset + 40, CONTENT_WIDTH, FONT_NORMAL_WHITE);
+
+    lang_text_draw_centered(m->legion_name_group, m->legion_name_id, x_offset, y_offset + 40, CONTENT_WIDTH, FONT_NORMAL_WHITE);
 
     // Number of soldiers
     int width = text_draw_number(m->num_figures, '@', " ", x_offset, y_offset + 60, FONT_NORMAL_WHITE, 0);
