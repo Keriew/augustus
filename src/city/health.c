@@ -54,16 +54,16 @@ static void cause_disease_in_building(int building_id)
         // Remove half the granary's food
         if (b->type == BUILDING_GRANARY) {
             for (int r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
-                building_granary_remove_resource(b, r, building_granary_resource_amount(r, b) / 2);
+                building_granary_try_remove_resource(b, r, building_granary_get_amount(b, r) / 2);
             }
         } else if (b->type == BUILDING_WAREHOUSE) {
             // Remove all food from warehouse
             for (int r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
-                building_warehouse_remove_resource(b, r, FULL_WAREHOUSE);
+                building_warehouse_try_remove_resource(b, r, FULL_WAREHOUSE);
             }
             // Remove half of oil and wine from warehouse
             for (int r = RESOURCE_WINE; r <= RESOURCE_OIL; r++) {
-                building_warehouse_remove_resource(b, r, building_warehouse_get_amount(b, r) / 2);
+                building_warehouse_try_remove_resource(b, r, building_warehouse_get_amount(b, r) / 2);
             }
         }
 
@@ -295,7 +295,7 @@ static void adjust_sickness_level_in_plague_buildings(int hospital_coverage_bonu
     }
 }
 
-int city_health_get_house_health_level(const building *b, int update_city_data) 
+int city_health_get_house_health_level(const building *b, int update_city_data)
 {
     int house_health = 0;
 
@@ -314,7 +314,7 @@ int city_health_get_house_health_level(const building *b, int update_city_data)
                 city_data.health.population_access.clinic += b->house_population;
             }
         }
-        
+
         if (b->data.house.bathhouse) {
             house_health += 15;
             if (update_city_data) {

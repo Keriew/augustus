@@ -59,7 +59,7 @@ static int take_resource_from_warehouse(figure *f, int warehouse_id)
         return 0;
     }
 
-    building_warehouse_remove_resource(warehouse, resource, num_loads);
+    building_warehouse_try_remove_resource(warehouse, resource, num_loads);
 
     // create slave workers
     int slave = f->id;

@@ -84,7 +84,7 @@ int building_dock_accepts_ship(int ship_id, int dock_id)
     }
     for (int resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
         if (city->sells_resource[resource] || city->buys_resource[resource]) {
-            if (building_distribution_is_good_accepted(resource, dock)) {
+            if (building_distribution_is_good_accepted(dock, resource)) {
                 return 1;
             }
         }
@@ -105,7 +105,7 @@ int building_dock_can_import_from_ship(const building *dock, int ship_id)
     }
 
     for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-        if (building_distribution_is_good_accepted(r, dock)) {
+        if (building_distribution_is_good_accepted(dock, r)) {
             return 1;
         }
     }
@@ -125,7 +125,7 @@ int building_dock_can_export_to_ship(const building *dock, int ship_id)
     }
 
     for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-        if (building_distribution_is_good_accepted(r, dock)) {
+        if (building_distribution_is_good_accepted(dock, r)) {
             return 1;
         }
     }
@@ -171,7 +171,7 @@ static void get_already_handled_goods(handled_goods *handled, int ship_id)
         // assign the road network (in case this is a new one) and add the goods this dock handles
         network->road_network_id = dock->road_network_id;
         for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-            if (building_distribution_is_good_accepted(r, dock)) {
+            if (building_distribution_is_good_accepted(dock, r)) {
                 network->goods[r] = 1;
             }
         }
@@ -192,7 +192,7 @@ static int all_dock_goods_already_handled(const handled_goods *handled, const bu
                 // the ship doesn't buy or sell this good
                 continue;
             }
-            if (building_distribution_is_good_accepted(r, dock) && !network->goods[r]) {
+            if (building_distribution_is_good_accepted(dock, r) && !network->goods[r]) {
                 // this dock accepts a good that all previous docks on this road network did not accept
                 return 0;
             }

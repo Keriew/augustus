@@ -9,7 +9,7 @@
 
 #include <string.h>
 
-int building_distribution_is_good_accepted(resource_type resource, const building *b)
+int building_distribution_is_good_accepted(const building *b, resource_type resource)
 {
     return b->accepted_goods[resource] > 0;
 }
@@ -24,7 +24,7 @@ int building_distribution_check_if_accepts_nothing(const building *b)
     return 1;
 }
 
-void building_distribution_toggle_good_accepted(resource_type resource, building *b)
+void building_distribution_toggle_good_accepted(building *b, resource_type resource)
 {
     if (b->accepted_goods[resource] == 0) {
         b->accepted_goods[resource] = 1;
@@ -111,7 +111,7 @@ int building_distribution_get_handled_resources_for_building(const building *b,
     int needed = 0;
     for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
         info[r].needed = building_distribution_resource_is_handled(r, b->type) &&
-            building_distribution_is_good_accepted(r, b);
+            building_distribution_is_good_accepted(b, r);
         if (!needed && info[r].needed) {
             needed = 1;
         }

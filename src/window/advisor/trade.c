@@ -129,7 +129,7 @@ static int draw_background(void)
 
     button_border_draw(45, 390, 40, 30, land_policy_available && data.focus_button_id == 3);
     int image_id;
-    
+
     if (land_policy_available) {
         image_id = image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE) + 1;
     } else {
@@ -236,7 +236,7 @@ static void draw_resource_info(const grid_box_item *item)
     }
     text_draw(resource_get_data(resource)->text, item->x + 48, item->y + 15, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
     if (resource_is_storable(resource)) {
-        int amount = city_resource_count(resource);
+        int amount = city_resource_count_warehouses_amount(resource);
         if (resource_is_food(resource)) {
             amount += city_resource_count_food_on_granaries(resource) / 100;
         }
@@ -329,7 +329,7 @@ static void button_resource(const grid_box_item *item)
 static void write_resource_storage_tooltip(tooltip_context *c, resource_type resource)
 {
     static uint8_t tooltip_resource_info[200];
-    int amount_warehouse = city_resource_count(resource);
+    int amount_warehouse = city_resource_count_warehouses_amount(resource);
     int amount_granary = city_resource_count_food_on_granaries(resource) / RESOURCE_ONE_LOAD;
     uint8_t *text = tooltip_resource_info;
     text += string_from_int(text, amount_warehouse, 0);

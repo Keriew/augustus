@@ -44,7 +44,7 @@ static void make_request_visible_and_send_message(scenario_request *request)
 {
     request->visible = 1;
     request->amount.requested = random_between_from_stdlib(request->amount.min, request->amount.max);
-    if (city_resource_count(request->resource) >= request->amount.requested) {
+    if (city_resource_count_warehouses_amount(request->resource) >= request->amount.requested) {
         request->can_comply_dialog_shown = 1;
     }
     int requested = request->amount.requested;
@@ -224,7 +224,8 @@ void scenario_request_delete(int id)
 void scenario_request_remap_resource(void)
 {
     scenario_request *request;
-    array_foreach(requests, request) {
+    array_foreach(requests, request)
+    {
         request->resource = resource_remap(request->resource);
     }
 }
@@ -238,7 +239,8 @@ int scenario_request_count_active(void)
 {
     int num_requests = 0;
     const scenario_request *request;
-    array_foreach(requests, request) {
+    array_foreach(requests, request)
+    {
         if (request->resource) {
             num_requests++;
         }
@@ -250,7 +252,8 @@ int scenario_request_count_visible(void)
 {
     int count = 0;
     const scenario_request *request;
-    array_foreach(requests, request) {
+    array_foreach(requests, request)
+    {
         if (request->resource && request->visible) {
             count++;
         }
@@ -262,7 +265,8 @@ int scenario_request_foreach_visible(int start_index, void (*callback)(int index
 {
     int index = start_index;
     const scenario_request *request;
-    array_foreach(requests, request) {
+    array_foreach(requests, request)
+    {
         if (request->resource && request->visible) {
             callback(index, scenario_request_get(request->id));
             index++;
@@ -274,7 +278,8 @@ int scenario_request_foreach_visible(int start_index, void (*callback)(int index
 const scenario_request *scenario_request_get_visible(int index)
 {
     const scenario_request *request;
-    array_foreach(requests, request) {
+    array_foreach(requests, request)
+    {
         if (request->resource && request->visible && request->state <= 1) {
             if (index == 0) {
                 return scenario_request_get(request->id);
