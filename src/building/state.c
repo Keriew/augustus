@@ -593,7 +593,7 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
         b->fumigation_frame = buffer_read_u8(buf);
         b->fumigation_direction = buffer_read_u8(buf);
     }
-    
+
     if (save_version > SAVE_GAME_LAST_STATIC_RESOURCES) {
         for (int i = 0; i < resource_total_mapped(); i++) {
             b->resources[resource_remap(i)] = buffer_read_i16(buf);

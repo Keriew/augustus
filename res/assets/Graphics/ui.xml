@@ -1221,4 +1221,7 @@
 	</image>
 	<image id="Mothball_Sprite" src="Mothball_Sprite"/>
 	<image id="Stockpile_Sprite" src="Stockpile_Sprite"/>
+	<image id="roadblock_button_small0" src="roadblock_button_small0" width="24" height="24"/>
+	<image id="roadblock_button_small1" src="roadblock_button_small1" width="24" height="24"/>
+	<image id="roadblock_button_small2" src="roadblock_button_small2" width="24" height="24"/>
 </assetlist>

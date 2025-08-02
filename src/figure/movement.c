@@ -84,46 +84,46 @@ static void set_target_height_bridge(figure *f)
     f->target_height = map_bridge_height(f->grid_offset);
 }
 
-static roadblock_permission get_permission_for_figure_type(figure* f)
+static roadblock_permission get_permission_for_figure_type(figure *f)
 {
     switch (f->type) {
-    case FIGURE_ENGINEER:
-    case FIGURE_PREFECT:
-        return PERMISSION_MAINTENANCE;
-        break;
-    case FIGURE_PRIEST:
-        return PERMISSION_PRIEST;
-        break;
-    case FIGURE_MARKET_TRADER:
-        return PERMISSION_MARKET;
-        break;
-    case FIGURE_GLADIATOR:
-    case FIGURE_CHARIOTEER:
-    case FIGURE_ACTOR:
-    case FIGURE_LION_TAMER:
-    case FIGURE_BARKEEP:
-        return PERMISSION_ENTERTAINER;
-        break;
-    case FIGURE_SURGEON:
-    case FIGURE_DOCTOR:
-    case FIGURE_BARBER:
-    case FIGURE_BATHHOUSE_WORKER:
-        return PERMISSION_MEDICINE;
-    case FIGURE_SCHOOL_CHILD:
-    case FIGURE_TEACHER:
-    case FIGURE_LIBRARIAN:
-        return PERMISSION_EDUCATION;
-    case FIGURE_TAX_COLLECTOR:
-        return PERMISSION_TAX_COLLECTOR;
-    case FIGURE_LABOR_SEEKER:
-        return PERMISSION_LABOR_SEEKER;
-    case FIGURE_MISSIONARY:
-        return PERMISSION_MISSIONARY;
-    case FIGURE_WATCHMAN:
-        return PERMISSION_WATCHMAN;
-    default:
-        return PERMISSION_NONE;
-        break;
+        case FIGURE_ENGINEER:
+        case FIGURE_PREFECT:
+            return PERMISSION_MAINTENANCE;
+            break;
+        case FIGURE_PRIEST:
+            return PERMISSION_PRIEST;
+            break;
+        case FIGURE_MARKET_TRADER:
+            return PERMISSION_MARKET;
+            break;
+        case FIGURE_GLADIATOR:
+        case FIGURE_CHARIOTEER:
+        case FIGURE_ACTOR:
+        case FIGURE_LION_TAMER:
+        case FIGURE_BARKEEP:
+            return PERMISSION_ENTERTAINER;
+            break;
+        case FIGURE_SURGEON:
+        case FIGURE_DOCTOR:
+        case FIGURE_BARBER:
+        case FIGURE_BATHHOUSE_WORKER:
+            return PERMISSION_MEDICINE;
+        case FIGURE_SCHOOL_CHILD:
+        case FIGURE_TEACHER:
+        case FIGURE_LIBRARIAN:
+            return PERMISSION_EDUCATION;
+        case FIGURE_TAX_COLLECTOR:
+            return PERMISSION_TAX_COLLECTOR;
+        case FIGURE_LABOR_SEEKER:
+            return PERMISSION_LABOR_SEEKER;
+        case FIGURE_MISSIONARY:
+            return PERMISSION_MISSIONARY;
+        case FIGURE_WATCHMAN:
+            return PERMISSION_WATCHMAN;
+        default:
+            return PERMISSION_NONE;
+            break;
     }
 }
 
@@ -257,7 +257,7 @@ static void advance_route_tile(figure *f, int roaming_enabled)
         }
     } else if (map_terrain_is(target_grid_offset, TERRAIN_ROAD | TERRAIN_ACCESS_RAMP | TERRAIN_HIGHWAY)) {
         if (roaming_enabled && map_terrain_is(target_grid_offset, TERRAIN_BUILDING)) {
-            building* b = building_get(map_building_at(target_grid_offset));
+            building *b = building_get(map_building_at(target_grid_offset));
             if (building_type_is_roadblock(b->type)) {
                 // do not allow roaming through roadblock
                 int permission = get_permission_for_figure_type(f);
@@ -267,16 +267,18 @@ static void advance_route_tile(figure *f, int roaming_enabled)
             }
         }
     } else if (map_terrain_is(target_grid_offset, TERRAIN_BUILDING)) {
-        int type = building_get(map_building_at(target_grid_offset))->type;
-        switch (type) {
-            case BUILDING_WAREHOUSE:
-            case BUILDING_GRANARY:
-            case BUILDING_TRIUMPHAL_ARCH:
-            case BUILDING_FORT_GROUND:
-                break; // OK to walk
-            default:
+        building *b = building_get(map_building_at(target_grid_offset));
+        if (building_type_is_roadblock(b->type) && roaming_enabled) { //only block roaming
+            int permission = get_permission_for_figure_type(f);
+            if (!building_roadblock_get_permission(permission, b)) {
                 f->direction = DIR_FIGURE_REROUTE;
+            }
+        } else {
+            if (!b->type == BUILDING_FORT_GROUND) { //allow roaming through fort grounds
+                f->direction = DIR_FIGURE_REROUTE;
+            }
         }
+
     } else if (map_terrain_is(target_grid_offset, TERRAIN_IMPASSABLE)) {
         f->direction = DIR_FIGURE_REROUTE;
     }
@@ -410,7 +412,7 @@ void figure_movement_move_ticks(figure *f, int num_ticks)
     walk_ticks(f, num_ticks, 0);
 }
 
-void figure_movement_move_ticks_with_percentage(figure* f, int num_ticks, int tick_percentage)
+void figure_movement_move_ticks_with_percentage(figure *f, int num_ticks, int tick_percentage)
 {
     int progress = f->progress_to_next_tick + tick_percentage;
 
@@ -468,7 +470,7 @@ void figure_movement_follow_ticks(figure *f, int num_ticks)
     }
 }
 
-void figure_movement_follow_ticks_with_percentage(figure* f, int num_ticks, int tick_percentage)
+void figure_movement_follow_ticks_with_percentage(figure *f, int num_ticks, int tick_percentage)
 {
     int progress = f->progress_to_next_tick + tick_percentage;
 
@@ -481,7 +483,7 @@ void figure_movement_follow_ticks_with_percentage(figure* f, int num_ticks, int 
     }
     f->progress_to_next_tick = (char) progress;
 
-    const figure* leader = figure_get(f->leading_figure_id);
+    const figure *leader = figure_get(f->leading_figure_id);
     if (f->x == f->source_x && f->y == f->source_y) {
         f->is_ghost = 1;
     }
@@ -494,8 +496,7 @@ void figure_movement_follow_ticks_with_percentage(figure* f, int num_ticks, int 
         f->progress_on_tile++;
         if (f->progress_on_tile < 15) {
             advance_tick(f);
-        }
-        else {
+        } else {
             f->progress_on_tile = 15;
             f->direction = calc_general_direction(f->x, f->y,
                 leader->previous_tile_x, leader->previous_tile_y);
