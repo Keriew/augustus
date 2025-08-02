@@ -312,9 +312,22 @@ int map_terrain_is_adjacent_to_open_water(int x, int y, int size)
 int map_terrain_get_adjacent_road_or_clear_land(int x, int y, int size, int *x_tile, int *y_tile)
 {
     int base_offset = map_grid_offset(x, y);
-    for (const int *tile_delta = map_grid_adjacent_offsets(size); *tile_delta; tile_delta++) {
+    const int *tile_delta;
+    // first try
+    for (tile_delta = map_grid_adjacent_offsets(size); *tile_delta; tile_delta++) {
         int grid_offset = base_offset + *tile_delta;
-        if (map_terrain_is(grid_offset, TERRAIN_ROAD) || !map_terrain_is(grid_offset, TERRAIN_ALMOST_CLEAR)) {
+        if (map_terrain_is(grid_offset, TERRAIN_ROAD) ||
+            !map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
+            *x_tile = map_grid_offset_to_x(grid_offset);
+            *y_tile = map_grid_offset_to_y(grid_offset);
+            return 1;
+        }
+    }
+    // second try
+    for (tile_delta = map_grid_adjacent_offsets(size); *tile_delta; tile_delta++) {
+        int grid_offset = base_offset + *tile_delta;
+        if (map_terrain_is(grid_offset, TERRAIN_ROAD) ||
+            !map_terrain_is(grid_offset, TERRAIN_ALMOST_CLEAR)) {
             *x_tile = map_grid_offset_to_x(grid_offset);
             *y_tile = map_grid_offset_to_y(grid_offset);
             return 1;
