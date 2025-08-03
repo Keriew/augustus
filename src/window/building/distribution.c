@@ -755,7 +755,7 @@ void window_building_draw_primary_product_stockpiling(building_info_context *c)
     int x = c->x_offset + primary_product_producer_button_stockpiling->x + BLOCK_SIZE * c->width_blocks - 40;
     int y = c->y_offset + primary_product_producer_button_stockpiling->y + 10;
     button_border_draw(x, y, 30, 30, data.primary_product_stockpiling_id);
-    image_draw(assets_get_image_id("UI", "Stockpile_Sprite"), x + 4, y + 6, building_stockpiling_enabled(building_get(c->building_id)) ?
+    image_draw(assets_get_image_id("UI", "Stockpile_Sprite"), x + 7, y + 6, building_stockpiling_enabled(building_get(c->building_id)) ?
     0xfff5a46b : COLOR_MASK_NONE, SCALE_NONE);
 }
 
