@@ -159,6 +159,21 @@ int building_storage_get_empty_all(int building_id)
     return array_item(storages, storage_id)->storage.empty_all;
 }
 
+int building_storage_count_stored_resource_types(int building_id)
+{
+    building *b = building_get(building_id);
+    if (!b->storage_id) {
+        return 0;
+    }
+    int stored_types_count = 0;
+    for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+        if (b->resources[r] > 0) {
+            stored_types_count++;
+        }
+    }
+    return stored_types_count;
+}
+
 const building_storage_state building_storage_get_state(building *b, int resource, int relative)
 {
     if (b->has_plague || b->state != BUILDING_STATE_IN_USE) {

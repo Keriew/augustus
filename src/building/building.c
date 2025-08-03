@@ -239,12 +239,13 @@ building *building_create(building_type type, int x, int y)
         b->type != BUILDING_PALISADE_GATE && config_get(CONFIG_GP_CH_GATES_DEFAULT_TO_PASS_ALL_WALKERS)) {
         b->data.roadblock.exceptions = ROADBLOCK_PERMISSION_ALL;
     }
-    if (building_type_is_bridge(b->type)) { //bridges always allow everyone by default
+    if (building_type_is_bridge(b->type) || b->type == BUILDING_GRANARY || b->type == BUILDING_WAREHOUSE) {
+        //bridges and other passable buildings should allow all walkers by default
         b->data.roadblock.exceptions = ROADBLOCK_PERMISSION_ALL;
     }
 
     if (b->type == BUILDING_MARKET && config_get(CONFIG_GP_CH_MARKETS_DONT_ACCEPT)) {
-            building_distribution_unaccept_all_goods(b);
+        building_distribution_unaccept_all_goods(b);
     }
 
     b->x = x;

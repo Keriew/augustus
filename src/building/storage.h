@@ -160,7 +160,13 @@ resource_type building_storage_get_highest_quantity_resource(building *b);
  */
 void building_storage_cycle_resource_state(int storage_id, resource_type resource_id);
 
+/**
+ * Cycles the quantity for the storage (used to be partial_state)
+ * @param storage_id Storage id
+ * @param resource_id Resource id
+ */
 void building_storage_cycle_partial_resource_state(int storage_id, resource_type resource_id, int reverse_order);
+
 /**
  * Sets all goods to 'not accepting'
  * @param storage_id Storage id
@@ -218,7 +224,11 @@ void building_storage_save_state(buffer *buf);
  */
 void building_storage_load_state(buffer *buf, int version);
 
-
+/**
+ * returns number of different resources currently stored in the building. returns 0 if no valid storage found.
+ * @param building_id The building id to check
+ */
+int building_storage_count_stored_resource_types(int building_id);
 
 void building_storage_toggle_permission(building_storage_permission_states p, building *b);
 int building_storage_get_permission(building_storage_permission_states p, building *b);

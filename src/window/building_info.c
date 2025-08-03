@@ -68,6 +68,7 @@ enum {
 };
 
 #define OFFSET(x,y) (x + GRID_SIZE * y)
+#define SMALL_ICON_SIDE 24
 
 static void button_help(int param1, int param2);
 static void button_close(int param1, int param2);
@@ -76,9 +77,9 @@ static void button_mothball(int mothball, int param2);
 static void button_monument_construction(const generic_button *button);
 
 static image_button image_buttons_help_advisor_close[] = {
-    {14, 3, 24, 24, IB_NORMAL, GROUP_CONTEXT_ICONS, 0, button_help, button_none, 0, 0, 1},
-    {424, 3, 24, 24, IB_NORMAL, GROUP_CONTEXT_ICONS, 4, button_close, button_none, 0, 0, 1},
-    {38, 3, 24, 24, IB_NORMAL, 0, 0, button_advisor, button_none, 0, 0, 1}
+    {0, 0, 24, 24, IB_NORMAL, GROUP_CONTEXT_ICONS, 0, button_help, button_none, 0, 0, 1},
+    {0, 0, 24, 24, IB_NORMAL, GROUP_CONTEXT_ICONS, 4, button_close, button_none, 0, 0, 1},
+    {0, 0, 24, 24, IB_NORMAL, 0, 0, button_advisor, button_none, 0, 0, 1}
 };
 
 static image_button image_button_mothball[] = {
@@ -98,7 +99,7 @@ static int original_overlay;
 
 static void init_context_buttons(building_info_context *c)
 {
-    int y_offset = c->y_offset + c->height_blocks * (BLOCK_SIZE - 1) - 13; // 13px from bottom edge
+    int y_offset = c->y_offset + c->height_blocks * BLOCK_SIZE - 13 - SMALL_ICON_SIDE; // 13px from bottom edge
     //help button
     image_buttons_help_advisor_close[0].y_offset = y_offset;
     image_buttons_help_advisor_close[0].x_offset = c->x_offset + 14;
@@ -116,7 +117,7 @@ static void init_context_buttons(building_info_context *c)
 
 static void update_context_buttons_vertical_offset(int new_context_y_offset, int new_context_block_height)
 {
-    int y_offset = new_context_y_offset + new_context_block_height * (BLOCK_SIZE - 1) - 13; // 13px from bottom edge
+    int y_offset = new_context_y_offset + new_context_block_height * BLOCK_SIZE - SMALL_ICON_SIDE - 18; // 18px from bottom edge
     for (int i = 0; i < 3; i++) {
         image_buttons_help_advisor_close[i].y_offset = y_offset;
     }
@@ -238,6 +239,8 @@ static int get_height_id(void)
             case BUILDING_DOCK:
             case BUILDING_LIGHTHOUSE:
             case BUILDING_CARAVANSERAI:
+            case BUILDING_WAREHOUSE:
+            case BUILDING_WAREHOUSE_SPACE:
                 return HEIGHT_6_38_BLOCKS;
 
                 //640px
@@ -259,6 +262,9 @@ static int get_height_id(void)
             case BUILDING_MESS_HALL:
             case BUILDING_CITY_MINT:
             case BUILDING_BARRACKS:
+            case BUILDING_GRANARY:
+                //case BUILDING_WAREHOUSE:
+                //case BUILDING_WAREHOUSE_SPACE:
                 return HEIGHT_11_28_BLOCKS;
 
                 //336px
@@ -290,6 +296,19 @@ static int get_height_id(void)
         }
     }
     return HEIGHT_0_22_BLOCKS;
+}
+static int adjust_height_for_storage_buildings(building_info_context *c)
+{
+    int stored_types = building_storage_count_stored_resource_types(c->building_id);
+    int y_offset_blocks = 0;
+    building *b = building_get(c->building_id);
+    if (!b->has_plague && c->has_road_access) {
+        y_offset_blocks = ((stored_types - 1) / 2 - 3) * 2 + 2;
+        if (b->type == BUILDING_WAREHOUSE && stored_types == 0) {
+            y_offset_blocks += 2;
+        }
+    }
+    c->height_blocks += y_offset_blocks;
 }
 
 static int has_mothball_button(void)
@@ -524,6 +543,7 @@ static void init(int grid_offset)
         case 13: context.height_blocks = 15; break;
         default: context.height_blocks = 22; break;
     }
+    adjust_height_for_storage_buildings(&context);
     if (screen_height() <= 600) {
         context.height_blocks = calc_bound(context.height_blocks, 0, 26);
     }
