@@ -114,6 +114,14 @@ static void init_context_buttons(building_info_context *c)
     }
 }
 
+static void update_context_buttons_vertical_offset(int new_context_y_offset, int new_context_block_height)
+{
+    int y_offset = new_context_y_offset + new_context_block_height * (BLOCK_SIZE - 1) - 13; // 13px from bottom edge
+    for (int i = 0; i < 3; i++) {
+        image_buttons_help_advisor_close[i].y_offset = y_offset;
+    }
+}
+
 static int get_height_id(void)
 {
     if (context.type == BUILDING_INFO_TERRAIN) {
@@ -938,6 +946,8 @@ static void draw_foreground(void)
         context.depot_selection.source ||
         context.depot_selection.destination ||
         context.depot_selection.resource) {
+        int new_context_y = window_building_get_vertical_offset(&context, 28);
+        update_context_buttons_vertical_offset(new_context_y, 28);
         image_buttons_draw(0, 0, image_buttons_help_advisor_close, 2);
     } else {
         int image_id = assets_get_image_id("UI", "Advisor_Building_Window_Border_1");
@@ -1053,7 +1063,6 @@ static void handle_input(const mouse *m, const hotkeys *h)
         context.depot_selection.destination ||
         context.depot_selection.source ||
         context.depot_selection.resource) {
-        int y_offset = window_building_get_vertical_offset(&context, 28);
         handled |= image_buttons_handle_mouse(m, 0, 0,
             image_buttons_help_advisor_close, 2, &focus_image_button_id);
     } else {

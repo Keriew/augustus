@@ -86,7 +86,7 @@ typedef struct {
 #define WIDTH_WINDOW_BORDER 4
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define NO_POSITION ((unsigned int) -1)
+#define SMALL_ICON_SIDE 24
 // Dynamic permission button system
 static generic_button permission_buttons[MAX_PERMISSION_BUTTONS];
 static int active_permissions_count = 0;
@@ -172,6 +172,11 @@ static image_button storage_image_buttons[] = {
     {0, 0, 20, 20, IB_NORMAL, 0, 0, toggle_permissions_all, button_none, 1, 0, 1, "UI", "Denied_Walker_Checkmark"},
     {0, 0, 20, 20, IB_NORMAL, 0, 0, toggle_permissions_all, button_none, 0, 0, 1, "UI", "Selection_Checkmark"},
     {0, 0, 24, 24, IB_NORMAL, 0, 0, roadblock_orders, button_none, 0, 0, 1, "UI", "roadblock_button_small0"},
+};
+
+static image_button distribution_orders_buttons[] = {
+    {0, 0, 20, 20, IB_NORMAL, 0, 0, storage_toggle_permissions, button_none, 1, 0, 1, "UI", "Denied_Walker_Checkmark"},
+    {0, 0, 20, 20, IB_NORMAL, 0, 0, toggle_permissions_all, button_none, 0, 0, 1, "UI", "Selection_Checkmark"},
 };
 
 static struct {
@@ -302,7 +307,7 @@ static void draw_accept_none_button(int x, int y, int focused, affect_all_button
 {
     button_border_draw(x, y, 20, 20, focused ? 1 : 0);
     if (state == ACCEPT_ALL) {
-        image_draw(assets_lookup_image_id(ASSET_UI_SELECTION_CHECKMARK), x + 4, y + 4, COLOR_MASK_NONE, SCALE_NONE);
+        image_draw(assets_get_image_id("UI", "Selection_Checkmark"), x + 4, y + 4, COLOR_MASK_NONE, SCALE_NONE);
     } else {
         image_draw(assets_get_image_id("UI", "Denied_Walker_Checkmark"), x + 4, y + 4, COLOR_MASK_NONE, SCALE_NONE);
     }
@@ -352,16 +357,6 @@ static int get_permissions_all_none_button_state(building_info_context *c)
         }
     }
     return rejects_all;
-}
-
-static void draw_permissions_none_button(int x, int y, int focused, affect_all_button_current_state state)
-{
-    button_border_draw(x, y, 20, 20, focused ? 1 : 0);
-    if (state == ACCEPT_ALL) {
-        image_draw(assets_lookup_image_id(ASSET_UI_SELECTION_CHECKMARK), x + 4, y + 4, COLOR_MASK_NONE, SCALE_NONE);
-    } else {
-        image_draw(assets_get_image_id("UI", "Denied_Walker_Checkmark"), x + 4, y + 4, COLOR_MASK_NONE, SCALE_NONE);
-    }
 }
 
 static void draw_permissions_buttons(int x, int y, building_info_context *c)
@@ -760,8 +755,9 @@ void window_building_draw_distributor_orders(building_info_context *c, const uin
 void window_building_draw_distributor_orders_foreground(building_info_context *c)
 {
     int y_offset = window_building_get_vertical_offset(c, 28);
-
+    //TODO: get buttons into the global and stop this monkey business with static declarations and hardcoded values
     int button_state = affect_all_button_distribution_state();
+
     draw_accept_none_button(c->x_offset + 394, y_offset + 404, data.orders_focus_button_id == 1, button_state);
     building *b = building_get(c->building_id);
     int lang_group, lang_active_id, lang_inactive_id;
@@ -1134,21 +1130,18 @@ void window_building_draw_storage(building_info_context *c)
                 BLOCK_SIZE * c->width_blocks, FONT_NORMAL_BLACK);
         } else {
             const resource_list *list = is_granary(c)
-                ? city_resource_get_potential_foods()
-                : 0; // warehouse uses data.stored_resources
+                ? city_resource_get_potential_foods() : 0; // warehouse uses data.stored_resources
 
-            for (unsigned int i = 0; i < stored_types; i++) {
-                resource_type r = is_granary(c)
-                    ? list->items[i]
-                    : data.stored_resources.items[i];
-                int amount = is_granary(c)
-                    ? b->resources[r]
-                    : building_warehouse_get_amount(b, r);
+            for (int i = 0; i < stored_types; i++) {
+                resource_type r = is_granary(c) ? list->items[i] : data.stored_resources.items[i];
+                int amount = is_granary(c) ? b->resources[r] : building_warehouse_get_amount(b, r);
 
-                if (amount <= 0) continue;
-
-                if (offset & 1) x = c->x_offset + 240;
-                else {
+                if (amount <= 0) {
+                    continue;
+                }
+                if (offset & 1) {
+                    x = c->x_offset + 240;
+                } else {
                     x = c->x_offset + 32;
                     y += BLOCK_SIZE + 13;
                 }
@@ -1217,40 +1210,35 @@ void window_building_draw_storage(building_info_context *c)
 
 static void storage_buttons_init(building_info_context *c)
 {
-    go_to_storage_orders_button->x = c->x_offset + c->width_blocks * BLOCK_SIZE / 4 - BLOCK_SIZE; // 25% start, 50% width
-    go_to_storage_orders_button->y = c->y_offset + c->height_blocks * (BLOCK_SIZE - 1) - 10; // 10px from bottom edge
-
     go_to_storage_orders_button->width = c->width_blocks * BLOCK_SIZE / 2 + 2 * BLOCK_SIZE; // 50% width + padding
     go_to_storage_orders_button->height = 20; // 20px height
+    go_to_storage_orders_button->x = c->x_offset + c->width_blocks * BLOCK_SIZE / 4 - BLOCK_SIZE; // 25% start, 50% width
+    go_to_storage_orders_button->y =
+        c->y_offset + c->height_blocks * BLOCK_SIZE - go_to_storage_orders_button->height - 14; // 14px from bottom edge
+
     //generic button is not handled in the array, therefore needs precise coordinates, not relative to c->xy_offset
     for (int i = 0; i < 5; i++) {
         storage_image_buttons[i].dont_draw = 0;
-        storage_image_buttons[i].x_offset = 0;
-        storage_image_buttons[i].y_offset = 0; //fallback reset 
+    }
+    for (int i = 0; i < 2; i++) {
+        storage_image_buttons[i].x_offset = c->width_blocks * BLOCK_SIZE - storage_image_buttons[0].width - 12;
+        storage_image_buttons[i].y_offset = 10; //10px frop top edge, 12px from right edge
+    }
+    for (int i = 2; i < 4; i++) {
+        storage_image_buttons[i].static_image = 1; // dont handle focus or press natively
+        storage_image_buttons[i].x_offset = c->width_blocks * BLOCK_SIZE - 12 - 73; // 73px from right edge
+        storage_image_buttons[i].y_offset = c->height_blocks * BLOCK_SIZE - 12 - 18; // 18px from bottom edge
     }
 
-    storage_image_buttons[0].x_offset = c->width_blocks * BLOCK_SIZE - 43; // 43px from right edge
-    storage_image_buttons[0].y_offset = 10; //10px frop top edge
-    storage_image_buttons[1].x_offset = c->width_blocks * BLOCK_SIZE - 43; // 43px from right edge
-    storage_image_buttons[1].y_offset = 10; //10px frop top edge
-
-
-    storage_image_buttons[2].static_image = 1; // dont handle focus or press natively
-    storage_image_buttons[2].x_offset = c->width_blocks * BLOCK_SIZE - 85; // 85px from right edge
-    storage_image_buttons[2].y_offset = c->height_blocks * (BLOCK_SIZE - 1) - 6; // 6px from bottom edge
-    storage_image_buttons[3].static_image = 1; // dont handle focus or press natively
-    storage_image_buttons[3].x_offset = c->width_blocks * BLOCK_SIZE - 85; // 85px from right edge
-    storage_image_buttons[3].y_offset = c->height_blocks * (BLOCK_SIZE - 1) - 6; // 6px from bottom edge
-
     storage_image_buttons[4].x_offset = 62; // 62px from left edge
-    storage_image_buttons[4].y_offset = c->height_blocks * (BLOCK_SIZE - 1) - 13; // 13px from bottom edge
+    storage_image_buttons[4].y_offset = c->height_blocks * BLOCK_SIZE - SMALL_ICON_SIDE - 13; // 13px from bottom edge
 }
 
 void window_building_draw_storage_foreground(building_info_context *c)
 {
     storage_buttons_init(c);
 
-    draw_permissions_buttons(c->x_offset, c->y_offset + BLOCK_SIZE * c->height_blocks - 186, c);
+    draw_permissions_buttons(c->x_offset, c->y_offset + 198, c); // vertical static
     // Special orders button
     generic_button *button = go_to_storage_orders_button;
     button_border_draw(button->x, button->y, button->width, button->height, data.focus_button_id == 1 ? 1 : 0);
