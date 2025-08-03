@@ -297,11 +297,15 @@ static int get_height_id(void)
     }
     return HEIGHT_0_22_BLOCKS;
 }
-static int adjust_height_for_storage_buildings(building_info_context *c)
+static void adjust_height_for_storage_buildings(building_info_context *c)
 {
+    building *b = building_get(c->building_id);
+    if (!b->storage_id) {
+        return;
+    }
     int stored_types = building_storage_count_stored_resource_types(c->building_id);
     int y_offset_blocks = 0;
-    building *b = building_get(c->building_id);
+
     if (!b->has_plague && c->has_road_access) {
         y_offset_blocks = ((stored_types - 1) / 2 - 3) * 2 + 2;
         if (b->type == BUILDING_WAREHOUSE && stored_types == 0) {

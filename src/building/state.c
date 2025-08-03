@@ -326,6 +326,11 @@ static void read_type_data(buffer *buf, building *b, int version)
             for (int i = 0; i < RESOURCE_MAX_LEGACY; i++) {
                 b->resources[resource_remap(i)] = buffer_read_i16(buf);
             }
+            b->data.roadblock.exceptions = ROADBLOCK_PERMISSION_ALL;
+        } else {
+            b->data.roadblock.exceptions = buffer_read_u16(buf);
+            // warehouse doesnt fall into this category and is read later with other roadblocks
+            // have to bump the save version here to make sure we dont read the granary and warehosue as permissions_none
         }
     } else if (building_monument_is_monument(b) && version <= SAVE_GAME_LAST_MONUMENT_TYPE_DATA) {
         if (version <= SAVE_GAME_LAST_STATIC_RESOURCES) {
