@@ -255,7 +255,7 @@ static void advance_route_tile(figure *f, int roaming_enabled)
         if (!map_routing_is_wall_passable(target_grid_offset)) {
             f->direction = DIR_FIGURE_REROUTE;
         }
-    } else if (map_terrain_is(target_grid_offset, TERRAIN_ROAD | TERRAIN_ACCESS_RAMP | TERRAIN_HIGHWAY)) {
+    } else if (map_terrain_is(target_grid_offset, TERRAIN_ROAD | TERRAIN_HIGHWAY)) { // removed TERRAIN_ACCESS_RAMP
         if (roaming_enabled && map_terrain_is(target_grid_offset, TERRAIN_BUILDING)) {
             building *b = building_get(map_building_at(target_grid_offset));
             if (building_type_is_roadblock(b->type)) {
@@ -361,7 +361,7 @@ static int is_valid_road_for_roaming(int grid_offset, int permission)
         return 1;
     }
     building *b = building_get(map_building_at(grid_offset));
-    return !building_type_is_roadblock(b->type) || building_roadblock_get_permission(permission, b);
+    return building_type_is_roadblock(b->type) != 1 || building_roadblock_get_permission(permission, b);
 }
 
 static void roam_set_direction(figure *f, int permission)
