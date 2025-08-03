@@ -218,25 +218,25 @@ void model_load_model_data(buffer *buf) {
     buffer_read_raw(buf, buildings, buf_size);
 }
 
-const model_building NOTHING = { .cost = 0, .desirability_value = 0, .desirability_step = 0,
+static const model_building NOTHING = { .cost = 0, .desirability_value = 0, .desirability_step = 0,
  .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
 
-const model_building GRAND_TEMPLE = { .cost = 2500, .desirability_value = 20, .desirability_step = 2,                .desirability_step_size = -4, .desirability_range = 8, .laborers = 50 };
+static const model_building GRAND_TEMPLE = { .cost = 2500, .desirability_value = 20, .desirability_step = 2,                .desirability_step_size = -4, .desirability_range = 8, .laborers = 50 };
 
-const model_building SMALL_STATUE = { .cost = 12, .desirability_value = 3, .desirability_step = 1,      .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
-
-
-const model_building MEDIUM_STATUE = { .cost = 60, .desirability_value = 10, .desirability_step = 1,      .desirability_step_size = -2, .desirability_range = 4, .laborers = 0 };
+static const model_building SMALL_STATUE = { .cost = 12, .desirability_value = 3, .desirability_step = 1,      .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
 
 
-const model_building LARGE_STATUE = { .cost = 150, .desirability_value = 14, .desirability_step = 2,      .desirability_step_size = -2, .desirability_range = 5, .laborers = 0 };
+static const model_building MEDIUM_STATUE = { .cost = 60, .desirability_value = 10, .desirability_step = 1,      .desirability_step_size = -2, .desirability_range = 4, .laborers = 0 };
 
-const model_building LARARIUM = { .cost = 45, .desirability_value = 4, .desirability_step = 1,
+
+static const model_building LARGE_STATUE = { .cost = 150, .desirability_value = 14, .desirability_step = 2,      .desirability_step_size = -2, .desirability_range = 5, .laborers = 0 };
+
+static const model_building LARARIUM = { .cost = 45, .desirability_value = 4, .desirability_step = 1,
  .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
 
-const model_building ROADBLOCK = { .cost = 12, .desirability_value = 0, .desirability_step = 0, .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
+static const model_building ROADBLOCK = { .cost = 12, .desirability_value = 0, .desirability_step = 0, .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
 
-const model_building FORT = { .cost = 1000, .desirability_value = -20, .desirability_step = 2, .desirability_step_size = 2, .desirability_range = 8, .laborers = 0 };
+static const model_building FORT = { .cost = 1000, .desirability_value = -20, .desirability_step = 2, .desirability_step_size = 2, .desirability_range = 8, .laborers = 0 };
 
 static const model_building new_buildings[NUM_NEW_BUILDINGS] = {
     ROADBLOCK, // Roadblock
