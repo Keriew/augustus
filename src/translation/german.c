@@ -1707,6 +1707,7 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_TERRAIN_SHRUB, "Busch"},
     {TR_CONDITION_TEXT_TIME_LEFT_UNTIL_DEFEAT, "Zeit bis zur Niederlage:"},
     {TR_CONDITION_TEXT_TIME_LEFT_UNTIL_VICTORY, "Zeit bis zum Sieg:"},
+    {TR_ACTION_TYPE_CHANGE_MODEL_DATA, "Ändere Model Daten"},
 };
 
 void translation_german(const translation_string **strings, int *num_strings)
