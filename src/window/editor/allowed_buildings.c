@@ -142,7 +142,7 @@ static void draw_background(void)
     graphics_in_dialog();
 
     outer_panel_draw(16, 32, 38, 26);
-    lang_text_draw_centered(44, 47, 26, 42, 608, FONT_LARGE_BLACK);
+    lang_text_draw_centered(44, 47, 26, 42, 608, FONT_LARGE_BLACK); //change to "Model"
     lang_text_draw_centered(13, 3, 16, 424, 608, FONT_NORMAL_BLACK);
 
     graphics_reset_dialog();

@@ -4,6 +4,7 @@
 #include "building/granary.h"
 #include "building/maintenance.h"
 #include "building/menu.h"
+#include "building/model.h"
 #include "building/monument.h"
 #include "building/storage.h"
 #include "city/data.h"
@@ -200,6 +201,7 @@ static void initialize_scenario_data(const uint8_t *scenario_name)
     image_load_enemy(scenario_property_enemy());
 
     city_data_init_scenario();
+    model_load();
 
     setting_set_default_game_speed();
     game_state_unpause();
@@ -304,7 +306,7 @@ static void initialize_saved_game(void)
     map_natives_check_land(0);
 
     city_message_clear_scroll();
-
+    
     setting_set_default_game_speed();
 
     game_state_unpause();

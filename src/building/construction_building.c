@@ -128,7 +128,6 @@ static void add_warehouse(building *b)
     game_undo_adjust_building(b);
 
     building_get(prev)->next_part_building_id = 0;
-    map_tiles_update_area_roads(b->x, b->y, 5);
 }
 
 static void add_building(building *b)

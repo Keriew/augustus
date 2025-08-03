@@ -4,6 +4,7 @@
 #include "building/count.h"
 #include "building/granary.h"
 #include "building/list.h"
+#include "building/model.h"
 #include "building/monument.h"
 #include "building/storage.h"
 #include "city/culture.h"
@@ -220,6 +221,7 @@ typedef struct {
     buffer *deliveries;
     buffer *custom_empire;
     buffer *visited_buildings;
+    buffer *building_model_data;
 } savegame_state;
 
 typedef struct {
@@ -274,6 +276,7 @@ typedef struct {
         int visited_buildings;
         int custom_campaigns;
         int dynamic_scenario_objects;
+        int custom_model_data;
     } features;
 } savegame_version_data;
 
@@ -498,6 +501,7 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
     version_data->features.visited_buildings = version > SAVE_GAME_LAST_GLOBAL_BUILDING_INFO;
     version_data->features.custom_campaigns = version > SAVE_GAME_LAST_NO_CUSTOM_CAMPAIGNS;
     version_data->features.dynamic_scenario_objects = version > SAVE_GAME_LAST_STATIC_SCENARIO_ORIGINAL_DATA;
+    version_data->features.custom_model_data = version > SAVE_GAME_LAST_NO_MODEL_DATA;
 }
 
 static void init_savegame_data(savegame_version_t version)
@@ -592,6 +596,9 @@ static void init_savegame_data(savegame_version_t version)
         state->custom_media = create_savegame_piece(PIECE_SIZE_DYNAMIC, 0);
         state->message_media_text_blob = create_savegame_piece(PIECE_SIZE_DYNAMIC, 0);
         state->message_media_metadata = create_savegame_piece(PIECE_SIZE_DYNAMIC, 0);
+    }
+    if (version_data.features.custom_model_data) {
+        state->building_model_data = create_savegame_piece(PIECE_SIZE_DYNAMIC, 0);
     }
     state->max_game_year = create_savegame_piece(4, 0);
     state->earthquake = create_savegame_piece(60, 0);
@@ -811,6 +818,11 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     if (version < SAVE_GAME_INCREASE_GRANARY_CAPACITY) {
         building_granary_update_built_granaries_capacity();
     }
+    
+    model_load();
+    if (version > SAVE_GAME_LAST_NO_MODEL_DATA) {
+        model_load_model_data(state->building_model_data);
+    }
 
     scenario_emperor_change_load_state(state->emperor_change_time, state->emperor_change_state);
     empire_load_state(state->empire);
@@ -913,7 +925,8 @@ static void savegame_save_to_state(savegame_state *state)
     city_view_save_state(state->city_view_orientation, state->city_view_camera);
     game_time_save_state(state->game_time);
     random_save_state(state->random_iv);
-
+    
+    model_save_model_data(state->building_model_data);
     scenario_emperor_change_save_state(state->emperor_change_time, state->emperor_change_state);
     empire_save_state(state->empire);
     empire_save_custom_map(state->empire_map);

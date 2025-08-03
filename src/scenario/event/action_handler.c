@@ -93,6 +93,8 @@ int scenario_action_type_execute(scenario_action_t *action)
             return scenario_action_type_change_climate_execute(action);
         case ACTION_TYPE_CHANGE_TERRAIN:
             return scenario_action_type_change_terrain_execute(action);
+        case ACTION_TYPE_CHANGE_MODEL_DATA:
+            return scenario_action_type_change_model_data_execute(action);
         default:
             return 0;
     }

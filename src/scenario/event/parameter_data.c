@@ -1,6 +1,7 @@
 #include "parameter_data.h"
 
 #include "building/menu.h"
+#include "building/model.h"
 #include "building/properties.h"
 #include "city/constants.h"
 #include "city/ratings.h"
@@ -284,6 +285,15 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm2 = {.name = "block_radius",       .type = PARAMETER_TYPE_NUMBER,     .min_limit = 0,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_RADIUS },
                                         .xml_parm3 = {.name = "terrain",            .type = PARAMETER_TYPE_TERRAIN,    .key = TR_PARAMETER_TERRAIN },
                                         .xml_parm4 = {.name = "add",                .type = PARAMETER_TYPE_BOOLEAN,    .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_ADD }, },
+    [ACTION_TYPE_CHANGE_MODEL_DATA]      = {.type = ACTION_TYPE_CHANGE_MODEL_DATA,
+                                        .xml_attr = {.name = "change_model_data",   .type = 
+                                        PARAMETER_TYPE_TEXT,       .key = TR_ACTION_TYPE_CHANGE_MODEL_DATA },
+                                        .xml_parm1 = {.name = "model",              .type = 
+                                        PARAMETER_TYPE_ALLOWED_BUILDING,   .key = TR_PARAMETER_MODEL },
+                                        .xml_parm2 = {.name = "data_type",          .type = 
+                                        PARAMETER_TYPE_DATA_TYPE,          .key = TR_PARAMETER_DATA_TYPE }, 
+                                        .xml_parm3 = {.name = "amount",             .type = 
+                                        PARAMETER_TYPE_NUMBER,             .min_limit = NEGATIVE_UNLIMITED, .max_limit = UNLIMITED,            .key = TR_PARAMETER_TYPE_NUMBER }, .xml_parm4 = { .name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,            .min_limit = 0,           .max_limit = 1,                    .key = TR_PARAMETER_SET_TO_VALUE }, },
 
 
 };
@@ -550,6 +560,18 @@ special_attribute_mapping_t special_attribute_mappings_terrain[] =
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_TERRAIN_SIZE (sizeof(special_attribute_mappings_terrain) / sizeof(special_attribute_mapping_t))
 
+special_attribute_mapping_t special_attribute_mappings_data_type[] =
+{
+    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "cost",                     .value = MODEL_COST,                                                   .key = TR_PARAMETER_COST },
+    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "desirability_value",       .value = MODEL_DESIRABILITY_VALUE,                   .key = TR_PARAMETER_DESIRABILITY_VALUE },
+    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "desirability_step",        .value = MODEL_DESIRABILITY_STEP,                    .key = TR_PARAMETER_DESIRABILITY_STEP },
+    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "desirability_step_size",   .value = MODEL_DESIRABILITY_STEP_SIZE,               .key = TR_PARAMETER_DESIRABILITY_STEP_SIZE },
+    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "desirability_range",       .value = MODEL_DESIRABILITY_RANGE,                   .key = TR_PARAMETER_DESIRABILITY_RANGE },
+    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "laborers",                 .value = MODEL_LABORERS,                                               .key = TR_PARAMETER_LABORERS },
+};
+
+#define SPECIAL_ATTRIBUTE_MAPPINGS_DATA_TYPE_SIZE (sizeof(special_attribute_mappings_data_type) / sizeof(special_attribute_mapping_t))
+
 
 static void generate_building_type_mappings(void)
 {
@@ -648,6 +670,8 @@ special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mappin
             return &special_attribute_mappings_climate[index];
         case PARAMETER_TYPE_TERRAIN:
             return &special_attribute_mappings_terrain[index];
+        case PARAMETER_TYPE_DATA_TYPE:
+            return &special_attribute_mappings_data_type[index];
         default:
             return 0;
     }
@@ -691,6 +715,8 @@ int scenario_events_parameter_data_get_mappings_size(parameter_type type)
             return SPECIAL_ATTRIBUTE_MAPPINGS_CLIMATE_SIZE;
         case PARAMETER_TYPE_TERRAIN:
             return SPECIAL_ATTRIBUTE_MAPPINGS_TERRAIN_SIZE;
+        case PARAMETER_TYPE_DATA_TYPE:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_DATA_TYPE_SIZE;
         default:
             return 0;
     }
@@ -766,6 +792,8 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
             return CLIMATE_CENTRAL;
         case PARAMETER_TYPE_TERRAIN:
             return TERRAIN_WATER;
+        case PARAMETER_TYPE_DATA_TYPE:
+            return MODEL_COST;
         default:
             return 0;
     }
