@@ -1221,4 +1221,7 @@
 	</image>
 	<image id="Mothball_Sprite" src="Mothball_Sprite"/>
 	<image id="Stockpile_Sprite" src="Stockpile_Sprite"/>
+	<image id="Roadblock_1" src="Roadblock_1"/>
+	<image id="Roadblock_2" src="Roadblock_2"/>
+	<image id="Roadblock_3" src="Roadblock_3"/>
 </assetlist>
