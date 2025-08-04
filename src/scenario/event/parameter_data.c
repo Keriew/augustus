@@ -1253,7 +1253,22 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
             }
             return;
         }
-
+        case ACTION_TYPE_CHANGE_MODEL_DATA:
+        {
+            result_text = append_text(string_from_ascii(":"), result_text, &maxlength);
+            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+            result_text = append_text(translation_for(action->parameter4 ? TR_PARAMETER_SET : TR_PARAMETER_CHANGE), result_text, &maxlength);
+            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_DATA_TYPE, action->parameter2, result_text, &maxlength);
+            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+            result_text = append_text(translation_for(TR_PARAMETER_OF), result_text, &maxlength);
+            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ALLOWED_BUILDING, action->parameter1, result_text, &maxlength);
+            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+            result_text = append_text(translation_for(action->parameter4 ? TR_PARAMETER_TO : TR_PARAMETER_BY), result_text, &maxlength);
+            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+            result_text = translation_for_number_value(action->parameter3, result_text, &maxlength);
+            return;
+        }
         default:
             {
                 result_text = append_text(string_from_ascii(" UNHANDLED ACTION TYPE!"), result_text, &maxlength);

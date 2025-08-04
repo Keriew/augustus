@@ -1670,6 +1670,11 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_DESIRABILITY_STEP_SIZE, "Desirability step size"},
     {TR_PARAMETER_DESIRABILITY_RANGE, "Desirability range"},
     {TR_PARAMETER_LABORERS, "Laborers"},
+    {TR_PARAMETER_SET, "Set"},
+    {TR_PARAMETER_CHANGE, "Change"},
+    {TR_PARAMETER_OF, "of"},
+    {TR_PARAMETER_TO, "to"},
+    {TR_PARAMETER_BY, "by"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
