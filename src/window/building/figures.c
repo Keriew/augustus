@@ -449,6 +449,7 @@ static void draw_cartpusher(building_info_context *c, figure *f)
     }
     building *source_building = building_get(f->building_id);
     building *target_building = building_get(f->destination_building_id);
+    building *last_destination_building = building_get(f->last_destinatation_id);
     int is_returning = 0;
     switch (f->action_state) {
         case FIGURE_ACTION_27_CARTPUSHER_RETURNING:
@@ -473,15 +474,29 @@ static void draw_cartpusher(building_info_context *c, figure *f)
             text_draw(translation_for(TR_FIGURES_CARTPUSHER_GOING_TO_ROME), x_base, y_base, FONT_NORMAL_BROWN, 0);
         } else {
             if (is_returning) {
-                width = lang_text_draw(129, 16, x_base, y_base, FONT_NORMAL_BROWN);
-                width += lang_text_draw(41, source_building->type, x_base + width, y_base, FONT_NORMAL_BROWN);
+                width = lang_text_draw(129, 16, x_base, y_base, FONT_NORMAL_BROWN); //returning to
+                width += lang_text_draw(41, source_building->type, x_base + width, y_base, FONT_NORMAL_BROWN); //type
+                if (source_building->storage_id) {
+                    width += text_draw_number(source_building->storage_id, 0, "", x_base + width, y_base, FONT_NORMAL_BROWN, COLOR_MASK_NONE); //from number
+                }
                 width += lang_text_draw(129, 14, x_base + width, y_base, FONT_NORMAL_BROWN);
-                lang_text_draw(41, target_building->type, x_base + width, y_base, FONT_NORMAL_BROWN);
+                if (last_destination_building) {
+                    lang_text_draw(41, last_destination_building->type, x_base + width, y_base, FONT_NORMAL_BROWN);
+                    if (last_destination_building->storage_id) {
+                        width += text_draw_number(last_destination_building->storage_id, 0, "", x_base + width, y_base, FONT_NORMAL_BROWN, COLOR_MASK_NONE); //from number
+                    }
+                }
             } else {
-                width = lang_text_draw(129, 15, x_base, y_base, FONT_NORMAL_BROWN);
+                width = lang_text_draw(129, 15, x_base, y_base, FONT_NORMAL_BROWN); //going to
                 width += lang_text_draw(41, target_building->type, x_base + width, y_base, FONT_NORMAL_BROWN);
-                width += lang_text_draw(129, 14, x_base + width, y_base, FONT_NORMAL_BROWN);
-                lang_text_draw(41, source_building->type, x_base + width, y_base, FONT_NORMAL_BROWN);
+                if (target_building->storage_id) {
+                    width += text_draw_number(target_building->storage_id, 0, "", x_base + width, y_base, FONT_NORMAL_BROWN, COLOR_MASK_NONE); //from number
+                }
+                width += lang_text_draw(129, 14, x_base + width, y_base, FONT_NORMAL_BROWN); //from 
+                width += lang_text_draw(41, source_building->type, x_base + width, y_base, FONT_NORMAL_BROWN);
+                if (source_building->storage_id) {
+                    width += text_draw_number(source_building->storage_id, 0, "", x_base + width, y_base, FONT_NORMAL_BROWN, COLOR_MASK_NONE); //from number
+                }
             }
         }
     }

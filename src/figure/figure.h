@@ -115,6 +115,7 @@ typedef struct {
     short attacker_id2;
     short opponent_id;
     short last_visited_index; //can only be used if figure goes through initialization process
+    int last_destinatation_id; //can be used for any figure, holds only one value
     struct {
         unsigned short tourist_money_spent;
         unsigned short ticks_since_last_visited_id[12];

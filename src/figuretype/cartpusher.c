@@ -71,6 +71,7 @@ static void cartpusher_return_to_source(figure *f)
     }
 
     f->wait_ticks = 0;
+    f->last_destinatation_id = f->destination_building_id; //record last destination
     f->destination_building_id = f->building_id;
     f->destination_x = f->source_x;
     f->destination_y = f->source_y;
