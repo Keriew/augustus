@@ -376,6 +376,7 @@ static void figure_save(buffer *buf, const figure *f)
     buffer_write_i16(buf, f->attacker_id2);
     buffer_write_i16(buf, f->opponent_id);
     buffer_write_i16(buf, f->last_visited_index);
+    buffer_write_i16(buf, f->last_destinatation_id);
 }
 
 static int get_resource_id(figure_type type, int resource)
@@ -504,7 +505,9 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     if (version > SAVE_GAME_LAST_GLOBAL_BUILDING_INFO) {
         f->last_visited_index = buffer_read_i16(buf);
     }
-
+    if (version > SAVE_GAME_LAST_GRANARY_WAREHOUSE_NON_ROADBLOCKS) {
+        f->last_destinatation_id = buffer_read_i16(buf);
+    }
     // The following code should only be executed if the savegame includes figure information that is not 
     // supported on this specific version of Augustus. The extra bytes in the buffer must be skipped in order
     // to prevent reading bogus data for the next figure

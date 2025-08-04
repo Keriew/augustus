@@ -481,7 +481,7 @@ static void draw_cartpusher(building_info_context *c, figure *f)
                 }
                 width += lang_text_draw(129, 14, x_base + width, y_base, FONT_NORMAL_BROWN);
                 if (last_destination_building) {
-                    lang_text_draw(41, last_destination_building->type, x_base + width, y_base, FONT_NORMAL_BROWN);
+                    width += lang_text_draw(41, last_destination_building->type, x_base + width, y_base, FONT_NORMAL_BROWN);
                     if (last_destination_building->storage_id) {
                         width += text_draw_number(last_destination_building->storage_id, 0, "", x_base + width, y_base, FONT_NORMAL_BROWN, COLOR_MASK_NONE); //from number
                     }
