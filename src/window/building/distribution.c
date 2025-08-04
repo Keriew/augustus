@@ -325,7 +325,7 @@ static void toggle_permissions_all(int param1, int param2)
         number_of_permissions = sizeof(granary_permissions_buttons) / sizeof(granary_permissions_buttons[0]);
     }
 
-    for (int i = 0; i < number_of_permissions; i++) { //do it via loop instead of bit check due to non-applicable permissions
+    for (int i = 0; i < number_of_permissions; i++) { //do it via loop instead of bit check due to unused permissions
         int permission = building_permissions[i];
         building_storage_set_permission(permission, building_get(data.building_id), accept_all);
     }
@@ -346,7 +346,7 @@ static int get_permissions_all_none_button_state(building_info_context *c)
         number_of_permissions = sizeof(granary_permissions_buttons) / sizeof(granary_permissions_buttons[0]);
     }
     int rejects_all = 1; // Assume it rejects all permissions
-    for (int i = 0; i < number_of_permissions; i++) { //do it via loop instead of bit check due to non-applicable permissions
+    for (int i = 0; i < number_of_permissions; i++) { //do it via loop instead of bit check due to unused permissions
         int permission = building_permissions[i];
         if (!building_storage_get_permission(permission, building_get(data.building_id))) {
             // If it accepts at least one resource, it's not rejecting all
@@ -866,8 +866,8 @@ void window_building_draw_primary_product_stockpiling(building_info_context *c)
     int x = c->x_offset + primary_product_producer_button_stockpiling->x + BLOCK_SIZE * c->width_blocks - 40;
     int y = c->y_offset + primary_product_producer_button_stockpiling->y + 10;
     button_border_draw(x, y, 30, 30, data.primary_product_stockpiling_id);
-    image_draw(assets_get_image_id("UI", "Stockpile_Sprite"), x + 7, y + 6, building_stockpiling_enabled(building_get(c->building_id)) ?
-    0xfff5a46b : COLOR_MASK_NONE, SCALE_NONE);
+    image_draw(assets_get_image_id("UI", "Stockpile_Sprite"), x + 7, y + 6,
+    building_stockpiling_enabled(building_get(c->building_id)) ? 0xfff5a46b : COLOR_MASK_NONE, SCALE_NONE);
 }
 
 static void draw_button_from_state(resource_storage_entry entry, int x, int y, building_type type, resource_type resource)

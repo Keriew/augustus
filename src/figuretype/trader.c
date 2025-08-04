@@ -402,21 +402,6 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
                 best_score = total_score;
                 best_building_id = b->id;
             }
-            // DEBUG LOGGING: Log scores for each building (using standard snprintf)
-            if (total_score > 0) {
-                char log_msg[256];
-                snprintf(log_msg, sizeof(log_msg),
-                    "%s %d Dist:%d [%d] Sell:%d Buy:%d Total:%d",
-                    (building_types[t] == BUILDING_GRANARY) ? "Granary" : "Warehouse",
-                    b->storage_id,
-                    raw_distance,
-                    distance_score,
-                    sell_score,
-                    buy_score,
-                    total_score);
-                log_info("", log_msg, 0);
-            }
-            // DEBUG AND TESTING BLOCK ------ REMOVE BEFORE RELEASE ------
         }
     }
     // 5. Return result 
