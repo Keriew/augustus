@@ -1665,6 +1665,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_BUTTON_REJECT_NATIVES, "Don't allow native traders to get from here"},
     {TR_TOOLTIP_BUTTON_ACCEPT_ALL, "Allow everyone to get from here"},
     {TR_TOOLTIP_BUTTON_REJECT_ALL, "Don't allow anyone to get from here"},
+    {TR_TOOLTIP_OVERLAY_PROBLEMS_NO_ROAD_ACCESS, "No road access"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

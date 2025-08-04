@@ -85,21 +85,21 @@ static int active_permissions_count = 0;
 static int granary_permissions_buttons[] = {
     BUILDING_STORAGE_PERMISSION_MARKET,
     BUILDING_STORAGE_PERMISSION_TRADERS,
-    BUILDING_STORAGE_PERMISSION_NATIVES,
     BUILDING_STORAGE_PERMISSION_DOCK,
     BUILDING_STORAGE_PERMISSION_BARKEEP,
     BUILDING_STORAGE_PERMISSION_QUARTERMASTER,
     BUILDING_STORAGE_PERMISSION_CARAVANSERAI,
+    BUILDING_STORAGE_PERMISSION_NATIVES,
 };
 static int warehouse_permissions_buttons[] = {
     BUILDING_STORAGE_PERMISSION_MARKET,
     BUILDING_STORAGE_PERMISSION_TRADERS,
-    BUILDING_STORAGE_PERMISSION_NATIVES,
     BUILDING_STORAGE_PERMISSION_DOCK,
     BUILDING_STORAGE_PERMISSION_BARKEEP,
     BUILDING_STORAGE_PERMISSION_WORKCAMP,
     BUILDING_STORAGE_PERMISSION_ARMOURY,
     BUILDING_STORAGE_PERMISSION_LIGHTHOUSE,
+    BUILDING_STORAGE_PERMISSION_NATIVES,
 };
 static generic_button orders_resource_buttons[] = {
     {0, 0, 210, 22, toggle_resource_state, 0, 1},
@@ -385,7 +385,8 @@ static void draw_permissions_buttons(int x, int y, building_info_context *c)
     button_width = MAX(button_width, 38); // Minimum 38px
     button_width = MIN(button_width, 52); // Maximum 52px
 
-    float original_scaling_factor = button_width / 52.0f;
+    int raw_scaling_factor = (button_width / 52.0f) * 100.0f;
+    float original_scaling_factor = raw_scaling_factor / 100.0f;
 
     // Calculate how much space is used by buttons
     int total_width_used_by_buttons = button_width * number_of_permissions;
@@ -399,7 +400,7 @@ static void draw_permissions_buttons(int x, int y, building_info_context *c)
     int pixel_carry = 0;
     active_permissions_count = number_of_permissions;
 
-    for (unsigned int i = 0; i < number_of_permissions; i++) {
+    for (int i = 0; i < number_of_permissions; i++) {
         int permission = building_permissions[i];
         int is_sea_trade_route = (permission == BUILDING_STORAGE_PERMISSION_DOCK);
         int permission_state = building_storage_get_permission(permission, building_get(data.building_id));
@@ -1066,7 +1067,6 @@ void window_building_draw_storage(building_info_context *c)
     int y = c->y_offset + 25;
     // height adjustment shouldn't be handled at this level, so was moved to building_info.c
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
-
     text_draw_label_and_number_centered(lang_get_string(28, b->type), b->storage_id, "",
         c->x_offset, c->y_offset + 10, 16 * c->width_blocks, FONT_LARGE_BLACK, 0);
 

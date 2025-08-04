@@ -64,8 +64,8 @@ figure *figure_create(figure_type type, int x, int y, direction_type dir)
     f->destination_building_id = 0;
     f->wait_ticks = 0;
     random_generate_next();
-    f->phrase_sequence_city = f->phrase_sequence_exact = random_byte() & 3;
     f->name = figure_name_get(type, 0);
+    f->phrase_sequence_city = f->phrase_sequence_exact = random_byte() & 3;
     map_figure_add(f);
     if (type == FIGURE_TRADE_CARAVAN || type == FIGURE_TRADE_SHIP || type == FIGURE_NATIVE_TRADER) {
         f->trader_id = trader_create();
@@ -249,7 +249,8 @@ void figure_init_scenario(void)
 void figure_kill_all(void)
 {
     figure *f;
-    array_foreach(data.figures, f) {
+    array_foreach(data.figures, f)
+    {
         switch (f->type) {
             default:
                 f->state = FIGURE_STATE_DEAD;
@@ -260,7 +261,7 @@ void figure_kill_all(void)
             case FIGURE_SHIPWRECK:
             case FIGURE_FORT_STANDARD:
                 continue;
-        }  
+        }
     }
 }
 
@@ -379,7 +380,7 @@ static void figure_save(buffer *buf, const figure *f)
 
 static int get_resource_id(figure_type type, int resource)
 {
-    
+
     switch (type) {
         case FIGURE_PRIEST_SUPPLIER:
         case FIGURE_BARKEEP_SUPPLIER:
@@ -522,7 +523,8 @@ void figure_save_state(buffer *list, buffer *seq)
     buffer_write_i32(list, FIGURE_CURRENT_BUFFER_SIZE);
 
     figure *f;
-    array_foreach(data.figures, f) {
+    array_foreach(data.figures, f)
+    {
         figure_save(list, f);
     }
 }

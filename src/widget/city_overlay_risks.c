@@ -69,6 +69,8 @@ void city_overlay_problems_prepare_building(building *b)
         b->show_on_problem_overlay = 1;
     } else if ((b->type == BUILDING_ARENA || b->type == BUILDING_COLOSSEUM) && !b->data.entertainment.days2) {
         b->show_on_problem_overlay = 1;
+    } else if (b->has_road_access == 0) {
+        b->show_on_problem_overlay = 1;
     }
 
     if (b->show_on_problem_overlay) {
@@ -98,7 +100,7 @@ static int show_building_native(const building *b)
 {
     return b->type == BUILDING_NATIVE_HUT || b->type == BUILDING_NATIVE_HUT_ALT ||
         b->type == BUILDING_NATIVE_MEETING || b->type == BUILDING_MISSION_POST || b->type == BUILDING_NATIVE_CROPS ||
-        b->type == BUILDING_NATIVE_DECORATION || b->type == BUILDING_NATIVE_MONUMENT || 
+        b->type == BUILDING_NATIVE_DECORATION || b->type == BUILDING_NATIVE_MONUMENT ||
         b->type == BUILDING_NATIVE_WATCHTOWER;
 }
 
@@ -326,6 +328,8 @@ static int get_tooltip_problems(tooltip_context *c, const building *b)
     } else if (b->type == BUILDING_HIPPODROME && !b->data.entertainment.days1) {
         c->text_group = 73;
         return 5;
+    } else if (b->has_road_access == 0) {
+        c->translation_key = TR_TOOLTIP_OVERLAY_PROBLEMS_NO_ROAD_ACCESS;
     }
     if (c->translation_key) {
         return 1;

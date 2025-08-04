@@ -39,6 +39,51 @@ int map_has_road_access(int x, int y, int size, map_point *road)
     return map_has_road_access_rotation(0, x, y, size, road);
 }
 
+int map_has_road_access_warehouse(int x, int y, map_point *road)
+{
+    building *warehouse = building_get(map_building_at(map_grid_offset(x, y)));
+    //   x = (warehouse->x);
+    //   y = (warehouse->y);
+    int rx = x = (warehouse->x);
+    int ry = y = (warehouse->y);
+    int glp = config_get(CONFIG_GP_CH_GLOBAL_LABOUR);
+    int valid_terrain = glp ? TERRAIN_ROAD | TERRAIN_HIGHWAY | TERRAIN_ACCESS_RAMP : TERRAIN_ROAD | TERRAIN_ACCESS_RAMP;
+    int has_road = 0;
+    if (!warehouse) {
+        return 0; //unable to map the building
+    }
+    // Check the 4 non-diagonal adjacent tiles for a 1x1 warehouse
+    if (map_terrain_is(map_grid_offset(x, y - 1), valid_terrain) &&
+        (!building_type_is_roadblock(building_get(map_building_at(map_grid_offset(x, y - 1)))->type) || glp)) {
+        rx = x;
+        ry = y - 1;
+        has_road = 1;
+    } else if (map_terrain_is(map_grid_offset(x + 1, y), valid_terrain) &&
+        (!building_type_is_roadblock(building_get(map_building_at(map_grid_offset(x + 1, y)))->type) || glp)) {
+        rx = x + 1;
+        ry = y;
+        has_road = 1;
+    } else if (map_terrain_is(map_grid_offset(x, y + 1), valid_terrain) &&
+        (!building_type_is_roadblock(building_get(map_building_at(map_grid_offset(x, y + 1)))->type) || glp)) {
+        rx = x;
+        ry = y + 1;
+        has_road = 1;
+    } else if (map_terrain_is(map_grid_offset(x - 1, y), valid_terrain) &&
+        (!building_type_is_roadblock(building_get(map_building_at(map_grid_offset(x - 1, y)))->type) || glp)) {
+        rx = x - 1;
+        ry = y;
+        has_road = 1;
+    }
+
+    if (has_road) {
+        if (road) {
+            map_point_store_result(rx, ry, road);
+        }
+        return 1;
+    }
+    return 0;
+}
+
 int map_has_road_access_rotation(int rotation, int x, int y, int size, map_point *road)
 {
     switch (rotation) {
@@ -95,20 +140,22 @@ int map_has_road_access_hippodrome(int x, int y, map_point *road)
 int map_has_road_access_granary(int x, int y, map_point *road)
 {
     int rx = -1, ry = -1;
-    if (map_terrain_is(map_grid_offset(x + 1, y - 1), TERRAIN_ROAD) &&
-        (!building_type_is_roadblock(building_get(map_building_at(map_grid_offset(x + 1, y - 1)))->type))) {
+    int glp = config_get(CONFIG_GP_CH_GLOBAL_LABOUR);
+    int valid_terrain = glp ? TERRAIN_ROAD | TERRAIN_HIGHWAY | TERRAIN_ACCESS_RAMP : TERRAIN_ROAD | TERRAIN_ACCESS_RAMP;
+    if (map_terrain_is(map_grid_offset(x + 1, y - 1), valid_terrain) &&
+        (!building_type_is_roadblock(building_get(map_building_at(map_grid_offset(x + 1, y - 1)))->type) || glp)) {
         rx = x + 1;
         ry = y - 1;
-    } else if (map_terrain_is(map_grid_offset(x + 3, y + 1), TERRAIN_ROAD) &&
-        (!building_type_is_roadblock(building_get(map_building_at(map_grid_offset(x + 3, y + 1)))->type))) {
+    } else if (map_terrain_is(map_grid_offset(x + 3, y + 1), valid_terrain) &&
+        (!building_type_is_roadblock(building_get(map_building_at(map_grid_offset(x + 3, y + 1)))->type) || glp)) {
         rx = x + 3;
         ry = y + 1;
-    } else if (map_terrain_is(map_grid_offset(x + 1, y + 3), TERRAIN_ROAD) &&
-        (!building_type_is_roadblock(building_get(map_building_at(map_grid_offset(x + 1, y + 3)))->type))) {
+    } else if (map_terrain_is(map_grid_offset(x + 1, y + 3), valid_terrain) &&
+        (!building_type_is_roadblock(building_get(map_building_at(map_grid_offset(x + 1, y + 3)))->type) || glp)) {
         rx = x + 1;
         ry = y + 3;
-    } else if (map_terrain_is(map_grid_offset(x - 1, y + 1), TERRAIN_ROAD) &&
-        (!building_type_is_roadblock(building_get(map_building_at(map_grid_offset(x - 1, y + 1)))->type))) {
+    } else if (map_terrain_is(map_grid_offset(x - 1, y + 1), valid_terrain) &&
+        (!building_type_is_roadblock(building_get(map_building_at(map_grid_offset(x - 1, y + 1)))->type) || glp)) {
         rx = x - 1;
         ry = y + 1;
     }

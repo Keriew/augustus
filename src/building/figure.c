@@ -215,8 +215,7 @@ static void spawn_figure_warehouse(building *b)
         }
     }
     map_point road;
-    if (map_has_road_access_rotation(b->subtype.orientation, b->x, b->y, b->size, &road) ||
-        map_has_road_access_rotation(b->subtype.orientation, b->x, b->y, 3, &road)) {
+    if (map_has_road_access_warehouse(b->x, b->y, &road)) {
         spawn_labor_seeker(b, road.x, road.y, 100);
         if (has_figure_of_type(b, FIGURE_WAREHOUSEMAN)) {
             return;

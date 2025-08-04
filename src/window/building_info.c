@@ -438,6 +438,8 @@ static void init(int grid_offset)
                 break;
         }
         switch (b->type) {
+            //TODO: this information should be derived from b->has_road_access. 
+            //context information should not differ from building properties
             case BUILDING_GRANARY:
                 context.has_road_access = map_has_road_access_granary(b->x, b->y, 0);
                 break;
@@ -445,7 +447,7 @@ static void init(int grid_offset)
                 context.has_road_access = map_has_road_access_hippodrome_rotation(b->x, b->y, 0, b->subtype.orientation);
                 break;
             case BUILDING_WAREHOUSE:
-                context.has_road_access = map_has_road_access_rotation(b->subtype.orientation, b->x, b->y, 3, 0);
+                context.has_road_access = map_has_road_access_warehouse(b->x, b->y, 0);
                 context.warehouse_space_text = building_warehouse_get_space_info(b);
                 break;
             case BUILDING_DEPOT:

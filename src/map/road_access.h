@@ -12,6 +12,8 @@ int map_has_road_access_hippodrome(int x, int y, map_point *road);
 
 int map_has_road_access_hippodrome_rotation(int x, int y, map_point *road, int rotation);
 
+int map_has_road_access_warehouse(int x, int y, map_point *road);
+
 int map_has_road_access_granary(int x, int y, map_point *road);
 
 int map_has_road_access_monument_construction(int x, int y, int size);
