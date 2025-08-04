@@ -324,15 +324,14 @@ int map_terrain_get_adjacent_road_or_clear_land(int x, int y, int size, int *x_t
         }
     }
     // second try
-    for (tile_delta = map_grid_adjacent_offsets(size); *tile_delta; tile_delta++) {
-        int grid_offset = base_offset + *tile_delta;
-        if (map_terrain_is(grid_offset, TERRAIN_ROAD) ||
-            !map_terrain_is(grid_offset, TERRAIN_ALMOST_CLEAR)) {
-            *x_tile = map_grid_offset_to_x(grid_offset);
-            *y_tile = map_grid_offset_to_y(grid_offset);
+    for (int yy = y; yy < y + size; yy++) {
+        for (int xx = x; xx < x + size; xx++) {
+            *x_tile = xx;
+            *y_tile = yy;
             return 1;
         }
     }
+
     return 0;
 }
 
