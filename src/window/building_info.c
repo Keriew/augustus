@@ -1026,7 +1026,7 @@ static int handle_specific_building_info_mouse(const mouse *m)
                 }
                 return window_building_handle_mouse_distributor(m, &context);
             }
-        } else if (building_type_is_roadblock(btype) == ROADBLACK_STANDARD) {
+        } else if (building_type_is_roadblock(btype) == ROADBLOCK_STANDARD) {
             if (context.show_special_orders) {
                 return window_building_handle_mouse_roadblock_orders(m, &context);
             } else {
