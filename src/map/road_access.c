@@ -474,6 +474,9 @@ static int tile_has_adjacent_road_tiles(int grid_offset, roadblock_permission pe
     for (int i = 0; i < 4; i++) {
         building *b = building_get(map_building_at(tiles[i]));
         if (building_type_is_roadblock(b->type) && !building_roadblock_get_permission(perm, b)) {
+
+            continue;
+        } else if (!(map_routing_citizen_is_passable_terrain(grid_offset) || map_routing_citizen_is_road(grid_offset))) {
             continue;
         }
         adjacent_roads += terrain_is_road_like(tiles[i]);
@@ -508,6 +511,7 @@ static int get_adjacent_road_tile_for_roaming(int grid_offset, roadblock_permiss
     int is_road = terrain_is_road_like(grid_offset);
     int no_permissions = 0;
     if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+
         building *b = building_get(map_building_at(grid_offset));
         if (building_type_is_roadblock(b->type)) {
             if (!building_roadblock_get_permission(perm, b)) {
@@ -515,11 +519,8 @@ static int get_adjacent_road_tile_for_roaming(int grid_offset, roadblock_permiss
             }
         }
         if (b->type == BUILDING_GRANARY) {
-            if (map_routing_citizen_is_road(grid_offset)) {
-                if (map_property_multi_tile_xy(grid_offset) == EDGE_X1Y1 ||
-                    tile_has_adjacent_road_tiles(grid_offset, perm) || tile_has_adjacent_granary_road(grid_offset)) {
-                    is_road = 1;
-                }
+            if (map_routing_citizen_is_passable_terrain(grid_offset) || map_routing_citizen_is_road(grid_offset)) {
+                is_road = 1;
             }
         } else if (b->type == BUILDING_WAREHOUSE) { //ideally should apply to all buildings
             if (map_routing_citizen_is_passable_terrain(grid_offset) || map_routing_citizen_is_road(grid_offset)) {

@@ -257,6 +257,9 @@ static void advance_route_tile(figure *f, int roaming_enabled)
         }
     } else if (map_terrain_is(target_grid_offset, TERRAIN_ROAD | TERRAIN_HIGHWAY | TERRAIN_ACCESS_RAMP)) {
         if (roaming_enabled && map_terrain_is(target_grid_offset, TERRAIN_BUILDING)) {
+            if (!map_routing_citizen_is_passable_terrain(target_grid_offset)) {
+                f->direction = DIR_FIGURE_REROUTE;
+            }
             building *b = building_get(map_building_at(target_grid_offset));
             if (building_type_is_roadblock(b->type)) {
                 // do not allow roaming through roadblock
@@ -270,15 +273,17 @@ static void advance_route_tile(figure *f, int roaming_enabled)
         building *b = building_get(map_building_at(target_grid_offset));
         if (building_type_is_roadblock(b->type) && roaming_enabled) { //only block roaming
             int permission = get_permission_for_figure_type(f);
-            if (!building_roadblock_get_permission(permission, b)) {
+            if (!map_routing_citizen_is_passable_terrain(target_grid_offset)) {
+                f->direction = DIR_FIGURE_REROUTE;
+            } else if (!building_roadblock_get_permission(permission, b)) {
                 f->direction = DIR_FIGURE_REROUTE;
             }
         } else {
-            if (b->type != BUILDING_FORT_GROUND) { //allow roaming through fort grounds
+            if (b->type != BUILDING_FORT_GROUND) {
                 f->direction = DIR_FIGURE_REROUTE;
             }
-        }
 
+        }
     } else if (map_terrain_is(target_grid_offset, TERRAIN_IMPASSABLE)) {
         f->direction = DIR_FIGURE_REROUTE;
     }
@@ -354,6 +359,7 @@ void figure_movement_init_roaming(figure *f)
 
 static int is_valid_road_for_roaming(int grid_offset, int permission)
 {
+    int valid = 0;
     if (!map_terrain_is(grid_offset, TERRAIN_ROAD)) {
         return 0;
     }
@@ -361,7 +367,17 @@ static int is_valid_road_for_roaming(int grid_offset, int permission)
         return 1;
     }
     building *b = building_get(map_building_at(grid_offset));
-    return building_type_is_roadblock(b->type) != 1 || building_roadblock_get_permission(permission, b);
+    if (!building_type_is_roadblock(b->type)) {
+        return 0;
+    } else {
+        valid = building_type_is_roadblock(b->type) != 1 || building_roadblock_get_permission(permission, b);
+        if (b->type == BUILDING_GRANARY) { // granary has passable and non-passable tiles
+            if (!map_routing_citizen_is_passable_terrain(grid_offset)) {
+                valid = 0;
+            }
+        }
+    }
+    return valid;
 }
 
 static void roam_set_direction(figure *f, int permission)
