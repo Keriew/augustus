@@ -334,14 +334,7 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
             }
         }
     }
-    const uint8_t *city_name;
-    if (f->type == FIGURE_NATIVE_TRADER) {
-        city_name = (const uint8_t *) "Native Trader";
-    } else {
-        city_name = empire_city_get_name(empire_city_get(f->empire_city_id));
-    }
-    log_info("Caravan: %s", city_name, 0);
-
+    int permissions = f->type == FIGURE_NATIVE_TRADER ? BUILDING_STORAGE_PERMISSION_NATIVES : BUILDING_STORAGE_PERMISSION_TRADERS;
     int sell_capacity = max_trade_units - f->loads_sold_or_carrying;
     int buy_capacity = max_trade_units - f->trader_amount_bought;
     int best_score = -1;
@@ -353,7 +346,7 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
             // Skip buildings
             if (b->state != BUILDING_STATE_IN_USE || b->has_plague || !b->has_road_access
             || (figure_visited_building_in_list(f->last_visited_index, b->id)) || b->id == f->destination_building_id ||
-            !building_storage_get_permission(BUILDING_STORAGE_PERMISSION_TRADERS, b)) {
+            !building_storage_get_permission(permissions, b)) {
                 continue; // Not active, infected, unreachable by road, recently visited, currenty at, not accepted
             }
             int sell_score = 0; // Score for how many units the trader can sell to this building
