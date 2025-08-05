@@ -222,7 +222,7 @@ void city_building_ghost_draw_fountain_range(int x, int y, int grid_offset)
 
 void city_building_ghost_draw_latrines_range(int x, int y, int grid_offset)
 {
-    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_GREY, data.scale);
+    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_DARK_GREEN & ALPHA_FONT_SEMI_TRANSPARENT, data.scale);
 }
 
 static void image_draw_warehouse(int image_id, int x, int y, color_t color)
