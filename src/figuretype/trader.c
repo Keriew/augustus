@@ -200,6 +200,21 @@ int figure_trade_caravan_can_sell(figure *trader, int building_id, int city_id)
     return 1;
 }
 
+resource_type get_native_trader_buy_resource(building *b)
+{
+    unsigned char i;
+    unsigned char highest_resource = RESOURCE_NONE;
+    if (b->type == BUILDING_WAREHOUSE) {
+        building_warehouse_recount_resources(b);
+    }
+    for (i = RESOURCE_NONE + 1; i < RESOURCE_MAX; i++) { //not interested in RESOURCE_NONE
+        if (b->resources[i] > highest_resource) {
+            highest_resource = i;
+        }
+    }
+    return highest_resource;
+}
+
 static int trader_get_buy_resource(int building_id, int city_id)
 {
     //TODO: get all the logic of trade happening into this function, rather than decision making in the action function
@@ -650,11 +665,22 @@ void figure_native_trader_action(figure *f)
             f->wait_ticks++;
             if (f->wait_ticks > 10) {
                 f->wait_ticks = 0;
-                if (figure_trade_caravan_can_buy(f, f->destination_building_id, 0)) {
-                    int resource = trader_get_buy_resource(f->destination_building_id, 0);
-                    trader_record_bought_resource(f->trader_id, resource);
-                    city_health_update_sickness_level_in_building(f->destination_building_id);
-                    f->trader_amount_bought += 3; //native traders 3 times less efficient
+                building *b = building_get(f->destination_building_id);
+                if (building_storage_get_permission(BUILDING_STORAGE_PERMISSION_NATIVES, b) &&
+                    f->trader_amount_bought < figure_trade_land_trade_units()) {
+                    int resource = get_native_trader_buy_resource(b);
+                    int removed = 0;
+                    if (b->type == BUILDING_GRANARY) {
+                        removed = building_granary_try_remove_resource(b, resource, 1);
+                    } else if (b->type == BUILDING_WAREHOUSE) {
+                        removed = building_warehouse_try_remove_resource(b, resource, 1);
+                    }
+                    if (removed) {
+                        trader_record_bought_resource(f->trader_id, resource);
+                        city_health_update_sickness_level_in_building(f->destination_building_id);
+                        f->trader_amount_bought += 3; //native traders 3 times less efficient
+                    }
+
                 } else {
                     map_point tile;
                     int building_id = get_closest_storage(f, f->x, f->y, 0, &tile);

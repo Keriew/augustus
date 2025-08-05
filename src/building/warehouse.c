@@ -325,13 +325,24 @@ int building_warehouse_remove_export(building *warehouse, int resource, int amou
     if (resource == RESOURCE_NONE || amount <= 0) {
         return 0; // invalid resource or amount
     }
-    building_storage_permission_states permission = land_trader ?
-        BUILDING_STORAGE_PERMISSION_TRADERS : BUILDING_STORAGE_PERMISSION_DOCK;
+    building_storage_permission_states permission;
+    switch (land_trader) {
+        case 0: // sea trader
+            permission = BUILDING_STORAGE_PERMISSION_DOCK;
+            break;
+        case 1: // land trader
+            permission = BUILDING_STORAGE_PERMISSION_TRADERS;
+            break;
+        case -1: //native trader
+            permission = BUILDING_STORAGE_PERMISSION_NATIVES;
+            land_trader = 1; // native trader is always land trader
+            break;
+    }
+
     if (!building_storage_get_permission(permission, warehouse)) {
         return 0; // cannot export from this warehouse
     }
     int removed_amount = building_warehouse_try_remove_resource(warehouse, resource, amount);
-
     int price = trade_price_sell(resource, land_trader);
     city_finance_process_export(price * removed_amount);
     return removed_amount;

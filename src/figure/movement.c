@@ -274,7 +274,7 @@ static void advance_route_tile(figure *f, int roaming_enabled)
                 f->direction = DIR_FIGURE_REROUTE;
             }
         } else {
-            if (!b->type == BUILDING_FORT_GROUND) { //allow roaming through fort grounds
+            if (b->type != BUILDING_FORT_GROUND) { //allow roaming through fort grounds
                 f->direction = DIR_FIGURE_REROUTE;
             }
         }

@@ -54,6 +54,22 @@ int building_granary_add_import(building *granary, int resource, int amount, int
     if (!resource) {
         return 0; // invalid resource
     }
+    building_storage_permission_states permission;
+    switch (land_trader) {
+        case 0: // sea trader
+            permission = BUILDING_STORAGE_PERMISSION_DOCK;
+            break;
+        case 1: // land trader
+            permission = BUILDING_STORAGE_PERMISSION_TRADERS;
+            break;
+        case -1: //native trader
+            permission = BUILDING_STORAGE_PERMISSION_NATIVES;
+            land_trader = 1; // native trader is always land trader
+            break;
+    }
+    if (!building_storage_get_permission(permission, granary)) {
+        return 0; // cannot export from this granary
+    }
     if (building_granary_try_add_resource(granary, resource, amount, 0) != amount) {
         return 0;
     }
@@ -67,12 +83,29 @@ int building_granary_remove_export(building *granary, int resource, int amount, 
     if (!resource) {
         return 0; // invalid resource
     }
-    if (building_granary_try_remove_resource(granary, resource, amount) != amount) {
+    building_storage_permission_states permission;
+    switch (land_trader) {
+        case 0: // sea trader
+            permission = BUILDING_STORAGE_PERMISSION_DOCK;
+            break;
+        case 1: // land trader
+            permission = BUILDING_STORAGE_PERMISSION_TRADERS;
+            break;
+        case -1: //native trader
+            permission = BUILDING_STORAGE_PERMISSION_NATIVES;
+            land_trader = 1; // native trader is always land trader
+            break;
+    }
+    if (!building_storage_get_permission(permission, granary)) {
+        return 0; // cannot export from this granary
+    }
+    int removed = !building_granary_try_remove_resource(granary, resource, amount);
+    if (!removed) {
         return 0;
     }
-    int price = trade_price_sell(resource, land_trader);
+    int price = trade_price_sell(resource, land_trader) * removed;
     city_finance_process_export(price);
-    return 1;
+    return removed;
 }
 
 int building_granary_try_add_resource(building *granary, int resource, int amount, int is_produced)
