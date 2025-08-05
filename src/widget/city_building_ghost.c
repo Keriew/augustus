@@ -1494,23 +1494,11 @@ static void create_tile_offsets(void)
 void draw_hippodrome_desirability(const map_tile *tile, building_type type)
 {
     int size = 5;
-
     building_rotation_force_two_orientations();
-    int orientation_index = building_rotation_get_building_orientation(building_rotation_get_rotation()) / 2;
-
     int grid_offset1 = tile->grid_offset;
     int grid_offset3 = grid_offset1 + building_rotation_get_delta_with_rotation(10);
-
-    int x_part1 = tile->x;
-    int y_part1 = tile->y;
-    int x_part3 = HIPPODROME_X_VIEW_OFFSETS[orientation_index];
-    int y_part3 = HIPPODROME_Y_VIEW_OFFSETS[orientation_index];
-
     map_tile tile_part3 = *tile;
-    tile_part3.x = x_part3;
-    tile_part3.y = y_part3;
     tile_part3.grid_offset = grid_offset3;
-
     draw_desirability_range(tile, type, size);
     draw_desirability_range(&tile_part3, type, size);
 }
