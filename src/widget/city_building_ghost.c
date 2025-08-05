@@ -222,7 +222,7 @@ void city_building_ghost_draw_fountain_range(int x, int y, int grid_offset)
 
 void city_building_ghost_draw_latrines_range(int x, int y, int grid_offset)
 {
-    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_DARK_GREEN & ALPHA_FONT_SEMI_TRANSPARENT, data.scale);
+    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_GREY, data.scale);
 }
 
 static void image_draw_warehouse(int image_id, int x, int y, color_t color)
@@ -453,7 +453,7 @@ static void draw_desirability_range(const map_tile *tile, building_type type, in
     if (desirability_value == 0 || desirability_range == 0) {
         return;         // If there is no desirability - do not draw
     }
-    
+    // Add bonuses from GT Venus
     if (building_is_statue_garden_temple(type) && building_monument_working(BUILDING_GRAND_TEMPLE_VENUS)) {
         int value_bonus = ((desirability_value / 4) > 1) ? (desirability_value / 4) : 1;
         desirability_value += value_bonus;
@@ -461,7 +461,10 @@ static void draw_desirability_range(const map_tile *tile, building_type type, in
             desirability_range += 1;
         }
     }
-    
+    // For drawing the correct radius of the reservoir
+    if (type == BUILDING_DRAGGABLE_RESERVOIR) {
+        negative_range += 4;
+    }
     // Calculating the Radius of Negative Desirability
     while (desirability_value < 0 && negative_range < desirability_range) {
         desirability_value += desirability_step_size;
@@ -863,9 +866,11 @@ static void draw_latrines(const map_tile *tile, int x, int y)
     }
 
     for (building *b = building_first_of_type(BUILDING_LATRINES); b; b = b->next_of_type) {
-        city_view_foreach_tile_in_range(b->grid_offset, 1, map_water_supply_latrines_radius(), city_building_ghost_draw_latrines_range);
+        city_view_foreach_tile_in_range(b->grid_offset, 1, map_water_supply_latrines_radius(),
+            city_building_ghost_draw_latrines_range);
     }
-    city_view_foreach_tile_in_range(tile->grid_offset, 1, map_water_supply_latrines_radius(), city_building_ghost_draw_latrines_range);
+    city_view_foreach_tile_in_range(tile->grid_offset, 1, map_water_supply_latrines_radius(),
+        city_building_ghost_draw_latrines_range);
 
     draw_building(image_id, x, y, color_mask);
     draw_building_tiles(x, y, 1, &blocked);
@@ -1486,6 +1491,30 @@ static void create_tile_offsets(void)
     }
 }
 
+void draw_hippodrome_desirability(const map_tile *tile, building_type type)
+{
+    int size = 5;
+
+    building_rotation_force_two_orientations();
+    int orientation_index = building_rotation_get_building_orientation(building_rotation_get_rotation()) / 2;
+
+    int grid_offset1 = tile->grid_offset;
+    int grid_offset3 = grid_offset1 + building_rotation_get_delta_with_rotation(10);
+
+    int x_part1 = tile->x;
+    int y_part1 = tile->y;
+    int x_part3 = HIPPODROME_X_VIEW_OFFSETS[orientation_index];
+    int y_part3 = HIPPODROME_Y_VIEW_OFFSETS[orientation_index];
+
+    map_tile tile_part3 = *tile;
+    tile_part3.x = x_part3;
+    tile_part3.y = y_part3;
+    tile_part3.grid_offset = grid_offset3;
+
+    draw_desirability_range(tile, type, size);
+    draw_desirability_range(&tile_part3, type, size);
+}
+
 void city_building_ghost_draw(const map_tile *tile)
 {
     if (!tile->grid_offset || scroll_in_progress()) {
@@ -1505,9 +1534,13 @@ void city_building_ghost_draw(const map_tile *tile)
     if ((config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL) &&
         type >= BUILDING_ANY && type <= BUILDING_TYPE_MAX) ||
         (config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE) &&
-            building_properties_for_type(type)->draw_desirability_range)) {
+            props->draw_desirability_range)) {
         int building_size = (type == BUILDING_WAREHOUSE) ? 3 : props->size;
-        draw_desirability_range(tile, type, building_size);
+        if (type == BUILDING_HIPPODROME) {
+            draw_hippodrome_desirability(tile, type);
+        } else {
+            draw_desirability_range(tile, type, building_size);
+        }
     }
 
     if (!config_get(CONFIG_UI_SHOW_GRID) && config_get(CONFIG_UI_SHOW_PARTIAL_GRID_AROUND_CONSTRUCTION)) {
