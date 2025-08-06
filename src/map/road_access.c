@@ -12,6 +12,7 @@
 #include "map/routing.h"
 #include "map/routing_terrain.h"
 #include "map/terrain.h"
+#include "map/tiles.h"
 
 static void find_minimum_road_tile(int x, int y, int size, int *min_value, int *min_grid_offset)
 {
@@ -39,11 +40,40 @@ int map_has_road_access(int x, int y, int size, map_point *road)
     return map_has_road_access_rotation(0, x, y, size, road);
 }
 
+void map_update_granary_internal_roads(const building *b)
+{
+    int cx = b->x + 1; // Center of the granary
+    int cy = b->y + 1;
+    int center_grid_offset = map_grid_offset(cx, cy);
+
+    map_terrain_add(center_grid_offset, TERRAIN_ROAD);
+
+    static const int edge_checks[4][2] = {
+        { 0,  2},
+        { 2,  0},
+        {-2,  0},
+        { 0, -2}
+    };
+
+    for (int i = 0; i < 4; ++i) {
+        int ex = cx + edge_checks[i][0];
+        int ey = cy + edge_checks[i][1];
+        int edge_grid_offset = map_grid_offset(ex, ey);
+        int ix = cx + edge_checks[i][0] / 2;
+        int iy = cy + edge_checks[i][1] / 2;
+        int inner_grid_offset = map_grid_offset(ix, iy);
+        if (map_terrain_is(edge_grid_offset, TERRAIN_ROAD)) {
+            map_terrain_add(inner_grid_offset, TERRAIN_ROAD);
+        } else {
+            map_terrain_remove(inner_grid_offset, TERRAIN_ROAD);
+        }
+    }
+    map_tiles_update_area_roads(b->x, b->y, 5);
+}
+
 int map_has_road_access_warehouse(int x, int y, map_point *road)
 {
-    building *warehouse = building_get(map_building_at(map_grid_offset(x, y)));
-    //   x = (warehouse->x);
-    //   y = (warehouse->y);
+    building *warehouse = building_main(building_get(map_building_at(map_grid_offset(x, y))));
     int rx = x = (warehouse->x);
     int ry = y = (warehouse->y);
     int glp = config_get(CONFIG_GP_CH_GLOBAL_LABOUR);
@@ -506,6 +536,23 @@ static int tile_has_adjacent_granary_road(int grid_offset)
     return 0;
 }
 
+int map_road_get_granary_inner_road_tiles_count(building *b)
+{
+    int count = 0;
+    int base_x = b->x;
+    int base_y = b->y;
+
+    for (int y_offset = 0; y_offset < 3; y_offset++) {
+        for (int x_offset = 0; x_offset < 3; x_offset++) {
+            int tile_offset = map_grid_offset(base_x + x_offset, base_y + y_offset);
+            if (map_terrain_is(tile_offset, TERRAIN_ROAD)) {
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
 static int get_adjacent_road_tile_for_roaming(int grid_offset, roadblock_permission perm)
 {
     int is_road = terrain_is_road_like(grid_offset);
@@ -519,10 +566,15 @@ static int get_adjacent_road_tile_for_roaming(int grid_offset, roadblock_permiss
             }
         }
         if (b->type == BUILDING_GRANARY) {
-            if (map_routing_citizen_is_passable_terrain(grid_offset) || map_routing_citizen_is_road(grid_offset)) {
-                is_road = 1;
+            if (map_routing_citizen_is_road(grid_offset)) {
+                if (map_road_get_granary_inner_road_tiles_count(b) >= 3) {
+                    is_road = 1; //edges of the granary that connect to another road become roads
+                    //not including passable terrain helps deal with roaming inside the granary
+                } else {
+                    is_road = 0; // dont roam into dead-end granaries
+                }
             }
-        } else if (b->type == BUILDING_WAREHOUSE) { //ideally should apply to all buildings
+        } else if (b->type == BUILDING_WAREHOUSE) {
             if (map_routing_citizen_is_passable_terrain(grid_offset) || map_routing_citizen_is_road(grid_offset)) {
                 is_road = 1;
             }

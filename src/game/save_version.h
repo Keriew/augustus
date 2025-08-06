@@ -19,8 +19,10 @@
 4.  When adding new properties to these functions, you may need to update the buffer size used in the function, which is
     defined on top of the file, e.g. FIGURE_ORIGINAL_BUFFER_SIZE or FIGURE_CURRENT_BUFFER_SIZE.
     *_ORIGINAL_BUFFER_SIZE is used to maintain backward compatibility with old savegames, so it shouldn't be changed.
-    Safest approach is to increase the size of the CURRENT buffer by the size of the new property + 2. e.g.
-    if you are adding a uint32_t (32 bits = 4 bytes) property, you should increase the buffer size by 6 bytes.
+    Safest approach is to increase the size of the CURRENT buffer by the size of the new property e.g.
+    if you are adding a uint32_t (32 bits = 4 bytes) property, you should increase the buffer size by 4.
+    some structures, like building/state.h even define helper macros for each version of the buffer. It's the standard
+    we should strive to follow where possible!
 5.  Remember that the order and size of reading and writing properties in the savegame must be the same, so if you are
     adding a buffer_write_u8(buf, b->new_property), you must also add a buffer_read_u8(buf) in the loading function,
     in the exact same order.

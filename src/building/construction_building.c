@@ -149,6 +149,7 @@ static void add_granary(building *b)
 {
     b->storage_id = building_storage_create(b->id);
     add_building(b);
+    map_update_granary_internal_roads(b);
     map_tiles_update_area_roads(b->x, b->y, 5);
 }
 

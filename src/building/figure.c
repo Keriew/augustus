@@ -242,6 +242,7 @@ static void spawn_figure_warehouse(building *b)
 static void spawn_figure_granary(building *b)
 {
     check_labor_problem(b);
+    map_update_granary_internal_roads(b); //internal roads updated basing on surrounding terrain
     map_point road;
     if (map_has_road_access_granary(b->x, b->y, &road)) {
         spawn_labor_seeker(b, road.x, road.y, 100);

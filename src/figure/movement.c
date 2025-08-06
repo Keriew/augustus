@@ -257,12 +257,14 @@ static void advance_route_tile(figure *f, int roaming_enabled)
         }
     } else if (map_terrain_is(target_grid_offset, TERRAIN_ROAD | TERRAIN_HIGHWAY | TERRAIN_ACCESS_RAMP)) {
         if (roaming_enabled && map_terrain_is(target_grid_offset, TERRAIN_BUILDING)) {
-            if (!map_routing_citizen_is_passable_terrain(target_grid_offset)) {
-                f->direction = DIR_FIGURE_REROUTE;
-            }
             building *b = building_get(map_building_at(target_grid_offset));
+            if (b->type == BUILDING_GRANARY) {
+                if (map_road_get_granary_inner_road_tiles_count(b) < 3) {
+                    f->direction = DIR_FIGURE_REROUTE; // do not roam into dead-end granaries
+                }
+            }
             if (building_type_is_roadblock(b->type)) {
-                // do not allow roaming through roadblock
+                // do not allow roaming through roadblock without permissions
                 int permission = get_permission_for_figure_type(f);
                 if (!building_roadblock_get_permission(permission, b)) {
                     f->direction = DIR_FIGURE_REROUTE;
@@ -270,12 +272,14 @@ static void advance_route_tile(figure *f, int roaming_enabled)
             }
         }
     } else if (map_terrain_is(target_grid_offset, TERRAIN_BUILDING)) {
+        if ((map_routing_citizen_is_passable_terrain(target_grid_offset) ||
+            map_routing_citizen_is_road(target_grid_offset) && !roaming_enabled)) {
+            return; // passable terrain - no reroute
+        }
         building *b = building_get(map_building_at(target_grid_offset));
         if (building_type_is_roadblock(b->type) && roaming_enabled) { //only block roaming
             int permission = get_permission_for_figure_type(f);
-            if (!map_routing_citizen_is_passable_terrain(target_grid_offset)) {
-                f->direction = DIR_FIGURE_REROUTE;
-            } else if (!building_roadblock_get_permission(permission, b)) {
+            if (!building_roadblock_get_permission(permission, b)) {
                 f->direction = DIR_FIGURE_REROUTE;
             }
         } else {
@@ -370,12 +374,17 @@ static int is_valid_road_for_roaming(int grid_offset, int permission)
     if (!building_type_is_roadblock(b->type)) {
         return 0;
     } else {
-        valid = building_type_is_roadblock(b->type) != 1 || building_roadblock_get_permission(permission, b);
-        if (b->type == BUILDING_GRANARY) { // granary has passable and non-passable tiles
-            if (!map_routing_citizen_is_passable_terrain(grid_offset)) {
-                valid = 0;
+        valid = building_roadblock_get_permission(permission, b);
+        if (valid) {
+            if (b->type == BUILDING_GRANARY) { // granary has road and non-road tiles
+                if (!map_terrain_is(grid_offset, TERRAIN_ROAD)) {
+                    valid = 0; // do not roam outside of granary cross
+                } else if (map_road_get_granary_inner_road_tiles_count(b) < 3) {
+                    valid = 0; // do not roam into dead-end granaries
+                }
             }
         }
+
     }
     return valid;
 }

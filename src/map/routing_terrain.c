@@ -158,7 +158,7 @@ static int get_land_type_noncitizen(int grid_offset)
             type = NONCITIZEN_5_FORT;
             break;
         case BUILDING_GRANARY:
-            switch (map_property_multi_tile_xy(grid_offset)) {
+            switch (map_property_multi_tile_xy(grid_offset)) { //granary cross allways passable
                 case EDGE_X1Y0:
                 case EDGE_X0Y1:
                 case EDGE_X1Y1:
