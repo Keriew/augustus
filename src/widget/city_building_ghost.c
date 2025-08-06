@@ -463,7 +463,7 @@ static void draw_desirability_range(const map_tile *tile, building_type type, in
     }
     // For drawing the correct radius of the reservoir
     if (type == BUILDING_DRAGGABLE_RESERVOIR) {
-        negative_range += 4;
+        negative_range = 4;
     }
     // Calculating the Radius of Negative Desirability
     while (desirability_value < 0 && negative_range < desirability_range) {
@@ -1518,19 +1518,6 @@ void city_building_ghost_draw(const map_tile *tile)
     int x, y;
     city_view_get_selected_tile_pixels(&x, &y);
 
-    const building_properties *props = building_properties_for_type(type);
-    if ((config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL) &&
-        type >= BUILDING_ANY && type <= BUILDING_TYPE_MAX) ||
-        (config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE) &&
-            props->draw_desirability_range)) {
-        int building_size = (type == BUILDING_WAREHOUSE) ? 3 : props->size;
-        if (type == BUILDING_HIPPODROME) {
-            draw_hippodrome_desirability(tile, type);
-        } else {
-            draw_desirability_range(tile, type, building_size);
-        }
-    }
-
     if (!config_get(CONFIG_UI_SHOW_GRID) && config_get(CONFIG_UI_SHOW_PARTIAL_GRID_AROUND_CONSTRUCTION)) {
         draw_partial_grid(tile->grid_offset, x, y, type);
     }
@@ -1602,4 +1589,19 @@ void city_building_ghost_draw(const map_tile *tile)
             draw_default(tile, x, y, type);
             break;
     }
+
+    const building_properties *props = building_properties_for_type(type);
+    if ((config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL) &&
+         type >= BUILDING_ANY && type <= BUILDING_TYPE_MAX) ||
+        (config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE) &&
+         props->draw_desirability_range)) {
+        int building_size = (type == BUILDING_WAREHOUSE) ? 3 : props->size;
+        if (type == BUILDING_HIPPODROME) {
+            draw_hippodrome_desirability(tile, type);
+        } else {
+            draw_desirability_range(tile, type, building_size);
+        }
+    }
+
 }
+
