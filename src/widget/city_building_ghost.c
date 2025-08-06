@@ -461,10 +461,6 @@ static void draw_desirability_range(const map_tile *tile, building_type type, in
             desirability_range += 1;
         }
     }
-    // For drawing the correct radius of the reservoir
-    if (type == BUILDING_DRAGGABLE_RESERVOIR) {
-        negative_range = 4;
-    }
     // Calculating the Radius of Negative Desirability
     while (desirability_value < 0 && negative_range < desirability_range) {
         desirability_value += desirability_step_size;
@@ -480,7 +476,7 @@ static void draw_desirability_range(const map_tile *tile, building_type type, in
     if (negative_range > 0) {
         city_view_foreach_tile_in_range(tile->grid_offset, building_size, negative_range, city_building_ghost_draw_malus_range);
     }
-}
+ }
 
 static void draw_default(const map_tile *tile, int x_view, int y_view, building_type type)
 {
@@ -1592,12 +1588,18 @@ void city_building_ghost_draw(const map_tile *tile)
 
     const building_properties *props = building_properties_for_type(type);
     if ((config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL) &&
-         type >= BUILDING_ANY && type <= BUILDING_TYPE_MAX) ||
+        type >= BUILDING_ANY && type <= BUILDING_TYPE_MAX) ||
         (config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE) &&
-         props->draw_desirability_range)) {
-        int building_size = (type == BUILDING_WAREHOUSE) ? 3 : props->size;
+            props->draw_desirability_range)) {
+        int building_size = (type == BUILDING_DRAGGABLE_RESERVOIR || type == BUILDING_WAREHOUSE) ? 3 : props->size;
         if (type == BUILDING_HIPPODROME) {
             draw_hippodrome_desirability(tile, type);
+        } else if (type == BUILDING_DRAGGABLE_RESERVOIR) {
+            map_tile shifted_tile = *tile;
+            shifted_tile.x -= 1;
+            shifted_tile.y -= 1;
+            shifted_tile.grid_offset = map_grid_offset(shifted_tile.x, shifted_tile.y);
+            draw_desirability_range(&shifted_tile, type, building_size);
         } else {
             draw_desirability_range(tile, type, building_size);
         }
