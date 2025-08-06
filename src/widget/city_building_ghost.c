@@ -1604,4 +1604,3 @@ void city_building_ghost_draw(const map_tile *tile)
     }
 
 }
-
