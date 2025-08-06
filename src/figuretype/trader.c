@@ -517,7 +517,6 @@ void figure_trade_caravan_action(figure *f)
                         trade_route_increase_traded(empire_city_get_route_id(f->empire_city_id), resource);
                         trader_record_bought_resource(f->trader_id, resource);
                         city_health_update_sickness_level_in_building(f->destination_building_id);
-
                         f->trader_amount_bought++;
                     } else {
                         move_on++;
