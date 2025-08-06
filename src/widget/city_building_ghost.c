@@ -1587,11 +1587,10 @@ void city_building_ghost_draw(const map_tile *tile)
     }
 
     const building_properties *props = building_properties_for_type(type);
-    if ((config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL) &&
-        type >= BUILDING_ANY && type <= BUILDING_TYPE_MAX) ||
-        (config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE) &&
-            props->draw_desirability_range)) {
+    if ((config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL) && type >= BUILDING_ANY && type <= BUILDING_TYPE_MAX) ||
+        (config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE) && props->draw_desirability_range)) {
         int building_size = (type == BUILDING_DRAGGABLE_RESERVOIR || type == BUILDING_WAREHOUSE) ? 3 : props->size;
+
         if (type == BUILDING_HIPPODROME) {
             draw_hippodrome_desirability(tile, type);
         } else if (type == BUILDING_DRAGGABLE_RESERVOIR) {
