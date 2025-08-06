@@ -476,7 +476,7 @@ static void draw_desirability_range(const map_tile *tile, building_type type, in
     if (negative_range > 0) {
         city_view_foreach_tile_in_range(tile->grid_offset, building_size, negative_range, city_building_ghost_draw_malus_range);
     }
- }
+}
 
 static void draw_default(const map_tile *tile, int x_view, int y_view, building_type type)
 {
