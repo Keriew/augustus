@@ -677,6 +677,8 @@ void figure_native_trader_action(figure *f)
                     }
                     if (removed) {
                         trader_record_bought_resource(f->trader_id, resource);
+                        int price = trade_price_sell(resource, 1);
+                        city_finance_process_export(price * removed);
                         city_health_update_sickness_level_in_building(f->destination_building_id);
                         f->trader_amount_bought += 3; //native traders 3 times less efficient
                     }
