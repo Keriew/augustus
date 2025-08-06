@@ -1514,6 +1514,24 @@ void city_building_ghost_draw(const map_tile *tile)
     int x, y;
     city_view_get_selected_tile_pixels(&x, &y);
 
+    const building_properties *props = building_properties_for_type(type);
+    if ((config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL) && type >= BUILDING_ANY && type <= BUILDING_TYPE_MAX) ||
+        (config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE) && props->draw_desirability_range)) {
+        int building_size = (type == BUILDING_DRAGGABLE_RESERVOIR || type == BUILDING_WAREHOUSE) ? 3 : props->size;
+
+        if (type == BUILDING_HIPPODROME) {
+            draw_hippodrome_desirability(tile, type);
+        } else if (type == BUILDING_DRAGGABLE_RESERVOIR) {
+            map_tile shifted_tile = *tile;
+            shifted_tile.x -= 1;
+            shifted_tile.y -= 1;
+            shifted_tile.grid_offset = map_grid_offset(shifted_tile.x, shifted_tile.y);
+            draw_desirability_range(&shifted_tile, type, building_size);
+        } else {
+            draw_desirability_range(tile, type, building_size);
+        }
+    }
+
     if (!config_get(CONFIG_UI_SHOW_GRID) && config_get(CONFIG_UI_SHOW_PARTIAL_GRID_AROUND_CONSTRUCTION)) {
         draw_partial_grid(tile->grid_offset, x, y, type);
     }
@@ -1585,23 +1603,4 @@ void city_building_ghost_draw(const map_tile *tile)
             draw_default(tile, x, y, type);
             break;
     }
-
-    const building_properties *props = building_properties_for_type(type);
-    if ((config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL) && type >= BUILDING_ANY && type <= BUILDING_TYPE_MAX) ||
-        (config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE) && props->draw_desirability_range)) {
-        int building_size = (type == BUILDING_DRAGGABLE_RESERVOIR || type == BUILDING_WAREHOUSE) ? 3 : props->size;
-
-        if (type == BUILDING_HIPPODROME) {
-            draw_hippodrome_desirability(tile, type);
-        } else if (type == BUILDING_DRAGGABLE_RESERVOIR) {
-            map_tile shifted_tile = *tile;
-            shifted_tile.x -= 1;
-            shifted_tile.y -= 1;
-            shifted_tile.grid_offset = map_grid_offset(shifted_tile.x, shifted_tile.y);
-            draw_desirability_range(&shifted_tile, type, building_size);
-        } else {
-            draw_desirability_range(tile, type, building_size);
-        }
-    }
-
 }
