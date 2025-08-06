@@ -20,7 +20,8 @@ typedef enum {
 } roadblock_permission;
 
 typedef enum {
-	ROADBLACK_STANDARD = 1,
+	ROADBLOCK_NONE = 0,
+	ROADBLOCK_STANDARD = 1,
 	ROADBLOCK_STORAGE = 2,
 }roadblock_type;
 

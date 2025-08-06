@@ -20,7 +20,7 @@
 
 #define FIGURE_ORIGINAL_BUFFER_SIZE 128
 #define FIGURE_CURRENT_BUFFER_SIZE 146
-
+// around 12 bytes left free in the current buffer size - save version 0xa7, August 2025
 static struct {
     int created_sequence;
     array(figure) figures;
