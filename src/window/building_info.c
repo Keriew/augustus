@@ -471,7 +471,7 @@ static void init(int grid_offset)
     context.figure.count = 0;
     for (int i = 0; i < 7; i++) {
         context.figure.figure_ids[i] = 0;
-    }//
+    }
     static const int FIGURE_OFFSETS[] = {
         OFFSET(0,0), OFFSET(0,-1), OFFSET(0,1), OFFSET(1,0), OFFSET(-1,0),
         OFFSET(-1,-1), OFFSET(1,-1), OFFSET(-1,1), OFFSET(1,1)
@@ -515,8 +515,7 @@ static void init(int grid_offset)
             continue;
         }
         figure *f = figure_get(figure_id);
-                                   //remove || figure_is_legion(f)
-        if (f->type == FIGURE_FORT_STANDARD) {
+        if (f->type == FIGURE_FORT_STANDARD || figure_is_legion(f)) {
             context.type = BUILDING_INFO_LEGION;
             context.formation_id = f->formation_id;
             const formation *m = formation_get(context.formation_id);
