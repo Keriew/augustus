@@ -221,8 +221,6 @@ void model_load_model_data(buffer *buf) {
 static const model_building NOTHING = { .cost = 0, .desirability_value = 0, .desirability_step = 0,
  .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
 
-{ .cost = 1000, .desirability_value = -20, .desirability_step = 2, .desirability_step_size = 2, .desirability_range = 8, .laborers = 0 };
-
 static const model_building new_buildings[NUM_NEW_BUILDINGS] = {
     { .cost = 12, .desirability_value = 0, .desirability_step = 0, .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 }, // Roadblock
     { .cost = 150, .desirability_value = -10, .desirability_step = 2, .desirability_step_size = 3, .desirability_range = 4, .laborers = 20 }, // Work camp
