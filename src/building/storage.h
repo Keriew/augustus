@@ -5,6 +5,8 @@
 #include "core/buffer.h"
 #include "game/resource.h"
 
+#define GRANARY_PERMISSIONS_COUNT 7
+#define WAREHOUSE_PERMISSIONS_COUNT 8
 /**
  * @file
  * Building storage functions
@@ -231,6 +233,7 @@ void building_storage_load_state(buffer *buf, int version);
 int building_storage_count_stored_resource_types(int building_id);
 
 void building_storage_toggle_permission(building_storage_permission_states p, building *b);
+void building_storage_set_permissions_all(building *b, int accept_all);
 int building_storage_get_permission(building_storage_permission_states p, building *b);
 void building_storage_set_permission(building_storage_permission_states p, building *b, int enable);
 
