@@ -342,7 +342,7 @@ void building_update_state(void)
                 road_recalc = 1;
             }
             map_building_tiles_remove(b->id, b->x, b->y);
-            if (building_type_is_roadblock(b->type) && b->size == 1 && !building_type_is_bridge(b->type)) {
+            if (building_type_is_roadblock(b->type) == 1 && b->size == 1) {
                 // Leave the road behind the deleted roadblock
                 // except for bridges - they are coded as size 1 too
                 map_terrain_add(b->grid_offset, TERRAIN_ROAD);
