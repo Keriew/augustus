@@ -1661,6 +1661,12 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_TERRAIN_SHRUB, "Кустарник"},
     {TR_CHEAT_DISABLE_INVASIONS, "Вторжения отключены"},
     {TR_CHEAT_DISABLE_LEGIONS_CONSUMPTION, "Отключено потребление пищи легионами"},
+    {TR_TOOLTIP_BUTTON_ACCEPT_NATIVES, "Разрешить доступ местным торговцам"},
+    {TR_TOOLTIP_BUTTON_REJECT_NATIVES, "Запретить доступ местным торговцам"},
+    {TR_TOOLTIP_BUTTON_ACCEPT_ALL, "Разрешить всем доступ"},
+    {TR_TOOLTIP_BUTTON_REJECT_ALL, "Запретить всем доступ"},
+    {TR_TOOLTIP_OVERLAY_PROBLEMS_NO_ROAD_ACCESS, "Нет доступа к дороге"},
+    {TR_WARNING_NO_WAREHOUSE_TOWER_ROAD_ACCESS, "Подключите дорогу к башне склада"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
