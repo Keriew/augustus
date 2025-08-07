@@ -320,12 +320,20 @@ static void read_type_data(buffer *buf, building *b, int version)
         }
         b->data.market.fetch_inventory_id = resource_map_legacy_inventory(buffer_read_u8(buf));
         b->data.market.is_mess_hall = buffer_read_u8(buf);
-    } else if (b->type == BUILDING_GRANARY) {
+    } else if (b->type == BUILDING_GRANARY && version <= SAVE_GAME_LAST_GRANARY_WAREHOUSE_NON_ROADBLOCKS) {
         if (version <= SAVE_GAME_LAST_STATIC_RESOURCES) {
             buffer_skip(buf, 2);
             for (int i = 0; i < RESOURCE_MAX_LEGACY; i++) {
                 b->resources[resource_remap(i)] = buffer_read_i16(buf);
             }
+
+        }
+        b->data.roadblock.exceptions = ROADBLOCK_PERMISSION_ALL;
+    } else if (b->type == BUILDING_WAREHOUSE || b->type == BUILDING_GRANARY) {
+        if (version <= SAVE_GAME_LAST_GRANARY_WAREHOUSE_NON_ROADBLOCKS) {
+            b->data.roadblock.exceptions = ROADBLOCK_PERMISSION_ALL;
+        } else {
+            b->data.roadblock.exceptions = buffer_read_u16(buf);
         }
     } else if (building_monument_is_monument(b) && version <= SAVE_GAME_LAST_MONUMENT_TYPE_DATA) {
         if (version <= SAVE_GAME_LAST_STATIC_RESOURCES) {
@@ -593,7 +601,7 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
         b->fumigation_frame = buffer_read_u8(buf);
         b->fumigation_direction = buffer_read_u8(buf);
     }
-    
+
     if (save_version > SAVE_GAME_LAST_STATIC_RESOURCES) {
         for (int i = 0; i < resource_total_mapped(); i++) {
             b->resources[resource_remap(i)] = buffer_read_i16(buf);

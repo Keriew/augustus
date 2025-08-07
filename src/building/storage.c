@@ -1,6 +1,9 @@
 #include "storage.h"
 
 #include "building/building.h"
+#include "building/granary.h"
+#include "building/warehouse.h"
+#include "building/type.h"
 #include "city/resource.h"
 #include "core/array.h"
 #include "core/calc.h"
@@ -38,6 +41,16 @@ void building_storage_clear_all(void)
 int building_storage_get_array_size(void)
 {
     return storages.size;
+}
+
+int building_storage_try_add_resource(building *b, int resource, int amount, int is_produced)
+{
+    if (b->type == BUILDING_GRANARY) {
+        return building_granary_try_add_resource(b, resource, amount, is_produced);
+    } else if (b->type == BUILDING_WAREHOUSE) {
+        return building_warehouse_try_add_resource(b, resource, amount);
+    }
+    return 0;
 }
 
 void building_storage_reset_building_ids(void)
@@ -136,6 +149,89 @@ void building_storage_toggle_empty_all(int storage_id)
     array_item(storages, storage_id)->storage.empty_all ^= 1;
 }
 
+int building_storage_get_empty_all(int building_id)
+{
+    building *b = building_get(building_id);
+    int storage_id = b->storage_id;
+    if (storage_id < 0 || storage_id >= storages.size) {
+        return 0;
+    }
+    return array_item(storages, storage_id)->storage.empty_all;
+}
+
+int building_storage_count_stored_resource_types(int building_id)
+{
+    building *b = building_get(building_id);
+    if (!b->storage_id) {
+        return 0;
+    }
+    int stored_types_count = 0;
+    for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+        if (b->resources[r] > 0) {
+            stored_types_count++;
+        }
+    }
+    return stored_types_count;
+}
+
+const building_storage_state building_storage_get_state(building *b, int resource, int relative)
+{
+    if (b->has_plague || b->state != BUILDING_STATE_IN_USE) {
+        return BUILDING_STORAGE_STATE_NOT_ACCEPTING;
+    }
+    if (b->type != BUILDING_GRANARY && b->type != BUILDING_WAREHOUSE) { //safeguard
+        return BUILDING_STORAGE_STATE_NOT_ACCEPTING;
+    }
+    const building_storage *s = building_storage_get(b->storage_id);
+    const resource_storage_entry *entry = &s->resource_state[resource];
+
+    if (!relative) {
+        // If relative is 0, return raw state without checking amounts
+        return entry->state;
+    }
+    int amount = (b->type == BUILDING_WAREHOUSE) ?
+        building_warehouse_get_amount(b, resource) : building_granary_get_amount(b, resource);
+
+    switch (entry->state) {
+        case BUILDING_STORAGE_STATE_ACCEPTING:
+            if (amount < entry->quantity) {
+                return BUILDING_STORAGE_STATE_ACCEPTING;
+            }
+            break;
+
+        case BUILDING_STORAGE_STATE_GETTING:
+            if (amount < entry->quantity) {
+                return BUILDING_STORAGE_STATE_GETTING;
+            }
+            break;
+
+        case BUILDING_STORAGE_STATE_MAINTAINING:
+            if (amount <= entry->quantity) {
+                return BUILDING_STORAGE_STATE_MAINTAINING;
+            }
+            break;
+
+        default:
+            break;
+    }
+    return BUILDING_STORAGE_STATE_NOT_ACCEPTING;
+}
+
+resource_type building_storage_get_highest_quantity_resource(building *b)
+{
+    unsigned char i;
+    unsigned char highest_resource = RESOURCE_NONE;
+    if (b->type == BUILDING_WAREHOUSE) {
+        building_warehouse_recount_resources(b);
+    }
+    for (i = RESOURCE_NONE + 1; i < RESOURCE_MAX; i++) { //not interested in RESOURCE_NONE
+        if (b->resources[i] > highest_resource) {
+            highest_resource = i;
+        }
+    }
+    return highest_resource;
+}
+
 void building_storage_cycle_resource_state(int storage_id, resource_type resource_id)
 {
     resource_storage_entry *entry = &array_item(storages, storage_id)->storage.resource_state[resource_id];
@@ -159,7 +255,7 @@ void building_storage_cycle_resource_state(int storage_id, resource_type resourc
     }
 }
 
-void building_storage_set_permission(building_storage_permission_states p, building *b)
+void building_storage_toggle_permission(building_storage_permission_states p, building *b)
 {
     int permission_bit = 1 << p;
     array_item(storages, b->storage_id)->storage.permissions ^= permission_bit;
@@ -170,6 +266,18 @@ int building_storage_get_permission(building_storage_permission_states p, buildi
     const building_storage *s = building_storage_get(b->storage_id);
     int permission_bit = 1 << p;
     return !(s->permissions & permission_bit);
+}
+
+void building_storage_set_permission(building_storage_permission_states p, building *b, int enable)
+{
+    int permission_bit = 1 << p;
+    int *permissions = &array_item(storages, b->storage_id)->storage.permissions;
+
+    if (enable) {
+        *permissions |= permission_bit;
+    } else {
+        *permissions &= ~permission_bit;
+    }
 }
 
 void building_storage_cycle_partial_resource_state(int storage_id, resource_type resource_id, int reverse_order)
@@ -259,7 +367,6 @@ void decode_legacy_storage_state(uint8_t legacy, resource_storage_entry *entry)
         case 0: entry->state = BUILDING_STORAGE_STATE_ACCEPTING; entry->quantity = BUILDING_STORAGE_QUANTITY_MAX; break;
         case 1: entry->state = BUILDING_STORAGE_STATE_NOT_ACCEPTING; entry->quantity = BUILDING_STORAGE_QUANTITY_MAX; break;
         case 2: entry->state = BUILDING_STORAGE_STATE_GETTING; entry->quantity = BUILDING_STORAGE_QUANTITY_MAX; break;
-
         case 3: entry->state = BUILDING_STORAGE_STATE_ACCEPTING; entry->quantity = BUILDING_STORAGE_QUANTITY_16; break;
         case 4: entry->state = BUILDING_STORAGE_STATE_ACCEPTING; entry->quantity = BUILDING_STORAGE_QUANTITY_8; break;
         case 5: entry->state = BUILDING_STORAGE_STATE_GETTING; entry->quantity = BUILDING_STORAGE_QUANTITY_16; break;
@@ -269,7 +376,6 @@ void decode_legacy_storage_state(uint8_t legacy, resource_storage_entry *entry)
         case 9: entry->state = BUILDING_STORAGE_STATE_NOT_ACCEPTING; entry->quantity = BUILDING_STORAGE_QUANTITY_16; break;
         case 10: entry->state = BUILDING_STORAGE_STATE_NOT_ACCEPTING; entry->quantity = BUILDING_STORAGE_QUANTITY_8; break;
         case 11: entry->state = BUILDING_STORAGE_STATE_NOT_ACCEPTING; entry->quantity = BUILDING_STORAGE_QUANTITY_24; break;
-
         default:
             entry->state = BUILDING_STORAGE_STATE_NOT_ACCEPTING;
             entry->quantity = BUILDING_STORAGE_QUANTITY_MAX;

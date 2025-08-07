@@ -28,7 +28,7 @@ int scenario_condition_type_building_count_active_met(const scenario_condition_t
     building_type type = condition->parameter3;
 
     int total_active_count = 0;
-    switch(type) {
+    switch (type) {
         case BUILDING_MENU_FARMS:
             total_active_count = building_set_count_farms(1);
             break;
@@ -83,7 +83,7 @@ int scenario_condition_type_building_count_any_met(const scenario_condition_t *c
     building_type type = condition->parameter3;
 
     int total_active_count = 0;
-    switch(type) {
+    switch (type) {
         case BUILDING_MENU_FARMS:
             total_active_count = building_set_count_farms(0);
             break;
@@ -148,7 +148,7 @@ int scenario_condition_type_building_count_area_met(const scenario_condition_t *
     int maxx = map_grid_offset_to_x(grid_offset) + block_radius;
     int maxy = map_grid_offset_to_y(grid_offset) + block_radius;
     int buildings_in_area = 0;
-    switch(type) {
+    switch (type) {
         case BUILDING_MENU_FARMS:
             buildings_in_area = building_set_area_count_farms(minx, miny, maxx, maxy);
             break;
@@ -282,16 +282,16 @@ int scenario_condition_type_resource_storage_available_met(const scenario_condit
     }
 
     int storage_available = 0;
-    switch(storage_type) {
+    switch (storage_type) {
         case STORAGE_TYPE_ALL:
-            storage_available += city_resource_get_available_empty_space_warehouses(resource, respect_settings);
-            storage_available += city_resource_get_available_empty_space_granaries(resource, respect_settings) / RESOURCE_ONE_LOAD;
-            break;
+            storage_available += city_resource_get_available_empty_space_warehouses(resource);
+            storage_available += city_resource_get_available_empty_space_granaries(resource)
+                break;
         case STORAGE_TYPE_GRANARIES:
-            storage_available += city_resource_get_available_empty_space_granaries(resource, respect_settings) / RESOURCE_ONE_LOAD;
+            storage_available += city_resource_get_available_empty_space_granaries(resource);
             break;
         case STORAGE_TYPE_WAREHOUSES:
-            storage_available += city_resource_get_available_empty_space_warehouses(resource, respect_settings);
+            storage_available += city_resource_get_available_empty_space_warehouses(resource);
             break;
         default:
             break;
@@ -312,9 +312,9 @@ int scenario_condition_type_resource_stored_count_met(const scenario_condition_t
     }
 
     int amount_stored = 0;
-    switch(storage_type) {
+    switch (storage_type) {
         case STORAGE_TYPE_ALL:
-            amount_stored += city_resource_count(resource);
+            amount_stored += city_resource_count_warehouses_amount(resource);
             if (resource_is_food(resource)) {
                 amount_stored += city_resource_count_food_on_granaries(resource) / RESOURCE_ONE_LOAD;
             }
@@ -325,7 +325,7 @@ int scenario_condition_type_resource_stored_count_met(const scenario_condition_t
             }
             break;
         case STORAGE_TYPE_WAREHOUSES:
-            amount_stored += city_resource_count(resource);
+            amount_stored += city_resource_count_warehouses_amount(resource);
             break;
         default:
             break;
@@ -456,7 +456,7 @@ int scenario_condition_type_trade_sell_price_met(const scenario_condition_t *con
     if (resource < RESOURCE_MIN || resource > RESOURCE_MAX) {
         return 0;
     }
-    
+
     int trade_sell_price = trade_price_base_sell(resource);
     return comparison_helper_compare_values(comparison, trade_sell_price, value);
 }

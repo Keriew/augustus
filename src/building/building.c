@@ -239,12 +239,13 @@ building *building_create(building_type type, int x, int y)
         b->type != BUILDING_PALISADE_GATE && config_get(CONFIG_GP_CH_GATES_DEFAULT_TO_PASS_ALL_WALKERS)) {
         b->data.roadblock.exceptions = ROADBLOCK_PERMISSION_ALL;
     }
-    if (building_type_is_bridge(b->type)) { //bridges always allow everyone by default
+    if (building_type_is_bridge(b->type) || b->type == BUILDING_GRANARY || b->type == BUILDING_WAREHOUSE) {
+        //bridges and other passable buildings should allow all walkers by default
         b->data.roadblock.exceptions = ROADBLOCK_PERMISSION_ALL;
     }
 
     if (b->type == BUILDING_MARKET && config_get(CONFIG_GP_CH_MARKETS_DONT_ACCEPT)) {
-            building_distribution_unaccept_all_goods(b);
+        building_distribution_unaccept_all_goods(b);
     }
 
     b->x = x;
@@ -329,12 +330,12 @@ void building_update_state(void)
             continue;
         }
         if (b->state == BUILDING_STATE_UNDO || b->state == BUILDING_STATE_DELETED_BY_PLAYER) {
-            if (b->type == BUILDING_TOWER || b->type == BUILDING_GATEHOUSE || b->type == BUILDING_SHIP_BRIDGE || b->type == BUILDING_LOW_BRIDGE) {
+            if (b->type == BUILDING_TOWER || b->type == BUILDING_GATEHOUSE) {
                 wall_recalc = 1;
                 road_recalc = 1;
             } else if (b->type == BUILDING_RESERVOIR) {
                 aqueduct_recalc = 1;
-            } else if (b->type == BUILDING_GRANARY) {
+            } else if (b->type == BUILDING_GRANARY || building_type_is_bridge(b->type)) {
                 road_recalc = 1;
             } else if ((b->type >= BUILDING_GRAND_TEMPLE_CERES && b->type <= BUILDING_GRAND_TEMPLE_VENUS) ||
                 b->type == BUILDING_PANTHEON || b->type == BUILDING_LIGHTHOUSE) {

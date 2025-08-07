@@ -103,7 +103,7 @@ typedef struct {
     signed char phrase_id;
     unsigned char phrase_sequence_city;
     unsigned char trader_id;
-    unsigned char wait_ticks_next_target;
+    unsigned char wait_ticks_next_target; //used for retargetting for fighting figures, and destination for pushers
     unsigned char dont_draw_elevated;
     short target_figure_id;
     short targeted_by_figure_id;
@@ -114,7 +114,8 @@ typedef struct {
     short attacker_id1;
     short attacker_id2;
     short opponent_id;
-    short last_visited_index;
+    short last_visited_index; //can only be used if figure goes through initialization process
+    int last_destinatation_id; //can be used for any figure, holds only one value
     struct {
         unsigned short tourist_money_spent;
         unsigned short ticks_since_last_visited_id[12];

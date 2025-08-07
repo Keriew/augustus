@@ -68,6 +68,7 @@ enum {
 };
 
 #define OFFSET(x,y) (x + GRID_SIZE * y)
+#define SMALL_ICON_SIDE 24
 
 static void button_help(int param1, int param2);
 static void button_close(int param1, int param2);
@@ -76,15 +77,15 @@ static void button_mothball(int mothball, int param2);
 static void button_monument_construction(const generic_button *button);
 
 static image_button image_buttons_help_advisor_close[] = {
-    {14, 3, 24, 24, IB_NORMAL, GROUP_CONTEXT_ICONS, 0, button_help, button_none, 0, 0, 1},
-    {424, 3, 24, 24, IB_NORMAL, GROUP_CONTEXT_ICONS, 4, button_close, button_none, 0, 0, 1},
-    {38, 3, 24, 24, IB_NORMAL, 0, 0, button_advisor, button_none, 0, 0, 1}
+    {0, 0, 24, 24, IB_NORMAL, GROUP_CONTEXT_ICONS, 0, button_help, button_none, 0, 0, 1},
+    {0, 0, 24, 24, IB_NORMAL, GROUP_CONTEXT_ICONS, 4, button_close, button_none, 0, 0, 1},
+    {0, 0, 24, 24, IB_NORMAL, 0, 0, button_advisor, button_none, 0, 0, 1}
 };
 
 static image_button image_button_mothball[] = {
-    {400, 3, 24, 24, IB_NORMAL, 0, 0, button_mothball, button_none, 0, 0, 1, "UI", "Mothball_1"},
-    {400, 3, 24, 24, IB_NORMAL, 0, 0, button_mothball, button_none, 0, 0, 1, "UI", "Unmothball_1"}
-};
+    {0, 0, 24, 24, IB_NORMAL, 0, 0, button_mothball, button_none, 0, 0, 1, "UI", "Mothball_1"},
+    {0, 0, 24, 24, IB_NORMAL, 0, 0, button_mothball, button_none, 0, 0, 1, "UI", "Unmothball_1"}
+}; //0d to adjust dynamically via init
 
 static generic_button generic_button_monument_construction[] = {
     {80, 3, 304, 24, button_monument_construction}
@@ -95,6 +96,32 @@ static unsigned int focus_image_button_id;
 static unsigned int focus_mothball_image_button_id;
 static unsigned int focus_monument_construction_button_id;
 static int original_overlay;
+
+static void init_context_buttons(building_info_context *c)
+{
+    int y_offset = c->y_offset + c->height_blocks * BLOCK_SIZE - 13 - SMALL_ICON_SIDE; // 13px from bottom edge
+    //help button
+    image_buttons_help_advisor_close[0].y_offset = y_offset;
+    image_buttons_help_advisor_close[0].x_offset = c->x_offset + 14;
+    //close button
+    image_buttons_help_advisor_close[1].y_offset = y_offset;
+    image_buttons_help_advisor_close[1].x_offset = c->x_offset + c->width_blocks * BLOCK_SIZE - 40; // 40px from right edge
+    //advisor button
+    image_buttons_help_advisor_close[2].y_offset = y_offset;
+    image_buttons_help_advisor_close[2].x_offset = c->x_offset + 38;
+    for (int i = 0; i < 2; i++) {
+        image_button_mothball[i].y_offset = y_offset;
+        image_button_mothball[i].x_offset = c->x_offset + c->width_blocks * BLOCK_SIZE - 64; // 64px from right edge
+    }
+}
+
+static void update_context_buttons_vertical_offset(int new_context_y_offset, int new_context_block_height)
+{
+    int y_offset = new_context_y_offset + new_context_block_height * BLOCK_SIZE - SMALL_ICON_SIDE - 18; // 18px from bottom edge
+    for (int i = 0; i < 3; i++) {
+        image_buttons_help_advisor_close[i].y_offset = y_offset;
+    }
+}
 
 static int get_height_id(void)
 {
@@ -233,6 +260,9 @@ static int get_height_id(void)
             case BUILDING_MESS_HALL:
             case BUILDING_CITY_MINT:
             case BUILDING_BARRACKS:
+            case BUILDING_GRANARY:
+            case BUILDING_WAREHOUSE:
+            case BUILDING_WAREHOUSE_SPACE:
                 return HEIGHT_11_28_BLOCKS;
 
                 //336px
@@ -265,19 +295,36 @@ static int get_height_id(void)
     }
     return HEIGHT_0_22_BLOCKS;
 }
+static void adjust_height_for_storage_buildings(building_info_context *c)
+{
+    building *b = building_get(c->building_id);
+    if (!b->storage_id) {
+        return;
+    }
+    int stored_types = building_storage_count_stored_resource_types(c->building_id);
+    int y_offset_blocks = 0;
+
+    if (!b->has_plague && c->has_road_access) {
+        y_offset_blocks = ((stored_types - 1) / 2 - 3) * 2 + 2;
+        if (b->type == BUILDING_WAREHOUSE && stored_types == 0) {
+            y_offset_blocks += 2;
+        }
+    }
+    c->height_blocks += y_offset_blocks;
+}
 
 static int has_mothball_button(void)
 {
     return model_get_building(building_get(context.building_id)->type)->laborers;
 }
 
-static void draw_mothball_button(int x, int y)
+static void draw_mothball_button(void)
 {
     building *b = building_get(context.building_id);
     if (b->state == BUILDING_STATE_MOTHBALLED) {
-        image_buttons_draw(x, y, image_button_mothball, 2);
+        image_buttons_draw(0, 0, image_button_mothball, 2); //  x and y offsets adjusted dynamically in init()
     } else {
-        image_buttons_draw(x, y, image_button_mothball, 1);
+        image_buttons_draw(0, 0, image_button_mothball, 1);
     }
 }
 
@@ -391,6 +438,8 @@ static void init(int grid_offset)
                 break;
         }
         switch (b->type) {
+            //TODO: this information should be derived from b->has_road_access. 
+            //context information should not differ from building properties
             case BUILDING_GRANARY:
                 context.has_road_access = map_has_road_access_granary(b->x, b->y, 0);
                 break;
@@ -398,7 +447,7 @@ static void init(int grid_offset)
                 context.has_road_access = map_has_road_access_hippodrome_rotation(b->x, b->y, 0, b->subtype.orientation);
                 break;
             case BUILDING_WAREHOUSE:
-                context.has_road_access = map_has_road_access_rotation(b->subtype.orientation, b->x, b->y, 3, 0);
+                context.has_road_access = map_has_road_access_warehouse(b->x, b->y, 0);
                 context.warehouse_space_text = building_warehouse_get_space_info(b);
                 break;
             case BUILDING_DEPOT:
@@ -498,6 +547,7 @@ static void init(int grid_offset)
         case 13: context.height_blocks = 15; break;
         default: context.height_blocks = 22; break;
     }
+    adjust_height_for_storage_buildings(&context);
     if (screen_height() <= 600) {
         context.height_blocks = calc_bound(context.height_blocks, 0, 26);
     }
@@ -584,17 +634,14 @@ static void draw_background(void)
             } else {
                 window_building_draw_mess_hall(&context);
             }
-        } else if (btype == BUILDING_GRANARY) {
-            if (context.show_special_orders) {
-                window_building_draw_granary_orders(&context);
+        } else if (btype == BUILDING_GRANARY || btype == BUILDING_WAREHOUSE) {
+            if (context.show_special_orders == SPECIAL_ORDERS_ROADBLOCK) {
+                window_building_draw_roadblock_orders(&context);
+            } else if (context.show_special_orders == SPECIAL_ORDERS_STORAGE ||
+                     context.show_special_orders == SPECIAL_ORDERS_GENERIC) {
+                window_building_draw_storage_orders(&context);
             } else {
-                window_building_draw_granary(&context);
-            }
-        } else if (btype == BUILDING_WAREHOUSE) {
-            if (context.show_special_orders) {
-                window_building_draw_warehouse_orders(&context);
-            } else {
-                window_building_draw_warehouse(&context);
+                window_building_draw_storage(&context);
             }
         } else if (btype == BUILDING_DEPOT) {
             if (context.depot_selection.source) {
@@ -809,6 +856,7 @@ static void draw_foreground(void)
 {
     building *b = building_get(context.building_id);
     // building-specific buttons
+    init_context_buttons(&context);
     if (context.type == BUILDING_INFO_BUILDING) {
         int btype = building_get(context.building_id)->type;
 
@@ -818,17 +866,14 @@ static void draw_foreground(void)
 
         if (btype == BUILDING_LIGHTHOUSE && b->monument.phase == MONUMENT_FINISHED) {
             window_building_draw_lighthouse_foreground(&context);
-        } else if (btype == BUILDING_GRANARY) {
-            if (context.show_special_orders) {
-                window_building_draw_granary_orders_foreground(&context);
+        } else if (btype == BUILDING_GRANARY || btype == BUILDING_WAREHOUSE) {
+            if (context.show_special_orders == SPECIAL_ORDERS_ROADBLOCK) {
+                window_building_draw_roadblock_orders_foreground(&context);
+            } else if (context.show_special_orders == SPECIAL_ORDERS_STORAGE ||
+                     context.show_special_orders == SPECIAL_ORDERS_GENERIC) {
+                window_building_draw_storage_orders_foreground(&context);
             } else {
-                window_building_draw_granary_foreground(&context);
-            }
-        } else if (btype == BUILDING_WAREHOUSE) {
-            if (context.show_special_orders) {
-                window_building_draw_warehouse_orders_foreground(&context);
-            } else {
-                window_building_draw_warehouse_foreground(&context);
+                window_building_draw_storage_foreground(&context);
             }
         } else if (btype == BUILDING_DEPOT) {
             if (context.depot_selection.source) {
@@ -925,15 +970,15 @@ static void draw_foreground(void)
         context.depot_selection.source ||
         context.depot_selection.destination ||
         context.depot_selection.resource) {
-        int y_offset = window_building_get_vertical_offset(&context, 28) + 400;
-        image_buttons_draw(context.x_offset, y_offset, image_buttons_help_advisor_close, 2);
+        int new_context_y = window_building_get_vertical_offset(&context, 28);
+        update_context_buttons_vertical_offset(new_context_y, 28);
+        image_buttons_draw(0, 0, image_buttons_help_advisor_close, 2);
     } else {
         int image_id = assets_get_image_id("UI", "Advisor_Building_Window_Border_1");
         image_buttons_help_advisor_close[2].image_offset = image_id + context.advisor_button * 4;
         image_buttons_help_advisor_close[2].parameter1 = context.advisor_button;
 
-        image_buttons_draw(context.x_offset, context.y_offset + BLOCK_SIZE * context.height_blocks - 40,
-            image_buttons_help_advisor_close, context.advisor_button ? 3 : 2);
+        image_buttons_draw(0, 0, image_buttons_help_advisor_close, context.advisor_button ? 3 : 2);
     }
 
     if (!context.show_special_orders &&
@@ -942,7 +987,7 @@ static void draw_foreground(void)
         !context.depot_selection.resource &&
         !building_monument_is_unfinished_monument(b) &&
         has_mothball_button()) {
-        draw_mothball_button(context.x_offset, context.y_offset + BLOCK_SIZE * context.height_blocks - 40);
+        draw_mothball_button();
     }
     if (!context.show_special_orders &&
         !context.depot_selection.source &&
@@ -951,7 +996,7 @@ static void draw_foreground(void)
         !building_monument_is_unfinished_monument(b)) {
         int workers_needed = model_get_building(building_get(context.building_id)->type)->laborers;
         if (workers_needed) {
-            draw_mothball_button(context.x_offset, context.y_offset + BLOCK_SIZE * context.height_blocks - 40);
+            draw_mothball_button();
         }
     }
 }
@@ -981,7 +1026,7 @@ static int handle_specific_building_info_mouse(const mouse *m)
                 }
                 return window_building_handle_mouse_distributor(m, &context);
             }
-        } else if (building_type_is_roadblock(btype)) {
+        } else if (building_type_is_roadblock(btype) == ROADBLOCK_STANDARD) {
             if (context.show_special_orders) {
                 return window_building_handle_mouse_roadblock_orders(m, &context);
             } else {
@@ -997,17 +1042,14 @@ static int handle_specific_building_info_mouse(const mouse *m)
             return window_building_handle_mouse_barracks(m, &context);
         } else if (btype == BUILDING_GRAND_TEMPLE_MARS) {
             return window_building_handle_mouse_grand_temple_mars(m, &context);
-        } else if (btype == BUILDING_GRANARY) {
-            if (context.show_special_orders) {
-                return window_building_handle_mouse_granary_orders(m, &context);
+        } else if (btype == BUILDING_GRANARY || btype == BUILDING_WAREHOUSE) {
+            if (context.show_special_orders == SPECIAL_ORDERS_GENERIC ||
+                context.show_special_orders == SPECIAL_ORDERS_STORAGE) {
+                return window_building_handle_mouse_storage_orders(m, &context);
+            } else if (context.show_special_orders == SPECIAL_ORDERS_ROADBLOCK) {
+                return window_building_handle_mouse_roadblock_orders(m, &context);
             } else {
-                return window_building_handle_mouse_granary(m, &context);
-            }
-        } else if (btype == BUILDING_WAREHOUSE) {
-            if (context.show_special_orders) {
-                return window_building_handle_mouse_warehouse_orders(m, &context);
-            } else {
-                return window_building_handle_mouse_warehouse(m, &context);
+                return window_building_handle_mouse_storage(m, &context);
             }
         } else if ((btype >= BUILDING_GRAND_TEMPLE_CERES && btype <= BUILDING_GRAND_TEMPLE_VENUS) ||
             btype == BUILDING_PANTHEON) {
@@ -1045,13 +1087,11 @@ static void handle_input(const mouse *m, const hotkeys *h)
         context.depot_selection.destination ||
         context.depot_selection.source ||
         context.depot_selection.resource) {
-        int y_offset = window_building_get_vertical_offset(&context, 28);
-        handled |= image_buttons_handle_mouse(m, context.x_offset, y_offset + 400,
+        handled |= image_buttons_handle_mouse(m, 0, 0,
             image_buttons_help_advisor_close, 2, &focus_image_button_id);
     } else {
         handled |= image_buttons_handle_mouse(
-            m, context.x_offset, context.y_offset + BLOCK_SIZE * context.height_blocks - 40,
-            image_buttons_help_advisor_close, context.advisor_button ? 3 : 2, &focus_image_button_id);
+            m, 0, 0, image_buttons_help_advisor_close, context.advisor_button ? 3 : 2, &focus_image_button_id);
         building *b = building_get(context.building_id);
         if (building_monument_is_unfinished_monument(b)) {
             handled = generic_buttons_handle_mouse(
@@ -1060,11 +1100,11 @@ static void handle_input(const mouse *m, const hotkeys *h)
         } else {
             if (has_mothball_button()) {
                 if (b->state == BUILDING_STATE_MOTHBALLED) {
-                    handled |= image_buttons_handle_mouse(m, context.x_offset, context.y_offset + BLOCK_SIZE * context.height_blocks - 40,
+                    handled |= image_buttons_handle_mouse(m, 0, 0,
                         image_button_mothball, 2, &focus_mothball_image_button_id);
                 } else {
-                    handled |= image_buttons_handle_mouse(m, context.x_offset, context.y_offset + BLOCK_SIZE * context.height_blocks - 40,
-                        image_button_mothball, 1, &focus_mothball_image_button_id);
+                    handled |= image_buttons_handle_mouse(m, 0, 0,
+                         image_button_mothball, 1, &focus_mothball_image_button_id);
                 }
             }
         }
@@ -1119,10 +1159,8 @@ static void get_tooltip(tooltip_context *c)
         }
     } else if (building_is_house(btype)) {
         precomposed_text = window_building_house_get_tooltip(&context);
-    } else if (btype == BUILDING_GRANARY) {
-        window_building_granary_get_tooltip_distribution_permissions(&translation);
-    } else if (btype == BUILDING_WAREHOUSE) {
-        window_building_warehouse_get_tooltip_distribution_permissions(&translation);
+    } else if (btype == BUILDING_GRANARY || btype == BUILDING_WAREHOUSE) {
+        window_building_storage_get_tooltip_distribution_permissions(&translation);
     } else if (btype == BUILDING_DOCK) {
         precomposed_text = window_building_dock_get_tooltip(&context);
     } else if (context.type == BUILDING_INFO_BUILDING && btype == BUILDING_DEPOT) {
@@ -1219,7 +1257,19 @@ int window_building_info_get_building_type(void)
 
 void window_building_info_show_storage_orders(void)
 {
-    context.show_special_orders = 1;
+    context.show_special_orders = SPECIAL_ORDERS_GENERIC;
+    window_invalidate();
+}
+
+void window_building_info_show_storage_special_orders(void)
+{
+    context.show_special_orders = SPECIAL_ORDERS_STORAGE;
+    window_invalidate();
+}
+
+void window_building_info_show_roadblock_orders(void)
+{
+    context.show_special_orders = SPECIAL_ORDERS_ROADBLOCK;
     window_invalidate();
 }
 

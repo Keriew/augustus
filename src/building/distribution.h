@@ -13,9 +13,9 @@ typedef struct {
 
 #define BASELINE_STOCK 50
 
-int building_distribution_is_good_accepted(resource_type resource, const building *b);
+int building_distribution_is_good_accepted(const building *b, resource_type resource);
 int building_distribution_check_if_accepts_nothing(const building *b);
-void building_distribution_toggle_good_accepted(resource_type resource, building *b);
+void building_distribution_toggle_good_accepted(building *b, resource_type resource);
 void building_distribution_unaccept_all_goods(building *b);
 void building_distribution_accept_all_goods(building *b);
 

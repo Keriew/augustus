@@ -50,7 +50,8 @@ void city_overlay_problems_prepare_building(building *b)
         b->show_on_problem_overlay = 1;
     } else if (!b->num_workers && building_get_laborers(b->type)) {
         b->show_on_problem_overlay = 1;
-    } else if (b->type == BUILDING_FOUNTAIN || b->type == BUILDING_BATHHOUSE) {
+    } else if (b->type == BUILDING_FOUNTAIN || b->type == BUILDING_BATHHOUSE ||
+         b->type == BUILDING_LARGE_POND || b->type == BUILDING_SMALL_POND) {
         if (!b->has_water_access) {
             b->show_on_problem_overlay = 1;
         }
@@ -59,6 +60,9 @@ void city_overlay_problems_prepare_building(building *b)
             b->show_on_problem_overlay = 1;
         }
     } else if (building_is_workshop(b->type)) {
+        if (b->type == BUILDING_CONCRETE_MAKER && !b->has_water_access) {
+            b->show_on_problem_overlay = 1;
+        }
         if (is_problem_cartpusher(b->figure_id)) {
             b->show_on_problem_overlay = 1;
         } else if (!building_industry_has_raw_materials_for_production(b)) {
@@ -68,6 +72,9 @@ void city_overlay_problems_prepare_building(building *b)
         b->type == BUILDING_COLOSSEUM || b->type == BUILDING_HIPPODROME) && !b->data.entertainment.days1) {
         b->show_on_problem_overlay = 1;
     } else if ((b->type == BUILDING_ARENA || b->type == BUILDING_COLOSSEUM) && !b->data.entertainment.days2) {
+        b->show_on_problem_overlay = 1;
+    } else if (b->has_road_access == 0 &&
+        building_get_laborers(b->type) && b->type != BUILDING_LATRINES && b->type != BUILDING_FOUNTAIN) {
         b->show_on_problem_overlay = 1;
     }
 
@@ -98,7 +105,7 @@ static int show_building_native(const building *b)
 {
     return b->type == BUILDING_NATIVE_HUT || b->type == BUILDING_NATIVE_HUT_ALT ||
         b->type == BUILDING_NATIVE_MEETING || b->type == BUILDING_MISSION_POST || b->type == BUILDING_NATIVE_CROPS ||
-        b->type == BUILDING_NATIVE_DECORATION || b->type == BUILDING_NATIVE_MONUMENT || 
+        b->type == BUILDING_NATIVE_DECORATION || b->type == BUILDING_NATIVE_MONUMENT ||
         b->type == BUILDING_NATIVE_WATCHTOWER;
 }
 
@@ -292,13 +299,19 @@ static int get_tooltip_problems(tooltip_context *c, const building *b)
         c->translation_key = TR_TOOLTIP_OVERLAY_PROBLEMS_MOTHBALLED;
     } else if (!b->num_workers && building_get_laborers(b->type)) {
         c->translation_key = TR_TOOLTIP_OVERLAY_PROBLEMS_NO_LABOR;
-    } else if (b->type == BUILDING_FOUNTAIN || b->type == BUILDING_BATHHOUSE) {
-        c->translation_key = TR_TOOLTIP_OVERLAY_PROBLEMS_NO_WATER_ACCESS;
+    } else if (b->type == BUILDING_FOUNTAIN || b->type == BUILDING_BATHHOUSE
+        || b->type == BUILDING_LARGE_POND || b->type == BUILDING_SMALL_POND) {
+        if (!b->has_water_access) {
+            c->translation_key = TR_TOOLTIP_OVERLAY_PROBLEMS_NO_WATER_ACCESS;
+        }
     } else if (b->type >= BUILDING_WHEAT_FARM && b->type <= BUILDING_CLAY_PIT) {
         if (is_problem_cartpusher(b->figure_id)) {
             c->translation_key = TR_TOOLTIP_OVERLAY_PROBLEMS_CARTPUSHER;
         }
     } else if (building_is_workshop(b->type)) {
+        if (b->type == BUILDING_CONCRETE_MAKER && !b->has_water_access) {
+            c->translation_key = TR_TOOLTIP_OVERLAY_PROBLEMS_NO_WATER_ACCESS;
+        }
         if (is_problem_cartpusher(b->figure_id)) {
             c->translation_key = TR_TOOLTIP_OVERLAY_PROBLEMS_CARTPUSHER;
         } else if (!building_industry_has_raw_materials_for_production(b)) {
@@ -326,6 +339,8 @@ static int get_tooltip_problems(tooltip_context *c, const building *b)
     } else if (b->type == BUILDING_HIPPODROME && !b->data.entertainment.days1) {
         c->text_group = 73;
         return 5;
+    } else if (b->has_road_access == 0) {
+        c->translation_key = TR_TOOLTIP_OVERLAY_PROBLEMS_NO_ROAD_ACCESS;
     }
     if (c->translation_key) {
         return 1;

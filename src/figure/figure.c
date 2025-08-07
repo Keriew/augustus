@@ -19,8 +19,8 @@
 #define FIGURE_ARRAY_SIZE_STEP 1000
 
 #define FIGURE_ORIGINAL_BUFFER_SIZE 128
-#define FIGURE_CURRENT_BUFFER_SIZE 130
-
+#define FIGURE_CURRENT_BUFFER_SIZE 146
+// around 12 bytes left free in the current buffer size - save version 0xa7, August 2025
 static struct {
     int created_sequence;
     array(figure) figures;
@@ -64,8 +64,8 @@ figure *figure_create(figure_type type, int x, int y, direction_type dir)
     f->destination_building_id = 0;
     f->wait_ticks = 0;
     random_generate_next();
-    f->phrase_sequence_city = f->phrase_sequence_exact = random_byte() & 3;
     f->name = figure_name_get(type, 0);
+    f->phrase_sequence_city = f->phrase_sequence_exact = random_byte() & 3;
     map_figure_add(f);
     if (type == FIGURE_TRADE_CARAVAN || type == FIGURE_TRADE_SHIP || type == FIGURE_NATIVE_TRADER) {
         f->trader_id = trader_create();
@@ -249,7 +249,8 @@ void figure_init_scenario(void)
 void figure_kill_all(void)
 {
     figure *f;
-    array_foreach(data.figures, f) {
+    array_foreach(data.figures, f)
+    {
         switch (f->type) {
             default:
                 f->state = FIGURE_STATE_DEAD;
@@ -260,7 +261,7 @@ void figure_kill_all(void)
             case FIGURE_SHIPWRECK:
             case FIGURE_FORT_STANDARD:
                 continue;
-        }  
+        }
     }
 }
 
@@ -375,11 +376,12 @@ static void figure_save(buffer *buf, const figure *f)
     buffer_write_i16(buf, f->attacker_id2);
     buffer_write_i16(buf, f->opponent_id);
     buffer_write_i16(buf, f->last_visited_index);
+    buffer_write_i16(buf, f->last_destinatation_id);
 }
 
 static int get_resource_id(figure_type type, int resource)
 {
-    
+
     switch (type) {
         case FIGURE_PRIEST_SUPPLIER:
         case FIGURE_BARKEEP_SUPPLIER:
@@ -503,7 +505,9 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     if (version > SAVE_GAME_LAST_GLOBAL_BUILDING_INFO) {
         f->last_visited_index = buffer_read_i16(buf);
     }
-
+    if (version > SAVE_GAME_LAST_GRANARY_WAREHOUSE_NON_ROADBLOCKS) {
+        f->last_destinatation_id = buffer_read_i16(buf);
+    }
     // The following code should only be executed if the savegame includes figure information that is not 
     // supported on this specific version of Augustus. The extra bytes in the buffer must be skipped in order
     // to prevent reading bogus data for the next figure
@@ -522,7 +526,8 @@ void figure_save_state(buffer *list, buffer *seq)
     buffer_write_i32(list, FIGURE_CURRENT_BUFFER_SIZE);
 
     figure *f;
-    array_foreach(data.figures, f) {
+    array_foreach(data.figures, f)
+    {
         figure_save(list, f);
     }
 }

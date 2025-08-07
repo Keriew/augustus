@@ -215,8 +215,7 @@ static void spawn_figure_warehouse(building *b)
         }
     }
     map_point road;
-    if (map_has_road_access_rotation(b->subtype.orientation, b->x, b->y, b->size, &road) ||
-        map_has_road_access_rotation(b->subtype.orientation, b->x, b->y, 3, &road)) {
+    if (map_has_road_access_warehouse(b->x, b->y, &road)) {
         spawn_labor_seeker(b, road.x, road.y, 100);
         if (has_figure_of_type(b, FIGURE_WAREHOUSEMAN)) {
             return;
@@ -226,7 +225,8 @@ static void spawn_figure_warehouse(building *b)
         if (task != WAREHOUSE_TASK_NONE) {
             figure *f = figure_create(FIGURE_WAREHOUSEMAN, road.x, road.y, DIR_4_BOTTOM);
             f->action_state = FIGURE_ACTION_50_WAREHOUSEMAN_CREATED;
-            f->loads_sold_or_carrying = 1;
+            f->loads_sold_or_carrying = 0; // spawn with 0, load is decided by the action. 
+            //this way we transfer resources from buildings to figures directly, without having to keep track
             if (task == WAREHOUSE_TASK_GETTING) {
                 f->resource_id = RESOURCE_NONE;
                 f->collecting_item_id = resource;
@@ -242,6 +242,7 @@ static void spawn_figure_warehouse(building *b)
 static void spawn_figure_granary(building *b)
 {
     check_labor_problem(b);
+    map_update_granary_internal_roads(b); //internal roads updated basing on surrounding terrain
     map_point road;
     if (map_has_road_access_granary(b->x, b->y, &road)) {
         spawn_labor_seeker(b, road.x, road.y, 100);
@@ -250,9 +251,10 @@ static void spawn_figure_granary(building *b)
         }
         int task = building_granary_determine_worker_task(b);
         if (task != GRANARY_TASK_NONE) {
-            figure *f = figure_create(FIGURE_WAREHOUSEMAN, road.x, road.y, DIR_4_BOTTOM);
+            figure *f = figure_create(FIGURE_WAREHOUSEMAN, b->x + 1, b->y + 1, DIR_4_BOTTOM);
+            //spawn in the center of the granary
             f->action_state = FIGURE_ACTION_50_WAREHOUSEMAN_CREATED;
-            f->loads_sold_or_carrying = 1;
+            //f->loads_sold_or_carrying = 1; //set loads at action, not spawn
             f->resource_id = task;
             b->figure_id = f->id;
             f->building_id = b->id;
