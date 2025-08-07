@@ -1092,8 +1092,9 @@ void window_building_draw_storage(building_info_context *c)
         int stored_types = building_storage_count_stored_resource_types(b->id);
         if (!stored_types) {
             int msg = is_granary(c) ? TR_BUILDING_GRANARY_NO_FOOD : TR_BUILDING_WAREHOUSE_NO_GOODS;
-            lang_text_draw_centered(CUSTOM_TRANSLATION, msg, c->x_offset, c->y_offset + 63,
+            lang_text_draw_centered(CUSTOM_TRANSLATION, msg, c->x_offset, c->y_offset + 44,
                 BLOCK_SIZE * c->width_blocks, FONT_NORMAL_BLACK);
+            y += 16;
         } else {
             for (int r = RESOURCE_NONE + 1; r < RESOURCE_MAX; r++) {
                 int amount = b->resources[r];

@@ -306,9 +306,9 @@ static void adjust_height_for_storage_buildings(building_info_context *c)
 
     if (!b->has_plague && c->has_road_access) {
         y_offset_blocks = ((stored_types - 1) / 2 - 3) * 2 + 2;
-        if (b->type == BUILDING_WAREHOUSE && stored_types == 0) {
-            y_offset_blocks += 2;
-        }
+       // if (b->type == BUILDING_WAREHOUSE && stored_types == 0) {
+     //       y_offset_blocks += 2;
+   //     }
     }
     c->height_blocks += y_offset_blocks;
 }
@@ -471,7 +471,7 @@ static void init(int grid_offset)
     context.figure.count = 0;
     for (int i = 0; i < 7; i++) {
         context.figure.figure_ids[i] = 0;
-    }
+    }//
     static const int FIGURE_OFFSETS[] = {
         OFFSET(0,0), OFFSET(0,-1), OFFSET(0,1), OFFSET(1,0), OFFSET(-1,0),
         OFFSET(-1,-1), OFFSET(1,-1), OFFSET(-1,1), OFFSET(1,1)
@@ -515,7 +515,8 @@ static void init(int grid_offset)
             continue;
         }
         figure *f = figure_get(figure_id);
-        if (f->type == FIGURE_FORT_STANDARD || figure_is_legion(f)) {
+                                   //remove || figure_is_legion(f)
+        if (f->type == FIGURE_FORT_STANDARD) {
             context.type = BUILDING_INFO_LEGION;
             context.formation_id = f->formation_id;
             const formation *m = formation_get(context.formation_id);
