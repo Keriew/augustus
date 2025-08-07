@@ -150,6 +150,7 @@ void building_warehouse_recount_resources(building *main)
         if (resource > RESOURCE_NONE && resource < RESOURCE_MAX) {
             main->resources[resource] += space->resources[resource];
         }
+        building_warehouse_space_set_image(space, resource);
     }
     // Total sum of all loads (regardless of type)
     int total_loads = 0;

@@ -1060,6 +1060,7 @@ const uint8_t *window_building_dock_get_tooltip(building_info_context *c)
 void window_building_draw_storage(building_info_context *c)
 {
     building *b = building_get(c->building_id);
+    building_warehouse_recount_resources(b);
     c->advisor_button = ADVISOR_TRADE;
     c->help_id = is_granary(c) ? 3 : 4;
     data.building_id = c->building_id;

@@ -306,9 +306,6 @@ static void adjust_height_for_storage_buildings(building_info_context *c)
 
     if (!b->has_plague && c->has_road_access) {
         y_offset_blocks = ((stored_types - 1) / 2 - 3) * 2 + 2;
-       // if (b->type == BUILDING_WAREHOUSE && stored_types == 0) {
-     //       y_offset_blocks += 2;
-   //     }
     }
     c->height_blocks += y_offset_blocks;
 }
