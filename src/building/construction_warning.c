@@ -82,9 +82,9 @@ static void check_road_access(int type, int x, int y, int size)
         has_road = 1;
     } else if (type == BUILDING_GRANARY && map_has_road_access_granary(x, y, 0)) {
         has_road = 1;
-    } else if (type == BUILDING_WAREHOUSE && map_has_road_access(x, y, 3, 0)) {
-        //simplified compared to actual road access calculation since rotation is not passed as any of the arguments,
-        //and tower cannot be located
+    } else if (type == BUILDING_WAREHOUSE) {
+        //warehouse road access is checked in construction_building.c -> add_warehouse()
+        //TODO: a dedicated function similar as for hippodrome should be used for consistency
         has_road = 1;
     } else if (type == BUILDING_HIPPODROME && map_has_road_access_hippodrome(x, y, 0)) {
         has_road = 1;
