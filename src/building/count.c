@@ -380,9 +380,26 @@ int building_count_fort_type_total(figure_type type)
 int building_count_roads(void)
 {
     int total = 0;
-    for (int grid_offset = map_data.start_offset; grid_offset <= map_data.width * map_data.height + map_data.start_offset; grid_offset++) {
-        if (map_terrain_is(grid_offset, TERRAIN_ROAD)) {
-            total++;
+    int grid_offset = map_data.start_offset;
+    for (int y = 0; y < map_data.height; y++, grid_offset += map_data.border_size) {
+        for (int x = 0; x < map_data.width; x++, grid_offset++) {
+            if (map_terrain_is(grid_offset, TERRAIN_ROAD)) {
+                total++;
+            }
+        }
+    }
+    return total;
+}
+
+int building_count_highway(void)
+{
+    int total = 0;
+    int grid_offset = map_data.start_offset;
+    for (int y = 0; y < map_data.height; y++, grid_offset += map_data.border_size) {
+        for (int x = 0; x < map_data.width; x++, grid_offset++) {
+            if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+                total++;
+            }
         }
     }
     return total;
