@@ -128,5 +128,10 @@ int building_count_roads(void);
 int building_count_highway(void);
 int building_count_plaza(void);
 int building_count_gardens(int overgrown);
+int building_count_roads_area(int minx, int miny, int maxx, int maxy);
+int building_count_highway_area(int minx, int miny, int maxx, int maxy);
+int building_count_plaza_area(int minx, int miny, int maxx, int maxy);
+int building_count_gardens_area(int minx, int miny, int maxx, int maxy, int overgrown);
+
 
 #endif // BUILDING_COUNT_H

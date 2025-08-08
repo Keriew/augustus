@@ -215,6 +215,21 @@ int scenario_condition_type_building_count_area_met(const scenario_condition_t *
         case BUILDING_FORT_MOUNTED:
             buildings_in_area = building_count_fort_type_in_area(minx, miny, maxx, maxy, FIGURE_FORT_MOUNTED);
             break;
+        case BUILDING_ROAD:
+            buildings_in_area = building_count_roads_area(minx, miny, maxx, maxy);
+            break;
+        case BUILDING_HIGHWAY:
+            buildings_in_area = building_count_highway_area(minx, miny, maxx, maxy);
+            break;
+        case BUILDING_PLAZA:
+            buildings_in_area = building_count_plaza_area(minx, miny, maxx, maxy);
+            break;
+        case BUILDING_GARDENS:
+            buildings_in_area = building_count_gardens_area(minx, miny, maxx, maxy, 0);
+            break;
+        case BUILDING_OVERGROWN_GARDENS:
+            buildings_in_area = building_count_gardens_area(minx, miny, maxx, maxy, 1);
+            break;
         default:
             buildings_in_area = building_count_in_area(type, minx, miny, maxx, maxy);
             break;
