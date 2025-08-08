@@ -33,7 +33,6 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .size = 1,
         .image_group = 112,
         .event_data.attr = "road",
-        .event_data.cannot_count = 1
     },
     [BUILDING_WALL] = {
         .size = 1,
@@ -208,7 +207,6 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .fire_proof = 1,
         .image_group = 58,
         .event_data.attr = "plaza",
-        .event_data.cannot_count = 1
     },
     [BUILDING_GARDENS] = {
         .size = 1,
@@ -217,7 +215,6 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .image_offset = 1,
         .sound_id = SOUND_CITY_GARDEN,
         .event_data.attr = "gardens",
-        .event_data.cannot_count = 1
     },
     [BUILDING_FORT_LEGIONARIES] = {
         .size = 3,
@@ -1196,7 +1193,6 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .custom_asset.group = "Admin_Logistics",
         .custom_asset.id = "Highway_Placement",
         .event_data.attr = "highway",
-        .event_data.cannot_count = 1
     },
     [BUILDING_GOLD_MINE] = {
         .size = 2,

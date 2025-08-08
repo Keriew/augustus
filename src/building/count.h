@@ -123,5 +123,6 @@ int building_count_active_fort_type(figure_type type);
  * @return Total number of forts of that type
  */
 int building_count_fort_type_total(figure_type type);
+int building_count_roads(void);
 
 #endif // BUILDING_COUNT_H

@@ -68,6 +68,9 @@ int scenario_condition_type_building_count_active_met(const scenario_condition_t
         case BUILDING_FORT_MOUNTED:
             total_active_count += building_count_fort_type_total(FIGURE_FORT_MOUNTED);
             break;
+        case BUILDING_ROAD:
+            total_active_count = building_count_roads();
+            break;
         default:
             total_active_count = building_count_active(type);
             break;
@@ -122,6 +125,9 @@ int scenario_condition_type_building_count_any_met(const scenario_condition_t *c
             break;
         case BUILDING_FORT_MOUNTED:
             total_active_count += building_count_fort_type_total(FIGURE_FORT_MOUNTED);
+            break;
+        case BUILDING_ROAD:
+            total_active_count = building_count_roads();
             break;
         default:
             total_active_count = building_count_total(type);

@@ -7,7 +7,9 @@
 #include "city/health.h"
 #include "figure/figure.h"
 #include "map/building.h"
+#include "map/data.h"
 #include "map/grid.h"
+#include "map/terrain.h"
 
 static const building_type building_set_farms[] = {
     BUILDING_WHEAT_FARM, BUILDING_VEGETABLE_FARM, BUILDING_FRUIT_FARM, BUILDING_OLIVE_FARM,
@@ -370,6 +372,17 @@ int building_count_fort_type_total(figure_type type)
             if (b->subtype.fort_figure_type == type) {
                 total++;
             }
+        }
+    }
+    return total;
+}
+
+int building_count_roads(void)
+{
+    int total = 0;
+    for (int grid_offset = map_data.start_offset; grid_offset <= map_data.width * map_data.height + map_data.start_offset; grid_offset++) {
+        if (map_terrain_is(grid_offset, TERRAIN_ROAD)) {
+            total++;
         }
     }
     return total;
