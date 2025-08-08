@@ -74,6 +74,15 @@ int scenario_condition_type_building_count_active_met(const scenario_condition_t
         case BUILDING_HIGHWAY:
             total_active_count = building_count_highway();
             break;
+        case BUILDING_PLAZA:
+            total_active_count = building_count_plaza();
+            break;
+        case BUILDING_GARDENS:
+            total_active_count = building_count_gardens(0);
+            break;
+        case BUILDING_OVERGROWN_GARDENS:
+            total_active_count = building_count_gardens(1);
+            break;
         default:
             total_active_count = building_count_active(type);
             break;
@@ -134,6 +143,15 @@ int scenario_condition_type_building_count_any_met(const scenario_condition_t *c
             break;
         case BUILDING_HIGHWAY:
             total_active_count = building_count_highway();
+            break;
+        case BUILDING_PLAZA:
+            total_active_count = building_count_plaza();
+            break;
+        case BUILDING_GARDENS:
+            total_active_count = building_count_gardens(0);
+            break;
+        case BUILDING_OVERGROWN_GARDENS:
+            total_active_count = building_count_gardens(1);
             break;
         default:
             total_active_count = building_count_total(type);

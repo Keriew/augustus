@@ -10,6 +10,7 @@
 #include "map/data.h"
 #include "map/grid.h"
 #include "map/terrain.h"
+#include "map/property.h"
 
 static const building_type building_set_farms[] = {
     BUILDING_WHEAT_FARM, BUILDING_VEGETABLE_FARM, BUILDING_FRUIT_FARM, BUILDING_OLIVE_FARM,
@@ -399,6 +400,37 @@ int building_count_highway(void)
         for (int x = 0; x < map_data.width; x++, grid_offset++) {
             if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
                 total++;
+            }
+        }
+    }
+    return total;
+}
+
+int building_count_plaza(void)
+{
+    int total = 0;
+    int grid_offset = map_data.start_offset;
+    for (int y = 0; y < map_data.height; y++, grid_offset += map_data.border_size) {
+        for (int x = 0; x < map_data.width; x++, grid_offset++) {
+            if (map_terrain_is(grid_offset, TERRAIN_ROAD) && map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset)) {
+                total++;
+            }
+        }
+    }
+    return total;
+}
+
+int building_count_gardens(int overgrown)
+{
+    int total = 0;
+    int grid_offset = map_data.start_offset;
+    for (int y = 0; y < map_data.height; y++, grid_offset += map_data.border_size) {
+        for (int x = 0; x < map_data.width; x++, grid_offset++) {
+            if (map_terrain_is(grid_offset, TERRAIN_GARDEN)) {
+                int is_overgrown = map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset) != 0;
+                if (is_overgrown == overgrown) {
+                    total++;
+                }
             }
         }
     }
