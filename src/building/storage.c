@@ -18,6 +18,26 @@
 #define STORAGE_STATIC_BUFFER_SIZE 10
 #define STORAGE_CURRENT_BUFFER_SIZE (STORAGE_STATIC_BUFFER_SIZE + RESOURCE_MAX * 2)
 
+static int granary_permissions[] = {
+    BUILDING_STORAGE_PERMISSION_MARKET,
+    BUILDING_STORAGE_PERMISSION_TRADERS,
+    BUILDING_STORAGE_PERMISSION_DOCK,
+    BUILDING_STORAGE_PERMISSION_BARKEEP,
+    BUILDING_STORAGE_PERMISSION_QUARTERMASTER,
+    BUILDING_STORAGE_PERMISSION_CARAVANSERAI,
+    BUILDING_STORAGE_PERMISSION_NATIVES,
+};
+static int warehouse_permissions[] = {
+    BUILDING_STORAGE_PERMISSION_MARKET,
+    BUILDING_STORAGE_PERMISSION_TRADERS,
+    BUILDING_STORAGE_PERMISSION_DOCK,
+    BUILDING_STORAGE_PERMISSION_BARKEEP,
+    BUILDING_STORAGE_PERMISSION_WORKCAMP,
+    BUILDING_STORAGE_PERMISSION_ARMOURY,
+    BUILDING_STORAGE_PERMISSION_LIGHTHOUSE,
+    BUILDING_STORAGE_PERMISSION_NATIVES,
+};
+
 static array(data_storage) storages;
 
 static void storage_create(data_storage *storage, unsigned int position)
@@ -277,6 +297,25 @@ void building_storage_set_permission(building_storage_permission_states p, build
         *permissions |= permission_bit;
     } else {
         *permissions &= ~permission_bit;
+    }
+}
+
+void building_storage_set_permissions_all(building *b, int accept_all)
+{
+    int *building_permissions;
+    int number_of_permissions;
+    int type = b->type;
+    if (type == BUILDING_WAREHOUSE) {
+        building_permissions = warehouse_permissions;
+        number_of_permissions = WAREHOUSE_PERMISSIONS_COUNT;
+    } else {
+        building_permissions = granary_permissions;
+        number_of_permissions = GRANARY_PERMISSIONS_COUNT;
+    }
+
+    for (int i = 0; i < number_of_permissions; i++) { //do it via loop instead of bit check due to unused permissions
+        int permission = building_permissions[i];
+        building_storage_set_permission(permission, b, accept_all);
     }
 }
 
