@@ -289,7 +289,7 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_attr = {.name = "change_model_data",   .type = 
                                         PARAMETER_TYPE_TEXT,       .key = TR_ACTION_TYPE_CHANGE_MODEL_DATA },
                                         .xml_parm1 = {.name = "model",              .type = 
-                                        PARAMETER_TYPE_ALLOWED_BUILDING,   .key = TR_PARAMETER_MODEL },
+                                        PARAMETER_TYPE_BUILDING,   .key = TR_PARAMETER_MODEL },
                                         .xml_parm2 = {.name = "data_type",          .type = 
                                         PARAMETER_TYPE_DATA_TYPE,          .key = TR_PARAMETER_DATA_TYPE }, 
                                         .xml_parm3 = {.name = "amount",             .type = 
