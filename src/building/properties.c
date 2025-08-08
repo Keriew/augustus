@@ -984,7 +984,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .draw_desirability_range = 1,
         .custom_asset.group = "Military",
         .custom_asset.id = "Mess OFF Central",
-        .event_data.attr = "mess_hall"
+        .event_data.attr = "mess_hall",
+        .event_data.cannot_count = 1
     },
     [BUILDING_LIGHTHOUSE] = {
         .size = 3,
@@ -1012,7 +1013,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
     [BUILDING_GRAND_GARDEN] = {
         .size = 2,
         .fire_proof = 1,
-        .event_data.attr = "grand_garden"
+        .event_data.attr = "grand_garden",
+        .event_data.cannot_count = 1
     },
     [BUILDING_ARENA] = {
         .size = 3,
@@ -1032,7 +1034,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
     [BUILDING_DOLPHIN_FOUNTAIN] = {
         .size = 2,
         .fire_proof = 1,
-        .event_data.attr = "dolphin_fountain"
+        .event_data.attr = "dolphin_fountain",
+        .event_data.cannot_count = 1
     },
     [BUILDING_HEDGE_DARK] = {
         .size = 1,
