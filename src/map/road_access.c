@@ -192,6 +192,11 @@ int map_has_road_access_granary(int x, int y, map_point *road)
         ry = y + 1;
     }
     if (rx >= 0 && ry >= 0) {
+        building *b = building_get(map_building_at(map_grid_offset(x, y)));
+        if (b) {
+            b->road_access_x = rx;
+            b->road_access_y = ry;
+        }
         if (road) {
             map_point_store_result(rx, ry, road);
         }
