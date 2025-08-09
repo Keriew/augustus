@@ -283,6 +283,12 @@ void building_maintenance_check_rome_access(void)
                 b->road_access_x = x_road;
                 b->road_access_y = y_road;
             }
+        } else if (b->type == BUILDING_GRANARY) {
+            // Try to match the road network/access point to the loading bay first
+            map_point road_acces_point;
+            if (map_has_road_access_granary(b->x, b->y, &road_acces_point)) {
+                road_grid_offset = map_grid_offset(road_acces_point.x, road_acces_point.y);
+            }
         } else if (b->type == BUILDING_WAREHOUSE) {
             // Try to match the road network/access point to the loading bay first
             map_point road_acces_point;
