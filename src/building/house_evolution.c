@@ -948,7 +948,7 @@ building_type building_house_determine_worst_desirability_building_type(const bu
     int lowest_desirability = 0;
     building_type lowest_building_type = BUILDING_NONE;
     int x_min, y_min, x_max, y_max;
-    map_grid_get_area(house->x, house->y, 1, 8, &x_min, &y_min, &x_max, &y_max);
+    map_grid_get_area(house->x, house->y, 1, 9, &x_min, &y_min, &x_max, &y_max);
 
     for (int y = y_min; y <= y_max; y++) {
         for (int x = x_min; x <= x_max; x++) {

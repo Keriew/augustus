@@ -457,9 +457,7 @@ static void draw_desirability_range(const map_tile *tile, building_type type, in
     if (building_is_statue_garden_temple(type) && building_monument_working(BUILDING_GRAND_TEMPLE_VENUS)) {
         int value_bonus = ((desirability_value / 4) > 1) ? (desirability_value / 4) : 1;
         desirability_value += value_bonus;
-        if (!(type >= BUILDING_GRAND_TEMPLE_CERES && type <= BUILDING_GRAND_TEMPLE_VENUS)) {
-            desirability_range += 1;
-        }
+        desirability_range += 1;
     }
     
     // Calculating the Radius of Negative Desirability
