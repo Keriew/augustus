@@ -12,6 +12,7 @@
 #include "figure/figure.h"
 #include "figure/formation.h"
 #include "figure/name.h"
+#include "game/campaign.h"
 #include "game/cheats.h"
 #include "game/difficulty.h"
 #include "game/time.h"
@@ -641,17 +642,14 @@ void scenario_invasion_process(void)
 int scenario_invasion_start_from_mars(void)
 {
     int mission = scenario_campaign_mission();
-    if (mission < 0 || mission > 19) {
-        mission = 0;
+    int amount;
+    if (game_campaign_is_original() && 0 <= mission && mission <= 19) {
+        amount = LOCAL_UPRISING_NUM_ENEMIES[mission];
+    } else {
+        amount = random_between_from_stdlib(3, 9);
     }
-    int amount = LOCAL_UPRISING_NUM_ENEMIES[mission];
     if (amount <= 0) {
-        // for custom mission
-        if (mission == 0) {
-            amount = random_between_from_stdlib(3, 9);
-        } else {
-            return 0;
-        }
+        return 0;
     }
     int grid_offset = start_invasion(ENEMY_0_BARBARIAN, amount, 8, FORMATION_ATTACK_FOOD_CHAIN, CHEATED_ARMY_ID);
     if (grid_offset) {
