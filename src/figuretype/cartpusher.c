@@ -1020,6 +1020,7 @@ void figure_warehouseman_action(figure *f)
                     f->collecting_item_id, 1) == 1) {
                     f->loads_sold_or_carrying++;
                     f->resource_id = f->collecting_item_id;
+                    f->last_destinatation_id = f->destination_building_id;
                     f->destination_building_id = 0;
                     figure_route_remove(f);
                 }

@@ -106,6 +106,8 @@ int map_has_road_access_warehouse(int x, int y, map_point *road)
     }
 
     if (has_road) {
+        warehouse->road_access_x = rx;
+        warehouse->road_access_y = ry;
         if (road) {
             map_point_store_result(rx, ry, road);
         }

@@ -706,6 +706,9 @@ static void set_market_graphic(building *b)
 
 static void send_supplier_to_destination(figure *f, int dst_building_id)
 {
+    if (f->destination_building_id) {
+        f->last_destinatation_id = f->destination_building_id; //store last destination
+    }
     f->destination_building_id = dst_building_id;
     building *b_dst = building_get(dst_building_id);
     map_point road;
