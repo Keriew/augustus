@@ -585,6 +585,10 @@ static void determine_granaryman_destination(figure *f, int road_network_id, int
         set_destination(f, FIGURE_ACTION_51_WAREHOUSEMAN_DELIVERING_RESOURCE, dst_building_id, dst.x, dst.y);
         if (remove_resources) {
             f->loads_sold_or_carrying = building_granary_try_remove_resource(granary, f->resource_id, loads_to_remove);
+            if (f->loads_sold_or_carrying == 0) {
+                f->state = FIGURE_STATE_DEAD;
+                f->is_ghost = 1; // no resources left, stand idle
+            }
         }
         return;
     }
@@ -594,6 +598,10 @@ static void determine_granaryman_destination(figure *f, int road_network_id, int
         set_destination(f, FIGURE_ACTION_51_WAREHOUSEMAN_DELIVERING_RESOURCE, dst_building_id, dst.x, dst.y);
         if (remove_resources) {
             f->loads_sold_or_carrying = building_granary_try_remove_resource(granary, f->resource_id, loads_to_remove);
+            if (f->loads_sold_or_carrying == 0) {
+                f->state = FIGURE_STATE_DEAD;
+                f->is_ghost = 1; // no resources left, stand idle
+            }
         }
         return;
     }
@@ -603,6 +611,10 @@ static void determine_granaryman_destination(figure *f, int road_network_id, int
         set_destination(f, FIGURE_ACTION_51_WAREHOUSEMAN_DELIVERING_RESOURCE, dst_building_id, dst.x, dst.y);
         if (remove_resources) {
             f->loads_sold_or_carrying = building_granary_try_remove_resource(granary, f->resource_id, loads_to_remove);
+        }
+        if (f->loads_sold_or_carrying == 0) {
+            f->state = FIGURE_STATE_DEAD;
+            f->is_ghost = 1; // no resources left, stand idle
         }
         return;
     }
@@ -677,7 +689,10 @@ static void determine_warehouseman_destination(figure *f, int road_network_id, i
     if (dst_building_id) {
         set_destination(f, FIGURE_ACTION_51_WAREHOUSEMAN_DELIVERING_RESOURCE, dst_building_id, dst.x, dst.y);
         if (remove_resources) {
-            remove_resource_from_warehouse(f, 1);
+            if (!remove_resource_from_warehouse(f, 1)) {
+                f->state = FIGURE_STATE_DEAD;
+                f->is_ghost = 1;
+            }
         }
         return;
     }
@@ -687,7 +702,10 @@ static void determine_warehouseman_destination(figure *f, int road_network_id, i
     if (dst_building_id) {
         set_destination(f, FIGURE_ACTION_51_WAREHOUSEMAN_DELIVERING_RESOURCE, dst_building_id, dst.x, dst.y);
         if (remove_resources) {
-            remove_resource_from_warehouse(f, 1);
+            if (!remove_resource_from_warehouse(f, 1)) {
+                f->state = FIGURE_STATE_DEAD;
+                f->is_ghost = 1;
+            }
         }
         return;
     }
@@ -697,7 +715,10 @@ static void determine_warehouseman_destination(figure *f, int road_network_id, i
     if (dst_building_id) {
         set_destination(f, FIGURE_ACTION_51_WAREHOUSEMAN_DELIVERING_RESOURCE, dst_building_id, dst.x, dst.y);
         if (remove_resources) {
-            remove_resource_from_warehouse(f, 1);
+            if (!remove_resource_from_warehouse(f, 1)) {
+                f->state = FIGURE_STATE_DEAD;
+                f->is_ghost = 1;
+            }
         }
         return;
     }
@@ -706,7 +727,10 @@ static void determine_warehouseman_destination(figure *f, int road_network_id, i
     if (dst_building_id) {
         set_destination(f, FIGURE_ACTION_51_WAREHOUSEMAN_DELIVERING_RESOURCE, dst_building_id, dst.x, dst.y);
         if (remove_resources) {
-            remove_resource_from_warehouse(f, 1);
+            if (!remove_resource_from_warehouse(f, 1)) {
+                f->state = FIGURE_STATE_DEAD;
+                f->is_ghost = 1;
+            }
         }
         return;
     }
@@ -723,7 +747,10 @@ static void determine_warehouseman_destination(figure *f, int road_network_id, i
                 set_destination(f, FIGURE_ACTION_51_WAREHOUSEMAN_DELIVERING_RESOURCE, dst_building_id, dst.x, dst.y);
                 f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS_HIGHWAY;
                 if (remove_resources) {
-                    remove_resource_from_warehouse(f, WAREHOUSE_EMPTY_ALL_CARTLOADS);
+                    if (!remove_resource_from_warehouse(f, WAREHOUSE_EMPTY_ALL_CARTLOADS)) {
+                        f->state = FIGURE_STATE_DEAD;
+                        f->is_ghost = 1;
+                    }
                 }
             }
             return;
@@ -734,7 +761,10 @@ static void determine_warehouseman_destination(figure *f, int road_network_id, i
     if (dst_building_id) {
         set_destination(f, FIGURE_ACTION_51_WAREHOUSEMAN_DELIVERING_RESOURCE, dst_building_id, dst.x, dst.y);
         if (remove_resources) {
-            remove_resource_from_warehouse(f, 1);
+            if (!remove_resource_from_warehouse(f, 1)) {
+                f->state = FIGURE_STATE_DEAD;
+                f->is_ghost = 1;
+            }
         }
         return;
     }

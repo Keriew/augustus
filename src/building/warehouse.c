@@ -708,7 +708,7 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
     if (pct_workers < 50) {
         return WAREHOUSE_TASK_NONE;
     }
-
+    building_warehouse_recount_resources(warehouse);
     building *space;
     //TASK 1: emptying takes priority
     if (building_storage_get_empty_all(warehouse->id)) {
