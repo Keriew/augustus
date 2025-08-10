@@ -828,7 +828,7 @@ static void draw_animation(int x, int y, int grid_offset)
         draw_plague(b, x, y, color_mask);
     } else if (map_sprite_bridge_at(grid_offset)) {
         city_draw_bridge(x, y, draw_context.scale, grid_offset);
-    } else if (b->type == BUILDING_FORT) {
+    } else if (building_is_fort(b->type)) {
         if (map_property_is_draw_tile(grid_offset)) {
             building *fort = building_get(map_building_at(grid_offset));
             image_id = assets_get_image_id("Military", "Fort_Jav_Flag_Central");

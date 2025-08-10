@@ -211,7 +211,7 @@ static void draw_menu_buttons(void)
             type = BUILDING_RESERVOIR;
         }
         int cost = model_get_building(type)->cost;
-        if (type == BUILDING_MENU_FORTS) {
+        if (type == BUILDING_MENU_FORT) {
             cost = 0;
         }
         if (type == BUILDING_MENU_GRAND_TEMPLES) {

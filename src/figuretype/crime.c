@@ -499,8 +499,12 @@ int figure_rioter_collapse_building(figure *f)
         switch (b->type) {
             case BUILDING_WAREHOUSE_SPACE:
             case BUILDING_WAREHOUSE:
+            case BUILDING_FORT_ARCHERS:
+            case BUILDING_FORT_LEGIONARIES:
+            case BUILDING_FORT_JAVELIN:
+            case BUILDING_FORT_MOUNTED:
+            case BUILDING_FORT_AUXILIA_INFANTRY:
             case BUILDING_FORT_GROUND:
-            case BUILDING_FORT:
             case BUILDING_BURNING_RUIN:
             case BUILDING_NATIVE_CROPS:
             case BUILDING_NATIVE_HUT:

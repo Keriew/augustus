@@ -286,7 +286,7 @@ void building_clear_related_data(building *b)
         building_storage_delete(b->storage_id);
         b->storage_id = 0;
     }
-    if (b->type == BUILDING_FORT) {
+    if (building_is_fort) {
         formation_legion_delete_for_fort(b);
     }
     if (b->type == BUILDING_TRIUMPHAL_ARCH) {
@@ -575,12 +575,8 @@ int building_get_levy(const building *b)
 
     // Mars module 1 bonus
     if (building_monument_gt_module_is_active(MARS_MODULE_1_MESS_HALL)) {
-        switch (b->type) {
-            case BUILDING_FORT:
-                levy = (levy / 4) * 3;
-                break;
-            default:
-                break;
+        if (building_is_fort(b->type)) {
+            levy = (levy / 4) * 3;
         }
     }
 

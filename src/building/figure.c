@@ -2083,7 +2083,11 @@ void building_figure_generate(void)
                 case BUILDING_NATIVE_CROPS:
                     update_native_crop_progress(b);
                     break;
-                case BUILDING_FORT:
+                case BUILDING_FORT_LEGIONARIES:
+                case BUILDING_FORT_JAVELIN:
+                case BUILDING_FORT_ARCHERS:
+                case BUILDING_FORT_AUXILIA_INFANTRY:
+                case BUILDING_FORT_MOUNTED:
                     formation_legion_update_recruit_status(b);
                     spawn_figure_fort_supplier(b);
                     break;
