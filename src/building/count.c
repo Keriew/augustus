@@ -437,7 +437,7 @@ int building_count_gardens(int overgrown)
     return total;
 }
 
-int building_count_roads_area(int minx, int miny, int maxx, int maxy)
+int building_count_roads_in_area(int minx, int miny, int maxx, int maxy)
 {
     int total = 0;
     int grid_offset;
@@ -453,7 +453,7 @@ int building_count_roads_area(int minx, int miny, int maxx, int maxy)
     return total;
 }
 
-int building_count_highway_area(int minx, int miny, int maxx, int maxy)
+int building_count_highway_in_area(int minx, int miny, int maxx, int maxy)
 {
     int total = 0;
     int grid_offset;
@@ -469,7 +469,7 @@ int building_count_highway_area(int minx, int miny, int maxx, int maxy)
     return total;
 }
 
-int building_count_plaza_area(int minx, int miny, int maxx, int maxy)
+int building_count_plaza_in_area(int minx, int miny, int maxx, int maxy)
 {
     int total = 0;
     int grid_offset;
@@ -485,7 +485,7 @@ int building_count_plaza_area(int minx, int miny, int maxx, int maxy)
     return total;
 }
 
-int building_count_gardens_area(int minx, int miny, int maxx, int maxy, int overgrown)
+int building_count_gardens_in_area(int minx, int miny, int maxx, int maxy, int overgrown)
 {
     int total = 0;
     int grid_offset;
