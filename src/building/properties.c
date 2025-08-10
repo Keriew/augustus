@@ -985,7 +985,6 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .custom_asset.group = "Military",
         .custom_asset.id = "Mess OFF Central",
         .event_data.attr = "mess_hall",
-        .event_data.cannot_count = 1
     },
     [BUILDING_LIGHTHOUSE] = {
         .size = 3,
