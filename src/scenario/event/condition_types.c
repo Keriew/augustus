@@ -16,6 +16,7 @@
 #include "game/settings.h"
 #include "game/time.h"
 #include "map/grid.h"
+#include "map/data.h"
 #include "scenario/custom_variable.h"
 #include "scenario/event/condition_comparison_helper.h"
 #include "scenario/request.h"
@@ -69,19 +70,19 @@ int scenario_condition_type_building_count_active_met(const scenario_condition_t
             total_active_count += building_count_fort_type_total(FIGURE_FORT_MOUNTED);
             break;
         case BUILDING_ROAD:
-            total_active_count = building_count_roads();
+            total_active_count = building_count_roads(0, 0, map_data.width, map_data.height);
             break;
         case BUILDING_HIGHWAY:
-            total_active_count = building_count_highway();
+            total_active_count = building_count_highway(0, 0, map_data.width, map_data.height);
             break;
         case BUILDING_PLAZA:
-            total_active_count = building_count_plaza();
+            total_active_count = building_count_plaza(0, 0, map_data.width, map_data.height);
             break;
         case BUILDING_GARDENS:
-            total_active_count = building_count_gardens(0);
+            total_active_count = building_count_gardens(0, 0, map_data.width, map_data.height, 0);
             break;
         case BUILDING_OVERGROWN_GARDENS:
-            total_active_count = building_count_gardens(1);
+            total_active_count = building_count_gardens(0, 0, map_data.width, map_data.height, 1);
             break;
         default:
             total_active_count = building_count_active(type);
@@ -139,19 +140,19 @@ int scenario_condition_type_building_count_any_met(const scenario_condition_t *c
             total_active_count += building_count_fort_type_total(FIGURE_FORT_MOUNTED);
             break;
         case BUILDING_ROAD:
-            total_active_count = building_count_roads();
+            total_active_count = building_count_roads(0, 0, map_data.width, map_data.height);
             break;
         case BUILDING_HIGHWAY:
-            total_active_count = building_count_highway();
+            total_active_count = building_count_highway(0, 0, map_data.width, map_data.height);
             break;
         case BUILDING_PLAZA:
-            total_active_count = building_count_plaza();
+            total_active_count = building_count_plaza(0, 0, map_data.width, map_data.height);
             break;
         case BUILDING_GARDENS:
-            total_active_count = building_count_gardens(0);
+            total_active_count = building_count_gardens(0, 0, map_data.width, map_data.height, 0);
             break;
         case BUILDING_OVERGROWN_GARDENS:
-            total_active_count = building_count_gardens(1);
+            total_active_count = building_count_gardens(0, 0, map_data.width, map_data.height, 1);
             break;
         default:
             total_active_count = building_count_total(type);

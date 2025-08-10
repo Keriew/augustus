@@ -378,12 +378,14 @@ int building_count_fort_type_total(figure_type type)
     return total;
 }
 
-int building_count_roads(void)
+int building_count_roads(int minx, int miny, int maxx, int maxy)
 {
     int total = 0;
-    int grid_offset = map_data.start_offset;
-    for (int y = 0; y < map_data.height; y++, grid_offset += map_data.border_size) {
-        for (int x = 0; x < map_data.width; x++, grid_offset++) {
+    int grid_offset;
+    for (int y = miny; y < maxy; y++) {
+        for (int x = minx; x < maxx; x++) {
+            grid_offset = map_grid_offset(x, y);
+            
             if (map_terrain_is(grid_offset, TERRAIN_ROAD)) {
                 total++;
             }
@@ -392,12 +394,14 @@ int building_count_roads(void)
     return total;
 }
 
-int building_count_highway(void)
+int building_count_highway(int minx, int miny, int maxx, int maxy)
 {
     int total = 0;
-    int grid_offset = map_data.start_offset;
-    for (int y = 0; y < map_data.height; y++, grid_offset += map_data.border_size) {
-        for (int x = 0; x < map_data.width; x++, grid_offset++) {
+    int grid_offset;
+    for (int y = miny; y < maxy; y++) {
+        for (int x = minx; x < maxx; x++) {
+            grid_offset = map_grid_offset(x, y);
+
             if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
                 total++;
             }
@@ -406,12 +410,14 @@ int building_count_highway(void)
     return total;
 }
 
-int building_count_plaza(void)
+int building_count_plaza(int minx, int miny, int maxx, int maxy)
 {
     int total = 0;
-    int grid_offset = map_data.start_offset;
-    for (int y = 0; y < map_data.height; y++, grid_offset += map_data.border_size) {
-        for (int x = 0; x < map_data.width; x++, grid_offset++) {
+    int grid_offset;
+    for (int y = miny; y < maxy; y++) {
+        for (int x = minx; x < maxx; x++) {
+            grid_offset = map_grid_offset(x, y);
+
             if (map_terrain_is(grid_offset, TERRAIN_ROAD) && map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset)) {
                 total++;
             }
@@ -420,12 +426,14 @@ int building_count_plaza(void)
     return total;
 }
 
-int building_count_gardens(int overgrown)
+int building_count_gardens(int minx, int miny, int maxx, int maxy, int overgrown)
 {
     int total = 0;
-    int grid_offset = map_data.start_offset;
-    for (int y = 0; y < map_data.height; y++, grid_offset += map_data.border_size) {
-        for (int x = 0; x < map_data.width; x++, grid_offset++) {
+    int grid_offset;
+    for (int y = miny; y < maxy; y++, grid_offset) {
+        for (int x = minx; x < maxx; x++) {
+            grid_offset = map_grid_offset(x, y);
+
             if (map_terrain_is(grid_offset, TERRAIN_GARDEN)) {
                 int is_overgrown = map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset) != 0;
                 if (is_overgrown == overgrown) {
@@ -439,67 +447,20 @@ int building_count_gardens(int overgrown)
 
 int building_count_roads_in_area(int minx, int miny, int maxx, int maxy)
 {
-    int total = 0;
-    int grid_offset;
-    for (int y = miny; y < maxy; y++) {
-        for (int x = minx; x < maxx; x++) {
-            grid_offset = map_grid_offset(x, y);
-
-            if (map_terrain_is(grid_offset, TERRAIN_ROAD)) {
-                total++;
-            }
-        }
-    }
-    return total;
+    return building_count_roads(minx, miny, maxx + 1, maxy + 1);
 }
 
 int building_count_highway_in_area(int minx, int miny, int maxx, int maxy)
 {
-    int total = 0;
-    int grid_offset;
-    for (int y = miny; y < maxy; y++) {
-        for (int x = minx; x < maxx; x++) {
-            grid_offset = map_grid_offset(x, y);
-
-            if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
-                total++;
-            }
-        }
-    }
-    return total;
+    return building_count_highway(minx, miny, maxx + 1, maxy + 1);
 }
 
 int building_count_plaza_in_area(int minx, int miny, int maxx, int maxy)
 {
-    int total = 0;
-    int grid_offset;
-    for (int y = miny; y < maxy; y++) {
-        for (int x = minx; x < maxx; x++) {
-            grid_offset = map_grid_offset(x, y);
-
-            if (map_terrain_is(grid_offset, TERRAIN_ROAD) && map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset)) {
-                total++;
-            }
-        }
-    }
-    return total;
+    return building_count_plaza(minx, miny, maxx + 1, maxy + 1);
 }
 
 int building_count_gardens_in_area(int minx, int miny, int maxx, int maxy, int overgrown)
 {
-    int total = 0;
-    int grid_offset;
-    for (int y = miny; y < maxy; y++) {
-        for (int x = minx; x < maxx; x++) {
-            grid_offset = map_grid_offset(x, y);
-            
-            if (map_terrain_is(grid_offset, TERRAIN_GARDEN)) {
-                int is_overgrown = map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset) != 0;
-                if (is_overgrown == overgrown) {
-                    total++;
-                }
-            }
-        }
-    }
-    return total;
+    return building_count_gardens(minx, miny, maxx + 1, maxy + 1, overgrown);
 }
