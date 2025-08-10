@@ -34,7 +34,7 @@
 #define MENU_ICON_WIDTH 14
 #define MENU_ICON_X_OFFSET 3
 #define MENU_ICON_Y_OFFSET 3
-#define MENU_ITEM_MONEY_OFFSET 82
+#define MENU_ITEM_MONEY_OFFSET 88
 
 #define TOOLTIP_TEXT_LENGTH 1000
 
@@ -206,7 +206,7 @@ static void draw_menu_buttons(void)
         }
         
         lang_text_draw_centered(28, type, item_x_align + MENU_TEXT_X_OFFSET, data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
-                MENU_ITEM_WIDTH, FONT_NORMAL_GREEN);
+            MENU_ITEM_WIDTH, FONT_NORMAL_GREEN);
         if (type == BUILDING_DRAGGABLE_RESERVOIR) {
             type = BUILDING_RESERVOIR;
         }
