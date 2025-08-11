@@ -323,6 +323,12 @@ static int start_invasion(int enemy_type, int amount, int invasion_point, format
     if (amount <= 0) {
         return -1;
     }
+
+    enemy_army *army = enemy_army_get_editable(invasion_id);
+    if (army) {
+        army->started_retreating = 0;
+    }
+
     int formations_per_type[3];
     int soldiers_per_formation[3][4];
     int x, y;
