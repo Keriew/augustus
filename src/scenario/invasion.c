@@ -645,8 +645,10 @@ int scenario_invasion_start_from_mars(void)
     int amount;
     if (game_campaign_is_original() && 0 <= mission && mission <= 19) {
         amount = LOCAL_UPRISING_NUM_ENEMIES[mission];
-    } else {
+    } else if(scenario_invasion_count_total() > 0) {
         amount = random_between_from_stdlib(3, 9);
+    } else {
+        amount = 0;
     }
     if (amount <= 0) {
         return 0;
