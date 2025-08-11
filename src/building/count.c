@@ -430,7 +430,7 @@ int building_count_gardens_in_area(int minx, int miny, int maxx, int maxy, int o
 {
     int total = 0;
     int grid_offset;
-    for (int y = miny; y < maxy; y++, grid_offset) {
+    for (int y = miny; y < maxy; y++) {
         for (int x = minx; x < maxx; x++) {
             grid_offset = map_grid_offset(x, y);
 
@@ -445,34 +445,34 @@ int building_count_gardens_in_area(int minx, int miny, int maxx, int maxy, int o
     return total;
 }
 
+static int min_x;
+static int min_y;
+
+static int init_count_terrain() {
+    min_x = map_grid_offset_to_x(map_data.start_offset);
+    min_y = map_grid_offset_to_y(map_data.start_offset);
+}
+
 int building_count_roads()
 {
-    int min_x = map_grid_offset_to_x(map_data.start_offset);
-    int min_y = map_grid_offset_to_y(map_data.start_offset);
-    
+    init_count_terrain();
     return building_count_roads_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height);
 }
 
 int building_count_highway()
 {
-    int min_x = map_grid_offset_to_x(map_data.start_offset);
-    int min_y = map_grid_offset_to_y(map_data.start_offset);
-    
+    init_count_terrain();
     return building_count_highway_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height);
 }
 
 int building_count_plaza()
 {
-    int min_x = map_grid_offset_to_x(map_data.start_offset);
-    int min_y = map_grid_offset_to_y(map_data.start_offset);
-    
+    init_count_terrain();
     return building_count_plaza_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height);
 }
 
 int building_count_gardens(int overgrown)
 {
-    int min_x = map_grid_offset_to_x(map_data.start_offset);
-    int min_y = map_grid_offset_to_y(map_data.start_offset);
-    
+    init_count_terrain();
     return building_count_gardens_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height, overgrown);
 }
