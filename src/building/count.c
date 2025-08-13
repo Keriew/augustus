@@ -455,24 +455,24 @@ static void get_min_map_xy(void) {
 
 int building_count_roads()
 {
-    init_count_terrain();
+    get_min_map_xy();
     return building_count_roads_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height);
 }
 
 int building_count_highway()
 {
-    init_count_terrain();
+    get_min_map_xy();
     return building_count_highway_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height);
 }
 
 int building_count_plaza()
 {
-    init_count_terrain();
+    get_min_map_xy();
     return building_count_plaza_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height);
 }
 
 int building_count_gardens(int overgrown)
 {
-    init_count_terrain();
+    get_min_map_xy();
     return building_count_gardens_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height, overgrown);
 }
