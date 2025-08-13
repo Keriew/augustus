@@ -144,7 +144,7 @@ static void enable_if_allowed(int *enabled, building_type menu_building_type, bu
     if (menu_building_type != type) {
         return;
     }
-    if (type == BUILDING_MENU_SMALL_TEMPLES || type == BUILDING_MENU_LARGE_TEMPLES) {
+    if (type == BUILDING_MENU_SMALL_TEMPLES || type == BUILDING_MENU_LARGE_TEMPLES || type == BUILDING_MENU_FORT) {
         *enabled = 1;
         enable_cycling_temples_if_allowed(type);
     } else {
