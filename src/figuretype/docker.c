@@ -20,7 +20,9 @@
 #include "figure/trader.h"
 #include "figuretype/trader.h"
 #include "game/resource.h"
+#include "map/building.h"
 #include "map/road_access.h"
+
 
 #define INFINITE 10000
 
@@ -328,7 +330,7 @@ static void set_docker_as_idle(figure *f)
 void figure_docker_action(figure *f)
 {
     building *b = building_get(f->building_id);
-
+    int ticks_to_move = 1;
     figure_image_increase_offset(f, 12);
     f->cart_image_id = 0;
     if (b->state != BUILDING_STATE_IN_USE) {
@@ -421,7 +423,8 @@ void figure_docker_action(figure *f)
             break;
         case FIGURE_ACTION_135_DOCKER_IMPORT_GOING_TO_STORAGE:
             set_cart_graphic(f);
-            figure_movement_move_ticks(f, 1);
+            ticks_to_move = (map_building_at(f->grid_offset) == f->building_id) ? 8 : 1;//speed up leaving the building
+            figure_movement_move_ticks(f, ticks_to_move);
             f->loads_sold_or_carrying = 1;
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_139_DOCKER_IMPORT_AT_STORAGE;
@@ -438,7 +441,8 @@ void figure_docker_action(figure *f)
             break;
         case FIGURE_ACTION_136_DOCKER_EXPORT_GOING_TO_STORAGE:
             f->cart_image_id = image_group(GROUP_FIGURE_CARTPUSHER_CART); // empty
-            figure_movement_move_ticks(f, 1);
+            ticks_to_move = (map_building_at(f->grid_offset) == f->building_id) ? 8 : 1; //speed up leaving the building
+            figure_movement_move_ticks(f, ticks_to_move);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_140_DOCKER_EXPORT_AT_STORAGE;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
