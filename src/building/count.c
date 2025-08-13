@@ -448,7 +448,7 @@ int building_count_gardens_in_area(int minx, int miny, int maxx, int maxy, int o
 static int min_x;
 static int min_y;
 
-static int init_count_terrain() {
+static void get_min_map_xy(void) {
     min_x = map_grid_offset_to_x(map_data.start_offset);
     min_y = map_grid_offset_to_y(map_data.start_offset);
 }
