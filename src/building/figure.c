@@ -4,7 +4,6 @@
 #include "building/armoury.h"
 #include "building/barracks.h"
 #include "building/caravanserai.h"
-#include "building/dock.h"
 #include "building/granary.h"
 #include "building/image.h"
 #include "building/industry.h"
@@ -1511,9 +1510,7 @@ static void spawn_figure_dock(building *b)
                 }
             }
         } else if (existing_dockers < max_dockers) {
-            map_point idle_tile;
-            building_dock_docker_idling_tile(b, &idle_tile);
-            figure *f = figure_create(FIGURE_DOCKER, idle_tile.x, idle_tile.y, DIR_FIGURE_AT_DESTINATION);
+            figure *f = figure_create(FIGURE_DOCKER, b->x, b->y, DIR_FIGURE_AT_DESTINATION);
             //spawn dockers on the building tile instead of the road
             f->action_state = FIGURE_ACTION_132_DOCKER_IDLING;
             f->building_id = b->id;
