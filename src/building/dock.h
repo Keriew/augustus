@@ -22,6 +22,8 @@ int building_dock_get_destination(int ship_id, int exclude_dock_id, map_point *t
 
 int building_dock_get_closer_free_destination(int ship_id, ship_dock_request_type request_type, map_point *tile);
 
+int building_dock_docker_idling_tile(building *b, map_point *tile);
+
 int building_dock_request_docking(int ship_id, int dock_id, map_point *tile);
 
 void building_dock_get_ship_request_tile(const building *dock, ship_dock_request_type request_type, map_point *tile);

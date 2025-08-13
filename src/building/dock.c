@@ -13,6 +13,7 @@
 #include "game/resource.h"
 #include "map/figure.h"
 #include "map/grid.h"
+#include "map/building.h"
 #include "map/routing.h"
 #include "map/routing_data.h"
 #include "map/terrain.h"
@@ -61,6 +62,32 @@ void building_dock_update_open_water_access(void)
             }
         }
     }
+}
+
+int building_dock_docker_idling_tile(building *b, map_point *tile)
+{
+    int road_x = b->road_access_x;
+    int road_y = b->road_access_y;
+    int adjacent_offsets[8][2] = {
+        {-1, -1}, {0, -1}, {1, -1},  // Top row
+        {-1,  0},          {1,  0},  // Middle row (skip center)
+        {-1,  1}, {0,  1}, {1,  1}   // Bottom row
+    };
+    for (int i = 0; i < 8; i++) {
+
+        int check_x = road_x + adjacent_offsets[i][0];
+        int check_y = road_y + adjacent_offsets[i][1];
+        int grid_offset = map_grid_offset(check_x, check_y);
+        // Check if this tile is inside the dock area
+        if (map_building_at(grid_offset) == b->id) {
+            if (tile) {
+                map_point_store_result(check_x, check_y, tile);
+            }
+
+            return map_grid_offset(check_x, check_y);
+        }
+    }
+    return 0; // No valid internal road tile found adjacent to road access
 }
 
 int building_dock_is_connected_to_open_water(int x, int y)
