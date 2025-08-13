@@ -233,5 +233,6 @@ int building_storage_count_stored_resource_types(int building_id);
 void building_storage_toggle_permission(building_storage_permission_states p, building *b);
 int building_storage_get_permission(building_storage_permission_states p, building *b);
 void building_storage_set_permission(building_storage_permission_states p, building *b, int enable);
+building_storage_permission_states building_storage_get_permission_from_building_type(building_type type);
 
 #endif // BUILDING_STORAGE_H

@@ -406,6 +406,25 @@ void building_storage_save_state(buffer *buf)
     }
 }
 
+building_storage_permission_states building_storage_get_permission_from_building_type(building_type type)
+{
+    switch (type) {
+        case BUILDING_MARKET:
+            return BUILDING_STORAGE_PERMISSION_MARKET;
+        case BUILDING_MESS_HALL:
+            return BUILDING_STORAGE_PERMISSION_QUARTERMASTER;
+        case BUILDING_TAVERN:
+            return BUILDING_STORAGE_PERMISSION_BARKEEP;
+        case BUILDING_CARAVANSERAI:
+            return BUILDING_STORAGE_PERMISSION_CARAVANSERAI;
+        case BUILDING_LIGHTHOUSE:
+            return BUILDING_STORAGE_PERMISSION_LIGHTHOUSE;
+        case BUILDING_ARMOURY:
+            return BUILDING_STORAGE_PERMISSION_ARMOURY;
+        default:
+            return BUILDING_STORAGE_PERMISSION_MARKET; // assume market for other types (usually priests)
+    }
+}
 
 void building_storage_load_state(buffer *buf, int version)
 {
