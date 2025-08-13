@@ -1510,8 +1510,7 @@ static void spawn_figure_dock(building *b)
                 }
             }
         } else if (existing_dockers < max_dockers) {
-            figure *f = figure_create(FIGURE_DOCKER, b->x, b->y, DIR_FIGURE_AT_DESTINATION);
-            //spawn dockers on the building tile instead of the road
+            figure *f = figure_create(FIGURE_DOCKER, road.x, road.y, DIR_4_BOTTOM);
             f->action_state = FIGURE_ACTION_132_DOCKER_IDLING;
             f->building_id = b->id;
             for (int i = 0; i < 3; i++) {
