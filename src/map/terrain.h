@@ -29,7 +29,6 @@ enum {
     // Combined
     TERRAIN_HIGHWAY = TERRAIN_HIGHWAY_TOP_LEFT | TERRAIN_HIGHWAY_BOTTOM_LEFT |
     TERRAIN_HIGHWAY_TOP_RIGHT | TERRAIN_HIGHWAY_BOTTOM_RIGHT,
-
     TERRAIN_WALL_OR_GATEHOUSE = TERRAIN_WALL | TERRAIN_GATEHOUSE,
 
     TERRAIN_NOT_CLEAR_EXCEPT_ROAD = TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_BUILDING | TERRAIN_SHRUB |
@@ -63,6 +62,8 @@ enum {
 };
 
 int map_terrain_is(int grid_offset, int terrain);
+
+int map_terrain_is_roadblock(int grid_offset);
 
 int map_terrain_is_superset(int grid_offset, unsigned int terrain_sum);
 

@@ -49,7 +49,7 @@ int building_market_get_needed_inventory(building *market, resource_storage_info
     int needed = 0;
     for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX_FOOD; r++) {
         info[r].needed = building_distribution_resource_is_handled(r, BUILDING_MARKET) &&
-            !scenario_property_rome_supplies_wheat() && building_distribution_is_good_accepted(r, market);
+            !scenario_property_rome_supplies_wheat() && building_distribution_is_good_accepted(market, r);
         if (!needed && info[r].needed) {
             needed = 1;
         }

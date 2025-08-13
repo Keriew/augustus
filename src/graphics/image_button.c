@@ -54,14 +54,19 @@ void image_buttons_draw(int x, int y, image_button *buttons, unsigned int num_bu
         } else {
             image_id = btn->image_offset;
         }
-        if (btn->enabled) {
-            if (btn->pressed) {
-                image_id += 2;
-            } else if (btn->focused) {
-                image_id += 1;
+        if (!btn->static_image) {
+            if (btn->enabled) {
+                if (btn->pressed) {
+                    image_id += 2;
+                } else if (btn->focused) {
+                    image_id += 1;
+                }
+            } else {
+                image_id += 3;
             }
-        } else {
-            image_id += 3;
+        }
+        if (btn->dont_draw) {
+            continue;
         }
         image_draw(image_id, x + btn->x_offset, y + btn->y_offset, COLOR_MASK_NONE, SCALE_NONE);
     }
@@ -88,6 +93,9 @@ int image_buttons_handle_mouse(
         *focus_button_id = 0;
     }
     for (unsigned int i = 0; i < num_buttons; i++) {
+        if (buttons[i].dont_draw) {
+            continue;
+        }
         image_button *btn = &buttons[i];
         if (btn->focused) {
             btn->focused--;

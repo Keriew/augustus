@@ -57,6 +57,7 @@ int building_data_transfer_copy(building *b)
         case DATA_TYPE_GRANARY:
             storage = building_storage_get(b->storage_id);
             data.storage = *storage;
+            data.i16 = b->data.roadblock.exceptions;
             break;
         case DATA_TYPE_WAREHOUSE:
             storage = building_storage_get(b->storage_id);
@@ -100,6 +101,7 @@ int building_data_transfer_paste(building *b)
         case DATA_TYPE_GRANARY:
         case DATA_TYPE_WAREHOUSE:
             building_storage_set_data(b->storage_id, data.storage);
+            b->data.roadblock.exceptions = data.i16;
             break;
         case DATA_TYPE_DOCK:
             memcpy(b->accepted_goods, data.resource, sizeof(unsigned char) * RESOURCE_MAX);
@@ -123,7 +125,7 @@ int building_data_transfer_paste(building *b)
 
 building_data_type building_data_transfer_data_type_from_building_type(building_type type)
 {
-    if (building_type_is_roadblock(type)) {
+    if (building_type_is_roadblock(type) == ROADBLOCK_STANDARD) {
         return DATA_TYPE_ROADBLOCK;
     }
 

@@ -1676,6 +1676,17 @@ static translation_string all_strings[] = {
     {TR_BUILDING_NATIVE_HUT_ALT, "Einheimischenhütte 2"},
     {TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, "Lagerhäuser und Silos können auf Straßen gebaut werden"},
     {TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, "Hebe ausgewählte Gebäude hervor"},
+	{TR_CHEAT_UNLOCK_LEGIONS, "Erlaubte Legionen: 20"},
+    {TR_BUILDING_FORT_STANDARD_ELEPHANTS, "\"Die Elephanten\""},
+    {TR_BUILDING_FORT_STANDARD_THUNDER_BOLTS, "\"Die Blitze\""},
+    {TR_BUILDING_FORT_STANDARD_BULLS, "\"Die Bullen\""},
+    {TR_BUILDING_FORT_STANDARD_CENTAURS, "\"Die Zentauren\""},
+    {TR_BUILDING_FORT_STANDARD_OCTOPI, "\"Die Oktopoden\""},
+    {TR_BUILDING_FORT_STANDARD_BEARS, "\"Die Bären\""},
+    {TR_BUILDING_FORT_STANDARD_SCORPIONS, "\"Die Skorpione\""},
+    {TR_BUILDING_FORT_STANDARD_CAMELS, "\"Die Kamele\""},
+    {TR_BUILDING_FORT_STANDARD_DOLPHINS, "\"Die Delphine\""},
+    {TR_BUILDING_FORT_STANDARD_SEA_GOATS, "\"Die Steinböcke\""},
     {TR_CONFIG_MAX_AUTOSAVE_SLOTS, "Maximale jährliche automatische Speicherungen:"},
     {TR_CONFIG_SHOW_DESIRABILITY_RANGE_ALL, "Zeige Attraktivität beim Bau eines Gebäudes"},
     {TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION, "Dekoration"},
@@ -1707,6 +1718,9 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_TERRAIN_SHRUB, "Busch"},
     {TR_CONDITION_TEXT_TIME_LEFT_UNTIL_DEFEAT, "Zeit bis zur Niederlage:"},
     {TR_CONDITION_TEXT_TIME_LEFT_UNTIL_VICTORY, "Zeit bis zum Sieg:"},
+    {TR_CONFIG_RANDOMISE_MUSIC, "Zufällige Stadtmusik"},
+    {TR_CHEAT_DISABLE_INVASIONS, "Keine Invasionen"},
+    {TR_CHEAT_DISABLE_LEGIONS_CONSUMPTION, "Soldaten benötigen kein Essen"},
 };
 
 void translation_german(const translation_string **strings, int *num_strings)

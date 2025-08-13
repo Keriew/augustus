@@ -81,7 +81,11 @@ void city_ratings_peace_building_destroyed(building_type type)
         case BUILDING_PREFECTURE:
         case BUILDING_ENGINEERS_POST:
         case BUILDING_WELL:
-        case BUILDING_FORT:
+        case BUILDING_FORT_ARCHERS:
+        case BUILDING_FORT_LEGIONARIES:
+        case BUILDING_FORT_JAVELIN:
+        case BUILDING_FORT_MOUNTED:
+        case BUILDING_FORT_AUXILIA_INFANTRY:
         case BUILDING_FORT_GROUND:
         case BUILDING_GATEHOUSE:
         case BUILDING_TOWER:
@@ -609,27 +613,27 @@ static void update_favor_rating(int is_yearly_update, int is_monthly_update)
             int bonus = 1;
             if (scenario_criteria_culture_enabled() &&
                 city_data.ratings.culture < calc_adjust_with_percentage(
-                scenario_criteria_culture(), milestone_pct)) {
+                    scenario_criteria_culture(), milestone_pct)) {
                 bonus = 0;
             }
             if (scenario_criteria_prosperity_enabled() &&
                 city_data.ratings.prosperity < calc_adjust_with_percentage(
-                scenario_criteria_prosperity(), milestone_pct)) {
+                    scenario_criteria_prosperity(), milestone_pct)) {
                 bonus = 0;
             }
             if (scenario_criteria_peace_enabled() &&
                 city_data.ratings.peace < calc_adjust_with_percentage(
-                scenario_criteria_peace(), milestone_pct)) {
+                    scenario_criteria_peace(), milestone_pct)) {
                 bonus = 0;
             }
             if (scenario_criteria_favor_enabled() &&
                 city_data.ratings.favor < calc_adjust_with_percentage(
-                scenario_criteria_favor(), milestone_pct)) {
+                    scenario_criteria_favor(), milestone_pct)) {
                 bonus = 0;
             }
             if (scenario_criteria_population_enabled() &&
                 city_data.population.population < calc_adjust_with_percentage(
-                scenario_criteria_population(), milestone_pct)) {
+                    scenario_criteria_population(), milestone_pct)) {
                 bonus = 0;
             }
             if (bonus) {

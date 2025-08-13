@@ -173,12 +173,12 @@ void window_building_draw_employment_without_house_cover(building_info_context *
 void window_building_draw_description(building_info_context *c, int text_group, int text_id)
 {
     lang_text_draw_multiline(text_group, text_id, c->x_offset + 32, c->y_offset + 56,
-        BLOCK_SIZE * (c->width_blocks - 3), FONT_NORMAL_BLACK);
+       BLOCK_SIZE * (c->width_blocks - 3), FONT_NORMAL_BLACK);
 }
 
-void window_building_draw_description_at(building_info_context *c, int y_offset, int text_group, int text_id)
+int window_building_draw_description_at(building_info_context *c, int y_offset, int text_group, int text_id)
 {
-    lang_text_draw_multiline(text_group, text_id, c->x_offset + 32, c->y_offset + y_offset,
+    return lang_text_draw_multiline(text_group, text_id, c->x_offset + 32, c->y_offset + y_offset,
         BLOCK_SIZE * (c->width_blocks - 3), FONT_NORMAL_BLACK);
 }
 

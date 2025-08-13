@@ -12,6 +12,13 @@ typedef enum {
 } building_info_type;
 
 typedef enum {
+    NO_SPECIAL_ORDERS = 0,
+    SPECIAL_ORDERS_GENERIC = 1,
+    SPECIAL_ORDERS_ROADBLOCK = 2,
+    SPECIAL_ORDERS_STORAGE = 3,
+}special_orders_type;
+
+typedef enum {
     TERRAIN_INFO_NONE = 0,
     TERRAIN_INFO_TREE = 1,
     TERRAIN_INFO_ROCK = 2,
@@ -73,7 +80,7 @@ typedef struct {
     } risk_icons;
 } building_info_context;
 
-void window_building_set_possible_position(int * x_offset, int * y_offset, int width_blocks, int height_blocks);
+void window_building_set_possible_position(int *x_offset, int *y_offset, int width_blocks, int height_blocks);
 
 int window_building_get_vertical_offset(building_info_context *c, int new_window_height);
 
@@ -85,7 +92,7 @@ void window_building_draw_employment_without_house_cover(building_info_context *
 
 void window_building_draw_description(building_info_context *c, int text_group, int text_id);
 
-void window_building_draw_description_at(building_info_context *c, int y_offset, int text_group, int text_id);
+int window_building_draw_description_at(building_info_context *c, int y_offset, int text_group, int text_id);
 
 void window_building_play_sound(building_info_context *c, const char *sound_file);
 

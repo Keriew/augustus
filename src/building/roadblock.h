@@ -19,6 +19,12 @@ typedef enum {
 	PERMISSION_WATCHMAN = 10,
 } roadblock_permission;
 
+typedef enum {
+	ROADBLOCK_NONE = 0,
+	ROADBLOCK_STANDARD = 1,
+	ROADBLOCK_STORAGE = 2,
+}roadblock_type;
+
 void building_roadblock_set_permission(roadblock_permission p, building *b);
 int building_roadblock_get_permission(roadblock_permission p, building *b);
 void building_roadblock_accept_none(building *b);

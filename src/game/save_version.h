@@ -1,9 +1,50 @@
 #ifndef GAME_SAVE_VERSION_H
 #define GAME_SAVE_VERSION_H
 
+/************************************************SAVEGAME GUIDE*******************************************************
+
+1.  Savegame versions are used to determine the save and load functions order of reading and writing data.
+    A new data added to the savegame can be completely compatible with order versions of the code, but because the
+    writing and loading instructions change, the savegame version must be updated to prevent bricking the saves.
+2.  Versions are hexadecimal numbers, so the first version is 0x00, the second is 0x01, etc. If you areunsure what is
+    going to be the next version, you can check the next hex online. When increasing the save version, you need to
+    increase the SAVE_GAME_CURRENT_VERSION by 1, and add a version that best describes the save before your change, e.g.:
+       If you have added a new building, a version could be 'SAVE_GAME_LAST_NO_NEW_BUILDING', or
+       If you changed a behaviour, a version could be 'SAVE_GAME_LAST_OLD_BEHAVIOUR'.
+3.  New properties of structures are not automatically included in the savegame process, so you need to add them deliberately.
+    If you are unsure, it's best to add them after all the other properties, unless you know a reason why it would be better
+    to include them earlier.
+    Properties need to be added in two places: Loading and Saving functions. These are usually located in the same file
+    as the .c file of structure, e.g. building state functions are in src/building/state.c; figure functions are in src/figure/figure.c.
+4.  When adding new properties to these functions, you may need to update the buffer size used in the function, which is
+    defined on top of the file, e.g. FIGURE_ORIGINAL_BUFFER_SIZE or FIGURE_CURRENT_BUFFER_SIZE.
+    *_ORIGINAL_BUFFER_SIZE is used to maintain backward compatibility with old savegames, so it shouldn't be changed.
+    Safest approach is to increase the size of the CURRENT buffer by the size of the new property e.g.
+    if you are adding a uint32_t (32 bits = 4 bytes) property, you should increase the buffer size by 4.
+    some structures, like building/state.h even define helper macros for each version of the buffer. It's the standard
+    we should strive to follow where possible!
+5.  Remember that the order and size of reading and writing properties in the savegame must be the same, so if you are
+    adding a buffer_write_u8(buf, b->new_property), you must also add a buffer_read_u8(buf) in the loading function,
+    in the exact same order.
+6.  In the loading functions, you need to check if the savegame version is high enough to include the new property,
+    usually done by if(version > SAVE_GAME_LAST_OLD_PROPERTY) { buffer_read_u8(buf); } else { ... };
+    { ... } needs to include logic of handling the case when the property is not present,
+    e.g. setting it to 0 or some default value. If a function can set this to a correct value during the loading,
+    use that. If the previous value is not compatible, a migration function needs to written and used.
+7.  If you are updating the data type of an already existing property, make sure that the new data type is large enough
+    to hold the data, e.g. uint16_t can hold values from 0 to 65535, while uint8_t can only hold values from 0 to 255.
+8.  It's not always necessary to update the savegame version when adding new properties. Check the structure that you
+    are modifying to see if there are unusued properties that can be used instead, or if there are properties that are
+    not used for certain types of structure. e.g. non-combat figures don't use 'wait_ticks_next_target', so to avoid
+    adding a new property, this property was used to store number of ticks to wait before changing destination for cartpushers.
+    If are using a property in non-original way, please make sure to leave a comment explaining the change.
+
+If you are unsure about anything regarding the savegame versioning, please ask on github or discord.
+**********************************************************************************************************************/
+
 typedef enum {
 
-    SAVE_GAME_CURRENT_VERSION = 0xa6,
+    SAVE_GAME_CURRENT_VERSION = 0xa7,
 
     SAVE_GAME_LAST_ORIGINAL_LIMITS_VERSION = 0x66,
     SAVE_GAME_LAST_SMALLER_IMAGE_ID_VERSION = 0x76,
@@ -21,7 +62,7 @@ typedef enum {
     SAVE_GAME_LAST_ZIP_COMPRESSION = 0x88,
     SAVE_GAME_LAST_ENEMY_ARMIES_BUFFER_BUG = 0x89,
     SAVE_GAME_LAST_BARRACKS_TOWER_SENTRY_REQUEST = 0x8a,
-    // SAVE_GAME_LAST_WITHOUT_HIGHWAYS = 0x8b, no actual changes to how games are saved. Crudelios just wants this here //shoutout to Crudelios.
+    // SAVE_GAME_LAST_WITHOUT_HIGHWAYS = 0x8b, no actual changes to how games are saved. Crudelios just wants this here 
     SAVE_GAME_LAST_UNVERSIONED_SCENARIOS = 0x8c,
     SAVE_GAME_LAST_EMPIRE_RESOURCES_ALWAYS_WRITE = 0x8d,
     // the difference between this version and UNVERSIONED_SCENARIOS above is this one actually saves the scenario version
@@ -49,7 +90,8 @@ typedef enum {
     SAVE_GAME_LAST_NO_ALT_NATIVE_HUTS = 0xa2,
     SAVE_GAME_LAST_NO_EXTRA_NATIVE_BUILDINGS = 0xa3,
     SAVE_GAME_LAST_STORAGE_STATE_AND_QUANTITY_TOGETHER = 0xa4,
-    SAVE_GAME_LAST_10_LEGIONS_MAX = 0xa5
+    SAVE_GAME_LAST_10_LEGIONS_MAX = 0xa5,
+    SAVE_GAME_LAST_GRANARY_WAREHOUSE_NON_ROADBLOCKS = 0xa6,
 } savegame_version_t;
 
 typedef enum {

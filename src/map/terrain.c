@@ -18,6 +18,12 @@ int map_terrain_is(int grid_offset, int terrain)
     return map_grid_is_valid_offset(grid_offset) && terrain_grid.items[grid_offset] & terrain;
 }
 
+int map_terrain_is_roadblock(int grid_offset)
+{
+    int terrain = map_terrain_get(grid_offset);
+    return (terrain & TERRAIN_BUILDING) && (terrain & TERRAIN_ROAD);
+}
+
 int map_terrain_is_superset(int grid_offset, unsigned int terrain_sum)
 {
     return map_grid_is_valid_offset(grid_offset) && ((terrain_grid.items[grid_offset] & terrain_sum) == terrain_sum);

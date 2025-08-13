@@ -155,6 +155,7 @@ void game_file_editor_create_scenario(int size)
 int game_file_editor_load_scenario(const char *scenario_file)
 {
     clear_map_data();
+    building_clear_all();
     if (!game_file_io_read_scenario(scenario_file)) {
         return 0;
     }

@@ -43,11 +43,21 @@ int city_resource_count_food_on_granaries(resource_type food)
     return city_data.resource.granary_food_stored[food];
 }
 
-int city_resource_count(resource_type resource)
+int city_resource_count_warehouses_amount(resource_type resource)
 {
     return city_data.resource.stored_in_warehouses[resource];
 }
 
+int city_resource_get_total_amount(resource_type resource, int respect_maintaining)
+{
+    int total = building_warehouses_count_available_resource(resource, respect_maintaining);
+
+    if (resource_is_food(resource)) {
+        int granary_total = building_granaries_count_available_resource(resource, respect_maintaining);
+        total += granary_total;
+    }
+    return total;
+}
 
 int city_resource_get_amount_including_granaries(resource_type resource, int amount, int *checked_granaries,
     int respect_maintaining)
@@ -74,7 +84,7 @@ int city_resource_get_amount_including_granaries(resource_type resource, int amo
 }
 
 
-int city_resource_get_available_empty_space_granaries(resource_type food, int respect_settings)
+int city_resource_get_available_empty_space_granaries(resource_type food)
 {
     int available_storage = 0;
     if (!resource_is_food(food)) {
@@ -85,28 +95,21 @@ int city_resource_get_available_empty_space_granaries(resource_type food, int re
         if (b->state != BUILDING_STATE_IN_USE) {
             continue;
         }
-        if (!respect_settings) {
-            available_storage += b->resources[RESOURCE_NONE];
-        } else {
-            available_storage += building_granary_maximum_receptible_amount(food, b);
-        }
+
+        available_storage += building_granary_maximum_receptible_amount(b, food);
     }
 
     return available_storage;
 }
 
-int city_resource_get_available_empty_space_warehouses(resource_type resource, int respect_settings)
+int city_resource_get_available_empty_space_warehouses(resource_type resource)
 {
     int available_storage = 0;
     for (building *b = building_first_of_type(BUILDING_WAREHOUSE); b; b = b->next_of_type) {
         if (b->state != BUILDING_STATE_IN_USE) {
             continue;
         }
-        if (!respect_settings) {
-            available_storage += building_warehouse_max_space_for_resource(resource, b);
-        } else {
-            available_storage += building_warehouse_maximum_receptible_amount(resource, b);
-        }
+        available_storage += building_warehouse_maximum_receptible_amount(b, resource);
     }
 
     return available_storage;
@@ -283,10 +286,8 @@ void city_resource_calculate_warehouse_stocks(void)
     for (building *b = building_first_of_type(BUILDING_WAREHOUSE); b; b = b->next_of_type) {
         if (b->state == BUILDING_STATE_IN_USE) {
             b->has_road_access = 0;
-            if (map_has_road_access_rotation(b->subtype.orientation, b->x, b->y, b->size, 0)) {
+            if (map_has_road_access_warehouse(b->x, b->y, 0)) {
                 b->has_road_access = 1;
-            } else if (map_has_road_access_rotation(b->subtype.orientation, b->x, b->y, 3, 0)) {
-                b->has_road_access = 2;
             }
         }
     }

@@ -59,10 +59,9 @@ static void check_road_access(int type, int x, int y, int size)
         case BUILDING_ROADBLOCK:
         case BUILDING_TRIUMPHAL_ARCH:
         case BUILDING_HOUSE_VACANT_LOT:
-        case BUILDING_FORT:
         case BUILDING_FORT_LEGIONARIES:
         case BUILDING_FORT_JAVELIN:
-        case BUILDING_FORT_MOUNTED:     
+        case BUILDING_FORT_MOUNTED:
         case BUILDING_FORT_AUXILIA_INFANTRY:
         case BUILDING_FORT_ARCHERS:
         case BUILDING_HORSE_STATUE:
@@ -80,7 +79,11 @@ static void check_road_access(int type, int x, int y, int size)
     int has_road = 0;
     if (map_has_road_access(x, y, size, 0)) {
         has_road = 1;
-    } else if (type == BUILDING_WAREHOUSE && map_has_road_access(x, y, size, 0)) {
+    } else if (type == BUILDING_GRANARY && map_has_road_access_granary(x, y, 0)) {
+        has_road = 1;
+    } else if (type == BUILDING_WAREHOUSE) {
+        //warehouse road access is checked in construction_building.c -> add_warehouse()
+        //TODO: a dedicated function similar as for hippodrome should be used for consistency
         has_road = 1;
     } else if (type == BUILDING_HIPPODROME && map_has_road_access_hippodrome(x, y, 0)) {
         has_road = 1;
@@ -156,7 +159,7 @@ static void check_armoury(int type)
 static void check_weapons_access(int type)
 {
     if (type == BUILDING_BARRACKS) {
-        if (city_resource_count(RESOURCE_WEAPONS) <= 0) {
+        if (city_resource_count_warehouses_amount(RESOURCE_WEAPONS) <= 0) {
             show(WARNING_WEAPONS_NEEDED);
         }
     }
@@ -218,7 +221,7 @@ static void check_raw_material_access(building_type type)
     for (int i = 0; i < num_resources; i++) {
         const resource_data *data = resource_get_data(chain[i].raw_material);
         if (building_count_active(data->industry) <= 0) {
-            if (city_resource_count(good) <= 0 && city_resource_count(chain[i].raw_material) <= 0) {
+            if (city_resource_count_warehouses_amount(good) <= 0 && city_resource_count_warehouses_amount(chain[i].raw_material) <= 0) {
                 show(data->warning.needed);
                 if (empire_can_produce_resource(chain[i].raw_material)) {
                     show(data->warning.create_industry);

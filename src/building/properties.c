@@ -329,12 +329,40 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .image_group = 205,
         .event_data.attr = "triumphal_arch"
     },
-    [BUILDING_FORT] = {
+    [BUILDING_FORT_LEGIONARIES] = {
         .size = 3,
         .fire_proof = 1,
         .image_group = 66,
         .sound_id = SOUND_CITY_FORT,
-        .event_data.attr = "fort"
+        .event_data.attr = "fort_legion",
+    },
+    [BUILDING_FORT_ARCHERS] = {
+        .size = 3,
+        .fire_proof = 1,
+        .image_group = 66,
+        .sound_id = SOUND_CITY_FORT,
+        .event_data.attr = "fort_archers"
+    },
+    [BUILDING_FORT_JAVELIN] = {
+        .size = 3,
+        .fire_proof = 1,
+        .image_group = 66,
+        .sound_id = SOUND_CITY_FORT,
+        .event_data.attr = "fort_javelin"
+    },
+    [BUILDING_FORT_MOUNTED] = {
+        .size = 3,
+        .fire_proof = 1,
+        .image_group = 66,
+        .sound_id = SOUND_CITY_FORT,
+        .event_data.attr = "fort_mounted"
+    },
+    [BUILDING_FORT_AUXILIA_INFANTRY] = {
+        .size = 3,
+        .fire_proof = 1,
+        .image_group = 66,
+        .sound_id = SOUND_CITY_FORT,
+        .event_data.attr = "fort_swords"
     },
     [BUILDING_GATEHOUSE] = {
         .size = 2,

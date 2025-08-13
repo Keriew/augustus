@@ -27,17 +27,16 @@ static building_type get_clone_type_from_building(building *b, building_type clo
     switch (clone_type) {
         case BUILDING_RESERVOIR:
             return BUILDING_DRAGGABLE_RESERVOIR;
-        case BUILDING_FORT:
-            if (b) {
-                switch (b->subtype.fort_figure_type) {
-                    case FIGURE_FORT_LEGIONARY: return BUILDING_FORT_LEGIONARIES;
-                    case FIGURE_FORT_JAVELIN: return BUILDING_FORT_JAVELIN;
-                    case FIGURE_FORT_MOUNTED: return BUILDING_FORT_MOUNTED;
-                    case FIGURE_FORT_INFANTRY: return BUILDING_FORT_AUXILIA_INFANTRY;
-                    case FIGURE_FORT_ARCHER: return BUILDING_FORT_ARCHERS;
-                }
-            }
-            return BUILDING_NONE;
+        case BUILDING_FORT_LEGIONARIES:
+            return BUILDING_FORT_LEGIONARIES;
+        case BUILDING_FORT_JAVELIN:
+            return BUILDING_FORT_JAVELIN;
+        case BUILDING_FORT_MOUNTED:
+            return BUILDING_FORT_MOUNTED;
+        case BUILDING_FORT_AUXILIA_INFANTRY:
+            return BUILDING_FORT_AUXILIA_INFANTRY;
+        case BUILDING_FORT_ARCHERS:
+            return BUILDING_FORT_ARCHERS;
         case BUILDING_NATIVE_CROPS:
         case BUILDING_NATIVE_HUT:
         case BUILDING_NATIVE_HUT_ALT:

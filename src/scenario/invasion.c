@@ -642,11 +642,16 @@ int scenario_invasion_start_from_mars(void)
 {
     int mission = scenario_campaign_mission();
     if (mission < 0 || mission > 19) {
-        return 0;
+        mission = 0;
     }
     int amount = LOCAL_UPRISING_NUM_ENEMIES[mission];
     if (amount <= 0) {
-        return 0;
+        // for custom mission
+        if (mission == 0) {
+            amount = random_between_from_stdlib(3, 9);
+        } else {
+            return 0;
+        }
     }
     int grid_offset = start_invasion(ENEMY_0_BARBARIAN, amount, 8, FORMATION_ATTACK_FOOD_CHAIN, CHEATED_ARMY_ID);
     if (grid_offset) {
