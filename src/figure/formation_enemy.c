@@ -1,5 +1,8 @@
 #include "formation_enemy.h"
 
+#include "map/data.h"
+#include "map/building.h"
+
 #include "building/building.h"
 #include "building/properties.h"
 #include "city/buildings.h"
@@ -266,95 +269,85 @@ static int set_enemy_target_building(formation *m)
     return best_building != 0;
 }
 
-
 static int get_structures_on_native_land(int *dst_x, int *dst_y)
 {
-    int meeting_x, meeting_y;
-    city_buildings_main_native_meeting_center(&meeting_x, &meeting_y);
+    struct {
+        building_type type;
+        int radius;
+    } native_buildings[] = {
+        { BUILDING_NATIVE_MEETING, 6 },
+        { BUILDING_NATIVE_WATCHTOWER, 3 },
+        { BUILDING_NATIVE_HUT, 3 },
+        { BUILDING_NATIVE_HUT_ALT, 3 }
+    };
 
-    building_type native_buildings[] = { BUILDING_NATIVE_MEETING, BUILDING_NATIVE_WATCHTOWER, 
-        BUILDING_NATIVE_HUT, BUILDING_NATIVE_HUT_ALT };
-    int min_distance = INFINITE;
-
-    for (int i = 0; i < sizeof(native_buildings) / sizeof(native_buildings[0]) && min_distance == INFINITE; i++) {
-        building_type type = native_buildings[i];
+    for (int i = 0; i < sizeof(native_buildings) / sizeof(native_buildings[0]); i++) {
+        building_type type = native_buildings[i].type;
+        int radius = native_buildings[i].radius;
         int size = building_properties_for_type(type)->size;
-        int radius = size * 2;
+
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
-            if (b->state != BUILDING_STATE_IN_USE) {
-                continue;
-            }
+            if (b->state != BUILDING_STATE_IN_USE) continue;
+
             int x_min, y_min, x_max, y_max;
             map_grid_get_area(b->x, b->y, size, radius, &x_min, &y_min, &x_max, &y_max);
+
             for (int yy = y_min; yy <= y_max; yy++) {
                 for (int xx = x_min; xx <= x_max; xx++) {
-                    if (map_terrain_is(map_grid_offset(xx, yy), TERRAIN_AQUEDUCT | TERRAIN_WALL | TERRAIN_GARDEN)) {
-                        int distance = calc_maximum_distance(meeting_x, meeting_y, xx, yy);
-                        if (distance < min_distance) {
-                            min_distance = distance;
-                            *dst_x = xx;
-                            *dst_y = yy;
+                    if (xx < 0 || xx >= map_data.width || yy < 0 || yy >= map_data.height)
+                        continue;
+
+                    int building_id = map_building_at(map_grid_offset(xx, yy));
+                    building *target = building_get(building_id);
+
+                    if (target && target->id > 0) {
+                        switch (target->type) {
+                            case BUILDING_MISSION_POST:
+                            case BUILDING_NATIVE_HUT:
+                            case BUILDING_NATIVE_HUT_ALT:
+                            case BUILDING_NATIVE_CROPS:
+                            case BUILDING_NATIVE_MEETING:
+                            case BUILDING_NATIVE_MONUMENT:
+                            case BUILDING_NATIVE_WATCHTOWER:
+                            case BUILDING_NATIVE_DECORATION:
+                            case BUILDING_WAREHOUSE:
+                            case BUILDING_FORT:
+                            case BUILDING_FORT_GROUND:
+                            case BUILDING_ROADBLOCK:
+                            case BUILDING_ROOFED_GARDEN_WALL_GATE:
+                            case BUILDING_PANELLED_GARDEN_GATE:
+                            case BUILDING_LOOPED_GARDEN_GATE:
+                            case BUILDING_HEDGE_GATE_DARK:
+                            case BUILDING_HEDGE_GATE_LIGHT:
+                                continue;
+                            default:
+                                *dst_x = xx;
+                                *dst_y = yy;
+                                return 1;
                         }
+                    }
+
+                    else if (map_terrain_is(map_grid_offset(xx, yy),
+                        TERRAIN_AQUEDUCT | TERRAIN_WALL | TERRAIN_GARDEN)) {
+                        *dst_x = xx;
+                        *dst_y = yy;
+                        return 1;
                     }
                 }
             }
         }
     }
-    return min_distance < INFINITE;
+
+    return 0;
 }
 
 static void set_native_target_building(formation *m)
 {
-    int meeting_x, meeting_y;
-    city_buildings_main_native_meeting_center(&meeting_x, &meeting_y);
-    building *min_building = 0;
-    int min_distance = INFINITE;
-    for (int i = 1; i < building_count(); i++) {
-        building *b = building_get(i);
-        if (b->state != BUILDING_STATE_IN_USE) {
-            continue;
-        }
-        switch (b->type) {
-            case BUILDING_MISSION_POST:
-            case BUILDING_NATIVE_HUT:
-            case BUILDING_NATIVE_HUT_ALT:
-            case BUILDING_NATIVE_CROPS:
-            case BUILDING_NATIVE_MEETING:
-            case BUILDING_NATIVE_MONUMENT:
-            case BUILDING_NATIVE_WATCHTOWER:
-            case BUILDING_NATIVE_DECORATION:
-            case BUILDING_WAREHOUSE:
-            case BUILDING_FORT:
-            case BUILDING_FORT_GROUND:
-            case BUILDING_ROADBLOCK:
-            case BUILDING_ROOFED_GARDEN_WALL_GATE:
-            case BUILDING_PANELLED_GARDEN_GATE:
-            case BUILDING_LOOPED_GARDEN_GATE:
-            case BUILDING_HEDGE_GATE_DARK:
-            case BUILDING_HEDGE_GATE_LIGHT:
-                break;
-            default:
-                {
-                    int distance = calc_maximum_distance(meeting_x, meeting_y, b->x, b->y);
-                    if (distance < min_distance) {
-                        min_building = b;
-                        min_distance = distance;
-                    }
-                }
-                break;
-        }
-    }
-    if (min_building) {
-        formation_set_destination_building(m, min_building->x, min_building->y, min_building->id);
+    int dst_x = 0, dst_y = 0;
+    if (get_structures_on_native_land(&dst_x, &dst_y)) {
+        formation_set_destination_building(m, dst_x, dst_y, 0);
     } else {
-        int dst_x = 0;
-        int dst_y = 0;
-        int has_target = get_structures_on_native_land(&dst_x, &dst_y);
-        if (has_target) {
-            formation_set_destination_building(m, dst_x, dst_y, 0);
-        } else {
-            formation_retreat(m);
-        }
+        formation_retreat(m);
     }
 }
 
