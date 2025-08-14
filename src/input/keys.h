@@ -101,6 +101,13 @@ typedef enum {
     KEY_TYPE_MIDDLE_MOUSE_BUTTON,
     KEY_TYPE_MOUSE_SCROLL_UP,
     KEY_TYPE_MOUSE_SCROLL_DOWN,
+    // extra mouse buttons - sdl 2 natively supports only 5 buttons
+    KEY_TYPE_MOUSE_BUTTON_4,
+    KEY_TYPE_MOUSE_BUTTON_5,
+    // but more can be added via handling event.button > 5 - precise handling has to be added to augustus.c
+    KEY_TYPE_MOUSE_BUTTON_6,
+    KEY_TYPE_MOUSE_BUTTON_7,
+    KEY_TYPE_MOUSE_BUTTON_8,
     KEY_TYPE_MAX_ITEMS
 } key_type;
 
