@@ -320,7 +320,11 @@ static int get_structures_on_native_land(int *dst_x, int *dst_y)
                             case BUILDING_NATIVE_WATCHTOWER:
                             case BUILDING_NATIVE_DECORATION:
                             case BUILDING_WAREHOUSE:
-                            case BUILDING_FORT:
+                            case BUILDING_FORT_ARCHERS:
+                            case BUILDING_FORT_LEGIONARIES:
+                            case BUILDING_FORT_JAVELIN:
+                            case BUILDING_FORT_MOUNTED:
+                            case BUILDING_FORT_AUXILIA_INFANTRY:
                             case BUILDING_FORT_GROUND:
                             case BUILDING_ROADBLOCK:
                             case BUILDING_ROOFED_GARDEN_WALL_GATE:
@@ -352,57 +356,9 @@ static int get_structures_on_native_land(int *dst_x, int *dst_y)
 
 static void set_native_target_building(formation *m)
 {
-
     int dst_x = 0, dst_y = 0;
     if (get_structures_on_native_land(&dst_x, &dst_y)) {
         formation_set_destination_building(m, dst_x, dst_y, 0);
-
-    int meeting_x, meeting_y;
-    city_buildings_main_native_meeting_center(&meeting_x, &meeting_y);
-    building *min_building = 0;
-    int min_distance = INFINITE;
-    for (int i = 1; i < building_count(); i++) {
-        building *b = building_get(i);
-        if (b->state != BUILDING_STATE_IN_USE) {
-            continue;
-        }
-        switch (b->type) {
-            case BUILDING_MISSION_POST:
-            case BUILDING_NATIVE_HUT:
-            case BUILDING_NATIVE_HUT_ALT:
-            case BUILDING_NATIVE_CROPS:
-            case BUILDING_NATIVE_MEETING:
-            case BUILDING_NATIVE_MONUMENT:
-            case BUILDING_NATIVE_WATCHTOWER:
-            case BUILDING_NATIVE_DECORATION:
-            case BUILDING_WAREHOUSE:
-            case BUILDING_FORT_ARCHERS:
-            case BUILDING_FORT_LEGIONARIES:
-            case BUILDING_FORT_JAVELIN:
-            case BUILDING_FORT_MOUNTED:
-            case BUILDING_FORT_AUXILIA_INFANTRY:
-            case BUILDING_FORT_GROUND:
-            case BUILDING_ROADBLOCK:
-            case BUILDING_ROOFED_GARDEN_WALL_GATE:
-            case BUILDING_PANELLED_GARDEN_GATE:
-            case BUILDING_LOOPED_GARDEN_GATE:
-            case BUILDING_HEDGE_GATE_DARK:
-            case BUILDING_HEDGE_GATE_LIGHT:
-                break;
-            default:
-            {
-                int distance = calc_maximum_distance(meeting_x, meeting_y, b->x, b->y);
-                if (distance < min_distance) {
-                    min_building = b;
-                    min_distance = distance;
-                }
-            }
-            break;
-        }
-    }
-    if (min_building) {
-        formation_set_destination_building(m, min_building->x, min_building->y, min_building->id);
-
     } else {
         formation_retreat(m);
     }
