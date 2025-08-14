@@ -526,11 +526,8 @@ int building_construction_place_building(building_type type, int x, int y)
 
     // phew, checks done!
     building *b;
-    if (building_is_fort(type)) {
-        b = building_create(BUILDING_FORT, x, y);
-    } else {
-        b = building_create(type, x, y);
-    }
+    b = building_create(type, x, y);
+
     game_undo_add_building(b);
     if (b->id <= 0) {
         return 0;

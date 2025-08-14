@@ -548,7 +548,7 @@ int building_image_get(const building *b)
             }
             return image_id;
         }
-        case BUILDING_FORT:
+        case BUILDING_MENU_FORT: // old saves used this type as generic fort, now it's menu-only type
         case BUILDING_FORT_JAVELIN:
         case BUILDING_FORT_LEGIONARIES:
         case BUILDING_FORT_MOUNTED:

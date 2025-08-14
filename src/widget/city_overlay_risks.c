@@ -113,7 +113,7 @@ static int show_building_enemy(const building *b)
 {
     return b->type == BUILDING_PREFECTURE
         || b->type == BUILDING_WATCHTOWER || b->type == BUILDING_TOWER
-        || b->type == BUILDING_FORT || b->type == BUILDING_FORT_GROUND
+        || (building_is_fort(b->type)) || b->type == BUILDING_FORT_GROUND
         || b->type == BUILDING_BARRACKS || b->type == BUILDING_MILITARY_ACADEMY
         || b->type == BUILDING_GATEHOUSE || b->type == BUILDING_PALISADE_GATE || b->type == BUILDING_PALISADE;
 }

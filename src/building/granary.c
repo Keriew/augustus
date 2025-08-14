@@ -99,7 +99,7 @@ int building_granary_remove_export(building *granary, int resource, int amount, 
     if (!building_storage_get_permission(permission, granary)) {
         return 0; // cannot export from this granary
     }
-    int removed = !building_granary_try_remove_resource(granary, resource, amount);
+    int removed = building_granary_try_remove_resource(granary, resource, amount);
     if (!removed) {
         return 0;
     }

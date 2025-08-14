@@ -256,7 +256,11 @@ static int get_height_id(void)
                 return HEIGHT_10_46_BLOCKS;
 
                 //448px
-            case BUILDING_FORT:
+            case BUILDING_FORT_LEGIONARIES:
+            case BUILDING_FORT_JAVELIN:
+            case BUILDING_FORT_MOUNTED:
+            case BUILDING_FORT_AUXILIA_INFANTRY:
+            case BUILDING_FORT_ARCHERS:
             case BUILDING_MESS_HALL:
             case BUILDING_CITY_MINT:
             case BUILDING_BARRACKS:
@@ -413,7 +417,11 @@ static void init(int grid_offset)
             case BUILDING_FORT_GROUND:
                 context.building_id = b->prev_part_building_id;
                 // fallthrough
-            case BUILDING_FORT:
+            case BUILDING_FORT_LEGIONARIES:
+            case BUILDING_FORT_JAVELIN:
+            case BUILDING_FORT_MOUNTED:
+            case BUILDING_FORT_AUXILIA_INFANTRY:
+            case BUILDING_FORT_ARCHERS:
                 context.formation_id = b->formation_id;
                 break;
             case BUILDING_WAREHOUSE_SPACE:
@@ -795,7 +803,7 @@ static void draw_background(void)
             window_building_draw_military_academy(&context);
         } else if (btype == BUILDING_BARRACKS) {
             window_building_draw_barracks(&context);
-        } else if (btype == BUILDING_FORT) {
+        } else if (building_is_fort(btype)) {
             window_building_draw_fort(&context);
         } else if (btype == BUILDING_BURNING_RUIN) {
             window_building_draw_burning_ruin(&context);

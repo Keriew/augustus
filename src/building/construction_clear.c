@@ -97,7 +97,7 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
                 if (!b) {
                     continue;
                 }
-                if (b->type == BUILDING_FORT_GROUND || b->type == BUILDING_FORT) {
+                if (b->type == BUILDING_FORT_GROUND || building_is_fort(b->type)) {
                     if (!measure_only && confirm.fort_confirmed != 1) {
                         continue;
                     }
@@ -254,7 +254,7 @@ int building_construction_clear_land(int measure_only, int x_start, int y_start,
             int building_id = map_building_at(grid_offset);
             if (building_id) {
                 building *b = building_get(building_id);
-                if (b->type == BUILDING_FORT || b->type == BUILDING_FORT_GROUND) {
+                if (building_is_fort(b->type) || b->type == BUILDING_FORT_GROUND) {
                     ask_confirm_fort = 1;
                 }
                 if (building_monument_is_monument(b)) {

@@ -149,7 +149,7 @@ static void update_food_resource(resource_storage_info *info, resource_type reso
 static void update_good_resource(resource_storage_info *info, resource_type resource, building *b, int distance)
 {
     if (distance < info[resource].min_distance &&
-        !city_resource_is_stockpiled(resource) && building_warehouse_get_amount(b, resource) > 0) {
+        !city_resource_is_stockpiled(resource) && building_warehouse_get_available_amount) {
         info[resource].min_distance = distance;
         info[resource].building_id = b->id;
     }
@@ -181,29 +181,7 @@ static int get_resource_storages(resource_storage_info info[RESOURCE_MAX],
         info[r].building_id = 0;
     }
 
-    int permission;
-
-    switch (type) {
-        case BUILDING_MESS_HALL:
-            permission = BUILDING_STORAGE_PERMISSION_QUARTERMASTER;
-            break;
-        case BUILDING_TAVERN:
-            permission = BUILDING_STORAGE_PERMISSION_BARKEEP;
-            break;
-        case BUILDING_CARAVANSERAI:
-            permission = BUILDING_STORAGE_PERMISSION_CARAVANSERAI;
-            break;
-        case BUILDING_LIGHTHOUSE:
-            permission = BUILDING_STORAGE_PERMISSION_LIGHTHOUSE;
-            break;
-        case BUILDING_ARMOURY:
-            permission = BUILDING_STORAGE_PERMISSION_ARMOURY;
-            break;
-        default:
-            permission = BUILDING_STORAGE_PERMISSION_MARKET;
-            break;
-    }
-
+    int permission = building_storage_get_permission_from_building_type(type);
     if (is_food_needed(info)) {
         for (building *b = building_first_of_type(BUILDING_GRANARY); b; b = b->next_of_type) {
             // Looter walkers have no type

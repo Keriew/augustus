@@ -453,7 +453,7 @@ static void draw_desirability_range(const map_tile *tile, building_type type, in
     if (desirability_value == 0 || desirability_range == 0) {
         return;         // If there is no desirability - do not draw
     }
-    
+
     if (building_is_statue_garden_temple(type) && building_monument_working(BUILDING_GRAND_TEMPLE_VENUS)) {
         int value_bonus = ((desirability_value / 4) > 1) ? (desirability_value / 4) : 1;
         desirability_value += value_bonus;
@@ -461,7 +461,7 @@ static void draw_desirability_range(const map_tile *tile, building_type type, in
             desirability_range += 1;
         }
     }
-    
+
     // Calculating the Radius of Negative Desirability
     while (desirability_value < 0 && negative_range < desirability_range) {
         desirability_value += desirability_step_size;
@@ -1011,7 +1011,7 @@ static void draw_fort(const map_tile *tile, int x, int y)
 {
     int blocked = 0;
 
-    int building_size_fort = building_properties_for_type(BUILDING_FORT)->size;
+    int building_size_fort = building_properties_for_type(BUILDING_FORT_LEGIONARIES)->size; //all forts are same size
     int num_tiles_fort = building_size_fort * building_size_fort;
     int building_size_ground = building_properties_for_type(BUILDING_FORT_GROUND)->size;
     int num_tiles_ground = building_size_ground * building_size_ground;
@@ -1041,7 +1041,7 @@ static void draw_fort(const map_tile *tile, int x, int y)
 
     color_t color_mask = blocked ? COLOR_MASK_BUILDING_GHOST_RED : COLOR_MASK_BUILDING_GHOST;
 
-    int image_id = get_new_building_image_id(tile->grid_offset, BUILDING_FORT);
+    int image_id = get_new_building_image_id(tile->grid_offset, BUILDING_FORT_LEGIONARIES); // same image for all forts
     int image_id_grounds = image_group(GROUP_BUILDING_FORT) + 1;
     if (orientation_index == 0 || orientation_index == 3) {
         // draw fort first, then ground

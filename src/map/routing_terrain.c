@@ -154,7 +154,11 @@ static int get_land_type_noncitizen(int grid_offset)
         case BUILDING_WATCHTOWER:
             type = NONCITIZEN_N1_BLOCKED;
             break;
-        case BUILDING_FORT:
+        case BUILDING_FORT_ARCHERS:
+        case BUILDING_FORT_LEGIONARIES:
+        case BUILDING_FORT_JAVELIN:
+        case BUILDING_FORT_MOUNTED:
+        case BUILDING_FORT_AUXILIA_INFANTRY:
             type = NONCITIZEN_5_FORT;
             break;
         case BUILDING_GRANARY:

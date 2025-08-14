@@ -323,7 +323,7 @@ static int get_least_filled_quota_resource(building *b, int city_id, signed char
 
 static int get_closest_storage(const figure *f, int x, int y, int city_id, map_point *dst)
 {
-    const int max_trade_units = (!f->type == FIGURE_NATIVE_TRADER) ?
+    const int max_trade_units = (f->type != FIGURE_NATIVE_TRADER) ?
         figure_trade_land_trade_units() : figure_trade_land_trade_units() / 3 + 1;
 
     resource_multiplier_init();
