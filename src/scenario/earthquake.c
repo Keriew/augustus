@@ -117,7 +117,7 @@ void scenario_earthquake_process(void)
             for (int y = 0; y < map_data.height; y++) {
                 for (int x = 0; x < map_data.width; x++) {
                     grid_offset = map_grid_offset(x, y);
-                    if (map_property_is_future_earthquake(grid_offset)) {
+                    if (map_property_is_future_earthquake(grid_offset) && can_advance_earthquake_to_tile(x, y)) {
                         advance_earthquake_to_tile(x, y);
                     }
                 }
