@@ -226,8 +226,7 @@ static void add_terrain(const void *tile_data, int dx, int dy)
             terrain = lower_land_tile(x, y, grid_offset, terrain);
             break;
         case TOOL_EARTHQUAKE_CUSTOM:
-            int warning = 0;
-            if (editor_tool_can_place_custom_earthquake(tile, &warning)) {
+            if (editor_tool_can_place_custom_earthquake(tile)) {
                 map_property_mark_future_earthquake(grid_offset);
             }
             break;
