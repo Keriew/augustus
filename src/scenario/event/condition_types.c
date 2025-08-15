@@ -68,6 +68,21 @@ int scenario_condition_type_building_count_active_met(const scenario_condition_t
         case BUILDING_FORT_MOUNTED:
             total_active_count += building_count_fort_type_total(FIGURE_FORT_MOUNTED);
             break;
+        case BUILDING_ROAD:
+            total_active_count = building_count_roads();
+            break;
+        case BUILDING_HIGHWAY:
+            total_active_count = building_count_highway();
+            break;
+        case BUILDING_PLAZA:
+            total_active_count = building_count_plaza();
+            break;
+        case BUILDING_GARDENS:
+            total_active_count = building_count_gardens(0);
+            break;
+        case BUILDING_OVERGROWN_GARDENS:
+            total_active_count = building_count_gardens(1);
+            break;
         default:
             total_active_count = building_count_active(type);
             break;
@@ -122,6 +137,21 @@ int scenario_condition_type_building_count_any_met(const scenario_condition_t *c
             break;
         case BUILDING_FORT_MOUNTED:
             total_active_count += building_count_fort_type_total(FIGURE_FORT_MOUNTED);
+            break;
+        case BUILDING_ROAD:
+            total_active_count = building_count_roads();
+            break;
+        case BUILDING_HIGHWAY:
+            total_active_count = building_count_highway();
+            break;
+        case BUILDING_PLAZA:
+            total_active_count = building_count_plaza();
+            break;
+        case BUILDING_GARDENS:
+            total_active_count = building_count_gardens(0);
+            break;
+        case BUILDING_OVERGROWN_GARDENS:
+            total_active_count = building_count_gardens(1);
             break;
         default:
             total_active_count = building_count_total(type);
@@ -185,8 +215,23 @@ int scenario_condition_type_building_count_area_met(const scenario_condition_t *
         case BUILDING_FORT_MOUNTED:
             buildings_in_area = building_count_fort_type_in_area(minx, miny, maxx, maxy, FIGURE_FORT_MOUNTED);
             break;
+        case BUILDING_ROAD:
+            buildings_in_area = building_count_roads_in_area(minx, miny, maxx + 1, maxy + 1);
+            break;
+        case BUILDING_HIGHWAY:
+            buildings_in_area = building_count_highway_in_area(minx, miny, maxx + 1, maxy + 1);
+            break;
+        case BUILDING_PLAZA:
+            buildings_in_area = building_count_plaza_in_area(minx, miny, maxx + 1, maxy + 1);
+            break;
+        case BUILDING_GARDENS:
+            buildings_in_area = building_count_gardens_in_area(minx, miny, maxx + 1, maxy + 1, 0);
+            break;
+        case BUILDING_OVERGROWN_GARDENS:
+            buildings_in_area = building_count_gardens_in_area(minx, miny, maxx + 1, maxy + 1, 1);
+            break;
         default:
-            buildings_in_area = building_count_in_area(type, minx, miny, maxx, maxy);
+            buildings_in_area = building_count_in_area(type, minx, miny, maxx + 1, maxy + 1);
             break;
     }
 
