@@ -10,7 +10,8 @@ enum {
     MENU_RIVER_POINTS = 4,
     MENU_NATIVE_BUILDINGS = 5,
     MENU_ANIMAL_POINTS = 6,
-    MENU_NUM_ITEMS = 7
+    MENU_EARTHQUAKE = 7,
+    MENU_NUM_ITEMS = 8
 };
 
 void window_editor_build_menu_show(int submenu);
