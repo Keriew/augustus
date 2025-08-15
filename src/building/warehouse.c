@@ -150,6 +150,7 @@ void building_warehouse_recount_resources(building *main)
         if (resource > RESOURCE_NONE && resource < RESOURCE_MAX) {
             main->resources[resource] += space->resources[resource];
         }
+        building_warehouse_space_set_image(space, resource);
     }
     // Total sum of all loads (regardless of type)
     int total_loads = 0;
@@ -310,6 +311,8 @@ int building_warehouse_add_import(building *warehouse, int resource, int amount,
     if (added_amount <= 0) {
         return 0; // no space to add
     }
+    int price = trade_price_buy(resource, land_trader);
+    city_finance_process_import(price * added_amount);
     return 1;
 }
 
@@ -599,7 +602,7 @@ int building_warehouse_for_storing(int src_building_id, int x, int y, int resour
     building *b = building_get(min_building_id);
     if (b->has_road_access == 1) {
         map_point_store_result(b->x, b->y, dst);
-    } else if (!map_has_road_access_rotation(b->subtype.orientation, b->x, b->y, 3, dst)) {
+    } else if (!map_has_road_access_warehouse(b->x, b->y, dst)) {
         return 0;
     }
     return min_building_id;
@@ -705,7 +708,7 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
     if (pct_workers < 50) {
         return WAREHOUSE_TASK_NONE;
     }
-
+    building_warehouse_recount_resources(warehouse);
     building *space;
     //TASK 1: emptying takes priority
     if (building_storage_get_empty_all(warehouse->id)) {

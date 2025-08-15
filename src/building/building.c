@@ -286,7 +286,7 @@ void building_clear_related_data(building *b)
         building_storage_delete(b->storage_id);
         b->storage_id = 0;
     }
-    if (b->type == BUILDING_FORT) {
+    if (building_is_fort) {
         formation_legion_delete_for_fort(b);
     }
     if (b->type == BUILDING_TRIUMPHAL_ARCH) {
@@ -387,18 +387,31 @@ void building_update_desirability(void)
         if (b->state != BUILDING_STATE_IN_USE) {
             continue;
         }
-        b->desirability = map_desirability_get_max(b->x, b->y, b->size);
+
+        // Use wider type to prevent 8-bit overflow
+        int desirability = map_desirability_get_max(b->x, b->y, b->size);
+
         if (b->is_close_to_water) {
-            b->desirability += 10;
+            desirability += 10;
         }
+
         switch (map_elevation_at(b->grid_offset)) {
             case 0: break;
-            case 1: b->desirability += 10; break;
-            case 2: b->desirability += 12; break;
-            case 3: b->desirability += 14; break;
-            case 4: b->desirability += 16; break;
-            default: b->desirability += 18; break;
+            case 1: desirability += 10; break;
+            case 2: desirability += 12; break;
+            case 3: desirability += 14; break;
+            case 4: desirability += 16; break;
+            default: desirability += 18; break;
         }
+
+        // Clamp before assigning to 8-bit signed int
+        if (desirability > 100) {
+            desirability = 100;
+        } else if (desirability < -100) {
+            desirability = -100;
+        }
+
+        b->desirability = (int8_t) desirability;
     }
 }
 
@@ -562,12 +575,8 @@ int building_get_levy(const building *b)
 
     // Mars module 1 bonus
     if (building_monument_gt_module_is_active(MARS_MODULE_1_MESS_HALL)) {
-        switch (b->type) {
-            case BUILDING_FORT:
-                levy = (levy / 4) * 3;
-                break;
-            default:
-                break;
+        if (building_is_fort(b->type)) {
+            levy = (levy / 4) * 3;
         }
     }
 

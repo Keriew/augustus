@@ -148,6 +148,7 @@ static int perform_large_curse(god_type god)
                 scenario_invasion_start_from_mars();
             } else {
                 city_message_post(1, MESSAGE_WRATH_OF_MARS_NO_MILITARY, 0, 0);
+                scenario_invasion_start_from_mars();
             }
             break;
         case GOD_VENUS:

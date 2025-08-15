@@ -1675,6 +1675,7 @@ typedef enum {
     TR_PARAMETER_OF,
     TR_PARAMETER_TO,
     TR_PARAMETER_BY,
+    TR_BUILDING_FORT_MENU,
     TRANSLATION_MAX_KEY
 } translation_key;
 

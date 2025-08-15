@@ -113,7 +113,7 @@ static int show_building_enemy(const building *b)
 {
     return b->type == BUILDING_PREFECTURE
         || b->type == BUILDING_WATCHTOWER || b->type == BUILDING_TOWER
-        || b->type == BUILDING_FORT || b->type == BUILDING_FORT_GROUND
+        || (building_is_fort(b->type)) || b->type == BUILDING_FORT_GROUND
         || b->type == BUILDING_BARRACKS || b->type == BUILDING_MILITARY_ACADEMY
         || b->type == BUILDING_GATEHOUSE || b->type == BUILDING_PALISADE_GATE || b->type == BUILDING_PALISADE;
 }
@@ -339,7 +339,8 @@ static int get_tooltip_problems(tooltip_context *c, const building *b)
     } else if (b->type == BUILDING_HIPPODROME && !b->data.entertainment.days1) {
         c->text_group = 73;
         return 5;
-    } else if (b->has_road_access == 0) {
+    } else if (b->has_road_access == 0 &&
+        building_get_laborers(b->type) && b->type != BUILDING_LATRINES && b->type != BUILDING_FOUNTAIN) {
         c->translation_key = TR_TOOLTIP_OVERLAY_PROBLEMS_NO_ROAD_ACCESS;
     }
     if (c->translation_key) {

@@ -355,7 +355,7 @@ int formation_legion_at_building(int grid_offset)
     int building_id = map_building_at(grid_offset);
     if (building_id > 0) {
         building *b = building_get(building_id);
-        if (b->state == BUILDING_STATE_IN_USE && (b->type == BUILDING_FORT || b->type == BUILDING_FORT_GROUND)) {
+        if (b->state == BUILDING_STATE_IN_USE && (building_is_fort(b->type) || b->type == BUILDING_FORT_GROUND)) {
             return b->formation_id;
         }
     }

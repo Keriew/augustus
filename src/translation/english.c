@@ -1683,6 +1683,7 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_OF, "of"},
     {TR_PARAMETER_TO, "to"},
     {TR_PARAMETER_BY, "by"},
+    {TR_BUILDING_FORT_MENU, "Fort"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

@@ -82,7 +82,7 @@ static struct {
     },
     {
         { TR_BUILDING_GRAND_TEMPLE_MERCURY_DESC_MODULE_1, TR_BUILDING_GRAND_TEMPLE_MERCURY_MODULE_1_DESC },
-        BUILDING_NONE,
+        BUILDING_FORT_GROUND, // every fort has a ground part, this can be used to check for existance of any fort
         "Merc M Icon"
     },
     {
@@ -92,7 +92,7 @@ static struct {
     },
     {
         { TR_BUILDING_GRAND_TEMPLE_MARS_DESC_MODULE_1, TR_BUILDING_GRAND_TEMPLE_MARS_MODULE_1_DESC },
-        BUILDING_FORT,
+        BUILDING_FORT_GROUND, // every fort has a ground part, this can be used to check for existance of any fort
         "Mars M2 Icon"
     },
     {

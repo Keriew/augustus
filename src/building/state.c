@@ -15,6 +15,25 @@ static int is_industry_type(const building *b)
         || b->type == BUILDING_SHIPYARD || b->type == BUILDING_WHARF;
 }
 
+static building_type get_fort_type(building *b)
+{
+    switch (b->subtype.fort_figure_type) {
+        case FIGURE_FORT_JAVELIN:
+            return BUILDING_FORT_JAVELIN;
+        case FIGURE_FORT_MOUNTED:
+            return BUILDING_FORT_MOUNTED;
+        case FIGURE_FORT_LEGIONARY:
+            return BUILDING_FORT_LEGIONARIES;
+        case FIGURE_FORT_INFANTRY:
+            return BUILDING_FORT_AUXILIA_INFANTRY;
+        case FIGURE_FORT_ARCHER:
+            return BUILDING_FORT_ARCHERS;
+        default:
+            return BUILDING_NONE;
+    }
+
+}
+
 static void write_type_data(buffer *buf, const building *b)
 {
     // This function should ALWAYS write 26 bytes.
@@ -447,6 +466,9 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     } else if (save_version <= SAVE_GAME_LAST_STATIC_RESOURCES &&
         (b->type == BUILDING_DOCK || building_has_supplier_inventory(b->type))) {
         migrate_accepted_goods(b, buffer_read_i16(buf));
+    } else if (b->type == BUILDING_MENU_FORT) { // Forts used to use a generic type for the main building
+        b->subtype.fort_figure_type = buffer_read_i16(buf);// union field, written as fort_figure_type for clarity
+        b->type = get_fort_type(b); // get the correct fort type to ensure compatibility
     } else {
         b->subtype.house_level = buffer_read_i16(buf); // which union field we use does not matter        
     }

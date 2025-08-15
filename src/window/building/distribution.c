@@ -1060,6 +1060,7 @@ const uint8_t *window_building_dock_get_tooltip(building_info_context *c)
 void window_building_draw_storage(building_info_context *c)
 {
     building *b = building_get(c->building_id);
+    building_warehouse_recount_resources(b);
     c->advisor_button = ADVISOR_TRADE;
     c->help_id = is_granary(c) ? 3 : 4;
     data.building_id = c->building_id;
@@ -1082,9 +1083,9 @@ void window_building_draw_storage(building_info_context *c)
                 is_granary(c) ? TR_BUILDING_GRANARY_PLAGUE_DESC : TR_BUILDING_WAREHOUSE_PLAGUE_DESC);
         }
     } else if (!c->has_road_access) {
-        y += 4 + window_building_draw_description_at(c, 63, 69, 25);
+        y += 4 + window_building_draw_description_at(c, 56, 69, 25);
     } else if (is_granary(c) && scenario_property_rome_supplies_wheat()) {
-        y += window_building_draw_description_at(c, 63, 98, 4);
+        y += window_building_draw_description_at(c, 56, 98, 4);
     } else {
         int total_stored = 0;
         int x;
@@ -1092,8 +1093,9 @@ void window_building_draw_storage(building_info_context *c)
         int stored_types = building_storage_count_stored_resource_types(b->id);
         if (!stored_types) {
             int msg = is_granary(c) ? TR_BUILDING_GRANARY_NO_FOOD : TR_BUILDING_WAREHOUSE_NO_GOODS;
-            lang_text_draw_centered(CUSTOM_TRANSLATION, msg, c->x_offset, c->y_offset + 63,
+            lang_text_draw_centered(CUSTOM_TRANSLATION, msg, c->x_offset, c->y_offset + 56,
                 BLOCK_SIZE * c->width_blocks, FONT_NORMAL_BLACK);
+            y += 32;
         } else {
             for (int r = RESOURCE_NONE + 1; r < RESOURCE_MAX; r++) {
                 int amount = b->resources[r];

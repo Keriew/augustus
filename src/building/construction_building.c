@@ -129,7 +129,7 @@ static void add_warehouse(building *b)
 
     building_get(prev)->next_part_building_id = 0;
     map_tiles_update_area_roads(b->x, b->y, 5);
-    if (!map_has_road_access(b->x, b->y, 1, 0)) {
+    if (!map_has_road_access_warehouse(b->x, b->y, 0)) {
         city_warning_show(WARNING_WAREHOUSE_TOWER, NEW_WARNING_SLOT);
     }
 }
@@ -526,11 +526,8 @@ int building_construction_place_building(building_type type, int x, int y)
 
     // phew, checks done!
     building *b;
-    if (building_is_fort(type)) {
-        b = building_create(BUILDING_FORT, x, y);
-    } else {
-        b = building_create(type, x, y);
-    }
+    b = building_create(type, x, y);
+
     game_undo_add_building(b);
     if (b->id <= 0) {
         return 0;
