@@ -1671,9 +1671,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_TOOL_EARTHQUAKE_POINT, "Earthquake point"},
     {TR_EDITOR_TOOL_EARTHQUAKE_CUSTOM, "Custom Earthquake"},
     {TR_BUILDING_FORT_MENU, "Fort"},
-    {TR_EDITOR_EARTHQUAKE_CUSTOM, "Custom"},
-    {TR_EDITOR_TOOL_EARTHQUAKE_POINT, "Earthquake point"},
-    {TR_EDITOR_TOOL_EARTHQUAKE_CUSTOM, "Custom Earthquake"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
