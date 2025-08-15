@@ -272,7 +272,7 @@ static int get_structures_on_native_land(int *dst_x, int *dst_y)
     int meeting_x, meeting_y;
     city_buildings_main_native_meeting_center(&meeting_x, &meeting_y);
 
-    building_type native_buildings[] = { BUILDING_NATIVE_MEETING, BUILDING_NATIVE_WATCHTOWER, 
+    building_type native_buildings[] = { BUILDING_NATIVE_MEETING, BUILDING_NATIVE_WATCHTOWER,
         BUILDING_NATIVE_HUT, BUILDING_NATIVE_HUT_ALT };
     int min_distance = INFINITE;
 
@@ -324,7 +324,11 @@ static void set_native_target_building(formation *m)
             case BUILDING_NATIVE_WATCHTOWER:
             case BUILDING_NATIVE_DECORATION:
             case BUILDING_WAREHOUSE:
-            case BUILDING_FORT:
+            case BUILDING_FORT_ARCHERS:
+            case BUILDING_FORT_LEGIONARIES:
+            case BUILDING_FORT_JAVELIN:
+            case BUILDING_FORT_MOUNTED:
+            case BUILDING_FORT_AUXILIA_INFANTRY:
             case BUILDING_FORT_GROUND:
             case BUILDING_ROADBLOCK:
             case BUILDING_ROOFED_GARDEN_WALL_GATE:
@@ -334,14 +338,14 @@ static void set_native_target_building(formation *m)
             case BUILDING_HEDGE_GATE_LIGHT:
                 break;
             default:
-                {
-                    int distance = calc_maximum_distance(meeting_x, meeting_y, b->x, b->y);
-                    if (distance < min_distance) {
-                        min_building = b;
-                        min_distance = distance;
-                    }
+            {
+                int distance = calc_maximum_distance(meeting_x, meeting_y, b->x, b->y);
+                if (distance < min_distance) {
+                    min_building = b;
+                    min_distance = distance;
                 }
-                break;
+            }
+            break;
         }
     }
     if (min_building) {

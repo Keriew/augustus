@@ -304,7 +304,7 @@ void building_maintenance_check_rome_access(void)
             road_grid_offset = map_road_to_largest_network_hippodrome(b->x, b->y, &x_road, &y_road, rotated);
         } else if (building_monument_is_unfinished_monument(b)) {
             road_grid_offset = map_road_to_largest_network_monument_construction(b->x, b->y, b->size, &x_road, &y_road);
-        } else if (b->type == BUILDING_FORT) {
+        } else if (building_is_fort(b->type)) {
             road_grid_offset = map_road_to_largest_network(b->x, b->y, b->size, &x_road, &y_road);
             if (road_grid_offset < 0) {
                 int reachable = map_closest_reachable_spot_within_radius(b->x, b->y, b->size, 1, &x_road, &y_road);
