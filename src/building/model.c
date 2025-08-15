@@ -108,14 +108,13 @@ static void override_model_data(void)
     buildings[BUILDING_FORT_JAVELIN].laborers = 0;
     buildings[BUILDING_FORT_LEGIONARIES].laborers = 0;
     buildings[BUILDING_FORT_MOUNTED].laborers = 0;
-    buildings[BUILDING_FORT].laborers = 0;
+
+    buildings[BUILDING_FORT_AUXILIA_INFANTRY].laborers = 0;
+    buildings[BUILDING_FORT_ARCHERS].laborers = 0;
     
     buildings[BUILDING_COLOSSEUM].cost = 1500;
     buildings[BUILDING_COLOSSEUM].laborers = 100;
     buildings[BUILDING_HIPPODROME].cost = 3500;
-
-    buildings[BUILDING_FORT_AUXILIA_INFANTRY].laborers = 0;
-    buildings[BUILDING_FORT_ARCHERS].laborers = 0;
 }
 
 int model_load(void)
