@@ -5,6 +5,7 @@
 #include "city/military.h"
 #include "figure/combat.h"
 #include "figure/formation.h"
+#include "figure/formation_enemy.h"
 #include "figure/image.h"
 #include "figure/movement.h"
 #include "figure/route.h"
@@ -81,6 +82,16 @@ void figure_indigenous_native_action(figure *f)
             }
             break;
         case FIGURE_ACTION_159_NATIVE_ATTACKING:
+        {
+            // Checking if there are any more buildings on native land
+            int dst_x, dst_y;
+            if (!get_structures_on_native_land(&dst_x, &dst_y)) {
+                f->action_state = FIGURE_ACTION_157_NATIVE_RETURNING_FROM_MEETING;
+                f->destination_x = f->source_x;
+                f->destination_y = f->source_y;
+                figure_route_remove(f);
+                break;
+            }
             city_figures_add_attacking_native();
             f->terrain_usage = TERRAIN_USAGE_ENEMY;
             figure_movement_move_ticks(f, 1);
@@ -90,6 +101,7 @@ void figure_indigenous_native_action(figure *f)
                 f->action_state = FIGURE_ACTION_158_NATIVE_CREATED;
             }
             break;
+        }
     }
     int dir;
     if (f->action_state == FIGURE_ACTION_150_ATTACK || f->direction == DIR_FIGURE_ATTACK) {
