@@ -75,6 +75,11 @@ figure *figure_create(figure_type type, int x, int y, direction_type dir)
 
 void figure_delete(figure *f)
 {
+    if (f->trader_id >= 0 &&
+    (f->type == FIGURE_TRADE_CARAVAN || f->type == FIGURE_TRADE_SHIP || f->type == FIGURE_NATIVE_TRADER)) {
+        trader_free(f->trader_id);
+        f->trader_id = -1;
+    }
     building *b = building_get(f->building_id);
     switch (f->type) {
         case FIGURE_LABOR_SEEKER:
