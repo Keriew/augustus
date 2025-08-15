@@ -602,7 +602,7 @@ int building_warehouse_for_storing(int src_building_id, int x, int y, int resour
     building *b = building_get(min_building_id);
     if (b->has_road_access == 1) {
         map_point_store_result(b->x, b->y, dst);
-    } else if (!map_has_road_access_rotation(b->subtype.orientation, b->x, b->y, 3, dst)) {
+    } else if (!map_has_road_access_warehouse(b->x, b->y, dst)) {
         return 0;
     }
     return min_building_id;

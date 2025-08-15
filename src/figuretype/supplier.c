@@ -157,10 +157,16 @@ static int change_market_supplier_destination(figure *f, int dst_building_id)
     f->destination_building_id = dst_building_id;
     building *b_dst = building_get(dst_building_id);
     map_point road;
-    if (!map_has_road_access_rotation(b_dst->subtype.orientation, b_dst->x, b_dst->y, b_dst->size, &road) &&
-        !map_has_road_access_rotation(b_dst->subtype.orientation, b_dst->x, b_dst->y, 3, &road)) {
+    int has_road_access = 0;
+    if (b_dst->type == BUILDING_WAREHOUSE) {
+        has_road_access = map_has_road_access_warehouse(b_dst->x, b_dst->y, &road);
+    } else if (b_dst->type == BUILDING_GRANARY) {
+        has_road_access = map_has_road_access_granary(b_dst->x, b_dst->y, &road);
+    }
+    if (!has_road_access) {
         return 0;
     }
+
     f->action_state = FIGURE_ACTION_145_SUPPLIER_GOING_TO_STORAGE;
     f->destination_x = road.x;
     f->destination_y = road.y;
