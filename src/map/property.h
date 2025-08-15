@@ -53,6 +53,10 @@ void map_property_clear_deleted(int grid_offset);
 
 void map_property_clear_constructing_and_deleted(void);
 
+int map_property_is_future_earthquake(int grid_offset);
+void map_property_mark_future_earthquake(int grid_offset);
+void map_property_clear_future_earthquake(int grid_offset);
+
 void map_property_clear(void);
 
 void map_property_backup(void);
