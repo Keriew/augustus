@@ -75,6 +75,16 @@ static const uint8_t *get_value(const uint8_t *ptr, const uint8_t *end_ptr, int 
 
 static void override_model_data(void)
 {
+    buildings[BUILDING_HOSPITAL].desirability_value = -2;
+    buildings[BUILDING_HOSPITAL].desirability_step = 1;
+    buildings[BUILDING_HOSPITAL].desirability_step_size = 1;
+    buildings[BUILDING_HOSPITAL].desirability_range = 2;
+
+    buildings[BUILDING_DRAGGABLE_RESERVOIR].desirability_value = -6;
+    buildings[BUILDING_DRAGGABLE_RESERVOIR].desirability_step = 1;
+    buildings[BUILDING_DRAGGABLE_RESERVOIR].desirability_step_size = 2;
+    buildings[BUILDING_DRAGGABLE_RESERVOIR].desirability_range = 3;
+
     buildings[BUILDING_LARGE_TEMPLE_CERES].desirability_value = 14;
     buildings[BUILDING_LARGE_TEMPLE_CERES].desirability_step = 2;
     buildings[BUILDING_LARGE_TEMPLE_CERES].desirability_step_size = -2;
