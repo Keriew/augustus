@@ -154,6 +154,7 @@ static void add_granary(building *b)
     add_building(b);
     map_update_granary_internal_roads(b);
     map_tiles_update_area_roads(b->x, b->y, 5);
+    building_storage_set_permissions_all(b, 0); // test to see if granaries spawn with no permissions
 }
 
 static void add_to_map(int type, building *b, int size, int orientation, int waterside_orientation_abs)
