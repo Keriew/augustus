@@ -416,6 +416,7 @@ static int xml_import_special_parse_attribute(xml_data_attribute_t *attr, int *t
         case PARAMETER_TYPE_CLIMATE:
         case PARAMETER_TYPE_TERRAIN:
         case PARAMETER_TYPE_DATA_TYPE:
+        case PARAMETER_TYPE_MODEL:
             return xml_import_special_parse_type(attr, attr->type, target);
         case PARAMETER_TYPE_BUILDING_COUNTING:
             return xml_import_special_parse_building_counting(attr, target);
