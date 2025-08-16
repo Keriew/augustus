@@ -12,7 +12,7 @@
 #define TMP_BUFFER_SIZE 100000
 
 #define NUM_BUILDINGS 130
-#define NUM_NEW_BUILDINGS 95
+#define NUM_NEW_BUILDINGS BUILDING_TYPE_MAX - 115
 #define NUM_HOUSES 20
 
 static const uint8_t ALL_BUILDINGS[] = { 'A', 'L', 'L', ' ', 'B', 'U', 'I', 'L', 'D', 'I', 'N', 'G', 'S', 0 };
@@ -265,7 +265,7 @@ static const model_building new_buildings[NUM_NEW_BUILDINGS] = {
     { .cost = 200, .desirability_value = -8, .desirability_step = 1,
     .desirability_step_size = 2, .desirability_range = 4, .laborers = 12 }, // Architect guild
     { .cost = 100, .desirability_value = -8, .desirability_step = 1,
-    .desirability_step_size = 2, .desirability_range = 4, .laborers = 10 }, // Mess hall
+    .desirability_step_size = 2, .desirability_range = 4, .laborers = 10 }, // Supply post
     { .cost = 1000, .desirability_value = 6, .desirability_step = 1,
     .desirability_step_size = -1, .desirability_range = 4, .laborers = 20 }, // Lighthouse
     { .cost = 0, .desirability_value = 0, .desirability_step = 0,  .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 }, // Menu Statues
