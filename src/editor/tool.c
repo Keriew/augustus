@@ -181,7 +181,7 @@ static void add_terrain(const void *tile_data, int dx, int dy)
     }
     int grid_offset = tile->grid_offset + map_grid_delta(dx, dy);
     int terrain = map_terrain_get(grid_offset);
-    if (terrain & TERRAIN_BUILDING) {
+    if (terrain & TERRAIN_BUILDING && data.type != TOOL_EARTHQUAKE_CUSTOM) {
         map_building_tiles_remove(0, x, y);
         terrain = map_terrain_get(grid_offset);
     }
@@ -199,12 +199,14 @@ static void add_terrain(const void *tile_data, int dx, int dy)
             if (!(terrain & TERRAIN_ROCK)) {
                 terrain &= TERRAIN_PAINT_MASK;
                 terrain |= TERRAIN_ROCK;
+                map_property_clear_future_earthquake(grid_offset);
             }
             break;
         case TOOL_WATER:
             if (!(terrain & TERRAIN_WATER) && !(terrain & TERRAIN_ELEVATION_ROCK)) {
                 terrain &= TERRAIN_PAINT_MASK;
                 terrain |= TERRAIN_WATER;
+                map_property_clear_future_earthquake(grid_offset);
             }
             break;
         case TOOL_SHRUB:
@@ -221,6 +223,7 @@ static void add_terrain(const void *tile_data, int dx, int dy)
             break;
         case TOOL_RAISE_LAND:
             terrain = raise_land_tile(x, y, grid_offset, terrain);
+            map_property_clear_future_earthquake(grid_offset);
             break;
         case TOOL_LOWER_LAND:
             terrain = lower_land_tile(x, y, grid_offset, terrain);
@@ -428,6 +431,7 @@ static void place_access_ramp(const map_tile *tile)
             for (int dx = 0; dx < 2; dx++) {
                 int grid_offset = tile->grid_offset + map_grid_delta(dx, dy);
                 map_terrain_set(grid_offset, map_terrain_get(grid_offset) & terrain_mask);
+                map_property_clear_future_earthquake(grid_offset);
             }
         }
         map_building_tiles_add(0, tile->x, tile->y, 2,

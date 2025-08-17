@@ -7,6 +7,8 @@
 #include "core/lang.h"
 #include "core/string.h"
 #include "editor/tool.h"
+#include "editor/editor.h"
+#include "graphics/color.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/menu.h"
@@ -18,8 +20,10 @@
 #include "map/figure.h"
 #include "map/grid.h"
 #include "map/image.h"
+#include "map/image_context.h"
 #include "map/point.h"
 #include "map/property.h"
+#include "map/terrain.h"
 #include "sound/city.h"
 #include "sound/effect.h"
 #include "translation/translation.h"
@@ -76,6 +80,12 @@ static void draw_footprint(int x, int y, int grid_offset)
         map_image_set(grid_offset, image_id);
     }
     image_draw_isometric_footprint_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
+    if (map_property_is_future_earthquake(grid_offset) && editor_is_active() && !map_terrain_is(grid_offset, TERRAIN_IMPASSABLE_EARTHQUAKE)) {
+        const terrain_image *image = map_image_context_get_future_earthquake(grid_offset);
+        if (image->is_valid) {
+            image_draw_isometric_footprint_from_draw_tile(image_group(GROUP_TERRAIN_EARTHQUAKE) + image->group_offset + image->item_offset, x, y, COLOR_MASK_BUILDING_GHOST, draw_context.scale);
+        }
+    }
     if (config_get(CONFIG_UI_SHOW_GRID) && draw_context.scale <= 2.0f) {
         //grid is drawn by the renderer directly at zoom > 200%
         static int grid_id = 0;
