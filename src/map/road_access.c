@@ -118,6 +118,7 @@ int map_has_road_access_warehouse(int x, int y, map_point *road)
 
 int map_has_road_access_rotation(int rotation, int x, int y, int size, map_point *road)
 {
+    // do not use for warehouses or granaries, they have their own access checks
     switch (rotation) {
         case 3:
             x = x - size + 1;

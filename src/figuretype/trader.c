@@ -415,13 +415,13 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
     // 5. Return result 
     if (best_building_id) {
         const building *best_building = building_get(best_building_id);
-        if (best_building->type == BUILDING_GRANARY) {
+        if (best_building->type == BUILDING_GRANARY && best_building->has_road_access >= 1) {
             // go to center of granary
             map_point_store_result(best_building->x + 1, best_building->y + 1, dst);
-        } else if (best_building->has_road_access >= 1) {
+        } else if (best_building->type == BUILDING_WAREHOUSE && best_building->has_road_access >= 1) {
             map_point_store_result(best_building->x, best_building->y, dst);
-        } else if (!map_has_road_access_rotation(best_building->subtype.orientation,
-            best_building->x, best_building->y, 3, dst)) {
+        } else if (!map_has_road_access_warehouse(best_building->x, best_building->y, dst) &&
+             !map_has_road_access_granary(best_building->x, best_building->y, dst)) {
             resource_multiplier_reset();
             return 0; // No road access found
         } else {
@@ -433,6 +433,8 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
     resource_multiplier_reset();
     return 0;
 }
+
+
 
 
 static void go_to_next_storage(figure *f)

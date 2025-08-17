@@ -149,7 +149,7 @@ static void update_food_resource(resource_storage_info *info, resource_type reso
 static void update_good_resource(resource_storage_info *info, resource_type resource, building *b, int distance)
 {
     if (distance < info[resource].min_distance &&
-        !city_resource_is_stockpiled(resource) && building_warehouse_get_available_amount) {
+        !city_resource_is_stockpiled(resource) && building_warehouse_get_available_amount(b, resource)) {
         info[resource].min_distance = distance;
         info[resource].building_id = b->id;
     }

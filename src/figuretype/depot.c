@@ -90,7 +90,7 @@ static int get_storage_road_access(building *b, map_point *point)
             map_point_store_result(b->x, b->y, point);
             return 1;
         } else {
-            return map_has_road_access_rotation(b->subtype.orientation, b->x, b->y, 3, point);
+            return map_has_road_access_warehouse(b->x, b->y, point);
         }
     } else {
         point->x = b->road_access_x;

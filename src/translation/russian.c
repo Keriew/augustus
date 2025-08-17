@@ -229,7 +229,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_GRAND_TEMPLE_VENUS_DESC_MODULE_1, "Храм Венеры Вертикордии"},
     {TR_BUILDING_GRAND_TEMPLE_VENUS_DESC_MODULE_2, "Храм Венеры Генетриксы"},
     {TR_BUILDING_PANTHEON_DESC_MODULE_1, "Пантеон Ара Максима"},
-    {TR_BUILDING_PANTHEON_DESC_MODULE_2, "Пантеон Рома Аетерна"},
+    {TR_BUILDING_PANTHEON_DESC_MODULE_2, "Пантеон Рома Этерна"},
     {TR_BUILDING_GRAND_TEMPLE_MENU, "Великий храм"},
     {TR_BUILDING_WORK_CAMP, "Рабочий лагерь"},
     {TR_BUILDING_WORK_CAMP_DESC, "Здесь собираются рабочие для доставки материалов на стройки."},
@@ -794,7 +794,7 @@ static translation_string all_strings[] = {
     {TR_WINDOW_RACE_RED_HORSE_DESCRIPTION, "Красная команда - известна как команда самых успешных возничих в истории Рима - бывшего гребца и спасителя римского консула."},
     {TR_WINDOW_RACE_WHITE_HORSE_DESCRIPTION, "Белая команда - основана бывшими гладиаторами. Бойцовский дух у них в крови, и даже став свободными людьми, они живут ради новых испытаний."},
     {TR_WINDOW_RACE_GREEN_HORSE_DESCRIPTION, "Зеленая команда - потомки всадников из рода \"Целеров\" времен Римского царства. Они до сих пор утверждают, что являются лучшими из лучших."},
-    {TR_CONFIG_DIGIT_SEPARATOR, "Разделить цифры"},
+    {TR_CONFIG_DIGIT_SEPARATOR, "Разделители в больших числах"},
     {TR_TOOLTIP_OVERLAY_PROBLEMS_NO_LABOR, "Нет рабочих"},
     {TR_WINDOW_BUILDING_DISTRIBUTION_GRANARY_CART_PUSHER_GETTING, "Наша тележка забирает товар из другого амбара."},
     {TR_WINDOW_BUILDING_DISTRIBUTION_CART_PUSHER_RETURNING_WITH, "Наша тележка возвращается с доставки."},
@@ -1615,6 +1615,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT, "Хижина туземцев 2"}, // Имя в меню редактора карт
     {TR_BUILDING_NATIVE_HUT_ALT, "Хижина туземцев alt"}, // Имя в окне Тип здания для подсчета сценария событий
     {TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, "Склады и амбары можно строить поверх дорог"},
+    {TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, "Подсветить выбранное здание"},
     {TR_CHEAT_UNLOCK_LEGIONS, "Доступно легионов: 20"},
     {TR_BUILDING_FORT_STANDARD_ELEPHANTS, "\"Слоны\""},
     {TR_BUILDING_FORT_STANDARD_THUNDER_BOLTS, "\"Молнии\""},
@@ -1626,7 +1627,6 @@ static translation_string all_strings[] = {
     {TR_BUILDING_FORT_STANDARD_CAMELS, "\"Верблюды\""},
     {TR_BUILDING_FORT_STANDARD_DOLPHINS, "\"Дельфины\""},
     {TR_BUILDING_FORT_STANDARD_SEA_GOATS, "\"Козероги\""},
-    {TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, "Подсветить выбранное здание"},
     {TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING, "Хранение"},
     {TR_CONFIG_MAX_AUTOSAVE_SLOTS, "Максимальное количество ежегодных автосохранений:"},
     {TR_TOOLTIP_PERSONAL_SAVINGS, "Ваши личные сбережения!"},
@@ -1663,10 +1663,11 @@ static translation_string all_strings[] = {
     {TR_CHEAT_DISABLE_LEGIONS_CONSUMPTION, "Отключено потребление пищи легионами"},
     {TR_TOOLTIP_BUTTON_ACCEPT_NATIVES, "Разрешить доступ местным торговцам"},
     {TR_TOOLTIP_BUTTON_REJECT_NATIVES, "Запретить доступ местным торговцам"},
-    {TR_TOOLTIP_BUTTON_ACCEPT_ALL, "Разрешить всем доступ"},
-    {TR_TOOLTIP_BUTTON_REJECT_ALL, "Запретить всем доступ"},
+    {TR_TOOLTIP_BUTTON_ACCEPT_ALL, "Разрешить доступ всем"},
+    {TR_TOOLTIP_BUTTON_REJECT_ALL, "Запретить доступ всем"},
     {TR_TOOLTIP_OVERLAY_PROBLEMS_NO_ROAD_ACCESS, "Нет доступа к дороге"},
-    {TR_WARNING_NO_WAREHOUSE_TOWER_ROAD_ACCESS, "Подключите дорогу к башне склада"},
+    {TR_WARNING_NO_WAREHOUSE_TOWER_ROAD_ACCESS, "Разверните склад башней к дороге, шоссе или лестнице"},
+    {TR_BUILDING_FORT_MENU, "Форт"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

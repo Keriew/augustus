@@ -219,12 +219,51 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .event_data.attr = "gardens",
         .event_data.cannot_count = 1
     },
+    [BUILDING_FORT_GROUND] = {
+        .size = 4,
+        .fire_proof = 1,
+        .image_group = 66,
+        .image_offset = 1
+    },
     [BUILDING_FORT_LEGIONARIES] = {
         .size = 3,
         .fire_proof = 1,
         .image_group = 66,
         .draw_desirability_range = 1,
+        .sound_id = SOUND_CITY_FORT,
         .event_data.attr = "fort_legionaries"
+    },
+    [BUILDING_FORT_JAVELIN] = {
+        .size = 3,
+        .fire_proof = 1,
+        .image_group = 66,
+        .draw_desirability_range = 1,
+        .sound_id = SOUND_CITY_FORT,
+        .event_data.attr = "fort_javelin"
+    },
+    [BUILDING_FORT_MOUNTED] = {
+        .size = 3,
+        .fire_proof = 1,
+        .image_group = 66,
+        .draw_desirability_range = 1,
+        .sound_id = SOUND_CITY_FORT,
+        .event_data.attr = "fort_mounted"
+    },
+    [BUILDING_FORT_ARCHERS] = {
+        .size = 3,
+        .fire_proof = 1,
+        .image_group = 66,
+        .draw_desirability_range = 1,
+        .sound_id = SOUND_CITY_FORT,
+        .event_data.attr = "fort_archers"
+    },
+    [BUILDING_FORT_AUXILIA_INFANTRY] = {
+        .size = 3,
+        .fire_proof = 1,
+        .image_group = 66,
+        .draw_desirability_range = 1,
+        .sound_id = SOUND_CITY_FORT,
+        .event_data.attr = "fort_swords"
     },
     [BUILDING_SMALL_STATUE] = {
         .size = 1,
@@ -248,20 +287,6 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .image_group = 61,
         .image_offset = 2,
         .event_data.attr = "large_statue"
-    },
-    [BUILDING_FORT_JAVELIN] = {
-        .size = 3,
-        .fire_proof = 1,
-        .image_group = 66,
-        .draw_desirability_range = 1,
-        .event_data.attr = "fort_javelin"
-    },
-    [BUILDING_FORT_MOUNTED] = {
-        .size = 3,
-        .fire_proof = 1,
-        .image_group = 66,
-        .draw_desirability_range = 1,
-        .event_data.attr = "fort_mounted"
     },
     [BUILDING_DOCTOR] = {
         .size = 1,
@@ -310,12 +335,6 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .custom_asset.id = "Downgraded_Library",
         .event_data.attr = "library"
     },
-    [BUILDING_FORT_GROUND] = {
-        .size = 4,
-        .fire_proof = 1,
-        .image_group = 66,
-        .image_offset = 1
-    },
     [BUILDING_PREFECTURE] = {
         .size = 1,
         .image_group = 64,
@@ -328,41 +347,6 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .fire_proof = 1,
         .image_group = 205,
         .event_data.attr = "triumphal_arch"
-    },
-    [BUILDING_FORT_LEGIONARIES] = {
-        .size = 3,
-        .fire_proof = 1,
-        .image_group = 66,
-        .sound_id = SOUND_CITY_FORT,
-        .event_data.attr = "fort_legion",
-    },
-    [BUILDING_FORT_ARCHERS] = {
-        .size = 3,
-        .fire_proof = 1,
-        .image_group = 66,
-        .sound_id = SOUND_CITY_FORT,
-        .event_data.attr = "fort_archers"
-    },
-    [BUILDING_FORT_JAVELIN] = {
-        .size = 3,
-        .fire_proof = 1,
-        .image_group = 66,
-        .sound_id = SOUND_CITY_FORT,
-        .event_data.attr = "fort_javelin"
-    },
-    [BUILDING_FORT_MOUNTED] = {
-        .size = 3,
-        .fire_proof = 1,
-        .image_group = 66,
-        .sound_id = SOUND_CITY_FORT,
-        .event_data.attr = "fort_mounted"
-    },
-    [BUILDING_FORT_AUXILIA_INFANTRY] = {
-        .size = 3,
-        .fire_proof = 1,
-        .image_group = 66,
-        .sound_id = SOUND_CITY_FORT,
-        .event_data.attr = "fort_swords"
     },
     [BUILDING_GATEHOUSE] = {
         .size = 2,
@@ -1341,20 +1325,6 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .custom_asset.id = "Overgrown_Garden_01",
         .event_data.attr = "overgrown_gardens"
     },
-    [BUILDING_FORT_AUXILIA_INFANTRY] = {
-        .size = 3,
-        .fire_proof = 1,
-        .draw_desirability_range = 1,
-        .custom_asset.group = "Military",
-        .event_data.attr = "fort_auxilia_infantry"
-    },
-    [BUILDING_FORT_ARCHERS] = {
-        .size = 3,
-        .fire_proof = 1,
-        .draw_desirability_range = 1,
-        .custom_asset.group = "Military",
-        .event_data.attr = "fort_archers"
-    },
     [BUILDING_ARMOURY] = {
         .size = 2,
         .sound_id = SOUND_CITY_ARMOURY,
@@ -1378,25 +1348,25 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .event_data.attr = "native_hut_alt"
     },
     [BUILDING_NATIVE_DECORATION] = {
-    .size = 1,
-    .fire_proof = 1,
-    .custom_asset.group = "Terrain_Maps",
-    .custom_asset.id = "Native_Decoration_Central_01",
-    .event_data.attr = "native_decor"
+        .size = 1,
+        .fire_proof = 1,
+        .custom_asset.group = "Terrain_Maps",
+        .custom_asset.id = "Native_Decoration_Central_01",
+        .event_data.attr = "native_decor"
     },
     [BUILDING_NATIVE_MONUMENT] = {
-    .size = 4,
-    .fire_proof = 1,
-    .custom_asset.group = "Terrain_Maps",
-    .custom_asset.id = "Native_Monument_Central_01",
-    .event_data.attr = "native_monument"
+        .size = 4,
+        .fire_proof = 1,
+        .custom_asset.group = "Terrain_Maps",
+        .custom_asset.id = "Native_Monument_Central_01",
+        .event_data.attr = "native_monument"
     },
     [BUILDING_NATIVE_WATCHTOWER] = {
-    .size = 1,
-    .fire_proof = 1,
-    .custom_asset.group = "Terrain_Maps",
-    .custom_asset.id = "Native_Watchtower_Central_01",
-    .event_data.attr = "native_watchtower"
+        .size = 1,
+        .fire_proof = 1,
+        .custom_asset.group = "Terrain_Maps",
+        .custom_asset.id = "Native_Watchtower_Central_01",
+        .event_data.attr = "native_watchtower"
     },
 };
 
