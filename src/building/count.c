@@ -84,6 +84,8 @@ static const building_type all_fort_types[] = {
     BUILDING_FORT_AUXILIA_INFANTRY,
     BUILDING_FORT_ARCHERS,
 };
+int building_count_forts(int active_only);
+
 int building_count_grand_temples(void)
 {
     return building_count_total(BUILDING_GRAND_TEMPLE_CERES) +
@@ -402,21 +404,21 @@ int building_count_fort_type_total(figure_type type)
     return total;
 }
 
-int building_count_forts_get_building_type_from_figure(figure_type type)
+figure_type building_count_forts_get_figure_type_from_building(building_type type)
 {
     switch (type) {
-        case FIGURE_FORT_LEGIONARY:
-            return BUILDING_FORT_LEGIONARIES;
-        case FIGURE_FORT_JAVELIN:
-            return BUILDING_FORT_JAVELIN;
-        case FIGURE_FORT_MOUNTED:
-            return BUILDING_FORT_MOUNTED;
-        case FIGURE_FORT_INFANTRY:
-            return BUILDING_FORT_AUXILIA_INFANTRY;
-        case FIGURE_FORT_ARCHER:
-            return BUILDING_FORT_ARCHERS;
+        case BUILDING_FORT_LEGIONARIES:
+            return FIGURE_FORT_LEGIONARY;
+        case BUILDING_FORT_JAVELIN:
+            return FIGURE_FORT_JAVELIN;
+        case BUILDING_FORT_MOUNTED:
+            return FIGURE_FORT_MOUNTED;
+        case BUILDING_FORT_AUXILIA_INFANTRY:
+            return FIGURE_FORT_INFANTRY;
+        case BUILDING_FORT_ARCHERS:
+            return FIGURE_FORT_ARCHER;
         default:
-            return BUILDING_NONE;
+            return FIGURE_NONE;
     }
 }
 
@@ -425,7 +427,7 @@ int building_count_forts(int active_only)
     int total = 0;
     for (size_t i = 0; i < sizeof(all_fort_types) / sizeof(all_fort_types[0]); i++) {
         // adjust the figure type here
-        figure_type f_type = building_count_forts_get_building_type_from_figure(all_fort_types[i]);
+        figure_type f_type = building_count_forts_get_figure_type_from_building(all_fort_types[i]);
         total += count_forts_per_type(all_fort_types[i], f_type, active_only);
     }
     return total;

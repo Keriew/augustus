@@ -1668,6 +1668,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_OVERLAY_PROBLEMS_NO_ROAD_ACCESS, "No road access"},
     {TR_WARNING_NO_WAREHOUSE_TOWER_ROAD_ACCESS, "Connect road to warehouse tower"},
     {TR_BUILDING_FORT_MENU, "Fort"},
+    {TR_PARAMETER_VALUE_BUILDING_MENU_FORTS, "All Forts"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
