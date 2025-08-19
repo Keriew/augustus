@@ -627,6 +627,8 @@ const uint8_t *lang_get_string(int group, int index)
                 return translation_for(TR_EDITOR_TOOL_EARTHQUAKE_POINT);
             case TR_EDITOR_TOOL_EARTHQUAKE_CUSTOM:
                 return translation_for(TR_EDITOR_TOOL_EARTHQUAKE_CUSTOM);
+            case TR_EDITOR_TOOL_EARTHQUAKE_REMOVE:
+                return translation_for(TR_EDITOR_TOOL_EARTHQUAKE_REMOVE);
             default:
                 break;
         }

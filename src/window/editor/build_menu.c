@@ -54,7 +54,7 @@ static const int MENU_TYPES[MENU_NUM_ITEMS][MAX_ITEMS_PER_MENU] = {
     TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION, TR_EDITOR_SCENARIO_BUILDING_NATIVE_MONUMENT,
     TR_EDITOR_SCENARIO_BUILDING_NATIVE_WATCHTOWER, -1},
     {23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, -1},
-    {TR_EDITOR_TOOL_EARTHQUAKE_POINT, TR_EDITOR_TOOL_EARTHQUAKE_CUSTOM, -1},
+    {TR_EDITOR_TOOL_EARTHQUAKE_POINT, TR_EDITOR_TOOL_EARTHQUAKE_CUSTOM, TR_EDITOR_TOOL_EARTHQUAKE_REMOVE, -1},
 };
 
 static struct {
@@ -193,6 +193,7 @@ static void button_menu_item(const generic_button *button)
             switch (index) {
                 case 0: editor_tool_set_type(TOOL_EARTHQUAKE_POINT); break;
                 case 1: editor_tool_set_type(TOOL_EARTHQUAKE_CUSTOM); break;
+                case 2: editor_tool_set_type(TOOL_EARTHQUAKE_CUSTOM_REMOVE); break;
             }
     }
     data.selected_submenu = MENU_NONE;

@@ -134,6 +134,7 @@ int editor_tool_is_brush(void)
         case TOOL_RAISE_LAND:
         case TOOL_LOWER_LAND:
         case TOOL_EARTHQUAKE_CUSTOM:
+        case TOOL_EARTHQUAKE_CUSTOM_REMOVE:
             return 1;
         default:
             return 0;
@@ -233,6 +234,8 @@ static void add_terrain(const void *tile_data, int dx, int dy)
                 map_property_mark_future_earthquake(grid_offset);
             }
             break;
+        case TOOL_EARTHQUAKE_CUSTOM_REMOVE:
+            map_property_clear_future_earthquake(grid_offset);
         default:
             break;
     }
@@ -268,6 +271,7 @@ void editor_tool_update_use(const map_tile *tile)
             break;
         case TOOL_TREES:
         case TOOL_EARTHQUAKE_CUSTOM:
+        case TOOL_EARTHQUAKE_CUSTOM_REMOVE:
             map_image_context_reset_water();
             map_tiles_update_region_water(x_min, y_min, x_max, y_max);
             map_tiles_update_all_rocks();
@@ -302,7 +306,7 @@ void editor_tool_update_use(const map_tile *tile)
             map_tiles_update_all_rocks();
             map_tiles_update_region_empty_land(x_min, y_min, x_max, y_max);
             map_tiles_update_region_meadow(x_min, y_min, x_max, y_max);
-            break;            
+            break;
         default:
             break;
     }

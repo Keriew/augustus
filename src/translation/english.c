@@ -1670,6 +1670,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_EARTHQUAKE_CUSTOM, "Custom"},
     {TR_EDITOR_TOOL_EARTHQUAKE_POINT, "Earthquake point"},
     {TR_EDITOR_TOOL_EARTHQUAKE_CUSTOM, "Custom Earthquake"},
+    {TR_EDITOR_TOOL_EARTHQUAKE_REMOVE, "Remove Earthquake"},
     {TR_BUILDING_FORT_MENU, "Fort"},
 };
 
