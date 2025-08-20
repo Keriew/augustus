@@ -74,7 +74,7 @@ void text_draw_cursor(int x_offset, int y_offset, int is_insert)
                 x_offset + input_cursor.x_offset - 3, x_offset + input_cursor.x_offset + 1,
                 y_offset + input_cursor.y_offset - 3, y_offset + input_cursor.y_offset - 3, COLOR_WHITE);
             graphics_draw_line(
-                x_offset + input_cursor.x_offset - 1, x_offset + input_cursor.x_offset - 1, 
+                x_offset + input_cursor.x_offset - 1, x_offset + input_cursor.x_offset - 1,
                 y_offset + input_cursor.y_offset - 3, y_offset + input_cursor.y_offset + 13, COLOR_WHITE);
             graphics_draw_line(
                 x_offset + input_cursor.x_offset - 3, x_offset + input_cursor.x_offset + 1,
@@ -616,6 +616,7 @@ int text_draw_multiline(const uint8_t *str, int x_offset, int y_offset, int box_
 
 int text_measure_multiline(const uint8_t *str, int box_width, font_t font, int *largest_width)
 {
+    // \n is not counted as a word and is only caught it directly after a word: "word \n" won't work correctly
     *largest_width = 0;
     int has_more_characters = 1;
     int guard = 0;

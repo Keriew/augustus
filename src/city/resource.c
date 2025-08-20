@@ -1,6 +1,7 @@
 #include "resource.h"
 
 #include "building/building.h"
+#include "building/caravanserai.h"
 #include "building/count.h"
 #include "building/granary.h"
 #include "building/industry.h"
@@ -17,6 +18,7 @@
 #include "empire/city.h"
 #include "figure/figure.h"
 #include "figure/formation.h"
+#include "game/cheats.h"
 #include "game/difficulty.h"
 #include "game/resource.h"
 #include "game/tutorial.h"
@@ -41,27 +43,48 @@ int city_resource_count_food_on_granaries(resource_type food)
     return city_data.resource.granary_food_stored[food];
 }
 
-int city_resource_count(resource_type resource)
+int city_resource_count_warehouses_amount(resource_type resource)
 {
     return city_data.resource.stored_in_warehouses[resource];
 }
 
-int city_resource_get_amount_including_granaries(resource_type resource, int amount, int *checked_granaries)
+int city_resource_get_total_amount(resource_type resource, int respect_maintaining)
+{
+    int total = building_warehouses_count_available_resource(resource, respect_maintaining);
+
+    if (resource_is_food(resource)) {
+        int granary_total = building_granaries_count_available_resource(resource, respect_maintaining);
+        total += granary_total;
+    }
+    return total;
+}
+
+int city_resource_get_amount_including_granaries(resource_type resource, int amount, int *checked_granaries,
+    int respect_maintaining)
 {
     if (checked_granaries) {
         *checked_granaries = 0;
     }
-    int amount_stored = city_data.resource.stored_in_warehouses[resource];
-    if (amount_stored < amount && resource_is_food(resource)) {
-        amount_stored += city_data.resource.granary_food_stored[resource] / 100;
+
+    int total = building_warehouses_count_available_resource(resource, respect_maintaining);
+    if (total >= amount) {
+        return total;
+    }
+
+    if (resource_is_food(resource)) {
+        int granary_total = building_granaries_count_available_resource(resource, respect_maintaining);
+        total += granary_total;
+
         if (checked_granaries) {
             *checked_granaries = 1;
         }
     }
-    return amount_stored;
+
+    return total;
 }
 
-int city_resource_get_available_empty_space_granaries(resource_type food, int respect_settings)
+
+int city_resource_get_available_empty_space_granaries(resource_type food)
 {
     int available_storage = 0;
     if (!resource_is_food(food)) {
@@ -72,28 +95,21 @@ int city_resource_get_available_empty_space_granaries(resource_type food, int re
         if (b->state != BUILDING_STATE_IN_USE) {
             continue;
         }
-        if (!respect_settings) {
-            available_storage += b->resources[RESOURCE_NONE];
-        } else {
-            available_storage += building_granary_maximum_receptible_amount(food, b);
-        }
+
+        available_storage += building_granary_maximum_receptible_amount(b, food);
     }
 
     return available_storage;
 }
 
-int city_resource_get_available_empty_space_warehouses(resource_type resource, int respect_settings)
+int city_resource_get_available_empty_space_warehouses(resource_type resource)
 {
     int available_storage = 0;
     for (building *b = building_first_of_type(BUILDING_WAREHOUSE); b; b = b->next_of_type) {
         if (b->state != BUILDING_STATE_IN_USE) {
             continue;
         }
-        if (!respect_settings) {
-            available_storage += building_warehouse_max_space_for_resource(resource, b);
-        } else {
-            available_storage += building_warehouse_maximum_receptible_amount(resource, b);
-        }
+        available_storage += building_warehouse_maximum_receptible_amount(b, resource);
     }
 
     return available_storage;
@@ -235,7 +251,8 @@ void city_resource_toggle_mothballed(resource_type resource)
 
 void city_resource_add_produced_to_granary(int amount)
 {
-    city_data.resource.food_produced_this_month += amount;
+    city_data.resource.food_produced_this_month += amount * RESOURCE_ONE_LOAD;
+    //food produced is counted in units, so convert from cartloads
 }
 
 void city_resource_add_to_granary(resource_type food, int amount)
@@ -269,10 +286,8 @@ void city_resource_calculate_warehouse_stocks(void)
     for (building *b = building_first_of_type(BUILDING_WAREHOUSE); b; b = b->next_of_type) {
         if (b->state == BUILDING_STATE_IN_USE) {
             b->has_road_access = 0;
-            if (map_has_road_access_rotation(b->subtype.orientation, b->x, b->y, b->size, 0)) {
+            if (map_has_road_access_warehouse(b->x, b->y, 0)) {
                 b->has_road_access = 1;
-            } else if (map_has_road_access_rotation(b->subtype.orientation, b->x, b->y, 3, 0)) {
-                b->has_road_access = 2;
             }
         }
     }
@@ -405,9 +420,9 @@ static void calculate_available_food(void)
             } else {
                 city_data.resource.granaries.operating++;
                 for (int r = 0; r < RESOURCE_MAX_FOOD; r++) {
-                    city_data.resource.granary_food_stored[r] += b->resources[r];
+                    city_data.resource.granary_food_stored[r] += b->resources[r] * RESOURCE_ONE_LOAD;
                 }
-                if (amount_stored > 400) {
+                if (amount_stored > 4) {
                     tutorial_on_filled_granary();
                 }
             }
@@ -514,6 +529,10 @@ static int mess_hall_consume_food(void)
     if (!b || (b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_MOTHBALLED)) {
         return 0;
     }
+    if (game_cheat_disabled_legions_consumption()) {
+        return 0;
+    }
+
     int food_required = city_military_total_soldiers_in_city() *
         difficulty_adjust_soldier_food_consumption(FOOD_PER_SOLDIER_MONTHLY);
     int num_foods = 0;
@@ -564,7 +583,7 @@ static int caravanserai_consume_food(void)
     if (!building_monument_working(BUILDING_CARAVANSERAI)) {
         return 0;
     }
-    int food_required = trade_caravan_count() * FOOD_PER_TRADER_MONTHLY;
+    int food_required = building_caravanserai_food_required_monthly();
 
     trade_policy policy = city_trade_policy_get(LAND_TRADE_POLICY);
 
@@ -618,9 +637,13 @@ void city_resource_consume_food(void)
     city_data.resource.food_types_eaten = 0;
 
     int total_consumed = house_consume_food() + mess_hall_consume_food() + caravanserai_consume_food();
-
+    if (game_cheat_disabled_legions_consumption()) {
+        city_data.mess_hall.food_stress_cumulative = 0;
+        city_data.mess_hall.food_percentage_missing_this_month = 0;
+        city_data.mess_hall.food_types = resource_total_food_mapped(); // max i think
+    }
     if (city_military_total_soldiers_in_city() > 0 && !city_buildings_has_mess_hall() &&
-        !city_data.mess_hall.missing_mess_hall_warning_shown) {
+        !city_data.mess_hall.missing_mess_hall_warning_shown && !game_cheat_disabled_legions_consumption()) {
         city_data.mess_hall.food_percentage_missing_this_month = 100;
         city_message_post(1, MESSAGE_SOLDIERS_STARVING_NO_MESS_HALL, 0, 0);
         city_data.mess_hall.missing_mess_hall_warning_shown = 1;
@@ -643,4 +666,5 @@ void city_resource_consume_food(void)
     city_data.resource.food_consumed_last_month = total_consumed;
     city_data.resource.food_produced_last_month = city_data.resource.food_produced_this_month;
     city_data.resource.food_produced_this_month = 0;
+
 }

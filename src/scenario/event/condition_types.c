@@ -28,7 +28,7 @@ int scenario_condition_type_building_count_active_met(const scenario_condition_t
     building_type type = condition->parameter3;
 
     int total_active_count = 0;
-    switch(type) {
+    switch (type) {
         case BUILDING_MENU_FARMS:
             total_active_count = building_set_count_farms(1);
             break;
@@ -60,13 +60,28 @@ int scenario_condition_type_building_count_active_met(const scenario_condition_t
             total_active_count = building_count_any_total(1);
             break;
         case BUILDING_FORT_LEGIONARIES:
-            total_active_count += building_count_fort_type_total(FIGURE_FORT_LEGIONARY);
+            total_active_count += building_count_active_fort_type(FIGURE_FORT_LEGIONARY);
             break;
         case BUILDING_FORT_JAVELIN:
-            total_active_count += building_count_fort_type_total(FIGURE_FORT_JAVELIN);
+            total_active_count += building_count_active_fort_type(FIGURE_FORT_JAVELIN);
             break;
         case BUILDING_FORT_MOUNTED:
-            total_active_count += building_count_fort_type_total(FIGURE_FORT_MOUNTED);
+            total_active_count += building_count_active_fort_type(FIGURE_FORT_MOUNTED);
+            break;
+        case BUILDING_ROAD:
+            total_active_count = building_count_roads();
+            break;
+        case BUILDING_HIGHWAY:
+            total_active_count = building_count_highway();
+            break;
+        case BUILDING_PLAZA:
+            total_active_count = building_count_plaza();
+            break;
+        case BUILDING_GARDENS:
+            total_active_count = building_count_gardens(0);
+            break;
+        case BUILDING_OVERGROWN_GARDENS:
+            total_active_count = building_count_gardens(1);
             break;
         default:
             total_active_count = building_count_active(type);
@@ -83,7 +98,7 @@ int scenario_condition_type_building_count_any_met(const scenario_condition_t *c
     building_type type = condition->parameter3;
 
     int total_active_count = 0;
-    switch(type) {
+    switch (type) {
         case BUILDING_MENU_FARMS:
             total_active_count = building_set_count_farms(0);
             break;
@@ -123,6 +138,21 @@ int scenario_condition_type_building_count_any_met(const scenario_condition_t *c
         case BUILDING_FORT_MOUNTED:
             total_active_count += building_count_fort_type_total(FIGURE_FORT_MOUNTED);
             break;
+        case BUILDING_ROAD:
+            total_active_count = building_count_roads();
+            break;
+        case BUILDING_HIGHWAY:
+            total_active_count = building_count_highway();
+            break;
+        case BUILDING_PLAZA:
+            total_active_count = building_count_plaza();
+            break;
+        case BUILDING_GARDENS:
+            total_active_count = building_count_gardens(0);
+            break;
+        case BUILDING_OVERGROWN_GARDENS:
+            total_active_count = building_count_gardens(1);
+            break;
         default:
             total_active_count = building_count_total(type);
             break;
@@ -148,7 +178,7 @@ int scenario_condition_type_building_count_area_met(const scenario_condition_t *
     int maxx = map_grid_offset_to_x(grid_offset) + block_radius;
     int maxy = map_grid_offset_to_y(grid_offset) + block_radius;
     int buildings_in_area = 0;
-    switch(type) {
+    switch (type) {
         case BUILDING_MENU_FARMS:
             buildings_in_area = building_set_area_count_farms(minx, miny, maxx, maxy);
             break;
@@ -185,8 +215,23 @@ int scenario_condition_type_building_count_area_met(const scenario_condition_t *
         case BUILDING_FORT_MOUNTED:
             buildings_in_area = building_count_fort_type_in_area(minx, miny, maxx, maxy, FIGURE_FORT_MOUNTED);
             break;
+        case BUILDING_ROAD:
+            buildings_in_area = building_count_roads_in_area(minx, miny, maxx + 1, maxy + 1);
+            break;
+        case BUILDING_HIGHWAY:
+            buildings_in_area = building_count_highway_in_area(minx, miny, maxx + 1, maxy + 1);
+            break;
+        case BUILDING_PLAZA:
+            buildings_in_area = building_count_plaza_in_area(minx, miny, maxx + 1, maxy + 1);
+            break;
+        case BUILDING_GARDENS:
+            buildings_in_area = building_count_gardens_in_area(minx, miny, maxx + 1, maxy + 1, 0);
+            break;
+        case BUILDING_OVERGROWN_GARDENS:
+            buildings_in_area = building_count_gardens_in_area(minx, miny, maxx + 1, maxy + 1, 1);
+            break;
         default:
-            buildings_in_area = building_count_in_area(type, minx, miny, maxx, maxy);
+            buildings_in_area = building_count_in_area(type, minx, miny, maxx + 1, maxy + 1);
             break;
     }
 
@@ -275,23 +320,23 @@ int scenario_condition_type_resource_storage_available_met(const scenario_condit
     int comparison = condition->parameter2;
     int value = condition->parameter3;
     storage_types storage_type = condition->parameter4;
-    int respect_settings = condition->parameter5;
+    int respect_settings = condition->parameter5; //for empty storage, respecting settings doesn't currently make sense
 
     if (resource < RESOURCE_MIN || resource > RESOURCE_MAX) {
         return 0;
     }
 
     int storage_available = 0;
-    switch(storage_type) {
+    switch (storage_type) {
         case STORAGE_TYPE_ALL:
-            storage_available += city_resource_get_available_empty_space_warehouses(resource, respect_settings);
-            storage_available += city_resource_get_available_empty_space_granaries(resource, respect_settings) / RESOURCE_ONE_LOAD;
+            storage_available += city_resource_get_available_empty_space_warehouses(resource);
+            storage_available += city_resource_get_available_empty_space_granaries(resource);
             break;
         case STORAGE_TYPE_GRANARIES:
-            storage_available += city_resource_get_available_empty_space_granaries(resource, respect_settings) / RESOURCE_ONE_LOAD;
+            storage_available += city_resource_get_available_empty_space_granaries(resource);
             break;
         case STORAGE_TYPE_WAREHOUSES:
-            storage_available += city_resource_get_available_empty_space_warehouses(resource, respect_settings);
+            storage_available += city_resource_get_available_empty_space_warehouses(resource);
             break;
         default:
             break;
@@ -312,9 +357,9 @@ int scenario_condition_type_resource_stored_count_met(const scenario_condition_t
     }
 
     int amount_stored = 0;
-    switch(storage_type) {
+    switch (storage_type) {
         case STORAGE_TYPE_ALL:
-            amount_stored += city_resource_count(resource);
+            amount_stored += city_resource_count_warehouses_amount(resource);
             if (resource_is_food(resource)) {
                 amount_stored += city_resource_count_food_on_granaries(resource) / RESOURCE_ONE_LOAD;
             }
@@ -325,7 +370,7 @@ int scenario_condition_type_resource_stored_count_met(const scenario_condition_t
             }
             break;
         case STORAGE_TYPE_WAREHOUSES:
-            amount_stored += city_resource_count(resource);
+            amount_stored += city_resource_count_warehouses_amount(resource);
             break;
         default:
             break;
@@ -456,7 +501,7 @@ int scenario_condition_type_trade_sell_price_met(const scenario_condition_t *con
     if (resource < RESOURCE_MIN || resource > RESOURCE_MAX) {
         return 0;
     }
-    
+
     int trade_sell_price = trade_price_base_sell(resource);
     return comparison_helper_compare_values(comparison, trade_sell_price, value);
 }

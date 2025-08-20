@@ -26,7 +26,7 @@ typedef enum {
 static const int ROUTE_OFFSETS[] = { -162, 1, 162, -1, -161, 163, 161, -163 };
 static const int ROUTE_OFFSETS_X[] = { 0, 1, 0, -1,  1, 1, -1, -1 };
 static const int ROUTE_OFFSETS_Y[] = { -1, 0, 1,  0, -1, 1,  1, -1 };
-static const int HIGHWAY_DIRECTIONS[] = { 
+static const int HIGHWAY_DIRECTIONS[] = {
     TERRAIN_HIGHWAY_TOP_RIGHT | TERRAIN_HIGHWAY_BOTTOM_RIGHT, // up
     TERRAIN_HIGHWAY_BOTTOM_LEFT | TERRAIN_HIGHWAY_BOTTOM_RIGHT, // right
     TERRAIN_HIGHWAY_TOP_LEFT | TERRAIN_HIGHWAY_BOTTOM_LEFT, // down
@@ -410,6 +410,20 @@ static int callback_calc_distance_build_aqueduct(int next_offset, int dist, int 
     return 1;
 }
 
+static int map_can_place_initial_reservoir(int grid_offset)
+{
+    if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
+        return 1;
+    } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+        if (building_get(map_building_at(grid_offset))->type == BUILDING_RESERVOIR) {
+            return 1;
+        }
+    } else {
+        return 0;
+    }
+
+}
+
 static int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aqueduct)
 {
     if (is_aqueduct && !map_can_place_aqueduct_on_highway(grid_offset, 0)) {
@@ -464,7 +478,14 @@ int map_routing_calculate_distances_for_building(routed_building_type type, int 
         route_queue_all_from(source_offset, DIRECTIONS_NO_DIAGONALS, callback_calc_distance_build_highway, 0);
         return 1;
     }
+    if (type == BUILDING_DRAGGABLE_RESERVOIR) {
+        if (map_can_place_initial_reservoir(source_offset)) {
+            return 1;
+        } else {
+            return 0;
+        }
 
+    }
     if (!map_can_place_initial_road_or_aqueduct(source_offset, type != ROUTED_BUILDING_ROAD)) {
         return 0;
     }

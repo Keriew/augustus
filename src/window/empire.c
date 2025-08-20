@@ -180,7 +180,6 @@ typedef struct {
 // measurements and scales helper functions
 static int measure_trade_row_width(const empire_city *city, int is_sell, const trade_row_style *style); // ???
 static void image_draw_silh_scaled_centered(int image_id, int x, int y, color_t color, int draw_scale_percent);
-static void image_draw_scaled_centered(int image_id, int x, int y, color_t color, int draw_scale_percent);
 static void animation_draw_scaled(const image *img, int image_id, int new_animation, int x, int y, color_t color, int draw_scale_percent);
 static int open_trade_button_icon_fits(const empire_city *city, const open_trade_button_style *style, trade_icon_type icon_type);
 
@@ -1465,7 +1464,7 @@ void window_empire_draw_trade_waypoints(const empire_object *trade_route, int x_
 
     // Build a list of all dot positions in the correct order.
     int dot_count = 0;
-    struct { int x, y; } dot_pos[128]; // Arbitrary upper limit
+    struct { int x, y; } dot_pos[1024]; // increased limit - 1024 dots max per route
 
     const empire_object *our_city = empire_object_get_our_city();
     const empire_object *trade_city = empire_object_get_trade_city(trade_route->trade_route_id);
@@ -1496,7 +1495,7 @@ void window_empire_draw_trade_waypoints(const empire_object *trade_route, int x_
     float dist = sqrtf(dx * dx + dy * dy);
     float nx = (float) dx / dist, ny = (float) dy / dist;
     float px = last_x, py = last_y, pos = remaining;
-    while (pos < dist && dot_count < 128) {
+    while (pos < dist && dot_count < 1024) {
         dot_pos[dot_count].x = (int) (px + nx * pos);
         dot_pos[dot_count].y = (int) (py + ny * pos);
         dot_count++;
@@ -1721,17 +1720,6 @@ static void image_draw_silh_scaled_centered(int image_id, int x, int y, color_t 
     float scaled_y = (((y) +img->height / 2.0f) - (img->height / obj_draw_scale) / 2.0f) * obj_draw_scale;
 
     image_draw_silhouette(image_id, scaled_x, scaled_y, color, obj_draw_scale);
-}
-
-static void image_draw_scaled_centered(int image_id, int x, int y, color_t color, int draw_scale_percent)
-{
-    float obj_draw_scale = 100.0f / draw_scale_percent;
-    const image *img = image_get(image_id);
-
-    float scaled_x = (((x) +img->width / 2.0f) - (img->width / obj_draw_scale) / 2.0f) * obj_draw_scale;
-    float scaled_y = (((y) +img->height / 2.0f) - (img->height / obj_draw_scale) / 2.0f) * obj_draw_scale;
-
-    image_draw(image_id, scaled_x, scaled_y, color, obj_draw_scale);
 }
 
 static void draw_invasion_warning(int x, int y, int image_id)

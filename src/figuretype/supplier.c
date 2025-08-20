@@ -8,6 +8,7 @@
 #include "building/storage.h"
 #include "building/warehouse.h"
 #include "core/image.h"
+#include "city/data_private.h"
 #include "figure/combat.h"
 #include "figure/image.h"
 #include "figure/movement.h"
@@ -19,6 +20,19 @@
 
 #define MAX_DISTANCE 40
 
+int figure_supplier_max_stocked_mess_hall_adjusted(void)
+{
+    int max_stock;
+    if (city_data.military.total_legions < 10) {
+        max_stock = MAX_FOOD_STOCKED_MESS_HALL;
+    } else if (city_data.military.total_legions == 10) {
+        max_stock = MAX_FOOD_STOCKED_MESS_HALL * 1.5f; //increase by 50% if max legions
+    } else {   //cheat code activated
+        max_stock = MAX_FOOD_STOCKED_MESS_HALL * 2; // double the possible stock
+    }
+    return max_stock;
+}
+
 int figure_supplier_create_delivery_boy(int leader_id, int first_figure_id, int type)
 {
     figure *f = figure_get(first_figure_id);
@@ -26,6 +40,7 @@ int figure_supplier_create_delivery_boy(int leader_id, int first_figure_id, int 
     f = figure_get(first_figure_id);
     boy->leading_figure_id = leader_id;
     boy->collecting_item_id = f->collecting_item_id;
+    boy->loads_sold_or_carrying = 1; // for consistency
     // deliver to destination instead of origin
     if (f->action_state == FIGURE_ACTION_214_DESTINATION_MARS_PRIEST_CREATED) {
         boy->building_id = f->destination_building_id;
@@ -42,48 +57,30 @@ static int take_food_from_granary(figure *f, int market_id, int granary_id)
     if (!resource_is_food(resource)) {
         return 0;
     }
-
     building *granary = building_get(granary_id);
     building *market = building_get(market_id);
 
     int market_units = market->resources[resource];
     int max_units = 0;
-    int granary_units = granary->resources[resource];
-    int num_loads;
+    int granary_loads_stored = building_granary_count_available_resource(granary, resource, 1);
+    int granary_loads_take = 0;
 
     if (market->type == BUILDING_MESS_HALL) {
-        max_units = MAX_FOOD_STOCKED_MESS_HALL - market_units;
+        max_units = figure_supplier_max_stocked_mess_hall_adjusted() - market_units;
     } else if (market->type == BUILDING_CARAVANSERAI) {
         max_units = MAX_FOOD_STOCKED_CARAVANSERAI - market_units;
     } else {
         max_units = MAX_FOOD_STOCKED_MARKET - market_units;
     }
-    if (granary_units >= 800) {
-        num_loads = 8;
-    } else if (granary_units >= 700) {
-        num_loads = 7;
-    } else if (granary_units >= 600) {
-        num_loads = 6;
-    } else if (granary_units >= 500) {
-        num_loads = 5;
-    } else if (granary_units >= 400) {
-        num_loads = 4;
-    } else if (granary_units >= 300) {
-        num_loads = 3;
-    } else if (granary_units >= 200) {
-        num_loads = 2;
-    } else if (granary_units >= 100) {
-        num_loads = 1;
+    if (granary_loads_stored > (max_units / RESOURCE_ONE_LOAD)) {
+        granary_loads_take = (max_units / RESOURCE_ONE_LOAD);
     } else {
-        num_loads = 0;
+        granary_loads_take = granary_loads_stored;
     }
-    if (num_loads > max_units / 100) {
-        num_loads = max_units / 100;
-    }
-    if (num_loads <= 0) {
+    if (!granary_loads_take) {
         return 0;
     }
-    building_granary_remove_resource(granary, resource, 100 * num_loads);
+    int amount_taken = building_granary_try_remove_resource(granary, resource, granary_loads_take);
 
     // create delivery boys
     int type = FIGURE_DELIVERY_BOY;
@@ -94,7 +91,7 @@ static int take_food_from_granary(figure *f, int market_id, int granary_id)
     }
     int leader_id = f->id;
     int previous_boy = f->id;
-    for (int i = 0; i < num_loads; i++) {
+    for (int i = 0; i < amount_taken; i++) {
         previous_boy = figure_supplier_create_delivery_boy(previous_boy, leader_id, type);
     }
     return 1;
@@ -132,7 +129,7 @@ static int take_resource_from_warehouse(figure *f, int warehouse_id, int max_amo
         return take_resource_from_generic_building(f, warehouse_id);
     }
     int num_loads;
-    int stored = building_warehouse_get_amount(warehouse, f->collecting_item_id);
+    int stored = building_warehouse_get_available_amount(warehouse, f->collecting_item_id);
     if (stored < max_amount) {
         num_loads = stored;
     } else {
@@ -141,7 +138,7 @@ static int take_resource_from_warehouse(figure *f, int warehouse_id, int max_amo
     if (num_loads <= 0) {
         return 0;
     }
-    building_warehouse_remove_resource(warehouse, f->collecting_item_id, num_loads);
+    building_warehouse_try_remove_resource(warehouse, f->collecting_item_id, num_loads);
 
     // create delivery boys
     if (f->type != FIGURE_LIGHTHOUSE_SUPPLIER) {
@@ -160,10 +157,16 @@ static int change_market_supplier_destination(figure *f, int dst_building_id)
     f->destination_building_id = dst_building_id;
     building *b_dst = building_get(dst_building_id);
     map_point road;
-    if (!map_has_road_access_rotation(b_dst->subtype.orientation, b_dst->x, b_dst->y, b_dst->size, &road) &&
-        !map_has_road_access_rotation(b_dst->subtype.orientation, b_dst->x, b_dst->y, 3, &road)) {
+    int has_road_access = 0;
+    if (b_dst->type == BUILDING_WAREHOUSE) {
+        has_road_access = map_has_road_access_warehouse(b_dst->x, b_dst->y, &road);
+    } else if (b_dst->type == BUILDING_GRANARY) {
+        has_road_access = map_has_road_access_granary(b_dst->x, b_dst->y, &road);
+    }
+    if (!has_road_access) {
         return 0;
     }
+
     f->action_state = FIGURE_ACTION_145_SUPPLIER_GOING_TO_STORAGE;
     f->destination_x = road.x;
     f->destination_y = road.y;

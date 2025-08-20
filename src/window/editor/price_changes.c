@@ -171,7 +171,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
 
 static void button_price_change(const grid_box_item *item)
 {
-    window_editor_edit_price_change_show(item->index);
+    window_editor_edit_price_change_show(data.price_changes[item->index]->id);
 }
 
 static void button_new_price_change(const generic_button *button)

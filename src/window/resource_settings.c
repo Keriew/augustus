@@ -115,7 +115,7 @@ static void draw_foreground(void)
     }
 
     if (resource_is_storable(data.resource)) {
-        int width = lang_text_draw_amount(8, 10, city_resource_count(data.resource), 66, 192, FONT_NORMAL_BLACK);
+        int width = lang_text_draw_amount(8, 10, city_resource_count_warehouses_amount(data.resource), 66, 192, FONT_NORMAL_BLACK);
         lang_text_draw(54, 15, 66 + width, 192, FONT_NORMAL_BLACK);
 
         int can_import_potentially = empire_can_import_resource_potentially(data.resource);
@@ -210,9 +210,9 @@ static int needs_to_open_trade_route(int status)
     return 0;
 }
 
-static void handle_input(const mouse* m, const hotkeys* h)
+static void handle_input(const mouse *m, const hotkeys *h)
 {
-    const mouse* m_dialog = mouse_in_dialog(m);
+    const mouse *m_dialog = mouse_in_dialog(m);
     if (image_buttons_handle_mouse(m_dialog, 0, 0, resource_image_buttons, 2, &data.focus_image_button_id)) {
         return;
     }

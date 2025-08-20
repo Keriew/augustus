@@ -9,16 +9,16 @@
  * Building models.
  */
 
-/**
- * Building model
- */
+ /**
+  * Building model
+  */
 typedef struct {
     int cost; /**< Cost of structure or of one tile of a structure (for walls) */
     int desirability_value; /**< Initial desirability value */
     int desirability_step; /**< Desirability step (in tiles) */
     int desirability_step_size; /**< Desirability step size */
     int desirability_range; /**< Max desirability range */
-    int laborers; /**< Number of people a building employs */
+    int laborers; /**< Number of people a building employs (max) */
 } model_building;
 
 /**

@@ -1,6 +1,8 @@
 #include "file_editor.h"
 
+#include "assets/assets.h"
 #include "building/construction.h"
+#include "building/image.h"
 #include "building/menu.h"
 #include "building/storage.h"
 #include "city/data.h"
@@ -153,6 +155,7 @@ void game_file_editor_create_scenario(int size)
 int game_file_editor_load_scenario(const char *scenario_file)
 {
     clear_map_data();
+    building_clear_all();
     if (!game_file_io_read_scenario(scenario_file)) {
         return 0;
     }
@@ -164,7 +167,26 @@ int game_file_editor_load_scenario(const char *scenario_file)
 
 int game_file_editor_write_scenario(const char *scenario_file)
 {
+    int image_alt_hut;
+    switch (scenario_property_climate()) {
+        case CLIMATE_NORTHERN:
+            image_alt_hut = assets_get_image_id("Terrain_Maps", "Native_Hut_Northern_01");
+            break;
+        case CLIMATE_DESERT:
+            image_alt_hut = assets_get_image_id("Terrain_Maps", "Native_Hut_Southern_01");
+            break;
+        default:
+            image_alt_hut = assets_get_image_id("Terrain_Maps", "Native_Hut_Central_01");
+    }
+    int image_native_decoration = building_image_get_for_type(BUILDING_NATIVE_DECORATION);
+    int image_native_monument = building_image_get_for_type(BUILDING_NATIVE_MONUMENT);
+    int image_native_watchtower = building_image_get_for_type(BUILDING_NATIVE_WATCHTOWER);
+
     scenario_editor_set_native_images(
+        image_alt_hut,
+        image_native_decoration,
+        image_native_monument,
+        image_native_watchtower,
         image_group(GROUP_EDITOR_BUILDING_NATIVE),
         image_group(GROUP_EDITOR_BUILDING_NATIVE) + 2,
         image_group(GROUP_EDITOR_BUILDING_CROPS)

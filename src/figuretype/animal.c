@@ -27,12 +27,12 @@ static const map_point SEAGULL_OFFSETS[] = {
 };
 
 static const map_point HORSE_DESTINATION_1[] = {
-    {2, 1}, {3, 1}, {4, 1}, {5, 1}, {6, 1}, {7, 1}, {8, 1}, {9, 1}, {10, 1}, {11, 1}, {12, 2},
-    {12, 3}, {11, 3}, {10, 3}, {9, 3}, {8, 3}, {7, 3}, {6, 3}, {5, 3}, {4, 3}, {3, 3}, {2, 2}
+    {2, 1},  {3, 1},  {4, 1},  {5, 1},  {6, 1}, {7, 1}, {8, 1}, {9, 1}, {10, 1}, {11, 1}, {12, 1}, {13, 2},
+    {13, 3}, {12, 3}, {11, 3}, {10, 3}, {9, 3}, {8, 3}, {7, 3}, {6, 3}, {5, 3},  {4, 3},  {3, 3},  {2, 2}
 };
 static const map_point HORSE_DESTINATION_2[] = {
-    {12, 3}, {11, 3}, {10, 3}, {9, 3}, {8, 3}, {7, 3}, {6, 3}, {5, 3}, {4, 3}, {3, 3}, {2, 2},
-    {2, 1}, {3, 1}, {4, 1}, {5, 1}, {6, 1}, {7, 1}, {8, 1}, {9, 1}, {10, 1}, {11, 1}, {12, 2}
+    {13, 3}, {12, 3}, {11, 3}, {10, 3}, {9, 3}, {8, 3}, {7, 3}, {6, 3}, {5, 3},  {4, 3},  {3, 3},  {2, 2},
+    {2, 1},  {3, 1},  {4, 1},  {5, 1},  {6, 1}, {7, 1}, {8, 1}, {9, 1}, {10, 1}, {11, 1}, {12, 1}, {13, 2}
 };
 
 static const int SHEEP_IMAGE_OFFSETS[] = {
@@ -471,7 +471,7 @@ void figure_hippodrome_horse_action(figure *f)
             f->direction = calc_general_direction(f->x, f->y, f->destination_x, f->destination_y);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->wait_ticks_missile++;
-                if (f->wait_ticks_missile >= 22) {
+                if (f->wait_ticks_missile >= 24) {
                     f->wait_ticks_missile = 0;
                     f->leading_figure_id++;
                     if (f->leading_figure_id >= 6) {

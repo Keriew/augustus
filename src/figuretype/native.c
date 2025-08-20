@@ -9,9 +9,16 @@
 #include "figure/movement.h"
 #include "figure/route.h"
 #include "map/terrain.h"
+#include "sound/speech.h"
+
+#define NATIVE_ATTACK_SOUND_DELAY 60000
+
+static time_millis native_attack_last_played = 0;
 
 void figure_indigenous_native_action(figure *f)
 {
+    time_millis now = time_get_millis();
+
     building *b = building_get(f->building_id);
     f->terrain_usage = TERRAIN_USAGE_ANY;
     f->use_cross_country = 0;
@@ -65,6 +72,10 @@ void figure_indigenous_native_action(figure *f)
                     f->destination_x = m->destination_x;
                     f->destination_y = m->destination_y;
                     f->destination_building_id = m->destination_building_id;
+                    if (native_attack_last_played == 0 || (now - native_attack_last_played) > NATIVE_ATTACK_SOUND_DELAY) {
+                        sound_speech_play_file("wavs/barbarian_war_cry.wav");
+                        native_attack_last_played = now;
+                    }
                 }
                 figure_route_remove(f);
             }

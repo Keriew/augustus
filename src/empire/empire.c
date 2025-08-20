@@ -289,7 +289,7 @@ int empire_get_hovered_object(int x, int y)
 }
 void empire_select_object_by_id(int object_id)
 {
-    object_id +=1 ;// index 0 means no selection, so increase by 1
+    object_id += 1;// index 0 means no selection, so increase by 1
     if (object_id <= 0) {
         data.selected_object = 0;
         return;
@@ -318,17 +318,19 @@ int empire_can_export_resource_to_city(int city_id, int resource)
         // quota reached
         return 0;
     }
-    int in_stock = city_resource_count(resource);
-    if (resource_is_food(resource) && config_get(CONFIG_GP_CH_ALLOW_EXPORTING_FROM_GRANARIES)) {
-        in_stock += city_resource_count_food_on_granaries(resource) / RESOURCE_ONE_LOAD;
+    int in_stock = 0;
+    if (!resource_is_food(resource) || config_get(CONFIG_GP_CH_ALLOW_EXPORTING_FROM_GRANARIES)) {
+        in_stock = city_resource_get_total_amount(resource, 1); //non food or allowed export from granaries
+    } else {
+        in_stock = city_resource_count_warehouses_amount(resource); // count warehouses only
     }
 
-    if (in_stock <= city_resource_export_over(resource)) {
+    if (in_stock <= city_resource_export_over(resource)) { // 0 means any amount can be exported
         // stocks too low
         return 0;
     }
     if (city_id == 0 || city->buys_resource[resource]) {
-        return (city_resource_trade_status(resource) & TRADE_STATUS_EXPORT) == TRADE_STATUS_EXPORT;
+        return (city_resource_trade_status((resource_type) resource) & TRADE_STATUS_EXPORT) == TRADE_STATUS_EXPORT;
     } else {
         return 0;
     }
@@ -364,14 +366,11 @@ int empire_can_import_resource_from_city(int city_id, int resource)
         return 0;
     }
 
-    int in_stock = city_resource_count(resource);
-    if (resource_is_food(resource)) {
-        in_stock += city_resource_count_food_on_granaries(resource) / RESOURCE_ONE_LOAD;
-    }
+    int in_stock = city_resource_get_total_amount(resource, 0); // dont respect maintaining, this is full count.
     int max_in_stock = 0;
     /* NOTE: don't forget to uncomment function get_max_stock_for_population
-    
-    int finished_good = RESOURCE_NONE; 
+
+    int finished_good = RESOURCE_NONE;
     switch (resource) {
         // food and finished materials
         case RESOURCE_WHEAT:

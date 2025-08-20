@@ -13,7 +13,7 @@ void map_tiles_update_all_plazas(void);
 void map_tiles_update_all_walls(void);
 void map_tiles_update_area_walls(int x, int y, int size);
 int map_tiles_set_wall(int x, int y);
-
+int map_tiles_is_adjacent_to_building_type(int grid_offset, int building_type, int diagonals_included);
 int map_tiles_is_paved_road(int grid_offset);
 void map_tiles_update_all_roads(void);
 void map_tiles_update_area_roads(int x, int y, int size);

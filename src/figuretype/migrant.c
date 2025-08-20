@@ -309,27 +309,27 @@ void figure_homeless_action(figure *f)
                 if (f->immigrant_building_id && building_is_house(b->type) && !b->has_plague) {
                     int max_people = model_get_house(b->subtype.house_level)->max_people;
                     if (b->house_is_merged) {
-                        max_people *= 4;
+                    } else if (figure_movement_move_ticks_cross_country(f, 1) == 1) {
+                        f->state = FIGURE_STATE_DEAD;
+                        int room = max_people - b->house_population;
+                        if (room < 0) {
+                            room = 0;
+                        }
+                        if (room < f->migrant_num_people) {
+                            f->migrant_num_people = room;
+                        }
+                        int is_empty = b->house_population == 0;
+                        b->house_population += f->migrant_num_people;
+                        b->house_population_room = max_people - b->house_population;
+                        city_population_add_homeless(f->migrant_num_people);
+                        if (is_empty) {
+                            building_house_change_to(b, BUILDING_HOUSE_SMALL_TENT);
+                        }
+                        b->immigrant_figure_id = 0;
+                        game_undo_disable();
                     }
-                    int room = max_people - b->house_population;
-                    if (room < 0) {
-                        room = 0;
-                    }
-                    if (room < f->migrant_num_people) {
-                        f->migrant_num_people = room;
-                    }
-                    int is_empty = b->house_population == 0;
-                    b->house_population += f->migrant_num_people;
-                    b->house_population_room = max_people - b->house_population;
-                    city_population_add_homeless(f->migrant_num_people);
-                    if (is_empty) {
-                        building_house_change_to(b, BUILDING_HOUSE_SMALL_TENT);
-                    }
-                    b->immigrant_figure_id = 0;
-                    game_undo_disable();
                 }
-            }
-            break;
+                break;
         case FIGURE_ACTION_10_HOMELESS_LEAVING:
             figure_movement_move_ticks(f, 1);
             if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
@@ -356,6 +356,7 @@ void figure_homeless_action(figure *f)
                 }
             }
             break;
+            }
+            figure_image_update(f, image_group(GROUP_FIGURE_HOMELESS));
     }
-    figure_image_update(f, image_group(GROUP_FIGURE_HOMELESS));
 }

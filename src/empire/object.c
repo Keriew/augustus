@@ -318,7 +318,7 @@ void empire_object_init_cities(int empire_id)
         city->route_id = obj->obj.trade_route_id;
         city->is_open = obj->trade_route_open;
         city->cost_to_open = obj->trade_route_cost;
-        city->is_sea_trade = is_sea_trade_route(obj->obj.trade_route_id);
+        city->is_sea_trade = empire_object_is_sea_trade_route(obj->obj.trade_route_id);
 
         for (int resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
             city->sells_resource[resource] = 0;
@@ -525,7 +525,7 @@ void empire_object_city_force_sell_resource(int object_id, int resource)
     array_item(objects, object_id)->city_sells_resource[resource] = 1;
 }
 
-int is_sea_trade_route(int route_id)
+int empire_object_is_sea_trade_route(int route_id)
 {
     full_empire_object *obj;
     array_foreach(objects, obj) {

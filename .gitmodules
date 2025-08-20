@@ -1,0 +1,3 @@
+[submodule "ext/easyav1"]
+	path = ext/easyav1
+	url = https://github.com/crudelios/easyav1

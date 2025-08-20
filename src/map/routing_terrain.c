@@ -146,15 +146,23 @@ static int get_land_type_noncitizen(int grid_offset)
             break;
         case BUILDING_BURNING_RUIN:
         case BUILDING_NATIVE_HUT:
+        case BUILDING_NATIVE_HUT_ALT:
         case BUILDING_NATIVE_MEETING:
         case BUILDING_NATIVE_CROPS:
+        case BUILDING_NATIVE_DECORATION:
+        case BUILDING_NATIVE_MONUMENT:
+        case BUILDING_WATCHTOWER:
             type = NONCITIZEN_N1_BLOCKED;
             break;
-        case BUILDING_FORT:
+        case BUILDING_FORT_ARCHERS:
+        case BUILDING_FORT_LEGIONARIES:
+        case BUILDING_FORT_JAVELIN:
+        case BUILDING_FORT_MOUNTED:
+        case BUILDING_FORT_AUXILIA_INFANTRY:
             type = NONCITIZEN_5_FORT;
             break;
         case BUILDING_GRANARY:
-            switch (map_property_multi_tile_xy(grid_offset)) {
+            switch (map_property_multi_tile_xy(grid_offset)) { //granary cross allways passable
                 case EDGE_X1Y0:
                 case EDGE_X0Y1:
                 case EDGE_X1Y1:

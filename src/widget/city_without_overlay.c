@@ -8,6 +8,7 @@
 #include "building/granary.h"
 #include "building/image.h"
 #include "building/industry.h"
+#include "building/model.h"
 #include "building/monument.h"
 #include "building/properties.h"
 #include "building/rotation.h"
@@ -30,6 +31,7 @@
 #include "graphics/clouds.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
+#include "graphics/weather.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
 #include "map/building.h"
@@ -49,6 +51,7 @@
 #define OFFSET(x,y) (x + GRID_SIZE * y)
 
 #define WAREHOUSE_FLAG_FRAMES 9
+#define SELECTED_BUILDING_COLOR_MASK COLOR_MASK_SKY_BLUE
 
 static const int ADJACENT_OFFSETS[2][4][7] = {
     {
@@ -73,6 +76,7 @@ static struct {
     int image_id_water_last;
     int selected_figure_id;
     int highlighted_formation;
+    unsigned int selected_building_id;
     pixel_coordinate *selected_figure_coord;
 
     float scale;
@@ -140,6 +144,43 @@ static void draw_roamer_frequency(int x, int y, int grid_offset)
     }
 }
 
+static color_t get_building_color_mask(const building *b)
+{
+    color_t color_mask = COLOR_MASK_NONE;
+    const model_building *model = model_get_building(b->type);
+    int labor_needed = model->laborers;
+    if (!labor_needed && b->type != BUILDING_WAREHOUSE_SPACE) {
+        // account for warehouse case
+        color_mask = COLOR_MASK_NONE;
+    } else {
+        switch (b->type) {
+            //buildings that have labor but no walkers
+            case BUILDING_LATRINES:
+            case BUILDING_WELL:
+                color_mask = COLOR_MASK_NONE;
+                //all other buildings
+            default:
+                color_mask = SELECTED_BUILDING_COLOR_MASK;
+        }
+    }
+    return color_mask;
+}
+
+static int is_building_selected(const building *b)
+{
+    if (!config_get(CONFIG_UI_HIGHLIGHT_SELECTED_BUILDING)) {
+        return 0;
+    }
+    const building *main_building = building_main(b);
+    unsigned int main_part_id = main_building->id;
+    if (b->id == draw_context.selected_building_id || main_part_id == draw_context.selected_building_id) {
+        return 1;
+    } else {
+        return 0;
+    }
+
+}
+
 static void draw_footprint(int x, int y, int grid_offset)
 {
     sound_city_progress_ambient();
@@ -154,6 +195,8 @@ static void draw_footprint(int x, int y, int grid_offset)
         building *b = building_get(building_id);
         if (draw_building_as_deleted(b)) {
             color_mask = COLOR_MASK_RED;
+        } else if (is_building_selected(b)) {
+            color_mask = get_building_color_mask(b);
         }
         int view_x, view_y, view_width, view_height;
         city_view_get_viewport(&view_x, &view_y, &view_width, &view_height);
@@ -197,6 +240,7 @@ static void draw_footprint(int x, int y, int grid_offset)
         image_draw_isometric_footprint_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
     }
     if (!building_id && config_get(CONFIG_UI_SHOW_GRID) && draw_context.scale <= 2.0f) {
+        //grid is drawn by the renderer directly at zoom > 200%
         static int grid_id = 0;
         if (!grid_id) {
             grid_id = assets_get_image_id("UI", "Grid_Full");
@@ -332,6 +376,76 @@ static void draw_workshop_raw_material_storage(const building *b, int x, int y, 
     }
 }
 
+static void get_mothball_icon_position(const building *b, int *x, int *y)
+{
+    const image *img = image_get(building_image_get(b));
+    int icon_id = assets_get_image_id("UI", "Mothball_Sprite");
+
+    switch (b->type) {
+        case BUILDING_WAREHOUSE:
+            *x += 21;
+            *y -= 60;
+            break;
+        case BUILDING_GRANARY:
+            *x += 83;
+            *y -= 120;
+            break;
+        case BUILDING_SAND_PIT:
+        case BUILDING_STONE_QUARRY:
+            *x += 50;
+            *y -= 30;
+            break;
+        case BUILDING_FOUNTAIN:
+            *x += 20;
+            *y -= 15;
+            break;
+        case BUILDING_WHEAT_FARM:
+        case BUILDING_VEGETABLE_FARM:
+        case BUILDING_FRUIT_FARM:
+        case BUILDING_OLIVE_FARM:
+        case BUILDING_VINES_FARM:
+        case BUILDING_PIG_FARM:
+            *x += 50;
+            *y -= 50;
+            break;
+        default:
+            *x = (img->width - image_get(icon_id)->width) / 2;
+            *y = (-image_get(icon_id)->height / 2) + 10;
+            break;
+    }
+    if (img->top) {
+        *y -= img->top->original.height;
+    }
+}
+
+static void draw_mothball_icon(const building *b, int x, int y, color_t color_mask, int grid_offset)
+{
+    if (!b || (!b->data.industry.is_stockpiling && b->state != BUILDING_STATE_MOTHBALLED)) {
+        return;
+    }
+    //farms have individual top drawings, but they have one building ID, unlike warehouses
+    if (b->prev_part_building_id) {
+        return; //do not draw mothball icon for non-main
+    }
+    if (building_is_farm(b->type)) {
+        if (map_property_multi_tile_size(grid_offset) == 1) {
+            return; //crop tile
+        }
+    }
+
+    int mothball_x = 0;
+    int mothball_y = 0;
+    get_mothball_icon_position(b, &mothball_x, &mothball_y);
+    x += mothball_x;
+    y += mothball_y;
+
+    if (b->state == BUILDING_STATE_MOTHBALLED) {
+        image_draw(assets_get_image_id("UI", "Mothball_Sprite"), x, y, COLOR_MASK_NONE, draw_context.scale);
+    } else if (b->data.industry.is_stockpiling) {
+        image_draw(assets_get_image_id("UI", "Stockpile_Sprite"), x, y, COLOR_MASK_NONE, draw_context.scale);
+    }
+}
+
 static void draw_senate_rating_flags(const building *b, int x, int y, color_t color_mask)
 {
     if (b->type == BUILDING_SENATE) {
@@ -372,12 +486,19 @@ static void draw_top(int x, int y, int grid_offset)
     color_t color_mask = 0;
     if (draw_building_as_deleted(b) || (map_property_is_deleted(grid_offset) && !is_multi_tile_terrain(grid_offset))) {
         color_mask = COLOR_MASK_RED;
+    } else if (is_building_selected(b)) {
+        color_mask = get_building_color_mask(b);
     }
+
     image_draw_isometric_top_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
     // specific buildings
-    draw_senate_rating_flags(b, x, y, color_mask);
-    draw_entertainment_spectators(b, x, y, color_mask);
-    draw_workshop_raw_material_storage(b, x, y, color_mask);
+    if (b->id > 0) { //dont draw or calculate for non-buildings
+        draw_senate_rating_flags(b, x, y, color_mask);
+        draw_mothball_icon(b, x, y, color_mask, grid_offset);
+        draw_entertainment_spectators(b, x, y, color_mask);
+        draw_workshop_raw_material_storage(b, x, y, color_mask);
+    }
+
 }
 
 static void draw_figures(int x, int y, int grid_offset)
@@ -477,7 +598,7 @@ static void draw_depot_resource(building *b, int x, int y, color_t color_mask)
     int img_id;
 
     if (b->num_workers > 0) {
-        switch(b->data.depot.current_order.resource_type) {
+        switch (b->data.depot.current_order.resource_type) {
             case RESOURCE_VEGETABLES:
                 img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Vegetables");
                 break;
@@ -539,7 +660,7 @@ static void draw_depot_resource(building *b, int x, int y, color_t color_mask)
             default:
                 img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Wheat");
                 break;
-        }        
+        }
     } else {
         img_id = assets_get_image_id("Admin_Logistics", "Cart_Depot_Cat");
     }
@@ -651,6 +772,8 @@ static void draw_animation(int x, int y, int grid_offset)
     color_t color_mask = 0;
     if (draw_building_as_deleted(b) || map_property_is_deleted(grid_offset)) {
         color_mask = COLOR_MASK_RED;
+    } else if (is_building_selected(b)) {
+        color_mask = get_building_color_mask(b);
     }
     if (img->animation) {
         if (map_property_is_draw_tile(grid_offset)) {
@@ -705,7 +828,7 @@ static void draw_animation(int x, int y, int grid_offset)
         draw_plague(b, x, y, color_mask);
     } else if (map_sprite_bridge_at(grid_offset)) {
         city_draw_bridge(x, y, draw_context.scale, grid_offset);
-    } else if (b->type == BUILDING_FORT) {
+    } else if (building_is_fort(b->type)) {
         if (map_property_is_draw_tile(grid_offset)) {
             building *fort = building_get(map_building_at(grid_offset));
             image_id = assets_get_image_id("Military", "Fort_Jav_Flag_Central");
@@ -768,11 +891,23 @@ static void draw_animation(int x, int y, int grid_offset)
 static void draw_elevated_figures(int x, int y, int grid_offset)
 {
     int figure_id = map_figure_at(grid_offset);
+
+
     while (figure_id > 0) {
         figure *f = figure_get(figure_id);
+
         if ((f->use_cross_country && !f->is_ghost && !f->dont_draw_elevated) || f->height_adjusted_ticks) {
             int highlight = f->formation_id > 0 && f->formation_id == draw_context.highlighted_formation;
             city_draw_figure(f, x, y, draw_context.scale, highlight);
+        } else if (f->building_id == draw_context.selected_building_id) { //figure originates from selected building
+            if (config_get(CONFIG_UI_SHOW_ROAMING_PATH)) {
+                int highlight = FIGURE_HIGHLIGHT_GREEN;
+                if (f->type == FIGURE_MARKET_SUPPLIER || f->type == FIGURE_DELIVERY_BOY) {
+                    highlight = FIGURE_HIGHLIGHT_RED; //green highlight makes market supplier look indistinguishable
+                }
+                city_draw_figure(f, x, y, draw_context.scale, highlight);
+            }
+
         }
         figure_id = f->next_figure_id_on_same_tile;
     }
@@ -953,10 +1088,13 @@ static void update_clouds(void)
  }
  ***/
 
-void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_coord, const map_tile *tile)
+void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_coord, const map_tile *tile, unsigned int roamer_preview_building_id)
 {
     int highlighted_formation_id = get_highlighted_formation_id(tile);
     init_draw_context(selected_figure_id, figure_coord, highlighted_formation_id);
+    if (roamer_preview_building_id) {
+        draw_context.selected_building_id = roamer_preview_building_id;//store the clicked building id
+    }
     int x, y, width, height;
     city_view_get_viewport(&x, &y, &width, &height);
     graphics_fill_rect(x, y, width, height, COLOR_BLACK);
@@ -985,4 +1123,5 @@ void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_
         city_view_foreach_valid_map_tile(deletion_draw_remaining);
     }
     update_clouds();
+    update_weather();
 }

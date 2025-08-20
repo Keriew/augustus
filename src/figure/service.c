@@ -208,7 +208,8 @@ static int provide_missionary_coverage(int x, int y)
             int building_id = map_building_at(map_grid_offset(xx, yy));
             if (building_id) {
                 building *b = building_get(building_id);
-                if (b->type == BUILDING_NATIVE_HUT || b->type == BUILDING_NATIVE_MEETING) {
+                if (b->type == BUILDING_NATIVE_HUT || b->type == BUILDING_NATIVE_HUT_ALT ||
+                    b->type == BUILDING_NATIVE_MEETING || b->type == BUILDING_NATIVE_WATCHTOWER) {
                     b->sentiment.native_anger = 0;
                 }
             }
@@ -325,7 +326,7 @@ static void tax_collector_coverage(building *b, int *max_tax_multiplier)
 
 static void distribute_good(building *b, building *market, int stock_wanted, resource_type resource)
 {
-    if (!building_distribution_is_good_accepted(resource, market)) {
+    if (!building_distribution_is_good_accepted(market, resource)) {
         return;
     }
     int amount_wanted = stock_wanted - b->resources[resource];
@@ -383,7 +384,7 @@ static void distribute_market_resources(building *b, building *market)
     if (model->food_types) {
         for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
             if (!resource_is_inventory(r) || b->resources[r] >= max_food_stocks ||
-                !building_distribution_is_good_accepted(r, market)) {
+                !building_distribution_is_good_accepted(market, r)) {
                 continue;
             }
             if (market->resources[r] >= max_food_stocks) {
@@ -522,12 +523,12 @@ int figure_service_provide_coverage(figure *f)
             houses_serviced = provide_culture(x, y, labor_seeker_coverage);
             break;
         case FIGURE_TAX_COLLECTOR:
-            {
-                int max_tax_rate = 0;
-                houses_serviced = provide_service(x, y, &max_tax_rate, tax_collector_coverage);
-                f->min_max_seen = max_tax_rate;
-                break;
-            }
+        {
+            int max_tax_rate = 0;
+            houses_serviced = provide_service(x, y, &max_tax_rate, tax_collector_coverage);
+            f->min_max_seen = max_tax_rate;
+            break;
+        }
         case FIGURE_MARKET_TRADER:
             houses_serviced = provide_market_goods(f->building_id, x, y);
             break;
@@ -561,6 +562,8 @@ int figure_service_provide_coverage(figure *f)
         case FIGURE_DOCKER:
         case FIGURE_CART_PUSHER:
         case FIGURE_DEPOT_CART_PUSHER:
+        case FIGURE_NATIVE_TRADER:
+        case FIGURE_LIGHTHOUSE_SUPPLIER:
             b = building_get(f->building_id);
             building *dest_b = building_get(f->destination_building_id);
 
@@ -674,25 +677,25 @@ int figure_service_provide_coverage(figure *f)
         }
         case FIGURE_ENGINEER:
         case FIGURE_WORK_CAMP_ARCHITECT:
-            {
-                int max_damage = 0;
-                houses_serviced = provide_service(x, y, &max_damage, engineer_coverage);
-                if (max_damage > f->min_max_seen) {
-                    f->min_max_seen = max_damage;
-                } else if (f->min_max_seen <= 10) {
-                    f->min_max_seen = 0;
-                } else {
-                    f->min_max_seen -= 10;
-                }
-                break;
+        {
+            int max_damage = 0;
+            houses_serviced = provide_service(x, y, &max_damage, engineer_coverage);
+            if (max_damage > f->min_max_seen) {
+                f->min_max_seen = max_damage;
+            } else if (f->min_max_seen <= 10) {
+                f->min_max_seen = 0;
+            } else {
+                f->min_max_seen -= 10;
             }
+            break;
+        }
         case FIGURE_PREFECT:
-            {
-                int min_happiness = 100;
-                houses_serviced = provide_service(x, y, &min_happiness, prefect_coverage);
-                f->min_max_seen = min_happiness;
-                break;
-            }
+        {
+            int min_happiness = 100;
+            houses_serviced = provide_service(x, y, &min_happiness, prefect_coverage);
+            f->min_max_seen = min_happiness;
+            break;
+        }
         case FIGURE_RIOTER:
             if (f->terrain_usage == TERRAIN_USAGE_ENEMY) {
                 if (figure_rioter_collapse_building(f) == 1) {

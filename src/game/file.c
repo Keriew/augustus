@@ -14,6 +14,7 @@
 #include "city/mission.h"
 #include "city/victory.h"
 #include "city/view.h"
+#include "core/config.h"
 #include "core/encoding.h"
 #include "core/file.h"
 #include "core/image.h"
@@ -40,6 +41,7 @@
 #include "game/time.h"
 #include "game/tutorial.h"
 #include "game/undo.h"
+#include "graphics/weather.h"
 #include "map/aqueduct.h"
 #include "map/bookmark.h"
 #include "map/building.h"
@@ -59,6 +61,7 @@
 #include "map/sprite.h"
 #include "map/terrain.h"
 #include "map/tiles.h"
+#include "platform/file_manager.h"
 #include "scenario/criteria.h"
 #include "scenario/custom_messages.h"
 #include "scenario/demand_change.h"
@@ -156,6 +159,9 @@ static void initialize_scenario_data(const uint8_t *scenario_name)
     map_tiles_update_all_walls();
     map_tiles_update_all_aqueducts(0);
 
+    // Load climate before to prevent climate related images blinking
+    image_load_climate(scenario_property_climate(), 0, 0, 0);
+
     map_natives_init();
 
     city_view_init();
@@ -191,13 +197,14 @@ static void initialize_scenario_data(const uint8_t *scenario_name)
     scenario_demand_change_init();
     scenario_price_change_init();
     building_menu_update();
-    image_load_climate(scenario_property_climate(), 0, 0, 0);
     image_load_enemy(scenario_property_enemy());
 
     city_data_init_scenario();
 
     setting_set_default_game_speed();
     game_state_unpause();
+
+    weather_reset();
 }
 
 static void load_empire_data(int is_custom_scenario, int empire_id)
@@ -301,6 +308,8 @@ static void initialize_saved_game(void)
     setting_set_default_game_speed();
 
     game_state_unpause();
+
+    weather_reset();
 }
 
 static int start_scenario(const uint8_t *scenario_name, const char *scenario_file)
@@ -450,6 +459,30 @@ int game_file_load_saved_game(const char *filename)
 int game_file_write_saved_game(const char *filename)
 {
     return game_file_io_write_saved_game(filename);
+}
+
+int game_file_make_yearly_autosave(void)
+{
+    int next_autosave_slot = config_get(CONFIG_GENERAL_NEXT_AUTOSAVE_SLOT);
+    if (next_autosave_slot >= config_get(CONFIG_GP_CH_MAX_AUTOSAVE_SLOTS)) {
+        next_autosave_slot = 0;
+    }
+
+    char current_save_name[FILE_NAME_MAX];
+    char backup_save_name[FILE_NAME_MAX];
+
+    snprintf(current_save_name, FILE_NAME_MAX, "%s%s",
+        platform_file_manager_get_directory_for_location(PATH_LOCATION_SAVEGAME, 0), "autosave-year.svx");
+    snprintf(backup_save_name, FILE_NAME_MAX, "%s%s%d%s",
+        platform_file_manager_get_directory_for_location(PATH_LOCATION_SAVEGAME, 0), "autosave-year-bak-",
+        next_autosave_slot, ".svx");
+
+    platform_file_manager_copy_file(current_save_name, backup_save_name);
+    game_file_write_saved_game(current_save_name);
+
+    next_autosave_slot++;
+    config_set(CONFIG_GENERAL_NEXT_AUTOSAVE_SLOT,next_autosave_slot);
+    config_save();
 }
 
 int game_file_delete_saved_game(const char *filename)

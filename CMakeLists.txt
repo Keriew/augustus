@@ -11,6 +11,7 @@ option(DRAW_ROUTING "Draw routing debug information." OFF)
 option(DRAW_HIGHWAY_TERRAIN "Draw highway debug information." OFF)
 option(DRAW_ROAD_NETWORK_IDS "Draw road network IDs for debugging." OFF)
 option(DRAW_TILE_COORDS "Draw tile coordinates." OFF)
+option(AV1_VIDEO_SUPPORT "Enable AV1 video support." OFF)
 
 if(${TARGET_PLATFORM} STREQUAL "vita" AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if(DEFINED ENV{VITASDK})
@@ -80,7 +81,19 @@ if (${TARGET_PLATFORM} STREQUAL "vita")
     set(VITA_TITLEID  "AUGUSTUS1")
 endif()
 
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake/")
+if (AV1_VIDEO_SUPPORT)
+    set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake/" "${CMAKE_SOURCE_DIR}/ext/easyav1/cmake/")
+
+    set(EASYAV1_BUILD_TOOLS OFF)
+    set(EASYAV1_USE_SANITIZERS OFF)
+
+    add_subdirectory("ext/easyav1")
+
+    include_directories(${SHORT_NAME} SYSTEM "ext/easyav1/src")
+else()
+    set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake/")
+    include_directories(${SHORT_NAME} SYSTEM "ext/easyav1_dummy")
+endif()
 
 set(CMAKE_C_STANDARD 99)
 
@@ -547,6 +560,7 @@ set(GRAPHICS_FILES
     ${PROJECT_SOURCE_DIR}/src/graphics/arrow_button.c
     ${PROJECT_SOURCE_DIR}/src/graphics/button.c
     ${PROJECT_SOURCE_DIR}/src/graphics/clouds.c
+    ${PROJECT_SOURCE_DIR}/src/graphics/weather.c
     ${PROJECT_SOURCE_DIR}/src/graphics/font.c
     ${PROJECT_SOURCE_DIR}/src/graphics/generic_button.c
     ${PROJECT_SOURCE_DIR}/src/graphics/graphics.c
@@ -985,10 +999,15 @@ if(MSVC)
     include_directories(SYSTEM ext/dirent)
 endif()
 
+if (AV1_VIDEO_SUPPORT)
+    set(EASYAV1_LIBRARY easyav1)
+endif()
+
 if(${TARGET_PLATFORM} STREQUAL "vita")
     target_link_libraries(${SHORT_NAME}
         ${SDL2_MIXER_LIBRARY}
         ${SDL2_LIBRARY}
+        ${EASYAV1_LIBRARY}
         vorbisfile
         vorbis
         mikmod
@@ -1036,7 +1055,7 @@ if(${TARGET_PLATFORM} STREQUAL "vita")
 elseif(NINTENDO_SWITCH)
 
     pkg_check_modules(SDL2 REQUIRED IMPORTED_TARGET sdl2 SDL2_mixer)
-    target_link_libraries(${SHORT_NAME} PkgConfig::SDL2)
+    target_link_libraries(${SHORT_NAME} PkgConfig::SDL2 ${EASYAV1_LIBRARY})
 
 nx_generate_nacp (${PROJECT_NAME}.nacp
     NAME   "Augustus"
@@ -1075,7 +1094,7 @@ else()
         )
     endif()
 
-    target_link_libraries(${SHORT_NAME} ${SDL2MAIN_LIBRARY} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY})
+    target_link_libraries(${SHORT_NAME} ${SDL2MAIN_LIBRARY} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY} ${EASYAV1_LIBRARY})
     if(NOT APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "android")
         install(TARGETS ${SHORT_NAME} RUNTIME DESTINATION bin)
     endif()
