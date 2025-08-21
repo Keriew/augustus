@@ -282,6 +282,7 @@ static struct {
     int selected_trade_route;
     int x_min, x_max, y_min, y_max;
     int x_draw_offset, y_draw_offset;
+    int usable_map_width;
     unsigned int focus_button_id;
     int is_scrolling;
     int finished_scroll;
@@ -485,7 +486,12 @@ static int handle_expanding_buttons_input(const mouse *m)
             break;
         }
     }
-
+    if (m->left.went_up && data.sidebar.expanded_main != NO_POSITION) {
+        // If left-clicked outside any button, collapse the expanded section
+        data.sidebar.expanded_main = NO_POSITION;
+        data.sidebar.resource_selection_active = 0;
+        return 1; // Block further input
+    }
     return (data.sidebar.expanded_main != NO_POSITION) ? 1 : 0;
 }
 
@@ -669,12 +675,11 @@ static void setup_sidebar(void)
     data.sidebar.margin_right = 3;
     data.sidebar.margin_top = 2 * BLOCK_SIZE + 6; //space for sorting buttons
     data.sidebar.margin_bottom = 6;
-
-    int usable_map_width = map_draw_x_max - map_draw_x_min;
+    data.usable_map_width = map_draw_x_max - map_draw_x_min;
 
     // Use only one width source - prefer dragging width when actively dragging
     float active_width_percent = sidebar_dragging ? sidebar_dragging_width : sidebar_width_percent;
-    int raw = (int) (usable_map_width * active_width_percent);
+    int raw = (int) (data.usable_map_width * active_width_percent);
     data.sidebar.width = ((raw + (BLOCK_SIZE / 2)) / BLOCK_SIZE) * BLOCK_SIZE + data.sidebar.margin_left + data.sidebar.margin_right; //ensure that the inner panels draw predictably
 
     data.sidebar.height = map_draw_y_max - map_draw_y_min;
@@ -1040,41 +1045,44 @@ static void draw_simple_button(int x, int y, int width, int height, int is_focus
     button_border_draw(x, y, width, height, is_focused);
     int font_height = font_definition_for(FONT_NORMAL_BLACK)->line_height;
     int y_text_offset = y + (height / 2) - (font_height / 2);
-    if (button_type >= BUTTON_INDEX_FILTERING_RESOURCES) {
-        resource_type r = button_type - BUTTON_INDEX_FILTERING_RESOURCES;
-        const uint8_t *resource_name = resource_get_data(r)->text;
-        int text_width = text_get_width(resource_name, FONT_NORMAL_BLACK);
-        int available_text_width = width - 16; // 8px margin on each side
-        image const *img = image_get(resource_get_data(r)->image.icon);
-        int text_x = x + 8 + (available_text_width - text_width - img->width) / 2; // Center horizontally
-        int cursor_x = text_x + text_draw(resource_name, text_x, y_text_offset, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
-        int img_y_offset = y + (height - img->height) / 2;
-        image_draw(resource_get_data(r)->image.icon, cursor_x, img_y_offset, COLOR_MASK_NONE, SCALE_NONE);
-        register_sorting_button(x, y, width, height, button_type);
-        return; //all done
-    }
+    int cursor_x = 0, text_x = 0, available_width = 0, image_width = 0, content_width = 0;
     if (number2 == TR_EMPIRE_SIDE_BAR_FILTER_BY_NONE) { // dont draw second text if it's "None"
         group2 = -1;
         number2 = -1;
     }
-    // Calculate total text width for centering
-    int text1_width = lang_text_get_width(group1, number1, FONT_NORMAL_BLACK);
-    int text2_width = (number2 >= 0) ? lang_text_get_width(group2, number2, FONT_NORMAL_BLACK) : 0;
-    int total_text_width = text1_width + text2_width;
-    int available_width = width - 2 * margin;
-    int text_x = x + margin + (available_width - total_text_width) / 2; // Center horizontally
-    // Draw first text and get cursor position
-    int cursor_x = text_x + lang_text_draw(group1, number1, text_x, y_text_offset, FONT_NORMAL_BLACK);
-    if (number2 >= 0) {
-        cursor_x = cursor_x + lang_text_draw(group2, number2, cursor_x, y_text_offset, FONT_NORMAL_BLACK);
-        if (number2 == TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE && data.sidebar.selected_filter_resource) {
-            //draw the resource icon too
-            resource_type r = data.sidebar.selected_filter_resource;
-            image const *img = image_get(resource_get_data(r)->image.icon);
-            int img_y_offset = y + (height - img->height) / 2;
-            image_draw(resource_get_data(r)->image.icon, cursor_x, img_y_offset, COLOR_MASK_NONE, SCALE_NONE);
+    if (image_id > 0) {
+        const image *img = image_get(image_id);
+        image_width = img->width;
+    }
+    // Special handling for resource buttons - use resource name instead of lang_text
+    if (button_type >= BUTTON_INDEX_FILTERING_RESOURCES) {
+        resource_type r = button_type - BUTTON_INDEX_FILTERING_RESOURCES;
+        const uint8_t *resource_name = resource_get_data(r)->text;
+        int text_width = text_get_width(resource_name, FONT_NORMAL_BLACK);
+        // Account for image width if present
+        content_width = text_width;
+        available_width = width - 2 * margin;
+        text_x = x + margin + (available_width - content_width) / 2;
+        cursor_x = text_x + text_draw(resource_name, text_x, y_text_offset, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+    } else {
+        // Calculate total text width for centering and account for image width if present
+        int text1_width = lang_text_get_width(group1, number1, FONT_NORMAL_BLACK);
+        int text2_width = (number2 >= 0) ? lang_text_get_width(group2, number2, FONT_NORMAL_BLACK) : 0;
+        int total_text_width = text1_width + text2_width;
+        available_width = width - 2 * margin;
+        content_width = total_text_width + image_width;
+        text_x = x + margin + (available_width - content_width) / 2; // Center horizontally
+        cursor_x = text_x + lang_text_draw(group1, number1, text_x, y_text_offset, FONT_NORMAL_BLACK);
+        if (number2 >= 0) {
+            cursor_x += lang_text_draw(group2, number2, cursor_x, y_text_offset, FONT_NORMAL_BLACK);
         }
     }
+    if (image_id > 0) {
+        const image *img = image_get(image_id);
+        int img_y_offset = y + (height - img->height) / 2;
+        image_draw(image_id, cursor_x + 4, img_y_offset, COLOR_MASK_NONE, SCALE_NONE); // 4px spacing
+    }
+
     register_sorting_button(x, y, width, height, button_type);
 }
 
@@ -1116,15 +1124,30 @@ static void draw_expanding_buttons(void)
     draw_simple_button(x_sort, base_y, button_width, button_height,
         data.sidebar.hovered_sorting_button == BUTTON_INDEX_SORT_MAIN && !sorting_arrow_focused,
         CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_SORT, // Base text: "Sort by:"
-        CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_SORT_BY_NAME + data.sidebar.current_sorting, 0);
+        CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_SORT_BY_NAME + data.sidebar.current_sorting, 0, 0);
     draw_sorting_arrow_button(x_sort, base_y, button_width, button_height);
     int x_filter = base_x + button_width + button_h_spacing;    // Filter main button
     // Filter main button with current selection displayed
     int filter_group2 = CUSTOM_TRANSLATION;
     int filter_number2 = TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE + data.sidebar.current_filtering;
+    int filter_image_id = 0;
+    switch (data.sidebar.current_filtering) {
+        case FILTER_BY_RESOURCE:
+            if (data.sidebar.selected_filter_resource != RESOURCE_NONE) {
+                filter_image_id = resource_get_data(data.sidebar.selected_filter_resource)->image.icon;
+            }
+            break;
+        case FILTER_BY_LAND:
+            filter_image_id = image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE) + 1;
+            break;
+        case FILTER_BY_SEA:
+            filter_image_id = image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE);
+            break;
+    }
+
     draw_simple_button(x_filter, base_y, button_width, button_height,
         data.sidebar.hovered_sorting_button == BUTTON_INDEX_FILTER_MAIN, //hovered state
-        CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_FILTER, filter_group2, filter_number2, 1);
+        CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_FILTER, filter_group2, filter_number2, 1, filter_image_id);
 
     if (data.sidebar.expanded_main == 0) {
         for (int i = 0; i < MAX_SORTING_KEY; ++i) {
@@ -1132,7 +1155,7 @@ static void draw_expanding_buttons(void)
             int y = base_y + v_margin + button_height + i * button_v_spacing;
             draw_simple_button(x_sort, y, button_width, button_height,
                 data.sidebar.hovered_sorting_button == button_type, //hovered state
-                CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_SORT_BY_NAME + i, -1, -1, button_type);
+                CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_SORT_BY_NAME + i, -1, -1, button_type, 0);
         }
     } else if (data.sidebar.expanded_main == 1) {
         if (data.sidebar.resource_selection_active) {
@@ -1144,7 +1167,8 @@ static void draw_expanding_buttons(void)
                     int button_type = BUTTON_INDEX_FILTERING_RESOURCES + r; // Use 100+ range for resource buttons
                     int y = base_y + v_margin + button_height + resource_count * button_v_spacing;
                     int is_focused = (data.sidebar.hovered_sorting_button == button_type);
-                    draw_simple_button(x_filter, y, button_width, button_height, is_focused, -1, -1, -1, -1, button_type);
+                    draw_simple_button(x_filter, y, button_width, button_height, is_focused,
+                        -1, -1, -1, -1, button_type, resource_get_data(r)->image.icon);
                     // text doesn't matter, resource name will decided basing on button_type
                     resource_count++;
                 }
@@ -1156,8 +1180,10 @@ static void draw_expanding_buttons(void)
                 int y = base_y + v_margin + button_height + i * button_v_spacing;
                 int translation_key = TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE + i;
                 int is_focused = (data.sidebar.hovered_sorting_button == button_type);
+                int image_id = (i == FILTER_BY_LAND) ? image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE) + 1 :
+                    (i == FILTER_BY_SEA) ? image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE) : 0; //default 0
                 draw_simple_button(x_filter, y, button_width, button_height, is_focused,
-                     CUSTOM_TRANSLATION, translation_key, -1, -1, button_type);
+                     CUSTOM_TRANSLATION, translation_key, -1, -1, button_type, image_id);
             }
         }
     }
@@ -2091,39 +2117,35 @@ void handle_sidebar_dragging(const mouse *m)
         window_invalidate(); // reset to previous width
         return;
     }
-    // if (is_sidebar_border(m)) {
-    //     return;
-    // }
     const int map_draw_x_max = data.x_max - WIDTH_BORDER;                 // right edge of usable map
     const int map_draw_x_min = data.x_min + WIDTH_BORDER;                 // left edge of usable map
-    const int usable_map_width = map_draw_x_max - map_draw_x_min;
 
     // Ignore if mouse isn't over the map horizontally
-    if (m->x < map_draw_x_min || m->x > map_draw_x_max || usable_map_width <= 0) {
+    if (m->x < map_draw_x_min || m->x > map_draw_x_max || data.usable_map_width <= 0) {
         return;
     }
 
     // Percent position measured FROM THE RIGHT EDGE (0 at right edge, 1 at left edge)
     const float dist_from_right_px = (float) (map_draw_x_max - m->x);
-    float mouse_percent_from_right = dist_from_right_px / (float) usable_map_width; // 0..1
+    float mouse_percent_from_right = dist_from_right_px / (float) data.usable_map_width;
 
     // Snap to 2% strips (each strip = 0.02 of map width)
     const float strip = 0.02f;
     int strip_index = (int) (mouse_percent_from_right / strip);
     if (strip_index < 0) strip_index = 0;
     float new_width = (strip_index + 0.5f) * strip;
-    if (new_width < 0.05f) {
+    if (new_width < 0.10f) {
         sidebar_dragging_width = 0.0f;      // collapse preview
-    } else if (new_width < 0.10f) {
-        sidebar_dragging_width = 0.10f;     // minimum visible width
-    } else if (new_width > 0.50f) {
-        sidebar_dragging_width = 0.50f;     // maximum width
+    } else if (new_width < 0.20f) {
+        sidebar_dragging_width = 0.20f;     // minimum visible width
+    } else if (new_width > 0.70f) {
+        sidebar_dragging_width = 0.70f;     // maximum width
     } else {
         sidebar_dragging_width = new_width;
     }
 
     // Immediate layout update for live feedback
-    int raw = (int) ((float) usable_map_width * sidebar_dragging_width);
+    int raw = (int) ((float) data.usable_map_width * sidebar_dragging_width);
     data.sidebar.width =
         ((raw + (BLOCK_SIZE / 2)) / BLOCK_SIZE) * BLOCK_SIZE
         + data.sidebar.margin_left + data.sidebar.margin_right;
@@ -2155,7 +2177,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
 
     if (m->is_touch) {
         const touch *t = touch_get_earliest();
-        if (!is_outside_map(t->current_point.x, t->current_point.y)) {
+        if (!is_outside_map(t->current_point.x, t->current_point.y) && !is_sidebar(m)) { // disable dragging on sidebar
             if (t->has_started) {
                 data.is_scrolling = 1;
                 scroll_drag_start(1);

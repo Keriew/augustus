@@ -1682,6 +1682,7 @@ static translation_string all_strings[] = {
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_LAND, "Land Routes"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_SEA, "Sea Routes"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_NONE, "No Filter"},
+    {TR_TOOLTIP_CHANGE_SIDEBAR_WIDTH, "Change sidebar width"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
