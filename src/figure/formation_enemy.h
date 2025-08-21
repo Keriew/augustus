@@ -11,4 +11,6 @@ int formation_enemy_move_formation_to(const formation *m, int x, int y, int *x_t
 
 void formation_enemy_update(void);
 
+int get_structures_on_native_land(int *dst_x, int *dst_y);
+
 #endif // FIGURE_FORMATION_ENEMY_H
