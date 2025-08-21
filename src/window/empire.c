@@ -67,7 +67,7 @@
 #define BUTTON_INDEX_FILTER_MAIN 1
 #define BUTTON_INDEX_FIRST_SORT_METHOD (BUTTON_INDEX_FILTER_MAIN + 1) // 2
 #define BUTTON_INDEX_FIRST_FILTER_METHOD (BUTTON_INDEX_FIRST_SORT_METHOD + MAX_SORTING_KEY)
-
+#define BUTTON_INDEX_FILTERING_RESOURCES 100
 
 #define FONT_SPACE_WIDTH font_definition_for(FONT_NORMAL_GREEN)->space_width
 #define FONT_HEIGHT_NORMAL font_definition_for(FONT_NORMAL_GREEN)->line_height
@@ -105,7 +105,7 @@ typedef enum {
 typedef enum {
     FILTER_BY_RESOURCE,
     FILTER_BY_OPEN,
-    FILTER_NONE, //keep second to last
+    FILTER_NONE,
     MAX_FILTER_KEY
 } filter_method;
 
@@ -301,6 +301,8 @@ static struct {
         int hovered_sorting_button;
         int expanded_main;
         int sorting_reversed; // 1 if sorting is reversed, 0 if not
+        int resource_selection_active; // 1 if we're in resource selection mode, 0 if not
+        resource_type selected_filter_resource;
     } sidebar;
     int trade_route_anim_start;
 } data = { 0, 1 , 0 };
@@ -316,8 +318,10 @@ static void init(void)
     data.trade_route_anim_start = 0;
     data.sidebar.expanded_main = NO_POSITION;
     data.sidebar.current_sorting = SORT_BY_NAME; // default sorting method
-    data.sidebar.current_filtering = FILTER_NONE;
+    data.sidebar.current_filtering = FILTER_NONE; // default to no filtering
     data.sidebar.hovered_sorting_button = NO_POSITION;
+    data.sidebar.resource_selection_active = 0; // not in resource selection mode
+    data.sidebar.selected_filter_resource = RESOURCE_NONE; // no resource selected
 
     process_selection();
     data.focus_button_id = 0;
@@ -391,6 +395,7 @@ static void handle_sidebar_border(const mouse *m)
     }
     //needs tooltip set here
 }
+
 static int handle_expanding_buttons_input(const mouse *m)
 {
     data.sidebar.hovered_sorting_button = NO_POSITION; // Reset hovered button
@@ -411,8 +416,9 @@ static int handle_expanding_buttons_input(const mouse *m)
     }
 
     // If right-clicked and something is expanded: collapse it and exit
-    if (m->right.went_up && data.sidebar.expanded_main != NO_POSITION) {
+    if (m->right.went_up && (data.sidebar.expanded_main != NO_POSITION || data.sidebar.resource_selection_active)) {
         data.sidebar.expanded_main = NO_POSITION;
+        data.sidebar.resource_selection_active = 0;
         return 1; // Block further input
     }
 
@@ -421,26 +427,57 @@ static int handle_expanding_buttons_input(const mouse *m)
 
         if (m->x >= btn->x && m->x < btn->x + btn->width &&
             m->y >= btn->y && m->y < btn->y + btn->height) {
-
             data.sidebar.hovered_sorting_button = btn->button_type;
-
             // Only handle left clicks here
             if (m->left.went_up) {
                 if (btn->button_type == BUTTON_INDEX_SORT_MAIN) {
                     data.sidebar.expanded_main = (data.sidebar.expanded_main == BUTTON_INDEX_SORT_MAIN) ? NO_POSITION : BUTTON_INDEX_SORT_MAIN;
                     return 1;
                 } else if (btn->button_type == BUTTON_INDEX_FILTER_MAIN) {
-                    data.sidebar.expanded_main = (data.sidebar.expanded_main == BUTTON_INDEX_FILTER_MAIN) ? NO_POSITION : BUTTON_INDEX_FILTER_MAIN;
+                    if (data.sidebar.expanded_main == BUTTON_INDEX_FILTER_MAIN) {
+                        // Already expanded, collapse it
+                        data.sidebar.expanded_main = NO_POSITION;
+                        data.sidebar.resource_selection_active = 0;
+                    } else {
+                        // Expand and show normal filter options (not resource selection)
+                        data.sidebar.expanded_main = BUTTON_INDEX_FILTER_MAIN;
+                        data.sidebar.resource_selection_active = 0; // Always start with normal filters
+                    }
                     return 1;
                 } else if (btn->button_type >= BUTTON_INDEX_FIRST_SORT_METHOD &&
                            btn->button_type < BUTTON_INDEX_FIRST_FILTER_METHOD) {
                     data.sidebar.current_sorting = btn->button_type - BUTTON_INDEX_FIRST_SORT_METHOD;
                     data.sidebar.expanded_main = NO_POSITION;
                     return 1;
-                } else if (btn->button_type >= BUTTON_INDEX_FIRST_FILTER_METHOD) {
-                    data.sidebar.current_filtering = btn->button_type - BUTTON_INDEX_FIRST_FILTER_METHOD;
-                    data.sidebar.expanded_main = NO_POSITION;
-                    return 1;
+                } else if (btn->button_type >= BUTTON_INDEX_FIRST_FILTER_METHOD && btn->button_type < BUTTON_INDEX_FILTERING_RESOURCES) {
+                    int filter_index = btn->button_type - BUTTON_INDEX_FIRST_FILTER_METHOD;
+                    // Ensure filter_index is within valid bounds
+                    if (filter_index >= 0 && filter_index < MAX_FILTER_KEY) {
+                        if (filter_index == FILTER_BY_RESOURCE) {
+                            // Enter resource selection mode instead of closing
+                            data.sidebar.resource_selection_active = 1;
+                            //data.sidebar.current_filtering = FILTER_BY_RESOURCE;
+                            // Keep expanded_main open to show resource list
+                            return 1;
+                        } else {
+                            // Normal filter selection
+                            data.sidebar.current_filtering = filter_index;
+                            data.sidebar.expanded_main = NO_POSITION;
+                            data.sidebar.resource_selection_active = 0;
+                            return 1;
+                        }
+                    }
+                } else if (btn->button_type >= BUTTON_INDEX_FILTERING_RESOURCES) {
+                    // Resource button clicked (in resource selection mode)
+                    resource_type selected_resource = btn->button_type - BUTTON_INDEX_FILTERING_RESOURCES;
+                    // Validate resource is within bounds
+                    if (selected_resource >= RESOURCE_MIN && selected_resource < RESOURCE_MAX) {
+                        data.sidebar.selected_filter_resource = selected_resource;
+                        data.sidebar.current_filtering = FILTER_BY_RESOURCE;
+                        data.sidebar.expanded_main = NO_POSITION;
+                        data.sidebar.resource_selection_active = 0;
+                        return 1;
+                    }
                 }
                 data.sidebar.expanded_main = NO_POSITION;
                 return 1; //clicked away
@@ -589,7 +626,14 @@ static int city_matches_current_filter(const empire_city *city)
             return city->is_open; // only open routes
         case FILTER_BY_RESOURCE:
             // placeholder for future resource-based filtering
-            return 1; // allow all for now
+            for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+                if (city->buys_resource[r] || city->sells_resource[r]) {
+                    if (data.sidebar.selected_filter_resource == r) {
+                        return 1; // city has the selected resource
+                    }
+                }
+            }
+            return 0; // no matching resource found
         case FILTER_NONE:
             return 1; // no filtering, allow all
         default:
@@ -991,11 +1035,16 @@ static void draw_simple_button(int x, int y, int width, int height, int is_focus
     button_border_draw(x, y, width, height, is_focused);
     int font_height = font_definition_for(FONT_NORMAL_BLACK)->line_height;
     int y_text_offset = y + (height / 2) - (font_height / 2);
+    if (button_type >= BUTTON_INDEX_FILTERING_RESOURCES) {
+        resource_type r = button_type - BUTTON_INDEX_FILTERING_RESOURCES;
+        const uint8_t *resource_name = resource_get_data(r)->text;
+        int text_width = text_get_width(resource_name, FONT_NORMAL_BLACK);
+        int available_text_width = width - 16; // 8px margin on each side
+        image const *img = image_get(resource_get_data(r)->image.empire);
+        int text_x = x + 8 + (available_text_width - text_width - img->width) / 2; // Center horizontally
 
-    // Optional image placeholder
-    int image_id = -1;
-    if (image_id > 0) {
-        image_draw(image_id, x + 4, y + 4, COLOR_MASK_NONE, SCALE_NONE);
+        int cursor_x = text_x + text_draw(resource_name, text_x, y_text_offset, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+        image_draw(resource_get_data(r)->image.empire, cursor_x, y_text_offset, COLOR_MASK_NONE, SCALE_NONE);
     }
     if (number2 == TR_EMPIRE_SIDE_BAR_FILTER_BY_NONE) { // dont draw second text if it's "None"
         group2 = -1;
@@ -1012,11 +1061,11 @@ static void draw_simple_button(int x, int y, int width, int height, int is_focus
 
     // Draw first text and get cursor position
     int cursor_x = text_x + lang_text_draw(group1, number1, text_x, y_text_offset, FONT_NORMAL_BLACK);
-
     // Draw second text if provided (number2 >= 0)
     if (number2 >= 0) {
         lang_text_draw(group2, number2, cursor_x, y_text_offset, FONT_NORMAL_BLACK);
     }
+
 
     register_sorting_button(x, y, width, height, button_type);
 }
@@ -1071,10 +1120,29 @@ static void draw_expanding_buttons(void)
     int x_filter = base_x + button_width + button_h_spacing;    // Filter main button
 
     // Filter main button with current selection displayed
+    int filter_group2, filter_number2;
+    if (data.sidebar.resource_selection_active) {
+        // Show "Filter by Resource" when in resource selection mode
+        filter_group2 = CUSTOM_TRANSLATION;
+        filter_number2 = TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE;
+    } else if (data.sidebar.current_filtering == FILTER_BY_RESOURCE) {
+        // Show "Filter by Resource" when resource filter is active
+        filter_group2 = CUSTOM_TRANSLATION;
+        filter_number2 = TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE;
+    } else if (data.sidebar.current_filtering == FILTER_BY_OPEN) {
+        // Show "Filter by Open" 
+        filter_group2 = CUSTOM_TRANSLATION;
+        filter_number2 = TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE + 1; // Assuming Open is +1 from Resource
+    } else {
+        // FILTER_NONE or any other value - show "None"
+        filter_group2 = CUSTOM_TRANSLATION;
+        filter_number2 = TR_EMPIRE_SIDE_BAR_FILTER_BY_NONE; // Need to add this translation
+    }
+
     draw_simple_button(x_filter, base_y, button_width, button_height,
         data.sidebar.hovered_sorting_button == BUTTON_INDEX_FILTER_MAIN,
         CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_FILTER, // Base text: "Filter by:"
-        CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE + data.sidebar.current_filtering, // Selected method
+        filter_group2, filter_number2, // Selected method
         1);
 
     if (data.sidebar.expanded_main == 0) {
@@ -1088,14 +1156,60 @@ static void draw_expanding_buttons(void)
                 button_type);
         }
     } else if (data.sidebar.expanded_main == 1) {
-        for (int i = 0; i < MAX_FILTER_KEY; ++i) {
-            int button_type = BUTTON_INDEX_FIRST_FILTER_METHOD + i;
-            int y = base_y + v_margin + button_height + i * button_v_spacing;
-            draw_simple_button(x_filter, y, button_width, button_height,
-                data.sidebar.hovered_sorting_button == button_type,
-                CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE + i,
-                -1, -1, // No second text
-                button_type);
+        if (data.sidebar.resource_selection_active) {
+            // Show resource list instead of normal filter options
+            int resource_count = 0;
+            for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+                if (resource_is_storable(r)) {
+                    int button_type = BUTTON_INDEX_FILTERING_RESOURCES + r; // Use 1000+ range for resource buttons
+                    int y = base_y + v_margin + button_height + resource_count * button_v_spacing;
+                    draw_simple_button(x_filter, base_y, button_width, button_height,
+                        data.sidebar.hovered_sorting_button == BUTTON_INDEX_FILTER_MAIN,
+                        CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_FILTER, // Base text: "Filter by:"
+                        -1, -1, button_type);
+                    // // Draw button background
+                    // graphics_set_clip_rectangle(x_filter, y, button_width, button_height);
+                    // int height_blocks = button_height / BLOCK_SIZE;
+                    // unbordered_panel_draw(x_filter, y, button_width / BLOCK_SIZE + 1, height_blocks);
+                    // graphics_reset_clip_rectangle();
+                    // button_border_draw(x_filter, y, button_width, button_height,
+                    //     data.sidebar.hovered_sorting_button == button_type);
+
+                    // // Draw resource name using text_draw since resource names are precomposed
+                    // int font_height = font_definition_for(FONT_NORMAL_BLACK)->line_height;
+                    // int y_text_offset = y + (button_height / 2) - (font_height / 2);
+                    // const uint8_t *resource_name = resource_get_data(r)->text;
+                    // int text_width = text_get_width(resource_name, FONT_NORMAL_BLACK);
+                    // int available_text_width = button_width - 16; // 8px margin on each side
+                    // int text_x = x_filter + 8 + (available_text_width - text_width) / 2; // Center horizontally
+                    // text_draw(resource_name, text_x, y_text_offset, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+
+                    //register_sorting_button(x_filter, y, button_width, button_height, button_type);
+                    resource_count++;
+                }
+            }
+        } else {
+            // Show normal filter options
+            for (int i = 0; i < MAX_FILTER_KEY; ++i) {
+                int button_type = BUTTON_INDEX_FIRST_FILTER_METHOD + i;
+                int y = base_y + v_margin + button_height + i * button_v_spacing;
+
+                // Determine the correct translation key for each filter type
+                int translation_key;
+                if (i == FILTER_BY_RESOURCE) {
+                    translation_key = TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE;
+                } else if (i == FILTER_BY_OPEN) {
+                    translation_key = TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE + 1; // Assuming Open is +1
+                } else {
+                    translation_key = TR_EMPIRE_SIDE_BAR_FILTER_BY_NONE; // Need this translation for "None"
+                }
+
+                draw_simple_button(x_filter, y, button_width, button_height,
+                    data.sidebar.hovered_sorting_button == button_type,
+                    CUSTOM_TRANSLATION, translation_key,
+                    -1, -1, // No second text
+                    button_type);
+            }
         }
     }
 
