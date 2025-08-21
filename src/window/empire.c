@@ -73,12 +73,9 @@
 #define FONT_HEIGHT_NORMAL font_definition_for(FONT_NORMAL_GREEN)->line_height
 #define FONT_HEIGHT_LARGE font_definition_for(FONT_LARGE_BLACK)->line_height
 
-#define NO_POSITION ((unsigned int) -1) //used as an alterntive to 0 for some of new pointers, to avoid confusion with when relying on external indexing, which can be 0-based
+#define NO_POSITION ((unsigned int) -1) //used as an alterntive to 0 for some of new pointers
+//to avoid confusion with when relying on external indexing, which can be 0-based
 
-float sidebar_width_percent = 0.25f; //default sidebar width
-int sidebar_dragging = 0; //is sidebar being dragged
-float sidebar_dragging_width = 0.0f;
-float sidebar_previous_width = 0.0f; //used to restore the width when dragging ends
 //typedefs 
 typedef enum {
     TRADE_ICON_NONE = -1,
@@ -265,6 +262,7 @@ static struct {
     int y_min;
     int y_max;
     int is_collapsed;
+    int is_hovered;
 }sidebar_border_btn;
 
 //values for drawing resource shields
@@ -307,6 +305,10 @@ static struct {
         int sorting_reversed; // 1 if sorting is reversed, 0 if not
         int resource_selection_active; // 1 if we're in resource selection mode, 0 if not
         resource_type selected_filter_resource;
+        uint8_t width_percent; // sidebar width as percentage of map width (0-100)
+        int dragging; // is sidebar being dragged
+        uint8_t dragging_width; // width during dragging (0-100)
+        uint8_t previous_width; // used to restore the width when dragging ends (0-100)
     } sidebar;
     int trade_route_anim_start;
 } data = { 0, 1 , 0 };
@@ -326,6 +328,10 @@ static void init(void)
     data.sidebar.hovered_sorting_button = NO_POSITION;
     data.sidebar.resource_selection_active = 0; // not in resource selection mode
     data.sidebar.selected_filter_resource = RESOURCE_NONE; // no resource selected
+    data.sidebar.width_percent = 25; // default sidebar width (25%)
+    data.sidebar.dragging = 0; // not dragging initially
+    data.sidebar.dragging_width = 0;
+    data.sidebar.previous_width = 0;
 
     process_selection();
     data.focus_button_id = 0;
@@ -392,9 +398,9 @@ static void handle_sidebar_border(const mouse *m)
         if (sidebar_border_btn.is_collapsed) {
             sidebar_expand();
         } else {
-            sidebar_previous_width = sidebar_width_percent;
-            sidebar_dragging_width = sidebar_width_percent;
-            sidebar_dragging = 1;
+            data.sidebar.previous_width = data.sidebar.width_percent;
+            data.sidebar.dragging_width = data.sidebar.width_percent;
+            data.sidebar.dragging = 1;
         }
     }
     //needs tooltip set here
@@ -408,9 +414,7 @@ static int handle_expanding_buttons_input(const mouse *m)
     // Check if mouse is over the arrow button first (highest priority)
     if (m->x >= sorting_arrow_button.x && m->x < sorting_arrow_button.x + sorting_arrow_button.width &&
         m->y >= sorting_arrow_button.y && m->y < sorting_arrow_button.y + sorting_arrow_button.height) {
-
         sorting_arrow_focused = 1; // Take focus away from main button
-
         if (m->left.went_up) {
             // Toggle sorting order
             data.sidebar.sorting_reversed = !data.sidebar.sorting_reversed;
@@ -497,13 +501,13 @@ static int handle_expanding_buttons_input(const mouse *m)
 
 static void sidebar_collapse(void)
 {
-    sidebar_width_percent = 0.0f;
+    data.sidebar.width_percent = 0;
     sidebar_border_btn.is_collapsed = 1;
     window_invalidate();
 }
 static void sidebar_expand(void)
 {
-    sidebar_width_percent = 0.25f;
+    data.sidebar.width_percent = 25;
     sidebar_border_btn.is_collapsed = 0;
     window_invalidate();
 }
@@ -678,8 +682,8 @@ static void setup_sidebar(void)
     data.usable_map_width = map_draw_x_max - map_draw_x_min;
 
     // Use only one width source - prefer dragging width when actively dragging
-    float active_width_percent = sidebar_dragging ? sidebar_dragging_width : sidebar_width_percent;
-    int raw = (int) (data.usable_map_width * active_width_percent);
+    uint8_t active_width_percent = data.sidebar.dragging ? data.sidebar.dragging_width : data.sidebar.width_percent;
+    int raw = (data.usable_map_width * active_width_percent) / 100;
     data.sidebar.width = ((raw + (BLOCK_SIZE / 2)) / BLOCK_SIZE) * BLOCK_SIZE + data.sidebar.margin_left + data.sidebar.margin_right; //ensure that the inner panels draw predictably
 
     data.sidebar.height = map_draw_y_max - map_draw_y_min;
@@ -768,7 +772,7 @@ static void draw_paneling(void)
         image_draw(image_base, data.sidebar.x_min - WIDTH_BORDER, y, COLOR_MASK_NONE, SCALE_NONE);
     }
 
-    sidebar_border_btn.is_collapsed = (sidebar_width_percent > 0.0f) ? 0 : 1;
+    sidebar_border_btn.is_collapsed = (data.sidebar.width_percent > 0) ? 0 : 1;
     sidebar_border_btn.x_min = data.sidebar.x_min - WIDTH_BORDER;
     sidebar_border_btn.x_max = sidebar_border_btn.is_collapsed ? data.sidebar.x_max : data.sidebar.x_min;
     sidebar_border_btn.y_min = data.sidebar.y_min;
@@ -1451,7 +1455,7 @@ static void on_sidebar_city_click(const grid_box_item *item)
 
 static void setup_sidebar_gridbox(void)
 {
-    if (sidebar_width_percent < 0.01f) {
+    if (data.sidebar.width_percent < 1) {
         return;
     }
 
@@ -1996,7 +2000,7 @@ static void draw_sidebar_grid_box(void)
         data.sidebar.width,
         data.sidebar.height
     );
-    if (sidebar_width_percent > 0.05f && (!sidebar_dragging || sidebar_dragging_width > 0.05f)) {
+    if (data.sidebar.width_percent > 5 && (!data.sidebar.dragging || data.sidebar.dragging_width > 5)) {
         draw_expanding_buttons();
     }
 
@@ -2103,17 +2107,17 @@ static void process_selection(void)
 void handle_sidebar_dragging(const mouse *m)
 {
     if (m->left.went_up) {
-        sidebar_dragging = 0; // stopped dragging
-        if (sidebar_dragging_width <= 0.05f) {
+        data.sidebar.dragging = 0; // stopped dragging
+        if (data.sidebar.dragging_width <= 5) {
             sidebar_collapse();
         } else {
-            sidebar_width_percent = sidebar_dragging_width; // save the width percent
+            data.sidebar.width_percent = data.sidebar.dragging_width; // save the width percent
         }
         return;
     }
     if (m->right.went_up) {
-        sidebar_dragging = 0;
-        sidebar_width_percent = sidebar_previous_width;
+        data.sidebar.dragging = 0;
+        data.sidebar.width_percent = data.sidebar.previous_width;
         window_invalidate(); // reset to previous width
         return;
     }
@@ -2125,27 +2129,27 @@ void handle_sidebar_dragging(const mouse *m)
         return;
     }
 
-    // Percent position measured FROM THE RIGHT EDGE (0 at right edge, 1 at left edge)
-    const float dist_from_right_px = (float) (map_draw_x_max - m->x);
-    float mouse_percent_from_right = dist_from_right_px / (float) data.usable_map_width;
+    // Percent position measured FROM THE RIGHT EDGE (0 at right edge, 100 at left edge)
+    const int dist_from_right_px = map_draw_x_max - m->x;
+    int mouse_percent_from_right = (dist_from_right_px * 100) / data.usable_map_width;
 
-    // Snap to 2% strips (each strip = 0.02 of map width)
-    const float strip = 0.02f;
-    int strip_index = (int) (mouse_percent_from_right / strip);
+    // Snap to 2% strips (each strip = 2% of map width)
+    const int strip = 2;
+    int strip_index = mouse_percent_from_right / strip;
     if (strip_index < 0) strip_index = 0;
-    float new_width = (strip_index + 0.5f) * strip;
-    if (new_width < 0.10f) {
-        sidebar_dragging_width = 0.0f;      // collapse preview
-    } else if (new_width < 0.20f) {
-        sidebar_dragging_width = 0.20f;     // minimum visible width
-    } else if (new_width > 0.70f) {
-        sidebar_dragging_width = 0.70f;     // maximum width
+    int new_width = (strip_index * strip) + 1; // +1 to center in strip
+    if (new_width < 10) {
+        data.sidebar.dragging_width = 0;      // collapse preview
+    } else if (new_width < 20) {
+        data.sidebar.dragging_width = 20;     // minimum visible width (20%)
+    } else if (new_width > 70) {
+        data.sidebar.dragging_width = 70;     // maximum width (70%)
     } else {
-        sidebar_dragging_width = new_width;
+        data.sidebar.dragging_width = new_width;
     }
 
     // Immediate layout update for live feedback
-    int raw = (int) ((float) data.usable_map_width * sidebar_dragging_width);
+    int raw = (data.usable_map_width * data.sidebar.dragging_width) / 100;
     data.sidebar.width =
         ((raw + (BLOCK_SIZE / 2)) / BLOCK_SIZE) * BLOCK_SIZE
         + data.sidebar.margin_left + data.sidebar.margin_right;
@@ -2158,7 +2162,7 @@ void handle_sidebar_dragging(const mouse *m)
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     pixel_offset position;
-    if (sidebar_dragging) {
+    if (data.sidebar.dragging) {
         handle_sidebar_dragging(m);
         return; //block other input handling if the sidebar is being dragged
     }
@@ -2436,7 +2440,7 @@ void window_empire_show(void)
 
 int window_empire_is_dragging_sidebar(void)
 {
-    return sidebar_dragging;
+    return data.sidebar.dragging;
 }
 
 void window_empire_show_checked(void)
