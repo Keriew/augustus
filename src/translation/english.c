@@ -1678,6 +1678,7 @@ static translation_string all_strings[] = {
     {TR_EMPIRE_SIDE_BAR_SORT_BY_PROFIT, "Profit"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE, "Resource"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_OPEN, "Open Routes"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_NONE, "No Filter"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

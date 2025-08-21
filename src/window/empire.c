@@ -105,6 +105,7 @@ typedef enum {
 typedef enum {
     FILTER_BY_RESOURCE,
     FILTER_BY_OPEN,
+    FILTER_NONE, //keep second to last
     MAX_FILTER_KEY
 } filter_method;
 
@@ -315,6 +316,7 @@ static void init(void)
     data.trade_route_anim_start = 0;
     data.sidebar.expanded_main = NO_POSITION;
     data.sidebar.current_sorting = SORT_BY_NAME; // default sorting method
+    data.sidebar.current_filtering = FILTER_NONE;
     data.sidebar.hovered_sorting_button = NO_POSITION;
 
     process_selection();
@@ -387,6 +389,7 @@ static void handle_sidebar_border(const mouse *m)
             sidebar_dragging = 1;
         }
     }
+    //needs tooltip set here
 }
 static int handle_expanding_buttons_input(const mouse *m)
 {
@@ -439,6 +442,7 @@ static int handle_expanding_buttons_input(const mouse *m)
                     data.sidebar.expanded_main = NO_POSITION;
                     return 1;
                 }
+                data.sidebar.expanded_main = NO_POSITION;
                 return 1; //clicked away
             }
 
@@ -448,7 +452,6 @@ static int handle_expanding_buttons_input(const mouse *m)
 
     return (data.sidebar.expanded_main != NO_POSITION) ? 1 : 0;
 }
-
 
 static void sidebar_collapse(void)
 {
@@ -577,6 +580,21 @@ static int sidebar_city_sorter(const void *a, const void *b)
         result = -result;
 
     return result;
+}
+
+static int city_matches_current_filter(const empire_city *city)
+{
+    switch (data.sidebar.current_filtering) {
+        case FILTER_BY_OPEN:
+            return city->is_open; // only open routes
+        case FILTER_BY_RESOURCE:
+            // placeholder for future resource-based filtering
+            return 1; // allow all for now
+        case FILTER_NONE:
+            return 1; // no filtering, allow all
+        default:
+            return 1;
+    }
 }
 
 static void setup_sidebar(void)
@@ -709,7 +727,6 @@ static void draw_paneling(void)
     scrollbar_draw(&sidebar_scrollbar);
 
 }
-
 
 static open_trade_button_style get_open_trade_button_style(int x, int y, trade_style_variant variant)
 {
@@ -898,7 +915,6 @@ static int open_trade_button_icon_fits(const empire_city *city, const open_trade
     return width_full < available_width;
 }
 
-
 void draw_open_trade_button(const empire_city *city, const open_trade_button_style *style, trade_icon_type icon_type)
 {
     int cost = city->cost_to_open;
@@ -975,14 +991,26 @@ static void draw_simple_button(int x, int y, int width, int height, int is_focus
     button_border_draw(x, y, width, height, is_focused);
     int font_height = font_definition_for(FONT_NORMAL_BLACK)->line_height;
     int y_text_offset = y + (height / 2) - (font_height / 2);
+
     // Optional image placeholder
     int image_id = -1;
     if (image_id > 0) {
         image_draw(image_id, x + 4, y + 4, COLOR_MASK_NONE, SCALE_NONE);
     }
+    if (number2 == TR_EMPIRE_SIDE_BAR_FILTER_BY_NONE) { // dont draw second text if it's "None"
+        group2 = -1;
+        number2 = -1;
+    }
+    // Calculate total text width for centering
+    int text1_width = lang_text_get_width(group1, number1, FONT_NORMAL_BLACK);
+    int text2_width = (number2 >= 0) ? lang_text_get_width(group2, number2, FONT_NORMAL_BLACK) : 0;
+    int total_text_width = text1_width + text2_width;
+
+    // Center the combined text within the button
+    int available_width = width - 16; // 8px margin on each side
+    int text_x = x + 8 + (available_width - total_text_width) / 2; // Center horizontally
 
     // Draw first text and get cursor position
-    int text_x = x + 8; // Small left margin
     int cursor_x = text_x + lang_text_draw(group1, number1, text_x, y_text_offset, FONT_NORMAL_BLACK);
 
     // Draw second text if provided (number2 >= 0)
@@ -1040,8 +1068,7 @@ static void draw_expanding_buttons(void)
         CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_SORT_BY_NAME + data.sidebar.current_sorting, // Selected method
         0);
     draw_sorting_arrow_button(x_sort, base_y, button_width, button_height);
-    // Filter main button
-    int x_filter = base_x + button_width + button_h_spacing;
+    int x_filter = base_x + button_width + button_h_spacing;    // Filter main button
 
     // Filter main button with current selection displayed
     draw_simple_button(x_filter, base_y, button_width, button_height,
@@ -1073,8 +1100,6 @@ static void draw_expanding_buttons(void)
     }
 
 }
-
-
 
 static int draw_trade_row(const empire_city *city, int is_sell, int x, int y, const trade_row_style *style)
 {
@@ -1180,7 +1205,6 @@ static int draw_trade_row(const empire_city *city, int is_sell, int x, int y, co
     }
     return x_cursor; // Final drawing position
 }
-
 
 static void draw_trade_city_info(const empire_object *object, const empire_city *city)
 {
@@ -1338,28 +1362,39 @@ static void on_sidebar_city_click(const grid_box_item *item)
 
 static void setup_sidebar_gridbox(void)
 {
-    // Prepare sidebar entries
-    if (sidebar_width_percent < 0.01f) { //dont set up sidebar gridbox
+    if (sidebar_width_percent < 0.01f) {
         return;
     }
+
     int y = data.sidebar.y_min;
     sidebar_city_count = 0;
-    for (int i = 1; i < empire_city_get_array_size(); i++) { //needs to start at 1 to skip the "no city" entry
+
+    for (int i = 1; i < empire_city_get_array_size(); i++) { // skip "no city" entry
         empire_city *city = empire_city_get(i);
         if (!city->in_use || city->type != EMPIRE_CITY_TRADE) continue;
-
+        // apply the chosen filter
+        if (!city_matches_current_filter(city)) continue;
         if (sidebar_city_count >= MAX_SIDEBAR_CITIES) break;
 
         sidebar_city_entry *entry = &sidebar_cities[sidebar_city_count];
-        entry->sidebar_item_id = sidebar_city_count; //this is the index in the sidebar_cities array
-        entry->city_id = i; //store city id, which is the index in the empire city array
-        entry->empire_object_id = city->empire_object_id; //store the empire object id, which is the index in the empire object array
+        entry->sidebar_item_id = sidebar_city_count;
+        entry->city_id = i;
+        entry->empire_object_id = city->empire_object_id;
         entry->x = data.sidebar.x_min + data.sidebar.margin_left;
         entry->y = y;
         y += SIDEBAR_ENTRY_HEIGHT;
         sidebar_city_count++;
     }
+
     qsort(sidebar_cities, sidebar_city_count, sizeof(sidebar_city_entry), sidebar_city_sorter);
+    int selection_visible = 0;
+    for (int i = 0; i < sidebar_city_count; i++) {
+        if (sidebar_cities[i].city_id == data.selected_city) { selection_visible = 1; break; }
+    }
+    if (!selection_visible) {
+        data.selected_city = 0; // or keep it but ensure UI handles "not in list"
+    }
+
     sidebar_grid_box.x = data.sidebar.x_min + data.sidebar.margin_left;
     sidebar_grid_box.y = data.sidebar.y_min + data.sidebar.margin_top;
     sidebar_grid_box.width = data.sidebar.width - data.sidebar.margin_right - data.sidebar.margin_left;
@@ -1379,7 +1414,6 @@ static void setup_sidebar_gridbox(void)
     sidebar_grid_box.offset_scrollbar_y = grid_box_has_scrollbar(&sidebar_grid_box) ? -20 : 0;
     grid_box_set_bounds(&sidebar_grid_box, sidebar_grid_box.x, sidebar_grid_box.y, sidebar_grid_box.width, sidebar_grid_box.height);
 }
-
 
 static void draw_city_info(const empire_object *object)
 {
