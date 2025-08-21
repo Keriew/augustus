@@ -1683,6 +1683,8 @@ static translation_string all_strings[] = {
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_SEA, "Sea Routes"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_NONE, "No Filter"},
     {TR_TOOLTIP_CHANGE_SIDEBAR_WIDTH, "Change sidebar width"},
+    {TR_TOOLTIP_ASCENDING_ORDER, "Ascending order"},
+    {TR_TOOLTIP_DESCENDING_ORDER, "Descending order"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

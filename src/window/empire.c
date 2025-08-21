@@ -5,6 +5,7 @@
 #include "city/military.h"
 #include "city/warning.h"
 #include "core/calc.h"
+#include "core/config.h"
 #include "core/image_group.h"
 #include "empire/city.h"
 #include "empire/empire.h"
@@ -318,21 +319,24 @@ static struct {
 
 static void init(void)
 {
-    data.sidebar.initialised = NO_POSITION;
+
     data.selected_button = NO_POSITION; // no button selected
     data.trade_route_anim_start = 0;
     data.sidebar.expanded_main = NO_POSITION;
-    data.sidebar.current_sorting = SORT_BY_NAME; // default sorting method
-    data.sidebar.current_filtering = FILTER_NONE; // default to no filtering
+    if (!data.sidebar.initialised) {
+        data.sidebar.current_sorting = SORT_BY_NAME; // default sorting method
+        data.sidebar.current_filtering = FILTER_NONE; // default to no filtering
+        data.sidebar.selected_filter_resource = RESOURCE_NONE; // no resource selected
+    }
     data.sidebar.hovered_sorting_button = NO_POSITION;
     data.sidebar.resource_selection_active = 0; // not in resource selection mode
-    data.sidebar.selected_filter_resource = RESOURCE_NONE; // no resource selected
-    data.sidebar.width_percent = 25; // default sidebar width (25%)
+
+    data.sidebar.width_percent = config_get(CONFIG_UI_EMPIRE_SIDEBAR_WIDTH); // default sidebar width (25%)
     data.sidebar.dragging = 0; // not dragging initially
     data.sidebar.dragging_width = 0;
     data.sidebar.previous_width = 0;
     data.sidebar.border_btn.is_hovered = 0; // not hovered initially
-
+    data.sidebar.initialised = 1;
     process_selection();
     data.focus_button_id = 0;
 
@@ -624,8 +628,6 @@ static void setup_sidebar(void)
     data.sidebar.x_max = map_draw_x_max;
     data.sidebar.y_min = map_draw_y_min;
     data.sidebar.y_max = map_draw_y_max;
-    // Setup grid box
-
 }
 
 // -------------------------------------------------------------------------------------------------------
@@ -2084,7 +2086,6 @@ static int is_outside_map(int x, int y)
         y < data.y_min + 16 || y >= data.y_max - BOTTOM_PANEL_HEIGHT);
 }
 
-// Sidebar border input handling
 static void handle_sidebar_border(const mouse *m)
 {
     // Set hover state
@@ -2117,6 +2118,7 @@ void handle_sidebar_dragging(const mouse *m)
             sidebar_collapse();
         } else {
             data.sidebar.width_percent = data.sidebar.dragging_width; // save the width percent
+            config_set(CONFIG_UI_EMPIRE_SIDEBAR_WIDTH, data.sidebar.width_percent);
         }
         return;
     }
@@ -2351,6 +2353,10 @@ static void get_tooltip(tooltip_context *c)
         c->type = TOOLTIP_BUTTON;
         c->text_group = CUSTOM_TRANSLATION;
         c->text_id = TR_TOOLTIP_CHANGE_SIDEBAR_WIDTH;
+    } else if (sorting_arrow_focused) {
+        c->type = TOOLTIP_BUTTON;
+        c->text_group = CUSTOM_TRANSLATION;
+        c->text_id = sorting_arrow_button.is_down ? TR_TOOLTIP_DESCENDING_ORDER : TR_TOOLTIP_ASCENDING_ORDER;
     } else {
         get_tooltip_trade_route_type(c);
     }
