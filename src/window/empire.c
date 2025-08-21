@@ -256,15 +256,6 @@ typedef struct {
 static arrow_button_info sorting_arrow_button;
 static int sorting_arrow_focused = 0;
 
-static struct {
-    int x_min;
-    int x_max;
-    int y_min;
-    int y_max;
-    int is_collapsed;
-    int is_hovered;
-}sidebar_border_btn;
-
 //values for drawing resource shields
 static px_point trade_amount_px_offsets[5] = {
     { 2, 0 },
@@ -309,6 +300,14 @@ static struct {
         int dragging; // is sidebar being dragged
         uint8_t dragging_width; // width during dragging (0-100)
         uint8_t previous_width; // used to restore the width when dragging ends (0-100)
+        struct {
+            int x_min;
+            int x_max;
+            int y_min;
+            int y_max;
+            int is_collapsed;
+            int is_hovered;
+        } border_btn;
     } sidebar;
     int trade_route_anim_start;
 } data = { 0, 1 , 0 };
@@ -351,10 +350,10 @@ static int is_sidebar(const mouse *m)
 
 static int is_sidebar_border(const mouse *m)
 {
-    if (m->x >= sidebar_border_btn.x_min &&
-        m->x <= sidebar_border_btn.x_max &&
-        m->y >= sidebar_border_btn.y_min &&
-        m->y <= sidebar_border_btn.y_max) {
+    if (m->x >= data.sidebar.border_btn.x_min &&
+        m->x <= data.sidebar.border_btn.x_max &&
+        m->y >= data.sidebar.border_btn.y_min &&
+        m->y <= data.sidebar.border_btn.y_max) {
         return 1;
     }
     return 0;
@@ -383,19 +382,19 @@ static void handle_sidebar_border(const mouse *m)
     if (!is_sidebar_border(m)) {
         return;
     }
-    // Draw the highlight directly on the sidebar_border_btn rectangle
+    // Draw the highlight directly on the sidebar border button rectangle
     data.hovered_object = 0; //clear hovers from sidebar
     graphics_shade_rect(
-        sidebar_border_btn.x_min,
-        sidebar_border_btn.y_min,
-        sidebar_border_btn.x_max - sidebar_border_btn.x_min,
-        sidebar_border_btn.y_max - sidebar_border_btn.y_min,
+        data.sidebar.border_btn.x_min,
+        data.sidebar.border_btn.y_min,
+        data.sidebar.border_btn.x_max - data.sidebar.border_btn.x_min,
+        data.sidebar.border_btn.y_max - data.sidebar.border_btn.y_min,
         2 // shade style (0-7)
     );
 
     // Handle expand/collapse toggle on left mouse release
     if (m->left.went_up) {
-        if (sidebar_border_btn.is_collapsed) {
+        if (data.sidebar.border_btn.is_collapsed) {
             sidebar_expand();
         } else {
             data.sidebar.previous_width = data.sidebar.width_percent;
@@ -502,13 +501,13 @@ static int handle_expanding_buttons_input(const mouse *m)
 static void sidebar_collapse(void)
 {
     data.sidebar.width_percent = 0;
-    sidebar_border_btn.is_collapsed = 1;
+    data.sidebar.border_btn.is_collapsed = 1;
     window_invalidate();
 }
 static void sidebar_expand(void)
 {
     data.sidebar.width_percent = 25;
-    sidebar_border_btn.is_collapsed = 0;
+    data.sidebar.border_btn.is_collapsed = 0;
     window_invalidate();
 }
 
@@ -772,11 +771,11 @@ static void draw_paneling(void)
         image_draw(image_base, data.sidebar.x_min - WIDTH_BORDER, y, COLOR_MASK_NONE, SCALE_NONE);
     }
 
-    sidebar_border_btn.is_collapsed = (data.sidebar.width_percent > 0) ? 0 : 1;
-    sidebar_border_btn.x_min = data.sidebar.x_min - WIDTH_BORDER;
-    sidebar_border_btn.x_max = sidebar_border_btn.is_collapsed ? data.sidebar.x_max : data.sidebar.x_min;
-    sidebar_border_btn.y_min = data.sidebar.y_min;
-    sidebar_border_btn.y_max = data.sidebar.y_max;
+    data.sidebar.border_btn.is_collapsed = (data.sidebar.width_percent > 0) ? 0 : 1;
+    data.sidebar.border_btn.x_min = data.sidebar.x_min - WIDTH_BORDER;
+    data.sidebar.border_btn.x_max = data.sidebar.border_btn.is_collapsed ? data.sidebar.x_max : data.sidebar.x_min;
+    data.sidebar.border_btn.y_min = data.sidebar.y_min;
+    data.sidebar.border_btn.y_max = data.sidebar.y_max;
 
 
     graphics_reset_clip_rectangle();
@@ -1960,7 +1959,7 @@ static void draw_city_name(const empire_city *city)
     int base_x_min = draw_ornaments_outside ? data.panel.x_min : data.x_min;
     int base_x_max = draw_ornaments_outside ? data.panel.x_max : data.x_max;
     image_draw(image_base + 6, base_x_min + 2, data.y_max - 199, COLOR_MASK_NONE, SCALE_NONE);//left bird
-    if (sidebar_border_btn.is_collapsed) {
+    if (data.sidebar.border_btn.is_collapsed) {
         image_draw(image_base + 7, base_x_max - 84, data.y_max - 199, COLOR_MASK_NONE, SCALE_NONE);//right bird
     }
     image_draw(image_base + 8, (data.x_min + data.x_max - 332) / 2, data.y_max - 181, COLOR_MASK_NONE, SCALE_NONE); //city badge big
@@ -2057,7 +2056,7 @@ static void draw_foreground(void)
         data.selected_city = 0;
     }
     draw_paneling();
-    if (!sidebar_border_btn.is_collapsed) {
+    if (!data.sidebar.border_btn.is_collapsed) {
         draw_sidebar_grid_box();  // grid_box uses usable_sidebar dimensions
         grid_box_request_refresh(&sidebar_grid_box);
     }
@@ -2171,7 +2170,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 
     // Only let the grid‐box process clicks if the sidebar is actually expanded:
-    if (!sidebar_border_btn.is_collapsed) {
+    if (!data.sidebar.border_btn.is_collapsed) {
         if (handle_expanding_buttons_input(m)) {
             return; //block other input handling if the expanding buttons are active
         }
