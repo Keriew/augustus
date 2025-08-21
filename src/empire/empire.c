@@ -33,7 +33,7 @@ static struct {
     int initial_scroll_y;
     int scroll_x;
     int scroll_y;
-    int selected_object;
+    unsigned int selected_object;
     int viewport_width;
     int viewport_height;
     struct {
