@@ -105,6 +105,9 @@ typedef enum {
 typedef enum {
     FILTER_BY_RESOURCE,
     FILTER_BY_OPEN,
+    FILTER_BY_CLOSED,
+    FILTER_BY_LAND,
+    FILTER_BY_SEA,
     FILTER_NONE,
     MAX_FILTER_KEY
 } filter_method;
@@ -445,7 +448,7 @@ static int handle_expanding_buttons_input(const mouse *m)
                     }
                     return 1;
                 } else if (btn->button_type >= BUTTON_INDEX_FIRST_SORT_METHOD &&
-                           btn->button_type < BUTTON_INDEX_FIRST_FILTER_METHOD) {
+                             btn->button_type < BUTTON_INDEX_FIRST_FILTER_METHOD) {
                     data.sidebar.current_sorting = btn->button_type - BUTTON_INDEX_FIRST_SORT_METHOD;
                     data.sidebar.expanded_main = NO_POSITION;
                     return 1;
@@ -454,10 +457,7 @@ static int handle_expanding_buttons_input(const mouse *m)
                     // Ensure filter_index is within valid bounds
                     if (filter_index >= 0 && filter_index < MAX_FILTER_KEY) {
                         if (filter_index == FILTER_BY_RESOURCE) {
-                            // Enter resource selection mode instead of closing
                             data.sidebar.resource_selection_active = 1;
-                            //data.sidebar.current_filtering = FILTER_BY_RESOURCE;
-                            // Keep expanded_main open to show resource list
                             return 1;
                         } else {
                             // Normal filter selection
@@ -482,7 +482,6 @@ static int handle_expanding_buttons_input(const mouse *m)
                 data.sidebar.expanded_main = NO_POSITION;
                 return 1; //clicked away
             }
-
             break;
         }
     }
@@ -561,7 +560,7 @@ static int sidebar_city_sorter(const void *a, const void *b)
         case SORT_BY_QUOTA_FILL_IMPORT:
         {
             // Determine if we are sorting by export or import quota fill
-            int is_sell = (data.sidebar.current_sorting == SORT_BY_QUOTA_FILL_EXPORT);
+            int is_sell = (data.sidebar.current_sorting == SORT_BY_QUOTA_FILL_IMPORT);
             int quota_a = get_city_trade_quota_fill(city_a, is_sell);
             int quota_b = get_city_trade_quota_fill(city_b, is_sell);
             result = (quota_a > quota_b) - (quota_a < quota_b);
@@ -624,6 +623,8 @@ static int city_matches_current_filter(const empire_city *city)
     switch (data.sidebar.current_filtering) {
         case FILTER_BY_OPEN:
             return city->is_open; // only open routes
+        case FILTER_BY_CLOSED:
+            return !city->is_open; // only closed routes
         case FILTER_BY_RESOURCE:
             // placeholder for future resource-based filtering
             for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
@@ -634,10 +635,12 @@ static int city_matches_current_filter(const empire_city *city)
                 }
             }
             return 0; // no matching resource found
-        case FILTER_NONE:
+        case FILTER_BY_LAND:
+            return !city->is_sea_trade; // only land routes
+        case FILTER_BY_SEA:
+            return city->is_sea_trade; // only sea routes
+        default: // FILTER_NONE
             return 1; // no filtering, allow all
-        default:
-            return 1;
     }
 }
 
@@ -1026,12 +1029,14 @@ void draw_open_trade_button(const empire_city *city, const open_trade_button_sty
     }
 }
 
-static void draw_simple_button(int x, int y, int width, int height, int is_focused, int group1, int number1, int group2, int number2, int button_type)
+static void draw_simple_button(int x, int y, int width, int height, int is_focused, int group1, int number1,
+     int group2, int number2, int button_type, int image_id)
 {
     graphics_set_clip_rectangle(x, y, width, height);
     int height_blocks = height / BLOCK_SIZE;
     unbordered_panel_draw(x, y, width / BLOCK_SIZE + 1, height_blocks);
     graphics_reset_clip_rectangle();
+    int margin = 8;
     button_border_draw(x, y, width, height, is_focused);
     int font_height = font_definition_for(FONT_NORMAL_BLACK)->line_height;
     int y_text_offset = y + (height / 2) - (font_height / 2);
@@ -1040,11 +1045,13 @@ static void draw_simple_button(int x, int y, int width, int height, int is_focus
         const uint8_t *resource_name = resource_get_data(r)->text;
         int text_width = text_get_width(resource_name, FONT_NORMAL_BLACK);
         int available_text_width = width - 16; // 8px margin on each side
-        image const *img = image_get(resource_get_data(r)->image.empire);
+        image const *img = image_get(resource_get_data(r)->image.icon);
         int text_x = x + 8 + (available_text_width - text_width - img->width) / 2; // Center horizontally
-
         int cursor_x = text_x + text_draw(resource_name, text_x, y_text_offset, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
-        image_draw(resource_get_data(r)->image.empire, cursor_x, y_text_offset, COLOR_MASK_NONE, SCALE_NONE);
+        int img_y_offset = y + (height - img->height) / 2;
+        image_draw(resource_get_data(r)->image.icon, cursor_x, img_y_offset, COLOR_MASK_NONE, SCALE_NONE);
+        register_sorting_button(x, y, width, height, button_type);
+        return; //all done
     }
     if (number2 == TR_EMPIRE_SIDE_BAR_FILTER_BY_NONE) { // dont draw second text if it's "None"
         group2 = -1;
@@ -1054,45 +1061,40 @@ static void draw_simple_button(int x, int y, int width, int height, int is_focus
     int text1_width = lang_text_get_width(group1, number1, FONT_NORMAL_BLACK);
     int text2_width = (number2 >= 0) ? lang_text_get_width(group2, number2, FONT_NORMAL_BLACK) : 0;
     int total_text_width = text1_width + text2_width;
-
-    // Center the combined text within the button
-    int available_width = width - 16; // 8px margin on each side
-    int text_x = x + 8 + (available_width - total_text_width) / 2; // Center horizontally
-
+    int available_width = width - 2 * margin;
+    int text_x = x + margin + (available_width - total_text_width) / 2; // Center horizontally
     // Draw first text and get cursor position
     int cursor_x = text_x + lang_text_draw(group1, number1, text_x, y_text_offset, FONT_NORMAL_BLACK);
-    // Draw second text if provided (number2 >= 0)
     if (number2 >= 0) {
-        lang_text_draw(group2, number2, cursor_x, y_text_offset, FONT_NORMAL_BLACK);
+        cursor_x = cursor_x + lang_text_draw(group2, number2, cursor_x, y_text_offset, FONT_NORMAL_BLACK);
+        if (number2 == TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE && data.sidebar.selected_filter_resource) {
+            //draw the resource icon too
+            resource_type r = data.sidebar.selected_filter_resource;
+            image const *img = image_get(resource_get_data(r)->image.icon);
+            int img_y_offset = y + (height - img->height) / 2;
+            image_draw(resource_get_data(r)->image.icon, cursor_x, img_y_offset, COLOR_MASK_NONE, SCALE_NONE);
+        }
     }
-
-
     register_sorting_button(x, y, width, height, button_type);
 }
 
 static void draw_sorting_arrow_button(int button_x, int button_y, int button_width, int button_height)
 {
-    // Position arrow button inside the sorting button, on the right side
-    int arrow_width = 24;
-    int arrow_height = 24;
     int margin = 10; // Margin from right edge to keep arrow fully inside
-    int arrow_x = button_x + button_width - arrow_width - margin; // Ensure it's inside the button
-    int arrow_y = button_y + (button_height - arrow_height) / 2; // Center vertically
+    sorting_arrow_button.is_down = data.sidebar.sorting_reversed ? 0 : 1; // Down when not reversed
+    int image_id = sorting_arrow_button.is_down ? 17 : 15; // 17 for down, 15 for up
 
     // Update arrow button info for hit detection
-    sorting_arrow_button.x = arrow_x;
-    sorting_arrow_button.y = arrow_y;
-    sorting_arrow_button.width = arrow_width;
-    sorting_arrow_button.height = arrow_height;
-    sorting_arrow_button.is_down = data.sidebar.sorting_reversed ? 0 : 1; // Down when not reversed
-
-    // Draw border if focused - similar to distribution permissions style
+    sorting_arrow_button.x = button_x + button_width - image_get(image_id)->width - margin; // Right edge minus image width and margin
+    sorting_arrow_button.y = button_y + (button_height - image_get(image_id)->height) / 2; // Center vertically
+    sorting_arrow_button.width = image_get(image_id)->width;
+    sorting_arrow_button.height = image_get(image_id)->height;
     if (sorting_arrow_focused) {
-        button_border_draw(arrow_x - 3, arrow_y - 3, arrow_width + 5, arrow_height + 5, sorting_arrow_focused);
+        button_border_draw(sorting_arrow_button.x - 3, sorting_arrow_button.y - 3,
+             sorting_arrow_button.width + 5, sorting_arrow_button.height + 5, sorting_arrow_focused);
         // -3 + 5 to account for the 1px innate border of the button 
     }
-    int image_id = sorting_arrow_button.is_down ? 17 : 15; // 17 for down, 15 for up
-    image_draw(image_id, arrow_x, arrow_y, COLOR_MASK_NONE, SCALE_NONE);
+    image_draw(image_id, sorting_arrow_button.x, sorting_arrow_button.y, COLOR_MASK_NONE, SCALE_NONE);
 }
 
 static void draw_expanding_buttons(void)
@@ -1114,77 +1116,36 @@ static void draw_expanding_buttons(void)
     draw_simple_button(x_sort, base_y, button_width, button_height,
         data.sidebar.hovered_sorting_button == BUTTON_INDEX_SORT_MAIN && !sorting_arrow_focused,
         CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_SORT, // Base text: "Sort by:"
-        CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_SORT_BY_NAME + data.sidebar.current_sorting, // Selected method
-        0);
+        CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_SORT_BY_NAME + data.sidebar.current_sorting, 0);
     draw_sorting_arrow_button(x_sort, base_y, button_width, button_height);
     int x_filter = base_x + button_width + button_h_spacing;    // Filter main button
-
     // Filter main button with current selection displayed
-    int filter_group2, filter_number2;
-    if (data.sidebar.resource_selection_active) {
-        // Show "Filter by Resource" when in resource selection mode
-        filter_group2 = CUSTOM_TRANSLATION;
-        filter_number2 = TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE;
-    } else if (data.sidebar.current_filtering == FILTER_BY_RESOURCE) {
-        // Show "Filter by Resource" when resource filter is active
-        filter_group2 = CUSTOM_TRANSLATION;
-        filter_number2 = TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE;
-    } else if (data.sidebar.current_filtering == FILTER_BY_OPEN) {
-        // Show "Filter by Open" 
-        filter_group2 = CUSTOM_TRANSLATION;
-        filter_number2 = TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE + 1; // Assuming Open is +1 from Resource
-    } else {
-        // FILTER_NONE or any other value - show "None"
-        filter_group2 = CUSTOM_TRANSLATION;
-        filter_number2 = TR_EMPIRE_SIDE_BAR_FILTER_BY_NONE; // Need to add this translation
-    }
-
+    int filter_group2 = CUSTOM_TRANSLATION;
+    int filter_number2 = TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE + data.sidebar.current_filtering;
     draw_simple_button(x_filter, base_y, button_width, button_height,
-        data.sidebar.hovered_sorting_button == BUTTON_INDEX_FILTER_MAIN,
-        CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_FILTER, // Base text: "Filter by:"
-        filter_group2, filter_number2, // Selected method
-        1);
+        data.sidebar.hovered_sorting_button == BUTTON_INDEX_FILTER_MAIN, //hovered state
+        CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_FILTER, filter_group2, filter_number2, 1);
 
     if (data.sidebar.expanded_main == 0) {
         for (int i = 0; i < MAX_SORTING_KEY; ++i) {
             int button_type = BUTTON_INDEX_FIRST_SORT_METHOD + i;  // Children start at 2
             int y = base_y + v_margin + button_height + i * button_v_spacing;
             draw_simple_button(x_sort, y, button_width, button_height,
-                data.sidebar.hovered_sorting_button == button_type,
-                CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_SORT_BY_NAME + i,
-                -1, -1, // No second text
-                button_type);
+                data.sidebar.hovered_sorting_button == button_type, //hovered state
+                CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_SORT_BY_NAME + i, -1, -1, button_type);
         }
     } else if (data.sidebar.expanded_main == 1) {
         if (data.sidebar.resource_selection_active) {
             // Show resource list instead of normal filter options
             int resource_count = 0;
             for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-                if (resource_is_storable(r)) {
-                    int button_type = BUTTON_INDEX_FILTERING_RESOURCES + r; // Use 1000+ range for resource buttons
+                if (resource_is_storable(r) &&
+                (empire_can_export_resource_potentially(r) || empire_can_import_resource_potentially(r))) {
+                    int button_type = BUTTON_INDEX_FILTERING_RESOURCES + r; // Use 100+ range for resource buttons
                     int y = base_y + v_margin + button_height + resource_count * button_v_spacing;
-                    draw_simple_button(x_filter, base_y, button_width, button_height,
-                        data.sidebar.hovered_sorting_button == BUTTON_INDEX_FILTER_MAIN,
-                        CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_FILTER, // Base text: "Filter by:"
-                        -1, -1, button_type);
-                    // // Draw button background
-                    // graphics_set_clip_rectangle(x_filter, y, button_width, button_height);
-                    // int height_blocks = button_height / BLOCK_SIZE;
-                    // unbordered_panel_draw(x_filter, y, button_width / BLOCK_SIZE + 1, height_blocks);
-                    // graphics_reset_clip_rectangle();
-                    // button_border_draw(x_filter, y, button_width, button_height,
-                    //     data.sidebar.hovered_sorting_button == button_type);
-
-                    // // Draw resource name using text_draw since resource names are precomposed
-                    // int font_height = font_definition_for(FONT_NORMAL_BLACK)->line_height;
-                    // int y_text_offset = y + (button_height / 2) - (font_height / 2);
-                    // const uint8_t *resource_name = resource_get_data(r)->text;
-                    // int text_width = text_get_width(resource_name, FONT_NORMAL_BLACK);
-                    // int available_text_width = button_width - 16; // 8px margin on each side
-                    // int text_x = x_filter + 8 + (available_text_width - text_width) / 2; // Center horizontally
-                    // text_draw(resource_name, text_x, y_text_offset, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
-
-                    //register_sorting_button(x_filter, y, button_width, button_height, button_type);
+                    int is_focused = (data.sidebar.hovered_sorting_button == button_type);
+                    draw_simple_button(x_filter, y, button_width, button_height, is_focused, -1, -1, -1, -1, button_type);
+                    // text doesn't matter, resource name will decided basing on button_type
                     resource_count++;
                 }
             }
@@ -1193,22 +1154,10 @@ static void draw_expanding_buttons(void)
             for (int i = 0; i < MAX_FILTER_KEY; ++i) {
                 int button_type = BUTTON_INDEX_FIRST_FILTER_METHOD + i;
                 int y = base_y + v_margin + button_height + i * button_v_spacing;
-
-                // Determine the correct translation key for each filter type
-                int translation_key;
-                if (i == FILTER_BY_RESOURCE) {
-                    translation_key = TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE;
-                } else if (i == FILTER_BY_OPEN) {
-                    translation_key = TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE + 1; // Assuming Open is +1
-                } else {
-                    translation_key = TR_EMPIRE_SIDE_BAR_FILTER_BY_NONE; // Need this translation for "None"
-                }
-
-                draw_simple_button(x_filter, y, button_width, button_height,
-                    data.sidebar.hovered_sorting_button == button_type,
-                    CUSTOM_TRANSLATION, translation_key,
-                    -1, -1, // No second text
-                    button_type);
+                int translation_key = TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE + i;
+                int is_focused = (data.sidebar.hovered_sorting_button == button_type);
+                draw_simple_button(x_filter, y, button_width, button_height, is_focused,
+                     CUSTOM_TRANSLATION, translation_key, -1, -1, button_type);
             }
         }
     }
@@ -1879,10 +1828,8 @@ static void draw_empire_object(const empire_object *obj)
                 int dx = offsets[i][0];
                 int dy = offsets[i][1];
                 image_draw_silh_scaled_centered(image_id,
-                    data.x_draw_offset + x + dx,
-                    data.y_draw_offset + y + dy,
-                    COLOR_MASK_ORANGE_GOLD, // any mask will work
-                    130);
+                    data.x_draw_offset + x + dx, data.y_draw_offset + y + dy, COLOR_MASK_ORANGE_GOLD, 130);
+                // any mask will work
             }
 
             image_draw_scaled_centered(image_id, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, 130);

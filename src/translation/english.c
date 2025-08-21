@@ -1678,6 +1678,9 @@ static translation_string all_strings[] = {
     {TR_EMPIRE_SIDE_BAR_SORT_BY_PROFIT, "Profit"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE, "Resource"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_OPEN, "Open Routes"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_CLOSED, "Closed Routes"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_LAND, "Land Routes"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_SEA, "Sea Routes"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_NONE, "No Filter"},
 };
 
