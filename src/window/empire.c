@@ -331,78 +331,11 @@ static void init(void)
     data.sidebar.dragging = 0; // not dragging initially
     data.sidebar.dragging_width = 0;
     data.sidebar.previous_width = 0;
+    data.sidebar.border_btn.is_hovered = 0; // not hovered initially
 
     process_selection();
     data.focus_button_id = 0;
 
-}
-
-static int is_sidebar(const mouse *m)
-{
-    if (m->x >= data.sidebar.x_min &&
-        m->x < data.sidebar.x_max &&
-        m->y >= data.sidebar.y_min &&
-        m->y < data.sidebar.y_max) {
-        return 1;
-    }
-    return 0;
-}
-
-static int is_sidebar_border(const mouse *m)
-{
-    if (m->x >= data.sidebar.border_btn.x_min &&
-        m->x <= data.sidebar.border_btn.x_max &&
-        m->y >= data.sidebar.border_btn.y_min &&
-        m->y <= data.sidebar.border_btn.y_max) {
-        return 1;
-    }
-    return 0;
-}
-
-static int is_map(const mouse *m)
-{
-    if (m->x >= data.x_min + WIDTH_BORDER &&
-        m->x < data.sidebar.x_min &&
-        m->y >= data.y_min + WIDTH_BORDER &&
-        m->y < data.y_max - BOTTOM_PANEL_HEIGHT - WIDTH_BORDER) {
-        return 1;
-    }
-    return 0;
-}
-
-static int is_outside_map(int x, int y)
-{
-    return (x < data.x_min + 16 || x >= data.sidebar.x_min ||
-        y < data.y_min + 16 || y >= data.y_max - BOTTOM_PANEL_HEIGHT);
-}
-
-static void handle_sidebar_border(const mouse *m)
-{
-    // Early exit if mouse not on sidebar border
-    if (!is_sidebar_border(m)) {
-        return;
-    }
-    // Draw the highlight directly on the sidebar border button rectangle
-    data.hovered_object = 0; //clear hovers from sidebar
-    graphics_shade_rect(
-        data.sidebar.border_btn.x_min,
-        data.sidebar.border_btn.y_min,
-        data.sidebar.border_btn.x_max - data.sidebar.border_btn.x_min,
-        data.sidebar.border_btn.y_max - data.sidebar.border_btn.y_min,
-        2 // shade style (0-7)
-    );
-
-    // Handle expand/collapse toggle on left mouse release
-    if (m->left.went_up) {
-        if (data.sidebar.border_btn.is_collapsed) {
-            sidebar_expand();
-        } else {
-            data.sidebar.previous_width = data.sidebar.width_percent;
-            data.sidebar.dragging_width = data.sidebar.width_percent;
-            data.sidebar.dragging = 1;
-        }
-    }
-    //needs tooltip set here
 }
 
 static int handle_expanding_buttons_input(const mouse *m)
@@ -777,6 +710,16 @@ static void draw_paneling(void)
     data.sidebar.border_btn.y_min = data.sidebar.y_min;
     data.sidebar.border_btn.y_max = data.sidebar.y_max;
 
+    // Draw border button highlight if hovered
+    if (data.sidebar.border_btn.is_hovered) {
+        graphics_shade_rect(
+            data.sidebar.border_btn.x_min,
+            data.sidebar.border_btn.y_min,
+            data.sidebar.border_btn.x_max - data.sidebar.border_btn.x_min,
+            data.sidebar.border_btn.y_max - data.sidebar.border_btn.y_min,
+            2 // shade style (0-7)
+        );
+    }
 
     graphics_reset_clip_rectangle();
     scrollbar_draw(&sidebar_scrollbar);
@@ -871,7 +814,6 @@ void draw_trade_resource(resource_type r, int trade_max, int x, int y)
     image_draw(resource_get_data(r)->image.empire, x, y, COLOR_MASK_NONE, SCALE_NONE);
     window_empire_draw_resource_shields(trade_max, x, y);
 }
-
 
 void window_empire_draw_resource_shields(int trade_max, int x_offset, int y_offset)
 {
@@ -2102,6 +2044,70 @@ static void process_selection(void)
 //                                              HANDLE INPUT
 // -------------------------------------------------------------------------------------------------------
 
+// Mouse position helper functions
+static int is_sidebar(const mouse *m)
+{
+    if (m->x >= data.sidebar.x_min &&
+        m->x < data.sidebar.x_max &&
+        m->y >= data.sidebar.y_min &&
+        m->y < data.sidebar.y_max) {
+        return 1;
+    }
+    return 0;
+}
+
+static int is_sidebar_border(const mouse *m)
+{
+    if (m->x >= data.sidebar.border_btn.x_min &&
+        m->x <= data.sidebar.border_btn.x_max &&
+        m->y >= data.sidebar.border_btn.y_min &&
+        m->y <= data.sidebar.border_btn.y_max) {
+        return 1;
+    }
+    return 0;
+}
+
+static int is_map(const mouse *m)
+{
+    if (m->x >= data.x_min + WIDTH_BORDER &&
+        m->x < data.sidebar.x_min &&
+        m->y >= data.y_min + WIDTH_BORDER &&
+        m->y < data.y_max - BOTTOM_PANEL_HEIGHT - WIDTH_BORDER) {
+        return 1;
+    }
+    return 0;
+}
+
+static int is_outside_map(int x, int y)
+{
+    return (x < data.x_min + 16 || x >= data.sidebar.x_min ||
+        y < data.y_min + 16 || y >= data.y_max - BOTTOM_PANEL_HEIGHT);
+}
+
+// Sidebar border input handling
+static void handle_sidebar_border(const mouse *m)
+{
+    // Set hover state
+    data.sidebar.border_btn.is_hovered = is_sidebar_border(m);
+
+    // Early exit if mouse not on sidebar border
+    if (!data.sidebar.border_btn.is_hovered) {
+        return;
+    }
+
+    data.hovered_object = 0; //clear hovers from sidebar
+
+    // Handle expand/collapse toggle on left mouse release
+    if (m->left.went_up) {
+        if (data.sidebar.border_btn.is_collapsed) {
+            sidebar_expand();
+        } else {
+            data.sidebar.previous_width = data.sidebar.width_percent;
+            data.sidebar.dragging_width = data.sidebar.width_percent;
+            data.sidebar.dragging = 1;
+        }
+    }
+}
 
 void handle_sidebar_dragging(const mouse *m)
 {
@@ -2341,6 +2347,10 @@ static void get_tooltip(tooltip_context *c)
                 c->text_id = 2;
                 break;
         }
+    } else if (data.sidebar.border_btn.is_hovered) {
+        c->type = TOOLTIP_BUTTON;
+        c->text_group = CUSTOM_TRANSLATION;
+        c->text_id = TR_TOOLTIP_CHANGE_SIDEBAR_WIDTH;
     } else {
         get_tooltip_trade_route_type(c);
     }
