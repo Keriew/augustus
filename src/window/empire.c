@@ -13,6 +13,7 @@
 #include "empire/trade_prices.h"
 #include "empire/type.h"
 #include "game/tutorial.h"
+#include "game/system.h"
 #include "graphics/arrow_button.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
@@ -27,6 +28,8 @@
 #include "graphics/window.h"
 #include "input/input.h"
 #include "input/scroll.h"
+#include "input/cursor.h"
+#include "platform/cursor.h"
 #include "scenario/empire.h"
 #include "scenario/invasion.h"
 #include "window/advisors.h"
@@ -52,7 +55,8 @@
 
 #define VERTICAL_TILE_WIDTH 40 //dimensions the vertical background tile in px, informative only
 #define VERTICAL_TILE_HEIGHT 72
-
+#define CLAMP(a, x, b) (((x) < (a)) ? (a) : \
+			((b) < (x)) ? (b) : (x))
 #define TRADE_DOT_SPACING 10 //spacing between dots in trade route line
 #define MAX_SIDEBAR_CITIES 256 
 #define MAX_RESOURCE_BUTTONS 256
@@ -72,7 +76,9 @@
 #define NO_POSITION ((unsigned int) -1) //used as an alterntive to 0 for some of new pointers, to avoid confusion with when relying on external indexing, which can be 0-based
 
 float sidebar_width_percent = 0.25f; //default sidebar width
-
+int sidebar_dragging = 0; //is sidebar being dragged
+float sidebar_dragging_width = 0.0f;
+float sidebar_previous_width = 0.0f; //used to restore the width when dragging ends
 //typedefs 
 typedef enum {
     TRADE_ICON_NONE = -1,
@@ -241,10 +247,13 @@ static image_button image_button_advisor[] = {
 static image_button image_button_show_prices[] = {
     {-4, 0, 24, 24, IB_NORMAL, GROUP_MESSAGE_ADVISOR_BUTTONS, 30, button_show_prices, button_none, 0, 0, 1}
 };
-static arrow_button arrow_buttons_sorting[] = {
-    { 20, 4, 17, 24, sorting_order, 1, 0 },
-    { 20, 4, 15, 24, sorting_order, 0, 0 }
-};
+typedef struct {
+    int x, y, width, height;
+    int is_down; // 1 for down arrow, 0 for up arrow
+} arrow_button_info;
+
+static arrow_button_info sorting_arrow_button;
+static int sorting_arrow_focused = 0;
 
 static struct {
     int x_min;
@@ -327,9 +336,9 @@ static int is_sidebar(const mouse *m)
 static int is_sidebar_border(const mouse *m)
 {
     if (m->x >= sidebar_border_btn.x_min &&
-        m->x < sidebar_border_btn.x_max &&
+        m->x <= sidebar_border_btn.x_max &&
         m->y >= sidebar_border_btn.y_min &&
-        m->y < sidebar_border_btn.y_max) {
+        m->y <= sidebar_border_btn.y_max) {
         return 1;
     }
     return 0;
@@ -373,13 +382,30 @@ static void handle_sidebar_border(const mouse *m)
         if (sidebar_border_btn.is_collapsed) {
             sidebar_expand();
         } else {
-            sidebar_collapse();
+            sidebar_previous_width = sidebar_width_percent;
+            sidebar_dragging_width = sidebar_width_percent;
+            sidebar_dragging = 1;
         }
     }
 }
 static int handle_expanding_buttons_input(const mouse *m)
 {
     data.sidebar.hovered_sorting_button = NO_POSITION; // Reset hovered button
+    sorting_arrow_focused = 0; // Reset arrow focus
+
+    // Check if mouse is over the arrow button first (highest priority)
+    if (m->x >= sorting_arrow_button.x && m->x < sorting_arrow_button.x + sorting_arrow_button.width &&
+        m->y >= sorting_arrow_button.y && m->y < sorting_arrow_button.y + sorting_arrow_button.height) {
+
+        sorting_arrow_focused = 1; // Take focus away from main button
+
+        if (m->left.went_up) {
+            // Toggle sorting order
+            data.sidebar.sorting_reversed = !data.sidebar.sorting_reversed;
+            return 1; // Block further input
+        }
+        return 1; // Block further input when hovering over arrow
+    }
 
     // If right-clicked and something is expanded: collapse it and exit
     if (m->right.went_up && data.sidebar.expanded_main != NO_POSITION) {
@@ -413,6 +439,7 @@ static int handle_expanding_buttons_input(const mouse *m)
                     data.sidebar.expanded_main = NO_POSITION;
                     return 1;
                 }
+                return 1; //clicked away
             }
 
             break;
@@ -493,6 +520,7 @@ static int sidebar_city_sorter(const void *a, const void *b)
         case SORT_BY_QUOTA_FILL_EXPORT:
         case SORT_BY_QUOTA_FILL_IMPORT:
         {
+            // Determine if we are sorting by export or import quota fill
             int is_sell = (data.sidebar.current_sorting == SORT_BY_QUOTA_FILL_EXPORT);
             int quota_a = get_city_trade_quota_fill(city_a, is_sell);
             int quota_b = get_city_trade_quota_fill(city_b, is_sell);
@@ -510,8 +538,8 @@ static int sidebar_city_sorter(const void *a, const void *b)
 
         case SORT_BY_PROFIT:
         {
-            int profit_a = -city_a->cost_to_open;
-            int profit_b = -city_b->cost_to_open;
+            int profit_a = 0;
+            int profit_b = 0;
 
             for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
                 if (!resource_is_storable(r)) continue;
@@ -579,8 +607,11 @@ static void setup_sidebar(void)
 
     int usable_map_width = map_draw_x_max - map_draw_x_min;
 
-    int raw = (int) (usable_map_width * sidebar_width_percent);
+    // Use only one width source - prefer dragging width when actively dragging
+    float active_width_percent = sidebar_dragging ? sidebar_dragging_width : sidebar_width_percent;
+    int raw = (int) (usable_map_width * active_width_percent);
     data.sidebar.width = ((raw + (BLOCK_SIZE / 2)) / BLOCK_SIZE) * BLOCK_SIZE + data.sidebar.margin_left + data.sidebar.margin_right; //ensure that the inner panels draw predictably
+
     data.sidebar.height = map_draw_y_max - map_draw_y_min;
 
     data.sidebar.x_min = map_draw_x_max - data.sidebar.width;
@@ -935,7 +966,7 @@ void draw_open_trade_button(const empire_city *city, const open_trade_button_sty
     }
 }
 
-static void draw_simple_button(int x, int y, int width, int height, int is_focused, int group, int number, int button_type)
+static void draw_simple_button(int x, int y, int width, int height, int is_focused, int group1, int number1, int group2, int number2, int button_type)
 {
     graphics_set_clip_rectangle(x, y, width, height);
     int height_blocks = height / BLOCK_SIZE;
@@ -950,9 +981,41 @@ static void draw_simple_button(int x, int y, int width, int height, int is_focus
         image_draw(image_id, x + 4, y + 4, COLOR_MASK_NONE, SCALE_NONE);
     }
 
-    // Draw text vertically centered
-    lang_text_draw_centered(group, number, x, y_text_offset, width, FONT_NORMAL_BLACK);
+    // Draw first text and get cursor position
+    int text_x = x + 8; // Small left margin
+    int cursor_x = text_x + lang_text_draw(group1, number1, text_x, y_text_offset, FONT_NORMAL_BLACK);
+
+    // Draw second text if provided (number2 >= 0)
+    if (number2 >= 0) {
+        lang_text_draw(group2, number2, cursor_x, y_text_offset, FONT_NORMAL_BLACK);
+    }
+
     register_sorting_button(x, y, width, height, button_type);
+}
+
+static void draw_sorting_arrow_button(int button_x, int button_y, int button_width, int button_height)
+{
+    // Position arrow button inside the sorting button, on the right side
+    int arrow_width = 24;
+    int arrow_height = 24;
+    int margin = 10; // Margin from right edge to keep arrow fully inside
+    int arrow_x = button_x + button_width - arrow_width - margin; // Ensure it's inside the button
+    int arrow_y = button_y + (button_height - arrow_height) / 2; // Center vertically
+
+    // Update arrow button info for hit detection
+    sorting_arrow_button.x = arrow_x;
+    sorting_arrow_button.y = arrow_y;
+    sorting_arrow_button.width = arrow_width;
+    sorting_arrow_button.height = arrow_height;
+    sorting_arrow_button.is_down = data.sidebar.sorting_reversed ? 0 : 1; // Down when not reversed
+
+    // Draw border if focused - similar to distribution permissions style
+    if (sorting_arrow_focused) {
+        button_border_draw(arrow_x - 3, arrow_y - 3, arrow_width + 5, arrow_height + 5, sorting_arrow_focused);
+        // -3 + 5 to account for the 1px innate border of the button 
+    }
+    int image_id = sorting_arrow_button.is_down ? 17 : 15; // 17 for down, 15 for up
+    image_draw(image_id, arrow_x, arrow_y, COLOR_MASK_NONE, SCALE_NONE);
 }
 
 static void draw_expanding_buttons(void)
@@ -970,16 +1033,22 @@ static void draw_expanding_buttons(void)
     int x_sort = base_x;
     sorting_button_count = 0; // Reset count for sorting buttons
 
+    // Sort main button with current selection displayed
     draw_simple_button(x_sort, base_y, button_width, button_height,
-        data.sidebar.hovered_sorting_button == BUTTON_INDEX_SORT_MAIN,
-        CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_SORT, 0);
-    arrow_buttons_draw(x_sort, base_y, arrow_buttons_sorting, 2);
+        data.sidebar.hovered_sorting_button == BUTTON_INDEX_SORT_MAIN && !sorting_arrow_focused,
+        CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_SORT, // Base text: "Sort by:"
+        CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_SORT_BY_NAME + data.sidebar.current_sorting, // Selected method
+        0);
+    draw_sorting_arrow_button(x_sort, base_y, button_width, button_height);
     // Filter main button
     int x_filter = base_x + button_width + button_h_spacing;
 
+    // Filter main button with current selection displayed
     draw_simple_button(x_filter, base_y, button_width, button_height,
         data.sidebar.hovered_sorting_button == BUTTON_INDEX_FILTER_MAIN,
-        CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_FILTER, 1);
+        CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_FILTER, // Base text: "Filter by:"
+        CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE + data.sidebar.current_filtering, // Selected method
+        1);
 
     if (data.sidebar.expanded_main == 0) {
         for (int i = 0; i < MAX_SORTING_KEY; ++i) {
@@ -988,6 +1057,7 @@ static void draw_expanding_buttons(void)
             draw_simple_button(x_sort, y, button_width, button_height,
                 data.sidebar.hovered_sorting_button == button_type,
                 CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_SORT_BY_NAME + i,
+                -1, -1, // No second text
                 button_type);
         }
     } else if (data.sidebar.expanded_main == 1) {
@@ -997,6 +1067,7 @@ static void draw_expanding_buttons(void)
             draw_simple_button(x_filter, y, button_width, button_height,
                 data.sidebar.hovered_sorting_button == button_type,
                 CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE + i,
+                -1, -1, // No second text
                 button_type);
         }
     }
@@ -1798,7 +1869,16 @@ static void draw_sidebar_grid_box(void)
         data.sidebar.height
     );
     grid_box_draw(&sidebar_grid_box);
-    draw_expanding_buttons();
+    graphics_set_clip_rectangle(
+        data.sidebar.x_min,
+        data.sidebar.y_min,
+        data.sidebar.width,
+        data.sidebar.height
+    );
+    if (sidebar_width_percent > 0.05f && (!sidebar_dragging || sidebar_dragging_width > 0.05f)) {
+        draw_expanding_buttons();
+    }
+
     graphics_reset_clip_rectangle();
 }
 
@@ -1898,9 +1978,73 @@ static void process_selection(void)
 //                                              HANDLE INPUT
 // -------------------------------------------------------------------------------------------------------
 
+
+void handle_sidebar_dragging(const mouse *m)
+{
+    if (m->left.went_up) {
+        sidebar_dragging = 0; // stopped dragging
+        if (sidebar_dragging_width <= 0.05f) {
+            sidebar_collapse();
+        } else {
+            sidebar_width_percent = sidebar_dragging_width; // save the width percent
+        }
+        return;
+    }
+    if (m->right.went_up) {
+        sidebar_dragging = 0;
+        sidebar_width_percent = sidebar_previous_width;
+        window_invalidate(); // reset to previous width
+        return;
+    }
+    // if (is_sidebar_border(m)) {
+    //     return;
+    // }
+    const int map_draw_x_max = data.x_max - WIDTH_BORDER;                 // right edge of usable map
+    const int map_draw_x_min = data.x_min + WIDTH_BORDER;                 // left edge of usable map
+    const int usable_map_width = map_draw_x_max - map_draw_x_min;
+
+    // Ignore if mouse isn't over the map horizontally
+    if (m->x < map_draw_x_min || m->x > map_draw_x_max || usable_map_width <= 0) {
+        return;
+    }
+
+    // Percent position measured FROM THE RIGHT EDGE (0 at right edge, 1 at left edge)
+    const float dist_from_right_px = (float) (map_draw_x_max - m->x);
+    float mouse_percent_from_right = dist_from_right_px / (float) usable_map_width; // 0..1
+
+    // Snap to 2% strips (each strip = 0.02 of map width)
+    const float strip = 0.02f;
+    int strip_index = (int) (mouse_percent_from_right / strip);
+    if (strip_index < 0) strip_index = 0;
+    float new_width = (strip_index + 0.5f) * strip;
+    if (new_width < 0.05f) {
+        sidebar_dragging_width = 0.0f;      // collapse preview
+    } else if (new_width < 0.10f) {
+        sidebar_dragging_width = 0.10f;     // minimum visible width
+    } else if (new_width > 0.50f) {
+        sidebar_dragging_width = 0.50f;     // maximum width
+    } else {
+        sidebar_dragging_width = new_width;
+    }
+
+    // Immediate layout update for live feedback
+    int raw = (int) ((float) usable_map_width * sidebar_dragging_width);
+    data.sidebar.width =
+        ((raw + (BLOCK_SIZE / 2)) / BLOCK_SIZE) * BLOCK_SIZE
+        + data.sidebar.margin_left + data.sidebar.margin_right;
+
+    data.sidebar.x_max = map_draw_x_max;
+    data.sidebar.x_min = data.sidebar.x_max - data.sidebar.width;
+}
+
+
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     pixel_offset position;
+    if (sidebar_dragging) {
+        handle_sidebar_dragging(m);
+        return; //block other input handling if the sidebar is being dragged
+    }
     if (scroll_get_delta(m, &position, SCROLL_TYPE_EMPIRE)) {
         empire_scroll_map(position.x, position.y);
     }
@@ -2029,6 +2173,9 @@ static void handle_input(const mouse *m, const hotkeys *h)
             if (!has_scrolled && input_go_back_requested(m, h)) {
                 window_city_show();
             }
+        }
+        if (h->escape_pressed) { // handle escape
+            window_city_show();
         }
     }
 }
@@ -2170,6 +2317,10 @@ void window_empire_show(void)
     window_show(&window);
 }
 
+int window_empire_is_dragging_sidebar(void)
+{
+    return sidebar_dragging;
+}
 
 void window_empire_show_checked(void)
 {

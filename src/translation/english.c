@@ -1671,7 +1671,7 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_VALUE_BUILDING_MENU_FORTS, "All Forts"},
     {TR_EMPIRE_SIDE_BAR_SORT, "Sort by:"},
     {TR_EMPIRE_SIDE_BAR_FILTER, "Filter by:"},
-    {TR_EMPIRE_SIDE_BAR_SORT_BY_NAME, "By name"},
+    {TR_EMPIRE_SIDE_BAR_SORT_BY_NAME, "Name"},
     {TR_EMPIRE_SIDE_BAR_SORT_BY_QUOTA_FILL_EXPORT, "Export Quota"},
     {TR_EMPIRE_SIDE_BAR_SORT_BY_QUOTA_FILL_IMPORT, "Import Quota"},
     {TR_EMPIRE_SIDE_BAR_SORT_BY_ROUTE_COST, "Route Cost"},
