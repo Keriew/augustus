@@ -1080,7 +1080,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED, "Supprimer sélection"},
     {TR_EDITOR_SCENARIO_EVENTS_GROUPS_EXPLANATION_TOOLTIP, "Si une des conditions dans un groupe est remplie, le groupe entier est considéré comme accompli.\nPour que l'événement se déclenche, tous les groupes, ainsi que les conditions non-groupées, doivent être accomplis."},
     {TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED_CONFIRM_TITLE, "Supprimer sélection ?"},
-    {TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED_CONFIRM_TEXT, "Voulez-vous vraiments supprimer les objets sélectionnés ?\n\nCette action est irréversible." },
+    {TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED_CONFIRM_TEXT, "Voulez-vous vraiment supprimer les objets sélectionnés ?\n\nCette action est irréversible." },
     {TR_EDITOR_UNABLE_TO_LOAD_EVENTS_TITLE, "Impossible de charger les événements de scénario"},
     {TR_EDITOR_CHECK_LOG_MESSAGE, "Veuillez consulter le fichier augustus-log.txt dans votre répertoire Augustus pour plus de détails."},
     {TR_EDITOR_UNABLE_TO_SAVE_EVENTS_TITLE, "Impossible de sauvegarder les événements de scénario"},
