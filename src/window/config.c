@@ -182,6 +182,7 @@ typedef struct {
     const uint8_t *(*get_display_text)(void);
     int y_offset;
     int enabled;
+    int height; // Pre-calculated height for drawing optimization
 } config_widget;
 
 static config_widget all_widgets[CONFIG_PAGES][MAX_WIDGETS] = {
@@ -312,20 +313,20 @@ static generic_button select_buttons[] = {
 };
 
 static numerical_range_widget ranges[] = {
-    { 50, 35,   0,  13,  1, 0},   // Game speed - match checkbox width
-    { 98, 35,   0,   0,  1, 0},   // Resolution - match checkbox width  
-    { 50, 35,  50, 500,  5, 0},   // Display scale - match checkbox width
-    { 50, 35, 100, 200, 50, 0},   // Cursor scale - match checkbox width
-    {130, 35,   0, 100,  1, 0},   // Master volume - match checkbox width
-    {130, 35,   0, 100,  1, 0},   // Music volume - match checkbox width
-    {130, 35,   0, 100,  1, 0},   // Speech volume - match checkbox width
-    {130, 35,   0, 100,  1, 0},   // Effects volume - match checkbox width
-    {130, 35,   0, 100,  1, 0},   // City sounds volume - match checkbox width
-    {130, 35,   0, 100,  1, 0},   // Video volume - match checkbox width
-    { 50, 35,   0, 100, 10, 0},   // Scroll speed - match checkbox width
-    {146, 35,   0,   4,  1, 0},   // Difficulty - match checkbox width
-    { 50, 35,   0,   5,  1, 0},   // Max grand temples - match checkbox width
-    { 50, 35,   1,  20,  1, 0},   // Autosave slots - match checkbox width
+    { 50, 30,   0,  13,  1, 0},
+    { 98, 27,   0,   0,  1, 0},
+    { 50, 30,  50, 500,  5, 0},
+    { 50, 30, 100, 200, 50, 0},
+    {130, 25,   0, 100,  1, 0},
+    {130, 25,   0, 100,  1, 0},
+    {130, 25,   0, 100,  1, 0},
+    {130, 25,   0, 100,  1, 0},
+    {130, 25,   0, 100,  1, 0},
+    {130, 25,   0, 100,  1, 0},
+    { 50, 16,   0, 100, 10, 0}, //scroll speed
+    {146, 24,   0,   4,  1, 0},
+    { 50, 30,   0,   5,  1, 0},
+    { 50, 30,   1,  20,  1, 0},
 };
 
 static generic_button bottom_buttons[NUM_BOTTOM_BUTTONS] = {
@@ -427,11 +428,12 @@ static int config_change_scroll_speed(int key);
 static int config_set_difficulty(int key);
 static int config_enable_gods_effects(int key);
 
+
 // Grid box related functions
 static void init_list_boxes(void);
 static void draw_list_box_item(const list_box_item *item);
 static void handle_list_box_select(unsigned int index, int is_double_click);
-
+static int measure_checkbox_height(translation_key description);
 // Grid box selection tracking
 // List box selection is handled internally, no external tracking needed
 
@@ -593,6 +595,27 @@ static void enable_all_widgets(void)
     }
 }
 
+static void calculate_widget_heights(void)
+{
+    for (int p = 0; p < CONFIG_PAGES; p++) {
+        for (int i = 0; i < MAX_WIDGETS; i++) {
+            config_widget *widget = &all_widgets[p][i];
+            if (widget->type) {
+                if (widget->type == TYPE_CHECKBOX) {
+                    // Store current page temporarily to calculate correct width for checkbox
+                    int original_page = data.page;
+                    data.page = p;
+                    widget->height = measure_checkbox_height(widget->description);
+                    data.page = original_page;
+                } else {
+                    // Default height for other widget types
+                    widget->height = ITEM_HEIGHT;
+                }
+            }
+        }
+    }
+}
+
 static void disable_widget(int type, int subtype)
 {
     for (int p = 0; p < CONFIG_PAGES; p++) {
@@ -671,6 +694,7 @@ static void init(int page, int show_background_image)
     }
 
     enable_all_widgets();
+    calculate_widget_heights();
     if (!system_can_scale_display(0, 0)) {
         disable_widget(TYPE_SPACE, TR_CONFIG_VIDEO);
         disable_widget(TYPE_HEADER, TR_CONFIG_VIDEO);
@@ -754,33 +778,75 @@ static void handle_list_box_select(unsigned int index, int is_double_click)
     window_request_refresh(); // Ensure UI stays responsive
 }
 
-
-
-static int checkbox_draw_row(unsigned int row_index, int x, int y, int value_key, translation_key description)
+static void draw_checkbox_widget(int row_index, int x, int y, config_widget *widget, int is_focused)
 {
+    // Calculate text width (same as measure_checkbox_height)
     int text_width = CHECKBOX_TEXT_WIDTH;
     if (data.widgets_per_page[data.page] <= NUM_VISIBLE_ITEMS) {
+        text_width += 32;
+    }
+    if (data.page == CONFIG_PAGE_UI_CHANGES || data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
+        text_width -= LIST_BOX_SHIFT;
+    }
+    // Draw the multiline text and get actual height
+    const uint8_t *text = translation_for(widget->description);
+    text_draw_multiline(text, x + 30, y + 5, text_width, 0, FONT_NORMAL_BLACK, 0);
+    // Calculate checkbox Y position (centered vertically in the text area)
+    int extra_height = widget->height - ITEM_HEIGHT;
+    int checkbox_y = y + (extra_height / 2);
+    // Draw checkbox border (focus overlay)
+    button_border_draw(x, checkbox_y, CHECKBOX_CHECK_SIZE, CHECKBOX_CHECK_SIZE, is_focused);
+    // Draw checkbox checkmark if enabled
+    if (data.config_values[widget->subtype].new_value) {
+        text_draw(string_from_ascii("x"), x + 6, checkbox_y + 3, FONT_NORMAL_BLACK, 0);
+    }
+}
+
+static int handle_checkbox_widget_input(const mouse *m, int x, int y, config_widget *widget, unsigned int *focus)
+{
+    // Calculate checkbox area dimensions (same as drawing)
+    int checkbox_width = CHECKBOX_WIDTH;
+    if (data.page == CONFIG_PAGE_UI_CHANGES || data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
+        checkbox_width -= LIST_BOX_SHIFT;
+    }
+    int height = widget->height;
+
+    // Check if mouse is within the entire checkbox widget area
+    if (!(x <= m->x && m->x < x + checkbox_width && y <= m->y && m->y < y + height)) {
+        return 0;
+    }
+
+    *focus = 1;
+    if (m->left.went_up) {
+        toggle_switch(widget->subtype);
+        return 1;
+    }
+    return 0;
+}
+
+static int measure_checkbox_height(translation_key description)
+{
+    int text_width = CHECKBOX_TEXT_WIDTH;
+    if (data.widgets_per_page[data.page] <= NUM_VISIBLE_ITEMS) { //no scrollbar - more space
         text_width += 32;
     }
     // Reduce text width for shifted layouts (UI and City Management tabs)
     if (data.page == CONFIG_PAGE_UI_CHANGES || data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
         text_width -= LIST_BOX_SHIFT;
     }
+
     const uint8_t *t_key = translation_for(description);
-    int consumed = text_draw_multiline(t_key, x + 30, y + 5, text_width, 0, FONT_NORMAL_BLACK, 0);
+    int largest_width = 0;
+    int num_lines = text_measure_multiline(t_key, text_width, FONT_NORMAL_BLACK, &largest_width);
 
-    // Extra height beyond a single line
-    int base = one_line_ml_height(FONT_NORMAL_BLACK);
-    int extra = consumed - base;
-    extra = extra < 0 ? 0 : extra; // no negative vals
-    data.row_extra[row_index] = extra;
-    int cb_y = y + (extra / 2);    // Center checkbox vertically relative to consumed height
-    data.row_checkbox_y[row_index] = cb_y;
+    // Convert number of lines to actual pixel height
+    int line_height = font_definition_for(FONT_NORMAL_BLACK)->line_height;
+    if (line_height < 11) line_height = 11;
+    line_height += 5; // matches text_draw_multiline() per-line advance
 
-    if (data.config_values[value_key].new_value) {
-        text_draw(string_from_ascii("x"), x + 6, cb_y + 3, FONT_NORMAL_BLACK, 0);
-    }
-    return extra;
+    int total_height = ((num_lines * line_height) > ITEM_HEIGHT) ? (num_lines * line_height) : ITEM_HEIGHT;
+
+    return total_height + 4; // add some padding
 }
 
 static void numerical_range_draw(const numerical_range_widget *w, int x, int y, const uint8_t *value_text)
@@ -1049,18 +1115,18 @@ static void draw_background(void)
         config_widget *w = data.widgets[i + data.starting_option + scrollbar.scroll_position];
         int y = ITEM_Y_OFFSET + ITEM_HEIGHT * i + additional_y_offset;
 
-        // early-exit if this row would spill past the panel bottom
-        int predicted_extra = (w->type == TYPE_CHECKBOX) ? data.row_extra[i] : 0;
-        int row_height = ITEM_HEIGHT + predicted_extra;
-        if (y + row_height > LIST_BOTTOM) break;
+        // Use pre-calculated height - check if widget fits in available space
+        if (y + w->height > LIST_BOTTOM) break;
 
         if (w->type == TYPE_HEADER) {
             text_draw(translation_for(w->subtype), base_x, y + w->y_offset, FONT_NORMAL_BLACK, 0);
 
         } else if (w->type == TYPE_CHECKBOX) {
-            int extra = checkbox_draw_row(i, base_x, y + w->y_offset, w->subtype, w->description);
-            additional_y_offset += extra; // accumulate real wrapped height
-
+            // Use unified checkbox widget (draws text and checkbox together)
+            draw_checkbox_widget(i, base_x, y + w->y_offset, w, 0); // No focus in background
+            // Accumulate extra height for next widget positioning
+            int extra_height = w->height - ITEM_HEIGHT;
+            additional_y_offset += extra_height;
         } else if (w->type == TYPE_SELECT) {
             text_draw(translation_for(w->description), base_x, y + 6 + w->y_offset, FONT_NORMAL_BLACK, 0);
             const generic_button *btn = &select_buttons[w->subtype];
@@ -1116,14 +1182,17 @@ static void draw_foreground(void)
         config_widget *w = data.widgets[i + data.starting_option + scrollbar.scroll_position];
         int y = ITEM_Y_OFFSET + ITEM_HEIGHT * i + additional_y_offset_fg;
 
-        int predicted_extra = (w->type == TYPE_CHECKBOX) ? data.row_extra[i] : 0;
-        int row_height = ITEM_HEIGHT + predicted_extra;
-        if (y + row_height > LIST_BOTTOM) break;
+        // Use pre-calculated height - check if widget fits in available space
+        if (y + w->height > LIST_BOTTOM) break;
 
         if (w->type == TYPE_CHECKBOX) {
-            button_border_draw(base_x, data.row_checkbox_y[i], CHECKBOX_CHECK_SIZE, CHECKBOX_CHECK_SIZE,
-                               data.focus_button == i + 1);
-            additional_y_offset_fg += data.row_extra[i];
+            // Draw only the checkbox border for focus (text already drawn in background)
+            int extra_height = w->height - ITEM_HEIGHT;
+            int checkbox_y = y + w->y_offset + (extra_height / 2);
+            if (data.focus_button == i + 1) {
+                button_border_draw(base_x, checkbox_y, CHECKBOX_CHECK_SIZE, CHECKBOX_CHECK_SIZE, 1);
+            }
+            additional_y_offset_fg += extra_height;
 
         } else if (w->type == TYPE_SELECT) {
             const generic_button *btn = &select_buttons[w->subtype];
@@ -1154,43 +1223,7 @@ static void draw_foreground(void)
     graphics_reset_dialog();
 }
 
-// static int is_checkbox(const mouse *m, int x, int y)
-// {
-//     if (x <= m->x && x + CHECKBOX_WIDTH > m->x &&
-//         y <= m->y && y + CHECKBOX_HEIGHT > m->y) {
-//         return 1;
-//     }
-//     return 0;
-// }
 
-// static int checkbox_handle_mouse(const mouse *m, int x, int y, int value_key, unsigned int *focus)
-// {
-//     if (!is_checkbox(m, x, y)) {
-//         return 0;
-//     }
-//     *focus = 1;
-//     if (m->left.went_up) {
-//         toggle_switch(value_key);
-//         return 1;
-//     } else {
-//         return 0;
-//     }
-// }
-
-static int checkbox_handle_mouse_row(const mouse *m, int x, int y, unsigned int row_index,
-                                     int value_key, unsigned int *focus)
-{
-    int height = one_line_ml_height(FONT_NORMAL_BLACK) + data.row_extra[row_index];
-    if (!(x <= m->x && m->x < x + CHECKBOX_WIDTH && y <= m->y && m->y < y + height)) {
-        return 0;
-    }
-    *focus = 1;
-    if (m->left.went_up) {
-        toggle_switch(value_key);
-        return 1;
-    }
-    return 0;
-}
 
 static int is_numerical_range(const numerical_range_widget *w, const mouse *m, int x, int y)
 {
@@ -1276,6 +1309,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
     if (scrollbar_handle_mouse(&scrollbar, m_dialog, 1)) {
         data.page_focus_button = 0;
         data.bottom_focus_button = 0;
+        window_request_refresh();
         return;
     }
 
@@ -1286,22 +1320,29 @@ static void handle_input(const mouse *m, const hotkeys *h)
         config_widget *w = data.widgets[i + data.starting_option + scrollbar.scroll_position];
         int y = ITEM_Y_OFFSET + ITEM_HEIGHT * i + additional_y_offset_in;
 
-        int predicted_extra = (w->type == TYPE_CHECKBOX) ? data.row_extra[i] : 0;
-        int row_height = ITEM_HEIGHT + predicted_extra;
-        if (y + row_height > LIST_BOTTOM) break;
-
+        // Use pre-calculated height - check if widget fits in available space
+        if (y + w->height > LIST_BOTTOM) {
+            break;
+        }
         if (w->type == TYPE_CHECKBOX) {
             unsigned int focus = 0;
-            handled |= checkbox_handle_mouse_row(m_dialog, base_x, y + w->y_offset, i, w->subtype, &focus);
-            if (focus) data.focus_button = i + 1;
-            additional_y_offset_in += data.row_extra[i];
+            // Use unified checkbox input handler
+            handled |= handle_checkbox_widget_input(m_dialog, base_x, y + w->y_offset, w, &focus);
+            if (focus) {
+                data.focus_button = i + 1;
+            }
+            // Calculate extra height beyond base ITEM_HEIGHT (same as drawing loops)
+            int extra_height = w->height - ITEM_HEIGHT;
+            additional_y_offset_in += extra_height;
 
         } else if (w->type == TYPE_SELECT) {
             generic_button *btn = &select_buttons[w->subtype];
             btn->parameter1 = y + w->y_offset; // anchor stays with shifted row
             unsigned int focus = 0;
             handled |= generic_buttons_handle_mouse(m_dialog, 0, y + w->y_offset, btn, 1, &focus);
-            if (focus) data.focus_button = i + 1;
+            if (focus) {
+                data.focus_button = i + 1;
+            }
 
         } else if (w->type == TYPE_NUMERICAL_RANGE) {
             handled |= numerical_range_handle_mouse(m_dialog, numerical_x, y + w->y_offset, w->subtype + 1);
@@ -1309,7 +1350,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 
     if (prev_focus != data.focus_button) {
-        window_request_refresh(); // repaint foreground so old focus border disappears
+        window_request_refresh(); // repaint foreground 
     }
     handled |= generic_buttons_handle_mouse(m_dialog, 0, 0, bottom_buttons,
         data.has_changes ? NUM_BOTTOM_BUTTONS : NUM_BOTTOM_BUTTONS - 1, &data.bottom_focus_button);
@@ -1319,7 +1360,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
     if (!handled && (m->right.went_up || h->escape_pressed)) {
         window_go_back();
     }
-
+    window_request_refresh();
 }
 
 static void on_scroll(void)
