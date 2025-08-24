@@ -91,4 +91,6 @@ void traders_save_state(buffer *buf);
  */
 void traders_load_state(buffer *buf);
 
+void trader_free(int trader_id);
+
 #endif // FIGURE_TRADE_INFO_H
