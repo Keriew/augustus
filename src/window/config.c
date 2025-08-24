@@ -58,9 +58,9 @@
 #define PLAYER_NAME_LENGTH 32
 
 // List box - left sidebar- layout constants
-#define LIST_BOX_SHIFT 200
+#define LIST_BOX_SHIFT 180
 #define LIST_BOX_WIDTH 180
-#define LIST_BOX_HEIGHT 300
+#define LIST_BOX_HEIGHT 310
 #define LIST_BOX_X 20
 #define LIST_BOX_Y 100
 #define LIST_BOX_ITEM_HEIGHT 24
@@ -227,7 +227,7 @@ static config_widget all_widgets[CONFIG_PAGES][MAX_WIDGETS] = {
     { // UI
         {TYPE_NUMERICAL_DESC, RANGE_SCROLL_SPEED, TR_CONFIG_SCROLL_SPEED},
         {TYPE_NUMERICAL_RANGE, RANGE_SCROLL_SPEED, 0, display_text_scroll_speed},
-        {TYPE_SPACE},
+        //{TYPE_SPACE},
         {TYPE_CHECKBOX, CONFIG_UI_SHOW_INTRO_VIDEO, TR_CONFIG_SHOW_INTRO_VIDEO},
         {TYPE_CHECKBOX, CONFIG_UI_SIDEBAR_INFO, TR_CONFIG_SIDEBAR_INFO},
         {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING},
@@ -386,9 +386,8 @@ static struct {
     uint8_t volume_text[64];
     uint8_t *volume_offset;
     int graphics_behind_tab[CONFIG_PAGES];
-    int row_extra[NUM_VISIBLE_ITEMS]; // extra height added by wrapped checkbox text
-    int row_checkbox_y[NUM_VISIBLE_ITEMS]; // cached checkbox top Y for focus overlay
-    // Grid boxes for UI and City Management tabs
+    //int row_extra[NUM_VISIBLE_ITEMS]; // extra height added by wrapped checkbox text
+    //int row_checkbox_y[NUM_VISIBLE_ITEMS]; // cached checkbox top Y for focus overlay
     list_box_type ui_list_box;
     list_box_type city_management_list_box;
 } data;
