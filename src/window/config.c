@@ -224,37 +224,8 @@ static config_widget all_widgets[CONFIG_PAGES][MAX_WIDGETS] = {
         {TYPE_CHECKBOX, CONFIG_GENERAL_ENABLE_VIDEO_SOUND, TR_CONFIG_VIDEO_SOUND, 0, 5},
         {TYPE_NUMERICAL_RANGE, RANGE_VIDEO_VOLUME, 0, display_text_video_volume, 1},
     },
-    { // UI
-        {TYPE_NUMERICAL_DESC, RANGE_SCROLL_SPEED, TR_CONFIG_SCROLL_SPEED},
-        {TYPE_NUMERICAL_RANGE, RANGE_SCROLL_SPEED, 0, display_text_scroll_speed},
-        //{TYPE_SPACE},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_INTRO_VIDEO, TR_CONFIG_SHOW_INTRO_VIDEO},
-        {TYPE_CHECKBOX, CONFIG_UI_SIDEBAR_INFO, TR_CONFIG_SIDEBAR_INFO},
-        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING},
-        {TYPE_CHECKBOX, CONFIG_UI_ASK_CONFIRMATION_ON_FILE_OVERWRITE, TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE},
-        {TYPE_CHECKBOX, CONFIG_UI_DISABLE_MOUSE_EDGE_SCROLLING, TR_CONFIG_DISABLE_MOUSE_EDGE_SCROLLING},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE, TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE_HOUSES, TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE_HOUSES},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_MARKET_RANGE, TR_CONFIG_SHOW_MARKET_RANGE},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_CONSTRUCTION_SIZE, TR_CONFIG_SHOW_CONSTRUCTION_SIZE},
-        {TYPE_CHECKBOX, CONFIG_UI_HIGHLIGHT_LEGIONS, TR_CONFIG_HIGHLIGHT_LEGIONS},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_MILITARY_SIDEBAR, TR_CONFIG_SHOW_MILITARY_SIDEBAR},
-        {TYPE_CHECKBOX, CONFIG_UI_DISABLE_RIGHT_CLICK_MAP_DRAG, TR_CONFIG_DISABLE_RIGHT_CLICK_MAP_DRAG},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_MAX_PROSPERITY, TR_CONFIG_SHOW_MAX_POSSIBLE_PROSPERITY},
-        {TYPE_CHECKBOX, CONFIG_UI_DIGIT_SEPARATOR, TR_CONFIG_DIGIT_SEPARATOR},
-        {TYPE_CHECKBOX, CONFIG_UI_INVERSE_MAP_DRAG, TR_CONFIG_UI_INVERSE_MAP_DRAG},
-        {TYPE_CHECKBOX, CONFIG_UI_MESSAGE_ALERTS, TR_CONFIG_UI_MESSAGE_ALERTS},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_GRID, TR_CONFIG_UI_SHOW_GRID},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_PARTIAL_GRID_AROUND_CONSTRUCTION, TR_CONFIG_UI_SHOW_PARTIAL_GRID_AROUND_CONSTRUCTION},
-        {TYPE_CHECKBOX, CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS, TR_CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_ROAMING_PATH, TR_CONFIG_SHOW_ROAMING_PATH },
-        {TYPE_CHECKBOX, CONFIG_UI_HIGHLIGHT_SELECTED_BUILDING, TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING },
-        {TYPE_CHECKBOX, CONFIG_UI_DRAW_CLOUD_SHADOWS, TR_CONFIG_DRAW_CLOUD_SHADOWS },
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_DESIRABILITY_RANGE, TR_CONFIG_SHOW_DESIRABILITY_RANGE},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL, TR_CONFIG_SHOW_DESIRABILITY_RANGE_ALL},
-        {TYPE_CHECKBOX, CONFIG_UI_DRAW_ASCLEPIUS, TR_CONFIG_DRAW_ASCLEPIUS },
-        {TYPE_CHECKBOX, CONFIG_UI_DRAW_WEATHER, TR_CONFIG_DRAW_WEATHER },
-        {TYPE_CHECKBOX, CONFIG_UI_MOVE_SAVINGS_TO_RIGHT, TR_CONFIG_MOVE_SAVINGS_TO_THE_RIGHT}
+    { // UI (now managed by categories)
+        {TYPE_NONE} // Widgets filled by category selection
     },
     { // Difficulty
         {TYPE_NUMERICAL_DESC, RANGE_DIFFICULTY, TR_CONFIG_DIFFICULTY},
@@ -271,26 +242,8 @@ static config_widget all_widgets[CONFIG_PAGES][MAX_WIDGETS] = {
         {TYPE_NUMERICAL_DESC, RANGE_MAX_GRAND_TEMPLES, TR_CONFIG_MAX_GRAND_TEMPLES},
         {TYPE_NUMERICAL_RANGE, RANGE_MAX_GRAND_TEMPLES, 0, display_text_max_grand_temples},
     },
-    { // City Management
-        {TYPE_CHECKBOX, CONFIG_GP_CH_NO_SUPPLIER_DISTRIBUTION, TR_CONFIG_NO_SUPPLIER_DISTRIBUTION },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_GETTING_GRANARIES_GO_OFFROAD, TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_GRANARIES_GET_DOUBLE, TR_CONFIG_GRANARIES_GET_DOUBLE },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_ALLOW_EXPORTING_FROM_GRANARIES, TR_CONFIG_ALLOW_EXPORTING_FROM_GRANARIES },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_FARMS_DELIVER_CLOSE, TR_CONFIG_FARMS_DELIVER_CLOSE },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_DELIVER_ONLY_TO_ACCEPTING_GRANARIES, TR_CONFIG_DELIVER_ONLY_TO_ACCEPTING_GRANARIES },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_TOWER_SENTRIES_GO_OFFROAD, TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_ALL_HOUSES_MERGE, TR_CONFIG_ALL_HOUSES_MERGE },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_PATRICIAN_DEVOLUTION_FIX, TR_CONFIG_PATRICIAN_DEVOLUTION_FIX },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_RANDOM_COLLAPSES_TAKE_MONEY, TR_CONFIG_RANDOM_COLLAPSES_TAKE_MONEY },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_WAREHOUSES_DONT_ACCEPT, TR_CONFIG_NOT_ACCEPTING_WAREHOUSES },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_MARKETS_DONT_ACCEPT, TR_CONFIG_NOT_ACCEPTING_MARKETS },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_HOUSES_DONT_EXPAND_INTO_GARDENS, TR_CONFIG_HOUSES_DONT_EXPAND_INTO_GARDENS },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_ROAMERS_DONT_SKIP_CORNERS, TR_CONFIG_ROAMERS_DONT_SKIP_CORNERS },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_AUTO_KILL_ANIMALS, TR_CONFIG_AUTO_KILL_ANIMALS},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_GATES_DEFAULT_TO_PASS_ALL_WALKERS, TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS},
-        {TYPE_CHECKBOX, CONFIG_GP_CARAVANS_MOVE_OFF_ROAD, TR_CONFIG_CARAVANS_MOVE_OFF_ROAD},
-        {TYPE_CHECKBOX, CONFIG_GP_STORAGE_INCREMENT_4, TR_CONFIG_STORAGE_STEP_4}
+    { // City Management (now managed by categories)
+        {TYPE_NONE} // Widgets filled by category selection
     }
 };
 
@@ -432,25 +385,113 @@ static int config_enable_gods_effects(int key);
 static void init_list_boxes(void);
 static void draw_list_box_item(const list_box_item *item);
 static void handle_list_box_select(unsigned int index, int is_double_click);
+static void copy_category_widgets_to_page(int page, int category_index);
 static int recalculate_page_heights(int page);
 // Grid box selection tracking
 // List box selection is handled internally, no external tracking needed
 
-// Placeholder grid box items
-static const char *ui_placeholder_items[] = {
-    "UI Setting 1",
-    "UI Setting 2",
-    "UI Setting 3",
-    "UI Setting 4",
-    "UI Setting 5"
+// Category-based list box items
+static const char *ui_categories[] = {
+    "General",      // CATEGORY_UI_GENERAL
+    "Scrolling",    // CATEGORY_UI_SCROLLING
+    "Building",     // CATEGORY_UI_BUILDING
+    "CityView",     // CATEGORY_UI_CITY_VIEW
+    "Weather"       // CATEGORY_UI_WEATHER
 };
 
-static const char *city_mgmt_placeholder_items[] = {
-    "City Setting 1",
-    "City Setting 2",
-    "City Setting 3",
-    "City Setting 4",
-    "City Setting 5"
+static const char *city_mgmt_categories[] = {
+    "Storage",      // CATEGORY_CITY_MANAGEMENT_STORAGE
+    "Roads",        // CATEGORY_CITY_MANAGEMENT_ROADS
+    "Roadblocks",   // CATEGORY_CITY_MANAGEMENT_ROADBLOCK_SETTINGS
+    "Housing"       // CATEGORY_CITY_MANAGEMENT_HOUSING
+};
+
+// Track currently selected categories
+static struct {
+    ui_config_category ui_category;
+    city_management_category city_mgmt_category;
+} selected_categories = {
+    CATEGORY_UI_GENERAL,
+    CATEGORY_CITY_MANAGEMENT_STORAGE
+};
+
+// Category-based widget organization for UI page
+static config_widget ui_widgets_by_category[5][MAX_WIDGETS] = {
+    // CATEGORY_UI_GENERAL - 4 widgets
+    {
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_INTRO_VIDEO, TR_CONFIG_SHOW_INTRO_VIDEO},
+        {TYPE_CHECKBOX, CONFIG_UI_SIDEBAR_INFO, TR_CONFIG_SIDEBAR_INFO},
+        {TYPE_CHECKBOX, CONFIG_UI_ASK_CONFIRMATION_ON_FILE_OVERWRITE, TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE},
+        {TYPE_CHECKBOX, CONFIG_UI_MOVE_SAVINGS_TO_RIGHT, TR_CONFIG_MOVE_SAVINGS_TO_THE_RIGHT},
+        {TYPE_NONE} // Terminator
+    },
+    // CATEGORY_UI_SCROLLING - 3 widgets
+    {
+        {TYPE_NUMERICAL_DESC, RANGE_SCROLL_SPEED, TR_CONFIG_SCROLL_SPEED},
+        {TYPE_NUMERICAL_RANGE, RANGE_SCROLL_SPEED, 0, display_text_scroll_speed},
+        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING},
+        {TYPE_NONE} // Terminator
+    },
+    // CATEGORY_UI_BUILDING - 3 widgets
+    {
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_CONSTRUCTION_SIZE, TR_CONFIG_SHOW_CONSTRUCTION_SIZE},
+        {TYPE_CHECKBOX, CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS, TR_CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_GRID, TR_CONFIG_UI_SHOW_GRID},
+        {TYPE_NONE} // Terminator
+    },
+    // CATEGORY_UI_CITY_VIEW - 4 widgets
+    {
+        {TYPE_CHECKBOX, CONFIG_UI_HIGHLIGHT_LEGIONS, TR_CONFIG_HIGHLIGHT_LEGIONS},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_MILITARY_SIDEBAR, TR_CONFIG_SHOW_MILITARY_SIDEBAR},
+        {TYPE_CHECKBOX, CONFIG_UI_HIGHLIGHT_SELECTED_BUILDING, TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE, TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE},
+        {TYPE_NONE} // Terminator
+    },
+    // CATEGORY_UI_WEATHER - 2 widgets
+    {
+        {TYPE_CHECKBOX, CONFIG_UI_DRAW_CLOUD_SHADOWS, TR_CONFIG_DRAW_CLOUD_SHADOWS},
+        {TYPE_CHECKBOX, CONFIG_UI_DRAW_WEATHER, TR_CONFIG_DRAW_WEATHER},
+        {TYPE_NONE} // Terminator
+    }
+};
+
+// Category-based widget organization for City Management page (divide 19 widgets among 4 categories)
+static config_widget city_mgmt_widgets_by_category[4][MAX_WIDGETS] = {
+    // CATEGORY_CITY_MANAGEMENT_STORAGE - first 5 widgets
+    {
+        {TYPE_CHECKBOX, CONFIG_GP_CH_NO_SUPPLIER_DISTRIBUTION, TR_CONFIG_NO_SUPPLIER_DISTRIBUTION },
+        {TYPE_CHECKBOX, CONFIG_GP_CH_GETTING_GRANARIES_GO_OFFROAD, TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD },
+        {TYPE_CHECKBOX, CONFIG_GP_CH_GRANARIES_GET_DOUBLE, TR_CONFIG_GRANARIES_GET_DOUBLE },
+        {TYPE_CHECKBOX, CONFIG_GP_CH_ALLOW_EXPORTING_FROM_GRANARIES, TR_CONFIG_ALLOW_EXPORTING_FROM_GRANARIES },
+        {TYPE_CHECKBOX, CONFIG_GP_CH_FARMS_DELIVER_CLOSE, TR_CONFIG_FARMS_DELIVER_CLOSE },
+        {TYPE_NONE} // Terminator
+    },
+    // CATEGORY_CITY_MANAGEMENT_ROADS - next 5 widgets
+    {
+        {TYPE_CHECKBOX, CONFIG_GP_CH_DELIVER_ONLY_TO_ACCEPTING_GRANARIES, TR_CONFIG_DELIVER_ONLY_TO_ACCEPTING_GRANARIES },
+        {TYPE_CHECKBOX, CONFIG_GP_CH_TOWER_SENTRIES_GO_OFFROAD, TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD },
+        {TYPE_CHECKBOX, CONFIG_GP_CH_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_ROAMERS_DONT_SKIP_CORNERS, TR_CONFIG_ROAMERS_DONT_SKIP_CORNERS },
+        {TYPE_CHECKBOX, CONFIG_GP_CARAVANS_MOVE_OFF_ROAD, TR_CONFIG_CARAVANS_MOVE_OFF_ROAD},
+        {TYPE_NONE} // Terminator
+    },
+    // CATEGORY_CITY_MANAGEMENT_ROADBLOCK_SETTINGS - next 5 widgets
+    {
+        {TYPE_CHECKBOX, CONFIG_GP_CH_GATES_DEFAULT_TO_PASS_ALL_WALKERS, TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_AUTO_KILL_ANIMALS, TR_CONFIG_AUTO_KILL_ANIMALS},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_WAREHOUSES_DONT_ACCEPT, TR_CONFIG_NOT_ACCEPTING_WAREHOUSES },
+        {TYPE_CHECKBOX, CONFIG_GP_CH_MARKETS_DONT_ACCEPT, TR_CONFIG_NOT_ACCEPTING_MARKETS },
+        {TYPE_CHECKBOX, CONFIG_GP_STORAGE_INCREMENT_4, TR_CONFIG_STORAGE_STEP_4},
+        {TYPE_NONE} // Terminator
+    },
+    // CATEGORY_CITY_MANAGEMENT_HOUSING - remaining 4 widgets
+    {
+        {TYPE_CHECKBOX, CONFIG_GP_CH_ALL_HOUSES_MERGE, TR_CONFIG_ALL_HOUSES_MERGE },
+        {TYPE_CHECKBOX, CONFIG_GP_CH_PATRICIAN_DEVOLUTION_FIX, TR_CONFIG_PATRICIAN_DEVOLUTION_FIX },
+        {TYPE_CHECKBOX, CONFIG_GP_CH_RANDOM_COLLAPSES_TAKE_MONEY, TR_CONFIG_RANDOM_COLLAPSES_TAKE_MONEY },
+        {TYPE_CHECKBOX, CONFIG_GP_CH_HOUSES_DONT_EXPAND_INTO_GARDENS, TR_CONFIG_HOUSES_DONT_EXPAND_INTO_GARDENS },
+        {TYPE_NONE} // Terminator
+    }
 };
 
 static inline void set_custom_config_changes(void)
@@ -706,10 +747,36 @@ static void install_widgets(void)
 static void set_page(int page)
 {
     data.page = page;
+
+    // Handle category-based pages with list boxes
+    if (page == CONFIG_PAGE_UI_CHANGES) {
+        // Reset to first category when switching to UI page
+        selected_categories.ui_category = CATEGORY_UI_GENERAL;
+        // Ensure UI category widgets are loaded for the current category
+        copy_category_widgets_to_page(CONFIG_PAGE_UI_CHANGES, selected_categories.ui_category);
+        list_box_select_index(&data.ui_list_box, selected_categories.ui_category);
+        // Rebuild global widget array to reflect category changes
+        install_widgets();
+    } else if (page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
+        // Reset to first category when switching to City Management page
+        selected_categories.city_mgmt_category = CATEGORY_CITY_MANAGEMENT_STORAGE;
+        // Ensure City Management category widgets are loaded for the current category
+        copy_category_widgets_to_page(CONFIG_PAGE_CITY_MANAGEMENT_CHANGES, selected_categories.city_mgmt_category);
+        list_box_select_index(&data.city_management_list_box, selected_categories.city_mgmt_category);
+        // Rebuild global widget array to reflect category changes
+        install_widgets();
+    } else {
+        // For non-category pages (General, Difficulty), ensure widget array is current
+        // but don't modify the all_widgets arrays since they have static content
+        install_widgets();
+    }
+
+    // Calculate starting_option AFTER install_widgets() to ensure correct widget counts
     data.starting_option = 0;
     for (unsigned int i = 0; i < data.page; i++) {
         data.starting_option += data.widgets_per_page[i];
     }
+
     recalculate_page_heights(page); // Recalculate heights for the new page
     scrollbar_init(&scrollbar, 0, data.widgets_per_page[page]);
 }
@@ -771,9 +838,12 @@ static void init(int page, int show_background_image)
         disable_widget(TYPE_NUMERICAL_DESC, RANGE_CURSOR_SCALE);
         disable_widget(TYPE_NUMERICAL_RANGE, RANGE_CURSOR_SCALE);
     }
+
+    // Initialize list boxes and categories BEFORE installing widgets
+    init_list_boxes();
+    // Now install widgets after category-based widget arrays have been set up
     install_widgets();
     set_page(page);
-    init_list_boxes();
 }
 
 static void init_list_boxes(void)
@@ -790,7 +860,7 @@ static void init_list_boxes(void)
     data.ui_list_box.draw_item = draw_list_box_item;
     data.ui_list_box.on_select = handle_list_box_select;
     data.ui_list_box.handle_tooltip = 0;
-    list_box_init(&data.ui_list_box, 5); // 5 placeholder items
+    list_box_init(&data.ui_list_box, 5); // 5 UI categories
 
     //City Management list box
     data.city_management_list_box.x = LIST_BOX_X;
@@ -804,21 +874,34 @@ static void init_list_boxes(void)
     data.city_management_list_box.draw_item = draw_list_box_item;
     data.city_management_list_box.on_select = handle_list_box_select;
     data.city_management_list_box.handle_tooltip = 0;
-    list_box_init(&data.city_management_list_box, 5); // 5 placeholder items
+    list_box_init(&data.city_management_list_box, 4); // 4 City Management categories
+
+    // Initialize categories with first category selected
+    selected_categories.ui_category = CATEGORY_UI_GENERAL;
+    selected_categories.city_mgmt_category = CATEGORY_CITY_MANAGEMENT_STORAGE;
+
+    // Set the initial selection for each list box
+    list_box_select_index(&data.ui_list_box, selected_categories.ui_category);
+    list_box_select_index(&data.city_management_list_box, selected_categories.city_mgmt_category);
+
+    // Set up initial widget layout for each page
+    copy_category_widgets_to_page(CONFIG_PAGE_UI_CHANGES, selected_categories.ui_category);
+    copy_category_widgets_to_page(CONFIG_PAGE_CITY_MANAGEMENT_CHANGES, selected_categories.city_mgmt_category);
 }
 
 static void draw_list_box_item(const list_box_item *item)
 {
-    // Determine which list box this item belongs to based on context
+    // Determine which category list to use based on current page
     const char **item_list;
     switch (data.page) {
         case CONFIG_PAGE_UI_CHANGES:
-            item_list = ui_placeholder_items;
+            item_list = ui_categories;
             break;
         case CONFIG_PAGE_CITY_MANAGEMENT_CHANGES:
-            item_list = city_mgmt_placeholder_items;
+            item_list = city_mgmt_categories;
             break;
-            // if more list boxes are added for other pages, handle them here
+        default:
+            return; // No list box for other pages
     }
 
     // selected item with two white lines above and below
@@ -835,12 +918,88 @@ static void draw_list_box_item(const list_box_item *item)
     text_draw_ellipsized(text, item->x + 5, item->y + 4, item->width - 10, text_font, 0);
 }
 
+// Helper function to copy widgets from a category to the main page widget array
+static void copy_category_widgets_to_page(int page, int category_index)
+{
+    // Validate inputs
+    if (page < 0 || page >= CONFIG_PAGES || category_index < 0) {
+        return;
+    }
+
+    // Only handle category-based pages (UI and City Management)
+    if (page != CONFIG_PAGE_UI_CHANGES && page != CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
+        return;
+    }
+
+    // Clear existing widgets for this page
+    for (int i = 0; i < MAX_WIDGETS; i++) {
+        all_widgets[page][i].type = TYPE_NONE;
+    }
+
+    // Copy widgets from the selected category
+    config_widget *source_widgets = NULL;
+    int max_categories = 0;
+
+    if (page == CONFIG_PAGE_UI_CHANGES) {
+        if (category_index >= 5) return; // UI has 5 categories
+        source_widgets = ui_widgets_by_category[category_index];
+        max_categories = 5;
+    } else if (page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
+        if (category_index >= 4) return; // City Management has 4 categories
+        source_widgets = city_mgmt_widgets_by_category[category_index];
+        max_categories = 4;
+    }
+
+    if (source_widgets && category_index < max_categories) {
+        for (int i = 0; i < MAX_WIDGETS && source_widgets[i].type != TYPE_NONE; i++) {
+            all_widgets[page][i] = source_widgets[i];
+            all_widgets[page][i].enabled = 1; // Ensure widgets are enabled
+        }
+    }
+}
+
 static void handle_list_box_select(unsigned int index, int is_double_click)
 {
-    // Handle list box item selection - placeholder functionality
-    // Selection state is managed by list box automatically
-    // You can add specific actions here later
-    window_request_refresh(); // Ensure UI stays responsive
+    // Update the selected category based on which page we're on
+    switch (data.page) {
+        case CONFIG_PAGE_UI_CHANGES:
+            if (index < 5) { // Number of UI categories - using < instead of <=
+                selected_categories.ui_category = (ui_config_category) index;
+                // Copy widgets from selected category to main widget array
+                copy_category_widgets_to_page(CONFIG_PAGE_UI_CHANGES, selected_categories.ui_category);
+                // Rebuild global widget array to reflect category changes
+                install_widgets();
+                // Recalculate starting_option after install_widgets
+                data.starting_option = 0;
+                for (unsigned int i = 0; i < data.page; i++) {
+                    data.starting_option += data.widgets_per_page[i];
+                }
+                // Recalculate heights for the new widget set
+                recalculate_page_heights(CONFIG_PAGE_UI_CHANGES);
+                window_request_refresh();
+            }
+            break;
+        case CONFIG_PAGE_CITY_MANAGEMENT_CHANGES:
+            if (index < 4) { // Number of City Management categories - using < instead of <=
+                selected_categories.city_mgmt_category = (city_management_category) index;
+                // Copy widgets from selected category to main widget array
+                copy_category_widgets_to_page(CONFIG_PAGE_CITY_MANAGEMENT_CHANGES, selected_categories.city_mgmt_category);
+                // Rebuild global widget array to reflect category changes
+                install_widgets();
+                // Recalculate starting_option after install_widgets
+                data.starting_option = 0;
+                for (unsigned int i = 0; i < data.page; i++) {
+                    data.starting_option += data.widgets_per_page[i];
+                }
+                // Recalculate heights for the new widget set
+                recalculate_page_heights(CONFIG_PAGE_CITY_MANAGEMENT_CHANGES);
+                window_request_refresh();
+            }
+            break;
+        default:
+            // No list box handling for other pages
+            break;
+    }
 }
 
 static int get_checkbox_y_for_focus(config_widget *widget, int base_y)
