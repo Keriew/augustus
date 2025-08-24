@@ -433,7 +433,7 @@ static int config_enable_gods_effects(int key);
 static void init_list_boxes(void);
 static void draw_list_box_item(const list_box_item *item);
 static void handle_list_box_select(unsigned int index, int is_double_click);
-static int measure_checkbox_height(translation_key description);
+static int recalculate_page_heights(int page);
 // Grid box selection tracking
 // List box selection is handled internally, no external tracking needed
 
@@ -597,23 +597,86 @@ static void enable_all_widgets(void)
 
 static void calculate_widget_heights(void)
 {
+    // Calculate heights for all pages
     for (int p = 0; p < CONFIG_PAGES; p++) {
-        for (int i = 0; i < MAX_WIDGETS; i++) {
-            config_widget *widget = &all_widgets[p][i];
-            if (widget->type) {
-                if (widget->type == TYPE_CHECKBOX) {
-                    // Store current page temporarily to calculate correct width for checkbox
-                    int original_page = data.page;
-                    data.page = p;
-                    widget->height = measure_checkbox_height(widget->description);
-                    data.page = original_page;
-                } else {
-                    // Default height for other widget types
-                    widget->height = ITEM_HEIGHT;
+        recalculate_page_heights(p); // Ignore return value during initialization
+    }
+}
+
+static int recalculate_page_heights(int page)
+{
+    //Calculate preliminary heights assuming no scrollbar 
+    int preliminary_total_height = 0;
+    int widget_count = 0;
+
+    for (int i = 0; i < MAX_WIDGETS; i++) {
+        config_widget *widget = &all_widgets[page][i];
+        if (widget->type) {
+            widget_count++;
+            if (widget->type == TYPE_CHECKBOX) {
+                // Calculate with maximum available width 
+                int text_width = CHECKBOX_TEXT_WIDTH + 32;
+                if (page == CONFIG_PAGE_UI_CHANGES || page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
+                    text_width -= LIST_BOX_SHIFT;
                 }
+
+                const uint8_t *text = translation_for(widget->description);
+                int largest_width = 0;
+                int num_lines = text_measure_multiline(text, text_width, FONT_NORMAL_BLACK, &largest_width);
+                int line_height = font_definition_for(FONT_NORMAL_BLACK)->line_height;
+                if (line_height < 11) line_height = 11;
+                line_height += 5;
+
+                int text_height = num_lines * line_height;
+                int total_height_with_padding = text_height + 8; // 4px top + 4px bottom, need to pull this out to define
+                widget->height = (total_height_with_padding > ITEM_HEIGHT) ? total_height_with_padding : ITEM_HEIGHT;
+            } else {
+                widget->height = ITEM_HEIGHT;
+            }
+            preliminary_total_height += widget->height;
+        }
+    }
+
+    // Determine if scrollbar is needed by checking if widgets fit in visible area
+    int items_fit_in_visible_area = 0;
+    int running_height = 0;
+    for (int i = 0; i < widget_count && running_height < LIST_HEIGHT; i++) {
+        config_widget *widget = &all_widgets[page][i];
+        if (widget->type) {
+            running_height += widget->height;
+            if (running_height <= LIST_HEIGHT) {
+                items_fit_in_visible_area++;
             }
         }
     }
+
+    //If we need a scrollbar, recalculate checkbox heights with reduced width
+    if (items_fit_in_visible_area < widget_count) {
+        for (int i = 0; i < MAX_WIDGETS; i++) {
+            config_widget *widget = &all_widgets[page][i];
+            if (widget->type == TYPE_CHECKBOX) {
+                // Recalculate with scrollbar present (reduced width)
+                int text_width = CHECKBOX_TEXT_WIDTH; // No +32 because scrollbar is present
+                if (page == CONFIG_PAGE_UI_CHANGES || page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
+                    text_width -= LIST_BOX_SHIFT;
+                }
+
+                const uint8_t *text = translation_for(widget->description);
+                int largest_width = 0;
+                int num_lines = text_measure_multiline(text, text_width, FONT_NORMAL_BLACK, &largest_width);
+                int line_height = font_definition_for(FONT_NORMAL_BLACK)->line_height;
+                if (line_height < 11) line_height = 11;
+                line_height += 5;
+
+                int text_height = num_lines * line_height;
+                int total_height_with_padding = text_height + 8;
+                widget->height = (total_height_with_padding > ITEM_HEIGHT) ? total_height_with_padding : ITEM_HEIGHT;
+            }
+        }
+    }
+    data.widgets_per_page[page] = widget_count;
+    // return 1 if needs scrollbar 
+    return items_fit_in_visible_area < widget_count;
 }
 
 static void disable_widget(int type, int subtype)
@@ -648,6 +711,7 @@ static void set_page(int page)
     for (unsigned int i = 0; i < data.page; i++) {
         data.starting_option += data.widgets_per_page[i];
     }
+    recalculate_page_heights(page); // Recalculate heights for the new page
     scrollbar_init(&scrollbar, 0, data.widgets_per_page[page]);
 }
 
@@ -710,15 +774,12 @@ static void init(int page, int show_background_image)
     }
     install_widgets();
     set_page(page);
-
-    // Initialize grid boxes
     init_list_boxes();
 }
 
-// List box implementation functions
 static void init_list_boxes(void)
 {
-    // Initialize UI list box
+    // UI tab list box
     data.ui_list_box.x = LIST_BOX_X;
     data.ui_list_box.y = LIST_BOX_Y;
     data.ui_list_box.width_blocks = LIST_BOX_WIDTH / BLOCK_SIZE;
@@ -732,7 +793,7 @@ static void init_list_boxes(void)
     data.ui_list_box.handle_tooltip = 0;
     list_box_init(&data.ui_list_box, 5); // 5 placeholder items
 
-    // Initialize City Management list box
+    //City Management list box
     data.city_management_list_box.x = LIST_BOX_X;
     data.city_management_list_box.y = LIST_BOX_Y;
     data.city_management_list_box.width_blocks = LIST_BOX_WIDTH / BLOCK_SIZE;
@@ -750,12 +811,18 @@ static void init_list_boxes(void)
 static void draw_list_box_item(const list_box_item *item)
 {
     // Determine which list box this item belongs to based on context
-    const char **item_list = ui_placeholder_items;
-    if (data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
-        item_list = city_mgmt_placeholder_items;
+    const char **item_list;
+    switch (data.page) {
+        case CONFIG_PAGE_UI_CHANGES:
+            item_list = ui_placeholder_items;
+            break;
+        case CONFIG_PAGE_CITY_MANAGEMENT_CHANGES:
+            item_list = city_mgmt_placeholder_items;
+            break;
+            // if more list boxes are added for other pages, handle them here
     }
 
-    // Draw selection styling for selected item using inset rect method like trade advisor
+    // selected item with two white lines above and below
     if (item->is_selected) {
         graphics_draw_inset_rect(item->x + 2, item->y - 1, item->width - 6, 1, COLOR_INSET_DARK, COLOR_INSET_LIGHT);
         graphics_draw_inset_rect(item->x + 2, item->y + item->height - 5, item->width - 6, 1,
@@ -765,9 +832,8 @@ static void draw_list_box_item(const list_box_item *item)
         button_border_draw(item->x, item->y - 2, item->width, item->height, 1);
     }
     font_t text_font = item->is_selected ? FONT_NORMAL_WHITE : FONT_NORMAL_GREEN;
-    // Draw item text
-    text_draw_ellipsized(string_from_ascii(item_list[item->index]),
-                        item->x + 5, item->y + 4, item->width - 10, text_font, 0);
+    const uint8_t *text = string_from_ascii(item_list[item->index]);
+    text_draw_ellipsized(text, item->x + 5, item->y + 4, item->width - 10, text_font, 0);
 }
 
 static void handle_list_box_select(unsigned int index, int is_double_click)
@@ -778,25 +844,35 @@ static void handle_list_box_select(unsigned int index, int is_double_click)
     window_request_refresh(); // Ensure UI stays responsive
 }
 
+static int get_checkbox_y_for_focus(config_widget *widget, int base_y)
+{
+    // Extract the text height from the pre-calculated widget height
+    int text_height = widget->height - 8; // Remove the 8px padding (4px top + 4px bottom)
+    if (text_height < 11) text_height = 11; // Minimum text height
+    int text_center_y = base_y + widget->y_offset + 4 + (text_height / 2);
+    int checkbox_y = text_center_y - (CHECKBOX_CHECK_SIZE / 2);
+    return checkbox_y;
+}
+
 static void draw_checkbox_widget(int row_index, int x, int y, config_widget *widget, int is_focused)
 {
-    // Calculate text width (same as measure_checkbox_height)
+    // Use the same width calculation logic that was used during height pre-calculation
     int text_width = CHECKBOX_TEXT_WIDTH;
-    if (data.widgets_per_page[data.page] <= NUM_VISIBLE_ITEMS) {
+    int has_scrollbar = (data.widgets_per_page[data.page] > NUM_VISIBLE_ITEMS);
+    if (!has_scrollbar) {
         text_width += 32;
     }
     if (data.page == CONFIG_PAGE_UI_CHANGES || data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
         text_width -= LIST_BOX_SHIFT;
     }
-    // Draw the multiline text and get actual height
+
+    // Draw the multiline text with 4px padding from top
     const uint8_t *text = translation_for(widget->description);
-    text_draw_multiline(text, x + 30, y + 5, text_width, 0, FONT_NORMAL_BLACK, 0);
-    // Calculate checkbox Y position (centered vertically in the text area)
-    int extra_height = widget->height - ITEM_HEIGHT;
-    int checkbox_y = y + (extra_height / 2);
-    // Draw checkbox border (focus overlay)
+    int text_height = text_draw_multiline(text, x + 30, y + 4 + 5, text_width, 0, FONT_NORMAL_BLACK, 0);
+    // Calculate checkbox y position - centered relative to the actual text height, not total padding
+    int text_center_y = y + 4 + (text_height / 2);
+    int checkbox_y = text_center_y - (CHECKBOX_CHECK_SIZE / 2);
     button_border_draw(x, checkbox_y, CHECKBOX_CHECK_SIZE, CHECKBOX_CHECK_SIZE, is_focused);
-    // Draw checkbox checkmark if enabled
     if (data.config_values[widget->subtype].new_value) {
         text_draw(string_from_ascii("x"), x + 6, checkbox_y + 3, FONT_NORMAL_BLACK, 0);
     }
@@ -804,49 +880,20 @@ static void draw_checkbox_widget(int row_index, int x, int y, config_widget *wid
 
 static int handle_checkbox_widget_input(const mouse *m, int x, int y, config_widget *widget, unsigned int *focus)
 {
-    // Calculate checkbox area dimensions (same as drawing)
     int checkbox_width = CHECKBOX_WIDTH;
     if (data.page == CONFIG_PAGE_UI_CHANGES || data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
         checkbox_width -= LIST_BOX_SHIFT;
     }
     int height = widget->height;
-
-    // Check if mouse is within the entire checkbox widget area
     if (!(x <= m->x && m->x < x + checkbox_width && y <= m->y && m->y < y + height)) {
         return 0;
     }
-
     *focus = 1;
     if (m->left.went_up) {
         toggle_switch(widget->subtype);
         return 1;
     }
     return 0;
-}
-
-static int measure_checkbox_height(translation_key description)
-{
-    int text_width = CHECKBOX_TEXT_WIDTH;
-    if (data.widgets_per_page[data.page] <= NUM_VISIBLE_ITEMS) { //no scrollbar - more space
-        text_width += 32;
-    }
-    // Reduce text width for shifted layouts (UI and City Management tabs)
-    if (data.page == CONFIG_PAGE_UI_CHANGES || data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
-        text_width -= LIST_BOX_SHIFT;
-    }
-
-    const uint8_t *t_key = translation_for(description);
-    int largest_width = 0;
-    int num_lines = text_measure_multiline(t_key, text_width, FONT_NORMAL_BLACK, &largest_width);
-
-    // Convert number of lines to actual pixel height
-    int line_height = font_definition_for(FONT_NORMAL_BLACK)->line_height;
-    if (line_height < 11) line_height = 11;
-    line_height += 5; // matches text_draw_multiline() per-line advance
-
-    int total_height = ((num_lines * line_height) > ITEM_HEIGHT) ? (num_lines * line_height) : ITEM_HEIGHT;
-
-    return total_height + 4; // add some padding
 }
 
 static void numerical_range_draw(const numerical_range_widget *w, int x, int y, const uint8_t *value_text)
@@ -1107,7 +1154,7 @@ static void draw_background(void)
     // Calculate X offset for shifted layouts
     int base_x = 20;
     if (data.page == CONFIG_PAGE_UI_CHANGES || data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
-        base_x = 20 + LIST_BOX_SHIFT;
+        base_x += LIST_BOX_SHIFT;
     }
 
     int additional_y_offset = 0;
@@ -1122,7 +1169,6 @@ static void draw_background(void)
             text_draw(translation_for(w->subtype), base_x, y + w->y_offset, FONT_NORMAL_BLACK, 0);
 
         } else if (w->type == TYPE_CHECKBOX) {
-            // Use unified checkbox widget (draws text and checkbox together)
             draw_checkbox_widget(i, base_x, y + w->y_offset, w, 0); // No focus in background
             // Accumulate extra height for next widget positioning
             int extra_height = w->height - ITEM_HEIGHT;
@@ -1142,7 +1188,6 @@ static void draw_background(void)
             text_draw(translation_for(w->description), base_x, y + 10 + w->y_offset, FONT_NORMAL_BLACK, 0);
         }
     }
-
 
     for (size_t i = 0; i < sizeof(bottom_buttons) / sizeof(*bottom_buttons); i++) {
         int disabled = i == NUM_BOTTOM_BUTTONS - 1 && !data.has_changes;
@@ -1174,7 +1219,7 @@ static void draw_foreground(void)
     // Calculate X offset for shifted layouts in foreground elements
     int base_x = 20;
     if (data.page == CONFIG_PAGE_UI_CHANGES || data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
-        base_x = 20 + LIST_BOX_SHIFT;
+        base_x += LIST_BOX_SHIFT;
     }
 
     int additional_y_offset_fg = 0;
@@ -1186,12 +1231,12 @@ static void draw_foreground(void)
         if (y + w->height > LIST_BOTTOM) break;
 
         if (w->type == TYPE_CHECKBOX) {
-            // Draw only the checkbox border for focus (text already drawn in background)
-            int extra_height = w->height - ITEM_HEIGHT;
-            int checkbox_y = y + w->y_offset + (extra_height / 2);
+            // Use helper function to get checkbox Y from pre-calculated height
             if (data.focus_button == i + 1) {
+                int checkbox_y = get_checkbox_y_for_focus(w, y);
                 button_border_draw(base_x, checkbox_y, CHECKBOX_CHECK_SIZE, CHECKBOX_CHECK_SIZE, 1);
             }
+            int extra_height = w->height - ITEM_HEIGHT;
             additional_y_offset_fg += extra_height;
 
         } else if (w->type == TYPE_SELECT) {
@@ -1319,8 +1364,6 @@ static void handle_input(const mouse *m, const hotkeys *h)
     for (unsigned int i = 0; i < NUM_VISIBLE_ITEMS && i < data.widgets_per_page[data.page]; i++) {
         config_widget *w = data.widgets[i + data.starting_option + scrollbar.scroll_position];
         int y = ITEM_Y_OFFSET + ITEM_HEIGHT * i + additional_y_offset_in;
-
-        // Use pre-calculated height - check if widget fits in available space
         if (y + w->height > LIST_BOTTOM) {
             break;
         }
@@ -1764,18 +1807,16 @@ static void button_page(const generic_button *button)
 {
     int page = button->parameter1;
     set_page(page);
-
-    // Reset selection when switching pages - list boxes handle this internally
-
-    // Request refresh for list boxes when switching to UI or City Management tabs
+    recalculate_page_heights(page);
     if (page == CONFIG_PAGE_UI_CHANGES) {
         list_box_request_refresh(&data.ui_list_box);
     } else if (page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
         list_box_request_refresh(&data.city_management_list_box);
     }
-
     window_invalidate();
-}static void get_tooltip(tooltip_context *c)
+}
+
+static void get_tooltip(tooltip_context *c)
 {
     if (data.page_focus_button) {
         unsigned int page = data.page_focus_button - 1;
