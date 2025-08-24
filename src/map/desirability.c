@@ -187,6 +187,8 @@ static void update_terrain(void)
                     model->desirability_step,
                     model->desirability_step_size,
                     model->desirability_range);
+            } else if (terrain & TERRAIN_AQUEDUCT) {
+                add_to_terrain(x, y, 1, -2, 1, 1, 2);
             }
         }
     }
