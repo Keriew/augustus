@@ -108,7 +108,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_NOT_ACCEPTING_MARKETS, "Markets don't accept anything when built" },
     {TR_CONFIG_HOUSES_DONT_EXPAND_INTO_GARDENS, "Houses don't expand into gardens"},
     {TR_CONFIG_ROAMERS_DONT_SKIP_CORNERS, "Roaming walkers don't skip corners"},
-    {TR_CONFIG_SHOW_MAX_POSSIBLE_PROSPERITY, "Display max attainable prosperity rating with current housing"},
+    {TR_CONFIG_SHOW_MAX_POSSIBLE_PROSPERITY, "Display max attainable prosperity rating with current housing Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum"},
     {TR_CONFIG_AUTO_KILL_ANIMALS, "Citizens will automatically kill harmless animals"},
     {TR_CONFIG_SHOW_ROAMING_PATH, "Preview paths traveled by roaming walkers"},
     {TR_CONFIG_DRAW_CLOUD_SHADOWS, "Draw cloud shadows"},

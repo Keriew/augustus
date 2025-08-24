@@ -11,8 +11,10 @@
 #include "game/settings.h"
 #include "game/system.h"
 #include "graphics/button.h"
+#include "graphics/color.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
+#include "graphics/list_box.h"
 #include "graphics/image.h"
 #include "graphics/panel.h"
 #include "graphics/screen.h"
@@ -54,6 +56,20 @@
 #define NUMERICAL_DOT_SIZE 20
 
 #define PLAYER_NAME_LENGTH 32
+
+// List box - left sidebar- layout constants
+#define LIST_BOX_SHIFT 200
+#define LIST_BOX_WIDTH 180
+#define LIST_BOX_HEIGHT 300
+#define LIST_BOX_X 20
+#define LIST_BOX_Y 100
+#define LIST_BOX_ITEM_HEIGHT 24
+#define LIST_BOX_MARGIN_H 4
+#define LIST_BOX_MARGIN_V 2
+// list panel with the actual options
+#define LIST_Y 75
+#define LIST_HEIGHT 355
+#define LIST_BOTTOM (LIST_Y + LIST_HEIGHT)
 
 static void on_scroll(void);
 
@@ -296,20 +312,20 @@ static generic_button select_buttons[] = {
 };
 
 static numerical_range_widget ranges[] = {
-    { 50, 30,   0,  13,  1, 0},
-    { 98, 27,   0,   0,  1, 0},
-    { 50, 30,  50, 500,  5, 0},
-    { 50, 30, 100, 200, 50, 0},
-    {130, 25,   0, 100,  1, 0},
-    {130, 25,   0, 100,  1, 0},
-    {130, 25,   0, 100,  1, 0},
-    {130, 25,   0, 100,  1, 0},
-    {130, 25,   0, 100,  1, 0},
-    {130, 25,   0, 100,  1, 0},
-    { 50, 30,   0, 100, 10, 0},
-    {146, 24,   0,   4,  1, 0},
-    { 50, 30,   0,   5,  1, 0},
-    { 50, 30,   1,  20,  1, 0},
+    { 50, 35,   0,  13,  1, 0},   // Game speed - match checkbox width
+    { 98, 35,   0,   0,  1, 0},   // Resolution - match checkbox width  
+    { 50, 35,  50, 500,  5, 0},   // Display scale - match checkbox width
+    { 50, 35, 100, 200, 50, 0},   // Cursor scale - match checkbox width
+    {130, 35,   0, 100,  1, 0},   // Master volume - match checkbox width
+    {130, 35,   0, 100,  1, 0},   // Music volume - match checkbox width
+    {130, 35,   0, 100,  1, 0},   // Speech volume - match checkbox width
+    {130, 35,   0, 100,  1, 0},   // Effects volume - match checkbox width
+    {130, 35,   0, 100,  1, 0},   // City sounds volume - match checkbox width
+    {130, 35,   0, 100,  1, 0},   // Video volume - match checkbox width
+    { 50, 35,   0, 100, 10, 0},   // Scroll speed - match checkbox width
+    {146, 35,   0,   4,  1, 0},   // Difficulty - match checkbox width
+    { 50, 35,   0,   5,  1, 0},   // Max grand temples - match checkbox width
+    { 50, 35,   1,  20,  1, 0},   // Autosave slots - match checkbox width
 };
 
 static generic_button bottom_buttons[NUM_BOTTOM_BUTTONS] = {
@@ -369,8 +385,19 @@ static struct {
     uint8_t volume_text[64];
     uint8_t *volume_offset;
     int graphics_behind_tab[CONFIG_PAGES];
+    int row_extra[NUM_VISIBLE_ITEMS]; // extra height added by wrapped checkbox text
+    int row_checkbox_y[NUM_VISIBLE_ITEMS]; // cached checkbox top Y for focus overlay
+    // Grid boxes for UI and City Management tabs
+    list_box_type ui_list_box;
+    list_box_type city_management_list_box;
 } data;
 
+static inline int one_line_ml_height(font_t font)
+{
+    int h = font_definition_for(font)->line_height;
+    if (h < 11) h = 11;
+    return h + 5; // matches text_draw_multiline() per-line advance
+}
 static int config_change_basic(int key);
 static int config_change_string_basic(int key);
 
@@ -399,6 +426,31 @@ static int config_change_scroll_speed(int key);
 
 static int config_set_difficulty(int key);
 static int config_enable_gods_effects(int key);
+
+// Grid box related functions
+static void init_list_boxes(void);
+static void draw_list_box_item(const list_box_item *item);
+static void handle_list_box_select(unsigned int index, int is_double_click);
+
+// Grid box selection tracking
+// List box selection is handled internally, no external tracking needed
+
+// Placeholder grid box items
+static const char *ui_placeholder_items[] = {
+    "UI Setting 1",
+    "UI Setting 2",
+    "UI Setting 3",
+    "UI Setting 4",
+    "UI Setting 5"
+};
+
+static const char *city_mgmt_placeholder_items[] = {
+    "City Setting 1",
+    "City Setting 2",
+    "City Setting 3",
+    "City Setting 4",
+    "City Setting 5"
+};
 
 static inline void set_custom_config_changes(void)
 {
@@ -634,23 +686,101 @@ static void init(int page, int show_background_image)
     }
     install_widgets();
     set_page(page);
+
+    // Initialize grid boxes
+    init_list_boxes();
 }
 
-static void checkbox_draw_text(int x, int y, int value_key, translation_key description)
+// List box implementation functions
+static void init_list_boxes(void)
 {
-    if (data.config_values[value_key].new_value) {
-        text_draw(string_from_ascii("x"), x + 6, y + 3, FONT_NORMAL_BLACK, 0);
+    // Initialize UI list box
+    data.ui_list_box.x = LIST_BOX_X;
+    data.ui_list_box.y = LIST_BOX_Y;
+    data.ui_list_box.width_blocks = LIST_BOX_WIDTH / BLOCK_SIZE;
+    data.ui_list_box.height_blocks = LIST_BOX_HEIGHT / BLOCK_SIZE;
+    data.ui_list_box.item_height = LIST_BOX_ITEM_HEIGHT;
+    data.ui_list_box.draw_inner_panel = 1;
+    data.ui_list_box.extend_to_hidden_scrollbar = 1;
+    data.ui_list_box.decorate_scrollbar = 1;
+    data.ui_list_box.draw_item = draw_list_box_item;
+    data.ui_list_box.on_select = handle_list_box_select;
+    data.ui_list_box.handle_tooltip = 0;
+    list_box_init(&data.ui_list_box, 5); // 5 placeholder items
+
+    // Initialize City Management list box
+    data.city_management_list_box.x = LIST_BOX_X;
+    data.city_management_list_box.y = LIST_BOX_Y;
+    data.city_management_list_box.width_blocks = LIST_BOX_WIDTH / BLOCK_SIZE;
+    data.city_management_list_box.height_blocks = LIST_BOX_HEIGHT / BLOCK_SIZE;
+    data.city_management_list_box.item_height = LIST_BOX_ITEM_HEIGHT;
+    data.city_management_list_box.draw_inner_panel = 1;
+    data.city_management_list_box.extend_to_hidden_scrollbar = 1;
+    data.city_management_list_box.decorate_scrollbar = 1;
+    data.city_management_list_box.draw_item = draw_list_box_item;
+    data.city_management_list_box.on_select = handle_list_box_select;
+    data.city_management_list_box.handle_tooltip = 0;
+    list_box_init(&data.city_management_list_box, 5); // 5 placeholder items
+}
+
+static void draw_list_box_item(const list_box_item *item)
+{
+    // Determine which list box this item belongs to based on context
+    const char **item_list = ui_placeholder_items;
+    if (data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
+        item_list = city_mgmt_placeholder_items;
     }
+
+    // Draw selection styling for selected item using inset rect method like trade advisor
+    if (item->is_selected) {
+        graphics_draw_inset_rect(item->x + 2, item->y - 1, item->width - 6, 1, COLOR_INSET_DARK, COLOR_INSET_LIGHT);
+        graphics_draw_inset_rect(item->x + 2, item->y + item->height - 5, item->width - 6, 1,
+            COLOR_INSET_DARK, COLOR_INSET_LIGHT);
+    }
+    if (item->is_focused) {
+        button_border_draw(item->x, item->y - 2, item->width, item->height, 1);
+    }
+    font_t text_font = item->is_selected ? FONT_NORMAL_WHITE : FONT_NORMAL_GREEN;
+    // Draw item text
+    text_draw_ellipsized(string_from_ascii(item_list[item->index]),
+                        item->x + 5, item->y + 4, item->width - 10, text_font, 0);
+}
+
+static void handle_list_box_select(unsigned int index, int is_double_click)
+{
+    // Handle list box item selection - placeholder functionality
+    // Selection state is managed by list box automatically
+    // You can add specific actions here later
+    window_request_refresh(); // Ensure UI stays responsive
+}
+
+
+
+static int checkbox_draw_row(unsigned int row_index, int x, int y, int value_key, translation_key description)
+{
     int text_width = CHECKBOX_TEXT_WIDTH;
     if (data.widgets_per_page[data.page] <= NUM_VISIBLE_ITEMS) {
         text_width += 32;
     }
-    text_draw_ellipsized(translation_for(description), x + 30, y + 5, text_width, FONT_NORMAL_BLACK, 0);
-}
+    // Reduce text width for shifted layouts (UI and City Management tabs)
+    if (data.page == CONFIG_PAGE_UI_CHANGES || data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
+        text_width -= LIST_BOX_SHIFT;
+    }
+    const uint8_t *t_key = translation_for(description);
+    int consumed = text_draw_multiline(t_key, x + 30, y + 5, text_width, 0, FONT_NORMAL_BLACK, 0);
 
-static void checkbox_draw(int x, int y, int has_focus)
-{
-    button_border_draw(x, y, CHECKBOX_CHECK_SIZE, CHECKBOX_CHECK_SIZE, has_focus);
+    // Extra height beyond a single line
+    int base = one_line_ml_height(FONT_NORMAL_BLACK);
+    int extra = consumed - base;
+    extra = extra < 0 ? 0 : extra; // no negative vals
+    data.row_extra[row_index] = extra;
+    int cb_y = y + (extra / 2);    // Center checkbox vertically relative to consumed height
+    data.row_checkbox_y[row_index] = cb_y;
+
+    if (data.config_values[value_key].new_value) {
+        text_draw(string_from_ascii("x"), x + 6, cb_y + 3, FONT_NORMAL_BLACK, 0);
+    }
+    return extra;
 }
 
 static void numerical_range_draw(const numerical_range_widget *w, int x, int y, const uint8_t *value_text)
@@ -908,24 +1038,45 @@ static void draw_background(void)
 
     button_border_draw(10, 75, 620, 355, 0);
 
+    // Calculate X offset for shifted layouts
+    int base_x = 20;
+    if (data.page == CONFIG_PAGE_UI_CHANGES || data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
+        base_x = 20 + LIST_BOX_SHIFT;
+    }
+
+    int additional_y_offset = 0;
     for (unsigned int i = 0; i < NUM_VISIBLE_ITEMS && i < data.widgets_per_page[data.page]; i++) {
         config_widget *w = data.widgets[i + data.starting_option + scrollbar.scroll_position];
-        int y = ITEM_Y_OFFSET + ITEM_HEIGHT * i;
+        int y = ITEM_Y_OFFSET + ITEM_HEIGHT * i + additional_y_offset;
+
+        // early-exit if this row would spill past the panel bottom
+        int predicted_extra = (w->type == TYPE_CHECKBOX) ? data.row_extra[i] : 0;
+        int row_height = ITEM_HEIGHT + predicted_extra;
+        if (y + row_height > LIST_BOTTOM) break;
+
         if (w->type == TYPE_HEADER) {
-            text_draw(translation_for(w->subtype), 20, y + w->y_offset, FONT_NORMAL_BLACK, 0);
+            text_draw(translation_for(w->subtype), base_x, y + w->y_offset, FONT_NORMAL_BLACK, 0);
+
         } else if (w->type == TYPE_CHECKBOX) {
-            checkbox_draw_text(20, y + w->y_offset, w->subtype, w->description);
+            int extra = checkbox_draw_row(i, base_x, y + w->y_offset, w->subtype, w->description);
+            additional_y_offset += extra; // accumulate real wrapped height
+
         } else if (w->type == TYPE_SELECT) {
-            text_draw(translation_for(w->description), 20, y + 6 + w->y_offset, FONT_NORMAL_BLACK, 0);
+            text_draw(translation_for(w->description), base_x, y + 6 + w->y_offset, FONT_NORMAL_BLACK, 0);
             const generic_button *btn = &select_buttons[w->subtype];
             text_draw_centered(w->get_display_text(), btn->x + 8, y + btn->y + 6 + w->y_offset,
-                btn->width - 16, FONT_NORMAL_BLACK, 0);
+                               btn->width - 16, FONT_NORMAL_BLACK, 0);
+
         } else if (w->type == TYPE_NUMERICAL_RANGE) {
-            numerical_range_draw(&ranges[w->subtype], NUMERICAL_RANGE_X, y + w->y_offset, w->get_display_text());
+            int numerical_x = (data.page == CONFIG_PAGE_UI_CHANGES || data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES)
+                ? NUMERICAL_RANGE_X + LIST_BOX_SHIFT : NUMERICAL_RANGE_X;
+            numerical_range_draw(&ranges[w->subtype], numerical_x, y + w->y_offset, w->get_display_text());
+
         } else if (w->type == TYPE_NUMERICAL_DESC) {
-            text_draw(translation_for(w->description), 20, y + 10 + w->y_offset, FONT_NORMAL_BLACK, 0);
+            text_draw(translation_for(w->description), base_x, y + 10 + w->y_offset, FONT_NORMAL_BLACK, 0);
         }
     }
+
 
     for (size_t i = 0; i < sizeof(bottom_buttons) / sizeof(*bottom_buttons); i++) {
         int disabled = i == NUM_BOTTOM_BUTTONS - 1 && !data.has_changes;
@@ -954,17 +1105,33 @@ static void draw_foreground(void)
         }
     }
 
+    // Calculate X offset for shifted layouts in foreground elements
+    int base_x = 20;
+    if (data.page == CONFIG_PAGE_UI_CHANGES || data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
+        base_x = 20 + LIST_BOX_SHIFT;
+    }
+
+    int additional_y_offset_fg = 0;
     for (unsigned int i = 0; i < NUM_VISIBLE_ITEMS && i < data.widgets_per_page[data.page]; i++) {
         config_widget *w = data.widgets[i + data.starting_option + scrollbar.scroll_position];
-        int y = ITEM_Y_OFFSET + ITEM_HEIGHT * i;
+        int y = ITEM_Y_OFFSET + ITEM_HEIGHT * i + additional_y_offset_fg;
+
+        int predicted_extra = (w->type == TYPE_CHECKBOX) ? data.row_extra[i] : 0;
+        int row_height = ITEM_HEIGHT + predicted_extra;
+        if (y + row_height > LIST_BOTTOM) break;
+
         if (w->type == TYPE_CHECKBOX) {
-            checkbox_draw(20, y + w->y_offset, data.focus_button == i + 1);
+            button_border_draw(base_x, data.row_checkbox_y[i], CHECKBOX_CHECK_SIZE, CHECKBOX_CHECK_SIZE,
+                               data.focus_button == i + 1);
+            additional_y_offset_fg += data.row_extra[i];
+
         } else if (w->type == TYPE_SELECT) {
             const generic_button *btn = &select_buttons[w->subtype];
             button_border_draw(btn->x, y + btn->y + w->y_offset,
-                btn->width, btn->height, data.focus_button == i + 1);
+                               btn->width, btn->height, data.focus_button == i + 1);
         }
     }
+
     for (size_t i = 0; i < sizeof(bottom_buttons) / sizeof(*bottom_buttons); i++) {
         button_border_draw(bottom_buttons[i].x, bottom_buttons[i].y,
             bottom_buttons[i].width, bottom_buttons[i].height, data.bottom_focus_button == i + 1);
@@ -975,30 +1142,54 @@ static void draw_foreground(void)
         scrollbar_draw(&scrollbar);
     }
 
+    // Draw list boxes LAST to ensure they're always on top
+    if (data.page == CONFIG_PAGE_UI_CHANGES) {
+        list_box_request_refresh(&data.ui_list_box);  // Ensure refresh every frame
+        list_box_draw(&data.ui_list_box);
+    } else if (data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
+        list_box_request_refresh(&data.city_management_list_box);  // Ensure refresh every frame
+        list_box_draw(&data.city_management_list_box);
+    }
+
     graphics_reset_dialog();
 }
 
-static int is_checkbox(const mouse *m, int x, int y)
-{
-    if (x <= m->x && x + CHECKBOX_WIDTH > m->x &&
-        y <= m->y && y + CHECKBOX_HEIGHT > m->y) {
-        return 1;
-    }
-    return 0;
-}
+// static int is_checkbox(const mouse *m, int x, int y)
+// {
+//     if (x <= m->x && x + CHECKBOX_WIDTH > m->x &&
+//         y <= m->y && y + CHECKBOX_HEIGHT > m->y) {
+//         return 1;
+//     }
+//     return 0;
+// }
 
-static int checkbox_handle_mouse(const mouse *m, int x, int y, int value_key, unsigned int *focus)
+// static int checkbox_handle_mouse(const mouse *m, int x, int y, int value_key, unsigned int *focus)
+// {
+//     if (!is_checkbox(m, x, y)) {
+//         return 0;
+//     }
+//     *focus = 1;
+//     if (m->left.went_up) {
+//         toggle_switch(value_key);
+//         return 1;
+//     } else {
+//         return 0;
+//     }
+// }
+
+static int checkbox_handle_mouse_row(const mouse *m, int x, int y, unsigned int row_index,
+                                     int value_key, unsigned int *focus)
 {
-    if (!is_checkbox(m, x, y)) {
+    int height = one_line_ml_height(FONT_NORMAL_BLACK) + data.row_extra[row_index];
+    if (!(x <= m->x && m->x < x + CHECKBOX_WIDTH && y <= m->y && m->y < y + height)) {
         return 0;
     }
     *focus = 1;
     if (m->left.went_up) {
         toggle_switch(value_key);
         return 1;
-    } else {
-        return 0;
     }
+    return 0;
 }
 
 static int is_numerical_range(const numerical_range_widget *w, const mouse *m, int x, int y)
@@ -1049,11 +1240,36 @@ static int numerical_range_handle_mouse(const mouse *m, int x, int y, int numeri
 
 static void handle_input(const mouse *m, const hotkeys *h)
 {
+
     const mouse *m_dialog = mouse_in_dialog(m);
+    unsigned int prev_focus = data.focus_button;  // remember
     data.focus_button = 0;
 
+    // Handle list box input for UI and City Management tabs
+    if (data.page == CONFIG_PAGE_UI_CHANGES) {
+        if (list_box_handle_input(&data.ui_list_box, m_dialog, 1)) {
+            data.page_focus_button = 0;
+            data.bottom_focus_button = 0;
+            return;
+        }
+    } else if (data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
+        if (list_box_handle_input(&data.city_management_list_box, m_dialog, 1)) {
+            data.page_focus_button = 0;
+            data.bottom_focus_button = 0;
+            return;
+        }
+    }
+
+    // Calculate X offset for shifted layouts
+    int base_x = 20;
+    int numerical_x = NUMERICAL_RANGE_X;
+    if (data.page == CONFIG_PAGE_UI_CHANGES || data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
+        base_x = 20 + LIST_BOX_SHIFT;
+        numerical_x = NUMERICAL_RANGE_X + LIST_BOX_SHIFT;
+    }
+
     if (data.active_numerical_range) {
-        numerical_range_handle_mouse(m_dialog, NUMERICAL_RANGE_X, 0, data.active_numerical_range);
+        numerical_range_handle_mouse(m_dialog, numerical_x, 0, data.active_numerical_range);
         return;
     }
 
@@ -1064,28 +1280,37 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 
     int handled = 0;
+    int additional_y_offset_in = 0;
+
     for (unsigned int i = 0; i < NUM_VISIBLE_ITEMS && i < data.widgets_per_page[data.page]; i++) {
         config_widget *w = data.widgets[i + data.starting_option + scrollbar.scroll_position];
-        int y = ITEM_Y_OFFSET + ITEM_HEIGHT * i;
+        int y = ITEM_Y_OFFSET + ITEM_HEIGHT * i + additional_y_offset_in;
+
+        int predicted_extra = (w->type == TYPE_CHECKBOX) ? data.row_extra[i] : 0;
+        int row_height = ITEM_HEIGHT + predicted_extra;
+        if (y + row_height > LIST_BOTTOM) break;
+
         if (w->type == TYPE_CHECKBOX) {
             unsigned int focus = 0;
-            handled |= checkbox_handle_mouse(m_dialog, 20, y + w->y_offset, w->subtype, &focus);
-            if (focus) {
-                data.focus_button = i + 1;
-            }
+            handled |= checkbox_handle_mouse_row(m_dialog, base_x, y + w->y_offset, i, w->subtype, &focus);
+            if (focus) data.focus_button = i + 1;
+            additional_y_offset_in += data.row_extra[i];
+
         } else if (w->type == TYPE_SELECT) {
             generic_button *btn = &select_buttons[w->subtype];
-            btn->parameter1 = y + w->y_offset;
+            btn->parameter1 = y + w->y_offset; // anchor stays with shifted row
             unsigned int focus = 0;
             handled |= generic_buttons_handle_mouse(m_dialog, 0, y + w->y_offset, btn, 1, &focus);
-            if (focus) {
-                data.focus_button = i + 1;
-            }
+            if (focus) data.focus_button = i + 1;
+
         } else if (w->type == TYPE_NUMERICAL_RANGE) {
-            handled |= numerical_range_handle_mouse(m_dialog, NUMERICAL_RANGE_X, y + w->y_offset, w->subtype + 1);
+            handled |= numerical_range_handle_mouse(m_dialog, numerical_x, y + w->y_offset, w->subtype + 1);
         }
     }
 
+    if (prev_focus != data.focus_button) {
+        window_request_refresh(); // repaint foreground so old focus border disappears
+    }
     handled |= generic_buttons_handle_mouse(m_dialog, 0, 0, bottom_buttons,
         data.has_changes ? NUM_BOTTOM_BUTTONS : NUM_BOTTOM_BUTTONS - 1, &data.bottom_focus_button);
 
@@ -1094,6 +1319,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
     if (!handled && (m->right.went_up || h->escape_pressed)) {
         window_go_back();
     }
+
 }
 
 static void on_scroll(void)
@@ -1497,10 +1723,18 @@ static void button_page(const generic_button *button)
 {
     int page = button->parameter1;
     set_page(page);
-    window_invalidate();
-}
 
-static void get_tooltip(tooltip_context *c)
+    // Reset selection when switching pages - list boxes handle this internally
+
+    // Request refresh for list boxes when switching to UI or City Management tabs
+    if (page == CONFIG_PAGE_UI_CHANGES) {
+        list_box_request_refresh(&data.ui_list_box);
+    } else if (page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
+        list_box_request_refresh(&data.city_management_list_box);
+    }
+
+    window_invalidate();
+}static void get_tooltip(tooltip_context *c)
 {
     if (data.page_focus_button) {
         unsigned int page = data.page_focus_button - 1;
