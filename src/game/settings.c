@@ -3,6 +3,7 @@
 #include "city/constants.h"
 #include "core/buffer.h"
 #include "core/calc.h"
+#include "core/config.h"
 #include "core/dir.h"
 #include "core/file.h"
 #include "core/string.h"
@@ -286,7 +287,7 @@ void setting_decrease_game_speed(void)
 
 void setting_set_default_game_speed(void)
 {
-    data.game_speed = 70;
+    data.game_speed = (int) config_get(CONFIG_GP_DEFAULT_GAME_SPEED);
 }
 
 int setting_scroll_speed(void)
@@ -318,9 +319,9 @@ set_tooltips setting_tooltips(void)
 void setting_cycle_tooltips(void)
 {
     switch (data.tooltips) {
-    case TOOLTIPS_NONE: data.tooltips = TOOLTIPS_SOME; break;
-    case TOOLTIPS_SOME: data.tooltips = TOOLTIPS_FULL; break;
-    default: data.tooltips = TOOLTIPS_NONE; break;
+        case TOOLTIPS_NONE: data.tooltips = TOOLTIPS_SOME; break;
+        case TOOLTIPS_SOME: data.tooltips = TOOLTIPS_FULL; break;
+        default: data.tooltips = TOOLTIPS_NONE; break;
     }
 }
 

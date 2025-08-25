@@ -94,6 +94,7 @@ enum {
     RANGE_DIFFICULTY,
     RANGE_MAX_GRAND_TEMPLES,
     RANGE_MAX_AUTOSAVE_SLOTS,
+    RANGE_DEFAULT_GAME_SPEED,
 };
 
 enum {
@@ -150,6 +151,7 @@ static const uint8_t *display_text_scroll_speed(void);
 static const uint8_t *display_text_difficulty(void);
 static const uint8_t *display_text_max_grand_temples(void);
 static const uint8_t *display_text_autosave_slots(void);
+static const uint8_t *display_text_default_game_speed(void);
 // page-related helpers
 static int get_widget_count_for(unsigned int page);
 static void set_page(unsigned int page);
@@ -169,6 +171,9 @@ static config_widget page_general[] = {
 
     {TYPE_NUMERICAL_DESC, RANGE_GAME_SPEED, TR_CONFIG_GAME_SPEED, NULL, 0, 1, ITEM_BASE_H, 10},
     {TYPE_NUMERICAL_RANGE, RANGE_GAME_SPEED, 0, display_text_game_speed, 0, 1, ITEM_BASE_H, 2},
+
+    {TYPE_NUMERICAL_DESC, RANGE_DEFAULT_GAME_SPEED, TR_CONFIG_DEFAULT_GAME_SPEED, NULL, 0, 1, ITEM_BASE_H, 10},
+    {TYPE_NUMERICAL_RANGE, RANGE_DEFAULT_GAME_SPEED, 0, display_text_default_game_speed, 0, 1, ITEM_BASE_H, 2},
 
     {TYPE_NUMERICAL_DESC, RANGE_MAX_AUTOSAVE_SLOTS, TR_CONFIG_MAX_AUTOSAVE_SLOTS, NULL, 0, 1, ITEM_BASE_H, 10},
     {TYPE_NUMERICAL_RANGE, RANGE_MAX_AUTOSAVE_SLOTS, 0, display_text_autosave_slots, 0, 1, ITEM_BASE_H, 2},
@@ -400,6 +405,7 @@ static numerical_range_widget ranges[] = {
     {146, 24,   0,   4,  1, 0},   //  difficulty enum index (0..4)
     { 50, 30,   0,   5,  1, 0},   //  max grand temples
     { 50, 30,   1,  20,  1, 0},   //  autosave slots
+    { 50, 30,   0,  13,  1, 0},   //  default game speed index
 
 };
 
@@ -502,7 +508,9 @@ static struct {
 static int one_line_ml_height(font_t font)
 {
     int h = font_definition_for(font)->line_height;
-    if (h < 11) h = 11;
+    if (h < 11) {
+        h = 11;
+    }
     return h + 5; //  matches text_draw_multiline() per-line advance
 
 }
@@ -537,10 +545,24 @@ static int config_change_game_speed(int key)
 {
     config_change_basic(key);
     int target = game_speeds[data.config_values[key].new_value];
-    while (setting_game_speed() > target) setting_decrease_game_speed();
-    while (setting_game_speed() < target) setting_increase_game_speed();
+    while (setting_game_speed() > target) {
+        setting_decrease_game_speed();
+    }
+    while (setting_game_speed() < target) {
+        setting_increase_game_speed();
+    }
     return 1;
 }
+
+static int config_change_default_game_speed(int key)
+{
+    int target = game_speeds[data.config_values[key].new_value];
+    data.config_values[key].new_value = target;
+    config_change_basic(key);
+    setting_set_default_game_speed();
+    return 1;
+}
+
 static int config_change_fullscreen(int key)
 {
     if (!system_is_fullscreen_only()) {
@@ -591,10 +613,15 @@ static int config_enable_audio(int key)
 {
     config_change_basic(key);
     if (data.config_values[key].new_value) {
-        if (data.show_background_image) sound_music_play_intro();
-        else { sound_music_stop(); sound_music_update(1); }
+        if (data.show_background_image) {
+            sound_music_play_intro();
+        } else {
+            sound_music_stop();
+            sound_music_update(1);
+        }
     } else {
-        sound_music_stop(); sound_speech_stop();
+        sound_music_stop();
+        sound_speech_stop();
     }
     return 1;
 }
@@ -610,12 +637,20 @@ static int config_set_master_volume(int key)
 static int config_enable_music(int key)
 {
     config_change_basic(key);
-    if (setting_sound_is_enabled(SOUND_TYPE_MUSIC) != data.config_values[key].new_value)
+    if (setting_sound_is_enabled(SOUND_TYPE_MUSIC) != data.config_values[key].new_value) {
         setting_toggle_sound_enabled(SOUND_TYPE_MUSIC);
+    }
+
     if (data.config_values[key].new_value) {
-        if (data.show_background_image) sound_music_play_intro();
-        else { sound_music_stop(); sound_music_update(1); }
-    } else sound_music_stop();
+        if (data.show_background_image) {
+            sound_music_play_intro();
+        } else {
+            sound_music_stop();
+            sound_music_update(1);
+        }
+    } else {
+        sound_music_stop();
+    }
     return 1;
 }
 static int config_enable_music_randomise(int key)
@@ -632,9 +667,13 @@ static int config_set_music_volume(int key)
 static int config_enable_speech(int key)
 {
     config_change_basic(key);
-    if (setting_sound_is_enabled(SOUND_TYPE_SPEECH) != data.config_values[key].new_value)
+    if (setting_sound_is_enabled(SOUND_TYPE_SPEECH) != data.config_values[key].new_value) {
         setting_toggle_sound_enabled(SOUND_TYPE_SPEECH);
-    if (!data.config_values[key].new_value) sound_speech_stop();
+    }
+
+    if (!data.config_values[key].new_value) {
+        sound_speech_stop();
+    }
     return 1;
 }
 static int config_set_speech_volume(int key)
@@ -647,8 +686,10 @@ static int config_set_speech_volume(int key)
 static int config_enable_effects(int key)
 {
     config_change_basic(key);
-    if (setting_sound_is_enabled(SOUND_TYPE_EFFECTS) != data.config_values[key].new_value)
+    if (setting_sound_is_enabled(SOUND_TYPE_EFFECTS) != data.config_values[key].new_value) {
         setting_toggle_sound_enabled(SOUND_TYPE_EFFECTS);
+    }
+
     return 1;
 }
 static int config_set_effects_volume(int key)
@@ -661,8 +702,10 @@ static int config_set_effects_volume(int key)
 static int config_enable_city_sounds(int key)
 {
     config_change_basic(key);
-    if (setting_sound_is_enabled(SOUND_TYPE_CITY) != data.config_values[key].new_value)
+    if (setting_sound_is_enabled(SOUND_TYPE_CITY) != data.config_values[key].new_value) {
         setting_toggle_sound_enabled(SOUND_TYPE_CITY);
+    }
+
     return 1;
 }
 static int config_set_city_sounds_volume(int key)
@@ -678,8 +721,12 @@ static int config_set_city_sounds_volume(int key)
 static int config_change_scroll_speed(int key)
 {
     config_change_basic(key);
-    while (setting_scroll_speed() > data.config_values[key].new_value) setting_decrease_scroll_speed();
-    while (setting_scroll_speed() < data.config_values[key].new_value) setting_increase_scroll_speed();
+    while (setting_scroll_speed() > data.config_values[key].new_value) {
+        setting_decrease_scroll_speed();
+    }
+    while (setting_scroll_speed() < data.config_values[key].new_value) {
+        setting_increase_scroll_speed();
+    }
     return 1;
 }
 
@@ -737,20 +784,54 @@ static uint8_t *percent_buf(int key)
 {
     return percentage_string(data.display_text, data.config_values[key].new_value);
 }
-static const uint8_t *display_text_display_scale(void) { return percent_buf(CONFIG_SCREEN_DISPLAY_SCALE); }
-static const uint8_t *display_text_cursor_scale(void) { return percent_buf(CONFIG_SCREEN_CURSOR_SCALE); }
-static const uint8_t *display_text_scroll_speed(void) { return percent_buf(CONFIG_ORIGINAL_SCROLL_SPEED); }
-
-static const uint8_t *display_text_master_volume(void) { percentage_string(data.volume_offset, data.config_values[CONFIG_GENERAL_MASTER_VOLUME].new_value); return data.volume_text; }
-static const uint8_t *display_text_music_volume(void) { percentage_string(data.volume_offset, data.config_values[CONFIG_ORIGINAL_MUSIC_VOLUME].new_value); return data.volume_text; }
-static const uint8_t *display_text_speech_volume(void) { percentage_string(data.volume_offset, data.config_values[CONFIG_ORIGINAL_SPEECH_VOLUME].new_value); return data.volume_text; }
-static const uint8_t *display_text_sound_effects_volume(void) { percentage_string(data.volume_offset, data.config_values[CONFIG_ORIGINAL_SOUND_EFFECTS_VOLUME].new_value); return data.volume_text; }
-static const uint8_t *display_text_city_sounds_volume(void) { percentage_string(data.volume_offset, data.config_values[CONFIG_ORIGINAL_CITY_SOUNDS_VOLUME].new_value); return data.volume_text; }
-static const uint8_t *display_text_video_volume(void) { percentage_string(data.volume_offset, data.config_values[CONFIG_GENERAL_VIDEO_VOLUME].new_value); return data.volume_text; }
-
-static const uint8_t *display_text_language(void) { return data.language_options.options[data.language_options.selected]; }
-static const uint8_t *display_text_user_directory(void) { return translation_for(TR_USER_DIRECTORIES_WINDOW_TITLE); }
-static const uint8_t *display_text_player_name(void) { return data.player_name; }
+static const uint8_t *display_text_display_scale(void)
+{
+    return percent_buf(CONFIG_SCREEN_DISPLAY_SCALE);
+}
+static const uint8_t *display_text_cursor_scale(void)
+{
+    return percent_buf(CONFIG_SCREEN_CURSOR_SCALE);
+}
+static const uint8_t *display_text_scroll_speed(void)
+{
+    return percent_buf(CONFIG_ORIGINAL_SCROLL_SPEED);
+}
+static const uint8_t *display_text_master_volume(void)
+{
+    percentage_string(data.volume_offset, data.config_values[CONFIG_GENERAL_MASTER_VOLUME].new_value); return data.volume_text;
+}
+static const uint8_t *display_text_music_volume(void)
+{
+    percentage_string(data.volume_offset, data.config_values[CONFIG_ORIGINAL_MUSIC_VOLUME].new_value); return data.volume_text;
+}
+static const uint8_t *display_text_speech_volume(void)
+{
+    percentage_string(data.volume_offset, data.config_values[CONFIG_ORIGINAL_SPEECH_VOLUME].new_value); return data.volume_text;
+}
+static const uint8_t *display_text_sound_effects_volume(void)
+{
+    percentage_string(data.volume_offset, data.config_values[CONFIG_ORIGINAL_SOUND_EFFECTS_VOLUME].new_value); return data.volume_text;
+}
+static const uint8_t *display_text_city_sounds_volume(void)
+{
+    percentage_string(data.volume_offset, data.config_values[CONFIG_ORIGINAL_CITY_SOUNDS_VOLUME].new_value); return data.volume_text;
+}
+static const uint8_t *display_text_video_volume(void)
+{
+    percentage_string(data.volume_offset, data.config_values[CONFIG_GENERAL_VIDEO_VOLUME].new_value); return data.volume_text;
+}
+static const uint8_t *display_text_language(void)
+{
+    return data.language_options.options[data.language_options.selected];
+}
+static const uint8_t *display_text_user_directory(void)
+{
+    return translation_for(TR_USER_DIRECTORIES_WINDOW_TITLE);
+}
+static const uint8_t *display_text_player_name(void)
+{
+    return data.player_name;
+}
 static const uint8_t *display_text_game_speed(void)
 {
     return percentage_string(data.display_text, game_speeds[data.config_values[CONFIG_ORIGINAL_GAME_SPEED].new_value]);
@@ -778,6 +859,10 @@ static const uint8_t *display_text_autosave_slots(void)
     string_from_int(data.display_text, data.config_values[CONFIG_GP_CH_MAX_AUTOSAVE_SLOTS].new_value, 0);
     return data.display_text;
 }
+static const uint8_t *display_text_default_game_speed(void)
+{
+    return percentage_string(data.display_text, game_speeds[data.config_values[CONFIG_GP_DEFAULT_GAME_SPEED].new_value]);
+}
 
 //    Range value binding, custom change-action table, init
 
@@ -797,13 +882,18 @@ static void set_range_values(void)
     ranges[RANGE_DIFFICULTY].value = &data.config_values[CONFIG_ORIGINAL_DIFFICULTY].new_value;
     ranges[RANGE_MAX_GRAND_TEMPLES].value = &data.config_values[CONFIG_GP_CH_MAX_GRAND_TEMPLES].new_value;
     ranges[RANGE_MAX_AUTOSAVE_SLOTS].value = &data.config_values[CONFIG_GP_CH_MAX_AUTOSAVE_SLOTS].new_value;
+    ranges[RANGE_DEFAULT_GAME_SPEED].value = &data.config_values[CONFIG_GP_DEFAULT_GAME_SPEED].new_value;
 }
 static void set_custom_config_changes(void)
 {
     //  default
 
-    for (int i = 0; i < CONFIG_MAX_ALL; ++i) data.config_values[i].change_action = config_change_basic;
-    for (int i = 0; i < CONFIG_STRING_MAX_ALL; ++i) data.config_string_values[i].change_action = config_change_string_basic;
+    for (int i = 0; i < CONFIG_MAX_ALL; ++i) {
+        data.config_values[i].change_action = config_change_basic;
+    }
+    for (int i = 0; i < CONFIG_STRING_MAX_ALL; ++i) {
+        data.config_string_values[i].change_action = config_change_string_basic;
+    }
 
     //  strings
 
@@ -818,6 +908,7 @@ static void set_custom_config_changes(void)
     data.config_values[CONFIG_SCREEN_CURSOR_SCALE].change_action = config_change_cursors;
     data.config_values[CONFIG_SCREEN_COLOR_CURSORS].change_action = config_change_cursors;
     data.config_values[CONFIG_ORIGINAL_GAME_SPEED].change_action = config_change_game_speed;
+    data.config_values[CONFIG_GP_DEFAULT_GAME_SPEED].change_action = config_change_default_game_speed;
 
     //  audio
 
@@ -843,8 +934,12 @@ static void set_custom_config_changes(void)
 static void set_player_name_width(void)
 {
     int width = text_get_width(data.player_name, FONT_NORMAL_BLACK) + 16;
-    if (width < 200) width = 200;
-    else if (width > 322) { width = 322; text_ellipsize(data.player_name, FONT_NORMAL_BLACK, width - 16); }
+    if (width < 200) {
+        width = 200;
+    } else if (width > 322) {
+        width = 322;
+        text_ellipsize(data.player_name, FONT_NORMAL_BLACK, width - 16);
+    }
     select_buttons[SELECT_PLAYER_NAME].width = width;
 }
 
@@ -859,6 +954,18 @@ static void fetch_original_config_values(void)
     }
     data.config_values[CONFIG_ORIGINAL_GAME_SPEED].original_value = (int) game_speed_index;
     data.config_values[CONFIG_ORIGINAL_GAME_SPEED].new_value = (int) game_speed_index;
+
+    // Default game speed - initialize from config system
+    int default_game_speed_index = 0;
+    int default_speed_value = config_get(CONFIG_GP_DEFAULT_GAME_SPEED);
+    while (default_game_speed_index < sizeof(game_speeds) / sizeof(int)) {
+        if (game_speeds[default_game_speed_index] >= default_speed_value) {
+            break;
+        }
+        default_game_speed_index++;
+    }
+    data.config_values[CONFIG_GP_DEFAULT_GAME_SPEED].original_value = default_game_speed_index;
+    data.config_values[CONFIG_GP_DEFAULT_GAME_SPEED].new_value = default_game_speed_index;
 
     //  sounds
 
@@ -910,14 +1017,17 @@ static void update_scale(void)
     if (system_can_scale_display(&min_scale, &max_scale)) {
         ranges[RANGE_DISPLAY_SCALE].min = min_scale;
         ranges[RANGE_DISPLAY_SCALE].max = max_scale;
-        if (*ranges[RANGE_DISPLAY_SCALE].value > max_scale)
+        if (*ranges[RANGE_DISPLAY_SCALE].value > max_scale) {
             *ranges[RANGE_DISPLAY_SCALE].value = max_scale;
+        }
+
     }
 }
 static void calculate_available_resolutions_and_fullscreen(void)
 {
-    if (system_is_fullscreen_only()) return;
-
+    if (system_is_fullscreen_only()) {
+        return;
+    }
     memset(available_resolutions, 0, sizeof(available_resolutions));
     int resolution_index = 0;
     int display_resolution_index = -1;
@@ -1010,7 +1120,9 @@ static void button_language_select(const generic_button *button)
 }
 static void set_player_name(const uint8_t *name)
 {
-    if (!string_length(name)) name = lang_get_string(9, 5);
+    if (!string_length(name)) {
+        name = lang_get_string(9, 5);
+    }
     string_copy(name, data.player_name, PLAYER_NAME_LENGTH);
     encoding_to_utf8(name, data.config_string_values[CONFIG_STRING_ORIGINAL_PLAYER_NAME].new_value, PLAYER_NAME_LENGTH, 0);
     set_player_name_width();
@@ -1129,7 +1241,9 @@ static void op_measure_checkbox(const config_widget *w, int avail_text_w, int *o
     const uint8_t *txt = translation_for(w->description);
     int h = checkbox_text_height(txt, avail_text_w) + 8; //  4+4 padding
 
-    if (h < ITEM_BASE_H) h = ITEM_BASE_H;
+    if (h < ITEM_BASE_H) {
+        h = ITEM_BASE_H;
+    }
     *out_h = h;
 }
 static void op_draw_bg_checkbox(const config_widget *w, int x, int y, int avail_text_w)
@@ -1145,7 +1259,9 @@ static void op_draw_bg_checkbox(const config_widget *w, int x, int y, int avail_
 }
 static void op_draw_fg_checkbox(const config_widget *w, int x, int y, int avail_text_w, int focused)
 {
-    if (!focused) return;
+    if (!focused) {
+        return;
+    }
     const uint8_t *txt = translation_for(w->description);
     int text_h = checkbox_text_height(txt, avail_text_w);
     int text_center_y = y + (text_h / 2);
@@ -1157,7 +1273,9 @@ static int op_input_checkbox(const config_widget *w, int x, int y, int avail_tex
     int width = avail_text_w + 30; //  30 includes checkbox + gap
 
     int height = w->height;
-    if (!(x <= m->x && m->x < x + width && y <= m->y && m->y < y + height)) return 0;
+    if (!(x <= m->x && m->x < x + width && y <= m->y && m->y < y + height)) {
+        return 0;
+    }
     *focused = 1;
     if (m->left.went_up) {
         data.config_values[w->subtype].new_value = 1 - data.config_values[w->subtype].new_value;
@@ -1229,19 +1347,27 @@ static void numerical_range_draw(const numerical_range_widget *r, int x, int y, 
 static int is_over_slider(const numerical_range_widget *r, const mouse *m, int x, int y, int extra_w)
 {
     if (x + r->x <= m->x && x + r->width_blocks * BLOCK_SIZE + r->x + extra_w >= m->x &&
-        y <= m->y && y + 16 > m->y) return 1;
+        y <= m->y && y + 16 > m->y) {
+        return 1;
+    }
     return 0;
 }
 static int handle_slider_mouse(const numerical_range_widget *r, const mouse *m, int x, int y, int id, int extra_w)
 {
     if (data.active_numerical_range) {
-        if (data.active_numerical_range != id) return 0;
-        if (!m->left.is_down) { data.active_numerical_range = 0; return 0; }
+        if (data.active_numerical_range != id) {
+            return 0;
+        }
+        if (!m->left.is_down) {
+            data.active_numerical_range = 0;
+            return 0;
+        }
     } else if (!m->left.went_down || !is_over_slider(r, m, x, y, extra_w)) {
         return 0;
     }
-    if (r->min == r->max) return 1;
-
+    if (r->min == r->max) {
+        return 1;
+    }
     int slider_w = r->width_blocks * BLOCK_SIZE - NUMERICAL_SLIDER_PADDING * 2 - NUMERICAL_DOT_SIZE + extra_w;
     int px_per_step = slider_w / (r->max - r->min);
     int dot = m->x - x - r->x - NUMERICAL_DOT_SIZE / 2 + px_per_step / 2;
@@ -1251,7 +1377,10 @@ static int handle_slider_mouse(const numerical_range_widget *r, const mouse *m, 
     int right = calc_bound(left + r->step, r->min, r->max);
     int closest = ((exact - left) < (right - exact)) ? left : right;
 
-    if (closest != *r->value) { *r->value = closest; window_request_refresh(); }
+    if (closest != *r->value) {
+        *r->value = closest;
+        window_request_refresh();
+    }
     data.active_numerical_range = id;
     return 1;
 }
@@ -1407,7 +1536,9 @@ static void build_layout_for_current_page(void)
 
     for (int i = 0; i < widget_count && i < MAX_WIDGETS; ++i) {
         const config_widget *w = get_widget_row_for(data.page, i);
-        if (!w) break;
+        if (!w) {
+            break;
+        }
         int h = ITEM_BASE_H;
         if (ops_by_type[w->type].measure) {
             ops_by_type[w->type].measure(w, span_no_sb.text_w, &h);
@@ -1425,17 +1556,23 @@ static void build_layout_for_current_page(void)
         int count_fit_from_top = 0;
         for (int i = 0; i < widget_count && i < MAX_WIDGETS; ++i) {
             const config_widget *w = get_widget_row_for(data.page, i);
-            if (!w) break;
+            if (!w) {
+                break;
+            }
             int h = ITEM_BASE_H;
             if (ops_by_type[w->type].measure) {
                 ops_by_type[w->type].measure(w, span_sb.text_w, &h);
             }
             current_y += w->margin_top;
-            if (current_y + h > LIST_BOTTOM) break;
+            if (current_y + h > LIST_BOTTOM) {
+                break;
+            }
             count_fit_from_top++;
             current_y += h;
         }
-        if (count_fit_from_top < 1) count_fit_from_top = 1; // at least one row
+        if (count_fit_from_top < 1) {
+            count_fit_from_top = 1; // at least one row
+        }
         elements_in_view = count_fit_from_top;
     }
 
@@ -1455,15 +1592,17 @@ static void build_layout_for_current_page(void)
 
     for (int i = start_widget_index; i < widget_count && visible_widget_index < MAX_WIDGETS; ++i) {
         const config_widget *w = get_widget_row_for((int) data.page, i);
-        if (!w) break;
-
+        if (!w) {
+            break;
+        }
         int h = ITEM_BASE_H;
         if (ops_by_type[w->type].measure) {
             ops_by_type[w->type].measure(w, span.text_w, &h);
         }
         current_y += w->margin_top;
-        if (current_y + h > LIST_BOTTOM) break;
-
+        if (current_y + h > LIST_BOTTOM) {
+            break;
+        }
         data.layout.rows[visible_widget_index] = w;
         data.layout.y[visible_widget_index] = current_y;
         data.layout.h[visible_widget_index] = h;
@@ -1479,9 +1618,11 @@ static void draw_background(void)
 {
     update_has_changes();
 
-    if (data.show_background_image) image_draw_fullscreen_background(image_group(GROUP_INTERMEZZO_BACKGROUND) + 5);
-    else window_draw_underlying_window();
-
+    if (data.show_background_image) {
+        image_draw_fullscreen_background(image_group(GROUP_INTERMEZZO_BACKGROUND) + 5);
+    } else {
+        window_draw_underlying_window();
+    }
     graphics_in_dialog();
 
     outer_panel_draw(0, 0, 40, 30);
@@ -1702,7 +1843,9 @@ static void handle_input(const mouse *m, const hotkeys *h)
         unsigned f = 0;
         if (ops_by_type[w->type].handle_input) {
             handled |= ops_by_type[w->type].handle_input(w, span.x, data.layout.y[v] + w->y_offset, span.text_w, md, &f);
-            if (f) data.focus_button = v + 1;
+            if (f) {
+                data.focus_button = v + 1;
+            }
         }
     }
 
@@ -1711,8 +1854,12 @@ static void handle_input(const mouse *m, const hotkeys *h)
     handled |= generic_buttons_handle_mouse(md, 0, 0, bottom_buttons, data.has_changes ? NUM_BOTTOM_BUTTONS : NUM_BOTTOM_BUTTONS - 1, &data.bottom_focus_button);
     handled |= generic_buttons_handle_mouse(md, 0, 0, page_buttons, CONFIG_PAGES, &data.page_focus_button);
 
-    if (!handled && (m->right.went_up || h->escape_pressed)) window_go_back();
-    if (prev_focus != data.focus_button) window_request_refresh();
+    if (!handled && (m->right.went_up || h->escape_pressed)) {
+        window_go_back();
+    }
+    if (prev_focus != data.focus_button) {
+        window_request_refresh();
+    }
     window_request_refresh();
 }
 //    Tooltips
