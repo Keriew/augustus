@@ -1668,6 +1668,23 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_OVERLAY_PROBLEMS_NO_ROAD_ACCESS, "Нет доступа к дороге"},
     {TR_WARNING_NO_WAREHOUSE_TOWER_ROAD_ACCESS, "Разверните склад башней к дороге, шоссе или лестнице"},
     {TR_BUILDING_FORT_MENU, "Форт"},
+    {TR_PARAMETER_VALUE_BUILDING_MENU_FORTS, "Все форты"},
+    {TR_EMPIRE_SIDE_BAR_SORT, "Сортировка:"},
+    {TR_EMPIRE_SIDE_BAR_FILTER, "Фильтр:"},
+    {TR_EMPIRE_SIDE_BAR_SORT_BY_NAME, "Название"},
+    {TR_EMPIRE_SIDE_BAR_SORT_BY_QUOTA_FILL_EXPORT, "Квота экспорта"},
+    {TR_EMPIRE_SIDE_BAR_SORT_BY_QUOTA_FILL_IMPORT, "Квота импорта"},
+    {TR_EMPIRE_SIDE_BAR_SORT_BY_ROUTE_COST, "Стоимость маршрута"},
+    {TR_EMPIRE_SIDE_BAR_SORT_BY_PROFIT, "Прибыль"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE, "Ресурс"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_OPEN, "Открытые маршруты"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_CLOSED, "Закрытые маршруты"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_LAND, "Сухопутные маршруты"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_SEA, "Морские маршруты"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_NONE, "Без фильтра"},
+    {TR_TOOLTIP_CHANGE_SIDEBAR_WIDTH, "Изменить ширину боковой панели"},
+    {TR_TOOLTIP_ASCENDING_ORDER, "По возрастанию"},
+    {TR_TOOLTIP_DESCENDING_ORDER, "По убыванию"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

@@ -33,7 +33,6 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .size = 1,
         .image_group = 112,
         .event_data.attr = "road",
-        .event_data.cannot_count = 1
     },
     [BUILDING_WALL] = {
         .size = 1,
@@ -208,7 +207,6 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .fire_proof = 1,
         .image_group = 58,
         .event_data.attr = "plaza",
-        .event_data.cannot_count = 1
     },
     [BUILDING_GARDENS] = {
         .size = 1,
@@ -217,7 +215,10 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .image_offset = 1,
         .sound_id = SOUND_CITY_GARDEN,
         .event_data.attr = "gardens",
-        .event_data.cannot_count = 1
+    },
+    [BUILDING_MENU_FORT] = {
+        .event_data.attr = "fort|all_forts",
+        .event_data.key = TR_PARAMETER_VALUE_BUILDING_MENU_FORTS
     },
     [BUILDING_FORT_GROUND] = {
         .size = 4,
@@ -999,7 +1000,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .draw_desirability_range = 1,
         .custom_asset.group = "Military",
         .custom_asset.id = "Mess OFF Central",
-        .event_data.attr = "mess_hall"
+        .event_data.attr = "mess_hall",
     },
     [BUILDING_LIGHTHOUSE] = {
         .size = 3,
@@ -1027,7 +1028,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
     [BUILDING_GRAND_GARDEN] = {
         .size = 2,
         .fire_proof = 1,
-        .event_data.attr = "grand_garden"
+        .event_data.attr = "grand_garden",
+        .event_data.cannot_count = 1
     },
     [BUILDING_ARENA] = {
         .size = 3,
@@ -1047,7 +1049,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
     [BUILDING_DOLPHIN_FOUNTAIN] = {
         .size = 2,
         .fire_proof = 1,
-        .event_data.attr = "dolphin_fountain"
+        .event_data.attr = "dolphin_fountain",
+        .event_data.cannot_count = 1
     },
     [BUILDING_HEDGE_DARK] = {
         .size = 1,
@@ -1208,7 +1211,6 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .custom_asset.group = "Admin_Logistics",
         .custom_asset.id = "Highway_Placement",
         .event_data.attr = "highway",
-        .event_data.cannot_count = 1
     },
     [BUILDING_GOLD_MINE] = {
         .size = 2,

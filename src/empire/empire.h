@@ -20,7 +20,7 @@ void empire_transform_coordinates(int *x_coord, int *y_coord);
 void empire_restore_coordinates(int *x_coord, int *y_coord);
 void empire_adjust_scroll(int *x_offset, int *y_offset);
 
-int empire_selected_object(void);
+unsigned int empire_selected_object(void);
 
 void empire_clear_selected_object(void);
 void empire_select_object(int x, int y);

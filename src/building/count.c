@@ -7,7 +7,10 @@
 #include "city/health.h"
 #include "figure/figure.h"
 #include "map/building.h"
+#include "map/data.h"
 #include "map/grid.h"
+#include "map/terrain.h"
+#include "map/property.h"
 
 static const building_type building_set_farms[] = {
     BUILDING_WHEAT_FARM, BUILDING_VEGETABLE_FARM, BUILDING_FRUIT_FARM, BUILDING_OLIVE_FARM,
@@ -81,6 +84,8 @@ static const building_type all_fort_types[] = {
     BUILDING_FORT_AUXILIA_INFANTRY,
     BUILDING_FORT_ARCHERS,
 };
+int building_count_forts(int active_only);
+
 int building_count_grand_temples(void)
 {
     return building_count_total(BUILDING_GRAND_TEMPLE_CERES) +
@@ -103,6 +108,9 @@ int building_count_grand_temples_active(void)
 
 int building_count_active(building_type type)
 {
+    if (type == BUILDING_MENU_FORT) {
+        return building_count_forts(1); // 1 means check active only
+    }
     int active = 0;
     for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
         if (building_is_active(b) && b == building_main(b)) {
@@ -114,6 +122,9 @@ int building_count_active(building_type type)
 
 int building_count_total(building_type type)
 {
+    if (type == BUILDING_MENU_FORT) {
+        return building_count_forts(0); // 0 means do not check active only
+    }
     int total = 0;
     for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
         if ((b->state == BUILDING_STATE_IN_USE || b->state == BUILDING_STATE_CREATED) && b == building_main(b)) {
@@ -385,9 +396,139 @@ int building_count_active_fort_type(figure_type type)
 
 int building_count_fort_type_total(figure_type type)
 {
+    // these functions might be deprecated due to the change of BUILDING_FORT to BUILDING_MENU_FORT
     int total = 0;
     for (size_t i = 0; i < sizeof(all_fort_types) / sizeof(all_fort_types[0]); i++) {
         total += count_forts_per_type(all_fort_types[i], type, 0);
     }
     return total;
+}
+
+figure_type building_count_forts_get_figure_type_from_building(building_type type)
+{
+    switch (type) {
+        case BUILDING_FORT_LEGIONARIES:
+            return FIGURE_FORT_LEGIONARY;
+        case BUILDING_FORT_JAVELIN:
+            return FIGURE_FORT_JAVELIN;
+        case BUILDING_FORT_MOUNTED:
+            return FIGURE_FORT_MOUNTED;
+        case BUILDING_FORT_AUXILIA_INFANTRY:
+            return FIGURE_FORT_INFANTRY;
+        case BUILDING_FORT_ARCHERS:
+            return FIGURE_FORT_ARCHER;
+        default:
+            return FIGURE_NONE;
+    }
+}
+
+int building_count_forts(int active_only)
+{
+    int total = 0;
+    for (size_t i = 0; i < sizeof(all_fort_types) / sizeof(all_fort_types[0]); i++) {
+        // adjust the figure type here
+        figure_type f_type = building_count_forts_get_figure_type_from_building(all_fort_types[i]);
+        total += count_forts_per_type(all_fort_types[i], f_type, active_only);
+    }
+    return total;
+}
+
+int building_count_roads_in_area(int minx, int miny, int maxx, int maxy)
+{
+    int total = 0;
+    int grid_offset;
+    for (int y = miny; y < maxy; y++) {
+        for (int x = minx; x < maxx; x++) {
+            grid_offset = map_grid_offset(x, y);
+
+            if (map_terrain_is(grid_offset, TERRAIN_ROAD)) {
+                total++;
+            }
+        }
+    }
+    return total;
+}
+
+int building_count_highway_in_area(int minx, int miny, int maxx, int maxy)
+{
+    int total = 0;
+    int grid_offset;
+    for (int y = miny; y < maxy; y++) {
+        for (int x = minx; x < maxx; x++) {
+            grid_offset = map_grid_offset(x, y);
+
+            if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+                total++;
+            }
+        }
+    }
+    return total;
+}
+
+int building_count_plaza_in_area(int minx, int miny, int maxx, int maxy)
+{
+    int total = 0;
+    int grid_offset;
+    for (int y = miny; y < maxy; y++) {
+        for (int x = minx; x < maxx; x++) {
+            grid_offset = map_grid_offset(x, y);
+
+            if (map_terrain_is(grid_offset, TERRAIN_ROAD) && map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset)) {
+                total++;
+            }
+        }
+    }
+    return total;
+}
+
+int building_count_gardens_in_area(int minx, int miny, int maxx, int maxy, int overgrown)
+{
+    int total = 0;
+    int grid_offset;
+    for (int y = miny; y < maxy; y++) {
+        for (int x = minx; x < maxx; x++) {
+            grid_offset = map_grid_offset(x, y);
+
+            if (map_terrain_is(grid_offset, TERRAIN_GARDEN)) {
+                int is_overgrown = map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset) != 0;
+                if (is_overgrown == overgrown) {
+                    total++;
+                }
+            }
+        }
+    }
+    return total;
+}
+
+static int min_x;
+static int min_y;
+
+static void get_min_map_xy(void)
+{
+    min_x = map_grid_offset_to_x(map_data.start_offset);
+    min_y = map_grid_offset_to_y(map_data.start_offset);
+}
+
+int building_count_roads()
+{
+    get_min_map_xy();
+    return building_count_roads_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height);
+}
+
+int building_count_highway()
+{
+    get_min_map_xy();
+    return building_count_highway_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height);
+}
+
+int building_count_plaza()
+{
+    get_min_map_xy();
+    return building_count_plaza_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height);
+}
+
+int building_count_gardens(int overgrown)
+{
+    get_min_map_xy();
+    return building_count_gardens_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height, overgrown);
 }

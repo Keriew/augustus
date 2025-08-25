@@ -1668,6 +1668,23 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_OVERLAY_PROBLEMS_NO_ROAD_ACCESS, "No road access"},
     {TR_WARNING_NO_WAREHOUSE_TOWER_ROAD_ACCESS, "Connect road to warehouse tower"},
     {TR_BUILDING_FORT_MENU, "Fort"},
+    {TR_PARAMETER_VALUE_BUILDING_MENU_FORTS, "All Forts"},
+    {TR_EMPIRE_SIDE_BAR_SORT, "Sort by:"},
+    {TR_EMPIRE_SIDE_BAR_FILTER, "Filter by:"},
+    {TR_EMPIRE_SIDE_BAR_SORT_BY_NAME, "Name"},
+    {TR_EMPIRE_SIDE_BAR_SORT_BY_QUOTA_FILL_EXPORT, "Export Quota"},
+    {TR_EMPIRE_SIDE_BAR_SORT_BY_QUOTA_FILL_IMPORT, "Import Quota"},
+    {TR_EMPIRE_SIDE_BAR_SORT_BY_ROUTE_COST, "Route Cost"},
+    {TR_EMPIRE_SIDE_BAR_SORT_BY_PROFIT, "Profit"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE, "Resource"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_OPEN, "Open Routes"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_CLOSED, "Closed Routes"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_LAND, "Land Routes"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_SEA, "Sea Routes"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_NONE, "No Filter"},
+    {TR_TOOLTIP_CHANGE_SIDEBAR_WIDTH, "Change sidebar width"},
+    {TR_TOOLTIP_ASCENDING_ORDER, "Ascending order"},
+    {TR_TOOLTIP_DESCENDING_ORDER, "Descending order"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
