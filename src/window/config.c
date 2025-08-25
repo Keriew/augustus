@@ -38,80 +38,35 @@
 #include <string.h>
 
 #define MAX_LANGUAGE_DIRS 20
-#define MAX_WIDGETS 36
-
-#define NUM_VISIBLE_ITEMS 13
-
-#define ITEM_Y_OFFSET 100
-#define ITEM_HEIGHT 24
-
-#define NUM_BOTTOM_BUTTONS 5
+#define MAX_WIDGETS       64
+#define NUM_VISIBLE_FALLBACK 13  //  keeps slider track length close to old feel
+#define ITEM_Y_OFFSET  100
+#define ITEM_BASE_H     24
 #define CHECKBOX_CHECK_SIZE 20
-#define CHECKBOX_HEIGHT 20
-#define CHECKBOX_WIDTH 560
-#define CHECKBOX_TEXT_WIDTH CHECKBOX_WIDTH - CHECKBOX_CHECK_SIZE - 15
-
-#define NUMERICAL_RANGE_X 20
-#define NUMERICAL_SLIDER_PADDING 2
-#define NUMERICAL_DOT_SIZE 20
-
 #define PLAYER_NAME_LENGTH 32
-
-// List box - left sidebar- layout constants
-#define LIST_BOX_SHIFT 180
-#define LIST_BOX_WIDTH 180
-#define LIST_BOX_HEIGHT 310
-#define LIST_BOX_X 20
-#define LIST_BOX_Y 100
-#define LIST_BOX_ITEM_HEIGHT 24
-#define LIST_BOX_MARGIN_H 4
-#define LIST_BOX_MARGIN_V 2
-// list panel with the actual options
-#define LIST_Y 75
+//  Left list (category)
+#define LIST_BOX_SHIFT   180
+#define LIST_BOX_WIDTH   180
+#define LIST_BOX_HEIGHT  310
+#define LIST_BOX_X        20
+#define LIST_BOX_Y       100
+#define LIST_BOX_ITEM_H   24
+//  List (content) rect
+#define LIST_Y       75
 #define LIST_HEIGHT 355
 #define LIST_BOTTOM (LIST_Y + LIST_HEIGHT)
-
-static void on_scroll(void);
-
-static void toggle_switch(int key);
-static void button_language_select(const generic_button *button);
-static void button_edit_player_name(const generic_button *button);
-static void button_change_user_directory(const generic_button *button);
-static void button_reset_defaults(const generic_button *button);
-static void button_hotkeys(const generic_button *button);
-static void button_close(const generic_button *button);
-static void button_page(const generic_button *button);
-
-static const uint8_t *display_text_language(void);
-static const uint8_t *display_text_user_directory(void);
-static const uint8_t *display_text_player_name(void);
-static const uint8_t *display_text_game_speed(void);
-static const uint8_t *display_text_resolution(void);
-static const uint8_t *display_text_display_scale(void);
-static const uint8_t *display_text_cursor_scale(void);
-static const uint8_t *display_text_master_volume(void);
-static const uint8_t *display_text_music_volume(void);
-static const uint8_t *display_text_speech_volume(void);
-static const uint8_t *display_text_sound_effects_volume(void);
-static const uint8_t *display_text_city_sounds_volume(void);
-static const uint8_t *display_text_video_volume(void);
-static const uint8_t *display_text_scroll_speed(void);
-static const uint8_t *display_text_difficulty(void);
-static const uint8_t *display_text_max_grand_temples(void);
-static const uint8_t *display_text_autosave_slots(void);
-
-
-static scrollbar_type scrollbar = {
-    580, ITEM_Y_OFFSET, ITEM_HEIGHT * NUM_VISIBLE_ITEMS, CHECKBOX_WIDTH, NUM_VISIBLE_ITEMS, on_scroll, 0, 4
-};
+//  Slider visuals
+#define NUMERICAL_RANGE_X        20
+#define NUMERICAL_SLIDER_PADDING  2
+#define NUMERICAL_DOT_SIZE       20
 
 enum {
     TYPE_NONE,
-    TYPE_SPACE,
+    TYPE_SPACE,          //  kept for backward compatibility (unused in new layout)
     TYPE_HEADER,
     TYPE_CHECKBOX,
     TYPE_SELECT,
-    TYPE_NUMERICAL_DESC,
+    TYPE_NUMERICAL_DESC, //  label line for a slider
     TYPE_NUMERICAL_RANGE
 };
 
@@ -161,6 +116,181 @@ enum {
     CONFIG_STRING_MAX_ALL
 };
 
+//  A declarative widget row
+
+typedef struct {
+    int type;
+    int subtype;                          //  semantic (config key / range / select id)
+    translation_key description;          //  label / header text key
+    const uint8_t *(*get_display_text)(void);
+    int y_offset;                         //  kept for compatibility; small nudges
+    int enabled;                          //  runtime on/off
+    int height;                           //  cached measured height (per pass)
+    int margin_top;                       //  extra spacing before (instead of TYPE_SPACE)
+} config_widget;
+
+static const uint8_t *display_text_language(void);
+static const uint8_t *display_text_user_directory(void);
+static const uint8_t *display_text_player_name(void);
+static const uint8_t *display_text_game_speed(void);
+static const uint8_t *display_text_resolution(void);
+static const uint8_t *display_text_display_scale(void);
+static const uint8_t *display_text_cursor_scale(void);
+static const uint8_t *display_text_master_volume(void);
+static const uint8_t *display_text_music_volume(void);
+static const uint8_t *display_text_speech_volume(void);
+static const uint8_t *display_text_sound_effects_volume(void);
+static const uint8_t *display_text_city_sounds_volume(void);
+static const uint8_t *display_text_video_volume(void);
+static const uint8_t *display_text_scroll_speed(void);
+static const uint8_t *display_text_difficulty(void);
+static const uint8_t *display_text_max_grand_temples(void);
+static const uint8_t *display_text_autosave_slots(void);
+
+static config_widget page_general[] = {
+    {TYPE_SELECT, SELECT_USER_DIRECTORY, TR_USER_DIRETORIES_WINDOW_USER_PATH, display_text_user_directory, 0, 1, ITEM_BASE_H, 8},
+    {TYPE_SELECT, SELECT_LANGUAGE,       TR_CONFIG_LANGUAGE_LABEL,            display_text_language,       0, 1, ITEM_BASE_H, 8},
+    {TYPE_SELECT, SELECT_PLAYER_NAME,    TR_CONFIG_DEFAULT_PLAYER_NAME,       display_text_player_name,    0, 1, ITEM_BASE_H, 8},
+
+    {TYPE_NUMERICAL_DESC,  RANGE_GAME_SPEED, TR_CONFIG_GAME_SPEED, 0, 0, ITEM_BASE_H, 10},
+    {TYPE_NUMERICAL_RANGE, RANGE_GAME_SPEED, 0,  display_text_game_speed, 0, 1, ITEM_BASE_H, 2},
+
+    {TYPE_NUMERICAL_DESC,  RANGE_MAX_AUTOSAVE_SLOTS, TR_CONFIG_MAX_AUTOSAVE_SLOTS, 0, 1, ITEM_BASE_H, 10},
+    {TYPE_NUMERICAL_RANGE, RANGE_MAX_AUTOSAVE_SLOTS, 0, display_text_autosave_slots, 0, 1, ITEM_BASE_H, 2},
+    {TYPE_CHECKBOX, CONFIG_GP_CH_YEARLY_AUTOSAVE, TR_BUTTON_YEARLY_AUTOSAVE_ON, 0, 1, ITEM_BASE_H, 6},
+
+    {TYPE_HEADER, 0, TR_CONFIG_VIDEO, 0, 1, ITEM_BASE_H, 14},
+    {TYPE_CHECKBOX, CONFIG_ORIGINAL_FULLSCREEN, TR_CONFIG_FULLSCREEN, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_NUMERICAL_DESC,  RANGE_RESOLUTION, TR_CONFIG_WINDOWED_RESOLUTION, 0, 1, ITEM_BASE_H, 10},
+    {TYPE_NUMERICAL_RANGE, RANGE_RESOLUTION, 0, display_text_resolution, 0, 1, ITEM_BASE_H, 2},
+    {TYPE_NUMERICAL_DESC,  RANGE_DISPLAY_SCALE, TR_CONFIG_DISPLAY_SCALE, 0, 1, ITEM_BASE_H, 10},
+    {TYPE_NUMERICAL_RANGE, RANGE_DISPLAY_SCALE, 0, display_text_display_scale, 0, 1, ITEM_BASE_H, 2},
+    {TYPE_NUMERICAL_DESC,  RANGE_CURSOR_SCALE, TR_CONFIG_CURSOR_SCALE, 0, 1, ITEM_BASE_H, 10},
+    {TYPE_NUMERICAL_RANGE, RANGE_CURSOR_SCALE, 0, display_text_cursor_scale, 0, 1, ITEM_BASE_H, 2},
+    {TYPE_CHECKBOX, CONFIG_SCREEN_COLOR_CURSORS, TR_CONFIG_USE_COLOR_CURSORS, 0, 1, ITEM_BASE_H, 6},
+
+    {TYPE_HEADER, 0, TR_CONFIG_AUDIO, 0, 1, ITEM_BASE_H, 14},
+    {TYPE_CHECKBOX, CONFIG_GENERAL_ENABLE_AUDIO, TR_CONFIG_ENABLE_AUDIO, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_NUMERICAL_RANGE, RANGE_MASTER_VOLUME, 0, display_text_master_volume, 0, 1, ITEM_BASE_H, 2},
+    {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_MUSIC, TR_CONFIG_MUSIC, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_CHECKBOX, CONFIG_GENERAL_ENABLE_MUSIC_RANDOMISE, TR_CONFIG_RANDOMISE_MUSIC, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_NUMERICAL_RANGE, RANGE_MUSIC_VOLUME, 0, display_text_music_volume, 0, 1, ITEM_BASE_H, 2},
+    {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_SPEECH, TR_CONFIG_SPEECH, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_NUMERICAL_RANGE, RANGE_SPEECH_VOLUME, 0, display_text_speech_volume, 0, 1, ITEM_BASE_H, 2},
+    {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_SOUND_EFFECTS, TR_CONFIG_EFFECTS, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_NUMERICAL_RANGE, RANGE_SOUND_EFFECTS_VOLUME, 0, display_text_sound_effects_volume, 0, 1, ITEM_BASE_H, 2},
+    {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_CITY_SOUNDS, TR_CONFIG_CITY_SOUNDS, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_NUMERICAL_RANGE, RANGE_CITY_SOUNDS_VOLUME, 0, display_text_city_sounds_volume, 0, 1, ITEM_BASE_H, 2},
+    {TYPE_CHECKBOX, CONFIG_GENERAL_ENABLE_VIDEO_SOUND, TR_CONFIG_VIDEO_SOUND, 0, 1, ITEM_BASE_H, 6},
+
+    {TYPE_NONE}
+};
+
+static config_widget page_difficulty[] = {
+    {TYPE_NUMERICAL_DESC,  RANGE_DIFFICULTY, TR_CONFIG_DIFFICULTY, 0, 1, ITEM_BASE_H, 10},
+    {TYPE_NUMERICAL_RANGE, RANGE_DIFFICULTY, 0, display_text_difficulty, 0, 1, ITEM_BASE_H, 2},
+    {TYPE_CHECKBOX, CONFIG_ORIGINAL_GODS_EFFECTS, TR_CONFIG_GODS_EFFECTS, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_CHECKBOX, CONFIG_GP_CH_JEALOUS_GODS, TR_CONFIG_JEALOUS_GODS, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_CHECKBOX, CONFIG_GP_CH_GLOBAL_LABOUR, TR_CONFIG_GLOBAL_LABOUR, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_CHECKBOX, CONFIG_GP_CH_RETIRE_AT_60, TR_CONFIG_RETIRE_AT_60, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_CHECKBOX, CONFIG_GP_CH_FIXED_WORKERS, TR_CONFIG_FIXED_WORKERS, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_CHECKBOX, CONFIG_GP_CH_WOLVES_BLOCK, TR_CONFIG_WOLVES_BLOCK, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_CHECKBOX, CONFIG_GP_CH_MULTIPLE_BARRACKS, TR_CONFIG_MULTIPLE_BARRACKS, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_CHECKBOX, CONFIG_GP_CH_DISABLE_INFINITE_WOLVES_SPAWNING, TR_CONFIG_GP_CH_DISABLE_INFINITE_WOLVES_SPAWNING, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_NUMERICAL_DESC,  RANGE_MAX_GRAND_TEMPLES, TR_CONFIG_MAX_GRAND_TEMPLES, 0, 1, ITEM_BASE_H, 10},
+    {TYPE_NUMERICAL_RANGE, RANGE_MAX_GRAND_TEMPLES, 0, display_text_max_grand_temples, 0, 1, ITEM_BASE_H, 2},
+    {TYPE_NONE}
+};
+
+static config_widget ui_widgets_by_category[CATEGORY_UI_COUNT][MAX_WIDGETS] = {
+    //  General
+
+    {
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_INTRO_VIDEO, TR_CONFIG_SHOW_INTRO_VIDEO, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SIDEBAR_INFO, TR_CONFIG_SIDEBAR_INFO, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_ASK_CONFIRMATION_ON_FILE_OVERWRITE, TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_MOVE_SAVINGS_TO_RIGHT, TR_CONFIG_MOVE_SAVINGS_TO_THE_RIGHT, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_NONE}
+    },
+    //  Scrolling
+
+    {
+        {TYPE_NUMERICAL_DESC,  RANGE_SCROLL_SPEED, TR_CONFIG_SCROLL_SPEED, 0, 1, ITEM_BASE_H, 10},
+        {TYPE_NUMERICAL_RANGE, RANGE_SCROLL_SPEED, 0, display_text_scroll_speed, 0, 1, ITEM_BASE_H, 2},
+        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_NONE}
+    },
+    //  Building
+
+    {
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_CONSTRUCTION_SIZE, TR_CONFIG_SHOW_CONSTRUCTION_SIZE, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS, TR_CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_GRID, TR_CONFIG_UI_SHOW_GRID, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_NONE}
+    },
+    //  CityView
+
+    {
+        {TYPE_CHECKBOX, CONFIG_UI_HIGHLIGHT_LEGIONS, TR_CONFIG_HIGHLIGHT_LEGIONS, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_MILITARY_SIDEBAR, TR_CONFIG_SHOW_MILITARY_SIDEBAR, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_HIGHLIGHT_SELECTED_BUILDING, TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE, TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_NONE}
+    },
+    //  Weather
+
+    {
+        {TYPE_CHECKBOX, CONFIG_UI_DRAW_CLOUD_SHADOWS, TR_CONFIG_DRAW_CLOUD_SHADOWS, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_DRAW_WEATHER, TR_CONFIG_DRAW_WEATHER, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_NONE}
+    }
+};
+
+static config_widget city_mgmt_widgets_by_category[CATEGORY_CITY_COUNT][MAX_WIDGETS] = {
+    //  Storage
+
+    {
+        {TYPE_CHECKBOX, CONFIG_GP_CH_NO_SUPPLIER_DISTRIBUTION, TR_CONFIG_NO_SUPPLIER_DISTRIBUTION, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_GETTING_GRANARIES_GO_OFFROAD, TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_GRANARIES_GET_DOUBLE, TR_CONFIG_GRANARIES_GET_DOUBLE, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_ALLOW_EXPORTING_FROM_GRANARIES, TR_CONFIG_ALLOW_EXPORTING_FROM_GRANARIES, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_FARMS_DELIVER_CLOSE, TR_CONFIG_FARMS_DELIVER_CLOSE, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_NONE}
+    },
+    //  Roads
+
+    {
+        {TYPE_CHECKBOX, CONFIG_GP_CH_DELIVER_ONLY_TO_ACCEPTING_GRANARIES, TR_CONFIG_DELIVER_ONLY_TO_ACCEPTING_GRANARIES, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_TOWER_SENTRIES_GO_OFFROAD, TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_ROAMERS_DONT_SKIP_CORNERS, TR_CONFIG_ROAMERS_DONT_SKIP_CORNERS, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_GP_CARAVANS_MOVE_OFF_ROAD, TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_NONE}
+    },
+    //  Roadblock settings
+
+    {
+        {TYPE_CHECKBOX, CONFIG_GP_CH_GATES_DEFAULT_TO_PASS_ALL_WALKERS, TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_AUTO_KILL_ANIMALS, TR_CONFIG_AUTO_KILL_ANIMALS, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_WAREHOUSES_DONT_ACCEPT, TR_CONFIG_NOT_ACCEPTING_WAREHOUSES, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_MARKETS_DONT_ACCEPT, TR_CONFIG_NOT_ACCEPTING_MARKETS, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_GP_STORAGE_INCREMENT_4, TR_CONFIG_STORAGE_STEP_4, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_NONE}
+    },
+    //  Housing
+
+    {
+        {TYPE_CHECKBOX, CONFIG_GP_CH_ALL_HOUSES_MERGE, TR_CONFIG_ALL_HOUSES_MERGE, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_PATRICIAN_DEVOLUTION_FIX, TR_CONFIG_PATRICIAN_DEVOLUTION_FIX, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_RANDOM_COLLAPSES_TAKE_MONEY, TR_CONFIG_RANDOM_COLLAPSES_TAKE_MONEY, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_HOUSES_DONT_EXPAND_INTO_GARDENS, TR_CONFIG_HOUSES_DONT_EXPAND_INTO_GARDENS, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_NONE}
+    }
+};
+
+static void on_scroll(void);
+
+
 typedef struct {
     int width;
     int height;
@@ -175,76 +305,8 @@ typedef struct {
     int *value;
 } numerical_range_widget;
 
-typedef struct {
-    int type;
-    int subtype;
-    translation_key description;
-    const uint8_t *(*get_display_text)(void);
-    int y_offset;
-    int enabled;
-    int height; // Pre-calculated height for drawing optimization
-} config_widget;
-
-static config_widget all_widgets[CONFIG_PAGES][MAX_WIDGETS] = {
-    { // General Settings
-        {TYPE_SELECT, SELECT_USER_DIRECTORY, TR_USER_DIRETORIES_WINDOW_USER_PATH, display_text_user_directory},
-        {TYPE_SPACE},
-        {TYPE_SELECT, SELECT_LANGUAGE, TR_CONFIG_LANGUAGE_LABEL, display_text_language},
-        {TYPE_SPACE},
-        {TYPE_SELECT, SELECT_PLAYER_NAME, TR_CONFIG_DEFAULT_PLAYER_NAME, display_text_player_name},
-        {TYPE_SPACE},
-        {TYPE_NUMERICAL_DESC, RANGE_GAME_SPEED, TR_CONFIG_GAME_SPEED},
-        {TYPE_NUMERICAL_RANGE, RANGE_GAME_SPEED, 0, display_text_game_speed},
-        {TYPE_NUMERICAL_DESC, RANGE_MAX_AUTOSAVE_SLOTS, TR_CONFIG_MAX_AUTOSAVE_SLOTS, 0, 5},
-        {TYPE_NUMERICAL_RANGE, RANGE_MAX_AUTOSAVE_SLOTS, 0, display_text_autosave_slots, 1},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_YEARLY_AUTOSAVE, TR_BUTTON_YEARLY_AUTOSAVE_ON},
-        {TYPE_SPACE, TR_CONFIG_VIDEO},
-        {TYPE_HEADER, TR_CONFIG_VIDEO},
-        {TYPE_CHECKBOX, CONFIG_ORIGINAL_FULLSCREEN, TR_CONFIG_FULLSCREEN },
-        {TYPE_NUMERICAL_DESC, RANGE_RESOLUTION, TR_CONFIG_WINDOWED_RESOLUTION},
-        {TYPE_NUMERICAL_RANGE, RANGE_RESOLUTION, 0, display_text_resolution},
-        {TYPE_NUMERICAL_DESC, RANGE_DISPLAY_SCALE, TR_CONFIG_DISPLAY_SCALE},
-        {TYPE_NUMERICAL_RANGE, RANGE_DISPLAY_SCALE, 0, display_text_display_scale},
-        {TYPE_NUMERICAL_DESC, RANGE_CURSOR_SCALE, TR_CONFIG_CURSOR_SCALE},
-        {TYPE_NUMERICAL_RANGE, RANGE_CURSOR_SCALE, 0, display_text_cursor_scale},
-        {TYPE_CHECKBOX, CONFIG_SCREEN_COLOR_CURSORS, TR_CONFIG_USE_COLOR_CURSORS, 0, 5},
-        {TYPE_SPACE, TR_CONFIG_AUDIO},
-        {TYPE_HEADER, TR_CONFIG_AUDIO, 0, 0, 5},
-        {TYPE_CHECKBOX, CONFIG_GENERAL_ENABLE_AUDIO, TR_CONFIG_ENABLE_AUDIO, 0, 5},
-        {TYPE_NUMERICAL_RANGE, RANGE_MASTER_VOLUME, 0, display_text_master_volume, 1},
-        {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_MUSIC, TR_CONFIG_MUSIC, 0, 5},
-        {TYPE_CHECKBOX, CONFIG_GENERAL_ENABLE_MUSIC_RANDOMISE, TR_CONFIG_RANDOMISE_MUSIC, 0, 5},
-        {TYPE_NUMERICAL_RANGE, RANGE_MUSIC_VOLUME, 0, display_text_music_volume, 1},
-        {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_SPEECH, TR_CONFIG_SPEECH, 0, 5},
-        {TYPE_NUMERICAL_RANGE, RANGE_SPEECH_VOLUME, 0, display_text_speech_volume, 1},
-        {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_SOUND_EFFECTS, TR_CONFIG_EFFECTS, 0, 5},
-        {TYPE_NUMERICAL_RANGE, RANGE_SOUND_EFFECTS_VOLUME, 0, display_text_sound_effects_volume, 1},
-        {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_CITY_SOUNDS, TR_CONFIG_CITY_SOUNDS, 0, 5},
-        {TYPE_NUMERICAL_RANGE, RANGE_CITY_SOUNDS_VOLUME, 0, display_text_city_sounds_volume, 1},
-        {TYPE_CHECKBOX, CONFIG_GENERAL_ENABLE_VIDEO_SOUND, TR_CONFIG_VIDEO_SOUND, 0, 5},
-        {TYPE_NUMERICAL_RANGE, RANGE_VIDEO_VOLUME, 0, display_text_video_volume, 1},
-    },
-    { // UI (now managed by categories)
-        {TYPE_NONE} // Widgets filled by category selection
-    },
-    { // Difficulty
-        {TYPE_NUMERICAL_DESC, RANGE_DIFFICULTY, TR_CONFIG_DIFFICULTY},
-        {TYPE_NUMERICAL_RANGE, RANGE_DIFFICULTY, 0, display_text_difficulty},
-        {TYPE_SPACE},
-        {TYPE_CHECKBOX, CONFIG_ORIGINAL_GODS_EFFECTS, TR_CONFIG_GODS_EFFECTS },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_JEALOUS_GODS, TR_CONFIG_JEALOUS_GODS },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_GLOBAL_LABOUR, TR_CONFIG_GLOBAL_LABOUR },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_RETIRE_AT_60, TR_CONFIG_RETIRE_AT_60 },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_FIXED_WORKERS, TR_CONFIG_FIXED_WORKERS },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_WOLVES_BLOCK, TR_CONFIG_WOLVES_BLOCK },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_MULTIPLE_BARRACKS, TR_CONFIG_MULTIPLE_BARRACKS },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_DISABLE_INFINITE_WOLVES_SPAWNING, TR_CONFIG_GP_CH_DISABLE_INFINITE_WOLVES_SPAWNING },
-        {TYPE_NUMERICAL_DESC, RANGE_MAX_GRAND_TEMPLES, TR_CONFIG_MAX_GRAND_TEMPLES},
-        {TYPE_NUMERICAL_RANGE, RANGE_MAX_GRAND_TEMPLES, 0, display_text_max_grand_temples},
-    },
-    { // City Management (now managed by categories)
-        {TYPE_NONE} // Widgets filled by category selection
-    }
+static scrollbar_type scrollbar = { 580,ITEM_Y_OFFSET,ITEM_BASE_H * NUM_VISIBLE_FALLBACK,
+    560,NUM_VISIBLE_FALLBACK,on_scroll, 0, 4
 };
 
 static const resolution resolutions[] = {
@@ -254,34 +316,49 @@ static const resolution resolutions[] = {
     { 1920, 1080 }, { 1920, 1200 }, { 2048, 1152 }, { 2560, 1080 },
     { 2560, 1440 }, { 3440, 1440 }, { 3840, 2160 }
 };
+static resolution available_resolutions[sizeof(resolutions) / sizeof(resolution) + 2];
 
 static const int game_speeds[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500 };
 
-static resolution available_resolutions[sizeof(resolutions) / sizeof(resolution) + 2];
+//  Select buttons (their X/width are static; Y is computed per-row during layout).
 
+static void button_language_select(const generic_button *button);
+static void button_edit_player_name(const generic_button *button);
+static void button_change_user_directory(const generic_button *button);
 static generic_button select_buttons[] = {
     {225, 0, 200, 24, button_language_select},
     {225, 0, 200, 24, button_edit_player_name},
     {225, 0, 200, 24, button_change_user_directory},
 };
 
+//  Numeric ranges (slider bar geometry + value binding populated in set_range_values()).
+
 static numerical_range_widget ranges[] = {
-    { 50, 30,   0,  13,  1, 0},
-    { 98, 27,   0,   0,  1, 0},
-    { 50, 30,  50, 500,  5, 0},
-    { 50, 30, 100, 200, 50, 0},
-    {130, 25,   0, 100,  1, 0},
-    {130, 25,   0, 100,  1, 0},
-    {130, 25,   0, 100,  1, 0},
-    {130, 25,   0, 100,  1, 0},
-    {130, 25,   0, 100,  1, 0},
-    {130, 25,   0, 100,  1, 0},
-    { 50, 16,   0, 100, 10, 0}, //scroll speed
-    {146, 24,   0,   4,  1, 0},
-    { 50, 30,   0,   5,  1, 0},
-    { 50, 30,   1,  20,  1, 0},
+    { 50, 30,   0,  13,  1, 0},   //  game speed index
+    { 98, 27,   0,   0,  1, 0},   //  resolution index
+    { 50, 30,  50, 500,  5, 0},   //  display scale %
+    { 50, 30, 100, 200, 50, 0},   //  cursor scale %
+    {130, 25,   0, 100,  1, 0},   //  master volume %
+    {130, 25,   0, 100,  1, 0},   //  music %
+    {130, 25,   0, 100,  1, 0},   //  speech %
+    {130, 25,   0, 100,  1, 0},   //  effects %
+    {130, 25,   0, 100,  1, 0},   //  city %
+    {130, 25,   0, 100,  1, 0},   //  video %
+    { 50, 16,   0, 100, 10, 0},   //  scroll speed %
+    {146, 24,   0,   4,  1, 0},   //  difficulty enum index (0..4)
+    { 50, 30,   0,   5,  1, 0},   //  max grand temples
+    { 50, 30,   1,  20,  1, 0},   //  autosave slots
+
 };
 
+//  Bottom buttons & page tabs
+
+static void button_hotkeys(const generic_button *button);
+static void button_reset_defaults(const generic_button *button);
+static void button_close(const generic_button *button);
+static void button_page(const generic_button *button);
+
+#define NUM_BOTTOM_BUTTONS 5
 static generic_button bottom_buttons[NUM_BOTTOM_BUTTONS] = {
     {  20, 436,  120, 30, button_hotkeys, 0, 0, TR_BUTTON_CONFIGURE_HOTKEYS },
     { 170, 436, 150, 30, button_reset_defaults, 0, 0, TR_BUTTON_RESET_DEFAULTS },
@@ -304,15 +381,36 @@ static translation_key page_names[CONFIG_PAGES] = {
     TR_CONFIG_HEADER_CITY_MANAGEMENT_CHANGES
 };
 
+static const char *ui_categories[CATEGORY_UI_COUNT] = {
+    "General", "Scrolling", "Building", "CityView", "Weather"
+};
+static const char *city_mgmt_categories[CATEGORY_CITY_COUNT] = {
+    "Storage", "Roads", "Roadblocks", "Housing"
+};
+
 static struct {
-    config_widget *widgets[MAX_WIDGETS * CONFIG_PAGES];
-    unsigned int num_widgets;
-    unsigned int focus_button;
-    unsigned int bottom_focus_button;
-    unsigned int page_focus_button;
+    ui_config_category ui_category;
+    city_management_category city_mgmt_category;
+} selected_categories = {
+    CATEGORY_UI_GENERAL, CATEGORY_CITY_MANAGEMENT_STORAGE
+};
+
+static list_box_type ui_list_box;
+static list_box_type city_mgmt_list_box;
+
+static void draw_list_box_item(const list_box_item *item);
+static void handle_list_box_select(unsigned int index, int is_double_click);
+
+//    Data model & helpers
+
+static struct {
     unsigned int page;
-    unsigned int widgets_per_page[CONFIG_PAGES];
-    int starting_option;
+    unsigned int page_focus_button;
+    unsigned int bottom_focus_button;
+    unsigned int focus_button;
+    int show_background_image;
+    int has_changes;
+    int reload_cursors;
     struct {
         int original_value;
         int new_value;
@@ -326,178 +424,342 @@ static struct {
     struct {
         const uint8_t *options[MAX_LANGUAGE_DIRS];
         uint8_t data[MAX_LANGUAGE_DIRS][CONFIG_STRING_VALUE_MAX];
-        char data_utf8[MAX_LANGUAGE_DIRS][CONFIG_STRING_VALUE_MAX];
+        char    data_utf8[MAX_LANGUAGE_DIRS][CONFIG_STRING_VALUE_MAX];
         int total;
         int selected;
     } language_options;
-    int active_numerical_range;
-    int show_background_image;
-    int has_changes;
-    int reload_cursors;
     uint8_t player_name[PLAYER_NAME_LENGTH];
-    uint8_t display_text[10];
+    uint8_t display_text[32];
     uint8_t volume_text[64];
     uint8_t *volume_offset;
+    int active_numerical_range; //  RANGE_* + 1 while dragging, 0 otherwise
     int graphics_behind_tab[CONFIG_PAGES];
-    //int row_extra[NUM_VISIBLE_ITEMS]; // extra height added by wrapped checkbox text
-    //int row_checkbox_y[NUM_VISIBLE_ITEMS]; // cached checkbox top Y for focus overlay
-    list_box_type ui_list_box;
-    list_box_type city_management_list_box;
+    //  layout cache for the current page
+    struct {
+        const config_widget *rows[MAX_WIDGETS];
+        int count;               //  total rows for page (enabled only)
+        int visible_from;        //  equals scrollbar.scroll_position
+        int visible_to;          //  exclusive end index
+        int y[MAX_WIDGETS];      //  y per visible row
+        int h[MAX_WIDGETS];      //  h per visible row
+        int has_scrollbar;
+    } layout;
+
 } data;
+
+//    Generic text helpers
+
 
 static inline int one_line_ml_height(font_t font)
 {
     int h = font_definition_for(font)->line_height;
     if (h < 11) h = 11;
-    return h + 5; // matches text_draw_multiline() per-line advance
+    return h + 5; //  matches text_draw_multiline() per-line advance
+
 }
-static int config_change_basic(int key);
-static int config_change_string_basic(int key);
-
-static int config_change_string_language(int key);
-static int config_change_string_player_name(int key);
-
-static int config_change_game_speed(int key);
-static int config_change_fullscreen(int key);
-static int config_change_display_resolution(int key);
-static int config_change_display_scale(int key);
-static int config_change_cursors(int key);
-
-static int config_enable_audio(int key);
-static int config_set_master_volume(int key);
-static int config_enable_music(int key);
-static int config_enable_music_randomise(int key);
-static int config_set_music_volume(int key);
-static int config_enable_speech(int key);
-static int config_set_speech_volume(int key);
-static int config_enable_effects(int key);
-static int config_set_effects_volume(int key);
-static int config_enable_city_sounds(int key);
-static int config_set_city_sounds_volume(int key);
-
-static int config_change_scroll_speed(int key);
-
-static int config_set_difficulty(int key);
-static int config_enable_gods_effects(int key);
-
-
-// Grid box related functions
-static void init_list_boxes(void);
-static void draw_list_box_item(const list_box_item *item);
-static void handle_list_box_select(unsigned int index, int is_double_click);
-static void copy_category_widgets_to_page(int page, int category_index);
-static int recalculate_page_heights(int page);
-// Grid box selection tracking
-// List box selection is handled internally, no external tracking needed
-
-// Category-based list box items
-static const char *ui_categories[] = {
-    "General",      // CATEGORY_UI_GENERAL
-    "Scrolling",    // CATEGORY_UI_SCROLLING
-    "Building",     // CATEGORY_UI_BUILDING
-    "CityView",     // CATEGORY_UI_CITY_VIEW
-    "Weather"       // CATEGORY_UI_WEATHER
-};
-
-static const char *city_mgmt_categories[] = {
-    "Storage",      // CATEGORY_CITY_MANAGEMENT_STORAGE
-    "Roads",        // CATEGORY_CITY_MANAGEMENT_ROADS
-    "Roadblocks",   // CATEGORY_CITY_MANAGEMENT_ROADBLOCK_SETTINGS
-    "Housing"       // CATEGORY_CITY_MANAGEMENT_HOUSING
-};
-
-// Track currently selected categories
-static struct {
-    ui_config_category ui_category;
-    city_management_category city_mgmt_category;
-} selected_categories = {
-    CATEGORY_UI_GENERAL,
-    CATEGORY_CITY_MANAGEMENT_STORAGE
-};
-
-// Category-based widget organization for UI page
-static config_widget ui_widgets_by_category[5][MAX_WIDGETS] = {
-    // CATEGORY_UI_GENERAL - 4 widgets
-    {
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_INTRO_VIDEO, TR_CONFIG_SHOW_INTRO_VIDEO},
-        {TYPE_CHECKBOX, CONFIG_UI_SIDEBAR_INFO, TR_CONFIG_SIDEBAR_INFO},
-        {TYPE_CHECKBOX, CONFIG_UI_ASK_CONFIRMATION_ON_FILE_OVERWRITE, TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE},
-        {TYPE_CHECKBOX, CONFIG_UI_MOVE_SAVINGS_TO_RIGHT, TR_CONFIG_MOVE_SAVINGS_TO_THE_RIGHT},
-        {TYPE_NONE} // Terminator
-    },
-    // CATEGORY_UI_SCROLLING - 3 widgets
-    {
-        {TYPE_NUMERICAL_DESC, RANGE_SCROLL_SPEED, TR_CONFIG_SCROLL_SPEED},
-        {TYPE_NUMERICAL_RANGE, RANGE_SCROLL_SPEED, 0, display_text_scroll_speed},
-        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING},
-        {TYPE_NONE} // Terminator
-    },
-    // CATEGORY_UI_BUILDING - 3 widgets
-    {
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_CONSTRUCTION_SIZE, TR_CONFIG_SHOW_CONSTRUCTION_SIZE},
-        {TYPE_CHECKBOX, CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS, TR_CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_GRID, TR_CONFIG_UI_SHOW_GRID},
-        {TYPE_NONE} // Terminator
-    },
-    // CATEGORY_UI_CITY_VIEW - 4 widgets
-    {
-        {TYPE_CHECKBOX, CONFIG_UI_HIGHLIGHT_LEGIONS, TR_CONFIG_HIGHLIGHT_LEGIONS},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_MILITARY_SIDEBAR, TR_CONFIG_SHOW_MILITARY_SIDEBAR},
-        {TYPE_CHECKBOX, CONFIG_UI_HIGHLIGHT_SELECTED_BUILDING, TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE, TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE},
-        {TYPE_NONE} // Terminator
-    },
-    // CATEGORY_UI_WEATHER - 2 widgets
-    {
-        {TYPE_CHECKBOX, CONFIG_UI_DRAW_CLOUD_SHADOWS, TR_CONFIG_DRAW_CLOUD_SHADOWS},
-        {TYPE_CHECKBOX, CONFIG_UI_DRAW_WEATHER, TR_CONFIG_DRAW_WEATHER},
-        {TYPE_NONE} // Terminator
-    }
-};
-
-// Category-based widget organization for City Management page (divide 19 widgets among 4 categories)
-static config_widget city_mgmt_widgets_by_category[4][MAX_WIDGETS] = {
-    // CATEGORY_CITY_MANAGEMENT_STORAGE - first 5 widgets
-    {
-        {TYPE_CHECKBOX, CONFIG_GP_CH_NO_SUPPLIER_DISTRIBUTION, TR_CONFIG_NO_SUPPLIER_DISTRIBUTION },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_GETTING_GRANARIES_GO_OFFROAD, TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_GRANARIES_GET_DOUBLE, TR_CONFIG_GRANARIES_GET_DOUBLE },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_ALLOW_EXPORTING_FROM_GRANARIES, TR_CONFIG_ALLOW_EXPORTING_FROM_GRANARIES },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_FARMS_DELIVER_CLOSE, TR_CONFIG_FARMS_DELIVER_CLOSE },
-        {TYPE_NONE} // Terminator
-    },
-    // CATEGORY_CITY_MANAGEMENT_ROADS - next 5 widgets
-    {
-        {TYPE_CHECKBOX, CONFIG_GP_CH_DELIVER_ONLY_TO_ACCEPTING_GRANARIES, TR_CONFIG_DELIVER_ONLY_TO_ACCEPTING_GRANARIES },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_TOWER_SENTRIES_GO_OFFROAD, TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_ROAMERS_DONT_SKIP_CORNERS, TR_CONFIG_ROAMERS_DONT_SKIP_CORNERS },
-        {TYPE_CHECKBOX, CONFIG_GP_CARAVANS_MOVE_OFF_ROAD, TR_CONFIG_CARAVANS_MOVE_OFF_ROAD},
-        {TYPE_NONE} // Terminator
-    },
-    // CATEGORY_CITY_MANAGEMENT_ROADBLOCK_SETTINGS - next 5 widgets
-    {
-        {TYPE_CHECKBOX, CONFIG_GP_CH_GATES_DEFAULT_TO_PASS_ALL_WALKERS, TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_AUTO_KILL_ANIMALS, TR_CONFIG_AUTO_KILL_ANIMALS},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_WAREHOUSES_DONT_ACCEPT, TR_CONFIG_NOT_ACCEPTING_WAREHOUSES },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_MARKETS_DONT_ACCEPT, TR_CONFIG_NOT_ACCEPTING_MARKETS },
-        {TYPE_CHECKBOX, CONFIG_GP_STORAGE_INCREMENT_4, TR_CONFIG_STORAGE_STEP_4},
-        {TYPE_NONE} // Terminator
-    },
-    // CATEGORY_CITY_MANAGEMENT_HOUSING - remaining 4 widgets
-    {
-        {TYPE_CHECKBOX, CONFIG_GP_CH_ALL_HOUSES_MERGE, TR_CONFIG_ALL_HOUSES_MERGE },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_PATRICIAN_DEVOLUTION_FIX, TR_CONFIG_PATRICIAN_DEVOLUTION_FIX },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_RANDOM_COLLAPSES_TAKE_MONEY, TR_CONFIG_RANDOM_COLLAPSES_TAKE_MONEY },
-        {TYPE_CHECKBOX, CONFIG_GP_CH_HOUSES_DONT_EXPAND_INTO_GARDENS, TR_CONFIG_HOUSES_DONT_EXPAND_INTO_GARDENS },
-        {TYPE_NONE} // Terminator
-    }
-};
-
-static inline void set_custom_config_changes(void)
+static uint8_t *percentage_string(uint8_t *s, int p)
 {
+    int o = string_from_int(s, p, 0);
+    s[o] = '%'; s[o + 1] = 0;
+    return s;
+}
+
+// 
+//    Config get/set action functions (kept, some grouped)
+// 
+
+static int config_change_basic(int key)
+{
+    if (key < CONFIG_MAX_ENTRIES) {
+        config_set(key, data.config_values[key].new_value);
+    }
+    data.config_values[key].original_value = data.config_values[key].new_value;
+    return 1;
+}
+static int config_change_string_basic(int key)
+{
+    config_set_string(key, data.config_string_values[key].new_value);
+    memcpy(data.config_string_values[key].original_value, data.config_string_values[key].new_value,
+           CONFIG_STRING_VALUE_MAX);
+    return 1;
+}
+
+//  — specialized actions —
+
+static int config_change_game_speed(int key)
+{
+    config_change_basic(key);
+    int target = game_speeds[data.config_values[key].new_value];
+    while (setting_game_speed() > target) setting_decrease_game_speed();
+    while (setting_game_speed() < target) setting_increase_game_speed();
+    return 1;
+}
+static int config_change_fullscreen(int key)
+{
+    if (!system_is_fullscreen_only()) {
+        system_set_fullscreen(data.config_values[key].new_value);
+        if (data.config_values[key].new_value) {
+            setting_set_display(1, screen_width(), screen_height());
+        }
+        config_change_basic(key);
+    }
+    return 1;
+}
+static int config_change_display_resolution(int key)
+{
+    if (!system_is_fullscreen_only()) {
+        const resolution *r = &available_resolutions[data.config_values[key].new_value];
+        if (!setting_fullscreen()) {
+            system_resize(r->width, r->height);
+        } else {
+            setting_set_display(0, r->width, r->height);
+            setting_set_display(1, r->width, r->height);
+        }
+        config_change_basic(key);
+    }
+    return 1;
+}
+static int config_change_display_scale(int key)
+{
+    data.config_values[key].new_value = system_scale_display(data.config_values[key].new_value);
+    return config_change_basic(key);
+}
+static void restart_cursors(void)
+{
+    if (data.reload_cursors) {
+        system_init_cursors(config_get(CONFIG_SCREEN_CURSOR_SCALE));
+        data.reload_cursors = 0;
+    }
+}
+static int config_change_cursors(int key)
+{
+    config_change_basic(key);
+    data.reload_cursors = 1;
+    return 1;
+}
+
+//  Audio family
+
+static int config_enable_audio(int key)
+{
+    config_change_basic(key);
+    if (data.config_values[key].new_value) {
+        if (data.show_background_image) sound_music_play_intro();
+        else { sound_music_stop(); sound_music_update(1); }
+    } else {
+        sound_music_stop(); sound_speech_stop();
+    }
+    return 1;
+}
+static int config_set_master_volume(int key)
+{
+    config_change_basic(key);
+    sound_music_set_volume(setting_sound(SOUND_TYPE_MUSIC)->volume);
+    sound_speech_set_volume(setting_sound(SOUND_TYPE_SPEECH)->volume);
+    sound_effect_set_volume(setting_sound(SOUND_TYPE_EFFECTS)->volume);
+    sound_city_set_volume(setting_sound(SOUND_TYPE_CITY)->volume);
+    return 1;
+}
+static int config_enable_music(int key)
+{
+    config_change_basic(key);
+    if (setting_sound_is_enabled(SOUND_TYPE_MUSIC) != data.config_values[key].new_value)
+        setting_toggle_sound_enabled(SOUND_TYPE_MUSIC);
+    if (data.config_values[key].new_value) {
+        if (data.show_background_image) sound_music_play_intro();
+        else { sound_music_stop(); sound_music_update(1); }
+    } else sound_music_stop();
+    return 1;
+}
+static int config_enable_music_randomise(int key) { return config_change_basic(key); }
+static int config_set_music_volume(int key)
+{
+    config_change_basic(key);
+    setting_set_sound_volume(SOUND_TYPE_MUSIC, data.config_values[key].new_value);
+    sound_music_set_volume(setting_sound(SOUND_TYPE_MUSIC)->volume);
+    return 1;
+}
+static int config_enable_speech(int key)
+{
+    config_change_basic(key);
+    if (setting_sound_is_enabled(SOUND_TYPE_SPEECH) != data.config_values[key].new_value)
+        setting_toggle_sound_enabled(SOUND_TYPE_SPEECH);
+    if (!data.config_values[key].new_value) sound_speech_stop();
+    return 1;
+}
+static int config_set_speech_volume(int key)
+{
+    config_change_basic(key);
+    setting_set_sound_volume(SOUND_TYPE_SPEECH, data.config_values[key].new_value);
+    sound_speech_set_volume(setting_sound(SOUND_TYPE_SPEECH)->volume);
+    return 1;
+}
+static int config_enable_effects(int key)
+{
+    config_change_basic(key);
+    if (setting_sound_is_enabled(SOUND_TYPE_EFFECTS) != data.config_values[key].new_value)
+        setting_toggle_sound_enabled(SOUND_TYPE_EFFECTS);
+    return 1;
+}
+static int config_set_effects_volume(int key)
+{
+    config_change_basic(key);
+    setting_set_sound_volume(SOUND_TYPE_EFFECTS, data.config_values[key].new_value);
+    sound_effect_set_volume(setting_sound(SOUND_TYPE_EFFECTS)->volume);
+    return 1;
+}
+static int config_enable_city_sounds(int key)
+{
+    config_change_basic(key);
+    if (setting_sound_is_enabled(SOUND_TYPE_CITY) != data.config_values[key].new_value)
+        setting_toggle_sound_enabled(SOUND_TYPE_CITY);
+    return 1;
+}
+static int config_set_city_sounds_volume(int key)
+{
+    config_change_basic(key);
+    setting_set_sound_volume(SOUND_TYPE_CITY, data.config_values[key].new_value);
+    sound_city_set_volume(setting_sound(SOUND_TYPE_CITY)->volume);
+    return 1;
+}
+
+//  Scroll / difficulty
+
+static int config_change_scroll_speed(int key)
+{
+    config_change_basic(key);
+    while (setting_scroll_speed() > data.config_values[key].new_value) setting_decrease_scroll_speed();
+    while (setting_scroll_speed() < data.config_values[key].new_value) setting_increase_scroll_speed();
+    return 1;
+}
+static int config_set_difficulty(int key)
+{
+    config_change_basic(key);
+    while (setting_difficulty() > data.config_values[key].new_value) setting_decrease_difficulty();
+    while (setting_difficulty() < data.config_values[key].new_value) setting_increase_difficulty();
+    return 1;
+}
+static int config_enable_gods_effects(int key)
+{
+    config_change_basic(key);
+    if (setting_gods_enabled() != data.config_values[key].new_value) setting_toggle_gods_enabled();
+    return 1;
+}
+
+//  Strings
+
+static int config_change_string_language(int key)
+{
+    config_set_string(CONFIG_STRING_UI_LANGUAGE_DIR, data.config_string_values[key].new_value);
+    if (!game_reload_language()) {
+        config_set_string(CONFIG_STRING_UI_LANGUAGE_DIR, data.config_string_values[key].original_value);
+        game_reload_language();
+        window_plain_message_dialog_show(TR_INVALID_LANGUAGE_TITLE, TR_INVALID_LANGUAGE_MESSAGE, 1);
+        return 0;
+    }
+    char title[100];
+    encoding_to_utf8(lang_get_string(9, 0), title, 100, 0);
+    system_change_window_title(title);
+    memcpy(data.config_string_values[key].original_value, data.config_string_values[key].new_value,
+           CONFIG_STRING_VALUE_MAX);
+    string_copy(translation_for(TR_CONFIG_LANGUAGE_DEFAULT), data.language_options.data[0], CONFIG_STRING_VALUE_MAX);
+    data.volume_offset = string_copy(translation_for(TR_CONFIG_VOLUME), data.volume_text, 63);
+    data.volume_offset = string_copy(string_from_ascii(" "), data.volume_offset,
+                                     (int) (data.volume_offset - data.volume_text - 1));
+    return 1;
+}
+static int config_change_string_player_name(int key)
+{
+    uint8_t player_name[PLAYER_NAME_LENGTH];
+    encoding_from_utf8(data.config_string_values[key].new_value, player_name, PLAYER_NAME_LENGTH);
+    setting_set_player_name(player_name);
+    memcpy(data.config_string_values[key].original_value, data.config_string_values[key].new_value,
+           CONFIG_STRING_VALUE_MAX);
+    return 1;
+}
+
+//Display text functions 
+
+static uint8_t *percent_buf(int key)
+{
+    return percentage_string(data.display_text, data.config_values[key].new_value);
+}
+static const uint8_t *display_text_display_scale(void) { return percent_buf(CONFIG_SCREEN_DISPLAY_SCALE); }
+static const uint8_t *display_text_cursor_scale(void) { return percent_buf(CONFIG_SCREEN_CURSOR_SCALE); }
+static const uint8_t *display_text_scroll_speed(void) { return percent_buf(CONFIG_ORIGINAL_SCROLL_SPEED); }
+
+static const uint8_t *display_text_master_volume(void) { percentage_string(data.volume_offset, data.config_values[CONFIG_GENERAL_MASTER_VOLUME].new_value); return data.volume_text; }
+static const uint8_t *display_text_music_volume(void) { percentage_string(data.volume_offset, data.config_values[CONFIG_ORIGINAL_MUSIC_VOLUME].new_value); return data.volume_text; }
+static const uint8_t *display_text_speech_volume(void) { percentage_string(data.volume_offset, data.config_values[CONFIG_ORIGINAL_SPEECH_VOLUME].new_value); return data.volume_text; }
+static const uint8_t *display_text_sound_effects_volume(void) { percentage_string(data.volume_offset, data.config_values[CONFIG_ORIGINAL_SOUND_EFFECTS_VOLUME].new_value); return data.volume_text; }
+static const uint8_t *display_text_city_sounds_volume(void) { percentage_string(data.volume_offset, data.config_values[CONFIG_ORIGINAL_CITY_SOUNDS_VOLUME].new_value); return data.volume_text; }
+static const uint8_t *display_text_video_volume(void) { percentage_string(data.volume_offset, data.config_values[CONFIG_GENERAL_VIDEO_VOLUME].new_value); return data.volume_text; }
+
+static const uint8_t *display_text_language(void) { return data.language_options.options[data.language_options.selected]; }
+static const uint8_t *display_text_user_directory(void) { return translation_for(TR_USER_DIRECTORIES_WINDOW_TITLE); }
+static const uint8_t *display_text_player_name(void) { return data.player_name; }
+static const uint8_t *display_text_game_speed(void)
+{
+    return percentage_string(data.display_text, game_speeds[data.config_values[CONFIG_ORIGINAL_GAME_SPEED].new_value]);
+}
+static const uint8_t *display_text_resolution(void)
+{
+    uint8_t *str = data.display_text;
+    resolution *r = &available_resolutions[data.config_values[CONFIG_ORIGINAL_WINDOWED_RESOLUTION].new_value];
+    str += string_from_int(str, r->width, 0);
+    str = string_copy(string_from_ascii("x"), str, 5);
+    string_from_int(str, r->height, 0);
+    return data.display_text;
+}
+static const uint8_t *display_text_difficulty(void)
+{
+    return lang_get_string(153, data.config_values[CONFIG_ORIGINAL_DIFFICULTY].new_value + 1);
+}
+static const uint8_t *display_text_max_grand_temples(void)
+{
+    string_from_int(data.display_text, data.config_values[CONFIG_GP_CH_MAX_GRAND_TEMPLES].new_value, 0);
+    return data.display_text;
+}
+static const uint8_t *display_text_autosave_slots(void)
+{
+    string_from_int(data.display_text, data.config_values[CONFIG_GP_CH_MAX_AUTOSAVE_SLOTS].new_value, 0);
+    return data.display_text;
+}
+
+// 
+//    Range value binding, custom change-action table, init
+// 
+
+static void set_range_values(void)
+{
+    ranges[RANGE_GAME_SPEED].value = &data.config_values[CONFIG_ORIGINAL_GAME_SPEED].new_value;
+    ranges[RANGE_RESOLUTION].value = &data.config_values[CONFIG_ORIGINAL_WINDOWED_RESOLUTION].new_value;
+    ranges[RANGE_DISPLAY_SCALE].value = &data.config_values[CONFIG_SCREEN_DISPLAY_SCALE].new_value;
+    ranges[RANGE_CURSOR_SCALE].value = &data.config_values[CONFIG_SCREEN_CURSOR_SCALE].new_value;
+    ranges[RANGE_MASTER_VOLUME].value = &data.config_values[CONFIG_GENERAL_MASTER_VOLUME].new_value;
+    ranges[RANGE_MUSIC_VOLUME].value = &data.config_values[CONFIG_ORIGINAL_MUSIC_VOLUME].new_value;
+    ranges[RANGE_SPEECH_VOLUME].value = &data.config_values[CONFIG_ORIGINAL_SPEECH_VOLUME].new_value;
+    ranges[RANGE_SOUND_EFFECTS_VOLUME].value = &data.config_values[CONFIG_ORIGINAL_SOUND_EFFECTS_VOLUME].new_value;
+    ranges[RANGE_CITY_SOUNDS_VOLUME].value = &data.config_values[CONFIG_ORIGINAL_CITY_SOUNDS_VOLUME].new_value;
+    ranges[RANGE_VIDEO_VOLUME].value = &data.config_values[CONFIG_GENERAL_VIDEO_VOLUME].new_value;
+    ranges[RANGE_SCROLL_SPEED].value = &data.config_values[CONFIG_ORIGINAL_SCROLL_SPEED].new_value;
+    ranges[RANGE_DIFFICULTY].value = &data.config_values[CONFIG_ORIGINAL_DIFFICULTY].new_value;
+    ranges[RANGE_MAX_GRAND_TEMPLES].value = &data.config_values[CONFIG_GP_CH_MAX_GRAND_TEMPLES].new_value;
+    ranges[RANGE_MAX_AUTOSAVE_SLOTS].value = &data.config_values[CONFIG_GP_CH_MAX_AUTOSAVE_SLOTS].new_value;
+}
+static void set_custom_config_changes(void)
+{
+    //  default
+
+    for (int i = 0; i < CONFIG_MAX_ALL; ++i) data.config_values[i].change_action = config_change_basic;
+    for (int i = 0; i < CONFIG_STRING_MAX_ALL; ++i) data.config_string_values[i].change_action = config_change_string_basic;
+
+    //  strings
+
     data.config_string_values[CONFIG_STRING_UI_LANGUAGE_DIR].change_action = config_change_string_language;
     data.config_string_values[CONFIG_STRING_ORIGINAL_PLAYER_NAME].change_action = config_change_string_player_name;
+
+    //  display / input
 
     data.config_values[CONFIG_ORIGINAL_FULLSCREEN].change_action = config_change_fullscreen;
     data.config_values[CONFIG_ORIGINAL_WINDOWED_RESOLUTION].change_action = config_change_display_resolution;
@@ -506,6 +768,9 @@ static inline void set_custom_config_changes(void)
     data.config_values[CONFIG_SCREEN_COLOR_CURSORS].change_action = config_change_cursors;
 
     data.config_values[CONFIG_ORIGINAL_GAME_SPEED].change_action = config_change_game_speed;
+
+    //  audio
+
     data.config_values[CONFIG_GENERAL_ENABLE_AUDIO].change_action = config_enable_audio;
     data.config_values[CONFIG_GENERAL_MASTER_VOLUME].change_action = config_set_master_volume;
     data.config_values[CONFIG_ORIGINAL_ENABLE_MUSIC].change_action = config_enable_music;
@@ -518,57 +783,34 @@ static inline void set_custom_config_changes(void)
     data.config_values[CONFIG_ORIGINAL_ENABLE_CITY_SOUNDS].change_action = config_enable_city_sounds;
     data.config_values[CONFIG_ORIGINAL_CITY_SOUNDS_VOLUME].change_action = config_set_city_sounds_volume;
 
-    data.config_values[CONFIG_ORIGINAL_SCROLL_SPEED].change_action = config_change_scroll_speed;
+    //  gameplay
 
+    data.config_values[CONFIG_ORIGINAL_SCROLL_SPEED].change_action = config_change_scroll_speed;
     data.config_values[CONFIG_ORIGINAL_DIFFICULTY].change_action = config_set_difficulty;
     data.config_values[CONFIG_ORIGINAL_GODS_EFFECTS].change_action = config_enable_gods_effects;
-}
-
-static inline void set_range_values(void)
-{
-    ranges[RANGE_GAME_SPEED].value = &data.config_values[CONFIG_ORIGINAL_GAME_SPEED].new_value;
-    ranges[RANGE_RESOLUTION].value = &data.config_values[CONFIG_ORIGINAL_WINDOWED_RESOLUTION].new_value;
-    ranges[RANGE_DISPLAY_SCALE].value = &data.config_values[CONFIG_SCREEN_DISPLAY_SCALE].new_value;
-    ranges[RANGE_CURSOR_SCALE].value = &data.config_values[CONFIG_SCREEN_CURSOR_SCALE].new_value;
-
-    ranges[RANGE_MASTER_VOLUME].value = &data.config_values[CONFIG_GENERAL_MASTER_VOLUME].new_value;
-    ranges[RANGE_MUSIC_VOLUME].value = &data.config_values[CONFIG_ORIGINAL_MUSIC_VOLUME].new_value;
-    ranges[RANGE_SPEECH_VOLUME].value = &data.config_values[CONFIG_ORIGINAL_SPEECH_VOLUME].new_value;
-    ranges[RANGE_SOUND_EFFECTS_VOLUME].value = &data.config_values[CONFIG_ORIGINAL_SOUND_EFFECTS_VOLUME].new_value;
-    ranges[RANGE_CITY_SOUNDS_VOLUME].value = &data.config_values[CONFIG_ORIGINAL_CITY_SOUNDS_VOLUME].new_value;
-    ranges[RANGE_VIDEO_VOLUME].value = &data.config_values[CONFIG_GENERAL_VIDEO_VOLUME].new_value;
-
-    ranges[RANGE_SCROLL_SPEED].value = &data.config_values[CONFIG_ORIGINAL_SCROLL_SPEED].new_value;
-    ranges[RANGE_DIFFICULTY].value = &data.config_values[CONFIG_ORIGINAL_DIFFICULTY].new_value;
-
-    ranges[RANGE_MAX_GRAND_TEMPLES].value = &data.config_values[CONFIG_GP_CH_MAX_GRAND_TEMPLES].new_value;
-    ranges[RANGE_MAX_AUTOSAVE_SLOTS].value = &data.config_values[CONFIG_GP_CH_MAX_AUTOSAVE_SLOTS].new_value;
-
 }
 
 static void set_player_name_width(void)
 {
     int width = text_get_width(data.player_name, FONT_NORMAL_BLACK) + 16;
-    if (width < 200) {
-        width = 200;
-    } else if (width > 322) {
-        width = 322;
-        text_ellipsize(data.player_name, FONT_NORMAL_BLACK, width - 16);
-    }
+    if (width < 200) width = 200;
+    else if (width > 322) { width = 322; text_ellipsize(data.player_name, FONT_NORMAL_BLACK, width - 16); }
     select_buttons[SELECT_PLAYER_NAME].width = width;
 }
 
 static void fetch_original_config_values(void)
 {
+    //  game speed -> index
+
     size_t game_speed_index = 0;
     while (game_speed_index < sizeof(game_speeds) / sizeof(int)) {
-        if (setting_game_speed() == game_speeds[game_speed_index]) {
-            break;
-        }
+        if (setting_game_speed() == game_speeds[game_speed_index]) break;
         game_speed_index++;
     }
     data.config_values[CONFIG_ORIGINAL_GAME_SPEED].original_value = (int) game_speed_index;
     data.config_values[CONFIG_ORIGINAL_GAME_SPEED].new_value = (int) game_speed_index;
+
+    //  sounds
 
     data.config_values[CONFIG_ORIGINAL_ENABLE_MUSIC].original_value = setting_sound(SOUND_TYPE_MUSIC)->enabled;
     data.config_values[CONFIG_ORIGINAL_ENABLE_MUSIC].new_value = setting_sound(SOUND_TYPE_MUSIC)->enabled;
@@ -599,613 +841,48 @@ static void fetch_original_config_values(void)
     data.config_values[CONFIG_ORIGINAL_GODS_EFFECTS].original_value = setting_gods_enabled();
     data.config_values[CONFIG_ORIGINAL_GODS_EFFECTS].new_value = setting_gods_enabled();
 
+    //  player name
+
     const uint8_t *player_name = setting_player_name();
-    if (!string_length(player_name)) {
-        player_name = lang_get_string(9, 5);
-    }
+    if (!string_length(player_name)) player_name = lang_get_string(9, 5);
     string_copy(player_name, data.player_name, PLAYER_NAME_LENGTH);
     encoding_to_utf8(data.player_name, data.config_string_values[CONFIG_STRING_ORIGINAL_PLAYER_NAME].original_value,
-        PLAYER_NAME_LENGTH, 0);
+                     PLAYER_NAME_LENGTH, 0);
     snprintf(data.config_string_values[CONFIG_STRING_ORIGINAL_PLAYER_NAME].new_value, CONFIG_STRING_VALUE_MAX, "%s",
-        data.config_string_values[CONFIG_STRING_ORIGINAL_PLAYER_NAME].original_value);
+             data.config_string_values[CONFIG_STRING_ORIGINAL_PLAYER_NAME].original_value);
 
     set_player_name_width();
 }
 
-static void init_config_values(void)
-{
-    for (int i = 0; i < CONFIG_MAX_ALL; ++i) {
-        data.config_values[i].change_action = config_change_basic;
-    }
-    for (int i = 0; i < CONFIG_STRING_MAX_ALL; ++i) {
-        data.config_string_values[i].change_action = config_change_string_basic;
-    }
-    set_custom_config_changes();
-    set_range_values();
-}
-
-static void enable_all_widgets(void)
-{
-    for (int p = 0; p < CONFIG_PAGES; p++) {
-        for (int i = 0; i < MAX_WIDGETS; i++) {
-            if (all_widgets[p][i].type) {
-                all_widgets[p][i].enabled = 1;
-            }
-        }
-    }
-}
-
-static void calculate_widget_heights(void)
-{
-    // Calculate heights for all pages
-    for (int p = 0; p < CONFIG_PAGES; p++) {
-        recalculate_page_heights(p); // Ignore return value during initialization
-    }
-}
-
-static int recalculate_page_heights(int page)
-{
-    //Calculate preliminary heights assuming no scrollbar 
-    int preliminary_total_height = 0;
-    int widget_count = 0;
-
-    for (int i = 0; i < MAX_WIDGETS; i++) {
-        config_widget *widget = &all_widgets[page][i];
-        if (widget->type) {
-            widget_count++;
-            if (widget->type == TYPE_CHECKBOX) {
-                // Calculate with maximum available width 
-                int text_width = CHECKBOX_TEXT_WIDTH + 32;
-                if (page == CONFIG_PAGE_UI_CHANGES || page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
-                    text_width -= LIST_BOX_SHIFT;
-                }
-
-                const uint8_t *text = translation_for(widget->description);
-                int largest_width = 0;
-                int num_lines = text_measure_multiline(text, text_width, FONT_NORMAL_BLACK, &largest_width);
-                int line_height = font_definition_for(FONT_NORMAL_BLACK)->line_height;
-                if (line_height < 11) line_height = 11;
-                line_height += 5;
-
-                int text_height = num_lines * line_height;
-                int total_height_with_padding = text_height + 8; // 4px top + 4px bottom, need to pull this out to define
-                widget->height = (total_height_with_padding > ITEM_HEIGHT) ? total_height_with_padding : ITEM_HEIGHT;
-            } else {
-                widget->height = ITEM_HEIGHT;
-            }
-            preliminary_total_height += widget->height;
-        }
-    }
-
-    // Determine if scrollbar is needed by checking if widgets fit in visible area
-    int items_fit_in_visible_area = 0;
-    int running_height = 0;
-    for (int i = 0; i < widget_count && running_height < LIST_HEIGHT; i++) {
-        config_widget *widget = &all_widgets[page][i];
-        if (widget->type) {
-            running_height += widget->height;
-            if (running_height <= LIST_HEIGHT) {
-                items_fit_in_visible_area++;
-            }
-        }
-    }
-
-    //If we need a scrollbar, recalculate checkbox heights with reduced width
-    if (items_fit_in_visible_area < widget_count) {
-        for (int i = 0; i < MAX_WIDGETS; i++) {
-            config_widget *widget = &all_widgets[page][i];
-            if (widget->type == TYPE_CHECKBOX) {
-                // Recalculate with scrollbar present (reduced width)
-                int text_width = CHECKBOX_TEXT_WIDTH; // No +32 because scrollbar is present
-                if (page == CONFIG_PAGE_UI_CHANGES || page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
-                    text_width -= LIST_BOX_SHIFT;
-                }
-
-                const uint8_t *text = translation_for(widget->description);
-                int largest_width = 0;
-                int num_lines = text_measure_multiline(text, text_width, FONT_NORMAL_BLACK, &largest_width);
-                int line_height = font_definition_for(FONT_NORMAL_BLACK)->line_height;
-                if (line_height < 11) line_height = 11;
-                line_height += 5;
-
-                int text_height = num_lines * line_height;
-                int total_height_with_padding = text_height + 8;
-                widget->height = (total_height_with_padding > ITEM_HEIGHT) ? total_height_with_padding : ITEM_HEIGHT;
-            }
-        }
-    }
-    data.widgets_per_page[page] = widget_count;
-    // return 1 if needs scrollbar 
-    return items_fit_in_visible_area < widget_count;
-}
-
-static void disable_widget(int type, int subtype)
-{
-    for (int p = 0; p < CONFIG_PAGES; p++) {
-        for (int i = 0; i < MAX_WIDGETS; i++) {
-            if (all_widgets[p][i].type == type && all_widgets[p][i].subtype == subtype) {
-                all_widgets[p][i].enabled = 0;
-            }
-        }
-    }
-}
-
-static void install_widgets(void)
-{
-    data.num_widgets = 0;
-    for (int p = 0; p < CONFIG_PAGES; p++) {
-        data.widgets_per_page[p] = 0;
-        for (int i = 0; i < MAX_WIDGETS; i++) {
-            if (all_widgets[p][i].enabled) {
-                data.widgets[data.num_widgets++] = &all_widgets[p][i];
-                data.widgets_per_page[p]++;
-            }
-        }
-    }
-}
-
-static void set_page(int page)
-{
-    data.page = page;
-
-    // Handle category-based pages with list boxes
-    if (page == CONFIG_PAGE_UI_CHANGES) {
-        // Reset to first category when switching to UI page
-        selected_categories.ui_category = CATEGORY_UI_GENERAL;
-        // Ensure UI category widgets are loaded for the current category
-        copy_category_widgets_to_page(CONFIG_PAGE_UI_CHANGES, selected_categories.ui_category);
-        list_box_select_index(&data.ui_list_box, selected_categories.ui_category);
-        // Rebuild global widget array to reflect category changes
-        install_widgets();
-    } else if (page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
-        // Reset to first category when switching to City Management page
-        selected_categories.city_mgmt_category = CATEGORY_CITY_MANAGEMENT_STORAGE;
-        // Ensure City Management category widgets are loaded for the current category
-        copy_category_widgets_to_page(CONFIG_PAGE_CITY_MANAGEMENT_CHANGES, selected_categories.city_mgmt_category);
-        list_box_select_index(&data.city_management_list_box, selected_categories.city_mgmt_category);
-        // Rebuild global widget array to reflect category changes
-        install_widgets();
-    } else {
-        // For non-category pages (General, Difficulty), ensure widget array is current
-        // but don't modify the all_widgets arrays since they have static content
-        install_widgets();
-    }
-
-    // Calculate starting_option AFTER install_widgets() to ensure correct widget counts
-    data.starting_option = 0;
-    for (unsigned int i = 0; i < data.page; i++) {
-        data.starting_option += data.widgets_per_page[i];
-    }
-
-    recalculate_page_heights(page); // Recalculate heights for the new page
-    scrollbar_init(&scrollbar, 0, data.widgets_per_page[page]);
-}
-
-static void init(int page, int show_background_image)
-{
-    if (!data.config_values[0].change_action) {
-        init_config_values();
-    }
-    if (!data.volume_text[0]) {
-        data.volume_offset = string_copy(translation_for(TR_CONFIG_VOLUME), data.volume_text, 63);
-        data.volume_offset = string_copy(string_from_ascii(" "), data.volume_offset,
-            (int) (data.volume_offset - data.volume_text - 1));
-    }
-
-    for (int i = 0; i < CONFIG_MAX_ENTRIES; i++) {
-        data.config_values[i].original_value = config_get(i);
-        data.config_values[i].new_value = config_get(i);
-    }
-    for (int i = 0; i < CONFIG_STRING_MAX_ENTRIES; i++) {
-        const char *value = config_get_string(i);
-        snprintf(data.config_string_values[i].original_value, CONFIG_STRING_VALUE_MAX, "%s", value);
-        snprintf(data.config_string_values[i].new_value, CONFIG_STRING_VALUE_MAX, "%s", value);
-    }
-    fetch_original_config_values();
-
-    data.show_background_image = show_background_image;
-    string_copy(translation_for(TR_CONFIG_LANGUAGE_DEFAULT), data.language_options.data[0], CONFIG_STRING_VALUE_MAX);
-    data.language_options.options[0] = data.language_options.data[0];
-    data.language_options.total = 1;
-    data.language_options.selected = 0;
-    const dir_listing *subdirs = dir_find_all_subdirectories(".");
-    const char *original_value = data.config_string_values[CONFIG_STRING_UI_LANGUAGE_DIR].original_value;
-    for (int i = 0; i < subdirs->num_files; i++) {
-        if (data.language_options.total < MAX_LANGUAGE_DIRS && lang_dir_is_valid(subdirs->files[i].name)) {
-            int opt_id = data.language_options.total;
-            snprintf(data.language_options.data_utf8[opt_id], CONFIG_STRING_VALUE_MAX, "%s", subdirs->files[i].name);
-            encoding_from_utf8(subdirs->files[i].name, data.language_options.data[opt_id], CONFIG_STRING_VALUE_MAX);
-            data.language_options.options[opt_id] = data.language_options.data[opt_id];
-            if (strcmp(original_value, subdirs->files[i].name) == 0) {
-                data.language_options.selected = opt_id;
-            }
-            data.language_options.total++;
-        }
-    }
-
-    enable_all_widgets();
-    calculate_widget_heights();
-    if (!system_can_scale_display(0, 0)) {
-        disable_widget(TYPE_SPACE, TR_CONFIG_VIDEO);
-        disable_widget(TYPE_HEADER, TR_CONFIG_VIDEO);
-        disable_widget(TYPE_CHECKBOX, CONFIG_ORIGINAL_FULLSCREEN);
-        disable_widget(TYPE_NUMERICAL_DESC, RANGE_RESOLUTION);
-        disable_widget(TYPE_NUMERICAL_RANGE, RANGE_RESOLUTION);
-        disable_widget(TYPE_NUMERICAL_DESC, RANGE_DISPLAY_SCALE);
-        disable_widget(TYPE_NUMERICAL_RANGE, RANGE_DISPLAY_SCALE);
-    }
-    if (system_is_fullscreen_only()) {
-        disable_widget(TYPE_NUMERICAL_DESC, RANGE_CURSOR_SCALE);
-        disable_widget(TYPE_NUMERICAL_RANGE, RANGE_CURSOR_SCALE);
-    }
-
-    // Initialize list boxes and categories BEFORE installing widgets
-    init_list_boxes();
-    // Now install widgets after category-based widget arrays have been set up
-    install_widgets();
-    set_page(page);
-}
-
-static void init_list_boxes(void)
-{
-    // UI tab list box
-    data.ui_list_box.x = LIST_BOX_X;
-    data.ui_list_box.y = LIST_BOX_Y;
-    data.ui_list_box.width_blocks = LIST_BOX_WIDTH / BLOCK_SIZE;
-    data.ui_list_box.height_blocks = LIST_BOX_HEIGHT / BLOCK_SIZE;
-    data.ui_list_box.item_height = LIST_BOX_ITEM_HEIGHT;
-    data.ui_list_box.draw_inner_panel = 1;
-    data.ui_list_box.extend_to_hidden_scrollbar = 1;
-    data.ui_list_box.decorate_scrollbar = 1;
-    data.ui_list_box.draw_item = draw_list_box_item;
-    data.ui_list_box.on_select = handle_list_box_select;
-    data.ui_list_box.handle_tooltip = 0;
-    list_box_init(&data.ui_list_box, 5); // 5 UI categories
-
-    //City Management list box
-    data.city_management_list_box.x = LIST_BOX_X;
-    data.city_management_list_box.y = LIST_BOX_Y;
-    data.city_management_list_box.width_blocks = LIST_BOX_WIDTH / BLOCK_SIZE;
-    data.city_management_list_box.height_blocks = LIST_BOX_HEIGHT / BLOCK_SIZE;
-    data.city_management_list_box.item_height = LIST_BOX_ITEM_HEIGHT;
-    data.city_management_list_box.draw_inner_panel = 1;
-    data.city_management_list_box.extend_to_hidden_scrollbar = 1;
-    data.city_management_list_box.decorate_scrollbar = 1;
-    data.city_management_list_box.draw_item = draw_list_box_item;
-    data.city_management_list_box.on_select = handle_list_box_select;
-    data.city_management_list_box.handle_tooltip = 0;
-    list_box_init(&data.city_management_list_box, 4); // 4 City Management categories
-
-    // Initialize categories with first category selected
-    selected_categories.ui_category = CATEGORY_UI_GENERAL;
-    selected_categories.city_mgmt_category = CATEGORY_CITY_MANAGEMENT_STORAGE;
-
-    // Set the initial selection for each list box
-    list_box_select_index(&data.ui_list_box, selected_categories.ui_category);
-    list_box_select_index(&data.city_management_list_box, selected_categories.city_mgmt_category);
-
-    // Set up initial widget layout for each page
-    copy_category_widgets_to_page(CONFIG_PAGE_UI_CHANGES, selected_categories.ui_category);
-    copy_category_widgets_to_page(CONFIG_PAGE_CITY_MANAGEMENT_CHANGES, selected_categories.city_mgmt_category);
-}
-
-static void draw_list_box_item(const list_box_item *item)
-{
-    // Determine which category list to use based on current page
-    const char **item_list;
-    switch (data.page) {
-        case CONFIG_PAGE_UI_CHANGES:
-            item_list = ui_categories;
-            break;
-        case CONFIG_PAGE_CITY_MANAGEMENT_CHANGES:
-            item_list = city_mgmt_categories;
-            break;
-        default:
-            return; // No list box for other pages
-    }
-
-    // selected item with two white lines above and below
-    if (item->is_selected) {
-        graphics_draw_inset_rect(item->x + 2, item->y - 1, item->width - 6, 1, COLOR_INSET_DARK, COLOR_INSET_LIGHT);
-        graphics_draw_inset_rect(item->x + 2, item->y + item->height - 5, item->width - 6, 1,
-            COLOR_INSET_DARK, COLOR_INSET_LIGHT);
-    }
-    if (item->is_focused) {
-        button_border_draw(item->x, item->y - 2, item->width, item->height, 1);
-    }
-    font_t text_font = item->is_selected ? FONT_NORMAL_WHITE : FONT_NORMAL_GREEN;
-    const uint8_t *text = string_from_ascii(item_list[item->index]);
-    text_draw_ellipsized(text, item->x + 5, item->y + 4, item->width - 10, text_font, 0);
-}
-
-// Helper function to copy widgets from a category to the main page widget array
-static void copy_category_widgets_to_page(int page, int category_index)
-{
-    // Validate inputs
-    if (page < 0 || page >= CONFIG_PAGES || category_index < 0) {
-        return;
-    }
-
-    // Only handle category-based pages (UI and City Management)
-    if (page != CONFIG_PAGE_UI_CHANGES && page != CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
-        return;
-    }
-
-    // Clear existing widgets for this page
-    for (int i = 0; i < MAX_WIDGETS; i++) {
-        all_widgets[page][i].type = TYPE_NONE;
-    }
-
-    // Copy widgets from the selected category
-    config_widget *source_widgets = NULL;
-    int max_categories = 0;
-
-    if (page == CONFIG_PAGE_UI_CHANGES) {
-        if (category_index >= 5) return; // UI has 5 categories
-        source_widgets = ui_widgets_by_category[category_index];
-        max_categories = 5;
-    } else if (page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
-        if (category_index >= 4) return; // City Management has 4 categories
-        source_widgets = city_mgmt_widgets_by_category[category_index];
-        max_categories = 4;
-    }
-
-    if (source_widgets && category_index < max_categories) {
-        for (int i = 0; i < MAX_WIDGETS && source_widgets[i].type != TYPE_NONE; i++) {
-            all_widgets[page][i] = source_widgets[i];
-            all_widgets[page][i].enabled = 1; // Ensure widgets are enabled
-        }
-    }
-}
-
-static void handle_list_box_select(unsigned int index, int is_double_click)
-{
-    // Update the selected category based on which page we're on
-    switch (data.page) {
-        case CONFIG_PAGE_UI_CHANGES:
-            if (index < 5) { // Number of UI categories - using < instead of <=
-                selected_categories.ui_category = (ui_config_category) index;
-                // Copy widgets from selected category to main widget array
-                copy_category_widgets_to_page(CONFIG_PAGE_UI_CHANGES, selected_categories.ui_category);
-                // Rebuild global widget array to reflect category changes
-                install_widgets();
-                // Recalculate starting_option after install_widgets
-                data.starting_option = 0;
-                for (unsigned int i = 0; i < data.page; i++) {
-                    data.starting_option += data.widgets_per_page[i];
-                }
-                // Recalculate heights for the new widget set
-                recalculate_page_heights(CONFIG_PAGE_UI_CHANGES);
-                window_request_refresh();
-            }
-            break;
-        case CONFIG_PAGE_CITY_MANAGEMENT_CHANGES:
-            if (index < 4) { // Number of City Management categories - using < instead of <=
-                selected_categories.city_mgmt_category = (city_management_category) index;
-                // Copy widgets from selected category to main widget array
-                copy_category_widgets_to_page(CONFIG_PAGE_CITY_MANAGEMENT_CHANGES, selected_categories.city_mgmt_category);
-                // Rebuild global widget array to reflect category changes
-                install_widgets();
-                // Recalculate starting_option after install_widgets
-                data.starting_option = 0;
-                for (unsigned int i = 0; i < data.page; i++) {
-                    data.starting_option += data.widgets_per_page[i];
-                }
-                // Recalculate heights for the new widget set
-                recalculate_page_heights(CONFIG_PAGE_CITY_MANAGEMENT_CHANGES);
-                window_request_refresh();
-            }
-            break;
-        default:
-            // No list box handling for other pages
-            break;
-    }
-}
-
-static int get_checkbox_y_for_focus(config_widget *widget, int base_y)
-{
-    // Extract the text height from the pre-calculated widget height
-    int text_height = widget->height - 8; // Remove the 8px padding (4px top + 4px bottom)
-    if (text_height < 11) text_height = 11; // Minimum text height
-    int text_center_y = base_y + widget->y_offset + 4 + (text_height / 2);
-    int checkbox_y = text_center_y - (CHECKBOX_CHECK_SIZE / 2);
-    return checkbox_y;
-}
-
-static void draw_checkbox_widget(int row_index, int x, int y, config_widget *widget, int is_focused)
-{
-    // Use the same width calculation logic that was used during height pre-calculation
-    int text_width = CHECKBOX_TEXT_WIDTH;
-    int has_scrollbar = (data.widgets_per_page[data.page] > NUM_VISIBLE_ITEMS);
-    if (!has_scrollbar) {
-        text_width += 32;
-    }
-    if (data.page == CONFIG_PAGE_UI_CHANGES || data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
-        text_width -= LIST_BOX_SHIFT;
-    }
-
-    // Draw the multiline text with 4px padding from top
-    const uint8_t *text = translation_for(widget->description);
-    int text_height = text_draw_multiline(text, x + 30, y + 4 + 5, text_width, 0, FONT_NORMAL_BLACK, 0);
-    // Calculate checkbox y position - centered relative to the actual text height, not total padding
-    int text_center_y = y + 4 + (text_height / 2);
-    int checkbox_y = text_center_y - (CHECKBOX_CHECK_SIZE / 2);
-    button_border_draw(x, checkbox_y, CHECKBOX_CHECK_SIZE, CHECKBOX_CHECK_SIZE, is_focused);
-    if (data.config_values[widget->subtype].new_value) {
-        text_draw(string_from_ascii("x"), x + 6, checkbox_y + 3, FONT_NORMAL_BLACK, 0);
-    }
-}
-
-static int handle_checkbox_widget_input(const mouse *m, int x, int y, config_widget *widget, unsigned int *focus)
-{
-    int checkbox_width = CHECKBOX_WIDTH;
-    if (data.page == CONFIG_PAGE_UI_CHANGES || data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
-        checkbox_width -= LIST_BOX_SHIFT;
-    }
-    int height = widget->height;
-    if (!(x <= m->x && m->x < x + checkbox_width && y <= m->y && m->y < y + height)) {
-        return 0;
-    }
-    *focus = 1;
-    if (m->left.went_up) {
-        toggle_switch(widget->subtype);
-        return 1;
-    }
-    return 0;
-}
-
-static void numerical_range_draw(const numerical_range_widget *w, int x, int y, const uint8_t *value_text)
-{
-    int extra_width = data.widgets_per_page[data.page] > NUM_VISIBLE_ITEMS ? 0 : 64;
-    text_draw(value_text, x, y + 6, FONT_NORMAL_BLACK, 0);
-    inner_panel_draw(x + w->x, y + 4, w->width_blocks + extra_width / 16, 1);
-
-    int width = w->width_blocks * BLOCK_SIZE + extra_width - NUMERICAL_SLIDER_PADDING * 2 - NUMERICAL_DOT_SIZE;
-    int scroll_position;
-    if (w->min != w->max) {
-        scroll_position = (*w->value - w->min) * width / (w->max - w->min);
-    } else {
-        scroll_position = width / 2;
-    }
-    image_draw(image_group(GROUP_PANEL_BUTTON) + 37,
-        x + w->x + NUMERICAL_SLIDER_PADDING + scroll_position, y + 2, COLOR_MASK_NONE, SCALE_NONE);
-}
-
-static uint8_t *percentage_string(uint8_t *string, int percentage)
-{
-    int offset = string_from_int(string, percentage, 0);
-    string[offset] = '%';
-    string[offset + 1] = 0;
-    return string;
-}
-
-static const uint8_t *display_text_language(void)
-{
-    return data.language_options.options[data.language_options.selected];
-}
-
-static const uint8_t *display_text_user_directory(void)
-{
-    return translation_for(TR_USER_DIRECTORIES_WINDOW_TITLE);
-}
-
-static const uint8_t *display_text_player_name(void)
-{
-    return data.player_name;
-}
-
-static const uint8_t *display_text_game_speed(void)
-{
-    return percentage_string(data.display_text, game_speeds[data.config_values[CONFIG_ORIGINAL_GAME_SPEED].new_value]);
-}
-
-static const uint8_t *display_text_resolution(void)
-{
-    uint8_t *str = data.display_text;
-    resolution *r = &available_resolutions[data.config_values[CONFIG_ORIGINAL_WINDOWED_RESOLUTION].new_value];
-    str += string_from_int(str, r->width, 0);
-    str = string_copy(string_from_ascii("x"), str, 5);
-    string_from_int(str, r->height, 0);
-    return data.display_text;
-}
-
-static const uint8_t *display_text_display_scale(void)
-{
-    return percentage_string(data.display_text, data.config_values[CONFIG_SCREEN_DISPLAY_SCALE].new_value);
-}
-
-static const uint8_t *display_text_cursor_scale(void)
-{
-    return percentage_string(data.display_text, data.config_values[CONFIG_SCREEN_CURSOR_SCALE].new_value);
-}
-
-static const uint8_t *display_text_master_volume(void)
-{
-    percentage_string(data.volume_offset, data.config_values[CONFIG_GENERAL_MASTER_VOLUME].new_value);
-    return data.volume_text;
-}
-
-static const uint8_t *display_text_music_volume(void)
-{
-    percentage_string(data.volume_offset, data.config_values[CONFIG_ORIGINAL_MUSIC_VOLUME].new_value);
-    return data.volume_text;
-}
-
-static const uint8_t *display_text_speech_volume(void)
-{
-    percentage_string(data.volume_offset, data.config_values[CONFIG_ORIGINAL_SPEECH_VOLUME].new_value);
-    return data.volume_text;
-}
-
-static const uint8_t *display_text_sound_effects_volume(void)
-{
-    percentage_string(data.volume_offset, data.config_values[CONFIG_ORIGINAL_SOUND_EFFECTS_VOLUME].new_value);
-    return data.volume_text;
-}
-
-static const uint8_t *display_text_video_volume(void)
-{
-    percentage_string(data.volume_offset, data.config_values[CONFIG_GENERAL_VIDEO_VOLUME].new_value);
-    return data.volume_text;
-}
-
-static const uint8_t *display_text_city_sounds_volume(void)
-{
-    percentage_string(data.volume_offset, data.config_values[CONFIG_ORIGINAL_CITY_SOUNDS_VOLUME].new_value);
-    return data.volume_text;
-}
-
-static const uint8_t *display_text_scroll_speed(void)
-{
-    return percentage_string(data.display_text, data.config_values[CONFIG_ORIGINAL_SCROLL_SPEED].new_value);
-}
-
-static const uint8_t *display_text_difficulty(void)
-{
-    return lang_get_string(153, data.config_values[CONFIG_ORIGINAL_DIFFICULTY].new_value + 1);
-}
-
-static const uint8_t *display_text_max_grand_temples(void)
-{
-    string_from_int(data.display_text, data.config_values[CONFIG_GP_CH_MAX_GRAND_TEMPLES].new_value, 0);
-    return data.display_text;
-}
-
-static const uint8_t *display_text_autosave_slots(void)
-{
-    string_from_int(data.display_text, data.config_values[CONFIG_GP_CH_MAX_AUTOSAVE_SLOTS].new_value, 0);
-    return data.display_text;
-}
-
 static void update_scale(void)
 {
-    int min_scale = 0;
-    int max_scale = 0;
+    int min_scale = 0, max_scale = 0;
     if (system_can_scale_display(&min_scale, &max_scale)) {
         ranges[RANGE_DISPLAY_SCALE].min = min_scale;
         ranges[RANGE_DISPLAY_SCALE].max = max_scale;
-        if (*ranges[RANGE_DISPLAY_SCALE].value > max_scale) {
+        if (*ranges[RANGE_DISPLAY_SCALE].value > max_scale)
             *ranges[RANGE_DISPLAY_SCALE].value = max_scale;
-        }
     }
 }
-
 static void calculate_available_resolutions_and_fullscreen(void)
 {
-    if (system_is_fullscreen_only()) {
-        return;
-    }
+    if (system_is_fullscreen_only()) return;
+
     memset(available_resolutions, 0, sizeof(available_resolutions));
     int resolution_index = 0;
     int display_resolution_index = -1;
     int current_resolution_index = -1;
+
     resolution max;
     system_get_max_resolution(&max.width, &max.height);
+
     static int old_width;
     static int old_height;
     static int old_fullscreen = -1;
+
     int width = screen_width();
     int height = screen_height();
+
     for (size_t i = 0; i < sizeof(resolutions) / sizeof(resolution); i++) {
         if (resolutions[i].width == width && resolutions[i].height == height) {
             current_resolution_index = resolution_index;
@@ -1221,22 +898,18 @@ static void calculate_available_resolutions_and_fullscreen(void)
         } else if (resolutions[i].width > max.width || resolutions[i].height > max.height) {
             continue;
         }
-        available_resolutions[resolution_index].width = resolutions[i].width;
-        available_resolutions[resolution_index].height = resolutions[i].height;
-        resolution_index++;
+        available_resolutions[resolution_index++] = resolutions[i];
     }
     if (display_resolution_index == -1) {
-        available_resolutions[resolution_index].width = max.width;
-        available_resolutions[resolution_index].height = max.height;
-        resolution_index++;
+        available_resolutions[resolution_index++] = max;
     }
 
     ranges[RANGE_RESOLUTION].max = resolution_index - 1;
+
     if (!setting_fullscreen() && (old_width != width || old_height != height)) {
         data.config_values[CONFIG_ORIGINAL_WINDOWED_RESOLUTION].original_value = current_resolution_index;
         data.config_values[CONFIG_ORIGINAL_WINDOWED_RESOLUTION].new_value = current_resolution_index;
-        old_width = width;
-        old_height = height;
+        old_width = width; old_height = height;
     }
     if (setting_fullscreen() != old_fullscreen) {
         data.config_values[CONFIG_ORIGINAL_FULLSCREEN].original_value = setting_fullscreen();
@@ -1245,107 +918,467 @@ static void calculate_available_resolutions_and_fullscreen(void)
     }
 }
 
-static inline int config_changed(config_key key)
+static inline int config_changed(int key)
 {
     return data.config_values[key].original_value != data.config_values[key].new_value;
 }
-
-static inline int config_string_changed(config_string_key key)
+static inline int config_string_changed(int key)
 {
     return strcmp(data.config_string_values[key].original_value, data.config_string_values[key].new_value) != 0;
 }
 
-static inline void update_widgets(void)
+static inline void update_has_changes(void)
 {
     update_scale();
     calculate_available_resolutions_and_fullscreen();
     data.has_changes = 0;
-    for (int i = 0; i < CONFIG_STRING_MAX_ALL && !data.has_changes; i++) {
-        if (config_string_changed(i)) {
-            data.has_changes = 1;
-        }
+    for (int i = 0; i < CONFIG_STRING_MAX_ALL && !data.has_changes; i++) if (config_string_changed(i)) data.has_changes = 1;
+    for (int i = 0; i < CONFIG_MAX_ALL && !data.has_changes; i++) if (config_changed(i))        data.has_changes = 1;
+}
+
+// 
+//    Select button actions
+// 
+
+static void set_language(int index)
+{
+    const char *dir = index == 0 ? "" : data.language_options.data_utf8[index];
+    snprintf(data.config_string_values[CONFIG_STRING_UI_LANGUAGE_DIR].new_value, CONFIG_STRING_VALUE_MAX, "%s", dir);
+    data.language_options.selected = index;
+}
+static void button_language_select(const generic_button *button)
+{
+    int height = button->parameter1;
+    window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y() + height, button,
+        data.language_options.options, data.language_options.total, set_language);
+}
+static void set_player_name(const uint8_t *name)
+{
+    if (!string_length(name)) name = lang_get_string(9, 5);
+    string_copy(name, data.player_name, PLAYER_NAME_LENGTH);
+    encoding_to_utf8(name, data.config_string_values[CONFIG_STRING_ORIGINAL_PLAYER_NAME].new_value, PLAYER_NAME_LENGTH, 0);
+    set_player_name_width();
+    window_invalidate();
+}
+static void button_edit_player_name(const generic_button *button)
+{
+    uint8_t player_name[PLAYER_NAME_LENGTH];
+    encoding_from_utf8(data.config_string_values[CONFIG_STRING_ORIGINAL_PLAYER_NAME].new_value, player_name, PLAYER_NAME_LENGTH);
+    window_text_input_show(lang_get_string(31, 0), lang_get_string(9, 5), player_name, PLAYER_NAME_LENGTH, set_player_name);
+}
+static void button_change_user_directory(const generic_button *button) { window_user_path_setup_show(0); }
+
+// 
+//    Category list boxes (unified)
+// 
+
+typedef struct {
+    list_box_type *lb;
+    const char **labels;
+    int count;
+    int page_id;
+    int *selected_ref; //  points into selected_categories
+
+} category_page_desc;
+
+static int page_is_category(int page)
+{
+    return page == CONFIG_PAGE_UI_CHANGES || page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES;
+}
+static category_page_desc current_category_desc(void)
+{
+    if (data.page == CONFIG_PAGE_UI_CHANGES) {
+        return (category_page_desc)
+        {
+            &ui_list_box, ui_categories, CATEGORY_UI_COUNT, CONFIG_PAGE_UI_CHANGES,
+                (int *) &selected_categories.ui_category
+        };
+    } else {
+        return (category_page_desc)
+        {
+            &city_mgmt_list_box, city_mgmt_categories, CATEGORY_CITY_COUNT, CONFIG_PAGE_CITY_MANAGEMENT_CHANGES,
+                (int *) &selected_categories.city_mgmt_category
+        };
     }
-    for (int i = 0; i < CONFIG_MAX_ALL && !data.has_changes; i++) {
-        if (config_changed(i)) {
-            data.has_changes = 1;
-        }
+}
+static void init_list_boxes(void)
+{
+    //  UI
+
+    ui_list_box.x = LIST_BOX_X;
+    ui_list_box.y = LIST_BOX_Y;
+    ui_list_box.width_blocks = LIST_BOX_WIDTH / BLOCK_SIZE;
+    ui_list_box.height_blocks = LIST_BOX_HEIGHT / BLOCK_SIZE;
+    ui_list_box.item_height = LIST_BOX_ITEM_H;
+    ui_list_box.draw_inner_panel = 1;
+    ui_list_box.extend_to_hidden_scrollbar = 1;
+    ui_list_box.decorate_scrollbar = 1;
+    ui_list_box.draw_item = draw_list_box_item;
+    ui_list_box.on_select = handle_list_box_select;
+    ui_list_box.handle_tooltip = 0;
+    list_box_init(&ui_list_box, CATEGORY_UI_COUNT);
+
+    //  City management
+
+    city_mgmt_list_box = ui_list_box; //  copy layout
+
+    list_box_init(&city_mgmt_list_box, CATEGORY_CITY_COUNT);
+
+    list_box_select_index(&ui_list_box, selected_categories.ui_category);
+    list_box_select_index(&city_mgmt_list_box, selected_categories.city_mgmt_category);
+}
+
+static void draw_list_box_item(const list_box_item *item)
+{
+    const char **labels = (data.page == CONFIG_PAGE_UI_CHANGES) ? ui_categories : city_mgmt_categories;
+
+    if (item->is_selected) {
+        graphics_draw_inset_rect(item->x + 2, item->y - 1, item->width - 6, 1, COLOR_INSET_DARK, COLOR_INSET_LIGHT);
+        graphics_draw_inset_rect(item->x + 2, item->y + item->height - 5, item->width - 6, 1, COLOR_INSET_DARK, COLOR_INSET_LIGHT);
+    }
+    if (item->is_focused) {
+        button_border_draw(item->x, item->y - 2, item->width, item->height, 1);
+    }
+    font_t f = item->is_selected ? FONT_NORMAL_WHITE : FONT_NORMAL_GREEN;
+    const uint8_t *txt = string_from_ascii(labels[item->index]);
+    text_draw_ellipsized(txt, item->x + 5, item->y + 4, item->width - 10, f, 0);
+}
+static void handle_list_box_select(unsigned int index, int is_double_click)
+{
+    category_page_desc desc = current_category_desc();
+    if (index < (unsigned) desc.count) {
+        *desc.selected_ref = (int) index;
+        //  layout will rebuild on next draw
+
+        window_request_refresh();
     }
 }
 
+// 
+//    Widget ops (measure / draw / input)
+// 
+
+typedef struct {
+    void (*measure)(const config_widget *, int avail_text_w, int *out_h);
+    void (*draw_bg)(const config_widget *, int x, int y, int avail_text_w);
+    void (*draw_fg)(const config_widget *, int x, int y, int avail_text_w, int focused);
+    int  (*handle_input)(const config_widget *, int x, int y, int avail_text_w, const mouse *m, unsigned *focused);
+} widget_ops;
+
+static int checkbox_text_height(const uint8_t *txt, int w)
+{
+    int largest = 0;
+    int lines = text_measure_multiline(txt, w, FONT_NORMAL_BLACK, &largest);
+    return lines * one_line_ml_height(FONT_NORMAL_BLACK);
+}
+static void op_measure_checkbox(const config_widget *w, int avail_text_w, int *out_h)
+{
+    const uint8_t *txt = translation_for(w->description);
+    int h = checkbox_text_height(txt, avail_text_w) + 8; //  4+4 padding
+
+    if (h < ITEM_BASE_H) h = ITEM_BASE_H;
+    *out_h = h;
+}
+static void op_draw_bg_checkbox(const config_widget *w, int x, int y, int avail_text_w)
+{
+    const uint8_t *txt = translation_for(w->description);
+    int text_h = text_draw_multiline(txt, x + 30, y + 4 + 5, avail_text_w, 0, FONT_NORMAL_BLACK, 0);
+    int text_center_y = y + 4 + (text_h / 2);
+    int box_y = text_center_y - (CHECKBOX_CHECK_SIZE / 2);
+    button_border_draw(x, box_y, CHECKBOX_CHECK_SIZE, CHECKBOX_CHECK_SIZE, 0);
+    if (data.config_values[w->subtype].new_value) {
+        text_draw(string_from_ascii("x"), x + 6, box_y + 3, FONT_NORMAL_BLACK, 0);
+    }
+}
+static void op_draw_fg_checkbox(const config_widget *w, int x, int y, int avail_text_w, int focused)
+{
+    if (!focused) return;
+    const uint8_t *txt = translation_for(w->description);
+    int text_h = checkbox_text_height(txt, avail_text_w);
+    int text_center_y = y + 4 + (text_h / 2);
+    int box_y = text_center_y - (CHECKBOX_CHECK_SIZE / 2);
+    button_border_draw(x, box_y, CHECKBOX_CHECK_SIZE, CHECKBOX_CHECK_SIZE, 1);
+}
+static int op_input_checkbox(const config_widget *w, int x, int y, int avail_text_w, const mouse *m, unsigned *focused)
+{
+    int width = avail_text_w + 30; //  30 includes checkbox + gap
+
+    int height = w->height;
+    if (!(x <= m->x && m->x < x + width && y <= m->y && m->y < y + height)) return 0;
+    *focused = 1;
+    if (m->left.went_up) {
+        data.config_values[w->subtype].new_value = 1 - data.config_values[w->subtype].new_value;
+        window_invalidate();
+        return 1;
+    }
+    return 0;
+}
+
+//  Select
+
+static void op_measure_select(const config_widget *w, int avail_text_w, int *out_h) { *out_h = ITEM_BASE_H; }
+static void op_draw_bg_select(const config_widget *w, int x, int y, int avail_text_w)
+{
+    text_draw(translation_for(w->description), x, y + 6 + w->y_offset, FONT_NORMAL_BLACK, 0);
+    const generic_button *btn = &select_buttons[w->subtype];
+    text_draw_centered(w->get_display_text(), btn->x + 8, y + btn->y + 6 + w->y_offset,
+                       btn->width - 16, FONT_NORMAL_BLACK, 0);
+}
+static void op_draw_fg_select(const config_widget *w, int x, int y, int avail_text_w, int focused)
+{
+    const generic_button *btn = &select_buttons[w->subtype];
+    button_border_draw(btn->x, y + btn->y + w->y_offset, btn->width, btn->height, focused);
+}
+static int op_input_select(const config_widget *w, int x, int y, int avail_text_w, const mouse *m, unsigned *focused)
+{
+    generic_button *btn = &select_buttons[w->subtype];
+    btn->parameter1 = y + w->y_offset; //  for popup anchor
+
+    return generic_buttons_handle_mouse(m, 0, y + w->y_offset, btn, 1, focused);
+}
+
+//  Numerical - desc
+
+static void op_measure_desc(const config_widget *w, int avail_text_w, int *out_h) { *out_h = ITEM_BASE_H; }
+static void op_draw_bg_desc(const config_widget *w, int x, int y, int avail_text_w)
+{
+    text_draw(translation_for(w->description), x, y + 10 + w->y_offset, FONT_NORMAL_BLACK, 0);
+}
+static void op_draw_fg_desc(const config_widget *w, int x, int y, int avail_text_w, int focused) { (void) w; (void) x; (void) y; (void) avail_text_w; (void) focused; }
+static int  op_input_desc(const config_widget *w, int x, int y, int avail_text_w, const mouse *m, unsigned *focused) { return 0; }
+
+//  Numerical - slider
+
+static void numerical_range_draw(const numerical_range_widget *r, int x, int y, const uint8_t *value_text, int extra_w)
+{
+    text_draw(value_text, x, y + 6, FONT_NORMAL_BLACK, 0);
+    inner_panel_draw(x + r->x, y + 4, r->width_blocks + extra_w / 16, 1);
+    int width = r->width_blocks * BLOCK_SIZE + extra_w - NUMERICAL_SLIDER_PADDING * 2 - NUMERICAL_DOT_SIZE;
+    int pos = (r->min != r->max) ? ((*r->value - r->min) * width / (r->max - r->min)) : width / 2;
+    image_draw(image_group(GROUP_PANEL_BUTTON) + 37, x + r->x + NUMERICAL_SLIDER_PADDING + pos, y + 2, COLOR_MASK_NONE, SCALE_NONE);
+}
+static int is_over_slider(const numerical_range_widget *r, const mouse *m, int x, int y, int extra_w)
+{
+    if (x + r->x <= m->x && x + r->width_blocks * BLOCK_SIZE + r->x + extra_w >= m->x &&
+        y <= m->y && y + 16 > m->y) return 1;
+    return 0;
+}
+static int handle_slider_mouse(const numerical_range_widget *r, const mouse *m, int x, int y, int id, int extra_w)
+{
+    if (data.active_numerical_range) {
+        if (data.active_numerical_range != id) return 0;
+        if (!m->left.is_down) { data.active_numerical_range = 0; return 0; }
+    } else if (!m->left.went_down || !is_over_slider(r, m, x, y, extra_w)) {
+        return 0;
+    }
+    if (r->min == r->max) return 1;
+
+    int slider_w = r->width_blocks * BLOCK_SIZE - NUMERICAL_SLIDER_PADDING * 2 - NUMERICAL_DOT_SIZE + extra_w;
+    int px_per_step = slider_w / (r->max - r->min);
+    int dot = m->x - x - r->x - NUMERICAL_DOT_SIZE / 2 + px_per_step / 2;
+
+    int exact = calc_bound(r->min + dot * (r->max - r->min) / slider_w, r->min, r->max);
+    int left = (exact / r->step) * r->step;
+    int right = calc_bound(left + r->step, r->min, r->max);
+    int closest = ((exact - left) < (right - exact)) ? left : right;
+
+    if (closest != *r->value) { *r->value = closest; window_request_refresh(); }
+    data.active_numerical_range = id;
+    return 1;
+}
+
+static void op_measure_range(const config_widget *w, int avail_text_w, int *out_h) { *out_h = ITEM_BASE_H; }
+static void op_draw_bg_range(const config_widget *w, int x, int y, int avail_text_w)
+{
+    int extra_w = data.layout.has_scrollbar ? 0 : 64;
+    int nx = x - (page_is_category((int) data.page) ? (LIST_BOX_SHIFT - NUMERICAL_RANGE_X) : 0);
+    numerical_range_draw(&ranges[w->subtype], nx, y + w->y_offset, w->get_display_text(), extra_w);
+}
+static void op_draw_fg_range(const config_widget *w, int x, int y, int avail_text_w, int focused) { (void) w; (void) x; (void) y; (void) avail_text_w; (void) focused; }
+static int  op_input_range(const config_widget *w, int x, int y, int avail_text_w, const mouse *m, unsigned *focused)
+{
+    int extra_w = data.layout.has_scrollbar ? 0 : 64;
+    int nx = x - (page_is_category((int) data.page) ? (LIST_BOX_SHIFT - NUMERICAL_RANGE_X) : 0);
+    (void) focused;
+    return handle_slider_mouse(&ranges[w->subtype], m, nx, y + w->y_offset, w->subtype + 1, extra_w);
+}
+
+//  Header
+
+static void op_measure_header(const config_widget *w, int avail_text_w, int *out_h) { *out_h = ITEM_BASE_H; }
+static void op_draw_bg_header(const config_widget *w, int x, int y, int avail_text_w)
+{
+    text_draw(translation_for(w->description ? w->description : w->subtype), x, y + w->y_offset, FONT_NORMAL_BLACK, 0);
+}
+static void op_draw_fg_header(const config_widget *w, int x, int y, int avail_text_w, int focused) { (void) w; (void) x; (void) y; (void) avail_text_w; (void) focused; }
+static int  op_input_header(const config_widget *w, int x, int y, int avail_text_w, const mouse *m, unsigned *focused) { return 0; }
+
+//  Ops table
+
+static const widget_ops ops_by_type[] = {
+    [TYPE_NONE] = {0},
+    [TYPE_SPACE] = {0},
+    [TYPE_HEADER] = {op_measure_header, op_draw_bg_header, op_draw_fg_header, op_input_header},
+    [TYPE_CHECKBOX] = {op_measure_checkbox, op_draw_bg_checkbox, op_draw_fg_checkbox, op_input_checkbox},
+    [TYPE_SELECT] = {op_measure_select, op_draw_bg_select, op_draw_fg_select, op_input_select},
+    [TYPE_NUMERICAL_DESC] = {op_measure_desc, op_draw_bg_desc, op_draw_fg_desc, op_input_desc},
+    [TYPE_NUMERICAL_RANGE] = {op_measure_range, op_draw_bg_range, op_draw_fg_range, op_input_range},
+};
+
+// 
+//    Widget source view (no copying)
+// 
+
+static const config_widget *get_widget_row_for(int page, int index)
+{
+    const config_widget *src = 0;
+    if (page == CONFIG_PAGE_UI_CHANGES) {
+        src = ui_widgets_by_category[selected_categories.ui_category];
+    } else if (page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
+        src = city_mgmt_widgets_by_category[selected_categories.city_mgmt_category];
+    } else if (page == CONFIG_PAGE_GENERAL) {
+        src = page_general;
+    } else { //  difficulty
+
+        src = page_difficulty;
+    }
+    for (int i = 0, n = 0; i < MAX_WIDGETS; i++) {
+        if (src[i].type == TYPE_NONE) break;
+        if (!src[i].enabled) continue;
+        if (n++ == index) return &src[i];
+    }
+    return 0;
+}
+static int get_widget_count_for(int page)
+{
+    const config_widget *src = 0;
+    if (page == CONFIG_PAGE_UI_CHANGES)      src = ui_widgets_by_category[selected_categories.ui_category];
+    else if (page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) src = city_mgmt_widgets_by_category[selected_categories.city_mgmt_category];
+    else if (page == CONFIG_PAGE_GENERAL)    src = page_general;
+    else                                     src = page_difficulty;
+
+    int n = 0;
+    for (int i = 0; i < MAX_WIDGETS; i++) { if (src[i].type == TYPE_NONE) break; if (src[i].enabled) n++; }
+    return n;
+}
+
+//  convenience: compute base x and available text width for checkboxes per page/scrollbar
+
+typedef struct { int x; int text_w; } content_span;
+static content_span content_span_for_page(int page, int has_scrollbar)
+{
+    int base_x = 20;
+    int text_w = 560 - CHECKBOX_CHECK_SIZE - 15; //  CHECKBOX_TEXT_WIDTH equivalent
+
+    if (!has_scrollbar) text_w += 32;
+    if (page_is_category(page)) { base_x += LIST_BOX_SHIFT; text_w -= LIST_BOX_SHIFT; }
+    return (content_span) { base_x, text_w };
+}
+
+// 
+//    Layout
+// 
+
+static void build_layout_for_current_page(void)
+{
+    //  1) optimistic measure w/o scrollbar
+
+    int count = get_widget_count_for((int) data.page);
+    int y = ITEM_Y_OFFSET;
+    int total_h = 0;
+    content_span span = content_span_for_page((int) data.page, // has_scrollbar
+0);
+
+    for (int i = 0; i < count && i < MAX_WIDGETS; i++) {
+        const config_widget *w = get_widget_row_for((int) data.page, i);
+        if (!w) break;
+        int h = ITEM_BASE_H;
+        if (ops_by_type[w->type].measure) ops_by_type[w->type].measure(w, span.text_w, &h);
+        total_h += (w->margin_top + h);
+    }
+
+    int needs_scroll = total_h > LIST_HEIGHT;
+
+    //  2) final measure with correct scrollbar presence
+
+    span = content_span_for_page((int) data.page, needs_scroll);
+    y = ITEM_Y_OFFSET;
+    int start = scrollbar.scroll_position;
+    if (start < 0) start = 0;
+    if (start > count) start = count;
+
+    data.layout.count = count;
+    data.layout.visible_from = start;
+    data.layout.has_scrollbar = needs_scroll;
+
+    int v = 0;
+    for (int i = start; i < count && v < MAX_WIDGETS; i++) {
+        const config_widget *w = get_widget_row_for((int) data.page, i);
+        if (!w) break;
+        int h = ITEM_BASE_H;
+        if (ops_by_type[w->type].measure) ops_by_type[w->type].measure(w, span.text_w, &h);
+        y += w->margin_top;
+        if (y + h > LIST_BOTTOM) break; //  stop at visible area
+
+        data.layout.rows[v] = w;
+        data.layout.y[v] = y;
+        data.layout.h[v] = h;
+        y += h;
+        v++;
+    }
+    data.layout.visible_to = start + v;
+    scrollbar_init(&scrollbar, 0, count);
+}
+
+// 
+//    Drawing
+// 
+
 static void draw_background(void)
 {
-    update_widgets();
+    update_has_changes();
 
-    if (data.show_background_image) {
-        image_draw_fullscreen_background(image_group(GROUP_INTERMEZZO_BACKGROUND) + 5);
-    } else {
-        window_draw_underlying_window();
-    }
+    if (data.show_background_image) image_draw_fullscreen_background(image_group(GROUP_INTERMEZZO_BACKGROUND) + 5);
+    else window_draw_underlying_window();
 
     graphics_in_dialog();
 
     outer_panel_draw(0, 0, 40, 30);
-
     text_draw_centered(translation_for(TR_CONFIG_TITLE), 16, 16, 608, FONT_LARGE_BLACK, 0);
 
+    //  tabs
+
     int page_x_offset = 30;
-    int open_tab_width = text_get_width(translation_for(page_names[data.page]), FONT_NORMAL_BLACK) + 6;
-    int max_closed_tab_width = (600 - page_x_offset * CONFIG_PAGES - open_tab_width) / (CONFIG_PAGES - 1);
+    int open_w = text_get_width(translation_for(page_names[data.page]), FONT_NORMAL_BLACK) + 6;
+    int max_closed_w = (600 - page_x_offset * CONFIG_PAGES - open_w) / (CONFIG_PAGES - 1);
+
     for (unsigned int i = 0; i < CONFIG_PAGES; ++i) {
         page_x_offset += 15;
-        int width = 0;
-        if (data.page == i) {
-            width = text_draw(translation_for(page_names[i]), page_x_offset, 58, FONT_NORMAL_BLACK, 0);
-        } else {
-            width = text_draw_ellipsized(translation_for(page_names[i]),
-                page_x_offset, 58, max_closed_tab_width, FONT_NORMAL_BLACK, 0);
-        }
+        int w = 0;
+        if (data.page == i) w = text_draw(translation_for(page_names[i]), page_x_offset, 58, FONT_NORMAL_BLACK, 0);
+        else                w = text_draw_ellipsized(translation_for(page_names[i]), page_x_offset, 58, max_closed_w, FONT_NORMAL_BLACK, 0);
         page_buttons[i].x = page_x_offset - 10;
-        page_buttons[i].width = width + 15;
-        data.graphics_behind_tab[i] = graphics_save_to_image(data.graphics_behind_tab[i],
-            page_buttons[i].x, 75, page_buttons[i].width, 3);
-        page_x_offset += width;
+        page_buttons[i].width = w + 15;
+        data.graphics_behind_tab[i] = graphics_save_to_image(data.graphics_behind_tab[i], page_buttons[i].x, 75, page_buttons[i].width, 3);
+        page_x_offset += w;
     }
 
     button_border_draw(10, 75, 620, 355, 0);
 
-    // Calculate X offset for shifted layouts
-    int base_x = 20;
-    if (data.page == CONFIG_PAGE_UI_CHANGES || data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
-        base_x += LIST_BOX_SHIFT;
+    //  lay out rows for current page
+
+    build_layout_for_current_page();
+    content_span span = content_span_for_page((int) data.page, data.layout.has_scrollbar);
+
+    //  draw background of rows
+
+    for (int v = 0; v < data.layout.visible_to - data.layout.visible_from; v++) {
+        const config_widget *w = data.layout.rows[v];
+        int y = data.layout.y[v] + w->y_offset;
+        if (ops_by_type[w->type].draw_bg) ops_by_type[w->type].draw_bg(w, span.x, y, span.text_w);
     }
 
-    int additional_y_offset = 0;
-    for (unsigned int i = 0; i < NUM_VISIBLE_ITEMS && i < data.widgets_per_page[data.page]; i++) {
-        config_widget *w = data.widgets[i + data.starting_option + scrollbar.scroll_position];
-        int y = ITEM_Y_OFFSET + ITEM_HEIGHT * i + additional_y_offset;
-
-        // Use pre-calculated height - check if widget fits in available space
-        if (y + w->height > LIST_BOTTOM) break;
-
-        if (w->type == TYPE_HEADER) {
-            text_draw(translation_for(w->subtype), base_x, y + w->y_offset, FONT_NORMAL_BLACK, 0);
-
-        } else if (w->type == TYPE_CHECKBOX) {
-            draw_checkbox_widget(i, base_x, y + w->y_offset, w, 0); // No focus in background
-            // Accumulate extra height for next widget positioning
-            int extra_height = w->height - ITEM_HEIGHT;
-            additional_y_offset += extra_height;
-        } else if (w->type == TYPE_SELECT) {
-            text_draw(translation_for(w->description), base_x, y + 6 + w->y_offset, FONT_NORMAL_BLACK, 0);
-            const generic_button *btn = &select_buttons[w->subtype];
-            text_draw_centered(w->get_display_text(), btn->x + 8, y + btn->y + 6 + w->y_offset,
-                               btn->width - 16, FONT_NORMAL_BLACK, 0);
-
-        } else if (w->type == TYPE_NUMERICAL_RANGE) {
-            int numerical_x = (data.page == CONFIG_PAGE_UI_CHANGES || data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES)
-                ? NUMERICAL_RANGE_X + LIST_BOX_SHIFT : NUMERICAL_RANGE_X;
-            numerical_range_draw(&ranges[w->subtype], numerical_x, y + w->y_offset, w->get_display_text());
-
-        } else if (w->type == TYPE_NUMERICAL_DESC) {
-            text_draw(translation_for(w->description), base_x, y + 10 + w->y_offset, FONT_NORMAL_BLACK, 0);
-        }
-    }
+    //  bottom buttons text
 
     for (size_t i = 0; i < sizeof(bottom_buttons) / sizeof(*bottom_buttons); i++) {
         int disabled = i == NUM_BOTTOM_BUTTONS - 1 && !data.has_changes;
@@ -1358,284 +1391,58 @@ static void draw_background(void)
     graphics_reset_dialog();
 }
 
-
 static void draw_foreground(void)
 {
     graphics_in_dialog();
 
+    //  tab tops & borders
+
     for (unsigned int i = 0; i < CONFIG_PAGES; ++i) {
-        button_border_draw(page_buttons[i].x, page_buttons[i].y,
-            page_buttons[i].width, page_buttons[i].height,
-            data.page_focus_button == i + 1);
-        if (data.page == i) {
-            graphics_draw_from_image(data.graphics_behind_tab[i], page_buttons[i].x, 75);
-        } else {
-            graphics_fill_rect(page_buttons[i].x, 75, page_buttons[i].width, 3, COLOR_WHITE);
-        }
+        button_border_draw(page_buttons[i].x, page_buttons[i].y, page_buttons[i].width, page_buttons[i].height,
+                           data.page_focus_button == i + 1);
+        if (data.page == i) graphics_draw_from_image(data.graphics_behind_tab[i], page_buttons[i].x, 75);
+        else                graphics_fill_rect(page_buttons[i].x, 75, page_buttons[i].width, 3, COLOR_WHITE);
     }
 
-    // Calculate X offset for shifted layouts in foreground elements
-    int base_x = 20;
-    if (data.page == CONFIG_PAGE_UI_CHANGES || data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
-        base_x += LIST_BOX_SHIFT;
+    //  rows fg (focus, borders, knobs)
+
+    content_span span = content_span_for_page((int) data.page, data.layout.has_scrollbar);
+    for (int v = 0; v < data.layout.visible_to - data.layout.visible_from; v++) {
+        const config_widget *w = data.layout.rows[v];
+        int focused = (data.focus_button == (unsigned) (v + 1));
+        int y = data.layout.y[v] + w->y_offset;
+        if (ops_by_type[w->type].draw_fg) ops_by_type[w->type].draw_fg(w, span.x, y, span.text_w, focused);
     }
 
-    int additional_y_offset_fg = 0;
-    for (unsigned int i = 0; i < NUM_VISIBLE_ITEMS && i < data.widgets_per_page[data.page]; i++) {
-        config_widget *w = data.widgets[i + data.starting_option + scrollbar.scroll_position];
-        int y = ITEM_Y_OFFSET + ITEM_HEIGHT * i + additional_y_offset_fg;
-
-        // Use pre-calculated height - check if widget fits in available space
-        if (y + w->height > LIST_BOTTOM) break;
-
-        if (w->type == TYPE_CHECKBOX) {
-            // Use helper function to get checkbox Y from pre-calculated height
-            if (data.focus_button == i + 1) {
-                int checkbox_y = get_checkbox_y_for_focus(w, y);
-                button_border_draw(base_x, checkbox_y, CHECKBOX_CHECK_SIZE, CHECKBOX_CHECK_SIZE, 1);
-            }
-            int extra_height = w->height - ITEM_HEIGHT;
-            additional_y_offset_fg += extra_height;
-
-        } else if (w->type == TYPE_SELECT) {
-            const generic_button *btn = &select_buttons[w->subtype];
-            button_border_draw(btn->x, y + btn->y + w->y_offset,
-                               btn->width, btn->height, data.focus_button == i + 1);
-        }
-    }
+    //  bottom buttons borders
 
     for (size_t i = 0; i < sizeof(bottom_buttons) / sizeof(*bottom_buttons); i++) {
         button_border_draw(bottom_buttons[i].x, bottom_buttons[i].y,
-            bottom_buttons[i].width, bottom_buttons[i].height, data.bottom_focus_button == i + 1);
+                           bottom_buttons[i].width, bottom_buttons[i].height,
+                           data.bottom_focus_button == i + 1);
     }
 
-    if (data.widgets_per_page[data.page] > NUM_VISIBLE_ITEMS) {
+    //  scrollbar (if needed)
+
+    if (data.layout.has_scrollbar) {
         inner_panel_draw(scrollbar.x + 4, scrollbar.y + 28, 2, scrollbar.height / BLOCK_SIZE - 3);
         scrollbar_draw(&scrollbar);
     }
 
-    // Draw list boxes LAST to ensure they're always on top
-    if (data.page == CONFIG_PAGE_UI_CHANGES) {
-        list_box_request_refresh(&data.ui_list_box);  // Ensure refresh every frame
-        list_box_draw(&data.ui_list_box);
-    } else if (data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
-        list_box_request_refresh(&data.city_management_list_box);  // Ensure refresh every frame
-        list_box_draw(&data.city_management_list_box);
+    //  category list (on top)
+
+    if (page_is_category((int) data.page)) {
+        category_page_desc desc = current_category_desc();
+        list_box_request_refresh(desc.lb);
+        list_box_draw(desc.lb);
     }
 
     graphics_reset_dialog();
 }
 
-
-
-static int is_numerical_range(const numerical_range_widget *w, const mouse *m, int x, int y)
-{
-    int extra_width = data.widgets_per_page[data.page] > NUM_VISIBLE_ITEMS ? 0 : 64;
-    if (x + w->x <= m->x && x + w->width_blocks * 16 + w->x + extra_width >= m->x &&
-        y <= m->y && y + 16 > m->y) {
-        return 1;
-    }
-    return 0;
-}
-
-static int numerical_range_handle_mouse(const mouse *m, int x, int y, int numerical_range_id)
-{
-    const numerical_range_widget *w = &ranges[numerical_range_id - 1];
-
-    if (data.active_numerical_range) {
-        if (data.active_numerical_range != numerical_range_id) {
-            return 0;
-        }
-        if (!m->left.is_down) {
-            data.active_numerical_range = 0;
-            return 0;
-        }
-    } else if (!m->left.went_down || !is_numerical_range(w, m, x, y)) {
-        return 0;
-    }
-    if (w->min == w->max) {
-        return 1;
-    }
-    int extra_width = data.widgets_per_page[data.page] > NUM_VISIBLE_ITEMS ? 0 : 64;
-    int slider_width = w->width_blocks * BLOCK_SIZE - NUMERICAL_SLIDER_PADDING * 2 - NUMERICAL_DOT_SIZE + extra_width;
-    int pixels_per_pct = slider_width / (w->max - w->min);
-    int dot_position = m->x - x - w->x - NUMERICAL_DOT_SIZE / 2 + pixels_per_pct / 2;
-
-    int exact_value = calc_bound(w->min + dot_position * (w->max - w->min) / slider_width, w->min, w->max);
-    int left_step_value = (exact_value / w->step) * w->step;
-    int right_step_value = calc_bound(left_step_value + w->step, w->min, w->max);
-    int closest_step_value = (exact_value - left_step_value) < (right_step_value - exact_value) ?
-        left_step_value : right_step_value;
-    if (closest_step_value != *w->value) {
-        *w->value = closest_step_value;
-        window_request_refresh();
-    }
-    data.active_numerical_range = numerical_range_id;
-    return 1;
-}
-
-static void handle_input(const mouse *m, const hotkeys *h)
-{
-
-    const mouse *m_dialog = mouse_in_dialog(m);
-    unsigned int prev_focus = data.focus_button;  // remember
-    data.focus_button = 0;
-
-    // Handle list box input for UI and City Management tabs
-    if (data.page == CONFIG_PAGE_UI_CHANGES) {
-        if (list_box_handle_input(&data.ui_list_box, m_dialog, 1)) {
-            data.page_focus_button = 0;
-            data.bottom_focus_button = 0;
-            return;
-        }
-    } else if (data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
-        if (list_box_handle_input(&data.city_management_list_box, m_dialog, 1)) {
-            data.page_focus_button = 0;
-            data.bottom_focus_button = 0;
-            return;
-        }
-    }
-
-    // Calculate X offset for shifted layouts
-    int base_x = 20;
-    int numerical_x = NUMERICAL_RANGE_X;
-    if (data.page == CONFIG_PAGE_UI_CHANGES || data.page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
-        base_x = 20 + LIST_BOX_SHIFT;
-        numerical_x = NUMERICAL_RANGE_X + LIST_BOX_SHIFT;
-    }
-
-    if (data.active_numerical_range) {
-        numerical_range_handle_mouse(m_dialog, numerical_x, 0, data.active_numerical_range);
-        return;
-    }
-
-    if (scrollbar_handle_mouse(&scrollbar, m_dialog, 1)) {
-        data.page_focus_button = 0;
-        data.bottom_focus_button = 0;
-        window_request_refresh();
-        return;
-    }
-
-    int handled = 0;
-    int additional_y_offset_in = 0;
-
-    for (unsigned int i = 0; i < NUM_VISIBLE_ITEMS && i < data.widgets_per_page[data.page]; i++) {
-        config_widget *w = data.widgets[i + data.starting_option + scrollbar.scroll_position];
-        int y = ITEM_Y_OFFSET + ITEM_HEIGHT * i + additional_y_offset_in;
-        if (y + w->height > LIST_BOTTOM) {
-            break;
-        }
-        if (w->type == TYPE_CHECKBOX) {
-            unsigned int focus = 0;
-            // Use unified checkbox input handler
-            handled |= handle_checkbox_widget_input(m_dialog, base_x, y + w->y_offset, w, &focus);
-            if (focus) {
-                data.focus_button = i + 1;
-            }
-            // Calculate extra height beyond base ITEM_HEIGHT (same as drawing loops)
-            int extra_height = w->height - ITEM_HEIGHT;
-            additional_y_offset_in += extra_height;
-
-        } else if (w->type == TYPE_SELECT) {
-            generic_button *btn = &select_buttons[w->subtype];
-            btn->parameter1 = y + w->y_offset; // anchor stays with shifted row
-            unsigned int focus = 0;
-            handled |= generic_buttons_handle_mouse(m_dialog, 0, y + w->y_offset, btn, 1, &focus);
-            if (focus) {
-                data.focus_button = i + 1;
-            }
-
-        } else if (w->type == TYPE_NUMERICAL_RANGE) {
-            handled |= numerical_range_handle_mouse(m_dialog, numerical_x, y + w->y_offset, w->subtype + 1);
-        }
-    }
-
-    if (prev_focus != data.focus_button) {
-        window_request_refresh(); // repaint foreground 
-    }
-    handled |= generic_buttons_handle_mouse(m_dialog, 0, 0, bottom_buttons,
-        data.has_changes ? NUM_BOTTOM_BUTTONS : NUM_BOTTOM_BUTTONS - 1, &data.bottom_focus_button);
-
-    handled |= generic_buttons_handle_mouse(m_dialog, 0, 0, page_buttons, CONFIG_PAGES, &data.page_focus_button);
-
-    if (!handled && (m->right.went_up || h->escape_pressed)) {
-        window_go_back();
-    }
-    window_request_refresh();
-}
-
-static void on_scroll(void)
-{
-    window_invalidate();
-}
-
-static void toggle_switch(int key)
-{
-    data.config_values[key].new_value = 1 - data.config_values[key].new_value;
-    window_invalidate();
-}
-
-static void set_language(int index)
-{
-    const char *dir = index == 0 ? "" : data.language_options.data_utf8[index];
-    snprintf(data.config_string_values[CONFIG_STRING_UI_LANGUAGE_DIR].new_value, CONFIG_STRING_VALUE_MAX, "%s", dir);
-
-    data.language_options.selected = index;
-}
-
-static void button_hotkeys(const generic_button *button)
-{
-    window_hotkey_config_show();
-}
-
-static void button_language_select(const generic_button *button)
-{
-    int height = button->parameter1;
-
-    window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y() + height, button,
-        data.language_options.options, data.language_options.total, set_language
-    );
-}
-
-static void set_player_name(const uint8_t *name)
-{
-    if (!string_length(name)) {
-        name = lang_get_string(9, 5);
-    }
-    string_copy(name, data.player_name, PLAYER_NAME_LENGTH);
-    encoding_to_utf8(name, data.config_string_values[CONFIG_STRING_ORIGINAL_PLAYER_NAME].new_value,
-        PLAYER_NAME_LENGTH, 0);
-    set_player_name_width();
-    window_invalidate();
-}
-
-static void button_edit_player_name(const generic_button *button)
-{
-    uint8_t player_name[PLAYER_NAME_LENGTH];
-    encoding_from_utf8(data.config_string_values[CONFIG_STRING_ORIGINAL_PLAYER_NAME].new_value,
-        player_name, PLAYER_NAME_LENGTH);
-    window_text_input_show(lang_get_string(31, 0), lang_get_string(9, 5), player_name,
-        PLAYER_NAME_LENGTH, set_player_name);
-}
-
-static void button_change_user_directory(const generic_button *button)
-{
-    window_user_path_setup_show(0);
-}
-
-static void button_reset_defaults(const generic_button *button)
-{
-    for (int i = 0; i < CONFIG_MAX_ENTRIES; ++i) {
-        data.config_values[i].new_value = config_get_default_value(i);
-    }
-    for (int i = 0; i < CONFIG_STRING_MAX_ENTRIES; ++i) {
-        snprintf(data.config_string_values[i].new_value, CONFIG_STRING_VALUE_MAX, "%s",
-            config_get_default_string_value(i));
-    }
-    set_language(0);
-    window_invalidate();
-
-}
+// 
+//    Input
+// 
 
 static void cancel_values(void)
 {
@@ -1643,351 +1450,230 @@ static void cancel_values(void)
         data.config_values[i].new_value = data.config_values[i].original_value;
     }
     for (int i = 0; i < CONFIG_STRING_MAX_ALL; i++) {
-        memcpy(data.config_string_values[i].new_value, data.config_string_values[i].original_value,
-            CONFIG_STRING_VALUE_MAX);
+        memcpy(data.config_string_values[i].new_value, data.config_string_values[i].original_value, CONFIG_STRING_VALUE_MAX);
     }
 }
-
-static int config_change_basic(int key)
-{
-    if (key < CONFIG_MAX_ENTRIES) {
-        config_set(key, data.config_values[key].new_value);
-    }
-    data.config_values[key].original_value = data.config_values[key].new_value;
-    return 1;
-}
-
-static int config_change_game_speed(int key)
-{
-    config_change_basic(key);
-
-    int game_speed = game_speeds[data.config_values[key].new_value];
-
-    while (setting_game_speed() > game_speed) {
-        setting_decrease_game_speed();
-    }
-    while (setting_game_speed() < game_speed) {
-        setting_increase_game_speed();
-    }
-    return 1;
-}
-
-static int config_change_fullscreen(int key)
-{
-    if (!system_is_fullscreen_only()) {
-        system_set_fullscreen(data.config_values[key].new_value);
-        // Force internal fullscreen setting to prevent cases where fullscreen wouldn't trigger
-        // if the user also changed the windowed resolution at the same time
-        if (data.config_values[key].new_value) {
-            setting_set_display(1, screen_width(), screen_height());
-        }
-        config_change_basic(key);
-    }
-    return 1;
-}
-
-static int config_change_display_resolution(int key)
-{
-    if (!system_is_fullscreen_only()) {
-        const resolution *r = &available_resolutions[data.config_values[key].new_value];
-        if (!setting_fullscreen()) {
-            system_resize(r->width, r->height);
-        } else {
-            // Force internal window size to the specified size even though the game stays at fullscreen
-            // If the user then disables fullscreen, the game will switch to the newly set size
-            setting_set_display(0, r->width, r->height);
-            setting_set_display(1, r->width, r->height);
-        }
-        config_change_basic(key);
-    }
-    return 1;
-}
-
-static int config_change_display_scale(int key)
-{
-    data.config_values[key].new_value = system_scale_display(data.config_values[key].new_value);
-    config_change_basic(key);
-    return 1;
-}
-
-static void restart_cursors(void)
-{
-    if (data.reload_cursors) {
-        system_init_cursors(config_get(CONFIG_SCREEN_CURSOR_SCALE));
-        data.reload_cursors = 0;
-    }
-}
-
-static int config_change_cursors(int key)
-{
-    config_change_basic(key);
-    data.reload_cursors = 1;
-    return 1;
-}
-
-static int config_enable_audio(int key)
-{
-    config_change_basic(key);
-    if (data.config_values[key].new_value) {
-        if (data.show_background_image) {
-            sound_music_play_intro();
-        } else {
-            sound_music_stop();
-            sound_music_update(1);
-        }
-    } else {
-        sound_music_stop();
-        sound_speech_stop();
-    }
-    return 1;
-}
-
-static int config_set_master_volume(int key)
-{
-    config_change_basic(key);
-    sound_music_set_volume(setting_sound(SOUND_TYPE_MUSIC)->volume);
-    sound_speech_set_volume(setting_sound(SOUND_TYPE_SPEECH)->volume);
-    sound_effect_set_volume(setting_sound(SOUND_TYPE_EFFECTS)->volume);
-    sound_city_set_volume(setting_sound(SOUND_TYPE_CITY)->volume);
-    return 1;
-}
-
-static int config_enable_music(int key)
-{
-    config_change_basic(key);
-
-    if (setting_sound_is_enabled(SOUND_TYPE_MUSIC) != data.config_values[key].new_value) {
-        setting_toggle_sound_enabled(SOUND_TYPE_MUSIC);
-    }
-    if (data.config_values[key].new_value) {
-        if (data.show_background_image) {
-            sound_music_play_intro();
-        } else {
-            sound_music_stop();
-            sound_music_update(1);
-        }
-    } else {
-        sound_music_stop();
-    }
-    return 1;
-}
-static int config_enable_music_randomise(int key)
-{
-    config_change_basic(key);
-    return 1;
-}
-
-static int config_set_music_volume(int key)
-{
-    config_change_basic(key);
-    setting_set_sound_volume(SOUND_TYPE_MUSIC, data.config_values[key].new_value);
-    sound_music_set_volume(setting_sound(SOUND_TYPE_MUSIC)->volume);
-    return 1;
-}
-
-static int config_enable_speech(int key)
-{
-    config_change_basic(key);
-
-    if (setting_sound_is_enabled(SOUND_TYPE_SPEECH) != data.config_values[key].new_value) {
-        setting_toggle_sound_enabled(SOUND_TYPE_SPEECH);
-    }
-    if (!data.config_values[key].new_value) {
-        sound_speech_stop();
-    }
-    return 1;
-}
-
-static int config_set_speech_volume(int key)
-{
-    config_change_basic(key);
-    setting_set_sound_volume(SOUND_TYPE_SPEECH, data.config_values[key].new_value);
-    sound_speech_set_volume(setting_sound(SOUND_TYPE_SPEECH)->volume);
-    return 1;
-}
-
-static int config_enable_effects(int key)
-{
-    config_change_basic(key);
-
-    if (setting_sound_is_enabled(SOUND_TYPE_EFFECTS) != data.config_values[key].new_value) {
-        setting_toggle_sound_enabled(SOUND_TYPE_EFFECTS);
-    }
-    return 1;
-}
-
-static int config_set_effects_volume(int key)
-{
-    config_change_basic(key);
-    setting_set_sound_volume(SOUND_TYPE_EFFECTS, data.config_values[key].new_value);
-    sound_effect_set_volume(setting_sound(SOUND_TYPE_EFFECTS)->volume);
-    return 1;
-}
-
-static int config_enable_city_sounds(int key)
-{
-    config_change_basic(key);
-
-    if (setting_sound_is_enabled(SOUND_TYPE_CITY) != data.config_values[key].new_value) {
-        setting_toggle_sound_enabled(SOUND_TYPE_CITY);
-    }
-    return 1;
-}
-
-static int config_set_city_sounds_volume(int key)
-{
-    config_change_basic(key);
-    setting_set_sound_volume(SOUND_TYPE_CITY, data.config_values[key].new_value);
-    sound_city_set_volume(setting_sound(SOUND_TYPE_CITY)->volume);
-    return 1;
-}
-
-static int config_change_scroll_speed(int key)
-{
-    config_change_basic(key);
-
-    while (setting_scroll_speed() > data.config_values[key].new_value) {
-        setting_decrease_scroll_speed();
-    }
-    while (setting_scroll_speed() < data.config_values[key].new_value) {
-        setting_increase_scroll_speed();
-    }
-    return 1;
-}
-
-static int config_set_difficulty(int key)
-{
-    config_change_basic(key);
-
-    while (setting_difficulty() > data.config_values[key].new_value) {
-        setting_decrease_difficulty();
-    }
-    while (setting_difficulty() < data.config_values[key].new_value) {
-        setting_increase_difficulty();
-    }
-    return 1;
-}
-
-static int config_enable_gods_effects(int key)
-{
-    config_change_basic(key);
-
-    if (setting_gods_enabled() != data.config_values[key].new_value) {
-        setting_toggle_gods_enabled();
-    }
-    return 1;
-}
-
-static int config_change_string_basic(int key)
-{
-    config_set_string(key, data.config_string_values[key].new_value);
-    memcpy(data.config_string_values[key].original_value, data.config_string_values[key].new_value,
-        CONFIG_STRING_VALUE_MAX);
-    return 1;
-}
-
-static int config_change_string_language(int key)
-{
-    config_set_string(CONFIG_STRING_UI_LANGUAGE_DIR, data.config_string_values[key].new_value);
-    if (!game_reload_language()) {
-        config_set_string(CONFIG_STRING_UI_LANGUAGE_DIR, data.config_string_values[key].original_value);
-        game_reload_language();
-        window_plain_message_dialog_show(TR_INVALID_LANGUAGE_TITLE, TR_INVALID_LANGUAGE_MESSAGE, 1);
-        return 0;
-    }
-
-    char title[100];
-    encoding_to_utf8(lang_get_string(9, 0), title, 100, 0);
-    system_change_window_title(title);
-
-    memcpy(data.config_string_values[key].original_value, data.config_string_values[key].new_value,
-        CONFIG_STRING_VALUE_MAX);
-    string_copy(translation_for(TR_CONFIG_LANGUAGE_DEFAULT), data.language_options.data[0], CONFIG_STRING_VALUE_MAX);
-
-    data.volume_offset = string_copy(translation_for(TR_CONFIG_VOLUME), data.volume_text, 63);
-    data.volume_offset = string_copy(string_from_ascii(" "), data.volume_offset,
-        (int) (data.volume_offset - data.volume_text - 1));
-
-    return 1;
-}
-
-static int config_change_string_player_name(int key)
-{
-    uint8_t player_name[PLAYER_NAME_LENGTH];
-    encoding_from_utf8(data.config_string_values[key].new_value, player_name, PLAYER_NAME_LENGTH);
-    setting_set_player_name(player_name);
-    memcpy(data.config_string_values[key].original_value, data.config_string_values[key].new_value,
-        CONFIG_STRING_VALUE_MAX);
-    return 1;
-}
-
 static int apply_changed_configs(void)
 {
-    if (!data.has_changes) {
-        return 1;
-    }
+    if (!data.has_changes) return 1;
     for (int i = 0; i < CONFIG_MAX_ALL; ++i) {
         if (config_changed(i)) {
-            if (!data.config_values[i].change_action(i)) {
-                return 0;
-            }
+            if (!data.config_values[i].change_action(i)) return 0;
         }
     }
     for (int i = 0; i < CONFIG_STRING_MAX_ALL; ++i) {
         if (config_string_changed(i)) {
-            if (!data.config_string_values[i].change_action(i)) {
-                return 0;
-            }
+            if (!data.config_string_values[i].change_action(i)) return 0;
         }
     }
     restart_cursors();
     return 1;
 }
 
+static void button_hotkeys(const generic_button *button) { window_hotkey_config_show(); }
+static void button_reset_defaults(const generic_button *button)
+{
+    for (int i = 0; i < CONFIG_MAX_ENTRIES; ++i) data.config_values[i].new_value = config_get_default_value(i);
+    for (int i = 0; i < CONFIG_STRING_MAX_ENTRIES; ++i)
+        snprintf(data.config_string_values[i].new_value, CONFIG_STRING_VALUE_MAX, "%s", config_get_default_string_value(i));
+    set_language(0);
+    window_invalidate();
+}
 static void button_close(const generic_button *button)
 {
     int save = button->parameter1;
-
-    if (!save) {
-        cancel_values();
-        window_go_back();
-        return;
-    }
-    if (apply_changed_configs() && save == 1) {
-        config_save();
-        window_go_back();
-        return;
-    }
+    if (!save) { cancel_values(); window_go_back(); return; }
+    if (apply_changed_configs() && save == 1) { config_save(); window_go_back(); return; }
     window_request_refresh();
 }
-
 static void button_page(const generic_button *button)
 {
-    int page = button->parameter1;
-    set_page(page);
-    recalculate_page_heights(page);
-    if (page == CONFIG_PAGE_UI_CHANGES) {
-        list_box_request_refresh(&data.ui_list_box);
-    } else if (page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
-        list_box_request_refresh(&data.city_management_list_box);
-    }
+    data.page = (unsigned) button->parameter1;
+    //  refresh layout and (if on category pages) keep current selection as is
+
     window_invalidate();
 }
+
+static void on_scroll(void)
+{
+    window_invalidate();
+};
+
+static void handle_input(const mouse *m, const hotkeys *h)
+{
+    const mouse *md = mouse_in_dialog(m);
+    unsigned prev_focus = data.focus_button;
+    data.focus_button = 0;
+
+    //  categories first (so clicks don't fall through)
+
+    if (page_is_category( data.page)) {
+        category_page_desc desc = current_category_desc();
+        if (list_box_handle_input(desc.lb, md, 1)) {
+            data.page_focus_button = 0;
+            data.bottom_focus_button = 0;
+            return;
+        }
+    }
+    if (scrollbar_handle_mouse(&scrollbar, md, 1)) {
+        data.page_focus_button = 0;
+        data.bottom_focus_button = 0;
+        window_request_refresh();
+        return;
+    }
+
+    if (data.active_numerical_range) {
+        build_layout_for_current_page();
+        content_span span = content_span_for_page((int) data.page, data.layout.has_scrollbar);
+        //  continue handling for the same id in op_input_range (we don't know which row, so iterate all visible)
+
+        for (int v = 0; v < data.layout.visible_to - data.layout.visible_from; v++) {
+            const config_widget *w = data.layout.rows[v];
+            if (w->type != TYPE_NUMERICAL_RANGE) continue;
+            unsigned f = 0;
+            if (ops_by_type[w->type].handle_input(w, span.x, data.layout.y[v] + w->y_offset, span.text_w, md, &f)) return;
+        }
+        return;
+    }
+    //  rows
+
+    build_layout_for_current_page();
+    content_span span = content_span_for_page((int) data.page, data.layout.has_scrollbar);
+    int handled = 0;
+
+    for (int v = 0; v < data.layout.visible_to - data.layout.visible_from; v++) {
+        const config_widget *w = data.layout.rows[v];
+        unsigned f = 0;
+        if (ops_by_type[w->type].handle_input) {
+            handled |= ops_by_type[w->type].handle_input(w, span.x, data.layout.y[v] + w->y_offset, span.text_w, md, &f);
+            if (f) data.focus_button = v + 1;
+        }
+    }
+
+    //  bottom and page buttons
+
+    handled |= generic_buttons_handle_mouse(md, 0, 0, bottom_buttons, data.has_changes ? NUM_BOTTOM_BUTTONS : NUM_BOTTOM_BUTTONS - 1, &data.bottom_focus_button);
+    handled |= generic_buttons_handle_mouse(md, 0, 0, page_buttons, CONFIG_PAGES, &data.page_focus_button);
+
+    if (!handled && (m->right.went_up || h->escape_pressed)) window_go_back();
+    if (prev_focus != data.focus_button) window_request_refresh();
+    window_request_refresh();
+}
+//    Tooltips
 
 static void get_tooltip(tooltip_context *c)
 {
     if (data.page_focus_button) {
         unsigned int page = data.page_focus_button - 1;
-        if (page == data.page) {
-            return;
-        }
-        int text_width = text_get_width(translation_for(page_names[page]), FONT_NORMAL_BLACK);
-        if (page_buttons[page].width - 15 < text_width) {
+        if (page == data.page) return;
+        int tw = text_get_width(translation_for(page_names[page]), FONT_NORMAL_BLACK);
+        if (page_buttons[page].width - 15 < tw) {
             c->translation_key = page_names[page];
             c->type = TOOLTIP_BUTTON;
         }
     }
 }
+//    Page setup, disabling unavailable widgets, init
+
+static void disable_widget_globally(int type, int subtype)
+{
+    //  general pages
+
+    for (int i = 0; page_general[i].type != TYPE_NONE; ++i)
+        if (page_general[i].type == type && page_general[i].subtype == subtype) page_general[i].enabled = 0;
+    for (int i = 0; page_difficulty[i].type != TYPE_NONE; ++i)
+        if (page_difficulty[i].type == type && page_difficulty[i].subtype == subtype) page_difficulty[i].enabled = 0;
+
+    //  category pages
+
+    for (int c = 0; c < CATEGORY_UI_COUNT; ++c)
+        for (int i = 0; i < MAX_WIDGETS && ui_widgets_by_category[c][i].type != TYPE_NONE; ++i)
+            if (ui_widgets_by_category[c][i].type == type && ui_widgets_by_category[c][i].subtype == subtype)
+                ui_widgets_by_category[c][i].enabled = 0;
+
+    for (int c = 0; c < CATEGORY_CITY_COUNT; ++c)
+        for (int i = 0; i < MAX_WIDGETS && city_mgmt_widgets_by_category[c][i].type != TYPE_NONE; ++i)
+            if (city_mgmt_widgets_by_category[c][i].type == type && city_mgmt_widgets_by_category[c][i].subtype == subtype)
+                city_mgmt_widgets_by_category[c][i].enabled = 0;
+}
+
+static void set_page(unsigned int page)
+{
+    data.page = page;
+    //  reset scroll to top when switching page for simplicity
+
+    scrollbar.scroll_position = 0;
+    window_invalidate();
+}
+
+static void init(unsigned int page, int show_background_image)
+{
+    memset(&data, 0, sizeof(data));
+    data.page = page;
+    data.show_background_image = show_background_image;
+
+    //  init volume prefix
+
+    data.volume_offset = string_copy(translation_for(TR_CONFIG_VOLUME), data.volume_text, 63);
+    data.volume_offset = string_copy(string_from_ascii(" "), data.volume_offset, (int) (data.volume_offset - data.volume_text - 1));
+
+    //  prime numeric configs from core config
+
+    for (int i = 0; i < CONFIG_MAX_ENTRIES; i++) {
+        data.config_values[i].original_value = config_get(i);
+        data.config_values[i].new_value = config_get(i);
+    }
+    for (int i = 0; i < CONFIG_STRING_MAX_ENTRIES; i++) {
+        const char *v = config_get_string(i);
+        snprintf(data.config_string_values[i].original_value, CONFIG_STRING_VALUE_MAX, "%s", v);
+        snprintf(data.config_string_values[i].new_value, CONFIG_STRING_VALUE_MAX, "%s", v);
+    }
+    fetch_original_config_values();
+
+    set_custom_config_changes();
+    set_range_values();
+
+    //  language options (default + dirs)
+
+    string_copy(translation_for(TR_CONFIG_LANGUAGE_DEFAULT), data.language_options.data[0], CONFIG_STRING_VALUE_MAX);
+    data.language_options.options[0] = data.language_options.data[0];
+    data.language_options.total = 1;
+    data.language_options.selected = 0;
+
+    const dir_listing *subdirs = dir_find_all_subdirectories(".");
+    const char *original_value = data.config_string_values[CONFIG_STRING_UI_LANGUAGE_DIR].original_value;
+    for (int i = 0; i < subdirs->num_files; i++) {
+        if (data.language_options.total < MAX_LANGUAGE_DIRS && lang_dir_is_valid(subdirs->files[i].name)) {
+            int opt = data.language_options.total;
+            snprintf(data.language_options.data_utf8[opt], CONFIG_STRING_VALUE_MAX, "%s", subdirs->files[i].name);
+            encoding_from_utf8(subdirs->files[i].name, data.language_options.data[opt], CONFIG_STRING_VALUE_MAX);
+            data.language_options.options[opt] = data.language_options.data[opt];
+            if (strcmp(original_value, subdirs->files[i].name) == 0) data.language_options.selected = opt;
+            data.language_options.total++;
+        }
+    }
+
+    //  system constraints
+
+    if (!system_can_scale_display(0, 0)) {
+        disable_widget_globally(TYPE_HEADER, TR_CONFIG_VIDEO);
+        disable_widget_globally(TYPE_NUMERICAL_DESC, RANGE_RESOLUTION);
+        disable_widget_globally(TYPE_NUMERICAL_RANGE, RANGE_RESOLUTION);
+        disable_widget_globally(TYPE_NUMERICAL_DESC, RANGE_DISPLAY_SCALE);
+        disable_widget_globally(TYPE_NUMERICAL_RANGE, RANGE_DISPLAY_SCALE);
+        disable_widget_globally(TYPE_CHECKBOX, CONFIG_ORIGINAL_FULLSCREEN);
+    }
+    if (system_is_fullscreen_only()) {
+        disable_widget_globally(TYPE_NUMERICAL_DESC, RANGE_CURSOR_SCALE);
+        disable_widget_globally(TYPE_NUMERICAL_RANGE, RANGE_CURSOR_SCALE);
+    }
+
+    init_list_boxes();
+}
+
+// 
+//    Entry
+// 
 
 void window_config_show(window_config_page page, int show_background_image)
 {

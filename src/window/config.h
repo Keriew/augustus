@@ -15,7 +15,8 @@ typedef enum {
     CATEGORY_UI_SCROLLING = 1,
     CATEGORY_UI_BUILDING = 2,
     CATEGORY_UI_CITY_VIEW = 3,
-    CATEGORY_UI_WEATHER = 4
+    CATEGORY_UI_WEATHER = 4,
+    CATEGORY_UI_COUNT
 } ui_config_category;
 
 typedef enum {
@@ -23,6 +24,7 @@ typedef enum {
     CATEGORY_CITY_MANAGEMENT_ROADS = 1,
     CATEGORY_CITY_MANAGEMENT_ROADBLOCK_SETTINGS = 2,
     CATEGORY_CITY_MANAGEMENT_HOUSING = 3,
+    CATEGORY_CITY_COUNT
 } city_management_category;
 
 void window_config_show(window_config_page page, int show_background_image);
