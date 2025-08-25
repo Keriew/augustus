@@ -59,10 +59,12 @@
 #define NUMERICAL_RANGE_X        20
 #define NUMERICAL_SLIDER_PADDING  2
 #define NUMERICAL_DOT_SIZE       20
+// bottom buttons
+#define NUM_BOTTOM_BUTTONS 5
 
 enum {
     TYPE_NONE,
-    TYPE_SPACE,          //  kept for backward compatibility (unused in new layout)
+    TYPE_SPACE,
     TYPE_HEADER,
     TYPE_CHECKBOX,
     TYPE_SELECT,
@@ -116,17 +118,18 @@ enum {
     CONFIG_STRING_MAX_ALL
 };
 
-//  A declarative widget row
+//  Widget main struct - use this for all widgets to ensure unified treatment, while allowing multiline checkboxes,
+//  variable height and width
 
 typedef struct {
     int type;
-    int subtype;                          //  semantic (config key / range / select id)
+    int subtype;
     translation_key description;          //  label / header text key
     const uint8_t *(*get_display_text)(void);
-    int y_offset;                         //  kept for compatibility; small nudges
-    int enabled;                          //  runtime on/off
-    int height;                           //  cached measured height (per pass)
-    int margin_top;                       //  extra spacing before (instead of TYPE_SPACE)
+    int y_offset; //  kept for compatibility 
+    int enabled; //  runtime on/off
+    int height;
+    int margin_top;  //  extra spacing before (can be used instead of TYPE_SPACE)
 } config_widget;
 
 static const uint8_t *display_text_language(void);
@@ -146,9 +149,18 @@ static const uint8_t *display_text_scroll_speed(void);
 static const uint8_t *display_text_difficulty(void);
 static const uint8_t *display_text_max_grand_temples(void);
 static const uint8_t *display_text_autosave_slots(void);
+// page-related helpers
+static int get_widget_count_for(unsigned int page);
+static void set_page(unsigned int page);
+static int page_is_category(unsigned int page);
+//input helpers
+static void on_scroll(void);
 
-static int get_widget_count_for(int page);
+//---------------------------------------------------------------------
+// ---------- WIDGET PLACEMENT IN PAGES IN ORDER ----------------------
+//---------------------------------------------------------------------
 
+// ---------- General ----------------------
 static config_widget page_general[] = {
     {TYPE_SELECT, SELECT_USER_DIRECTORY, TR_USER_DIRETORIES_WINDOW_USER_PATH, display_text_user_directory, 0, 1, ITEM_BASE_H, 8},
     {TYPE_SELECT, SELECT_LANGUAGE,       TR_CONFIG_LANGUAGE_LABEL,            display_text_language,       0, 1, ITEM_BASE_H, 8},
@@ -184,10 +196,67 @@ static config_widget page_general[] = {
     {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_CITY_SOUNDS, TR_CONFIG_CITY_SOUNDS, 0, 1, ITEM_BASE_H, 6},
     {TYPE_NUMERICAL_RANGE, RANGE_CITY_SOUNDS_VOLUME, 0, display_text_city_sounds_volume, 0, 1, ITEM_BASE_H, 2},
     {TYPE_CHECKBOX, CONFIG_GENERAL_ENABLE_VIDEO_SOUND, TR_CONFIG_VIDEO_SOUND, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_NUMERICAL_RANGE, RANGE_VIDEO_VOLUME, 0, display_text_video_volume, 0, 1, ITEM_BASE_H, 2},
 
     {TYPE_NONE}
 };
 
+// ---------- UI ----------------------
+static config_widget ui_widgets_by_category[CATEGORY_UI_COUNT][MAX_WIDGETS] = {
+    //  General
+    {
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_INTRO_VIDEO, TR_CONFIG_SHOW_INTRO_VIDEO, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SIDEBAR_INFO, TR_CONFIG_SIDEBAR_INFO, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_ASK_CONFIRMATION_ON_FILE_OVERWRITE, TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_MOVE_SAVINGS_TO_RIGHT, TR_CONFIG_MOVE_SAVINGS_TO_THE_RIGHT, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_NONE}
+    },
+    //  Scrolling
+    {
+        {TYPE_NUMERICAL_DESC,  RANGE_SCROLL_SPEED, TR_CONFIG_SCROLL_SPEED, 0, 1, ITEM_BASE_H, 10},
+        {TYPE_NUMERICAL_RANGE, RANGE_SCROLL_SPEED, 0, display_text_scroll_speed, 0, 1, ITEM_BASE_H, 2},
+        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_NONE}
+    },
+    //  Building
+    {
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_CONSTRUCTION_SIZE, TR_CONFIG_SHOW_CONSTRUCTION_SIZE, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS, TR_CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_GRID, TR_CONFIG_UI_SHOW_GRID, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_NONE}
+    },
+    //  CityView
+    {
+        {TYPE_CHECKBOX, CONFIG_UI_HIGHLIGHT_LEGIONS, TR_CONFIG_HIGHLIGHT_LEGIONS, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_MILITARY_SIDEBAR, TR_CONFIG_SHOW_MILITARY_SIDEBAR, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_HIGHLIGHT_SELECTED_BUILDING, TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE, TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_NONE}
+    },
+    //  Weather
+    {
+        {TYPE_CHECKBOX, CONFIG_UI_DRAW_CLOUD_SHADOWS, TR_CONFIG_DRAW_CLOUD_SHADOWS, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_DRAW_WEATHER, TR_CONFIG_DRAW_WEATHER, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_NONE}
+    }
+};
+
+// ---------- Diffuculty (GAMEPLAY) ----------------------
 static config_widget page_difficulty[] = {
     {TYPE_NUMERICAL_DESC,  RANGE_DIFFICULTY, TR_CONFIG_DIFFICULTY, 0, 1, ITEM_BASE_H, 10},
     {TYPE_NUMERICAL_RANGE, RANGE_DIFFICULTY, 0, display_text_difficulty, 0, 1, ITEM_BASE_H, 2},
@@ -204,53 +273,9 @@ static config_widget page_difficulty[] = {
     {TYPE_NONE}
 };
 
-static config_widget ui_widgets_by_category[CATEGORY_UI_COUNT][MAX_WIDGETS] = {
-    //  General
-
-    {
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_INTRO_VIDEO, TR_CONFIG_SHOW_INTRO_VIDEO, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SIDEBAR_INFO, TR_CONFIG_SIDEBAR_INFO, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_ASK_CONFIRMATION_ON_FILE_OVERWRITE, TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_MOVE_SAVINGS_TO_RIGHT, TR_CONFIG_MOVE_SAVINGS_TO_THE_RIGHT, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_NONE}
-    },
-    //  Scrolling
-
-    {
-        {TYPE_NUMERICAL_DESC,  RANGE_SCROLL_SPEED, TR_CONFIG_SCROLL_SPEED, 0, 1, ITEM_BASE_H, 10},
-        {TYPE_NUMERICAL_RANGE, RANGE_SCROLL_SPEED, 0, display_text_scroll_speed, 0, 1, ITEM_BASE_H, 2},
-        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_NONE}
-    },
-    //  Building
-
-    {
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_CONSTRUCTION_SIZE, TR_CONFIG_SHOW_CONSTRUCTION_SIZE, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS, TR_CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_GRID, TR_CONFIG_UI_SHOW_GRID, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_NONE}
-    },
-    //  CityView
-
-    {
-        {TYPE_CHECKBOX, CONFIG_UI_HIGHLIGHT_LEGIONS, TR_CONFIG_HIGHLIGHT_LEGIONS, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_MILITARY_SIDEBAR, TR_CONFIG_SHOW_MILITARY_SIDEBAR, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_HIGHLIGHT_SELECTED_BUILDING, TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE, TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_NONE}
-    },
-    //  Weather
-
-    {
-        {TYPE_CHECKBOX, CONFIG_UI_DRAW_CLOUD_SHADOWS, TR_CONFIG_DRAW_CLOUD_SHADOWS, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_DRAW_WEATHER, TR_CONFIG_DRAW_WEATHER, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_NONE}
-    }
-};
-
+// ---------- City Management ----------------------
 static config_widget city_mgmt_widgets_by_category[CATEGORY_CITY_COUNT][MAX_WIDGETS] = {
     //  Storage
-
     {
         {TYPE_CHECKBOX, CONFIG_GP_CH_NO_SUPPLIER_DISTRIBUTION, TR_CONFIG_NO_SUPPLIER_DISTRIBUTION, 0, 1, ITEM_BASE_H, 6},
         {TYPE_CHECKBOX, CONFIG_GP_CH_GETTING_GRANARIES_GO_OFFROAD, TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD, 0, 1, ITEM_BASE_H, 6},
@@ -260,7 +285,6 @@ static config_widget city_mgmt_widgets_by_category[CATEGORY_CITY_COUNT][MAX_WIDG
         {TYPE_NONE}
     },
     //  Roads
-
     {
         {TYPE_CHECKBOX, CONFIG_GP_CH_DELIVER_ONLY_TO_ACCEPTING_GRANARIES, TR_CONFIG_DELIVER_ONLY_TO_ACCEPTING_GRANARIES, 0, 1, ITEM_BASE_H, 6},
         {TYPE_CHECKBOX, CONFIG_GP_CH_TOWER_SENTRIES_GO_OFFROAD, TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD, 0, 1, ITEM_BASE_H, 6},
@@ -269,8 +293,7 @@ static config_widget city_mgmt_widgets_by_category[CATEGORY_CITY_COUNT][MAX_WIDG
         {TYPE_CHECKBOX, CONFIG_GP_CARAVANS_MOVE_OFF_ROAD, TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, 0, 1, ITEM_BASE_H, 6},
         {TYPE_NONE}
     },
-    //  Roadblock settings
-
+    //  Roadblock
     {
         {TYPE_CHECKBOX, CONFIG_GP_CH_GATES_DEFAULT_TO_PASS_ALL_WALKERS, TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, 0, 1, ITEM_BASE_H, 6},
         {TYPE_CHECKBOX, CONFIG_GP_CH_AUTO_KILL_ANIMALS, TR_CONFIG_AUTO_KILL_ANIMALS, 0, 1, ITEM_BASE_H, 6},
@@ -280,7 +303,6 @@ static config_widget city_mgmt_widgets_by_category[CATEGORY_CITY_COUNT][MAX_WIDG
         {TYPE_NONE}
     },
     //  Housing
-
     {
         {TYPE_CHECKBOX, CONFIG_GP_CH_ALL_HOUSES_MERGE, TR_CONFIG_ALL_HOUSES_MERGE, 0, 1, ITEM_BASE_H, 6},
         {TYPE_CHECKBOX, CONFIG_GP_CH_PATRICIAN_DEVOLUTION_FIX, TR_CONFIG_PATRICIAN_DEVOLUTION_FIX, 0, 1, ITEM_BASE_H, 6},
@@ -290,8 +312,7 @@ static config_widget city_mgmt_widgets_by_category[CATEGORY_CITY_COUNT][MAX_WIDG
     }
 };
 
-static void on_scroll(void);
-
+//more typedefs:
 
 typedef struct {
     int width;
@@ -306,6 +327,27 @@ typedef struct {
     int step;
     int *value;
 } numerical_range_widget;
+
+typedef struct {
+    list_box_type *lb;
+    const char **labels;
+    int count;
+    int page_id;
+    int *selected_ref; //  points into selected_categories
+} category_page_properties;
+
+//    Widget ops (measure / draw / input)
+typedef struct {
+    void (*measure)(const config_widget *, int avail_text_w, int *out_h);
+    void (*draw_bg)(const config_widget *, int x, int y, int avail_text_w);
+    void (*draw_fg)(const config_widget *, int x, int y, int avail_text_w, int focused);
+    int  (*handle_input)(const config_widget *, int x, int y, int avail_text_w, const mouse *m, unsigned *focused);
+} widget_ops;
+
+typedef struct {
+    int x;
+    int text_w;
+} content_span;
 
 static scrollbar_type scrollbar = { 580,ITEM_Y_OFFSET,ITEM_BASE_H * NUM_VISIBLE_FALLBACK,
     560,NUM_VISIBLE_FALLBACK,on_scroll, 0, 4
@@ -322,8 +364,15 @@ static resolution available_resolutions[sizeof(resolutions) / sizeof(resolution)
 
 static const int game_speeds[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500 };
 
-//  Select buttons (their X/width are static; Y is computed per-row during layout).
+static const unsigned char page_is_category_helper[CONFIG_PAGES] = {
+    // pages with category submenu
+    [CONFIG_PAGE_GENERAL] = 0,
+    [CONFIG_PAGE_UI_CHANGES] = 1,
+    [CONFIG_PAGE_GAMEPLAY_CHANGES] = 0,
+    [CONFIG_PAGE_CITY_MANAGEMENT_CHANGES] = 1,
+};
 
+// buttons helpers
 static void button_language_select(const generic_button *button);
 static void button_edit_player_name(const generic_button *button);
 static void button_change_user_directory(const generic_button *button);
@@ -346,7 +395,7 @@ static numerical_range_widget ranges[] = {
     {130, 25,   0, 100,  1, 0},   //  effects %
     {130, 25,   0, 100,  1, 0},   //  city %
     {130, 25,   0, 100,  1, 0},   //  video %
-    { 50, 16,   0, 100, 10, 0},   //  scroll speed %
+    { 180, 16,   0, 100, 10, 0},   //  scroll speed %
     {146, 24,   0,   4,  1, 0},   //  difficulty enum index (0..4)
     { 50, 30,   0,   5,  1, 0},   //  max grand temples
     { 50, 30,   1,  20,  1, 0},   //  autosave slots
@@ -360,7 +409,6 @@ static void button_reset_defaults(const generic_button *button);
 static void button_close(const generic_button *button);
 static void button_page(const generic_button *button);
 
-#define NUM_BOTTOM_BUTTONS 5
 static generic_button bottom_buttons[NUM_BOTTOM_BUTTONS] = {
     {  20, 436,  120, 30, button_hotkeys, 0, 0, TR_BUTTON_CONFIGURE_HOTKEYS },
     { 170, 436, 150, 30, button_reset_defaults, 0, 0, TR_BUTTON_RESET_DEFAULTS },
@@ -450,9 +498,7 @@ static struct {
 } data;
 
 //    Generic text helpers
-
-
-static inline int one_line_ml_height(font_t font)
+static int one_line_ml_height(font_t font)
 {
     int h = font_definition_for(font)->line_height;
     if (h < 11) h = 11;
@@ -466,9 +512,7 @@ static uint8_t *percentage_string(uint8_t *s, int p)
     return s;
 }
 
-// 
 //    Config get/set action functions (kept, some grouped)
-// 
 
 static int config_change_basic(int key)
 {
@@ -486,7 +530,7 @@ static int config_change_string_basic(int key)
     return 1;
 }
 
-//  — specialized actions —
+// specialized functions for config options that require more than just value
 
 static int config_change_game_speed(int key)
 {
@@ -540,7 +584,7 @@ static int config_change_cursors(int key)
     return 1;
 }
 
-//  Audio family
+//  Audio  functions
 
 static int config_enable_audio(int key)
 {
@@ -573,7 +617,10 @@ static int config_enable_music(int key)
     } else sound_music_stop();
     return 1;
 }
-static int config_enable_music_randomise(int key) { return config_change_basic(key); }
+static int config_enable_music_randomise(int key)
+{
+    return config_change_basic(key);
+}
 static int config_set_music_volume(int key)
 {
     config_change_basic(key);
@@ -625,7 +672,7 @@ static int config_set_city_sounds_volume(int key)
     return 1;
 }
 
-//  Scroll / difficulty
+//  Scroll
 
 static int config_change_scroll_speed(int key)
 {
@@ -634,6 +681,9 @@ static int config_change_scroll_speed(int key)
     while (setting_scroll_speed() < data.config_values[key].new_value) setting_increase_scroll_speed();
     return 1;
 }
+
+// Difficulty
+
 static int config_set_difficulty(int key)
 {
     config_change_basic(key);
@@ -728,9 +778,7 @@ static const uint8_t *display_text_autosave_slots(void)
     return data.display_text;
 }
 
-// 
 //    Range value binding, custom change-action table, init
-// 
 
 static void set_range_values(void)
 {
@@ -768,7 +816,6 @@ static void set_custom_config_changes(void)
     data.config_values[CONFIG_SCREEN_DISPLAY_SCALE].change_action = config_change_display_scale;
     data.config_values[CONFIG_SCREEN_CURSOR_SCALE].change_action = config_change_cursors;
     data.config_values[CONFIG_SCREEN_COLOR_CURSORS].change_action = config_change_cursors;
-
     data.config_values[CONFIG_ORIGINAL_GAME_SPEED].change_action = config_change_game_speed;
 
     //  audio
@@ -934,13 +981,19 @@ static inline void update_has_changes(void)
     update_scale();
     calculate_available_resolutions_and_fullscreen();
     data.has_changes = 0;
-    for (int i = 0; i < CONFIG_STRING_MAX_ALL && !data.has_changes; i++) if (config_string_changed(i)) data.has_changes = 1;
-    for (int i = 0; i < CONFIG_MAX_ALL && !data.has_changes; i++) if (config_changed(i))        data.has_changes = 1;
+    for (int i = 0; i < CONFIG_STRING_MAX_ALL && !data.has_changes; i++) {
+        if (config_string_changed(i)) {
+            data.has_changes = 1;
+        }
+    }
+    for (int i = 0; i < CONFIG_MAX_ALL && !data.has_changes; i++) {
+        if (config_changed(i)) {
+            data.has_changes = 1;
+        }
+    }
 }
 
-// 
-//    Select button actions
-// 
+//    buttons actions
 
 static void set_language(int index)
 {
@@ -968,45 +1021,33 @@ static void button_edit_player_name(const generic_button *button)
     encoding_from_utf8(data.config_string_values[CONFIG_STRING_ORIGINAL_PLAYER_NAME].new_value, player_name, PLAYER_NAME_LENGTH);
     window_text_input_show(lang_get_string(31, 0), lang_get_string(9, 5), player_name, PLAYER_NAME_LENGTH, set_player_name);
 }
-static void button_change_user_directory(const generic_button *button) { window_user_path_setup_show(0); }
-
-// 
-//    Category list boxes (unified)
-// 
-
-typedef struct {
-    list_box_type *lb;
-    const char **labels;
-    int count;
-    int page_id;
-    int *selected_ref; //  points into selected_categories
-
-} category_page_desc;
-
-static int page_is_category(int page)
+static void button_change_user_directory(const generic_button *button)
 {
-    return page == CONFIG_PAGE_UI_CHANGES || page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES;
+    window_user_path_setup_show(0);
 }
-static category_page_desc current_category_desc(void)
+
+// Category list boxes 
+static int page_is_category(unsigned int page)
 {
+    return (page < CONFIG_PAGES) ? page_is_category_helper[page] : 0;
+}
+
+static category_page_properties current_category_properties(void)
+{
+    category_page_properties properties;
     if (data.page == CONFIG_PAGE_UI_CHANGES) {
-        return (category_page_desc)
-        {
-            &ui_list_box, ui_categories, CATEGORY_UI_COUNT, CONFIG_PAGE_UI_CHANGES,
-                (int *) &selected_categories.ui_category
-        };
+        properties = (category_page_properties) { &ui_list_box, ui_categories, CATEGORY_UI_COUNT, CONFIG_PAGE_UI_CHANGES,
+                (int *) &selected_categories.ui_category };
     } else {
-        return (category_page_desc)
-        {
-            &city_mgmt_list_box, city_mgmt_categories, CATEGORY_CITY_COUNT, CONFIG_PAGE_CITY_MANAGEMENT_CHANGES,
-                (int *) &selected_categories.city_mgmt_category
-        };
+        properties = (category_page_properties) { &city_mgmt_list_box, city_mgmt_categories, CATEGORY_CITY_COUNT,
+             CONFIG_PAGE_CITY_MANAGEMENT_CHANGES,  (int *) &selected_categories.city_mgmt_category };
     }
+    return properties;
 }
+
 static void init_list_boxes(void)
 {
     //  UI
-
     ui_list_box.x = LIST_BOX_X;
     ui_list_box.y = LIST_BOX_Y;
     ui_list_box.width_blocks = LIST_BOX_WIDTH / BLOCK_SIZE;
@@ -1021,9 +1062,7 @@ static void init_list_boxes(void)
     list_box_init(&ui_list_box, CATEGORY_UI_COUNT);
 
     //  City management
-
     city_mgmt_list_box = ui_list_box; //  copy layout
-
     list_box_init(&city_mgmt_list_box, CATEGORY_CITY_COUNT);
 
     list_box_select_index(&ui_list_box, selected_categories.ui_category);
@@ -1048,32 +1087,15 @@ static void draw_list_box_item(const list_box_item *item)
 
 static void handle_list_box_select(unsigned int index, int is_double_click)
 {
-    category_page_desc desc = current_category_desc();
-    if (index < (unsigned) desc.count) {
-        *desc.selected_ref = (int) index;
-
-        // optional: jump to top when changing category
+    category_page_properties properties = current_category_properties();
+    if (index < (unsigned) properties.count) {
+        *properties.selected_ref = (int) index;
         scrollbar.scroll_position = 0;
-
         int count = get_widget_count_for(data.page);
-        //scrollbar.elements_in_view = NUM_VISIBLE_FALLBACK;
         scrollbar_init(&scrollbar, 0, count);
-
         window_request_refresh();
     }
 }
-
-
-// 
-//    Widget ops (measure / draw / input)
-// 
-
-typedef struct {
-    void (*measure)(const config_widget *, int avail_text_w, int *out_h);
-    void (*draw_bg)(const config_widget *, int x, int y, int avail_text_w);
-    void (*draw_fg)(const config_widget *, int x, int y, int avail_text_w, int focused);
-    int  (*handle_input)(const config_widget *, int x, int y, int avail_text_w, const mouse *m, unsigned *focused);
-} widget_ops;
 
 static int checkbox_text_height(const uint8_t *txt, int w)
 {
@@ -1111,22 +1133,29 @@ static void op_draw_fg_checkbox(const config_widget *w, int x, int y, int avail_
 }
 static int op_input_checkbox(const config_widget *w, int x, int y, int avail_text_w, const mouse *m, unsigned *focused)
 {
-    int width = avail_text_w + 30; //  30 includes checkbox + gap
+    int width = avail_text_w + 30; // checkbox + gap
 
-    int height = w->height;
-    if (!(x <= m->x && m->x < x + width && y <= m->y && m->y < y + height)) return 0;
+    // Recompute the actual row height (same logic as measure)
+    int h = checkbox_text_height(translation_for(w->description), avail_text_w) + 8;
+    if (h < ITEM_BASE_H) h = ITEM_BASE_H;
+
+    if (!(x <= m->x && m->x < x + width && y <= m->y && m->y < y + h)) return 0;
     *focused = 1;
     if (m->left.went_up) {
-        data.config_values[w->subtype].new_value = 1 - data.config_values[w->subtype].new_value;
+        data.config_values[w->subtype].new_value ^= 1;
         window_invalidate();
         return 1;
     }
     return 0;
 }
 
+
 //  Select
 
-static void op_measure_select(const config_widget *w, int avail_text_w, int *out_h) { *out_h = ITEM_BASE_H; }
+static void op_measure_select(const config_widget *w, int avail_text_w, int *out_h)
+{
+    *out_h = ITEM_BASE_H;
+}
 static void op_draw_bg_select(const config_widget *w, int x, int y, int avail_text_w)
 {
     text_draw(translation_for(w->description), x, y + 6 + w->y_offset, FONT_NORMAL_BLACK, 0);
@@ -1149,13 +1178,26 @@ static int op_input_select(const config_widget *w, int x, int y, int avail_text_
 
 //  Numerical - desc
 
-static void op_measure_desc(const config_widget *w, int avail_text_w, int *out_h) { *out_h = ITEM_BASE_H; }
+static void op_measure_desc(const config_widget *w, int avail_text_w, int *out_h)
+{
+    *out_h = ITEM_BASE_H;
+}
 static void op_draw_bg_desc(const config_widget *w, int x, int y, int avail_text_w)
 {
     text_draw(translation_for(w->description), x, y + 10 + w->y_offset, FONT_NORMAL_BLACK, 0);
 }
-static void op_draw_fg_desc(const config_widget *w, int x, int y, int avail_text_w, int focused) { (void) w; (void) x; (void) y; (void) avail_text_w; (void) focused; }
-static int  op_input_desc(const config_widget *w, int x, int y, int avail_text_w, const mouse *m, unsigned *focused) { return 0; }
+static void op_draw_fg_desc(const config_widget *w, int x, int y, int avail_text_w, int focused)
+{
+    (void) w;
+    (void) x;
+    (void) y;
+    (void) avail_text_w;
+    (void) focused;
+}
+static int  op_input_desc(const config_widget *w, int x, int y, int avail_text_w, const mouse *m, unsigned *focused)
+{
+    return 0;
+}
 
 //  Numerical - slider
 
@@ -1197,14 +1239,25 @@ static int handle_slider_mouse(const numerical_range_widget *r, const mouse *m, 
     return 1;
 }
 
-static void op_measure_range(const config_widget *w, int avail_text_w, int *out_h) { *out_h = ITEM_BASE_H; }
+static void op_measure_range(const config_widget *w, int avail_text_w, int *out_h)
+{
+    *out_h = ITEM_BASE_H;
+}
 static void op_draw_bg_range(const config_widget *w, int x, int y, int avail_text_w)
 {
     int extra_w = data.layout.has_scrollbar ? 0 : 64;
     int nx = x - (page_is_category((int) data.page) ? (LIST_BOX_SHIFT - NUMERICAL_RANGE_X) : 0);
     numerical_range_draw(&ranges[w->subtype], nx, y + w->y_offset, w->get_display_text(), extra_w);
 }
-static void op_draw_fg_range(const config_widget *w, int x, int y, int avail_text_w, int focused) { (void) w; (void) x; (void) y; (void) avail_text_w; (void) focused; }
+static void op_draw_fg_range(const config_widget *w, int x, int y, int avail_text_w, int focused)
+{    // We don't need to draw any foreground for range widgets,
+    // but the function must exist to satisfy the ops table, therefore the void casts.
+    (void) w;
+    (void) x;
+    (void) y;
+    (void) avail_text_w;
+    (void) focused;
+}
 static int  op_input_range(const config_widget *w, int x, int y, int avail_text_w, const mouse *m, unsigned *focused)
 {
     int extra_w = data.layout.has_scrollbar ? 0 : 64;
@@ -1214,14 +1267,26 @@ static int  op_input_range(const config_widget *w, int x, int y, int avail_text_
 }
 
 //  Header
-
-static void op_measure_header(const config_widget *w, int avail_text_w, int *out_h) { *out_h = ITEM_BASE_H; }
+static void op_measure_header(const config_widget *w, int avail_text_w, int *out_h)
+{
+    *out_h = ITEM_BASE_H;
+}
 static void op_draw_bg_header(const config_widget *w, int x, int y, int avail_text_w)
 {
     text_draw(translation_for(w->description ? w->description : w->subtype), x, y + w->y_offset, FONT_NORMAL_BLACK, 0);
 }
-static void op_draw_fg_header(const config_widget *w, int x, int y, int avail_text_w, int focused) { (void) w; (void) x; (void) y; (void) avail_text_w; (void) focused; }
-static int  op_input_header(const config_widget *w, int x, int y, int avail_text_w, const mouse *m, unsigned *focused) { return 0; }
+static void op_draw_fg_header(const config_widget *w, int x, int y, int avail_text_w, int focused)
+{
+    (void) w;
+    (void) x;
+    (void) y;
+    (void) avail_text_w;
+    (void) focused;
+}
+static int  op_input_header(const config_widget *w, int x, int y, int avail_text_w, const mouse *m, unsigned *focused)
+{
+    return 0;
+}
 
 //  Ops table
 
@@ -1235,9 +1300,7 @@ static const widget_ops ops_by_type[] = {
     [TYPE_NUMERICAL_RANGE] = {op_measure_range, op_draw_bg_range, op_draw_fg_range, op_input_range},
 };
 
-// 
-//    Widget source view (no copying)
-// 
+//   widget lookups
 
 static const config_widget *get_widget_row_for(int page, int index)
 {
@@ -1248,18 +1311,25 @@ static const config_widget *get_widget_row_for(int page, int index)
         src = city_mgmt_widgets_by_category[selected_categories.city_mgmt_category];
     } else if (page == CONFIG_PAGE_GENERAL) {
         src = page_general;
-    } else { //  difficulty
-
+    } else if (page == CONFIG_PAGE_GAMEPLAY_CHANGES) {
         src = page_difficulty;
+    } else {
+        return 0; //unknown page
     }
     for (int i = 0, n = 0; i < MAX_WIDGETS; i++) {
-        if (src[i].type == TYPE_NONE) break;
-        if (!src[i].enabled) continue;
-        if (n++ == index) return &src[i];
+        if (src[i].type == TYPE_NONE) {
+            break;
+        }
+        if (!src[i].enabled) {
+            continue;
+        }
+        if (n++ == index) {
+            return &src[i];
+        }
     }
     return 0;
 }
-static int get_widget_count_for(int page)
+static int get_widget_count_for(unsigned int page)
 {
     const config_widget *src = 0;
     if (page == CONFIG_PAGE_UI_CHANGES)      src = ui_widgets_by_category[selected_categories.ui_category];
@@ -1274,20 +1344,22 @@ static int get_widget_count_for(int page)
 
 //  convenience: compute base x and available text width for checkboxes per page/scrollbar
 
-typedef struct { int x; int text_w; } content_span;
-static content_span content_span_for_page(int page, int has_scrollbar)
+static content_span content_span_for_page(unsigned int page, int has_scrollbar)
 {
     int base_x = 20;
     int text_w = 560 - CHECKBOX_CHECK_SIZE - 15; //  CHECKBOX_TEXT_WIDTH equivalent
 
-    if (!has_scrollbar) text_w += 32;
-    if (page_is_category(page)) { base_x += LIST_BOX_SHIFT; text_w -= LIST_BOX_SHIFT; }
-    return (content_span) { base_x, text_w };
+    if (!has_scrollbar) {
+        text_w += 32;
+    }
+    if (page_is_category(page)) {
+        base_x += LIST_BOX_SHIFT;
+        text_w -= LIST_BOX_SHIFT;
+    }
+    content_span span = { base_x, text_w };
+    return span;
 }
-
-// 
 //    Layout
-// 
 
 static void build_layout_for_current_page(void)
 {
@@ -1300,9 +1372,13 @@ static void build_layout_for_current_page(void)
 
     for (int i = 0; i < count && i < MAX_WIDGETS; i++) {
         const config_widget *w = get_widget_row_for((int) data.page, i);
-        if (!w) break;
+        if (!w) {
+            break;
+        }
         int h = ITEM_BASE_H;
-        if (ops_by_type[w->type].measure) ops_by_type[w->type].measure(w, span.text_w, &h);
+        if (ops_by_type[w->type].measure) {
+            ops_by_type[w->type].measure(w, span.text_w, &h);
+        }
         total_h += (w->margin_top + h);
     }
 
@@ -1310,7 +1386,7 @@ static void build_layout_for_current_page(void)
 
     //  2) final measure with correct scrollbar presence
 
-    span = content_span_for_page((int) data.page, needs_scroll);
+    span = content_span_for_page(data.page, needs_scroll);
     y = ITEM_Y_OFFSET;
     int start = scrollbar.scroll_position;
     if (start < 0) start = 0;
@@ -1338,10 +1414,7 @@ static void build_layout_for_current_page(void)
     data.layout.visible_to = start + v;
     scrollbar.elements_in_view = NUM_VISIBLE_FALLBACK;
 }
-
-// 
 //    Drawing
-// 
 
 static void draw_background(void)
 {
@@ -1374,21 +1447,17 @@ static void draw_background(void)
 
     button_border_draw(10, 75, 620, 355, 0);
 
-    //  lay out rows for current page
+    //  layout rows for current page
 
     build_layout_for_current_page();
     content_span span = content_span_for_page((int) data.page, data.layout.has_scrollbar);
-
     //  draw background of rows
-
     for (int v = 0; v < data.layout.visible_to - data.layout.visible_from; v++) {
         const config_widget *w = data.layout.rows[v];
         int y = data.layout.y[v] + w->y_offset;
         if (ops_by_type[w->type].draw_bg) ops_by_type[w->type].draw_bg(w, span.x, y, span.text_w);
     }
-
     //  bottom buttons text
-
     for (size_t i = 0; i < sizeof(bottom_buttons) / sizeof(*bottom_buttons); i++) {
         int disabled = i == NUM_BOTTOM_BUTTONS - 1 && !data.has_changes;
         text_draw_centered(translation_for(bottom_buttons[i].parameter2),
@@ -1405,7 +1474,6 @@ static void draw_foreground(void)
     graphics_in_dialog();
 
     //  tab tops & borders
-
     for (unsigned int i = 0; i < CONFIG_PAGES; ++i) {
         button_border_draw(page_buttons[i].x, page_buttons[i].y, page_buttons[i].width, page_buttons[i].height,
                            data.page_focus_button == i + 1);
@@ -1414,7 +1482,6 @@ static void draw_foreground(void)
     }
 
     //  rows fg (focus, borders, knobs)
-
     content_span span = content_span_for_page((int) data.page, data.layout.has_scrollbar);
     for (int v = 0; v < data.layout.visible_to - data.layout.visible_from; v++) {
         const config_widget *w = data.layout.rows[v];
@@ -1424,7 +1491,6 @@ static void draw_foreground(void)
     }
 
     //  bottom buttons borders
-
     for (size_t i = 0; i < sizeof(bottom_buttons) / sizeof(*bottom_buttons); i++) {
         button_border_draw(bottom_buttons[i].x, bottom_buttons[i].y,
                            bottom_buttons[i].width, bottom_buttons[i].height,
@@ -1432,16 +1498,13 @@ static void draw_foreground(void)
     }
 
     //  scrollbar (if needed)
-
     if (data.layout.has_scrollbar) {
         inner_panel_draw(scrollbar.x + 4, scrollbar.y + 28, 2, scrollbar.height / BLOCK_SIZE - 3);
         scrollbar_draw(&scrollbar);
     }
-
     //  category list (on top)
-
     if (page_is_category((int) data.page)) {
-        category_page_desc desc = current_category_desc();
+        category_page_properties desc = current_category_properties();
         list_box_request_refresh(desc.lb);
         list_box_draw(desc.lb);
     }
@@ -1449,9 +1512,7 @@ static void draw_foreground(void)
     graphics_reset_dialog();
 }
 
-// 
 //    Input
-// 
 
 static void cancel_values(void)
 {
@@ -1479,7 +1540,10 @@ static int apply_changed_configs(void)
     return 1;
 }
 
-static void button_hotkeys(const generic_button *button) { window_hotkey_config_show(); }
+static void button_hotkeys(const generic_button *button)
+{
+    window_hotkey_config_show();
+}
 static void button_reset_defaults(const generic_button *button)
 {
     for (int i = 0; i < CONFIG_MAX_ENTRIES; ++i) data.config_values[i].new_value = config_get_default_value(i);
@@ -1497,9 +1561,8 @@ static void button_close(const generic_button *button)
 }
 static void button_page(const generic_button *button)
 {
-    data.page = (unsigned) button->parameter1;
+    set_page((unsigned) button->parameter1);
     //  refresh layout and (if on category pages) keep current selection as is
-
     window_invalidate();
 }
 
@@ -1517,7 +1580,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
     //  categories first (so clicks don't fall through)
 
     if (page_is_category(data.page)) {
-        category_page_desc desc = current_category_desc();
+        category_page_properties desc = current_category_properties();
         if (list_box_handle_input(desc.lb, md, 1)) {
             data.page_focus_button = 0;
             data.bottom_focus_button = 0;
@@ -1686,11 +1749,6 @@ static void init(unsigned int page, int show_background_image)
 
     init_list_boxes();
 }
-
-// 
-//    Entry
-// 
-
 void window_config_show(window_config_page page, int show_background_image)
 {
     window_type window = {
