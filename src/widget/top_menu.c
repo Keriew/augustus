@@ -543,7 +543,7 @@ static int draw_health_panel(int offset, int box_width, font_t font)
 
     // center it in the box
     int x = offset + (box_width - health_w) / 2;
-    text_draw_number(health, ' ', "", x, 5, font, color);
+    text_draw_number(health, ' ', "", x + 10, 5, font, color);
 
     return box_width;
 }
