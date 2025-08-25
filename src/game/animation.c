@@ -1,6 +1,7 @@
 #include "animation.h"
 
 #include "core/time.h"
+#include "graphics/window.h"
 
 #define MAX_ANIM_TIMERS 51
 
@@ -25,7 +26,7 @@ void game_animation_update(void)
     }
     unsigned int delay_millis = 0;
     for (int i = 0; i < MAX_ANIM_TIMERS; i++) {
-        if (now_millis - timers[i].last_update >= delay_millis) {
+        if (now_millis - timers[i].last_update >= delay_millis && window_is(WINDOW_CITY)) {
             timers[i].should_update = 1;
             timers[i].last_update = now_millis;
         }
