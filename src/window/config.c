@@ -271,6 +271,8 @@ static config_widget page_difficulty[] = {
     {TYPE_CHECKBOX, CONFIG_GP_CH_DISABLE_INFINITE_WOLVES_SPAWNING, TR_CONFIG_GP_CH_DISABLE_INFINITE_WOLVES_SPAWNING, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_NUMERICAL_DESC, RANGE_MAX_GRAND_TEMPLES, TR_CONFIG_MAX_GRAND_TEMPLES, NULL, 0, 1, ITEM_BASE_H, 10},
     {TYPE_NUMERICAL_RANGE, RANGE_MAX_GRAND_TEMPLES, 0, display_text_max_grand_temples, 0, 1, ITEM_BASE_H, 2},
+    {TYPE_SPACE, 0, 0, NULL, 0, 1, ITEM_BASE_H, 0},
+    {TYPE_SPACE, 0, 0, NULL, 0, 1, ITEM_BASE_H, 0}, //two spaces to visually match the padding to the general settings
     {TYPE_NONE}
 };
 
@@ -1109,6 +1111,13 @@ static void handle_list_box_select(unsigned int index, int is_double_click)
     }
 }
 
+static void op_measure_space(const config_widget *w, int avail_text_w, int *out_h)
+{
+    (void) avail_text_w;
+    // Default to one item high, but allow overriding via w->height if set.
+    *out_h = (w && w->height > 0) ? w->height : ITEM_BASE_H;
+}
+
 static int checkbox_text_height(const uint8_t *txt, int w)
 {
     int largest = 0;
@@ -1300,7 +1309,7 @@ static int  op_input_header(const config_widget *w, int x, int y, int avail_text
 
 static const widget_ops ops_by_type[] = {
     [TYPE_NONE] = {0},
-    [TYPE_SPACE] = {0},
+    [TYPE_SPACE] = {op_measure_space, 0, 0, 0},
     [TYPE_HEADER] = {op_measure_header, op_draw_bg_header, op_draw_fg_header, op_input_header},
     [TYPE_CHECKBOX] = {op_measure_checkbox, op_draw_bg_checkbox, op_draw_fg_checkbox, op_input_checkbox},
     [TYPE_SELECT] = {op_measure_select, op_draw_bg_select, op_draw_fg_select, op_input_select},
