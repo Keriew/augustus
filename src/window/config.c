@@ -43,6 +43,7 @@
 #define ITEM_Y_OFFSET  100
 #define ITEM_BASE_H     24
 #define CHECKBOX_CHECK_SIZE 20
+#define CHECKBOX_MARGIN 5
 #define PLAYER_NAME_LENGTH 32
 //  Left list (category)
 #define LIST_BOX_SHIFT   180
@@ -171,31 +172,31 @@ static config_widget page_general[] = {
 
     {TYPE_NUMERICAL_DESC, RANGE_MAX_AUTOSAVE_SLOTS, TR_CONFIG_MAX_AUTOSAVE_SLOTS, NULL, 0, 1, ITEM_BASE_H, 10},
     {TYPE_NUMERICAL_RANGE, RANGE_MAX_AUTOSAVE_SLOTS, 0, display_text_autosave_slots, 0, 1, ITEM_BASE_H, 2},
-    {TYPE_CHECKBOX, CONFIG_GP_CH_YEARLY_AUTOSAVE, TR_BUTTON_YEARLY_AUTOSAVE_ON, NULL, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_CHECKBOX, CONFIG_GP_CH_YEARLY_AUTOSAVE, TR_BUTTON_YEARLY_AUTOSAVE_ON, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
 
     {TYPE_HEADER, 0, TR_CONFIG_VIDEO, NULL, 0, 1, ITEM_BASE_H, 14},
-    {TYPE_CHECKBOX, CONFIG_ORIGINAL_FULLSCREEN, TR_CONFIG_FULLSCREEN, NULL, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_CHECKBOX, CONFIG_ORIGINAL_FULLSCREEN, TR_CONFIG_FULLSCREEN, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_NUMERICAL_DESC, RANGE_RESOLUTION, TR_CONFIG_WINDOWED_RESOLUTION, NULL, 0, 1, ITEM_BASE_H, 10},
     {TYPE_NUMERICAL_RANGE, RANGE_RESOLUTION, 0, display_text_resolution, 0, 1, ITEM_BASE_H, 2},
     {TYPE_NUMERICAL_DESC, RANGE_DISPLAY_SCALE, TR_CONFIG_DISPLAY_SCALE, NULL, 0, 1, ITEM_BASE_H, 10},
     {TYPE_NUMERICAL_RANGE, RANGE_DISPLAY_SCALE, 0, display_text_display_scale, 0, 1, ITEM_BASE_H, 2},
     {TYPE_NUMERICAL_DESC, RANGE_CURSOR_SCALE, TR_CONFIG_CURSOR_SCALE, NULL, 0, 1, ITEM_BASE_H, 10},
     {TYPE_NUMERICAL_RANGE, RANGE_CURSOR_SCALE, 0, display_text_cursor_scale, 0, 1, ITEM_BASE_H, 2},
-    {TYPE_CHECKBOX, CONFIG_SCREEN_COLOR_CURSORS, TR_CONFIG_USE_COLOR_CURSORS, NULL, 0, 1, ITEM_BASE_H, 14},
+    {TYPE_CHECKBOX, CONFIG_SCREEN_COLOR_CURSORS, TR_CONFIG_USE_COLOR_CURSORS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
 
     {TYPE_HEADER, 0, TR_CONFIG_AUDIO, NULL, 0, 1, ITEM_BASE_H, 14},
-    {TYPE_CHECKBOX, CONFIG_GENERAL_ENABLE_AUDIO, TR_CONFIG_ENABLE_AUDIO, NULL, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_CHECKBOX, CONFIG_GENERAL_ENABLE_AUDIO, TR_CONFIG_ENABLE_AUDIO, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_NUMERICAL_RANGE, RANGE_MASTER_VOLUME, 0, display_text_master_volume, 0, 1, ITEM_BASE_H, 2},
-    {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_MUSIC, TR_CONFIG_MUSIC, NULL, 0, 1, ITEM_BASE_H, 6},
-    {TYPE_CHECKBOX, CONFIG_GENERAL_ENABLE_MUSIC_RANDOMISE, TR_CONFIG_RANDOMISE_MUSIC, NULL, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_MUSIC, TR_CONFIG_MUSIC, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+    {TYPE_CHECKBOX, CONFIG_GENERAL_ENABLE_MUSIC_RANDOMISE, TR_CONFIG_RANDOMISE_MUSIC, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_NUMERICAL_RANGE, RANGE_MUSIC_VOLUME, 0, display_text_music_volume, 0, 1, ITEM_BASE_H, 2},
-    {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_SPEECH, TR_CONFIG_SPEECH, NULL, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_SPEECH, TR_CONFIG_SPEECH, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_NUMERICAL_RANGE, RANGE_SPEECH_VOLUME, 0, display_text_speech_volume, 0, 1, ITEM_BASE_H, 2},
-    {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_SOUND_EFFECTS, TR_CONFIG_EFFECTS, NULL, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_SOUND_EFFECTS, TR_CONFIG_EFFECTS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_NUMERICAL_RANGE, RANGE_SOUND_EFFECTS_VOLUME, 0, display_text_sound_effects_volume, 0, 1, ITEM_BASE_H, 2},
-    {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_CITY_SOUNDS, TR_CONFIG_CITY_SOUNDS, NULL, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_CITY_SOUNDS, TR_CONFIG_CITY_SOUNDS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_NUMERICAL_RANGE, RANGE_CITY_SOUNDS_VOLUME, 0, display_text_city_sounds_volume, 0, 1, ITEM_BASE_H, 2},
-    {TYPE_CHECKBOX, CONFIG_GENERAL_ENABLE_VIDEO_SOUND, TR_CONFIG_VIDEO_SOUND, NULL, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_CHECKBOX, CONFIG_GENERAL_ENABLE_VIDEO_SOUND, TR_CONFIG_VIDEO_SOUND, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_NUMERICAL_RANGE, RANGE_VIDEO_VOLUME, 0, display_text_video_volume, 0, 1, ITEM_BASE_H, 2},
 
     {TYPE_NONE}
@@ -206,54 +207,50 @@ static config_widget page_general[] = {
 static config_widget ui_widgets_by_category[CATEGORY_UI_COUNT][MAX_WIDGETS] = {
     // General
     {
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_INTRO_VIDEO, TR_CONFIG_SHOW_INTRO_VIDEO, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SIDEBAR_INFO, TR_CONFIG_SIDEBAR_INFO, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_ASK_CONFIRMATION_ON_FILE_OVERWRITE, TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_MOVE_SAVINGS_TO_RIGHT, TR_CONFIG_MOVE_SAVINGS_TO_THE_RIGHT, NULL, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_INTRO_VIDEO, TR_CONFIG_SHOW_INTRO_VIDEO, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_SIDEBAR_INFO, TR_CONFIG_SIDEBAR_INFO, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_ASK_CONFIRMATION_ON_FILE_OVERWRITE, TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_MAX_PROSPERITY, TR_CONFIG_SHOW_MAX_POSSIBLE_PROSPERITY, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_DIGIT_SEPARATOR, TR_CONFIG_DIGIT_SEPARATOR, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_MESSAGE_ALERTS, TR_CONFIG_UI_MESSAGE_ALERTS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     },
     // Scrolling
     {
         {TYPE_NUMERICAL_DESC, RANGE_SCROLL_SPEED, TR_CONFIG_SCROLL_SPEED, NULL, 0, 1, ITEM_BASE_H, 10},
         {TYPE_NUMERICAL_RANGE, RANGE_SCROLL_SPEED, 0, display_text_scroll_speed, 0, 1, ITEM_BASE_H, 2},
-        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, NULL, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_DISABLE_MOUSE_EDGE_SCROLLING, TR_CONFIG_DISABLE_MOUSE_EDGE_SCROLLING, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_DISABLE_RIGHT_CLICK_MAP_DRAG, TR_CONFIG_DISABLE_RIGHT_CLICK_MAP_DRAG, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_INVERSE_MAP_DRAG, TR_CONFIG_UI_INVERSE_MAP_DRAG, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     },
     // Building
     {
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_CONSTRUCTION_SIZE, TR_CONFIG_SHOW_CONSTRUCTION_SIZE, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS, TR_CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_GRID, TR_CONFIG_UI_SHOW_GRID, NULL, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_CONSTRUCTION_SIZE, TR_CONFIG_SHOW_CONSTRUCTION_SIZE, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS, TR_CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_GRID, TR_CONFIG_UI_SHOW_GRID, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_PARTIAL_GRID_AROUND_CONSTRUCTION, TR_CONFIG_UI_SHOW_PARTIAL_GRID_AROUND_CONSTRUCTION, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_ROAMING_PATH, TR_CONFIG_SHOW_ROAMING_PATH, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_DESIRABILITY_RANGE, TR_CONFIG_SHOW_DESIRABILITY_RANGE, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL, TR_CONFIG_SHOW_DESIRABILITY_RANGE_ALL, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE, TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     },
     // CityView
     {
-        {TYPE_CHECKBOX, CONFIG_UI_HIGHLIGHT_LEGIONS, TR_CONFIG_HIGHLIGHT_LEGIONS, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_MILITARY_SIDEBAR, TR_CONFIG_SHOW_MILITARY_SIDEBAR, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_HIGHLIGHT_SELECTED_BUILDING, TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE, TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE, NULL, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_HIGHLIGHT_LEGIONS, TR_CONFIG_HIGHLIGHT_LEGIONS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_MILITARY_SIDEBAR, TR_CONFIG_SHOW_MILITARY_SIDEBAR, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_HIGHLIGHT_SELECTED_BUILDING, TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+
+        {TYPE_CHECKBOX, CONFIG_UI_MOVE_SAVINGS_TO_RIGHT, TR_CONFIG_MOVE_SAVINGS_TO_THE_RIGHT, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_DRAW_ASCLEPIUS, TR_CONFIG_DRAW_ASCLEPIUS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     },
     // Weather
     {
-        {TYPE_CHECKBOX, CONFIG_UI_DRAW_CLOUD_SHADOWS, TR_CONFIG_DRAW_CLOUD_SHADOWS, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_UI_DRAW_WEATHER, TR_CONFIG_DRAW_WEATHER, NULL, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_UI_DRAW_CLOUD_SHADOWS, TR_CONFIG_DRAW_CLOUD_SHADOWS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_DRAW_WEATHER, TR_CONFIG_DRAW_WEATHER, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     }
 };
@@ -261,16 +258,16 @@ static config_widget ui_widgets_by_category[CATEGORY_UI_COUNT][MAX_WIDGETS] = {
 
 // ---------- Difficulty (GAMEPLAY) ----------------------
 static config_widget page_difficulty[] = {
-    {TYPE_NUMERICAL_DESC, RANGE_DIFFICULTY, TR_CONFIG_DIFFICULTY, NULL, 0, 1, ITEM_BASE_H, 10},
+    {TYPE_NUMERICAL_DESC, RANGE_DIFFICULTY, TR_CONFIG_DIFFICULTY, NULL, 0, 1, ITEM_BASE_H, 0},
     {TYPE_NUMERICAL_RANGE, RANGE_DIFFICULTY, 0, display_text_difficulty, 0, 1, ITEM_BASE_H, 2},
-    {TYPE_CHECKBOX, CONFIG_ORIGINAL_GODS_EFFECTS, TR_CONFIG_GODS_EFFECTS, NULL, 0, 1, ITEM_BASE_H, 6},
-    {TYPE_CHECKBOX, CONFIG_GP_CH_JEALOUS_GODS, TR_CONFIG_JEALOUS_GODS, NULL, 0, 1, ITEM_BASE_H, 6},
-    {TYPE_CHECKBOX, CONFIG_GP_CH_GLOBAL_LABOUR, TR_CONFIG_GLOBAL_LABOUR, NULL, 0, 1, ITEM_BASE_H, 6},
-    {TYPE_CHECKBOX, CONFIG_GP_CH_RETIRE_AT_60, TR_CONFIG_RETIRE_AT_60, NULL, 0, 1, ITEM_BASE_H, 6},
-    {TYPE_CHECKBOX, CONFIG_GP_CH_FIXED_WORKERS, TR_CONFIG_FIXED_WORKERS, NULL, 0, 1, ITEM_BASE_H, 6},
-    {TYPE_CHECKBOX, CONFIG_GP_CH_WOLVES_BLOCK, TR_CONFIG_WOLVES_BLOCK, NULL, 0, 1, ITEM_BASE_H, 6},
-    {TYPE_CHECKBOX, CONFIG_GP_CH_MULTIPLE_BARRACKS, TR_CONFIG_MULTIPLE_BARRACKS, NULL, 0, 1, ITEM_BASE_H, 6},
-    {TYPE_CHECKBOX, CONFIG_GP_CH_DISABLE_INFINITE_WOLVES_SPAWNING, TR_CONFIG_GP_CH_DISABLE_INFINITE_WOLVES_SPAWNING, NULL, 0, 1, ITEM_BASE_H, 6},
+    {TYPE_CHECKBOX, CONFIG_ORIGINAL_GODS_EFFECTS, TR_CONFIG_GODS_EFFECTS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+    {TYPE_CHECKBOX, CONFIG_GP_CH_JEALOUS_GODS, TR_CONFIG_JEALOUS_GODS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+    {TYPE_CHECKBOX, CONFIG_GP_CH_GLOBAL_LABOUR, TR_CONFIG_GLOBAL_LABOUR, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+    {TYPE_CHECKBOX, CONFIG_GP_CH_RETIRE_AT_60, TR_CONFIG_RETIRE_AT_60, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+    {TYPE_CHECKBOX, CONFIG_GP_CH_FIXED_WORKERS, TR_CONFIG_FIXED_WORKERS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+    {TYPE_CHECKBOX, CONFIG_GP_CH_WOLVES_BLOCK, TR_CONFIG_WOLVES_BLOCK, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+    {TYPE_CHECKBOX, CONFIG_GP_CH_MULTIPLE_BARRACKS, TR_CONFIG_MULTIPLE_BARRACKS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+    {TYPE_CHECKBOX, CONFIG_GP_CH_DISABLE_INFINITE_WOLVES_SPAWNING, TR_CONFIG_GP_CH_DISABLE_INFINITE_WOLVES_SPAWNING, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_NUMERICAL_DESC, RANGE_MAX_GRAND_TEMPLES, TR_CONFIG_MAX_GRAND_TEMPLES, NULL, 0, 1, ITEM_BASE_H, 10},
     {TYPE_NUMERICAL_RANGE, RANGE_MAX_GRAND_TEMPLES, 0, display_text_max_grand_temples, 0, 1, ITEM_BASE_H, 2},
     {TYPE_NONE}
@@ -280,37 +277,37 @@ static config_widget page_difficulty[] = {
 static config_widget city_mgmt_widgets_by_category[CATEGORY_CITY_COUNT][MAX_WIDGETS] = {
     // Storage
     {
-        {TYPE_CHECKBOX, CONFIG_GP_CH_NO_SUPPLIER_DISTRIBUTION, TR_CONFIG_NO_SUPPLIER_DISTRIBUTION, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_GETTING_GRANARIES_GO_OFFROAD, TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_GRANARIES_GET_DOUBLE, TR_CONFIG_GRANARIES_GET_DOUBLE, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_ALLOW_EXPORTING_FROM_GRANARIES, TR_CONFIG_ALLOW_EXPORTING_FROM_GRANARIES, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_FARMS_DELIVER_CLOSE, TR_CONFIG_FARMS_DELIVER_CLOSE, NULL, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_NO_SUPPLIER_DISTRIBUTION, TR_CONFIG_NO_SUPPLIER_DISTRIBUTION, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_GETTING_GRANARIES_GO_OFFROAD, TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_GRANARIES_GET_DOUBLE, TR_CONFIG_GRANARIES_GET_DOUBLE, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_ALLOW_EXPORTING_FROM_GRANARIES, TR_CONFIG_ALLOW_EXPORTING_FROM_GRANARIES, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_FARMS_DELIVER_CLOSE, TR_CONFIG_FARMS_DELIVER_CLOSE, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     },
     // Roads
     {
-        {TYPE_CHECKBOX, CONFIG_GP_CH_DELIVER_ONLY_TO_ACCEPTING_GRANARIES, TR_CONFIG_DELIVER_ONLY_TO_ACCEPTING_GRANARIES, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_TOWER_SENTRIES_GO_OFFROAD, TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_ROAMERS_DONT_SKIP_CORNERS, TR_CONFIG_ROAMERS_DONT_SKIP_CORNERS, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_GP_CARAVANS_MOVE_OFF_ROAD, TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, NULL, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_DELIVER_ONLY_TO_ACCEPTING_GRANARIES, TR_CONFIG_DELIVER_ONLY_TO_ACCEPTING_GRANARIES, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_TOWER_SENTRIES_GO_OFFROAD, TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_ROAMERS_DONT_SKIP_CORNERS, TR_CONFIG_ROAMERS_DONT_SKIP_CORNERS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CARAVANS_MOVE_OFF_ROAD, TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     },
     // Roadblock
     {
-        {TYPE_CHECKBOX, CONFIG_GP_CH_GATES_DEFAULT_TO_PASS_ALL_WALKERS, TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_AUTO_KILL_ANIMALS, TR_CONFIG_AUTO_KILL_ANIMALS, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_WAREHOUSES_DONT_ACCEPT, TR_CONFIG_NOT_ACCEPTING_WAREHOUSES, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_MARKETS_DONT_ACCEPT, TR_CONFIG_NOT_ACCEPTING_MARKETS, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_GP_STORAGE_INCREMENT_4, TR_CONFIG_STORAGE_STEP_4, NULL, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_GATES_DEFAULT_TO_PASS_ALL_WALKERS, TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_AUTO_KILL_ANIMALS, TR_CONFIG_AUTO_KILL_ANIMALS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_WAREHOUSES_DONT_ACCEPT, TR_CONFIG_NOT_ACCEPTING_WAREHOUSES, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_MARKETS_DONT_ACCEPT, TR_CONFIG_NOT_ACCEPTING_MARKETS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_STORAGE_INCREMENT_4, TR_CONFIG_STORAGE_STEP_4, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     },
     // Housing
     {
-        {TYPE_CHECKBOX, CONFIG_GP_CH_ALL_HOUSES_MERGE, TR_CONFIG_ALL_HOUSES_MERGE, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_PATRICIAN_DEVOLUTION_FIX, TR_CONFIG_PATRICIAN_DEVOLUTION_FIX, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_RANDOM_COLLAPSES_TAKE_MONEY, TR_CONFIG_RANDOM_COLLAPSES_TAKE_MONEY, NULL, 0, 1, ITEM_BASE_H, 6},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_HOUSES_DONT_EXPAND_INTO_GARDENS, TR_CONFIG_HOUSES_DONT_EXPAND_INTO_GARDENS, NULL, 0, 1, ITEM_BASE_H, 6},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_ALL_HOUSES_MERGE, TR_CONFIG_ALL_HOUSES_MERGE, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_PATRICIAN_DEVOLUTION_FIX, TR_CONFIG_PATRICIAN_DEVOLUTION_FIX, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_RANDOM_COLLAPSES_TAKE_MONEY, TR_CONFIG_RANDOM_COLLAPSES_TAKE_MONEY, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_HOUSES_DONT_EXPAND_INTO_GARDENS, TR_CONFIG_HOUSES_DONT_EXPAND_INTO_GARDENS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     }
 };
@@ -399,7 +396,7 @@ static numerical_range_widget ranges[] = {
     {130, 25,   0, 100,  1, 0},   //  effects %
     {130, 25,   0, 100,  1, 0},   //  city %
     {130, 25,   0, 100,  1, 0},   //  video %
-    { 180, 16,   0, 100, 10, 0},   //  scroll speed %
+    { 50, 18,   0, 100, 10, 0},   //  scroll speed %
     {146, 24,   0,   4,  1, 0},   //  difficulty enum index (0..4)
     { 50, 30,   0,   5,  1, 0},   //  max grand temples
     { 50, 30,   1,  20,  1, 0},   //  autosave slots
@@ -436,10 +433,10 @@ static translation_key page_names[CONFIG_PAGES] = {
 };
 
 static const char *ui_categories[CATEGORY_UI_COUNT] = {
-    "General", "Scrolling", "Building", "CityView", "Weather"
+    "General", "Scrolling and Map", "Building", "City View", "Weather"
 };
 static const char *city_mgmt_categories[CATEGORY_CITY_COUNT] = {
-    "Storage", "Roads", "Roadblocks", "Housing"
+    "Storage and Markets", "Roads", "Roadblocks", "Housing"
 };
 
 static struct {
@@ -454,7 +451,7 @@ static list_box_type city_mgmt_list_box;
 
 static void draw_list_box_item(const list_box_item *item);
 static void handle_list_box_select(unsigned int index, int is_double_click);
-
+static void list_box_tooltip(const list_box_item *item, tooltip_context *c);
 //    Data model & helpers
 
 static struct {
@@ -1062,7 +1059,7 @@ static void init_list_boxes(void)
     ui_list_box.decorate_scrollbar = 1;
     ui_list_box.draw_item = draw_list_box_item;
     ui_list_box.on_select = handle_list_box_select;
-    ui_list_box.handle_tooltip = 0;
+    ui_list_box.handle_tooltip = list_box_tooltip;
     list_box_init(&ui_list_box, CATEGORY_UI_COUNT);
 
     //  City management
@@ -1076,7 +1073,7 @@ static void init_list_boxes(void)
 static void draw_list_box_item(const list_box_item *item)
 {
     const char **labels = (data.page == CONFIG_PAGE_UI_CHANGES) ? ui_categories : city_mgmt_categories;
-
+    //TODO: labels should be a helper function, in case more pages have categories later
     if (item->is_selected) {
         graphics_draw_inset_rect(item->x + 2, item->y - 1, item->width - 6, 1, COLOR_INSET_DARK, COLOR_INSET_LIGHT);
         graphics_draw_inset_rect(item->x + 2, item->y + item->height - 5, item->width - 6, 1, COLOR_INSET_DARK, COLOR_INSET_LIGHT);
@@ -1087,6 +1084,19 @@ static void draw_list_box_item(const list_box_item *item)
     font_t f = item->is_selected ? FONT_NORMAL_WHITE : FONT_NORMAL_GREEN;
     const uint8_t *txt = string_from_ascii(labels[item->index]);
     text_draw_ellipsized(txt, item->x + 5, item->y + 4, item->width - 10, f, 0);
+}
+
+static void list_box_tooltip(const list_box_item *item, tooltip_context *c)
+{
+    const char **labels = (data.page == CONFIG_PAGE_UI_CHANGES) ? ui_categories : city_mgmt_categories;
+
+    if (item->is_focused) { // font color doesn't matter here
+        int text_width = text_get_width(string_from_ascii(labels[item->index]), FONT_NORMAL_BLACK);
+        if (text_width > item->width - 10) {
+            c->precomposed_text = string_from_ascii(labels[item->index]);
+            c->type = TOOLTIP_BUTTON;
+        }
+    }
 }
 
 static void handle_list_box_select(unsigned int index, int is_double_click)
@@ -1246,8 +1256,8 @@ static void op_measure_range(const config_widget *w, int avail_text_w, int *out_
 static void op_draw_bg_range(const config_widget *w, int x, int y, int avail_text_w)
 {
     int extra_w = data.layout.has_scrollbar ? 0 : 64;
-    int nx = x - (page_is_category((int) data.page) ? (LIST_BOX_SHIFT - NUMERICAL_RANGE_X) : 0);
-    numerical_range_draw(&ranges[w->subtype], nx, y + w->y_offset, w->get_display_text(), extra_w);
+    // content_span_for_page already accounts for category shift; don't offset again.
+    numerical_range_draw(&ranges[w->subtype], x, y + w->y_offset, w->get_display_text(), extra_w);
 }
 static void op_draw_fg_range(const config_widget *w, int x, int y, int avail_text_w, int focused)
 {    // We don't need to draw any foreground for range widgets,
@@ -1258,12 +1268,12 @@ static void op_draw_fg_range(const config_widget *w, int x, int y, int avail_tex
     (void) avail_text_w;
     (void) focused;
 }
-static int  op_input_range(const config_widget *w, int x, int y, int avail_text_w, const mouse *m, unsigned *focused)
+static int op_input_range(const config_widget *w, int x, int y, int avail_text_w, const mouse *m, unsigned *focused)
 {
     int extra_w = data.layout.has_scrollbar ? 0 : 64;
-    int nx = x - (page_is_category((int) data.page) ? (LIST_BOX_SHIFT - NUMERICAL_RANGE_X) : 0);
+    // Keep hit-testing aligned with drawing by using x directly.
     (void) focused;
-    return handle_slider_mouse(&ranges[w->subtype], m, nx, y + w->y_offset, w->subtype + 1, extra_w);
+    return handle_slider_mouse(&ranges[w->subtype], m, x, y + w->y_offset, w->subtype + 1, extra_w);
 }
 
 //  Header
@@ -1302,7 +1312,7 @@ static const widget_ops ops_by_type[] = {
 
 //   widget lookups
 
-static const config_widget *get_widget_row_for(int page, int index)
+static const config_widget *get_widget_row_for(unsigned int page, int index)
 {
     const config_widget *src = 0;
     if (page == CONFIG_PAGE_UI_CHANGES) {
@@ -1378,60 +1388,83 @@ static content_span content_span_for_page(unsigned int page, int has_scrollbar)
     return span;
 }
 //    Layout
-
 static void build_layout_for_current_page(void)
 {
-    //  1) optimistic measure w/o scrollbar
+    // Measure with NO scrollbar first
+    const int widget_count = get_widget_count_for(data.page);
+    const int available_content_height = LIST_BOTTOM - ITEM_Y_OFFSET;
 
-    int count = get_widget_count_for((int) data.page);
-    int y = ITEM_Y_OFFSET;
-    int total_h = 0;
-    content_span span = content_span_for_page((int) data.page, 0);
+    int content_height_no_sb = 0;
+    content_span span_no_sb = content_span_for_page(data.page, 0);
 
-    for (int i = 0; i < count && i < MAX_WIDGETS; i++) {
-        const config_widget *w = get_widget_row_for((int) data.page, i);
-        if (!w) {
-            break;
+    for (int i = 0; i < widget_count && i < MAX_WIDGETS; ++i) {
+        const config_widget *w = get_widget_row_for(data.page, i);
+        if (!w) break;
+        int h = ITEM_BASE_H;
+        if (ops_by_type[w->type].measure) {
+            ops_by_type[w->type].measure(w, span_no_sb.text_w, &h);
         }
+        content_height_no_sb += (w->margin_top + h);
+    }
+
+    int needs_scrollbar = content_height_no_sb > available_content_height;
+
+    // If a scrollbar is needed, recompute how many items fit using the narrower width.
+    int elements_in_view = widget_count; // default when no scrollbar
+    if (needs_scrollbar) {
+        content_span span_sb = content_span_for_page(data.page, 1);
+        int current_y = ITEM_Y_OFFSET;
+        int count_fit_from_top = 0;
+        for (int i = 0; i < widget_count && i < MAX_WIDGETS; ++i) {
+            const config_widget *w = get_widget_row_for(data.page, i);
+            if (!w) break;
+            int h = ITEM_BASE_H;
+            if (ops_by_type[w->type].measure) {
+                ops_by_type[w->type].measure(w, span_sb.text_w, &h);
+            }
+            current_y += w->margin_top;
+            if (current_y + h > LIST_BOTTOM) break;
+            count_fit_from_top++;
+            current_y += h;
+        }
+        if (count_fit_from_top < 1) count_fit_from_top = 1; // at least one row
+        elements_in_view = count_fit_from_top;
+    }
+
+    // Sync the scrollbar with the new elements_in_view and total count
+    scrollbar.elements_in_view = elements_in_view;
+    scrollbar_update_total_elements(&scrollbar, widget_count); //  important re-sync
+
+    // change the slice using the clamped scroll position
+    const int start_widget_index = (int) scrollbar.scroll_position;
+    data.layout.count = widget_count;
+    data.layout.visible_from = start_widget_index;
+    data.layout.has_scrollbar = needs_scrollbar;
+
+    content_span span = content_span_for_page(data.page, needs_scrollbar);
+    int current_y = ITEM_Y_OFFSET;
+    int visible_widget_index = 0;
+
+    for (int i = start_widget_index; i < widget_count && visible_widget_index < MAX_WIDGETS; ++i) {
+        const config_widget *w = get_widget_row_for((int) data.page, i);
+        if (!w) break;
+
         int h = ITEM_BASE_H;
         if (ops_by_type[w->type].measure) {
             ops_by_type[w->type].measure(w, span.text_w, &h);
         }
-        total_h += (w->margin_top + h);
+        current_y += w->margin_top;
+        if (current_y + h > LIST_BOTTOM) break;
+
+        data.layout.rows[visible_widget_index] = w;
+        data.layout.y[visible_widget_index] = current_y;
+        data.layout.h[visible_widget_index] = h;
+        current_y += h;
+        visible_widget_index++;
     }
-
-    int needs_scroll = total_h > LIST_HEIGHT;
-
-    //  2) final measure with correct scrollbar presence
-
-    span = content_span_for_page(data.page, needs_scroll);
-    y = ITEM_Y_OFFSET;
-    int start = scrollbar.scroll_position;
-    if (start < 0) start = 0;
-    if (start > count) start = count;
-
-    data.layout.count = count;
-    data.layout.visible_from = start;
-    data.layout.has_scrollbar = needs_scroll;
-
-    int v = 0;
-    for (int i = start; i < count && v < MAX_WIDGETS; i++) {
-        const config_widget *w = get_widget_row_for((int) data.page, i);
-        if (!w) break;
-        int h = ITEM_BASE_H;
-        if (ops_by_type[w->type].measure) ops_by_type[w->type].measure(w, span.text_w, &h);
-        y += w->margin_top;
-        if (y + h > LIST_BOTTOM) break; //  stop at visible area
-
-        data.layout.rows[v] = w;
-        data.layout.y[v] = y;
-        data.layout.h[v] = h;
-        y += h;
-        v++;
-    }
-    data.layout.visible_to = start + v;
-    scrollbar.elements_in_view = NUM_VISIBLE_FALLBACK;
+    data.layout.visible_to = start_widget_index + visible_widget_index;
 }
+
 //    Drawing
 
 static void draw_background(void)
@@ -1455,8 +1488,11 @@ static void draw_background(void)
     for (unsigned int i = 0; i < CONFIG_PAGES; ++i) {
         page_x_offset += 15;
         int w = 0;
-        if (data.page == i) w = text_draw(translation_for(page_names[i]), page_x_offset, 58, FONT_NORMAL_BLACK, 0);
-        else                w = text_draw_ellipsized(translation_for(page_names[i]), page_x_offset, 58, max_closed_w, FONT_NORMAL_BLACK, 0);
+        if (data.page == i) {
+            w = text_draw(translation_for(page_names[i]), page_x_offset, 58, FONT_NORMAL_BLACK, 0);
+        } else {
+            w = text_draw_ellipsized(translation_for(page_names[i]), page_x_offset, 58, max_closed_w, FONT_NORMAL_BLACK, 0);
+        }
         page_buttons[i].x = page_x_offset - 10;
         page_buttons[i].width = w + 15;
         data.graphics_behind_tab[i] = graphics_save_to_image(data.graphics_behind_tab[i], page_buttons[i].x, 75, page_buttons[i].width, 3);
@@ -1468,12 +1504,14 @@ static void draw_background(void)
     //  layout rows for current page
 
     build_layout_for_current_page();
-    content_span span = content_span_for_page((int) data.page, data.layout.has_scrollbar);
+    content_span span = content_span_for_page(data.page, data.layout.has_scrollbar);
     //  draw background of rows
     for (int v = 0; v < data.layout.visible_to - data.layout.visible_from; v++) {
         const config_widget *w = data.layout.rows[v];
         int y = data.layout.y[v] + w->y_offset;
-        if (ops_by_type[w->type].draw_bg) ops_by_type[w->type].draw_bg(w, span.x, y, span.text_w);
+        if (ops_by_type[w->type].draw_bg) {
+            ops_by_type[w->type].draw_bg(w, span.x, y, span.text_w);
+        }
     }
     //  bottom buttons text
     for (size_t i = 0; i < sizeof(bottom_buttons) / sizeof(*bottom_buttons); i++) {
@@ -1495,8 +1533,11 @@ static void draw_foreground(void)
     for (unsigned int i = 0; i < CONFIG_PAGES; ++i) {
         button_border_draw(page_buttons[i].x, page_buttons[i].y, page_buttons[i].width, page_buttons[i].height,
                            data.page_focus_button == i + 1);
-        if (data.page == i) graphics_draw_from_image(data.graphics_behind_tab[i], page_buttons[i].x, 75);
-        else                graphics_fill_rect(page_buttons[i].x, 75, page_buttons[i].width, 3, COLOR_WHITE);
+        if (data.page == i) {
+            graphics_draw_from_image(data.graphics_behind_tab[i], page_buttons[i].x, 75);
+        } else {
+            graphics_fill_rect(page_buttons[i].x, 75, page_buttons[i].width, 3, COLOR_WHITE);
+        }
     }
 
     //  rows fg (focus, borders, knobs)
@@ -1544,15 +1585,21 @@ static void cancel_values(void)
 }
 static int apply_changed_configs(void)
 {
-    if (!data.has_changes) return 1;
+    if (!data.has_changes) {
+        return 1;
+    }
     for (int i = 0; i < CONFIG_MAX_ALL; ++i) {
         if (config_changed(i)) {
-            if (!data.config_values[i].change_action(i)) return 0;
+            if (!data.config_values[i].change_action(i)) {
+                return 0;
+            }
         }
     }
     for (int i = 0; i < CONFIG_STRING_MAX_ALL; ++i) {
         if (config_string_changed(i)) {
-            if (!data.config_string_values[i].change_action(i)) return 0;
+            if (!data.config_string_values[i].change_action(i)) {
+                return 0;
+            }
         }
     }
     restart_cursors();
@@ -1565,17 +1612,29 @@ static void button_hotkeys(const generic_button *button)
 }
 static void button_reset_defaults(const generic_button *button)
 {
-    for (int i = 0; i < CONFIG_MAX_ENTRIES; ++i) data.config_values[i].new_value = config_get_default_value(i);
-    for (int i = 0; i < CONFIG_STRING_MAX_ENTRIES; ++i)
+    for (int i = 0; i < CONFIG_MAX_ENTRIES; i++) {
+        data.config_values[i].new_value = config_get_default_value(i);
+    }
+
+    for (int i = 0; i < CONFIG_STRING_MAX_ENTRIES; i++) {
         snprintf(data.config_string_values[i].new_value, CONFIG_STRING_VALUE_MAX, "%s", config_get_default_string_value(i));
+    }
     set_language(0);
     window_invalidate();
 }
 static void button_close(const generic_button *button)
 {
     int save = button->parameter1;
-    if (!save) { cancel_values(); window_go_back(); return; }
-    if (apply_changed_configs() && save == 1) { config_save(); window_go_back(); return; }
+    if (!save) {
+        cancel_values();
+        window_go_back();
+        return;
+    }
+    if (apply_changed_configs() && save == 1) {
+        config_save();
+        window_go_back();
+        return;
+    }
     window_request_refresh();
 }
 static void button_page(const generic_button *button)
@@ -1597,8 +1656,8 @@ static void handle_input(const mouse *m, const hotkeys *h)
     //  categories first (so clicks don't fall through)
 
     if (page_is_category(data.page)) {
-        category_page_properties desc = current_category_properties();
-        if (list_box_handle_input(desc.lb, md, 1)) {
+        category_page_properties page_properties = current_category_properties();
+        if (list_box_handle_input(page_properties.lb, md, 1)) {
             data.page_focus_button = 0;
             data.bottom_focus_button = 0;
             return;
@@ -1652,11 +1711,17 @@ static void handle_input(const mouse *m, const hotkeys *h)
 
 static void get_tooltip(tooltip_context *c)
 {
+    if (page_is_category(data.page)) {
+        category_page_properties desc = current_category_properties();
+        list_box_handle_tooltip(desc.lb, c);
+    }
     if (data.page_focus_button) {
         unsigned int page = data.page_focus_button - 1;
-        if (page == data.page) return;
-        int tw = text_get_width(translation_for(page_names[page]), FONT_NORMAL_BLACK);
-        if (page_buttons[page].width - 15 < tw) {
+        if (page == data.page) {
+            return;
+        }
+        int text_width = text_get_width(translation_for(page_names[page]), FONT_NORMAL_BLACK);
+        if (page_buttons[page].width - 15 < text_width) { //15 is the margin added
             c->translation_key = page_names[page];
             c->type = TOOLTIP_BUTTON;
         }
@@ -1692,7 +1757,6 @@ static void set_page(unsigned int page)
     data.page = page;
     scrollbar.scroll_position = 0;
     int count = get_widget_count_for((int) page);
-    scrollbar.elements_in_view = NUM_VISIBLE_FALLBACK;
     scrollbar_init(&scrollbar, 0, count);
 
     window_invalidate();
