@@ -147,6 +147,8 @@ static const uint8_t *display_text_difficulty(void);
 static const uint8_t *display_text_max_grand_temples(void);
 static const uint8_t *display_text_autosave_slots(void);
 
+static int get_widget_count_for(int page);
+
 static config_widget page_general[] = {
     {TYPE_SELECT, SELECT_USER_DIRECTORY, TR_USER_DIRETORIES_WINDOW_USER_PATH, display_text_user_directory, 0, 1, ITEM_BASE_H, 8},
     {TYPE_SELECT, SELECT_LANGUAGE,       TR_CONFIG_LANGUAGE_LABEL,            display_text_language,       0, 1, ITEM_BASE_H, 8},
@@ -1043,16 +1045,24 @@ static void draw_list_box_item(const list_box_item *item)
     const uint8_t *txt = string_from_ascii(labels[item->index]);
     text_draw_ellipsized(txt, item->x + 5, item->y + 4, item->width - 10, f, 0);
 }
+
 static void handle_list_box_select(unsigned int index, int is_double_click)
 {
     category_page_desc desc = current_category_desc();
     if (index < (unsigned) desc.count) {
         *desc.selected_ref = (int) index;
-        //  layout will rebuild on next draw
+
+        // optional: jump to top when changing category
+        scrollbar.scroll_position = 0;
+
+        int count = get_widget_count_for(data.page);
+        //scrollbar.elements_in_view = NUM_VISIBLE_FALLBACK;
+        scrollbar_init(&scrollbar, 0, count);
 
         window_request_refresh();
     }
 }
+
 
 // 
 //    Widget ops (measure / draw / input)
@@ -1286,8 +1296,7 @@ static void build_layout_for_current_page(void)
     int count = get_widget_count_for((int) data.page);
     int y = ITEM_Y_OFFSET;
     int total_h = 0;
-    content_span span = content_span_for_page((int) data.page, // has_scrollbar
-0);
+    content_span span = content_span_for_page((int) data.page, 0);
 
     for (int i = 0; i < count && i < MAX_WIDGETS; i++) {
         const config_widget *w = get_widget_row_for((int) data.page, i);
@@ -1327,7 +1336,7 @@ static void build_layout_for_current_page(void)
         v++;
     }
     data.layout.visible_to = start + v;
-    scrollbar_init(&scrollbar, 0, count);
+    scrollbar.elements_in_view = NUM_VISIBLE_FALLBACK;
 }
 
 // 
@@ -1507,7 +1516,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
 
     //  categories first (so clicks don't fall through)
 
-    if (page_is_category( data.page)) {
+    if (page_is_category(data.page)) {
         category_page_desc desc = current_category_desc();
         if (list_box_handle_input(desc.lb, md, 1)) {
             data.page_focus_button = 0;
@@ -1597,12 +1606,19 @@ static void disable_widget_globally(int type, int subtype)
                 city_mgmt_widgets_by_category[c][i].enabled = 0;
 }
 
+
 static void set_page(unsigned int page)
 {
     data.page = page;
-    //  reset scroll to top when switching page for simplicity
-
     scrollbar.scroll_position = 0;
+    // set how many items exist on this page (respects selected category & enabled flags)
+    int count = get_widget_count_for((int) page);
+    // keep the visible-window size consistent with your layout
+    scrollbar.elements_in_view = NUM_VISIBLE_FALLBACK;
+
+    // (re)initialize the scrollbar range for this page
+    scrollbar_init(&scrollbar, 0, count);
+
     window_invalidate();
 }
 
