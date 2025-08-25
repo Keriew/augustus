@@ -198,7 +198,6 @@ static config_widget page_general[] = {
     {TYPE_NUMERICAL_RANGE, RANGE_CITY_SOUNDS_VOLUME, 0, display_text_city_sounds_volume, 0, 1, ITEM_BASE_H, 2},
     {TYPE_CHECKBOX, CONFIG_GENERAL_ENABLE_VIDEO_SOUND, TR_CONFIG_VIDEO_SOUND, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_NUMERICAL_RANGE, RANGE_VIDEO_VOLUME, 0, display_text_video_volume, 0, 1, ITEM_BASE_H, 2},
-
     {TYPE_NONE}
 };
 
@@ -266,7 +265,9 @@ static config_widget page_difficulty[] = {
     {TYPE_CHECKBOX, CONFIG_GP_CH_RETIRE_AT_60, TR_CONFIG_RETIRE_AT_60, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_CHECKBOX, CONFIG_GP_CH_FIXED_WORKERS, TR_CONFIG_FIXED_WORKERS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_CHECKBOX, CONFIG_GP_CH_WOLVES_BLOCK, TR_CONFIG_WOLVES_BLOCK, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+    {TYPE_CHECKBOX, CONFIG_GP_CH_AUTO_KILL_ANIMALS, TR_CONFIG_AUTO_KILL_ANIMALS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_CHECKBOX, CONFIG_GP_CH_MULTIPLE_BARRACKS, TR_CONFIG_MULTIPLE_BARRACKS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+    {TYPE_CHECKBOX, CONFIG_GP_CH_RANDOM_COLLAPSES_TAKE_MONEY, TR_CONFIG_RANDOM_COLLAPSES_TAKE_MONEY, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_CHECKBOX, CONFIG_GP_CH_DISABLE_INFINITE_WOLVES_SPAWNING, TR_CONFIG_GP_CH_DISABLE_INFINITE_WOLVES_SPAWNING, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_NUMERICAL_DESC, RANGE_MAX_GRAND_TEMPLES, TR_CONFIG_MAX_GRAND_TEMPLES, NULL, 0, 1, ITEM_BASE_H, 10},
     {TYPE_NUMERICAL_RANGE, RANGE_MAX_GRAND_TEMPLES, 0, display_text_max_grand_temples, 0, 1, ITEM_BASE_H, 2},
@@ -278,40 +279,37 @@ static config_widget city_mgmt_widgets_by_category[CATEGORY_CITY_COUNT][MAX_WIDG
     // Storage
     {
         {TYPE_CHECKBOX, CONFIG_GP_CH_NO_SUPPLIER_DISTRIBUTION, TR_CONFIG_NO_SUPPLIER_DISTRIBUTION, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_GETTING_GRANARIES_GO_OFFROAD, TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_GP_CH_GRANARIES_GET_DOUBLE, TR_CONFIG_GRANARIES_GET_DOUBLE, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_GP_CH_ALLOW_EXPORTING_FROM_GRANARIES, TR_CONFIG_ALLOW_EXPORTING_FROM_GRANARIES, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_GP_CH_FARMS_DELIVER_CLOSE, TR_CONFIG_FARMS_DELIVER_CLOSE, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_WAREHOUSES_DONT_ACCEPT, TR_CONFIG_NOT_ACCEPTING_WAREHOUSES, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_MARKETS_DONT_ACCEPT, TR_CONFIG_NOT_ACCEPTING_MARKETS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_DELIVER_ONLY_TO_ACCEPTING_GRANARIES, TR_CONFIG_DELIVER_ONLY_TO_ACCEPTING_GRANARIES, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_STORAGE_INCREMENT_4, TR_CONFIG_STORAGE_STEP_4, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     },
     // Roads
     {
-        {TYPE_CHECKBOX, CONFIG_GP_CH_DELIVER_ONLY_TO_ACCEPTING_GRANARIES, TR_CONFIG_DELIVER_ONLY_TO_ACCEPTING_GRANARIES, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_TOWER_SENTRIES_GO_OFFROAD, TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_GP_CH_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_GP_CH_ROAMERS_DONT_SKIP_CORNERS, TR_CONFIG_ROAMERS_DONT_SKIP_CORNERS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_TOWER_SENTRIES_GO_OFFROAD, TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_GP_CARAVANS_MOVE_OFF_ROAD, TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_GETTING_GRANARIES_GO_OFFROAD, TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     },
     // Roadblock
     {
         {TYPE_CHECKBOX, CONFIG_GP_CH_GATES_DEFAULT_TO_PASS_ALL_WALKERS, TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_AUTO_KILL_ANIMALS, TR_CONFIG_AUTO_KILL_ANIMALS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_WAREHOUSES_DONT_ACCEPT, TR_CONFIG_NOT_ACCEPTING_WAREHOUSES, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_MARKETS_DONT_ACCEPT, TR_CONFIG_NOT_ACCEPTING_MARKETS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
-        {TYPE_CHECKBOX, CONFIG_GP_STORAGE_INCREMENT_4, TR_CONFIG_STORAGE_STEP_4, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     },
     // Housing
     {
         {TYPE_CHECKBOX, CONFIG_GP_CH_ALL_HOUSES_MERGE, TR_CONFIG_ALL_HOUSES_MERGE, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_GP_CH_PATRICIAN_DEVOLUTION_FIX, TR_CONFIG_PATRICIAN_DEVOLUTION_FIX, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_RANDOM_COLLAPSES_TAKE_MONEY, TR_CONFIG_RANDOM_COLLAPSES_TAKE_MONEY, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_GP_CH_HOUSES_DONT_EXPAND_INTO_GARDENS, TR_CONFIG_HOUSES_DONT_EXPAND_INTO_GARDENS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     }
 };
-
 
 //more typedefs:
 
@@ -1387,6 +1385,7 @@ static content_span content_span_for_page(unsigned int page, int has_scrollbar)
     content_span span = { base_x, text_w };
     return span;
 }
+
 //    Layout
 static void build_layout_for_current_page(void)
 {
@@ -1733,22 +1732,29 @@ static void disable_widget_globally(int type, int subtype)
 {
     //  general pages
 
-    for (int i = 0; page_general[i].type != TYPE_NONE; ++i)
-        if (page_general[i].type == type && page_general[i].subtype == subtype) page_general[i].enabled = 0;
-    for (int i = 0; page_difficulty[i].type != TYPE_NONE; ++i)
-        if (page_difficulty[i].type == type && page_difficulty[i].subtype == subtype) page_difficulty[i].enabled = 0;
+    for (int i = 0; page_general[i].type != TYPE_NONE; i++)
+        if (page_general[i].type == type && page_general[i].subtype == subtype) {
+            page_general[i].enabled = 0;
+        }
+    for (int i = 0; page_difficulty[i].type != TYPE_NONE; i++)
+        if (page_difficulty[i].type == type && page_difficulty[i].subtype == subtype) {
+            page_difficulty[i].enabled = 0;
+        }
 
     //  category pages
 
     for (int c = 0; c < CATEGORY_UI_COUNT; ++c)
         for (int i = 0; i < MAX_WIDGETS && ui_widgets_by_category[c][i].type != TYPE_NONE; ++i)
-            if (ui_widgets_by_category[c][i].type == type && ui_widgets_by_category[c][i].subtype == subtype)
+            if (ui_widgets_by_category[c][i].type == type && ui_widgets_by_category[c][i].subtype == subtype) {
                 ui_widgets_by_category[c][i].enabled = 0;
-
+            }
     for (int c = 0; c < CATEGORY_CITY_COUNT; ++c)
         for (int i = 0; i < MAX_WIDGETS && city_mgmt_widgets_by_category[c][i].type != TYPE_NONE; ++i)
-            if (city_mgmt_widgets_by_category[c][i].type == type && city_mgmt_widgets_by_category[c][i].subtype == subtype)
+            if (city_mgmt_widgets_by_category[c][i].type == type &&
+                city_mgmt_widgets_by_category[c][i].subtype == subtype) {
                 city_mgmt_widgets_by_category[c][i].enabled = 0;
+            }
+
 }
 
 
