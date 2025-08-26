@@ -6,9 +6,11 @@
 #include "city/buildings.h"
 #include "city/health.h"
 #include "figure/figure.h"
+#include "map/bridge.h"
 #include "map/building.h"
 #include "map/data.h"
 #include "map/grid.h"
+#include "map/sprite.h"
 #include "map/terrain.h"
 #include "map/property.h"
 
@@ -500,6 +502,22 @@ int building_count_gardens_in_area(int minx, int miny, int maxx, int maxy, int o
     return total;
 }
 
+int building_count_bridges_in_area(int minx, int miny, int maxx, int maxy, int ship)
+{
+    float total = 0;
+    int grid_offset;
+    for (int y = miny; y < maxy; y++) {
+        for (int x = minx; x < maxx; x++) {
+            grid_offset = map_grid_offset(x, y);
+            int bridge_sprite = map_sprite_bridge_at(grid_offset);
+            if (bridge_sprite >= 1 + ship*6 && bridge_sprite <= 4 + ship*6) {
+                total += 0.5;
+            }
+        }
+    }
+    return (int)total;
+}
+
 static int min_x;
 static int min_y;
 
@@ -531,4 +549,10 @@ int building_count_gardens(int overgrown)
 {
     get_min_map_xy();
     return building_count_gardens_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height, overgrown);
+}
+
+int building_count_bridges(int ship)
+{
+    get_min_map_xy();
+    return building_count_bridges_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height, ship);
 }

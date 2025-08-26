@@ -129,10 +129,11 @@ int building_count_roads(void);
 int building_count_highway(void);
 int building_count_plaza(void);
 int building_count_gardens(int overgrown);
+int building_count_bridges(int ship);
 int building_count_roads_in_area(int minx, int miny, int maxx, int maxy);
 int building_count_highway_in_area(int minx, int miny, int maxx, int maxy);
 int building_count_plaza_in_area(int minx, int miny, int maxx, int maxy);
 int building_count_gardens_in_area(int minx, int miny, int maxx, int maxy, int overgrown);
-
+int building_count_bridges_in_area(int minx, int miny, int maxx, int maxy, int ship);
 
 #endif // BUILDING_COUNT_H

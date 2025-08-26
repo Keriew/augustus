@@ -532,11 +532,13 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
     },
     [BUILDING_LOW_BRIDGE] = {
         .size = 1,
-        .fire_proof = 1
+        .fire_proof = 1,
+        .event_data.attr = "low_bridge"
     },
     [BUILDING_SHIP_BRIDGE] = {
         .size = 1,
-        .fire_proof = 1
+        .fire_proof = 1,
+        .event_data.attr = "ship_bridge"
     },
     [BUILDING_SENATE] = {
         .size = 5,

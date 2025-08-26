@@ -83,6 +83,12 @@ int scenario_condition_type_building_count_active_met(const scenario_condition_t
         case BUILDING_OVERGROWN_GARDENS:
             total_active_count = building_count_gardens(1);
             break;
+        case BUILDING_LOW_BRIDGE:
+            total_active_count = building_count_bridges(0);
+            break;
+        case BUILDING_SHIP_BRIDGE:
+            total_active_count = building_count_bridges(1);
+            break;
         default:
             total_active_count = building_count_active(type);
             break;
@@ -152,6 +158,12 @@ int scenario_condition_type_building_count_any_met(const scenario_condition_t *c
             break;
         case BUILDING_OVERGROWN_GARDENS:
             total_active_count = building_count_gardens(1);
+            break;
+        case BUILDING_LOW_BRIDGE:
+            total_active_count = building_count_bridges(0);
+            break;
+        case BUILDING_SHIP_BRIDGE:
+            total_active_count = building_count_bridges(1);
             break;
         default:
             total_active_count = building_count_total(type);
@@ -230,8 +242,14 @@ int scenario_condition_type_building_count_area_met(const scenario_condition_t *
         case BUILDING_OVERGROWN_GARDENS:
             buildings_in_area = building_count_gardens_in_area(minx, miny, maxx + 1, maxy + 1, 1);
             break;
+        case BUILDING_LOW_BRIDGE:
+            buildings_in_area = building_count_bridges_in_area(minx, miny, maxx + 1, maxy + 1, 0);
+            break;
+        case BUILDING_SHIP_BRIDGE:
+            buildings_in_area = building_count_bridges_in_area(minx, miny, maxx + 1, maxy + 1, 1);
+            break;
         default:
-            buildings_in_area = building_count_in_area(type, minx, miny, maxx + 1, maxy + 1);
+            buildings_in_area = building_count_in_area(type, minx, miny, maxx, maxy);
             break;
     }
 
