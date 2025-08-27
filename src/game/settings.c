@@ -292,7 +292,7 @@ void setting_increase_game_speed(void)
 
 void setting_set_default_game_speed(void)
 {
-    data.game_speed = game_speed_get_speed(config_get(CONFIG_GP_DEFAULT_GAME_SPEED)); //previously hardcoded 70
+    data.game_speed = game_speed_get_speed(config_get(CONFIG_GP_CH_DEFAULT_GAME_SPEED)); //previously hardcoded 70
 }
 
 int setting_scroll_speed(void)

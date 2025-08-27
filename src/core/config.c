@@ -95,7 +95,7 @@ static const char *ini_keys[] = {
     [CONFIG_WT_SNOW_SPEED] = "weather_snow_speed",
     [CONFIG_WT_SANDSTORM_SPEED] = "weather_sandstorm_speed",
     [CONFIG_UI_EMPIRE_SIDEBAR_WIDTH] = "ui_empire_sidebar_width",
-    [CONFIG_GP_DEFAULT_GAME_SPEED] = "gameplay_change_default_game_speed",
+    [CONFIG_GP_CH_DEFAULT_GAME_SPEED] = "gameplay_change_default_game_speed",
 };
 
 static const char *ini_string_keys[] = {
@@ -139,7 +139,7 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_WT_SNOW_SPEED] = 1,
     [CONFIG_WT_SANDSTORM_SPEED] = 2,
     [CONFIG_UI_EMPIRE_SIDEBAR_WIDTH] = 25,
-    [CONFIG_GP_DEFAULT_GAME_SPEED] = 80,
+    [CONFIG_GP_CH_DEFAULT_GAME_SPEED] = 80,
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };

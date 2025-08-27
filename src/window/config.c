@@ -337,7 +337,6 @@ typedef struct {
 
 typedef struct {
     list_box_type *lb;
-    const char **labels;
     int count;
     int page_id;
     int *selected_ref; //  points into selected_categories
@@ -437,12 +436,21 @@ static translation_key page_names[CONFIG_PAGES] = {
     TR_CONFIG_HEADER_CITY_MANAGEMENT_CHANGES
 };
 
-static const char *ui_categories[CATEGORY_UI_COUNT] = {
-    "General", "Scrolling and Map", "Building", "City View", "Weather"
+static const translation_key ui_category_keys[CATEGORY_UI_COUNT] = {
+    TR_CONFIG_CATEGORY_GENERAL,
+    TR_CONFIG_CATEGORY_UI_MAP,
+    TR_CONFIG_CATEGORY_UI_BUILDING,
+    TR_CONFIG_CATEGORY_UI_CITY,
+    TR_CONFIG_CATEGORY_UI_WEATHER,
 };
-static const char *city_mgmt_categories[CATEGORY_CITY_COUNT] = {
-    "Storage and Markets", "Roads", "Roadblocks", "Housing"
+
+static const translation_key city_mgmt_category_keys[CATEGORY_CITY_COUNT] = {
+    TR_CONFIG_CATEGORY_MANAGEMENT_STORAGE,
+    TR_CONFIG_CATEGORY_MANAGEMENT_ROADS,
+    TR_CONFIG_CATEGORY_MANAGEMENT_ROADBLOCKS,
+    TR_CONFIG_CATEGORY_MANAGEMENT_HOUSING,
 };
+
 
 static struct {
     ui_config_category ui_category;
@@ -846,7 +854,7 @@ static const uint8_t *display_text_autosave_slots(void)
 }
 static const uint8_t *display_text_default_game_speed(void)
 {
-    return percentage_string(data.display_text, game_speed_get_speed(data.config_values[CONFIG_GP_DEFAULT_GAME_SPEED].new_value));
+    return percentage_string(data.display_text, game_speed_get_speed(data.config_values[CONFIG_GP_CH_DEFAULT_GAME_SPEED].new_value));
 }
 
 //    Range value binding, custom change-action table, init
@@ -867,7 +875,7 @@ static void set_range_values(void)
     ranges[RANGE_DIFFICULTY].value = &data.config_values[CONFIG_ORIGINAL_DIFFICULTY].new_value;
     ranges[RANGE_MAX_GRAND_TEMPLES].value = &data.config_values[CONFIG_GP_CH_MAX_GRAND_TEMPLES].new_value;
     ranges[RANGE_MAX_AUTOSAVE_SLOTS].value = &data.config_values[CONFIG_GP_CH_MAX_AUTOSAVE_SLOTS].new_value;
-    ranges[RANGE_DEFAULT_GAME_SPEED].value = &data.config_values[CONFIG_GP_DEFAULT_GAME_SPEED].new_value;
+    ranges[RANGE_DEFAULT_GAME_SPEED].value = &data.config_values[CONFIG_GP_CH_DEFAULT_GAME_SPEED].new_value;
 }
 static void set_custom_config_changes(void)
 {
@@ -893,7 +901,7 @@ static void set_custom_config_changes(void)
     data.config_values[CONFIG_SCREEN_CURSOR_SCALE].change_action = config_change_cursors;
     data.config_values[CONFIG_SCREEN_COLOR_CURSORS].change_action = config_change_cursors;
     data.config_values[CONFIG_ORIGINAL_GAME_SPEED].change_action = config_change_game_speed;
-    data.config_values[CONFIG_GP_DEFAULT_GAME_SPEED].change_action = config_change_basic;
+    data.config_values[CONFIG_GP_CH_DEFAULT_GAME_SPEED].change_action = config_change_basic;
     //  audio
 
     data.config_values[CONFIG_GENERAL_ENABLE_AUDIO].change_action = config_enable_audio;
@@ -1111,10 +1119,10 @@ static category_page_properties current_category_properties(void)
 {
     category_page_properties properties;
     if (data.page == CONFIG_PAGE_UI_CHANGES) {
-        properties = (category_page_properties) { &ui_list_box, ui_categories, CATEGORY_UI_COUNT, CONFIG_PAGE_UI_CHANGES,
+        properties = (category_page_properties) { &ui_list_box, CATEGORY_UI_COUNT, CONFIG_PAGE_UI_CHANGES,
                 (int *) &selected_categories.ui_category };
     } else {
-        properties = (category_page_properties) { &city_mgmt_list_box, city_mgmt_categories, CATEGORY_CITY_COUNT,
+        properties = (category_page_properties) { &city_mgmt_list_box, CATEGORY_CITY_COUNT,
              CONFIG_PAGE_CITY_MANAGEMENT_CHANGES,  (int *) &selected_categories.city_mgmt_category };
     }
     return properties;
@@ -1146,8 +1154,8 @@ static void init_list_boxes(void)
 
 static void draw_list_box_item(const list_box_item *item)
 {
-    const char **labels = (data.page == CONFIG_PAGE_UI_CHANGES) ? ui_categories : city_mgmt_categories;
-    //TODO: labels should be a helper function, in case more pages have categories later
+    const translation_key *keys = (data.page == CONFIG_PAGE_UI_CHANGES) ? ui_category_keys : city_mgmt_category_keys;
+
     if (item->is_selected) {
         graphics_draw_inset_rect(item->x + 2, item->y - 1, item->width - 6, 1, COLOR_INSET_DARK, COLOR_INSET_LIGHT);
         graphics_draw_inset_rect(item->x + 2, item->y + item->height - 5, item->width - 6, 1, COLOR_INSET_DARK, COLOR_INSET_LIGHT);
@@ -1155,23 +1163,27 @@ static void draw_list_box_item(const list_box_item *item)
     if (item->is_focused) {
         button_border_draw(item->x, item->y - 2, item->width, item->height, 1);
     }
+
     font_t f = item->is_selected ? FONT_NORMAL_WHITE : FONT_NORMAL_GREEN;
-    const uint8_t *txt = string_from_ascii(labels[item->index]);
+    const uint8_t *txt = translation_for(keys[item->index]);
     text_draw_ellipsized(txt, item->x + 5, item->y + 4, item->width - 10, f, 0);
 }
 
+
 static void list_box_tooltip(const list_box_item *item, tooltip_context *c)
 {
-    const char **labels = (data.page == CONFIG_PAGE_UI_CHANGES) ? ui_categories : city_mgmt_categories;
+    const translation_key *keys = (data.page == CONFIG_PAGE_UI_CHANGES) ? ui_category_keys : city_mgmt_category_keys;
 
-    if (item->is_focused) { // font color doesn't matter here
-        int text_width = text_get_width(string_from_ascii(labels[item->index]), FONT_NORMAL_BLACK);
+    if (item->is_focused) {
+        const uint8_t *txt = translation_for(keys[item->index]);
+        int text_width = text_get_width(txt, FONT_NORMAL_BLACK);
         if (text_width > item->width - 10) {
-            c->precomposed_text = string_from_ascii(labels[item->index]);
+            c->precomposed_text = txt;
             c->type = TOOLTIP_BUTTON;
         }
     }
 }
+
 
 static void handle_list_box_select(unsigned int index, int is_double_click)
 {
