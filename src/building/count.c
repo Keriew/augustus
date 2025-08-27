@@ -502,22 +502,6 @@ int building_count_gardens_in_area(int minx, int miny, int maxx, int maxy, int o
     return total;
 }
 
-int building_count_bridges_in_area(int minx, int miny, int maxx, int maxy, int ship)
-{
-    float total = 0;
-    int grid_offset;
-    for (int y = miny; y < maxy; y++) {
-        for (int x = minx; x < maxx; x++) {
-            grid_offset = map_grid_offset(x, y);
-            int bridge_sprite = map_sprite_bridge_at(grid_offset);
-            if (bridge_sprite >= 1 + ship*6 && bridge_sprite <= 4 + ship*6) {
-                total += 0.5;
-            }
-        }
-    }
-    return (int)total;
-}
-
 static int min_x;
 static int min_y;
 
@@ -554,5 +538,56 @@ int building_count_gardens(int overgrown)
 int building_count_bridges(int ship)
 {
     get_min_map_xy();
-    return building_count_bridges_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height, ship);
+    float total = 0;
+    int grid_offset;
+    for (int y = min_y; y < min_y + map_data.height; y++) {
+        for (int x = min_x; x < min_x + map_data.width; x++) {
+            grid_offset = map_grid_offset(x, y);
+            int bridge_sprite = map_sprite_bridge_at(grid_offset);
+            if (bridge_sprite >= 1 + ship*6 && bridge_sprite <= 4 + ship*6) {
+                total += 0.5;
+            }
+        }
+    }
+    return (int)total;
+}
+
+int building_count_bridges_in_area(int minx, int miny, int maxx, int maxy, int ship)
+{
+    array(int) bridge_ids;
+    array_init(bridge_ids, 4, NULL, NULL);
+    int grid_offset;
+    for (int y = miny; y < maxy; y++) {
+        for (int x = minx; x < maxx; x++) {
+            grid_offset = map_grid_offset(x, y);
+            int building_id = map_building_at(grid_offset);
+            if (!building_id) {
+                continue;
+            }
+            building *b = building_main(building_get(building_id));
+            if (!b) {
+                continue;
+            }
+            if ((b->type == (ship ? BUILDING_SHIP_BRIDGE : BUILDING_LOW_BRIDGE)) && map_is_bridge(grid_offset)) {
+                int found = 0;
+                int *item;
+                array_foreach(bridge_ids, item) {
+                    if (*item == b->id) {
+                        found = 1;
+                        break;
+                    }
+                }
+                if (!found) {
+                    int *bridge_id;
+                    array_new_item(bridge_ids, bridge_id);
+                    if (bridge_id) {
+                        *bridge_id = b->id;
+                    }
+                }
+            }
+        }
+    }
+    int total = bridge_ids.size;
+    array_clear(bridge_ids);
+    return total;
 }
