@@ -10,6 +10,7 @@
 #include "game/game.h"
 #include "game/settings.h"
 #include "game/system.h"
+#include "game/speed.h"
 #include "graphics/button.h"
 #include "graphics/color.h"
 #include "graphics/generic_button.h"
@@ -368,8 +369,6 @@ static const resolution resolutions[] = {
 };
 static resolution available_resolutions[sizeof(resolutions) / sizeof(resolution) + 2];
 
-static const int game_speeds[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500 };
-
 static const unsigned char page_is_category_helper[CONFIG_PAGES] = {
     // pages with category submenu
     [CONFIG_PAGE_GENERAL] = 0,
@@ -391,7 +390,7 @@ static generic_button select_buttons[] = {
 //  Numeric ranges (slider bar geometry + value binding populated in set_range_values()).
 
 static numerical_range_widget ranges[] = {
-    { 50, 30,   0,  13,  1, 0},   //  game speed index
+    { 50, 30,   0,  SIZE_OF_GAME_SPEEDS ,  1, 0},   //  game speed index
     { 98, 27,   0,   0,  1, 0},   //  resolution index
     { 50, 30,  50, 500,  5, 0},   //  display scale %
     { 50, 30, 100, 200, 50, 0},   //  cursor scale %
@@ -405,7 +404,7 @@ static numerical_range_widget ranges[] = {
     {146, 24,   0,   4,  1, 0},   //  difficulty enum index (0..4)
     { 50, 30,   0,   5,  1, 0},   //  max grand temples
     { 50, 30,   1,  20,  1, 0},   //  autosave slots
-    { 50, 30,   0,  13,  1, 0},   //  default game speed index
+    { 50, 30,   0,  SIZE_OF_GAME_SPEEDS,  1, 0},   //  default game speed index
 
 };
 
@@ -544,22 +543,8 @@ static int config_change_string_basic(int key)
 static int config_change_game_speed(int key)
 {
     config_change_basic(key);
-    int target = game_speeds[data.config_values[key].new_value];
-    while (setting_game_speed() > target) {
-        setting_decrease_game_speed();
-    }
-    while (setting_game_speed() < target) {
-        setting_increase_game_speed();
-    }
-    return 1;
-}
-
-static int config_change_default_game_speed(int key)
-{
-    int target = game_speeds[data.config_values[key].new_value];
-    data.config_values[key].new_value = target;
-    config_change_basic(key);
-    setting_set_default_game_speed();
+    int target_speed = game_speed_get_speed(data.config_values[key].new_value);
+    setting_set_game_speed(target_speed);
     return 1;
 }
 
@@ -834,7 +819,7 @@ static const uint8_t *display_text_player_name(void)
 }
 static const uint8_t *display_text_game_speed(void)
 {
-    return percentage_string(data.display_text, game_speeds[data.config_values[CONFIG_ORIGINAL_GAME_SPEED].new_value]);
+    return percentage_string(data.display_text, game_speed_get_speed(data.config_values[CONFIG_ORIGINAL_GAME_SPEED].new_value));
 }
 static const uint8_t *display_text_resolution(void)
 {
@@ -861,7 +846,7 @@ static const uint8_t *display_text_autosave_slots(void)
 }
 static const uint8_t *display_text_default_game_speed(void)
 {
-    return percentage_string(data.display_text, game_speeds[data.config_values[CONFIG_GP_DEFAULT_GAME_SPEED].new_value]);
+    return percentage_string(data.display_text, game_speed_get_speed(data.config_values[CONFIG_GP_DEFAULT_GAME_SPEED].new_value));
 }
 
 //    Range value binding, custom change-action table, init
@@ -908,8 +893,7 @@ static void set_custom_config_changes(void)
     data.config_values[CONFIG_SCREEN_CURSOR_SCALE].change_action = config_change_cursors;
     data.config_values[CONFIG_SCREEN_COLOR_CURSORS].change_action = config_change_cursors;
     data.config_values[CONFIG_ORIGINAL_GAME_SPEED].change_action = config_change_game_speed;
-    data.config_values[CONFIG_GP_DEFAULT_GAME_SPEED].change_action = config_change_default_game_speed;
-
+    data.config_values[CONFIG_GP_DEFAULT_GAME_SPEED].change_action = config_change_basic;
     //  audio
 
     data.config_values[CONFIG_GENERAL_ENABLE_AUDIO].change_action = config_enable_audio;
@@ -945,30 +929,8 @@ static void set_player_name_width(void)
 
 static void fetch_original_config_values(void)
 {
-    //  game speed -> index
-
-    size_t game_speed_index = 0;
-    while (game_speed_index < sizeof(game_speeds) / sizeof(int)) {
-        if (setting_game_speed() == game_speeds[game_speed_index]) break;
-        game_speed_index++;
-    }
-    data.config_values[CONFIG_ORIGINAL_GAME_SPEED].original_value = (int) game_speed_index;
-    data.config_values[CONFIG_ORIGINAL_GAME_SPEED].new_value = (int) game_speed_index;
-
-    // Default game speed - initialize from config system
-    int default_game_speed_index = 0;
-    int default_speed_value = config_get(CONFIG_GP_DEFAULT_GAME_SPEED);
-    while (default_game_speed_index < sizeof(game_speeds) / sizeof(int)) {
-        if (game_speeds[default_game_speed_index] >= default_speed_value) {
-            break;
-        }
-        default_game_speed_index++;
-    }
-    data.config_values[CONFIG_GP_DEFAULT_GAME_SPEED].original_value = default_game_speed_index;
-    data.config_values[CONFIG_GP_DEFAULT_GAME_SPEED].new_value = default_game_speed_index;
-
-    //  sounds
-
+    data.config_values[CONFIG_ORIGINAL_GAME_SPEED].original_value = game_speed_get_index(setting_game_speed());
+    data.config_values[CONFIG_ORIGINAL_GAME_SPEED].new_value = game_speed_get_index(setting_game_speed());
     data.config_values[CONFIG_ORIGINAL_ENABLE_MUSIC].original_value = setting_sound(SOUND_TYPE_MUSIC)->enabled;
     data.config_values[CONFIG_ORIGINAL_ENABLE_MUSIC].new_value = setting_sound(SOUND_TYPE_MUSIC)->enabled;
     data.config_values[CONFIG_ORIGINAL_MUSIC_VOLUME].original_value = setting_sound(SOUND_TYPE_MUSIC)->volume;
