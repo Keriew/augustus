@@ -70,7 +70,7 @@ int building_granary_add_import(building *granary, int resource, int amount, int
     if (!building_storage_get_permission(permission, granary)) {
         return 0; // cannot export from this granary
     }
-    if (building_granary_try_add_resource(granary, resource, amount, 0) != amount) {
+    if (building_granary_try_add_resource(granary, resource, amount, 0, 1) != amount) {
         return 0;
     }
     int price = trade_price_buy(resource, land_trader);
@@ -108,14 +108,14 @@ int building_granary_remove_export(building *granary, int resource, int amount, 
     return removed;
 }
 
-int building_granary_try_add_resource(building *granary, int resource, int amount, int is_produced)
+int building_granary_try_add_resource(building *granary, int resource, int amount, int is_produced, int respect_settings)
 {
     if (granary->id <= 0 || !resource_is_food(resource) || granary->type != BUILDING_GRANARY
-    || building_storage_get_state(granary, resource, 1) == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
+    || ((building_storage_get_state(granary, resource, 1) == BUILDING_STORAGE_STATE_NOT_ACCEPTING) && respect_settings)) {
         return 0;
     }
     int amount_added = 0;
-    int max_current_capacity = building_granary_maximum_receptible_amount(granary, resource);
+    int max_current_capacity = respect_settings ? building_granary_maximum_receptible_amount(granary, resource) : granary->resources[RESOURCE_NONE];
     if (amount > max_current_capacity) {
         amount_added = max_current_capacity;
     } else {
@@ -145,7 +145,7 @@ int building_granaries_add_resource(int resource, int amount, int respect_settin
         if (b->state != BUILDING_STATE_IN_USE || b->resources[RESOURCE_NONE] <= 0) {
             continue;
         }
-        amount -= building_granary_try_add_resource(b, resource, amount, 0);
+        amount -= building_granary_try_add_resource(b, resource, amount, 0, respect_settings);
         if (amount <= 0) {
             break;
         }
@@ -585,7 +585,7 @@ void building_granary_bless(void)
 
         for (unsigned int i = 0; i < list->size; i++) {
             for (int n = 0; n < 6; n++) {
-                building_granary_try_add_resource(min_building, list->items[i], 1, 0);
+                building_granary_try_add_resource(min_building, list->items[i], 1, 0, 1);
             }
         }
     }
