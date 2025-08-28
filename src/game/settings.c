@@ -285,7 +285,7 @@ void setting_decrease_game_speed(void)
 void setting_increase_game_speed(void)
 {
     int index = game_speed_get_index(data.game_speed);
-    if (index < SIZE_OF_GAME_SPEEDS - 1) {
+    if (index < TOTAL_GAME_SPEEDS - 1) {
         index++;
     }
     data.game_speed = game_speed_get_speed(index);
