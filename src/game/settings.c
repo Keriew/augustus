@@ -272,6 +272,7 @@ int setting_set_game_speed(int speed)
     data.game_speed = speed;
     return 1;
 }
+
 void setting_decrease_game_speed(void)
 {
     int index = game_speed_get_index(data.game_speed);
