@@ -1646,7 +1646,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_MOVE_SAVINGS_TO_THE_RIGHT, "Стандартный порядок элементов в верхней панели"},
     {TR_TOOLTIP_DEPOT_MOVED, "Перемещаемый ресурс:"},
     {TR_TOOLTIP_DEPOT_ORDER_TO, "в"},
-    {TR_TOOLTIP_RIGHT_CLICK_TO_DECREASE, "Клик правой кнопкой уменьшает значения"},
+    {TR_TOOLTIP_RIGHT_CLICK_TO_DECREASE, "Щелчок правой кнопкой уменьшает значения"},
     {TR_TOOLTIP_POPULATION_GOAL, "Необходимо жителей:"},
     {TR_CONFIG_PATRICIAN_DEVOLUTION_FIX, "При деградации резиденций патрициев не создаются дома 1х1"},
     {TR_CONDITION_TEXT_TIME_LEFT_UNTIL_DEFEAT, "Время до поражения:"},
@@ -1685,6 +1685,16 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_CHANGE_SIDEBAR_WIDTH, "Изменить ширину боковой панели"},
     {TR_TOOLTIP_ASCENDING_ORDER, "По возрастанию"},
     {TR_TOOLTIP_DESCENDING_ORDER, "По убыванию"},
+    {TR_CONFIG_DEFAULT_GAME_SPEED, "Скорость игры по умолчанию:"},
+    {TR_CONFIG_CATEGORY_GENERAL, "Общие"},
+    {TR_CONFIG_CATEGORY_UI_MAP, "Прокрутка и карта"},
+    {TR_CONFIG_CATEGORY_UI_BUILDING, "Здания"},
+    {TR_CONFIG_CATEGORY_UI_CITY, "Вид города"},
+    {TR_CONFIG_CATEGORY_UI_WEATHER, "Погода"},
+    {TR_CONFIG_CATEGORY_MANAGEMENT_STORAGE, "Хранилища"},
+    {TR_CONFIG_CATEGORY_MANAGEMENT_ROADS, "Дороги"},
+    {TR_CONFIG_CATEGORY_MANAGEMENT_ROADBLOCKS, "Дорожные блоки"},
+    {TR_CONFIG_CATEGORY_MANAGEMENT_HOUSING, "Жилье"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
