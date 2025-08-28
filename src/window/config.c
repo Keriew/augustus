@@ -389,7 +389,7 @@ static generic_button select_buttons[] = {
 //  Numeric ranges (slider bar geometry + value binding populated in set_range_values()).
 
 static numerical_range_widget ranges[] = {
-    { 50, 30,   0,  TOTAL_GAME_SPEEDS ,  1, 0},   //  game speed index
+    { 50, 30,   0,  TOTAL_GAME_SPEEDS - 1,  1, 0},   //  game speed index, needs conversion from count to 0-based index
     { 98, 27,   0,   0,  1, 0},   //  resolution index
     { 50, 30,  50, 500,  5, 0},   //  display scale %
     { 50, 30, 100, 200, 50, 0},   //  cursor scale %
@@ -403,7 +403,7 @@ static numerical_range_widget ranges[] = {
     {146, 24,   0,   4,  1, 0},   //  difficulty enum index (0..4)
     { 50, 30,   0,   5,  1, 0},   //  max grand temples
     { 50, 30,   1,  20,  1, 0},   //  autosave slots
-    { 50, 30,   0,  TOTAL_GAME_SPEEDS,  1, 0},   //  default game speed index
+    { 50, 30,   0,  TOTAL_GAME_SPEEDS - 1,  1, 0},   //  default game speed index
 
 };
 
