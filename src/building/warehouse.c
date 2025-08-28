@@ -160,12 +160,12 @@ void building_warehouse_recount_resources(building *main)
     main->resources[RESOURCE_NONE] = BUILDING_STORAGE_QUANTITY_MAX - total_loads;
 }
 
-int building_warehouse_try_add_resource(building *b, int resource, int quantity)
+int building_warehouse_try_add_resource(building *b, int resource, int quantity, int respect_settings)
 {
     if (!b || b->id <= 0 || quantity <= 0 || !resource) {
         return 0;
     }
-    signed short max_acceptable = building_warehouse_maximum_receptible_amount(b, resource);
+    signed short max_acceptable = respect_settings ? building_warehouse_maximum_receptible_amount(b, resource) : b->resources[RESOURCE_NONE];
     if (!max_acceptable) {
         return 0;
     }
@@ -178,7 +178,7 @@ int building_warehouse_try_add_resource(building *b, int resource, int quantity)
         if (!space) {
             break;
         }
-        signed short space_remaining = MAX_CARTLOADS_PER_SPACE - space->resources[resource];
+        signed short space_remaining = MAX_CARTLOADS_PER_SPACE - space->resources[respect_settings ? resource : RESOURCE_NONE];
         signed short to_add = (quantity - added < space_remaining) ? (quantity - added) : space_remaining;
 
         space->resources[resource] += to_add;
@@ -195,7 +195,7 @@ int building_warehouse_try_add_resource(building *b, int resource, int quantity)
     return added;
 }
 
-int building_warehouses_add_resource(int resource, int amount)
+int building_warehouses_add_resource(int resource, int amount, int respect_settings)
 {
     if (amount <= 0) {
         return 0;
@@ -206,7 +206,7 @@ int building_warehouses_add_resource(int resource, int amount)
             continue;
         }
 
-        int was_added = building_warehouse_try_add_resource(b, resource, amount);
+        int was_added = building_warehouse_try_add_resource(b, resource, amount, respect_settings);
         amount -= was_added;
     }
 
@@ -307,7 +307,7 @@ int building_warehouse_add_import(building *warehouse, int resource, int amount,
     if (building_storage_get_state(warehouse, resource, 1) == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
         return 0; // cannot accept this resource
     }
-    int added_amount = building_warehouse_try_add_resource(warehouse, resource, 1);
+    int added_amount = building_warehouse_try_add_resource(warehouse, resource, 1, 1);
     if (added_amount <= 0) {
         return 0; // no space to add
     }

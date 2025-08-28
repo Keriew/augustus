@@ -33,7 +33,7 @@ Single warehouse functions
 int building_warehouse_get_space_info(building *warehouse);
 int building_warehouse_get_amount(building *warehouse, int resource);
 int building_warehouse_get_available_amount(building *warehouse, int resource);
-int building_warehouse_try_add_resource(building *b, int resource, int quantity);
+int building_warehouse_try_add_resource(building *b, int resource, int quantity, int respect_settings);
 int building_warehouse_maximum_receptible_amount(building *b, int resource);
 int building_warehouse_try_remove_resource(building *warehouse, int resource, int desired_amount);
 void building_warehouse_remove_resource_curse(building *warehouse, int amount);
@@ -58,6 +58,6 @@ Multiple/global warehouse functions
 int building_warehouses_remove_resource(int resource, int amount);
 int building_warehouses_count_available_resource(int resource, int respect_maintaining);
 int building_warehouses_send_resources_to_rome(int resource, int amount);
-int building_warehouses_add_resource(int resource, int amount);
+int building_warehouses_add_resource(int resource, int amount, int respect_settings);
 
 #endif // BUILDING_WAREHOUSE_H
