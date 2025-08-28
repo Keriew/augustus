@@ -554,7 +554,7 @@ int building_count_bridges(int ship)
 
 int building_count_bridges_in_area(int minx, int miny, int maxx, int maxy, int ship)
 {
-    array(int) bridge_ids;
+    array(int) bridge_ids = { 0 };
     array_init(bridge_ids, 4, NULL, NULL);
     int grid_offset;
     for (int y = miny; y < maxy; y++) {
