@@ -537,7 +537,7 @@ int building_warehouses_remove_resource(int resource, int amount)
         if (b->state == BUILDING_STATE_IN_USE) {
             if (building_storage_get_state(b, resource, 1) < BUILDING_STORAGE_STATE_GETTING) {
                 city_resource_set_last_used_warehouse(b->id);
-                amount = building_warehouse_try_remove_resource(b, resource, amount);
+                amount -= building_warehouse_try_remove_resource(b, resource, amount);
             }
         }
         b = b->next_of_type ? b->next_of_type : building_first_of_type(BUILDING_WAREHOUSE);
@@ -551,7 +551,7 @@ int building_warehouses_remove_resource(int resource, int amount)
     do {
         if (b->state == BUILDING_STATE_IN_USE) {
             city_resource_set_last_used_warehouse(b->id);
-            amount = building_warehouse_try_remove_resource(b, resource, amount);
+            amount -= building_warehouse_try_remove_resource(b, resource, amount);
         }
         b = b->next_of_type ? b->next_of_type : building_first_of_type(BUILDING_WAREHOUSE);
     } while (b != initial_warehouse && amount > 0);
