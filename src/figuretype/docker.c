@@ -148,7 +148,8 @@ static int get_closest_building_for_import(int x, int y, int city_id, building *
 
         if (is_invalid_destination(b, dock) ||
             building_storage_get_empty_all(b->id) ||
-            building_storage_get_state(b, resource, 1) == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
+            building_storage_get_state(b, resource, 1) == BUILDING_STORAGE_STATE_NOT_ACCEPTING ||
+            building_warehouse_get_space_info(b) == WAREHOUSE_FULL) {
             continue;
         }
         int distance_penalty = get_distance_penalty_imports(b, resource);
@@ -167,7 +168,8 @@ static int get_closest_building_for_import(int x, int y, int city_id, building *
         for (building *b = building_first_of_type(BUILDING_GRANARY); b; b = b->next_of_type) {
             if (is_invalid_destination(b, dock) ||
                 building_storage_get_empty_all(b->id) ||
-                building_storage_get_state(b, resource, 1) == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
+                building_storage_get_state(b, resource, 1) == BUILDING_STORAGE_STATE_NOT_ACCEPTING ||
+                building_granary_get_amount(b, RESOURCE_NONE) <= 0) {
                 continue;
             }
             // always prefer granary
