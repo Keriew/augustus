@@ -38,6 +38,7 @@ void setting_set_sound_volume(int type, int volume);
 void setting_reset_sound(int type, int enabled, int volume);
 
 int setting_game_speed(void);
+int setting_set_game_speed(int speed);
 void setting_increase_game_speed(void);
 void setting_decrease_game_speed(void);
 void setting_set_default_game_speed(void);

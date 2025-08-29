@@ -13,4 +13,6 @@ void window_empire_show(void);
 
 void window_empire_show_checked(void);
 
+int window_empire_is_dragging_sidebar(void);
+
 #endif // WINDOW_EMPIRE_H

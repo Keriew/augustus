@@ -15,11 +15,35 @@ static const time_millis MILLIS_PER_TICK_PER_SPEED[] = {
 static const time_millis MILLIS_PER_HYPER_SPEED[] = {
     702, 16, 8, 5, 3, 2
 };
-
+const int game_speeds[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 500 };
+//if updaing array, update TOTAL_GAME_SPEEDS, 0-based
 static struct {
     int last_check_was_valid;
     time_millis last_update;
 } data;
+
+int game_speed_get_index(int speed)
+{
+    int index = 0;
+    while (index < sizeof(game_speeds) / sizeof(int)) {
+        if (game_speeds[index] >= speed) {
+            break;
+        }
+        index++;
+    }
+    if (index >= sizeof(game_speeds) / sizeof(int)) {
+        index = (sizeof(game_speeds) / sizeof(int)) - 1;
+    }
+    return index;
+}
+
+int game_speed_get_speed(int index)
+{
+    if (index < 0) {
+        index = 0;
+    }
+    return game_speeds[index];
+}
 
 int game_speed_get_elapsed_ticks(void)
 {
@@ -37,7 +61,8 @@ int game_speed_get_elapsed_ticks(void)
         case WINDOW_SLIDING_SIDEBAR:
         case WINDOW_OVERLAY_MENU:
         case WINDOW_MILITARY_MENU:
-        case WINDOW_BUILD_MENU: {
+        case WINDOW_BUILD_MENU:
+        {
             int speed = setting_game_speed();
             if (speed < 10) {
                 return 0;

@@ -65,6 +65,12 @@ int building_warehouse_get_amount(building *warehouse, int resource)
     return loads;
 }
 
+int building_warehouse_get_free_space_amount(building *b)
+{
+    building_warehouse_recount_resources(b); //recount, since free space in warehouse is tied to individual spaces
+    return b->resources[RESOURCE_NONE];
+}
+
 int building_warehouse_get_available_amount(building *warehouse, int resource)
 {
     if (warehouse->state != BUILDING_STATE_IN_USE || warehouse->has_plague) {
@@ -160,12 +166,13 @@ void building_warehouse_recount_resources(building *main)
     main->resources[RESOURCE_NONE] = BUILDING_STORAGE_QUANTITY_MAX - total_loads;
 }
 
-int building_warehouse_try_add_resource(building *b, int resource, int quantity)
+int building_warehouse_try_add_resource(building *b, int resource, int quantity, int respect_settings)
 {
     if (!b || b->id <= 0 || quantity <= 0 || !resource) {
         return 0;
     }
-    signed short max_acceptable = building_warehouse_maximum_receptible_amount(b, resource);
+    signed short max_acceptable = respect_settings ?
+        building_warehouse_maximum_receptible_amount(b, resource) : building_warehouse_get_free_space_amount(b);
     if (!max_acceptable) {
         return 0;
     }
@@ -179,7 +186,9 @@ int building_warehouse_try_add_resource(building *b, int resource, int quantity)
             break;
         }
         signed short space_remaining = MAX_CARTLOADS_PER_SPACE - space->resources[resource];
-        signed short to_add = (quantity - added < space_remaining) ? (quantity - added) : space_remaining;
+        //we cannot ignore the individual space limitations, since it will affect the image shown
+        //we cannot mix multiple resources in one space either
+        signed short to_add = ((quantity - added) < space_remaining) ? (quantity - added) : space_remaining;
 
         space->resources[resource] += to_add;
         space->subtype.warehouse_resource_id = resource;
@@ -195,7 +204,7 @@ int building_warehouse_try_add_resource(building *b, int resource, int quantity)
     return added;
 }
 
-int building_warehouses_add_resource(int resource, int amount)
+int building_warehouses_add_resource(int resource, int amount, int respect_settings)
 {
     if (amount <= 0) {
         return 0;
@@ -206,7 +215,7 @@ int building_warehouses_add_resource(int resource, int amount)
             continue;
         }
 
-        int was_added = building_warehouse_try_add_resource(b, resource, amount);
+        int was_added = building_warehouse_try_add_resource(b, resource, amount, respect_settings);
         amount -= was_added;
     }
 
@@ -307,7 +316,7 @@ int building_warehouse_add_import(building *warehouse, int resource, int amount,
     if (building_storage_get_state(warehouse, resource, 1) == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
         return 0; // cannot accept this resource
     }
-    int added_amount = building_warehouse_try_add_resource(warehouse, resource, 1);
+    int added_amount = building_warehouse_try_add_resource(warehouse, resource, 1, 1);
     if (added_amount <= 0) {
         return 0; // no space to add
     }
@@ -442,7 +451,7 @@ int building_warehouse_maximum_receptible_amount(building *b, int resource)
     // allowed remaining is the amount that can be added to the warehouse considering set limit and current storage
     max_receptible = max_receptible < 0 ? 0 : max_receptible; // in case current storage exceeds limits, 0
 
-    return  max_receptible;
+    return max_receptible;
 }
 
 int building_warehouses_count_available_resource(int resource, int respect_maintaining)
@@ -537,7 +546,7 @@ int building_warehouses_remove_resource(int resource, int amount)
         if (b->state == BUILDING_STATE_IN_USE) {
             if (building_storage_get_state(b, resource, 1) < BUILDING_STORAGE_STATE_GETTING) {
                 city_resource_set_last_used_warehouse(b->id);
-                amount = building_warehouse_try_remove_resource(b, resource, amount);
+                amount -= building_warehouse_try_remove_resource(b, resource, amount);
             }
         }
         b = b->next_of_type ? b->next_of_type : building_first_of_type(BUILDING_WAREHOUSE);
@@ -551,7 +560,7 @@ int building_warehouses_remove_resource(int resource, int amount)
     do {
         if (b->state == BUILDING_STATE_IN_USE) {
             city_resource_set_last_used_warehouse(b->id);
-            amount = building_warehouse_try_remove_resource(b, resource, amount);
+            amount -= building_warehouse_try_remove_resource(b, resource, amount);
         }
         b = b->next_of_type ? b->next_of_type : building_first_of_type(BUILDING_WAREHOUSE);
     } while (b != initial_warehouse && amount > 0);

@@ -467,7 +467,7 @@ void figure_cartpusher_action(figure *f)
             f->wait_ticks++;
             if (f->wait_ticks > 10) {
                 int delivered = building_warehouse_try_add_resource(
-                    building_get(f->destination_building_id), f->resource_id, f->loads_sold_or_carrying);
+                    building_get(f->destination_building_id), f->resource_id, f->loads_sold_or_carrying, 1);
                 if (delivered) {
                     f->loads_sold_or_carrying -= delivered; //sure hope it equals 0
                     city_health_dispatch_sickness(f);
@@ -484,7 +484,7 @@ void figure_cartpusher_action(figure *f)
             f->wait_ticks++;
             if (f->wait_ticks > 5) {
                 int delivered = building_granary_try_add_resource(building_get(f->destination_building_id),
-                    f->resource_id, f->loads_sold_or_carrying, 1);
+                    f->resource_id, f->loads_sold_or_carrying, 1, 1);
                 if (delivered) {
                     f->loads_sold_or_carrying -= delivered; //sure hope it equals 0
                     city_health_dispatch_sickness(f);
@@ -936,7 +936,7 @@ void figure_warehouseman_action(figure *f)
             figure_movement_move_ticks_with_percentage(f, 1, percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 int delivered_loads = building_granary_try_add_resource(
-                    building_get(f->building_id), f->resource_id, f->loads_sold_or_carrying, 0);
+                    building_get(f->building_id), f->resource_id, f->loads_sold_or_carrying, 0, 1);
                 f->loads_sold_or_carrying -= delivered_loads;
                 f->state = FIGURE_STATE_DEAD;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
@@ -987,7 +987,7 @@ void figure_warehouseman_action(figure *f)
             figure_movement_move_ticks_with_percentage(f, 1, percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 building_warehouse_try_add_resource(building_get(f->building_id),
-                    f->resource_id, f->loads_sold_or_carrying);
+                    f->resource_id, f->loads_sold_or_carrying, 1);
                 f->state = FIGURE_STATE_DEAD;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
                 figure_route_remove(f);

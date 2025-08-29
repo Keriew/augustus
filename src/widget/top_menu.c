@@ -27,6 +27,7 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "scenario/criteria.h"
+#include "scenario/event/controller.h"
 #include "scenario/property.h"
 #include "widget/city.h"
 #include "window/advisors.h"
@@ -544,7 +545,7 @@ static int draw_health_panel(int offset, int box_width, font_t font)
 
     // center it in the box
     int x = offset + (box_width - health_w) / 2;
-    text_draw_number(health, ' ', "", x, 5, font, color);
+    text_draw_number(health, ' ', "", x + 10, 5, font, color);
 
     return box_width;
 }
@@ -868,20 +869,19 @@ int widget_top_menu_get_tooltip_text(tooltip_context *c)
             c->extra_text_groups[0] = 53;
             switch (button_id) {
                 case INFO_CULTURE:
-                    c->extra_text_ids[0] = (scenario_criteria_culture() <= 90)
+                    c->extra_text_ids[0] = (city_rating_culture() <= 90)
                         ? 9 + city_rating_explanation_for(SELECTED_RATING_CULTURE) : 50;
                     return 1;
-
                 case INFO_PROSPERITY:
-                    c->extra_text_ids[0] = (scenario_criteria_prosperity() <= 90)
+                    c->extra_text_ids[0] = (city_rating_prosperity() <= 90)
                         ? 16 + city_rating_explanation_for(SELECTED_RATING_PROSPERITY) : 51;
                     return 2;
                 case INFO_PEACE:
-                    c->extra_text_ids[0] = (scenario_criteria_peace() <= 90)
+                    c->extra_text_ids[0] = (city_rating_peace() <= 90)
                         ? 41 + city_rating_explanation_for(SELECTED_RATING_PEACE) : 52;
                     return 3;
                 case INFO_FAVOR:
-                    c->extra_text_ids[0] = (scenario_criteria_favor() <= 90)
+                    c->extra_text_ids[0] = (city_rating_favor() <= 90)
                         ? 27 + city_rating_explanation_for(SELECTED_RATING_FAVOR) : 53;
                     return 4;
                 case INFO_HEALTH:
@@ -917,6 +917,7 @@ static void replay_map_confirmed(int confirmed, int checked)
         window_mission_selection_show_again();
     }
     model_load();
+    scenario_events_process_all();
 }
 
 static void menu_file_replay_map(int param)
