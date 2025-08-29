@@ -1698,6 +1698,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_CUSTOM_VARIABLES_TEXT_DISPLAY, "Text to display"},
     {TR_EDITOR_CUSTOM_VARIABLES_IS_VISIBLE, "Visible"},
     {TR_ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY, "Change custom variable visibility" },
+    {TR_CONFIG_SHOW_CUSTOM_VARIABLES, "Show custom variables in city view" },
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

@@ -51,8 +51,8 @@
 #include "window/file_dialog.h"
 #include "window/message_list.h"
 
-#define TOPLEFT_MESSAGES_X 6
-#define TOPLEFT_MESSAGES_Y_SPACING 2
+#define TOPLEFT_MESSAGES_X 5
+#define TOPLEFT_MESSAGES_Y_SPACING 24
 
 static int mothball_warning_id;
 static int time_left_label_shown;
@@ -64,45 +64,9 @@ typedef struct {
     int unit_text;    // translation id for the unit (ignored if unit_group == -1)
 } ui_value_segment_t;
 
-// NEW: draw a label using a precomposed text prefix + one or more numeric value segments
 static void draw_topleft_label(int x, int y, const uint8_t *label_text, const ui_value_segment_t *segments,
-     int segment_count, font_t font)
-{
-    // Measure total width: precomposed text + all numbers + their (optional) units
-    int label_width = text_get_width(label_text, font);
-    for (int i = 0; i < segment_count; ++i) {
-        label_width += text_get_number_width(segments[i].value, '@', "", font);
-        if (segments[i].unit_group != -1) {
-            label_width += lang_text_get_width(segments[i].unit_group, segments[i].unit_text, font);
-        }
-    }
-
-    int label_blocks = (label_width + 2 * BLOCK_SIZE) / BLOCK_SIZE;
-    if (label_blocks < 1) label_blocks = 1;
-
-    label_draw(x, y, label_blocks, 1);
-    int draw_x = x + 6;
-    const int draw_y = y + 4;
-    // Draw the precomposed text and advance by its pixel width
-    int prefix_w = text_get_width(label_text, font);
-    text_draw(label_text, draw_x, draw_y, font, 0);
-    draw_x += prefix_w;
-
-    // Draw value segments
-    for (int i = 0; i < segment_count; ++i) {
-        draw_x += text_draw_number(segments[i].value, '@', "", draw_x, draw_y, font, 0);
-        if (segments[i].unit_group != -1) {
-            draw_x += lang_text_draw(segments[i].unit_group, segments[i].unit_text, draw_x, draw_y, font);
-        }
-    }
-}
-
-// quick wrapper for the common case of a single text + value
-static void draw_topleft_label_short(int x, int y, const uint8_t *label_text, int value, font_t font)
-{
-    ui_value_segment_t seg = { value, -1, 0 };
-    draw_topleft_label(x, y, label_text, &seg, 1, font);
-}
+    int segment_count, font_t font);
+static void draw_topleft_label_short(int x, int y, const uint8_t *label_text, int value, font_t font);
 
 static void draw_background(void)
 {
@@ -198,31 +162,27 @@ static void draw_paused_banner(void)
     }
 }
 
-// UPDATED: draw all visible custom variables using their precomposed display text
 static void draw_custom_variables_text_display(void)
 {
-    int y = 25 + (time_left_label_shown ? (BLOCK_SIZE + TOPLEFT_MESSAGES_Y_SPACING) : 0);
+    int y = 25 + (time_left_label_shown ? (TOPLEFT_MESSAGES_Y_SPACING) : 0);
     const font_t font = FONT_NORMAL_WHITE;
 
-    for (int i = 0; i < scenario_custom_variable_count(); ++i) {
+    for (int i = 0; i < scenario_custom_variable_count(); i++) {
         if (!scenario_custom_variable_is_visible(i)) {
             continue;
         }
-
         const uint8_t *display = scenario_custom_variable_get_text_display(i);
         int value = scenario_custom_variable_get_value(i);
-
-        // Background x is 1 to match the existing top-left pill style
-        draw_topleft_label_short(1, y, display, value, font);
-        y += BLOCK_SIZE + TOPLEFT_MESSAGES_Y_SPACING;
+        draw_topleft_label_short(TOPLEFT_MESSAGES_X, y, display, value, font);
+        y += TOPLEFT_MESSAGES_Y_SPACING;
     }
 }
 
-// UPDATED: precompose the "time left" label text, then draw with value segments
 static void draw_time_left(void)
 {
-    time_left_label_shown = 0;
 
+    int fps_offset = config_get(CONFIG_UI_DISPLAY_FPS) * 2 * BLOCK_SIZE; // shift to the right if FPS is displayed
+    time_left_label_shown = fps_offset > 0; // if fps is shown skip first row anyway
     if ((scenario_criteria_time_limit_enabled() || scenario_criteria_survival_enabled()) && !city_victory_has_won()) {
         time_left_label_shown = 1;
 
@@ -251,10 +211,48 @@ static void draw_time_left(void)
         };
 
         // Background x is 1 to match existing pills; y is 25 as before
-        draw_topleft_label(1, 25, label_str, segs, 2, font);
+        draw_topleft_label(fps_offset + TOPLEFT_MESSAGES_X, 25, label_str, segs, 2, font);
     }
 }
 
+static void draw_topleft_label(int x, int y, const uint8_t *label_text, const ui_value_segment_t *segments,
+    int segment_count, font_t font)
+{
+    // Measure total width: precomposed text + all numbers + their (optional) units
+    int label_width = text_get_width(label_text, font);
+    for (int i = 0; i < segment_count; ++i) {
+        label_width += text_get_number_width(segments[i].value, '@', "", font);
+        if (segments[i].unit_group != -1) {
+            label_width += lang_text_get_width(segments[i].unit_group, segments[i].unit_text, font);
+        }
+    }
+
+    int label_blocks = (label_width + 2 * BLOCK_SIZE) / BLOCK_SIZE;
+    if (label_blocks < 1) label_blocks = 1;
+
+    label_draw(x, y, label_blocks, 1);
+    int draw_x = x + 6;
+    const int draw_y = y + 4;
+    // Draw the precomposed text and advance by its pixel width
+    int prefix_w = text_get_width(label_text, font);
+    text_draw(label_text, draw_x, draw_y, font, 0);
+    draw_x += prefix_w;
+
+    // Draw value segments
+    for (int i = 0; i < segment_count; ++i) {
+        draw_x += text_draw_number(segments[i].value, '@', "", draw_x, draw_y, font, 0);
+        if (segments[i].unit_group != -1) {
+            draw_x += lang_text_draw(segments[i].unit_group, segments[i].unit_text, draw_x, draw_y, font);
+        }
+    }
+}
+
+//wrapper for the common case of a single text + value
+static void draw_topleft_label_short(int x, int y, const uint8_t *label_text, int value, font_t font)
+{
+    ui_value_segment_t seg = { value, -1, 0 };
+    draw_topleft_label(x, y, label_text, &seg, 1, font);
+}
 
 static void draw_speedrun_info(void)
 {
