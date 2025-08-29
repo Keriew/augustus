@@ -26,6 +26,7 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "scenario/criteria.h"
+#include "scenario/event/controller.h"
 #include "scenario/property.h"
 #include "widget/city.h"
 #include "window/advisors.h"
@@ -915,6 +916,7 @@ static void replay_map_confirmed(int confirmed, int checked)
         scenario_save_campaign_player_name();
         window_mission_selection_show_again();
     }
+    scenario_events_process_all();
 }
 
 static void menu_file_replay_map(int param)
