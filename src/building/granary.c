@@ -48,6 +48,11 @@ int building_granary_get_amount(building *b, int resource)
 {
     return b->resources[resource];
 }
+int building_granary_get_free_space_amount(building *b)
+{
+    return b->resources[RESOURCE_NONE];
+}
+
 
 int building_granary_add_import(building *granary, int resource, int amount, int land_trader)
 {
@@ -70,12 +75,14 @@ int building_granary_add_import(building *granary, int resource, int amount, int
     if (!building_storage_get_permission(permission, granary)) {
         return 0; // cannot export from this granary
     }
-    if (building_granary_try_add_resource(granary, resource, amount, 0, 1) != amount) {
+    int amount_added = building_granary_try_add_resource(granary, resource, amount, 0, 1);
+    if (!amount_added) {
         return 0;
     }
+
     int price = trade_price_buy(resource, land_trader);
-    city_finance_process_import(price);
-    return 1;
+    city_finance_process_import(price * amount_added);
+    return amount_added;
 }
 
 int building_granary_remove_export(building *granary, int resource, int amount, int land_trader)
@@ -309,7 +316,7 @@ int building_granary_remove_for_getting_deliveryman(building *src, building *dst
             max_amount = 8;
         }
     }
-    if (max_amount > dst->resources[RESOURCE_NONE]) {
+    if (max_amount > dst->resources[RESOURCE_NONE]) { // not necessary anymore since we check max receptible amount below
         max_amount = dst->resources[RESOURCE_NONE];
     }
     const int receptible_amount = building_granary_maximum_receptible_amount(dst, max_resource);
