@@ -164,6 +164,9 @@ static void draw_paused_banner(void)
 
 static void draw_custom_variables_text_display(void)
 {
+    if (!config_get(CONFIG_UI_SHOW_CUSTOM_VARIABLES)) {
+        return;
+    }
     int y = 25 + (time_left_label_shown ? (TOPLEFT_MESSAGES_Y_SPACING) : 0);
     const font_t font = FONT_NORMAL_WHITE;
 
