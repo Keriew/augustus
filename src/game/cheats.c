@@ -330,8 +330,8 @@ static void game_cheat_show_editor(uint8_t *args)
 
 static void game_cheat_change_weather(uint8_t *args)
 {
-    int weather = WEATHER_NONE;
-    int intensity = 0;
+    int weather = WEATHER_NONE; //is actually wheather type so either 0(WEATHER_NONE), 1(RAIN), 2(SNOW), 3(SAND)
+    int intensity = 0; //note that intesity only changes particles for Thunder set weather to rain with intesity higher ca. 900, rain sounds start at 500
     int index = parse_integer(args, &weather);
     parse_integer(args + index, &intensity);
     if (weather > WEATHER_SAND) {
