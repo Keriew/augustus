@@ -336,17 +336,9 @@ int scenario_action_type_building_force_collapse_execute(scenario_action_t *acti
             }
             if (type == BUILDING_OVERGROWN_GARDENS || type == BUILDING_PLAZA) {
                 map_property_clear_plaza_earthquake_or_overgrown_garden(current_grid_offset);
-                map_tiles_update_all_plazas();
-                map_tiles_update_all_roads();
             }
             if ((type == BUILDING_ROAD || type == BUILDING_GARDENS || type == BUILDING_HIGHWAY || type == BUILDING_OVERGROWN_GARDENS) && !map_terrain_is(current_grid_offset, TERRAIN_BUILDING)) {
                 map_terrain_remove(current_grid_offset, TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_HIGHWAY);
-                map_tiles_update_all_empty_land();
-                map_tiles_update_all_meadow();
-                map_tiles_update_all_highways();
-                map_tiles_update_all_gardens();
-                map_tiles_update_all_roads();
-                map_tiles_update_all_plazas();
             }
             int building_id = map_building_at(current_grid_offset);
             if (!building_id) {
@@ -364,7 +356,14 @@ int scenario_action_type_building_force_collapse_execute(scenario_action_t *acti
             }
         }
     }
-
+    if (type == BUILDING_ROAD || type == BUILDING_GARDENS || type == BUILDING_HIGHWAY || type == BUILDING_OVERGROWN_GARDENS || type == BUILDING_PLAZA) {
+        map_tiles_update_all_empty_land();
+        map_tiles_update_all_meadow();
+        map_tiles_update_all_highways();
+        map_tiles_update_all_gardens();
+        map_tiles_update_all_roads();
+        map_tiles_update_all_plazas();
+    }
     return 1;
 }
 
