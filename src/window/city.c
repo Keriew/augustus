@@ -170,7 +170,7 @@ static void draw_custom_variables_text_display(void)
     int y = 25 + (time_left_label_shown ? (TOPLEFT_MESSAGES_Y_SPACING) : 0);
     const font_t font = FONT_NORMAL_WHITE;
 
-    for (int i = 0; i < scenario_custom_variable_count(); i++) {
+    for (unsigned int i = 0; i < scenario_custom_variable_count(); i++) {
         if (!scenario_custom_variable_is_visible(i)) {
             continue;
         }
