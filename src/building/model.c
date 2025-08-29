@@ -12,13 +12,14 @@
 #define TMP_BUFFER_SIZE 100000
 
 #define NUM_BUILDINGS 130
-#define NUM_NEW_BUILDINGS BUILDING_TYPE_MAX - 115
+#define FIRST_NEW_BUILDING_INDEX BUILDING_ROADBLOCK
+#define NUM_NEW_BUILDINGS (BUILDING_TYPE_MAX - FIRST_NEW_BUILDING_INDEX)
 #define NUM_HOUSES 20
 
 static const uint8_t ALL_BUILDINGS[] = { 'A', 'L', 'L', ' ', 'B', 'U', 'I', 'L', 'D', 'I', 'N', 'G', 'S', 0 };
 static const uint8_t ALL_HOUSES[] = { 'A', 'L', 'L', ' ', 'H', 'O', 'U', 'S', 'E', 'S', 0 };
 
-static model_building buildings[NUM_BUILDINGS + NUM_NEW_BUILDINGS];
+static model_building buildings[BUILDING_TYPE_MAX];
 static model_house houses[NUM_HOUSES];
 static const model_building new_buildings[NUM_NEW_BUILDINGS];
 
@@ -168,7 +169,7 @@ int model_load(void)
     }
     
     for (int i = 0; i < NUM_NEW_BUILDINGS; i++) {
-        buildings[i + 130] = new_buildings[i];
+        buildings[i + FIRST_NEW_BUILDING_INDEX] = new_buildings[i];
     }
 
     ptr = &buffer[index_of_string(buffer, ALL_HOUSES, filesize)];
