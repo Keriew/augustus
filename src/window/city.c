@@ -212,8 +212,6 @@ static void draw_time_left(void)
             { years_left,  CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_YEARS  },
             { months_left, CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_MONTHS }
         };
-
-        // Background x is 1 to match existing pills; y is 25 as before
         draw_topleft_label(fps_offset + TOPLEFT_MESSAGES_X, 25, label_str, segs, 2, font);
     }
 }
