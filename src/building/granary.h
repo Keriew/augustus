@@ -219,6 +219,7 @@ int building_granary_determine_worker_task(building *granary);
   */
 void building_granaries_calculate_stocks(void);
 
+
 /**
  * @brief Save-game helper: update the capacity of all built granaries.
  */

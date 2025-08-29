@@ -442,7 +442,7 @@ int building_warehouse_maximum_receptible_amount(building *b, int resource)
     // allowed remaining is the amount that can be added to the warehouse considering set limit and current storage
     max_receptible = max_receptible < 0 ? 0 : max_receptible; // in case current storage exceeds limits, 0
 
-    return  max_receptible;
+    return max_receptible;
 }
 
 int building_warehouses_count_available_resource(int resource, int respect_maintaining)

@@ -1685,6 +1685,16 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_CHANGE_SIDEBAR_WIDTH, "Change sidebar width"},
     {TR_TOOLTIP_ASCENDING_ORDER, "Ascending order"},
     {TR_TOOLTIP_DESCENDING_ORDER, "Descending order"},
+    {TR_CONFIG_DEFAULT_GAME_SPEED, "Default game speed:"},
+    {TR_CONFIG_CATEGORY_GENERAL,"General"},
+    {TR_CONFIG_CATEGORY_UI_MAP,"Scrolling and Map"},
+    {TR_CONFIG_CATEGORY_UI_BUILDING,"Building"},
+    {TR_CONFIG_CATEGORY_UI_CITY,"City View"},
+    {TR_CONFIG_CATEGORY_UI_WEATHER,"Weather"},
+    {TR_CONFIG_CATEGORY_MANAGEMENT_STORAGE,"Storage and Markets"},
+    {TR_CONFIG_CATEGORY_MANAGEMENT_ROADS,"Roads"},
+    {TR_CONFIG_CATEGORY_MANAGEMENT_ROADBLOCKS,"Roadblocks"},
+    {TR_CONFIG_CATEGORY_MANAGEMENT_HOUSING,"Housing"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
