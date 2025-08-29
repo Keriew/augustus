@@ -91,6 +91,14 @@ int scenario_action_type_change_custom_variable_execute(scenario_action_t *actio
     return 1;
 }
 
+int scenario_action_type_change_custom_variable_visibility(scenario_action_t *action)
+{
+    int variable_id = action->parameter1;
+    int value = action->parameter2;
+    scenario_custom_variable_set_visibility(variable_id, value);
+    return 1;
+}
+
 int scenario_action_type_change_resource_produced_execute(scenario_action_t *action)
 {
     int resource = action->parameter1;
@@ -678,7 +686,7 @@ int scenario_action_type_change_terrain_execute(scenario_action_t *action)
                 continue;
             }
             if (add) {
-                if (terrain & TERRAIN_NOT_CLEAR) { 
+                if (terrain & TERRAIN_NOT_CLEAR) {
                     // Destroy buildings if the new terrains doesn't allow for buildings
                     int building_id = map_building_at(current_grid_offset);
                     if (building_id) {
@@ -691,7 +699,7 @@ int scenario_action_type_change_terrain_execute(scenario_action_t *action)
                 }
                 map_terrain_add(current_grid_offset, terrain);
             } else {
-                if (terrain == TERRAIN_WATER && map_terrain_get(current_grid_offset) & TERRAIN_WATER)  {
+                if (terrain == TERRAIN_WATER && map_terrain_get(current_grid_offset) & TERRAIN_WATER) {
                     // Destroy water buildings when removing water
                     int building_id = map_building_at(current_grid_offset);
                     if (building_id) {

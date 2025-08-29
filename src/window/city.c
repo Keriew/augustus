@@ -38,6 +38,7 @@
 #include "map/terrain.h"
 #include "scenario/allowed_building.h"
 #include "scenario/criteria.h"
+#include "scenario/custom_variable.h"
 #include "widget/city.h"
 #include "widget/city_with_overlay.h"
 #include "widget/top_menu.h"
@@ -50,7 +51,58 @@
 #include "window/file_dialog.h"
 #include "window/message_list.h"
 
+#define TOPLEFT_MESSAGES_X 6
+#define TOPLEFT_MESSAGES_Y_SPACING 2
+
 static int mothball_warning_id;
+static int time_left_label_shown;
+
+// One value + optional unit that follows it
+typedef struct {
+    int value;
+    int unit_group;   // translation group for the unit (or -1 if none)
+    int unit_text;    // translation id for the unit (ignored if unit_group == -1)
+} ui_value_segment_t;
+
+// NEW: draw a label using a precomposed text prefix + one or more numeric value segments
+static void draw_topleft_label(int x, int y, const uint8_t *label_text, const ui_value_segment_t *segments,
+     int segment_count, font_t font)
+{
+    // Measure total width: precomposed text + all numbers + their (optional) units
+    int label_width = text_get_width(label_text, font);
+    for (int i = 0; i < segment_count; ++i) {
+        label_width += text_get_number_width(segments[i].value, '@', "", font);
+        if (segments[i].unit_group != -1) {
+            label_width += lang_text_get_width(segments[i].unit_group, segments[i].unit_text, font);
+        }
+    }
+
+    int label_blocks = (label_width + 2 * BLOCK_SIZE) / BLOCK_SIZE;
+    if (label_blocks < 1) label_blocks = 1;
+
+    label_draw(x, y, label_blocks, 1);
+    int draw_x = x + 6;
+    const int draw_y = y + 4;
+    // Draw the precomposed text and advance by its pixel width
+    int prefix_w = text_get_width(label_text, font);
+    text_draw(label_text, draw_x, draw_y, font, 0);
+    draw_x += prefix_w;
+
+    // Draw value segments
+    for (int i = 0; i < segment_count; ++i) {
+        draw_x += text_draw_number(segments[i].value, '@', "", draw_x, draw_y, font, 0);
+        if (segments[i].unit_group != -1) {
+            draw_x += lang_text_draw(segments[i].unit_group, segments[i].unit_text, draw_x, draw_y, font);
+        }
+    }
+}
+
+// quick wrapper for the common case of a single text + value
+static void draw_topleft_label_short(int x, int y, const uint8_t *label_text, int value, font_t font)
+{
+    ui_value_segment_t seg = { value, -1, 0 };
+    draw_topleft_label(x, y, label_text, &seg, 1, font);
+}
 
 static void draw_background(void)
 {
@@ -146,67 +198,63 @@ static void draw_paused_banner(void)
     }
 }
 
-static void draw_time_left(void)
+// UPDATED: draw all visible custom variables using their precomposed display text
+static void draw_custom_variables_text_display(void)
 {
+    int y = 25 + (time_left_label_shown ? (BLOCK_SIZE + TOPLEFT_MESSAGES_Y_SPACING) : 0);
+    const font_t font = FONT_NORMAL_WHITE;
 
-    int fps_offset = config_get(CONFIG_UI_DISPLAY_FPS) * 2 * BLOCK_SIZE; // shift to the right if FPS is displayed
-
-    if (scenario_criteria_time_limit_enabled() && !city_victory_has_won()) {
-        int years;
-        if (scenario_criteria_max_year() <= game_time_year() + 1) {
-            years = 0;
-        } else {
-            years = scenario_criteria_max_year() - game_time_year() - 1;
-        }
-        int total_months = 12 - game_time_month() + 12 * years;
-        int years_left = total_months / 12;
-        int months_left = total_months % 12;
-        font_t font = FONT_NORMAL_WHITE; //changed font to white to match the rest of the UI
-        int label_width = lang_text_get_width(CUSTOM_TRANSLATION, TR_CONDITION_TEXT_TIME_LEFT_UNTIL_DEFEAT, font);
-        label_width += text_get_number_width(years_left, '@', "", font);
-        label_width += lang_text_get_width(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_YEARS, font);
-        label_width += text_get_number_width(months_left, '@', "", font);
-        label_width += lang_text_get_width(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_MONTHS, font);
-        int label_blocks = (label_width + 2 * BLOCK_SIZE) / BLOCK_SIZE; // 3 block sizes for nice padding
-        label_draw(1 + fps_offset, 25, label_blocks, 1);
-        int x_offset = 6 + fps_offset;
-        int y = 29;
-        x_offset += lang_text_draw(CUSTOM_TRANSLATION, TR_CONDITION_TEXT_TIME_LEFT_UNTIL_DEFEAT, x_offset, y, font);
-        x_offset += text_draw_number(years_left, '@', "", x_offset, y, font, 0);
-        x_offset += lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_YEARS, x_offset, y, font);
-        x_offset += text_draw_number(months_left, '@', "", x_offset, y, font, 0);
-        x_offset += lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_MONTHS, x_offset, y, font);
-
-    } else if (scenario_criteria_survival_enabled() && !city_victory_has_won()) {
-        int years;
-        if (scenario_criteria_max_year() <= game_time_year() + 1) {
-            years = 0;
-        } else {
-            years = scenario_criteria_max_year() - game_time_year() - 1;
+    for (int i = 0; i < scenario_custom_variable_count(); ++i) {
+        if (!scenario_custom_variable_is_visible(i)) {
+            continue;
         }
 
-        int total_months = 12 - game_time_month() + 12 * years;
-        int years_left = total_months / 12;
-        int months_left = total_months % 12;
+        const uint8_t *display = scenario_custom_variable_get_text_display(i);
+        int value = scenario_custom_variable_get_value(i);
 
-        font_t font = FONT_NORMAL_WHITE; // 
-        int label_width = lang_text_get_width(CUSTOM_TRANSLATION, TR_CONDITION_TEXT_TIME_LEFT_UNTIL_VICTORY, font);
-        label_width += text_get_number_width(years_left, '@', "", font);
-        label_width += lang_text_get_width(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_YEARS, font);
-        label_width += text_get_number_width(months_left, '@', "", font);
-        label_width += lang_text_get_width(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_MONTHS, font);
-        int label_blocks = (label_width + 2 * BLOCK_SIZE) / BLOCK_SIZE;
-
-        label_draw(1 + fps_offset, 25, label_blocks, 1);
-        int x_offset = 6 + fps_offset;
-        int y = 29;
-        x_offset += lang_text_draw(CUSTOM_TRANSLATION, TR_CONDITION_TEXT_TIME_LEFT_UNTIL_VICTORY, x_offset, y, font);
-        x_offset += text_draw_number(years_left, '@', "", x_offset, y, font, 0);
-        x_offset += lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_YEARS, x_offset, y, font);
-        x_offset += text_draw_number(months_left, '@', "", x_offset, y, font, 0);
-        x_offset += lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_MONTHS, x_offset, y, font);
+        // Background x is 1 to match the existing top-left pill style
+        draw_topleft_label_short(1, y, display, value, font);
+        y += BLOCK_SIZE + TOPLEFT_MESSAGES_Y_SPACING;
     }
 }
+
+// UPDATED: precompose the "time left" label text, then draw with value segments
+static void draw_time_left(void)
+{
+    time_left_label_shown = 0;
+
+    if ((scenario_criteria_time_limit_enabled() || scenario_criteria_survival_enabled()) && !city_victory_has_won()) {
+        time_left_label_shown = 1;
+
+        int years;
+        if (scenario_criteria_max_year() <= game_time_year() + 1) {
+            years = 0;
+        } else {
+            years = scenario_criteria_max_year() - game_time_year() - 1;
+        }
+
+        int total_months = 12 - game_time_month() + 12 * years;
+        int years_left = total_months / 12;
+        int months_left = total_months % 12;
+
+        const font_t font = FONT_NORMAL_WHITE;
+
+        // Precompose the prefix text (translated): "Time left until defeat/victory: "
+        const int label_id = scenario_criteria_time_limit_enabled()
+            ? TR_CONDITION_TEXT_TIME_LEFT_UNTIL_DEFEAT
+            : TR_CONDITION_TEXT_TIME_LEFT_UNTIL_VICTORY;
+        const uint8_t *label_str = lang_get_string(CUSTOM_TRANSLATION, label_id);
+
+        ui_value_segment_t segs[2] = {
+            { years_left,  CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_YEARS  },
+            { months_left, CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_MONTHS }
+        };
+
+        // Background x is 1 to match existing pills; y is 25 as before
+        draw_topleft_label(1, 25, label_str, segs, 2, font);
+    }
+}
+
 
 static void draw_speedrun_info(void)
 {
@@ -225,6 +273,7 @@ static void draw_foreground(void)
     draw_speedrun_info();
     if (window_is(WINDOW_CITY) || window_is(WINDOW_CITY_MILITARY)) {
         draw_time_left();
+        draw_custom_variables_text_display();
         widget_city_draw_construction_buttons();
         if (!mouse_get()->is_touch || sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED)) {
             draw_paused_banner();

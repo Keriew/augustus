@@ -1695,6 +1695,9 @@ static translation_string all_strings[] = {
     {TR_CONFIG_CATEGORY_MANAGEMENT_ROADS,"Roads"},
     {TR_CONFIG_CATEGORY_MANAGEMENT_ROADBLOCKS,"Roadblocks"},
     {TR_CONFIG_CATEGORY_MANAGEMENT_HOUSING,"Housing"},
+    {TR_EDITOR_CUSTOM_VARIABLES_TEXT_DISPLAY, "Text to display"},
+    {TR_EDITOR_CUSTOM_VARIABLES_IS_VISIBLE, "Visible"},
+    {TR_ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY, "Change custom variable visibility" },
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

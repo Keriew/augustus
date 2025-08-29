@@ -284,11 +284,11 @@ void scenario_save_state(buffer *buf)
     }
 
     buffer_write_i32(buf, scenario.rome_supplies_wheat);
-/***
-    for (int i = 0; i < MAX_ALLOWED_BUILDINGS; i++) {
-        buffer_write_i16(buf, scenario.allowed_buildings[i]);
-    }
-***/
+    /***
+        for (int i = 0; i < MAX_ALLOWED_BUILDINGS; i++) {
+            buffer_write_i16(buf, scenario.allowed_buildings[i]);
+        }
+    ***/
     buffer_write_i32(buf, scenario.win_criteria.culture.goal);
     buffer_write_i32(buf, scenario.win_criteria.prosperity.goal);
     buffer_write_i32(buf, scenario.win_criteria.peace.goal);
