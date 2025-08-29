@@ -1,7 +1,5 @@
 #include "parameter_data.h"
 
-#include <stdio.h>
-
 #include "building/menu.h"
 #include "building/model.h"
 #include "building/properties.h"

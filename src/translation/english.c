@@ -1661,8 +1661,6 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_TERRAIN_WATER, "Water" },
     {TR_PARAMETER_TERRAIN_MEADOW, "Meadow" },
     {TR_PARAMETER_TERRAIN_SHRUB, "Shrub" },
-     {TR_CHEAT_DISABLE_INVASIONS, "Disable invasions"},
-    {TR_CHEAT_DISABLE_LEGIONS_CONSUMPTION, "Disable soldier food consumption"},
     {TR_TOOLTIP_BUTTON_ACCEPT_NATIVES, "Allow native traders to get from here"},
     {TR_TOOLTIP_BUTTON_REJECT_NATIVES, "Don't allow native traders to get from here"},
     {TR_TOOLTIP_BUTTON_ACCEPT_ALL, "Allow everyone to get from here"},
