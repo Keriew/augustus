@@ -8,6 +8,7 @@
 #include "graphics/color.h"
 #include "graphics/graphics.h"
 #include "graphics/screen.h"
+#include "graphics/window.h"
 #include "scenario/property.h"
 #include "sound/device.h"
 #include "sound/speech.h"
@@ -250,9 +251,11 @@ static void draw_snow(void)
         count = max_particles;
     }
     for (int i = 0; i < count; ++i) {
-        int drift = ((data.elements[i].y + data.elements[i].drift_offset) % 10) - 5;
-        data.elements[i].x += (drift / 10) * data.elements[i].drift_direction;
-        data.elements[i].y += data.elements[i].speed;
+        if (window_is(WINDOW_CITY)) {
+            int drift = ((data.elements[i].y + data.elements[i].drift_offset) % 10) - 5;
+            data.elements[i].x += (drift / 10) * data.elements[i].drift_direction;
+            data.elements[i].y += data.elements[i].speed;
+        }
 
         graphics_draw_line(
             data.elements[i].x,
@@ -288,8 +291,10 @@ static void draw_sandstorm(void)
     }
 
     for (int i = 0; i < count; ++i) {
-        int wave = ((data.elements[i].y + data.elements[i].offset) % 10) - 5;
-        data.elements[i].x += data.elements[i].speed + (wave / 10);
+        if (window_is(WINDOW_CITY)) {
+            int wave = ((data.elements[i].y + data.elements[i].offset) % 10) - 5;
+            data.elements[i].x += data.elements[i].speed + (wave / 10);
+        }
 
         graphics_draw_line(
             data.elements[i].x,
@@ -311,7 +316,7 @@ static void draw_rain(void)
         return;
     }
 
-    if (data.weather_config.intensity < 600) {
+    if (data.weather_config.intensity < 600 && window_is(WINDOW_CITY)) {
         update_wind();
     }
 
@@ -339,10 +344,12 @@ static void draw_rain(void)
             data.elements[i].y + data.elements[i].length,
             COLOR_WEATHER_DROPS);
 
-        data.elements[i].x += dx;
+        if (window_is(WINDOW_CITY)) {
+            data.elements[i].x += dx;
 
-        int dy = base_speed + data.elements[i].speed + (((data.elements[i].x + data.elements[i].y) % 10) / 10);
-        data.elements[i].y += dy;
+            int dy = base_speed + data.elements[i].speed + (((data.elements[i].x + data.elements[i].y) % 10) / 10);
+            data.elements[i].y += dy;
+        }
 
         if (data.elements[i].y >= screen_height() || data.elements[i].x <= 0 || data.elements[i].x >= screen_width()) {
             init_weather_element(&data.elements[i], data.weather_config.type);
