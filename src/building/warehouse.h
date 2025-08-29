@@ -48,6 +48,14 @@ int building_warehouse_get_space_info(building *warehouse);
 int building_warehouse_get_amount(building *warehouse, int resource);
 
 /**
+ * @brief Get the amount of free space in the warehouse overall.
+ * @param b
+ * @param resource
+ * @return Amount of the free space in the warehouse
+ */
+int building_warehouse_get_free_space_amount(building *b);
+
+/**
  * @brief Count available (deliverable) amount in a warehouse.
  * TODO: create building_storage helper for this and granary equivalent
  * @param warehouse

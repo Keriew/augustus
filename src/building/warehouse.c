@@ -185,8 +185,10 @@ int building_warehouse_try_add_resource(building *b, int resource, int quantity,
         if (!space) {
             break;
         }
-        signed short space_remaining = MAX_CARTLOADS_PER_SPACE - space->resources[respect_settings ? resource : RESOURCE_NONE];
-        signed short to_add = (quantity - added < space_remaining) ? (quantity - added) : space_remaining;
+        signed short space_remaining = MAX_CARTLOADS_PER_SPACE - space->resources[resource];
+        //we cannot ignore the individual space limitations, since it will affect the image shown
+        //we cannot mix multiple resources in one space either
+        signed short to_add = ((quantity - added) < space_remaining) ? (quantity - added) : space_remaining;
 
         space->resources[resource] += to_add;
         space->subtype.warehouse_resource_id = resource;

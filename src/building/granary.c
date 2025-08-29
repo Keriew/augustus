@@ -122,7 +122,8 @@ int building_granary_try_add_resource(building *granary, int resource, int amoun
         return 0;
     }
     int amount_added = 0;
-    int max_current_capacity = respect_settings ? building_granary_maximum_receptible_amount(granary, resource) : granary->resources[RESOURCE_NONE];
+    int max_current_capacity = respect_settings ?
+        building_granary_maximum_receptible_amount(granary, resource) : building_granary_get_free_space_amount(granary);
     if (amount > max_current_capacity) {
         amount_added = max_current_capacity;
     } else {
