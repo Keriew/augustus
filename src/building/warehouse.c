@@ -65,6 +65,12 @@ int building_warehouse_get_amount(building *warehouse, int resource)
     return loads;
 }
 
+int building_warehouse_get_free_space_amount(building *b)
+{
+    building_warehouse_recount_resources(b); //recount, since free space in warehouse is tied to individual spaces
+    return b->resources[RESOURCE_NONE];
+}
+
 int building_warehouse_get_available_amount(building *warehouse, int resource)
 {
     if (warehouse->state != BUILDING_STATE_IN_USE || warehouse->has_plague) {
@@ -165,7 +171,8 @@ int building_warehouse_try_add_resource(building *b, int resource, int quantity,
     if (!b || b->id <= 0 || quantity <= 0 || !resource) {
         return 0;
     }
-    signed short max_acceptable = respect_settings ? building_warehouse_maximum_receptible_amount(b, resource) : b->resources[RESOURCE_NONE];
+    signed short max_acceptable = respect_settings ?
+        building_warehouse_maximum_receptible_amount(b, resource) : building_warehouse_get_free_space_amount(b);
     if (!max_acceptable) {
         return 0;
     }
