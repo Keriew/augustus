@@ -2,6 +2,7 @@
 
 #include "assets/assets.h"
 #include "building/construction.h"
+#include "building/model.h"
 #include "city/constants.h"
 #include "city/emperor.h"
 #include "city/finance.h"
@@ -915,6 +916,7 @@ static void replay_map_confirmed(int confirmed, int checked)
         scenario_save_campaign_player_name();
         window_mission_selection_show_again();
     }
+    model_load();
 }
 
 static void menu_file_replay_map(int param)

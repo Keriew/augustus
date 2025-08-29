@@ -1,6 +1,7 @@
 #include "city_pause_menu.h"
 
 #include "building/construction.h"
+#include "building/model.h"
 #include "core/lang.h"
 #include "game/campaign.h"
 #include "game/file.h"
@@ -100,6 +101,7 @@ static void replay_map_confirmed(int confirmed, int checked)
         scenario_save_campaign_player_name();
         window_mission_selection_show_again();
     }
+    model_load();
 }
 
 static void main_menu_confirmed(int confirmed, int checked)
