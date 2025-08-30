@@ -31,7 +31,8 @@
 
 #define CHECKBOX_ROW_WIDTH 25
 #define ID_ROW_WIDTH 32
-#define VALUE_ROW_WIDTH 120
+#define VALUE_ROW_WIDTH 60
+#define NAME_ROW_WIDTH 100
 #define BUTTONS_PADDING 4
 #define NUM_ITEM_BUTTONS (sizeof(item_buttons) / sizeof(generic_button))
 #define NUM_CONSTANT_BUTTONS (sizeof(constant_buttons) / sizeof(generic_button))
@@ -47,6 +48,8 @@ typedef enum {
 static void button_variable_checkbox(const generic_button *button);
 static void button_edit_variable_name(const generic_button *button);
 static void button_edit_variable_value(const generic_button *button);
+static void button_edit_display_text(const generic_button *button);
+static void button_variable_visible_checkbox(const generic_button *button);
 
 static void button_select_all_none(const generic_button *button);
 static void button_delete_selected(const generic_button *button);
@@ -75,8 +78,10 @@ static struct {
 
 static generic_button item_buttons[] = {
     { 1, 2, 20, 20, button_variable_checkbox },
-    { 0, 0, 0, 25, button_edit_variable_name },
-    { 0, 0, VALUE_ROW_WIDTH, 25, button_edit_variable_value }
+    { 0, 0, NAME_ROW_WIDTH, 25, button_edit_variable_name },
+    { 0, 0, VALUE_ROW_WIDTH, 25, button_edit_variable_value },
+    { 0, 0, 0, 25, button_edit_display_text },
+    { 0, 0, 20, 20, button_variable_visible_checkbox }
 };
 
 static generic_button constant_buttons[] = {
@@ -150,20 +155,27 @@ static void update_item_buttons_positions(void)
 {
     if (data.callback) {
         item_buttons[1].x = ID_ROW_WIDTH;
-        item_buttons[1].width = variable_buttons.width - variable_buttons.item_margin.horizontal - ID_ROW_WIDTH;
         if (grid_box_has_scrollbar(&variable_buttons)) {
             item_buttons[1].width -= 2 * BLOCK_SIZE;
         }
         return;
     }
+
+    // Position name button (fixed width)
     item_buttons[1].x = CHECKBOX_ROW_WIDTH + ID_ROW_WIDTH;
-    item_buttons[1].width = variable_buttons.width - variable_buttons.item_margin.horizontal - item_buttons[1].x -
-        VALUE_ROW_WIDTH - BUTTONS_PADDING;
+
+    // Position value button (fixed width)
+    item_buttons[2].x = item_buttons[1].x + item_buttons[1].width + BUTTONS_PADDING;
+
+    // Position visible checkbox (fixed width)
+    item_buttons[4].x = variable_buttons.width - variable_buttons.item_margin.horizontal - CHECKBOX_ROW_WIDTH;
     if (grid_box_has_scrollbar(&variable_buttons)) {
-        item_buttons[1].width -= 2 * BLOCK_SIZE;
+        item_buttons[4].x -= 2 * BLOCK_SIZE;
     }
 
-    item_buttons[2].x = item_buttons[1].x + item_buttons[1].width + BUTTONS_PADDING;
+    // Position display text button (takes remaining width)
+    item_buttons[3].x = item_buttons[2].x + item_buttons[2].width + BUTTONS_PADDING;
+    item_buttons[3].width = item_buttons[4].x - item_buttons[3].x - BUTTONS_PADDING;
 }
 
 static void draw_background(void)
@@ -208,6 +220,10 @@ static void draw_background(void)
 
     lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_VALUE, base_x_offset + item_buttons[2].x, 96,
         FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_TEXT_DISPLAY,
+        base_x_offset + item_buttons[3].x, 96, item_buttons[3].width, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_IS_VISIBLE,
+        base_x_offset + item_buttons[4].x, 96, item_buttons[4].width, FONT_SMALL_PLAIN);
 
     // Bottom buttons
     const generic_button *delete_selected_button = &constant_buttons[1];
@@ -264,6 +280,27 @@ static void draw_variable_item(const grid_box_item *item)
 
     text_draw_number(value, ' ', "", item->x + item_buttons[2].x + 8, item->y + item_buttons[2].y + 8,
         FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+
+    // Display Text
+    button_border_draw(item->x + item_buttons[3].x, item->y + item_buttons[3].y, item_buttons[3].width,
+        item_buttons[3].height, item->is_focused && data.item_buttons_focus_id == 4);
+
+    const uint8_t *display_text = scenario_custom_variable_get_text_display(id);
+    if (display_text && *display_text) {
+        text_draw(display_text, item->x + item_buttons[3].x + 8, item->y + item_buttons[3].y + 8,
+            FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+    }
+
+    // Visible Checkbox
+    button_border_draw(item->x + item_buttons[4].x, item->y + item_buttons[4].y, item_buttons[4].width,
+        item_buttons[4].height, item->is_focused && data.item_buttons_focus_id == 5);
+
+    if (scenario_custom_variable_is_visible(id)) {
+        int checkmark_id = assets_lookup_image_id(ASSET_UI_SELECTION_CHECKMARK);
+        const image *img = image_get(checkmark_id);
+        image_draw(checkmark_id, item->x + item_buttons[4].x + (CHECKBOX_ROW_WIDTH - img->original.width) / 2,
+            item->y + item_buttons[4].y + (20 - img->original.height) / 2, COLOR_MASK_NONE, SCALE_NONE);
+    }
 }
 
 static void draw_foreground(void)
@@ -417,6 +454,36 @@ static void button_edit_variable_value(const generic_button *button)
     }
     window_numeric_input_bound_show(variable_buttons.focused_item.x, variable_buttons.focused_item.y, button,
         9, -1000000000, 1000000000, set_variable_value);
+}
+
+static void set_display_text(const uint8_t *text)
+{
+    scenario_custom_variable_set_text_display(data.custom_variable_ids[data.target_index], text);
+    data.target_index = NO_SELECTION;
+    window_request_refresh();
+}
+
+static void button_edit_display_text(const generic_button *button)
+{
+    if (data.callback) {
+        return;
+    }
+    unsigned int id = data.custom_variable_ids[data.target_index];
+    const uint8_t *current_text = scenario_custom_variable_get_text_display(id);
+    const uint8_t *title = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_TEXT_DISPLAY);
+    window_text_input_show(title, 0, current_text,
+        CUSTOM_VARIABLE_TEXT_DISPLAY_LENGTH, set_display_text);
+}
+
+static void button_variable_visible_checkbox(const generic_button *button)
+{
+    if (data.callback) {
+        return;
+    }
+    unsigned int id = data.custom_variable_ids[data.target_index];
+    int current_visible = scenario_custom_variable_is_visible(id);
+    scenario_custom_variable_set_visibility(id, !current_visible);
+    window_request_refresh();
 }
 
 static void variable_item_click(const grid_box_item *item)
