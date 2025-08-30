@@ -1685,6 +1685,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_CHANGE_SIDEBAR_WIDTH, "Change sidebar width"},
     {TR_TOOLTIP_ASCENDING_ORDER, "Ascending order"},
     {TR_TOOLTIP_DESCENDING_ORDER, "Descending order"},
+    {TR_CHEAT_CHANGE_WEATHER, "Weather changed"},
     {TR_CONFIG_DEFAULT_GAME_SPEED, "Default game speed:"},
     {TR_CONFIG_CATEGORY_GENERAL,"General"},
     {TR_CONFIG_CATEGORY_UI_MAP,"Scrolling and Map"},

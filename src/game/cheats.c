@@ -19,6 +19,7 @@
 #include "graphics/color.h"
 #include "graphics/font.h"
 #include "graphics/text.h"
+#include "graphics/weather.h"
 #include "graphics/window.h"
 #include "scenario/invasion.h"
 #include "scenario/property.h"
@@ -53,6 +54,7 @@ static void game_cheat_change_climate(uint8_t *);
 static void game_cheat_unlock_legions(uint8_t *);
 static void game_cheat_disable_legions_consumption(uint8_t *);
 static void game_cheat_disable_invasions(uint8_t *);
+static void game_cheat_change_weather(uint8_t *);
 
 static void (*const execute_command[])(uint8_t *args) = {
     game_cheat_add_money,
@@ -73,6 +75,7 @@ static void (*const execute_command[])(uint8_t *args) = {
     game_cheat_unlock_legions,
     game_cheat_disable_legions_consumption,
     game_cheat_disable_invasions,
+    game_cheat_change_weather,
 };
 
 static const char *commands[] = {
@@ -93,7 +96,8 @@ static const char *commands[] = {
     "globalwarming",
     "ihaveanarmy",
     "breadandfish",
-    "leavemealone"
+    "leavemealone",
+    "weather"
 };
 
 #define NUMBER_OF_COMMANDS sizeof (commands) / sizeof (commands[0])
@@ -322,6 +326,19 @@ static void game_cheat_show_editor(uint8_t *args)
         window_plain_message_dialog_show(TR_CHEAT_EDITOR_WARNING_TITLE, TR_CHEAT_EDITOR_WARNING_TEXT, 1);
         map_editor_warning_shown = 1;
     }
+}
+
+static void game_cheat_change_weather(uint8_t *args)
+{
+    int weather = WEATHER_NONE; //is actually weather type so either 0(WEATHER_NONE), 1(RAIN), 2(SNOW), 3(SAND)
+    int intensity = 0; //note that intesity only changes particles for Thunder set weather to rain with intesity higher ca. 900, rain sounds start at 500
+    int index = parse_integer(args, &weather);
+    parse_integer(args + index, &intensity);
+    if (weather > WEATHER_SAND) {
+        weather = WEATHER_NONE;
+    }
+    set_weather(1, intensity, weather);
+    show_warning(TR_CHEAT_CHANGE_WEATHER);   
 }
 
 void game_cheat_parse_command(uint8_t *command)
