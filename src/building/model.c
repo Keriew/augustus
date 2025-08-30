@@ -11,7 +11,6 @@
 
 #define TMP_BUFFER_SIZE 100000
 
-#define NUM_BUILDINGS 130
 #define FIRST_NEW_BUILDING_INDEX BUILDING_ROADBLOCK
 #define NUM_NEW_BUILDINGS (BUILDING_TYPE_MAX - FIRST_NEW_BUILDING_INDEX)
 #define NUM_HOUSES 20
@@ -147,7 +146,7 @@ int model_load(void)
         }
     } while (brace_index && guard > 0);
 
-    if (num_lines != NUM_BUILDINGS + NUM_HOUSES) {
+    if (num_lines != 130 + NUM_HOUSES) {
         log_error("Model has incorrect no of lines ", 0, num_lines + 1);
         free(buffer);
         return 0;
@@ -156,7 +155,7 @@ int model_load(void)
     int dummy;
     ptr = &buffer[index_of_string(buffer, ALL_BUILDINGS, filesize)];
     const uint8_t *end_ptr = &buffer[filesize];
-    for (int i = 0; i < NUM_BUILDINGS; i++) {
+    for (int i = 0; i < FIRST_NEW_BUILDING_INDEX; i++) {
         ptr += index_of(ptr, '{', filesize);
 
         ptr = get_value(ptr, end_ptr, &buildings[i].cost);
@@ -206,7 +205,7 @@ int model_load(void)
 }
 
 void model_save_model_data(buffer *buf) {
-    int buf_size = sizeof(model_building) * (NUM_BUILDINGS + NUM_NEW_BUILDINGS);
+    int buf_size = sizeof(model_building) * BUILDING_TYPE_MAX;
     uint8_t *buf_data = malloc(buf_size);
     
     buffer_init(buf, buf_data, buf_size);
@@ -214,7 +213,7 @@ void model_save_model_data(buffer *buf) {
     buffer_write_raw(buf, buildings, buf_size);
 }
 void model_load_model_data(buffer *buf) {
-    int buf_size = sizeof(model_building) * (NUM_BUILDINGS + NUM_NEW_BUILDINGS);
+    int buf_size = sizeof(model_building) * BUILDING_TYPE_MAX;
     
     buffer_read_raw(buf, buildings, buf_size);
 }
