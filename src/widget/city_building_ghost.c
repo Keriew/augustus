@@ -454,6 +454,7 @@ static void draw_desirability_range(const map_tile *tile, building_type type, in
         return;         // If there is no desirability - do not draw
     }
 
+    // Add bonuses from GT Venus
     if (building_is_statue_garden_temple(type) && building_monument_working(BUILDING_GRAND_TEMPLE_VENUS)) {
         int value_bonus = ((desirability_value / 4) > 1) ? (desirability_value / 4) : 1;
         desirability_value += value_bonus;
@@ -863,9 +864,11 @@ static void draw_latrines(const map_tile *tile, int x, int y)
     }
 
     for (building *b = building_first_of_type(BUILDING_LATRINES); b; b = b->next_of_type) {
-        city_view_foreach_tile_in_range(b->grid_offset, 1, map_water_supply_latrines_radius(), city_building_ghost_draw_latrines_range);
+        city_view_foreach_tile_in_range(b->grid_offset, 1, map_water_supply_latrines_radius(),
+            city_building_ghost_draw_latrines_range);
     }
-    city_view_foreach_tile_in_range(tile->grid_offset, 1, map_water_supply_latrines_radius(), city_building_ghost_draw_latrines_range);
+    city_view_foreach_tile_in_range(tile->grid_offset, 1, map_water_supply_latrines_radius(),
+        city_building_ghost_draw_latrines_range);
 
     draw_building(image_id, x, y, color_mask);
     draw_building_tiles(x, y, 1, &blocked);
@@ -1486,6 +1489,18 @@ static void create_tile_offsets(void)
     }
 }
 
+void draw_hippodrome_desirability(const map_tile *tile, building_type type)
+{
+    int size = 5;
+    building_rotation_force_two_orientations();
+    int grid_offset1 = tile->grid_offset;
+    int grid_offset3 = grid_offset1 + building_rotation_get_delta_with_rotation(10);
+    map_tile tile_part3 = *tile;
+    tile_part3.grid_offset = grid_offset3;
+    draw_desirability_range(tile, type, size);
+    draw_desirability_range(&tile_part3, type, size);
+}
+
 void city_building_ghost_draw(const map_tile *tile)
 {
     if (!tile->grid_offset || scroll_in_progress()) {
@@ -1502,12 +1517,21 @@ void city_building_ghost_draw(const map_tile *tile)
     city_view_get_selected_tile_pixels(&x, &y);
 
     const building_properties *props = building_properties_for_type(type);
-    if ((config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL) &&
-        type >= BUILDING_ANY && type <= BUILDING_TYPE_MAX) ||
-        (config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE) &&
-            building_properties_for_type(type)->draw_desirability_range)) {
-        int building_size = (type == BUILDING_WAREHOUSE) ? 3 : props->size;
-        draw_desirability_range(tile, type, building_size);
+    if ((config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL) && type >= BUILDING_ANY && type <= BUILDING_TYPE_MAX) ||
+        (config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE) && props->draw_desirability_range)) {
+        int building_size = (type == BUILDING_DRAGGABLE_RESERVOIR || type == BUILDING_WAREHOUSE) ? 3 : props->size;
+
+        if (type == BUILDING_HIPPODROME) {
+            draw_hippodrome_desirability(tile, type);
+        } else if (type == BUILDING_DRAGGABLE_RESERVOIR) {
+            map_tile shifted_tile = *tile;
+            shifted_tile.x -= 1;
+            shifted_tile.y -= 1;
+            shifted_tile.grid_offset = map_grid_offset(shifted_tile.x, shifted_tile.y);
+            draw_desirability_range(&shifted_tile, type, building_size);
+        } else {
+            draw_desirability_range(tile, type, building_size);
+        }
     }
 
     if (!config_get(CONFIG_UI_SHOW_GRID) && config_get(CONFIG_UI_SHOW_PARTIAL_GRID_AROUND_CONSTRUCTION)) {

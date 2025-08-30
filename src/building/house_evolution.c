@@ -929,6 +929,8 @@ static building_type get_building_type_at_tile(const building *house, int x, int
     if (building_id <= 0) {
         if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
             return BUILDING_HIGHWAY;
+        } else if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
+            return BUILDING_DRAGGABLE_RESERVOIR;
         } else {
             return BUILDING_NONE;
         }
