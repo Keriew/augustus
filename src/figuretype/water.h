@@ -12,5 +12,6 @@ void figure_shipwreck_action(figure *f);
 void figure_fishing_boat_action(figure *f);
 
 void figure_sink_all_ships(void);
+void figure_sink_half_ships(void);
 
 #endif // FIGURETYPE_WATER_H
