@@ -125,8 +125,8 @@ int scenario_action_type_change_resource_stockpiles_execute(scenario_action_t *a
                 remaining = building_warehouses_remove_resource(resource, remaining);
                 remaining = building_granaries_remove_resource(resource, remaining);
             } else {
-                remaining = building_warehouses_add_resource(resource, remaining);
-                remaining = building_granaries_add_resource(resource, remaining, 0); //not produced
+                remaining = building_warehouses_add_resource(resource, remaining, respect_settings);
+                remaining = building_granaries_add_resource(resource, remaining, respect_settings);
             }
             break;
         case STORAGE_TYPE_GRANARIES:
@@ -140,7 +140,7 @@ int scenario_action_type_change_resource_stockpiles_execute(scenario_action_t *a
             if (to_remove) {
                 remaining = building_warehouses_remove_resource(resource, remaining);
             } else {
-                remaining = building_warehouses_add_resource(resource, remaining);
+                remaining = building_warehouses_add_resource(resource, remaining, respect_settings);
             }
             break;
         default:

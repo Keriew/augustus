@@ -33,7 +33,7 @@ static struct {
     int initial_scroll_y;
     int scroll_x;
     int scroll_y;
-    int selected_object;
+    unsigned int selected_object;
     int viewport_width;
     int viewport_height;
     struct {
@@ -263,9 +263,9 @@ void empire_scroll_map(int x, int y)
     check_scroll_boundaries();
 }
 
-int empire_selected_object(void)
+unsigned int empire_selected_object(void)
 {
-    return data.selected_object;
+    return data.selected_object; // id is an unsigned int
 }
 
 void empire_clear_selected_object(void)

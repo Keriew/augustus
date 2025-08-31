@@ -46,9 +46,9 @@ int building_storage_get_array_size(void)
 int building_storage_try_add_resource(building *b, int resource, int amount, int is_produced)
 {
     if (b->type == BUILDING_GRANARY) {
-        return building_granary_try_add_resource(b, resource, amount, is_produced);
+        return building_granary_try_add_resource(b, resource, amount, is_produced, 1);
     } else if (b->type == BUILDING_WAREHOUSE) {
-        return building_warehouse_try_add_resource(b, resource, amount);
+        return building_warehouse_try_add_resource(b, resource, amount, 1);
     }
     return 0;
 }

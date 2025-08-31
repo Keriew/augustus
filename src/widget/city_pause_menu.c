@@ -15,6 +15,7 @@
 #include "graphics/panel.h"
 #include "graphics/window.h"
 #include "input/input.h"
+#include "scenario/event/controller.h"
 #include "scenario/property.h"
 #include "translation/translation.h"
 #include "window/config.h"
@@ -100,6 +101,7 @@ static void replay_map_confirmed(int confirmed, int checked)
         scenario_save_campaign_player_name();
         window_mission_selection_show_again();
     }
+    scenario_events_process_all();
 }
 
 static void main_menu_confirmed(int confirmed, int checked)
