@@ -3,6 +3,7 @@
 #include "core/array.h"
 #include "core/log.h"
 #include "core/string.h"
+#include "game/save_version.h"
 #include "scenario/message_media_text_blob.h"
 
 typedef struct {
@@ -10,6 +11,8 @@ typedef struct {
     int in_use;
     int value;
     uint8_t name[CUSTOM_VARIABLE_NAME_LENGTH];
+    uint8_t text_display[CUSTOM_VARIABLE_TEXT_DISPLAY_LENGTH];
+    unsigned char allow_display;
 } custom_variable_t;
 
 static array(custom_variable_t) custom_variables;
@@ -35,6 +38,8 @@ unsigned int scenario_custom_variable_create(const uint8_t *name, int initial_va
     }
     variable->in_use = 1;
     variable->value = initial_value;
+    variable->text_display[0] = 0; // Initialize to empty string
+    variable->allow_display = 0; // Initialize to not visible
     if (name) {
         string_copy(name, variable->name, CUSTOM_VARIABLE_NAME_LENGTH);
     }
@@ -51,7 +56,8 @@ void scenario_custom_variable_delete_all(void)
 unsigned int scenario_custom_variable_get_id_by_name(const uint8_t *name)
 {
     const custom_variable_t *variable;
-    array_foreach(custom_variables, variable) {
+    array_foreach(custom_variables, variable)
+    {
         if (name && string_equals(variable->name, name)) {
             return variable->id;
         }
@@ -92,6 +98,39 @@ const uint8_t *scenario_custom_variable_get_name(unsigned int id)
     return variable ? variable->name : 0;
 }
 
+int scenario_custom_variable_is_visible(unsigned int id)
+{
+    const custom_variable_t *variable = get_variable(id);
+    return variable ? variable->allow_display : 0;
+}
+
+void scenario_custom_variable_set_visibility(unsigned int id, int visible)
+{
+    custom_variable_t *variable = get_variable(id);
+    if (variable) {
+        variable->allow_display = visible ? 1 : 0;
+    }
+}
+
+const uint8_t *scenario_custom_variable_get_text_display(unsigned int id)
+{
+    const custom_variable_t *variable = get_variable(id);
+    return variable ? variable->text_display : 0;
+}
+
+void scenario_custom_variable_set_text_display(unsigned int id, const uint8_t *text)
+{
+    custom_variable_t *variable = get_variable(id);
+    if (!variable) {
+        return;
+    }
+    if (!text || !*text) {
+        variable->text_display[0] = 0;
+    }
+    string_copy(text, variable->text_display, CUSTOM_VARIABLE_NAME_LENGTH);
+}
+
+
 void scenario_custom_variable_rename(unsigned int id, const uint8_t *name)
 {
     custom_variable_t *variable = get_variable(id);
@@ -121,18 +160,22 @@ void scenario_custom_variable_set_value(unsigned int id, int new_value)
 
 void scenario_custom_variable_save_state(buffer *buf)
 {
-    uint32_t struct_size = sizeof(int32_t) + sizeof(uint8_t) + sizeof(uint8_t) * CUSTOM_VARIABLE_NAME_LENGTH;
+    uint32_t struct_size = sizeof(int32_t) + sizeof(uint8_t) + sizeof(uint8_t) * CUSTOM_VARIABLE_NAME_LENGTH +
+        sizeof(uint8_t) * CUSTOM_VARIABLE_TEXT_DISPLAY_LENGTH + sizeof(uint8_t);
     buffer_init_dynamic_array(buf, custom_variables.size, struct_size);
 
     const custom_variable_t *variable;
-    array_foreach(custom_variables, variable) {
+    array_foreach(custom_variables, variable)
+    {
         buffer_write_u8(buf, variable->in_use);
         buffer_write_i32(buf, variable->value);
         buffer_write_raw(buf, variable->name, CUSTOM_VARIABLE_NAME_LENGTH);
+        buffer_write_raw(buf, variable->text_display, CUSTOM_VARIABLE_TEXT_DISPLAY_LENGTH);
+        buffer_write_u8(buf, variable->allow_display);
     }
 }
 
-void scenario_custom_variable_load_state(buffer *buf)
+void scenario_custom_variable_load_state(buffer *buf, int version)
 {
     unsigned int total_variables = buffer_load_dynamic_array(buf);
 
@@ -146,6 +189,13 @@ void scenario_custom_variable_load_state(buffer *buf)
         variable->in_use = buffer_read_u8(buf);
         variable->value = buffer_read_i32(buf);
         buffer_read_raw(buf, variable->name, CUSTOM_VARIABLE_NAME_LENGTH);
+        if (version > SCENARIO_LAST_NO_VISIBLE_CUSTOM_VARIABLES) {
+            buffer_read_raw(buf, variable->text_display, CUSTOM_VARIABLE_TEXT_DISPLAY_LENGTH);
+            variable->allow_display = buffer_read_u8(buf);
+        } else {
+            variable->text_display[0] = 0; //initialize to empty string
+            variable->allow_display = 0; //initialize to not visible
+        }
     }
 }
 
@@ -156,12 +206,14 @@ void scenario_custom_variable_load_state_old_version(buffer *buf)
         log_error("Failed to initialize custom variables array - out of memory. The game will probably crash.", 0, 0);
         return;
     }
-    
+
     for (unsigned int i = 0; i < MAX_ORIGINAL_CUSTOM_VARIABLES; i++) {
         custom_variable_t *variable = array_next(custom_variables);
         variable->in_use = buffer_read_u8(buf);
         variable->value = buffer_read_i32(buf);
         int name_link = buffer_read_i32(buf);
+        variable->text_display[0] = 0; // Initialize to empty string
+        variable->allow_display = 0; // Initialize to not visible
         if (!variable->in_use) {
             name_link = 0;
             variable->value = 0;

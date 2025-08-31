@@ -624,7 +624,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .image_group = 76,
         .sound_id = SOUND_CITY_ORACLE,
         .draw_desirability_range = 1,
-        .event_data.attr = "amphitheater"
+        .event_data.attr = "oracle"
     },
     [BUILDING_BURNING_RUIN] = {
         .size = 1,

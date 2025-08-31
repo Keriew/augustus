@@ -686,7 +686,7 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
         scenario_demand_change_load_state(file->demand_changes);
         scenario_price_change_load_state(file->price_changes);
         scenario_allowed_building_load_state(file->allowed_buildings);
-        scenario_custom_variable_load_state(file->custom_variables);
+        scenario_custom_variable_load_state(file->custom_variables, version);
     }
     if (version > SCENARIO_LAST_NO_EVENTS) {
         scenario_events_load_state(file->scenario_events, file->scenario_conditions, file->scenario_actions,
@@ -775,7 +775,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
         scenario_demand_change_load_state(state->demand_changes);
         scenario_price_change_load_state(state->price_changes);
         scenario_allowed_building_load_state(state->allowed_buildings);
-        scenario_custom_variable_load_state(state->custom_variables);
+        scenario_custom_variable_load_state(state->custom_variables, scenario_version);
     }
 
     if (scenario_version > SCENARIO_LAST_NO_EVENTS) {
