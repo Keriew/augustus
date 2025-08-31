@@ -1119,7 +1119,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_CUSTOM_VARIABLES_COUNT, "Всего переменных:"},
     {TR_EDITOR_CUSTOM_VARIABLES_ID, "ID"},
     {TR_EDITOR_CUSTOM_VARIABLES_NAME, "Имя"},
-    {TR_EDITOR_CUSTOM_VARIABLES_VALUE, "Базовое значение"},
+    {TR_EDITOR_CUSTOM_VARIABLES_VALUE, "Значение"},
     {TR_EDITOR_CUSTOM_VARIABLES_NEW, "Новая переменная"},
     {TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_SET_NAME_TITLE, "Ошибка в имени переменной"},
     {TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_SET_NAME_TEXT, "Невозможно установить имя переменной.\n\nИмя не указано или уже используется другой переменной.\n\nПожалуйста, введите другое имя для переменной."},
@@ -1628,7 +1628,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_FORT_STANDARD_DOLPHINS, "\"Дельфины\""},
     {TR_BUILDING_FORT_STANDARD_SEA_GOATS, "\"Козероги\""},
     {TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING, "Хранение"},
-    {TR_CONFIG_MAX_AUTOSAVE_SLOTS, "Максимальное количество ежегодных автосохранений:"},
+    {TR_CONFIG_MAX_AUTOSAVE_SLOTS, "Максимальное количество слотов ежегодных автосохранений:"},
     {TR_TOOLTIP_PERSONAL_SAVINGS, "Ваши личные сбережения!"},
     {TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION, "Декор туземцев"}, // Имя в меню редактора карт
     {TR_EDITOR_SCENARIO_BUILDING_NATIVE_MONUMENT, "Монумент туземцев"}, // Имя в меню редактора карт
@@ -1695,6 +1695,10 @@ static translation_string all_strings[] = {
     {TR_CONFIG_CATEGORY_MANAGEMENT_ROADS, "Дороги"},
     {TR_CONFIG_CATEGORY_MANAGEMENT_ROADBLOCKS, "Дорожные блоки"},
     {TR_CONFIG_CATEGORY_MANAGEMENT_HOUSING, "Жилье"},
+    {TR_EDITOR_CUSTOM_VARIABLES_TEXT_DISPLAY, "Отображаемый текст"},
+    {TR_EDITOR_CUSTOM_VARIABLES_IS_VISIBLE, "Видимость"},
+    {TR_ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY, "Изменить видимость переменной"},
+    {TR_CONFIG_SHOW_CUSTOM_VARIABLES, "Показать пользовательские переменные в городском обзоре"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
