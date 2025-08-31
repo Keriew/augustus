@@ -29,6 +29,7 @@
 #include "window/editor/demand_changes.h"
 #include "window/editor/invasions.h"
 #include "window/editor/map.h"
+#include "window/editor/model_data.h"
 #include "window/editor/price_changes.h"
 #include "window/editor/requests.h"
 #include "window/editor/scenario_events.h"
@@ -340,6 +341,7 @@ static void button_delete_victory(const generic_button *button)
 static void button_change_model_data(const generic_button *button)
 {
     stop();
+    window_model_data_show();
 }
 
 static void button_return_to_city(const generic_button *button)
