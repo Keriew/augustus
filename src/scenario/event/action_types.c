@@ -337,7 +337,8 @@ int scenario_action_type_building_force_collapse_execute(scenario_action_t *acti
             if (type == BUILDING_OVERGROWN_GARDENS || type == BUILDING_PLAZA) {
                 map_property_clear_plaza_earthquake_or_overgrown_garden(current_grid_offset);
             }
-            if ((type == BUILDING_ROAD || type == BUILDING_GARDENS || type == BUILDING_HIGHWAY || type == BUILDING_OVERGROWN_GARDENS) && !map_terrain_is(current_grid_offset, TERRAIN_BUILDING)) {
+            if ((type == BUILDING_ROAD || type == BUILDING_GARDENS || type == BUILDING_HIGHWAY ||
+                type == BUILDING_OVERGROWN_GARDENS) && !map_terrain_is(current_grid_offset, TERRAIN_BUILDING)) {
                 map_terrain_remove(current_grid_offset, TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_HIGHWAY);
             }
             int building_id = map_building_at(current_grid_offset);
@@ -356,7 +357,8 @@ int scenario_action_type_building_force_collapse_execute(scenario_action_t *acti
             }
         }
     }
-    if (type == BUILDING_ROAD || type == BUILDING_GARDENS || type == BUILDING_HIGHWAY || type == BUILDING_OVERGROWN_GARDENS || type == BUILDING_PLAZA) {
+    if (type == BUILDING_ROAD || type == BUILDING_GARDENS || type == BUILDING_HIGHWAY ||
+        type == BUILDING_OVERGROWN_GARDENS || type == BUILDING_PLAZA) {
         map_tiles_update_all_empty_land();
         map_tiles_update_all_meadow();
         map_tiles_update_all_highways();
@@ -692,7 +694,7 @@ int scenario_action_type_change_terrain_execute(scenario_action_t *action)
                 continue;
             }
             if (add) {
-                if (terrain & TERRAIN_NOT_CLEAR) { 
+                if (terrain & TERRAIN_NOT_CLEAR) {
                     // Destroy buildings if the new terrains doesn't allow for buildings
                     int building_id = map_building_at(current_grid_offset);
                     if (building_id) {
@@ -705,7 +707,7 @@ int scenario_action_type_change_terrain_execute(scenario_action_t *action)
                 }
                 map_terrain_add(current_grid_offset, terrain);
             } else {
-                if (terrain == TERRAIN_WATER && map_terrain_get(current_grid_offset) & TERRAIN_WATER)  {
+                if (terrain == TERRAIN_WATER && map_terrain_get(current_grid_offset) & TERRAIN_WATER) {
                     // Destroy water buildings when removing water
                     int building_id = map_building_at(current_grid_offset);
                     if (building_id) {
