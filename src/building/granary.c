@@ -350,8 +350,12 @@ int building_granary_determine_worker_task(building *granary)
     }
 
     for (resource_type food = RESOURCE_MIN_FOOD; food < RESOURCE_MAX_FOOD; food++) {
+        if (city_resource_is_stockpiled(food)) { //in line with warehouse behaviour, don't fetch stockpiled food
+            continue;
+        }
         if (building_storage_get_state(granary, food, 1) == BUILDING_STORAGE_STATE_GETTING &&
-            non_getting_granaries.total_storage[food] >= ONE_CARTLOAD) {
+            non_getting_granaries.total_storage[food] >= ONE_CARTLOAD &&
+            building_storage_get_amount(granary, food) < building_storage_get_storage_state_quantity(granary, food)) {
             return GRANARY_TASK_GETTING;
         }
     }
