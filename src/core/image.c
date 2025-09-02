@@ -46,6 +46,7 @@
 #define GREEK_FONT_BASE_OFFSET 1
 
 #define NAME_SIZE 32
+#define NAME_SIZE_LONG 128
 
 #define IMAGE_TYPE_ISOMETRIC 30
 
@@ -123,7 +124,8 @@ static const char EDITOR_GRAPHICS_555[][NAME_SIZE] = {
 static const char EXTERNAL_FONTS_SG2[NAME_SIZE] = "C3_fonts.sg2";
 static const char EXTERNAL_FONTS_555[NAME_SIZE] = "C3_fonts.555";
 static const char CHINESE_FONTS_555[NAME_SIZE] = "rome.555";
-static const char CHINESE_FONTS_555_V2[NAME_SIZE] = "rome-v2.555";
+static const char SIMP_CHINESE_FONTS_555_V2[NAME_SIZE_LONG] = ASSETS_DIRECTORY "/i18n/Simplified_Chinese.555";
+static const char TRAD_CHINESE_FONTS_555_V2[NAME_SIZE] = "rome-v2.555";
 static const char KOREAN_FONTS_555[NAME_SIZE] = "korean.555";
 static const char KOREAN_FONTS_555_V2[NAME_SIZE] = "korean-v2.555";
 static const char JAPANESE_FONTS_555[NAME_SIZE] = "japanese-v2.555";
@@ -177,7 +179,7 @@ static multibyte_font_data multibyte_font_info[MULTIBYTE_FONT_MAX] = {
     {
         .name = "Traditional Chinese",
         .file_v1 = CHINESE_FONTS_555,
-        .file_v2 = CHINESE_FONTS_555_V2,
+        .file_v2 = TRAD_CHINESE_FONTS_555_V2,
         .data_size = CHINESE_FONT_DATA_SIZE,
         .chars = IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS,
         .sizes = {
@@ -189,7 +191,7 @@ static multibyte_font_data multibyte_font_info[MULTIBYTE_FONT_MAX] = {
     {
         .name = "Simplified Chinese",
         .file_v1 = CHINESE_FONTS_555,
-        .file_v2 = CHINESE_FONTS_555_V2,
+        .file_v2 = SIMP_CHINESE_FONTS_555_V2,
         .data_size = CHINESE_FONT_DATA_SIZE,
         .chars = IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS,
         .sizes = {
