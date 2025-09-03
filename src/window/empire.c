@@ -266,6 +266,9 @@ static px_point trade_amount_px_offsets[5] = {
     { 4, 6 },
 };
 
+//values for drawing animated dots
+static struct {int x, y, sea;} anim_dots[128]; //This limits number of trade routes, increase if someone complains
+
 static struct {
     unsigned int selected_button;
     int selected_city;
@@ -1650,20 +1653,28 @@ void window_empire_draw_trade_waypoints(const empire_object *trade_route, int x_
         anim_dot = dot_count - 1 - ((elapsed / dot_duration) % dot_count);
     }
 
-
     for (int i = 0; i < dot_count; i++) {
         int img;
-        float scale;
 
         if (i == anim_dot) {
-            img = is_sea ? land_image_id : sea_image_id; // animate using opposite image
-            scale = 160; // scale up the animated dot
+            anim_dots[trade_route->trade_route_id].x = dot_pos[i].x + x_offset;
+            anim_dots[trade_route->trade_route_id].y = dot_pos[i].y + y_offset;
+            anim_dots[trade_route->trade_route_id].sea = is_sea;
         } else {
             img = is_sea ? sea_image_id : land_image_id;
-            scale = 100; // normal scale
+            image_draw_scaled_centered(img, dot_pos[i].x + x_offset, dot_pos[i].y + y_offset, COLOR_MASK_NONE, 100);
         }
+    }
+}
 
-        image_draw_scaled_centered(img, dot_pos[i].x + x_offset, dot_pos[i].y + y_offset, COLOR_MASK_NONE, scale);
+static void anim_dot_draw(const empire_object *obj)
+{
+    if (obj->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE || obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
+        if (!empire_city_is_trade_route_open(obj->trade_route_id)) {
+            return;
+        }
+        int img = anim_dots[obj->trade_route_id].sea ? assets_get_image_id("UI", "LandRouteDot") : assets_get_image_id("UI", "SeaRouteDot");
+        image_draw_scaled_centered(img, anim_dots[obj->trade_route_id].x, anim_dots[obj->trade_route_id].y, COLOR_MASK_NONE, 160);
     }
 }
 
@@ -1891,6 +1902,7 @@ static void draw_map(void)
         data.trade_route_anim_start = time_get_millis();
     }
     empire_object_foreach(draw_empire_object);
+    empire_object_foreach(anim_dot_draw);
     scenario_invasion_foreach_warning(draw_invasion_warning);
 
     graphics_reset_clip_rectangle();
