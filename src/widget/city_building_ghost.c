@@ -715,7 +715,7 @@ static void draw_draggable_reservoir(const map_tile *tile, int x, int y)
                 discouraged_terrain &= ~TERRAIN_AQUEDUCT;
             }
 
-            if (blocked || forbidden_terrain) {
+            if (forbidden_terrain) {
                 blocked_tiles[i] = TILE_FORBIDDEN;
             } else if (map_has_figure_at(tile_offset)) {
                 blocked_tiles[i] = TILE_FORBIDDEN;
