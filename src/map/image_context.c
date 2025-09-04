@@ -378,7 +378,7 @@ const terrain_image *map_image_context_get_future_earthquake(int grid_offset)
     int tiles[MAX_TILES];
     for (int i = 0; i < MAX_TILES; i++) {
         int offset = grid_offset + map_grid_direction_delta(i);
-        tiles[i] = map_property_is_future_earthquake(grid_offset) ? 1 : 0;
+        tiles[i] = map_property_is_future_earthquake(offset) ? 1 : 0;
     }
     return get_image(CONTEXT_EARTHQUAKE, tiles);
 }
