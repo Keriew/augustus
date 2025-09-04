@@ -1489,16 +1489,16 @@ static void create_tile_offsets(void)
     }
 }
 
-void draw_hippodrome_desirability(const map_tile *tile, building_type type)
+void draw_hippodrome_desirability(const map_tile *tile)
 {
-    int size = 5;
+    int size = building_properties_for_type(BUILDING_HIPPODROME)->size;
     building_rotation_force_two_orientations();
     int grid_offset1 = tile->grid_offset;
     int grid_offset3 = grid_offset1 + building_rotation_get_delta_with_rotation(10);
     map_tile tile_part3 = *tile;
     tile_part3.grid_offset = grid_offset3;
-    draw_desirability_range(tile, type, size);
-    draw_desirability_range(&tile_part3, type, size);
+    draw_desirability_range(tile, BUILDING_HIPPODROME, size);
+    draw_desirability_range(&tile_part3, BUILDING_HIPPODROME, size);
 }
 
 void city_building_ghost_draw(const map_tile *tile)
@@ -1522,7 +1522,7 @@ void city_building_ghost_draw(const map_tile *tile)
         int building_size = (type == BUILDING_DRAGGABLE_RESERVOIR || type == BUILDING_WAREHOUSE) ? 3 : props->size;
 
         if (type == BUILDING_HIPPODROME) {
-            draw_hippodrome_desirability(tile, type);
+            draw_hippodrome_desirability(tile);
         } else if (type == BUILDING_DRAGGABLE_RESERVOIR) {
             map_tile shifted_tile = *tile;
             shifted_tile.x -= 1;
