@@ -156,8 +156,9 @@ static color_t get_building_color_mask(const building *b)
         switch (b->type) {
             //buildings that have labor but no walkers
             case BUILDING_LATRINES:
-            case BUILDING_WELL:
+            case BUILDING_FOUNTAIN:
                 color_mask = COLOR_MASK_NONE;
+                break;
                 //all other buildings
             default:
                 color_mask = SELECTED_BUILDING_COLOR_MASK;
