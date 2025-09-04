@@ -174,6 +174,23 @@ int building_storage_count_stored_resource_types(int building_id)
     return stored_types_count;
 }
 
+int building_storage_get_amount(building *b, resource_type resource)
+{
+    if (b->type == BUILDING_GRANARY) {
+        return building_granary_get_amount(b, resource);
+    } else if (b->type == BUILDING_WAREHOUSE) {
+        return building_warehouse_get_amount(b, resource);
+    }
+    return 0;
+}
+
+int building_storage_get_storage_state_quantity(building *b, resource_type resource)
+{
+    const building_storage *s = building_storage_get(b->storage_id);
+    const resource_storage_entry *entry = &s->resource_state[resource];
+    return entry->quantity;
+}
+
 const building_storage_state building_storage_get_state(building *b, int resource, int relative)
 {
     if (b->has_plague || b->state != BUILDING_STATE_IN_USE) {
@@ -200,7 +217,7 @@ const building_storage_state building_storage_get_state(building *b, int resourc
             break;
 
         case BUILDING_STORAGE_STATE_GETTING:
-            if (amount < entry->quantity) {
+            if (amount <= entry->quantity) {
                 return BUILDING_STORAGE_STATE_GETTING;
             }
             break;

@@ -1685,6 +1685,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_CHANGE_SIDEBAR_WIDTH, "Change sidebar width"},
     {TR_TOOLTIP_ASCENDING_ORDER, "Ascending order"},
     {TR_TOOLTIP_DESCENDING_ORDER, "Descending order"},
+    {TR_CHEAT_CHANGE_WEATHER, "Weather changed"},
     {TR_CONFIG_DEFAULT_GAME_SPEED, "Default game speed:"},
     {TR_CONFIG_CATEGORY_GENERAL,"General"},
     {TR_CONFIG_CATEGORY_UI_MAP,"Scrolling and Map"},
@@ -1699,6 +1700,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_CUSTOM_VARIABLES_IS_VISIBLE, "Visible"},
     {TR_ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY, "Change custom variable visibility" },
     {TR_CONFIG_SHOW_CUSTOM_VARIABLES, "Show custom variables in city view" },
+    {TR_CONFIG_ENABLE_GETTING_WHILE_STOCKPILED, "Enable 'Getting' while a resource is stockpiled" },
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

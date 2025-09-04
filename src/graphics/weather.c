@@ -433,7 +433,7 @@ void update_weather()
 
 }
 
-static void set_weather(int active, int intensity, weather_type type)
+void set_weather(int active, int intensity, weather_type type)
 {
     data.weather_config.active = active;
     data.weather_config.intensity = intensity;

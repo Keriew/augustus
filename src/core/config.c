@@ -97,6 +97,7 @@ static const char *ini_keys[] = {
     [CONFIG_UI_EMPIRE_SIDEBAR_WIDTH] = "ui_empire_sidebar_width",
     [CONFIG_GP_CH_DEFAULT_GAME_SPEED] = "gameplay_change_default_game_speed",
     [CONFIG_UI_SHOW_CUSTOM_VARIABLES] = "ui_show_custom_variables",
+    [CONFIG_GP_CH_ENABLE_GETTING_WHILE_STOCKPILED] = "gameplay_change_stockpiled_getting",
 };
 
 static const char *ini_string_keys[] = {
@@ -142,6 +143,7 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_UI_EMPIRE_SIDEBAR_WIDTH] = 25,
     [CONFIG_GP_CH_DEFAULT_GAME_SPEED] = 7, //0-based index, 7 points to 80%
     [CONFIG_UI_SHOW_CUSTOM_VARIABLES] = 1,
+    [CONFIG_GP_CH_ENABLE_GETTING_WHILE_STOCKPILED] = 0,
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };
