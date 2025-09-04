@@ -640,29 +640,6 @@ static int draw_footprint_water(int x, int y, float scale, int grid_offset)
     int is_building = map_terrain_is(grid_offset, TERRAIN_BUILDING);
     if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY) && !map_terrain_is(grid_offset, TERRAIN_GATEHOUSE)) {
         city_draw_highway_footprint(x, y, scale, grid_offset);
-    // --- special handling of meadows ---
-    } else if (map_terrain_is(grid_offset, TERRAIN_MEADOW) && !is_building) {
-        int terrain = map_terrain_get(grid_offset);
-        int image_id = map_image_at(grid_offset);
-        // If a water zone extends over a meadow, draw pipes on top
-        if (terrain & (TERRAIN_RESERVOIR_RANGE | TERRAIN_FOUNTAIN_RANGE)) {
-            int overlay_id = image_group(GROUP_TERRAIN_OVERLAY);
-            if ((terrain & (TERRAIN_RESERVOIR_RANGE | TERRAIN_FOUNTAIN_RANGE))
-                == (TERRAIN_RESERVOIR_RANGE | TERRAIN_FOUNTAIN_RANGE)) {
-                overlay_id += 27;
-            } else if (terrain & TERRAIN_RESERVOIR_RANGE) {
-                overlay_id += 11;
-            } else if (terrain & TERRAIN_FOUNTAIN_RANGE) {
-                overlay_id += 19;
-            }
-            // First draw the meadow
-            image_draw_isometric_footprint_from_draw_tile(image_id, x, y, 0, scale);
-            // Then the pipes
-            image_draw_isometric_footprint_from_draw_tile(overlay_id, x, y, 0, scale);
-        } else {
-            // A regular meadow without water
-            image_draw_isometric_footprint_from_draw_tile(image_id, x, y, 0, scale);
-        }
     } else if (map_terrain_is(grid_offset, terrain_on_water_overlay()) && !is_building) {
         image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, 0, scale);
     } else if (map_terrain_is(grid_offset, TERRAIN_WALL)) {
@@ -726,36 +703,6 @@ static int draw_top_water(int x, int y, float scale, int grid_offset)
     if (!map_property_is_draw_tile(grid_offset)) {
         return 1;
     }
-    // --- special handling of meadows ---
-    if (map_terrain_is(grid_offset, TERRAIN_MEADOW) && !map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
-        int terrain = map_terrain_get(grid_offset);
-        int image_id = map_image_at(grid_offset);
-        color_t color_mask = 0;
-        if (map_property_is_deleted(grid_offset) && map_property_multi_tile_size(grid_offset) == 1) {
-            color_mask = COLOR_MASK_RED;
-        }
-        // If a water zone extends over a meadow, draw pipes on top.
-        if (terrain & (TERRAIN_RESERVOIR_RANGE | TERRAIN_FOUNTAIN_RANGE)) {
-            int overlay_id = image_group(GROUP_TERRAIN_OVERLAY);
-            if ((terrain & (TERRAIN_RESERVOIR_RANGE | TERRAIN_FOUNTAIN_RANGE))
-                == (TERRAIN_RESERVOIR_RANGE | TERRAIN_FOUNTAIN_RANGE)) {
-                overlay_id += 27;
-            } else if (terrain & TERRAIN_RESERVOIR_RANGE) {
-                overlay_id += 11;
-            } else if (terrain & TERRAIN_FOUNTAIN_RANGE) {
-                overlay_id += 19;
-            }
-            // First draw the meadow
-            image_draw_isometric_top_from_draw_tile(image_id, x, y, color_mask, scale);
-            // Then the pipes
-            image_draw_isometric_top_from_draw_tile(overlay_id, x, y, color_mask, scale);
-        } else {
-            // A regular meadow without water
-            image_draw_isometric_top_from_draw_tile(image_id, x, y, color_mask, scale);
-        }
-        return 1;
-    }
-    // --- standard logic for other types ---
     if (map_terrain_is(grid_offset, terrain_on_water_overlay())) {
         if (!map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
             color_t color_mask = 0;
