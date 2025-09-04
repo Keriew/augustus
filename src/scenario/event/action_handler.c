@@ -45,6 +45,8 @@ int scenario_action_type_execute(scenario_action_t *action)
             return scenario_action_type_change_city_rating_execute(action);
         case ACTION_TYPE_CHANGE_CUSTOM_VARIABLE:
             return scenario_action_type_change_custom_variable_execute(action);
+        case ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY:
+            return scenario_action_type_change_custom_variable_visibility(action);
         case ACTION_TYPE_CHANGE_RESOURCE_PRODUCED:
             return scenario_action_type_change_resource_produced_execute(action);
         case ACTION_TYPE_CHANGE_RESOURCE_STOCKPILES:
@@ -137,11 +139,11 @@ unsigned int scenario_action_type_load_state(buffer *buf, scenario_action_t *act
     } else if (action->type == ACTION_TYPE_TRADE_ROUTE_ADD_NEW_RESOURCE) {
         action->parameter2 = resource_remap(action->parameter2);
     } else if (action->type == ACTION_TYPE_TRADE_SET_PRICE) {
-        action->parameter1 = resource_remap(action->parameter1);        
+        action->parameter1 = resource_remap(action->parameter1);
     } else if (action->type == ACTION_TYPE_TRADE_SET_BUY_PRICE_ONLY) {
-        action->parameter1 = resource_remap(action->parameter1);        
+        action->parameter1 = resource_remap(action->parameter1);
     } else if (action->type == ACTION_TYPE_TRADE_SET_SELL_PRICE_ONLY) {
-        action->parameter1 = resource_remap(action->parameter1);        
+        action->parameter1 = resource_remap(action->parameter1);
     } else if (action->type == ACTION_TYPE_CHANGE_ALLOWED_BUILDINGS) {
         if (!is_new_version) {
             int original_id = action->parameter1;

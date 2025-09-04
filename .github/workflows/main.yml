@@ -51,13 +51,13 @@ jobs:
             SDL_MIXER_VERSION: 2.8.1
             BUILD_TARGET: mac
             DEPLOY: mac
-          - name: iOS
-            os: macos-latest
-            cache-key: ios
-            SDL_VERSION: 2.32.8
-            SDL_MIXER_VERSION: 2.8.1
-            BUILD_TARGET: ios
-            DEPLOY: ios
+#          - name: iOS
+#            os: macos-latest
+#            cache-key: ios
+#            SDL_VERSION: 2.32.8
+#            SDL_MIXER_VERSION: 2.8.1
+#            BUILD_TARGET: ios
+#            DEPLOY: ios
           - name: Nintendo Switch
             os: ubuntu-24.04
             BUILD_TARGET: switch

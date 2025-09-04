@@ -46,9 +46,9 @@ int building_storage_get_array_size(void)
 int building_storage_try_add_resource(building *b, int resource, int amount, int is_produced)
 {
     if (b->type == BUILDING_GRANARY) {
-        return building_granary_try_add_resource(b, resource, amount, is_produced);
+        return building_granary_try_add_resource(b, resource, amount, is_produced, 1);
     } else if (b->type == BUILDING_WAREHOUSE) {
-        return building_warehouse_try_add_resource(b, resource, amount);
+        return building_warehouse_try_add_resource(b, resource, amount, 1);
     }
     return 0;
 }
@@ -174,6 +174,23 @@ int building_storage_count_stored_resource_types(int building_id)
     return stored_types_count;
 }
 
+int building_storage_get_amount(building *b, resource_type resource)
+{
+    if (b->type == BUILDING_GRANARY) {
+        return building_granary_get_amount(b, resource);
+    } else if (b->type == BUILDING_WAREHOUSE) {
+        return building_warehouse_get_amount(b, resource);
+    }
+    return 0;
+}
+
+int building_storage_get_storage_state_quantity(building *b, resource_type resource)
+{
+    const building_storage *s = building_storage_get(b->storage_id);
+    const resource_storage_entry *entry = &s->resource_state[resource];
+    return entry->quantity;
+}
+
 const building_storage_state building_storage_get_state(building *b, int resource, int relative)
 {
     if (b->has_plague || b->state != BUILDING_STATE_IN_USE) {
@@ -200,7 +217,7 @@ const building_storage_state building_storage_get_state(building *b, int resourc
             break;
 
         case BUILDING_STORAGE_STATE_GETTING:
-            if (amount < entry->quantity) {
+            if (amount <= entry->quantity) {
                 return BUILDING_STORAGE_STATE_GETTING;
             }
             break;

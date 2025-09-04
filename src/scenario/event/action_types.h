@@ -9,6 +9,8 @@ int scenario_action_type_change_city_rating_execute(scenario_action_t *action);
 
 int scenario_action_type_change_custom_variable_execute(scenario_action_t *action);
 
+int scenario_action_type_change_custom_variable_visibility(scenario_action_t *action);
+
 int scenario_action_type_change_resource_produced_execute(scenario_action_t *action);
 
 int scenario_action_type_change_resource_stockpiles_execute(scenario_action_t *action);
