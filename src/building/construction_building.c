@@ -440,7 +440,7 @@ int building_construction_place_building(building_type type, int x, int y)
         int orient_index = building_rotation_get_rotation();
         int x_offset = offsets_x[orient_index];
         int y_offset = offsets_y[orient_index];
-        if (!map_tiles_are_clear(x + x_offset, y + y_offset, 4, terrain_mask, check_figure)) {
+        if (!map_tiles_are_clear(x + x_offset, y + y_offset, 4, terrain_mask, 0)) { // ignore figures on fort grounds
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return 0;
         }
