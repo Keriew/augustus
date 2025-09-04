@@ -64,6 +64,9 @@
 #define MAX_TRADE_OPEN_BUTTONS 64
 #define MAX_SORTING_BUTTONS 64
 
+#define DEFAULT_DOT_SCALE 100//dot scales
+#define ANIM_DOT_SCALE 160
+
 #define BUTTON_INDEX_SORT_MAIN 0 // informative only
 #define BUTTON_INDEX_FILTER_MAIN 1
 #define BUTTON_INDEX_FIRST_SORT_METHOD (BUTTON_INDEX_FILTER_MAIN + 1) // 2
@@ -267,7 +270,10 @@ static px_point trade_amount_px_offsets[5] = {
 };
 
 //values for drawing animated dots
-static struct {int x, y, sea;} anim_dots[128]; //This limits number of trade routes, increase if someone complains
+static struct {int x;
+               int y;
+               int sea;
+              } anim_dots[128]; //This limits number of trade routes
 
 static struct {
     unsigned int selected_button;
@@ -1662,7 +1668,7 @@ void window_empire_draw_trade_waypoints(const empire_object *trade_route, int x_
             anim_dots[trade_route->trade_route_id].sea = is_sea;
         } else {
             img = is_sea ? sea_image_id : land_image_id;
-            image_draw_scaled_centered(img, dot_pos[i].x + x_offset, dot_pos[i].y + y_offset, COLOR_MASK_NONE, 100);
+            image_draw_scaled_centered(img, dot_pos[i].x + x_offset, dot_pos[i].y + y_offset, COLOR_MASK_NONE, DEFAULT_DOT_SCALE);
         }
     }
 }
@@ -1674,7 +1680,7 @@ static void anim_dot_draw(const empire_object *obj)
             return;
         }
         int img = anim_dots[obj->trade_route_id].sea ? assets_get_image_id("UI", "LandRouteDot") : assets_get_image_id("UI", "SeaRouteDot");
-        image_draw_scaled_centered(img, anim_dots[obj->trade_route_id].x, anim_dots[obj->trade_route_id].y, COLOR_MASK_NONE, 160);
+        image_draw_scaled_centered(img, anim_dots[obj->trade_route_id].x, anim_dots[obj->trade_route_id].y, COLOR_MASK_NONE, ANIM_DOT_SCALE);
     }
 }
 
