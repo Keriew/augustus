@@ -638,8 +638,10 @@ static int draw_footprint_water(int x, int y, float scale, int grid_offset)
         image_draw_isometric_footprint_from_draw_tile(water_image, x, y, 0, scale);
     }
     int is_building = map_terrain_is(grid_offset, TERRAIN_BUILDING);
+    if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY) && !map_terrain_is(grid_offset, TERRAIN_GATEHOUSE)) {
+        city_draw_highway_footprint(x, y, scale, grid_offset);
     // --- special handling of meadows ---
-    if (map_terrain_is(grid_offset, TERRAIN_MEADOW) && !is_building) {
+    } else if (map_terrain_is(grid_offset, TERRAIN_MEADOW) && !is_building) {
         int terrain = map_terrain_get(grid_offset);
         int image_id = map_image_at(grid_offset);
         // If a water zone extends over a meadow, draw pipes on top
@@ -661,8 +663,6 @@ static int draw_footprint_water(int x, int y, float scale, int grid_offset)
             // A regular meadow without water
             image_draw_isometric_footprint_from_draw_tile(image_id, x, y, 0, scale);
         }
-    } else if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY) && !map_terrain_is(grid_offset, TERRAIN_GATEHOUSE)) {
-        city_draw_highway_footprint(x, y, scale, grid_offset);
     } else if (map_terrain_is(grid_offset, terrain_on_water_overlay()) && !is_building) {
         image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, 0, scale);
     } else if (map_terrain_is(grid_offset, TERRAIN_WALL)) {
