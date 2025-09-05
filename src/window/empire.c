@@ -1684,6 +1684,16 @@ static void anim_dot_draw(const empire_object *obj)
     }
 }
 
+static void trade_route_icon_draw(const empire_object *obj)
+{
+    if (obj->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE || obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
+        if (!empire_city_is_trade_route_open(obj->trade_route_id)) {
+            return;
+        }
+        image_draw(obj->image_id, data.x_draw_offset + obj->x, data.y_draw_offset + obj->y, COLOR_MASK_NONE, SCALE_NONE);
+    }
+}
+
 void window_empire_draw_border(const empire_object *border, int x_offset, int y_offset)
 {
     const empire_object *first_edge = empire_object_get(border->id + 1);
@@ -1909,6 +1919,7 @@ static void draw_map(void)
     }
     empire_object_foreach(draw_empire_object);
     empire_object_foreach(anim_dot_draw);
+    empire_object_foreach(trade_route_icon_draw);
     scenario_invasion_foreach_warning(draw_invasion_warning);
 
     graphics_reset_clip_rectangle();
