@@ -64,6 +64,9 @@
 #define MAX_TRADE_OPEN_BUTTONS 64
 #define MAX_SORTING_BUTTONS 64
 
+#define DEFAULT_DOT_SCALE 100//dot scales
+#define ANIM_DOT_SCALE 160
+
 #define BUTTON_INDEX_SORT_MAIN 0 // informative only
 #define BUTTON_INDEX_FILTER_MAIN 1
 #define BUTTON_INDEX_FIRST_SORT_METHOD (BUTTON_INDEX_FILTER_MAIN + 1) // 2
@@ -265,6 +268,12 @@ static px_point trade_amount_px_offsets[5] = {
     { 0, 3 },
     { 4, 6 },
 };
+
+//values for drawing animated dots
+static struct {int x;
+               int y;
+               int sea;
+              } anim_dots[128]; //This limits number of trade routes
 
 static struct {
     unsigned int selected_button;
@@ -1650,20 +1659,38 @@ void window_empire_draw_trade_waypoints(const empire_object *trade_route, int x_
         anim_dot = dot_count - 1 - ((elapsed / dot_duration) % dot_count);
     }
 
-
     for (int i = 0; i < dot_count; i++) {
         int img;
-        float scale;
 
         if (i == anim_dot) {
-            img = is_sea ? land_image_id : sea_image_id; // animate using opposite image
-            scale = 160; // scale up the animated dot
+            anim_dots[trade_route->trade_route_id].x = dot_pos[i].x + x_offset;
+            anim_dots[trade_route->trade_route_id].y = dot_pos[i].y + y_offset;
+            anim_dots[trade_route->trade_route_id].sea = is_sea;
         } else {
             img = is_sea ? sea_image_id : land_image_id;
-            scale = 100; // normal scale
+            image_draw_scaled_centered(img, dot_pos[i].x + x_offset, dot_pos[i].y + y_offset, COLOR_MASK_NONE, DEFAULT_DOT_SCALE);
         }
+    }
+}
 
-        image_draw_scaled_centered(img, dot_pos[i].x + x_offset, dot_pos[i].y + y_offset, COLOR_MASK_NONE, scale);
+static void anim_dot_draw(const empire_object *obj)
+{
+    if (obj->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE || obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
+        if (!empire_city_is_trade_route_open(obj->trade_route_id)) {
+            return;
+        }
+        int img = anim_dots[obj->trade_route_id].sea ? assets_get_image_id("UI", "LandRouteDot") : assets_get_image_id("UI", "SeaRouteDot");
+        image_draw_scaled_centered(img, anim_dots[obj->trade_route_id].x, anim_dots[obj->trade_route_id].y, COLOR_MASK_NONE, ANIM_DOT_SCALE);
+    }
+}
+
+static void trade_route_icon_draw(const empire_object *obj)
+{
+    if (obj->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE || obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
+        if (!empire_city_is_trade_route_open(obj->trade_route_id)) {
+            return;
+        }
+        image_draw(obj->image_id, data.x_draw_offset + obj->x, data.y_draw_offset + obj->y, COLOR_MASK_NONE, SCALE_NONE);
     }
 }
 
@@ -1891,6 +1918,8 @@ static void draw_map(void)
         data.trade_route_anim_start = time_get_millis();
     }
     empire_object_foreach(draw_empire_object);
+    empire_object_foreach(anim_dot_draw);
+    empire_object_foreach(trade_route_icon_draw);
     scenario_invasion_foreach_warning(draw_invasion_warning);
 
     graphics_reset_clip_rectangle();
