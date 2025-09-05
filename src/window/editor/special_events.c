@@ -11,6 +11,7 @@
 #include "input/input.h"
 #include "scenario/editor_events.h"
 #include "scenario/property.h"
+#include "scenario/types.h"
 #include "window/editor/attributes.h"
 #include "window/editor/map.h"
 #include "window/numeric_input.h"
@@ -72,7 +73,11 @@ static void draw_foreground(void)
     // earthquake
     lang_text_draw(38, 1, 36, 112, FONT_NORMAL_BLACK);
     button_border_draw(216, 106, 100, 24, focus_button_id == 1);
-    lang_text_draw_centered(40, scenario_editor_earthquake_severity(), 216, 112, 100, FONT_NORMAL_BLACK);
+    if (!(scenario_editor_earthquake_severity() == EARTHQUAKE_CUSTOM)) {
+        lang_text_draw_centered(40, scenario_editor_earthquake_severity(), 216, 112, 100, FONT_NORMAL_BLACK);
+    } else {
+        text_draw_centered(translation_for(TR_EDITOR_EARTHQUAKE_CUSTOM), 216, 112, 100, FONT_NORMAL_BLACK, 0);
+    }
 
     button_border_draw(326, 106, 150, 24, focus_button_id == 2);
     text_draw_number(scenario_editor_earthquake_year(), '+', " ", 340, 112, FONT_NORMAL_BLACK, 0);
