@@ -98,6 +98,7 @@ static const char *ini_keys[] = {
     [CONFIG_GP_CH_DEFAULT_GAME_SPEED] = "gameplay_change_default_game_speed",
     [CONFIG_UI_SHOW_CUSTOM_VARIABLES] = "ui_show_custom_variables",
     [CONFIG_GP_CH_ENABLE_GETTING_WHILE_STOCKPILED] = "gameplay_change_stockpiled_getting",
+    [CONFIG_UI_PAVED_ROADS_NEAR_GRANNARIES] = "ui_paved_roads_near_grannaries",
 };
 
 static const char *ini_string_keys[] = {
@@ -144,6 +145,7 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_GP_CH_DEFAULT_GAME_SPEED] = 7, //0-based index, 7 points to 80%
     [CONFIG_UI_SHOW_CUSTOM_VARIABLES] = 1,
     [CONFIG_GP_CH_ENABLE_GETTING_WHILE_STOCKPILED] = 0,
+    [CONFIG_UI_PAVED_ROADS_NEAR_GRANNARIES] = 1,
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };
