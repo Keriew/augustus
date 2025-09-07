@@ -351,7 +351,8 @@ int building_construction_place_building(building_type type, int x, int y)
 {
     int terrain_mask = TERRAIN_ALL;
     if (building_type_is_roadblock(type)) {
-        terrain_mask = type == BUILDING_GATEHOUSE ? ~TERRAIN_WALL & ~TERRAIN_ROAD & ~TERRAIN_HIGHWAY : ~TERRAIN_ROAD & ~TERRAIN_HIGHWAY;
+        terrain_mask = type == BUILDING_GATEHOUSE ? ~TERRAIN_WALL & ~TERRAIN_ROAD &
+            ~TERRAIN_HIGHWAY : ~TERRAIN_ROAD & ~TERRAIN_HIGHWAY;
         //allow building gatehouses over walls and roads, other non-bridge roadblocks over roads and highways
     } else if (type == BUILDING_TOWER) {
         terrain_mask = ~TERRAIN_WALL;
@@ -440,7 +441,7 @@ int building_construction_place_building(building_type type, int x, int y)
         int orient_index = building_rotation_get_rotation();
         int x_offset = offsets_x[orient_index];
         int y_offset = offsets_y[orient_index];
-        if (!map_tiles_are_clear(x + x_offset, y + y_offset, 4, terrain_mask, check_figure)) {
+        if (!map_tiles_are_clear(x + x_offset, y + y_offset, 4, terrain_mask, 0)) { // ignore figures on fort grounds
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return 0;
         }

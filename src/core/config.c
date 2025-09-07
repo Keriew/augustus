@@ -99,6 +99,7 @@ static const char *ini_keys[] = {
     [CONFIG_UI_SHOW_CUSTOM_VARIABLES] = "ui_show_custom_variables",
     [CONFIG_GP_CH_ENABLE_GETTING_WHILE_STOCKPILED] = "gameplay_change_stockpiled_getting",
     [CONFIG_UI_EMPIRE_ROUTE_ANIMATIONS] = "ui_empire_route_animations",
+    [CONFIG_UI_PAVED_ROADS_NEAR_GRANNARIES] = "ui_paved_roads_near_grannaries",
 };
 
 static const char *ini_string_keys[] = {
@@ -146,6 +147,7 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_UI_SHOW_CUSTOM_VARIABLES] = 1,
     [CONFIG_GP_CH_ENABLE_GETTING_WHILE_STOCKPILED] = 0,
     [CONFIG_UI_EMPIRE_ROUTE_ANIMATIONS] = 1,
+    [CONFIG_UI_PAVED_ROADS_NEAR_GRANNARIES] = 1,
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };

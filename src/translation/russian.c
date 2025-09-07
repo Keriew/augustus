@@ -1223,8 +1223,8 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_BUILDING_FORCE_COLLAPSE, "Здание: Разрушить"},
     {TR_ACTION_TYPE_INVASION_IMMEDIATE, "Вторжение началось:"},
     {TR_ACTION_TYPE_CAUSE_BLESSING, "Боги: вызвать Благословение"},
-    {TR_ACTION_TYPE_CAUSE_MINOR_CURSE, "Боги: вызвать Недовольство"},
-    {TR_ACTION_TYPE_CAUSE_MAJOR_CURSE, "Боги: вызвать Гнев"},
+    {TR_ACTION_TYPE_CAUSE_MINOR_CURSE, "Боги: вызвать Проклятие (малое)"},
+    {TR_ACTION_TYPE_CAUSE_MAJOR_CURSE, "Боги: вызвать Проклятие (большое)"},
     {TR_ACTION_TYPE_CHANGE_CLIMATE, "Изменить климат:"},
     {TR_PARAMETER_VALUE_COMPARISON_TYPE_EQUAL, "\"Равно\""},
     {TR_PARAMETER_VALUE_COMPARISON_TYPE_EQUAL_OR_LESS, "\"Меньше или равно\""},
@@ -1685,6 +1685,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_CHANGE_SIDEBAR_WIDTH, "Изменить ширину боковой панели"},
     {TR_TOOLTIP_ASCENDING_ORDER, "По возрастанию"},
     {TR_TOOLTIP_DESCENDING_ORDER, "По убыванию"},
+    {TR_CHEAT_CHANGE_WEATHER, "Погода изменена"},
     {TR_CONFIG_DEFAULT_GAME_SPEED, "Скорость игры по умолчанию:"},
     {TR_CONFIG_CATEGORY_GENERAL, "Общие"},
     {TR_CONFIG_CATEGORY_UI_MAP, "Прокрутка и карта"},
@@ -1696,9 +1697,10 @@ static translation_string all_strings[] = {
     {TR_CONFIG_CATEGORY_MANAGEMENT_ROADBLOCKS, "Дорожные блоки"},
     {TR_CONFIG_CATEGORY_MANAGEMENT_HOUSING, "Жилье"},
     {TR_EDITOR_CUSTOM_VARIABLES_TEXT_DISPLAY, "Отображаемый текст"},
-    {TR_EDITOR_CUSTOM_VARIABLES_IS_VISIBLE, "Видимость"},
-    {TR_ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY, "Изменить видимость переменной"},
+    {TR_EDITOR_CUSTOM_VARIABLES_IS_VISIBLE, "Показать"},
+    {TR_ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY, "Изменить видимость переменной:"},
     {TR_CONFIG_SHOW_CUSTOM_VARIABLES, "Показать пользовательские переменные в городском обзоре"},
+    {TR_CONFIG_ENABLE_GETTING_WHILE_STOCKPILED, "Разрешить \"Получение\", когда ресурс складируется"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
