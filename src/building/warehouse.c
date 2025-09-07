@@ -11,6 +11,7 @@
 #include "city/resource.h"
 #include "core/calc.h"
 #include "core/image.h"
+#include "core/config.h"
 #include "empire/trade_prices.h"
 #include "figure/figure.h"
 #include "game/tutorial.h"
@@ -735,9 +736,11 @@ int building_warehouse_determine_worker_task(building *warehouse, int *resource)
     //TASK 2: getting resources
     for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
         //determine if any of the resources need to be fetched becasuse of 'getting'
-        if (building_storage_get_state(warehouse, r, 1) != BUILDING_STORAGE_STATE_GETTING ||
-            city_resource_is_stockpiled(r) || !resource_is_storable(r)) {
+        if (building_storage_get_state(warehouse, r, 1) != BUILDING_STORAGE_STATE_GETTING || !resource_is_storable(r)) {
             continue;
+        }
+        if (!config_get(CONFIG_GP_CH_ENABLE_GETTING_WHILE_STOCKPILED) && city_resource_is_stockpiled(r)) {
+            continue; // skip if stockpiled
         }
         unsigned char needed = building_warehouse_maximum_receptible_amount(warehouse, r);
 

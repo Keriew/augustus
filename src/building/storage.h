@@ -230,6 +230,21 @@ void building_storage_load_state(buffer *buf, int version);
  */
 int building_storage_count_stored_resource_types(int building_id);
 
+/* STORAGE API HELPERS*/
+
+/**
+ * returns the quantity associated with the storage state for a given resource in a building
+ * @param b building to check
+ * @param resource Resource id to check
+ */
+int building_storage_get_storage_state_quantity(building *b, resource_type resource);
+/**
+ * returns the amount currently stored in the building for a given resource. Works for granaries and warehouses.
+ * @param b building to check
+ * @param resource Resource id to check
+ */
+int building_storage_get_amount(building *b, resource_type resource);
+
 void building_storage_toggle_permission(building_storage_permission_states p, building *b);
 int building_storage_get_permission(building_storage_permission_states p, building *b);
 void building_storage_set_permission(building_storage_permission_states p, building *b, int enable);

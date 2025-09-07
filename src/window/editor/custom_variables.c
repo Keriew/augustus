@@ -32,7 +32,7 @@
 #define CHECKBOX_ROW_WIDTH 25
 #define ID_ROW_WIDTH 32
 #define VALUE_ROW_WIDTH 60
-#define NAME_ROW_WIDTH 100
+#define NAME_ROW_WIDTH 170
 #define BUTTONS_PADDING 4
 #define NUM_ITEM_BUTTONS (sizeof(item_buttons) / sizeof(generic_button))
 #define NUM_CONSTANT_BUTTONS (sizeof(constant_buttons) / sizeof(generic_button))
@@ -77,7 +77,7 @@ static struct {
 } data;
 
 static generic_button item_buttons[] = {
-    { 1, 2, 20, 20, button_variable_checkbox },
+    { 0, 0, 20, 20, button_variable_checkbox },
     { 0, 0, NAME_ROW_WIDTH, 25, button_edit_variable_name },
     { 0, 0, VALUE_ROW_WIDTH, 25, button_edit_variable_value },
     { 0, 0, 0, 25, button_edit_display_text },
@@ -85,19 +85,19 @@ static generic_button item_buttons[] = {
 };
 
 static generic_button constant_buttons[] = {
-    { 32, 91, 20, 20, button_select_all_none },
-    { 32, 454, 200, 30, button_delete_selected, 0 },
+    { 31, 55, 20, 20, button_select_all_none },
+    { 31, 454, 200, 30, button_delete_selected, 0 },
     { 237, 454, 200, 30, button_new_variable },
-    { 442, 454, 200, 30, button_ok }
+    { 442, 454, 150, 30, button_ok }
 };
 
 static grid_box_type variable_buttons = {
     .x = 26,
-    .y = 116,
+    .y = 79,
     .width = 38 * BLOCK_SIZE,
-    .height = 21 * BLOCK_SIZE,
+    .height = 23 * BLOCK_SIZE,
     .num_columns = 1,
-    .item_height = 30,
+    .item_height = 28,
     .item_margin.horizontal = 10,
     .item_margin.vertical = 5,
     .extend_to_hidden_scrollbar = 1,
@@ -188,16 +188,16 @@ static void draw_background(void)
 
     outer_panel_draw(16, 16, 40, data.callback ? 28 : 30);
 
-    text_draw_centered(translation_for(TR_EDITOR_CUSTOM_VARIABLES_TITLE), 0, 32, 640, FONT_LARGE_BLACK, 0);
-    text_draw_label_and_number_centered(translation_for(TR_EDITOR_CUSTOM_VARIABLES_COUNT), data.custom_variables_in_use,
-        "", 0, 70, 640, FONT_NORMAL_BLACK, 0);
+    text_draw_centered(translation_for(TR_EDITOR_CUSTOM_VARIABLES_TITLE), 20, 27, 640, FONT_LARGE_BLACK, 0);
+    text_draw_label_and_number(translation_for(TR_EDITOR_CUSTOM_VARIABLES_COUNT), data.custom_variables_in_use,
+        "", 32, 30, FONT_SMALL_PLAIN, 0);
 
     int base_x_offset = variable_buttons.x + variable_buttons.item_margin.horizontal / 2;
 
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_ID,
-        variable_buttons.x + (data.callback ? 0 : CHECKBOX_ROW_WIDTH), 96, 40, FONT_SMALL_PLAIN);
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_NAME, base_x_offset + item_buttons[1].x, 96,
-        FONT_SMALL_PLAIN);
+        variable_buttons.x + (data.callback ? 0 : CHECKBOX_ROW_WIDTH), 60, 40, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_NAME, base_x_offset + item_buttons[1].x, 60,
+        NAME_ROW_WIDTH, FONT_SMALL_PLAIN);
 
     grid_box_request_refresh(&variable_buttons);
 
@@ -218,12 +218,12 @@ static void draw_background(void)
              select_all_none_button->y + (20 - img->original.height) / 2, COLOR_MASK_NONE, SCALE_NONE);
     }
 
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_VALUE, base_x_offset + item_buttons[2].x, 96,
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_VALUE, base_x_offset + item_buttons[2].x, 60,
         FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_TEXT_DISPLAY,
-        base_x_offset + item_buttons[3].x, 96, item_buttons[3].width, FONT_SMALL_PLAIN);
+        base_x_offset + item_buttons[3].x, 60, item_buttons[3].width, FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_IS_VISIBLE,
-        base_x_offset + item_buttons[4].x, 96, item_buttons[4].width, FONT_SMALL_PLAIN);
+        base_x_offset + item_buttons[4].x - 15, 60, 20, FONT_SMALL_PLAIN);
 
     // Bottom buttons
     const generic_button *delete_selected_button = &constant_buttons[1];
@@ -256,7 +256,7 @@ static void draw_variable_item(const grid_box_item *item)
 
     if (name && *name) {
         text_draw(name, item->x + item_buttons[1].x + 8, item->y + item_buttons[1].y + 8,
-            FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+            FONT_SMALL_PLAIN, 0);
     }
 
     if (data.callback) {
@@ -278,7 +278,7 @@ static void draw_variable_item(const grid_box_item *item)
     button_border_draw(item->x + item_buttons[2].x, item->y + item_buttons[2].y, item_buttons[2].width,
         item_buttons[2].height, item->is_focused && data.item_buttons_focus_id == 3);
 
-    text_draw_number(value, ' ', "", item->x + item_buttons[2].x + 8, item->y + item_buttons[2].y + 8,
+    text_draw_number(value, ' ', "", item->x + item_buttons[2].x, item->y + item_buttons[2].y + 8,
         FONT_NORMAL_BLACK, COLOR_MASK_NONE);
 
     // Display Text
@@ -288,7 +288,7 @@ static void draw_variable_item(const grid_box_item *item)
     const uint8_t *display_text = scenario_custom_variable_get_text_display(id);
     if (display_text && *display_text) {
         text_draw(display_text, item->x + item_buttons[3].x + 8, item->y + item_buttons[3].y + 8,
-            FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+            FONT_SMALL_PLAIN, 0);
     }
 
     // Visible Checkbox
@@ -298,7 +298,7 @@ static void draw_variable_item(const grid_box_item *item)
     if (scenario_custom_variable_is_visible(id)) {
         int checkmark_id = assets_lookup_image_id(ASSET_UI_SELECTION_CHECKMARK);
         const image *img = image_get(checkmark_id);
-        image_draw(checkmark_id, item->x + item_buttons[4].x + (CHECKBOX_ROW_WIDTH - img->original.width) / 2,
+        image_draw(checkmark_id, item->x + item_buttons[4].x + (20 - img->original.width) / 2,
             item->y + item_buttons[4].y + (20 - img->original.height) / 2, COLOR_MASK_NONE, SCALE_NONE);
     }
 }

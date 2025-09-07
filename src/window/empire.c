@@ -1621,7 +1621,7 @@ void window_empire_draw_trade_waypoints(const empire_object *trade_route, int x_
         float dist = sqrtf(dx * dx + dy * dy);
         float nx = (float) dx / dist, ny = (float) dy / dist;
         float px = last_x, py = last_y, pos = remaining;
-        while (pos < dist && dot_count < 128) {
+        while (pos < dist && dot_count < 1024) {
             dot_pos[dot_count].x = (int) (px + nx * pos);
             dot_pos[dot_count].y = (int) (py + ny * pos);
             dot_count++;
