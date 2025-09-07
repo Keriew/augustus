@@ -270,10 +270,11 @@ static px_point trade_amount_px_offsets[5] = {
 };
 
 //values for drawing animated dots
-static struct {int x;
-               int y;
-               int sea;
-              } anim_dots[128]; //This limits number of trade routes
+static struct {
+    int x;
+    int y;
+    int sea;
+} anim_dots[128]; //This limits number of trade routes
 
 static struct {
     unsigned int selected_button;
@@ -1675,12 +1676,14 @@ void window_empire_draw_trade_waypoints(const empire_object *trade_route, int x_
 
 static void anim_dot_draw(const empire_object *obj)
 {
-    if (obj->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE || obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
-        if (!empire_city_is_trade_route_open(obj->trade_route_id)) {
+    if (obj->type == EMPIRE_OBJECT_TRADE_WAYPOINT) {
+        if (!empire_city_is_trade_route_open(obj->trade_route_id) || !config_get(CONFIG_UI_EMPIRE_ROUTE_ANIMATIONS)) {
             return;
         }
-        int img = anim_dots[obj->trade_route_id].sea ? assets_get_image_id("UI", "LandRouteDot") : assets_get_image_id("UI", "SeaRouteDot");
-        image_draw_scaled_centered(img, anim_dots[obj->trade_route_id].x, anim_dots[obj->trade_route_id].y, COLOR_MASK_NONE, ANIM_DOT_SCALE);
+        int img = anim_dots[obj->trade_route_id].sea ?
+            assets_get_image_id("UI", "LandRouteDot") : assets_get_image_id("UI", "SeaRouteDot");
+        image_draw_scaled_centered(img, anim_dots[obj->trade_route_id].x, anim_dots[obj->trade_route_id].y,
+             COLOR_MASK_NONE, ANIM_DOT_SCALE);
     }
 }
 

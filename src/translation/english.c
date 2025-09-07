@@ -1701,6 +1701,7 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY, "Change custom variable visibility" },
     {TR_CONFIG_SHOW_CUSTOM_VARIABLES, "Show custom variables in city view" },
     {TR_CONFIG_ENABLE_GETTING_WHILE_STOCKPILED, "Enable 'Getting' while a resource is stockpiled" },
+    {TR_CONFIG_UI_EMPIRE_ROUTE_ANIMATIONS, "Enable trade animations in empire view" },
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
