@@ -23,6 +23,14 @@ static void draw_background(void)
     outer_panel_draw(16, 32, 38, 26);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_ACTION_TYPE_CHANGE_MODEL_DATA, 26, 42, 608, FONT_LARGE_BLACK);
     lang_text_draw_centered(13, 3, 16, 424, 608, FONT_NORMAL_BLACK);
+    
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_MODEL, 80, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_COST, 200, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_VALUE, 265, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_STEP, 330, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_STEP_SIZE, 395, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_RANGE, 460, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_LABORERS, 525, 75, 30, FONT_SMALL_PLAIN);
 
     graphics_reset_dialog();
 }

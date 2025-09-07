@@ -1713,6 +1713,10 @@ static translation_string all_strings[] = {
     {TR_EDITOR_CUSTOM_VARIABLES_IS_VISIBLE, "Visible"},
     {TR_ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY, "Change custom variable visibility" },
     {TR_CONFIG_SHOW_CUSTOM_VARIABLES, "Show custom variables in city view" },
+    {TR_EDITOR_MODEL_DATA_DES_VALUE, "DES"},
+    {TR_EDITOR_MODEL_DATA_DES_STEP, "STP"},
+    {TR_EDITOR_MODEL_DATA_DES_STEP_SIZE, "SZE"},
+    {TR_EDITOR_MODEL_DATA_DES_RANGE, "RGE"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
