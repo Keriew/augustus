@@ -220,8 +220,7 @@ void empire_object_save(buffer *buf)
     int total_size = 0;
 
     full_empire_object *full;
-    array_foreach(objects, full)
-    {
+    array_foreach(objects, full) {
         if (full->in_use && full->obj.type == EMPIRE_OBJECT_CITY) {
             total_size += size_per_city;
         } else if (full->in_use) {
@@ -234,8 +233,7 @@ void empire_object_save(buffer *buf)
     buffer_init(buf, buf_data, total_size + sizeof(uint32_t));
     buffer_write_i32(buf, objects.size);
 
-    array_foreach(objects, full)
-    {
+    array_foreach(objects, full) {
         empire_object *obj = &full->obj;
         buffer_write_u8(buf, obj->type);
         buffer_write_u8(buf, full->in_use);
