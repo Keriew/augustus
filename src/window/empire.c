@@ -63,6 +63,11 @@
 #define MAX_SIDEBAR_CITIES 256 
 #define MAX_RESOURCE_BUTTONS 256
 #define MAX_TRADE_OPEN_BUTTONS 64
+#define MAX_TRADE_EDGES 4096
+#define MAX_DOTS_PER_ROUTE 1024
+#define MAX_DOTS_ON_MAP (MAX_DOTS_PER_ROUTE * MAX_SIDEBAR_CITIES)
+#define TRADE_PULSE_DOT_MS 180 
+#define TRADE_DOT_ANIMATION_SCALE 160
 
 #define FONT_SPACE_WIDTH font_definition_for(FONT_NORMAL_GREEN)->space_width
 #define FONT_HEIGHT_NORMAL font_definition_for(FONT_NORMAL_GREEN)->line_height
@@ -154,13 +159,43 @@ typedef struct {
     resource_type res;
     int do_highlight;
 } resource_button;
+// Edges are DIRECTIONAL (start->end). No normalization.
+// One edge can appear in multiple routes; we draw it once per frame via `drawn`.
 
+typedef struct {
+    int id;                 // 0-based index in g_trade_edges
+    int x1, y1, x2, y2;     // start -> end (exact order preserved)
+    int trade_route_id;     // for reference
+    int is_sea;             // 1 sea, 0 land
+    int drawn;              // set during draw pass to avoid double-drawing same edge
+} trade_edge;
+
+typedef struct {
+    int x;
+    int y;
+    int is_sea;
+} trade_dot;
+
+struct trade_route_anim {
+    int index;
+    trade_dot *trade_dots[MAX_DOTS_ON_MAP];
+} trade_routes_anim;
+
+static trade_edge g_trade_edges[MAX_TRADE_EDGES];
+static int g_trade_edge_count = 0;
+
+// For each route_id: a list of 0-based edge indices, terminated by -1.
+static int trade_city_edges[MAX_SIDEBAR_CITIES][MAX_TRADE_EDGES];
 // measurements and scales helper functions
 static int measure_trade_row_width(const empire_city *city, int is_sell, const trade_row_style *style); // ???
 static void image_draw_silh_scaled_centered(int image_id, int x, int y, color_t color, int draw_scale_percent);
 static void animation_draw_scaled(const image *img, int image_id, int new_animation, int x, int y, color_t color, int draw_scale_percent);
 static int open_trade_button_icon_fits(const empire_city *city, const open_trade_button_style *style, trade_icon_type icon_type);
 static void draw_sidebar_city_item(const grid_box_item *item);
+static int draw_images_at_interval(int image_id, int x_draw_offset, int y_draw_offset,
+    int start_x, int start_y, int end_x, int end_y, int interval, int remaining);
+void window_empire_collect_trade_edges(void);
+static void window_empire_draw_trade_route_pulses(const empire_object *route_object, int x_offset, int y_offset);
 // 'styles' get functions
 static trade_row_style get_trade_row_style(const empire_city *city, int is_sell, int max_draw_width, trade_style_variant variant);
 static open_trade_button_style get_open_trade_button_style(int x, int y, trade_style_variant variant);
@@ -296,6 +331,8 @@ static void init(void)
     data.sidebar.initialised = 1;
     process_selection();
     data.focus_button_id = 0;
+    window_empire_collect_trade_edges();
+    data.trade_route_anim_start = time_get_millis();
 }
 
 static void setup_sidebar(void)
@@ -649,6 +686,232 @@ static void draw_paneling(void)
     graphics_reset_clip_rectangle();
     scrollbar_draw(&sidebar_scrollbar);
 
+}
+
+// -------------------------------------------------------------------------------------------------------
+//                                          NEW TRADE ROUTES
+// -------------------------------------------------------------------------------------------------------
+
+// Return existing/new edge index (0-based), or -1 on overflow.
+// Equality is order-sensitive: same (x1,y1)->(x2,y2) AND same is_sea.
+static int add_or_get_trade_edge(int start_x, int start_y, int end_x, int end_y, int route_id, int is_sea)
+{
+    for (int edge_index = 0; edge_index < g_trade_edge_count; edge_index++) {
+        trade_edge *edge = &g_trade_edges[edge_index];
+        if (edge->is_sea == is_sea &&
+            edge->x1 == start_x && edge->y1 == start_y &&
+            edge->x2 == end_x && edge->y2 == end_y) {
+            return edge_index; // found existing directed edge
+        }
+    }
+
+    if (g_trade_edge_count >= MAX_TRADE_EDGES) {
+        return -1; // cannot add more edges
+    }
+
+    trade_edge new_edge = {
+        .id = g_trade_edge_count,
+        .x1 = start_x,
+        .y1 = start_y,
+        .x2 = end_x,
+        .y2 = end_y,
+        .trade_route_id = route_id,
+        .is_sea = is_sea,
+        .drawn = 0
+    };
+
+    g_trade_edges[g_trade_edge_count] = new_edge;
+    g_trade_edge_count++;
+
+    return new_edge.id;
+}
+
+void window_empire_collect_trade_edges(void)
+{
+    const empire_object *our_city_object = empire_object_get_our_city();
+    g_trade_edge_count = 0;
+    memset(g_trade_edges, 0, sizeof(g_trade_edges));
+    memset(trade_city_edges, 0xFF, sizeof(trade_city_edges));
+    // Pre-fill per-route edge lists with -1 (sentinel terminator).
+    for (int object_index = 0; object_index < empire_object_count(); object_index++) {
+        const empire_object *route_object = empire_object_get(object_index);
+        int is_sea_route = -1;
+        if (route_object->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
+            is_sea_route = 1;
+        } else if (route_object->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE) {
+            is_sea_route = 0;
+        } else {
+            continue; // not a trade route object
+        }
+
+        int route_id = route_object->trade_route_id;
+        if (route_id < 0 || route_id >= MAX_SIDEBAR_CITIES) {
+            continue; // invalid route id; skip this route
+        }
+
+        const empire_object *trade_city_object = empire_object_get_trade_city(route_id);
+        int segment_start_x = our_city_object->x + 25;
+        int segment_start_y = our_city_object->y + 25;
+        int route_edge_count = 0;
+
+        // Waypoints belonging to this route are contiguous after the route object
+        for (int waypoint_index = object_index + 1; waypoint_index < empire_object_count(); waypoint_index++) {
+            const empire_object *waypoint_object = empire_object_get(waypoint_index);
+
+            if (waypoint_object->type != EMPIRE_OBJECT_TRADE_WAYPOINT || waypoint_object->trade_route_id != route_id) {
+                break; // reached non-waypoint or different route; waypoint sequence ends
+            }
+
+            int edge_index = add_or_get_trade_edge(
+                segment_start_x, segment_start_y, waypoint_object->x, waypoint_object->y, route_id, is_sea_route);
+
+            if (edge_index >= 0) {
+                if (route_edge_count < MAX_TRADE_EDGES) {
+                    trade_city_edges[route_id][route_edge_count] = edge_index;
+                    route_edge_count++;
+                }
+            }
+
+            segment_start_x = waypoint_object->x;
+            segment_start_y = waypoint_object->y;
+        }
+
+        // Final leg to destination city center
+        int city_center_x = trade_city_object->x + 25;
+        int city_center_y = trade_city_object->y + 25;
+
+        int final_edge_index = add_or_get_trade_edge(
+            segment_start_x, segment_start_y, city_center_x, city_center_y, route_id, is_sea_route);
+
+        if (final_edge_index >= 0) {
+            if (route_edge_count < MAX_TRADE_EDGES) {
+                trade_city_edges[route_id][route_edge_count] = final_edge_index;
+                route_edge_count++;
+            }
+        }
+
+        if (route_edge_count < MAX_TRADE_EDGES) {
+            trade_city_edges[route_id][route_edge_count] = -1; // explicit terminator for clarity
+        }
+    }
+}
+
+void window_empire_draw_static_trade_waypoints(const empire_object *route_object, int x_offset, int y_offset)
+{
+    int is_sea_route = 0;
+    if (route_object->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
+        is_sea_route = 1;
+    } else {
+        is_sea_route = 0; // treat anything else here as land (caller should pass a valid route)
+    }
+
+    int image_id = assets_get_image_id("UI", is_sea_route ? "SeaRouteDot" : "LandRouteDot");
+    int route_id = route_object->trade_route_id;
+    if (route_id < 0 || route_id >= MAX_SIDEBAR_CITIES) {
+        return; // invalid route id; nothing to draw
+    }
+
+    // Even spacing across the whole polychain; remainder carries between edges.
+    const empire_object *our_city_object = empire_object_get_our_city();
+    (void) our_city_object; // not needed here but kept for parity with collection step
+
+    int remaining_spacing = TRADE_DOT_SPACING;
+
+    for (int list_index = 0; list_index < MAX_TRADE_EDGES; list_index++) {
+        int edge_index = trade_city_edges[route_id][list_index];
+
+        if (edge_index < 0) {
+            break; // reached sentinel; no more edges for this route
+        }
+
+        if (edge_index >= g_trade_edge_count) {
+            continue; // stale or out-of-range mapping; skip this edge
+        }
+
+        trade_edge *edge = &g_trade_edges[edge_index];
+
+        int draw_image_id = edge->drawn ? 0 : image_id;
+        remaining_spacing = draw_images_at_interval(draw_image_id, x_offset, y_offset, edge->x1, edge->y1,
+                                                    edge->x2, edge->y2, TRADE_DOT_SPACING, remaining_spacing);
+
+        edge->drawn = 1; // mark as processed for this frame
+    }
+    if (config_get(CONFIG_UI_ANIMATE_TRADE_ROUTES)) {
+        window_empire_draw_trade_route_pulses(route_object, x_offset, y_offset);
+    }
+}
+
+static void draw_trade_route_pulse_index(int image_id, int x_offset, int y_offset, int route_id, int dot_index)
+{
+    if (!image_id || !route_id) {
+        return;
+    }
+
+    int target_distance = dot_index * TRADE_DOT_SPACING;
+    int accumulated_distance = 0;
+
+    for (int list_index = 0; list_index < MAX_TRADE_EDGES; list_index++) {
+        int edge_index = trade_city_edges[route_id][list_index];
+        if (edge_index < 0) {
+            break;
+        }
+
+        trade_edge *edge = &g_trade_edges[edge_index];
+        int dx = edge->x2 - edge->x1;
+        int dy = edge->y2 - edge->y1;
+        int segment_length = (int) sqrt(dx * dx + dy * dy);
+
+        if (target_distance <= accumulated_distance + segment_length) {
+            int along = target_distance - accumulated_distance;
+            int x_factor = calc_percentage(dx, segment_length);
+            int y_factor = calc_percentage(dy, segment_length);
+            int x = calc_adjust_with_percentage(along, x_factor) + edge->x1;
+            int y = calc_adjust_with_percentage(along, y_factor) + edge->y1;
+
+            image_draw_scaled_centered(image_id, x_offset + x, y_offset + y, COLOR_MASK_NONE, TRADE_DOT_ANIMATION_SCALE);
+            return;
+        }
+        accumulated_distance += segment_length;
+    }
+}
+
+static void window_empire_draw_trade_route_pulses(const empire_object *route_object, int x_offset, int y_offset)
+{
+    int is_sea_route = 0;
+    if (route_object->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
+        is_sea_route = 1;
+    } else if (route_object->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE) {
+        is_sea_route = 0;
+    } else {
+        return;
+    }
+    int route_id = route_object->trade_route_id;
+    int pulse_image_id = assets_get_image_id("UI", !is_sea_route ? "SeaRouteDot" : "LandRouteDot"); //opposite image
+
+    int total_length_pixels = 0;
+    for (int list_index = 0; list_index < MAX_TRADE_EDGES; list_index++) {
+        int edge_index = trade_city_edges[route_id][list_index];
+        if (edge_index < 0) {
+            break; // no more edges
+        }
+        trade_edge *edge = &g_trade_edges[edge_index];
+        int delta_x = edge->x2 - edge->x1;
+        int delta_y = edge->y2 - edge->y1;
+        int segment_length = (int) sqrt(delta_x * delta_x + delta_y * delta_y);
+        total_length_pixels += segment_length;
+    }
+
+    int dot_count = (total_length_pixels / TRADE_DOT_SPACING) + 1;
+    if (!dot_count) {
+        return;
+    }
+    time_millis elapsed_millis = time_get_millis() - data.trade_route_anim_start;
+
+    int ticks_since_start = (int) (elapsed_millis / TRADE_PULSE_DOT_MS);
+    int forward_index_from_start = ticks_since_start % dot_count;
+
+    int index_from_trade_city = (dot_count - 1) - forward_index_from_start;
+    draw_trade_route_pulse_index(pulse_image_id, x_offset, y_offset, route_id, index_from_trade_city);
 }
 
 // -------------------------------------------------------------------------------------------------------
@@ -1147,76 +1410,6 @@ static int draw_images_at_interval(int image_id, int x_draw_offset, int y_draw_o
     return remaining;
 }
 
-void window_empire_draw_trade_waypoints(const empire_object *trade_route, int x_offset, int y_offset)
-{
-    int is_sea = trade_route->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE;
-    int sea_image_id = assets_get_image_id("UI", "SeaRouteDot");
-    int land_image_id = assets_get_image_id("UI", "LandRouteDot");
-
-    // Build a list of all dot positions in the correct order.
-    int dot_count = 0;
-    struct { int x, y; } dot_pos[1024]; // increased limit - 1024 dots max per route
-
-    const empire_object *our_city = empire_object_get_our_city();
-    const empire_object *trade_city = empire_object_get_trade_city(trade_route->trade_route_id);
-    int last_x = our_city->x + 25;
-    int last_y = our_city->y + 25;
-    int remaining = TRADE_DOT_SPACING;
-
-    for (int i = trade_route->id + 1; i < empire_object_count(); i++) {
-        empire_object *obj = empire_object_get(i);
-        if (obj->type != EMPIRE_OBJECT_TRADE_WAYPOINT || obj->trade_route_id != trade_route->trade_route_id) break;
-        // Calculate positions at intervals
-        int dx = obj->x - last_x, dy = obj->y - last_y;
-        float dist = sqrtf(dx * dx + dy * dy);
-        float nx = (float) dx / dist, ny = (float) dy / dist;
-        float px = last_x, py = last_y, pos = remaining;
-        while (pos < dist && dot_count < 1024) {
-            dot_pos[dot_count].x = (int) (px + nx * pos);
-            dot_pos[dot_count].y = (int) (py + ny * pos);
-            dot_count++;
-            pos += TRADE_DOT_SPACING;
-        }
-        remaining = (int) (pos - dist);
-        last_x = obj->x;
-        last_y = obj->y;
-    }
-    // Final leg to trade city
-    int dx = (trade_city->x + 25) - last_x, dy = (trade_city->y + 25) - last_y;
-    float dist = sqrtf(dx * dx + dy * dy);
-    float nx = (float) dx / dist, ny = (float) dy / dist;
-    float px = last_x, py = last_y, pos = remaining;
-    while (pos < dist && dot_count < 1024) {
-        dot_pos[dot_count].x = (int) (px + nx * pos);
-        dot_pos[dot_count].y = (int) (py + ny * pos);
-        dot_count++;
-        pos += TRADE_DOT_SPACING;
-    }
-
-    int anim_dot = -1;
-    if (dot_count > 0 && data.trade_route_anim_start > 0) {
-        time_millis elapsed = time_get_millis() - data.trade_route_anim_start;
-        int dot_duration = 180; // ms per dot
-        anim_dot = dot_count - 1 - ((elapsed / dot_duration) % dot_count);
-    }
-
-
-    for (int i = 0; i < dot_count; i++) {
-        int img;
-        float scale;
-
-        if (i == anim_dot) {
-            img = is_sea ? land_image_id : sea_image_id; // animate using opposite image
-            scale = 160; // scale up the animated dot
-        } else {
-            img = is_sea ? sea_image_id : land_image_id;
-            scale = 100; // normal scale
-        }
-
-        image_draw_scaled_centered(img, dot_pos[i].x + x_offset, dot_pos[i].y + y_offset, COLOR_MASK_NONE, scale);
-    }
-}
-
 void window_empire_draw_border(const empire_object *border, int x_offset, int y_offset)
 {
     const empire_object *first_edge = empire_object_get(border->id + 1);
@@ -1225,7 +1418,7 @@ void window_empire_draw_border(const empire_object *border, int x_offset, int y_
     }
     int last_x = first_edge->x;
     int last_y = first_edge->y;
-    int image_id = first_edge->image_id;
+    int image_id = first_edge->image_id + 1;
     int remaining = border->width;
 
     // Align the coordinate to the base of the border flag's mast
@@ -1284,7 +1477,7 @@ static void draw_empire_object(const empire_object *obj)
             return;
         }
         if (scenario_empire_id() == SCENARIO_CUSTOM_EMPIRE) {
-            window_empire_draw_trade_waypoints(obj, data.x_draw_offset, data.y_draw_offset);
+            return; //trade routes drawn separately
         }
     }
     int x, y, image_id;
@@ -1387,6 +1580,16 @@ static void draw_empire_object(const empire_object *obj)
     }
 }
 
+static void empire_draw_object_trade_route(const empire_object *obj)
+{
+    if (obj->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE || obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
+        if (empire_city_is_trade_route_open(obj->trade_route_id)) {
+            window_empire_draw_static_trade_waypoints(obj, data.x_draw_offset, data.y_draw_offset);
+        }
+    }
+    return;
+}
+
 static void animation_draw_scaled(const image *img, int image_id, int new_animation, int x, int y, color_t color, int draw_scale_percent)
 {
     float obj_draw_scale = 100.0f / draw_scale_percent;
@@ -1424,12 +1627,11 @@ static void draw_map(void)
     int map_clip_x_max = data.sidebar.x_min;  // Stop before sidebar starts
     int map_clip_y_max = data.y_max - BOTTOM_PANEL_HEIGHT;
 
-    graphics_set_clip_rectangle(
-        map_clip_x_min,
-        map_clip_y_min,
-        map_clip_x_max - map_clip_x_min,
-        map_clip_y_max - map_clip_y_min);
-
+    graphics_set_clip_rectangle(map_clip_x_min, map_clip_y_min, map_clip_x_max - map_clip_x_min, map_clip_y_max - map_clip_y_min);
+    // Reset all edge drawn flags for this frame
+    for (int i = 0; i < g_trade_edge_count; i++) {
+        g_trade_edges[i].drawn = 0;
+    }
     empire_set_viewport(map_clip_x_max - map_clip_x_min, map_clip_y_max - map_clip_y_min);
 
     data.x_draw_offset = map_clip_x_min;
@@ -1440,7 +1642,13 @@ static void draw_map(void)
     if (data.trade_route_anim_start == 0) {
         data.trade_route_anim_start = time_get_millis();
     }
+
     empire_object_foreach(draw_empire_object);
+    empire_object_foreach_of_type(empire_draw_object_trade_route, EMPIRE_OBJECT_SEA_TRADE_ROUTE);
+    empire_object_foreach_of_type(empire_draw_object_trade_route, EMPIRE_OBJECT_LAND_TRADE_ROUTE);
+    empire_object_foreach_of_type(draw_empire_object, EMPIRE_OBJECT_CITY);
+
+
     scenario_invasion_foreach_warning(draw_invasion_warning);
 
     graphics_reset_clip_rectangle();
@@ -1580,7 +1788,8 @@ static void process_selection(void)
 {
     int selected_object = empire_selected_object();
     if (selected_object) {
-        data.selected_city = empire_city_get_for_object(selected_object - 1); //data.selected_city is array index of the empire object from the array of cities 
+        data.selected_city = empire_city_get_for_object(selected_object - 1);
+        //data.selected_city is array index of the empire object from the array of cities 
     } else {
         data.selected_city = 0;
     }

@@ -61,6 +61,8 @@ const empire_object *empire_object_get_trade_city(int trade_route_id);
 
 void empire_object_foreach(void (*callback)(const empire_object *));
 
+void empire_object_foreach_of_type(void (*callback)(const empire_object *), empire_object_type type);
+
 const empire_object *empire_object_get_battle_icon(int path_id, int year);
 
 int empire_object_get_max_invasion_path(void);
