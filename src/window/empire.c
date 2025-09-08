@@ -1418,7 +1418,7 @@ void window_empire_draw_border(const empire_object *border, int x_offset, int y_
     }
     int last_x = first_edge->x;
     int last_y = first_edge->y;
-    int image_id = first_edge->image_id + 1;
+    int image_id = first_edge->image_id;
     int remaining = border->width;
 
     // Align the coordinate to the base of the border flag's mast
@@ -1474,10 +1474,7 @@ static void draw_empire_object(const empire_object *obj)
     }
     if (obj->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE || obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
         if (!empire_city_is_trade_route_open(obj->trade_route_id)) {
-            return;
-        }
-        if (scenario_empire_id() == SCENARIO_CUSTOM_EMPIRE) {
-            return; //trade routes drawn separately
+            return; // dont draw the icon if route is closed
         }
     }
     int x, y, image_id;
@@ -1583,8 +1580,10 @@ static void draw_empire_object(const empire_object *obj)
 static void empire_draw_object_trade_route(const empire_object *obj)
 {
     if (obj->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE || obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
-        if (empire_city_is_trade_route_open(obj->trade_route_id)) {
-            window_empire_draw_static_trade_waypoints(obj, data.x_draw_offset, data.y_draw_offset);
+        if (scenario_empire_id() == SCENARIO_CUSTOM_EMPIRE) {
+            if (empire_city_is_trade_route_open(obj->trade_route_id)) {
+                window_empire_draw_static_trade_waypoints(obj, data.x_draw_offset, data.y_draw_offset);
+            }
         }
     }
     return;
@@ -1646,8 +1645,9 @@ static void draw_map(void)
     empire_object_foreach(draw_empire_object);
     empire_object_foreach_of_type(empire_draw_object_trade_route, EMPIRE_OBJECT_SEA_TRADE_ROUTE);
     empire_object_foreach_of_type(empire_draw_object_trade_route, EMPIRE_OBJECT_LAND_TRADE_ROUTE);
+    empire_object_foreach_of_type(draw_empire_object, EMPIRE_OBJECT_LAND_TRADE_ROUTE);
+    empire_object_foreach_of_type(draw_empire_object, EMPIRE_OBJECT_SEA_TRADE_ROUTE);
     empire_object_foreach_of_type(draw_empire_object, EMPIRE_OBJECT_CITY);
-
 
     scenario_invasion_foreach_warning(draw_invasion_warning);
 
@@ -1722,7 +1722,7 @@ static void draw_trade_button_highlights(void)
             float pulse = sinf(time_seconds * 1.0f * 3.14f); // 1 full cycle per second
             int alpha = 96 + (int) (pulse * 64); // Range: 32–160
             graphics_tint_rect(btn->x, btn->y, RESOURCE_ICON_WIDTH - 1, RESOURCE_ICON_HEIGHT - 1,
-                COLOR_MASK_DIMMED_PURPLE, alpha
+                COLOR_MASK_DARK_PINK, alpha
             );
         }
 
