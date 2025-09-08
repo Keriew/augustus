@@ -24,8 +24,7 @@ static void fix_image_ids(void)
 {
     int image_id = 0;
     full_empire_object *obj;
-    array_foreach(objects, obj)
-    {
+    array_foreach(objects, obj) {
         if (obj->in_use && obj->obj.type == EMPIRE_OBJECT_CITY && obj->city_type == EMPIRE_CITY_OURS) {
             image_id = obj->obj.image_id;
             break;
@@ -34,8 +33,7 @@ static void fix_image_ids(void)
     if (image_id > 0 && image_id != image_group(GROUP_EMPIRE_CITY)) {
         // empire map uses old version of graphics: increase every graphic id
         int offset = image_group(GROUP_EMPIRE_CITY) - image_id;
-        array_foreach(objects, obj)
-        {
+        array_foreach(objects, obj) {
             if (obj->obj.image_id > 0 && obj->obj.image_id < IMAGE_MAIN_ENTRIES) {
                 obj->obj.image_id += offset;
                 if (obj->obj.expanded.image_id) {
@@ -281,8 +279,7 @@ void empire_object_init_cities(int empire_id)
         return;
     }
     full_empire_object *obj;
-    array_foreach(objects, obj)
-    {
+    array_foreach(objects, obj) {
         if (!obj->in_use || obj->obj.type != EMPIRE_OBJECT_CITY) {
             continue;
         }
@@ -366,8 +363,7 @@ int empire_object_init_distant_battle_travel_months(empire_object_type object_ty
 {
     int month = 0;
     full_empire_object *obj;
-    array_foreach(objects, obj)
-    {
+    array_foreach(objects, obj) {
         if (obj->in_use && obj->obj.type == object_type) {
             month++;
             obj->obj.distant_battle_travel_months = month;
@@ -396,8 +392,7 @@ empire_object *empire_object_get(int object_id)
 const empire_object *empire_object_get_our_city(void)
 {
     full_empire_object *obj;
-    array_foreach(objects, obj)
-    {
+    array_foreach(objects, obj) {
         if (obj->in_use) {
             if (obj->obj.type == EMPIRE_OBJECT_CITY && obj->city_type == EMPIRE_CITY_OURS) {
                 return &obj->obj;
@@ -410,8 +405,7 @@ const empire_object *empire_object_get_our_city(void)
 const empire_object *empire_object_get_trade_city(int trade_route_id)
 {
     full_empire_object *obj;
-    array_foreach(objects, obj)
-    {
+    array_foreach(objects, obj) {
         if (obj->in_use) {
             if (obj->obj.type == EMPIRE_OBJECT_CITY && obj->obj.trade_route_id == trade_route_id) {
                 return &obj->obj;
@@ -424,8 +418,7 @@ const empire_object *empire_object_get_trade_city(int trade_route_id)
 void empire_object_foreach(void (*callback)(const empire_object *))
 {
     full_empire_object *obj;
-    array_foreach(objects, obj)
-    {
+    array_foreach(objects, obj) {
         if (obj->in_use) {
             callback(&obj->obj);
         }
@@ -434,8 +427,7 @@ void empire_object_foreach(void (*callback)(const empire_object *))
 void empire_object_foreach_of_type(void (*callback)(const empire_object *), empire_object_type type)
 {
     full_empire_object *obj;
-    array_foreach(objects, obj)
-    {
+    array_foreach(objects, obj) {
         if (obj->in_use && obj->obj.type == type) {
             callback(&obj->obj);
         }
@@ -445,8 +437,7 @@ void empire_object_foreach_of_type(void (*callback)(const empire_object *), empi
 const empire_object *empire_object_get_battle_icon(int path_id, int year)
 {
     full_empire_object *obj;
-    array_foreach(objects, obj)
-    {
+    array_foreach(objects, obj) {
         if (obj->in_use) {
             if (obj->obj.type == EMPIRE_OBJECT_BATTLE_ICON &&
                 obj->obj.invasion_path_id == path_id && obj->obj.invasion_years == year) {
@@ -461,8 +452,7 @@ int empire_object_get_max_invasion_path(void)
 {
     int max_path = 0;
     full_empire_object *obj;
-    array_foreach(objects, obj)
-    {
+    array_foreach(objects, obj) {
         if (obj->in_use && obj->obj.type == EMPIRE_OBJECT_BATTLE_ICON) {
             if (obj->obj.invasion_path_id > max_path) {
                 max_path = obj->obj.invasion_path_id;
@@ -478,8 +468,7 @@ int empire_object_get_closest(int x, int y)
     int min_obj_id = 0;
     int city_is_selected = 0;
     full_empire_object *full;
-    array_foreach(objects, full)
-    {
+    array_foreach(objects, full) {
         const empire_object *obj = &full->obj;
         int obj_x, obj_y;
         if (city_is_selected && obj->type != EMPIRE_OBJECT_CITY) {
@@ -550,8 +539,7 @@ void empire_object_city_force_sell_resource(int object_id, int resource)
 int empire_object_is_sea_trade_route(int route_id)
 {
     full_empire_object *obj;
-    array_foreach(objects, obj)
-    {
+    array_foreach(objects, obj) {
         if (obj->in_use && obj->obj.trade_route_id == route_id) {
             if (obj->obj.type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
                 return 1;
