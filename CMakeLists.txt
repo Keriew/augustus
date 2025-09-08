@@ -710,6 +710,7 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/select_campaign.c
     ${PROJECT_SOURCE_DIR}/src/window/select_list.c
     ${PROJECT_SOURCE_DIR}/src/window/set_salary.c
+    ${PROJECT_SOURCE_DIR}/src/window/sort.c
     ${PROJECT_SOURCE_DIR}/src/window/text_input.c
     ${PROJECT_SOURCE_DIR}/src/window/trade_opened.c
     ${PROJECT_SOURCE_DIR}/src/window/trade_prices.c
