@@ -64,7 +64,7 @@
 #define MAX_TRADE_OPEN_BUTTONS 64
 #define MAX_SORTING_BUTTONS 64
 
-#define DEFAULT_DOT_SCALE 100//dot scales
+#define DEFAULT_DOT_SCALE 100
 #define ANIM_DOT_SCALE 160
 
 #define BUTTON_INDEX_SORT_MAIN 0 // informative only
