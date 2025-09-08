@@ -174,6 +174,15 @@ void building_storage_cycle_partial_resource_state(int storage_id, resource_type
 void building_storage_accept_none(int storage_id);
 
 /**
+ * check if a building accepts a certain resource
+ * @param b The building to check
+ * @param resource Resource id to check
+ * @param understaffed Pointer to int that will be set to 1 if the building is understaffed, otherwise 0
+ * @return 1 if it does, 0 if it does not
+ */
+int building_storage_accepts_storage(building *b, resource_type resource, int *understaffed);
+
+/**
  * Sets all goods to 'accepting'
  * @param storage_id Storage id
  */
