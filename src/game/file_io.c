@@ -108,6 +108,7 @@ typedef struct {
     buffer *empire;
     buffer *empire_map;
     buffer *end_marker;
+    buffer *model_data;
 } scenario_state;
 
 static struct {
@@ -387,6 +388,9 @@ static void init_scenario_data(scenario_version_t version)
     }
     if (version > SCENARIO_LAST_NO_CUSTOM_EMPIRE_MAP_IMAGE) {
         state->empire_map = create_scenario_piece(PIECE_SIZE_DYNAMIC, 0);
+    }
+    if (version > SCENARIO_LAST_NO_MODEL_DATA) {
+        state->model_data = create_scenario_piece(PIECE_SIZE_DYNAMIC, 0);
     }
     state->end_marker = create_scenario_piece(4, 0);
 }
@@ -712,6 +716,10 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
     if (version > SCENARIO_LAST_NO_CUSTOM_EMPIRE_MAP_IMAGE) {
         empire_load_custom_map(file->empire_map);
     }
+    model_load();
+    if (version > SCENARIO_LAST_NO_MODEL_DATA) {
+        model_load_model_data(file->model_data);
+    }
     buffer_skip(file->end_marker, 4);
 }
 
@@ -739,6 +747,7 @@ static void scenario_save_to_state(scenario_state *file)
     message_media_text_blob_save_state(file->message_media_text_blob, file->message_media_metadata);
     empire_object_save(file->empire);
     empire_save_custom_map(file->empire_map);
+    model_save_model_data(file->model_data);
     buffer_skip(file->end_marker, 4);
 }
 
