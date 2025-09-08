@@ -54,7 +54,7 @@ int window_sort_get_hovered_sorting_button(void);
 int window_sort_get_sorting_reversed(void);
 int window_sort_get_expanded_main(void);
 int window_sort_get_resource_selection_active(void);
-
+int window_sort_count_trade_resources(const empire_city *city, int is_sell);
 void window_sort_set_current_sorting(int sorting);
 void window_sort_set_current_filtering(int filtering);
 void window_sort_set_selected_filter_resource(resource_type resource);

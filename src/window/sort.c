@@ -60,6 +60,21 @@ typedef struct {
 static arrow_button_info sorting_arrow_button;
 static int sorting_arrow_focused = 0;
 
+
+int window_sort_count_trade_resources(const empire_city *city, int is_sell)
+{
+    int count = 0;
+    for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+        if (resource_is_storable(r)) {
+            if ((is_sell && city->sells_resource[r]) ||
+                (!is_sell && city->buys_resource[r])) {
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
 static int get_city_trade_quota_fill(const empire_city *city, int is_sell)
 {
     int total_now = 0;
@@ -86,8 +101,7 @@ static sorting_button sorting_buttons[MAX_SORTING_BUTTONS];
 static int sorting_button_count = 0;
 
 // External helper functions that need to be provided by the empire window
-extern int count_trade_resources(const empire_city *city, int is_sell);
-extern int get_city_trade_quota_fill(const empire_city *city, int is_sell);
+
 
 // Initialization
 void window_sort_init(void)
