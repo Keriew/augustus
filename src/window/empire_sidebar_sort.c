@@ -1,4 +1,4 @@
-#include "sort.h"
+#include "empire_sidebar_sort.h"
 
 #include "empire/city.h"
 #include "empire/trade_prices.h"
@@ -61,7 +61,7 @@ static arrow_button_info sorting_arrow_button;
 static int sorting_arrow_focused = 0;
 
 
-int window_sort_count_trade_resources(const empire_city *city, int is_sell)
+int window_empire_sidebar_sort_count_trade_resources(const empire_city *city, int is_sell)
 {
     int count = 0;
     for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
@@ -104,7 +104,7 @@ static int sorting_button_count = 0;
 
 
 // Initialization
-void window_sort_init(void)
+void window_empire_sidebar_sort_init(void)
 {
     sort_data.current_sorting = SORT_BY_NAME;
     sort_data.current_filtering = FILTER_NONE;
@@ -117,42 +117,42 @@ void window_sort_init(void)
 }
 
 // Getter functions
-int window_sort_get_current_sorting(void) { return sort_data.current_sorting; }
-int window_sort_get_current_filtering(void) { return sort_data.current_filtering; }
-resource_type window_sort_get_selected_filter_resource(void) { return sort_data.selected_filter_resource; }
-int window_sort_get_hovered_sorting_button(void) { return sort_data.hovered_sorting_button; }
-int window_sort_get_sorting_reversed(void) { return sort_data.sorting_reversed; }
-int window_sort_get_expanded_main(void) { return sort_data.expanded_main; }
-int window_sort_get_resource_selection_active(void) { return sort_data.resource_selection_active; }
+int window_empire_sidebar_sort_get_current_sorting(void) { return sort_data.current_sorting; }
+int window_empire_sidebar_sort_get_current_filtering(void) { return sort_data.current_filtering; }
+resource_type window_empire_sidebar_sort_get_selected_filter_resource(void) { return sort_data.selected_filter_resource; }
+int window_empire_sidebar_sort_get_hovered_sorting_button(void) { return sort_data.hovered_sorting_button; }
+int window_empire_sidebar_sort_get_sorting_reversed(void) { return sort_data.sorting_reversed; }
+int window_empire_sidebar_sort_get_expanded_main(void) { return sort_data.expanded_main; }
+int window_empire_sidebar_sort_get_resource_selection_active(void) { return sort_data.resource_selection_active; }
 
 // Setter functions
-void window_sort_set_current_sorting(int sorting) { sort_data.current_sorting = sorting; }
-void window_sort_set_current_filtering(int filtering) { sort_data.current_filtering = filtering; }
-void window_sort_set_selected_filter_resource(resource_type resource) { sort_data.selected_filter_resource = resource; }
-void window_sort_set_hovered_sorting_button(int button) { sort_data.hovered_sorting_button = button; }
-void window_sort_set_sorting_reversed(int reversed) { sort_data.sorting_reversed = reversed; }
-void window_sort_set_expanded_main(int expanded) { sort_data.expanded_main = expanded; }
-void window_sort_set_resource_selection_active(int active) { sort_data.resource_selection_active = active; }
+void window_empire_sidebar_sort_set_current_sorting(int sorting) { sort_data.current_sorting = sorting; }
+void window_empire_sidebar_sort_set_current_filtering(int filtering) { sort_data.current_filtering = filtering; }
+void window_empire_sidebar_sort_set_selected_filter_resource(resource_type resource) { sort_data.selected_filter_resource = resource; }
+void window_empire_sidebar_sort_set_hovered_sorting_button(int button) { sort_data.hovered_sorting_button = button; }
+void window_empire_sidebar_sort_set_sorting_reversed(int reversed) { sort_data.sorting_reversed = reversed; }
+void window_empire_sidebar_sort_set_expanded_main(int expanded) { sort_data.expanded_main = expanded; }
+void window_empire_sidebar_sort_set_resource_selection_active(int active) { sort_data.resource_selection_active = active; }
 
 // Reset functions
-void window_sort_reset_hovered_sorting_button(void) { sort_data.hovered_sorting_button = NO_POSITION; }
-void window_sort_reset_sorting_button_count(void) { sorting_button_count = 0; }
+void window_empire_sidebar_sort_reset_hovered_sorting_button(void) { sort_data.hovered_sorting_button = NO_POSITION; }
+void window_empire_sidebar_sort_reset_sorting_button_count(void) { sorting_button_count = 0; }
 
 // Button management
-int window_sort_get_sorting_button_count(void) { return sorting_button_count; }
-const sorting_button *window_sort_get_sorting_button(int index)
+int window_empire_sidebar_sort_get_sorting_button_count(void) { return sorting_button_count; }
+const sorting_button *window_empire_sidebar_sort_get_sorting_button(int index)
 {
     if (index < 0 || index >= sorting_button_count) return 0;
     return &sorting_buttons[index];
 }
 
-void window_sort_register_sorting_button(int x, int y, int width, int height, int button_type)
+void window_empire_sidebar_sort_register_sorting_button(int x, int y, int width, int height, int button_type)
 {
     if (sorting_button_count >= MAX_SORTING_BUTTONS) return;
     sorting_buttons[sorting_button_count++] = (sorting_button) { x, y, width, height, button_type };
 }
 
-int window_sort_sidebar_city_sorter(const void *a, const void *b)
+int window_empire_sidebar_sort_sidebar_city_sorter(const void *a, const void *b)
 {
     const sidebar_city_entry *entry_a = (const sidebar_city_entry *) a;
     const sidebar_city_entry *entry_b = (const sidebar_city_entry *) b;
@@ -239,7 +239,7 @@ int window_sort_sidebar_city_sorter(const void *a, const void *b)
     return result;
 }
 
-int window_sort_city_matches_current_filter(const empire_city *city)
+int window_empire_sidebar_sort_city_matches_current_filter(const empire_city *city)
 {
     if (!city) {
         return 0; // Null cities don't match any filter
@@ -268,7 +268,7 @@ int window_sort_city_matches_current_filter(const empire_city *city)
     }
 }
 
-void window_sort_draw_simple_button(int x, int y, int width, int height, int is_focused, int group1, int number1,
+void window_empire_sidebar_sort_draw_simple_button(int x, int y, int width, int height, int is_focused, int group1, int number1,
      int group2, int number2, int button_type, int image_id)
 {
     graphics_set_clip_rectangle(x, y, width, height);
@@ -317,13 +317,13 @@ void window_sort_draw_simple_button(int x, int y, int width, int height, int is_
         image_draw(image_id, cursor_x + 4, img_y_offset, COLOR_MASK_NONE, SCALE_NONE); // 4px spacing
     }
 
-    window_sort_register_sorting_button(x, y, width, height, button_type);
+    window_empire_sidebar_sort_register_sorting_button(x, y, width, height, button_type);
 }
 
-void window_sort_draw_sorting_arrow_button(int button_x, int button_y, int button_width, int button_height)
+void window_empire_sidebar_sort_draw_sorting_arrow_button(int button_x, int button_y, int button_width, int button_height)
 {
     int margin = 10; // Margin from right edge to keep arrow fully inside
-    sorting_arrow_button.is_down = window_sort_get_sorting_reversed() ? 0 : 1; // Down when not reversed
+    sorting_arrow_button.is_down = window_empire_sidebar_sort_get_sorting_reversed() ? 0 : 1; // Down when not reversed
     int image_id = sorting_arrow_button.is_down ? 17 : 15; // 17 for down, 15 for up
 
     // Update arrow button info for hit detection
@@ -339,7 +339,7 @@ void window_sort_draw_sorting_arrow_button(int button_x, int button_y, int butto
     image_draw(image_id, sorting_arrow_button.x, sorting_arrow_button.y, COLOR_MASK_NONE, SCALE_NONE);
 }
 
-void window_sort_draw_expanding_buttons(int sidebar_x_min, int sidebar_y_min, int sidebar_width, int has_scrollbar)
+void window_empire_sidebar_sort_draw_expanding_buttons(int sidebar_x_min, int sidebar_y_min, int sidebar_width, int has_scrollbar)
 {
     int button_height = 2 * BLOCK_SIZE;
     int v_margin = 4; // 4px universal vertical margin 
@@ -352,23 +352,23 @@ void window_sort_draw_expanding_buttons(int sidebar_x_min, int sidebar_y_min, in
 
     // Sort main button
     int x_sort = base_x;
-    window_sort_reset_sorting_button_count(); // Reset count for sorting buttons
+    window_empire_sidebar_sort_reset_sorting_button_count(); // Reset count for sorting buttons
 
     // Sort main button with current selection displayed
-    window_sort_draw_simple_button(x_sort, base_y, button_width, button_height,
-        window_sort_get_hovered_sorting_button() == BUTTON_INDEX_SORT_MAIN && !sorting_arrow_focused,
+    window_empire_sidebar_sort_draw_simple_button(x_sort, base_y, button_width, button_height,
+        window_empire_sidebar_sort_get_hovered_sorting_button() == BUTTON_INDEX_SORT_MAIN && !sorting_arrow_focused,
         CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_SORT, // Base text: "Sort by:"
-        CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_SORT_BY_NAME + window_sort_get_current_sorting(), 0, 0);
-    window_sort_draw_sorting_arrow_button(x_sort, base_y, button_width, button_height);
+        CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_SORT_BY_NAME + window_empire_sidebar_sort_get_current_sorting(), 0, 0);
+    window_empire_sidebar_sort_draw_sorting_arrow_button(x_sort, base_y, button_width, button_height);
     int x_filter = base_x + button_width + button_h_spacing;    // Filter main button
     // Filter main button with current selection displayed
     int filter_group2 = CUSTOM_TRANSLATION;
-    int filter_number2 = TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE + window_sort_get_current_filtering();
+    int filter_number2 = TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE + window_empire_sidebar_sort_get_current_filtering();
     int filter_image_id = 0;
-    switch (window_sort_get_current_filtering()) {
+    switch (window_empire_sidebar_sort_get_current_filtering()) {
         case FILTER_BY_RESOURCE:
-            if (window_sort_get_selected_filter_resource() != RESOURCE_NONE) {
-                filter_image_id = resource_get_data(window_sort_get_selected_filter_resource())->image.icon;
+            if (window_empire_sidebar_sort_get_selected_filter_resource() != RESOURCE_NONE) {
+                filter_image_id = resource_get_data(window_empire_sidebar_sort_get_selected_filter_resource())->image.icon;
             }
             break;
         case FILTER_BY_LAND:
@@ -379,20 +379,20 @@ void window_sort_draw_expanding_buttons(int sidebar_x_min, int sidebar_y_min, in
             break;
     }
 
-    window_sort_draw_simple_button(x_filter, base_y, button_width, button_height,
-        window_sort_get_hovered_sorting_button() == BUTTON_INDEX_FILTER_MAIN, //hovered state
+    window_empire_sidebar_sort_draw_simple_button(x_filter, base_y, button_width, button_height,
+        window_empire_sidebar_sort_get_hovered_sorting_button() == BUTTON_INDEX_FILTER_MAIN, //hovered state
         CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_FILTER, filter_group2, filter_number2, 1, filter_image_id);
 
-    if (window_sort_get_expanded_main() == 0) {
+    if (window_empire_sidebar_sort_get_expanded_main() == 0) {
         for (int i = 0; i < MAX_SORTING_KEY; ++i) {
             int button_type = BUTTON_INDEX_FIRST_SORT_METHOD + i;  // Children start at 2
             int y = base_y + v_margin + button_height + i * button_v_spacing;
-            window_sort_draw_simple_button(x_sort, y, button_width, button_height,
-                window_sort_get_hovered_sorting_button() == button_type, //hovered state
+            window_empire_sidebar_sort_draw_simple_button(x_sort, y, button_width, button_height,
+                window_empire_sidebar_sort_get_hovered_sorting_button() == button_type, //hovered state
                 CUSTOM_TRANSLATION, TR_EMPIRE_SIDE_BAR_SORT_BY_NAME + i, -1, -1, button_type, 0);
         }
-    } else if (window_sort_get_expanded_main() == 1) {
-        if (window_sort_get_resource_selection_active()) {
+    } else if (window_empire_sidebar_sort_get_expanded_main() == 1) {
+        if (window_empire_sidebar_sort_get_resource_selection_active()) {
             // Show resource list instead of normal filter options
             int resource_count = 0;
             for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
@@ -400,8 +400,8 @@ void window_sort_draw_expanding_buttons(int sidebar_x_min, int sidebar_y_min, in
                 (empire_can_export_resource_potentially(r) || empire_can_import_resource_potentially(r))) {
                     int button_type = BUTTON_INDEX_FILTERING_RESOURCES + r; // Use 100+ range for resource buttons
                     int y = base_y + v_margin + button_height + resource_count * button_v_spacing;
-                    int is_focused = (window_sort_get_hovered_sorting_button() == button_type);
-                    window_sort_draw_simple_button(x_filter, y, button_width, button_height, is_focused,
+                    int is_focused = (window_empire_sidebar_sort_get_hovered_sorting_button() == button_type);
+                    window_empire_sidebar_sort_draw_simple_button(x_filter, y, button_width, button_height, is_focused,
                         -1, -1, -1, -1, button_type, resource_get_data(r)->image.icon);
                     // text doesn't matter, resource name will decided basing on button_type
                     resource_count++;
@@ -413,19 +413,19 @@ void window_sort_draw_expanding_buttons(int sidebar_x_min, int sidebar_y_min, in
                 int button_type = BUTTON_INDEX_FIRST_FILTER_METHOD + i;
                 int y = base_y + v_margin + button_height + i * button_v_spacing;
                 int translation_key = TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE + i;
-                int is_focused = (window_sort_get_hovered_sorting_button() == button_type);
+                int is_focused = (window_empire_sidebar_sort_get_hovered_sorting_button() == button_type);
                 int image_id = (i == FILTER_BY_LAND) ? image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE) + 1 :
                     (i == FILTER_BY_SEA) ? image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE) : 0; //default 0
-                window_sort_draw_simple_button(x_filter, y, button_width, button_height, is_focused,
+                window_empire_sidebar_sort_draw_simple_button(x_filter, y, button_width, button_height, is_focused,
                      CUSTOM_TRANSLATION, translation_key, -1, -1, button_type, image_id);
             }
         }
     }
 }
 
-int window_sort_handle_expanding_buttons_input(const mouse *m)
+int window_empire_sidebar_sort_handle_expanding_buttons_input(const mouse *m)
 {
-    window_sort_set_hovered_sorting_button(NO_POSITION); // Reset hovered button
+    window_empire_sidebar_sort_set_hovered_sorting_button(NO_POSITION); // Reset hovered button
     sorting_arrow_focused = 0; // Reset arrow focus
 
     // Check if mouse is over the arrow button first (highest priority)
@@ -434,7 +434,7 @@ int window_sort_handle_expanding_buttons_input(const mouse *m)
         sorting_arrow_focused = 1; // Take focus away from main button
         if (m->left.went_up) {
             // Toggle sorting order
-            window_sort_set_sorting_reversed(!window_sort_get_sorting_reversed());
+            window_empire_sidebar_sort_set_sorting_reversed(!window_empire_sidebar_sort_get_sorting_reversed());
             return 1; // Block further input
         }
         return 1; // Block further input when hovering over arrow
@@ -442,39 +442,39 @@ int window_sort_handle_expanding_buttons_input(const mouse *m)
 
     // If right-clicked and something is expanded: collapse it and exit
     if (m->right.went_up &&
-        (window_sort_get_expanded_main() != NO_POSITION || window_sort_get_resource_selection_active())) {
-        window_sort_set_expanded_main(NO_POSITION);
-        window_sort_set_resource_selection_active(0);
+        (window_empire_sidebar_sort_get_expanded_main() != NO_POSITION || window_empire_sidebar_sort_get_resource_selection_active())) {
+        window_empire_sidebar_sort_set_expanded_main(NO_POSITION);
+        window_empire_sidebar_sort_set_resource_selection_active(0);
         return 1; // Block further input
     }
 
-    for (int i = 0; i < window_sort_get_sorting_button_count(); ++i) {
-        const sorting_button *btn = window_sort_get_sorting_button(i);
+    for (int i = 0; i < window_empire_sidebar_sort_get_sorting_button_count(); ++i) {
+        const sorting_button *btn = window_empire_sidebar_sort_get_sorting_button(i);
 
         if (m->x >= btn->x && m->x < btn->x + btn->width &&
             m->y >= btn->y && m->y < btn->y + btn->height) {
-            window_sort_set_hovered_sorting_button(btn->button_type);
+            window_empire_sidebar_sort_set_hovered_sorting_button(btn->button_type);
             // Only handle left clicks here
             if (m->left.went_up) {
                 if (btn->button_type == BUTTON_INDEX_SORT_MAIN) {
-                    window_sort_set_expanded_main((window_sort_get_expanded_main() == BUTTON_INDEX_SORT_MAIN) ?
+                    window_empire_sidebar_sort_set_expanded_main((window_empire_sidebar_sort_get_expanded_main() == BUTTON_INDEX_SORT_MAIN) ?
                      NO_POSITION : BUTTON_INDEX_SORT_MAIN);
                     return 1;
                 } else if (btn->button_type == BUTTON_INDEX_FILTER_MAIN) {
-                    if (window_sort_get_expanded_main() == BUTTON_INDEX_FILTER_MAIN) {
+                    if (window_empire_sidebar_sort_get_expanded_main() == BUTTON_INDEX_FILTER_MAIN) {
                         // Already expanded, collapse it
-                        window_sort_set_expanded_main(NO_POSITION);
-                        window_sort_set_resource_selection_active(0);
+                        window_empire_sidebar_sort_set_expanded_main(NO_POSITION);
+                        window_empire_sidebar_sort_set_resource_selection_active(0);
                     } else {
                         // Expand and show normal filter options (not resource selection)
-                        window_sort_set_expanded_main(BUTTON_INDEX_FILTER_MAIN);
-                        window_sort_set_resource_selection_active(0); // Always start with normal filters
+                        window_empire_sidebar_sort_set_expanded_main(BUTTON_INDEX_FILTER_MAIN);
+                        window_empire_sidebar_sort_set_resource_selection_active(0); // Always start with normal filters
                     }
                     return 1;
                 } else if (btn->button_type >= BUTTON_INDEX_FIRST_SORT_METHOD &&
                              btn->button_type < BUTTON_INDEX_FIRST_FILTER_METHOD) {
-                    window_sort_set_current_sorting(btn->button_type - BUTTON_INDEX_FIRST_SORT_METHOD);
-                    window_sort_set_expanded_main(NO_POSITION);
+                    window_empire_sidebar_sort_set_current_sorting(btn->button_type - BUTTON_INDEX_FIRST_SORT_METHOD);
+                    window_empire_sidebar_sort_set_expanded_main(NO_POSITION);
                     return 1;
                 } else if (btn->button_type >= BUTTON_INDEX_FIRST_FILTER_METHOD &&
                            btn->button_type < BUTTON_INDEX_FILTERING_RESOURCES) {
@@ -482,13 +482,13 @@ int window_sort_handle_expanding_buttons_input(const mouse *m)
                     // Ensure filter_index is within valid bounds
                     if (filter_index >= 0 && filter_index < MAX_FILTER_KEY) {
                         if (filter_index == FILTER_BY_RESOURCE) {
-                            window_sort_set_resource_selection_active(1);
+                            window_empire_sidebar_sort_set_resource_selection_active(1);
                             return 1;
                         } else {
                             // Normal filter selection
-                            window_sort_set_current_filtering(filter_index);
-                            window_sort_set_expanded_main(NO_POSITION);
-                            window_sort_set_resource_selection_active(0);
+                            window_empire_sidebar_sort_set_current_filtering(filter_index);
+                            window_empire_sidebar_sort_set_expanded_main(NO_POSITION);
+                            window_empire_sidebar_sort_set_resource_selection_active(0);
                             return 1;
                         }
                     }
@@ -497,34 +497,34 @@ int window_sort_handle_expanding_buttons_input(const mouse *m)
                     resource_type selected_resource = btn->button_type - BUTTON_INDEX_FILTERING_RESOURCES;
                     // Validate resource is within bounds
                     if (selected_resource >= RESOURCE_MIN && selected_resource < RESOURCE_MAX) {
-                        window_sort_set_selected_filter_resource(selected_resource);
-                        window_sort_set_current_filtering(FILTER_BY_RESOURCE);
-                        window_sort_set_expanded_main(NO_POSITION);
-                        window_sort_set_resource_selection_active(0);
+                        window_empire_sidebar_sort_set_selected_filter_resource(selected_resource);
+                        window_empire_sidebar_sort_set_current_filtering(FILTER_BY_RESOURCE);
+                        window_empire_sidebar_sort_set_expanded_main(NO_POSITION);
+                        window_empire_sidebar_sort_set_resource_selection_active(0);
                         return 1;
                     }
                 }
-                window_sort_set_expanded_main(NO_POSITION);
+                window_empire_sidebar_sort_set_expanded_main(NO_POSITION);
                 return 1; //clicked away
             }
             break;
         }
     }
-    if (m->left.went_up && window_sort_get_expanded_main() != NO_POSITION) {
+    if (m->left.went_up && window_empire_sidebar_sort_get_expanded_main() != NO_POSITION) {
         // If left-clicked outside any button, collapse the expanded section
-        window_sort_set_expanded_main(NO_POSITION);
-        window_sort_set_resource_selection_active(0);
+        window_empire_sidebar_sort_set_expanded_main(NO_POSITION);
+        window_empire_sidebar_sort_set_resource_selection_active(0);
         return 1; // Block further input
     }
-    return (window_sort_get_expanded_main() != NO_POSITION) ? 1 : 0;
+    return (window_empire_sidebar_sort_get_expanded_main() != NO_POSITION) ? 1 : 0;
 }
 
-int window_sort_get_sorting_arrow_focused(void)
+int window_empire_sidebar_sort_get_sorting_arrow_focused(void)
 {
     return sorting_arrow_focused;
 }
 
-int window_sort_get_sorting_arrow_is_down(void)
+int window_empire_sidebar_sort_get_sorting_arrow_is_down(void)
 {
     return sorting_arrow_button.is_down;
 }

@@ -682,6 +682,7 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/console.c
     ${PROJECT_SOURCE_DIR}/src/window/donate_to_city.c
     ${PROJECT_SOURCE_DIR}/src/window/empire.c
+    ${PROJECT_SOURCE_DIR}/src/window/empire_sidebar_sort.c
     ${PROJECT_SOURCE_DIR}/src/window/file_dialog.c
     ${PROJECT_SOURCE_DIR}/src/window/gift_to_emperor.c
     ${PROJECT_SOURCE_DIR}/src/window/hold_games.c
@@ -710,7 +711,6 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/select_campaign.c
     ${PROJECT_SOURCE_DIR}/src/window/select_list.c
     ${PROJECT_SOURCE_DIR}/src/window/set_salary.c
-    ${PROJECT_SOURCE_DIR}/src/window/sort.c
     ${PROJECT_SOURCE_DIR}/src/window/text_input.c
     ${PROJECT_SOURCE_DIR}/src/window/trade_opened.c
     ${PROJECT_SOURCE_DIR}/src/window/trade_prices.c
