@@ -1702,6 +1702,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_SHOW_CUSTOM_VARIABLES, "Показать пользовательские переменные в городском обзоре"},
     {TR_CONFIG_ENABLE_GETTING_WHILE_STOCKPILED, "Разрешить \"Получение\", когда ресурс складируется"},
     {TR_CONFIG_ENABLE_PAVED_ROADS_NEAR_GRANNARIES, "Мощеные дороги рядом с амбарами"},
+    {TR_CONFIG_UI_ANIMATE_TRADE_ROUTES, "Анимация торговых путей"},
     {TR_HOTKEY_NEXT_TRACK, "Следующий случайный трек"},
     {TR_CONFIG_MOVE_LEGION_SOUND_SWAP, "Альтернативный звук движения легиона"},
 };
