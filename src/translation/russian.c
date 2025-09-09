@@ -1703,6 +1703,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_ENABLE_GETTING_WHILE_STOCKPILED, "Разрешить \"Получение\", когда ресурс складируется"},
     {TR_CONFIG_ENABLE_PAVED_ROADS_NEAR_GRANNARIES, "Мощеные дороги рядом с амбарами"},
     {TR_HOTKEY_NEXT_TRACK, "Следующий случайный трек"},
+    {TR_CONFIG_MOVE_LEGION_SOUND_SWAP, "Альтернативный звук движения легиона"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
