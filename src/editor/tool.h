@@ -28,7 +28,9 @@ typedef enum {
     TOOL_NATIVE_HUT_ALT = 26,
     TOOL_NATIVE_DECORATION = 27,
     TOOL_NATIVE_MONUMENT = 28,
-    TOOL_NATIVE_WATCHTOWER = 29
+    TOOL_NATIVE_WATCHTOWER = 29,
+    TOOL_EARTHQUAKE_CUSTOM = 30,
+    TOOL_EARTHQUAKE_CUSTOM_REMOVE = 31
 } tool_type;
 
 tool_type editor_tool_type(void);
