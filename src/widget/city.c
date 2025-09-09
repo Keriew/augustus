@@ -697,7 +697,12 @@ static void military_map_click(int legion_formation_id, const map_tile *tile)
         formation_legion_return_home(m);
     } else {
         formation_legion_move_to(m, tile);
-        sound_speech_play_file("wavs/cohort5.wav");
+        if (config_get(CONFIG_UI_MOVE_LEGION_SOUND_SWAP)) {
+            sound_speech_play_file("wavs/marching.wav"); //replacement marching sound
+        } else {
+            sound_speech_play_file("wavs/cohort5.wav");
+        }
+
     }
     window_city_show();
 }
