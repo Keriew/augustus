@@ -1703,6 +1703,8 @@ static translation_string all_strings[] = {
     {TR_CONFIG_ENABLE_GETTING_WHILE_STOCKPILED, "Enable 'Getting' while a resource is stockpiled" },
     {TR_CONFIG_ENABLE_PAVED_ROADS_NEAR_GRANNARIES, "Pave roads next to grannaries"},
     {TR_CONFIG_UI_ANIMATE_TRADE_ROUTES, "Animate trade routes"},
+    {TR_HOTKEY_NEXT_TRACK, "Next random track"},
+    {TR_CONFIG_MOVE_LEGION_SOUND_SWAP, "Alternative legion move sound"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

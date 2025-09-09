@@ -91,12 +91,8 @@ static int should_change_destination(const figure *f, int building_id, int x_dst
     }
     switch (f->action_state) {
         case FIGURE_ACTION_21_CARTPUSHER_DELIVERING_TO_WAREHOUSE:
-            if (!building_warehouse_accepts_storage(current_destination, f->resource_id, 0)) {
-                return 1;
-            }
-            break;
         case FIGURE_ACTION_22_CARTPUSHER_DELIVERING_TO_GRANARY:
-            if (!building_granary_accepts_storage(current_destination, f->resource_id, 0)) {
+            if (!building_storage_accepts_storage(current_destination, f->resource_id, 0)) {
                 return 1;
             }
             break;
@@ -108,12 +104,10 @@ static int should_change_destination(const figure *f, int building_id, int x_dst
                 return current_destination->type == new_destination->type &&
                     new_destination->resources[f->resource_id] < current_destination->resources[f->resource_id];
             }
-            if (current_destination->type == BUILDING_GRANARY) {
-                if (!building_granary_accepts_storage(current_destination, f->resource_id, 0)) {
+            if (current_destination->type == BUILDING_GRANARY || current_destination->type == BUILDING_WAREHOUSE) {
+                if (!building_storage_accepts_storage(current_destination, f->resource_id, 0)) {
                     return 1;
                 }
-            } else if (!building_warehouse_accepts_storage(current_destination, f->resource_id, 0)) {
-                return 1;
             }
             break;
         case FIGURE_ACTION_54_WAREHOUSEMAN_GETTING_FOOD:
@@ -473,6 +467,10 @@ void figure_cartpusher_action(figure *f)
                     city_health_dispatch_sickness(f);
                     cartpusher_return_to_source(f);
                 } else {
+                    if (should_change_destination(f, f->destination_building_id, f->destination_x, f->destination_y)) {
+                        determine_cartpusher_destination(f, b, road_network_id);
+                        break;
+                    }
                     figure_route_remove(f);
                     f->action_state = FIGURE_ACTION_20_CARTPUSHER_INITIAL;
                     f->wait_ticks = 0;
@@ -492,6 +490,10 @@ void figure_cartpusher_action(figure *f)
                 } else {
                     if (!f->loads_sold_or_carrying) {
                         cartpusher_return_to_source(f);
+                        break;
+                    }
+                    if (should_change_destination(f, f->destination_building_id, f->destination_x, f->destination_y)) {
+                        determine_cartpusher_destination(f, b, road_network_id);
                         break;
                     }
                     f->action_state = FIGURE_ACTION_20_CARTPUSHER_INITIAL;

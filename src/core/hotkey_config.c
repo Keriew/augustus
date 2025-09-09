@@ -128,6 +128,7 @@ static const char *ini_keys[] = {
     "show_overlay_native",
     "build_highway",
     "show_overlay_enemy",
+    "next_track",
 };
 
 static struct {

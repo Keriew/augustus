@@ -199,6 +199,7 @@ static config_widget page_general[] = {
     {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_SPEECH, TR_CONFIG_SPEECH, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_NUMERICAL_RANGE, RANGE_SPEECH_VOLUME, 0, display_text_speech_volume, 0, 1, ITEM_BASE_H, 2},
     {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_SOUND_EFFECTS, TR_CONFIG_EFFECTS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+    {TYPE_CHECKBOX, CONFIG_UI_MOVE_LEGION_SOUND_SWAP, TR_CONFIG_MOVE_LEGION_SOUND_SWAP, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_NUMERICAL_RANGE, RANGE_SOUND_EFFECTS_VOLUME, 0, display_text_sound_effects_volume, 0, 1, ITEM_BASE_H, 2},
     {TYPE_CHECKBOX, CONFIG_ORIGINAL_ENABLE_CITY_SOUNDS, TR_CONFIG_CITY_SOUNDS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_NUMERICAL_RANGE, RANGE_CITY_SOUNDS_VOLUME, 0, display_text_city_sounds_volume, 0, 1, ITEM_BASE_H, 2},
@@ -653,7 +654,9 @@ static int config_enable_music(int key)
 }
 static int config_enable_music_randomise(int key)
 {
-    return config_change_basic(key);
+    int ok = config_change_basic(key);
+    sound_music_update(1);
+    return ok;
 }
 static int config_set_music_volume(int key)
 {
