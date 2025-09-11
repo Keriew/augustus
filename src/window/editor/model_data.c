@@ -1,17 +1,56 @@
 #include "model_data.h"
 
+#include "building/type.h"
+#include "core/lang.h"
 #include "graphics/font.h"
+#include "graphics/button.h"
 #include "graphics/graphics.h"
+#include "graphics/grid_box.h"
 #include "graphics/lang_text.h"
+#include "graphics/text.h"
 #include "graphics/panel.h"
 #include "graphics/window.h"
 #include "input/input.h"
 #include "translation/translation.h"
 #include "window/editor/map.h"
 
+static void draw_model_item(const grid_box_item *item);
+static void model_item_click(const grid_box_item *item);
+
+
+static struct {
+    unsigned int total_items;
+} data = {
+    BUILDING_TYPE_MAX
+};
+
+static grid_box_type model_buttons = {
+    .x = 25,
+    .y = 88,
+    .width = 36 * BLOCK_SIZE,
+    .height = 20 * BLOCK_SIZE,
+    .item_height = 28,
+    .item_margin.horizontal = 8,
+    .item_margin.vertical = 2,
+    .extend_to_hidden_scrollbar = 1,
+    .on_click = model_item_click,
+    .draw_item = draw_model_item
+};
+
 static void init(void)
 {
+    grid_box_init(&model_buttons, data.total_items);
+}
+
+static void model_item_click(const grid_box_item *item)
+{
     
+}
+
+static void draw_model_item(const grid_box_item *item)
+{
+    button_border_draw(item->x, item->y, item->width, item->height, 0);
+    text_draw(lang_get_building_type_string(item->index), item->x + 8, item->y + 8, FONT_NORMAL_BLACK, 0);
 }
 
 static void draw_background(void)
@@ -33,15 +72,24 @@ static void draw_background(void)
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_LABORERS, 525, 75, 30, FONT_SMALL_PLAIN);
 
     graphics_reset_dialog();
+    
+    grid_box_request_refresh(&model_buttons);
 }
 
 static void draw_foreground(void)
 {
+    graphics_in_dialog();
     
+    grid_box_draw(&model_buttons);
+    
+    graphics_reset_dialog();
 }
 
 static void handle_input(const mouse *m, const hotkeys *h)
 {
+    if (grid_box_handle_input(&model_buttons, mouse_in_dialog(m), 1)) {
+        return;
+    }
     if (input_go_back_requested(m, h)) {
         window_go_back();
     }
