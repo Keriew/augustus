@@ -1351,10 +1351,10 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_VALUE_ENEMY_UNDEFINED, "По карте"},
     {TR_PARAMETER_VALUE_ENEMY_0_BARBARIAN, "Варвары"},
     {TR_PARAMETER_VALUE_ENEMY_1_NUMIDIAN, "Нумидийцы"},
-    {TR_PARAMETER_VALUE_ENEMY_2_GAUL, "Галы"},
+    {TR_PARAMETER_VALUE_ENEMY_2_GAUL, "Галлы"},
     {TR_PARAMETER_VALUE_ENEMY_3_CELT, "Кельты"},
     {TR_PARAMETER_VALUE_ENEMY_4_GOTH, "Готы"},
-    {TR_PARAMETER_VALUE_ENEMY_5_PERGAMUM, "Пергамонцы"},
+    {TR_PARAMETER_VALUE_ENEMY_5_PERGAMUM, "Пергамцы"},
     {TR_PARAMETER_VALUE_ENEMY_6_SELEUCID, "Селевкиды"},
     {TR_PARAMETER_VALUE_ENEMY_7_ETRUSCAN, "Этруски"},
     {TR_PARAMETER_VALUE_ENEMY_8_GREEK, "Греки"},
@@ -1597,7 +1597,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_EDIT_DEMAND_CHANGE_INVALID_ROUTE_SET, "Некорректный маршрут"},
     {TR_EDITOR_ALLOWED_BUILDINGS_ALLOWED, "Разрешено"},
     {TR_EDITOR_ALLOWED_BUILDINGS_NOT_ALLOWED, "Не разрешено"},
-    {TR_SELECT_NONE, "Не выбрано"},
+    {TR_SELECT_NONE, "Отменить все"},
     {TR_SELECT_ALL, "Выбрать все"},
     {TR_SELECTED, "Выбранное"},
     {TR_WINDOW_MESSAGE_LIST_SELECTED_ALL, "Все сообщения"},
@@ -1701,6 +1701,10 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY, "Изменить видимость переменной:"},
     {TR_CONFIG_SHOW_CUSTOM_VARIABLES, "Показать пользовательские переменные в городском обзоре"},
     {TR_CONFIG_ENABLE_GETTING_WHILE_STOCKPILED, "Разрешить \"Получение\", когда ресурс складируется"},
+    {TR_CONFIG_ENABLE_PAVED_ROADS_NEAR_GRANNARIES, "Мощеные дороги рядом с амбарами"},
+    {TR_CONFIG_UI_ANIMATE_TRADE_ROUTES, "Анимация торговых путей"},
+    {TR_HOTKEY_NEXT_TRACK, "Следующий случайный трек"},
+    {TR_CONFIG_MOVE_LEGION_SOUND_SWAP, "Альтернативный звук движения легиона"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
