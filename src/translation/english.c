@@ -1701,7 +1701,7 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY, "Change custom variable visibility" },
     {TR_CONFIG_SHOW_CUSTOM_VARIABLES, "Show custom variables in city view" },
     {TR_CONFIG_ENABLE_GETTING_WHILE_STOCKPILED, "Enable 'Getting' while a resource is stockpiled" },
-    {TR_CONFIG_ENABLE_PAVED_ROADS_NEAR_GRANNARIES, "Pave roads next to grannaries"},
+    {TR_CONFIG_ENABLE_PAVED_ROADS_NEAR_GRANARIES, "Pave roads next to granaries"},
     {TR_CONFIG_UI_ANIMATE_TRADE_ROUTES, "Animate trade routes"},
     {TR_HOTKEY_NEXT_TRACK, "Next random track"},
     {TR_CONFIG_MOVE_LEGION_SOUND_SWAP, "Alternative legion move sound"},
