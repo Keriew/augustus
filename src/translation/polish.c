@@ -1563,6 +1563,11 @@ static translation_string all_strings[] = {
     {TR_CONFIG_CATEGORY_MANAGEMENT_ROADS, "Drogi"},
     {TR_CONFIG_CATEGORY_MANAGEMENT_ROADBLOCKS, "Blokady"},
     {TR_CONFIG_CATEGORY_MANAGEMENT_HOUSING, "Domy"},
+    // TODO 1682 - 1686
+    {TR_CONFIG_ENABLE_PAVED_ROADS_NEAR_GRANARIES, "Utwardzaj drogi obok spichlerzy"},
+    {TR_CONFIG_UI_ANIMATE_TRADE_ROUTES, "Animowane szlaki handlowe"},
+    {TR_HOTKEY_NEXT_TRACK, "Następny losowy utwór"},
+    {TR_CONFIG_MOVE_LEGION_SOUND_SWAP, "Alternatywny dźwięk ruchu legionów"},
 };
 
 void translation_polish(const translation_string **strings, int *num_strings)
