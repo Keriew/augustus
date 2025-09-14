@@ -1,9 +1,12 @@
 #include "model_data.h"
 
+#include "building/model.h"
 #include "building/type.h"
 #include "core/lang.h"
+#include "core/string.h"
 #include "graphics/font.h"
 #include "graphics/button.h"
+#include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/grid_box.h"
 #include "graphics/lang_text.h"
@@ -14,6 +17,8 @@
 #include "translation/translation.h"
 #include "window/editor/map.h"
 
+static void button_edit_cost(const generic_button *button);
+
 static void draw_model_item(const grid_box_item *item);
 static void model_item_click(const grid_box_item *item);
 
@@ -22,6 +27,10 @@ static struct {
     unsigned int total_items;
 } data = {
     BUILDING_TYPE_MAX
+};
+
+static generic_button data_buttons[] = {
+    {200, 2, 48, 20, button_edit_cost}
 };
 
 static grid_box_type model_buttons = {
@@ -42,6 +51,11 @@ static void init(void)
     grid_box_init(&model_buttons, data.total_items);
 }
 
+static void button_edit_cost(const generic_button *button)
+{
+    
+}
+
 static void model_item_click(const grid_box_item *item)
 {
     
@@ -51,6 +65,16 @@ static void draw_model_item(const grid_box_item *item)
 {
     button_border_draw(item->x, item->y, item->width, item->height, 0);
     text_draw(lang_get_building_type_string(item->index), item->x + 8, item->y + 8, FONT_NORMAL_BLACK, 0);
+    
+    // Cost
+    button_border_draw(item->x + data_buttons[0].x, item->y + data_buttons[0].y,
+        data_buttons[0].width, data_buttons[0].height, item->is_focused);
+    
+    uint8_t *cost_string;
+    int cost = model_get_building(0)->cost;
+    string_from_int(cost_string, cost, 0);
+    text_draw(cost_string, item->x + data_buttons[0].x + 8, item->y + data_buttons[0].y + 8, 
+              FONT_SMALL_PLAIN, 0);
 }
 
 static void draw_background(void)
