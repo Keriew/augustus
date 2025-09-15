@@ -17,6 +17,8 @@
 #include "translation/translation.h"
 #include "window/editor/map.h"
 
+#define NUM_DATA_BUTTONS (sizeof(data_buttons) / sizeof(generic_button))
+
 static void button_edit_cost(const generic_button *button);
 static void button_edit_value(const generic_button *button);
 static void button_edit_step(const generic_button *button);
@@ -30,17 +32,18 @@ static void model_item_click(const grid_box_item *item);
 
 static struct {
     unsigned int total_items;
+    unsigned int data_buttons_focus_id;
 } data = {
     BUILDING_TYPE_MAX
 };
 
 static generic_button data_buttons[] = {
     {200, 2, 48, 20, button_edit_cost},
-    {260, 2, 48, 20, button_edit_cost},
-    {315, 2, 48, 20, button_edit_cost},
-    {370, 2, 48, 20, button_edit_cost},
-    {425, 2, 48, 20, button_edit_cost},
-    {480, 2, 48, 20, button_edit_cost}
+    {260, 2, 48, 20, button_edit_value},
+    {315, 2, 48, 20, button_edit_step},
+    {370, 2, 48, 20, button_edit_step_size},
+    {425, 2, 48, 20, button_edit_range},
+    {480, 2, 48, 20, button_edit_laborers}
 };
 
 static grid_box_type model_buttons = {
@@ -103,7 +106,7 @@ static void draw_model_item(const grid_box_item *item)
     
     for (int i = 0; i < 6; i++) {
         button_border_draw(item->x + data_buttons[i].x, item->y + data_buttons[i].y,
-            data_buttons[i].width, data_buttons[i].height, item->is_focused);
+            data_buttons[i].width, data_buttons[i].height, item->is_focused && data.data_buttons_focus_id == i+1);
 
         uint8_t data_string[8];
         int value = 0;
@@ -162,9 +165,20 @@ static void draw_foreground(void)
 
 static void handle_input(const mouse *m, const hotkeys *h)
 {
-    if (grid_box_handle_input(&model_buttons, mouse_in_dialog(m), 1)) {
+    const mouse *m_dialog = mouse_in_dialog(m);
+    if (grid_box_handle_input(&model_buttons, m_dialog, 1)) {
         return;
     }
+    
+    int x = 0, y = 0;
+    if (model_buttons.focused_item.is_focused) {
+        x = model_buttons.focused_item.x;
+        y = model_buttons.focused_item.y;
+    }
+    if (generic_buttons_handle_mouse(m_dialog, x, y, data_buttons, NUM_DATA_BUTTONS, &data.data_buttons_focus_id)) {
+        return;
+    }
+    
     if (input_go_back_requested(m, h)) {
         window_go_back();
     }
