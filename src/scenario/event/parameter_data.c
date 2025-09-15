@@ -606,7 +606,7 @@ static void generate_model_mappings(void)
     }
     for (building_type type = BUILDING_NONE; type < BUILDING_TYPE_MAX; type++) {
         const building_properties *props = building_properties_for_type(type);
-        if ((!(props->event_data.attr && props->size) || (type >= 10 && type < 30)) && type != BUILDING_CLEAR_LAND || (type == BUILDING_GRAND_GARDEN || type == BUILDING_DOLPHIN_FOUNTAIN)) {
+        if ((!(props->event_data.attr && props->size)) && type != BUILDING_CLEAR_LAND || (type == BUILDING_GRAND_GARDEN || type == BUILDING_DOLPHIN_FOUNTAIN)) {
             continue;
         }
         special_attribute_mapping_t *mapping = &special_attribute_mappings_model_buildings[special_attribute_mappings_model_buildings_size];

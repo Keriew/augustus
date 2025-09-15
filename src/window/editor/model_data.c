@@ -1,6 +1,7 @@
 #include "model_data.h"
 
 #include "building/model.h"
+#include "building/properties.h"
 #include "building/type.h"
 #include "core/lang.h"
 #include "core/string.h"
@@ -16,6 +17,7 @@
 #include "input/input.h"
 #include "translation/translation.h"
 #include "window/editor/map.h"
+#include "window/numeric_input.h"
 
 #define NUM_DATA_BUTTONS (sizeof(data_buttons) / sizeof(generic_button))
 
@@ -26,16 +28,16 @@ static void button_edit_step_size(const generic_button *button);
 static void button_edit_range(const generic_button *button);
 static void button_edit_laborers(const generic_button *button);
 
+static void populate_list(void);
 static void draw_model_item(const grid_box_item *item);
 static void model_item_click(const grid_box_item *item);
 
 
 static struct {
     unsigned int total_items;
+    building_type items[BUILDING_TYPE_MAX];
     unsigned int data_buttons_focus_id;
-} data = {
-    BUILDING_TYPE_MAX
-};
+} data;
 
 static generic_button data_buttons[] = {
     {200, 2, 48, 20, button_edit_cost},
@@ -61,7 +63,19 @@ static grid_box_type model_buttons = {
 
 static void init(void)
 {
+    populate_list();
     grid_box_init(&model_buttons, data.total_items);
+}
+
+static void populate_list(void)
+{
+    data.total_items = 0;
+    for (int i = 0; i < BUILDING_TYPE_MAX; i++) {
+        const building_properties *props = building_properties_for_type(i);
+        if (((props->event_data.attr && props->size) || i == BUILDING_CLEAR_LAND) && i != BUILDING_GRAND_GARDEN && i != BUILDING_DOLPHIN_FOUNTAIN) {
+            data.items[data.total_items++] = i;
+        }
+    }
 }
 
 static void button_edit_cost(const generic_button *button)
@@ -102,7 +116,7 @@ static void model_item_click(const grid_box_item *item)
 static void draw_model_item(const grid_box_item *item)
 {
     button_border_draw(item->x, item->y, item->width, item->height, 0);
-    text_draw(lang_get_building_type_string(item->index), item->x + 8, item->y + 8, FONT_NORMAL_BLACK, 0);
+    text_draw(lang_get_building_type_string(data.items[item->index]), item->x + 8, item->y + 8, FONT_NORMAL_BLACK, 0);
     
     for (int i = 0; i < 6; i++) {
         button_border_draw(item->x + data_buttons[i].x, item->y + data_buttons[i].y,
@@ -112,17 +126,17 @@ static void draw_model_item(const grid_box_item *item)
         int value = 0;
         switch (i) {
             case 0:
-                value = model_get_building(item->index)->cost;break;
+                value = model_get_building(data.items[item->index])->cost;break;
             case 1:
-                value = model_get_building(item->index)->desirability_value;break;
+                value = model_get_building(data.items[item->index])->desirability_value;break;
             case 2:
-                value = model_get_building(item->index)->desirability_step;break;
+                value = model_get_building(data.items[item->index])->desirability_step;break;
             case 3:
-                value = model_get_building(item->index)->desirability_step_size;break;
+                value = model_get_building(data.items[item->index])->desirability_step_size;break;
             case 4:
-                value = model_get_building(item->index)->desirability_range;break;
+                value = model_get_building(data.items[item->index])->desirability_range;break;
             case 5:
-                value = model_get_building(item->index)->laborers;break;
+                value = model_get_building(data.items[item->index])->laborers;break;
         }
         string_from_int(data_string, value, 0);
         text_draw(data_string, item->x + data_buttons[i].x + 8, item->y + data_buttons[i].y + 6, 
