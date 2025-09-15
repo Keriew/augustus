@@ -18,6 +18,11 @@
 #include "window/editor/map.h"
 
 static void button_edit_cost(const generic_button *button);
+static void button_edit_value(const generic_button *button);
+static void button_edit_step(const generic_button *button);
+static void button_edit_step_size(const generic_button *button);
+static void button_edit_range(const generic_button *button);
+static void button_edit_laborers(const generic_button *button);
 
 static void draw_model_item(const grid_box_item *item);
 static void model_item_click(const grid_box_item *item);
@@ -30,7 +35,12 @@ static struct {
 };
 
 static generic_button data_buttons[] = {
-    {200, 2, 48, 20, button_edit_cost}
+    {200, 2, 48, 20, button_edit_cost},
+    {260, 2, 48, 20, button_edit_cost},
+    {315, 2, 48, 20, button_edit_cost},
+    {370, 2, 48, 20, button_edit_cost},
+    {425, 2, 48, 20, button_edit_cost},
+    {480, 2, 48, 20, button_edit_cost}
 };
 
 static grid_box_type model_buttons = {
@@ -56,6 +66,31 @@ static void button_edit_cost(const generic_button *button)
     
 }
 
+static void button_edit_value(const generic_button *button)
+{
+    
+}
+
+static void button_edit_step(const generic_button *button)
+{
+    
+}
+
+static void button_edit_step_size(const generic_button *button)
+{
+    
+}
+
+static void button_edit_range(const generic_button *button)
+{
+    
+}
+
+static void button_edit_laborers(const generic_button *button)
+{
+    
+}
+
 static void model_item_click(const grid_box_item *item)
 {
     
@@ -66,15 +101,31 @@ static void draw_model_item(const grid_box_item *item)
     button_border_draw(item->x, item->y, item->width, item->height, 0);
     text_draw(lang_get_building_type_string(item->index), item->x + 8, item->y + 8, FONT_NORMAL_BLACK, 0);
     
-    // Cost
-    button_border_draw(item->x + data_buttons[0].x, item->y + data_buttons[0].y,
-        data_buttons[0].width, data_buttons[0].height, item->is_focused);
+    for (int i = 0; i < 6; i++) {
+        button_border_draw(item->x + data_buttons[i].x, item->y + data_buttons[i].y,
+            data_buttons[i].width, data_buttons[i].height, item->is_focused);
+
+        uint8_t data_string[8];
+        int value = 0;
+        switch (i) {
+            case 0:
+                value = model_get_building(item->index)->cost;break;
+            case 1:
+                value = model_get_building(item->index)->desirability_value;break;
+            case 2:
+                value = model_get_building(item->index)->desirability_step;break;
+            case 3:
+                value = model_get_building(item->index)->desirability_step_size;break;
+            case 4:
+                value = model_get_building(item->index)->desirability_range;break;
+            case 5:
+                value = model_get_building(item->index)->laborers;break;
+        }
+        string_from_int(data_string, value, 0);
+        text_draw(data_string, item->x + data_buttons[i].x + 8, item->y + data_buttons[i].y + 6, 
+                  FONT_SMALL_PLAIN, 0);
+    }
     
-    uint8_t cost_string[8];
-    int cost = model_get_building(item->index)->cost;
-    string_from_int(cost_string, cost, 0);
-    text_draw(cost_string, item->x + data_buttons[0].x + 8, item->y + data_buttons[0].y + 6, 
-              FONT_SMALL_PLAIN, 0);
 }
 
 static void draw_background(void)
