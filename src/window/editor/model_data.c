@@ -95,29 +95,69 @@ static void button_edit_cost(const generic_button *button)
         9, -1000000000, 1000000000, set_cost_value);
 }
 
+static void set_desirability_value(int value)
+{
+    model_building *model = model_get_building(data.items[data.target_index]);
+    model->desirability_value = value;
+    data.target_index = NO_SELECTION;
+}
+
 static void button_edit_value(const generic_button *button)
 {
-    
+    window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
+        9, -1000000000, 1000000000, set_desirability_value);
+}
+
+static void set_desirability_step(int value)
+{
+    model_building *model = model_get_building(data.items[data.target_index]);
+    model->desirability_step = value;
+    data.target_index = NO_SELECTION;
 }
 
 static void button_edit_step(const generic_button *button)
 {
-    
+    window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
+        9, -1000000000, 1000000000, set_desirability_step);
+}
+
+static void set_desirability_step_size(int value)
+{
+    model_building *model = model_get_building(data.items[data.target_index]);
+    model->desirability_step_size = value;
+    data.target_index = NO_SELECTION;
 }
 
 static void button_edit_step_size(const generic_button *button)
 {
-    
+    window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
+        9, -1000000000, 1000000000, set_desirability_step_size);
+}
+
+static void set_desirability_range(int value)
+{
+    model_building *model = model_get_building(data.items[data.target_index]);
+    model->desirability_range = value;
+    data.target_index = NO_SELECTION;
 }
 
 static void button_edit_range(const generic_button *button)
 {
-    
+    window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
+        9, -1000000000, 1000000000, set_desirability_range);
+}
+
+static void set_laborers(int value)
+{
+    model_building *model = model_get_building(data.items[data.target_index]);
+    model->laborers = value;
+    data.target_index = NO_SELECTION;
 }
 
 static void button_edit_laborers(const generic_button *button)
 {
-    
+    window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
+        9, -1000000000, 1000000000, set_laborers);
 }
 
 static void model_item_click(const grid_box_item *item)
