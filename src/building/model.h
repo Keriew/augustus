@@ -69,7 +69,7 @@ void model_load_model_data(buffer *buf);
  * @param type Building type
  * @return Read-only model
  */
-const model_building *model_get_building(building_type type);
+model_building *model_get_building(building_type type);
 
 /**
  * Gets the model for a house

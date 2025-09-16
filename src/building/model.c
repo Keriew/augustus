@@ -329,7 +329,7 @@ static void populate_new_buildings(void) {
     buildings[BUILDING_NATIVE_DECORATION] = (model_building){ .cost = 0, .desirability_value = 6, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 4, .laborers = 0 };
 }
 
-const model_building *model_get_building(building_type type)
+model_building *model_get_building(building_type type)
 {
     if (type > BUILDING_TYPE_MAX) {
         return &NOTHING;
