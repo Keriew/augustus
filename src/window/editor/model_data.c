@@ -19,6 +19,7 @@
 #include "window/editor/map.h"
 #include "window/numeric_input.h"
 
+#define NO_SELECTION (unsigned int) -1
 #define NUM_DATA_BUTTONS (sizeof(data_buttons) / sizeof(generic_button))
 
 static void button_edit_cost(const generic_button *button);
@@ -36,7 +37,9 @@ static void model_item_click(const grid_box_item *item);
 static struct {
     unsigned int total_items;
     building_type items[BUILDING_TYPE_MAX];
+    
     unsigned int data_buttons_focus_id;
+    unsigned int target_index;
 } data;
 
 static generic_button data_buttons[] = {
@@ -63,6 +66,7 @@ static grid_box_type model_buttons = {
 
 static void init(void)
 {
+    data.target_index = NO_SELECTION;
     populate_list();
     grid_box_init(&model_buttons, data.total_items);
 }
@@ -78,9 +82,17 @@ static void populate_list(void)
     }
 }
 
+static void set_cost_value(int value)
+{
+    model_building *model = model_get_building(data.items[data.target_index]);
+    model->cost = value;
+    data.target_index = NO_SELECTION;
+}
+
 static void button_edit_cost(const generic_button *button)
 {
-    
+    window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
+        9, -1000000000, 1000000000, set_cost_value);
 }
 
 static void button_edit_value(const generic_button *button)
@@ -110,7 +122,7 @@ static void button_edit_laborers(const generic_button *button)
 
 static void model_item_click(const grid_box_item *item)
 {
-    
+    data.target_index = item->index;
 }
 
 static void draw_model_item(const grid_box_item *item)
@@ -180,9 +192,7 @@ static void draw_foreground(void)
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
-    if (grid_box_handle_input(&model_buttons, m_dialog, 1)) {
-        return;
-    }
+    grid_box_handle_input(&model_buttons, m_dialog, 1);
     
     int x = 0, y = 0;
     if (model_buttons.focused_item.is_focused) {
