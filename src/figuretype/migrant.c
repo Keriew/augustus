@@ -309,12 +309,12 @@ void figure_homeless_action(figure *f)
                 if (f->immigrant_building_id && building_is_house(b->type) && !b->has_plague) {
                     int max_people = model_get_house(b->subtype.house_level)->max_people;
                     if (b->house_is_merged) {
-                    } else if (figure_movement_move_ticks_cross_country(f, 1) == 1) {
-                        f->state = FIGURE_STATE_DEAD;
-                        int room = max_people - b->house_population;
-                        if (room < 0) {
-                            room = 0;
-                        }
+                        max_people *= 4;
+                    }
+                    int room = max_people - b->house_population;
+                    if (room < 0) {
+                        room = 0;
+                    }
                         if (room < f->migrant_num_people) {
                             f->migrant_num_people = room;
                         }
@@ -358,5 +358,4 @@ void figure_homeless_action(figure *f)
             break;
             }
             figure_image_update(f, image_group(GROUP_FIGURE_HOMELESS));
-    }
 }
