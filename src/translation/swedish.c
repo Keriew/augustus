@@ -1036,7 +1036,27 @@ static translation_string all_strings[] = {
     {TR_WINDOW_ADVISOR_ENTERTAINMENT_TAVERN_COVERAGE_PLURAL, "Krogar"},
     {TR_BUILDING_FORMAL_GARDENS, "Fina trädgårdar" },
     {TR_BUILDING_OVERGROWN_GARDENS, "Vildvuxna trädgårdar" },
-    {TR_WINDOW_ADVISOR_RELIGION_ALTARS_HEADER, "Altare" }
+    {TR_WINDOW_ADVISOR_RELIGION_ALTARS_HEADER, "Altare" },
+    {TR_OVERLAY_HOUSING_SMALL_TENTS, "Små tält"},
+    {TR_OVERLAY_HOUSING_LARGE_TENTS, "Stora tält"},
+    {TR_OVERLAY_HOUSING_SMALL_SHACKS, "Små skjul"},
+    {TR_OVERLAY_HOUSING_LARGE_SHACKS, "Stora skjul"},
+    {TR_OVERLAY_HOUSING_SMALL_HOVELS, "Små kojor"},
+    {TR_OVERLAY_HOUSING_LARGE_HOVELS, "Stora kojor"},
+    {TR_OVERLAY_HOUSING_SMALL_CASAS, "Små Casas"},
+    {TR_OVERLAY_HOUSING_LARGE_CASAS, "Stora Casas"},
+    {TR_OVERLAY_HOUSING_SMALL_INSULAE, "Små Insulae"},
+    {TR_OVERLAY_HOUSING_MEDIUM_INSULAE, "Medelstora Insulae"},
+    {TR_OVERLAY_HOUSING_LARGE_INSULAE, "Stora Insulae"},
+    {TR_OVERLAY_HOUSING_GRAND_INSULAE, "Storslagna Insulae"},
+    {TR_OVERLAY_HOUSING_SMALL_VILLAS, "Små villor"},
+    {TR_OVERLAY_HOUSING_MEDIUM_VILLAS, "Medelstora villor"},
+    {TR_OVERLAY_HOUSING_LARGE_VILLAS, "Stora villor"},
+    {TR_OVERLAY_HOUSING_GRAND_VILLAS, "Storslagna villor"},
+    {TR_OVERLAY_HOUSING_SMALL_PALACES, "Små palats"},
+    {TR_OVERLAY_HOUSING_MEDIUM_PALACES, "Medelstora palats"},
+    {TR_OVERLAY_HOUSING_LARGE_PALACES, "Stora palats"},
+    {TR_OVERLAY_HOUSING_LUXURY_PALACES, "Lyxiga palats"}
 };
 
 void translation_swedish(const translation_string **strings, int *num_strings)

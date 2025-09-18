@@ -834,6 +834,26 @@ static translation_string all_strings[] = {
     {TR_WINDOW_ASSET_PREVIEWER_UNNAMED_ASSET, "（未命名資源）"},
     {TR_WINDOW_RACE_YOUR_BET, "你的債務"},
     {TR_ZOOM, "縮放："},
+    {TR_OVERLAY_HOUSING_SMALL_TENTS, "小帳篷"},
+    {TR_OVERLAY_HOUSING_LARGE_TENTS, "大帳篷"},
+    {TR_OVERLAY_HOUSING_SMALL_SHACKS, "小棚屋"},
+    {TR_OVERLAY_HOUSING_LARGE_SHACKS, "大棚屋"},
+    {TR_OVERLAY_HOUSING_SMALL_HOVELS, "小茅屋"},
+    {TR_OVERLAY_HOUSING_LARGE_HOVELS, "大茅屋"},
+    {TR_OVERLAY_HOUSING_SMALL_CASAS, "小Casas"},
+    {TR_OVERLAY_HOUSING_LARGE_CASAS, "大Casas"},
+    {TR_OVERLAY_HOUSING_SMALL_INSULAE, "小Insulae"},
+    {TR_OVERLAY_HOUSING_MEDIUM_INSULAE, "中等Insulae"},
+    {TR_OVERLAY_HOUSING_LARGE_INSULAE, "大Insulae"},
+    {TR_OVERLAY_HOUSING_GRAND_INSULAE, "宏偉的Insulae"},
+    {TR_OVERLAY_HOUSING_SMALL_VILLAS, "小別墅"},
+    {TR_OVERLAY_HOUSING_MEDIUM_VILLAS, "中等別墅"},
+    {TR_OVERLAY_HOUSING_LARGE_VILLAS, "大別墅"},
+    {TR_OVERLAY_HOUSING_GRAND_VILLAS, "宏偉的別墅"},
+    {TR_OVERLAY_HOUSING_SMALL_PALACES, "小宮殿"},
+    {TR_OVERLAY_HOUSING_MEDIUM_PALACES, "中等宮殿"},
+    {TR_OVERLAY_HOUSING_LARGE_PALACES, "大宮殿"},
+    {TR_OVERLAY_HOUSING_LUXURY_PALACES, "豪華宮殿"}
 };
 
 void translation_traditional_chinese(const translation_string **strings, int *num_strings)

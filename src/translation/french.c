@@ -1701,6 +1701,26 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY, "Modifier la visibilité de la variable perso." },
     {TR_CONFIG_SHOW_CUSTOM_VARIABLES, "Afficher les variables personnalisées en jeu" },
     {TR_CONFIG_ENABLE_GETTING_WHILE_STOCKPILED, "Autoriser 'Aller chercher' lorsqu'une ressource est stockée" },
+    {TR_OVERLAY_HOUSING_SMALL_TENTS, "Petites tentes"},
+    {TR_OVERLAY_HOUSING_LARGE_TENTS, "Grandes tentes"},
+    {TR_OVERLAY_HOUSING_SMALL_SHACKS, "Petites cabanes"},
+    {TR_OVERLAY_HOUSING_LARGE_SHACKS, "Grandes cabanes"},
+    {TR_OVERLAY_HOUSING_SMALL_HOVELS, "Petites masures"},
+    {TR_OVERLAY_HOUSING_LARGE_HOVELS, "Grandes masures"},
+    {TR_OVERLAY_HOUSING_SMALL_CASAS, "Petites Casas"},
+    {TR_OVERLAY_HOUSING_LARGE_CASAS, "Grandes Casas"},
+    {TR_OVERLAY_HOUSING_SMALL_INSULAE, "Petites Insulae"},
+    {TR_OVERLAY_HOUSING_MEDIUM_INSULAE, "Insulae moyennes"},
+    {TR_OVERLAY_HOUSING_LARGE_INSULAE, "Grandes Insulae"},
+    {TR_OVERLAY_HOUSING_GRAND_INSULAE, "Insulae grandioses"},
+    {TR_OVERLAY_HOUSING_SMALL_VILLAS, "Petites villas"},
+    {TR_OVERLAY_HOUSING_MEDIUM_VILLAS, "Villas moyennes"},
+    {TR_OVERLAY_HOUSING_LARGE_VILLAS, "Grandes villas"},
+    {TR_OVERLAY_HOUSING_GRAND_VILLAS, "Villas grandioses"},
+    {TR_OVERLAY_HOUSING_SMALL_PALACES, "Petits palais"},
+    {TR_OVERLAY_HOUSING_MEDIUM_PALACES, "Palais moyens"},
+    {TR_OVERLAY_HOUSING_LARGE_PALACES, "Grands palais"},
+    {TR_OVERLAY_HOUSING_LUXURY_PALACES, "Palais luxueux"}
 };
 
 void translation_french(const translation_string **strings, int *num_strings)

@@ -108,6 +108,26 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_DUPLICATE_MESSAGE, "このキー操作は次の操作に割り当てられています:"},
     {TR_WARNING_SCREENSHOT_SAVED, "保存したスクリーンショット： "}, // TODO: Google translate
     {TR_OVERLAY_EFFICIENCY, "効率"},
+    {TR_OVERLAY_HOUSING_SMALL_TENTS, "小さなテント"},
+    {TR_OVERLAY_HOUSING_LARGE_TENTS, "大きなテント"},
+    {TR_OVERLAY_HOUSING_SMALL_SHACKS, "小さな小屋"},
+    {TR_OVERLAY_HOUSING_LARGE_SHACKS, "大きな小屋"},
+    {TR_OVERLAY_HOUSING_SMALL_HOVELS, "小さな粗末な家"},
+    {TR_OVERLAY_HOUSING_LARGE_HOVELS, "大きな粗末な家"},
+    {TR_OVERLAY_HOUSING_SMALL_CASAS, "小さなCasas"},
+    {TR_OVERLAY_HOUSING_LARGE_CASAS, "大きなCasas"},
+    {TR_OVERLAY_HOUSING_SMALL_INSULAE, "小さなInsulae"},
+    {TR_OVERLAY_HOUSING_MEDIUM_INSULAE, "中くらいのInsulae"},
+    {TR_OVERLAY_HOUSING_LARGE_INSULAE, "大きなInsulae"},
+    {TR_OVERLAY_HOUSING_GRAND_INSULAE, "壮大なInsulae"},
+    {TR_OVERLAY_HOUSING_SMALL_VILLAS, "小さなヴィラ"},
+    {TR_OVERLAY_HOUSING_MEDIUM_VILLAS, "中くらいのヴィラ"},
+    {TR_OVERLAY_HOUSING_LARGE_VILLAS, "大きなヴィラ"},
+    {TR_OVERLAY_HOUSING_GRAND_VILLAS, "壮大なヴィラ"},
+    {TR_OVERLAY_HOUSING_SMALL_PALACES, "小さな宮殿"},
+    {TR_OVERLAY_HOUSING_MEDIUM_PALACES, "中くらいの宮殿"},
+    {TR_OVERLAY_HOUSING_LARGE_PALACES, "大きな宮殿"},
+    {TR_OVERLAY_HOUSING_LUXURY_PALACES, "豪華な宮殿"}
 };
 
 void translation_japanese(const translation_string **strings, int *num_strings)

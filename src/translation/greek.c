@@ -1338,8 +1338,27 @@ static translation_string all_strings[] = {
     {TR_BUILDING_INFO_TOTAL_FOOD, "Σύνολο τροφίμων:" },
     {TR_BUILDING_FORMAL_GARDENS, "Επίσημοι κήποι" },
     {TR_BUILDING_OVERGROWN_GARDENS, "Κατάφυτοι κήποι" },			
-    {TR_WINDOW_ADVISOR_RELIGION_ALTARS_HEADER, "βωμός" }
-
+    {TR_WINDOW_ADVISOR_RELIGION_ALTARS_HEADER, "βωμός" },
+    {TR_OVERLAY_HOUSING_SMALL_TENTS, "Μικρές σκηνές"},
+    {TR_OVERLAY_HOUSING_LARGE_TENTS, "Μεγάλες σκηνές"},
+    {TR_OVERLAY_HOUSING_SMALL_SHACKS, "Μικρές καλύβες"},
+    {TR_OVERLAY_HOUSING_LARGE_SHACKS, "Μεγάλες καλύβες"},
+    {TR_OVERLAY_HOUSING_SMALL_HOVELS, "Μικρές παράγκες"},
+    {TR_OVERLAY_HOUSING_LARGE_HOVELS, "Μεγάλες παράγκες"},
+    {TR_OVERLAY_HOUSING_SMALL_CASAS, "Μικρές Casas"},
+    {TR_OVERLAY_HOUSING_LARGE_CASAS, "Μεγάλες Casas"},
+    {TR_OVERLAY_HOUSING_SMALL_INSULAE, "Μικρές Insulae"},
+    {TR_OVERLAY_HOUSING_MEDIUM_INSULAE, "Μεσαίες Insulae"},
+    {TR_OVERLAY_HOUSING_LARGE_INSULAE, "Μεγάλες Insulae"},
+    {TR_OVERLAY_HOUSING_GRAND_INSULAE, "Μεγαλοπρεπείς Insulae"},
+    {TR_OVERLAY_HOUSING_SMALL_VILLAS, "Μικρές βίλες"},
+    {TR_OVERLAY_HOUSING_MEDIUM_VILLAS, "Μεσαίες βίλες"},
+    {TR_OVERLAY_HOUSING_LARGE_VILLAS, "Μεγάλες βίλες"},
+    {TR_OVERLAY_HOUSING_GRAND_VILLAS, "Μεγαλοπρεπείς βίλες"},
+    {TR_OVERLAY_HOUSING_SMALL_PALACES, "Μικρά παλάτια"},
+    {TR_OVERLAY_HOUSING_MEDIUM_PALACES, "Μεσαία παλάτια"},
+    {TR_OVERLAY_HOUSING_LARGE_PALACES, "Μεγάλα παλάτια"},
+    {TR_OVERLAY_HOUSING_LUXURY_PALACES, "Πολυτελή παλάτια"}
 };
 
 void translation_greek(const translation_string **strings, int *num_strings)

@@ -1701,6 +1701,26 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY, "Изменить видимость переменной:"},
     {TR_CONFIG_SHOW_CUSTOM_VARIABLES, "Показать пользовательские переменные в городском обзоре"},
     {TR_CONFIG_ENABLE_GETTING_WHILE_STOCKPILED, "Разрешить \"Получение\", когда ресурс складируется"},
+    {TR_OVERLAY_HOUSING_SMALL_TENTS, "Малые шатры"},
+    {TR_OVERLAY_HOUSING_LARGE_TENTS, "Большие шатры"},
+    {TR_OVERLAY_HOUSING_SMALL_SHACKS, "Малые хижины"},
+    {TR_OVERLAY_HOUSING_LARGE_SHACKS, "Большие хижины"},
+    {TR_OVERLAY_HOUSING_SMALL_HOVELS, "Малые лачуги"},
+    {TR_OVERLAY_HOUSING_LARGE_HOVELS, "Большие лачуги"},
+    {TR_OVERLAY_HOUSING_SMALL_CASAS, "Малые Casas"},
+    {TR_OVERLAY_HOUSING_LARGE_CASAS, "Большие Casas"},
+    {TR_OVERLAY_HOUSING_SMALL_INSULAE, "Малые Insulae"},
+    {TR_OVERLAY_HOUSING_MEDIUM_INSULAE, "Средние Insulae"},
+    {TR_OVERLAY_HOUSING_LARGE_INSULAE, "Большие Insulae"},
+    {TR_OVERLAY_HOUSING_GRAND_INSULAE, "Великолепные Insulae"},
+    {TR_OVERLAY_HOUSING_SMALL_VILLAS, "Малые виллы"},
+    {TR_OVERLAY_HOUSING_MEDIUM_VILLAS, "Средние виллы"},
+    {TR_OVERLAY_HOUSING_LARGE_VILLAS, "Большие виллы"},
+    {TR_OVERLAY_HOUSING_GRAND_VILLAS, "Великолепные виллы"},
+    {TR_OVERLAY_HOUSING_SMALL_PALACES, "Малые дворцы"},
+    {TR_OVERLAY_HOUSING_MEDIUM_PALACES, "Средние дворцы"},
+    {TR_OVERLAY_HOUSING_LARGE_PALACES, "Большие дворцы"},
+    {TR_OVERLAY_HOUSING_LUXURY_PALACES, "Роскошные дворцы"}
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

@@ -1464,6 +1464,26 @@ static translation_string all_strings[] = {
     {TR_BUILDING_FORT_JAVELIN, "Ausiliari - Giavellottieri" },
     {TR_WINDOW_ADVISOR_JAVELIN, "Giavellottieri" },
     {TR_WARNING_NO_ARMOURY, "Costruisci un'armeria per consegnare armi alle scuderie" },
+    {TR_OVERLAY_HOUSING_SMALL_TENTS, "Piccole tende"},
+    {TR_OVERLAY_HOUSING_LARGE_TENTS, "Grandi tende"},
+    {TR_OVERLAY_HOUSING_SMALL_SHACKS, "Piccole baracche"},
+    {TR_OVERLAY_HOUSING_LARGE_SHACKS, "Grandi baracche"},
+    {TR_OVERLAY_HOUSING_SMALL_HOVELS, "Piccoli tuguri"},
+    {TR_OVERLAY_HOUSING_LARGE_HOVELS, "Grandi tuguri"},
+    {TR_OVERLAY_HOUSING_SMALL_CASAS, "Piccole Casas"},
+    {TR_OVERLAY_HOUSING_LARGE_CASAS, "Grandi Casas"},
+    {TR_OVERLAY_HOUSING_SMALL_INSULAE, "Piccole Insulae"},
+    {TR_OVERLAY_HOUSING_MEDIUM_INSULAE, "Insulae medie"},
+    {TR_OVERLAY_HOUSING_LARGE_INSULAE, "Grandi Insulae"},
+    {TR_OVERLAY_HOUSING_GRAND_INSULAE, "Insulae grandiose"},
+    {TR_OVERLAY_HOUSING_SMALL_VILLAS, "Piccole ville"},
+    {TR_OVERLAY_HOUSING_MEDIUM_VILLAS, "Ville medie"},
+    {TR_OVERLAY_HOUSING_LARGE_VILLAS, "Grandi ville"},
+    {TR_OVERLAY_HOUSING_GRAND_VILLAS, "Ville grandiose"},
+    {TR_OVERLAY_HOUSING_SMALL_PALACES, "Piccoli palazzi"},
+    {TR_OVERLAY_HOUSING_MEDIUM_PALACES, "Palazzi medi"},
+    {TR_OVERLAY_HOUSING_LARGE_PALACES, "Grandi palazzi"},
+    {TR_OVERLAY_HOUSING_LUXURY_PALACES, "Palazzi lussuosi"}
 };
 
 void translation_italian(const translation_string **strings, int *num_strings)

@@ -109,6 +109,26 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_DUPLICATE_TITLE, "Klávesová zkratka již použita"},
     {TR_HOTKEY_DUPLICATE_MESSAGE, "Tato kombinace kláves je již přiřazena k následující akci:"},
     {TR_WARNING_SCREENSHOT_SAVED, "Snímek obrazovky byl uložen: "},
+    {TR_OVERLAY_HOUSING_SMALL_TENTS, "Malé stany"},
+    {TR_OVERLAY_HOUSING_LARGE_TENTS, "Velké stany"},
+    {TR_OVERLAY_HOUSING_SMALL_SHACKS, "Malé chatrče"},
+    {TR_OVERLAY_HOUSING_LARGE_SHACKS, "Velké chatrče"},
+    {TR_OVERLAY_HOUSING_SMALL_HOVELS, "Malé chýše"},
+    {TR_OVERLAY_HOUSING_LARGE_HOVELS, "Velké chýše"},
+    {TR_OVERLAY_HOUSING_SMALL_CASAS, "Malé Casas"},
+    {TR_OVERLAY_HOUSING_LARGE_CASAS, "Velké Casas"},
+    {TR_OVERLAY_HOUSING_SMALL_INSULAE, "Malé Insulae"},
+    {TR_OVERLAY_HOUSING_MEDIUM_INSULAE, "Střední Insulae"},
+    {TR_OVERLAY_HOUSING_LARGE_INSULAE, "Velké Insulae"},
+    {TR_OVERLAY_HOUSING_GRAND_INSULAE, "Velkolepé Insulae"},
+    {TR_OVERLAY_HOUSING_SMALL_VILLAS, "Malé vily"},
+    {TR_OVERLAY_HOUSING_MEDIUM_VILLAS, "Střední vily"},
+    {TR_OVERLAY_HOUSING_LARGE_VILLAS, "Velké vily"},
+    {TR_OVERLAY_HOUSING_GRAND_VILLAS, "Velkolepé vily"},
+    {TR_OVERLAY_HOUSING_SMALL_PALACES, "Malé paláce"},
+    {TR_OVERLAY_HOUSING_MEDIUM_PALACES, "Střední paláce"},
+    {TR_OVERLAY_HOUSING_LARGE_PALACES, "Velké paláce"},
+    {TR_OVERLAY_HOUSING_LUXURY_PALACES, "Luxusní paláce"}
 };
 
 void translation_czech(const translation_string **strings, int *num_strings)

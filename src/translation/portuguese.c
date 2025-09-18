@@ -1621,7 +1621,27 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_SELECT_ACTION, "Selecionar ação"},
     {TR_EDITOR_SCENARIO_SELECT_CONDITION, "Selecionar condição"},
     {TR_HOTKEY_SHOW_OVERLAY_ENEMY, "Visão de inimigos"},
-    {TR_PARAMETER_TYPE_REQUEST, "Solicitação"}
+    {TR_PARAMETER_TYPE_REQUEST, "Solicitação"},
+    {TR_OVERLAY_HOUSING_SMALL_TENTS, "Pequenas tendas"},
+    {TR_OVERLAY_HOUSING_LARGE_TENTS, "Grandes tendas"},
+    {TR_OVERLAY_HOUSING_SMALL_SHACKS, "Pequenas cabanas"},
+    {TR_OVERLAY_HOUSING_LARGE_SHACKS, "Grandes cabanas"},
+    {TR_OVERLAY_HOUSING_SMALL_HOVELS, "Pequenos casebres"},
+    {TR_OVERLAY_HOUSING_LARGE_HOVELS, "Grandes casebres"},
+    {TR_OVERLAY_HOUSING_SMALL_CASAS, "Pequenas Casas"},
+    {TR_OVERLAY_HOUSING_LARGE_CASAS, "Grandes Casas"},
+    {TR_OVERLAY_HOUSING_SMALL_INSULAE, "Pequenas Insulae"},
+    {TR_OVERLAY_HOUSING_MEDIUM_INSULAE, "Médias Insulae"},
+    {TR_OVERLAY_HOUSING_LARGE_INSULAE, "Grandes Insulae"},
+    {TR_OVERLAY_HOUSING_GRAND_INSULAE, "Insulae grandiosas"},
+    {TR_OVERLAY_HOUSING_SMALL_VILLAS, "Pequenas vilas"},
+    {TR_OVERLAY_HOUSING_MEDIUM_VILLAS, "Vilas médias"},
+    {TR_OVERLAY_HOUSING_LARGE_VILLAS, "Grandes vilas"},
+    {TR_OVERLAY_HOUSING_GRAND_VILLAS, "Vilas grandiosas"},
+    {TR_OVERLAY_HOUSING_SMALL_PALACES, "Pequenos palácios"},
+    {TR_OVERLAY_HOUSING_MEDIUM_PALACES, "Palácios médios"},
+    {TR_OVERLAY_HOUSING_LARGE_PALACES, "Grandes palácios"},
+    {TR_OVERLAY_HOUSING_LUXURY_PALACES, "Palácios luxuosos"}
 };
 
 void translation_portuguese(const translation_string **strings, int *num_strings)

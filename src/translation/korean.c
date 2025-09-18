@@ -1630,6 +1630,26 @@ static translation_string all_strings[] = {
 	{TR_FIX_KOREAN_BUILDING_DOCTORS_CLINIC, "진료소"},
 	{TR_OVERLAY_LOGISTICS, "물류"},
     {TR_HOTKEY_SHOW_OVERLAY_RELATIVE, "현황 보기 종료"},
+    {TR_OVERLAY_HOUSING_SMALL_TENTS, "작은 천막"},
+    {TR_OVERLAY_HOUSING_LARGE_TENTS, "큰 천막"},
+    {TR_OVERLAY_HOUSING_SMALL_SHACKS, "작은 오두막"},
+    {TR_OVERLAY_HOUSING_LARGE_SHACKS, "큰 오두막"},
+    {TR_OVERLAY_HOUSING_SMALL_HOVELS, "작은 초가집"},
+    {TR_OVERLAY_HOUSING_LARGE_HOVELS, "큰 초가집"},
+    {TR_OVERLAY_HOUSING_SMALL_CASAS, "작은 Casas"},
+    {TR_OVERLAY_HOUSING_LARGE_CASAS, "큰 Casas"},
+    {TR_OVERLAY_HOUSING_SMALL_INSULAE, "작은 Insulae"},
+    {TR_OVERLAY_HOUSING_MEDIUM_INSULAE, "중간 Insulae"},
+    {TR_OVERLAY_HOUSING_LARGE_INSULAE, "큰 Insulae"},
+    {TR_OVERLAY_HOUSING_GRAND_INSULAE, "웅장한 Insulae"},
+    {TR_OVERLAY_HOUSING_SMALL_VILLAS, "작은 빌라"},
+    {TR_OVERLAY_HOUSING_MEDIUM_VILLAS, "중간 빌라"},
+    {TR_OVERLAY_HOUSING_LARGE_VILLAS, "큰 빌라"},
+    {TR_OVERLAY_HOUSING_GRAND_VILLAS, "웅장한 빌라"},
+    {TR_OVERLAY_HOUSING_SMALL_PALACES, "작은 궁전"},
+    {TR_OVERLAY_HOUSING_MEDIUM_PALACES, "중간 궁전"},
+    {TR_OVERLAY_HOUSING_LARGE_PALACES, "큰 궁전"},
+    {TR_OVERLAY_HOUSING_LUXURY_PALACES, "호화로운 궁전"}
 };
 
 void translation_korean(const translation_string **strings, int *num_strings)

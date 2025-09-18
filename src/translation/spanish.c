@@ -1479,7 +1479,27 @@ static translation_string all_strings[] = {
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TITLE, "Ruta de usuario modificada"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TEXT, "La ruta de usuario se ha modificado correctamente.\n¿Quieres copiar tus archivos?"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_OVERWRITE, "Sobrescribir archivos existentes"},
-    {TR_FIGURE_TYPE_ARMORY_CARTPUSHER, "Repartidor de armería"}
+    {TR_FIGURE_TYPE_ARMORY_CARTPUSHER, "Repartidor de armería"},
+    {TR_OVERLAY_HOUSING_SMALL_TENTS, "Pequeñas tiendas"},
+    {TR_OVERLAY_HOUSING_LARGE_TENTS, "Grandes tiendas"},
+    {TR_OVERLAY_HOUSING_SMALL_SHACKS, "Pequeñas chozas"},
+    {TR_OVERLAY_HOUSING_LARGE_SHACKS, "Grandes chozas"},
+    {TR_OVERLAY_HOUSING_SMALL_HOVELS, "Pequeños tugurios"},
+    {TR_OVERLAY_HOUSING_LARGE_HOVELS, "Grandes tugurios"},
+    {TR_OVERLAY_HOUSING_SMALL_CASAS, "Pequeñas Casas"},
+    {TR_OVERLAY_HOUSING_LARGE_CASAS, "Grandes Casas"},
+    {TR_OVERLAY_HOUSING_SMALL_INSULAE, "Pequeñas Insulae"},
+    {TR_OVERLAY_HOUSING_MEDIUM_INSULAE, "Insulae medianas"},
+    {TR_OVERLAY_HOUSING_LARGE_INSULAE, "Grandes Insulae"},
+    {TR_OVERLAY_HOUSING_GRAND_INSULAE, "Insulae grandiosas"},
+    {TR_OVERLAY_HOUSING_SMALL_VILLAS, "Pequeñas villas"},
+    {TR_OVERLAY_HOUSING_MEDIUM_VILLAS, "Villas medianas"},
+    {TR_OVERLAY_HOUSING_LARGE_VILLAS, "Grandes villas"},
+    {TR_OVERLAY_HOUSING_GRAND_VILLAS, "Villas grandiosas"},
+    {TR_OVERLAY_HOUSING_SMALL_PALACES, "Pequeños palacios"},
+    {TR_OVERLAY_HOUSING_MEDIUM_PALACES, "Palacios medianos"},
+    {TR_OVERLAY_HOUSING_LARGE_PALACES, "Grandes palacios"},
+    {TR_OVERLAY_HOUSING_LUXURY_PALACES, "Palacios lujosos"}
 																													  																			 												
 };
 

@@ -598,6 +598,7 @@ set(WIDGET_FILES
     ${PROJECT_SOURCE_DIR}/src/widget/city_overlay_education.c
     ${PROJECT_SOURCE_DIR}/src/widget/city_overlay_entertainment.c
     ${PROJECT_SOURCE_DIR}/src/widget/city_overlay_health.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city_overlay_housing.c
     ${PROJECT_SOURCE_DIR}/src/widget/city_overlay_other.c
     ${PROJECT_SOURCE_DIR}/src/widget/city_overlay_risks.c
     ${PROJECT_SOURCE_DIR}/src/widget/city_pause_menu.c

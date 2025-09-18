@@ -1755,6 +1755,26 @@ static translation_string all_strings[] = {
     {TR_CONFIG_CATEGORY_MANAGEMENT_ROADS, "Straßen"},
     {TR_CONFIG_CATEGORY_MANAGEMENT_ROADBLOCKS, "Straßensperren"},
     {TR_CONFIG_CATEGORY_MANAGEMENT_HOUSING, "Häuser"},
+    {TR_OVERLAY_HOUSING_SMALL_TENTS, "Kleine Zelte"},
+    {TR_OVERLAY_HOUSING_LARGE_TENTS, "Große Zelte"},
+    {TR_OVERLAY_HOUSING_SMALL_SHACKS, "Kleine Hütten"},
+    {TR_OVERLAY_HOUSING_LARGE_SHACKS, "Große Hütten"},
+    {TR_OVERLAY_HOUSING_SMALL_HOVELS, "Kleine Behausungen"},
+    {TR_OVERLAY_HOUSING_LARGE_HOVELS, "Große Behausungen"},
+    {TR_OVERLAY_HOUSING_SMALL_CASAS, "Kleine Casas"},
+    {TR_OVERLAY_HOUSING_LARGE_CASAS, "Große Casas"},
+    {TR_OVERLAY_HOUSING_SMALL_INSULAE, "Kleine Insulae"},
+    {TR_OVERLAY_HOUSING_MEDIUM_INSULAE, "Mittlere Insulae"},
+    {TR_OVERLAY_HOUSING_LARGE_INSULAE, "Große Insulae"},
+    {TR_OVERLAY_HOUSING_GRAND_INSULAE, "Prächtige Insulae"},
+    {TR_OVERLAY_HOUSING_SMALL_VILLAS, "Kleine Villen"},
+    {TR_OVERLAY_HOUSING_MEDIUM_VILLAS, "Mittlere Villen"},
+    {TR_OVERLAY_HOUSING_LARGE_VILLAS, "Große Villen"},
+    {TR_OVERLAY_HOUSING_GRAND_VILLAS, "Prächtige Villen"},
+    {TR_OVERLAY_HOUSING_SMALL_PALACES, "Kleine Paläste"},
+    {TR_OVERLAY_HOUSING_MEDIUM_PALACES, "Mittlere Paläste"},
+    {TR_OVERLAY_HOUSING_LARGE_PALACES, "Große Paläste"},
+    {TR_OVERLAY_HOUSING_LUXURY_PALACES, "Luxuspaläste"}
 };
 
 void translation_german(const translation_string **strings, int *num_strings)
