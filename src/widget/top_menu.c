@@ -52,7 +52,8 @@ enum {
     INFO_PEACE = 7,
     INFO_FAVOR = 8,
     INFO_RATINGS = 9,
-    INFO_HEALTH = 10 //health last since doesnt count towards goals
+    INFO_SINCE_GIFT = 10,
+    INFO_HEALTH = 11 //health last since doesnt count towards goals
 };
 typedef enum {
     WIDGET_LAYOUT_NONE = 0,   // fits nothing
@@ -156,6 +157,7 @@ static struct {
     top_menu_tooltip_range peace;
     top_menu_tooltip_range favor;
     top_menu_tooltip_range ratings;
+    top_menu_tooltip_range gift;
     top_menu_tooltip_range health;
     unsigned char savings_on_right;
     int menu_end;
@@ -175,6 +177,7 @@ static struct {
     int prosperity;
     int peace;
     int favor;
+    int gift;
     int health;
     int s_width;
     widget_layout_case_t current_layout;
@@ -346,7 +349,7 @@ static void reset_data_states(void)
     top_menu_tooltip_range *ranges[] = {
         &data.funds, &data.population, &data.date,
         &data.personal, &data.culture, &data.prosperity,
-        &data.peace, &data.favor, &data.ratings, &data.health
+        &data.peace, &data.favor, &data.ratings, &data.health, &data.gift
     };
 
     for (size_t i = 0; i < sizeof(ranges) / sizeof(ranges[0]); ++i) {
@@ -450,7 +453,7 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
             group3_start_x = data.date.end + PANEL_MARGIN; // force Panel margin here for visual consistency
         } else {
             // anchor to right edge
-            group3_start_x = bar_right_edge - w_rating - PANEL_MARGIN - data.extra_space;
+            group3_start_x = bar_right_edge - w_rating - PANEL_MARGIN - data.extra_space * 3;
             if (data.savings_on_right) {
                 group3_start_x -= (data.basic_margin + w_savings);
             }
@@ -549,6 +552,23 @@ static int draw_health_panel(int offset, int box_width, font_t font)
     return box_width;
 }
 
+static int draw_gift_panel(int offset, int box_width, font_t font)
+{
+    int since_gift = city_emperor_months_since_gift();
+    
+    color_t color = COLOR_WHITE;
+    if (since_gift >= 12) {
+        color = COLOR_FONT_GREEN;
+    }
+    
+    int gift_width = text_get_number_width(since_gift, ' ', "", font);
+    
+    int x = offset + (box_width - gift_width) / 2;
+    text_draw_number(since_gift, ' ', "", x + 10, 5, font, color);
+
+    return box_width;
+}
+
 static color_t get_savings_color_mask(void)
 {
     city_emperor_calculate_gift_costs(); //update gift costs before checking affordability
@@ -608,6 +628,7 @@ void widget_top_menu_draw(int force)
         drawn.peace == city_rating_peace() &&
         drawn.favor == city_rating_favor() &&
         drawn.health == city_health() &&
+        drawn.gift == city_emperor_months_since_gift() &&
         !detect_layout_change()) {
         return;
     }
@@ -686,7 +707,7 @@ void widget_top_menu_draw(int force)
         int x = data.ratings.start;
 
 
-        draw_black_panel(x, 0, block_w);
+        draw_black_panel(x, 0, block_w + 40);
         x += data.extra_space / 2;
         const int rating_ids[] = { INFO_CULTURE, INFO_PROSPERITY, INFO_PEACE, INFO_FAVOR };
         top_menu_tooltip_range *targets[] = { &data.culture, &data.prosperity, &data.peace, &data.favor };
@@ -696,8 +717,10 @@ void widget_top_menu_draw(int force)
             targets[i]->start = x_offset;
             targets[i]->end = x_offset + draw_rating_panel(x_offset, rating_ids[i], slot_w, gap_length, font, date_color);
         }
-        data.health.start = targets[3]->end;
-        data.health.end = draw_health_panel(targets[3]->end - gap_length * 2, slot_w / 2, font) + targets[3]->end;
+        data.gift.start = targets[3]->end;
+        data.gift.end = draw_gift_panel(targets[3]->end - gap_length * 2, slot_w / 2, font) + targets[3]->end;
+        data.health.start = data.gift.end;
+        data.health.end = draw_health_panel(data.gift.end - gap_length * 2, slot_w / 2, font) + data.gift.end;
 
     }
 
@@ -710,6 +733,7 @@ void widget_top_menu_draw(int force)
     drawn.prosperity = city_rating_prosperity();
     drawn.peace = city_rating_peace();
     drawn.favor = city_rating_favor();
+    drawn.gift = city_emperor_months_since_gift();
     drawn.health = city_health();
 }
 
@@ -764,6 +788,9 @@ static int get_info_id(int mouse_x, int mouse_y)
     if (mouse_x > data.favor.start && mouse_x < data.favor.end) {
         return INFO_FAVOR;
     }
+    if (mouse_x > data.gift.start && mouse_x < data.gift.end) {
+        return INFO_SINCE_GIFT;
+    }
     if (mouse_x > data.health.start && mouse_x < data.health.end) {
         return INFO_HEALTH;
     }
@@ -796,6 +823,7 @@ static int handle_mouse_menu(const mouse *m)
                 ratings_advisors_go_to(ADVISOR_FINANCIAL);
             }
         case INFO_PERSONAL:
+        case INFO_SINCE_GIFT:
             if (m->left.went_up) {
                 ratings_advisors_go_to(ADVISOR_IMPERIAL);
             }
@@ -883,6 +911,10 @@ int widget_top_menu_get_tooltip_text(tooltip_context *c)
                     c->extra_text_ids[0] = (city_rating_favor() <= 90)
                         ? 27 + city_rating_explanation_for(SELECTED_RATING_FAVOR) : 53;
                     return 4;
+                case INFO_SINCE_GIFT:
+                    c->text_group = 52;
+                    c->num_extra_texts = 0;
+                    return 50;
                 case INFO_HEALTH:
                     c->text_group = CUSTOM_TRANSLATION;
                     c->extra_text_groups[0] = 56;
