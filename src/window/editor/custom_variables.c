@@ -648,49 +648,41 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 }
 
-static void variable_item_tooltip(const grid_box_item *item, tooltip_context *c)
-{
-    unsigned int id = data.custom_variable_ids[item->index];
-
-    // Name
-    const uint8_t *name = scenario_custom_variable_get_name(id);
-    int name_x = item_buttons[1].x;
-    int name_w = item_buttons[1].width;
-    if (name && *name &&
-        item->mouse.x >= name_x &&
-        item->mouse.x <= name_x + name_w &&
-        text_get_width(name, FONT_SMALL_PLAIN) > name_w - 16) {
-        c->precomposed_text = name;
-        c->type = TOOLTIP_BUTTON;
-        return;
-    }
-
-    // Display Text
-    const uint8_t *display_text = scenario_custom_variable_get_text_display(id);
-    int display_x = item_buttons[3].x;
-    int display_w = item_buttons[3].width;
-    if (display_text && *display_text &&
-        item->mouse.x >= display_x &&
-        item->mouse.x <= display_x + display_w &&
-        text_get_width(display_text, FONT_SMALL_PLAIN) > display_w - 16) {
-        c->precomposed_text = display_text;
-        c->type = TOOLTIP_BUTTON;
-        return;
-    }
-}
-
 static void get_tooltip(tooltip_context *c)
 {
-    if (data.callback || data.selected && data.custom_variables_in_use && data.constant_button_focus_id == 1) {
-        c->precomposed_text = lang_get_string(CUSTOM_TRANSLATION,
-            data.selection_type == CHECKBOX_ALL_SELECTED ? TR_SELECT_NONE : TR_SELECT_ALL);
+    if (data.callback || (data.selected && data.custom_variables_in_use && data.constant_button_focus_id == 1)) {
+        c->precomposed_text = lang_get_string(
+            CUSTOM_TRANSLATION,
+            data.selection_type == CHECKBOX_ALL_SELECTED ? TR_SELECT_NONE : TR_SELECT_ALL
+        );
         c->type = TOOLTIP_BUTTON;
         return;
     }
 
     if (variable_buttons.focused_item.is_focused) {
-        const grid_box_item *item = &variable_buttons.focused_item;
-        variable_item_tooltip(item, c);
+        unsigned int id = data.custom_variable_ids[variable_buttons.focused_item.index];
+
+        // Name
+        if (data.item_buttons_focus_id == 2) {
+            const uint8_t *name = scenario_custom_variable_get_name(id);
+            int name_w = item_buttons[1].width;
+            if (name && *name && text_get_width(name, FONT_SMALL_PLAIN) > name_w - 16) {
+                c->precomposed_text = name;
+                c->type = TOOLTIP_BUTTON;
+                return;
+            }
+        }
+
+        // Display Text
+        if (data.item_buttons_focus_id == 4) {
+            const uint8_t *display_text = scenario_custom_variable_get_text_display(id);
+            int display_w = item_buttons[3].width;
+            if (display_text && *display_text && text_get_width(display_text, FONT_SMALL_PLAIN) > display_w - 16) {
+                c->precomposed_text = display_text;
+                c->type = TOOLTIP_BUTTON;
+                return;
+            }
+        }
     }
 }
 
