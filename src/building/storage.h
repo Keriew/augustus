@@ -154,6 +154,11 @@ void building_storage_set_data(int storage_id, building_storage new_data);
 resource_type building_storage_get_highest_quantity_resource(building *b);
 
 /**
+ * TODO: header
+ */
+int building_storage_summary_tooltip(building *b, char *tooltip_text, int max_length);
+
+/**
  * Cycles the resource state for the storage
  * @param storage_id Storage id
  * @param resource_id Resource id

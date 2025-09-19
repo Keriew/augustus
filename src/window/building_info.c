@@ -1170,7 +1170,7 @@ static void get_tooltip(tooltip_context *c)
         precomposed_text = window_building_dock_get_tooltip(&context);
     } else if (context.type == BUILDING_INFO_BUILDING && btype == BUILDING_DEPOT) {
         if (context.depot_selection.source || context.depot_selection.destination) {
-            window_building_depot_get_tooltip_source_destination(&translation);
+            precomposed_text = window_building_depot_get_tooltip_source_destination(&translation, &group_id);
         } else if (!context.depot_selection.resource) {
             window_building_depot_get_tooltip_main(&translation);
         }

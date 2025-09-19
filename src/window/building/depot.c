@@ -533,12 +533,32 @@ void window_building_depot_get_tooltip_main(int *translation)
     }
 }
 
-void window_building_depot_get_tooltip_source_destination(int *translation)
+
+const uint8_t *window_building_depot_get_tooltip_source_destination(int *translation, int *group_id)
 {
     if (data.storage_building_view_focus_button_id &&
         depot_select_storage_buttons[data.storage_building_view_focus_button_id - 1].parameter2) {
         *translation = TR_TOOLTIP_BUTTON_CENTER_CAMERA;
+        *group_id = CUSTOM_TRANSLATION;
+        return 0;
     }
+
+    // For storage selection buttons, show storage summary tooltip
+    if (data.storage_building_focus_button_id &&
+        depot_select_storage_buttons[data.storage_building_focus_button_id - 1].parameter2) {
+
+        building *storage_building = building_get(depot_select_storage_buttons[data.storage_building_focus_button_id - 1].parameter2);
+        if (storage_building) {
+            static char tooltip_buffer[512];
+            if (building_storage_summary_tooltip(storage_building, &tooltip_buffer, sizeof(tooltip_buffer))) {
+                // You'll need to add a way to return custom text instead of just translation keys
+                // This might require modifying the tooltip system to accept custom strings
+                return tooltip_buffer; // You'd need to define this
+                // Store tooltip_buffer somewhere accessible to the tooltip rendering system
+            }
+        }
+    }
+    return 0;
 }
 
 static void set_order_resource(const generic_button *button)

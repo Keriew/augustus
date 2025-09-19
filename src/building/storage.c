@@ -9,8 +9,13 @@
 #include "core/calc.h"
 #include "core/config.h"
 #include "core/log.h"
+#include "core/string.h"
+#include "city/resource.h"
+#include "empire/city.h"
 #include "game/resource.h"
 #include "game/save_version.h"
+
+
 
 #define STORAGE_ARRAY_SIZE_STEP 200
 
@@ -365,6 +370,74 @@ int building_storage_check_if_accepts_nothing(int storage_id)
     }
     return 1;
 }
+
+int building_storage_summary_tooltip(building *b, char *tooltip_text, int max_length)
+{
+    if (!b || !tooltip_text || max_length <= 0) {
+        return 0;
+    }
+
+    uint8_t *out = (uint8_t *) tooltip_text;
+    uint8_t *start = out;
+    int written = 0;
+
+    out[0] = '\0'; // initialize
+
+    const resource_list *list = b->type == BUILDING_WAREHOUSE ?
+        city_resource_get_available() : city_resource_get_available_foods();
+    for (unsigned int i = 0; i < list->size; i++) {
+        resource_type r = list->items[i];
+        const resource_data *res = resource_get_data(r);
+
+        building_storage_state state = building_storage_get_state(b, r, 1);
+        int quantity = building_storage_get_storage_state_quantity(b, r);
+
+        const uint8_t *resource_name = res->text;
+        const uint8_t *state_text = (const uint8_t *) "";
+
+        switch (state) {
+            case BUILDING_STORAGE_STATE_ACCEPTING:
+                state_text = lang_get_string(99, 7); // "Accepting"
+                break;
+            case BUILDING_STORAGE_STATE_NOT_ACCEPTING:
+                state_text = lang_get_string(99, 8); // "Not Accepting"
+                break;
+            case BUILDING_STORAGE_STATE_GETTING:
+                state_text = lang_get_string(99, 9 + (b->type == BUILDING_GRANARY)); // "Getting" 
+                break;
+            case BUILDING_STORAGE_STATE_MAINTAINING:
+                state_text = lang_get_string(CUSTOM_TRANSLATION, TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING);
+                break;
+            default:
+                state_text = (const uint8_t *) "";
+                break;
+        }
+
+        if (out != start) {
+            out = string_copy(string_from_ascii("\n"), out, max_length - (int) (out - start));
+        }
+
+        out = string_copy(resource_name, out, max_length - (int) (out - start));
+        out = string_copy(string_from_ascii(" - "), out, max_length - (int) (out - start));
+        out = string_copy(state_text, out, max_length - (int) (out - start));
+
+        if (state != BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
+            out = string_copy(string_from_ascii(" - "), out, max_length - (int) (out - start));
+            out += string_from_int(out, quantity, 0);
+        }
+
+        written = 1;
+
+        if ((int) (out - start) >= max_length) {
+            start[max_length - 1] = '\0';
+            break;
+        }
+    }
+
+    return written ? 1 : 0;
+}
+
+
 
 
 int building_storage_resource_max_storable(building *b, resource_type resource_id)
