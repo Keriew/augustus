@@ -7,6 +7,7 @@
 #include "building/warehouse.h"
 #include "city/resource.h"
 #include "city/view.h"
+#include "core/config.h"
 #include "figure/figure.h"
 #include "graphics/button.h"
 #include "graphics/generic_button.h"
@@ -165,14 +166,20 @@ static void calculate_available_storages(int building_id)
             continue;
         }
         building *store_building = building_get(storage_building_id);
-        if (store_building && building_is_active(store_building) && store_building->storage_id == i &&
-            building_storage_resource_max_storable(store_building, data.target_resource_id) > 0) {
+        int max_storable = building_storage_resource_max_storable(store_building, data.target_resource_id);
+        if (store_building && (building_is_active(store_building) || config_get(CONFIG_GP_CART_DEPOT_ADVANCED)) &&
+            store_building->storage_id == i && max_storable > 0) {
             data.available_storages++;
             if (b->data.depot.current_order.src_storage_id == store_building->id) {
                 has_valid_src = 1;
             }
             if (b->data.depot.current_order.dst_storage_id == store_building->id) {
                 has_valid_dst = 1;
+            }
+        } else {
+            if (config_get(CONFIG_GP_CART_DEPOT_ADVANCED)) {
+                //advanced orders: more options, allow inactive buildings, non-used storages etc
+
             }
         }
     }
