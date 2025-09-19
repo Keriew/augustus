@@ -651,10 +651,8 @@ static void handle_input(const mouse *m, const hotkeys *h)
 static void get_tooltip(tooltip_context *c)
 {
     if (data.callback || (data.selected && data.custom_variables_in_use && data.constant_button_focus_id == 1)) {
-        c->precomposed_text = lang_get_string(
-            CUSTOM_TRANSLATION,
-            data.selection_type == CHECKBOX_ALL_SELECTED ? TR_SELECT_NONE : TR_SELECT_ALL
-        );
+        c->precomposed_text = lang_get_string(CUSTOM_TRANSLATION,
+            data.selection_type == CHECKBOX_ALL_SELECTED ? TR_SELECT_NONE : TR_SELECT_ALL);
         c->type = TOOLTIP_BUTTON;
         return;
     }
