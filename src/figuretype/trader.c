@@ -434,9 +434,6 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
     return 0;
 }
 
-
-
-
 static void go_to_next_storage(figure *f)
 {
     map_point dst;
@@ -667,9 +664,9 @@ void figure_native_trader_action(figure *f)
             if (f->wait_ticks > 10) {
                 f->wait_ticks = 0;
                 building *b = building_get(f->destination_building_id);
+                int resource = get_native_trader_buy_resource(b); // preemptive check of resource to avoid standing idle
                 if (building_storage_get_permission(BUILDING_STORAGE_PERMISSION_NATIVES, b) &&
-                    f->trader_amount_bought < figure_trade_land_trade_units()) {
-                    int resource = get_native_trader_buy_resource(b);
+                    f->trader_amount_bought < figure_trade_land_trade_units() && resource != RESOURCE_NONE) {
                     int removed = 0;
                     if (b->type == BUILDING_GRANARY) {
                         removed = building_granary_try_remove_resource(b, resource, 1);
