@@ -1000,7 +1000,10 @@ void building_construction_place(void)
     if (!type) {
         return;
     }
-    if (city_finance_out_of_money()) {
+    if (city_finance_out_of_money() && type != BUILDING_WELL) {
+        if (building_count(BUILDING_WELL) > 5) { // allow wells even when out of money, but limit to 5
+            return;
+        }
         map_property_clear_constructing_and_deleted();
         city_warning_show(WARNING_OUT_OF_MONEY, NEW_WARNING_SLOT);
         return;

@@ -143,7 +143,16 @@ static int parse_integer(uint8_t *string, int *value)
 void game_cheat_activate(void)
 {
     if (window_is(WINDOW_BUILDING_INFO)) {
-        data.is_cheating = window_building_info_get_building_type() == BUILDING_WELL;
+        building_type b_type = window_building_info_get_building_type();
+        switch (b_type) { //add more buildings to prevent debugging softlock
+            case BUILDING_WELL:
+            case BUILDING_FOUNTAIN:
+                data.is_cheating = 1;
+                break;
+            default:
+                data.is_cheating = 0;
+                break;
+        }
     } else if (data.is_cheating && window_is(WINDOW_MESSAGE_DIALOG)) {
         data.is_cheating = 2;
         scenario_invasion_start_from_cheat();
@@ -338,7 +347,7 @@ static void game_cheat_change_weather(uint8_t *args)
         weather = WEATHER_NONE;
     }
     set_weather(1, intensity, weather);
-    show_warning(TR_CHEAT_CHANGE_WEATHER);   
+    show_warning(TR_CHEAT_CHANGE_WEATHER);
 }
 
 void game_cheat_parse_command(uint8_t *command)
