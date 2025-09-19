@@ -248,15 +248,17 @@ static void draw_variable_item(const grid_box_item *item)
 
     // Variable ID
     text_draw_number_centered(id, item->x + (data.callback ? 0 : CHECKBOX_ROW_WIDTH), item->y + 8,
-        32, FONT_NORMAL_BLACK);
+        32, FONT_SMALL_PLAIN);
 
     // Variable Name
     button_border_draw(item->x + item_buttons[1].x, item->y + item_buttons[1].y,
-        item_buttons[1].width, item_buttons[1].height, item->is_focused && data.item_buttons_focus_id == 2);
+    item_buttons[1].width, item_buttons[1].height, item->is_focused && data.item_buttons_focus_id == 2);
 
     if (name && *name) {
-        text_draw(name, item->x + item_buttons[1].x + 8, item->y + item_buttons[1].y + 8,
-            FONT_SMALL_PLAIN, 0);
+        int x = item->x + item_buttons[1].x + 8;
+        int y = item->y + item_buttons[1].y + 8;
+        int name_box_w = item_buttons[1].width - 16;
+        text_draw_ellipsized(name, x, y, name_box_w, FONT_SMALL_PLAIN, 0);
     }
 
     if (data.callback) {
@@ -278,8 +280,8 @@ static void draw_variable_item(const grid_box_item *item)
     button_border_draw(item->x + item_buttons[2].x, item->y + item_buttons[2].y, item_buttons[2].width,
         item_buttons[2].height, item->is_focused && data.item_buttons_focus_id == 3);
 
-    text_draw_number(value, ' ', "", item->x + item_buttons[2].x, item->y + item_buttons[2].y + 8,
-        FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+    text_draw_number(value, ' ', "", item->x + item_buttons[2].x + 4, item->y + item_buttons[2].y + 8,
+        FONT_SMALL_PLAIN, 0);
 
     // Display Text
     button_border_draw(item->x + item_buttons[3].x, item->y + item_buttons[3].y, item_buttons[3].width,
@@ -287,8 +289,10 @@ static void draw_variable_item(const grid_box_item *item)
 
     const uint8_t *display_text = scenario_custom_variable_get_text_display(id);
     if (display_text && *display_text) {
-        text_draw(display_text, item->x + item_buttons[3].x + 8, item->y + item_buttons[3].y + 8,
-            FONT_SMALL_PLAIN, 0);
+        int x = item->x + item_buttons[3].x + 8;
+        int y = item->y + item_buttons[3].y + 8;
+        int display_box_w = item_buttons[3].width - 16;
+        text_draw_ellipsized(display_text, x, y, display_box_w, FONT_SMALL_PLAIN, 0);
     }
 
     // Visible Checkbox
@@ -644,14 +648,50 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 }
 
-static void get_tooltip(tooltip_context *c)
+static void variable_item_tooltip(const grid_box_item *item, tooltip_context *c)
 {
-    if (data.callback || !data.selected || !data.custom_variables_in_use || data.constant_button_focus_id != 1) {
+    unsigned int id = data.custom_variable_ids[item->index];
+
+    // Name
+    const uint8_t *name = scenario_custom_variable_get_name(id);
+    int name_x = item_buttons[1].x;
+    int name_w = item_buttons[1].width;
+    if (name && *name &&
+        item->mouse.x >= name_x &&
+        item->mouse.x <= name_x + name_w &&
+        text_get_width(name, FONT_SMALL_PLAIN) > name_w - 16) {
+        c->precomposed_text = name;
+        c->type = TOOLTIP_BUTTON;
         return;
     }
-    c->precomposed_text = lang_get_string(CUSTOM_TRANSLATION,
-        data.selection_type == CHECKBOX_ALL_SELECTED ? TR_SELECT_NONE : TR_SELECT_ALL);
-    c->type = TOOLTIP_BUTTON;
+
+    // Display Text
+    const uint8_t *display_text = scenario_custom_variable_get_text_display(id);
+    int display_x = item_buttons[3].x;
+    int display_w = item_buttons[3].width;
+    if (display_text && *display_text &&
+        item->mouse.x >= display_x &&
+        item->mouse.x <= display_x + display_w &&
+        text_get_width(display_text, FONT_SMALL_PLAIN) > display_w - 16) {
+        c->precomposed_text = display_text;
+        c->type = TOOLTIP_BUTTON;
+        return;
+    }
+}
+
+static void get_tooltip(tooltip_context *c)
+{
+    if (data.callback || data.selected && data.custom_variables_in_use && data.constant_button_focus_id == 1) {
+        c->precomposed_text = lang_get_string(CUSTOM_TRANSLATION,
+            data.selection_type == CHECKBOX_ALL_SELECTED ? TR_SELECT_NONE : TR_SELECT_ALL);
+        c->type = TOOLTIP_BUTTON;
+        return;
+    }
+
+    if (variable_buttons.focused_item.is_focused) {
+        const grid_box_item *item = &variable_buttons.focused_item;
+        variable_item_tooltip(item, c);
+    }
 }
 
 void window_editor_custom_variables_show(void (*callback)(unsigned int id))
