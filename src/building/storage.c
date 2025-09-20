@@ -14,8 +14,7 @@
 #include "empire/city.h"
 #include "game/resource.h"
 #include "game/save_version.h"
-
-
+#include "graphics/text.h"
 
 #define STORAGE_ARRAY_SIZE_STEP 200
 
@@ -382,6 +381,11 @@ static const uint8_t *storage_state_text(building_storage_state state, building_
     }
 }
 
+static int spacing_helper(int phrase_width, int target_width)
+{
+    return 0;
+}
+
 int building_storage_summary_tooltip(building *b, char *tooltip_text, int max_length)
 {
     if (!b || !tooltip_text || max_length <= 0) return 0;
@@ -393,52 +397,85 @@ int building_storage_summary_tooltip(building *b, char *tooltip_text, int max_le
     for (unsigned int i = 0; i < list->size; i++) {
         const resource_data *res = resource_get_data(list->items[i]);
         if (!res) continue;
-        building_storage_state st = building_storage_get_state(b, list->items[i], 1);
-        int rn = string_length(res->text);
-        int sn = string_length(storage_state_text(st, b->type));
-        if (rn > name_w) name_w = rn;
-        if (sn > state_w) state_w = sn;
+        building_storage_state st = building_storage_get_state(b, list->items[i], 0);
+
+        int rn_pixels = text_get_width(res->text, FONT_SMALL_PLAIN);
+        int sn_pixels = text_get_width(storage_state_text(st, b->type), FONT_SMALL_PLAIN);
+        if (rn_pixels > name_w) name_w = rn_pixels;
+        if (sn_pixels > state_w) state_w = sn_pixels;
     }
 
     uint8_t *out = (uint8_t *) tooltip_text, *start = out;
     out[0] = '\0'; int written = 0;
+    int space_width = font_definition_for(FONT_SMALL_PLAIN)->space_width;
+
+    const uint8_t *space_str = (const uint8_t *) " ";
+    const uint8_t *newline_str = (const uint8_t *) "\n";
+    const uint8_t *dash_str = (const uint8_t *) " - ";
+    const uint8_t empty_char[] = { 0x01, 0x00 };  // treated as 1px due to letter spacing
 
     for (unsigned int i = 0; i < list->size; i++) {
         resource_type r = list->items[i];
         const resource_data *res = resource_get_data(r);
         if (!res) continue;
 
-        building_storage_state state = building_storage_get_state(b, r, 1);
+        building_storage_state state = building_storage_get_state(b, r, 0);
         int qty = building_storage_get_storage_state_quantity(b, r);
         const uint8_t *rn = res->text;
         const uint8_t *st = storage_state_text(state, b->type);
 
-        if (out != start) out = string_copy("\n", out, max_length - (out - start));
+        if (i > 0) {
+            out = string_copy(newline_str, out, max_length - (out - start));
+        }
 
         // resource col
         out = string_copy(rn, out, max_length - (out - start));
-        for (int pad = name_w - string_length(rn); pad-- > 0;) out = string_copy(" ", out, max_length - (out - start));
+        int resource_name_width = text_get_width(rn, FONT_SMALL_PLAIN);
+        int state_name_width = text_get_width(st, FONT_SMALL_PLAIN);
 
-        out = string_copy(" - ", out, max_length - (out - start));
+        int j = resource_name_width;
+        while (j < name_w) {
+            if (j + space_width <= name_w) {
+                out = string_copy(space_str, out, max_length - (out - start));
+                j += space_width;
+            } else {
+                out = string_copy(empty_char, out, max_length - (out - start));
+                j += 1;
+            }
+        }
+
+        out = string_copy(dash_str, out, max_length - (out - start));
 
         // state col
         out = string_copy(st, out, max_length - (out - start));
-        for (int pad = state_w - string_length(st); pad-- > 0;) out = string_copy(" ", out, max_length - (out - start));
+        j = state_name_width;
+        while (j < state_w) {
+            if (j + space_width <= state_w) {
+                out = string_copy(space_str, out, max_length - (out - start));
+                j += space_width;
+            } else {
+                out = string_copy(empty_char, out, max_length - (out - start));
+                j += 1;
+            }
+        }
 
         // quantity col only if relevant
         if (state != BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
-            out = string_copy(" - ", out, max_length - (out - start));
-            out += string_from_int(out, qty, 0);
+            out = string_copy(dash_str, out, max_length - (out - start));
+            uint8_t qty_buf[12];
+            string_from_int(qty_buf, qty, 0);
+            out = string_copy(qty_buf, out, max_length - (out - start));
         }
 
         written = 1;
-        if ((out - start) >= max_length) { start[max_length - 1] = '\0'; break; }
+        if ((out - start) >= max_length) {
+            start[max_length - 1] = '\0';
+            break;
+        }
     }
 
     return written;
 }
-
-
 
 int building_storage_resource_max_storable(building *b, resource_type resource_id)
 {

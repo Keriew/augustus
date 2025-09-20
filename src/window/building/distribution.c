@@ -1247,15 +1247,18 @@ void window_building_draw_storage_foreground(building_info_context *c)
 
 void window_building_draw_storage_orders(building_info_context *c)
 {
-    int label_id = is_granary(c) ? 98 : 99;
+    int group_id = is_granary(c) ? 98 : 99;
+    int storage_id = building_get(c->building_id)->storage_id;
+    lang_fragment instructions_header[] = {
+    { LANG_FRAG_LABEL, .text_group = group_id, .text_id = 0},
+    { LANG_FRAG_NUMBER, .number = storage_id },
+    { LANG_FRAG_LABEL,  .text_group = CUSTOM_TRANSLATION, TR_BUILDING_INFO_INSTRUCTIONS},
+    };
     int y_offset = window_building_get_vertical_offset(c, 28);
     c->help_id = is_granary(c) ? 3 : 4;
-
     outer_panel_draw(c->x_offset, y_offset, 29, 28);
-    lang_text_draw_centered(label_id, is_granary(c) ? 6 : 3,
-        c->x_offset, y_offset + 10,
-        BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
-
+    lang_text_draw_sequence_centered(instructions_header, 3, c->x_offset, y_offset + 10,
+         BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
     if (!data.showing_special_orders || data.building_id != c->building_id) {
         const resource_list *list = is_granary(c) ? city_resource_get_potential_foods()
             : city_resource_get_potential();
