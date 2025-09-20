@@ -181,7 +181,9 @@ static void setup_buttons_for_selected_depot(void)
             continue;
         }
         building *store_building = building_get(storage->building_id);
-        if (store_building) {
+        // Only include inactive storages that have a valid storage_id and weren't already counted in first pass
+        int max_storable = building_storage_resource_max_storable(store_building, data.target_resource_id);
+        if ((max_storable == 0 || !building_is_active(store_building)) && store_building->storage_id > 0) {
             row_count++;
             if (row_count <= scrollbar.scroll_position) {
                 continue;
@@ -225,8 +227,7 @@ static void calculate_available_storages(int building_id)
             if ((unsigned int) b->data.depot.current_order.dst_storage_id == store_building->id) {
                 has_valid_dst = 1;
             }
-        } else if (config_get(CONFIG_GP_CART_DEPOT_ADVANCED)) {
-
+        } else if ((!building_is_active(store_building) || max_storable == 0) && store_building->storage_id > 0) {
             data.secondary_storages++;
             if ((unsigned int) b->data.depot.current_order.src_storage_id == store_building->id) {
                 has_valid_src = 1;
@@ -527,8 +528,13 @@ void window_building_draw_depot_select_source_destination(building_info_context 
     // Second pass: draw inactive storages
     for (int i = 0; i < storage_array_size && drawn_rows < MAX_VISIBLE_ROWS; i++) {
         const data_storage *storage = building_storage_get_array_entry(i);
+        if (!storage->in_use || !storage->building_id) {
+            continue;
+        }
         building *store_building = building_get(storage->building_id);
-        if (store_building) {
+        // Only include inactive storages that have a valid storage_id and weren't already counted in first pass
+        int max_storable = building_storage_resource_max_storable(store_building, data.target_resource_id);
+        if ((max_storable == 0 || !building_is_active(store_building)) && store_building->storage_id > 0) {
             row_count++;
             if (row_count <= scrollbar.scroll_position) {
                 continue;
@@ -544,7 +550,7 @@ void window_building_draw_depot_select_source_destination(building_info_context 
             image_draw(assets_lookup_image_id(ASSET_UI_GEAR_ICON),
                 c->x_offset + 27, y_offset + 49 + ROW_HEIGHT * drawn_rows, COLOR_MASK_NONE, SCALE_NONE);
 
-            // Middle button - select storage
+            // Middle button - select storage (disabled for inactive storages)
             button_border_draw(c->x_offset + 18 + BLOCK_SIZE * 2, y_offset + 46 + ROW_HEIGHT * drawn_rows,
                 base_width, 22, 0);
             text_draw_label_and_number_centered(lang_get_string(28, bld->type), bld->storage_id, "",
