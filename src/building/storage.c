@@ -371,72 +371,72 @@ int building_storage_check_if_accepts_nothing(int storage_id)
     return 1;
 }
 
+static const uint8_t *storage_state_text(building_storage_state state, building_type bt)
+{
+    switch (state) {
+        case BUILDING_STORAGE_STATE_ACCEPTING:   return lang_get_string(99, 7);
+        case BUILDING_STORAGE_STATE_NOT_ACCEPTING: return lang_get_string(99, 8);
+        case BUILDING_STORAGE_STATE_GETTING:     return lang_get_string(99, 9 + (bt == BUILDING_GRANARY));
+        case BUILDING_STORAGE_STATE_MAINTAINING: return lang_get_string(CUSTOM_TRANSLATION, TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING);
+        default: return (const uint8_t *) "";
+    }
+}
+
 int building_storage_summary_tooltip(building *b, char *tooltip_text, int max_length)
 {
-    if (!b || !tooltip_text || max_length <= 0) {
-        return 0;
+    if (!b || !tooltip_text || max_length <= 0) return 0;
+
+    const resource_list *list = (b->type == BUILDING_WAREHOUSE)
+        ? city_resource_get_available() : city_resource_get_available_foods();
+
+    int name_w = 0, state_w = 0;
+    for (unsigned int i = 0; i < list->size; i++) {
+        const resource_data *res = resource_get_data(list->items[i]);
+        if (!res) continue;
+        building_storage_state st = building_storage_get_state(b, list->items[i], 1);
+        int rn = string_length(res->text);
+        int sn = string_length(storage_state_text(st, b->type));
+        if (rn > name_w) name_w = rn;
+        if (sn > state_w) state_w = sn;
     }
 
-    uint8_t *out = (uint8_t *) tooltip_text;
-    uint8_t *start = out;
-    int written = 0;
+    uint8_t *out = (uint8_t *) tooltip_text, *start = out;
+    out[0] = '\0'; int written = 0;
 
-    out[0] = '\0'; // initialize
-
-    const resource_list *list = b->type == BUILDING_WAREHOUSE ?
-        city_resource_get_available() : city_resource_get_available_foods();
     for (unsigned int i = 0; i < list->size; i++) {
         resource_type r = list->items[i];
         const resource_data *res = resource_get_data(r);
+        if (!res) continue;
 
         building_storage_state state = building_storage_get_state(b, r, 1);
-        int quantity = building_storage_get_storage_state_quantity(b, r);
+        int qty = building_storage_get_storage_state_quantity(b, r);
+        const uint8_t *rn = res->text;
+        const uint8_t *st = storage_state_text(state, b->type);
 
-        const uint8_t *resource_name = res->text;
-        const uint8_t *state_text = (const uint8_t *) "";
+        if (out != start) out = string_copy("\n", out, max_length - (out - start));
 
-        switch (state) {
-            case BUILDING_STORAGE_STATE_ACCEPTING:
-                state_text = lang_get_string(99, 7); // "Accepting"
-                break;
-            case BUILDING_STORAGE_STATE_NOT_ACCEPTING:
-                state_text = lang_get_string(99, 8); // "Not Accepting"
-                break;
-            case BUILDING_STORAGE_STATE_GETTING:
-                state_text = lang_get_string(99, 9 + (b->type == BUILDING_GRANARY)); // "Getting" 
-                break;
-            case BUILDING_STORAGE_STATE_MAINTAINING:
-                state_text = lang_get_string(CUSTOM_TRANSLATION, TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING);
-                break;
-            default:
-                state_text = (const uint8_t *) "";
-                break;
-        }
+        // resource col
+        out = string_copy(rn, out, max_length - (out - start));
+        for (int pad = name_w - string_length(rn); pad-- > 0;) out = string_copy(" ", out, max_length - (out - start));
 
-        if (out != start) {
-            out = string_copy(string_from_ascii("\n"), out, max_length - (int) (out - start));
-        }
+        out = string_copy(" - ", out, max_length - (out - start));
 
-        out = string_copy(resource_name, out, max_length - (int) (out - start));
-        out = string_copy(string_from_ascii(" - "), out, max_length - (int) (out - start));
-        out = string_copy(state_text, out, max_length - (int) (out - start));
+        // state col
+        out = string_copy(st, out, max_length - (out - start));
+        for (int pad = state_w - string_length(st); pad-- > 0;) out = string_copy(" ", out, max_length - (out - start));
 
+        // quantity col only if relevant
         if (state != BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
-            out = string_copy(string_from_ascii(" - "), out, max_length - (int) (out - start));
-            out += string_from_int(out, quantity, 0);
+            out = string_copy(" - ", out, max_length - (out - start));
+            out += string_from_int(out, qty, 0);
         }
 
         written = 1;
-
-        if ((int) (out - start) >= max_length) {
-            start[max_length - 1] = '\0';
-            break;
-        }
+        if ((out - start) >= max_length) { start[max_length - 1] = '\0'; break; }
     }
 
-    return written ? 1 : 0;
+    return written;
 }
-
 
 
 
