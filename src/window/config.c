@@ -70,6 +70,7 @@ enum {
     TYPE_HEADER,
     TYPE_CHECKBOX,
     TYPE_SELECT,
+    TYPE_SELECT_LIST,     //  dropdown select list using window/select_list.c
     TYPE_NUMERICAL_DESC, //  label line for a slider
     TYPE_NUMERICAL_RANGE
 };
@@ -77,7 +78,12 @@ enum {
 enum {
     SELECT_LANGUAGE,
     SELECT_PLAYER_NAME,
-    SELECT_USER_DIRECTORY
+    SELECT_USER_DIRECTORY,
+    SELECT_DIFFICULTY_LIST
+};
+
+enum {
+    SELECT_LIST_DIFFICULTY
 };
 
 enum {
@@ -150,6 +156,7 @@ static const uint8_t *display_text_city_sounds_volume(void);
 static const uint8_t *display_text_video_volume(void);
 static const uint8_t *display_text_scroll_speed(void);
 static const uint8_t *display_text_difficulty(void);
+static const uint8_t *display_text_select_list_difficulty(void);
 static const uint8_t *display_text_max_grand_temples(void);
 static const uint8_t *display_text_autosave_slots(void);
 static const uint8_t *display_text_default_game_speed(void);
@@ -268,8 +275,7 @@ static config_widget ui_widgets_by_category[CATEGORY_UI_COUNT][MAX_WIDGETS] = {
 
 // ---------- Difficulty (GAMEPLAY) ----------------------
 static config_widget page_difficulty[] = {
-    {TYPE_NUMERICAL_DESC, RANGE_DIFFICULTY, TR_CONFIG_DIFFICULTY, NULL, 0, 1, ITEM_BASE_H, 0},
-    {TYPE_NUMERICAL_RANGE, RANGE_DIFFICULTY, 0, display_text_difficulty, 0, 1, ITEM_BASE_H, 2},
+    {TYPE_SELECT_LIST, SELECT_DIFFICULTY_LIST, TR_CONFIG_DIFFICULTY, display_text_select_list_difficulty, 0, 1, ITEM_BASE_H, 8},
     {TYPE_CHECKBOX, CONFIG_ORIGINAL_GODS_EFFECTS, TR_CONFIG_GODS_EFFECTS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_CHECKBOX, CONFIG_GP_CH_JEALOUS_GODS, TR_CONFIG_JEALOUS_GODS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_CHECKBOX, CONFIG_GP_CH_GLOBAL_LABOUR, TR_CONFIG_GLOBAL_LABOUR, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
@@ -342,6 +348,15 @@ typedef struct {
 } numerical_range_widget;
 
 typedef struct {
+    const translation_key *items;  // array of translation keys for items
+    int num_items;                  // number of items in the list
+    int *value;                     // pointer to config value
+    int (*get_display_value)(int config_value);  // convert config value to display index
+    int (*set_config_value)(int selected_index); // convert selected index to config value
+    select_list_style style;        // visual style for the dropdown
+} select_list_widget;
+
+typedef struct {
     list_box_type *lb;
     int count;
     int page_id;
@@ -386,10 +401,16 @@ static const unsigned char page_is_category_helper[CONFIG_PAGES] = {
 static void button_language_select(const generic_button *button);
 static void button_edit_player_name(const generic_button *button);
 static void button_change_user_directory(const generic_button *button);
+static void button_difficulty_select_list(const generic_button *button);
+static void on_select_list_item(int selected_index);
+
+// Select list state
+static int select_list_button_id = 0;
 static generic_button select_buttons[] = {
     {225, 0, 200, 24, button_language_select},
     {225, 0, 200, 24, button_edit_player_name},
     {225, 0, 200, 24, button_change_user_directory},
+    {225, 0, 200, 24, button_difficulty_select_list},
 };
 
 //  Numeric ranges (slider bar geometry + value binding populated in set_range_values()).
@@ -411,6 +432,23 @@ static numerical_range_widget ranges[] = {
     { 50, 30,   1,  20,  1, 0},   //  autosave slots
     { 50, 30,   0,  TOTAL_GAME_SPEEDS - 1,  1, 0},   //  default game speed index
 
+};
+
+//  Select list widgets (dropdown lists using window/select_list.c)
+static int difficulty_get_display_value(int config_value);
+static int difficulty_set_config_value(int selected_index);
+
+static const translation_key difficulty_items[] = {
+    TR_PARAMETER_VALUE_DIFFICULTY_VERY_EASY,
+    TR_PARAMETER_VALUE_DIFFICULTY_EASY,
+    TR_PARAMETER_VALUE_DIFFICULTY_NORMAL,
+    TR_PARAMETER_VALUE_DIFFICULTY_HARD,
+    TR_PARAMETER_VALUE_DIFFICULTY_VERY_HARD
+};
+
+static select_list_widget select_lists[] = {
+    // DIFFICULTY: Maps config values 0-4 to difficulty translation keys
+    { difficulty_items, 5, 0, difficulty_get_display_value, difficulty_set_config_value, SELECT_LIST_STYLE_BUTTONS}
 };
 
 //  Bottom buttons & page tabs
@@ -779,6 +817,26 @@ static int config_change_string_player_name(int key)
     return 1;
 }
 
+static int select_list_direct_mapping_get(int config_value)
+{
+    return config_value;
+}
+
+static int select_list_direct_mapping_set(int selected_index)
+{
+    return selected_index;
+}
+
+static int difficulty_get_display_value(int config_value)
+{
+    return select_list_direct_mapping_get(config_value);
+}
+
+static int difficulty_set_config_value(int selected_index)
+{
+    return select_list_direct_mapping_set(selected_index);
+}
+
 //Display text functions 
 
 static uint8_t *percent_buf(int key)
@@ -850,6 +908,13 @@ static const uint8_t *display_text_difficulty(void)
 {
     return lang_get_string(153, data.config_values[CONFIG_ORIGINAL_DIFFICULTY].new_value + 1);
 }
+
+static const uint8_t *display_text_select_list_difficulty(void)
+{
+    int config_val = data.config_values[CONFIG_ORIGINAL_DIFFICULTY].new_value;
+    int display_index = select_lists[SELECT_LIST_DIFFICULTY].get_display_value(config_val);
+    return translation_for(select_lists[SELECT_LIST_DIFFICULTY].items[display_index]);
+}
 static const uint8_t *display_text_max_grand_temples(void)
 {
     string_from_int(data.display_text, data.config_values[CONFIG_GP_CH_MAX_GRAND_TEMPLES].new_value, 0);
@@ -885,6 +950,12 @@ static void set_range_values(void)
     ranges[RANGE_MAX_AUTOSAVE_SLOTS].value = &data.config_values[CONFIG_GP_CH_MAX_AUTOSAVE_SLOTS].new_value;
     ranges[RANGE_DEFAULT_GAME_SPEED].value = &data.config_values[CONFIG_GP_CH_DEFAULT_GAME_SPEED].new_value;
 }
+
+static void set_select_list_values(void)
+{
+    select_lists[SELECT_LIST_DIFFICULTY].value = &data.config_values[CONFIG_ORIGINAL_DIFFICULTY].new_value;
+}
+
 static void set_custom_config_changes(void)
 {
     //  default
@@ -1115,6 +1186,22 @@ static void button_edit_player_name(const generic_button *button)
 static void button_change_user_directory(const generic_button *button)
 {
     window_user_path_setup_show(0);
+}
+
+static void button_difficulty_select_list(const generic_button *button)
+{
+    int height = button->parameter1;
+    select_list_widget *sl = &select_lists[SELECT_LIST_DIFFICULTY];
+
+    // Convert translation keys to text array
+    static const uint8_t *text_items[5]; // Max items for difficulty levels
+    for (int i = 0; i < sl->num_items; i++) {
+        text_items[i] = translation_for(sl->items[i]);
+    }
+
+    select_list_button_id = SELECT_LIST_DIFFICULTY;
+    window_select_list_show_text_styled(screen_dialog_offset_x(), screen_dialog_offset_y() + height, button,
+        text_items, sl->num_items, on_select_list_item, sl->style);
 }
 
 // Category list boxes 
@@ -1416,6 +1503,71 @@ static int  op_input_header(const config_widget *w, int x, int y, int avail_text
     return 0;
 }
 
+//  Select List
+
+/**
+ * @brief Callback handler for select list item selection
+ *
+ * This function is called when a user selects an item from any select list.
+ * It converts the selected index to a config value and updates the appropriate
+ * configuration setting.
+ *
+ * To add a new select list, add a new case here that maps your SELECT_LIST_*
+ * enum value to the appropriate CONFIG_* key.
+ */
+static void on_select_list_item(int selected_index)
+{
+    select_list_widget *sl = &select_lists[select_list_button_id];
+    int new_config_value = sl->set_config_value(selected_index);
+
+    // Find which config key this select list controls
+    // ADD NEW CASES HERE for additional select lists:
+    switch (select_list_button_id) {
+        case SELECT_LIST_DIFFICULTY:
+            data.config_values[CONFIG_ORIGINAL_DIFFICULTY].new_value = new_config_value;
+            break;
+
+            // Example for future additions:
+            // case SELECT_LIST_MY_NEW_OPTION:
+            //     data.config_values[CONFIG_MY_NEW_OPTION].new_value = new_config_value;
+            //     break;
+
+        default:
+            // Should not happen - indicates missing case for a select list
+            break;
+    }
+
+    update_has_changes();
+}
+
+static void op_measure_select_list(const config_widget *w, int avail_text_w, int *out_h)
+{
+    *out_h = ITEM_BASE_H;
+}
+
+static void op_draw_bg_select_list(const config_widget *w, int x, int y, int avail_text_w)
+{
+    text_draw(translation_for(w->description), x, y + 6 + w->y_offset, FONT_NORMAL_BLACK, 0);
+    const generic_button *btn = &select_buttons[w->subtype];
+    text_draw_centered(w->get_display_text(), btn->x + 8, y + btn->y + 6 + w->y_offset,
+                       btn->width - 16, FONT_NORMAL_BLACK, 0);
+}
+
+static void op_draw_fg_select_list(const config_widget *w, int x, int y, int avail_text_w, int focused)
+{
+    const generic_button *btn = &select_buttons[w->subtype];
+    button_border_draw(btn->x, y + btn->y + w->y_offset, btn->width, btn->height, focused);
+}
+
+static int op_input_select_list(const config_widget *w, int x, int y, int avail_text_w, const mouse *m, unsigned *focused)
+{
+    generic_button *btn = &select_buttons[w->subtype];
+    btn->parameter1 = y + w->y_offset; // for popup anchor
+
+    // Use the generic button handling for proper focus and input
+    return generic_buttons_handle_mouse(m, 0, y + w->y_offset, btn, 1, focused);
+}
+
 //  Ops table
 
 static const widget_ops ops_by_type[] = {
@@ -1424,6 +1576,7 @@ static const widget_ops ops_by_type[] = {
     [TYPE_HEADER] = {op_measure_header, op_draw_bg_header, op_draw_fg_header, op_input_header},
     [TYPE_CHECKBOX] = {op_measure_checkbox, op_draw_bg_checkbox, op_draw_fg_checkbox, op_input_checkbox},
     [TYPE_SELECT] = {op_measure_select, op_draw_bg_select, op_draw_fg_select, op_input_select},
+    [TYPE_SELECT_LIST] = {op_measure_select_list, op_draw_bg_select_list, op_draw_fg_select_list, op_input_select_list},
     [TYPE_NUMERICAL_DESC] = {op_measure_desc, op_draw_bg_desc, op_draw_fg_desc, op_input_desc},
     [TYPE_NUMERICAL_RANGE] = {op_measure_range, op_draw_bg_range, op_draw_fg_range, op_input_range},
 };
@@ -1932,6 +2085,7 @@ static void init(unsigned int page, int show_background_image)
 
     set_custom_config_changes();
     set_range_values();
+    set_select_list_values();
 
     //  language options (default + dirs)
 

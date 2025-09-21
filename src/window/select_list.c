@@ -1,7 +1,23 @@
+/**
+ * @file select_list.c
+ * @brief Dropdown widget supporting up to 40 items with auto positioning
+ *
+ * USAGE:
+ * - window_select_list_show() - translation groups
+ * - window_select_list_show_text() - text arrays
+ *
+ * EXAMPLE:
+ * static void callback(int selected_index) { handle_selection(selected_index); }
+ * window_select_list_show_text(x, y, button, options, count, callback);
+ *
+ * FEATURES: Auto positioning, 2-column layout for >20 items, mouse/keyboard support
+ */
+
 #include "select_list.h"
 
 #include "graphics/button.h"
 #include "graphics/color.h"
+#include "graphics/graphics.h"
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
 #include "graphics/screen.h"
@@ -19,6 +35,7 @@ enum {
 };
 
 static void button_select_item(const generic_button *button);
+static void draw_item(int item_id, int x, int y, int selected);
 
 static generic_button buttons_list1[MAX_ITEMS_PER_LIST] = {
     {5, 8, 190, 18, button_select_item, 0, 0},
@@ -76,6 +93,9 @@ static struct {
     int width;
     void (*callback)(int);
     unsigned int focus_button_id;
+    select_list_style style;
+    int item_height;
+    int item_v_spacing;
 } data;
 
 static unsigned int items_in_first_list(void)
@@ -118,13 +138,14 @@ static void determine_offsets(int x, int y, const generic_button *button)
     }
 }
 
-static void init_group(int x, int y, const generic_button *button, int group, int num_items, void (*callback)(int))
+static void init_group(int x, int y, const generic_button *button, int group, int num_items, void (*callback)(int), select_list_style style)
 {
     data.mode = MODE_GROUP;
     data.group = group;
     data.width = BASE_LIST_WIDTH;
     data.num_items = num_items;
     data.callback = callback;
+    data.style = style;
     for (int i = 0; i < MAX_ITEMS_PER_LIST; i++) {
         buttons_list1[i].width = data.width - 10;
     }
@@ -132,12 +153,13 @@ static void init_group(int x, int y, const generic_button *button, int group, in
 }
 
 static void init_text(int x, int y, const generic_button *button, const uint8_t **items, int num_items,
-    void (*callback)(int))
+    void (*callback)(int), select_list_style style)
 {
     data.mode = MODE_TEXT;
     data.items = items;
     data.num_items = num_items;
     data.callback = callback;
+    data.style = style;
     data.width = BASE_LIST_WIDTH;
     if (data.num_items <= MAX_ITEMS_PER_LIST) {
         for (int i = 0; i < num_items; i++) {
@@ -161,7 +183,8 @@ static void init_text(int x, int y, const generic_button *button, const uint8_t 
     determine_offsets(x, y, button);
 }
 
-static void draw_item(int item_id, int x, int y, int selected)
+// Style-specific drawing functions
+static void draw_item_default(int item_id, int x, int y, int selected)
 {
     color_t color = selected ? COLOR_FONT_BLUE : COLOR_BLACK;
     if (data.mode == MODE_GROUP) {
@@ -177,7 +200,35 @@ static void draw_item(int item_id, int x, int y, int selected)
     }
 }
 
-static void draw_foreground(void)
+static void draw_item_buttons(int item_id, int x, int y, int selected)
+{
+    // Draw individual button borders with gaps (spacing)
+    int text_y_offset = 6; // Center text vertically within button
+    int text_x_offset = 0; // No horizontal offset
+    x += data.x;
+    y += data.y;
+    // Draw button border
+    graphics_set_clip_rectangle(x, y - 2, data.width + 2, data.item_height + 4);
+    int height_blocks = data.item_height / BLOCK_SIZE;
+    unbordered_panel_draw(x, y, data.width / BLOCK_SIZE + 1, height_blocks + 1);
+    graphics_reset_clip_rectangle();
+    button_border_draw(x - 1, y, data.width + 2, data.item_height, selected);
+
+    color_t color = COLOR_MASK_NONE;
+    if (data.mode == MODE_GROUP) {
+        lang_text_draw_centered_colored(data.group, item_id, x + text_x_offset, y + text_y_offset, data.width,
+            FONT_NORMAL_BLACK, color);
+    } else {
+        if (data.width == BASE_LIST_WIDTH) {
+            text_draw_centered(data.items[item_id], x + text_x_offset, y + text_y_offset, BASE_LIST_WIDTH, FONT_NORMAL_BLACK, color);
+        } else {
+            text_draw_ellipsized(data.items[item_id], x + text_x_offset, y + text_y_offset,
+                data.width - 10, FONT_NORMAL_BLACK, color);
+        }
+    }
+}
+
+static void draw_foreground_default(void)
 {
     if (data.num_items > MAX_ITEMS_PER_LIST) {
         unsigned int max_first = items_in_first_list();
@@ -194,6 +245,55 @@ static void draw_foreground(void)
         for (unsigned int i = 0; i < data.num_items; i++) {
             draw_item(i, 5, 11 + 20 * i, i + 1 == data.focus_button_id);
         }
+    }
+}
+
+static void draw_foreground_buttons(void)
+{
+    if (data.num_items > MAX_ITEMS_PER_LIST) {
+        unsigned int max_first = items_in_first_list();
+        for (unsigned int i = 0; i < max_first; i++) {
+            draw_item(i, 0, data.item_v_spacing + data.item_height * i, i + 1 == data.focus_button_id);
+        }
+        for (unsigned int i = 0; i < data.num_items - max_first; i++) {
+            int highlight = MAX_ITEMS_PER_LIST + i + 1 == data.focus_button_id;
+            draw_item(i + max_first, 200, data.item_v_spacing + data.item_height * i, highlight);
+        }
+    } else {
+        for (unsigned int i = 0; i < data.num_items; i++) {
+            draw_item(i, 0, data.item_v_spacing + data.item_height * i, i + 1 == data.focus_button_id);
+        }
+    }
+}
+
+// Style dispatcher functions
+static void draw_item(int item_id, int x, int y, int selected)
+{
+    switch (data.style) {
+        case SELECT_LIST_STYLE_BUTTONS:
+            draw_item_buttons(item_id, x, y, selected);
+            break;
+        case SELECT_LIST_STYLE_DEFAULT:
+        default:
+            draw_item_default(item_id, x, y, selected);
+            break;
+    }
+}
+
+static void draw_foreground(void)
+{
+    switch (data.style) {
+        case SELECT_LIST_STYLE_BUTTONS:
+            data.item_height = 24;
+            data.item_v_spacing = 2;
+            draw_foreground_buttons();
+            break;
+        case SELECT_LIST_STYLE_DEFAULT:
+        default:
+            data.item_height = 20;
+            data.item_v_spacing = 0;
+            draw_foreground_default();
+            break;
     }
 }
 
@@ -249,18 +349,11 @@ void button_select_item(const generic_button *button)
 void window_select_list_show(int x, int y, const generic_button *button, int group, int num_items,
     void (*callback)(int))
 {
-    window_type window = {
-        WINDOW_SELECT_LIST,
-        window_draw_underlying_window,
-        draw_foreground,
-        handle_input
-    };
-    init_group(x, y, button, group, num_items, callback);
-    window_show(&window);
+    window_select_list_show_styled(x, y, button, group, num_items, callback, SELECT_LIST_STYLE_DEFAULT);
 }
 
-void window_select_list_show_text(int x, int y, const generic_button *button, const uint8_t **items, int num_items,
-    void (*callback)(int))
+void window_select_list_show_styled(int x, int y, const generic_button *button, int group, int num_items,
+    void (*callback)(int), select_list_style style)
 {
     window_type window = {
         WINDOW_SELECT_LIST,
@@ -268,6 +361,25 @@ void window_select_list_show_text(int x, int y, const generic_button *button, co
         draw_foreground,
         handle_input
     };
-    init_text(x, y, button, items, num_items, callback);
+    init_group(x, y, button, group, num_items, callback, style);
+    window_show(&window);
+}
+
+void window_select_list_show_text(int x, int y, const generic_button *button, const uint8_t **items, int num_items,
+    void (*callback)(int))
+{
+    window_select_list_show_text_styled(x, y, button, items, num_items, callback, SELECT_LIST_STYLE_DEFAULT);
+}
+
+void window_select_list_show_text_styled(int x, int y, const generic_button *button, const uint8_t **items, int num_items,
+    void (*callback)(int), select_list_style style)
+{
+    window_type window = {
+        WINDOW_SELECT_LIST,
+        window_draw_underlying_window,
+        draw_foreground,
+        handle_input
+    };
+    init_text(x, y, button, items, num_items, callback, style);
     window_show(&window);
 }
