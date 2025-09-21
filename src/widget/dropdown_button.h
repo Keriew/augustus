@@ -19,6 +19,7 @@ typedef struct {
     unsigned int num_buttons;    /**< Total count (origin + options) */
     short expanded;              /**< 1 = expanded, 0 = collapsed */
     int selected_index;          /**< Index of selected option (>=1), -1 if none */
+    int selected_value;          /**< Arbitrary value carried by selected option */
 
     /* Layout configuration */
     int width;                   /**< Dropdown width: 0 = auto (based on longest text) */
@@ -42,6 +43,21 @@ typedef struct {
  */
 void dropdown_button_init(dropdown_button *dd, complex_button *buttons,
     unsigned int num_buttons, int width, int spacing, int padding);
+
+/**
+ * @brief Simplified initialization: only x, y, fragment list, and count required.
+ *
+ * Creates a dropdown where the origin is the first fragment,
+ * and all other fragments become options. Buttons are defaulted to
+ * visible and enabled, auto-sized based on longest text + padding.
+ *
+ * @param x      X coordinate of origin button
+ * @param y      Y coordinate of origin button
+ * @param frags  Array of lang_fragments (size = count)
+ * @param count  Number of fragments (>=1)
+ * @param dd     Pointer to dropdown_button to initialize
+ */
+void dropdown_button_init_simple(int x, int y, const lang_fragment *frags, unsigned int count, dropdown_button *dd);
 
 /**
  * @brief Draw a dropdown (origin button + expanded options if expanded).

@@ -10,13 +10,13 @@
 static void draw_default_style(const complex_button *button)
 {
     const int inner_margin = 2; // small horizontal margin for text/images
-    const font_t font = button->enabled ? FONT_NORMAL_BLACK : FONT_NORMAL_WHITE;
+    const font_t font = !button->is_disabled ? FONT_NORMAL_BLACK : FONT_NORMAL_WHITE;
 
     graphics_set_clip_rectangle(button->x, button->y, button->width, button->height);
 
     int height_blocks = button->height / BLOCK_SIZE;
     unbordered_panel_draw(button->x, button->y, button->width / BLOCK_SIZE + 1, height_blocks + 1);
-    int draw_red_border = button->enabled ? button->is_focused : 0;    // Only draw border if enabled
+    int draw_red_border = !button->is_disabled ? button->is_focused : 0;    // Only draw border if enabled
     button_border_draw(button->x, button->y, button->width, button->height, draw_red_border);
 
     // Y offset based on positioning enum (row: top, center, bottom)
@@ -78,7 +78,7 @@ static void draw_default_style(const complex_button *button)
     }
 
     // Draw before-image if present
-    color_t mask = button->enabled ? COLOR_MASK_NONE : COLOR_MASK_GRAY;
+    color_t mask = !button->is_disabled ? COLOR_MASK_NONE : COLOR_MASK_GRAY;
     if (img_before) {
         int img_y = button->y + (button->height - img_before->height) / 2;
         image_draw(button->image_before, cursor_x, img_y, mask, SCALE_NONE);
@@ -116,7 +116,7 @@ static void draw_grey_style(const complex_button *button)
 // === Draw a single button ===
 void complex_button_draw(const complex_button *button)
 {
-    if (!button->visible) {
+    if (button->is_hidden) {
         return;
     }
 
@@ -139,7 +139,7 @@ void complex_button_array_draw(const complex_button *buttons, unsigned int num_b
 
 int complex_button_handle_mouse(const mouse *m, complex_button *btn)
 {
-    if (!btn->visible || !btn->enabled) {
+    if (btn->is_hidden || btn->is_disabled) {
         btn->is_focused = 0;
         btn->is_clicked = 0;
         return 0;
@@ -163,27 +163,24 @@ int complex_button_handle_mouse(const mouse *m, complex_button *btn)
         }
 
         // --- Left click ---
-        if (m->left.went_down) {
+
+        if (m->left.went_up) {
             btn->is_clicked = 1;
-        }
-        if (m->left.went_up && btn->is_clicked) {
-            btn->is_clicked = 0;
             btn->is_active = !btn->is_active; // persistent toggle
+            handled = 1;
             if (btn->left_click_handler) {
                 btn->left_click_handler(btn);
-                handled = 1;
             }
+
         }
 
         // --- Right click ---
-        if (m->right.went_down) {
+
+        if (m->right.went_up) {
             btn->is_clicked = 1;
-        }
-        if (m->right.went_up && btn->is_clicked) {
-            btn->is_clicked = 0;
+            handled = 1;
             if (btn->right_click_handler) {
                 btn->right_click_handler(btn);
-                handled = 1;
             }
         }
     } else {

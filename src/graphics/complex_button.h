@@ -32,23 +32,25 @@ typedef struct complex_button {
     short height;
     short is_focused;
     short is_clicked;
-    short is_active; // persists toggle/selected/checked/expanded state
-    short visible;
-    short enabled; // 0 = ignore input, draw as disabled
-    short state; //special parameter for button state, enabling custom behaviours
+    short is_active;              // persists toggle/selected/checked/expanded state
+    short is_hidden;              // 1 = hidden, 0 = visible
+    short is_disabled;            // 1 = disabled, 0 = enabled
+    short state;                  // special parameter for custom behaviours
     void (*left_click_handler)(const struct complex_button *button);
     void (*right_click_handler)(const struct complex_button *button);
     void (*hover_handler)(const struct complex_button *button);
     tooltip_context tooltip_c;
-    const lang_fragment *sequence; //sequence of text to draw on button
-    sequence_positioning sequence_position; //how to position the text sequence within the button
-    int sequence_size; //how many fragments in sequence
+    const lang_fragment *sequence;     // sequence of text to draw on button
+    sequence_positioning sequence_position;
+    int sequence_size;
     int parameters[MAX_COMPLEX_BUTTON_PARAMETERS];
-    int image_before; //id-based image to draw before text
+    int image_before;
     int image_after;
-    complex_button_style style; //style enum value
-    short expanded_hitbox_radius; //if >0 hitbox is around the button by this many pixels - for inprecise mouse control
+    complex_button_style style;
+    short expanded_hitbox_radius;
+    void *user_data; // custom user data pointer, e.g. can point to a parent struct
 } complex_button;
+
 
 void complex_button_draw(const complex_button *button);
 void complex_button_array_draw(const complex_button *buttons, unsigned int num_buttons);
