@@ -161,7 +161,6 @@ int lang_text_draw_multiline(int group, int number, int x_offset, int y_offset, 
     const uint8_t *str = lang_get_string(group, number);
     return text_draw_multiline(str, x_offset, y_offset, box_width, 0, font, 0);
 }
-
 int lang_text_get_sequence_width(const lang_fragment *seq, int count, font_t font)
 {
     int width = 0;
