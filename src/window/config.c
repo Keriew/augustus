@@ -276,6 +276,8 @@ static config_widget ui_widgets_by_category[CATEGORY_UI_COUNT][MAX_WIDGETS] = {
 // ---------- Difficulty (GAMEPLAY) ----------------------
 static config_widget page_difficulty[] = {
     {TYPE_SELECT_LIST, SELECT_DIFFICULTY_LIST, TR_CONFIG_DIFFICULTY, display_text_select_list_difficulty, 0, 1, ITEM_BASE_H, 8},
+    //{TYPE_NUMERICAL_DESC, RANGE_DIFFICULTY, TR_CONFIG_DIFFICULTY, NULL, 0, 1, ITEM_BASE_H, 0},
+    //{TYPE_NUMERICAL_RANGE, RANGE_DIFFICULTY, 0, display_text_difficulty, 0, 1, ITEM_BASE_H, 2},
     {TYPE_CHECKBOX, CONFIG_ORIGINAL_GODS_EFFECTS, TR_CONFIG_GODS_EFFECTS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_CHECKBOX, CONFIG_GP_CH_JEALOUS_GODS, TR_CONFIG_JEALOUS_GODS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_CHECKBOX, CONFIG_GP_CH_GLOBAL_LABOUR, TR_CONFIG_GLOBAL_LABOUR, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
@@ -1505,16 +1507,6 @@ static int  op_input_header(const config_widget *w, int x, int y, int avail_text
 
 //  Select List
 
-/**
- * @brief Callback handler for select list item selection
- *
- * This function is called when a user selects an item from any select list.
- * It converts the selected index to a config value and updates the appropriate
- * configuration setting.
- *
- * To add a new select list, add a new case here that maps your SELECT_LIST_*
- * enum value to the appropriate CONFIG_* key.
- */
 static void on_select_list_item(int selected_index)
 {
     select_list_widget *sl = &select_lists[select_list_button_id];
@@ -1526,12 +1518,6 @@ static void on_select_list_item(int selected_index)
         case SELECT_LIST_DIFFICULTY:
             data.config_values[CONFIG_ORIGINAL_DIFFICULTY].new_value = new_config_value;
             break;
-
-            // Example for future additions:
-            // case SELECT_LIST_MY_NEW_OPTION:
-            //     data.config_values[CONFIG_MY_NEW_OPTION].new_value = new_config_value;
-            //     break;
-
         default:
             // Should not happen - indicates missing case for a select list
             break;
