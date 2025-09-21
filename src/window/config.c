@@ -69,7 +69,7 @@ enum {
     TYPE_SPACE,
     TYPE_HEADER,
     TYPE_CHECKBOX,
-    TYPE_SELECT,
+    TYPE_SELECT, // dropdown or text input
     TYPE_NUMERICAL_DESC, //  label line for a slider
     TYPE_NUMERICAL_RANGE
 };
