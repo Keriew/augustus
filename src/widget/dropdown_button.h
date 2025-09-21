@@ -57,7 +57,7 @@ void dropdown_button_init(dropdown_button *dd, complex_button *buttons,
  * @param count  Number of fragments (>=1)
  * @param dd     Pointer to dropdown_button to initialize
  */
-void dropdown_button_init_simple(int x, int y, lang_fragment *frags, unsigned int count, dropdown_button *dd);
+void dropdown_button_init_simple(int x, int y, const lang_fragment *frags, unsigned int count, dropdown_button *dd);
 
 /**
  * @brief Draw a dropdown (origin button + expanded options if expanded).

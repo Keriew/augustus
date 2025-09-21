@@ -163,27 +163,24 @@ int complex_button_handle_mouse(const mouse *m, complex_button *btn)
         }
 
         // --- Left click ---
-        if (m->left.went_down) {
+
+        if (m->left.went_up) {
             btn->is_clicked = 1;
-        }
-        if (m->left.went_up && btn->is_clicked) {
-            btn->is_clicked = 0;
             btn->is_active = !btn->is_active; // persistent toggle
+            handled = 1;
             if (btn->left_click_handler) {
                 btn->left_click_handler(btn);
-                handled = 1;
             }
+
         }
 
         // --- Right click ---
-        if (m->right.went_down) {
+
+        if (m->right.went_up) {
             btn->is_clicked = 1;
-        }
-        if (m->right.went_up && btn->is_clicked) {
-            btn->is_clicked = 0;
+            handled = 1;
             if (btn->right_click_handler) {
                 btn->right_click_handler(btn);
-                handled = 1;
             }
         }
     } else {

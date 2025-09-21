@@ -1,6 +1,7 @@
 #include "dropdown_button.h"
 #include "graphics/font.h"
 #include "graphics/lang_text.h"
+#include "graphics/window.h"
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -85,7 +86,7 @@ void dropdown_button_init(dropdown_button *dd, complex_button *buttons,
     }
 }
 
-void dropdown_button_init_simple(int x, int y, lang_fragment *frags, unsigned int count, dropdown_button *dd)
+void dropdown_button_init_simple(int x, int y, const lang_fragment *frags, unsigned int count, dropdown_button *dd)
 {
     if (count == 0 || count > DROPDOWN_BUTTON_MAX_COUNT) {
         memset(dd, 0, sizeof(*dd));
@@ -97,7 +98,7 @@ void dropdown_button_init_simple(int x, int y, lang_fragment *frags, unsigned in
 
     dd->num_buttons = count;
     dd->expanded = 0;
-    dd->selected_index = -1;
+    dd->selected_index = 0; // show the sequence of the origin by default
     dd->selected_value = -1;
 
     dd->width = 0;     // auto
@@ -114,6 +115,7 @@ void dropdown_button_init_simple(int x, int y, lang_fragment *frags, unsigned in
     origin->is_hidden = 0;
     origin->is_disabled = 0;
     origin->sequence = &frags[0];
+    origin->sequence_position = SEQUENCE_POSITION_CENTER;
     origin->sequence_size = 1;
 
     // Setup options [1..count-1]
@@ -124,6 +126,7 @@ void dropdown_button_init_simple(int x, int y, lang_fragment *frags, unsigned in
         opt->is_disabled = 0;
         opt->sequence = &frags[i];
         opt->sequence_size = 1;
+        opt->sequence_position = SEQUENCE_POSITION_CENTER;
 
         // store backref to dropdown + index + value
         opt->user_data = dd; // pointer to parent 
@@ -165,6 +168,8 @@ int dropdown_button_handle_mouse(const mouse *m, dropdown_button *dd)
     if (complex_button_handle_mouse(m, &dd->buttons[0])) {
         dd->expanded = !dd->expanded;
         handled = 1;
+        window_request_refresh();
+        return handled; // don't process options on same click
     }
 
     // Handle options if expanded
@@ -174,6 +179,8 @@ int dropdown_button_handle_mouse(const mouse *m, dropdown_button *dd)
                 dd->selected_index = i;
                 dd->expanded = 0; // collapse
                 handled = 1;
+                window_request_refresh();
+                return handled;
             }
         }
     }

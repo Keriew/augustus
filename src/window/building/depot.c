@@ -271,7 +271,7 @@ void window_building_depot_init_resource_selection(void)
 
 static void window_building_depot_init_tooltip_style_dropdown(building_info_context *c)
 {
-    lang_fragment frags[4]; // fragment
+    static lang_fragment frags[4]; // fragments array - keep static to ensure it remains valid
     for (int i = 0; i < 4; i++) {
         frags[i].type = LANG_FRAG_LABEL;
         frags[i].text_group = CUSTOM_TRANSLATION;
