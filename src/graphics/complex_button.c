@@ -1,13 +1,16 @@
 #include "complex_button.h"
 
+#include "graphics/button.h"
+#include "graphics/graphics.h"
 #include "graphics/panel.h"
 #include "input/mouse.h"
+
+#include <stddef.h>
 
 static void draw_default_style(const complex_button *button)
 {
     const int inner_margin = 2; // small horizontal margin for text/images
     const font_t font = button->enabled ? FONT_NORMAL_BLACK : FONT_NORMAL_WHITE;
-    const color_t text_color = button->enabled ? COLOR_MASK_NONE : COLOR_FONT_GRAY;
 
     graphics_set_clip_rectangle(button->x, button->y, button->width, button->height);
 
