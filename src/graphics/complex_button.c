@@ -16,12 +16,8 @@ static void draw_default_style(const complex_button *button)
 
     int height_blocks = button->height / BLOCK_SIZE;
     unbordered_panel_draw(button->x, button->y, button->width / BLOCK_SIZE + 1, height_blocks + 1);
-
-    // Only draw border if enabled
-
-    int draw_red_border = button->enabled ? button->is_focused : 0;
+    int draw_red_border = button->enabled ? button->is_focused : 0;    // Only draw border if enabled
     button_border_draw(button->x, button->y, button->width, button->height, draw_red_border);
-
 
     // Y offset based on positioning enum (row: top, center, bottom)
     int text_height = font_definition_for(font)->line_height;
@@ -134,7 +130,6 @@ void complex_button_draw(const complex_button *button)
     }
 }
 
-// === Draw an array of buttons ===
 void complex_button_array_draw(const complex_button *buttons, unsigned int num_buttons)
 {
     for (unsigned int i = 0; i < num_buttons; i++) {
@@ -142,7 +137,6 @@ void complex_button_array_draw(const complex_button *buttons, unsigned int num_b
     }
 }
 
-// === Handle input for a single button ===
 int complex_button_handle_mouse(const mouse *m, complex_button *btn)
 {
     if (!btn->visible || !btn->enabled) {
@@ -199,7 +193,6 @@ int complex_button_handle_mouse(const mouse *m, complex_button *btn)
     return handled;
 }
 
-// === Handle input for an array of buttons ===
 int complex_button_array_handle_mouse(const mouse *m, complex_button *buttons, unsigned int num_buttons)
 {
     int handled = 0;
