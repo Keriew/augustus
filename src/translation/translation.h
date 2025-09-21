@@ -1703,6 +1703,10 @@ typedef enum {
     TR_BUILDING_INFO_INSTRUCTIONS,
     TR_BUILDING_INFO_OTHER_STORAGE_BUILDINGS,
     TR_TOOLTIP_GOTO_STORAGE_INSTRUCTIONS,
+    TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE, // depot tooltip group start (don't change order of these)
+    TR_TOOLTIP_NONE,
+    TR_TOOLTIP_MINIMAL,
+    TR_TOOLTIP_FULL, // depot tooltip group end
     TRANSLATION_MAX_KEY
 } translation_key;
 

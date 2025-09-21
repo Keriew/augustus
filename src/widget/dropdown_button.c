@@ -3,6 +3,12 @@
 #include "graphics/lang_text.h"
 
 #include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define DROPDOWN_BUTTON_MAX_COUNT 20 // arbitrary limit for static storage
+
+static complex_button dropdown_button_storage[DROPDOWN_BUTTON_MAX_COUNT]; //buffer for simple init
 
 static int calculate_text_width(const complex_button *btn, font_t font)
 {
@@ -10,6 +16,21 @@ static int calculate_text_width(const complex_button *btn, font_t font)
         return 0;
     }
     return lang_text_get_sequence_width(btn->sequence, btn->sequence_size, font);
+}
+
+/* --- Default left click handler for dropdown options --- */
+static void dropdown_option_click(const complex_button *btn)
+{
+    dropdown_button *dd = (dropdown_button *) btn->user_data;
+    int index = btn->parameters[0];
+
+    dd->selected_index = index;
+    dd->selected_value = btn->parameters[1]; // free value carrier
+    dd->expanded = 0;
+
+    // Update origin text to match selected option
+    dd->buttons[0].sequence = btn->sequence;
+    dd->buttons[0].sequence_size = btn->sequence_size;
 }
 
 void dropdown_button_init(dropdown_button *dd, complex_button *buttons,
@@ -62,6 +83,57 @@ void dropdown_button_init(dropdown_button *dd, complex_button *buttons,
         buttons[i].width = calc_width;
         buttons[i].height = dd->calculated_height;
     }
+}
+
+void dropdown_button_init_simple(int x, int y, lang_fragment *frags, unsigned int count, dropdown_button *dd)
+{
+    if (count == 0 || count > DROPDOWN_BUTTON_MAX_COUNT) {
+        memset(dd, 0, sizeof(*dd));
+        return;
+    }
+
+    dd->buttons = dropdown_button_storage;
+    memset(dd->buttons, 0, sizeof(dropdown_button_storage));
+
+    dd->num_buttons = count;
+    dd->expanded = 0;
+    dd->selected_index = -1;
+    dd->selected_value = -1;
+
+    dd->width = 0;     // auto
+    dd->spacing = 2;
+    dd->padding = 10;
+
+    // Setup origin (button 0)
+    complex_button *origin = &dd->buttons[0];
+    origin->x = x;
+    origin->y = y;
+    origin->height = font_definition_for(FONT_NORMAL_BLACK)->line_height + 6;
+    origin->width = 0; // auto sized in dropdown_button_init
+    origin->style = COMPLEX_BUTTON_STYLE_DEFAULT;
+    origin->is_hidden = 0;
+    origin->is_disabled = 0;
+    origin->sequence = &frags[0];
+    origin->sequence_size = 1;
+
+    // Setup options [1..count-1]
+    for (unsigned int i = 1; i < count; i++) {
+        complex_button *opt = &dd->buttons[i];
+        opt->style = COMPLEX_BUTTON_STYLE_DEFAULT;
+        opt->is_hidden = 0;
+        opt->is_disabled = 0;
+        opt->sequence = &frags[i];
+        opt->sequence_size = 1;
+
+        // store backref to dropdown + index + value
+        opt->user_data = dd; // pointer to parent 
+        opt->parameters[0] = i;    // keep index in int slot
+        opt->parameters[1] = i;    // default "value" = index, can override
+        opt->left_click_handler = dropdown_option_click;
+    }
+
+    // Finalize layout
+    dropdown_button_init(dd, dd->buttons, count, 0, dd->spacing, dd->padding);
 }
 
 void dropdown_button_draw(const dropdown_button *dd)

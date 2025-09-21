@@ -10,6 +10,7 @@
 #include "core/config.h"
 #include "figure/figure.h"
 #include "graphics/button.h"
+#include "graphics/complex_button.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
@@ -19,6 +20,7 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "translation/translation.h"
+#include "widget/dropdown_button.h"
 #include "window/building_info.h"
 
 static void order_set_source(const generic_button *button);
@@ -132,6 +134,7 @@ static generic_button depot_order_buttons[] = {
     {384, 56, 32, 22, set_camera_position},
     {384, 82, 32, 22, set_camera_position},
 };
+dropdown_button tooltip_style_dropdown_button;
 
 static void setup_buttons_for_selected_depot(void)
 {
@@ -266,9 +269,21 @@ void window_building_depot_init_resource_selection(void)
     }
 }
 
+static void window_building_depot_init_tooltip_style_dropdown(void)
+{
+    lang_fragment frags[4]; // fragment
+    for (int i = 0; i < 4; i++) {
+        frags[i].type = LANG_FRAG_LABEL;
+        frags[i].text_group = CUSTOM_TRANSLATION;
+        frags[i].text_id = TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE + i;
+    }
+    dropdown_button_init_simple(200, 100, frags, 4, &tooltip_style_dropdown_button);
+}
+
 void window_building_depot_init_storage_selection(void)
 {
     int total_rows = data.available_storages + data.secondary_storages + (data.secondary_storages > 0 ? 1 : 0);
+    window_building_depot_init_tooltip_style_dropdown();
     // +1 for separator row
     scrollbar_init(&scrollbar, 0, total_rows);
 }
@@ -570,6 +585,7 @@ void window_building_draw_depot_select_source_destination(building_info_context 
             drawn_rows++;
         }
     }
+    dropdown_button_draw(&tooltip_style_dropdown_button);
 }
 
 static void set_order_source(const generic_button *button)
@@ -630,7 +646,9 @@ static int handle_mouse_depot_select_source_destination(const mouse *m, building
     if (scrollbar_handle_mouse(&scrollbar, m, 1)) {
         return 1;
     }
-
+    if (dropdown_button_handle_mouse(m, &tooltip_style_dropdown_button)) {
+        return 1;
+    }
     int y_offset = window_building_get_vertical_offset(c, 28);
     for (int i = 0; i < MAX_VISIBLE_ROWS; i++) {
         // Left button - goto storage orders
