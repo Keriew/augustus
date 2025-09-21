@@ -605,6 +605,7 @@ set(WIDGET_FILES
     ${PROJECT_SOURCE_DIR}/src/widget/city_water_ghost.c
     ${PROJECT_SOURCE_DIR}/src/widget/city_with_overlay.c
     ${PROJECT_SOURCE_DIR}/src/widget/city_without_overlay.c
+    ${PROJECT_SOURCE_DIR}/src/widget/dropdown_button.c
     ${PROJECT_SOURCE_DIR}/src/widget/input_box.c
     ${PROJECT_SOURCE_DIR}/src/widget/map_editor.c
     ${PROJECT_SOURCE_DIR}/src/widget/map_editor_tool.c
