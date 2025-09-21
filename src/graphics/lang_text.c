@@ -161,3 +161,62 @@ int lang_text_draw_multiline(int group, int number, int x_offset, int y_offset, 
     const uint8_t *str = lang_get_string(group, number);
     return text_draw_multiline(str, x_offset, y_offset, box_width, 0, font, 0);
 }
+int lang_text_get_sequence_width(const lang_fragment *seq, int count, font_t font)
+{
+    int width = 0;
+    for (int i = 0; i < count; i++) {
+        const lang_fragment *f = &seq[i];
+        switch (f->type) {
+            case LANG_FRAG_LABEL:
+                width += lang_text_get_width(f->text_group, f->text_id, font);
+                break;
+            case LANG_FRAG_AMOUNT:
+                width += lang_text_get_amount_width(f->text_group, f->text_id, f->number, font);
+                break;
+            case LANG_FRAG_NUMBER:
+                width += text_get_number_width(f->number, '\0', "\0", font);
+                break;
+            case LANG_FRAG_TEXT:
+                width += text_get_width(f->text, font);
+                break;
+            case LANG_FRAG_SPACE:
+                width += f->space_width;
+                break;
+        }
+    }
+    return width;
+}
+
+int lang_text_draw_sequence(const lang_fragment *seq, int count, int x, int y, font_t font)
+{
+    int width = 0;
+    for (int i = 0; i < count; i++) {
+        const lang_fragment *f = &seq[i];
+        switch (f->type) {
+            case LANG_FRAG_LABEL:
+                width += lang_text_draw(f->text_group, f->text_id, x + width, y, font);
+                break;
+            case LANG_FRAG_AMOUNT:
+                width += lang_text_draw_amount(f->text_group, f->text_id, f->number, x + width, y, font);
+                break;
+            case LANG_FRAG_NUMBER:
+                width += text_draw_number(f->number, '\0', "\0", x + width, y, font, COLOR_MASK_NONE);
+                break;
+            case LANG_FRAG_TEXT:
+                width += text_draw(f->text, x + width, y, font, COLOR_MASK_NONE);
+                break;
+            case LANG_FRAG_SPACE:
+                width += f->space_width;
+                break;
+        }
+    }
+    return width;
+}
+
+int lang_text_draw_sequence_centered(
+    const lang_fragment *seq, int count, int x, int y, int box_width, font_t font)
+{
+    int total_width = lang_text_get_sequence_width(seq, count, font);
+    int start_x = x + (box_width - total_width) / 2;
+    return lang_text_draw_sequence(seq, count, start_x, y, font);
+}
