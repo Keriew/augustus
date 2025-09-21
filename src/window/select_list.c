@@ -118,10 +118,10 @@ static void determine_offsets(int x, int y, const generic_button *button)
     int height;
     if (data.num_items > MAX_ITEMS_PER_LIST) {
         width = 26 * BLOCK_SIZE;
-        height = 20 * items_in_first_list() + 24;
+        height = data.item_height * items_in_first_list() + (data.style == SELECT_LIST_STYLE_BUTTONS ? data.item_v_spacing * 2 : 24);
     } else {
-        width = data.width + BLOCK_SIZE - 1;
-        height = 20 * data.num_items + 24;
+        width = data.width + (data.style == SELECT_LIST_STYLE_BUTTONS ? 2 : BLOCK_SIZE - 1);
+        height = data.item_height * data.num_items + (data.style == SELECT_LIST_STYLE_BUTTONS ? data.item_v_spacing * 2 : 24);
     }
 
     if (data.x + width > screen_width()) {
@@ -146,9 +146,29 @@ static void init_group(int x, int y, const generic_button *button, int group, in
     data.num_items = num_items;
     data.callback = callback;
     data.style = style;
-    for (int i = 0; i < MAX_ITEMS_PER_LIST; i++) {
-        buttons_list1[i].width = data.width - 10;
+
+    // Set style-dependent values
+    if (style == SELECT_LIST_STYLE_BUTTONS) {
+        data.item_height = 24;
+        data.item_v_spacing = 2;
+    } else {
+        data.item_height = 20;
+        data.item_v_spacing = 0;
     }
+
+    // Update button positions and sizes based on style
+    for (int i = 0; i < MAX_ITEMS_PER_LIST; i++) {
+        buttons_list1[i].width = data.width + (style == SELECT_LIST_STYLE_BUTTONS ? 2 : -10);
+        buttons_list1[i].height = data.item_height;
+        buttons_list1[i].y = data.item_v_spacing + data.item_height * i + (style == SELECT_LIST_STYLE_BUTTONS ? 0 : 8);
+        buttons_list1[i].x = style == SELECT_LIST_STYLE_BUTTONS ? 0 : 5;
+
+        buttons_list2[i].width = data.width + (style == SELECT_LIST_STYLE_BUTTONS ? 2 : -10);
+        buttons_list2[i].height = data.item_height;
+        buttons_list2[i].y = data.item_v_spacing + data.item_height * i + (style == SELECT_LIST_STYLE_BUTTONS ? 0 : 8);
+        buttons_list2[i].x = style == SELECT_LIST_STYLE_BUTTONS ? 200 : 205;
+    }
+
     determine_offsets(x, y, button);
 }
 
@@ -161,6 +181,16 @@ static void init_text(int x, int y, const generic_button *button, const uint8_t 
     data.callback = callback;
     data.style = style;
     data.width = BASE_LIST_WIDTH;
+
+    // Set style-dependent values
+    if (style == SELECT_LIST_STYLE_BUTTONS) {
+        data.item_height = 24;
+        data.item_v_spacing = 2;
+    } else {
+        data.item_height = 20;
+        data.item_v_spacing = 0;
+    }
+
     if (data.num_items <= MAX_ITEMS_PER_LIST) {
         for (int i = 0; i < num_items; i++) {
             int width = text_get_width(data.items[i], FONT_NORMAL_PLAIN) + 10;
@@ -172,12 +202,25 @@ static void init_text(int x, int y, const generic_button *button, const uint8_t 
                 }
             }
         }
+        // Update button positions and sizes based on style
         for (int i = 0; i < num_items; i++) {
-            buttons_list1[i].width = data.width;
+            buttons_list1[i].width = data.width + (style == SELECT_LIST_STYLE_BUTTONS ? 2 : 0);
+            buttons_list1[i].height = data.item_height;
+            buttons_list1[i].y = data.item_v_spacing + data.item_height * i + (style == SELECT_LIST_STYLE_BUTTONS ? 0 : 8);
+            buttons_list1[i].x = style == SELECT_LIST_STYLE_BUTTONS ? 0 : 5;
         }
     } else {
+        // Update button positions and sizes for multi-column layout
         for (int i = 0; i < MAX_ITEMS_PER_LIST; i++) {
-            buttons_list1[i].width = data.width - 10;
+            buttons_list1[i].width = data.width + (style == SELECT_LIST_STYLE_BUTTONS ? 2 : -10);
+            buttons_list1[i].height = data.item_height;
+            buttons_list1[i].y = data.item_v_spacing + data.item_height * i + (style == SELECT_LIST_STYLE_BUTTONS ? 0 : 8);
+            buttons_list1[i].x = style == SELECT_LIST_STYLE_BUTTONS ? 0 : 5;
+
+            buttons_list2[i].width = data.width + (style == SELECT_LIST_STYLE_BUTTONS ? 2 : -10);
+            buttons_list2[i].height = data.item_height;
+            buttons_list2[i].y = data.item_v_spacing + data.item_height * i + (style == SELECT_LIST_STYLE_BUTTONS ? 0 : 8);
+            buttons_list2[i].x = style == SELECT_LIST_STYLE_BUTTONS ? 200 : 205;
         }
     }
     determine_offsets(x, y, button);
@@ -232,18 +275,18 @@ static void draw_foreground_default(void)
 {
     if (data.num_items > MAX_ITEMS_PER_LIST) {
         unsigned int max_first = items_in_first_list();
-        outer_panel_draw(data.x, data.y, 26, (20 * max_first + 24) / BLOCK_SIZE);
+        outer_panel_draw(data.x, data.y, 26, (data.item_height * max_first + 24) / BLOCK_SIZE);
         for (unsigned int i = 0; i < max_first; i++) {
-            draw_item(i, 5, 11 + 20 * i, i + 1 == data.focus_button_id);
+            draw_item(i, 5, 11 + data.item_height * i, i + 1 == data.focus_button_id);
         }
         for (unsigned int i = 0; i < data.num_items - max_first; i++) {
-            draw_item(i + max_first, 205, 11 + 20 * i, MAX_ITEMS_PER_LIST + i + 1 == data.focus_button_id);
+            draw_item(i + max_first, 205, 11 + data.item_height * i, MAX_ITEMS_PER_LIST + i + 1 == data.focus_button_id);
         }
     } else {
         int width_blocks = (data.width + BLOCK_SIZE - 1) / BLOCK_SIZE;
-        outer_panel_draw(data.x, data.y, width_blocks, (20 * data.num_items + 24) / BLOCK_SIZE);
+        outer_panel_draw(data.x, data.y, width_blocks, (data.item_height * data.num_items + 24) / BLOCK_SIZE);
         for (unsigned int i = 0; i < data.num_items; i++) {
-            draw_item(i, 5, 11 + 20 * i, i + 1 == data.focus_button_id);
+            draw_item(i, 5, 11 + data.item_height * i, i + 1 == data.focus_button_id);
         }
     }
 }
@@ -284,14 +327,10 @@ static void draw_foreground(void)
 {
     switch (data.style) {
         case SELECT_LIST_STYLE_BUTTONS:
-            data.item_height = 24;
-            data.item_v_spacing = 2;
             draw_foreground_buttons();
             break;
         case SELECT_LIST_STYLE_DEFAULT:
         default:
-            data.item_height = 20;
-            data.item_v_spacing = 0;
             draw_foreground_default();
             break;
     }
@@ -303,10 +342,10 @@ static int click_outside_window(const mouse *m)
     int height;
     if (data.num_items > MAX_ITEMS_PER_LIST) {
         width = 26 * BLOCK_SIZE;
-        height = 20 * items_in_first_list() + 24;
+        height = data.item_height * items_in_first_list() + (data.style == SELECT_LIST_STYLE_BUTTONS ? data.item_v_spacing * 2 : 24);
     } else {
-        width = data.width + BLOCK_SIZE - 1;
-        height = 20 * data.num_items + 24;
+        width = data.width + (data.style == SELECT_LIST_STYLE_BUTTONS ? 2 : BLOCK_SIZE - 1);
+        height = data.item_height * data.num_items + (data.style == SELECT_LIST_STYLE_BUTTONS ? data.item_v_spacing * 2 : 24);
     }
     return m->left.went_up && (m->x < data.x || m->x >= data.x + width || m->y < data.y || m->y >= data.y + height);
 }
