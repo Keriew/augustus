@@ -6,7 +6,7 @@
 
 void window_building_depot_init_main(int building_id);
 void window_building_depot_init_resource_selection(void);
-void window_building_depot_init_storage_selection(void);
+void window_building_depot_init_storage_selection(building_info_context *c);
 
 void window_building_draw_depot(building_info_context *c);
 void window_building_draw_depot_foreground(building_info_context *c);

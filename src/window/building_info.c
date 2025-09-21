@@ -1304,14 +1304,14 @@ void window_building_info_show_roadblock_orders(void)
 
 void window_building_info_depot_select_source(void)
 {
-    window_building_depot_init_storage_selection();
+    window_building_depot_init_storage_selection(&context);
     context.depot_selection = 2;
     window_invalidate();
 }
 
 void window_building_info_depot_select_destination(void)
 {
-    window_building_depot_init_storage_selection();
+    window_building_depot_init_storage_selection(&context);
     context.depot_selection = 3;
     window_invalidate();
 }

@@ -269,7 +269,7 @@ void window_building_depot_init_resource_selection(void)
     }
 }
 
-static void window_building_depot_init_tooltip_style_dropdown(void)
+static void window_building_depot_init_tooltip_style_dropdown(building_info_context *c)
 {
     lang_fragment frags[4]; // fragment
     for (int i = 0; i < 4; i++) {
@@ -277,13 +277,19 @@ static void window_building_depot_init_tooltip_style_dropdown(void)
         frags[i].text_group = CUSTOM_TRANSLATION;
         frags[i].text_id = TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE + i;
     }
-    dropdown_button_init_simple(200, 100, frags, 4, &tooltip_style_dropdown_button);
+
+    // Calculate position: horizontally centered, 20 pixels above bottom edge
+    int y_offset = window_building_get_vertical_offset(c, 28);
+    int dropdown_x = c->x_offset + (c->width_blocks * BLOCK_SIZE - 200) / 2; // Center horizontally, assuming 200px width
+    int dropdown_y = y_offset + (28 * BLOCK_SIZE) - 20 - 26; // 20px above bottom, minus button height
+
+    dropdown_button_init_simple(dropdown_x, dropdown_y, frags, 4, &tooltip_style_dropdown_button);
 }
 
-void window_building_depot_init_storage_selection(void)
+void window_building_depot_init_storage_selection(building_info_context *c)
 {
     int total_rows = data.available_storages + data.secondary_storages + (data.secondary_storages > 0 ? 1 : 0);
-    window_building_depot_init_tooltip_style_dropdown();
+    window_building_depot_init_tooltip_style_dropdown(c);
     // +1 for separator row
     scrollbar_init(&scrollbar, 0, total_rows);
 }
