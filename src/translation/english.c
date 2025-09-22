@@ -1707,6 +1707,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_MOVE_LEGION_SOUND_SWAP, "Alternative legion move sound"},
     {TR_CONFIG_ADVANCED_CART_DEPOT_OPTIONS, "Enable advanced cart depot orders"},
     {TR_BUILDING_INFO_INSTRUCTIONS, "instructions" },
+    {TR_BUILDING_INFO_ACTIVE_STORAGE_BUILDINGS, "Active storage buildings" },
     {TR_BUILDING_INFO_OTHER_STORAGE_BUILDINGS, "Other storage buildings" },
     {TR_TOOLTIP_GOTO_STORAGE_INSTRUCTIONS, "Open building's storage instructions" },
     {TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE, "Tooltip style:" },

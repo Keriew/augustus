@@ -33,6 +33,8 @@ static void set_order_resource(const generic_button *button);
 static void set_camera_position(const generic_button *button);
 static void goto_special_orders_on_top(const generic_button *button);
 
+static void tooltip_style_changed(dropdown_button *button);
+
 #define DEPOT_BUTTONS_X_OFFSET 32
 #define DEPOT_BUTTONS_Y_OFFSET 204
 #define ROW_HEIGHT 22
@@ -135,7 +137,7 @@ static generic_button depot_order_buttons[] = {
     {384, 82, 32, 22, set_camera_position},
 };
 dropdown_button tooltip_style_dropdown_button;
-static void tooltip_style_changed(const dropdown_button *button);
+
 
 static void setup_buttons_for_selected_depot(void)
 {
@@ -270,7 +272,7 @@ void window_building_depot_init_resource_selection(void)
     }
 }
 
-static void tooltip_style_changed(const dropdown_button *button)
+static void tooltip_style_changed(dropdown_button *button)
 {
     if (button->selected_index < 1 || button->selected_index > 4) {
         return;
@@ -290,19 +292,20 @@ static void window_building_depot_init_tooltip_style_dropdown(building_info_cont
     frags[0].text_id = config_get(CONFIG_UI_CART_DEPOT_TOOLTIP_STYLE) + TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE + 1;
     // Calculate position: horizontally centered, 20 pixels above bottom edge
 
-    int btn_width = 200;
-    int dropdown_x = c->x_offset + (c->width_blocks * BLOCK_SIZE - btn_width) / 2; // Center the button
-    int dropdown_y = c->y_offset + c->height_blocks * BLOCK_SIZE - 46; // 20px above bottom + button height
+    int btn_width = 150;
+    int dropdown_x = c->x_offset + (c->width_blocks * BLOCK_SIZE) / 2 - btn_width / 2; // Center the button
+    int dropdown_y = c->y_offset + (c->height_blocks + 1) * BLOCK_SIZE - 7;
+    tooltip_style_dropdown_button.width = btn_width;
     dropdown_button_init_simple(dropdown_x, dropdown_y, frags, 4, &tooltip_style_dropdown_button);
     tooltip_style_dropdown_button.selected_callback = tooltip_style_changed; // Set the callback function
-    tooltip_style_dropdown_button.width = btn_width;
 }
 
 void window_building_depot_init_storage_selection(building_info_context *c)
 {
-    int total_rows = data.available_storages + data.secondary_storages + (data.secondary_storages > 0 ? 1 : 0);
+    int separator_rows = (data.secondary_storages > 0 ? 2 : 0) + (data.available_storages > 0 ? 1 : 0);
+    int total_rows = data.available_storages + data.secondary_storages + separator_rows;
     window_building_depot_init_tooltip_style_dropdown(c);
-    // +1 for separator row
+
     scrollbar_init(&scrollbar, 0, total_rows);
 }
 
@@ -408,7 +411,7 @@ void window_building_draw_depot_foreground(building_info_context *c)
             TR_BUILDING_INFO_DEPOT_NO_SOURCE_AVAILABLE;
         text_draw_centered(lang_get_string(CUSTOM_TRANSLATION, translation),
             x_offset + depot_order_buttons[1].x, y_offset + depot_order_buttons[1].y + 6,
-            depot_order_buttons[1].width, FONT_NORMAL_PLAIN, COLOR_FONT_GRAY);
+            depot_order_buttons[1].width, FONT_NORMAL_BLACK, COLOR_FONT_GRAY);
     }
 
     text_draw(translation_for(TR_BUILDING_INFO_DEPOT_DESTINATION), x_offset, y_offset + depot_order_buttons[2].y + 6, FONT_NORMAL_BLACK, 0);
@@ -504,6 +507,16 @@ void window_building_draw_depot_select_source_destination(building_info_context 
     unsigned int row_count = 0;
     unsigned int drawn_rows = 0;
 
+    // header/separator for active storages
+    if (data.available_storages > 0 && drawn_rows < MAX_VISIBLE_ROWS) {
+        row_count++;; // skip 1 row for active storage header
+        if (row_count > scrollbar.scroll_position) {
+            lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_INFO_ACTIVE_STORAGE_BUILDINGS,
+                c->x_offset + 18 + BLOCK_SIZE * 2, y_offset + 50 + ROW_HEIGHT * drawn_rows, base_width,
+                FONT_NORMAL_WHITE);
+            drawn_rows++;
+        }
+    }
     // First pass: draw active storages
     for (int i = 0; i < storage_array_size && drawn_rows < MAX_VISIBLE_ROWS; i++) {
         const data_storage *storage = building_storage_get_array_entry(i);
@@ -531,7 +544,7 @@ void window_building_draw_depot_select_source_destination(building_info_context 
             button_border_draw(c->x_offset + 18 + BLOCK_SIZE * 2, y_offset + 46 + ROW_HEIGHT * drawn_rows, base_width,
                 22, data.storage_building_focus_button_id == drawn_rows + 1);
             text_draw_label_and_number_centered(
-                lang_get_string(28, bld->type), bld->storage_id, "", c->x_offset + 18 + BLOCK_SIZE * 2 + 14,
+                lang_get_string(28, bld->type), bld->storage_id, "", c->x_offset + 18 + BLOCK_SIZE * 2,
                 y_offset + 52 + ROW_HEIGHT * drawn_rows, base_width, FONT_NORMAL_WHITE, 0);
 
             // Right button - view storage
@@ -550,8 +563,9 @@ void window_building_draw_depot_select_source_destination(building_info_context 
 
     // Draw separator if we have inactive storages
     if (data.secondary_storages > 0 && drawn_rows < MAX_VISIBLE_ROWS) {
-        row_count++;
+        row_count += 2; //skip two rows for inactive storage header
         if (row_count > scrollbar.scroll_position) {
+            drawn_rows++;
             lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_INFO_OTHER_STORAGE_BUILDINGS,
                 c->x_offset + 18 + BLOCK_SIZE * 2, y_offset + 50 + ROW_HEIGHT * drawn_rows, base_width, FONT_NORMAL_RED);
             drawn_rows++;
@@ -587,8 +601,8 @@ void window_building_draw_depot_select_source_destination(building_info_context 
             button_border_draw(c->x_offset + 18 + BLOCK_SIZE * 2, y_offset + 46 + ROW_HEIGHT * drawn_rows,
                 base_width, 22, 0);
             text_draw_label_and_number_centered(lang_get_string(28, bld->type), bld->storage_id, "",
-                c->x_offset + 18 + BLOCK_SIZE * 2 + 14, y_offset + 52 + ROW_HEIGHT * drawn_rows, base_width,
-                FONT_NORMAL_GREEN, COLOR_FONT_LIGHT_GRAY);
+                c->x_offset + 18 + BLOCK_SIZE * 2, y_offset + 52 + ROW_HEIGHT * drawn_rows, base_width,
+                FONT_NORMAL_BLACK, COLOR_FONT_LIGHT_GRAY);
 
             // Right button - view storage
             button_border_draw(c->x_offset + 18 + base_width + BLOCK_SIZE * 2, y_offset + 46 + ROW_HEIGHT * drawn_rows,
@@ -603,9 +617,9 @@ void window_building_draw_depot_select_source_destination(building_info_context 
             drawn_rows++;
         }
     }
-    // Position text label 10 pixels to the left of the dropdown button
-    int label_x = c->x_offset + (c->width_blocks * BLOCK_SIZE - 200) / 2 - 120; // 120px left of dropdown
-    int label_y = c->y_offset + c->height_blocks * BLOCK_SIZE - 42; // Same line as dropdown
+
+    int label_x = c->x_offset + 45;
+    int label_y = c->y_offset + (c->height_blocks + 1) * BLOCK_SIZE - 4; // Same line as dropdown
     lang_text_draw(CUSTOM_TRANSLATION, TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE, label_x, label_y, FONT_NORMAL_BLACK);
     dropdown_button_draw(&tooltip_style_dropdown_button);
 }
