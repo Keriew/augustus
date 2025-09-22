@@ -783,7 +783,7 @@ const uint8_t *window_building_depot_get_tooltip_source_destination(int *transla
         return 0;
     }
     if (data.storage_building_goto_orders_focus_button_id &&
-        depot_select_storage_buttons[data.storage_building_goto_orders_focus_button_id - 1].parameter1) {
+        depot_goto_storage_orders_buttons[data.storage_building_goto_orders_focus_button_id - 1].parameter1) {
         *translation = TR_TOOLTIP_GOTO_STORAGE_INSTRUCTIONS;
         *group_id = CUSTOM_TRANSLATION;
     }
