@@ -1,5 +1,6 @@
 #include "destruction.h"
 
+#include "building/data_transfer.h"
 #include "building/image.h"
 #include "city/message.h"
 #include "city/population.h"
@@ -41,7 +42,6 @@ static void destroy_without_rubble(building *b)
     b->state = BUILDING_STATE_DELETED_BY_GAME;
 }
 
-
 static void destroy_on_fire(building *b, int plagued)
 {
     game_undo_disable();
@@ -60,7 +60,9 @@ static void destroy_on_fire(building *b, int plagued)
     b->sickness_duration = 0;
     b->output_resource_id = 0;
     b->distance_from_entry = 0;
-    building_clear_related_data(b);
+    if (building_data_transfer_data_type_from_building_type(b->type) == DATA_TYPE_NOT_SUPPORTED) {
+        building_clear_related_data(b); //retain the building data in the rubble until rubble is cleared
+    }
 
     int waterside_building = 0;
     if (b->type == BUILDING_DOCK || b->type == BUILDING_WHARF || b->type == BUILDING_SHIPYARD) {
