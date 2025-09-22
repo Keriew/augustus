@@ -101,7 +101,7 @@ static const char *ini_keys[] = {
     [CONFIG_UI_PAVED_ROADS_NEAR_GRANNARIES] = "ui_paved_roads_near_grannaries",
     [CONFIG_UI_ANIMATE_TRADE_ROUTES] = "ui_animate_trade_routes",
     [CONFIG_UI_MOVE_LEGION_SOUND_SWAP] = "ui_move_legion_sound_swap",
-    [CONFIG_GP_CART_DEPOT_ADVANCED] = "gameplay_change_cart_depot_advanced_settings",
+    [CONFIG_GP_CH_CART_DEPOT_ADVANCED] = "gameplay_change_cart_depot_advanced_settings",
     [CONFIG_UI_CART_DEPOT_TOOLTIP_STYLE] = "ui_cart_depot_tooltip_style",
 };
 
@@ -152,7 +152,7 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_UI_PAVED_ROADS_NEAR_GRANNARIES] = 1,
     [CONFIG_UI_ANIMATE_TRADE_ROUTES] = 1,
     [CONFIG_UI_MOVE_LEGION_SOUND_SWAP] = 0,
-    [CONFIG_GP_CART_DEPOT_ADVANCED] = 1,
+    [CONFIG_GP_CH_CART_DEPOT_ADVANCED] = 1,
     [CONFIG_UI_CART_DEPOT_TOOLTIP_STYLE] = 1,
 };
 
