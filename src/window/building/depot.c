@@ -282,7 +282,7 @@ static void tooltip_style_changed(const dropdown_button *button)
 static void window_building_depot_init_tooltip_style_dropdown(building_info_context *c)
 {
     static lang_fragment frags[4]; // fragments array - keep static to ensure it remains valid
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 4; i++) {
         frags[i].type = LANG_FRAG_LABEL;
         frags[i].text_group = CUSTOM_TRANSLATION;
         frags[i].text_id = TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE + i;
@@ -290,10 +290,9 @@ static void window_building_depot_init_tooltip_style_dropdown(building_info_cont
     frags[0].text_id = config_get(CONFIG_UI_CART_DEPOT_TOOLTIP_STYLE) + TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE + 1;
     // Calculate position: horizontally centered, 20 pixels above bottom edge
 
-    int y_offset = window_building_get_vertical_offset(c, c->height_blocks);
-    int btn_width = 500;
-    int dropdown_x = c->x_offset + (c->width_blocks * BLOCK_SIZE) / 2 - btn_width / 2; // Center assuming btn_width 
-    int dropdown_y = y_offset + c->y_offset + (c->height_blocks + 1 * BLOCK_SIZE) - 21 - 26; // 20px above bottom, minus button height
+    int btn_width = 200;
+    int dropdown_x = c->x_offset + (c->width_blocks * BLOCK_SIZE - btn_width) / 2; // Center the button
+    int dropdown_y = c->y_offset + c->height_blocks * BLOCK_SIZE - 46; // 20px above bottom + button height
     dropdown_button_init_simple(dropdown_x, dropdown_y, frags, 4, &tooltip_style_dropdown_button);
     tooltip_style_dropdown_button.selected_callback = tooltip_style_changed; // Set the callback function
     tooltip_style_dropdown_button.width = btn_width;
@@ -604,9 +603,10 @@ void window_building_draw_depot_select_source_destination(building_info_context 
             drawn_rows++;
         }
     }
-    lang_text_draw(CUSTOM_TRANSLATION, TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE,
-        c->x_offset + 300 / 2, c->y_offset + (c->height_blocks + 1 * BLOCK_SIZE) - 21 - 26,
-        FONT_NORMAL_BLACK);
+    // Position text label 10 pixels to the left of the dropdown button
+    int label_x = c->x_offset + (c->width_blocks * BLOCK_SIZE - 200) / 2 - 120; // 120px left of dropdown
+    int label_y = c->y_offset + c->height_blocks * BLOCK_SIZE - 42; // Same line as dropdown
+    lang_text_draw(CUSTOM_TRANSLATION, TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE, label_x, label_y, FONT_NORMAL_BLACK);
     dropdown_button_draw(&tooltip_style_dropdown_button);
 }
 
@@ -632,10 +632,7 @@ static void set_order_destination(const generic_button *button)
 {
     int depot_building_id = button->parameter1;
     int building_id = button->parameter2;
-    if (depot_building_id == -1) { //ineligible storage hack
-        return;
-    }
-    if (!building_id) {
+    if (depot_building_id == -1 || !building_id) { //ineligible storage hack
         return;
     }
     building *b = building_get(depot_building_id);
