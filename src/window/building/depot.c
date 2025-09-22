@@ -165,10 +165,11 @@ static void setup_buttons_for_selected_depot(void)
     // First pass: active storages
     for (int i = 0; i < storage_array_size && button_index < MAX_VISIBLE_ROWS; i++) {
         const data_storage *storage = building_storage_get_array_entry(i);
-        if (!storage->in_use || !storage->building_id) {
+        building *store_building = building_get(storage->building_id);
+        if (!storage->in_use || !storage->building_id ||
+             (!resource_is_food(data.target_resource_id) && store_building->type == BUILDING_GRANARY)) {
             continue;
         }
-        building *store_building = building_get(storage->building_id);
         int max_storable = building_storage_resource_max_storable(store_building, data.target_resource_id);
         if (building_is_active(store_building) && max_storable > 0) {
             row_count++;
@@ -195,10 +196,11 @@ static void setup_buttons_for_selected_depot(void)
     // Second pass: inactive/other storages
     for (int i = 0; i < storage_array_size && button_index < MAX_VISIBLE_ROWS; i++) {
         const data_storage *storage = building_storage_get_array_entry(i);
-        if (!storage->in_use || !storage->building_id) {
+        building *store_building = building_get(storage->building_id);
+        if (!storage->in_use || !storage->building_id ||
+             (!resource_is_food(data.target_resource_id) && store_building->type == BUILDING_GRANARY)) {
             continue;
         }
-        building *store_building = building_get(storage->building_id);
         // Only include inactive storages that have a valid storage_id and weren't already counted in first pass
         int max_storable = building_storage_resource_max_storable(store_building, data.target_resource_id);
         if ((max_storable == 0 || !building_is_active(store_building)) && store_building->storage_id > 0) {
@@ -243,7 +245,7 @@ static void calculate_available_storages(int building_id)
         building *store = building_get(storage_b_id);
         int max_storable = building_storage_resource_max_storable(store, data.target_resource_id);
         int active = building_is_active(store);
-        if (!store || !building_id || (!resource_is_food && store->type == BUILDING_GRANARY)) {
+        if (!store || !building_id || (!resource_is_food(data.target_resource_id) && store->type == BUILDING_GRANARY)) {
             continue;
         }
         if (active && max_storable > 0) {
@@ -271,8 +273,8 @@ static void calculate_available_storages(int building_id)
 void window_building_depot_init_main(int building_id)
 {
     city_resource_determine_available(1);
-    calculate_available_storages(building_id);
     data.advanced_mode = config_get(CONFIG_GP_CH_CART_DEPOT_ADVANCED);
+    calculate_available_storages(building_id);
 }
 
 void window_building_depot_init_resource_selection(void)

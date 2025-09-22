@@ -392,6 +392,9 @@ int building_storage_summary_tooltip(building *b, char *tooltip_text, int max_le
     if (style == STORAGE_SUMMARY_STYLE_NONE) {
         tooltip_text[0] = '\0';
         return 0;
+    } else if (b->state == BUILDING_STATE_MOTHBALLED) {
+
+        TR_TOOLTIP_OVERLAY_PROBLEMS_MOTHBALLED
     }
 
     const resource_list *list = (b->type == BUILDING_WAREHOUSE)
