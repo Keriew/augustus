@@ -164,6 +164,7 @@ int dropdown_button_handle_mouse(const mouse *m, dropdown_button *dd)
 
     int handled = 0;
 
+
     // Handle origin
     if (complex_button_handle_mouse(m, &dd->buttons[0])) {
         dd->expanded = !dd->expanded;
@@ -179,6 +180,10 @@ int dropdown_button_handle_mouse(const mouse *m, dropdown_button *dd)
                 dd->selected_index = i;
                 dd->expanded = 0; // collapse
                 handled = 1;
+                // activate the callback if dropdown state changes:
+                if (dd->selected_callback) {
+                    dd->selected_callback(dd); // pass origin button as parameter
+                }
                 window_request_refresh();
                 return handled;
             }

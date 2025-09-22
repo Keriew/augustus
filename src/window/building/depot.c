@@ -135,6 +135,7 @@ static generic_button depot_order_buttons[] = {
     {384, 82, 32, 22, set_camera_position},
 };
 dropdown_button tooltip_style_dropdown_button;
+static void tooltip_style_changed(const dropdown_button *button);
 
 static void setup_buttons_for_selected_depot(void)
 {
@@ -269,21 +270,33 @@ void window_building_depot_init_resource_selection(void)
     }
 }
 
+static void tooltip_style_changed(const dropdown_button *button)
+{
+    if (button->selected_index < 1 || button->selected_index > 4) {
+        return;
+    }
+    config_set(CONFIG_UI_CART_DEPOT_TOOLTIP_STYLE, button->selected_index - 1);
+    window_request_refresh();
+}
+
 static void window_building_depot_init_tooltip_style_dropdown(building_info_context *c)
 {
     static lang_fragment frags[4]; // fragments array - keep static to ensure it remains valid
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 3; i++) {
         frags[i].type = LANG_FRAG_LABEL;
         frags[i].text_group = CUSTOM_TRANSLATION;
         frags[i].text_id = TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE + i;
     }
-
+    frags[0].text_id = config_get(CONFIG_UI_CART_DEPOT_TOOLTIP_STYLE) + TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE + 1;
     // Calculate position: horizontally centered, 20 pixels above bottom edge
-    int y_offset = window_building_get_vertical_offset(c, 28);
-    int dropdown_x = c->x_offset + (c->width_blocks * BLOCK_SIZE - 200) / 2; // Center horizontally, assuming 200px width
-    int dropdown_y = y_offset + (28 * BLOCK_SIZE) - 20 - 26; // 20px above bottom, minus button height
 
+    int y_offset = window_building_get_vertical_offset(c, c->height_blocks);
+    int btn_width = 500;
+    int dropdown_x = c->x_offset + (c->width_blocks * BLOCK_SIZE) / 2 - btn_width / 2; // Center assuming btn_width 
+    int dropdown_y = y_offset + c->y_offset + (c->height_blocks + 1 * BLOCK_SIZE) - 21 - 26; // 20px above bottom, minus button height
     dropdown_button_init_simple(dropdown_x, dropdown_y, frags, 4, &tooltip_style_dropdown_button);
+    tooltip_style_dropdown_button.selected_callback = tooltip_style_changed; // Set the callback function
+    tooltip_style_dropdown_button.width = btn_width;
 }
 
 void window_building_depot_init_storage_selection(building_info_context *c)
@@ -591,6 +604,9 @@ void window_building_draw_depot_select_source_destination(building_info_context 
             drawn_rows++;
         }
     }
+    lang_text_draw(CUSTOM_TRANSLATION, TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE,
+        c->x_offset + 300 / 2, c->y_offset + (c->height_blocks + 1 * BLOCK_SIZE) - 21 - 26,
+        FONT_NORMAL_BLACK);
     dropdown_button_draw(&tooltip_style_dropdown_button);
 }
 
@@ -741,7 +757,8 @@ const uint8_t *window_building_depot_get_tooltip_source_destination(int *transla
         building *storage_building = building_get(storage_building_id);
         if (storage_building) {
             static char tooltip_buffer[1024];
-            if (building_storage_summary_tooltip(storage_building, tooltip_buffer, sizeof(tooltip_buffer))) {
+            storage_summary_style tooltip_style = config_get(CONFIG_UI_CART_DEPOT_TOOLTIP_STYLE);
+            if (building_storage_summary_tooltip(storage_building, tooltip_buffer, sizeof(tooltip_buffer), tooltip_style)) {
                 return (const uint8_t *) tooltip_buffer;
             }
         }

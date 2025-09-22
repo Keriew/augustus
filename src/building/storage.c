@@ -386,21 +386,27 @@ static int spacing_helper(int phrase_width, int target_width)
     return 0;
 }
 
-int building_storage_summary_tooltip(building *b, char *tooltip_text, int max_length)
+int building_storage_summary_tooltip(building *b, char *tooltip_text, int max_length, storage_summary_style style)
 {
     if (!b || !tooltip_text || max_length <= 0) return 0;
+    if (style == STORAGE_SUMMARY_STYLE_NONE) {
+        tooltip_text[0] = '\0';
+        return 0;
+    }
 
     const resource_list *list = (b->type == BUILDING_WAREHOUSE)
         ? city_resource_get_available() : city_resource_get_available_foods();
-
+    building_storage_state state;
     int name_w = 0, state_w = 0;
     for (unsigned int i = 0; i < list->size; i++) {
         const resource_data *res = resource_get_data(list->items[i]);
         if (!res) continue;
-        building_storage_state st = building_storage_get_state(b, list->items[i], 0);
-
+        state = building_storage_get_state(b, list->items[i], 0);
+        if (style == STORAGE_SUMMARY_STYLE_MINIMAL && state == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
+            continue;
+        }
         int rn_pixels = text_get_width(res->text, FONT_SMALL_PLAIN);
-        int sn_pixels = text_get_width(storage_state_text(st, b->type), FONT_SMALL_PLAIN);
+        int sn_pixels = text_get_width(storage_state_text(state, b->type), FONT_SMALL_PLAIN);
         if (rn_pixels > name_w) name_w = rn_pixels;
         if (sn_pixels > state_w) state_w = sn_pixels;
     }
@@ -417,13 +423,16 @@ int building_storage_summary_tooltip(building *b, char *tooltip_text, int max_le
     for (unsigned int i = 0; i < list->size; i++) {
         resource_type r = list->items[i];
         const resource_data *res = resource_get_data(r);
-        if (!res) continue;
-
-        building_storage_state state = building_storage_get_state(b, r, 0);
+        if (!res) {
+            continue;
+        }
+        state = building_storage_get_state(b, r, 0);
         int qty = building_storage_get_storage_state_quantity(b, r);
         const uint8_t *rn = res->text;
         const uint8_t *st = storage_state_text(state, b->type);
-
+        if (style == STORAGE_SUMMARY_STYLE_MINIMAL && state == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
+            continue;
+        }
         if (i > 0) {
             out = string_copy(newline_str, out, max_length - (out - start));
         }

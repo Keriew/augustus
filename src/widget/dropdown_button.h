@@ -7,19 +7,23 @@
  * @brief Maximum allowed dropdown width in pixels when auto-sizing.
  */
 #define DROPDOWN_BUTTON_MAX_WIDTH 400
+struct dropdown_button;  // forward declaration
 
- /**
-  * @brief A dropdown widget built on top of complex_button.
-  *
-  * The first button in the array is the origin (the clickable dropdown header).
-  * The remaining buttons are the options shown when expanded.
-  */
+
+/**
+ * @brief A dropdown widget built on top of complex_button.
+ *
+ * The first button in the array is the origin (the clickable dropdown header).
+ * The remaining buttons are the options shown when expanded.
+ */
 typedef struct {
     complex_button *buttons;     /**< Buttons array: [0] = origin, [1..] = options */
     unsigned int num_buttons;    /**< Total count (origin + options) */
     short expanded;              /**< 1 = expanded, 0 = collapsed */
     int selected_index;          /**< Index of selected option (>=1), -1 if none */
     int selected_value;          /**< Arbitrary value carried by selected option */
+    void (*selected_callback)    /**< click handler for options */
+        (const struct dropdown_button *button); /*the dropdown_button pointer is handed over to the selected_callback*/
 
     /* Layout configuration */
     int width;                   /**< Dropdown width: 0 = auto (based on longest text) */

@@ -54,6 +54,12 @@ typedef enum {
     BUILDING_STORAGE_PERMISSION_NATIVES = 10,
 } building_storage_permission_states;
 
+typedef enum {
+    STORAGE_SUMMARY_STYLE_NONE = 0,
+    STORAGE_SUMMARY_STYLE_MINIMAL = 1,
+    STORAGE_SUMMARY_STYLE_FULL = 2
+} storage_summary_style;
+
 /**
  * Building storage struct
  */
@@ -156,7 +162,7 @@ resource_type building_storage_get_highest_quantity_resource(building *b);
 /**
  * TODO: header
  */
-int building_storage_summary_tooltip(building *b, char *tooltip_text, int max_length);
+int building_storage_summary_tooltip(building *b, char *tooltip_text, int max_length, storage_summary_style style);
 
 /**
  * Cycles the resource state for the storage
