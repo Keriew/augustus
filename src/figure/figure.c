@@ -185,7 +185,7 @@ void figure_delete(figure *f)
             building_monument_remove_delivery(f->id);
             // intentional fallthrough
         default:
-            if (f->building_id) {
+            if (f->building_id && b) { //building can be already deleted
                 b->figure_id = 0;
             }
             break;

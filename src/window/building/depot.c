@@ -155,7 +155,7 @@ static void setup_buttons_for_selected_depot(void)
     unsigned int drawn_rows = 0;
 
     // Header row for active storages
-    if (data.available_storages > 0 && drawn_rows < MAX_VISIBLE_ROWS) {
+    if (data.available_storages > 0 && drawn_rows < MAX_VISIBLE_ROWS && data.advanced_mode) {
         row_count++;
         if (row_count > scrollbar.scroll_position) {
             drawn_rows++; // This row doesn't have buttons, just increment drawn_rows
@@ -184,8 +184,11 @@ static void setup_buttons_for_selected_depot(void)
             button_index++;
         }
     }
-
+    if (!data.advanced_mode) {
+        return;
+    }
     // Add separator rows if there are secondary storages
+
     if (data.secondary_storages > 0 && drawn_rows < MAX_VISIBLE_ROWS) {
         row_count += 2; // Skip 2 rows for separator
         if (row_count > scrollbar.scroll_position) {
@@ -433,7 +436,7 @@ void window_building_draw_depot_foreground(building_info_context *c)
             TR_BUILDING_INFO_DEPOT_ONE_BUILDING_FOR_RESOURCE : TR_BUILDING_INFO_DEPOT_NO_SOURCE_AVAILABLE;
         text_draw_centered(lang_get_string(CUSTOM_TRANSLATION, translation),
             x_offset + depot_order_buttons[1].x, y_offset + depot_order_buttons[1].y + 6,
-            depot_order_buttons[1].width, FONT_NORMAL_BLACK, COLOR_FONT_GRAY);
+            depot_order_buttons[1].width, FONT_NORMAL_PLAIN, COLOR_FONT_GRAY);
     }
 
     text_draw(translation_for(TR_BUILDING_INFO_DEPOT_DESTINATION), x_offset, y_offset + depot_order_buttons[2].y + 6, FONT_NORMAL_BLACK, 0);
@@ -530,7 +533,7 @@ void window_building_draw_depot_select_source_destination(building_info_context 
     unsigned int drawn_rows = 0;
 
     // header/separator for active storages
-    if (data.available_storages > 0 && drawn_rows < MAX_VISIBLE_ROWS) {
+    if (data.available_storages > 0 && drawn_rows < MAX_VISIBLE_ROWS && data.advanced_mode) {
         row_count++;; // skip 1 row for active storage header
         if (row_count > scrollbar.scroll_position) {
             lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_INFO_ACTIVE_STORAGE_BUILDINGS,
@@ -584,7 +587,14 @@ void window_building_draw_depot_select_source_destination(building_info_context 
             drawn_rows++;
         }
     }
-
+    if (!data.advanced_mode) {
+        int label_x = c->x_offset + 45;
+        int label_y = c->y_offset + (c->height_blocks + 1) * BLOCK_SIZE - 3; // Same line as dropdown
+        lang_text_draw_ellipsized(CUSTOM_TRANSLATION, TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE,
+            label_x, label_y, tooltip_style_dropdown_button.buttons[0].x - label_x, FONT_NORMAL_BLACK);
+        dropdown_button_draw(&tooltip_style_dropdown_button);
+        return;
+    }
     // Draw separator if we have inactive storages
     if (data.secondary_storages > 0 && drawn_rows < MAX_VISIBLE_ROWS) {
         row_count += 2; //skip two rows for inactive storage header
