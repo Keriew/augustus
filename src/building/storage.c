@@ -393,15 +393,16 @@ int building_storage_summary_tooltip(building *b, char *tooltip_text, int max_le
         tooltip_text[0] = '\0';
         return 0;
     } else if (b->state == BUILDING_STATE_MOTHBALLED) {
-
-        TR_TOOLTIP_OVERLAY_PROBLEMS_MOTHBALLED
+        const uint8_t *mothballed_text = lang_get_string(CUSTOM_TRANSLATION, TR_TOOLTIP_OVERLAY_PROBLEMS_MOTHBALLED);
+        string_copy(mothballed_text, (uint8_t *) tooltip_text, max_length);
+        return 1;
     }
 
     const resource_list *list = (b->type == BUILDING_WAREHOUSE)
         ? city_resource_get_available() : city_resource_get_available_foods();
     building_storage_state state;
     int name_w = 0, state_w = 0;
-    for (unsigned int i = 0; i < list->size; i++) {
+    for (unsigned int i = 0; i < list->size; i++) { // find max widths for formatting
         const resource_data *res = resource_get_data(list->items[i]);
         if (!res) continue;
         state = building_storage_get_state(b, list->items[i], 0);
