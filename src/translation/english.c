@@ -1710,7 +1710,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_INFO_ACTIVE_STORAGE_BUILDINGS, "Accepting storage buildings" },
     {TR_BUILDING_INFO_OTHER_STORAGE_BUILDINGS, "Other storage buildings" },
     {TR_TOOLTIP_GOTO_STORAGE_INSTRUCTIONS, "Open building's storage instructions" },
-    {TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE, "Tooltip style e e e e e e e e e e e:" },
+    {TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE, "Tooltip style:" },
     {TR_TOOLTIP_NONE, "None"},
     {TR_TOOLTIP_MINIMAL, "Minimal"},
     {TR_TOOLTIP_FULL, "Full"},

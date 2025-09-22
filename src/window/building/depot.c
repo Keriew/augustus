@@ -238,11 +238,12 @@ static void calculate_available_storages(int building_id)
     int has_valid_dst = 0;
     int storage_array_size = building_storage_get_array_size();
     for (int i = 0; i < storage_array_size; i++) {
-        int building_id = building_storage_get_array_entry(i)->building_id;
-        building *store = building_get(building_id);
+
+        int storage_b_id = building_storage_get_array_entry(i)->building_id;
+        building *store = building_get(storage_b_id);
         int max_storable = building_storage_resource_max_storable(store, data.target_resource_id);
         int active = building_is_active(store);
-        if (!store || !building_id) {
+        if (!store || !building_id || (!resource_is_food && store->type == BUILDING_GRANARY)) {
             continue;
         }
         if (active && max_storable > 0) {
@@ -539,10 +540,12 @@ void window_building_draw_depot_select_source_destination(building_info_context 
     // First pass: draw active storages
     for (int i = 0; i < storage_array_size && drawn_rows < MAX_VISIBLE_ROWS; i++) {
         const data_storage *storage = building_storage_get_array_entry(i);
-        if (!storage->in_use || !storage->building_id) {
+        building *store_building = building_get(storage->building_id);
+        if (!storage->in_use || !storage->building_id ||
+            (!resource_is_food(data.target_resource_id) && store_building->type == BUILDING_GRANARY)) {
             continue;
         }
-        building *store_building = building_get(storage->building_id);
+
         int max_storable = building_storage_resource_max_storable(store_building, data.target_resource_id);
         if (building_is_active(store_building) && max_storable > 0) {
             row_count++;
@@ -594,10 +597,12 @@ void window_building_draw_depot_select_source_destination(building_info_context 
     // Second pass: draw inactive storages
     for (int i = 0; i < storage_array_size && drawn_rows < MAX_VISIBLE_ROWS; i++) {
         const data_storage *storage = building_storage_get_array_entry(i);
-        if (!storage->in_use || !storage->building_id) {
+        building *store_building = building_get(storage->building_id);
+        if (!storage->in_use || !storage->building_id ||
+            (!resource_is_food(data.target_resource_id) && store_building->type == BUILDING_GRANARY)) {
             continue;
         }
-        building *store_building = building_get(storage->building_id);
+
         // Only include inactive storages that have a valid storage_id and weren't already counted in first pass
         int max_storable = building_storage_resource_max_storable(store_building, data.target_resource_id);
         if ((max_storable == 0 || !building_is_active(store_building)) && store_building->storage_id > 0) {
@@ -605,8 +610,7 @@ void window_building_draw_depot_select_source_destination(building_info_context 
             if (row_count <= scrollbar.scroll_position) {
                 continue;
             }
-            // trust me i hate this method as well but its late and im tired
-            // we need to come up with a better way to deal with standard buttons drawing
+            // TODO: come up with a better way to deal with standard buttons drawing
             building *bld = store_building;
             // Left button - goto storage orders
             button_border_draw(c->x_offset + 18, y_offset + 46 + ROW_HEIGHT * drawn_rows, BLOCK_SIZE * 2, 22,
@@ -648,7 +652,7 @@ static void set_order_source(const generic_button *button)
 {
     int depot_building_id = button->parameter1;
     int building_id = button->parameter2;
-    if (depot_building_id == -1) { //ineligible storage hack
+    if (depot_building_id == -1) { //ineligible storage
         return;
     }
     if (!building_id) {
