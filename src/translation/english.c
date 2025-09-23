@@ -1705,6 +1705,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_UI_ANIMATE_TRADE_ROUTES, "Animate trade routes"},
     {TR_HOTKEY_NEXT_TRACK, "Next random track"},
     {TR_CONFIG_MOVE_LEGION_SOUND_SWAP, "Alternative legion move sound"},
+    {TR_BUILDING_INFO_REPAIR_BUILDING, "Repair building" },
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

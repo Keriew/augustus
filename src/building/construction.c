@@ -108,7 +108,7 @@ static const struct cycle building_cycles[] = {
 static unsigned int count_enabled_buildings_for_cycling(unsigned int cycle_index)
 {
     unsigned int count = 0;
-    for (int i = 0; i < building_cycles[cycle_index].size; i++) {
+    for (int i = 0; i < (int) building_cycles[cycle_index].size; i++) {
         if (scenario_allowed_building(building_cycles[cycle_index].array[i])) {
             count++;
         }
@@ -166,7 +166,7 @@ int building_construction_cycle_forward(void)
         for (int j = 0; j < size; j++) {
             if (building_cycles[i].array[j] == building_construction_type()) {
                 data.cycle_step += 1;
-                if (data.cycle_step < building_cycles[i].rotations_to_next) {
+                if (data.cycle_step < (int) building_cycles[i].rotations_to_next) {
                     return 0;
                 }
                 data.cycle_step = 0;

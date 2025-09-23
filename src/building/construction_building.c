@@ -67,6 +67,10 @@ static void add_fort(int type, building *fort)
     ground->formation_id = fort->formation_id;
 }
 
+int building_construction_prepare_terrain(int grid_offset, int size_x, int size_y, clear_mode clear_mode)
+{
+
+}
 
 static void add_hippodrome(building *b)
 {

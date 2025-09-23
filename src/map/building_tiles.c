@@ -218,7 +218,7 @@ static int remove_temporary_wall_building(int building_id)
     if (b->type != BUILDING_WALL) {
         return 0;
     }
-    building_destroy(b);
+    //building_destroy(b);
     return 1;
 }
 
@@ -305,7 +305,8 @@ int map_building_tiles_mark_construction(int x, int y, int size, int terrain, in
 void map_building_tiles_mark_deleting(int grid_offset)
 {
     int building_id = map_building_at(grid_offset);
-    if (map_is_bridge(grid_offset)) { // previous version triggered map_bridge_remove with an early exit condition for regular terrain.
+    if (map_is_bridge(grid_offset)) {
+        // previous version triggered map_bridge_remove with an early exit condition for regular terrain.
         map_bridge_remove(grid_offset, 1);
     } else if (building_id) {
         grid_offset = building_main(building_get(building_id))->grid_offset;

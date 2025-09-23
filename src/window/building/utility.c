@@ -8,6 +8,7 @@
 #include "core/dir.h"
 #include "core/image.h"
 #include "graphics/button.h"
+#include "graphics/complex_button.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
@@ -36,6 +37,7 @@ static struct {
 static generic_button go_to_orders_button[] = {
     {0, 0, 304, 20, button_go_to_orders},
 };
+static complex_button repair_building_button[] = { 0 };
 
 static generic_button orders_permission_buttons[] = {
     {0, 4, 210, 22, button_toggle_figure_state, 0, PERMISSION_MAINTENANCE},
@@ -261,10 +263,31 @@ void window_building_draw_burning_ruin(building_info_context *c)
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(111, 0, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
 
-    lang_text_draw(41, c->rubble_building_type,
+    lang_text_draw(41, building_get(c->rubble_building_id)->type,
         c->x_offset + 32, c->y_offset + BLOCK_SIZE * c->height_blocks - 173, FONT_NORMAL_BLACK);
     lang_text_draw_multiline(111, 1, c->x_offset + 32, c->y_offset + BLOCK_SIZE * c->height_blocks - 143,
         BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_BLACK);
+}
+
+static void trigger_building_repair(const complex_button *button)
+{
+    building *b = building_get(button->parameters[0]);
+    building_repair(b);
+    window_go_back();
+}
+
+static void init_repair_building_button(building_info_context *c)
+{
+    repair_building_button->x = c->x_offset + 32 + 60;
+    repair_building_button->y = c->y_offset + BLOCK_SIZE * c->height_blocks - 173;
+    repair_building_button->width = 200;
+    repair_building_button->height = 20;
+    repair_building_button->parameters[0] = c->rubble_building_id;
+    repair_building_button->user_data = c;
+    repair_building_button->left_click_handler = trigger_building_repair;
+    static lang_fragment frag = { LANG_FRAG_LABEL, CUSTOM_TRANSLATION, TR_BUILDING_INFO_REPAIR_BUILDING, 0, 0, 0 };
+    repair_building_button->sequence = &frag;
+    repair_building_button->sequence_size = 1;
 }
 
 void window_building_draw_rubble(building_info_context *c)
@@ -273,8 +296,9 @@ void window_building_draw_rubble(building_info_context *c)
     window_building_play_sound(c, "wavs/ruin.wav");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(140, 0, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
-
-    lang_text_draw(41, c->rubble_building_type,
+    init_repair_building_button(c);
+    complex_button_draw(repair_building_button);
+    lang_text_draw(41, building_get(c->rubble_building_id)->type,
         c->x_offset + 32, c->y_offset + BLOCK_SIZE * c->height_blocks - 173, FONT_NORMAL_BLACK);
     lang_text_draw_multiline(140, 1, c->x_offset + 32, c->y_offset + BLOCK_SIZE * c->height_blocks - 143,
         BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_BLACK);
@@ -447,7 +471,6 @@ void window_building_draw_native_watchtower(building_info_context *c)
     window_building_draw_description_at(c, 96, CUSTOM_TRANSLATION, TR_BUILDING_NATIVE_WATCHTOWER_DESC);
 }
 
-
 void window_building_draw_highway(building_info_context *c)
 {
     //c->help_id = 0;
@@ -470,8 +493,6 @@ static void button_toggle_figure_state(const generic_button *button)
     window_invalidate();
 }
 
-
-
 static void button_roadblock_orders(const generic_button *button)
 {
     building *b = building_get(data.building_id);
@@ -487,6 +508,11 @@ static void button_roadblock_orders(const generic_button *button)
 static void button_go_to_orders(const generic_button *button)
 {
     window_building_info_show_storage_orders();
+}
+
+int window_building_handle_rubble_button(const mouse *m, building_info_context *c)
+{
+    return complex_button_handle_mouse(m, repair_building_button);
 }
 
 int window_building_handle_mouse_roadblock_button(const mouse *m, building_info_context *c)

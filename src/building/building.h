@@ -38,7 +38,7 @@ typedef struct building {
     unsigned char size;
     unsigned char house_is_merged;
     unsigned char house_size;
-    unsigned char x;
+    unsigned char x; //these are not grid coordinates but image coordinates
     unsigned char y;
     short grid_offset;
     building_type type;
@@ -222,6 +222,8 @@ building *building_main(building *b);
 building *building_next(building *b);
 
 building *building_create(building_type type, int x, int y);
+
+void building_repair(building *b);
 
 void building_clear_related_data(building *b);
 

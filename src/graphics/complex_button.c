@@ -3,6 +3,7 @@
 #include "graphics/button.h"
 #include "graphics/graphics.h"
 #include "graphics/panel.h"
+#include "graphics/window.h"
 #include "input/mouse.h"
 
 #include <stddef.h>
@@ -154,12 +155,17 @@ int complex_button_handle_mouse(const mouse *m, complex_button *btn)
     int bottom = btn->y + btn->height + btn->expanded_hitbox_radius;
 
     int inside = (m->x >= left && m->x < right && m->y >= top && m->y < bottom);
-
-    btn->is_focused = inside ? 1 : 0;
+    if (btn->is_focused != inside) {
+        window_request_refresh(); // redraw to show focus change
+    }
+    btn->is_focused = inside;
 
     if (inside) {
+
         if (btn->hover_handler) {
             btn->hover_handler(btn);
+            // hover handler does not consume the event, but it doesn't request refresh either
+            // if needed, the handler should call window_request_refresh() or window_invalidate()
         }
 
         // --- Left click ---

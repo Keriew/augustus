@@ -1,6 +1,9 @@
 #include "building.h"
 
+#include "building/construction_building.h"
+#include "building/construction_clear.h"
 #include "building/distribution.h"
+#include "building/data_transfer.h"
 #include "building/industry.h"
 #include "building/granary.h"
 #include "building/menu.h"
@@ -21,9 +24,11 @@
 #include "core/log.h"
 #include "figure/figure.h"
 #include "figure/formation_legion.h"
+#include "figuretype/missile.h"
 #include "game/difficulty.h"
 #include "game/save_version.h"
 #include "game/undo.h"
+#include "map/building.h"
 #include "map/building_tiles.h"
 #include "map/bridge.h"
 #include "map/desirability.h"
@@ -314,6 +319,26 @@ void building_trim(void)
     array_trim(data.buildings);
 }
 
+void building_repair(building *b)
+{
+    building_data_transfer_copy(b, 1);
+    int x = map_grid_offset_to_x(b->grid_offset);
+    int y = map_grid_offset_to_y(b->grid_offset);
+    int size = b->size;
+    building_type building_type = b->type;
+
+    // Clear the land area first
+    map_terrain_remove_with_radius(x, y, size, 0, TERRAIN_RUBBLE);
+    building_construction_place_building(building_type, x, y);
+    // Find the newly created building and restore its data
+    building *new_building = building_get(map_building_at(map_grid_offset(x, y)));
+
+    building_data_transfer_paste(new_building, 1);
+    figure_create_explosion_cloud(new_building->x, new_building->y, new_building->size);
+
+    // use map_tiles_update if needed
+}
+
 void building_update_state(void)
 {
     int land_recalc = 0;
@@ -354,12 +379,12 @@ void building_update_state(void)
             if (b->house_size) {
                 city_population_remove_home_removed(b->house_population);
             }
-            building_delete(b);
+            // building_delete(b); // keep the rubbled building as a reference for reconstruction
         } else if (b->state == BUILDING_STATE_DELETED_BY_GAME) {
             building_delete(b);
         } else if (b->immigrant_figure_id) {
             const figure *f = figure_get(b->immigrant_figure_id);
-            if (f->state != FIGURE_STATE_ALIVE || f->destination_building_id != array_index) {
+            if (f->state != FIGURE_STATE_ALIVE || (unsigned int) f->destination_building_id != array_index) {
                 b->immigrant_figure_id = 0;
             }
         }

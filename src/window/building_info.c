@@ -358,7 +358,7 @@ static void init(int grid_offset)
     context.depot_selection.resource = 0;
     context.advisor_button = ADVISOR_NONE;
     context.building_id = map_building_at(grid_offset);
-    context.rubble_building_type = map_rubble_building_type(grid_offset);
+    context.rubble_building_id = map_rubble_building_id(grid_offset);
     context.has_reservoir_pipes = map_terrain_is(grid_offset, TERRAIN_RESERVOIR_RANGE);
     context.aqueduct_has_water = map_aqueduct_has_water_access_at(grid_offset);
 
@@ -1088,6 +1088,9 @@ static void handle_input(const mouse *m, const hotkeys *h)
 {
     int handled = 0;
     // general buttons
+    if (context.terrain_type == TERRAIN_INFO_RUBBLE) {
+        handled |= window_building_handle_rubble_button(m, &context);
+    }
     if (context.show_special_orders ||
         context.depot_selection.destination ||
         context.depot_selection.source ||
