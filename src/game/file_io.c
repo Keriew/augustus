@@ -786,7 +786,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     }
     scenario_map_init();
 
-    map_building_load_state(state->building_grid, state->building_damage_grid);
+    map_building_load_state(state->building_grid, state->building_damage_grid, version);
     map_terrain_load_state(state->terrain_grid, version > SAVE_GAME_LAST_ORIGINAL_TERRAIN_DATA_SIZE_VERSION,
         version <= SAVE_GAME_LAST_STORED_IMAGE_IDS ? state->image_grid : 0,
         version <= SAVE_GAME_LAST_SMALLER_IMAGE_ID_VERSION);

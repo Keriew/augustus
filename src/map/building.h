@@ -3,6 +3,7 @@
 
 #include "building/type.h"
 #include "core/buffer.h"
+#include "game/save_version.h"
 
 /**
  * Returns the building at the given offset
@@ -35,7 +36,7 @@ void map_building_clear(void);
 
 void map_building_save_state(buffer *buildings, buffer *damage);
 
-void map_building_load_state(buffer *buildings, buffer *damage);
+void map_building_load_state(buffer *buildings, buffer *damage, savegame_version_t version);
 
 int map_building_is_reservoir(int x, int y);
 
