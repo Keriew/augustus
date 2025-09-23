@@ -213,6 +213,8 @@ int building_count(void);
 
 int building_find(building_type type);
 
+int building_can_repair(building_type type);
+
 building *building_first_of_type(building_type type);
 
 void building_change_type(building *b, building_type type);

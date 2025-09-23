@@ -63,9 +63,14 @@ building *building_get(int id)
 {
     return array_item(data.buildings, id);
 }
-static int building_can_repair(building_type type)
+int building_can_repair(building_type type)
 {
-    building_clone_type_from_building_type(type);
+    building_type repair_type = building_clone_type_from_building_type(type);
+    if (repair_type == BUILDING_NONE) {
+        return 0;
+    } else {
+        return 1;
+    }
 }
 int building_dist(int x, int y, int w, int h, building *b)
 {
@@ -325,17 +330,27 @@ void building_trim(void)
 
 int building_repair(building *b)
 {
+    building_type repair_type = b->type;
+    
+    // For rubble buildings, check if we have the original type stored
+    if (b->state == BUILDING_STATE_RUBBLE && b->data.rubble.original_type != BUILDING_NONE) {
+        repair_type = b->data.rubble.original_type;
+    }
+    
+    if (!building_can_repair(repair_type)) {
+        city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
+        return 0;
+    }
     building_data_transfer_backup(); // backup player's transfer data
     building_data_transfer_copy(b, 1);
     int x = map_grid_offset_to_x(b->grid_offset);
     int y = map_grid_offset_to_y(b->grid_offset);
     int size = b->size;
-    building_type building_type = b->type;
 
     // Clear the land area first
     building_construction_prepare_terrain(b->grid_offset, size, size, CLEAR_MODE_RUBBLE, 1); // clearing cost processed 
-    int success = building_construction_place_building(building_type, x, y); // need to process also building cost
-    int placement_cost = model_get_building(building_type)->cost;
+    int success = building_construction_place_building(repair_type, x, y); // need to process also building cost
+    int placement_cost = model_get_building(repair_type)->cost;
     city_finance_process_construction(placement_cost + placement_cost / 20); // extra 5% cost for repairs
     if (!success) {
         city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);

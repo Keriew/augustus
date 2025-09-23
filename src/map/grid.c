@@ -141,7 +141,6 @@ grid_slice *map_grid_get_grid_slice_ring(int center_grid_offset, int inner_radiu
             }
         }
     }
-
     slice->size = count;
     return slice;
 }

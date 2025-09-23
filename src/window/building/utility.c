@@ -296,8 +296,10 @@ void window_building_draw_rubble(building_info_context *c)
     window_building_play_sound(c, "wavs/ruin.wav");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(140, 0, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
-    init_repair_building_button(c);
-    complex_button_draw(repair_building_button);
+    if (building_can_repair(building_get(c->rubble_building_id)->type)) {
+        init_repair_building_button(c);
+        complex_button_draw(repair_building_button);
+    }
     lang_text_draw(41, building_get(c->rubble_building_id)->type,
         c->x_offset + 32, c->y_offset + BLOCK_SIZE * c->height_blocks - 173, FONT_NORMAL_BLACK);
     lang_text_draw_multiline(140, 1, c->x_offset + 32, c->y_offset + BLOCK_SIZE * c->height_blocks - 143,
