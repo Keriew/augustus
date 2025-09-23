@@ -223,7 +223,7 @@ building *building_next(building *b);
 
 building *building_create(building_type type, int x, int y);
 
-void building_repair(building *b);
+int building_repair(building *b);
 
 void building_clear_related_data(building *b);
 

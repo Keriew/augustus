@@ -79,6 +79,11 @@ static building_type get_clone_type_from_building(building *b, building_type clo
     }
 }
 
+building_type building_clone_type_from_building_type(building_type type)
+{
+    return get_clone_type_from_building(NULL, type);
+}
+
 int building_clone_rotation_from_grid_offset(int grid_offset)
 {
     int building_id = map_building_at(grid_offset);

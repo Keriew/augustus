@@ -7,7 +7,7 @@
 
 #include <string.h>
 
-static struct {
+typedef struct {
     building_data_type data_type;
     unsigned char resource[RESOURCE_MAX];
     building_storage storage;
@@ -16,14 +16,33 @@ static struct {
     short i16;
     int i32;
     signed char mothball;
-} data;
+} transfer_data;
 
-int building_data_transfer_repair(void)
+static transfer_data data;
+static transfer_data backup_data;
+
+void building_data_transfer_clear(int backup)
 {
-    // perform an out of loop transfer of data without overwriting current data transfer data
-    unsigned char backup[sizeof(data)]; //temporary buffer to hold current data
-    memcpy(backup, &data, sizeof(data)); //make a copy
-    // copy the data b2b
+    if (backup) {
+        memset(&backup_data, 0, sizeof(backup_data));
+    } else {
+        memset(&data, 0, sizeof(data));
+    }
+}
+void building_data_transfer_backup(void)
+{
+    backup_data = data;
+}
+
+void building_data_transfer_restore(void)
+{
+    data = backup_data;
+}
+
+void building_data_transfer_restore_and_clear_backup(void)
+{
+    data = backup_data;
+    memset(&backup_data, 0, sizeof(backup_data));
 }
 
 int building_data_transfer_possible(building *b)

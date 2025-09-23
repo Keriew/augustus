@@ -15,6 +15,7 @@
 #include "building/storage.h"
 #include "building/variant.h"
 #include "city/buildings.h"
+#include "city/finance.h"
 #include "city/view.h"
 #include "city/warning.h"
 #include "core/config.h"
@@ -54,22 +55,65 @@ static void add_fort(int type, building *fort)
     const int offsets_x[] = { 3, -1, -4, 0 };
     const int offsets_y[] = { -1, -4, 0, 3 };
     int id = fort->id;
-    building *ground = building_create(BUILDING_FORT_GROUND, fort->x + offsets_x[building_rotation_get_rotation()], fort->y + offsets_y[building_rotation_get_rotation()]);
+    building *ground = building_create(BUILDING_FORT_GROUND, fort->x + offsets_x[building_rotation_get_rotation()],
+        fort->y + offsets_y[building_rotation_get_rotation()]);
     game_undo_add_building(ground);
     fort = building_get(id);
     ground->prev_part_building_id = fort->id;
     fort->next_part_building_id = ground->id;
     ground->next_part_building_id = 0;
-    map_building_tiles_add(ground->id, fort->x + offsets_x[building_rotation_get_rotation()], fort->y + offsets_y[building_rotation_get_rotation()], 4,
-        image_group(GROUP_BUILDING_FORT) + 1, TERRAIN_BUILDING);
+    map_building_tiles_add(ground->id, fort->x + offsets_x[building_rotation_get_rotation()],
+     fort->y + offsets_y[building_rotation_get_rotation()], 4, image_group(GROUP_BUILDING_FORT) + 1, TERRAIN_BUILDING);
 
     fort->formation_id = formation_legion_create_for_fort(fort);
     ground->formation_id = fort->formation_id;
 }
 
-int building_construction_prepare_terrain(int grid_offset, int size_x, int size_y, clear_mode clear_mode)
+int building_construction_prepare_terrain(int grid_offset, int size_x, int size_y, clear_mode clear_mode, int cost)
 {
+    int x = map_grid_offset_to_x(grid_offset);
+    int y = map_grid_offset_to_y(grid_offset);
+    int total_cost = 0;
+    for (int dy = 0; dy < size_y; dy++) {
+        for (int dx = 0; dx < size_x; dx++) {
+            int gx = x + dx;
+            int gy = y + dy;
+            int g_offset = map_grid_offset(gx, gy);
+            switch (clear_mode) {
+                case CLEAR_MODE_FORCE:
+                    if (map_terrain_is(g_offset, TERRAIN_CLEARABLE)) {
+                        total_cost += cost * 3; // 'lazy' preparation is 50% more expensive per cleared tile
+                    }
+                    map_terrain_set(g_offset, TERRAIN_CLEAR);
 
+                    break;
+                case CLEAR_MODE_RUBBLE:
+                    if (map_terrain_is(g_offset, TERRAIN_RUBBLE)) {
+                        total_cost += cost * 3;
+                    }
+                    map_terrain_remove(g_offset, TERRAIN_RUBBLE);
+                    break;
+                case CLEAR_MODE_TREES:
+                    if (map_terrain_is(g_offset, TERRAIN_TREE)) {
+                        total_cost += cost * 3;
+                    }
+                    map_terrain_remove(g_offset, TERRAIN_TREE);
+                    break;
+                case CLEAR_MODE_PLAYER:
+                    if (map_terrain_is(g_offset, TERRAIN_CLEARABLE)) {
+                        total_cost += cost * 3;
+                    }
+                    map_terrain_remove(g_offset, TERRAIN_CLEARABLE);
+                    break;
+                default:
+                    return 0; //invalid clear mode
+            }
+        }
+    }
+    if (cost && total_cost > 0) {
+        city_finance_process_construction(total_cost);
+    }
+    return 1;
 }
 
 static void add_hippodrome(building *b)
@@ -376,6 +420,7 @@ int building_construction_place_building(building_type type, int x, int y)
         size = 3;
     }
     // Do not check for a figure when build a roadblock of single tile size
+    // TODO: do not check for figures on tiles that are citizen passable in general
     int check_figure = type == BUILDING_ROADBLOCK && size == 1 ? 0 : 1;
     int building_orientation = 0;
     if (type == BUILDING_GATEHOUSE) {

@@ -1,5 +1,6 @@
 #include "building.h"
 
+#include "building/clone.h"
 #include "building/construction_building.h"
 #include "building/construction_clear.h"
 #include "building/distribution.h"
@@ -62,7 +63,10 @@ building *building_get(int id)
 {
     return array_item(data.buildings, id);
 }
-
+static int building_can_repair(building_type type)
+{
+    building_clone_type_from_building_type(type);
+}
 int building_dist(int x, int y, int w, int h, building *b)
 {
     int size = building_properties_for_type(b->type)->size;
@@ -319,8 +323,9 @@ void building_trim(void)
     array_trim(data.buildings);
 }
 
-void building_repair(building *b)
+int building_repair(building *b)
 {
+    building_data_transfer_backup(); // backup player's transfer data
     building_data_transfer_copy(b, 1);
     int x = map_grid_offset_to_x(b->grid_offset);
     int y = map_grid_offset_to_y(b->grid_offset);
@@ -328,15 +333,21 @@ void building_repair(building *b)
     building_type building_type = b->type;
 
     // Clear the land area first
-    map_terrain_remove_with_radius(x, y, size, 0, TERRAIN_RUBBLE);
-    building_construction_place_building(building_type, x, y);
+    building_construction_prepare_terrain(b->grid_offset, size, size, CLEAR_MODE_RUBBLE, 1); // clearing cost processed 
+    int success = building_construction_place_building(building_type, x, y); // need to process also building cost
+    int placement_cost = model_get_building(building_type)->cost;
+    city_finance_process_construction(placement_cost + placement_cost / 20); // extra 5% cost for repairs
+    if (!success) {
+        city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
+        return 0;
+    }
     // Find the newly created building and restore its data
     building *new_building = building_get(map_building_at(map_grid_offset(x, y)));
 
     building_data_transfer_paste(new_building, 1);
-    figure_create_explosion_cloud(new_building->x, new_building->y, new_building->size);
-
-    // use map_tiles_update if needed
+    building_data_transfer_restore_and_clear_backup(); // restore player's transfer data from backup
+    figure_create_explosion_cloud(new_building->x, new_building->y, new_building->size); // poof
+    return 1;
 }
 
 void building_update_state(void)

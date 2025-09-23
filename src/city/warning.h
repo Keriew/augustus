@@ -85,6 +85,7 @@ typedef enum {
     WARNING_BUILD_SENATE = 91,
     WARNING_NO_ARMOURY = 92,
     WARNING_WAREHOUSE_TOWER = 93,
+    WARNING_REPAIR_IMPOSSIBLE = 94,
 } warning_type;
 
 #define NEW_WARNING_SLOT 0
