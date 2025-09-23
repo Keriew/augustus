@@ -159,8 +159,7 @@ void map_grid_bound_area(int *x_min, int *y_min, int *x_max, int *y_max)
     }
 }
 
-void map_grid_get_area(int x, int y, int size, int radius,
-                       int *x_min, int *y_min, int *x_max, int *y_max)
+void map_grid_get_area(int x, int y, int size, int radius, int *x_min, int *y_min, int *x_max, int *y_max)
 {
     *x_min = x - radius;
     *y_min = y - radius;
