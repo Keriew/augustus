@@ -7,7 +7,7 @@
 
 static grid_u32 buildings_grid;
 static grid_u8 damage_grid;
-static grid_u32 rubble_type_grid;
+static grid_u32 rubble_info_grid;
 
 int map_building_at(int grid_offset)
 {
@@ -35,31 +35,31 @@ int map_building_damage_increase(int grid_offset)
     return ++damage_grid.items[grid_offset];
 }
 
-int map_rubble_building_type(int grid_offset)
+int map_rubble_building_id(int grid_offset)
 {
-    return rubble_type_grid.items[grid_offset];
+    return rubble_info_grid.items[grid_offset];
 }
 
-void map_set_rubble_building_type(int grid_offset, building_type type)
+void map_set_rubble_building_id(int grid_offset, unsigned int building_id)
 {
-    rubble_type_grid.items[grid_offset] = type;
+    rubble_info_grid.items[grid_offset] = building_id;
 }
 
 void map_building_clear(void)
 {
     map_grid_clear_u32(buildings_grid.items);
     map_grid_clear_u8(damage_grid.items);
-    map_grid_clear_u32(rubble_type_grid.items);
+    map_grid_clear_u32(rubble_info_grid.items);
 }
 
-void map_building_save_state(buffer *buildings, buffer *damage)
+void map_building_save_state(buffer *buildings, buffer *damage, buffer *rubble)
 {
     map_grid_save_state_u32(buildings_grid.items, buildings);
     map_grid_save_state_u8(damage_grid.items, damage);
-    //map_grid_save_state_u32(rubble_type_grid.items, buildings);
+    map_grid_save_state_u32(rubble_info_grid.items, rubble);
 }
 
-void map_building_load_state(buffer *buildings, buffer *damage, savegame_version_t version)
+void map_building_load_state(buffer *buildings, buffer *damage, buffer *rubble, savegame_version_t version)
 {
     if (version <= SAVE_GAME_LAST_U16_GRIDS) {
         map_grid_load_state_u16_to_u32(buildings_grid.items, buildings);
@@ -67,7 +67,7 @@ void map_building_load_state(buffer *buildings, buffer *damage, savegame_version
     } else {
         map_grid_load_state_u32(buildings_grid.items, buildings);
         map_grid_load_state_u8(damage_grid.items, damage);
-        //map_grid_load_state_u32(rubble_type_grid.items, buildings);
+        map_grid_load_state_u32(rubble_info_grid.items, rubble);
     }
 }
 

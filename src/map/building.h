@@ -25,18 +25,18 @@ int map_building_damage_increase(int grid_offset);
 
 void map_building_damage_clear(int grid_offset);
 
-int map_rubble_building_type(int grid_offset);
+int map_rubble_building_id(int grid_offset);
 
-void map_set_rubble_building_type(int grid_offset, building_type type);
+void map_set_rubble_building_id(int grid_offset, unsigned int building_id);
 
 /**
  * Clears the maps related to buildings
  */
 void map_building_clear(void);
 
-void map_building_save_state(buffer *buildings, buffer *damage);
+void map_building_save_state(buffer *buildings, buffer *damage, buffer *rubble);
 
-void map_building_load_state(buffer *buildings, buffer *damage, savegame_version_t version);
+void map_building_load_state(buffer *buildings, buffer *damage, buffer *rubble, savegame_version_t version);
 
 int map_building_is_reservoir(int x, int y);
 

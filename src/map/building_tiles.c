@@ -176,7 +176,7 @@ void map_building_tiles_remove(int building_id, int x, int y)
                 continue;
             }
             if (building_id && b->type != BUILDING_BURNING_RUIN) {
-                map_set_rubble_building_type(grid_offset, b->type);
+                map_set_rubble_building_id(grid_offset, b->id);
             }
             map_property_clear_constructing(grid_offset);
             map_property_set_multi_tile_size(grid_offset, 1);
@@ -215,9 +215,9 @@ void map_building_tiles_set_rubble(int building_id, int x, int y, int size)
                 continue;
             }
             if (building_id && building_get(map_building_at(grid_offset))->type != BUILDING_BURNING_RUIN) {
-                map_set_rubble_building_type(grid_offset, b->type);
+                map_set_rubble_building_id(grid_offset, b->id);
             } else if (!building_id && map_terrain_get(grid_offset) & TERRAIN_WALL) {
-                map_set_rubble_building_type(grid_offset, BUILDING_WALL);
+                map_set_rubble_building_type(grid_offset, BUILDING_WALL); // WRONG
             }
             map_property_clear_constructing(grid_offset);
             map_property_set_multi_tile_size(grid_offset, 1);
