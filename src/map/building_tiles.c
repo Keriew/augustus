@@ -202,6 +202,26 @@ void map_building_tiles_remove(int building_id, int x, int y)
     map_tiles_update_region_rubble(x, y, x + size, y + size);
 }
 
+static int create_temporary_wall_building(int x, int y)
+{
+    building *b = building_create(BUILDING_WALL, x, y);
+    return b->id;
+}
+
+static int remove_temporary_wall_building(int building_id)
+{
+    //placeholder 
+    if (!building_id) {
+        return 0;
+    }
+    building *b = building_get(building_id);
+    if (b->type != BUILDING_WALL) {
+        return 0;
+    }
+    building_destroy(b);
+    return 1;
+}
+
 void map_building_tiles_set_rubble(int building_id, int x, int y, int size)
 {
     if (!map_grid_is_inside(x, y, size)) {
@@ -217,7 +237,10 @@ void map_building_tiles_set_rubble(int building_id, int x, int y, int size)
             if (building_id && building_get(map_building_at(grid_offset))->type != BUILDING_BURNING_RUIN) {
                 map_set_rubble_building_id(grid_offset, b->id);
             } else if (!building_id && map_terrain_get(grid_offset) & TERRAIN_WALL) {
-                map_set_rubble_building_type(grid_offset, BUILDING_WALL); // WRONG
+                // since walls are not buildings, but rather terrain, we create a temporary dummy building for them
+                // once the rubble is repaired or cleared, it will be reset to wall terrain or clear terrain accordingly
+                int temp_b_id = create_temporary_wall_building(x + dx, y + dy);
+                map_set_rubble_building_id(grid_offset, temp_b_id);
             }
             map_property_clear_constructing(grid_offset);
             map_property_set_multi_tile_size(grid_offset, 1);
