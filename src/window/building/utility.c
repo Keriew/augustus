@@ -300,7 +300,7 @@ void window_building_draw_rubble(building_info_context *c)
         init_repair_building_button(c);
         complex_button_draw(repair_building_button);
     } else if (building_get(c->rubble_building_id)->type == BUILDING_BURNING_RUIN) {
-        building_type previous_type = building_get(c->rubble_building_id)->data.rubble.was_tent;
+        building_type previous_type = building_get(c->rubble_building_id)->data.rubble.og_type;
         if (building_can_repair(previous_type)) {
             init_repair_building_button(c);
             complex_button_draw(repair_building_button);

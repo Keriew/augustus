@@ -330,18 +330,40 @@ void building_trim(void)
 
 int building_was_tent(building *b)
 {
-    if (b->type == BUILDING_BURNING_RUIN) {
-        return b->data.rubble.was_tent;
+    return b->data.rubble.og_type == 1;
+}
+
+static int building_is_still_burning(building *b)
+{
+    int hot = (b->type == BUILDING_BURNING_RUIN);
+    int grid_offset = hot ? b->data.rubble.og_grid_offset : b->grid_offset;
+    int size = hot ? b->data.rubble.og_size : b->size;
+    grid_slice *b_area = map_grid_get_grid_slice_square(grid_offset, size);
+    for (int i = 0; i < b_area->size; i++) {
+        int offset = b_area->grid_offsets[i];
+        if (building_get(map_building_at(offset))->type == BUILDING_BURNING_RUIN) {
+            if (building_get(map_building_at(offset))->state == BUILDING_STATE_RUBBLE) {
+                continue; // extinguished tile
+            }
+            return 1;
+        }
     }
     return 0;
 }
 
 int building_repair(building *b)
 {
-    if (b->type == BUILDING_BURNING_RUIN) {
+    int use_rubble_data = 0;
+    if (b->type == BUILDING_BURNING_RUIN) { // fire does a lot of damage. So much, it changes the internal structures
+        // of the building, changing sizes and grid offsets so we have to fetch the rubble data
         // Try to get the original building type from the rubble data
-        building_type previous_type = b->data.rubble.was_tent;
-        if (previous_type) {
+        if (building_is_still_burning(b)) {
+            city_warning_show(WARNING_REPAIR_BURNING, NEW_WARNING_SLOT);
+            return 0;
+        }
+        use_rubble_data = 1;
+        building_type previous_type = b->data.rubble.og_type;
+        if (previous_type) { // exceptions should be checked and handled here
             b->type = previous_type;
         }
     }
@@ -351,26 +373,32 @@ int building_repair(building *b)
     }
     building_data_transfer_backup(); // backup player's transfer data
     building_data_transfer_copy(b, 1);
+    if (use_rubble_data) {        // Restore the rubble data to the building
+        b->size = b->data.rubble.og_size;
+        b->grid_offset = b->data.rubble.og_grid_offset;
+        b->type = b->data.rubble.og_type;
+        b->subtype.orientation = b->data.rubble.og_orientation;
+    }
     int x = map_grid_offset_to_x(b->grid_offset);
     int y = map_grid_offset_to_y(b->grid_offset);
     int size = b->size;
     building_type building_type = b->type;
 
-    // Clear the land area first
-    int clearing = building_construction_prepare_terrain(b->grid_offset, size, size, CLEAR_MODE_RUBBLE, 1); // clearing cost processed 
+    // Clear the land area first and process cost
+    int clearing = building_construction_prepare_terrain(b->grid_offset, size, size, CLEAR_MODE_RUBBLE, 1);
     int success = building_construction_place_building(building_type, x, y); // need to process also building cost
     int placement_cost = model_get_building(building_type)->cost;
-    city_finance_process_construction(placement_cost + placement_cost / 20); // extra 5% cost for repairs
-    if (!success) {
+    if (!success || !clearing) {
         city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
         return 0;
     }
+    city_finance_process_construction(placement_cost + placement_cost / 20); // extra 5% cost for repairs
     // Find the newly created building and restore its data
     building *new_building = building_get(map_building_at(map_grid_offset(x, y)));
 
     building_data_transfer_paste(new_building, 1);
     building_data_transfer_restore_and_clear_backup(); // restore player's transfer data from backup
-    figure_create_explosion_cloud(new_building->x, new_building->y, new_building->size); // poof
+    figure_create_explosion_cloud(new_building->x, new_building->y, new_building->size, 1); // poof
     return 1;
 }
 

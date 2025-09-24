@@ -50,7 +50,12 @@ static void destroy_on_fire(building *b, int plagued)
     if (b->house_size && b->house_population) {
         city_population_remove_home_removed(b->house_population);
     }
-    int was_tent = (b->house_size && b->subtype.house_level <= HOUSE_LARGE_TENT) ? 1 : b->type;
+    // save original info for rubble data
+    int og_type = (b->house_size && b->subtype.house_level <= HOUSE_LARGE_TENT) ? 1 : b->type;
+    int og_size = b->size;
+    int og_orientation = b->subtype.orientation;
+    int og_grid_offset = b->grid_offset;
+
     b->house_population = 0;
     b->house_size = 0;
     b->sickness_level = 0;
@@ -86,7 +91,11 @@ static void destroy_on_fire(building *b, int plagued)
         b->size = 1;
         b->has_plague = plagued;
         memset(&b->data, 0, sizeof(b->data));
-        b->data.rubble.was_tent = was_tent;
+        b->data.rubble.og_type = og_type;
+        b->data.rubble.og_grid_offset = og_grid_offset;
+        b->data.rubble.og_size = og_size;
+        b->data.rubble.og_orientation = og_orientation;
+
         map_building_tiles_add(b->id, b->x, b->y, 1, building_image_get(b), TERRAIN_BUILDING);
     }
     static const int x_tiles[] = {
@@ -103,7 +112,6 @@ static void destroy_on_fire(building *b, int plagued)
         }
         building *ruin = building_create(BUILDING_BURNING_RUIN, x, y);
         map_set_rubble_building_id(map_grid_offset(x, y), b->id);
-        ruin->data.rubble.was_tent = was_tent;
         map_building_tiles_add(ruin->id, ruin->x, ruin->y, 1, building_image_get(ruin), TERRAIN_BUILDING);
         ruin->fire_duration = (ruin->house_figure_generation_delay & 7) + 1;
         ruin->figure_id4 = 0;
@@ -172,7 +180,7 @@ void building_destroy_by_collapse(building *b)
 {
     b->state = BUILDING_STATE_RUBBLE;
     map_building_tiles_set_rubble(b->id, b->x, b->y, b->size);
-    figure_create_explosion_cloud(b->x, b->y, b->size);
+    figure_create_explosion_cloud(b->x, b->y, b->size, 0);
     destroy_linked_parts(b, DESTROY_COLLAPSE, 0);
 }
 
