@@ -3,6 +3,9 @@
 
 #include "core/buffer.h"
 
+#define TERRAIN_LAST_FLAG TERRAIN_HIGHWAY_BOTTOM_RIGHT
+#define TERRAIN_NUM_FLAGS  (21)  // bits
+
 enum {
     TERRAIN_CLEAR = 0,
     TERRAIN_TREE = 1 << 0,
@@ -61,6 +64,12 @@ enum {
 
     TERRAIN_MAP_EDGE = TERRAIN_TREE | TERRAIN_WATER,
 };
+
+typedef struct {
+    uint8_t bits[TERRAIN_NUM_FLAGS];
+} terrain_flags_array;
+
+terrain_flags_array terrain_to_array(int grid_offset);
 
 int map_terrain_is(int grid_offset, int terrain);
 

@@ -109,6 +109,11 @@ static void write_type_data(buffer *buf, const building *b)
             buffer_write_i16(buf, b->data.industry.production_current_month);
         }
         buffer_write_i16(buf, b->data.industry.fishing_boat_id);
+    } else if (b->type == BUILDING_BURNING_RUIN) {
+        buffer_write_u16(buf, b->data.rubble.og_type);
+        buffer_write_u16(buf, b->data.rubble.og_grid_offset);
+        buffer_write_u8(buf, b->data.rubble.og_size);
+        buffer_write_u8(buf, b->data.rubble.og_orientation);
     } else {
         buffer_write_u8(buf, b->data.entertainment.num_shows);
         buffer_write_u8(buf, b->data.entertainment.days1);
@@ -158,7 +163,7 @@ void building_state_save_to_buffer(buffer *buf, const building *b)
     buffer_write_u8(buf, b->house_tavern_food_access);
     buffer_write_i16(buf, b->prev_part_building_id);
     buffer_write_i16(buf, b->next_part_building_id);
-    buffer_write_i16(buf, 0);
+    buffer_write_i16(buf, 0); // Q: what was here and why was it removed? can we replace it with something useful?
     buffer_write_u8(buf, b->house_sentiment_message);
     buffer_write_u8(buf, b->has_well_access);
     buffer_write_i16(buf, b->num_workers);
@@ -345,7 +350,6 @@ static void read_type_data(buffer *buf, building *b, int version)
             for (int i = 0; i < RESOURCE_MAX_LEGACY; i++) {
                 b->resources[resource_remap(i)] = buffer_read_i16(buf);
             }
-
         }
         b->data.roadblock.exceptions = ROADBLOCK_PERMISSION_ALL;
     } else if (b->type == BUILDING_WAREHOUSE || b->type == BUILDING_GRANARY) {
@@ -424,6 +428,11 @@ static void read_type_data(buffer *buf, building *b, int version)
             buffer_skip(buf, 6);
         }
         b->data.industry.fishing_boat_id = buffer_read_i16(buf);
+    } else if (b->type == BUILDING_BURNING_RUIN && version > SAVE_GAME_LAST_U16_GRIDS) {
+        b->data.rubble.og_type = buffer_read_u16(buf);
+        b->data.rubble.og_grid_offset = buffer_read_u16(buf);
+        b->data.rubble.og_size = buffer_read_u8(buf);
+        b->data.rubble.og_orientation = buffer_read_u8(buf);
     } else {
         if (version <= SAVE_GAME_LAST_STATIC_RESOURCES) {
             buffer_skip(buf, 26);

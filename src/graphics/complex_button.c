@@ -11,7 +11,8 @@
 static void draw_default_style(const complex_button *button)
 {
     const int inner_margin = 2; // small horizontal margin for text/images
-    const font_t font = !button->is_disabled ? FONT_NORMAL_BLACK : FONT_NORMAL_WHITE;
+    const font_t font = button->is_disabled ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK;
+    const color_t f_color = button->is_disabled ? COLOR_FONT_GRAY : COLOR_MASK_NONE;
 
     graphics_set_clip_rectangle(button->x, button->y, button->width, button->height);
 
@@ -19,11 +20,11 @@ static void draw_default_style(const complex_button *button)
     unbordered_panel_draw(button->x, button->y, button->width / BLOCK_SIZE + 1, height_blocks + 1);
     int draw_red_border = !button->is_disabled ? button->is_focused : 0;    // Only draw border if enabled
     button_border_draw(button->x, button->y, button->width, button->height, draw_red_border);
-
+    sequence_positioning pos = (!button->sequence_position) ? SEQUENCE_POSITION_CENTER : button->sequence_position;
     // Y offset based on positioning enum (row: top, center, bottom)
     int text_height = font_definition_for(font)->line_height;
     int sequence_y_offset = 0;
-    switch (button->sequence_position) {
+    switch (pos) {
         case SEQUENCE_POSITION_TOP_LEFT:
         case SEQUENCE_POSITION_TOP_CENTER:
         case SEQUENCE_POSITION_TOP_RIGHT:
@@ -59,12 +60,7 @@ static void draw_default_style(const complex_button *button)
     int total_width = img_before_w + seq_width + img_after_w;
 
     int cursor_x = 0;
-    switch (button->sequence_position) {
-        case SEQUENCE_POSITION_TOP_CENTER:
-        case SEQUENCE_POSITION_CENTER:
-        case SEQUENCE_POSITION_BOTTOM_CENTER:
-            cursor_x = button->x + (button->width - total_width) / 2;
-            break;
+    switch (pos) {
         case SEQUENCE_POSITION_TOP_RIGHT:
         case SEQUENCE_POSITION_CENTER_RIGHT:
         case SEQUENCE_POSITION_BOTTOM_RIGHT:
@@ -73,8 +69,13 @@ static void draw_default_style(const complex_button *button)
         case SEQUENCE_POSITION_TOP_LEFT:
         case SEQUENCE_POSITION_CENTER_LEFT:
         case SEQUENCE_POSITION_BOTTOM_LEFT:
-        default:
             cursor_x = button->x + inner_margin;
+            break;
+        case SEQUENCE_POSITION_TOP_CENTER:
+        case SEQUENCE_POSITION_CENTER:
+        case SEQUENCE_POSITION_BOTTOM_CENTER:
+        default:
+            cursor_x = button->x + (button->width - total_width) / 2;
             break;
     }
 
@@ -88,14 +89,13 @@ static void draw_default_style(const complex_button *button)
 
     // Draw sequence (centered version if enum is 2,5,8)
     if (button->sequence && button->sequence_size > 0) {
-        if (button->sequence_position == SEQUENCE_POSITION_TOP_CENTER ||
-            button->sequence_position == SEQUENCE_POSITION_CENTER ||
-            button->sequence_position == SEQUENCE_POSITION_BOTTOM_CENTER) {
+        if (pos == SEQUENCE_POSITION_TOP_CENTER || pos == SEQUENCE_POSITION_CENTER ||
+             pos == SEQUENCE_POSITION_BOTTOM_CENTER) {
             lang_text_draw_sequence_centered(
-                button->sequence, button->sequence_size, button->x, sequence_y_offset, button->width, font);
+                button->sequence, button->sequence_size, button->x, sequence_y_offset, button->width, font, f_color);
         } else {
             cursor_x += lang_text_draw_sequence(
-                button->sequence, button->sequence_size, cursor_x, sequence_y_offset, font);
+                button->sequence, button->sequence_size, cursor_x, sequence_y_offset, font, f_color);
         }
     }
 
@@ -120,7 +120,6 @@ void complex_button_draw(const complex_button *button)
     if (button->is_hidden) {
         return;
     }
-
     switch (button->style) {
         case COMPLEX_BUTTON_STYLE_DEFAULT:
             draw_default_style(button);
@@ -179,9 +178,7 @@ int complex_button_handle_mouse(const mouse *m, complex_button *btn)
             }
 
         }
-
         // --- Right click ---
-
         if (m->right.went_up) {
             btn->is_clicked = 1;
             handled = 1;

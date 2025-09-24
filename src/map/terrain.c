@@ -13,6 +13,17 @@
 static grid_u32 terrain_grid;
 static grid_u32 terrain_grid_backup;
 
+terrain_flags_array terrain_to_array(int grid_offset)
+{
+    // helper that creates a an rray with flags set according to the bits in value, for easy debugging of terrain
+    unsigned int terrain_value = terrain_grid.items[grid_offset];
+    terrain_flags_array result = { 0 };
+    for (size_t i = 0; i < TERRAIN_NUM_FLAGS; ++i) {
+        result.bits[i] = (terrain_value >> i) & 1u;
+    }
+    return result;
+}
+
 int map_terrain_is(int grid_offset, int terrain)
 {
     return map_grid_is_valid_offset(grid_offset) && terrain_grid.items[grid_offset] & terrain;

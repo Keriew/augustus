@@ -45,15 +45,20 @@ void building_data_transfer_restore_and_clear_backup(void)
     memset(&backup_data, 0, sizeof(backup_data));
 }
 
-int building_data_transfer_possible(building *b)
+int building_data_transfer_possible(building *b, int supress_warnings)
 {
     building_data_type data_type = building_data_transfer_data_type_from_building_type(b->type);
     if (data.data_type == DATA_TYPE_NOT_SUPPORTED || data_type == DATA_TYPE_NOT_SUPPORTED) {
-        city_warning_show(WARNING_DATA_PASTE_FAILURE, NEW_WARNING_SLOT);
+        if (!supress_warnings) {
+            city_warning_show(WARNING_DATA_PASTE_FAILURE, NEW_WARNING_SLOT);
+        }
         return 0;
     }
     if (data.data_type != data_type) {
-        city_warning_show(WARNING_DATA_PASTE_FAILURE, NEW_WARNING_SLOT);
+        if (!supress_warnings) {
+            city_warning_show(WARNING_DATA_PASTE_FAILURE, NEW_WARNING_SLOT);
+        }
+
         return 0;
     }
     return 1;
@@ -118,7 +123,7 @@ int building_data_transfer_paste(building *b, int supress_warnings)
 {
     building_data_type data_type = building_data_transfer_data_type_from_building_type(b->type);
 
-    if (!building_data_transfer_possible(b)) {
+    if (!building_data_transfer_possible(b, supress_warnings)) {
         return 0;
     }
 

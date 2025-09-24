@@ -24,7 +24,7 @@ int building_data_transfer_copy(building *b, int supress_warnings);
 
 int building_data_transfer_paste(building *b, int supress_warnings);
 
-int building_data_transfer_possible(building *b);
+int building_data_transfer_possible(building *b, int supress_warnings);
 
 building_data_type building_data_transfer_data_type_from_building_type(building_type type);
 

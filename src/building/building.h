@@ -151,10 +151,10 @@ typedef struct building {
             unsigned char evolve_text_id;
         } house;
         struct {
-            int og_type;
-            int og_grid_offset;
-            int og_size;
-            int og_orientation;
+            unsigned short og_type;
+            unsigned short og_grid_offset;
+            unsigned char og_size;
+            unsigned char og_orientation;
         } rubble;
         struct {
             unsigned short exceptions;
@@ -234,6 +234,8 @@ building *building_create(building_type type, int x, int y);
 int building_was_tent(building *b);
 
 int building_repair(building *b);
+
+int building_is_still_burning(building *b);
 
 void building_clear_related_data(building *b);
 

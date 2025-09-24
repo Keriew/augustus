@@ -51,7 +51,7 @@ static void destroy_on_fire(building *b, int plagued)
         city_population_remove_home_removed(b->house_population);
     }
     // save original info for rubble data
-    int og_type = (b->house_size && b->subtype.house_level <= HOUSE_LARGE_TENT) ? 1 : b->type;
+    int og_type = b->type;
     int og_size = b->size;
     int og_orientation = b->subtype.orientation;
     int og_grid_offset = b->grid_offset;
@@ -95,7 +95,6 @@ static void destroy_on_fire(building *b, int plagued)
         b->data.rubble.og_grid_offset = og_grid_offset;
         b->data.rubble.og_size = og_size;
         b->data.rubble.og_orientation = og_orientation;
-
         map_building_tiles_add(b->id, b->x, b->y, 1, building_image_get(b), TERRAIN_BUILDING);
     }
     static const int x_tiles[] = {
@@ -117,6 +116,10 @@ static void destroy_on_fire(building *b, int plagued)
         ruin->figure_id4 = 0;
         ruin->fire_proof = 1;
         ruin->has_plague = plagued;
+        ruin->data.rubble.og_type = og_type;
+        ruin->data.rubble.og_grid_offset = og_grid_offset;
+        ruin->data.rubble.og_size = og_size;
+        ruin->data.rubble.og_orientation = og_orientation;
     }
     if (waterside_building) {
         map_routing_update_water();

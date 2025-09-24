@@ -7,6 +7,7 @@
 #include "core/lang.h"
 #include "core/string.h"
 #include "core/time.h"
+#include "game/cheats.h"
 #include "game/settings.h"
 #include "graphics/graphics.h"
 #include "graphics/lang_text.h"
@@ -400,6 +401,7 @@ static void draw_senate_tooltip(tooltip_context *c)
 static void draw_tile_tooltip(tooltip_context *c)
 {
     view_tile view;
+    int include_grid = game_cheat_tooltip_enabled() > 1;
     if (city_view_pixels_to_view_tile(c->mouse_x, c->mouse_y, &view)) {
         int grid_offset = city_view_tile_to_grid_offset(&view);
         city_view_set_selected_view_tile(&view);
@@ -407,8 +409,8 @@ static void draw_tile_tooltip(tooltip_context *c)
         int y_tile = map_grid_offset_to_y(grid_offset);
 
         int x, y;
-        int width = 60;
-        int height = 40;
+        int width = include_grid ? 90 : 60;
+        int height = include_grid ? 45 : 38;
         if (c->mouse_x < width + 20) {
             x = c->mouse_x + 20;
         } else {
@@ -439,7 +441,10 @@ static void draw_tile_tooltip(tooltip_context *c)
         graphics_fill_rect(1, 1, width - 2, height - 2, COLOR_WHITE);
         text_draw_label_and_number(string_from_ascii("x: "), x_tile, " ", 2, 5, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
         text_draw_label_and_number(string_from_ascii("y: "), y_tile, " ", 2, 19, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
-
+        if (include_grid) {
+            text_draw_label_and_number(
+                string_from_ascii("grid: "), grid_offset, " ", 2, 33, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
+        }
         graphics_renderer()->finish_tooltip_creation();
 
         save_tooltip_text(0);

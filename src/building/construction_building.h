@@ -2,6 +2,7 @@
 #define BUILDING_CONSTRUCTION_BUILDING_H
 
 #include "building/type.h"
+#include "map/grid.h"
 
 typedef enum {
     CLEAR_MODE_FORCE = 0, //removes everything, even if not removable by player
@@ -10,7 +11,7 @@ typedef enum {
     CLEAR_MODE_PLAYER = 3, //removes only things that player can clear, i.e. buildings, trees, rubble, roads etc.
 } clear_mode;
 /**
- * Places a building of the specified type at the given coordinates
+ * @brief Places a building of the specified type at the given coordinates
  * Doesn't process the finance, but checks the correct terrain and figure collisions
 */
 int building_construction_place_building(building_type type, int x, int y);
@@ -18,7 +19,14 @@ int building_construction_is_granary_cross_tile(int tile_no);
 int building_construction_is_warehouse_corner(int tile_no);
 
 /**
- * Prepares terrain for building construction by clearing the specified area
+ *@brief Uses building_construction_place to fill all vacant lots in the specified area
+* @param area area to fill
+* @return number of lots filled
+*/
+int building_construction_fill_vacant_lots(grid_slice *area);
+
+/**
+ * @brief Prepares terrain for building construction by clearing the specified area
  *
  * @param grid_offset Starting grid position for terrain clearing
  * @param size_x Horizontal size of the area to clear (in tiles)

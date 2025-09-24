@@ -24,6 +24,7 @@
 #include "empire/city.h"
 #include "figure/formation_legion.h"
 #include "game/undo.h"
+#include "map/building.h"
 #include "map/building_tiles.h"
 #include "map/grid.h"
 #include "map/orientation.h"
@@ -393,6 +394,30 @@ int building_construction_is_warehouse_corner(int tile_no)
     int corner = building_rotation_get_corner(2 * effective_rotation);
 
     return tile_no == corner;
+}
+
+int building_construction_fill_vacant_lots(grid_slice *area)
+{
+    int items_placed = 0;
+    game_undo_restore_building_state();
+    for (int i = 0; i < area->size; i++) {
+        int grid_offset = area->grid_offsets[i];
+        int x = map_grid_offset_to_x(grid_offset);
+        int y = map_grid_offset_to_y(grid_offset);
+        int success = building_construction_place_building(BUILDING_HOUSE_VACANT_LOT, x, y);
+        if (!success) {
+            continue;
+        }
+        building *b = building_get(map_building_at(grid_offset));
+        map_building_tiles_add(b->id, x, y, 1, image_group(GROUP_BUILDING_HOUSE_VACANT_LOT), TERRAIN_BUILDING);
+        game_undo_add_building(b);
+        items_placed++;
+    }
+    if (items_placed > 0) {
+        building_construction_warning_check_food_stocks(BUILDING_HOUSE_VACANT_LOT);
+        map_routing_update_land();
+    }
+    return items_placed;
 }
 
 int building_construction_place_building(building_type type, int x, int y)

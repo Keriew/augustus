@@ -34,6 +34,7 @@
 #include "map/bridge.h"
 #include "map/desirability.h"
 #include "map/elevation.h"
+#include "map/figure.h"
 #include "map/grid.h"
 #include "map/random.h"
 #include "map/routing_terrain.h"
@@ -330,10 +331,10 @@ void building_trim(void)
 
 int building_was_tent(building *b)
 {
-    return b->data.rubble.og_type == 1;
+    return b->data.rubble.og_type == BUILDING_HOUSE_LARGE_TENT || b->data.rubble.og_type == BUILDING_HOUSE_SMALL_TENT;
 }
 
-static int building_is_still_burning(building *b)
+int building_is_still_burning(building *b)
 {
     int hot = (b->type == BUILDING_BURNING_RUIN);
     int grid_offset = hot ? b->data.rubble.og_grid_offset : b->grid_offset;
@@ -341,6 +342,9 @@ static int building_is_still_burning(building *b)
     grid_slice *b_area = map_grid_get_grid_slice_square(grid_offset, size);
     for (int i = 0; i < b_area->size; i++) {
         int offset = b_area->grid_offsets[i];
+        if (map_has_figure_at(offset)) {  // also check for prefects on the tile - their presence prevents rebuilding
+            return 1;
+        }
         if (building_get(map_building_at(offset))->type == BUILDING_BURNING_RUIN) {
             if (building_get(map_building_at(offset))->state == BUILDING_STATE_RUBBLE) {
                 continue; // extinguished tile
@@ -353,7 +357,9 @@ static int building_is_still_burning(building *b)
 
 int building_repair(building *b)
 {
-    int use_rubble_data = 0;
+    int use_rubble_data = 0, is_house_lot = 0, success = 0; // flags for the function   
+    int og_size, og_grid_offset, og_orientation; // placeholders for original building data
+    building_type og_type;
     if (b->type == BUILDING_BURNING_RUIN) { // fire does a lot of damage. So much, it changes the internal structures
         // of the building, changing sizes and grid offsets so we have to fetch the rubble data
         // Try to get the original building type from the rubble data
@@ -361,10 +367,19 @@ int building_repair(building *b)
             city_warning_show(WARNING_REPAIR_BURNING, NEW_WARNING_SLOT);
             return 0;
         }
-        use_rubble_data = 1;
-        building_type previous_type = b->data.rubble.og_type;
-        if (previous_type) { // exceptions should be checked and handled here
-            b->type = previous_type;
+        og_size = b->data.rubble.og_size;
+        og_grid_offset = b->data.rubble.og_grid_offset;
+        og_orientation = b->data.rubble.og_orientation;
+        og_type = b->data.rubble.og_type;
+        if (og_type) { // exceptions should be checked and handled here
+            if (building_is_house(og_type) || og_type == 1) {
+                is_house_lot = 1;
+                b->type = BUILDING_HOUSE_VACANT_LOT; // all houses become vacant lots
+            }
+            switch (og_type) {
+                default:
+                    b->type = og_type;
+            }
         }
     }
     if (!building_can_repair(b->type)) {
@@ -373,21 +388,22 @@ int building_repair(building *b)
     }
     building_data_transfer_backup(); // backup player's transfer data
     building_data_transfer_copy(b, 1);
-    if (use_rubble_data) {        // Restore the rubble data to the building
-        b->size = b->data.rubble.og_size;
-        b->grid_offset = b->data.rubble.og_grid_offset;
-        b->type = b->data.rubble.og_type;
-        b->subtype.orientation = b->data.rubble.og_orientation;
-    }
-    int x = map_grid_offset_to_x(b->grid_offset);
-    int y = map_grid_offset_to_y(b->grid_offset);
-    int size = b->size;
-    building_type building_type = b->type;
+    og_grid_offset = og_grid_offset ? og_grid_offset : b->grid_offset;
+    int x = map_grid_offset_to_x(og_grid_offset);
+    int y = map_grid_offset_to_y(og_grid_offset);
+    int size = og_size ? og_size : b->size;
+    building_type building_type = og_type ? og_type : b->type;
 
     // Clear the land area first and process cost
-    int clearing = building_construction_prepare_terrain(b->grid_offset, size, size, CLEAR_MODE_RUBBLE, 1);
-    int success = building_construction_place_building(building_type, x, y); // need to process also building cost
-    int placement_cost = model_get_building(building_type)->cost;
+    int clearing = building_construction_prepare_terrain(og_grid_offset, size, size, CLEAR_MODE_RUBBLE, 1);
+    if (is_house_lot) {
+        grid_slice *area = map_grid_get_grid_slice_square(og_grid_offset, og_size);
+        success = building_construction_fill_vacant_lots(area); // holds the number of houses created
+    } else {
+        success = building_construction_place_building(building_type, x, y); // 1/0 success for non-draggable buildings
+    }
+
+    int placement_cost = model_get_building(building_type)->cost * success;
     if (!success || !clearing) {
         city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
         return 0;
@@ -398,7 +414,7 @@ int building_repair(building *b)
 
     building_data_transfer_paste(new_building, 1);
     building_data_transfer_restore_and_clear_backup(); // restore player's transfer data from backup
-    figure_create_explosion_cloud(new_building->x, new_building->y, new_building->size, 1); // poof
+    figure_create_explosion_cloud(new_building->x, new_building->y, og_size, 1); // poof
     return 1;
 }
 
