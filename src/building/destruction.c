@@ -90,7 +90,9 @@ static void destroy_on_fire(building *b, int plagued)
         b->fire_proof = 1;
         b->size = 1;
         b->has_plague = plagued;
-        memset(&b->data, 0, sizeof(b->data));
+        if (!building_can_repair(og_type)) {
+            memset(&b->data, 0, sizeof(b->data)); // removes all data - don't do it for repairable buildings
+        }
         b->data.rubble.og_type = og_type;
         b->data.rubble.og_grid_offset = og_grid_offset;
         b->data.rubble.og_size = og_size;

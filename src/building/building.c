@@ -358,8 +358,8 @@ int building_is_still_burning(building *b)
 int building_repair(building *b)
 {
     int use_rubble_data = 0, is_house_lot = 0, success = 0; // flags for the function   
-    int og_size, og_grid_offset, og_orientation; // placeholders for original building data
-    building_type og_type;
+    int og_size = 0, og_grid_offset = 0, og_orientation = 0; // placeholders for original building data
+    building_type og_type = BUILDING_NONE;
     if (b->type == BUILDING_BURNING_RUIN) { // fire does a lot of damage. So much, it changes the internal structures
         // of the building, changing sizes and grid offsets so we have to fetch the rubble data
         // Try to get the original building type from the rubble data

@@ -313,6 +313,9 @@ void window_building_draw_rubble(building_info_context *c)
     if (building_can_repair(og_type)) {
         init_repair_building_button(c);
         complex_button_draw(repair_building_button);
+    } else if (building_can_repair(b->type)) {
+        init_repair_building_button(c);
+        complex_button_draw(repair_building_button);
     }
     int cursor = lang_text_draw(41, b->type,
         c->x_offset + 32, c->y_offset + BLOCK_SIZE * c->height_blocks - 173, FONT_NORMAL_BLACK);
