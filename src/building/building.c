@@ -328,16 +328,24 @@ void building_trim(void)
     array_trim(data.buildings);
 }
 
+int building_was_tent(building *b)
+{
+    if (b->type == BUILDING_BURNING_RUIN) {
+        return b->data.rubble.was_tent;
+    }
+    return 0;
+}
+
 int building_repair(building *b)
 {
-    building_type repair_type = b->type;
-    
-    // For rubble buildings, check if we have the original type stored
-    if (b->state == BUILDING_STATE_RUBBLE && b->data.rubble.original_type != BUILDING_NONE) {
-        repair_type = b->data.rubble.original_type;
+    if (b->type == BUILDING_BURNING_RUIN) {
+        // Try to get the original building type from the rubble data
+        building_type previous_type = b->data.rubble.was_tent;
+        if (previous_type) {
+            b->type = previous_type;
+        }
     }
-    
-    if (!building_can_repair(repair_type)) {
+    if (!building_can_repair(b->type)) {
         city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
         return 0;
     }
@@ -346,11 +354,12 @@ int building_repair(building *b)
     int x = map_grid_offset_to_x(b->grid_offset);
     int y = map_grid_offset_to_y(b->grid_offset);
     int size = b->size;
+    building_type building_type = b->type;
 
     // Clear the land area first
-    building_construction_prepare_terrain(b->grid_offset, size, size, CLEAR_MODE_RUBBLE, 1); // clearing cost processed 
-    int success = building_construction_place_building(repair_type, x, y); // need to process also building cost
-    int placement_cost = model_get_building(repair_type)->cost;
+    int clearing = building_construction_prepare_terrain(b->grid_offset, size, size, CLEAR_MODE_RUBBLE, 1); // clearing cost processed 
+    int success = building_construction_place_building(building_type, x, y); // need to process also building cost
+    int placement_cost = model_get_building(building_type)->cost;
     city_finance_process_construction(placement_cost + placement_cost / 20); // extra 5% cost for repairs
     if (!success) {
         city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);

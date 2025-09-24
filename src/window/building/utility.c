@@ -299,6 +299,12 @@ void window_building_draw_rubble(building_info_context *c)
     if (building_can_repair(building_get(c->rubble_building_id)->type)) {
         init_repair_building_button(c);
         complex_button_draw(repair_building_button);
+    } else if (building_get(c->rubble_building_id)->type == BUILDING_BURNING_RUIN) {
+        building_type previous_type = building_get(c->rubble_building_id)->data.rubble.was_tent;
+        if (building_can_repair(previous_type)) {
+            init_repair_building_button(c);
+            complex_button_draw(repair_building_button);
+        }
     }
     lang_text_draw(41, building_get(c->rubble_building_id)->type,
         c->x_offset + 32, c->y_offset + BLOCK_SIZE * c->height_blocks - 173, FONT_NORMAL_BLACK);

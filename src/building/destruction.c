@@ -50,8 +50,7 @@ static void destroy_on_fire(building *b, int plagued)
     if (b->house_size && b->house_population) {
         city_population_remove_home_removed(b->house_population);
     }
-    int was_tent = b->house_size && b->subtype.house_level <= HOUSE_LARGE_TENT;
-    building_type original_type = b->type; // Store original building type for repair
+    int was_tent = (b->house_size && b->subtype.house_level <= HOUSE_LARGE_TENT) ? 1 : b->type;
     b->house_population = 0;
     b->house_size = 0;
     b->sickness_level = 0;
@@ -88,7 +87,6 @@ static void destroy_on_fire(building *b, int plagued)
         b->has_plague = plagued;
         memset(&b->data, 0, sizeof(b->data));
         b->data.rubble.was_tent = was_tent;
-        b->data.rubble.original_type = original_type;
         map_building_tiles_add(b->id, b->x, b->y, 1, building_image_get(b), TERRAIN_BUILDING);
     }
     static const int x_tiles[] = {
@@ -104,8 +102,8 @@ static void destroy_on_fire(building *b, int plagued)
             continue;
         }
         building *ruin = building_create(BUILDING_BURNING_RUIN, x, y);
+        map_set_rubble_building_id(map_grid_offset(x, y), b->id);
         ruin->data.rubble.was_tent = was_tent;
-        ruin->data.rubble.original_type = original_type;
         map_building_tiles_add(ruin->id, ruin->x, ruin->y, 1, building_image_get(ruin), TERRAIN_BUILDING);
         ruin->fire_duration = (ruin->house_figure_generation_delay & 7) + 1;
         ruin->figure_id4 = 0;
@@ -134,7 +132,6 @@ static void destroy_linked_parts(building *b, int destruction_method, int plague
                 destroy_on_fire(part, plagued);
                 break;
             default:
-                part->data.rubble.original_type = part->type; // Store original type for collapse
                 map_building_tiles_set_rubble(part_id, part->x, part->y, part->size);
                 part->state = BUILDING_STATE_RUBBLE;
                 break;
@@ -156,7 +153,6 @@ static void destroy_linked_parts(building *b, int destruction_method, int plague
                 destroy_on_fire(part, plagued);
                 break;
             default:
-                part->data.rubble.original_type = part->type; // Store original type for collapse
                 map_building_tiles_set_rubble(part_id, part->x, part->y, part->size);
                 part->state = BUILDING_STATE_RUBBLE;
         }
@@ -174,9 +170,7 @@ static void destroy_linked_parts(building *b, int destruction_method, int plague
 
 void building_destroy_by_collapse(building *b)
 {
-    building_type original_type = b->type; // Store original building type for repair
     b->state = BUILDING_STATE_RUBBLE;
-    b->data.rubble.original_type = original_type;
     map_building_tiles_set_rubble(b->id, b->x, b->y, b->size);
     figure_create_explosion_cloud(b->x, b->y, b->size);
     destroy_linked_parts(b, DESTROY_COLLAPSE, 0);
