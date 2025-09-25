@@ -25,9 +25,9 @@ int map_building_damage_increase(int grid_offset);
 
 void map_building_damage_clear(int grid_offset);
 
-int map_rubble_building_id(int grid_offset);
+int map_building_rubble_building_id(int grid_offset);
 
-void map_set_rubble_building_id(int grid_offset, unsigned int building_id);
+void map_building_set_rubble_building_id(int grid_offset, unsigned int building_id);
 
 /**
  * Clears the maps related to buildings

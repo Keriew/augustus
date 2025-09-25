@@ -37,7 +37,7 @@ static struct {
 static generic_button go_to_orders_button[] = {
     {0, 0, 304, 20, button_go_to_orders},
 };
-static complex_button repair_building_button[] = { 0 };
+complex_button repair_building_button[] = { 0 };
 
 static generic_button orders_permission_buttons[] = {
     {0, 4, 210, 22, button_toggle_figure_state, 0, PERMISSION_MAINTENANCE},
@@ -273,6 +273,7 @@ static void trigger_building_repair(const complex_button *button)
 {
     building *b = building_get(button->parameters[0]);
     building_repair(b);
+    window_invalidate();
     window_go_back();
 }
 

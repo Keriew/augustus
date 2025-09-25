@@ -358,8 +358,9 @@ int building_is_still_burning(building *b)
 int building_repair(building *b)
 {
     int use_rubble_data = 0, is_house_lot = 0, success = 0; // flags for the function   
-    int og_size = 0, og_grid_offset = 0, og_orientation = 0; // placeholders for original building data
+    int og_size = 0, og_grid_offset = 0, og_orientation = 0, has_tmp = 0; // placeholders for original building data
     building_type og_type = BUILDING_NONE;
+    building_storage tmp = { 0 };
     if (b->type == BUILDING_BURNING_RUIN) { // fire does a lot of damage. So much, it changes the internal structures
         // of the building, changing sizes and grid offsets so we have to fetch the rubble data
         // Try to get the original building type from the rubble data
@@ -377,6 +378,12 @@ int building_repair(building *b)
                 b->type = BUILDING_HOUSE_VACANT_LOT; // all houses become vacant lots
             }
             switch (og_type) {
+                case BUILDING_GRANARY:
+                case BUILDING_WAREHOUSE:
+                    const building_storage *src = building_storage_get(b->storage_id);
+                    tmp = *src;   // copy contents into a new variable
+                    has_tmp = 1;
+                    building_storage_delete(b->storage_id); // free up the old storage
                 default:
                     b->type = og_type;
             }
@@ -391,7 +398,11 @@ int building_repair(building *b)
     og_grid_offset = og_grid_offset ? og_grid_offset : b->grid_offset;
     int x = map_grid_offset_to_x(og_grid_offset);
     int y = map_grid_offset_to_y(og_grid_offset);
+    int grid_offset = map_grid_offset(x, y);
     int size = og_size ? og_size : b->size;
+    if (og_type == BUILDING_WAREHOUSE) {
+        size = 3;
+    }
     building_type building_type = og_type ? og_type : b->type;
 
     // Clear the land area first and process cost
@@ -409,10 +420,18 @@ int building_repair(building *b)
         return 0;
     }
     city_finance_process_construction(placement_cost + placement_cost / 20); // extra 5% cost for repairs
+
     // Find the newly created building and restore its data
     building *new_building = building_get(map_building_at(map_grid_offset(x, y)));
-
+    grid_slice *b_area = map_grid_get_grid_slice_square(grid_offset, size);
+    for (int i = 0; i < b_area->size; i++) {
+        int offset = b_area->grid_offsets[i];
+        map_building_set_rubble_building_id(offset, 0); // clear any remaining rubble building ids
+    }
     building_data_transfer_paste(new_building, 1);
+    if (has_tmp) {
+        building_storage_set_data(new_building->storage_id, tmp);
+    }
     building_data_transfer_restore_and_clear_backup(); // restore player's transfer data from backup
     figure_create_explosion_cloud(new_building->x, new_building->y, og_size, 1); // poof
     return 1;

@@ -131,7 +131,7 @@ void map_grid_load_state_u16_to_u32(uint32_t *grid, buffer *buf);
 void map_grid_load_state_u32(uint32_t *grid, buffer *buf);
 
 /**
- * Creates a grid slice representing a rectangular area starting from the given grid offset.
+ * @brief Creates a grid slice representing a rectangular area starting from the given grid offset.
  * All grid points within the specified width and height are included.
  *
  * @param start_grid_offset Grid offset of the top-left corner of the rectangle
@@ -142,7 +142,7 @@ void map_grid_load_state_u32(uint32_t *grid, buffer *buf);
 grid_slice *map_grid_get_grid_slice_rectangle(int start_grid_offset, int width, int height);
 
 /**
- * Creates a grid slice representing a square area starting from the given grid offset.
+ * @brief Creates a grid slice representing a square area starting from the given grid offset.
  * All grid points within the specified size x size area are included.
  *
  * @param start_grid_offset Grid offset of the top-left corner of the square
@@ -152,7 +152,7 @@ grid_slice *map_grid_get_grid_slice_rectangle(int start_grid_offset, int width, 
 grid_slice *map_grid_get_grid_slice_square(int start_grid_offset, int size);
 
 /**
- * Creates a grid slice representing a ring (hollow circle) centered at the given grid offset.
+ * @brief Creates a grid slice representing a ring (hollow circle) centered at the given grid offset.
  * The ring has an inner radius and outer radius, with grid points included if their
  * chess distance from the center falls within this range.
  *
@@ -164,7 +164,7 @@ grid_slice *map_grid_get_grid_slice_square(int start_grid_offset, int size);
 grid_slice *map_grid_get_grid_slice_ring(int center_grid_offset, int inner_radius, int outer_radius);
 
 /**
- * Creates a grid slice representing a filled circle centered at the given grid offset.
+ * @brief Creates a grid slice representing a filled circle centered at the given grid offset.
  * All grid points within the specified radius are included using chess distance.
  *
  * @param center_grid_offset Grid offset of the circle center

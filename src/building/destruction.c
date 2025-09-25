@@ -93,6 +93,7 @@ static void destroy_on_fire(building *b, int plagued)
         if (!building_can_repair(og_type)) {
             memset(&b->data, 0, sizeof(b->data)); // removes all data - don't do it for repairable buildings
         }
+        map_building_set_rubble_building_id(og_grid_offset, b->id);
         b->data.rubble.og_type = og_type;
         b->data.rubble.og_grid_offset = og_grid_offset;
         b->data.rubble.og_size = og_size;
@@ -112,7 +113,7 @@ static void destroy_on_fire(building *b, int plagued)
             continue;
         }
         building *ruin = building_create(BUILDING_BURNING_RUIN, x, y);
-        map_set_rubble_building_id(map_grid_offset(x, y), b->id);
+        map_building_set_rubble_building_id(map_grid_offset(x, y), b->id);
         map_building_tiles_add(ruin->id, ruin->x, ruin->y, 1, building_image_get(ruin), TERRAIN_BUILDING);
         ruin->fire_duration = (ruin->house_figure_generation_delay & 7) + 1;
         ruin->figure_id4 = 0;
