@@ -357,85 +357,87 @@ int building_is_still_burning(building *b)
 
 int building_repair(building *b)
 {
-    int use_rubble_data = 0, is_house_lot = 0, success = 0; // flags for the function   
-    int og_size = 0, og_grid_offset = 0, og_orientation = 0, has_tmp = 0; // placeholders for original building data
-    building_type og_type = BUILDING_NONE;
-    building_storage tmp = { 0 };
-    if (b->type == BUILDING_BURNING_RUIN) { // fire does a lot of damage. So much, it changes the internal structures
-        // of the building, changing sizes and grid offsets so we have to fetch the rubble data
-        // Try to get the original building type from the rubble data
-        if (building_is_still_burning(b)) {
-            city_warning_show(WARNING_REPAIR_BURNING, NEW_WARNING_SLOT);
-            return 0;
-        }
-        og_size = b->data.rubble.og_size;
-        og_grid_offset = b->data.rubble.og_grid_offset;
-        og_orientation = b->data.rubble.og_orientation;
-        og_type = b->data.rubble.og_type;
-        if (og_type) { // exceptions should be checked and handled here
-            if (building_is_house(og_type) || og_type == 1) {
-                is_house_lot = 1;
-                b->type = BUILDING_HOUSE_VACANT_LOT; // all houses become vacant lots
-            }
-            switch (og_type) {
-                case BUILDING_GRANARY:
-                case BUILDING_WAREHOUSE:
-                    const building_storage *src = building_storage_get(b->storage_id);
-                    tmp = *src;   // copy contents into a new variable
-                    has_tmp = 1;
-                    building_storage_delete(b->storage_id); // free up the old storage
-                default:
-                    b->type = og_type;
-            }
-        }
+    if (!b) {
+        return 0;
+    }
+    if (b->type == BUILDING_BURNING_RUIN && building_is_still_burning(b)) {
+        city_warning_show(WARNING_REPAIR_BURNING, NEW_WARNING_SLOT);
+        return 0;
     }
     if (!building_can_repair(b->type)) {
         city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
         return 0;
     }
-    building_data_transfer_backup(); // backup player's transfer data
+    // flags and placeholders
+    int og_size = 0, og_grid_offset = 0, og_orientation = 0, has_tmp = 0, is_house_lot = 0, success = 0;
+    building_type og_type = BUILDING_NONE;
+    building_storage tmp = { 0 };
+
+    // --- Handle rubble recovery ---
+    if (b->type == BUILDING_BURNING_RUIN) {
+        og_size = b->data.rubble.og_size;
+        og_grid_offset = b->data.rubble.og_grid_offset;
+        og_orientation = b->data.rubble.og_orientation;
+        og_type = b->data.rubble.og_type;
+        if (og_type) {  // exceptions should be checked and handled here
+            if (building_is_house(og_type) || og_type == 1) {
+                is_house_lot = 1;
+                b->type = BUILDING_HOUSE_VACANT_LOT;
+            }
+            switch (og_type) {
+                case BUILDING_GRANARY:
+                case BUILDING_WAREHOUSE:
+                    const building_storage *src = building_storage_get(b->storage_id);
+                    tmp = *src;
+                    has_tmp = 1;
+                    building_storage_delete(b->storage_id);
+                    break;
+                default:
+                    b->type = og_type;
+            }
+        }
+    }
+    building_data_transfer_backup();
     building_data_transfer_copy(b, 1);
-    og_grid_offset = og_grid_offset ? og_grid_offset : b->grid_offset;
-    int x = map_grid_offset_to_x(og_grid_offset);
-    int y = map_grid_offset_to_y(og_grid_offset);
-    int grid_offset = map_grid_offset(x, y);
+    //  Resolve placement data 
+    int grid_offset = og_grid_offset ? og_grid_offset : b->grid_offset;
+    int x = map_grid_offset_to_x(grid_offset);
+    int y = map_grid_offset_to_y(grid_offset);
+
     int size = og_size ? og_size : b->size;
-    if (og_type == BUILDING_WAREHOUSE) {
-        size = 3;
-    }
-    building_type building_type = og_type ? og_type : b->type;
-
-    // Clear the land area first and process cost
-    int clearing = building_construction_prepare_terrain(og_grid_offset, size, size, CLEAR_MODE_RUBBLE, 1);
+    size = (og_type == BUILDING_WAREHOUSE) ? 3 : size;
+    building_type type_to_place = og_type ? og_type : b->type;
+    // --- Clear terrain & place building ---
+    int cleared = building_construction_prepare_terrain(grid_offset, size, size, CLEAR_MODE_RUBBLE, 1);
     if (is_house_lot) {
-        grid_slice *area = map_grid_get_grid_slice_square(og_grid_offset, og_size);
-        success = building_construction_fill_vacant_lots(area); // holds the number of houses created
+        grid_slice *area = map_grid_get_grid_slice_square(grid_offset, og_size);
+        success = building_construction_fill_vacant_lots(area);
     } else {
-        success = building_construction_place_building(building_type, x, y); // 1/0 success for non-draggable buildings
+        success = building_construction_place_building(type_to_place, x, y);
     }
-
-    int placement_cost = model_get_building(building_type)->cost * success;
-    if (!success || !clearing) {
+    if (!success || !cleared) {
         city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
         return 0;
     }
-    city_finance_process_construction(placement_cost + placement_cost / 20); // extra 5% cost for repairs
-
-    // Find the newly created building and restore its data
+    int placement_cost = model_get_building(type_to_place)->cost * success;
+    city_finance_process_construction(placement_cost + placement_cost / 20); // +5%
     building *new_building = building_get(map_building_at(map_grid_offset(x, y)));
     grid_slice *b_area = map_grid_get_grid_slice_square(grid_offset, size);
+
     for (int i = 0; i < b_area->size; i++) {
-        int offset = b_area->grid_offsets[i];
-        map_building_set_rubble_building_id(offset, 0); // clear any remaining rubble building ids
+        map_building_set_rubble_building_id(b_area->grid_offsets[i], 0); //remove rubble
     }
+
     building_data_transfer_paste(new_building, 1);
     if (has_tmp) {
         building_storage_set_data(new_building->storage_id, tmp);
     }
-    building_data_transfer_restore_and_clear_backup(); // restore player's transfer data from backup
-    figure_create_explosion_cloud(new_building->x, new_building->y, og_size, 1); // poof
+
+    building_data_transfer_restore_and_clear_backup();
+    figure_create_explosion_cloud(new_building->x, new_building->y, og_size, 1);
     return 1;
 }
+
 
 void building_update_state(void)
 {
