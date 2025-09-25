@@ -204,7 +204,7 @@ static int recalculate_market_supplier_destination(figure *f)
     int road_network = market->road_network_id;
 
     if (!building_market_get_needed_inventory(market, info) ||
-        !building_distribution_get_resource_storages_for_figure(info, BUILDING_MARKET, road_network, f, config_get(CONFIG_GP_MARKET_RANGE) ? MARKET_MAX_DISTANCE : map_data.width)) {
+        !building_distribution_get_resource_storages_for_figure(info, BUILDING_MARKET, road_network, f, config_get(CONFIG_GP_CH__MARKET_RANGE) ? MARKET_MAX_DISTANCE : map_data.width)) {
         return 0;
     }
 

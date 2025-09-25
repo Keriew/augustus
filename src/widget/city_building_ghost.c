@@ -1264,7 +1264,7 @@ static void draw_market(const map_tile *tile, int x, int y)
     } else {
         blocked = is_blocked_for_building(grid_offset, building_size, blocked_tiles, 1);
     }
-    if (config_get(CONFIG_UI_SHOW_MARKET_RANGE) && config_get(CONFIG_GP_MARKET_RANGE)) {
+    if (config_get(CONFIG_UI_SHOW_MARKET_RANGE) && config_get(CONFIG_GP_CH_MARKET_RANGE)) {
         city_view_foreach_tile_in_range(tile->grid_offset, 2, MARKET_MAX_DISTANCE, draw_market_range);
     }
     int image_id = image_group(building_properties_for_type(BUILDING_MARKET)->image_group);
