@@ -28,18 +28,19 @@ jobs:
       - name: Build
         run: cmake --build build --config Release --parallel
         
-      - name: Debug build output
-        run: ls -R build
-        
       - name: Package macOS binary
         run: |
           mkdir -p package
-          cp build/Release/augustus package/augustus || cp build/augustus package/augustus
-          # Copy SDL2 dylibs (adjust paths if needed)
+          # Copy the actual binary out of the .app bundle
+          cp build/augustus.app/Contents/MacOS/augustus package/augustus
+          # Copy the .app itself (so testers can double-click it like a normal Mac app)
+          cp -R build/augustus.app package/
+          # Copy SDL2 dylibs (optional — only if you want standalone without Homebrew)
           cp $(brew --prefix sdl2)/lib/libSDL2-2.0.0.dylib package/ || true
           cp $(brew --prefix sdl2_mixer)/lib/libSDL2_mixer-2.0.0.dylib package/ || true
           cd package
           zip -r ../augustus-macos.zip .
+
 
       - name: Create Release
         id: create_release
