@@ -27,7 +27,10 @@ jobs:
 
       - name: Build
         run: cmake --build build --config Release --parallel
-
+        
+      - name: Debug build output
+        run: ls -R build
+        
       - name: Package macOS binary
         run: |
           mkdir -p package
