@@ -495,12 +495,12 @@ int window_empire_sidebar_sort_handle_expanding_buttons_input(const mouse *m)
                     }
                     return 1;
                 } else if (btn->button_type >= BUTTON_INDEX_FIRST_SORT_METHOD &&
-                             btn->button_type < BUTTON_INDEX_FIRST_FILTER_METHOD) {
+                           btn->button_type < BUTTON_INDEX_FIRST_FILTER_METHOD) {
                     window_empire_sidebar_sort_set_current_sorting(btn->button_type - BUTTON_INDEX_FIRST_SORT_METHOD);
                     window_empire_sidebar_sort_set_expanded_main(NO_POSITION);
                     return 1;
                 } else if (btn->button_type >= BUTTON_INDEX_FIRST_FILTER_METHOD &&
-         btn->button_type < BUTTON_INDEX_FILTERING_RESOURCES) {
+                           btn->button_type < BUTTON_INDEX_FILTERING_RESOURCES) {
                     int filter_index = btn->button_type - BUTTON_INDEX_FIRST_FILTER_METHOD;
                     // Ensure filter_index is within valid bounds
                     if (filter_index >= 0 && filter_index < MAX_FILTER_KEY) {
