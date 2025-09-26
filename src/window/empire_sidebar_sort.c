@@ -260,20 +260,20 @@ int window_empire_sidebar_sort_city_matches_current_filter(const empire_city *ci
             }
             return 0;
         }
-        case FILTER_BY_RESOURCE_BUY:
+        case FILTER_BY_RESOURCE_SELL:
         {
             for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-                if (city->buys_resource[r] &&
+                if (city->sells_resource[r] &&
                     sort_data.selected_filter_resource == r) {
                     return 1;
                 }
             }
             return 0;
         }
-        case FILTER_BY_RESOURCE_SELL:
+        case FILTER_BY_RESOURCE_BUY:
         {
             for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-                if (city->sells_resource[r] &&
+                if (city->buys_resource[r] &&
                     sort_data.selected_filter_resource == r) {
                     return 1;
                 }
