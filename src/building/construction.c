@@ -350,11 +350,16 @@ static int place_wall(int x_start, int y_start, int x_end, int y_end)
             if (!map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
                 items_placed++;
                 map_tiles_set_wall(x, y);
+                building *wall = building_create(BUILDING_WALL, x, y);
+                map_building_set(grid_offset, wall->id);
+                map_terrain_add(grid_offset, TERRAIN_BUILDING);
+
             }
         }
     }
     map_routing_update_land();
     map_routing_update_walls();
+    map_tiles_update_all_walls();
     return items_placed;
 }
 

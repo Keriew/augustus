@@ -642,8 +642,7 @@ static void set_wall_gatehouse_image_manually(int grid_offset)
 
 static void set_wall_image(int x, int y, int grid_offset)
 {
-    if (!map_terrain_is(grid_offset, TERRAIN_WALL) ||
-        map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+    if (!map_terrain_is(grid_offset, TERRAIN_WALL)) {
         return;
     }
     const terrain_image *img = map_image_context_get_wall(grid_offset);

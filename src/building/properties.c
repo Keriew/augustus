@@ -38,6 +38,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .size = 1,
         .image_group = 24,
         .image_offset = 26,
+        .fire_proof = 1,
         .draw_desirability_range = 1,
         .event_data.attr = "wall"
     },
@@ -50,6 +51,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .size = 1,
         .image_group = 19,
         .image_offset = 2,
+        .fire_proof = 1,
         .event_data.attr = "aqueduct"
     },
     [BUILDING_HOUSE_SMALL_TENT] = {
