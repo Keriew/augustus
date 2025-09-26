@@ -527,9 +527,9 @@ int window_empire_sidebar_sort_handle_expanding_buttons_input(const mouse *m)
                         // SELL, BUY or BOTH
                         int current_filter = window_empire_sidebar_sort_get_current_filtering();
                         if (current_filter == FILTER_BY_RESOURCE_SELL) {
-                            window_empire_sidebar_sort_set_current_filtering(FILTER_BY_RESOURCE_BUY);
-                        } else if (current_filter == FILTER_BY_RESOURCE_BUY) {
                             window_empire_sidebar_sort_set_current_filtering(FILTER_BY_RESOURCE_SELL);
+                        } else if (current_filter == FILTER_BY_RESOURCE_BUY) {
+                            window_empire_sidebar_sort_set_current_filtering(FILTER_BY_RESOURCE_BUY);
                         } else {
                             window_empire_sidebar_sort_set_current_filtering(FILTER_BY_RESOURCE);
                         }
