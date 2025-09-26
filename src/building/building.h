@@ -239,6 +239,8 @@ int building_is_still_burning(building *b);
 
 int building_can_repair(building *b);
 
+int building_repair_cost(building *b);
+
 void building_clear_related_data(building *b);
 
 building *building_restore_from_undo(building *to_restore);

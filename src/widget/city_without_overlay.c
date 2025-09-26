@@ -951,7 +951,8 @@ static void deletion_draw_figures_animations(int x, int y, int grid_offset)
             // blending mode only work in standard RED or GREEN, any other colors have to be drawn flat.
             // passing a different color will just draw the red blending by default
         } else {
-            image_draw_isometric_footprint(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, color, draw_context.scale);// no blending, just draw the flat tile
+            image_draw_isometric_footprint(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, color, draw_context.scale);
+            // no blending, just draw the flat tile
         }
     }
     if (map_property_is_draw_tile(grid_offset) && !should_draw_top_before_deletion(grid_offset)) {

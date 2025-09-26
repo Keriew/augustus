@@ -800,14 +800,14 @@ void building_construction_update(int x, int y, int grid_offset)
 
     map_property_clear_constructing_and_deleted();
     int current_cost = model_get_building(type)->cost;
-
+    int repaired_buildings = 0;
     if (type == BUILDING_CLEAR_LAND) {
         int items_placed = last_items_cleared = building_construction_clear_land(1, data.start.x, data.start.y, x, y);
         if (items_placed >= 0) {
             current_cost *= items_placed;
         }
     } else if (type == BUILDING_REPAIR_LAND) {
-        int cost = building_construction_repair_land(1, data.start.x, data.start.y, x, y);
+        int cost = building_construction_repair_land(1, data.start.x, data.start.y, x, y, &repaired_buildings);
         if (cost >= 0) {
             current_cost *= cost;
         }
@@ -1040,6 +1040,7 @@ void building_construction_place(void)
     }
 
     int placement_cost = model_get_building(type)->cost;
+    int repaired_buildings = 0;
     if (type == BUILDING_CLEAR_LAND) {
         // BUG in original (keep this behaviour): if confirmation has to be asked (bridge/fort),
         // the previous cost is deducted from treasury and if user chooses 'no', they still pay for removal.
@@ -1052,7 +1053,7 @@ void building_construction_place(void)
         placement_cost *= items_placed;
         map_property_clear_constructing_and_deleted();
     } else if (type == BUILDING_REPAIR_LAND) {
-        int cost = building_construction_repair_land(1, x_start, y_start, x_end, y_end);
+        int cost = building_construction_repair_land(0, data.start.x, data.start.y, x_end, y_end, &repaired_buildings);
         map_property_clear_constructing_and_deleted();
     } else if (type == BUILDING_WALL) {
         placement_cost *= place_wall(x_start, y_start, x_end, y_end, 0);

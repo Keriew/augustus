@@ -97,7 +97,6 @@ int building_construction_prepare_terrain(grid_slice *grid_slice, clear_mode cle
                 map_terrain_remove(g_offset, terrain_mask_to_remove);
             }
         }
-
     }
     if (cost == COST_PROCESS && total_cost > 0) {
         city_finance_process_construction(total_cost);

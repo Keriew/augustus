@@ -5,6 +5,7 @@
 #include "building/monument.h"
 #include "city/warning.h"
 #include "core/config.h"
+#include "core/string.h"
 #include "figure/roamer_preview.h"
 #include "figuretype/migrant.h"
 #include "game/undo.h"
@@ -31,6 +32,7 @@ static struct {
     int fort_confirmed;
     int monument_confirmed;
     int repair_confirmed;
+    int repair_cost;
 } confirm;
 
 static building *get_deletable_building(int grid_offset)
@@ -244,12 +246,17 @@ static void confirm_repair_buildings(int accepted, int checked)
     } else {
         confirm.repair_confirmed = -1;
     }
+    if (accepted == 1) {
+        building_construction_repair_land(0, confirm.x_start, confirm.y_start, confirm.x_end, confirm.y_end, 0);
+    }
 }
 
 int building_construction_clear_land(int measure_only, int x_start, int y_start, int x_end, int y_end)
 {
     confirm.fort_confirmed = 0;
     confirm.bridge_confirmed = 0;
+    confirm.monument_confirmed = 0;
+    confirm.repair_confirmed = 0;
     if (measure_only) {
         return clear_land_confirmed(measure_only, x_start, y_start, x_end, y_end);
     }
@@ -306,7 +313,7 @@ color_t building_construction_clear_color(void)
     if (building_construction_type() == BUILDING_CLEAR_LAND) {
         return COLOR_MASK_RED;
     } else if (building_construction_type() == BUILDING_REPAIR_LAND) {
-        return COLOR_MASK_DARK_GREEN;
+        return COLOR_MASK_GREEN;
     }
     return COLOR_MASK_NONE;
 }
@@ -316,23 +323,74 @@ int building_construction_repair_land(int measure_only, int x_start, int y_start
     grid_slice *slice = map_grid_get_grid_slice_from_corners(x_start, y_start, x_end, y_end);
     int repairable_buildings = 0;
     int repair_cost = 0;
+
+    // If this is the actual repair execution after confirmation
+    if (!measure_only && confirm.repair_confirmed == 1) {
+        // Perform the actual repairs
+        for (int i = 0; i < slice->size; i++) {
+            int grid_offset = slice->grid_offsets[i];
+            int building_id = map_building_rubble_building_id(grid_offset);
+            if (building_id) {
+                building *b = building_get(building_id);
+                if (building_can_repair(b)) {
+                    repairable_buildings++;
+                    building_repair(b);
+                }
+            }
+        }
+        confirm.repair_confirmed = 0;        // Reset confirmation state
+        return repairable_buildings;
+    }
+    // Measure phase - count buildings and calculate cost
     for (int i = 0; i < slice->size; i++) {
         int grid_offset = slice->grid_offsets[i];
-        map_property_mark_deleted(grid_offset);
+        if (measure_only) {
+            map_property_mark_deleted(grid_offset);
+        }
         int building_id = map_building_rubble_building_id(grid_offset);
         if (building_id) {
             building *b = building_get(building_id);
             if (building_can_repair(b)) {
                 repairable_buildings++;
-                if (measure_only) {
-                    repair_cost += building_repair_cost(b);
-                }
+                repair_cost += building_repair_cost(b);
             }
         }
     }
-    if (!measure_only) {
-        window_popup_dialog_show_confirmation(0, translation_for(TR_CONFIRM_REPAIR_BUILDINGS), 0, 0, confirm_repair_buildings);
 
+    if (buildings_count) {
+        *buildings_count = repairable_buildings;
     }
-    return repair_cost;
+
+    // If not measuring only and we haven't confirmed yet, show confirmation dialog
+    if (!measure_only && confirm.repair_confirmed == 0 && repairable_buildings > 0) {
+        confirm.x_start = x_start;
+        confirm.y_start = y_start;
+        confirm.x_end = x_end;
+        confirm.y_end = y_end;
+        confirm.repair_cost = repair_cost;
+        static uint8_t big_buffer[120] = { 0 };
+        const uint8_t *custom_text = translation_for(TR_CONFIRM_REPAIR_BUILDINGS_TITLE);
+
+        int offset = 0;
+        const uint8_t *prefix = translation_for(TR_CONFIRM_REPAIR_BUILDINGS);
+        string_copy(prefix, &big_buffer[offset], sizeof(big_buffer) - offset);
+        offset += string_length(prefix);
+        big_buffer[offset++] = ' ';
+
+        offset += string_from_int(&big_buffer[offset], repair_cost, 0);
+        big_buffer[offset++] = ' ';
+
+        const uint8_t *currency = lang_get_string(6, 0);
+        string_copy(currency, &big_buffer[offset], sizeof(big_buffer) - offset);
+        offset += string_length(currency);
+
+        big_buffer[offset++] = '?';
+        big_buffer[offset] = '\0';
+        const uint8_t *pointer = big_buffer;
+        window_popup_dialog_show_confirmation(custom_text, pointer, 0, confirm_repair_buildings);
+        return -1;
+    }
+
+
+    return measure_only ? repair_cost : repairable_buildings;
 }
