@@ -772,7 +772,14 @@ static void draw_animation(int x, int y, int grid_offset)
     building *b = building_get(building_id);
     color_t color_mask = 0;
     if (draw_building_as_deleted(b) || map_property_is_deleted(grid_offset)) {
-        color_mask = COLOR_MASK_RED;
+        building_type c_type = building_construction_type();
+        switch (c_type) {
+            case BUILDING_CLEAR_LAND:
+                color_mask = COLOR_MASK_RED;
+            case BUILDING_REPAIR_LAND:
+                color_mask = COLOR_MASK_GREEN;
+                return;
+        }
     } else if (is_building_selected(b)) {
         color_mask = get_building_color_mask(b);
     }

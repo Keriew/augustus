@@ -79,6 +79,13 @@ grid_slice *map_grid_get_grid_slice(int *grid_offsets, int size)
     return slice;
 }
 
+grid_slice *map_grid_get_grid_slice_from_corners(int start_x, int start_y, int end_x, int end_y)
+{
+    int width = end_x - start_x + 1;
+    int height = end_y - start_y + 1;
+    return map_grid_get_grid_slice_rectangle(map_grid_offset(start_x, start_y), width, height);
+}
+
 grid_slice *map_grid_get_grid_slice_rectangle(int start_grid_offset, int width, int height)
 {
     grid_slice *slice = allocate_grid_slice_memory();

@@ -65,7 +65,7 @@ static void destroy_on_fire(building *b, int plagued)
     b->sickness_duration = 0;
     b->output_resource_id = 0;
     b->distance_from_entry = 0;
-    if (!building_can_repair(b->type)) {
+    if (!building_can_repair_type(b->type)) {
         building_clear_related_data(b); //retain the building data in the rubble until rubble is cleared
     }
 
@@ -90,7 +90,7 @@ static void destroy_on_fire(building *b, int plagued)
         b->fire_proof = 1;
         b->size = 1;
         b->has_plague = plagued;
-        if (!building_can_repair(og_type)) {
+        if (!building_can_repair_type(og_type)) {
             memset(&b->data, 0, sizeof(b->data)); // removes all data - don't do it for repairable buildings
         }
         map_building_set_rubble_grid_building_id(og_grid_offset, b->id, og_size);

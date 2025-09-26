@@ -608,7 +608,8 @@ const uint8_t *lang_get_string(int group, int index)
                 return translation_for(TR_BUILDING_NATIVE_MONUMENT);
             case BUILDING_NATIVE_WATCHTOWER:
                 return translation_for(TR_BUILDING_NATIVE_WATCHTOWER);
-
+            case BUILDING_REPAIR_LAND:
+                return translation_for(TR_BUILDING_LAND_REPAIR);
             default:
                 break;
         }

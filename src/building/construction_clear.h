@@ -12,4 +12,6 @@
  */
 int building_construction_clear_land(int measure_only, int x_start, int y_start, int x_end, int y_end);
 
+int building_construction_repair_land(int measure_only, int x_start, int y_start, int x_end, int y_end);
+
 #endif // BUILDING_CONSTRUCTION_CLEAR_H

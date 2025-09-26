@@ -311,10 +311,10 @@ void window_building_draw_rubble(building_info_context *c)
     building_type og_type = b->data.rubble.og_type;
     int is_burning_ruins = (b->type == BUILDING_BURNING_RUIN);
 
-    if (building_can_repair(og_type)) {
+    if (building_can_repair_type(og_type)) {
         init_repair_building_button(c);
         complex_button_draw(repair_building_button);
-    } else if (building_can_repair(b->type)) {
+    } else if (building_can_repair_type(b->type)) {
         init_repair_building_button(c);
         complex_button_draw(repair_building_button);
     }

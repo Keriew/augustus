@@ -64,7 +64,7 @@ building *building_get(int id)
 {
     return array_item(data.buildings, id);
 }
-int building_can_repair(building_type type)
+int building_can_repair_type(building_type type)
 {
     building_type repair_type = building_clone_type_from_building_type(type);
     if (repair_type == BUILDING_NONE) {
@@ -355,6 +355,30 @@ int building_is_still_burning(building *b)
     return 0;
 }
 
+int building_can_repair(building *b)
+{
+    if (!b) {
+        return 0;
+    }
+    if (b->type == BUILDING_BURNING_RUIN) {
+        if (building_is_still_burning(b)) {
+            return 0;
+        }
+        if (!building_can_repair_type(b->data.rubble.og_type)) {
+            return 0;
+        } else {
+            return 1;
+        }
+    } else {
+        if (b->state != BUILDING_STATE_RUBBLE) {
+            return 0;
+        } else {
+            return building_can_repair_type(b->type);
+        }
+    }
+    return building_can_repair_type(b->type);
+}
+
 int building_repair(building *b)
 {
     if (!b) {
@@ -364,7 +388,7 @@ int building_repair(building *b)
         city_warning_show(WARNING_REPAIR_BURNING, NEW_WARNING_SLOT);
         return 0;
     }
-    if (!building_can_repair(b->type) && !building_can_repair(b->data.rubble.og_type)) {
+    if (!building_can_repair_type(b->type) && !building_can_repair_type(b->data.rubble.og_type)) {
         city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
         return 0;
     }

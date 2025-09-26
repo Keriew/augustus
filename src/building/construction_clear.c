@@ -288,3 +288,21 @@ int building_construction_clear_land(int measure_only, int x_start, int y_start,
         return clear_land_confirmed(measure_only, x_start, y_start, x_end, y_end);
     }
 }
+
+int building_construction_repair_land(int measure_only, int x_start, int y_start, int x_end, int y_end)
+{
+    grid_slice *slice = map_grid_get_grid_slice_from_corners(x_start, y_start, x_end, y_end);
+    int repairable_buildings = 0;
+    for (int i = 0; i < slice->size; i++) {
+        int grid_offset = slice->grid_offsets[i];
+        map_property_mark_deleted(grid_offset);
+        int building_id = map_building_at(grid_offset);
+        if (building_id) {
+            building *b = building_get(building_id);
+            if (building_can_repair(b)) {
+                repairable_buildings++;
+            }
+        }
+    }
+    return 1;
+}

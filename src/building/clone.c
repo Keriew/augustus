@@ -71,7 +71,6 @@ static building_type get_clone_type_from_building(building *b, building_type clo
             return BUILDING_PAVILION_RED;
         case BUILDING_PAVILION_YELLOW:
             return BUILDING_PAVILION_YELLOW;
-
         case BUILDING_PALISADE_GATE:
             return BUILDING_PALISADE;
         default:

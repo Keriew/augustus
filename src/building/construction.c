@@ -806,6 +806,11 @@ void building_construction_update(int x, int y, int grid_offset)
         if (items_placed >= 0) {
             current_cost *= items_placed;
         }
+    } else if (type == BUILDING_REPAIR_LAND) {
+        int cost = building_construction_repair_land(1, data.start.x, data.start.y, x, y);
+        if (cost >= 0) {
+            current_cost *= cost;
+        }
     } else if (type == BUILDING_WALL) {
         int items_placed = place_wall(data.start.x, data.start.y, x, y, 1);
         if (items_placed >= 0) {
@@ -1045,6 +1050,9 @@ void building_construction_place(void)
             items_placed = last_items_cleared;
         }
         placement_cost *= items_placed;
+        map_property_clear_constructing_and_deleted();
+    } else if (type == BUILDING_REPAIR_LAND) {
+        int cost = building_construction_repair_land(1, x_start, y_start, x_end, y_end);
         map_property_clear_constructing_and_deleted();
     } else if (type == BUILDING_WALL) {
         placement_cost *= place_wall(x_start, y_start, x_end, y_end, 0);

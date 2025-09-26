@@ -287,7 +287,7 @@ static void draw_regular_building(building_type type, int image_id, int x, int y
         } else {
             image_draw(image_id + 1, x - 33, y - 56, color, data.scale);
         }
-    } else if (type != BUILDING_CLEAR_LAND) {
+    } else if (type != BUILDING_CLEAR_LAND && type != BUILDING_REPAIR_LAND) {
         draw_building(image_id, x, y, color);
     }
     draw_building_tiles(x, y, num_tiles, blocked_tiles);
@@ -1387,6 +1387,19 @@ int city_building_ghost_mark_deleting(const map_tile *tile)
     }
     return 1;
 }
+// int city_building_ghost_mark_repair(const map_tile *tile)
+// {
+//     int construction_type = building_construction_type();
+//     if (!tile->grid_offset || building_construction_draw_as_constructing() ||
+//         scroll_in_progress() || construction_type != BUILDING_REPAIR_LAND) {
+//         return (construction_type == BUILDING_REPAIR_LAND);
+//     }
+//     if (!building_construction_in_progress()) {
+//         map_property_clear_constructing_and_deleted();
+//     }
+//     map_building_tiles_mark_repair(tile->grid_offset);
+//     return 1;
+// }
 
 static int is_water_building(void)
 {
@@ -1508,7 +1521,8 @@ void city_building_ghost_draw(const map_tile *tile)
     }
     building_type type = building_construction_type();
     data.ghost_building.type = type;
-    if (building_construction_draw_as_constructing() || type == BUILDING_NONE || type == BUILDING_CLEAR_LAND) {
+    if (building_construction_draw_as_constructing() || type == BUILDING_NONE
+        || type == BUILDING_CLEAR_LAND || type == BUILDING_REPAIR_LAND) {
         return;
     }
     create_tile_offsets();

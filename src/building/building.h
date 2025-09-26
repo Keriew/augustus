@@ -216,7 +216,7 @@ int building_count(void);
 
 int building_find(building_type type);
 
-int building_can_repair(building_type type);
+int building_can_repair_type(building_type type);
 
 building *building_first_of_type(building_type type);
 
@@ -236,6 +236,8 @@ int building_was_tent(building *b);
 int building_repair(building *b);
 
 int building_is_still_burning(building *b);
+
+int building_can_repair(building *b);
 
 void building_clear_related_data(building *b);
 

@@ -47,6 +47,8 @@ void map_grid_init(int width, int height, int start_offset, int border_size);
 
 grid_slice *map_grid_get_grid_slice(int *grid_offsets, int size);
 
+grid_slice *map_grid_get_grid_slice_from_corners(int start_x, int start_y, int end_x, int end_y);
+
 int map_grid_is_valid_offset(int grid_offset);
 
 int map_grid_offset(int x, int y);
