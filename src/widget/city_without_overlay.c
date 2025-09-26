@@ -486,7 +486,14 @@ static void draw_top(int x, int y, int grid_offset)
     int image_id = map_image_at(grid_offset);
     color_t color_mask = 0;
     if (draw_building_as_deleted(b) || (map_property_is_deleted(grid_offset) && !is_multi_tile_terrain(grid_offset))) {
-        color_mask = COLOR_MASK_RED;
+        building_type c_type = building_construction_type();
+        switch (c_type) {
+            case BUILDING_CLEAR_LAND:
+                color_mask = COLOR_MASK_RED;
+            case BUILDING_REPAIR_LAND:
+                color_mask = COLOR_MASK_GREEN;
+                return;
+        }
     } else if (is_building_selected(b)) {
         color_mask = get_building_color_mask(b);
     }
@@ -776,9 +783,10 @@ static void draw_animation(int x, int y, int grid_offset)
         switch (c_type) {
             case BUILDING_CLEAR_LAND:
                 color_mask = COLOR_MASK_RED;
+                break;
             case BUILDING_REPAIR_LAND:
                 color_mask = COLOR_MASK_GREEN;
-                return;
+                break;
         }
     } else if (is_building_selected(b)) {
         color_mask = get_building_color_mask(b);
@@ -951,7 +959,8 @@ static void deletion_draw_terrain_top(int x, int y, int grid_offset)
 static void deletion_draw_figures_animations(int x, int y, int grid_offset)
 {
     if (map_property_is_deleted(grid_offset) || draw_building_as_deleted(building_get(map_building_at(grid_offset)))) {
-        image_blend_footprint_color(x, y, COLOR_MASK_RED, draw_context.scale);
+        color_t color = building_construction_type() == BUILDING_CLEAR_LAND ? COLOR_MASK_RED : COLOR_MASK_GREEN;
+        image_blend_footprint_color(x, y, color, draw_context.scale);
     }
     if (map_property_is_draw_tile(grid_offset) && !should_draw_top_before_deletion(grid_offset)) {
         draw_top(x, y, grid_offset);
