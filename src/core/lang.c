@@ -610,6 +610,9 @@ const uint8_t *lang_get_string(int group, int index)
                 return translation_for(TR_BUILDING_NATIVE_WATCHTOWER);
             case BUILDING_REPAIR_LAND:
                 return translation_for(TR_BUILDING_LAND_REPAIR);
+            case BUILDING_CLEAR_LAND:
+                return translation_for(TR_BUILDING_LAND_CLEAR);
+
             default:
                 break;
         }

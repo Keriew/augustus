@@ -23,6 +23,8 @@
 #include "translation/translation.h"
 #include "window/popup_dialog.h"
 
+#include <string.h>
+
 static struct {
     int x_start;
     int y_start;
@@ -33,8 +35,9 @@ static struct {
     int monument_confirmed;
     int repair_confirmed;
     int repair_cost;
+    int repairable_buildings[1000];
 } confirm;
-
+static int repair_land_confirmed(int measure_only, int x_start, int y_start, int x_end, int y_end, int *buildings_count);
 static building *get_deletable_building(int grid_offset)
 {
     int building_id = map_building_at(grid_offset);
@@ -247,7 +250,7 @@ static void confirm_repair_buildings(int accepted, int checked)
         confirm.repair_confirmed = -1;
     }
     if (accepted == 1) {
-        building_construction_repair_land(0, confirm.x_start, confirm.y_start, confirm.x_end, confirm.y_end, 0);
+        repair_land_confirmed(0, confirm.x_start, confirm.y_start, confirm.x_end, confirm.y_end, 0);
     }
 }
 
@@ -318,29 +321,21 @@ color_t building_construction_clear_color(void)
     return COLOR_MASK_NONE;
 }
 
-int building_construction_repair_land(int measure_only, int x_start, int y_start, int x_end, int y_end, int *buildings_count)
+static int was_building_counted(int building_id, int count_of_processed)
+{
+    for (int i = 0; i < count_of_processed; i++) {
+        if (confirm.repairable_buildings[i] == building_id) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static int repair_land_confirmed(int measure_only, int x_start, int y_start, int x_end, int y_end, int *buildings_count)
 {
     grid_slice *slice = map_grid_get_grid_slice_from_corners(x_start, y_start, x_end, y_end);
     int repairable_buildings = 0;
     int repair_cost = 0;
-
-    // If this is the actual repair execution after confirmation
-    if (!measure_only && confirm.repair_confirmed == 1) {
-        // Perform the actual repairs
-        for (int i = 0; i < slice->size; i++) {
-            int grid_offset = slice->grid_offsets[i];
-            int building_id = map_building_rubble_building_id(grid_offset);
-            if (building_id) {
-                building *b = building_get(building_id);
-                if (building_can_repair(b)) {
-                    repairable_buildings++;
-                    building_repair(b);
-                }
-            }
-        }
-        confirm.repair_confirmed = 0;        // Reset confirmation state
-        return repairable_buildings;
-    }
     // Measure phase - count buildings and calculate cost
     for (int i = 0; i < slice->size; i++) {
         int grid_offset = slice->grid_offsets[i];
@@ -351,23 +346,42 @@ int building_construction_repair_land(int measure_only, int x_start, int y_start
         if (building_id) {
             building *b = building_get(building_id);
             if (building_can_repair(b)) {
-                repairable_buildings++;
-                repair_cost += building_repair_cost(b);
+                if (!was_building_counted(b->id, repairable_buildings)) {
+                    if (measure_only) {
+                        repair_cost += building_repair_cost(b);
+                    } else {
+                        building_repair(b);// Actually perform the repair
+                    }
+                    confirm.repairable_buildings[repairable_buildings] = b->id;
+                    repairable_buildings++;
+                }
             }
         }
     }
-
     if (buildings_count) {
         *buildings_count = repairable_buildings;
     }
+    return measure_only ? repair_cost : repairable_buildings;
+}
 
-    // If not measuring only and we haven't confirmed yet, show confirmation dialog
-    if (!measure_only && confirm.repair_confirmed == 0 && repairable_buildings > 0) {
+int building_construction_repair_land(int measure_only, int x_start, int y_start, int x_end, int y_end, int *buildings_count)
+{
+    confirm.repair_confirmed = 0;
+    memset(confirm.repairable_buildings, 0, sizeof(confirm.repairable_buildings)); // reset the array
+    if (measure_only) {
+        return repair_land_confirmed(measure_only, x_start, y_start, x_end, y_end, buildings_count);
+    }
+
+    int repairable_buildings = 0;    // First, measure to see if there are any repairable buildings and get the cost
+    int repair_cost = repair_land_confirmed(1, x_start, y_start, x_end, y_end, &repairable_buildings);
+
+    if (repairable_buildings > 0) {        // Store the coordinates and cost for the confirmation callback
         confirm.x_start = x_start;
         confirm.y_start = y_start;
         confirm.x_end = x_end;
         confirm.y_end = y_end;
         confirm.repair_cost = repair_cost;
+
         static uint8_t big_buffer[120] = { 0 };
         const uint8_t *custom_text = translation_for(TR_CONFIRM_REPAIR_BUILDINGS_TITLE);
 
@@ -387,10 +401,10 @@ int building_construction_repair_land(int measure_only, int x_start, int y_start
         big_buffer[offset++] = '?';
         big_buffer[offset] = '\0';
         const uint8_t *pointer = big_buffer;
+
         window_popup_dialog_show_confirmation(custom_text, pointer, 0, confirm_repair_buildings);
-        return -1;
+        return -1; // Indicates confirmation dialog shown
+    } else {
+        return repair_land_confirmed(measure_only, x_start, y_start, x_end, y_end, buildings_count);
     }
-
-
-    return measure_only ? repair_cost : repairable_buildings;
 }

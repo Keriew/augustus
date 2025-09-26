@@ -781,7 +781,7 @@ static const uint8_t *get_allowed_building_name(building_type type)
         return lang_get_string(68, 20);
     }
     if (type == BUILDING_CLEAR_LAND) {
-        return lang_get_string(68, 21);
+        return lang_get_string(CUSTOM_TRANSLATION, TR_BUILDING_LAND_CLEAR);
     }
     if (type == BUILDING_REPAIR_LAND) {
         return lang_get_string(CUSTOM_TRANSLATION, TR_BUILDING_LAND_REPAIR);
