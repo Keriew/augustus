@@ -367,6 +367,7 @@ static int callback_calc_distance_build_road(int next_offset, int dist, int dire
             blocked = 1;
             break;
         default:
+            if (map_terrain_is(next_offset, TERRAIN_BUILDING)) {
                 blocked = 1;
             }
             break;
@@ -392,12 +393,16 @@ static int callback_calc_distance_build_aqueduct(int next_offset, int dist, int 
             blocked = 1;
             break;
         default:
+            if (map_terrain_is(next_offset, TERRAIN_BUILDING)) {
                 if (terrain_land_citizen.items[next_offset] != CITIZEN_N4_RESERVOIR_CONNECTOR) {
                     blocked = 1;
                 }
             }
             break;
     }
+    if (map_terrain_is(next_offset, TERRAIN_ROAD) && !map_can_place_aqueduct_on_road(next_offset)) {
+        distance.determined.items[next_offset] = -1;
+        blocked = 1;
     }
     if (!blocked) {
         enqueue(next_offset, dist);
@@ -435,6 +440,7 @@ static int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aquedu
             return 1;
         }
         if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+            if (building_get(map_building_at(grid_offset))->type == BUILDING_RESERVOIR) {
                 return 1;
             }
         }
@@ -662,7 +668,7 @@ int map_routing_noncitizen_can_travel_over_land(
 static int callback_travel_noncitizen_through_everything(int offset, int next_offset, int direction)
 {
     if (terrain_land_noncitizen.items[next_offset] >= NONCITIZEN_0_PASSABLE) {
-        return 1; // this is likely the cause of the bug for invaders crossing through forts
+        return 1;
     }
     return 0;
 }
