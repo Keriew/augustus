@@ -1099,7 +1099,6 @@ static void draw_hippodrome(const map_tile *tile, int x, int y)
     int x_part3 = x_part2 + HIPPODROME_X_VIEW_OFFSETS[orientation_index];
     int y_part3 = y_part2 + HIPPODROME_Y_VIEW_OFFSETS[orientation_index];
 
-
     color_t color_mask;
     if (blocked) {
         color_mask = COLOR_MASK_BUILDING_GHOST_RED;
@@ -1374,32 +1373,23 @@ static void draw_concrete_maker(const map_tile *tile, int x, int y)
 int city_building_ghost_mark_deleting(const map_tile *tile)
 {
     int construction_type = building_construction_type();
-    if (!tile->grid_offset || building_construction_draw_as_constructing() ||
-        scroll_in_progress() || construction_type != BUILDING_CLEAR_LAND) {
-        return (construction_type == BUILDING_CLEAR_LAND);
+    int is_land_work = (construction_type == BUILDING_CLEAR_LAND || construction_type == BUILDING_REPAIR_LAND);
+    if (!is_land_work) {    // bail out early if not a land-work type
+        return 0;
     }
-    if (!building_construction_in_progress()) {
+    if (!tile->grid_offset || building_construction_draw_as_constructing() || scroll_in_progress()) {
+        return 1;
+    }
+    if (!building_construction_in_progress()) { // no construction, clear bits
         map_property_clear_constructing_and_deleted();
     }
     map_building_tiles_mark_deleting(tile->grid_offset);
+
     if (map_terrain_is(tile->grid_offset, TERRAIN_HIGHWAY) && !map_terrain_is(tile->grid_offset, TERRAIN_AQUEDUCT)) {
         map_tiles_clear_highway(tile->grid_offset, 1);
     }
     return 1;
 }
-// int city_building_ghost_mark_repair(const map_tile *tile)
-// {
-//     int construction_type = building_construction_type();
-//     if (!tile->grid_offset || building_construction_draw_as_constructing() ||
-//         scroll_in_progress() || construction_type != BUILDING_REPAIR_LAND) {
-//         return (construction_type == BUILDING_REPAIR_LAND);
-//     }
-//     if (!building_construction_in_progress()) {
-//         map_property_clear_constructing_and_deleted();
-//     }
-//     map_building_tiles_mark_repair(tile->grid_offset);
-//     return 1;
-// }
 
 static int is_water_building(void)
 {
