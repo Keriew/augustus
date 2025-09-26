@@ -10,6 +10,12 @@ typedef enum {
     CLEAR_MODE_TREES = 2, //removes only trees
     CLEAR_MODE_PLAYER = 3, //removes only things that player can clear, i.e. buildings, trees, rubble, roads etc.
 } clear_mode;
+
+typedef enum {
+    COST_FREE = -1, // perform operation for free
+    COST_MEASURE = 0, // measure cost only, do not perform operation
+    COST_PROCESS = 1 // perform operation for a cost
+}cost_calculation;
 /**
  * @brief Places a building of the specified type at the given coordinates
  * Doesn't process the finance, but checks the correct terrain and figure collisions
@@ -28,13 +34,13 @@ int building_construction_fill_vacant_lots(grid_slice *area);
 /**
  * @brief Prepares terrain for building construction by clearing the specified area
  *
- * @param grid_offset Starting grid position for terrain clearing
- * @param size_x Horizontal size of the area to clear (in tiles)
- * @param size_y Vertical size of the area to clear (in tiles)
+ * @param grid_slice array of grid offsets representing the area to prepare
  * @param clear_mode Determines what types of terrain/objects to remove
- * @param cost 1/0, whether to charge the player for clearing
+ * @param cost Calculation mode for cost (free, measure only, or process)
  * @return Success/failure status of the terrain preparation
  */
-int building_construction_prepare_terrain(int grid_offset, int size_x, int size_y, clear_mode clear_mode, int cost);
+int building_construction_prepare_terrain(grid_slice *grid_slice, clear_mode clear_mode, cost_calculation cost);
 
 #endif // BUILDING_CONSTRUCTION_BUILDING_H
+
+

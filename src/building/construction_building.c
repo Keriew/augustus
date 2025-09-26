@@ -70,52 +70,41 @@ static void add_fort(int type, building *fort)
     ground->formation_id = fort->formation_id;
 }
 
-int building_construction_prepare_terrain(int grid_offset, int size_x, int size_y, clear_mode clear_mode, int cost)
+int building_construction_prepare_terrain(grid_slice *grid_slice, clear_mode clear_mode, cost_calculation cost)
 {
-    int x = map_grid_offset_to_x(grid_offset);
-    int y = map_grid_offset_to_y(grid_offset);
     int total_cost = 0;
-    for (int dy = 0; dy < size_y; dy++) {
-        for (int dx = 0; dx < size_x; dx++) {
-            int gx = x + dx;
-            int gy = y + dy;
-            int g_offset = map_grid_offset(gx, gy);
-            switch (clear_mode) {
-                case CLEAR_MODE_FORCE:
-                    if (map_terrain_is(g_offset, TERRAIN_CLEARABLE)) {
-                        total_cost += cost * 3; // 'lazy' preparation is 50% more expensive per cleared tile
-                    }
-                    map_terrain_set(g_offset, TERRAIN_CLEAR);
-
-                    break;
-                case CLEAR_MODE_RUBBLE:
-                    if (map_terrain_is(g_offset, TERRAIN_RUBBLE)) {
-                        total_cost += cost * 3;
-                    }
-                    map_terrain_remove(g_offset, TERRAIN_RUBBLE);
-                    break;
-                case CLEAR_MODE_TREES:
-                    if (map_terrain_is(g_offset, TERRAIN_TREE)) {
-                        total_cost += cost * 3;
-                    }
-                    map_terrain_remove(g_offset, TERRAIN_TREE);
-                    break;
-                case CLEAR_MODE_PLAYER:
-                    if (map_terrain_is(g_offset, TERRAIN_CLEARABLE)) {
-                        total_cost += cost * 3;
-                    }
-                    map_terrain_remove(g_offset, TERRAIN_CLEARABLE);
-                    break;
-                default:
-                    return 0; //invalid clear mode
+    for (int i = 0; i < grid_slice->size; i++) {
+        int g_offset = grid_slice->grid_offsets[i];
+        int terrain_mask_to_remove = 0;
+        switch (clear_mode) { //ugly but efficient
+            case CLEAR_MODE_FORCE:
+                terrain_mask_to_remove = TERRAIN_NOT_CLEAR;
+                break;
+            case CLEAR_MODE_RUBBLE:
+                terrain_mask_to_remove = TERRAIN_RUBBLE;
+                break;
+            case CLEAR_MODE_TREES:
+                terrain_mask_to_remove = TERRAIN_TREE;
+                break;
+            case CLEAR_MODE_PLAYER:
+            default:
+                terrain_mask_to_remove = TERRAIN_CLEARABLE;
+                break;
+        }
+        if (map_terrain_is(g_offset, terrain_mask_to_remove)) {
+            total_cost += (cost == COST_FREE) ? 0 : 3; // base cost per tile is 50% more than regular clear
+            if (cost != COST_MEASURE) {
+                map_terrain_remove(g_offset, terrain_mask_to_remove);
             }
         }
+
     }
-    if (cost && total_cost > 0) {
+    if (cost == COST_PROCESS && total_cost > 0) {
         city_finance_process_construction(total_cost);
     }
-    return 1;
+    return total_cost;
 }
+
 
 static void add_hippodrome(building *b)
 {

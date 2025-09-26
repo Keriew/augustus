@@ -1,12 +1,14 @@
 #include "construction_clear.h"
 
 #include "building/building.h"
+#include "building/construction.h"
 #include "building/monument.h"
 #include "city/warning.h"
 #include "core/config.h"
 #include "figure/roamer_preview.h"
 #include "figuretype/migrant.h"
 #include "game/undo.h"
+#include "graphics/color.h"
 #include "graphics/window.h"
 #include "map/aqueduct.h"
 #include "map/bridge.h"
@@ -28,6 +30,7 @@ static struct {
     int bridge_confirmed;
     int fort_confirmed;
     int monument_confirmed;
+    int repair_confirmed;
 } confirm;
 
 static building *get_deletable_building(int grid_offset)
@@ -234,6 +237,15 @@ static void confirm_delete_monument(int accepted, int checked)
     clear_land_confirmed(0, confirm.x_start, confirm.y_start, confirm.x_end, confirm.y_end);
 }
 
+static void confirm_repair_buildings(int accepted, int checked)
+{
+    if (accepted == 1) {
+        confirm.repair_confirmed = 1;
+    } else {
+        confirm.repair_confirmed = -1;
+    }
+}
+
 int building_construction_clear_land(int measure_only, int x_start, int y_start, int x_end, int y_end)
 {
     confirm.fort_confirmed = 0;
@@ -289,20 +301,38 @@ int building_construction_clear_land(int measure_only, int x_start, int y_start,
     }
 }
 
-int building_construction_repair_land(int measure_only, int x_start, int y_start, int x_end, int y_end)
+color_t building_construction_clear_color(void)
+{
+    if (building_construction_type() == BUILDING_CLEAR_LAND) {
+        return COLOR_MASK_RED;
+    } else if (building_construction_type() == BUILDING_REPAIR_LAND) {
+        return COLOR_MASK_DARK_GREEN;
+    }
+    return COLOR_MASK_NONE;
+}
+
+int building_construction_repair_land(int measure_only, int x_start, int y_start, int x_end, int y_end, int *buildings_count)
 {
     grid_slice *slice = map_grid_get_grid_slice_from_corners(x_start, y_start, x_end, y_end);
     int repairable_buildings = 0;
+    int repair_cost = 0;
     for (int i = 0; i < slice->size; i++) {
         int grid_offset = slice->grid_offsets[i];
         map_property_mark_deleted(grid_offset);
-        int building_id = map_building_at(grid_offset);
+        int building_id = map_building_rubble_building_id(grid_offset);
         if (building_id) {
             building *b = building_get(building_id);
             if (building_can_repair(b)) {
                 repairable_buildings++;
+                if (measure_only) {
+                    repair_cost += building_repair_cost(b);
+                }
             }
         }
     }
-    return 1;
+    if (!measure_only) {
+        window_popup_dialog_show_confirmation(0, translation_for(TR_CONFIRM_REPAIR_BUILDINGS), 0, 0, confirm_repair_buildings);
+
+    }
+    return repair_cost;
 }

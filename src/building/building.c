@@ -379,6 +379,17 @@ int building_can_repair(building *b)
     return building_can_repair_type(b->type);
 }
 
+int building_repair_cost(building *b)
+{
+    if (!b || !building_can_repair(b)) {
+        return 0;
+    }
+    grid_slice *grid_slice = map_grid_get_grid_slice_square(b->grid_offset, b->size); // wont work correctly for hippo
+    int clear_cost = building_construction_prepare_terrain(grid_slice, CLEAR_MODE_RUBBLE, COST_MEASURE);
+    int placement_cost = model_get_building(b->type)->cost;
+    return clear_cost + placement_cost + placement_cost / 20; // +5% fee on a building price
+}
+
 int building_repair(building *b)
 {
     if (!b) {
@@ -432,10 +443,10 @@ int building_repair(building *b)
     size = (og_type == BUILDING_WAREHOUSE) ? 3 : size;
     building_type type_to_place = og_type ? og_type : b->type;
     // --- Clear terrain & place building ---
-    int cleared = building_construction_prepare_terrain(grid_offset, size, size, CLEAR_MODE_RUBBLE, 1);
+    grid_slice *grid_slice = map_grid_get_grid_slice_square(grid_offset, size);
+    int cleared = building_construction_prepare_terrain(grid_slice, CLEAR_MODE_RUBBLE, COST_PROCESS);
     if (is_house_lot) {
-        grid_slice *area = map_grid_get_grid_slice_square(grid_offset, og_size);
-        success = building_construction_fill_vacant_lots(area);
+        success = building_construction_fill_vacant_lots(grid_slice);
     } else {
         success = building_construction_place_building(type_to_place, x, y);
     }

@@ -1710,6 +1710,7 @@ static translation_string all_strings[] = {
     {TR_WARNING_REPAIR_BURNING, "Can't repair while the building is on fire" },
     {TR_BUILDING_INFO_BUILDING_BURNING, "Building is on fire" },
     {TR_BUILDING_LAND_REPAIR, "Repair area"},
+    {TR_CONFIRM_REPAIR_BUILDINGS, "Repair all buildings in the area for "},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
