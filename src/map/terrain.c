@@ -1,5 +1,6 @@
 #include "terrain.h"
 
+#include <string.h>
 #include "building/building.h"
 #include "city/map.h"
 #include "core/image.h"
@@ -13,17 +14,37 @@
 static grid_u32 terrain_grid;
 static grid_u32 terrain_grid_backup;
 
-terrain_flags_array terrain_to_array(int grid_offset)
-{
-    // helper that creates a an rray with flags set according to the bits in value, for easy debugging of terrain
-    unsigned int terrain_value = terrain_grid.items[grid_offset];
-    terrain_flags_array result = { 0 };
-    for (size_t i = 0; i < TERRAIN_NUM_FLAGS; ++i) {
-        result.bits[i] = (terrain_value >> i) & 1u;
-    }
-    return result;
-}
 
+const terrain_flags_array *map_terrain_to_array(int grid_offset)
+{
+    static terrain_flags_array result;
+    static const char *names[TERRAIN_NUM_FLAGS] = {
+        "TREE", "ROCK", "WATER", "BUILDING", "SHRUB", "GARDEN", "ROAD",
+        "RESERVOIR_R", "AQUEDUCT", "ELEVATION", "ACCESS_RAMP", "MEADOW",
+        "RUBBLE", "FOUNTAIN_R", "WALL", "GATEHOUSE", "ORG_TREE",
+        "HWAY_TOP_LEFT", "HWAY_BOT_LEFT", "HWAY_TOP_RIGHT", "HWAY_BOT_RIGHT"
+    };
+
+    unsigned int terrain_value = terrain_grid.items[grid_offset];
+    result.count = 0;
+
+    if (terrain_value == 0) {
+        strcpy(result.key[0], "CLEAR");
+        result.bits[0] = 1;
+        result.count = 1;
+        return &result;
+    }
+
+    for (int i = 0; i < TERRAIN_NUM_FLAGS; ++i) {
+        result.bits[i] = (terrain_value >> i) & 1;
+        if (result.bits[i]) {
+            strcpy(result.key[result.count], names[i]);
+            result.count++;
+        }
+    }
+
+    return &result;
+}
 int map_terrain_is(int grid_offset, int terrain)
 {
     return map_grid_is_valid_offset(grid_offset) && terrain_grid.items[grid_offset] & terrain;

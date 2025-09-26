@@ -1,10 +1,12 @@
 #ifndef MAP_TERRAIN_H
 #define MAP_TERRAIN_H
 
+#include <stdint.h>
 #include "core/buffer.h"
 
 #define TERRAIN_LAST_FLAG TERRAIN_HIGHWAY_BOTTOM_RIGHT
 #define TERRAIN_NUM_FLAGS  (21)  // bits
+#define KEY_MAX_LEN 32 // max length of a single key - only debugging purposes
 
 enum {
     TERRAIN_CLEAR = 0,
@@ -66,11 +68,12 @@ enum {
 };
 
 typedef struct {
-    uint8_t bits[TERRAIN_NUM_FLAGS];
+    char key[TERRAIN_NUM_FLAGS][KEY_MAX_LEN];  // array of active flag names
+    uint8_t bits[TERRAIN_NUM_FLAGS];           // which bits are set (for compatibility)
+    int count;                                 // number of active flags
 } terrain_flags_array;
 
-terrain_flags_array terrain_to_array(int grid_offset);
-
+const terrain_flags_array *map_terrain_to_array(int grid_offset);
 int map_terrain_is(int grid_offset, int terrain);
 
 int map_terrain_is_roadblock(int grid_offset);

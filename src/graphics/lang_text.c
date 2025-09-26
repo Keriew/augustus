@@ -212,8 +212,8 @@ int lang_text_draw_sequence(const lang_fragment *seq, int count, int x, int y, f
     }
     return width;
 }
-
 int lang_text_draw_sequence_centered(
+
     const lang_fragment *seq, int count, int x, int y, int box_width, font_t font, color_t color)
 {
     int total_width = lang_text_get_sequence_width(seq, count, font);

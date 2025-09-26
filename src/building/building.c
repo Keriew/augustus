@@ -364,7 +364,7 @@ int building_repair(building *b)
         city_warning_show(WARNING_REPAIR_BURNING, NEW_WARNING_SLOT);
         return 0;
     }
-    if (!building_can_repair(b->type)) {
+    if (!building_can_repair(b->type) && !building_can_repair(b->data.rubble.og_type)) {
         city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
         return 0;
     }
@@ -422,11 +422,7 @@ int building_repair(building *b)
     int placement_cost = model_get_building(type_to_place)->cost * success;
     city_finance_process_construction(placement_cost + placement_cost / 20); // +5%
     building *new_building = building_get(map_building_at(map_grid_offset(x, y)));
-    grid_slice *b_area = map_grid_get_grid_slice_square(grid_offset, size);
-
-    for (int i = 0; i < b_area->size; i++) {
-        map_building_set_rubble_building_id(b_area->grid_offsets[i], 0); //remove rubble
-    }
+    map_building_set_rubble_grid_building_id(grid_offset, 0, og_size); // remove rubble marker
 
     building_data_transfer_paste(new_building, 1);
     if (has_tmp) {
@@ -478,6 +474,8 @@ void building_update_state(void)
         } else if (b->state == BUILDING_STATE_RUBBLE) {
             if (b->house_size) {
                 city_population_remove_home_removed(b->house_population);
+                b->house_population = 0;
+                b->house_size = 0;
             }
             // building_delete(b); // keep the rubbled building as a reference for reconstruction
         } else if (b->state == BUILDING_STATE_DELETED_BY_GAME) {

@@ -22,7 +22,7 @@ int map_building_from_buffer(buffer *buildings, int grid_offset)
 
 void map_building_set(int grid_offset, int building_id)
 {
-    buildings_grid.items[grid_offset] = building_id; //this is stupid, remove this function
+    buildings_grid.items[grid_offset] = building_id;
 }
 
 void map_building_damage_clear(int grid_offset)
@@ -40,9 +40,20 @@ int map_building_rubble_building_id(int grid_offset)
     return rubble_info_grid.items[grid_offset];
 }
 
-void map_building_set_rubble_building_id(int grid_offset, unsigned int building_id)
+void map_building_set_rubble_grid_building_id(int grid_offset, unsigned int building_id, int size)
 {
-    rubble_info_grid.items[grid_offset] = building_id;
+    if (size == 1) {
+        rubble_info_grid.items[grid_offset] = building_id;
+        return;
+    }
+    int x = map_grid_offset_to_x(grid_offset);
+    int y = map_grid_offset_to_y(grid_offset);
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            int offset = map_grid_offset(x + i, y + j);
+            rubble_info_grid.items[offset] = building_id;
+        }
+    }
 }
 
 void map_building_clear(void)

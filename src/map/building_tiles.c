@@ -175,9 +175,6 @@ void map_building_tiles_remove(int building_id, int x, int y)
             if (building_id && map_building_at(grid_offset) != building_id) {
                 continue;
             }
-            // if (building_id && b->type != BUILDING_BURNING_RUIN) {
-            //     map_building_set_rubble_building_id(grid_offset, b->id);
-            // }
             map_property_clear_constructing(grid_offset);
             map_property_set_multi_tile_size(grid_offset, 1);
             map_property_clear_multi_tile_xy(grid_offset);
@@ -227,6 +224,7 @@ void map_building_tiles_set_rubble(int building_id, int x, int y, int size)
     if (!map_grid_is_inside(x, y, size)) {
         return;
     }
+    // building id passed here is the original building that got destroyed, but can be 0 for walls and aqueducts
     building *b = building_get(building_id);
     for (int dy = 0; dy < size; dy++) {
         for (int dx = 0; dx < size; dx++) {
@@ -235,14 +233,14 @@ void map_building_tiles_set_rubble(int building_id, int x, int y, int size)
                 continue;
             }
             if (building_id && building_get(map_building_at(grid_offset))->type != BUILDING_BURNING_RUIN) {
-                // map_building_set_rubble_building_id(grid_offset, b->id);
-            } else if (!building_id && map_terrain_get(grid_offset) & TERRAIN_WALL) {
+                map_building_set_rubble_grid_building_id(grid_offset, b->id, 1);
+            } else if (!building_id && map_terrain_get(grid_offset) & TERRAIN_WALL) { // add aqueducts here too
                 // since walls are not buildings, but rather terrain, we create a temporary dummy building for them
                 // once the rubble is repaired or cleared, it will be reset to wall terrain or clear terrain accordingly
                 int temp_b_id = create_temporary_wall_building(x + dx, y + dy);
-                // map_building_set_rubble_building_id(grid_offset, temp_b_id);
+                // map_building_set_rubble_grid_building_id(grid_offset, temp_b_id,1);
             } else if (building_id && building_get(map_building_at(grid_offset))->type == BUILDING_BURNING_RUIN) {
-                // map_building_set_rubble_building_id(grid_offset, b->id);
+                // map_building_set_rubble_grid_building_id(grid_offset, b->id,1);
             }
             map_property_clear_constructing(grid_offset);
             map_property_set_multi_tile_size(grid_offset, 1);
