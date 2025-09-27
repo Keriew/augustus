@@ -207,13 +207,11 @@ void building_destroy_without_rubble(building *b)
     destroy_without_rubble(b);
 }
 
-
 void building_destroy_by_rioter(building *b)
 {
     destroy_on_fire(b, 0);
     destroy_linked_parts(b, DESTROY_FIRE, 0);
 }
-
 
 int building_destroy_first_of_type(building_type type)
 {
