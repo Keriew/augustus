@@ -467,7 +467,8 @@ int building_repair(building *b)
         return 0;
     }
     int placement_cost = model_get_building(type_to_place)->cost * success;
-    city_finance_process_construction(placement_cost + placement_cost / 20); // +5%
+    int full_cost = (placement_cost + placement_cost / 20);// +5%
+    city_finance_process_construction(full_cost);
     building *new_building = building_get(map_building_at(map_grid_offset(x, y)));
     map_building_set_rubble_grid_building_id(grid_offset, 0, size); // remove rubble marker
     building_data_transfer_paste(new_building, 1);
@@ -481,7 +482,7 @@ int building_repair(building *b)
     building_data_transfer_restore_and_clear_backup();
     figure_create_explosion_cloud(new_building->x, new_building->y, og_size, 1);
     game_undo_disable(); // not accounting for undoing repairs
-    return 1;
+    return full_cost;
 }
 
 void building_update_state(void)

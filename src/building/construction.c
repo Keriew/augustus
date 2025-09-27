@@ -23,6 +23,7 @@
 #include "core/calc.h"
 #include "core/config.h"
 #include "core/image.h"
+#include "core/log.h"
 #include "figure/formation.h"
 #include "game/undo.h"
 #include "graphics/window.h"
@@ -962,6 +963,7 @@ void building_construction_update(int x, int y, int grid_offset)
         }
     }
     data.cost_preview = current_cost;
+    log_info("Construction preview cost: %d", NULL, current_cost);
 }
 
 static figure_type nearby_enemy_type(int x_start, int y_start, int x_end, int y_end)
@@ -1055,6 +1057,8 @@ void building_construction_place(void)
         map_property_clear_constructing_and_deleted();
     } else if (type == BUILDING_REPAIR_LAND) {
         int cost = building_construction_repair_land(0, data.start.x, data.start.y, x_end, y_end, &repaired_buildings);
+        //cost processed inside the repair land function
+        log_info("Repair land actual cost: %d", NULL, cost);
         map_property_clear_constructing_and_deleted();
     } else if (type == BUILDING_WALL) {
         placement_cost *= place_wall(x_start, y_start, x_end, y_end, 0);

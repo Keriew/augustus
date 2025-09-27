@@ -5,6 +5,7 @@
 #include "building/monument.h"
 #include "city/warning.h"
 #include "core/config.h"
+#include "core/log.h"
 #include "core/string.h"
 #include "figure/roamer_preview.h"
 #include "figuretype/migrant.h"
@@ -350,7 +351,7 @@ static int repair_land_confirmed(int measure_only, int x_start, int y_start, int
                     if (measure_only) {
                         repair_cost += building_repair_cost(b);
                     } else {
-                        building_repair(b);// Actually perform the repair
+                        repair_cost += building_repair(b);// Actually perform the repair
                     }
                     confirm.repairable_buildings[repairable_buildings] = b->id;
                     repairable_buildings++;
@@ -404,9 +405,8 @@ int building_construction_repair_land(int measure_only, int x_start, int y_start
         const uint8_t *pointer = big_buffer;
 
         window_popup_dialog_show_confirmation(custom_text, pointer, 0, confirm_repair_buildings);
-        return -1; // Indicates confirmation dialog shown
+        return repair_cost;
     } else {
-        // No buildings to repair, return 0 cost
-        return 0;
+        return 0;// No buildings to repair, return 0 cost
     }
 }
