@@ -605,7 +605,23 @@ void map_terrain_migrate_old_bridges(void)
     }
 }
 
-
+void map_terrain_migrate_old_walls(void)
+{
+    for (int y = 0; y < GRID_SIZE; y++) {
+        for (int x = 0; x < GRID_SIZE; x++) {
+            int grid_offset = map_grid_offset(x, y);
+            if (!map_grid_is_valid_offset(grid_offset)) {
+                continue;
+            }
+            if (map_terrain_is(grid_offset, TERRAIN_WALL) && !map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+                // Create wall building for each wall tile
+                building *b = building_create(BUILDING_WALL, x, y);
+                map_building_set(grid_offset, b->id);
+                map_terrain_add(grid_offset, TERRAIN_BUILDING);
+            }
+        }
+    }
+}
 
 void map_terrain_load_state(buffer *buf, int expanded_terrain_data, buffer *images, int legacy_image_buffer)
 {

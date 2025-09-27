@@ -882,6 +882,9 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     if (version <= SAVE_GAME_LAST_SPRITE_BRIDGES_MIGRATION_FIX) {
         map_terrain_migrate_old_bridges();
     }
+    if (version <= SAVE_GAME_LAST_U16_GRIDS) {
+        map_terrain_migrate_old_walls();
+    }
 
 }
 

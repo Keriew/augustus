@@ -25,7 +25,7 @@ enum {
     TERRAIN_RUBBLE = 1 << 12,
     TERRAIN_FOUNTAIN_RANGE = 1 << 13,
     TERRAIN_WALL = 1 << 14,
-    TERRAIN_GATEHOUSE = 1 << 15,
+    TERRAIN_GATEHOUSE = 1 << 15, // this is used for TERRAIN_TOWER as well
     TERRAIN_ORIGINALLY_TREE = 1 << 16,
     TERRAIN_HIGHWAY_TOP_LEFT = 1 << 17,
     TERRAIN_HIGHWAY_BOTTOM_LEFT = 1 << 18,
@@ -159,6 +159,8 @@ void map_terrain_save_state(buffer *buf);
 void map_terrain_save_state_legacy(buffer *buf);
 
 void map_terrain_migrate_old_bridges(void);
+
+void map_terrain_migrate_old_walls(void);
 
 void map_terrain_load_state(buffer *buf, int expanded_terrain_data, buffer *images, int legacy_image_buffer);
 
