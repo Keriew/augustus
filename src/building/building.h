@@ -230,6 +230,8 @@ building *building_create(building_type type, int x, int y);
 
 int building_was_tent(building *b);
 
+int building_is_storage(building_type b_type);
+
 int building_repair(building *b);
 
 int building_is_still_burning(building *b);
