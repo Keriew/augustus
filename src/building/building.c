@@ -1,6 +1,7 @@
 #include "building.h"
 
 #include "building/clone.h"
+#include "building/construction.h"
 #include "building/construction_building.h"
 #include "building/construction_clear.h"
 #include "building/data_transfer.h"
@@ -430,18 +431,12 @@ int building_repair(building *b)
         og_orientation = b->data.rubble.og_orientation;
         og_type = b->data.rubble.og_type;
         if (og_type) {  // exceptions should be checked and handled here
-            b->type = og_type;
-            if (building_is_house(og_type) || og_type == 1) {
-                is_house_lot = 1;
-                b->type = BUILDING_HOUSE_VACANT_LOT;
-            }
             if (building_is_storage(b->type)) {
                 const building_storage *src = building_storage_get(b->storage_id);
                 tmp = *src;
                 has_tmp = 1;
                 building_storage_delete(b->storage_id);
             }
-
         }
     }
     building_data_transfer_backup();
@@ -450,8 +445,12 @@ int building_repair(building *b)
     int grid_offset = og_grid_offset ? og_grid_offset : b->grid_offset;
     int x = map_grid_offset_to_x(grid_offset);
     int y = map_grid_offset_to_y(grid_offset);
-
+    if (building_is_house(og_type) || og_type == 1) {
+        is_house_lot = 1;
+        b->type = BUILDING_HOUSE_VACANT_LOT;
+    }
     int size = og_size ? og_size : b->size;
+    int type = og_type ? og_type : b->type;
     size = (og_type == BUILDING_WAREHOUSE) ? 3 : size;
     building_type type_to_place = og_type ? og_type : b->type;
     // --- Clear terrain & place building ---
@@ -459,6 +458,8 @@ int building_repair(building *b)
     int cleared = building_construction_prepare_terrain(grid_slice, CLEAR_MODE_RUBBLE, COST_PROCESS);
     if (is_house_lot) {
         success = building_construction_fill_vacant_lots(grid_slice);
+    } else if (type == BUILDING_WALL) {
+        success = building_construction_place_wall(grid_offset);
     } else {
         success = building_construction_place_building(type_to_place, x, y);
     }

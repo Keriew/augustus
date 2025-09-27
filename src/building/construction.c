@@ -336,10 +336,13 @@ static int place_garden(int x_start, int y_start, int x_end, int y_end, int is_o
     return items_placed;
 }
 
-static int place_wall(int x_start, int y_start, int x_end, int y_end, int measure_only)
+static int place_wall(int x_start, int y_start, int x_end, int y_end, int measure_only, int construction_mode)
 {
-    game_undo_restore_map(0);
-
+    if (construction_mode) {
+        game_undo_restore_map(0); // map_tiles_set_wall places wall terrain, even during preview. 
+        //the restoration is done to go back to the terrain state before measuring. 
+        //It's not needed if not using regular construction mode, e.g. repairs
+    }
     int x_min, y_min, x_max, y_max;
     map_grid_start_end_to_area(x_start, y_start, x_end, y_end, &x_min, &y_min, &x_max, &y_max);
 
@@ -364,6 +367,12 @@ static int place_wall(int x_start, int y_start, int x_end, int y_end, int measur
     return items_placed;
 }
 
+int building_construction_place_wall(int grid_offset)
+{
+    int x = map_grid_offset_to_x(grid_offset);
+    int y = map_grid_offset_to_y(grid_offset);
+    return place_wall(x, y, x, y, 0, 0);
+}
 
 static int plot_draggable_building(int x_start, int y_start, int x_end, int y_end, int allow_roads)
 {
@@ -813,7 +822,7 @@ void building_construction_update(int x, int y, int grid_offset)
             current_cost = cost;  // Use total cost directly, don't multiply
         }
     } else if (type == BUILDING_WALL) {
-        int items_placed = place_wall(data.start.x, data.start.y, x, y, 1);
+        int items_placed = place_wall(data.start.x, data.start.y, x, y, 1, 1);
         if (items_placed >= 0) {
             current_cost *= items_placed;
         }
@@ -1058,7 +1067,7 @@ void building_construction_place(void)
         //cost processed inside the repair land function
         map_property_clear_constructing_and_deleted();
     } else if (type == BUILDING_WALL) {
-        placement_cost *= place_wall(x_start, y_start, x_end, y_end, 0);
+        placement_cost *= place_wall(x_start, y_start, x_end, y_end, 0, 1);
     } else if (type == BUILDING_ROAD) {
         placement_cost *= building_construction_place_road(0, x_start, y_start, x_end, y_end);
     } else if (type == BUILDING_HIGHWAY) {
