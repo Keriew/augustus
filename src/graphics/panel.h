@@ -2,6 +2,8 @@
 #define GRAPHICS_PANEL_H
 
 #define BLOCK_SIZE 16
+#define LABEL_TYPE_HOVER 2
+#define LABEL_TYPE_NORMAL 1
 
 void outer_panel_draw(int x, int y, int width_blocks, int height_blocks);
 

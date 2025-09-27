@@ -34,6 +34,7 @@
 #include "widget/city_overlay_education.h"
 #include "widget/city_overlay_entertainment.h"
 #include "widget/city_overlay_health.h"
+#include "widget/city_overlay_housing.h"
 #include "widget/city_overlay_other.h"
 #include "widget/city_overlay_risks.h"
 #include "widget/city_without_overlay.h"
@@ -136,6 +137,60 @@ static const city_overlay *get_city_overlay(void)
             return city_overlay_for_logistics();
         case OVERLAY_STORAGES:
             return city_overlay_for_storages();
+        case OVERLAY_HOUSE_SMALL_TENT:
+            return city_overlay_for_small_tent();
+        case OVERLAY_HOUSE_LARGE_TENT:
+            return city_overlay_for_large_tent();
+        case OVERLAY_HOUSE_SMALL_SHACK:
+            return city_overlay_for_small_shack();
+        case OVERLAY_HOUSE_LARGE_SHACK:
+            return city_overlay_for_large_shack();
+        case OVERLAY_HOUSE_SMALL_HOVEL:
+            return city_overlay_for_small_hovel();
+        case OVERLAY_HOUSE_LARGE_HOVEL:
+            return city_overlay_for_large_hovel();
+        case OVERLAY_HOUSE_SMALL_CASA:
+            return city_overlay_for_small_casa();
+        case OVERLAY_HOUSE_LARGE_CASA:
+            return city_overlay_for_large_casa();
+        case OVERLAY_HOUSE_SMALL_INSULA:
+            return city_overlay_for_small_insula();
+        case OVERLAY_HOUSE_MEDIUM_INSULA:
+            return city_overlay_for_medium_insula();
+        case OVERLAY_HOUSE_LARGE_INSULA:
+            return city_overlay_for_large_insula();
+        case OVERLAY_HOUSE_GRAND_INSULA:
+            return city_overlay_for_grand_insula();
+        case OVERLAY_HOUSE_SMALL_VILLA:
+            return city_overlay_for_small_villa();
+        case OVERLAY_HOUSE_MEDIUM_VILLA:
+            return city_overlay_for_medium_villa();
+        case OVERLAY_HOUSE_LARGE_VILLA:
+            return city_overlay_for_large_villa();
+        case OVERLAY_HOUSE_GRAND_VILLA:
+            return city_overlay_for_grand_villa();
+        case OVERLAY_HOUSE_SMALL_PALACE:
+            return city_overlay_for_small_palace();
+        case OVERLAY_HOUSE_MEDIUM_PALACE:
+            return city_overlay_for_medium_palace();
+        case OVERLAY_HOUSE_LARGE_PALACE:
+            return city_overlay_for_large_palace();
+        case OVERLAY_HOUSE_LUXURY_PALACE:
+            return city_overlay_for_luxury_palace();
+        case OVERLAY_HOUSING_GROUPS_TENTS:
+            return city_overlay_for_housing_groups_tents();
+        case OVERLAY_HOUSING_GROUPS_SHACKS:
+            return city_overlay_for_housing_groups_shacks();
+        case OVERLAY_HOUSING_GROUPS_HOVELS:
+            return city_overlay_for_housing_groups_hovels();
+        case OVERLAY_HOUSING_GROUPS_CASAE:
+            return city_overlay_for_housing_groups_casae();
+        case OVERLAY_HOUSING_GROUPS_INSULAE:
+            return city_overlay_for_housing_groups_insulae();
+        case OVERLAY_HOUSING_GROUPS_VILLAS:
+            return city_overlay_for_housing_groups_villas();
+        case OVERLAY_HOUSING_GROUPS_PALACES:
+            return city_overlay_for_housing_groups_palaces();
         default:
             return 0;
     }
@@ -159,18 +214,15 @@ static color_t get_building_color_mask(const building *b)
     color_t color_mask = COLOR_MASK_NONE;
     const model_building *model = model_get_building(b->type);
     int labor_needed = model->laborers;
-    if (!labor_needed && b->type != BUILDING_WAREHOUSE_SPACE) {
-        // account for warehouse case
+    if (!labor_needed && b->type != BUILDING_WAREHOUSE_SPACE) { // account for warehouse case
         color_mask = COLOR_MASK_NONE;
     } else {
-        switch (b->type) {
-            //buildings that have labor but no walkers
+        switch (b->type) { //buildings that have labor but no walkers
             case BUILDING_LATRINES:
             case BUILDING_FOUNTAIN:
                 color_mask = COLOR_MASK_NONE;
                 break;
-                //all other buildings
-            default:
+            default: //all other buildings
                 color_mask = SELECTED_BUILDING_COLOR_MASK;
         }
     }

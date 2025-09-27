@@ -1705,6 +1705,15 @@ static translation_string all_strings[] = {
     {TR_CONFIG_UI_ANIMATE_TRADE_ROUTES, "Animate trade routes"},
     {TR_HOTKEY_NEXT_TRACK, "Next random track"},
     {TR_CONFIG_MOVE_LEGION_SOUND_SWAP, "Alternative legion move sound"},
+    {TR_OVERLAY_HOUSING_TENTS, "Tents"},
+    {TR_OVERLAY_HOUSING_SHACKS, "Shacks"},
+    {TR_OVERLAY_HOUSING_HOVELS, "Hovels"},
+    {TR_OVERLAY_HOUSING_CASAS, "Casae"},
+    {TR_OVERLAY_HOUSE_INSULAS, "Insulae"},
+    {TR_OVERLAY_HOUSE_VILLAS, "Villas"},
+    {TR_OVERLAY_HOUSE_PALACES, "Palaces"},
+    {TR_OVERLAY_BY_GROUP, "By Group"}
+
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
