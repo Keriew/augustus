@@ -173,6 +173,11 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
                 if (map_terrain_is(grid_offset, TERRAIN_ROAD | TERRAIN_GARDEN)) {
                     map_property_clear_plaza_earthquake_or_overgrown_garden(grid_offset);
                 }
+                if (map_terrain_is(grid_offset, TERRAIN_RUBBLE) && !measure_only) {
+                    if (map_building_rubble_building_id(grid_offset)) {
+                        map_building_set_rubble_grid_building_id(grid_offset, 0, 1); // remove rubble marker
+                    }
+                }
                 map_terrain_remove(grid_offset, TERRAIN_CLEARABLE);
                 items_placed++;
             }
