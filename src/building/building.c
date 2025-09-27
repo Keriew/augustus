@@ -458,8 +458,14 @@ int building_repair(building *b)
     int cleared = building_construction_prepare_terrain(grid_slice, CLEAR_MODE_RUBBLE, COST_PROCESS);
     if (is_house_lot) {
         success = building_construction_fill_vacant_lots(grid_slice);
-    } else if (type == BUILDING_WALL) {
-        success = building_construction_place_wall(grid_offset);
+    } else if (type == BUILDING_WALL || type == BUILDING_TOWER) {
+        for (int i = 0; i < grid_slice->size; i++) {
+            success = building_construction_place_wall(grid_slice->grid_offsets[i]);
+        }
+        if (type == BUILDING_TOWER) {
+            map_tiles_update_all_walls(); // towers affect wall connections
+            success = building_construction_place_building(type_to_place, x, y);
+        }
     } else {
         success = building_construction_place_building(type_to_place, x, y);
     }
