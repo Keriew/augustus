@@ -228,9 +228,6 @@ building *building_next(building *b);
 
 building *building_create(building_type type, int x, int y);
 
-/** Tent types are 'flattened' to 1 when rubbled. If not tent, og_type is building_type
- * @return 1 if was tent, 0 if not
-*/
 int building_was_tent(building *b);
 
 int building_repair(building *b);
