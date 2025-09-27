@@ -387,7 +387,6 @@ int building_construction_is_warehouse_corner(int tile_no)
 int building_construction_fill_vacant_lots(grid_slice *area)
 {
     int items_placed = 0;
-    game_undo_restore_building_state();
     for (int i = 0; i < area->size; i++) {
         int grid_offset = area->grid_offsets[i];
         int x = map_grid_offset_to_x(grid_offset);

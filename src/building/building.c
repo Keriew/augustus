@@ -16,6 +16,7 @@
 #include "building/state.h"
 #include "building/storage.h"
 #include "building/variant.h"
+#include "building/type.h"
 #include "city/buildings.h"
 #include "city/finance.h"
 #include "city/population.h"
@@ -41,7 +42,6 @@
 #include "map/routing_terrain.h"
 #include "map/terrain.h"
 #include "map/tiles.h"
-
 
 
 #define BUILDING_ARRAY_SIZE_STEP 2000
@@ -157,7 +157,7 @@ static void fill_adjacent_types(building *b)
         while (id) {
             building *prev = building_get(id);
             if (prev->state != BUILDING_STATE_UNUSED &&
-                prev->type == b->type && b->next_of_type) { // nulpointer guards needed - this is a common fallthrough
+                prev->type == b->type && b->next_of_type) {
                 b->prev_of_type = prev;
                 b->next_of_type = prev->next_of_type;
                 b->next_of_type->prev_of_type = b;
@@ -532,7 +532,6 @@ void building_update_state(void)
             if (b->house_size) {
                 city_population_remove_home_removed(b->house_population);
                 b->house_population = 0;
-                b->house_size = 0;
             }
             // building_delete(b); // keep the rubbled building as a reference for reconstruction
         } else if (b->state == BUILDING_STATE_DELETED_BY_GAME) {
