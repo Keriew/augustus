@@ -16,7 +16,7 @@ int scenario_editor_earthquake_year(void)
 void scenario_editor_earthquake_cycle_severity(void)
 {
     scenario.earthquake.severity++;
-    if (scenario.earthquake.severity > EARTHQUAKE_LARGE) {
+    if (scenario.earthquake.severity > EARTHQUAKE_CUSTOM) {
         scenario.earthquake.severity = EARTHQUAKE_NONE;
     }
     scenario_editor_set_as_unsaved();
