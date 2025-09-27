@@ -5,7 +5,6 @@
 #include "building/monument.h"
 #include "city/warning.h"
 #include "core/config.h"
-#include "core/log.h"
 #include "core/string.h"
 #include "figure/roamer_preview.h"
 #include "figuretype/migrant.h"

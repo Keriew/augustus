@@ -22,7 +22,6 @@
 #include "core/array.h"
 #include "core/calc.h"
 #include "core/config.h"
-#include "core/log.h"
 #include "figure/figure.h"
 #include "figure/formation_legion.h"
 #include "figuretype/missile.h"

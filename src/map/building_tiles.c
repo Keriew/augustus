@@ -215,14 +215,7 @@ void map_building_tiles_set_rubble(int building_id, int x, int y, int size)
             }
             if (building_id && building_get(map_building_at(grid_offset))->type != BUILDING_BURNING_RUIN) {
                 map_building_set_rubble_grid_building_id(grid_offset, b->id, 1);
-                /*}  else if (!building_id && map_terrain_get(grid_offset) & TERRAIN_WALL) { // add aqueducts here too
-                    // since walls are not buildings, but rather terrain, we create a temporary dummy building for them
-                    // once the rubble is repaired or cleared, it will be reset to wall terrain or clear terrain accordingly
-                    int temp_b_id = create_temporary_wall_building(x + dx, y + dy); */
-                    // map_building_set_rubble_grid_building_id(grid_offset, temp_b_id,1);
-                    // aqueducts and walls are buildings - should work like with buildings
-            } else if (building_id && building_get(map_building_at(grid_offset))->type == BUILDING_BURNING_RUIN) {
-                // map_building_set_rubble_grid_building_id(grid_offset, b->id,1);
+                // set rubble building id for the original. Collapsing into burning ruin sets this in destruction.c
             }
             map_property_clear_constructing(grid_offset);
             map_property_set_multi_tile_size(grid_offset, 1);
