@@ -432,44 +432,44 @@ int building_repair(building *b)
             }
             b->type = og_type;
         }
-        building_data_transfer_backup();
-        building_data_transfer_copy(b, 1);
-        //  Resolve placement data 
-        int grid_offset = og_grid_offset ? og_grid_offset : b->grid_offset;
-        int x = map_grid_offset_to_x(grid_offset);
-        int y = map_grid_offset_to_y(grid_offset);
-
-        int size = og_size ? og_size : b->size;
-        size = (og_type == BUILDING_WAREHOUSE) ? 3 : size;
-        building_type type_to_place = og_type ? og_type : b->type;
-        // --- Clear terrain & place building ---
-        grid_slice *grid_slice = map_grid_get_grid_slice_square(grid_offset, size);
-        int cleared = building_construction_prepare_terrain(grid_slice, CLEAR_MODE_RUBBLE, COST_PROCESS);
-        if (is_house_lot) {
-            success = building_construction_fill_vacant_lots(grid_slice);
-        } else {
-            success = building_construction_place_building(type_to_place, x, y);
-        }
-        if (!success || !cleared) {
-            city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
-            return 0;
-        }
-        int placement_cost = model_get_building(type_to_place)->cost * success;
-        city_finance_process_construction(placement_cost + placement_cost / 20); // +5%
-        building *new_building = building_get(map_building_at(map_grid_offset(x, y)));
-        map_building_set_rubble_grid_building_id(grid_offset, 0, size); // remove rubble marker
-        building_data_transfer_paste(new_building, 1);
-        if (new_building->state == BUILDING_STATE_RUBBLE) {
-            new_building->state = BUILDING_STATE_CREATED;
-        }
-        if (has_tmp) {
-            building_storage_set_data(new_building->storage_id, tmp);
-        }
-
-        building_data_transfer_restore_and_clear_backup();
-        figure_create_explosion_cloud(new_building->x, new_building->y, og_size, 1);
-        return 1;
     }
+    building_data_transfer_backup();
+    building_data_transfer_copy(b, 1);
+    //  Resolve placement data 
+    int grid_offset = og_grid_offset ? og_grid_offset : b->grid_offset;
+    int x = map_grid_offset_to_x(grid_offset);
+    int y = map_grid_offset_to_y(grid_offset);
+
+    int size = og_size ? og_size : b->size;
+    size = (og_type == BUILDING_WAREHOUSE) ? 3 : size;
+    building_type type_to_place = og_type ? og_type : b->type;
+    // --- Clear terrain & place building ---
+    grid_slice *grid_slice = map_grid_get_grid_slice_square(grid_offset, size);
+    int cleared = building_construction_prepare_terrain(grid_slice, CLEAR_MODE_RUBBLE, COST_PROCESS);
+    if (is_house_lot) {
+        success = building_construction_fill_vacant_lots(grid_slice);
+    } else {
+        success = building_construction_place_building(type_to_place, x, y);
+    }
+    if (!success || !cleared) {
+        city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
+        return 0;
+    }
+    int placement_cost = model_get_building(type_to_place)->cost * success;
+    city_finance_process_construction(placement_cost + placement_cost / 20); // +5%
+    building *new_building = building_get(map_building_at(map_grid_offset(x, y)));
+    map_building_set_rubble_grid_building_id(grid_offset, 0, size); // remove rubble marker
+    building_data_transfer_paste(new_building, 1);
+    if (new_building->state == BUILDING_STATE_RUBBLE) {
+        new_building->state = BUILDING_STATE_CREATED;
+    }
+    if (has_tmp) {
+        building_storage_set_data(new_building->storage_id, tmp);
+    }
+
+    building_data_transfer_restore_and_clear_backup();
+    figure_create_explosion_cloud(new_building->x, new_building->y, og_size, 1);
+    return 1;
 }
 
 void building_update_state(void)
