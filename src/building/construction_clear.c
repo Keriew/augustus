@@ -382,7 +382,8 @@ int building_construction_repair_land(int measure_only, int x_start, int y_start
         confirm.y_end = y_end;
         confirm.repair_cost = repair_cost;
 
-        static uint8_t big_buffer[120] = { 0 };
+        static uint8_t big_buffer[120];
+        memset(big_buffer, 0, sizeof(big_buffer)); // Clear buffer
         const uint8_t *custom_text = translation_for(TR_CONFIRM_REPAIR_BUILDINGS_TITLE);
 
         int offset = 0;

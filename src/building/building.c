@@ -480,6 +480,7 @@ int building_repair(building *b)
 
     building_data_transfer_restore_and_clear_backup();
     figure_create_explosion_cloud(new_building->x, new_building->y, og_size, 1);
+    game_undo_disable(); // not accounting for undoing repairs
     return 1;
 }
 
