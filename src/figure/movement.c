@@ -803,7 +803,8 @@ int figure_movement_can_launch_cross_country_missile(int x_src, int y_src, int x
     figure *f = figure_get(0); // abuse unused figure 0 as scratch
     f->cross_country_x = 15 * x_src;
     f->cross_country_y = 15 * y_src;
-    if (map_terrain_is(map_grid_offset(x_src, y_src), TERRAIN_WALL_OR_GATEHOUSE) || building_get(map_building_at(map_grid_offset(x_src, y_src)))->type == BUILDING_WATCHTOWER) {
+    if (map_terrain_is(map_grid_offset(x_src, y_src), TERRAIN_WALL_OR_GATEHOUSE) ||
+        building_get(map_building_at(map_grid_offset(x_src, y_src)))->type == BUILDING_WATCHTOWER) {
         height = 6;
     }
     figure_movement_set_cross_country_direction(f, 15 * x_src, 15 * y_src, 15 * x_dst, 15 * y_dst, 0);

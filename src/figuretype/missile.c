@@ -11,9 +11,9 @@
 #include "map/point.h"
 #include "sound/effect.h"
 
-static const int CLOUD_TILE_OFFSETS[] = {0, 0, 0, 1, 1, 2};
+static const int CLOUD_TILE_OFFSETS[] = { 0, 0, 0, 1, 1, 2 };
 
-static const int CLOUD_CC_OFFSETS[] = {0, 7, 14, 7, 14, 7};
+static const int CLOUD_CC_OFFSETS[] = { 0, 7, 14, 7, 14, 7 };
 
 static const int CLOUD_SPEED[] = {
     1, 2, 1, 3, 2, 1, 3, 2, 1, 1, 2, 1, 2, 1, 3, 1
@@ -29,7 +29,7 @@ static const int CLOUD_IMAGE_OFFSETS[] = {
     2, 2, 2, 2, 3, 3, 3, 4, 4, 5, 6, 7
 };
 
-void figure_create_explosion_cloud(int x, int y, int size)
+void figure_create_explosion_cloud(int x, int y, int size, int alt_sound)
 {
     int tile_offset = CLOUD_TILE_OFFSETS[size];
     int cc_offset = CLOUD_CC_OFFSETS[size];
@@ -48,7 +48,7 @@ void figure_create_explosion_cloud(int x, int y, int size)
             f->speed_multiplier = CLOUD_SPEED[i];
         }
     }
-    sound_effect_play(SOUND_EFFECT_EXPLOSION);
+    sound_effect_play(alt_sound ? SOUND_EFFECT_BUILD : SOUND_EFFECT_EXPLOSION);
 }
 
 void figure_create_missile(int figure_id, int x, int y, int x_dst, int y_dst, figure_type type)
@@ -119,7 +119,7 @@ void figure_explosion_cloud_action(figure *f)
     figure_movement_move_ticks_cross_country(f, f->speed_multiplier);
     if (f->progress_on_tile < 48) {
         f->image_id = image_group(GROUP_FIGURE_EXPLOSION) +
-                       CLOUD_IMAGE_OFFSETS[f->progress_on_tile / 2];
+            CLOUD_IMAGE_OFFSETS[f->progress_on_tile / 2];
     } else {
         f->image_id = image_group(GROUP_FIGURE_EXPLOSION) + 7;
     }
@@ -199,24 +199,23 @@ void figure_spear_action(figure *f)
     f->image_id = image_group(GROUP_FIGURE_MISSILE) + dir;
 }
 
-void figure_friendly_arrow_action(figure* f)
+void figure_friendly_arrow_action(figure *f)
 {
-	f->use_cross_country = 1;
-	f->progress_on_tile++;
-	if (f->progress_on_tile > 120) {
-		f->state = FIGURE_STATE_DEAD;
-	}
-	int should_die = figure_movement_move_ticks_cross_country(f, 4);
-	int target_id = get_non_citizen_on_tile(f->grid_offset);
-	if (target_id) {
-		missile_hit_target(f, target_id, FIGURE_ENEMY_CAESAR_LEGIONARY);
-		sound_effect_play(SOUND_EFFECT_ARROW_HIT);
-	}
-	else if (should_die) {
-		f->state = FIGURE_STATE_DEAD;
-	}
-	int dir = (16 + f->direction - 2 * city_view_orientation()) % 16;
-	f->image_id = image_group(GROUP_FIGURE_MISSILE) + 16 + dir;
+    f->use_cross_country = 1;
+    f->progress_on_tile++;
+    if (f->progress_on_tile > 120) {
+        f->state = FIGURE_STATE_DEAD;
+    }
+    int should_die = figure_movement_move_ticks_cross_country(f, 4);
+    int target_id = get_non_citizen_on_tile(f->grid_offset);
+    if (target_id) {
+        missile_hit_target(f, target_id, FIGURE_ENEMY_CAESAR_LEGIONARY);
+        sound_effect_play(SOUND_EFFECT_ARROW_HIT);
+    } else if (should_die) {
+        f->state = FIGURE_STATE_DEAD;
+    }
+    int dir = (16 + f->direction - 2 * city_view_orientation()) % 16;
+    f->image_id = image_group(GROUP_FIGURE_MISSILE) + 16 + dir;
 }
 
 

@@ -368,10 +368,8 @@ static int calculate_people_per_house_type(void)
     int total = 0;
     for (building_type type = BUILDING_HOUSE_SMALL_TENT; type <= BUILDING_HOUSE_LUXURY_PALACE; type++) {
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
-            if (b->state == BUILDING_STATE_UNUSED ||
-                b->state == BUILDING_STATE_UNDO ||
-                b->state == BUILDING_STATE_DELETED_BY_GAME ||
-                b->state == BUILDING_STATE_DELETED_BY_PLAYER ||
+            if (b->state == BUILDING_STATE_UNUSED || b->state == BUILDING_STATE_UNDO ||
+                b->state == BUILDING_STATE_DELETED_BY_GAME || b->state == BUILDING_STATE_DELETED_BY_PLAYER ||
                 !b->house_size) {
                 continue;
             }

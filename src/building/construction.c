@@ -108,7 +108,7 @@ static const struct cycle building_cycles[] = {
 static unsigned int count_enabled_buildings_for_cycling(unsigned int cycle_index)
 {
     unsigned int count = 0;
-    for (int i = 0; i < building_cycles[cycle_index].size; i++) {
+    for (int i = 0; i < (int) building_cycles[cycle_index].size; i++) {
         if (scenario_allowed_building(building_cycles[cycle_index].array[i])) {
             count++;
         }
@@ -166,7 +166,7 @@ int building_construction_cycle_forward(void)
         for (int j = 0; j < size; j++) {
             if (building_cycles[i].array[j] == building_construction_type()) {
                 data.cycle_step += 1;
-                if (data.cycle_step < building_cycles[i].rotations_to_next) {
+                if (data.cycle_step < (int) building_cycles[i].rotations_to_next) {
                     return 0;
                 }
                 data.cycle_step = 0;
@@ -336,7 +336,7 @@ static int place_garden(int x_start, int y_start, int x_end, int y_end, int is_o
     return items_placed;
 }
 
-static int place_wall(int x_start, int y_start, int x_end, int y_end)
+static int place_wall(int x_start, int y_start, int x_end, int y_end, int measure_only)
 {
     game_undo_restore_map(0);
 
@@ -350,11 +350,17 @@ static int place_wall(int x_start, int y_start, int x_end, int y_end)
             if (!map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
                 items_placed++;
                 map_tiles_set_wall(x, y);
+                if (!measure_only) {
+                    building *wall = building_create(BUILDING_WALL, x, y);
+                    map_building_set(grid_offset, wall->id);
+                    map_terrain_add(grid_offset, TERRAIN_BUILDING);
+                }
             }
         }
     }
     map_routing_update_land();
     map_routing_update_walls();
+    map_tiles_update_all_walls();
     return items_placed;
 }
 
@@ -627,7 +633,7 @@ int building_construction_size(int *x, int *y)
 {
     if (!config_get(CONFIG_UI_SHOW_CONSTRUCTION_SIZE) ||
         !building_construction_is_updatable() || !data.in_progress ||
-        (data.type != BUILDING_CLEAR_LAND && !data.cost_preview)) {
+        ((data.type != BUILDING_CLEAR_LAND && data.type != BUILDING_REPAIR_LAND) && !data.cost_preview)) {
         return 0;
     }
     int size_x = data.end.x - data.start.x;
@@ -695,6 +701,7 @@ int building_construction_is_updatable(void)
 {
     switch (data.type) {
         case BUILDING_CLEAR_LAND:
+        case BUILDING_REPAIR_LAND:
         case BUILDING_ROAD:
         case BUILDING_AQUEDUCT:
         case BUILDING_DRAGGABLE_RESERVOIR:
@@ -794,14 +801,19 @@ void building_construction_update(int x, int y, int grid_offset)
 
     map_property_clear_constructing_and_deleted();
     int current_cost = model_get_building(type)->cost;
-
+    int repaired_buildings = 0;
     if (type == BUILDING_CLEAR_LAND) {
         int items_placed = last_items_cleared = building_construction_clear_land(1, data.start.x, data.start.y, x, y);
         if (items_placed >= 0) {
             current_cost *= items_placed;
         }
+    } else if (type == BUILDING_REPAIR_LAND) {
+        int cost = building_construction_repair_land(1, data.start.x, data.start.y, x, y, &repaired_buildings);
+        if (cost >= 0) {
+            current_cost = cost;  // Use total cost directly, don't multiply
+        }
     } else if (type == BUILDING_WALL) {
-        int items_placed = place_wall(data.start.x, data.start.y, x, y);
+        int items_placed = place_wall(data.start.x, data.start.y, x, y, 1);
         if (items_placed >= 0) {
             current_cost *= items_placed;
         }
@@ -1029,6 +1041,7 @@ void building_construction_place(void)
     }
 
     int placement_cost = model_get_building(type)->cost;
+    int repaired_buildings = 0;
     if (type == BUILDING_CLEAR_LAND) {
         // BUG in original (keep this behaviour): if confirmation has to be asked (bridge/fort),
         // the previous cost is deducted from treasury and if user chooses 'no', they still pay for removal.
@@ -1040,8 +1053,12 @@ void building_construction_place(void)
         }
         placement_cost *= items_placed;
         map_property_clear_constructing_and_deleted();
+    } else if (type == BUILDING_REPAIR_LAND) {
+        int cost = building_construction_repair_land(0, data.start.x, data.start.y, x_end, y_end, &repaired_buildings);
+        //cost processed inside the repair land function
+        map_property_clear_constructing_and_deleted();
     } else if (type == BUILDING_WALL) {
-        placement_cost *= place_wall(x_start, y_start, x_end, y_end);
+        placement_cost *= place_wall(x_start, y_start, x_end, y_end, 0);
     } else if (type == BUILDING_ROAD) {
         placement_cost *= building_construction_place_road(0, x_start, y_start, x_end, y_end);
     } else if (type == BUILDING_HIGHWAY) {
@@ -1162,6 +1179,7 @@ static void set_warning(int *warning_id, int warning)
         *warning_id = warning;
     }
 }
+
 
 int building_construction_can_place_on_terrain(int x, int y, int *warning_id)
 {

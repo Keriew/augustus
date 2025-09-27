@@ -366,7 +366,6 @@ int building_storage_check_if_accepts_nothing(int storage_id)
     return 1;
 }
 
-
 int building_storage_resource_max_storable(building *b, resource_type resource_id)
 {
     if (b->type == BUILDING_GRANARY && resource_id >= RESOURCE_MIN_NON_FOOD) {

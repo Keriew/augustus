@@ -221,8 +221,9 @@ typedef enum {
     BUILDING_NATIVE_WATCHTOWER = 207,
     BUILDING_NATIVE_MONUMENT = 208,
     BUILDING_NATIVE_DECORATION = 209,
+    BUILDING_REPAIR_LAND = 210, // tool, not an actual building
     // helper constants
-    BUILDING_TYPE_MAX = 210
+    BUILDING_TYPE_MAX = 211
 } building_type;
 
 /**

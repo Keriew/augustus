@@ -1,5 +1,6 @@
 #include "terrain.h"
 
+#include <string.h>
 #include "building/building.h"
 #include "city/map.h"
 #include "core/image.h"
@@ -13,6 +14,37 @@
 static grid_u32 terrain_grid;
 static grid_u32 terrain_grid_backup;
 
+
+const terrain_flags_array *map_terrain_to_array(int grid_offset)
+{
+    static terrain_flags_array result;
+    static const char *names[TERRAIN_NUM_FLAGS] = {
+        "TREE", "ROCK", "WATER", "BUILDING", "SHRUB", "GARDEN", "ROAD",
+        "RESERVOIR_R", "AQUEDUCT", "ELEVATION", "ACCESS_RAMP", "MEADOW",
+        "RUBBLE", "FOUNTAIN_R", "WALL", "GATEHOUSE", "ORG_TREE",
+        "HWAY_TOP_LEFT", "HWAY_BOT_LEFT", "HWAY_TOP_RIGHT", "HWAY_BOT_RIGHT"
+    };
+
+    unsigned int terrain_value = terrain_grid.items[grid_offset];
+    result.count = 0;
+
+    if (terrain_value == 0) {
+        strcpy(result.key[0], "CLEAR");
+        result.bits[0] = 1;
+        result.count = 1;
+        return &result;
+    }
+
+    for (int i = 0; i < TERRAIN_NUM_FLAGS; ++i) {
+        result.bits[i] = (terrain_value >> i) & 1;
+        if (result.bits[i]) {
+            strcpy(result.key[result.count], names[i]);
+            result.count++;
+        }
+    }
+
+    return &result;
+}
 int map_terrain_is(int grid_offset, int terrain)
 {
     return map_grid_is_valid_offset(grid_offset) && terrain_grid.items[grid_offset] & terrain;
@@ -573,7 +605,23 @@ void map_terrain_migrate_old_bridges(void)
     }
 }
 
-
+void map_terrain_migrate_old_walls(void)
+{
+    for (int y = 0; y < GRID_SIZE; y++) {
+        for (int x = 0; x < GRID_SIZE; x++) {
+            int grid_offset = map_grid_offset(x, y);
+            if (!map_grid_is_valid_offset(grid_offset)) {
+                continue;
+            }
+            if (map_terrain_is(grid_offset, TERRAIN_WALL) && !map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+                // Create wall building for each wall tile
+                building *b = building_create(BUILDING_WALL, x, y);
+                map_building_set(grid_offset, b->id);
+                map_terrain_add(grid_offset, TERRAIN_BUILDING);
+            }
+        }
+    }
+}
 
 void map_terrain_load_state(buffer *buf, int expanded_terrain_data, buffer *images, int legacy_image_buffer)
 {

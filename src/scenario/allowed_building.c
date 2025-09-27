@@ -76,7 +76,7 @@ static int enable_submenu_buildings(building_type type, int allowed)
         return 0;
     }
     int all_items = building_menu_count_all_items(submenu);
-    for (unsigned int i = 0; i < all_items; i++) {
+    for (unsigned int i = 0; (int) i < all_items; i++) {
         building_type item = building_menu_type(submenu, i);
         if (item == type) {
             continue;

@@ -175,9 +175,6 @@ void map_building_tiles_remove(int building_id, int x, int y)
             if (building_id && map_building_at(grid_offset) != building_id) {
                 continue;
             }
-            if (building_id && b->type != BUILDING_BURNING_RUIN) {
-                map_set_rubble_building_type(grid_offset, b->type);
-            }
             map_property_clear_constructing(grid_offset);
             map_property_set_multi_tile_size(grid_offset, 1);
             map_property_clear_multi_tile_xy(grid_offset);
@@ -202,11 +199,13 @@ void map_building_tiles_remove(int building_id, int x, int y)
     map_tiles_update_region_rubble(x, y, x + size, y + size);
 }
 
+
 void map_building_tiles_set_rubble(int building_id, int x, int y, int size)
 {
     if (!map_grid_is_inside(x, y, size)) {
         return;
     }
+    // building id passed here is the original building that got destroyed, but can be 0 for walls and aqueducts
     building *b = building_get(building_id);
     for (int dy = 0; dy < size; dy++) {
         for (int dx = 0; dx < size; dx++) {
@@ -215,9 +214,8 @@ void map_building_tiles_set_rubble(int building_id, int x, int y, int size)
                 continue;
             }
             if (building_id && building_get(map_building_at(grid_offset))->type != BUILDING_BURNING_RUIN) {
-                map_set_rubble_building_type(grid_offset, b->type);
-            } else if (!building_id && map_terrain_get(grid_offset) & TERRAIN_WALL) {
-                map_set_rubble_building_type(grid_offset, BUILDING_WALL);
+                map_building_set_rubble_grid_building_id(grid_offset, b->id, 1);
+                // set rubble building id for the original. Collapsing into burning ruin sets this in destruction.c
             }
             map_property_clear_constructing(grid_offset);
             map_property_set_multi_tile_size(grid_offset, 1);
@@ -282,7 +280,8 @@ int map_building_tiles_mark_construction(int x, int y, int size, int terrain, in
 void map_building_tiles_mark_deleting(int grid_offset)
 {
     int building_id = map_building_at(grid_offset);
-    if (map_is_bridge(grid_offset)) { // previous version triggered map_bridge_remove with an early exit condition for regular terrain.
+    if (map_is_bridge(grid_offset)) {
+        // previous version triggered map_bridge_remove with an early exit condition for regular terrain.
         map_bridge_remove(grid_offset, 1);
     } else if (building_id) {
         grid_offset = building_main(building_get(building_id))->grid_offset;

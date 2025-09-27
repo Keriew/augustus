@@ -1705,6 +1705,14 @@ static translation_string all_strings[] = {
     {TR_CONFIG_UI_ANIMATE_TRADE_ROUTES, "Animate trade routes"},
     {TR_HOTKEY_NEXT_TRACK, "Next random track"},
     {TR_CONFIG_MOVE_LEGION_SOUND_SWAP, "Alternative legion move sound"},
+    {TR_BUILDING_INFO_REPAIR_BUILDING, "Repair building" },
+    {TR_WARNING_REPAIR_IMPOSSIBLE, "Can't' repair this building" },
+    {TR_WARNING_REPAIR_BURNING, "Can't repair while the building is on fire" },
+    {TR_BUILDING_INFO_BUILDING_BURNING, "Building is on fire" },
+    {TR_BUILDING_LAND_REPAIR, "Repair area"},
+    {TR_CONFIRM_REPAIR_BUILDINGS, "Repair all buildings in the area for "},
+    {TR_CONFIRM_REPAIR_BUILDINGS_TITLE, "Repair buildings"},
+    {TR_BUILDING_LAND_CLEAR, "Clear area"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

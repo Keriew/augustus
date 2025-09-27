@@ -800,14 +800,14 @@ static void handle_hotkeys(const hotkeys *h)
         int building_id = map_building_at(widget_city_current_grid_offset());
         if (building_id) {
             building *b = building_main(building_get(building_id));
-            building_data_transfer_copy(b);
+            building_data_transfer_copy(b, 0);
         }
     }
     if (h->paste_building_settings) {
         int building_id = map_building_at(widget_city_current_grid_offset());
         if (building_id) {
             building *b = building_main(building_get(building_id));
-            building_data_transfer_paste(b);
+            building_data_transfer_paste(b, 0);
         }
     }
     if (h->show_empire_map) {
