@@ -26,6 +26,8 @@ typedef enum {
 
 typedef enum {
     FILTER_BY_RESOURCE,
+    FILTER_BY_RESOURCE_SELL,
+    FILTER_BY_RESOURCE_BUY,
     FILTER_BY_OPEN,
     FILTER_BY_CLOSED,
     FILTER_BY_LAND,

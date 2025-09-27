@@ -1677,6 +1677,8 @@ static translation_string all_strings[] = {
     {TR_EMPIRE_SIDE_BAR_SORT_BY_ROUTE_COST, "Route Cost"},
     {TR_EMPIRE_SIDE_BAR_SORT_BY_PROFIT, "Profit"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE, "Resource"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE_SELL, "Resource (Sold)"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE_BUY, "Resource (Bought)"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_OPEN, "Open Routes"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_CLOSED, "Closed Routes"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_LAND, "Land Routes"},

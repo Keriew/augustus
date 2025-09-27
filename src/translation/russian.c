@@ -1677,6 +1677,8 @@ static translation_string all_strings[] = {
     {TR_EMPIRE_SIDE_BAR_SORT_BY_ROUTE_COST, "Стоимость маршрута"},
     {TR_EMPIRE_SIDE_BAR_SORT_BY_PROFIT, "Прибыль"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE, "Ресурс"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE_SELL, "Ресурс (Продажа)"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE_BUY, "Ресурс (Покупка)"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_OPEN, "Открытые маршруты"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_CLOSED, "Закрытые маршруты"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_LAND, "Сухопутные маршруты"},
