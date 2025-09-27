@@ -101,6 +101,7 @@ static const char *ini_keys[] = {
     [CONFIG_UI_PAVED_ROADS_NEAR_GRANNARIES] = "ui_paved_roads_near_grannaries",
     [CONFIG_UI_ANIMATE_TRADE_ROUTES] = "ui_animate_trade_routes",
     [CONFIG_UI_MOVE_LEGION_SOUND_SWAP] = "ui_move_legion_sound_swap",
+    [CONFIG_GP_CH_MARKET_RANGE] = "gameplay_market_range",
 };
 
 static const char *ini_string_keys[] = {
@@ -150,6 +151,7 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_UI_PAVED_ROADS_NEAR_GRANNARIES] = 1,
     [CONFIG_UI_ANIMATE_TRADE_ROUTES] = 1,
     [CONFIG_UI_MOVE_LEGION_SOUND_SWAP] = 0,
+    [CONFIG_GP_CH_MARKET_RANGE] = 1,
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };
