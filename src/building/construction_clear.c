@@ -361,7 +361,7 @@ static int repair_land_confirmed(int measure_only, int x_start, int y_start, int
     if (buildings_count) {
         *buildings_count = repairable_buildings;
     }
-    return measure_only ? repair_cost : repairable_buildings;
+    return repair_cost;
 }
 
 int building_construction_repair_land(int measure_only, int x_start, int y_start, int x_end, int y_end, int *buildings_count)
@@ -405,6 +405,7 @@ int building_construction_repair_land(int measure_only, int x_start, int y_start
         window_popup_dialog_show_confirmation(custom_text, pointer, 0, confirm_repair_buildings);
         return -1; // Indicates confirmation dialog shown
     } else {
-        return repair_land_confirmed(measure_only, x_start, y_start, x_end, y_end, buildings_count);
+        // No buildings to repair, return 0 cost
+        return 0;
     }
 }

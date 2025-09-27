@@ -810,7 +810,7 @@ void building_construction_update(int x, int y, int grid_offset)
     } else if (type == BUILDING_REPAIR_LAND) {
         int cost = building_construction_repair_land(1, data.start.x, data.start.y, x, y, &repaired_buildings);
         if (cost >= 0) {
-            current_cost *= cost;
+            current_cost = cost;  // Use total cost directly, don't multiply
         }
     } else if (type == BUILDING_WALL) {
         int items_placed = place_wall(data.start.x, data.start.y, x, y, 1);
