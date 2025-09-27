@@ -1,6 +1,8 @@
 #include "grid.h"
 
+#include "building/building.h"
 #include "core/log.h"
+#include "map/building.h"
 #include "map/data.h"
 
 #include <stdlib.h>
@@ -117,6 +119,28 @@ grid_slice *map_grid_get_grid_slice_rectangle(int start_grid_offset, int width, 
         }
     }
     slice->size = width * height > MAX_SLICE_SIZE ? MAX_SLICE_SIZE : width * height;
+    return slice;
+}
+
+grid_slice *map_grid_get_grid_slice_house(int building_id, int check_rubble)
+{
+    int found_tiles = 0;
+    grid_slice *slice = allocate_grid_slice_memory();
+    building *b = building_get(building_id);
+    int starting_x = map_grid_offset_to_x(b->grid_offset);
+    int starting_y = map_grid_offset_to_y(b->grid_offset);
+    for (int i = 0; i < 4; i++) // max house size is 4x4
+    {
+        for (int j = 0; j < 4; j++) {
+            int offset = map_grid_offset(starting_x + j, starting_y + i);
+            if ((check_rubble ? map_building_rubble_building_id(offset) : map_building_at(offset)) == building_id) {
+                slice->grid_offsets[found_tiles] = offset;
+                found_tiles++;
+                continue;
+            }
+        }
+        slice->size = found_tiles;
+    }
     return slice;
 }
 

@@ -144,6 +144,15 @@ void map_grid_load_state_u32(uint32_t *grid, buffer *buf);
 grid_slice *map_grid_get_grid_slice_rectangle(int start_grid_offset, int width, int height);
 
 /**
+ * @brief Creates a grid slice representing area occupied by the given house building.
+ *
+ * @param building_id id to search for
+ * @param check_rubble if true, will check for rubble info grid instead of building grid
+ * @return Allocated grid_slice containing rectangle coordinates, or NULL on failure
+ */
+grid_slice *map_grid_get_grid_slice_house(int building_id, int check_rubble);
+
+/**
  * @brief Creates a grid slice representing a square area starting from the given grid offset.
  * All grid points within the specified size x size area are included.
  *

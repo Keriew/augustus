@@ -381,17 +381,27 @@ int building_can_repair(building *b)
             return building_can_repair_type(b->type);
         }
     }
-    return building_can_repair_type(b->type);
 }
 
 int building_repair_cost(building *b)
 {
+    int og_grid_offset = 0, og_size = 0, og_type = 0;
     if (!b || !building_can_repair(b)) {
         return 0;
     }
-    grid_slice *grid_slice = map_grid_get_grid_slice_square(b->grid_offset, b->size); // wont work correctly for hippo
+    int is_ruin = b->type == BUILDING_BURNING_RUIN;
+    og_grid_offset = is_ruin ? b->data.rubble.og_grid_offset : b->grid_offset;
+    og_size = is_ruin ? b->data.rubble.og_size : b->size;
+    og_type = is_ruin ? b->data.rubble.og_type : b->type;
+
+    if (building_is_house(og_type)) {
+        grid_slice *house_slice = map_grid_get_grid_slice_house(b->id, 1);
+        int clear_cost = house_slice->size * (11 + 3); // 10.5 per new house tile + 3 per rubble tile to clear
+        return clear_cost;
+    }
+    grid_slice *grid_slice = map_grid_get_grid_slice_square(og_grid_offset, og_size); // wont work correctly for hippo
     int clear_cost = building_construction_prepare_terrain(grid_slice, CLEAR_MODE_RUBBLE, COST_MEASURE);
-    int placement_cost = model_get_building(b->type)->cost;
+    int placement_cost = model_get_building(og_type)->cost;
     return clear_cost + placement_cost + placement_cost / 20; // +5% fee on a building price
 }
 
@@ -420,6 +430,7 @@ int building_repair(building *b)
         og_orientation = b->data.rubble.og_orientation;
         og_type = b->data.rubble.og_type;
         if (og_type) {  // exceptions should be checked and handled here
+            b->type = og_type;
             if (building_is_house(og_type) || og_type == 1) {
                 is_house_lot = 1;
                 b->type = BUILDING_HOUSE_VACANT_LOT;
@@ -430,7 +441,7 @@ int building_repair(building *b)
                 has_tmp = 1;
                 building_storage_delete(b->storage_id);
             }
-            b->type = og_type;
+
         }
     }
     building_data_transfer_backup();
