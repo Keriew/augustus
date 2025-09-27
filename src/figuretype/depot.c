@@ -109,10 +109,14 @@ static int is_order_condition_satisfied(const order *current_order)
         return 0;
     }
     building *src = building_get(current_order->src_storage_id);
+    building *dst = building_get(current_order->dst_storage_id);
+    if (!building_is_active(src) || !building_is_active(dst)) {
+        return 0;
+    }
     int src_amount = src->type == BUILDING_GRANARY ?
         building_granary_get_amount(src, current_order->resource_type) :
         building_warehouse_get_amount(src, current_order->resource_type);
-    building *dst = building_get(current_order->dst_storage_id);
+
     int dst_amount = dst->type == BUILDING_GRANARY ?
         building_granary_get_amount(dst, current_order->resource_type) :
         building_warehouse_get_amount(dst, current_order->resource_type);

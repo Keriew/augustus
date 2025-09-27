@@ -68,11 +68,7 @@ typedef struct {
         int drawn;
         int figure_ids[7];
     } figure;
-    struct {
-        int resource;
-        int source;
-        int destination;
-    } depot_selection;
+    int depot_selection;
     struct {
         int active;
         int x_offset;

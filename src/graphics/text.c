@@ -325,7 +325,11 @@ int text_draw_scaled(const uint8_t *str, int x, int y, font_t font, color_t colo
     while (length > 0) {
         int num_bytes = 1;
 
-        if (*str >= ' ') {
+        if (*str == 0x01) { // special padding character
+            // Invisible 1px push
+            current_x += 1;
+            num_bytes = 1; // just consume the byte
+        } else if (*str >= ' ') {
             int letter_id = font_letter_id(def, str, &num_bytes);
             int width;
             if (*str == ' ' || *str == '_' || letter_id < 0) {

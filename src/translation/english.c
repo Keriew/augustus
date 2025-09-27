@@ -1705,6 +1705,15 @@ static translation_string all_strings[] = {
     {TR_CONFIG_UI_ANIMATE_TRADE_ROUTES, "Animate trade routes"},
     {TR_HOTKEY_NEXT_TRACK, "Next random track"},
     {TR_CONFIG_MOVE_LEGION_SOUND_SWAP, "Alternative legion move sound"},
+    {TR_CONFIG_ADVANCED_CART_DEPOT_OPTIONS, "Enable advanced cart depot orders"},
+    {TR_BUILDING_INFO_INSTRUCTIONS, "instructions" },
+    {TR_BUILDING_INFO_ACTIVE_STORAGE_BUILDINGS, "Accepting storage buildings" },
+    {TR_BUILDING_INFO_OTHER_STORAGE_BUILDINGS, "Other storage buildings" },
+    {TR_TOOLTIP_GOTO_STORAGE_INSTRUCTIONS, "Open building's storage instructions" },
+    {TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE, "Tooltip style:" },
+    {TR_TOOLTIP_NONE, "None"},
+    {TR_TOOLTIP_MINIMAL, "Minimal"},
+    {TR_TOOLTIP_FULL, "Full"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

@@ -1000,6 +1000,7 @@ void building_construction_place(void)
     if (!type) {
         return;
     }
+
     if (city_finance_out_of_money()) {
         if (type == BUILDING_WELL && building_count_total(BUILDING_WELL) < 5) {
             // allow wells even when out of money, but limit to 5
