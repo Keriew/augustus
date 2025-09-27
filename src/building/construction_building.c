@@ -410,13 +410,13 @@ int building_construction_fill_vacant_lots(grid_slice *area)
 
 int building_construction_place_building(building_type type, int x, int y)
 {
-    int terrain_mask = TERRAIN_ALL;
+    unsigned int terrain_mask = TERRAIN_ALL;
     if (building_type_is_roadblock(type)) {
         terrain_mask = type == BUILDING_GATEHOUSE ? ~TERRAIN_WALL & ~TERRAIN_ROAD &
             ~TERRAIN_HIGHWAY : ~TERRAIN_ROAD & ~TERRAIN_HIGHWAY;
         //allow building gatehouses over walls and roads, other non-bridge roadblocks over roads and highways
     } else if (type == BUILDING_TOWER) {
-        terrain_mask = ~TERRAIN_WALL;
+        terrain_mask = ~TERRAIN_WALL & ~TERRAIN_BUILDING;
     } else if (type == BUILDING_RESERVOIR || type == BUILDING_DRAGGABLE_RESERVOIR) {
         terrain_mask = ~TERRAIN_AQUEDUCT;
     }
@@ -454,6 +454,13 @@ int building_construction_place_building(building_type type, int x, int y)
             } else {
                 building_orientation = 2;
             }
+        }
+    }
+    if (type == BUILDING_TOWER) {
+        int tower_terrain_mask = TERRAIN_WALL;
+        if (!map_terrain_all_tiles_in_radius_are(x, y, 2, 0, tower_terrain_mask)) {
+            city_warning_show(WARNING_WALL_NEEDED, NEW_WARNING_SLOT);
+            return 0;
         }
     }
     if (type == BUILDING_ROADBLOCK) {

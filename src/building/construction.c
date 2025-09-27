@@ -633,7 +633,7 @@ int building_construction_size(int *x, int *y)
 {
     if (!config_get(CONFIG_UI_SHOW_CONSTRUCTION_SIZE) ||
         !building_construction_is_updatable() || !data.in_progress ||
-        (data.type != BUILDING_CLEAR_LAND && !data.cost_preview)) {
+        ((data.type != BUILDING_CLEAR_LAND && data.type != BUILDING_REPAIR_LAND) && !data.cost_preview)) {
         return 0;
     }
     int size_x = data.end.x - data.start.x;
@@ -701,6 +701,7 @@ int building_construction_is_updatable(void)
 {
     switch (data.type) {
         case BUILDING_CLEAR_LAND:
+        case BUILDING_REPAIR_LAND:
         case BUILDING_ROAD:
         case BUILDING_AQUEDUCT:
         case BUILDING_DRAGGABLE_RESERVOIR:
@@ -1177,6 +1178,7 @@ static void set_warning(int *warning_id, int warning)
         *warning_id = warning;
     }
 }
+
 
 int building_construction_can_place_on_terrain(int x, int y, int *warning_id)
 {

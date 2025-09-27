@@ -457,9 +457,11 @@ int building_repair(building *b)
     int placement_cost = model_get_building(type_to_place)->cost * success;
     city_finance_process_construction(placement_cost + placement_cost / 20); // +5%
     building *new_building = building_get(map_building_at(map_grid_offset(x, y)));
-    map_building_set_rubble_grid_building_id(grid_offset, 0, og_size); // remove rubble marker
-
+    map_building_set_rubble_grid_building_id(grid_offset, 0, size); // remove rubble marker
     building_data_transfer_paste(new_building, 1);
+    if (new_building->state == BUILDING_STATE_RUBBLE) {
+        new_building->state = BUILDING_STATE_CREATED;
+    }
     if (has_tmp) {
         building_storage_set_data(new_building->storage_id, tmp);
     }
