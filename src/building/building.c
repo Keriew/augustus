@@ -156,8 +156,7 @@ static void fill_adjacent_types(building *b)
         int id = b->id - 1;
         while (id) {
             building *prev = building_get(id);
-            if (prev->state != BUILDING_STATE_UNUSED &&
-                prev->type == b->type && b->next_of_type) {
+            if (prev->state != BUILDING_STATE_UNUSED && prev->type == b->type) {
                 b->prev_of_type = prev;
                 b->next_of_type = prev->next_of_type;
                 b->next_of_type->prev_of_type = b;
