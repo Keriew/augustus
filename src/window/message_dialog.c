@@ -439,7 +439,6 @@ static void draw_city_message_text(const lang_message *msg)
                     send_request_button.x = data.x + 160;
                     send_request_button.y = data.y + BLOCK_SIZE * msg->height_blocks - 40;
                     send_request_button.parameter1 = request->id;
-                    text_draw_number(data.focus_request_button, 0, "", 100, 100, FONT_LARGE_BLACK, COLOR_BLACK);
                     button_border_draw(send_request_button.x, send_request_button.y, 160, 27, data.focus_request_button);
                     text_draw_centered(translation_for(TR_SIDEBAR_EXTRA_REQUESTS_SEND), send_request_button.x,
                         send_request_button.y + 8, 158, FONT_NORMAL_BLACK, 0);
@@ -767,8 +766,7 @@ static int handle_input_normal(const mouse *m_dialog, const lang_message *msg)
     }
     if (msg->type == TYPE_MESSAGE) {
         if (image_buttons_handle_mouse(
-            m_dialog, data.x + 16, data.y + BLOCK_SIZE * msg->height_blocks - 40, get_advisor_button(), 1, 0) || 
-            generic_buttons_handle_mouse(m_dialog, 0, 0, &send_request_button, 1, &data.focus_request_button)) {
+            m_dialog, data.x + 16, data.y + BLOCK_SIZE * msg->height_blocks - 40, get_advisor_button(), 1, 0)) {
             return 1;
         }
         if (is_event_message(msg)) {
@@ -777,6 +775,9 @@ static int handle_input_normal(const mouse *m_dialog, const lang_message *msg)
                 return 1;
             }
         }
+    }
+    if (generic_buttons_handle_mouse(m_dialog, 0, 0, &send_request_button, 1, &data.focus_request_button)) {
+        return 1;
     }
 
     if (image_buttons_handle_mouse(m_dialog,
