@@ -696,8 +696,11 @@ static void draw_foreground_normal(void)
         if (is_event_message(msg)) {
             image_buttons_draw(data.x + 64, data.y_text + 36, &image_button_go_to_problem, 1);
         }
-        if (msg->type == MESSAGE_TYPE_IMPERIAL) {
-            button_border_draw(send_request_button.x, send_request_button.y, 160, 27, data.focus_request_button);
+        if (msg->message_type == MESSAGE_TYPE_IMPERIAL) {
+            const scenario_request *request = scenario_request_get(send_request_button.parameter1);
+            if (city_resource_get_total_amount(request->resource, 1) >= request->amount.requested && request->state < REQUEST_STATE_DISPATCHED) { 
+                button_border_draw(send_request_button.x, send_request_button.y, 160, 27, data.focus_request_button);
+            }
         }
     }
     image_buttons_draw(data.x + BLOCK_SIZE * msg->width_blocks - 38, data.y + BLOCK_SIZE * msg->height_blocks - 36,
