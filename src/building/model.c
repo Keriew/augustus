@@ -110,6 +110,9 @@ static void override_model_data(void)
     buildings[BUILDING_LARGE_TEMPLE_VENUS].desirability_step_size = -2;
     buildings[BUILDING_LARGE_TEMPLE_VENUS].desirability_range = 5;
 
+    buildings[BUILDING_SMALL_POND].desirability_value = 11; // +1 compared to statues
+    buildings[BUILDING_LARGE_POND].desirability_value = 15; // +1 compared to statues
+
     buildings[BUILDING_WELL].laborers = 0;
     buildings[BUILDING_GATEHOUSE].laborers = 0;
     buildings[BUILDING_FORT_JAVELIN].laborers = 0;
@@ -203,82 +206,265 @@ int model_load(void)
     return 1;
 }
 
-const model_building MODEL_ROADBLOCK = { .cost = 12, .desirability_value = 0, .desirability_step = 0,
- .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
-const model_building MODEL_WORK_CAMP = { .cost = 150, .desirability_value = -10, .desirability_step = 2,
- .desirability_step_size = 3, .desirability_range = 4, .laborers = 20 };
-const model_building MODEL_ARCHITECT_GUILD = { .cost = 200, .desirability_value = -8, .desirability_step = 1,
- .desirability_step_size = 2, .desirability_range = 4, .laborers = 12 };
-const model_building MODEL_GRAND_TEMPLE_CERES = { .cost = 2500, .desirability_value = 20, .desirability_step = 2,
- .desirability_step_size = -4, .desirability_range = 8, .laborers = 50 };
-const model_building MODEL_GRAND_TEMPLE_NEPTUNE = { .cost = 2500, .desirability_value = 20, .desirability_step = 2,
- .desirability_step_size = -4, .desirability_range = 8, .laborers = 50 };
-const model_building MODEL_GRAND_TEMPLE_MERCURY = { .cost = 2500, .desirability_value = 20, .desirability_step = 2,
- .desirability_step_size = -4, .desirability_range = 8, .laborers = 50 };
-const model_building MODEL_GRAND_TEMPLE_MARS = { .cost = 2500, .desirability_value = 20, .desirability_step = 2,
- .desirability_step_size = -4, .desirability_range = 8, .laborers = 50 };
-const model_building MODEL_GRAND_TEMPLE_VENUS = { .cost = 2500, .desirability_value = 20, .desirability_step = 2,
- .desirability_step_size = -4, .desirability_range = 8, .laborers = 50 };
-const model_building MODEL_PANTHEON = { .cost = 3500, .desirability_value = 20, .desirability_step = 2,
- .desirability_step_size = -4, .desirability_range = 8, .laborers = 50 };
-const model_building MODEL_LIGHTHOUSE = { .cost = 1000, .desirability_value = 6, .desirability_step = 1,
- .desirability_step_size = -1, .desirability_range = 4, .laborers = 20 };
-const model_building MODEL_MESS_HALL = { .cost = 100, .desirability_value = -8, .desirability_step = 1,
- .desirability_step_size = 2, .desirability_range = 4, .laborers = 10 };
-const model_building MODEL_TAVERN = { .cost = 40, .desirability_value = -2, .desirability_step = 1,
- .desirability_step_size = 1, .desirability_range = 6, .laborers = 8 };
-const model_building MODEL_GRAND_GARDEN = { .cost = 400, .desirability_value = 0, .desirability_step = 0,
- .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
-const model_building MODEL_ARENA = { .cost = 500, .desirability_value = -3, .desirability_step = 1,
- .desirability_step_size = 1, .desirability_range = 3, .laborers = 25 };
-const model_building MODEL_COLOSSEUM = { .cost = 1500, .desirability_value = -3, .desirability_step = 1,
- .desirability_step_size = 1, .desirability_range = 3, .laborers = 100 };
-const model_building MODEL_HIPPODROME = { .cost = 3500, .desirability_value = -3, .desirability_step = 1,
- .desirability_step_size = 1, .desirability_range = 3, .laborers = 150 };
-const model_building MODEL_NULL = { .cost = 0, .desirability_value = 0, .desirability_step = 0,
- .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
-const model_building MODEL_LARARIUM = { .cost = 45, .desirability_value = 4, .desirability_step = 1,
- .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
-const model_building MODEL_NYMPHAEUM = { .cost = 400, .desirability_value = 12, .desirability_step = 2,
- .desirability_step_size = -1, .desirability_range = 6, .laborers = 0 };
-const model_building MODEL_SMALL_MAUSOLEUM = { .cost = 250, .desirability_value = -8, .desirability_step = 1,
- .desirability_step_size = 3, .desirability_range = 5, .laborers = 0 };
-const model_building MODEL_LARGE_MAUSOLEUM = { .cost = 500, .desirability_value = -10, .desirability_step = 1,
- .desirability_step_size = 3, .desirability_range = 6, .laborers = 0 };
-const model_building MODEL_WATCHTOWER = { .cost = 100, .desirability_value = -6, .desirability_step = 1,
- .desirability_step_size = 2, .desirability_range = 3, .laborers = 8 };
-const model_building MODEL_CARAVANSERAI = { .cost = 500, .desirability_value = -10, .desirability_step = 2,
- .desirability_step_size = 3, .desirability_range = 4, .laborers = 20 };
-const model_building MODEL_PALISADE = { .cost = 6, .desirability_value = 0, .desirability_step = 0,
- .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
-const model_building MODEL_HIGHWAY = { .cost = 100, .desirability_value = -4, .desirability_step = 1,
- .desirability_step_size = 2, .desirability_range = 2, .laborers = 0 };
-const model_building MODEL_GOLD_MINE = { .cost = 100, .desirability_value = -6, .desirability_step = 1,
- .desirability_step_size = 1, .desirability_range = 4, .laborers = 30 };
-const model_building MODEL_STONE_QUARRY = { .cost = 60, .desirability_value = -6, .desirability_step = 1,
- .desirability_step_size = 1, .desirability_range = 4, .laborers = 10 };
-const model_building MODEL_SAND_PIT = { .cost = 40, .desirability_value = -6, .desirability_step = 1,
- .desirability_step_size = 1, .desirability_range = 4, .laborers = 10 };
-const model_building MODEL_BRICKWORKS = { .cost = 80, .desirability_value = -3, .desirability_step = 1,
- .desirability_step_size = 1, .desirability_range = 3, .laborers = 10 };
-const model_building MODEL_CONCRETE_MAKER = { .cost = 60, .desirability_value = -3, .desirability_step = 1,
- .desirability_step_size = 1, .desirability_range = 3, .laborers = 10 };
-const model_building MODEL_CITY_MINT = { .cost = 250, .desirability_value = -3, .desirability_step = 1,
- .desirability_step_size = 1, .desirability_range = 3, .laborers = 40 };
-const model_building MODEL_DEPOT = { .cost = 100, .desirability_value = -3, .desirability_step = 1,
- .desirability_step_size = 1, .desirability_range = 2, .laborers = 15 };
-const model_building MODEL_ARMOURY = { .cost = 50, .desirability_value = -5, .desirability_step = 1,
- .desirability_step_size = 1, .desirability_range = 4, .laborers = 6 };
-const model_building MODEL_LATRINE = { .cost = 15, .desirability_value = 0, .desirability_step = 0,
- .desirability_step_size = 0, .desirability_range = 0, .laborers = 2 };
-const model_building MODEL_NATIVE_DECORATION = { .cost = 0, .desirability_value = 6, .desirability_step = 1,
- .desirability_step_size = -1, .desirability_range = 4, .laborers = 0 };
-const model_building MODEL_NATIVE_MONUMENT = { .cost = 0, .desirability_value = 15, .desirability_step = 2,
- .desirability_step_size = -2, .desirability_range = 8, .laborers = 0 };
-const model_building MODEL_NATIVE_WATCHTOWER = { .cost = 0, .desirability_value = -10, .desirability_step = 1,
- .desirability_step_size = 2, .desirability_range = 4, .laborers = 0 };
-
-
+const model_building MODEL_ROADBLOCK = {
+    .cost = 12,
+    .desirability_value = 0,
+    .desirability_step = 0,
+    .desirability_step_size = 0,
+    .desirability_range = 0,
+    .laborers = 0 };
+const model_building MODEL_WORK_CAMP = {
+    .cost = 150,
+    .desirability_value = -10,
+    .desirability_step = 2,
+    .desirability_step_size = 3,
+    .desirability_range = 4,
+    .laborers = 20 };
+const model_building MODEL_ARCHITECT_GUILD = {
+    .cost = 200,
+    .desirability_value = -8,
+    .desirability_step = 1,
+    .desirability_step_size = 2,
+    .desirability_range = 4,
+    .laborers = 12 };
+const model_building MODEL_GRAND_TEMPLE_CERES = {
+    .cost = 2500,
+    .desirability_value = 20,
+    .desirability_step = 2,
+    .desirability_step_size = -4,
+    .desirability_range = 8,
+    .laborers = 50 };
+const model_building MODEL_GRAND_TEMPLE_NEPTUNE = {
+    .cost = 2500,
+    .desirability_value = 20,
+    .desirability_step = 2,
+    .desirability_step_size = -4,
+    .desirability_range = 8,
+    .laborers = 50 };
+const model_building MODEL_GRAND_TEMPLE_MERCURY = {
+    .cost = 2500,
+    .desirability_value = 20,
+    .desirability_step = 2,
+    .desirability_step_size = -4,
+    .desirability_range = 8,
+    .laborers = 50 };
+const model_building MODEL_GRAND_TEMPLE_MARS = {
+    .cost = 2500,
+    .desirability_value = 20,
+    .desirability_step = 2,
+    .desirability_step_size = -4,
+    .desirability_range = 8,
+    .laborers = 50 };
+const model_building MODEL_GRAND_TEMPLE_VENUS = {
+    .cost = 2500,
+    .desirability_value = 20,
+    .desirability_step = 2,
+    .desirability_step_size = -4,
+    .desirability_range = 8,
+    .laborers = 50 };
+const model_building MODEL_PANTHEON = {
+    .cost = 3500,
+    .desirability_value = 20,
+    .desirability_step = 2,
+    .desirability_step_size = -4,
+    .desirability_range = 8,
+    .laborers = 50 };
+const model_building MODEL_LIGHTHOUSE = {
+    .cost = 1000,
+    .desirability_value = 6,
+    .desirability_step = 1,
+    .desirability_step_size = -1,
+    .desirability_range = 4,
+    .laborers = 20 };
+const model_building MODEL_MESS_HALL = {
+    .cost = 100,
+    .desirability_value = -8,
+    .desirability_step = 1,
+    .desirability_step_size = 2,
+    .desirability_range = 4,
+    .laborers = 10 };
+const model_building MODEL_TAVERN = {
+    .cost = 40,
+    .desirability_value = -2,
+    .desirability_step = 1,
+    .desirability_step_size = 1,
+    .desirability_range = 6,
+    .laborers = 8 };
+const model_building MODEL_GRAND_GARDEN = {
+    .cost = 400,
+    .desirability_value = 0,
+    .desirability_step = 0,
+    .desirability_step_size = 0,
+    .desirability_range = 0,
+    .laborers = 0 };
+const model_building MODEL_ARENA = {
+    .cost = 500,
+    .desirability_value = -3,
+    .desirability_step = 1,
+    .desirability_step_size = 1,
+    .desirability_range = 3,
+    .laborers = 25 };
+const model_building MODEL_COLOSSEUM = {
+    .cost = 1500,
+    .desirability_value = -3,
+    .desirability_step = 1,
+    .desirability_step_size = 1,
+    .desirability_range = 3,
+    .laborers = 100 };
+const model_building MODEL_HIPPODROME = {
+    .cost = 3500,
+    .desirability_value = -3,
+    .desirability_step = 1,
+    .desirability_step_size = 1,
+    .desirability_range = 3,
+    .laborers = 150 };
+const model_building MODEL_NULL = {
+    .cost = 0,
+    .desirability_value = 0,
+    .desirability_step = 0,
+    .desirability_step_size = 0,
+    .desirability_range = 0,
+    .laborers = 0 };
+const model_building MODEL_LARARIUM = {
+    .cost = 45,
+    .desirability_value = 4,
+    .desirability_step = 1,
+    .desirability_step_size = -1,
+    .desirability_range = 3,
+    .laborers = 0 };
+const model_building MODEL_NYMPHAEUM = {
+    .cost = 400,
+    .desirability_value = 12,
+    .desirability_step = 2,
+    .desirability_step_size = -1,
+    .desirability_range = 6,
+    .laborers = 0 };
+const model_building MODEL_SMALL_MAUSOLEUM = {
+    .cost = 250,
+    .desirability_value = -8,
+    .desirability_step = 1,
+    .desirability_step_size = 3,
+    .desirability_range = 5,
+    .laborers = 0 };
+const model_building MODEL_LARGE_MAUSOLEUM = {
+    .cost = 500,
+    .desirability_value = -10,
+    .desirability_step = 1,
+    .desirability_step_size = 3,
+    .desirability_range = 6,
+    .laborers = 0 };
+const model_building MODEL_WATCHTOWER = {
+    .cost = 100,
+    .desirability_value = -6,
+    .desirability_step = 1,
+    .desirability_step_size = 2,
+    .desirability_range = 3,
+    .laborers = 8 };
+const model_building MODEL_CARAVANSERAI = {
+    .cost = 500,
+    .desirability_value = -10,
+    .desirability_step = 2,
+    .desirability_step_size = 3,
+    .desirability_range = 4,
+    .laborers = 20 };
+const model_building MODEL_PALISADE = {
+    .cost = 6,
+    .desirability_value = 0,
+    .desirability_step = 0,
+    .desirability_step_size = 0,
+    .desirability_range = 0,
+    .laborers = 0 };
+const model_building MODEL_HIGHWAY = {
+    .cost = 100,
+    .desirability_value = -4,
+    .desirability_step = 1,
+    .desirability_step_size = 2,
+    .desirability_range = 2,
+    .laborers = 0 };
+const model_building MODEL_GOLD_MINE = {
+    .cost = 100,
+    .desirability_value = -6,
+    .desirability_step = 1,
+    .desirability_step_size = 1,
+    .desirability_range = 4,
+    .laborers = 30 };
+const model_building MODEL_STONE_QUARRY = {
+    .cost = 60,
+    .desirability_value = -6,
+    .desirability_step = 1,
+    .desirability_step_size = 1,
+    .desirability_range = 4,
+    .laborers = 10 };
+const model_building MODEL_SAND_PIT = {
+    .cost = 40,
+    .desirability_value = -6,
+    .desirability_step = 1,
+    .desirability_step_size = 1,
+    .desirability_range = 4,
+    .laborers = 10 };
+const model_building MODEL_BRICKWORKS = {
+    .cost = 80,
+    .desirability_value = -3,
+    .desirability_step = 1,
+    .desirability_step_size = 1,
+    .desirability_range = 3,
+    .laborers = 10 };
+const model_building MODEL_CONCRETE_MAKER = {
+    .cost = 60,
+    .desirability_value = -3,
+    .desirability_step = 1,
+    .desirability_step_size = 1,
+    .desirability_range = 3,
+    .laborers = 10 };
+const model_building MODEL_CITY_MINT = {
+    .cost = 250,
+    .desirability_value = -3,
+    .desirability_step = 1,
+    .desirability_step_size = 1,
+    .desirability_range = 3,
+    .laborers = 40 };
+const model_building MODEL_DEPOT = {
+    .cost = 100,
+    .desirability_value = -3,
+    .desirability_step = 1,
+    .desirability_step_size = 1,
+    .desirability_range = 2,
+    .laborers = 15 };
+const model_building MODEL_ARMOURY = {
+    .cost = 50,
+    .desirability_value = -5,
+    .desirability_step = 1,
+    .desirability_step_size = 1,
+    .desirability_range = 4,
+    .laborers = 6 };
+const model_building MODEL_LATRINE = {
+    .cost = 15,
+    .desirability_value = 0,
+    .desirability_step = 0,
+    .desirability_step_size = 0,
+    .desirability_range = 0,
+    .laborers = 2 };
+const model_building MODEL_NATIVE_DECORATION = {
+    .cost = 0,
+    .desirability_value = 6,
+    .desirability_step = 1,
+    .desirability_step_size = -1,
+    .desirability_range = 4,
+    .laborers = 0 };
+const model_building MODEL_NATIVE_MONUMENT = {
+    .cost = 0,
+    .desirability_value = 15,
+    .desirability_step = 2,
+    .desirability_step_size = -2,
+    .desirability_range = 8,
+    .laborers = 0 };
+const model_building MODEL_NATIVE_WATCHTOWER = {
+    .cost = 0,
+    .desirability_value = -10,
+    .desirability_step = 1,
+    .desirability_step_size = 2,
+    .desirability_range = 4,
+    .laborers = 0 };
 
 const model_building *model_get_building(building_type type)
 {
