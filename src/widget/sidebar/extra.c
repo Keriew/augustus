@@ -45,7 +45,7 @@
 #define EXTRA_INFO_HEIGHT_UNEMPLOYMENT 48
 #define EXTRA_INFO_HEIGHT_INVASIONS 48
 #define EXTRA_INFO_HEIGHT_GODS 64
-#define EXTRA_INFO_HEIGHT_RATINGS 176
+#define EXTRA_INFO_HEIGHT_RATINGS 256
 #define EXTRA_INFO_HEIGHT_REQUESTS_PANEL 48
 #define EXTRA_INFO_HEIGHT_REQUESTS_MIN EXTRA_INFO_LINE_SPACE + EXTRA_INFO_HEIGHT_REQUESTS_PANEL
 
@@ -109,6 +109,11 @@ static struct {
         objective favor;
         objective population;
     } objectives;
+    struct
+    {
+        objective prosperity;
+        objective population;
+    } stats;
     struct {
         int happy;
         int angry;
@@ -227,6 +232,19 @@ static int calculate_extra_info_height(int available_height)
     }
 
     return height;
+}
+
+static void set_extra_info_stats(void)
+{
+    data.stats.population.target = 0;
+    data.stats.prosperity.target = 0;
+
+    if (scenario_criteria_prosperity_enabled()) {
+        data.stats.prosperity.target = scenario_criteria_prosperity();
+    }
+    if (scenario_criteria_population_enabled()) {
+        data.stats.population.target = scenario_criteria_population();
+    }
 }
 
 static void set_extra_info_objectives(void)
@@ -361,19 +379,22 @@ static int update_extra_info(int is_background)
     if (data.info_to_display & SIDEBAR_EXTRA_DISPLAY_RATINGS) {
         if (is_background) {
             set_extra_info_objectives();
+            set_extra_info_stats();
         }
         changed |= update_extra_info_value(city_rating_culture(), &data.objectives.culture.value);
         changed |= update_extra_info_value(city_rating_prosperity(), &data.objectives.prosperity.value);
         changed |= update_extra_info_value(city_rating_peace(), &data.objectives.peace.value);
         changed |= update_extra_info_value(city_rating_favor(), &data.objectives.favor.value);
         changed |= update_extra_info_value(city_population(), &data.objectives.population.value);
+        changed |= update_extra_info_value(city_ratings_prosperity_max(), &data.stats.prosperity.value);
+        changed |= update_extra_info_value(city_population_total_housing_capacity(), &data.stats.population.value);
     }
 
     return changed;
 }
 
 static int draw_extra_info_objective(
-    int x_offset, int y_offset, int text_group, int text_id, objective *obj, int cut_off_at_parenthesis)
+    int x_offset, int y_offset, int text_group, int text_id, objective *obj, int cut_off_at_parenthesis, int has_target)
 {
     if (cut_off_at_parenthesis) {
         // Exception for Chinese: the string for "population" includes the hotkey " (6)"
@@ -390,9 +411,16 @@ static int draw_extra_info_objective(
     } else {
         lang_text_draw(text_group, text_id, x_offset + 11, y_offset, FONT_NORMAL_WHITE);
     }
-    font_t font = obj->value >= obj->target ? FONT_NORMAL_GREEN : FONT_NORMAL_RED;
+    font_t font =  obj->value >= obj->target ? FONT_NORMAL_GREEN : FONT_NORMAL_RED;
+    if (has_target == 0) {
+        font = FONT_NORMAL_GREEN;
+    }
+
     int width = text_draw_number(obj->value, '@', "", x_offset + 11, y_offset + EXTRA_INFO_LINE_SPACE, font, 0);
-    text_draw_number(obj->target, '(', ")", x_offset + 11 + width, y_offset + EXTRA_INFO_LINE_SPACE, font, 0);
+
+    if (has_target) {
+        text_draw_number(obj->target, '(', ")", x_offset + 11 + width, y_offset + EXTRA_INFO_LINE_SPACE, font, 0);
+    }
     return EXTRA_INFO_LINE_SPACE * 2;
 }
 
@@ -588,11 +616,14 @@ static void draw_extra_info_panel(void)
 
         data.objectives_y_offset = y_offset;
 
-        y_offset += draw_extra_info_objective(data.x_offset, y_offset, 53, 1, &data.objectives.culture, 0);
-        y_offset += draw_extra_info_objective(data.x_offset, y_offset, 53, 2, &data.objectives.prosperity, 0);
-        y_offset += draw_extra_info_objective(data.x_offset, y_offset, 53, 3, &data.objectives.peace, 0);
-        y_offset += draw_extra_info_objective(data.x_offset, y_offset, 53, 4, &data.objectives.favor, 0);
-        y_offset += draw_extra_info_objective(data.x_offset, y_offset, 4, 6, &data.objectives.population, 1);
+        y_offset += draw_extra_info_objective(data.x_offset, y_offset, 53, 1, &data.objectives.culture, 0,1);
+        y_offset += draw_extra_info_objective(data.x_offset, y_offset, 53, 2, &data.objectives.prosperity, 0,1);
+        y_offset += draw_extra_info_objective(data.x_offset, y_offset, 53, 3, &data.objectives.peace, 0,1);
+        y_offset += draw_extra_info_objective(data.x_offset, y_offset, 53, 4, &data.objectives.favor, 0,1);
+        y_offset += draw_extra_info_objective(data.x_offset, y_offset, 4, 6, &data.objectives.population, 1,1);
+        y_offset += EXTRA_INFO_LINE_SPACE;
+        y_offset += draw_extra_info_objective(data.x_offset, y_offset, CUSTOM_TRANSLATION, TR_SIDEBAR_CITY_CAPACITY, &data.stats.population, 0,0);
+        y_offset += draw_extra_info_objective(data.x_offset, y_offset, CUSTOM_TRANSLATION, TR_SIDEBAR_MAX_PROSPERITY, &data.stats.prosperity, 0,0);
     }
 
     if (data.info_to_display & SIDEBAR_EXTRA_DISPLAY_REQUESTS) {
