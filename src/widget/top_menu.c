@@ -859,9 +859,6 @@ int widget_top_menu_get_tooltip_text(tooltip_context *c)
         }
         if (button_id < 4) {
             return 59 + button_id;
-        } else if (button_id == INFO_PERSONAL) {
-            c->text_group = CUSTOM_TRANSLATION;
-            return TR_TOOLTIP_PERSONAL_SAVINGS;
         } else {
             c->text_group = 53;
             c->num_extra_texts = 1;
@@ -879,10 +876,22 @@ int widget_top_menu_get_tooltip_text(tooltip_context *c)
                     c->extra_text_ids[0] = (city_rating_peace() <= 90)
                         ? 41 + city_rating_explanation_for(SELECTED_RATING_PEACE) : 52;
                     return 3;
+                case INFO_PERSONAL:
                 case INFO_FAVOR:
-                    c->extra_text_ids[0] = (city_rating_favor() <= 90)
-                        ? 27 + city_rating_explanation_for(SELECTED_RATING_FAVOR) : 53;
-                    return 4;
+                {
+                    const uint8_t *original_text = lang_get_string(53, (city_rating_favor() <= 90)
+                        ? 27 + city_rating_explanation_for(SELECTED_RATING_FAVOR) : 53);
+                    if (button_id == INFO_PERSONAL) {
+                        original_text = lang_get_string(CUSTOM_TRANSLATION, TR_TOOLTIP_PERSONAL_SAVINGS);
+                    }
+                    const uint8_t *gift_text = lang_get_string(52, 50);
+                    int value = city_emperor_months_since_gift();
+                    const uint8_t *months_text = lang_get_string(8, 4 + (value != 1));
+                    static char formatted_text[128];
+                    snprintf(formatted_text, sizeof(formatted_text), "%s\n%s: %d %s", original_text, gift_text, value, months_text);
+                    c->precomposed_text = (const uint8_t *) formatted_text;
+                    return 1;
+                }
                 case INFO_HEALTH:
                     c->text_group = CUSTOM_TRANSLATION;
                     c->extra_text_groups[0] = 56;

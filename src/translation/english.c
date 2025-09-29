@@ -1677,6 +1677,8 @@ static translation_string all_strings[] = {
     {TR_EMPIRE_SIDE_BAR_SORT_BY_ROUTE_COST, "Route Cost"},
     {TR_EMPIRE_SIDE_BAR_SORT_BY_PROFIT, "Profit"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE, "Resource"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE_SELL, "Resource (Sold)"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE_BUY, "Resource (Bought)"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_OPEN, "Open Routes"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_CLOSED, "Closed Routes"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_LAND, "Land Routes"},
@@ -1713,6 +1715,7 @@ static translation_string all_strings[] = {
     {TR_CONFIRM_REPAIR_BUILDINGS, "Repair all buildings in the area for "},
     {TR_CONFIRM_REPAIR_BUILDINGS_TITLE, "Repair buildings"},
     {TR_BUILDING_LAND_CLEAR, "Clear area"},
+    {TR_CONFIG_ENABLE_MARKET_RANGE, "Enable market range"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
