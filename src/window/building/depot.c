@@ -170,7 +170,7 @@ static void setup_buttons_for_selected_depot(void)
     for (int i = 0; i < storage_array_size && button_index < MAX_VISIBLE_ROWS; i++) {
         const data_storage *storage = building_storage_get_array_entry(i);
         building *store_building = building_get(storage->building_id);
-        if (!storage->in_use || !storage->building_id ||
+        if (!storage->in_use || !storage->building_id || store_building->state == BUILDING_STATE_MOTHBALLED ||
              (!resource_is_food(data.target_resource_id) && store_building->type == BUILDING_GRANARY)) {
             continue;
         }
@@ -210,7 +210,8 @@ static void setup_buttons_for_selected_depot(void)
         }
         // Only include inactive storages that have a valid storage_id and weren't already counted in first pass
         int max_storable = building_storage_resource_max_storable(store_building, data.target_resource_id);
-        if ((max_storable == 0 || !storage->in_use) && store_building->storage_id > 0) {
+        if ((max_storable == 0 || !storage->in_use || store_building->state == BUILDING_STATE_MOTHBALLED) &&
+            store_building->storage_id > 0) {
             row_count++;
             if (row_count <= scrollbar.scroll_position) {
                 continue;
@@ -263,18 +264,25 @@ static void calculate_available_storages(int building_id)
             }
         }
         if ((unsigned) b->data.depot.current_order.src_storage_id == store->id) {
-            has_valid_src = 1;
+            building_storage_state src_state = building_storage_get_state(
+                building_get(b->data.depot.current_order.src_storage_id), b->data.depot.current_order.resource_type, 0);
+            has_valid_src = src_state != BUILDING_STORAGE_STATE_NOT_ACCEPTING ? 1 : 0;
         }
         if ((unsigned) b->data.depot.current_order.dst_storage_id == store->id) {
-            has_valid_dst = 1;
+            building_storage_state dst_state = building_storage_get_state(
+                building_get(b->data.depot.current_order.dst_storage_id), b->data.depot.current_order.resource_type, 0);
+            has_valid_dst = dst_state != BUILDING_STORAGE_STATE_NOT_ACCEPTING ? 1 : 0;
         }
     }
     if (!has_valid_src) {
         b->data.depot.current_order.src_storage_id = 0;
+        window_invalidate();
     }
     if (!has_valid_dst) {
         b->data.depot.current_order.dst_storage_id = 0;
+        window_invalidate();
     }
+
 }
 
 void window_building_depot_init_main(int building_id)
@@ -368,6 +376,7 @@ void window_building_draw_depot_foreground(building_info_context *c)
     building *src = building_get(b->data.depot.current_order.src_storage_id);
     building *dst = building_get(b->data.depot.current_order.dst_storage_id);
     setup_buttons_for_selected_depot();
+    calculate_available_storages(data.depot_building_id);
     if (!c->has_road_access) {
         window_building_draw_description(c, 69, 25);
     } else if (b->num_workers <= 0) {
@@ -561,7 +570,7 @@ void window_building_draw_depot_select_source_destination(building_info_context 
     for (int i = 0; i < storage_array_size && drawn_rows < MAX_VISIBLE_ROWS; i++) {
         const data_storage *storage = building_storage_get_array_entry(i);
         building *store_building = building_get(storage->building_id);
-        if (!storage->in_use || !storage->building_id ||
+        if (!storage->in_use || !storage->building_id || store_building->state == BUILDING_STATE_MOTHBALLED ||
             (!resource_is_food(data.target_resource_id) && store_building->type == BUILDING_GRANARY)) {
             continue;
         }
@@ -632,7 +641,8 @@ void window_building_draw_depot_select_source_destination(building_info_context 
 
         // Only include inactive storages that have a valid storage_id and weren't already counted in first pass
         int max_storable = building_storage_resource_max_storable(store_building, data.target_resource_id);
-        if ((max_storable == 0 || !storage->in_use) && store_building->storage_id > 0) {
+        if ((max_storable == 0 || !storage->in_use || store_building->state == BUILDING_STATE_MOTHBALLED)
+            && store_building->storage_id > 0) {
             row_count++;
             if (row_count <= scrollbar.scroll_position) {
                 continue;
