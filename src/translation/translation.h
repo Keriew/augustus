@@ -1708,6 +1708,7 @@ typedef enum {
     TR_TOOLTIP_NONE,
     TR_TOOLTIP_MINIMAL,
     TR_TOOLTIP_FULL, // depot tooltip group end
+    TR_CONFIG_CLEAR_WARNINGS_RIGHTCLICK,
     TRANSLATION_MAX_KEY
 } translation_key;
 

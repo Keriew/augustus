@@ -1714,6 +1714,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_NONE, "None"},
     {TR_TOOLTIP_MINIMAL, "Minimal"},
     {TR_TOOLTIP_FULL, "Full"},
+    {TR_CONFIG_CLEAR_WARNINGS_RIGHTCLICK,"Right click to clear warnings in city view"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
