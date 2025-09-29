@@ -253,26 +253,15 @@ resource_type building_storage_get_highest_quantity_resource(building *b)
     return highest_resource;
 }
 
-void building_storage_cycle_resource_state(int storage_id, resource_type resource_id)
+void building_storage_cycle_resource_state(int storage_id, resource_type resource_id, int reverse_order)
 {
     resource_storage_entry *entry = &array_item(storages, storage_id)->storage.resource_state[resource_id];
+    int num_states = BUILDING_STORAGE_STATE_MAX;
 
-    switch (entry->state) {
-        case BUILDING_STORAGE_STATE_ACCEPTING:
-            entry->state = BUILDING_STORAGE_STATE_GETTING;
-            break;
-        case BUILDING_STORAGE_STATE_GETTING:
-            entry->state = BUILDING_STORAGE_STATE_MAINTAINING;
-            break;
-        case BUILDING_STORAGE_STATE_MAINTAINING:
-            entry->state = BUILDING_STORAGE_STATE_NOT_ACCEPTING;
-            break;
-        case BUILDING_STORAGE_STATE_NOT_ACCEPTING:
-            entry->state = BUILDING_STORAGE_STATE_ACCEPTING;
-            break;
-        default:
-            entry->state = BUILDING_STORAGE_STATE_ACCEPTING;
-            break;
+    if (reverse_order) {
+        entry->state = (entry->state - 1 + num_states) % num_states;
+    } else {
+        entry->state = (entry->state + 1) % num_states;
     }
 }
 

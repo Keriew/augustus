@@ -26,6 +26,8 @@ int city_resource_get_total_amount(resource_type resource, int respect_maintaini
 int city_resource_get_amount_including_granaries(resource_type resource, int amount, int *checked_granaries,
      int respect_stockpiling);
 
+int city_resource_get_amount_for_request(resource_type resource, int amount);
+
 int city_resource_get_available_empty_space_granaries(resource_type food);
 int city_resource_get_available_empty_space_warehouses(resource_type resource);
 

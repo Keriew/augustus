@@ -48,6 +48,9 @@ static void toggle_resource_state(const generic_button *button);
 static void toggle_partial_resource_state(const generic_button *button, int reverse_order);
 static void toggle_partial_resource_state_reverse(const generic_button *button);
 static void toggle_partial_resource_state_forward(const generic_button *button);
+static void resource_state_forward(const generic_button *button);
+static void resource_state_back(const generic_button *button);
+static void toggle_resource_state(const generic_button *button, int reverse_order);
 static void dock_toggle_route(const generic_button *button);
 static void storage_empty_all(const generic_button *button);
 static void storage_toggle_all_states(int param1, int param2);
@@ -90,6 +93,7 @@ static int granary_permissions_buttons[] = {
     BUILDING_STORAGE_PERMISSION_QUARTERMASTER,
     BUILDING_STORAGE_PERMISSION_CARAVANSERAI,
     BUILDING_STORAGE_PERMISSION_NATIVES,
+    BUILDING_STORAGE_PERMISSION_CAESAR,
 };
 static int warehouse_permissions_buttons[] = {
     BUILDING_STORAGE_PERMISSION_MARKET,
@@ -100,24 +104,25 @@ static int warehouse_permissions_buttons[] = {
     BUILDING_STORAGE_PERMISSION_ARMOURY,
     BUILDING_STORAGE_PERMISSION_LIGHTHOUSE,
     BUILDING_STORAGE_PERMISSION_NATIVES,
+    BUILDING_STORAGE_PERMISSION_CAESAR,
 };
 static generic_button orders_resource_buttons[] = {
-    {0, 0, 210, 22, toggle_resource_state, 0, 1},
-    {0, 22, 210, 22, toggle_resource_state, 0, 2},
-    {0, 44, 210, 22, toggle_resource_state, 0, 3},
-    {0, 66, 210, 22, toggle_resource_state, 0, 4},
-    {0, 88, 210, 22, toggle_resource_state, 0, 5},
-    {0, 110, 210, 22, toggle_resource_state, 0, 6},
-    {0, 132, 210, 22, toggle_resource_state, 0, 7},
-    {0, 154, 210, 22, toggle_resource_state, 0, 8},
-    {0, 176, 210, 22, toggle_resource_state, 0, 9},
-    {0, 198, 210, 22, toggle_resource_state, 0, 10},
-    {0, 220, 210, 22, toggle_resource_state, 0, 11},
-    {0, 242, 210, 22, toggle_resource_state, 0, 12},
-    {0, 264, 210, 22, toggle_resource_state, 0, 13},
-    {0, 286, 210, 22, toggle_resource_state, 0, 14},
-    {0, 308, 210, 22, toggle_resource_state, 0, 15},
-    {0, 330, 210, 22, toggle_resource_state, 0, 16},
+    {0, 0, 210, 22, resource_state_forward, resource_state_back, 1},
+    {0, 22, 210, 22, resource_state_forward, resource_state_back, 2},
+    {0, 44, 210, 22, resource_state_forward, resource_state_back, 3},
+    {0, 66, 210, 22, resource_state_forward, resource_state_back, 4},
+    {0, 88, 210, 22, resource_state_forward, resource_state_back, 5},
+    {0, 110, 210, 22, resource_state_forward, resource_state_back, 6},
+    {0, 132, 210, 22, resource_state_forward, resource_state_back, 7},
+    {0, 154, 210, 22, resource_state_forward, resource_state_back, 8},
+    {0, 176, 210, 22, resource_state_forward, resource_state_back, 9},
+    {0, 198, 210, 22, resource_state_forward, resource_state_back, 10},
+    {0, 220, 210, 22, resource_state_forward, resource_state_back, 11},
+    {0, 242, 210, 22, resource_state_forward, resource_state_back, 12},
+    {0, 264, 210, 22, resource_state_forward, resource_state_back, 13},
+    {0, 286, 210, 22, resource_state_forward, resource_state_back, 14},
+    {0, 308, 210, 22, resource_state_forward, resource_state_back, 15},
+    {0, 330, 210, 22, resource_state_forward, resource_state_back, 16},
 };
 
 static generic_button orders_partial_resource_buttons[] = {
@@ -278,6 +283,8 @@ int get_storage_permission_image(building_storage_permission_states permission)
             return assets_get_image_id("Walkers", "overseer_sw_01");
         case BUILDING_STORAGE_PERMISSION_NATIVES:
             return image_group(GROUP_FIGURE_CARTPUSHER_CART) + 136;
+        case BUILDING_STORAGE_PERMISSION_CAESAR:
+            return assets_get_image_id("Walkers", "caesar_static_sw_02");
         default:
             return -1;
     }
@@ -1434,7 +1441,17 @@ static void go_to_orders(const generic_button *button)
     window_building_info_show_storage_orders();
 }
 
-static void toggle_resource_state(const generic_button *button)
+static void resource_state_forward(const generic_button *button)
+{
+    toggle_resource_state(button, 0);
+}
+
+static void resource_state_back(const generic_button *button)
+{
+    toggle_resource_state(button, 1);
+}
+
+static void toggle_resource_state(const generic_button *button, int reverse_order)
 {
     int index = button->parameter1;
     building *b = building_get(data.building_id);
@@ -1449,7 +1466,7 @@ static void toggle_resource_state(const generic_button *button)
         } else {
             resource = city_resource_get_potential_foods()->items[index];
         }
-        building_storage_cycle_resource_state(b->storage_id, resource);
+        building_storage_cycle_resource_state(b->storage_id, resource, reverse_order);
     }
     window_invalidate();
 }

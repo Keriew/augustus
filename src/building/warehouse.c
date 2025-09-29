@@ -455,26 +455,20 @@ int building_warehouse_maximum_receptible_amount(building *b, int resource)
     return max_receptible;
 }
 
-int building_warehouses_count_available_resource(int resource, int respect_maintaining)
+int building_warehouses_count_available_resource(int resource, int respect_maintaining, int caesars_request)
 {
     int total = 0;
-    building *b = get_next_warehouse();
-    if (!b) {
-        return 0;
-    }
-    building *initial_warehouse = b;
-
-    do {
-        if (b->state == BUILDING_STATE_IN_USE) {
-            if (!respect_maintaining ||
-                building_storage_get_state(b, resource, 1) != BUILDING_STORAGE_STATE_MAINTAINING ||
-                building_storage_get_empty_all(b->id)) {
-                total += building_warehouse_get_amount(b, resource);
-            }
+    for (building *b = building_first_of_type(BUILDING_WAREHOUSE); b; b = b->next_of_type) {
+        if (b->state != BUILDING_STATE_IN_USE || (caesars_request &&
+            !building_storage_get_permission(BUILDING_STORAGE_PERMISSION_CAESAR, b))) {
+            continue;
         }
-        b = b->next_of_type ? b->next_of_type : building_first_of_type(BUILDING_WAREHOUSE);
-    } while (b != initial_warehouse);
-
+        if (!respect_maintaining ||
+            building_storage_get_state(b, resource, 1) != BUILDING_STORAGE_STATE_MAINTAINING ||
+            building_storage_get_empty_all(b->id)) {
+            total += building_warehouse_get_amount(b, resource);
+        }
+    }
     return total;
 }
 

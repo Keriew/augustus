@@ -15,6 +15,7 @@
 #include "city/trade.h"
 #include "city/trade_policy.h"
 #include "core/calc.h"
+#include "core/config.h"
 #include "empire/city.h"
 #include "figure/figure.h"
 #include "figure/formation.h"
@@ -50,10 +51,10 @@ int city_resource_count_warehouses_amount(resource_type resource)
 
 int city_resource_get_total_amount(resource_type resource, int respect_maintaining)
 {
-    int total = building_warehouses_count_available_resource(resource, respect_maintaining);
+    int total = building_warehouses_count_available_resource(resource, respect_maintaining, 0);
 
     if (resource_is_food(resource)) {
-        int granary_total = building_granaries_count_available_resource(resource, respect_maintaining);
+        int granary_total = building_granaries_count_available_resource(resource, respect_maintaining, 0);
         total += granary_total;
     }
     return total;
@@ -66,13 +67,13 @@ int city_resource_get_amount_including_granaries(resource_type resource, int amo
         *checked_granaries = 0;
     }
 
-    int total = building_warehouses_count_available_resource(resource, respect_maintaining);
+    int total = building_warehouses_count_available_resource(resource, respect_maintaining, 0);
     if (total >= amount) {
         return total;
     }
 
     if (resource_is_food(resource)) {
-        int granary_total = building_granaries_count_available_resource(resource, respect_maintaining);
+        int granary_total = building_granaries_count_available_resource(resource, respect_maintaining, 0);
         total += granary_total;
 
         if (checked_granaries) {
@@ -83,6 +84,20 @@ int city_resource_get_amount_including_granaries(resource_type resource, int amo
     return total;
 }
 
+int city_resource_get_amount_for_request(resource_type resource, int amount)
+{
+    int respect_maintaining = config_get(CONFIG_GP_CH_STORAGE_REQUESTS_RESPECT_MAINTAIN);
+    int total = building_warehouses_count_available_resource(resource, respect_maintaining, 1);
+    if (total >= amount) {
+        return total;
+    }
+
+    if (resource_is_food(resource)) {
+        int granary_total = building_granaries_count_available_resource(resource, respect_maintaining, 1);
+        total += granary_total;
+    }
+    return total;
+}
 
 int city_resource_get_available_empty_space_granaries(resource_type food)
 {
