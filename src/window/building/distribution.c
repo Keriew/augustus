@@ -393,6 +393,7 @@ static void draw_permissions_buttons(int x, int y, building_info_context *c)
     button_width = MIN(button_width, 52); // Maximum 52px
 
     int raw_scaling_factor = (button_width / 52.0f) * 100.0f;
+    raw_scaling_factor = raw_scaling_factor == 90 ? 91 : raw_scaling_factor; // Avoid 90% scaling due to visual issues
     float original_scaling_factor = raw_scaling_factor / 100.0f;
 
     // Calculate how much space is used by buttons

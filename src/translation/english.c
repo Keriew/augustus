@@ -1663,6 +1663,8 @@ static translation_string all_strings[] = {
     {TR_CHEAT_DISABLE_LEGIONS_CONSUMPTION, "Disable soldier food consumption"},
     {TR_TOOLTIP_BUTTON_ACCEPT_NATIVES, "Allow native traders to get from here"},
     {TR_TOOLTIP_BUTTON_REJECT_NATIVES, "Don't allow native traders to get from here"},
+    {TR_TOOLTIP_BUTTON_ACCEPT_CAESAR, "Allow Caesar's requests to get from here"},
+    {TR_TOOLTIP_BUTTON_REJECT_CAESAR, "Don't allow Caesar's requests to get from here"},
     {TR_TOOLTIP_BUTTON_ACCEPT_ALL, "Allow everyone to get from here"},
     {TR_TOOLTIP_BUTTON_REJECT_ALL, "Don't allow anyone to get from here"},
     {TR_TOOLTIP_OVERLAY_PROBLEMS_NO_ROAD_ACCESS, "No road access"},
