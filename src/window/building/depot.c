@@ -276,11 +276,9 @@ static void calculate_available_storages(int building_id)
     }
     if (!has_valid_src) {
         b->data.depot.current_order.src_storage_id = 0;
-        window_invalidate();
     }
     if (!has_valid_dst) {
         b->data.depot.current_order.dst_storage_id = 0;
-        window_invalidate();
     }
 
 }
