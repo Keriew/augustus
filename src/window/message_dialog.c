@@ -439,7 +439,6 @@ static void draw_city_message_text(const lang_message *msg)
                     send_request_button.x = data.x + 160;
                     send_request_button.y = data.y + BLOCK_SIZE * msg->height_blocks - 40;
                     send_request_button.parameter1 = request->id;
-                    button_border_draw(send_request_button.x, send_request_button.y, 160, 27, data.focus_request_button);
                     text_draw_centered(translation_for(TR_SIDEBAR_EXTRA_REQUESTS_SEND), send_request_button.x,
                         send_request_button.y + 8, 158, FONT_NORMAL_BLACK, 0);
                 }
@@ -696,6 +695,9 @@ static void draw_foreground_normal(void)
         image_buttons_draw(data.x + 16, data.y + BLOCK_SIZE * msg->height_blocks - 40, get_advisor_button(), 1);
         if (is_event_message(msg)) {
             image_buttons_draw(data.x + 64, data.y_text + 36, &image_button_go_to_problem, 1);
+        }
+        if (msg->type == MESSAGE_TYPE_IMPERIAL) {
+            button_border_draw(send_request_button.x, send_request_button.y, 160, 27, data.focus_request_button);
         }
     }
     image_buttons_draw(data.x + BLOCK_SIZE * msg->width_blocks - 38, data.y + BLOCK_SIZE * msg->height_blocks - 36,
