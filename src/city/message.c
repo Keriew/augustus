@@ -219,7 +219,7 @@ void city_message_post(int use_popup, int message_type, int param1, int param2)
     if (is_invasion_message(msg->message_type) && setting_game_speed() > 70) {
         setting_set_default_game_speed();
     }
-    if (use_popup && window_is(WINDOW_CITY)) {
+    if ((use_popup && window_is(WINDOW_CITY)) || window_is(WINDOW_BUILDING_INFO)) {
         show_message_popup(id);
     } else if (use_popup) {
         // add to queue to be processed when player returns to city
@@ -298,18 +298,18 @@ void city_message_sort_and_compact(void)
         for (int a = 0; a < MAX_MESSAGES - 1; a++) {
             int swap = 0;
             if (data.messages[a].message_type) {
-                if (data.messages[a].sequence < data.messages[a+1].sequence) {
-                    if (data.messages[a+1].message_type) {
+                if (data.messages[a].sequence < data.messages[a + 1].sequence) {
+                    if (data.messages[a + 1].message_type) {
                         swap = 1;
                     }
                 }
-            } else if (data.messages[a+1].message_type) {
+            } else if (data.messages[a + 1].message_type) {
                 swap = 1;
             }
             if (swap) {
                 city_message tmp_message = data.messages[a];
-                data.messages[a] = data.messages[a+1];
-                data.messages[a+1] = tmp_message;
+                data.messages[a] = data.messages[a + 1];
+                data.messages[a + 1] = tmp_message;
             }
         }
     }
@@ -452,7 +452,7 @@ message_advisor city_message_get_advisor(city_message_type message_type)
         case MESSAGE_LOOTING:
         case MESSAGE_THEFT:
             return MESSAGE_ADVISOR_CHIEF;
-            
+
         case MESSAGE_CITY_IN_DEBT:
         case MESSAGE_CITY_IN_DEBT_AGAIN:
         case MESSAGE_CITY_STILL_IN_DEBT:
