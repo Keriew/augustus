@@ -1679,6 +1679,8 @@ static translation_string all_strings[] = {
     {TR_EMPIRE_SIDE_BAR_SORT_BY_ROUTE_COST, "Route Cost"},
     {TR_EMPIRE_SIDE_BAR_SORT_BY_PROFIT, "Profit"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE, "Resource"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE_SELL, "Resource (Sold)"},
+    {TR_EMPIRE_SIDE_BAR_FILTER_BY_RESOURCE_BUY, "Resource (Bought)"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_OPEN, "Open Routes"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_CLOSED, "Closed Routes"},
     {TR_EMPIRE_SIDE_BAR_FILTER_BY_LAND, "Land Routes"},
@@ -1718,6 +1720,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_FULL, "Full"},
     {TR_CONFIG_CLEAR_WARNINGS_RIGHTCLICK,"Right click to clear warnings in city view"},
     {TR_CONFIG_GP_CH_STORAGE_REQUESTS_RESPECT_MAINTAIN, "Caesar's requests respect 'Maintaining'"},
+    {TR_CONFIG_ENABLE_MARKET_RANGE, "Enable market range"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

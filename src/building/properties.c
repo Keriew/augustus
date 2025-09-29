@@ -585,793 +585,793 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .size = 1,
         .fire_proof = 1,
         .image_group = 23,
-       // .sound_id = SOUND_CITY_WELL, // Disabled in original
-        .event_data.attr = "well"
-    },
-    [BUILDING_NATIVE_CROPS] = {
-        .size = 1,
-        .fire_proof = 1,
-        .image_group = 100,
-        .event_data.attr = "native_crops",
-        .sound_id = SOUND_CITY_WHEAT_FARM,
-        .event_data.key = TR_PARAMETER_VALUE_BUILDING_NATIVE_CROPS
-    },
-    [BUILDING_MILITARY_ACADEMY] = {
-        .size = 3,
-        .image_group = 201,
-        .sound_id = SOUND_CITY_MILITARY_ACADEMY,
-        .draw_desirability_range = 1,
-        .event_data.attr = "military_academy"
-    },
-    [BUILDING_BARRACKS] = {
-        .size = 3,
-        .image_group = 166,
-        .sound_id = SOUND_CITY_BARRACKS,
-        .draw_desirability_range = 1,
-        .event_data.attr = "barracks"
-    },
-    [BUILDING_MENU_SMALL_TEMPLES] = {
-        .event_data.attr = "small_temples|all_small_temples",
-        .event_data.key = TR_PARAMETER_VALUE_BUILDING_MENU_SMALL_TEMPLES
-    },
-    [BUILDING_MENU_LARGE_TEMPLES] = {
-        .event_data.attr = "large_temples|all_large_temples",
-        .event_data.key = TR_PARAMETER_VALUE_BUILDING_MENU_LARGE_TEMPLES
-    },
-    [BUILDING_ORACLE] = {
-        .size = 2,
-        .fire_proof = 1,
-        .image_group = 76,
-        .sound_id = SOUND_CITY_ORACLE,
-        .draw_desirability_range = 1,
-        .event_data.attr = "oracle"
-    },
-    [BUILDING_BURNING_RUIN] = {
-        .size = 1,
-        .fire_proof = 1,
-        .sound_id = SOUND_CITY_BURNING_RUIN
-    },
-    [BUILDING_WHEAT_FARM] = {
-        .size = 3,
-        .image_group = 37,
-        .sound_id = SOUND_CITY_WHEAT_FARM,
-        .event_data.attr = "wheat_farm"
-    },
-    [BUILDING_VEGETABLE_FARM] = {
-        .size = 3,
-        .image_group = 37,
-        .sound_id = SOUND_CITY_VEGETABLE_FARM,
-        .event_data.attr = "vegetable_farm"
-    },
-    [BUILDING_FRUIT_FARM] = {
-        .size = 3,
-        .image_group = 37,
-        .sound_id = SOUND_CITY_FRUIT_FARM,
-        .event_data.attr = "fruit_farm"
-    },
-    [BUILDING_OLIVE_FARM] = {
-        .size = 3,
-        .image_group = 37,
-        .sound_id = SOUND_CITY_OLIVE_FARM,
-        .event_data.attr = "olive_farm"
-    },
-    [BUILDING_VINES_FARM] = {
-        .size = 3,
-        .image_group = 37,
-        .sound_id = SOUND_CITY_VINE_FARM,
-        .event_data.attr = "vines_farm"
-    },
-    [BUILDING_PIG_FARM] = {
-        .size = 3,
-        .image_group = 37,
-        .sound_id = SOUND_CITY_PIG_FARM,
-        .event_data.attr = "pig_farm"
-    },
-    [BUILDING_MARBLE_QUARRY] = {
-        .size = 2,
-        .image_group = 38,
-        .sound_id = SOUND_CITY_QUARRY,
-        .event_data.attr = "marble_quarry"
-    },
-    [BUILDING_IRON_MINE] = {
-        .size = 2,
-        .image_group = 39,
-        .sound_id = SOUND_CITY_IRON_MINE,
-        .event_data.attr = "iron_mine"
-    },
-    [BUILDING_TIMBER_YARD] = {
-        .size = 2,
-        .image_group = 65,
-        .sound_id = SOUND_CITY_TIMBER_YARD,
-        .event_data.attr = "timber_yard"
-    },
-    [BUILDING_CLAY_PIT] = {
-        .size = 2,
-        .image_group = 40,
-        .sound_id = SOUND_CITY_CLAY_PIT,
-        .event_data.attr = "clay_pit"
-    },
-    [BUILDING_WINE_WORKSHOP] = {
-        .size = 2,
-        .image_group = 44,
-        .sound_id = SOUND_CITY_WINE_WORKSHOP,
-        .event_data.attr = "wine_workshop"
-    },
-    [BUILDING_OIL_WORKSHOP] = {
-        .size = 2,
-        .image_group = 122,
-        .sound_id = SOUND_CITY_OIL_WORKSHOP,
-        .event_data.attr = "oil_workshop"
-    },
-    [BUILDING_WEAPONS_WORKSHOP] = {
-        .size = 2,
-        .image_group = 123,
-        .sound_id = SOUND_CITY_WEAPONS_WORKSHOP,
-        .event_data.attr = "weapons_workshop"
-    },
-    [BUILDING_FURNITURE_WORKSHOP] = {
-        .size = 2,
-        .image_group = 124,
-        .sound_id = SOUND_CITY_FURNITURE_WORKSHOP,
-        .event_data.attr = "furniture_workshop"
-    },
-    [BUILDING_POTTERY_WORKSHOP] = {
-        .size = 2,
-        .image_group = 125,
-        .sound_id = SOUND_CITY_POTTERY_WORKSHOP,
-        .event_data.attr = "pottery_workshop"
-    },
-    [BUILDING_ROADBLOCK] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Admin_Logistics",
-        .event_data.attr = "roadblock"
-    },
-    [BUILDING_WORKCAMP] = {
-        .size = 3,
-        .sound_id = SOUND_CITY_WORKCAMP,
-        .custom_asset.group = "Admin_Logistics",
-        .custom_asset.id = "Workcamp Central",
-        .event_data.attr = "workcamp"
-    },
-    [BUILDING_GRAND_TEMPLE_CERES] = {
-        .size = 7,
-        .fire_proof = 1,
-        .sound_id = SOUND_CITY_TEMPLE_CERES,
-        .draw_desirability_range = 1,
-        .custom_asset.group = "Monuments",
-        .custom_asset.id = "Ceres Complex Off",
-        .event_data.attr = "grand_temple_ceres"
-    },
-    [BUILDING_GRAND_TEMPLE_NEPTUNE] = {
-        .size = 7,
-        .fire_proof = 1,
-        .sound_id = SOUND_CITY_TEMPLE_NEPTUNE,
-        .draw_desirability_range = 1,
-        .custom_asset.group = "Monuments",
-        .custom_asset.id = "Neptune Complex Off",
-        .event_data.attr = "grand_temple_neptune"
-    },
-    [BUILDING_GRAND_TEMPLE_MERCURY] = {
-        .size = 7,
-        .fire_proof = 1,
-        .sound_id = SOUND_CITY_TEMPLE_MERCURY,
-        .draw_desirability_range = 1,
-        .custom_asset.group = "Monuments",
-        .custom_asset.id = "Mercury Complex Off",
-        .event_data.attr = "grand_temple_mercury"
-    },
-    [BUILDING_GRAND_TEMPLE_MARS] = {
-        .size = 7,
-        .fire_proof = 1,
-        .sound_id = SOUND_CITY_TEMPLE_MARS,
-        .draw_desirability_range = 1,
-        .custom_asset.group = "Monuments",
-        .custom_asset.id = "Mars Complex Off",
-        .event_data.attr = "grand_temple_mars"
-    },
-    [BUILDING_GRAND_TEMPLE_VENUS] = {
-        .size = 7,
-        .fire_proof = 1,
-        .sound_id = SOUND_CITY_TEMPLE_VENUS,
-        .draw_desirability_range = 1,
-        .custom_asset.group = "Monuments",
-        .custom_asset.id = "Venus Complex Off",
-        .event_data.attr = "grand_temple_venus"
-    },
-    [BUILDING_MENU_GRAND_TEMPLES] = {
-        .event_data.attr = "grand_temples|all_grand_temples",
-        .event_data.key = TR_PARAMETER_VALUE_BUILDING_MENU_GRAND_TEMPLES
-    },
-    [BUILDING_MENU_TREES] = {
-        .event_data.attr = "trees|all_trees",
-        .event_data.key = TR_PARAMETER_VALUE_BUILDING_MENU_TREES
-    },
-    [BUILDING_MENU_PATHS] = {
-        .event_data.attr = "paths|all_paths",
-        .event_data.key = TR_PARAMETER_VALUE_BUILDING_MENU_PATHS
-    },
-    [BUILDING_MENU_PARKS] = {
-        .event_data.attr = "parks|all_parks",
-        .event_data.key = TR_PARAMETER_VALUE_BUILDING_MENU_PARKS
-    },
-    [BUILDING_SMALL_POND] = {
-        .size = 2,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "s pond south off",
-        .event_data.attr = "small_pond"
-    },
-    [BUILDING_LARGE_POND] = {
-        .size = 3,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "l pond south off",
-        .event_data.attr = "large_pond"
-    },
-    [BUILDING_PINE_TREE] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "ornamental pine",
-        .event_data.attr = "pine_tree"
-    },
-    [BUILDING_FIR_TREE] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "ornamental fir",
-        .event_data.attr = "fir_tree"
-    },
-    [BUILDING_OAK_TREE] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "ornamental oak",
-        .event_data.attr = "oak_tree"
-    },
-    [BUILDING_ELM_TREE] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "ornamental elm",
-        .event_data.attr = "elm_tree"
-    },
-    [BUILDING_FIG_TREE] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "ornamental fig",
-        .event_data.attr = "fig_tree"
-    },
-    [BUILDING_PLUM_TREE] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "ornamental plum",
-        .event_data.attr = "plum_tree"
-    },
-    [BUILDING_PALM_TREE] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "ornamental palm",
-        .event_data.attr = "palm_tree"
-    },
-    [BUILDING_DATE_TREE] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "ornamental date",
-        .event_data.attr = "date_tree"
-    },
-    [BUILDING_PINE_PATH] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "path orn pine",
-        .event_data.attr = "pine_tree"
-    },
-    [BUILDING_FIR_PATH] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "path orn fir",
-        .event_data.attr = "fir_path"
-    },
-    [BUILDING_OAK_PATH] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "path orn oak",
-        .event_data.attr = "oak_path"
-    },
-    [BUILDING_ELM_PATH] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "path orn elm",
-        .event_data.attr = "elm_path"
-    },
-    [BUILDING_FIG_PATH] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "path orn fig",
-        .event_data.attr = "fig_path"
-    },
-    [BUILDING_PLUM_PATH] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "path orn plum",
-        .event_data.attr = "plum_path"
-    },
-    [BUILDING_PALM_PATH] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "path orn palm",
-        .event_data.attr = "palm_path"
-    },
-    [BUILDING_DATE_PATH] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "path orn date",
-        .event_data.attr = "date_path"
-    },
-    [BUILDING_PAVILION_BLUE] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "pavilion blue",
-        .event_data.attr = "pavilion_blue"
-    },
-    [BUILDING_PAVILION_RED] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "pavilion red",
-        .event_data.attr = "pavilion_red"
-    },
-    [BUILDING_PAVILION_ORANGE] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "pavilion orange",
-        .event_data.attr = "pavilion_orange"
-    },
-    [BUILDING_PAVILION_YELLOW] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "pavilion yellow",
-        .event_data.attr = "pavilion_yellow"
-    },
-    [BUILDING_PAVILION_GREEN] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "pavilion green",
-        .event_data.attr = "pavilion_green"
-    },
-    [BUILDING_GODDESS_STATUE] = {
-        .size = 1,
-        .fire_proof = 1,
-        .rotation_offset = 13,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "sml statue 2",
-        .event_data.attr = "goddess_statue|small_statue_alt"
-    },
-    [BUILDING_SENATOR_STATUE] = {
-        .size = 1,
-        .fire_proof = 1,
-        .rotation_offset = 13,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "sml statue 3",
-        .event_data.attr = "senator_statue|small_statue_alt_b"
-    },
-    [BUILDING_OBELISK] = {
-        .size = 2,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "obelisk",
-        .event_data.attr = "obelisk"
-    },
-    [BUILDING_PANTHEON] = {
-        .size = 7,
-        .fire_proof = 1,
-        .sound_id = SOUND_CITY_ORACLE,
-        .draw_desirability_range = 1,
-        .custom_asset.group = "Monuments",
-        .custom_asset.id = "Pantheon Off",
-        .event_data.attr = "pantheon"
-    },
-    [BUILDING_ARCHITECT_GUILD] = {
-        .size = 2,
-        .fire_proof = 1,
-        .sound_id = SOUND_CITY_ENGINEERS_POST,
-        .custom_asset.group = "Admin_Logistics",
-        .custom_asset.id = "Arch Guild OFF",
-        .event_data.attr = "architect_guild"
-    },
-    [BUILDING_MESS_HALL] = {
-        .size = 3,
-        .sound_id = SOUND_CITY_MESS_HALL,
-        .draw_desirability_range = 1,
-        .custom_asset.group = "Military",
-        .custom_asset.id = "Mess OFF Central",
-        .event_data.attr = "mess_hall",
-    },
-    [BUILDING_LIGHTHOUSE] = {
-        .size = 3,
-        .fire_proof = 1,
-        .sound_id = SOUND_CITY_LIGHTHOUSE,
-        .custom_asset.group = "Monuments",
-        .custom_asset.id = "Lighthouse OFF",
-        .event_data.attr = "lighthouse"
-    },
-    [BUILDING_MENU_STATUES] = {
-        .event_data.attr = "statues|all_statues",
-        .event_data.key = TR_PARAMETER_VALUE_BUILDING_MENU_STATUES
-    },
-    [BUILDING_MENU_GOV_RES] = {
-        .event_data.attr = "governor_home|all_governors_houses",
-        .event_data.key = TR_PARAMETER_VALUE_BUILDING_MENU_GOV_RES
-    },
-    [BUILDING_TAVERN] = {
-        .size = 2,
-        .sound_id = SOUND_CITY_TAVERN,
-        .custom_asset.group = "Health_Culture",
-        .custom_asset.id = "Tavern OFF",
-        .event_data.attr = "tavern"
-    },
-    [BUILDING_GRAND_GARDEN] = {
-        .size = 2,
-        .fire_proof = 1,
-        .event_data.attr = "grand_garden",
-        .event_data.cannot_count = 1
-    },
-    [BUILDING_ARENA] = {
-        .size = 3,
-        .sound_id = SOUND_CITY_COLOSSEUM,
-        .custom_asset.group = "Health_Culture",
-        .custom_asset.id = "Arena OFF",
-        .event_data.attr = "arena"
-    },
-    [BUILDING_HORSE_STATUE] = {
-        .size = 3,
-        .fire_proof = 1,
-        .rotation_offset = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "Eque Statue",
-        .event_data.attr = "horse_statue"
-    },
-    [BUILDING_DOLPHIN_FOUNTAIN] = {
-        .size = 2,
-        .fire_proof = 1,
-        .event_data.attr = "dolphin_fountain",
-        .event_data.cannot_count = 1
-    },
-    [BUILDING_HEDGE_DARK] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "D Hedge 01",
-        .event_data.attr = "hedge_dark"
-    },
-    [BUILDING_HEDGE_LIGHT] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "L Hedge 01",
-        .event_data.attr = "hedge_light"
-    },
-    [BUILDING_LOOPED_GARDEN_WALL] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "C Garden Wall 01",
-        .event_data.attr = "looped_garden_wall"
-    },
-    [BUILDING_LEGION_STATUE] = {
-        .size = 2,
-        .fire_proof = 1,
-        .rotation_offset = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "legio statue",
-        .event_data.attr = "legion_statue"
-    },
-    [BUILDING_DECORATIVE_COLUMN] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "sml col B",
-        .event_data.attr = "decorative_column"
-    },
-    [BUILDING_COLONNADE] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "G Colonnade 01",
-        .event_data.attr = "colonnade"
-    },
-    [BUILDING_GARDEN_PATH] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "Garden Path 01",
-        .event_data.attr = "garden_path"
-    },
-    [BUILDING_LARARIUM] = {
-        .size = 1,
-        .draw_desirability_range = 1,
-        .custom_asset.group = "Health_Culture",
-        .custom_asset.id = "Lararium 01",
-        .event_data.attr = "lararium"
-    },
-    [BUILDING_NYMPHAEUM] = {
-        .size = 3,
-        .fire_proof = 1,
-        .sound_id = SOUND_CITY_ORACLE,
-        .draw_desirability_range = 1,
-        .custom_asset.group = "Monuments",
-        .custom_asset.id = "Nymphaeum OFF",
-        .event_data.attr = "nymphaeum"
-    },
-    [BUILDING_SMALL_MAUSOLEUM] = {
-        .size = 2,
-        .fire_proof = 1,
-        .sound_id = SOUND_CITY_ORACLE,
-        .draw_desirability_range = 1,
-        .rotation_offset = 1,
-        .custom_asset.group = "Monuments",
-        .custom_asset.id = "Mausoleum S",
-        .event_data.attr = "small_mausoleum"
-    },
-    [BUILDING_LARGE_MAUSOLEUM] = {
-        .size = 3,
-        .fire_proof = 1,
-        .sound_id = SOUND_CITY_ORACLE,
-        .draw_desirability_range = 1,
-        .custom_asset.group = "Monuments",
-        .custom_asset.id = "Mausoleum L",
-        .event_data.attr = "large_mausoleum"
-    },
-    [BUILDING_WATCHTOWER] = {
-        .size = 2,
-        .fire_proof = 1,
-        .sound_id = SOUND_CITY_WATCHTOWER,
-        .draw_desirability_range = 1,
-        .custom_asset.group = "Military",
-        .custom_asset.id = "Watchtower C OFF",
-        .event_data.attr = "watchtower"
-    },
-    [BUILDING_CARAVANSERAI] = {
-        .size = 4,
-        .fire_proof = 1,
-        .sound_id = SOUND_CITY_CARAVANSERAI,
-        .custom_asset.group = "Monuments",
-        .custom_asset.id = "Caravanserai_C_OFF",
-        .event_data.attr = "caravanserai"
-    },
-    [BUILDING_ROOFED_GARDEN_WALL] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "R Garden Wall 01",
-        .event_data.attr = "roofed_garden_wall"
-    },
-    [BUILDING_ROOFED_GARDEN_WALL_GATE] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "Garden_Gate_B",
-        .event_data.attr = "garden_wall_gate"
-    },
-    [BUILDING_PALISADE] = {
-        .size = 1,
-        .fire_proof = 1,
-        .draw_desirability_range = 1,
-        .custom_asset.group = "Military",
-        .custom_asset.id = "Pal Wall C 01",
-        .event_data.attr = "palisade"
-    },
-    [BUILDING_HEDGE_GATE_DARK] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "D Hedge Gate",
-        .event_data.attr = "hedge_gate_dark"
-    },
-    [BUILDING_HEDGE_GATE_LIGHT] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "L Hedge Gate",
-        .event_data.attr = "hedge_gate_light"
-    },
-    [BUILDING_PALISADE_GATE] = {
-        .size = 1,
-        .fire_proof = 1,
-        .draw_desirability_range = 1,
-        .custom_asset.group = "Military",
-        .custom_asset.id = "Palisade_Gate",
-        .event_data.attr = "palisade_gate"
-    },
-    [BUILDING_GLADIATOR_STATUE] = {
-        .size = 1,
-        .fire_proof = 1,
-        .rotation_offset = 1,
-        .custom_asset.group = "Aesthetics",
-        .event_data.attr = "gladiator_statue"
-    },
-    [BUILDING_HIGHWAY] = {
-        .size = 2,
-        .fire_proof = 1,
-        .custom_asset.group = "Admin_Logistics",
-        .custom_asset.id = "Highway_Placement",
-        .event_data.attr = "highway",
-    },
-    [BUILDING_GOLD_MINE] = {
-        .size = 2,
-        .custom_asset.group = "Industry",
-        .custom_asset.id = "Gold_Mine_C_OFF",
-        .event_data.attr = "gold_mine"
-    },
-    [BUILDING_STONE_QUARRY] = {
-        .size = 2,
-        .custom_asset.group = "Industry",
-        .custom_asset.id = "Stone_Quarry_C_OFF",
-        .event_data.attr = "stone_quarry"
-    },
-    [BUILDING_SAND_PIT] = {
-        .size = 2,
-        .custom_asset.group = "Industry",
-        .custom_asset.id = "Sand_Pit_C_OFF",
-        .event_data.attr = "sand_pit"
-    },
-    [BUILDING_BRICKWORKS] = {
-        .size = 2,
-        .sound_id = SOUND_CITY_BRICKWORKS,
-        .custom_asset.group = "Industry",
-        .custom_asset.id = "Brickworks_C_OFF",
-        .event_data.attr = "brickworks"
-    },
-    [BUILDING_CONCRETE_MAKER] = {
-        .size = 2,
-        .sound_id = SOUND_CITY_CONCRETE_MAKER,
-        .custom_asset.group = "Industry",
-        .custom_asset.id = "Concrete_Maker_C_OFF",
-        .event_data.attr = "concrete_maker"
-    },
-    [BUILDING_CITY_MINT] = {
-        .size = 3,
-        .fire_proof = 1,
-        .sound_id = SOUND_CITY_CITY_MINT,
-        .custom_asset.group = "Monuments",
-        .custom_asset.id = "City_Mint_ON",
-        .event_data.attr = "city_mint"
-    },
-    [BUILDING_DEPOT] = {
-        .size = 2,
-        .sound_id = SOUND_CITY_DEPOT,
-        .custom_asset.group = "Admin_Logistics",
-        .custom_asset.id = "Cart Depot N OFF",
-        .event_data.attr = "cart_depot"
-    },
-    [BUILDING_LOOPED_GARDEN_GATE] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "Garden_Gate",
-        .event_data.attr = "looped_garden_gate"
-    },
-    [BUILDING_PANELLED_GARDEN_GATE] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "Garden_Gate_C",
-        .event_data.attr = "panelled_garden_gate"
-    },
-    [BUILDING_PANELLED_GARDEN_WALL] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "Garden_Wall_C",
-        .event_data.attr = "panelled_garden_wall"
-    },
-    [BUILDING_SHRINE_CERES] = {
-        .size = 1,
-        .rotation_offset = 1,
-        .draw_desirability_range = 1,
-        .custom_asset.group = "Health_Culture",
-        .custom_asset.id = "Altar_Ceres",
-        .event_data.attr = "shrine_ceres"
-    },
-    [BUILDING_SHRINE_MARS] = {
-        .size = 1,
-        .rotation_offset = 1,
-        .draw_desirability_range = 1,
-        .custom_asset.group = "Health_Culture",
-        .custom_asset.id = "Altar_Mars",
-        .event_data.attr = "shrine_mars"
-    },
-    [BUILDING_SHRINE_MERCURY] = {
-        .size = 1,
-        .rotation_offset = 1,
-        .draw_desirability_range = 1,
-        .custom_asset.group = "Health_Culture",
-        .custom_asset.id = "Altar_Mercury",
-        .event_data.attr = "shrine_mercury"
-    },
-    [BUILDING_SHRINE_NEPTUNE] = {
-        .size = 1,
-        .rotation_offset = 1,
-        .draw_desirability_range = 1,
-        .custom_asset.group = "Health_Culture",
-        .custom_asset.id = "Altar_Neptune",
-        .event_data.attr = "shrine_neptune"
-    },
-    [BUILDING_SHRINE_VENUS] = {
-        .size = 1,
-        .rotation_offset = 1,
-        .draw_desirability_range = 1,
-        .custom_asset.group = "Health_Culture",
-        .custom_asset.id = "Altar_Venus",
-        .event_data.attr = "shrine_venus"
-    },
-    [BUILDING_OVERGROWN_GARDENS] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Aesthetics",
-        .custom_asset.id = "Overgrown_Garden_01",
-        .event_data.attr = "overgrown_gardens"
-    },
-    [BUILDING_ARMOURY] = {
-        .size = 2,
-        .sound_id = SOUND_CITY_ARMOURY,
-        .draw_desirability_range = 1,
-        .custom_asset.group = "Military",
-        .custom_asset.id = "Armoury_OFF_C",
-        .event_data.attr = "armoury"
-    },
-    [BUILDING_LATRINES] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Health_Culture",
-        .custom_asset.id = "Latrine_N",
-        .event_data.attr = "latrines"
-    },
-    [BUILDING_NATIVE_HUT_ALT] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Terrain_Maps",
-        .custom_asset.id = "Native_Hut_Central_01",
-        .event_data.attr = "native_hut_alt"
-    },
-    [BUILDING_NATIVE_DECORATION] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Terrain_Maps",
-        .custom_asset.id = "Native_Decoration_Central_01",
-        .event_data.attr = "native_decor"
-    },
-    [BUILDING_NATIVE_MONUMENT] = {
-        .size = 4,
-        .fire_proof = 1,
-        .custom_asset.group = "Terrain_Maps",
-        .custom_asset.id = "Native_Monument_Central_01",
-        .event_data.attr = "native_monument"
-    },
-    [BUILDING_NATIVE_WATCHTOWER] = {
-        .size = 1,
-        .fire_proof = 1,
-        .custom_asset.group = "Terrain_Maps",
-        .custom_asset.id = "Native_Watchtower_Central_01",
-        .event_data.attr = "native_watchtower"
-    },
+        // .sound_id = SOUND_CITY_WELL, // Disabled in original
+         .event_data.attr = "well"
+     },
+     [BUILDING_NATIVE_CROPS] = {
+         .size = 1,
+         .fire_proof = 1,
+         .image_group = 100,
+         .event_data.attr = "native_crops",
+         .sound_id = SOUND_CITY_WHEAT_FARM,
+         .event_data.key = TR_PARAMETER_VALUE_BUILDING_NATIVE_CROPS
+     },
+     [BUILDING_MILITARY_ACADEMY] = {
+         .size = 3,
+         .image_group = 201,
+         .sound_id = SOUND_CITY_MILITARY_ACADEMY,
+         .draw_desirability_range = 1,
+         .event_data.attr = "military_academy"
+     },
+     [BUILDING_BARRACKS] = {
+         .size = 3,
+         .image_group = 166,
+         .sound_id = SOUND_CITY_BARRACKS,
+         .draw_desirability_range = 1,
+         .event_data.attr = "barracks"
+     },
+     [BUILDING_MENU_SMALL_TEMPLES] = {
+         .event_data.attr = "small_temples|all_small_temples",
+         .event_data.key = TR_PARAMETER_VALUE_BUILDING_MENU_SMALL_TEMPLES
+     },
+     [BUILDING_MENU_LARGE_TEMPLES] = {
+         .event_data.attr = "large_temples|all_large_temples",
+         .event_data.key = TR_PARAMETER_VALUE_BUILDING_MENU_LARGE_TEMPLES
+     },
+     [BUILDING_ORACLE] = {
+         .size = 2,
+         .fire_proof = 1,
+         .image_group = 76,
+         .sound_id = SOUND_CITY_ORACLE,
+         .draw_desirability_range = 1,
+         .event_data.attr = "oracle"
+     },
+     [BUILDING_BURNING_RUIN] = {
+         .size = 1,
+         .fire_proof = 1,
+         .sound_id = SOUND_CITY_BURNING_RUIN
+     },
+     [BUILDING_WHEAT_FARM] = {
+         .size = 3,
+         .image_group = 37,
+         .sound_id = SOUND_CITY_WHEAT_FARM,
+         .event_data.attr = "wheat_farm"
+     },
+     [BUILDING_VEGETABLE_FARM] = {
+         .size = 3,
+         .image_group = 37,
+         .sound_id = SOUND_CITY_VEGETABLE_FARM,
+         .event_data.attr = "vegetable_farm"
+     },
+     [BUILDING_FRUIT_FARM] = {
+         .size = 3,
+         .image_group = 37,
+         .sound_id = SOUND_CITY_FRUIT_FARM,
+         .event_data.attr = "fruit_farm"
+     },
+     [BUILDING_OLIVE_FARM] = {
+         .size = 3,
+         .image_group = 37,
+         .sound_id = SOUND_CITY_OLIVE_FARM,
+         .event_data.attr = "olive_farm"
+     },
+     [BUILDING_VINES_FARM] = {
+         .size = 3,
+         .image_group = 37,
+         .sound_id = SOUND_CITY_VINE_FARM,
+         .event_data.attr = "vines_farm"
+     },
+     [BUILDING_PIG_FARM] = {
+         .size = 3,
+         .image_group = 37,
+         .sound_id = SOUND_CITY_PIG_FARM,
+         .event_data.attr = "pig_farm"
+     },
+     [BUILDING_MARBLE_QUARRY] = {
+         .size = 2,
+         .image_group = 38,
+         .sound_id = SOUND_CITY_QUARRY,
+         .event_data.attr = "marble_quarry"
+     },
+     [BUILDING_IRON_MINE] = {
+         .size = 2,
+         .image_group = 39,
+         .sound_id = SOUND_CITY_IRON_MINE,
+         .event_data.attr = "iron_mine"
+     },
+     [BUILDING_TIMBER_YARD] = {
+         .size = 2,
+         .image_group = 65,
+         .sound_id = SOUND_CITY_TIMBER_YARD,
+         .event_data.attr = "timber_yard"
+     },
+     [BUILDING_CLAY_PIT] = {
+         .size = 2,
+         .image_group = 40,
+         .sound_id = SOUND_CITY_CLAY_PIT,
+         .event_data.attr = "clay_pit"
+     },
+     [BUILDING_WINE_WORKSHOP] = {
+         .size = 2,
+         .image_group = 44,
+         .sound_id = SOUND_CITY_WINE_WORKSHOP,
+         .event_data.attr = "wine_workshop"
+     },
+     [BUILDING_OIL_WORKSHOP] = {
+         .size = 2,
+         .image_group = 122,
+         .sound_id = SOUND_CITY_OIL_WORKSHOP,
+         .event_data.attr = "oil_workshop"
+     },
+     [BUILDING_WEAPONS_WORKSHOP] = {
+         .size = 2,
+         .image_group = 123,
+         .sound_id = SOUND_CITY_WEAPONS_WORKSHOP,
+         .event_data.attr = "weapons_workshop"
+     },
+     [BUILDING_FURNITURE_WORKSHOP] = {
+         .size = 2,
+         .image_group = 124,
+         .sound_id = SOUND_CITY_FURNITURE_WORKSHOP,
+         .event_data.attr = "furniture_workshop"
+     },
+     [BUILDING_POTTERY_WORKSHOP] = {
+         .size = 2,
+         .image_group = 125,
+         .sound_id = SOUND_CITY_POTTERY_WORKSHOP,
+         .event_data.attr = "pottery_workshop"
+     },
+     [BUILDING_ROADBLOCK] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Admin_Logistics",
+         .event_data.attr = "roadblock"
+     },
+     [BUILDING_WORKCAMP] = {
+         .size = 3,
+         .sound_id = SOUND_CITY_WORKCAMP,
+         .custom_asset.group = "Admin_Logistics",
+         .custom_asset.id = "Workcamp Central",
+         .event_data.attr = "workcamp"
+     },
+     [BUILDING_GRAND_TEMPLE_CERES] = {
+         .size = 7,
+         .fire_proof = 1,
+         .sound_id = SOUND_CITY_TEMPLE_CERES,
+         .draw_desirability_range = 1,
+         .custom_asset.group = "Monuments",
+         .custom_asset.id = "Ceres Complex Off",
+         .event_data.attr = "grand_temple_ceres"
+     },
+     [BUILDING_GRAND_TEMPLE_NEPTUNE] = {
+         .size = 7,
+         .fire_proof = 1,
+         .sound_id = SOUND_CITY_TEMPLE_NEPTUNE,
+         .draw_desirability_range = 1,
+         .custom_asset.group = "Monuments",
+         .custom_asset.id = "Neptune Complex Off",
+         .event_data.attr = "grand_temple_neptune"
+     },
+     [BUILDING_GRAND_TEMPLE_MERCURY] = {
+         .size = 7,
+         .fire_proof = 1,
+         .sound_id = SOUND_CITY_TEMPLE_MERCURY,
+         .draw_desirability_range = 1,
+         .custom_asset.group = "Monuments",
+         .custom_asset.id = "Mercury Complex Off",
+         .event_data.attr = "grand_temple_mercury"
+     },
+     [BUILDING_GRAND_TEMPLE_MARS] = {
+         .size = 7,
+         .fire_proof = 1,
+         .sound_id = SOUND_CITY_TEMPLE_MARS,
+         .draw_desirability_range = 1,
+         .custom_asset.group = "Monuments",
+         .custom_asset.id = "Mars Complex Off",
+         .event_data.attr = "grand_temple_mars"
+     },
+     [BUILDING_GRAND_TEMPLE_VENUS] = {
+         .size = 7,
+         .fire_proof = 1,
+         .sound_id = SOUND_CITY_TEMPLE_VENUS,
+         .draw_desirability_range = 1,
+         .custom_asset.group = "Monuments",
+         .custom_asset.id = "Venus Complex Off",
+         .event_data.attr = "grand_temple_venus"
+     },
+     [BUILDING_MENU_GRAND_TEMPLES] = {
+         .event_data.attr = "grand_temples|all_grand_temples",
+         .event_data.key = TR_PARAMETER_VALUE_BUILDING_MENU_GRAND_TEMPLES
+     },
+     [BUILDING_MENU_TREES] = {
+         .event_data.attr = "trees|all_trees",
+         .event_data.key = TR_PARAMETER_VALUE_BUILDING_MENU_TREES
+     },
+     [BUILDING_MENU_PATHS] = {
+         .event_data.attr = "paths|all_paths",
+         .event_data.key = TR_PARAMETER_VALUE_BUILDING_MENU_PATHS
+     },
+     [BUILDING_MENU_PARKS] = {
+         .event_data.attr = "parks|all_parks",
+         .event_data.key = TR_PARAMETER_VALUE_BUILDING_MENU_PARKS
+     },
+     [BUILDING_SMALL_POND] = {
+         .size = 2,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "s pond south off",
+         .event_data.attr = "small_pond"
+     },
+     [BUILDING_LARGE_POND] = {
+         .size = 3,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "l pond south off",
+         .event_data.attr = "large_pond"
+     },
+     [BUILDING_PINE_TREE] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "ornamental pine",
+         .event_data.attr = "pine_tree"
+     },
+     [BUILDING_FIR_TREE] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "ornamental fir",
+         .event_data.attr = "fir_tree"
+     },
+     [BUILDING_OAK_TREE] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "ornamental oak",
+         .event_data.attr = "oak_tree"
+     },
+     [BUILDING_ELM_TREE] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "ornamental elm",
+         .event_data.attr = "elm_tree"
+     },
+     [BUILDING_FIG_TREE] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "ornamental fig",
+         .event_data.attr = "fig_tree"
+     },
+     [BUILDING_PLUM_TREE] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "ornamental plum",
+         .event_data.attr = "plum_tree"
+     },
+     [BUILDING_PALM_TREE] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "ornamental palm",
+         .event_data.attr = "palm_tree"
+     },
+     [BUILDING_DATE_TREE] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "ornamental date",
+         .event_data.attr = "date_tree"
+     },
+     [BUILDING_PINE_PATH] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "path orn pine",
+         .event_data.attr = "pine_tree"
+     },
+     [BUILDING_FIR_PATH] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "path orn fir",
+         .event_data.attr = "fir_path"
+     },
+     [BUILDING_OAK_PATH] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "path orn oak",
+         .event_data.attr = "oak_path"
+     },
+     [BUILDING_ELM_PATH] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "path orn elm",
+         .event_data.attr = "elm_path"
+     },
+     [BUILDING_FIG_PATH] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "path orn fig",
+         .event_data.attr = "fig_path"
+     },
+     [BUILDING_PLUM_PATH] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "path orn plum",
+         .event_data.attr = "plum_path"
+     },
+     [BUILDING_PALM_PATH] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "path orn palm",
+         .event_data.attr = "palm_path"
+     },
+     [BUILDING_DATE_PATH] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "path orn date",
+         .event_data.attr = "date_path"
+     },
+     [BUILDING_PAVILION_BLUE] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "pavilion blue",
+         .event_data.attr = "pavilion_blue"
+     },
+     [BUILDING_PAVILION_RED] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "pavilion red",
+         .event_data.attr = "pavilion_red"
+     },
+     [BUILDING_PAVILION_ORANGE] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "pavilion orange",
+         .event_data.attr = "pavilion_orange"
+     },
+     [BUILDING_PAVILION_YELLOW] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "pavilion yellow",
+         .event_data.attr = "pavilion_yellow"
+     },
+     [BUILDING_PAVILION_GREEN] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "pavilion green",
+         .event_data.attr = "pavilion_green"
+     },
+     [BUILDING_GODDESS_STATUE] = {
+         .size = 1,
+         .fire_proof = 1,
+         .rotation_offset = 13,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "sml statue 2",
+         .event_data.attr = "goddess_statue|small_statue_alt"
+     },
+     [BUILDING_SENATOR_STATUE] = {
+         .size = 1,
+         .fire_proof = 1,
+         .rotation_offset = 13,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "sml statue 3",
+         .event_data.attr = "senator_statue|small_statue_alt_b"
+     },
+     [BUILDING_OBELISK] = {
+         .size = 2,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "obelisk",
+         .event_data.attr = "obelisk"
+     },
+     [BUILDING_PANTHEON] = {
+         .size = 7,
+         .fire_proof = 1,
+         .sound_id = SOUND_CITY_ORACLE,
+         .draw_desirability_range = 1,
+         .custom_asset.group = "Monuments",
+         .custom_asset.id = "Pantheon Off",
+         .event_data.attr = "pantheon"
+     },
+     [BUILDING_ARCHITECT_GUILD] = {
+         .size = 2,
+         .fire_proof = 1,
+         .sound_id = SOUND_CITY_ENGINEERS_POST,
+         .custom_asset.group = "Admin_Logistics",
+         .custom_asset.id = "Arch Guild OFF",
+         .event_data.attr = "architect_guild"
+     },
+     [BUILDING_MESS_HALL] = {
+         .size = 3,
+         .sound_id = SOUND_CITY_MESS_HALL,
+         .draw_desirability_range = 1,
+         .custom_asset.group = "Military",
+         .custom_asset.id = "Mess OFF Central",
+         .event_data.attr = "mess_hall",
+     },
+     [BUILDING_LIGHTHOUSE] = {
+         .size = 3,
+         .fire_proof = 1,
+         .sound_id = SOUND_CITY_LIGHTHOUSE,
+         .custom_asset.group = "Monuments",
+         .custom_asset.id = "Lighthouse OFF",
+         .event_data.attr = "lighthouse"
+     },
+     [BUILDING_MENU_STATUES] = {
+         .event_data.attr = "statues|all_statues",
+         .event_data.key = TR_PARAMETER_VALUE_BUILDING_MENU_STATUES
+     },
+     [BUILDING_MENU_GOV_RES] = {
+         .event_data.attr = "governor_home|all_governors_houses",
+         .event_data.key = TR_PARAMETER_VALUE_BUILDING_MENU_GOV_RES
+     },
+     [BUILDING_TAVERN] = {
+         .size = 2,
+         .sound_id = SOUND_CITY_TAVERN,
+         .custom_asset.group = "Health_Culture",
+         .custom_asset.id = "Tavern OFF",
+         .event_data.attr = "tavern"
+     },
+     [BUILDING_GRAND_GARDEN] = {
+         .size = 2,
+         .fire_proof = 1,
+         .event_data.attr = "grand_garden",
+         .event_data.cannot_count = 1
+     },
+     [BUILDING_ARENA] = {
+         .size = 3,
+         .sound_id = SOUND_CITY_COLOSSEUM,
+         .custom_asset.group = "Health_Culture",
+         .custom_asset.id = "Arena OFF",
+         .event_data.attr = "arena"
+     },
+     [BUILDING_HORSE_STATUE] = {
+         .size = 3,
+         .fire_proof = 1,
+         .rotation_offset = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "Eque Statue",
+         .event_data.attr = "horse_statue"
+     },
+     [BUILDING_DOLPHIN_FOUNTAIN] = {
+         .size = 2,
+         .fire_proof = 1,
+         .event_data.attr = "dolphin_fountain",
+         .event_data.cannot_count = 1
+     },
+     [BUILDING_HEDGE_DARK] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "D Hedge 01",
+         .event_data.attr = "hedge_dark"
+     },
+     [BUILDING_HEDGE_LIGHT] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "L Hedge 01",
+         .event_data.attr = "hedge_light"
+     },
+     [BUILDING_LOOPED_GARDEN_WALL] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "C Garden Wall 01",
+         .event_data.attr = "looped_garden_wall"
+     },
+     [BUILDING_LEGION_STATUE] = {
+         .size = 2,
+         .fire_proof = 1,
+         .rotation_offset = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "legio statue",
+         .event_data.attr = "legion_statue"
+     },
+     [BUILDING_DECORATIVE_COLUMN] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "sml col B",
+         .event_data.attr = "decorative_column"
+     },
+     [BUILDING_COLONNADE] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "G Colonnade 01",
+         .event_data.attr = "colonnade"
+     },
+     [BUILDING_GARDEN_PATH] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "Garden Path 01",
+         .event_data.attr = "garden_path"
+     },
+     [BUILDING_LARARIUM] = {
+         .size = 1,
+         .draw_desirability_range = 1,
+         .custom_asset.group = "Health_Culture",
+         .custom_asset.id = "Lararium 01",
+         .event_data.attr = "lararium"
+     },
+     [BUILDING_NYMPHAEUM] = {
+         .size = 3,
+         .fire_proof = 1,
+         .sound_id = SOUND_CITY_ORACLE,
+         .draw_desirability_range = 1,
+         .custom_asset.group = "Monuments",
+         .custom_asset.id = "Nymphaeum OFF",
+         .event_data.attr = "nymphaeum"
+     },
+     [BUILDING_SMALL_MAUSOLEUM] = {
+         .size = 2,
+         .fire_proof = 1,
+         .sound_id = SOUND_CITY_ORACLE,
+         .draw_desirability_range = 1,
+         .rotation_offset = 1,
+         .custom_asset.group = "Monuments",
+         .custom_asset.id = "Mausoleum S",
+         .event_data.attr = "small_mausoleum"
+     },
+     [BUILDING_LARGE_MAUSOLEUM] = {
+         .size = 3,
+         .fire_proof = 1,
+         .sound_id = SOUND_CITY_ORACLE,
+         .draw_desirability_range = 1,
+         .custom_asset.group = "Monuments",
+         .custom_asset.id = "Mausoleum L",
+         .event_data.attr = "large_mausoleum"
+     },
+     [BUILDING_WATCHTOWER] = {
+         .size = 2,
+         .fire_proof = 1,
+         .sound_id = SOUND_CITY_WATCHTOWER,
+         .draw_desirability_range = 1,
+         .custom_asset.group = "Military",
+         .custom_asset.id = "Watchtower C OFF",
+         .event_data.attr = "watchtower"
+     },
+     [BUILDING_CARAVANSERAI] = {
+         .size = 4,
+         .fire_proof = 1,
+         .sound_id = SOUND_CITY_CARAVANSERAI,
+         .custom_asset.group = "Monuments",
+         .custom_asset.id = "Caravanserai_C_OFF",
+         .event_data.attr = "caravanserai"
+     },
+     [BUILDING_ROOFED_GARDEN_WALL] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "R Garden Wall 01",
+         .event_data.attr = "roofed_garden_wall"
+     },
+     [BUILDING_ROOFED_GARDEN_WALL_GATE] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "Garden_Gate_B",
+         .event_data.attr = "garden_wall_gate"
+     },
+     [BUILDING_PALISADE] = {
+         .size = 1,
+         .fire_proof = 1,
+         .draw_desirability_range = 1,
+         .custom_asset.group = "Military",
+         .custom_asset.id = "Pal Wall C 01",
+         .event_data.attr = "palisade"
+     },
+     [BUILDING_HEDGE_GATE_DARK] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "D Hedge Gate",
+         .event_data.attr = "hedge_gate_dark"
+     },
+     [BUILDING_HEDGE_GATE_LIGHT] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "L Hedge Gate",
+         .event_data.attr = "hedge_gate_light"
+     },
+     [BUILDING_PALISADE_GATE] = {
+         .size = 1,
+         .fire_proof = 1,
+         .draw_desirability_range = 1,
+         .custom_asset.group = "Military",
+         .custom_asset.id = "Palisade_Gate",
+         .event_data.attr = "palisade_gate"
+     },
+     [BUILDING_GLADIATOR_STATUE] = {
+         .size = 1,
+         .fire_proof = 1,
+         .rotation_offset = 1,
+         .custom_asset.group = "Aesthetics",
+         .event_data.attr = "gladiator_statue"
+     },
+     [BUILDING_HIGHWAY] = {
+         .size = 2,
+         .fire_proof = 1,
+         .custom_asset.group = "Admin_Logistics",
+         .custom_asset.id = "Highway_Placement",
+         .event_data.attr = "highway",
+     },
+     [BUILDING_GOLD_MINE] = {
+         .size = 2,
+         .custom_asset.group = "Industry",
+         .custom_asset.id = "Gold_Mine_C_OFF",
+         .event_data.attr = "gold_mine"
+     },
+     [BUILDING_STONE_QUARRY] = {
+         .size = 2,
+         .custom_asset.group = "Industry",
+         .custom_asset.id = "Stone_Quarry_C_OFF",
+         .event_data.attr = "stone_quarry"
+     },
+     [BUILDING_SAND_PIT] = {
+         .size = 2,
+         .custom_asset.group = "Industry",
+         .custom_asset.id = "Sand_Pit_C_OFF",
+         .event_data.attr = "sand_pit"
+     },
+     [BUILDING_BRICKWORKS] = {
+         .size = 2,
+         .sound_id = SOUND_CITY_BRICKWORKS,
+         .custom_asset.group = "Industry",
+         .custom_asset.id = "Brickworks_C_OFF",
+         .event_data.attr = "brickworks"
+     },
+     [BUILDING_CONCRETE_MAKER] = {
+         .size = 2,
+         .sound_id = SOUND_CITY_CONCRETE_MAKER,
+         .custom_asset.group = "Industry",
+         .custom_asset.id = "Concrete_Maker_C_OFF",
+         .event_data.attr = "concrete_maker"
+     },
+     [BUILDING_CITY_MINT] = {
+         .size = 3,
+         .fire_proof = 1,
+         .sound_id = SOUND_CITY_CITY_MINT,
+         .custom_asset.group = "Monuments",
+         .custom_asset.id = "City_Mint_ON",
+         .event_data.attr = "city_mint"
+     },
+     [BUILDING_DEPOT] = {
+         .size = 2,
+         .sound_id = SOUND_CITY_DEPOT,
+         .custom_asset.group = "Admin_Logistics",
+         .custom_asset.id = "Cart Depot N OFF",
+         .event_data.attr = "cart_depot"
+     },
+     [BUILDING_LOOPED_GARDEN_GATE] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "Garden_Gate",
+         .event_data.attr = "looped_garden_gate"
+     },
+     [BUILDING_PANELLED_GARDEN_GATE] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "Garden_Gate_C",
+         .event_data.attr = "panelled_garden_gate"
+     },
+     [BUILDING_PANELLED_GARDEN_WALL] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "Garden_Wall_C",
+         .event_data.attr = "panelled_garden_wall"
+     },
+     [BUILDING_SHRINE_CERES] = {
+         .size = 1,
+         .rotation_offset = 1,
+         .draw_desirability_range = 1,
+         .custom_asset.group = "Health_Culture",
+         .custom_asset.id = "Altar_Ceres",
+         .event_data.attr = "shrine_ceres"
+     },
+     [BUILDING_SHRINE_MARS] = {
+         .size = 1,
+         .rotation_offset = 1,
+         .draw_desirability_range = 1,
+         .custom_asset.group = "Health_Culture",
+         .custom_asset.id = "Altar_Mars",
+         .event_data.attr = "shrine_mars"
+     },
+     [BUILDING_SHRINE_MERCURY] = {
+         .size = 1,
+         .rotation_offset = 1,
+         .draw_desirability_range = 1,
+         .custom_asset.group = "Health_Culture",
+         .custom_asset.id = "Altar_Mercury",
+         .event_data.attr = "shrine_mercury"
+     },
+     [BUILDING_SHRINE_NEPTUNE] = {
+         .size = 1,
+         .rotation_offset = 1,
+         .draw_desirability_range = 1,
+         .custom_asset.group = "Health_Culture",
+         .custom_asset.id = "Altar_Neptune",
+         .event_data.attr = "shrine_neptune"
+     },
+     [BUILDING_SHRINE_VENUS] = {
+         .size = 1,
+         .rotation_offset = 1,
+         .draw_desirability_range = 1,
+         .custom_asset.group = "Health_Culture",
+         .custom_asset.id = "Altar_Venus",
+         .event_data.attr = "shrine_venus"
+     },
+     [BUILDING_OVERGROWN_GARDENS] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Aesthetics",
+         .custom_asset.id = "Overgrown_Garden_01",
+         .event_data.attr = "overgrown_gardens"
+     },
+     [BUILDING_ARMOURY] = {
+         .size = 2,
+         .sound_id = SOUND_CITY_ARMOURY,
+         .draw_desirability_range = 1,
+         .custom_asset.group = "Military",
+         .custom_asset.id = "Armoury_OFF_C",
+         .event_data.attr = "armoury"
+     },
+     [BUILDING_LATRINES] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Health_Culture",
+         .custom_asset.id = "Latrine_N",
+         .event_data.attr = "latrines"
+     },
+     [BUILDING_NATIVE_HUT_ALT] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Terrain_Maps",
+         .custom_asset.id = "Native_Hut_Central_01",
+         .event_data.attr = "native_hut_alt"
+     },
+     [BUILDING_NATIVE_DECORATION] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Terrain_Maps",
+         .custom_asset.id = "Native_Decoration_Central_01",
+         .event_data.attr = "native_decor"
+     },
+     [BUILDING_NATIVE_MONUMENT] = {
+         .size = 4,
+         .fire_proof = 1,
+         .custom_asset.group = "Terrain_Maps",
+         .custom_asset.id = "Native_Monument_Central_01",
+         .event_data.attr = "native_monument"
+     },
+     [BUILDING_NATIVE_WATCHTOWER] = {
+         .size = 1,
+         .fire_proof = 1,
+         .custom_asset.group = "Terrain_Maps",
+         .custom_asset.id = "Native_Watchtower_Central_01",
+         .event_data.attr = "native_watchtower"
+     },
 };
 
 void building_properties_init(void)
