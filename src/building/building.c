@@ -5,6 +5,7 @@
 #include "building/construction_building.h"
 #include "building/construction_clear.h"
 #include "building/data_transfer.h"
+#include "building/destruction.h"
 #include "building/distribution.h"
 #include "building/industry.h"
 #include "building/granary.h"
@@ -418,8 +419,10 @@ int building_repair(building *b)
         city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
         return 0;
     }
+    int building_id = building_destruction_get_og_building(b);
+    b = building_get(building_id); //ensure we've got the right building in case given a burning ruin tile
     // flags and placeholders
-    int og_size = 0, og_grid_offset = 0, og_orientation = 0, has_tmp = 0, is_house_lot = 0, success = 0;
+    int og_size = 0, og_grid_offset = 0, og_orientation = 0, og_storage_id, has_tmp = 0, is_house_lot = 0, success = 0;
     building_type og_type = BUILDING_NONE;
     building_storage tmp = { 0 };
 
@@ -429,17 +432,11 @@ int building_repair(building *b)
         og_grid_offset = b->data.rubble.og_grid_offset;
         og_orientation = b->data.rubble.og_orientation;
         og_type = b->data.rubble.og_type;
-        if (og_type) {  // exceptions should be checked and handled here
-            if (building_is_storage(b->type)) {
-
-                //conbuilding_storage_restorest building_storage *src = building_storage_get(b->storage_id);
-                //tmp = *src;
-                //has_tmp = 1;
-               // building_storage_delete(b->storage_id);
-               //try to use 
-            }
-        }
+        //og_storage_id = b->storage_id; //even burning ruins should retain their original storage id
     }
+    // if (building_is_storage(b->type)) {
+    //     int og_storage_id = b->storage_id; 
+    // }
     building_data_transfer_backup();
     building_data_transfer_copy(b, 1);
     //  Resolve placement data 
@@ -454,8 +451,10 @@ int building_repair(building *b)
     int type = og_type ? og_type : b->type;
     size = (og_type == BUILDING_WAREHOUSE) ? 3 : size;
     building_type type_to_place = og_type ? og_type : b->type;
+    og_storage_id = b->storage_id; //store the original storage id before clearing it
     // --- Clear terrain & place building ---
     grid_slice *grid_slice = map_grid_get_grid_slice_square(grid_offset, size);
+    map_terrain_backup(); // backup the terrain in case of failure
     int cleared = building_construction_prepare_terrain(grid_slice, CLEAR_MODE_RUBBLE, COST_PROCESS);
     if (is_house_lot) {
         success = building_construction_fill_vacant_lots(grid_slice);
@@ -469,19 +468,26 @@ int building_repair(building *b)
         }
     } else {
         success = building_construction_place_building(type_to_place, x, y);
-        if (building_is_storage(type_to_place) && b->storage_id) {
-            int success = building_storage_change_building(b->storage_id, b->id);
-
-        }
     }
+    building *new_building = building_get(map_building_at(map_grid_offset(x, y)));
     if (!success || !cleared) {
+        map_terrain_restore(); // restore terrain on failure
         city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
         return 0;
+    }
+    if (building_is_storage(type_to_place) && b->storage_id) {
+
+        if (new_building->storage_id != og_storage_id) {
+            // wrong storage is given
+            building_storage_delete(b->storage_id);
+            int storage_restore = building_storage_change_building(b->storage_id, new_building->id);
+            // if storage_restore, refresh orders of cart depots
+        }
     }
     int placement_cost = model_get_building(type_to_place)->cost * success;
     int full_cost = (placement_cost + placement_cost / 20);// +5%
     city_finance_process_construction(full_cost);
-    building *new_building = building_get(map_building_at(map_grid_offset(x, y)));
+
     map_building_set_rubble_grid_building_id(grid_offset, 0, size); // remove rubble marker
     building_data_transfer_paste(new_building, 1);
     if (new_building->state == BUILDING_STATE_RUBBLE) {
@@ -493,6 +499,7 @@ int building_repair(building *b)
 
     building_data_transfer_restore_and_clear_backup();
     figure_create_explosion_cloud(new_building->x, new_building->y, og_size, 1);
+    b->state = BUILDING_STATE_DELETED_BY_GAME; //remove the old building entry
     game_undo_disable(); // not accounting for undoing repairs
     return full_cost;
 }

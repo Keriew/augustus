@@ -111,7 +111,7 @@ int building_storage_get_building_id(int storage_id)
     return array_item(storages, storage_id)->building_id;
 }
 
-int building_storage_restore(int storage_id, int building_id)
+int building_storage_restore(int storage_id)
 {
     if (array_item(storages, storage_id)->in_use) {
         return 0;
@@ -129,6 +129,7 @@ int building_storage_change_building(int storage_id, int building_id)
         return 0;
     }
     array_item(storages, storage_id)->building_id = building_id;
+    building_get(building_id)->storage_id = storage_id; // set for the main entry
     return 1;
 }
 
