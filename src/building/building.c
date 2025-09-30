@@ -431,10 +431,12 @@ int building_repair(building *b)
         og_type = b->data.rubble.og_type;
         if (og_type) {  // exceptions should be checked and handled here
             if (building_is_storage(b->type)) {
-                const building_storage *src = building_storage_get(b->storage_id);
-                tmp = *src;
-                has_tmp = 1;
-                building_storage_delete(b->storage_id);
+
+                //conbuilding_storage_restorest building_storage *src = building_storage_get(b->storage_id);
+                //tmp = *src;
+                //has_tmp = 1;
+               // building_storage_delete(b->storage_id);
+               //try to use 
             }
         }
     }
@@ -467,6 +469,10 @@ int building_repair(building *b)
         }
     } else {
         success = building_construction_place_building(type_to_place, x, y);
+        if (building_is_storage(type_to_place) && b->storage_id) {
+            int success = building_storage_change_building(b->storage_id, b->id);
+
+        }
     }
     if (!success || !cleared) {
         city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);

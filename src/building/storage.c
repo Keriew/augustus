@@ -111,7 +111,7 @@ int building_storage_get_building_id(int storage_id)
     return array_item(storages, storage_id)->building_id;
 }
 
-int building_storage_restore(int storage_id)
+int building_storage_restore(int storage_id, int building_id)
 {
     if (array_item(storages, storage_id)->in_use) {
         return 0;
@@ -121,6 +121,15 @@ int building_storage_restore(int storage_id)
         storages.size = storage_id + 1;
     }
     return storage_id;
+}
+
+int building_storage_change_building(int storage_id, int building_id)
+{
+    if (storage_id < 0 || storage_id >= storages.size) {
+        return 0;
+    }
+    array_item(storages, storage_id)->building_id = building_id;
+    return 1;
 }
 
 void building_storage_delete(int storage_id)

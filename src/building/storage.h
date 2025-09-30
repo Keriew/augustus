@@ -18,10 +18,11 @@ enum {
  * Storage state
  */
 typedef enum {
-    BUILDING_STORAGE_STATE_ACCEPTING = 0,
-    BUILDING_STORAGE_STATE_NOT_ACCEPTING = 1,
+    BUILDING_STORAGE_STATE_NOT_ACCEPTING = 0,
+    BUILDING_STORAGE_STATE_ACCEPTING = 1,
     BUILDING_STORAGE_STATE_GETTING = 2,
     BUILDING_STORAGE_STATE_MAINTAINING = 3,
+    BUILDING_STORAGE_STATE_MAX = 4
 } building_storage_state;
 
 typedef enum {
@@ -101,6 +102,14 @@ int building_storage_restore(int storage_id);
  * @param storage_id Storage id
  */
 void building_storage_delete(int storage_id);
+
+/**
+ * Changes the building id for a storage.
+ * @param storage_id Storage id
+ * @param building_id New building id
+ * @return 1 on success, 0 on failure
+ */
+int building_storage_change_building(int storage_id, int building_id);
 
 /**
  * Gets the size of the storages array.
