@@ -16,6 +16,8 @@ enum {
 
 /**
  * Storage state
+ * state > 0 - means the building accepts that resource
+ * storage_state_max helps in cycling through the states
  */
 typedef enum {
     BUILDING_STORAGE_STATE_NOT_ACCEPTING = 0,
