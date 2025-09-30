@@ -349,8 +349,6 @@ int scenario_action_type_building_force_collapse_execute(scenario_action_t *acti
                 type == BUILDING_OVERGROWN_GARDENS) && !map_terrain_is(current_grid_offset, TERRAIN_BUILDING)) {
                 int terrain = TERRAIN_ROAD;
                 switch (type) {
-                    case BUILDING_ROAD:
-                        break;
                     case BUILDING_GARDENS:
                     case BUILDING_OVERGROWN_GARDENS:
                         terrain = TERRAIN_GARDEN;
@@ -360,6 +358,9 @@ int scenario_action_type_building_force_collapse_execute(scenario_action_t *acti
                         break;
                     default:
                         break;
+                }
+                if (type == BUILDING_HIGHWAY) {
+                    map_tiles_clear_highway(current_grid_offset, 0);
                 }
                 map_terrain_remove(current_grid_offset, terrain);
             }
