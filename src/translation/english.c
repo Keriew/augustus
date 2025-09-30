@@ -1715,7 +1715,9 @@ static translation_string all_strings[] = {
     {TR_CONFIRM_REPAIR_BUILDINGS, "Repair all buildings in the area for "},
     {TR_CONFIRM_REPAIR_BUILDINGS_TITLE, "Repair buildings"},
     {TR_BUILDING_LAND_CLEAR, "Clear area"},
-    {TR_CONFIG_ENABLE_MARKET_RANGE, "Enable market range"}
+    {TR_CONFIG_ENABLE_MARKET_RANGE, "Enable market range"},
+    { TR_WARNING_CANT_REPAIR_MONUMENTS, "Unique Monuments cannot be repaired" },
+    {TR_WARNING_CANT_REPAIR_AQUEDUCTS, "Aqueducts cannot be repaired"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

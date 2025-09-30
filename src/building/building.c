@@ -68,6 +68,9 @@ building *building_get(int id)
 }
 int building_can_repair_type(building_type type)
 {
+    if (building_monument_is_limited(type) || type == BUILDING_AQUEDUCT) {
+        return 0; // limited monuments and aqueducts cannot be repaired at the moment, aqueducts require a rework,
+    }   //and limited monuments are too complex to easily repair, and arent a common occurrence
     building_type repair_type = building_clone_type_from_building_type(type);
     if (repair_type == BUILDING_NONE) {
         return 0;
@@ -416,7 +419,13 @@ int building_repair(building *b)
         return 0;
     }
     if (!building_can_repair_type(b->type) && !building_can_repair_type(b->data.rubble.og_type)) {
-        city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
+        if (building_monument_is_limited(b->type) || building_monument_is_limited(b->data.rubble.og_type)) {
+            city_warning_show(WARNING_REPAIR_MONUMENT, NEW_WARNING_SLOT);
+        } else if (b->type == BUILDING_AQUEDUCT || b->data.rubble.og_type == BUILDING_AQUEDUCT) {
+            city_warning_show(WARNING_REPAIR_AQUEDUCT, NEW_WARNING_SLOT);
+        } else {
+            city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
+        }
         return 0;
     }
     int building_id = building_destruction_get_og_building(b);
@@ -472,6 +481,7 @@ int building_repair(building *b)
     building *new_building = building_get(map_building_at(map_grid_offset(x, y)));
     if (!success || !cleared) {
         map_terrain_restore(); // restore terrain on failure
+        city_finance_process_construction(-cleared); // refund clearing cost
         city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
         return 0;
     }

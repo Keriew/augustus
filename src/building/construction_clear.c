@@ -175,6 +175,10 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
                 }
                 if (map_terrain_is(grid_offset, TERRAIN_RUBBLE) && !measure_only) {
                     if (map_building_rubble_building_id(grid_offset)) {
+                        building *rubble_building = building_get(map_building_rubble_building_id(grid_offset));
+                        if (rubble_building) {
+                            rubble_building->state = BUILDING_STATE_DELETED_BY_GAME;
+                        }
                         map_building_set_rubble_grid_building_id(grid_offset, 0, 1); // remove rubble marker
                     }
                 }
@@ -359,6 +363,14 @@ static int repair_land_confirmed(int measure_only, int x_start, int y_start, int
                     }
                     confirm.repairable_buildings[repairable_buildings] = b->id;
                     repairable_buildings++;
+                }
+            } else {
+                if (building_monument_is_limited(b->type)) {
+                    city_warning_show(WARNING_REPAIR_MONUMENT, NEW_WARNING_SLOT);
+                } else if (b->type == BUILDING_AQUEDUCT) {
+                    city_warning_show(WARNING_REPAIR_AQUEDUCT, NEW_WARNING_SLOT);
+                } else {
+                    city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
                 }
             }
         }

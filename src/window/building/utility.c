@@ -2,6 +2,7 @@
 
 #include "assets/assets.h"
 #include "building/building.h"
+#include "building/clone.h"
 #include "building/roadblock.h"
 #include "city/constants.h"
 #include "city/finance.h"
@@ -288,7 +289,10 @@ static void init_repair_building_button(building_info_context *c)
     repair_building_button->parameters[0] = c->rubble_building_id;
     building *b = building_get(c->rubble_building_id);
     static lang_fragment frag;
-    if (building_is_still_burning(b)) {
+    if (!building_can_repair(b)) {
+        frag = (lang_fragment) { LANG_FRAG_LABEL, CUSTOM_TRANSLATION, TR_WARNING_REPAIR_IMPOSSIBLE, 0, 0, 0 };
+        repair_building_button->is_disabled = 1;
+    } else if (building_is_still_burning(b)) {
         frag = (lang_fragment) { LANG_FRAG_LABEL, CUSTOM_TRANSLATION, TR_BUILDING_INFO_BUILDING_BURNING, 0, 0, 0 };
         repair_building_button->is_disabled = 1;
     } else {
@@ -309,19 +313,21 @@ void window_building_draw_rubble(building_info_context *c)
     lang_text_draw_centered(140, 0, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
     building *b = building_get(c->rubble_building_id);
     building_type og_type = b->data.rubble.og_type;
+    building_type type = og_type == BUILDING_NONE ? b->type : og_type;
     int is_burning_ruins = (b->type == BUILDING_BURNING_RUIN);
 
-    if (building_can_repair_type(og_type)) {
+    if (building_can_repair_type(type) || building_can_repair_type(type)) {
         init_repair_building_button(c);
         complex_button_draw(repair_building_button);
-    } else if (building_can_repair_type(b->type)) {
+    } else if (building_clone_type_from_building_type(type) != BUILDING_NONE) {
+        // cant repair but can clone - aqueducts or limited monuments. Show disabled button
         init_repair_building_button(c);
         complex_button_draw(repair_building_button);
     }
-    int cursor = lang_text_draw(41, b->type,
+    int cursor = lang_text_draw(41, type,
         c->x_offset + 32, c->y_offset + BLOCK_SIZE * c->height_blocks - 173, FONT_NORMAL_BLACK);
-    if (is_burning_ruins && og_type) { // show original building type if it's burning ruins
-        cursor += lang_text_draw(41, og_type, c->x_offset + 32 + cursor, c->y_offset + BLOCK_SIZE * c->height_blocks - 173,
+    if (is_burning_ruins && type) { // show original building type if it's burning ruins
+        cursor += lang_text_draw(41, type, c->x_offset + 32 + cursor, c->y_offset + BLOCK_SIZE * c->height_blocks - 173,
              FONT_NORMAL_RED);
     }
     lang_text_draw_multiline(140, 1, c->x_offset + 32, c->y_offset + BLOCK_SIZE * c->height_blocks - 143,
