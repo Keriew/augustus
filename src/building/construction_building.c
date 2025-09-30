@@ -391,12 +391,12 @@ int building_construction_fill_vacant_lots(grid_slice *area)
         int grid_offset = area->grid_offsets[i];
         int x = map_grid_offset_to_x(grid_offset);
         int y = map_grid_offset_to_y(grid_offset);
-        int success = building_construction_place_building(BUILDING_HOUSE_VACANT_LOT, x, y);
+        int success = building_construction_place_building(BUILDING_HOUSE_VACANT_LOT, x, y, 1);
         if (!success) {
             continue;
         }
         building *b = building_get(map_building_at(grid_offset));
-        map_building_tiles_add(b->id, x, y, 1, image_group(GROUP_BUILDING_HOUSE_VACANT_LOT), TERRAIN_BUILDING);
+        //map_building_tiles_add(b->id, x, y, 1, image_group(GROUP_BUILDING_HOUSE_VACANT_LOT), TERRAIN_BUILDING);
         game_undo_add_building(b);
         items_placed++;
     }
@@ -407,7 +407,7 @@ int building_construction_fill_vacant_lots(grid_slice *area)
     return items_placed;
 }
 
-int building_construction_place_building(building_type type, int x, int y)
+int building_construction_place_building(building_type type, int x, int y, int exact_coordinates)
 {
     unsigned int terrain_mask = TERRAIN_ALL;
     if (building_type_is_roadblock(type)) {
@@ -436,11 +436,19 @@ int building_construction_place_building(building_type type, int x, int y)
     int check_figure = type == BUILDING_ROADBLOCK && size == 1 ? 0 : 1;
     int building_orientation = 0;
     if (type == BUILDING_GATEHOUSE) {
-        building_orientation = map_orientation_for_gatehouse(x, y);
+        //check if there's a preset orientation from old gatehouse
+        building *old_b = building_get(map_building_rubble_building_id(map_grid_offset(x, y)));
+        if (old_b && old_b->type == BUILDING_GATEHOUSE) {
+            building_orientation = old_b->subtype.orientation;
+        } else {
+            building_orientation = map_orientation_for_gatehouse(x, y);
+        }
     } else if (type == BUILDING_TRIUMPHAL_ARCH) {
         building_orientation = map_orientation_for_triumphal_arch(x, y);
     }
-    building_construction_offset_start_from_orientation(&x, &y, size);
+    if (!exact_coordinates) {
+        building_construction_offset_start_from_orientation(&x, &y, size);
+    }
     // extra checks
     if (type == BUILDING_GATEHOUSE) {
         if (!map_tiles_are_clear(x, y, size, terrain_mask, check_figure)) {

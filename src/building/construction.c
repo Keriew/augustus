@@ -357,6 +357,7 @@ static int place_wall(int x_start, int y_start, int x_end, int y_end, int measur
                     building *wall = building_create(BUILDING_WALL, x, y);
                     map_building_set(grid_offset, wall->id);
                     map_terrain_add(grid_offset, TERRAIN_BUILDING);
+                    map_terrain_add(grid_offset, TERRAIN_WALL);
                 }
             }
         }
@@ -1168,7 +1169,7 @@ void building_construction_place(void)
         placement_cost *= place_draggable_building(x_start, y_start, x_end, y_end, type, rotation);
     } else if (type == BUILDING_HOUSE_VACANT_LOT) {
         placement_cost *= place_houses(0, x_start, y_start, x_end, y_end);
-    } else if (!building_construction_place_building(type, x_end, y_end)) {
+    } else if (!building_construction_place_building(type, x_end, y_end, 0)) {
         return;
     }
 

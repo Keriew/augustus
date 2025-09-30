@@ -18,9 +18,14 @@ typedef enum {
 }cost_calculation;
 /**
  * @brief Places a building of the specified type at the given coordinates
+ * CAREFUL: x and y are offset depending on city orientation, can cause problems with exact coordinates given
  * Doesn't process the finance, but checks the correct terrain and figure collisions
+ * @param type Building type to place
+ * @param x tile X coordinate for placement
+ * @param y tile Y coordinate for placement
+ * @param exact_coordinates If 1, x and y are used as exact coordinates without any offset adjustments
 */
-int building_construction_place_building(building_type type, int x, int y);
+int building_construction_place_building(building_type type, int x, int y, int exact_coordinates);
 int building_construction_is_granary_cross_tile(int tile_no);
 int building_construction_is_warehouse_corner(int tile_no);
 
