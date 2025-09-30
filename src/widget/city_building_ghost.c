@@ -31,6 +31,7 @@
 #include "map/bridge.h"
 #include "map/building.h"
 #include "map/building_tiles.h"
+#include "map/data.h"
 #include "map/figure.h"
 #include "map/grid.h"
 #include "map/image_context.h"
@@ -605,7 +606,7 @@ static void draw_first_reservoir_range(int x, int y, int grid_offset)
         data.reservoir_range.offsets[data.reservoir_range.total] = grid_offset;
         data.reservoir_range.total++;
     }
-    int color_mask = data.reservoir_range.blocked ? COLOR_MASK_GREY : COLOR_MASK_BLUE;
+    int color_mask = data.reservoir_range.blocked ? COLOR_MASK_GRAY : COLOR_MASK_BLUE;
     image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, color_mask, data.scale);
 }
 
@@ -616,7 +617,7 @@ static void draw_second_reservoir_range(int x, int y, int grid_offset)
             return;
         }
     }
-    int color_mask = data.reservoir_range.blocked ? COLOR_MASK_GREY : COLOR_MASK_BLUE;
+    int color_mask = data.reservoir_range.blocked ? COLOR_MASK_GRAY : COLOR_MASK_BLUE;
     image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, color_mask, data.scale);
 }
 
@@ -1245,7 +1246,7 @@ static void draw_road(const map_tile *tile, int x, int y)
 
 static void draw_market_range(int x, int y, int grid_offset)
 {
-    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_GREY, data.scale);
+    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_GRAY, data.scale);
 }
 
 static void draw_market(const map_tile *tile, int x, int y)
@@ -1263,7 +1264,7 @@ static void draw_market(const map_tile *tile, int x, int y)
     } else {
         blocked = is_blocked_for_building(grid_offset, building_size, blocked_tiles, 1);
     }
-    if (config_get(CONFIG_UI_SHOW_MARKET_RANGE)) {
+    if (config_get(CONFIG_UI_SHOW_MARKET_RANGE) && config_get(CONFIG_GP_CH_MARKET_RANGE)) {
         city_view_foreach_tile_in_range(tile->grid_offset, 2, MARKET_MAX_DISTANCE, draw_market_range);
     }
     int image_id = image_group(building_properties_for_type(BUILDING_MARKET)->image_group);

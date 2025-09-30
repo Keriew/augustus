@@ -202,14 +202,14 @@ int figure_trade_caravan_can_sell(figure *trader, int building_id, int city_id)
 
 resource_type get_native_trader_buy_resource(building *b)
 {
-    unsigned char i;
-    unsigned char highest_resource = RESOURCE_NONE;
+    resource_type highest_resource = RESOURCE_NONE;
     if (b->type == BUILDING_WAREHOUSE) {
         building_warehouse_recount_resources(b);
     }
-    for (i = RESOURCE_NONE + 1; i < RESOURCE_MAX; i++) { //not interested in RESOURCE_NONE
-        if (b->resources[i] > highest_resource) {
-            highest_resource = i;
+    for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+        if (b->resources[r] > highest_resource &&
+            (city_resource_trade_status(r) & TRADE_STATUS_EXPORT)) {
+            highest_resource = r;
         }
     }
     return highest_resource;
@@ -433,9 +433,6 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
     resource_multiplier_reset();
     return 0;
 }
-
-
-
 
 static void go_to_next_storage(figure *f)
 {
@@ -667,9 +664,9 @@ void figure_native_trader_action(figure *f)
             if (f->wait_ticks > 10) {
                 f->wait_ticks = 0;
                 building *b = building_get(f->destination_building_id);
+                int resource = get_native_trader_buy_resource(b); // preemptive check of resource to avoid standing idle
                 if (building_storage_get_permission(BUILDING_STORAGE_PERMISSION_NATIVES, b) &&
-                    f->trader_amount_bought < figure_trade_land_trade_units()) {
-                    int resource = get_native_trader_buy_resource(b);
+                    f->trader_amount_bought < figure_trade_land_trade_units() && resource != RESOURCE_NONE) {
                     int removed = 0;
                     if (b->type == BUILDING_GRANARY) {
                         removed = building_granary_try_remove_resource(b, resource, 1);

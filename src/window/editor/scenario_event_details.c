@@ -185,7 +185,8 @@ static unsigned int count_maximum_needed_list_items(void)
 {
     unsigned int total_items = 0;
     scenario_condition_group_t *group;
-    array_foreach(data.event->condition_groups, group) {
+    array_foreach(data.event->condition_groups, group)
+    {
         if (group->conditions.size > 0) {
             total_items += group->conditions.size + 1;
         }
@@ -219,7 +220,8 @@ static void update_visible_conditions_and_actions(void)
             if (group->conditions.size > 0) {
                 data.conditions.list[data.conditions.active].group_id = i;
                 data.conditions.active++;
-                array_foreach(group->conditions, condition) {
+                array_foreach(group->conditions, condition)
+                {
                     if (condition->type != CONDITION_TYPE_UNDEFINED) {
                         data.conditions.list[data.conditions.active].group_id = i;
                         data.conditions.list[data.conditions.active].condition = condition;
@@ -233,7 +235,8 @@ static void update_visible_conditions_and_actions(void)
             data.conditions.list[data.conditions.active].group_id = 0;
             data.conditions.active++;
         }
-        array_foreach(group->conditions, condition) {
+        array_foreach(group->conditions, condition)
+        {
             if (condition->type != CONDITION_TYPE_UNDEFINED) {
                 data.conditions.list[data.conditions.active].group_id = 0;
                 data.conditions.list[data.conditions.active].condition = condition;
@@ -259,7 +262,8 @@ static void update_visible_conditions_and_actions(void)
     data.actions.active = 0;
     if (data.actions.available) {
         scenario_action_t *action;
-        array_foreach(data.event->actions, action) {
+        array_foreach(data.event->actions, action)
+        {
             if (action->type != ACTION_TYPE_UNDEFINED) {
                 data.actions.list[data.actions.active] = action;
                 data.actions.active++;
@@ -370,7 +374,7 @@ static int color_from_state(event_state state)
         } else if (state == EVENT_STATE_PAUSED) {
             return COLOR_MASK_RED;
         } else if (state == EVENT_STATE_DISABLED) {
-            return COLOR_MASK_GREY;
+            return COLOR_MASK_GRAY;
         }
     }
     return COLOR_MASK_NONE;

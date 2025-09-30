@@ -553,7 +553,7 @@ static void init(int grid_offset)
         default: context.height_blocks = 22; break;
     }
     adjust_height_for_storage_buildings(&context);
-    if (screen_height() <= 600) {
+    if (screen_height() <= 800) { // longest window is mars grand temple at 736px height
         context.height_blocks = calc_bound(context.height_blocks, 0, 26);
     }
     // dialog placement

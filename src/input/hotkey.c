@@ -9,6 +9,7 @@
 #include "graphics/video.h"
 #include "graphics/window.h"
 #include "input/scroll.h"
+#include "sound/music.h"
 #include "window/hotkey_editor.h"
 #include "window/popup_dialog.h"
 
@@ -35,6 +36,7 @@ typedef struct {
     int save_screenshot;
     int save_city_screenshot;
     int save_minimap_screenshot;
+    int next_track;
 } global_hotkeys;
 
 static struct {
@@ -440,6 +442,9 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
             def->action = &data.hotkey_state.show_overlay;
             def->value = OVERLAY_ENEMY;
             break;
+        case HOTKEY_NEXT_TRACK:
+            def->action = &data.global_hotkey_state.next_track;
+            break;
         default:
             def->action = 0;
     }
@@ -664,6 +669,9 @@ void hotkey_handle_global_keys(void)
     }
     if (data.global_hotkey_state.save_minimap_screenshot) {
         graphics_save_screenshot(SCREENSHOT_MINIMAP);
+    }
+    if (data.global_hotkey_state.next_track) {
+        sound_music_next_track();
     }
 }
 

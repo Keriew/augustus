@@ -174,7 +174,9 @@ void building_maintenance_check_fire_collapse(void)
     scenario_climate climate = scenario_property_climate();
     int recalculate_terrain = 0;
     int random_global = random_byte() & 7;
-
+    if (city_population() < 10) {
+        return; // skip fire/collapse checks in very early game to avoid frustrating the player
+    }
     for (int i = 1; i < building_count(); i++) {
         building *b = building_get(i);
         if (b->state != BUILDING_STATE_IN_USE || b->fire_proof) {

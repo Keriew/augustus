@@ -1001,9 +1001,14 @@ void building_construction_place(void)
         return;
     }
     if (city_finance_out_of_money()) {
-        map_property_clear_constructing_and_deleted();
-        city_warning_show(WARNING_OUT_OF_MONEY, NEW_WARNING_SLOT);
-        return;
+        if (type == BUILDING_WELL && building_count_total(BUILDING_WELL) < 5) {
+            // allow wells even when out of money, but limit to 5
+        } else {
+            // For all other buildings or if we already have 5+ wells
+            map_property_clear_constructing_and_deleted();
+            city_warning_show(WARNING_OUT_OF_MONEY, NEW_WARNING_SLOT);
+            return;
+        }
     }
 
     figure_type enemy_figure_type = nearby_enemy_type(x_start, y_start, x_end, y_end);

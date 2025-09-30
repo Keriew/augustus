@@ -11,6 +11,7 @@ typedef struct {
     int rotation_offset;
     int sound_id;
     int draw_desirability_range;
+    int venus_gt_bonus; // indicator of whether building is part of the 'garden/statue/temple' group
     struct {
         const char *group;
         const char *id;

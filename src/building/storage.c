@@ -330,7 +330,14 @@ void building_storage_cycle_partial_resource_state(int storage_id, resource_type
     entry->quantity = (building_storage_quantity) current;
 }
 
-
+int building_storage_accepts_storage(building *b, resource_type resource, int *understaffed)
+{
+    if (b->type == BUILDING_WAREHOUSE) {
+        return building_warehouse_accepts_storage(b, resource, understaffed);
+    } else if (b->type == BUILDING_GRANARY) {
+        return building_granary_accepts_storage(b, resource, understaffed);
+    }
+}
 
 void building_storage_accept_none(int storage_id)
 {
@@ -339,7 +346,6 @@ void building_storage_accept_none(int storage_id)
         s->storage.resource_state[r].state = BUILDING_STORAGE_STATE_NOT_ACCEPTING;
     }
 }
-
 
 void building_storage_accept_all(int storage_id)
 {

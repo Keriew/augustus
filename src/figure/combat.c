@@ -92,6 +92,9 @@ static void hit_opponent(figure *f)
     if (m->is_charging && m->figure_type == FIGURE_FORT_MOUNTED) {
         figure_attack += 4; // charging bonus for mounted units
     }
+    if (m->is_charging && m->figure_type == FIGURE_FORT_INFANTRY) {
+        figure_attack += 2; // charging bonus for sword infantry
+    }
 
     // defense modifiers
     if (opponent_formation->is_halted &&
