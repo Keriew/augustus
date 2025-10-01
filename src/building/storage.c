@@ -197,7 +197,7 @@ int building_storage_get_storage_state_quantity(building *b, resource_type resou
 
 const building_storage_state building_storage_get_state(building *b, int resource, int relative)
 {
-    if (b->has_plague || b->state != BUILDING_STATE_IN_USE) {
+    if (b->has_plague || (b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_CREATED)) {
         return BUILDING_STORAGE_STATE_NOT_ACCEPTING;
     }
     if (b->type != BUILDING_GRANARY && b->type != BUILDING_WAREHOUSE) { //safeguard
