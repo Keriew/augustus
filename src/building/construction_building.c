@@ -450,8 +450,6 @@ int building_construction_place_building(building_type type, int x, int y, int e
         building_construction_offset_start_from_orientation(&x, &y, size);
     }
     // extra checks
-<<<<<<< Updated upstream
-=======
     if (type == BUILDING_TOWER) {
         if (!map_terrain_all_tiles_in_radius_are(x, y, size, 0, TERRAIN_WALL)) {
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
@@ -468,7 +466,6 @@ int building_construction_place_building(building_type type, int x, int y, int e
             }
         }
     }
->>>>>>> Stashed changes
     if (type == BUILDING_GATEHOUSE) {
         if (!map_tiles_are_clear(x, y, size, terrain_mask, check_figure)) {
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
