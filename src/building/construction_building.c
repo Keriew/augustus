@@ -409,7 +409,7 @@ int building_construction_fill_vacant_lots(grid_slice *area)
 
 int building_construction_place_building(building_type type, int x, int y, int exact_coordinates)
 {
-    unsigned int terrain_mask = TERRAIN_ALL;
+    int terrain_mask = TERRAIN_ALL;
     if (building_type_is_roadblock(type)) {
         terrain_mask = type == BUILDING_GATEHOUSE ? ~TERRAIN_WALL & ~TERRAIN_ROAD &
             ~TERRAIN_HIGHWAY : ~TERRAIN_ROAD & ~TERRAIN_HIGHWAY;
@@ -450,6 +450,25 @@ int building_construction_place_building(building_type type, int x, int y, int e
         building_construction_offset_start_from_orientation(&x, &y, size);
     }
     // extra checks
+<<<<<<< Updated upstream
+=======
+    if (type == BUILDING_TOWER) {
+        if (!map_terrain_all_tiles_in_radius_are(x, y, size, 0, TERRAIN_WALL)) {
+            city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
+            return 0;
+        }
+        if (!map_terrain_all_tiles_in_radius_are(x, y, 2, 0, TERRAIN_BUILDING)) {
+            city_warning_show(WARNING_WALL_NEEDED, NEW_WARNING_SLOT);
+            return 0;
+        }
+        if (!building_orientation) {
+            building_orientation = building_rotation_get_rotation() + 1;
+            if (building_orientation > 4) {
+                building_orientation = 1;
+            }
+        }
+    }
+>>>>>>> Stashed changes
     if (type == BUILDING_GATEHOUSE) {
         if (!map_tiles_are_clear(x, y, size, terrain_mask, check_figure)) {
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
@@ -461,13 +480,6 @@ int building_construction_place_building(building_type type, int x, int y, int e
             } else {
                 building_orientation = 2;
             }
-        }
-    }
-    if (type == BUILDING_TOWER) {
-        int tower_terrain_mask = TERRAIN_WALL;
-        if (!map_terrain_all_tiles_in_radius_are(x, y, 2, 0, tower_terrain_mask)) {
-            city_warning_show(WARNING_WALL_NEEDED, NEW_WARNING_SLOT);
-            return 0;
         }
     }
     if (type == BUILDING_ROADBLOCK) {

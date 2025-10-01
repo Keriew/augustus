@@ -17,34 +17,39 @@ static grid_u32 terrain_grid_backup;
 
 const terrain_flags_array *map_terrain_to_array(int grid_offset)
 {
-    static terrain_flags_array result;
     static const char *names[TERRAIN_NUM_FLAGS] = {
         "TREE", "ROCK", "WATER", "BUILDING", "SHRUB", "GARDEN", "ROAD",
         "RESERVOIR_R", "AQUEDUCT", "ELEVATION", "ACCESS_RAMP", "MEADOW",
         "RUBBLE", "FOUNTAIN_R", "WALL", "GATEHOUSE", "ORG_TREE",
-        "HWAY_TOP_LEFT", "HWAY_BOT_LEFT", "HWAY_TOP_RIGHT", "HWAY_BOT_RIGHT"
     };
-
+    static terrain_flags_array result;
     unsigned int terrain_value = terrain_grid.items[grid_offset];
-    result.count = 0;
+
+    // Reset everything to zero to avoid stale data
+    memset(&result, 0, sizeof(result));
 
     if (terrain_value == 0) {
-        strcpy(result.key[0], "CLEAR");
-        result.bits[0] = 1;
+        // No bits set: represent as CLEAR
+        strncpy(result.key[0], "CLEAR", KEY_MAX_LEN - 1);
+        result.key[0][KEY_MAX_LEN - 1] = '\0';
         result.count = 1;
         return &result;
     }
 
     for (int i = 0; i < TERRAIN_NUM_FLAGS; ++i) {
-        result.bits[i] = (terrain_value >> i) & 1;
-        if (result.bits[i]) {
-            strcpy(result.key[result.count], names[i]);
+        if ((terrain_value >> i) & 1) {
+            result.bits[i] = 1;
+
+            strncpy(result.key[result.count], names[i], KEY_MAX_LEN - 1);
+            result.key[result.count][KEY_MAX_LEN - 1] = '\0';
+
             result.count++;
         }
     }
 
     return &result;
 }
+
 int map_terrain_is(int grid_offset, int terrain)
 {
     return map_grid_is_valid_offset(grid_offset) && terrain_grid.items[grid_offset] & terrain;
