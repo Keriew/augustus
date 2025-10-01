@@ -1227,6 +1227,4 @@
 	<image id="gear_icon" src="gear_placeholder"/>
 	<image id="copy_icon" src="copy_settings"/>
 	<image id="paste_icon" src="paste_settings"/>
-	<image id="paste_icon2" src="paste_settings2"/>
-	<image id="paste_icon3" src="paste_settings3"/>
 </assetlist>
