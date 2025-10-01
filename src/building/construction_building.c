@@ -104,6 +104,20 @@ int building_construction_prepare_terrain(grid_slice *grid_slice, clear_mode cle
     return total_cost;
 }
 
+static int check_gatehouse_tiles(int grid_offset)
+{
+    grid_slice *slice = map_grid_get_grid_slice_square(grid_offset, 2);
+    for (int i = 0; i < slice->size; i++) {
+        if (map_terrain_is(slice->grid_offsets[i], TERRAIN_BUILDING)) {
+            if (map_terrain_is(slice->grid_offsets[i], TERRAIN_WALL)) {
+                continue;
+            } else {
+                return 0;
+            }
+        }
+    }
+    return 1;
+}
 
 static void add_hippodrome(building *b)
 {
@@ -412,7 +426,7 @@ int building_construction_place_building(building_type type, int x, int y, int e
     int terrain_mask = TERRAIN_ALL;
     if (building_type_is_roadblock(type)) {
         terrain_mask = type == BUILDING_GATEHOUSE ? ~TERRAIN_WALL & ~TERRAIN_ROAD &
-            ~TERRAIN_HIGHWAY : ~TERRAIN_ROAD & ~TERRAIN_HIGHWAY;
+            ~TERRAIN_HIGHWAY & ~TERRAIN_BUILDING : ~TERRAIN_ROAD & ~TERRAIN_HIGHWAY;
         //allow building gatehouses over walls and roads, other non-bridge roadblocks over roads and highways
     } else if (type == BUILDING_TOWER) {
         terrain_mask = ~TERRAIN_WALL & ~TERRAIN_BUILDING;
@@ -486,6 +500,10 @@ int building_construction_place_building(building_type type, int x, int y, int e
     }
     if (type == BUILDING_TRIUMPHAL_ARCH) {
         if (!map_tiles_are_clear(x, y, size, terrain_mask, check_figure)) {
+            city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
+            return 0;
+        }
+        if (!check_gatehouse_tiles(map_grid_offset(x, y))) { //helper to make sure all building tiles are on walls
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return 0;
         }
