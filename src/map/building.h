@@ -29,10 +29,18 @@ int map_building_rubble_building_id(int grid_offset);
 
 void map_building_set_rubble_grid_building_id(int grid_offset, unsigned int building_id, int size);
 
+int map_building_ruins_left(int building_id);
+
+void map_building_backup(void);
+
 /**
  * Clears the maps related to buildings
  */
 void map_building_clear(void);
+
+void map_building_restore(void);
+
+void map_building_clear_backup(void);
 
 void map_building_save_state(buffer *buildings, buffer *damage, buffer *rubble);
 

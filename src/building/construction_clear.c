@@ -62,7 +62,6 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
     int items_placed = 0;
     game_undo_restore_building_state();
     game_undo_restore_map(0);
-
     int x_min, x_max, y_min, y_max;
     map_grid_start_end_to_area(x_start, y_start, x_end, y_end, &x_min, &y_min, &x_max, &y_max);
 
@@ -174,10 +173,19 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
                     map_property_clear_plaza_earthquake_or_overgrown_garden(grid_offset);
                 }
                 if (map_terrain_is(grid_offset, TERRAIN_RUBBLE) && !measure_only) {
+                    //rubble state handling:
+
                     if (map_building_rubble_building_id(grid_offset)) {
                         building *rubble_building = building_get(map_building_rubble_building_id(grid_offset));
                         if (rubble_building) {
-                            rubble_building->state = BUILDING_STATE_DELETED_BY_GAME;
+                            if (rubble_building->state == BUILDING_STATE_RUBBLE) {
+                                int ruins_left = map_building_ruins_left(rubble_building->id);
+                                if (!ruins_left) { //dont remove buildings until their last rubble is gone
+                                    rubble_building->state = BUILDING_STATE_DELETED_BY_GAME;
+                                }
+                            } else {
+                                rubble_building->state = BUILDING_STATE_DELETED_BY_GAME;
+                            }
                         }
                         map_building_set_rubble_grid_building_id(grid_offset, 0, 1); // remove rubble marker
                     }

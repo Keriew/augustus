@@ -66,8 +66,10 @@ int building_data_transfer_possible(building *b, int supress_warnings)
 
 int building_data_transfer_copy(building *b, int supress_warnings)
 {
-    building_data_type data_type = building_data_transfer_data_type_from_building_type(b->type);
+    building_type copy_type = b->type == BUILDING_BURNING_RUIN ? b->data.rubble.og_type : b->type;
+    building_data_type data_type = building_data_transfer_data_type_from_building_type(copy_type);
     if (data_type == DATA_TYPE_NOT_SUPPORTED) {
+
         if (!supress_warnings) {
             city_warning_show(WARNING_DATA_COPY_NOT_SUPPORTED, NEW_WARNING_SLOT);
         }

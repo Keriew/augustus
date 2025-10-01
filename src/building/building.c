@@ -428,8 +428,6 @@ int building_repair(building *b)
         }
         return 0;
     }
-    int building_id = building_destruction_get_og_building(b);
-    b = building_get(building_id); //ensure we've got the right building in case given a burning ruin tile
     // flags and placeholders
     int og_size = 0, og_grid_offset = 0, og_orientation = 0, og_storage_id, wall = 0, is_house_lot = 0, success = 0;
     building_type og_type = BUILDING_NONE;
@@ -487,10 +485,9 @@ int building_repair(building *b)
     }
     if (building_is_storage(type_to_place) && b->storage_id) {
         if (new_building->storage_id != og_storage_id) {
-            // wrong storage is given
-            building_storage_delete(b->storage_id);
-            int storage_restore = building_storage_change_building(b->storage_id, new_building->id);
+            /*int storage_restore = */building_storage_change_building(b->storage_id, new_building->id);
             // TODO: if storage_restore, refresh orders of cart depots. Requires merge of new depot code
+            b->storage_id = 0; // remove reference to the storage we just deleted
         }
     }
     int placement_cost = model_get_building(type_to_place)->cost * success;

@@ -42,18 +42,6 @@ static void destroy_without_rubble(building *b)
     b->state = BUILDING_STATE_DELETED_BY_GAME;
 }
 
-int building_destruction_get_og_building(building *b)
-{
-    if (b->type == BUILDING_BURNING_RUIN) { // if given A ruin, find the ID of the original building, to get the grid
-        int og_building_id = map_building_rubble_building_id(b->grid_offset); //this should already be main building
-        building *og_building = building_get(og_building_id); // to be extra safe, get the building struct
-        int main_ruin_id = map_building_at(og_building->grid_offset); //the offset of the og should have the main ruin
-        return main_ruin_id;
-    } else { // collapse or rubble destruction - the main building should still exist exactly as it was
-        return map_building_rubble_building_id(b->grid_offset);
-    }
-}
-
 static void destroy_on_fire(building *b, int plagued)
 {
     game_undo_disable();

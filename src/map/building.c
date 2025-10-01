@@ -9,6 +9,11 @@ static grid_u32 buildings_grid;
 static grid_u8 damage_grid;
 static grid_u32 rubble_info_grid;
 
+static grid_u32 buildings_grid_backup;
+static grid_u8 damage_grid_backup;
+static grid_u32 rubble_info_grid_backup;
+
+
 int map_building_at(int grid_offset)
 {
     return map_grid_is_valid_offset(grid_offset) ? buildings_grid.items[grid_offset] : 0;
@@ -54,6 +59,45 @@ void map_building_set_rubble_grid_building_id(int grid_offset, unsigned int buil
             rubble_info_grid.items[offset] = building_id;
         }
     }
+}
+
+int map_building_ruins_left(int building_id)
+{
+    // doesnt work for hippodromes and forts - forts shouldnt turn to rubble, hippodromes are not repairable
+    building *b = building_get(building_id);
+    int ruins_count = 0;
+    if (b->type == BUILDING_HIPPODROME || building_is_fort(b->type)) {
+        return 0;
+    }
+    grid_slice *slice = map_grid_get_grid_slice_square(b->grid_offset, b->size);
+    for (int i = 0; i < slice->size; i++) {
+        int grid_offset = slice->grid_offsets[i];
+        if (map_building_rubble_building_id(grid_offset) == building_id) {
+            ruins_count++;
+        }
+    }
+    return ruins_count;
+}
+
+void map_building_backup(void)
+{
+    map_grid_copy_u32(buildings_grid.items, buildings_grid_backup.items);
+    map_grid_copy_u8(damage_grid.items, damage_grid_backup.items);
+    map_grid_copy_u32(rubble_info_grid.items, rubble_info_grid_backup.items);
+}
+
+void map_building_restore(void)
+{
+    map_grid_copy_u32(buildings_grid_backup.items, buildings_grid.items);
+    map_grid_copy_u8(damage_grid_backup.items, damage_grid.items);
+    map_grid_copy_u32(rubble_info_grid_backup.items, rubble_info_grid.items);
+}
+
+void map_building_clear_backup(void)
+{
+    map_grid_clear_u32(buildings_grid_backup.items);
+    map_grid_clear_u8(damage_grid_backup.items);
+    map_grid_clear_u32(rubble_info_grid_backup.items);
 }
 
 void map_building_clear(void)
