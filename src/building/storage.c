@@ -383,16 +383,18 @@ int building_storage_summary_tooltip(building *b, char *tooltip_text, int max_le
     }
 
     const resource_list *list = (b->type == BUILDING_WAREHOUSE)
-        ? city_resource_get_available() : city_resource_get_available_foods();
+        ? city_resource_get_potential() : city_resource_get_potential_foods();
+
     building_storage_state state;
     int name_w = 0, state_w = 0;
-    for (unsigned int i = 0; i < list->size; i++) { // find max widths for formatting
+
+    // Measure max widths
+    for (unsigned int i = 0; i < list->size; i++) {
         const resource_data *res = resource_get_data(list->items[i]);
         if (!res) continue;
         state = building_storage_get_state(b, list->items[i], 0);
-        if (style == STORAGE_SUMMARY_STYLE_MINIMAL && state == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
-            continue;
-        }
+        if (style == STORAGE_SUMMARY_STYLE_MINIMAL && state == BUILDING_STORAGE_STATE_NOT_ACCEPTING) continue;
+
         int rn_pixels = text_get_width(res->text, FONT_SMALL_PLAIN);
         int sn_pixels = text_get_width(storage_state_text(state, b->type), FONT_SMALL_PLAIN);
         if (rn_pixels > name_w) name_w = rn_pixels;
@@ -401,35 +403,30 @@ int building_storage_summary_tooltip(building *b, char *tooltip_text, int max_le
 
     uint8_t *out = (uint8_t *) tooltip_text, *start = out;
     out[0] = '\0'; int written = 0;
-    int space_width = font_definition_for(FONT_SMALL_PLAIN)->space_width;
 
+    int space_width = font_definition_for(FONT_SMALL_PLAIN)->space_width;
     const uint8_t *space_str = (const uint8_t *) " ";
     const uint8_t *newline_str = (const uint8_t *) "\n";
     const uint8_t *dash_str = (const uint8_t *) " - ";
-    const uint8_t empty_char[] = { 0x01, 0x00 };  // treated as 1px due to letter spacing
+    const uint8_t empty_char[] = { 0x01, 0x00 };  // 1px spacer (NOT allowed before newline)
 
     for (unsigned int i = 0; i < list->size; i++) {
         resource_type r = list->items[i];
         const resource_data *res = resource_get_data(r);
-        if (!res) {
-            continue;
-        }
+        if (!res) continue;
+
         state = building_storage_get_state(b, r, 0);
+        if (style == STORAGE_SUMMARY_STYLE_MINIMAL && state == BUILDING_STORAGE_STATE_NOT_ACCEPTING) continue;
+
         int qty = building_storage_get_storage_state_quantity(b, r);
         const uint8_t *rn = res->text;
         const uint8_t *st = storage_state_text(state, b->type);
-        if (style == STORAGE_SUMMARY_STYLE_MINIMAL && state == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
-            continue;
-        }
-        if (i > 0) {
-            out = string_copy(newline_str, out, max_length - (out - start));
-        }
 
-        // resource col
+        // Resource column
         out = string_copy(rn, out, max_length - (out - start));
         int resource_name_width = text_get_width(rn, FONT_SMALL_PLAIN);
-        int state_name_width = text_get_width(st, FONT_SMALL_PLAIN);
 
+        // Pad to resource name column width (mid-line padding is OK)
         int j = resource_name_width;
         while (j < name_w) {
             if (j + space_width <= name_w) {
@@ -441,27 +438,35 @@ int building_storage_summary_tooltip(building *b, char *tooltip_text, int max_le
             }
         }
 
+        // Separator
         out = string_copy(dash_str, out, max_length - (out - start));
 
-        // state col
+        // State column text
         out = string_copy(st, out, max_length - (out - start));
-        j = state_name_width;
-        while (j < state_w) {
-            if (j + space_width <= state_w) {
-                out = string_copy(space_str, out, max_length - (out - start));
-                j += space_width;
-            } else {
-                out = string_copy(empty_char, out, max_length - (out - start));
-                j += 1;
-            }
-        }
+        int state_name_width = text_get_width(st, FONT_SMALL_PLAIN);
 
-        // quantity col only if relevant
         if (state != BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
+            j = state_name_width;
+            while (j < state_w) {
+                if (j + space_width <= state_w) {
+                    out = string_copy(space_str, out, max_length - (out - start));
+                    j += space_width;
+                } else {
+                    out = string_copy(empty_char, out, max_length - (out - start));
+                    j += 1;
+                }
+            }
+
+            // Quantity column
             out = string_copy(dash_str, out, max_length - (out - start));
             uint8_t qty_buf[12];
             string_from_int(qty_buf, qty, 0);
-            out = string_copy(qty_buf, out, max_length - (out - start));
+            out = string_copy(qty_buf, out, max_length - (out - start)); // Line must end on the last digit 
+            out = string_copy(newline_str, out, max_length - (out - start));// (no padding before \n)
+        } else {
+            // IMPORTANT: For NOT_ACCEPTING we must NOT pad after 'st' and must
+            // NOT let newline follow a space or empty_char. Go straight to \n.
+            out = string_copy(newline_str, out, max_length - (out - start));
         }
 
         written = 1;
@@ -470,7 +475,10 @@ int building_storage_summary_tooltip(building *b, char *tooltip_text, int max_le
             break;
         }
     }
-
+    // Remove trailing '\n' on the very last line (if any).
+    if (written && out > (uint8_t *) tooltip_text && out[-1] == '\n') {
+        out[-1] = '\0';
+    }
     return written;
 }
 
