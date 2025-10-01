@@ -485,6 +485,10 @@ int building_construction_place_building(building_type type, int x, int y, int e
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return 0;
         }
+        if (!check_gatehouse_tiles(map_grid_offset(x, y))) { //helper to make sure all building tiles are on walls
+            city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
+            return 0;
+        }
         if (!building_orientation) {
             if (building_rotation_get_road_orientation() == 1) {
                 building_orientation = 1;
@@ -500,10 +504,6 @@ int building_construction_place_building(building_type type, int x, int y, int e
     }
     if (type == BUILDING_TRIUMPHAL_ARCH) {
         if (!map_tiles_are_clear(x, y, size, terrain_mask, check_figure)) {
-            city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
-            return 0;
-        }
-        if (!check_gatehouse_tiles(map_grid_offset(x, y))) { //helper to make sure all building tiles are on walls
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return 0;
         }
