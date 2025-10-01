@@ -62,7 +62,7 @@ void assets_init(int force_reload, color_t **main_images, int *main_image_widths
     data.asset_lookup[ASSET_UI_VERTICAL_EMPIRE_PANEL] = assets_get_image_id("UI", "Empire_panel_texture_vertical");
     data.asset_lookup[ASSET_UI_GEAR_ICON] = assets_get_image_id("UI", "gear_icon");
     data.asset_lookup[ASSET_UI_COPY_ICON] = assets_get_image_id("UI", "copy_icon");
-    data.asset_lookup[ASSET_UI_PASTE_ICON] = assets_get_image_id("UI", "paste_icon3");
+    data.asset_lookup[ASSET_UI_PASTE_ICON] = assets_get_image_id("UI", "paste_icon");
 }
 
 int assets_load_single_group(const char *file_name, color_t **main_images, int *main_image_widths)
