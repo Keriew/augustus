@@ -370,11 +370,6 @@ static const uint8_t *storage_state_text(building_storage_state state, building_
     }
 }
 
-static int spacing_helper(int phrase_width, int target_width)
-{
-    return 0;
-}
-
 int building_storage_summary_tooltip(building *b, char *tooltip_text, int max_length, storage_summary_style style)
 {
     if (!b || !tooltip_text || max_length <= 0) return 0;
