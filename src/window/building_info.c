@@ -97,6 +97,7 @@ static unsigned int focus_image_button_id;
 static unsigned int focus_mothball_image_button_id;
 static unsigned int focus_monument_construction_button_id;
 static int original_overlay;
+static int previous_overlay;
 
 static void init_context_buttons(building_info_context *c)
 {
@@ -1278,6 +1279,7 @@ void window_building_info_show_storage_special_orders(void)
 void window_building_info_show_storage_special_orders_on_top(int building_id)
 {
     previous_context = context;
+    previous_overlay = original_overlay;
     building *new_context_building = building_get(building_id);
     window_building_info_show(new_context_building->grid_offset);
     context.show_special_orders = SPECIAL_ORDERS_STORAGE;
@@ -1287,6 +1289,7 @@ void window_building_info_show_storage_special_orders_on_top(int building_id)
 void window_building_info_restore_previous_context(void)
 {
     context = previous_context;
+    original_overlay = previous_overlay;
     window_building_info_reset_previous_context();
     window_invalidate();
 }
@@ -1294,6 +1297,7 @@ void window_building_info_restore_previous_context(void)
 void window_building_info_reset_previous_context(void)
 {
     previous_context = (building_info_context) { 0 };
+    previous_overlay = OVERLAY_NONE;
 }
 
 void window_building_info_show_roadblock_orders(void)
