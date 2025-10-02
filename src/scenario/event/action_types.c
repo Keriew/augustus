@@ -347,7 +347,22 @@ int scenario_action_type_building_force_collapse_execute(scenario_action_t *acti
             }
             if ((type == BUILDING_ROAD || type == BUILDING_GARDENS || type == BUILDING_HIGHWAY ||
                 type == BUILDING_OVERGROWN_GARDENS) && !map_terrain_is(current_grid_offset, TERRAIN_BUILDING)) {
-                map_terrain_remove(current_grid_offset, TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_HIGHWAY);
+                int terrain = TERRAIN_ROAD;
+                switch (type) {
+                    case BUILDING_GARDENS:
+                    case BUILDING_OVERGROWN_GARDENS:
+                        terrain = TERRAIN_GARDEN;
+                        break;
+                    case BUILDING_HIGHWAY:
+                        terrain = TERRAIN_HIGHWAY;
+                        break;
+                    default:
+                        break;
+                }
+                if (type == BUILDING_HIGHWAY) {
+                    map_tiles_clear_highway(current_grid_offset, 0);
+                }
+                map_terrain_remove(current_grid_offset, terrain);
             }
             int building_id = map_building_at(current_grid_offset);
             if (!building_id) {
