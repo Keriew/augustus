@@ -150,10 +150,7 @@ static void process_request(scenario_request *request)
         }
         if (!request->can_comply_dialog_shown) {
             resource_type resource = request->resource;
-            int resource_amount = building_warehouses_count_available_resource(resource, 1);
-            if (resource_is_food(resource)) {
-                resource_amount += building_granaries_count_available_resource(resource, 1);
-            }
+            int resource_amount = city_resource_get_amount_for_request(resource, request->amount.requested);
             if (resource_amount >= request->amount.requested) {
                 request->can_comply_dialog_shown = 1;
                 city_message_post(1, MESSAGE_REQUEST_CAN_COMPLY, request->id, 0);

@@ -34,6 +34,13 @@ static void dropdown_option_click(const complex_button *btn)
     dd->buttons[0].sequence_size = btn->sequence_size;
 }
 
+static void dropdown_cancel(const complex_button *btn)
+{
+    dropdown_button *dd = (dropdown_button *) btn->user_data;
+    dd->expanded = 0;
+    window_request_refresh();
+}
+
 void dropdown_button_init(dropdown_button *dd, complex_button *buttons,
     unsigned int num_buttons, int width, int spacing, int padding)
 {
@@ -100,8 +107,7 @@ void dropdown_button_init_simple(int x, int y, const lang_fragment *frags, unsig
     dd->expanded = 0;
     dd->selected_index = 0; // show the sequence of the origin by default
     dd->selected_value = -1;
-
-    dd->width = 0;     // auto
+    int buttons_width = dd->width ? dd->width : 0;
     dd->spacing = 2;
     dd->padding = 10;
 
@@ -110,7 +116,7 @@ void dropdown_button_init_simple(int x, int y, const lang_fragment *frags, unsig
     origin->x = x;
     origin->y = y;
     origin->height = font_definition_for(FONT_NORMAL_BLACK)->line_height + 6;
-    origin->width = 0; // auto sized in dropdown_button_init
+    origin->width = buttons_width;
     origin->style = COMPLEX_BUTTON_STYLE_DEFAULT;
     origin->is_hidden = 0;
     origin->is_disabled = 0;
@@ -133,10 +139,11 @@ void dropdown_button_init_simple(int x, int y, const lang_fragment *frags, unsig
         opt->parameters[0] = i;    // keep index in int slot
         opt->parameters[1] = i;    // default "value" = index, can override
         opt->left_click_handler = dropdown_option_click;
+        //opt->right_click_handler = dropdown_cancel;
     }
 
     // Finalize layout
-    dropdown_button_init(dd, dd->buttons, count, 0, dd->spacing, dd->padding);
+    dropdown_button_init(dd, dd->buttons, count, buttons_width, dd->spacing, dd->padding);
 }
 
 void dropdown_button_draw(const dropdown_button *dd)
@@ -164,6 +171,7 @@ int dropdown_button_handle_mouse(const mouse *m, dropdown_button *dd)
 
     int handled = 0;
 
+
     // Handle origin
     if (complex_button_handle_mouse(m, &dd->buttons[0])) {
         dd->expanded = !dd->expanded;
@@ -174,10 +182,28 @@ int dropdown_button_handle_mouse(const mouse *m, dropdown_button *dd)
 
     // Handle options if expanded
     if (dd->expanded) {
-        for (unsigned int i = 1; i < dd->num_buttons; i++) {
+        if (!dd->rightclick_expanded_callback && m->right.went_up) {
+            dd->expanded = 0;
+            window_request_refresh();
+            handled = 1;
+            return handled; // collapse on any rightclick if no callback
+        }
+        for (unsigned int i = 1; i < dd->num_buttons; i++) { //handle option buttons
             if (complex_button_handle_mouse(m, &dd->buttons[i])) {
                 dd->selected_index = i;
                 dd->expanded = 0; // collapse
+                handled = 1;
+                // activate the callback if dropdown state changes:
+                if (dd->selected_callback) {
+                    dd->selected_callback((dropdown_button *) dd); // pass origin button as parameter
+                }
+                window_request_refresh();
+                return handled;
+            }
+        }
+        if (m->right.went_up) { // handle rightclick callback if set
+            if (dd->rightclick_expanded_callback) {
+                dd->rightclick_expanded_callback((dropdown_button *) dd);
                 handled = 1;
                 window_request_refresh();
                 return handled;

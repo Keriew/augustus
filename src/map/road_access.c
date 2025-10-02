@@ -22,8 +22,9 @@ static void find_minimum_road_tile(int x, int y, int size, int *min_value, int *
         if (!map_terrain_is(grid_offset, TERRAIN_BUILDING) ||
             building_get(map_building_at(grid_offset))->type != BUILDING_GATEHOUSE) {
             if (map_terrain_is(grid_offset, TERRAIN_ROAD)) {
-                if (building_type_is_roadblock(building_get(map_building_at(grid_offset))->type)) {
-                    continue;
+                int roadblock_type = building_type_is_roadblock(building_get(map_building_at(grid_offset))->type);
+                if (roadblock_type == 1 || roadblock_type == 2) {
+                    continue; // ignore non-bridge roadblocks
                 }
                 int road_index = city_map_road_network_index(map_road_network_get(grid_offset));
                 if (road_index < *min_value) {

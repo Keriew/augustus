@@ -1224,4 +1224,7 @@
 	<image id="Roadblock_1" src="Roadblock_1"/>
 	<image id="Roadblock_2" src="Roadblock_2"/>
 	<image id="Roadblock_3" src="Roadblock_3"/>
+	<image id="gear_icon" src="gear_placeholder"/>
+	<image id="copy_icon" src="copy_settings"/>
+	<image id="paste_icon" src="paste_settings"/>
 </assetlist>
