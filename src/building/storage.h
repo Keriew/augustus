@@ -24,6 +24,8 @@ typedef enum {
     BUILDING_STORAGE_STATE_MAINTAINING = 3,
 } building_storage_state;
 
+#define BUILDING_STORAGE_STATE_MAX 4 //helper outside of enum to avoid dependency issues
+
 typedef enum {
     BUILDING_STORAGE_QUANTITY_MAX = 32,
     BUILDING_STORAGE_QUANTITY_28 = 28,
@@ -52,7 +54,14 @@ typedef enum {
     BUILDING_STORAGE_PERMISSION_ARMOURY = 8,
     BUILDING_STORAGE_PERMISSION_WORKCAMP = 9,
     BUILDING_STORAGE_PERMISSION_NATIVES = 10,
+    BUILDING_STORAGE_PERMISSION_CAESAR = 11,
 } building_storage_permission_states;
+
+typedef enum {
+    STORAGE_SUMMARY_STYLE_NONE = 0,
+    STORAGE_SUMMARY_STYLE_MINIMAL = 1,
+    STORAGE_SUMMARY_STYLE_FULL = 2
+} storage_summary_style;
 
 /**
  * Building storage struct
@@ -154,11 +163,17 @@ void building_storage_set_data(int storage_id, building_storage new_data);
 resource_type building_storage_get_highest_quantity_resource(building *b);
 
 /**
+ * TODO: header
+ */
+int building_storage_summary_tooltip(building *b, char *tooltip_text, int max_length, storage_summary_style style);
+
+/**
  * Cycles the resource state for the storage
  * @param storage_id Storage id
  * @param resource_id Resource id
+ * @param reverse_order If 1, cycles in reverse order
  */
-void building_storage_cycle_resource_state(int storage_id, resource_type resource_id);
+void building_storage_cycle_resource_state(int storage_id, resource_type resource_id, int reverse_order);
 
 /**
  * Cycles the quantity for the storage (used to be partial_state)

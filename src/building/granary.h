@@ -11,8 +11,8 @@
 #define QUARTER_GRANARY 8
 
 enum {
-    GRANARY_TASK_NONE = -1,
-    GRANARY_TASK_GETTING = 0
+  GRANARY_TASK_NONE = -1,
+  GRANARY_TASK_GETTING = 0
 };
 
 /*---------------------------------------*
@@ -48,9 +48,10 @@ int building_granary_count_available_resource(building *b, int resource, int res
  * @brief Sum available amounts across all granaries.
  * @param resource
  * @param respect_maintaining
+ * @param caesars_request If true, count only granaries that allow Caesar to take resources
  * @return available amount across all granaries
  */
-int building_granaries_count_available_resource(int resource, int respect_maintaining);
+int building_granaries_count_available_resource(int resource, int respect_maintaining, int caesars_request);
 
 /**
  * @brief Calculate the maximum amount of a resource that can be added to a granary.

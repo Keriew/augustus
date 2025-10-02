@@ -34,8 +34,6 @@
 #include "map/terrain.h"
 #include "map/tiles.h"
 
-
-
 #define BUILDING_ARRAY_SIZE_STEP 2000
 
 #define WATER_DESIRABILITY_RANGE 3
@@ -457,16 +455,8 @@ int building_is_house(building_type type)
 // For Venus GT base bonus
 int building_is_statue_garden_temple(building_type type)
 {
-    return ((type >= BUILDING_SMALL_TEMPLE_CERES && type <= BUILDING_LARGE_TEMPLE_VENUS) ||
-        (type >= BUILDING_GRAND_TEMPLE_CERES && type <= BUILDING_GRAND_TEMPLE_VENUS) ||
-        (type >= BUILDING_SMALL_STATUE && type <= BUILDING_LARGE_STATUE) ||
-        (type >= BUILDING_SMALL_POND && type <= BUILDING_PANTHEON) ||
-        (type == BUILDING_GARDENS) || (type == BUILDING_GARDEN_PATH) ||
-        (type >= BUILDING_HORSE_STATUE && type <= BUILDING_LARGE_MAUSOLEUM) ||
-        (type >= BUILDING_SHRINE_CERES && type <= BUILDING_SHRINE_VENUS) ||
-        type == BUILDING_LOOPED_GARDEN_WALL || type == BUILDING_GLADIATOR_STATUE ||
-        type == BUILDING_PANELLED_GARDEN_WALL || type == BUILDING_ROOFED_GARDEN_WALL
-        );
+    const building_properties *props = building_properties_for_type(type);
+    return props->venus_gt_bonus;
 }
 
 int building_is_ceres_temple(building_type type)

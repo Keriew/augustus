@@ -73,14 +73,17 @@ int building_warehouse_get_available_amount(building *warehouse, int resource);
  */
 int building_warehouse_maximum_receptible_amount(building *b, int resource);
 
+
+
 /**
  * @brief Sum available amounts across all warehouses.
  * TODO: create building_storage helper for this and granary equivalent
  * @param resource
  * @param respect_maintaining
+ * @param caesars_request If true, count only warehouses that allow Caesar to take resources
  * @return available amount across all warehouses
  */
-int building_warehouses_count_available_resource(int resource, int respect_maintaining);
+int building_warehouses_count_available_resource(int resource, int respect_maintaining, int caesars_request);
 
 /*---------------------------------------*
  * Acceptance / storage checks

@@ -9,8 +9,12 @@
 #include "core/calc.h"
 #include "core/config.h"
 #include "core/log.h"
+#include "core/string.h"
+#include "city/resource.h"
+#include "empire/city.h"
 #include "game/resource.h"
 #include "game/save_version.h"
+#include "graphics/text.h"
 
 #define STORAGE_ARRAY_SIZE_STEP 200
 
@@ -193,7 +197,7 @@ int building_storage_get_storage_state_quantity(building *b, resource_type resou
 
 const building_storage_state building_storage_get_state(building *b, int resource, int relative)
 {
-    if (b->has_plague || b->state != BUILDING_STATE_IN_USE) {
+    if (b->has_plague || (b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_CREATED)) {
         return BUILDING_STORAGE_STATE_NOT_ACCEPTING;
     }
     if (b->type != BUILDING_GRANARY && b->type != BUILDING_WAREHOUSE) { //safeguard
@@ -249,28 +253,28 @@ resource_type building_storage_get_highest_quantity_resource(building *b)
     return highest_resource;
 }
 
-void building_storage_cycle_resource_state(int storage_id, resource_type resource_id)
+void building_storage_cycle_resource_state(int storage_id, resource_type resource_id, int reverse_order)
 {
     resource_storage_entry *entry = &array_item(storages, storage_id)->storage.resource_state[resource_id];
-
-    switch (entry->state) {
-        case BUILDING_STORAGE_STATE_ACCEPTING:
-            entry->state = BUILDING_STORAGE_STATE_GETTING;
+    int num_states = BUILDING_STORAGE_STATE_MAX;
+    int ordered[BUILDING_STORAGE_STATE_MAX] = { BUILDING_STORAGE_STATE_NOT_ACCEPTING, BUILDING_STORAGE_STATE_ACCEPTING,
+        BUILDING_STORAGE_STATE_GETTING, BUILDING_STORAGE_STATE_MAINTAINING };
+    int idx = 0;    // find current state's index in ordered[]
+    for (int i = 0; i < num_states; i++) {
+        if (ordered[i] == entry->state) {
+            idx = i;
             break;
-        case BUILDING_STORAGE_STATE_GETTING:
-            entry->state = BUILDING_STORAGE_STATE_MAINTAINING;
-            break;
-        case BUILDING_STORAGE_STATE_MAINTAINING:
-            entry->state = BUILDING_STORAGE_STATE_NOT_ACCEPTING;
-            break;
-        case BUILDING_STORAGE_STATE_NOT_ACCEPTING:
-            entry->state = BUILDING_STORAGE_STATE_ACCEPTING;
-            break;
-        default:
-            entry->state = BUILDING_STORAGE_STATE_ACCEPTING;
-            break;
+        }
     }
+    // step forward/backward with wrap
+    if (reverse_order) {
+        idx = (idx - 1 + num_states) % num_states;
+    } else {
+        idx = (idx + 1) % num_states;
+    }
+    entry->state = ordered[idx];
 }
+
 
 void building_storage_toggle_permission(building_storage_permission_states p, building *b)
 {
@@ -366,6 +370,128 @@ int building_storage_check_if_accepts_nothing(int storage_id)
     return 1;
 }
 
+static const uint8_t *storage_state_text(building_storage_state state, building_type bt)
+{
+    switch (state) {
+        case BUILDING_STORAGE_STATE_ACCEPTING:   return lang_get_string(99, 7);
+        case BUILDING_STORAGE_STATE_NOT_ACCEPTING: return lang_get_string(99, 8);
+        case BUILDING_STORAGE_STATE_GETTING:     return lang_get_string(99, 9 + (bt == BUILDING_GRANARY));
+        case BUILDING_STORAGE_STATE_MAINTAINING: return lang_get_string(CUSTOM_TRANSLATION, TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING);
+        default: return (const uint8_t *) "";
+    }
+}
+
+int building_storage_summary_tooltip(building *b, char *tooltip_text, int max_length, storage_summary_style style)
+{
+    if (!b || !tooltip_text || max_length <= 0) return 0;
+    if (style == STORAGE_SUMMARY_STYLE_NONE) {
+        tooltip_text[0] = '\0';
+        return 0;
+    } else if (b->state == BUILDING_STATE_MOTHBALLED) {
+        const uint8_t *mothballed_text = lang_get_string(CUSTOM_TRANSLATION, TR_TOOLTIP_OVERLAY_PROBLEMS_MOTHBALLED);
+        string_copy(mothballed_text, (uint8_t *) tooltip_text, max_length);
+        return 1;
+    }
+
+    const resource_list *list = (b->type == BUILDING_WAREHOUSE)
+        ? city_resource_get_potential() : city_resource_get_potential_foods();
+
+    building_storage_state state;
+    int name_w = 0, state_w = 0;
+
+    // Measure max widths
+    for (unsigned int i = 0; i < list->size; i++) {
+        const resource_data *res = resource_get_data(list->items[i]);
+        if (!res) continue;
+        state = building_storage_get_state(b, list->items[i], 0);
+        if (style == STORAGE_SUMMARY_STYLE_MINIMAL && state == BUILDING_STORAGE_STATE_NOT_ACCEPTING) continue;
+
+        int rn_pixels = text_get_width(res->text, FONT_SMALL_PLAIN);
+        int sn_pixels = text_get_width(storage_state_text(state, b->type), FONT_SMALL_PLAIN);
+        if (rn_pixels > name_w) name_w = rn_pixels;
+        if (sn_pixels > state_w) state_w = sn_pixels;
+    }
+
+    uint8_t *out = (uint8_t *) tooltip_text, *start = out;
+    out[0] = '\0'; int written = 0;
+
+    int space_width = font_definition_for(FONT_SMALL_PLAIN)->space_width;
+    const uint8_t *space_str = (const uint8_t *) " ";
+    const uint8_t *newline_str = (const uint8_t *) "\n";
+    const uint8_t *dash_str = (const uint8_t *) " - ";
+    const uint8_t empty_char[] = { 0x01, 0x00 };  // 1px spacer (NOT allowed before newline)
+
+    for (unsigned int i = 0; i < list->size; i++) {
+        resource_type r = list->items[i];
+        const resource_data *res = resource_get_data(r);
+        if (!res) continue;
+
+        state = building_storage_get_state(b, r, 0);
+        if (style == STORAGE_SUMMARY_STYLE_MINIMAL && state == BUILDING_STORAGE_STATE_NOT_ACCEPTING) continue;
+
+        int qty = building_storage_get_storage_state_quantity(b, r);
+        const uint8_t *rn = res->text;
+        const uint8_t *st = storage_state_text(state, b->type);
+
+        // Resource column
+        out = string_copy(rn, out, max_length - (out - start));
+        int resource_name_width = text_get_width(rn, FONT_SMALL_PLAIN);
+
+        // Pad to resource name column width (mid-line padding is OK)
+        int j = resource_name_width;
+        while (j < name_w) {
+            if (j + space_width <= name_w) {
+                out = string_copy(space_str, out, max_length - (out - start));
+                j += space_width;
+            } else {
+                out = string_copy(empty_char, out, max_length - (out - start));
+                j += 1;
+            }
+        }
+
+        // Separator
+        out = string_copy(dash_str, out, max_length - (out - start));
+
+        // State column text
+        out = string_copy(st, out, max_length - (out - start));
+        int state_name_width = text_get_width(st, FONT_SMALL_PLAIN);
+
+        if (state != BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
+            j = state_name_width;
+            while (j < state_w) {
+                if (j + space_width <= state_w) {
+                    out = string_copy(space_str, out, max_length - (out - start));
+                    j += space_width;
+                } else {
+                    out = string_copy(empty_char, out, max_length - (out - start));
+                    j += 1;
+                }
+            }
+
+            // Quantity column
+            out = string_copy(dash_str, out, max_length - (out - start));
+            uint8_t qty_buf[12];
+            string_from_int(qty_buf, qty, 0);
+            out = string_copy(qty_buf, out, max_length - (out - start)); // Line must end on the last digit 
+            out = string_copy(newline_str, out, max_length - (out - start));// (no padding before \n)
+        } else {
+            // IMPORTANT: For NOT_ACCEPTING we must NOT pad after 'st' and must
+            // NOT let newline follow a space or empty_char. Go straight to \n.
+            out = string_copy(newline_str, out, max_length - (out - start));
+        }
+
+        written = 1;
+        if ((out - start) >= max_length) {
+            start[max_length - 1] = '\0';
+            break;
+        }
+    }
+    // Remove trailing '\n' on the very last line (if any).
+    if (written && out > (uint8_t *) tooltip_text && out[-1] == '\n') {
+        out[-1] = '\0';
+    }
+    return written;
+}
 
 int building_storage_resource_max_storable(building *b, resource_type resource_id)
 {

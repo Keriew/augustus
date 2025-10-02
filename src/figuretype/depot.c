@@ -109,10 +109,14 @@ static int is_order_condition_satisfied(const order *current_order)
         return 0;
     }
     building *src = building_get(current_order->src_storage_id);
+    building *dst = building_get(current_order->dst_storage_id);
+    if (!building_is_active(src) || !building_is_active(dst)) {
+        return 0;
+    }
     int src_amount = src->type == BUILDING_GRANARY ?
         building_granary_get_amount(src, current_order->resource_type) :
         building_warehouse_get_amount(src, current_order->resource_type);
-    building *dst = building_get(current_order->dst_storage_id);
+
     int dst_amount = dst->type == BUILDING_GRANARY ?
         building_granary_get_amount(dst, current_order->resource_type) :
         building_warehouse_get_amount(dst, current_order->resource_type);
@@ -203,6 +207,9 @@ static int check_valid_storages(order *current_order, int action_state)
 {
     int valid_storages = 1;
     building *src = building_get(current_order->src_storage_id);
+    if (building_storage_get_state(src, current_order->resource_type, 0) != BUILDING_STORAGE_STATE_ACCEPTING) {
+        current_order->src_storage_id = 0;
+    }
     if (!src || !src->storage_id || src->state != BUILDING_STATE_IN_USE) {
         if (action_state == FIGURE_ACTION_239_DEPOT_CART_PUSHER_HEADING_TO_SOURCE ||
             action_state == FIGURE_ACTION_240_DEPOT_CART_PUSHER_AT_SOURCE) {
@@ -211,6 +218,9 @@ static int check_valid_storages(order *current_order, int action_state)
         current_order->src_storage_id = 0;
     }
     building *dst = building_get(current_order->dst_storage_id);
+    if (building_storage_get_state(dst, current_order->resource_type, 0) != BUILDING_STORAGE_STATE_ACCEPTING) {
+        current_order->dst_storage_id = 0;
+    }
     if (!dst || !dst->storage_id || dst->state != BUILDING_STATE_IN_USE) {
         valid_storages = 0;
         current_order->dst_storage_id = 0;

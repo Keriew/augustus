@@ -135,28 +135,28 @@ static const int CHAR_TO_FONT_IMAGE_GREEK[] = {
 };
 
 static const font_definition DEFINITIONS_DEFAULT[] = {
-    {FONT_NORMAL_PLAIN,   0, 0, 6, 1, 11, image_y_offset_default},
-    {FONT_NORMAL_BLACK, 134, 0, 6, 0, 11, image_y_offset_default},
-    {FONT_NORMAL_WHITE, 268, 0, 6, 0, 11, image_y_offset_default},
-    {FONT_NORMAL_RED,   402, 0, 6, 0, 11, image_y_offset_default},
-    {FONT_LARGE_PLAIN,  536, 0, 8, 1, 23, image_y_offset_default},
-    {FONT_LARGE_BLACK,  670, 0, 8, 0, 23, image_y_offset_default},
-    {FONT_LARGE_BROWN,  804, 0, 8, 0, 24, image_y_offset_default},
-    {FONT_SMALL_PLAIN,  938, 0, 4, 1, 9, image_y_offset_default},
-    {FONT_NORMAL_GREEN,1072, 0, 6, 0, 11, image_y_offset_default},
+    {FONT_NORMAL_PLAIN,   0,  0, 6, 1, 11, image_y_offset_default},
+    {FONT_NORMAL_BLACK, 134,  0, 6, 0, 11, image_y_offset_default},
+    {FONT_NORMAL_WHITE, 268,  0, 6, 0, 11, image_y_offset_default},
+    {FONT_NORMAL_RED,   402,  0, 6, 0, 11, image_y_offset_default},
+    {FONT_LARGE_PLAIN,  536,  0, 8, 1, 23, image_y_offset_default},
+    {FONT_LARGE_BLACK,  670,  0, 8, 0, 23, image_y_offset_default},
+    {FONT_LARGE_BROWN,  804,  0, 8, 0, 24, image_y_offset_default},
+    {FONT_SMALL_PLAIN,  938,  0, 4, 1, 9,  image_y_offset_default},
+    {FONT_NORMAL_GREEN, 1072, 0, 6, 0, 11, image_y_offset_default},
     {FONT_NORMAL_BROWN, 1206, 0, 6, 0, 11, image_y_offset_default}
 };
 
 static const font_definition DEFINITIONS_EASTERN[] = {
-    {FONT_NORMAL_PLAIN,   0, 0, 6, 1, 11, image_y_offset_eastern},
-    {FONT_NORMAL_BLACK, 134, 0, 6, 0, 11, image_y_offset_eastern},
-    {FONT_NORMAL_WHITE, 268, 0, 6, 0, 11, image_y_offset_eastern},
-    {FONT_NORMAL_RED,   402, 0, 6, 0, 11, image_y_offset_eastern},
-    {FONT_LARGE_PLAIN,  536, 0, 8, 1, 23, image_y_offset_eastern},
-    {FONT_LARGE_BLACK,  670, 0, 8, 0, 23, image_y_offset_eastern},
-    {FONT_LARGE_BROWN,  804, 0, 8, 0, 24, image_y_offset_eastern},
-    {FONT_SMALL_PLAIN,  938, 0, 4, 1, 9, image_y_offset_eastern},
-    {FONT_NORMAL_GREEN,1072, 0, 6, 0, 11, image_y_offset_eastern},
+    {FONT_NORMAL_PLAIN,   0,  0, 6, 1, 11, image_y_offset_eastern},
+    {FONT_NORMAL_BLACK, 134,  0, 6, 0, 11, image_y_offset_eastern},
+    {FONT_NORMAL_WHITE, 268,  0, 6, 0, 11, image_y_offset_eastern},
+    {FONT_NORMAL_RED,   402,  0, 6, 0, 11, image_y_offset_eastern},
+    {FONT_LARGE_PLAIN,  536,  0, 8, 1, 23, image_y_offset_eastern},
+    {FONT_LARGE_BLACK,  670,  0, 8, 0, 23, image_y_offset_eastern},
+    {FONT_LARGE_BROWN,  804,  0, 8, 0, 24, image_y_offset_eastern},
+    {FONT_SMALL_PLAIN,  938,  0, 4, 1, 9,  image_y_offset_eastern},
+    {FONT_NORMAL_GREEN, 1072, 0, 6, 0, 11, image_y_offset_eastern},
     {FONT_NORMAL_BROWN, 1206, 0, 6, 0, 11, image_y_offset_eastern}
 };
 
@@ -174,14 +174,14 @@ static const font_definition DEFINITIONS_CYRILLIC[] = {
 };
 
 static const font_definition DEFINITIONS_GREEK[] = {
-    {FONT_NORMAL_PLAIN,   0, 0, 6, 1, 11, image_y_offset_greek},
-    {FONT_NORMAL_BLACK, 149, 0, 6, 0, 11, image_y_offset_greek},
-    {FONT_NORMAL_WHITE, 298, 0, 6, 0, 11, image_y_offset_greek},
-    {FONT_NORMAL_RED,   447, 0, 6, 0, 11, image_y_offset_greek},
-    {FONT_LARGE_PLAIN,  596, 0, 8, 1, 23, image_y_offset_greek},
-    {FONT_LARGE_BLACK,  745, 0, 8, 0, 23, image_y_offset_greek},
-    {FONT_LARGE_BROWN,  894, 0, 8, 0, 24, image_y_offset_greek},
-    {FONT_SMALL_PLAIN, 1043, 0, 4, 1, 9, image_y_offset_greek},
+    {FONT_NORMAL_PLAIN,   0,  0, 6, 1, 11, image_y_offset_greek},
+    {FONT_NORMAL_BLACK, 149,  0, 6, 0, 11, image_y_offset_greek},
+    {FONT_NORMAL_WHITE, 298,  0, 6, 0, 11, image_y_offset_greek},
+    {FONT_NORMAL_RED,   447,  0, 6, 0, 11, image_y_offset_greek},
+    {FONT_LARGE_PLAIN,  596,  0, 8, 1, 23, image_y_offset_greek},
+    {FONT_LARGE_BLACK,  745,  0, 8, 0, 23, image_y_offset_greek},
+    {FONT_LARGE_BROWN,  894,  0, 8, 0, 24, image_y_offset_greek},
+    {FONT_SMALL_PLAIN,  1043, 0, 4, 1, 9,  image_y_offset_greek},
     {FONT_NORMAL_GREEN, 1192, 0, 6, 0, 11, image_y_offset_greek},
     {FONT_NORMAL_BROWN, 1341, 0, 6, 0, 11, image_y_offset_greek}
 };

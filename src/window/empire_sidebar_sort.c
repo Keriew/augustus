@@ -251,14 +251,35 @@ int window_empire_sidebar_sort_city_matches_current_filter(const empire_city *ci
         case FILTER_BY_CLOSED:
             return !city->is_open;
         case FILTER_BY_RESOURCE:
+        {
             for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-                if (city->buys_resource[r] || city->sells_resource[r]) {
-                    if (sort_data.selected_filter_resource == r) {
-                        return 1;
-                    }
+                if ((city->buys_resource[r] || city->sells_resource[r]) &&
+                    sort_data.selected_filter_resource == r) {
+                    return 1;
                 }
             }
             return 0;
+        }
+        case FILTER_BY_RESOURCE_SELL:
+        {
+            for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+                if (city->sells_resource[r] &&
+                    sort_data.selected_filter_resource == r) {
+                    return 1;
+                }
+            }
+            return 0;
+        }
+        case FILTER_BY_RESOURCE_BUY:
+        {
+            for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+                if (city->buys_resource[r] &&
+                    sort_data.selected_filter_resource == r) {
+                    return 1;
+                }
+            }
+            return 0;
+        }
         case FILTER_BY_LAND:
             return !city->is_sea_trade;
         case FILTER_BY_SEA:
@@ -367,6 +388,8 @@ void window_empire_sidebar_sort_draw_expanding_buttons(int sidebar_x_min, int si
     int filter_image_id = 0;
     switch (window_empire_sidebar_sort_get_current_filtering()) {
         case FILTER_BY_RESOURCE:
+        case FILTER_BY_RESOURCE_SELL:
+        case FILTER_BY_RESOURCE_BUY:
             if (window_empire_sidebar_sort_get_selected_filter_resource() != RESOURCE_NONE) {
                 filter_image_id = resource_get_data(window_empire_sidebar_sort_get_selected_filter_resource())->image.icon;
             }
@@ -417,7 +440,7 @@ void window_empire_sidebar_sort_draw_expanding_buttons(int sidebar_x_min, int si
                 int image_id = (i == FILTER_BY_LAND) ? image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE) + 1 :
                     (i == FILTER_BY_SEA) ? image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE) : 0; //default 0
                 window_empire_sidebar_sort_draw_simple_button(x_filter, y, button_width, button_height, is_focused,
-                     CUSTOM_TRANSLATION, translation_key, -1, -1, button_type, image_id);
+                    CUSTOM_TRANSLATION, translation_key, -1, -1, button_type, image_id);
             }
         }
     }
@@ -472,7 +495,7 @@ int window_empire_sidebar_sort_handle_expanding_buttons_input(const mouse *m)
                     }
                     return 1;
                 } else if (btn->button_type >= BUTTON_INDEX_FIRST_SORT_METHOD &&
-                             btn->button_type < BUTTON_INDEX_FIRST_FILTER_METHOD) {
+                           btn->button_type < BUTTON_INDEX_FIRST_FILTER_METHOD) {
                     window_empire_sidebar_sort_set_current_sorting(btn->button_type - BUTTON_INDEX_FIRST_SORT_METHOD);
                     window_empire_sidebar_sort_set_expanded_main(NO_POSITION);
                     return 1;
@@ -481,7 +504,10 @@ int window_empire_sidebar_sort_handle_expanding_buttons_input(const mouse *m)
                     int filter_index = btn->button_type - BUTTON_INDEX_FIRST_FILTER_METHOD;
                     // Ensure filter_index is within valid bounds
                     if (filter_index >= 0 && filter_index < MAX_FILTER_KEY) {
-                        if (filter_index == FILTER_BY_RESOURCE) {
+                        if (filter_index == FILTER_BY_RESOURCE ||
+                            filter_index == FILTER_BY_RESOURCE_SELL ||
+                            filter_index == FILTER_BY_RESOURCE_BUY) {
+                            window_empire_sidebar_sort_set_current_filtering(filter_index);
                             window_empire_sidebar_sort_set_resource_selection_active(1);
                             return 1;
                         } else {
@@ -498,7 +524,15 @@ int window_empire_sidebar_sort_handle_expanding_buttons_input(const mouse *m)
                     // Validate resource is within bounds
                     if (selected_resource >= RESOURCE_MIN && selected_resource < RESOURCE_MAX) {
                         window_empire_sidebar_sort_set_selected_filter_resource(selected_resource);
-                        window_empire_sidebar_sort_set_current_filtering(FILTER_BY_RESOURCE);
+                        // SELL, BUY or BOTH
+                        int current_filter = window_empire_sidebar_sort_get_current_filtering();
+                        if (current_filter == FILTER_BY_RESOURCE_SELL) {
+                            window_empire_sidebar_sort_set_current_filtering(FILTER_BY_RESOURCE_SELL);
+                        } else if (current_filter == FILTER_BY_RESOURCE_BUY) {
+                            window_empire_sidebar_sort_set_current_filtering(FILTER_BY_RESOURCE_BUY);
+                        } else {
+                            window_empire_sidebar_sort_set_current_filtering(FILTER_BY_RESOURCE);
+                        }
                         window_empire_sidebar_sort_set_expanded_main(NO_POSITION);
                         window_empire_sidebar_sort_set_resource_selection_active(0);
                         return 1;

@@ -7,29 +7,33 @@
  * @brief Maximum allowed dropdown width in pixels when auto-sizing.
  */
 #define DROPDOWN_BUTTON_MAX_WIDTH 400
+typedef struct dropdown_button dropdown_button;  // forward declaration
 
- /**
-  * @brief A dropdown widget built on top of complex_button.
-  *
-  * The first button in the array is the origin (the clickable dropdown header).
-  * The remaining buttons are the options shown when expanded.
-  */
-typedef struct {
-    complex_button *buttons;     /**< Buttons array: [0] = origin, [1..] = options */
-    unsigned int num_buttons;    /**< Total count (origin + options) */
-    short expanded;              /**< 1 = expanded, 0 = collapsed */
-    int selected_index;          /**< Index of selected option (>=1), -1 if none */
-    int selected_value;          /**< Arbitrary value carried by selected option */
-
+/**
+ * @brief A dropdown widget built on top of complex_button.
+ *
+ * The first button in the array is the origin (the clickable dropdown header).
+ * The remaining buttons are the options shown when expanded.
+ */
+struct dropdown_button {
+    complex_button *buttons;               /**< Buttons array: [0] = origin, [1..] = options */
+    unsigned int num_buttons;              /**< Total count (origin + options) */
+    short expanded;                        /**< 1 = expanded, 0 = collapsed */
+    int selected_index;                    /**< Index of selected option (>=1), -1 if none */
+    int selected_value;                    /**< Arbitrary value carried by selected option */
+    void (*selected_callback)              /**< click handler for options */
+        (dropdown_button *button);         /**< The dropdown_button pointer is handed over to the selected_callback*/
+    void (*rightclick_expanded_callback)  /**< If null, all rightclicks while expanded will de-expand the dropdown*/
+        (dropdown_button *button);         /**< The dropdown_button pointer is handed over to the rightclick_callback*/
     /* Layout configuration */
-    int width;                   /**< Dropdown width: 0 = auto (based on longest text) */
-    int spacing;                 /**< Vertical spacing between option buttons (px) */
-    int padding;                 /**< Horizontal padding added to text width (px) */
+    int width;                             /**< Dropdown width: 0 = auto (based on longest text) */
+    int spacing;                           /**< Vertical spacing between option buttons (px) */
+    int padding;                           /**< Horizontal padding added to text width (px) */
 
     /* Cached layout values */
-    int calculated_width;        /**< Final calculated width */
-    int calculated_height;       /**< Option button height (all options same) */
-} dropdown_button;
+    int calculated_width;                  /**< Final calculated width */
+    int calculated_height;                 /**< Option button height (all options same) */
+};
 
 /**
  * @brief Initialize a dropdown and calculate its geometry.

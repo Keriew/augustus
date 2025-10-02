@@ -545,9 +545,9 @@ const uint8_t *lang_get_string(int group, int index)
             case BUILDING_SAND_PIT:
                 return translation_for(TR_BUILDING_SAND_PIT);
             case BUILDING_BRICKWORKS:
-                return translation_for(TR_BUILDING_BRICKWORKS);
+                return translation_for(TR_RESOURCE_BRICKS);
             case BUILDING_CONCRETE_MAKER:
-                return translation_for(TR_BUILDING_CONCRETE_MAKER);
+                return translation_for(TR_RESOURCE_CONCRETE);
             case BUILDING_LOOPED_GARDEN_GATE:
                 return translation_for(TR_BUILDING_LOOPED_GARDEN_WALL_GATE);
             case BUILDING_PANELLED_GARDEN_WALL:

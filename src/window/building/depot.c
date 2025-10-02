@@ -3,12 +3,15 @@
 #include "assets/assets.h"
 #include "building/building.h"
 #include "building/count.h"
+#include "building/data_transfer.h"
 #include "building/storage.h"
 #include "building/warehouse.h"
 #include "city/resource.h"
 #include "city/view.h"
+#include "core/config.h"
 #include "figure/figure.h"
 #include "graphics/button.h"
+#include "graphics/complex_button.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
@@ -18,6 +21,7 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "translation/translation.h"
+#include "widget/dropdown_button.h"
 #include "window/building_info.h"
 
 static void order_set_source(const generic_button *button);
@@ -28,6 +32,11 @@ static void order_set_condition_threshold(const generic_button *button);
 static void order_set_condition_threshold_reverse(const generic_button *button);
 static void set_order_resource(const generic_button *button);
 static void set_camera_position(const generic_button *button);
+static void goto_special_orders_on_top(const generic_button *button);
+static void copy_settings(const generic_button *button);
+static void paste_settings(const generic_button *button);
+
+static void tooltip_style_changed(dropdown_button *button);
 
 #define DEPOT_BUTTONS_X_OFFSET 32
 #define DEPOT_BUTTONS_Y_OFFSET 204
@@ -43,9 +52,12 @@ static struct {
     unsigned int resource_focus_button_id;
     unsigned int storage_building_focus_button_id;
     unsigned int storage_building_view_focus_button_id;
+    unsigned int storage_building_goto_orders_focus_button_id;
     unsigned int depot_resource_focus_button_id;
     int depot_building_id;
-    unsigned int available_storages;
+    unsigned char available_storages;
+    unsigned char secondary_storages;
+    unsigned char advanced_mode;
     resource_type target_resource_id;
     pixel_area window_area;
 } data;
@@ -72,6 +84,24 @@ static generic_button depot_view_storage_buttons[] = {
     {0, 0, 0, ROW_HEIGHT, set_camera_position},
     {0, 0, 0, ROW_HEIGHT, set_camera_position},
     {0, 0, 0, ROW_HEIGHT, set_camera_position},
+};
+
+static generic_button depot_goto_storage_orders_buttons[] = {
+    {0, 0, 0, ROW_HEIGHT, goto_special_orders_on_top},
+    {0, 0, 0, ROW_HEIGHT, goto_special_orders_on_top},
+    {0, 0, 0, ROW_HEIGHT, goto_special_orders_on_top},
+    {0, 0, 0, ROW_HEIGHT, goto_special_orders_on_top},
+    {0, 0, 0, ROW_HEIGHT, goto_special_orders_on_top},
+    {0, 0, 0, ROW_HEIGHT, goto_special_orders_on_top},
+    {0, 0, 0, ROW_HEIGHT, goto_special_orders_on_top},
+    {0, 0, 0, ROW_HEIGHT, goto_special_orders_on_top},
+    {0, 0, 0, ROW_HEIGHT, goto_special_orders_on_top},
+    {0, 0, 0, ROW_HEIGHT, goto_special_orders_on_top},
+    {0, 0, 0, ROW_HEIGHT, goto_special_orders_on_top},
+    {0, 0, 0, ROW_HEIGHT, goto_special_orders_on_top},
+    {0, 0, 0, ROW_HEIGHT, goto_special_orders_on_top},
+    {0, 0, 0, ROW_HEIGHT, goto_special_orders_on_top},
+    {0, 0, 0, ROW_HEIGHT, goto_special_orders_on_top},
 };
 
 static generic_button depot_select_resource_buttons[] = {
@@ -102,14 +132,17 @@ static generic_button depot_select_resource_buttons[] = {
 };
 
 static generic_button depot_order_buttons[] = {
-    {100, 0, 284, 26, order_set_resource, 0, 1},
-    {100, 56, 284, 22, order_set_source, 0, 2},
-    {100, 82, 284, 22, order_set_destination, 0, 3},
-    {100, 30, 284, 22, order_set_condition_type, 0, 4},
-    {384, 30, 32, 22, order_set_condition_threshold, order_set_condition_threshold_reverse, 5},
-    {384, 56, 32, 22, set_camera_position},
-    {384, 82, 32, 22, set_camera_position},
+    {100,  0, 284, ROW_HEIGHT + 4, order_set_resource, 0, 1},
+    {100, 56, 284, ROW_HEIGHT, order_set_source, 0, 2},
+    {100, 82, 284, ROW_HEIGHT, order_set_destination, 0, 3},
+    {100, 30, 284, ROW_HEIGHT, order_set_condition_type, 0, 4},
+    {384, 30,  32, ROW_HEIGHT, order_set_condition_threshold, order_set_condition_threshold_reverse, 5},
+    {384, 56,  32, ROW_HEIGHT, set_camera_position},
+    {384, 82,  32, ROW_HEIGHT, set_camera_position},
+    {40, 112,  22, ROW_HEIGHT, copy_settings},
+    {63, 112,  22, ROW_HEIGHT, paste_settings},
 };
+dropdown_button tooltip_style_dropdown_button;
 
 static void setup_buttons_for_selected_depot(void)
 {
@@ -122,27 +155,82 @@ static void setup_buttons_for_selected_depot(void)
 
     int button_index = 0;
     int storage_array_size = building_storage_get_array_size();
-    unsigned int current_storage_offset = 0;
-    for (int i = 0; i < storage_array_size; i++) {
-        if (current_storage_offset >= data.available_storages || button_index >= MAX_VISIBLE_ROWS) {
-            break;
+    unsigned int row_count = 0;
+    unsigned int drawn_rows = 0;
+
+    // Header row for active storages
+    if (data.available_storages > 0 && drawn_rows < MAX_VISIBLE_ROWS && data.advanced_mode) {
+        row_count++;
+        if (row_count > scrollbar.scroll_position) {
+            drawn_rows++; // This row doesn't have buttons, just increment drawn_rows
         }
+    }
+
+    // First pass: active storages
+    for (int i = 0; i < storage_array_size && button_index < MAX_VISIBLE_ROWS; i++) {
         const data_storage *storage = building_storage_get_array_entry(i);
-        if (!storage->in_use || !storage->building_id) {
+        building *store_building = building_get(storage->building_id);
+        if (!storage->in_use || !storage->building_id || store_building->state == BUILDING_STATE_MOTHBALLED ||
+             (!resource_is_food(data.target_resource_id) && store_building->type == BUILDING_GRANARY)) {
             continue;
         }
-        building *store_building = building_get(storage->building_id);
-        if (building_is_active(store_building) && store_building->storage_id == storage->id &&
-            building_storage_resource_max_storable(store_building, data.target_resource_id) > 0) {
-            current_storage_offset++;
-            if (current_storage_offset <= scrollbar.scroll_position) {
+        int max_storable = building_storage_resource_max_storable(store_building, data.target_resource_id);
+        if (storage->in_use && max_storable > 0) {
+            row_count++;
+            if (row_count <= scrollbar.scroll_position) {
                 continue;
             }
-            depot_select_storage_buttons[button_index].parameter2 = storage->building_id;
-            depot_view_storage_buttons[button_index].parameter1 = storage->building_id;
+            // Map button_index to the correct drawn_row position
+            depot_select_storage_buttons[drawn_rows].parameter2 = storage->building_id;
+            depot_view_storage_buttons[drawn_rows].parameter1 = storage->building_id;
+            depot_goto_storage_orders_buttons[drawn_rows].parameter1 = storage->building_id;
+            drawn_rows++;
             button_index++;
         }
     }
+    if (!data.advanced_mode) {
+        return;
+    }
+    // Add separator rows if there are secondary storages
+
+    if (data.secondary_storages > 0 && drawn_rows < MAX_VISIBLE_ROWS) {
+        row_count += 2; // Skip 2 rows for separator
+        if (row_count > scrollbar.scroll_position) {
+            drawn_rows += 2; // These rows don't have buttons, just increment drawn_rows
+        }
+    }
+
+    // Second pass: inactive/other storages
+    for (int i = 0; i < storage_array_size && button_index < MAX_VISIBLE_ROWS; i++) {
+        const data_storage *storage = building_storage_get_array_entry(i);
+        building *store_building = building_get(storage->building_id);
+        if (!storage->building_id ||
+             (!resource_is_food(data.target_resource_id) && store_building->type == BUILDING_GRANARY)) {
+            continue;
+        }
+        // Only include inactive storages that have a valid storage_id and weren't already counted in first pass
+        int max_storable = building_storage_resource_max_storable(store_building, data.target_resource_id);
+        if ((max_storable == 0 || !storage->in_use || store_building->state == BUILDING_STATE_MOTHBALLED) &&
+            store_building->storage_id > 0) {
+            row_count++;
+            if (row_count <= scrollbar.scroll_position) {
+                continue;
+            }
+            // Map button_index to the correct drawn_row position
+            depot_select_storage_buttons[drawn_rows].parameter1 = -1; // indicate secondary storage
+            depot_select_storage_buttons[drawn_rows].parameter2 = storage->building_id;
+            depot_view_storage_buttons[drawn_rows].parameter1 = storage->building_id;
+            depot_goto_storage_orders_buttons[drawn_rows].parameter1 = storage->building_id;
+            drawn_rows++;
+            button_index++;
+        }
+    }
+    scrollbar_reset(&scrollbar, 0);
+}
+
+static int total_storages(void)
+{
+    return data.available_storages + (data.advanced_mode ? data.secondary_storages : 0);
 }
 
 static void calculate_available_storages(int building_id)
@@ -156,24 +244,35 @@ static void calculate_available_storages(int building_id)
     data.target_resource_id = b->data.depot.current_order.resource_type;
 
     data.available_storages = 0;
+    data.secondary_storages = 0;
     int has_valid_src = 0;
     int has_valid_dst = 0;
     int storage_array_size = building_storage_get_array_size();
     for (int i = 0; i < storage_array_size; i++) {
-        int storage_building_id = building_storage_get_array_entry(i)->building_id;
-        if (!storage_building_id) {
+
+        const data_storage *storage = building_storage_get_array_entry(i);
+        building *store = building_get(storage->building_id);
+        int max_storable = building_storage_resource_max_storable(store, data.target_resource_id);
+        int active = storage->in_use;
+        if (!store || !building_id || (!resource_is_food(data.target_resource_id) && store->type == BUILDING_GRANARY)) {
             continue;
         }
-        building *store_building = building_get(storage_building_id);
-        if (store_building && building_is_active(store_building) && store_building->storage_id == i &&
-            building_storage_resource_max_storable(store_building, data.target_resource_id) > 0) {
+        if (active && max_storable > 0) {
             data.available_storages++;
-            if (b->data.depot.current_order.src_storage_id == store_building->id) {
-                has_valid_src = 1;
+        } else if ((!active || max_storable == 0) && store->storage_id > 0) {
+            if (data.advanced_mode) {
+                data.secondary_storages++;  // advanced orders: allow inactive/non-used storages
             }
-            if (b->data.depot.current_order.dst_storage_id == store_building->id) {
-                has_valid_dst = 1;
-            }
+        }
+        if ((unsigned) b->data.depot.current_order.src_storage_id == store->id) {
+            building_storage_state src_state = building_storage_get_state(
+                building_get(b->data.depot.current_order.src_storage_id), b->data.depot.current_order.resource_type, 0);
+            has_valid_src = src_state != BUILDING_STORAGE_STATE_NOT_ACCEPTING ? 1 : 0;
+        }
+        if ((unsigned) b->data.depot.current_order.dst_storage_id == store->id) {
+            building_storage_state dst_state = building_storage_get_state(
+                building_get(b->data.depot.current_order.dst_storage_id), b->data.depot.current_order.resource_type, 0);
+            has_valid_dst = dst_state != BUILDING_STORAGE_STATE_NOT_ACCEPTING ? 1 : 0;
         }
     }
     if (!has_valid_src) {
@@ -182,11 +281,13 @@ static void calculate_available_storages(int building_id)
     if (!has_valid_dst) {
         b->data.depot.current_order.dst_storage_id = 0;
     }
+
 }
 
 void window_building_depot_init_main(int building_id)
 {
     city_resource_determine_available(1);
+    data.advanced_mode = config_get(CONFIG_GP_CH_CART_DEPOT_ADVANCED);
     calculate_available_storages(building_id);
 }
 
@@ -204,9 +305,43 @@ void window_building_depot_init_resource_selection(void)
     }
 }
 
-void window_building_depot_init_storage_selection(void)
+static void tooltip_style_changed(dropdown_button *button)
 {
-    scrollbar_init(&scrollbar, 0, data.available_storages);
+    if (button->selected_index < 1 || button->selected_index > 4) {
+        return;
+    }
+    config_set(CONFIG_UI_CART_DEPOT_TOOLTIP_STYLE, button->selected_index - 1);
+    window_request_refresh();
+}
+
+static void window_building_depot_init_tooltip_style_dropdown(building_info_context *c)
+{
+    static lang_fragment frags[4]; // fragments array - keep static to ensure it remains valid
+    for (int i = 0; i < 4; i++) {
+        frags[i].type = LANG_FRAG_LABEL;
+        frags[i].text_group = CUSTOM_TRANSLATION;
+        frags[i].text_id = TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE + i;
+    }
+    frags[0].text_id = config_get(CONFIG_UI_CART_DEPOT_TOOLTIP_STYLE) + TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE + 1;
+
+    int btn_width = 150;
+    int dropdown_x = c->x_offset + (c->width_blocks * BLOCK_SIZE) / 2 - btn_width / 2; // Center the button
+    int dropdown_y = c->y_offset + (c->height_blocks + 1) * BLOCK_SIZE - 7;
+    tooltip_style_dropdown_button.width = btn_width;
+    dropdown_button_init_simple(dropdown_x, dropdown_y, frags, 4, &tooltip_style_dropdown_button);
+    tooltip_style_dropdown_button.selected_callback = tooltip_style_changed; // Set the callback function
+}
+
+void window_building_depot_init_storage_selection(building_info_context *c)
+{
+    int separator_rows = (data.secondary_storages > 0 ? 2 : 0) + (data.available_storages > 0 ? 1 : 0);
+    int total_rows = data.available_storages + data.secondary_storages + separator_rows;
+    if (!data.advanced_mode) {
+        total_rows = data.available_storages; // for basic mode, only show active storages
+    }
+    window_building_depot_init_tooltip_style_dropdown(c);
+
+    scrollbar_init(&scrollbar, 0, total_rows);
 }
 
 static void on_scroll(void)
@@ -239,7 +374,8 @@ void window_building_draw_depot_foreground(building_info_context *c)
     building *b = building_get(data.depot_building_id);
     building *src = building_get(b->data.depot.current_order.src_storage_id);
     building *dst = building_get(b->data.depot.current_order.dst_storage_id);
-
+    setup_buttons_for_selected_depot();
+    calculate_available_storages(data.depot_building_id);
     if (!c->has_road_access) {
         window_building_draw_description(c, 69, 25);
     } else if (b->num_workers <= 0) {
@@ -290,9 +426,9 @@ void window_building_draw_depot_foreground(building_info_context *c)
     }
 
     text_draw(translation_for(TR_BUILDING_INFO_DEPOT_SOURCE), x_offset, y_offset + depot_order_buttons[1].y + 6, FONT_NORMAL_BLACK, 0);
+    int focus_border = data.focus_button_id == 2 && total_storages() > 1;
     button_border_draw(x_offset + depot_order_buttons[1].x, y_offset + depot_order_buttons[1].y,
-        depot_order_buttons[1].width, depot_order_buttons[1].height,
-        data.focus_button_id == 2 && data.available_storages > 1);
+        depot_order_buttons[1].width, depot_order_buttons[1].height, focus_border);
     if (src->storage_id) {
         text_draw_label_and_number_centered(lang_get_string(28, src->type),
             src->storage_id, "", x_offset + depot_order_buttons[1].x, y_offset + depot_order_buttons[1].y + 6,
@@ -302,13 +438,14 @@ void window_building_draw_depot_foreground(building_info_context *c)
         image_draw(assets_lookup_image_id(ASSET_CENTER_CAMERA_ON_BUILDING), x_offset + depot_order_buttons[5].x + 3,
             y_offset + depot_order_buttons[5].y + 3, COLOR_FONT_PLAIN, SCALE_NONE);
         depot_order_buttons[5].parameter1 = src->id;
-    } else if (data.available_storages > 1) {
+    } else if (total_storages() > 1) {
         lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_INFO_DEPOT_SELECT_SOURCE,
             x_offset + depot_order_buttons[1].x, y_offset + depot_order_buttons[1].y + 6,
             depot_order_buttons[1].width, FONT_NORMAL_BLACK);
     } else {
-        translation_key translation = data.available_storages == 1 ? TR_BUILDING_INFO_DEPOT_ONE_BUILDING_FOR_RESOURCE :
-            TR_BUILDING_INFO_DEPOT_NO_SOURCE_AVAILABLE;
+        translation_key translation;
+        translation = total_storages() == 1 ?
+            TR_BUILDING_INFO_DEPOT_ONE_BUILDING_FOR_RESOURCE : TR_BUILDING_INFO_DEPOT_NO_SOURCE_AVAILABLE;
         text_draw_centered(lang_get_string(CUSTOM_TRANSLATION, translation),
             x_offset + depot_order_buttons[1].x, y_offset + depot_order_buttons[1].y + 6,
             depot_order_buttons[1].width, FONT_NORMAL_PLAIN, COLOR_FONT_GRAY);
@@ -317,7 +454,7 @@ void window_building_draw_depot_foreground(building_info_context *c)
     text_draw(translation_for(TR_BUILDING_INFO_DEPOT_DESTINATION), x_offset, y_offset + depot_order_buttons[2].y + 6, FONT_NORMAL_BLACK, 0);
     button_border_draw(x_offset + depot_order_buttons[2].x, y_offset + depot_order_buttons[2].y,
         depot_order_buttons[2].width, depot_order_buttons[2].height,
-        data.focus_button_id == 3 && data.available_storages > 1);
+        data.focus_button_id == 3 && total_storages() > 1);
     if (dst->storage_id) {
         text_draw_label_and_number_centered(lang_get_string(28, dst->type),
             dst->storage_id, "", x_offset + depot_order_buttons[2].x, y_offset + depot_order_buttons[2].y + 6,
@@ -327,35 +464,46 @@ void window_building_draw_depot_foreground(building_info_context *c)
         image_draw(assets_lookup_image_id(ASSET_CENTER_CAMERA_ON_BUILDING), x_offset + depot_order_buttons[6].x + 3,
             y_offset + depot_order_buttons[6].y + 3, COLOR_FONT_PLAIN, SCALE_NONE);
         depot_order_buttons[6].parameter1 = dst->id;
-    } else if (data.available_storages > 1) {
+    } else if (total_storages() > 1) {
         lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_INFO_DEPOT_SELECT_DESTINATION,
             x_offset + depot_order_buttons[2].x, y_offset + depot_order_buttons[2].y + 6,
             depot_order_buttons[2].width, FONT_NORMAL_BLACK);
     } else {
-        translation_key translation = data.available_storages == 1 ? TR_BUILDING_INFO_DEPOT_ONE_BUILDING_FOR_RESOURCE :
+        translation_key translation = total_storages() == 1 ? TR_BUILDING_INFO_DEPOT_ONE_BUILDING_FOR_RESOURCE :
             TR_BUILDING_INFO_DEPOT_NO_DESTINATION_AVAILABLE;
         text_draw_centered(lang_get_string(CUSTOM_TRANSLATION, translation),
             x_offset + depot_order_buttons[2].x, y_offset + depot_order_buttons[2].y + 6,
             depot_order_buttons[1].width, FONT_NORMAL_PLAIN, COLOR_FONT_GRAY);
+    }
+    //copy and paste buttons
+    if (data.advanced_mode) {
+        button_border_draw(x_offset + depot_order_buttons[7].x, y_offset + depot_order_buttons[7].y,
+            depot_order_buttons[7].width, depot_order_buttons[7].height, data.focus_button_id == 8);
+        image_draw(assets_lookup_image_id(ASSET_UI_COPY_ICON), x_offset + depot_order_buttons[7].x + 3,
+            y_offset + depot_order_buttons[7].y + 3, COLOR_FONT_PLAIN, SCALE_NONE);
+        button_border_draw(x_offset + depot_order_buttons[8].x, y_offset + depot_order_buttons[8].y,
+            depot_order_buttons[8].width, depot_order_buttons[8].height, data.focus_button_id == 9);
+        image_draw(assets_lookup_image_id(ASSET_UI_PASTE_ICON), x_offset + depot_order_buttons[8].x + 3,
+            y_offset + depot_order_buttons[8].y + 3, COLOR_FONT_PLAIN, SCALE_NONE);
     }
 }
 
 int window_building_handle_mouse_depot(const mouse *m, building_info_context *c)
 {
     return generic_buttons_handle_mouse(m, c->x_offset + DEPOT_BUTTONS_X_OFFSET, c->y_offset + DEPOT_BUTTONS_Y_OFFSET,
-        depot_order_buttons, 7, &data.focus_button_id);
+        depot_order_buttons, data.advanced_mode ? 9 : 7, &data.focus_button_id);
 }
 
 static void order_set_source(const generic_button *button)
 {
-    if (data.available_storages > 1) {
+    if (total_storages() > 1) {
         window_building_info_depot_select_source();
     }
 }
 
 static void order_set_destination(const generic_button *button)
 {
-    if (data.available_storages > 1) {
+    if (total_storages() > 1) {
         window_building_info_depot_select_destination();
     }
 }
@@ -402,31 +550,147 @@ void window_building_draw_depot_select_source_destination(building_info_context 
     scrollbar.y = y_offset + 46;
     scrollbar_draw(&scrollbar);
 
-    unsigned int index = 0;
-    int base_width = BLOCK_SIZE * (c->width_blocks - 4) - 4 - (scrollbar.max_scroll_position > 0 ? 39 : 0);
+    int base_width = BLOCK_SIZE * (c->width_blocks - 4) - 4 - (scrollbar.max_scroll_position > 0 ? 39 : 0) - BLOCK_SIZE * 2;
+    int storage_array_size = building_storage_get_array_size();
+    unsigned int row_count = 0;
+    unsigned int drawn_rows = 0;
 
-    for (index = 0; index < MAX_VISIBLE_ROWS; index++) {
-        if (depot_select_storage_buttons[index].parameter2) {
-            building *bld = building_get(depot_select_storage_buttons[index].parameter2);
-            button_border_draw(c->x_offset + 18, y_offset + 46 + ROW_HEIGHT * index, base_width, 22,
-                data.storage_building_focus_button_id == index + 1);
-            button_border_draw(c->x_offset + 18 + base_width, y_offset + 46 + ROW_HEIGHT * index, BLOCK_SIZE * 2, 22,
-                data.storage_building_view_focus_button_id == index + 1);
-            image_draw(assets_lookup_image_id(ASSET_CENTER_CAMERA_ON_BUILDING),
-                c->x_offset + 22 + base_width, y_offset + 50 + ROW_HEIGHT * index, COLOR_FONT_PLAIN, SCALE_NONE);
-            image_draw(assets_lookup_image_id(ASSET_CENTER_CAMERA_ON_BUILDING),
-                c->x_offset + 21 + base_width, y_offset + 49 + ROW_HEIGHT * index, COLOR_MASK_NONE, SCALE_NONE);
-            text_draw_label_and_number_centered(lang_get_string(28, bld->type), bld->storage_id, "",
-                c->x_offset + 32, y_offset + 52 + ROW_HEIGHT * index, base_width, FONT_NORMAL_WHITE, 0);
+    // header/separator for active storages
+    if (data.available_storages > 0 && drawn_rows < MAX_VISIBLE_ROWS && data.advanced_mode) {
+        row_count++;; // skip 1 row for active storage header
+        if (row_count > scrollbar.scroll_position) {
+            lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_INFO_ACTIVE_STORAGE_BUILDINGS,
+                c->x_offset + 18 + BLOCK_SIZE * 2, y_offset + 50 + ROW_HEIGHT * drawn_rows, base_width,
+                FONT_NORMAL_WHITE);
+            drawn_rows++;
         }
     }
+    // First pass: draw active storages
+    for (int i = 0; i < storage_array_size && drawn_rows < MAX_VISIBLE_ROWS; i++) {
+        const data_storage *storage = building_storage_get_array_entry(i);
+        building *store_building = building_get(storage->building_id);
+        if (!storage->in_use || !storage->building_id || store_building->state == BUILDING_STATE_MOTHBALLED ||
+            (!resource_is_food(data.target_resource_id) && store_building->type == BUILDING_GRANARY)) {
+            continue;
+        }
+
+        int max_storable = building_storage_resource_max_storable(store_building, data.target_resource_id);
+        if (storage->in_use && max_storable > 0) {
+            row_count++;
+            if (row_count <= scrollbar.scroll_position) {
+                continue;
+            }
+
+            building *bld = store_building;
+            // Left button - goto storage orders
+            button_border_draw(c->x_offset + 18, y_offset + 46 + ROW_HEIGHT * drawn_rows, BLOCK_SIZE * 2, 22,
+                data.storage_building_goto_orders_focus_button_id == drawn_rows + 1);
+            image_draw(assets_lookup_image_id(ASSET_UI_GEAR_ICON),
+                c->x_offset + 28, y_offset + 50 + ROW_HEIGHT * drawn_rows, COLOR_FONT_PLAIN, SCALE_NONE);
+            image_draw(assets_lookup_image_id(ASSET_UI_GEAR_ICON),
+                c->x_offset + 27, y_offset + 49 + ROW_HEIGHT * drawn_rows, COLOR_MASK_NONE, SCALE_NONE);
+
+            // Middle button - select storage
+            button_border_draw(c->x_offset + 18 + BLOCK_SIZE * 2, y_offset + 46 + ROW_HEIGHT * drawn_rows, base_width,
+                22, data.storage_building_focus_button_id == drawn_rows + 1);
+            text_draw_label_and_number_centered(
+                lang_get_string(28, bld->type), bld->storage_id, "", c->x_offset + 18 + BLOCK_SIZE * 2,
+                y_offset + 52 + ROW_HEIGHT * drawn_rows, base_width, FONT_NORMAL_WHITE, 0);
+
+            // Right button - view storage
+            button_border_draw(c->x_offset + 18 + base_width + BLOCK_SIZE * 2, y_offset + 46 + ROW_HEIGHT * drawn_rows,
+                BLOCK_SIZE * 2, 22, data.storage_building_view_focus_button_id == drawn_rows + 1);
+            image_draw(
+                assets_lookup_image_id(ASSET_CENTER_CAMERA_ON_BUILDING), c->x_offset + 22 + base_width + BLOCK_SIZE * 2,
+                y_offset + 50 + ROW_HEIGHT * drawn_rows, COLOR_FONT_PLAIN, SCALE_NONE);
+            image_draw(
+                assets_lookup_image_id(ASSET_CENTER_CAMERA_ON_BUILDING), c->x_offset + 21 + base_width + BLOCK_SIZE * 2,
+                y_offset + 49 + ROW_HEIGHT * drawn_rows, COLOR_MASK_NONE, SCALE_NONE);
+
+            drawn_rows++;
+        }
+    }
+    if (!data.advanced_mode) {
+        int label_x = c->x_offset + 45;
+        int label_y = c->y_offset + (c->height_blocks + 1) * BLOCK_SIZE - 3; // Same line as dropdown
+        lang_text_draw_ellipsized(CUSTOM_TRANSLATION, TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE,
+            label_x, label_y, tooltip_style_dropdown_button.buttons[0].x - label_x, FONT_NORMAL_BLACK);
+        dropdown_button_draw(&tooltip_style_dropdown_button);
+        return;
+    }
+    // Draw separator if we have inactive storages
+    if (data.secondary_storages > 0 && drawn_rows < MAX_VISIBLE_ROWS) {
+        row_count += 2; //skip two rows for inactive storage header
+        if (row_count > scrollbar.scroll_position) {
+            drawn_rows++;
+            lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_INFO_OTHER_STORAGE_BUILDINGS,
+                c->x_offset + 18 + BLOCK_SIZE * 2, y_offset + 50 + ROW_HEIGHT * drawn_rows, base_width, FONT_NORMAL_RED);
+            drawn_rows++;
+        }
+    }
+
+    // Second pass: draw inactive storages
+    for (int i = 0; i < storage_array_size && drawn_rows < MAX_VISIBLE_ROWS; i++) {
+        const data_storage *storage = building_storage_get_array_entry(i);
+        building *store_building = building_get(storage->building_id);
+        if (!storage->in_use || !storage->building_id ||
+            (!resource_is_food(data.target_resource_id) && store_building->type == BUILDING_GRANARY)) {
+            continue;
+        }
+
+        // Only include inactive storages that have a valid storage_id and weren't already counted in first pass
+        int max_storable = building_storage_resource_max_storable(store_building, data.target_resource_id);
+        if ((max_storable == 0 || !storage->in_use || store_building->state == BUILDING_STATE_MOTHBALLED)
+            && store_building->storage_id > 0) {
+            row_count++;
+            if (row_count <= scrollbar.scroll_position) {
+                continue;
+            }
+            // TODO: come up with a better way to deal with standard buttons drawing
+            building *bld = store_building;
+            // Left button - goto storage orders
+            button_border_draw(c->x_offset + 18, y_offset + 46 + ROW_HEIGHT * drawn_rows, BLOCK_SIZE * 2, 22,
+                data.storage_building_goto_orders_focus_button_id == drawn_rows + 1);
+            image_draw(assets_lookup_image_id(ASSET_UI_GEAR_ICON),
+                c->x_offset + 28, y_offset + 50 + ROW_HEIGHT * drawn_rows, COLOR_FONT_PLAIN, SCALE_NONE);
+            image_draw(assets_lookup_image_id(ASSET_UI_GEAR_ICON),
+                c->x_offset + 27, y_offset + 49 + ROW_HEIGHT * drawn_rows, COLOR_MASK_NONE, SCALE_NONE);
+
+            // Middle button - select storage (disabled for inactive storages)
+            button_border_draw(c->x_offset + 18 + BLOCK_SIZE * 2, y_offset + 46 + ROW_HEIGHT * drawn_rows,
+                base_width, 22, 0);
+            text_draw_label_and_number_centered(lang_get_string(28, bld->type), bld->storage_id, "",
+                c->x_offset + 18 + BLOCK_SIZE * 2, y_offset + 52 + ROW_HEIGHT * drawn_rows, base_width,
+                FONT_NORMAL_BLACK, COLOR_FONT_LIGHT_GRAY);
+
+            // Right button - view storage - center camera on storage
+            button_border_draw(c->x_offset + 18 + base_width + BLOCK_SIZE * 2, y_offset + 46 + ROW_HEIGHT * drawn_rows,
+                BLOCK_SIZE * 2, 22, data.storage_building_view_focus_button_id == drawn_rows + 1);
+            image_draw(
+                assets_lookup_image_id(ASSET_CENTER_CAMERA_ON_BUILDING), c->x_offset + 22 + base_width + BLOCK_SIZE * 2,
+                y_offset + 50 + ROW_HEIGHT * drawn_rows, COLOR_FONT_PLAIN, SCALE_NONE);
+            image_draw(
+                assets_lookup_image_id(ASSET_CENTER_CAMERA_ON_BUILDING), c->x_offset + 21 + base_width + BLOCK_SIZE * 2,
+                y_offset + 49 + ROW_HEIGHT * drawn_rows, COLOR_MASK_NONE, SCALE_NONE);
+
+            drawn_rows++;
+        }
+    }
+
+    int label_x = c->x_offset + 45;
+    int label_y = c->y_offset + (c->height_blocks + 1) * BLOCK_SIZE - 3; // Same line as dropdown
+    lang_text_draw_ellipsized(CUSTOM_TRANSLATION, TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE,
+        label_x, label_y, tooltip_style_dropdown_button.buttons[0].x - label_x, FONT_NORMAL_BLACK);
+    dropdown_button_draw(&tooltip_style_dropdown_button);
 }
 
 static void set_order_source(const generic_button *button)
 {
     int depot_building_id = button->parameter1;
     int building_id = button->parameter2;
-
+    if (depot_building_id == -1) { //ineligible storage
+        return;
+    }
     if (!building_id) {
         return;
     }
@@ -442,8 +706,7 @@ static void set_order_destination(const generic_button *button)
 {
     int depot_building_id = button->parameter1;
     int building_id = button->parameter2;
-
-    if (!building_id) {
+    if (depot_building_id == -1 || !building_id) { //ineligible storage hack
         return;
     }
     building *b = building_get(depot_building_id);
@@ -466,27 +729,65 @@ static void set_camera_position(const generic_button *button)
     window_request_refresh();
 }
 
+static void copy_settings(const generic_button *button)
+{
+    building *b = building_get(data.depot_building_id);
+    building_data_transfer_copy(b);
+    calculate_available_storages(data.depot_building_id);
+    setup_buttons_for_selected_depot();
+    window_invalidate();
+}
+
+static void paste_settings(const generic_button *button)
+{
+    building *b = building_get(data.depot_building_id);
+    building_data_transfer_paste(b);
+    calculate_available_storages(data.depot_building_id);
+    setup_buttons_for_selected_depot();
+    window_invalidate();
+}
+
+
+static void goto_special_orders_on_top(const generic_button *button)
+{
+    window_building_info_show_storage_special_orders_on_top(button->parameter1);
+}
+
 static int handle_mouse_depot_select_source_destination(const mouse *m, building_info_context *c, int is_source)
 {
     if (scrollbar_handle_mouse(&scrollbar, m, 1)) {
         return 1;
     }
-
+    if (dropdown_button_handle_mouse(m, &tooltip_style_dropdown_button)) {
+        return 1;
+    }
     int y_offset = window_building_get_vertical_offset(c, 28);
     for (int i = 0; i < MAX_VISIBLE_ROWS; i++) {
-        depot_select_storage_buttons[i].x = 0;
+        // Left button - goto storage orders
+        depot_goto_storage_orders_buttons[i].x = 0;
+        depot_goto_storage_orders_buttons[i].y = ROW_HEIGHT * i;
+        depot_goto_storage_orders_buttons[i].width = BLOCK_SIZE * 2;
+        depot_goto_storage_orders_buttons[i].height = ROW_HEIGHT;
+
+        // Middle button - select storage (adjusted x position to make room for left button)
+        depot_select_storage_buttons[i].x = BLOCK_SIZE * 2;
         depot_select_storage_buttons[i].y = ROW_HEIGHT * i;
         depot_select_storage_buttons[i].width = BLOCK_SIZE * (c->width_blocks - 4) - 4 -
-            (scrollbar.max_scroll_position > 0 ? 39 : 0);
+            (scrollbar.max_scroll_position > 0 ? 39 : 0) - BLOCK_SIZE * 2;
         depot_select_storage_buttons[i].height = ROW_HEIGHT;
         depot_select_storage_buttons[i].left_click_handler = is_source ? set_order_source : set_order_destination;
+
+        // Right button - view storage (adjusted x position)
         depot_view_storage_buttons[i].x = BLOCK_SIZE * (c->width_blocks - 4) - 4 -
             (scrollbar.max_scroll_position > 0 ? 39 : 0);
         depot_view_storage_buttons[i].y = ROW_HEIGHT * i;
         depot_view_storage_buttons[i].width = BLOCK_SIZE * 2;
+        depot_view_storage_buttons[i].height = ROW_HEIGHT;
     }
 
-    return generic_buttons_handle_mouse(m, c->x_offset + 18, y_offset + 46, depot_select_storage_buttons,
+    return generic_buttons_handle_mouse(m, c->x_offset + 18, y_offset + 46, depot_goto_storage_orders_buttons,
+        MAX_VISIBLE_ROWS, &data.storage_building_goto_orders_focus_button_id) ||
+        generic_buttons_handle_mouse(m, c->x_offset + 18, y_offset + 46, depot_select_storage_buttons,
         MAX_VISIBLE_ROWS, &data.storage_building_focus_button_id) ||
         generic_buttons_handle_mouse(m, c->x_offset + 18, y_offset + 46, depot_view_storage_buttons,
         MAX_VISIBLE_ROWS, &data.storage_building_view_focus_button_id);
@@ -524,14 +825,41 @@ void window_building_depot_get_tooltip_main(int *translation)
         (data.focus_button_id == 7 && depot->data.depot.current_order.dst_storage_id)) {
         *translation = TR_TOOLTIP_BUTTON_CENTER_CAMERA;
     }
+    if (data.focus_button_id == 8) {
+        *translation = TR_HOTKEY_COPY_SETTINGS;
+    }
+    if (data.focus_button_id == 9) {
+        *translation = TR_HOTKEY_PASTE_SETTINGS;
+    }
 }
 
-void window_building_depot_get_tooltip_source_destination(int *translation)
+const uint8_t *window_building_depot_get_tooltip_source_destination(int *translation, int *group_id)
 {
     if (data.storage_building_view_focus_button_id &&
         depot_select_storage_buttons[data.storage_building_view_focus_button_id - 1].parameter2) {
         *translation = TR_TOOLTIP_BUTTON_CENTER_CAMERA;
+        *group_id = CUSTOM_TRANSLATION;
+        return 0;
     }
+    if (data.storage_building_goto_orders_focus_button_id &&
+        depot_goto_storage_orders_buttons[data.storage_building_goto_orders_focus_button_id - 1].parameter1) {
+        *translation = TR_TOOLTIP_GOTO_STORAGE_INSTRUCTIONS;
+        *group_id = CUSTOM_TRANSLATION;
+    }
+    // For storage selection buttons, show storage summary tooltip
+    if (data.storage_building_focus_button_id &&
+        depot_select_storage_buttons[data.storage_building_focus_button_id - 1].parameter2) {
+        int storage_building_id = depot_select_storage_buttons[data.storage_building_focus_button_id - 1].parameter2;
+        building *storage_building = building_get(storage_building_id);
+        if (storage_building) {
+            static char tooltip_buffer[1024];
+            storage_summary_style tooltip_style = config_get(CONFIG_UI_CART_DEPOT_TOOLTIP_STYLE);
+            if (building_storage_summary_tooltip(storage_building, tooltip_buffer, sizeof(tooltip_buffer), tooltip_style)) {
+                return (const uint8_t *) tooltip_buffer;
+            }
+        }
+    }
+    return 0;
 }
 
 static void set_order_resource(const generic_button *button)
