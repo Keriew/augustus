@@ -1663,6 +1663,8 @@ static translation_string all_strings[] = {
     {TR_CHEAT_DISABLE_LEGIONS_CONSUMPTION, "Отключено потребление пищи легионами"},
     {TR_TOOLTIP_BUTTON_ACCEPT_NATIVES, "Разрешить доступ местным торговцам"},
     {TR_TOOLTIP_BUTTON_REJECT_NATIVES, "Запретить доступ местным торговцам"},
+     {TR_TOOLTIP_BUTTON_ACCEPT_CAESAR, "Разрешить запросы Цезаря отсюда"},
+     {TR_TOOLTIP_BUTTON_REJECT_CAESAR, "Запретить запросы Цезаря отсюда"},
     {TR_TOOLTIP_BUTTON_ACCEPT_ALL, "Разрешить доступ всем"},
     {TR_TOOLTIP_BUTTON_REJECT_ALL, "Запретить доступ всем"},
     {TR_TOOLTIP_OVERLAY_PROBLEMS_NO_ROAD_ACCESS, "Нет доступа к дороге"},
@@ -1707,6 +1709,18 @@ static translation_string all_strings[] = {
     {TR_CONFIG_UI_ANIMATE_TRADE_ROUTES, "Анимация торговых путей"},
     {TR_HOTKEY_NEXT_TRACK, "Следующий случайный трек"},
     {TR_CONFIG_MOVE_LEGION_SOUND_SWAP, "Альтернативный звук движения легиона"},
+    {TR_CONFIG_ADVANCED_CART_DEPOT_OPTIONS, "ВКЛ расширенные указания для станции повозок"},
+    {TR_BUILDING_INFO_INSTRUCTIONS, "указания"},
+    {TR_BUILDING_INFO_ACTIVE_STORAGE_BUILDINGS, "Принимающие хранилища"},
+    {TR_BUILDING_INFO_OTHER_STORAGE_BUILDINGS, "Другие хранилища"},
+    {TR_TOOLTIP_GOTO_STORAGE_INSTRUCTIONS, "Открыть особые указания хранилища"},
+    {TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE, "Подсказки:"},
+    {TR_TOOLTIP_NONE, "Нет"},
+    {TR_TOOLTIP_MINIMAL, "Минимум"},
+    {TR_TOOLTIP_FULL, "Полные"},
+    {TR_CONFIG_CLEAR_WARNINGS_RIGHTCLICK, "Щелчок правой кнопкой очистит предупреждения в обзоре города"},
+    {TR_CONFIG_GP_CH_STORAGE_REQUESTS_RESPECT_MAINTAIN, "Запросы Цезаря учитывают \"Хранение\""},
+    {TR_CONFIG_ENABLE_MARKET_RANGE, "ВКЛ ограниченную область доступа рынков"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
