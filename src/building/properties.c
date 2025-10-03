@@ -592,14 +592,14 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .size = 1,
         .fire_proof = 1,
         .image_group = 54,
-        .sound_id = SOUND_CITY_FOUNTAIN, // Disabled in original
+        .sound_id = SOUND_CITY_FOUNTAIN,
         .event_data.attr = "fountain"
     },
     [BUILDING_WELL] = {
         .size = 1,
         .fire_proof = 1,
         .image_group = 23,
-        // .sound_id = SOUND_CITY_WELL, // Disabled in original
+        .sound_id = SOUND_CITY_WELL,
         .event_data.attr = "well"
      },
      [BUILDING_NATIVE_CROPS] = {
@@ -1083,7 +1083,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
      },
      [BUILDING_ARENA] = {
         .size = 3,
-        .sound_id = SOUND_CITY_COLOSSEUM,
+        .sound_id = SOUND_CITY_ARENA,
         .custom_asset.group = "Health_Culture",
         .custom_asset.id = "Arena OFF",
         .event_data.attr = "arena"

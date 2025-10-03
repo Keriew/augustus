@@ -1,7 +1,9 @@
 #include "city.h"
 
+#include "building/model.h"
 #include "building/properties.h"
 #include "city/figures.h"
+#include "city/population.h"
 #include "core/file.h"
 #include "core/random.h"
 #include "core/time.h"
@@ -11,7 +13,7 @@
 #include <string.h>
 
 #define SOUND_VIEWS_THRESHOLD 200
-#define SOUND_DELAY_MILLIS 30000
+#define SOUND_DELAY_MILLIS 10000
 #define SOUND_PLAY_INTERVAL_MILLIS 2000
 
 typedef enum {
@@ -92,7 +94,7 @@ static struct {
         [SOUND_CITY_FORUM]              = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/forum.wav" } },
         [SOUND_CITY_RESERVOIR]          = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/resevoir.wav" } },
         [SOUND_CITY_FOUNTAIN]           = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/fountain.wav" } },
-        [SOUND_CITY_WELL]               = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/well1.wav" } },
+        [SOUND_CITY_WELL]               = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/well.wav" } },
         [SOUND_CITY_MILITARY_ACADEMY]   = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/mil_acad.wav" } },
         [SOUND_CITY_BARRACKS]           = { .filenames.total = 2, .filenames.list = (sound_filenames[]) { "wavs/barracks.wav", "wavs/marching.wav" } },
         [SOUND_CITY_ORACLE]             = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/oracle.wav" } },
@@ -119,14 +121,15 @@ static struct {
         [SOUND_CITY_DEPOT]              = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { ASSETS_DIRECTORY "/Sounds/Ox.ogg" } },
         [SOUND_CITY_CONCRETE_MAKER]     = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { ASSETS_DIRECTORY "/Sounds/ConcreteMaker.ogg" } },
         [SOUND_CITY_CONSTRUCTION_SITE]  = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { ASSETS_DIRECTORY "/Sounds/Engineer.ogg" } },
-        [SOUND_CITY_NATIVE_HUT]         = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { ASSETS_DIRECTORY "/Sounds/NativeHut.ogg" } }
+        [SOUND_CITY_NATIVE_HUT]         = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { ASSETS_DIRECTORY "/Sounds/NativeHut.ogg" } },
+        [SOUND_CITY_ARENA]              = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/colloseum.wav" } }, //In the future, this will become a separate sound… hopefully
     },
     .ambient_sounds = {
-        [SOUND_AMBIENT_EMPTY_LAND1] = {.filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/empty_land1.wav" } },
-        [SOUND_AMBIENT_EMPTY_LAND2] = {.filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/empty_land2.wav" } },
-        [SOUND_AMBIENT_EMPTY_LAND3] = {.filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/empty_land3.wav" } },
-        [SOUND_AMBIENT_EMPTY_TERRAIN01] = {.filenames.total = 1, .filenames.list = (sound_filenames[]) { ASSETS_DIRECTORY "/Sounds/Terrain01.ogg" } },
-        [SOUND_AMBIENT_EMPTY_TERRAIN02] = {.filenames.total = 1, .filenames.list = (sound_filenames[]) { ASSETS_DIRECTORY "/Sounds/Terrain02.ogg" } }
+        [SOUND_AMBIENT_EMPTY_LAND1]     = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/empty_land1.wav" } },
+        [SOUND_AMBIENT_EMPTY_LAND2]     = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/empty_land2.wav" } },
+        [SOUND_AMBIENT_EMPTY_LAND3]     = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/empty_land3.wav" } },
+        [SOUND_AMBIENT_EMPTY_TERRAIN01] = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { ASSETS_DIRECTORY "/Sounds/Terrain01.ogg" } },
+        [SOUND_AMBIENT_EMPTY_TERRAIN02] = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { ASSETS_DIRECTORY "/Sounds/Terrain02.ogg" } },
     }
 };
 
@@ -163,12 +166,35 @@ void sound_city_mark_building_view(building_type type, int num_workers, int dire
     if (sound == SOUND_CITY_NONE) {
         return;
     }
-    if (type == BUILDING_THEATER || type == BUILDING_AMPHITHEATER ||
-        type == BUILDING_GLADIATOR_SCHOOL || type == BUILDING_HIPPODROME) {
-        // entertainment is shut off when caesar invades
-        if (num_workers <= 0 || city_figures_imperial_soldiers() > 0) {
-            return;
-        }
+    const model_building *model = model_get_building(type);
+    int enemies_present = city_figures_enemies() > 0 || city_figures_imperial_soldiers() > 0;
+
+    // Buildings for which sound is disabled during enemy attacks
+    int mute_on_enemies = 0;
+    switch (type) {
+        case BUILDING_BATHHOUSE:
+        case BUILDING_SCHOOL:
+        case BUILDING_THEATER:
+        case BUILDING_AMPHITHEATER:
+        case BUILDING_ARENA:
+        case BUILDING_COLOSSEUM:
+        case BUILDING_HIPPODROME:
+        case BUILDING_ACTOR_COLONY:
+        case BUILDING_GLADIATOR_SCHOOL:
+        case BUILDING_CHARIOT_MAKER:
+        case BUILDING_GOVERNORS_HOUSE:
+        case BUILDING_GOVERNORS_VILLA:
+        case BUILDING_GOVERNORS_PALACE:
+            mute_on_enemies = 1;
+            break;
+        default:
+            break;
+    }
+    // Shut off when:
+    if ((model->laborers > 0 && num_workers <= 0)
+        || city_population() <= 0
+        || (enemies_present && mute_on_enemies)) {
+        return;
     }
 
     data.city_sounds[sound].available = 1;
