@@ -7,6 +7,8 @@
 #include "core/lang.h"
 #include "core/string.h"
 #include "editor/tool.h"
+#include "editor/editor.h"
+#include "graphics/color.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/menu.h"
@@ -18,8 +20,10 @@
 #include "map/figure.h"
 #include "map/grid.h"
 #include "map/image.h"
+#include "map/image_context.h"
 #include "map/point.h"
 #include "map/property.h"
+#include "map/terrain.h"
 #include "sound/city.h"
 #include "sound/effect.h"
 #include "translation/translation.h"
@@ -76,6 +80,7 @@ static void draw_footprint(int x, int y, int grid_offset)
         map_image_set(grid_offset, image_id);
     }
     image_draw_isometric_footprint_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
+    
     if (config_get(CONFIG_UI_SHOW_GRID) && draw_context.scale <= 2.0f) {
         //grid is drawn by the renderer directly at zoom > 200%
         static int grid_id = 0;
@@ -83,6 +88,19 @@ static void draw_footprint(int x, int y, int grid_offset)
             grid_id = assets_get_image_id("UI", "Grid_Full");
         }
         image_draw(grid_id, x, y, COLOR_GRID, draw_context.scale);
+    }
+}
+
+static void draw_custom_earthquake(int x, int y, int grid_offset)
+{
+    if (grid_offset < 0 || !map_property_is_draw_tile(grid_offset)) {
+        return;
+    }
+    if (map_property_is_future_earthquake(grid_offset) && editor_is_active() && !map_terrain_is(grid_offset, TERRAIN_IMPASSABLE_EARTHQUAKE)) {
+        const terrain_image *image = map_image_context_get_future_earthquake(grid_offset);
+        if (image->is_valid) {
+            image_draw_isometric_footprint_from_draw_tile(image_group(GROUP_TERRAIN_EARTHQUAKE) + image->group_offset + image->item_offset, x, y, ALPHA_MASK_CUSTOM_EARTHQUAKE, draw_context.scale);
+        }
     }
 }
 
@@ -146,6 +164,7 @@ void widget_map_editor_draw(void)
     graphics_fill_rect(x, y, width, height, COLOR_BLACK);
     city_view_foreach_valid_map_tile(draw_footprint);
     city_view_foreach_valid_map_tile_row(draw_flags, draw_top, 0);
+    city_view_foreach_valid_map_tile(draw_custom_earthquake);
     map_editor_tool_draw(&data.current_tile);
     graphics_reset_clip_rectangle();
 }
