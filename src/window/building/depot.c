@@ -732,7 +732,7 @@ static void set_camera_position(const generic_button *button)
 static void copy_settings(const generic_button *button)
 {
     building *b = building_get(data.depot_building_id);
-    building_data_transfer_copy(b);
+    building_data_transfer_copy(b, 0);
     calculate_available_storages(data.depot_building_id);
     setup_buttons_for_selected_depot();
     window_invalidate();
@@ -741,7 +741,7 @@ static void copy_settings(const generic_button *button)
 static void paste_settings(const generic_button *button)
 {
     building *b = building_get(data.depot_building_id);
-    building_data_transfer_paste(b);
+    building_data_transfer_paste(b, 0);
     calculate_available_storages(data.depot_building_id);
     setup_buttons_for_selected_depot();
     window_invalidate();

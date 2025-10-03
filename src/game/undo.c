@@ -135,6 +135,7 @@ int game_undo_start_build(building_type type)
     map_aqueduct_backup();
     map_property_backup();
     map_sprite_backup();
+    map_building_backup();
 
     return 1;
 }
@@ -171,6 +172,7 @@ void game_undo_restore_map(int include_properties)
 {
     map_terrain_restore();
     map_aqueduct_restore();
+    map_building_restore();
     if (include_properties) {
         map_property_restore();
     }
@@ -246,6 +248,7 @@ void game_undo_perform(void)
         map_sprite_restore();
         map_image_restore();
         map_property_restore();
+        map_building_restore();
         map_property_clear_constructing_and_deleted();
     } else if (data.type == BUILDING_AQUEDUCT || data.type == BUILDING_ROAD ||
         data.type == BUILDING_WALL || data.type == BUILDING_HIGHWAY) {

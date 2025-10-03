@@ -10,6 +10,7 @@
 #include "city/sentiment.h"
 #include "city/victory.h"
 #include "city/warning.h"
+#include "core/config.h"
 #include "core/lang.h"
 #include "core/string.h"
 #include "empire/city.h"
@@ -163,6 +164,9 @@ void game_cheat_activate(void)
 
 int game_cheat_tooltip_enabled(void)
 {
+    if (config_get(CONFIG_DEBUG_START_WITH_TOOLTIP)) {
+        data.tooltip_enabled = (config_get(CONFIG_DEBUG_START_WITH_TOOLTIP));
+    }
     return data.tooltip_enabled;
 }
 

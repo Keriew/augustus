@@ -7,7 +7,7 @@
 
 #include <string.h>
 
-static struct {
+typedef struct {
     building_data_type data_type;
     unsigned char resource[RESOURCE_MAX];
     building_storage storage;
@@ -16,27 +16,64 @@ static struct {
     short i16;
     int i32;
     signed char mothball;
-} data;
+} transfer_data;
 
-int building_data_transfer_possible(building *b)
+static transfer_data data;
+static transfer_data backup_data;
+
+void building_data_transfer_clear(int backup)
+{
+    if (backup) {
+        memset(&backup_data, 0, sizeof(backup_data));
+    } else {
+        memset(&data, 0, sizeof(data));
+    }
+}
+void building_data_transfer_backup(void)
+{
+    backup_data = data;
+}
+
+void building_data_transfer_restore(void)
+{
+    data = backup_data;
+}
+
+void building_data_transfer_restore_and_clear_backup(void)
+{
+    data = backup_data;
+    memset(&backup_data, 0, sizeof(backup_data));
+}
+
+int building_data_transfer_possible(building *b, int supress_warnings)
 {
     building_data_type data_type = building_data_transfer_data_type_from_building_type(b->type);
     if (data.data_type == DATA_TYPE_NOT_SUPPORTED || data_type == DATA_TYPE_NOT_SUPPORTED) {
-        city_warning_show(WARNING_DATA_PASTE_FAILURE, NEW_WARNING_SLOT);
+        if (!supress_warnings) {
+            city_warning_show(WARNING_DATA_PASTE_FAILURE, NEW_WARNING_SLOT);
+        }
         return 0;
     }
     if (data.data_type != data_type) {
-        city_warning_show(WARNING_DATA_PASTE_FAILURE, NEW_WARNING_SLOT);
+        if (!supress_warnings) {
+            city_warning_show(WARNING_DATA_PASTE_FAILURE, NEW_WARNING_SLOT);
+        }
+
         return 0;
     }
     return 1;
 }
 
-int building_data_transfer_copy(building *b)
+int building_data_transfer_copy(building *b, int supress_warnings)
 {
-    building_data_type data_type = building_data_transfer_data_type_from_building_type(b->type);
+    building_type copy_type = b->type == BUILDING_BURNING_RUIN ? b->data.rubble.og_type : b->type;
+    building_data_type data_type = building_data_transfer_data_type_from_building_type(copy_type);
     if (data_type == DATA_TYPE_NOT_SUPPORTED) {
-        city_warning_show(WARNING_DATA_COPY_NOT_SUPPORTED, NEW_WARNING_SLOT);
+
+        if (!supress_warnings) {
+            city_warning_show(WARNING_DATA_COPY_NOT_SUPPORTED, NEW_WARNING_SLOT);
+        }
+        return 0;
     } else {
         memset(&data, 0, sizeof(data));
         data.data_type = data_type;
@@ -78,15 +115,17 @@ int building_data_transfer_copy(building *b)
             return 0;
 
     }
-    city_warning_show(WARNING_DATA_COPY_SUCCESS, NEW_WARNING_SLOT);
+    if (!supress_warnings) {
+        city_warning_show(WARNING_DATA_COPY_SUCCESS, NEW_WARNING_SLOT);
+    }
     return 1;
 }
 
-int building_data_transfer_paste(building *b)
+int building_data_transfer_paste(building *b, int supress_warnings)
 {
     building_data_type data_type = building_data_transfer_data_type_from_building_type(b->type);
 
-    if (!building_data_transfer_possible(b)) {
+    if (!building_data_transfer_possible(b, supress_warnings)) {
         return 0;
     }
 
@@ -118,7 +157,9 @@ int building_data_transfer_paste(building *b)
             return 0;
     }
     building_mothball_set(b, data.mothball);
-    city_warning_show(WARNING_DATA_PASTE_SUCCESS, NEW_WARNING_SLOT);
+    if (!supress_warnings) {
+        city_warning_show(WARNING_DATA_PASTE_SUCCESS, NEW_WARNING_SLOT);
+    }
     return 1;
 
 }

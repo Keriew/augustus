@@ -276,6 +276,26 @@ int building_monument_add_module(building *b, int module)
     return 1;
 }
 
+int building_monument_is_limited(building_type type)
+{
+    switch (type) {
+        case BUILDING_GRAND_TEMPLE_CERES:
+        case BUILDING_GRAND_TEMPLE_NEPTUNE:
+        case BUILDING_GRAND_TEMPLE_MERCURY:
+        case BUILDING_GRAND_TEMPLE_MARS:
+        case BUILDING_GRAND_TEMPLE_VENUS:
+        case BUILDING_PANTHEON:
+        case BUILDING_LIGHTHOUSE:
+        case BUILDING_CARAVANSERAI:
+        case BUILDING_COLOSSEUM:
+        case BUILDING_HIPPODROME:
+        case BUILDING_CITY_MINT:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
 int building_monument_get_monument(int x, int y, int resource, int road_network_id, map_point *dst)
 {
     if (city_resource_is_stockpiled(resource)) {

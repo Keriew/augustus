@@ -2,12 +2,14 @@
 
 #include "assets/assets.h"
 #include "building/building.h"
+#include "building/clone.h"
 #include "building/roadblock.h"
 #include "city/constants.h"
 #include "city/finance.h"
 #include "core/dir.h"
 #include "core/image.h"
 #include "graphics/button.h"
+#include "graphics/complex_button.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
@@ -36,6 +38,7 @@ static struct {
 static generic_button go_to_orders_button[] = {
     {0, 0, 304, 20, button_go_to_orders},
 };
+complex_button repair_building_button[] = { 0 };
 
 static generic_button orders_permission_buttons[] = {
     {0, 4, 210, 22, button_toggle_figure_state, 0, PERMISSION_MAINTENANCE},
@@ -261,10 +264,45 @@ void window_building_draw_burning_ruin(building_info_context *c)
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(111, 0, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
 
-    lang_text_draw(41, c->rubble_building_type,
+    lang_text_draw(41, building_get(c->rubble_building_id)->type,
         c->x_offset + 32, c->y_offset + BLOCK_SIZE * c->height_blocks - 173, FONT_NORMAL_BLACK);
     lang_text_draw_multiline(111, 1, c->x_offset + 32, c->y_offset + BLOCK_SIZE * c->height_blocks - 143,
         BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_BLACK);
+}
+
+static void trigger_building_repair(const complex_button *button)
+{
+    building *b = building_get(button->parameters[0]);
+    building_repair(b);
+    window_invalidate();
+    window_go_back();
+}
+
+static void init_repair_building_button(building_info_context *c)
+{
+    int context_width = BLOCK_SIZE * c->width_blocks;
+    int button_width = context_width / 2;  // 50% of context width
+    repair_building_button->x = c->x_offset + (context_width - button_width) / 2;  // Center horizontally
+    repair_building_button->y = c->y_offset + BLOCK_SIZE * c->height_blocks - 30;
+    repair_building_button->width = button_width;
+    repair_building_button->height = 20;
+    repair_building_button->parameters[0] = c->rubble_building_id;
+    building *b = building_get(c->rubble_building_id);
+    static lang_fragment frag;
+    if (!building_can_repair(b)) {
+        frag = (lang_fragment) { LANG_FRAG_LABEL, CUSTOM_TRANSLATION, TR_WARNING_REPAIR_IMPOSSIBLE, 0, 0, 0 };
+        repair_building_button->is_disabled = 1;
+    } else if (building_is_still_burning(b)) {
+        frag = (lang_fragment) { LANG_FRAG_LABEL, CUSTOM_TRANSLATION, TR_BUILDING_INFO_BUILDING_BURNING, 0, 0, 0 };
+        repair_building_button->is_disabled = 1;
+    } else {
+        frag = (lang_fragment) { LANG_FRAG_LABEL, CUSTOM_TRANSLATION, TR_BUILDING_INFO_REPAIR_BUILDING, 0, 0, 0 };
+        repair_building_button->is_disabled = 0;
+    }
+    repair_building_button->user_data = c;
+    repair_building_button->left_click_handler = trigger_building_repair;
+    repair_building_button->sequence = &frag;
+    repair_building_button->sequence_size = 1;
 }
 
 void window_building_draw_rubble(building_info_context *c)
@@ -273,9 +311,25 @@ void window_building_draw_rubble(building_info_context *c)
     window_building_play_sound(c, "wavs/ruin.wav");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(140, 0, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
+    building *b = building_get(c->rubble_building_id);
+    building_type og_type = b->data.rubble.og_type;
+    building_type type = og_type == BUILDING_NONE ? b->type : og_type;
+    int is_burning_ruins = (b->type == BUILDING_BURNING_RUIN);
 
-    lang_text_draw(41, c->rubble_building_type,
+    if (building_can_repair_type(type) || building_can_repair_type(type)) {
+        init_repair_building_button(c);
+        complex_button_draw(repair_building_button);
+    } else if (building_clone_type_from_building_type(type) != BUILDING_NONE) {
+        // cant repair but can clone - aqueducts or limited monuments. Show disabled button
+        init_repair_building_button(c);
+        complex_button_draw(repair_building_button);
+    }
+    int cursor = lang_text_draw(41, type,
         c->x_offset + 32, c->y_offset + BLOCK_SIZE * c->height_blocks - 173, FONT_NORMAL_BLACK);
+    if (is_burning_ruins && type) { // show original building type if it's burning ruins
+        cursor += lang_text_draw(41, type, c->x_offset + 32 + cursor, c->y_offset + BLOCK_SIZE * c->height_blocks - 173,
+             FONT_NORMAL_RED);
+    }
     lang_text_draw_multiline(140, 1, c->x_offset + 32, c->y_offset + BLOCK_SIZE * c->height_blocks - 143,
         BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_BLACK);
 }
@@ -447,7 +501,6 @@ void window_building_draw_native_watchtower(building_info_context *c)
     window_building_draw_description_at(c, 96, CUSTOM_TRANSLATION, TR_BUILDING_NATIVE_WATCHTOWER_DESC);
 }
 
-
 void window_building_draw_highway(building_info_context *c)
 {
     //c->help_id = 0;
@@ -470,8 +523,6 @@ static void button_toggle_figure_state(const generic_button *button)
     window_invalidate();
 }
 
-
-
 static void button_roadblock_orders(const generic_button *button)
 {
     building *b = building_get(data.building_id);
@@ -487,6 +538,11 @@ static void button_roadblock_orders(const generic_button *button)
 static void button_go_to_orders(const generic_button *button)
 {
     window_building_info_show_storage_orders();
+}
+
+int window_building_handle_rubble_button(const mouse *m, building_info_context *c)
+{
+    return complex_button_handle_mouse(m, repair_building_button);
 }
 
 int window_building_handle_mouse_roadblock_button(const mouse *m, building_info_context *c)

@@ -85,6 +85,14 @@ static const uint8_t *get_text_for_warning(warning_type type)
             return translation_for(TR_WARNING_NO_ARMOURY);
         case WARNING_WAREHOUSE_TOWER:
             return translation_for(TR_WARNING_NO_WAREHOUSE_TOWER_ROAD_ACCESS);
+        case WARNING_REPAIR_IMPOSSIBLE:
+            return translation_for(TR_WARNING_REPAIR_IMPOSSIBLE);
+        case WARNING_REPAIR_BURNING:
+            return translation_for(TR_WARNING_REPAIR_BURNING);
+        case WARNING_REPAIR_MONUMENT:
+            return translation_for(TR_WARNING_CANT_REPAIR_MONUMENTS);
+        case WARNING_REPAIR_AQUEDUCT:
+            return translation_for(TR_WARNING_CANT_REPAIR_AQUEDUCTS);
         default:
             return lang_get_string(19, type - 2);
     }

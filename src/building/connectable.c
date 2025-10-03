@@ -15,7 +15,7 @@
 
 #define MAX_TILES 8
 
-typedef struct  {
+typedef struct {
     const unsigned char tiles[MAX_TILES];
     const unsigned char offset_for_orientation[4];
     const int rotation;
@@ -385,7 +385,7 @@ int building_connectable_get_garden_gate_offset(int grid_offset)
             continue;
         }
         building *b = building_get(map_building_at(offset));
-        if (is_garden_wall(b->type) || 
+        if (is_garden_wall(b->type) ||
             (map_property_is_constructing(offset) && !map_terrain_is(offset, TERRAIN_ROAD) && is_garden_wall(building_construction_type()))) {
             tiles[i] = 1;
         }
@@ -496,6 +496,9 @@ int building_connectable_num_variants(building_type type)
 void building_connectable_update_connections_for_type(building_type type)
 {
     for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
+        if (b->state == BUILDING_STATE_RUBBLE) {
+            continue;
+        }
         map_image_set(b->grid_offset, building_image_get(b));
     }
 }

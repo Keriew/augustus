@@ -127,6 +127,16 @@ int building_storage_restore(int storage_id)
     return storage_id;
 }
 
+int building_storage_change_building(int storage_id, int building_id)
+{
+    if (storage_id < 0 || storage_id >= storages.size) {
+        return 0;
+    }
+    array_item(storages, storage_id)->building_id = building_id;
+    building_get(building_id)->storage_id = storage_id; // set for the main entry
+    return 1;
+}
+
 void building_storage_delete(int storage_id)
 {
     array_item(storages, storage_id)->in_use = 0;
@@ -575,6 +585,18 @@ building_storage_permission_states building_storage_get_permission_from_building
     }
 }
 
+static int states_remap(int state)
+{
+    // prior to version LAST_U16_GRIDS, NOT_ACCEPTING was 1, ACCEPTING was 0
+    switch (state) {
+        case 0: return BUILDING_STORAGE_STATE_ACCEPTING;
+        case 1: return BUILDING_STORAGE_STATE_NOT_ACCEPTING;
+        case 2: return BUILDING_STORAGE_STATE_GETTING;
+        case 3: return BUILDING_STORAGE_STATE_MAINTAINING;
+        default: return BUILDING_STORAGE_STATE_NOT_ACCEPTING;
+    }
+}
+
 void building_storage_load_state(buffer *buf, int version)
 {
     int storage_buf_size;
@@ -610,6 +632,9 @@ void building_storage_load_state(buffer *buf, int version)
             for (int r = 0; r < num_resources; r++) {
                 int remapped = resource_remap(r);
                 s->storage.resource_state[remapped].state = buffer_read_u8(buf);
+                if (version <= SAVE_GAME_LAST_U16_GRIDS) {
+                    s->storage.resource_state[remapped].state = states_remap(s->storage.resource_state[remapped].state);
+                }
                 s->storage.resource_state[remapped].quantity = buffer_read_u8(buf);
             }
 
