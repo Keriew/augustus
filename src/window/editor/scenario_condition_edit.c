@@ -14,6 +14,7 @@
 #include "scenario/event/condition_handler.h"
 #include "scenario/event/controller.h"
 #include "scenario/event/parameter_data.h"
+#include "widget/input_box.h"
 #include "window/editor/custom_variables.h"
 #include "window/editor/map.h"
 #include "window/editor/requests.h"
@@ -233,7 +234,8 @@ static void create_evaluation_formula(void)
             memset(data.formula, 0, MAX_FORMULA_LENGTH);
         }
     }
-    window_text_input_show("FORMULA", "...", data.formula, MAX_FORMULA_LENGTH, set_formula_value);
+    window_text_input_expanded_show("FORMULA", "...", data.formula, MAX_FORMULA_LENGTH,
+         set_formula_value, INPUT_BOX_CHARS_FORMULAS);
 }
 
 static void set_param_value(int value)

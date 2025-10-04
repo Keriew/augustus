@@ -14,6 +14,7 @@
 #include "scenario/event/controller.h"
 #include "scenario/event/parameter_data.h"
 #include "scenario/event/action_handler.h"
+#include "widget/input_box.h"
 #include "window/editor/allowed_buildings.h"
 #include "window/editor/custom_variables.h"
 #include "window/editor/map.h"
@@ -359,7 +360,8 @@ static void create_evaluation_formula(void)
             memset(data.formula, 0, MAX_FORMULA_LENGTH);
         }
     }
-    window_text_input_show("FORMULA", "...", data.formula, MAX_FORMULA_LENGTH, set_formula_value);
+    window_text_input_expanded_show("FORMULA", "...", data.formula, MAX_FORMULA_LENGTH,
+         set_formula_value, INPUT_BOX_CHARS_FORMULAS);
 }
 
 static void custom_variable_selection(void)

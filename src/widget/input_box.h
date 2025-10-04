@@ -25,6 +25,7 @@ typedef struct {
     const uint8_t *placeholder;
     void (*on_change)(int is_addition_at_end);
     uint8_t *old_text;
+    const char *allowed_chars;
 } input_box;
 
 /**
