@@ -11,6 +11,7 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
+#include "scenario/event/controller.h"
 #include "scenario/event/parameter_data.h"
 #include "scenario/event/action_handler.h"
 #include "window/editor/allowed_buildings.h"
@@ -24,6 +25,7 @@
 #include "window/editor/select_special_attribute_mapping.h"
 #include "window/numeric_input.h"
 #include "window/select_list.h"
+#include "window/text_input.h"
 
 #define BUTTON_LEFT_PADDING 32
 #define BUTTON_WIDTH 608
@@ -60,7 +62,7 @@ static struct {
     int parameter_being_edited_current_value;
 
     uint8_t display_text[MAX_TEXT_LENGTH];
-
+    uint8_t formula[MAX_FORMULA_LENGTH];
     scenario_action_t *action;
     scenario_action_data_t *xml_info;
 } data;
@@ -309,6 +311,22 @@ static void set_param_custom_variable(unsigned int id)
     }
 }
 
+static void set_formula_value(const uint8_t *formula)
+{
+    strncpy((char *) data.formula, (const char *) formula, MAX_FORMULA_LENGTH - 1);
+    data.formula[MAX_FORMULA_LENGTH - 1] = 0;
+    // Add formula to list and get its index
+
+    int formulas_index = scenario_formula_add(data.formula);
+    set_param_value(formulas_index);
+    window_invalidate();
+}
+
+static void create_evaluation_formula(void)
+{
+    window_text_input_show("FORMULA", "...", data.formula, MAX_FORMULA_LENGTH, set_formula_value);
+}
+
 static void custom_variable_selection(void)
 {
     window_editor_custom_variables_show(set_param_custom_variable);
@@ -383,6 +401,9 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             return;
         case PARAMETER_TYPE_CUSTOM_VARIABLE:
             custom_variable_selection();
+            return;
+        case PARAMETER_TYPE_FORMULA:
+            create_evaluation_formula();
             return;
         default:
             return;

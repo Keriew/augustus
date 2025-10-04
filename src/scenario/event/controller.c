@@ -10,19 +10,58 @@
 #define SCENARIO_EVENTS_SIZE_STEP 50
 
 static array(scenario_event_t) scenario_events;
+static scenario_formula_t scenario_formulas[MAX_FORMULAS];
+static unsigned int scenario_formulas_size = 0;
 
 void scenario_events_init(void)
 {
     scenario_event_t *current;
-    array_foreach(scenario_events, current) {
+    array_foreach(scenario_events, current)
+    {
         scenario_event_init(current);
     }
+}
+
+unsigned int scenario_formula_add(const uint8_t *formatted_calculation)
+{
+    scenario_formulas_size++;
+    if (scenario_formulas_size >= MAX_FORMULAS) {
+        log_error("Maximum number of custom formulas reached.", 0, 0);
+        return -1;
+    }
+    scenario_formula_t calculation;
+    calculation.id = scenario_formulas_size;
+    calculation.evaluation = 0;
+    strncpy((char *) calculation.formatted_calculation, (const char *) formatted_calculation, MAX_FORMULA_LENGTH - 1);
+    scenario_formulas[scenario_formulas_size] = calculation;
+    // null termination on last char-  treating as string 
+    return calculation.id;
+}
+
+void scenario_formula_change(unsigned int id, const uint8_t *formatted_calculation)
+{
+    if (id <= 0 || id > scenario_formulas_size) {
+        log_error("Invalid formula ID.", 0, 0);
+        return;
+    }
+    strncpy((char *) scenario_formulas[id].formatted_calculation,
+        (const char *) formatted_calculation, MAX_FORMULA_LENGTH - 1);
+}
+
+const uint8_t *scenario_formula_get(unsigned int id)
+{
+    if (id == 0 || id > scenario_formulas_size) {
+        log_error("Invalid formula index.", 0, 0);
+        return NULL;
+    }
+    return scenario_formulas[id].formatted_calculation;
 }
 
 void scenario_events_clear(void)
 {
     scenario_event_t *current;
-    array_foreach(scenario_events, current) {
+    array_foreach(scenario_events, current)
+    {
         scenario_event_delete(current);
     }
     scenario_events.size = 0;
@@ -70,7 +109,8 @@ scenario_event_t *scenario_event_create(int repeat_min, int repeat_max, int max_
 void scenario_event_delete(scenario_event_t *event)
 {
     scenario_condition_group_t *condition_group;
-    array_foreach(event->condition_groups, condition_group) {
+    array_foreach(event->condition_groups, condition_group)
+    {
         array_clear(condition_group->conditions);
     }
     array_clear(event->condition_groups);
@@ -79,6 +119,18 @@ void scenario_event_delete(scenario_event_t *event)
     event->state = EVENT_STATE_UNDEFINED;
     array_trim(scenario_events);
 }
+
+// void scenario_formula_delete(scenario_formula_t *formula)
+// {
+//     scenario_formula_t *current;
+//     array_foreach(scenario_formulas, current)
+//     {
+//         array_clear(scenario_formulas);
+//     }
+//     memset(formula, 0, sizeof(scenario_formula_t));
+//     array_trim(scenario_events);
+// }
+
 
 int scenario_events_get_count(void)
 {
@@ -92,7 +144,8 @@ static void info_save_state(buffer *buf)
     buffer_init_dynamic_array(buf, array_size, struct_size);
 
     scenario_event_t *current;
-    array_foreach(scenario_events, current) {
+    array_foreach(scenario_events, current)
+    {
         scenario_event_save_state(buf, current);
     }
 }
@@ -105,9 +158,11 @@ static void conditions_save_state(buffer *buf)
     const scenario_event_t *event;
     const scenario_condition_group_t *group;
 
-    array_foreach(scenario_events, event) {
+    array_foreach(scenario_events, event)
+    {
         total_groups += event->condition_groups.size;
-        array_foreach(event->condition_groups, group) {
+        array_foreach(event->condition_groups, group)
+        {
             total_conditions += group->conditions.size;
         }
     }
@@ -116,8 +171,10 @@ static void conditions_save_state(buffer *buf)
 
     buffer_init_dynamic(buf, size);
 
-    array_foreach(scenario_events, event) {
-        array_foreach(event->condition_groups, group) {
+    array_foreach(scenario_events, event)
+    {
+        array_foreach(event->condition_groups, group)
+        {
             scenario_condition_group_save_state(buf, group, LINK_TYPE_SCENARIO_EVENT, event->id);
         }
     }
@@ -127,7 +184,8 @@ static void actions_save_state(buffer *buf)
 {
     int32_t array_size = 0;
     scenario_event_t *current_event;
-    array_foreach(scenario_events, current_event) {
+    array_foreach(scenario_events, current_event)
+    {
         array_size += current_event->actions.size;
     }
 
@@ -145,7 +203,7 @@ static void actions_save_state(buffer *buf)
 
 }
 
-void scenario_events_save_state(buffer *buf_events, buffer *buf_conditions,  buffer *buf_actions)
+void scenario_events_save_state(buffer *buf_events, buffer *buf_conditions, buffer *buf_actions)
 {
     info_save_state(buf_events);
     conditions_save_state(buf_conditions);
@@ -213,11 +271,11 @@ static void load_link_action(scenario_action_t *action, int link_type, int32_t l
 {
     switch (link_type) {
         case LINK_TYPE_SCENARIO_EVENT:
-            {
-                scenario_event_t *event = scenario_event_get(link_id);
-                scenario_event_link_action(event, action);
-            }
-            break;
+        {
+            scenario_event_t *event = scenario_event_get(link_id);
+            scenario_event_link_action(event, action);
+        }
+        break;
         default:
             log_error("Unhandled action link type. The game will probably crash.", 0, 0);
             break;
@@ -256,7 +314,8 @@ void scenario_events_load_state(buffer *buf_events, buffer *buf_conditions, buff
     actions_load_state(buf_actions, is_new_version);
 
     scenario_event_t *current;
-    array_foreach(scenario_events, current) {
+    array_foreach(scenario_events, current)
+    {
         if (current->state == EVENT_STATE_DELETED) {
             current->state = EVENT_STATE_UNDEFINED;
         }
@@ -266,7 +325,8 @@ void scenario_events_load_state(buffer *buf_events, buffer *buf_conditions, buff
 void scenario_events_process_all(void)
 {
     scenario_event_t *current;
-    array_foreach(scenario_events, current) {
+    array_foreach(scenario_events, current)
+    {
         scenario_event_conditional_execute(current);
     }
 }
@@ -274,7 +334,8 @@ void scenario_events_process_all(void)
 scenario_event_t *scenario_events_get_using_custom_variable(int custom_variable_id)
 {
     scenario_event_t *current;
-    array_foreach(scenario_events, current) {
+    array_foreach(scenario_events, current)
+    {
         if (scenario_event_uses_custom_variable(current, custom_variable_id)) {
             return current;
         }
@@ -285,7 +346,8 @@ scenario_event_t *scenario_events_get_using_custom_variable(int custom_variable_
 void scenario_events_progress_paused(int months_passed)
 {
     scenario_event_t *current;
-    array_foreach(scenario_events, current) {
+    array_foreach(scenario_events, current)
+    {
         scenario_event_decrease_pause_time(current, months_passed);
     }
 }

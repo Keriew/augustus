@@ -36,6 +36,7 @@ typedef enum {
     PARAMETER_TYPE_GOD,
     PARAMETER_TYPE_CLIMATE,
     PARAMETER_TYPE_TERRAIN,
+    PARAMETER_TYPE_FORMULA,
 } parameter_type;
 
 typedef struct {

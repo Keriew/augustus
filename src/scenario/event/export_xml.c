@@ -157,6 +157,15 @@ static int export_parse_attribute(xml_data_attribute_t *attr, int target)
             return export_attribute_custom_message(attr, target);
         case PARAMETER_TYPE_CUSTOM_VARIABLE:
             return export_attribute_custom_variable(attr, target);
+        case PARAMETER_TYPE_FORMULA:
+        {
+            const uint8_t *formula = scenario_formula_get(target);
+            if (formula) {
+                xml_exporter_add_attribute_encoded_text(attr->name, formula);
+                return 1;
+            }
+            return 0;
+        }
         case PARAMETER_TYPE_UNDEFINED:
             return 1;
         default:
@@ -245,7 +254,8 @@ static int export_event(scenario_event_t *event)
     xml_exporter_new_element("conditions");
 
     const scenario_condition_group_t *group;
-    array_foreach(event->condition_groups, group) {
+    array_foreach(event->condition_groups, group)
+    {
         if (group->conditions.size > 0) {
             if (group->type != FULFILLMENT_TYPE_ALL) {
                 xml_exporter_new_element("group");
@@ -266,7 +276,7 @@ static int export_event(scenario_event_t *event)
     xml_exporter_close_element();
 
     xml_exporter_close_element();
-    
+
     return 1;
 }
 

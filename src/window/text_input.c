@@ -38,8 +38,8 @@ static struct {
     unsigned int focus_button_id;
 } data;
 
-static void init(const uint8_t *title, const uint8_t *placeholder, const uint8_t *text, int max_length,
-    void (*callback)(const uint8_t *))
+static void init(const uint8_t *title, const uint8_t *placeholder, const uint8_t *text,
+     int max_length, int special_characters, void (*callback)(const uint8_t *))
 {
     data.callback = callback;
     data.focus_button_id = 0;
@@ -59,6 +59,7 @@ static void init(const uint8_t *title, const uint8_t *placeholder, const uint8_t
     }
     text_input.placeholder = placeholder;
     text_input.text_length = data.max_length;
+    text_input.allow_punctuation = special_characters;
     data.title = title;
 
     data.x_offset = 128;
@@ -132,6 +133,19 @@ void window_text_input_show(const uint8_t *title, const uint8_t *placeholder, co
         draw_foreground,
         handle_input,
     };
-    init(title, placeholder, text, max_length, callback);
+    init(title, placeholder, text, max_length, 1, callback);
+    window_show(&window);
+}
+
+void window_text_input_expanded_show(const uint8_t *title, const uint8_t *placeholder, const uint8_t *text, int max_length,
+    void (*callback)(const uint8_t *))
+{
+    window_type window = {
+        WINDOW_TEXT_INPUT,
+        draw_background,
+        draw_foreground,
+        handle_input,
+    };
+    init(title, placeholder, text, max_length, 1, callback);
     window_show(&window);
 }

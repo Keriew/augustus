@@ -12,6 +12,7 @@
 #include "figure/formation.h"
 #include "game/resource.h"
 #include "map/terrain.h"
+#include "scenario/event/controller.h"
 #include "scenario/custom_messages.h"
 #include "scenario/custom_variable.h"
 #include "scenario/invasion.h"
@@ -134,6 +135,12 @@ static scenario_condition_data_t scenario_condition_data[CONDITION_TYPE_MAX] = {
                                         .xml_parm3 = {.name = "building",            .type = PARAMETER_TYPE_BUILDING,         .key = TR_PARAMETER_TYPE_BUILDING_COUNTING },
                                         .xml_parm4 = {.name = "check",               .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
                                         .xml_parm5 = {.name = "value",               .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER }, },
+    [CONDITION_TYPE_CUSTOM_VARIABLE_CHECK_FORMULA] = {.type = CONDITION_TYPE_CUSTOM_VARIABLE_CHECK_FORMULA,
+                                        .xml_attr = {.name = "variable_check_formula",       .type = PARAMETER_TYPE_TEXT,             .key = TR_CONDITION_TYPE_CUSTOM_VARIABLE_CHECK_FORMULA },
+                                        .xml_parm1 = {.name = "variable_uid",   .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,         .max_limit = 99,       .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
+                                        .xml_parm2 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,        .key = TR_PARAMETER_TYPE_CHECK },
+                                        .xml_parm3 = {.name = "formula",        .type = PARAMETER_TYPE_FORMULA,          .min_limit = 0,         .max_limit = UNLIMITED,       .key = TR_PARAMETER_TYPE_FORMULA }, },
+
 };
 
 scenario_condition_data_t *scenario_events_parameter_data_get_conditions_xml_attributes(condition_types type)
@@ -288,7 +295,10 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_attr = {.name = "change_variable_visibility",        .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY },
                                         .xml_parm1 = {.name = "variable_uid",   .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,      .max_limit = 99,     .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
                                         .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_BOOLEAN, .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_TYPE_BOOLEAN }, },
-
+    [ACTION_TYPE_CUSTOM_VARIABLE_FORMULA] = {.type = ACTION_TYPE_CUSTOM_VARIABLE_FORMULA,
+                                        .xml_attr = {.name = "variable_formula",       .type = PARAMETER_TYPE_TEXT,             .key = TR_ACTION_TYPE_CUSTOM_VARIABLE_FORMULA },
+                                        .xml_parm1 = {.name = "variable_uid",   .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,      .max_limit = 99,     .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
+                                        .xml_parm2 = {.name = "formula",        .type = PARAMETER_TYPE_FORMULA,          .key = TR_PARAMETER_TYPE_FORMULA }, },
 
 };
 
@@ -553,7 +563,6 @@ special_attribute_mapping_t special_attribute_mappings_terrain[] =
 };
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_TERRAIN_SIZE (sizeof(special_attribute_mappings_terrain) / sizeof(special_attribute_mapping_t))
-
 
 static void generate_building_type_mappings(void)
 {
@@ -922,6 +931,14 @@ void scenario_events_parameter_data_get_display_string_for_value(parameter_type 
         {
             const uint8_t *text = resource_get_data(value)->text;
             result_text = string_copy(text, result_text, maxlength);
+            return;
+        }
+        case PARAMETER_TYPE_FORMULA:
+        {
+            const uint8_t *formula_string = scenario_formula_get(value);
+            if (formula_string) {
+                result_text = string_copy(formula_string, result_text, maxlength);
+            }
             return;
         }
         default:

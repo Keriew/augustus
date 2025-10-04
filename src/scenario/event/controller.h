@@ -12,6 +12,9 @@ typedef enum {
 } scenario_events_version;
 
 void scenario_events_init(void);
+unsigned int scenario_formula_add(const uint8_t *formatted_calculation);
+void scenario_formula_change(unsigned int id, const uint8_t *formatted_calculation);
+const uint8_t *scenario_formula_get(unsigned int id);
 void scenario_events_clear(void);
 scenario_event_t *scenario_event_get(int event_id);
 scenario_event_t *scenario_event_create(int repeat_min, int repeat_max, int max_repeats);

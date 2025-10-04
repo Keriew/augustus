@@ -9,6 +9,8 @@
 #define CONDITION_GROUP_ITEMS_ARRAY_SIZE_STEP 2
 #define CONDITION_GROUP_STRUCT_SIZE (2 * sizeof(uint32_t) + 1 * sizeof(uint16_t) + 1 * sizeof(uint8_t))
 #define CONDITION_STRUCT_SIZE (5 * sizeof(int32_t) + 1 * sizeof(int16_t))
+#define MAX_FORMULA_LENGTH 100
+#define MAX_FORMULAS 1000
 
 typedef enum {
     EVENT_STATE_UNDEFINED = 0,
@@ -49,6 +51,7 @@ typedef enum {
     CONDITION_TYPE_RESOURCE_STORED_COUNT = 22,
     CONDITION_TYPE_RESOURCE_STORAGE_AVAILABLE = 23,
     CONDITION_TYPE_BUILDING_COUNT_AREA = 24,
+    CONDITION_TYPE_CUSTOM_VARIABLE_CHECK_FORMULA = 25,
     CONDITION_TYPE_MAX,
     // helper constants
     CONDITION_TYPE_MIN = CONDITION_TYPE_TIME_PASSED,
@@ -90,6 +93,7 @@ typedef enum {
     ACTION_TYPE_CHANGE_CLIMATE = 32,
     ACTION_TYPE_CHANGE_TERRAIN = 33,
     ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY = 34,
+    ACTION_TYPE_CUSTOM_VARIABLE_FORMULA = 35,
     ACTION_TYPE_MAX,
     // helper constants
     ACTION_TYPE_MIN = ACTION_TYPE_ADJUST_FAVOR,
@@ -154,5 +158,17 @@ typedef struct {
     array(scenario_condition_group_t) condition_groups;
     array(scenario_action_t) actions;
 } scenario_event_t;
+
+typedef struct {
+    int evaluation_type;
+    int parameters[100];
+    void(*callback); //dunno if i need that - evaluation type should point to enum, enum should be mapped by function
+} city_evaluation_t;
+
+typedef struct {
+    unsigned int id; //this number should correspond to the index in array
+    uint8_t formatted_calculation[MAX_FORMULA_LENGTH]; // use [custom_variable_id] to refer to custom variables in the formula
+    int evaluation;
+} scenario_formula_t;
 
 #endif // SCENARIO_EVENT_DATA_H

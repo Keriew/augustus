@@ -338,7 +338,7 @@ static int keyboard_character(uint8_t *text)
         add = data.allow_punctuation;
     } else if (c == '"' || c == '%' || c == '\'' || c == '(' || c == ')' ||
                c == '*' || c == '+' || c == '/' || c == ':' || c == ';' ||
-               c == '=' || c == '_') { //other punctuation supported in current font files
+               c == '=' || c == '_' || c == '[' || c == ']') { //other punctuation supported in current font files
         add = data.allow_punctuation;
     } else if (c >= 0x80) { // do not check non-ascii for valid characters
         add = 1;
