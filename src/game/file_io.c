@@ -94,6 +94,7 @@ typedef struct {
     buffer *scenario_events;
     buffer *scenario_conditions;
     buffer *scenario_actions;
+    buffer *scenario_formulas;
     buffer *custom_messages;
     buffer *custom_media;
     buffer *requests;
@@ -164,6 +165,7 @@ typedef struct {
     buffer *scenario_events;
     buffer *scenario_conditions;
     buffer *scenario_actions;
+    buffer *scenario_formulas;
     buffer *custom_messages;
     buffer *custom_media;
     buffer *requests;
@@ -384,6 +386,9 @@ static void init_scenario_data(scenario_version_t version)
     }
     if (version > SCENARIO_LAST_NO_CUSTOM_EMPIRE_MAP_IMAGE) {
         state->empire_map = create_scenario_piece(PIECE_SIZE_DYNAMIC, 0);
+    }
+    if (version > SCENARIO_LAST_NO_FORMULAS) {
+        state->scenario_formulas = create_scenario_piece(PIECE_SIZE_DYNAMIC, 1);
     }
     state->end_marker = create_scenario_piece(4, 0);
 }
@@ -688,9 +693,12 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
         scenario_allowed_building_load_state(file->allowed_buildings);
         scenario_custom_variable_load_state(file->custom_variables, version);
     }
+    if (version > SCENARIO_LAST_NO_FORMULAS) {
+
+    }
     if (version > SCENARIO_LAST_NO_EVENTS) {
         scenario_events_load_state(file->scenario_events, file->scenario_conditions, file->scenario_actions,
-            version > SCENARIO_LAST_STATIC_ORIGINAL_DATA);
+            file->scenario_formulas, version);
     } else {
         scenario_events_clear();
     }
@@ -726,7 +734,7 @@ static void scenario_save_to_state(scenario_state *file)
     scenario_price_change_save_state(file->price_changes);
     scenario_allowed_building_save_state(file->allowed_buildings);
     scenario_custom_variable_save_state(file->custom_variables);
-    scenario_events_save_state(file->scenario_events, file->scenario_conditions, file->scenario_actions);
+    scenario_events_save_state(file->scenario_events, file->scenario_conditions, file->scenario_actions, file->scenario_formulas);
     custom_messages_save_state(file->custom_messages);
     custom_media_save_state(file->custom_media);
     message_media_text_blob_save_state(file->message_media_text_blob, file->message_media_metadata);
@@ -780,7 +788,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
 
     if (scenario_version > SCENARIO_LAST_NO_EVENTS) {
         scenario_events_load_state(state->scenario_events, state->scenario_conditions, state->scenario_actions,
-            scenario_version > SCENARIO_LAST_STATIC_ORIGINAL_DATA);
+            state->scenario_formulas, scenario_version);
     } else {
         scenario_events_clear();
     }
@@ -929,7 +937,7 @@ static void savegame_save_to_state(savegame_state *state)
     scenario_price_change_save_state(state->price_changes);
     scenario_allowed_building_save_state(state->allowed_buildings);
     scenario_custom_variable_save_state(state->custom_variables);
-    scenario_events_save_state(state->scenario_events, state->scenario_conditions, state->scenario_actions);
+    scenario_events_save_state(state->scenario_events, state->scenario_conditions, state->scenario_actions, state->scenario_formulas);
     custom_messages_save_state(state->custom_messages);
     custom_media_save_state(state->custom_media);
     message_media_text_blob_save_state(state->message_media_text_blob, state->message_media_metadata);
