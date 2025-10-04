@@ -935,7 +935,7 @@ void scenario_events_parameter_data_get_display_string_for_value(parameter_type 
         }
         case PARAMETER_TYPE_FORMULA:
         {
-            const uint8_t *formula_string = scenario_formula_get(value);
+            const uint8_t *formula_string = scenario_formula_get_string(value);
             if (formula_string) {
                 result_text = string_copy(formula_string, result_text, maxlength);
             }

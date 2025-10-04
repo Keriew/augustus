@@ -224,7 +224,7 @@ static void create_evaluation_formula(void)
 {
     int current_index = get_param_value();
     if (current_index > 0) {
-        const uint8_t *src = scenario_formula_get(current_index);
+        const uint8_t *src = scenario_formula_get_string(current_index);
         if (src) {
             strncpy((char *) data.formula, (const char *) src, MAX_FORMULA_LENGTH - 1);
             data.formula[MAX_FORMULA_LENGTH - 1] = '\0';
@@ -276,7 +276,6 @@ static int get_param_value(void)
             return -1;
     }
 }
-
 
 static void set_parameter_being_edited(int value)
 {

@@ -1,7 +1,7 @@
 #ifndef CONDITION_TYPES_H
 #define CONDITION_TYPES_H
 
-#include "scenario/scenario_event_data.h"
+#include "scenario/event/data.h"
 
 int scenario_condition_type_building_count_active_met(const scenario_condition_t *condition);
 
@@ -51,5 +51,7 @@ int scenario_condition_type_trade_route_price_met(const scenario_condition_t *co
 int scenario_condition_type_trade_sell_price_met(const scenario_condition_t *condition);
 
 int scenario_condition_type_tax_rate_met(const scenario_condition_t *condition);
+
+int scenario_condition_type_custom_variable_check_formula(const scenario_condition_t *condition);
 
 #endif // CONDITION_TYPES_H

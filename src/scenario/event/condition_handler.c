@@ -3,6 +3,7 @@
 #include "core/log.h"
 #include "game/resource.h"
 #include "scenario/event/condition_types.h"
+#include "scenario/event/conditions/condition_types.h"
 
 static int condition_in_use(const scenario_condition_t *condition)
 {
@@ -88,6 +89,8 @@ int scenario_condition_type_is_met(scenario_condition_t *condition)
             return scenario_condition_type_trade_sell_price_met(condition);
         case CONDITION_TYPE_TAX_RATE:
             return scenario_condition_type_tax_rate_met(condition);
+        case CONDITION_TYPE_CUSTOM_VARIABLE_CHECK_FORMULA:
+            return scenario_condition_type_custom_variable_check_formula(condition);
         default:
             // If we cannot figure condition type (such as with deleted conditions) then default to passed.
             return 1;
@@ -103,7 +106,8 @@ void scenario_condition_type_delete(scenario_condition_t *condition)
 static void save_conditions_in_group(buffer *buf, const scenario_condition_group_t *group)
 {
     const scenario_condition_t *condition;
-    array_foreach(group->conditions, condition) {
+    array_foreach(group->conditions, condition)
+    {
         buffer_write_i16(buf, condition->type);
         buffer_write_i32(buf, condition->parameter1);
         buffer_write_i32(buf, condition->parameter2);

@@ -269,6 +269,7 @@ typedef struct {
         int scenario_events;
         int scenario_conditions;
         int scenario_actions;
+        int scenario_formulas;
         int custom_messages_and_media;
         int city_faction_info;
         int resource_version;
@@ -585,6 +586,9 @@ static void init_savegame_data(savegame_version_t version)
     }
     if (version_data.features.scenario_events) {
         state->scenario_events = create_savegame_piece(PIECE_SIZE_DYNAMIC, 0);
+    }
+    if (version_data.features.scenario_formulas) {
+        state->scenario_formulas = create_savegame_piece(PIECE_SIZE_DYNAMIC, 0);
     }
     if (version_data.features.scenario_conditions) {
         state->scenario_conditions = create_savegame_piece(PIECE_SIZE_DYNAMIC, 0);

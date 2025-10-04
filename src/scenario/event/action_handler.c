@@ -95,6 +95,8 @@ int scenario_action_type_execute(scenario_action_t *action)
             return scenario_action_type_change_climate_execute(action);
         case ACTION_TYPE_CHANGE_TERRAIN:
             return scenario_action_type_change_terrain_execute(action);
+        case ACTION_TYPE_CUSTOM_VARIABLE_FORMULA:
+            return scenario_action_type_custom_variable_formula_execute(action);
         default:
             return 0;
     }

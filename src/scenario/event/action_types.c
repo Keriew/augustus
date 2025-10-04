@@ -29,6 +29,8 @@
 #include "map/tiles.h"
 #include "scenario/allowed_building.h"
 #include "scenario/custom_variable.h"
+#include "scenario/event/controller.h"
+#include "scenario/event/formula.h"
 #include "scenario/gladiator_revolt.h"
 #include "scenario/custom_messages.h"
 #include "scenario/invasion.h"
@@ -97,6 +99,19 @@ int scenario_action_type_change_custom_variable_visibility(scenario_action_t *ac
     int variable_id = action->parameter1;
     int value = action->parameter2;
     scenario_custom_variable_set_visibility(variable_id, value);
+    return 1;
+}
+
+int scenario_action_type_custom_variable_formula_execute(scenario_action_t *action)
+{
+    int variable_id = action->parameter1;
+    unsigned int formula_id = (unsigned int) action->parameter2; //cast 
+
+    if (formula_id < 0) {
+        return 0;
+    }
+    int evaluation = scenario_formula_evaluate_formula(formula_id);
+    scenario_custom_variable_set_value(variable_id, evaluation);
     return 1;
 }
 

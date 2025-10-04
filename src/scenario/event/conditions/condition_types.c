@@ -19,7 +19,7 @@
 #include "scenario/custom_variable.h"
 #include "scenario/request.h"
 #include "scenario/scenario.h"
-#include "scenario/condition_types/comparison_helper.h"
+#include "scenario/event/condition_comparison_helper.h"
 
 int scenario_condition_type_building_count_active_met(const scenario_condition_t *condition)
 {
@@ -285,8 +285,8 @@ int scenario_condition_type_resource_storage_available_met(const scenario_condit
     switch (storage_type) {
         case STORAGE_TYPE_ALL:
             storage_available += city_resource_get_available_empty_space_warehouses(resource);
-            storage_available += city_resource_get_available_empty_space_granaries(resource)
-                break;
+            storage_available += city_resource_get_available_empty_space_granaries(resource);
+            break;
         case STORAGE_TYPE_GRANARIES:
             storage_available += city_resource_get_available_empty_space_granaries(resource);
             break;

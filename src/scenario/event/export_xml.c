@@ -159,7 +159,7 @@ static int export_parse_attribute(xml_data_attribute_t *attr, int target)
             return export_attribute_custom_variable(attr, target);
         case PARAMETER_TYPE_FORMULA:
         {
-            const uint8_t *formula = scenario_formula_get(target);
+            const uint8_t *formula = scenario_formula_get_string(target);
             if (formula) {
                 xml_exporter_add_attribute_encoded_text(attr->name, formula);
                 return 1;

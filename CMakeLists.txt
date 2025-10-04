@@ -549,6 +549,7 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/event/import_xml.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/export_xml.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/controller.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/formula.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/parameter_data.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/action_handler.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/action_types.c

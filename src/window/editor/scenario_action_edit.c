@@ -63,6 +63,7 @@ static struct {
 
     uint8_t display_text[MAX_TEXT_LENGTH];
     uint8_t formula[MAX_FORMULA_LENGTH];
+    unsigned int formula_index;
     scenario_action_t *action;
     scenario_action_data_t *xml_info;
 } data;
@@ -311,19 +312,53 @@ static void set_param_custom_variable(unsigned int id)
     }
 }
 
+static int get_param_value(void)
+{
+    switch (data.parameter_being_edited) {
+        case 1:
+            return data.action->parameter1;
+        case 2:
+            return data.action->parameter2;
+        case 3:
+            return data.action->parameter3;
+        case 4:
+            return data.action->parameter4;
+        case 5:
+            return data.action->parameter5;
+        default:
+            return -1;
+    }
+}
+
 static void set_formula_value(const uint8_t *formula)
 {
     strncpy((char *) data.formula, (const char *) formula, MAX_FORMULA_LENGTH - 1);
     data.formula[MAX_FORMULA_LENGTH - 1] = 0;
     // Add formula to list and get its index
-
-    int formulas_index = scenario_formula_add(data.formula);
-    set_param_value(formulas_index);
+    if (!data.formula_index) {
+        data.formula_index = scenario_formula_add(data.formula);
+        set_param_value(data.formula_index);
+    } else {
+        // Update existing formula
+        scenario_formula_change(data.formula_index, data.formula);
+        set_param_value(data.formula_index);
+    }
     window_invalidate();
 }
 
 static void create_evaluation_formula(void)
 {
+    int current_index = get_param_value();
+    if (current_index > 0) {
+        const uint8_t *src = scenario_formula_get_string(current_index);
+        if (src) {
+            strncpy((char *) data.formula, (const char *) src, MAX_FORMULA_LENGTH - 1);
+            data.formula[MAX_FORMULA_LENGTH - 1] = '\0';
+            data.formula_index = current_index;
+        } else {
+            memset(data.formula, 0, MAX_FORMULA_LENGTH);
+        }
+    }
     window_text_input_show("FORMULA", "...", data.formula, MAX_FORMULA_LENGTH, set_formula_value);
 }
 

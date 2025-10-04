@@ -18,6 +18,7 @@
 #include "map/grid.h"
 #include "scenario/custom_variable.h"
 #include "scenario/event/condition_comparison_helper.h"
+#include "scenario/event/controller.h"
 #include "scenario/request.h"
 #include "scenario/scenario.h"
 
@@ -361,6 +362,16 @@ int scenario_condition_type_resource_storage_available_met(const scenario_condit
     }
 
     return comparison_helper_compare_values(comparison, storage_available, value);
+}
+
+int scenario_condition_type_custom_variable_check_formula(const scenario_condition_t *condition)
+{
+    int target_variable_val = scenario_custom_variable_get_value(condition->parameter1);
+    int comparison = condition->parameter2;
+    int formula_id = condition->parameter3;
+    int formula_evaluation = scenario_formula_evaluate_formula(formula_id);
+
+    return comparison_helper_compare_values(comparison, target_variable_val, formula_evaluation);
 }
 
 int scenario_condition_type_resource_stored_count_met(const scenario_condition_t *condition)
