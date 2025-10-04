@@ -174,9 +174,11 @@ static void draw_custom_variables_text_display(void)
         if (!scenario_custom_variable_is_visible(i)) {
             continue;
         }
-        const uint8_t *display = scenario_custom_variable_get_text_display(i);
+        const uint8_t *var_text_raw = scenario_custom_variable_get_text_display(i);
+        uint8_t var_text_resolved[100];
+        scenario_custom_variable_resolve_name(var_text_raw, var_text_resolved, 100);
         int value = scenario_custom_variable_get_value(i);
-        draw_topleft_label_short(TOPLEFT_MESSAGES_X, y, display, value, font);
+        draw_topleft_label_short(TOPLEFT_MESSAGES_X, y, var_text_resolved, 0, font); // 0 for test
         y += TOPLEFT_MESSAGES_Y_SPACING;
     }
 }
