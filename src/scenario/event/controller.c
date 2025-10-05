@@ -129,8 +129,8 @@ scenario_event_t *scenario_event_create(int repeat_min, int repeat_max, int max_
         return 0;
     }
     event->state = EVENT_STATE_ACTIVE;
-    event->repeat_months_min = repeat_min;
-    event->repeat_months_max = repeat_max;
+    event->repeat_days_min = repeat_min;
+    event->repeat_days_max = repeat_max;
     event->max_number_of_repeats = max_repeats;
 
     return event;
@@ -445,11 +445,11 @@ scenario_event_t *scenario_events_get_using_custom_variable(int custom_variable_
     return 0;
 }
 
-void scenario_events_progress_paused(int months_passed)
+void scenario_events_progress_paused(int days_passed)
 {
     scenario_event_t *current;
     array_foreach(scenario_events, current)
     {
-        scenario_event_decrease_pause_time(current, months_passed);
+        scenario_event_decrease_pause_time(current, days_passed);
     }
 }

@@ -28,7 +28,7 @@ void scenario_events_save_state(buffer *buf_events, buffer *buf_conditions, buff
 void scenario_events_load_state(buffer *buf_events, buffer *buf_conditions, buffer *buf_actions, buffer *buf_formulas, int is_new_version);
 
 void scenario_events_process_all(void);
-void scenario_events_progress_paused(int months_passed);
+void scenario_events_progress_paused(int days_passed);
 scenario_event_t *scenario_events_get_using_custom_variable(int custom_variable_id);
 
 #endif // SCENARIO_EVENTS_CONTOLLER_H

@@ -10,6 +10,7 @@
 
 typedef enum {
     COMPLEX_BUTTON_STYLE_DEFAULT,  // Basic style: single rectangle with red border and texture fill
+    COMPLEX_BUTTON_STYLE_DEFAULT_SMALL, // like default but small font and less padding
     COMPLEX_BUTTON_STYLE_GRAY,     // main-menu-like style
 } complex_button_style;
 

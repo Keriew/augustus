@@ -54,9 +54,9 @@ void scenario_event_save_state(buffer *buf, scenario_event_t *event)
 
     buffer_write_i32(buf, event->id);
     buffer_write_i16(buf, event->state);
-    buffer_write_i32(buf, event->repeat_months_min);
-    buffer_write_i32(buf, event->repeat_months_max);
-    buffer_write_i32(buf, event->months_until_active);
+    buffer_write_i32(buf, event->repeat_days_min);
+    buffer_write_i32(buf, event->repeat_days_max);
+    buffer_write_i32(buf, event->days_until_active);
     buffer_write_i32(buf, event->max_number_of_repeats);
     buffer_write_i32(buf, event->execution_count);
     buffer_write_u16(buf, event->actions.size);
@@ -70,13 +70,13 @@ void scenario_event_load_state(buffer *buf, scenario_event_t *event, int is_new_
 {
     int saved_id = buffer_read_i32(buf);
     event->state = buffer_read_i16(buf);
-    event->repeat_months_min = buffer_read_i32(buf);
-    event->repeat_months_max = buffer_read_i32(buf);
-    event->months_until_active = buffer_read_i32(buf);
+    event->repeat_days_min = buffer_read_i32(buf);
+    event->repeat_days_max = buffer_read_i32(buf);
+    event->days_until_active = buffer_read_i32(buf);
     event->max_number_of_repeats = buffer_read_i32(buf);
     event->execution_count = buffer_read_i32(buf);
     if (!is_new_version) {
-       buffer_skip(buf, 2);
+        buffer_skip(buf, 2);
     }
     unsigned int actions_count = buffer_read_u16(buf);
     unsigned int condition_groups_count = 0;
@@ -152,7 +152,7 @@ void scenario_event_link_action(scenario_event_t *event, scenario_action_t *acti
 
 int scenario_event_can_repeat(scenario_event_t *event)
 {
-    return (event->repeat_months_min > 0) && (event->repeat_months_max >= event->repeat_months_min) &&
+    return (event->repeat_days_min > 0) && (event->repeat_days_max >= event->repeat_days_min) &&
         ((event->execution_count < event->max_number_of_repeats) || (event->max_number_of_repeats <= 0));
 }
 
@@ -164,7 +164,7 @@ static int conditions_fulfilled(scenario_event_t *event)
     if (event->actions.size == 0) {
         return 0;
     }
-    
+
     scenario_condition_group_t *group;
     array_foreach(event->condition_groups, group) {
         int group_fulfilled = 0;
@@ -186,19 +186,19 @@ static int conditions_fulfilled(scenario_event_t *event)
     return 1;
 }
 
-int scenario_event_decrease_pause_time(scenario_event_t *event, int months_passed)
+int scenario_event_decrease_pause_time(scenario_event_t *event, int days_passed)
 {
     if (event->state != EVENT_STATE_PAUSED) {
         return 0;
     }
 
-    if (event->months_until_active > 0) {
-        event->months_until_active -= months_passed;
+    if (event->days_until_active > 0) {
+        event->days_until_active -= days_passed;
     }
-    if (event->months_until_active < 0) {
-        event->months_until_active = 0;
+    if (event->days_until_active < 0) {
+        event->days_until_active = 0;
     }
-    if (event->months_until_active == 0) {
+    if (event->days_until_active == 0) {
         event->state = EVENT_STATE_ACTIVE;
     }
     return 1;
@@ -222,7 +222,7 @@ int scenario_event_conditional_execute(scenario_event_t *event)
         if (scenario_event_can_repeat(event)) {
             scenario_event_init(event);
             event->state = EVENT_STATE_PAUSED;
-            event->months_until_active = random_between_from_stdlib(event->repeat_months_min, event->repeat_months_max);
+            event->days_until_active = random_between_from_stdlib(event->repeat_days_min, event->repeat_days_max);
         } else {
             event->state = EVENT_STATE_DISABLED;
         }

@@ -179,7 +179,7 @@ static int xml_import_create_custom_variable(void)
     uint8_t encoded_name[300];
     encoding_from_utf8(name, encoded_name, 300);
     unsigned int id = scenario_custom_variable_get_id_by_name(encoded_name);
-    if(id) {
+    if (id) {
         xml_import_log_error("Variable unique identifier is not unique");
         return 0;
     }
@@ -199,12 +199,12 @@ static int xml_import_start_event(void)
         return 0;
     }
 
-    int min = xml_parser_get_attribute_int("repeat_months_min");
+    int min = xml_parser_get_attribute_int("repeat_days_min");
     if (!min) {
         min = 0;
     }
 
-    int max = xml_parser_get_attribute_int("repeat_months_max");
+    int max = xml_parser_get_attribute_int("repeat_days_max");
     if (!max) {
         max = min;
     }
@@ -459,7 +459,7 @@ static int xml_import_special_parse_building_counting(xml_data_attribute_t *attr
         return 0;
     }
 
-    switch(found->value) {
+    switch (found->value) {
         case BUILDING_CLEAR_LAND:
         case BUILDING_DISTRIBUTION_CENTER_UNUSED:
         case BUILDING_BURNING_RUIN:
@@ -468,7 +468,7 @@ static int xml_import_special_parse_building_counting(xml_data_attribute_t *attr
         default:
             break;
     }
-    
+
     *target = found->value;
     return 1;
 }
@@ -514,12 +514,12 @@ static int xml_import_special_parse_resource(xml_data_attribute_t *attr, int *ta
         xml_import_log_error("Missing attribute.");
         return 0;
     }
-    
+
     const char *value = xml_parser_get_attribute_string(attr->name);
     for (resource_type i = RESOURCE_MIN; i < RESOURCE_MAX; i++) {
         const char *resource_name = resource_get_data(i)->xml_attr_name;
         if (xml_parser_compare_multiple(resource_name, value)) {
-            *target = (int)i;
+            *target = (int) i;
             return 1;
         }
     }
@@ -558,7 +558,7 @@ static int xml_import_special_parse_limited_number(xml_data_attribute_t *attr, i
     if (!attr->name) {
         return 0;
     }
-    
+
     int has_attr = xml_parser_has_attribute(attr->name);
     if (!has_attr) {
         xml_import_log_error("Missing attribute.");

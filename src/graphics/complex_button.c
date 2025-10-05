@@ -7,10 +7,18 @@
 
 #include <stddef.h>
 
-static void draw_default_style(const complex_button *button)
+static void draw_default_style(const complex_button *button, font_t base_font)
 {
+    font_t font;
     const int inner_margin = 2; // small horizontal margin for text/images
-    const font_t font = !button->is_disabled ? FONT_NORMAL_BLACK : FONT_NORMAL_WHITE;
+    switch (base_font) {
+        case FONT_NORMAL_BLACK:
+            font = !button->is_disabled ? FONT_NORMAL_BLACK : FONT_NORMAL_WHITE;
+            break;
+        case FONT_SMALL_PLAIN:
+            font = base_font;
+            break;
+    }
 
     graphics_set_clip_rectangle(button->x, button->y, button->width, button->height);
 
@@ -122,7 +130,10 @@ void complex_button_draw(const complex_button *button)
 
     switch (button->style) {
         case COMPLEX_BUTTON_STYLE_DEFAULT:
-            draw_default_style(button);
+            draw_default_style(button, FONT_NORMAL_BLACK);
+            break;
+        case COMPLEX_BUTTON_STYLE_DEFAULT_SMALL:
+            draw_default_style(button, FONT_SMALL_PLAIN);
             break;
         case COMPLEX_BUTTON_STYLE_GRAY:
             draw_grey_style(button);

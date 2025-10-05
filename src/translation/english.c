@@ -1724,6 +1724,7 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_TYPE_FORMULA, "Formula" },
     {TR_CONDITION_TYPE_CUSTOM_VARIABLE_CHECK_FORMULA, "Custom variable value (formula)" },
     {TR_ACTION_TYPE_CUSTOM_VARIABLE_FORMULA, "Change custom variable value (formula)" },
+    {TR_EDITOR_REPEAT_INTERVAL_TYPE, "TIME"}
 
 };
 

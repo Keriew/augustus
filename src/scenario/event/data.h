@@ -149,11 +149,11 @@ typedef struct {
 typedef struct {
     unsigned int id;
     event_state state;
-    int repeat_months_min;
-    int repeat_months_max;
+    int repeat_days_min; // changed to days from months in scenario version 20, with conversion done in editor
+    int repeat_days_max;
     int max_number_of_repeats;
     int execution_count;
-    int months_until_active;
+    int days_until_active;
     uint8_t name[EVENT_NAME_LENGTH];
     array(scenario_condition_group_t) condition_groups;
     array(scenario_action_t) actions;

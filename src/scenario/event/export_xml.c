@@ -241,11 +241,11 @@ static int export_event(scenario_event_t *event)
     if (*event->name) {
         xml_exporter_add_attribute_encoded_text("name", event->name);
     }
-    if (event->repeat_months_min > 0) {
-        xml_exporter_add_attribute_int("repeat_months_min", event->repeat_months_min);
+    if (event->repeat_days_min > 0) {
+        xml_exporter_add_attribute_int("repeat_days_min", event->repeat_days_min);
     }
-    if (event->repeat_months_max > 0) {
-        xml_exporter_add_attribute_int("repeat_months_max", event->repeat_months_max);
+    if (event->repeat_days_max > 0) {
+        xml_exporter_add_attribute_int("repeat_days_max", event->repeat_days_max);
     }
     if (event->max_number_of_repeats > 0) {
         xml_exporter_add_attribute_int("max_number_of_repeats", event->max_number_of_repeats);
