@@ -7,7 +7,7 @@
  * @brief Evaluate a mathematical formula string with floating-point precision.
  *
  * This function parses and evaluates a mathematical expression containing:
- *  - Numbers (integer or decimal)
+ *  - Numbers (integers only in input)
  *  - Operators: +, -, *, /
  *  - Parentheses for grouping: ( )
  *  - Custom variables in square brackets, e.g. [12],
@@ -18,15 +18,16 @@
  * being returned.
  *
  * Examples:
- *  - "5/2*2"      → 5
- *  - "3.7 + 1.2"  → 5
- *  - "(2 + [3])/2" → result depends on variable [3]
+ *  - "5/2*2"      = 5
+ *  - "37/10 + 12/10"  = 5
+ *  - "(2 + [3])/2" = result depends on variable [3]
  *
- * @param str  Null-terminated input string (max length ≈ 100 characters).
+ * @param str  Null-terminated input string (max length = 100 characters).
  * @return The rounded integer result of the evaluated expression.
  *
  * @note  Division by zero is handled: any divisors too close to 0 are treated as multiplication by 0 instead.
- * @note Decimal inputs are supported, but the output is always rounded to int.
+ * @note Decimal inputs are not supported, the output is always rounded to int. They can be processed,
+ *  but since custom variables cannot be decimal, it's not very useful, and % can be represented as /100.
  */
 int scenario_event_formula_evaluate(const char *str);
 

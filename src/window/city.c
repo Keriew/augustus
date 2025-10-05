@@ -57,15 +57,7 @@
 static int mothball_warning_id;
 static int time_left_label_shown;
 
-// One value + optional unit that follows it
-typedef struct {
-    int value;
-    int unit_group;   // translation group for the unit (or -1 if none)
-    int unit_text;    // translation id for the unit (ignored if unit_group == -1)
-} ui_value_segment_t;
-
-static void draw_topleft_label(int x, int y, const uint8_t *label_text, const ui_value_segment_t *segments,
-    int segment_count, font_t font);
+static void draw_topleft_label_with_fragments(int x, int y, const lang_fragment *fragments, int fragment_count, font_t font);
 static void draw_topleft_label_short(int x, int y, const uint8_t *label_text, int value, font_t font);
 
 static void draw_background(void)
@@ -177,8 +169,12 @@ static void draw_custom_variables_text_display(void)
         const uint8_t *var_text_raw = scenario_custom_variable_get_text_display(i);
         uint8_t var_text_resolved[100];
         scenario_custom_variable_resolve_name(var_text_raw, var_text_resolved, 100);
-        int value = scenario_custom_variable_get_value(i);
-        draw_topleft_label_short(TOPLEFT_MESSAGES_X, y, var_text_resolved, 0, font); // 0 for test
+        
+        // Draw just the text since numbers are now baked into the text
+        lang_fragment frags[1] = {
+            { .type = LANG_FRAG_TEXT, .text = var_text_resolved }
+        };
+        draw_topleft_label_with_fragments(TOPLEFT_MESSAGES_X, y, frags, 1, font);
         y += TOPLEFT_MESSAGES_Y_SPACING;
     }
 }
@@ -210,51 +206,37 @@ static void draw_time_left(void)
             : TR_CONDITION_TEXT_TIME_LEFT_UNTIL_VICTORY;
         const uint8_t *label_str = lang_get_string(CUSTOM_TRANSLATION, label_id);
 
-        ui_value_segment_t segs[2] = {
-            { years_left,  CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_YEARS  },
-            { months_left, CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_MONTHS }
+        lang_fragment frags[3] = {
+            { .type = LANG_FRAG_TEXT, .text = label_str },
+            { .type = LANG_FRAG_AMOUNT, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_REPEAT_FREQUENCY_YEARS, .number = years_left },
+            { .type = LANG_FRAG_AMOUNT, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_REPEAT_FREQUENCY_MONTHS, .number = months_left }
         };
-        draw_topleft_label(fps_offset + TOPLEFT_MESSAGES_X, 25, label_str, segs, 2, font);
+        draw_topleft_label_with_fragments(fps_offset + TOPLEFT_MESSAGES_X, 25, frags, 3, font);
     }
 }
 
-static void draw_topleft_label(int x, int y, const uint8_t *label_text, const ui_value_segment_t *segments,
-    int segment_count, font_t font)
+static void draw_topleft_label_with_fragments(int x, int y, const lang_fragment *fragments, int fragment_count, font_t font)
 {
-    // Measure total width: precomposed text + all numbers + their (optional) units
-    int label_width = text_get_width(label_text, font);
-    for (int i = 0; i < segment_count; ++i) {
-        label_width += text_get_number_width(segments[i].value, '@', "", font);
-        if (segments[i].unit_group != -1) {
-            label_width += lang_text_get_width(segments[i].unit_group, segments[i].unit_text, font);
-        }
-    }
+    // Measure total width using the new sequence width function
+    int label_width = lang_text_get_sequence_width(fragments, fragment_count, font);
 
     int label_blocks = (label_width + 2 * BLOCK_SIZE) / BLOCK_SIZE;
     if (label_blocks < 1) label_blocks = 1;
 
     label_draw(x, y, label_blocks, 1);
-    int draw_x = x + 6;
-    const int draw_y = y + 4;
-    // Draw the precomposed text and advance by its pixel width
-    int prefix_w = text_get_width(label_text, font);
-    text_draw(label_text, draw_x, draw_y, font, 0);
-    draw_x += prefix_w;
-
-    // Draw value segments
-    for (int i = 0; i < segment_count; ++i) {
-        draw_x += text_draw_number(segments[i].value, '@', "", draw_x, draw_y, font, 0);
-        if (segments[i].unit_group != -1) {
-            draw_x += lang_text_draw(segments[i].unit_group, segments[i].unit_text, draw_x, draw_y, font);
-        }
-    }
+    
+    // Draw the sequence using the new lang_fragment system
+    lang_text_draw_sequence(fragments, fragment_count, x + 6, y + 4, font);
 }
 
 //wrapper for the common case of a single text + value
 static void draw_topleft_label_short(int x, int y, const uint8_t *label_text, int value, font_t font)
 {
-    ui_value_segment_t seg = { value, -1, 0 };
-    draw_topleft_label(x, y, label_text, &seg, 1, font);
+    lang_fragment frags[2] = {
+        { .type = LANG_FRAG_TEXT, .text = label_text },
+        { .type = LANG_FRAG_NUMBER, .number = value }
+    };
+    draw_topleft_label_with_fragments(x, y, frags, 2, font);
 }
 
 static void draw_speedrun_info(void)
