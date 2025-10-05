@@ -50,9 +50,9 @@ enum {
 };
 
 enum {
-    REPEAT_INTERVAL_DAYS = 0,
-    REPEAT_INTERVAL_MONTHS = 1,
-    REPEAT_INTERVAL_YEARS = 2,
+    REPEAT_INTERVAL_DAYS = 1,
+    REPEAT_INTERVAL_MONTHS = 2,
+    REPEAT_INTERVAL_YEARS = 3,
 };
 
 enum {
@@ -124,7 +124,6 @@ static struct {
         unsigned int select_all_none;
         unsigned int bottom;
     } focus_button;
-    unsigned char repeat_interval_type;
     int do_not_ask_again_for_delete;
 } data;
 
@@ -345,10 +344,10 @@ static void stop_input(void)
 
 static void convert_repeat_interval(void)
 {
-    if (data.repeat_interval_type == REPEAT_INTERVAL_MONTHS) {
+    if (data.event->repeat_inverval == REPEAT_INTERVAL_MONTHS) {
         data.event->repeat_days_min *= 16;
         data.event->repeat_days_max *= 16;
-    } else if (data.repeat_interval_type == REPEAT_INTERVAL_YEARS) {
+    } else if (data.event->repeat_inverval == REPEAT_INTERVAL_YEARS) {
         data.event->repeat_days_min *= 16 * 12;
         data.event->repeat_days_max *= 16 * 12;
     }
@@ -379,7 +378,7 @@ static void prepare_event(int event_id)
 
 static void set_repeat_interval_type(dropdown_button *dd)
 {
-    data.repeat_interval_type = dd->selected_index - 1;//callback
+    data.event->repeat_inverval = dd->selected_index;//callback
 }
 
 static void dropdown_init(void)
@@ -395,7 +394,10 @@ static void dropdown_init(void)
     repeat_interval_dropdown.width = 70; // set width before init, otherwise it will be auto'd
     repeat_interval_dropdown.padding = 0;
     repeat_interval_dropdown.selected_callback = set_repeat_interval_type;
+    repeat_interval_dropdown.selected_index =
+        data.event->repeat_inverval ? data.event->repeat_inverval : REPEAT_INTERVAL_DAYS;
     dropdown_button_init_simple(dd_x, dd_y, repeat_interval_frags, 4, &repeat_interval_dropdown);
+
 }
 
 static void init(int event_id)
@@ -501,8 +503,6 @@ static void draw_background(void)
     btn = &top_buttons[5];
     text_draw_number_centered_colored(data.event->repeat_days_max, btn->x, btn->y + 6,
         btn->width, enabled_font, enabled_color);
-    //lang_text_draw_colored(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_MONTHS, btn->x + btn->width + 10,
-       // btn->y + 6, enabled_font, enabled_color);
     dropdown_button_draw(&repeat_interval_dropdown);
     // Checkmarks for select all/none buttons for conditions
     int checkmark_id = assets_lookup_image_id(ASSET_UI_SELECTION_CHECKMARK);

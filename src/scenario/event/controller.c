@@ -229,13 +229,13 @@ void scenario_events_save_state(buffer *buf_events, buffer *buf_conditions, buff
     formulas_save_state(buf_formulas);
 }
 
-static void info_load_state(buffer *buf, int is_new_version)
+static void info_load_state(buffer *buf, int scenario_version)
 {
     unsigned int array_size = buffer_load_dynamic_array(buf);
 
     for (unsigned int i = 0; i < array_size; i++) {
         scenario_event_t *event = scenario_event_create(0, 0, 0);
-        scenario_event_load_state(buf, event, is_new_version);
+        scenario_event_load_state(buf, event, scenario_version);
     }
 }
 
@@ -359,52 +359,11 @@ static void formulas_load_state(buffer *buf)
     scenario_formulas_size = max_id; // should be also equal to array_size unless there were bad IDs
 }
 
-
-// static void formulas_save_state(buffer *buf)
-// {
-//     // Save the number of formulas actually in use
-//     int struct_size = sizeof(unsigned int) + MAX_FORMULA_LENGTH + sizeof(int);
-//     buffer_write_u32(buf, scenario_formulas_size); // write size of the array - reserved for future use
-//     buffer_init_dynamic_array(buf, scenario_formulas_size, struct_size);
-
-//     for (unsigned int i = 1; i <= scenario_formulas_size; i++) {
-//         buffer_write_u32(buf, scenario_formulas[i].id);
-//         buffer_write_raw(buf, scenario_formulas[i].formatted_calculation, MAX_FORMULA_LENGTH);
-//         buffer_write_i32(buf, scenario_formulas[i].evaluation);
-//     }
-
-// }
-
-// static void formulas_load_state(buffer *buf)
-// {
-//     scenario_formulas_size = buffer_read_u32(buf);
-//     unsigned int array_size = buffer_load_dynamic_array(buf);
-//     scenario_formulas_size = 0;// Clear existing formulas
-//     memset(scenario_formulas, 0, sizeof(scenario_formulas));
-
-//     int debug_size = 0;
-//     for (unsigned int i = 0; i < array_size &&scenario_formulas_size < MAX_FORMULAS; i++) {
-//         unsigned int id = buffer_read_u32(buf);
-
-//         // Validate the ID and make sure we don't exceed our array bounds
-//         if (id > 0 && id <= MAX_FORMULAS) {
-//             buffer_read_raw(buf, scenario_formulas[id].formatted_calculation, MAX_FORMULA_LENGTH);
-//             int evaluation = buffer_read_i32(buf);
-//             scenario_formulas[id].id = id;
-//             scenario_formulas[id].evaluation = evaluation;
-//             debug_size = id > debug_size ? id : debug_size;
-//         } else {
-//             buffer_skip(buf, MAX_FORMULA_LENGTH + sizeof(int));// Skip invalid formula data
-//         }
-//     }
-//     scenario_formulas_size = debug_size; //just test
-// }
-
 void scenario_events_load_state(buffer *buf_events, buffer *buf_conditions, buffer *buf_actions, buffer *buf_formulas,
      int scenario_version)
 {
     scenario_events_clear();
-    info_load_state(buf_events, scenario_version > SCENARIO_LAST_STATIC_ORIGINAL_DATA);
+    info_load_state(buf_events, scenario_version);
     if (scenario_version > SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
         conditions_load_state(buf_conditions);
     } else {

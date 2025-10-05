@@ -151,6 +151,7 @@ typedef struct {
     event_state state;
     int repeat_days_min; // changed to days from months in scenario version 20, with conversion done in editor
     int repeat_days_max;
+    int repeat_inverval; // days between repeats, 0 = every time, 1 = every other time, etc.
     int max_number_of_repeats;
     int execution_count;
     int days_until_active;

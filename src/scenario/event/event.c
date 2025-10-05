@@ -3,6 +3,7 @@
 #include "core/encoding.h"
 #include "core/log.h"
 #include "core/random.h"
+#include "game/save_version.h"
 #include "scenario/event/action_handler.h"
 #include "scenario/event/condition_handler.h"
 
@@ -56,6 +57,7 @@ void scenario_event_save_state(buffer *buf, scenario_event_t *event)
     buffer_write_i16(buf, event->state);
     buffer_write_i32(buf, event->repeat_days_min);
     buffer_write_i32(buf, event->repeat_days_max);
+    buffer_write_u8(buf, event->repeat_inverval);
     buffer_write_i32(buf, event->days_until_active);
     buffer_write_i32(buf, event->max_number_of_repeats);
     buffer_write_i32(buf, event->execution_count);
@@ -66,21 +68,29 @@ void scenario_event_save_state(buffer *buf, scenario_event_t *event)
     buffer_write_raw(buf, name_utf8, EVENT_NAME_LENGTH * 2);
 }
 
-void scenario_event_load_state(buffer *buf, scenario_event_t *event, int is_new_version)
+void scenario_event_load_state(buffer *buf, scenario_event_t *event, int scenario_version)
 {
     int saved_id = buffer_read_i32(buf);
     event->state = buffer_read_i16(buf);
-    event->repeat_days_min = buffer_read_i32(buf);
-    event->repeat_days_max = buffer_read_i32(buf);
+    int repeat_min = buffer_read_i32(buf);
+    int repeat_max = buffer_read_i32(buf);
+    if (scenario_version <= SCENARIO_LAST_NO_FORMULAS) {
+        repeat_min *= 16; // used to be in months, convert to days
+        repeat_max *= 16;
+    } else {
+        event->repeat_inverval = buffer_read_u8(buf);
+    }
+    event->repeat_days_min = repeat_min;
+    event->repeat_days_max = repeat_max;
     event->days_until_active = buffer_read_i32(buf);
     event->max_number_of_repeats = buffer_read_i32(buf);
     event->execution_count = buffer_read_i32(buf);
-    if (!is_new_version) {
+    if (!(scenario_version > SCENARIO_LAST_STATIC_ORIGINAL_DATA)) {
         buffer_skip(buf, 2);
     }
     unsigned int actions_count = buffer_read_u16(buf);
     unsigned int condition_groups_count = 0;
-    if (is_new_version) {
+    if (scenario_version > SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
         condition_groups_count = buffer_read_u16(buf);
         char name_utf8[EVENT_NAME_LENGTH * 2];
         buffer_read_raw(buf, name_utf8, EVENT_NAME_LENGTH * 2);
