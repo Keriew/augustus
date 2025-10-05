@@ -2,7 +2,7 @@
 #define CONDITION_HANDLER_H
 
 #include "core/buffer.h"
-#include "scenario/scenario_event_data.h"
+#include "scenario/event/data.h"
 
 void scenario_condition_group_new(scenario_condition_group_t *group, unsigned int id);
 int scenario_condition_group_in_use(const scenario_condition_group_t *group);

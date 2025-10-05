@@ -2,7 +2,7 @@
 
 #include "core/log.h"
 #include "game/resource.h"
-#include "scenario/condition_types/condition_types.h"
+#include "scenario/event/condition_types.h"
 
 static int condition_in_use(const scenario_condition_t *condition)
 {
@@ -103,7 +103,8 @@ void scenario_condition_type_delete(scenario_condition_t *condition)
 static void save_conditions_in_group(buffer *buf, const scenario_condition_group_t *group)
 {
     const scenario_condition_t *condition;
-    array_foreach(group->conditions, condition) {
+    array_foreach(group->conditions, condition)
+    {
         buffer_write_i16(buf, condition->type);
         buffer_write_i32(buf, condition->parameter1);
         buffer_write_i32(buf, condition->parameter2);
