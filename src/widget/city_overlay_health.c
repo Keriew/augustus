@@ -169,7 +169,7 @@ static int get_tooltip_barber(tooltip_context *c, const building *b)
         return 31;
     } else if (b->data.house.barber >= 80) {
         return 32;
-    } else if (b->data.house.barber < 20) {
+    } else if (b->data.house.barber >= 20) {
         return 33;
     } else {
         return 34;

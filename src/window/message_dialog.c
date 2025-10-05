@@ -1,6 +1,7 @@
 #include "message_dialog.h"
 
 #include "city/message.h"
+#include "city/resource.h"
 #include "city/sentiment.h"
 #include "city/view.h"
 #include "core/image_group.h"
@@ -10,6 +11,7 @@
 #include "empire/city.h"
 #include "figure/formation.h"
 #include "game/settings.h"
+#include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/image_button.h"
@@ -42,6 +44,8 @@ static void button_close(int param1, int param2);
 static void button_help(int param1, int param2);
 static void button_advisor(int advisor, int param2);
 static void button_go_to_problem(int param1, int param2);
+
+static void button_dispatch_request(const generic_button *button);
 
 static image_button image_button_back = {
     0, 0, 31, 20, IB_NORMAL, GROUP_MESSAGE_ICON, 8, button_back, button_none, 0, 0, 1
@@ -86,6 +90,8 @@ static image_button image_button_chief = {
     0, 0, 27, 27, IB_NORMAL, GROUP_MESSAGE_ADVISOR_BUTTONS, 33, button_advisor, button_none, ADVISOR_CHIEF, 0, 1
 };
 
+static generic_button send_request_button = {0, 0, 160, 27, button_dispatch_request};
+
 static struct {
     struct {
         int text_id;
@@ -110,6 +116,7 @@ static struct {
     int text_height_blocks;
     int text_width_blocks;
     unsigned int focus_button_id;
+    unsigned int focus_request_button;
 
     lang_message custom_lang_message;
     custom_message_t *custom_msg;
@@ -415,17 +422,25 @@ static void draw_city_message_text(const lang_message *msg)
                 data.text_height_blocks - 1, 0);
             if (msg->message_type == MESSAGE_TYPE_IMPERIAL) {
                 const scenario_request *request = scenario_request_get(player_message.param1);
+                resource_type resource = request->resource;
                 int y_offset = data.y_text + 86 + lines * 16;
                 int requested_amount = player_message.param2 ? player_message.param2 : request->amount.requested;
                 text_draw_number(requested_amount, '@', " ", data.x_text + 8, y_offset, FONT_NORMAL_WHITE, 0);
-                image_draw(resource_image(request->resource), data.x_text + 70, y_offset - 5,
+                image_draw(resource_image(resource), data.x_text + 70, y_offset - 5,
                     COLOR_MASK_NONE, SCALE_NONE);
-                text_draw(resource_get_data(request->resource)->text,
+                text_draw(resource_get_data(resource)->text,
                     data.x_text + 100, y_offset, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
                 if (request->state == REQUEST_STATE_NORMAL || request->state == REQUEST_STATE_OVERDUE) {
                     int width = lang_text_draw_amount(8, 4, request->months_to_comply,
                         data.x_text + 200, y_offset, FONT_NORMAL_WHITE);
                     lang_text_draw(12, 2, data.x_text + 200 + width, y_offset, FONT_NORMAL_WHITE);
+                }
+                if (city_resource_get_total_amount(resource, 1) >= request->amount.requested && request->state < REQUEST_STATE_DISPATCHED) {
+                    send_request_button.x = data.x + 160;
+                    send_request_button.y = data.y + BLOCK_SIZE * msg->height_blocks - 40;
+                    send_request_button.parameter1 = request->id;
+                    text_draw_centered(translation_for(TR_SIDEBAR_EXTRA_REQUESTS_SEND), send_request_button.x,
+                        send_request_button.y + 8, 158, FONT_NORMAL_BLACK, 0);
                 }
             }
             break;
@@ -681,6 +696,12 @@ static void draw_foreground_normal(void)
         if (is_event_message(msg)) {
             image_buttons_draw(data.x + 64, data.y_text + 36, &image_button_go_to_problem, 1);
         }
+        if (msg->message_type == MESSAGE_TYPE_IMPERIAL) {
+            const scenario_request *request = scenario_request_get(send_request_button.parameter1);
+            if (city_resource_get_total_amount(request->resource, 1) >= request->amount.requested && request->state < REQUEST_STATE_DISPATCHED) { 
+                button_border_draw(send_request_button.x, send_request_button.y, 160, 27, data.focus_request_button);
+            }
+        }
     }
     image_buttons_draw(data.x + BLOCK_SIZE * msg->width_blocks - 38, data.y + BLOCK_SIZE * msg->height_blocks - 36,
         &image_button_close, 1);
@@ -759,6 +780,9 @@ static int handle_input_normal(const mouse *m_dialog, const lang_message *msg)
                 return 1;
             }
         }
+    }
+    if (generic_buttons_handle_mouse(m_dialog, 0, 0, &send_request_button, 1, &data.focus_request_button)) {
+        return 1;
     }
 
     if (image_buttons_handle_mouse(m_dialog,
@@ -875,6 +899,12 @@ static void button_go_to_problem(int param1, int param2)
         city_view_go_to_grid_offset(grid_offset);
     }
     window_city_show();
+}
+
+static void button_dispatch_request(const generic_button *button)
+{
+    scenario_request_dispatch(button->parameter1);
+    button_close(0, 0);
 }
 
 static void get_tooltip(tooltip_context *c)

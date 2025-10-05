@@ -207,7 +207,7 @@ static int check_valid_storages(order *current_order, int action_state)
 {
     int valid_storages = 1;
     building *src = building_get(current_order->src_storage_id);
-    if (building_storage_get_state(src, current_order->resource_type, 0) != BUILDING_STORAGE_STATE_ACCEPTING) {
+    if (building_storage_get_state(src, current_order->resource_type, 0) == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
         current_order->src_storage_id = 0;
     }
     if (!src || !src->storage_id || src->state != BUILDING_STATE_IN_USE) {
@@ -218,7 +218,7 @@ static int check_valid_storages(order *current_order, int action_state)
         current_order->src_storage_id = 0;
     }
     building *dst = building_get(current_order->dst_storage_id);
-    if (building_storage_get_state(dst, current_order->resource_type, 0) != BUILDING_STORAGE_STATE_ACCEPTING) {
+    if (building_storage_get_state(dst, current_order->resource_type, 0) == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
         current_order->dst_storage_id = 0;
     }
     if (!dst || !dst->storage_id || dst->state != BUILDING_STATE_IN_USE) {
