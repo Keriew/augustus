@@ -13,6 +13,7 @@
 #include "game/resource.h"
 #include "map/terrain.h"
 #include "scenario/event/controller.h"
+#include "scenario/event/parameter_city.h"
 #include "scenario/custom_messages.h"
 #include "scenario/custom_variable.h"
 #include "scenario/invasion.h"
@@ -299,7 +300,10 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_attr = {.name = "variable_formula",       .type = PARAMETER_TYPE_TEXT,             .key = TR_ACTION_TYPE_CUSTOM_VARIABLE_FORMULA },
                                         .xml_parm1 = {.name = "variable_uid",   .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,      .max_limit = 99,     .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
                                         .xml_parm2 = {.name = "formula",        .type = PARAMETER_TYPE_FORMULA,          .key = TR_PARAMETER_TYPE_FORMULA }, },
-
+    [ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY] = {.type = ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY,
+                                        .xml_attr = {.name = "variable_city_property",       .type = PARAMETER_TYPE_TEXT,             .key = TR_PLACEHOLDER },
+                                        .xml_parm1 = {.name = "variable_uid",   .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,      .max_limit = 99,     .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
+                                        .xml_parm2 = {.name = "property",      .type = PARAMETER_TYPE_CITY_PROPERTY,    .key = TR_PLACEHOLDER }, },
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)
@@ -564,6 +568,32 @@ special_attribute_mapping_t special_attribute_mappings_terrain[] =
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_TERRAIN_SIZE (sizeof(special_attribute_mappings_terrain) / sizeof(special_attribute_mapping_t))
 
+
+// like condition, but not condition
+special_attribute_mapping_t special_attribute_mappings_city_property[] = {
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "difficulty",              .value = CITY_PROPERTY_DIFFICULTY,              .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "money",                   .value = CITY_PROPERTY_MONEY,                   .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "population",              .value = CITY_PROPERTY_POPULATION,              .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "savings",                 .value = CITY_PROPERTY_SAVINGS,                 .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "year_finance_balance",    .value = CITY_PROPERTY_YEAR_FINANCE_BALANCE,    .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "resource_stock",          .value = CITY_PROPERTY_RESOURCE_STOCK,          .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_favor",             .value = CITY_PROPERTY_STATS_FAVOR,             .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_prosperity",        .value = CITY_PROPERTY_STATS_PROSPERITY,        .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_culture",           .value = CITY_PROPERTY_STATS_CULTURE,           .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_peace",             .value = CITY_PROPERTY_STATS_PEACE,             .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_city_health",       .value = CITY_PROPERTY_STATS_CITY_HEALTH,       .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "pops_unemployment",       .value = CITY_PROPERTY_POPS_UNEMPLOYMENT,       .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "rome_wages",              .value = CITY_PROPERTY_ROME_WAGES,              .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "city_wages",              .value = CITY_PROPERTY_CITY_WAGES,              .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "building_count_active",   .value = CITY_PROPERTY_BUILDING_COUNT_ACTIVE,   .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "building_count_any",      .value = CITY_PROPERTY_BUILDING_COUNT_ANY,      .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "troops_count_player",     .value = CITY_PROPERTY_TROOPS_COUNT_PLAYER,     .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "troops_count_enemy",      .value = CITY_PROPERTY_TROOPS_COUNT_ENEMY,      .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "terrain_count_tiles",     .value = CITY_PROPERTY_TERRAIN_COUNT_TILES,     .key = TR_PLACEHOLDER },
+};
+unsigned int special_attribute_mappings_city_property_size;
+
+#define SPECIAL_ATTRIBUTE_MAPPINGS_CITY_PROPERTY (sizeof(special_attribute_mappings_city_property) / sizeof(special_attribute_mapping_t))
 static void generate_building_type_mappings(void)
 {
     if (special_attribute_mappings_building_type_size > 0) {

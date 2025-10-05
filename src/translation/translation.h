@@ -1719,6 +1719,7 @@ typedef enum {
     TR_CONDITION_TYPE_CUSTOM_VARIABLE_CHECK_FORMULA,
     TR_ACTION_TYPE_CUSTOM_VARIABLE_FORMULA,
     TR_EDITOR_REPEAT_INTERVAL_TYPE,
+    TR_PLACEHOLDER, //useful during debugging and testing, shouldnt be used in production
     TRANSLATION_MAX_KEY
 } translation_key;
 
