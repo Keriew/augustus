@@ -90,6 +90,8 @@ static void handle_condition_tooltip(const grid_box_item *item, tooltip_context 
 static void handle_action_tooltip(const grid_box_item *item, tooltip_context *c);
 
 static void button_select_all_none(const generic_button *button);
+static int convert_display_to_days(int display);
+static int convert_days_to_display(int days);
 
 typedef struct {
     int group_id;
@@ -496,12 +498,14 @@ static void draw_background(void)
         FONT_NORMAL_BLACK);
     lang_text_draw_colored(CUSTOM_TRANSLATION, TR_EDITOR_BETWEEN, top_buttons[0].x + 240, btn->y + 6,
         enabled_font, enabled_color);
-    text_draw_number_centered_colored(data.event->repeat_days_min, btn->x, btn->y + 6,
+    int repeat_min = convert_days_to_display(data.event->repeat_days_min);
+    int repeat_max = convert_days_to_display(data.event->repeat_days_max);
+    text_draw_number_centered_colored(repeat_min, btn->x, btn->y + 6,
         btn->width, enabled_font, enabled_color);
     lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_AND, btn->x + btn->width,
         btn->y + 6, btn[1].x - (btn->x + btn->width), enabled_font, enabled_color);
     btn = &top_buttons[5];
-    text_draw_number_centered_colored(data.event->repeat_days_max, btn->x, btn->y + 6,
+    text_draw_number_centered_colored(repeat_max, btn->x, btn->y + 6,
         btn->width, enabled_font, enabled_color);
     dropdown_button_draw(&repeat_interval_dropdown);
     // Checkmarks for select all/none buttons for conditions
@@ -728,19 +732,44 @@ static void button_repeat_times(const generic_button *button)
         3, 1, 999, set_repeat_times);
 }
 
+static int convert_days_to_display(int days)
+{
+    if (data.event->repeat_inverval == REPEAT_INTERVAL_MONTHS) {
+        return days / 16;
+    } else if (data.event->repeat_inverval == REPEAT_INTERVAL_YEARS) {
+        return days / 16 / 12;
+    } else {
+        return days;
+    }
+}
+
+static int convert_display_to_days(int display)
+{
+    if (data.event->repeat_inverval == REPEAT_INTERVAL_MONTHS) {
+        return display * 16;
+    } else if (data.event->repeat_inverval == REPEAT_INTERVAL_YEARS) {
+        return display * 16 * 12;
+    } else {
+        return display;
+    }
+}
+
 static void set_repeat_interval_min(int value)
 {
-    data.event->repeat_days_min = value;
-    if (data.event->repeat_days_max < value) {
-        data.event->repeat_days_max = value;
+    int days = convert_display_to_days(value);// store always in days
+    data.event->repeat_days_min =
+        data.event->repeat_days_min = days;
+    if (data.event->repeat_days_max < days) {
+        data.event->repeat_days_max = days;
     }
 }
 
 static void set_repeat_interval_max(int value)
 {
-    data.event->repeat_days_max = value;
-    if (data.event->repeat_days_min > value) {
-        data.event->repeat_days_min = value;
+    int days = convert_display_to_days(value);// store always in days
+    data.event->repeat_days_max = days;
+    if (data.event->repeat_days_min > days) {
+        data.event->repeat_days_min = days;;
     }
 }
 

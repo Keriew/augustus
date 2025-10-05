@@ -72,16 +72,15 @@ void scenario_event_load_state(buffer *buf, scenario_event_t *event, int scenari
 {
     int saved_id = buffer_read_i32(buf);
     event->state = buffer_read_i16(buf);
-    int repeat_min = buffer_read_i32(buf);
-    int repeat_max = buffer_read_i32(buf);
+    event->repeat_days_min = buffer_read_i32(buf);
+    event->repeat_days_max = buffer_read_i32(buf);
     if (scenario_version <= SCENARIO_LAST_NO_FORMULAS) {
-        repeat_min *= 16; // used to be in months, convert to days
-        repeat_max *= 16;
+        event->repeat_inverval = 2; // months
+        event->repeat_days_min *= 16;
+        event->repeat_days_max *= 16;
     } else {
         event->repeat_inverval = buffer_read_u8(buf);
     }
-    event->repeat_days_min = repeat_min;
-    event->repeat_days_max = repeat_max;
     event->days_until_active = buffer_read_i32(buf);
     event->max_number_of_repeats = buffer_read_i32(buf);
     event->execution_count = buffer_read_i32(buf);
@@ -246,7 +245,8 @@ int scenario_event_execute(scenario_event_t *event)
     int actioned = 1;
 
     scenario_action_t *current;
-    array_foreach(event->actions, current) {
+    array_foreach(event->actions, current)
+    {
         int action_result = scenario_action_type_execute(current);
         actioned &= action_result;
     }
@@ -258,8 +258,10 @@ int scenario_event_uses_custom_variable(const scenario_event_t *event, int custo
 {
     scenario_condition_group_t *group;
     scenario_condition_t *condition;
-    array_foreach(event->condition_groups, group) {
-        array_foreach(group->conditions, condition) {
+    array_foreach(event->condition_groups, group)
+    {
+        array_foreach(group->conditions, condition)
+        {
             if (scenario_condition_uses_custom_variable(condition, custom_variable_id)) {
                 return 1;
             }
@@ -267,7 +269,8 @@ int scenario_event_uses_custom_variable(const scenario_event_t *event, int custo
     }
 
     scenario_action_t *action;
-    array_foreach(event->actions, action) {
+    array_foreach(event->actions, action)
+    {
         if (scenario_action_uses_custom_variable(action, custom_variable_id)) {
             return 1;
         }
