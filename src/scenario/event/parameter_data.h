@@ -103,4 +103,12 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
 void scenario_events_parameter_data_get_display_string_for_condition(const scenario_condition_t *condition,
     uint8_t *result_text, int maxlength);
 
+/**
+ * Resolves a flexible parameter type to a concrete type based on context
+ * @param action The action containing the flexible parameter
+ * @param param_number The parameter number (3, 4, or 5) to resolve
+ * @return The resolved parameter type, or PARAMETER_TYPE_UNDEFINED if not applicable
+ */
+parameter_type scenario_events_parameter_data_resolve_flexible_type(const scenario_action_t *action, int param_number);
+
 #endif // SCENARIO_EVENTS_PARAMETER_DATA_H

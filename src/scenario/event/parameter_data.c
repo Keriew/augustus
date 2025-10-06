@@ -639,6 +639,7 @@ static special_attribute_mapping_t special_attribute_mappings_age[] = {
 
 // like condition, but not condition
 static special_attribute_mapping_t special_attribute_mappings_city_property[] = {
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "none",                    .value = CITY_PROPERTY_NONE,                    .key = TR_PLACEHOLDER },
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "difficulty",              .value = CITY_PROPERTY_DIFFICULTY,              .key = TR_PLACEHOLDER },
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "money",                   .value = CITY_PROPERTY_MONEY,                   .key = TR_PLACEHOLDER },
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "population",              .value = CITY_PROPERTY_POPULATION,              .key = TR_PLACEHOLDER },
@@ -944,6 +945,36 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
         default:
             return 0;
     }
+}
+
+parameter_type scenario_events_parameter_data_resolve_flexible_type(const scenario_action_t *action, int param_number)
+{
+    // Only ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY uses flexible parameters
+    if (action->type != ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY) {
+        return PARAMETER_TYPE_UNDEFINED;
+    }
+
+    // param_number should be 3, 4, or 5 (the flexible parameters)
+    if (param_number < 3 || param_number > 5) {
+        return PARAMETER_TYPE_UNDEFINED;
+    }
+
+    // Get the city property from parameter2
+    city_property_t city_property = action->parameter2;
+
+    // Get the parameter info for this city property
+    city_property_info_t info = city_property_get_param_info(city_property);
+
+    // Map param_number to the array index (3->0, 4->1, 5->2)
+    int param_index = param_number - 3;
+
+    // Check if this parameter is needed for this city property
+    if (param_index >= info.count) {
+        return PARAMETER_TYPE_UNDEFINED;  // This parameter is not needed
+    }
+
+    // Return the resolved type
+    return info.param_types[param_index];
 }
 
 static const uint8_t *get_allowed_building_name(building_type type)

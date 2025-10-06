@@ -1733,7 +1733,8 @@ static translation_string all_strings[] = {
     {TR_OVERLAY_HOUSE_INSULAS, "Insulae"},
     {TR_OVERLAY_HOUSE_VILLAS, "Villas"},
     {TR_OVERLAY_HOUSE_PALACES, "Palaces"},
-    {TR_OVERLAY_BY_GROUP, "By Group"}
+    {TR_OVERLAY_BY_GROUP, "By Group"},
+    {TR_EDITOR_PARAMETER_CITY_PROPERTY, "City Property" }
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

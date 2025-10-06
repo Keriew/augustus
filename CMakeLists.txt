@@ -551,6 +551,7 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/event/controller.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/formula.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/parameter_data.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/parameter_city.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/action_handler.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/action_types.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/condition_comparison_helper.c

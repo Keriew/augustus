@@ -1,6 +1,8 @@
 #ifndef SCENARIO_EVENT_CITY_PROPERTY_H
 #define SCENARIO_EVENT_CITY_PROPERTY_H
 
+#include "scenario/event/parameter_data.h"
+
 typedef enum {
     CITY_PROPERTY_NONE,
     CITY_PROPERTY_DIFFICULTY,
@@ -41,5 +43,12 @@ typedef struct
 } city_property_info_t;
 
 int process_parameter(city_property_t type);
+
+/**
+ * Get parameter info for a city property
+ * @param type The city property type
+ * @return Info struct with count and parameter types needed
+ */
+city_property_info_t city_property_get_param_info(city_property_t type);
 
 #endif // SCENARIO_EVENT_CITY_PROPERTY_H

@@ -81,6 +81,17 @@ static void init(scenario_action_t *action)
     data.action = action;
 }
 
+static parameter_type get_resolved_parameter_type(xml_data_attribute_t *param_attr, int param_number)
+{
+    // If the parameter is not flexible, return its type directly
+    if (param_attr->type != PARAMETER_TYPE_FLEXIBLE) {
+        return param_attr->type;
+    }
+
+    // Resolve the flexible type based on the action context
+    return scenario_events_parameter_data_resolve_flexible_type(data.action, param_number);
+}
+
 static void draw_background(void)
 {
     data.xml_info = scenario_events_parameter_data_get_actions_xml_attributes(data.action->type);
@@ -102,61 +113,66 @@ static void draw_foreground(void)
     text_draw_centered(translation_for(data.xml_info->xml_attr.key), 32, 72, BUTTON_WIDTH, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
 
     unsigned int button_id = 0;
-    if (data.xml_info->xml_parm1.type > PARAMETER_TYPE_UNDEFINED) {
+    parameter_type resolved_type1 = get_resolved_parameter_type(&data.xml_info->xml_parm1, 1);
+    if (resolved_type1 > PARAMETER_TYPE_UNDEFINED) {
         large_label_draw(buttons[button_id].x, buttons[button_id].y, buttons[button_id].width / 16,
             data.focus_button_id == button_id + 1 ? 1 : 0);
         text_draw_centered(translation_for(data.xml_info->xml_parm1.key),
             buttons[button_id].x, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
-        text_draw_centered(translation_for_param_value(data.xml_info->xml_parm1.type, data.action->parameter1),
+        text_draw_centered(translation_for_param_value(resolved_type1, data.action->parameter1),
             buttons[button_id].x + BUTTON_WIDTH / 2, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     }
     button_id++;
 
-    if (data.xml_info->xml_parm2.type > PARAMETER_TYPE_UNDEFINED) {
+    parameter_type resolved_type2 = get_resolved_parameter_type(&data.xml_info->xml_parm2, 2);
+    if (resolved_type2 > PARAMETER_TYPE_UNDEFINED) {
         large_label_draw(buttons[button_id].x, buttons[button_id].y, buttons[button_id].width / 16,
             data.focus_button_id == button_id + 1 ? 1 : 0);
         text_draw_centered(translation_for(data.xml_info->xml_parm2.key),
             buttons[button_id].x, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
-        text_draw_centered(translation_for_param_value(data.xml_info->xml_parm2.type, data.action->parameter2),
+        text_draw_centered(translation_for_param_value(resolved_type2, data.action->parameter2),
             buttons[button_id].x + BUTTON_WIDTH / 2, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     }
     button_id++;
 
-    if (data.xml_info->xml_parm3.type > PARAMETER_TYPE_UNDEFINED) {
+    parameter_type resolved_type3 = get_resolved_parameter_type(&data.xml_info->xml_parm3, 3);
+    if (resolved_type3 > PARAMETER_TYPE_UNDEFINED) {
         large_label_draw(buttons[button_id].x, buttons[button_id].y, buttons[button_id].width / 16,
             data.focus_button_id == button_id + 1 ? 1 : 0);
         text_draw_centered(translation_for(data.xml_info->xml_parm3.key),
             buttons[button_id].x, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
-        text_draw_centered(translation_for_param_value(data.xml_info->xml_parm3.type, data.action->parameter3),
+        text_draw_centered(translation_for_param_value(resolved_type3, data.action->parameter3),
             buttons[button_id].x + BUTTON_WIDTH / 2, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     }
     button_id++;
 
-    if (data.xml_info->xml_parm4.type > PARAMETER_TYPE_UNDEFINED) {
+    parameter_type resolved_type4 = get_resolved_parameter_type(&data.xml_info->xml_parm4, 4);
+    if (resolved_type4 > PARAMETER_TYPE_UNDEFINED) {
         large_label_draw(buttons[button_id].x, buttons[button_id].y, buttons[button_id].width / 16,
             data.focus_button_id == button_id + 1 ? 1 : 0);
         text_draw_centered(translation_for(data.xml_info->xml_parm4.key),
             buttons[button_id].x, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
-        text_draw_centered(translation_for_param_value(data.xml_info->xml_parm4.type, data.action->parameter4),
+        text_draw_centered(translation_for_param_value(resolved_type4, data.action->parameter4),
             buttons[button_id].x + BUTTON_WIDTH / 2, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     }
     button_id++;
 
-    if (data.xml_info->xml_parm5.type > PARAMETER_TYPE_UNDEFINED) {
+    parameter_type resolved_type5 = get_resolved_parameter_type(&data.xml_info->xml_parm5, 5);
+    if (resolved_type5 > PARAMETER_TYPE_UNDEFINED) {
         large_label_draw(buttons[button_id].x, buttons[button_id].y, buttons[button_id].width / 16,
             data.focus_button_id == button_id + 1 ? 1 : 0);
         text_draw_centered(translation_for(data.xml_info->xml_parm5.key),
             buttons[button_id].x, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
-        text_draw_centered(translation_for_param_value(data.xml_info->xml_parm5.type, data.action->parameter5),
+        text_draw_centered(translation_for_param_value(resolved_type5, data.action->parameter5),
             buttons[button_id].x + BUTTON_WIDTH / 2, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     }
@@ -196,12 +212,37 @@ static void button_change_type(const generic_button *button)
 
 static void button_amount(const generic_button *button)
 {
+    // For flexible parameters, we need to resolve their actual types
+    xml_data_attribute_t resolved_param;
+    xml_data_attribute_t *param_ptr;
+
     switch (button->parameter1) {
-        case 1: change_parameter(&data.xml_info->xml_parm1, button); break;
-        case 2: change_parameter(&data.xml_info->xml_parm2, button); break;
-        case 3: change_parameter(&data.xml_info->xml_parm3, button); break;
-        case 4: change_parameter(&data.xml_info->xml_parm4, button); break;
-        case 5: change_parameter(&data.xml_info->xml_parm5, button); break;
+        case 1:
+            param_ptr = &data.xml_info->xml_parm1;
+            break;
+        case 2:
+            param_ptr = &data.xml_info->xml_parm2;
+            break;
+        case 3:
+            param_ptr = &data.xml_info->xml_parm3;
+            break;
+        case 4:
+            param_ptr = &data.xml_info->xml_parm4;
+            break;
+        case 5:
+            param_ptr = &data.xml_info->xml_parm5;
+            break;
+        default:
+            return;
+    }
+
+    // If it's a flexible type, create a resolved copy
+    if (param_ptr->type == PARAMETER_TYPE_FLEXIBLE) {
+        resolved_param = *param_ptr;
+        resolved_param.type = scenario_events_parameter_data_resolve_flexible_type(data.action, button->parameter1);
+        change_parameter(&resolved_param, button);
+    } else {
+        change_parameter(param_ptr, button);
     }
 }
 
@@ -416,6 +457,13 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
         case PARAMETER_TYPE_GOD:
         case PARAMETER_TYPE_CLIMATE:
         case PARAMETER_TYPE_TERRAIN:
+        case PARAMETER_TYPE_CITY_PROPERTY:
+        case PARAMETER_TYPE_PERCENTAGE:
+        case PARAMETER_TYPE_HOUSING_TYPE:
+        case PARAMETER_TYPE_AGE_GROUP:
+        case PARAMETER_TYPE_PLAYER_TROOPS:
+        case PARAMETER_TYPE_ENEMY_CLASS:
+        case PARAMETER_TYPE_COVERAGE_BUILDINGS:
             window_editor_select_special_attribute_mapping_show(parameter->type, set_param_value, data.parameter_being_edited_current_value);
             return;
         case PARAMETER_TYPE_ALLOWED_BUILDING:
