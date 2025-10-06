@@ -302,9 +302,12 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm1 = {.name = "variable_uid",   .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,      .max_limit = 99,     .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
                                         .xml_parm2 = {.name = "formula",        .type = PARAMETER_TYPE_FORMULA,          .key = TR_PARAMETER_TYPE_FORMULA }, },
     [ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY] = {.type = ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY,
-                                        .xml_attr = {.name = "variable_city_property",       .type = PARAMETER_TYPE_TEXT,             .key = TR_PLACEHOLDER },
-                                        .xml_parm1 = {.name = "variable_uid",   .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,      .max_limit = 99,     .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
-                                        .xml_parm2 = {.name = "property",      .type = PARAMETER_TYPE_CITY_PROPERTY,    .key = TR_PLACEHOLDER }, },
+                                        .xml_attr = {.name = "variable_city_property",  .type = PARAMETER_TYPE_TEXT,             .key = TR_PLACEHOLDER },
+                                        .xml_parm1 = {.name = "variable_uid",            .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,      .max_limit = 99,     .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
+                                        .xml_parm2 = {.name = "property",                .type = PARAMETER_TYPE_CITY_PROPERTY,    .key = TR_PLACEHOLDER },
+                                        .xml_parm3 = {.name = "flexible",                .type = PARAMETER_TYPE_FLEXIBLE  ,           .key = TR_PLACEHOLDER },
+                                        .xml_parm4 = {.name = "flexible",                .type = PARAMETER_TYPE_FLEXIBLE  ,           .key = TR_PLACEHOLDER },
+                                        .xml_parm5 = {.name = "flexible",                .type = PARAMETER_TYPE_FLEXIBLE  ,           .key = TR_PLACEHOLDER },},
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)
@@ -855,6 +858,14 @@ int scenario_events_parameter_data_get_mappings_size(parameter_type type)
             return SPECIAL_ATTRIBUTE_MAPPINGS_AGE_SIZE;
         case PARAMETER_TYPE_CITY_PROPERTY:
             return SPECIAL_ATTRIBUTE_MAPPINGS_CITY_PROPERTY_SIZE;
+        case PARAMETER_TYPE_PERCENTAGE:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_PERCENTAGE_SIZE;
+        case PARAMETER_TYPE_ENEMY_CLASS:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_TROOPS_CLASS_SIZE;
+        case PARAMETER_TYPE_PLAYER_TROOPS:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_PLAYER_TROOPS_SIZE;
+        case PARAMETER_TYPE_COVERAGE_BUILDINGS:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_COVERAGE_BUILDINGS_SIZE;
         default:
             return 0;
     }
