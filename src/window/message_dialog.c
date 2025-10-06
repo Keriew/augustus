@@ -781,8 +781,11 @@ static int handle_input_normal(const mouse *m_dialog, const lang_message *msg)
             }
         }
     }
-    if (generic_buttons_handle_mouse(m_dialog, 0, 0, &send_request_button, 1, &data.focus_request_button)) {
-        return 1;
+    const scenario_request *request = scenario_request_get(send_request_button.parameter1);
+    if (city_resource_get_total_amount(request->resource, 1) >= request->amount.requested && request->state < REQUEST_STATE_DISPATCHED) {
+        if (generic_buttons_handle_mouse(m_dialog, 0, 0, &send_request_button, 1, &data.focus_request_button)) {
+            return 1;
+        }
     }
 
     if (image_buttons_handle_mouse(m_dialog,
