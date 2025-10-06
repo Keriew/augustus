@@ -169,10 +169,10 @@ static void draw_custom_variables_text_display(void)
         const uint8_t *var_text_raw = scenario_custom_variable_get_text_display(i);
         uint8_t var_text_resolved[100];
         scenario_custom_variable_resolve_name(var_text_raw, var_text_resolved, 100);
-        
+
         // Draw just the text since numbers are now baked into the text
         lang_fragment frags[1] = {
-            { .type = LANG_FRAG_TEXT, .text = var_text_resolved }
+            {.type = LANG_FRAG_TEXT, .text = var_text_resolved }
         };
         draw_topleft_label_with_fragments(TOPLEFT_MESSAGES_X, y, frags, 1, font);
         y += TOPLEFT_MESSAGES_Y_SPACING;
@@ -207,9 +207,9 @@ static void draw_time_left(void)
         const uint8_t *label_str = lang_get_string(CUSTOM_TRANSLATION, label_id);
 
         lang_fragment frags[3] = {
-            { .type = LANG_FRAG_TEXT, .text = label_str },
-            { .type = LANG_FRAG_AMOUNT, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_REPEAT_FREQUENCY_YEARS, .number = years_left },
-            { .type = LANG_FRAG_AMOUNT, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_REPEAT_FREQUENCY_MONTHS, .number = months_left }
+            {.type = LANG_FRAG_TEXT, .text = label_str },
+            {.type = LANG_FRAG_AMOUNT, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_REPEAT_FREQUENCY_YEARS, .number = years_left },
+            {.type = LANG_FRAG_AMOUNT, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_REPEAT_FREQUENCY_MONTHS, .number = months_left }
         };
         draw_topleft_label_with_fragments(fps_offset + TOPLEFT_MESSAGES_X, 25, frags, 3, font);
     }
@@ -224,7 +224,7 @@ static void draw_topleft_label_with_fragments(int x, int y, const lang_fragment 
     if (label_blocks < 1) label_blocks = 1;
 
     label_draw(x, y, label_blocks, 1);
-    
+
     // Draw the sequence using the new lang_fragment system
     lang_text_draw_sequence(fragments, fragment_count, x + 6, y + 4, font);
 }
@@ -233,8 +233,8 @@ static void draw_topleft_label_with_fragments(int x, int y, const lang_fragment 
 static void draw_topleft_label_short(int x, int y, const uint8_t *label_text, int value, font_t font)
 {
     lang_fragment frags[2] = {
-        { .type = LANG_FRAG_TEXT, .text = label_text },
-        { .type = LANG_FRAG_NUMBER, .number = value }
+        {.type = LANG_FRAG_TEXT, .text = label_text },
+        {.type = LANG_FRAG_NUMBER, .number = value }
     };
     draw_topleft_label_with_fragments(x, y, frags, 2, font);
 }

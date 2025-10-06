@@ -568,6 +568,12 @@ special_attribute_mapping_t special_attribute_mappings_terrain[] =
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_TERRAIN_SIZE (sizeof(special_attribute_mappings_terrain) / sizeof(special_attribute_mapping_t))
 
+special_attribute_mapping_t special_attribute_mappings_percentage[] = {
+    {.type = PARAMETER_TYPE_PERCENTAGE, .text = "Percentage", .value = 1, .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_PERCENTAGE, .text = "Absolute",   .value = 0, .key = TR_PLACEHOLDER },
+};
+
+#define SPECIAL_ATTRIBUTE_MAPPINGS_PERCENTAGE_SIZE (sizeof(special_attribute_mappings_percentage) / sizeof(special_attribute_mapping_t))
 
 // like condition, but not condition
 special_attribute_mapping_t special_attribute_mappings_city_property[] = {
