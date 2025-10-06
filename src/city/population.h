@@ -74,6 +74,8 @@ int city_population_yearly_deaths(void);
 
 int city_population_yearly_births(void);
 
+int city_population_in_age_decennium(int decennium);
+
 int city_population_average_age(void);
 
 int city_population_percent_in_workforce(void);

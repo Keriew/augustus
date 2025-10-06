@@ -24,8 +24,7 @@ typedef enum {
     CITY_PROPERTY_ROME_WAGES,
     CITY_PROPERTY_CITY_WAGES,
     // buildings
-    CITY_PROPERTY_BUILDING_COUNT_ACTIVE,//complex
-    CITY_PROPERTY_BUILDING_COUNT_ANY,//complex
+    CITY_PROPERTY_BUILDING_COUNT,
     //troops
     CITY_PROPERTY_TROOPS_COUNT_PLAYER,//complex
     CITY_PROPERTY_TROOPS_COUNT_ENEMY,//complex
@@ -33,6 +32,13 @@ typedef enum {
     CITY_PROPERTY_TERRAIN_COUNT_TILES,//complex
     CITY_PROPERTY_MAX,
 } city_property_t;
+
+// Struct describing how many and what kind of extra parameters a property requires
+typedef struct
+{
+    int count;                     // how many parameters needed
+    parameter_type param_types[3]; // what enum type each param comes from (up to 3)
+} city_property_info_t;
 
 int process_parameter(city_property_t type);
 

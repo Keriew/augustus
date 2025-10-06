@@ -11,6 +11,7 @@
 #include "empire/city.h"
 #include "figure/formation.h"
 #include "game/resource.h"
+#include "game/state.h"
 #include "map/terrain.h"
 #include "scenario/event/controller.h"
 #include "scenario/event/parameter_city.h"
@@ -536,7 +537,7 @@ static special_attribute_mapping_t special_attribute_mappings_enemy_type[] = {
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_ENEMY_TYPE_SIZE (sizeof(special_attribute_mappings_enemy_type) / sizeof(special_attribute_mapping_t))
 
-special_attribute_mapping_t special_attribute_mappings_god[] =
+static special_attribute_mapping_t special_attribute_mappings_god[] =
 {
     {.type = PARAMETER_TYPE_GOD,                .text = "Ceres",          .value = GOD_CERES,         .key = TR_PARAMETER_VALUE_GOD_CERES },
     {.type = PARAMETER_TYPE_GOD,                .text = "Mars",           .value = GOD_MARS,          .key = TR_PARAMETER_VALUE_GOD_MARS },
@@ -548,7 +549,7 @@ special_attribute_mapping_t special_attribute_mappings_god[] =
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_GOD_SIZE (sizeof(special_attribute_mappings_god) / sizeof(special_attribute_mapping_t))
 
-special_attribute_mapping_t special_attribute_mappings_climate[] =
+static special_attribute_mapping_t special_attribute_mappings_climate[] =
 {
     {.type = PARAMETER_TYPE_CLIMATE,            .text = "Central",        .value = CLIMATE_CENTRAL,   .key = TR_PARAMETER_VALUE_CLIMATE_CENTRAL },
     {.type = PARAMETER_TYPE_CLIMATE,            .text = "Northern",       .value = CLIMATE_NORTHERN,  .key = TR_PARAMETER_VALUE_CLIMATE_NORTHERN },
@@ -557,7 +558,7 @@ special_attribute_mapping_t special_attribute_mappings_climate[] =
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_CLIMATE_SIZE (sizeof(special_attribute_mappings_climate) / sizeof(special_attribute_mapping_t))
 
-special_attribute_mapping_t special_attribute_mappings_terrain[] =
+static special_attribute_mapping_t special_attribute_mappings_terrain[] =
 {
     {.type = PARAMETER_TYPE_TERRAIN,            .text = "Water",            .value = TERRAIN_WATER,   .key = TR_PARAMETER_TERRAIN_WATER },
     {.type = PARAMETER_TYPE_TERRAIN,            .text = "Rock",             .value = TERRAIN_ROCK,  .key = TR_PARAMETER_TERRAIN_ROCK },
@@ -568,15 +569,73 @@ special_attribute_mapping_t special_attribute_mappings_terrain[] =
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_TERRAIN_SIZE (sizeof(special_attribute_mappings_terrain) / sizeof(special_attribute_mapping_t))
 
-special_attribute_mapping_t special_attribute_mappings_percentage[] = {
+static special_attribute_mapping_t special_attribute_mappings_percentage[] = {
     {.type = PARAMETER_TYPE_PERCENTAGE, .text = "Percentage", .value = 1, .key = TR_PLACEHOLDER },
     {.type = PARAMETER_TYPE_PERCENTAGE, .text = "Absolute",   .value = 0, .key = TR_PLACEHOLDER },
 };
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_PERCENTAGE_SIZE (sizeof(special_attribute_mappings_percentage) / sizeof(special_attribute_mapping_t))
 
+static special_attribute_mapping_t special_attribute_mappings_housing[] = {
+    // Individual housing types
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "vacant_lot",       .value = BUILDING_HOUSE_VACANT_LOT,     .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_tent",       .value = BUILDING_HOUSE_SMALL_TENT,     .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_tent",       .value = BUILDING_HOUSE_LARGE_TENT,     .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_shack",      .value = BUILDING_HOUSE_SMALL_SHACK,    .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_shack",      .value = BUILDING_HOUSE_LARGE_SHACK,    .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_hovel",      .value = BUILDING_HOUSE_SMALL_HOVEL,    .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_hovel",      .value = BUILDING_HOUSE_LARGE_HOVEL,    .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_casa",       .value = BUILDING_HOUSE_SMALL_CASA,     .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_casa",       .value = BUILDING_HOUSE_LARGE_CASA,     .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_insula",     .value = BUILDING_HOUSE_SMALL_INSULA,   .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "medium_insula",    .value = BUILDING_HOUSE_MEDIUM_INSULA,  .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_insula",     .value = BUILDING_HOUSE_LARGE_INSULA,   .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "grand_insula",     .value = BUILDING_HOUSE_GRAND_INSULA,   .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_villa",      .value = BUILDING_HOUSE_SMALL_VILLA,    .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "medium_villa",     .value = BUILDING_HOUSE_MEDIUM_VILLA,   .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_villa",      .value = BUILDING_HOUSE_LARGE_VILLA,    .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "grand_villa",      .value = BUILDING_HOUSE_GRAND_VILLA,    .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_palace",     .value = BUILDING_HOUSE_SMALL_PALACE,   .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "medium_palace",    .value = BUILDING_HOUSE_MEDIUM_PALACE,  .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_palace",     .value = BUILDING_HOUSE_LARGE_PALACE,   .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "luxury_palace",    .value = BUILDING_HOUSE_LUXURY_PALACE,  .key = TR_PLACEHOLDER },
+
+    // Housing groups (using overlay enum values for groups)
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "group_tents",      .value = HOUSE_GROUP_TENT,     .key = TR_OVERLAY_HOUSING_TENTS },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "group_shacks",     .value = HOUSE_GROUP_SHACK,    .key = TR_OVERLAY_HOUSING_SHACKS },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "group_hovels",     .value = HOUSE_GROUP_HOVEL,    .key = TR_OVERLAY_HOUSING_HOVELS },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "group_casae",      .value = HOUSE_GROUP_CASA,     .key = TR_OVERLAY_HOUSING_CASAS },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "group_insulae",    .value = HOUSE_GROUP_INSULA,   .key = TR_OVERLAY_HOUSE_INSULAS },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "group_villas",     .value = HOUSE_GROUP_VILLA,    .key = TR_OVERLAY_HOUSE_VILLAS },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "group_palaces",    .value = HOUSE_GROUP_PALACE,   .key = TR_OVERLAY_HOUSE_PALACES },
+};
+
+#define SPECIAL_ATTRIBUTE_MAPPINGS_HOUSING_SIZE (sizeof(special_attribute_mappings_housing) / sizeof(special_attribute_mapping_t))
+
+static special_attribute_mapping_t special_attribute_mappings_age[] = {
+    // Decenniums (10-year age groups)
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_0",  .value = 0,  .key = TR_PLACEHOLDER }, // Ages 0-9
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_1",  .value = 1,  .key = TR_PLACEHOLDER }, // Ages 10-19
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_2",  .value = 2,  .key = TR_PLACEHOLDER }, // Ages 20-29
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_3",  .value = 3,  .key = TR_PLACEHOLDER }, // Ages 30-39
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_4",  .value = 4,  .key = TR_PLACEHOLDER }, // Ages 40-49
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_5",  .value = 5,  .key = TR_PLACEHOLDER }, // Ages 50-59
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_6",  .value = 6,  .key = TR_PLACEHOLDER }, // Ages 60-69
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_7",  .value = 7,  .key = TR_PLACEHOLDER }, // Ages 70-79
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_8",  .value = 8,  .key = TR_PLACEHOLDER }, // Ages 80-89
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_9",  .value = 9,  .key = TR_PLACEHOLDER }, // Ages 90-99
+
+    // Age groups
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "school_age",   .value = 10, .key = TR_PLACEHOLDER }, // Ages 0-14
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "academy_age",  .value = 11, .key = TR_PLACEHOLDER }, // Ages 14-21
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "working_age",  .value = 12, .key = TR_PLACEHOLDER }, // Ages 20-49/59 (depends on config)
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "retired",      .value = 13, .key = TR_PLACEHOLDER }, // Ages 50+/60+ (depends on config)
+};
+
+#define SPECIAL_ATTRIBUTE_MAPPINGS_AGE_SIZE (sizeof(special_attribute_mappings_age) / sizeof(special_attribute_mapping_t))
+
 // like condition, but not condition
-special_attribute_mapping_t special_attribute_mappings_city_property[] = {
+static special_attribute_mapping_t special_attribute_mappings_city_property[] = {
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "difficulty",              .value = CITY_PROPERTY_DIFFICULTY,              .key = TR_PLACEHOLDER },
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "money",                   .value = CITY_PROPERTY_MONEY,                   .key = TR_PLACEHOLDER },
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "population",              .value = CITY_PROPERTY_POPULATION,              .key = TR_PLACEHOLDER },
@@ -591,15 +650,50 @@ special_attribute_mapping_t special_attribute_mappings_city_property[] = {
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "pops_unemployment",       .value = CITY_PROPERTY_POPS_UNEMPLOYMENT,       .key = TR_PLACEHOLDER },
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "rome_wages",              .value = CITY_PROPERTY_ROME_WAGES,              .key = TR_PLACEHOLDER },
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "city_wages",              .value = CITY_PROPERTY_CITY_WAGES,              .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "building_count_active",   .value = CITY_PROPERTY_BUILDING_COUNT_ACTIVE,   .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "building_count_any",      .value = CITY_PROPERTY_BUILDING_COUNT_ANY,      .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "building_count",          .value = CITY_PROPERTY_BUILDING_COUNT,          .key = TR_PLACEHOLDER },
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "troops_count_player",     .value = CITY_PROPERTY_TROOPS_COUNT_PLAYER,     .key = TR_PLACEHOLDER },
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "troops_count_enemy",      .value = CITY_PROPERTY_TROOPS_COUNT_ENEMY,      .key = TR_PLACEHOLDER },
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "terrain_count_tiles",     .value = CITY_PROPERTY_TERRAIN_COUNT_TILES,     .key = TR_PLACEHOLDER },
 };
-unsigned int special_attribute_mappings_city_property_size;
 
-#define SPECIAL_ATTRIBUTE_MAPPINGS_CITY_PROPERTY (sizeof(special_attribute_mappings_city_property) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_CITY_PROPERTY_SIZE (sizeof(special_attribute_mappings_city_property) / sizeof(special_attribute_mapping_t))
+
+
+static special_attribute_mapping_t special_attribute_mappings_troops_class[] = {
+    {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "all",            .value = ENEMY_CLASS_ALL,            .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "melee",          .value = ENEMY_CLASS_MELEE,          .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "ranged",         .value = ENEMY_CLASS_RANGED,         .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "cavalry",        .value = ENEMY_CLASS_MOUNTED,        .key = TR_PLACEHOLDER },
+};
+#define SPECIAL_ATTRIBUTE_MAPPINGS_TROOPS_CLASS_SIZE (sizeof(special_attribute_mappings_troops_class) / sizeof(special_attribute_mapping_t))
+
+static special_attribute_mapping_t special_attribute_mappings_player_troops[] = {
+    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "all",            .value = FIGURE_FORT_STANDARD,          .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "sword",          .value = FIGURE_FORT_INFANTRY ,      .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "bow",            .value = FIGURE_FORT_ARCHER,       .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "cavalry",        .value = FIGURE_FORT_MOUNTED,      .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "legion",         .value = FIGURE_FORT_LEGIONARY,       .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "javelin",        .value = FIGURE_FORT_JAVELIN,         .key = TR_PLACEHOLDER },
+};
+
+#define SPECIAL_ATTRIBUTE_MAPPINGS_PLAYER_TROOPS_SIZE (sizeof(special_attribute_mappings_player_troops) / sizeof(special_attribute_mapping_t))
+
+static special_attribute_mapping_t special_attribute_mappings_coverage_buildings[] = {
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "theatres",      .value = BUILDING_THEATER,           .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "arenas",        .value = BUILDING_ARENA,            .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "amphitheatres", .value = BUILDING_AMPHITHEATER,       .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "taverns",       .value = BUILDING_TAVERN,           .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "colosseum",     .value = BUILDING_COLOSSEUM,           .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "hippodrome",    .value = BUILDING_HIPPODROME,           .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "doctors",       .value = BUILDING_DOCTOR,           .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "barbers",       .value = BUILDING_BARBER,           .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "hospitals",     .value = BUILDING_HOSPITAL,           .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "baths",         .value = BUILDING_BATHHOUSE,           .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "schools",       .value = BUILDING_SCHOOL,           .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "libraries",     .value = BUILDING_LIBRARY,           .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "academies",     .value = BUILDING_ACADEMY,           .key = TR_PLACEHOLDER },
+};
+
 static void generate_building_type_mappings(void)
 {
     if (special_attribute_mappings_building_type_size > 0) {
@@ -697,6 +791,12 @@ special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mappin
             return &special_attribute_mappings_climate[index];
         case PARAMETER_TYPE_TERRAIN:
             return &special_attribute_mappings_terrain[index];
+        case PARAMETER_TYPE_HOUSING_TYPE:
+            return &special_attribute_mappings_housing[index];
+        case PARAMETER_TYPE_AGE_GROUP:
+            return &special_attribute_mappings_age[index];
+        case PARAMETER_TYPE_CITY_PROPERTY:
+            return &special_attribute_mappings_city_property[index];
         default:
             return 0;
     }
@@ -740,6 +840,12 @@ int scenario_events_parameter_data_get_mappings_size(parameter_type type)
             return SPECIAL_ATTRIBUTE_MAPPINGS_CLIMATE_SIZE;
         case PARAMETER_TYPE_TERRAIN:
             return SPECIAL_ATTRIBUTE_MAPPINGS_TERRAIN_SIZE;
+        case PARAMETER_TYPE_HOUSING_TYPE:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_HOUSING_SIZE;
+        case PARAMETER_TYPE_AGE_GROUP:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_AGE_SIZE;
+        case PARAMETER_TYPE_CITY_PROPERTY:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_CITY_PROPERTY_SIZE;
         default:
             return 0;
     }

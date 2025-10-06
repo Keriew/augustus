@@ -9,13 +9,6 @@
 #include "scenario/event/parameter_data.h"
 #include "game/settings.h"
 
-// Struct describing how many and what kind of extra parameters a property requires
-typedef struct
-{
-    int count;                     // how many parameters needed
-    parameter_type param_types[3]; // what enum type each param comes from (up to 3)
-} city_property_param_info_t;
-
 int process_parameter(city_property_t type)
 {
     switch (type)
@@ -61,11 +54,8 @@ int process_parameter(city_property_t type)
     case CITY_PROPERTY_POPS_BY_AGE:
         // TODO: Handle population by age parameter (requires age group)
         return 0;
-    case CITY_PROPERTY_BUILDING_COUNT_ACTIVE:
+    case CITY_PROPERTY_BUILDING_COUNT:
         // TODO: Handle active building count parameter (requires building type)
-        return 0;
-    case CITY_PROPERTY_BUILDING_COUNT_ANY:
-        // TODO: Handle any building count parameter (requires building type)
         return 0;
     case CITY_PROPERTY_TROOPS_COUNT_PLAYER:
         // TODO: Handle player troops count parameter (requires troop type)
@@ -85,54 +75,61 @@ int process_parameter(city_property_t type)
 }
 
 // Function returning parameter info for each city property
-city_property_param_info_t city_property_get_param_info(city_property_t type)
+city_property_info_t city_property_get_param_info(city_property_t type)
 {
-    city_property_param_info_t info = {0, {PARAM_TYPE_NONE}}; // default: no params
+    city_property_info_t info = {0, {PARAMETER_TYPE_UNDEFINED}}; // default: no params
 
     switch (type)
     {
-
     // --- Complex properties: have enum-based parameter requirements ---
     case CITY_PROPERTY_RESOURCE_STOCK:
-        info.count = 1;
-        info.param_types[0] = PARAM_TYPE_RESOURCE;
+        info.count = 3;
+        info.param_types[0] = PARAMETER_TYPE_RESOURCE;
+        info.param_types[1] = PARAMETER_TYPE_STORAGE_TYPE;
+        info.param_types[2] = PARAMETER_TYPE_BOOLEAN; // respect settings
         break;
 
     case CITY_PROPERTY_SERVICE_COVERAGE:
         info.count = 1;
-        info.param_types[0] = PARAM_TYPE_SERVICE;
+        info.param_types[0] = PARAMETER_TYPE_COVERAGE_BUILDINGS;
         break;
 
     case CITY_PROPERTY_POPS_UNEMPLOYMENT:
         info.count = 1;
-        info.param_types[0] = PARAM_TYPE_POP_CLASS;
+        info.param_types[0] = PARAMETER_TYPE_PERCENTAGE;
         break;
 
     case CITY_PROPERTY_POPS_HOUSING_TYPE:
-        info.count = 1;
-        info.param_types[0] = PARAM_TYPE_HOUSING;
+        info.count = 2;
+        info.param_types[0] = PARAMETER_TYPE_HOUSING_TYPE;
+        info.param_types[1] = PARAMETER_TYPE_PERCENTAGE;
         break;
 
     case CITY_PROPERTY_POPS_BY_AGE:
-        info.count = 1;
-        info.param_types[0] = PARAM_TYPE_AGE_GROUP;
+        info.count = 2;
+        info.param_types[0] = PARAMETER_TYPE_AGE_GROUP;
+        info.param_types[1] = PARAMETER_TYPE_PERCENTAGE;
         break;
 
-    case CITY_PROPERTY_BUILDING_COUNT_ACTIVE:
-    case CITY_PROPERTY_BUILDING_COUNT_ANY:
-        info.count = 1;
-        info.param_types[0] = PARAM_TYPE_BUILDING;
+    case CITY_PROPERTY_BUILDING_COUNT:
+        info.count = 2;
+        info.param_types[0] = PARAMETER_TYPE_BUILDING;
+        info.param_types[1] = PARAMETER_TYPE_BOOLEAN; // active only or all
         break;
 
     case CITY_PROPERTY_TROOPS_COUNT_PLAYER:
+        info.count = 1;
+        info.param_types[0] = PARAMETER_TYPE_PLAYER_TROOPS;
+        break;
+
     case CITY_PROPERTY_TROOPS_COUNT_ENEMY:
         info.count = 1;
-        info.param_types[0] = PARAM_TYPE_TROOP;
+        info.param_types[0] = PARAMETER_TYPE_ENEMY_CLASS;
         break;
 
     case CITY_PROPERTY_TERRAIN_COUNT_TILES:
         info.count = 1;
-        info.param_types[0] = PARAM_TYPE_TERRAIN;
+        info.param_types[0] = PARAMETER_TYPE_TERRAIN;
         break;
 
     // --- Invalid / none ---

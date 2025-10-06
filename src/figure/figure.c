@@ -15,6 +15,7 @@
 #include "figure/visited_buildings.h"
 #include "map/figure.h"
 #include "map/grid.h"
+#include "figure.h"
 
 #define FIGURE_ARRAY_SIZE_STEP 1000
 
@@ -215,6 +216,71 @@ int figure_is_dead(const figure *f)
 int figure_is_enemy(const figure *f)
 {
     return (f->type >= FIGURE_ENEMY43_SPEAR && f->type <= FIGURE_ENEMY_CAESAR_LEGIONARY) || f->type == FIGURE_ENEMY_CATAPULT;
+}
+
+int figure_is_melee_enemy(const figure *f)
+{
+    switch (f->type) { //only invading melee types, no gladiators or caesars troops
+        case FIGURE_ENEMY44_SWORD:
+        case FIGURE_ENEMY45_SWORD:
+        case FIGURE_ENEMY49_FAST_SWORD:
+        case FIGURE_ENEMY50_SWORD:
+        case FIGURE_ENEMY53_AXE:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+int figure_is_ranged_enemy(const figure *f)
+{
+    switch (f->type) {
+        /* Spear-throwers / javelin / bows / siege */
+        case FIGURE_ENEMY43_SPEAR:
+        case FIGURE_ENEMY51_SPEAR:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+int figure_is_mounted_enemy(const figure *f)
+{
+    switch (f->type) {
+        /* Animal-mounted or vehicle types */
+        case FIGURE_ENEMY46_CAMEL:
+        case FIGURE_ENEMY47_ELEPHANT:
+        case FIGURE_ENEMY48_CHARIOT:
+        case FIGURE_ENEMY52_MOUNTED_ARCHER:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+int figure_is_caesar_enemy(const figure *f)
+{
+    switch (f->type) {
+        case FIGURE_ENEMY_CAESAR_JAVELIN:
+        case FIGURE_ENEMY_CAESAR_MOUNTED:
+        case FIGURE_ENEMY_CAESAR_LEGIONARY:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+int figure_enemy_class(const figure *f)
+{
+    if (figure_is_melee_enemy(f)) {
+        return ENEMY_CLASS_MELEE;
+    } else if (figure_is_ranged_enemy(f)) {
+        return ENEMY_CLASS_RANGED;
+    } else if (figure_is_mounted_enemy(f)) {
+        return ENEMY_CLASS_MOUNTED;
+    } else { //not an enemy or unknown type
+        return ENEMY_CLASS_ALL;
+    }
 }
 
 int figure_is_legion(const figure *f)
