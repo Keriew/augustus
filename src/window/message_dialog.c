@@ -10,6 +10,7 @@
 #include "empire/city.h"
 #include "figure/formation.h"
 #include "game/settings.h"
+#include "graphics/complex_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/image_button.h"
@@ -42,6 +43,7 @@ static void button_close(int param1, int param2);
 static void button_help(int param1, int param2);
 static void button_advisor(int advisor, int param2);
 static void button_go_to_problem(int param1, int param2);
+static void button_dispatch_request(const complex_button *button);
 
 static image_button image_button_back = {
     0, 0, 31, 20, IB_NORMAL, GROUP_MESSAGE_ICON, 8, button_back, button_none, 0, 0, 1
@@ -85,6 +87,15 @@ static image_button image_button_financial = {
 static image_button image_button_chief = {
     0, 0, 27, 27, IB_NORMAL, GROUP_MESSAGE_ADVISOR_BUTTONS, 33, button_advisor, button_none, ADVISOR_CHIEF, 0, 1
 };
+static lang_fragment seq = { .type = LANG_FRAG_LABEL, .text_id = TR_SIDEBAR_EXTRA_REQUESTS_SEND, .text_group = CUSTOM_TRANSLATION };
+static complex_button complex_button_dispatch_request = {
+    .width = 200,
+    .height = 28,
+    .left_click_handler = button_dispatch_request,
+    .sequence = &seq,
+    .sequence_size = 1,
+    .sequence_position = SEQUENCE_POSITION_CENTER,
+};
 
 static struct {
     struct {
@@ -124,9 +135,15 @@ static struct {
     int use_popup;
 } player_message;
 
-static void set_city_message(int year, int month,
-    int param1, int param2,
-    message_advisor advisor, int use_popup)
+static void button_dispatch_request(const complex_button *button)
+{
+    int request_id = button->parameters[0];
+    scenario_request_dispatch(request_id);
+    complex_button_dispatch_request.is_hidden = 1;
+    button_close(0, 0);
+}
+
+static void set_city_message(int year, int month, int param1, int param2, message_advisor advisor, int use_popup)
 {
     player_message.year = year;
     player_message.month = month;
@@ -262,6 +279,27 @@ static const lang_message *get_custom_or_standard_lang_message(int text_id)
     } else {
         return &data.custom_lang_message;
     }
+}
+
+static int setup_request_button(const lang_message *msg)
+{
+    if (msg->message_type != MESSAGE_TYPE_IMPERIAL) {
+        return 0;
+    }
+    if (scenario_request_can_comply(player_message.param1)) { // param1 should already be set to request id here
+        complex_button_dispatch_request.is_hidden = 0;
+        complex_button_dispatch_request.parameters[0] = player_message.param1;
+        complex_button_dispatch_request.x = data.x + (BLOCK_SIZE * msg->width_blocks) / 2 -
+            complex_button_dispatch_request.width / 2;
+        complex_button_dispatch_request.y = data.y + BLOCK_SIZE * msg->height_blocks - 40;
+        if (data.show_video) { // video message positioning is different
+            complex_button_dispatch_request.x -= 32;
+            complex_button_dispatch_request.y += 128;
+        }
+        return 1;
+    }
+    complex_button_dispatch_request.is_hidden = 1;
+    return 0;
 }
 
 static void init(int text_id, int is_custom_message, void (*background_callback)(void))
@@ -570,8 +608,9 @@ static void draw_background_video(void)
     }
     inner_panel_draw(data.x + 8, y_base, 25, inner_height_blocks);
     if (msg->message_type != MESSAGE_TYPE_CUSTOM) {
-        text_draw_centered(msg->title.text,
-            data.x + 8, data.y + 414, 400, FONT_NORMAL_BLACK, 0);
+        if (!setup_request_button(msg)) {
+            text_draw_centered(msg->title.text, data.x + 8, data.y + 414, 400, FONT_NORMAL_BLACK, 0);
+        }
     }
 
     int width = lang_text_draw(25, player_message.month, data.x + 16, y_base + 4, FONT_NORMAL_WHITE);
@@ -684,6 +723,8 @@ static void draw_foreground_normal(void)
     }
     image_buttons_draw(data.x + BLOCK_SIZE * msg->width_blocks - 38, data.y + BLOCK_SIZE * msg->height_blocks - 36,
         &image_button_close, 1);
+    setup_request_button(msg);
+    complex_button_draw(&complex_button_dispatch_request);
     rich_text_draw_scrollbar();
 }
 
@@ -702,6 +743,10 @@ static void draw_foreground_video(void)
         }
         if (msg->subtitle.text) {
             text_draw_centered(msg->subtitle.text, data.x + 32, data.y + 368, 368, FONT_SMALL_PLAIN, 0);
+        }
+    } else {
+        if (setup_request_button(msg)) {
+            complex_button_draw(&complex_button_dispatch_request);
         }
     }
 }
@@ -723,6 +768,9 @@ static int handle_input_video(const mouse *m_dialog, const lang_message *msg, co
         return 1;
     }
     if (image_buttons_handle_mouse(m_dialog, data.x + 372, data.y + 410, &image_button_close, 1, 0)) {
+        return 1;
+    }
+    if (complex_button_handle_mouse(m_dialog, &complex_button_dispatch_request)) {
         return 1;
     }
     if (is_event_message(msg)) {
@@ -749,6 +797,9 @@ static int handle_input_normal(const mouse *m_dialog, const lang_message *msg)
         return 1;
     }
     if (msg->type == TYPE_MESSAGE) {
+        if (complex_button_handle_mouse(m_dialog, &complex_button_dispatch_request)) {
+            return 1;
+        }
         if (image_buttons_handle_mouse(
             m_dialog, data.x + 16, data.y + BLOCK_SIZE * msg->height_blocks - 40, get_advisor_button(), 1, 0)) {
             return 1;
@@ -805,8 +856,6 @@ static void handle_input(const mouse *m, const hotkeys *h)
     if (!handled && input_go_back_requested(m, h) && can_skip_popup()) {
         button_close(0, 0);
     }
-
-
 }
 
 static void button_back(int param1, int param2)

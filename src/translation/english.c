@@ -1726,6 +1726,14 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_CUSTOM_VARIABLE_FORMULA, "Change custom variable value (formula)" },
     {TR_EDITOR_REPEAT_INTERVAL_TYPE, "TIME"},
     {TR_PLACEHOLDER, "Placeholder" },
+    {TR_OVERLAY_HOUSING_TENTS, "Tents"},
+    {TR_OVERLAY_HOUSING_SHACKS, "Shacks"},
+    {TR_OVERLAY_HOUSING_HOVELS, "Hovels"},
+    {TR_OVERLAY_HOUSING_CASAS, "Casae"},
+    {TR_OVERLAY_HOUSE_INSULAS, "Insulae"},
+    {TR_OVERLAY_HOUSE_VILLAS, "Villas"},
+    {TR_OVERLAY_HOUSE_PALACES, "Palaces"},
+    {TR_OVERLAY_BY_GROUP, "By Group"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

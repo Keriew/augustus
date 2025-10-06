@@ -244,6 +244,8 @@ building *building_create(building_type type, int x, int y)
 
     if (b->type == BUILDING_MARKET && config_get(CONFIG_GP_CH_MARKETS_DONT_ACCEPT)) {
         building_distribution_unaccept_all_goods(b);
+    } else if (b->type == BUILDING_MARKET && !config_get(CONFIG_GP_CH_MARKETS_DONT_ACCEPT)) {
+        building_distribution_accept_all_goods(b);
     }
 
     b->x = x;
