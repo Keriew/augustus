@@ -43,6 +43,7 @@ static void draw_default_style(const complex_button *button)
 
     // Pre-calc widths
     int seq_width = lang_text_get_sequence_width(button->sequence, button->sequence_size, font);
+    seq_width = seq_width % 2 ? seq_width - 1 : seq_width; // even up for better centering
     int img_before_w = 0, img_after_w = 0;
     const image *img_before = NULL, *img_after = NULL;
 

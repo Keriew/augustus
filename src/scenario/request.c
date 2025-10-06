@@ -57,6 +57,22 @@ static void make_request_visible_and_send_message(scenario_request *request)
     }
 }
 
+int scenario_request_can_comply(int id)
+{
+    scenario_request *request = array_item(requests, id);
+    if (!request) {
+        return 0;
+    }
+    if (request->state != REQUEST_STATE_NORMAL && request->state != REQUEST_STATE_OVERDUE) {
+        return 0;
+    }
+    if (!request->visible) {
+        return 0;
+    }
+    int amount = city_resource_get_amount_for_request(request->resource, request->amount.requested);
+    return amount >= request->amount.requested;
+}
+
 void scenario_request_clear_all(void)
 {
     if (!array_init(requests, REQUESTS_ARRAY_SIZE_STEP, new_request, request_in_use)) {
