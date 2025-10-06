@@ -44,6 +44,7 @@ typedef enum {
     PARAMETER_TYPE_ENEMY_CLASS,
     PARAMETER_TYPE_PLAYER_TROOPS,
     PARAMETER_TYPE_COVERAGE_BUILDINGS,
+    PARAMETER_TYPE_FLEXIBLE, // special type that can be anything, used in city_property to map the right type at runtime
 } parameter_type;
 
 typedef struct {

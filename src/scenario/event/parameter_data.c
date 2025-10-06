@@ -693,6 +693,7 @@ static special_attribute_mapping_t special_attribute_mappings_coverage_buildings
     {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "libraries",     .value = BUILDING_LIBRARY,           .key = TR_PLACEHOLDER },
     {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "academies",     .value = BUILDING_ACADEMY,           .key = TR_PLACEHOLDER },
 };
+#define SPECIAL_ATTRIBUTE_MAPPINGS_COVERAGE_BUILDINGS_SIZE (sizeof(special_attribute_mappings_coverage_buildings) / sizeof(special_attribute_mapping_t))
 
 static void generate_building_type_mappings(void)
 {
@@ -797,6 +798,14 @@ special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mappin
             return &special_attribute_mappings_age[index];
         case PARAMETER_TYPE_CITY_PROPERTY:
             return &special_attribute_mappings_city_property[index];
+        case PARAMETER_TYPE_PERCENTAGE:
+            return &special_attribute_mappings_percentage[index];
+        case PARAMETER_TYPE_ENEMY_CLASS:
+            return &special_attribute_mappings_troops_class[index];
+        case PARAMETER_TYPE_PLAYER_TROOPS:
+            return &special_attribute_mappings_player_troops[index];
+        case PARAMETER_TYPE_COVERAGE_BUILDINGS:
+            return &special_attribute_mappings_coverage_buildings[index];
         default:
             return 0;
     }
