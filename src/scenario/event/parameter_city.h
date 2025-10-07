@@ -10,7 +10,7 @@ typedef enum {
     CITY_PROPERTY_POPULATION,
     CITY_PROPERTY_SAVINGS,
     CITY_PROPERTY_YEAR_FINANCE_BALANCE,
-    CITY_PROPERTY_RESOURCE_STOCK, //complex
+    CITY_PROPERTY_RESOURCE_STOCK,
     // stats
     CITY_PROPERTY_STATS_FAVOR,
     CITY_PROPERTY_STATS_PROSPERITY,
@@ -18,20 +18,20 @@ typedef enum {
     CITY_PROPERTY_STATS_PEACE,
     CITY_PROPERTY_STATS_CITY_HEALTH,
     // service coverage
-    CITY_PROPERTY_SERVICE_COVERAGE,//complex
+    CITY_PROPERTY_SERVICE_COVERAGE,
     // Population
-    CITY_PROPERTY_POPS_UNEMPLOYMENT,//complex
-    CITY_PROPERTY_POPS_HOUSING_TYPE,//complex
-    CITY_PROPERTY_POPS_BY_AGE,//complex
+    CITY_PROPERTY_POPS_UNEMPLOYMENT,
+    CITY_PROPERTY_POPS_HOUSING_TYPE,
+    CITY_PROPERTY_POPS_BY_AGE,
     CITY_PROPERTY_ROME_WAGES,
     CITY_PROPERTY_CITY_WAGES,
     // buildings
     CITY_PROPERTY_BUILDING_COUNT,
-    //troops
-    CITY_PROPERTY_TROOPS_COUNT_PLAYER,//complex
-    CITY_PROPERTY_TROOPS_COUNT_ENEMY,//complex
-    //terrain
-    CITY_PROPERTY_TERRAIN_COUNT_TILES,//complex
+    // troops
+    CITY_PROPERTY_TROOPS_COUNT_PLAYER,
+    CITY_PROPERTY_TROOPS_COUNT_ENEMY,
+    // terrain
+    CITY_PROPERTY_TERRAIN_COUNT_TILES,
     CITY_PROPERTY_MAX,
 } city_property_t;
 
@@ -42,6 +42,8 @@ typedef struct
     parameter_type param_types[3]; // what enum type each param comes from (up to 3)
     int param_keys[3];  // translation keys for parameter types, if applicable
 } city_property_info_t;
+
+int scenario_event_parameter_city_for_action(scenario_action_t *action);
 
 /**
  * Get parameter info for a city property

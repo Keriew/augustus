@@ -273,6 +273,27 @@ static void set_param_value(int value)
             return;
         case 2:
             data.action->parameter2 = value;
+            // For ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY, when parameter2 (city_property) changes,
+            // we need to reset parameters 3-5 to their default values based on the newly resolved flexible types
+            if (data.action->type == ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY) {
+                // Reset parameters 3-5 using the resolved flexible types
+                xml_data_attribute_t resolved_param;
+                
+                // Parameter 3
+                resolved_param = data.xml_info->xml_parm3;
+                resolved_param.type = scenario_events_parameter_data_resolve_flexible_type(data.action, 3);
+                data.action->parameter3 = scenario_events_parameter_data_get_default_value_for_parameter(&resolved_param);
+                
+                // Parameter 4
+                resolved_param = data.xml_info->xml_parm4;
+                resolved_param.type = scenario_events_parameter_data_resolve_flexible_type(data.action, 4);
+                data.action->parameter4 = scenario_events_parameter_data_get_default_value_for_parameter(&resolved_param);
+                
+                // Parameter 5
+                resolved_param = data.xml_info->xml_parm5;
+                resolved_param.type = scenario_events_parameter_data_resolve_flexible_type(data.action, 5);
+                data.action->parameter5 = scenario_events_parameter_data_get_default_value_for_parameter(&resolved_param);
+            }
             return;
         case 3:
             data.action->parameter3 = value;

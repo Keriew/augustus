@@ -1734,7 +1734,7 @@ static translation_string all_strings[] = {
     {TR_OVERLAY_HOUSE_VILLAS, "Villas"},
     {TR_OVERLAY_HOUSE_PALACES, "Palaces"},
     {TR_OVERLAY_BY_GROUP, "By Group"},
-    {TR_EDITOR_PARAMETER_CITY_PROPERTY, "City Property" },
+    {TR_EDITOR_PARAMETER_CITY_PROPERTY, "Custom variable value (city property)" },
     {TR_PARAMETER_PERCENTAGE, "Percentage" },
     {TR_PARAMETER_ABSOLUTE, "Absolute" },
     {TR_DECENNIUM_0, "0-9"},

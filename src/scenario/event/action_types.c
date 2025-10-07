@@ -115,6 +115,14 @@ int scenario_action_type_custom_variable_formula_execute(scenario_action_t *acti
     return 1;
 }
 
+int scenario_action_type_custom_variable_city_property_execute(scenario_action_t *action)
+{
+    int value = scenario_event_parameter_city_for_action(action);
+    int variable_id = action->parameter1;
+    scenario_custom_variable_set_value(variable_id, value);
+    return 1;
+}
+
 int scenario_action_type_change_resource_produced_execute(scenario_action_t *action)
 {
     int resource = action->parameter1;
