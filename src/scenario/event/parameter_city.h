@@ -40,6 +40,7 @@ typedef struct
 {
     int count;                     // how many parameters needed
     parameter_type param_types[3]; // what enum type each param comes from (up to 3)
+    int param_keys[3];  // translation keys for parameter types, if applicable
 } city_property_info_t;
 
 int process_parameter(city_property_t type);

@@ -13,6 +13,7 @@
 #include "input/input.h"
 #include "scenario/event/controller.h"
 #include "scenario/event/parameter_data.h"
+#include "scenario/event/parameter_city.h"
 #include "scenario/event/action_handler.h"
 #include "widget/input_box.h"
 #include "window/editor/allowed_buildings.h"
@@ -92,6 +93,31 @@ static parameter_type get_resolved_parameter_type(xml_data_attribute_t *param_at
     return scenario_events_parameter_data_resolve_flexible_type(data.action, param_number);
 }
 
+static translation_key get_resolved_parameter_key(xml_data_attribute_t *param_attr, int param_number)
+{
+    // If the parameter is not flexible, return its key directly
+    if (param_attr->type != PARAMETER_TYPE_FLEXIBLE) {
+        return param_attr->key;
+    }
+
+    // For flexible parameters in city property actions, get the key from city_property_info_t
+    if (data.action->type == ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY && param_number >= 3 && param_number <= 5) {
+        city_property_t city_property = data.action->parameter2;
+        city_property_info_t info = city_property_get_param_info(city_property);
+        
+        // Map param_number to the array index (3->0, 4->1, 5->2)
+        int param_index = param_number - 3;
+        
+        // Return the translation key if this parameter is needed
+        if (param_index < info.count) {
+            return info.param_keys[param_index];
+        }
+    }
+
+    // Fallback to the original key if resolution fails
+    return param_attr->key;
+}
+
 static void draw_background(void)
 {
     data.xml_info = scenario_events_parameter_data_get_actions_xml_attributes(data.action->type);
@@ -143,7 +169,7 @@ static void draw_foreground(void)
     if (resolved_type3 > PARAMETER_TYPE_UNDEFINED) {
         large_label_draw(buttons[button_id].x, buttons[button_id].y, buttons[button_id].width / 16,
             data.focus_button_id == button_id + 1 ? 1 : 0);
-        text_draw_centered(translation_for(data.xml_info->xml_parm3.key),
+        text_draw_centered(translation_for(get_resolved_parameter_key(&data.xml_info->xml_parm3, 3)),
             buttons[button_id].x, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
         text_draw_centered(translation_for_param_value(resolved_type3, data.action->parameter3),
@@ -156,7 +182,7 @@ static void draw_foreground(void)
     if (resolved_type4 > PARAMETER_TYPE_UNDEFINED) {
         large_label_draw(buttons[button_id].x, buttons[button_id].y, buttons[button_id].width / 16,
             data.focus_button_id == button_id + 1 ? 1 : 0);
-        text_draw_centered(translation_for(data.xml_info->xml_parm4.key),
+        text_draw_centered(translation_for(get_resolved_parameter_key(&data.xml_info->xml_parm4, 4)),
             buttons[button_id].x, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
         text_draw_centered(translation_for_param_value(resolved_type4, data.action->parameter4),
@@ -169,7 +195,7 @@ static void draw_foreground(void)
     if (resolved_type5 > PARAMETER_TYPE_UNDEFINED) {
         large_label_draw(buttons[button_id].x, buttons[button_id].y, buttons[button_id].width / 16,
             data.focus_button_id == button_id + 1 ? 1 : 0);
-        text_draw_centered(translation_for(data.xml_info->xml_parm5.key),
+        text_draw_centered(translation_for(get_resolved_parameter_key(&data.xml_info->xml_parm5, 5)),
             buttons[button_id].x, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
         text_draw_centered(translation_for_param_value(resolved_type5, data.action->parameter5),

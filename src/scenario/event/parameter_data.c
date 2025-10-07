@@ -302,9 +302,9 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm1 = {.name = "variable_uid",   .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,      .max_limit = 99,     .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
                                         .xml_parm2 = {.name = "formula",        .type = PARAMETER_TYPE_FORMULA,          .key = TR_PARAMETER_TYPE_FORMULA }, },
     [ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY] = {.type = ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY,
-                                        .xml_attr = {.name = "variable_city_property",  .type = PARAMETER_TYPE_TEXT,             .key = TR_PLACEHOLDER },
+                                        .xml_attr = {.name = "variable_city_property",  .type = PARAMETER_TYPE_TEXT,             .key = TR_EDITOR_PARAMETER_CITY_PROPERTY },
                                         .xml_parm1 = {.name = "variable_uid",            .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,      .max_limit = 99,     .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
-                                        .xml_parm2 = {.name = "property",                .type = PARAMETER_TYPE_CITY_PROPERTY,    .key = TR_PLACEHOLDER },
+                                        .xml_parm2 = {.name = "property",                .type = PARAMETER_TYPE_CITY_PROPERTY,    .key = TR_EDITOR_PARAMETER_CITY_PROPERTY},
                                         .xml_parm3 = {.name = "flexible",                .type = PARAMETER_TYPE_FLEXIBLE  ,           .key = TR_PLACEHOLDER },
                                         .xml_parm4 = {.name = "flexible",                .type = PARAMETER_TYPE_FLEXIBLE  ,           .key = TR_PLACEHOLDER },
                                         .xml_parm5 = {.name = "flexible",                .type = PARAMETER_TYPE_FLEXIBLE  ,           .key = TR_PLACEHOLDER },},
@@ -573,8 +573,8 @@ static special_attribute_mapping_t special_attribute_mappings_terrain[] =
 #define SPECIAL_ATTRIBUTE_MAPPINGS_TERRAIN_SIZE (sizeof(special_attribute_mappings_terrain) / sizeof(special_attribute_mapping_t))
 
 static special_attribute_mapping_t special_attribute_mappings_percentage[] = {
-    {.type = PARAMETER_TYPE_PERCENTAGE, .text = "Percentage", .value = 1, .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_PERCENTAGE, .text = "Absolute",   .value = 0, .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_PERCENTAGE, .text = "Percentage", .value = 0, .key = TR_PARAMETER_PERCENTAGE },
+    {.type = PARAMETER_TYPE_PERCENTAGE, .text = "Absolute",   .value = 1, .key = TR_PARAMETER_ABSOLUTE },
 };
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_PERCENTAGE_SIZE (sizeof(special_attribute_mappings_percentage) / sizeof(special_attribute_mapping_t))
@@ -617,16 +617,16 @@ static special_attribute_mapping_t special_attribute_mappings_housing[] = {
 
 static special_attribute_mapping_t special_attribute_mappings_age[] = {
     // Decenniums (10-year age groups)
-    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_0",  .value = 0,  .key = TR_PLACEHOLDER }, // Ages 0-9
-    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_1",  .value = 1,  .key = TR_PLACEHOLDER }, // Ages 10-19
-    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_2",  .value = 2,  .key = TR_PLACEHOLDER }, // Ages 20-29
-    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_3",  .value = 3,  .key = TR_PLACEHOLDER }, // Ages 30-39
-    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_4",  .value = 4,  .key = TR_PLACEHOLDER }, // Ages 40-49
-    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_5",  .value = 5,  .key = TR_PLACEHOLDER }, // Ages 50-59
-    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_6",  .value = 6,  .key = TR_PLACEHOLDER }, // Ages 60-69
-    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_7",  .value = 7,  .key = TR_PLACEHOLDER }, // Ages 70-79
-    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_8",  .value = 8,  .key = TR_PLACEHOLDER }, // Ages 80-89
-    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_9",  .value = 9,  .key = TR_PLACEHOLDER }, // Ages 90-99
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_0",  .value = 0,  .key = TR_DECENNIUM_0 }, // Ages 0-9
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_1",  .value = 1,  .key = TR_DECENNIUM_1 }, // Ages 10-19
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_2",  .value = 2,  .key = TR_DECENNIUM_2 }, // Ages 20-29
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_3",  .value = 3,  .key = TR_DECENNIUM_3 }, // Ages 30-39
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_4",  .value = 4,  .key = TR_DECENNIUM_4 }, // Ages 40-49
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_5",  .value = 5,  .key = TR_DECENNIUM_5 }, // Ages 50-59
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_6",  .value = 6,  .key = TR_DECENNIUM_6 }, // Ages 60-69
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_7",  .value = 7,  .key = TR_DECENNIUM_7 }, // Ages 70-79
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_8",  .value = 8,  .key = TR_DECENNIUM_8 }, // Ages 80-89
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_9",  .value = 9,  .key = TR_DECENNIUM_9 }, // Ages 90-99
 
     // Age groups
     {.type = PARAMETER_TYPE_AGE_GROUP, .text = "school_age",   .value = 10, .key = TR_PLACEHOLDER }, // Ages 0-14
@@ -639,45 +639,45 @@ static special_attribute_mapping_t special_attribute_mappings_age[] = {
 
 // like condition, but not condition
 static special_attribute_mapping_t special_attribute_mappings_city_property[] = {
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "none",                    .value = CITY_PROPERTY_NONE,                    .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "difficulty",              .value = CITY_PROPERTY_DIFFICULTY,              .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "money",                   .value = CITY_PROPERTY_MONEY,                   .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "population",              .value = CITY_PROPERTY_POPULATION,              .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "savings",                 .value = CITY_PROPERTY_SAVINGS,                 .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "year_finance_balance",    .value = CITY_PROPERTY_YEAR_FINANCE_BALANCE,    .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "resource_stock",          .value = CITY_PROPERTY_RESOURCE_STOCK,          .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_favor",             .value = CITY_PROPERTY_STATS_FAVOR,             .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_prosperity",        .value = CITY_PROPERTY_STATS_PROSPERITY,        .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_culture",           .value = CITY_PROPERTY_STATS_CULTURE,           .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_peace",             .value = CITY_PROPERTY_STATS_PEACE,             .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_city_health",       .value = CITY_PROPERTY_STATS_CITY_HEALTH,       .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "pops_unemployment",       .value = CITY_PROPERTY_POPS_UNEMPLOYMENT,       .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "rome_wages",              .value = CITY_PROPERTY_ROME_WAGES,              .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "city_wages",              .value = CITY_PROPERTY_CITY_WAGES,              .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "building_count",          .value = CITY_PROPERTY_BUILDING_COUNT,          .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "troops_count_player",     .value = CITY_PROPERTY_TROOPS_COUNT_PLAYER,     .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "troops_count_enemy",      .value = CITY_PROPERTY_TROOPS_COUNT_ENEMY,      .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "terrain_count_tiles",     .value = CITY_PROPERTY_TERRAIN_COUNT_TILES,     .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "none",                    .value = CITY_PROPERTY_NONE,                    .key = TR_CITY_PROPERTY_NONE },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "difficulty",              .value = CITY_PROPERTY_DIFFICULTY,              .key = TR_CITY_PROPERTY_DIFFICULTY },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "money",                   .value = CITY_PROPERTY_MONEY,                   .key = TR_CITY_PROPERTY_MONEY },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "population",              .value = CITY_PROPERTY_POPULATION,              .key = TR_CITY_PROPERTY_POPULATION },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "savings",                 .value = CITY_PROPERTY_SAVINGS,                 .key = TR_CITY_PROPERTY_SAVINGS },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "year_finance_balance",    .value = CITY_PROPERTY_YEAR_FINANCE_BALANCE,    .key = TR_CITY_PROPERTY_YEAR_FINANCE_BALANCE },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "resource_stock",          .value = CITY_PROPERTY_RESOURCE_STOCK,          .key = TR_CITY_PROPERTY_RESOURCE_STOCK },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_favor",             .value = CITY_PROPERTY_STATS_FAVOR,             .key = TR_CITY_PROPERTY_STATS_FAVOR },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_prosperity",        .value = CITY_PROPERTY_STATS_PROSPERITY,        .key = TR_CITY_PROPERTY_STATS_PROSPERITY },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_culture",           .value = CITY_PROPERTY_STATS_CULTURE,           .key = TR_CITY_PROPERTY_STATS_CULTURE },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_peace",             .value = CITY_PROPERTY_STATS_PEACE,             .key = TR_CITY_PROPERTY_STATS_PEACE },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_city_health",       .value = CITY_PROPERTY_STATS_CITY_HEALTH,       .key = TR_CITY_PROPERTY_STATS_CITY_HEALTH },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "pops_unemployment",       .value = CITY_PROPERTY_POPS_UNEMPLOYMENT,       .key = TR_CITY_PROPERTY_POPS_UNEMPLOYMENT },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "rome_wages",              .value = CITY_PROPERTY_ROME_WAGES,              .key = TR_CITY_PROPERTY_ROME_WAGES },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "city_wages",              .value = CITY_PROPERTY_CITY_WAGES,              .key = TR_CITY_PROPERTY_CITY_WAGES },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "building_count",          .value = CITY_PROPERTY_BUILDING_COUNT,          .key = TR_CITY_PROPERTY_BUILDING_COUNT },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "troops_count_player",     .value = CITY_PROPERTY_TROOPS_COUNT_PLAYER,     .key = TR_CITY_PROPERTY_TROOPS_COUNT_PLAYER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "troops_count_enemy",      .value = CITY_PROPERTY_TROOPS_COUNT_ENEMY,      .key = TR_CITY_PROPERTY_TROOPS_COUNT_ENEMY },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "terrain_count_tiles",     .value = CITY_PROPERTY_TERRAIN_COUNT_TILES,     .key = TR_CITY_PROPERTY_TERRAIN_COUNT_TILES },
 };
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_CITY_PROPERTY_SIZE (sizeof(special_attribute_mappings_city_property) / sizeof(special_attribute_mapping_t))
 
 
 static special_attribute_mapping_t special_attribute_mappings_troops_class[] = {
-    {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "all",            .value = ENEMY_CLASS_ALL,            .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "melee",          .value = ENEMY_CLASS_MELEE,          .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "ranged",         .value = ENEMY_CLASS_RANGED,         .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "cavalry",        .value = ENEMY_CLASS_MOUNTED,        .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "all",            .value = ENEMY_CLASS_ALL,            .key = TR_CITY_PROPERTY_ALL },
+    {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "melee",          .value = ENEMY_CLASS_MELEE,          .key = TR_CITY_PROPERTY_TROOPS_MELEE },
+    {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "ranged",         .value = ENEMY_CLASS_RANGED,         .key = TR_CITY_PROPERTY_TROOPS_RANGED },
+    {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "cavalry",        .value = ENEMY_CLASS_MOUNTED,        .key = TR_CITY_PROPERTY_TROOPS_MOUNTED },
 };
 #define SPECIAL_ATTRIBUTE_MAPPINGS_TROOPS_CLASS_SIZE (sizeof(special_attribute_mappings_troops_class) / sizeof(special_attribute_mapping_t))
 
 static special_attribute_mapping_t special_attribute_mappings_player_troops[] = {
-    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "all",            .value = FIGURE_FORT_STANDARD,          .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "sword",          .value = FIGURE_FORT_INFANTRY ,      .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "bow",            .value = FIGURE_FORT_ARCHER,       .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "cavalry",        .value = FIGURE_FORT_MOUNTED,      .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "legion",         .value = FIGURE_FORT_LEGIONARY,       .key = TR_PLACEHOLDER },
-    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "javelin",        .value = FIGURE_FORT_JAVELIN,         .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "all",            .value = 0,                          .key = TR_CITY_PROPERTY_ALL},
+    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "sword",          .value = FIGURE_FORT_INFANTRY ,      .key = TR_BUILDING_FORT_AUXILIA_INFANTRY },
+    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "bow",            .value = FIGURE_FORT_ARCHER,       .key = TR_BUILDING_FORT_ARCHERS },
+    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "cavalry",        .value = FIGURE_FORT_MOUNTED,      .key = TR_BUILDING_FORT_MOUNTED},
+    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "legion",         .value = FIGURE_FORT_LEGIONARY,       .key = TR_BUILDING_FORT_LEGIONARIES },
+    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "javelin",        .value = FIGURE_FORT_JAVELIN,         .key = TR_BUILDING_FORT_JAVELIN },
 };
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_PLAYER_TROOPS_SIZE (sizeof(special_attribute_mappings_player_troops) / sizeof(special_attribute_mapping_t))
