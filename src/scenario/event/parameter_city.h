@@ -43,8 +43,6 @@ typedef struct
     int param_keys[3];  // translation keys for parameter types, if applicable
 } city_property_info_t;
 
-int process_parameter(city_property_t type);
-
 /**
  * Get parameter info for a city property
  * @param type The city property type

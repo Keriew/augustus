@@ -13,9 +13,13 @@
 #include "city/ratings.h"
 #include "city/resource.h"
 #include "core/calc.h"
+#include "figure/figure.h"
 #include "figure/formation.h"
+#include "map/grid.h"
+#include "map/terrain.h"
 #include "scenario/event/parameter_data.h"
 #include "game/settings.h"
+#include "window/advisors.h"
 
 static int resource_count(scenario_action_t *action)
 {
@@ -159,7 +163,52 @@ static int get_player_soldiers_count(scenario_action_t *action)
     return formation_legion_count_alive_soldiers_by_type(type);
 }
 
-int process_parameter(scenario_action_t *action)
+static int get_enemy_troops_count(scenario_action_t *action)
+{
+    enemy_class_t enemy_class = action->parameter3;
+    int count = 0;
+    for (int i = 1; i < figure_count(); i++) {    // Iterate through all figures to count enemy troops
+        figure *f = figure_get(i);
+        if (!figure_is_enemy(f) || figure_is_dead(f)) {
+            continue;
+        }
+        switch (enemy_class) {
+            case ENEMY_CLASS_MELEE:
+                count += figure_is_melee_enemy(f);
+                break;
+            case ENEMY_CLASS_RANGED:
+                count += figure_is_ranged_enemy(f);
+                break;
+            case ENEMY_CLASS_MOUNTED:
+                count += figure_is_mounted_enemy(f);
+                break;
+            case ENEMY_CLASS_ALL:
+                count++;
+                break;
+        }
+    }
+    return count;
+}
+
+static int get_terrain_tiles_count(scenario_action_t *action)
+{
+    // TODO: this probably should go as global somewhere
+    int terrain_type = action->parameter3;
+    int count = 0;
+    int width, height;
+    map_grid_size(&width, &height);
+    for (int y = 0; y < height; y++) {    // Iterate through all map tiles
+        for (int x = 0; x < width; x++) {
+            int grid_offset = map_grid_offset(x, y);
+            if (map_terrain_is(grid_offset, terrain_type)) {
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
+static int process_parameter(scenario_action_t *action)
 {
     city_property_t type = action->parameter2;
     switch (type) { // Simple properties - direct return values
@@ -204,11 +253,9 @@ int process_parameter(scenario_action_t *action)
         case CITY_PROPERTY_TROOPS_COUNT_PLAYER:
             return get_player_soldiers_count(action);
         case CITY_PROPERTY_TROOPS_COUNT_ENEMY:
-            // TODO: Handle enemy troops count parameter (requires troop type)
-            return 0;
+            return get_enemy_troops_count(action);
         case CITY_PROPERTY_TERRAIN_COUNT_TILES:
-            // TODO: Handle terrain tiles count parameter (requires terrain type)
-            return 0;
+            return get_terrain_tiles_count(action);
 
         case CITY_PROPERTY_NONE:
         case CITY_PROPERTY_MAX:
@@ -299,7 +346,3 @@ city_property_info_t city_property_get_param_info(city_property_t type)
     return info;
 }
 
-int city_property_execute(city_property_t type, int value)
-{
-    return process_parameter(type);
-}
