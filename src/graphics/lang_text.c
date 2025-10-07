@@ -169,9 +169,11 @@ int lang_text_get_sequence_width(const lang_fragment *seq, int count, font_t fon
         switch (f->type) {
             case LANG_FRAG_LABEL:
                 width += lang_text_get_width(f->text_group, f->text_id, font);
+                width -= font_definition_for(font)->space_width;
                 break;
             case LANG_FRAG_AMOUNT:
                 width += lang_text_get_amount_width(f->text_group, f->text_id, f->number, font);
+                width -= font_definition_for(font)->space_width;
                 break;
             case LANG_FRAG_NUMBER:
                 width += text_get_number_width(f->number, '\0', "\0", font);

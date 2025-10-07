@@ -1732,6 +1732,14 @@ static translation_string all_strings[] = {
     {TR_CONFIG_CLEAR_WARNINGS_RIGHTCLICK,"Right click to clear warnings in city view"},
     {TR_CONFIG_GP_CH_STORAGE_REQUESTS_RESPECT_MAINTAIN, "Caesar's requests respect 'Maintaining'"},
     {TR_CONFIG_ENABLE_MARKET_RANGE, "Enable market range"},
+    {TR_OVERLAY_HOUSING_TENTS, "Tents"},
+    {TR_OVERLAY_HOUSING_SHACKS, "Shacks"},
+    {TR_OVERLAY_HOUSING_HOVELS, "Hovels"},
+    {TR_OVERLAY_HOUSING_CASAS, "Casae"},
+    {TR_OVERLAY_HOUSE_INSULAS, "Insulae"},
+    {TR_OVERLAY_HOUSE_VILLAS, "Villas"},
+    {TR_OVERLAY_HOUSE_PALACES, "Palaces"},
+    {TR_OVERLAY_BY_GROUP, "By Group"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
