@@ -20,6 +20,7 @@
 #include "scenario/event/parameter_data.h"
 #include "game/settings.h"
 #include "window/advisors.h"
+#include "parameter_city.h"
 
 static int resource_count(scenario_action_t *action)
 {
@@ -208,7 +209,7 @@ static int get_terrain_tiles_count(scenario_action_t *action)
     return count;
 }
 
-static int process_parameter(scenario_action_t *action)
+int scenario_event_parameter_city_for_action(scenario_action_t *action)
 {
     city_property_t type = action->parameter2;
     switch (type) { // Simple properties - direct return values
