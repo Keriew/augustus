@@ -1734,7 +1734,7 @@ static translation_string all_strings[] = {
     {TR_OVERLAY_HOUSE_VILLAS, "Villas"},
     {TR_OVERLAY_HOUSE_PALACES, "Palaces"},
     {TR_OVERLAY_BY_GROUP, "By Group"},
-    {TR_EDITOR_PARAMETER_CITY_PROPERTY, "Custom variable value (city property)" },
+    {TR_EDITOR_PARAMETER_CITY_PROPERTY, "Change custom variable value (city property)" },
     {TR_PARAMETER_PERCENTAGE, "Percentage" },
     {TR_PARAMETER_ABSOLUTE, "Absolute" },
     {TR_DECENNIUM_0, "0-9"},
@@ -1774,6 +1774,22 @@ static translation_string all_strings[] = {
     {TR_CITY_PROPERTY_TROOPS_MOUNTED, "Mounted troops"},
     {TR_CITY_PROPERTY_ALL, "All"},
     {TR_CITY_PROPERTY_ACTIVE_ONLY, "Active only"},
+    {TR_CITY_PROPERTY_COVERAGE_THEATRE, "Theatre coverage"},
+    {TR_CITY_PROPERTY_COVERAGE_ARENA, "Arena coverage"},
+    {TR_CITY_PROPERTY_COVERAGE_AMPHITHEATRE, "Amphitheatre coverage"},
+    {TR_CITY_PROPERTY_COVERAGE_TAVERN, "Tavern coverage"},
+    {TR_CITY_PROPERTY_COVERAGE_COLOSSEUM, "Colosseum coverage"},
+    {TR_CITY_PROPERTY_COVERAGE_HIPPODROME, "Hippodrome coverage"},
+    {TR_CITY_PROPERTY_COVERAGE_BATHS, "Baths coverage"},
+    {TR_CITY_PROPERTY_COVERAGE_DOCTOR, "Doctor coverage"},
+    {TR_CITY_PROPERTY_COVERAGE_BARBER, "Barber coverage"},
+    {TR_CITY_PROPERTY_COVERAGE_HOSPITAL, "Hospital coverage"},
+    {TR_CITY_PROPERTY_COVERAGE_SCHOOL, "School coverage"},
+    {TR_CITY_PROPERTY_COVERAGE_LIBRARY, "Library coverage"},
+    {TR_CITY_PROPERTY_COVERAGE_ACADEMY, "Academy coverage"},
+    {TR_CITY_PROPERTY_CHOOSE_PROPERTY, "Choose City property"},
+
+
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
