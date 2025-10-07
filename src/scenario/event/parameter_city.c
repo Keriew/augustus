@@ -1,5 +1,8 @@
 #include "scenario/event/parameter_city.h"
 
+#include "building/count.h"
+#include "building/granary.h"
+#include "building/warehouse.h"
 #include "city/constants.h"
 #include "city/emperor.h"
 #include "city/finance.h"
@@ -8,11 +11,157 @@
 #include "city/data.h"
 #include "city/population.h"
 #include "city/ratings.h"
+#include "city/resource.h"
+#include "core/calc.h"
+#include "figure/formation.h"
 #include "scenario/event/parameter_data.h"
 #include "game/settings.h"
 
-int process_parameter(city_property_t type)
+static int resource_count(scenario_action_t *action)
 {
+    resource_type resource = action->parameter3;
+    storage_types storage_type = action->parameter4;
+    int respect_settings = action->parameter5;
+    switch (storage_type) {
+        case STORAGE_TYPE_GRANARIES:
+            return building_granaries_count_available_resource(resource, respect_settings, 0);
+        case STORAGE_TYPE_WAREHOUSES:
+            return  building_warehouses_count_available_resource(resource, respect_settings, 0);
+        case STORAGE_TYPE_ALL:
+        default:
+            return city_resource_get_total_amount(resource, respect_settings);
+    }
+
+}
+
+static int building_coverage(scenario_action_t *action)
+{
+    building_type type = action->parameter3;
+    switch (type) {
+        case BUILDING_TAVERN:
+            return window_advisors_get_tavern_coverage();
+        case BUILDING_THEATER:
+            return window_advisors_get_theater_coverage();
+        case BUILDING_ARENA:
+            return window_advisors_get_arena_coverage();
+        case BUILDING_AMPHITHEATER:
+            return window_advisors_get_amphitheater_coverage();
+        case BUILDING_HIPPODROME:
+            return window_advisors_get_hippodrome_coverage();
+        case BUILDING_COLOSSEUM:
+            return window_advisors_get_colosseum_coverage();
+        case BUILDING_BATHHOUSE:
+            return window_advisors_get_bathhouse_coverage();
+        case BUILDING_BARBER:
+            return window_advisors_get_barber_coverage();
+        case BUILDING_DOCTOR:
+            return window_advisors_get_clinic_coverage();
+        case BUILDING_HOSPITAL:
+            return window_advisors_get_hospital_coverage();
+        case BUILDING_SCHOOL:
+            return window_advisors_get_school_coverage();
+        case BUILDING_LIBRARY:
+            return window_advisors_get_library_coverage();
+        case BUILDING_ACADEMY:
+            return window_advisors_get_academy_coverage();
+        default:
+            return 0;
+    }
+}
+
+static int unemployment_rate(scenario_action_t *action)
+{
+    int is_absolute = action->parameter3;
+    if (is_absolute) {
+        return city_labor_workers_unemployed();
+    } else {
+        return city_labor_unemployment_percentage();
+    }
+}
+
+static int population_by_housing_type(scenario_action_t *action)
+{
+    house_level level = action->parameter3 - 10; // convert from building_type to house_level
+    int is_absolute = action->parameter4;
+    int is_group = (level >= HOUSE_GROUP_TENT);
+    int total_pop = city_population();
+    if (!total_pop) {
+        return 0;
+    }
+    if (!is_group) {
+        int pop_at_level = city_population_at_level(level);
+        if (is_absolute) {
+            return pop_at_level;
+        }
+        return calc_percentage(pop_at_level, total_pop);
+    }
+    int min = 0;
+    int max = 0;
+    int total = 0;
+    switch (level) {    // handle housing groups
+        case HOUSE_GROUP_TENT:   min = HOUSE_SMALL_TENT;   max = HOUSE_LARGE_TENT;   break;
+        case HOUSE_GROUP_SHACK:  min = HOUSE_SMALL_SHACK;  max = HOUSE_LARGE_SHACK;  break;
+        case HOUSE_GROUP_HOVEL:  min = HOUSE_SMALL_HOVEL;  max = HOUSE_LARGE_HOVEL;  break;
+        case HOUSE_GROUP_CASA:   min = HOUSE_SMALL_CASA;   max = HOUSE_LARGE_CASA;   break;
+        case HOUSE_GROUP_INSULA: min = HOUSE_SMALL_INSULA; max = HOUSE_GRAND_INSULA; break;
+        case HOUSE_GROUP_VILLA:  min = HOUSE_SMALL_VILLA;  max = HOUSE_GRAND_VILLA;  break;
+        case HOUSE_GROUP_PALACE: min = HOUSE_SMALL_PALACE; max = HOUSE_LUXURY_PALACE; break;
+        default:
+            return 0;
+    }
+
+    for (int i = min; i <= max; i++) {
+        total += city_population_at_level(i);
+    }
+    return is_absolute ? total : calc_percentage(total, total_pop);
+}
+
+static int population_by_age(scenario_action_t *action)
+{
+    int age_group = action->parameter3;
+    int is_absolute = action->parameter4;
+    int total_pop = city_population();
+    int value = 0;
+    if (!total_pop) {
+        return 0;
+    }
+    if (age_group >= 0 && age_group < 10) { // decennial age groups
+        value = city_population_in_age_decennium(age_group);
+    } else if (age_group >= 10) {
+        switch (age_group) { // non-decennial age groups
+            case 10:
+                value = city_population_school_age();
+                break;
+            case 11:
+                value = city_population_academy_age();
+                break;
+            case 12:
+                value = city_labor_workers_employed();
+                break;
+            case 13:
+                value = city_population_retired_people();
+                break;
+        }
+    }
+    return is_absolute ? value : calc_percentage(value, total_pop);
+}
+
+static int get_building_count(scenario_action_t *action)
+{
+    building_type type = action->parameter3;
+    int active_only = action->parameter4;
+    return active_only ? building_count_active(type) : building_count_total(type);
+}
+
+static int get_player_soldiers_count(scenario_action_t *action)
+{
+    figure_type type = action->parameter3;
+    return formation_legion_count_alive_soldiers_by_type(type);
+}
+
+int process_parameter(scenario_action_t *action)
+{
+    city_property_t type = action->parameter2;
     switch (type) { // Simple properties - direct return values
         case CITY_PROPERTY_DIFFICULTY:
             return setting_difficulty();
@@ -41,26 +190,19 @@ int process_parameter(city_property_t type)
 
             // Complex properties - require additional parameters
         case CITY_PROPERTY_RESOURCE_STOCK:
-            // TODO: Handle resource stock parameter (requires resource type)
-            return 0;
+            return resource_count(action);
         case CITY_PROPERTY_SERVICE_COVERAGE:
-            // TODO: Handle service coverage parameter (requires service type)
-            return 0;
+            return building_coverage(action);
         case CITY_PROPERTY_POPS_UNEMPLOYMENT:
-            // TODO: Handle unemployment parameter (requires population class)
-            return 0;
+            return unemployment_rate(action);
         case CITY_PROPERTY_POPS_HOUSING_TYPE:
-            // TODO: Handle housing type parameter (requires housing type)
-            return 0;
+            return population_by_housing_type(action);
         case CITY_PROPERTY_POPS_BY_AGE:
-            // TODO: Handle population by age parameter (requires age group)
-            return 0;
+            return population_by_age(action);
         case CITY_PROPERTY_BUILDING_COUNT:
-            // TODO: Handle active building count parameter (requires building type)
-            return 0;
+            return get_building_count(action);
         case CITY_PROPERTY_TROOPS_COUNT_PLAYER:
-            // TODO: Handle player troops count parameter (requires troop type)
-            return 0;
+            return get_player_soldiers_count(action);
         case CITY_PROPERTY_TROOPS_COUNT_ENEMY:
             // TODO: Handle enemy troops count parameter (requires troop type)
             return 0;

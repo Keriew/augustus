@@ -218,18 +218,22 @@ void city_population_remove_for_troop_request(int num_people)
 
 int city_population_people_of_working_age(void)
 {
+    int total_working_people = city_population_in_age_decennium(2) + city_population_in_age_decennium(3)
+        + city_population_in_age_decennium(4);
     if (config_get(CONFIG_GP_CH_RETIRE_AT_60)) {
-        return
-            city_population_in_age_decennium(2) +
-            city_population_in_age_decennium(3) +
-            city_population_in_age_decennium(4) +
-            city_population_in_age_decennium(5);
-    } else {
-        return
-            city_population_in_age_decennium(2) +
-            city_population_in_age_decennium(3) +
-            city_population_in_age_decennium(4);
+        total_working_people += city_population_in_age_decennium(5);
     }
+    return total_working_people;
+}
+
+int city_population_retired_people(void)
+{
+    int total_retired_people = city_population_in_age_decennium(6) + city_population_in_age_decennium(7)
+        + city_population_in_age_decennium(8) + city_population_in_age_decennium(9);
+    if (config_get(CONFIG_GP_CH_RETIRE_AT_60)) {
+        total_retired_people += city_population_in_age_decennium(5);
+    }
+    return total_retired_people;
 }
 
 int city_population_percent_in_workforce(void)
@@ -389,6 +393,7 @@ static int calculate_people_per_house_type(void)
             if (b->subtype.house_level >= HOUSE_SMALL_VILLA) {
                 city_data.population.people_in_villas_palaces += pop;
             }
+
         }
     }
     return total;

@@ -42,6 +42,8 @@ void city_population_remove_for_troop_request(int num_people);
 
 int city_population_people_of_working_age(void);
 
+int city_population_retired_people(void);
+
 void city_population_calculate_educational_age(void);
 
 void city_population_record_monthly(void);

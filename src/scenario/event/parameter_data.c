@@ -581,7 +581,6 @@ static special_attribute_mapping_t special_attribute_mappings_percentage[] = {
 
 static special_attribute_mapping_t special_attribute_mappings_housing[] = {
     // Individual housing types
-    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "vacant_lot",       .value = BUILDING_HOUSE_VACANT_LOT,     .key = TR_PLACEHOLDER },
     {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_tent",       .value = BUILDING_HOUSE_SMALL_TENT,     .key = TR_PLACEHOLDER },
     {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_tent",       .value = BUILDING_HOUSE_LARGE_TENT,     .key = TR_PLACEHOLDER },
     {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_shack",      .value = BUILDING_HOUSE_SMALL_SHACK,    .key = TR_PLACEHOLDER },
@@ -639,7 +638,6 @@ static special_attribute_mapping_t special_attribute_mappings_age[] = {
 
 // like condition, but not condition
 static special_attribute_mapping_t special_attribute_mappings_city_property[] = {
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "none",                    .value = CITY_PROPERTY_NONE,                    .key = TR_CITY_PROPERTY_NONE },
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "difficulty",              .value = CITY_PROPERTY_DIFFICULTY,              .key = TR_CITY_PROPERTY_DIFFICULTY },
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "money",                   .value = CITY_PROPERTY_MONEY,                   .key = TR_CITY_PROPERTY_MONEY },
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "population",              .value = CITY_PROPERTY_POPULATION,              .key = TR_CITY_PROPERTY_POPULATION },
@@ -672,11 +670,11 @@ static special_attribute_mapping_t special_attribute_mappings_troops_class[] = {
 #define SPECIAL_ATTRIBUTE_MAPPINGS_TROOPS_CLASS_SIZE (sizeof(special_attribute_mappings_troops_class) / sizeof(special_attribute_mapping_t))
 
 static special_attribute_mapping_t special_attribute_mappings_player_troops[] = {
-    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "all",            .value = 0,                          .key = TR_CITY_PROPERTY_ALL},
+    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "all",            .value = FIGURE_FORT_STANDARD,                          .key = TR_CITY_PROPERTY_ALL},
     {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "sword",          .value = FIGURE_FORT_INFANTRY ,      .key = TR_BUILDING_FORT_AUXILIA_INFANTRY },
     {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "bow",            .value = FIGURE_FORT_ARCHER,       .key = TR_BUILDING_FORT_ARCHERS },
     {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "cavalry",        .value = FIGURE_FORT_MOUNTED,      .key = TR_BUILDING_FORT_MOUNTED},
-    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "legion",         .value = FIGURE_FORT_LEGIONARY,       .key = TR_BUILDING_FORT_LEGIONARIES },
+    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "legionary",      .value = FIGURE_FORT_LEGIONARY,       .key = TR_BUILDING_FORT_LEGIONARIES },
     {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "javelin",        .value = FIGURE_FORT_JAVELIN,         .key = TR_BUILDING_FORT_JAVELIN },
 };
 
@@ -942,6 +940,16 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
             return CLIMATE_CENTRAL;
         case PARAMETER_TYPE_TERRAIN:
             return TERRAIN_WATER;
+        case PARAMETER_TYPE_HOUSING_TYPE:
+            return BUILDING_HOUSE_SMALL_TENT;
+        case PARAMETER_TYPE_CITY_PROPERTY:
+            return CITY_PROPERTY_DIFFICULTY;
+        case PARAMETER_TYPE_ENEMY_CLASS:
+            return ENEMY_CLASS_ALL;
+        case PARAMETER_TYPE_PLAYER_TROOPS:
+            return FIGURE_FORT_STANDARD;
+        case PARAMETER_TYPE_COVERAGE_BUILDINGS:
+            return BUILDING_THEATER;
         default:
             return 0;
     }
@@ -950,30 +958,19 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
 parameter_type scenario_events_parameter_data_resolve_flexible_type(const scenario_action_t *action, int param_number)
 {
     // Only ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY uses flexible parameters
-    if (action->type != ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY) {
-        return PARAMETER_TYPE_UNDEFINED;
-    }
-
-    // param_number should be 3, 4, or 5 (the flexible parameters)
-    if (param_number < 3 || param_number > 5) {
+    if (action->type != ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY || param_number < 3 || param_number > 5) {
         return PARAMETER_TYPE_UNDEFINED;
     }
 
     // Get the city property from parameter2
     city_property_t city_property = action->parameter2;
-
-    // Get the parameter info for this city property
     city_property_info_t info = city_property_get_param_info(city_property);
 
     // Map param_number to the array index (3->0, 4->1, 5->2)
     int param_index = param_number - 3;
-
-    // Check if this parameter is needed for this city property
-    if (param_index >= info.count) {
-        return PARAMETER_TYPE_UNDEFINED;  // This parameter is not needed
+    if (param_index >= info.count) {    // Check if this parameter is needed for this city property
+        return PARAMETER_TYPE_UNDEFINED;
     }
-
-    // Return the resolved type
     return info.param_types[param_index];
 }
 

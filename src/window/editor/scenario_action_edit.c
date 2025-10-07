@@ -95,25 +95,18 @@ static parameter_type get_resolved_parameter_type(xml_data_attribute_t *param_at
 
 static translation_key get_resolved_parameter_key(xml_data_attribute_t *param_attr, int param_number)
 {
-    // If the parameter is not flexible, return its key directly
     if (param_attr->type != PARAMETER_TYPE_FLEXIBLE) {
         return param_attr->key;
     }
-
     // For flexible parameters in city property actions, get the key from city_property_info_t
     if (data.action->type == ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY && param_number >= 3 && param_number <= 5) {
         city_property_t city_property = data.action->parameter2;
         city_property_info_t info = city_property_get_param_info(city_property);
-        
-        // Map param_number to the array index (3->0, 4->1, 5->2)
         int param_index = param_number - 3;
-        
-        // Return the translation key if this parameter is needed
-        if (param_index < info.count) {
+        if (param_index < info.count) {// Return the translation key if this parameter is needed
             return info.param_keys[param_index];
         }
     }
-
     // Fallback to the original key if resolution fails
     return param_attr->key;
 }
