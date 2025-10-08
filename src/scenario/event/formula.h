@@ -1,6 +1,8 @@
 #ifndef SCENARIO_EVENT_FORMULA_H
 #define SCENARIO_EVENT_FORMULA_H
 
+#include "scenario/event/data.h"
+
 #include <stddef.h>
 
 /**

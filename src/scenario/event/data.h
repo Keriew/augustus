@@ -167,6 +167,8 @@ typedef struct {
     int evaluation;
     unsigned char is_static; // flag to indicate if formula needs to be re-evaluated every time or whether its static
     unsigned char is_error; // flag to indicate an error in formula that will prevent it from evaluation
+    int min_evaluation;
+    int max_evaluation;
 } scenario_formula_t;
 
 #endif // SCENARIO_EVENT_DATA_H

@@ -7,6 +7,9 @@
 #include <ctype.h>
 #include <math.h>
 
+#define CLAMP(x, low, high) ((x) < (low) ? (low) : ((x) > (high) ? (high) : (x))) // simple clamp macro 
+// because mathematicians have only discovered clamping in 2023, so its not in all math.h yet
+
 double parse_expr(const char **s);
 
 double get_var_value(int id)
@@ -113,16 +116,16 @@ double parse_expr(const char **s)
     return val;
 }
 
-int scenario_event_formula_check(scenario_formula_t *formula)
+int scenario_event_formula_check(scenario_formula_t *s_formula)
 {
-    const char *s = formula->formatted_calculation;
-    formula->is_error = 0;
-    formula->is_static = 1;
+    char *s = (char *) s_formula->formatted_calculation;
+    s_formula->is_error = 0;
+    s_formula->is_static = 1;
     while (*s) {
         if (*s == '[') {
             s++; // Move past '['
             if (!isdigit(*s)) { // Check if there's at least one digit
-                formula->is_error = 1;
+                s_formula->is_error = 1;
                 return 0; // Invalid: no number after [
             }
             int variable_id = 0;
@@ -131,25 +134,25 @@ int scenario_event_formula_check(scenario_formula_t *formula)
                 s++;
             }
             if (*s != ']') { // Check for closing bracket
-                formula->is_error = 1;
+                s_formula->is_error = 1;
                 return 0; // Invalid: missing ] or non-digit character
             }
             if (!scenario_custom_variable_exists(variable_id)) { // Check if variable exists
-                formula->is_error = 1;
+                s_formula->is_error = 1;
                 return 0; // Invalid: variable doesn't exist
             }
-            formula->is_static = 0; // Found a variable
+            s_formula->is_static = 0; // Found a variable
             s++; // Skip the ]
         } else if (*s == ']') {
-            formula->is_error = 1;
+            s_formula->is_error = 1;
             return 0; // Invalid: ] without matching [
         } else {
             s++;
         }
     }
-    if (formula->is_static) {
+    if (s_formula->is_static) {
         // Evaluate static formula once
-        formula->evaluation = scenario_event_formula_evaluate((const char *) formula->formatted_calculation);
+        s_formula->evaluation = scenario_event_formula_evaluate(s_formula);
     }
     return 1; // Valid 
 }
@@ -161,25 +164,26 @@ static int formula_evaluate(const char *str)
     return (int) round(result);
 }
 
-int scenario_event_formula_evaluate(scenario_formula_t *formula)
+int scenario_event_formula_evaluate(scenario_formula_t *s_formula)
 {
-    if (formula->is_error) {
+    if (s_formula->is_error) {
         return 0;
     }
-    if (formula->is_static) {
-        return formula->evaluation;
+    if (s_formula->is_static) {
+        return s_formula->evaluation;
     }
-    int evaluation = formula_evaluate((const char *) formula->formatted_calculation);
-    formula->evaluation = evaluation;
+    int evaluation = formula_evaluate((const char *) s_formula->formatted_calculation);
+    evaluation = CLAMP(evaluation, s_formula->min_evaluation, s_formula->max_evaluation);
+    s_formula->evaluation = evaluation;
     return evaluation;
 }
 
-int scenario_event_formula_is_static(scenario_formula_t *formula)
+int scenario_event_formula_is_static(scenario_formula_t *s_formula)
 {
-    return formula->is_static;
+    return s_formula->is_static;
 }
 
-int scenario_event_formula_is_error(scenario_formula_t *formula)
+int scenario_event_formula_is_error(scenario_formula_t *s_formula)
 {
-    return formula->is_error;
+    return s_formula->is_error;
 }
