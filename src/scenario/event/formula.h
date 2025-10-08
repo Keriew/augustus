@@ -32,8 +32,10 @@
  *  but since custom variables cannot be decimal, it's not very useful, and % can be represented as /100.
  */
 int scenario_event_formula_evaluate(scenario_formula_t *formula);
-int scenario_event_formula_is_static(scenario_formula_t *formula);
+int scenario_event_formula_check(scenario_formula_t *formula);
+
+int scenario_event_formula_is_static(unsigned int id);
 int scenario_event_formula_is_error(unsigned int id);
-int scenario_event_formula_check(unsigned int id);
+
 
 #endif // SCENARIO_EVENT_FORMULA_H
