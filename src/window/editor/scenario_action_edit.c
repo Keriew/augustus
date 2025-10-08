@@ -437,9 +437,9 @@ static void create_evaluation_formula(xml_data_attribute_t *parameter)
     data.formula_min_limit = parameter->min_limit;
     data.formula_max_limit = parameter->max_limit;
     if (current_index > 0) { // a formula already exists
-        const uint8_t *src = scenario_formula_get_string(current_index);
+        const uint8_t *src = scenario_formula_get_string((unsigned int) current_index);
         if (src) {
-            if (!scenario_event_formula_is_error(current_index)) {
+            if (!scenario_event_formula_is_error((unsigned int) current_index)) {
                 strncpy((char *) data.formula, (const char *) src, MAX_FORMULA_LENGTH - 1);
                 data.formula[MAX_FORMULA_LENGTH - 1] = '\0';
                 data.formula_index = current_index;
