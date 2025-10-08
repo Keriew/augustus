@@ -1,7 +1,9 @@
 #include "formula.h"
 
 #include "scenario/custom_variable.h"
+#include "scenario/event/controller.h"
 #include "scenario/event/data.h"
+
 
 #include <stdio.h>
 #include <ctype.h>
@@ -11,6 +13,7 @@
 // because mathematicians have only discovered clamping in 2023, so its not in all math.h yet
 
 double parse_expr(const char **s);
+static int formula_evaluate(const char *str);
 
 double get_var_value(int id)
 {
@@ -152,7 +155,9 @@ int scenario_event_formula_check(scenario_formula_t *s_formula)
     }
     if (s_formula->is_static) {
         // Evaluate static formula once
-        s_formula->evaluation = scenario_event_formula_evaluate(s_formula);
+        int evaluation = formula_evaluate((const char *) s_formula->formatted_calculation);
+        evaluation = CLAMP(evaluation, s_formula->min_evaluation, s_formula->max_evaluation);
+        s_formula->evaluation = evaluation;
     }
     return 1; // Valid 
 }
@@ -178,12 +183,14 @@ int scenario_event_formula_evaluate(scenario_formula_t *s_formula)
     return evaluation;
 }
 
-int scenario_event_formula_is_static(scenario_formula_t *s_formula)
+int scenario_event_formula_is_static(unsigned int id)
 {
-    return s_formula->is_static;
+    scenario_formula_t *form = scenario_formula_get(id);
+    return form->is_static;
 }
 
-int scenario_event_formula_is_error(scenario_formula_t *s_formula)
+int scenario_event_formula_is_error(unsigned int id)
 {
-    return s_formula->is_error;
+    scenario_formula_t *form = scenario_formula_get(id);
+    return form->is_error;
 }

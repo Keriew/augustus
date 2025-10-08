@@ -11,10 +11,11 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
+#include "scenario/event/action_handler.h"
 #include "scenario/event/controller.h"
+#include "scenario/event/formula.h"
 #include "scenario/event/parameter_data.h"
 #include "scenario/event/parameter_city.h"
-#include "scenario/event/action_handler.h"
 #include "widget/input_box.h"
 #include "window/editor/allowed_buildings.h"
 #include "window/editor/custom_variables.h"
@@ -435,15 +436,19 @@ static void create_evaluation_formula(xml_data_attribute_t *parameter)
     int current_index = get_param_value();
     data.formula_min_limit = parameter->min_limit;
     data.formula_max_limit = parameter->max_limit;
-    if (current_index > 0) {
+    if (current_index > 0) { // a formula already exists
         const uint8_t *src = scenario_formula_get_string(current_index);
         if (src) {
-            strncpy((char *) data.formula, (const char *) src, MAX_FORMULA_LENGTH - 1);
-            data.formula[MAX_FORMULA_LENGTH - 1] = '\0';
-            data.formula_index = current_index;
+            if (!scenario_event_formula_is_error(current_index)) {
+                strncpy((char *) data.formula, (const char *) src, MAX_FORMULA_LENGTH - 1);
+                data.formula[MAX_FORMULA_LENGTH - 1] = '\0';
+                data.formula_index = current_index;
+            }
         } else {
             memset(data.formula, 0, MAX_FORMULA_LENGTH);
         }
+    } else {
+        memset(data.formula, 0, MAX_FORMULA_LENGTH); //clear if not assigned to prevent last formula from peeking through
     }
     window_text_input_expanded_show("FORMULA", "...", data.formula, MAX_FORMULA_LENGTH,
          set_formula_value, INPUT_BOX_CHARS_FORMULAS);

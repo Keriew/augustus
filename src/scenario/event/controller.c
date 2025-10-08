@@ -55,6 +55,11 @@ void scenario_formula_change(unsigned int id, const uint8_t *formatted_calculati
     }
     strncpy((char *) scenario_formulas[id].formatted_calculation,
         (const char *) formatted_calculation, MAX_FORMULA_LENGTH - 1);
+    if (!scenario_event_formula_check(&scenario_formulas[id])) {
+        scenario_formulas[id].evaluation = 0;
+        scenario_formulas[id].is_error = 1;
+        scenario_formulas[id].is_static = 0;
+    }
 }
 
 const uint8_t *scenario_formula_get_string(unsigned int id)
@@ -63,10 +68,12 @@ const uint8_t *scenario_formula_get_string(unsigned int id)
         log_error("Invalid formula index.", 0, 0);
         return NULL;
     }
-    if (scenario_formulas[id].is_static) {
-        return (const uint8_t *) &scenario_formulas[id].evaluation;
-    } else if (scenario_formulas[id].is_error) {
+    if (scenario_formulas[id].is_error) {
         return (const uint8_t *) "Error";
+    } else if (scenario_formulas[id].is_static) {
+        static uint8_t buffer[16];
+        snprintf((char *) buffer, sizeof(buffer), "%d", scenario_formulas[id].evaluation);
+        return buffer;
     }
     return scenario_formulas[id].formatted_calculation;
 }
