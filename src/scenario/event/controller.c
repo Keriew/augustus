@@ -40,6 +40,7 @@ unsigned int scenario_formula_add(const uint8_t *formatted_calculation)
     calculation.evaluation = 0;
     strncpy((char *) calculation.formatted_calculation, (const char *) formatted_calculation, MAX_FORMULA_LENGTH - 1);
     scenario_formulas[scenario_formulas_size] = calculation;
+    scenario_event_formula_check(&scenario_formulas[scenario_formulas_size]);
     // null termination on last char-  treating as string 
     return calculation.id;
 }
@@ -78,8 +79,7 @@ int scenario_formula_evaluate_formula(unsigned int id)
         log_error("Invalid formula index.", 0, 0);
         return 0;
     }
-    int evaluation = scenario_event_formula_evaluate((const char *) scenario_formulas[id].formatted_calculation);
-    scenario_formulas[id].evaluation = evaluation;
+    int evaluation = scenario_event_formula_evaluate(&scenario_formulas[id]);
     return evaluation;
 }
 
@@ -331,6 +331,8 @@ static void formulas_save_state(buffer *buf)
         buffer_write_u32(buf, id);
         buffer_write_raw(buf, scenario_formulas[id].formatted_calculation, MAX_FORMULA_LENGTH);
         buffer_write_i32(buf, scenario_formulas[id].evaluation);
+        buffer_write_u8(buf, scenario_formulas[id].is_static);
+        buffer_write_u8(buf, scenario_formulas[id].is_error);
     }
 }
 
@@ -352,6 +354,8 @@ static void formulas_load_state(buffer *buf)
         buffer_read_raw(buf, scenario_formulas[id].formatted_calculation, MAX_FORMULA_LENGTH);
         scenario_formulas[id].formatted_calculation[MAX_FORMULA_LENGTH - 1] = '\0'; // ensure safety
         scenario_formulas[id].evaluation = buffer_read_i32(buf);
+        scenario_formulas[id].is_static = buffer_read_u8(buf);
+        scenario_formulas[id].is_error = buffer_read_u8(buf);
         max_id = id > max_id ? id : max_id;
     }
 

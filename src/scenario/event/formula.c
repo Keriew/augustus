@@ -1,8 +1,11 @@
+#include "formula.h"
+
 #include "scenario/custom_variable.h"
+#include "scenario/event/data.h"
 
 #include <stdio.h>
 #include <ctype.h>
-#include <math.h> // for round()
+#include <math.h>
 
 double parse_expr(const char **s);
 
@@ -110,9 +113,73 @@ double parse_expr(const char **s)
     return val;
 }
 
-int scenario_event_formula_evaluate(const char *str)
+int scenario_event_formula_check(scenario_formula_t *formula)
+{
+    const char *s = formula->formatted_calculation;
+    formula->is_error = 0;
+    formula->is_static = 1;
+    while (*s) {
+        if (*s == '[') {
+            s++; // Move past '['
+            if (!isdigit(*s)) { // Check if there's at least one digit
+                formula->is_error = 1;
+                return 0; // Invalid: no number after [
+            }
+            int variable_id = 0;
+            while (isdigit(*s)) { // Parse the variable ID
+                variable_id = variable_id * 10 + (*s - '0');
+                s++;
+            }
+            if (*s != ']') { // Check for closing bracket
+                formula->is_error = 1;
+                return 0; // Invalid: missing ] or non-digit character
+            }
+            if (!scenario_custom_variable_exists(variable_id)) { // Check if variable exists
+                formula->is_error = 1;
+                return 0; // Invalid: variable doesn't exist
+            }
+            formula->is_static = 0; // Found a variable
+            s++; // Skip the ]
+        } else if (*s == ']') {
+            formula->is_error = 1;
+            return 0; // Invalid: ] without matching [
+        } else {
+            s++;
+        }
+    }
+    if (formula->is_static) {
+        // Evaluate static formula once
+        formula->evaluation = scenario_event_formula_evaluate((const char *) formula->formatted_calculation);
+    }
+    return 1; // Valid 
+}
+
+static int formula_evaluate(const char *str)
 {
     double result = parse_expr(&str);
     // round() from <math.h> gives nearest integer (e.g. 4.5 -> 5)
     return (int) round(result);
+}
+
+int scenario_event_formula_evaluate(scenario_formula_t *formula)
+{
+    if (formula->is_error) {
+        return 0;
+    }
+    if (formula->is_static) {
+        return formula->evaluation;
+    }
+    int evaluation = formula_evaluate((const char *) formula->formatted_calculation);
+    formula->evaluation = evaluation;
+    return evaluation;
+}
+
+int scenario_event_formula_is_static(scenario_formula_t *formula)
+{
+    return formula->is_static;
+}
+
+int scenario_event_formula_is_error(scenario_formula_t *formula)
+{
+    return formula->is_error;
 }

@@ -22,14 +22,16 @@
  *  - "37/10 + 12/10"  = 5
  *  - "(2 + [3])/2" = result depends on variable [3]
  *
- * @param str  Null-terminated input string (max length = 100 characters).
+ * @param formula
  * @return The rounded integer result of the evaluated expression.
  *
  * @note  Division by zero is handled: any divisors too close to 0 are treated as multiplication by 0 instead.
  * @note Decimal inputs are not supported, the output is always rounded to int. They can be processed,
  *  but since custom variables cannot be decimal, it's not very useful, and % can be represented as /100.
  */
-int scenario_event_formula_evaluate(const char *str);
-
+int scenario_event_formula_evaluate(scenario_formula_t *formula);
+int scenario_event_formula_is_static(scenario_formula_t *formula);
+int scenario_event_formula_is_error(scenario_formula_t *formula);
+int scenario_event_formula_check(scenario_formula_t *formula);
 
 #endif // SCENARIO_EVENT_FORMULA_H

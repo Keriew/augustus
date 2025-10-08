@@ -162,15 +162,11 @@ typedef struct {
 } scenario_event_t;
 
 typedef struct {
-    int evaluation_type;
-    int parameters[100];
-    void(*callback); //dunno if i need that - evaluation type should point to enum, enum should be mapped by function
-} city_evaluation_t;
-
-typedef struct {
     unsigned int id; //this number should correspond to the index in array
-    uint8_t formatted_calculation[MAX_FORMULA_LENGTH]; // use [custom_variable_id] to refer to custom variables in the formula
+    uint8_t formatted_calculation[MAX_FORMULA_LENGTH]; //use [custom_variable_id] to get custom variables in the formula
     int evaluation;
+    unsigned char is_static; // flag to indicate if formula needs to be re-evaluated every time or whether its static
+    unsigned char is_error; // flag to indicate an error in formula that will prevent it from evaluation
 } scenario_formula_t;
 
 #endif // SCENARIO_EVENT_DATA_H
