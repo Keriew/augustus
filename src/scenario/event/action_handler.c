@@ -6,6 +6,10 @@
 
 void scenario_action_type_init(scenario_action_t *action)
 {
+    if (scenario_action_should_use_formula(action)) {
+        return;
+    }
+    
     switch (action->type) {
         case ACTION_TYPE_ADJUST_CITY_HEALTH:
             scenario_action_type_city_health_init(action);

@@ -205,7 +205,7 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm1 = {.name = "min",            .type = PARAMETER_TYPE_MIN_MAX_NUMBER,           .min_limit = -100,      .max_limit = 100,     .key = TR_PARAMETER_TYPE_MIN_MAX_NUMBER_MIN },
                                         .xml_parm2 = {.name = "max",            .type = PARAMETER_TYPE_MIN_MAX_NUMBER,           .min_limit = -100,      .max_limit = 100,     .key = TR_PARAMETER_TYPE_MIN_MAX_NUMBER_MAX },
                                         .xml_parm3 = {.name = "set_to_value",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_SET_TO_VALUE },
-                                    .xml_parm3 = {.name = "formula" ,        .type = PARAMETER_TYPE_FORMULA,      .min_limit = -100,      .max_limit = 100,        .key = TR_PARAMETER_TYPE_FORMULA },},
+                                        .xml_parm4 = {.name = "formula",        .type = PARAMETER_TYPE_FORMULA,      .min_limit = -100,      .max_limit = 100,        .key = TR_PARAMETER_TYPE_FORMULA },},
     [ACTION_TYPE_TRADE_SET_PRICE] = {.type = ACTION_TYPE_TRADE_SET_PRICE,
                                         .xml_attr = {.name = "trade_price_set",    .type = PARAMETER_TYPE_TEXT,         .key = TR_ACTION_TYPE_TRADE_SET_PRICE },
                                         .xml_parm1 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE,         .key = TR_PARAMETER_TYPE_RESOURCE },

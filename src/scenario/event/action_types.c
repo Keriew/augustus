@@ -32,6 +32,7 @@
 #include "scenario/event/controller.h"
 #include "scenario/event/formula.h"
 #include "scenario/event/parameter_city.h"
+#include "scenario/event/parameter_data.h"
 #include "scenario/gladiator_revolt.h"  
 #include "scenario/custom_messages.h"
 #include "scenario/invasion.h"
@@ -40,6 +41,8 @@
 #include "scenario/scenario.h"
 
 #include <stdlib.h>
+
+static int get_action_value_with_formula_support(scenario_action_t *action);
 
 int scenario_action_type_change_allowed_buildings_execute(scenario_action_t *action)
 {
@@ -185,13 +188,14 @@ int scenario_action_type_change_resource_stockpiles_execute(scenario_action_t *a
 
 void scenario_action_type_city_health_init(scenario_action_t *action)
 {
-    action->parameter4 = random_between_from_stdlib(action->parameter1, action->parameter2);
+    action->parameter4 = get_action_value_with_formula_support(action);
 }
 
 int scenario_action_type_city_health_execute(scenario_action_t *action)
 {
     int is_hard_set = action->parameter3;
-    int adjustment = action->parameter4;
+    int adjustment = scenario_action_should_use_formula(action) ? 
+        evaluate_action_formula_directly(action) : action->parameter4;
 
     if (is_hard_set) {
         city_health_set(adjustment);
@@ -200,6 +204,80 @@ int scenario_action_type_city_health_execute(scenario_action_t *action)
     }
 
     return 1;
+}
+
+int scenario_action_has_minmax_and_formula(scenario_action_t *action,
+     int *formula_param_num, int *min_param_num, int *max_param_num)
+{
+    scenario_action_data_t *xml_info = scenario_events_parameter_data_get_actions_xml_attributes(action->type);
+    if (!xml_info) return 0;
+
+    xml_data_attribute_t *params[5] = { &xml_info->xml_parm1, &xml_info->xml_parm2, &xml_info->xml_parm3,
+        &xml_info->xml_parm4, &xml_info->xml_parm5 };
+    int found_min = 0, found_max = 0, found_formula = 0;
+
+    for (int i = 0; i < 5; i++) {
+        if (params[i]->type == PARAMETER_TYPE_MIN_MAX_NUMBER) {
+            if (!found_min) {
+                if (min_param_num) *min_param_num = i + 1;
+                found_min = 1;
+            } else if (!found_max) {
+                if (max_param_num) *max_param_num = i + 1;
+                found_max = 1;
+            }
+        } else if (params[i]->type == PARAMETER_TYPE_FORMULA) {
+            if (formula_param_num) *formula_param_num = i + 1;
+            found_formula = 1;
+        }
+    }
+
+    return found_min && found_max && found_formula;
+}
+
+int scenario_action_should_use_formula(scenario_action_t *action)
+{
+    int formula_param_num = 0;
+    
+    if (!scenario_action_has_minmax_and_formula(action, &formula_param_num, 0, 0)) {
+        return 0;
+    }
+    
+    int param_values[5] = { action->parameter1, action->parameter2, action->parameter3, action->parameter4, action->parameter5 };
+    int formula_id = param_values[formula_param_num - 1];
+    
+    return formula_id > 0;
+}
+
+static int evaluate_action_formula_directly(scenario_action_t *action)
+{
+    int formula_param_num = 0;
+    
+    if (!scenario_action_has_minmax_and_formula(action, &formula_param_num, 0, 0)) {
+        return 0;
+    }
+    
+    int param_values[5] = { action->parameter1, action->parameter2, action->parameter3, action->parameter4, action->parameter5 };
+    return scenario_formula_evaluate_formula(param_values[formula_param_num - 1]);
+}
+
+static int get_action_value_with_formula_support(scenario_action_t *action)
+{
+    int min_value = 0, max_value = 0, formula_id = 0;
+    int min_param_num = 0, max_param_num = 0, formula_param_num = 0;
+
+    if (!scenario_action_has_minmax_and_formula(action, &formula_param_num, &min_param_num, &max_param_num)) {
+        return 0;
+    }
+
+    int param_values[5] = { action->parameter1, action->parameter2, action->parameter3, action->parameter4, action->parameter5 };
+    min_value = param_values[min_param_num - 1];
+    max_value = param_values[max_param_num - 1];
+    formula_id = param_values[formula_param_num - 1];
+
+    if (formula_id > 0) {
+        return scenario_formula_evaluate_formula(formula_id);
+    }
+    return random_between_from_stdlib(min_value, max_value);
 }
 
 int scenario_action_type_empire_map_convert_future_trade_city_execute(scenario_action_t *action)
@@ -262,12 +340,13 @@ int scenario_action_type_invasion_immediate_execute(scenario_action_t *action)
 
 void scenario_action_type_money_add_init(scenario_action_t *action)
 {
-    action->parameter3 = random_between_from_stdlib(action->parameter1, action->parameter2);
+    action->parameter3 = get_action_value_with_formula_support(action);
 }
 
 int scenario_action_type_money_add_execute(scenario_action_t *action)
 {
-    int adjustment = action->parameter3;
+    int adjustment = scenario_action_should_use_formula(action) ? 
+        evaluate_action_formula_directly(action) : action->parameter3;
     city_finance_treasury_add_miscellaneous(adjustment);
 
     return 1;
@@ -290,13 +369,14 @@ int scenario_action_type_request_immediately_start_execute(scenario_action_t *ac
 
 void scenario_action_type_rome_wages_init(scenario_action_t *action)
 {
-    action->parameter4 = random_between_from_stdlib(action->parameter1, action->parameter2);
+    action->parameter4 = get_action_value_with_formula_support(action);
 }
 
 int scenario_action_type_rome_wages_execute(scenario_action_t *action)
 {
     int is_hard_set = action->parameter3;
-    int adjustment = action->parameter4;
+    int adjustment = scenario_action_should_use_formula(action) ? 
+        evaluate_action_formula_directly(action) : action->parameter4;
 
     city_data.labor.months_since_last_wage_change = 0;
 
@@ -338,12 +418,13 @@ int scenario_action_type_rome_wages_execute(scenario_action_t *action)
 
 void scenario_action_type_savings_add_init(scenario_action_t *action)
 {
-    action->parameter3 = random_between_from_stdlib(action->parameter1, action->parameter2);
+    action->parameter3 = get_action_value_with_formula_support(action);
 }
 
 int scenario_action_type_savings_add_execute(scenario_action_t *action)
 {
-    int adjustment = action->parameter3;
+    int adjustment = scenario_action_should_use_formula(action) ? 
+        evaluate_action_formula_directly(action) : action->parameter3;
     city_emperor_add_personal_savings(adjustment);
 
     return 1;
