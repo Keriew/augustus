@@ -46,9 +46,6 @@ static int place_routed_building(int x_start, int y_start, int x_end, int y_end,
             case ROUTED_BUILDING_ROAD:
                 *items += map_tiles_set_road(x_end, y_end);
                 break;
-            case ROUTED_BUILDING_WALL: // deprecated
-                *items += map_tiles_set_wall(x_end, y_end);
-                break;
             case ROUTED_BUILDING_AQUEDUCT:
                 *items += map_building_tiles_add_aqueduct(x_end, y_end);
                 break;
@@ -153,6 +150,7 @@ int building_construction_place_aqueduct(int x_start, int y_start, int x_end, in
         if (map_terrain_count_directly_adjacent_with_types(grid_offset, TERRAIN_ROAD | TERRAIN_AQUEDUCT)) {
             blocked = 1;
         }
+    } else if (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR) && !map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
         blocked = 1;
     }
     grid_offset = map_grid_offset(x_end, y_end);
@@ -164,6 +162,7 @@ int building_construction_place_aqueduct(int x_start, int y_start, int x_end, in
             blocked = 1;
         }
 
+    } else if (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR) && !map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
         blocked = 1;
     }
     if (blocked) {
