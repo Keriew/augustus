@@ -50,6 +50,7 @@
 #include "window/empire.h"
 #include "window/file_dialog.h"
 #include "window/message_list.h"
+#include "window/overlay_menu.h"
 
 #define TOPLEFT_MESSAGES_X 5
 #define TOPLEFT_MESSAGES_Y_SPACING 24
@@ -703,15 +704,18 @@ static void handle_hotkeys(const hotkeys *h)
     }
     if (h->show_overlay) {
         show_overlay(h->show_overlay);
+        window_overlay_menu_update();
     }
     if (h->show_overlay_relative) {
         show_overlay_from_grid_offset(widget_city_current_grid_offset());
+        window_overlay_menu_update();
     }
     if (h->toggle_overlay) {
         exit_military_command();
         game_state_toggle_overlay();
         show_roamers_for_overlay(game_state_overlay());
         city_with_overlay_update();
+        window_overlay_menu_update();
         window_invalidate();
     }
     if (h->show_advisor) {

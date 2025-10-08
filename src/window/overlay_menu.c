@@ -55,8 +55,8 @@ static const overlay_menu_entry submenu_risks[] = {
     { OVERLAY_CRIME, 0, JULIUS, NULL },
     { OVERLAY_NATIVE, 0, JULIUS, NULL },
     { OVERLAY_PROBLEMS, 0, JULIUS, NULL },
-    { OVERLAY_ENEMY, 0, JULIUS, NULL },
-    { OVERLAY_SICKNESS, 0, JULIUS, NULL },
+    { OVERLAY_ENEMY, TR_OVERLAY_ENEMY, AUGUSTUS, NULL },
+    { OVERLAY_SICKNESS, TR_OVERLAY_SICKNESS, AUGUSTUS, NULL },
     OVERLAY_MENU_END
 };
 
@@ -89,7 +89,7 @@ static const overlay_menu_entry submenu_health[] = {
 };
 
 static const overlay_menu_entry submenu_commerce[] = {
-    {OVERLAY_LOGISTICS, TR_OVERLAY_HEALTH, AUGUSTUS, NULL},
+    {OVERLAY_LOGISTICS, TR_OVERLAY_LOGISTICS, AUGUSTUS, NULL},
     {OVERLAY_FOOD_STOCKS, 0, JULIUS, NULL},
     {OVERLAY_EFFICIENCY, TR_OVERLAY_EFFICIENCY, AUGUSTUS, NULL},
     {OVERLAY_MOTHBALL, TR_OVERLAY_MOTHBALL, AUGUSTUS, NULL},
@@ -325,6 +325,11 @@ void window_overlay_menu_show(void)
         handle_input
     };
     window_show(&window);
+}
+
+void window_overlay_menu_update(void)
+{
+    data.selected_overlay_id = game_state_overlay();
 }
 
 const uint8_t *get_current_overlay_text(void)

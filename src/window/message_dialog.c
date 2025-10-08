@@ -1,6 +1,7 @@
 #include "message_dialog.h"
 
 #include "city/message.h"
+#include "city/resource.h"
 #include "city/sentiment.h"
 #include "city/view.h"
 #include "core/image_group.h"
@@ -139,7 +140,11 @@ static void button_dispatch_request(const complex_button *button)
 {
     int request_id = button->parameters[0];
     scenario_request_dispatch(request_id);
+    scenario_request *req = scenario_request_get(request_id);
     complex_button_dispatch_request.is_hidden = 1;
+    if (city_resource_is_stockpiled(req->resource)){
+        city_resource_toggle_stockpiled(req->resource);
+    }
     button_close(0, 0);
 }
 
