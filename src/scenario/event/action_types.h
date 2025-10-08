@@ -76,21 +76,4 @@ int scenario_action_type_change_climate_execute(scenario_action_t *action);
 
 int scenario_action_type_change_terrain_execute(scenario_action_t *action);
 
-/**
- * Check if an action has both MIN_MAX_NUMBER and FORMULA parameters
- * @param action The action to check
- * @param formula_param_num Output: parameter number (1-5) containing the formula, or NULL if not needed
- * @param min_param_num Output: parameter number (1-5) containing the min value, or NULL if not needed
- * @param max_param_num Output: parameter number (1-5) containing the max value, or NULL if not needed
- * @return 1 if action has both MIN_MAX and FORMULA parameters, 0 otherwise
- */
-int scenario_action_has_minmax_and_formula(scenario_action_t *action, int *formula_param_num, int *min_param_num, int *max_param_num);
-
-/**
- * Check if an action should use formula evaluation instead of min/max random
- * @param action The action to check
- * @return 1 if action has both MIN_MAX and FORMULA parameters AND the formula is non-empty, 0 otherwise
- */
-int scenario_action_should_use_formula(scenario_action_t *action);
-
 #endif // ACTION_TYPES_H
