@@ -11,13 +11,14 @@ typedef enum {
     SCENARIO_EVENTS_VERSION_INITIAL = 1,
 } scenario_events_version;
 
-unsigned int scenario_formula_add(const uint8_t *formatted_calculation);
+unsigned int scenario_formula_add(const uint8_t *formatted_calculation, int min_limit, int max_limit);
 void scenario_formula_change(unsigned int id, const uint8_t *formatted_calculation);
 const uint8_t *scenario_formula_get_string(unsigned int id);
 scenario_formula_t *scenario_formula_get(unsigned int id);
 int scenario_formula_evaluate_formula(unsigned int id);
 
 void scenario_events_init(void);
+
 void scenario_events_clear(void);
 scenario_event_t *scenario_event_get(int event_id);
 scenario_event_t *scenario_event_create(int repeat_min, int repeat_max, int max_repeats);

@@ -64,6 +64,8 @@ static struct {
 
     uint8_t display_text[MAX_TEXT_LENGTH];
     uint8_t formula[MAX_FORMULA_LENGTH];
+    int formula_min_limit;
+    int formula_max_limit;
     unsigned int formula_index;
     scenario_condition_t *condition;
     scenario_condition_data_t *xml_info;
@@ -211,7 +213,7 @@ static void set_formula_value(const uint8_t *formula)
     data.formula[MAX_FORMULA_LENGTH - 1] = 0;
     // Add formula to list and get its index
     if (!data.formula_index) {
-        data.formula_index = scenario_formula_add(data.formula);
+        data.formula_index = scenario_formula_add(data.formula, data.formula_min_limit, data.formula_max_limit);
         set_param_value(data.formula_index);
     } else {
         // Update existing formula

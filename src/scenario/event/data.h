@@ -164,11 +164,11 @@ typedef struct {
 typedef struct {
     unsigned int id; //this number should correspond to the index in array
     uint8_t formatted_calculation[MAX_FORMULA_LENGTH]; //use [custom_variable_id] to get custom variables in the formula
-    int evaluation;
+    int evaluation; // the last evaluated result of the formula, or in case of static - the only evaluation
     unsigned char is_static; // flag to indicate if formula needs to be re-evaluated every time or whether its static
     unsigned char is_error; // flag to indicate an error in formula that will prevent it from evaluation
-    int min_evaluation;
-    int max_evaluation;
+    int min_evaluation; //limits are inherited from xml parameters on adding to the array
+    int max_evaluation; //they cannot be set afterwards, because they are dictated by the kind of number expected to be returned
 } scenario_formula_t;
 
 #endif // SCENARIO_EVENT_DATA_H

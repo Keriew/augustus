@@ -28,7 +28,7 @@ void scenario_events_init(void)
     }
 }
 
-unsigned int scenario_formula_add(const uint8_t *formatted_calculation)
+unsigned int scenario_formula_add(const uint8_t *formatted_calculation, int min_limit, int max_limit)
 {
     scenario_formulas_size++;
     if (scenario_formulas_size >= MAX_FORMULAS) {
@@ -36,6 +36,8 @@ unsigned int scenario_formula_add(const uint8_t *formatted_calculation)
         return 0;
     }
     scenario_formula_t calculation;
+    calculation.min_evaluation = min_limit;
+    calculation.max_evaluation = max_limit;
     calculation.id = scenario_formulas_size;
     calculation.evaluation = 0;
     strncpy((char *) calculation.formatted_calculation, (const char *) formatted_calculation, MAX_FORMULA_LENGTH - 1);
@@ -60,6 +62,11 @@ const uint8_t *scenario_formula_get_string(unsigned int id)
     if (id == 0 || id > scenario_formulas_size) {
         log_error("Invalid formula index.", 0, 0);
         return NULL;
+    }
+    if (scenario_formulas[id].is_static) {
+        return (const uint8_t *) &scenario_formulas[id].evaluation;
+    } else if (scenario_formulas[id].is_error) {
+        return (const uint8_t *) "Error";
     }
     return scenario_formulas[id].formatted_calculation;
 }
@@ -333,6 +340,8 @@ static void formulas_save_state(buffer *buf)
         buffer_write_i32(buf, scenario_formulas[id].evaluation);
         buffer_write_u8(buf, scenario_formulas[id].is_static);
         buffer_write_u8(buf, scenario_formulas[id].is_error);
+        buffer_write_i32(buf, scenario_formulas[id].min_evaluation);
+        buffer_write_i32(buf, scenario_formulas[id].max_evaluation);
     }
 }
 
@@ -356,6 +365,8 @@ static void formulas_load_state(buffer *buf)
         scenario_formulas[id].evaluation = buffer_read_i32(buf);
         scenario_formulas[id].is_static = buffer_read_u8(buf);
         scenario_formulas[id].is_error = buffer_read_u8(buf);
+        scenario_formulas[id].min_evaluation = buffer_read_i32(buf);
+        scenario_formulas[id].max_evaluation = buffer_read_i32(buf);
         max_id = id > max_id ? id : max_id;
     }
 

@@ -65,6 +65,8 @@ static struct {
 
     uint8_t display_text[MAX_TEXT_LENGTH];
     uint8_t formula[MAX_FORMULA_LENGTH];
+    int formula_min_limit;
+    int formula_max_limit;
     unsigned int formula_index;
     scenario_action_t *action;
     scenario_action_data_t *xml_info;
@@ -278,17 +280,17 @@ static void set_param_value(int value)
             if (data.action->type == ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY) {
                 // Reset parameters 3-5 using the resolved flexible types
                 xml_data_attribute_t resolved_param;
-                
+
                 // Parameter 3
                 resolved_param = data.xml_info->xml_parm3;
                 resolved_param.type = scenario_events_parameter_data_resolve_flexible_type(data.action, 3);
                 data.action->parameter3 = scenario_events_parameter_data_get_default_value_for_parameter(&resolved_param);
-                
+
                 // Parameter 4
                 resolved_param = data.xml_info->xml_parm4;
                 resolved_param.type = scenario_events_parameter_data_resolve_flexible_type(data.action, 4);
                 data.action->parameter4 = scenario_events_parameter_data_get_default_value_for_parameter(&resolved_param);
-                
+
                 // Parameter 5
                 resolved_param = data.xml_info->xml_parm5;
                 resolved_param.type = scenario_events_parameter_data_resolve_flexible_type(data.action, 5);
@@ -418,7 +420,7 @@ static void set_formula_value(const uint8_t *formula)
     data.formula[MAX_FORMULA_LENGTH - 1] = 0;
     // Add formula to list and get its index
     if (!data.formula_index) {
-        data.formula_index = scenario_formula_add(data.formula);
+        data.formula_index = scenario_formula_add(data.formula, data.formula_min_limit, data.formula_max_limit);
         set_param_value(data.formula_index);
     } else {
         // Update existing formula
@@ -428,9 +430,11 @@ static void set_formula_value(const uint8_t *formula)
     window_invalidate();
 }
 
-static void create_evaluation_formula(void)
+static void create_evaluation_formula(xml_data_attribute_t *parameter)
 {
     int current_index = get_param_value();
+    data.formula_min_limit = parameter->min_limit;
+    data.formula_max_limit = parameter->max_limit;
     if (current_index > 0) {
         const uint8_t *src = scenario_formula_get_string(current_index);
         if (src) {
@@ -528,7 +532,7 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             custom_variable_selection();
             return;
         case PARAMETER_TYPE_FORMULA:
-            create_evaluation_formula();
+            create_evaluation_formula(parameter);
             return;
         default:
             return;
