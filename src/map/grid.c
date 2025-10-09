@@ -56,16 +56,45 @@ void map_grid_init(int width, int height, int start_offset, int border_size)
     map_data.border_size = border_size;
 }
 
-static grid_slice *allocate_grid_slice_memory(void)
+grid_slice *allocate_grid_slice_memory(void)
 {
     grid_slice *slice = malloc(sizeof(grid_slice));
     if (!slice) {
-        log_error("Failed to allocate memory for grid_slice. The game will now crash.", 0, 0);
+        log_error("Failed to allocate memory for grid_slice struct.", 0, 0);
         return NULL;
     }
+
+    // Allocate full buffer dynamically — not inside struct anymore
+    slice->grid_offsets = malloc(sizeof(int) * MAX_SLICE_SIZE);
+    if (!slice->grid_offsets) {
+        log_error("Failed to allocate memory for grid_slice offsets.", 0, 0);
+        free(slice);
+        return NULL;
+    }
+
     slice->size = 0;
-    memset(slice->grid_offsets, -1, sizeof(slice->grid_offsets));
+    memset(slice->grid_offsets, -1, sizeof(int) * MAX_SLICE_SIZE);
     return slice;
+}
+
+int reallocate_grid_slice_memory(grid_slice *slice)
+{
+    if (!slice) return -1;
+
+    if (slice->size <= 0) {
+        free(slice->grid_offsets);
+        slice->grid_offsets = NULL;
+        return 0;
+    }
+
+    int *new_ptr = realloc(slice->grid_offsets, sizeof(int) * slice->size);
+    if (!new_ptr) {
+        log_error("Failed to reallocate grid_slice offsets; keeping old buffer.", 0, 0);
+        return -1;
+    }
+
+    slice->grid_offsets = new_ptr;
+    return 0;
 }
 
 grid_slice *map_grid_get_grid_slice(int *grid_offsets, int size)
@@ -78,6 +107,7 @@ grid_slice *map_grid_get_grid_slice(int *grid_offsets, int size)
     for (int i = 0; i < slice->size; i++) {
         slice->grid_offsets[i] = grid_offsets[i];
     }
+    reallocate_grid_slice_memory(slice);
     return slice;
 }
 
@@ -119,6 +149,7 @@ grid_slice *map_grid_get_grid_slice_rectangle(int start_grid_offset, int width, 
         }
     }
     slice->size = width * height > MAX_SLICE_SIZE ? MAX_SLICE_SIZE : width * height;
+    reallocate_grid_slice_memory(slice);
     return slice;
 }
 
@@ -141,6 +172,7 @@ grid_slice *map_grid_get_grid_slice_house(int building_id, int check_rubble)
         }
         slice->size = found_tiles;
     }
+    reallocate_grid_slice_memory(slice);
     return slice;
 }
 
@@ -181,6 +213,7 @@ grid_slice *map_grid_get_grid_slice_ring(int center_grid_offset, int inner_radiu
         }
     }
     slice->size = count;
+    reallocate_grid_slice_memory(slice);
     return slice;
 }
 
