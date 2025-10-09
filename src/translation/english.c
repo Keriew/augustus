@@ -1717,8 +1717,7 @@ static translation_string all_strings[] = {
     {TR_CONFIRM_REPAIR_BUILDINGS, "Repair all buildings in the area for "},
     {TR_CONFIRM_REPAIR_BUILDINGS_TITLE, "Repair buildings"},
     {TR_BUILDING_LAND_CLEAR, "Clear area"},
-    {TR_CONFIG_ENABLE_MARKET_RANGE, "Enable market range"},
-    { TR_WARNING_CANT_REPAIR_MONUMENTS, "Unique Monuments cannot be repaired" },
+    {TR_WARNING_CANT_REPAIR_MONUMENTS, "Unique Monuments cannot be repaired" },
     {TR_WARNING_CANT_REPAIR_AQUEDUCTS, "Aqueducts cannot be repaired"},
     {TR_CONFIG_ADVANCED_CART_DEPOT_OPTIONS, "Enable advanced cart depot orders"},
     {TR_BUILDING_INFO_INSTRUCTIONS, "instructions" },
@@ -1729,7 +1728,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_NONE, "None"},
     {TR_TOOLTIP_MINIMAL, "Minimal"},
     {TR_TOOLTIP_FULL, "Full"},
-    {TR_CONFIG_CLEAR_WARNINGS_RIGHTCLICK,"Right click to clear warnings in city view"},
+    {TR_CONFIG_CLEAR_WARNINGS_RIGHTCLICK, "Right click to clear warnings in city view"},
     {TR_CONFIG_GP_CH_STORAGE_REQUESTS_RESPECT_MAINTAIN, "Caesar's requests respect 'Maintaining'"},
     {TR_CONFIG_ENABLE_MARKET_RANGE, "Enable market range"},
     {TR_OVERLAY_HOUSING_TENTS, "Tents"},
@@ -1740,7 +1739,7 @@ static translation_string all_strings[] = {
     {TR_OVERLAY_HOUSE_VILLAS, "Villas"},
     {TR_OVERLAY_HOUSE_PALACES, "Palaces"},
     {TR_OVERLAY_BY_GROUP, "By Group"},
-    {TR_BUTTON_INFO_RETURN_ALL_LEGIONS, "Recall all legions" },
+    {TR_BUTTON_INFO_RETURN_ALL_LEGIONS, "Recall all legions"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
