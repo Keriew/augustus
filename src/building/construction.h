@@ -53,5 +53,11 @@ int building_construction_get_start_grid_offset(void);
 
 void building_construction_reset_draw_as_constructing(void);
 int building_construction_draw_as_constructing(void);
+/** @brief to place a single wall tile at the given grid offset. since walls are being moved to building category,
+* Every tile should be handled separately with individual building IDs
+*/
+int building_construction_place_wall(int grid_offset);
 
 #endif // BUILDING_CONSTRUCTION_H
+
+

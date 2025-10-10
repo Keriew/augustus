@@ -1709,6 +1709,16 @@ static translation_string all_strings[] = {
     {TR_CONFIG_UI_ANIMATE_TRADE_ROUTES, "Анимация торговых путей"},
     {TR_HOTKEY_NEXT_TRACK, "Следующий случайный трек"},
     {TR_CONFIG_MOVE_LEGION_SOUND_SWAP, "Альтернативный звук движения легиона"},
+    {TR_BUILDING_INFO_REPAIR_BUILDING, "Восстановить здание"},
+    {TR_WARNING_REPAIR_IMPOSSIBLE, "Невозможно восстановить это здание"},
+    {TR_WARNING_REPAIR_BURNING, "Невозможно восстановить, пока здание горит"},
+    {TR_BUILDING_INFO_BUILDING_BURNING, "Здание горит"},
+    {TR_BUILDING_LAND_REPAIR, "Зона восстановления"},
+    {TR_CONFIRM_REPAIR_BUILDINGS, "Восстановить все здания в зоне за "},
+    {TR_CONFIRM_REPAIR_BUILDINGS_TITLE, "Восстановление зданий"},
+    {TR_BUILDING_LAND_CLEAR, "Очистить зону"},
+    {TR_WARNING_CANT_REPAIR_MONUMENTS, "Уникальные памятники нельзя восстановить"},
+    {TR_WARNING_CANT_REPAIR_AQUEDUCTS, "Акведуки нельзя восстановить"},
     {TR_CONFIG_ADVANCED_CART_DEPOT_OPTIONS, "ВКЛ расширенные указания для станции повозок"},
     {TR_BUILDING_INFO_INSTRUCTIONS, "указания"},
     {TR_BUILDING_INFO_ACTIVE_STORAGE_BUILDINGS, "Принимающие хранилища"},
@@ -1729,6 +1739,7 @@ static translation_string all_strings[] = {
     {TR_OVERLAY_HOUSE_VILLAS, "Виллы"},
     {TR_OVERLAY_HOUSE_PALACES, "Дворцы"},
     {TR_OVERLAY_BY_GROUP, "По группам"},
+    {TR_BUTTON_INFO_RETURN_ALL_LEGIONS, "Вернуть все легионы"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

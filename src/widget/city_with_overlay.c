@@ -747,7 +747,7 @@ static void draw_top(int x, int y, int grid_offset)
         if (!map_terrain_is(grid_offset, TERRAIN_WALL | TERRAIN_AQUEDUCT | TERRAIN_ROAD)) {
             color_t color_mask = 0;
             if (map_property_is_deleted(grid_offset) && !is_multi_tile_terrain(grid_offset)) {
-                color_mask = COLOR_MASK_RED;
+                color_mask = building_construction_type() == BUILDING_CLEAR_LAND ? COLOR_MASK_RED : COLOR_MASK_GREEN;
             }
             // terrain
             image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);

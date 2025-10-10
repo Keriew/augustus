@@ -1,6 +1,7 @@
 #include "message_dialog.h"
 
 #include "city/message.h"
+#include "city/resource.h"
 #include "city/sentiment.h"
 #include "city/view.h"
 #include "core/image_group.h"
@@ -139,7 +140,11 @@ static void button_dispatch_request(const complex_button *button)
 {
     int request_id = button->parameters[0];
     scenario_request_dispatch(request_id);
+    scenario_request *req = scenario_request_get(request_id);
     complex_button_dispatch_request.is_hidden = 1;
+    if (city_resource_is_stockpiled(req->resource)) {
+        city_resource_toggle_stockpiled(req->resource);
+    }
     button_close(0, 0);
 }
 
@@ -284,6 +289,7 @@ static const lang_message *get_custom_or_standard_lang_message(int text_id)
 static int setup_request_button(const lang_message *msg)
 {
     if (msg->message_type != MESSAGE_TYPE_IMPERIAL) {
+        complex_button_dispatch_request.is_hidden = 1;
         return 0;
     }
     if (scenario_request_can_comply(player_message.param1)) { // param1 should already be set to request id here
@@ -629,8 +635,6 @@ static void draw_background_video(void)
     if (msg->message_type != MESSAGE_TYPE_CUSTOM) {
         if (small_font) {
             // Draw in black and then white to create shadow effect
-           // rich_text_draw_colored(msg->content.text,
-           //     data.x + 16 + 1, y_base + 24 + 1, 384, data.text_height_blocks - 1, COLOR_BLACK);
             rich_text_draw_colored(msg->content.text,
                 data.x + 16, y_base + 24, 384, data.text_height_blocks - 1, 0); //COLOR_WHITE
         } else {

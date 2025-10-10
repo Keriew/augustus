@@ -461,6 +461,7 @@ static int xml_import_special_parse_building_counting(xml_data_attribute_t *attr
 
     switch (found->value) {
         case BUILDING_CLEAR_LAND:
+        case BUILDING_REPAIR_LAND:
         case BUILDING_DISTRIBUTION_CENTER_UNUSED:
         case BUILDING_BURNING_RUIN:
             xml_import_log_error("I cannot count that.");

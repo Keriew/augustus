@@ -95,7 +95,7 @@ static void advance_earthquake_to_tile(int x, int y)
     map_routing_update_land();
     map_routing_update_walls();
 
-    figure_create_explosion_cloud(x, y, 1);
+    figure_create_explosion_cloud(x, y, 1, 0);
 }
 
 void scenario_earthquake_process(void)

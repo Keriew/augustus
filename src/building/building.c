@@ -1,5 +1,11 @@
 #include "building.h"
 
+#include "building/clone.h"
+#include "building/construction.h"
+#include "building/construction_building.h"
+#include "building/construction_clear.h"
+#include "building/data_transfer.h"
+#include "building/destruction.h"
 #include "building/distribution.h"
 #include "building/industry.h"
 #include "building/granary.h"
@@ -11,6 +17,7 @@
 #include "building/state.h"
 #include "building/storage.h"
 #include "building/variant.h"
+#include "building/type.h"
 #include "city/buildings.h"
 #include "city/finance.h"
 #include "city/population.h"
@@ -21,13 +28,16 @@
 #include "core/log.h"
 #include "figure/figure.h"
 #include "figure/formation_legion.h"
+#include "figuretype/missile.h"
 #include "game/difficulty.h"
 #include "game/save_version.h"
 #include "game/undo.h"
+#include "map/building.h"
 #include "map/building_tiles.h"
 #include "map/bridge.h"
 #include "map/desirability.h"
 #include "map/elevation.h"
+#include "map/figure.h"
 #include "map/grid.h"
 #include "map/random.h"
 #include "map/routing_terrain.h"
@@ -55,7 +65,18 @@ building *building_get(int id)
 {
     return array_item(data.buildings, id);
 }
-
+int building_can_repair_type(building_type type)
+{
+    if (building_monument_is_limited(type) || type == BUILDING_AQUEDUCT) {
+        return 0; // limited monuments and aqueducts cannot be repaired at the moment, aqueducts require a rework,
+    }   //and limited monuments are too complex to easily repair, and arent a common occurrence
+    building_type repair_type = building_clone_type_from_building_type(type);
+    if (repair_type == BUILDING_NONE) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
 int building_dist(int x, int y, int w, int h, building *b)
 {
     int size = building_properties_for_type(b->type)->size;
@@ -138,8 +159,7 @@ static void fill_adjacent_types(building *b)
         int id = b->id - 1;
         while (id) {
             building *prev = building_get(id);
-            if (prev->state != BUILDING_STATE_UNUSED &&
-                prev->type == b->type) {
+            if (prev->state != BUILDING_STATE_UNUSED && prev->type == b->type) {
                 b->prev_of_type = prev;
                 b->next_of_type = prev->next_of_type;
                 b->next_of_type->prev_of_type = b;
@@ -314,6 +334,183 @@ void building_trim(void)
     array_trim(data.buildings);
 }
 
+int building_was_tent(building *b)
+{
+    return b->data.rubble.og_type == BUILDING_HOUSE_LARGE_TENT || b->data.rubble.og_type == BUILDING_HOUSE_SMALL_TENT;
+}
+
+int building_is_storage(building_type b_type)
+{
+    return b_type == BUILDING_GRANARY || b_type == BUILDING_WAREHOUSE;
+}
+
+int building_is_still_burning(building *b)
+{
+    int hot = (b->type == BUILDING_BURNING_RUIN);
+    int grid_offset = hot ? b->data.rubble.og_grid_offset : b->grid_offset;
+    int size = hot ? b->data.rubble.og_size : b->size;
+    grid_slice *b_area = map_grid_get_grid_slice_square(grid_offset, size);
+    for (int i = 0; i < b_area->size; i++) {
+        int offset = b_area->grid_offsets[i];
+        if (map_has_figure_at(offset)) {  // also check for prefects on the tile - their presence prevents rebuilding
+            return 1;
+        }
+        if (building_get(map_building_at(offset))->type == BUILDING_BURNING_RUIN) {
+            if (building_get(map_building_at(offset))->state == BUILDING_STATE_RUBBLE) {
+                continue; // extinguished tile
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int building_can_repair(building *b)
+{
+    if (!b) {
+        return 0;
+    }
+    if (b->type == BUILDING_BURNING_RUIN) {
+        if (building_is_still_burning(b)) {
+            return 0;
+        }
+        if (!building_can_repair_type(b->data.rubble.og_type)) {
+            return 0;
+        } else {
+            return 1;
+        }
+    } else {
+        if (b->state != BUILDING_STATE_RUBBLE) {
+            return 0;
+        } else {
+            return building_can_repair_type(b->type);
+        }
+    }
+}
+
+int building_repair_cost(building *b)
+{
+    int og_grid_offset = 0, og_size = 0, og_type = 0;
+    if (!b || !building_can_repair(b)) {
+        return 0;
+    }
+    int is_ruin = b->type == BUILDING_BURNING_RUIN;
+    og_grid_offset = is_ruin ? b->data.rubble.og_grid_offset : b->grid_offset;
+    og_size = is_ruin ? b->data.rubble.og_size : b->size;
+    og_type = is_ruin ? b->data.rubble.og_type : b->type;
+
+    if (building_is_house(og_type)) {
+        grid_slice *house_slice = map_grid_get_grid_slice_house(b->id, 1);
+        int clear_cost = house_slice->size * (11 + 3); // 10.5 per new house tile + 3 per rubble tile to clear
+        return clear_cost;
+    }
+    grid_slice *grid_slice = map_grid_get_grid_slice_square(og_grid_offset, og_size); // wont work correctly for hippo
+    int clear_cost = building_construction_prepare_terrain(grid_slice, CLEAR_MODE_RUBBLE, COST_MEASURE);
+    int placement_cost = model_get_building(og_type)->cost;
+    return clear_cost + placement_cost + placement_cost / 20; // +5% fee on a building price
+}
+
+int building_repair(building *b)
+{
+    if (!b) {
+        return 0;
+    }
+    if (b->type == BUILDING_BURNING_RUIN && building_is_still_burning(b)) {
+        city_warning_show(WARNING_REPAIR_BURNING, NEW_WARNING_SLOT);
+        return 0;
+    }
+    if (!building_can_repair_type(b->type) && !building_can_repair_type(b->data.rubble.og_type)) {
+        if (building_monument_is_limited(b->type) || building_monument_is_limited(b->data.rubble.og_type)) {
+            city_warning_show(WARNING_REPAIR_MONUMENT, NEW_WARNING_SLOT);
+        } else if (b->type == BUILDING_AQUEDUCT || b->data.rubble.og_type == BUILDING_AQUEDUCT) {
+            city_warning_show(WARNING_REPAIR_AQUEDUCT, NEW_WARNING_SLOT);
+        } else {
+            city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
+        }
+        return 0;
+    }
+    // flags and placeholders
+    int og_size = 0, og_grid_offset = 0, og_orientation = 0, og_storage_id, wall = 0, is_house_lot = 0, success = 0;
+    building_type og_type = BUILDING_NONE;
+
+    // --- Handle rubble recovery ---
+    if (b->type == BUILDING_BURNING_RUIN) {
+        og_size = b->data.rubble.og_size;
+        og_grid_offset = b->data.rubble.og_grid_offset;
+        og_orientation = b->data.rubble.og_orientation;
+        og_type = b->data.rubble.og_type;
+    }
+    building_data_transfer_backup();
+    building_data_transfer_copy(b, 1);
+    //  Resolve placement data 
+    int grid_offset = og_grid_offset ? og_grid_offset : b->grid_offset;
+    int x = map_grid_offset_to_x(grid_offset);
+    int y = map_grid_offset_to_y(grid_offset);
+    int size = og_size ? og_size : b->size;
+    int type = og_type ? og_type : b->type;
+    size = (og_type == BUILDING_WAREHOUSE) ? 3 : size;
+    building_type type_to_place = og_type ? og_type : b->type;
+
+    if (building_is_house(type) || type == 1) {
+        is_house_lot = 1;
+        building_change_type(b, BUILDING_HOUSE_VACANT_LOT);
+    }
+    og_storage_id = b->storage_id; //store the original storage id before clearing it
+    // --- Clear terrain & place building ---
+    grid_slice *grid_slice = map_grid_get_grid_slice_square(grid_offset, size);
+    map_terrain_backup(); // backup the terrain in case of failure
+    int cleared = building_construction_prepare_terrain(grid_slice, CLEAR_MODE_RUBBLE, COST_PROCESS);
+    if (is_house_lot) {
+        success = building_construction_fill_vacant_lots(grid_slice);
+    } else if (type_to_place == BUILDING_WALL || type_to_place == BUILDING_TOWER) {
+        wall = 1;
+        for (int i = 0; i < grid_slice->size; i++) {
+            success = building_construction_place_wall(grid_slice->grid_offsets[i]);
+        }
+        if (type_to_place == BUILDING_TOWER) {
+            map_tiles_update_all_walls(); // towers affect wall connections
+            success = building_construction_place_building(type_to_place, x, y, 1);
+        }
+    } else {
+        if (type_to_place == BUILDING_GATEHOUSE) {
+            wall = 1;
+        }
+        success = building_construction_place_building(type_to_place, x, y, 1);
+    }
+    building *new_building = building_get(map_building_at(map_grid_offset(x, y)));
+    if (!success || !cleared) {
+        map_terrain_restore(); // restore terrain on failure
+        city_finance_process_construction(-cleared); // refund clearing cost
+        city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
+        return 0;
+    }
+    if (building_is_storage(type_to_place) && b->storage_id) {
+        if (new_building->storage_id != og_storage_id) {
+            /*int storage_restore = */building_storage_change_building(b->storage_id, new_building->id);
+            // TODO: if storage_restore, refresh orders of cart depots. Requires merge of new depot code
+            b->storage_id = 0; // remove reference to the storage we just deleted
+        }
+    }
+    int placement_cost = model_get_building(type_to_place)->cost * success;
+    int full_cost = (placement_cost + placement_cost / 20);// +5%
+
+    city_finance_process_construction(full_cost);
+    new_building->subtype.orientation = og_orientation;
+    map_building_set_rubble_grid_building_id(grid_offset, 0, size); // remove rubble marker
+    building_data_transfer_paste(new_building, 1);
+    if (new_building->state == BUILDING_STATE_RUBBLE) {
+        new_building->state = BUILDING_STATE_CREATED;
+    }
+    building_data_transfer_restore_and_clear_backup();
+    figure_create_explosion_cloud(new_building->x, new_building->y, og_size, 1);
+    if (wall) {
+        map_tiles_update_all_walls(); // towers affect wall connections
+    }
+    building_delete(b);
+    game_undo_disable(); // not accounting for undoing repairs
+    return full_cost;
+}
+
 void building_update_state(void)
 {
     int land_recalc = 0;
@@ -353,13 +550,14 @@ void building_update_state(void)
         } else if (b->state == BUILDING_STATE_RUBBLE) {
             if (b->house_size) {
                 city_population_remove_home_removed(b->house_population);
+                b->house_population = 0;
             }
-            building_delete(b);
+            // building_delete(b); // keep the rubbled building as a reference for reconstruction
         } else if (b->state == BUILDING_STATE_DELETED_BY_GAME) {
             building_delete(b);
         } else if (b->immigrant_figure_id) {
             const figure *f = figure_get(b->immigrant_figure_id);
-            if (f->state != FIGURE_STATE_ALIVE || f->destination_building_id != array_index) {
+            if (f->state != FIGURE_STATE_ALIVE || (unsigned int) f->destination_building_id != array_index) {
                 b->immigrant_figure_id = 0;
             }
         }

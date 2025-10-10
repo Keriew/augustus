@@ -189,23 +189,23 @@ int lang_text_get_sequence_width(const lang_fragment *seq, int count, font_t fon
     return width;
 }
 
-int lang_text_draw_sequence(const lang_fragment *seq, int count, int x, int y, font_t font)
+int lang_text_draw_sequence(const lang_fragment *seq, int count, int x, int y, font_t font, color_t color)
 {
     int width = 0;
     for (int i = 0; i < count; i++) {
         const lang_fragment *f = &seq[i];
         switch (f->type) {
             case LANG_FRAG_LABEL:
-                width += lang_text_draw(f->text_group, f->text_id, x + width, y, font);
+                width += lang_text_draw_colored(f->text_group, f->text_id, x + width, y, font, color);
                 break;
             case LANG_FRAG_AMOUNT:
-                width += lang_text_draw_amount(f->text_group, f->text_id, f->number, x + width, y, font);
+                width += lang_text_draw_amount_colored(f->text_group, f->text_id, f->number, x + width, y, font, color);
                 break;
             case LANG_FRAG_NUMBER:
-                width += text_draw_number(f->number, '\0', "\0", x + width, y, font, COLOR_MASK_NONE);
+                width += text_draw_number(f->number, '\0', "\0", x + width, y, font, color);
                 break;
             case LANG_FRAG_TEXT:
-                width += text_draw(f->text, x + width, y, font, COLOR_MASK_NONE);
+                width += text_draw(f->text, x + width, y, font, color);
                 break;
             case LANG_FRAG_SPACE:
                 width += f->space_width;
@@ -214,11 +214,11 @@ int lang_text_draw_sequence(const lang_fragment *seq, int count, int x, int y, f
     }
     return width;
 }
-
 int lang_text_draw_sequence_centered(
-    const lang_fragment *seq, int count, int x, int y, int box_width, font_t font)
+
+    const lang_fragment *seq, int count, int x, int y, int box_width, font_t font, color_t color)
 {
     int total_width = lang_text_get_sequence_width(seq, count, font);
     int start_x = x + (box_width - total_width) / 2;
-    return lang_text_draw_sequence(seq, count, start_x, y, font);
+    return lang_text_draw_sequence(seq, count, start_x, y, font, color);
 }

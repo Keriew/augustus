@@ -46,9 +46,6 @@ static int place_routed_building(int x_start, int y_start, int x_end, int y_end,
             case ROUTED_BUILDING_ROAD:
                 *items += map_tiles_set_road(x_end, y_end);
                 break;
-            case ROUTED_BUILDING_WALL:
-                *items += map_tiles_set_wall(x_end, y_end);
-                break;
             case ROUTED_BUILDING_AQUEDUCT:
                 *items += map_building_tiles_add_aqueduct(x_end, y_end);
                 break;

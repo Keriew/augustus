@@ -1709,6 +1709,16 @@ static translation_string all_strings[] = {
     {TR_CONFIG_UI_ANIMATE_TRADE_ROUTES, "Animate trade routes"},
     {TR_HOTKEY_NEXT_TRACK, "Next random track"},
     {TR_CONFIG_MOVE_LEGION_SOUND_SWAP, "Alternative legion move sound"},
+    {TR_BUILDING_INFO_REPAIR_BUILDING, "Repair building" },
+    {TR_WARNING_REPAIR_IMPOSSIBLE, "Can't' repair this building" },
+    {TR_WARNING_REPAIR_BURNING, "Can't repair while the building is on fire" },
+    {TR_BUILDING_INFO_BUILDING_BURNING, "Building is on fire" },
+    {TR_BUILDING_LAND_REPAIR, "Repair area"},
+    {TR_CONFIRM_REPAIR_BUILDINGS, "Repair all buildings in the area for "},
+    {TR_CONFIRM_REPAIR_BUILDINGS_TITLE, "Repair buildings"},
+    {TR_BUILDING_LAND_CLEAR, "Clear area"},
+    {TR_WARNING_CANT_REPAIR_MONUMENTS, "Unique Monuments cannot be repaired" },
+    {TR_WARNING_CANT_REPAIR_AQUEDUCTS, "Aqueducts cannot be repaired"},
     {TR_CONFIG_ADVANCED_CART_DEPOT_OPTIONS, "Enable advanced cart depot orders"},
     {TR_BUILDING_INFO_INSTRUCTIONS, "instructions" },
     {TR_BUILDING_INFO_ACTIVE_STORAGE_BUILDINGS, "Accepting storage buildings" },
@@ -1718,7 +1728,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_NONE, "None"},
     {TR_TOOLTIP_MINIMAL, "Minimal"},
     {TR_TOOLTIP_FULL, "Full"},
-    {TR_CONFIG_CLEAR_WARNINGS_RIGHTCLICK,"Right click to clear warnings in city view"},
+    {TR_CONFIG_CLEAR_WARNINGS_RIGHTCLICK, "Right click to clear warnings in city view"},
     {TR_CONFIG_GP_CH_STORAGE_REQUESTS_RESPECT_MAINTAIN, "Caesar's requests respect 'Maintaining'"},
     {TR_CONFIG_ENABLE_MARKET_RANGE, "Enable market range"},
     {TR_PARAMETER_TYPE_FORMULA, "Formula" },
@@ -1788,8 +1798,7 @@ static translation_string all_strings[] = {
     {TR_CITY_PROPERTY_COVERAGE_LIBRARY, "Library coverage"},
     {TR_CITY_PROPERTY_COVERAGE_ACADEMY, "Academy coverage"},
     {TR_CITY_PROPERTY_CHOOSE_PROPERTY, "Choose City property"},
-
-
+    {TR_BUTTON_INFO_RETURN_ALL_LEGIONS, "Recall all legions"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
