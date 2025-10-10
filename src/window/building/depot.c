@@ -227,6 +227,7 @@ static void setup_buttons_for_selected_depot(void)
     }
     if (scrollbar.max_scroll_position == 0) {
         scrollbar_reset(&scrollbar, 0);
+    }
 }
 
 static int total_storages(void)
