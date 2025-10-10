@@ -10,6 +10,7 @@
 #include "city/view.h"
 #include "core/config.h"
 #include "figure/figure.h"
+#include "figuretype/depot.h"
 #include "graphics/button.h"
 #include "graphics/complex_button.h"
 #include "graphics/generic_button.h"
@@ -35,6 +36,7 @@ static void set_camera_position(const generic_button *button);
 static void goto_special_orders_on_top(const generic_button *button);
 static void copy_settings(const generic_button *button);
 static void paste_settings(const generic_button *button);
+static void depot_recall_all_cart_pushers(const generic_button *button);
 
 static void tooltip_style_changed(dropdown_button *button);
 
@@ -141,6 +143,7 @@ static generic_button depot_order_buttons[] = {
     {384, 82,  32, ROW_HEIGHT, set_camera_position},
     {40, 112,  22, ROW_HEIGHT, copy_settings},
     {63, 112,  22, ROW_HEIGHT, paste_settings},
+    {100, 112, 250, ROW_HEIGHT, depot_recall_all_cart_pushers},
 };
 dropdown_button tooltip_style_dropdown_button;
 
@@ -486,12 +489,18 @@ void window_building_draw_depot_foreground(building_info_context *c)
         image_draw(assets_lookup_image_id(ASSET_UI_PASTE_ICON), x_offset + depot_order_buttons[8].x + 3,
             y_offset + depot_order_buttons[8].y + 3, COLOR_FONT_PLAIN, SCALE_NONE);
     }
+    // Return all carts button
+    button_border_draw(x_offset + depot_order_buttons[9].x, y_offset + depot_order_buttons[9].y,
+        depot_order_buttons[9].width, depot_order_buttons[9].height, data.focus_button_id == 10);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_FIGURE_INFO_DEPOT_RECALL,
+        x_offset + depot_order_buttons[9].x, y_offset + depot_order_buttons[9].y + 6,
+        depot_order_buttons[9].width, FONT_NORMAL_RED);
 }
 
 int window_building_handle_mouse_depot(const mouse *m, building_info_context *c)
 {
     return generic_buttons_handle_mouse(m, c->x_offset + DEPOT_BUTTONS_X_OFFSET, c->y_offset + DEPOT_BUTTONS_Y_OFFSET,
-        depot_order_buttons, data.advanced_mode ? 9 : 7, &data.focus_button_id);
+        depot_order_buttons, data.advanced_mode ? 10 : 8, &data.focus_button_id);
 }
 
 static void order_set_source(const generic_button *button)
@@ -747,6 +756,26 @@ static void paste_settings(const generic_button *button)
     window_invalidate();
 }
 
+static void depot_recall_all_cart_pushers(const generic_button *button)
+{
+    building *b = building_get(data.depot_building_id);
+    if (!b || b->type != BUILDING_DEPOT)
+        return;
+    int recalled_count = 0;
+    for (int i = 0; i < 3; i++) {
+        if (b->data.distribution.cartpusher_ids[i]) {
+            figure *f = figure_get(b->data.distribution.cartpusher_ids[i]);
+            if (f && f->state != FIGURE_STATE_DEAD) {
+                figure_depot_recall(f);
+                recalled_count++;
+            }
+        }
+    }
+    if (recalled_count > 0) {
+        city_warning_show(WARNING_DEPOT_CART_PUSHER_RECALL_ALL, NEW_WARNING_SLOT);
+    }
+    window_request_refresh();
+}
 
 static void goto_special_orders_on_top(const generic_button *button)
 {
@@ -805,6 +834,21 @@ int window_building_handle_mouse_depot_select_destination(const mouse *m, buildi
 
 static void order_set_resource(const generic_button *button)
 {
+    building *b = building_get(data.depot_building_id);
+    if (!b || b->type != BUILDING_DEPOT)
+        return;
+    // Check if there are active carts (Ox) associated with this depot
+    for (int i = 0; i < 3; i++) {
+        if (b->data.distribution.cartpusher_ids[i]) {
+            figure *f = figure_get(b->data.distribution.cartpusher_ids[i]);
+            if (f && f->state != FIGURE_STATE_DEAD) {
+                // If there is an active cart, changing the resource is prohibited
+                city_warning_show(WARNING_DEPOT_RESOURCE_CHANGE, NEW_WARNING_SLOT);
+                return;
+            }
+        }
+    }
+    // If there are no carts, allow resource selection
     window_building_info_depot_select_resource();
 }
 

@@ -1413,6 +1413,8 @@ static translation_string all_strings[] = {
     {TR_BUILDING_INFO_DEPOT_SELECT_RESOURCE_TITLE, "Select resource" },
     {TR_TOOLTIP_BUTTON_CENTER_CAMERA, "Center camera on building"},
     {TR_FIGURE_INFO_DEPOT_RECALL, "Recall" },
+    {TR_WARNING_DEPOT_RECALL_ALL, "All Depot cartpusher recalled!"},
+    {TR_WARNING_DEPOT_RESOURCE_CHANGE, "Cannot change resource while there are active cart pushers!"},
     {TR_FIGURE_INFO_DEPOT_RETURNING, "Returning" },
     {TR_FIGURE_INFO_DEPOT_DELIVER, "Delivering" },
     {TR_FIGURE_INFO_DEPOT_FROM, "From " },

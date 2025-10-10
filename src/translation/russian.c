@@ -1413,6 +1413,8 @@ static translation_string all_strings[] = {
     {TR_BUILDING_INFO_DEPOT_SELECT_RESOURCE_TITLE, "Выберите ресурс"},
     {TR_TOOLTIP_BUTTON_CENTER_CAMERA, "Навести камеру на здание"},
     {TR_FIGURE_INFO_DEPOT_RECALL, "Отозвать"},
+    {TR_WARNING_DEPOT_RECALL_ALL, "Все тележки отозваны!"},
+    {TR_WARNING_DEPOT_RESOURCE_CHANGE, "Нельзя изменить ресурс, пока есть активные тележки!"},
     {TR_FIGURE_INFO_DEPOT_RETURNING, "Возвращается"},
     {TR_FIGURE_INFO_DEPOT_DELIVER, "Доставляет"},
     {TR_FIGURE_INFO_DEPOT_FROM, "От "},
