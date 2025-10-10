@@ -32,6 +32,9 @@ typedef enum {
     CITY_PROPERTY_TROOPS_COUNT_ENEMY,
     // terrain
     CITY_PROPERTY_TERRAIN_COUNT_TILES,
+    // trade
+    CITY_PROPERTY_QUOTA_FILL_IMPORT, //cant do both in one due to parameter number limits
+    CITY_PROPERTY_QUOTA_FILL_EXPORT,
     CITY_PROPERTY_MAX,
 } city_property_t;
 

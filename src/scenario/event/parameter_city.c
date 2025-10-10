@@ -88,7 +88,7 @@ static int population_by_housing_type(scenario_action_t *action)
 {
     house_level level = action->parameter3 - 10; // convert from building_type to house_level
     int is_absolute = action->parameter4;
-    int is_group = (level >= HOUSE_GROUP_TENT);
+    int is_group = ((int) level >= (int) HOUSE_GROUP_TENT);
     int total_pop = city_population();
     if (!total_pop) {
         return 0;
@@ -103,7 +103,8 @@ static int population_by_housing_type(scenario_action_t *action)
     int min = 0;
     int max = 0;
     int total = 0;
-    switch (level) {    // handle housing groups
+    int level_as_int = (int) level; // Store the int value separately
+    switch (level_as_int) { // Use the int variable in switch
         case HOUSE_GROUP_TENT:   min = HOUSE_SMALL_TENT;   max = HOUSE_LARGE_TENT;   break;
         case HOUSE_GROUP_SHACK:  min = HOUSE_SMALL_SHACK;  max = HOUSE_LARGE_SHACK;  break;
         case HOUSE_GROUP_HOVEL:  min = HOUSE_SMALL_HOVEL;  max = HOUSE_LARGE_HOVEL;  break;
@@ -279,7 +280,7 @@ city_property_info_t city_property_get_param_info(city_property_t type)
             info.param_types[2] = PARAMETER_TYPE_BOOLEAN; // respect settings
             info.param_keys[0] = TR_PARAMETER_TYPE_RESOURCE;
             info.param_keys[1] = TR_PARAMETER_TYPE_STORAGE_TYPE;
-            info.param_keys[2] = TR_PARAMETER_TYPE_BOOLEAN;
+            info.param_keys[2] = TR_PARAMETER_RESPECT_SETTINGS;
             break;
 
         case CITY_PROPERTY_SERVICE_COVERAGE:
@@ -335,7 +336,16 @@ city_property_info_t city_property_get_param_info(city_property_t type)
             info.param_types[0] = PARAMETER_TYPE_TERRAIN;
             info.param_keys[0] = TR_PARAMETER_TERRAIN;
             break;
-
+        case CITY_PROPERTY_QUOTA_FILL_IMPORT:
+        case CITY_PROPERTY_QUOTA_FILL_EXPORT:
+            info.count = 3;
+            info.param_types[0] = PARAMETER_TYPE_ROUTE;
+            info.param_types[1] = PARAMETER_TYPE_RESOURCE;
+            info.param_types[2] = PARAMETER_TYPE_PERCENTAGE;
+            info.param_keys[0] = TR_PARAMETER_TYPE_ROUTE;
+            info.param_keys[1] = TR_PARAMETER_TYPE_RESOURCE;
+            info.param_keys[2] = TR_PARAMETER_PERCENTAGE;
+            break;
             // --- Invalid / none ---
         case CITY_PROPERTY_NONE:
         case CITY_PROPERTY_MAX:

@@ -306,7 +306,7 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm1 = {.name = "variable_uid",   .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,      .max_limit = 99,     .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
                                         .xml_parm2 = {.name = "formula",        .type = PARAMETER_TYPE_FORMULA,          .key = TR_PARAMETER_TYPE_FORMULA }, },
     [ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY] = {.type = ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY,
-                                        .xml_attr = {.name = "variable_city_property",  .type = PARAMETER_TYPE_TEXT,             .key = TR_EDITOR_PARAMETER_CITY_PROPERTY },
+                                        .xml_attr = {.name = "variable_city_property",  .type = PARAMETER_TYPE_TEXT,             .key = TR_EDITOR_ACTION_TYPE_CITY_PROPERTY },
                                         .xml_parm1 = {.name = "variable_uid",            .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,      .max_limit = 99,     .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
                                         .xml_parm2 = {.name = "property",                .type = PARAMETER_TYPE_CITY_PROPERTY,    .key = TR_EDITOR_PARAMETER_CITY_PROPERTY},
                                         .xml_parm3 = {.name = "flexible",                .type = PARAMETER_TYPE_FLEXIBLE  ,           .key = TR_PLACEHOLDER },
@@ -663,6 +663,9 @@ static special_attribute_mapping_t special_attribute_mappings_city_property[] = 
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "troops_count_player",     .value = CITY_PROPERTY_TROOPS_COUNT_PLAYER,     .key = TR_CITY_PROPERTY_TROOPS_COUNT_PLAYER },
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "troops_count_enemy",      .value = CITY_PROPERTY_TROOPS_COUNT_ENEMY,      .key = TR_CITY_PROPERTY_TROOPS_COUNT_ENEMY },
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "terrain_count_tiles",     .value = CITY_PROPERTY_TERRAIN_COUNT_TILES,     .key = TR_CITY_PROPERTY_TERRAIN_COUNT_TILES },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "quota_fill_import",       .value = CITY_PROPERTY_QUOTA_FILL_IMPORT,       .key = TR_CITY_PROPERTY_QUOTA_FILL_IMPORT },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "quota_fill_export",       .value = CITY_PROPERTY_QUOTA_FILL_EXPORT,       .key = TR_CITY_PROPERTY_QUOTA_FILL_EXPORT },
+
 };
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_CITY_PROPERTY_SIZE (sizeof(special_attribute_mappings_city_property) / sizeof(special_attribute_mapping_t))
@@ -762,6 +765,37 @@ static void generate_allowed_buildings_mappings(void)
         generate_submenu_mappings(group);
     }
 }
+
+// static void generate_route_resource_mappings(int route_id, special_attribute_mapping_t *mappings)
+// {
+
+//     if (route_id < 0 ) {
+//         return;
+//     }
+
+//     empire_city *city = empire_city_get(route_id);
+//     if (!city || !city->in_use) {
+//         return;
+//     }
+
+//     // Iterate through all resources to check which ones this route trades
+//     for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+//         if (!resource_is_storable(r)) {
+//             continue;
+//         }
+
+//         // Check if city buys or sells this resource
+//         if (empire_city_is_trade_route(route_id) && 
+//             (empire_city_sells_resource(route_id, r) || empire_city_buys_resource(route_id, r))) {
+
+//             special_attribute_mapping_t *mapping = &mappings[*size];
+//             mapping->type = PARAMETER_TYPE_ROUTE_RESOURCE;
+//             mapping->text = resource_get_data(r)->xml_attr_name;
+//             mapping->value = r;
+//             (*size)++;
+//         }
+//     }
+// }
 
 special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mapping(parameter_type type, int index)
 {
@@ -957,6 +991,8 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
             return FIGURE_FORT_STANDARD;
         case PARAMETER_TYPE_COVERAGE_BUILDINGS:
             return BUILDING_THEATER;
+        case PARAMETER_TYPE_ROUTE_RESOURCE:
+            return RESOURCE_NONE;
         default:
             return 0;
     }

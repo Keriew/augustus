@@ -227,7 +227,7 @@ static void draw_topleft_label_with_fragments(int x, int y, const lang_fragment 
     label_draw(x, y, label_blocks, 1);
 
     // Draw the sequence using the new lang_fragment system
-    lang_text_draw_sequence(fragments, fragment_count, x + 6, y + 4, font);
+    lang_text_draw_sequence(fragments, fragment_count, x + 6, y + 4, font, COLOR_MASK_NONE);
 }
 
 //wrapper for the common case of a single text + value

@@ -1744,7 +1744,8 @@ static translation_string all_strings[] = {
     {TR_OVERLAY_HOUSE_VILLAS, "Villas"},
     {TR_OVERLAY_HOUSE_PALACES, "Palaces"},
     {TR_OVERLAY_BY_GROUP, "By Group"},
-    {TR_EDITOR_PARAMETER_CITY_PROPERTY, "Change custom variable value (city property)" },
+    {TR_EDITOR_PARAMETER_CITY_PROPERTY, "City property" },
+    {TR_EDITOR_ACTION_TYPE_CITY_PROPERTY, "Change custom variable value (city property)" },
     {TR_PARAMETER_PERCENTAGE, "Percentage" },
     {TR_PARAMETER_ABSOLUTE, "Absolute" },
     {TR_DECENNIUM_0, "0-9"},
@@ -1799,6 +1800,8 @@ static translation_string all_strings[] = {
     {TR_CITY_PROPERTY_COVERAGE_ACADEMY, "Academy coverage"},
     {TR_CITY_PROPERTY_CHOOSE_PROPERTY, "Choose City property"},
     {TR_BUTTON_INFO_RETURN_ALL_LEGIONS, "Recall all legions"},
+    {TR_CITY_PROPERTY_QUOTA_FILL_IMPORT, "Import quota fill"},
+    {TR_CITY_PROPERTY_QUOTA_FILL_EXPORT, "Export quota fill"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

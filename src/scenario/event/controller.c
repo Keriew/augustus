@@ -1,5 +1,6 @@
 #include "controller.h"
 
+#include "core/array.h"
 #include "core/log.h"
 #include "game/save_version.h"
 #include "scenario/event/action_handler.h"
@@ -224,10 +225,10 @@ static void actions_save_state(buffer *buf)
     int struct_size = (2 * sizeof(int16_t)) + (6 * sizeof(int32_t));
     buffer_init_dynamic_array(buf, array_size, struct_size);
 
-    for (int i = 0; i < scenario_events.size; i++) {
+    for (unsigned int i = 0; i < scenario_events.size; i++) {
         current_event = array_item(scenario_events, i);
 
-        for (int j = 0; j < current_event->actions.size; j++) {
+        for (unsigned int j = 0; j < current_event->actions.size; j++) {
             scenario_action_t *current_action = array_item(current_event->actions, j);
             scenario_action_type_save_state(buf, current_action, LINK_TYPE_SCENARIO_EVENT, current_event->id);
         }
