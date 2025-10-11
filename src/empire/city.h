@@ -54,6 +54,10 @@ int empire_city_get_for_object(int empire_object_id);
 
 int empire_city_get_for_trade_route(int route_id);
 
+int empire_city_buys_resource(int city_id, int resource);
+
+int empire_city_sells_resource(int city_id, int resource);
+
 int empire_city_get_trade_routes_count(int is_sea_trade, int is_route_open);
 
 int empire_city_is_trade_route_open(int route_id);

@@ -66,6 +66,7 @@ static struct {
 
     uint8_t display_text[MAX_TEXT_LENGTH];
     uint8_t formula[MAX_FORMULA_LENGTH];
+    uint8_t route_resource_name[MAX_TEXT_LENGTH];
     int formula_min_limit;
     int formula_max_limit;
     unsigned int formula_index;
@@ -312,6 +313,12 @@ static void set_param_value(int value)
     }
 }
 
+static void set_parameter_route_resource(int value, const uint8_t *name)
+{
+    string_copy(name, data.route_resource_name, MAX_TEXT_LENGTH);
+    set_param_value(value);
+}
+
 static void set_parameter_being_edited(int value)
 {
     data.parameter_being_edited = value;
@@ -538,6 +545,10 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             return;
         case PARAMETER_TYPE_FORMULA:
             create_evaluation_formula(parameter);
+            return;
+        case PARAMETER_TYPE_ROUTE_RESOURCE:
+            // Pass the route_id from parameter3 to the window
+            window_editor_select_city_resources_for_route_show(set_param_value, data.action->parameter3);
             return;
         default:
             return;

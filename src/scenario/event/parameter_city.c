@@ -13,6 +13,8 @@
 #include "city/ratings.h"
 #include "city/resource.h"
 #include "core/calc.h"
+#include "empire/city.h"
+#include "empire/trade_route.h"
 #include "figure/figure.h"
 #include "figure/formation.h"
 #include "map/grid.h"
@@ -20,7 +22,12 @@
 #include "scenario/event/parameter_data.h"
 #include "game/settings.h"
 #include "window/advisors.h"
+#include "window/editor/select_city_trade_route.h"
 #include "parameter_city.h"
+
+#define RESOURCE_ALL_BUYS RESOURCE_MAX + 1 // max +1 indicates all resources that this trade route buys
+#define RESOURCE_ALL_SELLS RESOURCE_MAX + 2 // max +2 indicates all resources that this trade route sells
+//above mirros the defines in select_city_trade_route.c
 
 static int resource_count(scenario_action_t *action)
 {
@@ -210,6 +217,39 @@ static int get_terrain_tiles_count(scenario_action_t *action)
     return count;
 }
 
+static int city_trade_quota_fill_percentage(scenario_action_t *action)
+{
+    // Decode the encoded route+resource value from parameter4
+    int encoded_value = action->parameter4;
+    unsigned int trade_route_id = window_editor_select_city_trade_route_decode_route_id(encoded_value);
+    unsigned int resource_id = window_editor_select_city_trade_route_decode_resource_id(encoded_value);
+    unsigned int is_absolute = action->parameter5;
+    int traded = 0;
+    int limit = 0;
+    int city_id = empire_city_get_for_trade_route(trade_route_id);
+
+    if (resource_id == RESOURCE_ALL_BUYS || resource_id == RESOURCE_ALL_SELLS) {
+        for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+            int buys = empire_city_buys_resource(city_id, r);
+            int sells = empire_city_sells_resource(city_id, r);
+
+            if ((resource_id == RESOURCE_ALL_BUYS && buys) || (resource_id == RESOURCE_ALL_SELLS && sells)) {
+                traded += trade_route_traded(trade_route_id, r);
+                limit += trade_route_limit(trade_route_id, r);
+            }
+        }
+    } else {
+        traded = trade_route_traded(trade_route_id, resource_id);
+        limit = trade_route_limit(trade_route_id, resource_id);
+    }
+    if (is_absolute) {
+        return traded;
+    }
+    return limit == 0 ? 0 : calc_percentage(traded, limit);
+}
+
+
+
 int scenario_event_parameter_city_for_action(scenario_action_t *action)
 {
     city_property_t type = action->parameter2;
@@ -258,7 +298,8 @@ int scenario_event_parameter_city_for_action(scenario_action_t *action)
             return get_enemy_troops_count(action);
         case CITY_PROPERTY_TERRAIN_COUNT_TILES:
             return get_terrain_tiles_count(action);
-
+        case CITY_PROPERTY_QUOTA_FILL:
+            return city_trade_quota_fill_percentage(action);
         case CITY_PROPERTY_NONE:
         case CITY_PROPERTY_MAX:
         default:
@@ -336,11 +377,10 @@ city_property_info_t city_property_get_param_info(city_property_t type)
             info.param_types[0] = PARAMETER_TYPE_TERRAIN;
             info.param_keys[0] = TR_PARAMETER_TERRAIN;
             break;
-        case CITY_PROPERTY_QUOTA_FILL_IMPORT:
-        case CITY_PROPERTY_QUOTA_FILL_EXPORT:
+        case CITY_PROPERTY_QUOTA_FILL:
             info.count = 3;
             info.param_types[0] = PARAMETER_TYPE_ROUTE;
-            info.param_types[1] = PARAMETER_TYPE_RESOURCE;
+            info.param_types[1] = PARAMETER_TYPE_ROUTE_RESOURCE;
             info.param_types[2] = PARAMETER_TYPE_PERCENTAGE;
             info.param_keys[0] = TR_PARAMETER_TYPE_ROUTE;
             info.param_keys[1] = TR_PARAMETER_TYPE_RESOURCE;

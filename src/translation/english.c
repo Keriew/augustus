@@ -1800,8 +1800,11 @@ static translation_string all_strings[] = {
     {TR_CITY_PROPERTY_COVERAGE_ACADEMY, "Academy coverage"},
     {TR_CITY_PROPERTY_CHOOSE_PROPERTY, "Choose City property"},
     {TR_BUTTON_INFO_RETURN_ALL_LEGIONS, "Recall all legions"},
-    {TR_CITY_PROPERTY_QUOTA_FILL_IMPORT, "Import quota fill"},
-    {TR_CITY_PROPERTY_QUOTA_FILL_EXPORT, "Export quota fill"},
+    {TR_CITY_PROPERTY_QUOTA_FILL, "Quota fill"},
+    {TR_EDITOR_BUYS, "(Buys)"},
+    {TR_EDITOR_SELLS, "(Sells)"},
+    {TR_EDITOR_ALL_BUYS, "All (Buys)"},
+    {TR_EDITOR_ALL_SELLS, "All (Sells)"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

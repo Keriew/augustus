@@ -19,6 +19,7 @@
 #include "scenario/custom_variable.h"
 #include "scenario/invasion.h"
 #include "scenario/request.h"
+#include "window/editor/select_city_trade_route.h"
 
 #define UNLIMITED 1000000000 //fits in 32bit signed/unsigned int
 #define NEGATIVE_UNLIMITED -1000000000 //fits in 32bit signed int
@@ -663,8 +664,7 @@ static special_attribute_mapping_t special_attribute_mappings_city_property[] = 
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "troops_count_player",     .value = CITY_PROPERTY_TROOPS_COUNT_PLAYER,     .key = TR_CITY_PROPERTY_TROOPS_COUNT_PLAYER },
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "troops_count_enemy",      .value = CITY_PROPERTY_TROOPS_COUNT_ENEMY,      .key = TR_CITY_PROPERTY_TROOPS_COUNT_ENEMY },
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "terrain_count_tiles",     .value = CITY_PROPERTY_TERRAIN_COUNT_TILES,     .key = TR_CITY_PROPERTY_TERRAIN_COUNT_TILES },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "quota_fill_import",       .value = CITY_PROPERTY_QUOTA_FILL_IMPORT,       .key = TR_CITY_PROPERTY_QUOTA_FILL_IMPORT },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "quota_fill_export",       .value = CITY_PROPERTY_QUOTA_FILL_EXPORT,       .key = TR_CITY_PROPERTY_QUOTA_FILL_EXPORT },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "quota_fill_import",       .value = CITY_PROPERTY_QUOTA_FILL,              .key = TR_CITY_PROPERTY_QUOTA_FILL },
 
 };
 
@@ -765,37 +765,6 @@ static void generate_allowed_buildings_mappings(void)
         generate_submenu_mappings(group);
     }
 }
-
-// static void generate_route_resource_mappings(int route_id, special_attribute_mapping_t *mappings)
-// {
-
-//     if (route_id < 0 ) {
-//         return;
-//     }
-
-//     empire_city *city = empire_city_get(route_id);
-//     if (!city || !city->in_use) {
-//         return;
-//     }
-
-//     // Iterate through all resources to check which ones this route trades
-//     for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-//         if (!resource_is_storable(r)) {
-//             continue;
-//         }
-
-//         // Check if city buys or sells this resource
-//         if (empire_city_is_trade_route(route_id) && 
-//             (empire_city_sells_resource(route_id, r) || empire_city_buys_resource(route_id, r))) {
-
-//             special_attribute_mapping_t *mapping = &mappings[*size];
-//             mapping->type = PARAMETER_TYPE_ROUTE_RESOURCE;
-//             mapping->text = resource_get_data(r)->xml_attr_name;
-//             mapping->value = r;
-//             (*size)++;
-//         }
-//     }
-// }
 
 special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mapping(parameter_type type, int index)
 {
@@ -992,7 +961,10 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
         case PARAMETER_TYPE_COVERAGE_BUILDINGS:
             return BUILDING_THEATER;
         case PARAMETER_TYPE_ROUTE_RESOURCE:
-            return RESOURCE_NONE;
+            // Encode default route_id=1 with RESOURCE_ALL_BUYS (RESOURCE_MAX + 1)
+            return window_editor_select_city_trade_route_encode_route_resource(1, RESOURCE_MAX + 1);
+        case PARAMETER_TYPE_ROUTE:
+            return 1; // there should be at least one route
         default:
             return 0;
     }
@@ -1175,6 +1147,12 @@ void scenario_events_parameter_data_get_display_string_for_value(parameter_type 
             if (formula_string) {
                 result_text = string_copy(formula_string, result_text, maxlength);
             }
+            return;
+        }
+        case PARAMETER_TYPE_ROUTE_RESOURCE:
+        {
+            const uint8_t *text = window_editor_select_city_trade_route_show_get_selected_name(value);
+            result_text = string_copy(text, result_text, maxlength);
             return;
         }
         default:
@@ -1500,7 +1478,6 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
             }
             return;
         }
-
         default:
         {
             result_text = append_text(string_from_ascii(" UNHANDLED ACTION TYPE!"), result_text, &maxlength);
