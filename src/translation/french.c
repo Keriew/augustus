@@ -1709,6 +1709,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_UI_ANIMATE_TRADE_ROUTES, "Animer les routes commerciales"},
     {TR_HOTKEY_NEXT_TRACK, "Piste audio suivante"},
     {TR_CONFIG_MOVE_LEGION_SOUND_SWAP, "Son alternatif pour le déplacement des légions"},
+    // TODO 1695 - 1702
     {TR_CONFIG_ADVANCED_CART_DEPOT_OPTIONS, "Activer les ordres avancés du dépôt de charrettes"},
     {TR_BUILDING_INFO_INSTRUCTIONS, "Instructions" },
     {TR_BUILDING_INFO_ACTIVE_STORAGE_BUILDINGS, "Bâtiments acceptant la ressource" },
@@ -1718,7 +1719,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_NONE, "Aucun"},
     {TR_TOOLTIP_MINIMAL, "Minimal"},
     {TR_TOOLTIP_FULL, "Complet"},
-    {TR_CONFIG_CLEAR_WARNINGS_RIGHTCLICK,"Clic droit pour fermer les bandeaux d'alerte"},
+    {TR_CONFIG_CLEAR_WARNINGS_RIGHTCLICK, "Clic droit pour fermer les bandeaux d'alerte"},
     {TR_CONFIG_GP_CH_STORAGE_REQUESTS_RESPECT_MAINTAIN, "Les requêtes de César respectent l'ordre 'Conserver'"},
     {TR_CONFIG_ENABLE_MARKET_RANGE, "Zone de couverture par défaut des marchés"}
 };
