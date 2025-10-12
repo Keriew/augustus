@@ -26,6 +26,7 @@ enum {
     DESTROY_COLLAPSE = 0,
     DESTROY_FIRE = 1,
     DESTROY_NO_RUBBLE = 2,
+    DESTROY_EARTHQUAKE = 3, // earthquake collapses - non repairable, rubble where possible, remove from array at once
 };
 static void destroy_without_rubble(building *b)
 {
@@ -144,6 +145,10 @@ static void destroy_linked_parts(building *b, int destruction_method, int plague
             case DESTROY_FIRE:
                 destroy_on_fire(part, plagued);
                 break;
+            case DESTROY_EARTHQUAKE:
+                part->state = BUILDING_STATE_DELETED_BY_GAME;
+                map_building_tiles_set_rubble(part_id, part->x, part->y, part->size);
+                break;
             default:
                 map_building_tiles_set_rubble(part_id, part->x, part->y, part->size);
                 part->state = BUILDING_STATE_RUBBLE;
@@ -165,6 +170,9 @@ static void destroy_linked_parts(building *b, int destruction_method, int plague
             case DESTROY_FIRE:
                 destroy_on_fire(part, plagued);
                 break;
+            case DESTROY_EARTHQUAKE:
+                part->state = BUILDING_STATE_DELETED_BY_GAME;
+                map_building_tiles_set_rubble(part_id, part->x, part->y, part->size);
             default:
                 map_building_tiles_set_rubble(part_id, part->x, part->y, part->size);
                 part->state = BUILDING_STATE_RUBBLE;
@@ -193,6 +201,11 @@ void building_destroy_by_fire(building *b)
 {
     destroy_on_fire(b, 0);
     destroy_linked_parts(b, DESTROY_FIRE, 0);
+}
+void building_destroy_by_earthquake(building *b)
+{
+    map_building_tiles_set_rubble(b->id, b->x, b->y, b->size);
+    destroy_linked_parts(b, DESTROY_EARTHQUAKE, 0);
 }
 
 void building_destroy_by_plague(building *b)

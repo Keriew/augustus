@@ -74,7 +74,7 @@ static void advance_earthquake_to_tile(int x, int y)
     if (building_id) {
         building *b = building_get(building_id);
         if (b->type != BUILDING_BURNING_RUIN) {
-            building_destroy_by_fire(b);
+            building_destroy_by_earthquake(b);
         }
         sound_effect_play(SOUND_EFFECT_EXPLOSION);
         int ruin_id = map_building_at(grid_offset);
