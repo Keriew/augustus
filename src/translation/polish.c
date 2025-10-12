@@ -1574,7 +1574,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_INFO_BUILDING_BURNING, "Budynek się pali" },
     {TR_BUILDING_LAND_REPAIR, "Napraw obszar"},
     {TR_BUILDING_LAND_CLEAR, "Wyczyść obszar"},
-    {TR_CONFIRM_REPAIR_BUILDINGS, "Napraw wszystkie budynki w obszarze za "},
+    {TR_CONFIRM_REPAIR_BUILDINGS, "Naprawić wszystkie budynki w obszarze za "},
     {TR_CONFIRM_REPAIR_BUILDINGS_TITLE, "Napraw budynki"},
     {TR_CONFIG_ADVANCED_CART_DEPOT_OPTIONS, "Zaawansowane instrukcje dla składów wózków"},
     {TR_BUILDING_INFO_INSTRUCTIONS, "Instrukcje" },
