@@ -493,6 +493,11 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
         version_data->features.scenario_events = 1;
         version_data->features.scenario_conditions = 1;
         version_data->features.scenario_actions = 1;
+        if (version > SAVE_GAME_LAST_NO_FORMULAS) {
+            version_data->features.scenario_formulas = 1;
+        } else {
+            version_data->features.scenario_formulas = 0;
+        }
     } else {
         version_data->features.scenario_events = 0;
         version_data->features.scenario_conditions = 0;
