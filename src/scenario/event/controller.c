@@ -48,7 +48,7 @@ unsigned int scenario_formula_add(const uint8_t *formatted_calculation, int min_
     return calculation.id;
 }
 
-void scenario_formula_change(unsigned int id, const uint8_t *formatted_calculation)
+void scenario_formula_change(unsigned int id, const uint8_t *formatted_calculation, int min_eval, int max_eval)
 {
     if (id <= 0 || id > scenario_formulas_size) {
         log_error("Invalid formula ID.", 0, 0);
@@ -56,6 +56,8 @@ void scenario_formula_change(unsigned int id, const uint8_t *formatted_calculati
     }
     strncpy((char *) scenario_formulas[id].formatted_calculation,
         (const char *) formatted_calculation, MAX_FORMULA_LENGTH - 1);
+    scenario_formulas[id].min_evaluation = min_eval; //update limits too
+    scenario_formulas[id].max_evaluation = max_eval;
     if (!scenario_event_formula_check(&scenario_formulas[id])) {
         scenario_formulas[id].evaluation = 0;
         scenario_formulas[id].is_error = 1;

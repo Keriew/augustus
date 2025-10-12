@@ -217,7 +217,7 @@ static void set_formula_value(const uint8_t *formula)
         set_param_value(data.formula_index);
     } else {
         // Update existing formula
-        scenario_formula_change(data.formula_index, data.formula);
+        scenario_formula_change(data.formula_index, data.formula, data.formula_min_limit, data.formula_max_limit);
         set_param_value(data.formula_index);
     }
     window_invalidate();
@@ -413,6 +413,8 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             custom_variable_selection();
             return;
         case PARAMETER_TYPE_FORMULA:
+            data.formula_min_limit = parameter->min_limit;
+            data.formula_max_limit = parameter->max_limit;
             create_evaluation_formula();
         default:
             return;

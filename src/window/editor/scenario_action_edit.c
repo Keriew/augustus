@@ -432,7 +432,7 @@ static void set_formula_value(const uint8_t *formula)
         set_param_value(data.formula_index);
     } else {
         // Update existing formula
-        scenario_formula_change(data.formula_index, data.formula);
+        scenario_formula_change(data.formula_index, data.formula, data.formula_min_limit, data.formula_max_limit);
         set_param_value(data.formula_index);
     }
     window_invalidate();
