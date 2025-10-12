@@ -346,10 +346,10 @@ static void stop_input(void)
 
 static void convert_repeat_interval(void)
 {
-    if (data.event->repeat_inverval == REPEAT_INTERVAL_MONTHS) {
+    if (data.event->repeat_interval == REPEAT_INTERVAL_MONTHS) {
         data.event->repeat_days_min *= 16;
         data.event->repeat_days_max *= 16;
-    } else if (data.event->repeat_inverval == REPEAT_INTERVAL_YEARS) {
+    } else if (data.event->repeat_interval == REPEAT_INTERVAL_YEARS) {
         data.event->repeat_days_min *= 16 * 12;
         data.event->repeat_days_max *= 16 * 12;
     }
@@ -380,7 +380,7 @@ static void prepare_event(int event_id)
 
 static void set_repeat_interval_type(dropdown_button *dd)
 {
-    data.event->repeat_inverval = dd->selected_index;//callback
+    data.event->repeat_interval = dd->selected_index;//callback
 }
 
 static void dropdown_init(void)
@@ -397,7 +397,7 @@ static void dropdown_init(void)
     repeat_interval_dropdown.padding = 0;
     repeat_interval_dropdown.selected_callback = set_repeat_interval_type;
     repeat_interval_dropdown.selected_index =
-        data.event->repeat_inverval ? data.event->repeat_inverval : REPEAT_INTERVAL_DAYS;
+        data.event->repeat_interval ? data.event->repeat_interval : REPEAT_INTERVAL_DAYS;
     dropdown_button_init_simple(dd_x, dd_y, repeat_interval_frags, 4, &repeat_interval_dropdown);
 
 }
@@ -734,9 +734,9 @@ static void button_repeat_times(const generic_button *button)
 
 static int convert_days_to_display(int days)
 {
-    if (data.event->repeat_inverval == REPEAT_INTERVAL_MONTHS) {
+    if (data.event->repeat_interval == REPEAT_INTERVAL_MONTHS) {
         return days / 16;
-    } else if (data.event->repeat_inverval == REPEAT_INTERVAL_YEARS) {
+    } else if (data.event->repeat_interval == REPEAT_INTERVAL_YEARS) {
         return days / 16 / 12;
     } else {
         return days;
@@ -745,9 +745,9 @@ static int convert_days_to_display(int days)
 
 static int convert_display_to_days(int display)
 {
-    if (data.event->repeat_inverval == REPEAT_INTERVAL_MONTHS) {
+    if (data.event->repeat_interval == REPEAT_INTERVAL_MONTHS) {
         return display * 16;
-    } else if (data.event->repeat_inverval == REPEAT_INTERVAL_YEARS) {
+    } else if (data.event->repeat_interval == REPEAT_INTERVAL_YEARS) {
         return display * 16 * 12;
     } else {
         return display;

@@ -147,6 +147,7 @@ scenario_event_t *scenario_event_create(int repeat_min, int repeat_max, int max_
     event->repeat_days_min = repeat_min;
     event->repeat_days_max = repeat_max;
     event->max_number_of_repeats = max_repeats;
+    event->repeat_interval = 1; // Default to every day
 
     return event;
 }
@@ -173,7 +174,13 @@ int scenario_events_get_count(void)
 static void info_save_state(buffer *buf)
 {
     uint32_t array_size = scenario_events.size;
-    uint32_t struct_size = (6 * sizeof(int32_t)) + (3 * sizeof(int16_t)) + EVENT_NAME_LENGTH * 2 * sizeof(char);
+    uint32_t struct_size =
+        (6 * sizeof(int32_t)) + // repeat_days_min, repeat_days_max, days_until_active, max_repeats, exec_count + id
+        (1 * sizeof(int16_t)) + // state
+        (1 * sizeof(uint8_t)) + // repeat_interval
+        (2 * sizeof(uint16_t)) + // actions.size, condition_groups.size
+        (EVENT_NAME_LENGTH * 2 * sizeof(char)); // name_utf8
+
     buffer_init_dynamic_array(buf, array_size, struct_size);
 
     scenario_event_t *current;

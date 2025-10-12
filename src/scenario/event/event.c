@@ -36,14 +36,17 @@ void scenario_event_init(scenario_event_t *event)
     event->state = EVENT_STATE_ACTIVE;
     scenario_condition_group_t *group;
     scenario_condition_t *condition;
-    array_foreach(event->condition_groups, group) {
-        array_foreach(group->conditions, condition) {
+    array_foreach(event->condition_groups, group)
+    {
+        array_foreach(group->conditions, condition)
+        {
             scenario_condition_type_init(condition);
         }
     }
     scenario_action_t *action;
-    array_foreach(event->actions, action) {
-       scenario_action_type_init(action);
+    array_foreach(event->actions, action)
+    {
+        scenario_action_type_init(action);
     }
 }
 
@@ -57,7 +60,7 @@ void scenario_event_save_state(buffer *buf, scenario_event_t *event)
     buffer_write_i16(buf, event->state);
     buffer_write_i32(buf, event->repeat_days_min);
     buffer_write_i32(buf, event->repeat_days_max);
-    buffer_write_u8(buf, event->repeat_inverval);
+    buffer_write_u8(buf, event->repeat_interval);
     buffer_write_i32(buf, event->days_until_active);
     buffer_write_i32(buf, event->max_number_of_repeats);
     buffer_write_i32(buf, event->execution_count);
@@ -75,11 +78,11 @@ void scenario_event_load_state(buffer *buf, scenario_event_t *event, int scenari
     event->repeat_days_min = buffer_read_i32(buf);
     event->repeat_days_max = buffer_read_i32(buf);
     if (scenario_version <= SCENARIO_LAST_NO_FORMULAS) {
-        event->repeat_inverval = 2; // months
+        event->repeat_interval = 2; // months
         event->repeat_days_min *= 16;
         event->repeat_days_max *= 16;
     } else {
-        event->repeat_inverval = buffer_read_u8(buf);
+        event->repeat_interval = buffer_read_u8(buf);
     }
     event->days_until_active = buffer_read_i32(buf);
     event->max_number_of_repeats = buffer_read_i32(buf);
@@ -175,7 +178,8 @@ static int conditions_fulfilled(scenario_event_t *event)
     }
 
     scenario_condition_group_t *group;
-    array_foreach(event->condition_groups, group) {
+    array_foreach(event->condition_groups, group)
+    {
         int group_fulfilled = 0;
         for (unsigned int i = 0; i < group->conditions.size; i++) {
             scenario_condition_t *condition = array_item(group->conditions, i);
@@ -217,7 +221,8 @@ int scenario_event_count_conditions(const scenario_event_t *event)
 {
     int total_conditions = 0;
     const scenario_condition_group_t *group;
-    array_foreach(event->condition_groups, group) {
+    array_foreach(event->condition_groups, group)
+    {
         total_conditions += group->conditions.size;
     }
     return total_conditions;
