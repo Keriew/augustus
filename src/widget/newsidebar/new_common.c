@@ -12,7 +12,7 @@ int new_sidebar_common_get_x_offset_expanded(void)
 
 int new_sidebar_common_get_x_offset_collapsed(void)
 {
-    return screen_width() - SIDEBAR_COLLAPSED_WIDTH;
+    return screen_width() - SIDEBAR_EXPANDED_WIDTH;
 }
 
 int new_sidebar_common_get_height(void)

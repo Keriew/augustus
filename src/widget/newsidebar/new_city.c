@@ -110,18 +110,21 @@ static void draw_overlay_text(int x_offset)
     }
 }
 
-static void draw_new_sidebar_remainder(int x_offset, int is_collapsed)
+static void draw_new_sidebar_remainder(int x_offset)
 {
-    int width = SIDEBAR_EXPANDED_WIDTH;
-    if (is_collapsed) {
-        width = SIDEBAR_COLLAPSED_WIDTH;
-    }
-    int available_height = new_sidebar_common_get_height() - SIDEBAR_MAIN_SECTION_HEIGHT;
-    int extra_height = new_sidebar_extra_draw_background(x_offset, SIDEBAR_FILLER_Y_OFFSET,
-        width, available_height, is_collapsed, NEW_SIDEBAR_EXTRA_DISPLAY_ALL);
+    //int width = SIDEBAR_EXPANDED_WIDTH;
+    int width = 162;
+
+   // int available_height = new_sidebar_common_get_height() - SIDEBAR_MAIN_SECTION_HEIGHT;
+   int available_height = new_sidebar_common_get_height() - MINIMAP_HEIGHT - MINIMAP_Y_OFFSET;
+
+    int y_offset = SIDEBAR_FILLER_Y_OFFSET + MINIMAP_Y_OFFSET;
+
+    int extra_height = new_sidebar_extra_draw_background(x_offset, y_offset,
+        width, available_height, 0, NEW_SIDEBAR_EXTRA_DISPLAY_ALL);
     new_sidebar_extra_draw_foreground();
     int relief_y_offset = SIDEBAR_FILLER_Y_OFFSET + extra_height;
-    new_sidebar_common_draw_relief(x_offset, relief_y_offset, GROUP_SIDE_PANEL, is_collapsed);
+    new_sidebar_common_draw_relief(x_offset, relief_y_offset, GROUP_SIDE_PANEL, 0);
 }
 
 static void draw_number_of_messages(int x_offset)
@@ -159,7 +162,7 @@ static void draw_collapsed_background(void)
     int x_offset = new_sidebar_common_get_x_offset_collapsed();
     image_draw(image_group(GROUP_SIDE_PANEL), x_offset, 24, COLOR_MASK_NONE, SCALE_NONE);
     draw_buttons_collapsed(x_offset);
-    draw_new_sidebar_remainder(x_offset, 1);
+    draw_new_sidebar_remainder(x_offset + 42);
 }
 
 static void draw_expanded_background(int x_offset)
@@ -169,19 +172,22 @@ static void draw_expanded_background(int x_offset)
     draw_overlay_text(x_offset + 4);
     draw_number_of_messages(x_offset);
     image_draw(window_build_menu_image(), x_offset + 6, 239, COLOR_MASK_NONE, SCALE_NONE);
+
     widget_minimap_update(0);
     widget_minimap_draw_decorated(x_offset + 8, MINIMAP_Y_OFFSET, MINIMAP_WIDTH, MINIMAP_HEIGHT);
 
-    draw_new_sidebar_remainder(x_offset, 0);
+    draw_new_sidebar_remainder(x_offset);
 }
 
 void widget_new_sidebar_city_draw_background(void)
 {
-    if (city_view_is_sidebar_collapsed()) {
-        draw_collapsed_background();
-    } else {
-        draw_expanded_background(new_sidebar_common_get_x_offset_expanded());
-    }
+    draw_collapsed_background();
+    //
+    // if (city_view_is_sidebar_collapsed()) {
+    //     draw_collapsed_background();
+    // } else {
+    //     draw_expanded_background(new_sidebar_common_get_x_offset_expanded());
+    // }
 }
 
 static void enable_building_buttons(void)
@@ -204,17 +210,23 @@ void widget_new_sidebar_city_draw_foreground(void)
     if (building_menu_has_changed()) {
         enable_building_buttons();
     }
-    if (city_view_is_sidebar_collapsed()) {
-        int x_offset = new_sidebar_common_get_x_offset_collapsed();
-        draw_buttons_collapsed(x_offset);
-    } else {
-        int x_offset = new_sidebar_common_get_x_offset_expanded();
-        draw_buttons_expanded(x_offset);
-        draw_overlay_text(x_offset + 4);
-        widget_minimap_draw_decorated(x_offset + 8, MINIMAP_Y_OFFSET, MINIMAP_WIDTH, MINIMAP_HEIGHT);
-        draw_number_of_messages(x_offset);
-    }
-    new_sidebar_extra_draw_foreground();
+
+    int x_offset = new_sidebar_common_get_x_offset_collapsed();
+    draw_buttons_collapsed(x_offset);
+
+    int new_x_offset = x_offset + 42;
+
+    // if (city_view_is_sidebar_collapsed()) {
+    //     int x_offset = new_sidebar_common_get_x_offset_collapsed();
+    //     draw_buttons_collapsed(x_offset);
+    // } else {
+     //   int x_offset = new_sidebar_common_get_x_offset_expanded();
+     //   draw_buttons_expanded(new_x_offset);
+       // draw_overlay_text(new_x_offset + 4);
+        widget_minimap_draw_decorated(new_x_offset + 8, MINIMAP_Y_OFFSET, MINIMAP_WIDTH, MINIMAP_HEIGHT);
+    //    draw_number_of_messages(new_x_offset);
+   // }
+   new_sidebar_extra_draw_foreground();
 }
 
 int widget_new_sidebar_city_handle_mouse(const mouse *m)
@@ -225,7 +237,7 @@ int widget_new_sidebar_city_handle_mouse(const mouse *m)
     int handled = 0;
     unsigned int button_id;
     data.focus_button_for_tooltip = 0;
-    if (city_view_is_sidebar_collapsed()) {
+   // if (city_view_is_sidebar_collapsed()) {
         int x_offset = new_sidebar_common_get_x_offset_collapsed();
         handled |= image_buttons_handle_mouse(m, x_offset, 24, button_expand_new_sidebar, 1, &button_id);
         if (button_id) {
@@ -235,37 +247,37 @@ int widget_new_sidebar_city_handle_mouse(const mouse *m)
         if (button_id) {
             data.focus_button_for_tooltip = button_id + 19;
         }
-    } else {
-        if (widget_minimap_handle_mouse(m)) {
-            return 1;
-        }
-        int x_offset = new_sidebar_common_get_x_offset_expanded();
-        handled |= image_buttons_handle_mouse(m, x_offset, 24, buttons_overlays_collapse_new_sidebar, 2, &button_id);
-        if (button_id) {
-            data.focus_button_for_tooltip = button_id + 9;
-        }
-        handled |= image_buttons_handle_mouse(m, x_offset, 24, buttons_build_expanded, 15, &button_id);
-        if (button_id) {
-            data.focus_button_for_tooltip = button_id + 19;
-        }
-        handled |= image_buttons_handle_mouse(m, x_offset, 24, buttons_top_expanded, 6, &button_id);
-        if (button_id) {
-            data.focus_button_for_tooltip = button_id + 39;
-        }
-        handled |= new_sidebar_extra_handle_mouse(m);
-    }
+    // } else {
+    //     if (widget_minimap_handle_mouse(m)) {
+    //         return 1;
+    //     }
+    //     int x_offset = new_sidebar_common_get_x_offset_expanded();
+    //     handled |= image_buttons_handle_mouse(m, x_offset, 24, buttons_overlays_collapse_new_sidebar, 2, &button_id);
+    //     if (button_id) {
+    //         data.focus_button_for_tooltip = button_id + 9;
+    //     }
+    //     handled |= image_buttons_handle_mouse(m, x_offset, 24, buttons_build_expanded, 15, &button_id);
+    //     if (button_id) {
+    //         data.focus_button_for_tooltip = button_id + 19;
+    //     }
+    //     handled |= image_buttons_handle_mouse(m, x_offset, 24, buttons_top_expanded, 6, &button_id);
+    //     if (button_id) {
+    //         data.focus_button_for_tooltip = button_id + 39;
+    //     }
+    //     handled |= new_sidebar_extra_handle_mouse(m);
+    // }
     return handled;
 }
 
 int widget_new_sidebar_city_handle_mouse_build_menu(const mouse *m)
 {
-    if (city_view_is_sidebar_collapsed()) {
+  //  if (city_view_is_sidebar_collapsed()) {
         return image_buttons_handle_mouse(m,
             new_sidebar_common_get_x_offset_collapsed(), 24, buttons_build_collapsed, 12, 0);
-    } else {
-        return image_buttons_handle_mouse(m,
-            new_sidebar_common_get_x_offset_expanded(), 24, buttons_build_expanded, 15, 0);
-    }
+    // } else {
+    //     return image_buttons_handle_mouse(m,
+    //         new_sidebar_common_get_x_offset_expanded(), 24, buttons_build_expanded, 15, 0);
+    // }
 }
 
 int widget_new_sidebar_city_get_tooltip_text(tooltip_context *c)
