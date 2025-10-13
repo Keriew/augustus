@@ -572,6 +572,7 @@ static special_attribute_mapping_t special_attribute_mappings_god[] =
     {.type = PARAMETER_TYPE_GOD,                .text = "Mercury",        .value = GOD_MERCURY,       .key = TR_PARAMETER_VALUE_GOD_MERCURY },
     {.type = PARAMETER_TYPE_GOD,                .text = "Neptune",        .value = GOD_NEPTUNE,       .key = TR_PARAMETER_VALUE_GOD_NEPTUNE },
     {.type = PARAMETER_TYPE_GOD,                .text = "Venus",          .value = GOD_VENUS,         .key = TR_PARAMETER_VALUE_GOD_VENUS },
+    {.type = PARAMETER_TYPE_GOD,                .text = "All",            .value = GOD_ALL,           .key = TR_CITY_PROPERTY_ALL },
 
 };
 
@@ -964,7 +965,7 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
         case PARAMETER_TYPE_INVASION_TYPE:
             return INVASION_TYPE_ENEMY_ARMY;
         case PARAMETER_TYPE_CHECK:
-            return COMPARISON_TYPE_EQUAL;
+            return COMPARISON_TYPE_EQUAL_OR_MORE;
         case PARAMETER_TYPE_DIFFICULTY:
             return DIFFICULTY_NORMAL;
         case PARAMETER_TYPE_ENEMY_TYPE:
@@ -1269,6 +1270,20 @@ static uint8_t *translation_for_boolean_text(int value, translation_key true_key
     return result_text;
 }
 
+static uint8_t *translation_for_formula_index(int index, uint8_t *result_text, int *maxlength)
+{
+    result_text = append_text(string_from_ascii(" "), result_text, maxlength);
+
+    const uint8_t *text = scenario_formula_get_string(index);
+    if (text) {
+        result_text = append_text(text, result_text, maxlength);
+    } else {
+        result_text = append_text(string_from_ascii("???"), result_text, maxlength);
+    }
+
+    return result_text;
+}
+
 static uint8_t *translation_for_attr_mapping_text(parameter_type type, int value, uint8_t *result_text, int *maxlength)
 {
     result_text = append_text(string_from_ascii(" "), result_text, maxlength);
@@ -1305,7 +1320,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         }
         case ACTION_TYPE_ADJUST_FAVOR:
         {
-            result_text = translation_for_number_value(action->parameter1, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
             return;
         }
         case ACTION_TYPE_ADJUST_MONEY:
@@ -1318,10 +1333,10 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         {
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(TR_PARAMETER_GRID_OFFSET), result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter1, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(TR_PARAMETER_RADIUS), result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
             if (action->parameter4) {
                 result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
                 result_text = append_text(translation_for(TR_PARAMETER_DISPLAY_DESTROY_ALL_TYPES), result_text, &maxlength);
@@ -1340,7 +1355,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RATING_TYPE, action->parameter1, result_text, &maxlength);
             result_text = translation_for_set_or_add_text(action->parameter3, result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
             return;
         }
         case ACTION_TYPE_CHANGE_CUSTOM_VARIABLE:
@@ -1356,7 +1371,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
             }
 
             result_text = translation_for_set_or_add_text(action->parameter3, result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
             return;
         }
         case ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY:
@@ -1384,7 +1399,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_STORAGE_TYPE, action->parameter3, result_text, &maxlength);
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter1, result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
             result_text = translation_for_boolean_text(action->parameter4, TR_PARAMETER_DISPLAY_RESPECT_SETTINGS, TR_PARAMETER_DISPLAY_IGNORE_SETTINGS, result_text, &maxlength);
             return;
         }
@@ -1403,24 +1418,24 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_INVASION_TYPE, action->parameter1, result_text, &maxlength);
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(TR_PARAMETER_TYPE_INVASION_SIZE), result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ENEMY_TYPE, action->parameter5, result_text, &maxlength);
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(TR_PARAMETER_TYPE_INVASION_POINT), result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter3, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter3, result_text, &maxlength);
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_TARGET_TYPE, action->parameter4, result_text, &maxlength);
             return;
         }
         case ACTION_TYPE_REQUEST_IMMEDIATELY_START:
         case ACTION_TYPE_TAX_RATE_SET:
         {
-            result_text = translation_for_number_value(action->parameter1, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
             return;
         }
         case ACTION_TYPE_TRADE_PROBLEM_LAND:
         case ACTION_TYPE_TRADE_PROBLEM_SEA:
         {
-            result_text = translation_for_number_value(action->parameter1, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(TR_PARAMETER_DISPLAY_DAYS), result_text, &maxlength);
             return;
@@ -1433,14 +1448,14 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         case ACTION_TYPE_TRADE_ADJUST_PRICE:
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter1, result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
             result_text = translation_for_boolean_text(action->parameter3, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
             return;
         }
         case ACTION_TYPE_TRADE_ADJUST_ROUTE_AMOUNT:
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, action->parameter1, result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter3, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter3, result_text, &maxlength);
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter2, result_text, &maxlength);
             result_text = translation_for_boolean_text(action->parameter4, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
             return;
@@ -1450,7 +1465,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, action->parameter1, result_text, &maxlength);
             result_text = translation_for_boolean_text(action->parameter4, TR_PARAMETER_DISPLAY_ADD_AS_BUYING, TR_PARAMETER_DISPLAY_ADD_AS_SELLING, result_text, &maxlength);
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter2, result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter3, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter3, result_text, &maxlength);
             result_text = translation_for_boolean_text(action->parameter5, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
             return;
         }
@@ -1458,7 +1473,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, action->parameter1, result_text, &maxlength);
             result_text = translation_for_set_or_add_text(action->parameter3, result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
             result_text = translation_for_boolean_text(action->parameter4, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
             return;
         }
@@ -1472,7 +1487,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter1, result_text, &maxlength);
             result_text = translation_for_boolean_text(action->parameter3, TR_PARAMETER_DISPLAY_BUY_PRICE, TR_PARAMETER_DISPLAY_SELL_PRICE, result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
             result_text = translation_for_boolean_text(action->parameter4, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
             return;
         }
@@ -1480,7 +1495,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         case ACTION_TYPE_TRADE_SET_SELL_PRICE_ONLY:
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter1, result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
             return;
         }
         case ACTION_TYPE_SHOW_CUSTOM_MESSAGE:
@@ -1504,10 +1519,10 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         {
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(TR_PARAMETER_GRID_OFFSET), result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter1, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(TR_PARAMETER_RADIUS), result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
             if (action->parameter4) {
                 result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_TERRAIN, action->parameter3, result_text, &maxlength);
                 result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
@@ -1517,6 +1532,88 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
                 result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
                 result_text = append_text(translation_for(TR_EDITOR_DELETE), result_text, &maxlength);
             }
+            return;
+        }
+        case ACTION_TYPE_CUSTOM_VARIABLE_FORMULA:
+        {
+            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+            if (scenario_custom_variable_exists(action->parameter1) &&
+                scenario_custom_variable_get_name(action->parameter1)) {
+                result_text = append_text(scenario_custom_variable_get_name(action->parameter1),
+                    result_text, &maxlength);
+            } else {
+                result_text = append_text(string_from_ascii("???"), result_text, &maxlength);
+            }
+            result_text = append_text(string_from_ascii(" = "), result_text, &maxlength);
+            // Get the formula string from the formula array
+            if (action->parameter2 > 0) {
+                const uint8_t *formula_str = scenario_formula_get_string(action->parameter2);
+                if (formula_str) {
+                    result_text = append_text(formula_str, result_text, &maxlength);
+                } else {
+                    result_text = append_text(string_from_ascii("???"), result_text, &maxlength);
+                }
+            } else {
+                result_text = append_text(string_from_ascii("0"), result_text, &maxlength);
+            }
+            return;
+        }
+        case ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY:
+        {
+            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+            if (scenario_custom_variable_exists(action->parameter1) &&
+                scenario_custom_variable_get_name(action->parameter1)) {
+                result_text = append_text(scenario_custom_variable_get_name(action->parameter1),
+                    result_text, &maxlength);
+            } else {
+                result_text = append_text(string_from_ascii("???"), result_text, &maxlength);
+            }
+            result_text = append_text(string_from_ascii(" = "), result_text, &maxlength);
+            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_CITY_PROPERTY, action->parameter2, result_text, &maxlength);
+            return;
+        }
+        case ACTION_TYPE_GOD_SENTIMENT_CHANGE:
+        {
+            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_GOD, action->parameter1, result_text, &maxlength);
+            result_text = translation_for_set_or_add_text(action->parameter3, result_text, &maxlength);
+            // Get the formula string if parameter2 is a formula index
+            if (action->parameter2 > 0) {
+                const uint8_t *formula_str = scenario_formula_get_string(action->parameter2);
+                if (formula_str) {
+                    result_text = append_text(formula_str, result_text, &maxlength);
+                } else {
+                    result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
+                }
+            } else {
+                result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
+            }
+            return;
+        }
+        case ACTION_TYPE_POP_SENTIMENT_CHANGE:
+        {
+            result_text = translation_for_set_or_add_text(action->parameter2, result_text, &maxlength);
+            // Get the formula string if parameter1 is a formula index
+            if (action->parameter1 > 0) {
+                const uint8_t *formula_str = scenario_formula_get_string(action->parameter1);
+                if (formula_str) {
+                    result_text = append_text(formula_str, result_text, &maxlength);
+                } else {
+                    result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
+                }
+            } else {
+                result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
+            }
+            return;
+        }
+        case ACTION_TYPE_WIN:
+        case ACTION_TYPE_LOSE:
+        {
+            // No parameters to display
+            return;
+        }
+        case ACTION_TYPE_CHANGE_RANK:
+        {
+            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RANK, action->parameter1, result_text, &maxlength);
             return;
         }
         default:
@@ -1539,21 +1636,21 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_BUILDING_COUNTING, condition->parameter3, result_text, &maxlength);
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter2, result_text, &maxlength);
             return;
         }
         case CONDITION_TYPE_CITY_POPULATION:
         {
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm3.type, condition->parameter3, result_text, &maxlength);
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter2, result_text, &maxlength);
             return;
         }
         case CONDITION_TYPE_COUNT_OWN_TROOPS:
         {
             result_text = translation_for_boolean_text(condition->parameter3, TR_PARAMETER_DISPLAY_IN_CITY, TR_PARAMETER_DISPLAY_ANYWHERE, result_text, &maxlength);
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter2, result_text, &maxlength);
             return;
         }
         case CONDITION_TYPE_CUSTOM_VARIABLE_CHECK:
@@ -1568,7 +1665,7 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
             }
 
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter3, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter3, result_text, &maxlength);
             return;
         }
         case CONDITION_TYPE_DIFFICULTY:
@@ -1588,14 +1685,14 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
         case CONDITION_TYPE_STATS_CITY_HEALTH:
         {
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter2, result_text, &maxlength);
             return;
         }
         case CONDITION_TYPE_POPS_UNEMPLOYMENT:
         {
             result_text = translation_for_boolean_text(condition->parameter1, TR_PARAMETER_DISPLAY_PERCENTAGE, TR_PARAMETER_DISPLAY_FLAT_NUMBER, result_text, &maxlength);
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter3, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter3, result_text, &maxlength);
             return;
         }
         case CONDITION_TYPE_REQUEST_IS_ONGOING:
@@ -1609,13 +1706,13 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
         {
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(TR_PARAMETER_GRID_OFFSET), result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter1, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter1, result_text, &maxlength);
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(TR_PARAMETER_RADIUS), result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter2, result_text, &maxlength);
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_BUILDING, condition->parameter3, result_text, &maxlength);
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm4.type, condition->parameter4, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter5, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter5, result_text, &maxlength);
             return;
         }
         case CONDITION_TYPE_RESOURCE_STORAGE_AVAILABLE:
@@ -1624,7 +1721,7 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
             result_text = translation_for_boolean_text(condition->parameter5, TR_PARAMETER_DISPLAY_RESPECT_SETTINGS, TR_PARAMETER_DISPLAY_IGNORE_SETTINGS, result_text, &maxlength);
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, condition->parameter1, result_text, &maxlength);
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter3, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter3, result_text, &maxlength);
             return;
         }
         case CONDITION_TYPE_RESOURCE_STORED_COUNT:
@@ -1632,7 +1729,7 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_STORAGE_TYPE, condition->parameter4, result_text, &maxlength);
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, condition->parameter1, result_text, &maxlength);
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter3, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter3, result_text, &maxlength);
             return;
         }
         case CONDITION_TYPE_TIME_PASSED:
@@ -1651,14 +1748,14 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, condition->parameter1, result_text, &maxlength);
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter3, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter3, result_text, &maxlength);
             return;
         }
         case CONDITION_TYPE_TRADE_SELL_PRICE:
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, condition->parameter1, result_text, &maxlength);
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter3, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter3, result_text, &maxlength);
             return;
         }
         default:

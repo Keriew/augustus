@@ -885,7 +885,7 @@ static void button_add_new_condition(const generic_button *button)
 {
     condition_types type = CONDITION_TYPE_TIME_PASSED;
     scenario_condition_t *condition = scenario_event_condition_create(array_item(data.event->condition_groups, 0), type);
-    condition->parameter1 = 1;
+    condition->parameter1 = 3; //3(EQUAL OR MORE); 1(EQUAL) baits mapmakers into making events that only trigger once
     select_no_conditions();
     window_request_refresh();
 }

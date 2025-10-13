@@ -405,18 +405,28 @@ int city_gods_calculate_least_happy(void)
 
 void city_god_change_happiness(int god_id, int amount)
 {
-    if (god_id < 0 || god_id >= MAX_GODS) {
+    if (god_id < 0) {
         return;
+    } else if (god_id == GOD_ALL) {
+        for (int i = 0; i < MAX_GODS; i++) {
+            city_data.religion.gods[i].happiness = calc_bound(amount + city_data.religion.gods[i].happiness, 0, 100);
+        }
+    } else {
+        city_data.religion.gods[god_id].happiness = calc_bound(amount + city_data.religion.gods[god_id].happiness, 0, 100);
     }
-    city_data.religion.gods[god_id].happiness = calc_bound(city_data.religion.gods[god_id].happiness + amount, 0, 100);
 }
 
 void city_god_set_happiness(int god_id, int amount_set)
 {
-    if (god_id < 0 || god_id >= MAX_GODS) {
+    if (god_id < 0) {
         return;
+    } else if (god_id == GOD_ALL) {
+        for (int i = 0; i < MAX_GODS; i++) {
+            city_data.religion.gods[i].happiness = calc_bound(amount_set, 0, 100);
+        }
+    } else {
+        city_data.religion.gods[god_id].happiness = calc_bound(amount_set, 0, 100);
     }
-    city_data.religion.gods[god_id].happiness = calc_bound(amount_set, 0, 100);
 }
 
 int city_god_happiness(int god_id)
@@ -475,14 +485,31 @@ int city_god_venus_bonus_employment(void)
 
 void city_god_blessing(int god_id)
 {
-    perform_blessing(god_id);
+    if (god_id == GOD_ALL) {
+        for (int i = 0; i < MAX_GODS; i++) {
+            perform_blessing(i);
+        }
+    } else {
+        perform_blessing(god_id);
+    }
+
 }
 
 void city_god_curse(int god_id, int is_major)
 {
-    if (is_major) {
-        perform_large_curse(god_id);
+    if (god_id == GOD_ALL) {
+        for (int i = 0; i < MAX_GODS; i++) {
+            if (is_major) {
+                perform_large_curse(i);
+            } else {
+                perform_small_curse(i);
+            }
+        }
     } else {
-        perform_small_curse(god_id);
+        if (is_major) {
+            perform_large_curse(god_id);
+        } else {
+            perform_small_curse(god_id);
+        }
     }
 }
