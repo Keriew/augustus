@@ -620,6 +620,11 @@ set(WIDGET_FILES
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/extra.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/military.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/slide.c
+    ${PROJECT_SOURCE_DIR}/src/widget/newsidebar/new_city.c
+    ${PROJECT_SOURCE_DIR}/src/widget/newsidebar/new_common.c
+    ${PROJECT_SOURCE_DIR}/src/widget/newsidebar/new_extra.c
+    ${PROJECT_SOURCE_DIR}/src/widget/newsidebar/new_military.c
+    ${PROJECT_SOURCE_DIR}/src/widget/newsidebar/new_slide.c
 )
 set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/advisors.c

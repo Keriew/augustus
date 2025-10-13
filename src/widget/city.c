@@ -43,6 +43,8 @@
 #include "window/building_info.h"
 #include "window/city.h"
 
+#include "newsidebar/new_extra.h"
+
 #define NO_POSITION ((unsigned int)-1)
 
 static struct {
@@ -185,7 +187,8 @@ static void draw_construction_buttons(void)
     city_view_get_viewport(&x, &y, &width, &height);
     int x_offset = width - 4 * BLOCK_SIZE;
     int y_offset = 40;
-    if (((sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED) || !mouse_get()->is_touch) && width < 680)
+    //TODO: config
+    if (((new_sidebar_extra_is_information_displayed(NEW_SIDEBAR_EXTRA_DISPLAY_GAME_SPEED) || !mouse_get()->is_touch) && width < 680)
             && game_state_is_paused()) {
         y_offset = 100;
     }
@@ -201,7 +204,8 @@ static void draw_construction_buttons(void)
 
     if ((mouse_get()->is_touch || config_get(CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS)) &&
         building_construction_can_rotate()) {
-        if (!sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED)) {
+        //TODO: config
+        if (!new_sidebar_extra_is_information_displayed(NEW_SIDEBAR_EXTRA_DISPLAY_GAME_SPEED)) {
             x_offset = 4 * BLOCK_SIZE + 8;
         } else {
             x_offset = 16;
@@ -225,7 +229,8 @@ static void draw_construction_buttons(void)
 
 void widget_city_draw_construction_buttons(void)
 {
-    if (!sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED)) {
+    //TODO: config
+    if (!new_sidebar_extra_is_information_displayed(NEW_SIDEBAR_EXTRA_DISPLAY_GAME_SPEED)) {
         draw_pause_button();
     }
     draw_construction_buttons();
@@ -233,7 +238,8 @@ void widget_city_draw_construction_buttons(void)
 
 static int is_pause_button(int x, int y)
 {
-    return !sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED) &&
+    //TODO: config
+    return !new_sidebar_extra_is_information_displayed(NEW_SIDEBAR_EXTRA_DISPLAY_GAME_SPEED) &&
         x < 4 * BLOCK_SIZE + 4 && y >= 24 && y < 56 + 4 * BLOCK_SIZE;
 }
 
@@ -245,7 +251,8 @@ static int is_cancel_construction_button(int x, int y)
     int touch_width = 5 * BLOCK_SIZE;
     int touch_height = 22 + 4 * BLOCK_SIZE;
     int x_offset = width - touch_width;
-    int y_offset = (sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED) && width < 680
+    //TODO: config
+    int y_offset = (new_sidebar_extra_is_information_displayed(NEW_SIDEBAR_EXTRA_DISPLAY_GAME_SPEED) && width < 680
             && game_state_is_paused()) ? 84 : 24;
 
     return x >= x_offset && x < x_offset + touch_width && y >= y_offset && y < y_offset + touch_height;
@@ -256,7 +263,8 @@ static int is_rotate_backward_button(int x, int y)
     int city_x, city_y, width, height;
     city_view_get_viewport(&city_x, &city_y, &width, &height);
 
-    int sidebar_pause_button = sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED);
+    //TODO: config
+    int sidebar_pause_button = new_sidebar_extra_is_information_displayed(NEW_SIDEBAR_EXTRA_DISPLAY_GAME_SPEED);
     int x_offset = sidebar_pause_button ? 16 : 4 * BLOCK_SIZE + 4;
     int y_offset = sidebar_pause_button && width < 680 && game_state_is_paused() ? 84 : 24;
     return x >= x_offset && x < x_offset + 3 * BLOCK_SIZE &&
@@ -268,7 +276,8 @@ static int is_rotate_forward_button(int x, int y)
     int city_x, city_y, width, height;
     city_view_get_viewport(&city_x, &city_y, &width, &height);
 
-    int sidebar_pause_button = sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED);
+    //TODO: config
+    int sidebar_pause_button = new_sidebar_extra_is_information_displayed(NEW_SIDEBAR_EXTRA_DISPLAY_GAME_SPEED);
     int x_offset = sidebar_pause_button ? 4 * BLOCK_SIZE + 4 : 7 * BLOCK_SIZE + 4;
     int y_offset = sidebar_pause_button && width < 680 && game_state_is_paused() ? 84 : 24;
     return x >= x_offset && x < x_offset + 3 * BLOCK_SIZE &&
