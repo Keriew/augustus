@@ -403,6 +403,22 @@ int city_gods_calculate_least_happy(void)
     return max_god > 0;
 }
 
+void city_god_change_happiness(int god_id, int amount)
+{
+    if (god_id < 0 || god_id >= MAX_GODS) {
+        return;
+    }
+    city_data.religion.gods[god_id].happiness = calc_bound(city_data.religion.gods[god_id].happiness + amount, 0, 100);
+}
+
+void city_god_set_happiness(int god_id, int amount_set)
+{
+    if (god_id < 0 || god_id >= MAX_GODS) {
+        return;
+    }
+    city_data.religion.gods[god_id].happiness = calc_bound(amount_set, 0, 100);
+}
+
 int city_god_happiness(int god_id)
 {
     return city_data.religion.gods[god_id].happiness;

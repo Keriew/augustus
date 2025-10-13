@@ -1805,6 +1805,10 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SELLS, "(Sells)"},
     {TR_EDITOR_ALL_BUYS, "All (Buys)"},
     {TR_EDITOR_ALL_SELLS, "All (Sells)"},
+    {TR_ACTION_TYPE_WIN, "Instant Victory"},
+    {TR_ACTION_TYPE_LOSE, "Instant Defeat"},
+    {TR_ACTION_TYPE_GOD_SENTIMENT, "Change god sentiment"},
+    {TR_ACTION_TYPE_POP_SENTIMENT, "Change population sentiment"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

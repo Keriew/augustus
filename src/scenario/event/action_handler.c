@@ -99,6 +99,14 @@ int scenario_action_type_execute(scenario_action_t *action)
             return scenario_action_type_custom_variable_formula_execute(action);
         case ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY:
             return scenario_action_type_custom_variable_city_property_execute(action);
+        case ACTION_TYPE_GOD_SENTIMENT_CHANGE:
+            return scenario_action_type_change_god_sentiment_execute(action);
+        case ACTION_TYPE_POP_SENTIMENT_CHANGE:
+            return scenario_action_type_change_pop_sentiment_execute(action);
+        case ACTION_TYPE_WIN:
+            return scenario_action_type_win_execute(action);
+        case ACTION_TYPE_LOSE:
+            return scenario_action_type_lose_execute(action);
         default:
             return 0;
     }

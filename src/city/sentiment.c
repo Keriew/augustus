@@ -56,6 +56,17 @@ void city_sentiment_change_happiness(int amount)
     }
 }
 
+void city_sentiment_set_happiness(int amount_set)
+{
+    for (building_type type = BUILDING_HOUSE_SMALL_TENT; type <= BUILDING_HOUSE_LUXURY_PALACE; type++) {
+        for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
+            if (b->state == BUILDING_STATE_IN_USE && b->house_size) {
+                b->sentiment.house_happiness = calc_bound(amount_set, 0, 100);
+            }
+        }
+    }
+}
+
 void city_sentiment_set_max_happiness(int max)
 {
     max = calc_bound(max, 0, 100);

@@ -13,8 +13,10 @@
 #include "city/labor.h"
 #include "city/message.h"
 #include "city/ratings.h"
-#include "core/random.h"
+#include "city/sentiment.h"
 #include "city/trade.h"
+#include "city/victory.h"
+#include "core/random.h"
 #include "empire/city.h"
 #include "empire/object.h"
 #include "empire/trade_prices.h"
@@ -771,5 +773,48 @@ int scenario_action_type_change_terrain_execute(scenario_action_t *action)
     map_tiles_update_all();
     map_routing_update_all();
 
+    return 1;
+}
+
+int scenario_action_type_change_god_sentiment_execute(scenario_action_t *action)
+{
+    int god_id = action->parameter1;
+    int amount = action->parameter2;
+    int is_hard_set = action->parameter3;
+
+    if (is_hard_set) {
+        city_god_set_happiness(god_id, amount);
+    } else {
+        city_god_change_happiness(god_id, amount);
+    }
+
+    return 1;
+}
+
+int scenario_action_type_change_pop_sentiment_execute(scenario_action_t *action)
+{
+    int amount = action->parameter1;
+    int is_hard_set = action->parameter2;
+
+    if (is_hard_set) {
+        city_sentiment_set_happiness(amount);
+    } else {
+        city_sentiment_change_happiness(amount);
+    }
+
+    return 1;
+}
+
+int scenario_action_type_win_execute(scenario_action_t *action)
+{
+    city_victory_force_win();
+    city_victory_check();
+    return 1;
+}
+
+int scenario_action_type_lose_execute(scenario_action_t *action)
+{
+    city_victory_force_lose();
+    city_victory_check();
     return 1;
 }

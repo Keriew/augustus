@@ -17,6 +17,7 @@
 static struct {
     int state;
     int force_win;
+    int force_lose;
 } data;
 
 void city_victory_reset(void)
@@ -28,6 +29,11 @@ void city_victory_reset(void)
 void city_victory_force_win(void)
 {
     data.force_win = 1;
+}
+
+void city_victory_force_lose(void)
+{
+    data.force_lose = 1;
 }
 
 int city_victory_state(void)
@@ -96,7 +102,7 @@ static int determine_victory_state(void)
     if (scenario_criteria_time_limit_enabled() || scenario_criteria_survival_enabled()) {
         has_criteria = 1;
     }
-    
+
     if (city_figures_total_invading_enemies() > 2 + city_data.figure.soldiers) {
         if (city_data.population.population < city_data.population.highest_ever / 4) {
             state = VICTORY_STATE_LOST;
@@ -125,12 +131,15 @@ void city_victory_check(void)
     }
     if (data.force_win) {
         data.state = VICTORY_STATE_WON;
+    } else if (data.force_lose) {
+        data.state = VICTORY_STATE_LOST;
     }
     if (data.state != VICTORY_STATE_NONE) {
         building_construction_clear_type();
         if (data.state == VICTORY_STATE_LOST) {
             if (city_data.mission.fired_message_shown) {
                 window_mission_end_show_fired();
+                data.force_lose = 0;
             } else {
                 city_data.mission.fired_message_shown = 1;
                 city_message_post(1, MESSAGE_FIRED, 0, 0);
@@ -146,6 +155,7 @@ void city_victory_check(void)
                 sound_speech_play_file("wavs/fanfare_nu2.wav");
                 window_victory_dialog_show();
             }
+            data.force_lose = 0;
         }
     }
 }
