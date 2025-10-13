@@ -305,7 +305,7 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
     [ACTION_TYPE_CUSTOM_VARIABLE_FORMULA] = {.type = ACTION_TYPE_CUSTOM_VARIABLE_FORMULA,
                                         .xml_attr = {.name = "variable_formula",       .type = PARAMETER_TYPE_TEXT,             .key = TR_ACTION_TYPE_CUSTOM_VARIABLE_FORMULA },
                                         .xml_parm1 = {.name = "variable_uid",   .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,      .max_limit = 99,     .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
-                                        .xml_parm2 = {.name = "formula",        .type = PARAMETER_TYPE_FORMULA,          .key = TR_PARAMETER_TYPE_FORMULA }, },
+                                        .xml_parm2 = {.name = "formula",        .type = PARAMETER_TYPE_FORMULA,          .min_limit = NEGATIVE_UNLIMITED,      .max_limit = UNLIMITED, .key = TR_PARAMETER_TYPE_FORMULA }, },
     [ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY] = {.type = ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY,
                                         .xml_attr = {.name = "variable_city_property",  .type = PARAMETER_TYPE_TEXT,             .key = TR_EDITOR_ACTION_TYPE_CITY_PROPERTY },
                                         .xml_parm1 = {.name = "variable_uid",            .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,      .max_limit = 99,     .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },

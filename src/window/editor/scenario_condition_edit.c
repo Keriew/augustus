@@ -223,9 +223,11 @@ static void set_formula_value(const uint8_t *formula)
     window_invalidate();
 }
 
-static void create_evaluation_formula(void)
+static void create_evaluation_formula(xml_data_attribute_t *parameter)
 {
     int current_index = get_param_value();
+    data.formula_min_limit = parameter->min_limit;
+    data.formula_max_limit = parameter->max_limit;
     if (current_index > 0) {
         const uint8_t *src = scenario_formula_get_string(current_index);
         if (src) {
@@ -413,9 +415,7 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             custom_variable_selection();
             return;
         case PARAMETER_TYPE_FORMULA:
-            data.formula_min_limit = parameter->min_limit;
-            data.formula_max_limit = parameter->max_limit;
-            create_evaluation_formula();
+            create_evaluation_formula(parameter);
         default:
             return;
     }
