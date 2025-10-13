@@ -36,7 +36,7 @@
 
 #define MINIMAP_Y_OFFSET 59
 
-static void button_overlay(int param1, int param2);
+static void button_overlay_click(int param1, int param2);
 static void button_collapse_expand(int param1, int param2);
 static void button_build(int submenu, int param2);
 static void button_undo(int param1, int param2);
@@ -51,7 +51,7 @@ static void button_rotate(int clockwise, int param2);
 
 static image_button buttons_overlays_collapse_sidebar[] = {
     {127, 5, 31, 20, IB_NORMAL, 90, 0, button_collapse_expand, button_none, 0, 0, 1},
-    {4, 3, 117, 31, IB_NORMAL, 93, 0, button_overlay, button_help, 0, MESSAGE_DIALOG_OVERLAYS, 1}
+    {4, 3, 117, 31, IB_NORMAL, 93, 0, button_overlay_click, button_help, 0, MESSAGE_DIALOG_OVERLAYS, 1}
 };
 
 static image_button button_expand_sidebar[] = {
@@ -290,7 +290,7 @@ static void slide_finished(void)
     window_city_show();
 }
 
-static void button_overlay(int param1, int param2)
+static void button_overlay_click(int param1, int param2)
 {
     window_overlay_menu_show();
 }

@@ -413,7 +413,7 @@ static void draw_background(int x_offset)
         0, NEW_SIDEBAR_EXTRA_DISPLAY_ALL);
     new_sidebar_extra_draw_foreground();
 
-    new_sidebar_common_draw_relief(x_offset, MILITARY_PANEL_HEIGHT + extra_height, GROUP_SIDE_PANEL, 0);
+    new_sidebar_common_draw_relief(x_offset, MILITARY_PANEL_HEIGHT + extra_height, GROUP_SIDE_PANEL);
 }
 
 void widget_new_sidebar_military_draw_background(void)

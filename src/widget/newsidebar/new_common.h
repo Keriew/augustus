@@ -16,6 +16,6 @@ int new_sidebar_common_get_x_offset_collapsed(void);
 
 int new_sidebar_common_get_height(void);
 
-void new_sidebar_common_draw_relief(int x_offset, int y_offset, int image_id, int is_collapsed);
+void new_sidebar_common_draw_relief(int x_offset, int y_offset, int image_id);
 
 #endif // WIDGET_NEW_SIDEBAR_COMMON_H
