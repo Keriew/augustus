@@ -350,7 +350,7 @@ static int is_event_message(const lang_message *msg)
     return msg->type == TYPE_MESSAGE &&
         (msg->message_type == MESSAGE_TYPE_DISASTER ||
         msg->message_type == MESSAGE_TYPE_INVASION ||
-        msg->message_type == MESSAGE_TYPE_BUILDING_COMPLETION || msg->message_type == MESSAGE_TYPE_RANK_CHANGE);
+        msg->message_type == MESSAGE_TYPE_BUILDING_COMPLETION);
 }
 
 static void draw_city_message_text(const lang_message *msg)
@@ -413,15 +413,15 @@ static void draw_city_message_text(const lang_message *msg)
             static lang_fragment rank_frag[3];
             rank_frag[0] = (lang_fragment)
             { .type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_MESSAGE_PROMOTE_RANK_PREFIX };
-            rank_frag[1] = (lang_fragment) { .type = LANG_FRAG_LABEL, .text_group = 32, .text_id = new_rank };
+            rank_frag[1] = (lang_fragment) { .type = LANG_FRAG_LABEL, .text_group = 32, .text_id = new_rank, .space_width = 0 };
             rank_frag[2] = (lang_fragment)
             { .type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_MESSAGE_PROMOTE_RANK_SUFFIX };
             if (new_rank < old_rank) {
                 rank_frag[0].text_id = TR_MESSAGE_DEMOTE_RANK_PREFIX;
                 rank_frag[2].text_id = TR_MESSAGE_DEMOTE_RANK_SUFFIX;
             }
-            lang_text_draw_sequence_multiline(rank_frag, 3, data.x + 100, data.y_text + 44,
-                BLOCK_SIZE * (data.text_width_blocks), 0, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
+            lang_text_draw_sequence_multiline(rank_frag, 3, data.x + 40, data.y_text + 44,
+                BLOCK_SIZE * (data.text_width_blocks) - 40, 0, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
             break;
         }
 

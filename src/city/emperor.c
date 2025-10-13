@@ -304,7 +304,7 @@ void city_emperor_change_rank(int change)
     }
     city_emperor_set_salary_rank(new_rank);
     if (new_rank != old_rank) {
-        city_message_post(1, MESSAGE_TYPE_RANK_CHANGE, old_rank, new_rank);
+        city_message_post(1, MESSAGE_GOVERNOR_RANK_CHANGE, old_rank, new_rank);
     }
 }
 

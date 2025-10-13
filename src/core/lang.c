@@ -316,8 +316,7 @@ void load_augustus_messages(void)
     i += 1;
 
     m = &data.message_entries[i];
-    set_message_parameters(m, TR_CITY_MESSAGE_TITLE_GOVERNOR_RANK_CHANGE, 0, 0,
-        MESSAGE_TYPE_RANK_CHANGE);
+    set_message_parameters(m, TR_CITY_MESSAGE_TITLE_GOVERNOR_RANK_CHANGE, 0, 0, MESSAGE_TYPE_RANK_CHANGE);
     i += 1;
 }
 
