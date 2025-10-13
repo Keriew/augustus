@@ -520,6 +520,7 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
         case PARAMETER_TYPE_PLAYER_TROOPS:
         case PARAMETER_TYPE_ENEMY_CLASS:
         case PARAMETER_TYPE_COVERAGE_BUILDINGS:
+        case PARAMETER_TYPE_RANK:
             window_editor_select_special_attribute_mapping_show(parameter->type, set_param_value, data.parameter_being_edited_current_value);
             return;
         case PARAMETER_TYPE_ALLOWED_BUILDING:

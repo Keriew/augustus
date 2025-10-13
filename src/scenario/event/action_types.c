@@ -818,3 +818,9 @@ int scenario_action_type_lose_execute(scenario_action_t *action)
     city_victory_check();
     return 1;
 }
+int scenario_action_type_change_rank_execute(scenario_action_t *action)
+{
+    int new_rank = action->parameter1;
+    city_emperor_change_rank(new_rank);
+    return 1;
+}

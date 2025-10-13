@@ -328,7 +328,11 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
     .xml_attr = {.name = "win",    .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_WIN },},
 [ACTION_TYPE_LOSE] = {.type = ACTION_TYPE_LOSE,
     .xml_attr = {.name = "lose",    .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_LOSE },},
-
+[ACTION_TYPE_CHANGE_RANK] = {
+    .type = ACTION_TYPE_CHANGE_RANK,
+    .xml_attr = {.name = "change_rank",      .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_CHANGE_RANK },
+    .xml_parm1 = {.name = "rank",           .type = PARAMETER_TYPE_RANK,      .key = TR_PARAMETER_TYPE_RANK },
+}
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)
@@ -723,6 +727,23 @@ static special_attribute_mapping_t special_attribute_mappings_coverage_buildings
 };
 #define SPECIAL_ATTRIBUTE_MAPPINGS_COVERAGE_BUILDINGS_SIZE (sizeof(special_attribute_mappings_coverage_buildings) / sizeof(special_attribute_mapping_t))
 
+static special_attribute_mapping_t special_attribute_mappings_rank[] = {
+    {.type = PARAMETER_TYPE_RANK, .text = "citizen",        .value = 0,  .key = TR_RANK_CITIZEN },
+    {.type = PARAMETER_TYPE_RANK, .text = "clerk",          .value = 1,  .key = TR_RANK_CLERK },
+    {.type = PARAMETER_TYPE_RANK, .text = "engineer",       .value = 2,  .key = TR_RANK_ENGINEER },
+    {.type = PARAMETER_TYPE_RANK, .text = "architect",      .value = 3,  .key = TR_RANK_ARCHITECT },
+    {.type = PARAMETER_TYPE_RANK, .text = "quaestor",       .value = 4,  .key = TR_RANK_QUAESTOR },
+    {.type = PARAMETER_TYPE_RANK, .text = "procurator",     .value = 5,  .key = TR_RANK_PROCURATOR },
+    {.type = PARAMETER_TYPE_RANK, .text = "aedile",         .value = 6,  .key = TR_RANK_AEDILE },
+    {.type = PARAMETER_TYPE_RANK, .text = "praetor",        .value = 7,  .key = TR_RANK_PRAETOR },
+    {.type = PARAMETER_TYPE_RANK, .text = "consul",         .value = 8,  .key = TR_RANK_CONSUL },
+    {.type = PARAMETER_TYPE_RANK, .text = "proconsul",      .value = 9,  .key = TR_RANK_PROCONSUL },
+    {.type = PARAMETER_TYPE_RANK, .text = "caesar",         .value = 10, .key = TR_RANK_CAESAR },
+    {.type = PARAMETER_TYPE_RANK, .text = "promotion",      .value = 11, .key = TR_RANK_PROMOTE },
+    {.type = PARAMETER_TYPE_RANK, .text = "demotion",       .value = 12, .key = TR_RANK_DEMOTE}
+};
+#define SPECIAL_ATTRIBUTE_MAPPINGS_RANK_SIZE (sizeof(special_attribute_mappings_rank) / sizeof(special_attribute_mapping_t))
+
 static void generate_building_type_mappings(void)
 {
     if (special_attribute_mappings_building_type_size > 0) {
@@ -834,6 +855,8 @@ special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mappin
             return &special_attribute_mappings_player_troops[index];
         case PARAMETER_TYPE_COVERAGE_BUILDINGS:
             return &special_attribute_mappings_coverage_buildings[index];
+        case PARAMETER_TYPE_RANK:
+            return &special_attribute_mappings_rank[index];
         default:
             return 0;
     }
@@ -891,6 +914,8 @@ int scenario_events_parameter_data_get_mappings_size(parameter_type type)
             return SPECIAL_ATTRIBUTE_MAPPINGS_PLAYER_TROOPS_SIZE;
         case PARAMETER_TYPE_COVERAGE_BUILDINGS:
             return SPECIAL_ATTRIBUTE_MAPPINGS_COVERAGE_BUILDINGS_SIZE;
+        case PARAMETER_TYPE_RANK:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_RANK_SIZE;
         default:
             return 0;
     }

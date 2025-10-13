@@ -214,6 +214,70 @@ int lang_text_draw_sequence(const lang_fragment *seq, int count, int x, int y, f
     }
     return width;
 }
+
+
+int lang_text_draw_sequence_multiline(const lang_fragment *seq, int count, int x, int y, int box_width,
+    int height_offset, font_t font, color_t color)
+{
+    int current_x = x;
+    int current_y = y;
+    int line_height = height_offset > 0 ? height_offset : font_definition_for(font)->line_height;
+    int lines_drawn = 0;
+
+    for (int i = 0; i < count; i++) {
+        const lang_fragment *f = &seq[i];
+        int fragment_width = 0;
+
+        // Calculate the width of this fragment
+        switch (f->type) {
+            case LANG_FRAG_LABEL:
+                fragment_width = lang_text_get_width(f->text_group, f->text_id, font);
+                break;
+            case LANG_FRAG_AMOUNT:
+                fragment_width = lang_text_get_amount_width(f->text_group, f->text_id, f->number, font);
+                break;
+            case LANG_FRAG_NUMBER:
+                fragment_width = text_get_number_width(f->number, '\0', "\0", font);
+                break;
+            case LANG_FRAG_TEXT:
+                fragment_width = text_get_width(f->text, font);
+                break;
+            case LANG_FRAG_SPACE:
+                fragment_width = f->space_width;
+                break;
+        }
+
+        // Check if we need to wrap to the next line
+        if (current_x + fragment_width > x + box_width && current_x > x) {
+            current_x = x;
+            current_y += line_height;
+            lines_drawn++;
+        }
+
+        // Draw the fragment
+        switch (f->type) {
+            case LANG_FRAG_LABEL:
+                current_x += lang_text_draw_colored(f->text_group, f->text_id, current_x, current_y, font, color);
+                break;
+            case LANG_FRAG_AMOUNT:
+                current_x += lang_text_draw_amount_colored(f->text_group, f->text_id, f->number,
+                    current_x, current_y, font, color);
+                break;
+            case LANG_FRAG_NUMBER:
+                current_x += text_draw_number(f->number, '\0', "\0", current_x, current_y, font, color);
+                break;
+            case LANG_FRAG_TEXT:
+                current_x += text_draw(f->text, current_x, current_y, font, color);
+                break;
+            case LANG_FRAG_SPACE:
+                current_x += f->space_width;
+                break;
+        }
+    }
+
+    return lines_drawn + 1; // Return total number of lines used
+}
+
 int lang_text_draw_sequence_centered(
 
     const lang_fragment *seq, int count, int x, int y, int box_width, font_t font, color_t color)

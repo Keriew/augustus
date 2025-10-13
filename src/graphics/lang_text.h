@@ -48,6 +48,7 @@ int lang_text_draw_multiline(int group, int number, int x_offset, int y_offset, 
 
 int lang_text_get_sequence_width(const lang_fragment *seq, int count, font_t font);
 int lang_text_draw_sequence(const lang_fragment *seq, int count, int x, int y, font_t font, color_t color);
+int lang_text_draw_sequence_multiline(const lang_fragment *seq, int count, int x, int y, int box_width, int height_offset, font_t font, color_t color);
 int lang_text_draw_sequence_centered(const lang_fragment *seq, int count, int x, int y, int box_width, font_t font, color_t color);
 
 #endif // GRAPHICS_LANG_TEXT_H

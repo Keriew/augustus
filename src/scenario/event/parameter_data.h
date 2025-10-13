@@ -46,6 +46,7 @@ typedef enum {
     PARAMETER_TYPE_COVERAGE_BUILDINGS,
     PARAMETER_TYPE_FLEXIBLE, // special type that can be anything, used in city_property to map the right type at runtime
     PARAMETER_TYPE_ROUTE_RESOURCE, //dynamic mapping of resource available on a route
+    PARAMETER_TYPE_RANK,
 } parameter_type;
 
 typedef struct {

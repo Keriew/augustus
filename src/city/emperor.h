@@ -35,9 +35,17 @@ int city_emperor_months_since_gift(void);
 
 int city_emperor_salary_for_rank(int rank);
 
+void city_emperor_change_rank(int change);
+/** @brief set rank during the game, via event or else */
+void city_emperor_set_rank(int new_rank);
+/** @brief preset rank before scenario load */
 void city_emperor_set_salary_rank(int rank);
 
 int city_emperor_rank_for_salary_paid(int salary);
+
+int city_emperor_promote_rank(void);
+
+int city_emperor_demote_rank(void);
 
 int city_emperor_salary_rank(void);
 int city_emperor_salary_amount(void);
