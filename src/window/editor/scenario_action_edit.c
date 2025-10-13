@@ -84,6 +84,7 @@ static uint8_t *translation_for_param_value(parameter_type type, int value)
 static void init(scenario_action_t *action)
 {
     data.action = action;
+    memset(data.formula, 0, MAX_TEXT_LENGTH);
     data.formula_index = 0;  // Reset formula index when switching actions
     data.parameter_being_edited = 0;
     data.parameter_being_edited_current_value = 0;
