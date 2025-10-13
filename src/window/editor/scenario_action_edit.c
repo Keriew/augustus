@@ -84,6 +84,9 @@ static uint8_t *translation_for_param_value(parameter_type type, int value)
 static void init(scenario_action_t *action)
 {
     data.action = action;
+    data.formula_index = 0;  // Reset formula index when switching actions
+    data.parameter_being_edited = 0;
+    data.parameter_being_edited_current_value = 0;
 }
 
 static parameter_type get_resolved_parameter_type(xml_data_attribute_t *param_attr, int param_number)
@@ -453,9 +456,11 @@ static void create_evaluation_formula(xml_data_attribute_t *parameter)
             }
         } else {
             memset(data.formula, 0, MAX_FORMULA_LENGTH);
+            data.formula_index = 0;  // Reset if formula not found
         }
     } else {
         memset(data.formula, 0, MAX_FORMULA_LENGTH); //clear if not assigned to prevent last formula from peeking through
+        data.formula_index = 0;  // Reset formula index for new formulas
     }
     window_text_input_expanded_show("FORMULA", "...", data.formula, MAX_FORMULA_LENGTH,
          set_formula_value, INPUT_BOX_CHARS_FORMULAS);
