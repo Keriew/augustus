@@ -57,7 +57,7 @@ int scenario_action_type_change_allowed_buildings_execute(scenario_action_t *act
 int scenario_action_type_change_city_rating_execute(scenario_action_t *action)
 {
     selected_rating rating = action->parameter1;
-    int value = action->parameter2;
+    int value = scenario_formula_evaluate_formula(action->parameter2);
     int is_hard_set = action->parameter3;
 
     switch (rating) {
@@ -85,7 +85,7 @@ int scenario_action_type_change_city_rating_execute(scenario_action_t *action)
 int scenario_action_type_change_custom_variable_execute(scenario_action_t *action)
 {
     int variable_id = action->parameter1;
-    int value = action->parameter2;
+    int value = scenario_formula_evaluate_formula(action->parameter2);
     int is_hard_set = action->parameter3;
 
     if (!is_hard_set) {
@@ -141,7 +141,7 @@ int scenario_action_type_change_resource_produced_execute(scenario_action_t *act
 int scenario_action_type_change_resource_stockpiles_execute(scenario_action_t *action)
 {
     int resource = action->parameter1;
-    int amount = action->parameter2;
+    int amount = scenario_formula_evaluate_formula(action->parameter2);
     storage_types storage_type = action->parameter3;
     int respect_settings = action->parameter4;
 
@@ -226,7 +226,7 @@ int scenario_action_type_empire_map_convert_future_trade_city_execute(scenario_a
 
 int scenario_action_type_favor_add_execute(scenario_action_t *action)
 {
-    int adjustment = action->parameter1;
+    int adjustment = scenario_formula_evaluate_formula(action->parameter1);
     city_ratings_change_favor(adjustment);
 
     return 1;
@@ -242,8 +242,8 @@ int scenario_action_type_gladiator_revolt_execute(scenario_action_t *action)
 int scenario_action_type_invasion_immediate_execute(scenario_action_t *action)
 {
     int attack_type = action->parameter1;
-    int size = action->parameter2;
-    int invasion_point = action->parameter3;
+    int size = scenario_formula_evaluate_formula(action->parameter2);
+    int invasion_point = scenario_formula_evaluate_formula(action->parameter3);
     int target_type = action->parameter4;
     int enemy_id = action->parameter5;
 
@@ -353,8 +353,8 @@ int scenario_action_type_savings_add_execute(scenario_action_t *action)
 
 int scenario_action_type_building_force_collapse_execute(scenario_action_t *action)
 {
-    int grid_offset = action->parameter1;
-    int block_radius = action->parameter2;
+    int grid_offset = scenario_formula_evaluate_formula(action->parameter1);
+    int block_radius = scenario_formula_evaluate_formula(action->parameter2);
     building_type type = action->parameter3;
     int destroy_all = action->parameter4;
 
@@ -433,7 +433,7 @@ int scenario_action_type_send_standard_message_execute(scenario_action_t *action
 int scenario_action_type_trade_price_set_execute(scenario_action_t *action)
 {
     int resource = action->parameter1;
-    int amount = action->parameter2;
+    int amount = scenario_formula_evaluate_formula(action->parameter2);
     int set_buy_price = action->parameter3;
     int show_message = action->parameter4;
 
@@ -471,7 +471,7 @@ int scenario_action_type_trade_price_set_execute(scenario_action_t *action)
 int scenario_action_type_trade_set_buy_price_execute(scenario_action_t *action)
 {
     int resource = action->parameter1;
-    int amount = action->parameter2;
+    int amount = scenario_formula_evaluate_formula(action->parameter2);
 
     if (resource < RESOURCE_MIN || resource > RESOURCE_MAX) {
         return 0;
@@ -483,7 +483,7 @@ int scenario_action_type_trade_set_buy_price_execute(scenario_action_t *action)
 int scenario_action_type_trade_set_sell_price_execute(scenario_action_t *action)
 {
     int resource = action->parameter1;
-    int amount = action->parameter2;
+    int amount = scenario_formula_evaluate_formula(action->parameter2);
 
     if (resource < RESOURCE_MIN || resource > RESOURCE_MAX) {
         return 0;
@@ -496,7 +496,7 @@ int scenario_action_type_trade_add_new_resource_execute(scenario_action_t *actio
 {
     int route_id = action->parameter1;
     int resource = action->parameter2;
-    int amount = action->parameter3;
+    int amount = scenario_formula_evaluate_formula(action->parameter3);
     int add_as_buying = action->parameter4;
     int show_message = action->parameter5;
 
@@ -533,7 +533,7 @@ int scenario_action_type_trade_add_new_resource_execute(scenario_action_t *actio
 int scenario_action_type_trade_price_adjust_execute(scenario_action_t *action)
 {
     int resource = action->parameter1;
-    int adjustment = action->parameter2;
+    int adjustment = scenario_formula_evaluate_formula(action->parameter2);
     int show_message = action->parameter3;
 
     if (resource < RESOURCE_MIN || resource > RESOURCE_MAX) {
@@ -559,7 +559,7 @@ int scenario_action_type_trade_price_adjust_execute(scenario_action_t *action)
 
 int scenario_action_type_trade_problems_land_execute(scenario_action_t *action)
 {
-    int duration = action->parameter1;
+    int duration = scenario_formula_evaluate_formula(action->parameter1);
 
     city_data.trade.months_since_last_land_trade_problem = 0;
     city_trade_start_land_trade_problems(duration);
@@ -574,7 +574,7 @@ int scenario_action_type_trade_problems_land_execute(scenario_action_t *action)
 
 int scenario_action_type_trade_problems_sea_execute(scenario_action_t *action)
 {
-    int duration = action->parameter1;
+    int duration = scenario_formula_evaluate_formula(action->parameter1);
 
     city_data.trade.months_since_last_sea_trade_problem = 0;
     city_trade_start_sea_trade_problems(duration);
@@ -586,7 +586,7 @@ int scenario_action_type_trade_problems_sea_execute(scenario_action_t *action)
 int scenario_action_type_trade_route_adjust_open_price_execute(scenario_action_t *action)
 {
     int route_id = action->parameter1;
-    int amount = action->parameter2;
+    int amount = scenario_formula_evaluate_formula(action->parameter2);
     int is_hard_set = action->parameter3;
     int show_message = action->parameter4;
 
@@ -631,7 +631,7 @@ int scenario_action_type_trade_route_amount_execute(scenario_action_t *action)
 {
     int route_id = action->parameter1;
     int resource = action->parameter2;
-    int amount = action->parameter3;
+    int amount = scenario_formula_evaluate_formula(action->parameter3);
     int show_message = action->parameter4;
 
     if (!trade_route_is_valid(route_id)) {
@@ -682,7 +682,7 @@ int scenario_action_type_show_custom_message_execute(scenario_action_t *action)
 
 int scenario_action_type_tax_rate_set_execute(scenario_action_t *action)
 {
-    int new_rate = action->parameter1;
+    int new_rate = scenario_formula_evaluate_formula(action->parameter1);
 
     city_finance_set_tax_percentage(new_rate);
 
@@ -727,8 +727,8 @@ int scenario_action_type_change_climate_execute(scenario_action_t *action)
 
 int scenario_action_type_change_terrain_execute(scenario_action_t *action)
 {
-    int grid_offset = action->parameter1;
-    int block_radius = action->parameter2;
+    int grid_offset = scenario_formula_evaluate_formula(action->parameter1);
+    int block_radius = scenario_formula_evaluate_formula(action->parameter2);
     int terrain = action->parameter3;
     int add = action->parameter4;
 
@@ -779,9 +779,8 @@ int scenario_action_type_change_terrain_execute(scenario_action_t *action)
 int scenario_action_type_change_god_sentiment_execute(scenario_action_t *action)
 {
     int god_id = action->parameter1;
-    int amount = action->parameter2;
+    int amount = scenario_formula_evaluate_formula(action->parameter2);
     int is_hard_set = action->parameter3;
-
     if (is_hard_set) {
         city_god_set_happiness(god_id, amount);
     } else {
@@ -793,7 +792,7 @@ int scenario_action_type_change_god_sentiment_execute(scenario_action_t *action)
 
 int scenario_action_type_change_pop_sentiment_execute(scenario_action_t *action)
 {
-    int amount = action->parameter1;
+    int amount = scenario_formula_evaluate_formula(action->parameter1);
     int is_hard_set = action->parameter2;
 
     if (is_hard_set) {
