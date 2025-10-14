@@ -3,7 +3,6 @@
 #include "core/log.h"
 #include "game/resource.h"
 #include "scenario/event/condition_types.h"
-#include "scenario/event/conditions/condition_types.h"
 
 static int condition_in_use(const scenario_condition_t *condition)
 {

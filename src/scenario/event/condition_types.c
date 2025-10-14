@@ -19,13 +19,14 @@
 #include "scenario/custom_variable.h"
 #include "scenario/event/condition_comparison_helper.h"
 #include "scenario/event/controller.h"
+#include "scenario/event/formula.h"
 #include "scenario/request.h"
 #include "scenario/scenario.h"
 
 int scenario_condition_type_building_count_active_met(const scenario_condition_t *condition)
 {
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
     building_type type = condition->parameter3;
 
     int total_active_count = 0;
@@ -101,7 +102,7 @@ int scenario_condition_type_building_count_active_met(const scenario_condition_t
 int scenario_condition_type_building_count_any_met(const scenario_condition_t *condition)
 {
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
     building_type type = condition->parameter3;
 
     int total_active_count = 0;
@@ -174,13 +175,23 @@ int scenario_condition_type_building_count_any_met(const scenario_condition_t *c
     return comparison_helper_compare_values(comparison, total_active_count, value);
 }
 
+int scenario_condition_type_custom_variable_check_formula(const scenario_condition_t *condition)
+{
+    int target_variable_val = scenario_custom_variable_get_value(condition->parameter1);
+    int comparison = condition->parameter2;
+    int formula_id = condition->parameter3;
+    int formula_evaluation = scenario_formula_evaluate_formula(formula_id);
+
+    return comparison_helper_compare_values(comparison, target_variable_val, formula_evaluation);
+}
+
 int scenario_condition_type_building_count_area_met(const scenario_condition_t *condition)
 {
-    int grid_offset = condition->parameter1;
-    int block_radius = condition->parameter2;
+    int grid_offset = scenario_formula_evaluate_formula(condition->parameter1);
+    int block_radius = scenario_formula_evaluate_formula(condition->parameter2);
     building_type type = condition->parameter3;
     int comparison = condition->parameter4;
-    int value = condition->parameter5;
+    int value = scenario_formula_evaluate_formula(condition->parameter5);
 
     if (!map_grid_is_valid_offset(grid_offset)) {
         return 0;
@@ -260,7 +271,7 @@ int scenario_condition_type_building_count_area_met(const scenario_condition_t *
 int scenario_condition_type_city_population_met(const scenario_condition_t *condition)
 {
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
     int class = condition->parameter3;
 
     int population_value_to_use = city_data.population.population;
@@ -278,7 +289,7 @@ int scenario_condition_type_city_population_met(const scenario_condition_t *cond
 int scenario_condition_type_count_own_troops_met(const scenario_condition_t *condition)
 {
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
     int in_city_only = condition->parameter3;
 
     int soldier_count = in_city_only ? city_military_total_soldiers_in_city() : city_military_total_soldiers();
@@ -290,7 +301,7 @@ int scenario_condition_type_custom_variable_check_met(const scenario_condition_t
 {
     int target_variable = scenario_custom_variable_get_value(condition->parameter1);
     int comparison = condition->parameter2;
-    int value = condition->parameter3;
+    int value = scenario_formula_evaluate_formula(condition->parameter3);
 
     return comparison_helper_compare_values(comparison, target_variable, value);
 }
@@ -308,7 +319,7 @@ int scenario_condition_type_money_met(const scenario_condition_t *condition)
 {
     int funds = city_finance_treasury();
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
 
     return comparison_helper_compare_values(comparison, funds, value);
 }
@@ -317,7 +328,7 @@ int scenario_condition_type_population_unemployed_met(const scenario_condition_t
 {
     int use_percentage = condition->parameter1;
     int comparison = condition->parameter2;
-    int value = condition->parameter3;
+    int value = scenario_formula_evaluate_formula(condition->parameter3);
 
     int unemployed_total = use_percentage ? city_labor_unemployment_percentage() : city_labor_workers_unemployed();
 
@@ -337,7 +348,7 @@ int scenario_condition_type_resource_storage_available_met(const scenario_condit
 {
     int resource = condition->parameter1;
     int comparison = condition->parameter2;
-    int value = condition->parameter3;
+    int value = scenario_formula_evaluate_formula(condition->parameter3);
     storage_types storage_type = condition->parameter4;
     int respect_settings = condition->parameter5; //for empty storage, respecting settings doesn't currently make sense
 
@@ -364,21 +375,11 @@ int scenario_condition_type_resource_storage_available_met(const scenario_condit
     return comparison_helper_compare_values(comparison, storage_available, value);
 }
 
-int scenario_condition_type_custom_variable_check_formula(const scenario_condition_t *condition)
-{
-    int target_variable_val = scenario_custom_variable_get_value(condition->parameter1);
-    int comparison = condition->parameter2;
-    int formula_id = condition->parameter3;
-    int formula_evaluation = scenario_formula_evaluate_formula(formula_id);
-
-    return comparison_helper_compare_values(comparison, target_variable_val, formula_evaluation);
-}
-
 int scenario_condition_type_resource_stored_count_met(const scenario_condition_t *condition)
 {
     int resource = condition->parameter1;
     int comparison = condition->parameter2;
-    int value = condition->parameter3;
+    int value = scenario_formula_evaluate_formula(condition->parameter3);
     storage_types storage_type = condition->parameter4;
 
     if (resource < RESOURCE_MIN || resource > RESOURCE_MAX) {
@@ -412,7 +413,7 @@ int scenario_condition_type_rome_wages_met(const scenario_condition_t *condition
 {
     int wages = city_labor_wages_rome();
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
 
     return comparison_helper_compare_values(comparison, wages, value);
 }
@@ -421,7 +422,7 @@ int scenario_condition_type_savings_met(const scenario_condition_t *condition)
 {
     int funds = city_emperor_personal_savings();
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
 
     return comparison_helper_compare_values(comparison, funds, value);
 }
@@ -430,7 +431,7 @@ int scenario_condition_type_stats_city_health_met(const scenario_condition_t *co
 {
     int stat_value = city_health();
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
 
     return comparison_helper_compare_values(comparison, stat_value, value);
 }
@@ -439,7 +440,7 @@ int scenario_condition_type_stats_culture_met(const scenario_condition_t *condit
 {
     int stat_value = city_rating_culture();
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
 
     return comparison_helper_compare_values(comparison, stat_value, value);
 }
@@ -448,7 +449,7 @@ int scenario_condition_type_stats_favor_met(const scenario_condition_t *conditio
 {
     int stat_value = city_rating_favor();
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
 
     return comparison_helper_compare_values(comparison, stat_value, value);
 }
@@ -457,7 +458,7 @@ int scenario_condition_type_stats_peace_met(const scenario_condition_t *conditio
 {
     int stat_value = city_rating_peace();
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
 
     return comparison_helper_compare_values(comparison, stat_value, value);
 }
@@ -466,7 +467,7 @@ int scenario_condition_type_stats_prosperity_met(const scenario_condition_t *con
 {
     int stat_value = city_rating_prosperity();
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
 
     return comparison_helper_compare_values(comparison, stat_value, value);
 }
@@ -510,7 +511,7 @@ int scenario_condition_type_trade_route_price_met(const scenario_condition_t *co
 {
     int route_id = condition->parameter1;
     int comparison = condition->parameter2;
-    int value = condition->parameter3;
+    int value = scenario_formula_evaluate_formula(condition->parameter3);
 
     if (!trade_route_is_valid(route_id)) {
         return 0;
@@ -525,7 +526,7 @@ int scenario_condition_type_trade_sell_price_met(const scenario_condition_t *con
 {
     int resource = condition->parameter1;
     int comparison = condition->parameter2;
-    int value = condition->parameter3;
+    int value = scenario_formula_evaluate_formula(condition->parameter3);
 
     if (resource < RESOURCE_MIN || resource > RESOURCE_MAX) {
         return 0;
@@ -539,7 +540,7 @@ int scenario_condition_type_tax_rate_met(const scenario_condition_t *condition)
 {
     int tax_rate = city_finance_tax_percentage();
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
 
     return comparison_helper_compare_values(comparison, tax_rate, value);
 }
