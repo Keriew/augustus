@@ -10,6 +10,7 @@
 #include "map/grid.h"
 #include "map/image.h"
 #include "widget/minimap.h"
+#include "widget/newsidebar/new_city.h"
 
 #define TILE_WIDTH_PIXELS 60
 #define TILE_HEIGHT_PIXELS 30
@@ -42,6 +43,7 @@ static struct {
         int y_pixels;
     } selected_tile;
 } data;
+
 
 static int view_to_grid_offset_lookup[VIEW_X_MAX][VIEW_Y_MAX];
 
@@ -580,35 +582,28 @@ void city_view_rotate_right(void)
     check_camera_boundaries();
 }
 
-static void set_viewport(int x_offset, int y_offset, int width, int height)
+static void set_viewport(void)
 {
-    data.viewport.x = x_offset;
-    data.viewport.y = y_offset;
+    const int sidebar_width = widget_sidebar_width();
+    const int width = data.screen_width - sidebar_width - 2;
+    const int height = data.screen_height - TOP_MENU_HEIGHT;
+
+    data.viewport.x = 0;
+    data.viewport.y = TOP_MENU_HEIGHT;
     data.viewport.width_pixels = width - 2;
-    data.viewport.height_pixels = height;
+    data.viewport.height_pixels = data.screen_height - TOP_MENU_HEIGHT;
+
     data.viewport.width_tiles = calc_adjust_with_percentage(width, data.scale) / TILE_WIDTH_PIXELS;
     data.viewport.height_tiles = calc_adjust_with_percentage(height, data.scale) / HALF_TILE_HEIGHT_PIXELS;
-}
-
-static void set_viewport_with_sidebar(void)
-{
-    set_viewport(0, TOP_MENU_HEIGHT, data.screen_width - 160, data.screen_height - TOP_MENU_HEIGHT);
-}
-
-static void set_viewport_without_sidebar(void)
-{
-    set_viewport(0, TOP_MENU_HEIGHT, data.screen_width - 40, data.screen_height - TOP_MENU_HEIGHT);
 }
 
 void city_view_set_scale(int scale)
 {
     scale = calc_bound(scale, 50, city_view_get_max_scale());
     data.scale = scale;
-    if (data.sidebar_collapsed) {
-        set_viewport_without_sidebar();
-    } else {
-        set_viewport_with_sidebar();
-    }
+
+    set_viewport();
+
     check_camera_boundaries();
     graphics_renderer()->update_scale(scale);
 }
@@ -617,11 +612,7 @@ void city_view_set_viewport(int screen_width, int screen_height)
 {
     data.screen_width = screen_width;
     data.screen_height = screen_height;
-    if (data.sidebar_collapsed) {
-        set_viewport_without_sidebar();
-    } else {
-        set_viewport_with_sidebar();
-    }
+    set_viewport();
     check_camera_boundaries();
 }
 
@@ -646,19 +637,15 @@ int city_view_is_sidebar_collapsed(void)
 
 void city_view_start_sidebar_toggle(void)
 {
-    set_viewport_without_sidebar();
+    set_viewport();
     check_camera_boundaries();
 }
 
 void city_view_toggle_sidebar(void)
 {
-    if (data.sidebar_collapsed) {
-        data.sidebar_collapsed = 0;
-        set_viewport_with_sidebar();
-    } else {
-        data.sidebar_collapsed = 1;
-        set_viewport_without_sidebar();
-    }
+    data.sidebar_collapsed = !data.sidebar_collapsed;
+
+    set_viewport();
     check_camera_boundaries();
 }
 

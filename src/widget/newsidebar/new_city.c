@@ -194,6 +194,11 @@ static void enable_building_buttons(void)
     }
 }
 
+int widget_sidebar_width(void)
+{
+    return SIDEBAR_ADVANCED_WIDTH;
+}
+
 void widget_new_sidebar_city_draw_foreground(void)
 {
     if (building_menu_has_changed()) {

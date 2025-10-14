@@ -4,6 +4,8 @@
 #include "graphics/tooltip.h"
 #include "input/mouse.h"
 
+int widget_sidebar_width(void);
+
 void widget_new_sidebar_city_draw_background(void);
 void widget_new_sidebar_city_draw_foreground(void);
 
