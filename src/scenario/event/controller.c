@@ -347,8 +347,12 @@ static void actions_load_state(buffer *buf, int is_new_version)
 
 static void formulas_save_state(buffer *buf)
 {
-    // Each record: id (u32) + formatted_calculation (fixed MAX_FORMULA_LENGTH bytes) + evaluation (i32)
-    int struct_size = sizeof(uint32_t) + MAX_FORMULA_LENGTH + sizeof(int32_t);
+    int struct_size =
+        sizeof(uint32_t)              // id
+        + MAX_FORMULA_LENGTH          // formatted_calculation
+        + sizeof(int32_t)             // evaluation
+        + sizeof(uint8_t) * 2         // is_static + is_error
+        + sizeof(int32_t) * 2;        // min_evaluation + max_evaluation
     buffer_init_dynamic_array(buf, scenario_formulas_size, struct_size);
 
     for (unsigned int id = 1; id <= scenario_formulas_size; ++id) {

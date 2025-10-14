@@ -82,7 +82,7 @@ static void init(scenario_condition_t *condition)
 {
     data.condition = condition;
     memset(data.formula, 0, MAX_TEXT_LENGTH);
-    data.formula_index = 0;  // Reset formula index when switching actions
+    data.formula_index = 0;
     data.parameter_being_edited = 0;
     data.parameter_being_edited_current_value = 0;
 }
