@@ -33,19 +33,19 @@ static void draw_sliding_foreground(void)
     window_request_refresh();
     data.position += speed_get_delta(&data.slide_speed);
     int is_finished = 0;
-    if (data.position >= SIDEBAR_EXPANDED_WIDTH) {
-        data.position = SIDEBAR_EXPANDED_WIDTH;
+    if (data.position >= SIDEBAR_ADVANCED_WIDTH) {
+        data.position = SIDEBAR_ADVANCED_WIDTH;
         is_finished = 1;
     }
 
-    int x_offset = new_sidebar_common_get_x_offset_expanded();
-    graphics_set_clip_rectangle(x_offset, TOP_MENU_HEIGHT, SIDEBAR_EXPANDED_WIDTH, new_sidebar_common_get_height());
+    int x_offset = new_sidebar_common_get_x_offset_advanced();
+    graphics_set_clip_rectangle(x_offset, TOP_MENU_HEIGHT, SIDEBAR_ADVANCED_WIDTH, new_sidebar_common_get_height());
 
     if (data.direction == SLIDE_DIRECTION_IN) {
         if (data.position > SIDEBAR_DECELERATION_OFFSET) {
             speed_set_target(&data.slide_speed, 1, SLIDE_ACCELERATION_MILLIS, 1);
         }
-        x_offset += SIDEBAR_EXPANDED_WIDTH - data.position;
+        x_offset += SIDEBAR_ADVANCED_WIDTH - data.position;
     } else {
         x_offset += data.position;
     }

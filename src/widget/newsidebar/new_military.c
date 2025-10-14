@@ -36,7 +36,7 @@
 #define Y_OFFSET_BOTTOM_BUTTONS 257
 #define MILITARY_PANEL_BLOCKS 18
 #define CONTENT_PADDING 10
-#define CONTENT_WIDTH (SIDEBAR_EXPANDED_WIDTH - 2 * CONTENT_PADDING)
+#define CONTENT_WIDTH (SIDEBAR_ADVANCED_WIDTH - 2 * CONTENT_PADDING)
 
 static const int IMAGE_OFFSETS_TO_FORMATION[7] = {
     FORMATION_COLUMN,
@@ -372,11 +372,11 @@ static void draw_military_panel_background(int x_offset)
 {
     graphics_draw_line(x_offset, x_offset, Y_OFFSET_PANEL_START,
         Y_OFFSET_PANEL_START + MILITARY_PANEL_BLOCKS * BLOCK_SIZE, COLOR_WHITE);
-    graphics_draw_line(x_offset + SIDEBAR_EXPANDED_WIDTH - 1, x_offset + SIDEBAR_EXPANDED_WIDTH - 1,
+    graphics_draw_line(x_offset + SIDEBAR_ADVANCED_WIDTH - 1, x_offset + SIDEBAR_ADVANCED_WIDTH - 1,
         Y_OFFSET_PANEL_START, Y_OFFSET_PANEL_START + MILITARY_PANEL_BLOCKS * BLOCK_SIZE, COLOR_SIDEBAR);
     inner_panel_draw(x_offset + 1, Y_OFFSET_PANEL_START + 10,
-        SIDEBAR_EXPANDED_WIDTH / BLOCK_SIZE, MILITARY_PANEL_BLOCKS);
-    inner_panel_draw(x_offset + 1, Y_OFFSET_PANEL_START, SIDEBAR_EXPANDED_WIDTH / BLOCK_SIZE, 1);
+        SIDEBAR_ADVANCED_WIDTH / BLOCK_SIZE, MILITARY_PANEL_BLOCKS);
+    inner_panel_draw(x_offset + 1, Y_OFFSET_PANEL_START, SIDEBAR_ADVANCED_WIDTH / BLOCK_SIZE, 1);
 
     draw_military_info_text(x_offset + CONTENT_PADDING, Y_OFFSET_PANEL_START);
     draw_military_info_buttons(x_offset, Y_OFFSET_PANEL_START);
@@ -409,7 +409,7 @@ static void draw_background(int x_offset)
     draw_military_panel_background(x_offset);
     draw_legion_buttons(x_offset, Y_OFFSET_PANEL_START);
     int extra_height = new_sidebar_extra_draw_background(x_offset, MILITARY_PANEL_HEIGHT,
-        SIDEBAR_EXPANDED_WIDTH, new_sidebar_common_get_height() - MILITARY_PANEL_HEIGHT + TOP_MENU_HEIGHT,
+        SIDEBAR_ADVANCED_WIDTH, new_sidebar_common_get_height() - MILITARY_PANEL_HEIGHT + TOP_MENU_HEIGHT,
         0, NEW_SIDEBAR_EXTRA_DISPLAY_ALL);
     new_sidebar_extra_draw_foreground();
 
@@ -418,7 +418,7 @@ static void draw_background(int x_offset)
 
 void widget_new_sidebar_military_draw_background(void)
 {
-    draw_background(new_sidebar_common_get_x_offset_expanded());
+    draw_background(new_sidebar_common_get_x_offset_advanced());
 }
 
 static int has_legion_changed(const legion_info *legion, const formation *m)
@@ -451,7 +451,7 @@ static void draw_foreground(int x_offset)
 
 void widget_new_sidebar_military_draw_foreground(void)
 {
-    draw_foreground(new_sidebar_common_get_x_offset_expanded());
+    draw_foreground(new_sidebar_common_get_x_offset_advanced());
 }
 
 static void draw_sliding(int x_offset)
@@ -462,7 +462,7 @@ static void draw_sliding(int x_offset)
 
 int widget_new_sidebar_military_handle_input(const mouse *m)
 {
-    int x_offset = new_sidebar_common_get_x_offset_expanded();
+    int x_offset = new_sidebar_common_get_x_offset_advanced();
     if (image_buttons_handle_mouse(m, x_offset, 24, buttons_title_close, 2, &data.top_buttons_focus_id)) {
         return 1;
     }

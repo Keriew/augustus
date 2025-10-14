@@ -5,14 +5,9 @@
 #include "graphics/screen.h"
 #include "widget/minimap.h"
 
-int new_sidebar_common_get_x_offset_expanded(void)
+int new_sidebar_common_get_x_offset_advanced(void)
 {
-    return screen_width() - SIDEBAR_EXPANDED_WIDTH;
-}
-
-int new_sidebar_common_get_x_offset_collapsed(void)
-{
-    return screen_width() - SIDEBAR_EXPANDED_WIDTH;
+    return screen_width() - SIDEBAR_ADVANCED_WIDTH;
 }
 
 int new_sidebar_common_get_height(void)

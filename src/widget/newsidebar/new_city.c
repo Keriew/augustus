@@ -173,7 +173,7 @@ static void draw_expanded_background(int x_offset)
 
 void widget_new_sidebar_city_draw_background(void)
 {
-    int x_offset = new_sidebar_common_get_x_offset_collapsed();
+    int x_offset = new_sidebar_common_get_x_offset_advanced();
     image_draw(image_group(GROUP_SIDE_PANEL), x_offset, TOP_MENU_HEIGHT, COLOR_MASK_NONE, SCALE_NONE);
     // draw_buttons_collapsed(x_offset);
     draw_new_sidebar_remainder(x_offset + 42);
@@ -200,7 +200,7 @@ void widget_new_sidebar_city_draw_foreground(void)
         enable_building_buttons();
     }
 
-    const int x_offset = new_sidebar_common_get_x_offset_collapsed();
+    const int x_offset = new_sidebar_common_get_x_offset_advanced();
     draw_buttons(x_offset);
 
     const int new_x_offset = x_offset + 42;
@@ -221,7 +221,7 @@ int widget_new_sidebar_city_handle_mouse(const mouse *m)
     unsigned int button_id;
     data.focus_button_for_tooltip = 0;
    // if (city_view_is_sidebar_collapsed()) {
-        int x_offset = new_sidebar_common_get_x_offset_collapsed();
+        int x_offset = new_sidebar_common_get_x_offset_advanced();
         // handled |= image_buttons_handle_mouse(m, x_offset, 24, button_expand_new_sidebar, 1, &button_id);
         // if (button_id) {
         //     data.focus_button_for_tooltip = 12;
@@ -256,7 +256,7 @@ int widget_new_sidebar_city_handle_mouse_build_menu(const mouse *m)
 {
   //  if (city_view_is_sidebar_collapsed()) {
         return image_buttons_handle_mouse(m,
-            new_sidebar_common_get_x_offset_collapsed(), 24, buttons_build, 12, 0);
+            new_sidebar_common_get_x_offset_advanced(), 24, buttons_build, 12, 0);
     // } else {
     //     return image_buttons_handle_mouse(m,
     //         new_sidebar_common_get_x_offset_expanded(), 24, buttons_build, 15, 0);
