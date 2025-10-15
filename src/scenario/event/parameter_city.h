@@ -43,6 +43,7 @@ typedef struct
     int count;                     // how many parameters needed
     parameter_type param_types[3]; // what enum type each param comes from (up to 3)
     int param_keys[3];  // translation keys for parameter types, if applicable
+    const char *param_names[3];    // XML attribute names for each parameter
 } city_property_info_t;
 
 int scenario_event_parameter_city_for_action(scenario_action_t *action);
