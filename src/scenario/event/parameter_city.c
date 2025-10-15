@@ -163,7 +163,64 @@ static int get_building_count(scenario_action_t *action)
 {
     building_type type = action->parameter3;
     int active_only = action->parameter4;
-    return active_only ? building_count_active(type) : building_count_total(type);
+    int total_count = 0;
+    switch (type) {
+        case BUILDING_MENU_FARMS:
+            total_count = building_set_count_farms(active_only);
+            break;
+        case BUILDING_MENU_RAW_MATERIALS:
+            total_count = building_set_count_raw_materials(active_only);
+            break;
+        case BUILDING_MENU_WORKSHOPS:
+            total_count = building_set_count_workshops(active_only);
+            break;
+        case BUILDING_MENU_SMALL_TEMPLES:
+            total_count = building_set_count_small_temples(active_only);
+            break;
+        case BUILDING_MENU_LARGE_TEMPLES:
+            total_count = building_set_count_large_temples(active_only);
+            break;
+        case BUILDING_MENU_GRAND_TEMPLES:
+            total_count = building_count_grand_temples_active();
+            break;
+        case BUILDING_MENU_TREES:
+            total_count = building_set_count_deco_trees();
+            break;
+        case BUILDING_MENU_PATHS:
+            total_count = building_set_count_deco_paths();
+            break;
+        case BUILDING_MENU_PARKS:
+            total_count = building_set_count_deco_statues();
+            break;
+        case BUILDING_ANY:
+            total_count = building_count_any_total(active_only);
+            break;
+        case BUILDING_ROAD:
+            total_count = building_count_roads();
+            break;
+        case BUILDING_HIGHWAY:
+            total_count = building_count_highway();
+            break;
+        case BUILDING_PLAZA:
+            total_count = building_count_plaza();
+            break;
+        case BUILDING_GARDENS:
+            total_count = building_count_gardens(0);
+            break;
+        case BUILDING_OVERGROWN_GARDENS:
+            total_count = building_count_gardens(1);
+            break;
+        case BUILDING_LOW_BRIDGE:
+            total_count = building_count_bridges(0);
+            break;
+        case BUILDING_SHIP_BRIDGE:
+            total_count = building_count_bridges(1);
+            break;
+        default:
+            total_count = active_only ? building_count_active(type) : building_count_total(type);
+            break;
+    }
+    return total_count;
 }
 
 static int get_player_soldiers_count(scenario_action_t *action)
