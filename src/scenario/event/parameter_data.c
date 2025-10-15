@@ -685,7 +685,7 @@ static special_attribute_mapping_t special_attribute_mappings_city_property[] = 
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "troops_count_player",     .value = CITY_PROPERTY_TROOPS_COUNT_PLAYER,     .key = TR_CITY_PROPERTY_TROOPS_COUNT_PLAYER },
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "troops_count_enemy",      .value = CITY_PROPERTY_TROOPS_COUNT_ENEMY,      .key = TR_CITY_PROPERTY_TROOPS_COUNT_ENEMY },
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "terrain_count_tiles",     .value = CITY_PROPERTY_TERRAIN_COUNT_TILES,     .key = TR_CITY_PROPERTY_TERRAIN_COUNT_TILES },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "quota_fill_import",       .value = CITY_PROPERTY_QUOTA_FILL,              .key = TR_CITY_PROPERTY_QUOTA_FILL },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "quota_fill",       .value = CITY_PROPERTY_QUOTA_FILL,              .key = TR_CITY_PROPERTY_QUOTA_FILL },
 
 };
 

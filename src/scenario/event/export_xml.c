@@ -9,8 +9,10 @@
 #include "scenario/custom_messages.h"
 #include "scenario/custom_variable.h"
 #include "scenario/event/controller.h"
+#include "scenario/event/parameter_city.h"
 #include "scenario/event/parameter_data.h"
 #include "window/plain_message_dialog.h"
+#include "window/editor/select_city_trade_route.h"
 
 #include <stdio.h>
 
@@ -120,9 +122,9 @@ static int export_attribute_custom_variable(xml_data_attribute_t *attr, int targ
     return 1;
 }
 
-static int export_parse_attribute(xml_data_attribute_t *attr, int target)
+static int export_parse_attribute_with_resolved_type(xml_data_attribute_t *attr, parameter_type resolved_type, int target)
 {
-    switch (attr->type) {
+    switch (resolved_type) {
         case PARAMETER_TYPE_INVASION_TYPE:
         case PARAMETER_TYPE_BOOLEAN:
         case PARAMETER_TYPE_BUILDING:
@@ -138,9 +140,23 @@ static int export_parse_attribute(xml_data_attribute_t *attr, int target)
         case PARAMETER_TYPE_GOD:
         case PARAMETER_TYPE_CLIMATE:
         case PARAMETER_TYPE_TERRAIN:
-            return export_attribute_by_type(attr, attr->type, target);
+        case PARAMETER_TYPE_PERCENTAGE:
+        case PARAMETER_TYPE_HOUSING_TYPE:
+        case PARAMETER_TYPE_AGE_GROUP:
+        case PARAMETER_TYPE_ENEMY_CLASS:
+        case PARAMETER_TYPE_PLAYER_TROOPS:
+        case PARAMETER_TYPE_COVERAGE_BUILDINGS:
+        case PARAMETER_TYPE_RANK:
+        case PARAMETER_TYPE_CITY_PROPERTY:
+        case PARAMETER_TYPE_MEDIA_TYPE:
+            return export_attribute_by_type(attr, resolved_type, target);
         case PARAMETER_TYPE_BUILDING_COUNTING:
             return export_attribute_by_type(attr, PARAMETER_TYPE_BUILDING, target);
+        case PARAMETER_TYPE_ROUTE_RESOURCE:
+        {
+            int value = window_editor_select_city_trade_route_decode_resource_id(target);
+            return export_attribute_number(attr, value);
+        }
         case PARAMETER_TYPE_REQUEST:
             return export_attribute_number(attr, target);
         case PARAMETER_TYPE_FUTURE_CITY:
@@ -159,19 +175,34 @@ static int export_parse_attribute(xml_data_attribute_t *attr, int target)
             return export_attribute_custom_variable(attr, target);
         case PARAMETER_TYPE_FORMULA:
         {
-            const uint8_t *formula = scenario_formula_get_string(target);
-            if (formula) {
-                xml_exporter_add_attribute_encoded_text(attr->name, formula);
+            if (!attr->name) {
                 return 1;
             }
-            return 0;
+            const uint8_t *formula = scenario_formula_get_string(target);
+            if (!formula) {
+                // If formula ID is invalid, replace with 000
+                const char *buffer = "000";
+                xml_exporter_add_attribute_text(attr->name, buffer);
+            } else {
+                xml_exporter_add_attribute_encoded_text(attr->name, formula);
+            }
+            return 1;
         }
         case PARAMETER_TYPE_UNDEFINED:
             return 1;
+        case PARAMETER_TYPE_FLEXIBLE:
+            // FLEXIBLE should have been resolved before calling this function
+            log_exporting_error("Unresolved FLEXIBLE parameter type encountered during export");
+            return 0;
         default:
             log_exporting_error("Something is very wrong. Failed to find attribute type.");
             return 0;
     }
+}
+
+static int export_parse_attribute(xml_data_attribute_t *attr, int target)
+{
+    return export_parse_attribute_with_resolved_type(attr, attr->type, target);
 }
 
 static void export_event_condition(scenario_condition_t *condition)
@@ -221,9 +252,46 @@ static void export_event_action(scenario_action_t *action)
 
     export_parse_attribute(&action_data->xml_parm1, action->parameter1);
     export_parse_attribute(&action_data->xml_parm2, action->parameter2);
-    export_parse_attribute(&action_data->xml_parm3, action->parameter3);
-    export_parse_attribute(&action_data->xml_parm4, action->parameter4);
-    export_parse_attribute(&action_data->xml_parm5, action->parameter5);
+
+    // Handle flexible parameters - resolve them to their actual types and get proper attribute names
+    if (action_data->xml_parm3.type == PARAMETER_TYPE_FLEXIBLE) {
+        parameter_type type3 = scenario_events_parameter_data_resolve_flexible_type(action, 3);
+        city_property_info_t info = city_property_get_param_info(action->parameter2);
+        if (type3 != PARAMETER_TYPE_UNDEFINED && info.count >= 1) {
+            xml_data_attribute_t resolved_attr = action_data->xml_parm3;
+            resolved_attr.type = type3;
+            resolved_attr.name = info.param_names[0];
+            export_parse_attribute_with_resolved_type(&resolved_attr, type3, action->parameter3);
+        }
+    } else {
+        export_parse_attribute(&action_data->xml_parm3, action->parameter3);
+    }
+
+    if (action_data->xml_parm4.type == PARAMETER_TYPE_FLEXIBLE) {
+        parameter_type type4 = scenario_events_parameter_data_resolve_flexible_type(action, 4);
+        city_property_info_t info = city_property_get_param_info(action->parameter2);
+        if (type4 != PARAMETER_TYPE_UNDEFINED && info.count >= 2) {
+            xml_data_attribute_t resolved_attr = action_data->xml_parm4;
+            resolved_attr.type = type4;
+            resolved_attr.name = info.param_names[1];
+            export_parse_attribute_with_resolved_type(&resolved_attr, type4, action->parameter4);
+        }
+    } else {
+        export_parse_attribute(&action_data->xml_parm4, action->parameter4);
+    }
+
+    if (action_data->xml_parm5.type == PARAMETER_TYPE_FLEXIBLE) {
+        parameter_type type5 = scenario_events_parameter_data_resolve_flexible_type(action, 5);
+        city_property_info_t info = city_property_get_param_info(action->parameter2);
+        if (type5 != PARAMETER_TYPE_UNDEFINED && info.count >= 3) {
+            xml_data_attribute_t resolved_attr = action_data->xml_parm5;
+            resolved_attr.type = type5;
+            resolved_attr.name = info.param_names[2];
+            export_parse_attribute_with_resolved_type(&resolved_attr, type5, action->parameter5);
+        }
+    } else {
+        export_parse_attribute(&action_data->xml_parm5, action->parameter5);
+    }
 
     xml_exporter_close_element();
 }
