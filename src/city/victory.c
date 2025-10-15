@@ -121,7 +121,7 @@ static int determine_victory_state(void)
 
 void city_victory_check(void)
 {
-    if (scenario_is_open_play()) {
+    if (scenario_is_open_play() && !data.force_win && !data.force_lose) {
         return;
     }
     data.state = determine_victory_state();
