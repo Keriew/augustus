@@ -1193,6 +1193,10 @@ void scenario_events_parameter_data_get_display_string_for_value(parameter_type 
         }
         case PARAMETER_TYPE_ROUTE_RESOURCE:
         {
+            if (RESOURCE_MIN < value && value < RESOURCE_MAX) {
+                result_text = string_copy(translation_for(TR_PARAMETER_VALUE_NONE), result_text, maxlength);
+                return;
+            }
             const uint8_t *text = window_editor_select_city_trade_route_show_get_selected_name(value);
             result_text = string_copy(text, result_text, maxlength);
             return;
