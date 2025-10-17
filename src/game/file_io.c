@@ -745,7 +745,7 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
         empire_load_custom_map(file->empire_map);
     }
     model_load();
-    if (version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
+    if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         model_load_model_data(file->model_data);
     }
     buffer_skip(file->end_marker, 4);
