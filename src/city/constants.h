@@ -54,7 +54,8 @@ typedef enum {
     GOD_NEPTUNE = 1,
     GOD_MERCURY = 2,
     GOD_MARS = 3,
-    GOD_VENUS = 4
+    GOD_VENUS = 4,
+    GOD_ALL = 5,
 } god_type;
 
 typedef enum {

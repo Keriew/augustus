@@ -1227,4 +1227,6 @@
 	<image id="gear_icon" src="gear_placeholder"/>
 	<image id="copy_icon" src="copy_settings"/>
 	<image id="paste_icon" src="paste_settings"/>
+	<image id="leftbracket_white_l" src="leftbracket_white_l"/>
+	<image id="rightbracket_white_l" src="rightbracket_white_l"/>
 </assetlist>

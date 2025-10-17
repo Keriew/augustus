@@ -5,7 +5,7 @@
 
 #include <stdint.h>
 
-void keyboard_start_capture(uint8_t *text, int max_length, int allow_punctuation, int box_width, font_t font);
+void keyboard_start_capture(uint8_t *text, int max_length, int allow_punctuation, int box_width, font_t font, const char *allowed_chars);
 void keyboard_refresh(void);
 void keyboard_stop_capture(void);
 

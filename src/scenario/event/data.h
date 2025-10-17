@@ -9,6 +9,8 @@
 #define CONDITION_GROUP_ITEMS_ARRAY_SIZE_STEP 2
 #define CONDITION_GROUP_STRUCT_SIZE (2 * sizeof(uint32_t) + 1 * sizeof(uint16_t) + 1 * sizeof(uint8_t))
 #define CONDITION_STRUCT_SIZE (5 * sizeof(int32_t) + 1 * sizeof(int16_t))
+#define MAX_FORMULA_LENGTH 100
+#define MAX_FORMULAS 1000
 
 typedef enum {
     EVENT_STATE_UNDEFINED = 0,
@@ -49,6 +51,7 @@ typedef enum {
     CONDITION_TYPE_RESOURCE_STORED_COUNT = 22,
     CONDITION_TYPE_RESOURCE_STORAGE_AVAILABLE = 23,
     CONDITION_TYPE_BUILDING_COUNT_AREA = 24,
+    CONDITION_TYPE_CUSTOM_VARIABLE_CHECK_FORMULA = 25,
     CONDITION_TYPE_MAX,
     // helper constants
     CONDITION_TYPE_MIN = CONDITION_TYPE_TIME_PASSED,
@@ -90,7 +93,14 @@ typedef enum {
     ACTION_TYPE_CHANGE_CLIMATE = 32,
     ACTION_TYPE_CHANGE_TERRAIN = 33,
     ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY = 34,
-    ACTION_TYPE_CHANGE_MODEL_DATA = 35,
+    ACTION_TYPE_CUSTOM_VARIABLE_FORMULA = 35,
+    ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY = 36,
+    ACTION_TYPE_GOD_SENTIMENT_CHANGE = 37,
+    ACTION_TYPE_POP_SENTIMENT_CHANGE = 38,
+    ACTION_TYPE_WIN = 39,
+    ACTION_TYPE_LOSE = 40,
+    ACTION_TYPE_CHANGE_RANK = 41,
+    ACTION_TYPE_CHANGE_MODEL_DATA = 42,
     ACTION_TYPE_MAX,
     // helper constants
     ACTION_TYPE_MIN = ACTION_TYPE_ADJUST_FAVOR,
@@ -146,14 +156,25 @@ typedef struct {
 typedef struct {
     unsigned int id;
     event_state state;
-    int repeat_months_min;
-    int repeat_months_max;
+    int repeat_days_min; // changed to days from months in scenario version 20, with conversion done in editor
+    int repeat_days_max;
+    uint8_t repeat_interval; // days between repeats, 0 = every time, 1 = every other time, etc.
     int max_number_of_repeats;
     int execution_count;
-    int months_until_active;
+    int days_until_active;
     uint8_t name[EVENT_NAME_LENGTH];
     array(scenario_condition_group_t) condition_groups;
     array(scenario_action_t) actions;
 } scenario_event_t;
+
+typedef struct {
+    unsigned int id; //this number should correspond to the index in array
+    uint8_t formatted_calculation[MAX_FORMULA_LENGTH]; //use [custom_variable_id] to get custom variables in the formula
+    int evaluation; // the last evaluated result of the formula, or in case of static - the only evaluation
+    unsigned char is_static; // flag to indicate if formula needs to be re-evaluated every time or whether its static
+    unsigned char is_error; // flag to indicate an error in formula that will prevent it from evaluation
+    int min_evaluation; //limits are inherited from xml parameters on adding to the array
+    int max_evaluation; //they cannot be set afterwards, because they are dictated by the kind of number expected to be returned
+} scenario_formula_t;
 
 #endif // SCENARIO_EVENT_DATA_H

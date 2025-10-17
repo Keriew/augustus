@@ -42,6 +42,8 @@ void city_population_remove_for_troop_request(int num_people);
 
 int city_population_people_of_working_age(void);
 
+int city_population_retired_people(void);
+
 void city_population_calculate_educational_age(void);
 
 void city_population_record_monthly(void);
@@ -73,6 +75,8 @@ int city_population_total_housing_capacity(void);
 int city_population_yearly_deaths(void);
 
 int city_population_yearly_births(void);
+
+int city_population_in_age_decennium(int decennium);
 
 int city_population_average_age(void);
 

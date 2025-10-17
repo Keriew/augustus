@@ -12,14 +12,18 @@
 #include "empire/city.h"
 #include "figure/formation.h"
 #include "game/resource.h"
+#include "game/state.h"
 #include "map/terrain.h"
+#include "scenario/event/controller.h"
+#include "scenario/event/parameter_city.h"
 #include "scenario/custom_messages.h"
 #include "scenario/custom_variable.h"
 #include "scenario/invasion.h"
 #include "scenario/request.h"
+#include "window/editor/select_city_trade_route.h"
 
-#define UNLIMITED 1000000000
-#define NEGATIVE_UNLIMITED -1000000000
+#define UNLIMITED 1000000000 //fits in 32bit signed/unsigned int
+#define NEGATIVE_UNLIMITED -1000000000 //fits in 32bit signed int
 
 static scenario_condition_data_t scenario_condition_data[CONDITION_TYPE_MAX] = {
     [CONDITION_TYPE_TIME_PASSED] = {.type = CONDITION_TYPE_TIME_PASSED,
@@ -34,59 +38,59 @@ static scenario_condition_data_t scenario_condition_data[CONDITION_TYPE_MAX] = {
     [CONDITION_TYPE_MONEY] = {.type = CONDITION_TYPE_MONEY,
                                         .xml_attr = {.name = "money",          .type = PARAMETER_TYPE_TEXT,             .key = TR_CONDITION_TYPE_MONEY },
                                         .xml_parm1 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,     .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_NUMBER,           .min_limit = -10000,    .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER }, },
+                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,           .min_limit = -10000,    .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
     [CONDITION_TYPE_SAVINGS] = {.type = CONDITION_TYPE_SAVINGS,
                                         .xml_attr = {.name = "savings",        .type = PARAMETER_TYPE_TEXT,             .key = TR_CONDITION_TYPE_SAVINGS },
                                         .xml_parm1 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,     .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = UNLIMITED,   .key = TR_PARAMETER_TYPE_NUMBER }, },
+                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = UNLIMITED,   .key = TR_PARAMETER_TYPE_FORMULA }, },
     [CONDITION_TYPE_STATS_FAVOR] = {.type = CONDITION_TYPE_STATS_FAVOR,
                                         .xml_attr = {.name = "stats_favor",    .type = PARAMETER_TYPE_TEXT,             .key = TR_CONDITION_TYPE_STATS_FAVOR },
                                         .xml_parm1 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,     .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = 100,   .key = TR_PARAMETER_TYPE_NUMBER }, },
+                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = 100,   .key = TR_PARAMETER_TYPE_FORMULA }, },
     [CONDITION_TYPE_STATS_PROSPERITY] = {.type = CONDITION_TYPE_STATS_PROSPERITY,
                                         .xml_attr = {.name = "stats_prosperity",     .type = PARAMETER_TYPE_TEXT,       .key = TR_CONDITION_TYPE_STATS_PROSPERITY },
                                         .xml_parm1 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,     .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = 100,   .key = TR_PARAMETER_TYPE_NUMBER }, },
+                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = 100,   .key = TR_PARAMETER_TYPE_FORMULA }, },
     [CONDITION_TYPE_STATS_CULTURE] = {.type = CONDITION_TYPE_STATS_CULTURE,
                                         .xml_attr = {.name = "stats_culture",        .type = PARAMETER_TYPE_TEXT,       .key = TR_CONDITION_TYPE_STATS_CULTURE },
                                         .xml_parm1 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,     .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = 100,   .key = TR_PARAMETER_TYPE_NUMBER }, },
+                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = 100,   .key = TR_PARAMETER_TYPE_FORMULA }, },
     [CONDITION_TYPE_STATS_PEACE] = {.type = CONDITION_TYPE_STATS_PEACE,
                                         .xml_attr = {.name = "stats_peace",          .type = PARAMETER_TYPE_TEXT,       .key = TR_CONDITION_TYPE_STATS_PEACE },
                                         .xml_parm1 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,     .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = 100,   .key = TR_PARAMETER_TYPE_NUMBER }, },
+                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = 100,   .key = TR_PARAMETER_TYPE_FORMULA }, },
     [CONDITION_TYPE_TRADE_SELL_PRICE] = {.type = CONDITION_TYPE_TRADE_SELL_PRICE,
                                         .xml_attr = {.name = "trade_sell_price",     .type = PARAMETER_TYPE_TEXT,       .key = TR_CONDITION_TYPE_TRADE_SELL_PRICE },
                                         .xml_parm1 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE,         .key = TR_PARAMETER_TYPE_RESOURCE },
                                         .xml_parm2 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm3 = {.name = "value",          .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER }, },
+                                        .xml_parm3 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
     [CONDITION_TYPE_POPS_UNEMPLOYMENT] = {.type = CONDITION_TYPE_POPS_UNEMPLOYMENT,
                                         .xml_attr = {.name = "population_unemployed",     .type = PARAMETER_TYPE_TEXT,  .key = TR_CONDITION_TYPE_POPS_UNEMPLOYMENT },
                                         .xml_parm1 = {.name = "percentage",     .type = PARAMETER_TYPE_BOOLEAN,          .key = TR_PARAMETER_USE_PERCENTAGE },
                                         .xml_parm2 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm3 = {.name = "value",          .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER }, },
+                                        .xml_parm3 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
     [CONDITION_TYPE_ROME_WAGES] = {.type = CONDITION_TYPE_ROME_WAGES,
                                         .xml_attr = {.name = "rome_wages",     .type = PARAMETER_TYPE_TEXT,             .key = TR_CONDITION_TYPE_ROME_WAGES },
                                         .xml_parm1 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,         .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = 10000,     .key = TR_PARAMETER_TYPE_NUMBER }, },
+                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = 10000,     .key = TR_PARAMETER_TYPE_FORMULA }, },
     [CONDITION_TYPE_CITY_POPULATION] = {.type = CONDITION_TYPE_CITY_POPULATION,
                                         .xml_attr = {.name = "city_population",     .type = PARAMETER_TYPE_TEXT,        .key = TR_CONDITION_TYPE_CITY_POPULATION },
                                         .xml_parm1 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm3 = {.name = "class",          .type = PARAMETER_TYPE_POP_CLASS,        .min_limit = 1,         .max_limit = 3,             .key = TR_PARAMETER_TYPE_POP_CLASS }, },
     [CONDITION_TYPE_BUILDING_COUNT_ACTIVE] = {.type = CONDITION_TYPE_BUILDING_COUNT_ACTIVE,
                                         .xml_attr = {.name = "building_count_active",     .type = PARAMETER_TYPE_TEXT,  .key = TR_CONDITION_TYPE_BUILDING_COUNT_ACTIVE },
                                         .xml_parm1 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm3 = {.name = "building",       .type = PARAMETER_TYPE_BUILDING_COUNTING,                        .key = TR_PARAMETER_TYPE_BUILDING_COUNTING }, },
     [CONDITION_TYPE_STATS_CITY_HEALTH] = {.type = CONDITION_TYPE_STATS_CITY_HEALTH,
                                         .xml_attr = {.name = "stats_health",          .type = PARAMETER_TYPE_TEXT,      .key = TR_CONDITION_TYPE_STATS_CITY_HEALTH },
                                         .xml_parm1 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,       .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = 100,     .key = TR_PARAMETER_TYPE_NUMBER }, },
+                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = 100,     .key = TR_PARAMETER_TYPE_FORMULA }, },
     [CONDITION_TYPE_COUNT_OWN_TROOPS] = {.type = CONDITION_TYPE_COUNT_OWN_TROOPS,
                                         .xml_attr = {.name = "count_own_troops",     .type = PARAMETER_TYPE_TEXT,       .key = TR_CONDITION_TYPE_COUNT_OWN_TROOPS },
                                         .xml_parm1 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm3 = {.name = "in_city_only",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,         .max_limit = 1,             .key = TR_PARAMETER_IN_CITY_ONLY }, },
     [CONDITION_TYPE_REQUEST_IS_ONGOING] = {.type = CONDITION_TYPE_REQUEST_IS_ONGOING,
                                         .xml_attr = {.name = "request_is_ongoing",     .type = PARAMETER_TYPE_TEXT,     .key = TR_CONDITION_TYPE_REQUEST_IS_ONGOING },
@@ -95,17 +99,17 @@ static scenario_condition_data_t scenario_condition_data[CONDITION_TYPE_MAX] = {
     [CONDITION_TYPE_TAX_RATE] = {.type = CONDITION_TYPE_TAX_RATE,
                                         .xml_attr = {.name = "tax_rate",       .type = PARAMETER_TYPE_TEXT,             .key = TR_CONDITION_TYPE_TAX_RATE },
                                         .xml_parm1 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,         .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = 25,       .key = TR_PARAMETER_TYPE_NUMBER }, },
+                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = 25,       .key = TR_PARAMETER_TYPE_FORMULA }, },
     [CONDITION_TYPE_BUILDING_COUNT_ANY] = {.type = CONDITION_TYPE_BUILDING_COUNT_ANY,
                                         .xml_attr = {.name = "building_count_any",     .type = PARAMETER_TYPE_TEXT,  .key = TR_CONDITION_TYPE_BUILDING_COUNT_ANY },
                                         .xml_parm1 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm3 = {.name = "building",       .type = PARAMETER_TYPE_BUILDING_COUNTING,                        .key = TR_PARAMETER_TYPE_BUILDING_COUNTING }, },
     [CONDITION_TYPE_CUSTOM_VARIABLE_CHECK] = {.type = CONDITION_TYPE_CUSTOM_VARIABLE_CHECK,
                                         .xml_attr = {.name = "variable_check",       .type = PARAMETER_TYPE_TEXT,             .key = TR_CONDITION_TYPE_CUSTOM_VARIABLE_CHECK },
                                         .xml_parm1 = {.name = "variable_uid",   .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,         .max_limit = 99,       .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
                                         .xml_parm2 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,        .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm3 = {.name = "value",          .type = PARAMETER_TYPE_NUMBER,           .min_limit = NEGATIVE_UNLIMITED,               .max_limit = UNLIMITED,       .key = TR_PARAMETER_TYPE_NUMBER }, },
+                                        .xml_parm3 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,           .min_limit = NEGATIVE_UNLIMITED,               .max_limit = UNLIMITED,       .key = TR_PARAMETER_TYPE_FORMULA }, },
     [CONDITION_TYPE_TRADE_ROUTE_OPEN] = {.type = CONDITION_TYPE_TRADE_ROUTE_OPEN,
                                         .xml_attr = {.name = "trade_route_open",     .type = PARAMETER_TYPE_TEXT,       .key = TR_CONDITION_TYPE_TRADE_ROUTE_OPEN },
                                         .xml_parm1 = {.name = "target_city",          .type = PARAMETER_TYPE_ROUTE,      .key = TR_PARAMETER_TYPE_ROUTE },
@@ -114,27 +118,33 @@ static scenario_condition_data_t scenario_condition_data[CONDITION_TYPE_MAX] = {
                                         .xml_attr = {.name = "trade_route_price",    .type = PARAMETER_TYPE_TEXT,       .key = TR_CONDITION_TYPE_TRADE_ROUTE_PRICE },
                                         .xml_parm1 = {.name = "target_city",    .type = PARAMETER_TYPE_ROUTE,            .key = TR_PARAMETER_TYPE_ROUTE },
                                         .xml_parm2 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm3 = {.name = "value",          .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER }, },
+                                        .xml_parm3 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
     [CONDITION_TYPE_RESOURCE_STORED_COUNT] = {.type = CONDITION_TYPE_RESOURCE_STORED_COUNT,
                                         .xml_attr = {.name = "resource_stored_count",     .type = PARAMETER_TYPE_TEXT,       .key = TR_CONDITION_TYPE_RESOURCE_STORED_COUNT },
                                         .xml_parm1 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE,         .key = TR_PARAMETER_TYPE_RESOURCE },
                                         .xml_parm2 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm3 = {.name = "value",          .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm3 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm4 = {.name = "storage_type",   .type = PARAMETER_TYPE_STORAGE_TYPE,     .key = TR_PARAMETER_TYPE_STORAGE_TYPE }, },
     [CONDITION_TYPE_RESOURCE_STORAGE_AVAILABLE] = {.type = CONDITION_TYPE_RESOURCE_STORAGE_AVAILABLE,
                                         .xml_attr = {.name = "resource_storage_available",     .type = PARAMETER_TYPE_TEXT,       .key = TR_CONDITION_TYPE_RESOURCE_STORAGE_AVAILABLE },
                                         .xml_parm1 = {.name = "resource",            .type = PARAMETER_TYPE_RESOURCE,         .key = TR_PARAMETER_TYPE_RESOURCE },
                                         .xml_parm2 = {.name = "check",               .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm3 = {.name = "value",               .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm3 = {.name = "value",               .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm4 = {.name = "storage_type",        .type = PARAMETER_TYPE_STORAGE_TYPE,     .key = TR_PARAMETER_TYPE_STORAGE_TYPE },
                                         .xml_parm5 = {.name = "respect_settings",    .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,         .max_limit = 1,             .key = TR_PARAMETER_RESPECT_SETTINGS }, },
     [CONDITION_TYPE_BUILDING_COUNT_AREA] = {.type = CONDITION_TYPE_BUILDING_COUNT_AREA,
                                         .xml_attr = {.name = "building_count_area", .type = PARAMETER_TYPE_TEXT,             .key = TR_CONDITION_TYPE_BUILDING_COUNT_AREA },
-                                        .xml_parm1 = {.name = "grid_offset",         .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET },
-                                        .xml_parm2 = {.name = "block_radius",        .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_RADIUS },
+                                        .xml_parm1 = {.name = "grid_offset",         .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET },
+                                        .xml_parm2 = {.name = "block_radius",        .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_RADIUS },
                                         .xml_parm3 = {.name = "building",            .type = PARAMETER_TYPE_BUILDING,         .key = TR_PARAMETER_TYPE_BUILDING_COUNTING },
                                         .xml_parm4 = {.name = "check",               .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm5 = {.name = "value",               .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER }, },
+                                        .xml_parm5 = {.name = "value",               .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
+    [CONDITION_TYPE_CUSTOM_VARIABLE_CHECK_FORMULA] = {.type = CONDITION_TYPE_CUSTOM_VARIABLE_CHECK_FORMULA,
+                                        .xml_attr = {.name = "variable_check_formula",       .type = PARAMETER_TYPE_TEXT,             .key = TR_CONDITION_TYPE_CUSTOM_VARIABLE_CHECK_FORMULA },
+                                        .xml_parm1 = {.name = "variable_uid",   .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,         .max_limit = 99,       .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
+                                        .xml_parm2 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,        .key = TR_PARAMETER_TYPE_CHECK },
+                                        .xml_parm3 = {.name = "formula",        .type = PARAMETER_TYPE_FORMULA,          .min_limit = NEGATIVE_UNLIMITED,         .max_limit = UNLIMITED,       .key = TR_PARAMETER_TYPE_FORMULA }, },
+
 };
 
 scenario_condition_data_t *scenario_events_parameter_data_get_conditions_xml_attributes(condition_types type)
@@ -145,37 +155,40 @@ scenario_condition_data_t *scenario_events_parameter_data_get_conditions_xml_att
 static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
     [ACTION_TYPE_ADJUST_FAVOR] = {.type = ACTION_TYPE_ADJUST_FAVOR,
                                         .xml_attr = {.name = "favor_add",          .type = PARAMETER_TYPE_TEXT,     .key = TR_ACTION_TYPE_ADJUST_FAVOR },
-                                        .xml_parm1 = {.name = "amount",         .type = PARAMETER_TYPE_NUMBER,           .min_limit = -100,      .max_limit = 100,     .key = TR_PARAMETER_TYPE_NUMBER }, },
+                                        .xml_parm1 = {.name = "amount",         .type = PARAMETER_TYPE_FORMULA,           .min_limit = -100,      .max_limit = 100,     .key = TR_PARAMETER_TYPE_FORMULA }, },
     [ACTION_TYPE_ADJUST_MONEY] = {.type = ACTION_TYPE_ADJUST_MONEY,
                                         .xml_attr = {.name = "money_add",          .type = PARAMETER_TYPE_TEXT,     .key = TR_ACTION_TYPE_ADJUST_MONEY },
                                         .xml_parm1 = {.name = "min",            .type = PARAMETER_TYPE_MIN_MAX_NUMBER,           .min_limit = NEGATIVE_UNLIMITED,      .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_MIN_MAX_NUMBER_MIN  },
-                                        .xml_parm2 = {.name = "max",            .type = PARAMETER_TYPE_MIN_MAX_NUMBER,           .min_limit = NEGATIVE_UNLIMITED,      .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_MIN_MAX_NUMBER_MAX  }, },
+                                        .xml_parm2 = {.name = "max",            .type = PARAMETER_TYPE_MIN_MAX_NUMBER,           .min_limit = NEGATIVE_UNLIMITED,      .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_MIN_MAX_NUMBER_MAX  },
+                                        .xml_parm3 = {.name = "formula" ,        .type = PARAMETER_TYPE_FORMULA,        .min_limit = NEGATIVE_UNLIMITED,      .max_limit = UNLIMITED,      .key = TR_PARAMETER_TYPE_FORMULA },},
     [ACTION_TYPE_ADJUST_SAVINGS] = {.type = ACTION_TYPE_ADJUST_SAVINGS,
                                         .xml_attr = {.name = "savings_add",        .type = PARAMETER_TYPE_TEXT,     .key = TR_ACTION_TYPE_ADJUST_SAVINGS },
                                         .xml_parm1 = {.name = "min",            .type = PARAMETER_TYPE_MIN_MAX_NUMBER,           .min_limit = NEGATIVE_UNLIMITED,      .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_MIN_MAX_NUMBER_MIN  },
-                                        .xml_parm2 = {.name = "max",            .type = PARAMETER_TYPE_MIN_MAX_NUMBER,           .min_limit = NEGATIVE_UNLIMITED,      .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_MIN_MAX_NUMBER_MAX }, },
+                                        .xml_parm2 = {.name = "max",            .type = PARAMETER_TYPE_MIN_MAX_NUMBER,           .min_limit = NEGATIVE_UNLIMITED,      .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_MIN_MAX_NUMBER_MAX },
+                                         .xml_parm3 = {.name = "formula" ,        .type = PARAMETER_TYPE_FORMULA,      .min_limit = NEGATIVE_UNLIMITED,      .max_limit = UNLIMITED,        .key = TR_PARAMETER_TYPE_FORMULA }, },
     [ACTION_TYPE_TRADE_ADJUST_PRICE] = {.type = ACTION_TYPE_TRADE_ADJUST_PRICE,
                                         .xml_attr = {.name = "trade_price_adjust",    .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_TRADE_ADJUST_PRICE },
                                         .xml_parm1 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE,         .key = TR_PARAMETER_TYPE_RESOURCE },
-                                        .xml_parm2 = {.name = "amount",         .type = PARAMETER_TYPE_NUMBER,           .min_limit = -10000,      .max_limit = 10000,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm2 = {.name = "amount",         .type = PARAMETER_TYPE_FORMULA,           .min_limit = -10000,      .max_limit = 10000,     .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm3 = {.name = "show_message",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,           .max_limit = 1,         .key = TR_PARAMETER_SHOW_MESSAGE }, },
     [ACTION_TYPE_TRADE_PROBLEM_LAND] = {.type = ACTION_TYPE_TRADE_PROBLEM_LAND,
                                         .xml_attr = {.name = "trade_problems_land",    .type = PARAMETER_TYPE_TEXT,     .key = TR_ACTION_TYPE_TRADE_PROBLEM_LAND },
-                                        .xml_parm1 = {.name = "duration",       .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,      .max_limit = 10000,     .key = TR_PARAMETER_TYPE_NUMBER }, },
+                                        .xml_parm1 = {.name = "duration",       .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,      .max_limit = 10000,     .key = TR_PARAMETER_TYPE_FORMULA }, },
     [ACTION_TYPE_TRADE_PROBLEM_SEA] = {.type = ACTION_TYPE_TRADE_PROBLEM_SEA,
                                         .xml_attr = {.name = "trade_problems_sea",    .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_TRADE_PROBLEM_SEA },
-                                        .xml_parm1 = {.name = "duration",       .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,      .max_limit = 10000,     .key = TR_PARAMETER_TYPE_NUMBER }, },
+                                        .xml_parm1 = {.name = "duration",       .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,      .max_limit = 10000,     .key = TR_PARAMETER_TYPE_FORMULA }, },
     [ACTION_TYPE_TRADE_ADJUST_ROUTE_AMOUNT] = {.type = ACTION_TYPE_TRADE_ADJUST_ROUTE_AMOUNT,
                                         .xml_attr = {.name = "trade_route_amount",    .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_TRADE_ADJUST_ROUTE_AMOUNT },
                                         .xml_parm1 = {.name = "target_city",    .type = PARAMETER_TYPE_ROUTE,            .key = TR_PARAMETER_TYPE_ROUTE },
                                         .xml_parm2 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE,         .key = TR_PARAMETER_TYPE_RESOURCE },
-                                        .xml_parm3 = {.name = "amount",         .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,      .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm3 = {.name = "amount",         .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,      .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm4 = {.name = "show_message",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,      .max_limit = 1,          .key = TR_PARAMETER_SHOW_MESSAGE }, },
     [ACTION_TYPE_ADJUST_ROME_WAGES] = {.type = ACTION_TYPE_ADJUST_ROME_WAGES,
                                         .xml_attr = {.name = "change_rome_wages",     .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_ADJUST_ROME_WAGES },
                                         .xml_parm1 = {.name = "min",            .type = PARAMETER_TYPE_MIN_MAX_NUMBER,           .min_limit = -10000,      .max_limit = 10000,     .key = TR_PARAMETER_TYPE_MIN_MAX_NUMBER_MIN },
                                         .xml_parm2 = {.name = "max",            .type = PARAMETER_TYPE_MIN_MAX_NUMBER,           .min_limit = -10000,      .max_limit = 10000,     .key = TR_PARAMETER_TYPE_MIN_MAX_NUMBER_MAX },
-                                        .xml_parm3 = {.name = "set_to_value",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_SET_TO_VALUE }, },
+                                        .xml_parm3 = {.name = "set_to_value",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_SET_TO_VALUE },
+                                    .xml_parm4 = {.name = "formula" ,        .type = PARAMETER_TYPE_FORMULA,      .min_limit = -10000,      .max_limit = 10000,        .key = TR_PARAMETER_TYPE_FORMULA },},
     [ACTION_TYPE_GLADIATOR_REVOLT] = {.type = ACTION_TYPE_GLADIATOR_REVOLT,
                                         .xml_attr = {.name = "gladiator_revolt",     .type = PARAMETER_TYPE_TEXT,       .key = TR_ACTION_TYPE_GLADIATOR_REVOLT }, },
     [ACTION_TYPE_CHANGE_RESOURCE_PRODUCED] = {.type = ACTION_TYPE_CHANGE_RESOURCE_PRODUCED,
@@ -193,11 +206,12 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_attr = {.name = "city_health",    .type = PARAMETER_TYPE_TEXT,               .key = TR_ACTION_TYPE_ADJUST_CITY_HEALTH },
                                         .xml_parm1 = {.name = "min",            .type = PARAMETER_TYPE_MIN_MAX_NUMBER,           .min_limit = -100,      .max_limit = 100,     .key = TR_PARAMETER_TYPE_MIN_MAX_NUMBER_MIN },
                                         .xml_parm2 = {.name = "max",            .type = PARAMETER_TYPE_MIN_MAX_NUMBER,           .min_limit = -100,      .max_limit = 100,     .key = TR_PARAMETER_TYPE_MIN_MAX_NUMBER_MAX },
-                                        .xml_parm3 = {.name = "set_to_value",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_SET_TO_VALUE }, },
+                                        .xml_parm3 = {.name = "set_to_value",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_SET_TO_VALUE },
+                                    .xml_parm3 = {.name = "formula" ,        .type = PARAMETER_TYPE_FORMULA,      .min_limit = -100,      .max_limit = 100,        .key = TR_PARAMETER_TYPE_FORMULA },},
     [ACTION_TYPE_TRADE_SET_PRICE] = {.type = ACTION_TYPE_TRADE_SET_PRICE,
                                         .xml_attr = {.name = "trade_price_set",    .type = PARAMETER_TYPE_TEXT,         .key = TR_ACTION_TYPE_TRADE_SET_PRICE },
                                         .xml_parm1 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE,         .key = TR_PARAMETER_TYPE_RESOURCE },
-                                        .xml_parm2 = {.name = "amount",         .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm2 = {.name = "amount",         .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm3 = {.name = "set_buy_price",  .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,           .max_limit = 1,      .key = TR_PARAMETER_SET_BUY_PRICE },
                                         .xml_parm4 = {.name = "show_message",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,           .max_limit = 1,      .key = TR_PARAMETER_SHOW_MESSAGE }, },
     [ACTION_TYPE_EMPIRE_MAP_CONVERT_FUTURE_TRADE_CITY] = {.type = ACTION_TYPE_EMPIRE_MAP_CONVERT_FUTURE_TRADE_CITY,
@@ -212,27 +226,27 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm1 = {.name = "message_uid",    .type = PARAMETER_TYPE_CUSTOM_MESSAGE,   .key = TR_PARAMETER_TYPE_CUSTOM_MESSAGE }, },
     [ACTION_TYPE_TAX_RATE_SET] = {.type = ACTION_TYPE_TAX_RATE_SET,
                                         .xml_attr = {.name = "tax_rate_set",   .type = PARAMETER_TYPE_TEXT,             .key = TR_ACTION_TYPE_TAX_RATE_SET },
-                                        .xml_parm1 = {.name = "amount",         .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,      .max_limit = 25,     .key = TR_PARAMETER_TYPE_NUMBER }, },
+                                        .xml_parm1 = {.name = "amount",         .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,      .max_limit = 25,     .key = TR_PARAMETER_TYPE_FORMULA }, },
     [ACTION_TYPE_CHANGE_CUSTOM_VARIABLE] = {.type = ACTION_TYPE_CHANGE_CUSTOM_VARIABLE,
                                         .xml_attr = {.name = "change_variable",        .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_CHANGE_CUSTOM_VARIABLE },
                                         .xml_parm1 = {.name = "variable_uid",   .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,      .max_limit = 99,     .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
-                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_NUMBER,           .min_limit = NEGATIVE_UNLIMITED,          .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,           .min_limit = NEGATIVE_UNLIMITED,          .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm3 = {.name = "set_to_value",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_SET_TO_VALUE }, },
     [ACTION_TYPE_TRADE_ADJUST_ROUTE_OPEN_PRICE] = {.type = ACTION_TYPE_TRADE_ADJUST_ROUTE_OPEN_PRICE,
                                         .xml_attr = {.name = "change_trade_route_open_price",    .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_TRADE_ADJUST_ROUTE_OPEN_PRICE },
                                         .xml_parm1 = {.name = "target_city",    .type = PARAMETER_TYPE_ROUTE,            .key = TR_PARAMETER_TYPE_ROUTE },
-                                        .xml_parm2 = {.name = "amount",         .type = PARAMETER_TYPE_NUMBER,           .min_limit = NEGATIVE_UNLIMITED,          .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm2 = {.name = "amount",         .type = PARAMETER_TYPE_FORMULA,           .min_limit = NEGATIVE_UNLIMITED,          .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm3 = {.name = "set_to_value",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_SET_TO_VALUE },
                                         .xml_parm4 = {.name = "show_message",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_SHOW_MESSAGE }, },
     [ACTION_TYPE_CHANGE_CITY_RATING] = {.type = ACTION_TYPE_CHANGE_CITY_RATING,
                                         .xml_attr = {.name = "change_city_rating",   .type = PARAMETER_TYPE_TEXT,             .key = TR_ACTION_TYPE_CHANGE_CITY_RATING },
                                         .xml_parm1 = {.name = "rating",         .type = PARAMETER_TYPE_RATING_TYPE,      .min_limit = 0,           .max_limit = 4,      .key = TR_PARAMETER_TYPE_RATING_TYPE },
-                                        .xml_parm2 = {.name = "amount",         .type = PARAMETER_TYPE_NUMBER,           .min_limit = -100,        .max_limit = 100,    .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm2 = {.name = "amount",         .type = PARAMETER_TYPE_FORMULA,           .min_limit = -100,        .max_limit = 100,    .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm3 = {.name = "set_to_value",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,           .max_limit = 1,      .key = TR_PARAMETER_SET_TO_VALUE }, },
     [ACTION_TYPE_CHANGE_RESOURCE_STOCKPILES] = {.type = ACTION_TYPE_CHANGE_RESOURCE_STOCKPILES,
                                         .xml_attr = {.name = "change_resource_stockpiles",    .type = PARAMETER_TYPE_TEXT,             .key = TR_ACTION_TYPE_CHANGE_RESOURCE_STOCKPILES },
                                         .xml_parm1 = {.name = "resource",           .type = PARAMETER_TYPE_RESOURCE,         .key = TR_PARAMETER_TYPE_RESOURCE },
-                                        .xml_parm2 = {.name = "amount",             .type = PARAMETER_TYPE_NUMBER,           .min_limit = NEGATIVE_UNLIMITED,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm2 = {.name = "amount",             .type = PARAMETER_TYPE_FORMULA,           .min_limit = NEGATIVE_UNLIMITED,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm3 = {.name = "storage_type",       .type = PARAMETER_TYPE_STORAGE_TYPE,     .key = TR_PARAMETER_TYPE_STORAGE_TYPE },
                                         .xml_parm4 = {.name = "respect_settings",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,                            .max_limit = 1,             .key = TR_PARAMETER_RESPECT_SETTINGS }, },
     [ACTION_TYPE_TRADE_ROUTE_SET_OPEN] = {.type = ACTION_TYPE_TRADE_ROUTE_SET_OPEN,
@@ -243,28 +257,28 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_attr = {.name = "trade_route_add_new_resource",    .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_TRADE_ROUTE_ADD_NEW_RESOURCE },
                                         .xml_parm1 = {.name = "target_city",    .type = PARAMETER_TYPE_ROUTE,            .key = TR_PARAMETER_TYPE_ROUTE },
                                         .xml_parm2 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE,         .key = TR_PARAMETER_TYPE_RESOURCE },
-                                        .xml_parm3 = {.name = "amount",         .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,      .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm3 = {.name = "amount",         .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,      .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm4 = {.name = "add_as_buying",  .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_ADD_AS_BUYING },
                                         .xml_parm5 = {.name = "show_message",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_SHOW_MESSAGE }, },
     [ACTION_TYPE_TRADE_SET_BUY_PRICE_ONLY] = {.type = ACTION_TYPE_TRADE_SET_BUY_PRICE_ONLY,
                                         .xml_attr = {.name = "trade_set_buy_price_only",    .type = PARAMETER_TYPE_TEXT,         .key = TR_ACTION_TYPE_TRADE_SET_BUY_PRICE_ONLY },
                                         .xml_parm1 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE,         .key = TR_PARAMETER_TYPE_RESOURCE },
-                                        .xml_parm2 = {.name = "amount",         .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER }, },
+                                        .xml_parm2 = {.name = "amount",         .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
     [ACTION_TYPE_TRADE_SET_SELL_PRICE_ONLY] = {.type = ACTION_TYPE_TRADE_SET_SELL_PRICE_ONLY,
                                         .xml_attr = {.name = "trade_set_sell_price_only",    .type = PARAMETER_TYPE_TEXT,         .key = TR_ACTION_TYPE_TRADE_SET_SELL_PRICE_ONLY },
                                         .xml_parm1 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE,         .key = TR_PARAMETER_TYPE_RESOURCE },
-                                        .xml_parm2 = {.name = "amount",         .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER }, },
+                                        .xml_parm2 = {.name = "amount",         .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
     [ACTION_TYPE_BUILDING_FORCE_COLLAPSE] = {.type = ACTION_TYPE_BUILDING_FORCE_COLLAPSE,
                                         .xml_attr = {.name = "building_force_collapse",    .type = PARAMETER_TYPE_TEXT,         .key = TR_ACTION_TYPE_BUILDING_FORCE_COLLAPSE },
-                                        .xml_parm1 = {.name = "grid_offset",    .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET },
-                                        .xml_parm2 = {.name = "block_radius",   .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_RADIUS },
+                                        .xml_parm1 = {.name = "grid_offset",    .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET },
+                                        .xml_parm2 = {.name = "block_radius",   .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_RADIUS },
                                         .xml_parm3 = {.name = "building",       .type = PARAMETER_TYPE_BUILDING,         .key = TR_PARAMETER_TYPE_BUILDING_COUNTING },
                                         .xml_parm4 = {.name = "destroy_all",    .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_DESTROY_ALL }, },
     [ACTION_TYPE_INVASION_IMMEDIATE] = {.type = ACTION_TYPE_INVASION_IMMEDIATE,
                                         .xml_attr = {.name = "invasion_start_immediate",    .type = PARAMETER_TYPE_TEXT,             .key = TR_ACTION_TYPE_INVASION_IMMEDIATE },
                                         .xml_parm1 = {.name = "attack_type",                 .type = PARAMETER_TYPE_INVASION_TYPE,    .key = TR_PARAMETER_TYPE_INVASION_TYPE },
-                                        .xml_parm2 = {.name = "size",                        .type = PARAMETER_TYPE_NUMBER,           .min_limit = 1,           .max_limit = 200,     .key = TR_PARAMETER_TYPE_INVASION_SIZE },
-                                        .xml_parm3 = {.name = "invasion_point",              .type = PARAMETER_TYPE_NUMBER,           .min_limit = 1,           .max_limit = 9,       .key = TR_PARAMETER_TYPE_INVASION_POINT },
+                                        .xml_parm2 = {.name = "size",                        .type = PARAMETER_TYPE_FORMULA,           .min_limit = 1,           .max_limit = 200,     .key = TR_PARAMETER_TYPE_INVASION_SIZE },
+                                        .xml_parm3 = {.name = "invasion_point",              .type = PARAMETER_TYPE_FORMULA,           .min_limit = 1,           .max_limit = 9,       .key = TR_PARAMETER_TYPE_INVASION_POINT },
                                         .xml_parm4 = {.name = "target_type",                 .type = PARAMETER_TYPE_TARGET_TYPE,      .key = TR_PARAMETER_TYPE_TARGET_TYPE },
                                         .xml_parm5 = {.name = "enemy_type",                  .type = PARAMETER_TYPE_ENEMY_TYPE,       .key = TR_PARAMETER_TYPE_ENEMY_TYPE }, },
     [ACTION_TYPE_CAUSE_BLESSING] = {.type = ACTION_TYPE_CAUSE_BLESSING,
@@ -281,8 +295,8 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm1 = {.name = "climate",            .type = PARAMETER_TYPE_CLIMATE,   .key = TR_PARAMETER_TYPE_CLIMATE }, },
     [ACTION_TYPE_CHANGE_TERRAIN] = {.type = ACTION_TYPE_CHANGE_TERRAIN,
                                         .xml_attr = {.name = "change_terrain",      .type = PARAMETER_TYPE_TEXT,       .key = TR_ACTION_TYPE_CHANGE_TERRAIN },
-                                        .xml_parm1 = {.name = "grid_offset",        .type = PARAMETER_TYPE_NUMBER,     .min_limit = 0,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET },
-                                        .xml_parm2 = {.name = "block_radius",       .type = PARAMETER_TYPE_NUMBER,     .min_limit = 0,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_RADIUS },
+                                        .xml_parm1 = {.name = "grid_offset",        .type = PARAMETER_TYPE_FORMULA,     .min_limit = 0,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET },
+                                        .xml_parm2 = {.name = "block_radius",       .type = PARAMETER_TYPE_FORMULA,     .min_limit = 0,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_RADIUS },
                                         .xml_parm3 = {.name = "terrain",            .type = PARAMETER_TYPE_TERRAIN,    .key = TR_PARAMETER_TERRAIN },
                                         .xml_parm4 = {.name = "add",                .type = PARAMETER_TYPE_BOOLEAN,    .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_ADD }, },
     [ACTION_TYPE_CHANGE_MODEL_DATA]      = {.type = ACTION_TYPE_CHANGE_MODEL_DATA,
@@ -300,6 +314,37 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm1 = {.name = "variable_uid",   .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,      .max_limit = 99,     .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
                                         .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_BOOLEAN, .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_TYPE_BOOLEAN }, },
 
+    [ACTION_TYPE_CUSTOM_VARIABLE_FORMULA] = {.type = ACTION_TYPE_CUSTOM_VARIABLE_FORMULA,
+                                        .xml_attr = {.name = "variable_formula",       .type = PARAMETER_TYPE_TEXT,             .key = TR_ACTION_TYPE_CUSTOM_VARIABLE_FORMULA },
+                                        .xml_parm1 = {.name = "variable_uid",   .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,      .max_limit = 99,     .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
+                                        .xml_parm2 = {.name = "formula",        .type = PARAMETER_TYPE_FORMULA,          .min_limit = NEGATIVE_UNLIMITED,      .max_limit = UNLIMITED, .key = TR_PARAMETER_TYPE_FORMULA }, },
+    [ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY] = {.type = ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY,
+                                        .xml_attr = {.name = "variable_city_property",  .type = PARAMETER_TYPE_TEXT,             .key = TR_EDITOR_ACTION_TYPE_CITY_PROPERTY },
+                                        .xml_parm1 = {.name = "variable_uid",            .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,      .max_limit = 99,     .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
+                                        .xml_parm2 = {.name = "property",                .type = PARAMETER_TYPE_CITY_PROPERTY,    .key = TR_EDITOR_PARAMETER_CITY_PROPERTY},
+                                        .xml_parm3 = {.name = "flexible",                .type = PARAMETER_TYPE_FLEXIBLE  ,           .key = TR_PLACEHOLDER },
+                                        .xml_parm4 = {.name = "flexible",                .type = PARAMETER_TYPE_FLEXIBLE  ,           .key = TR_PLACEHOLDER },
+                                        .xml_parm5 = {.name = "flexible",                .type = PARAMETER_TYPE_FLEXIBLE  ,           .key = TR_PLACEHOLDER },},
+ [ACTION_TYPE_GOD_SENTIMENT_CHANGE] = {.type = ACTION_TYPE_GOD_SENTIMENT_CHANGE,
+                                        .xml_attr = {.name = "change_god_sentiment",    .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_GOD_SENTIMENT },
+                                        .xml_parm1 = {.name = "god",                 .type = PARAMETER_TYPE_GOD,       .key = TR_PARAMETER_TYPE_GOD },
+                                        .xml_parm2 = {.name = "amount",              .type = PARAMETER_TYPE_FORMULA,  .min_limit = -100,        .max_limit = 100,     .key = TR_PARAMETER_TYPE_FORMULA },
+                                        .xml_parm3 = {.name = "set_to_value",        .type = PARAMETER_TYPE_BOOLEAN,  .min_limit = 0,        .max_limit = 1,       .key = TR_PARAMETER_SET_TO_VALUE },
+                                    },
+[ACTION_TYPE_POP_SENTIMENT_CHANGE] = {.type = ACTION_TYPE_POP_SENTIMENT_CHANGE,
+    .xml_attr = {.name = "change_pop_sentiment",    .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_POP_SENTIMENT},
+    .xml_parm1 = {.name = "amount",              .type = PARAMETER_TYPE_FORMULA,  .min_limit = -100,        .max_limit = 100,     .key = TR_PARAMETER_TYPE_FORMULA },
+    .xml_parm2 = {.name = "set_to_value",        .type = PARAMETER_TYPE_BOOLEAN,  .min_limit = 0,        .max_limit = 1,       .key = TR_PARAMETER_SET_TO_VALUE },
+},
+[ACTION_TYPE_WIN] = {.type = ACTION_TYPE_WIN,
+    .xml_attr = {.name = "win",    .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_WIN },},
+[ACTION_TYPE_LOSE] = {.type = ACTION_TYPE_LOSE,
+    .xml_attr = {.name = "lose",    .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_LOSE },},
+[ACTION_TYPE_CHANGE_RANK] = {
+    .type = ACTION_TYPE_CHANGE_RANK,
+    .xml_attr = {.name = "change_rank",      .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_CHANGE_RANK },
+    .xml_parm1 = {.name = "rank",           .type = PARAMETER_TYPE_RANK,      .key = TR_PARAMETER_TYPE_RANK },
+}
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)
@@ -535,19 +580,20 @@ static special_attribute_mapping_t special_attribute_mappings_enemy_type[] = {
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_ENEMY_TYPE_SIZE (sizeof(special_attribute_mappings_enemy_type) / sizeof(special_attribute_mapping_t))
 
-special_attribute_mapping_t special_attribute_mappings_god[] =
+static special_attribute_mapping_t special_attribute_mappings_god[] =
 {
     {.type = PARAMETER_TYPE_GOD,                .text = "Ceres",          .value = GOD_CERES,         .key = TR_PARAMETER_VALUE_GOD_CERES },
     {.type = PARAMETER_TYPE_GOD,                .text = "Mars",           .value = GOD_MARS,          .key = TR_PARAMETER_VALUE_GOD_MARS },
     {.type = PARAMETER_TYPE_GOD,                .text = "Mercury",        .value = GOD_MERCURY,       .key = TR_PARAMETER_VALUE_GOD_MERCURY },
     {.type = PARAMETER_TYPE_GOD,                .text = "Neptune",        .value = GOD_NEPTUNE,       .key = TR_PARAMETER_VALUE_GOD_NEPTUNE },
     {.type = PARAMETER_TYPE_GOD,                .text = "Venus",          .value = GOD_VENUS,         .key = TR_PARAMETER_VALUE_GOD_VENUS },
+    {.type = PARAMETER_TYPE_GOD,                .text = "All",            .value = GOD_ALL,           .key = TR_CITY_PROPERTY_ALL },
 
 };
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_GOD_SIZE (sizeof(special_attribute_mappings_god) / sizeof(special_attribute_mapping_t))
 
-special_attribute_mapping_t special_attribute_mappings_climate[] =
+static special_attribute_mapping_t special_attribute_mappings_climate[] =
 {
     {.type = PARAMETER_TYPE_CLIMATE,            .text = "Central",        .value = CLIMATE_CENTRAL,   .key = TR_PARAMETER_VALUE_CLIMATE_CENTRAL },
     {.type = PARAMETER_TYPE_CLIMATE,            .text = "Northern",       .value = CLIMATE_NORTHERN,  .key = TR_PARAMETER_VALUE_CLIMATE_NORTHERN },
@@ -556,7 +602,7 @@ special_attribute_mapping_t special_attribute_mappings_climate[] =
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_CLIMATE_SIZE (sizeof(special_attribute_mappings_climate) / sizeof(special_attribute_mapping_t))
 
-special_attribute_mapping_t special_attribute_mappings_terrain[] =
+static special_attribute_mapping_t special_attribute_mappings_terrain[] =
 {
     {.type = PARAMETER_TYPE_TERRAIN,            .text = "Water",            .value = TERRAIN_WATER,   .key = TR_PARAMETER_TERRAIN_WATER },
     {.type = PARAMETER_TYPE_TERRAIN,            .text = "Rock",             .value = TERRAIN_ROCK,  .key = TR_PARAMETER_TERRAIN_ROCK },
@@ -579,6 +625,152 @@ special_attribute_mapping_t special_attribute_mappings_data_type[] =
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_DATA_TYPE_SIZE (sizeof(special_attribute_mappings_data_type) / sizeof(special_attribute_mapping_t))
 
+static special_attribute_mapping_t special_attribute_mappings_percentage[] = {
+    {.type = PARAMETER_TYPE_PERCENTAGE, .text = "Percentage", .value = 0, .key = TR_PARAMETER_PERCENTAGE },
+    {.type = PARAMETER_TYPE_PERCENTAGE, .text = "Absolute",   .value = 1, .key = TR_PARAMETER_ABSOLUTE },
+};
+
+#define SPECIAL_ATTRIBUTE_MAPPINGS_PERCENTAGE_SIZE (sizeof(special_attribute_mappings_percentage) / sizeof(special_attribute_mapping_t))
+
+static special_attribute_mapping_t special_attribute_mappings_housing[] = {
+    // Individual housing types
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_tent",       .value = BUILDING_HOUSE_SMALL_TENT,     .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_tent",       .value = BUILDING_HOUSE_LARGE_TENT,     .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_shack",      .value = BUILDING_HOUSE_SMALL_SHACK,    .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_shack",      .value = BUILDING_HOUSE_LARGE_SHACK,    .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_hovel",      .value = BUILDING_HOUSE_SMALL_HOVEL,    .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_hovel",      .value = BUILDING_HOUSE_LARGE_HOVEL,    .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_casa",       .value = BUILDING_HOUSE_SMALL_CASA,     .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_casa",       .value = BUILDING_HOUSE_LARGE_CASA,     .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_insula",     .value = BUILDING_HOUSE_SMALL_INSULA,   .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "medium_insula",    .value = BUILDING_HOUSE_MEDIUM_INSULA,  .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_insula",     .value = BUILDING_HOUSE_LARGE_INSULA,   .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "grand_insula",     .value = BUILDING_HOUSE_GRAND_INSULA,   .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_villa",      .value = BUILDING_HOUSE_SMALL_VILLA,    .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "medium_villa",     .value = BUILDING_HOUSE_MEDIUM_VILLA,   .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_villa",      .value = BUILDING_HOUSE_LARGE_VILLA,    .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "grand_villa",      .value = BUILDING_HOUSE_GRAND_VILLA,    .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_palace",     .value = BUILDING_HOUSE_SMALL_PALACE,   .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "medium_palace",    .value = BUILDING_HOUSE_MEDIUM_PALACE,  .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_palace",     .value = BUILDING_HOUSE_LARGE_PALACE,   .key = TR_PLACEHOLDER },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "luxury_palace",    .value = BUILDING_HOUSE_LUXURY_PALACE,  .key = TR_PLACEHOLDER },
+
+    // Housing groups (using overlay enum values for groups)
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "group_tents",      .value = HOUSE_GROUP_TENT,     .key = TR_OVERLAY_HOUSING_TENTS },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "group_shacks",     .value = HOUSE_GROUP_SHACK,    .key = TR_OVERLAY_HOUSING_SHACKS },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "group_hovels",     .value = HOUSE_GROUP_HOVEL,    .key = TR_OVERLAY_HOUSING_HOVELS },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "group_casae",      .value = HOUSE_GROUP_CASA,     .key = TR_OVERLAY_HOUSING_CASAS },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "group_insulae",    .value = HOUSE_GROUP_INSULA,   .key = TR_OVERLAY_HOUSE_INSULAS },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "group_villas",     .value = HOUSE_GROUP_VILLA,    .key = TR_OVERLAY_HOUSE_VILLAS },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "group_palaces",    .value = HOUSE_GROUP_PALACE,   .key = TR_OVERLAY_HOUSE_PALACES },
+};
+
+#define SPECIAL_ATTRIBUTE_MAPPINGS_HOUSING_SIZE (sizeof(special_attribute_mappings_housing) / sizeof(special_attribute_mapping_t))
+
+static special_attribute_mapping_t special_attribute_mappings_age[] = {
+    // Decenniums (10-year age groups)
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_0",  .value = 0,  .key = TR_DECENNIUM_0 }, // Ages 0-9
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_1",  .value = 1,  .key = TR_DECENNIUM_1 }, // Ages 10-19
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_2",  .value = 2,  .key = TR_DECENNIUM_2 }, // Ages 20-29
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_3",  .value = 3,  .key = TR_DECENNIUM_3 }, // Ages 30-39
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_4",  .value = 4,  .key = TR_DECENNIUM_4 }, // Ages 40-49
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_5",  .value = 5,  .key = TR_DECENNIUM_5 }, // Ages 50-59
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_6",  .value = 6,  .key = TR_DECENNIUM_6 }, // Ages 60-69
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_7",  .value = 7,  .key = TR_DECENNIUM_7 }, // Ages 70-79
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_8",  .value = 8,  .key = TR_DECENNIUM_8 }, // Ages 80-89
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_9",  .value = 9,  .key = TR_DECENNIUM_9 }, // Ages 90-99
+
+    // Age groups
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "school_age",   .value = 10, .key = TR_PLACEHOLDER }, // Ages 0-14
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "academy_age",  .value = 11, .key = TR_PLACEHOLDER }, // Ages 14-21
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "working_age",  .value = 12, .key = TR_PLACEHOLDER }, // Ages 20-49/59 (depends on config)
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "retired",      .value = 13, .key = TR_PLACEHOLDER }, // Ages 50+/60+ (depends on config)
+};
+
+#define SPECIAL_ATTRIBUTE_MAPPINGS_AGE_SIZE (sizeof(special_attribute_mappings_age) / sizeof(special_attribute_mapping_t))
+
+// like condition, but not condition
+static special_attribute_mapping_t special_attribute_mappings_city_property[] = {
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "difficulty",              .value = CITY_PROPERTY_DIFFICULTY,              .key = TR_CITY_PROPERTY_DIFFICULTY },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "money",                   .value = CITY_PROPERTY_MONEY,                   .key = TR_CITY_PROPERTY_MONEY },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "population",              .value = CITY_PROPERTY_POPULATION,              .key = TR_CITY_PROPERTY_POPULATION },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "savings",                 .value = CITY_PROPERTY_SAVINGS,                 .key = TR_CITY_PROPERTY_SAVINGS },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "year_finance_balance",    .value = CITY_PROPERTY_YEAR_FINANCE_BALANCE,    .key = TR_CITY_PROPERTY_YEAR_FINANCE_BALANCE },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "resource_stock",          .value = CITY_PROPERTY_RESOURCE_STOCK,          .key = TR_CITY_PROPERTY_RESOURCE_STOCK },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_favor",             .value = CITY_PROPERTY_STATS_FAVOR,             .key = TR_CITY_PROPERTY_STATS_FAVOR },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_prosperity",        .value = CITY_PROPERTY_STATS_PROSPERITY,        .key = TR_CITY_PROPERTY_STATS_PROSPERITY },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_culture",           .value = CITY_PROPERTY_STATS_CULTURE,           .key = TR_CITY_PROPERTY_STATS_CULTURE },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_peace",             .value = CITY_PROPERTY_STATS_PEACE,             .key = TR_CITY_PROPERTY_STATS_PEACE },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_city_health",       .value = CITY_PROPERTY_STATS_CITY_HEALTH,       .key = TR_CITY_PROPERTY_STATS_CITY_HEALTH },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "service coverage",        .value = CITY_PROPERTY_SERVICE_COVERAGE,        .key = TR_CITY_PROPERTY_SERVICE_COVERAGE },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "pops_unemployment",       .value = CITY_PROPERTY_POPS_UNEMPLOYMENT,       .key = TR_CITY_PROPERTY_POPS_UNEMPLOYMENT },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "pops_housing_type",       .value = CITY_PROPERTY_POPS_HOUSING_TYPE,       .key = TR_CITY_PROPERTY_POPS_HOUSING_TYPE },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "pops_age",                .value = CITY_PROPERTY_POPS_BY_AGE,             .key = TR_CITY_PROPERTY_POPS_BY_AGE },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "rome_wages",              .value = CITY_PROPERTY_ROME_WAGES,              .key = TR_CITY_PROPERTY_ROME_WAGES },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "city_wages",              .value = CITY_PROPERTY_CITY_WAGES,              .key = TR_CITY_PROPERTY_CITY_WAGES },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "building_count",          .value = CITY_PROPERTY_BUILDING_COUNT,          .key = TR_CITY_PROPERTY_BUILDING_COUNT },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "troops_count_player",     .value = CITY_PROPERTY_TROOPS_COUNT_PLAYER,     .key = TR_CITY_PROPERTY_TROOPS_COUNT_PLAYER },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "troops_count_enemy",      .value = CITY_PROPERTY_TROOPS_COUNT_ENEMY,      .key = TR_CITY_PROPERTY_TROOPS_COUNT_ENEMY },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "terrain_count_tiles",     .value = CITY_PROPERTY_TERRAIN_COUNT_TILES,     .key = TR_CITY_PROPERTY_TERRAIN_COUNT_TILES },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "quota_fill",       .value = CITY_PROPERTY_QUOTA_FILL,              .key = TR_CITY_PROPERTY_QUOTA_FILL },
+
+};
+
+#define SPECIAL_ATTRIBUTE_MAPPINGS_CITY_PROPERTY_SIZE (sizeof(special_attribute_mappings_city_property) / sizeof(special_attribute_mapping_t))
+
+
+static special_attribute_mapping_t special_attribute_mappings_troops_class[] = {
+    {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "all",            .value = ENEMY_CLASS_ALL,            .key = TR_CITY_PROPERTY_ALL },
+    {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "melee",          .value = ENEMY_CLASS_MELEE,          .key = TR_CITY_PROPERTY_TROOPS_MELEE },
+    {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "ranged",         .value = ENEMY_CLASS_RANGED,         .key = TR_CITY_PROPERTY_TROOPS_RANGED },
+    {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "cavalry",        .value = ENEMY_CLASS_MOUNTED,        .key = TR_CITY_PROPERTY_TROOPS_MOUNTED },
+};
+#define SPECIAL_ATTRIBUTE_MAPPINGS_TROOPS_CLASS_SIZE (sizeof(special_attribute_mappings_troops_class) / sizeof(special_attribute_mapping_t))
+
+static special_attribute_mapping_t special_attribute_mappings_player_troops[] = {
+    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "all",            .value = FIGURE_FORT_STANDARD,                          .key = TR_CITY_PROPERTY_ALL},
+    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "sword",          .value = FIGURE_FORT_INFANTRY ,      .key = TR_BUILDING_FORT_AUXILIA_INFANTRY },
+    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "bow",            .value = FIGURE_FORT_ARCHER,       .key = TR_BUILDING_FORT_ARCHERS },
+    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "cavalry",        .value = FIGURE_FORT_MOUNTED,      .key = TR_BUILDING_FORT_MOUNTED},
+    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "legionary",      .value = FIGURE_FORT_LEGIONARY,       .key = TR_BUILDING_FORT_LEGIONARIES },
+    {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "javelin",        .value = FIGURE_FORT_JAVELIN,         .key = TR_BUILDING_FORT_JAVELIN },
+};
+
+#define SPECIAL_ATTRIBUTE_MAPPINGS_PLAYER_TROOPS_SIZE (sizeof(special_attribute_mappings_player_troops) / sizeof(special_attribute_mapping_t))
+
+static special_attribute_mapping_t special_attribute_mappings_coverage_buildings[] = {
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "theatres",      .value = BUILDING_THEATER,              .key = TR_CITY_PROPERTY_COVERAGE_THEATRE },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "arenas",        .value = BUILDING_ARENA,                .key = TR_CITY_PROPERTY_COVERAGE_ARENA },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "amphitheatres", .value = BUILDING_AMPHITHEATER,         .key = TR_CITY_PROPERTY_COVERAGE_AMPHITHEATRE },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "taverns",       .value = BUILDING_TAVERN,               .key = TR_CITY_PROPERTY_COVERAGE_TAVERN },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "colosseum",     .value = BUILDING_COLOSSEUM,            .key = TR_CITY_PROPERTY_COVERAGE_COLOSSEUM },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "hippodrome",    .value = BUILDING_HIPPODROME,           .key = TR_CITY_PROPERTY_COVERAGE_HIPPODROME },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "doctors",       .value = BUILDING_DOCTOR,               .key = TR_CITY_PROPERTY_COVERAGE_DOCTOR },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "barbers",       .value = BUILDING_BARBER,               .key = TR_CITY_PROPERTY_COVERAGE_BARBER },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "hospitals",     .value = BUILDING_HOSPITAL,             .key = TR_CITY_PROPERTY_COVERAGE_HOSPITAL },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "baths",         .value = BUILDING_BATHHOUSE,            .key = TR_CITY_PROPERTY_COVERAGE_BATHS },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "schools",       .value = BUILDING_SCHOOL,               .key = TR_CITY_PROPERTY_COVERAGE_SCHOOL },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "libraries",     .value = BUILDING_LIBRARY,              .key = TR_CITY_PROPERTY_COVERAGE_LIBRARY },
+    {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "academies",     .value = BUILDING_ACADEMY,              .key = TR_CITY_PROPERTY_COVERAGE_ACADEMY },
+};
+#define SPECIAL_ATTRIBUTE_MAPPINGS_COVERAGE_BUILDINGS_SIZE (sizeof(special_attribute_mappings_coverage_buildings) / sizeof(special_attribute_mapping_t))
+
+static special_attribute_mapping_t special_attribute_mappings_rank[] = {
+    {.type = PARAMETER_TYPE_RANK, .text = "citizen",        .value = 0,  .key = TR_RANK_CITIZEN },
+    {.type = PARAMETER_TYPE_RANK, .text = "clerk",          .value = 1,  .key = TR_RANK_CLERK },
+    {.type = PARAMETER_TYPE_RANK, .text = "engineer",       .value = 2,  .key = TR_RANK_ENGINEER },
+    {.type = PARAMETER_TYPE_RANK, .text = "architect",      .value = 3,  .key = TR_RANK_ARCHITECT },
+    {.type = PARAMETER_TYPE_RANK, .text = "quaestor",       .value = 4,  .key = TR_RANK_QUAESTOR },
+    {.type = PARAMETER_TYPE_RANK, .text = "procurator",     .value = 5,  .key = TR_RANK_PROCURATOR },
+    {.type = PARAMETER_TYPE_RANK, .text = "aedile",         .value = 6,  .key = TR_RANK_AEDILE },
+    {.type = PARAMETER_TYPE_RANK, .text = "praetor",        .value = 7,  .key = TR_RANK_PRAETOR },
+    {.type = PARAMETER_TYPE_RANK, .text = "consul",         .value = 8,  .key = TR_RANK_CONSUL },
+    {.type = PARAMETER_TYPE_RANK, .text = "proconsul",      .value = 9,  .key = TR_RANK_PROCONSUL },
+    {.type = PARAMETER_TYPE_RANK, .text = "caesar",         .value = 10, .key = TR_RANK_CAESAR },
+    {.type = PARAMETER_TYPE_RANK, .text = "promotion",      .value = 11, .key = TR_RANK_PROMOTE },
+    {.type = PARAMETER_TYPE_RANK, .text = "demotion",       .value = 12, .key = TR_RANK_DEMOTE}
+};
+#define SPECIAL_ATTRIBUTE_MAPPINGS_RANK_SIZE (sizeof(special_attribute_mappings_rank) / sizeof(special_attribute_mapping_t))
 
 static void generate_building_type_mappings(void)
 {
@@ -701,6 +893,22 @@ special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mappin
         case PARAMETER_TYPE_MODEL:
             generate_model_mappings();
             return &special_attribute_mappings_model_buildings[index];
+        case PARAMETER_TYPE_HOUSING_TYPE:
+            return &special_attribute_mappings_housing[index];
+        case PARAMETER_TYPE_AGE_GROUP:
+            return &special_attribute_mappings_age[index];
+        case PARAMETER_TYPE_CITY_PROPERTY:
+            return &special_attribute_mappings_city_property[index];
+        case PARAMETER_TYPE_PERCENTAGE:
+            return &special_attribute_mappings_percentage[index];
+        case PARAMETER_TYPE_ENEMY_CLASS:
+            return &special_attribute_mappings_troops_class[index];
+        case PARAMETER_TYPE_PLAYER_TROOPS:
+            return &special_attribute_mappings_player_troops[index];
+        case PARAMETER_TYPE_COVERAGE_BUILDINGS:
+            return &special_attribute_mappings_coverage_buildings[index];
+        case PARAMETER_TYPE_RANK:
+            return &special_attribute_mappings_rank[index];
         default:
             return 0;
     }
@@ -749,6 +957,22 @@ int scenario_events_parameter_data_get_mappings_size(parameter_type type)
         case PARAMETER_TYPE_MODEL:
             generate_model_mappings();
             return special_attribute_mappings_model_buildings_size;
+        case PARAMETER_TYPE_HOUSING_TYPE:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_HOUSING_SIZE;
+        case PARAMETER_TYPE_AGE_GROUP:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_AGE_SIZE;
+        case PARAMETER_TYPE_CITY_PROPERTY:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_CITY_PROPERTY_SIZE;
+        case PARAMETER_TYPE_PERCENTAGE:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_PERCENTAGE_SIZE;
+        case PARAMETER_TYPE_ENEMY_CLASS:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_TROOPS_CLASS_SIZE;
+        case PARAMETER_TYPE_PLAYER_TROOPS:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_PLAYER_TROOPS_SIZE;
+        case PARAMETER_TYPE_COVERAGE_BUILDINGS:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_COVERAGE_BUILDINGS_SIZE;
+        case PARAMETER_TYPE_RANK:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_RANK_SIZE;
         default:
             return 0;
     }
@@ -797,7 +1021,7 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
         case PARAMETER_TYPE_INVASION_TYPE:
             return INVASION_TYPE_ENEMY_ARMY;
         case PARAMETER_TYPE_CHECK:
-            return COMPARISON_TYPE_EQUAL;
+            return COMPARISON_TYPE_EQUAL_OR_MORE;
         case PARAMETER_TYPE_DIFFICULTY:
             return DIFFICULTY_NORMAL;
         case PARAMETER_TYPE_ENEMY_TYPE:
@@ -827,9 +1051,43 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
             return TERRAIN_WATER;
         case PARAMETER_TYPE_DATA_TYPE:
             return MODEL_COST;
+        case PARAMETER_TYPE_HOUSING_TYPE:
+            return BUILDING_HOUSE_SMALL_TENT;
+        case PARAMETER_TYPE_CITY_PROPERTY:
+            return CITY_PROPERTY_DIFFICULTY;
+        case PARAMETER_TYPE_ENEMY_CLASS:
+            return ENEMY_CLASS_ALL;
+        case PARAMETER_TYPE_PLAYER_TROOPS:
+            return FIGURE_FORT_STANDARD;
+        case PARAMETER_TYPE_COVERAGE_BUILDINGS:
+            return BUILDING_THEATER;
+        case PARAMETER_TYPE_ROUTE_RESOURCE:
+            // Encode default route_id=1 with RESOURCE_ALL_BUYS (RESOURCE_MAX + 1)
+            return window_editor_select_city_trade_route_encode_route_resource(1, RESOURCE_MAX + 1);
+        case PARAMETER_TYPE_ROUTE:
+            return 1; // there should be at least one route
         default:
             return 0;
     }
+}
+
+parameter_type scenario_events_parameter_data_resolve_flexible_type(const scenario_action_t *action, int param_number)
+{
+    // Only ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY uses flexible parameters
+    if (action->type != ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY || param_number < 3 || param_number > 5) {
+        return PARAMETER_TYPE_UNDEFINED;
+    }
+
+    // Get the city property from parameter2
+    city_property_t city_property = action->parameter2;
+    city_property_info_t info = city_property_get_param_info(city_property);
+
+    // Map param_number to the array index (3->0, 4->1, 5->2)
+    int param_index = param_number - 3;
+    if (param_index >= info.count) {    // Check if this parameter is needed for this city property
+        return PARAMETER_TYPE_UNDEFINED;
+    }
+    return info.param_types[param_index];
 }
 
 static const uint8_t *get_allowed_building_name(building_type type)
@@ -985,6 +1243,24 @@ void scenario_events_parameter_data_get_display_string_for_value(parameter_type 
             result_text = string_copy(text, result_text, maxlength);
             return;
         }
+        case PARAMETER_TYPE_FORMULA:
+        {
+            const uint8_t *formula_string = scenario_formula_get_string(value);
+            if (formula_string) {
+                result_text = string_copy(formula_string, result_text, maxlength);
+            }
+            return;
+        }
+        case PARAMETER_TYPE_ROUTE_RESOURCE:
+        {
+            if (RESOURCE_MIN < value && value < RESOURCE_MAX) {
+                result_text = string_copy(translation_for(TR_PARAMETER_VALUE_NONE), result_text, maxlength);
+                return;
+            }
+            const uint8_t *text = window_editor_select_city_trade_route_show_get_selected_name(value);
+            result_text = string_copy(text, result_text, maxlength);
+            return;
+        }
         default:
         {
             special_attribute_mapping_t *attribute = scenario_events_parameter_data_get_attribute_mapping_by_value(type, value);
@@ -1058,6 +1334,20 @@ static uint8_t *translation_for_boolean_text(int value, translation_key true_key
     return result_text;
 }
 
+static uint8_t *translation_for_formula_index(int index, uint8_t *result_text, int *maxlength)
+{
+    result_text = append_text(string_from_ascii(" "), result_text, maxlength);
+
+    const uint8_t *text = scenario_formula_get_string(index);
+    if (text) {
+        result_text = append_text(text, result_text, maxlength);
+    } else {
+        result_text = append_text(string_from_ascii("???"), result_text, maxlength);
+    }
+
+    return result_text;
+}
+
 static uint8_t *translation_for_attr_mapping_text(parameter_type type, int value, uint8_t *result_text, int *maxlength)
 {
     result_text = append_text(string_from_ascii(" "), result_text, maxlength);
@@ -1094,7 +1384,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         }
         case ACTION_TYPE_ADJUST_FAVOR:
         {
-            result_text = translation_for_number_value(action->parameter1, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
             return;
         }
         case ACTION_TYPE_ADJUST_MONEY:
@@ -1107,10 +1397,10 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         {
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(TR_PARAMETER_GRID_OFFSET), result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter1, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(TR_PARAMETER_RADIUS), result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
             if (action->parameter4) {
                 result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
                 result_text = append_text(translation_for(TR_PARAMETER_DISPLAY_DESTROY_ALL_TYPES), result_text, &maxlength);
@@ -1129,7 +1419,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RATING_TYPE, action->parameter1, result_text, &maxlength);
             result_text = translation_for_set_or_add_text(action->parameter3, result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
             return;
         }
         case ACTION_TYPE_CHANGE_CUSTOM_VARIABLE:
@@ -1145,7 +1435,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
             }
 
             result_text = translation_for_set_or_add_text(action->parameter3, result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
             return;
         }
         case ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY:
@@ -1173,7 +1463,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_STORAGE_TYPE, action->parameter3, result_text, &maxlength);
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter1, result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
             result_text = translation_for_boolean_text(action->parameter4, TR_PARAMETER_DISPLAY_RESPECT_SETTINGS, TR_PARAMETER_DISPLAY_IGNORE_SETTINGS, result_text, &maxlength);
             return;
         }
@@ -1192,24 +1482,24 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_INVASION_TYPE, action->parameter1, result_text, &maxlength);
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(TR_PARAMETER_TYPE_INVASION_SIZE), result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ENEMY_TYPE, action->parameter5, result_text, &maxlength);
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(TR_PARAMETER_TYPE_INVASION_POINT), result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter3, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter3, result_text, &maxlength);
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_TARGET_TYPE, action->parameter4, result_text, &maxlength);
             return;
         }
         case ACTION_TYPE_REQUEST_IMMEDIATELY_START:
         case ACTION_TYPE_TAX_RATE_SET:
         {
-            result_text = translation_for_number_value(action->parameter1, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
             return;
         }
         case ACTION_TYPE_TRADE_PROBLEM_LAND:
         case ACTION_TYPE_TRADE_PROBLEM_SEA:
         {
-            result_text = translation_for_number_value(action->parameter1, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(TR_PARAMETER_DISPLAY_DAYS), result_text, &maxlength);
             return;
@@ -1222,14 +1512,14 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         case ACTION_TYPE_TRADE_ADJUST_PRICE:
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter1, result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
             result_text = translation_for_boolean_text(action->parameter3, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
             return;
         }
         case ACTION_TYPE_TRADE_ADJUST_ROUTE_AMOUNT:
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, action->parameter1, result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter3, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter3, result_text, &maxlength);
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter2, result_text, &maxlength);
             result_text = translation_for_boolean_text(action->parameter4, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
             return;
@@ -1239,7 +1529,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, action->parameter1, result_text, &maxlength);
             result_text = translation_for_boolean_text(action->parameter4, TR_PARAMETER_DISPLAY_ADD_AS_BUYING, TR_PARAMETER_DISPLAY_ADD_AS_SELLING, result_text, &maxlength);
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter2, result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter3, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter3, result_text, &maxlength);
             result_text = translation_for_boolean_text(action->parameter5, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
             return;
         }
@@ -1247,7 +1537,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, action->parameter1, result_text, &maxlength);
             result_text = translation_for_set_or_add_text(action->parameter3, result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
             result_text = translation_for_boolean_text(action->parameter4, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
             return;
         }
@@ -1261,7 +1551,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter1, result_text, &maxlength);
             result_text = translation_for_boolean_text(action->parameter3, TR_PARAMETER_DISPLAY_BUY_PRICE, TR_PARAMETER_DISPLAY_SELL_PRICE, result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
             result_text = translation_for_boolean_text(action->parameter4, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
             return;
         }
@@ -1269,7 +1559,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         case ACTION_TYPE_TRADE_SET_SELL_PRICE_ONLY:
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter1, result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
             return;
         }
         case ACTION_TYPE_SHOW_CUSTOM_MESSAGE:
@@ -1293,10 +1583,10 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         {
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(TR_PARAMETER_GRID_OFFSET), result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter1, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(TR_PARAMETER_RADIUS), result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
             if (action->parameter4) {
                 result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_TERRAIN, action->parameter3, result_text, &maxlength);
                 result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
@@ -1322,6 +1612,86 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
             result_text = append_text(translation_for(action->parameter4 ? TR_PARAMETER_TO : TR_PARAMETER_BY), result_text, &maxlength);
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = translation_for_number_value(action->parameter3, result_text, &maxlength);
+        case ACTION_TYPE_CUSTOM_VARIABLE_FORMULA:
+        {
+            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+            if (scenario_custom_variable_exists(action->parameter1) &&
+                scenario_custom_variable_get_name(action->parameter1)) {
+                result_text = append_text(scenario_custom_variable_get_name(action->parameter1),
+                    result_text, &maxlength);
+            } else {
+                result_text = append_text(string_from_ascii("???"), result_text, &maxlength);
+            }
+            result_text = append_text(string_from_ascii(" = "), result_text, &maxlength);
+            // Get the formula string from the formula array
+            if (action->parameter2 > 0) {
+                const uint8_t *formula_str = scenario_formula_get_string(action->parameter2);
+                if (formula_str) {
+                    result_text = append_text(formula_str, result_text, &maxlength);
+                } else {
+                    result_text = append_text(string_from_ascii("???"), result_text, &maxlength);
+                }
+            } else {
+                result_text = append_text(string_from_ascii("0"), result_text, &maxlength);
+            }
+            return;
+        }
+        case ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY:
+        {
+            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+            if (scenario_custom_variable_exists(action->parameter1) &&
+                scenario_custom_variable_get_name(action->parameter1)) {
+                result_text = append_text(scenario_custom_variable_get_name(action->parameter1),
+                    result_text, &maxlength);
+            } else {
+                result_text = append_text(string_from_ascii("???"), result_text, &maxlength);
+            }
+            result_text = append_text(string_from_ascii(" = "), result_text, &maxlength);
+            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_CITY_PROPERTY, action->parameter2, result_text, &maxlength);
+            return;
+        }
+        case ACTION_TYPE_GOD_SENTIMENT_CHANGE:
+        {
+            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_GOD, action->parameter1, result_text, &maxlength);
+            result_text = translation_for_set_or_add_text(action->parameter3, result_text, &maxlength);
+            // Get the formula string if parameter2 is a formula index
+            if (action->parameter2 > 0) {
+                const uint8_t *formula_str = scenario_formula_get_string(action->parameter2);
+                if (formula_str) {
+                    result_text = append_text(formula_str, result_text, &maxlength);
+                } else {
+                    result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
+                }
+            } else {
+                result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
+            }
+            return;
+        }
+        case ACTION_TYPE_POP_SENTIMENT_CHANGE:
+        {
+            result_text = translation_for_set_or_add_text(action->parameter2, result_text, &maxlength);
+            // Get the formula string if parameter1 is a formula index
+            if (action->parameter1 > 0) {
+                const uint8_t *formula_str = scenario_formula_get_string(action->parameter1);
+                if (formula_str) {
+                    result_text = append_text(formula_str, result_text, &maxlength);
+                } else {
+                    result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
+                }
+            } else {
+                result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
+            }
+            return;
+        }
+        case ACTION_TYPE_WIN:
+        case ACTION_TYPE_LOSE:
+        {
+            // No parameters to display
+            return;
+        }
+        case ACTION_TYPE_CHANGE_RANK:
+        {
+            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RANK, action->parameter1, result_text, &maxlength);
             return;
         }
         default:
@@ -1344,21 +1714,21 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_BUILDING_COUNTING, condition->parameter3, result_text, &maxlength);
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter2, result_text, &maxlength);
             return;
         }
         case CONDITION_TYPE_CITY_POPULATION:
         {
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm3.type, condition->parameter3, result_text, &maxlength);
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter2, result_text, &maxlength);
             return;
         }
         case CONDITION_TYPE_COUNT_OWN_TROOPS:
         {
             result_text = translation_for_boolean_text(condition->parameter3, TR_PARAMETER_DISPLAY_IN_CITY, TR_PARAMETER_DISPLAY_ANYWHERE, result_text, &maxlength);
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter2, result_text, &maxlength);
             return;
         }
         case CONDITION_TYPE_CUSTOM_VARIABLE_CHECK:
@@ -1373,7 +1743,7 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
             }
 
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter3, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter3, result_text, &maxlength);
             return;
         }
         case CONDITION_TYPE_DIFFICULTY:
@@ -1393,14 +1763,14 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
         case CONDITION_TYPE_STATS_CITY_HEALTH:
         {
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter2, result_text, &maxlength);
             return;
         }
         case CONDITION_TYPE_POPS_UNEMPLOYMENT:
         {
             result_text = translation_for_boolean_text(condition->parameter1, TR_PARAMETER_DISPLAY_PERCENTAGE, TR_PARAMETER_DISPLAY_FLAT_NUMBER, result_text, &maxlength);
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter3, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter3, result_text, &maxlength);
             return;
         }
         case CONDITION_TYPE_REQUEST_IS_ONGOING:
@@ -1414,13 +1784,13 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
         {
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(TR_PARAMETER_GRID_OFFSET), result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter1, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter1, result_text, &maxlength);
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(TR_PARAMETER_RADIUS), result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter2, result_text, &maxlength);
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_BUILDING, condition->parameter3, result_text, &maxlength);
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm4.type, condition->parameter4, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter5, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter5, result_text, &maxlength);
             return;
         }
         case CONDITION_TYPE_RESOURCE_STORAGE_AVAILABLE:
@@ -1429,7 +1799,7 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
             result_text = translation_for_boolean_text(condition->parameter5, TR_PARAMETER_DISPLAY_RESPECT_SETTINGS, TR_PARAMETER_DISPLAY_IGNORE_SETTINGS, result_text, &maxlength);
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, condition->parameter1, result_text, &maxlength);
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter3, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter3, result_text, &maxlength);
             return;
         }
         case CONDITION_TYPE_RESOURCE_STORED_COUNT:
@@ -1437,7 +1807,7 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_STORAGE_TYPE, condition->parameter4, result_text, &maxlength);
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, condition->parameter1, result_text, &maxlength);
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter3, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter3, result_text, &maxlength);
             return;
         }
         case CONDITION_TYPE_TIME_PASSED:
@@ -1456,14 +1826,14 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, condition->parameter1, result_text, &maxlength);
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter3, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter3, result_text, &maxlength);
             return;
         }
         case CONDITION_TYPE_TRADE_SELL_PRICE:
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, condition->parameter1, result_text, &maxlength);
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
-            result_text = translation_for_number_value(condition->parameter3, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter3, result_text, &maxlength);
             return;
         }
         default:

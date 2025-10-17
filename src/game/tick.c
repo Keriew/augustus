@@ -116,8 +116,6 @@ static void advance_month(void)
     city_games_decrement_month_counts();
     city_gods_update_blessings();
     tutorial_on_month_tick();
-    scenario_events_progress_paused(1);
-    scenario_events_process_all();
     if (setting_monthly_autosave()) {
         game_file_write_saved_game(dir_append_location("autosave.svx", PATH_LOCATION_SAVEGAME));
     }
@@ -142,6 +140,8 @@ static void advance_day(void)
         // 0-based index so 11 = December, 15 = last day of the month
         game_file_make_yearly_autosave();
     }
+    scenario_events_progress_paused(1);
+    scenario_events_process_all();
 }
 
 static void advance_tick(void)

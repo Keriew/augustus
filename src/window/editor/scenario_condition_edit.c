@@ -12,7 +12,9 @@
 #include "graphics/window.h"
 #include "input/input.h"
 #include "scenario/event/condition_handler.h"
+#include "scenario/event/controller.h"
 #include "scenario/event/parameter_data.h"
+#include "widget/input_box.h"
 #include "window/editor/custom_variables.h"
 #include "window/editor/map.h"
 #include "window/editor/requests.h"
@@ -23,12 +25,14 @@
 #include "window/editor/select_special_attribute_mapping.h"
 #include "window/numeric_input.h"
 #include "window/select_list.h"
+#include "window/text_input.h"
 
 #define BUTTON_LEFT_PADDING 32
 #define BUTTON_WIDTH 608
 #define DETAILS_Y_OFFSET 128
 #define DETAILS_ROW_HEIGHT 32
 #define MAX_TEXT_LENGTH 50
+#define MAX_FORMULA_LENGTH 100
 
 static void init(scenario_condition_t *condition);
 static void button_amount(const generic_button *button);
@@ -40,6 +44,7 @@ static void set_parameter_being_edited(int value);
 static void resource_selection(const generic_button *button);
 static void custom_message_selection(void);
 static void change_parameter(xml_data_attribute_t *parameter, const generic_button *button);
+static int get_param_value(void);
 
 static generic_button buttons[] = {
     {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (0 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_amount, 0, 1},
@@ -58,7 +63,10 @@ static struct {
     int parameter_being_edited_current_value;
 
     uint8_t display_text[MAX_TEXT_LENGTH];
-
+    uint8_t formula[MAX_FORMULA_LENGTH];
+    int formula_min_limit;
+    int formula_max_limit;
+    unsigned int formula_index;
     scenario_condition_t *condition;
     scenario_condition_data_t *xml_info;
 } data;
@@ -73,6 +81,10 @@ static uint8_t *translation_for_param_value(parameter_type type, int value)
 static void init(scenario_condition_t *condition)
 {
     data.condition = condition;
+    memset(data.formula, 0, MAX_TEXT_LENGTH);
+    data.formula_index = 0;
+    data.parameter_being_edited = 0;
+    data.parameter_being_edited_current_value = 0;
 }
 
 static void draw_background(void)
@@ -199,6 +211,41 @@ static void button_amount(const generic_button *button)
     }
 }
 
+static void set_formula_value(const uint8_t *formula)
+{
+    strncpy((char *) data.formula, (const char *) formula, MAX_FORMULA_LENGTH - 1);
+    data.formula[MAX_FORMULA_LENGTH - 1] = 0;
+    // Add formula to list and get its index
+    if (!data.formula_index) {
+        data.formula_index = scenario_formula_add(data.formula, data.formula_min_limit, data.formula_max_limit);
+        set_param_value(data.formula_index);
+    } else {
+        // Update existing formula
+        scenario_formula_change(data.formula_index, data.formula, data.formula_min_limit, data.formula_max_limit);
+        set_param_value(data.formula_index);
+    }
+    window_invalidate();
+}
+
+static void create_evaluation_formula(xml_data_attribute_t *parameter)
+{
+    int current_index = get_param_value();
+    data.formula_min_limit = parameter->min_limit;
+    data.formula_max_limit = parameter->max_limit;
+    if (current_index > 0) {
+        const uint8_t *src = scenario_formula_get_string(current_index);
+        if (src) {
+            strncpy((char *) data.formula, (const char *) src, MAX_FORMULA_LENGTH - 1);
+            data.formula[MAX_FORMULA_LENGTH - 1] = '\0';
+            data.formula_index = current_index;
+        } else {
+            memset(data.formula, 0, MAX_FORMULA_LENGTH);
+        }
+    }
+    window_text_input_expanded_show("FORMULA", "...", data.formula, MAX_FORMULA_LENGTH,
+         set_formula_value, INPUT_BOX_CHARS_FORMULAS);
+}
+
 static void set_param_value(int value)
 {
     switch (data.parameter_being_edited) {
@@ -219,6 +266,24 @@ static void set_param_value(int value)
             return;
         default:
             return;
+    }
+}
+
+static int get_param_value(void)
+{
+    switch (data.parameter_being_edited) {
+        case 1:
+            return data.condition->parameter1;
+        case 2:
+            return data.condition->parameter2;
+        case 3:
+            return data.condition->parameter3;
+        case 4:
+            return data.condition->parameter4;
+        case 5:
+            return data.condition->parameter5;
+        default:
+            return -1;
     }
 }
 
@@ -353,6 +418,8 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
         case PARAMETER_TYPE_CUSTOM_VARIABLE:
             custom_variable_selection();
             return;
+        case PARAMETER_TYPE_FORMULA:
+            create_evaluation_formula(parameter);
         default:
             return;
     }

@@ -13,6 +13,10 @@ void city_gods_calculate_moods(int update_moods);
 
 int city_gods_calculate_least_happy(void);
 
+void city_god_change_happiness(int god_id, int amount);
+
+void city_god_set_happiness(int god_id, int amount_set);
+
 int city_god_happiness(int god_id);
 
 int city_god_wrath_bolts(int god_id);

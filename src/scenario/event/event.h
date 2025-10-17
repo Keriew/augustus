@@ -20,7 +20,7 @@ int scenario_event_count_conditions(const scenario_event_t *event);
 
 int scenario_event_can_repeat(scenario_event_t *event);
 
-int scenario_event_decrease_pause_time(scenario_event_t *event, int months_passed);
+int scenario_event_decrease_pause_time(scenario_event_t *event, int days_passed);
 int scenario_event_conditional_execute(scenario_event_t *event);
 int scenario_event_execute(scenario_event_t *event);
 int scenario_event_uses_custom_variable(const scenario_event_t *event, int custom_variable_id);

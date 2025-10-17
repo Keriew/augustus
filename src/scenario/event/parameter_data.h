@@ -38,6 +38,17 @@ typedef enum {
     PARAMETER_TYPE_TERRAIN,
     PARAMETER_TYPE_DATA_TYPE,
     PARAMETER_TYPE_MODEL,
+    PARAMETER_TYPE_FORMULA,
+    PARAMETER_TYPE_CITY_PROPERTY,
+    PARAMETER_TYPE_PERCENTAGE,
+    PARAMETER_TYPE_HOUSING_TYPE,
+    PARAMETER_TYPE_AGE_GROUP,
+    PARAMETER_TYPE_ENEMY_CLASS,
+    PARAMETER_TYPE_PLAYER_TROOPS,
+    PARAMETER_TYPE_COVERAGE_BUILDINGS,
+    PARAMETER_TYPE_FLEXIBLE, // special type that can be anything, used in city_property to map the right type at runtime
+    PARAMETER_TYPE_ROUTE_RESOURCE, //dynamic mapping of resource available on a route
+    PARAMETER_TYPE_RANK,
 } parameter_type;
 
 typedef struct {
@@ -95,5 +106,13 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
     int maxlength);
 void scenario_events_parameter_data_get_display_string_for_condition(const scenario_condition_t *condition,
     uint8_t *result_text, int maxlength);
+
+/**
+ * Resolves a flexible parameter type to a concrete type based on context
+ * @param action The action containing the flexible parameter
+ * @param param_number The parameter number (3, 4, or 5) to resolve
+ * @return The resolved parameter type, or PARAMETER_TYPE_UNDEFINED if not applicable
+ */
+parameter_type scenario_events_parameter_data_resolve_flexible_type(const scenario_action_t *action, int param_number);
 
 #endif // SCENARIO_EVENTS_PARAMETER_DATA_H

@@ -254,6 +254,17 @@ typedef enum {
     HOUSE_MAX = 19,
 } house_level;
 
+typedef enum {
+    HOUSE_GROUP_ALL = 0,
+    HOUSE_GROUP_TENT = 10000,
+    HOUSE_GROUP_SHACK = 20000,
+    HOUSE_GROUP_HOVEL = 30000,
+    HOUSE_GROUP_CASA = 40000,
+    HOUSE_GROUP_INSULA = 50000,
+    HOUSE_GROUP_VILLA = 60000,
+    HOUSE_GROUP_PALACE = 70000
+} house_groups;
+
 enum {
     BUILDING_STATE_UNUSED = 0,
     BUILDING_STATE_IN_USE = 1,
