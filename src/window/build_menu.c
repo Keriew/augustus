@@ -8,8 +8,11 @@
 #include "building/rotation.h"
 #include "city/view.h"
 #include "city/warning.h"
+#include "core/config.h"
+#include "core/image.h"
 #include "core/lang.h"
 #include "core/string.h"
+#include "game/resource.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
@@ -30,6 +33,7 @@
 #define MENU_CLICK_MARGIN 20
 #define MENU_TEXT_X_OFFSET 8
 
+#define MENU_RESOURCE_ICON_SIZE 16
 
 #define MENU_ICON_WIDTH 14
 #define MENU_ICON_X_OFFSET 3
@@ -183,6 +187,86 @@ static int is_auto_cycle_button(building_type type)
         (type == BUILDING_MENU_GARDENS && data.selected_submenu == BUILD_MENU_GARDENS);
 }
 
+static int produced_resource_icon(building_type type)
+{
+    switch (type) {
+        case BUILDING_PIG_FARM:
+            return resource_get_data(RESOURCE_MEAT)->image.icon;
+        case BUILDING_WHEAT_FARM:
+            return resource_get_data(RESOURCE_WHEAT)->image.icon;
+        case BUILDING_VINES_FARM:
+            return resource_get_data(RESOURCE_VINES)->image.icon;
+        case BUILDING_OLIVE_FARM:
+            return resource_get_data(RESOURCE_OLIVES)->image.icon;
+        case BUILDING_VEGETABLE_FARM:
+            return resource_get_data(RESOURCE_VEGETABLES)->image.icon;
+        case BUILDING_WHARF:
+            return resource_get_data(RESOURCE_FISH)->image.icon;
+        case BUILDING_OIL_WORKSHOP:
+            return resource_get_data(RESOURCE_OIL)->image.icon;
+        case BUILDING_WINE_WORKSHOP:
+            return resource_get_data(RESOURCE_WINE)->image.icon;
+        case BUILDING_WEAPONS_WORKSHOP:
+            return resource_get_data(RESOURCE_WEAPONS)->image.icon;
+        case BUILDING_POTTERY_WORKSHOP:
+            return resource_get_data(RESOURCE_POTTERY)->image.icon;
+        case BUILDING_BRICKWORKS:
+            return resource_get_data(RESOURCE_BRICKS)->image.icon;
+        case BUILDING_TIMBER_YARD:
+            return resource_get_data(RESOURCE_TIMBER)->image.icon;
+        case BUILDING_STONE_QUARRY:
+            return resource_get_data(RESOURCE_STONE)->image.icon;
+        case BUILDING_IRON_MINE:
+            return resource_get_data(RESOURCE_IRON)->image.icon;
+        case BUILDING_CONCRETE_MAKER:
+            return resource_get_data(RESOURCE_CONCRETE)->image.icon;
+        case BUILDING_FURNITURE_WORKSHOP:
+            return resource_get_data(RESOURCE_FURNITURE)->image.icon;
+        case BUILDING_MARBLE_QUARRY:
+            return resource_get_data(RESOURCE_MARBLE)->image.icon;
+        case BUILDING_GOLD_MINE:
+            return resource_get_data(RESOURCE_GOLD)->image.icon;
+        case BUILDING_CLAY_PIT:
+            return resource_get_data(RESOURCE_CLAY)->image.icon;
+        case BUILDING_SAND_PIT:
+            return resource_get_data(RESOURCE_SAND)->image.icon;
+        case BUILDING_FRUIT_FARM:
+            return resource_get_data(RESOURCE_FRUIT)->image.icon;
+        default:
+            return -1;
+    }
+}
+
+static void draw_resource_icon_scaled(int image_id, int x, int y, int max_size)
+{
+    const image *img = image_get(image_id);
+    if (!img) {
+        return;
+    }
+    int scale_percent;
+    if (img->height < 20) {
+        scale_percent = 100;
+    } else {
+        scale_percent = (20.0f / img->height) * 100.0f;
+    }
+    switch (image_id) {
+        case 1192://meat
+            y = y + 4;
+            break;
+        case 1195://iron
+            y = y + 2;
+            break;
+        case 11658://gold
+            y = y + 3;
+            break;
+        case 1203://fish
+            y = y + 4;
+            break;
+    }
+
+    image_draw_scaled_centered(image_id, x, y, COLOR_MASK_NONE, scale_percent);
+}
+
 static void draw_menu_buttons(void)
 {
     int x_offset = get_sidebar_x_offset();
@@ -204,8 +288,17 @@ static void draw_menu_buttons(void)
             continue;
         }
 
-        lang_text_draw_centered(28, type, item_x_align + MENU_TEXT_X_OFFSET, data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
-            MENU_ITEM_WIDTH, FONT_NORMAL_GREEN);
+        // Draw resource icon if this building produces a resource
+        int resource_icon = produced_resource_icon(type);
+        int text_offset = MENU_TEXT_X_OFFSET;
+        if (resource_icon >= 0 && config_get(CONFIG_UI_CV_BUILD_MENU_ICONS)) {
+            draw_resource_icon_scaled(resource_icon, item_x_align + MENU_TEXT_X_OFFSET + 2,
+                data.y_offset + MENU_Y_OFFSET + MENU_ITEM_HEIGHT * i + 2, MENU_RESOURCE_ICON_SIZE);
+            text_offset += MENU_RESOURCE_ICON_SIZE + 4; // Shift text right to make room for icon + padding
+        }
+
+        lang_text_draw_centered(28, type, item_x_align + text_offset, data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
+            MENU_ITEM_WIDTH - (text_offset - MENU_TEXT_X_OFFSET), FONT_NORMAL_GREEN);
         if (type == BUILDING_DRAGGABLE_RESERVOIR) {
             type = BUILDING_RESERVOIR;
         }

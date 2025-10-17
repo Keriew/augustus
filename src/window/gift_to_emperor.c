@@ -84,7 +84,7 @@ static void draw_foreground(void)
         int width = lang_text_draw(52, 59 + gift->id, 224, 258, font);
         text_draw_money(gift->cost, 224 + width, 258, font);
         if (current_gift == GIFT_LAVISH) {
-            button_border_draw(120, 242, 428, 24, 1);
+            button_border_draw(120, 251, 428, 24, 1);
         }
     }
     // can give at least one type

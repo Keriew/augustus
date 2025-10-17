@@ -1848,6 +1848,7 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_CHANGE_RANK, "Change governor rank"},
     {TR_CITY_MESSAGE_TITLE_GOVERNOR_RANK_CHANGE, "Governor rank"},
     {TR_TOOLTIP_OVERLAY_LEVY_PER_TILE, " Denarii paid monthly in levies per tile"},
+    {TR_CONFIG_UI_CV_BUILD_MENU_ICONS, "Show resource icons in build menu"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
