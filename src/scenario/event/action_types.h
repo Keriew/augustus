@@ -76,6 +76,8 @@ int scenario_action_type_change_climate_execute(scenario_action_t *action);
 
 int scenario_action_type_change_terrain_execute(scenario_action_t *action);
 
+int scenario_action_type_change_model_data_execute(scenario_action_t *action);
+
 int scenario_action_type_change_god_sentiment_execute(scenario_action_t *action);
 
 int scenario_action_type_change_pop_sentiment_execute(scenario_action_t *action);

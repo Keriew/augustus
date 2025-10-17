@@ -4,6 +4,7 @@
 #include "building/dock.h"
 #include "building/granary.h"
 #include "building/menu.h"
+#include "building/model.h"
 #include "building/warehouse.h"
 #include "city/data_private.h"
 #include "city/emperor.h"
@@ -776,6 +777,37 @@ int scenario_action_type_change_terrain_execute(scenario_action_t *action)
     return 1;
 }
 
+int scenario_action_type_change_model_data_execute(scenario_action_t *action) {
+    int model = action->parameter1;
+    int data_type = action->parameter2;
+    int amount = action->parameter3;
+    int set_to_value = action->parameter4;
+    
+    model_building *model_ptr = model_get_building(model);
+    
+    switch (data_type) {
+        case MODEL_COST:
+            model_ptr->cost = set_to_value ? amount : amount + model_ptr->cost;
+            break;
+        case MODEL_DESIRABILITY_VALUE:
+            model_ptr->desirability_value = set_to_value ? amount : amount + model_ptr->desirability_value;
+            break;
+        case MODEL_DESIRABILITY_STEP:
+            model_ptr->desirability_step = set_to_value ? amount : amount + model_ptr->desirability_step;
+            break;
+        case MODEL_DESIRABILITY_STEP_SIZE:
+            model_ptr->desirability_step_size = set_to_value ? amount : amount + model_ptr->desirability_step_size;
+            break;
+        case MODEL_DESIRABILITY_RANGE:
+            model_ptr->desirability_range = set_to_value ? amount : amount + model_ptr->desirability_range;
+            break;
+        case MODEL_LABORERS:
+            model_ptr->laborers = set_to_value ? amount : amount + model_ptr->laborers;
+            break;
+        default:
+            break;
+    }
+    
 int scenario_action_type_change_god_sentiment_execute(scenario_action_t *action)
 {
     int god_id = action->parameter1;

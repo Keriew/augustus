@@ -1,6 +1,7 @@
 #include "building/model.h"
 
 #include "city/resource.h"
+#include "core/buffer.h"
 #include "core/io.h"
 #include "core/log.h"
 #include "core/string.h"
@@ -10,14 +11,17 @@
 
 #define TMP_BUFFER_SIZE 100000
 
-#define NUM_BUILDINGS 130
+#define FIRST_NEW_BUILDING_INDEX BUILDING_ROADBLOCK
+#define NUM_NEW_BUILDINGS (BUILDING_TYPE_MAX - FIRST_NEW_BUILDING_INDEX)
 #define NUM_HOUSES 20
 
 static const uint8_t ALL_BUILDINGS[] = { 'A', 'L', 'L', ' ', 'B', 'U', 'I', 'L', 'D', 'I', 'N', 'G', 'S', 0 };
 static const uint8_t ALL_HOUSES[] = { 'A', 'L', 'L', ' ', 'H', 'O', 'U', 'S', 'E', 'S', 0 };
 
-static model_building buildings[NUM_BUILDINGS];
+static model_building buildings[BUILDING_TYPE_MAX];
 static model_house houses[NUM_HOUSES];
+
+static void populate_new_buildings(void);
 
 static int strings_equal(const uint8_t *a, const uint8_t *b, int len)
 {
@@ -118,8 +122,13 @@ static void override_model_data(void)
     buildings[BUILDING_FORT_JAVELIN].laborers = 0;
     buildings[BUILDING_FORT_LEGIONARIES].laborers = 0;
     buildings[BUILDING_FORT_MOUNTED].laborers = 0;
+
     buildings[BUILDING_FORT_AUXILIA_INFANTRY].laborers = 0;
     buildings[BUILDING_FORT_ARCHERS].laborers = 0;
+    
+    buildings[BUILDING_COLOSSEUM].cost = 1500;
+    buildings[BUILDING_COLOSSEUM].laborers = 100;
+    buildings[BUILDING_HIPPODROME].cost = 3500;
 }
 
 int model_load(void)
@@ -150,7 +159,7 @@ int model_load(void)
         }
     } while (brace_index && guard > 0);
 
-    if (num_lines != NUM_BUILDINGS + NUM_HOUSES) {
+    if (num_lines != 130 + NUM_HOUSES) {
         log_error("Model has incorrect no of lines ", 0, num_lines + 1);
         free(buffer);
         return 0;
@@ -159,7 +168,7 @@ int model_load(void)
     int dummy;
     ptr = &buffer[index_of_string(buffer, ALL_BUILDINGS, filesize)];
     const uint8_t *end_ptr = &buffer[filesize];
-    for (int i = 0; i < NUM_BUILDINGS; i++) {
+    for (int i = 0; i < FIRST_NEW_BUILDING_INDEX; i++) {
         ptr += index_of(ptr, '{', filesize);
 
         ptr = get_value(ptr, end_ptr, &buildings[i].cost);
@@ -171,6 +180,8 @@ int model_load(void)
         ptr = get_value(ptr, end_ptr, &dummy);
         ptr = get_value(ptr, end_ptr, &dummy);
     }
+    
+    populate_new_buildings();
 
     ptr = &buffer[index_of_string(buffer, ALL_HOUSES, filesize)];
 
@@ -206,385 +217,127 @@ int model_load(void)
     return 1;
 }
 
-const model_building MODEL_ROADBLOCK = {
-    .cost = 12,
-    .desirability_value = 0,
-    .desirability_step = 0,
-    .desirability_step_size = 0,
-    .desirability_range = 0,
-    .laborers = 0 };
-const model_building MODEL_WORK_CAMP = {
-    .cost = 150,
-    .desirability_value = -10,
-    .desirability_step = 2,
-    .desirability_step_size = 3,
-    .desirability_range = 4,
-    .laborers = 20 };
-const model_building MODEL_ARCHITECT_GUILD = {
-    .cost = 200,
-    .desirability_value = -8,
-    .desirability_step = 1,
-    .desirability_step_size = 2,
-    .desirability_range = 4,
-    .laborers = 12 };
-const model_building MODEL_GRAND_TEMPLE_CERES = {
-    .cost = 2500,
-    .desirability_value = 20,
-    .desirability_step = 2,
-    .desirability_step_size = -4,
-    .desirability_range = 8,
-    .laborers = 50 };
-const model_building MODEL_GRAND_TEMPLE_NEPTUNE = {
-    .cost = 2500,
-    .desirability_value = 20,
-    .desirability_step = 2,
-    .desirability_step_size = -4,
-    .desirability_range = 8,
-    .laborers = 50 };
-const model_building MODEL_GRAND_TEMPLE_MERCURY = {
-    .cost = 2500,
-    .desirability_value = 20,
-    .desirability_step = 2,
-    .desirability_step_size = -4,
-    .desirability_range = 8,
-    .laborers = 50 };
-const model_building MODEL_GRAND_TEMPLE_MARS = {
-    .cost = 2500,
-    .desirability_value = 20,
-    .desirability_step = 2,
-    .desirability_step_size = -4,
-    .desirability_range = 8,
-    .laborers = 50 };
-const model_building MODEL_GRAND_TEMPLE_VENUS = {
-    .cost = 2500,
-    .desirability_value = 20,
-    .desirability_step = 2,
-    .desirability_step_size = -4,
-    .desirability_range = 8,
-    .laborers = 50 };
-const model_building MODEL_PANTHEON = {
-    .cost = 3500,
-    .desirability_value = 20,
-    .desirability_step = 2,
-    .desirability_step_size = -4,
-    .desirability_range = 8,
-    .laborers = 50 };
-const model_building MODEL_LIGHTHOUSE = {
-    .cost = 1000,
-    .desirability_value = 6,
-    .desirability_step = 1,
-    .desirability_step_size = -1,
-    .desirability_range = 4,
-    .laborers = 20 };
-const model_building MODEL_MESS_HALL = {
-    .cost = 100,
-    .desirability_value = -8,
-    .desirability_step = 1,
-    .desirability_step_size = 2,
-    .desirability_range = 4,
-    .laborers = 10 };
-const model_building MODEL_TAVERN = {
-    .cost = 40,
-    .desirability_value = -2,
-    .desirability_step = 1,
-    .desirability_step_size = 1,
-    .desirability_range = 6,
-    .laborers = 8 };
-const model_building MODEL_GRAND_GARDEN = {
-    .cost = 400,
-    .desirability_value = 0,
-    .desirability_step = 0,
-    .desirability_step_size = 0,
-    .desirability_range = 0,
-    .laborers = 0 };
-const model_building MODEL_ARENA = {
-    .cost = 500,
-    .desirability_value = -3,
-    .desirability_step = 1,
-    .desirability_step_size = 1,
-    .desirability_range = 3,
-    .laborers = 25 };
-const model_building MODEL_COLOSSEUM = {
-    .cost = 1500,
-    .desirability_value = -3,
-    .desirability_step = 1,
-    .desirability_step_size = 1,
-    .desirability_range = 3,
-    .laborers = 100 };
-const model_building MODEL_HIPPODROME = {
-    .cost = 3500,
-    .desirability_value = -3,
-    .desirability_step = 1,
-    .desirability_step_size = 1,
-    .desirability_range = 3,
-    .laborers = 150 };
-const model_building MODEL_NULL = {
-    .cost = 0,
-    .desirability_value = 0,
-    .desirability_step = 0,
-    .desirability_step_size = 0,
-    .desirability_range = 0,
-    .laborers = 0 };
-const model_building MODEL_LARARIUM = {
-    .cost = 45,
-    .desirability_value = 4,
-    .desirability_step = 1,
-    .desirability_step_size = -1,
-    .desirability_range = 3,
-    .laborers = 0 };
-const model_building MODEL_NYMPHAEUM = {
-    .cost = 400,
-    .desirability_value = 12,
-    .desirability_step = 2,
-    .desirability_step_size = -1,
-    .desirability_range = 6,
-    .laborers = 0 };
-const model_building MODEL_SMALL_MAUSOLEUM = {
-    .cost = 250,
-    .desirability_value = -8,
-    .desirability_step = 1,
-    .desirability_step_size = 3,
-    .desirability_range = 5,
-    .laborers = 0 };
-const model_building MODEL_LARGE_MAUSOLEUM = {
-    .cost = 500,
-    .desirability_value = -10,
-    .desirability_step = 1,
-    .desirability_step_size = 3,
-    .desirability_range = 6,
-    .laborers = 0 };
-const model_building MODEL_WATCHTOWER = {
-    .cost = 100,
-    .desirability_value = -6,
-    .desirability_step = 1,
-    .desirability_step_size = 2,
-    .desirability_range = 3,
-    .laborers = 8 };
-const model_building MODEL_CARAVANSERAI = {
-    .cost = 500,
-    .desirability_value = -10,
-    .desirability_step = 2,
-    .desirability_step_size = 3,
-    .desirability_range = 4,
-    .laborers = 20 };
-const model_building MODEL_PALISADE = {
-    .cost = 6,
-    .desirability_value = 0,
-    .desirability_step = 0,
-    .desirability_step_size = 0,
-    .desirability_range = 0,
-    .laborers = 0 };
-const model_building MODEL_HIGHWAY = {
-    .cost = 100,
-    .desirability_value = -4,
-    .desirability_step = 1,
-    .desirability_step_size = 2,
-    .desirability_range = 2,
-    .laborers = 0 };
-const model_building MODEL_GOLD_MINE = {
-    .cost = 100,
-    .desirability_value = -6,
-    .desirability_step = 1,
-    .desirability_step_size = 1,
-    .desirability_range = 4,
-    .laborers = 30 };
-const model_building MODEL_STONE_QUARRY = {
-    .cost = 60,
-    .desirability_value = -6,
-    .desirability_step = 1,
-    .desirability_step_size = 1,
-    .desirability_range = 4,
-    .laborers = 10 };
-const model_building MODEL_SAND_PIT = {
-    .cost = 40,
-    .desirability_value = -6,
-    .desirability_step = 1,
-    .desirability_step_size = 1,
-    .desirability_range = 4,
-    .laborers = 10 };
-const model_building MODEL_BRICKWORKS = {
-    .cost = 80,
-    .desirability_value = -3,
-    .desirability_step = 1,
-    .desirability_step_size = 1,
-    .desirability_range = 3,
-    .laborers = 10 };
-const model_building MODEL_CONCRETE_MAKER = {
-    .cost = 60,
-    .desirability_value = -3,
-    .desirability_step = 1,
-    .desirability_step_size = 1,
-    .desirability_range = 3,
-    .laborers = 10 };
-const model_building MODEL_CITY_MINT = {
-    .cost = 250,
-    .desirability_value = -3,
-    .desirability_step = 1,
-    .desirability_step_size = 1,
-    .desirability_range = 3,
-    .laborers = 40 };
-const model_building MODEL_DEPOT = {
-    .cost = 100,
-    .desirability_value = -3,
-    .desirability_step = 1,
-    .desirability_step_size = 1,
-    .desirability_range = 2,
-    .laborers = 15 };
-const model_building MODEL_ARMOURY = {
-    .cost = 50,
-    .desirability_value = -5,
-    .desirability_step = 1,
-    .desirability_step_size = 1,
-    .desirability_range = 4,
-    .laborers = 6 };
-const model_building MODEL_LATRINE = {
-    .cost = 15,
-    .desirability_value = 0,
-    .desirability_step = 0,
-    .desirability_step_size = 0,
-    .desirability_range = 0,
-    .laborers = 2 };
-const model_building MODEL_NATIVE_DECORATION = {
-    .cost = 0,
-    .desirability_value = 6,
-    .desirability_step = 1,
-    .desirability_step_size = -1,
-    .desirability_range = 4,
-    .laborers = 0 };
-const model_building MODEL_NATIVE_MONUMENT = {
-    .cost = 0,
-    .desirability_value = 15,
-    .desirability_step = 2,
-    .desirability_step_size = -2,
-    .desirability_range = 8,
-    .laborers = 0 };
-const model_building MODEL_NATIVE_WATCHTOWER = {
-    .cost = 0,
-    .desirability_value = -10,
-    .desirability_step = 1,
-    .desirability_step_size = 2,
-    .desirability_range = 4,
-    .laborers = 0 };
+void model_save_model_data(buffer *buf) {
+    int buf_size = sizeof(model_building) * BUILDING_TYPE_MAX;
+    uint8_t *buf_data = malloc(buf_size);
+    
+    buffer_init(buf, buf_data, buf_size);
+    
+    buffer_write_raw(buf, buildings, buf_size);
+}
+void model_load_model_data(buffer *buf) {
+    int buf_size = sizeof(model_building) * BUILDING_TYPE_MAX;
+    
+    buffer_read_raw(buf, buildings, buf_size);
+}
 
-const model_building *model_get_building(building_type type)
+static const model_building NOTHING = { .cost = 0, .desirability_value = 0, .desirability_step = 0,
+ .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
+
+static void populate_new_buildings(void) {
+    buildings[BUILDING_ROADBLOCK] = (model_building){ .cost = 12, .desirability_value = 0, .desirability_step = 0, .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
+    buildings[BUILDING_WORKCAMP] = (model_building){ .cost = 150, .desirability_value = -10, .desirability_step = 2, .desirability_step_size = 3, .desirability_range = 4, .laborers = 20 };
+    buildings[BUILDING_GRAND_TEMPLE_CERES] = (model_building){ .cost = 2500, .desirability_value = 20, .desirability_step = 2, .desirability_step_size = -4, .desirability_range = 8, .laborers = 50 };
+    buildings[BUILDING_GRAND_TEMPLE_NEPTUNE] = (model_building){ .cost = 2500, .desirability_value = 20, .desirability_step = 2, .desirability_step_size = -4, .desirability_range = 8, .laborers = 50 };
+    buildings[BUILDING_GRAND_TEMPLE_MERCURY] = (model_building){ .cost = 2500, .desirability_value = 20, .desirability_step = 2, .desirability_step_size = -4, .desirability_range = 8, .laborers = 50 };
+    buildings[BUILDING_GRAND_TEMPLE_MARS] = (model_building){ .cost = 2500, .desirability_value = 20, .desirability_step = 2, .desirability_step_size = -4, .desirability_range = 8, .laborers = 50 };
+    buildings[BUILDING_GRAND_TEMPLE_VENUS] = (model_building){ .cost = 2500, .desirability_value = 20, .desirability_step = 2, .desirability_step_size = -4, .desirability_range = 8, .laborers = 50 };
+    buildings[BUILDING_MENU_GRAND_TEMPLES] = (model_building){ .cost = 0, .desirability_value = 0, .desirability_step = 0,  .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
+    buildings[BUILDING_MENU_TREES] = (model_building){ .cost = 0, .desirability_value = 0, .desirability_step = 0,  .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
+    buildings[BUILDING_MENU_PATHS] = (model_building){ .cost = 0, .desirability_value = 0, .desirability_step = 0,  .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
+    buildings[BUILDING_MENU_PARKS] = (model_building){ .cost = 0, .desirability_value = 0, .desirability_step = 0,  .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
+    buildings[BUILDING_SMALL_POND] = (model_building){ .cost = 60, .desirability_value = 10, .desirability_step = 1, .desirability_step_size = -2, .desirability_range = 4, .laborers = 0 };
+    buildings[BUILDING_LARGE_POND] = (model_building){ .cost = 150, .desirability_value = 14, .desirability_step = 2, .desirability_step_size = -2, .desirability_range = 5, .laborers = 0 };
+    buildings[BUILDING_PINE_TREE] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_FIR_TREE] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_OAK_TREE] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_ELM_TREE] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_FIG_TREE] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_PLUM_TREE] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_PALM_TREE] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_DATE_TREE] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_PINE_PATH] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_FIR_PATH] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_OAK_PATH] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_ELM_PATH] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_FIG_PATH] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_PLUM_PATH] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_PALM_PATH] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_DATE_PATH] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_PAVILION_BLUE] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_PAVILION_RED] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_PAVILION_ORANGE] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_PAVILION_YELLOW] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_PAVILION_GREEN] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_GODDESS_STATUE] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_SENATOR_STATUE] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_OBELISK] = (model_building){ .cost = 60, .desirability_value = 10, .desirability_step = 1, .desirability_step_size = -2, .desirability_range = 4, .laborers = 0 };
+    buildings[BUILDING_PANTHEON] = (model_building){ .cost = 3500, .desirability_value = 20, .desirability_step = 2, .desirability_step_size = -4, .desirability_range = 8, .laborers = 50 };
+    buildings[BUILDING_ARCHITECT_GUILD] = (model_building){ .cost = 200, .desirability_value = -8, .desirability_step = 1, .desirability_step_size = 2, .desirability_range = 4, .laborers = 12 };
+    buildings[BUILDING_MESS_HALL] = (model_building){ .cost = 100, .desirability_value = -8, .desirability_step = 1, .desirability_step_size = 2, .desirability_range = 4, .laborers = 10 };
+    buildings[BUILDING_LIGHTHOUSE] = (model_building){ .cost = 1000, .desirability_value = 6, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 4, .laborers = 20 };
+    buildings[BUILDING_MENU_STATUES] = (model_building){ .cost = 0, .desirability_value = 0, .desirability_step = 0,  .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
+    buildings[BUILDING_MENU_GOV_RES] = (model_building){ .cost = 0, .desirability_value = 0, .desirability_step = 0,  .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
+    buildings[BUILDING_TAVERN] = (model_building){ .cost = 40, .desirability_value = -2, .desirability_step = 1, .desirability_step_size = 1, .desirability_range = 6, .laborers = 8 };
+    buildings[BUILDING_GRAND_GARDEN] = (model_building){ .cost = 400, .desirability_value = 0, .desirability_step = 0, .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
+    buildings[BUILDING_ARENA] = (model_building){ .cost = 500, .desirability_value = -3, .desirability_step = 1, .desirability_step_size = 1, .desirability_range = 3, .laborers = 25 };
+    buildings[BUILDING_HORSE_STATUE] = (model_building){ .cost = 150, .desirability_value = 14, .desirability_step = 2, .desirability_step_size = -2, .desirability_range = 5, .laborers = 0 };
+    buildings[BUILDING_DOLPHIN_FOUNTAIN] = (model_building){ .cost = 60, .desirability_value = 10, .desirability_step = 1, .desirability_step_size = -2, .desirability_range = 4, .laborers = 0 };
+    buildings[BUILDING_HEDGE_DARK] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_HEDGE_LIGHT] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_LOOPED_GARDEN_WALL] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_LEGION_STATUE] = (model_building){ .cost = 60, .desirability_value = 10, .desirability_step = 1, .desirability_step_size = -2, .desirability_range = 4, .laborers = 0 };
+    buildings[BUILDING_DECORATIVE_COLUMN] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_COLONNADE] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_LARARIUM] = (model_building){ .cost = 45, .desirability_value = 4, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_NYMPHAEUM] = (model_building){ .cost = 400, .desirability_value = 12, .desirability_step = 2, .desirability_step_size = -1, .desirability_range = 6, .laborers = 0 };
+    buildings[BUILDING_SMALL_MAUSOLEUM] = (model_building){ .cost = 250, .desirability_value = -8, .desirability_step = 1, .desirability_step_size = 3, .desirability_range = 5, .laborers = 0 };
+    buildings[BUILDING_LARGE_MAUSOLEUM] = (model_building){ .cost = 500, .desirability_value = -10, .desirability_step = 1, .desirability_step_size = 3, .desirability_range = 6, .laborers = 0 };
+    buildings[BUILDING_WATCHTOWER] = (model_building){ .cost = 100, .desirability_value = -6, .desirability_step = 1, .desirability_step_size = 2, .desirability_range = 3, .laborers = 8 };
+    buildings[BUILDING_PALISADE] = (model_building){ .cost = 6, .desirability_value = 0, .desirability_step = 0, .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
+    buildings[BUILDING_GARDEN_PATH] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_CARAVANSERAI] = (model_building){ .cost = 500, .desirability_value = -10, .desirability_step = 2, .desirability_step_size = 3, .desirability_range = 4, .laborers = 20 };
+    buildings[BUILDING_ROOFED_GARDEN_WALL] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_ROOFED_GARDEN_WALL_GATE] = (model_building){ .cost = 12, .desirability_value = 0, .desirability_step = 0, .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
+    buildings[BUILDING_HEDGE_GATE_DARK] = (model_building){ .cost = 12, .desirability_value = 0, .desirability_step = 0, .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
+    buildings[BUILDING_HEDGE_GATE_LIGHT] = (model_building){ .cost = 12, .desirability_value = 0, .desirability_step = 0, .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
+    buildings[BUILDING_PALISADE_GATE] = (model_building){ .cost = 6, .desirability_value = 0, .desirability_step = 0, .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
+    buildings[BUILDING_GLADIATOR_STATUE] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_HIGHWAY] = (model_building){ .cost = 100, .desirability_value = -4, .desirability_step = 1, .desirability_step_size = 2, .desirability_range = 2, .laborers = 0 };
+    buildings[BUILDING_GOLD_MINE] = (model_building){ .cost = 100, .desirability_value = -6, .desirability_step = 1, .desirability_step_size = 1, .desirability_range = 4, .laborers = 30 };
+    buildings[BUILDING_CITY_MINT] = (model_building){ .cost = 250, .desirability_value = -3, .desirability_step = 1, .desirability_step_size = 1, .desirability_range = 3, .laborers = 40 };
+    buildings[BUILDING_DEPOT] = (model_building){ .cost = 100, .desirability_value = -3, .desirability_step = 1, .desirability_step_size = 1, .desirability_range = 2, .laborers = 15 };
+    buildings[BUILDING_SAND_PIT] = (model_building){ .cost = 40, .desirability_value = -6, .desirability_step = 1, .desirability_step_size = 1, .desirability_range = 4, .laborers = 10 };
+    buildings[BUILDING_STONE_QUARRY] = (model_building){ .cost = 60, .desirability_value = -6, .desirability_step = 1, .desirability_step_size = 1, .desirability_range = 4, .laborers = 10 };
+    buildings[BUILDING_CONCRETE_MAKER] = (model_building){ .cost = 60, .desirability_value = -3, .desirability_step = 1, .desirability_step_size = 1, .desirability_range = 3, .laborers = 10 };
+    buildings[BUILDING_BRICKWORKS] = (model_building){ .cost = 80, .desirability_value = -3, .desirability_step = 1, .desirability_step_size = 1, .desirability_range = 3, .laborers = 10 };
+    buildings[BUILDING_PANELLED_GARDEN_WALL] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_PANELLED_GARDEN_GATE] = (model_building){ .cost = 12, .desirability_value = 0, .desirability_step = 0, .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
+    buildings[BUILDING_LOOPED_GARDEN_GATE] = (model_building){ .cost = 12, .desirability_value = 0, .desirability_step = 0, .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
+    buildings[BUILDING_SHRINE_CERES] = (model_building){ .cost = 45, .desirability_value = 4, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_SHRINE_NEPTUNE] = (model_building){ .cost = 45, .desirability_value = 4, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_SHRINE_MERCURY] = (model_building){ .cost = 45, .desirability_value = 4, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_SHRINE_MARS] = (model_building){ .cost = 45, .desirability_value = 4, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_SHRINE_VENUS] = (model_building){ .cost = 45, .desirability_value = 4, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_MENU_SHRINES] = (model_building){ .cost = 0, .desirability_value = 0, .desirability_step = 0,  .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
+    buildings[BUILDING_MENU_GARDENS] = (model_building){ .cost = 0, .desirability_value = 0, .desirability_step = 0,  .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
+    buildings[BUILDING_OVERGROWN_GARDENS] = (model_building){ .cost = 12, .desirability_value = 3, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 3, .laborers = 0 };
+    buildings[BUILDING_FORT_AUXILIA_INFANTRY] = (model_building){ .cost = 1000, .desirability_value = -20, .desirability_step = 2, .desirability_step_size = 2, .desirability_range = 8, .laborers = 0 };
+    buildings[BUILDING_ARMOURY] = (model_building){ .cost = 50, .desirability_value = -5, .desirability_step = 1, .desirability_step_size = 1, .desirability_range = 4, .laborers = 6 };
+    buildings[BUILDING_FORT_ARCHERS] = (model_building){ .cost = 1000, .desirability_value = -20, .desirability_step = 2, .desirability_step_size = 2, .desirability_range = 8, .laborers = 0 };
+    buildings[BUILDING_LATRINES] = (model_building){ .cost = 15, .desirability_value = 0, .desirability_step = 0, .desirability_step_size = 0, .desirability_range = 0, .laborers = 2 };
+    buildings[BUILDING_NATIVE_HUT_ALT] = (model_building){ .cost = 50, .desirability_value = 0, .desirability_step = 0, .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
+    buildings[BUILDING_NATIVE_WATCHTOWER] = (model_building){ .cost = 0, .desirability_value = -10, .desirability_step = 1, .desirability_step_size = 2, .desirability_range = 4, .laborers = 0 };
+    buildings[BUILDING_NATIVE_MONUMENT] = (model_building){ .cost = 0, .desirability_value = 15, .desirability_step = 2, .desirability_step_size = -2, .desirability_range = 8, .laborers = 0 };
+    buildings[BUILDING_NATIVE_DECORATION] = (model_building){ .cost = 0, .desirability_value = 6, .desirability_step = 1, .desirability_step_size = -1, .desirability_range = 4, .laborers = 0 };
+}
+
+model_building *model_get_building(building_type type)
 {
-    switch (type) {
-        case BUILDING_ROADBLOCK:
-        case BUILDING_ROOFED_GARDEN_WALL_GATE:
-        case BUILDING_LOOPED_GARDEN_GATE:
-        case BUILDING_PANELLED_GARDEN_GATE:
-        case BUILDING_HEDGE_GATE_DARK:
-        case BUILDING_HEDGE_GATE_LIGHT:
-            return &MODEL_ROADBLOCK;
-        case BUILDING_WORKCAMP:
-            return &MODEL_WORK_CAMP;
-        case BUILDING_ARCHITECT_GUILD:
-            return &MODEL_ARCHITECT_GUILD;
-        case BUILDING_GRAND_TEMPLE_CERES:
-            return &MODEL_GRAND_TEMPLE_CERES;
-        case BUILDING_GRAND_TEMPLE_NEPTUNE:
-            return &MODEL_GRAND_TEMPLE_NEPTUNE;
-        case BUILDING_GRAND_TEMPLE_MERCURY:
-            return &MODEL_GRAND_TEMPLE_MERCURY;
-        case BUILDING_GRAND_TEMPLE_MARS:
-            return &MODEL_GRAND_TEMPLE_MARS;
-        case BUILDING_GRAND_TEMPLE_VENUS:
-            return &MODEL_GRAND_TEMPLE_VENUS;
-        case BUILDING_PANTHEON:
-            return &MODEL_PANTHEON;
-        case BUILDING_MESS_HALL:
-            return &MODEL_MESS_HALL;
-        case BUILDING_LIGHTHOUSE:
-            return &MODEL_LIGHTHOUSE;
-        case BUILDING_TAVERN:
-            return &MODEL_TAVERN;
-        case BUILDING_GRAND_GARDEN:
-            return &MODEL_GRAND_GARDEN;
-        case BUILDING_ARENA:
-            return &MODEL_ARENA;
-        case BUILDING_COLOSSEUM:
-            return &MODEL_COLOSSEUM;
-        case BUILDING_HIPPODROME:
-            return &MODEL_HIPPODROME;
-        case BUILDING_LARARIUM:
-        case BUILDING_SHRINE_CERES:
-        case BUILDING_SHRINE_MARS:
-        case BUILDING_SHRINE_MERCURY:
-        case BUILDING_SHRINE_NEPTUNE:
-        case BUILDING_SHRINE_VENUS:
-            return &MODEL_LARARIUM;
-        case BUILDING_NYMPHAEUM:
-            return &MODEL_NYMPHAEUM;
-        case BUILDING_WATCHTOWER:
-            return &MODEL_WATCHTOWER;
-        case BUILDING_SMALL_MAUSOLEUM:
-            return &MODEL_SMALL_MAUSOLEUM;
-        case BUILDING_LARGE_MAUSOLEUM:
-            return &MODEL_LARGE_MAUSOLEUM;
-        case BUILDING_CARAVANSERAI:
-            return &MODEL_CARAVANSERAI;
-        case BUILDING_PALISADE:
-        case BUILDING_PALISADE_GATE:
-            return &MODEL_PALISADE;
-        case BUILDING_HIGHWAY:
-            return &MODEL_HIGHWAY;
-        case BUILDING_GOLD_MINE:
-            return &MODEL_GOLD_MINE;
-        case BUILDING_STONE_QUARRY:
-            return &MODEL_STONE_QUARRY;
-        case BUILDING_SAND_PIT:
-            return &MODEL_SAND_PIT;
-        case BUILDING_BRICKWORKS:
-            return &MODEL_BRICKWORKS;
-        case BUILDING_CONCRETE_MAKER:
-            return &MODEL_CONCRETE_MAKER;
-        case BUILDING_CITY_MINT:
-            return &MODEL_CITY_MINT;
-        case BUILDING_DEPOT:
-            return &MODEL_DEPOT;
-        case BUILDING_OVERGROWN_GARDENS:
-            return &buildings[BUILDING_GARDENS];
-        case BUILDING_ARMOURY:
-            return &MODEL_ARMOURY;
-        case BUILDING_LATRINES:
-            return &MODEL_LATRINE;
-        case BUILDING_NATIVE_DECORATION:
-            return &MODEL_NATIVE_DECORATION;
-        case BUILDING_NATIVE_MONUMENT:
-            return &MODEL_NATIVE_MONUMENT;
-        case BUILDING_NATIVE_WATCHTOWER:
-            return &MODEL_NATIVE_WATCHTOWER;
-        default:
-            break;
+    if (type > BUILDING_TYPE_MAX) {
+        return &NOTHING;
     }
-
-    if ((type >= BUILDING_PINE_TREE && type <= BUILDING_SENATOR_STATUE) ||
-        type == BUILDING_HEDGE_DARK || type == BUILDING_HEDGE_LIGHT ||
-        type == BUILDING_DECORATIVE_COLUMN || type == BUILDING_LOOPED_GARDEN_WALL ||
-        type == BUILDING_COLONNADE || type == BUILDING_LOOPED_GARDEN_WALL ||
-        type == BUILDING_ROOFED_GARDEN_WALL || type == BUILDING_GARDEN_PATH ||
-        type == BUILDING_PANELLED_GARDEN_WALL || type == BUILDING_GLADIATOR_STATUE) {
-        return &buildings[BUILDING_SMALL_STATUE];
-    }
-
-    if (type == BUILDING_SMALL_POND || type == BUILDING_OBELISK ||
-        type == BUILDING_LEGION_STATUE || type == BUILDING_DOLPHIN_FOUNTAIN) {
-        return &buildings[BUILDING_MEDIUM_STATUE];
-    }
-
-    if (type == BUILDING_LARGE_POND || type == BUILDING_HORSE_STATUE) {
-        return &buildings[BUILDING_LARGE_STATUE];
-    }
-
-    if (type == BUILDING_FORT_AUXILIA_INFANTRY || type == BUILDING_FORT_ARCHERS) {
-        return &buildings[BUILDING_FORT_LEGIONARIES];
-    }
-
-    if (type > 129) {
-        return &MODEL_NULL;
-    } else {
-        return &buildings[type];
-    }
+    return &buildings[type];
 }
 
 const model_house *model_get_house(house_level level)

@@ -3,6 +3,7 @@
 
 #include "building/type.h"
 #include "city/resource.h"
+#include "core/buffer.h"
 
 /**
  * @file
@@ -45,18 +46,30 @@ typedef struct {
     int tax_multiplier; /**< Tax rate multiplier */
 } model_house;
 
+enum {
+    MODEL_COST,
+    MODEL_DESIRABILITY_VALUE,
+    MODEL_DESIRABILITY_STEP,
+    MODEL_DESIRABILITY_STEP_SIZE,
+    MODEL_DESIRABILITY_RANGE,
+    MODEL_LABORERS,
+};
+
 /**
  * Loads the model from file
  * @return boolean true if model was loaded successfully, false otherwise
  */
 int model_load(void);
 
+void model_save_model_data(buffer *buf);
+void model_load_model_data(buffer *buf);
+
 /**
  * Gets the model for a building
  * @param type Building type
  * @return Read-only model
  */
-const model_building *model_get_building(building_type type);
+model_building *model_get_building(building_type type);
 
 /**
  * Gets the model for a house

@@ -21,7 +21,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#define XML_TOTAL_ELEMENTS 71
+#define XML_TOTAL_ELEMENTS 72
 #define ERROR_MESSAGE_LENGTH 200
 
 static struct {
@@ -129,13 +129,14 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "cause_major_curse", xml_import_create_action, 0, "actions" },
     { "change_climate", xml_import_create_action, 0, "actions"},
     { "change_terrain", xml_import_create_action, 0, "actions"},
+    { "change_model_data", xml_import_create_action, 0, "actions"},
     { "change_variable_visibility", xml_import_create_action, 0, "actions"},
     { "variable_formula", xml_import_create_action, 0, "actions"},
     { "variable_city_property", xml_import_create_action, 0, "actions"},
     { "change_god_sentiment", xml_import_create_action, 0, "actions"},
     { "change_pop_sentiment", xml_import_create_action, 0, "actions"},
-    { "win", xml_import_create_action, 0, "actions"},
-    { "lose", xml_import_create_action, 0, "actions"}, // 70
+    { "win", xml_import_create_action, 0, "actions"}, // 70
+    { "lose", xml_import_create_action, 0, "actions"},
 };
 
 static int xml_import_start_scenario_events(void)
@@ -477,6 +478,8 @@ static int xml_import_special_parse_attribute_with_resolved_type(xml_data_attrib
         case PARAMETER_TYPE_GOD:
         case PARAMETER_TYPE_CLIMATE:
         case PARAMETER_TYPE_TERRAIN:
+        case PARAMETER_TYPE_DATA_TYPE:
+        case PARAMETER_TYPE_MODEL:
         case PARAMETER_TYPE_PERCENTAGE:
         case PARAMETER_TYPE_HOUSING_TYPE:
         case PARAMETER_TYPE_AGE_GROUP:
