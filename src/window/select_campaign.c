@@ -69,6 +69,7 @@ static list_box_type list_box = {
 };
 
 static input_box player_name_input = { 304, 52, 20, 2, FONT_NORMAL_WHITE, 1, data.player_name, PLAYER_NAME_LENGTH };
+static scrollbar_type desc_scroll = { 0 };
 
 static void calculate_input_box_width(void)
 {
@@ -102,19 +103,17 @@ static void init(void)
 static void draw_background(void)
 {
     image_draw_fullscreen_background(image_group(GROUP_MAIN_MENU_BACKGROUND));
-
     graphics_in_dialog();
     outer_panel_draw(0, 0, 40, 30);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_WINDOW_SELECT_CAMPAIGN, 32, 14, 554, FONT_LARGE_BLACK);
     lang_text_draw(31, 0, 16, 61, FONT_NORMAL_BLACK);
-
     const campaign_info *info = game_campaign_get_info();
     if (!info) {
         lang_text_draw_centered(CUSTOM_TRANSLATION, TR_SAVE_DIALOG_INVALID_FILE, 362, 241, 246, FONT_LARGE_BLACK);
         data.available_buttons = 1;
     } else {
         int y_offset = 40;
-        text_draw_centered(info->name, 362, CAMPAIGN_LIST_Y_POSITION, 246, FONT_NORMAL_BLACK, 0);
+        text_draw_centered_ellipsized(info->name, 362, CAMPAIGN_LIST_Y_POSITION, 246, FONT_NORMAL_BLACK, 0);
         if (info->author) {
             int width = lang_text_draw(CUSTOM_TRANSLATION, TR_WINDOW_CAMPAIGN_AUTHOR,
                 362, CAMPAIGN_LIST_Y_POSITION + 20, FONT_NORMAL_BLACK);
@@ -122,11 +121,12 @@ static void draw_background(void)
             y_offset += 20;
         }
         if (info->description) {
-            rich_text_reset(0);
-            int box_width = rich_text_init(info->description, 62, CAMPAIGN_LIST_Y_POSITION + y_offset,
-                246 / BLOCK_SIZE, (340 - y_offset) / BLOCK_SIZE, 0);
+            int box_width = rich_text_init(info->description, 362, CAMPAIGN_LIST_Y_POSITION + y_offset,
+                230 / BLOCK_SIZE, (300 - y_offset) / BLOCK_SIZE, 1);
             rich_text_draw(info->description, 362, CAMPAIGN_LIST_Y_POSITION + y_offset,
-                box_width * BLOCK_SIZE, (340 - y_offset) / BLOCK_SIZE, 0);
+                box_width * BLOCK_SIZE - 1, (320 - y_offset) / BLOCK_SIZE, 0);
+            rich_text_update();
+            rich_text_draw_scrollbar();
         } else {
             lang_text_draw_centered(CUSTOM_TRANSLATION, TR_WINDOW_CAMPAIGN_NO_DESC, 362, 246, 246, FONT_NORMAL_BLACK);
         }
@@ -195,12 +195,15 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 
     const mouse *m_dialog = mouse_in_dialog(m);
-
+    if (rich_text_handle_mouse(m_dialog)) {
+        return;
+    }
     if (input_box_handle_mouse(m_dialog, &player_name_input) ||
         generic_buttons_handle_mouse(m_dialog, 0, 0, bottom_buttons,
             data.available_buttons, &data.bottom_button_focus_id) ||
         list_box_handle_input(&list_box, m_dialog, 1)) {
         list_box_request_refresh(&list_box);
+        window_invalidate();
         return;
     }
     if (input_go_back_requested(m, h)) {

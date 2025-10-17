@@ -1,5 +1,8 @@
 #include "grid.h"
 
+#include "building/building.h"
+#include "core/log.h"
+#include "map/building.h"
 #include "map/data.h"
 
 #include <stdlib.h>
@@ -51,6 +54,140 @@ void map_grid_init(int width, int height, int start_offset, int border_size)
     map_data.height = height;
     map_data.start_offset = start_offset;
     map_data.border_size = border_size;
+}
+
+static grid_slice *allocate_grid_slice_memory(void)
+{
+    grid_slice *slice = malloc(sizeof(grid_slice));
+    if (!slice) {
+        log_error("Failed to allocate memory for grid_slice. The game will now crash.", 0, 0);
+        return NULL;
+    }
+    slice->size = 0;
+    memset(slice->grid_offsets, -1, sizeof(slice->grid_offsets));
+    return slice;
+}
+
+grid_slice *map_grid_get_grid_slice(int *grid_offsets, int size)
+{
+    grid_slice *slice = allocate_grid_slice_memory();
+    if (!slice) {
+        return NULL;
+    }
+    slice->size = size > MAX_SLICE_SIZE ? MAX_SLICE_SIZE : size; //cap size
+    for (int i = 0; i < slice->size; i++) {
+        slice->grid_offsets[i] = grid_offsets[i];
+    }
+    return slice;
+}
+
+grid_slice *map_grid_get_grid_slice_from_corners(int start_x, int start_y, int end_x, int end_y)
+{
+    // Normalize the corners so that x_min <= x_max and y_min <= y_max
+    int x_min = (start_x < end_x) ? start_x : end_x;
+    int x_max = (start_x > end_x) ? start_x : end_x;
+    int y_min = (start_y < end_y) ? start_y : end_y;
+    int y_max = (start_y > end_y) ? start_y : end_y;
+
+    int width = x_max - x_min + 1;
+    int height = y_max - y_min + 1;
+
+    return map_grid_get_grid_slice_rectangle(map_grid_offset(x_min, y_min), width, height);
+}
+
+
+grid_slice *map_grid_get_grid_slice_rectangle(int start_grid_offset, int width, int height)
+{
+    grid_slice *slice = allocate_grid_slice_memory();
+    if (!slice) {
+        return NULL;
+    }
+    int x = map_grid_offset_to_x(start_grid_offset);
+    int y = map_grid_offset_to_y(start_grid_offset);
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            if (i * width + j >= MAX_SLICE_SIZE) {
+                slice->size = MAX_SLICE_SIZE;
+                return slice;
+            }
+            int offset = map_grid_offset(x + j, y + i);
+            if (map_grid_is_valid_offset(offset)) {
+                slice->grid_offsets[i * width + j] = offset;
+            } else {
+                slice->grid_offsets[i * width + j] = -1; // Invalid offset
+            }
+        }
+    }
+    slice->size = width * height > MAX_SLICE_SIZE ? MAX_SLICE_SIZE : width * height;
+    return slice;
+}
+
+grid_slice *map_grid_get_grid_slice_house(int building_id, int check_rubble)
+{
+    int found_tiles = 0;
+    grid_slice *slice = allocate_grid_slice_memory();
+    building *b = building_get(building_id);
+    int starting_x = map_grid_offset_to_x(b->grid_offset);
+    int starting_y = map_grid_offset_to_y(b->grid_offset);
+    for (int i = 0; i < 4; i++) // max house size is 4x4
+    {
+        for (int j = 0; j < 4; j++) {
+            int offset = map_grid_offset(starting_x + j, starting_y + i);
+            if ((check_rubble ? map_building_rubble_building_id(offset) : map_building_at(offset)) == building_id) {
+                slice->grid_offsets[found_tiles] = offset;
+                found_tiles++;
+                continue;
+            }
+        }
+        slice->size = found_tiles;
+    }
+    return slice;
+}
+
+grid_slice *map_grid_get_grid_slice_square(int start_grid_offset, int size)
+{
+    grid_slice *slice = map_grid_get_grid_slice_rectangle(start_grid_offset, size, size);
+    return slice;
+}
+
+grid_slice *map_grid_get_grid_slice_ring(int center_grid_offset, int inner_radius, int outer_radius)
+{
+    grid_slice *slice = allocate_grid_slice_memory();
+    if (!slice) {
+        return NULL;
+    }
+
+    int center_x = map_grid_offset_to_x(center_grid_offset);
+    int center_y = map_grid_offset_to_y(center_grid_offset);
+    int count = 0;
+
+    // Iterate through a square area that encompasses the outer radius
+    for (int dy = -outer_radius; dy <= outer_radius; dy++) {
+        for (int dx = -outer_radius; dx <= outer_radius; dx++) {
+            // Calculate chess distance (max of abs(dx), abs(dy)) - same as existing adjacent patterns
+            int distance = (abs(dx) > abs(dy)) ? abs(dx) : abs(dy);
+
+            // Include if within ring bounds (greater than inner radius, less than or equal to outer radius)
+            if (distance > inner_radius && distance <= outer_radius) {
+                int x = center_x + dx;
+                int y = center_y + dy;
+                int offset = map_grid_offset(x, y);
+                // Only add valid offsets and respect size limits
+                if (map_grid_is_valid_offset(offset) && count < MAX_SLICE_SIZE) {
+                    slice->grid_offsets[count] = offset;
+                    count++;
+                }
+            }
+        }
+    }
+    slice->size = count;
+    return slice;
+}
+
+grid_slice *map_grid_get_grid_slice_circle(int center_grid_offset, int radius)
+{
+    // A circle is just a ring with inner_radius = 0
+    return map_grid_get_grid_slice_ring(center_grid_offset, 0, radius);
 }
 
 int map_grid_is_valid_offset(int grid_offset)
@@ -159,8 +296,7 @@ void map_grid_bound_area(int *x_min, int *y_min, int *x_max, int *y_max)
     }
 }
 
-void map_grid_get_area(int x, int y, int size, int radius,
-                       int *x_min, int *y_min, int *x_max, int *y_max)
+void map_grid_get_area(int x, int y, int size, int radius, int *x_min, int *y_min, int *x_max, int *y_max)
 {
     *x_min = x - radius;
     *y_min = y - radius;

@@ -288,7 +288,7 @@ static void draw_regular_building(building_type type, int image_id, int x, int y
         } else {
             image_draw(image_id + 1, x - 33, y - 56, color, data.scale);
         }
-    } else if (type != BUILDING_CLEAR_LAND) {
+    } else if (type != BUILDING_CLEAR_LAND && type != BUILDING_REPAIR_LAND) {
         draw_building(image_id, x, y, color);
     }
     draw_building_tiles(x, y, num_tiles, blocked_tiles);
@@ -520,8 +520,8 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
                 discouraged_terrain &= ~(TERRAIN_HIGHWAY | TERRAIN_WALL | TERRAIN_ROAD);
             }
             if (type == BUILDING_TOWER) {
-                forbidden_terrain &= ~TERRAIN_WALL;
-                discouraged_terrain &= ~TERRAIN_WALL;
+                forbidden_terrain &= ~TERRAIN_WALL & ~TERRAIN_BUILDING;
+                discouraged_terrain &= ~TERRAIN_WALL & ~TERRAIN_BUILDING;
             }
             if (config_get(CONFIG_GP_CH_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT)) {
                 if (type == BUILDING_WAREHOUSE) {
@@ -1100,7 +1100,6 @@ static void draw_hippodrome(const map_tile *tile, int x, int y)
     int x_part3 = x_part2 + HIPPODROME_X_VIEW_OFFSETS[orientation_index];
     int y_part3 = y_part2 + HIPPODROME_Y_VIEW_OFFSETS[orientation_index];
 
-
     color_t color_mask;
     if (blocked) {
         color_mask = COLOR_MASK_BUILDING_GHOST_RED;
@@ -1375,14 +1374,18 @@ static void draw_concrete_maker(const map_tile *tile, int x, int y)
 int city_building_ghost_mark_deleting(const map_tile *tile)
 {
     int construction_type = building_construction_type();
-    if (!tile->grid_offset || building_construction_draw_as_constructing() ||
-        scroll_in_progress() || construction_type != BUILDING_CLEAR_LAND) {
-        return (construction_type == BUILDING_CLEAR_LAND);
+    int is_land_work = (construction_type == BUILDING_CLEAR_LAND || construction_type == BUILDING_REPAIR_LAND);
+    if (!is_land_work) {    // bail out early if not a land-work type
+        return 0;
     }
-    if (!building_construction_in_progress()) {
+    if (!tile->grid_offset || building_construction_draw_as_constructing() || scroll_in_progress()) {
+        return 1;
+    }
+    if (!building_construction_in_progress()) { // no construction, clear bits
         map_property_clear_constructing_and_deleted();
     }
     map_building_tiles_mark_deleting(tile->grid_offset);
+
     if (map_terrain_is(tile->grid_offset, TERRAIN_HIGHWAY) && !map_terrain_is(tile->grid_offset, TERRAIN_AQUEDUCT)) {
         map_tiles_clear_highway(tile->grid_offset, 1);
     }
@@ -1509,7 +1512,8 @@ void city_building_ghost_draw(const map_tile *tile)
     }
     building_type type = building_construction_type();
     data.ghost_building.type = type;
-    if (building_construction_draw_as_constructing() || type == BUILDING_NONE || type == BUILDING_CLEAR_LAND) {
+    if (building_construction_draw_as_constructing() || type == BUILDING_NONE
+        || type == BUILDING_CLEAR_LAND || type == BUILDING_REPAIR_LAND) {
         return;
     }
     create_tile_offsets();

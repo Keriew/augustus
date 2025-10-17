@@ -179,7 +179,7 @@ void building_maintenance_check_fire_collapse(void)
     }
     for (int i = 1; i < building_count(); i++) {
         building *b = building_get(i);
-        if (b->state != BUILDING_STATE_IN_USE || b->fire_proof) {
+        if (b->state != BUILDING_STATE_IN_USE || b->fire_proof || b->state == BUILDING_STATE_RUBBLE) {
             continue;
         }
         if (b->type == BUILDING_HIPPODROME && b->prev_part_building_id) {

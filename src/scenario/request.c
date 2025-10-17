@@ -57,6 +57,22 @@ static void make_request_visible_and_send_message(scenario_request *request)
     }
 }
 
+int scenario_request_can_comply(int id)
+{
+    scenario_request *request = array_item(requests, id);
+    if (!request) {
+        return 0;
+    }
+    if (request->state != REQUEST_STATE_NORMAL && request->state != REQUEST_STATE_OVERDUE) {
+        return 0;
+    }
+    if (!request->visible) {
+        return 0;
+    }
+    int amount = city_resource_get_amount_for_request(request->resource, request->amount.requested);
+    return amount >= request->amount.requested;
+}
+
 void scenario_request_clear_all(void)
 {
     if (!array_init(requests, REQUESTS_ARRAY_SIZE_STEP, new_request, request_in_use)) {
@@ -150,10 +166,7 @@ static void process_request(scenario_request *request)
         }
         if (!request->can_comply_dialog_shown) {
             resource_type resource = request->resource;
-            int resource_amount = building_warehouses_count_available_resource(resource, 1);
-            if (resource_is_food(resource)) {
-                resource_amount += building_granaries_count_available_resource(resource, 1);
-            }
+            int resource_amount = city_resource_get_amount_for_request(resource, request->amount.requested);
             if (resource_amount >= request->amount.requested) {
                 request->can_comply_dialog_shown = 1;
                 city_message_post(1, MESSAGE_REQUEST_CAN_COMPLY, request->id, 0);

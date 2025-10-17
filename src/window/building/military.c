@@ -26,6 +26,7 @@
 #include "window/building/culture.h"
 
 static void button_return_to_fort(const generic_button *button);
+static void button_all_legions_return_to_fort(const generic_button *button);
 static void button_layout(const generic_button *button);
 static void button_priority(const generic_button *button);
 static void button_delivery(const generic_button *button);
@@ -52,8 +53,9 @@ static generic_button delivery_buttons[] = {
     {0, 0, 52, 52, button_delivery},
 };
 
-static generic_button return_button[] = {
-    {0, 0, 288, 32, button_return_to_fort},
+static generic_button return_buttons[] = {
+    {0, 0, 180, 32, button_return_to_fort},
+    {148, 0, 180, 32, button_all_legions_return_to_fort},
 };
 
 static struct {
@@ -579,10 +581,17 @@ void window_building_draw_legion_info_foreground(building_info_context *c)
         BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_GREEN);
 
     if (!m->is_at_fort && !m->in_distant_battle) {
-        button_border_draw(c->x_offset + BLOCK_SIZE * (c->width_blocks - 18) / 2,
-            c->y_offset + 2 + BLOCK_SIZE * c->height_blocks - 48, 288, 32, data.return_button_id == 1);
-        lang_text_draw_centered(138, 58, c->x_offset + BLOCK_SIZE * (c->width_blocks - 18) / 2,
-            c->y_offset + 3 + BLOCK_SIZE * c->height_blocks - 39, 288, FONT_NORMAL_BLACK);
+        int button_x = c->x_offset + BLOCK_SIZE * (c->width_blocks - 18) / 2;
+        int button_y = c->y_offset + 2 + BLOCK_SIZE * c->height_blocks - 48;
+
+        // First button
+        button_border_draw(button_x - 45, button_y, 185, 32, data.return_button_id == 1);
+        lang_text_draw_centered(138, 58, button_x - 45, button_y + 9, 185, FONT_NORMAL_BLACK);
+
+        // Second button  
+        button_border_draw(button_x + 148, button_y, 185, 32, data.return_button_id == 2);
+        lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUTTON_INFO_RETURN_ALL_LEGIONS,
+            button_x + 148, button_y + 9, 185, FONT_NORMAL_BLACK);
     }
 }
 
@@ -598,7 +607,7 @@ int window_building_handle_mouse_legion_info(const mouse *m, building_info_conte
     }
     if (!handled) {
         handled = generic_buttons_handle_mouse(m, c->x_offset + BLOCK_SIZE * (c->width_blocks - 18) / 2,
-            c->y_offset + BLOCK_SIZE * c->height_blocks - 48, return_button, 1, &data.return_button_id);
+            c->y_offset + BLOCK_SIZE * c->height_blocks - 48, return_buttons, 2, &data.return_button_id);
     }
     data.context_for_callback = 0;
     return handled;
@@ -657,6 +666,12 @@ static void button_return_to_fort(const generic_button *button)
         formation_legion_return_home(m);
         window_city_show();
     }
+}
+
+static void button_all_legions_return_to_fort(const generic_button *button)
+{
+    formation_legion_return_home_all();
+    window_city_show();
 }
 
 static void button_layout(const generic_button *button)

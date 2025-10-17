@@ -31,15 +31,14 @@ int city_request_get_status(int index)
         if (request->resource == RESOURCE_DENARII) {
             if (city_finance_treasury() <= request->amount.requested) {
                 return CITY_REQUEST_STATUS_NOT_ENOUGH_RESOURCES;
+            } else {
+                return request->id + CITY_REQUEST_STATUS_MAX;
             }
         } else {
             int using_granaries;
-            int amount = city_resource_get_amount_including_granaries(request->resource,
-                request->amount.requested, &using_granaries, 1);
+            int amount = city_resource_get_amount_for_request(request->resource, request->amount.requested);
             if (amount < request->amount.requested) {
                 return CITY_REQUEST_STATUS_NOT_ENOUGH_RESOURCES;
-            } else if (using_granaries) {
-                return CITY_REQUEST_STATUS_RESOURCES_FROM_GRANARY | (request->id + CITY_REQUEST_STATUS_MAX);
             }
         }
         return request->id + CITY_REQUEST_STATUS_MAX;

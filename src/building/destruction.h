@@ -3,9 +3,13 @@
 
 #include "building/building.h"
 
+int building_destruction_get_og_building(building *b);
+
 void building_destroy_by_collapse(building *b);
 
 void building_destroy_by_fire(building *b);
+
+void building_destroy_by_earthquake(building *b);
 
 void building_destroy_without_rubble(building *b);
 

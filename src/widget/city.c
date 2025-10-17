@@ -303,7 +303,11 @@ static int handle_right_click_allow_building_info(const map_tile *tile)
     }
     if (allow && city_has_warnings()) {
         city_warning_clear_all();
-        allow = 0;
+        if (config_get(CONFIG_UI_CLEAR_WARNINGS_RIGHTCLICK)) {
+            allow = 0;
+        } else {
+            allow = 1;
+        }
     }
     return allow;
 }

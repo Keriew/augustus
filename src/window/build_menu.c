@@ -95,8 +95,7 @@ static int init(build_menu_group submenu)
     data.selected_submenu = submenu;
     data.num_items = building_menu_count_items(submenu);
     data.y_offset = Y_MENU_OFFSETS[data.num_items];
-    if (submenu == BUILD_MENU_VACANT_HOUSE ||
-        submenu == BUILD_MENU_CLEAR_LAND) {
+    if (submenu == BUILD_MENU_VACANT_HOUSE) {
         button_menu_item(0);
         return 0;
     } else {
@@ -217,6 +216,9 @@ static void draw_menu_buttons(void)
         if (type == BUILDING_MENU_GRAND_TEMPLES) {
             cost = 0;
         }
+        if (type == BUILDING_REPAIR_LAND) {
+            cost = 3; // it's 50% more expensive than clearing land
+        }
         if (cost) {
             text_draw_money(cost, x_offset - MENU_ITEM_MONEY_OFFSET,
                 data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
@@ -316,7 +318,7 @@ static void button_menu_item(int item)
         window_invalidate();
         return;
     }
-    building_construction_set_type(type);
+    building_construction_set_type(type, 0);
 
     if (set_submenu_for_type(type)) {
         data.num_items = building_menu_count_items(data.selected_submenu);

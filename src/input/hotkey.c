@@ -243,6 +243,10 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
             def->action = &data.hotkey_state.building;
             def->value = BUILDING_CLEAR_LAND;
             break;
+        case HOTKEY_BUILD_REPAIR_LAND:
+            def->action = &data.hotkey_state.building;
+            def->value = BUILDING_REPAIR_LAND;
+            break;
         case HOTKEY_BUILD_ROAD:
             def->action = &data.hotkey_state.building;
             def->value = BUILDING_ROAD;

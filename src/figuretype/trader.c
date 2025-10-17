@@ -813,7 +813,7 @@ void figure_trade_ship_action(figure *f)
             figure_movement_move_ticks_with_percentage(f, 1, move_speed);
             f->height_adjusted_ticks = 0;
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
-                f->wait_ticks = 0;
+                f->wait_ticks = TRADER_INITIAL_WAIT;
                 f->action_state = FIGURE_ACTION_114_TRADE_SHIP_ANCHORED;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
                 f->wait_ticks = 0;

@@ -114,8 +114,8 @@ static void override_model_data(void)
     buildings[BUILDING_LARGE_TEMPLE_VENUS].desirability_step_size = -2;
     buildings[BUILDING_LARGE_TEMPLE_VENUS].desirability_range = 5;
 
-    buildings[BUILDING_SMALL_POND].desirability_value = 11; // +1 compared to statues
-    buildings[BUILDING_LARGE_POND].desirability_value = 15; // +1 compared to statues
+    //buildings[BUILDING_SMALL_POND].desirability_value = 11; // +1 compared to statues 
+    //buildings[BUILDING_LARGE_POND].desirability_value = 15; // suspended due to community backlash
 
     buildings[BUILDING_WELL].laborers = 0;
     buildings[BUILDING_GATEHOUSE].laborers = 0;

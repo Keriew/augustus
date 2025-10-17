@@ -727,6 +727,13 @@ static void send_supplier_to_destination(figure *f, int dst_building_id)
             f->destination_x = road.x;
             f->destination_y = road.y;
         }
+    } else if (b_dst->type == BUILDING_GRAND_TEMPLE_VENUS) {
+        if (map_has_road_access(b_dst->x, b_dst->y, b_dst->size, &road)) {
+            destination_found = 1;
+            f->action_state = FIGURE_ACTION_145_SUPPLIER_GOING_TO_STORAGE;
+            f->destination_x = road.x;
+            f->destination_y = road.y;
+        }
     }
     if (!destination_found) {
         f->action_state = FIGURE_ACTION_146_SUPPLIER_RETURNING;

@@ -34,10 +34,15 @@ static void update_water_access(void)
 {
     memset(has_water_access, 0, sizeof(uint8_t) * GRID_SIZE * GRID_SIZE);
     for (building *b = building_first_of_type(BUILDING_WELL); b; b = b->next_of_type) {
-        city_view_foreach_tile_in_range(b->grid_offset, 1, map_water_supply_well_radius(), set_well_access);
+        if (b->state != BUILDING_STATE_RUBBLE) {
+            city_view_foreach_tile_in_range(b->grid_offset, 1, map_water_supply_well_radius(), set_well_access);
+        }
+
     }
     for (building *b = building_first_of_type(BUILDING_FOUNTAIN); b; b = b->next_of_type) {
-        city_view_foreach_tile_in_range(b->grid_offset, 1, map_water_supply_fountain_radius(), set_fountain_access);
+        if (b->state != BUILDING_STATE_RUBBLE) {
+            city_view_foreach_tile_in_range(b->grid_offset, 1, map_water_supply_fountain_radius(), set_fountain_access);
+        }
     }
 }
 
@@ -58,11 +63,16 @@ void city_water_ghost_draw_water_structure_ranges(void)
     // because the linked list counts update immediately so the outlines still update even when the game is paused
     int num_wells = 0;
     for (building *b = building_first_of_type(BUILDING_WELL); b; b = b->next_of_type) {
-        num_wells++;
+        if (b->state != BUILDING_STATE_RUBBLE) {
+            num_wells++;
+        }
+
     }
     int num_fountains = 0;
     for (building *b = building_first_of_type(BUILDING_FOUNTAIN); b; b = b->next_of_type) {
-        num_fountains++;
+        if (b->state != BUILDING_STATE_RUBBLE) {
+            num_fountains++;
+        }
     }
     if (type != last_building_type || num_wells != last_well_count || num_fountains != last_fountain_count) {
         update_water_access();

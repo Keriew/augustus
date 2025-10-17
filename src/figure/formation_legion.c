@@ -189,6 +189,16 @@ void formation_legion_return_home(formation *m)
     }
 }
 
+void formation_legion_return_home_all(void)
+{
+    for (int i = 1; i < formation_count(); i++) {
+        formation *m = formation_get(i);
+        if (m->in_use && m->is_legion && !m->is_at_fort && !m->in_distant_battle) {
+            formation_legion_return_home(m);
+        }
+    }
+}
+
 static int dispatch_soldiers(formation *m)
 {
     m->in_distant_battle = 1;

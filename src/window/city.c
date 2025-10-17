@@ -50,6 +50,7 @@
 #include "window/empire.h"
 #include "window/file_dialog.h"
 #include "window/message_list.h"
+#include "window/overlay_menu.h"
 
 #define TOPLEFT_MESSAGES_X 5
 #define TOPLEFT_MESSAGES_Y_SPACING 24
@@ -684,8 +685,7 @@ static void set_construction_building_type(building_type type, int rotation)
 {
     if (scenario_allowed_building(type) && building_menu_is_enabled(type)) {
         building_construction_cancel();
-        building_construction_set_type(type);
-        building_rotation_setup_rotation(rotation);
+        building_construction_set_type(type, rotation);
         window_request_refresh();
     }
 }
@@ -703,15 +703,18 @@ static void handle_hotkeys(const hotkeys *h)
     }
     if (h->show_overlay) {
         show_overlay(h->show_overlay);
+        window_overlay_menu_update();
     }
     if (h->show_overlay_relative) {
         show_overlay_from_grid_offset(widget_city_current_grid_offset());
+        window_overlay_menu_update();
     }
     if (h->toggle_overlay) {
         exit_military_command();
         game_state_toggle_overlay();
         show_roamers_for_overlay(game_state_overlay());
         city_with_overlay_update();
+        window_overlay_menu_update();
         window_invalidate();
     }
     if (h->show_advisor) {
@@ -800,14 +803,14 @@ static void handle_hotkeys(const hotkeys *h)
         int building_id = map_building_at(widget_city_current_grid_offset());
         if (building_id) {
             building *b = building_main(building_get(building_id));
-            building_data_transfer_copy(b);
+            building_data_transfer_copy(b, 0);
         }
     }
     if (h->paste_building_settings) {
         int building_id = map_building_at(widget_city_current_grid_offset());
         if (building_id) {
             building *b = building_main(building_get(building_id));
-            building_data_transfer_paste(b);
+            building_data_transfer_paste(b, 0);
         }
     }
     if (h->show_empire_map) {
