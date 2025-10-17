@@ -77,7 +77,7 @@ void scenario_event_load_state(buffer *buf, scenario_event_t *event, int scenari
     event->state = buffer_read_i16(buf);
     event->repeat_days_min = buffer_read_i32(buf);
     event->repeat_days_max = buffer_read_i32(buf);
-    if (scenario_version <= SCENARIO_LAST_NO_FORMULAS) {
+    if (scenario_version <= SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         event->repeat_interval = 2; // months
         event->repeat_days_min *= 16;
         event->repeat_days_max *= 16;

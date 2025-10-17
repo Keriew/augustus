@@ -498,7 +498,7 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
         version_data->features.scenario_events = 1;
         version_data->features.scenario_conditions = 1;
         version_data->features.scenario_actions = 1;
-        if (version > SAVE_GAME_LAST_NO_FORMULAS) {
+        if (version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
             version_data->features.scenario_formulas = 1;
         } else {
             version_data->features.scenario_formulas = 0;
@@ -523,7 +523,7 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
     version_data->features.visited_buildings = version > SAVE_GAME_LAST_GLOBAL_BUILDING_INFO;
     version_data->features.custom_campaigns = version > SAVE_GAME_LAST_NO_CUSTOM_CAMPAIGNS;
     version_data->features.dynamic_scenario_objects = version > SAVE_GAME_LAST_STATIC_SCENARIO_ORIGINAL_DATA;
-    version_data->features.custom_model_data = version > SAVE_GAME_LAST_NO_MODEL_DATA;
+    version_data->features.custom_model_data = version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA;
     version_data->features.rubble_grid = version > SAVE_GAME_LAST_U16_GRIDS;
 }
 
@@ -724,7 +724,7 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
         scenario_allowed_building_load_state(file->allowed_buildings);
         scenario_custom_variable_load_state(file->custom_variables, version);
     }
-    if (version > SCENARIO_LAST_NO_FORMULAS) {
+    if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
 
     }
     if (version > SCENARIO_LAST_NO_EVENTS) {
@@ -745,7 +745,7 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
         empire_load_custom_map(file->empire_map);
     }
     model_load();
-    if (version > SCENARIO_LAST_NO_MODEL_DATA) {
+    if (version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         model_load_model_data(file->model_data);
     }
     buffer_skip(file->end_marker, 4);
@@ -855,9 +855,9 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     if (version < SAVE_GAME_INCREASE_GRANARY_CAPACITY) {
         building_granary_update_built_granaries_capacity();
     }
-    
+
     model_load();
-    if (version > SAVE_GAME_LAST_NO_MODEL_DATA) {
+    if (version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         model_load_model_data(state->building_model_data);
     }
 
@@ -965,7 +965,7 @@ static void savegame_save_to_state(savegame_state *state)
     city_view_save_state(state->city_view_orientation, state->city_view_camera);
     game_time_save_state(state->game_time);
     random_save_state(state->random_iv);
-    
+
     model_save_model_data(state->building_model_data);
     scenario_emperor_change_save_state(state->emperor_change_time, state->emperor_change_state);
     empire_save_state(state->empire);

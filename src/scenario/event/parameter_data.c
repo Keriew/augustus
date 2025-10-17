@@ -299,16 +299,16 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm2 = {.name = "block_radius",       .type = PARAMETER_TYPE_FORMULA,     .min_limit = 0,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_RADIUS },
                                         .xml_parm3 = {.name = "terrain",            .type = PARAMETER_TYPE_TERRAIN,    .key = TR_PARAMETER_TERRAIN },
                                         .xml_parm4 = {.name = "add",                .type = PARAMETER_TYPE_BOOLEAN,    .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_ADD }, },
-    [ACTION_TYPE_CHANGE_MODEL_DATA]      = {.type = ACTION_TYPE_CHANGE_MODEL_DATA,
-                                        .xml_attr = {.name = "change_model_data",   .type = 
+    [ACTION_TYPE_CHANGE_MODEL_DATA] = {.type = ACTION_TYPE_CHANGE_MODEL_DATA,
+                                        .xml_attr = {.name = "change_model_data",   .type =
                                         PARAMETER_TYPE_TEXT,       .key = TR_ACTION_TYPE_CHANGE_MODEL_DATA },
-                                        .xml_parm1 = {.name = "model",              .type = 
+                                        .xml_parm1 = {.name = "model",              .type =
                                         PARAMETER_TYPE_MODEL,   .key = TR_PARAMETER_MODEL },
-                                        .xml_parm2 = {.name = "data_type",          .type = 
-                                        PARAMETER_TYPE_DATA_TYPE,          .key = TR_PARAMETER_DATA_TYPE }, 
-                                        .xml_parm3 = {.name = "amount",             .type = 
+                                        .xml_parm2 = {.name = "data_type",          .type =
+                                        PARAMETER_TYPE_DATA_TYPE,          .key = TR_PARAMETER_DATA_TYPE },
+                                        .xml_parm3 = {.name = "amount",             .type =
                                         PARAMETER_TYPE_NUMBER,             .min_limit = NEGATIVE_UNLIMITED, .max_limit = UNLIMITED,            .key = TR_PARAMETER_TYPE_NUMBER },
-                                        .xml_parm4 = { .name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,            .min_limit = 0,           .max_limit = 1,                    .key = TR_PARAMETER_SET_TO_VALUE }, },
+                                        .xml_parm4 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,            .min_limit = 0,           .max_limit = 1,                    .key = TR_PARAMETER_SET_TO_VALUE }, },
     [ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY] = {.type = ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY,
                                         .xml_attr = {.name = "change_variable_visibility",        .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY },
                                         .xml_parm1 = {.name = "variable_uid",   .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,      .max_limit = 99,     .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
@@ -1699,9 +1699,9 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
             result_text = append_text(string_from_ascii(" UNHANDLED ACTION TYPE!"), result_text, &maxlength);
             return;
         }
+        }
     }
 }
-
 void scenario_events_parameter_data_get_display_string_for_condition(const scenario_condition_t *condition,
     uint8_t *result_text, int maxlength)
 {

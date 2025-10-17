@@ -406,7 +406,7 @@ void scenario_events_load_state(buffer *buf_events, buffer *buf_conditions, buff
         conditions_load_state_old_version(buf_conditions);
     }
     actions_load_state(buf_actions, scenario_version > SCENARIO_LAST_STATIC_ORIGINAL_DATA);
-    if (scenario_version > SCENARIO_LAST_NO_FORMULAS) {
+    if (scenario_version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         formulas_load_state(buf_formulas);
     }
 
