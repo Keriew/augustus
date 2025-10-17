@@ -1823,6 +1823,7 @@ typedef enum {
     TR_RANK_CONSUL,
     TR_RANK_PROCONSUL,
     TR_RANK_CAESAR, // rank names group end
+    TR_TOOLTIP_OVERLAY_LEVY_PER_TILE,
     TRANSLATION_MAX_KEY
 } translation_key;
 

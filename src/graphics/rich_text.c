@@ -98,6 +98,13 @@ void rich_text_reset(int scroll_position)
     rich_text_clear_links();
 }
 
+void rich_text_update(void)
+{
+    scrollbar_reset(&scrollbar, scrollbar.scroll_position);
+    data.num_lines = 0;
+    rich_text_clear_links();
+}
+
 void rich_text_clear_links(void)
 {
     for (int i = 0; i < MAX_LINKS; i++) {

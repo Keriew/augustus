@@ -323,10 +323,10 @@ static int start_scenario(const uint8_t *scenario_name, const char *scenario_fil
         return 0;
     }
     if (!load_custom_scenario(scenario_name, full_scenario_file)) {
+        uint8_t scenario_mapx_name[FILE_NAME_MAX];
+        string_copy(scenario_name, scenario_mapx_name, FILE_NAME_MAX);
         if (game_file_load_saved_game(full_scenario_file) == FILE_LOAD_SUCCESS) {
             is_save_game = 1;
-            uint8_t scenario_mapx_name[FILE_NAME_MAX];
-            string_copy(scenario_name, scenario_mapx_name, FILE_NAME_MAX);
             scenario_set_name(scenario_mapx_name);
         } else {
             return 0;

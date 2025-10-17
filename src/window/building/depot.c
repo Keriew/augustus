@@ -167,7 +167,7 @@ static void setup_buttons_for_selected_depot(void)
     }
 
     // First pass: active storages
-    for (int i = 0; i < storage_array_size && button_index < MAX_VISIBLE_ROWS; i++) {
+    for (int i = 0; i < storage_array_size; i++) {
         const data_storage *storage = building_storage_get_array_entry(i);
         building *store_building = building_get(storage->building_id);
         if (!storage->in_use || !storage->building_id || store_building->state == BUILDING_STATE_MOTHBALLED ||
@@ -177,7 +177,7 @@ static void setup_buttons_for_selected_depot(void)
         int max_storable = building_storage_resource_max_storable(store_building, data.target_resource_id);
         if (storage->in_use && max_storable > 0) {
             row_count++;
-            if (row_count <= scrollbar.scroll_position) {
+            if (row_count <= scrollbar.scroll_position || drawn_rows >= MAX_VISIBLE_ROWS) {
                 continue;
             }
             // Map button_index to the correct drawn_row position
@@ -191,17 +191,18 @@ static void setup_buttons_for_selected_depot(void)
     if (!data.advanced_mode) {
         return;
     }
-    // Add separator rows if there are secondary storages
-
+    // separator rows for secondary storages
     if (data.secondary_storages > 0 && drawn_rows < MAX_VISIBLE_ROWS) {
-        row_count += 2; // Skip 2 rows for separator
-        if (row_count > scrollbar.scroll_position) {
-            drawn_rows += 2; // These rows don't have buttons, just increment drawn_rows
-        }
-    }
+        row_count++;
+        int first_visible = (row_count > scrollbar.scroll_position) && (drawn_rows < MAX_VISIBLE_ROWS);
+        if (first_visible) drawn_rows++;
 
+        row_count++;
+        int second_visible = (row_count > scrollbar.scroll_position) && (drawn_rows < MAX_VISIBLE_ROWS);
+        if (second_visible) drawn_rows++;
+    }
     // Second pass: inactive/other storages
-    for (int i = 0; i < storage_array_size && button_index < MAX_VISIBLE_ROWS; i++) {
+    for (int i = 0; i < storage_array_size; i++) {
         const data_storage *storage = building_storage_get_array_entry(i);
         building *store_building = building_get(storage->building_id);
         if (!storage->building_id ||
@@ -213,7 +214,7 @@ static void setup_buttons_for_selected_depot(void)
         if ((max_storable == 0 || !storage->in_use || store_building->state == BUILDING_STATE_MOTHBALLED) &&
             store_building->storage_id > 0) {
             row_count++;
-            if (row_count <= scrollbar.scroll_position) {
+            if (row_count <= scrollbar.scroll_position || drawn_rows >= MAX_VISIBLE_ROWS) {
                 continue;
             }
             // Map button_index to the correct drawn_row position
@@ -225,7 +226,7 @@ static void setup_buttons_for_selected_depot(void)
             button_index++;
         }
     }
-    scrollbar_reset(&scrollbar, 0);
+    scrollbar_update_total_elements(&scrollbar, row_count);
 }
 
 static int total_storages(void)
@@ -557,7 +558,7 @@ void window_building_draw_depot_select_source_destination(building_info_context 
 
     // header/separator for active storages
     if (data.available_storages > 0 && drawn_rows < MAX_VISIBLE_ROWS && data.advanced_mode) {
-        row_count++;; // skip 1 row for active storage header
+        row_count++;// skip 1 row for active storage header
         if (row_count > scrollbar.scroll_position) {
             lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_INFO_ACTIVE_STORAGE_BUILDINGS,
                 c->x_offset + 18 + BLOCK_SIZE * 2, y_offset + 50 + ROW_HEIGHT * drawn_rows, base_width,
@@ -618,13 +619,18 @@ void window_building_draw_depot_select_source_destination(building_info_context 
         dropdown_button_draw(&tooltip_style_dropdown_button);
         return;
     }
-    // Draw separator if we have inactive storages
+
+    // spacer rows for secondary storages
     if (data.secondary_storages > 0 && drawn_rows < MAX_VISIBLE_ROWS) {
-        row_count += 2; //skip two rows for inactive storage header
-        if (row_count > scrollbar.scroll_position) {
-            drawn_rows++;
-            lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_INFO_OTHER_STORAGE_BUILDINGS,
-                c->x_offset + 18 + BLOCK_SIZE * 2, y_offset + 50 + ROW_HEIGHT * drawn_rows, base_width, FONT_NORMAL_RED);
+        for (int i = 0; i < 2; ++i) {
+            row_count++;
+            if (row_count <= scrollbar.scroll_position || drawn_rows >= MAX_VISIBLE_ROWS)
+                continue;
+            if (i == 1) {// second row -> draw label
+                lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_INFO_OTHER_STORAGE_BUILDINGS,
+                    c->x_offset + 18 + BLOCK_SIZE * 2, y_offset + 50 + ROW_HEIGHT * drawn_rows, base_width, FONT_NORMAL_RED
+                );
+            }
             drawn_rows++;
         }
     }

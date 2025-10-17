@@ -1568,6 +1568,17 @@ static translation_string all_strings[] = {
     {TR_CONFIG_UI_ANIMATE_TRADE_ROUTES, "Animowane szlaki handlowe"},
     {TR_HOTKEY_NEXT_TRACK, "Następny losowy utwór"},
     {TR_CONFIG_MOVE_LEGION_SOUND_SWAP, "Alternatywny dźwięk ruchu legionów"},
+    {TR_BUILDING_INFO_REPAIR_BUILDING, "Napraw budynek" },
+    {TR_WARNING_REPAIR_IMPOSSIBLE, "Nie można naprawić tego budynku" },
+    {TR_WARNING_REPAIR_BURNING, "Nie można naprawiać palących się budynków" },
+    {TR_BUILDING_INFO_BUILDING_BURNING, "Budynek się pali" },
+    {TR_BUILDING_LAND_REPAIR, "Napraw obszar"},
+    {TR_BUILDING_LAND_CLEAR, "Wyczyść obszar"},
+    {TR_CONFIRM_REPAIR_BUILDINGS, "Naprawić wszystkie budynki w obszarze za "},
+    {TR_CONFIRM_REPAIR_BUILDINGS_TITLE, "Napraw budynki"},
+    {TR_CONFIG_ADVANCED_CART_DEPOT_OPTIONS, "Zaawansowane instrukcje dla składów wózków"},
+    {TR_BUILDING_INFO_INSTRUCTIONS, "Instrukcje" },
+     // TODO 1705 - 1725
 };
 
 void translation_polish(const translation_string **strings, int *num_strings)

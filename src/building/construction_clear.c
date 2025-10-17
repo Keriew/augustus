@@ -363,6 +363,9 @@ static int repair_land_confirmed(int measure_only, int x_start, int y_start, int
         if (building_id) {
             building *b = building_get(building_id);
             if (building_can_repair(b)) {
+                if (b->type == BUILDING_WAREHOUSE_SPACE) { // swap the b pointer for the main warehouse building
+                    b = building_get(map_building_rubble_building_id(b->data.rubble.og_grid_offset));
+                }
                 if (!was_building_counted(b->id, repairable_buildings)) {
                     if (measure_only) {
                         repair_cost += building_repair_cost(b);

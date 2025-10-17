@@ -95,6 +95,12 @@ static void write_type_data(buffer *buf, const building *b)
         buffer_write_i16(buf, b->data.dock.trade_ship_id);
     } else if (building_type_is_roadblock(b->type)) {
         buffer_write_u16(buf, b->data.roadblock.exceptions);
+        if (b->type == BUILDING_WAREHOUSE) {
+            buffer_write_u16(buf, b->data.rubble.og_type);
+            buffer_write_u16(buf, b->data.rubble.og_grid_offset);
+            buffer_write_u8(buf, b->data.rubble.og_size);
+            buffer_write_u8(buf, b->data.rubble.og_orientation);
+        }
     } else if (is_industry_type(b)) {
         buffer_write_i16(buf, b->data.industry.progress);
         buffer_write_u8(buf, b->data.industry.is_stockpiling);
@@ -109,7 +115,7 @@ static void write_type_data(buffer *buf, const building *b)
             buffer_write_i16(buf, b->data.industry.production_current_month);
         }
         buffer_write_i16(buf, b->data.industry.fishing_boat_id);
-    } else if (b->type == BUILDING_BURNING_RUIN) {
+    } else if (b->type == BUILDING_BURNING_RUIN || b->type == BUILDING_WAREHOUSE_SPACE) {
         buffer_write_u16(buf, b->data.rubble.og_type);
         buffer_write_u16(buf, b->data.rubble.og_grid_offset);
         buffer_write_u8(buf, b->data.rubble.og_size);
@@ -358,6 +364,12 @@ static void read_type_data(buffer *buf, building *b, int version)
         } else {
             b->data.roadblock.exceptions = buffer_read_u16(buf);
         }
+        if (b->type == BUILDING_WAREHOUSE) {
+            b->data.rubble.og_type = buffer_read_u16(buf);
+            b->data.rubble.og_grid_offset = buffer_read_u16(buf);
+            b->data.rubble.og_size = buffer_read_u8(buf);
+            b->data.rubble.og_orientation = buffer_read_u8(buf);
+        }
     } else if (building_monument_is_monument(b) && version <= SAVE_GAME_LAST_MONUMENT_TYPE_DATA) {
         if (version <= SAVE_GAME_LAST_STATIC_RESOURCES) {
             for (int i = 0; i < RESOURCE_MAX_LEGACY; i++) {
@@ -428,7 +440,7 @@ static void read_type_data(buffer *buf, building *b, int version)
             buffer_skip(buf, 6);
         }
         b->data.industry.fishing_boat_id = buffer_read_i16(buf);
-    } else if (b->type == BUILDING_BURNING_RUIN && version > SAVE_GAME_LAST_U16_GRIDS) {
+    } else if ((b->type == BUILDING_BURNING_RUIN || b->type == BUILDING_WAREHOUSE_SPACE) && version > SAVE_GAME_LAST_U16_GRIDS) {
         b->data.rubble.og_type = buffer_read_u16(buf);
         b->data.rubble.og_grid_offset = buffer_read_u16(buf);
         b->data.rubble.og_size = buffer_read_u8(buf);

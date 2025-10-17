@@ -26,7 +26,10 @@ enum {
     DESTROY_COLLAPSE = 0,
     DESTROY_FIRE = 1,
     DESTROY_NO_RUBBLE = 2,
+    DESTROY_EARTHQUAKE = 3, // earthquake collapses - non repairable, rubble where possible, remove from array at once
 };
+static void set_rubble_grid_info_for_all_parts(building *b);
+
 static void destroy_without_rubble(building *b)
 {
     game_undo_disable();
@@ -144,6 +147,9 @@ static void destroy_linked_parts(building *b, int destruction_method, int plague
             case DESTROY_FIRE:
                 destroy_on_fire(part, plagued);
                 break;
+            case DESTROY_EARTHQUAKE:
+                part->state = BUILDING_STATE_DELETED_BY_GAME;
+                break;
             default:
                 map_building_tiles_set_rubble(part_id, part->x, part->y, part->size);
                 part->state = BUILDING_STATE_RUBBLE;
@@ -165,6 +171,8 @@ static void destroy_linked_parts(building *b, int destruction_method, int plague
             case DESTROY_FIRE:
                 destroy_on_fire(part, plagued);
                 break;
+            case DESTROY_EARTHQUAKE:
+                part->state = BUILDING_STATE_DELETED_BY_GAME;
             default:
                 map_building_tiles_set_rubble(part_id, part->x, part->y, part->size);
                 part->state = BUILDING_STATE_RUBBLE;
@@ -184,6 +192,7 @@ static void destroy_linked_parts(building *b, int destruction_method, int plague
 void building_destroy_by_collapse(building *b)
 {
     b->state = BUILDING_STATE_RUBBLE;
+    set_rubble_grid_info_for_all_parts(b);
     map_building_tiles_set_rubble(b->id, b->x, b->y, b->size);
     figure_create_explosion_cloud(b->x, b->y, b->size, 0);
     destroy_linked_parts(b, DESTROY_COLLAPSE, 0);
@@ -193,6 +202,14 @@ void building_destroy_by_fire(building *b)
 {
     destroy_on_fire(b, 0);
     destroy_linked_parts(b, DESTROY_FIRE, 0);
+}
+void building_destroy_by_earthquake(building *b)
+{
+    int grid_offset = b->grid_offset; // save before destroying building
+    int size = b->size;
+    map_building_tiles_set_rubble(b->id, b->x, b->y, b->size);
+    destroy_linked_parts(b, DESTROY_EARTHQUAKE, 0);
+    map_building_set_rubble_grid_building_id(grid_offset, 0, size);
 }
 
 void building_destroy_by_plague(building *b)
@@ -254,6 +271,20 @@ void building_destroy_increase_enemy_damage(int grid_offset, int max_damage)
     if (map_building_damage_increase(grid_offset) > max_damage) {
         building_destroy_by_enemy(map_grid_offset_to_x(grid_offset),
             map_grid_offset_to_y(grid_offset), grid_offset);
+    }
+}
+
+static void set_rubble_grid_info_for_all_parts(building *b)
+{
+    b = building_main(b); //get main warehouse building to copy data from
+    building *part = b; //initialize part iterator - start with main building
+    for (int i = 0; i < 9 && part->id > 0; i++) {
+        building *next_part = building_next(part);
+        part->data.rubble.og_type = b->type;
+        part->data.rubble.og_grid_offset = b->grid_offset;
+        part->data.rubble.og_size = b->type == BUILDING_WAREHOUSE ? 3 : b->size;
+        part->data.rubble.og_orientation = b->subtype.orientation;
+        part = next_part;
     }
 }
 

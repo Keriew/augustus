@@ -33,6 +33,8 @@
 
 #include <stdio.h>
 
+#define HIGHWAY_LEVY_MONTHLY 1
+
 static void draw_storage_ids(int x, int y, float scale, int grid_offset);
 
 static int show_building_religion(const building *b)
@@ -510,6 +512,20 @@ static int get_tooltip_levy(tooltip_context *c, const building *b)
     return 0;
 }
 
+static int get_offset_tooltip_levy(tooltip_context *c, int grid_offset)
+{
+    if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+        return get_tooltip_levy(c, building_get(map_building_at(grid_offset)));
+    }
+    if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+        c->has_numeric_prefix = 1;
+        c->numeric_prefix = 1;
+        c->translation_key = TR_TOOLTIP_OVERLAY_LEVY_PER_TILE;
+        return 1;
+    }
+    return 0;
+}
+
 static int get_tooltip_sentiment(tooltip_context *c, int grid_offset)
 {
     if (!map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
@@ -965,8 +981,8 @@ const city_overlay *city_overlay_for_levy(void)
         show_building_none,
         show_figure_none,
         get_column_height_levy,
+        get_offset_tooltip_levy,
         0,
-        get_tooltip_levy,
         0,
         0
     };

@@ -231,6 +231,12 @@ building *building_create(building_type type, int x, int y);
 int building_was_tent(building *b);
 
 int building_is_storage(building_type b_type);
+/**
+ * @brief Repairs a building using it's entry in the buildings array. In cases of warehouses and burning ruins,
+ * some information is removed or reset, so data from b->data.rubble is used to help restore the building.
+ * in the future, we should implement a more general system for saving and restoring building state.
+ * Keeping a building in the array is helpful because it holds the building's ID, and allows keeping the storage structure.
+ */
 
 int building_repair(building *b);
 

@@ -311,6 +311,20 @@ int text_draw_ellipsized(const uint8_t *str, int x, int y, int box_width, font_t
     return text_draw(buffer, x, y, font, color);
 }
 
+int text_draw_centered_ellipsized(const uint8_t *str, int x, int y, int box_width, font_t font, color_t color)
+{
+    static uint8_t buffer[1000];
+    string_copy(str, buffer, sizeof(buffer));
+
+    text_ellipsize(buffer, font, box_width);
+
+    int text_width = text_get_width(buffer, font);
+    int offset = (box_width - text_width) / 2;
+    if (offset < 0) offset = 0;
+
+    return text_draw(buffer, x + offset, y, font, color);
+}
+
 int text_draw_scaled(const uint8_t *str, int x, int y, font_t font, color_t color, float scale)
 {
     const font_definition *def = font_definition_for(font);

@@ -318,7 +318,7 @@ static void button_menu_item(int item)
         window_invalidate();
         return;
     }
-    building_construction_set_type(type);
+    building_construction_set_type(type, 0);
 
     if (set_submenu_for_type(type)) {
         data.num_items = building_menu_count_items(data.selected_submenu);

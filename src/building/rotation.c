@@ -67,6 +67,9 @@ static void update_rotation_message(void)
 {
     uint8_t *cursor = data.rotation_text;
     building_type type = building_construction_type();
+    if (!building_variant_has_variants(type) && !get_num_rotations(type)) {
+        return; // only show for buildings with variants
+    }
     cursor += string_from_int(cursor, data.extra_rotation + 1, 0);
     cursor = string_copy(string_from_ascii("/"), cursor, 100 - (int) (cursor - data.rotation_text));
     cursor += string_from_int(cursor, get_num_rotations(type), 0);

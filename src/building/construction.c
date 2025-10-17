@@ -563,7 +563,7 @@ int building_construction_can_rotate(void)
     return building_rotation_type_has_rotations(data.type);
 }
 
-void building_construction_set_type(building_type type)
+void building_construction_set_type(building_type type, int setup_rotation)
 {
     if (type != data.type) {
         building_rotation_remove_rotation();
@@ -617,7 +617,7 @@ void building_construction_set_type(building_type type)
         }
     }
     if (building_construction_can_rotate()) {
-        building_rotation_setup_rotation(0);
+        building_rotation_setup_rotation(setup_rotation);
     }
 }
 

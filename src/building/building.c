@@ -394,7 +394,9 @@ int building_repair_cost(building *b)
     if (!b || !building_can_repair(b)) {
         return 0;
     }
-    int is_ruin = b->type == BUILDING_BURNING_RUIN;
+    int is_ruin = b->type == BUILDING_BURNING_RUIN || // ruins and collapsed warehouse parts all use rubble data 
+        b->type == BUILDING_WAREHOUSE_SPACE || b->type == BUILDING_WAREHOUSE;
+
     og_grid_offset = is_ruin ? b->data.rubble.og_grid_offset : b->grid_offset;
     og_size = is_ruin ? b->data.rubble.og_size : b->size;
     og_type = is_ruin ? b->data.rubble.og_type : b->type;
@@ -404,9 +406,15 @@ int building_repair_cost(building *b)
         int clear_cost = house_slice->size * (11 + 3); // 10.5 per new house tile + 3 per rubble tile to clear
         return clear_cost;
     }
+    if (b->type == BUILDING_WAREHOUSE_SPACE) {
+        og_size = 1; // dont charge for clearing the whole warehouse, just the collapsed part, otherwise its *9
+    }
     grid_slice *grid_slice = map_grid_get_grid_slice_square(og_grid_offset, og_size); // wont work correctly for hippo
     int clear_cost = building_construction_prepare_terrain(grid_slice, CLEAR_MODE_RUBBLE, COST_MEASURE);
     int placement_cost = model_get_building(og_type)->cost;
+    if (og_type == BUILDING_WAREHOUSE && b->type == BUILDING_WAREHOUSE_SPACE) {
+        placement_cost = 0; // collapsed warehouse parts only need clearing cost, no placement cost
+    }
     return clear_cost + placement_cost + placement_cost / 20; // +5% fee on a building price
 }
 
@@ -434,7 +442,8 @@ int building_repair(building *b)
     building_type og_type = BUILDING_NONE;
 
     // --- Handle rubble recovery ---
-    if (b->type == BUILDING_BURNING_RUIN) {
+    if (b->type == BUILDING_BURNING_RUIN || b->type == BUILDING_WAREHOUSE_SPACE || b->type == BUILDING_WAREHOUSE) {
+        // in collapse, warehouse space and warehouse all inherit the rubble data of the original warehouse
         og_size = b->data.rubble.og_size;
         og_grid_offset = b->data.rubble.og_grid_offset;
         og_orientation = b->data.rubble.og_orientation;
@@ -455,6 +464,7 @@ int building_repair(building *b)
         is_house_lot = 1;
         building_change_type(b, BUILDING_HOUSE_VACANT_LOT);
     }
+    int placement_cost = 0;
     og_storage_id = b->storage_id; //store the original storage id before clearing it
     // --- Clear terrain & place building ---
     grid_slice *grid_slice = map_grid_get_grid_slice_square(grid_offset, size);
@@ -465,7 +475,9 @@ int building_repair(building *b)
     } else if (type_to_place == BUILDING_WALL || type_to_place == BUILDING_TOWER) {
         wall = 1;
         for (int i = 0; i < grid_slice->size; i++) {
+
             success = building_construction_place_wall(grid_slice->grid_offsets[i]);
+            placement_cost += model_get_building(BUILDING_WALL)->cost * success; // TODO: confirm if wall cost is stored in model
         }
         if (type_to_place == BUILDING_TOWER) {
             map_tiles_update_all_walls(); // towers affect wall connections
@@ -491,7 +503,7 @@ int building_repair(building *b)
             b->storage_id = 0; // remove reference to the storage we just deleted
         }
     }
-    int placement_cost = model_get_building(type_to_place)->cost * success;
+    placement_cost += model_get_building(type_to_place)->cost * success;
     int full_cost = (placement_cost + placement_cost / 20);// +5%
 
     city_finance_process_construction(full_cost);

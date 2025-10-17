@@ -669,8 +669,7 @@ static void set_construction_building_type(building_type type, int rotation)
 {
     if (scenario_allowed_building(type) && building_menu_is_enabled(type)) {
         building_construction_cancel();
-        building_construction_set_type(type);
-        building_rotation_setup_rotation(rotation);
+        building_construction_set_type(type, rotation);
         window_request_refresh();
     }
 }
