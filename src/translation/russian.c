@@ -1413,6 +1413,8 @@ static translation_string all_strings[] = {
     {TR_BUILDING_INFO_DEPOT_SELECT_RESOURCE_TITLE, "Выберите ресурс"},
     {TR_TOOLTIP_BUTTON_CENTER_CAMERA, "Навести камеру на здание"},
     {TR_FIGURE_INFO_DEPOT_RECALL, "Отозвать"},
+    {TR_WARNING_DEPOT_RECALL_ALL, "Все тележки отозваны!"},
+    {TR_WARNING_DEPOT_RESOURCE_CHANGE, "Нельзя изменить ресурс, пока есть активные тележки!"},
     {TR_FIGURE_INFO_DEPOT_RETURNING, "Возвращается"},
     {TR_FIGURE_INFO_DEPOT_DELIVER, "Доставляет"},
     {TR_FIGURE_INFO_DEPOT_FROM, "От "},
@@ -1740,6 +1742,12 @@ static translation_string all_strings[] = {
     {TR_OVERLAY_HOUSE_PALACES, "Дворцы"},
     {TR_OVERLAY_BY_GROUP, "По группам"},
     {TR_BUTTON_INFO_RETURN_ALL_LEGIONS, "Вернуть все легионы"},
+    {TR_WINDOW_BUILDING_DISTRIBUTION_CART_PUSHER_WAIT_LOAD, "Наша тележка ожидает погрузки."},
+    {TR_WINDOW_BUILDING_DISTRIBUTION_CART_PUSHER_WAIT_UNLOAD, "Наша тележка ожидает разгрузки."},
+    {TR_WINDOW_BUILDING_DISTRIBUTION_CART_PUSHER_GETTING_FOOD, "Наша тележка направляется в амбар за едой."},
+    {TR_WINDOW_BUILDING_DISTRIBUTION_CART_PUSHER_GETTING_GOODS, "Наша тележка направляется на склад за товаром."},
+    {TR_WINDOW_BUILDING_DISTRIBUTION_CART_PUSHER_DELIVER, "Наша тележка доставляет товар."},
+    {TR_WINDOW_BUILDING_DISTRIBUTION_CART_PUSHER_WAIT, "Наша тележка ждет новых указаний."},
     {TR_TOOLTIP_OVERLAY_LEVY_PER_TILE, " Ден. налога в месяц за плитку"},
 };
 
