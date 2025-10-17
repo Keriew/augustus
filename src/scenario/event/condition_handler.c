@@ -165,6 +165,7 @@ int scenario_condition_uses_custom_variable(const scenario_condition_t *conditio
 {
     switch (condition->type) {
         case CONDITION_TYPE_CUSTOM_VARIABLE_CHECK:
+        case CONDITION_TYPE_CUSTOM_VARIABLE_CHECK_FORMULA:
             return condition->parameter1 == custom_variable_id;
         default:
             return 0;

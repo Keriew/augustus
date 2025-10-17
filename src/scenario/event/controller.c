@@ -408,6 +408,9 @@ void scenario_events_load_state(buffer *buf_events, buffer *buf_conditions, buff
     actions_load_state(buf_actions, scenario_version > SCENARIO_LAST_STATIC_ORIGINAL_DATA);
     if (scenario_version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         formulas_load_state(buf_formulas);
+    } else {
+        scenario_formulas_size = 0;
+        memset(scenario_formulas, 0, sizeof(scenario_formulas));
     }
 
     scenario_event_t *current;

@@ -215,37 +215,49 @@ static void set_formula_value(const uint8_t *formula)
 {
     strncpy((char *) data.formula, (const char *) formula, MAX_FORMULA_LENGTH - 1);
     data.formula[MAX_FORMULA_LENGTH - 1] = 0;
-    // Add formula to list and get its index
-    if (!data.formula_index) {
+
+    // Get the current parameter's formula index
+    int current_index = get_param_value();
+
+    // Add or update formula
+    if (!current_index || current_index == 0) {
+        // Create new formula
         data.formula_index = scenario_formula_add(data.formula, data.formula_min_limit, data.formula_max_limit);
-        set_param_value(data.formula_index);
     } else {
         // Update existing formula
-        scenario_formula_change(data.formula_index, data.formula, data.formula_min_limit, data.formula_max_limit);
-        set_param_value(data.formula_index);
+        scenario_formula_change(current_index, data.formula, data.formula_min_limit, data.formula_max_limit);
+        data.formula_index = current_index;
     }
+
+    // Save the formula index to the correct parameter
+    set_param_value(data.formula_index);
     window_invalidate();
 }
 
 static void create_evaluation_formula(xml_data_attribute_t *parameter)
 {
+    // Get the formula index for THIS specific parameter
     int current_index = get_param_value();
+
     data.formula_min_limit = parameter->min_limit;
     data.formula_max_limit = parameter->max_limit;
+    data.formula_index = current_index; // Store current parameter's index
+
     if (current_index > 0) {
         const uint8_t *src = scenario_formula_get_string(current_index);
         if (src) {
             strncpy((char *) data.formula, (const char *) src, MAX_FORMULA_LENGTH - 1);
             data.formula[MAX_FORMULA_LENGTH - 1] = '\0';
-            data.formula_index = current_index;
         } else {
             memset(data.formula, 0, MAX_FORMULA_LENGTH);
         }
+    } else {
+        memset(data.formula, 0, MAX_FORMULA_LENGTH);
     }
+
     window_text_input_expanded_show("FORMULA", "...", data.formula, MAX_FORMULA_LENGTH,
          set_formula_value, INPUT_BOX_CHARS_FORMULAS);
 }
-
 static void set_param_value(int value)
 {
     switch (data.parameter_being_edited) {
@@ -290,6 +302,7 @@ static int get_param_value(void)
 static void set_parameter_being_edited(int value)
 {
     data.parameter_being_edited = value;
+
     switch (value) {
         case 1:
             data.parameter_being_edited_current_value = data.condition->parameter1;

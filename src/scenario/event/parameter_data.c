@@ -6,6 +6,7 @@
 #include "city/constants.h"
 #include "city/ratings.h"
 #include "city/resource.h"
+#include "core/array.h"
 #include "core/lang.h"
 #include "core/string.h"
 #include "core/xml_parser.h"
@@ -607,7 +608,7 @@ static special_attribute_mapping_t special_attribute_mappings_terrain[] =
     {.type = PARAMETER_TYPE_TERRAIN,            .text = "Water",            .value = TERRAIN_WATER,   .key = TR_PARAMETER_TERRAIN_WATER },
     {.type = PARAMETER_TYPE_TERRAIN,            .text = "Rock",             .value = TERRAIN_ROCK,  .key = TR_PARAMETER_TERRAIN_ROCK },
     {.type = PARAMETER_TYPE_TERRAIN,            .text = "Fertile Ground",   .value = TERRAIN_MEADOW,    .key = TR_PARAMETER_TERRAIN_MEADOW },
-    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Tree",             .value = TERRAIN_TREE,    .key = TR_PARAMETER_TERRAIN_TREE },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Tree",             .value = TERRAIN_TREE,     .key = TR_PARAMETER_TERRAIN_TREE },
     {.type = PARAMETER_TYPE_TERRAIN,            .text = "Shrub",            .value = TERRAIN_SHRUB,    .key = TR_PARAMETER_TERRAIN_SHRUB },
 };
 
@@ -1842,4 +1843,13 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
             return;
         }
     }
+}
+
+void scenario_events_parameter_data_migrate_to_formulas(void)
+{
+    // array_foreach(group->conditions, condition)
+    // {
+    //     scenario_condition_data_t *xml_info = scenario_events_parameter_data_get_conditions_xml_attributes(condition->type);
+    // }
+
 }
