@@ -189,52 +189,11 @@ static int is_auto_cycle_button(building_type type)
 
 static int produced_resource_icon(building_type type)
 {
-    switch (type) {
-        case BUILDING_PIG_FARM:
-            return resource_get_data(RESOURCE_MEAT)->image.icon;
-        case BUILDING_WHEAT_FARM:
-            return resource_get_data(RESOURCE_WHEAT)->image.icon;
-        case BUILDING_VINES_FARM:
-            return resource_get_data(RESOURCE_VINES)->image.icon;
-        case BUILDING_OLIVE_FARM:
-            return resource_get_data(RESOURCE_OLIVES)->image.icon;
-        case BUILDING_VEGETABLE_FARM:
-            return resource_get_data(RESOURCE_VEGETABLES)->image.icon;
-        case BUILDING_WHARF:
-            return resource_get_data(RESOURCE_FISH)->image.icon;
-        case BUILDING_OIL_WORKSHOP:
-            return resource_get_data(RESOURCE_OIL)->image.icon;
-        case BUILDING_WINE_WORKSHOP:
-            return resource_get_data(RESOURCE_WINE)->image.icon;
-        case BUILDING_WEAPONS_WORKSHOP:
-            return resource_get_data(RESOURCE_WEAPONS)->image.icon;
-        case BUILDING_POTTERY_WORKSHOP:
-            return resource_get_data(RESOURCE_POTTERY)->image.icon;
-        case BUILDING_BRICKWORKS:
-            return resource_get_data(RESOURCE_BRICKS)->image.icon;
-        case BUILDING_TIMBER_YARD:
-            return resource_get_data(RESOURCE_TIMBER)->image.icon;
-        case BUILDING_STONE_QUARRY:
-            return resource_get_data(RESOURCE_STONE)->image.icon;
-        case BUILDING_IRON_MINE:
-            return resource_get_data(RESOURCE_IRON)->image.icon;
-        case BUILDING_CONCRETE_MAKER:
-            return resource_get_data(RESOURCE_CONCRETE)->image.icon;
-        case BUILDING_FURNITURE_WORKSHOP:
-            return resource_get_data(RESOURCE_FURNITURE)->image.icon;
-        case BUILDING_MARBLE_QUARRY:
-            return resource_get_data(RESOURCE_MARBLE)->image.icon;
-        case BUILDING_GOLD_MINE:
-            return resource_get_data(RESOURCE_GOLD)->image.icon;
-        case BUILDING_CLAY_PIT:
-            return resource_get_data(RESOURCE_CLAY)->image.icon;
-        case BUILDING_SAND_PIT:
-            return resource_get_data(RESOURCE_SAND)->image.icon;
-        case BUILDING_FRUIT_FARM:
-            return resource_get_data(RESOURCE_FRUIT)->image.icon;
-        default:
-            return -1;
+    resource_type r = resource_get_from_industry(type);
+    if (r != RESOURCE_NONE) {
+        return resource_get_data(r)->image.icon;
     }
+    return -1;
 }
 
 static void draw_resource_icon_scaled(int image_id, int x, int y, int max_size)

@@ -67,6 +67,8 @@ void scenario_request_init(void);
 
 int scenario_request_new(void);
 
+void scenario_request_show_ready_message(scenario_request *request);
+
 void scenario_request_process(void);
 
 void scenario_request_dispatch(int id);

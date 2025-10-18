@@ -974,8 +974,12 @@ void building_construction_update(int x, int y, int grid_offset)
     data.cost_preview = current_cost;
 }
 
-static figure_type nearby_enemy_type(int x_start, int y_start, int x_end, int y_end)
+figure_type building_construction_nearby_enemy_type(grid_slice *slice)
 {
+    if (!slice || slice->size == 0) {
+        return FIGURE_NONE;
+    }
+
     for (int i = 1; i < figure_count(); i++) {
         figure *f = figure_get(i);
         if (config_get(CONFIG_GP_CH_WOLVES_BLOCK)) {
@@ -985,18 +989,25 @@ static figure_type nearby_enemy_type(int x_start, int y_start, int x_end, int y_
         } else if (figure_is_dead(f) || !figure_is_enemy(f)) {
             continue;
         }
+
         int distance = f->type == FIGURE_WOLF ? 6 : 12;
-        int dx = (f->x > x_start) ? (f->x - x_start) : (x_start - f->x);
-        int dy = (f->y > y_start) ? (f->y - y_start) : (y_start - f->y);
-        if (dx <= distance && dy <= distance) {
-            return f->type;
-        }
-        dx = (f->x > x_end) ? (f->x - x_end) : (x_end - f->x);
-        dy = (f->y > y_end) ? (f->y - y_end) : (y_end - f->y);
-        if (dx <= distance && dy <= distance) {
-            return f->type;
+        int figure_offset = map_grid_offset(f->x, f->y);
+
+        // Check if figure is within distance of any tile in the grid slice
+        for (int j = 0; j < slice->size; j++) {
+            int grid_offset = slice->grid_offsets[j];
+            int tile_x = map_grid_offset_to_x(grid_offset);
+            int tile_y = map_grid_offset_to_y(grid_offset);
+
+            int dx = (f->x > tile_x) ? (f->x - tile_x) : (tile_x - f->x);
+            int dy = (f->y > tile_y) ? (f->y - tile_y) : (tile_y - f->y);
+
+            if (dx <= distance && dy <= distance) {
+                return f->type;
+            }
         }
     }
+
     return FIGURE_NONE;
 }
 
@@ -1017,6 +1028,7 @@ void building_construction_place(void)
     int y_start = data.start.y;
     int x_end = data.end.x;
     int y_end = data.end.y;
+    grid_slice *slice = map_grid_get_grid_slice_from_corners(x_start, y_start, x_end, y_end);
     building_type type = building_construction_type();
     building_construction_warning_reset();
     if (!type) {
@@ -1034,7 +1046,7 @@ void building_construction_place(void)
         }
     }
 
-    figure_type enemy_figure_type = nearby_enemy_type(x_start, y_start, x_end, y_end);
+    figure_type enemy_figure_type = building_construction_nearby_enemy_type(slice);
 
     if (type != BUILDING_CLEAR_LAND && enemy_figure_type != FIGURE_NONE) {
         if (type == BUILDING_WALL || type == BUILDING_ROAD || type == BUILDING_AQUEDUCT || type == BUILDING_HIGHWAY) {
@@ -1065,7 +1077,7 @@ void building_construction_place(void)
         placement_cost *= items_placed;
         map_property_clear_constructing_and_deleted();
     } else if (type == BUILDING_REPAIR_LAND) {
-        int cost = building_construction_repair_land(0, data.start.x, data.start.y, x_end, y_end, &repaired_buildings);
+        building_construction_repair_land(0, data.start.x, data.start.y, x_end, y_end, &repaired_buildings);
         //cost processed inside the repair land function
         map_property_clear_constructing_and_deleted();
     } else if (type == BUILDING_WALL) {

@@ -443,8 +443,8 @@ int building_repair(building *b)
     building_type og_type = BUILDING_NONE;
 
     // --- Handle rubble recovery ---
-    if (b->type == BUILDING_BURNING_RUIN || b->type == BUILDING_WAREHOUSE_SPACE || b->type == BUILDING_WAREHOUSE) {
-        // in collapse, warehouse space and warehouse all inherit the rubble data of the original warehouse
+    if (b->data.rubble.og_size || b->data.rubble.og_grid_offset ||        // if there's rubble data, take it from there
+         b->data.rubble.og_orientation || b->data.rubble.og_type) {
         og_size = b->data.rubble.og_size;
         og_grid_offset = b->data.rubble.og_grid_offset;
         og_orientation = b->data.rubble.og_orientation;
@@ -469,6 +469,11 @@ int building_repair(building *b)
     og_storage_id = b->storage_id; //store the original storage id before clearing it
     // --- Clear terrain & place building ---
     grid_slice *grid_slice = map_grid_get_grid_slice_square(grid_offset, size);
+    if (building_construction_nearby_enemy_type(grid_slice) != FIGURE_NONE) {
+        city_warning_show(WARNING_ENEMY_NEARBY, NEW_WARNING_SLOT);
+        building_data_transfer_restore_and_clear_backup();
+        return 0;
+    }
     map_terrain_backup(); // backup the terrain in case of failure
     int cleared = building_construction_prepare_terrain(grid_slice, CLEAR_MODE_RUBBLE, COST_PROCESS);
     if (is_house_lot) {

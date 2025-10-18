@@ -1850,6 +1850,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_OVERLAY_LEVY_PER_TILE, " Denarii paid monthly in levies per tile"},
     {TR_CONFIG_UI_CV_BUILD_MENU_ICONS, "Show resource icons in build menu"},
     {TR_EDITOR_RESET_FAVOR_MONTHLY, "Reset favor monthly"},
+    {TR_CONFIG_UI_WT_ENABLE_SNOW_CENTRAL, "Enable snow in central climate"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

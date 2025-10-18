@@ -70,7 +70,7 @@ int scenario_request_can_comply(int id)
         return 0;
     }
     int amount = city_resource_get_amount_for_request(request->resource, request->amount.requested);
-    return amount >= request->amount.requested;
+    return amount >= (int) request->amount.requested;
 }
 
 void scenario_request_clear_all(void)
@@ -115,6 +115,18 @@ static void schedule_request_again(scenario_request *request)
     request->amount.requested = 0;
     if (request->repeat.times > 0) {
         request->repeat.times--;
+    }
+}
+
+void scenario_request_show_ready_message(scenario_request *request)
+{
+    if (!request->can_comply_dialog_shown) {
+        resource_type resource = request->resource;
+        int resource_amount = city_resource_get_amount_for_request(resource, request->amount.requested);
+        if (resource_amount >= (int) request->amount.requested) {
+            request->can_comply_dialog_shown = 1;
+            city_message_post(1, MESSAGE_REQUEST_CAN_COMPLY, request->id, 0);
+        }
     }
 }
 
@@ -167,7 +179,7 @@ static void process_request(scenario_request *request)
         if (!request->can_comply_dialog_shown) {
             resource_type resource = request->resource;
             int resource_amount = city_resource_get_amount_for_request(resource, request->amount.requested);
-            if (resource_amount >= request->amount.requested) {
+            if (resource_amount >= (int) request->amount.requested) {
                 request->can_comply_dialog_shown = 1;
                 city_message_post(1, MESSAGE_REQUEST_CAN_COMPLY, request->id, 0);
             }

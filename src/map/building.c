@@ -69,10 +69,15 @@ int map_building_ruins_left(int building_id)
     if (b->type == BUILDING_HIPPODROME || building_is_fort(b->type)) {
         return 0;
     }
-    grid_slice *slice = map_grid_get_grid_slice_square(b->grid_offset, b->size);
+    int size = b->data.rubble.og_size ? b->data.rubble.og_size : b->size;
+    int slice_offset = b->data.rubble.og_grid_offset ? b->data.rubble.og_grid_offset : b->grid_offset;
+    grid_slice *slice = map_grid_get_grid_slice_square(slice_offset, size);
     for (int i = 0; i < slice->size; i++) {
         int grid_offset = slice->grid_offsets[i];
         if (map_building_rubble_building_id(grid_offset) == building_id) {
+            ruins_count++;
+        } else if (map_building_at(grid_offset) == building_id &&
+                building_get(building_id)->type == BUILDING_BURNING_RUIN) {
             ruins_count++;
         }
     }

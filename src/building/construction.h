@@ -2,6 +2,8 @@
 #define BUILDING_CONSTRUCTION_H
 
 #include "building/type.h"
+#include "figure/type.h"
+#include "map/grid.h"
 
 int building_construction_cycle_forward(void);
 
@@ -40,6 +42,8 @@ int building_construction_is_updatable(void);
 void building_construction_cancel(void);
 
 void building_construction_update(int x, int y, int grid_offset);
+
+figure_type building_construction_nearby_enemy_type(grid_slice *slice);
 
 void building_construction_offset_start_from_orientation(int *x, int *y, int size);
 
