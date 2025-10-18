@@ -90,6 +90,27 @@ scenario_condition_data_t *scenario_events_parameter_data_get_conditions_xml_att
 scenario_condition_data_t *scenario_events_parameter_data_get_conditions_xml_attributes_alphabetical(int index);
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type);
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes_alphabetical(int index);
+
+/**
+ * Gets the parameter type for a specific parameter of an action
+ * @param action_type The action type
+ * @param parameter_index The parameter index (1-5)
+ * @param min_limit Pointer to store minimum limit if applicable
+ * @param max_limit Pointer to store maximum limit if applicable
+ * @return The parameter type, or PARAMETER_TYPE_UNDEFINED if invalid
+ */
+parameter_type scenario_events_parameter_data_get_action_parameter_type(action_types action_type, int parameter_index, int *min_limit, int *max_limit);
+
+/**
+ * Gets the parameter type for a specific parameter of a condition
+ * @param condition_type The condition type
+ * @param parameter_index The parameter index (1-5)
+ * @param min_limit Pointer to store minimum limit if applicable
+ * @param max_limit Pointer to store maximum limit if applicable
+ * @return The parameter type, or PARAMETER_TYPE_UNDEFINED if invalid
+ */
+parameter_type scenario_events_parameter_data_get_condition_parameter_type(condition_types condition_type, int parameter_index, int *min_limit, int *max_limit);
+
 special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mapping(parameter_type type, int index);
 special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mapping_by_value(parameter_type type, int target);
 special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mapping_by_text(parameter_type type, const char *value);

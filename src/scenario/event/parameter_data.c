@@ -353,6 +353,79 @@ scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attribute
     return &scenario_action_data[type];
 }
 
+parameter_type scenario_events_parameter_data_get_action_parameter_type(
+    action_types action_type, int parameter_index, int *min_limit, int *max_limit)
+{
+    if (action_type < 0 || action_type >= ACTION_TYPE_MAX) {
+        return PARAMETER_TYPE_UNDEFINED;
+    }
+
+    const scenario_action_data_t *action = &scenario_action_data[action_type];
+
+    switch (parameter_index) {
+        case 1:
+            *min_limit = action->xml_parm1.min_limit;
+            *max_limit = action->xml_parm1.max_limit;
+            return action->xml_parm1.type;
+        case 2:
+            *min_limit = action->xml_parm2.min_limit;
+            *max_limit = action->xml_parm2.max_limit;
+            return action->xml_parm2.type;
+        case 3:
+            *min_limit = action->xml_parm3.min_limit;
+            *max_limit = action->xml_parm3.max_limit;
+            return action->xml_parm3.type;
+        case 4:
+            *min_limit = action->xml_parm4.min_limit;
+            *max_limit = action->xml_parm4.max_limit;
+            return action->xml_parm4.type;
+        case 5:
+            *min_limit = action->xml_parm5.min_limit;
+            *max_limit = action->xml_parm5.max_limit;
+        default:
+            *min_limit = 0;
+            *max_limit = 0;
+            return PARAMETER_TYPE_UNDEFINED;
+    }
+}
+
+parameter_type scenario_events_parameter_data_get_condition_parameter_type(
+    condition_types condition_type, int parameter_index, int *min_limit, int *max_limit)
+{
+    if (condition_type < 0 || condition_type >= CONDITION_TYPE_MAX) {
+        return PARAMETER_TYPE_UNDEFINED;
+    }
+
+    const scenario_condition_data_t *condition = &scenario_condition_data[condition_type];
+
+    switch (parameter_index) {
+        case 1:
+            *min_limit = condition->xml_parm1.min_limit;
+            *max_limit = condition->xml_parm1.max_limit;
+            return condition->xml_parm1.type;
+        case 2:
+            *min_limit = condition->xml_parm2.min_limit;
+            *max_limit = condition->xml_parm2.max_limit;
+            return condition->xml_parm2.type;
+        case 3:
+            *min_limit = condition->xml_parm3.min_limit;
+            *max_limit = condition->xml_parm3.max_limit;
+            return condition->xml_parm3.type;
+        case 4:
+            *min_limit = condition->xml_parm4.min_limit;
+            *max_limit = condition->xml_parm4.max_limit;
+            return condition->xml_parm4.type;
+        case 5:
+            *min_limit = condition->xml_parm5.min_limit;
+            *max_limit = condition->xml_parm5.max_limit;
+            return condition->xml_parm5.type;
+        default:
+            *min_limit = 0;
+            *max_limit = 0;
+            return PARAMETER_TYPE_UNDEFINED;
+    }
+}
+
 typedef struct {
     int type;
     translation_key key;

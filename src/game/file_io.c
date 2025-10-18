@@ -724,9 +724,6 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
         scenario_allowed_building_load_state(file->allowed_buildings);
         scenario_custom_variable_load_state(file->custom_variables, version);
     }
-    if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
-
-    }
     if (version > SCENARIO_LAST_NO_EVENTS) {
         scenario_events_load_state(file->scenario_events, file->scenario_conditions, file->scenario_actions,
             file->scenario_formulas, version);
@@ -747,7 +744,10 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
     model_load();
     if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         model_load_model_data(file->model_data);
+    } else {
+        scenario_events_migrate_to_formulas();
     }
+
     buffer_skip(file->end_marker, 4);
 }
 
@@ -921,6 +921,9 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     }
     if (version <= SAVE_GAME_LAST_U16_GRIDS) {
         map_terrain_migrate_old_walls();
+    }
+    if (version <= SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
+        scenario_events_migrate_to_formulas();
     }
 
 }

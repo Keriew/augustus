@@ -2,11 +2,13 @@
 
 #include "core/array.h"
 #include "core/log.h"
+#include "core/string.h"   
 #include "game/save_version.h"
 #include "scenario/event/action_handler.h"
 #include "scenario/event/condition_handler.h"
 #include "scenario/event/event.h"
 #include "scenario/event/formula.h"
+#include "scenario/event/parameter_data.h "
 #include "scenario/scenario.h"
 
 #include <string.h>
@@ -449,5 +451,97 @@ void scenario_events_progress_paused(int days_passed)
     array_foreach(scenario_events, current)
     {
         scenario_event_decrease_pause_time(current, days_passed);
+    }
+}
+
+static void migrate_parameters_action(scenario_action_t *action)
+{
+    // migration for older actions (pre-formulas)
+    int min_limit = 0, max_limit = 0;
+    parameter_type p_type;
+    action_types action_type = action->type;
+    int *params[] = {    // Collect addresses of the fields
+        &action->parameter1,
+        &action->parameter2,
+        &action->parameter3,
+        &action->parameter4,
+        &action->parameter5
+    };
+    for (int i = 1; i <= 5; ++i) {
+        int *param_value = params[i - 1];
+        p_type = scenario_events_parameter_data_get_action_parameter_type(
+            action_type, i, &min_limit, &max_limit);
+        if (p_type == PARAMETER_TYPE_FORMULA && param_value != NULL) {
+            char buffer[16];  // Make sure buffer is large enough
+            memset(buffer, 0, sizeof(buffer));
+            string_from_int(buffer, *param_value, 0);
+            unsigned int id = scenario_formula_add((const uint8_t) buffer, min_limit, max_limit);
+            switch (i) {
+                case 1: action->parameter1 = id; break;
+                case 2: action->parameter2 = id; break;
+                case 3: action->parameter3 = id; break;
+                case 4: action->parameter4 = id; break;
+                case 5: action->parameter5 = id; break;
+            }
+        }
+    }
+}
+
+
+static void migrate_parameters_condition(scenario_condition_t *condition)
+{
+    // migration for older conditions (pre-formulas)
+    int min_limit = 0, max_limit = 0;
+    parameter_type p_type;
+    condition_types condition_type = condition->type;
+
+    int *params[] = {    // Collect addresses of the fields
+        &condition->parameter1,
+        &condition->parameter2,
+        &condition->parameter3,
+        &condition->parameter4,
+        &condition->parameter5
+    };
+
+    for (int i = 1; i <= 5; ++i) {
+        int *param_value = params[i - 1];
+        p_type = scenario_events_parameter_data_get_condition_parameter_type(
+            condition_type, i, &min_limit, &max_limit);
+        if (p_type == PARAMETER_TYPE_FORMULA && param_value != NULL) {
+            uint8_t buffer[16];  // Make sure buffer is large enough
+            memset(buffer, 0, sizeof(buffer));
+            string_from_int(buffer, *param_value, 0);
+            unsigned int id = scenario_formula_add(buffer, min_limit, max_limit);
+            switch (i) {
+                case 1: condition->parameter1 = id; break;
+                case 2: condition->parameter2 = id; break;
+                case 3: condition->parameter3 = id; break;
+                case 4: condition->parameter4 = id; break;
+                case 5: condition->parameter5 = id; break;
+            }
+        }
+    }
+}
+
+
+void scenario_events_migrate_to_formulas(void)
+{
+    scenario_event_t *current;
+    array_foreach(scenario_events, current) //go through all events
+    {
+        scenario_action_t *action;
+        array_foreach(current->actions, action) //go through all actions of this event
+        {
+            migrate_parameters_action(action); //migrate parameters if needed
+        }
+        scenario_condition_group_t *group;
+        scenario_condition_t *condition;
+        array_foreach(current->condition_groups, group) //through all condition groups of this event
+        {
+            array_foreach(group->conditions, condition) //through all conditions of this group
+            {
+                migrate_parameters_condition(condition); //migrate parameters if needed
+            }
+        }
     }
 }

@@ -65,6 +65,7 @@ building *building_get(int id)
 {
     return array_item(data.buildings, id);
 }
+
 int building_can_repair_type(building_type type)
 {
     if (building_monument_is_limited(type) || type == BUILDING_AQUEDUCT) {
