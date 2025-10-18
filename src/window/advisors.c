@@ -4,12 +4,15 @@
 #include "city/constants.h"
 #include "city/culture.h"
 #include "city/finance.h"
+#include "city/health.h"
 #include "city/houses.h"
 #include "city/labor.h"
 #include "city/migration.h"
+#include "city/population.h"
 #include "city/ratings.h"
 #include "city/resource.h"
 #include "city/warning.h"
+#include "core/calc.h"
 #include "core/image_group.h"
 #include "figure/formation.h"
 #include "game/settings.h"
@@ -339,4 +342,92 @@ int window_advisors_show_advisor(advisor_type advisor)
     window_advisors_set_advisor(advisor);
     window_advisors_show();
     return 1;
+}
+
+// Building coverage rating functions
+
+// Entertainment building coverage functions
+
+int window_advisors_get_tavern_coverage(void)
+{
+    return city_culture_coverage_tavern();
+}
+
+int window_advisors_get_theater_coverage(void)
+{
+    return city_culture_coverage_theater();
+}
+
+int window_advisors_get_amphitheater_coverage(void)
+{
+    return city_culture_coverage_amphitheater();
+}
+
+int window_advisors_get_arena_coverage(void)
+{
+    return city_culture_coverage_arena();
+}
+
+int window_advisors_get_colosseum_coverage(void)
+{
+    return city_culture_coverage_colosseum();
+}
+
+int window_advisors_get_hippodrome_coverage(void)
+{
+    return city_culture_coverage_hippodrome();
+}
+
+// Health building coverage functions
+
+int window_advisors_get_bathhouse_coverage(void)
+{
+    int population = city_population();
+    if (population <= 0) {
+        return 0;
+    }
+    int people_covered = city_health_get_population_with_baths_access();
+    return calc_percentage(people_covered, population);
+}
+
+int window_advisors_get_barber_coverage(void)
+{
+    int population = city_population();
+    if (population <= 0) {
+        return 0;
+    }
+    int people_covered = city_health_get_population_with_barber_access();
+    return calc_percentage(people_covered, population);
+}
+
+int window_advisors_get_clinic_coverage(void)
+{
+    int population = city_population();
+    if (population <= 0) {
+        return 0;
+    }
+    int people_covered = city_health_get_population_with_clinic_access();
+    return calc_percentage(people_covered, population);
+}
+
+int window_advisors_get_hospital_coverage(void)
+{
+    return city_culture_coverage_hospital();
+}
+
+// Education building coverage functions
+
+int window_advisors_get_school_coverage(void)
+{
+    return city_culture_coverage_school();
+}
+
+int window_advisors_get_library_coverage(void)
+{
+    return city_culture_coverage_library();
+}
+
+int window_advisors_get_academy_coverage(void)
+{
+    return city_culture_coverage_academy();
 }

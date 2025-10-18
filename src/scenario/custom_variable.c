@@ -6,6 +6,9 @@
 #include "game/save_version.h"
 #include "scenario/message_media_text_blob.h"
 
+#include <stdio.h>   // for snprintf
+#include <ctype.h>   // for isdigit
+
 typedef struct {
     unsigned int id;
     int in_use;
@@ -230,4 +233,51 @@ void scenario_custom_variable_load_state_old_version(buffer *buf)
     }
     array_trim(custom_variables);
     message_media_text_blob_remove_unused();
+}
+
+void scenario_custom_variable_resolve_name(const uint8_t *input, uint8_t *output, int max_length)
+{
+    if (!input || !output || max_length <= 0) {
+        return;
+    }
+
+    const uint8_t *src = input;
+    uint8_t *dst = output;
+    int remaining = max_length - 1; // reserve space for null terminator
+
+    while (*src && remaining > 0) {
+        if (*src == '[') {
+            src++; // move past '['
+            // Try to parse a number inside [ ]
+            unsigned int id = 0;
+            const uint8_t *start = src;
+            while (*src && isdigit(*src)) {
+                id = id * 10 + (*src - '0');
+                src++;
+            }
+
+            if (*src == ']') {
+                src++; // skip closing bracket
+                // Replace with variable value
+                int value = scenario_custom_variable_get_value(id);
+                int written = snprintf((char *) dst, remaining, "%d", value);
+                if (written < 0) written = 0;
+                if (written > remaining) written = remaining;
+                dst += written;
+                remaining -= written;
+            } else {
+                // malformed [something -> copy it as-is
+                const uint8_t *p = start - 1; // include '['
+                while (p < src && remaining > 0) {
+                    *dst++ = *p++;
+                    remaining--;
+                }
+            }
+        } else {
+            *dst++ = *src++;
+            remaining--;
+        }
+    }
+
+    *dst = '\0';
 }

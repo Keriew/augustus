@@ -33,6 +33,7 @@
 #define ID_ROW_WIDTH 32
 #define VALUE_ROW_WIDTH 60
 #define NAME_ROW_WIDTH 170
+#define NAME_ROW_WIDTH_CALLBACK 3 * NAME_ROW_WIDTH
 #define BUTTONS_PADDING 4
 #define NUM_ITEM_BUTTONS (sizeof(item_buttons) / sizeof(generic_button))
 #define NUM_CONSTANT_BUTTONS (sizeof(constant_buttons) / sizeof(generic_button))
@@ -155,14 +156,17 @@ static void update_item_buttons_positions(void)
 {
     if (data.callback) {
         item_buttons[1].x = ID_ROW_WIDTH;
+        // Reset to base width and adjust for scrollbar
+        item_buttons[1].width = NAME_ROW_WIDTH_CALLBACK;
         if (grid_box_has_scrollbar(&variable_buttons)) {
-            item_buttons[1].width -= 2 * BLOCK_SIZE;
+            item_buttons[1].width = NAME_ROW_WIDTH_CALLBACK - 2 * BLOCK_SIZE;
         }
         return;
     }
 
     // Position name button (fixed width)
     item_buttons[1].x = CHECKBOX_ROW_WIDTH + ID_ROW_WIDTH;
+    item_buttons[1].width = NAME_ROW_WIDTH;
 
     // Position value button (fixed width)
     item_buttons[2].x = item_buttons[1].x + item_buttons[1].width + BUTTONS_PADDING;
@@ -197,7 +201,7 @@ static void draw_background(void)
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_ID,
         variable_buttons.x + (data.callback ? 0 : CHECKBOX_ROW_WIDTH), 60, 40, FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_NAME, base_x_offset + item_buttons[1].x, 60,
-        NAME_ROW_WIDTH, FONT_SMALL_PLAIN);
+        data.callback ? NAME_ROW_WIDTH : NAME_ROW_WIDTH_CALLBACK, FONT_SMALL_PLAIN);
 
     grid_box_request_refresh(&variable_buttons);
 
@@ -650,7 +654,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
 
 static void get_tooltip(tooltip_context *c)
 {
-    if (data.callback || (data.selected && data.custom_variables_in_use && data.constant_button_focus_id == 1)) {
+    if (data.selected && data.custom_variables_in_use && data.constant_button_focus_id == 1) {
         c->precomposed_text = lang_get_string(CUSTOM_TRANSLATION,
             data.selection_type == CHECKBOX_ALL_SELECTED ? TR_SELECT_NONE : TR_SELECT_ALL);
         c->type = TOOLTIP_BUTTON;

@@ -258,6 +258,8 @@ void building_update_desirability(void);
 
 int building_is_house(building_type type);
 
+int building_get_house_group(building_type type);
+
 int building_is_ceres_temple(building_type type);
 
 int building_is_neptune_temple(building_type type);
@@ -269,6 +271,8 @@ int building_is_mars_temple(building_type type);
 int building_is_venus_temple(building_type type);
 
 int building_has_supplier_inventory(building_type type);
+
+int building_is_house_group(house_groups group, building_type type);
 
 int building_is_statue_garden_temple(building_type type);
 

@@ -105,7 +105,7 @@ void dropdown_button_init_simple(int x, int y, const lang_fragment *frags, unsig
 
     dd->num_buttons = count;
     dd->expanded = 0;
-    dd->selected_index = 0; // show the sequence of the origin by default
+    dd->selected_index = dd->selected_index > 0 ? dd->selected_index : 0; // show the sequence of the origin by default
     dd->selected_value = -1;
     int buttons_width = dd->width ? dd->width : 0;
     dd->spacing = 2;
@@ -120,7 +120,8 @@ void dropdown_button_init_simple(int x, int y, const lang_fragment *frags, unsig
     origin->style = COMPLEX_BUTTON_STYLE_DEFAULT;
     origin->is_hidden = 0;
     origin->is_disabled = 0;
-    origin->sequence = &frags[0];
+    int has_selection = dd->selected_index > 0;
+    origin->sequence = &frags[has_selection ? dd->selected_index : 0];
     origin->sequence_position = SEQUENCE_POSITION_CENTER;
     origin->sequence_size = 1;
 

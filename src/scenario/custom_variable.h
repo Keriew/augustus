@@ -32,4 +32,6 @@ void scenario_custom_variable_save_state(buffer *buf);
 void scenario_custom_variable_load_state(buffer *buf, int version);
 void scenario_custom_variable_load_state_old_version(buffer *buf);
 
+void scenario_custom_variable_resolve_name(const uint8_t *input, uint8_t *output, int max_length);
+
 #endif // SCENARIO_CUSTOM_VARIABLE_H

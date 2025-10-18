@@ -14,6 +14,9 @@
 #define IMAGE_FONT_MULTIBYTE_KOREAN_MAX_CHARS 2350
 #define IMAGE_FONT_MULTIBYTE_JAPANESE_MAX_CHARS 3321
 
+#define IMAGE_FONT_CUSTOM_OFFSET 14000 //new letters and symbols added via assets
+#define IMAGE_FONT_CUSTOM_MAX_CHARS 1000 // unless another group like symbols is added, this can be expanded
+
 #define IMAGE_ATLAS_BIT_OFFSET 28
 #define IMAGE_ATLAS_BIT_MASK 0x0fffffff
 
@@ -26,9 +29,9 @@
  * Image functions
  */
 
-/**
- * Image animation metadata
- */
+ /**
+  * Image animation metadata
+  */
 typedef struct {
     int num_sprites;
     int sprite_offset_x;

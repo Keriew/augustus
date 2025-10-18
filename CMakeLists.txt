@@ -549,7 +549,9 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/event/import_xml.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/export_xml.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/controller.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/formula.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/parameter_data.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/parameter_city.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/action_handler.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/action_types.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/condition_comparison_helper.c
@@ -663,6 +665,7 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/editor/empire.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/invasions.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/map.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/model_data.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/price_changes.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/requests.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/scenario_events.c

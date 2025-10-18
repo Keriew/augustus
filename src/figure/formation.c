@@ -653,6 +653,21 @@ int formation_legion_count_alive_soldiers(int formation_id)
     return alive_soldiers;
 }
 
+int formation_legion_count_alive_soldiers_by_type(figure_type type)
+{
+    formation *m;
+    int totals = 0;
+    array_foreach(formations, m)
+    {
+        if (m->in_use && m->is_legion && (m->figure_type == type || type == FIGURE_FORT_STANDARD)) {
+            // fort_standard used to count all types
+            totals += formation_legion_count_alive_soldiers(m->id);
+        }
+    }
+    return totals;
+}
+
+
 static int add_figure(int formation_id, int figure_id, int deployed, int damage, int max_damage)
 {
     formation *f = formation_get(formation_id);
