@@ -475,7 +475,7 @@ static void migrate_parameters_action(scenario_action_t *action)
             char buffer[16];  // Make sure buffer is large enough
             memset(buffer, 0, sizeof(buffer));
             string_from_int(buffer, *param_value, 0);
-            unsigned int id = scenario_formula_add((const uint8_t) buffer, min_limit, max_limit);
+            unsigned int id = scenario_formula_add((const uint8_t *) buffer, min_limit, max_limit);
             switch (i) {
                 case 1: action->parameter1 = id; break;
                 case 2: action->parameter2 = id; break;
@@ -486,7 +486,6 @@ static void migrate_parameters_action(scenario_action_t *action)
         }
     }
 }
-
 
 static void migrate_parameters_condition(scenario_condition_t *condition)
 {
@@ -511,7 +510,7 @@ static void migrate_parameters_condition(scenario_condition_t *condition)
             uint8_t buffer[16];  // Make sure buffer is large enough
             memset(buffer, 0, sizeof(buffer));
             string_from_int(buffer, *param_value, 0);
-            unsigned int id = scenario_formula_add(buffer, min_limit, max_limit);
+            unsigned int id = scenario_formula_add((const uint8_t *) buffer, min_limit, max_limit);
             switch (i) {
                 case 1: condition->parameter1 = id; break;
                 case 2: condition->parameter2 = id; break;
@@ -522,7 +521,6 @@ static void migrate_parameters_condition(scenario_condition_t *condition)
         }
     }
 }
-
 
 void scenario_events_migrate_to_formulas(void)
 {
