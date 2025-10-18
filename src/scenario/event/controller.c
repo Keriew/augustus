@@ -8,7 +8,7 @@
 #include "scenario/event/condition_handler.h"
 #include "scenario/event/event.h"
 #include "scenario/event/formula.h"
-#include "scenario/event/parameter_data.h "
+#include "scenario/event/parameter_data.h"
 #include "scenario/scenario.h"
 
 #include <string.h>
