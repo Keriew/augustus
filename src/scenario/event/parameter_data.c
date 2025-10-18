@@ -780,7 +780,8 @@ static void generate_building_type_mappings(void)
     }
     for (building_type type = BUILDING_NONE; type < BUILDING_TYPE_MAX; type++) {
         const building_properties *props = building_properties_for_type(type);
-        if (!props->event_data.attr || props->event_data.cannot_count) {
+        if (!(props->event_data.attr || props->building_model_data) || 
+            props->event_data.cannot_count) {
             continue;
         }
         special_attribute_mapping_t *mapping = &special_attribute_mappings_buildings[special_attribute_mappings_building_type_size];
@@ -799,7 +800,7 @@ static void generate_model_mappings(void)
     }
     for (building_type type = BUILDING_NONE; type < BUILDING_TYPE_MAX; type++) {
         const building_properties *props = building_properties_for_type(type);
-        if ((!(props->event_data.attr && props->size)) && type != BUILDING_CLEAR_LAND || (type == BUILDING_GRAND_GARDEN || type == BUILDING_DOLPHIN_FOUNTAIN)) {
+        if (!props->building_model_data || (type == BUILDING_GRAND_GARDEN || type == BUILDING_DOLPHIN_FOUNTAIN)) {
             continue;
         }
         special_attribute_mapping_t *mapping = &special_attribute_mappings_model_buildings[special_attribute_mappings_model_buildings_size];

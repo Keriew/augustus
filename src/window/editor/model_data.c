@@ -76,7 +76,8 @@ static void populate_list(void)
     data.total_items = 0;
     for (int i = 0; i < BUILDING_TYPE_MAX; i++) {
         const building_properties *props = building_properties_for_type(i);
-        if (((props->event_data.attr && props->size) || i == BUILDING_CLEAR_LAND) && i != BUILDING_GRAND_GARDEN && i != BUILDING_DOLPHIN_FOUNTAIN) {
+        if ((props->building_model_data && props->event_data.attr &&
+             i != BUILDING_GRAND_GARDEN && i != BUILDING_DOLPHIN_FOUNTAIN) {
             data.items[data.total_items++] = i;
         }
     }
