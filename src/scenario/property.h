@@ -43,6 +43,8 @@ void scenario_restore_campaign_player_name(void);
 
 int scenario_is_open_play(void);
 
+int scenario_reset_favor_monthly(void);
+
 int scenario_open_play_id(void);
 
 scenario_climate scenario_property_climate(void);

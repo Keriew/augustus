@@ -1843,6 +1843,7 @@ typedef enum {
     TR_RANK_CAESAR, // rank names group end
     TR_TOOLTIP_OVERLAY_LEVY_PER_TILE,
     TR_CONFIG_UI_CV_BUILD_MENU_ICONS,
+    TR_EDITOR_RESET_FAVOR_MONTHLY,
     TRANSLATION_MAX_KEY
 } translation_key;
 

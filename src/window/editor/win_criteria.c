@@ -32,6 +32,7 @@ static void button_survival_years(const generic_button *button);
 static void button_population_toggle(const generic_button *button);
 static void button_population_value(const generic_button *button);
 static void button_open_play_toggle(const generic_button *button);
+static void button_reset_favor_toggle(const generic_button *button);
 
 static generic_button buttons[] = {
     {316, 132, 80, 30, button_rating_toggle, 0, RATING_CULTURE},
@@ -49,6 +50,7 @@ static generic_button buttons[] = {
     {316, 372, 80, 30, button_population_toggle},
     {416, 372, 180, 30, button_population_value},
     {316, 92, 80, 30, button_open_play_toggle},
+    {516, 98, 24, 24, button_reset_favor_toggle}
 };
 
 static unsigned int focus_button_id;
@@ -68,12 +70,19 @@ static void draw_foreground(void)
     lang_text_draw_centered(13, 3, 16, 424, 608, FONT_NORMAL_BLACK);
 
     int is_open_play = scenario_is_open_play();
+    int reset_favor = scenario_reset_favor_monthly();
     // advanced feature: open play
     lang_text_draw(44, 107, 35, 101, FONT_NORMAL_BLACK);
     button_border_draw(316, 92, 80, 30, focus_button_id == 15);
+    if (is_open_play) {
+        lang_text_draw_multiline(CUSTOM_TRANSLATION, TR_EDITOR_RESET_FAVOR_MONTHLY, 416, 96, 100, FONT_NORMAL_BLACK);
+        button_border_draw(516, 98, 24, 24, focus_button_id == 16); //checkbox
+        if (reset_favor) {
+            text_draw("x", 525, 105, FONT_NORMAL_BLACK, 0);
+        }
+    }
+
     lang_text_draw_centered(18, is_open_play, 316, 101, 80, FONT_NORMAL_BLACK);
-    // button_border_draw(416, 92, 180, 30, focus_button_id == 16);
-    // text_draw_number_centered(scenario_open_play_id(), 416, 101, 180, FONT_NORMAL_BLACK);
 
     lang_text_draw(44, 50, 35, 141, FONT_NORMAL_BLACK);
     button_border_draw(316, 132, 80, 30, focus_button_id == 1);
@@ -133,7 +142,7 @@ static void draw_foreground(void)
 
 static void handle_input(const mouse *m, const hotkeys *h)
 {
-    if (generic_buttons_handle_mouse(mouse_in_dialog(m), 0, 0, buttons, 15, &focus_button_id)) {
+    if (generic_buttons_handle_mouse(mouse_in_dialog(m), 0, 0, buttons, 16, &focus_button_id)) {
         return;
     }
     if (input_go_back_requested(m, h)) {
@@ -216,6 +225,11 @@ static void button_population_value(const generic_button *button)
 static void button_open_play_toggle(const generic_button *button)
 {
     scenario_editor_toggle_open_play();
+}
+
+static void button_reset_favor_toggle(const generic_button *button)
+{
+    scenario_editor_toggle_favour_reset();
 }
 
 void window_editor_win_criteria_show(void)
