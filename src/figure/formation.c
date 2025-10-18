@@ -23,8 +23,6 @@
 
 #include <stdio.h>
 
-#include "widget/newsidebar/new_military.h"
-
 
 #define FORMATION_ARRAY_SIZE_STEP 50
 #define ORIGINAL_BUFFER_SIZE_PER_FORMATION 128
@@ -98,10 +96,9 @@ formation *formation_create_legion(int building_id, figure_type type)
 
     //standards and name
 
-    //TODO: config (3x)
-    m->legion_flag_id = widget_new_sidebar_military_get_standard_image(m->legion_id);
-    m->legion_name_id = widget_new_sidebar_military_get_legion_name_id(m->legion_id);
-    m->legion_name_group = widget_new_sidebar_military_get_legion_name_group(m->legion_id);
+    m->legion_flag_id = widget_sidebar_military_get_standard_image(m->legion_id);
+    m->legion_name_id = widget_sidebar_military_get_legion_name_id(m->legion_id);
+    m->legion_name_group = widget_sidebar_military_get_legion_name_group(m->legion_id);
     return m;
 }
 
@@ -966,10 +963,9 @@ void formations_load_state(buffer *buf, buffer *totals, int version)
                 f->legion_id = f->legion_id + f->is_legion; // 1-based index for legions
             }
             // after increasing number of legions, switched to 1-based index
-            //TODO: config (3x)
-            f->legion_flag_id = widget_new_sidebar_military_get_standard_image(f->legion_id);
-            f->legion_name_id = widget_new_sidebar_military_get_legion_name_id(f->legion_id);
-            f->legion_name_group = widget_new_sidebar_military_get_legion_name_group(f->legion_id);
+            f->legion_flag_id = widget_sidebar_military_get_standard_image(f->legion_id);
+            f->legion_name_id = widget_sidebar_military_get_legion_name_id(f->legion_id);
+            f->legion_name_group = widget_sidebar_military_get_legion_name_group(f->legion_id);
         } else {
             f->legion_flag_id = buffer_read_i32(buf);
             f->legion_name_id = buffer_read_i32(buf);

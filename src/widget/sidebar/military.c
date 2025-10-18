@@ -575,8 +575,8 @@ int widget_sidebar_military_enter(int formation_id)
     if (had_selected_legions) {
         return 0;
     }
-    data.city_view_was_collapsed = city_view_is_sidebar_collapsed();
-    if (data.city_view_was_collapsed) {
+
+    if (widget_sidebar_is_collapsed()) {
         city_view_start_sidebar_toggle();
         sidebar_slide(SLIDE_DIRECTION_IN, widget_sidebar_city_draw_background, draw_sliding, slide_in_finished);
     } else {

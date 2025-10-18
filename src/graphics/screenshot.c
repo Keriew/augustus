@@ -25,6 +25,8 @@
 #include <string.h>
 #include <time.h>
 
+#include "widget/sidebar/city.h"
+
 #define TILE_X_SIZE 60
 #define TILE_Y_SIZE 30
 #define IMAGE_HEIGHT_CHUNK (TILE_Y_SIZE * 15)
@@ -300,7 +302,7 @@ static void create_full_city_screenshot(void)
     graphics_set_clip_rectangle(0, TOP_MENU_HEIGHT, canvas_width, IMAGE_HEIGHT_CHUNK);
     int viewport_x, viewport_y, viewport_width, viewport_height;
     city_view_get_viewport(&viewport_x, &viewport_y, &viewport_width, &viewport_height);
-    city_view_set_viewport(canvas_width + (city_view_is_sidebar_collapsed() ? 42 : 162),
+    city_view_set_viewport(canvas_width +  widget_sidebar_city_get_width(),
         IMAGE_HEIGHT_CHUNK + TOP_MENU_HEIGHT);
     int current_height = base_height;
     while ((size = image_request_rows()) != 0) {
@@ -325,7 +327,7 @@ static void create_full_city_screenshot(void)
         }
         current_height += IMAGE_HEIGHT_CHUNK;
     }
-    city_view_set_viewport(viewport_width + (city_view_is_sidebar_collapsed() ? 42 : 162), viewport_height + TOP_MENU_HEIGHT);
+    city_view_set_viewport(viewport_width + widget_sidebar_city_get_width(), viewport_height + TOP_MENU_HEIGHT);
     city_view_set_scale(old_scale);
     config_set(CONFIG_UI_DRAW_CLOUD_SHADOWS, draw_cloud_shadows);
     graphics_reset_clip_rectangle();

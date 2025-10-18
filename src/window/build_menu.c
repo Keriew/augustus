@@ -20,7 +20,6 @@
 #include "scenario/property.h"
 #include "translation/translation.h"
 #include "widget/city.h"
-#include "widget/newsidebar/new_city.h"
 #include "widget/sidebar/city.h"
 #include "window/city.h"
 
@@ -270,8 +269,7 @@ static int handle_build_submenu(const mouse *m)
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     if (handle_build_submenu(m) ||
-        //TODO: config
-        widget_new_sidebar_city_handle_mouse_build_menu(m)) {
+        widget_sidebar_city_handle_mouse_build_menu(m)) {
         return;
     }
     if (input_go_back_requested(m, h) || click_outside_menu(m, get_sidebar_x_offset())) {

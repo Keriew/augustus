@@ -614,17 +614,15 @@ set(WIDGET_FILES
     ${PROJECT_SOURCE_DIR}/src/widget/minimap.c
     ${PROJECT_SOURCE_DIR}/src/widget/top_menu.c
     ${PROJECT_SOURCE_DIR}/src/widget/top_menu_editor.c
+    ${PROJECT_SOURCE_DIR}/src/widget/sidebar/collapsed/sidebar.c
+    ${PROJECT_SOURCE_DIR}/src/widget/sidebar/expanded/sidebar.c
+    ${PROJECT_SOURCE_DIR}/src/widget/sidebar/advanced/sidebar.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/city.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/common.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/editor.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/extra.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/military.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/slide.c
-    ${PROJECT_SOURCE_DIR}/src/widget/newsidebar/new_city.c
-    ${PROJECT_SOURCE_DIR}/src/widget/newsidebar/new_common.c
-    ${PROJECT_SOURCE_DIR}/src/widget/newsidebar/new_extra.c
-    ${PROJECT_SOURCE_DIR}/src/widget/newsidebar/new_military.c
-    ${PROJECT_SOURCE_DIR}/src/widget/newsidebar/new_slide.c
 )
 set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/advisors.c

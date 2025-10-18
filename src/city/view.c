@@ -10,7 +10,7 @@
 #include "map/grid.h"
 #include "map/image.h"
 #include "widget/minimap.h"
-#include "widget/newsidebar/new_city.h"
+#include "widget/sidebar/city.h"
 
 #define TILE_WIDTH_PIXELS 60
 #define TILE_HEIGHT_PIXELS 30
@@ -23,7 +23,6 @@ static const int Y_DIRECTION_FOR_ORIENTATION[] = {1, -1, -1,  1};
 static struct {
     int screen_width;
     int screen_height;
-    int sidebar_collapsed;
     int orientation;
     int scale;
     struct {
@@ -584,7 +583,7 @@ void city_view_rotate_right(void)
 
 static void set_viewport(void)
 {
-    const int sidebar_width = widget_sidebar_width();
+    const int sidebar_width = widget_sidebar_city_get_width();
     const int width = data.screen_width - sidebar_width - 2;
     const int height = data.screen_height - TOP_MENU_HEIGHT;
 
@@ -630,11 +629,6 @@ void city_view_get_viewport_size_tiles(int *width, int *height)
     *height = data.viewport.height_tiles;
 }
 
-int city_view_is_sidebar_collapsed(void)
-{
-    return data.sidebar_collapsed;
-}
-
 void city_view_start_sidebar_toggle(void)
 {
     set_viewport();
@@ -643,7 +637,7 @@ void city_view_start_sidebar_toggle(void)
 
 void city_view_toggle_sidebar(void)
 {
-    data.sidebar_collapsed = !data.sidebar_collapsed;
+    //data.sidebar_collapsed = !data.sidebar_collapsed;
 
     set_viewport();
     check_camera_boundaries();
