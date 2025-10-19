@@ -4,7 +4,7 @@
 #include "building/dock.h"
 #include "building/granary.h"
 #include "building/menu.h"
-#include "building/model.h"
+#include "building/properties.h"
 #include "building/warehouse.h"
 #include "city/data_private.h"
 #include "city/emperor.h"

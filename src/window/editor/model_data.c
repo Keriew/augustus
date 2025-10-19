@@ -1,6 +1,5 @@
 #include "model_data.h"
 
-#include "building/model.h"
 #include "building/properties.h"
 #include "building/type.h"
 #include "core/lang.h"
@@ -76,7 +75,9 @@ static void populate_list(void)
     data.total_items = 0;
     for (int i = 0; i < BUILDING_TYPE_MAX; i++) {
         const building_properties *props = building_properties_for_type(i);
-        if (((props->event_data.attr && props->size) || i == BUILDING_CLEAR_LAND) && i != BUILDING_GRAND_GARDEN && i != BUILDING_DOLPHIN_FOUNTAIN) {
+        if ((props->size && props->event_data.attr) &&
+            i != BUILDING_GRAND_GARDEN && i != BUILDING_DOLPHIN_FOUNTAIN ||
+            i == BUILDING_CLEAR_LAND || i == BUILDING_REPAIR_LAND) {
             data.items[data.total_items++] = i;
         }
     }

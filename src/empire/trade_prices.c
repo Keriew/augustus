@@ -1,7 +1,7 @@
 #include "building/caravanserai.h"
 #include "building/lighthouse.h"
-#include "building/model.h"
 #include "building/monument.h"
+#include "building/properties.h"
 #include "city/buildings.h"
 #include "city/resource.h"
 #include "city/trade_policy.h"

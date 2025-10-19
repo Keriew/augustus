@@ -9,7 +9,6 @@
 #include "building/construction_warning.h"
 #include "building/count.h"
 #include "building/image.h"
-#include "building/model.h"
 #include "building/monument.h"
 #include "building/properties.h"
 #include "building/rotation.h"

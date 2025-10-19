@@ -1,7 +1,7 @@
 #include "granary.h"
 
 #include "building/destruction.h"
-#include "building/model.h"
+#include "building/properties.h"
 #include "building/storage.h"
 #include "building/warehouse.h"
 #include "city/finance.h"

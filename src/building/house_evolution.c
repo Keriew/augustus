@@ -1,8 +1,8 @@
 #include "house_evolution.h"
 
 #include "building/house.h"
-#include "building/model.h"
 #include "building/monument.h"
+#include "building/properties.h"
 #include "city/houses.h"
 #include "city/resource.h"
 #include "core/calc.h"

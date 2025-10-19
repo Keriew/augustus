@@ -2,8 +2,8 @@
 
 #include "building/building.h"
 #include "building/distribution.h"
-#include "building/model.h"
 #include "building/monument.h"
+#include "building/properties.h"
 #include "city/buildings.h"
 #include "city/finance.h"
 #include "core/config.h"
