@@ -10,7 +10,6 @@
 #include "building/industry.h"
 #include "building/granary.h"
 #include "building/menu.h"
-#include "building/model.h"
 #include "building/monument.h"
 #include "building/properties.h"
 #include "building/rotation.h"

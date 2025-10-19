@@ -7,6 +7,7 @@
 #include "type.h"
 
 #include <stddef.h>
+#include <stdlib.h>
 
 static model_building buildings[BUILDING_TYPE_MAX];
 
@@ -79,7 +80,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .sound_id = SOUND_CITY_HOUSE_SLUM,
         .event_data.attr = "vacant_lot|house_small_tent|housing",
         .building_model_data = {.cost = 10, .desirability_value = -3, .desirability_step = 1,
-            desirability_step_size = 1, .desirability_range = 3, .laborers = 0},
+            .desirability_step_size = 1, .desirability_range = 3, .laborers = 0},
         .house_model_data = {
             .devolve_desirability = -101,
             .evolve_desirability = -10,
@@ -403,7 +404,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .size = 2,
         .sound_id = SOUND_CITY_HOUSE_GOOD,
         .event_data.attr = "house_medium_villa",
-        {.cost = 0, .desirability_value = 1, .desirability_step = 2,
+        .building_model_data = {.cost = 0, .desirability_value = 1, .desirability_step = 2,
             .desirability_step_size = -1, .desirability_range = 2, .laborers = 0},
         .house_model_data = {
             .devolve_desirability = 50,
@@ -606,7 +607,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .sound_id = SOUND_CITY_COLOSSEUM,
         .event_data.attr = "colosseum",
         .building_model_data = {.cost = 1500, .desirability_value = -3, .desirability_step = 1,
-            .desirability_step_size = 1, desirability_range = 3, .laborers = 100} // Differs from model.txt
+            .desirability_step_size = 1, .desirability_range = 3, .laborers = 100} // Differs from model.txt
     },
     [BUILDING_GLADIATOR_SCHOOL] = {
         .size = 3,
@@ -686,7 +687,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .draw_desirability_range = 1,
         .sound_id = SOUND_CITY_FORT,
         .event_data.attr = "fort_javelin",
-        .building_model_data = {.cost = 1000, ,desirability_value = -20, .desirability_step = 2,
+        .building_model_data = {.cost = 1000, .desirability_value = -20, .desirability_step = 2,
             .desirability_step_size = 2, .desirability_range = 8, .laborers = 0}
     },
     [BUILDING_FORT_MOUNTED] = {
@@ -1226,7 +1227,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .sound_id = SOUND_CITY_OLIVE_FARM,
         .event_data.attr = "olive_farm",
         .building_model_data = {.cost = 40, .desirability_value = 2, .desirability_step = 1,
-            desirability_step_size = 1, desirability_range = 2, .laborers = 10}
+            .desirability_step_size = 1, .desirability_range = 2, .laborers = 10}
      },
      [BUILDING_VINES_FARM] = {
         .size = 3,
@@ -1281,8 +1282,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .image_group = 44,
         .sound_id = SOUND_CITY_WINE_WORKSHOP,
         .event_data.attr = "wine_workshop",
-        .building_model_data = {.cost = 45, desirability_value = -1, .desirability_step = 1,
-            desirability_step_size = 1, desirability_range = 1, laborers = 10}
+        .building_model_data = {.cost = 45, .desirability_value = -1, .desirability_step = 1,
+            .desirability_step_size = 1, .desirability_range = 1, .laborers = 10}
      },
      [BUILDING_OIL_WORKSHOP] = {
         .size = 2,
@@ -1923,8 +1924,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .custom_asset.group = "Aesthetics",
         .custom_asset.id = "Garden_Gate_B",
         .event_data.attr = "garden_wall_gate",
-        .building_model_data = {.cost = 12, desirability_value = 0, .desirability_step = 0,
-            desirability_step_size = 0, desirability_range = 0, laborers = 0}
+        .building_model_data = {.cost = 12, .desirability_value = 0, .desirability_step = 0,
+            .desirability_step_size = 0, .desirability_range = 0, .laborers = 0}
      },
      [BUILDING_PALISADE] = {
         .size = 1,
@@ -1942,8 +1943,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .custom_asset.group = "Aesthetics",
         .custom_asset.id = "D Hedge Gate",
         .event_data.attr = "hedge_gate_dark",
-        .building_model_data = {.cost = 12, desirability_value = 0, .desirability_step = 0,
-            desirability_step_size = 0, desirability_range = 0, laborers = 0}
+        .building_model_data = {.cost = 12, .desirability_value = 0, .desirability_step = 0,
+            .desirability_step_size = 0, .desirability_range = 0, .laborers = 0}
      },
      [BUILDING_HEDGE_GATE_LIGHT] = {
         .size = 1,
@@ -1951,8 +1952,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .custom_asset.group = "Aesthetics",
         .custom_asset.id = "L Hedge Gate",
         .event_data.attr = "hedge_gate_light",
-        .building_model_data = {.cost = 12, desirability_value = 0, .desirability_step = 0,
-            desirability_step_size = 0, desirability_range = 0, laborers = 0}
+        .building_model_data = {.cost = 12, .desirability_value = 0, .desirability_step = 0,
+            .desirability_step_size = 0, .desirability_range = 0, .laborers = 0}
      },
      [BUILDING_PALISADE_GATE] = {
         .size = 1,
@@ -1961,8 +1962,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .custom_asset.group = "Military",
         .custom_asset.id = "Palisade_Gate",
         .event_data.attr = "palisade_gate",
-        .building_model_data = {.cost = 12, desirability_value = 0, .desirability_step = 0,
-            desirability_step_size = 0, desirability_range = 0, laborers = 0}
+        .building_model_data = {.cost = 12, .desirability_value = 0, .desirability_step = 0,
+            .desirability_step_size = 0, .desirability_range = 0, .laborers = 0}
      },
      [BUILDING_GLADIATOR_STATUE] = {
         .venus_gt_bonus = 1,
@@ -2051,7 +2052,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .custom_asset.id = "Garden_Gate",
         .event_data.attr = "looped_garden_gate",
         .building_model_data = {.cost = 12, .desirability_value = 0, .desirability_step = 0,
-            ödesirability_step_size = 0, .desirability_range = 0, .laborers = 0}
+            .desirability_step_size = 0, .desirability_range = 0, .laborers = 0}
      },
      [BUILDING_PANELLED_GARDEN_GATE] = {
         .size = 1,
@@ -2219,14 +2220,17 @@ const building_properties *building_properties_for_type(building_type type)
 
 // MODEL DATA
 
-static const model_building NOTHING = { .cost = 0, .desirability_value = 0, .desirability_step = 0,
- .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
+static model_building NOTHING = {.cost = 0, .desirability_value = 0, .desirability_step = 0,
+ .desirability_step_size = 0, .desirability_range = 0, .laborers = 0};
 
 void model_reset(void)
 {
     for (building_type type = BUILDING_ANY; type < BUILDING_TYPE_MAX; type++) {
-        if (properties[type].building_model_data) {
-            buildings[type] = properties[type].building_model_data;
+        const building_properties *props = &properties[type];
+        if ((props->size && props->event_data.attr) &&
+            type != BUILDING_GRAND_GARDEN && type != BUILDING_DOLPHIN_FOUNTAIN ||
+            type == BUILDING_CLEAR_LAND || type == BUILDING_REPAIR_LAND) {
+            buildings[type] = props->building_model_data;
         } else {
             buildings[type] = NOTHING;
         }

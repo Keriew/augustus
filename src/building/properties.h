@@ -2,6 +2,8 @@
 #define BUILDING_PROPERTIES_H
 
 #include "building/type.h"
+#include "city/resource.h"
+#include "core/buffer.h"
 
 // MODEL DATA
 
@@ -101,7 +103,7 @@ typedef struct {
         int cannot_count;
     } event_data;
     model_building building_model_data;
-    model_house houses_model_data;
+    model_house house_model_data;
 } building_properties;
 
 void building_properties_init(void);

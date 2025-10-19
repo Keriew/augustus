@@ -2,8 +2,7 @@
 
 #include "building/building.h"
 #include "building/count.h"
-#include "building/model.h"
-#include "building/count.h"
+#include "building/properties.h"
 #include "city/culture.h"
 #include "city/data_private.h"
 #include "city/games.h"

@@ -5,7 +5,7 @@
 #include "building/construction.h"
 #include "building/granary.h"
 #include "building/industry.h"
-#include "building/model.h"
+#include "building/properties.h"
 #include "building/storage.h"
 #include "building/type.h"
 #include "city/view.h"

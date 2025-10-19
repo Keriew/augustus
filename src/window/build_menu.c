@@ -4,7 +4,7 @@
 #include "building/construction.h"
 #include "building/menu.h"
 #include "building/monument.h"
-#include "building/model.h"
+#include "building/properties.h"
 #include "building/rotation.h"
 #include "city/view.h"
 #include "city/warning.h"

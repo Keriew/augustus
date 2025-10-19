@@ -347,7 +347,6 @@ set(BUILDING_FILES
     ${PROJECT_SOURCE_DIR}/src/building/market.c
     ${PROJECT_SOURCE_DIR}/src/building/menu.c
     ${PROJECT_SOURCE_DIR}/src/building/mess_hall.c
-    ${PROJECT_SOURCE_DIR}/src/building/model.c
     ${PROJECT_SOURCE_DIR}/src/building/monument.c
     ${PROJECT_SOURCE_DIR}/src/building/properties.c
     ${PROJECT_SOURCE_DIR}/src/building/roadblock.c

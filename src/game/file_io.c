@@ -4,8 +4,8 @@
 #include "building/count.h"
 #include "building/granary.h"
 #include "building/list.h"
-#include "building/model.h"
 #include "building/monument.h"
+#include "building/properties.h"
 #include "building/storage.h"
 #include "city/culture.h"
 #include "city/data.h"
@@ -744,7 +744,7 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
     if (version > SCENARIO_LAST_NO_CUSTOM_EMPIRE_MAP_IMAGE) {
         empire_load_custom_map(file->empire_map);
     }
-    model_load();
+    model_reset();
     if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         model_load_model_data(file->model_data);
     }
@@ -856,7 +856,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
         building_granary_update_built_granaries_capacity();
     }
 
-    model_load();
+    model_reset();
     if (version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         model_load_model_data(state->building_model_data);
     }
