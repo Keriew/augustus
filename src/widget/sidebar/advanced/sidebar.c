@@ -33,7 +33,7 @@
 #define MINIMAP_Y_OFFSET 59
 
 static void button_overlay_click(int param1, int param2);
-//static void button_collapse_expand(int param1, int param2);
+static void button_collapse_expand(int param1, int param2);
 static void button_build(int submenu, int param2);
 static void button_undo(int param1, int param2);
 static void button_messages(int param1, int param2);
@@ -45,17 +45,10 @@ static void button_toggle_grid(int param1, int param2);
 static void button_rotate_north(int param1, int param2);
 static void button_rotate(int clockwise, int param2);
 
-// static image_button buttons_overlays_collapse_new_sidebar[] = {
-//     {127, 5, 31, 20, IB_NORMAL, 90, 0, button_collapse_expand, button_none, 0, 0, 1},
-// };
-
-static image_button button_overlay[] ={
+static image_button buttons_overlays_collapse_sidebar[] = {
+    {127, 5, 31, 20, IB_NORMAL, 90, 0, button_collapse_expand, button_none, 0, 0, 1},
     {4, 3, 117, 31, IB_NORMAL, 93, 0, button_overlay_click, button_help, 0, MESSAGE_DIALOG_OVERLAYS, 1}
 };
-
-// static image_button button_expand_new_sidebar[] = {
-//     {6, 4, 31, 20, IB_NORMAL, 90, 4, button_collapse_expand, button_none, 0, 0, 1}
-// };
 
 static image_button buttons_build[] = {
     {2, 26, 39, 26, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 0, button_build, button_none, BUILD_MENU_VACANT_HOUSE, 0, 1},
@@ -100,17 +93,17 @@ static void draw_overlay_text(int x_offset)
 static void draw_sidebar_remainder(const int x_offset)
 {
     //int width = SIDEBAR_EXPANDED_WIDTH;
-    int width = 162;
+    const int width = 162;
 
     // int available_height = sidebar_common_get_height() - SIDEBAR_MAIN_SECTION_HEIGHT;
-    int available_height = sidebar_common_get_height() - MINIMAP_HEIGHT - MINIMAP_Y_OFFSET;
+    const int available_height = sidebar_common_get_height() - MINIMAP_HEIGHT - MINIMAP_Y_OFFSET;
 
-    int y_offset = SIDEBAR_FILLER_Y_OFFSET + MINIMAP_Y_OFFSET;
+    const int y_offset = SIDEBAR_FILLER_Y_OFFSET + MINIMAP_Y_OFFSET;
 
-    int extra_height = sidebar_extra_draw_background(x_offset, y_offset,
+    const int extra_height = sidebar_extra_draw_background(x_offset, y_offset,
         width, available_height, 0, SIDEBAR_EXTRA_DISPLAY_ALL);
     sidebar_extra_draw_foreground();
-    int relief_y_offset = SIDEBAR_FILLER_Y_OFFSET + extra_height;
+    const int relief_y_offset = SIDEBAR_FILLER_Y_OFFSET + extra_height;
 
     sidebar_common_draw_relief(x_offset - 42, relief_y_offset, GROUP_SIDE_PANEL, 0);
 }
@@ -134,7 +127,7 @@ static void draw_number_of_messages(int x_offset)
 static void draw_buttons(int x_offset)
 {
     buttons_build[14].enabled = game_can_undo();
-    image_buttons_draw(x_offset + 42, 24, button_overlay, 1);
+    image_buttons_draw(x_offset + 42, 24, buttons_overlays_collapse_sidebar, 2);
     image_buttons_draw(x_offset, 0, buttons_build, 15);
     //   image_buttons_draw(x_offset, 24, buttons_top_expanded, 6);
 }
@@ -208,10 +201,10 @@ int handle_advanced_sidebar_mouse(const mouse *m)
     //         return 1;
     //     }
     //     int x_offset = new_sidebar_common_get_x_offset_expanded();
-    //     handled |= image_buttons_handle_mouse(m, x_offset, 24, buttons_overlays_collapse_new_sidebar, 2, &button_id);
-    //     if (button_id) {
-    //         data.focus_button_for_tooltip = button_id + 9;
-    //     }
+    handled |= image_buttons_handle_mouse(m, x_offset, 24, buttons_overlays_collapse_sidebar, 2, &button_id);
+    if (button_id) {
+        data.focus_button_for_tooltip = button_id + 9;
+    }
     //     handled |= image_buttons_handle_mouse(m, x_offset, 24, buttons_build_expanded, 15, &button_id);
     //     if (button_id) {
     //         data.focus_button_for_tooltip = button_id + 19;
@@ -271,7 +264,7 @@ static void button_messages(int param1, int param2)
     window_message_list_show();
 }
 
-static void button_help(int param1, int param2)
+static void button_help(int param1, const int param2)
 {
     window_build_menu_hide();
     window_message_dialog_show(param2, window_city_draw_all);
@@ -280,7 +273,7 @@ static void button_help(int param1, int param2)
 static void button_go_to_problem(int param1, int param2)
 {
     window_build_menu_hide();
-    int grid_offset = city_message_next_problem_area_grid_offset();
+    const int grid_offset = city_message_next_problem_area_grid_offset();
     if (grid_offset) {
         city_view_go_to_grid_offset(grid_offset);
         window_city_show();
@@ -310,7 +303,7 @@ static void button_rotate_north(int param1, int param2)
     window_invalidate();
 }
 
-static void button_rotate(int clockwise, int param2)
+static void button_rotate(const int clockwise, int param2)
 {
     if (clockwise) {
         game_orientation_rotate_right();

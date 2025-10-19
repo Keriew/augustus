@@ -26,7 +26,7 @@ static void draw_slide_old(void)
     switch (data.previousState) {
         case EXPANDED:
             x_offset -= expanded_sidebar_width();
-            draw_advanced_sidebar_background(x_offset);
+            draw_expanded_sidebar_background(x_offset);
             break;
         case COLLAPSED:
             x_offset -= collapsed_sidebar_width();
@@ -111,7 +111,7 @@ void widget_sidebar_city_draw_background(void)
     switch (data.currentState) {
         case EXPANDED:
             x_offset -= expanded_sidebar_width();
-            draw_advanced_sidebar_background(x_offset);
+            draw_expanded_sidebar_background(x_offset);
             break;
         case COLLAPSED:
             x_offset -= collapsed_sidebar_width();
@@ -129,7 +129,7 @@ void widget_sidebar_city_draw_foreground(void)
 {
     switch (data.currentState) {
         case EXPANDED:
-            draw_advanced_sidebar_foreground();
+            draw_expanded_sidebar_foreground();
             break;
         case COLLAPSED:
             draw_collapsed_sidebar_foreground();
