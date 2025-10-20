@@ -52,7 +52,7 @@ static void draw_sidebar_remainder(const int x_offset)
     sidebar_extra_draw_foreground();
 
     const int relief_y_offset = SIDEBAR_FILLER_Y_OFFSET + extra_height;
-    sidebar_common_draw_relief(x_offset, relief_y_offset, GROUP_SIDE_PANEL, 1);
+    sidebar_common_draw_relief(x_offset, relief_y_offset, GROUP_SIDE_PANEL, 1,0);
 }
 
 static void draw_buttons_collapsed(const int x_offset)

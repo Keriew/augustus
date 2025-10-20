@@ -416,7 +416,7 @@ static void draw_background(int x_offset)
         0, SIDEBAR_EXTRA_DISPLAY_ALL);
     sidebar_extra_draw_foreground();
 
-    sidebar_common_draw_relief(x_offset, MILITARY_PANEL_HEIGHT + extra_height, GROUP_SIDE_PANEL, 0);
+    sidebar_common_draw_relief(x_offset, MILITARY_PANEL_HEIGHT + extra_height, GROUP_SIDE_PANEL, 0, 0);
 }
 
 void widget_sidebar_military_draw_background(void)

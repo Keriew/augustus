@@ -9,6 +9,6 @@
 #define MINIMAP_HEIGHT 111
 
 int sidebar_common_get_height(void);
-void sidebar_common_draw_relief(int x_offset, int y_offset, int image_id, int is_collapsed);
+void sidebar_common_draw_relief(int x_offset, int y_offset, int image_id, int is_collapsed, int scale);
 
 #endif // WIDGET_SIDEBAR_COMMON_H

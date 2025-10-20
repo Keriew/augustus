@@ -144,7 +144,7 @@ void widget_sidebar_editor_draw_background(void)
     draw_buttons();
     widget_minimap_update(0);
     widget_minimap_draw_decorated(x_offset + 8, MINIMAP_Y_OFFSET, MINIMAP_WIDTH, MINIMAP_HEIGHT);
-    sidebar_common_draw_relief(x_offset, SIDEBAR_FILLER_Y_OFFSET, GROUP_EDITOR_SIDE_PANEL, 0);
+    sidebar_common_draw_relief(x_offset, SIDEBAR_FILLER_Y_OFFSET, GROUP_EDITOR_SIDE_PANEL, 0, 0);
 }
 
 void widget_sidebar_editor_draw_foreground(void)

@@ -104,7 +104,7 @@ static void draw_sidebar_remainder(const int x_offset)
     sidebar_extra_draw_foreground();
 
     const int relief_y_offset = SIDEBAR_FILLER_Y_OFFSET + extra_height;
-    sidebar_common_draw_relief(x_offset, relief_y_offset, GROUP_SIDE_PANEL, 0);
+    sidebar_common_draw_relief(x_offset, relief_y_offset, GROUP_SIDE_PANEL, 0, 0);
 }
 
 static void draw_number_of_messages(const int x_offset)
