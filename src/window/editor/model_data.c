@@ -28,6 +28,8 @@ static void button_edit_step_size(const generic_button *button);
 static void button_edit_range(const generic_button *button);
 static void button_edit_laborers(const generic_button *button);
 
+static void button_static_click(const generic_button *button);
+
 static void populate_list(void);
 static void draw_model_item(const grid_box_item *item);
 static void model_item_click(const grid_box_item *item);
@@ -38,6 +40,7 @@ static struct {
     building_type items[BUILDING_TYPE_MAX];
     
     unsigned int data_buttons_focus_id;
+    unsigned int static_buttons_focus_id;
     unsigned int target_index;
 } data;
 
@@ -49,6 +52,13 @@ static generic_button data_buttons[] = {
     {425, 2, 48, 20, button_edit_range},
     {480, 2, 48, 20, button_edit_laborers}
 };
+
+static generic_button static_buttons[] = {
+    {40, 25 * BLOCK_SIZE, 10 * BLOCK_SIZE, 24, button_static_click, 0, 0},
+    {216, 25 * BLOCK_SIZE, 10 * BLOCK_SIZE, 24, button_static_click, 0, 1},
+    {392, 25 * BLOCK_SIZE, 10 * BLOCK_SIZE, 24, button_static_click, 0, 2}
+};
+#define NUM_STATIC_BUTTONS (sizeof(static_buttons) / sizeof(generic_button))
 
 static grid_box_type model_buttons = {
     .x = 25,
@@ -80,6 +90,24 @@ static void populate_list(void)
             i == BUILDING_CLEAR_LAND || i == BUILDING_REPAIR_LAND) {
             data.items[data.total_items++] = i;
         }
+    }
+}
+
+static void button_static_click(const generic_button *button)
+{
+    switch (button->parameter1) {
+        case 0:
+            
+            break;
+        case 1:
+            model_reset();
+            window_request_refresh();
+            break;
+        case 2:
+            
+            break;
+        default:
+            break;
     }
 }
 
@@ -204,17 +232,17 @@ static void draw_background(void)
 
     graphics_in_dialog();
 
-    outer_panel_draw(16, 32, 38, 26);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_ACTION_TYPE_CHANGE_MODEL_DATA, 26, 42, 608, FONT_LARGE_BLACK);
-    lang_text_draw_centered(13, 3, 16, 424, 608, FONT_NORMAL_BLACK);
+    outer_panel_draw(16, 32, 38, 27);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_ACTION_TYPE_CHANGE_MODEL_DATA, 26, 42, 38 * BLOCK_SIZE, FONT_LARGE_BLACK);
+    lang_text_draw_centered(13, 3, 16, 27 * BLOCK_SIZE + 8, 38 * BLOCK_SIZE, FONT_NORMAL_BLACK);
     
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_MODEL, 80, 75, 30, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_COST, 200, 75, 30, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_VALUE, 265, 75, 30, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_STEP, 330, 75, 30, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_STEP_SIZE, 395, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_COST, 235, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_VALUE, 295, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_STEP, 350, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_STEP_SIZE, 405, 75, 30, FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_RANGE, 460, 75, 30, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_LABORERS, 525, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_LABORERS, 505, 75, 30, FONT_SMALL_PLAIN);
 
     graphics_reset_dialog();
     
@@ -225,6 +253,25 @@ static void draw_foreground(void)
 {
     graphics_in_dialog();
     
+    for (int i = 0; i < NUM_STATIC_BUTTONS; i++) {
+        button_border_draw(static_buttons[i].x, static_buttons[i].y,
+            static_buttons[i].width, static_buttons[i].height, data.static_buttons_focus_id == i+1);
+        translation_key key;
+        switch (i) {
+            case 0:
+                key = TR_EDITOR_SCENARIO_EVENTS_EXPORT;
+                break;
+            case 1:
+                key = TR_BUTTON_RESET_DEFAULTS;
+                break;
+            case 2:
+                key = TR_EDITOR_SCENARIO_EVENTS_IMPORT;
+                break;
+        }
+        lang_text_draw_centered(CUSTOM_TRANSLATION, key, 
+            static_buttons[i].x, static_buttons[i].y + 6, static_buttons[i].width, FONT_NORMAL_BLACK);
+    }
+    
     grid_box_draw(&model_buttons);
     
     graphics_reset_dialog();
@@ -233,8 +280,11 @@ static void draw_foreground(void)
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
+    if (generic_buttons_handle_mouse(m_dialog, 0, 0, static_buttons, NUM_STATIC_BUTTONS, &data.static_buttons_focus_id)) {
+        return;
+    }
     grid_box_handle_input(&model_buttons, m_dialog, 1);
-    
+
     int x = 0, y = 0;
     if (model_buttons.focused_item.is_focused) {
         x = model_buttons.focused_item.x;
