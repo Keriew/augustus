@@ -6,6 +6,7 @@
 #include "core/string.h"
 #include "editor/editor.h"
 #include "graphics/button.h"
+#include "graphics/complex_button.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/grid_box.h"
@@ -22,6 +23,7 @@
 #include "scenario/message_media_text_blob.h"
 #include "scenario/property.h"
 #include "scenario/scenario.h"
+#include "widget/dropdown_button.h"
 #include "window/editor/attributes.h"
 #include "window/editor/map.h"
 #include "window/numeric_input.h"
@@ -32,11 +34,18 @@
 #define CHECKBOX_ROW_WIDTH 25
 #define ID_ROW_WIDTH 32
 #define VALUE_ROW_WIDTH 60
-#define NAME_ROW_WIDTH 170
+#define NAME_ROW_WIDTH 130
 #define NAME_ROW_WIDTH_CALLBACK 3 * NAME_ROW_WIDTH
 #define BUTTONS_PADDING 4
+#define COLOR_DROPDOWN_WIDTH 60
 #define NUM_ITEM_BUTTONS (sizeof(item_buttons) / sizeof(generic_button))
 #define NUM_CONSTANT_BUTTONS (sizeof(constant_buttons) / sizeof(generic_button))
+#define COLOR_BUTTONS_COUNT 12 // 10 + "none" + anchor
+
+//gridbox macros and constants
+#define GRID_BOX_HEIGHT 23 * BLOCK_SIZE
+#define GRID_BOX_ITEM_HEIGHT 28
+#define MAX_VISIBLE_GRID_ITEMS (GRID_BOX_HEIGHT / GRID_BOX_ITEM_HEIGHT) // height of grid box / item height
 
 #define NO_SELECTION (unsigned int) -1
 
@@ -49,6 +58,7 @@ typedef enum {
 static void button_variable_checkbox(const generic_button *button);
 static void button_edit_variable_name(const generic_button *button);
 static void button_edit_variable_value(const generic_button *button);
+static void button_edit_color(const dropdown_button *button);
 static void button_edit_display_text(const generic_button *button);
 static void button_variable_visible_checkbox(const generic_button *button);
 
@@ -63,17 +73,15 @@ static void draw_variable_item(const grid_box_item *item);
 static struct {
     unsigned int constant_button_focus_id;
     unsigned int item_buttons_focus_id;
-
     unsigned int target_index;
-
     unsigned int *custom_variable_ids;
     unsigned int total_custom_variables;
     unsigned int custom_variables_in_use;
-
+    unsigned int ellipsized_tooltip; // index of the dropdown button providing tooltip
+    unsigned int expanded_dropdown; // index of the currently expanded dropdown button
     uint8_t *selected;
     checkbox_selection_type selection_type;
     int do_not_ask_again_for_delete;
-
     void (*callback)(unsigned int id);
 } data;
 
@@ -92,19 +100,59 @@ static generic_button constant_buttons[] = {
     { 442, 454, 150, 30, button_ok }
 };
 
+static lang_fragment color_fragments[COLOR_BUTTONS_COUNT];
+static dropdown_button color_dropdowns[MAX_VISIBLE_GRID_ITEMS] = { 0 };
+static complex_button color_dropdown_options[MAX_VISIBLE_GRID_ITEMS][COLOR_BUTTONS_COUNT] = { 0 };
+
+// static array because adding a new complex structure to the gridbox exceeds my abilities
+// as a dynamic structure more akin to an object, it needs to be initialized per item in the gridbox
+
+
 static grid_box_type variable_buttons = {
     .x = 26,
     .y = 79,
     .width = 38 * BLOCK_SIZE,
-    .height = 23 * BLOCK_SIZE,
+    .height = GRID_BOX_HEIGHT, //if changing this 
     .num_columns = 1,
-    .item_height = 28,
+    .item_height = GRID_BOX_ITEM_HEIGHT, //or this, update the MAX_VISIBLE_GRID_ITEMS macro accordingly
     .item_margin.horizontal = 10,
     .item_margin.vertical = 5,
     .extend_to_hidden_scrollbar = 1,
     .on_click = variable_item_click,
     .draw_item = draw_variable_item
 };
+
+static void init_color_dropdown(void)
+{
+    for (int editor_colors = 0; editor_colors < COLOR_BUTTONS_COUNT; editor_colors++) {
+        color_fragments[editor_colors].type = LANG_FRAG_LABEL;
+        color_fragments[editor_colors].text_group = CUSTOM_TRANSLATION;
+        color_fragments[editor_colors].text_id = TR_EDITOR_COLOR_LABEL + editor_colors;
+    }
+
+    for (int dd_anchors = 0; dd_anchors < MAX_VISIBLE_GRID_ITEMS; dd_anchors++) {
+        color_dropdown_options[dd_anchors][0].is_hidden = 0;
+        color_dropdown_options[dd_anchors][0].x = 598;
+        color_dropdown_options[dd_anchors][0].y = GRID_BOX_ITEM_HEIGHT * dd_anchors + 79;
+        color_dropdown_options[dd_anchors][0].height = CHECKBOX_ROW_WIDTH;
+        color_dropdown_options[dd_anchors][0].width = COLOR_DROPDOWN_WIDTH + 20;
+        for (int j = 0; j < COLOR_BUTTONS_COUNT; j++) { // dropdown option buttons - COLOR_BUTTONS_COUNT per dropdown
+            color_dropdown_options[dd_anchors][j].sequence = &color_fragments[j];
+            color_dropdown_options[dd_anchors][j].sequence_size = 1;
+            color_dropdown_options[dd_anchors][j].left_click_handler = dropdown_button_default_option_click;
+            color_dropdown_options[dd_anchors][j].user_data = &color_dropdowns[dd_anchors]; //backref to parent dropdown
+            //color_dropdown_options[dd_anchors][j].style = COMPLEX_BUTTON_STYLE_DEFAULT;
+            color_dropdown_options[dd_anchors][j].parameters[0] = dd_anchors;
+            // draw_variable_item will reestablish the correct variable id with scroll offset
+            color_dropdown_options[dd_anchors][j].color_mask = complex_button_basic_colors(j - 1);
+            if (j > 8) {
+                color_dropdown_options[dd_anchors][j].font = FONT_SMALL_PLAIN; //white font for dark colors
+            }
+        }
+        dropdown_button_init(&color_dropdowns[dd_anchors], color_dropdown_options[dd_anchors], COLOR_BUTTONS_COUNT, COLOR_DROPDOWN_WIDTH, 2, 4);
+        color_dropdowns[dd_anchors].selected_callback = button_edit_color;
+    }
+}
 
 static void select_all_to(uint8_t value)
 {
@@ -148,8 +196,10 @@ static void populate_list(void)
 static void init(void (*callback)(unsigned int id))
 {
     data.callback = callback;
+    init_color_dropdown();
     populate_list();
     grid_box_init(&variable_buttons, data.custom_variables_in_use);
+    grid_box_request_refresh(&variable_buttons);
 }
 
 static void update_item_buttons_positions(void)
@@ -162,6 +212,9 @@ static void update_item_buttons_positions(void)
             item_buttons[1].width = NAME_ROW_WIDTH_CALLBACK - 2 * BLOCK_SIZE;
         }
         return;
+    } else {
+        item_buttons[1].x = CHECKBOX_ROW_WIDTH + ID_ROW_WIDTH;
+        item_buttons[1].width = NAME_ROW_WIDTH;
     }
 
     // Position name button (fixed width)
@@ -172,14 +225,13 @@ static void update_item_buttons_positions(void)
     item_buttons[2].x = item_buttons[1].x + item_buttons[1].width + BUTTONS_PADDING;
 
     // Position visible checkbox (fixed width)
-    item_buttons[4].x = variable_buttons.width - variable_buttons.item_margin.horizontal - CHECKBOX_ROW_WIDTH;
+    item_buttons[4].x = variable_buttons.width - variable_buttons.item_margin.horizontal - CHECKBOX_ROW_WIDTH - 60;
     if (grid_box_has_scrollbar(&variable_buttons)) {
         item_buttons[4].x -= 2 * BLOCK_SIZE;
     }
 
-    // Position display text button (takes remaining width)
     item_buttons[3].x = item_buttons[2].x + item_buttons[2].width + BUTTONS_PADDING;
-    item_buttons[3].width = item_buttons[4].x - item_buttons[3].x - BUTTONS_PADDING;
+    item_buttons[3].width = item_buttons[4].x - item_buttons[3].x - BUTTONS_PADDING - COLOR_DROPDOWN_WIDTH;
 }
 
 static void draw_background(void)
@@ -201,7 +253,7 @@ static void draw_background(void)
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_ID,
         variable_buttons.x + (data.callback ? 0 : CHECKBOX_ROW_WIDTH), 60, 40, FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_NAME, base_x_offset + item_buttons[1].x, 60,
-        data.callback ? NAME_ROW_WIDTH : NAME_ROW_WIDTH_CALLBACK, FONT_SMALL_PLAIN);
+        data.callback ? NAME_ROW_WIDTH_CALLBACK : NAME_ROW_WIDTH, FONT_SMALL_PLAIN);
 
     grid_box_request_refresh(&variable_buttons);
 
@@ -227,8 +279,9 @@ static void draw_background(void)
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_TEXT_DISPLAY,
         base_x_offset + item_buttons[3].x, 60, item_buttons[3].width, FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_IS_VISIBLE,
-        base_x_offset + item_buttons[4].x - 15, 60, 20, FONT_SMALL_PLAIN);
-
+        base_x_offset + item_buttons[4].x - 15 - 20, 60, 20, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_COLOR_LABEL,
+        color_dropdowns->buttons[0].x - 20, 60, 20, FONT_SMALL_PLAIN);
     // Bottom buttons
     const generic_button *delete_selected_button = &constant_buttons[1];
     color_t color = data.selection_type == CHECKBOX_NO_SELECTION ? COLOR_FONT_LIGHT_GRAY : COLOR_RED;
@@ -249,7 +302,10 @@ static void draw_variable_item(const grid_box_item *item)
     unsigned int id = data.custom_variable_ids[item->index];
     const uint8_t *name = scenario_custom_variable_get_name(id);
     int value = scenario_custom_variable_get_value(id);
-
+    color_dropdown_options[item->index][0].color_mask = scenario_custom_variable_get_color(id); //set the selected colour option
+    color_dropdown_options[item->index][0].is_hidden = 0; //unhide the associated color dropdown
+    color_dropdown_options[item->index][0].parameters[0] = id; //set the variable id as parameter for the color dropdown
+    color_dropdowns[item->index].selected_index = scenario_custom_variable_get_color_group(id);
     // Variable ID
     text_draw_number_centered(id, item->x + (data.callback ? 0 : CHECKBOX_ROW_WIDTH), item->y + 8,
         32, FONT_SMALL_PLAIN);
@@ -330,7 +386,23 @@ static void draw_foreground(void)
         button_border_draw(constant_buttons[i].x, constant_buttons[i].y, constant_buttons[i].width,
             constant_buttons[i].height, focus);
     }
-
+    data.expanded_dropdown = (unsigned int) -1; //reset expanded tracker before drawing dropdowns
+    for (unsigned int i = 0; i < MAX_VISIBLE_GRID_ITEMS && i < data.custom_variables_in_use; i++) {
+        dropdown_button *dd = &color_dropdowns[i];
+        dd->buttons[0].is_hidden = 0;
+        if (dd->expanded == 1) {
+            data.expanded_dropdown = i;
+            continue;
+        }
+        dropdown_button_draw(dd);
+    }
+    for (unsigned int i = 0; i < MAX_VISIBLE_GRID_ITEMS && i < data.custom_variables_in_use; i++) {
+        dropdown_button *dd = &color_dropdowns[i];
+        if (!dd->expanded) {
+            continue;
+        }
+        dropdown_button_draw(dd);
+    } //second loop to draw the expanded dropdowns on top
     graphics_reset_dialog();
 }
 
@@ -462,6 +534,15 @@ static void button_edit_variable_value(const generic_button *button)
     }
     window_numeric_input_bound_show(variable_buttons.focused_item.x, variable_buttons.focused_item.y, button,
         9, -1000000000, 1000000000, set_variable_value);
+}
+
+static void button_edit_color(const dropdown_button *dd)
+{
+    unsigned int color_id = dd->selected_index; //1-based index for custom variables
+    int variable_id = dd->buttons[0].parameters[0]; //get variable id from the selected button
+    scenario_custom_variable_set_color_group(variable_id, color_id);
+
+    window_request_refresh();
 }
 
 static void set_display_text(const uint8_t *text)
@@ -631,6 +712,20 @@ static void button_ok(const generic_button *button)
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
+    if (data.expanded_dropdown != -1) { // handle dropdowns, starting with expanded
+        if (dropdown_button_handle_mouse(m_dialog, &color_dropdowns[data.expanded_dropdown])) {
+            window_invalidate();
+        }
+        return;
+    } else {
+        for (int i = 0; i < MAX_VISIBLE_GRID_ITEMS; ++i) {
+            if (dropdown_button_handle_mouse(m_dialog, &color_dropdowns[i])) {
+                window_invalidate();
+                return;
+            }
+        }
+    }
+
     if (grid_box_handle_input(&variable_buttons, m_dialog, 1)) {
         if (data.callback) {
             return;
@@ -641,6 +736,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         x = variable_buttons.focused_item.x;
         y = variable_buttons.focused_item.y;
     }
+
     if (generic_buttons_handle_mouse(m_dialog, x, y, item_buttons, NUM_ITEM_BUTTONS, &data.item_buttons_focus_id) ||
         generic_buttons_handle_mouse(m_dialog, 0, 0, constant_buttons, NUM_CONSTANT_BUTTONS,
             &data.constant_button_focus_id)) {
@@ -663,7 +759,9 @@ static void get_tooltip(tooltip_context *c)
 
     if (variable_buttons.focused_item.is_focused) {
         unsigned int id = data.custom_variable_ids[variable_buttons.focused_item.index];
-
+        if (dropdown_button_get_tooltip_for_ellipsize(&color_dropdowns[id - 1], c)) {
+            return;
+        }
         // Name
         if (data.item_buttons_focus_id == 2) {
             const uint8_t *name = scenario_custom_variable_get_name(id);

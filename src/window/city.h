@@ -13,4 +13,7 @@ void window_city_military_show(int legion_formation_id);
 
 void window_city_return(void);
 
+/** @brief collective check to see if the current window is any of the city view windows */
+int window_city_is_window_cityview(void);
+
 #endif // WINDOW_CITY_H

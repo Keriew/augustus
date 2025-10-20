@@ -50,5 +50,11 @@ int lang_text_get_sequence_width(const lang_fragment *seq, int count, font_t fon
 int lang_text_draw_sequence(const lang_fragment *seq, int count, int x, int y, font_t font, color_t color);
 int lang_text_draw_sequence_multiline(const lang_fragment *seq, int count, int x, int y, int box_width, int height_offset, font_t font, color_t color);
 int lang_text_draw_sequence_centered(const lang_fragment *seq, int count, int x, int y, int box_width, font_t font, color_t color);
+int lang_text_draw_sequence_ellipsized(const lang_fragment *seq, int count, int x, int y, int box_width,
+    font_t font, color_t color, int *was_ellipsized);
+
+int lang_text_draw_sequence_centered_ellipsized(const lang_fragment *seq, int count, int x, int y, int box_width, font_t font, color_t color, int *was_ellipsized);
+
+int lang_text_concatenate_sequence(const lang_fragment *seq, int count, uint8_t *dst, int dst_size);
 
 #endif // GRAPHICS_LANG_TEXT_H

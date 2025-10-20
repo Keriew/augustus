@@ -57,8 +57,14 @@
 static int mothball_warning_id;
 static int time_left_label_shown;
 
-static void draw_topleft_label_with_fragments(int x, int y, const lang_fragment *fragments, int fragment_count, font_t font);
+static void draw_topleft_label_with_fragments(int x, int y, const lang_fragment *fragments, int fragment_count, font_t font, color_t color_ver);
 static void draw_topleft_label_short(int x, int y, const uint8_t *label_text, int value, font_t font);
+
+int window_city_is_window_cityview(void)
+{
+    return ((window_get_id() >= WINDOW_CITY && window_get_id() <= WINDOW_SLIDING_SIDEBAR)
+            || window_is(WINDOW_CITY_MAIN_MENU));
+}
 
 static void draw_background(void)
 {
@@ -174,7 +180,8 @@ static void draw_custom_variables_text_display(void)
         lang_fragment frags[1] = {
             {.type = LANG_FRAG_TEXT, .text = var_text_resolved }
         };
-        draw_topleft_label_with_fragments(TOPLEFT_MESSAGES_X, y, frags, 1, font);
+        color_t color_ver = scenario_custom_variable_get_color(i);
+        draw_topleft_label_with_fragments(TOPLEFT_MESSAGES_X, y, frags, 1, font, color_ver);
         y += TOPLEFT_MESSAGES_Y_SPACING;
     }
 }
@@ -211,11 +218,27 @@ static void draw_time_left(void)
             {.type = LANG_FRAG_AMOUNT, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_REPEAT_FREQUENCY_YEARS, .number = years_left },
             {.type = LANG_FRAG_AMOUNT, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_REPEAT_FREQUENCY_MONTHS, .number = months_left }
         };
-        draw_topleft_label_with_fragments(fps_offset + TOPLEFT_MESSAGES_X, 25, frags, 3, font);
+        draw_topleft_label_with_fragments(fps_offset + TOPLEFT_MESSAGES_X, 25, frags, 3, font, COLOR_MASK_NONE);
     }
 }
 
-static void draw_topleft_label_with_fragments(int x, int y, const lang_fragment *fragments, int fragment_count, font_t font)
+void label_draw_masked(int x, int y, int width_blocks, int type, color_t color)
+{
+    int image_base = image_group(GROUP_PANEL_BUTTON);
+    for (int i = 0; i < width_blocks; i++) {
+        int image_id;
+        if (i == 0) {
+            image_id = 3 * type + 40;
+        } else if (i < width_blocks - 1) {
+            image_id = 3 * type + 41;
+        } else {
+            image_id = 3 * type + 42;
+        }
+        image_draw(image_base + image_id, x + BLOCK_SIZE * i, y, color, SCALE_NONE);
+    }
+}
+
+static void draw_topleft_label_with_fragments(int x, int y, const lang_fragment *fragments, int fragment_count, font_t font, color_t color)
 {
     // Measure total width using the new sequence width function
     int label_width = lang_text_get_sequence_width(fragments, fragment_count, font);
@@ -223,7 +246,7 @@ static void draw_topleft_label_with_fragments(int x, int y, const lang_fragment 
     int label_blocks = (label_width + 2 * BLOCK_SIZE) / BLOCK_SIZE;
     if (label_blocks < 1) label_blocks = 1;
 
-    label_draw(x, y, label_blocks, 1);
+    label_draw_masked(x, y, label_blocks, 1, color);
 
     // Draw the sequence using the new lang_fragment system
     lang_text_draw_sequence(fragments, fragment_count, x + 6, y + 4, font, COLOR_MASK_NONE);
@@ -236,7 +259,8 @@ static void draw_topleft_label_short(int x, int y, const uint8_t *label_text, in
         {.type = LANG_FRAG_TEXT, .text = label_text },
         {.type = LANG_FRAG_NUMBER, .number = value }
     };
-    draw_topleft_label_with_fragments(x, y, frags, 2, font);
+    color_t color = COLOR_MASK_NONE;
+    draw_topleft_label_with_fragments(x, y, frags, 2, font, color);
 }
 
 static void draw_speedrun_info(void)
@@ -254,7 +278,7 @@ static void draw_foreground(void)
     window_city_draw();
     widget_sidebar_city_draw_foreground();
     draw_speedrun_info();
-    if (window_is(WINDOW_CITY) || window_is(WINDOW_CITY_MILITARY)) {
+    if ((window_get_id() >= WINDOW_CITY && window_get_id() <= WINDOW_SLIDING_SIDEBAR) || window_is(WINDOW_CITY_MAIN_MENU)) {
         draw_time_left();
         draw_custom_variables_text_display();
         widget_city_draw_construction_buttons();

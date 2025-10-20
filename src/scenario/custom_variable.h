@@ -2,6 +2,7 @@
 #define SCENARIO_CUSTOM_VARIABLE_H
 
 #include "core/buffer.h"
+#include "graphics/color.h"
 
 #define MAX_ORIGINAL_CUSTOM_VARIABLES 100
 #define CUSTOM_VARIABLE_NAME_LENGTH 64
@@ -11,6 +12,10 @@ unsigned int scenario_custom_variable_create(const uint8_t *name, int initial_va
 
 void scenario_custom_variable_delete(unsigned int id);
 void scenario_custom_variable_delete_all(void);
+
+void scenario_custom_variable_set_color_group(unsigned int id, int color_group);
+int scenario_custom_variable_get_color_group(unsigned int id);
+color_t scenario_custom_variable_get_color(unsigned int id);
 
 unsigned int scenario_custom_variable_get_id_by_name(const uint8_t *name);
 

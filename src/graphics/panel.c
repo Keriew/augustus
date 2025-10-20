@@ -51,7 +51,7 @@ void outer_panel_draw(int x, int y, int width_blocks, int height_blocks)
     }
 }
 
-void unbordered_panel_draw(int x, int y, int width_blocks, int height_blocks)
+void unbordered_panel_draw_colored(int x, int y, int width_blocks, int height_blocks, color_t color)
 {
     int image_base = image_group(GROUP_DIALOG_BACKGROUND);
     int image_y = 0;
@@ -59,7 +59,7 @@ void unbordered_panel_draw(int x, int y, int width_blocks, int height_blocks)
         int image_x = 0;
         for (int xx = 0; xx < width_blocks; xx++) {
             int image_id = 13 + image_y + image_x++;
-            image_draw(image_base + image_id, x + BLOCK_SIZE * xx, y + BLOCK_SIZE * yy, COLOR_MASK_NONE, SCALE_NONE);
+            image_draw(image_base + image_id, x + BLOCK_SIZE * xx, y + BLOCK_SIZE * yy, color, SCALE_NONE);
             if (image_x >= 10) {
                 image_x = 0;
             }
@@ -69,6 +69,11 @@ void unbordered_panel_draw(int x, int y, int width_blocks, int height_blocks)
             image_y = 0;
         }
     }
+}
+
+void unbordered_panel_draw(int x, int y, int width_blocks, int height_blocks)
+{
+    unbordered_panel_draw_colored(x, y, width_blocks, height_blocks, COLOR_MASK_NONE);
 }
 
 void inner_panel_draw(int x, int y, int width_blocks, int height_blocks)
