@@ -24,6 +24,8 @@
 #include "widget/sidebar/extra.h"
 #include "widget/sidebar/slide.h"
 #include "window/building/military.h"
+
+#include "expanded/sidebar.h"
 #include "window/city.h"
 #include "window/military_menu.h"
 
@@ -36,7 +38,8 @@
 #define Y_OFFSET_BOTTOM_BUTTONS 257
 #define MILITARY_PANEL_BLOCKS 18
 #define CONTENT_PADDING 10
-#define CONTENT_WIDTH (SIDEBAR_EXPANDED_WIDTH - 2 * CONTENT_PADDING)
+#define PANEL_WIDTH 162
+#define CONTENT_WIDTH (PANEL_WIDTH - 2 * CONTENT_PADDING)
 
 static const int IMAGE_OFFSETS_TO_FORMATION[7] = {
     FORMATION_COLUMN,
@@ -372,11 +375,11 @@ static void draw_military_panel_background(int x_offset)
 {
     graphics_draw_line(x_offset, x_offset, Y_OFFSET_PANEL_START,
         Y_OFFSET_PANEL_START + MILITARY_PANEL_BLOCKS * BLOCK_SIZE, COLOR_WHITE);
-    graphics_draw_line(x_offset + SIDEBAR_EXPANDED_WIDTH - 1, x_offset + SIDEBAR_EXPANDED_WIDTH - 1,
+    graphics_draw_line(x_offset + PANEL_WIDTH - 1, x_offset + PANEL_WIDTH - 1,
         Y_OFFSET_PANEL_START, Y_OFFSET_PANEL_START + MILITARY_PANEL_BLOCKS * BLOCK_SIZE, COLOR_SIDEBAR);
     inner_panel_draw(x_offset + 1, Y_OFFSET_PANEL_START + 10,
-        SIDEBAR_EXPANDED_WIDTH / BLOCK_SIZE, MILITARY_PANEL_BLOCKS);
-    inner_panel_draw(x_offset + 1, Y_OFFSET_PANEL_START, SIDEBAR_EXPANDED_WIDTH / BLOCK_SIZE, 1);
+        PANEL_WIDTH / BLOCK_SIZE, MILITARY_PANEL_BLOCKS);
+    inner_panel_draw(x_offset + 1, Y_OFFSET_PANEL_START, PANEL_WIDTH / BLOCK_SIZE, 1);
 
     draw_military_info_text(x_offset + CONTENT_PADDING, Y_OFFSET_PANEL_START);
     draw_military_info_buttons(x_offset, Y_OFFSET_PANEL_START);
@@ -409,7 +412,7 @@ static void draw_background(int x_offset)
     draw_military_panel_background(x_offset);
     draw_legion_buttons(x_offset, Y_OFFSET_PANEL_START);
     int extra_height = sidebar_extra_draw_background(x_offset, MILITARY_PANEL_HEIGHT,
-        SIDEBAR_EXPANDED_WIDTH, sidebar_common_get_height() - MILITARY_PANEL_HEIGHT + TOP_MENU_HEIGHT,
+        PANEL_WIDTH, sidebar_common_get_height() - MILITARY_PANEL_HEIGHT + TOP_MENU_HEIGHT,
         0, SIDEBAR_EXTRA_DISPLAY_ALL);
     sidebar_extra_draw_foreground();
 
@@ -418,7 +421,8 @@ static void draw_background(int x_offset)
 
 void widget_sidebar_military_draw_background(void)
 {
-    draw_background(sidebar_common_get_x_offset_expanded());
+    // todo: this need to change
+    draw_background(calculate_x_offset_sidebar_expanded());
 }
 
 static int has_legion_changed(const legion_info *legion, const formation *m)
@@ -451,7 +455,8 @@ static void draw_foreground(int x_offset)
 
 void widget_sidebar_military_draw_foreground(void)
 {
-    draw_foreground(sidebar_common_get_x_offset_expanded());
+    // todo: this need to change
+    draw_foreground(calculate_x_offset_sidebar_expanded());
 }
 
 static void draw_sliding(int x_offset)
@@ -462,7 +467,8 @@ static void draw_sliding(int x_offset)
 
 int widget_sidebar_military_handle_input(const mouse *m)
 {
-    int x_offset = sidebar_common_get_x_offset_expanded();
+    // todo: this need to change
+    const int x_offset = calculate_x_offset_sidebar_expanded();
     if (image_buttons_handle_mouse(m, x_offset, 24, buttons_title_close, 2, &data.top_buttons_focus_id)) {
         return 1;
     }
@@ -486,7 +492,7 @@ int widget_sidebar_military_handle_input(const mouse *m)
     return sidebar_extra_handle_mouse(m);
 }
 
-static int get_layout_text_id(int layout)
+static int get_layout_text_id(const int layout)
 {
     switch (layout) {
         case FORMATION_SINGLE_LINE_1:
@@ -577,8 +583,10 @@ int widget_sidebar_military_enter(int formation_id)
     }
 
     if (widget_sidebar_is_collapsed()) {
-        city_view_start_sidebar_toggle();
-        sidebar_slide(SLIDE_DIRECTION_IN, widget_sidebar_city_draw_background, draw_sliding, slide_in_finished);
+        sidebar_next();
+        //todo: something need to change here
+        // 0,0 is WRONG -> Temp value CHANGE todo
+        sidebar_slide(SLIDE_DIRECTION_IN, widget_sidebar_city_draw_background, draw_sliding, slide_in_finished,0 , 0);
     } else {
         slide_in_finished();
     }
@@ -592,9 +600,12 @@ int widget_sidebar_military_exit(void)
         widget_minimap_invalidate();
         return 0;
     }
+
+    //todo: something need to change here
+    // 0,0 is WRONG -> Temp value CHANGE todo
     if (data.city_view_was_collapsed) {
         city_view_toggle_sidebar();
-        sidebar_slide(SLIDE_DIRECTION_OUT, widget_sidebar_city_draw_background, draw_sliding, slide_out_finished);
+        sidebar_slide(SLIDE_DIRECTION_OUT, widget_sidebar_city_draw_background, draw_sliding, slide_out_finished,0,0);
     } else {
         slide_out_finished();
     }

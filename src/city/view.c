@@ -583,8 +583,8 @@ void city_view_rotate_right(void)
 
 static void set_viewport(void)
 {
-    const int sidebar_width = widget_sidebar_city_get_width();
-    const int width = data.screen_width - sidebar_width - 2;
+    const int sidebar_width = widget_sidebar_city_get_width() - 2;
+    const int width = data.screen_width - sidebar_width;
     const int height = data.screen_height - TOP_MENU_HEIGHT;
 
     data.viewport.x = 0;

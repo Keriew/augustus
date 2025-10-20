@@ -40,7 +40,7 @@ static void draw_slide_old(void)
     }
 }
 
-static void draw_slide_new(int x_offset)
+static void draw_slide_new(const int x_offset)
 {
     switch (data.currentState) {
         case EXPANDED:
@@ -64,23 +64,28 @@ static void slide_finished(void)
 
 void sidebar_next(void)
 {
-    city_view_start_sidebar_toggle();
-
     data.previousState = data.currentState;
+    const int previous_sidebar_width = widget_sidebar_city_get_width();
+    const int previous_sidebar_x_offset = widget_sidebar_calculate_x_offset();
+    slide_direction slide_direction = SLIDE_DIRECTION_OUT;
 
     if (data.currentState == COLLAPSED) {
+        slide_direction = SLIDE_DIRECTION_IN;
         data.currentState = ADVANCED;
     } else if (data.currentState == ADVANCED) {
         data.currentState = EXPANDED;
     } else if (data.currentState == EXPANDED) {
+        slide_direction = SLIDE_DIRECTION_IN;
         data.currentState = COLLAPSED;
     }
 
     city_view_start_sidebar_toggle();
-    sidebar_slide(!widget_sidebar_is_collapsed(),
+    sidebar_slide(slide_direction,
                   draw_slide_old,
                   draw_slide_new,
-                  slide_finished);
+                  slide_finished,
+                  previous_sidebar_width,
+                  previous_sidebar_x_offset);
 
     window_city_show();
 }
@@ -178,6 +183,20 @@ unsigned int widget_sidebar_city_get_tooltip_text(tooltip_context *c)
             return get_collapsed_sidebar_tooltip_text(c);
         case ADVANCED:
             return get_advanced_sidebar_tooltip_text(c);
+        default:
+            return 0;
+    }
+}
+
+int widget_sidebar_calculate_x_offset(void)
+{
+    switch (data.currentState) {
+        case EXPANDED:
+            return calculate_x_offset_sidebar_expanded();
+        case COLLAPSED:
+            return calculate_x_offset_sidebar_collapsed();
+        case ADVANCED:
+            return calculate_x_offset_sidebar_advanced();
         default:
             return 0;
     }

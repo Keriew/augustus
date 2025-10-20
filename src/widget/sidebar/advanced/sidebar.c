@@ -12,6 +12,7 @@
 #include "graphics/image.h"
 #include "graphics/image_button.h"
 #include "graphics/lang_text.h"
+#include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "scenario/property.h"
@@ -31,6 +32,7 @@
 
 
 #define MINIMAP_Y_OFFSET 59
+#define SIDEBAR_ADVANCED_WIDTH 204
 
 static void button_overlay_click(int param1, int param2);
 static void button_collapse_expand(int param1, int param2);
@@ -150,7 +152,12 @@ static void enable_building_buttons(void)
 
 int advanced_sidebar_width(void)
 {
-    return 204;
+    return SIDEBAR_ADVANCED_WIDTH;
+}
+
+int calculate_x_offset_sidebar_advanced(void)
+{
+    return screen_width() - SIDEBAR_ADVANCED_WIDTH;
 }
 
 void draw_advanced_sidebar_background(int x_offset)
@@ -166,7 +173,7 @@ void draw_advanced_sidebar_foreground(void)
         enable_building_buttons();
     }
 
-    const int x_offset = sidebar_common_get_x_offset_advanced();
+    const int x_offset = calculate_x_offset_sidebar_advanced();
     draw_buttons(x_offset);
 
     const int new_x_offset = x_offset + 42;
@@ -187,7 +194,7 @@ int handle_advanced_sidebar_mouse(const mouse *m)
     unsigned int button_id;
     data.focus_button_for_tooltip = 0;
     // if (city_view_is_sidebar_collapsed()) {
-    int x_offset = sidebar_common_get_x_offset_advanced();
+    const int x_offset = calculate_x_offset_sidebar_advanced();
     // handled |= image_buttons_handle_mouse(m, x_offset, 24, button_expand_new_sidebar, 1, &button_id);
     // if (button_id) {
     //     data.focus_button_for_tooltip = 12;
@@ -222,7 +229,7 @@ int handle_advanced_sidebar_mouse_build_menu(const mouse *m)
 {
     //  if (city_view_is_sidebar_collapsed()) {
     return image_buttons_handle_mouse(m,
-        sidebar_common_get_x_offset_advanced(), 24, buttons_build, 12, 0);
+        calculate_x_offset_sidebar_advanced(), 24, buttons_build, 12, 0);
     // } else {
     //     return image_buttons_handle_mouse(m,
     //         new_sidebar_common_get_x_offset_expanded(), 24, buttons_build, 15, 0);

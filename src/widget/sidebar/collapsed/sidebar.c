@@ -4,6 +4,7 @@
 #include "city/warning.h"
 #include "graphics/image.h"
 #include "graphics/image_button.h"
+#include "graphics/screen.h"
 #include "graphics/window.h"
 #include "translation/translation.h"
 #include "widget/city.h"
@@ -11,6 +12,8 @@
 #include "widget/sidebar/common.h"
 #include "widget/sidebar/extra.h"
 #include "window/build_menu.h"
+
+#define SIDEBAR_COLLAPSED_WIDTH 42
 
 static void button_collapse_expand(int param1, int param2);
 static void button_build(int submenu, int param2);
@@ -73,7 +76,6 @@ int collapsed_sidebar_width(void)
     return SIDEBAR_COLLAPSED_WIDTH;
 }
 
-
 void draw_collapsed_sidebar_background(int x_offset)
 {
     image_draw(image_group(GROUP_SIDE_PANEL), x_offset, 24, COLOR_MASK_NONE, SCALE_NONE);
@@ -82,17 +84,25 @@ void draw_collapsed_sidebar_background(int x_offset)
     draw_sidebar_remainder(x_offset);
 }
 
+int calculate_x_offset_sidebar_collapsed(void)
+{
+    return screen_width() - SIDEBAR_COLLAPSED_WIDTH;
+}
+
+
 void draw_collapsed_sidebar_foreground()
 {
     if (building_menu_has_changed()) {
         enable_building_buttons();
     }
 
-    const int x_offset = sidebar_common_get_x_offset_collapsed();
+    const int x_offset = calculate_x_offset_sidebar_collapsed();
+
     draw_buttons_collapsed(x_offset);
 
     sidebar_extra_draw_foreground();
 }
+
 
 int handle_collapsed_sidebar_mouse(const mouse *m)
 {
@@ -103,7 +113,7 @@ int handle_collapsed_sidebar_mouse(const mouse *m)
     unsigned int button_id;
     data.focus_button_for_tooltip = 0;
 
-    const int x_offset = sidebar_common_get_x_offset_collapsed();
+    const int x_offset = calculate_x_offset_sidebar_collapsed();
     handled |= image_buttons_handle_mouse(m, x_offset, 24, button_expand_sidebar, 1, &button_id);
     if (button_id) {
         data.focus_button_for_tooltip = 12;
@@ -119,7 +129,7 @@ int handle_collapsed_sidebar_mouse(const mouse *m)
 int handle_collapsed_sidebar_mouse_build_menu(const mouse *m)
 {
     return image_buttons_handle_mouse(m,
-        sidebar_common_get_x_offset_collapsed(), 24, buttons_build_collapsed, 12, 0);
+        calculate_x_offset_sidebar_collapsed(), 24, buttons_build_collapsed, 12, 0);
 }
 
 unsigned int get_collapsed_sidebar_tooltip_text(tooltip_context *c)

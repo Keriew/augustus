@@ -12,6 +12,7 @@
 #include "graphics/image.h"
 #include "graphics/image_button.h"
 #include "graphics/lang_text.h"
+#include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "scenario/property.h"
@@ -31,6 +32,7 @@
 #include "window/overlay_menu.h"
 
 #define MINIMAP_Y_OFFSET 59
+#define SIDEBAR_EXPANDED_WIDTH 162
 
 static void button_overlay_click(int param1, int param2);
 static void button_collapse(int param1, int param2);
@@ -144,7 +146,12 @@ int expanded_sidebar_width(void)
     return SIDEBAR_EXPANDED_WIDTH;
 }
 
-void draw_expanded_sidebar_background(int x_offset)
+int calculate_x_offset_sidebar_expanded(void)
+{
+    return screen_width() - SIDEBAR_EXPANDED_WIDTH;
+}
+
+void draw_expanded_sidebar_background(const int x_offset)
 {
     image_draw(image_group(GROUP_SIDE_PANEL) + 1, x_offset, 24, COLOR_MASK_NONE, SCALE_NONE);
     draw_buttons_expanded(x_offset);
@@ -163,7 +170,7 @@ void draw_expanded_sidebar_foreground(void)
         enable_building_buttons();
     }
 
-    const int x_offset = sidebar_common_get_x_offset_expanded();
+    const int x_offset = calculate_x_offset_sidebar_expanded();
     draw_buttons_expanded(x_offset);
     draw_overlay_text(x_offset + 4);
     widget_minimap_draw_decorated(x_offset + 8, MINIMAP_Y_OFFSET, MINIMAP_WIDTH, MINIMAP_HEIGHT);
@@ -185,7 +192,7 @@ int handle_expanded_sidebar_mouse(const mouse *m)
         return 1;
     }
 
-    const int x_offset = sidebar_common_get_x_offset_expanded();
+    const int x_offset = calculate_x_offset_sidebar_expanded();
     handled |= image_buttons_handle_mouse(m, x_offset, 24, buttons_overlays_collapse_sidebar, 2, &button_id);
     if (button_id) {
         data.focus_button_for_tooltip = button_id + 9;
@@ -206,7 +213,7 @@ int handle_expanded_sidebar_mouse(const mouse *m)
 int handle_expanded_sidebar_mouse_build_menu(const mouse *m)
 {
     return image_buttons_handle_mouse(m,
-        sidebar_common_get_x_offset_expanded(), 24, buttons_build_expanded, 15, 0);
+        calculate_x_offset_sidebar_expanded(), 24, buttons_build_expanded, 15, 0);
 }
 
 unsigned int get_expanded_sidebar_tooltip_text(tooltip_context *c)

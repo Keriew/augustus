@@ -12,6 +12,8 @@ void draw_expanded_sidebar_foreground(void);
 int handle_expanded_sidebar_mouse(const mouse *m);
 int handle_expanded_sidebar_mouse_build_menu( const mouse *m);
 
+int calculate_x_offset_sidebar_expanded(void);
+
 unsigned int get_expanded_sidebar_tooltip_text(tooltip_context *c);
 
 #endif //  WIDGET_EXPANDED_SIDEBAR
