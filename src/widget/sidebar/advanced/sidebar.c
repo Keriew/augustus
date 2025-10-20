@@ -47,32 +47,55 @@ static void button_toggle_grid(int param1, int param2);
 static void button_rotate_north(int param1, int param2);
 static void button_rotate(int clockwise, int param2);
 
+/*
+   reminders
+   =========
+   left and right margins are 4
+   button margins are 6
+   group margins are 15
+*/
+
 static image_button buttons_overlays_collapse_sidebar[] = {
-    {127, 5, 31, 20, IB_NORMAL, 90, 0, button_collapse_expand, button_none, 0, 0, 1},
-    {4, 3, 117, 31, IB_NORMAL, 93, 0, button_overlay_click, button_help, 0, MESSAGE_DIALOG_OVERLAYS, 1}
+    {4, 3, 159, 31, IB_NORMAL, 93, 0, button_overlay_click, button_help, 0, MESSAGE_DIALOG_OVERLAYS, 1},
+    {165, 5, 31, 20, IB_NORMAL, 90, 0, button_collapse_expand, button_none, 0, 0, 1},
+// -------------------------
+// ---- minimap         ----
+// ----    x:36, y:9    ----
+// ---- height: 143     ----
+// -------------------------
+
+// ----- width was 71 now 95
+    {4, 183, 95, 23, IB_NORMAL, GROUP_SIDEBAR_ADVISORS_EMPIRE, 0, button_advisors, button_none, 0, 0, 1},
+    {105, 183, 95, 23, IB_NORMAL, GROUP_SIDEBAR_ADVISORS_EMPIRE, 3, button_empire, button_help, 0, MESSAGE_DIALOG_EMPIRE_MAP, 1},
+// ----
+    {4, 212, 33, 22, IB_NORMAL, 0, 0, button_toggle_grid, button_none, 0, 0, 1, "UI", "Toggle Grid Button" },
+    {43, 212, 33, 22, IB_NORMAL, GROUP_SIDEBAR_BRIEFING_ROTATE_BUTTONS, 3, button_rotate_north, button_none, 0, 0, 1},
+    {81, 212, 33, 22, IB_NORMAL, GROUP_SIDEBAR_BRIEFING_ROTATE_BUTTONS, 6, button_rotate, button_none, 0, 0, 1},
+    {120, 212, 33, 22, IB_NORMAL, GROUP_SIDEBAR_BRIEFING_ROTATE_BUTTONS, 9, button_rotate, button_none, 1, 0, 1},
+    {159, 212, 39, 22, IB_NORMAL, GROUP_MESSAGE_ICON, 18, button_messages, button_help, 0, MESSAGE_DIALOG_MESSAGES, 1},
+
 };
 
+
 static image_button buttons_build[] = {
-    {2, 26, 39, 26, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 0, button_build, button_none, BUILD_MENU_VACANT_HOUSE, 0, 1},
-    {2, 67, 39, 26, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 8, button_build, button_none, BUILD_MENU_CLEAR_LAND, 0, 1},
-    {2, 102, 39, 26, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 12, button_build, button_none, BUILD_MENU_ROAD, 0, 1},
-    {2, 137, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 4, button_build, button_none, BUILD_MENU_WATER, 0, 1},
-    {2, 172, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 40, button_build, button_none, BUILD_MENU_HEALTH, 0, 1, "UI", "Asclepius Button"},
-    {2, 207, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 28, button_build, button_none, BUILD_MENU_TEMPLES, 0, 1},
-    {2, 242, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 24, button_build, button_none, BUILD_MENU_EDUCATION, 0, 1},
-    {2, 277, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 20, button_build, button_none, BUILD_MENU_ENTERTAINMENT, 0, 1},
-    {2, 312, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 16, button_build, button_none, BUILD_MENU_ADMINISTRATION, 0, 1},
-    {2, 347, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 44, button_build, button_none, BUILD_MENU_ENGINEERING, 0, 1},
-    {2, 382, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 36, button_build, button_none, BUILD_MENU_SECURITY, 0, 1},
-    {2, 417, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 32, button_build, button_none, BUILD_MENU_INDUSTRY, 0, 1},
-    {2, 452, 39, 26, IB_NORMAL, GROUP_MESSAGE_ICON, 18, button_messages, button_help, 0, MESSAGE_DIALOG_MESSAGES, 1},
-    {2, 487, 39, 26, IB_BUILD, GROUP_MESSAGE_ICON, 22, button_go_to_problem, button_none, 0, 0, 1},
-    {2, 522, 39, 26, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 48, button_undo, button_none, 0, 0, 1},
+    {4, 26, 39, 26, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 0, button_build, button_none, BUILD_MENU_VACANT_HOUSE, 0, 1},
+    {4, 67, 39, 26, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 8, button_build, button_none, BUILD_MENU_CLEAR_LAND, 0, 1},
+    {4, 102, 39, 26, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 12, button_build, button_none, BUILD_MENU_ROAD, 0, 1},
+    {4, 137, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 4, button_build, button_none, BUILD_MENU_WATER, 0, 1},
+    {4, 172, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 40, button_build, button_none, BUILD_MENU_HEALTH, 0, 1, "UI", "Asclepius Button"},
+    {4, 207, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 28, button_build, button_none, BUILD_MENU_TEMPLES, 0, 1},
+    {4, 242, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 24, button_build, button_none, BUILD_MENU_EDUCATION, 0, 1},
+    {4, 277, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 20, button_build, button_none, BUILD_MENU_ENTERTAINMENT, 0, 1},
+    {4, 312, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 16, button_build, button_none, BUILD_MENU_ADMINISTRATION, 0, 1},
+    {4, 347, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 44, button_build, button_none, BUILD_MENU_ENGINEERING, 0, 1},
+    {4, 382, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 36, button_build, button_none, BUILD_MENU_SECURITY, 0, 1},
+    {4, 417, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 32, button_build, button_none, BUILD_MENU_INDUSTRY, 0, 1},
+    {4, 487, 39, 26, IB_BUILD, GROUP_MESSAGE_ICON, 22, button_go_to_problem, button_none, 0, 0, 1},
+    {4, 522, 39, 26, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 48, button_undo, button_none, 0, 0, 1},
 };
 
 static image_button buttons_top_expanded[] = {
-    {7, 155, 71, 23, IB_NORMAL, GROUP_SIDEBAR_ADVISORS_EMPIRE, 0, button_advisors, button_none, 0, 0, 1},
-    {84, 155, 71, 23, IB_NORMAL, GROUP_SIDEBAR_ADVISORS_EMPIRE, 3, button_empire, button_help, 0, MESSAGE_DIALOG_EMPIRE_MAP, 1},
+
     {7, 184, 33, 22, IB_NORMAL, 0, 0, button_toggle_grid, button_none, 0, 0, 1, "UI", "Toggle Grid Button" },
     {46, 184, 33, 22, IB_NORMAL, GROUP_SIDEBAR_BRIEFING_ROTATE_BUTTONS, 3, button_rotate_north, button_none, 0, 0, 1},
     {84, 184, 33, 22, IB_NORMAL, GROUP_SIDEBAR_BRIEFING_ROTATE_BUTTONS, 6, button_rotate, button_none, 0, 0, 1},
@@ -95,15 +118,15 @@ static void draw_overlay_text(int x_offset)
 static void draw_sidebar_remainder(const int x_offset)
 {
     //int width = SIDEBAR_EXPANDED_WIDTH;
-    const int width = 162;
+    const int sidebar_without_icons_width = 162;
 
     // int available_height = sidebar_common_get_height() - SIDEBAR_MAIN_SECTION_HEIGHT;
     const int available_height = sidebar_common_get_height() - MINIMAP_HEIGHT - MINIMAP_Y_OFFSET;
 
-    const int y_offset = SIDEBAR_FILLER_Y_OFFSET + MINIMAP_Y_OFFSET;
+    const int y_offset = 201;
 
     const int extra_height = sidebar_extra_draw_background(x_offset, y_offset,
-        width, available_height, 0, SIDEBAR_EXTRA_DISPLAY_ALL);
+        sidebar_without_icons_width, available_height, 0, SIDEBAR_EXTRA_DISPLAY_ALL);
     sidebar_extra_draw_foreground();
     const int relief_y_offset = SIDEBAR_FILLER_Y_OFFSET + extra_height;
 
@@ -112,25 +135,28 @@ static void draw_sidebar_remainder(const int x_offset)
 
 static void draw_number_of_messages(int x_offset)
 {
+    const int y = TOP_MENU_HEIGHT + 210 + 8;
+    x_offset += 159+35;
+
     int messages = city_message_count();
     int show_messages = game_campaign_is_original() || messages > 0 || scenario_intro_message();
-    buttons_build[12].enabled = show_messages;
-    buttons_build[13].enabled = city_message_problem_area_count();
+    buttons_overlays_collapse_sidebar[8].enabled = show_messages;
+    buttons_build[12].enabled = city_message_problem_area_count();
     if (show_messages) {
         int width = text_get_number_width(messages, '@', "", FONT_SMALL_PLAIN);
-        text_draw_number(messages, '@', "", (x_offset + 100) - width, 452, FONT_SMALL_PLAIN, COLOR_BLACK); //top
-        text_draw_number(messages, '@', "", (x_offset + 100) - width, 454, FONT_SMALL_PLAIN, COLOR_BLACK); //bottom
-        text_draw_number(messages, '@', "", (x_offset + 99) - width, 453, FONT_SMALL_PLAIN, COLOR_BLACK); //left
-        text_draw_number(messages, '@', "", (x_offset + 101) - width, 453, FONT_SMALL_PLAIN, COLOR_BLACK); //right
-        text_draw_number(messages, '@', "", (x_offset + 100) - width, 453, FONT_SMALL_PLAIN, COLOR_WHITE);
+        text_draw_number(messages, '@', "", x_offset - width, y, FONT_SMALL_PLAIN, COLOR_BLACK); //top
+        text_draw_number(messages, '@', "", x_offset - width, y, FONT_SMALL_PLAIN, COLOR_BLACK); //bottom
+        text_draw_number(messages, '@', "", x_offset + 1 - width, y, FONT_SMALL_PLAIN, COLOR_BLACK); //left
+        text_draw_number(messages, '@', "", x_offset + 2 - width, y, FONT_SMALL_PLAIN, COLOR_BLACK); //right
+        text_draw_number(messages, '@', "", x_offset - width, y, FONT_SMALL_PLAIN, COLOR_WHITE);
     }
 }
 
 static void draw_buttons(int x_offset)
 {
-    buttons_build[14].enabled = game_can_undo();
-    image_buttons_draw(x_offset + 42, 24, buttons_overlays_collapse_sidebar, 2);
-    image_buttons_draw(x_offset, 0, buttons_build, 15);
+    buttons_build[13].enabled = game_can_undo();
+    image_buttons_draw(x_offset, 24, buttons_overlays_collapse_sidebar, 9);
+    image_buttons_draw(x_offset, 240, buttons_build, 14);
     //   image_buttons_draw(x_offset, 24, buttons_top_expanded, 6);
 }
 
@@ -160,11 +186,11 @@ int calculate_x_offset_sidebar_advanced(void)
     return screen_width() - SIDEBAR_ADVANCED_WIDTH;
 }
 
-void draw_advanced_sidebar_background(int x_offset)
+void draw_advanced_sidebar_background(const int x_offset)
 {
-    image_draw(image_group(GROUP_SIDE_PANEL), x_offset, TOP_MENU_HEIGHT, COLOR_MASK_NONE, SCALE_NONE);
+    // image_draw(image_group(GROUP_SIDE_PANEL), x_offset, TOP_MENU_HEIGHT, COLOR_MASK_NONE, SCALE_NONE);
     // draw_buttons_collapsed(x_offset);
-    draw_sidebar_remainder(x_offset + 42);
+    // draw_sidebar_remainder(x_offset + 42);
 }
 
 void draw_advanced_sidebar_foreground(void)
@@ -176,13 +202,12 @@ void draw_advanced_sidebar_foreground(void)
     const int x_offset = calculate_x_offset_sidebar_advanced();
     draw_buttons(x_offset);
 
-    const int new_x_offset = x_offset + 42;
+    draw_overlay_text(x_offset + 4);
 
-    draw_overlay_text(new_x_offset + 4);
-    widget_minimap_draw_decorated(new_x_offset + 8, MINIMAP_Y_OFFSET, MINIMAP_WIDTH, MINIMAP_HEIGHT);
-    draw_number_of_messages(new_x_offset);
-    // }
-    sidebar_extra_draw_foreground();
+    widget_minimap_draw_decorated(x_offset + 8, 36 + TOP_MENU_HEIGHT, 187, 143);
+    draw_number_of_messages(x_offset);
+
+    // sidebar_extra_draw_foreground();
 }
 
 int handle_advanced_sidebar_mouse(const mouse *m)

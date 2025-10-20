@@ -11,7 +11,7 @@
 #include "expanded/sidebar.h"
 #include "graphics/screen.h"
 
-typedef enum {EXPANDED, COLLAPSED, ADVANCED } States;
+typedef enum {ADVANCED, EXPANDED, COLLAPSED } States;
 
 static struct {
     States currentState;
