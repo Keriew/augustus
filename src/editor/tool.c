@@ -23,6 +23,10 @@
 #include "city/warning.h"
 #include "widget/minimap.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #define TERRAIN_PAINT_MASK ~(TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_BUILDING |\
                             TERRAIN_SHRUB | TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_MEADOW)
 
@@ -34,7 +38,9 @@ static struct {
     int build_in_progress;
     int start_elevation;
     map_tile start_tile;
-} data = { 0, TOOL_GRASS, 0, 3, 0 };
+    grid_slice *land_selection;
+    void (*selection_callback)(grid_slice *selection);
+} data = { 0, TOOL_GRASS, 0, 3, 0, 0, {0}, 0, 0 };
 
 tool_type editor_tool_type(void)
 {
@@ -100,7 +106,7 @@ void editor_tool_foreach_brush_tile(void (*callback)(const void *user_data, int 
 
 int editor_tool_is_updatable(void)
 {
-    return data.type == TOOL_ROAD;
+    return data.type == TOOL_ROAD || data.type == TOOL_SELECT_LAND;;
 }
 
 int editor_tool_is_in_use(void)
@@ -509,7 +515,56 @@ void editor_tool_end_use(const map_tile *tile)
         case TOOL_ROAD:
             place_road(&data.start_tile, tile);
             break;
+        case TOOL_SELECT_LAND:
+            // Create grid_slice from start and end tiles
+            if (data.land_selection) {
+                free(data.land_selection);
+                data.land_selection = 0;
+            }
+            data.land_selection = map_grid_get_grid_slice_from_corners(
+                data.start_tile.x, data.start_tile.y, tile->x, tile->y);
+
+            // Trigger callback if set
+            if (data.selection_callback && data.land_selection) {
+                data.selection_callback(data.land_selection);
+            }
+            break;
         default:
             break;
+    }
+}
+
+void editor_tool_set_selection_callback(void (*callback)(grid_slice *selection))
+{
+    data.selection_callback = callback;
+}
+
+grid_slice *editor_tool_get_land_selection(void)
+{
+    return data.land_selection;
+}
+
+const map_tile *editor_tool_get_start_tile(void)
+{
+    if (data.build_in_progress && editor_tool_is_updatable()) {
+        return &data.start_tile;
+    }
+    return 0;
+}
+
+void editor_tool_get_selection_offsets(int *start_offset, int *end_offset)
+{
+    if (!data.land_selection || data.land_selection->size == 0) {
+        if (start_offset) *start_offset = 0;
+        if (end_offset) *end_offset = 0;
+        return;
+    }
+
+    // Return the first and last offsets which represent the rectangle corners
+    if (start_offset) {
+        *start_offset = data.land_selection->grid_offsets[0];
+    }
+    if (end_offset) {
+        *end_offset = data.land_selection->grid_offsets[data.land_selection->size - 1];
     }
 }

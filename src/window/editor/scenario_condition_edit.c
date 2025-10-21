@@ -1,6 +1,7 @@
 #include "scenario_condition_edit.h"
 
 #include "core/string.h"
+#include "editor/tool.h"
 #include "game/resource.h"
 #include "graphics/button.h"
 #include "graphics/generic_button.h"
@@ -45,6 +46,8 @@ static void resource_selection(const generic_button *button);
 static void custom_message_selection(void);
 static void change_parameter(xml_data_attribute_t *parameter, const generic_button *button);
 static int get_param_value(void);
+static void on_grid_slice_selected(grid_slice *selection);
+static void start_grid_slice_selection(void);
 
 static generic_button buttons[] = {
     {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (0 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_amount, 0, 1},
@@ -390,6 +393,67 @@ static void custom_variable_selection(void)
     window_editor_custom_variables_show(set_param_custom_variable);
 }
 
+static void on_grid_slice_selected(grid_slice *selection)
+{
+    if (!selection || selection->size == 0) {
+        // User cancelled or invalid selection
+        editor_tool_deactivate();
+        window_editor_scenario_condition_edit_show(data.condition);
+        return;
+    }
+
+    // Get the start and end grid offsets (opposite corners of the rectangle)
+    int start_offset = 0;
+    int end_offset = 0;
+    editor_tool_get_selection_offsets(&start_offset, &end_offset);
+
+    // Store both corners in consecutive parameters
+    // For GRID_SLICE type, we assume it uses two consecutive parameters:
+    // - The first parameter stores the start corner offset
+    // - The next parameter stores the end corner offset
+    // These two offsets can later be used to reconstruct the rectangle using
+    // map_grid_get_grid_slice_from_corners() or similar functions
+    switch (data.parameter_being_edited) {
+        case 1:
+            data.condition->parameter1 = start_offset;
+            data.condition->parameter2 = end_offset;
+            break;
+        case 2:
+            data.condition->parameter2 = start_offset;
+            data.condition->parameter3 = end_offset;
+            break;
+        case 3:
+            data.condition->parameter3 = start_offset;
+            data.condition->parameter4 = end_offset;
+            break;
+        case 4:
+            data.condition->parameter4 = start_offset;
+            data.condition->parameter5 = end_offset;
+            break;
+        case 5:
+            // Can't store end offset if editing parameter 5 (it's the last one)
+            // Just store start offset
+            data.condition->parameter5 = start_offset;
+            break;
+    }
+
+    // Deactivate the tool and return to the condition edit window
+    editor_tool_deactivate();
+    window_editor_scenario_condition_edit_show(data.condition);
+}
+
+static void start_grid_slice_selection(void)
+{
+    // Set up the callback
+    editor_tool_set_selection_callback(on_grid_slice_selected);
+
+    // Activate the land selection tool
+    editor_tool_set_type(TOOL_SELECT_LAND);
+
+    // Switch to the editor map window to allow selection
+    window_editor_map_show();
+}
+
 static void change_parameter(xml_data_attribute_t *parameter, const generic_button *button)
 {
     set_parameter_being_edited(button->parameter1);
@@ -431,8 +495,12 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
         case PARAMETER_TYPE_CUSTOM_VARIABLE:
             custom_variable_selection();
             return;
+        case PARAMETER_TYPE_GRID_SLICE:
+            start_grid_slice_selection();
+            return;
         case PARAMETER_TYPE_FORMULA:
             create_evaluation_formula(parameter);
+            return;
         default:
             return;
     }

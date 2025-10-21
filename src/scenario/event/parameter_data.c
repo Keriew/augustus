@@ -134,8 +134,8 @@ static scenario_condition_data_t scenario_condition_data[CONDITION_TYPE_MAX] = {
                                         .xml_parm5 = {.name = "respect_settings",    .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,         .max_limit = 1,             .key = TR_PARAMETER_RESPECT_SETTINGS }, },
     [CONDITION_TYPE_BUILDING_COUNT_AREA] = {.type = CONDITION_TYPE_BUILDING_COUNT_AREA,
                                         .xml_attr = {.name = "building_count_area", .type = PARAMETER_TYPE_TEXT,             .key = TR_CONDITION_TYPE_BUILDING_COUNT_AREA },
-                                        .xml_parm1 = {.name = "grid_offset",         .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET },
-                                        .xml_parm2 = {.name = "block_radius",        .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_RADIUS },
+                                        .xml_parm1 = {.name = "grid_offset",         .type = PARAMETER_TYPE_GRID_SLICE,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET_CORNER1 },
+                                        .xml_parm2 = {.name = "grid_offset2",        .type = PARAMETER_TYPE_GRID_SLICE,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET_CORNER2 },
                                         .xml_parm3 = {.name = "building",            .type = PARAMETER_TYPE_BUILDING,         .key = TR_PARAMETER_TYPE_BUILDING_COUNTING },
                                         .xml_parm4 = {.name = "check",               .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
                                         .xml_parm5 = {.name = "value",               .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
@@ -871,7 +871,7 @@ static void generate_model_mappings(void)
     }
     for (building_type type = BUILDING_NONE; type < BUILDING_TYPE_MAX; type++) {
         const building_properties *props = building_properties_for_type(type);
-        if (!(props->size || props->event_data.attr) && type != BUILDING_CLEAR_LAND && type != BUILDING_REPAIR_LAND || 
+        if (!(props->size || props->event_data.attr) && type != BUILDING_CLEAR_LAND && type != BUILDING_REPAIR_LAND ||
             (type == BUILDING_GRAND_GARDEN || type == BUILDING_DOLPHIN_FOUNTAIN)) {
             continue;
         }
@@ -1084,6 +1084,7 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
 {
     switch (attribute_data->type) {
         case PARAMETER_TYPE_NUMBER:
+        case PARAMETER_TYPE_GRID_SLICE:
             if (attribute_data->min_limit > 0) {
                 return attribute_data->min_limit;
             } else {
@@ -1197,6 +1198,10 @@ const uint8_t *scenario_events_parameter_data_get_display_string(special_attribu
                 return translation_for(entry->key);
             }
             break;
+        case PARAMETER_TYPE_GRID_SLICE:
+            static const uint8_t buffer[16];
+            string_from_int(buffer, entry->value, 0);
+            return buffer;
         default:
             return translation_for(entry->key);
     }
@@ -1264,6 +1269,7 @@ void scenario_events_parameter_data_get_display_string_for_value(parameter_type 
     switch (type) {
         case PARAMETER_TYPE_NUMBER:
         case PARAMETER_TYPE_MIN_MAX_NUMBER:
+        case PARAMETER_TYPE_GRID_SLICE:
             string_from_int(result_text, value, 0);
             return;
         case PARAMETER_TYPE_CUSTOM_VARIABLE:

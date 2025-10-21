@@ -2,6 +2,7 @@
 #define EDITOR_TOOL_H
 
 #include "map/point.h"
+#include "map/grid.h"
 
 typedef enum {
     TOOL_GRASS = 0,
@@ -30,6 +31,7 @@ typedef enum {
     TOOL_NATIVE_MONUMENT = 28,
     TOOL_NATIVE_WATCHTOWER = 29,
     TOOL_NATIVE_RUINS = 30,
+    TOOL_SELECT_LAND = 31
 } tool_type;
 
 tool_type editor_tool_type(void);
@@ -52,5 +54,32 @@ void editor_tool_start_use(const map_tile *tile);
 void editor_tool_update_use(const map_tile *tile);
 
 void editor_tool_end_use(const map_tile *tile);
+
+/**
+ * @brief Set callback for TOOL_SELECT_LAND to receive the selected grid_slice
+ * @param callback Function to be called when selection is completed, receives grid_slice pointer
+ */
+void editor_tool_set_selection_callback(void (*callback)(grid_slice *selection));
+
+/**
+ * @brief Get the current land selection from TOOL_SELECT_LAND
+ * @return grid_slice pointer with selected tiles, or NULL if no selection or tool not active
+ * @note The returned pointer is dynamically allocated and must be freed by the caller
+ */
+grid_slice *editor_tool_get_land_selection(void);
+
+/**
+ * @brief Get the start tile for updatable tools (TOOL_ROAD, TOOL_SELECT_LAND)
+ * @return Pointer to the start map_tile, or NULL if tool not in use
+ */
+const map_tile *editor_tool_get_start_tile(void);
+
+/**
+ * @brief Get the start and end grid offsets from the land selection
+ * @param start_offset Pointer to store the start grid offset (can be NULL)
+ * @param end_offset Pointer to store the end grid offset (can be NULL)
+ * @note The offsets represent opposite corners of the selected rectangle
+ */
+void editor_tool_get_selection_offsets(int *start_offset, int *end_offset);
 
 #endif // EDITOR_TOOL_H
