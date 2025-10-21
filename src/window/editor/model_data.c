@@ -16,6 +16,7 @@
 #include "input/input.h"
 #include "translation/translation.h"
 #include "window/editor/map.h"
+#include "window/file_dialog.h"
 #include "window/numeric_input.h"
 
 #define NO_SELECTION (unsigned int) -1
@@ -97,14 +98,14 @@ static void button_static_click(const generic_button *button)
 {
     switch (button->parameter1) {
         case 0:
-            
+            window_file_dialog_show(FILE_TYPE_MODEL_DATA, FILE_DIALOG_SAVE);
             break;
         case 1:
             model_reset();
             window_request_refresh();
             break;
         case 2:
-            
+            window_file_dialog_show(FILE_TYPE_MODEL_DATA, FILE_DIALOG_LOAD);
             break;
         default:
             break;

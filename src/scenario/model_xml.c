@@ -77,7 +77,8 @@ int scenario_model_export_to_xml(const char *filename)
 
 static int start_building_model(void);
 
-static const xml_parser_element xml_elements[1] = {
+static const xml_parser_element xml_elements[2] = {
+    {"model_data"},
     {"building_model", start_building_model, 0, "model_data"}
 };
 #define MAX_XML_ELEMENTS sizeof(xml_elements)/sizeof(xml_parser_element)
@@ -91,7 +92,7 @@ static void xml_import_log_error(const char *msg)
     log_error("Line:", 0, data.error_line_number);
 
     window_plain_message_dialog_show_with_extra(
-        TR_EDITOR_UNABLE_TO_LOAD_EVENTS_TITLE, TR_EDITOR_CHECK_LOG_MESSAGE,
+        TR_EDITOR_UNABLE_TO_LOAD_MODEL_DATA_TITLE, TR_EDITOR_CHECK_LOG_MESSAGE,
         string_from_ascii(data.error_message), 0);
 }
 
@@ -105,27 +106,27 @@ static int start_building_model(void)
     }
     building_type type = found->value;
     
-    if (xml_parser_has_attribute("cost")) {
+    if (!xml_parser_has_attribute("cost")) {
         xml_import_log_error("Attribute missing. 'cost' not given");
         return 0;
     }
-    if (xml_parser_has_attribute("desirability_value")) {
+    if (!xml_parser_has_attribute("desirability_value")) {
         xml_import_log_error("Attribute missing. 'desirability_value' not given");
         return 0;
     }
-    if (xml_parser_has_attribute("desirability_step")) {
+    if (!xml_parser_has_attribute("desirability_step")) {
         xml_import_log_error("Attribute missing. 'desirability_step' not given");
         return 0;
     }
-    if (xml_parser_has_attribute("desirability_step_size")) {
+    if (!xml_parser_has_attribute("desirability_step_size")) {
         xml_import_log_error("Attribute missing. 'desirability_step_size' not given");
         return 0;
     }
-    if (xml_parser_has_attribute("desirability_range")) {
+    if (!xml_parser_has_attribute("desirability_range")) {
         xml_import_log_error("Attribute missing. 'desirability_range' not given");
         return 0;
     }
-    if (xml_parser_has_attribute("laborers")) {
+    if (!xml_parser_has_attribute("laborers")) {
         xml_import_log_error("Attribute missing. 'laborers' not given");
         return 0;
     }
