@@ -811,7 +811,7 @@ static char *file_to_buffer(const char *filename, int *output_length)
 {
     FILE *file = file_open(filename, "r");
     if (!file) {
-        log_error("Error opening empire file", filename, 0);
+        log_error("Error opening event file", filename, 0);
         return 0;
     }
     fseek(file, 0, SEEK_END);
@@ -820,7 +820,7 @@ static char *file_to_buffer(const char *filename, int *output_length)
 
     char *buf = malloc(size);
     if (!buf) {
-        log_error("Error opening empire file", filename, 0);
+        log_error("Error opening event file", filename, 0);
         file_close(file);
         return 0;
     }
