@@ -23,6 +23,7 @@
 #include "game/state.h"
 #include "game/time.h"
 #include "game/undo.h"
+#include "graphics/complex_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
@@ -57,6 +58,8 @@
 static int mothball_warning_id;
 static int time_left_label_shown;
 
+
+
 static void draw_topleft_label_with_fragments(int x, int y, const lang_fragment *fragments, int fragment_count, font_t font, color_t color_ver);
 static void draw_topleft_label_short(int x, int y, const uint8_t *label_text, int value, font_t font);
 
@@ -68,7 +71,7 @@ int window_city_is_window_cityview(void)
 
 static void draw_background(void)
 {
-    if (window_is(WINDOW_CITY)) {
+    if (window_city_is_window_cityview()) {
         widget_city_setup_routing_preview();
     }
     widget_sidebar_city_draw_background();
@@ -160,7 +163,7 @@ static void draw_paused_banner(void)
     }
 }
 
-static void draw_custom_variables_text_display(void)
+void window_city_draw_custom_variables_text_display(void)
 {
     if (!config_get(CONFIG_UI_SHOW_CUSTOM_VARIABLES)) {
         return;
@@ -180,7 +183,8 @@ static void draw_custom_variables_text_display(void)
         lang_fragment frags[1] = {
             {.type = LANG_FRAG_TEXT, .text = var_text_resolved }
         };
-        color_t color_ver = scenario_custom_variable_get_color(i);
+        int c_group = scenario_custom_variable_get_color_group(i);
+        color_t color_ver = complex_button_basic_colors(c_group - 1); // color groups are 1-based
         draw_topleft_label_with_fragments(TOPLEFT_MESSAGES_X, y, frags, 1, font, color_ver);
         y += TOPLEFT_MESSAGES_Y_SPACING;
     }
@@ -278,9 +282,9 @@ static void draw_foreground(void)
     window_city_draw();
     widget_sidebar_city_draw_foreground();
     draw_speedrun_info();
-    if ((window_get_id() >= WINDOW_CITY && window_get_id() <= WINDOW_SLIDING_SIDEBAR) || window_is(WINDOW_CITY_MAIN_MENU)) {
+    if (window_city_is_window_cityview()) {
         draw_time_left();
-        draw_custom_variables_text_display();
+        window_city_draw_custom_variables_text_display();
         widget_city_draw_construction_buttons();
         if (!mouse_get()->is_touch || sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED)) {
             draw_paused_banner();

@@ -132,7 +132,7 @@ static void init_color_dropdown(void)
 
     for (int dd_anchors = 0; dd_anchors < MAX_VISIBLE_GRID_ITEMS; dd_anchors++) {
         color_dropdown_options[dd_anchors][0].is_hidden = 0;
-        color_dropdown_options[dd_anchors][0].x = 598;
+        color_dropdown_options[dd_anchors][0].x = 568;
         color_dropdown_options[dd_anchors][0].y = GRID_BOX_ITEM_HEIGHT * dd_anchors + 79;
         color_dropdown_options[dd_anchors][0].height = CHECKBOX_ROW_WIDTH;
         color_dropdown_options[dd_anchors][0].width = COLOR_DROPDOWN_WIDTH + 20;
@@ -225,13 +225,21 @@ static void update_item_buttons_positions(void)
     item_buttons[2].x = item_buttons[1].x + item_buttons[1].width + BUTTONS_PADDING;
 
     // Position visible checkbox (fixed width)
-    item_buttons[4].x = variable_buttons.width - variable_buttons.item_margin.horizontal - CHECKBOX_ROW_WIDTH - 60;
+    item_buttons[4].x = variable_buttons.width - variable_buttons.item_margin.horizontal
+        - CHECKBOX_ROW_WIDTH - COLOR_DROPDOWN_WIDTH;
     if (grid_box_has_scrollbar(&variable_buttons)) {
         item_buttons[4].x -= 2 * BLOCK_SIZE;
+        for (int i = 0; i < MAX_VISIBLE_GRID_ITEMS; i++) {
+            color_dropdown_options[i][0].x = 568 - 2 * BLOCK_SIZE;
+        }
+    } else {
+        for (int i = 0; i < MAX_VISIBLE_GRID_ITEMS; i++) {
+            color_dropdown_options[i][0].x = 568;
+        }
     }
 
     item_buttons[3].x = item_buttons[2].x + item_buttons[2].width + BUTTONS_PADDING;
-    item_buttons[3].width = item_buttons[4].x - item_buttons[3].x - BUTTONS_PADDING - COLOR_DROPDOWN_WIDTH;
+    item_buttons[3].width = item_buttons[4].x - item_buttons[3].x - BUTTONS_PADDING;
 }
 
 static void draw_background(void)
@@ -279,9 +287,9 @@ static void draw_background(void)
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_TEXT_DISPLAY,
         base_x_offset + item_buttons[3].x, 60, item_buttons[3].width, FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_IS_VISIBLE,
-        base_x_offset + item_buttons[4].x - 15 - 20, 60, 20, FONT_SMALL_PLAIN);
+        base_x_offset + item_buttons[4].x - 15, 60, 20, FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_COLOR_LABEL,
-        color_dropdowns->buttons[0].x - 20, 60, 20, FONT_SMALL_PLAIN);
+        color_dropdowns->buttons[0].x, 60, COLOR_DROPDOWN_WIDTH, FONT_SMALL_PLAIN);
     // Bottom buttons
     const generic_button *delete_selected_button = &constant_buttons[1];
     color_t color = data.selection_type == CHECKBOX_NO_SELECTION ? COLOR_FONT_LIGHT_GRAY : COLOR_RED;
@@ -297,15 +305,26 @@ static void draw_background(void)
     graphics_reset_dialog();
 }
 
+static void update_dd_anchor(int variable_id, int grid_box_position)
+{
+    int id = variable_id;
+    int pos = grid_box_position;
+    int color_group = scenario_custom_variable_get_color_group(id);
+    color_dropdowns[pos].selected_index = scenario_custom_variable_get_color_group(id); // selcted index color
+    color_dropdown_options[pos][0].parameters[0] = id; //set the variable id as parameter for the color dropdown
+    color_dropdown_options[pos][0].color_mask = scenario_custom_variable_get_color(id); //set the selected colour option
+    color_dropdown_options[pos][0].is_hidden = 0; //unhide the associated color dropdown
+    color_dropdown_options[pos][0].sequence = &color_fragments[color_group]; //select text
+    color_dropdown_options[pos][0].font = (color_group > 8) ? FONT_SMALL_PLAIN : FONT_NORMAL_BLACK; //match font
+}
+
 static void draw_variable_item(const grid_box_item *item)
 {
     unsigned int id = data.custom_variable_ids[item->index];
     const uint8_t *name = scenario_custom_variable_get_name(id);
     int value = scenario_custom_variable_get_value(id);
-    color_dropdown_options[item->index][0].color_mask = scenario_custom_variable_get_color(id); //set the selected colour option
-    color_dropdown_options[item->index][0].is_hidden = 0; //unhide the associated color dropdown
-    color_dropdown_options[item->index][0].parameters[0] = id; //set the variable id as parameter for the color dropdown
-    color_dropdowns[item->index].selected_index = scenario_custom_variable_get_color_group(id);
+    update_dd_anchor(id, item->position);
+
     // Variable ID
     text_draw_number_centered(id, item->x + (data.callback ? 0 : CHECKBOX_ROW_WIDTH), item->y + 8,
         32, FONT_SMALL_PLAIN);
@@ -541,7 +560,6 @@ static void button_edit_color(dropdown_button *dd)
     unsigned int color_id = dd->selected_index; //1-based index for custom variables
     int variable_id = dd->buttons[0].parameters[0]; //get variable id from the selected button
     scenario_custom_variable_set_color_group(variable_id, color_id);
-
     window_request_refresh();
 }
 
