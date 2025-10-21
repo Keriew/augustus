@@ -58,7 +58,7 @@ typedef enum {
 static void button_variable_checkbox(const generic_button *button);
 static void button_edit_variable_name(const generic_button *button);
 static void button_edit_variable_value(const generic_button *button);
-static void button_edit_color(const dropdown_button *button);
+static void button_edit_color(dropdown_button *button);
 static void button_edit_display_text(const generic_button *button);
 static void button_variable_visible_checkbox(const generic_button *button);
 
@@ -536,7 +536,7 @@ static void button_edit_variable_value(const generic_button *button)
         9, -1000000000, 1000000000, set_variable_value);
 }
 
-static void button_edit_color(const dropdown_button *dd)
+static void button_edit_color(dropdown_button *dd)
 {
     unsigned int color_id = dd->selected_index; //1-based index for custom variables
     int variable_id = dd->buttons[0].parameters[0]; //get variable id from the selected button
