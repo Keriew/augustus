@@ -9,7 +9,7 @@
 
 #define DROPDOWN_BUTTON_MAX_COUNT 20 // arbitrary limit for static storage
 
-static complex_button dropdown_button_storage[DROPDOWN_BUTTON_MAX_COUNT]; //buffer for simple init
+static complex_button dropdown_button_storage[DROPDOWN_BUTTON_MAX_COUNT] = { 0 }; //buffer for simple init
 
 static int calculate_text_width(const complex_button *btn, font_t font)
 {
@@ -115,9 +115,8 @@ void dropdown_button_init_simple(int x, int y, const lang_fragment *frags, unsig
         memset(dd, 0, sizeof(*dd));
         return;
     }
-    memset(dd->buttons, 0, sizeof(dropdown_button_storage));
     dd->buttons = dropdown_button_storage;
-
+    memset(dd->buttons, 0, sizeof(dropdown_button_storage));
     dd->num_buttons = count;
     dd->expanded = 0;
     dd->selected_index = dd->selected_index > 0 ? dd->selected_index : 0; // show the sequence of the origin by default
