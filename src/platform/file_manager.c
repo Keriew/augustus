@@ -249,7 +249,7 @@ static struct {
     "editor/empires/",
     "editor/messages/",
     "editor/events/",
-    "editor/model"
+    "editor/model/"
 };
 
 static void set_assets_directory(void)

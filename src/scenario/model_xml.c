@@ -31,17 +31,34 @@ static void export_model_data(buffer *buf)
     xml_exporter_new_element("model_data");
     xml_exporter_add_attribute_int("version", MODEL_DATA_VERSION);
     
-    for (building_type type = BUILDING_ANY; type < BUILDING_TYPE_MAX; type++) {
+    int edited_models = 0;
+    
+    for (building_type type = BUILDING_ANY + 1; type < BUILDING_TYPE_MAX; ++type) {
         const building_properties *props = building_properties_for_type(type);
-        if (!(props->size || props->event_data.attr) && type != BUILDING_CLEAR_LAND && type != BUILDING_REPAIR_LAND || 
-            (type == BUILDING_GRAND_GARDEN || type == BUILDING_DOLPHIN_FOUNTAIN)) {
+        if (!props) {
             continue;
         }
-        if (memcmp(model_get_building(type), &props->building_model_data, sizeof(model_building)) == 0) {
+        
+        if (((!props->size || !props->event_data.attr) && type != BUILDING_CLEAR_LAND && type != BUILDING_REPAIR_LAND )
+             || type == BUILDING_GRAND_GARDEN
+             || type == BUILDING_DOLPHIN_FOUNTAIN ) {
             continue;
         }
+
         model_building *model = model_get_building(type);
-        xml_exporter_new_element("model_building");
+        model_building *prop_model = &props->building_model_data;
+        if (!model) {
+            continue;
+        }
+        if (model == prop_model) {
+            continue;
+        }
+
+        if (memcmp(model, prop_model, sizeof(*model)) == 0) {
+            continue;
+        }
+        
+        xml_exporter_new_element("building_model");
         xml_exporter_add_attribute_text("building_type", props->event_data.attr);
         xml_exporter_add_attribute_int("cost", model->cost);
         xml_exporter_add_attribute_int("desirability_value", model->desirability_value);
@@ -49,10 +66,16 @@ static void export_model_data(buffer *buf)
         xml_exporter_add_attribute_int("desirability_step_size", model->desirability_step_size);
         xml_exporter_add_attribute_int("desirability_range", model->desirability_range);
         xml_exporter_add_attribute_int("laborers", model->laborers);
+        xml_exporter_close_element();
+        
+        edited_models++;
     }
-    
+    if (!edited_models) {
+        xml_exporter_add_element_text("<!--Nothing here but xml parser doesn't like empty things-->");
+        xml_exporter_close_element();
+    }
     xml_exporter_close_element();
-    xml_exporter_newline();
+    
 }
 
 int scenario_model_export_to_xml(const char *filename)

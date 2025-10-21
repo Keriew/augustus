@@ -871,7 +871,7 @@ static void generate_model_mappings(void)
     }
     for (building_type type = BUILDING_NONE; type < BUILDING_TYPE_MAX; type++) {
         const building_properties *props = building_properties_for_type(type);
-        if (!(props->size || props->event_data.attr) && type != BUILDING_CLEAR_LAND && type != BUILDING_REPAIR_LAND || 
+        if ((!props->size || !props->event_data.attr) && type != BUILDING_CLEAR_LAND && type != BUILDING_REPAIR_LAND || 
             (type == BUILDING_GRAND_GARDEN || type == BUILDING_DOLPHIN_FOUNTAIN)) {
             continue;
         }
