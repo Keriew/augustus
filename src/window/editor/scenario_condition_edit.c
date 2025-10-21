@@ -401,42 +401,12 @@ static void on_grid_slice_selected(grid_slice *selection)
         window_editor_scenario_condition_edit_show(data.condition);
         return;
     }
-
     // Get the start and end grid offsets (opposite corners of the rectangle)
     int start_offset = 0;
     int end_offset = 0;
     editor_tool_get_selection_offsets(&start_offset, &end_offset);
-
-    // Store both corners in consecutive parameters
-    // For GRID_SLICE type, we assume it uses two consecutive parameters:
-    // - The first parameter stores the start corner offset
-    // - The next parameter stores the end corner offset
-    // These two offsets can later be used to reconstruct the rectangle using
-    // map_grid_get_grid_slice_from_corners() or similar functions
-    switch (data.parameter_being_edited) {
-        case 1:
-            data.condition->parameter1 = start_offset;
-            data.condition->parameter2 = end_offset;
-            break;
-        case 2:
-            data.condition->parameter2 = start_offset;
-            data.condition->parameter3 = end_offset;
-            break;
-        case 3:
-            data.condition->parameter3 = start_offset;
-            data.condition->parameter4 = end_offset;
-            break;
-        case 4:
-            data.condition->parameter4 = start_offset;
-            data.condition->parameter5 = end_offset;
-            break;
-        case 5:
-            // Can't store end offset if editing parameter 5 (it's the last one)
-            // Just store start offset
-            data.condition->parameter5 = start_offset;
-            break;
-    }
-
+    data.condition->parameter1 = start_offset;
+    data.condition->parameter2 = end_offset;
     // Deactivate the tool and return to the condition edit window
     editor_tool_deactivate();
     window_editor_scenario_condition_edit_show(data.condition);

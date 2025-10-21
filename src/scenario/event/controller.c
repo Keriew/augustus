@@ -543,3 +543,25 @@ void scenario_events_migrate_to_formulas(void)
         }
     }
 }
+
+void scenario_events_migrate_to_grid_slices(void)
+{
+    scenario_event_t *current;
+    array_foreach(scenario_events, current) //go through all events
+    {
+        scenario_action_t *action;
+        array_foreach(current->actions, action) //go through all actions of this event
+        {
+            migrate_parameters_action(action); //migrate parameters if needed
+        }
+        scenario_condition_group_t *group;
+        scenario_condition_t *condition;
+        array_foreach(current->condition_groups, group) //through all condition groups of this event
+        {
+            array_foreach(group->conditions, condition) //through all conditions of this group
+            {
+                migrate_parameters_condition(condition); //migrate parameters if needed
+            }
+        }
+    }
+}

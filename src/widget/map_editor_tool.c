@@ -31,7 +31,7 @@ static void draw_flat_tile(int x, int y, color_t color_mask)
 {
     if (color_mask == COLOR_MASK_GREEN && scenario_property_climate() != CLIMATE_DESERT) {
         image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, ALPHA_MASK_SEMI_TRANSPARENT & color_mask, scale);
-    } else if (color_mask != COLOR_MASK_NONE) {
+    } else if (color_mask != COLOR_MASK_GREEN && color_mask != COLOR_MASK_RED) {
         image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, color_mask, scale);
     } else {
         image_blend_footprint_color(x, y, color_mask, scale);
@@ -252,7 +252,7 @@ void map_editor_tool_draw(const map_tile *tile)
                 }
             } else {
                 // Just highlight the current tile when not dragging
-                draw_flat_tile(x, y, COLOR_MASK_BLUE);
+                draw_flat_tile(x, y, COLOR_MASK_AMBER);
             }
             break;
     }

@@ -248,7 +248,6 @@ void scenario_custom_variable_load_state(buffer *buf, int version)
     }
 }
 
-
 void scenario_custom_variable_load_state_old_version(buffer *buf)
 {
     if (!array_init(custom_variables, CUSTOM_VARIABLES_SIZE_STEP, new_variable, variable_in_use) ||
