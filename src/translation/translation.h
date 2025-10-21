@@ -1857,6 +1857,7 @@ typedef enum {
     TR_EDITOR_COLOR_BLUE,
     TR_EDITOR_COLOR_DARK_BLUE,
     TR_EDITOR_COLOR_BLACK, // label colors group end
+    TR_EDITOR_RUBBLE,
     TRANSLATION_MAX_KEY
 } translation_key;
 

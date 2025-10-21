@@ -1863,6 +1863,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_COLOR_GRAY, "Gray" },
     {TR_EDITOR_COLOR_BLACK, "Black"},
     {TR_EDITOR_COLOR_DARK_BLUE, "Dark Blue"},
+    {TR_EDITOR_RUBBLE, "Rubble"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

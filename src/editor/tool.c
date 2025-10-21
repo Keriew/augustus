@@ -34,7 +34,7 @@ static struct {
     int build_in_progress;
     int start_elevation;
     map_tile start_tile;
-} data = {0, TOOL_GRASS, 0, 3, 0};
+} data = { 0, TOOL_GRASS, 0, 3, 0 };
 
 tool_type editor_tool_type(void)
 {
@@ -131,6 +131,7 @@ int editor_tool_is_brush(void)
         case TOOL_SHRUB:
         case TOOL_ROCKS:
         case TOOL_MEADOW:
+        case TOOL_NATIVE_RUINS:
         case TOOL_RAISE_LAND:
         case TOOL_LOWER_LAND:
             return 1;
@@ -184,6 +185,11 @@ static void add_terrain(const void *tile_data, int dx, int dy)
         map_building_tiles_remove(0, x, y);
         terrain = map_terrain_get(grid_offset);
     }
+    if (terrain & TERRAIN_RUBBLE) {
+        map_terrain_remove(grid_offset, TERRAIN_RUBBLE);
+        terrain = map_terrain_get(grid_offset);
+    }
+
     switch (data.type) {
         case TOOL_GRASS:
             terrain &= TERRAIN_PAINT_MASK;
@@ -216,6 +222,12 @@ static void add_terrain(const void *tile_data, int dx, int dy)
             if (!(terrain & TERRAIN_MEADOW)) {
                 terrain &= TERRAIN_PAINT_MASK;
                 terrain |= TERRAIN_MEADOW;
+            }
+            break;
+        case TOOL_NATIVE_RUINS:
+            if (!(terrain & TERRAIN_RUBBLE)) {
+                terrain &= TERRAIN_PAINT_MASK;
+                terrain |= TERRAIN_RUBBLE;
             }
             break;
         case TOOL_RAISE_LAND:
@@ -280,6 +292,10 @@ void editor_tool_update_use(const map_tile *tile)
             map_tiles_update_region_water(x_min, y_min, x_max, y_max);
             map_tiles_update_all_rocks();
             map_tiles_update_region_meadow(x_min, y_min, x_max, y_max);
+            break;
+        case TOOL_NATIVE_RUINS:
+            // Rubble doesn't need terrain updates, just refresh the rubble graphics
+            map_tiles_update_region_rubble(x_min, y_min, x_max, y_max);
             break;
         case TOOL_RAISE_LAND:
         case TOOL_LOWER_LAND:
