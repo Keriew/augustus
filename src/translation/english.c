@@ -1853,7 +1853,20 @@ static translation_string all_strings[] = {
     {TR_CONFIG_UI_WT_ENABLE_SNOW_CENTRAL, "Enable snow in central climate"},
     {TR_EDITOR_UNABLE_TO_LOAD_MODEL_DATA_TITLE, "Unable to load model data xml"},
     {TR_EDITOR_MODEL_DATA_IMPORT_FULL, "Import model data"},
-    {TR_EDITOR_MODEL_DATA_EXPORT_FULL, "Export model data"}
+    {TR_EDITOR_MODEL_DATA_EXPORT_FULL, "Export model data"},
+    {TR_EDITOR_COLOR_LABEL, "Color"},
+    {TR_EDITOR_COLOR_NONE, "None" },
+    {TR_EDITOR_COLOR_BLUE, "Blue" },
+    {TR_EDITOR_COLOR_ORANGE, "Orange" },
+    {TR_EDITOR_COLOR_GREEN, "Green" },
+    {TR_EDITOR_COLOR_PURPLE, "Purple" },
+    {TR_EDITOR_COLOR_OLIVE, "Olive" },
+    {TR_EDITOR_COLOR_TURQUOISE, "Turquoise" },
+    {TR_EDITOR_COLOR_CORAL, "Red" },
+    {TR_EDITOR_COLOR_GRAY, "Gray" },
+    {TR_EDITOR_COLOR_BLACK, "Black"},
+    {TR_EDITOR_COLOR_DARK_BLUE, "Dark Blue"},
+    {TR_EDITOR_RUBBLE, "Rubble"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

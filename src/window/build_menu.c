@@ -301,6 +301,7 @@ static void draw_menu_buttons(void)
 static void draw_foreground(void)
 {
     window_city_draw();
+    window_city_draw_custom_variables_text_display();
     draw_menu_buttons();
 }
 

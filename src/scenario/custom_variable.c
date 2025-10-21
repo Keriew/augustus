@@ -4,6 +4,7 @@
 #include "core/log.h"
 #include "core/string.h"
 #include "game/save_version.h"
+#include "graphics/color.h"
 #include "scenario/message_media_text_blob.h"
 
 #include <stdio.h>   // for snprintf
@@ -16,9 +17,11 @@ typedef struct {
     uint8_t name[CUSTOM_VARIABLE_NAME_LENGTH];
     uint8_t text_display[CUSTOM_VARIABLE_TEXT_DISPLAY_LENGTH];
     unsigned char allow_display;
+    unsigned char color_group;
 } custom_variable_t;
 
 static array(custom_variable_t) custom_variables;
+static custom_variable_t *get_variable(unsigned int id);
 
 #define CUSTOM_VARIABLES_SIZE_STEP 8
 
@@ -54,6 +57,40 @@ void scenario_custom_variable_delete_all(void)
 {
     array_init(custom_variables, CUSTOM_VARIABLES_SIZE_STEP, new_variable, variable_in_use);
     array_advance(custom_variables);
+}
+
+void scenario_custom_variable_set_color_group(unsigned int id, int color_group)
+{
+    custom_variable_t *var = get_variable(id);
+    var->color_group = color_group;
+}
+
+int scenario_custom_variable_get_color_group(unsigned int id)
+{
+    custom_variable_t *var = get_variable(id);
+    int color_id = var ? var->color_group : 0;
+    return color_id;
+}
+
+color_t scenario_custom_variable_get_color(unsigned int id)
+{
+    custom_variable_t *var = get_variable(id);
+    unsigned char color_id = var->color_group;
+    switch (color_id) {
+        case 1: return COLOR_MASK_PASTEL_GREEN;
+        case 2: return COLOR_MASK_PASTEL_PURPLE;
+        case 3: return COLOR_MASK_PASTEL_ORANGE;
+        case 4: return COLOR_MASK_PASTEL_OLIVE;
+        case 5: return COLOR_MASK_PASTEL_TURQUOISE;
+        case 6: return COLOR_MASK_PASTEL_CORAL;
+        case 7: return COLOR_MASK_PASTEL_GRAY;
+        case 8: return COLOR_MASK_PASTEL_BLUE;
+        case 9: return COLOR_MASK_PASTEL_DARK_BLUE;
+        case 10: return COLOR_MASK_PASTEL_BLACK;
+
+        default:
+            return COLOR_MASK_NONE;
+    }
 }
 
 unsigned int scenario_custom_variable_get_id_by_name(const uint8_t *name)
@@ -175,6 +212,7 @@ void scenario_custom_variable_save_state(buffer *buf)
         buffer_write_raw(buf, variable->name, CUSTOM_VARIABLE_NAME_LENGTH);
         buffer_write_raw(buf, variable->text_display, CUSTOM_VARIABLE_TEXT_DISPLAY_LENGTH);
         buffer_write_u8(buf, variable->allow_display);
+        buffer_write_u8(buf, variable->color_group);
     }
 }
 
@@ -187,11 +225,13 @@ void scenario_custom_variable_load_state(buffer *buf, int version)
         log_error("Failed to initialize custom variables array - out of memory. The game will probably crash.", 0, 0);
         return;
     }
+
     for (unsigned int i = 0; i < total_variables; i++) {
         custom_variable_t *variable = array_next(custom_variables);
         variable->in_use = buffer_read_u8(buf);
         variable->value = buffer_read_i32(buf);
         buffer_read_raw(buf, variable->name, CUSTOM_VARIABLE_NAME_LENGTH);
+
         if (version > SCENARIO_LAST_NO_VISIBLE_CUSTOM_VARIABLES) {
             buffer_read_raw(buf, variable->text_display, CUSTOM_VARIABLE_TEXT_DISPLAY_LENGTH);
             variable->allow_display = buffer_read_u8(buf);
@@ -199,8 +239,15 @@ void scenario_custom_variable_load_state(buffer *buf, int version)
             variable->text_display[0] = 0; //initialize to empty string
             variable->allow_display = 0; //initialize to not visible
         }
+
+        if (version > SCENARIO_TESTING_VERSION_BUMP_2) {
+            variable->color_group = buffer_read_u8(buf);
+        } else {
+            variable->color_group = (unsigned char) -1;
+        }
     }
 }
+
 
 void scenario_custom_variable_load_state_old_version(buffer *buf)
 {

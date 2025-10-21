@@ -13,8 +13,8 @@
 
 #define MAX_TILES 16
 
-static const int X_VIEW_OFFSETS[MAX_TILES] = {0, -30, 30, 0, -60, 60, -30, 30, 0, -90, 90, -60, 60, -30, 30, 0 };
-static const int Y_VIEW_OFFSETS[MAX_TILES] = {0, 15, 15, 30, 30, 30, 45, 45, 60, 45, 45, 60, 60, 75, 75, 90 };
+static const int X_VIEW_OFFSETS[MAX_TILES] = { 0, -30, 30, 0, -60, 60, -30, 30, 0, -90, 90, -60, 60, -30, 30, 0 };
+static const int Y_VIEW_OFFSETS[MAX_TILES] = { 0, 15, 15, 30, 30, 30, 45, 45, 60, 45, 45, 60, 60, 75, 75, 90 };
 
 static float scale = SCALE_NONE;
 
@@ -126,7 +126,7 @@ static void draw_brush_tile(const void *data, int dx, int dy)
 
 static void draw_brush(const map_tile *tile, int x, int y)
 {
-    view_tile vt = {x, y};
+    view_tile vt = { x, y };
     editor_tool_foreach_brush_tile(draw_brush_tile, &vt);
 }
 
@@ -137,7 +137,7 @@ static void draw_access_ramp(const map_tile *tile, int x, int y)
         int image_id = image_group(GROUP_TERRAIN_ACCESS_RAMP) + orientation;
         draw_building_image(image_id, x, y);
     } else {
-        int blocked[4] = {1, 1, 1, 1};
+        int blocked[4] = { 1, 1, 1, 1 };
         draw_partially_blocked(x, y, 4, blocked);
     }
 }
@@ -200,6 +200,7 @@ void map_editor_tool_draw(const map_tile *tile)
         case TOOL_SHRUB:
         case TOOL_TREES:
         case TOOL_WATER:
+        case TOOL_NATIVE_RUINS:
         case TOOL_RAISE_LAND:
         case TOOL_LOWER_LAND:
             draw_brush(tile, x, y);
