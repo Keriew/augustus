@@ -50,6 +50,8 @@ typedef uint32_t color_t;
 #define COLOR_MASK_DARK_PINK 0x88402060
 #define COLOR_MASK_BLUE 0x663377ff
 #define COLOR_MASK_GRAY 0x66aaaaaa
+#define COLOR_MASK_LIGHT_GRAY 0xbbaaaaaa
+#define COLOR_MASK_HOVER 0xdde0e0e0
 #define COLOR_MASK_PINK 0x99fa94ff
 #define COLOR_MASK_LEGION_HIGHLIGHT 0xffff6633
 #define COLOR_MASK_FOOTPRINT_GHOST 0x22ffffff
