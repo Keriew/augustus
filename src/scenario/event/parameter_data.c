@@ -1210,7 +1210,7 @@ const uint8_t *scenario_events_parameter_data_get_display_string(special_attribu
         case PARAMETER_TYPE_GRID_SLICE:
             static uint8_t buffer[16];
             string_from_int(buffer, entry->value, 0);
-            return (const) buffer;
+            return (const uint8_t *) buffer;
         default:
             return translation_for(entry->key);
     }
