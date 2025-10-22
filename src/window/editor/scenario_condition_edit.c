@@ -464,12 +464,14 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             custom_variable_selection();
             return;
         case PARAMETER_TYPE_GRID_SLICE:
+            {
             int grid_offset1 = data.condition->parameter1;
             int grid_offset2 = data.condition->parameter2;
             grid_slice *existing_selection = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
             editor_tool_set_existing_land_selection(existing_selection);
             start_grid_slice_selection();
             return;
+            }
         case PARAMETER_TYPE_FORMULA:
             create_evaluation_formula(parameter);
             return;
