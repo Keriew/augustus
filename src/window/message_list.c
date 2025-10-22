@@ -78,7 +78,7 @@ static generic_button generic_button_delete_common[] = {
 };
 
 
-static scrollbar_type scrollbar = {432, 112, 208, 416, MAX_MESSAGES, on_scroll, 1};
+static scrollbar_type scrollbar = { 432, 112, 208, 416, MAX_MESSAGES, on_scroll, 1 };
 
 static void draw_delete_read_button(int x, int y, int focused)
 {
@@ -110,7 +110,7 @@ static struct {
 static void draw_message_type_button(int x, int y, int focused)
 {
     button_border_draw(x, y, generic_button_messages_type->width, generic_button_messages_type->height, focused ? 1 : 0);
-    text_draw_centered(translation_for(TR_WINDOW_MESSAGE_LIST_SELECTED_ALL + data.type_displayed), x + 4, y + 4, 
+    text_draw_centered(translation_for(TR_WINDOW_MESSAGE_LIST_SELECTED_ALL + data.type_displayed), x + 4, y + 4,
         generic_button_messages_type->width, FONT_NORMAL_BLACK, 0);
 }
 
@@ -238,7 +238,8 @@ static void draw_messages(unsigned int total_messages)
         } else {
             custom_message_t *custom_msg = custom_messages_get(msg->param1);
             if (custom_msg->title) {
-                text_draw(custom_msg->title->text, data.x_text + 180, data.y_text + 8 + 20 * i, font, 0);
+                text_draw_ellipsized(custom_msg->title->text, data.x_text + 180, data.y_text + 8 + 20 * i,
+                    data.text_width_blocks * BLOCK_SIZE - 180, font, 0);
             } else {
                 text_draw(translation_for(TR_ACTION_TYPE_A_MESSAGE), data.x_text + 180, data.y_text + 8 + 20 * i, font, 0);
             }
@@ -396,12 +397,12 @@ static void button_delete_all_common(const generic_button *button)
 static void button_delete_all_read(const generic_button *button)
 {
     for (int id = 0; id < city_message_count();) {
-            const city_message* msg = city_message_get(id);
-            if (msg->is_read) {
-                city_message_delete(id);
-            } else {
-                id++;
-            }
+        const city_message *msg = city_message_get(id);
+        if (msg->is_read) {
+            city_message_delete(id);
+        } else {
+            id++;
+        }
     }
     select_messages();
     window_invalidate();

@@ -11,17 +11,19 @@ enum {
     BIT_SIZE5 = 0x08,
     BIT_SIZE7 = 0x0f,
     BIT_SIZES = 0x0f,
-    BIT_NO_SIZES = 0xf0,
+    BIT_NO_SIZES = 0xfff0,
     BIT_CONSTRUCTION = 0x10,
-    BIT_NO_CONSTRUCTION = 0xef,
+    BIT_NO_CONSTRUCTION = 0xffef,
     BIT_ALTERNATE_TERRAIN = 0x20,
     BIT_DELETED = 0x40,
-    BIT_NO_DELETED = 0xbf,
+    BIT_NO_DELETED = 0xffbf,
     BIT_REPAIR = 0x40, // shares with DELETED, player can never mark deleted and repair at the same time
-    BIT_NO_REPAIR = 0xbf,
+    BIT_NO_REPAIR = 0xffbf,
     BIT_PLAZA_EARTHQUAKE_OR_OVERGROWN_GARDEN = 0x80,
-    BIT_NO_PLAZA = 0x7f,
-    BIT_NO_CONSTRUCTION_AND_DELETED = 0xaf,
+    BIT_NO_PLAZA = 0xff7f,
+    BIT_NO_CONSTRUCTION_AND_DELETED = 0xffaf, // hope that's right please controll and it's actually OR not AND
+    BIT_FUTURE_EARTHQUAKE = 0x100,
+    BIT_NO_FUTURE_EARTHQUAKE = 0xfeff,
     EDGE_MASK_X = 0x7,
     EDGE_MASK_Y = 0x38,
     EDGE_MASK_XY = 0x3f,
@@ -32,10 +34,10 @@ enum {
 };
 
 static grid_u8 edge_grid;
-static grid_u8 bitfields_grid;
+static grid_u16 bitfields_grid;
 
 static grid_u8 edge_backup;
-static grid_u8 bitfields_backup;
+static grid_u16 bitfields_backup;
 
 static int edge_for(int x, int y)
 {
@@ -128,7 +130,7 @@ int map_property_multi_tile_size(int grid_offset)
 int map_property_multi_tile_size_from_buffer(buffer *bitfields, int grid_offset)
 {
     buffer_set(bitfields, grid_offset);
-    switch (buffer_read_u8(bitfields) & BIT_SIZES) {
+    switch (buffer_read_u16(bitfields) & BIT_SIZES) {
         case BIT_SIZE2: return 2;
         case BIT_SIZE3: return 3;
         case BIT_SIZE4: return 4;
@@ -217,35 +219,50 @@ void map_property_clear_deleted(int grid_offset)
 
 void map_property_clear_constructing_and_deleted(void)
 {
-    map_grid_and_u8(bitfields_grid.items, BIT_NO_CONSTRUCTION_AND_DELETED);
+    map_grid_and_u16(bitfields_grid.items, BIT_NO_CONSTRUCTION_AND_DELETED);
+}
+
+int map_property_is_future_earthquake(int grid_offset)
+{
+    return bitfields_grid.items[grid_offset] & BIT_FUTURE_EARTHQUAKE;
+}
+
+void map_property_mark_future_earthquake(int grid_offset)
+{
+    bitfields_grid.items[grid_offset] |= BIT_FUTURE_EARTHQUAKE;
+}
+
+void map_property_clear_future_earthquake(int grid_offset)
+{
+    bitfields_grid.items[grid_offset] &= BIT_NO_FUTURE_EARTHQUAKE;
 }
 
 void map_property_clear(void)
 {
-    map_grid_clear_u8(bitfields_grid.items);
+    map_grid_clear_u16(bitfields_grid.items);
     map_grid_clear_u8(edge_grid.items);
 }
 
 void map_property_backup(void)
 {
-    map_grid_copy_u8(bitfields_grid.items, bitfields_backup.items);
+    map_grid_copy_u16(bitfields_grid.items, bitfields_backup.items);
     map_grid_copy_u8(edge_grid.items, edge_backup.items);
 }
 
 void map_property_restore(void)
 {
-    map_grid_copy_u8(bitfields_backup.items, bitfields_grid.items);
+    map_grid_copy_u16(bitfields_backup.items, bitfields_grid.items);
     map_grid_copy_u8(edge_backup.items, edge_grid.items);
 }
 
 void map_property_save_state(buffer *bitfields, buffer *edge)
 {
-    map_grid_save_state_u8(bitfields_grid.items, bitfields);
+    map_grid_save_state_u16(bitfields_grid.items, bitfields);
     map_grid_save_state_u8(edge_grid.items, edge);
 }
 
 void map_property_load_state(buffer *bitfields, buffer *edge)
 {
-    map_grid_load_state_u8(bitfields_grid.items, bitfields);
+    map_grid_load_state_u16(bitfields_grid.items, bitfields);
     map_grid_load_state_u8(edge_grid.items, edge);
 }

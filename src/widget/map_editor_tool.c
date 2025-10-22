@@ -234,6 +234,8 @@ void map_editor_tool_draw(const map_tile *tile)
         case TOOL_NATIVE_RUINS:
         case TOOL_RAISE_LAND:
         case TOOL_LOWER_LAND:
+        case TOOL_EARTHQUAKE_CUSTOM:
+        case TOOL_EARTHQUAKE_CUSTOM_REMOVE:
             draw_brush(tile, x, y);
             break;
 

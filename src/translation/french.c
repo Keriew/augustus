@@ -1708,8 +1708,15 @@ static translation_string all_strings[] = {
     {TR_CONFIG_ENABLE_PAVED_ROADS_NEAR_GRANARIES, "Paver les routes aux abords des greniers"},
     {TR_CONFIG_UI_ANIMATE_TRADE_ROUTES, "Animer les routes commerciales"},
     {TR_HOTKEY_NEXT_TRACK, "Piste audio suivante"},
-    {TR_CONFIG_MOVE_LEGION_SOUND_SWAP, "Son alternatif pour le déplacement des légions"},
-    // TODO 1695 - 1702
+    {TR_CONFIG_MOVE_LEGION_SOUND_SWAP, "Son alternatif pour le déplacement des légions"}, // TODO 1695 - 1702
+    {TR_BUILDING_INFO_REPAIR_BUILDING, "Réparer le bâtiment" },
+    {TR_WARNING_REPAIR_IMPOSSIBLE, "Bâtiment non réparable" },
+    {TR_WARNING_REPAIR_BURNING, "Impossible de réparer durant l'incendie" },
+    {TR_BUILDING_INFO_BUILDING_BURNING, "Le bâtiment est en feu" },
+    {TR_BUILDING_LAND_REPAIR, "Réparer la zone"},
+    {TR_BUILDING_LAND_CLEAR, "Déblayer la zone"},
+    {TR_CONFIRM_REPAIR_BUILDINGS, "Réparer tous les bâtiments dans cette zone pour "},
+    {TR_CONFIRM_REPAIR_BUILDINGS_TITLE, "Réparer les bâtiments"},
     {TR_CONFIG_ADVANCED_CART_DEPOT_OPTIONS, "Activer les ordres avancés du dépôt de charrettes"},
     {TR_BUILDING_INFO_INSTRUCTIONS, "Instructions" },
     {TR_BUILDING_INFO_ACTIVE_STORAGE_BUILDINGS, "Bâtiments acceptant la ressource" },
@@ -1721,7 +1728,21 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_FULL, "Complet"},
     {TR_CONFIG_CLEAR_WARNINGS_RIGHTCLICK, "Clic droit pour fermer les bandeaux d'alerte"},
     {TR_CONFIG_GP_CH_STORAGE_REQUESTS_RESPECT_MAINTAIN, "Les requêtes de César respectent l'ordre 'Conserver'"},
-    {TR_CONFIG_ENABLE_MARKET_RANGE, "Zone de couverture par défaut des marchés"}
+    {TR_CONFIG_ENABLE_MARKET_RANGE, "Zone de couverture par défaut des marchés"},
+    {TR_WARNING_CANT_REPAIR_MONUMENTS, "Impossible de réparer les Monuments uniques" },
+    {TR_WARNING_CANT_REPAIR_AQUEDUCTS, "Impossible de réparer les Aqueducs"},
+    {TR_OVERLAY_HOUSING_TENTS, "Tentes"},
+    {TR_OVERLAY_HOUSING_SHACKS, "Huttes"},
+    {TR_OVERLAY_HOUSING_HOVELS, "Taudis"},
+    {TR_OVERLAY_HOUSING_CASAS, "Casae"},
+    {TR_OVERLAY_HOUSE_INSULAS, "Insulae"},
+    {TR_OVERLAY_HOUSE_VILLAS, "Villas"},
+    {TR_OVERLAY_HOUSE_PALACES, "Palais"},
+    {TR_OVERLAY_BY_GROUP, "Par groupe"},
+    {TR_BUTTON_INFO_RETURN_ALL_LEGIONS, "Rappeler les légions"},
+    {TR_TOOLTIP_OVERLAY_LEVY_PER_TILE, " denarii dépensés en frais chaque mois par tronçon"},
+    {TR_CONFIG_UI_CV_BUILD_MENU_ICONS, "Afficher les icônes des ressources dans le menu de construction"},
+    {TR_CONFIG_UI_WT_ENABLE_SNOW_CENTRAL, "Autoriser la neige pour le climat central"},
 };
 
 void translation_french(const translation_string **strings, int *num_strings)
