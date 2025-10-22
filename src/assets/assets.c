@@ -15,6 +15,7 @@ static struct {
     int roadblock_image_id;
     asset_image *roadblock_image;
     int asset_lookup[ASSET_MAX_KEY];
+    int font_lookup[ASSET_FONT_MAX_KEY];
 } data;
 
 void assets_init(int force_reload, color_t **main_images, int *main_image_widths)
@@ -63,6 +64,10 @@ void assets_init(int force_reload, color_t **main_images, int *main_image_widths
     data.asset_lookup[ASSET_UI_GEAR_ICON] = assets_get_image_id("UI", "gear_icon");
     data.asset_lookup[ASSET_UI_COPY_ICON] = assets_get_image_id("UI", "copy_icon");
     data.asset_lookup[ASSET_UI_PASTE_ICON] = assets_get_image_id("UI", "paste_icon");
+
+    // font assets
+    data.font_lookup[ASSET_FONT_SQ_BRACKET_LEFT] = assets_get_image_id("UI", "leftbracket_white_l");
+    data.font_lookup[ASSET_FONT_SQ_BRACKET_RIGHT] = assets_get_image_id("UI", "rightbracket_white_l");
 }
 
 int assets_load_single_group(const char *file_name, color_t **main_images, int *main_image_widths)
@@ -157,6 +162,12 @@ const image *assets_get_image(int image_id)
         return image_get(0);
     }
     return &img->img;
+}
+
+const image *assets_get_font_image(int letter_id)
+{
+    const image *img = image_get(data.font_lookup[letter_id - IMAGE_FONT_CUSTOM_OFFSET]);
+    return img; // offset used to differentiate from normal letters
 }
 
 void assets_load_unpacked_asset(int image_id)

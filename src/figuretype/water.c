@@ -1,8 +1,8 @@
 #include "water.h"
 
 #include "building/building.h"
-#include "building/model.h"
 #include "building/monument.h"
+#include "building/properties.h"
 #include "city/gods.h"
 #include "city/message.h"
 #include "core/calc.h"

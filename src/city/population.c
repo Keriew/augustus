@@ -150,7 +150,7 @@ static void remove_from_census_in_age_decennium(int decennium, int num_people)
     }
 }
 
-static int get_people_in_age_decennium(int decennium)
+int city_population_in_age_decennium(int decennium)
 {
     int pop = 0;
     for (int i = 0; i < 10; i++) {
@@ -218,18 +218,22 @@ void city_population_remove_for_troop_request(int num_people)
 
 int city_population_people_of_working_age(void)
 {
+    int total_working_people = city_population_in_age_decennium(2) + city_population_in_age_decennium(3)
+        + city_population_in_age_decennium(4);
     if (config_get(CONFIG_GP_CH_RETIRE_AT_60)) {
-        return
-            get_people_in_age_decennium(2) +
-            get_people_in_age_decennium(3) +
-            get_people_in_age_decennium(4) +
-            get_people_in_age_decennium(5);
-    } else {
-        return
-            get_people_in_age_decennium(2) +
-            get_people_in_age_decennium(3) +
-            get_people_in_age_decennium(4);
+        total_working_people += city_population_in_age_decennium(5);
     }
+    return total_working_people;
+}
+
+int city_population_retired_people(void)
+{
+    int total_retired_people = city_population_in_age_decennium(6) + city_population_in_age_decennium(7)
+        + city_population_in_age_decennium(8) + city_population_in_age_decennium(9);
+    if (config_get(CONFIG_GP_CH_RETIRE_AT_60)) {
+        total_retired_people += city_population_in_age_decennium(5);
+    }
+    return total_retired_people;
 }
 
 int city_population_percent_in_workforce(void)
@@ -299,7 +303,7 @@ static void yearly_advance_ages_and_calculate_deaths(void)
     city_data.population.at_age[0] = 0;
     city_data.population.yearly_deaths = 0;
     for (int decennium = 9; decennium >= 0; decennium--) {
-        int people = get_people_in_age_decennium(decennium);
+        int people = city_population_in_age_decennium(decennium);
         int death_percentage = DEATHS_PER_HEALTH_PER_AGE_DECENNIUM[city_data.health.value / 10][decennium];
         int deaths = calc_adjust_with_percentage(people, death_percentage);
         int removed = house_population_remove_from_city(deaths + aged100);
@@ -339,7 +343,7 @@ static void yearly_calculate_births(void)
 {
     city_data.population.yearly_births = 0;
     for (int decennium = 9; decennium >= 0; decennium--) {
-        int people = get_people_in_age_decennium(decennium);
+        int people = city_population_in_age_decennium(decennium);
         int births = calc_adjust_with_percentage(people, BIRTHS_PER_AGE_DECENNIUM[decennium]);
         int added = house_population_add_to_city(births);
         city_data.population.at_age[0] += added;
@@ -387,6 +391,7 @@ static int calculate_people_per_house_type(void)
             if (b->subtype.house_level >= HOUSE_SMALL_VILLA) {
                 city_data.population.people_in_villas_palaces += pop;
             }
+
         }
     }
     return total;

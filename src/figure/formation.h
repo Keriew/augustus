@@ -203,6 +203,7 @@ void formation_set_home(formation *m, int x, int y);
 void formation_retreat(formation *m);
 
 int formation_legion_count_alive_soldiers(int formation_id);
+int formation_legion_count_alive_soldiers_by_type(figure_type type);
 void formation_move_herds_away(int x, int y);
 
 void formation_calculate_figures(void);

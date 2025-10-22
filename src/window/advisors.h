@@ -33,4 +33,20 @@ void window_advisors_show_checked(void);
 
 int window_advisors_show_advisor(advisor_type advisor);
 
+int window_advisors_get_tavern_coverage(void);
+int window_advisors_get_theater_coverage(void);
+int window_advisors_get_amphitheater_coverage(void);
+int window_advisors_get_arena_coverage(void);
+int window_advisors_get_colosseum_coverage(void);
+int window_advisors_get_hippodrome_coverage(void);
+
+int window_advisors_get_bathhouse_coverage(void);
+int window_advisors_get_barber_coverage(void);
+int window_advisors_get_clinic_coverage(void);
+int window_advisors_get_hospital_coverage(void);
+
+int window_advisors_get_school_coverage(void);
+int window_advisors_get_library_coverage(void);
+int window_advisors_get_academy_coverage(void);
+
 #endif // WINDOW_ADVISORS_H

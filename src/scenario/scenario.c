@@ -252,6 +252,7 @@ void scenario_save_state(buffer *buf)
 
     buffer_write_i16(buf, scenario.image_id);
     buffer_write_i16(buf, scenario.is_open_play);
+    buffer_write_i16(buf, scenario.reset_favour_monthly);
     buffer_write_i16(buf, scenario.player_rank);
 
     for (int i = 0; i < MAX_HERD_POINTS; i++) {
@@ -399,6 +400,11 @@ void scenario_load_state(buffer *buf, int version)
 
     scenario.image_id = buffer_read_i16(buf);
     scenario.is_open_play = buffer_read_i16(buf);
+    if (version > SCENARIO_TESTING_VERSION_BUMP_1) { //<INTERNAL_VERSION_TEST>
+        scenario.reset_favour_monthly = buffer_read_i16(buf);
+    } else {
+        scenario.reset_favour_monthly = 1;
+    }
     scenario.player_rank = buffer_read_i16(buf);
 
     for (int i = 0; i < MAX_HERD_POINTS; i++) {

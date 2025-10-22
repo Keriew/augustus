@@ -20,6 +20,7 @@
 #include "scenario/event/controller.h"
 #include "scenario/event/parameter_data.h"
 #include "widget/input_box.h"
+#include "widget/dropdown_button.h"
 #include "window/editor/map.h"
 #include "window/editor/scenario_action_edit.h"
 #include "window/editor/scenario_condition_edit.h"
@@ -46,6 +47,12 @@ enum {
     EVENT_REPEAT_NEVER = 0,
     EVENT_REPEAT_FOREVER = 1,
     EVENT_REPEAT_TIMES = 2
+};
+
+enum {
+    REPEAT_INTERVAL_DAYS = 1,
+    REPEAT_INTERVAL_MONTHS = 2,
+    REPEAT_INTERVAL_YEARS = 3,
 };
 
 enum {
@@ -83,6 +90,8 @@ static void handle_condition_tooltip(const grid_box_item *item, tooltip_context 
 static void handle_action_tooltip(const grid_box_item *item, tooltip_context *c);
 
 static void button_select_all_none(const generic_button *button);
+static int convert_display_to_days(int display);
+static int convert_days_to_display(int days);
 
 typedef struct {
     int group_id;
@@ -170,6 +179,8 @@ static generic_button select_all_none_buttons[] = {
     {16, 163, 20, 20, button_select_all_none, 0, SELECT_CONDITIONS},
     {320, 163, 20, 20, button_select_all_none, 0, SELECT_ACTIONS}
 };
+
+static dropdown_button repeat_interval_dropdown;
 
 #define NUM_BOTTOM_BUTTONS (sizeof(bottom_buttons) / sizeof(generic_button))
 
@@ -333,18 +344,29 @@ static void stop_input(void)
     string_copy(data.event_name, data.event->name, EVENT_NAME_LENGTH);
 }
 
+static void convert_repeat_interval(void)
+{
+    if (data.event->repeat_interval == REPEAT_INTERVAL_MONTHS) {
+        data.event->repeat_days_min *= 16;
+        data.event->repeat_days_max *= 16;
+    } else if (data.event->repeat_interval == REPEAT_INTERVAL_YEARS) {
+        data.event->repeat_days_min *= 16 * 12;
+        data.event->repeat_days_max *= 16 * 12;
+    }
+}
+
 static void prepare_event(int event_id)
 {
     data.event = scenario_event_get(event_id);
 
-    if (data.event->repeat_months_min > data.event->repeat_months_max) {
-        data.event->repeat_months_min = data.event->repeat_months_max;
+    if (data.event->repeat_days_min > data.event->repeat_days_max) {
+        data.event->repeat_days_min = data.event->repeat_days_max;
     }
-    if (data.event->repeat_months_min == 0) {
+    if (data.event->repeat_days_min == 0) {
         data.repeat_type = EVENT_REPEAT_NEVER;
-        data.event->repeat_months_min = 1;
-        if (data.event->repeat_months_max == 0) {
-            data.event->repeat_months_max = 1;
+        data.event->repeat_days_min = 1;
+        if (data.event->repeat_days_max == 0) {
+            data.event->repeat_days_max = 1;
         }
     } else if (data.event->max_number_of_repeats == 0) {
         data.repeat_type = EVENT_REPEAT_FOREVER;
@@ -356,12 +378,37 @@ static void prepare_event(int event_id)
     update_groups();
 }
 
+static void set_repeat_interval_type(dropdown_button *dd)
+{
+    data.event->repeat_interval = dd->selected_index;//callback
+}
+
+static void dropdown_init(void)
+{
+    int dd_x = top_buttons[5].x + top_buttons[5].width + 10;
+    int dd_y = top_buttons[5].y + 6;
+    static lang_fragment repeat_interval_frags[] = {
+        {.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_REPEAT_INTERVAL_TYPE},
+        {.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_PARAMETER_DISPLAY_DAYS },
+        {.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_PARAMETER_DISPLAY_MONTHS },
+        {.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_REPEAT_FREQUENCY_YEARS }
+    };
+    repeat_interval_dropdown.width = 70; // set width before init, otherwise it will be auto'd
+    repeat_interval_dropdown.padding = 0;
+    repeat_interval_dropdown.selected_callback = set_repeat_interval_type;
+    repeat_interval_dropdown.selected_index =
+        data.event->repeat_interval ? data.event->repeat_interval : REPEAT_INTERVAL_DAYS;
+    dropdown_button_init_simple(dd_x, dd_y, repeat_interval_frags, 4, &repeat_interval_dropdown);
+
+}
+
 static void init(int event_id)
 {
     prepare_event(event_id);
     start_input();
     grid_box_init(&conditions_grid_box, count_maximum_needed_list_items());
     grid_box_init(&actions_grid_box, data.event->actions.size);
+    dropdown_init();
     select_no_conditions();
     select_no_actions();
 }
@@ -395,7 +442,7 @@ static void draw_background(void)
         text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENT_EXECUTION_COUNT),
             data.event->execution_count, "", 40, 72, FONT_NORMAL_PLAIN, COLOR_BLACK);
         text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENT_MONTHS_UNTIL_ACTIVE),
-            data.event->months_until_active, "", 336, 72, FONT_NORMAL_PLAIN, COLOR_BLACK);
+            data.event->days_until_active, "", 336, 72, FONT_NORMAL_PLAIN, COLOR_BLACK);
     }
 
     // Refresh lists
@@ -451,16 +498,16 @@ static void draw_background(void)
         FONT_NORMAL_BLACK);
     lang_text_draw_colored(CUSTOM_TRANSLATION, TR_EDITOR_BETWEEN, top_buttons[0].x + 240, btn->y + 6,
         enabled_font, enabled_color);
-    text_draw_number_centered_colored(data.event->repeat_months_min, btn->x, btn->y + 6,
+    int repeat_min = convert_days_to_display(data.event->repeat_days_min);
+    int repeat_max = convert_days_to_display(data.event->repeat_days_max);
+    text_draw_number_centered_colored(repeat_min, btn->x, btn->y + 6,
         btn->width, enabled_font, enabled_color);
     lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_AND, btn->x + btn->width,
         btn->y + 6, btn[1].x - (btn->x + btn->width), enabled_font, enabled_color);
     btn = &top_buttons[5];
-    text_draw_number_centered_colored(data.event->repeat_months_max, btn->x, btn->y + 6,
+    text_draw_number_centered_colored(repeat_max, btn->x, btn->y + 6,
         btn->width, enabled_font, enabled_color);
-    lang_text_draw_colored(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY_MONTHS, btn->x + btn->width + 10,
-        btn->y + 6, enabled_font, enabled_color);
-
+    dropdown_button_draw(&repeat_interval_dropdown);
     // Checkmarks for select all/none buttons for conditions
     int checkmark_id = assets_lookup_image_id(ASSET_UI_SELECTION_CHECKMARK);
     const image *img = image_get(checkmark_id);
@@ -653,7 +700,8 @@ static void handle_input(const mouse *m, const hotkeys *h)
         generic_buttons_handle_mouse(m_dialog, 0, 0, top_buttons, NUM_TOP_BUTTONS, &data.focus_button.top) ||
         generic_buttons_handle_mouse(m_dialog, 0, 0, select_all_none_buttons, 2, &data.focus_button.select_all_none) ||
         generic_buttons_handle_mouse(m_dialog, 0, 0, bottom_buttons, NUM_BOTTOM_BUTTONS, &data.focus_button.bottom) ||
-        grid_box_handle_input(data.focused_grid_box, m_dialog, 1)) {
+        grid_box_handle_input(data.focused_grid_box, m_dialog, 1) ||
+        dropdown_button_handle_mouse(m_dialog, &repeat_interval_dropdown)) {
         return;
     }
     if (input_go_back_requested(m, h)) {
@@ -684,19 +732,44 @@ static void button_repeat_times(const generic_button *button)
         3, 1, 999, set_repeat_times);
 }
 
+static int convert_days_to_display(int days)
+{
+    if (data.event->repeat_interval == REPEAT_INTERVAL_MONTHS) {
+        return days / 16;
+    } else if (data.event->repeat_interval == REPEAT_INTERVAL_YEARS) {
+        return days / 16 / 12;
+    } else {
+        return days;
+    }
+}
+
+static int convert_display_to_days(int display)
+{
+    if (data.event->repeat_interval == REPEAT_INTERVAL_MONTHS) {
+        return display * 16;
+    } else if (data.event->repeat_interval == REPEAT_INTERVAL_YEARS) {
+        return display * 16 * 12;
+    } else {
+        return display;
+    }
+}
+
 static void set_repeat_interval_min(int value)
 {
-    data.event->repeat_months_min = value;
-    if (data.event->repeat_months_max < value) {
-        data.event->repeat_months_max = value;
+    int days = convert_display_to_days(value);// store always in days
+    data.event->repeat_days_min =
+        data.event->repeat_days_min = days;
+    if (data.event->repeat_days_max < days) {
+        data.event->repeat_days_max = days;
     }
 }
 
 static void set_repeat_interval_max(int value)
 {
-    data.event->repeat_months_max = value;
-    if (data.event->repeat_months_min > value) {
-        data.event->repeat_months_min = value;
+    int days = convert_display_to_days(value);// store always in days
+    data.event->repeat_days_max = days;
+    if (data.event->repeat_days_min > days) {
+        data.event->repeat_days_min = days;;
     }
 }
 
@@ -812,7 +885,7 @@ static void button_add_new_condition(const generic_button *button)
 {
     condition_types type = CONDITION_TYPE_TIME_PASSED;
     scenario_condition_t *condition = scenario_event_condition_create(array_item(data.event->condition_groups, 0), type);
-    condition->parameter1 = 1;
+    condition->parameter1 = 3; //3(EQUAL OR MORE); 1(EQUAL) baits mapmakers into making events that only trigger once
     select_no_conditions();
     window_request_refresh();
 }
@@ -885,8 +958,8 @@ static void button_delete_event(const generic_button *button)
 static void set_repeat_type(void)
 {
     if (data.repeat_type == EVENT_REPEAT_NEVER) {
-        data.event->repeat_months_min = 0;
-        data.event->repeat_months_max = 0;
+        data.event->repeat_days_min = 0;
+        data.event->repeat_days_max = 0;
     } else if (data.repeat_type == EVENT_REPEAT_FOREVER) {
         data.event->max_number_of_repeats = 0;
     }

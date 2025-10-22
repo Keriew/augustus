@@ -119,7 +119,7 @@ void scenario_editor_create(int map_size)
     scenario.random_events.min_wages = 5;
 }
 
-void scenario_editor_set_native_images(int image_alt_hut, int image_native_decoration, 
+void scenario_editor_set_native_images(int image_alt_hut, int image_native_decoration,
     int image_native_monument, int image_native_watchtower, int image_hut, int image_meeting, int image_crops)
 {
     scenario.native_images.alt_hut = image_alt_hut;
@@ -289,6 +289,12 @@ void scenario_editor_toggle_open_play(void)
     if (scenario.is_open_play) {
         scenario.open_play_scenario_id = 12; // fix it to 12: first unused entry
     }
+    scenario_editor_set_as_unsaved();
+}
+
+void scenario_editor_toggle_favour_reset(void)
+{
+    scenario.reset_favour_monthly = !scenario.reset_favour_monthly;
     scenario_editor_set_as_unsaved();
 }
 

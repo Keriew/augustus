@@ -1,7 +1,7 @@
 #include "sentiment.h"
 
 #include "building/building.h"
-#include "building/model.h"
+#include "building/properties.h"
 #include "city/constants.h"
 #include "city/data_private.h"
 #include "city/figures.h"
@@ -51,6 +51,17 @@ void city_sentiment_change_happiness(int amount)
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
             if (b->state == BUILDING_STATE_IN_USE && b->house_size) {
                 b->sentiment.house_happiness = calc_bound(b->sentiment.house_happiness + amount, 0, 100);
+            }
+        }
+    }
+}
+
+void city_sentiment_set_happiness(int amount_set)
+{
+    for (building_type type = BUILDING_HOUSE_SMALL_TENT; type <= BUILDING_HOUSE_LUXURY_PALACE; type++) {
+        for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
+            if (b->state == BUILDING_STATE_IN_USE && b->house_size) {
+                b->sentiment.house_happiness = calc_bound(amount_set, 0, 100);
             }
         }
     }

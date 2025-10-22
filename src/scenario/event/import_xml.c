@@ -13,13 +13,15 @@
 #include "scenario/event/controller.h"
 #include "scenario/event/data.h"
 #include "scenario/event/event.h"
+#include "scenario/event/parameter_city.h"
 #include "scenario/event/parameter_data.h"
 #include "window/plain_message_dialog.h"
+#include "window/editor/select_city_trade_route.h"
 
 #include <math.h>
 #include <stdio.h>
 
-#define XML_TOTAL_ELEMENTS 64
+#define XML_TOTAL_ELEMENTS 72
 #define ERROR_MESSAGE_LENGTH 200
 
 static struct {
@@ -53,6 +55,8 @@ static int xml_import_special_parse_resource(xml_data_attribute_t *attr, int *ta
 static int xml_import_special_parse_route(xml_data_attribute_t *attr, int *target);
 static int xml_import_special_parse_custom_message(xml_data_attribute_t *attr, int *target);
 static int xml_import_special_parse_custom_variable(xml_data_attribute_t *attr, int *target);
+static int xml_import_special_parse_formula(xml_data_attribute_t *attr, int *target);
+static int xml_import_special_parse_number(xml_data_attribute_t *attr, int *target);
 
 static condition_types get_condition_type_from_element_name(const char *name);
 static action_types get_action_type_from_element_name(const char *name);
@@ -125,6 +129,14 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "cause_major_curse", xml_import_create_action, 0, "actions" },
     { "change_climate", xml_import_create_action, 0, "actions"},
     { "change_terrain", xml_import_create_action, 0, "actions"},
+    { "change_model_data", xml_import_create_action, 0, "actions"},
+    { "change_variable_visibility", xml_import_create_action, 0, "actions"},
+    { "variable_formula", xml_import_create_action, 0, "actions"},
+    { "variable_city_property", xml_import_create_action, 0, "actions"},
+    { "change_god_sentiment", xml_import_create_action, 0, "actions"},
+    { "change_pop_sentiment", xml_import_create_action, 0, "actions"},
+    { "win", xml_import_create_action, 0, "actions"}, // 70
+    { "lose", xml_import_create_action, 0, "actions"},
 };
 
 static int xml_import_start_scenario_events(void)
@@ -199,12 +211,12 @@ static int xml_import_start_event(void)
         return 0;
     }
 
-    int min = xml_parser_get_attribute_int("repeat_months_min");
+    int min = xml_parser_get_attribute_int("repeat_days_min");
     if (!min) {
         min = 0;
     }
 
-    int max = xml_parser_get_attribute_int("repeat_months_max");
+    int max = xml_parser_get_attribute_int("repeat_days_max");
     if (!max) {
         max = min;
     }
@@ -322,16 +334,63 @@ static action_types get_action_type_from_element_name(const char *name)
     return ACTION_TYPE_UNDEFINED;
 }
 
+static int xml_import_special_parse_attribute_with_resolved_type(xml_data_attribute_t *attr, parameter_type resolved_type, int *target);
+
 static int action_populate_parameters(scenario_action_t *action)
 {
     scenario_action_data_t *action_data = scenario_events_parameter_data_get_actions_xml_attributes(action->type);
     int success = 1;
     success &= xml_import_special_parse_attribute(&action_data->xml_parm1, &action->parameter1);
     success &= xml_import_special_parse_attribute(&action_data->xml_parm2, &action->parameter2);
-    success &= xml_import_special_parse_attribute(&action_data->xml_parm3, &action->parameter3);
-    success &= xml_import_special_parse_attribute(&action_data->xml_parm4, &action->parameter4);
-    success &= xml_import_special_parse_attribute(&action_data->xml_parm5, &action->parameter5);
 
+    // Handle flexible parameters - resolve them to their actual types and get proper attribute names before parsing
+    // Note: parameter2 must be parsed first as it contains the city_property that determines the flexible types
+    if (action_data->xml_parm3.type == PARAMETER_TYPE_FLEXIBLE) {
+        parameter_type type3 = scenario_events_parameter_data_resolve_flexible_type(action, 3);
+        city_property_info_t info = city_property_get_param_info(action->parameter2);
+        if (type3 != PARAMETER_TYPE_UNDEFINED && info.count >= 1) {
+            xml_data_attribute_t resolved_attr = action_data->xml_parm3;
+            resolved_attr.type = type3;
+            resolved_attr.name = info.param_names[0];
+            success &= xml_import_special_parse_attribute_with_resolved_type(&resolved_attr, type3, &action->parameter3);
+        }
+    } else {
+        success &= xml_import_special_parse_attribute(&action_data->xml_parm3, &action->parameter3);
+    }
+
+    if (action_data->xml_parm4.type == PARAMETER_TYPE_FLEXIBLE) {
+        parameter_type type4 = scenario_events_parameter_data_resolve_flexible_type(action, 4);
+        city_property_info_t info = city_property_get_param_info(action->parameter2);
+        if (type4 != PARAMETER_TYPE_UNDEFINED && info.count >= 2) {
+            xml_data_attribute_t resolved_attr = action_data->xml_parm4;
+            resolved_attr.type = type4;
+            resolved_attr.name = info.param_names[1];
+            success &= xml_import_special_parse_attribute_with_resolved_type(&resolved_attr, type4, &action->parameter4);
+        }
+    } else {
+        success &= xml_import_special_parse_attribute(&action_data->xml_parm4, &action->parameter4);
+    }
+
+    if (action_data->xml_parm5.type == PARAMETER_TYPE_FLEXIBLE) {
+        parameter_type type5 = scenario_events_parameter_data_resolve_flexible_type(action, 5);
+        city_property_info_t info = city_property_get_param_info(action->parameter2);
+        if (type5 != PARAMETER_TYPE_UNDEFINED && info.count >= 3) {
+            xml_data_attribute_t resolved_attr = action_data->xml_parm5;
+            resolved_attr.type = type5;
+            resolved_attr.name = info.param_names[2];
+            success &= xml_import_special_parse_attribute_with_resolved_type(&resolved_attr, type5, &action->parameter5);
+        }
+    } else {
+        success &= xml_import_special_parse_attribute(&action_data->xml_parm5, &action->parameter5);
+    }
+    // since xml exports route and resource separately, we need to combine them into one parameter here
+    if (action_data->type == ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY) {
+        if (action->parameter2 == CITY_PROPERTY_QUOTA_FILL) {
+            int trade_route_id = action->parameter3;
+            int raw_resource_id = action->parameter4;
+            action->parameter4 = window_editor_select_city_trade_route_encode_route_resource(action->parameter3, raw_resource_id);
+        }
+    }
     return success;
 }
 
@@ -381,6 +440,11 @@ static int xml_import_special_parse_type(xml_data_attribute_t *attr, parameter_t
 
     int has_attr = xml_parser_has_attribute(attr->name);
     if (!has_attr) {
+        // For boolean types, default to false (0) if attribute is missing
+        if (type == PARAMETER_TYPE_BOOLEAN) {
+            *target = 0;
+            return 1;
+        }
         xml_import_log_error("Missing attribute.");
         return 0;
     }
@@ -396,9 +460,9 @@ static int xml_import_special_parse_type(xml_data_attribute_t *attr, parameter_t
     return 1;
 }
 
-static int xml_import_special_parse_attribute(xml_data_attribute_t *attr, int *target)
+static int xml_import_special_parse_attribute_with_resolved_type(xml_data_attribute_t *attr, parameter_type resolved_type, int *target)
 {
-    switch (attr->type) {
+    switch (resolved_type) {
         case PARAMETER_TYPE_INVASION_TYPE:
         case PARAMETER_TYPE_BOOLEAN:
         case PARAMETER_TYPE_BUILDING:
@@ -414,7 +478,20 @@ static int xml_import_special_parse_attribute(xml_data_attribute_t *attr, int *t
         case PARAMETER_TYPE_GOD:
         case PARAMETER_TYPE_CLIMATE:
         case PARAMETER_TYPE_TERRAIN:
-            return xml_import_special_parse_type(attr, attr->type, target);
+        case PARAMETER_TYPE_DATA_TYPE:
+        case PARAMETER_TYPE_MODEL:
+        case PARAMETER_TYPE_PERCENTAGE:
+        case PARAMETER_TYPE_HOUSING_TYPE:
+        case PARAMETER_TYPE_AGE_GROUP:
+        case PARAMETER_TYPE_ENEMY_CLASS:
+        case PARAMETER_TYPE_PLAYER_TROOPS:
+        case PARAMETER_TYPE_COVERAGE_BUILDINGS:
+        case PARAMETER_TYPE_RANK:
+        case PARAMETER_TYPE_CITY_PROPERTY:
+        case PARAMETER_TYPE_MEDIA_TYPE:
+            return xml_import_special_parse_type(attr, resolved_type, target);
+        case PARAMETER_TYPE_ROUTE_RESOURCE:
+            return xml_import_special_parse_number(attr, target);
         case PARAMETER_TYPE_BUILDING_COUNTING:
             return xml_import_special_parse_building_counting(attr, target);
         case PARAMETER_TYPE_FUTURE_CITY:
@@ -432,12 +509,23 @@ static int xml_import_special_parse_attribute(xml_data_attribute_t *attr, int *t
             return xml_import_special_parse_custom_message(attr, target);
         case PARAMETER_TYPE_CUSTOM_VARIABLE:
             return xml_import_special_parse_custom_variable(attr, target);
+        case PARAMETER_TYPE_FORMULA:
+            return xml_import_special_parse_formula(attr, target);
         case PARAMETER_TYPE_UNDEFINED:
             return 1;
+        case PARAMETER_TYPE_FLEXIBLE:
+            // FLEXIBLE should have been resolved before calling this function
+            xml_import_log_error("Unresolved FLEXIBLE parameter type encountered during import");
+            return 0;
         default:
             xml_import_log_error("Something is very wrong. Failed to find attribute type.");
             return 0;
     }
+}
+
+static int xml_import_special_parse_attribute(xml_data_attribute_t *attr, int *target)
+{
+    return xml_import_special_parse_attribute_with_resolved_type(attr, attr->type, target);
 }
 
 static int xml_import_special_parse_building_counting(xml_data_attribute_t *attr, int *target)
@@ -582,6 +670,23 @@ static int xml_import_special_parse_limited_number(xml_data_attribute_t *attr, i
     return 1;
 }
 
+
+static int xml_import_special_parse_number(xml_data_attribute_t *attr, int *target)
+{
+    if (!attr->name) {
+        return 0;
+    }
+    int has_attr = xml_parser_has_attribute(attr->name);
+    if (!has_attr) {
+        xml_import_log_error("Missing attribute.");
+        return 0;
+    }
+    int param_value = xml_parser_get_attribute_int(attr->name);
+
+    *target = param_value;
+    return 1;
+}
+
 static int xml_import_special_parse_min_max_number(xml_data_attribute_t *attr, int *target)
 {
     int has_attr = xml_parser_has_attribute("amount");
@@ -638,6 +743,44 @@ static int xml_import_special_parse_custom_variable(xml_data_attribute_t *attr, 
     }
 }
 
+static int xml_import_special_parse_formula(xml_data_attribute_t *attr, int *target)
+{
+    if (!attr->name) {
+        return 1;
+    }
+
+    int has_attr = xml_parser_has_attribute(attr->name);
+    if (!has_attr) {
+        // If attribute is missing, create a formula with "0"
+        unsigned int formula_id = scenario_formula_add(string_from_ascii("0"), -1000000000, 1000000000);
+        if (formula_id) {
+            *target = formula_id;
+            return 1;
+        }
+        xml_import_log_error("Missing attribute.");
+        return 0;
+    }
+
+    const char *value = xml_parser_get_attribute_string(attr->name);
+    if (!value || !*value) {
+        // If attribute is empty, treat as "0"
+        value = "0";
+    }
+    const uint8_t *converted_formula = string_from_ascii(value);
+
+    // Create a new formula with the imported string
+    // Using default limits of -1000000000 to 1000000000 (no effective limit)
+    unsigned int formula_id = scenario_formula_add(converted_formula, -1000000000, 1000000000);
+
+    if (formula_id) {
+        *target = formula_id;
+        return 1;
+    } else {
+        xml_import_log_error("Could not create formula from imported string.");
+        return 0;
+    }
+}
+
 static void reset_data(void)
 {
     data.success = 1;
@@ -668,7 +811,7 @@ static char *file_to_buffer(const char *filename, int *output_length)
 {
     FILE *file = file_open(filename, "r");
     if (!file) {
-        log_error("Error opening empire file", filename, 0);
+        log_error("Error opening event file", filename, 0);
         return 0;
     }
     fseek(file, 0, SEEK_END);
@@ -677,7 +820,7 @@ static char *file_to_buffer(const char *filename, int *output_length)
 
     char *buf = malloc(size);
     if (!buf) {
-        log_error("Error opening empire file", filename, 0);
+        log_error("Error opening event file", filename, 0);
         file_close(file);
         return 0;
     }

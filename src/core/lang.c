@@ -314,6 +314,10 @@ void load_augustus_messages(void)
     set_message_parameters(m, TR_CITY_MESSAGE_TITLE_MONUMENT_COMPLETE, TR_CITY_MESSAGE_TEXT_CARAVANSERAI_COMPLETE, 0,
         MESSAGE_TYPE_GENERAL);
     i += 1;
+
+    m = &data.message_entries[i];
+    set_message_parameters(m, TR_CITY_MESSAGE_TITLE_GOVERNOR_RANK_CHANGE, 0, 0, MESSAGE_TYPE_RANK_CHANGE);
+    i += 1;
 }
 
 
@@ -634,6 +638,8 @@ const uint8_t *lang_get_string(int group, int index)
                 return translation_for(TR_EDITOR_TOOL_EARTHQUAKE_CUSTOM);
             case TR_EDITOR_TOOL_EARTHQUAKE_REMOVE:
                 return translation_for(TR_EDITOR_TOOL_EARTHQUAKE_REMOVE);
+            case TR_EDITOR_RUBBLE:
+                return translation_for(TR_EDITOR_RUBBLE);
             default:
                 break;
         }

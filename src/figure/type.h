@@ -6,9 +6,9 @@
  * Figure types.
  */
 
-/**
- * Figure types
- */
+ /**
+  * Figure types
+  */
 typedef enum {
     FIGURE_NONE = 0,
     FIGURE_IMMIGRANT = 1,
@@ -127,6 +127,13 @@ typedef enum {
     ENEMY_11_CAESAR = 11,
     ENEMY_MAX
 } enemy_type_t;
+
+typedef enum {
+    ENEMY_CLASS_ALL = 0,
+    ENEMY_CLASS_MELEE = 1,
+    ENEMY_CLASS_RANGED = 2,
+    ENEMY_CLASS_MOUNTED = 3,
+} enemy_class_t;
 
 enum {
     FIGURE_STATE_ALIVE = 1,

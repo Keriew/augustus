@@ -12,6 +12,7 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
+#include "scenario/event/parameter_data.h"
 #include "window/editor/map.h"
 #include "window/numeric_input.h"
 
@@ -92,6 +93,7 @@ static const uint8_t *get_display_string(special_attribute_mapping_t *entry)
     switch (entry->type) {
         case PARAMETER_TYPE_BUILDING:
         case PARAMETER_TYPE_BUILDING_COUNTING:
+        case PARAMETER_TYPE_MODEL:
             if (entry->key == TR_PARAMETER_VALUE_DYNAMIC_RESOLVE) {
                 return lang_get_building_type_string(entry->value);
             } else {

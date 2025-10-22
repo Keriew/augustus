@@ -2,8 +2,8 @@
 
 #include "assets/assets.h"
 #include "building/building.h"
-#include "building/model.h"
 #include "building/monument.h"
+#include "building/properties.h"
 #include "city/labor.h"
 #include "city/population.h"
 #include "city/resource.h"

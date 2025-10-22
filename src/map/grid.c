@@ -95,6 +95,39 @@ grid_slice *map_grid_get_grid_slice_from_corners(int start_x, int start_y, int e
     return map_grid_get_grid_slice_rectangle(map_grid_offset(x_min, y_min), width, height);
 }
 
+grid_slice *map_grid_get_grid_slice_from_corner_offsets(int corner_offset_1, int corner_offset_2)
+{
+    int start_x = map_grid_offset_to_x(corner_offset_1);
+    int start_y = map_grid_offset_to_y(corner_offset_1);
+    int end_x = map_grid_offset_to_x(corner_offset_2);
+    int end_y = map_grid_offset_to_y(corner_offset_2);
+
+    return map_grid_get_grid_slice_from_corners(start_x, start_y, end_x, end_y);
+}
+
+int map_grid_get_corner_offsets_from_grid_slice(const grid_slice *slice, int *top_left_offset, int *bottom_right_offset)
+{
+    if (!slice || slice->size == 0) {
+        return 0;
+    }
+    int x_min = 2147483647, y_min = 2147483647; // no max offset values defined, just use INT_MAX
+    int x_max = 0, y_max = 0;
+    for (int i = 0; i < slice->size; i++) {
+        int offset = slice->grid_offsets[i];
+        int x = map_grid_offset_to_x(offset);
+        int y = map_grid_offset_to_y(offset);
+        if (x < x_min) x_min = x;
+        if (y < y_min) y_min = y;
+        if (x > x_max) x_max = x;
+        if (y > y_max) y_max = y;
+    }
+
+    // Convert corners back to grid offsets
+    *top_left_offset = map_grid_offset(x_min, y_min);
+    *bottom_right_offset = map_grid_offset(x_max, y_max);
+    return 1;
+}
+
 
 grid_slice *map_grid_get_grid_slice_rectangle(int start_grid_offset, int width, int height)
 {
@@ -184,7 +217,7 @@ grid_slice *map_grid_get_grid_slice_ring(int center_grid_offset, int inner_radiu
     return slice;
 }
 
-grid_slice *map_grid_get_grid_slice_circle(int center_grid_offset, int radius)
+grid_slice *map_grid_get_grid_slice_from_center(int center_grid_offset, int radius)
 {
     // A circle is just a ring with inner_radius = 0
     return map_grid_get_grid_slice_ring(center_grid_offset, 0, radius);
