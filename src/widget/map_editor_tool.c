@@ -3,12 +3,14 @@
 #include "assets/assets.h"
 #include "building/image.h"
 #include "building/properties.h"
+#include "city/view.h"
 #include "core/image_group_editor.h"
 #include "editor/tool.h"
 #include "editor/tool_restriction.h"
 #include "graphics/image.h"
 #include "input/scroll.h"
 #include "map/terrain.h"
+#include "map/grid.h"
 #include "scenario/property.h"
 
 #define MAX_TILES 16
@@ -29,6 +31,8 @@ static void draw_flat_tile(int x, int y, color_t color_mask)
 {
     if (color_mask == COLOR_MASK_GREEN && scenario_property_climate() != CLIMATE_DESERT) {
         image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, ALPHA_MASK_SEMI_TRANSPARENT & color_mask, scale);
+    } else if (color_mask != COLOR_MASK_GREEN && color_mask != COLOR_MASK_RED) {
+        image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, color_mask, scale);
     } else {
         image_blend_footprint_color(x, y, color_mask, scale);
     }
@@ -147,6 +151,33 @@ static void draw_map_flag(int x, int y, int is_ok)
     draw_flat_tile(x, y, is_ok ? COLOR_MASK_GREEN : COLOR_MASK_RED);
 }
 
+static void draw_selection_rectangle(const map_tile *current_tile, const map_tile *start_tile, color_t color)
+{
+    // Get the grid slice for the rectangle selection
+    grid_slice *slice = map_grid_get_grid_slice_from_corners(
+        start_tile->x, start_tile->y, current_tile->x, current_tile->y);
+
+    if (!slice) {
+        return;
+    }
+    int x_pixels, y_pixels;
+    city_view_get_selected_tile_pixels(&x_pixels, &y_pixels);
+
+    // Draw simple highlight for each tile in the selection
+    for (int i = 0; i < slice->size; i++) {
+        int offset = slice->grid_offsets[i];
+        // Calculate the isometric view position for this tile
+        int xx = map_grid_offset_to_x(offset);
+        int yy = map_grid_offset_to_y(offset);
+        int dx = xx - current_tile->x;
+        int dy = yy - current_tile->y;
+        int view_dx = (dx - dy) * 30;
+        int view_dy = (dx + dy) * 15;
+        // Draw flat tile highlight at the calculated position
+        draw_flat_tile(x_pixels + view_dx, y_pixels + view_dy, color);
+    }
+}
+
 void map_editor_tool_draw(const map_tile *tile)
 {
     if (!tile->grid_offset || scroll_in_progress() || !editor_tool_is_active()) {
@@ -208,6 +239,34 @@ void map_editor_tool_draw(const map_tile *tile)
 
         case TOOL_ROAD:
             draw_road(tile, x, y);
+            break;
+
+        case TOOL_SELECT_LAND:
+            if (editor_tool_is_in_use()) {
+                const map_tile *start_tile = editor_tool_get_start_tile();
+                if (start_tile && start_tile->grid_offset) {
+                    draw_selection_rectangle(tile, start_tile, COLOR_MASK_AMBER);
+                }
+            } else {
+                // Just highlight the current tile when not dragging
+                int corner1, corner2;
+                grid_slice *existing_selection = editor_tool_get_existing_land_selection();
+                int success = map_grid_get_corner_offsets_from_grid_slice(existing_selection, &corner1, &corner2);
+                if (success) {
+                    map_tile start_tile = {
+                        .x = map_grid_offset_to_x(corner1),
+                        .y = map_grid_offset_to_y(corner1),
+                        .grid_offset = corner1
+                    };
+                    map_tile end_tile = {
+                        .x = map_grid_offset_to_x(corner2),
+                        .y = map_grid_offset_to_y(corner2),
+                        .grid_offset = corner2
+                    };
+                    //draw_selection_rectangle(&start_tile, &end_tile, COLOR_MASK_BUILDING_GHOST); // needs more work
+                }
+                draw_flat_tile(x, y, COLOR_MASK_AMBER);
+            }
             break;
     }
 }

@@ -4,6 +4,8 @@
 #include "core/log.h"
 #include "core/string.h"   
 #include "game/save_version.h"
+#include "map/grid.h"
+#include "scenario/custom_variable.h"
 #include "scenario/event/action_handler.h"
 #include "scenario/event/condition_handler.h"
 #include "scenario/event/event.h"
@@ -522,6 +524,17 @@ static void migrate_parameters_condition(scenario_condition_t *condition)
     }
 }
 
+void scenario_events_migrate_to_resolved_display_names(void)
+{
+    for (unsigned int i = 0; i < scenario_custom_variable_count(); i++) {
+        const uint8_t *name = scenario_custom_variable_get_text_display(i);
+        uint8_t new_name[CUSTOM_VARIABLE_TEXT_DISPLAY_LENGTH];
+        // Format: "<original name> [id]"
+        snprintf((char *) new_name, sizeof(new_name), "%s [%u]", (const char *) name, i);
+        scenario_custom_variable_set_text_display(i, new_name);
+    }
+}
+
 void scenario_events_migrate_to_formulas(void)
 {
     scenario_event_t *current;
@@ -539,6 +552,48 @@ void scenario_events_migrate_to_formulas(void)
             array_foreach(group->conditions, condition) //through all conditions of this group
             {
                 migrate_parameters_condition(condition); //migrate parameters if needed
+            }
+        }
+    }
+}
+
+void scenario_events_migrate_to_grid_slices(void)
+{
+    scenario_event_t *current;
+    array_foreach(scenario_events, current) //go through all events
+    {
+        scenario_action_t *action;
+        array_foreach(current->actions, action) //go through all actions of this event
+        {
+            if (action->type == ACTION_TYPE_BUILDING_FORCE_COLLAPSE ||
+                action->type == ACTION_TYPE_CHANGE_TERRAIN) {
+                // For these action types, we need to convert grid offset and radius into grid offset corners
+                // into two GRID_SLICE parameters (corner1 and corner2)
+                int old_grid_offset = action->parameter1;
+                int radius = action->parameter2;
+                int corner1 = 0, corner2 = 0;
+                grid_slice *slice = map_grid_get_grid_slice_from_center(old_grid_offset, radius);
+                map_grid_get_corner_offsets_from_grid_slice(slice, &corner1, &corner2);
+                action->parameter1 = corner1;
+                action->parameter2 = corner2;
+            }
+        }
+        scenario_condition_group_t *group;
+        scenario_condition_t *condition;
+        array_foreach(current->condition_groups, group) //through all condition groups of this event
+        {
+            array_foreach(group->conditions, condition) //through all conditions of this group
+            {
+                if (condition->type == CONDITION_TYPE_BUILDING_COUNT_AREA) {
+                    // CONDITION_TYPE_TERRAIN_IN_AREA introduced with the new parameters from start
+                    int old_grid_offset = condition->parameter1;
+                    int radius = condition->parameter2;
+                    int corner1 = 0, corner2 = 0;
+                    grid_slice *slice = map_grid_get_grid_slice_from_center(old_grid_offset, radius);
+                    map_grid_get_corner_offsets_from_grid_slice(slice, &corner1, &corner2);
+                    condition->parameter1 = corner1;
+                    condition->parameter2 = corner2;
+                }
             }
         }
     }

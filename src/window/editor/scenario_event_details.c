@@ -180,7 +180,7 @@ static generic_button select_all_none_buttons[] = {
     {320, 163, 20, 20, button_select_all_none, 0, SELECT_ACTIONS}
 };
 
-static dropdown_button repeat_interval_dropdown = { 0 };
+static dropdown_button repeat_interval_dropdown;
 
 #define NUM_BOTTOM_BUTTONS (sizeof(bottom_buttons) / sizeof(generic_button))
 

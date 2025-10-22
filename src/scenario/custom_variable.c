@@ -170,7 +170,6 @@ void scenario_custom_variable_set_text_display(unsigned int id, const uint8_t *t
     string_copy(text, variable->text_display, CUSTOM_VARIABLE_NAME_LENGTH);
 }
 
-
 void scenario_custom_variable_rename(unsigned int id, const uint8_t *name)
 {
     custom_variable_t *variable = get_variable(id);
@@ -247,7 +246,6 @@ void scenario_custom_variable_load_state(buffer *buf, int version)
         }
     }
 }
-
 
 void scenario_custom_variable_load_state_old_version(buffer *buf)
 {

@@ -187,20 +187,18 @@ int scenario_condition_type_custom_variable_check_formula(const scenario_conditi
 
 int scenario_condition_type_building_count_area_met(const scenario_condition_t *condition)
 {
-    int grid_offset = scenario_formula_evaluate_formula(condition->parameter1);
-    int block_radius = scenario_formula_evaluate_formula(condition->parameter2);
+    int grid_offset1 = condition->parameter1;
+    int grid_offset2 = condition->parameter2;
     building_type type = condition->parameter3;
     int comparison = condition->parameter4;
     int value = scenario_formula_evaluate_formula(condition->parameter5);
 
-    if (!map_grid_is_valid_offset(grid_offset)) {
-        return 0;
-    }
+    grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
 
-    int minx = map_grid_offset_to_x(grid_offset) - block_radius;
-    int miny = map_grid_offset_to_y(grid_offset) - block_radius;
-    int maxx = map_grid_offset_to_x(grid_offset) + block_radius;
-    int maxy = map_grid_offset_to_y(grid_offset) + block_radius;
+    int minx = map_grid_offset_to_x(grid_offset1);
+    int miny = map_grid_offset_to_y(grid_offset1);
+    int maxx = map_grid_offset_to_x(grid_offset2);
+    int maxy = map_grid_offset_to_y(grid_offset2);
     int buildings_in_area = 0;
     switch (type) {
         case BUILDING_MENU_FARMS:
