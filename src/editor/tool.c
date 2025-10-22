@@ -38,9 +38,10 @@ static struct {
     int build_in_progress;
     int start_elevation;
     map_tile start_tile;
-    grid_slice *land_selection;
+    grid_slice *land_selection; // selection being edited right now
+    grid_slice *existing_selection; // previously existing selection
     void (*selection_callback)(grid_slice *selection);
-} data = { 0, TOOL_GRASS, 0, 3, 0, 0, {0}, 0, 0 };
+} data = { 0, TOOL_GRASS, 0, 3, 0, 0, {0}, {0}, {0}, 0 };
 
 tool_type editor_tool_type(void)
 {
@@ -542,6 +543,31 @@ void editor_tool_set_selection_callback(void (*callback)(grid_slice *selection))
 grid_slice *editor_tool_get_land_selection(void)
 {
     return data.land_selection;
+}
+
+grid_slice *editor_tool_get_existing_land_selection(void)
+{
+    return data.existing_selection;
+}
+
+void editor_tool_set_land_selection(grid_slice *selection)
+{
+    data.land_selection = selection;
+}
+
+void editor_tool_set_existing_land_selection(grid_slice *selection)
+{
+    data.existing_selection = selection;
+}
+
+void editor_tool_clear_existing_land_selection(void)
+{
+    memset(data.existing_selection, 0, sizeof(grid_slice));
+}
+
+void editor_tool_clear_land_selection(void)
+{
+    memset(data.land_selection, 0, sizeof(grid_slice));
 }
 
 const map_tile *editor_tool_get_start_tile(void)

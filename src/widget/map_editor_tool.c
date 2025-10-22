@@ -151,33 +151,30 @@ static void draw_map_flag(int x, int y, int is_ok)
     draw_flat_tile(x, y, is_ok ? COLOR_MASK_GREEN : COLOR_MASK_RED);
 }
 
-static void draw_selection_rectangle(const map_tile *current_tile, const map_tile *start_tile)
+static void draw_selection_rectangle(const map_tile *current_tile, const map_tile *start_tile, color_t color)
 {
-    // Calculate bounds of the rectangle
-    int x_min, y_min, x_max, y_max;
-    map_grid_start_end_to_area(start_tile->x, start_tile->y, current_tile->x, current_tile->y,
-        &x_min, &y_min, &x_max, &y_max);
+    // Get the grid slice for the rectangle selection
+    grid_slice *slice = map_grid_get_grid_slice_from_corners(
+        start_tile->x, start_tile->y, current_tile->x, current_tile->y);
+
+    if (!slice) {
+        return;
+    }
+    int x_pixels, y_pixels;
+    city_view_get_selected_tile_pixels(&x_pixels, &y_pixels);
 
     // Draw simple highlight for each tile in the selection
-    for (int yy = y_min; yy <= y_max; yy++) {
-        for (int xx = x_min; xx <= x_max; xx++) {
-            if (!map_grid_is_inside(xx, yy, 1)) {
-                continue;
-            }
-
-            // Calculate the isometric view position for this tile
-            // Using the same offset calculation as other tiles
-            int dx = xx - current_tile->x;
-            int dy = yy - current_tile->y;
-            int view_dx = (dx - dy) * 30;
-            int view_dy = (dx + dy) * 15;
-
-            int x_pixels, y_pixels;
-            city_view_get_selected_tile_pixels(&x_pixels, &y_pixels);
-
-            // Draw flat tile highlight at the calculated position
-            draw_flat_tile(x_pixels + view_dx, y_pixels + view_dy, COLOR_MASK_AMBER);
-        }
+    for (int i = 0; i < slice->size; i++) {
+        int offset = slice->grid_offsets[i];
+        // Calculate the isometric view position for this tile
+        int xx = map_grid_offset_to_x(offset);
+        int yy = map_grid_offset_to_y(offset);
+        int dx = xx - current_tile->x;
+        int dy = yy - current_tile->y;
+        int view_dx = (dx - dy) * 30;
+        int view_dy = (dx + dy) * 15;
+        // Draw flat tile highlight at the calculated position
+        draw_flat_tile(x_pixels + view_dx, y_pixels + view_dy, color);
     }
 }
 
@@ -248,10 +245,26 @@ void map_editor_tool_draw(const map_tile *tile)
             if (editor_tool_is_in_use()) {
                 const map_tile *start_tile = editor_tool_get_start_tile();
                 if (start_tile && start_tile->grid_offset) {
-                    draw_selection_rectangle(tile, start_tile);
+                    draw_selection_rectangle(tile, start_tile, COLOR_MASK_AMBER);
                 }
             } else {
                 // Just highlight the current tile when not dragging
+                int corner1, corner2;
+                grid_slice *existing_selection = editor_tool_get_existing_land_selection();
+                int success = map_grid_get_corner_offsets_from_grid_slice(existing_selection, &corner1, &corner2);
+                if (success) {
+                    map_tile start_tile = {
+                        .x = map_grid_offset_to_x(corner1),
+                        .y = map_grid_offset_to_y(corner1),
+                        .grid_offset = corner1
+                    };
+                    map_tile end_tile = {
+                        .x = map_grid_offset_to_x(corner2),
+                        .y = map_grid_offset_to_y(corner2),
+                        .grid_offset = corner2
+                    };
+                    //draw_selection_rectangle(&start_tile, &end_tile, COLOR_MASK_BUILDING_GHOST); // needs more work
+                }
                 draw_flat_tile(x, y, COLOR_MASK_AMBER);
             }
             break;

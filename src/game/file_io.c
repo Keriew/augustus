@@ -746,6 +746,8 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
         model_load_model_data(file->model_data);
     } else {
         scenario_events_migrate_to_formulas();
+        scenario_events_migrate_to_grid_slices();
+        scenario_events_migrate_to_resolved_display_names();
     }
 
     buffer_skip(file->end_marker, 4);
@@ -924,6 +926,8 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     }
     if (version <= SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         scenario_events_migrate_to_formulas();
+        scenario_events_migrate_to_grid_slices();
+        scenario_events_migrate_to_resolved_display_names();
     }
 
 }

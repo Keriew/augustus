@@ -416,10 +416,8 @@ static void start_grid_slice_selection(void)
 {
     // Set up the callback
     editor_tool_set_selection_callback(on_grid_slice_selected);
-
     // Activate the land selection tool
     editor_tool_set_type(TOOL_SELECT_LAND);
-
     // Switch to the editor map window to allow selection
     window_editor_map_show();
 }
@@ -466,6 +464,10 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             custom_variable_selection();
             return;
         case PARAMETER_TYPE_GRID_SLICE:
+            int grid_offset1 = data.condition->parameter1;
+            int grid_offset2 = data.condition->parameter2;
+            grid_slice *existing_selection = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
+            editor_tool_set_existing_land_selection(existing_selection);
             start_grid_slice_selection();
             return;
         case PARAMETER_TYPE_FORMULA:

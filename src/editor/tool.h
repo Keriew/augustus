@@ -68,6 +68,16 @@ void editor_tool_set_selection_callback(void (*callback)(grid_slice *selection))
  */
 grid_slice *editor_tool_get_land_selection(void);
 
+grid_slice *editor_tool_get_existing_land_selection(void);
+
+void editor_tool_set_land_selection(grid_slice *selection);
+
+void editor_tool_set_existing_land_selection(grid_slice *selection);
+
+void editor_tool_clear_existing_land_selection(void);
+
+void editor_tool_clear_land_selection(void);
+
 /**
  * @brief Get the start tile for updatable tools (TOOL_ROAD, TOOL_SELECT_LAND)
  * @return Pointer to the start map_tile, or NULL if tool not in use
