@@ -90,6 +90,8 @@ int scenario_condition_type_is_met(scenario_condition_t *condition)
             return scenario_condition_type_tax_rate_met(condition);
         case CONDITION_TYPE_CUSTOM_VARIABLE_CHECK_FORMULA:
             return scenario_condition_type_custom_variable_check_formula(condition);
+        case CONDITION_TYPE_TERRAIN_IN_AREA:
+            return scenario_condition_type_terrain_count_area_met(condition);
         default:
             // If we cannot figure condition type (such as with deleted conditions) then default to passed.
             return 1;

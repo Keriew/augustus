@@ -16,6 +16,7 @@
 #include "game/settings.h"
 #include "game/time.h"
 #include "map/grid.h"
+#include "map/terrain.h"
 #include "scenario/custom_variable.h"
 #include "scenario/event/condition_comparison_helper.h"
 #include "scenario/event/controller.h"
@@ -183,6 +184,25 @@ int scenario_condition_type_custom_variable_check_formula(const scenario_conditi
     int formula_evaluation = scenario_formula_evaluate_formula(formula_id);
 
     return comparison_helper_compare_values(comparison, target_variable_val, formula_evaluation);
+}
+
+int scenario_condition_type_terrain_count_area_met(const scenario_condition_t *condition)
+{
+    int grid_offset1 = condition->parameter1;
+    int grid_offset2 = condition->parameter2;
+    int terrain_type = condition->parameter3;
+    int comparison = condition->parameter4;
+    int value = scenario_formula_evaluate_formula(condition->parameter5);
+
+    int current_count = 0;
+    grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
+    for (int i = 0; i < slice->size; i++) {
+        int grid_offset = slice->grid_offsets[i];
+        if (map_terrain_is(grid_offset, terrain_type)) {
+            current_count++;
+        }
+    }
+    return comparison_helper_compare_values(comparison, current_count, value);
 }
 
 int scenario_condition_type_building_count_area_met(const scenario_condition_t *condition)
