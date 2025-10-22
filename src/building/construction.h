@@ -2,6 +2,8 @@
 #define BUILDING_CONSTRUCTION_H
 
 #include "building/type.h"
+#include "figure/type.h"
+#include "map/grid.h"
 
 int building_construction_cycle_forward(void);
 
@@ -15,7 +17,7 @@ int building_construction_type_cycle_steps(building_type type);
 
 void building_construction_set_cost(int cost);
 
-void building_construction_set_type(building_type type);
+void building_construction_set_type(building_type type, int setup_rotation);
 
 void building_construction_clear_type(void);
 
@@ -41,6 +43,8 @@ void building_construction_cancel(void);
 
 void building_construction_update(int x, int y, int grid_offset);
 
+figure_type building_construction_nearby_enemy_type(grid_slice *slice);
+
 void building_construction_offset_start_from_orientation(int *x, int *y, int size);
 
 void building_construction_place(void);
@@ -53,5 +57,11 @@ int building_construction_get_start_grid_offset(void);
 
 void building_construction_reset_draw_as_constructing(void);
 int building_construction_draw_as_constructing(void);
+/** @brief to place a single wall tile at the given grid offset. since walls are being moved to building category,
+* Every tile should be handled separately with individual building IDs
+*/
+int building_construction_place_wall(int grid_offset);
 
 #endif // BUILDING_CONSTRUCTION_H
+
+

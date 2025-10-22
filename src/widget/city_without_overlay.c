@@ -4,6 +4,7 @@
 #include "building/animation.h"
 #include "building/connectable.h"
 #include "building/construction.h"
+#include "building/construction_clear.h"
 #include "building/dock.h"
 #include "building/granary.h"
 #include "building/image.h"
@@ -156,8 +157,9 @@ static color_t get_building_color_mask(const building *b)
         switch (b->type) {
             //buildings that have labor but no walkers
             case BUILDING_LATRINES:
-            case BUILDING_WELL:
+            case BUILDING_FOUNTAIN:
                 color_mask = COLOR_MASK_NONE;
+                break;
                 //all other buildings
             default:
                 color_mask = SELECTED_BUILDING_COLOR_MASK;
@@ -194,7 +196,7 @@ static void draw_footprint(int x, int y, int grid_offset)
     if (building_id) {
         building *b = building_get(building_id);
         if (draw_building_as_deleted(b)) {
-            color_mask = COLOR_MASK_RED;
+            color_mask = building_construction_clear_color();
         } else if (is_building_selected(b)) {
             color_mask = get_building_color_mask(b);
         }
@@ -485,7 +487,7 @@ static void draw_top(int x, int y, int grid_offset)
     int image_id = map_image_at(grid_offset);
     color_t color_mask = 0;
     if (draw_building_as_deleted(b) || (map_property_is_deleted(grid_offset) && !is_multi_tile_terrain(grid_offset))) {
-        color_mask = COLOR_MASK_RED;
+        color_mask = building_construction_clear_color();
     } else if (is_building_selected(b)) {
         color_mask = get_building_color_mask(b);
     }
@@ -771,7 +773,7 @@ static void draw_animation(int x, int y, int grid_offset)
     building *b = building_get(building_id);
     color_t color_mask = 0;
     if (draw_building_as_deleted(b) || map_property_is_deleted(grid_offset)) {
-        color_mask = COLOR_MASK_RED;
+        color_mask = building_construction_clear_color();
     } else if (is_building_selected(b)) {
         color_mask = get_building_color_mask(b);
     }
@@ -859,7 +861,7 @@ static void draw_animation(int x, int y, int grid_offset)
                 }
             }
             image_draw(image_id, x + 81, y + 5,
-                draw_building_as_deleted(fort) ? COLOR_MASK_RED : COLOR_MASK_NONE, draw_context.scale);
+                draw_building_as_deleted(fort) ? building_construction_clear_color() : COLOR_MASK_NONE, draw_context.scale);
         }
     } else if (b->type == BUILDING_GATEHOUSE) {
         int xy = map_property_multi_tile_xy(grid_offset);
@@ -870,7 +872,7 @@ static void draw_animation(int x, int y, int grid_offset)
             (orientation == DIR_6_LEFT && xy == EDGE_X1Y0)) {
             building *gate = building_get(map_building_at(grid_offset));
             image_id = image_group(GROUP_BUILDING_GATEHOUSE);
-            color_mask = draw_building_as_deleted(gate) ? COLOR_MASK_RED : 0;
+            color_mask = draw_building_as_deleted(gate) ? building_construction_clear_color() : 0;
             if (gate->subtype.orientation == 1) {
                 if (orientation == DIR_0_TOP || orientation == DIR_4_BOTTOM) {
                     image_draw(image_id, x - 22, y - 80, color_mask, draw_context.scale);
@@ -923,7 +925,7 @@ static void draw_hippodrome_ornaments(int x, int y, int grid_offset)
         image_draw(image_id + 1,
             x + img->animation->sprite_offset_x,
             y + img->animation->sprite_offset_y - top_height + FOOTPRINT_HALF_HEIGHT,
-            draw_building_as_deleted(b) ? COLOR_MASK_RED : COLOR_MASK_NONE, draw_context.scale
+            draw_building_as_deleted(b) ? building_construction_clear_color() : COLOR_MASK_NONE, draw_context.scale
         );
     }
 }
@@ -943,7 +945,15 @@ static void deletion_draw_terrain_top(int x, int y, int grid_offset)
 static void deletion_draw_figures_animations(int x, int y, int grid_offset)
 {
     if (map_property_is_deleted(grid_offset) || draw_building_as_deleted(building_get(map_building_at(grid_offset)))) {
-        image_blend_footprint_color(x, y, COLOR_MASK_RED, draw_context.scale);
+        color_t color = building_construction_clear_color();
+        if (color == COLOR_MASK_RED || color == COLOR_MASK_GREEN) {
+            image_blend_footprint_color(x, y, color, draw_context.scale);
+            // blending mode only work in standard RED or GREEN, any other colors have to be drawn flat.
+            // passing a different color will just draw the red blending by default
+        } else {
+            image_draw_isometric_footprint(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, color, draw_context.scale);
+            // no blending, just draw the flat tile
+        }
     }
     if (map_property_is_draw_tile(grid_offset) && !should_draw_top_before_deletion(grid_offset)) {
         draw_top(x, y, grid_offset);

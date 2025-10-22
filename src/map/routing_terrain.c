@@ -139,7 +139,7 @@ static int get_land_type_noncitizen(int grid_offset)
     int type = NONCITIZEN_1_BUILDING;
     switch (building_get(map_building_at(grid_offset))->type) {
         default:
-            return NONCITIZEN_1_BUILDING;
+            return NONCITIZEN_1_BUILDING; //add wall here
         case BUILDING_WAREHOUSE:
         case BUILDING_FORT_GROUND:
             type = NONCITIZEN_0_PASSABLE;
@@ -151,7 +151,7 @@ static int get_land_type_noncitizen(int grid_offset)
         case BUILDING_NATIVE_CROPS:
         case BUILDING_NATIVE_DECORATION:
         case BUILDING_NATIVE_MONUMENT:
-        case BUILDING_WATCHTOWER:
+        case BUILDING_NATIVE_WATCHTOWER:
             type = NONCITIZEN_N1_BLOCKED;
             break;
         case BUILDING_FORT_ARCHERS:
@@ -181,6 +181,9 @@ static int get_land_type_noncitizen(int grid_offset)
         case BUILDING_SHIP_BRIDGE:
         case BUILDING_LOW_BRIDGE:
             type = NONCITIZEN_0_PASSABLE;
+            break;
+        case BUILDING_WALL:
+            type = NONCITIZEN_3_WALL;
             break;
     }
     return type;

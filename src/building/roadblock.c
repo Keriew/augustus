@@ -32,12 +32,13 @@ int building_type_is_roadblock(building_type type)
         case BUILDING_PALISADE_GATE:
         case BUILDING_GATEHOUSE:
         case BUILDING_TRIUMPHAL_ARCH:
-            return 1;
+            return 1; // simple roadblocks
         case BUILDING_GRANARY:
         case BUILDING_WAREHOUSE:
+            return 2; // buildings with other purpose and roadblock functionality
         case BUILDING_SHIP_BRIDGE:
         case BUILDING_LOW_BRIDGE:
-            return 2;
+            return 3; // bridges
         default:
             return 0;
     }

@@ -15,6 +15,7 @@
 #include "building/storage.h"
 #include "building/variant.h"
 #include "city/buildings.h"
+#include "city/finance.h"
 #include "city/view.h"
 #include "city/warning.h"
 #include "core/config.h"
@@ -23,6 +24,7 @@
 #include "empire/city.h"
 #include "figure/formation_legion.h"
 #include "game/undo.h"
+#include "map/building.h"
 #include "map/building_tiles.h"
 #include "map/grid.h"
 #include "map/orientation.h"
@@ -54,19 +56,68 @@ static void add_fort(int type, building *fort)
     const int offsets_x[] = { 3, -1, -4, 0 };
     const int offsets_y[] = { -1, -4, 0, 3 };
     int id = fort->id;
-    building *ground = building_create(BUILDING_FORT_GROUND, fort->x + offsets_x[building_rotation_get_rotation()], fort->y + offsets_y[building_rotation_get_rotation()]);
+    building *ground = building_create(BUILDING_FORT_GROUND, fort->x + offsets_x[building_rotation_get_rotation()],
+        fort->y + offsets_y[building_rotation_get_rotation()]);
     game_undo_add_building(ground);
     fort = building_get(id);
     ground->prev_part_building_id = fort->id;
     fort->next_part_building_id = ground->id;
     ground->next_part_building_id = 0;
-    map_building_tiles_add(ground->id, fort->x + offsets_x[building_rotation_get_rotation()], fort->y + offsets_y[building_rotation_get_rotation()], 4,
-        image_group(GROUP_BUILDING_FORT) + 1, TERRAIN_BUILDING);
+    map_building_tiles_add(ground->id, fort->x + offsets_x[building_rotation_get_rotation()],
+     fort->y + offsets_y[building_rotation_get_rotation()], 4, image_group(GROUP_BUILDING_FORT) + 1, TERRAIN_BUILDING);
 
     fort->formation_id = formation_legion_create_for_fort(fort);
     ground->formation_id = fort->formation_id;
 }
 
+int building_construction_prepare_terrain(grid_slice *grid_slice, clear_mode clear_mode, cost_calculation cost)
+{
+    int total_cost = 0;
+    for (int i = 0; i < grid_slice->size; i++) {
+        int g_offset = grid_slice->grid_offsets[i];
+        int terrain_mask_to_remove = 0;
+        switch (clear_mode) { //ugly but efficient
+            case CLEAR_MODE_FORCE:
+                terrain_mask_to_remove = TERRAIN_NOT_CLEAR;
+                break;
+            case CLEAR_MODE_RUBBLE:
+                terrain_mask_to_remove = TERRAIN_RUBBLE;
+                break;
+            case CLEAR_MODE_TREES:
+                terrain_mask_to_remove = TERRAIN_TREE;
+                break;
+            case CLEAR_MODE_PLAYER:
+            default:
+                terrain_mask_to_remove = TERRAIN_CLEARABLE;
+                break;
+        }
+        if (map_terrain_is(g_offset, terrain_mask_to_remove)) {
+            total_cost += (cost == COST_FREE) ? 0 : 3; // base cost per tile is 50% more than regular clear
+            if (cost != COST_MEASURE) {
+                map_terrain_remove(g_offset, terrain_mask_to_remove);
+            }
+        }
+    }
+    if (cost == COST_PROCESS && total_cost > 0) {
+        city_finance_process_construction(total_cost);
+    }
+    return total_cost;
+}
+
+static int check_gatehouse_tiles(int grid_offset)
+{
+    grid_slice *slice = map_grid_get_grid_slice_square(grid_offset, 2);
+    for (int i = 0; i < slice->size; i++) {
+        if (map_terrain_is(slice->grid_offsets[i], TERRAIN_BUILDING)) {
+            if (map_terrain_is(slice->grid_offsets[i], TERRAIN_WALL)) {
+                continue;
+            } else {
+                return 0;
+            }
+        }
+    }
+    return 1;
+}
 
 static void add_hippodrome(building *b)
 {
@@ -347,14 +398,37 @@ int building_construction_is_warehouse_corner(int tile_no)
     return tile_no == corner;
 }
 
-int building_construction_place_building(building_type type, int x, int y)
+int building_construction_fill_vacant_lots(grid_slice *area)
+{
+    int items_placed = 0;
+    for (int i = 0; i < area->size; i++) {
+        int grid_offset = area->grid_offsets[i];
+        int x = map_grid_offset_to_x(grid_offset);
+        int y = map_grid_offset_to_y(grid_offset);
+        int success = building_construction_place_building(BUILDING_HOUSE_VACANT_LOT, x, y, 1);
+        if (!success) {
+            continue;
+        }
+        building *b = building_get(map_building_at(grid_offset));
+        game_undo_add_building(b);
+        items_placed++;
+    }
+    if (items_placed > 0) {
+        building_construction_warning_check_food_stocks(BUILDING_HOUSE_VACANT_LOT);
+        map_routing_update_land();
+    }
+    return items_placed;
+}
+
+int building_construction_place_building(building_type type, int x, int y, int exact_coordinates)
 {
     int terrain_mask = TERRAIN_ALL;
     if (building_type_is_roadblock(type)) {
-        terrain_mask = type == BUILDING_GATEHOUSE ? ~TERRAIN_WALL & ~TERRAIN_ROAD & ~TERRAIN_HIGHWAY : ~TERRAIN_ROAD & ~TERRAIN_HIGHWAY;
+        terrain_mask = type == BUILDING_GATEHOUSE ? ~TERRAIN_WALL & ~TERRAIN_ROAD &
+            ~TERRAIN_HIGHWAY & ~TERRAIN_BUILDING : ~TERRAIN_ROAD & ~TERRAIN_HIGHWAY;
         //allow building gatehouses over walls and roads, other non-bridge roadblocks over roads and highways
     } else if (type == BUILDING_TOWER) {
-        terrain_mask = ~TERRAIN_WALL;
+        terrain_mask = ~TERRAIN_WALL & ~TERRAIN_BUILDING;
     } else if (type == BUILDING_RESERVOIR || type == BUILDING_DRAGGABLE_RESERVOIR) {
         terrain_mask = ~TERRAIN_AQUEDUCT;
     }
@@ -371,17 +445,46 @@ int building_construction_place_building(building_type type, int x, int y)
         size = 3;
     }
     // Do not check for a figure when build a roadblock of single tile size
+    // TODO: do not check for figures on tiles that are citizen passable in general
     int check_figure = type == BUILDING_ROADBLOCK && size == 1 ? 0 : 1;
     int building_orientation = 0;
     if (type == BUILDING_GATEHOUSE) {
-        building_orientation = map_orientation_for_gatehouse(x, y);
+        //check if there's a preset orientation from old gatehouse
+        building *old_b = building_get(map_building_rubble_building_id(map_grid_offset(x, y)));
+        if (old_b && old_b->type == BUILDING_GATEHOUSE) {
+            building_orientation = old_b->subtype.orientation;
+        } else {
+            building_orientation = map_orientation_for_gatehouse(x, y);
+        }
     } else if (type == BUILDING_TRIUMPHAL_ARCH) {
         building_orientation = map_orientation_for_triumphal_arch(x, y);
     }
-    building_construction_offset_start_from_orientation(&x, &y, size);
+    if (!exact_coordinates) {
+        building_construction_offset_start_from_orientation(&x, &y, size);
+    }
     // extra checks
+    if (type == BUILDING_TOWER) {
+        if (!map_terrain_all_tiles_in_radius_are(x, y, size, 0, TERRAIN_WALL)) {
+            city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
+            return 0;
+        }
+        if (!map_terrain_all_tiles_in_radius_are(x, y, 2, 0, TERRAIN_BUILDING)) {
+            city_warning_show(WARNING_WALL_NEEDED, NEW_WARNING_SLOT);
+            return 0;
+        }
+        if (!building_orientation) {
+            building_orientation = building_rotation_get_rotation() + 1;
+            if (building_orientation > 4) {
+                building_orientation = 1;
+            }
+        }
+    }
     if (type == BUILDING_GATEHOUSE) {
         if (!map_tiles_are_clear(x, y, size, terrain_mask, check_figure)) {
+            city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
+            return 0;
+        }
+        if (!check_gatehouse_tiles(map_grid_offset(x, y))) { //helper to make sure all building tiles are on walls
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return 0;
         }
@@ -440,7 +543,7 @@ int building_construction_place_building(building_type type, int x, int y)
         int orient_index = building_rotation_get_rotation();
         int x_offset = offsets_x[orient_index];
         int y_offset = offsets_y[orient_index];
-        if (!map_tiles_are_clear(x + x_offset, y + y_offset, 4, terrain_mask, check_figure)) {
+        if (!map_tiles_are_clear(x + x_offset, y + y_offset, 4, terrain_mask, 0)) { // ignore figures on fort grounds
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return 0;
         }

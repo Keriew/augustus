@@ -130,7 +130,15 @@ static void draw_foreground(void)
 
     graphics_fill_rect(data.x + 16, data.y + 16, 96, 30, COLOR_BLACK);
     if (data.num_digits > 0) {
-        text_draw_number_centered_colored(data.value, data.x + 19, data.y + 19, 92, FONT_LARGE_PLAIN, COLOR_FONT_RED);
+        font_t font;
+        if (data.num_digits + data.is_negative_value > 9) {
+            font = FONT_SMALL_PLAIN;
+        } else if (data.num_digits + data.is_negative_value > 6) {
+            font = FONT_NORMAL_PLAIN;
+        } else {
+            font = FONT_LARGE_PLAIN;
+        }
+        text_draw_number_centered_colored(data.value, data.x + 19, data.y + 19, 92, font, COLOR_FONT_RED);
     }
 
     draw_number_button(data.x + 21, data.y + 51, 1, data.focus_button_id == 1);

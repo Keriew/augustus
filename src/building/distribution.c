@@ -35,7 +35,9 @@ void building_distribution_toggle_good_accepted(building *b, resource_type resou
 
 void building_distribution_unaccept_all_goods(building *b)
 {
-    memset(b->accepted_goods, 0, sizeof(b->accepted_goods));
+    for (resource_type resource = 0; resource < RESOURCE_MAX_WITH_MONUMENT_RESOURCES; resource++) {
+        b->accepted_goods[resource] = 0; //loop instead of memset for consistency and clarity
+    }
 }
 
 void building_distribution_accept_all_goods(building *b)
@@ -75,11 +77,11 @@ void building_distribution_update_demands(building *b)
 
 int building_distribution_resource_is_handled(resource_type resource, building_type type)
 {
+    if (type == BUILDING_DOCK) { // before 'potentially' checks to avoid docks not accepting future resources
+        return 1;
+    }
     if (!empire_can_produce_resource_potentially(resource) && !empire_can_import_resource_potentially(resource)) {
         return 0;
-    }
-    if (type == BUILDING_DOCK) {
-        return 1;
     }
     if (!resource_is_inventory(resource)) {
         return 0;

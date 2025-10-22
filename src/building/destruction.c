@@ -1,5 +1,6 @@
 #include "destruction.h"
 
+#include "building/data_transfer.h"
 #include "building/image.h"
 #include "city/message.h"
 #include "city/population.h"
@@ -25,7 +26,10 @@ enum {
     DESTROY_COLLAPSE = 0,
     DESTROY_FIRE = 1,
     DESTROY_NO_RUBBLE = 2,
+    DESTROY_EARTHQUAKE = 3, // earthquake collapses - non repairable, rubble where possible, remove from array at once
 };
+static void set_rubble_grid_info_for_all_parts(building *b);
+
 static void destroy_without_rubble(building *b)
 {
     game_undo_disable();
@@ -41,7 +45,6 @@ static void destroy_without_rubble(building *b)
     b->state = BUILDING_STATE_DELETED_BY_GAME;
 }
 
-
 static void destroy_on_fire(building *b, int plagued)
 {
     game_undo_disable();
@@ -50,7 +53,12 @@ static void destroy_on_fire(building *b, int plagued)
     if (b->house_size && b->house_population) {
         city_population_remove_home_removed(b->house_population);
     }
-    int was_tent = b->house_size && b->subtype.house_level <= HOUSE_LARGE_TENT;
+    // save original info for rubble data
+    int og_type = b->type;
+    int og_size = b->size;
+    int og_orientation = b->subtype.orientation;
+    int og_grid_offset = b->grid_offset;
+
     b->house_population = 0;
     b->house_size = 0;
     b->sickness_level = 0;
@@ -60,7 +68,9 @@ static void destroy_on_fire(building *b, int plagued)
     b->sickness_duration = 0;
     b->output_resource_id = 0;
     b->distance_from_entry = 0;
-    building_clear_related_data(b);
+    if (!building_can_repair_type(b->type)) {
+        building_clear_related_data(b); //retain the building data in the rubble until rubble is cleared
+    }
 
     int waterside_building = 0;
     if (b->type == BUILDING_DOCK || b->type == BUILDING_WHARF || b->type == BUILDING_SHIPYARD) {
@@ -83,8 +93,14 @@ static void destroy_on_fire(building *b, int plagued)
         b->fire_proof = 1;
         b->size = 1;
         b->has_plague = plagued;
-        memset(&b->data, 0, sizeof(b->data));
-        b->data.rubble.was_tent = was_tent;
+        if (!building_can_repair_type(og_type)) {
+            memset(&b->data, 0, sizeof(b->data)); // removes all data - don't do it for repairable buildings
+        }
+        map_building_set_rubble_grid_building_id(og_grid_offset, b->id, og_size);
+        b->data.rubble.og_type = og_type;
+        b->data.rubble.og_grid_offset = og_grid_offset;
+        b->data.rubble.og_size = og_size;
+        b->data.rubble.og_orientation = og_orientation;
         map_building_tiles_add(b->id, b->x, b->y, 1, building_image_get(b), TERRAIN_BUILDING);
     }
     static const int x_tiles[] = {
@@ -100,12 +116,15 @@ static void destroy_on_fire(building *b, int plagued)
             continue;
         }
         building *ruin = building_create(BUILDING_BURNING_RUIN, x, y);
-        ruin->data.rubble.was_tent = was_tent;
         map_building_tiles_add(ruin->id, ruin->x, ruin->y, 1, building_image_get(ruin), TERRAIN_BUILDING);
         ruin->fire_duration = (ruin->house_figure_generation_delay & 7) + 1;
         ruin->figure_id4 = 0;
         ruin->fire_proof = 1;
         ruin->has_plague = plagued;
+        ruin->data.rubble.og_type = og_type;
+        ruin->data.rubble.og_grid_offset = og_grid_offset;
+        ruin->data.rubble.og_size = og_size;
+        ruin->data.rubble.og_orientation = og_orientation;
     }
     if (waterside_building) {
         map_routing_update_water();
@@ -128,6 +147,9 @@ static void destroy_linked_parts(building *b, int destruction_method, int plague
             case DESTROY_FIRE:
                 destroy_on_fire(part, plagued);
                 break;
+            case DESTROY_EARTHQUAKE:
+                part->state = BUILDING_STATE_DELETED_BY_GAME;
+                break;
             default:
                 map_building_tiles_set_rubble(part_id, part->x, part->y, part->size);
                 part->state = BUILDING_STATE_RUBBLE;
@@ -149,6 +171,8 @@ static void destroy_linked_parts(building *b, int destruction_method, int plague
             case DESTROY_FIRE:
                 destroy_on_fire(part, plagued);
                 break;
+            case DESTROY_EARTHQUAKE:
+                part->state = BUILDING_STATE_DELETED_BY_GAME;
             default:
                 map_building_tiles_set_rubble(part_id, part->x, part->y, part->size);
                 part->state = BUILDING_STATE_RUBBLE;
@@ -168,8 +192,9 @@ static void destroy_linked_parts(building *b, int destruction_method, int plague
 void building_destroy_by_collapse(building *b)
 {
     b->state = BUILDING_STATE_RUBBLE;
+    set_rubble_grid_info_for_all_parts(b);
     map_building_tiles_set_rubble(b->id, b->x, b->y, b->size);
-    figure_create_explosion_cloud(b->x, b->y, b->size);
+    figure_create_explosion_cloud(b->x, b->y, b->size, 0);
     destroy_linked_parts(b, DESTROY_COLLAPSE, 0);
 }
 
@@ -177,6 +202,14 @@ void building_destroy_by_fire(building *b)
 {
     destroy_on_fire(b, 0);
     destroy_linked_parts(b, DESTROY_FIRE, 0);
+}
+void building_destroy_by_earthquake(building *b)
+{
+    int grid_offset = b->grid_offset; // save before destroying building
+    int size = b->size;
+    map_building_tiles_set_rubble(b->id, b->x, b->y, b->size);
+    destroy_linked_parts(b, DESTROY_EARTHQUAKE, 0);
+    map_building_set_rubble_grid_building_id(grid_offset, 0, size);
 }
 
 void building_destroy_by_plague(building *b)
@@ -191,13 +224,11 @@ void building_destroy_without_rubble(building *b)
     destroy_without_rubble(b);
 }
 
-
 void building_destroy_by_rioter(building *b)
 {
     destroy_on_fire(b, 0);
     destroy_linked_parts(b, DESTROY_FIRE, 0);
 }
-
 
 int building_destroy_first_of_type(building_type type)
 {
@@ -240,6 +271,20 @@ void building_destroy_increase_enemy_damage(int grid_offset, int max_damage)
     if (map_building_damage_increase(grid_offset) > max_damage) {
         building_destroy_by_enemy(map_grid_offset_to_x(grid_offset),
             map_grid_offset_to_y(grid_offset), grid_offset);
+    }
+}
+
+static void set_rubble_grid_info_for_all_parts(building *b)
+{
+    b = building_main(b); //get main warehouse building to copy data from
+    building *part = b; //initialize part iterator - start with main building
+    for (int i = 0; i < 9 && part->id > 0; i++) {
+        building *next_part = building_next(part);
+        part->data.rubble.og_type = b->type;
+        part->data.rubble.og_grid_offset = b->grid_offset;
+        part->data.rubble.og_size = b->type == BUILDING_WAREHOUSE ? 3 : b->size;
+        part->data.rubble.og_orientation = b->subtype.orientation;
+        part = next_part;
     }
 }
 

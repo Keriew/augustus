@@ -4,6 +4,7 @@
 #include "building/building.h"
 #include "city/map.h"
 #include "city/view.h"
+#include "core/config.h"
 #include "core/direction.h"
 #include "core/image.h"
 #include "map/aqueduct.h"
@@ -641,8 +642,7 @@ static void set_wall_gatehouse_image_manually(int grid_offset)
 
 static void set_wall_image(int x, int y, int grid_offset)
 {
-    if (!map_terrain_is(grid_offset, TERRAIN_WALL) ||
-        map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+    if (!map_terrain_is(grid_offset, TERRAIN_WALL)) {
         return;
     }
     const terrain_image *img = map_image_context_get_wall(grid_offset);
@@ -718,7 +718,7 @@ int map_tiles_is_paved_road(int grid_offset)
     if (desirability > 0 && map_terrain_is(grid_offset, TERRAIN_FOUNTAIN_RANGE)) {
         return 1;
     }
-    if (map_tiles_is_adjacent_to_building_type(grid_offset, BUILDING_GRANARY, 1)) {
+    if (map_tiles_is_adjacent_to_building_type(grid_offset, BUILDING_GRANARY, 1) && config_get(CONFIG_UI_PAVED_ROADS_NEAR_GRANNARIES)) {
         return 1;
     }
     int x = map_grid_offset_to_x(grid_offset);

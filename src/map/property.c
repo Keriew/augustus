@@ -17,6 +17,8 @@ enum {
     BIT_ALTERNATE_TERRAIN = 0x20,
     BIT_DELETED = 0x40,
     BIT_NO_DELETED = 0xffbf,
+    BIT_REPAIR = 0x40, // shares with DELETED, player can never mark deleted and repair at the same time
+    BIT_NO_REPAIR = 0xffbf,
     BIT_PLAZA_EARTHQUAKE_OR_OVERGROWN_GARDEN = 0x80,
     BIT_NO_PLAZA = 0xff7f,
     BIT_NO_CONSTRUCTION_AND_DELETED = 0xffaf, // hope that's right please controll and it's actually OR not AND

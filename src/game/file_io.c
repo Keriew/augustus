@@ -73,6 +73,9 @@
 #define COMPRESS_BUFFER_INITIAL_SIZE 1000000
 #define UNCOMPRESSED 0x80000000
 #define PIECE_SIZE_DYNAMIC 0
+#define GRID_SIZE_BUF_U8 GRID_SIZE * GRID_SIZE
+#define GRID_SIZE_BUF_U16 GRID_SIZE * GRID_SIZE * 2
+#define GRID_SIZE_BUF_U32 GRID_SIZE * GRID_SIZE * 4
 
 typedef struct {
     buffer buf;
@@ -220,12 +223,15 @@ typedef struct {
     buffer *deliveries;
     buffer *custom_empire;
     buffer *visited_buildings;
+    buffer *rubble_grid;
 } savegame_state;
 
 typedef struct {
     struct {
         int burning_totals;
         int image_grid;
+        int building_grid;
+        int rubble_grid;
         int terrain_grid;
         int figures;
         int route_figures;
@@ -274,6 +280,7 @@ typedef struct {
         int visited_buildings;
         int custom_campaigns;
         int dynamic_scenario_objects;
+        int rubble_grid;
     } features;
 } savegame_version_data;
 
@@ -347,12 +354,12 @@ static void init_scenario_data(scenario_version_t version)
     if (version > SCENARIO_LAST_NO_STATIC_RESOURCES) {
         state->resource_version = create_scenario_piece(4, 0);
     }
-    state->graphic_ids = create_scenario_piece(52488, 0);
-    state->edge = create_scenario_piece(26244, 0);
-    state->terrain = create_scenario_piece(52488, 0);
-    state->bitfields = create_scenario_piece(52488, 0);
-    state->random = create_scenario_piece(26244, 0);
-    state->elevation = create_scenario_piece(26244, 0);
+    state->graphic_ids = create_scenario_piece(GRID_SIZE_BUF_U16, 0);
+    state->edge = create_scenario_piece(GRID_SIZE_BUF_U8, 0);
+    state->terrain = create_scenario_piece(GRID_SIZE_BUF_U16, 0);
+    state->bitfields = create_scenario_piece(GRID_SIZE_BUF_U8, 0);
+    state->random = create_scenario_piece(GRID_SIZE_BUF_U8, 0);
+    state->elevation = create_scenario_piece(GRID_SIZE_BUF_U8, 0);
     state->random_iv = create_scenario_piece(8, 0);
     state->camera = create_scenario_piece(8, 0);
 
@@ -409,8 +416,10 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
         count_multiplier = PIECE_SIZE_DYNAMIC;
     }
 
-    version_data->piece_sizes.image_grid = 52488 * (version > SAVE_GAME_LAST_SMALLER_IMAGE_ID_VERSION ? 2 : 1);
-    version_data->piece_sizes.terrain_grid = 52488 * (version > SAVE_GAME_LAST_ORIGINAL_TERRAIN_DATA_SIZE_VERSION ? 2 : 1);
+    version_data->piece_sizes.image_grid = GRID_SIZE_BUF_U16 * (version > SAVE_GAME_LAST_SMALLER_IMAGE_ID_VERSION ? 2 : 1);
+    version_data->piece_sizes.building_grid = GRID_SIZE_BUF_U16 * (version > SAVE_GAME_LAST_U16_GRIDS ? 2 : 1);
+    version_data->piece_sizes.terrain_grid = GRID_SIZE_BUF_U16 * (version > SAVE_GAME_LAST_ORIGINAL_TERRAIN_DATA_SIZE_VERSION ? 2 : 1);
+    version_data->piece_sizes.rubble_grid = GRID_SIZE_BUF_U32;
     version_data->piece_sizes.figures = 128000 * multiplier;
     version_data->piece_sizes.route_figures = 1200 * multiplier;
     version_data->piece_sizes.route_paths = 300000 * multiplier;
@@ -498,6 +507,7 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
     version_data->features.visited_buildings = version > SAVE_GAME_LAST_GLOBAL_BUILDING_INFO;
     version_data->features.custom_campaigns = version > SAVE_GAME_LAST_NO_CUSTOM_CAMPAIGNS;
     version_data->features.dynamic_scenario_objects = version > SAVE_GAME_LAST_STATIC_SCENARIO_ORIGINAL_DATA;
+    version_data->features.rubble_grid = version > SAVE_GAME_LAST_U16_GRIDS;
 }
 
 static void init_savegame_data(savegame_version_t version)
@@ -519,19 +529,19 @@ static void init_savegame_data(savegame_version_t version)
     if (version_data.features.image_grid) {
         state->image_grid = create_savegame_piece(version_data.piece_sizes.image_grid, 1);
     }
-    state->edge_grid = create_savegame_piece(26244, 1);
-    state->building_grid = create_savegame_piece(52488, 1);
+    state->edge_grid = create_savegame_piece(GRID_SIZE_BUF_U8, 1);
+    state->building_grid = create_savegame_piece(version_data.piece_sizes.building_grid, 1);
     state->terrain_grid = create_savegame_piece(version_data.piece_sizes.terrain_grid, 1);
-    state->aqueduct_grid = create_savegame_piece(26244, 1);
-    state->figure_grid = create_savegame_piece(52488, 1);
-    state->bitfields_grid = create_savegame_piece(52488, 1);
-    state->sprite_grid = create_savegame_piece(26244, 1);
-    state->random_grid = create_savegame_piece(26244, 0);
-    state->desirability_grid = create_savegame_piece(26244, 1);
-    state->elevation_grid = create_savegame_piece(26244, 1);
-    state->building_damage_grid = create_savegame_piece(26244, 1);
-    state->aqueduct_backup_grid = create_savegame_piece(26244, 1);
-    state->sprite_backup_grid = create_savegame_piece(26244, 1);
+    state->aqueduct_grid = create_savegame_piece(GRID_SIZE_BUF_U8, 1);
+    state->figure_grid = create_savegame_piece(GRID_SIZE_BUF_U16, 1);
+    state->bitfields_grid = create_savegame_piece(GRID_SIZE_BUF_U8, 1);
+    state->sprite_grid = create_savegame_piece(GRID_SIZE_BUF_U8, 1);
+    state->random_grid = create_savegame_piece(GRID_SIZE_BUF_U8, 0);
+    state->desirability_grid = create_savegame_piece(GRID_SIZE_BUF_U8, 1);
+    state->elevation_grid = create_savegame_piece(GRID_SIZE_BUF_U8, 1);
+    state->building_damage_grid = create_savegame_piece(GRID_SIZE_BUF_U8, 1);
+    state->aqueduct_backup_grid = create_savegame_piece(GRID_SIZE_BUF_U8, 1);
+    state->sprite_backup_grid = create_savegame_piece(GRID_SIZE_BUF_U8, 1);
     state->figures = create_savegame_piece(version_data.piece_sizes.figures, 1);
     state->route_figures = create_savegame_piece(version_data.piece_sizes.route_figures, 1);
     state->route_paths = create_savegame_piece(version_data.piece_sizes.route_paths, 1);
@@ -654,6 +664,9 @@ static void init_savegame_data(savegame_version_t version)
     }
     if (version_data.features.visited_buildings) {
         state->visited_buildings = create_savegame_piece(PIECE_SIZE_DYNAMIC, 1);
+    }
+    if (version_data.features.rubble_grid) {
+        state->rubble_grid = create_savegame_piece(GRID_SIZE_BUF_U32, 1);
     }
 }
 
@@ -786,7 +799,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     }
     scenario_map_init();
 
-    map_building_load_state(state->building_grid, state->building_damage_grid);
+    map_building_load_state(state->building_grid, state->building_damage_grid, state->rubble_grid, version);
     map_terrain_load_state(state->terrain_grid, version > SAVE_GAME_LAST_ORIGINAL_TERRAIN_DATA_SIZE_VERSION,
         version <= SAVE_GAME_LAST_STORED_IMAGE_IDS ? state->image_grid : 0,
         version <= SAVE_GAME_LAST_SMALLER_IMAGE_ID_VERSION);
@@ -870,6 +883,9 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     if (version <= SAVE_GAME_LAST_SPRITE_BRIDGES_MIGRATION_FIX) {
         map_terrain_migrate_old_bridges();
     }
+    if (version <= SAVE_GAME_LAST_U16_GRIDS) {
+        map_terrain_migrate_old_walls();
+    }
 
 }
 
@@ -886,7 +902,7 @@ static void savegame_save_to_state(savegame_state *state)
         state->scenario_name,
         state->campaign_name);
 
-    map_building_save_state(state->building_grid, state->building_damage_grid);
+    map_building_save_state(state->building_grid, state->building_damage_grid, state->rubble_grid);
     map_terrain_save_state(state->terrain_grid);
     map_aqueduct_save_state(state->aqueduct_grid, state->aqueduct_backup_grid);
     map_figure_save_state(state->figure_grid);

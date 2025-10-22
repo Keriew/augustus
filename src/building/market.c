@@ -1,6 +1,8 @@
 #include "market.h"
 
 #include "building/distribution.h"
+#include "core/config.h"
+#include "map/data.h"
 #include "scenario/property.h"
 
 #define MAX_FOOD 600
@@ -93,7 +95,8 @@ int building_market_get_storage_destination(building *market)
 {
     resource_storage_info info[RESOURCE_MAX] = { 0 };
     if (!building_market_get_needed_inventory(market, info) ||
-        !building_distribution_get_resource_storages_for_building(info, market, MARKET_MAX_DISTANCE)) {
+        !building_distribution_get_resource_storages_for_building(info, market, 
+            config_get(CONFIG_GP_CH_MARKET_RANGE) ? MARKET_MAX_DISTANCE : map_data.width)) {
         return 0;
     }
     int fetch_inventory = building_market_fetch_inventory(market, info);

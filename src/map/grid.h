@@ -8,6 +8,20 @@
 enum {
     GRID_SIZE = 162
 };
+#define MAX_SLICE_SIZE GRID_SIZE * GRID_SIZE 
+/**
+ * Represents a collection of grid offsets
+ *
+ * Used to store multiple grid coordinates as a contiguous array of offsets,
+ * for operations on groups of tiles - allows easy iteration through uneven shapes
+ *
+ * @param grid_offsets Array containing the grid offset positions
+ * @param size 1-based count of valid entries in grid_offsets, 0 means empty arrray, 1 means [0] is valid, etc.
+ */
+typedef struct grid_slice {
+    int grid_offsets[MAX_SLICE_SIZE];
+    int size;
+} grid_slice;
 
 typedef struct {
     uint8_t items[GRID_SIZE * GRID_SIZE];
@@ -30,6 +44,10 @@ typedef struct {
 } grid_u32;
 
 void map_grid_init(int width, int height, int start_offset, int border_size);
+
+grid_slice *map_grid_get_grid_slice(int *grid_offsets, int size);
+
+grid_slice *map_grid_get_grid_slice_from_corners(int start_x, int start_y, int end_x, int end_y);
 
 int map_grid_is_valid_offset(int grid_offset);
 
@@ -61,11 +79,9 @@ void map_grid_bound(int *x, int *y);
 
 void map_grid_bound_area(int *x_min, int *y_min, int *x_max, int *y_max);
 
-void map_grid_get_area(int x, int y, int size, int radius,
-                       int *x_min, int *y_min, int *x_max, int *y_max);
+void map_grid_get_area(int x, int y, int size, int radius, int *x_min, int *y_min, int *x_max, int *y_max);
 
-void map_grid_start_end_to_area(int x_start, int y_start, int x_end, int y_end,
-                                int *x_min, int *y_min, int *x_max, int *y_max);
+void map_grid_start_end_to_area(int x_start, int y_start, int x_end, int y_end, int *x_min, int *y_min, int *x_max, int *y_max);
 
 int map_grid_is_inside(int x, int y, int size);
 
@@ -117,5 +133,57 @@ void map_grid_load_state_u16(uint16_t *grid, buffer *buf);
 void map_grid_load_state_u16_to_u32(uint32_t *grid, buffer *buf);
 
 void map_grid_load_state_u32(uint32_t *grid, buffer *buf);
+
+/**
+ * @brief Creates a grid slice representing a rectangular area starting from the given grid offset.
+ * All grid points within the specified width and height are included.
+ *
+ * @param start_grid_offset Grid offset of the top-left corner of the rectangle
+ * @param width Width of the rectangle in grid units
+ * @param height Height of the rectangle in grid units
+ * @return Allocated grid_slice containing rectangle coordinates, or NULL on failure
+ */
+grid_slice *map_grid_get_grid_slice_rectangle(int start_grid_offset, int width, int height);
+
+/**
+ * @brief Creates a grid slice representing area occupied by the given house building.
+ *
+ * @param building_id id to search for
+ * @param check_rubble if true, will check for rubble info grid instead of building grid
+ * @return Allocated grid_slice containing rectangle coordinates, or NULL on failure
+ */
+grid_slice *map_grid_get_grid_slice_house(int building_id, int check_rubble);
+
+/**
+ * @brief Creates a grid slice representing a square area starting from the given grid offset.
+ * All grid points within the specified size x size area are included.
+ *
+ * @param start_grid_offset Grid offset of the top-left corner of the square
+ * @param size Side length of the square in grid units
+ * @return Allocated grid_slice containing square coordinates, or NULL on failure
+ */
+grid_slice *map_grid_get_grid_slice_square(int start_grid_offset, int size);
+
+/**
+ * @brief Creates a grid slice representing a ring (hollow circle) centered at the given grid offset.
+ * The ring has an inner radius and outer radius, with grid points included if their
+ * chess distance from the center falls within this range.
+ *
+ * @param center_grid_offset Grid offset of the ring center
+ * @param inner_radius Inner radius of the ring (exclusive, using chess distance)
+ * @param outer_radius Outer radius of the ring (inclusive, using chess distance)
+ * @return Allocated grid_slice containing ring coordinates, or NULL on failure
+ */
+grid_slice *map_grid_get_grid_slice_ring(int center_grid_offset, int inner_radius, int outer_radius);
+
+/**
+ * @brief Creates a grid slice representing a filled circle centered at the given grid offset.
+ * All grid points within the specified radius are included using chess distance.
+ *
+ * @param center_grid_offset Grid offset of the circle center
+ * @param radius Radius of the circle (inclusive, using chess distance)
+ * @return Allocated grid_slice containing circle coordinates, or NULL on failure
+ */
+grid_slice *map_grid_get_grid_slice_circle(int center_grid_offset, int radius);
 
 #endif // MAP_GRID_H

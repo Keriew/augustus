@@ -23,6 +23,7 @@
 #include "game/resource.h"
 #include "map/building.h"
 #include "map/grid.h"
+#include "map/property.h"
 #include "map/routing_terrain.h"
 #include "map/terrain.h"
 #include "map/tiles.h"
@@ -341,6 +342,28 @@ int scenario_action_type_building_force_collapse_execute(scenario_action_t *acti
             if (!map_grid_is_valid_offset(current_grid_offset)) {
                 continue;
             }
+            if (type == BUILDING_OVERGROWN_GARDENS || type == BUILDING_PLAZA) {
+                map_property_clear_plaza_earthquake_or_overgrown_garden(current_grid_offset);
+            }
+            if ((type == BUILDING_ROAD || type == BUILDING_GARDENS || type == BUILDING_HIGHWAY ||
+                type == BUILDING_OVERGROWN_GARDENS) && !map_terrain_is(current_grid_offset, TERRAIN_BUILDING)) {
+                int terrain = TERRAIN_ROAD;
+                switch (type) {
+                    case BUILDING_GARDENS:
+                    case BUILDING_OVERGROWN_GARDENS:
+                        terrain = TERRAIN_GARDEN;
+                        break;
+                    case BUILDING_HIGHWAY:
+                        terrain = TERRAIN_HIGHWAY;
+                        break;
+                    default:
+                        break;
+                }
+                if (type == BUILDING_HIGHWAY) {
+                    map_tiles_clear_highway(current_grid_offset, 0);
+                }
+                map_terrain_remove(current_grid_offset, terrain);
+            }
             int building_id = map_building_at(current_grid_offset);
             if (!building_id) {
                 continue;
@@ -357,7 +380,15 @@ int scenario_action_type_building_force_collapse_execute(scenario_action_t *acti
             }
         }
     }
-
+    if (type == BUILDING_ROAD || type == BUILDING_GARDENS || type == BUILDING_HIGHWAY ||
+        type == BUILDING_OVERGROWN_GARDENS || type == BUILDING_PLAZA) {
+        map_tiles_update_all_empty_land();
+        map_tiles_update_all_meadow();
+        map_tiles_update_all_highways();
+        map_tiles_update_all_gardens();
+        map_tiles_update_all_roads();
+        map_tiles_update_all_plazas();
+    }
     return 1;
 }
 

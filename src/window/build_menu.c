@@ -8,8 +8,11 @@
 #include "building/rotation.h"
 #include "city/view.h"
 #include "city/warning.h"
+#include "core/config.h"
+#include "core/image.h"
 #include "core/lang.h"
 #include "core/string.h"
+#include "game/resource.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
@@ -30,6 +33,7 @@
 #define MENU_CLICK_MARGIN 20
 #define MENU_TEXT_X_OFFSET 8
 
+#define MENU_RESOURCE_ICON_SIZE 16
 
 #define MENU_ICON_WIDTH 14
 #define MENU_ICON_X_OFFSET 3
@@ -95,8 +99,7 @@ static int init(build_menu_group submenu)
     data.selected_submenu = submenu;
     data.num_items = building_menu_count_items(submenu);
     data.y_offset = Y_MENU_OFFSETS[data.num_items];
-    if (submenu == BUILD_MENU_VACANT_HOUSE ||
-        submenu == BUILD_MENU_CLEAR_LAND) {
+    if (submenu == BUILD_MENU_VACANT_HOUSE) {
         button_menu_item(0);
         return 0;
     } else {
@@ -184,6 +187,45 @@ static int is_auto_cycle_button(building_type type)
         (type == BUILDING_MENU_GARDENS && data.selected_submenu == BUILD_MENU_GARDENS);
 }
 
+static int produced_resource_icon(building_type type)
+{
+    resource_type r = resource_get_from_industry(type);
+    if (r != RESOURCE_NONE) {
+        return resource_get_data(r)->image.icon;
+    }
+    return -1;
+}
+
+static void draw_resource_icon_scaled(int image_id, int x, int y, int max_size)
+{
+    const image *img = image_get(image_id);
+    if (!img) {
+        return;
+    }
+    int scale_percent;
+    if (img->height < 20) {
+        scale_percent = 100;
+    } else {
+        scale_percent = (20.0f / img->height) * 100.0f;
+    }
+    switch (image_id) {
+        case 1192://meat
+            y = y + 4;
+            break;
+        case 1195://iron
+            y = y + 2;
+            break;
+        case 11658://gold
+            y = y + 3;
+            break;
+        case 1203://fish
+            y = y + 4;
+            break;
+    }
+
+    image_draw_scaled_centered(image_id, x, y, COLOR_MASK_NONE, scale_percent);
+}
+
 static void draw_menu_buttons(void)
 {
     int x_offset = get_sidebar_x_offset();
@@ -205,8 +247,17 @@ static void draw_menu_buttons(void)
             continue;
         }
 
-        lang_text_draw_centered(28, type, item_x_align + MENU_TEXT_X_OFFSET, data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
-            MENU_ITEM_WIDTH, FONT_NORMAL_GREEN);
+        // Draw resource icon if this building produces a resource
+        int resource_icon = produced_resource_icon(type);
+        int text_offset = MENU_TEXT_X_OFFSET;
+        if (resource_icon >= 0 && config_get(CONFIG_UI_CV_BUILD_MENU_ICONS)) {
+            draw_resource_icon_scaled(resource_icon, item_x_align + MENU_TEXT_X_OFFSET + 2,
+                data.y_offset + MENU_Y_OFFSET + MENU_ITEM_HEIGHT * i + 2, MENU_RESOURCE_ICON_SIZE);
+            text_offset += MENU_RESOURCE_ICON_SIZE + 4; // Shift text right to make room for icon + padding
+        }
+
+        lang_text_draw_centered(28, type, item_x_align + text_offset, data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
+            MENU_ITEM_WIDTH - (text_offset - MENU_TEXT_X_OFFSET), FONT_NORMAL_GREEN);
         if (type == BUILDING_DRAGGABLE_RESERVOIR) {
             type = BUILDING_RESERVOIR;
         }
@@ -216,6 +267,9 @@ static void draw_menu_buttons(void)
         }
         if (type == BUILDING_MENU_GRAND_TEMPLES) {
             cost = 0;
+        }
+        if (type == BUILDING_REPAIR_LAND) {
+            cost = 3; // it's 50% more expensive than clearing land
         }
         if (cost) {
             text_draw_money(cost, x_offset - MENU_ITEM_MONEY_OFFSET,
@@ -316,7 +370,7 @@ static void button_menu_item(int item)
         window_invalidate();
         return;
     }
-    building_construction_set_type(type);
+    building_construction_set_type(type, 0);
 
     if (set_submenu_for_type(type)) {
         data.num_items = building_menu_count_items(data.selected_submenu);

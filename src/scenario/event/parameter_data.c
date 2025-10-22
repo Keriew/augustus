@@ -781,7 +781,10 @@ static const uint8_t *get_allowed_building_name(building_type type)
         return lang_get_string(68, 20);
     }
     if (type == BUILDING_CLEAR_LAND) {
-        return lang_get_string(68, 21);
+        return lang_get_string(CUSTOM_TRANSLATION, TR_BUILDING_LAND_CLEAR);
+    }
+    if (type == BUILDING_REPAIR_LAND) {
+        return lang_get_string(CUSTOM_TRANSLATION, TR_BUILDING_LAND_REPAIR);
     }
     return lang_get_building_type_string(type);
 }
@@ -1237,10 +1240,13 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
             result_text = append_text(translation_for(TR_PARAMETER_RADIUS), result_text, &maxlength);
             result_text = translation_for_number_value(action->parameter2, result_text, &maxlength);
             if (action->parameter4) {
+                result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_TERRAIN, action->parameter3, result_text, &maxlength);
                 result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-                result_text = append_text(translation_for(TR_ACTION_TYPE_CHANGE_TERRAIN), result_text, &maxlength);
+                result_text = append_text(translation_for(TR_PARAMETER_ADD), result_text, &maxlength);
             } else {
                 result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_TERRAIN, action->parameter3, result_text, &maxlength);
+                result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+                result_text = append_text(translation_for(TR_EDITOR_DELETE), result_text, &maxlength);
             }
             return;
         }

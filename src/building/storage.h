@@ -16,13 +16,18 @@ enum {
 
 /**
  * Storage state
+ * state > 0 - means the building accepts that resource
+ * storage_state_max helps in cycling through the states
  */
 typedef enum {
-    BUILDING_STORAGE_STATE_ACCEPTING = 0,
-    BUILDING_STORAGE_STATE_NOT_ACCEPTING = 1,
+    BUILDING_STORAGE_STATE_NOT_ACCEPTING = 0,
+    BUILDING_STORAGE_STATE_ACCEPTING = 1,
     BUILDING_STORAGE_STATE_GETTING = 2,
     BUILDING_STORAGE_STATE_MAINTAINING = 3,
+    BUILDING_STORAGE_STATE_MAX = 4
 } building_storage_state;
+
+#define BUILDING_STORAGE_STATE_MAX 4 //helper outside of enum to avoid dependency issues
 
 typedef enum {
     BUILDING_STORAGE_QUANTITY_MAX = 32,
@@ -52,7 +57,14 @@ typedef enum {
     BUILDING_STORAGE_PERMISSION_ARMOURY = 8,
     BUILDING_STORAGE_PERMISSION_WORKCAMP = 9,
     BUILDING_STORAGE_PERMISSION_NATIVES = 10,
+    BUILDING_STORAGE_PERMISSION_CAESAR = 11,
 } building_storage_permission_states;
+
+typedef enum {
+    STORAGE_SUMMARY_STYLE_NONE = 0,
+    STORAGE_SUMMARY_STYLE_MINIMAL = 1,
+    STORAGE_SUMMARY_STYLE_FULL = 2
+} storage_summary_style;
 
 /**
  * Building storage struct
@@ -101,6 +113,14 @@ int building_storage_restore(int storage_id);
  * @param storage_id Storage id
  */
 void building_storage_delete(int storage_id);
+
+/**
+ * Changes the building id for a storage.
+ * @param storage_id Storage id
+ * @param building_id New building id
+ * @return 1 on success, 0 on failure
+ */
+int building_storage_change_building(int storage_id, int building_id);
 
 /**
  * Gets the size of the storages array.
@@ -154,11 +174,17 @@ void building_storage_set_data(int storage_id, building_storage new_data);
 resource_type building_storage_get_highest_quantity_resource(building *b);
 
 /**
+ * TODO: header
+ */
+int building_storage_summary_tooltip(building *b, char *tooltip_text, int max_length, storage_summary_style style);
+
+/**
  * Cycles the resource state for the storage
  * @param storage_id Storage id
  * @param resource_id Resource id
+ * @param reverse_order If 1, cycles in reverse order
  */
-void building_storage_cycle_resource_state(int storage_id, resource_type resource_id);
+void building_storage_cycle_resource_state(int storage_id, resource_type resource_id, int reverse_order);
 
 /**
  * Cycles the quantity for the storage (used to be partial_state)
@@ -172,6 +198,15 @@ void building_storage_cycle_partial_resource_state(int storage_id, resource_type
  * @param storage_id Storage id
  */
 void building_storage_accept_none(int storage_id);
+
+/**
+ * check if a building accepts a certain resource
+ * @param b The building to check
+ * @param resource Resource id to check
+ * @param understaffed Pointer to int that will be set to 1 if the building is understaffed, otherwise 0
+ * @return 1 if it does, 0 if it does not
+ */
+int building_storage_accepts_storage(building *b, resource_type resource, int *understaffed);
 
 /**
  * Sets all goods to 'accepting'
@@ -229,6 +264,21 @@ void building_storage_load_state(buffer *buf, int version);
  * @param building_id The building id to check
  */
 int building_storage_count_stored_resource_types(int building_id);
+
+/* STORAGE API HELPERS*/
+
+/**
+ * returns the quantity associated with the storage state for a given resource in a building
+ * @param b building to check
+ * @param resource Resource id to check
+ */
+int building_storage_get_storage_state_quantity(building *b, resource_type resource);
+/**
+ * returns the amount currently stored in the building for a given resource. Works for granaries and warehouses.
+ * @param b building to check
+ * @param resource Resource id to check
+ */
+int building_storage_get_amount(building *b, resource_type resource);
 
 void building_storage_toggle_permission(building_storage_permission_states p, building *b);
 int building_storage_get_permission(building_storage_permission_states p, building *b);

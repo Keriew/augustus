@@ -99,7 +99,7 @@ void empire_object_load(buffer *buf, int version)
         if (full->in_use) {
             highest_id_in_use = i;
         }
-    
+
         if (version > SCENARIO_LAST_UNVERSIONED && !full->in_use) {
             continue;
         }
@@ -306,7 +306,7 @@ void empire_object_init_cities(int empire_id)
             (city->type == EMPIRE_CITY_TRADE || city->type == EMPIRE_CITY_FUTURE_TRADE)) {
             obj->obj.trade_route_id = trade_route_new();
             array_item(objects, obj->obj.id + 1)->obj.trade_route_id = obj->obj.trade_route_id;
-            for (int j = obj->obj.id + 2; j < objects.size; j++) {
+            for (int j = obj->obj.id + 2; (unsigned int) j < objects.size; j++) {
                 full_empire_object *waypoint = array_item(objects, j);
                 if (waypoint->obj.type != EMPIRE_OBJECT_TRADE_WAYPOINT) {
                     break;
@@ -418,6 +418,15 @@ void empire_object_foreach(void (*callback)(const empire_object *))
     full_empire_object *obj;
     array_foreach(objects, obj) {
         if (obj->in_use) {
+            callback(&obj->obj);
+        }
+    }
+}
+void empire_object_foreach_of_type(void (*callback)(const empire_object *), empire_object_type type)
+{
+    full_empire_object *obj;
+    array_foreach(objects, obj) {
+        if (obj->in_use && obj->obj.type == type) {
             callback(&obj->obj);
         }
     }

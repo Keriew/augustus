@@ -15,7 +15,7 @@
 #include "input/input.h"
 #include "window/advisors.h"
 
-static void button_set_amount(const generic_button *button);
+static void button_increase_amount(const generic_button *button);
 static void button_donate(const generic_button *button);
 static void button_cancel(const generic_button *button);
 static void arrow_button_amount(int is_down, int param2);
@@ -23,11 +23,11 @@ static void arrow_button_amount(int is_down, int param2);
 static generic_button buttons[] = {
     {336, 283, 160, 20, button_cancel},
     {144, 283, 160, 20, button_donate},
-    {128, 216, 64, 20, button_set_amount},
-    {208, 216, 64, 20, button_set_amount, 0, 1},
-    {288, 216, 64, 20, button_set_amount, 0, 2},
-    {368, 216, 64, 20, button_set_amount, 0, 3},
-    {448, 216, 64, 20, button_set_amount, 0, 4},
+    {128, 216, 64, 20, button_increase_amount},
+    {208, 216, 64, 20, button_increase_amount, 0, 1},
+    {288, 216, 64, 20, button_increase_amount, 0, 2},
+    {368, 216, 64, 20, button_increase_amount, 0, 3},
+    {448, 216, 64, 20, button_increase_amount, 0, 4},
 };
 
 static arrow_button arrow_buttons[] = {
@@ -108,7 +108,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 }
 
-static void button_set_amount(const generic_button *button)
+static void button_increase_amount(const generic_button *button)
 {
     int amount_id = button->parameter1;
     int amount;
@@ -120,7 +120,10 @@ static void button_set_amount(const generic_button *button)
         case 4: amount = 1000000; break;
         default: return;
     }
-    city_emperor_set_donation_amount(amount);
+    if (amount_id == 0) {
+        city_emperor_set_donation_amount(amount);
+    }
+    city_emperor_change_donation_amount(amount);
     window_invalidate();
 }
 

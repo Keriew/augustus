@@ -1755,6 +1755,27 @@ static translation_string all_strings[] = {
     {TR_CONFIG_CATEGORY_MANAGEMENT_ROADS, "Straßen"},
     {TR_CONFIG_CATEGORY_MANAGEMENT_ROADBLOCKS, "Straßensperren"},
     {TR_CONFIG_CATEGORY_MANAGEMENT_HOUSING, "Häuser"},
+    {TR_EDITOR_CUSTOM_VARIABLES_TEXT_DISPLAY, "Text zum anzeigen"},
+    {TR_EDITOR_CUSTOM_VARIABLES_IS_VISIBLE, "Sichtbar"},
+    {TR_ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY, "Ändere Benutzerdefinierte Variablen Sichtbarkeit" },
+    {TR_CONFIG_SHOW_CUSTOM_VARIABLES, "Zeige Benutzerdefinierte Variablen in der Stadtansicht" },
+    {TR_CONFIG_ENABLE_GETTING_WHILE_STOCKPILED, "Erlaube 'Fordern' wenn die resource gehamstert wird" },
+    {TR_CONFIG_ENABLE_PAVED_ROADS_NEAR_GRANARIES, "Pflastere Straßen neben Silos"},
+    {TR_CONFIG_UI_ANIMATE_TRADE_ROUTES, "Animiere Handelsrouten"},
+    {TR_HOTKEY_NEXT_TRACK, "Nächstes zufälliges Stück"},
+    {TR_CONFIG_MOVE_LEGION_SOUND_SWAP, "Alternatives Legionsbewegungsgeräusch"},
+    {TR_CONFIG_ADVANCED_CART_DEPOT_OPTIONS, "Schalte erweiterte Karren-Depot Optionen ein"},
+    {TR_BUILDING_INFO_INSTRUCTIONS, "Anweisungen" },
+    {TR_BUILDING_INFO_ACTIVE_STORAGE_BUILDINGS, "Aktzeptierende Lagergebäude" },
+    {TR_BUILDING_INFO_OTHER_STORAGE_BUILDINGS, "Andere Lagergebäude" },
+    {TR_TOOLTIP_GOTO_STORAGE_INSTRUCTIONS, "Öffne die Lageranweisungen des Gebäudes" },
+    {TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE, "Tooltip stil:" },
+    {TR_TOOLTIP_NONE, "Keine"},
+    {TR_TOOLTIP_MINIMAL, "Minimal"},
+    {TR_TOOLTIP_FULL, "Alle"},
+    {TR_CONFIG_CLEAR_WARNINGS_RIGHTCLICK, "Rechtsklick löscht alle Warnungen"},
+    {TR_CONFIG_GP_CH_STORAGE_REQUESTS_RESPECT_MAINTAIN, "Caesars Forderungen respektieren 'Behalten'"},
+    {TR_CONFIG_ENABLE_MARKET_RANGE, "Schalte Reichweite von Märkten ein"}
 };
 
 void translation_german(const translation_string **strings, int *num_strings)

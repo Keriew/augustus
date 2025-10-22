@@ -26,7 +26,8 @@ void game_animation_update(void)
     }
     unsigned int delay_millis = 0;
     for (int i = 0; i < MAX_ANIM_TIMERS; i++) {
-        if (now_millis - timers[i].last_update >= delay_millis && window_is(WINDOW_CITY)) {
+        if (now_millis - timers[i].last_update >= delay_millis && (window_is(WINDOW_CITY) || window_is(WINDOW_EMPIRE) ||
+            window_is(WINDOW_EDITOR_MAP) || window_is(WINDOW_TRADE_OPENED) || window_is(WINDOW_EDITOR_EMPIRE))) {
             timers[i].should_update = 1;
             timers[i].last_update = now_millis;
         }

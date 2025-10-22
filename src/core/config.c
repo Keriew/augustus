@@ -97,6 +97,18 @@ static const char *ini_keys[] = {
     [CONFIG_UI_EMPIRE_SIDEBAR_WIDTH] = "ui_empire_sidebar_width",
     [CONFIG_GP_CH_DEFAULT_GAME_SPEED] = "gameplay_change_default_game_speed",
     [CONFIG_UI_SHOW_CUSTOM_VARIABLES] = "ui_show_custom_variables",
+    [CONFIG_GP_CH_ENABLE_GETTING_WHILE_STOCKPILED] = "gameplay_change_stockpiled_getting",
+    [CONFIG_UI_PAVED_ROADS_NEAR_GRANNARIES] = "ui_paved_roads_near_grannaries",
+    [CONFIG_UI_ANIMATE_TRADE_ROUTES] = "ui_animate_trade_routes",
+    [CONFIG_UI_MOVE_LEGION_SOUND_SWAP] = "ui_move_legion_sound_swap",
+    [CONFIG_GP_CH_CART_DEPOT_ADVANCED] = "gameplay_change_cart_depot_advanced_settings",
+    [CONFIG_UI_CART_DEPOT_TOOLTIP_STYLE] = "ui_cart_depot_tooltip_style",
+    [CONFIG_DEBUG_START_WITH_TOOLTIP] = "debug_start_with_tooltip",
+    [CONFIG_UI_CLEAR_WARNINGS_RIGHTCLICK] = "ui_clear_warnings_rightclick",
+    [CONFIG_GP_CH_STORAGE_REQUESTS_RESPECT_MAINTAIN] = "gp_ch_storage_requests_respect_maintain",
+    [CONFIG_GP_CH_MARKET_RANGE] = "gameplay_market_range",
+    [CONFIG_UI_CV_BUILD_MENU_ICONS] = "ui_cv_build_menu_icons",
+    [CONFIG_UI_WT_ENABLE_SNOW_CENTRAL] = "ui_wt_enable_snow_central",
 };
 
 static const char *ini_string_keys[] = {
@@ -142,6 +154,19 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_UI_EMPIRE_SIDEBAR_WIDTH] = 25,
     [CONFIG_GP_CH_DEFAULT_GAME_SPEED] = 7, //0-based index, 7 points to 80%
     [CONFIG_UI_SHOW_CUSTOM_VARIABLES] = 1,
+    [CONFIG_GP_CH_ENABLE_GETTING_WHILE_STOCKPILED] = 0,
+    [CONFIG_UI_PAVED_ROADS_NEAR_GRANNARIES] = 1,
+    [CONFIG_UI_ANIMATE_TRADE_ROUTES] = 1,
+    [CONFIG_UI_MOVE_LEGION_SOUND_SWAP] = 0,
+    [CONFIG_GP_CH_CART_DEPOT_ADVANCED] = 1,
+    [CONFIG_UI_CART_DEPOT_TOOLTIP_STYLE] = 1,
+    [CONFIG_DEBUG_START_WITH_TOOLTIP] = 0,
+    [CONFIG_UI_CLEAR_WARNINGS_RIGHTCLICK] = 1,
+    [CONFIG_GP_CH_STORAGE_REQUESTS_RESPECT_MAINTAIN] = 1,
+    [CONFIG_GP_CH_MARKET_RANGE] = 1,
+
+    [CONFIG_UI_CV_BUILD_MENU_ICONS] = 1,
+    [CONFIG_UI_WT_ENABLE_SNOW_CENTRAL] = 0,
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };

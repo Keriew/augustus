@@ -30,6 +30,7 @@ int building_monument_get_monument(int x, int y, int resource, int road_network_
 int building_monument_has_unfinished_monuments(void);
 void building_monument_set_phase(building *b, int phase);
 int building_monument_is_monument(const building *b);
+int building_monument_is_limited(building_type type);
 int building_monument_type_is_monument(building_type type);
 int building_monument_type_is_mini_monument(building_type type);
 int building_monument_is_grand_temple(building_type type);
