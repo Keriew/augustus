@@ -376,7 +376,10 @@ int map_bridge_count_figures(int grid_offset)
     // find lower end of the bridge
     while (map_is_bridge(current) && map_building_at(current) == building_id) {
         if (map_has_figure_at(current)) {
-            figures++;
+            figure *f = figure_get(map_figure_at(current));
+            if (f->type != FIGURE_FLOTSAM && f->type != FIGURE_FISH_GULLS) {
+                figures++;
+            }
         }
         current += delta;
     }
