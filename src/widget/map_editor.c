@@ -9,6 +9,7 @@
 #include "editor/tool.h"
 #include "editor/editor.h"
 #include "graphics/color.h"
+#include "graphics/complex_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/menu.h"
@@ -24,6 +25,8 @@
 #include "map/point.h"
 #include "map/property.h"
 #include "map/terrain.h"
+#include "scenario/custom_variable.h"
+#include "scenario/event/controller.h"
 #include "sound/city.h"
 #include "sound/effect.h"
 #include "translation/translation.h"
@@ -31,6 +34,9 @@
 #include "widget/map_editor_pause_menu.h"
 #include "widget/map_editor_tool.h"
 
+#include <string.h>
+
+#define MAX_EDITOR_EVENT_TILES 1000
 
 static struct {
     map_tile current_tile;
@@ -47,6 +53,7 @@ static struct {
     int image_id_water_first;
     int image_id_water_last;
     float scale;
+    map_editor_event_tile event_tiles[MAX_EDITOR_EVENT_TILES];
 } draw_context;
 
 static void init_draw_context(void)
@@ -60,6 +67,40 @@ static void init_draw_context(void)
     draw_context.image_id_water_first = image_group(GROUP_TERRAIN_WATER);
     draw_context.image_id_water_last = 5 + draw_context.image_id_water_first;
     draw_context.scale = city_view_get_scale() / 100.0f;
+    widget_map_editor_clear_draw_context_event_tiles();
+    scenario_events_fetch_event_tiles_to_editor();
+}
+
+void widget_map_editor_clear_draw_context_event_tiles(void)
+{
+    memset(draw_context.event_tiles, -1, sizeof(draw_context.event_tiles));
+}
+
+int widget_map_editor_add_draw_context_event_tile(int grid_offset, int event_id)
+{
+    for (int i = 0; i < MAX_EDITOR_EVENT_TILES; i++) {
+        if (draw_context.event_tiles[i].grid_offset == -1 && draw_context.event_tiles[i].event_id == -1) {
+            draw_context.event_tiles[i].grid_offset = grid_offset;
+            draw_context.event_tiles[i].event_id = event_id;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static void draw_event_area_highlight(int x, int y, int grid_offset)
+{
+    //color_t color_mask = complex_button_basic_colors(int id)
+    for (int i = 0; i < MAX_EDITOR_EVENT_TILES; i++) {
+        if (draw_context.event_tiles[i].grid_offset == -1 && draw_context.event_tiles[i].event_id == -1) {
+            return;
+        }
+        if (draw_context.event_tiles[i].grid_offset == grid_offset) {
+            color_t color_mask = complex_button_basic_colors((draw_context.event_tiles[i].event_id % 9) + 1);
+            image_draw_isometric_footprint_from_draw_tile(image_group(GROUP_TERRAIN_OVERLAY), x, y, color_mask, draw_context.scale);
+            return;
+        }
+    }
 }
 
 static void draw_footprint(int x, int y, int grid_offset)
@@ -79,8 +120,17 @@ static void draw_footprint(int x, int y, int grid_offset)
         }
         map_image_set(grid_offset, image_id);
     }
+    for (int i = 0; i < MAX_EDITOR_EVENT_TILES; i++) { // check if this grid offset is associated with an event
+        if (draw_context.event_tiles[i].grid_offset == -1 && draw_context.event_tiles[i].event_id == -1) {
+            break; // no more event tiles
+        }
+        if (draw_context.event_tiles[i].grid_offset == grid_offset) {
+            color_mask = complex_button_basic_colors((draw_context.event_tiles[i].event_id % 9) + 1);
+            break; // color aquired, exit loop
+        }
+    }
     image_draw_isometric_footprint_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
-    
+
     if (config_get(CONFIG_UI_SHOW_GRID) && draw_context.scale <= 2.0f) {
         //grid is drawn by the renderer directly at zoom > 200%
         static int grid_id = 0;
@@ -165,6 +215,7 @@ void widget_map_editor_draw(void)
     city_view_foreach_valid_map_tile(draw_footprint);
     city_view_foreach_valid_map_tile_row(draw_flags, draw_top, 0);
     city_view_foreach_valid_map_tile(draw_custom_earthquake);
+    //city_view_foreach_valid_map_tile(draw_event_area_highlight);
     map_editor_tool_draw(&data.current_tile);
     graphics_reset_clip_rectangle();
 }

@@ -34,6 +34,7 @@ int scenario_event_is_active(const scenario_event_t *event)
 void scenario_event_init(scenario_event_t *event)
 {
     event->state = EVENT_STATE_ACTIVE;
+    unsigned int event_id = event->id;
     scenario_condition_group_t *group;
     scenario_condition_t *condition;
     array_foreach(event->condition_groups, group)
@@ -41,12 +42,14 @@ void scenario_event_init(scenario_event_t *event)
         array_foreach(group->conditions, condition)
         {
             scenario_condition_type_init(condition);
+            condition->parent_event_id = event_id;
         }
     }
     scenario_action_t *action;
     array_foreach(event->actions, action)
     {
         scenario_action_type_init(action);
+        action->parent_event_id = event_id;
     }
 }
 
@@ -135,6 +138,11 @@ void scenario_event_link_condition_group(scenario_event_t *event, scenario_condi
     scenario_condition_group_t *new_group = 0;
     array_new_item(event->condition_groups, new_group);
     new_group->conditions = group->conditions;
+    scenario_condition_t *condition;
+    array_foreach(new_group->conditions, condition)
+    {
+        condition->parent_event_id = event->id;
+    }
 }
 
 scenario_action_t *scenario_event_action_create(scenario_event_t *event, int type)
@@ -160,6 +168,7 @@ void scenario_event_link_action(scenario_event_t *event, scenario_action_t *acti
     new_action->parameter3 = action->parameter3;
     new_action->parameter4 = action->parameter4;
     new_action->parameter5 = action->parameter5;
+    new_action->parent_event_id = event->id;
 }
 
 int scenario_event_can_repeat(scenario_event_t *event)

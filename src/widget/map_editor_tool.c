@@ -254,19 +254,6 @@ void map_editor_tool_draw(const map_tile *tile)
                 int corner1, corner2;
                 grid_slice *existing_selection = editor_tool_get_existing_land_selection();
                 int success = map_grid_get_corner_offsets_from_grid_slice(existing_selection, &corner1, &corner2);
-                if (success) {
-                    map_tile start_tile = {
-                        .x = map_grid_offset_to_x(corner1),
-                        .y = map_grid_offset_to_y(corner1),
-                        .grid_offset = corner1
-                    };
-                    map_tile end_tile = {
-                        .x = map_grid_offset_to_x(corner2),
-                        .y = map_grid_offset_to_y(corner2),
-                        .grid_offset = corner2
-                    };
-                    //draw_selection_rectangle(&start_tile, &end_tile, COLOR_MASK_BUILDING_GHOST); // needs more work
-                }
                 draw_flat_tile(x, y, COLOR_MASK_AMBER);
             }
             break;

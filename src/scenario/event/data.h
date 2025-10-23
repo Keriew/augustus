@@ -138,6 +138,7 @@ typedef struct {
     int parameter3;
     int parameter4;
     int parameter5;
+    int parent_event_id; // not saved to savefile or scenario file, assigned during load for reference
 } scenario_condition_t;
 
 typedef struct {
@@ -152,6 +153,7 @@ typedef struct {
     int parameter3;
     int parameter4;
     int parameter5;
+    int parent_event_id; // not saved to savefile or scenario file, assigned during load for reference
 } scenario_action_t;
 
 typedef struct {

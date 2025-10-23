@@ -34,6 +34,10 @@ scenario_event_t *scenario_events_get_using_custom_variable(int custom_variable_
 void scenario_events_migrate_to_resolved_display_names(void);
 void scenario_events_migrate_to_formulas(void);
 
+void scenario_events_assign_parent_event_ids(void);
+
+void scenario_events_fetch_event_tiles_to_editor(void);
+
 void scenario_events_migrate_to_grid_slices(void);
 
 #endif // SCENARIO_EVENTS_CONTOLLER_H

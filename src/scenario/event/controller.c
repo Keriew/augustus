@@ -12,6 +12,7 @@
 #include "scenario/event/formula.h"
 #include "scenario/event/parameter_data.h"
 #include "scenario/scenario.h"
+#include "widget/map_editor.h"
 
 #include <string.h>
 
@@ -476,7 +477,7 @@ static void migrate_parameters_action(scenario_action_t *action)
         if (p_type == PARAMETER_TYPE_FORMULA && param_value != NULL) {
             char buffer[16];  // Make sure buffer is large enough
             memset(buffer, 0, sizeof(buffer));
-            string_from_int(buffer, *param_value, 0);
+            string_from_int((uint8_t) buffer, *param_value, 0);
             unsigned int id = scenario_formula_add((const uint8_t *) buffer, min_limit, max_limit);
             switch (i) {
                 case 1: action->parameter1 = id; break;
@@ -557,6 +558,68 @@ void scenario_events_migrate_to_formulas(void)
     }
 }
 
+void scenario_events_assign_parent_event_ids(void)
+{
+    scenario_event_t *current;
+    array_foreach(scenario_events, current) //go through all events
+    {
+        int event_id = current->id;
+        scenario_action_t *action;
+        array_foreach(current->actions, action) //go through all actions of this event
+        {
+            action->parent_event_id = event_id;
+        }
+        scenario_condition_group_t *group;
+        scenario_condition_t *condition;
+        array_foreach(current->condition_groups, group) //through all condition groups of this event
+        {
+            array_foreach(group->conditions, condition) //through all conditions of this group
+            {
+                condition->parent_event_id = event_id;
+            }
+        }
+    }
+}
+
+void scenario_events_fetch_event_tiles_to_editor(void)
+{
+    scenario_event_t *current;
+    array_foreach(scenario_events, current) //go through all events
+    {
+        int event_id = current->id;
+        scenario_action_t *action;
+        array_foreach(current->actions, action) //go through all actions of this event
+        {
+            if (action->type == ACTION_TYPE_BUILDING_FORCE_COLLAPSE ||
+                action->type == ACTION_TYPE_CHANGE_TERRAIN) {
+                int grid_offset1 = action->parameter1;
+                int grid_offset2 = action->parameter2;
+                grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
+                for (int i = 0; i < slice->size; i++) {
+                    widget_map_editor_add_draw_context_event_tile(slice->grid_offsets[i], event_id);
+                }
+
+            }
+        }
+        scenario_condition_group_t *group;
+        scenario_condition_t *condition;
+        array_foreach(current->condition_groups, group) //through all condition groups of this event
+        {
+            array_foreach(group->conditions, condition) //through all conditions of this group
+            {
+                if (condition->type == CONDITION_TYPE_BUILDING_COUNT_AREA || CONDITION_TYPE_TERRAIN_IN_AREA) {
+                    int grid_offset1 = condition->parameter1;
+                    int grid_offset2 = condition->parameter2;
+                    grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
+                    for (int i = 0; i < slice->size; i++) {
+                        widget_map_editor_add_draw_context_event_tile(slice->grid_offsets[i], event_id);
+                    }
+
+                }
+            }
+        }
+    }
+}
 void scenario_events_migrate_to_grid_slices(void)
 {
     scenario_event_t *current;

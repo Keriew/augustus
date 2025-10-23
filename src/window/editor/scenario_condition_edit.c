@@ -16,6 +16,7 @@
 #include "scenario/event/controller.h"
 #include "scenario/event/parameter_data.h"
 #include "widget/input_box.h"
+#include "widget/map_editor.h"
 #include "window/editor/custom_variables.h"
 #include "window/editor/map.h"
 #include "window/editor/requests.h"
@@ -258,7 +259,7 @@ static void create_evaluation_formula(xml_data_attribute_t *parameter)
         memset(data.formula, 0, MAX_FORMULA_LENGTH);
     }
 
-    window_text_input_expanded_show("FORMULA", "...", data.formula, MAX_FORMULA_LENGTH,
+    window_text_input_expanded_show(string_from_ascii("FORMULA"), string_from_ascii("..."), data.formula, MAX_FORMULA_LENGTH,
          set_formula_value, INPUT_BOX_CHARS_FORMULAS);
 }
 static void set_param_value(int value)
@@ -405,6 +406,12 @@ static void on_grid_slice_selected(grid_slice *selection)
     int start_offset = 0;
     int end_offset = 0;
     editor_tool_get_selection_offsets(&start_offset, &end_offset);
+
+    for (int i = 0; i < selection->size; i++) {
+        if (selection->grid_offsets[i]) {
+            widget_map_editor_add_draw_context_event_tile(selection->grid_offsets[i], data.condition->parent_event_id);
+        }
+    }
     data.condition->parameter1 = start_offset;
     data.condition->parameter2 = end_offset;
     // Deactivate the tool and return to the condition edit window
@@ -464,14 +471,14 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             custom_variable_selection();
             return;
         case PARAMETER_TYPE_GRID_SLICE:
-            {
+        {
             int grid_offset1 = data.condition->parameter1;
             int grid_offset2 = data.condition->parameter2;
             grid_slice *existing_selection = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
             editor_tool_set_existing_land_selection(existing_selection);
             start_grid_slice_selection();
             return;
-            }
+        }
         case PARAMETER_TYPE_FORMULA:
             create_evaluation_formula(parameter);
             return;
