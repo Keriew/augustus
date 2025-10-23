@@ -47,8 +47,8 @@ static void game_cheat_finish_monuments(uint8_t *);
 static void game_cheat_set_monument_phase(uint8_t *);
 static void game_cheat_unlock_all_buildings(uint8_t *);
 static void game_cheat_incite_riot(uint8_t *);
-static void game_cheat_show_custom_events(uint8_t *);
-static void game_cheat_show_editor(uint8_t *);
+//static void game_cheat_show_custom_events(uint8_t *);
+//static void game_cheat_show_editor(uint8_t *);
 static void game_cheat_cast_curse(uint8_t *);
 static void game_cheat_make_buildings_invincible(uint8_t *);
 static void game_cheat_change_climate(uint8_t *);
@@ -68,8 +68,8 @@ static void (*const execute_command[])(uint8_t *args) = {
     game_cheat_set_monument_phase,
     game_cheat_unlock_all_buildings,
     game_cheat_incite_riot,
-    game_cheat_show_custom_events,
-    game_cheat_show_editor,
+    //game_cheat_show_custom_events,
+    //game_cheat_show_editor,
     game_cheat_cast_curse,
     game_cheat_make_buildings_invincible,
     game_cheat_change_climate,
@@ -90,8 +90,8 @@ static const char *commands[] = {
     "monumentphase",
     "whathaveromansdoneforus",
     "nike",
-    "debug.customevents",
-    "debug.showeditor",
+    //"debug.customevents",
+    //"debug.showeditor",
     "curse",
     "romanconcrete",
     "globalwarming",
@@ -327,17 +327,21 @@ static void game_cheat_incite_riot(uint8_t *args)
     city_sentiment_change_happiness(50);
 }
 
-static void game_cheat_show_custom_events(uint8_t *args)
+void game_cheat_show_custom_events(void)
 {
-    window_editor_scenario_events_show();
+    if (data.is_cheating) {
+        window_editor_scenario_events_show();
+    }
 }
 
-static void game_cheat_show_editor(uint8_t *args)
+void game_cheat_show_editor(void)
 {
-    window_editor_attributes_show();
-    if (!map_editor_warning_shown) {
-        window_plain_message_dialog_show(TR_CHEAT_EDITOR_WARNING_TITLE, TR_CHEAT_EDITOR_WARNING_TEXT, 1);
-        map_editor_warning_shown = 1;
+    if (data.is_cheating) {
+        window_editor_attributes_show();
+        if (!map_editor_warning_shown) {
+            window_plain_message_dialog_show(TR_CHEAT_EDITOR_WARNING_TITLE, TR_CHEAT_EDITOR_WARNING_TEXT, 1);
+            map_editor_warning_shown = 1;
+        }
     }
 }
 
