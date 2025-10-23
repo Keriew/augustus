@@ -58,7 +58,6 @@ static void button_rotate(int clockwise, int param2);
    group margins are 15
 */
 
-
 static image_button buttons_overlays_collapse_sidebar[] = {
     {4, 3, 159, 31, IB_NORMAL, 93, 0, button_overlay_click, button_help, 0, MESSAGE_DIALOG_OVERLAYS, 1},
     {165, 5, 31, 20, IB_NORMAL, 90, 0, button_collapse_expand, button_none, 0, 0, 1},

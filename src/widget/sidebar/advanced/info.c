@@ -2,6 +2,7 @@
 
 #include "building/count.h"
 #include "building/model.h"
+#include "city/labor.h"
 #include "city/population.h"
 #include "core/image.h"
 #include "game/resource.h"
@@ -9,7 +10,8 @@
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
 #include "graphics/text.h"
-
+#define SECTION_PADDING 8
+#define LINE_HEIGHT 16
 
 void draw_infopanel_background(int x_offset, int y_offset, int width, int height)
 {
@@ -18,57 +20,107 @@ void draw_infopanel_background(int x_offset, int y_offset, int width, int height
     graphics_draw_line(x_offset + width - 1, x_offset + width - 1, y_offset,
         y_offset + height, COLOR_SIDEBAR);
     inner_panel_draw(x_offset + 1, y_offset, width / BLOCK_SIZE, panel_blocks);
-
 }
 
-void draw_housing_table(int x, int y_offset)
+static int add_info_header(const uint8_t* header, const int x_offset, const int y_offset)
 {
-    int rows = 0;
+    text_draw(header, x_offset, y_offset, FONT_NORMAL_WHITE, 0);
+    return y_offset + LINE_HEIGHT;
+}
 
-    resource_list list = { 0 };
-    for (resource_type r = RESOURCE_MIN_NON_FOOD; r < RESOURCE_MAX_NON_FOOD; r++) {
-        if (resource_is_inventory(r)) {
-            list.items[list.size++] = r;
-        }
-    }
+static int add_info_number(const int value, const int x_offset, const int y_offset)
+{
+    text_draw_number(value, '@', "", x_offset, y_offset, FONT_NORMAL_GREEN, 0);
+    return y_offset + LINE_HEIGHT;
+}
 
+static int add_info_number_with_subsection(const int value, const int sub_value, const int x_offset, const int y_offset)
+{
+    const int text_width = text_draw_number(value,'@', "", x_offset, y_offset, FONT_NORMAL_GREEN, 0);
+    text_draw_number(sub_value, '(', ")", x_offset + text_width, y_offset, FONT_NORMAL_GREEN, 0);
+
+    return y_offset + LINE_HEIGHT;
+}
+
+static int add_info_section_panel(const uint8_t* header, const int value, const int x_offset, int y_offset)
+{
+    y_offset = add_info_header(header, x_offset, y_offset);
+    y_offset = add_info_number(value, x_offset, y_offset);
+    return y_offset + SECTION_PADDING;
+}
+
+static int add_info_section_panel_with_sub_value(const uint8_t* header, const int value, const int sub_value, const int x_offset, int y_offset)
+{
+    y_offset = add_info_header(header, x_offset, y_offset);
+    y_offset = add_info_number_with_subsection(value, sub_value, x_offset, y_offset);
+    return y_offset + SECTION_PADDING;
+}
+
+static int add_info_section_panel_percentage(const uint8_t* header, const int value, const int sub_value, const int x_offset, int y_offset)
+{
+    y_offset = add_info_header(header, x_offset, y_offset);
+
+    const int text_width = text_draw_percentage(value, x_offset, y_offset, FONT_NORMAL_GREEN);
+
+    text_draw_number(sub_value, '(', ")", x_offset +text_width, y_offset, FONT_NORMAL_GREEN, 0);
+
+    y_offset += LINE_HEIGHT + SECTION_PADDING;
+    return y_offset;
+}
+
+void draw_housing_table(int x_offset, int y_offset)
+{
+    x_offset += 5;
     int total_residences = 0;
-    int houses_using_goods[RESOURCE_MAX] = { 0 };
+
+    int housing_y_offset = y_offset + (6 * LINE_HEIGHT) + (3 * SECTION_PADDING);
 
     for (house_level level = HOUSE_MIN; level <= HOUSE_MAX; level++) {
-        int residences_at_level = building_count_active(BUILDING_HOUSE_SMALL_TENT + level);
+        const int residences_at_level = building_count_active(BUILDING_HOUSE_SMALL_TENT + level);
         if (!residences_at_level) {
             continue;
         }
         total_residences += residences_at_level;
 
-        for (unsigned int i = 0; i < list.size; i++) {
-            if (model_house_uses_inventory(level, list.items[i])) {
-                houses_using_goods[list.items[i]] += residences_at_level;
-            }
-        }
-
-        lang_text_draw(29, level, x + 30, y_offset + (20 * rows), FONT_NORMAL_GREEN);
-        text_draw_number(residences_at_level, '@', " ", x, y_offset + (20 * rows), FONT_NORMAL_WHITE, 0);
-        if (rows == 11) {
-            x += 280;
-            rows = 0;
-        } else {
-            rows++;
-        }
+        add_info_number(residences_at_level, x_offset, housing_y_offset);
+        housing_y_offset = add_info_header(
+            lang_get_string(29, level),
+            x_offset + 30,
+            housing_y_offset
+            );
     }
 
+    y_offset = add_info_section_panel_percentage(
+        lang_get_string(68, 148),
+        city_labor_unemployment_percentage(),
+        city_labor_workers_unemployed() - city_labor_workers_needed(),
+        x_offset,
+        y_offset
+        );
 
-    // info in the top right corner
-    text_draw(translation_for(TR_ADVISOR_TOTAL_NUM_HOUSES), 320, y_offset + 180, FONT_NORMAL_GREEN, 0);
-    text_draw_number(total_residences, '@', " ", 500, y_offset + 180, FONT_NORMAL_WHITE, 0);
+    y_offset = add_info_section_panel(
+        translation_for(TR_ADVISOR_TOTAL_NUM_HOUSES),
+        total_residences,
+        x_offset,
+        y_offset
+    );
 
-    text_draw(translation_for(TR_ADVISOR_AVAILABLE_HOUSING_CAPACITY), 320, y_offset + 200, FONT_NORMAL_GREEN, 0);
-    text_draw_number(city_population_open_housing_capacity(), '@', " ", 500, y_offset + 200, FONT_NORMAL_WHITE, 0);
+    y_offset = add_info_section_panel_with_sub_value(
+        translation_for(TR_ADVISOR_TOTAL_HOUSING_CAPACITY),
+        city_population_total_housing_capacity(),
+        city_population_open_housing_capacity(),
+        x_offset,
+        y_offset
+    );
+
+    // info that is normally in the bottom
+    /*
+
+
 
     text_draw(translation_for(TR_ADVISOR_TOTAL_HOUSING_CAPACITY), 320, y_offset + 220, FONT_NORMAL_GREEN, 0);
     text_draw_number(city_population_total_housing_capacity(), '@', " ", 500, y_offset + 220, FONT_NORMAL_WHITE, 0);
-
+*/
 
     // the using tabel pottery etc...
     // for (unsigned int i = 0; i < list.size; i++) {
