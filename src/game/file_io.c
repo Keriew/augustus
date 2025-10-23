@@ -364,7 +364,7 @@ static void init_scenario_data(scenario_version_t version)
     state->graphic_ids = create_scenario_piece(GRID_SIZE_BUF_U16, 0);
     state->edge = create_scenario_piece(GRID_SIZE_BUF_U8, 0);
     state->terrain = create_scenario_piece(GRID_SIZE_BUF_U16, 0);
-    state->bitfields = create_scenario_piece(GRID_SIZE_BUF_U8, 0);
+    state->bitfields = create_scenario_piece(GRID_SIZE_BUF_U16, 0);
     state->random = create_scenario_piece(GRID_SIZE_BUF_U8, 0);
     state->elevation = create_scenario_piece(GRID_SIZE_BUF_U8, 0);
     state->random_iv = create_scenario_piece(8, 0);
@@ -551,7 +551,7 @@ static void init_savegame_data(savegame_version_t version)
     state->terrain_grid = create_savegame_piece(version_data.piece_sizes.terrain_grid, 1);
     state->aqueduct_grid = create_savegame_piece(GRID_SIZE_BUF_U8, 1);
     state->figure_grid = create_savegame_piece(GRID_SIZE_BUF_U16, 1);
-    state->bitfields_grid = create_savegame_piece(GRID_SIZE_BUF_U8, 1);
+    state->bitfields_grid = create_savegame_piece(GRID_SIZE_BUF_U16, 1);
     state->sprite_grid = create_savegame_piece(GRID_SIZE_BUF_U8, 1);
     state->random_grid = create_savegame_piece(GRID_SIZE_BUF_U8, 0);
     state->desirability_grid = create_savegame_piece(GRID_SIZE_BUF_U8, 1);
