@@ -1,6 +1,7 @@
 #include "scenario_action_edit.h"
 
 #include "core/string.h"
+#include "editor/tool.h"
 #include "game/resource.h"
 #include "graphics/button.h"
 #include "graphics/generic_button.h"
@@ -11,12 +12,14 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
+#include "map/grid.h"
 #include "scenario/event/action_handler.h"
 #include "scenario/event/controller.h"
 #include "scenario/event/formula.h"
 #include "scenario/event/parameter_data.h"
 #include "scenario/event/parameter_city.h"
 #include "widget/input_box.h"
+#include "widget/map_editor.h"
 #include "window/editor/allowed_buildings.h"
 #include "window/editor/custom_variables.h"
 #include "window/editor/map.h"
@@ -495,6 +498,41 @@ static void set_param_allowed_building(int type)
     }
 }
 
+static void on_grid_slice_selected(grid_slice *selection)
+{
+    if (!selection || selection->size == 0) {
+        // User cancelled or invalid selection
+        editor_tool_deactivate();
+        window_editor_scenario_action_edit_show(data.action);
+        return;
+    }
+    // Get the start and end grid offsets (opposite corners of the rectangle)
+    int start_offset = 0;
+    int end_offset = 0;
+    editor_tool_get_selection_offsets(&start_offset, &end_offset);
+
+    for (int i = 0; i < selection->size; i++) {
+        if (selection->grid_offsets[i]) {
+            widget_map_editor_add_draw_context_event_tile(selection->grid_offsets[i], data.action->parent_event_id);
+        }
+    }
+    data.action->parameter1 = start_offset;
+    data.action->parameter2 = end_offset;
+    // Deactivate the tool and return to the action edit window
+    editor_tool_deactivate();
+    window_editor_scenario_action_edit_show(data.action);
+}
+
+static void start_grid_slice_selection(void)
+{
+    // Set up the callback
+    editor_tool_set_selection_callback(on_grid_slice_selected);
+    // Activate the land selection tool
+    editor_tool_set_type(TOOL_SELECT_LAND);
+    // Switch to the editor map window to allow selection
+    window_editor_map_show();
+}
+
 static void change_parameter(xml_data_attribute_t *parameter, const generic_button *button)
 {
     set_parameter_being_edited(button->parameter1);
@@ -559,6 +597,15 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             // Pass the route_id from parameter3 to the window
             window_editor_select_city_resources_for_route_show(set_param_value, data.action->parameter3);
             return;
+        case PARAMETER_TYPE_GRID_SLICE:
+        {
+            int grid_offset1 = data.action->parameter1;
+            int grid_offset2 = data.action->parameter2;
+            grid_slice *existing_selection = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
+            editor_tool_set_existing_land_selection(existing_selection);
+            start_grid_slice_selection();
+            return;
+        }
         default:
             return;
     }

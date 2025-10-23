@@ -88,6 +88,19 @@ int widget_map_editor_add_draw_context_event_tile(int grid_offset, int event_id)
     return 0;
 }
 
+int widget_map_editor_get_event_id_at_grid_offset(int grid_offset)
+{
+    for (int i = 0; i < MAX_EDITOR_EVENT_TILES; i++) {
+        if (draw_context.event_tiles[i].grid_offset == -1 && draw_context.event_tiles[i].event_id == -1) {
+            break; // no more event tiles
+        }
+        if (draw_context.event_tiles[i].grid_offset == grid_offset) {
+            return draw_context.event_tiles[i].event_id;
+        }
+    }
+    return -1;
+}
+
 static void draw_event_area_highlight(int x, int y, int grid_offset)
 {
     //color_t color_mask = complex_button_basic_colors(int id)
@@ -427,6 +440,21 @@ static void handle_touch(void)
     }
 }
 
+void widget_map_editor_get_tooltip(tooltip_context *c)
+{
+    map_tile *tile = &data.current_tile;
+    if (tile->grid_offset) {
+        int event_id = widget_map_editor_get_event_id_at_grid_offset(tile->grid_offset);
+        if (event_id != -1) {
+            static uint8_t tooltip_text[100];
+            uint8_t *cursor = string_copy(string_from_ascii("Event ID: "), tooltip_text, 100);
+            string_from_int(cursor, event_id, 0);
+            c->type = TOOLTIP_BUTTON;
+            c->precomposed_text = tooltip_text;
+        }
+    }
+}
+
 void widget_map_editor_handle_input(const mouse *m, const hotkeys *h)
 {
     scroll_map(m);
@@ -463,6 +491,7 @@ void widget_map_editor_handle_input(const mouse *m, const hotkeys *h)
     zoom_map(m, h, city_view_get_scale());
 
     if (tile->grid_offset) {
+
         if (m->left.went_down) {
             if (!editor_tool_is_in_use()) {
                 editor_tool_start_use(tile);

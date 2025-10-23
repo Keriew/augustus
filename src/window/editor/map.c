@@ -69,6 +69,11 @@ static void handle_input(const mouse *m, const hotkeys *h)
     widget_map_editor_handle_input(m, h);
 }
 
+static void get_tooltip(tooltip_context *c)
+{
+    widget_map_editor_get_tooltip(c);
+}
+
 void window_editor_map_draw_all(void)
 {
     draw_background();
@@ -91,7 +96,8 @@ void window_editor_map_show(void)
         WINDOW_EDITOR_MAP,
         draw_background,
         draw_foreground,
-        handle_input
+        handle_input,
+        get_tooltip
     };
     window_show(&window);
 }
