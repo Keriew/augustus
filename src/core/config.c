@@ -109,6 +109,7 @@ static const char *ini_keys[] = {
     [CONFIG_GP_CH_MARKET_RANGE] = "gameplay_market_range",
     [CONFIG_UI_CV_BUILD_MENU_ICONS] = "ui_cv_build_menu_icons",
     [CONFIG_UI_WT_ENABLE_SNOW_CENTRAL] = "ui_wt_enable_snow_central",
+    [CONFIG_UI_CV_CURSOR_SHADOW] = "ui_cv_cursor_shadow",
 };
 
 static const char *ini_string_keys[] = {
@@ -167,6 +168,7 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
 
     [CONFIG_UI_CV_BUILD_MENU_ICONS] = 1,
     [CONFIG_UI_WT_ENABLE_SNOW_CENTRAL] = 0,
+    [CONFIG_UI_CV_CURSOR_SHADOW] = 1,
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };
