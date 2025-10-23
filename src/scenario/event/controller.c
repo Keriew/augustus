@@ -477,7 +477,7 @@ static void migrate_parameters_action(scenario_action_t *action)
         if (p_type == PARAMETER_TYPE_FORMULA && param_value != NULL) {
             char buffer[16];  // Make sure buffer is large enough
             memset(buffer, 0, sizeof(buffer));
-            string_from_int((uint8_t) buffer, *param_value, 0);
+            string_from_int((uint8_t*) buffer, *param_value, 0);
             unsigned int id = scenario_formula_add((const uint8_t *) buffer, min_limit, max_limit);
             switch (i) {
                 case 1: action->parameter1 = id; break;
