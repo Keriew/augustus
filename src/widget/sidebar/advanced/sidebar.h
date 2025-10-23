@@ -16,4 +16,4 @@ int calculate_x_offset_sidebar_advanced(void);
 
 unsigned int get_advanced_sidebar_tooltip_text(tooltip_context *c);
 
-#endif //  WIDGET_ADVANCED_SIDEBAR
+#endif

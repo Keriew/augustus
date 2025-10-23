@@ -1,5 +1,6 @@
 #include "sidebar.h"
 
+#include "info.h"
 #include "building/menu.h"
 #include "city/message.h"
 #include "city/view.h"
@@ -33,6 +34,8 @@
 
 #define MINIMAP_Y_OFFSET 59
 #define SIDEBAR_ADVANCED_WIDTH 204
+#define BUILD_BUTTONS_COUNT  14
+#define TOP_BUTTONS_COUNT  9
 
 static void button_overlay_click(int param1, int param2);
 static void button_collapse_expand(int param1, int param2);
@@ -55,6 +58,7 @@ static void button_rotate(int clockwise, int param2);
    group margins are 15
 */
 
+
 static image_button buttons_overlays_collapse_sidebar[] = {
     {4, 3, 159, 31, IB_NORMAL, 93, 0, button_overlay_click, button_help, 0, MESSAGE_DIALOG_OVERLAYS, 1},
     {165, 5, 31, 20, IB_NORMAL, 90, 0, button_collapse_expand, button_none, 0, 0, 1},
@@ -76,22 +80,24 @@ static image_button buttons_overlays_collapse_sidebar[] = {
 
 };
 
+// height for info panel = 494
+// width = 169
 
 static image_button buttons_build[] = {
-    {4, 26, 39, 26, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 0, button_build, button_none, BUILD_MENU_VACANT_HOUSE, 0, 1},
-    {4, 67, 39, 26, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 8, button_build, button_none, BUILD_MENU_CLEAR_LAND, 0, 1},
-    {4, 102, 39, 26, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 12, button_build, button_none, BUILD_MENU_ROAD, 0, 1},
-    {4, 137, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 4, button_build, button_none, BUILD_MENU_WATER, 0, 1},
-    {4, 172, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 40, button_build, button_none, BUILD_MENU_HEALTH, 0, 1, "UI", "Asclepius Button"},
-    {4, 207, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 28, button_build, button_none, BUILD_MENU_TEMPLES, 0, 1},
-    {4, 242, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 24, button_build, button_none, BUILD_MENU_EDUCATION, 0, 1},
-    {4, 277, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 20, button_build, button_none, BUILD_MENU_ENTERTAINMENT, 0, 1},
-    {4, 312, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 16, button_build, button_none, BUILD_MENU_ADMINISTRATION, 0, 1},
-    {4, 347, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 44, button_build, button_none, BUILD_MENU_ENGINEERING, 0, 1},
-    {4, 382, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 36, button_build, button_none, BUILD_MENU_SECURITY, 0, 1},
-    {4, 417, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 32, button_build, button_none, BUILD_MENU_INDUSTRY, 0, 1},
-    {4, 487, 39, 26, IB_BUILD, GROUP_MESSAGE_ICON, 22, button_go_to_problem, button_none, 0, 0, 1},
-    {4, 522, 39, 26, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 48, button_undo, button_none, 0, 0, 1},
+    {4, 240, 39, 26, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 0, button_build, button_none, BUILD_MENU_VACANT_HOUSE, 0, 1},
+    {4, 275, 39, 26, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 8, button_build, button_none, BUILD_MENU_CLEAR_LAND, 0, 1},
+    {4, 310, 39, 26, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 12, button_build, button_none, BUILD_MENU_ROAD, 0, 1},
+    {4, 345, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 4, button_build, button_none, BUILD_MENU_WATER, 0, 1},
+    {4, 380, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 40, button_build, button_none, BUILD_MENU_HEALTH, 0, 1, "UI", "Asclepius Button"},
+    {4, 415, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 28, button_build, button_none, BUILD_MENU_TEMPLES, 0, 1},
+    {4, 450, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 24, button_build, button_none, BUILD_MENU_EDUCATION, 0, 1},
+    {4, 485, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 20, button_build, button_none, BUILD_MENU_ENTERTAINMENT, 0, 1},
+    {4, 520, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 16, button_build, button_none, BUILD_MENU_ADMINISTRATION, 0, 1},
+    {4, 555, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 44, button_build, button_none, BUILD_MENU_ENGINEERING, 0, 1},
+    {4, 590, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 36, button_build, button_none, BUILD_MENU_SECURITY, 0, 1},
+    {4, 625, 39, 26, IB_BUILD, GROUP_SIDEBAR_BUTTONS, 32, button_build, button_none, BUILD_MENU_INDUSTRY, 0, 1},
+    {4, 660, 39, 26, IB_BUILD, GROUP_MESSAGE_ICON, 22, button_go_to_problem, button_none, 0, 0, 1},
+    {4, 695, 39, 26, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 48, button_undo, button_none, 0, 0, 1},
 };
 
 static image_button buttons_top_expanded[] = {
@@ -103,6 +109,7 @@ static image_button buttons_top_expanded[] = {
 };
 static struct {
     unsigned int focus_button_for_tooltip;
+    int show_info_for;
 } data;
 
 static void draw_overlay_text(int x_offset)
@@ -155,19 +162,14 @@ static void draw_number_of_messages(int x_offset)
 static void draw_buttons(int x_offset)
 {
     buttons_build[13].enabled = game_can_undo();
-    image_buttons_draw(x_offset, 24, buttons_overlays_collapse_sidebar, 9);
-    image_buttons_draw(x_offset, 240, buttons_build, 14);
+    image_buttons_draw(x_offset, TOP_MENU_HEIGHT, buttons_overlays_collapse_sidebar, TOP_BUTTONS_COUNT);
+    image_buttons_draw(x_offset, TOP_MENU_HEIGHT, buttons_build, BUILD_BUTTONS_COUNT);
     //   image_buttons_draw(x_offset, 24, buttons_top_expanded, 6);
 }
 
 static void enable_building_buttons(void)
 {
     for (int i = 0; i < 12; i++) {
-        buttons_build[i].enabled = 1;
-        if (building_menu_count_items(buttons_build[i].parameter1) <= 0) {
-            buttons_build[i].enabled = 0;
-        }
-
         buttons_build[i].enabled = 1;
         if (building_menu_count_items(buttons_build[i].parameter1) <= 0) {
             buttons_build[i].enabled = 0;
@@ -186,8 +188,20 @@ int calculate_x_offset_sidebar_advanced(void)
     return screen_width() - SIDEBAR_ADVANCED_WIDTH;
 }
 
+
+static void show_housing_info(void)
+{
+    int x_offset = calculate_x_offset_sidebar_advanced() + 48;
+    draw_infopanel_background(x_offset, 240 + 22 + 6, 162, 494);
+}
+
 void draw_advanced_sidebar_background(const int x_offset)
 {
+    if (data.show_info_for == 1)
+    {
+        show_housing_info();
+    }
+
     // image_draw(image_group(GROUP_SIDE_PANEL), x_offset, TOP_MENU_HEIGHT, COLOR_MASK_NONE, SCALE_NONE);
     // draw_buttons_collapsed(x_offset);
     // draw_sidebar_remainder(x_offset + 42);
@@ -224,7 +238,7 @@ int handle_advanced_sidebar_mouse(const mouse *m)
     // if (button_id) {
     //     data.focus_button_for_tooltip = 12;
     // }
-    handled |= image_buttons_handle_mouse(m, x_offset, 24, buttons_build, 12, &button_id);
+    handled |= image_buttons_handle_mouse(m, x_offset, TOP_MENU_HEIGHT, buttons_build, 14, &button_id);
     if (button_id) {
         data.focus_button_for_tooltip = button_id + 19;
     }
@@ -233,7 +247,7 @@ int handle_advanced_sidebar_mouse(const mouse *m)
     //         return 1;
     //     }
     //     int x_offset = new_sidebar_common_get_x_offset_expanded();
-    handled |= image_buttons_handle_mouse(m, x_offset, 24, buttons_overlays_collapse_sidebar, 2, &button_id);
+    handled |= image_buttons_handle_mouse(m, x_offset, TOP_MENU_HEIGHT, buttons_overlays_collapse_sidebar, 9 , &button_id);
     if (button_id) {
         data.focus_button_for_tooltip = button_id + 9;
     }
@@ -254,7 +268,7 @@ int handle_advanced_sidebar_mouse_build_menu(const mouse *m)
 {
     //  if (city_view_is_sidebar_collapsed()) {
     return image_buttons_handle_mouse(m,
-        calculate_x_offset_sidebar_advanced(), 24, buttons_build, 12, 0);
+        calculate_x_offset_sidebar_advanced(), TOP_MENU_HEIGHT, buttons_build, 12, 0);
     // } else {
     //     return image_buttons_handle_mouse(m,
     //         new_sidebar_common_get_x_offset_expanded(), 24, buttons_build, 15, 0);
@@ -278,8 +292,11 @@ static void button_collapse_expand(int param1, int param2)
     sidebar_next();
 }
 
+
 static void button_build(const int submenu, int param2)
 {
+    data.show_info_for = submenu + 1;
+
     window_build_menu_show(submenu);
 }
 
