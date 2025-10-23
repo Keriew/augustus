@@ -190,7 +190,7 @@ static void add_terrain(const void *tile_data, int dx, int dy)
     }
     int grid_offset = tile->grid_offset + map_grid_delta(dx, dy);
     int terrain = map_terrain_get(grid_offset);
-    if (terrain & TERRAIN_BUILDING && data.type != TOOL_EARTHQUAKE_CUSTOM) {
+    if (terrain & TERRAIN_BUILDING && data.type != TOOL_EARTHQUAKE_CUSTOM && data.type != TOOL_EARTHQUAKE_CUSTOM_REMOVE) {
         map_building_tiles_remove(0, x, y);
         terrain = map_terrain_get(grid_offset);
     }
