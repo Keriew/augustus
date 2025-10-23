@@ -8,10 +8,8 @@
 #include "figuretype/missile.h"
 #include "game/time.h"
 #include "map/building.h"
-#include "map/building_tiles.h"
 #include "map/data.h"
 #include "map/grid.h"
-#include "map/image.h"
 #include "map/property.h"
 #include "map/routing_terrain.h"
 #include "map/terrain.h"
@@ -31,7 +29,13 @@ static struct {
         int x;
         int y;
     } expand[4];
+    int next_delay;
 } data;
+
+struct field{
+    int x;
+    int y;
+};
 
 void scenario_earthquake_init(void)
 {
@@ -87,7 +91,6 @@ static void advance_earthquake_to_tile(int x, int y)
             map_building_set(grid_offset, 0);
         }
     }
-    
     map_tiles_clear_highway(grid_offset, 0);
     map_terrain_set(grid_offset, 0);
     map_tiles_set_earthquake(x, y);
@@ -103,33 +106,63 @@ static void advance_earthquake_to_tile(int x, int y)
     figure_create_explosion_cloud(x, y, 1, 0);
 }
 
+static struct field custom_earthquake_find_next_tile(void)
+{
+    for (int y = 0; y < map_data.height; y++) {
+        for (int x = 0; x < map_data.width; x++) {
+            int grid_offset = map_grid_offset(x, y);
+            if (map_property_is_future_earthquake(grid_offset) &&
+                can_advance_earthquake_to_tile(x, y)) {
+                return (struct field){x, y};
+            }
+        }
+    }
+    return (struct field){0, 0};
+}
+
+static int custom_earthquake_advance_next_tile(void)
+{
+    struct field coords = custom_earthquake_find_next_tile();
+    if (coords.x) {
+        advance_earthquake_to_tile(coords.x, coords.y);
+        int grid_offset = map_grid_offset(coords.x, coords.y);
+        map_property_clear_future_earthquake(grid_offset);
+        return 1; // one tile processed, wait next tick
+    }
+    return 0;
+}
+
 void scenario_earthquake_process(void)
 {
+    // Check if earthquake is disabled or not set
     if (scenario.earthquake.severity == EARTHQUAKE_NONE ||
-        (scenario.earthquake_point.x == -1 || scenario.earthquake_point.y == -1) && scenario.earthquake.severity != EARTHQUAKE_CUSTOM) {
+        (scenario.earthquake_point.x == -1 || scenario.earthquake_point.y == -1) &&
+        scenario.earthquake.severity != EARTHQUAKE_CUSTOM) {
         return;
     }
+    // --- Custom earthquake ---
     if (scenario.earthquake.severity == EARTHQUAKE_CUSTOM) {
-        if (data.state == EVENT_NOT_STARTED) {
+        static int custom_delay = 0; // Delay counter in ticks
+        if (data.state == EVENT_NOT_STARTED) { // Start event
             if (game_time_year() == data.game_year && game_time_month() == data.month) {
                 data.state = EVENT_IN_PROGRESS;
-                data.duration = 0;
-                data.delay = 0;
-                city_message_post(1, MESSAGE_EARTHQUAKE, 0, map_grid_offset(data.expand[0].x, data.expand[0].y));
+                struct field coords = custom_earthquake_find_next_tile();
+                city_message_post(1, MESSAGE_EARTHQUAKE, 0,
+                    map_grid_offset(coords.x, coords.y));
             }
         } else if (data.state == EVENT_IN_PROGRESS) {
-            int grid_offset;
-            for (int y = 0; y < map_data.height; y++) {
-                for (int x = 0; x < map_data.width; x++) {
-                    grid_offset = map_grid_offset(x, y);
-                    if (map_property_is_future_earthquake(grid_offset) && can_advance_earthquake_to_tile(x, y)) {
-                        advance_earthquake_to_tile(x, y);
-                    }
+            custom_delay++;
+            if (custom_delay >= data.next_delay) {
+                custom_delay = 0;
+                // Generate new random delay for next tile
+                data.next_delay = 10 + (random_byte() % 91); // 10..100 ticks
+                
+                if (!custom_earthquake_advance_next_tile()) { // If no tiles left, finish the event
+                    data.state = EVENT_FINISHED;
                 }
             }
-            data.state = EVENT_FINISHED;
         }
-    } else {
+    } else { //Regular earthquake
         if (data.state == EVENT_NOT_STARTED) {
             if (game_time_year() == data.game_year &&
                 game_time_month() == data.month) {
