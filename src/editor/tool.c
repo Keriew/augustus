@@ -243,7 +243,6 @@ static void add_terrain(const void *tile_data, int dx, int dy)
             break;
         case TOOL_RAISE_LAND:
             terrain = raise_land_tile(x, y, grid_offset, terrain);
-            map_property_clear_future_earthquake(grid_offset);
             break;
         case TOOL_LOWER_LAND:
             terrain = lower_land_tile(x, y, grid_offset, terrain);
