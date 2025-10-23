@@ -193,6 +193,8 @@ static void show_housing_info(void)
 {
     int x_offset = calculate_x_offset_sidebar_advanced() + 48;
     draw_infopanel_background(x_offset, 240 + 22 + 6, 162, 494);
+
+    draw_housing_table(x_offset + 2, 240 + 22 + 12);
 }
 
 void draw_advanced_sidebar_background(const int x_offset)
