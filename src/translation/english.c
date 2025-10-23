@@ -1874,6 +1874,7 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_GRID_OFFSET_CORNER1, "Corner 1"},
     {TR_PARAMETER_GRID_OFFSET_CORNER2, "Corner 2"},
     {TR_CONDITION_TYPE_TERRAIN_IN_AREA, "Terrain in area"},
+    {TR_CONFIG_UI_CV_CURSOR_SHADOW, "Enable cursor shadow"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
