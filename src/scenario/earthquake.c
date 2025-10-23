@@ -8,8 +8,10 @@
 #include "figuretype/missile.h"
 #include "game/time.h"
 #include "map/building.h"
+#include "map/building_tiles.h"
 #include "map/data.h"
 #include "map/grid.h"
+#include "map/image.h"
 #include "map/property.h"
 #include "map/routing_terrain.h"
 #include "map/terrain.h"
@@ -84,6 +86,9 @@ static void advance_earthquake_to_tile(int x, int y)
             building_get(ruin_id)->state = BUILDING_STATE_DELETED_BY_GAME;
             map_building_set(grid_offset, 0);
         }
+    } else {
+        map_building_tiles_remove(0, x, y); // remove any non building building e.g natives
+        map_image_set(grid_offset, 0);
     }
     map_tiles_clear_highway(grid_offset, 0);
     map_terrain_set(grid_offset, 0);
