@@ -755,9 +755,10 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
     } else {
         scenario_events_migrate_to_formulas();
         scenario_events_migrate_to_resolved_display_names();
-        if (version <= SCENARIO_TESTING_VERSION_BUMP_2) {
-            scenario_events_migrate_to_grid_slices();
-        }
+
+    }
+    if (version <= SCENARIO_TESTING_VERSION_BUMP_4) {
+        scenario_events_migrate_to_grid_slices();
     }
     scenario_events_assign_parent_event_ids();
 
@@ -938,9 +939,10 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     if (version <= SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         scenario_events_migrate_to_formulas();
         scenario_events_migrate_to_resolved_display_names();
-        if (version <= SAVE_GAME_TESTING_VERSION_BUMP_2) {
-            scenario_events_migrate_to_grid_slices();
-        }
+
+    }
+    if (version <= SAVE_GAME_TESTING_VERSION_BUMP_4) {
+        scenario_events_migrate_to_grid_slices();
     }
     scenario_events_assign_parent_event_ids();
 }
