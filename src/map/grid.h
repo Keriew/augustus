@@ -19,7 +19,7 @@ enum {
  * @param size 1-based count of valid entries in grid_offsets, 0 means empty arrray, 1 means [0] is valid, etc.
  */
 typedef struct grid_slice {
-    int grid_offsets[MAX_SLICE_SIZE];
+    int *grid_offsets;  // dynamically allocated
     int size;
 } grid_slice;
 
