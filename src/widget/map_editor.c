@@ -156,6 +156,7 @@ static void draw_custom_earthquake(int x, int y, int grid_offset)
             images[grid_offset] = *map_image_context_get_future_earthquake(grid_offset);
         }
         if (images[grid_offset].is_valid) {
+            image_draw_isometric_footprint_from_draw_tile(image_group(GROUP_TERRAIN_EARTHQUAKE) +
                 images[grid_offset].group_offset + images[grid_offset].item_offset, x, y, ALPHA_MASK_CUSTOM_EARTHQUAKE, draw_context.scale);
         }
     }
