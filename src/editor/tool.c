@@ -41,7 +41,7 @@ static struct {
     grid_slice *land_selection; // selection being edited right now
     grid_slice *existing_selection; // previously existing selection
     void (*selection_callback)(grid_slice *selection);
-} data = { 0, TOOL_GRASS, 0, 3, 0, 0, {0}, (grid_slice *){0}, (grid_slice *){0}, 0 };
+} data = { 0, TOOL_GRASS, 0, 3, 0, 0, {0}, NULL, NULL, 0 };
 
 tool_type editor_tool_type(void)
 {
