@@ -552,7 +552,6 @@ void editor_tool_end_use(const map_tile *tile)
         case TOOL_SELECT_LAND:
             // Create grid_slice from start and end tiles
             if (data.land_selection) {
-                free(data.land_selection);
                 data.land_selection = 0;
             }
             data.land_selection = map_grid_get_grid_slice_from_corners(

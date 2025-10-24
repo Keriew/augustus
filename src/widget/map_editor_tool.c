@@ -251,9 +251,6 @@ void map_editor_tool_draw(const map_tile *tile)
                 }
             } else {
                 // Just highlight the current tile when not dragging
-                int corner1, corner2;
-                grid_slice *existing_selection = editor_tool_get_existing_land_selection();
-                int success = map_grid_get_corner_offsets_from_grid_slice(existing_selection, &corner1, &corner2);
                 draw_flat_tile(x, y, COLOR_MASK_AMBER);
             }
             break;

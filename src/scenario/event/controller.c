@@ -477,7 +477,7 @@ static void migrate_parameters_action(scenario_action_t *action)
         if (p_type == PARAMETER_TYPE_FORMULA && param_value != NULL) {
             char buffer[16];  // Make sure buffer is large enough
             memset(buffer, 0, sizeof(buffer));
-            string_from_int((uint8_t*) buffer, *param_value, 0);
+            string_from_int((uint8_t *) buffer, *param_value, 0);
             unsigned int id = scenario_formula_add((const uint8_t *) buffer, min_limit, max_limit);
             switch (i) {
                 case 1: action->parameter1 = id; break;
@@ -607,7 +607,8 @@ void scenario_events_fetch_event_tiles_to_editor(void)
         {
             array_foreach(group->conditions, condition) //through all conditions of this group
             {
-                if (condition->type == CONDITION_TYPE_BUILDING_COUNT_AREA || CONDITION_TYPE_TERRAIN_IN_AREA) {
+                if (condition->type == CONDITION_TYPE_BUILDING_COUNT_AREA ||
+                    condition->type == CONDITION_TYPE_TERRAIN_IN_AREA) {
                     int grid_offset1 = condition->parameter1;
                     int grid_offset2 = condition->parameter2;
                     grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
@@ -632,12 +633,12 @@ void scenario_events_migrate_to_grid_slices(void)
                 action->type == ACTION_TYPE_CHANGE_TERRAIN) {
                 // For these action types, we need to convert grid offset and radius into grid offset corners
                 // into two GRID_SLICE parameters (corner1 and corner2)
-                int old_grid_offset = action->parameter1;
-                int radius = action->parameter2;
+                int old_grid_offset = scenario_formula_evaluate_formula(action->parameter1);
+                int radius = scenario_formula_evaluate_formula(action->parameter2);
                 int corner1 = 0, corner2 = 0;
                 grid_slice *slice = map_grid_get_grid_slice_from_center(old_grid_offset, radius);
                 map_grid_get_corner_offsets_from_grid_slice(slice, &corner1, &corner2);
-                action->parameter1 = corner1;
+                action->parameter1 = corner1; // test on value not formula
                 action->parameter2 = corner2;
             }
         }
@@ -649,8 +650,8 @@ void scenario_events_migrate_to_grid_slices(void)
             {
                 if (condition->type == CONDITION_TYPE_BUILDING_COUNT_AREA) {
                     // CONDITION_TYPE_TERRAIN_IN_AREA introduced with the new parameters from start
-                    int old_grid_offset = condition->parameter1;
-                    int radius = condition->parameter2;
+                    int old_grid_offset = scenario_formula_evaluate_formula(condition->parameter1);
+                    int radius = scenario_formula_evaluate_formula(condition->parameter2);
                     int corner1 = 0, corner2 = 0;
                     grid_slice *slice = map_grid_get_grid_slice_from_center(old_grid_offset, radius);
                     map_grid_get_corner_offsets_from_grid_slice(slice, &corner1, &corner2);
