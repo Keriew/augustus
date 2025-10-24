@@ -45,9 +45,8 @@ static struct {
     int capture_input;
     int cursor_grid_offset;
     
-    terrain_image earthquake_image;
     int custom_earthquake_refresh;
-} data = {.custom_earthquake_refresh = 1, .earthquake_image = {}};
+} data = {.custom_earthquake_refresh = 1};
 
 static struct {
     time_millis last_water_animation_time;
@@ -168,13 +167,13 @@ static void draw_custom_earthquake(int x, int y, int grid_offset)
         return;
     }
     if (map_property_is_future_earthquake(grid_offset) && editor_is_active() && !map_terrain_is(grid_offset, TERRAIN_IMPASSABLE_EARTHQUAKE)) {
-        terrain_image image = data.earthquake_image;
-        if (data.custom_earthquake_refresh) {
-            image = *map_image_context_get_future_earthquake(grid_offset);
-            data.earthquake_image = image;
+        static terrain_image images[GRID_SIZE * GRID_SIZE] = {};
+        if (data.custom_earthquake_refresh || !images[grid_offset].is_valid) {
+            images[grid_offset] = *map_image_context_get_future_earthquake(grid_offset);
         }
-        if (image.is_valid) {
-            image_draw_isometric_footprint_from_draw_tile(image_group(GROUP_TERRAIN_EARTHQUAKE) + image.group_offset + image.item_offset, x, y, ALPHA_MASK_CUSTOM_EARTHQUAKE, draw_context.scale);
+        if (images[grid_offset].is_valid) {
+            image_draw_isometric_footprint_from_draw_tile(image_group(GROUP_TERRAIN_EARTHQUAKE) + 
+                images[grid_offset].group_offset + images[grid_offset].item_offset, x, y, ALPHA_MASK_CUSTOM_EARTHQUAKE, draw_context.scale);
         }
     }
 }
