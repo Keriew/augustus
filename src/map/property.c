@@ -266,3 +266,14 @@ void map_property_load_state(buffer *bitfields, buffer *edge)
     map_grid_load_state_u16(bitfields_grid.items, bitfields);
     map_grid_load_state_u8(edge_grid.items, edge);
 }
+
+void map_property_load_state_u8(buffer *bitfields, buffer *edge)
+{
+    uint8_t buf[GRID_SIZE * GRID_SIZE];
+    map_grid_load_state_u8(buf, bitfields);
+    for (int i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
+        uint16_t value = (uint16_t)buf[i];
+        bitfields_grid.items[i] = value &= BIT_NO_FUTURE_EARTHQUAKE;
+    }
+    map_grid_load_state_u8(edge_grid.items, edge);
+}

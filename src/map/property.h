@@ -64,5 +64,6 @@ void map_property_restore(void);
 
 void map_property_save_state(buffer *bitfields, buffer *edge);
 void map_property_load_state(buffer *bitfields, buffer *edge);
+void map_property_load_state_u8(buffer *bitfields, buffer *edge);
 
 #endif // MAP_PROPERTY_H

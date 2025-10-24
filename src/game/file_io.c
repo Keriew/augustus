@@ -711,7 +711,11 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
 
     map_image_load_state_legacy(file->graphic_ids);
     map_terrain_load_state(file->terrain, 0, file->graphic_ids, 1);
-    map_property_load_state(file->bitfields, file->edge);
+    if (version > SCENARIO_TESTING_VERSION_BUMP_5) { //Decrease to SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA before merge
+        map_property_load_state(file->bitfields, file->edge);
+    } else {
+        map_property_load_state_u8(file->bitfields, file->edge);
+    }
     map_random_load_state(file->random);
     map_elevation_load_state(file->elevation);
     city_view_load_scenario_state(file->camera);
@@ -851,7 +855,11 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     map_aqueduct_load_state(state->aqueduct_grid, state->aqueduct_backup_grid);
     map_figure_load_state(state->figure_grid);
     map_sprite_load_state(state->sprite_grid, state->sprite_backup_grid);
-    map_property_load_state(state->bitfields_grid, state->edge_grid);
+    if (version > SAVE_GAME_TESTING_VERSION_BUMP_5) { //Decrease to SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA before merge
+        map_property_load_state(state->bitfields_grid, state->edge_grid);
+    } else {
+        map_property_load_state_u8(state->bitfields_grid, state->edge_grid);
+    }
     map_random_load_state(state->random_grid);
     map_desirability_load_state(state->desirability_grid);
     map_elevation_load_state(state->elevation_grid);
