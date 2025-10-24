@@ -112,32 +112,65 @@ void draw_housing_table(int x_offset, int y_offset)
         x_offset,
         y_offset
     );
-
-    // info that is normally in the bottom
-    /*
-
-
-
-    text_draw(translation_for(TR_ADVISOR_TOTAL_HOUSING_CAPACITY), 320, y_offset + 220, FONT_NORMAL_GREEN, 0);
-    text_draw_number(city_population_total_housing_capacity(), '@', " ", 500, y_offset + 220, FONT_NORMAL_WHITE, 0);
-*/
-
-    // the using tabel pottery etc...
-    // for (unsigned int i = 0; i < list.size; i++) {
-    //
-    //     int image_id = resource_get_data(list.items[i])->image.icon;
-    //     const image *img = image_get(image_id);
-    //     int base_width = (26 - img->original.width) / 2;
-    //     int base_height = (26 - img->original.height) / 2;
-    //
-    //     image_draw(resource_get_data(list.items[i])->image.icon, 54 + base_width, y_offset + 260 + (23 * i) + base_height - 5,
-    //         COLOR_MASK_NONE, SCALE_NONE);
-    //     text_draw(translation_for(TR_ADVISOR_RESIDENCES_USING_POTTERY + i), 90, y_offset + 263 + (23 * i),
-    //         FONT_NORMAL_BLACK, 0);
-    //     text_draw_number(houses_using_goods[list.items[i]], '@', " ", 499, y_offset + 263 + (23 * i),
-    //         FONT_NORMAL_BLACK, 0);
-    //     image_draw(resource_get_data(list.items[i])->image.icon, 550 + base_width, y_offset + 260 + (23 * i) + base_height - 5,
-    //         COLOR_MASK_NONE, SCALE_NONE);
-    // }
 }
 
+#define LARARIUM_COVERAGE 10
+#define SHRINE_COVERAGE 50
+#define SMALL_TEMPLE_COVERAGE 750
+#define LARGE_TEMPLE_COVERAGE 3000
+#define ORACLE_COVERAGE 500
+#define LARGE_ORACLE_COVERAGE 750
+#define PANTHEON_COVERAGE 1500
+#define GRAND_TEMPLE_COVERAGE 5000
+
+static int draw_god_row(god_type god, int x_offset, int y_offset, int base_god_value, building_type altar, building_type small_temple,
+    building_type large_temple, building_type grand_temple)
+{
+
+    int value = base_god_value +
+        SHRINE_COVERAGE * building_count_active(altar) +
+        SMALL_TEMPLE_COVERAGE * building_count_active(small_temple) +
+        LARGE_TEMPLE_COVERAGE * building_count_active(large_temple) +
+        GRAND_TEMPLE_COVERAGE * building_count_active(grand_temple);
+
+    y_offset = add_info_section_panel(
+        lang_get_string(59,11 + god),
+        value,
+        x_offset,
+        y_offset
+        );
+
+    return y_offset;
+
+}
+
+void draw_gods_table(int x_offset, int y_offset)
+{
+    x_offset += 5;
+
+    const int oracles = building_count_active(BUILDING_ORACLE);
+    const int larariums = building_count_total(BUILDING_LARARIUM);
+    const int nymphaeums = building_count_active(BUILDING_NYMPHAEUM);
+    const int small_mausoleums = building_count_active(BUILDING_SMALL_MAUSOLEUM);
+    const int large_mausoleums = building_count_active(BUILDING_LARGE_MAUSOLEUM);
+
+    const int base_god_value =
+       PANTHEON_COVERAGE * building_count_active(BUILDING_PANTHEON) +
+       LARARIUM_COVERAGE * larariums +
+       ORACLE_COVERAGE * oracles +
+       ORACLE_COVERAGE * small_mausoleums +
+       LARGE_ORACLE_COVERAGE * nymphaeums +
+       LARGE_ORACLE_COVERAGE * large_mausoleums ;
+
+    // // god rows
+    y_offset = draw_god_row(GOD_CERES, x_offset, y_offset, base_god_value, BUILDING_SHRINE_CERES, BUILDING_SMALL_TEMPLE_CERES,
+         BUILDING_LARGE_TEMPLE_CERES, BUILDING_GRAND_TEMPLE_CERES);
+    y_offset = draw_god_row(GOD_NEPTUNE, x_offset, y_offset, base_god_value, BUILDING_SHRINE_NEPTUNE, BUILDING_SMALL_TEMPLE_NEPTUNE,
+        BUILDING_LARGE_TEMPLE_NEPTUNE, BUILDING_GRAND_TEMPLE_NEPTUNE);
+    y_offset = draw_god_row(GOD_MERCURY, x_offset, y_offset, base_god_value, BUILDING_SHRINE_MERCURY, BUILDING_SMALL_TEMPLE_MERCURY,
+        BUILDING_LARGE_TEMPLE_MERCURY, BUILDING_GRAND_TEMPLE_MERCURY);
+    y_offset = draw_god_row(GOD_MARS, x_offset, y_offset, base_god_value, BUILDING_SHRINE_MARS, BUILDING_SMALL_TEMPLE_MARS,
+        BUILDING_LARGE_TEMPLE_MARS, BUILDING_GRAND_TEMPLE_MARS);
+    draw_god_row(GOD_VENUS, x_offset, y_offset, base_god_value, BUILDING_SHRINE_VENUS, BUILDING_SMALL_TEMPLE_VENUS,
+        BUILDING_LARGE_TEMPLE_VENUS, BUILDING_GRAND_TEMPLE_VENUS);
+}
