@@ -12,12 +12,19 @@
 #include "graphics/panel.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
+#include "scenario/event/controller.h"
 #include "widget/map_editor.h"
 #include "widget/top_menu_editor.h"
 #include "widget/sidebar/editor.h"
 #include "window/file_dialog.h"
 #include "window/popup_dialog.h"
 #include "window/editor/attributes.h"
+
+static void init(void)
+{
+    widget_map_editor_clear_draw_context_event_tiles();
+    scenario_events_fetch_event_tiles_to_editor();
+}
 
 static void draw_background(void)
 {
@@ -92,6 +99,7 @@ void window_editor_map_draw(void)
 
 void window_editor_map_show(void)
 {
+    init();
     window_type window = {
         WINDOW_EDITOR_MAP,
         draw_background,

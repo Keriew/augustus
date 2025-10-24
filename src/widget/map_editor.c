@@ -34,9 +34,10 @@
 #include "widget/map_editor_pause_menu.h"
 #include "widget/map_editor_tool.h"
 
+#include <stdio.h>
 #include <string.h>
 
-#define MAX_EDITOR_EVENT_TILES 10000
+#define MAX_EVENTS_PER_TILE 10
 
 static struct {
     map_tile current_tile;
@@ -44,9 +45,9 @@ static struct {
     int new_start_grid_offset;
     int capture_input;
     int cursor_grid_offset;
-    
+
     int custom_earthquake_refresh;
-} data = {.custom_earthquake_refresh = 1};
+} data = { .custom_earthquake_refresh = 1 };
 
 static struct {
     time_millis last_water_animation_time;
@@ -55,8 +56,9 @@ static struct {
     int image_id_water_first;
     int image_id_water_last;
     float scale;
-    map_editor_event_tile event_tiles[MAX_EDITOR_EVENT_TILES];
 } draw_context;
+
+int event_tiles[GRID_SIZE * GRID_SIZE][MAX_EVENTS_PER_TILE];
 
 static void init_draw_context(void)
 {
@@ -69,13 +71,11 @@ static void init_draw_context(void)
     draw_context.image_id_water_first = image_group(GROUP_TERRAIN_WATER);
     draw_context.image_id_water_last = 5 + draw_context.image_id_water_first;
     draw_context.scale = city_view_get_scale() / 100.0f;
-    widget_map_editor_clear_draw_context_event_tiles();
-    scenario_events_fetch_event_tiles_to_editor();
 }
 
 void widget_map_editor_clear_draw_context_event_tiles(void)
 {
-    memset(draw_context.event_tiles, -1, sizeof(draw_context.event_tiles));
+    memset(event_tiles, -1, sizeof(event_tiles));
 }
 
 void widget_map_editor_custom_earthquake_request_refresh(void)
@@ -85,40 +85,30 @@ void widget_map_editor_custom_earthquake_request_refresh(void)
 
 int widget_map_editor_add_draw_context_event_tile(int grid_offset, int event_id)
 {
-    for (int i = 0; i < MAX_EDITOR_EVENT_TILES; i++) {
-        if (draw_context.event_tiles[i].grid_offset == -1 && draw_context.event_tiles[i].event_id == -1) {
-            draw_context.event_tiles[i].grid_offset = grid_offset;
-            draw_context.event_tiles[i].event_id = event_id;
+    for (int i = 0; i < MAX_EVENTS_PER_TILE; i++) {
+        if (event_tiles[grid_offset][i] == event_id) {
+            return 1; // already exists
+        }
+        if (event_tiles[grid_offset][i] == -1) {
+            event_tiles[grid_offset][i] = event_id;
             return 1;
         }
     }
     return 0;
 }
 
-int widget_map_editor_get_event_id_at_grid_offset(int grid_offset)
-{
-    for (int i = 0; i < MAX_EDITOR_EVENT_TILES; i++) {
-        if (draw_context.event_tiles[i].grid_offset == -1 && draw_context.event_tiles[i].event_id == -1) {
-            break; // no more event tiles
-        }
-        if (draw_context.event_tiles[i].grid_offset == grid_offset) {
-            return draw_context.event_tiles[i].event_id;
-        }
-    }
-    return -1;
-}
-
 static void draw_event_area_highlight(int x, int y, int grid_offset)
 {
-    //color_t color_mask = complex_button_basic_colors(int id)
-    for (int i = 0; i < MAX_EDITOR_EVENT_TILES; i++) {
-        if (draw_context.event_tiles[i].grid_offset == -1 && draw_context.event_tiles[i].event_id == -1) {
-            return;
-        }
-        if (draw_context.event_tiles[i].grid_offset == grid_offset) {
-            color_t color_mask = complex_button_basic_colors((draw_context.event_tiles[i].event_id % 9) + 1);
-            image_draw_isometric_footprint_from_draw_tile(image_group(GROUP_TERRAIN_OVERLAY), x, y, color_mask, draw_context.scale);
-            return;
+
+    for (int grid_x = 0; x < GRID_SIZE; x++) {
+        for (int grid_y = 0; y < GRID_SIZE; y++) {
+            grid_offset = map_grid_offset(grid_x, grid_y);
+            if (event_tiles[grid_offset][0] == -1) {
+                continue; // no event tiles here
+            }
+            color_t color_mask = complex_button_basic_colors((event_tiles[grid_offset][0] % 10) + 1);
+            image_draw_isometric_footprint_from_draw_tile(
+                image_group(GROUP_TERRAIN_OVERLAY), x, y, color_mask, draw_context.scale);
         }
     }
 }
@@ -140,14 +130,8 @@ static void draw_footprint(int x, int y, int grid_offset)
         }
         map_image_set(grid_offset, image_id);
     }
-    for (int i = 0; i < MAX_EDITOR_EVENT_TILES; i++) { // check if this grid offset is associated with an event
-        if (draw_context.event_tiles[i].grid_offset == -1 && draw_context.event_tiles[i].event_id == -1) {
-            break; // no more event tiles
-        }
-        if (draw_context.event_tiles[i].grid_offset == grid_offset) {
-            color_mask = complex_button_basic_colors((draw_context.event_tiles[i].event_id % 10) + 1);
-            break; // color aquired, exit loop
-        }
+    if (event_tiles[grid_offset][0] != -1) {
+        color_mask = complex_button_basic_colors((event_tiles[grid_offset][0] % 10) + 1);
     }
     image_draw_isometric_footprint_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
 
@@ -172,7 +156,6 @@ static void draw_custom_earthquake(int x, int y, int grid_offset)
             images[grid_offset] = *map_image_context_get_future_earthquake(grid_offset);
         }
         if (images[grid_offset].is_valid) {
-            image_draw_isometric_footprint_from_draw_tile(image_group(GROUP_TERRAIN_EARTHQUAKE) + 
                 images[grid_offset].group_offset + images[grid_offset].item_offset, x, y, ALPHA_MASK_CUSTOM_EARTHQUAKE, draw_context.scale);
         }
     }
@@ -185,6 +168,9 @@ static void draw_top(int x, int y, int grid_offset)
     }
     int image_id = map_image_at(grid_offset);
     color_t color_mask = 0;
+    if (event_tiles[grid_offset][0] != -1) {
+        color_mask = complex_button_basic_colors((event_tiles[grid_offset][0] % 10) + 1);
+    }
     image_draw_isometric_top_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
 }
 
@@ -240,7 +226,6 @@ void widget_map_editor_draw(void)
     city_view_foreach_valid_map_tile_row(draw_flags, draw_top, 0);
     city_view_foreach_valid_map_tile(draw_custom_earthquake);
     data.custom_earthquake_refresh = 0;
-    //city_view_foreach_valid_map_tile(draw_event_area_highlight);
     map_editor_tool_draw(&data.current_tile);
     graphics_reset_clip_rectangle();
 }
@@ -456,16 +441,28 @@ void widget_map_editor_get_tooltip(tooltip_context *c)
 {
     map_tile *tile = &data.current_tile;
     if (tile->grid_offset) {
-        int event_id = widget_map_editor_get_event_id_at_grid_offset(tile->grid_offset);
-        if (event_id != -1) {
-            static uint8_t tooltip_text[100];
-            uint8_t *cursor = string_copy(string_from_ascii("Event ID: "), tooltip_text, 100);
-            string_from_int(cursor, event_id, 0);
-            c->type = TOOLTIP_BUTTON;
-            c->precomposed_text = tooltip_text;
+        static uint8_t tooltip_text[128]; // increased a bit for safety
+        int offset = tile->grid_offset;
+        if (event_tiles[offset][0] == -1) {
+            return; // No events
         }
+        int len = snprintf((char *) tooltip_text, sizeof(tooltip_text), "Event IDs: ");
+        for (int i = 0; i < MAX_EVENTS_PER_TILE; i++) {
+            int event_id = event_tiles[offset][i];
+            if (event_id == -1)
+                break;
+            int written = snprintf((char *) tooltip_text + len, sizeof(tooltip_text) - len, "%s%d", " ", event_id);
+            // add a space before all but the first number
+            if (written < 0 || written >= (int) (sizeof(tooltip_text) - len)) {
+                break;
+            }
+            len += written;
+        }
+        c->type = TOOLTIP_BUTTON;
+        c->precomposed_text = tooltip_text;
     }
 }
+
 
 void widget_map_editor_handle_input(const mouse *m, const hotkeys *h)
 {

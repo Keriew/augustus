@@ -474,7 +474,7 @@ static void migrate_parameters_action(scenario_action_t *action)
         int *param_value = params[i - 1];
         p_type = scenario_events_parameter_data_get_action_parameter_type(
             action_type, i, &min_limit, &max_limit);
-        if (p_type == PARAMETER_TYPE_FORMULA && param_value != NULL) {
+        if ((p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) && param_value != NULL) {
             char buffer[16];  // Make sure buffer is large enough
             memset(buffer, 0, sizeof(buffer));
             string_from_int((uint8_t *) buffer, *param_value, 0);
@@ -509,7 +509,7 @@ static void migrate_parameters_condition(scenario_condition_t *condition)
         int *param_value = params[i - 1];
         p_type = scenario_events_parameter_data_get_condition_parameter_type(
             condition_type, i, &min_limit, &max_limit);
-        if (p_type == PARAMETER_TYPE_FORMULA && param_value != NULL) {
+        if ((p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) && param_value != NULL) {
             uint8_t buffer[16];  // Make sure buffer is large enough
             memset(buffer, 0, sizeof(buffer));
             string_from_int(buffer, *param_value, 0);
