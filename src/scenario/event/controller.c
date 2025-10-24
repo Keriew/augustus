@@ -607,7 +607,8 @@ void scenario_events_fetch_event_tiles_to_editor(void)
         {
             array_foreach(group->conditions, condition) //through all conditions of this group
             {
-                if (condition->type == CONDITION_TYPE_BUILDING_COUNT_AREA || CONDITION_TYPE_TERRAIN_IN_AREA) {
+                if (condition->type == CONDITION_TYPE_BUILDING_COUNT_AREA ||
+                    condition->type == CONDITION_TYPE_TERRAIN_IN_AREA) {
                     int grid_offset1 = condition->parameter1;
                     int grid_offset2 = condition->parameter2;
                     grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);

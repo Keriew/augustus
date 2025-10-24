@@ -36,7 +36,7 @@
 
 #include <string.h>
 
-#define MAX_EDITOR_EVENT_TILES 1000
+#define MAX_EDITOR_EVENT_TILES 10000
 
 static struct {
     map_tile current_tile;
