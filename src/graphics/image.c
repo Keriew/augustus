@@ -2,6 +2,9 @@
 
 #include "assets/assets.h"
 #include "core/image.h"
+
+#include <math.h>
+
 #include "graphics/renderer.h"
 #include "graphics/screen.h"
 
@@ -26,6 +29,19 @@ void image_draw_silhouette(int image_id, int x, int y, color_t color, float scal
     }
     graphics_renderer()->draw_silhouette(img, x, y, color, scale);
 
+}
+
+void image_draw_scaled_from_corner(const int image_id, const int x, const int y, const color_t color,
+    const int draw_scale_percent)
+{
+    const float obj_draw_scale = 100.0f / (float)draw_scale_percent;
+
+    // The draw_image function divides x and y by scale internally.
+    // Multiply here to cancel (invert) that effect.
+    const int inverting_scale_x = (int)lroundf((float)x * obj_draw_scale);
+    const int inverting_scale_y = (int)lroundf((float)y * obj_draw_scale);
+
+    image_draw(image_id, inverting_scale_x, inverting_scale_y, color, obj_draw_scale);
 }
 
 void image_draw_scaled_centered(int image_id, int x, int y, color_t color, int draw_scale_percent)

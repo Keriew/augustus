@@ -614,6 +614,10 @@ set(WIDGET_FILES
     ${PROJECT_SOURCE_DIR}/src/widget/minimap.c
     ${PROJECT_SOURCE_DIR}/src/widget/top_menu.c
     ${PROJECT_SOURCE_DIR}/src/widget/top_menu_editor.c
+    ${PROJECT_SOURCE_DIR}/src/widget/sidebar/collapsed/sidebar.c
+    ${PROJECT_SOURCE_DIR}/src/widget/sidebar/expanded/sidebar.c
+    ${PROJECT_SOURCE_DIR}/src/widget/sidebar/advanced/sidebar.c
+    ${PROJECT_SOURCE_DIR}/src/widget/sidebar/advanced/info.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/city.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/common.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/editor.c
