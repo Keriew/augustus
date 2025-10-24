@@ -138,7 +138,7 @@ static void draw_footprint(int x, int y, int grid_offset)
             break; // no more event tiles
         }
         if (draw_context.event_tiles[i].grid_offset == grid_offset) {
-            color_mask = complex_button_basic_colors((draw_context.event_tiles[i].event_id % 9) + 1);
+            color_mask = complex_button_basic_colors((draw_context.event_tiles[i].event_id % 10) + 1);
             break; // color aquired, exit loop
         }
     }

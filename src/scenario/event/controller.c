@@ -638,12 +638,6 @@ void scenario_events_migrate_to_grid_slices(void)
                 int corner1 = 0, corner2 = 0;
                 grid_slice *slice = map_grid_get_grid_slice_from_center(old_grid_offset, radius);
                 map_grid_get_corner_offsets_from_grid_slice(slice, &corner1, &corner2);
-                uint8_t corner1_formula[16];
-                uint8_t corner2_formula[16];
-                string_from_int(corner1_formula, corner1, 0);
-                string_from_int(corner2_formula, corner2, 0);
-                int corner1_formula_id = scenario_formula_add(corner1_formula, 0, 2147483647);
-                int corner2_formula_id = scenario_formula_add(corner2_formula, 0, 2147483647);
                 action->parameter1 = corner1; // test on value not formula
                 action->parameter2 = corner2;
             }

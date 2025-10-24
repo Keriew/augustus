@@ -251,7 +251,6 @@ void map_editor_tool_draw(const map_tile *tile)
                 }
             } else {
                 // Just highlight the current tile when not dragging
-
                 draw_flat_tile(x, y, COLOR_MASK_AMBER);
             }
             break;
