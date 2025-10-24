@@ -21,6 +21,7 @@
 #include "scenario/editor_events.h"
 #include "scenario/editor_map.h"
 #include "city/warning.h"
+#include "widget/map_editor.h"
 #include "widget/minimap.h"
 
 #include <stdio.h>
@@ -41,7 +42,7 @@ static struct {
     grid_slice *land_selection; // selection being edited right now
     grid_slice *existing_selection; // previously existing selection
     void (*selection_callback)(grid_slice *selection);
-} data = { 0, TOOL_GRASS, 0, 3, 0, 0, {0}, (grid_slice *){0}, (grid_slice *){0}, 0 };
+} data = { 0, TOOL_GRASS, 0, 3, 0, 0, {0}, NULL, NULL, 0 };
 
 tool_type editor_tool_type(void)
 {
@@ -288,8 +289,6 @@ void editor_tool_update_use(const map_tile *tile)
             map_tiles_update_region_meadow(x_min, y_min, x_max, y_max);
             break;
         case TOOL_TREES:
-        case TOOL_EARTHQUAKE_CUSTOM:
-        case TOOL_EARTHQUAKE_CUSTOM_REMOVE:
             map_image_context_reset_water();
             map_tiles_update_region_water(x_min, y_min, x_max, y_max);
             map_tiles_update_all_rocks();
@@ -329,6 +328,9 @@ void editor_tool_update_use(const map_tile *tile)
             map_tiles_update_region_empty_land(x_min, y_min, x_max, y_max);
             map_tiles_update_region_meadow(x_min, y_min, x_max, y_max);
             break;
+        case TOOL_EARTHQUAKE_CUSTOM:
+        case TOOL_EARTHQUAKE_CUSTOM_REMOVE:
+            widget_map_editor_custom_earthquake_request_refresh();
         default:
             break;
     }

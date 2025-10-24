@@ -44,7 +44,10 @@ static struct {
     int new_start_grid_offset;
     int capture_input;
     int cursor_grid_offset;
-} data;
+    
+    terrain_image earthquake_image;
+    int custom_earthquake_refresh;
+} data = {.custom_earthquake_refresh = 1, .earthquake_image = {}};
 
 static struct {
     time_millis last_water_animation_time;
@@ -74,6 +77,11 @@ static void init_draw_context(void)
 void widget_map_editor_clear_draw_context_event_tiles(void)
 {
     memset(draw_context.event_tiles, -1, sizeof(draw_context.event_tiles));
+}
+
+void widget_map_editor_custom_earthquake_request_refresh(void)
+{
+    data.custom_earthquake_refresh = 1;
 }
 
 int widget_map_editor_add_draw_context_event_tile(int grid_offset, int event_id)
@@ -156,13 +164,17 @@ static void draw_footprint(int x, int y, int grid_offset)
 
 static void draw_custom_earthquake(int x, int y, int grid_offset)
 {
-    if (grid_offset < 0 || !map_property_is_draw_tile(grid_offset)) {
+    if (grid_offset < 0) {
         return;
     }
     if (map_property_is_future_earthquake(grid_offset) && editor_is_active() && !map_terrain_is(grid_offset, TERRAIN_IMPASSABLE_EARTHQUAKE)) {
-        const terrain_image *image = map_image_context_get_future_earthquake(grid_offset);
-        if (image->is_valid) {
-            image_draw_isometric_footprint_from_draw_tile(image_group(GROUP_TERRAIN_EARTHQUAKE) + image->group_offset + image->item_offset, x, y, ALPHA_MASK_CUSTOM_EARTHQUAKE, draw_context.scale);
+        terrain_image image = data.earthquake_image;
+        if (data.custom_earthquake_refresh) {
+            image = *map_image_context_get_future_earthquake(grid_offset);
+            data.earthquake_image = image;
+        }
+        if (image.is_valid) {
+            image_draw_isometric_footprint_from_draw_tile(image_group(GROUP_TERRAIN_EARTHQUAKE) + image.group_offset + image.item_offset, x, y, ALPHA_MASK_CUSTOM_EARTHQUAKE, draw_context.scale);
         }
     }
 }
@@ -228,6 +240,7 @@ void widget_map_editor_draw(void)
     city_view_foreach_valid_map_tile(draw_footprint);
     city_view_foreach_valid_map_tile_row(draw_flags, draw_top, 0);
     city_view_foreach_valid_map_tile(draw_custom_earthquake);
+    data.custom_earthquake_refresh = 0;
     //city_view_foreach_valid_map_tile(draw_event_area_highlight);
     map_editor_tool_draw(&data.current_tile);
     graphics_reset_clip_rectangle();
