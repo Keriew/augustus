@@ -99,13 +99,9 @@ static void advance_earthquake_to_tile(int x, int y)
                     part = prev;
                 }
                 // destroy all part
-                while (part) {
-                    building *next = (part->next_part_building_id > 0) ? building_get(part->next_part_building_id) : NULL;
+                for (building *next; part; part = next) {
+                    next = (part->next_part_building_id > 0) ? building_get(part->next_part_building_id) : NULL;
                     building_destroy_by_earthquake(part);
-                    if (!next) {
-                        break;
-                    }
-                    part = next;
                 }
             } else {
                 building_destroy_by_earthquake(b);
