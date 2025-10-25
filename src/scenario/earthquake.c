@@ -155,6 +155,47 @@ static int custom_earthquake_advance_next_tile(void)
     return 0;
 }
 
+#define MAX_TILES_PER_TICK 5
+
+static int custom_earthquake_advance_random_tiles(void)
+{
+    // 1. Collect all tiles that can be affected by the earthquake
+    struct field candidates[GRID_SIZE * GRID_SIZE];
+    int count = 0;
+
+    for (int y = 0; y < map_data.height; y++) {
+        for (int x = 0; x < map_data.width; x++) {
+            int grid_offset = map_grid_offset(x, y);
+            if (map_property_is_future_earthquake(grid_offset) &&
+                can_advance_earthquake_to_tile(x, y)) {
+                candidates[count++] = (struct field) { x, y };
+            }
+        }
+    }
+
+    if (count == 0)
+        return 0; // No more tiles to process
+
+    // 2. Select random tiles to process
+    int tiles_to_process = (count < MAX_TILES_PER_TICK) ? count : MAX_TILES_PER_TICK;
+
+    for (int i = 0; i < tiles_to_process; i++) {
+        int index = random_short() % count; // Use random_int() to get a nice random wave from right top to left bottom
+        struct field coords = candidates[index];
+
+        // Process the selected tile
+        advance_earthquake_to_tile(coords.x, coords.y);
+        int grid_offset = map_grid_offset(coords.x, coords.y);
+        map_property_clear_future_earthquake(grid_offset);
+
+        // Remove the processed tile from the array to avoid duplicates
+        candidates[index] = candidates[count - 1];
+        count--;
+    }
+
+    return 1; // At least one tile processed
+}
+
 void scenario_earthquake_process(void)
 {
     // Check if earthquake is disabled or not set
@@ -180,7 +221,7 @@ void scenario_earthquake_process(void)
                 // Generate new random delay for next tile
                 data.next_delay = 10 + (random_byte() % 91); // 10..100 ticks
                 
-                if (!custom_earthquake_advance_next_tile()) { // If no tiles left, finish the event
+                if (!custom_earthquake_advance_random_tiles()) { // If no tiles left, finish the event
                     data.state = EVENT_FINISHED;
                 }
             }
