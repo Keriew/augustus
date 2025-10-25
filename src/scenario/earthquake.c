@@ -1,5 +1,7 @@
 #include "earthquake.h"
 
+#include "building/monument.h"
+
 #include "building/building.h"
 #include "building/destruction.h"
 #include "city/message.h"
@@ -81,8 +83,33 @@ static void advance_earthquake_to_tile(int x, int y)
     int building_id = map_building_at(grid_offset);
     if (building_id) {
         building *b = building_get(building_id);
+
+        if (!b) {
+            return;
+        }
+
         if (b->type != BUILDING_BURNING_RUIN) {
-            building_destroy_by_earthquake(b);
+            // (fort, hippodrome, ect.)
+            if (b->prev_part_building_id > 0 || b->next_part_building_id > 0) {
+                // find first part
+                building *part = b;
+                while (part->prev_part_building_id > 0) {
+                    building *prev = building_get(part->prev_part_building_id);
+                    if (!prev) break;
+                    part = prev;
+                }
+                // destroy all part
+                while (part) {
+                    building *next = (part->next_part_building_id > 0) ? building_get(part->next_part_building_id) : NULL;
+                    building_destroy_by_earthquake(part);
+                    if (!next) {
+                        break;
+                    }
+                    part = next;
+                }
+            } else {
+                building_destroy_by_earthquake(b);
+            }
         }
         sound_effect_play(SOUND_EFFECT_EXPLOSION);
         int ruin_id = map_building_at(grid_offset);

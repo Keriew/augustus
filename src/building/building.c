@@ -306,7 +306,7 @@ void building_clear_related_data(building *b)
         building_storage_delete(b->storage_id);
         b->storage_id = 0;
     }
-    if (building_is_fort) {
+    if (building_is_fort(b->type)) {
         formation_legion_delete_for_fort(b);
     }
     if (b->type == BUILDING_TRIUMPHAL_ARCH) {
@@ -570,6 +570,12 @@ void building_update_state(void)
                 b->house_population = 0;
             }
             // building_delete(b); // keep the rubbled building as a reference for reconstruction
+
+            // monuments clear
+            if (building_monument_is_limited(b->type) || building_monument_is_unfinished_monument(b)) {
+                building_delete(b);
+            }
+
         } else if (b->state == BUILDING_STATE_DELETED_BY_GAME) {
             building_delete(b);
         } else if (b->immigrant_figure_id) {
