@@ -215,7 +215,12 @@ void draw_advanced_sidebar_background(const int x_offset)
     }
 
     // image_draw(image_group(GROUP_SIDE_PANEL), x_offset, TOP_MENU_HEIGHT, COLOR_MASK_NONE, SCALE_NONE);
-    // draw_buttons_collapsed(x_offset);
+    draw_buttons(x_offset);
+    draw_overlay_text(x_offset + 4);
+    draw_number_of_messages(x_offset);
+    widget_minimap_update(0);
+    widget_minimap_draw_decorated(x_offset + 8, 36 + TOP_MENU_HEIGHT, 187, 143);
+
     // draw_sidebar_remainder(x_offset + 42);
 }
 
@@ -227,11 +232,11 @@ void draw_advanced_sidebar_foreground(void)
 
     const int x_offset = calculate_x_offset_sidebar_advanced();
     draw_buttons(x_offset);
-
     draw_overlay_text(x_offset + 4);
-
     widget_minimap_draw_decorated(x_offset + 8, 36 + TOP_MENU_HEIGHT, 187, 143);
     draw_number_of_messages(x_offset);
+
+
 
     // sidebar_extra_draw_foreground();
 }

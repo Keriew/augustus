@@ -228,7 +228,6 @@ static void draw_construction_buttons(void)
 
 void widget_city_draw_construction_buttons(void)
 {
-    //TODO: config
     if (!sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED)) {
         draw_pause_button();
     }
