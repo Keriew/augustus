@@ -4,6 +4,14 @@
 #include "graphics/font.h"
 #include "input/mouse.h"
 
+// Common predefined character sets
+#define INPUT_BOX_CHARS_NUMERIC       "0123456789 "
+#define INPUT_BOX_CHARS_ALPHA         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz "
+#define INPUT_BOX_CHARS_ALPHANUMERIC  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 "
+#define INPUT_BOX_CHARS_FILENAME      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-() "
+#define INPUT_BOX_CHARS_FORMULAS      "01234567890+-*/()[]" 
+#define INPUT_BOX_CHARS_ALL_SUPPORTED "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-()!\"\'*+,./:;=?[]_ "
+
 typedef struct {
     int x;
     int y;
@@ -17,6 +25,7 @@ typedef struct {
     const uint8_t *placeholder;
     void (*on_change)(int is_addition_at_end);
     uint8_t *old_text;
+    const char *allowed_chars;
 } input_box;
 
 /**

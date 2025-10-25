@@ -2,8 +2,7 @@
 
 #include "building/building.h"
 #include "building/count.h"
-#include "building/model.h"
-#include "building/count.h"
+#include "building/properties.h"
 #include "city/culture.h"
 #include "city/data_private.h"
 #include "city/games.h"
@@ -551,7 +550,7 @@ static void update_peace_rating(void)
 
 static void update_favor_rating(int is_yearly_update, int is_monthly_update)
 {
-    if (scenario_is_open_play()) {
+    if (scenario_is_open_play() && scenario_reset_favor_monthly()) {
         city_data.ratings.favor = 50;
         return;
     }

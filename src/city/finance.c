@@ -2,8 +2,8 @@
 
 #include "building/building.h"
 #include "building/count.h"
-#include "building/model.h"
 #include "building/monument.h"
+#include "building/properties.h"
 #include "city/data_private.h"
 #include "city/culture.h"
 #include "city/festival.h"

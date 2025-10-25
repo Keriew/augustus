@@ -2,7 +2,7 @@
 
 #include "core/calc.h"
 #include "building/construction.h"
-#include "building/model.h"
+#include "building/properties.h"
 #include "game/undo.h"
 #include "map/building.h"
 #include "map/building_tiles.h"

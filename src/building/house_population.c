@@ -1,8 +1,8 @@
 #include "house_population.h"
 
 #include "building/list.h"
-#include "building/model.h"
 #include "building/monument.h"
+#include "building/properties.h"
 #include "city/labor.h"
 #include "city/message.h"
 #include "city/migration.h"

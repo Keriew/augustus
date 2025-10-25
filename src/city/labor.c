@@ -1,8 +1,8 @@
 #include "labor.h"
 
 #include "building/building.h"
-#include "building/model.h"
 #include "building/monument.h"
+#include "building/properties.h"
 #include "core/config.h"
 #include "city/data_private.h"
 #include "city/gods.h"

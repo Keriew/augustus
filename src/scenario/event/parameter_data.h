@@ -36,6 +36,20 @@ typedef enum {
     PARAMETER_TYPE_GOD,
     PARAMETER_TYPE_CLIMATE,
     PARAMETER_TYPE_TERRAIN,
+    PARAMETER_TYPE_DATA_TYPE,
+    PARAMETER_TYPE_MODEL,
+    PARAMETER_TYPE_FORMULA,
+    PARAMETER_TYPE_CITY_PROPERTY,
+    PARAMETER_TYPE_PERCENTAGE,
+    PARAMETER_TYPE_HOUSING_TYPE,
+    PARAMETER_TYPE_AGE_GROUP,
+    PARAMETER_TYPE_ENEMY_CLASS,
+    PARAMETER_TYPE_PLAYER_TROOPS,
+    PARAMETER_TYPE_COVERAGE_BUILDINGS,
+    PARAMETER_TYPE_FLEXIBLE, // special type that can be anything, used in city_property to map the right type at runtime
+    PARAMETER_TYPE_ROUTE_RESOURCE, //dynamic mapping of resource available on a route
+    PARAMETER_TYPE_RANK,
+    PARAMETER_TYPE_GRID_SLICE,
 } parameter_type;
 
 typedef struct {
@@ -77,6 +91,27 @@ scenario_condition_data_t *scenario_events_parameter_data_get_conditions_xml_att
 scenario_condition_data_t *scenario_events_parameter_data_get_conditions_xml_attributes_alphabetical(int index);
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type);
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes_alphabetical(int index);
+
+/**
+ * Gets the parameter type for a specific parameter of an action
+ * @param action_type The action type
+ * @param parameter_index The parameter index (1-5)
+ * @param min_limit Pointer to store minimum limit if applicable
+ * @param max_limit Pointer to store maximum limit if applicable
+ * @return The parameter type, or PARAMETER_TYPE_UNDEFINED if invalid
+ */
+parameter_type scenario_events_parameter_data_get_action_parameter_type(action_types action_type, int parameter_index, int *min_limit, int *max_limit);
+
+/**
+ * Gets the parameter type for a specific parameter of a condition
+ * @param condition_type The condition type
+ * @param parameter_index The parameter index (1-5)
+ * @param min_limit Pointer to store minimum limit if applicable
+ * @param max_limit Pointer to store maximum limit if applicable
+ * @return The parameter type, or PARAMETER_TYPE_UNDEFINED if invalid
+ */
+parameter_type scenario_events_parameter_data_get_condition_parameter_type(condition_types condition_type, int parameter_index, int *min_limit, int *max_limit);
+
 special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mapping(parameter_type type, int index);
 special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mapping_by_value(parameter_type type, int target);
 special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mapping_by_text(parameter_type type, const char *value);
@@ -93,5 +128,13 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
     int maxlength);
 void scenario_events_parameter_data_get_display_string_for_condition(const scenario_condition_t *condition,
     uint8_t *result_text, int maxlength);
+
+/**
+ * Resolves a flexible parameter type to a concrete type based on context
+ * @param action The action containing the flexible parameter
+ * @param param_number The parameter number (3, 4, or 5) to resolve
+ * @return The resolved parameter type, or PARAMETER_TYPE_UNDEFINED if not applicable
+ */
+parameter_type scenario_events_parameter_data_resolve_flexible_type(const scenario_action_t *action, int param_number);
 
 #endif // SCENARIO_EVENTS_PARAMETER_DATA_H

@@ -1,0 +1,118 @@
+TR_PLACEHOLDER Occurrences in parameter_data.c
+=================================================
+
+Analysis Date: October 6, 2025
+File: src/scenario/event/parameter_data.c
+Total Occurrences: 84 unique instances (some duplicates due to grep showing double results)
+
+Line-by-Line Breakdown:
+-----------------------
+
+Line 305: .xml_attr = {.name = "variable_city_property",  .type = PARAMETER_TYPE_TEXT,             .key = TR_PLACEHOLDER },
+Line 307: .xml_parm2 = {.name = "property",                .type = PARAMETER_TYPE_CITY_PROPERTY,    .key = TR_PLACEHOLDER },
+Line 308: .xml_parm3 = {.name = "flexible",                .type = PARAMETER_TYPE_FLEXIBLE  ,           .key = TR_PLACEHOLDER },
+Line 309: .xml_parm4 = {.name = "flexible",                .type = PARAMETER_TYPE_FLEXIBLE  ,           .key = TR_PLACEHOLDER },
+Line 310: .xml_parm5 = {.name = "flexible",                .type = PARAMETER_TYPE_FLEXIBLE  ,           .key = TR_PLACEHOLDER },},
+
+Line 576: {.type = PARAMETER_TYPE_PERCENTAGE, .text = "Percentage", .value = 1, .key = TR_PLACEHOLDER },
+Line 577: {.type = PARAMETER_TYPE_PERCENTAGE, .text = "Absolute",   .value = 0, .key = TR_PLACEHOLDER },
+
+Line 584: {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "vacant_lot",       .value = BUILDING_HOUSE_VACANT_LOT,     .key = TR_PLACEHOLDER },
+Line 585: {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_tent",       .value = BUILDING_HOUSE_SMALL_TENT,     .key = TR_PLACEHOLDER },
+Line 586: {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_tent",       .value = BUILDING_HOUSE_LARGE_TENT,     .key = TR_PLACEHOLDER },
+Line 587: {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_shack",      .value = BUILDING_HOUSE_SMALL_SHACK,    .key = TR_PLACEHOLDER },
+Line 588: {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_shack",      .value = BUILDING_HOUSE_LARGE_SHACK,    .key = TR_PLACEHOLDER },
+Line 589: {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_hovel",      .value = BUILDING_HOUSE_SMALL_HOVEL,    .key = TR_PLACEHOLDER },
+Line 590: {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_hovel",      .value = BUILDING_HOUSE_LARGE_HOVEL,    .key = TR_PLACEHOLDER },
+Line 591: {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_casa",       .value = BUILDING_HOUSE_SMALL_CASA,     .key = TR_PLACEHOLDER },
+Line 592: {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_casa",       .value = BUILDING_HOUSE_LARGE_CASA,     .key = TR_PLACEHOLDER },
+Line 593: {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_insula",     .value = BUILDING_HOUSE_SMALL_INSULA,   .key = TR_PLACEHOLDER },
+Line 594: {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "medium_insula",    .value = BUILDING_HOUSE_MEDIUM_INSULA,  .key = TR_PLACEHOLDER },
+Line 595: {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_insula",     .value = BUILDING_HOUSE_LARGE_INSULA,   .key = TR_PLACEHOLDER },
+Line 596: {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "grand_insula",     .value = BUILDING_HOUSE_GRAND_INSULA,   .key = TR_PLACEHOLDER },
+Line 597: {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_villa",      .value = BUILDING_HOUSE_SMALL_VILLA,    .key = TR_PLACEHOLDER },
+Line 598: {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "medium_villa",     .value = BUILDING_HOUSE_MEDIUM_VILLA,   .key = TR_PLACEHOLDER },
+Line 599: {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_villa",      .value = BUILDING_HOUSE_LARGE_VILLA,    .key = TR_PLACEHOLDER },
+Line 600: {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "grand_villa",      .value = BUILDING_HOUSE_GRAND_VILLA,    .key = TR_PLACEHOLDER },
+Line 601: {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_palace",     .value = BUILDING_HOUSE_SMALL_PALACE,   .key = TR_PLACEHOLDER },
+Line 602: {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "medium_palace",    .value = BUILDING_HOUSE_MEDIUM_PALACE,  .key = TR_PLACEHOLDER },
+Line 603: {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_palace",     .value = BUILDING_HOUSE_LARGE_PALACE,   .key = TR_PLACEHOLDER },
+Line 604: {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "luxury_palace",    .value = BUILDING_HOUSE_LUXURY_PALACE,  .key = TR_PLACEHOLDER },
+
+Line 620: {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_0",  .value = 0,  .key = TR_PLACEHOLDER }, // Ages 0-9
+Line 621: {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_1",  .value = 1,  .key = TR_PLACEHOLDER }, // Ages 10-19
+Line 622: {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_2",  .value = 2,  .key = TR_PLACEHOLDER }, // Ages 20-29
+Line 623: {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_3",  .value = 3,  .key = TR_PLACEHOLDER }, // Ages 30-39
+Line 624: {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_4",  .value = 4,  .key = TR_PLACEHOLDER }, // Ages 40-49
+Line 625: {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_5",  .value = 5,  .key = TR_PLACEHOLDER }, // Ages 50-59
+Line 626: {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_6",  .value = 6,  .key = TR_PLACEHOLDER }, // Ages 60-69
+Line 627: {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_7",  .value = 7,  .key = TR_PLACEHOLDER }, // Ages 70-79
+Line 628: {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_8",  .value = 8,  .key = TR_PLACEHOLDER }, // Ages 80-89
+Line 629: {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_9",  .value = 9,  .key = TR_PLACEHOLDER }, // Ages 90-99
+Line 632: {.type = PARAMETER_TYPE_AGE_GROUP, .text = "school_age",   .value = 10, .key = TR_PLACEHOLDER }, // Ages 0-14
+Line 633: {.type = PARAMETER_TYPE_AGE_GROUP, .text = "academy_age",  .value = 11, .key = TR_PLACEHOLDER }, // Ages 14-21
+Line 634: {.type = PARAMETER_TYPE_AGE_GROUP, .text = "working_age",  .value = 12, .key = TR_PLACEHOLDER }, // Ages 20-49/59 (depends on config)
+Line 635: {.type = PARAMETER_TYPE_AGE_GROUP, .text = "retired",      .value = 13, .key = TR_PLACEHOLDER }, // Ages 50+/60+ (depends on config)
+
+Line 642: {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "none",                    .value = CITY_PROPERTY_NONE,                    .key = TR_PLACEHOLDER },
+Line 643: {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "difficulty",              .value = CITY_PROPERTY_DIFFICULTY,              .key = TR_PLACEHOLDER },
+Line 644: {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "money",                   .value = CITY_PROPERTY_MONEY,                   .key = TR_PLACEHOLDER },
+Line 645: {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "population",              .value = CITY_PROPERTY_POPULATION,              .key = TR_PLACEHOLDER },
+Line 646: {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "savings",                 .value = CITY_PROPERTY_SAVINGS,                 .key = TR_PLACEHOLDER },
+Line 647: {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "year_finance_balance",    .value = CITY_PROPERTY_YEAR_FINANCE_BALANCE,    .key = TR_PLACEHOLDER },
+Line 648: {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "resource_stock",          .value = CITY_PROPERTY_RESOURCE_STOCK,          .key = TR_PLACEHOLDER },
+Line 649: {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_favor",             .value = CITY_PROPERTY_STATS_FAVOR,             .key = TR_PLACEHOLDER },
+Line 650: {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_prosperity",        .value = CITY_PROPERTY_STATS_PROSPERITY,        .key = TR_PLACEHOLDER },
+Line 651: {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_culture",           .value = CITY_PROPERTY_STATS_CULTURE,           .key = TR_PLACEHOLDER },
+Line 652: {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_peace",             .value = CITY_PROPERTY_STATS_PEACE,             .key = TR_PLACEHOLDER },
+Line 653: {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "stats_city_health",       .value = CITY_PROPERTY_STATS_CITY_HEALTH,       .key = TR_PLACEHOLDER },
+Line 654: {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "pops_unemployment",       .value = CITY_PROPERTY_POPS_UNEMPLOYMENT,       .key = TR_PLACEHOLDER },
+Line 655: {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "rome_wages",              .value = CITY_PROPERTY_ROME_WAGES,              .key = TR_PLACEHOLDER },
+Line 656: {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "city_wages",              .value = CITY_PROPERTY_CITY_WAGES,              .key = TR_PLACEHOLDER },
+Line 657: {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "building_count",          .value = CITY_PROPERTY_BUILDING_COUNT,          .key = TR_PLACEHOLDER },
+Line 658: {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "troops_count_player",     .value = CITY_PROPERTY_TROOPS_COUNT_PLAYER,     .key = TR_PLACEHOLDER },
+Line 659: {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "troops_count_enemy",      .value = CITY_PROPERTY_TROOPS_COUNT_ENEMY,      .key = TR_PLACEHOLDER },
+Line 660: {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "terrain_count_tiles",     .value = CITY_PROPERTY_TERRAIN_COUNT_TILES,     .key = TR_PLACEHOLDER },
+
+Line 667: {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "all",            .value = ENEMY_CLASS_ALL,            .key = TR_PLACEHOLDER },
+Line 668: {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "melee",          .value = ENEMY_CLASS_MELEE,          .key = TR_PLACEHOLDER },
+Line 669: {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "ranged",         .value = ENEMY_CLASS_RANGED,         .key = TR_PLACEHOLDER },
+Line 670: {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "cavalry",        .value = ENEMY_CLASS_MOUNTED,        .key = TR_PLACEHOLDER },
+
+Line 675: {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "all",            .value = FIGURE_FORT_STANDARD,          .key = TR_PLACEHOLDER },
+Line 676: {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "sword",          .value = FIGURE_FORT_INFANTRY ,      .key = TR_PLACEHOLDER },
+Line 677: {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "bow",            .value = FIGURE_FORT_ARCHER,       .key = TR_PLACEHOLDER },
+Line 678: {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "cavalry",        .value = FIGURE_FORT_MOUNTED,      .key = TR_PLACEHOLDER },
+Line 679: {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "legion",         .value = FIGURE_FORT_LEGIONARY,       .key = TR_PLACEHOLDER },
+Line 680: {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "javelin",        .value = FIGURE_FORT_JAVELIN,         .key = TR_PLACEHOLDER },
+
+Line 686: {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "theatres",      .value = BUILDING_THEATER,           .key = TR_PLACEHOLDER },
+Line 687: {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "arenas",        .value = BUILDING_ARENA,            .key = TR_PLACEHOLDER },
+Line 688: {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "amphitheatres", .value = BUILDING_AMPHITHEATER,       .key = TR_PLACEHOLDER },
+Line 689: {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "taverns",       .value = BUILDING_TAVERN,           .key = TR_PLACEHOLDER },
+Line 690: {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "colosseum",     .value = BUILDING_COLOSSEUM,           .key = TR_PLACEHOLDER },
+Line 691: {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "hippodrome",    .value = BUILDING_HIPPODROME,           .key = TR_PLACEHOLDER },
+Line 692: {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "doctors",       .value = BUILDING_DOCTOR,           .key = TR_PLACEHOLDER },
+Line 693: {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "barbers",       .value = BUILDING_BARBER,           .key = TR_PLACEHOLDER },
+Line 694: {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "hospitals",     .value = BUILDING_HOSPITAL,           .key = TR_PLACEHOLDER },
+Line 695: {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "baths",         .value = BUILDING_BATHHOUSE,           .key = TR_PLACEHOLDER },
+Line 696: {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "schools",       .value = BUILDING_SCHOOL,           .key = TR_PLACEHOLDER },
+Line 697: {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "libraries",     .value = BUILDING_LIBRARY,           .key = TR_PLACEHOLDER },
+Line 698: {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "academies",     .value = BUILDING_ACADEMY,           .key = TR_PLACEHOLDER },
+
+Summary by Parameter Type:
+--------------------------
+- ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY (lines 305, 307-310): 5 occurrences
+- PARAMETER_TYPE_PERCENTAGE (lines 576-577): 2 occurrences  
+- PARAMETER_TYPE_HOUSING_TYPE (lines 584-604): 21 occurrences
+- PARAMETER_TYPE_AGE_GROUP (lines 620-635): 14 occurrences
+- PARAMETER_TYPE_CITY_PROPERTY (lines 642-660): 19 occurrences
+- PARAMETER_TYPE_ENEMY_CLASS (lines 667-670): 4 occurrences
+- PARAMETER_TYPE_PLAYER_TROOPS (lines 675-680): 6 occurrences
+- PARAMETER_TYPE_COVERAGE_BUILDINGS (lines 686-698): 13 occurrences
+
+Total: 84 instances of TR_PLACEHOLDER
+
+Notes:
+------
+All TR_PLACEHOLDER instances appear to be used as placeholder translation keys for parameter mappings that need proper localization keys. These likely need to be replaced with actual translation key constants to enable proper internationalization.

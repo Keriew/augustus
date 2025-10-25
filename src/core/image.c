@@ -1389,6 +1389,8 @@ const image *image_letter(int letter_id)
         return &data.font[data.font_base_offset + letter_id - IMAGE_FONT_MULTIBYTE_OFFSET];
     } else if (letter_id < IMAGE_FONT_MULTIBYTE_OFFSET) {
         return &data.main[data.group_image_ids[GROUP_FONT] + letter_id];
+    } else if (letter_id > IMAGE_FONT_CUSTOM_OFFSET) {
+        return assets_get_font_image(letter_id);
     } else {
         return &DUMMY_IMAGE;
     }

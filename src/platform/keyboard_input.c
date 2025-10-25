@@ -269,9 +269,9 @@ void platform_handle_key_down(SDL_KeyboardEvent *event)
             event->keysym.scancode = SDL_SCANCODE_ESCAPE;
             break;
 #else
-        // Hack: since Android handles the right mouse button as a back button
-        // (or even as an "ESC" keypress) and SDL doesn't yet have a proper implementation 
-        // for this, we'll treat the back button as a right mouse button when the mouse is active
+            // Hack: since Android handles the right mouse button as a back button
+            // (or even as an "ESC" keypress) and SDL doesn't yet have a proper implementation 
+            // for this, we'll treat the back button as a right mouse button when the mouse is active
         case SDLK_ESCAPE:
             if (!mouse_get()->is_touch) {
                 mouse_set_right_down(1);
@@ -294,7 +294,7 @@ void platform_handle_key_down(SDL_KeyboardEvent *event)
                 break;
             case KEY_TYPE_DOWN:
                 scroll_arrow_down(1);
-            // Fixed hotkeys - always handle them
+                // Fixed hotkeys - always handle them
             case KEY_TYPE_ENTER:
             case KEY_TYPE_ESCAPE:
             case KEY_TYPE_F5:

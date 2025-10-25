@@ -101,6 +101,11 @@ int scenario_is_open_play(void)
     return scenario.is_open_play;
 }
 
+int scenario_reset_favor_monthly(void)
+{
+    return scenario.reset_favour_monthly;
+}
+
 int scenario_open_play_id(void)
 {
     return scenario.open_play_scenario_id;

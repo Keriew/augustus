@@ -67,7 +67,7 @@ extern struct scenario_t {
     int open_play_scenario_id;
     int intro_custom_message_id;
     int victory_custom_message_id;
-
+    int reset_favour_monthly;
     scenario_win_criteria win_criteria;
 
     struct {

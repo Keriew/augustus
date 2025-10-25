@@ -100,6 +100,7 @@ void platform_user_path_copy_files(const char *original_user_path, int overwrite
             case PATH_LOCATION_EDITOR_CUSTOM_EMPIRES:
             case PATH_LOCATION_EDITOR_CUSTOM_MESSAGES:
             case PATH_LOCATION_EDITOR_CUSTOM_EVENTS:
+            case PATH_LOCATION_EDITOR_MODEL_DATA:
                 listing = dir_find_files_with_extension(original_directory, "xml");
                 break;
             default:

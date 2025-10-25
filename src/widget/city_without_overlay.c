@@ -9,7 +9,6 @@
 #include "building/granary.h"
 #include "building/image.h"
 #include "building/industry.h"
-#include "building/model.h"
 #include "building/monument.h"
 #include "building/properties.h"
 #include "building/rotation.h"
@@ -253,7 +252,7 @@ static void draw_footprint(int x, int y, int grid_offset)
     }
 
     // Apply hover effect to non-building tiles if cursor is on them, config enabled, and not scrolling
-    if (!building_id && is_cursor_tile && !map_property_is_deleted(grid_offset) && 
+    if (!building_id && is_cursor_tile && !map_property_is_deleted(grid_offset) &&
         config_get(CONFIG_UI_CV_CURSOR_SHADOW) && !scroll_in_progress()) {
         color_mask = COLOR_MASK_HOVER;
     }

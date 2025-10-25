@@ -2,7 +2,6 @@
 
 #include "assets/assets.h"
 #include "building/image.h"
-#include "building/model.h"
 #include "building/properties.h"
 #include "city/finance.h"
 #include "city/message.h"
