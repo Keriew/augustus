@@ -759,7 +759,6 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
     } else {
         scenario_events_migrate_to_formulas();
         scenario_events_migrate_to_resolved_display_names();
-
     }
     if (version <= SCENARIO_TESTING_VERSION_BUMP_4) {
         scenario_events_migrate_to_grid_slices();

@@ -354,8 +354,8 @@ int scenario_action_type_savings_add_execute(scenario_action_t *action)
 
 int scenario_action_type_building_force_collapse_execute(scenario_action_t *action)
 {
-    int grid_offset1 = scenario_formula_evaluate_formula(action->parameter1);
-    int grid_offset2 = scenario_formula_evaluate_formula(action->parameter2);
+    int grid_offset1 = action->parameter1;
+    int grid_offset2 = action->parameter2;
     building_type type = action->parameter3;
     int destroy_all = action->parameter4;
     grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
@@ -724,8 +724,8 @@ int scenario_action_type_change_climate_execute(scenario_action_t *action)
 
 int scenario_action_type_change_terrain_execute(scenario_action_t *action)
 {
-    int grid_offset1 = scenario_formula_evaluate_formula(action->parameter1);
-    int grid_offset2 = scenario_formula_evaluate_formula(action->parameter2);
+    int grid_offset1 = action->parameter1;
+    int grid_offset2 = action->parameter2;
     int terrain = action->parameter3;
     int add = action->parameter4;
     grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);

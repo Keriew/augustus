@@ -730,7 +730,7 @@ static void button_ok(const generic_button *button)
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
-    if (data.expanded_dropdown != -1) { // handle dropdowns, starting with expanded
+    if (data.expanded_dropdown != -1 && data.custom_variables_in_use) { // handle dropdowns, starting with expanded
         if (dropdown_button_handle_mouse(m_dialog, &color_dropdowns[data.expanded_dropdown])) {
             window_invalidate();
         }
