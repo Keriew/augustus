@@ -7,4 +7,6 @@ void draw_housing_table(int x_offset, int y_offset);
 
 void draw_gods_table(int x_offset, int y_offset);
 
+void draw_health_table(int x_offset, int y_offset);
+
 #endif

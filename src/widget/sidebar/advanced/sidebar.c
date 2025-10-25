@@ -204,6 +204,14 @@ static void show_god_info(void)
     draw_gods_table(x_offset + 2, 240 + 22 + 12);
 }
 
+static void show_health_info(void)
+{
+    int x_offset = calculate_x_offset_sidebar_advanced() + 48;
+    draw_infopanel_background(x_offset, 240 + 22 + 6, 162, 494);
+
+    draw_health_table(x_offset + 2, 240 + 22 + 12);
+}
+
 void draw_advanced_sidebar_background(const int x_offset)
 {
     if (data.show_info_for == 1)
@@ -212,6 +220,9 @@ void draw_advanced_sidebar_background(const int x_offset)
     } else if (data.show_info_for == BUILD_MENU_TEMPLES + 1)
     {
         show_god_info();
+    } else if (data.show_info_for == BUILD_MENU_HEALTH + 1)
+    {
+        show_health_info();
     }
 
     // image_draw(image_group(GROUP_SIDE_PANEL), x_offset, TOP_MENU_HEIGHT, COLOR_MASK_NONE, SCALE_NONE);
