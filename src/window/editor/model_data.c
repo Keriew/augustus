@@ -107,6 +107,7 @@ static void button_static_click(const generic_button *button)
             break;
         case 1:
             model_reset();
+            resource_init();
             window_request_refresh();
             break;
         case 2:

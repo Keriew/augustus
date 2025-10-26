@@ -10,6 +10,7 @@
 #include "scenario/property.h"
 #include "translation/translation.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 #define RESOURCE_ALL (RESOURCE_MAX + RESOURCE_TOTAL_SPECIAL)
@@ -357,9 +358,13 @@ int resource_total_food_mapped(void)
 }
 
 void production_rates_save(buffer *buf)
-{    
+{
+    int buf_size = sizeof(uint16_t) * RESOURCE_ALL;
+    uint8_t *buf_data = malloc(buf_size);
+    buffer_init(buf, buf_data, buf_size);
+    
     for (resource_type resource = RESOURCE_MIN; resource < RESOURCE_ALL; resource++) {
-            buffer_write_u16(buf, resource_info[resource].production_per_month);
+        buffer_write_u16(buf, resource_info[resource].production_per_month);
     }
 }
 
