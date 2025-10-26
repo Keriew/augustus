@@ -799,7 +799,9 @@ int scenario_action_type_change_model_data_execute(scenario_action_t *action)
         default:
             break;
     }
+    return 1;
 }
+
 int scenario_action_type_change_god_sentiment_execute(scenario_action_t *action)
 {
     int god_id = action->parameter1;
@@ -841,9 +843,26 @@ int scenario_action_type_lose_execute(scenario_action_t *action)
     city_victory_check();
     return 1;
 }
+
 int scenario_action_type_change_rank_execute(scenario_action_t *action)
 {
     int new_rank = action->parameter1;
     city_emperor_change_rank(new_rank);
+    return 1;
+}
+
+int scenario_action_type_change_production_rate_execute(scenario_action_t *action)
+{
+    resource_type resource = action->parameter1;
+    int rate = scenario_formula_evaluate_formula(action->parameter2);
+    int set_to_value = action->parameter3;
+    
+    resource_data *current_data = resource_get_data(resource);
+    if (set_to_value) {
+        current_data->production_per_month = rate;
+    } else {
+        current_data->production_per_month += rate;
+    }
+            
     return 1;
 }

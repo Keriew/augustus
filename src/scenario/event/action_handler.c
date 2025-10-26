@@ -111,6 +111,8 @@ int scenario_action_type_execute(scenario_action_t *action)
             return scenario_action_type_lose_execute(action);
         case ACTION_TYPE_CHANGE_RANK:
             return scenario_action_type_change_rank_execute(action);
+        case ACTION_TYPE_CHANGE_PRODUCTION_RATE:
+            return scenario_action_type_change_production_rate_execute(action);
         default:
             return 0;
     }

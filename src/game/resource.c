@@ -61,7 +61,7 @@ static struct {
     int joined_meat_and_fish;
 } mapping;
 
-static resource_data resource_info[RESOURCE_ALL] = {
+static resource_data resource_info_defaults[RESOURCE_ALL] = {
     [RESOURCE_NONE]       = { .type = RESOURCE_NONE },
     [RESOURCE_WHEAT]      = { .type = RESOURCE_WHEAT,      .xml_attr_name = "wheat",       .flags = RESOURCE_FLAG_FOOD | RESOURCE_FLAG_INVENTORY, .industry = BUILDING_WHEAT_FARM,         .production_per_month = 160, .default_trade_price = {  28,  22 } },
     [RESOURCE_VEGETABLES] = { .type = RESOURCE_VEGETABLES, .xml_attr_name = "vegetables",  .flags = RESOURCE_FLAG_FOOD | RESOURCE_FLAG_INVENTORY, .industry = BUILDING_VEGETABLE_FARM,     .production_per_month = 80,  .default_trade_price = {  38,  30 } },
@@ -87,6 +87,8 @@ static resource_data resource_info[RESOURCE_ALL] = {
     [RESOURCE_DENARII]    = { .type = RESOURCE_DENARII,    .industry = BUILDING_CITY_MINT, .production_per_month = 200 },
     [RESOURCE_TROOPS]     = { .type = RESOURCE_TROOPS  }
 };
+
+static resource_data resource_info[RESOURCE_ALL];
 
 static const resource_supply_chain SUPPLY_CHAIN[RESOURCE_SUPPLY_CHAIN_MAX_SIZE] = {
     { .raw_amount = 100, .raw_material = RESOURCE_CLAY,   .good = RESOURCE_POTTERY   },
@@ -164,6 +166,8 @@ int resource_get_supply_chain_for_raw_material(resource_supply_chain *chain, res
 
 void resource_init(void)
 {
+    memcpy(resource_info, resource_info_defaults, sizeof(resource_info_defaults));
+    
     int food_index = 0;
     int good_index = 0;
 
@@ -350,4 +354,18 @@ int resource_total_mapped(void)
 int resource_total_food_mapped(void)
 {
     return mapping.total_food_resources;
+}
+
+void production_rates_save(buffer *buf)
+{    
+    for (resource_type resource = RESOURCE_MIN; resource < RESOURCE_ALL; resource++) {
+            buffer_write_u16(buf, resource_info[resource].production_per_month);
+    }
+}
+
+void production_rates_load(buffer *buf)
+{
+    for (resource_type resource = RESOURCE_MIN; resource < RESOURCE_ALL; resource++) {
+        resource_info[resource].production_per_month = buffer_read_u16(buf);
+    }
 }

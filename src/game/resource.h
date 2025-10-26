@@ -3,6 +3,7 @@
 
 #include "building/type.h"
 #include "city/warning.h"
+#include "core/buffer.h"
 #include "core/lang.h"
 
 /**
@@ -153,5 +154,8 @@ resource_type resource_remap(int id);
 int resource_total_mapped(void);
 
 int resource_total_food_mapped(void);
+
+void production_rates_load(buffer *buf);
+void production_rates_save(buffer *buf);
 
 #endif // GAME_RESOURCE_H

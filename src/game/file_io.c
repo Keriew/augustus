@@ -113,6 +113,7 @@ typedef struct {
     buffer *empire_map;
     buffer *end_marker;
     buffer *model_data;
+    buffer *production_rates;
 } scenario_state;
 
 static struct {
@@ -229,6 +230,7 @@ typedef struct {
     buffer *visited_buildings;
     buffer *building_model_data;
     buffer *rubble_grid;
+    buffer *production_rates;
 } savegame_state;
 
 typedef struct {
@@ -288,6 +290,7 @@ typedef struct {
         int dynamic_scenario_objects;
         int custom_model_data;
         int rubble_grid;
+        int custom_production_rates;
     } features;
 } savegame_version_data;
 
@@ -406,6 +409,9 @@ static void init_scenario_data(scenario_version_t version)
     if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         state->model_data = create_scenario_piece(PIECE_SIZE_DYNAMIC, 0);
         state->scenario_formulas = create_scenario_piece(PIECE_SIZE_DYNAMIC, 1);
+    }
+    if (version > SCENARIO_TESTING_VERSION_BUMP_6) { // Put into upper if before merge
+        state->production_rates = create_scenario_piece(PIECE_SIZE_DYNAMIC, 1);
     }
     state->end_marker = create_scenario_piece(4, 0);
 }
@@ -529,6 +535,7 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
     version_data->features.dynamic_scenario_objects = version > SAVE_GAME_LAST_STATIC_SCENARIO_ORIGINAL_DATA;
     version_data->features.custom_model_data = version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA;
     version_data->features.rubble_grid = version > SAVE_GAME_LAST_U16_GRIDS;
+    version_data->features.custom_production_rates = version > SAVE_GAME_TESTING_VERSION_BUMP_6; // change to SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA before merge
 }
 
 static void init_savegame_data(savegame_version_t version)
@@ -699,6 +706,9 @@ static void init_savegame_data(savegame_version_t version)
     if (version_data.features.rubble_grid) {
         state->rubble_grid = create_savegame_piece(GRID_SIZE_BUF_U32, 1);
     }
+    if (version_data.features.custom_production_rates) {
+        state->production_rates = create_savegame_piece(PIECE_SIZE_DYNAMIC, 1);
+    }
 }
 
 static void scenario_load_from_state(scenario_state *file, scenario_version_t version)
@@ -764,6 +774,10 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
     if (version <= SCENARIO_TESTING_VERSION_BUMP_4) {
         scenario_events_migrate_to_grid_slices();
     }
+    resource_init();
+    if (version > SCENARIO_TESTING_VERSION_BUMP_6) { // Decrease before merge
+        production_rates_load(file->production_rates);
+    }
     scenario_events_assign_parent_event_ids();
 
     buffer_skip(file->end_marker, 4);
@@ -794,6 +808,7 @@ static void scenario_save_to_state(scenario_state *file)
     empire_object_save(file->empire);
     empire_save_custom_map(file->empire_map);
     model_save_model_data(file->model_data);
+    production_rates_save(file->production_rates);
     buffer_skip(file->end_marker, 4);
 }
 
@@ -881,6 +896,11 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     model_reset();
     if (version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         model_load_model_data(state->building_model_data);
+    }
+    
+    resource_init();
+    if (version > SAVE_GAME_TESTING_VERSION_BUMP_6) { // Decrease before merge
+        production_rates_load(state->production_rates);
     }
 
     scenario_emperor_change_load_state(state->emperor_change_time, state->emperor_change_state);
@@ -1042,6 +1062,8 @@ static void savegame_save_to_state(savegame_state *state)
     building_monument_delivery_save_state(state->deliveries);
     empire_object_save(state->custom_empire);
     figure_visited_buildings_save_state(state->visited_buildings);
+    
+    production_rates_save(state->production_rates);
 }
 
 static int get_scenario_version(FILE *fp)

@@ -315,8 +315,7 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         PARAMETER_TYPE_MODEL,   .key = TR_PARAMETER_MODEL },
                                         .xml_parm2 = {.name = "data_type",          .type =
                                         PARAMETER_TYPE_DATA_TYPE,          .key = TR_PARAMETER_DATA_TYPE },
-                                        .xml_parm3 = {.name = "amount",             .type =
-                                        PARAMETER_TYPE_NUMBER,             .min_limit = NEGATIVE_UNLIMITED, .max_limit = UNLIMITED,            .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm3 = {.name = "amount",        .type = PARAMETER_TYPE_FORMULA,          .min_limit = NEGATIVE_UNLIMITED,      .max_limit = UNLIMITED, .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm4 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,            .min_limit = 0,           .max_limit = 1,                    .key = TR_PARAMETER_SET_TO_VALUE }, },
     [ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY] = {.type = ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY,
                                         .xml_attr = {.name = "change_variable_visibility",        .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY },
@@ -333,27 +332,30 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm2 = {.name = "property",                .type = PARAMETER_TYPE_CITY_PROPERTY,    .key = TR_EDITOR_PARAMETER_CITY_PROPERTY},
                                         .xml_parm3 = {.name = "flexible",                .type = PARAMETER_TYPE_FLEXIBLE  ,           .key = TR_PLACEHOLDER },
                                         .xml_parm4 = {.name = "flexible",                .type = PARAMETER_TYPE_FLEXIBLE  ,           .key = TR_PLACEHOLDER },
-                                        .xml_parm5 = {.name = "flexible",                .type = PARAMETER_TYPE_FLEXIBLE  ,           .key = TR_PLACEHOLDER },},
- [ACTION_TYPE_GOD_SENTIMENT_CHANGE] = {.type = ACTION_TYPE_GOD_SENTIMENT_CHANGE,
+                                        .xml_parm5 = {.name = "flexible",                .type = PARAMETER_TYPE_FLEXIBLE  ,           .key = TR_PLACEHOLDER }, },
+    [ACTION_TYPE_GOD_SENTIMENT_CHANGE] = {.type = ACTION_TYPE_GOD_SENTIMENT_CHANGE,
                                         .xml_attr = {.name = "change_god_sentiment",    .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_GOD_SENTIMENT },
                                         .xml_parm1 = {.name = "god",                 .type = PARAMETER_TYPE_GOD,       .key = TR_PARAMETER_TYPE_GOD },
                                         .xml_parm2 = {.name = "amount",              .type = PARAMETER_TYPE_FORMULA,  .min_limit = -100,        .max_limit = 100,     .key = TR_PARAMETER_TYPE_FORMULA },
-                                        .xml_parm3 = {.name = "set_to_value",        .type = PARAMETER_TYPE_BOOLEAN,  .min_limit = 0,        .max_limit = 1,       .key = TR_PARAMETER_SET_TO_VALUE },
-                                    },
-[ACTION_TYPE_POP_SENTIMENT_CHANGE] = {.type = ACTION_TYPE_POP_SENTIMENT_CHANGE,
-    .xml_attr = {.name = "change_pop_sentiment",    .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_POP_SENTIMENT},
-    .xml_parm1 = {.name = "amount",              .type = PARAMETER_TYPE_FORMULA,  .min_limit = -100,        .max_limit = 100,     .key = TR_PARAMETER_TYPE_FORMULA },
-    .xml_parm2 = {.name = "set_to_value",        .type = PARAMETER_TYPE_BOOLEAN,  .min_limit = 0,        .max_limit = 1,       .key = TR_PARAMETER_SET_TO_VALUE },
-},
-[ACTION_TYPE_WIN] = {.type = ACTION_TYPE_WIN,
-    .xml_attr = {.name = "win",    .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_WIN },},
-[ACTION_TYPE_LOSE] = {.type = ACTION_TYPE_LOSE,
-    .xml_attr = {.name = "lose",    .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_LOSE },},
-[ACTION_TYPE_CHANGE_RANK] = {
-    .type = ACTION_TYPE_CHANGE_RANK,
-    .xml_attr = {.name = "change_rank",      .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_CHANGE_RANK },
-    .xml_parm1 = {.name = "rank",           .type = PARAMETER_TYPE_RANK,      .key = TR_PARAMETER_TYPE_RANK },
-}
+                                        .xml_parm3 = {.name = "set_to_value",        .type = PARAMETER_TYPE_BOOLEAN,  .min_limit = 0,        .max_limit = 1,       .key = TR_PARAMETER_SET_TO_VALUE }, },
+    [ACTION_TYPE_POP_SENTIMENT_CHANGE] = {.type = ACTION_TYPE_POP_SENTIMENT_CHANGE,
+                                        .xml_attr = {.name = "change_pop_sentiment",    .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_POP_SENTIMENT},
+                                        .xml_parm1 = {.name = "amount",              .type = PARAMETER_TYPE_FORMULA,  .min_limit = -100,     .max_limit = 100,     .key = TR_PARAMETER_TYPE_FORMULA },
+                                        .xml_parm2 = {.name = "set_to_value",        .type = PARAMETER_TYPE_BOOLEAN,  .min_limit = 0,        .max_limit = 1,       .key = TR_PARAMETER_SET_TO_VALUE }, },
+    [ACTION_TYPE_WIN] = {.type = ACTION_TYPE_WIN,
+                                        .xml_attr = {.name = "win",    .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_WIN }, },
+    [ACTION_TYPE_LOSE] = {.type = ACTION_TYPE_LOSE,
+                                        .xml_attr = {.name = "lose",   .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_LOSE }, },
+    [ACTION_TYPE_CHANGE_RANK] = {.type = ACTION_TYPE_CHANGE_RANK,
+                                        .xml_attr = {.name = "change_rank",     .type = PARAMETER_TYPE_TEXT,      .key = TR_ACTION_TYPE_CHANGE_RANK },
+                                        .xml_parm1 = {.name = "rank",           .type = PARAMETER_TYPE_RANK,      .key = TR_PARAMETER_TYPE_RANK }, },
+    [ACTION_TYPE_CHANGE_PRODUCTION_RATE] = {.type = ACTION_TYPE_CHANGE_PRODUCTION_RATE,
+                                        .xml_attr = {.name = "change_production_rate",  .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_PRODUCTION_RATE},
+                                        .xml_parm1 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE,   .key = TR_PARAMETER_TYPE_RESOURCE },
+                                        .xml_parm2 = {.name = "rate",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = 0,           
+                                            .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm3 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,
+                                            .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, }
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)
@@ -1783,6 +1785,17 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         case ACTION_TYPE_CHANGE_RANK:
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RANK, action->parameter1, result_text, &maxlength);
+            return;
+        }
+        case ACTION_TYPE_CHANGE_PRODUCTION_RATE:
+        {
+            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+            result_text = append_text(translation_for(TR_PARAMETER_OF), result_text, &maxlength);
+            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter1, result_text, &maxlength);
+            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+            result_text = append_text(translation_for(action->parameter3 ? TR_PARAMETER_BY : TR_PARAMETER_TO), result_text, &maxlength);
+            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
             return;
         }
         default:

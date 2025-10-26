@@ -137,6 +137,7 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "change_pop_sentiment", xml_import_create_action, 0, "actions"},
     { "win", xml_import_create_action, 0, "actions"}, // 70
     { "lose", xml_import_create_action, 0, "actions"},
+    { "change_production_rate", xml_import_create_action, 0, "actions"},
 };
 
 static int xml_import_start_scenario_events(void)
