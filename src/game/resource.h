@@ -138,7 +138,7 @@ resource_type resource_get_from_industry(building_type industry);
 int resource_get_supply_chain_for_good(resource_supply_chain *chain, resource_type good);
 int resource_get_supply_chain_for_raw_material(resource_supply_chain *chain, resource_type raw_material);
 
-const resource_data *resource_get_data(resource_type resource);
+resource_data *resource_get_data(resource_type resource);
 
 void resource_set_mapping(resource_version_t version);
 

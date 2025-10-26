@@ -1,9 +1,11 @@
 #include "model_data.h"
 
+#include "building/industry.h"
 #include "building/properties.h"
 #include "building/type.h"
 #include "core/lang.h"
 #include "core/string.h"
+#include "game/resource.h"
 #include "graphics/font.h"
 #include "graphics/button.h"
 #include "graphics/generic_button.h"
@@ -28,6 +30,7 @@ static void button_edit_step(const generic_button *button);
 static void button_edit_step_size(const generic_button *button);
 static void button_edit_range(const generic_button *button);
 static void button_edit_laborers(const generic_button *button);
+static void button_edit_production(const generic_button *button);
 
 static void button_static_click(const generic_button *button);
 
@@ -51,20 +54,22 @@ static generic_button data_buttons[] = {
     {315, 2, 48, 20, button_edit_step},
     {370, 2, 48, 20, button_edit_step_size},
     {425, 2, 48, 20, button_edit_range},
-    {480, 2, 48, 20, button_edit_laborers}
+    {480, 2, 48, 20, button_edit_laborers},
+    {535, 2, 48, 20, button_edit_production}
 };
+#define MAX_DATA_BUTTONS (sizeof(data_buttons) / sizeof(generic_button))
 
 static generic_button static_buttons[] = {
-    {40, 25 * BLOCK_SIZE, 10 * BLOCK_SIZE, 24, button_static_click, 0, 0},
-    {216, 25 * BLOCK_SIZE, 10 * BLOCK_SIZE, 24, button_static_click, 0, 1},
-    {392, 25 * BLOCK_SIZE, 10 * BLOCK_SIZE, 24, button_static_click, 0, 2}
+    {28, 25 * BLOCK_SIZE, 12 * BLOCK_SIZE, 24, button_static_click, 0, 0},
+    {232, 25 * BLOCK_SIZE, 12 * BLOCK_SIZE, 24, button_static_click, 0, 1},
+    {436, 25 * BLOCK_SIZE, 12 * BLOCK_SIZE, 24, button_static_click, 0, 2}
 };
 #define NUM_STATIC_BUTTONS (sizeof(static_buttons) / sizeof(generic_button))
 
 static grid_box_type model_buttons = {
     .x = 25,
     .y = 88,
-    .width = 36 * BLOCK_SIZE,
+    .width = 40 * BLOCK_SIZE ,
     .height = 20 * BLOCK_SIZE,
     .item_height = 28,
     .item_margin.horizontal = 8,
@@ -190,6 +195,19 @@ static void button_edit_laborers(const generic_button *button)
         9, -1000000000, 1000000000, set_laborers);
 }
 
+static void set_production(int value)
+{
+    resource_data *resource = resource_get_data(resource_get_from_industry(data.items[data.target_index]));
+    resource->production_per_month = value;
+    data.target_index = NO_SELECTION;
+}
+
+static void button_edit_production(const generic_button *button)
+{
+    window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
+        9, -1000000000, 1000000000, set_production);
+}
+
 static void model_item_click(const grid_box_item *item)
 {
     data.target_index = item->index;
@@ -200,7 +218,8 @@ static void draw_model_item(const grid_box_item *item)
     button_border_draw(item->x, item->y, item->width, item->height, 0);
     text_draw(lang_get_building_type_string(data.items[item->index]), item->x + 8, item->y + 8, FONT_NORMAL_BLACK, 0);
     
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < MAX_DATA_BUTTONS - (!building_is_raw_resource_producer(data.items[item->index]) || 
+        building_is_workshop(data.items[item->index]) || data.items[item->index] == BUILDING_WHARF); i++) {
         button_border_draw(item->x + data_buttons[i].x, item->y + data_buttons[i].y,
             data_buttons[i].width, data_buttons[i].height, item->is_focused && data.data_buttons_focus_id == i+1);
 
@@ -219,6 +238,8 @@ static void draw_model_item(const grid_box_item *item)
                 value = model_get_building(data.items[item->index])->desirability_range;break;
             case 5:
                 value = model_get_building(data.items[item->index])->laborers;break;
+            case 6:
+                value = resource_get_data(resource_get_from_industry(data.items[item->index]))->production_per_month;
         }
         string_from_int(data_string, value, 0);
         text_draw(data_string, item->x + data_buttons[i].x + 8, item->y + data_buttons[i].y + 6, 
@@ -233,9 +254,9 @@ static void draw_background(void)
 
     graphics_in_dialog();
 
-    outer_panel_draw(16, 32, 38, 27);
+    outer_panel_draw(16, 32, 42, 27);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_ACTION_TYPE_CHANGE_MODEL_DATA, 26, 42, 38 * BLOCK_SIZE, FONT_LARGE_BLACK);
-    lang_text_draw_centered(13, 3, 16, 27 * BLOCK_SIZE + 8, 38 * BLOCK_SIZE, FONT_NORMAL_BLACK);
+    lang_text_draw_centered(13, 3, 16, 27 * BLOCK_SIZE + 8, 42 * BLOCK_SIZE, FONT_NORMAL_BLACK);
     
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_MODEL, 80, 75, 30, FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_COST, 235, 75, 30, FONT_SMALL_PLAIN);
@@ -244,6 +265,7 @@ static void draw_background(void)
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_STEP_SIZE, 405, 75, 30, FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_RANGE, 460, 75, 30, FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_LABORERS, 505, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_PRODUCTION, 570, 75, 30, FONT_SMALL_PLAIN);
 
     graphics_reset_dialog();
     

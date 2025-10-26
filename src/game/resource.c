@@ -255,7 +255,7 @@ void resource_init(void)
     resource_info[RESOURCE_TROOPS].text = lang_get_string(23, 17);
 }
 
-const resource_data *resource_get_data(resource_type resource)
+resource_data *resource_get_data(resource_type resource)
 {
     return &resource_info[resource];
 }
