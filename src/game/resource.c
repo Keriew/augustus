@@ -265,6 +265,11 @@ resource_data *resource_get_data(resource_type resource)
     return &resource_info[resource];
 }
 
+resource_data *resource_get_defaults(resource_type resource)
+{
+    return &resource_info_defaults[resource];
+}
+
 void resource_set_mapping(resource_version_t version)
 {
     mapping.version = version;

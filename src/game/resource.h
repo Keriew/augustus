@@ -141,6 +141,8 @@ int resource_get_supply_chain_for_raw_material(resource_supply_chain *chain, res
 
 resource_data *resource_get_data(resource_type resource);
 
+resource_data *resource_get_defaults(resource_type resource);
+
 void resource_set_mapping(resource_version_t version);
 
 resource_version_t resource_mapping_get_version(void);

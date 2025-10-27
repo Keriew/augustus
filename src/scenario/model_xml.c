@@ -1,5 +1,6 @@
 #include "model_xml.h"
 
+#include "building/industry.h"
 #include "building/properties.h"
 #include "building/type.h"
 #include "core/buffer.h"
@@ -8,6 +9,7 @@
 #include "core/string.h"
 #include "core/xml_exporter.h"
 #include "core/xml_parser.h"
+#include "game/resource.h"
 #include "scenario/event/parameter_data.h"
 #include "window/plain_message_dialog.h"
 
@@ -50,12 +52,16 @@ static void export_model_data(buffer *buf)
         if (!model) {
             continue;
         }
-        if (model == prop_model) {
-            continue;
-        }
+        
+        resource_data *resource = resource_get_data(resource_get_from_industry(type));
+        if (resource->production_per_month == resource_get_defaults(resource_get_from_industry(type))->production_per_month) {
+            if (model == prop_model) {
+                continue;
+            }
 
-        if (memcmp(model, prop_model, sizeof(*model)) == 0) {
-            continue;
+            if (memcmp(model, prop_model, sizeof(*model)) == 0) {
+                continue;
+            }
         }
         
         xml_exporter_new_element("building_model");
@@ -66,10 +72,16 @@ static void export_model_data(buffer *buf)
         xml_exporter_add_attribute_int("desirability_step_size", model->desirability_step_size);
         xml_exporter_add_attribute_int("desirability_range", model->desirability_range);
         xml_exporter_add_attribute_int("laborers", model->laborers);
+        if ((building_is_raw_resource_producer(type) || building_is_workshop(type) || type == BUILDING_WHARF)) {
+            if (resource->production_per_month != resource_get_defaults(resource_get_from_industry(type))->production_per_month) {
+                xml_exporter_add_attribute_int("production_rate", resource->production_per_month);
+            }
+        }
         xml_exporter_close_element();
         
         edited_models++;
     }
+    
     if (!edited_models) {
         xml_exporter_add_element_text("<!--Nothing here but xml parser doesn't like empty things-->");
         xml_exporter_close_element();
@@ -162,6 +174,10 @@ static int start_building_model(void)
     model_ptr->desirability_step_size = xml_parser_get_attribute_int("desirability_step_size");
     model_ptr->desirability_range = xml_parser_get_attribute_int("desirability_range");
     model_ptr->laborers = xml_parser_get_attribute_int("laborers");
+    if (xml_parser_has_attribute("production_rate")) {
+        resource_data *resource = resource_get_data(resource_get_from_industry(type));
+        resource->production_per_month = xml_parser_get_attribute_int("production_rate");
+    }
     
     return 1;
 }
@@ -169,6 +185,7 @@ static int start_building_model(void)
 static int parse_xml(char *buf, int buffer_length)
 {
     model_reset();
+    resource_init();
     data.success = 1;
     if (!xml_parser_init(xml_elements, MAX_XML_ELEMENTS, 1)) {
         data.success = 0;
@@ -177,6 +194,7 @@ static int parse_xml(char *buf, int buffer_length)
         if (!xml_parser_parse(buf, buffer_length, 1)) {
             data.success = 0;
             model_reset();
+            resource_init();
         }
     }
     xml_parser_free();
