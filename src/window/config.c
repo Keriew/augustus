@@ -22,6 +22,7 @@
 #include "graphics/scrollbar.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
+#include "platform/screen.h"
 #include "sound/city.h"
 #include "sound/device.h"
 #include "sound/effect.h"
@@ -37,6 +38,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <SDL_mouse.h>
 
 #define MAX_LANGUAGE_DIRS 20
 #define MAX_WIDGETS       64
@@ -153,6 +155,7 @@ static const uint8_t *display_text_difficulty(void);
 static const uint8_t *display_text_max_grand_temples(void);
 static const uint8_t *display_text_autosave_slots(void);
 static const uint8_t *display_text_default_game_speed(void);
+
 // page-related helpers
 static int get_widget_count_for(unsigned int page);
 static void set_page(unsigned int page);
@@ -725,6 +728,14 @@ static int config_set_city_sounds_volume(int key)
     return 1;
 }
 
+static int config_mouse_unlock_fullscreen(int key)
+{
+    config_change_basic(key);
+    platform_screen_update_window_grab();
+    window_invalidate();
+    return 1;
+}
+
 //  Scroll
 
 static int config_change_scroll_speed(int key)
@@ -916,6 +927,7 @@ static void set_custom_config_changes(void)
     data.config_values[CONFIG_SCREEN_DISPLAY_SCALE].change_action = config_change_display_scale;
     data.config_values[CONFIG_SCREEN_CURSOR_SCALE].change_action = config_change_cursors;
     data.config_values[CONFIG_SCREEN_COLOR_CURSORS].change_action = config_change_cursors;
+    data.config_values[CONFIG_GENERAL_UNLOCK_MOUSE].change_action = config_mouse_unlock_fullscreen;
     data.config_values[CONFIG_ORIGINAL_GAME_SPEED].change_action = config_change_game_speed;
     data.config_values[CONFIG_GP_CH_DEFAULT_GAME_SPEED].change_action = config_change_basic;
     //  audio

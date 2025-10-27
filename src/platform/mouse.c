@@ -1,4 +1,5 @@
 #include "core/calc.h"
+#include "core/config.h"
 #include "game/system.h"
 #include "input/mouse.h"
 #include "platform/screen.h"
@@ -27,8 +28,6 @@ void system_mouse_set_relative_mode(int enabled)
         data.x = calc_adjust_with_percentage(data.x, scale_percentage);
         data.y = calc_adjust_with_percentage(data.y, scale_percentage);
         SDL_SetRelativeMouseMode(SDL_TRUE);
-        // Discard the first value, which is incorrect
-        // (the first one gives the relative position to center of window)
         system_mouse_get_relative_state(NULL, NULL);
     } else {
         SDL_SetRelativeMouseMode(SDL_FALSE);
@@ -37,6 +36,7 @@ void system_mouse_set_relative_mode(int enabled)
     }
     data.enabled = enabled;
 }
+
 
 void system_move_mouse_cursor(int delta_x, int delta_y)
 {
