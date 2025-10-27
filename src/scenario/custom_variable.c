@@ -199,8 +199,13 @@ void scenario_custom_variable_set_value(unsigned int id, int new_value)
 
 void scenario_custom_variable_save_state(buffer *buf)
 {
-    uint32_t struct_size = sizeof(int32_t) + sizeof(uint8_t) + sizeof(uint8_t) * CUSTOM_VARIABLE_NAME_LENGTH +
-        sizeof(uint8_t) * CUSTOM_VARIABLE_TEXT_DISPLAY_LENGTH + sizeof(uint8_t);
+    uint32_t struct_size =
+        sizeof(uint8_t) + //variable in use
+        sizeof(int32_t) + // value
+        sizeof(uint8_t) * CUSTOM_VARIABLE_NAME_LENGTH + //name
+        sizeof(uint8_t) * CUSTOM_VARIABLE_TEXT_DISPLAY_LENGTH + //display name
+        sizeof(uint8_t) + // allow display
+        sizeof(uint8_t); // color group
     buffer_init_dynamic_array(buf, custom_variables.size, struct_size);
 
     const custom_variable_t *variable;

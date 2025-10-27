@@ -434,7 +434,7 @@ static void draw_tile_tooltip(tooltip_context *c)
         switch (debug_tooltip_type) {
             case 4: // desirability per tile
                 width = 110;
-                height = 47;
+                height = 61;
                 break;
             case 3: // terrain flags and other info included
                 width = 110;

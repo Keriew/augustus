@@ -18,9 +18,9 @@ static grid_u32 terrain_grid_backup;
 const terrain_flags_array *map_terrain_to_array(int grid_offset)
 {
     static const char *names[TERRAIN_NUM_FLAGS] = {
-        "TREE", "ROCK", "WATER", "BUILDING", "SHRUB", "GARDEN", "ROAD",
-        "RESERVOIR_R", "AQUEDUCT", "ELEVATION", "ACCESS_RAMP", "MEADOW",
-        "RUBBLE", "FOUNTAIN_R", "WALL", "GATEHOUSE", "ORG_TREE",
+        "TREE", "ROCK", "WATER", "BUILDING", "SHRUB", "GARDEN", "ROAD", "RESERVOIR_R", "AQUEDUCT", "ELEVATION",
+        "ACCESS_RAMP", "MEADOW", "RUBBLE", "FOUNTAIN_R", "WALL", "GATEHOUSE", "ORG_TREE", "HIGHWAY1", "HIGHWAY2",
+        "HIGHWAY3", "HIGHWAY4"
     };
     static terrain_flags_array result;
     unsigned int terrain_value = terrain_grid.items[grid_offset];

@@ -16,6 +16,7 @@
 #include "graphics/panel.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
+#include "map/building.h"
 #include "map/water_supply.h"
 #include "translation/translation.h"
 #include "window/building_info.h"
@@ -288,6 +289,9 @@ static void init_repair_building_button(building_info_context *c)
     repair_building_button->height = 20;
     repair_building_button->parameters[0] = c->rubble_building_id;
     building *b = building_get(c->rubble_building_id);
+    if (b->type == BUILDING_WAREHOUSE_SPACE) { // swap the b pointer for the main warehouse building
+        b = building_get(map_building_rubble_building_id(b->data.rubble.og_grid_offset));
+    }
     static lang_fragment frag;
     if (!building_can_repair(b)) {
         frag = (lang_fragment) { LANG_FRAG_LABEL, CUSTOM_TRANSLATION, TR_WARNING_REPAIR_IMPOSSIBLE, 0, 0, 0 };

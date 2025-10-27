@@ -448,12 +448,12 @@ int building_construction_place_building(building_type type, int x, int y, int e
     // TODO: do not check for figures on tiles that are citizen passable in general
     int check_figure = type == BUILDING_ROADBLOCK && size == 1 ? 0 : 1;
     int building_orientation = 0;
-    if (type == BUILDING_GATEHOUSE) {
-        //check if there's a preset orientation from old gatehouse
+    if (type == BUILDING_GATEHOUSE || type == BUILDING_WAREHOUSE) {
+        //check if there's a preset orientation from old building
         building *old_b = building_get(map_building_rubble_building_id(map_grid_offset(x, y)));
-        if (old_b && old_b->type == BUILDING_GATEHOUSE) {
+        if (old_b && old_b->type == BUILDING_GATEHOUSE || old_b->type == BUILDING_WAREHOUSE) {
             building_orientation = old_b->subtype.orientation;
-        } else {
+        } else if (type == BUILDING_GATEHOUSE) {
             building_orientation = map_orientation_for_gatehouse(x, y);
         }
     } else if (type == BUILDING_TRIUMPHAL_ARCH) {

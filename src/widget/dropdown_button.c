@@ -52,6 +52,13 @@ void dropdown_button_default_option_click(const complex_button *btn)
     update_anchor(dd);
 }
 
+void dropdown_button_default_origin_click(const complex_button *btn)
+{
+    dropdown_button *dd = (dropdown_button *) btn->user_data;
+    dd->expanded = !dd->expanded;
+    window_request_refresh();
+}
+
 static void dropdown_cancel(const complex_button *btn)
 {
     dropdown_button *dd = (dropdown_button *) btn->user_data;
@@ -138,7 +145,8 @@ void dropdown_button_init_simple(int x, int y, const lang_fragment *frags, unsig
     origin->sequence = &frags[has_selection ? dd->selected_index : 0];
     origin->sequence_position = SEQUENCE_POSITION_CENTER;
     origin->sequence_size = 1;
-
+    origin->left_click_handler = dropdown_button_default_origin_click;
+    origin->user_data = dd; // pointer to parent 
     // Setup options [1..count-1]
     for (unsigned int i = 1; i < count; i++) {
         complex_button *opt = &dd->buttons[i];

@@ -441,14 +441,38 @@ int building_repair(building *b)
     int og_size = 0, og_grid_offset = 0, og_orientation = 0, og_storage_id, wall = 0, is_house_lot = 0, success = 0;
     building_type og_type = BUILDING_NONE;
 
+    if (b->type == BUILDING_WAREHOUSE_SPACE) { // collapsed warehouse parts use the main warehouse data
+        building *main_warehouse = building_get(map_building_rubble_building_id(b->data.rubble.og_grid_offset));
+        if (main_warehouse) {
+            b = main_warehouse;
+        }
+    }
+    // TODO: wrap warehouse and granary repairs into a separate helper, to better control the storage transfer
     // --- Handle rubble recovery ---
     if (b->data.rubble.og_size || b->data.rubble.og_grid_offset ||        // if there's rubble data, take it from there
-         b->data.rubble.og_orientation || b->data.rubble.og_type) {
+        b->data.rubble.og_orientation || b->data.rubble.og_type) {
         og_size = b->data.rubble.og_size;
         og_grid_offset = b->data.rubble.og_grid_offset;
         og_orientation = b->data.rubble.og_orientation;
         og_type = b->data.rubble.og_type;
     }
+    // --- Special handling for warehouse coordinates ---
+    // For warehouses, og_grid_offset points to the tower (entrance) corner, not the top-left
+    // We need to convert it to the top-left corner based on the orientation
+    if (og_type == BUILDING_WAREHOUSE && og_grid_offset && og_orientation >= 0) {
+        // Warehouse tower offset positions based on orientation (matches construction_building.c)
+        int x_offset[9] = { 0, 0, 1, 1, 0, 2, 1, 2, 2 };
+        int y_offset[9] = { 0, 1, 0, 1, 2, 0, 2, 1, 2 };
+        int corner = building_rotation_get_corner(2 * og_orientation);
+
+        // Convert from tower position to top-left corner
+        int tower_x = map_grid_offset_to_x(og_grid_offset);
+        int tower_y = map_grid_offset_to_y(og_grid_offset);
+        int top_left_x = tower_x - x_offset[corner];
+        int top_left_y = tower_y - y_offset[corner];
+        og_grid_offset = map_grid_offset(top_left_x, top_left_y);
+    }
+
     building_data_transfer_backup();
     building_data_transfer_copy(b, 1);
     //  Resolve placement data 
@@ -523,7 +547,7 @@ int building_repair(building *b)
     if (wall) {
         map_tiles_update_all_walls(); // towers affect wall connections
     }
-    building_delete(b);
+    b->state = BUILDING_STATE_DELETED_BY_GAME; // mark old building as deleted
     game_undo_disable(); // not accounting for undoing repairs
     return full_cost;
 }
