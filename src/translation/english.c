@@ -1877,6 +1877,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_UI_CV_CURSOR_SHADOW, "Enable cursor shadow"},
     {TR_EDITOR_MODEL_PRODUCTION, "Rate"},
     {TR_ACTION_TYPE_PRODUCTION_RATE, "Change production rate"}
+    { TR_CONFIG_GENERAL_UNLOCK_MOUSE, "Lock mouse in Fullscreen mode" },
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
