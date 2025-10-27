@@ -21,7 +21,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#define XML_TOTAL_ELEMENTS 72
+#define XML_TOTAL_ELEMENTS 73
 #define ERROR_MESSAGE_LENGTH 200
 
 static struct {
