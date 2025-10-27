@@ -1744,6 +1744,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_UI_CV_BUILD_MENU_ICONS, "Show resource icons in build menu"},
     {TR_CONFIG_UI_WT_ENABLE_SNOW_CENTRAL, "Enable snow in central climate"},
     {TR_CONFIG_UI_CV_CURSOR_SHADOW, "Enable cursor shadow"},
+    {TR_CONFIG_GENERAL_UNLOCK_MOUSE, "Lock mouse in Fullscreen"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
