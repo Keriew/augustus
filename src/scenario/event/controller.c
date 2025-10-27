@@ -583,6 +583,7 @@ void scenario_events_assign_parent_event_ids(void)
 
 void scenario_events_fetch_event_tiles_to_editor(void)
 {
+    widget_map_editor_clear_draw_context_event_tiles();
     scenario_event_t *current;
     array_foreach(scenario_events, current) //go through all events
     {

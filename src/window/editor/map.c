@@ -22,7 +22,6 @@
 
 static void init(void)
 {
-    widget_map_editor_clear_draw_context_event_tiles();
     scenario_events_fetch_event_tiles_to_editor();
 }
 

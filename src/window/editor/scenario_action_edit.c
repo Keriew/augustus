@@ -520,6 +520,7 @@ static void on_grid_slice_selected(grid_slice *selection)
     data.action->parameter2 = end_offset;
     // Deactivate the tool and return to the action edit window
     editor_tool_deactivate();
+    scenario_events_fetch_event_tiles_to_editor();
     window_editor_scenario_action_edit_show(data.action);
 }
 
