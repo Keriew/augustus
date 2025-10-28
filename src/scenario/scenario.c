@@ -577,7 +577,7 @@ int scenario_climate_from_buffer(buffer *buf, int version)
     } else if (version <= SCENARIO_LAST_NO_WAGE_LIMITS) {
         buffer_set(buf, 1764);
     } else {
-        buffer_set(buf, buffer_offsets.misc + 36);
+        buffer_set(buf, buffer_offsets.misc + 38); // measure offsets to make sure they match
     }
     return buffer_read_u8(buf);
 }
