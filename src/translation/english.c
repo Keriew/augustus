@@ -1878,7 +1878,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_MODEL_PRODUCTION, "Rate"},
     {TR_ACTION_TYPE_PRODUCTION_RATE, "Change production rate"},
     { TR_CONFIG_GENERAL_UNLOCK_MOUSE, "Lock mouse in Fullscreen mode" },
-    {TR_CONFIG_GP_CH_HOUSING_PRE_MERGE_VACANT_LOTS, "Houses always marge in 2x2"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
