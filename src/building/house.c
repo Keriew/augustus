@@ -11,6 +11,7 @@
 #include "map/building_tiles.h"
 #include "map/grid.h"
 #include "map/image.h"
+#include "map/property.h"
 #include "map/random.h"
 #include "map/road_access.h"
 #include "map/terrain.h"
@@ -118,6 +119,16 @@ static void merge(building *b)
     b->grid_offset = map_grid_offset(b->x, b->y);
     b->house_is_merged = 1;
     map_building_tiles_add(b->id, b->x, b->y, 2, building_image_get(b), TERRAIN_BUILDING);
+    if (config_get(CONFIG_GP_CH_HOUSING_PRE_MERGE_VACANT_LOTS)) {
+        if (b->type == BUILDING_HOUSE_VACANT_LOT) {
+            grid_slice *slice = map_grid_get_grid_slice_house(b->id, 0);
+            for (int i = 0; i < slice->size; i++) {
+                int offset = slice->grid_offsets[i];
+                map_property_mark_draw_tile(offset); // re-mark the tiles for redraw
+            }
+        }
+    }
+
 }
 
 void building_house_merge(building *house)
