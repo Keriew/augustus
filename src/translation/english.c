@@ -1879,7 +1879,11 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_PRODUCTION_RATE, "Change production rate"},
     {TR_EDITOR_EARTHQUAKE_RIGHT_TO_LEFT, "From right to left"},
     {TR_EDITOR_EARTHQUAKE_RANDOM, "Random"},
-    {TR_EDITOR_EARTHQUAKE_RANDOM_RIGHT_TO_LEFT, "Random from right to left"}
+    {TR_EDITOR_EARTHQUAKE_RANDOM_RIGHT_TO_LEFT, "Random from right to left"},
+    {TR_EDITOR_DESIRABILITY_VALUE, "Desirability value\nThe initial value of the building"},
+    {TR_EDITOR_DESIRABILITY_STEP, "Desirability step\nThe step in tiles until the next increase/decrease of the value"},
+    {TR_EDITOR_DESIRABILITY_STEP_SIZE, "Desirability step size\nThe ammount it increases/decreases"},
+    {TR_EDITOR_DESIRABILITY_RANGE, "Desirability range\nThe max range beyond it there's no impact"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

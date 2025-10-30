@@ -21,6 +21,8 @@
 #include "window/file_dialog.h"
 #include "window/numeric_input.h"
 
+#include <stdio.h>
+
 #define NO_SELECTION (unsigned int) -1
 #define NUM_DATA_BUTTONS (sizeof(data_buttons) / sizeof(generic_button))
 
@@ -329,6 +331,42 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 }
 
+static int desirability_tooltip(tooltip_context *c)
+{
+    const mouse *m_global = mouse_get();
+    const mouse *m = mouse_in_dialog(m_global);
+
+    for (int i = 0; i < 4; i++) {
+        const uint8_t *text = translation_for(TR_EDITOR_MODEL_DATA_DES_VALUE + i);
+        int width = text_get_width(text, FONT_SMALL_PLAIN);
+        int x;
+
+        switch (i) {
+            case 0:
+                x = 295;
+                break;
+            case 1:
+                x = 350;
+                break;
+            case 2:
+                x = 405;
+                break;
+            case 3:
+                x = 460;
+                break;
+        }
+        
+        if (x <= m->x && x + width > m->x &&
+            75 <= m->y && 75 + 10 > m->y) {
+            c->text_group = CUSTOM_TRANSLATION;
+            c->text_id = TR_EDITOR_DESIRABILITY_VALUE + i;
+            c->type = TOOLTIP_BUTTON;
+            return 1;
+        }
+    }
+    return 0;
+}
+
 static void building_tooltip(const grid_box_item *item, tooltip_context *c)
 {
     uint8_t *text;
@@ -341,7 +379,9 @@ static void building_tooltip(const grid_box_item *item, tooltip_context *c)
 
 static void get_tooltip(tooltip_context *c)
 {
-    grid_box_handle_tooltip(&model_buttons, c);
+    if (!desirability_tooltip(c)) {
+        grid_box_handle_tooltip(&model_buttons, c);
+    }
 }
 
 void window_model_data_show(void)
