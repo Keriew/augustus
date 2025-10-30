@@ -82,6 +82,7 @@ extern struct scenario_t {
     struct {
         int severity;
         int year;
+        int pattern;
     } earthquake;
 
     struct {

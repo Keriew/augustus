@@ -305,6 +305,7 @@ void scenario_save_state(buffer *buf)
 
     buffer_write_i32(buf, scenario.earthquake.severity);
     buffer_write_i32(buf, scenario.earthquake.year);
+    buffer_write_u8(buf, scenario.earthquake.pattern);
 
     buffer_write_i32(buf, scenario.win_criteria.population.enabled);
     buffer_write_i32(buf, scenario.win_criteria.population.goal);
@@ -482,6 +483,7 @@ void scenario_load_state(buffer *buf, int version)
 
     scenario.earthquake.severity = buffer_read_i32(buf);
     scenario.earthquake.year = buffer_read_i32(buf);
+    scenario.earthquake.pattern = buffer_read_u8(buf);
 
     scenario.win_criteria.population.enabled = buffer_read_i32(buf);
     scenario.win_criteria.population.goal = buffer_read_i32(buf);

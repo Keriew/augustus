@@ -38,6 +38,8 @@ static void populate_list(void);
 static void draw_model_item(const grid_box_item *item);
 static void model_item_click(const grid_box_item *item);
 
+static void building_tooltip(const grid_box_item *item, tooltip_context *c);
+
 
 static struct {
     unsigned int total_items;
@@ -55,7 +57,7 @@ static generic_button data_buttons[] = {
     {370, 2, 48, 20, button_edit_step_size},
     {425, 2, 48, 20, button_edit_range},
     {480, 2, 48, 20, button_edit_laborers},
-    {535, 2, 48, 20, button_edit_production}
+    {535, 2, 48, 20, button_edit_production, NULL, 0}
 };
 #define MAX_DATA_BUTTONS (sizeof(data_buttons) / sizeof(generic_button))
 
@@ -76,7 +78,8 @@ static grid_box_type model_buttons = {
     .item_margin.vertical = 2,
     .extend_to_hidden_scrollbar = 1,
     .on_click = model_item_click,
-    .draw_item = draw_model_item
+    .draw_item = draw_model_item,
+    .handle_tooltip = building_tooltip
 };
 
 static void init(void)
@@ -205,6 +208,9 @@ static void set_production(int value)
 
 static void button_edit_production(const generic_button *button)
 {
+    if (!button->parameter1) {
+        return;
+    }
     window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
         9, -1000000000, 1000000000, set_production);
 }
@@ -217,10 +223,10 @@ static void model_item_click(const grid_box_item *item)
 static void draw_model_item(const grid_box_item *item)
 {
     button_border_draw(item->x, item->y, item->width, item->height, 0);
-    text_draw(lang_get_building_type_string(data.items[item->index]), item->x + 8, item->y + 8, FONT_NORMAL_BLACK, 0);
+    text_draw_ellipsized(lang_get_building_type_string(data.items[item->index]), item->x + 8, item->y + 8, 12 * BLOCK_SIZE, FONT_NORMAL_BLACK, 0);
     
-    for (int i = 0; i < MAX_DATA_BUTTONS - (!building_is_raw_resource_producer(data.items[item->index]) || 
-        building_is_workshop(data.items[item->index]) || data.items[item->index] == BUILDING_WHARF); i++) {
+    for (int i = 0; i < MAX_DATA_BUTTONS - (!(building_is_raw_resource_producer(data.items[item->index]) || 
+        building_is_workshop(data.items[item->index]) || data.items[item->index] == BUILDING_WHARF || building_is_farm(data.items[item->index]))); i++) {
         button_border_draw(item->x + data_buttons[i].x, item->y + data_buttons[i].y,
             data_buttons[i].width, data_buttons[i].height, item->is_focused && data.data_buttons_focus_id == i+1);
 
@@ -240,6 +246,7 @@ static void draw_model_item(const grid_box_item *item)
             case 5:
                 value = model_get_building(data.items[item->index])->laborers;break;
             case 6:
+                data_buttons[i].parameter1 = 1;
                 value = resource_get_data(resource_get_from_industry(data.items[item->index]))->production_per_month;
         }
         string_from_int(data_string, value, 0);
@@ -323,6 +330,21 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 }
 
+static void building_tooltip(const grid_box_item *item, tooltip_context *c)
+{
+    uint8_t *text;
+    text = (uint8_t *)lang_get_building_type_string(data.items[item->index]);
+    if (text_get_width(text, FONT_SMALL_PLAIN) > 12 * BLOCK_SIZE - 32 && !data.data_buttons_focus_id) {
+        c->precomposed_text = text;
+        c->type = TOOLTIP_BUTTON;
+    }
+}
+
+static void get_tooltip(tooltip_context *c)
+{
+    grid_box_handle_tooltip(&model_buttons, c);
+}
+
 void window_model_data_show(void)
 {
     init();
@@ -330,7 +352,8 @@ void window_model_data_show(void)
         WINDOW_EDITOR_MODEL_DATA,
         draw_background,
         draw_foreground,
-        handle_input
+        handle_input,
+        get_tooltip
     };
     window_show(&window);
 }

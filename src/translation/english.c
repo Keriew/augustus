@@ -1876,7 +1876,10 @@ static translation_string all_strings[] = {
     {TR_CONDITION_TYPE_TERRAIN_IN_AREA, "Terrain in area"},
     {TR_CONFIG_UI_CV_CURSOR_SHADOW, "Enable cursor shadow"},
     {TR_EDITOR_MODEL_PRODUCTION, "Rate"},
-    {TR_ACTION_TYPE_PRODUCTION_RATE, "Change production rate"}
+    {TR_ACTION_TYPE_PRODUCTION_RATE, "Change production rate"},
+    {TR_EDITOR_EARTHQUAKE_RIGHT_TO_LEFT, "From right to left"},
+    {TR_EDITOR_EARTHQUAKE_RANDOM, "Random"},
+    {TR_EDITOR_EARTHQUAKE_RANDOM_RIGHT_TO_LEFT, "Random from right to left"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

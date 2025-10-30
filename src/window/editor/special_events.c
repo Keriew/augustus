@@ -12,6 +12,7 @@
 #include "scenario/editor_events.h"
 #include "scenario/property.h"
 #include "scenario/types.h"
+#include "widget/dropdown_button.h"
 #include "window/editor/attributes.h"
 #include "window/editor/map.h"
 #include "window/numeric_input.h"
@@ -31,14 +32,15 @@ static void button_min_wages(const generic_button *button);
 static void button_contamination_toggle(const generic_button *button);
 static void button_iron_mine_toggle(const generic_button *button);
 static void button_clay_pit_toggle(const generic_button *button);
+static void dd_earthquake_pattern(dropdown_button *dd);
 
 static generic_button buttons[] = {
     {216, 106, 100, 24, button_earthquake_severity},
-    {326, 106, 150, 24, button_earthquake_year},
+    {326, 106, 130, 24, button_earthquake_year},
     {216, 136, 100, 24, button_gladiator_toggle},
-    {326, 136, 150, 24, button_gladiator_year},
+    {326, 136, 130, 24, button_gladiator_year},
     {216, 166, 100, 24, button_emperor_toggle},
-    {326, 166, 150, 24, button_emperor_year},
+    {326, 166, 130, 24, button_emperor_year},
     {216, 196, 100, 24, button_sea_trade_toggle},
     {216, 226, 100, 24, button_land_trade_toggle},
     {216, 256, 100, 24, button_raise_wages_toggle},
@@ -50,7 +52,24 @@ static generic_button buttons[] = {
     {216, 376, 100, 24, button_clay_pit_toggle},
 };
 
+static dropdown_button earthquake_pattern_dropdown;
+
+static lang_fragment dd_fragments[] = {
+    {.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_EARTHQUAKE_RIGHT_TO_LEFT},
+    {.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_EARTHQUAKE_RANDOM},
+    {.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_EARTHQUAKE_RANDOM_RIGHT_TO_LEFT}
+};
+
 static unsigned int focus_button_id;
+
+static void init_dd(void)
+{
+    int dd_x = buttons[1].x + buttons[1].width + 8;
+    int dd_y = buttons[1].y;
+    earthquake_pattern_dropdown.width = BLOCK_SIZE * 6;
+    earthquake_pattern_dropdown.selected_callback = dd_earthquake_pattern;
+    dropdown_button_init_simple(dd_x, dd_y, dd_fragments, 3, &earthquake_pattern_dropdown);
+}
 
 static void draw_background(void)
 {
@@ -61,7 +80,7 @@ static void draw_foreground(void)
 {
     graphics_in_dialog();
 
-    outer_panel_draw(16, 32, 32, 26);
+    outer_panel_draw(16, 32, 35, 26);
 
     lang_text_draw(38, 0, 32, 48, FONT_LARGE_BLACK);
     lang_text_draw_centered(13, 3, 16, 424, 480, FONT_NORMAL_BLACK);
@@ -79,18 +98,20 @@ static void draw_foreground(void)
         text_draw_centered(translation_for(TR_EDITOR_EARTHQUAKE_CUSTOM), 216, 112, 100, FONT_NORMAL_BLACK, 0);
     }
 
-    button_border_draw(326, 106, 150, 24, focus_button_id == 2);
+    button_border_draw(326, 106, 130, 24, focus_button_id == 2);
     text_draw_number(scenario_editor_earthquake_year(), '+', " ", 340, 112, FONT_NORMAL_BLACK, 0);
     lang_text_draw_year(
         scenario_property_start_year() + scenario_editor_earthquake_year(),
         380, 112, FONT_NORMAL_BLACK);
+    
+    dropdown_button_draw(&earthquake_pattern_dropdown);
 
     // gladiator revolt
     lang_text_draw(38, 2, 36, 142, FONT_NORMAL_BLACK);
     button_border_draw(216, 136, 100, 24, focus_button_id == 3);
     lang_text_draw_centered(18, scenario_editor_gladiator_revolt_enabled(), 216, 142, 100, FONT_NORMAL_BLACK);
 
-    button_border_draw(326, 136, 150, 24, focus_button_id == 4);
+    button_border_draw(326, 136, 130, 24, focus_button_id == 4);
     text_draw_number(scenario_editor_gladiator_revolt_year(), '+', " ", 340, 142, FONT_NORMAL_BLACK, 0);
     lang_text_draw_year(
         scenario_property_start_year() + scenario_editor_gladiator_revolt_year(),
@@ -101,7 +122,7 @@ static void draw_foreground(void)
     button_border_draw(216, 166, 100, 24, focus_button_id == 5);
     lang_text_draw_centered(18, scenario_editor_emperor_change_enabled(), 216, 172, 100, FONT_NORMAL_BLACK);
 
-    button_border_draw(326, 166, 150, 24, focus_button_id == 6);
+    button_border_draw(326, 166, 130, 24, focus_button_id == 6);
     text_draw_number(scenario_editor_emperor_change_year(), '+', " ", 340, 172, FONT_NORMAL_BLACK, 0);
     lang_text_draw_year(
         scenario_property_start_year() + scenario_editor_emperor_change_year(),
@@ -154,7 +175,9 @@ static void draw_foreground(void)
 
 static void handle_input(const mouse *m, const hotkeys *h)
 {
-    if (generic_buttons_handle_mouse(mouse_in_dialog(m), 0, 0, buttons, 15, &focus_button_id)) {
+    const mouse *m_dialog = mouse_in_dialog(m);
+    if (generic_buttons_handle_mouse(m_dialog, 0, 0, buttons, 15, &focus_button_id) || 
+        dropdown_button_handle_mouse(m_dialog, &earthquake_pattern_dropdown)) {
         return;
     }
     if (input_go_back_requested(m, h)) {
@@ -257,6 +280,11 @@ static void button_clay_pit_toggle(const generic_button *button)
     window_request_refresh();
 }
 
+static void dd_earthquake_pattern(dropdown_button *dd)
+{
+    
+}
+
 void window_editor_special_events_show(void)
 {
     window_type window = {
@@ -265,5 +293,6 @@ void window_editor_special_events_show(void)
         draw_foreground,
         handle_input
     };
+    init_dd();
     window_show(&window);
 }
