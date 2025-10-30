@@ -57,7 +57,7 @@ static generic_button data_buttons[] = {
     {370, 2, 48, 20, button_edit_step_size},
     {425, 2, 48, 20, button_edit_range},
     {480, 2, 48, 20, button_edit_laborers},
-    {535, 2, 48, 20, button_edit_production, NULL, 0}
+    {535, 2, 48, 20, button_edit_production}
 };
 #define MAX_DATA_BUTTONS (sizeof(data_buttons) / sizeof(generic_button))
 
@@ -208,11 +208,11 @@ static void set_production(int value)
 
 static void button_edit_production(const generic_button *button)
 {
-    if (!button->parameter1) {
-        return;
+    building_type type = data.items[data.target_index];
+    if (building_is_raw_resource_producer(type) || building_is_workshop(type) || type == BUILDING_WHARF || building_is_farm(type)) {
+        window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
+            9, -1000000000, 1000000000, set_production);
     }
-    window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
-        9, -1000000000, 1000000000, set_production);
 }
 
 static void model_item_click(const grid_box_item *item)
@@ -246,7 +246,6 @@ static void draw_model_item(const grid_box_item *item)
             case 5:
                 value = model_get_building(data.items[item->index])->laborers;break;
             case 6:
-                data_buttons[i].parameter1 = 1;
                 value = resource_get_data(resource_get_from_industry(data.items[item->index]))->production_per_month;
         }
         string_from_int(data_string, value, 0);
