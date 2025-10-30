@@ -27,4 +27,8 @@ int game_cheat_extra_legions(void);
 int game_cheat_disabled_legions_consumption(void);
 
 int game_cheat_disabled_invasions(void);
+
+void game_cheat_show_custom_events(void);
+
+void game_cheat_show_editor(void);
 #endif // GAME_CHEATS_H
