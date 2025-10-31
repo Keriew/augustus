@@ -28,6 +28,12 @@ void scenario_editor_earthquake_set_year(int year)
     scenario_editor_set_as_unsaved();
 }
 
+void scenario_editor_earthquake_set_pattern(int pattern)
+{
+    scenario.earthquake.pattern = pattern;
+    scenario_editor_set_as_unsaved();
+}
+
 int scenario_editor_gladiator_revolt_enabled(void)
 {
     return scenario.gladiator_revolt.enabled;

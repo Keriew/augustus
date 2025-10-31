@@ -48,6 +48,7 @@ static struct {
     size_t misc;
     size_t alt_huts;
     size_t native_buildings;
+    size_t earthquake_patterns;
     size_t introduction;
     size_t custom_variables;
     size_t custom_name;
@@ -172,6 +173,11 @@ static void calculate_buffer_offsets(int scenario_version)
         buffer_offsets.introduction = next_start_offset;
         next_start_offset = buffer_offsets.introduction + 4;
     }
+    
+    if (scenario_version > SCENARIO_TESTING_VERSION_BUMP_6) {
+        buffer_offsets.earthquake_patterns = next_start_offset;
+        next_start_offset = buffer_offsets.introduction + 1;
+    }
 
     if (scenario_version > SCENARIO_LAST_NO_CUSTOM_VARIABLES && scenario_version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
         buffer_offsets.custom_variables = next_start_offset;
@@ -205,6 +211,8 @@ int scenario_get_state_buffer_size_by_savegame_version(int savegame_version)
         calculate_buffer_offsets(SCENARIO_LAST_NO_ALT_NATIVE_HUTS);
     } else if (savegame_version <= SAVE_GAME_LAST_NO_EXTRA_NATIVE_BUILDINGS) {
         calculate_buffer_offsets(SCENARIO_LAST_NO_EXTRA_NATIVE_BUILDINGS);
+    } else if (savegame_version <= SAVE_GAME_TESTING_VERSION_BUMP_7) {
+        calculate_buffer_offsets(SCENARIO_TESTING_VERSION_BUMP_7);
     } else {
         calculate_buffer_offsets(SCENARIO_CURRENT_VERSION);
     }

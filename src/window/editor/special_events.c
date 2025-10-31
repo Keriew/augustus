@@ -12,6 +12,7 @@
 #include "scenario/editor_events.h"
 #include "scenario/property.h"
 #include "scenario/types.h"
+#include "scenario/data.h"
 #include "widget/dropdown_button.h"
 #include "window/editor/attributes.h"
 #include "window/editor/map.h"
@@ -68,6 +69,7 @@ static void init_dd(void)
     int dd_y = buttons[1].y;
     earthquake_pattern_dropdown.width = BLOCK_SIZE * 6;
     earthquake_pattern_dropdown.selected_callback = dd_earthquake_pattern;
+    earthquake_pattern_dropdown.selected_index = scenario.earthquake.pattern;
     dropdown_button_init_simple(dd_x, dd_y, dd_fragments, 3, &earthquake_pattern_dropdown);
 }
 
@@ -282,7 +284,7 @@ static void button_clay_pit_toggle(const generic_button *button)
 
 static void dd_earthquake_pattern(dropdown_button *dd)
 {
-    
+    scenario_editor_earthquake_set_pattern(dd->selected_index);
 }
 
 void window_editor_special_events_show(void)
