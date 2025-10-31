@@ -55,6 +55,15 @@ static void create_vacant_lot(int x, int y)
     map_building_tiles_add(b->id, b->x, b->y, 1, building_image_get(b), TERRAIN_BUILDING);
 }
 
+void building_house_vacant_lot_mark_draw(int building_id)
+{
+    grid_slice *slice = map_grid_get_grid_slice_house(building_id, 0);
+    for (int i = 0; i < slice->size; i++) {
+        int grid_offset = slice->grid_offsets[i];
+        map_property_mark_draw_tile(grid_offset);
+    }
+}
+
 void building_house_change_to_vacant_lot(building *house)
 {
     house->house_population = 0;
