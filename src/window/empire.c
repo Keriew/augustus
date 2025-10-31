@@ -2172,8 +2172,6 @@ static void confirmed_open_trade_by_route(int accepted, int checked)
         building_menu_update();
         window_trade_opened_show(city_id);
     }
-
-    data.selected_trade_route = 0;  // Always clear
 }
 
 static void button_open_trade_by_route(int route_id)

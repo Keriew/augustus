@@ -137,7 +137,12 @@ int window_build_menu_image(void)
                 return image_base + 3;
             }
         case BUILD_MENU_HEALTH:
-            return image_base + 5;
+            if (config_get(CONFIG_UI_DRAW_ASCLEPIUS)) {
+                int image_id_asclepius = assets_lookup_image_id(ASSET_UI_ASCEPIUS);
+                return image_id_asclepius;
+            } else {
+                return image_base + 5;
+            }
         case BUILD_MENU_TEMPLES:
         case BUILD_MENU_SMALL_TEMPLES:
         case BUILD_MENU_LARGE_TEMPLES:

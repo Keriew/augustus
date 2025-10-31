@@ -64,7 +64,7 @@ void assets_init(int force_reload, color_t **main_images, int *main_image_widths
     data.asset_lookup[ASSET_UI_GEAR_ICON] = assets_get_image_id("UI", "gear_icon");
     data.asset_lookup[ASSET_UI_COPY_ICON] = assets_get_image_id("UI", "copy_icon");
     data.asset_lookup[ASSET_UI_PASTE_ICON] = assets_get_image_id("UI", "paste_icon");
-
+    data.asset_lookup[ASSET_UI_ASCEPIUS] = assets_get_image_id("UI", "Asclepius Button");
     // font assets
     data.font_lookup[ASSET_FONT_SQ_BRACKET_LEFT] = assets_get_image_id("UI", "leftbracket_white_l");
     data.font_lookup[ASSET_FONT_SQ_BRACKET_RIGHT] = assets_get_image_id("UI", "rightbracket_white_l");
