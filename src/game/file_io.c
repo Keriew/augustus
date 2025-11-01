@@ -305,7 +305,7 @@ static struct {
     savegame_version_t version;
     int city_width;
     int city_height;
-    int caravanserai_id;
+    unsigned int caravanserai_id;
     scenario_climate climate;
 } minimap_data;
 
@@ -1678,7 +1678,7 @@ static unsigned int savegame_get_building_id(int grid_offset)
     return map_building_from_buffer(savegame_data.state.building_grid, grid_offset);
 }
 
-static building *savegame_building(int id)
+static building *savegame_building(unsigned int id)
 {
     static building b;
     // Old savegame versions had a bug where the caravanserai's building save data size was one byte too small, so all

@@ -255,12 +255,12 @@ void scenario_request_remap_resource(void)
     }
 }
 
-int scenario_request_count_total(void)
+unsigned int scenario_request_count_total(void)
 {
     return requests.size;
 }
 
-int scenario_request_count_active(void)
+unsigned int scenario_request_count_active(void)
 {
     int num_requests = 0;
     const scenario_request *request;

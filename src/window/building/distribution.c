@@ -367,7 +367,7 @@ static void draw_permissions_buttons(int x, int y, building_info_context *c)
 {
     int image_offset_x, image_offset_y;
     int *building_permissions;
-    int number_of_permissions;
+    unsigned int number_of_permissions;
     active_permissions_count = 0;
     building *b = building_get(data.building_id);
     building_type type = b->type;
