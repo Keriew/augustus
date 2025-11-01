@@ -16,7 +16,7 @@ typedef struct {
     struct {
         int (*figure)(int grid_offset, int (*callback)(figure *f));
         int (*terrain)(int grid_offset);
-        int (*building_id)(int grid_offset);
+        unsigned int (*building_id)(int grid_offset);
         int (*is_draw_tile)(int grid_offset);
         int (*tile_size)(int grid_offset);
         int (*random)(int grid_offset);

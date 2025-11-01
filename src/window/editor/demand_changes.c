@@ -83,7 +83,7 @@ static void limit_and_sort_list(void)
 
 static void update_demand_changes_list(void)
 {
-    int current_demand_changes = scenario_demand_change_count_total();
+    unsigned int current_demand_changes = scenario_demand_change_count_total();
     if (current_demand_changes != data.total_demand_changes) {
         free(data.demand_changes);
         data.demand_changes = 0;
@@ -127,7 +127,7 @@ static void draw_background(void)
     grid_box_request_refresh(&demand_change_buttons);
 }
 
-static void get_change_amount(int index, demand_change_amount_t *amount)
+static void get_change_amount(unsigned int index, demand_change_amount_t *amount)
 {
     const demand_change_t *new_demand_change = data.demand_changes[index];
     int previous_value = 0;
