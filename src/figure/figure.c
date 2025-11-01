@@ -342,7 +342,7 @@ int figure_target_is_alive(const figure *f)
     }
     return 0;
 }
-
+//TODO: review if int/char/short match the structure
 static void figure_save(buffer *buf, const figure *f)
 {
     buffer_write_u8(buf, f->alternative_location_index);
