@@ -70,7 +70,7 @@ static void init_dd(void)
     int dd_y = buttons[1].y;
     earthquake_pattern_dropdown.width = BLOCK_SIZE * 6;
     earthquake_pattern_dropdown.selected_callback = dd_earthquake_pattern;
-    earthquake_pattern_dropdown.selected_index = scenario.earthquake.pattern;
+    earthquake_pattern_dropdown.selected_index = scenario.earthquake.pattern + 1;
     dropdown_button_init_simple(dd_x, dd_y, dd_fragments, 4, &earthquake_pattern_dropdown);
 }
 
@@ -285,7 +285,7 @@ static void button_clay_pit_toggle(const generic_button *button)
 
 static void dd_earthquake_pattern(dropdown_button *dd)
 {
-    scenario_editor_earthquake_set_pattern(dd->selected_index);
+    scenario_editor_earthquake_set_pattern(dd->selected_index - 1);
 }
 
 void window_editor_special_events_show(void)

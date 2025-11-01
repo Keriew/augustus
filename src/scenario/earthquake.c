@@ -180,7 +180,7 @@ static int custom_earthquake_advance_random_tiles(void)
     int tiles_to_process = (count < MAX_TILES_PER_TICK) ? count : MAX_TILES_PER_TICK;
 
     for (int i = 0; i < tiles_to_process; i++) {
-        int index = (scenario.earthquake.pattern == 1 ? random_short() : random_byte()) % count; // choose random out of candidates
+        int index = (scenario.earthquake.pattern == EARTHQUAKE_PATTERN_RANDOM ? random_short() : random_byte()) % count; // choose random out of candidates
         struct field coords = candidates[index];
 
         // Process the selected tile
@@ -219,9 +219,9 @@ void scenario_earthquake_process(void)
             if (custom_delay >= data.next_delay) {
                 custom_delay = 0;
                 // Generate new random delay for next tile
-                data.next_delay = 10 + (random_byte() % (scenario.earthquake.pattern == 0 ? 15 : 90) + 1); // 10..100 ticks
+                data.next_delay = 10 + (random_byte() % (scenario.earthquake.pattern == EARTHQUAKE_PATTERN_RIGHT_LEFT ? 15 : 90) + 1); // 10 to 25 or 100 ticks
                 
-                if (!(scenario.earthquake.pattern == 0 ? custom_earthquake_advance_next_tile() : 
+                if (!(scenario.earthquake.pattern == EARTHQUAKE_PATTERN_RIGHT_LEFT ? custom_earthquake_advance_next_tile() : 
                     custom_earthquake_advance_random_tiles())) { // If no tiles left, finish the event
                     data.state = EVENT_FINISHED;
                 }
