@@ -8,7 +8,7 @@
 
 typedef struct {
     scenario_climate(*climate)(void);
-    building *(*building)(int id);
+    building *(*building)(unsigned int id);
     struct {
         int (*width)(void);
         int (*height)(void);

@@ -111,7 +111,7 @@ typedef struct building {
             unsigned char has_fish;
             unsigned char is_stockpiling;
             unsigned char orientation;
-            short fishing_boat_id;
+            unsigned int fishing_boat_id; // in line with f->id
             unsigned char age_months;
             unsigned char average_production_per_month;
             short production_current_month;
@@ -205,7 +205,7 @@ typedef struct building {
     unsigned char accepted_goods[RESOURCE_MAX];
 } building;
 
-building *building_get(int id);
+building *building_get(unsigned int id);
 
 int building_dist(int x, int y, int w, int h, building *b);
 

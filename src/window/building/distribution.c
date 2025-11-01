@@ -407,7 +407,7 @@ static void draw_permissions_buttons(int x, int y, building_info_context *c)
     int pixel_carry = 0;
     active_permissions_count = number_of_permissions;
 
-    for (int i = 0; i < number_of_permissions; i++) {
+    for (unsigned int i = 0; i < number_of_permissions; i++) {
         int permission = building_permissions[i];
         int is_sea_trade_route = (permission == BUILDING_STORAGE_PERMISSION_DOCK);
         int permission_state = building_storage_get_permission(permission, building_get(data.building_id));

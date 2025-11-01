@@ -193,7 +193,7 @@ static int xml_start_map(void)
     int height = xml_parser_get_attribute_int("height");
 
     empire_set_custom_map(filename, x_offset, y_offset, width, height);
-    
+
     if (xml_parser_get_attribute_bool("show_ireland")) {
         if (empire_get_image_id() != image_group(editor_is_active() ? GROUP_EDITOR_EMPIRE_MAP : GROUP_EMPIRE_MAP)) {
             log_info("Ireland image cannot be enabled on custom maps", 0, 0);
@@ -436,7 +436,7 @@ static int xml_start_resource(void)
         log_error("Resource not in buy or sell tag", 0, 0);
         return 0;
     }
-    
+
     full_empire_object *city_obj = empire_object_get_full(data.current_city_id);
 
     if (!xml_parser_has_attribute("type")) {
@@ -650,7 +650,7 @@ static void xml_end_distant_battle_path(void)
     }
 
     int month = 1;
-    for (int i = 1; i < data.distant_battle_waypoints.size; i++) {
+    for (unsigned int i = 1; i < data.distant_battle_waypoints.size; i++) {
         waypoint *last = array_item(data.distant_battle_waypoints, i - 1);
         waypoint *current = array_item(data.distant_battle_waypoints, i);
         int x_diff = current->x - last->x;
@@ -666,7 +666,7 @@ static void xml_end_distant_battle_path(void)
             army_obj->obj.type = obj_type;
             army_obj->obj.image_id = image_group(image_id);
             army_obj->obj.x = (int) ((double) j / current->num_months * x_diff + last->x);
-            army_obj->obj.y = (int) ((double)j / current->num_months * y_diff + last->y);
+            army_obj->obj.y = (int) ((double) j / current->num_months * y_diff + last->y);
             army_obj->obj.distant_battle_travel_months = month;
             month++;
         }
@@ -730,7 +730,7 @@ static void set_trade_coords(const empire_object *our_city)
         section_distances[sections] = (int) sqrt(x_diff * x_diff + y_diff * y_diff);
         distance += section_distances[sections];
         sections++;
-    
+
         last_x = our_city->x + 25;
         last_y = our_city->y + 25;
         int next_x = trade_city->obj.x + 25;

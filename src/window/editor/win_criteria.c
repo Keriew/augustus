@@ -1,5 +1,6 @@
 #include "win_criteria.h"
 
+#include "core/string.h"
 #include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
@@ -78,7 +79,7 @@ static void draw_foreground(void)
         lang_text_draw_multiline(CUSTOM_TRANSLATION, TR_EDITOR_RESET_FAVOR_MONTHLY, 416, 96, 100, FONT_NORMAL_BLACK);
         button_border_draw(516, 98, 24, 24, focus_button_id == 16); //checkbox
         if (reset_favor) {
-            text_draw("x", 525, 105, FONT_NORMAL_BLACK, 0);
+            text_draw(string_from_ascii("x"), 525, 105, FONT_NORMAL_BLACK, 0);
         }
     }
 
