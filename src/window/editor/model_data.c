@@ -46,7 +46,7 @@ static void building_tooltip(const grid_box_item *item, tooltip_context *c);
 static struct {
     unsigned int total_items;
     building_type items[BUILDING_TYPE_MAX];
-    
+
     unsigned int data_buttons_focus_id;
     unsigned int static_buttons_focus_id;
     unsigned int target_index;
@@ -222,39 +222,58 @@ static void model_item_click(const grid_box_item *item)
     data.target_index = item->index;
 }
 
+static void get_building_translation(building_type b_type, uint8_t *buffer, int buffer_size)
+{
+    const uint8_t *b_type_string = lang_get_building_type_string(b_type);
+
+    if (BUILDING_SMALL_TEMPLE_CERES <= b_type && b_type <= BUILDING_SMALL_TEMPLE_VENUS) {
+        const uint8_t *temple_prefix = lang_get_building_type_string(BUILDING_MENU_SMALL_TEMPLES);
+        snprintf((char *) buffer, buffer_size, "%s %s", temple_prefix, b_type_string);
+    } else if (BUILDING_LARGE_TEMPLE_CERES <= b_type && b_type <= BUILDING_LARGE_TEMPLE_VENUS) {
+        const uint8_t *temple_prefix = lang_get_building_type_string(BUILDING_MENU_LARGE_TEMPLES);
+        snprintf((char *) buffer, buffer_size, "%s %s", temple_prefix, b_type_string);
+    } else {
+        string_copy(b_type_string, buffer, buffer_size);
+    }
+}
+
 static void draw_model_item(const grid_box_item *item)
 {
     button_border_draw(item->x, item->y, item->width, item->height, 0);
-    text_draw_ellipsized(lang_get_building_type_string(data.items[item->index]), item->x + 8, item->y + 8, 12 * BLOCK_SIZE, FONT_NORMAL_BLACK, 0);
-    
-    for (int i = 0; i < MAX_DATA_BUTTONS - (!(building_is_raw_resource_producer(data.items[item->index]) || 
-        building_is_workshop(data.items[item->index]) || data.items[item->index] == BUILDING_WHARF || building_is_farm(data.items[item->index]))); i++) {
+    int b_type = data.items[item->index];
+    uint8_t b_string[128];
+
+    get_building_translation(b_type, b_string, sizeof(b_string));
+    text_draw_ellipsized(b_string, item->x + 8, item->y + 8, 12 * BLOCK_SIZE, FONT_NORMAL_BLACK, 0);
+
+    for (int i = 0; i < MAX_DATA_BUTTONS - (!(building_is_raw_resource_producer(b_type) ||
+        building_is_workshop(b_type) || b_type == BUILDING_WHARF || building_is_farm(b_type))); i++) {
         button_border_draw(item->x + data_buttons[i].x, item->y + data_buttons[i].y,
-            data_buttons[i].width, data_buttons[i].height, item->is_focused && data.data_buttons_focus_id == i+1);
+            data_buttons[i].width, data_buttons[i].height, item->is_focused && data.data_buttons_focus_id == i + 1);
 
         uint8_t data_string[8];
         int value = 0;
         switch (i) {
             case 0:
-                value = model_get_building(data.items[item->index])->cost;break;
+                value = model_get_building(b_type)->cost; break;
             case 1:
-                value = model_get_building(data.items[item->index])->desirability_value;break;
+                value = model_get_building(b_type)->desirability_value; break;
             case 2:
-                value = model_get_building(data.items[item->index])->desirability_step;break;
+                value = model_get_building(b_type)->desirability_step; break;
             case 3:
-                value = model_get_building(data.items[item->index])->desirability_step_size;break;
+                value = model_get_building(b_type)->desirability_step_size; break;
             case 4:
-                value = model_get_building(data.items[item->index])->desirability_range;break;
+                value = model_get_building(b_type)->desirability_range; break;
             case 5:
-                value = model_get_building(data.items[item->index])->laborers;break;
+                value = model_get_building(b_type)->laborers; break;
             case 6:
-                value = resource_get_data(resource_get_from_industry(data.items[item->index]))->production_per_month;
+                value = resource_get_data(resource_get_from_industry(b_type))->production_per_month;
         }
         string_from_int(data_string, value, 0);
-        text_draw(data_string, item->x + data_buttons[i].x + 8, item->y + data_buttons[i].y + 6, 
+        text_draw(data_string, item->x + data_buttons[i].x + 8, item->y + data_buttons[i].y + 6,
                   FONT_SMALL_PLAIN, 0);
     }
-    
+
 }
 
 static void draw_background(void)
@@ -266,7 +285,7 @@ static void draw_background(void)
     outer_panel_draw(16, 32, 42, 27);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_ACTION_TYPE_CHANGE_MODEL_DATA, 26, 42, 38 * BLOCK_SIZE, FONT_LARGE_BLACK);
     lang_text_draw_centered(13, 3, 16, 27 * BLOCK_SIZE + 8, 42 * BLOCK_SIZE, FONT_NORMAL_BLACK);
-    
+
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_MODEL, 80, 75, 30, FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_COST, 235, 75, 30, FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_VALUE, 295, 75, 30, FONT_SMALL_PLAIN);
@@ -277,17 +296,17 @@ static void draw_background(void)
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_PRODUCTION, 570, 75, 30, FONT_SMALL_PLAIN);
 
     graphics_reset_dialog();
-    
+
     grid_box_request_refresh(&model_buttons);
 }
 
 static void draw_foreground(void)
 {
     graphics_in_dialog();
-    
+
     for (int i = 0; i < NUM_STATIC_BUTTONS; i++) {
         button_border_draw(static_buttons[i].x, static_buttons[i].y,
-            static_buttons[i].width, static_buttons[i].height, data.static_buttons_focus_id == i+1);
+            static_buttons[i].width, static_buttons[i].height, data.static_buttons_focus_id == i + 1);
         translation_key key;
         switch (i) {
             case 0:
@@ -300,12 +319,12 @@ static void draw_foreground(void)
                 key = TR_EDITOR_SCENARIO_EVENTS_IMPORT;
                 break;
         }
-        lang_text_draw_centered(CUSTOM_TRANSLATION, key, 
+        lang_text_draw_centered(CUSTOM_TRANSLATION, key,
             static_buttons[i].x, static_buttons[i].y + 6, static_buttons[i].width, FONT_NORMAL_BLACK);
     }
-    
+
     grid_box_draw(&model_buttons);
-    
+
     graphics_reset_dialog();
 }
 
@@ -325,7 +344,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
     if (generic_buttons_handle_mouse(m_dialog, x, y, data_buttons, NUM_DATA_BUTTONS, &data.data_buttons_focus_id)) {
         return;
     }
-    
+
     if (input_go_back_requested(m, h)) {
         window_go_back();
     }
@@ -355,7 +374,7 @@ static int desirability_tooltip(tooltip_context *c)
                 x = 460;
                 break;
         }
-        
+
         if (x <= m->x && x + width > m->x &&
             75 <= m->y && 75 + 10 > m->y) {
             c->text_group = CUSTOM_TRANSLATION;
@@ -370,7 +389,7 @@ static int desirability_tooltip(tooltip_context *c)
 static void building_tooltip(const grid_box_item *item, tooltip_context *c)
 {
     uint8_t *text;
-    text = (uint8_t *)lang_get_building_type_string(data.items[item->index]);
+    text = (uint8_t *) lang_get_building_type_string(data.items[item->index]);
     if (text_get_width(text, FONT_SMALL_PLAIN) > 12 * BLOCK_SIZE - 32 && !data.data_buttons_focus_id) {
         c->precomposed_text = text;
         c->type = TOOLTIP_BUTTON;

@@ -916,7 +916,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .draw_desirability_range = 1,
         .event_data.attr = "large_temple_ceres",
         .event_data.key = TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_CERES,
-        .building_model_data = {.cost = 150, .desirability_value = -6, .desirability_step = 1,
+        .building_model_data = {.cost = 150, .desirability_value = 6, .desirability_step = 1,
             .desirability_step_size = 2, .desirability_range = 3, .laborers = 5}
     },
     [BUILDING_LARGE_TEMPLE_NEPTUNE] = {
@@ -929,7 +929,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .draw_desirability_range = 1,
         .event_data.attr = "large_temple_neptune",
         .event_data.key = TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_NEPTUNE,
-        .building_model_data = {.cost = 150, .desirability_value = -6, .desirability_step = 1,
+        .building_model_data = {.cost = 150, .desirability_value = 6, .desirability_step = 1,
             .desirability_step_size = 2, .desirability_range = 3, .laborers = 5}
     },
     [BUILDING_LARGE_TEMPLE_MERCURY] = {
@@ -942,7 +942,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .draw_desirability_range = 1,
         .event_data.attr = "large_temple_mercury",
         .event_data.key = TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_MERCURY,
-        .building_model_data = {.cost = 150, .desirability_value = -6, .desirability_step = 1,
+        .building_model_data = {.cost = 150, .desirability_value = 6, .desirability_step = 1,
             .desirability_step_size = 2, .desirability_range = 3, .laborers = 5}
     },
     [BUILDING_LARGE_TEMPLE_MARS] = {
@@ -955,7 +955,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .draw_desirability_range = 1,
         .event_data.attr = "large_temple_mars",
         .event_data.key = TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_MARS,
-        .building_model_data = {.cost = 150, .desirability_value = -6, .desirability_step = 1,
+        .building_model_data = {.cost = 150, .desirability_value = 6, .desirability_step = 1,
             .desirability_step_size = 2, .desirability_range = 3, .laborers = 5}
     },
     [BUILDING_LARGE_TEMPLE_VENUS] = {
@@ -968,7 +968,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .draw_desirability_range = 1,
         .event_data.attr = "large_temple_venus",
         .event_data.key = TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_VENUS,
-        .building_model_data = {.cost = 150, .desirability_value = -6, .desirability_step = 1,
+        .building_model_data = {.cost = 150, .desirability_value = 6, .desirability_step = 1,
             .desirability_step_size = 2, .desirability_range = 3, .laborers = 5}
     },
     [BUILDING_MARKET] = {
@@ -2220,8 +2220,8 @@ const building_properties *building_properties_for_type(building_type type)
 
 // MODEL DATA
 
-static model_building NOTHING = {.cost = 0, .desirability_value = 0, .desirability_step = 0,
- .desirability_step_size = 0, .desirability_range = 0, .laborers = 0};
+static model_building NOTHING = { .cost = 0, .desirability_value = 0, .desirability_step = 0,
+ .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
 
 void model_reset(void)
 {
@@ -2237,17 +2237,19 @@ void model_reset(void)
     }
 }
 
-void model_save_model_data(buffer *buf) {
+void model_save_model_data(buffer *buf)
+{
     int buf_size = sizeof(model_building) * BUILDING_TYPE_MAX;
     uint8_t *buf_data = malloc(buf_size);
-    
+
     buffer_init(buf, buf_data, buf_size);
-    
+
     buffer_write_raw(buf, buildings, buf_size);
 }
-void model_load_model_data(buffer *buf) {
+void model_load_model_data(buffer *buf)
+{
     int buf_size = sizeof(model_building) * BUILDING_TYPE_MAX;
-    
+
     buffer_read_raw(buf, buildings, buf_size);
 }
 
