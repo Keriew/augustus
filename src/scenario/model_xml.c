@@ -32,27 +32,27 @@ static void export_model_data(buffer *buf)
 {
     xml_exporter_new_element("model_data");
     xml_exporter_add_attribute_int("version", MODEL_DATA_VERSION);
-    
+
     int edited_models = 0;
-    
+
     for (building_type type = BUILDING_ANY + 1; type < BUILDING_TYPE_MAX; ++type) {
         const building_properties *props = building_properties_for_type(type);
         if (!props) {
             continue;
         }
-        
-        if (((!props->size || !props->event_data.attr) && type != BUILDING_CLEAR_LAND && type != BUILDING_REPAIR_LAND )
+
+        if (((!props->size || !props->event_data.attr) && type != BUILDING_CLEAR_LAND && type != BUILDING_REPAIR_LAND)
              || type == BUILDING_GRAND_GARDEN
-             || type == BUILDING_DOLPHIN_FOUNTAIN ) {
+             || type == BUILDING_DOLPHIN_FOUNTAIN) {
             continue;
         }
 
         model_building *model = model_get_building(type);
-        model_building *prop_model = &props->building_model_data;
+        model_building *prop_model = &props->building_model_data; //de-constantify to remove warning
         if (!model) {
             continue;
         }
-        
+
         resource_data *resource = resource_get_data(resource_get_from_industry(type));
         if (resource->production_per_month == resource_get_defaults(resource_get_from_industry(type))->production_per_month) {
             if (model == prop_model) {
@@ -63,7 +63,7 @@ static void export_model_data(buffer *buf)
                 continue;
             }
         }
-        
+
         xml_exporter_new_element("building_model");
         xml_exporter_add_attribute_text("building_type", props->event_data.attr);
         xml_exporter_add_attribute_int("cost", model->cost);
@@ -78,16 +78,16 @@ static void export_model_data(buffer *buf)
             }
         }
         xml_exporter_close_element();
-        
+
         edited_models++;
     }
-    
+
     if (!edited_models) {
         xml_exporter_add_element_text("<!--Nothing here but xml parser doesn't like empty things-->");
         xml_exporter_close_element();
     }
     xml_exporter_close_element();
-    
+
 }
 
 int scenario_model_export_to_xml(const char *filename)
@@ -140,7 +140,7 @@ static int start_building_model(void)
         return 0;
     }
     building_type type = found->value;
-    
+
     if (!xml_parser_has_attribute("cost")) {
         xml_import_log_error("Attribute missing. 'cost' not given");
         return 0;
@@ -165,9 +165,9 @@ static int start_building_model(void)
         xml_import_log_error("Attribute missing. 'laborers' not given");
         return 0;
     }
-    
+
     model_building *model_ptr = model_get_building(type);
-    
+
     model_ptr->cost = xml_parser_get_attribute_int("cost");
     model_ptr->desirability_value = xml_parser_get_attribute_int("desirability_value");
     model_ptr->desirability_step = xml_parser_get_attribute_int("desirability_step");
@@ -178,7 +178,7 @@ static int start_building_model(void)
         resource_data *resource = resource_get_data(resource_get_from_industry(type));
         resource->production_per_month = xml_parser_get_attribute_int("production_rate");
     }
-    
+
     return 1;
 }
 
@@ -198,7 +198,7 @@ static int parse_xml(char *buf, int buffer_length)
         }
     }
     xml_parser_free();
-    
+
     return data.success;
 }
 

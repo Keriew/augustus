@@ -544,7 +544,7 @@ static void draw_top(int x, int y, int grid_offset)
 
 static void draw_figures(int x, int y, int grid_offset)
 {
-    int figure_id = map_figure_at(grid_offset);
+    unsigned int figure_id = map_figure_at(grid_offset);
     while (figure_id) {
         figure *f = figure_get(figure_id);
         if (figure_id == draw_context.selected_figure_id) {

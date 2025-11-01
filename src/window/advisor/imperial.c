@@ -72,7 +72,7 @@ static void draw_request(int index, const scenario_request *request)
         int treasury = city_finance_treasury();
         width = text_draw_number(treasury, '@', " ", 40, 120 + 42 * index, FONT_NORMAL_WHITE, 0);
         width += lang_text_draw(52, 44, 40 + width, 120 + 42 * index, FONT_NORMAL_WHITE);
-        if (treasury < request->amount.requested) {
+        if (treasury < (int) request->amount.requested) {
             lang_text_draw(52, 48, 80 + width, 120 + 42 * index, FONT_NORMAL_WHITE);
         } else {
             lang_text_draw(52, 47, 80 + width, 120 + 42 * index, FONT_NORMAL_WHITE);
@@ -89,7 +89,7 @@ static void draw_request(int index, const scenario_request *request)
         } else {
             width += lang_text_draw(52, 43, 40 + width, y_offset, FONT_NORMAL_WHITE);
         }
-        if (amount_stored < request->amount.requested) {
+        if (amount_stored < (int) request->amount.requested) {
             lang_text_draw(52, 48, 80 + width, y_offset, FONT_NORMAL_WHITE);
         } else {
             lang_text_draw(52, 47, 80 + width, y_offset, FONT_NORMAL_WHITE);

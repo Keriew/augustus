@@ -182,7 +182,7 @@ void message_media_text_blob_save_state(buffer *blob_buffer, buffer *meta_buffer
     struct_size = (3 * sizeof(int32_t));
     buffer_init_dynamic_array(meta_buffer, array_size, struct_size);
 
-    for (int i = 0; i < array_size; i++) {
+    for (unsigned int i = 0; i < array_size; i++) {
         buffer_write_i32(meta_buffer, message_media_text_blob.text_entries[i].id);
         buffer_write_i32(meta_buffer, message_media_text_blob.text_entries[i].offset);
         buffer_write_i32(meta_buffer, message_media_text_blob.text_entries[i].length);
@@ -275,7 +275,7 @@ void message_media_text_blob_remove_unused(void)
 
         index++;
     }
-    
+
     free(message_media_text_blob.text_entries);
     free(message_media_text_blob.text_blob);
 

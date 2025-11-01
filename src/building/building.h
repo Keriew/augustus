@@ -97,7 +97,7 @@ typedef struct building {
             int accepted_route_ids;
         } dock;
         struct {
-            short cartpusher_ids[3];
+            unsigned int cartpusher_ids[3]; //changed from short to match f->id
         } distribution;
         struct {
             unsigned char fetch_inventory_id;

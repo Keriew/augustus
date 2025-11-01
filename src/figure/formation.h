@@ -153,7 +153,7 @@ int formation_create_enemy(figure_type type, int x, int y, int layout, int orien
 formation *formation_get(int formation_id);
 int formation_count(void);
 
-int formation_get_selected(void);
+unsigned int formation_get_selected(void);
 void formation_set_selected(int formation_id);
 
 int formation_update_halted_state(formation *m);
