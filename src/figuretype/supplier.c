@@ -156,7 +156,7 @@ static int change_market_supplier_destination(figure *f, int dst_building_id)
     figure_route_remove(f);
     f->destination_building_id = dst_building_id;
     building *b_dst = building_get(dst_building_id);
-    map_point road;
+    map_point road = { 0 };
     int has_road_access = 0;
     if (b_dst->type == BUILDING_WAREHOUSE) {
         has_road_access = map_has_road_access_warehouse(b_dst->x, b_dst->y, &road);

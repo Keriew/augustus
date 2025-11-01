@@ -34,6 +34,7 @@ static void draw_default_style(const complex_button *button, font_t base_font, c
     font_t font;
     const int inner_margin = 2; // small horizontal margin for text/images
     switch (base_font) {
+        default:
         case FONT_NORMAL_BLACK:
             font = !button->is_disabled ? FONT_NORMAL_BLACK : FONT_NORMAL_WHITE;
             break;
@@ -130,7 +131,7 @@ static void draw_default_style(const complex_button *button, font_t base_font, c
                 sequence_y_offset, button->width, font, f_color, &was_ellipsized);
         }
     }
-    complex_button_ellipsized(button, was_ellipsized); //de-constant button to set ellipsized flag
+    complex_button_ellipsized((complex_button *) button, was_ellipsized); //de-constant button to set ellipsized flag
 
     // Draw after-image if present
     if (img_after) {
