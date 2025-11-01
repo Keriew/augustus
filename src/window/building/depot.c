@@ -692,8 +692,8 @@ void window_building_draw_depot_select_source_destination(building_info_context 
 
 static void set_order_source(const generic_button *button)
 {
-    int depot_building_id = button->parameter1;
-    int building_id = button->parameter2;
+    unsigned int depot_building_id = (unsigned int) button->parameter1;
+    unsigned int building_id = (unsigned int) button->parameter2;
     if (depot_building_id == -1) { //ineligible storage
         return;
     }
@@ -710,8 +710,8 @@ static void set_order_source(const generic_button *button)
 
 static void set_order_destination(const generic_button *button)
 {
-    int depot_building_id = button->parameter1;
-    int building_id = button->parameter2;
+    unsigned int depot_building_id = (unsigned int) button->parameter1;
+    unsigned int building_id = (unsigned int) button->parameter2;
     if (depot_building_id == -1 || !building_id) { //ineligible storage hack
         return;
     }
@@ -725,7 +725,7 @@ static void set_order_destination(const generic_button *button)
 
 static void set_camera_position(const generic_button *button)
 {
-    int building_id = button->parameter1;
+    unsigned int building_id = button->parameter1;
     const building *b = building_get(building_id);
     if (!b || b->id == 0) {
         return;

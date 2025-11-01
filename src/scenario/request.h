@@ -73,9 +73,9 @@ void scenario_request_process(void);
 
 void scenario_request_dispatch(int id);
 
-int scenario_request_count_total(void);
+unsigned int scenario_request_count_total(void);
 
-int scenario_request_count_active(void);
+unsigned int scenario_request_count_active(void);
 
 int scenario_request_count_visible(void);
 

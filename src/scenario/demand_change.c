@@ -119,7 +119,7 @@ void scenario_demand_change_remap_resource(void)
     }
 }
 
-int scenario_demand_change_count_total(void)
+unsigned int scenario_demand_change_count_total(void)
 {
     return demand_changes.size;
 }

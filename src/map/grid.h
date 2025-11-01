@@ -157,7 +157,7 @@ grid_slice *map_grid_get_grid_slice_rectangle(int start_grid_offset, int width, 
  * @param check_rubble if true, will check for rubble info grid instead of building grid
  * @return Allocated grid_slice containing rectangle coordinates, or NULL on failure
  */
-grid_slice *map_grid_get_grid_slice_house(int building_id, int check_rubble);
+grid_slice *map_grid_get_grid_slice_house(unsigned int building_id, int check_rubble);
 
 /**
  * @brief Creates a grid slice representing a square area starting from the given grid offset.

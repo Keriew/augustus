@@ -83,7 +83,7 @@ static void limit_and_sort_list(void)
 static void update_invasion_list(void)
 {
     int current_invasions = scenario_invasion_count_total();
-    if (current_invasions != data.total_invasions) {
+    if ((unsigned int) current_invasions != data.total_invasions) {
         free(data.invasions);
         data.invasions = 0;
         if (current_invasions) {

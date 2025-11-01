@@ -68,7 +68,7 @@ enum farm_ghost_object {
     FARM_GHOST_CROP
 };
 
-static enum {
+enum {
     TILE_FORBIDDEN = 1,
     TILE_ALLOWED = 0,
     TILE_DISCOURAGED = -1

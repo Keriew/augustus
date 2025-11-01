@@ -17,9 +17,9 @@ static void new_mission(campaign_mission *mission, unsigned int index)
     mission->last_scenario = mission->first_scenario - 1;
 }
 
-static void new_scenario(campaign_scenario *scenario, unsigned int index)
+static void new_scenario(campaign_scenario *camp_scenario, unsigned int index)
 {
-    scenario->id = index;
+    camp_scenario->id = index;
 }
 
 campaign_mission *campaign_mission_new(void)
@@ -30,7 +30,8 @@ campaign_mission *campaign_mission_new(void)
 campaign_mission *campaign_mission_current(int index)
 {
     campaign_mission *mission;
-    array_foreach(data.missions, mission) {
+    array_foreach(data.missions, mission)
+    {
         if (mission->first_scenario <= index && mission->last_scenario >= index) {
             return mission;
         }
@@ -41,7 +42,8 @@ campaign_mission *campaign_mission_current(int index)
 campaign_mission *campaign_mission_next(int last_index)
 {
     campaign_mission *mission;
-    array_foreach(data.missions, mission) {
+    array_foreach(data.missions, mission)
+    {
         if (mission->first_scenario > last_index) {
             return mission;
         }
@@ -54,7 +56,7 @@ campaign_scenario *campaign_mission_new_scenario(void)
     return array_advance(data.scenarios);
 }
 
-campaign_scenario *campaign_mission_get_scenario(int scenario_id)
+campaign_scenario *campaign_mission_get_scenario(unsigned int scenario_id)
 {
     return scenario_id >= 0 && scenario_id < data.scenarios.size ? array_item(data.scenarios, scenario_id) : 0;
 }
@@ -70,20 +72,22 @@ void campaign_mission_clear(void)
 {
     if (game_campaign_is_custom()) {
         campaign_mission *mission;
-        array_foreach(data.missions, mission) {
+        array_foreach(data.missions, mission)
+        {
             free((uint8_t *) mission->title);
             free((char *) mission->background_image.path);
             free((char *) mission->intro_video);
         }
     }
     array_clear(data.missions);
-    campaign_scenario *scenario;
-    array_foreach(data.scenarios, scenario) {
-        free((uint8_t *) scenario->name);
+    campaign_scenario *camp_scenario;
+    array_foreach(data.scenarios, camp_scenario)
+    {
+        free((uint8_t *) camp_scenario->name);
         if (game_campaign_is_custom()) {
-            free((uint8_t *) scenario->description);
-            free((char *) scenario->fanfare);
-            free((char *) scenario->path);
+            free((uint8_t *) camp_scenario->description);
+            free((char *) camp_scenario->fanfare);
+            free((char *) camp_scenario->path);
         }
     }
     array_clear(data.scenarios);

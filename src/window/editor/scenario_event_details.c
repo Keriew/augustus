@@ -683,11 +683,11 @@ static void get_focused_grid_box(const mouse *m)
     if (!data.focused_grid_box) {
         data.focused_grid_box = &conditions_grid_box;
     }
-    if (m->x >= conditions_grid_box.x && m->x < conditions_grid_box.x + conditions_grid_box.width &&
-        m->y >= conditions_grid_box.y && m->y < conditions_grid_box.y + conditions_grid_box.height) {
+    if (m->x >= conditions_grid_box.x && m->x < (int) (conditions_grid_box.x + conditions_grid_box.width) &&
+        m->y >= conditions_grid_box.y && m->y < (int) (conditions_grid_box.y + conditions_grid_box.height)) {
         data.focused_grid_box = &conditions_grid_box;
-    } else if (m->x >= actions_grid_box.x && m->x < actions_grid_box.x + actions_grid_box.width &&
-        m->y >= actions_grid_box.y && m->y < actions_grid_box.y + actions_grid_box.height) {
+    } else if (m->x >= actions_grid_box.x && m->x < (int) (actions_grid_box.x + actions_grid_box.width) &&
+        m->y >= actions_grid_box.y && m->y < (int) (actions_grid_box.y + actions_grid_box.height)) {
         data.focused_grid_box = &actions_grid_box;
     }
 }
@@ -838,7 +838,7 @@ static void set_selected_to_group(int group_id)
 {
     scenario_condition_group_t *group;
     // New group
-    if (group_id >= data.event->condition_groups.size) {
+    if ((unsigned int) group_id >= data.event->condition_groups.size) {
         group = array_advance(data.event->condition_groups);
         if (!group) {
             log_error("Unable to create new group - memory full. The game will probably crash", 0, 0);

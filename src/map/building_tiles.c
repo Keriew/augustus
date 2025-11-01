@@ -17,7 +17,7 @@
 #include "map/terrain.h"
 #include "map/tiles.h"
 
-void map_building_tiles_add_remove(int building_id, int x, int y, int size, int image_id, int terrain_to_add, int terrain_to_remove)
+void map_building_tiles_add_remove(unsigned int building_id, int x, int y, int size, int image_id, int terrain_to_add, int terrain_to_remove)
 {
     if (!map_grid_is_inside(x, y, size)) {
         return;
@@ -56,12 +56,12 @@ void map_building_tiles_add_remove(int building_id, int x, int y, int size, int 
     }
 }
 
-void map_building_tiles_add(int building_id, int x, int y, int size, int image_id, int terrain)
+void map_building_tiles_add(unsigned int building_id, int x, int y, int size, int image_id, int terrain)
 {
     map_building_tiles_add_remove(building_id, x, y, size, image_id, terrain, TERRAIN_CLEARABLE);
 }
 
-static void set_crop_tile(int building_id, int x, int y, int dx, int dy, int crop_image_id, int growth)
+static void set_crop_tile(unsigned int building_id, int x, int y, int dx, int dy, int crop_image_id, int growth)
 {
     int grid_offset = map_grid_offset(x + dx, y + dy);
     map_terrain_remove(grid_offset, TERRAIN_CLEARABLE);
@@ -72,7 +72,7 @@ static void set_crop_tile(int building_id, int x, int y, int dx, int dy, int cro
     map_image_set(grid_offset, crop_image_id + (growth < 4 ? growth : 4));
 }
 
-void map_building_tiles_add_farm(int building_id, int x, int y, int crop_image_id, int progress)
+void map_building_tiles_add_farm(unsigned int building_id, int x, int y, int crop_image_id, int progress)
 {
     if (!map_grid_is_inside(x, y, 3)) {
         return;
@@ -153,7 +153,7 @@ static int north_tile_grid_offset(int x, int y, int *size)
     return grid_offset;
 }
 
-void map_building_tiles_remove(int building_id, int x, int y)
+void map_building_tiles_remove(unsigned int building_id, int x, int y)
 {
     if (!map_grid_is_inside(x, y, 1)) {
         return;
@@ -200,7 +200,7 @@ void map_building_tiles_remove(int building_id, int x, int y)
 }
 
 
-void map_building_tiles_set_rubble(int building_id, int x, int y, int size)
+void map_building_tiles_set_rubble(unsigned int building_id, int x, int y, int size)
 {
     if (!map_grid_is_inside(x, y, size)) {
         return;

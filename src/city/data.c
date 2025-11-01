@@ -1072,7 +1072,7 @@ void city_data_load_state(buffer *main, buffer *graph_order,
     load_entry_exit(entry_exit_xy, entry_exit_grid_offset);
 }
 
-void city_data_load_basic_info(buffer *main, int *population, int *treasury, int *caravanserai_id, int version)
+void city_data_load_basic_info(buffer *main, int *population, int *treasury, unsigned int *caravanserai_id, int version)
 {
     int discard_unused_values = version > SAVE_GAME_LAST_UNKNOWN_UNUSED_CITY_DATA;
     int discard_workshop_bytes = (version > SAVE_GAME_LAST_STATIC_RESOURCES) ? 6 * sizeof(int32_t) * 2 : 0;

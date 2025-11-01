@@ -172,7 +172,7 @@ grid_slice *map_grid_get_grid_slice_rectangle(int start_grid_offset, int width, 
     return allocate_grid_slice_memory_from_offsets(tmp, count);
 }
 
-grid_slice *map_grid_get_grid_slice_house(int building_id, int check_rubble)
+grid_slice *map_grid_get_grid_slice_house(unsigned int building_id, int check_rubble)
 {
     int tmp[MAX_SLICE_SIZE];
     int count = 0;

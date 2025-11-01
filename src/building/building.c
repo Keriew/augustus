@@ -60,7 +60,7 @@ static struct {
     int unfixable_houses;
 } extra;
 
-building *building_get(int id)
+building *building_get(unsigned int id)
 {
     return array_item(data.buildings, id);
 }

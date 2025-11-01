@@ -305,7 +305,7 @@ static struct {
     savegame_version_t version;
     int city_width;
     int city_height;
-    int caravanserai_id;
+    unsigned int caravanserai_id;
     scenario_climate climate;
 } minimap_data;
 
@@ -896,7 +896,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     if (version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         model_load_model_data(state->building_model_data);
     }
-    
+
     resource_init();
     if (version > SAVE_GAME_TESTING_VERSION_BUMP_6) { // Decrease before merge
         production_rates_load(state->production_rates);
@@ -1061,7 +1061,7 @@ static void savegame_save_to_state(savegame_state *state)
     building_monument_delivery_save_state(state->deliveries);
     empire_object_save(state->custom_empire);
     figure_visited_buildings_save_state(state->visited_buildings);
-    
+
     production_rates_save(state->production_rates);
 }
 
@@ -1673,12 +1673,12 @@ static int savegame_random_at(int grid_offset)
     return map_random_get_from_buffer(savegame_data.state.random_grid, grid_offset);
 }
 
-static int savegame_get_building_id(int grid_offset)
+static unsigned int savegame_get_building_id(int grid_offset)
 {
     return map_building_from_buffer(savegame_data.state.building_grid, grid_offset);
 }
 
-static building *savegame_building(int id)
+static building *savegame_building(unsigned int id)
 {
     static building b;
     // Old savegame versions had a bug where the caravanserai's building save data size was one byte too small, so all

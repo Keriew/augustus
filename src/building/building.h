@@ -16,8 +16,8 @@ typedef enum order_condition_type {
 
 typedef struct order {
     resource_type resource_type;
-    int src_storage_id; //this is actually building_id, not storage_id
-    int dst_storage_id; //this is actually building_id, not storage_id
+    unsigned int src_storage_id; //this is actually building_id, not storage_id
+    unsigned int dst_storage_id; //this is actually building_id, not storage_id
     struct {
         order_condition_type condition_type;
         int threshold;
@@ -97,7 +97,7 @@ typedef struct building {
             int accepted_route_ids;
         } dock;
         struct {
-            short cartpusher_ids[3];
+            unsigned int cartpusher_ids[3]; //changed from short to match f->id
         } distribution;
         struct {
             unsigned char fetch_inventory_id;
@@ -111,7 +111,7 @@ typedef struct building {
             unsigned char has_fish;
             unsigned char is_stockpiling;
             unsigned char orientation;
-            short fishing_boat_id;
+            unsigned int fishing_boat_id; // in line with f->id
             unsigned char age_months;
             unsigned char average_production_per_month;
             short production_current_month;
@@ -205,7 +205,7 @@ typedef struct building {
     unsigned char accepted_goods[RESOURCE_MAX];
 } building;
 
-building *building_get(int id);
+building *building_get(unsigned int id);
 
 int building_dist(int x, int y, int w, int h, building *b);
 

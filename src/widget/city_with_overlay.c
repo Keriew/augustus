@@ -229,12 +229,12 @@ static color_t get_building_color_mask(const building *b)
     return color_mask;
 }
 
-static int is_building_selected(const building *b)
+static int is_building_selected(building *b)
 {
     if (!config_get(CONFIG_UI_HIGHLIGHT_SELECTED_BUILDING)) { // if option not selected in config, abandon
         return 0;
     }
-    int main_part_id = building_main(b)->id; //check if side or main part is selected
+    unsigned int main_part_id = building_main(b)->id; //check if side or main part is selected
     if (b->id == city_roamer_preview_selected_building_id || main_part_id == city_roamer_preview_selected_building_id) {
         return 1;
     } else {

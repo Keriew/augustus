@@ -34,7 +34,7 @@ static struct {
     int id_last_in_use;
     int id_last_legion;
     int num_legions;
-    int selected_formation;
+    unsigned int selected_formation;
 } data;
 
 static void initialize_new_formation(formation *m, unsigned int position)
@@ -167,7 +167,7 @@ int formation_count(void)
     return formations.size;
 }
 
-int formation_get_selected(void)
+unsigned int formation_get_selected(void)
 {
     return data.selected_formation;
 }

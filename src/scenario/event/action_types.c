@@ -285,7 +285,7 @@ int scenario_action_type_request_immediately_start_execute(scenario_action_t *ac
         return 0; // Firing this (request immediately) event off at the start of the scenario breaks it. So prevent that.
     }
 
-    int request_id = action->parameter1;
+    unsigned int request_id = action->parameter1;
     if (request_id < 0 || request_id >= scenario_request_count_total()) {
         return 0;
     }
@@ -860,13 +860,13 @@ int scenario_action_type_change_production_rate_execute(scenario_action_t *actio
     resource_type resource = action->parameter1;
     int rate = scenario_formula_evaluate_formula(action->parameter2);
     int set_to_value = action->parameter3;
-    
+
     resource_data *current_data = resource_get_data(resource);
     if (set_to_value) {
         current_data->production_per_month = rate;
     } else {
         current_data->production_per_month += rate;
     }
-            
+
     return 1;
 }
