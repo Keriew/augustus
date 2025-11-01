@@ -137,7 +137,7 @@ typedef struct {
         int y_home;
     } prev;
 
-    int target_formation_id;
+    unsigned int target_formation_id;
 
 } formation;
 

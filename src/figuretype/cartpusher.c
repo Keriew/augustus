@@ -78,7 +78,7 @@ static void cartpusher_return_to_source(figure *f)
     set_cart_graphic(f, 0);
 }
 
-static int should_change_destination(const figure *f, int building_id, int x_dst, int y_dst)
+static int should_change_destination(const figure *f, unsigned int building_id, int x_dst, int y_dst)
 {
     if (!f->destination_building_id) {
         return 1;
@@ -670,7 +670,7 @@ static void determine_warehouseman_destination(figure *f, int road_network_id, i
 {
     f->is_ghost = 0;
     map_point dst;
-    int dst_building_id;
+    unsigned int dst_building_id;
     if (!f->resource_id) {
         // getting warehouseman
         dst_building_id = building_warehouse_for_getting(

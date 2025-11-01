@@ -417,6 +417,8 @@ static int map_can_place_initial_reservoir(int grid_offset)
     } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
         if (building_get(map_building_at(grid_offset))->type == BUILDING_RESERVOIR) {
             return 1;
+        } else {
+            return 0;
         }
     } else {
         return 0;

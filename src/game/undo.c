@@ -98,7 +98,7 @@ int game_undo_contains_building(int building_id)
         return 0;
     }
     for (int i = 0; i < MAX_UNDO_BUILDINGS; i++) {
-        if (data.buildings[i].id == building_id) {
+        if (data.buildings[i].id == (unsigned int) building_id) {
             return 1;
         }
     }

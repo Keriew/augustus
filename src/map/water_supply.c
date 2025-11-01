@@ -113,7 +113,7 @@ static void set_all_aqueducts_to_no_water(void)
                 int image_id = map_image_at(grid_offset);
                 if (image_id < image_group(GROUP_BUILDING_AQUEDUCT_NO_WATER)) {
                     map_image_set(grid_offset, image_id + 15);
-                } else if(map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+                } else if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
                     image_id = map_tiles_highway_get_aqueduct_image(grid_offset);
                     map_image_set(grid_offset, image_id);
                 }
@@ -331,8 +331,8 @@ int map_water_supply_is_building_unnecessary(int building_id, int radius)
     for (int yy = y_min; yy <= y_max; yy++) {
         for (int xx = x_min; xx <= x_max; xx++) {
             int grid_offset = map_grid_offset(xx, yy);
-            int building_id = map_building_at(grid_offset);
-            if (building_id && building_get(building_id)->house_size) {
+            int found_building_id = map_building_at(grid_offset);
+            if (found_building_id && building_get(found_building_id)->house_size) {
                 num_houses++;
                 if (!map_terrain_is(grid_offset, TERRAIN_FOUNTAIN_RANGE)) {
                     return BUILDING_NECESSARY;
