@@ -1,5 +1,6 @@
 #include "slide.h"
 
+#include "city.h"
 #include "core/speed.h"
 #include "graphics/graphics.h"
 #include "graphics/menu.h"
@@ -15,6 +16,8 @@
 
 static struct {
     int position;
+    int previous_sidebar_width;
+    int previous_sidebar_x_offset;
     speed_type slide_speed;
     slide_direction direction;
     back_sidebar_draw_function back_sidebar_draw;
@@ -33,19 +36,20 @@ static void draw_sliding_foreground(void)
     window_request_refresh();
     data.position += speed_get_delta(&data.slide_speed);
     int is_finished = 0;
-    if (data.position >= SIDEBAR_EXPANDED_WIDTH) {
-        data.position = SIDEBAR_EXPANDED_WIDTH;
+    const int sidebar_width = data.previous_sidebar_width;
+    if (data.position >= sidebar_width) {
+        data.position = sidebar_width;
         is_finished = 1;
     }
 
-    int x_offset = sidebar_common_get_x_offset_expanded();
-    graphics_set_clip_rectangle(x_offset, TOP_MENU_HEIGHT, SIDEBAR_EXPANDED_WIDTH, sidebar_common_get_height());
+    int x_offset = data.previous_sidebar_x_offset;
+    graphics_set_clip_rectangle(x_offset, TOP_MENU_HEIGHT, sidebar_width, sidebar_common_get_height());
 
     if (data.direction == SLIDE_DIRECTION_IN) {
         if (data.position > SIDEBAR_DECELERATION_OFFSET) {
             speed_set_target(&data.slide_speed, 1, SLIDE_ACCELERATION_MILLIS, 1);
         }
-        x_offset += SIDEBAR_EXPANDED_WIDTH - data.position;
+        x_offset += sidebar_width - data.position;
     } else {
         x_offset += data.position;
     }
@@ -60,17 +64,21 @@ static void draw_sliding_foreground(void)
     }
 }
 
-void sidebar_slide(slide_direction direction, back_sidebar_draw_function back_sidebar_callback,
-    front_sidebar_draw_function front_sidebar_callback, slide_finished_function finished_callback)
+void sidebar_slide(const slide_direction direction, const back_sidebar_draw_function back_sidebar_callback,
+    const front_sidebar_draw_function front_sidebar_callback, const slide_finished_function finished_callback,
+    const int previous_sidebar_width, const int previous_sidebar_x_offset)
 {
     data.direction = direction;
     data.position = 0;
     speed_clear(&data.slide_speed);
-    speed_set_target(&data.slide_speed, SLIDE_SPEED,
-        direction == SLIDE_DIRECTION_OUT ? SLIDE_ACCELERATION_MILLIS : SPEED_CHANGE_IMMEDIATE, 1);
+    speed_set_target(&data.slide_speed, SLIDE_SPEED,SLIDE_ACCELERATION_MILLIS, 1);
+        //direction == SLIDE_DIRECTION_OUT ? SLIDE_ACCELERATION_MILLIS : SPEED_CHANGE_IMMEDIATE, 1);
+    // todo fix??
     data.back_sidebar_draw = back_sidebar_callback;
     data.front_sidebar_draw = front_sidebar_callback;
     data.finished_callback = finished_callback;
+    data.previous_sidebar_x_offset = previous_sidebar_x_offset;
+    data.previous_sidebar_width = previous_sidebar_width;
     sound_effect_play(SOUND_EFFECT_SIDEBAR);
 
     window_type window = {

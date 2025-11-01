@@ -71,6 +71,7 @@ static void draw_background(void)
 
     if (!window_is(WINDOW_FILE_DIALOG)) {
         graphics_in_dialog();
+
         outer_panel_draw(162, 32, 20, 22);
         if (!data.logo_image_id) {
             data.logo_image_id = assets_get_image_id("UI", "Main Menu Banner");

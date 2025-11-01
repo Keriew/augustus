@@ -1,4 +1,5 @@
 #include "city.h"
+#include "sidebar/city.h"
 
 #include "building/construction.h"
 #include "building/properties.h"
@@ -185,6 +186,7 @@ static void draw_construction_buttons(void)
     city_view_get_viewport(&x, &y, &width, &height);
     int x_offset = width - 4 * BLOCK_SIZE;
     int y_offset = 40;
+    
     if (((sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED) || !mouse_get()->is_touch) && width < 680)
             && game_state_is_paused()) {
         y_offset = 100;
@@ -201,6 +203,7 @@ static void draw_construction_buttons(void)
 
     if ((mouse_get()->is_touch || config_get(CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS)) &&
         building_construction_can_rotate()) {
+        
         if (!sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED)) {
             x_offset = 4 * BLOCK_SIZE + 8;
         } else {
@@ -256,6 +259,7 @@ static int is_rotate_backward_button(int x, int y)
     int city_x, city_y, width, height;
     city_view_get_viewport(&city_x, &city_y, &width, &height);
 
+    //TODO: config
     int sidebar_pause_button = sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED);
     int x_offset = sidebar_pause_button ? 16 : 4 * BLOCK_SIZE + 4;
     int y_offset = sidebar_pause_button && width < 680 && game_state_is_paused() ? 84 : 24;
@@ -268,6 +272,7 @@ static int is_rotate_forward_button(int x, int y)
     int city_x, city_y, width, height;
     city_view_get_viewport(&city_x, &city_y, &width, &height);
 
+    //TODO: config
     int sidebar_pause_button = sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED);
     int x_offset = sidebar_pause_button ? 4 * BLOCK_SIZE + 4 : 7 * BLOCK_SIZE + 4;
     int y_offset = sidebar_pause_button && width < 680 && game_state_is_paused() ? 84 : 24;
@@ -715,7 +720,7 @@ void widget_city_handle_input_military(const mouse *m, const hotkeys *h, int leg
 {
     map_tile *tile = &data.current_tile;
     update_city_view_coords(m->x, m->y, tile);
-    if (!city_view_is_sidebar_collapsed() && widget_minimap_handle_mouse(m)) {
+    if (!widget_sidebar_is_collapsed() && widget_minimap_handle_mouse(m)) {
         return;
     }
     scroll_map(m);
