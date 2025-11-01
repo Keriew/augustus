@@ -83,7 +83,7 @@ void building_house_change_to_vacant_lot(building *house)
     }
 }
 
-static void prepare_for_merge(int building_id, int num_tiles)
+static void prepare_for_merge(unsigned int building_id, int num_tiles)
 {
     for (resource_type r = 0; r < RESOURCE_MAX; r++) {
         merge_data.inventory[r] = 0;

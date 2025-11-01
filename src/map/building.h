@@ -10,7 +10,7 @@
  * @param grid_offset Map offset
  * @return Building ID of building at offset, 0 means no building
  */
-int map_building_at(int grid_offset);
+unsigned int map_building_at(int grid_offset);
 
 int map_building_from_buffer(buffer *buildings, int grid_offset);
 

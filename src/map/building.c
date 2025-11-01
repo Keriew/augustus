@@ -14,7 +14,7 @@ static grid_u8 damage_grid_backup;
 static grid_u32 rubble_info_grid_backup;
 
 
-int map_building_at(int grid_offset)
+unsigned int map_building_at(int grid_offset)
 {
     return map_grid_is_valid_offset(grid_offset) ? buildings_grid.items[grid_offset] : 0;
 }
