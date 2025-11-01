@@ -689,7 +689,8 @@ void building_construction_start(int x, int y, int grid_offset)
                 break;
             case BUILDING_DRAGGABLE_RESERVOIR:
                 can_start = map_routing_calculate_distances_for_building(
-                (routed_building_type)BUILDING_DRAGGABLE_RESERVOIR, data.start.x, data.start.y);
+                ROUTED_BUILDING_AQUEDUCT, data.start.x, data.start.y);
+                break;
             case BUILDING_WALL:
                 can_start = map_routing_calculate_distances_for_building(
                     ROUTED_BUILDING_WALL, data.start.x, data.start.y);
