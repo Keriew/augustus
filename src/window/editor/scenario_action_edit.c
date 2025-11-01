@@ -466,7 +466,7 @@ static void create_evaluation_formula(xml_data_attribute_t *parameter)
         memset(data.formula, 0, MAX_FORMULA_LENGTH); //clear if not assigned to prevent last formula from peeking through
         data.formula_index = 0;  // Reset formula index for new formulas
     }
-    window_text_input_expanded_show("FORMULA", "...", data.formula, MAX_FORMULA_LENGTH,
+    window_text_input_expanded_show(string_from_ascii("FORMULA"), string_from_ascii("..."), data.formula, MAX_FORMULA_LENGTH,
          set_formula_value, INPUT_BOX_CHARS_FORMULAS);
 }
 

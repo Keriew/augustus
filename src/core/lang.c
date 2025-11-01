@@ -93,7 +93,7 @@ static uint8_t *get_message_text(int32_t offset)
     if (l_type == LANGUAGE_GERMAN && offset == 289) {
         const uint8_t *try_translation = translation_for(TR_FIX_GERMAN_CITY_RETAKEN);
         if (try_translation) {
-            return try_translation;
+            return (uint8_t *) try_translation;
         }
     }
     return &data.message_data[offset];
