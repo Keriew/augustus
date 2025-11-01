@@ -53,7 +53,7 @@ void grid_box_draw(grid_box_type *grid_box);
 unsigned int get_usable_width(const grid_box_type *grid_box);
 void grid_box_set_bounds(grid_box_type *grid_box,
                          int new_x, int new_y,
-                         int new_width, int new_height);
+                         unsigned int new_width, unsigned int new_height);
 void grid_box_set_offset_scrollbar(grid_box_type *grid_box, int offset_scrollbar_x, int offset_scrollbar_y);
 int grid_box_handle_input(grid_box_type *grid_box, const mouse *m, int in_dialog);
 void grid_box_handle_tooltip(const grid_box_type *grid_box, tooltip_context *c);

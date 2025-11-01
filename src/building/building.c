@@ -334,7 +334,7 @@ void building_trim(void)
     array_trim(data.buildings);
 }
 
-int building_was_tent(building *b)
+int building_was_tent(const building *b)
 {
     return b->data.rubble.og_type == BUILDING_HOUSE_LARGE_TENT || b->data.rubble.og_type == BUILDING_HOUSE_SMALL_TENT;
 }
