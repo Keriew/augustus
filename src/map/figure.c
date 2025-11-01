@@ -9,7 +9,7 @@ int map_has_figure_at(int grid_offset)
     return map_grid_is_valid_offset(grid_offset) && figures.items[grid_offset] > 0;
 }
 
-int map_figure_at(int grid_offset)
+unsigned int map_figure_at(int grid_offset)
 {
     return map_grid_is_valid_offset(grid_offset) ? figures.items[grid_offset] : 0;
 }
@@ -72,7 +72,7 @@ void map_figure_delete(figure *f)
         figures.items[f->grid_offset] = f->next_figure_id_on_same_tile;
     } else {
         figure *prev = figure_get(figures.items[f->grid_offset]);
-        while (prev->id && prev->next_figure_id_on_same_tile != f->id) {
+        while (prev->id && (unsigned int) prev->next_figure_id_on_same_tile != f->id) {
             prev = figure_get(prev->next_figure_id_on_same_tile);
         }
         prev->next_figure_id_on_same_tile = f->next_figure_id_on_same_tile;
