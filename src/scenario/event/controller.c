@@ -208,8 +208,8 @@ static void conditions_save_state(buffer *buf)
     array_foreach(scenario_events, event)
     {
         total_groups += event->condition_groups.size;
-        array_foreach(event->condition_groups, group)
-        {
+        for (unsigned int j = 0; j < event->condition_groups.size; j++) {
+            group = array_item(event->condition_groups, j);
             total_conditions += group->conditions.size;
         }
     }
@@ -220,8 +220,8 @@ static void conditions_save_state(buffer *buf)
 
     array_foreach(scenario_events, event)
     {
-        array_foreach(event->condition_groups, group)
-        {
+        for (unsigned int j = 0; j < event->condition_groups.size; j++) {
+            group = array_item(event->condition_groups, j);
             scenario_condition_group_save_state(buf, group, LINK_TYPE_SCENARIO_EVENT, event->id);
         }
     }
@@ -542,16 +542,16 @@ void scenario_events_migrate_to_formulas(void)
     array_foreach(scenario_events, current) //go through all events
     {
         scenario_action_t *action;
-        array_foreach(current->actions, action) //go through all actions of this event
-        {
+        for (unsigned int j = 0; j < current->actions.size; j++) {
+            action = array_item(current->actions, j);
             migrate_parameters_action(action); //migrate parameters if needed
         }
         scenario_condition_group_t *group;
         scenario_condition_t *condition;
-        array_foreach(current->condition_groups, group) //through all condition groups of this event
-        {
-            array_foreach(group->conditions, condition) //through all conditions of this group
-            {
+        for (unsigned int j = 0; j < current->condition_groups.size; j++) {
+            group = array_item(current->condition_groups, j);
+            for (unsigned int k = 0; k < group->conditions.size; k++) {
+                condition = array_item(group->conditions, k);
                 migrate_parameters_condition(condition); //migrate parameters if needed
             }
         }
@@ -565,16 +565,16 @@ void scenario_events_assign_parent_event_ids(void)
     {
         int event_id = current->id;
         scenario_action_t *action;
-        array_foreach(current->actions, action) //go through all actions of this event
-        {
+        for (unsigned int j = 0; j < current->actions.size; j++) {
+            action = array_item(current->actions, j);
             action->parent_event_id = event_id;
         }
         scenario_condition_group_t *group;
         scenario_condition_t *condition;
-        array_foreach(current->condition_groups, group) //through all condition groups of this event
-        {
-            array_foreach(group->conditions, condition) //through all conditions of this group
-            {
+        for (unsigned int j = 0; j < current->condition_groups.size; j++) {
+            group = array_item(current->condition_groups, j);
+            for (unsigned int k = 0; k < group->conditions.size; k++) {
+                condition = array_item(group->conditions, k);
                 condition->parent_event_id = event_id;
             }
         }
@@ -589,8 +589,8 @@ void scenario_events_fetch_event_tiles_to_editor(void)
     {
         int event_id = current->id;
         scenario_action_t *action;
-        array_foreach(current->actions, action) //go through all actions of this event
-        {
+        for (unsigned int j = 0; j < current->actions.size; j++) {
+            action = array_item(current->actions, j);
             if (action->type == ACTION_TYPE_BUILDING_FORCE_COLLAPSE ||
                 action->type == ACTION_TYPE_CHANGE_TERRAIN) {
                 int grid_offset1 = action->parameter1;
@@ -604,10 +604,10 @@ void scenario_events_fetch_event_tiles_to_editor(void)
         }
         scenario_condition_group_t *group;
         scenario_condition_t *condition;
-        array_foreach(current->condition_groups, group) //through all condition groups of this event
-        {
-            array_foreach(group->conditions, condition) //through all conditions of this group
-            {
+        for (unsigned int j = 0; j < current->condition_groups.size; j++) {
+            group = array_item(current->condition_groups, j);
+            for (unsigned int k = 0; k < group->conditions.size; k++) {
+                condition = array_item(group->conditions, k);
                 if (condition->type == CONDITION_TYPE_BUILDING_COUNT_AREA ||
                     condition->type == CONDITION_TYPE_TERRAIN_IN_AREA) {
                     int grid_offset1 = condition->parameter1;
@@ -628,8 +628,8 @@ void scenario_events_migrate_to_grid_slices(void)
     array_foreach(scenario_events, current) //go through all events
     {
         scenario_action_t *action;
-        array_foreach(current->actions, action) //go through all actions of this event
-        {
+        for (unsigned int j = 0; j < current->actions.size; j++) {
+            action = array_item(current->actions, j);
             if (action->type == ACTION_TYPE_BUILDING_FORCE_COLLAPSE ||
                 action->type == ACTION_TYPE_CHANGE_TERRAIN) {
                 // For these action types, we need to convert grid offset and radius into grid offset corners
@@ -645,10 +645,10 @@ void scenario_events_migrate_to_grid_slices(void)
         }
         scenario_condition_group_t *group;
         scenario_condition_t *condition;
-        array_foreach(current->condition_groups, group) //through all condition groups of this event
-        {
-            array_foreach(group->conditions, condition) //through all conditions of this group
-            {
+        for (unsigned int j = 0; j < current->condition_groups.size; j++) {
+            group = array_item(current->condition_groups, j);
+            for (unsigned int k = 0; k < group->conditions.size; k++) {
+                condition = array_item(group->conditions, k);
                 if (condition->type == CONDITION_TYPE_BUILDING_COUNT_AREA) {
                     // CONDITION_TYPE_TERRAIN_IN_AREA introduced with the new parameters from start
                     int old_grid_offset = scenario_formula_evaluate_formula(condition->parameter1);
