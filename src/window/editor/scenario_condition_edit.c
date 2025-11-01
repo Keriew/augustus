@@ -398,8 +398,8 @@ static void on_grid_slice_selected(grid_slice *selection)
 {
     if (!selection || selection->size == 0) {
         // User cancelled or invalid selection
-        editor_tool_deactivate();
-        window_editor_scenario_condition_edit_show(data.condition);
+        editor_tool_clear_selection_callback();
+        window_go_back();
         return;
     }
     // Get the start and end grid offsets (opposite corners of the rectangle)
@@ -414,9 +414,9 @@ static void on_grid_slice_selected(grid_slice *selection)
     }
     data.condition->parameter1 = start_offset;
     data.condition->parameter2 = end_offset;
-    // Deactivate the tool and return to the condition edit window
-    editor_tool_deactivate();
-    window_editor_scenario_condition_edit_show(data.condition);
+    scenario_events_fetch_event_tiles_to_editor();
+    editor_tool_clear_selection_callback();
+    window_go_back();
 }
 
 static void start_grid_slice_selection(void)
@@ -442,6 +442,7 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
         case PARAMETER_TYPE_BUILDING:
         case PARAMETER_TYPE_BUILDING_COUNTING:
         case PARAMETER_TYPE_CHECK:
+        case PARAMETER_TYPE_TERRAIN:
         case PARAMETER_TYPE_DIFFICULTY:
         case PARAMETER_TYPE_ENEMY_TYPE:
         case PARAMETER_TYPE_INVASION_TYPE:
@@ -472,10 +473,6 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             return;
         case PARAMETER_TYPE_GRID_SLICE:
         {
-            int grid_offset1 = data.condition->parameter1;
-            int grid_offset2 = data.condition->parameter2;
-            grid_slice *existing_selection = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
-            editor_tool_set_existing_land_selection(existing_selection);
             start_grid_slice_selection();
             return;
         }

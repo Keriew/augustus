@@ -40,6 +40,7 @@ tool_type editor_tool_type(void);
 int editor_tool_is_active(void);
 void editor_tool_deactivate(void);
 void editor_tool_set_type(tool_type tool);
+void editor_tool_clear_selection_callback(void);
 void editor_tool_set_with_id(tool_type tool, int id);
 
 int editor_tool_is_brush(void);
@@ -70,13 +71,7 @@ void editor_tool_set_selection_callback(void (*callback)(grid_slice *selection))
  */
 grid_slice *editor_tool_get_land_selection(void);
 
-grid_slice *editor_tool_get_existing_land_selection(void);
-
 void editor_tool_set_land_selection(grid_slice *selection);
-
-void editor_tool_set_existing_land_selection(grid_slice *selection);
-
-void editor_tool_clear_existing_land_selection(void);
 
 void editor_tool_clear_land_selection(void);
 

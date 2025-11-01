@@ -99,7 +99,6 @@ int widget_map_editor_add_draw_context_event_tile(int grid_offset, int event_id)
 
 static void draw_event_area_highlight(int x, int y, int grid_offset)
 {
-
     for (int grid_x = 0; x < GRID_SIZE; x++) {
         for (int grid_y = 0; y < GRID_SIZE; y++) {
             grid_offset = map_grid_offset(grid_x, grid_y);

@@ -36,8 +36,12 @@ const terrain_flags_array *map_terrain_to_array(int grid_offset)
         return &result;
     }
 
-    for (int i = 0; i < TERRAIN_NUM_FLAGS; ++i) {
+    for (int i = 0; i < TERRAIN_NUM_FLAGS; i++) {
         if ((terrain_value >> i) & 1) {
+            if (result.count >= TERRAIN_NUM_FLAGS) {
+                // Safety: avoid buffer overflow
+                break;
+            }
             result.bits[i] = 1;
 
             strncpy(result.key[result.count], names[i], KEY_MAX_LEN - 1);

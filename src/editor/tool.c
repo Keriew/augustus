@@ -40,10 +40,9 @@ static struct {
     int start_elevation;
     map_tile start_tile;
     grid_slice *land_selection; // selection being edited right now
-    grid_slice *existing_selection; // previously existing selection
     void (*selection_callback)(grid_slice *selection);
     int found_custom_earthquake;
-} data = { 0, TOOL_GRASS, 0, 3, 0, 0, {0}, NULL, NULL, 0, 0 };
+} data = { 0, TOOL_GRASS, 0, 3, 0, 0, {0}, NULL, 0, 0 };
 
 tool_type editor_tool_type(void)
 {
@@ -57,17 +56,29 @@ int editor_tool_is_active(void)
 
 void editor_tool_deactivate(void)
 {
-    if (editor_tool_is_updatable() && data.build_in_progress) {
-        game_undo_restore_map(1);
-        data.build_in_progress = 0;
-    } else {
+    if (data.selection_callback && data.type == TOOL_SELECT_LAND) {
         data.active = 0;
-    }
+        data.selection_callback(data.land_selection);
+    } else
+        if (editor_tool_is_updatable() && data.build_in_progress) {
+            game_undo_restore_map(1);
+            data.build_in_progress = 0;
+        } else {
+            data.active = 0;
+        }
 }
 
 void editor_tool_set_type(tool_type type)
 {
     editor_tool_set_with_id(type, 0);
+    if (type == TOOL_SELECT_LAND) {
+        data.land_selection = map_grid_get_grid_slice(0, 0); // empty selection
+    }
+}
+
+void editor_tool_clear_selection_callback(void)
+{
+    data.selection_callback = 0;
 }
 
 void editor_tool_set_with_id(tool_type type, int id)
@@ -200,7 +211,7 @@ static void add_terrain(const void *tile_data, int dx, int dy)
         map_terrain_remove(grid_offset, TERRAIN_RUBBLE);
         terrain = map_terrain_get(grid_offset);
     }
-    
+
     if (map_property_is_future_earthquake(grid_offset)) {
         data.found_custom_earthquake += 1;
     }
@@ -278,7 +289,7 @@ void editor_tool_update_use(const map_tile *tile)
     if (!editor_tool_is_brush()) {
         return;
     }
-    
+
     data.found_custom_earthquake = 0;
 
     editor_tool_foreach_brush_tile(add_terrain, tile);
@@ -336,13 +347,13 @@ void editor_tool_update_use(const map_tile *tile)
             map_tiles_update_region_meadow(x_min, y_min, x_max, y_max);
             break;
         case TOOL_EARTHQUAKE_CUSTOM:
-            {
+        {
             int max_tiles_covered_by_brush = 2 * data.brush_size * data.brush_size - 2 * data.brush_size + 1;
             if (data.found_custom_earthquake < max_tiles_covered_by_brush) {
                 widget_map_editor_custom_earthquake_request_refresh();
             }
             break;
-            }
+        }
         case TOOL_EARTHQUAKE_CUSTOM_REMOVE:
             if (data.found_custom_earthquake) {
                 widget_map_editor_custom_earthquake_request_refresh();
@@ -577,24 +588,9 @@ grid_slice *editor_tool_get_land_selection(void)
     return data.land_selection;
 }
 
-grid_slice *editor_tool_get_existing_land_selection(void)
-{
-    return data.existing_selection;
-}
-
 void editor_tool_set_land_selection(grid_slice *selection)
 {
     data.land_selection = selection;
-}
-
-void editor_tool_set_existing_land_selection(grid_slice *selection)
-{
-    data.existing_selection = selection;
-}
-
-void editor_tool_clear_existing_land_selection(void)
-{
-    memset(data.existing_selection, 0, sizeof(grid_slice));
 }
 
 void editor_tool_clear_land_selection(void)

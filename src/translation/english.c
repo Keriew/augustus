@@ -1885,6 +1885,8 @@ static translation_string all_strings[] = {
     {TR_EDITOR_DESIRABILITY_STEP_SIZE, "Desirability step size\nThe ammount it increases/decreases"},
     {TR_EDITOR_DESIRABILITY_RANGE, "Desirability range\nThe max range beyond it there's no impact"},
     {TR_EDITOR_EARTHQUAKE_PATTERN, "Pattern"},
+    {TR_CONFIG_GENERAL_UNLOCK_MOUSE, "Lock mouse in Fullscreen mode" },
+    {TR_CONFIG_GP_CH_HOUSING_PRE_MERGE_VACANT_LOTS, "Houses always merge in 2x2"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

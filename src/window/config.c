@@ -22,6 +22,7 @@
 #include "graphics/scrollbar.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
+#include "platform/screen.h"
 #include "sound/city.h"
 #include "sound/device.h"
 #include "sound/effect.h"
@@ -37,6 +38,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <SDL_mouse.h>
 
 #define MAX_LANGUAGE_DIRS 20
 #define MAX_WIDGETS       64
@@ -153,6 +155,7 @@ static const uint8_t *display_text_difficulty(void);
 static const uint8_t *display_text_max_grand_temples(void);
 static const uint8_t *display_text_autosave_slots(void);
 static const uint8_t *display_text_default_game_speed(void);
+
 // page-related helpers
 static int get_widget_count_for(unsigned int page);
 static void set_page(unsigned int page);
@@ -189,6 +192,7 @@ static config_widget page_general[] = {
     {TYPE_NUMERICAL_DESC, RANGE_CURSOR_SCALE, TR_CONFIG_CURSOR_SCALE, NULL, 0, 1, ITEM_BASE_H, 10},
     {TYPE_NUMERICAL_RANGE, RANGE_CURSOR_SCALE, 0, display_text_cursor_scale, 0, 1, ITEM_BASE_H, 2},
     {TYPE_CHECKBOX, CONFIG_SCREEN_COLOR_CURSORS, TR_CONFIG_USE_COLOR_CURSORS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+    {TYPE_CHECKBOX, CONFIG_GENERAL_UNLOCK_MOUSE, TR_CONFIG_GENERAL_UNLOCK_MOUSE, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
 
     {TYPE_HEADER, 0, TR_CONFIG_AUDIO, NULL, 0, 1, ITEM_BASE_H, 14},
     {TYPE_CHECKBOX, CONFIG_GENERAL_ENABLE_AUDIO, TR_CONFIG_ENABLE_AUDIO, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
@@ -328,6 +332,7 @@ static config_widget city_mgmt_widgets_by_category[CATEGORY_CITY_COUNT][MAX_WIDG
         {TYPE_CHECKBOX, CONFIG_GP_CH_ALL_HOUSES_MERGE, TR_CONFIG_ALL_HOUSES_MERGE, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_GP_CH_PATRICIAN_DEVOLUTION_FIX, TR_CONFIG_PATRICIAN_DEVOLUTION_FIX, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_GP_CH_HOUSES_DONT_EXPAND_INTO_GARDENS, TR_CONFIG_HOUSES_DONT_EXPAND_INTO_GARDENS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_HOUSING_PRE_MERGE_VACANT_LOTS, TR_CONFIG_GP_CH_HOUSING_PRE_MERGE_VACANT_LOTS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     }
 };
@@ -724,6 +729,14 @@ static int config_set_city_sounds_volume(int key)
     return 1;
 }
 
+static int config_mouse_unlock_fullscreen(int key)
+{
+    config_change_basic(key);
+    platform_screen_update_window_grab();
+    window_invalidate();
+    return 1;
+}
+
 //  Scroll
 
 static int config_change_scroll_speed(int key)
@@ -915,6 +928,7 @@ static void set_custom_config_changes(void)
     data.config_values[CONFIG_SCREEN_DISPLAY_SCALE].change_action = config_change_display_scale;
     data.config_values[CONFIG_SCREEN_CURSOR_SCALE].change_action = config_change_cursors;
     data.config_values[CONFIG_SCREEN_COLOR_CURSORS].change_action = config_change_cursors;
+    data.config_values[CONFIG_GENERAL_UNLOCK_MOUSE].change_action = config_mouse_unlock_fullscreen;
     data.config_values[CONFIG_ORIGINAL_GAME_SPEED].change_action = config_change_game_speed;
     data.config_values[CONFIG_GP_CH_DEFAULT_GAME_SPEED].change_action = config_change_basic;
     //  audio
