@@ -48,7 +48,6 @@ static struct {
     size_t misc;
     size_t alt_huts;
     size_t native_buildings;
-    size_t earthquake_patterns;
     size_t introduction;
     size_t custom_variables;
     size_t custom_name;
@@ -172,11 +171,6 @@ static void calculate_buffer_offsets(int scenario_version)
     if (scenario_version > SCENARIO_LAST_NO_CUSTOM_MESSAGES) {
         buffer_offsets.introduction = next_start_offset;
         next_start_offset = buffer_offsets.introduction + 4;
-    }
-    
-    if (scenario_version > SCENARIO_TESTING_VERSION_BUMP_7) {
-        buffer_offsets.earthquake_patterns = next_start_offset;
-        next_start_offset = buffer_offsets.introduction + 1;
     }
 
     if (scenario_version > SCENARIO_LAST_NO_CUSTOM_VARIABLES && scenario_version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
@@ -491,7 +485,11 @@ void scenario_load_state(buffer *buf, int version)
 
     scenario.earthquake.severity = buffer_read_i32(buf);
     scenario.earthquake.year = buffer_read_i32(buf);
-    scenario.earthquake.pattern = buffer_read_u8(buf);
+    if (version > SCENARIO_TESTING_VERSION_BUMP_7) {
+        scenario.earthquake.pattern = buffer_read_u8(buf);
+    } else {
+        scenario.earthquake.pattern = 0;
+    }
 
     scenario.win_criteria.population.enabled = buffer_read_i32(buf);
     scenario.win_criteria.population.goal = buffer_read_i32(buf);
