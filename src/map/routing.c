@@ -420,9 +420,9 @@ static int map_can_place_initial_reservoir(int grid_offset)
         } else {
             return 0;
         }
-    } else {
-        return 0;
     }
+    
+    return 0;
 
 }
 

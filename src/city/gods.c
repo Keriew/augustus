@@ -85,6 +85,8 @@ static void perform_blessing(god_type god)
             city_population_venus_blessing();
             city_data.religion.venus_blessing_months_left = VENUS_BLESSING_MONTHS;
             break;
+        default:
+            break;
     }
 }
 
@@ -122,6 +124,8 @@ static void perform_small_curse(god_type god)
             city_data.sentiment.blessing_festival_boost -= 15;
             city_health_change(-10);
             city_sentiment_update();
+            break;
+        default:
             break;
     }
 }
@@ -170,6 +174,8 @@ static int perform_large_curse(god_type god)
             }
             city_data.religion.venus_curse_active = 1;
             city_sentiment_update();
+            break;
+        default:
             break;
     }
     return 1;

@@ -48,7 +48,7 @@ static void export_model_data(buffer *buf)
         }
 
         model_building *model = model_get_building(type);
-        model_building *prop_model = &props->building_model_data; //de-constantify to remove warning
+        model_building *prop_model = (model_building *) &props->building_model_data;
         if (!model) {
             continue;
         }
