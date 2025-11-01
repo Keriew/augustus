@@ -174,7 +174,7 @@ static void calculate_buffer_offsets(int scenario_version)
         next_start_offset = buffer_offsets.introduction + 4;
     }
     
-    if (scenario_version > SCENARIO_TESTING_VERSION_BUMP_6) {
+    if (scenario_version > SCENARIO_TESTING_VERSION_BUMP_7) {
         buffer_offsets.earthquake_patterns = next_start_offset;
         next_start_offset = buffer_offsets.introduction + 1;
     }
