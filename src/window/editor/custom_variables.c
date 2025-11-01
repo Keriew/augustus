@@ -733,8 +733,9 @@ static void handle_input(const mouse *m, const hotkeys *h)
     if (data.expanded_dropdown != -1 && data.custom_variables_in_use) { // handle dropdowns, starting with expanded
         if (dropdown_button_handle_mouse(m_dialog, &color_dropdowns[data.expanded_dropdown])) {
             window_invalidate();
+            return;
         }
-        return;
+
     } else {
         for (int i = 0; i < MAX_VISIBLE_GRID_ITEMS; ++i) {
             if (dropdown_button_handle_mouse(m_dialog, &color_dropdowns[i])) {
