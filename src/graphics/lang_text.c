@@ -287,6 +287,8 @@ int lang_text_draw_sequence_multiline(const lang_fragment *seq, int count, int x
                         case LANG_FRAG_SPACE:
                             current_x += f->space_width;
                             break;
+                        default:
+                            break;
                     }
                     break;
             }
