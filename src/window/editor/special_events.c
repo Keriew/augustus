@@ -106,8 +106,9 @@ static void draw_foreground(void)
     lang_text_draw_year(
         scenario_property_start_year() + scenario_editor_earthquake_year(),
         380, 112, FONT_NORMAL_BLACK);
-    
-    dropdown_button_draw(&earthquake_pattern_dropdown);
+    if (scenario.earthquake.severity == EARTHQUAKE_CUSTOM) {
+        dropdown_button_draw(&earthquake_pattern_dropdown);
+    }
 
     // gladiator revolt
     lang_text_draw(38, 2, 36, 142, FONT_NORMAL_BLACK);
@@ -179,9 +180,13 @@ static void draw_foreground(void)
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
-    if (generic_buttons_handle_mouse(m_dialog, 0, 0, buttons, 15, &focus_button_id) || 
-        dropdown_button_handle_mouse(m_dialog, &earthquake_pattern_dropdown)) {
+    if (generic_buttons_handle_mouse(m_dialog, 0, 0, buttons, 15, &focus_button_id)) {
         return;
+    }
+    if (scenario.earthquake.severity == EARTHQUAKE_CUSTOM) {
+        if (dropdown_button_handle_mouse(m_dialog, &earthquake_pattern_dropdown)) {
+            return;
+        }
     }
     if (input_go_back_requested(m, h)) {
         window_editor_attributes_show();
