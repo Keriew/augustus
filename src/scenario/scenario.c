@@ -653,7 +653,7 @@ void scenario_objectives_from_buffer(buffer *buf, int version, scenario_win_crit
     } else if (version <= SCENARIO_LAST_NO_WAGE_LIMITS) {
         buffer_set(buf, 1632);
     } else {
-        buffer_set(buf, buffer_offsets.win_criteria);
+        buffer_set(buf, buffer_offsets.win_criteria + 2); // 2 bits for favour reset
     }
     win_criteria->culture.goal = buffer_read_i32(buf);
     win_criteria->prosperity.goal = buffer_read_i32(buf);
