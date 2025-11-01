@@ -102,7 +102,7 @@ int assets_get_image_id(const char *assetlist_name, const char *image_name)
         return data.roadblock_image_id;
     }
     const asset_image *img = asset_image_get_from_id(group->first_image_index);
-    while (img && img->index <= group->last_image_index) {
+    while (img && img->index <= (unsigned int) group->last_image_index) {
         if (img->id && strcmp(img->id, image_name) == 0) {
             return img->index + IMAGE_MAIN_ENTRIES;
         }
@@ -121,7 +121,7 @@ int assets_get_external_image(const char *path, int force_reload)
     image_groups *group = group_get_from_name(ASSET_EXTERNAL_FILE_LIST);
     asset_image *img = asset_image_get_from_id(group->first_image_index);
     int was_found = 0;
-    while (img && img->index <= group->last_image_index) {
+    while (img && img->index <= (unsigned int) group->last_image_index) {
         if (img->id && strcmp(img->id, path) == 0) {
             if (!force_reload) {
                 return img->index + IMAGE_MAIN_ENTRIES;

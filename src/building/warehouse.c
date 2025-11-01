@@ -309,8 +309,20 @@ int building_warehouse_add_import(building *warehouse, int resource, int amount,
             // account for fetched warehouse space instead of main warehouse
         }
     }
-    building_storage_permission_states permission = land_trader ?
-        BUILDING_STORAGE_PERMISSION_TRADERS : BUILDING_STORAGE_PERMISSION_DOCK;
+    building_storage_permission_states permission;
+    switch (land_trader) {
+        default:
+        case 0: // sea trader
+            permission = BUILDING_STORAGE_PERMISSION_DOCK;
+            break;
+        case 1: // land trader
+            permission = BUILDING_STORAGE_PERMISSION_TRADERS;
+            break;
+        case -1: //native trader
+            permission = BUILDING_STORAGE_PERMISSION_NATIVES;
+            land_trader = 1; // native trader is always land trader
+            break;
+    }
     if (!building_storage_get_permission(permission, warehouse)) {
         return 0; // cannot import to this warehouse
     }
@@ -340,6 +352,7 @@ int building_warehouse_remove_export(building *warehouse, int resource, int amou
     }
     building_storage_permission_states permission;
     switch (land_trader) {
+        default:
         case 0: // sea trader
             permission = BUILDING_STORAGE_PERMISSION_DOCK;
             break;
@@ -582,7 +595,7 @@ int building_warehouse_for_storing(int src_building_id, int x, int y, int resour
     int min_dist = INFINITE;
     int min_building_id = 0;
     for (building *b = building_first_of_type(BUILDING_WAREHOUSE); b; b = b->next_of_type) {
-        if (b->id == src_building_id || (road_network_id != -1 && b->road_network_id != road_network_id) ||
+        if (b->id == (unsigned int) src_building_id || (road_network_id != -1 && b->road_network_id != road_network_id) ||
             !building_warehouse_accepts_storage(b, resource, understaffed) ||
             (building_warehouse_maximum_receptible_amount(b, resource) <= 0)) {
             continue;

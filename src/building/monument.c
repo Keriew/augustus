@@ -35,146 +35,146 @@ typedef struct {
 } monument_type;
 
 static const monument_type grand_temple = {
-    .phases    = 6,
+    .phases = 6,
     .resources = {
-        { [ARCHITECTS] = 1, [RESOURCE_STONE] = 20 },
-        { [ARCHITECTS] = 1, [RESOURCE_TIMBER] = 8, [RESOURCE_CONCRETE] = 20 },
-        { [ARCHITECTS] = 1, [RESOURCE_TIMBER] = 8, [RESOURCE_MARBLE] = 16 },
-        { [ARCHITECTS] = 1, [RESOURCE_TIMBER] = 16, [RESOURCE_BRICKS] = 28, [RESOURCE_MARBLE] = 12 },
+        { [ARCHITECTS] = 1,[RESOURCE_STONE] = 20 },
+        { [ARCHITECTS] = 1,[RESOURCE_TIMBER] = 8,[RESOURCE_CONCRETE] = 20 },
+        { [ARCHITECTS] = 1,[RESOURCE_TIMBER] = 8,[RESOURCE_MARBLE] = 16 },
+        { [ARCHITECTS] = 1,[RESOURCE_TIMBER] = 16,[RESOURCE_BRICKS] = 28,[RESOURCE_MARBLE] = 12 },
         { [ARCHITECTS] = 4 },
         { NOTHING }
     }
 };
 
 static const monument_type pantheon = {
-    .phases    = 6,
+    .phases = 6,
     .resources = {
-        { [ARCHITECTS] = 1, [RESOURCE_STONE] = 20 },
-        { [ARCHITECTS] = 1, [RESOURCE_TIMBER] = 8,  [RESOURCE_STONE] = 20 },
-        { [ARCHITECTS] = 1, [RESOURCE_TIMBER] = 16, [RESOURCE_CONCRETE] = 40 },
-        { [ARCHITECTS] = 1, [RESOURCE_TIMBER] = 16, [RESOURCE_MARBLE] = 32, [RESOURCE_GOLD] = 16 },
+        { [ARCHITECTS] = 1,[RESOURCE_STONE] = 20 },
+        { [ARCHITECTS] = 1,[RESOURCE_TIMBER] = 8,[RESOURCE_STONE] = 20 },
+        { [ARCHITECTS] = 1,[RESOURCE_TIMBER] = 16,[RESOURCE_CONCRETE] = 40 },
+        { [ARCHITECTS] = 1,[RESOURCE_TIMBER] = 16,[RESOURCE_MARBLE] = 32,[RESOURCE_GOLD] = 16 },
         { [ARCHITECTS] = 4 },
         { NOTHING }
     }
 };
 
 static const monument_type lighthouse = {
-    .phases    = 5,
+    .phases = 5,
     .resources = {
-        { [ARCHITECTS] = 1, [RESOURCE_STONE] = 16 },
-        { [ARCHITECTS] = 1, [RESOURCE_TIMBER] = 8,  [RESOURCE_STONE] = 16 },
-        { [ARCHITECTS] = 1, [RESOURCE_TIMBER] = 16, [RESOURCE_STONE] = 12 },
-        { [ARCHITECTS] = 4, [RESOURCE_TIMBER] = 8,  [RESOURCE_BRICKS] = 20, [RESOURCE_STONE] = 12 },
+        { [ARCHITECTS] = 1,[RESOURCE_STONE] = 16 },
+        { [ARCHITECTS] = 1,[RESOURCE_TIMBER] = 8,[RESOURCE_STONE] = 16 },
+        { [ARCHITECTS] = 1,[RESOURCE_TIMBER] = 16,[RESOURCE_STONE] = 12 },
+        { [ARCHITECTS] = 4,[RESOURCE_TIMBER] = 8,[RESOURCE_BRICKS] = 20,[RESOURCE_STONE] = 12 },
         { NOTHING }
     }
 };
 
 static const monument_type colosseum = {
-    .phases    = 5,
+    .phases = 5,
     .resources = {
-        { [ARCHITECTS] = 1, [RESOURCE_STONE] = 12 },
-        { [ARCHITECTS] = 1, [RESOURCE_TIMBER] = 8,  [RESOURCE_CONCRETE] = 16 },
-        { [ARCHITECTS] = 1, [RESOURCE_TIMBER] = 12, [RESOURCE_STONE] = 16 },
-        { [ARCHITECTS] = 4, [RESOURCE_TIMBER] = 12, [RESOURCE_BRICKS] = 16, [RESOURCE_MARBLE] = 20 },
+        { [ARCHITECTS] = 1,[RESOURCE_STONE] = 12 },
+        { [ARCHITECTS] = 1,[RESOURCE_TIMBER] = 8,[RESOURCE_CONCRETE] = 16 },
+        { [ARCHITECTS] = 1,[RESOURCE_TIMBER] = 12,[RESOURCE_STONE] = 16 },
+        { [ARCHITECTS] = 4,[RESOURCE_TIMBER] = 12,[RESOURCE_BRICKS] = 16,[RESOURCE_MARBLE] = 20 },
         { NOTHING }
     }
 };
 
 static const monument_type hippodrome = {
-    .phases    = 5,
+    .phases = 5,
     .resources = {
-        { [ARCHITECTS] = 1, [RESOURCE_STONE] = 32 },
-        { [ARCHITECTS] = 1, [RESOURCE_TIMBER] = 16, [RESOURCE_CONCRETE] = 32 },
-        { [ARCHITECTS] = 1, [RESOURCE_TIMBER] = 16, [RESOURCE_STONE] = 32 },
-        { [ARCHITECTS] = 4, [RESOURCE_TIMBER] = 32, [RESOURCE_BRICKS] = 32, [RESOURCE_MARBLE] = 48 },
+        { [ARCHITECTS] = 1,[RESOURCE_STONE] = 32 },
+        { [ARCHITECTS] = 1,[RESOURCE_TIMBER] = 16,[RESOURCE_CONCRETE] = 32 },
+        { [ARCHITECTS] = 1,[RESOURCE_TIMBER] = 16,[RESOURCE_STONE] = 32 },
+        { [ARCHITECTS] = 4,[RESOURCE_TIMBER] = 32,[RESOURCE_BRICKS] = 32,[RESOURCE_MARBLE] = 48 },
         { NOTHING }
     }
 };
 
 static const monument_type oracle = {
-    .phases    = 3,
+    .phases = 3,
     .resources = {
-        { [ARCHITECTS] = 1, [RESOURCE_CONCRETE] = 2, [RESOURCE_MARBLE] = 2 },
+        { [ARCHITECTS] = 1,[RESOURCE_CONCRETE] = 2,[RESOURCE_MARBLE] = 2 },
         { [ARCHITECTS] = 1 },
         { NOTHING }
     }
 };
 
 static const monument_type small_mausoleum = {
-    .phases    = 3,
+    .phases = 3,
     .resources = {
-        { [ARCHITECTS] = 1, [RESOURCE_STONE] = 2, [RESOURCE_CONCRETE] = 4 },
-        { [ARCHITECTS] = 1, [RESOURCE_MARBLE] = 2 },
+        { [ARCHITECTS] = 1,[RESOURCE_STONE] = 2,[RESOURCE_CONCRETE] = 4 },
+        { [ARCHITECTS] = 1,[RESOURCE_MARBLE] = 2 },
         { NOTHING }
     }
 };
 
 static const monument_type large_temple = {
-    .phases    = 3,
+    .phases = 3,
     .resources = {
-        { [ARCHITECTS] = 1, [RESOURCE_STONE] = 4, [RESOURCE_CONCRETE] = 4 },
-        { [ARCHITECTS] = 1, [RESOURCE_MARBLE] = 2 },
+        { [ARCHITECTS] = 1,[RESOURCE_STONE] = 4,[RESOURCE_CONCRETE] = 4 },
+        { [ARCHITECTS] = 1,[RESOURCE_MARBLE] = 2 },
         { NOTHING }
     }
 };
 
 static const monument_type nymphaeum = {
-    .phases    = 3,
+    .phases = 3,
     .resources = {
-        { [ARCHITECTS] = 1, [RESOURCE_STONE] = 12, [RESOURCE_CONCRETE] = 4 },
-        { [ARCHITECTS] = 1, [RESOURCE_MARBLE] = 2 },
+        { [ARCHITECTS] = 1,[RESOURCE_STONE] = 12,[RESOURCE_CONCRETE] = 4 },
+        { [ARCHITECTS] = 1,[RESOURCE_MARBLE] = 2 },
         { NOTHING }
     }
 };
 
 static const monument_type large_mausoleum = {
-    .phases    = 3,
+    .phases = 3,
     .resources = {
-        { [ARCHITECTS] = 1, [RESOURCE_STONE] = 8, [RESOURCE_CONCRETE] = 4 },
-        { [ARCHITECTS] = 1, [RESOURCE_MARBLE] = 4 },
+        { [ARCHITECTS] = 1,[RESOURCE_STONE] = 8,[RESOURCE_CONCRETE] = 4 },
+        { [ARCHITECTS] = 1,[RESOURCE_MARBLE] = 4 },
         { NOTHING }
     }
 };
 
 static const monument_type caravanserai = {
-    .phases    = 3,
+    .phases = 3,
     .resources = {
-        { [ARCHITECTS] = 1, [RESOURCE_STONE] = 12 },
-        { [ARCHITECTS] = 1, [RESOURCE_TIMBER] = 8, [RESOURCE_BRICKS] = 12, [RESOURCE_STONE] = 12 },
+        { [ARCHITECTS] = 1,[RESOURCE_STONE] = 12 },
+        { [ARCHITECTS] = 1,[RESOURCE_TIMBER] = 8,[RESOURCE_BRICKS] = 12,[RESOURCE_STONE] = 12 },
         { NOTHING }
     }
 };
 
 static const monument_type city_mint = {
-    .phases    = 3,
+    .phases = 3,
     .resources = {
-        { [ARCHITECTS] = 1, [RESOURCE_STONE] = 8 },
-        { [ARCHITECTS] = 1, [RESOURCE_BRICKS] = 4, [RESOURCE_IRON] = 4, [RESOURCE_TIMBER] = 4 },
+        { [ARCHITECTS] = 1,[RESOURCE_STONE] = 8 },
+        { [ARCHITECTS] = 1,[RESOURCE_BRICKS] = 4,[RESOURCE_IRON] = 4,[RESOURCE_TIMBER] = 4 },
         { NOTHING }
     }
 };
 
 static const monument_type *MONUMENT_TYPES[BUILDING_TYPE_MAX] = {
-    [BUILDING_GRAND_TEMPLE_CERES]   = &grand_temple,
+    [BUILDING_GRAND_TEMPLE_CERES] = &grand_temple,
     [BUILDING_GRAND_TEMPLE_NEPTUNE] = &grand_temple,
     [BUILDING_GRAND_TEMPLE_MERCURY] = &grand_temple,
-    [BUILDING_GRAND_TEMPLE_MARS]    = &grand_temple,
-    [BUILDING_GRAND_TEMPLE_VENUS]   = &grand_temple,
-    [BUILDING_PANTHEON]             = &pantheon,
-    [BUILDING_ORACLE]               = &oracle,
-    [BUILDING_LARGE_TEMPLE_CERES]   = &large_temple,
+    [BUILDING_GRAND_TEMPLE_MARS] = &grand_temple,
+    [BUILDING_GRAND_TEMPLE_VENUS] = &grand_temple,
+    [BUILDING_PANTHEON] = &pantheon,
+    [BUILDING_ORACLE] = &oracle,
+    [BUILDING_LARGE_TEMPLE_CERES] = &large_temple,
     [BUILDING_LARGE_TEMPLE_NEPTUNE] = &large_temple,
     [BUILDING_LARGE_TEMPLE_MERCURY] = &large_temple,
-    [BUILDING_LARGE_TEMPLE_MARS]    = &large_temple,
-    [BUILDING_LARGE_TEMPLE_VENUS]   = &large_temple,
-    [BUILDING_LIGHTHOUSE]           = &lighthouse,
-    [BUILDING_COLOSSEUM]            = &colosseum,
-    [BUILDING_HIPPODROME]           = &hippodrome,
-    [BUILDING_NYMPHAEUM]            = &nymphaeum,
-    [BUILDING_LARGE_MAUSOLEUM]      = &large_mausoleum,
-    [BUILDING_SMALL_MAUSOLEUM]      = &small_mausoleum,
-    [BUILDING_CARAVANSERAI]         = &caravanserai,
-    [BUILDING_CITY_MINT]            = &city_mint
+    [BUILDING_LARGE_TEMPLE_MARS] = &large_temple,
+    [BUILDING_LARGE_TEMPLE_VENUS] = &large_temple,
+    [BUILDING_LIGHTHOUSE] = &lighthouse,
+    [BUILDING_COLOSSEUM] = &colosseum,
+    [BUILDING_HIPPODROME] = &hippodrome,
+    [BUILDING_NYMPHAEUM] = &nymphaeum,
+    [BUILDING_LARGE_MAUSOLEUM] = &large_mausoleum,
+    [BUILDING_SMALL_MAUSOLEUM] = &small_mausoleum,
+    [BUILDING_CARAVANSERAI] = &caravanserai,
+    [BUILDING_CITY_MINT] = &city_mint
 };
 
 typedef struct {
@@ -536,7 +536,8 @@ void building_monument_add_delivery(int monument_id, int figure_id, int resource
 int building_monument_has_delivery_for_worker(int figure_id)
 {
     monument_delivery *delivery;
-    array_foreach(monument_deliveries, delivery) {
+    array_foreach(monument_deliveries, delivery)
+    {
         if (delivery->walker_id == figure_id && delivery->destination_id > 0) {
             return 1;
         }
@@ -547,7 +548,8 @@ int building_monument_has_delivery_for_worker(int figure_id)
 void building_monument_remove_delivery(int figure_id)
 {
     monument_delivery *delivery;
-    array_foreach(monument_deliveries, delivery) {
+    array_foreach(monument_deliveries, delivery)
+    {
         if (delivery->walker_id == figure_id) {
             delivery->destination_id = 0;
         }
@@ -558,7 +560,8 @@ void building_monument_remove_delivery(int figure_id)
 void building_monument_remove_all_deliveries(int monument_id)
 {
     monument_delivery *delivery;
-    array_foreach(monument_deliveries, delivery) {
+    array_foreach(monument_deliveries, delivery)
+    {
         if (delivery->destination_id == monument_id) {
             delivery->destination_id = 0;
         }
@@ -570,7 +573,8 @@ static int resource_in_delivery(int monument_id, int resource_id)
 {
     int resources = 0;
     monument_delivery *delivery;
-    array_foreach(monument_deliveries, delivery) {
+    array_foreach(monument_deliveries, delivery)
+    {
         if (delivery->destination_id == monument_id &&
             delivery->resource == resource_id) {
             resources += delivery->cartloads;
@@ -589,8 +593,9 @@ static int resource_in_delivery_multipart(building *b, int resource_id)
 
     while (b->id) {
         monument_delivery *delivery;
-        array_foreach(monument_deliveries, delivery) {
-            if (delivery->destination_id == b->id &&
+        array_foreach(monument_deliveries, delivery)
+        {
+            if ((unsigned int) delivery->destination_id == b->id &&
                 delivery->resource == resource_id) {
                 resources += delivery->cartloads;
             }
@@ -758,7 +763,8 @@ void building_monument_delivery_save_state(buffer *buf)
     buffer_write_i32(buf, ORIGINAL_DELIVERY_BUFFER_SIZE);
 
     monument_delivery *delivery;
-    array_foreach(monument_deliveries, delivery) {
+    array_foreach(monument_deliveries, delivery)
+    {
         delivery_save(buf, delivery);
     }
 }

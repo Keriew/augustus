@@ -109,7 +109,7 @@ int building_storage_create(int building_id)
 
 int building_storage_get_building_id(int storage_id)
 {
-    if (storage_id < 0 || storage_id >= storages.size) {
+    if (storage_id < 0 || (unsigned int) storage_id >= storages.size) {
         return 0;
     }
     return array_item(storages, storage_id)->building_id;
@@ -121,7 +121,7 @@ int building_storage_restore(int storage_id)
         return 0;
     }
     array_item(storages, storage_id)->in_use = 1;
-    if (storage_id >= storages.size) {
+    if ((unsigned int) storage_id >= storages.size) {
         storages.size = storage_id + 1;
     }
     return storage_id;
@@ -129,7 +129,7 @@ int building_storage_restore(int storage_id)
 
 int building_storage_change_building(int storage_id, int building_id)
 {
-    if (storage_id < 0 || storage_id >= storages.size) {
+    if (storage_id < 0 || (unsigned int) storage_id >= storages.size) {
         return 0;
     }
     array_item(storages, storage_id)->building_id = building_id;
@@ -166,7 +166,7 @@ void building_storage_toggle_empty_all(int storage_id)
 int building_storage_get_empty_all(int building_id)
 {
     building *b = building_get(building_id);
-    int storage_id = b->storage_id;
+    unsigned int storage_id = b->storage_id;
     if (storage_id < 0 || storage_id >= storages.size) {
         return 0;
     }
@@ -351,6 +351,7 @@ int building_storage_accepts_storage(building *b, resource_type resource, int *u
     } else if (b->type == BUILDING_GRANARY) {
         return building_granary_accepts_storage(b, resource, understaffed);
     }
+    return 0;
 }
 
 void building_storage_accept_none(int storage_id)

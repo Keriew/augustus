@@ -990,8 +990,6 @@ figure_type building_construction_nearby_enemy_type(grid_slice *slice)
         }
 
         int distance = f->type == FIGURE_WOLF ? 6 : 12;
-        int figure_offset = map_grid_offset(f->x, f->y);
-
         // Check if figure is within distance of any tile in the grid slice
         for (int j = 0; j < slice->size; j++) {
             int grid_offset = slice->grid_offsets[j];

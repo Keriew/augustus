@@ -928,7 +928,7 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
 static building_type get_building_type_at_tile(const building *house, int x, int y)
 {
     int grid_offset = map_grid_offset(x, y);
-    int building_id = map_building_at(grid_offset);
+    unsigned int building_id = (unsigned int) map_building_at(grid_offset);
     if (building_id <= 0) {
         if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
             return BUILDING_HIGHWAY;
