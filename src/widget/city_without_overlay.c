@@ -75,8 +75,8 @@ static struct {
 
     int image_id_water_first;
     int image_id_water_last;
-    int selected_figure_id;
-    int highlighted_formation;
+    unsigned int selected_figure_id;
+    unsigned int highlighted_formation;
     unsigned int selected_building_id;
     unsigned int hovered_building_id;
     map_tile *cursor_tile;

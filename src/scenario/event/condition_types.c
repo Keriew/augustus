@@ -213,8 +213,6 @@ int scenario_condition_type_building_count_area_met(const scenario_condition_t *
     int comparison = condition->parameter4;
     int value = scenario_formula_evaluate_formula(condition->parameter5);
 
-    grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
-
     int minx = map_grid_offset_to_x(grid_offset1);
     int miny = map_grid_offset_to_y(grid_offset1);
     int maxx = map_grid_offset_to_x(grid_offset2);
@@ -368,7 +366,7 @@ int scenario_condition_type_resource_storage_available_met(const scenario_condit
     int comparison = condition->parameter2;
     int value = scenario_formula_evaluate_formula(condition->parameter3);
     storage_types storage_type = condition->parameter4;
-    int respect_settings = condition->parameter5; //for empty storage, respecting settings doesn't currently make sense
+    //int respect_settings = condition->parameter5; //for empty storage, respecting settings doesn't currently make sense
 
     if (resource < RESOURCE_MIN || resource > RESOURCE_MAX) {
         return 0;
