@@ -480,14 +480,7 @@ int map_routing_calculate_distances_for_building(routed_building_type type, int 
         route_queue_all_from(source_offset, DIRECTIONS_NO_DIAGONALS, callback_calc_distance_build_highway, 0);
         return 1;
     }
-    if (type == ROUTED_BUILDING_AQUEDUCT) {
-        if (map_can_place_initial_reservoir(source_offset)) {
-            return 1;
-        } else {
-            return 0;
-        }
 
-    }
     if (!map_can_place_initial_road_or_aqueduct(source_offset, type != ROUTED_BUILDING_ROAD)) {
         return 0;
     }
