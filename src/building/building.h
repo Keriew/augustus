@@ -61,10 +61,10 @@ typedef struct building {
     short house_unreachable_ticks;
     unsigned char road_access_x;
     unsigned char road_access_y;
-    short figure_id;
-    short figure_id2; // labor seeker or market supplier
-    short immigrant_figure_id;
-    short figure_id4; // tower ballista, burning ruin prefect, doctor healing plague
+    unsigned int figure_id;
+    unsigned int figure_id2; // labor seeker or market supplier
+    unsigned int immigrant_figure_id;
+    unsigned int figure_id4; // tower ballista, burning ruin prefect, doctor healing plague
     unsigned char figure_spawn_delay;
     unsigned char days_since_offering;
     unsigned char figure_roam_direction;
@@ -258,6 +258,8 @@ void building_update_desirability(void);
 
 int building_is_house(building_type type);
 
+int building_get_house_group(building_type type);
+
 int building_is_ceres_temple(building_type type);
 
 int building_is_neptune_temple(building_type type);
@@ -269,6 +271,8 @@ int building_is_mars_temple(building_type type);
 int building_is_venus_temple(building_type type);
 
 int building_has_supplier_inventory(building_type type);
+
+int building_is_house_group(house_groups group, building_type type);
 
 int building_is_statue_garden_temple(building_type type);
 

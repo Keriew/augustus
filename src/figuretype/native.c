@@ -23,7 +23,7 @@ void figure_indigenous_native_action(figure *f)
     f->terrain_usage = TERRAIN_USAGE_ANY;
     f->use_cross_country = 0;
     f->max_roam_length = 800;
-    if (b->state != BUILDING_STATE_IN_USE || b->figure_id != f->id) {
+    if (b->state != BUILDING_STATE_IN_USE || (unsigned int) b->figure_id != f->id) {
         f->state = FIGURE_STATE_DEAD;
     }
     figure_image_increase_offset(f, 12);
@@ -55,7 +55,7 @@ void figure_indigenous_native_action(figure *f)
         case FIGURE_ACTION_158_NATIVE_CREATED:
             f->image_offset = 0;
             f->wait_ticks++;
-            if (f->wait_ticks > 10 + (f->id & 3)) {
+            if ((unsigned int) f->wait_ticks > 10 + (f->id & 3)) {
                 f->wait_ticks = 0;
                 const formation *m = formation_get(NATIVE_FORMATION);
                 if (!city_military_is_native_attack_active() || m->months_low_morale > 0) {

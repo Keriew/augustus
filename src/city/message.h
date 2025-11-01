@@ -190,6 +190,7 @@ typedef enum {
     MESSAGE_CUSTOM_MESSAGE = 160,
     MESSAGE_ROUTE_PRICE_CHANGE = 161,
     MESSAGE_CARAVANSERAI_COMPLETE = 162,
+    MESSAGE_GOVERNOR_RANK_CHANGE = 163,
 } city_message_type;
 
 typedef struct {

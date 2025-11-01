@@ -51,6 +51,7 @@
 #include "scenario/property.h"
 #include "sound/city.h"
 #include "sound/music.h"
+#include "widget/map_editor.h"
 
 void game_file_editor_clear_data(void)
 {
@@ -135,6 +136,7 @@ static void prepare_map_for_editing(void)
     map_tiles_update_all_plazas();
     map_tiles_update_all_walls();
     map_tiles_update_all_aqueducts(0);
+    widget_map_editor_custom_earthquake_request_refresh();
     map_natives_init_editor();
     map_routing_update_all();
 

@@ -1,8 +1,8 @@
 #include "barracks.h"
 
 #include "building/count.h"
-#include "building/model.h"
 #include "building/monument.h"
+#include "building/properties.h"
 #include "building/storage.h"
 #include "core/config.h"
 #include "city/buildings.h"

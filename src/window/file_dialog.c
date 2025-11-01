@@ -30,6 +30,7 @@
 #include "scenario/editor.h"
 #include "scenario/custom_messages_export_xml.h"
 #include "scenario/custom_messages_import_xml.h"
+#include "scenario/model_xml.h"
 #include "scenario/event/export_xml.h"
 #include "scenario/event/import_xml.h"
 #include "translation/translation.h"
@@ -37,6 +38,7 @@
 #include "window/city.h"
 #include "window/editor/custom_messages.h"
 #include "window/editor/map.h"
+#include "window/editor/model_data.h"
 #include "window/editor/scenario_events.h"
 #include "widget/minimap.h"
 #include "window/plain_message_dialog.h"
@@ -124,10 +126,11 @@ static const int MISSION_ID_TO_CITY_ID[] = {
 static file_type_data saved_game_data = { "sav", PATH_LOCATION_SAVEGAME };
 static file_type_data saved_game_data_expanded = { "svx", PATH_LOCATION_SAVEGAME };
 static file_type_data scenario_data = { "map", PATH_LOCATION_SCENARIO };
-static file_type_data scenario_data_expanded = { "mapx", PATH_LOCATION_SCENARIO};
+static file_type_data scenario_data_expanded = { "mapx", PATH_LOCATION_SCENARIO };
 static file_type_data empire_data = { "xml", PATH_LOCATION_EDITOR_CUSTOM_EMPIRES };
 static file_type_data scenario_event_data = { "xml", PATH_LOCATION_EDITOR_CUSTOM_EVENTS };
 static file_type_data custom_messages_data = { "xml", PATH_LOCATION_EDITOR_CUSTOM_MESSAGES };
+static file_type_data model_data = { "xml", PATH_LOCATION_EDITOR_MODEL_DATA };
 
 static int compare_name(const void *va, const void *vb)
 {
@@ -212,6 +215,8 @@ static void init(file_type type, file_dialog_type dialog_type)
         data.file_data = &scenario_event_data;
     } else if (type == FILE_TYPE_CUSTOM_MESSAGES) {
         data.file_data = &custom_messages_data;
+    } else if (type == FILE_TYPE_MODEL_DATA) {
+        data.file_data = &model_data;
     } else {
         data.file_data = &saved_game_data_expanded;
     }
@@ -247,6 +252,8 @@ static void init(file_type type, file_dialog_type dialog_type)
             data.file_list = dir_find_files_with_extension_at_location(scenario_event_data.location, scenario_event_data.extension);
         } else if (type == FILE_TYPE_CUSTOM_MESSAGES) {
             data.file_list = dir_find_files_with_extension_at_location(custom_messages_data.location, custom_messages_data.extension);
+        } else if (type == FILE_TYPE_MODEL_DATA) {
+            data.file_list = dir_find_files_with_extension_at_location(model_data.location, model_data.extension);
         } else {
             data.file_list = dir_find_files_with_extension_at_location(saved_game_data.location, saved_game_data.extension);
             data.file_list = dir_append_files_with_extension(saved_game_data_expanded.extension);
@@ -371,6 +378,11 @@ static void draw_foreground(void)
                 message_id = TR_EDITOR_CUSTOM_MESSAGES_EXPORT_FULL;
             }
             lang_text_draw_centered(CUSTOM_TRANSLATION, message_id, 32, 14, 554, FONT_LARGE_BLACK);
+        } else if (data.type == FILE_TYPE_MODEL_DATA) {
+            int message_id = TR_EDITOR_MODEL_DATA_IMPORT_FULL;
+            if (data.dialog_type == FILE_DIALOG_SAVE) {
+                message_id = TR_EDITOR_MODEL_DATA_EXPORT_FULL;
+            }
         } else {
             int text_id = data.dialog_type + (data.type == FILE_TYPE_SCENARIO ? 3 : 0);
             lang_text_draw_centered(43, text_id, 32, 14, 554, FONT_LARGE_BLACK);
@@ -392,7 +404,7 @@ static void draw_foreground(void)
 
         // Saved game info
         if (*data.selected_file && data.type != FILE_TYPE_EMPIRE && data.type != FILE_TYPE_SCENARIO_EVENTS
-            && data.type != FILE_TYPE_CUSTOM_MESSAGES) {
+            && data.type != FILE_TYPE_CUSTOM_MESSAGES && data.type != FILE_TYPE_MODEL_DATA) {
             if (data.savegame_info_status == SAVEGAME_STATUS_OK) {
                 if (data.dialog_type != FILE_DIALOG_SAVE) {
                     if (text_get_width(data.typed_name, FONT_NORMAL_BLACK) > 246) {
@@ -578,6 +590,9 @@ static void confirm_save_file(int accepted, int checked)
     } else if (data.type == FILE_TYPE_CUSTOM_MESSAGES) {
         custom_messages_export_to_xml(filename);
         window_editor_custom_messages_show();
+    } else if (data.type == FILE_TYPE_MODEL_DATA) {
+        scenario_model_export_to_xml(filename);
+        window_model_data_show();
     }
     snprintf(data.file_data->last_loaded_file, FILE_NAME_MAX, "%s", data.selected_file);
 }
@@ -658,6 +673,14 @@ static void button_ok_cancel(int is_ok, int param2)
             } else {
                 window_plain_message_dialog_show(TR_EDITOR_UNABLE_TO_LOAD_CUSTOM_MESSAGES_TITLE,
                     TR_EDITOR_CHECK_LOG_MESSAGE, 1);
+                return;
+            }
+        } else if (data.type == FILE_TYPE_MODEL_DATA) {
+            int result = scenario_model_xml_parse_file(filename);
+            if (result) {
+                window_model_data_show();
+            } else {
+                window_plain_message_dialog_show(TR_EDITOR_UNABLE_TO_LOAD_MODEL_DATA_TITLE, TR_EDITOR_CHECK_LOG_MESSAGE, 1);
                 return;
             }
         }

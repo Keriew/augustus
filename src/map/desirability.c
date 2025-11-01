@@ -1,8 +1,8 @@
 #include "desirability.h"
 
 #include "building/building.h"
-#include "building/model.h"
 #include "building/monument.h"
+#include "building/properties.h"
 #include "core/calc.h"
 #include "map/data.h"
 #include "map/grid.h"

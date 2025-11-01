@@ -37,7 +37,7 @@ int trade_route_count(void)
 
 int trade_route_is_valid(int route_id)
 {
-    return route_id >= 0 && route_id < routes.size;
+    return route_id >= 0 && (unsigned int) route_id < routes.size;
 }
 
 void trade_route_set(int route_id, resource_type resource, int limit)
@@ -104,17 +104,18 @@ int trade_route_limit_reached(int route_id, resource_type resource)
 }
 
 void trade_routes_save_state(buffer *limit, buffer *traded)
-{   
+{
     int buf_size = sizeof(int32_t) * RESOURCE_MAX * routes.size;
     uint8_t *buf_data = malloc(buf_size + sizeof(int32_t));
     buffer_init(limit, buf_data, buf_size + sizeof(int32_t));
     buffer_write_i32(limit, routes.size);
 
     buf_data = malloc(buf_size);
-    buffer_init(traded, buf_data, buf_size);  
+    buffer_init(traded, buf_data, buf_size);
 
     route_resource *route;
-    array_foreach(routes, route) {
+    array_foreach(routes, route)
+    {
         for (resource_type r = 0; r < RESOURCE_MAX; r++) {
             buffer_write_i32(limit, route->limit[r]);
             buffer_write_i32(traded, route->traded[r]);

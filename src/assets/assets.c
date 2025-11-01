@@ -15,6 +15,7 @@ static struct {
     int roadblock_image_id;
     asset_image *roadblock_image;
     int asset_lookup[ASSET_MAX_KEY];
+    int font_lookup[ASSET_FONT_MAX_KEY];
 } data;
 
 void assets_init(int force_reload, color_t **main_images, int *main_image_widths)
@@ -64,6 +65,9 @@ void assets_init(int force_reload, color_t **main_images, int *main_image_widths
     data.asset_lookup[ASSET_UI_COPY_ICON] = assets_get_image_id("UI", "copy_icon");
     data.asset_lookup[ASSET_UI_PASTE_ICON] = assets_get_image_id("UI", "paste_icon");
     data.asset_lookup[ASSET_UI_ASCEPIUS] = assets_get_image_id("UI", "Asclepius Button");
+    // font assets
+    data.font_lookup[ASSET_FONT_SQ_BRACKET_LEFT] = assets_get_image_id("UI", "leftbracket_white_l");
+    data.font_lookup[ASSET_FONT_SQ_BRACKET_RIGHT] = assets_get_image_id("UI", "rightbracket_white_l");
 }
 
 int assets_load_single_group(const char *file_name, color_t **main_images, int *main_image_widths)
@@ -98,7 +102,7 @@ int assets_get_image_id(const char *assetlist_name, const char *image_name)
         return data.roadblock_image_id;
     }
     const asset_image *img = asset_image_get_from_id(group->first_image_index);
-    while (img && img->index <= group->last_image_index) {
+    while (img && img->index <= (unsigned int) group->last_image_index) {
         if (img->id && strcmp(img->id, image_name) == 0) {
             return img->index + IMAGE_MAIN_ENTRIES;
         }
@@ -117,7 +121,7 @@ int assets_get_external_image(const char *path, int force_reload)
     image_groups *group = group_get_from_name(ASSET_EXTERNAL_FILE_LIST);
     asset_image *img = asset_image_get_from_id(group->first_image_index);
     int was_found = 0;
-    while (img && img->index <= group->last_image_index) {
+    while (img && img->index <= (unsigned int) group->last_image_index) {
         if (img->id && strcmp(img->id, path) == 0) {
             if (!force_reload) {
                 return img->index + IMAGE_MAIN_ENTRIES;
@@ -158,6 +162,12 @@ const image *assets_get_image(int image_id)
         return image_get(0);
     }
     return &img->img;
+}
+
+const image *assets_get_font_image(int letter_id)
+{
+    const image *img = image_get(data.font_lookup[letter_id - IMAGE_FONT_CUSTOM_OFFSET]);
+    return img; // offset used to differentiate from normal letters
 }
 
 void assets_load_unpacked_asset(int image_id)

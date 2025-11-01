@@ -63,6 +63,7 @@ void dropdown_button_init(dropdown_button *dd, complex_button *buttons,
  */
 void dropdown_button_init_simple(int x, int y, const lang_fragment *frags, unsigned int count, dropdown_button *dd);
 
+int dropdown_button_get_tooltip_for_ellipsize(const dropdown_button *dd, tooltip_context *c);
 /**
  * @brief Draw a dropdown (origin button + expanded options if expanded).
  *
@@ -81,5 +82,14 @@ void dropdown_button_draw(const dropdown_button *dd);
  * @return 1 if any button handled input, 0 otherwise.
  */
 int dropdown_button_handle_mouse(const mouse *m, dropdown_button *dd);
+
+/**
+ * @brief Default click handler for dropdown options.
+ * Sets the selected index and value, collapses the dropdown,
+ * and updates the origin button's text to match the selected option.
+ * @param btn Pointer to the clicked complex_button (option).
+ */
+void dropdown_button_default_option_click(const complex_button *btn);
+
 
 #endif // GRAPHICS_DROPDOWN_BUTTON_H

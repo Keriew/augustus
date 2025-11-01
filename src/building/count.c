@@ -234,7 +234,7 @@ int building_count_fort_type_in_area(int minx, int miny, int maxx, int maxy, fig
                 int building_already_counted = 0;
 
                 for (int i = 0; i < total; i++) {
-                    if (found_buildings[i] == b->id) {
+                    if ((unsigned int) found_buildings[i] == b->id) {
                         building_already_counted = 1;
                         break;
                     }
@@ -544,12 +544,12 @@ int building_count_bridges(int ship)
         for (int x = min_x; x < min_x + map_data.width; x++) {
             grid_offset = map_grid_offset(x, y);
             int bridge_sprite = map_sprite_bridge_at(grid_offset);
-            if (bridge_sprite >= 1 + ship*6 && bridge_sprite <= 4 + ship*6) {
+            if (bridge_sprite >= 1 + ship * 6 && bridge_sprite <= 4 + ship * 6) {
                 total += 0.5;
             }
         }
     }
-    return (int)total;
+    return (int) total;
 }
 
 int building_count_bridges_in_area(int minx, int miny, int maxx, int maxy, int ship)
@@ -571,8 +571,9 @@ int building_count_bridges_in_area(int minx, int miny, int maxx, int maxy, int s
             if ((b->type == (ship ? BUILDING_SHIP_BRIDGE : BUILDING_LOW_BRIDGE)) && map_is_bridge(grid_offset)) {
                 int found = 0;
                 int *item;
-                array_foreach(bridge_ids, item) {
-                    if (*item == b->id) {
+                array_foreach(bridge_ids, item)
+                {
+                    if ((unsigned int) *item == b->id) {
                         found = 1;
                         break;
                     }

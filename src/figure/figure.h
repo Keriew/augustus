@@ -111,9 +111,9 @@ typedef struct {
     unsigned short target_figure_created_sequence;
     unsigned char figures_on_same_tile_index;
     unsigned char num_attackers;
-    short attacker_id1;
-    short attacker_id2;
-    short opponent_id;
+    unsigned int attacker_id1;
+    unsigned int attacker_id2;
+    unsigned int opponent_id;
     short last_visited_index; //can only be used if figure goes through initialization process
     int last_destinatation_id; //can be used for any figure, holds only one value
     struct {
@@ -143,6 +143,14 @@ void figure_delete(figure *f);
 int figure_is_dead(const figure *f);
 
 int figure_is_enemy(const figure *f);
+
+int figure_is_melee_enemy(const figure *f);
+
+int figure_is_ranged_enemy(const figure *f);
+
+int figure_is_mounted_enemy(const figure *f);
+
+int figure_is_caesar_enemy(const figure *f);
 
 int figure_is_legion(const figure *f);
 

@@ -9,7 +9,7 @@
  * @param grid_offset Map offset
  * @return Figure ID of first figure at offset
  */
-int map_figure_at(int grid_offset);
+unsigned int map_figure_at(int grid_offset);
 
 /**
  * Returns whether there is a figure at the given offset

@@ -427,7 +427,7 @@ void figure_combat_attack_figure_at(figure *f, int grid_offset)
     }
     formation *l = formation_get(f->formation_id);
     int guard = 0;
-    int opponent_id = map_figure_at(grid_offset);
+    unsigned int opponent_id = map_figure_at(grid_offset);
     while (1) {
         if (++guard >= figure_count() || opponent_id <= 0) {
             break;

@@ -9,7 +9,6 @@
 #include "building/industry.h"
 #include "building/market.h"
 #include "building/monument.h"
-#include "building/model.h"
 #include "building/properties.h"
 #include "building/rotation.h"
 #include "building/type.h"

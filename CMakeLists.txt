@@ -347,7 +347,6 @@ set(BUILDING_FILES
     ${PROJECT_SOURCE_DIR}/src/building/market.c
     ${PROJECT_SOURCE_DIR}/src/building/menu.c
     ${PROJECT_SOURCE_DIR}/src/building/mess_hall.c
-    ${PROJECT_SOURCE_DIR}/src/building/model.c
     ${PROJECT_SOURCE_DIR}/src/building/monument.c
     ${PROJECT_SOURCE_DIR}/src/building/properties.c
     ${PROJECT_SOURCE_DIR}/src/building/roadblock.c
@@ -540,6 +539,7 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/invasion.c
     ${PROJECT_SOURCE_DIR}/src/scenario/map.c
     ${PROJECT_SOURCE_DIR}/src/scenario/message_media_text_blob.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/model_xml.c
     ${PROJECT_SOURCE_DIR}/src/scenario/price_change.c
     ${PROJECT_SOURCE_DIR}/src/scenario/property.c
     ${PROJECT_SOURCE_DIR}/src/scenario/random_event.c
@@ -549,7 +549,9 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/event/import_xml.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/export_xml.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/controller.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/formula.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/parameter_data.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/parameter_city.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/action_handler.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/action_types.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/condition_comparison_helper.c
@@ -663,6 +665,7 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/editor/empire.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/invasions.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/map.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/model_data.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/price_changes.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/requests.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/scenario_events.c

@@ -1,5 +1,7 @@
 #include "earthquake.h"
 
+#include "building/monument.h"
+
 #include "building/building.h"
 #include "building/destruction.h"
 #include "city/message.h"
@@ -8,7 +10,9 @@
 #include "figuretype/missile.h"
 #include "game/time.h"
 #include "map/building.h"
+#include "map/data.h"
 #include "map/grid.h"
+#include "map/property.h"
 #include "map/routing_terrain.h"
 #include "map/terrain.h"
 #include "map/tiles.h"
@@ -27,7 +31,13 @@ static struct {
         int x;
         int y;
     } expand[4];
+    int next_delay;
 } data;
+
+struct field{
+    int x;
+    int y;
+};
 
 void scenario_earthquake_init(void)
 {
@@ -60,7 +70,7 @@ void scenario_earthquake_init(void)
 
 static int can_advance_earthquake_to_tile(int x, int y)
 {
-    if (map_terrain_is(map_grid_offset(x, y), TERRAIN_ELEVATION | TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_ACCESS_RAMP)) {
+    if (map_terrain_is(map_grid_offset(x, y), TERRAIN_IMPASSABLE_EARTHQUAKE)) {
         return 0;
     } else {
         return 1;
@@ -73,8 +83,29 @@ static void advance_earthquake_to_tile(int x, int y)
     int building_id = map_building_at(grid_offset);
     if (building_id) {
         building *b = building_get(building_id);
+
+        if (!b) {
+            return;
+        }
+
         if (b->type != BUILDING_BURNING_RUIN) {
-            building_destroy_by_earthquake(b);
+            // (fort, hippodrome, ect.)
+            if (b->prev_part_building_id > 0 || b->next_part_building_id > 0) {
+                // find first part
+                building *part = b;
+                while (part->prev_part_building_id > 0) {
+                    building *prev = building_get(part->prev_part_building_id);
+                    if (!prev) break;
+                    part = prev;
+                }
+                // destroy all part
+                for (building *next; part; part = next) {
+                    next = (part->next_part_building_id > 0) ? building_get(part->next_part_building_id) : NULL;
+                    building_destroy_by_earthquake(part);
+                }
+            } else {
+                building_destroy_by_earthquake(b);
+            }
         }
         sound_effect_play(SOUND_EFFECT_EXPLOSION);
         int ruin_id = map_building_at(grid_offset);
@@ -98,56 +129,150 @@ static void advance_earthquake_to_tile(int x, int y)
     figure_create_explosion_cloud(x, y, 1, 0);
 }
 
+static struct field custom_earthquake_find_next_tile(void)
+{
+    for (int y = 0; y < map_data.height; y++) {
+        for (int x = 0; x < map_data.width; x++) {
+            int grid_offset = map_grid_offset(x, y);
+            if (map_property_is_future_earthquake(grid_offset) &&
+                can_advance_earthquake_to_tile(x, y)) {
+                return (struct field){x, y};
+            }
+        }
+    }
+    return (struct field){0, 0};
+}
+
+static int custom_earthquake_advance_next_tile(void)
+{
+    struct field coords = custom_earthquake_find_next_tile();
+    if (coords.x) {
+        advance_earthquake_to_tile(coords.x, coords.y);
+        int grid_offset = map_grid_offset(coords.x, coords.y);
+        map_property_clear_future_earthquake(grid_offset);
+        return 1; // one tile processed, wait next tick
+    }
+    return 0;
+}
+
+#define MAX_TILES_PER_TICK 5
+
+static int custom_earthquake_advance_random_tiles(void)
+{
+    // 1. Collect all tiles that can be affected by the earthquake
+    struct field candidates[GRID_SIZE * GRID_SIZE];
+    int count = 0;
+
+    for (int y = 0; y < map_data.height; y++) {
+        for (int x = 0; x < map_data.width; x++) {
+            int grid_offset = map_grid_offset(x, y);
+            if (map_property_is_future_earthquake(grid_offset) &&
+                can_advance_earthquake_to_tile(x, y)) {
+                candidates[count++] = (struct field) { x, y };
+            }
+        }
+    }
+
+    if (count == 0)
+        return 0; // No more tiles to process
+
+    // 2. Select random tiles to process
+    int tiles_to_process = (count < MAX_TILES_PER_TICK) ? count : MAX_TILES_PER_TICK;
+
+    for (int i = 0; i < tiles_to_process; i++) {
+        int index = (scenario.earthquake.pattern == EARTHQUAKE_PATTERN_RANDOM ? random_short() : random_byte()) % count; // choose random out of candidates
+        struct field coords = candidates[index];
+
+        // Process the selected tile
+        advance_earthquake_to_tile(coords.x, coords.y);
+        int grid_offset = map_grid_offset(coords.x, coords.y);
+        map_property_clear_future_earthquake(grid_offset);
+
+        // Remove the processed tile from the array to avoid duplicates
+        candidates[index] = candidates[count - 1];
+        count--;
+    }
+
+    return 1; // At least one tile processed
+}
+
 void scenario_earthquake_process(void)
 {
+    // Check if earthquake is disabled or not set
     if (scenario.earthquake.severity == EARTHQUAKE_NONE ||
-        scenario.earthquake_point.x == -1 || scenario.earthquake_point.y == -1) {
+        (scenario.earthquake_point.x == -1 || scenario.earthquake_point.y == -1) &&
+        scenario.earthquake.severity != EARTHQUAKE_CUSTOM) {
         return;
     }
-    if (data.state == EVENT_NOT_STARTED) {
-        if (game_time_year() == data.game_year &&
-            game_time_month() == data.month) {
-            data.state = EVENT_IN_PROGRESS;
-            data.duration = 0;
-            data.delay = 0;
-            advance_earthquake_to_tile(data.expand[0].x, data.expand[0].y);
-            city_message_post(1, MESSAGE_EARTHQUAKE, 0,
-                map_grid_offset(data.expand[0].x, data.expand[0].y));
+    // --- Custom earthquake ---
+    if (scenario.earthquake.severity == EARTHQUAKE_CUSTOM) {
+        static int custom_delay = 0; // Delay counter in ticks
+        if (data.state == EVENT_NOT_STARTED) { // Start event
+            if (game_time_year() == data.game_year && game_time_month() == data.month) {
+                data.state = EVENT_IN_PROGRESS;
+                struct field coords = custom_earthquake_find_next_tile();
+                city_message_post(1, MESSAGE_EARTHQUAKE, 0,
+                    map_grid_offset(coords.x, coords.y));
+            }
+        } else if (data.state == EVENT_IN_PROGRESS) {
+            custom_delay++;
+            if (custom_delay >= data.next_delay) {
+                custom_delay = 0;
+                // Generate new random delay for next tile
+                data.next_delay = 10 + (random_byte() % (scenario.earthquake.pattern == EARTHQUAKE_PATTERN_RIGHT_LEFT ? 15 : 90) + 1); // 10 to 25 or 100 ticks
+                
+                if (!(scenario.earthquake.pattern == EARTHQUAKE_PATTERN_RIGHT_LEFT ? custom_earthquake_advance_next_tile() : 
+                    custom_earthquake_advance_random_tiles())) { // If no tiles left, finish the event
+                    data.state = EVENT_FINISHED;
+                }
+            }
         }
-    } else if (data.state == EVENT_IN_PROGRESS) {
-        data.delay++;
-        if (data.delay >= data.max_delay) {
-            data.delay = 0;
-            data.duration++;
-            if (data.duration >= data.max_duration) {
-                data.state = EVENT_FINISHED;
+    } else { //Regular earthquake
+        if (data.state == EVENT_NOT_STARTED) {
+            if (game_time_year() == data.game_year &&
+                game_time_month() == data.month) {
+                data.state = EVENT_IN_PROGRESS;
+                data.duration = 0;
+                data.delay = 0;
+                advance_earthquake_to_tile(data.expand[0].x, data.expand[0].y);
+                city_message_post(1, MESSAGE_EARTHQUAKE, 0,
+                    map_grid_offset(data.expand[0].x, data.expand[0].y));
             }
-            int dx, dy, index;
-            switch (random_byte() & 0xf) {
-                case 0: index = 0; dx = 0; dy = -1; break;
-                case 1: index = 1; dx = 1; dy = 0; break;
-                case 2: index = 2; dx = 0; dy = 1; break;
-                case 3: index = 3; dx = -1; dy = 0; break;
-                case 4: index = 0; dx = 0; dy = -1; break;
-                case 5: index = 0; dx = -1; dy = 0; break;
-                case 6: index = 0; dx = 1; dy = 0; break;
-                case 7: index = 1; dx = 1; dy = 0; break;
-                case 8: index = 1; dx = 0; dy = -1; break;
-                case 9: index = 1; dx = 0; dy = 1; break;
-                case 10: index = 2; dx = 0; dy = 1; break;
-                case 11: index = 2; dx = -1; dy = 0; break;
-                case 12: index = 2; dx = 1; dy = 0; break;
-                case 13: index = 3; dx = -1; dy = 0; break;
-                case 14: index = 3; dx = 0; dy = -1; break;
-                case 15: index = 3; dx = 0; dy = 1; break;
-                default: return;
-            }
-            int x = calc_bound(data.expand[index].x + dx, 0, scenario.map.width - 1);
-            int y = calc_bound(data.expand[index].y + dy, 0, scenario.map.height - 1);
-            if (can_advance_earthquake_to_tile(x, y)) {
-                data.expand[index].x = x;
-                data.expand[index].y = y;
-                advance_earthquake_to_tile(x, y);
+        } else if (data.state == EVENT_IN_PROGRESS) {
+            data.delay++;
+            if (data.delay >= data.max_delay) {
+                data.delay = 0;
+                data.duration++;
+                if (data.duration >= data.max_duration) {
+                    data.state = EVENT_FINISHED;
+                }
+                int dx, dy, index;
+                switch (random_byte() & 0xf) {
+                    case 0: index = 0; dx = 0; dy = -1; break;
+                    case 1: index = 1; dx = 1; dy = 0; break;
+                    case 2: index = 2; dx = 0; dy = 1; break;
+                    case 3: index = 3; dx = -1; dy = 0; break;
+                    case 4: index = 0; dx = 0; dy = -1; break;
+                    case 5: index = 0; dx = -1; dy = 0; break;
+                    case 6: index = 0; dx = 1; dy = 0; break;
+                    case 7: index = 1; dx = 1; dy = 0; break;
+                    case 8: index = 1; dx = 0; dy = -1; break;
+                    case 9: index = 1; dx = 0; dy = 1; break;
+                    case 10: index = 2; dx = 0; dy = 1; break;
+                    case 11: index = 2; dx = -1; dy = 0; break;
+                    case 12: index = 2; dx = 1; dy = 0; break;
+                    case 13: index = 3; dx = -1; dy = 0; break;
+                    case 14: index = 3; dx = 0; dy = -1; break;
+                    case 15: index = 3; dx = 0; dy = 1; break;
+                    default: return;
+                }
+                int x = calc_bound(data.expand[index].x + dx, 0, scenario.map.width - 1);
+                int y = calc_bound(data.expand[index].y + dy, 0, scenario.map.height - 1);
+                if (can_advance_earthquake_to_tile(x, y)) {
+                    data.expand[index].x = x;
+                    data.expand[index].y = y;
+                    advance_earthquake_to_tile(x, y);
+                }
             }
         }
     }
