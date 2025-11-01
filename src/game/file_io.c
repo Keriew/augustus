@@ -1729,9 +1729,9 @@ static savegame_load_status savegame_read_file_info(saved_game_info *info, saveg
     city_data_load_basic_info(state->city_data, &info->population, &info->treasury, &minimap_data.caravanserai_id, version);
     game_time_load_basic_info(state->game_time, &info->month, &info->year);
 
-    scenario_description_from_buffer(state->scenario, info->description, version);
-    info->image_id = scenario_image_id_from_buffer(state->scenario, version);
-    info->climate = scenario_climate_from_buffer(state->scenario, version);
+    scenario_description_from_buffer(state->scenario, info->description, scenario_version);
+    info->image_id = scenario_image_id_from_buffer(state->scenario, scenario_version);
+    info->climate = scenario_climate_from_buffer(state->scenario, scenario_version);
     if (scenario_version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
         info->total_invasions = scenario_invasions_from_buffer(state->scenario, scenario_version);
     } else {

@@ -99,7 +99,9 @@ static void calculate_buffer_offsets(int scenario_version)
 
     buffer_offsets.image = next_start_offset;
     next_start_offset = buffer_offsets.image + 6;
-
+    if (scenario_version > SCENARIO_TESTING_VERSION_BUMP_7) {
+        next_start_offset += 2;// favour reset monthly pattern is +2 bytes
+    }
     buffer_offsets.herds = next_start_offset;
     next_start_offset = buffer_offsets.herds + MAX_HERD_POINTS * 4;
 
@@ -148,7 +150,9 @@ static void calculate_buffer_offsets(int scenario_version)
 
     buffer_offsets.win_criteria = next_start_offset;
     next_start_offset = buffer_offsets.win_criteria + 52;
-
+    if (scenario_version > SCENARIO_TESTING_VERSION_BUMP_7) {
+        next_start_offset += 1;// earthkek pattern is +1 byte
+    }
     buffer_offsets.map_points = next_start_offset;
     next_start_offset = buffer_offsets.map_points + 12;
 
@@ -608,9 +612,9 @@ int scenario_invasions_from_buffer(buffer *buf, int version)
     return num_invasions;
 }
 
-int scenario_image_id_from_buffer(buffer *buf, int version)
+int scenario_image_id_from_buffer(buffer *buf, int scenario_version)
 {
-    calculate_buffer_offsets(version);
+    calculate_buffer_offsets(scenario_version);
     buffer_set(buf, (int) buffer_offsets.image);
     return buffer_read_i16(buf);
 }
@@ -653,7 +657,7 @@ void scenario_objectives_from_buffer(buffer *buf, int version, scenario_win_crit
     } else if (version <= SCENARIO_LAST_NO_WAGE_LIMITS) {
         buffer_set(buf, 1632);
     } else {
-        buffer_set(buf, (int) buffer_offsets.win_criteria + 2); // 2 bits for favour reset
+        buffer_set(buf, (int) buffer_offsets.win_criteria); // 2 bits for favour reset
     }
     win_criteria->culture.goal = buffer_read_i32(buf);
     win_criteria->prosperity.goal = buffer_read_i32(buf);
