@@ -118,7 +118,7 @@ static void draw_employment_details(building_info_context *c, building *b, int y
 {
     y_offset += c->y_offset;
     image_draw(image_group(GROUP_CONTEXT_ICONS) + 14,
-        c->x_offset + 40, y_offset + 6, COLOR_MASK_NONE, SCALE_NONE);
+        c->x_offset + 40, y_offset + 4, COLOR_MASK_NONE, SCALE_NONE);
 
     int levy = building_get_levy(b);
     if (levy) {
