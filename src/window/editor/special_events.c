@@ -56,6 +56,7 @@ static generic_button buttons[] = {
 static dropdown_button earthquake_pattern_dropdown;
 
 static lang_fragment dd_fragments[] = {
+    {.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_EARTHQUAKE_PATTERN},
     {.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_EARTHQUAKE_RIGHT_TO_LEFT},
     {.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_EARTHQUAKE_RANDOM},
     {.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_EARTHQUAKE_RANDOM_RIGHT_TO_LEFT}
@@ -70,7 +71,7 @@ static void init_dd(void)
     earthquake_pattern_dropdown.width = BLOCK_SIZE * 6;
     earthquake_pattern_dropdown.selected_callback = dd_earthquake_pattern;
     earthquake_pattern_dropdown.selected_index = scenario.earthquake.pattern;
-    dropdown_button_init_simple(dd_x, dd_y, dd_fragments, 3, &earthquake_pattern_dropdown);
+    dropdown_button_init_simple(dd_x, dd_y, dd_fragments, 4, &earthquake_pattern_dropdown);
 }
 
 static void draw_background(void)
