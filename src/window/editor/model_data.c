@@ -246,7 +246,7 @@ static void draw_model_item(const grid_box_item *item)
     get_building_translation(b_type, b_string, sizeof(b_string));
     text_draw_ellipsized(b_string, item->x + 8, item->y + 8, 12 * BLOCK_SIZE, FONT_NORMAL_BLACK, 0);
 
-    for (int i = 0; i < MAX_DATA_BUTTONS - (!(building_is_raw_resource_producer(b_type) ||
+    for (unsigned int i = 0; i < MAX_DATA_BUTTONS - (!(building_is_raw_resource_producer(b_type) ||
         building_is_workshop(b_type) || b_type == BUILDING_WHARF || building_is_farm(b_type))); i++) {
         button_border_draw(item->x + data_buttons[i].x, item->y + data_buttons[i].y,
             data_buttons[i].width, data_buttons[i].height, item->is_focused && data.data_buttons_focus_id == i + 1);
@@ -304,11 +304,12 @@ static void draw_foreground(void)
 {
     graphics_in_dialog();
 
-    for (int i = 0; i < NUM_STATIC_BUTTONS; i++) {
+    for (unsigned int i = 0; i < NUM_STATIC_BUTTONS; i++) {
         button_border_draw(static_buttons[i].x, static_buttons[i].y,
             static_buttons[i].width, static_buttons[i].height, data.static_buttons_focus_id == i + 1);
         translation_key key;
         switch (i) {
+            default:
             case 0:
                 key = TR_EDITOR_SCENARIO_EVENTS_EXPORT;
                 break;
@@ -361,6 +362,7 @@ static int desirability_tooltip(tooltip_context *c)
         int x;
 
         switch (i) {
+            default:
             case 0:
                 x = 295;
                 break;
