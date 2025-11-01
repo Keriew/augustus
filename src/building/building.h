@@ -61,10 +61,10 @@ typedef struct building {
     short house_unreachable_ticks;
     unsigned char road_access_x;
     unsigned char road_access_y;
-    short figure_id;
-    short figure_id2; // labor seeker or market supplier
-    short immigrant_figure_id;
-    short figure_id4; // tower ballista, burning ruin prefect, doctor healing plague
+    unsigned int figure_id;
+    unsigned int figure_id2; // labor seeker or market supplier
+    unsigned int immigrant_figure_id;
+    unsigned int figure_id4; // tower ballista, burning ruin prefect, doctor healing plague
     unsigned char figure_spawn_delay;
     unsigned char days_since_offering;
     unsigned char figure_roam_direction;

@@ -90,7 +90,7 @@ formation *formation_create_legion(int building_id, figure_type type)
     m->target_formation_id = 0;
 
     data.num_legions++;
-    if (m->id > data.id_last_in_use) {
+    if (m->id > (unsigned int) data.id_last_in_use) {
         data.id_last_in_use = m->id;
     }
 
@@ -343,7 +343,7 @@ void formation_calculate_legion_totals(void)
     data.id_last_legion = 0;
     data.num_legions = 0;
     city_military_clear_legionary_legions();
-    for (int i = 1; i < formations.size; i++) {
+    for (unsigned int i = 1; i < formations.size; i++) {
         formation *m = formation_get(i);
         if (m->in_use) {
             if (m->is_legion) {
@@ -458,7 +458,7 @@ void formation_update_morale_after_death(formation *m)
 
 static void change_all_morale(int legion, int enemy)
 {
-    for (int i = 1; i < formations.size; i++) {
+    for (unsigned int i = 1; i < formations.size; i++) {
         formation *m = formation_get(i);
         if (m->in_use && !m->is_herd) {
             if (m->is_legion) {
@@ -504,7 +504,7 @@ void formation_update_monthly_morale_deployed(void)
 
 static void update_morale_for_mess_hall(void)
 {
-    for (int i = 1; i < formations.size; i++) {
+    for (unsigned int i = 1; i < formations.size; i++) {
         formation *f = formation_get(i);
         int max_morale = 0;
         if (f->in_use != 1 || !f->is_legion) {
@@ -531,7 +531,7 @@ static void update_morale_for_mess_hall(void)
 
 void formation_update_monthly_morale_at_rest(void)
 {
-    for (int i = 1; i < formations.size; i++) {
+    for (unsigned int i = 1; i < formations.size; i++) {
         formation *m = formation_get(i);
         if (m->in_use != 1 || m->is_herd) {
             continue;
@@ -561,7 +561,7 @@ void formation_update_monthly_morale_at_rest(void)
 
 void formation_change_all_legions_morale(int amount)
 {
-    for (int i = 1; i < formations.size; i++) {
+    for (unsigned int i = 1; i < formations.size; i++) {
         formation *m = formation_get(i);
         if (!m->is_legion) {
             continue;
@@ -626,7 +626,7 @@ void formation_retreat(formation *m)
 
 static void clear_figures(void)
 {
-    for (int i = 1; i < formations.size; i++) {
+    for (unsigned int i = 1; i < formations.size; i++) {
         formation *f = formation_get(i);
         for (int fig = 0; fig < MAX_FORMATION_FIGURES; fig++) {
             f->figures[fig] = 0;
@@ -691,7 +691,7 @@ static int add_figure(int formation_id, int figure_id, int deployed, int damage,
 
 void formation_move_herds_away(int x, int y)
 {
-    for (int i = 1; i < formations.size; i++) {
+    for (unsigned int i = 1; i < formations.size; i++) {
         formation *f = formation_get(i);
         if (f->in_use != 1 || f->is_legion || !f->is_herd || f->num_figures <= 0) {
             continue;
@@ -725,7 +725,7 @@ void formation_calculate_figures(void)
     }
 
     enemy_army_totals_clear();
-    for (int i = 1; i < formations.size; i++) {
+    for (unsigned int i = 1; i < formations.size; i++) {
         formation *m = formation_get(i);
         if (m->in_use && !m->is_herd) {
             if (m->is_legion) {
@@ -847,7 +847,7 @@ void formations_save_state(buffer *buf, buffer *totals)
     buffer_init(buf, buf_data, buf_size);
     buffer_write_i32(buf, CURRENT_BUFFER_SIZE_PER_FORMATION);
 
-    for (int i = 0; i < formations.size; i++) {
+    for (unsigned int i = 0; i < formations.size; i++) {
         formation *f = formation_get(i);
         buffer_write_u8(buf, f->in_use);
         buffer_write_u8(buf, f->faction_id);
@@ -1035,9 +1035,9 @@ void formations_load_state(buffer *buf, buffer *totals, int version)
     formations.size = highest_id_in_use + 1;
 
     // old saves did not write formations to a zeroed out buffer, so check for invalid target_formation_ids
-    for (int i = 0; i < formations.size; i++) {
+    for (unsigned int i = 0; i < formations.size; i++) {
         formation *f = array_item(formations, i);
-        if (f->target_formation_id < 0 || f->target_formation_id >= formations.size) {
+        if (f->target_formation_id < 0 || (unsigned int) f->target_formation_id >= formations.size) {
             f->target_formation_id = 0;
         }
     }

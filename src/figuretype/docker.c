@@ -368,7 +368,7 @@ void figure_docker_action(figure *f)
                 b->data.dock.queued_docker_id = f->id;
                 f->wait_ticks = 0;
             }
-            if (b->data.dock.queued_docker_id == f->id) {
+            if ((unsigned int) b->data.dock.queued_docker_id == f->id) {
                 b->data.dock.num_ships = 120;
                 f->wait_ticks++;
                 if (f->wait_ticks >= 0) {
@@ -382,7 +382,7 @@ void figure_docker_action(figure *f)
                 for (int i = 0; i < 3; i++) {
                     if (b->data.distribution.cartpusher_ids[i]) {
                         figure *docker = figure_get(b->data.distribution.cartpusher_ids[i]);
-                        if (docker->id == b->data.dock.queued_docker_id && docker->state == FIGURE_STATE_ALIVE) {
+                        if (docker->id == (unsigned int) b->data.dock.queued_docker_id && docker->state == FIGURE_STATE_ALIVE) {
                             if (docker->action_state == FIGURE_ACTION_133_DOCKER_IMPORT_QUEUE ||
                                 docker->action_state == FIGURE_ACTION_134_DOCKER_EXPORT_QUEUE) {
                                 has_queued_docker = 1;
@@ -401,7 +401,7 @@ void figure_docker_action(figure *f)
                 b->data.dock.queued_docker_id = f->id;
                 f->wait_ticks = 0;
             }
-            if (b->data.dock.queued_docker_id == f->id) {
+            if ((unsigned int) b->data.dock.queued_docker_id == f->id) {
                 b->data.dock.num_ships = 120;
                 f->wait_ticks++;
                 if (f->wait_ticks >= 80) {

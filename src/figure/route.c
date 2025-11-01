@@ -35,11 +35,12 @@ void figure_route_clear_all(void)
 void figure_route_clean(void)
 {
     figure_path_data *path;
-    array_foreach(paths, path) {
+    array_foreach(paths, path)
+    {
         int figure_id = path->figure_id;
         if (figure_id > 0 && figure_id < figure_count()) {
             const figure *f = figure_get(figure_id);
-            if (f->state != FIGURE_STATE_ALIVE || f->routing_path_id != array_index) {
+            if (f->state != FIGURE_STATE_ALIVE || f->routing_path_id != (short) array_index) {
                 path->figure_id = 0;
             }
         }
@@ -155,7 +156,8 @@ void figure_route_add(figure *f)
 void figure_route_remove(figure *f)
 {
     if (f->routing_path_id > 0) {
-        if (f->routing_path_id < paths.size && array_item(paths, f->routing_path_id)->figure_id == f->id) {
+        if (f->routing_path_id < (short) paths.size &&
+            (unsigned int) array_item(paths, f->routing_path_id)->figure_id == f->id) {
             array_item(paths, f->routing_path_id)->figure_id = 0;
         }
         f->routing_path_id = 0;
@@ -179,7 +181,8 @@ void figure_route_save_state(buffer *figures, buffer *buf_paths)
     buffer_init(buf_paths, buf_data, size);
 
     figure_path_data *path;
-    array_foreach(paths, path) {
+    array_foreach(paths, path)
+    {
         buffer_write_i16(figures, path->figure_id);
         buffer_write_raw(buf_paths, path->directions, MAX_PATH_LENGTH);
     }
