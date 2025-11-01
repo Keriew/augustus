@@ -99,7 +99,7 @@ typedef struct {
     int year_notified;
     int month_notified;
     int months_to_go;
-    int invasion_id;
+    unsigned int invasion_id;
 } invasion_warning;
 
 static struct {
@@ -651,7 +651,7 @@ int scenario_invasion_start_from_mars(void)
     int amount;
     if (game_campaign_is_original() && 0 <= mission && mission <= 19) {
         amount = LOCAL_UPRISING_NUM_ENEMIES[mission];
-    } else if(scenario_invasion_count_total() > 0) {
+    } else if (scenario_invasion_count_total() > 0) {
         amount = random_between_from_stdlib(3, 9);
     } else {
         amount = 0;

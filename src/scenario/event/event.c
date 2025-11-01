@@ -37,10 +37,10 @@ void scenario_event_init(scenario_event_t *event)
     unsigned int event_id = event->id;
     scenario_condition_group_t *group;
     scenario_condition_t *condition;
-    array_foreach(event->condition_groups, group)
-    {
-        array_foreach(group->conditions, condition)
-        {
+    for (unsigned int i = 0; i < event->condition_groups.size; i++) {
+        group = array_item(event->condition_groups, i);
+        for (unsigned int j = 0; j < group->conditions.size; j++) {
+            condition = array_item(group->conditions, j);
             scenario_condition_type_init(condition);
             condition->parent_event_id = event_id;
         }
@@ -115,7 +115,7 @@ void scenario_event_load_state(buffer *buf, scenario_event_t *event, int scenari
     if (condition_groups_count == 0) {
         array_advance(event->condition_groups);
     }
-    if (event->id != saved_id) {
+    if (event->id != (unsigned int) saved_id) {
         log_error("Loaded event id does not match what it was saved with. The game will likely crash. event->id: ",
             0, event->id);
     }
@@ -272,10 +272,10 @@ int scenario_event_uses_custom_variable(const scenario_event_t *event, int custo
 {
     scenario_condition_group_t *group;
     scenario_condition_t *condition;
-    array_foreach(event->condition_groups, group)
-    {
-        array_foreach(group->conditions, condition)
-        {
+    for (unsigned int i = 0; i < event->condition_groups.size; i++) {
+        group = array_item(event->condition_groups, i);
+        for (unsigned int j = 0; j < group->conditions.size; j++) {
+            condition = array_item(group->conditions, j);
             if (scenario_condition_uses_custom_variable(condition, custom_variable_id)) {
                 return 1;
             }

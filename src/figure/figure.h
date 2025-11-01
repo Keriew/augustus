@@ -73,10 +73,10 @@ typedef struct {
     short cc_delta_xy;
     unsigned char cc_direction; // 1 = x, 2 = y
     unsigned char speed_multiplier;
-    short building_id;
-    short immigrant_building_id;
-    short destination_building_id;
-    short formation_id;
+    unsigned int building_id;
+    unsigned int immigrant_building_id;
+    unsigned int destination_building_id;
+    unsigned int formation_id;
     unsigned char index_in_formation;
     unsigned char formation_at_rest;
     unsigned char migrant_num_people;

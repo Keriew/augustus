@@ -324,13 +324,16 @@ static int export_event(scenario_event_t *event)
     xml_exporter_new_element("conditions");
 
     const scenario_condition_group_t *group;
-    array_foreach(event->condition_groups, group)
-    {
+    for (unsigned int i = 0; i < event->condition_groups.size; i++) {
+        group = array_item(event->condition_groups, i);
         if (group->conditions.size > 0) {
             if (group->type != FULFILLMENT_TYPE_ALL) {
                 xml_exporter_new_element("group");
             }
-            array_foreach_callback(group->conditions, export_event_condition);
+            for (unsigned int j = 0; j < group->conditions.size; j++) {
+                scenario_condition_t *condition = array_item(group->conditions, j);
+                export_event_condition(condition);
+            }
             if (group->type != FULFILLMENT_TYPE_ALL) {
                 xml_exporter_close_element();
             }

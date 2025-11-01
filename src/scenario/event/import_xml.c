@@ -389,7 +389,7 @@ static int action_populate_parameters(scenario_action_t *action)
         if (action->parameter2 == CITY_PROPERTY_QUOTA_FILL) {
             int trade_route_id = action->parameter3;
             int raw_resource_id = action->parameter4;
-            action->parameter4 = window_editor_select_city_trade_route_encode_route_resource(action->parameter3, raw_resource_id);
+            action->parameter4 = window_editor_select_city_trade_route_encode_route_resource(trade_route_id, raw_resource_id);
         }
     }
     return success;

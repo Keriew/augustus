@@ -123,7 +123,7 @@ static int get_distance_penalty_exports(building *b, int resource)
 }
 
 
-static int get_closest_building_for_import(int x, int y, int city_id, building *dock,
+static unsigned int get_closest_building_for_import(int x, int y, int city_id, building *dock,
     map_point *dst, int *import_resource)
 {
     int resource = *import_resource;
@@ -254,7 +254,7 @@ static int deliver_import_resource(figure *f, building *dock)
     }
     map_point tile;
     int resource = f->resource_id;
-    int destination_id = get_closest_building_for_import(f->x, f->y, ship->empire_city_id,
+    unsigned int destination_id = get_closest_building_for_import(f->x, f->y, ship->empire_city_id,
         dock, &tile, &resource);
     if (!destination_id) {
         return 0;
@@ -289,7 +289,7 @@ static int fetch_export_resource(figure *f, building *dock, int add_to_bought)
     }
     map_point tile;
     int resource = f->resource_id;
-    int destination_id = get_closest_building_for_export(f->x, f->y, ship->empire_city_id,
+    unsigned int destination_id = get_closest_building_for_export(f->x, f->y, ship->empire_city_id,
         dock, &tile, &resource);
     if (!destination_id) {
         return 0;
