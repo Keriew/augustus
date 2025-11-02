@@ -1463,8 +1463,8 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         case ACTION_TYPE_ADJUST_CITY_HEALTH:
         case ACTION_TYPE_ADJUST_ROME_WAGES:
         {
-            result_text = translation_for_set_or_add_text(action->parameter3, result_text, &maxlength);
-            result_text = translation_for_min_max_values(action->parameter1, action->parameter2, result_text, &maxlength);
+            result_text = translation_for_set_or_add_text(action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
             return;
         }
         case ACTION_TYPE_ADJUST_FAVOR:
@@ -1475,7 +1475,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         case ACTION_TYPE_ADJUST_MONEY:
         case ACTION_TYPE_ADJUST_SAVINGS:
         {
-            result_text = translation_for_min_max_values(action->parameter1, action->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
             return;
         }
         case ACTION_TYPE_BUILDING_FORCE_COLLAPSE:
