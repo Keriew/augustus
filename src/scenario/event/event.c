@@ -48,7 +48,6 @@ void scenario_event_init(scenario_event_t *event)
     scenario_action_t *action;
     array_foreach(event->actions, action)
     {
-        scenario_action_type_init(action);
         action->parent_event_id = event_id;
     }
 }

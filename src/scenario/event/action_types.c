@@ -186,16 +186,10 @@ int scenario_action_type_change_resource_stockpiles_execute(scenario_action_t *a
     return 1;
 }
 
-void scenario_action_type_city_health_init(scenario_action_t *action)
-{
-    action->parameter4 = action->parameter5 > 0 ? scenario_formula_evaluate_formula(action->parameter5) : 
-        random_between_from_stdlib(action->parameter1, action->parameter2);
-}
-
 int scenario_action_type_city_health_execute(scenario_action_t *action)
 {
-    int is_hard_set = action->parameter3;
-    int adjustment = action->parameter4;
+    int is_hard_set = action->parameter2;
+    int adjustment = scenario_formula_evaluate_formula(action->parameter1);
 
     if (is_hard_set) {
         city_health_set(adjustment);
@@ -264,15 +258,9 @@ int scenario_action_type_invasion_immediate_execute(scenario_action_t *action)
     return 1;
 }
 
-void scenario_action_type_money_add_init(scenario_action_t *action)
-{
-    action->parameter3 = action->parameter4 > 0 ? scenario_formula_evaluate_formula(action->parameter4) : 
-        random_between_from_stdlib(action->parameter1, action->parameter2);
-}
-
 int scenario_action_type_money_add_execute(scenario_action_t *action)
 {
-    int adjustment = action->parameter3;
+    int adjustment = scenario_formula_evaluate_formula(action->parameter1);
     city_finance_treasury_add_miscellaneous(adjustment);
 
     return 1;
@@ -293,16 +281,10 @@ int scenario_action_type_request_immediately_start_execute(scenario_action_t *ac
     return scenario_request_force_start(request_id);
 }
 
-void scenario_action_type_rome_wages_init(scenario_action_t *action)
-{
-    action->parameter4 = action->parameter5 > 0 ? scenario_formula_evaluate_formula(action->parameter5) : 
-        random_between_from_stdlib(action->parameter1, action->parameter2);
-}
-
 int scenario_action_type_rome_wages_execute(scenario_action_t *action)
 {
-    int is_hard_set = action->parameter3;
-    int adjustment = action->parameter4;
+    int is_hard_set = action->parameter2;
+    int adjustment = scenario_formula_evaluate_formula(action->parameter1);
 
     city_data.labor.months_since_last_wage_change = 0;
 
@@ -342,15 +324,9 @@ int scenario_action_type_rome_wages_execute(scenario_action_t *action)
     return 1;
 }
 
-void scenario_action_type_savings_add_init(scenario_action_t *action)
-{
-    action->parameter3 = action->parameter4 > 0 ? scenario_formula_evaluate_formula(action->parameter4) : 
-        random_between_from_stdlib(action->parameter1, action->parameter2);
-}
-
 int scenario_action_type_savings_add_execute(scenario_action_t *action)
 {
-    int adjustment = action->parameter3;
+    int adjustment = scenario_formula_evaluate_formula(action->parameter1);
     city_emperor_add_personal_savings(adjustment);
 
     return 1;

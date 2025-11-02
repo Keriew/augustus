@@ -14,6 +14,7 @@
  *  - Parentheses for grouping: ( )
  *  - Custom variables in square brackets, e.g. [12],
  *    which are resolved via custom_variable_get_value(id).
+ *  - random values in parathenses (expression1 , expression2) seperated with a comma
  *
  * The expression is evaluated using double-precision floating-point arithmetic
  * internally, but the final result is rounded to the nearest integer before

@@ -4,26 +4,6 @@
 #include "scenario/allowed_building.h"
 #include "scenario/event/action_types.h"
 
-void scenario_action_type_init(scenario_action_t *action)
-{
-    switch (action->type) {
-        case ACTION_TYPE_ADJUST_CITY_HEALTH:
-            scenario_action_type_city_health_init(action);
-            break;
-        case ACTION_TYPE_ADJUST_MONEY:
-            scenario_action_type_money_add_init(action);
-            break;
-        case ACTION_TYPE_ADJUST_ROME_WAGES:
-            scenario_action_type_rome_wages_init(action);
-            break;
-        case ACTION_TYPE_ADJUST_SAVINGS:
-            scenario_action_type_savings_add_init(action);
-            break;
-        default:
-            break;
-    }
-}
-
 int scenario_action_type_execute(scenario_action_t *action)
 {
     switch (action->type) {

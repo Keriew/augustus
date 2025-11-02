@@ -4,7 +4,6 @@
 #include "core/buffer.h"
 #include "scenario/event/data.h"
 
-void scenario_action_type_init(scenario_action_t *action);
 int scenario_action_type_execute(scenario_action_t *action);
 
 void scenario_action_type_delete(scenario_action_t *action);

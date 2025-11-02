@@ -214,7 +214,6 @@ static void draw_foreground(void)
 
 static void close_window(void)
 {
-    scenario_action_type_init(data.action);
     window_go_back();
 }
 

@@ -27,15 +27,12 @@ int scenario_action_type_gladiator_revolt_execute(scenario_action_t *action);
 
 int scenario_action_type_invasion_immediate_execute(scenario_action_t *action);
 
-void scenario_action_type_money_add_init(scenario_action_t *action);
 int scenario_action_type_money_add_execute(scenario_action_t *action);
 
 int scenario_action_type_request_immediately_start_execute(scenario_action_t *action);
 
-void scenario_action_type_rome_wages_init(scenario_action_t *action);
 int scenario_action_type_rome_wages_execute(scenario_action_t *action);
 
-void scenario_action_type_savings_add_init(scenario_action_t *action);
 int scenario_action_type_savings_add_execute(scenario_action_t *action);
 
 int scenario_action_type_building_force_collapse_execute(scenario_action_t *action);
@@ -61,7 +58,6 @@ int scenario_action_type_trade_route_open_execute(scenario_action_t *action);
 
 int scenario_action_type_trade_route_amount_execute(scenario_action_t *action);
 
-void scenario_action_type_city_health_init(scenario_action_t *action);
 int scenario_action_type_city_health_execute(scenario_action_t *action);
 
 int scenario_action_type_show_custom_message_execute(scenario_action_t *action);
