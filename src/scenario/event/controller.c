@@ -14,6 +14,7 @@
 #include "scenario/scenario.h"
 #include "widget/map_editor.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #define SCENARIO_EVENTS_SIZE_STEP 50
@@ -463,6 +464,10 @@ static void migrate_parameters_action(scenario_action_t *action)
     int min_limit = 0, max_limit = 0;
     parameter_type p_type;
     action_types action_type = action->type;
+    if (action_type == ACTION_TYPE_ADJUST_CITY_HEALTH || action_type == ACTION_TYPE_ADJUST_ROME_WAGES ||
+        action_type == ACTION_TYPE_ADJUST_MONEY || action_type == ACTION_TYPE_ADJUST_SAVINGS) {
+        return;
+    }
     int *params[] = {    // Collect addresses of the fields
         &action->parameter1,
         &action->parameter2,
@@ -554,6 +559,39 @@ void scenario_events_migrate_to_formulas(void)
                 condition = array_item(group->conditions, k);
                 migrate_parameters_condition(condition); //migrate parameters if needed
             }
+        }
+    }
+}
+
+void scenario_events_min_max_migrate_to_formulas(void)
+{
+    scenario_event_t *current;
+    array_foreach(scenario_events, current) //go through all events
+    {
+        scenario_action_t *action;
+        for (unsigned int j = 0; j < current->actions.size; j++) { // go through all actions in event
+            action = array_item(current->actions, j);
+            action_types type = action->type;
+            if (type != ACTION_TYPE_ADJUST_CITY_HEALTH && type != ACTION_TYPE_ADJUST_ROME_WAGES &&
+                type != ACTION_TYPE_ADJUST_MONEY && type != ACTION_TYPE_ADJUST_SAVINGS) {
+                continue;
+            }
+            int min_limit = 0, max_limit = 0;
+            uint8_t buffer[32];
+            memset(buffer, 0, sizeof(buffer));
+            if (type == ACTION_TYPE_ADJUST_CITY_HEALTH) {
+                min_limit = -100;
+                max_limit = 100;
+            } else if (type == ACTION_TYPE_ADJUST_ROME_WAGES) {
+                min_limit = -10000;
+                max_limit = 10000;
+            } else {
+                min_limit = -1000000000;
+                max_limit = 1000000000;
+            }
+            sprintf((char *)buffer, "(%i,%i)", action->parameter1, action->parameter2);
+            unsigned int id = scenario_formula_add((const uint8_t *) buffer, min_limit, max_limit);
+            action->parameter1 = id;
         }
     }
 }

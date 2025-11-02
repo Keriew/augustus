@@ -33,6 +33,7 @@ void scenario_events_progress_paused(int days_passed);
 scenario_event_t *scenario_events_get_using_custom_variable(int custom_variable_id);
 void scenario_events_migrate_to_resolved_display_names(void);
 void scenario_events_migrate_to_formulas(void);
+void scenario_events_min_max_migrate_to_formulas(void);
 
 void scenario_events_assign_parent_event_ids(void);
 
