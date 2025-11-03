@@ -93,14 +93,15 @@ static int unemployment_rate(scenario_action_t *action)
 
 static int population_by_housing_type(scenario_action_t *action)
 {
-    house_level level = action->parameter3 - 10; // convert from building_type to house_level
+
     int is_absolute = action->parameter4;
-    int is_group = ((int) level >= (int) HOUSE_GROUP_TENT);
+    int is_group = ((int) action->parameter3 >= (int) HOUSE_GROUP_TENT);
     int total_pop = city_population();
     if (!total_pop) {
         return 0;
     }
     if (!is_group) {
+        house_level level = action->parameter3 - 10; // convert from building_type to house_level
         int pop_at_level = city_population_at_level(level);
         if (is_absolute) {
             return pop_at_level;
@@ -110,7 +111,7 @@ static int population_by_housing_type(scenario_action_t *action)
     int min = 0;
     int max = 0;
     int total = 0;
-    int level_as_int = (int) level; // Store the int value separately
+    int level_as_int = (int) action->parameter3; // Store the int value separately
     switch (level_as_int) { // Use the int variable in switch
         case HOUSE_GROUP_TENT:   min = HOUSE_SMALL_TENT;   max = HOUSE_LARGE_TENT;   break;
         case HOUSE_GROUP_SHACK:  min = HOUSE_SMALL_SHACK;  max = HOUSE_LARGE_SHACK;  break;
@@ -320,6 +321,7 @@ int scenario_event_parameter_city_for_action(scenario_action_t *action)
         case CITY_PROPERTY_SAVINGS:
             return city_emperor_personal_savings();
         case CITY_PROPERTY_YEAR_FINANCE_BALANCE:
+            city_finance_calculate_totals();
             return city_finance_overview_last_year()->net_in_out;
         case CITY_PROPERTY_STATS_FAVOR:
             return city_rating_favor();

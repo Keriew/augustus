@@ -1887,7 +1887,27 @@ static translation_string all_strings[] = {
     {TR_EDITOR_EARTHQUAKE_PATTERN, "Pattern"},
     {TR_CONFIG_GENERAL_UNLOCK_MOUSE, "Lock mouse in Fullscreen mode" },
     {TR_CONFIG_GP_CH_HOUSING_PRE_MERGE_VACANT_LOTS, "Houses always merge in 2x2"},
-    {TR_EDITOR_EARTHQUAKE_CUSTOM_SET, "Custom earthquake"}
+    {TR_EDITOR_EARTHQUAKE_CUSTOM_SET, "Custom earthquake"},
+    {TR_BUILDING_HOUSE_SMALL_TENT,    "Small Tent"},
+    {TR_BUILDING_HOUSE_LARGE_TENT,    "Large Tent"},
+    {TR_BUILDING_HOUSE_SMALL_SHACK,   "Small Shack"},
+    {TR_BUILDING_HOUSE_LARGE_SHACK,   "Large Shack"},
+    {TR_BUILDING_HOUSE_SMALL_HOVEL,   "Small Hovel"},
+    {TR_BUILDING_HOUSE_LARGE_HOVEL,   "Large Hovel"},
+    {TR_BUILDING_HOUSE_SMALL_CASA,    "Small Casa"},
+    {TR_BUILDING_HOUSE_LARGE_CASA,    "Large Casa"},
+    {TR_BUILDING_HOUSE_SMALL_INSULA,  "Small Insula"},
+    {TR_BUILDING_HOUSE_MEDIUM_INSULA, "Medium Insula"},
+    {TR_BUILDING_HOUSE_LARGE_INSULA,  "Large Insula"},
+    {TR_BUILDING_HOUSE_GRAND_INSULA,  "Grand Insula"},
+    {TR_BUILDING_HOUSE_SMALL_VILLA,   "Small Villa"},
+    {TR_BUILDING_HOUSE_MEDIUM_VILLA,  "Medium Villa"},
+    {TR_BUILDING_HOUSE_LARGE_VILLA,   "Large Villa"},
+    {TR_BUILDING_HOUSE_GRAND_VILLA,   "Grand Villa"},
+    {TR_BUILDING_HOUSE_SMALL_PALACE,  "Small Palace"},
+    {TR_BUILDING_HOUSE_MEDIUM_PALACE, "Medium Palace"},
+    {TR_BUILDING_HOUSE_LARGE_PALACE,  "Large Palace"},
+    {TR_BUILDING_HOUSE_LUXURY_PALACE, "Luxury Palace"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
