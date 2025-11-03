@@ -20,7 +20,7 @@
 #define FIGURE_ARRAY_SIZE_STEP 1000
 
 #define FIGURE_ORIGINAL_BUFFER_SIZE 128
-#define FIGURE_CURRENT_BUFFER_SIZE 146
+#define FIGURE_CURRENT_BUFFER_SIZE 164
 // around 12 bytes left free in the current buffer size - save version 0xa7, August 2025
 static struct {
     int created_sequence;
@@ -349,8 +349,8 @@ static void figure_save(buffer *buf, const figure *f)
     buffer_write_u8(buf, f->image_offset);
     buffer_write_u8(buf, f->is_enemy_image);
     buffer_write_u8(buf, f->flotsam_visible);
-    buffer_write_i16(buf, f->image_id);
-    buffer_write_i16(buf, f->cart_image_id);
+    buffer_write_i32(buf, f->image_id);
+    buffer_write_i32(buf, f->cart_image_id);
     buffer_write_i16(buf, f->next_figure_id_on_same_tile);
     buffer_write_u8(buf, f->type);
     buffer_write_u8(buf, f->resource_id);
@@ -400,10 +400,10 @@ static void figure_save(buffer *buf, const figure *f)
     buffer_write_i16(buf, f->cc_delta_xy);
     buffer_write_u8(buf, f->cc_direction);
     buffer_write_u8(buf, f->speed_multiplier);
-    buffer_write_i16(buf, f->building_id);
-    buffer_write_i16(buf, f->immigrant_building_id);
-    buffer_write_i16(buf, f->destination_building_id);
-    buffer_write_i16(buf, f->formation_id);
+    buffer_write_i32(buf, f->building_id);
+    buffer_write_i32(buf, f->immigrant_building_id);
+    buffer_write_i32(buf, f->destination_building_id);
+    buffer_write_i32(buf, f->formation_id);
     buffer_write_u8(buf, f->index_in_formation);
     buffer_write_u8(buf, f->formation_at_rest);
     buffer_write_u8(buf, f->migrant_num_people);
@@ -438,9 +438,9 @@ static void figure_save(buffer *buf, const figure *f)
     buffer_write_u16(buf, f->target_figure_created_sequence);
     buffer_write_u8(buf, f->figures_on_same_tile_index);
     buffer_write_u8(buf, f->num_attackers);
-    buffer_write_i16(buf, f->attacker_id1);
-    buffer_write_i16(buf, f->attacker_id2);
-    buffer_write_i16(buf, f->opponent_id);
+    buffer_write_i32(buf, f->attacker_id1);
+    buffer_write_i32(buf, f->attacker_id2);
+    buffer_write_i32(buf, f->opponent_id);
     buffer_write_i16(buf, f->last_visited_index);
     buffer_write_i16(buf, f->last_destinatation_id);
 }
@@ -470,8 +470,13 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     f->image_offset = buffer_read_u8(buf);
     f->is_enemy_image = buffer_read_u8(buf);
     f->flotsam_visible = buffer_read_u8(buf);
-    f->image_id = buffer_read_i16(buf);
-    f->cart_image_id = buffer_read_i16(buf);
+    if (version <= SAVE_GAME_TESTING_VERSION_BUMP_8) {
+        f->image_id = buffer_read_i16(buf);
+        f->cart_image_id = buffer_read_i16(buf);
+    } else {
+        f->image_id = buffer_read_i32(buf);
+        f->cart_image_id = buffer_read_i32(buf);
+    }
     f->next_figure_id_on_same_tile = buffer_read_i16(buf);
     f->type = buffer_read_u8(buf);
     int resource = buffer_read_u8(buf);
@@ -526,10 +531,17 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     f->cc_delta_xy = buffer_read_i16(buf);
     f->cc_direction = buffer_read_u8(buf);
     f->speed_multiplier = buffer_read_u8(buf);
-    f->building_id = buffer_read_i16(buf);
-    f->immigrant_building_id = buffer_read_i16(buf);
-    f->destination_building_id = buffer_read_i16(buf);
-    f->formation_id = buffer_read_i16(buf);
+    if (version <= SAVE_GAME_TESTING_VERSION_BUMP_8) {
+        f->building_id = buffer_read_i16(buf);
+        f->immigrant_building_id = buffer_read_i16(buf);
+        f->destination_building_id = buffer_read_i16(buf);
+        f->formation_id = buffer_read_i16(buf);
+    } else {
+        f->building_id = buffer_read_i32(buf);
+        f->immigrant_building_id = buffer_read_i32(buf);
+        f->destination_building_id = buffer_read_i32(buf);
+        f->formation_id = buffer_read_i32(buf);
+    }
     f->index_in_formation = buffer_read_u8(buf);
     f->formation_at_rest = buffer_read_u8(buf);
     f->migrant_num_people = buffer_read_u8(buf);
@@ -565,9 +577,15 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     f->target_figure_created_sequence = buffer_read_u16(buf);
     f->figures_on_same_tile_index = buffer_read_u8(buf);
     f->num_attackers = buffer_read_u8(buf);
-    f->attacker_id1 = buffer_read_i16(buf);
-    f->attacker_id2 = buffer_read_i16(buf);
-    f->opponent_id = buffer_read_i16(buf);
+    if (version <= SAVE_GAME_TESTING_VERSION_BUMP_8) {
+        f->attacker_id1 = buffer_read_i16(buf);
+        f->attacker_id2 = buffer_read_i16(buf);
+        f->opponent_id = buffer_read_i16(buf);
+    } else {
+        f->attacker_id1 = buffer_read_i32(buf);
+        f->attacker_id2 = buffer_read_i32(buf);
+        f->opponent_id = buffer_read_i32(buf);
+    }
     if (version > SAVE_GAME_LAST_GLOBAL_BUILDING_INFO) {
         f->last_visited_index = buffer_read_i16(buf);
     }
