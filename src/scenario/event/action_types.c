@@ -364,24 +364,23 @@ int scenario_action_type_building_force_collapse_execute(scenario_action_t *acti
             }
             if (type == BUILDING_HIGHWAY) {
                 map_tiles_clear_highway(current_grid_offset, 0);
+
+                map_terrain_remove(current_grid_offset, terrain);
+            }
+            int building_id = map_building_at(current_grid_offset);
+            if (!building_id) {
+                continue;
+            }
+            building *b = building_main(building_get(building_id));
+            if (b->type == BUILDING_BURNING_RUIN) {
+                continue;
+            }
+            if ((b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_MOTHBALLED) || b->is_deleted) {
+                continue;
+            }
             if (destroy_all || b->type == type || (type == BUILDING_MENU_FORT && building_is_fort(b->type))) {
                 building_destroy_by_collapse(b);
             }
-            map_terrain_remove(current_grid_offset, terrain);
-        }
-        int building_id = map_building_at(current_grid_offset);
-        if (!building_id) {
-            continue;
-        }
-        building *b = building_main(building_get(building_id));
-        if (b->type == BUILDING_BURNING_RUIN) {
-            continue;
-        }
-        if ((b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_MOTHBALLED) || b->is_deleted) {
-            continue;
-        }
-        if (destroy_all || b->type == type) {
-            building_destroy_by_collapse(b);
         }
     }
 
