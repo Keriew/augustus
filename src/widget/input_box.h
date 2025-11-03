@@ -10,7 +10,7 @@
 #define INPUT_BOX_CHARS_ALPHANUMERIC  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 "
 #define INPUT_BOX_CHARS_FILENAME      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-() "
 #define INPUT_BOX_CHARS_FORMULAS      "01234567890+-*/()[],{}" 
-#define INPUT_BOX_CHARS_ALL_SUPPORTED "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-()!\"\'*+,./:;=?[]_ "
+#define INPUT_BOX_CHARS_ALL_SUPPORTED "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-()!\"\'*+,./:;=?[]_{} "
 
 typedef struct {
     int x;
