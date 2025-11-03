@@ -364,6 +364,8 @@ int scenario_action_type_building_force_collapse_execute(scenario_action_t *acti
             }
             if (type == BUILDING_HIGHWAY) {
                 map_tiles_clear_highway(current_grid_offset, 0);
+            if (destroy_all || b->type == type || (type == BUILDING_MENU_FORT && building_is_fort(b->type))) {
+                building_destroy_by_collapse(b);
             }
             map_terrain_remove(current_grid_offset, terrain);
         }

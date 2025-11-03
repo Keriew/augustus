@@ -67,9 +67,10 @@ building *building_get(unsigned int id)
 
 int building_can_repair_type(building_type type)
 {
-    if (building_monument_is_limited(type) || type == BUILDING_AQUEDUCT) {
+    if (building_monument_is_limited(type) || type == BUILDING_AQUEDUCT || building_is_fort(type)) {
         return 0; // limited monuments and aqueducts cannot be repaired at the moment, aqueducts require a rework,
     }   //and limited monuments are too complex to easily repair, and arent a common occurrence
+    // forts have the complexity of holding formations, so are also currently excluded
     building_type repair_type = building_clone_type_from_building_type(type);
     if (repair_type == BUILDING_NONE) {
         return 0;
@@ -592,6 +593,9 @@ void building_update_state(void)
             if (b->house_size) {
                 city_population_remove_home_removed(b->house_population);
                 b->house_population = 0;
+            }
+            if (building_is_fort(b->type)) {
+                b->state = BUILDING_STATE_DELETED_BY_GAME;
             }
             // building_delete(b); // keep the rubbled building as a reference for reconstruction
 
