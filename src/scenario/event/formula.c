@@ -59,12 +59,6 @@ double parse_factor(const char **s)
     if (**s == '(') {
         (*s)++;
         double val = parse_expr(s);
-        if (**s == ',') {
-            (*s)++;
-            double val2 = parse_expr(s);
-            val = val < val2 ? random_between_from_stdlib(val, val2) : random_between_from_stdlib(val2, val);
-            // random_between_from_stdlib does only work if min <= max otherwise it return min so the values have to be switched
-        }
         if (**s == ')') (*s)++;
         return val;
     } else if (**s == '[') {
@@ -72,6 +66,20 @@ double parse_factor(const char **s)
         int id = (int) parse_number(s);
         if (**s == ']') (*s)++;
         return get_var_value(id);
+    } else if (**s == '{') {
+        (*s)++;
+        double val = 0;
+        double val1 = parse_expr(s);
+        if (**s == ',') {
+            (*s)++;
+            double val2 = parse_expr(s);
+            val = val1 < val2 ? random_between_from_stdlib(val1, val2) : random_between_from_stdlib(val2, val1);
+            // random_between_from_stdlib does only work if min <= max otherwise it return min so the values have to be switched
+        }
+        if (**s == '}') {
+            (*s)++;
+        }
+        return val;
     } else if (**s == '-') { // unary minus
         (*s)++;
         return -parse_factor(s);

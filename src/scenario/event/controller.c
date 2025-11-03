@@ -589,7 +589,7 @@ void scenario_events_min_max_migrate_to_formulas(void)
                 min_limit = -1000000000;
                 max_limit = 1000000000;
             }
-            sprintf((char *)buffer, "(%i,%i)", action->parameter1, action->parameter2);
+            sprintf((char *)buffer, "{%i,%i}", action->parameter1, action->parameter2);
             unsigned int id = scenario_formula_add((const uint8_t *) buffer, min_limit, max_limit);
             action->parameter1 = id;
         }
