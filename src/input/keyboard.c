@@ -347,7 +347,7 @@ static int is_character_allowed(uint8_t c)
         return data.allow_punctuation;
     } else if (c == '"' || c == '%' || c == '\'' || c == '(' || c == ')' ||
                c == '*' || c == '+' || c == '/' || c == ':' || c == ';' ||
-               c == '=' || c == '_' || c == '[' || c == ']') { // fully supported punctuation
+               c == '=' || c == '_' || c == '[' || c == ']' || c == '{' || c == '}') { // fully supported punctuation
         return data.allow_punctuation;
     } else if (c >= 0x80) { // non-ASCII (UTF-8 continuation, etc.)
         return 1;

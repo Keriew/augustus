@@ -557,6 +557,10 @@ static int font_character_beyond_mapping(const uint8_t *str)
             return IMAGE_FONT_CUSTOM_OFFSET + ASSET_FONT_SQ_BRACKET_LEFT;
         case ']':
             return IMAGE_FONT_CUSTOM_OFFSET + ASSET_FONT_SQ_BRACKET_RIGHT;
+        case '{':
+            return IMAGE_FONT_CUSTOM_OFFSET + ASSET_FONT_CRLY_BRACKET_LEFT;
+        case '}':
+            return IMAGE_FONT_CUSTOM_OFFSET + ASSET_FONT_CRLY_BRACKET_RIGHT;
         default:
             return -1;
     }
