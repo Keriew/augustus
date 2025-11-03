@@ -11,6 +11,7 @@ typedef back_sidebar_draw_function slide_finished_function;
 typedef void (*front_sidebar_draw_function)(int x_offset);
 
 void sidebar_slide(slide_direction direction, back_sidebar_draw_function back_sidebar_callback,
-    front_sidebar_draw_function front_sidebar_callback, slide_finished_function finished_callback);
+    front_sidebar_draw_function front_sidebar_callback, slide_finished_function finished_callback,
+    int previous_sidebar_width, int previous_sidebar_x_offset);
 
 #endif // WIDGET_SIDEBAR_SLIDE_H
