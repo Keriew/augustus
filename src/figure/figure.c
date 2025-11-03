@@ -470,7 +470,7 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     f->image_offset = buffer_read_u8(buf);
     f->is_enemy_image = buffer_read_u8(buf);
     f->flotsam_visible = buffer_read_u8(buf);
-    if (version <= SAVE_GAME_TESTING_VERSION_BUMP_8) {
+    if (version <= SAVE_GAME_TESTING_VERSION_BUMP_9) {
         f->image_id = buffer_read_i16(buf);
         f->cart_image_id = buffer_read_i16(buf);
     } else {
@@ -531,7 +531,7 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     f->cc_delta_xy = buffer_read_i16(buf);
     f->cc_direction = buffer_read_u8(buf);
     f->speed_multiplier = buffer_read_u8(buf);
-    if (version <= SAVE_GAME_TESTING_VERSION_BUMP_8) {
+    if (version <= SAVE_GAME_TESTING_VERSION_BUMP_9) {
         f->building_id = buffer_read_i16(buf);
         f->immigrant_building_id = buffer_read_i16(buf);
         f->destination_building_id = buffer_read_i16(buf);
@@ -577,7 +577,7 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     f->target_figure_created_sequence = buffer_read_u16(buf);
     f->figures_on_same_tile_index = buffer_read_u8(buf);
     f->num_attackers = buffer_read_u8(buf);
-    if (version <= SAVE_GAME_TESTING_VERSION_BUMP_8) {
+    if (version <= SAVE_GAME_TESTING_VERSION_BUMP_9) {
         f->attacker_id1 = buffer_read_i16(buf);
         f->attacker_id2 = buffer_read_i16(buf);
         f->opponent_id = buffer_read_i16(buf);

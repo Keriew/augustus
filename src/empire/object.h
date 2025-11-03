@@ -35,6 +35,7 @@ typedef struct {
     int city_sells_resource[RESOURCE_MAX];
     int city_buys_resource[RESOURCE_MAX];
     empire_object obj;
+    empire_city_icon city_icon;
 } full_empire_object;
 
 void empire_object_clear(void);
