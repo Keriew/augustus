@@ -1,6 +1,6 @@
 #include "sidebar.h"
 
-#include "info.h"
+#include "advisors/info.h"
 #include "building/menu.h"
 #include "city/message.h"
 #include "city/view.h"
@@ -111,7 +111,7 @@ static struct {
     int show_info_for;
 } data;
 
-static void draw_overlay_text(int x_offset)
+static void draw_overlay_text(const int x_offset)
 {
     if (game_state_overlay()) {
         const uint8_t *text = get_current_overlay_text();
@@ -176,7 +176,6 @@ static void enable_building_buttons(void)
     }
 }
 
-
 int advanced_sidebar_width(void)
 {
     return SIDEBAR_ADVANCED_WIDTH;
@@ -187,42 +186,23 @@ int calculate_x_offset_sidebar_advanced(void)
     return screen_width() - SIDEBAR_ADVANCED_WIDTH;
 }
 
-
-static void show_housing_info(void)
-{
-    int x_offset = calculate_x_offset_sidebar_advanced() + 48;
-    draw_infopanel_background(x_offset, 240 + 22 + 6, 162, 494);
-
-    draw_housing_table(x_offset + 2, 240 + 22 + 12);
-}
-
-static void show_god_info(void)
-{
-    int x_offset = calculate_x_offset_sidebar_advanced() + 48;
-    draw_infopanel_background(x_offset, 240 + 22 + 6, 162, 494);
-
-    draw_gods_table(x_offset + 2, 240 + 22 + 12);
-}
-
-static void show_health_info(void)
-{
-    int x_offset = calculate_x_offset_sidebar_advanced() + 48;
-    draw_infopanel_background(x_offset, 240 + 22 + 6, 162, 494);
-
-    draw_health_table(x_offset + 2, 240 + 22 + 12);
-}
-
 void draw_advanced_sidebar_background(const int x_offset)
 {
-    if (data.show_info_for == 1)
-    {
-        show_housing_info();
-    } else if (data.show_info_for == BUILD_MENU_TEMPLES + 1)
-    {
-        show_god_info();
-    } else if (data.show_info_for == BUILD_MENU_HEALTH + 1)
-    {
-        show_health_info();
+    const int info_panel_x_offset = x_offset + 48;
+    const int info_panel_y_offset = 268;
+    draw_info_panel_background(info_panel_x_offset, info_panel_y_offset);
+
+    switch (data.show_info_for){
+    case BUILD_MENU_HEALTH:
+        draw_health_table();
+        break;
+    case BUILD_MENU_VACANT_HOUSE:
+        draw_housing_table();
+        break;
+    case BUILD_MENU_TEMPLES:
+        draw_gods_table();
+        break;
+    default: ;
     }
 
     // image_draw(image_group(GROUP_SIDE_PANEL), x_offset, TOP_MENU_HEIGHT, COLOR_MASK_NONE, SCALE_NONE);
@@ -237,11 +217,25 @@ void draw_advanced_sidebar_background(const int x_offset)
 
 void draw_advanced_sidebar_foreground(void)
 {
+    const int x_offset = calculate_x_offset_sidebar_advanced();
+
+    switch (data.show_info_for){
+        case BUILD_MENU_HEALTH:
+            draw_health_table();
+            break;
+        case BUILD_MENU_VACANT_HOUSE:
+            draw_housing_table();
+            break;
+        case BUILD_MENU_TEMPLES:
+            draw_gods_table();
+            break;
+        default: ;
+    }
+
     if (building_menu_has_changed()) {
         enable_building_buttons();
     }
 
-    const int x_offset = calculate_x_offset_sidebar_advanced();
     draw_buttons(x_offset);
     draw_overlay_text(x_offset + 4);
     widget_minimap_draw_decorated(x_offset + 8, 36 + TOP_MENU_HEIGHT, 187, 143);
@@ -279,6 +273,8 @@ int handle_advanced_sidebar_mouse(const mouse *m)
     if (button_id) {
         data.focus_button_for_tooltip = button_id + 9;
     }
+
+    handled |= info_panel_mouse_handle(m);
     //     handled |= image_buttons_handle_mouse(m, x_offset, 24, buttons_build_expanded, 15, &button_id);
     //     if (button_id) {
     //         data.focus_button_for_tooltip = button_id + 19;
@@ -320,10 +316,15 @@ static void button_collapse_expand(int param1, int param2)
     sidebar_next();
 }
 
-
 static void button_build(const int submenu, int param2)
 {
-    data.show_info_for = submenu + 1;
+    if (submenu == BUILD_MENU_VACANT_HOUSE ||
+        submenu == BUILD_MENU_TEMPLES ||
+        submenu == BUILD_MENU_HEALTH){
+
+        data.show_info_for = submenu;
+    }
+
 
     window_build_menu_show(submenu);
 }
