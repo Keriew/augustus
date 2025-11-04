@@ -59,6 +59,13 @@ void dropdown_button_default_origin_click(const complex_button *btn)
     window_request_refresh();
 }
 
+static void dropdown_cancel(const complex_button *btn)
+{
+    dropdown_button *dd = (dropdown_button *) btn->user_data;
+    dd->expanded = 0;
+    window_request_refresh();
+}
+
 void dropdown_button_init(dropdown_button *dd, complex_button *buttons,
     unsigned int num_buttons, int width, int spacing, int padding)
 {
