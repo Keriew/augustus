@@ -91,18 +91,6 @@ static void update_mpg_audio(plm_t *mpeg, plm_samples_t *samples, void *user)
     sound_device_write_custom_music_data(samples->interleaved, sizeof(float) * samples->count * 2);
 }
 
-static const char *get_filename_from_path(const char *filename)
-{
-    if (data.type == VIDEO_TYPE_SMK) {
-        return filename;
-    } else if (data.type == VIDEO_TYPE_AV1) {
-        return filename;
-    } else if (data.type == VIDEO_TYPE_MPG) {
-        return filename;
-    }
-    return NULL;
-}
-
 static int load_av1(const char *filename)
 {
     if (data.type == VIDEO_TYPE_SMK || data.type == VIDEO_TYPE_MPG) {

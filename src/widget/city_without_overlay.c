@@ -79,7 +79,7 @@ static struct {
     unsigned int highlighted_formation;
     unsigned int selected_building_id;
     unsigned int hovered_building_id;
-    map_tile *cursor_tile;
+    const map_tile *cursor_tile;
     pixel_coordinate *selected_figure_coord;
 
     float scale;
@@ -104,7 +104,8 @@ static void init_draw_context(int selected_figure_id, pixel_coordinate *figure_c
 
     // Determine hovered building - only if config enabled and not scrolling
     draw_context.hovered_building_id = 0;
-    if (config_get(CONFIG_UI_CV_CURSOR_SHADOW) && draw_context.cursor_tile && draw_context.cursor_tile->grid_offset && !scroll_in_progress()) {
+    if (config_get(CONFIG_UI_CV_CURSOR_SHADOW) && draw_context.cursor_tile && draw_context.cursor_tile->grid_offset &&
+        !scroll_in_progress()) {
         int building_id = map_building_at(draw_context.cursor_tile->grid_offset);
         if (building_id) {
             building *b = building_get(building_id);
@@ -195,7 +196,6 @@ static int is_building_selected(building *b)
     }
 
 }
-
 
 static int is_building_hovered(building *b)
 {

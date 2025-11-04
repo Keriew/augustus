@@ -78,7 +78,6 @@ static void advance_year(void)
 
 static void advance_month(void)
 {
-    int new_year = 0;
     city_migration_reset_newcomers();
     city_health_update();
     scenario_random_event_process();
@@ -106,7 +105,6 @@ static void advance_month(void)
 
     if (game_time_advance_month()) {
         advance_year();
-        new_year = 1;
     } else {
         city_ratings_update(0, 1);
     }

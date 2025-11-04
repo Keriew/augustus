@@ -30,8 +30,6 @@
 
 #define MAX_BUTTONS 6
 
-static void show_editor(void);
-
 static void button_click(const generic_button *button);
 
 static struct {

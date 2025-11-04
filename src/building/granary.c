@@ -434,7 +434,7 @@ building *building_granary_get_granary_needing_food(building *source, int resour
         if (b->road_network_id != source->road_network_id || !building_granary_accepts_storage(b, resource, 0)) {
             continue;
         }
-        if ((building_storage_get_state(b, resource, 1) == BUILDING_STORAGE_STATE_GETTING) && getting ||
+        if ((building_storage_get_state(b, resource, 1) == BUILDING_STORAGE_STATE_GETTING && getting) ||
             (building_storage_get_state(b, resource, 1) != BUILDING_STORAGE_STATE_GETTING && !getting)) {
             //'not accepting' is already filtered out by building_granary_accepts_storage
             //if getting is 1, then we are looking only for granaries that are getting the resource, otherwise only accepting

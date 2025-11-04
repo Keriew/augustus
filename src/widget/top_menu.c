@@ -796,14 +796,17 @@ static int handle_mouse_menu(const mouse *m)
             if (m->left.went_up) {
                 ratings_advisors_go_to(ADVISOR_FINANCIAL);
             }
+            break;
         case INFO_PERSONAL:
             if (m->left.went_up) {
                 ratings_advisors_go_to(ADVISOR_IMPERIAL);
             }
+            break;
         case INFO_POPULATION:
             if (m->left.went_up) {
                 ratings_advisors_go_to(ADVISOR_POPULATION);
             }
+            break;
         case INFO_CULTURE:
         case INFO_PROSPERITY:
         case INFO_PEACE:
@@ -811,10 +814,12 @@ static int handle_mouse_menu(const mouse *m)
             if (m->left.went_up) {
                 ratings_advisors_go_to(ADVISOR_RATINGS);
             }
+            break;
         case INFO_HEALTH:
             if (m->left.went_up) {
                 ratings_advisors_go_to(ADVISOR_HEALTH);
             }
+            break;
     }
     if (menu_id && m->left.went_up) {
         data.open_sub_menu = menu_id;

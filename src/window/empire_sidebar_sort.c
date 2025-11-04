@@ -231,6 +231,7 @@ int window_empire_sidebar_sort_sidebar_city_sorter(const void *a, const void *b)
             result = (profit_a > profit_b) - (profit_a < profit_b);
             break;
         }
+
         default:
             break;
     }

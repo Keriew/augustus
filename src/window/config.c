@@ -1797,7 +1797,7 @@ static void button_page(const generic_button *button)
 static void on_scroll(void)
 {
     window_invalidate();
-};
+}
 
 static void handle_input(const mouse *m, const hotkeys *h)
 {

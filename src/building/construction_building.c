@@ -451,7 +451,7 @@ int building_construction_place_building(building_type type, int x, int y, int e
     if (type == BUILDING_GATEHOUSE || type == BUILDING_WAREHOUSE) {
         //check if there's a preset orientation from old building
         building *old_b = building_get(map_building_rubble_building_id(map_grid_offset(x, y)));
-        if (old_b && old_b->type == BUILDING_GATEHOUSE || old_b->type == BUILDING_WAREHOUSE) {
+        if (old_b && (old_b->type == BUILDING_GATEHOUSE || old_b->type == BUILDING_WAREHOUSE)) {
             building_orientation = old_b->subtype.orientation;
         } else if (type == BUILDING_GATEHOUSE) {
             building_orientation = map_orientation_for_gatehouse(x, y);

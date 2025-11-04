@@ -225,7 +225,6 @@ static void on_sidebar_city_click(const grid_box_item *item);
 //buttons position registrators to enable dynamic positioning
 static void register_resource_button(int x, int y, int width, int height, resource_type r, int highlight);
 static void register_open_trade_button(int x, int y, int width, int height, int route_id, int highlight);
-static void sorting_order(int is_down, int param2);
 
 //arrays and counts for sidebar trade, resource and sorting buttons
 static trade_open_button trade_open_buttons[MAX_TRADE_OPEN_BUTTONS];
@@ -2144,10 +2143,7 @@ static void button_return_to_city(int param1, int param2)
 {
     window_city_show();
 }
-static void sorting_order(int is_down, int param2)
-{
-    window_empire_sidebar_sort_set_sorting_reversed(is_down);
-}
+
 static void button_advisor(int advisor, int param2)
 {
     window_advisors_show_advisor(advisor);

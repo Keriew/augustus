@@ -689,7 +689,7 @@ void building_construction_start(int x, int y, int grid_offset)
                 break;
             case BUILDING_DRAGGABLE_RESERVOIR:
                 can_start = map_routing_calculate_distances_for_building(
-                ROUTED_BUILDING_AQUEDUCT, data.start.x, data.start.y);
+                    ROUTED_BUILDING_DRAGGABLE_RESERVOIR, data.start.x, data.start.y);
                 break;
             case BUILDING_WALL:
                 can_start = map_routing_calculate_distances_for_building(
@@ -991,6 +991,7 @@ figure_type building_construction_nearby_enemy_type(grid_slice *slice)
         }
 
         int distance = f->type == FIGURE_WOLF ? 6 : 12;
+      
         // Check if figure is within distance of any tile in the grid slice
         for (int j = 0; j < slice->size; j++) {
             int grid_offset = slice->grid_offsets[j];
