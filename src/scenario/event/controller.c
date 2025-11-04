@@ -590,6 +590,9 @@ void scenario_events_min_max_migrate_to_formulas(void)
                 max_limit = 1000000000;
             }
             sprintf((char *)buffer, "{%i,%i}", action->parameter1, action->parameter2);
+            if (type == ACTION_TYPE_ADJUST_CITY_HEALTH || type == ACTION_TYPE_ADJUST_ROME_WAGES) {
+                action->parameter2 = action->parameter3;
+            }
             unsigned int id = scenario_formula_add((const uint8_t *) buffer, min_limit, max_limit);
             action->parameter1 = id;
         }
