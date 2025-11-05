@@ -806,7 +806,7 @@ int empire_city_get_icon_image_id(empire_city_icon_type type)
         case EMPIRE_CITY_ICON_DISTANT_CITY:
             return image_group(GROUP_EMPIRE_FOREIGN_CITY);
         case EMPIRE_CITY_ICON_TOWER:
-            return image_group(GROUP_EMPIRE_FOREIGN_CITY) + 60;
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_OLD_WATCHTOWER); // old_watchtower
         default:
             return -1;
     }
