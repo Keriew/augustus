@@ -778,7 +778,7 @@ static void get_tooltip(tooltip_context *c)
 
     if (variable_buttons.focused_item.is_focused) {
         unsigned int id = data.custom_variable_ids[variable_buttons.focused_item.position];
-        if (dropdown_button_get_tooltip_for_ellipsize(&color_dropdowns[id - 1], c)) {
+        if (dropdown_button_handle_tooltip(&color_dropdowns[id - 1], c)) {
             return;
         }
         // Name

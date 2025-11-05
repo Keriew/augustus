@@ -259,3 +259,23 @@ int complex_button_array_handle_mouse(const mouse *m, complex_button *buttons, u
 
     return handled;
 }
+
+int complex_button_handle_tooltip(const complex_button *button, tooltip_context *c)
+{
+    if (button->is_focused) {
+        c->type = button->tooltip_c.type;
+        c->precomposed_text = button->tooltip_c.precomposed_text;
+        return 1;
+    }
+    return 0;
+}
+
+int complex_button_array_handle_tooltip(const complex_button *buttons, unsigned int num_buttons, tooltip_context *c)
+{
+    for (unsigned int i = 0; i < num_buttons; i++) {
+        if (complex_button_handle_tooltip(&buttons[i], c)) {
+            return 1;
+        }
+    }
+    return 0;
+}

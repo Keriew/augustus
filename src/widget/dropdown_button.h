@@ -63,7 +63,8 @@ void dropdown_button_init(dropdown_button *dd, complex_button *buttons,
  */
 void dropdown_button_init_simple(int x, int y, const lang_fragment *frags, unsigned int count, dropdown_button *dd);
 
-int dropdown_button_get_tooltip_for_ellipsize(const dropdown_button *dd, tooltip_context *c);
+int dropdown_button_handle_tooltip(const dropdown_button *dd, tooltip_context *c);
+
 /**
  * @brief Draw a dropdown (origin button + expanded options if expanded).
  *

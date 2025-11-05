@@ -169,19 +169,12 @@ void dropdown_button_init_simple(int x, int y, const lang_fragment *frags, unsig
     dropdown_button_init(dd, dd->buttons, count, buttons_width, dd->spacing, dd->padding);
 }
 
-int dropdown_button_get_tooltip_for_ellipsize(const dropdown_button *dd, tooltip_context *c)
+int dropdown_button_handle_tooltip(const dropdown_button *dd, tooltip_context *c)
 {
     if (dd->num_buttons == 0) {
         return 0;
     }
-    for (unsigned int i = 1; i < dd->num_buttons; i++) {
-        if (dd->buttons[i].is_ellipsized && dd->buttons[i].is_focused) {
-            c->precomposed_text = dd->buttons[i].tooltip_c.precomposed_text;
-            c->type = dd->buttons[i].tooltip_c.type;
-            return i;
-        }
-    }
-    return 0;
+    return complex_button_array_handle_tooltip(dd->buttons, dd->num_buttons, c);
 }
 
 void dropdown_button_draw(const dropdown_button *dd)
