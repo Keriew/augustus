@@ -293,13 +293,19 @@ static void dd_earthquake_pattern(dropdown_button *dd)
     scenario_editor_earthquake_set_pattern(dd->selected_index - 1);
 }
 
+static void get_tooltip(tooltip_context *c)
+{
+    dropdown_button_handle_tooltip(&earthquake_pattern_dropdown, c);
+}
+
 void window_editor_special_events_show(void)
 {
     window_type window = {
         WINDOW_EDITOR_SPECIAL_EVENTS,
         draw_background,
         draw_foreground,
-        handle_input
+        handle_input,
+        get_tooltip
     };
     init_dd();
     window_show(&window);
