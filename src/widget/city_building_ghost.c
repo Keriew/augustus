@@ -1529,8 +1529,24 @@ void city_building_ghost_draw(const map_tile *tile)
             draw_hippodrome_desirability(tile);
         } else if (type == BUILDING_DRAGGABLE_RESERVOIR) {
             map_tile shifted_tile = *tile;
-            shifted_tile.x -= 1;
-            shifted_tile.y -= 1;
+            switch (city_view_orientation()) {
+                case DIR_0_TOP:
+                    shifted_tile.x -= 1;
+                    shifted_tile.y -= 1;
+                    break;
+                case DIR_2_RIGHT:
+                    shifted_tile.x += 1;
+                    shifted_tile.y -= 1;
+                    break;
+                case DIR_4_BOTTOM:
+                    shifted_tile.x += 1;
+                    shifted_tile.y += 1;
+                    break;
+                case DIR_6_LEFT:
+                    shifted_tile.x -= 1;
+                    shifted_tile.y += 1;
+                    break;
+            }
             shifted_tile.grid_offset = map_grid_offset(shifted_tile.x, shifted_tile.y);
             draw_desirability_range(&shifted_tile, type, building_size);
         } else {
