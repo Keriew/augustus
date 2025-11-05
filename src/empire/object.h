@@ -2,6 +2,7 @@
 #define EMPIRE_OBJECT_H
 
 #include "core/buffer.h"
+#include "empire/city.h"
 #include "empire/type.h"
 #include "game/resource.h"
 
@@ -23,6 +24,7 @@ typedef struct {
     int trade_route_id;
     int invasion_path_id;
     int invasion_years;
+    empire_city_icon_type empire_city_icon;
 } empire_object;
 
 typedef struct {
@@ -35,7 +37,7 @@ typedef struct {
     int city_sells_resource[RESOURCE_MAX];
     int city_buys_resource[RESOURCE_MAX];
     empire_object obj;
-    empire_city_icon city_icon;
+    empire_city_icon_type empire_city_icon;
 } full_empire_object;
 
 void empire_object_clear(void);

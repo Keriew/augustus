@@ -24,12 +24,4 @@ typedef enum {
     EMPIRE_CITY_FUTURE_ROMAN = 6,
 } empire_city_type;
 
-typedef enum {
-    EMPIRE_ICON_CONSTRUCTION = 0,
-    EMPIRE_ICON_DISTANT_VARIANT1 = 1,
-    EMPIRE_ICON_DISTANT_VARIANT2 = 2,
-    EMPIRE_ICON_RESOURCE_FARM = 3,
-    EMPIRE_ICON_RESOURCE_WAREHOUSE = 4,
-}empire_city_icon;
-
 #endif // EMPIRE_TYPE_H

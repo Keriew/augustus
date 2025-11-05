@@ -1,5 +1,6 @@
 #include "city.h"
 
+#include "assets/assets.h"
 #include "building/monument.h"
 #include "core/array.h"
 #include "core/calc.h"
@@ -762,4 +763,51 @@ void empire_city_load_state(buffer *buf, int version)
 int empire_city_get_array_size(void)
 {
     return cities.size;
+}
+
+int empire_city_get_icon_image_id(empire_city_icon_type type)
+{
+    switch (type) {
+        case EMPIRE_CITY_ICON_TRADE_TOWN:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_1);  // tr_town
+        case EMPIRE_CITY_ICON_ROMAN_TOWN:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_2);  // ro_town
+        case EMPIRE_CITY_ICON_TRADE_VILLAGE:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_3);  // tr_village
+        case EMPIRE_CITY_ICON_ROMAN_VILLAGE:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_4);  // ro_village
+        case EMPIRE_CITY_ICON_ROMAN_CAPITAL:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_5);  // ro_capital
+
+        case EMPIRE_CITY_ICON_DISTANT_TOWN:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_6);  // dis_town
+        case EMPIRE_CITY_ICON_DISTANT_VILLAGE:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_7);  // dis_village
+
+        case EMPIRE_CITY_ICON_CONSTRUCTION:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_8);  // construction
+
+        case EMPIRE_CITY_ICON_RESOURCE_FOOD:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_9);  // res_food
+        case EMPIRE_CITY_ICON_RESOURCE_GOODS:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_10); // res_goods
+
+        case EMPIRE_CITY_ICON_TRADE_SEA:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_11); // tr_sea
+        case EMPIRE_CITY_ICON_TRADE_LAND:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_12); // tr_land
+
+        case EMPIRE_CITY_ICON_OUR_CITY:
+            return image_group(GROUP_EMPIRE_CITY);
+        case EMPIRE_CITY_ICON_TRADE_CITY:
+            return image_group(GROUP_EMPIRE_CITY_TRADE);
+        case EMPIRE_CITY_ICON_ROMAN_CITY:
+            return image_group(GROUP_EMPIRE_CITY_DISTANT_ROMAN);
+        case EMPIRE_CITY_ICON_DISTANT_CITY:
+            return image_group(GROUP_EMPIRE_FOREIGN_CITY);
+        case EMPIRE_CITY_ICON_TOWER:
+            return image_group(GROUP_EMPIRE_FOREIGN_CITY) + 60;
+        default:
+            return -1;
+    }
 }

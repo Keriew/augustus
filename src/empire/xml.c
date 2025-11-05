@@ -336,13 +336,18 @@ static int xml_start_city(void)
 
     static const char *city_types[6] = { "roman", "ours", "trade", "future_trade", "distant", "vulnerable" };
     static const char *trade_route_types[2] = { "land", "sea" };
-
+    static const char *city_icons[17] = { "construction", "dis_town", "dis_village", "res_food", "res_goods",
+                                          "tr_town", "ro_town", "tr_village", "ro_village", "ro_capital", "tr_sea",
+                                          "tr_land", "our_city", "tr_city", "ro_city", "dis_city", "tower" };
     const char *name = xml_parser_get_attribute_string("name");
     if (name) {
         string_copy(string_from_ascii(name), city_obj->city_custom_name, sizeof(city_obj->city_custom_name));
     }
 
     int city_type = xml_parser_get_attribute_enum("type", city_types, 6, EMPIRE_CITY_DISTANT_ROMAN);
+    int city_icon_type = xml_parser_get_attribute_enum("icon", city_icons, 17, EMPIRE_CITY_ICON_DEFAULT + 1);
+    city_obj->empire_city_icon = city_icon_type;
+    city_obj->obj.empire_city_icon = city_icon_type;
     if (city_type < EMPIRE_CITY_DISTANT_ROMAN) {
         city_obj->city_type = EMPIRE_CITY_TRADE;
     } else {

@@ -8,23 +8,24 @@
 #define EMPIRE_CITY_MAX_TRADERS 3
 
 typedef enum {
-    EMPIRE_CITY_ICON_CONSTRUCTION,
-    EMPIRE_CITY_ICON_DISTANT_TOWN,
-    EMPIRE_CITY_ICON_DISTANT_VILLAGE,
-    EMPIRE_CITY_ICON_RESOURCE_FOOD,
-    EMPIRE_CITY_ICON_RESOURCE_GOODS,
-    EMPIRE_CITY_ICON_TRADE_TOWN,
-    EMPIRE_CITY_ICON_ROMAN_TOWN,
-    EMPIRE_CITY_ICON_TRADE_VILLAGE,
-    EMPIRE_CITY_ICON_ROMAN_VILLAGE,
-    EMPIRE_CITY_ICON_ROMAN_CAPITAL,
-    EMPIRE_CITY_ICON_TRADE_SEA,
-    EMPIRE_CITY_ICON_TRADE_LAND,
-    EMPIRE_CITY_ICON_OUR_CITY,
-    EMPIRE_CITY_ICON_TRADE_CITY,
-    EMPIRE_CITY_ICON_ROMAN_CITY,
-    EMPIRE_CITY_ICON_DISTANT_CITY,
-    EMPIRE_CITY_ICON_TOWER,
+    EMPIRE_CITY_ICON_DEFAULT, // not specified
+    EMPIRE_CITY_ICON_CONSTRUCTION, //construction
+    EMPIRE_CITY_ICON_DISTANT_TOWN, //dis_town
+    EMPIRE_CITY_ICON_DISTANT_VILLAGE, //dis_village
+    EMPIRE_CITY_ICON_RESOURCE_FOOD, //res_food
+    EMPIRE_CITY_ICON_RESOURCE_GOODS, //res_goods
+    EMPIRE_CITY_ICON_TRADE_TOWN, // tr_town
+    EMPIRE_CITY_ICON_ROMAN_TOWN, // ro_town
+    EMPIRE_CITY_ICON_TRADE_VILLAGE, // tr_village
+    EMPIRE_CITY_ICON_ROMAN_VILLAGE, // ro_village
+    EMPIRE_CITY_ICON_ROMAN_CAPITAL, // ro_capital
+    EMPIRE_CITY_ICON_TRADE_SEA, // tr_sea
+    EMPIRE_CITY_ICON_TRADE_LAND, // tr_land
+    EMPIRE_CITY_ICON_OUR_CITY, // our_city
+    EMPIRE_CITY_ICON_TRADE_CITY, //tr_city
+    EMPIRE_CITY_ICON_ROMAN_CITY, //ro_city
+    EMPIRE_CITY_ICON_DISTANT_CITY, //dis_city
+    EMPIRE_CITY_ICON_TOWER, // tower
 } empire_city_icon_type;
 
 typedef struct {
@@ -40,7 +41,6 @@ typedef struct {
     int empire_object_id;
     int is_sea_trade;
     int trader_figure_ids[EMPIRE_CITY_MAX_TRADERS];
-    empire_city_icon_type empire_city_icon;
 } empire_city;
 
 void empire_city_clear_all(void);
@@ -125,5 +125,7 @@ void empire_city_update_trading_data(int empire_id);
 void empire_city_load_state(buffer *buf, int version);
 
 int empire_city_get_array_size(void);
+
+int empire_city_get_icon_image_id(empire_city_icon_type type);
 
 #endif // EMPIRE_CITY_H

@@ -254,26 +254,204 @@
 		<layer group="199" image="13"/>
 		<layer src="Housing_Advisor_S" x="3" y="3"/>
 	</image>
+	<!-- Note: City flags for map icons -->
+	<!-- Red flags - Trade-->
+	<image id="city_flag_red_01" width="19" height="12" >
+		<layer group="175" image="1"/>
+	</image>
+	<image id="city_flag_red_02" width="19" height="12" >
+		<layer group="175" image="2"/>
+	</image>
+	<image id="city_flag_red_03" width="19" height="12" >
+		<layer group="175" image="3"/>
+	</image>
+	<image id="city_flag_red_04" width="19" height="12" >
+		<layer group="175" image="4"/>
+	</image>
+	<image id="city_flag_red_05" width="19" height="12" >
+		<layer group="175" image="5"/>
+	</image>
+	<image id="city_flag_red_06" width="19" height="12" >
+		<layer group="175" image="6"/>
+	</image>
+	<!-- Blue flags - Roman-->
+	<image id="city_flag_blue_01" width="19" height="12" >
+		<layer group="176" image="1"/>
+	</image>
+	<image id="city_flag_blue_02" width="19" height="12" >
+		<layer group="176" image="2"/>
+	</image>
+	<image id="city_flag_blue_03" width="19" height="12" >
+		<layer group="176" image="3"/>
+	</image>
+	<image id="city_flag_blue_04" width="19" height="12" >
+		<layer group="176" image="4"/>
+	</image>
+	<image id="city_flag_blue_05" width="19" height="12" >
+		<layer group="176" image="5"/>
+	</image>
+	<image id="city_flag_blue_06" width="19" height="12" >
+		<layer group="176" image="6"/>
+	</image>
+	<!-- Yellow flags - Distant -->
+	<image id="city_flag_yellow_01" width="19" height="12" >
+		<layer group="177" image="1"/>
+	</image>
+	<image id="city_flag_yellow_02" width="19" height="12" >
+		<layer group="177" image="2"/>
+	</image>
+	<image id="city_flag_yellow_03" width="19" height="12" >
+		<layer group="177" image="3"/>
+	</image>
+	<image id="city_flag_yellow_04" width="19" height="12" >
+		<layer group="177" image="4"/>
+	</image>
+	<image id="city_flag_yellow_05" width="19" height="12" >
+		<layer group="177" image="5"/>
+	</image>
+	<image id="city_flag_yellow_06" width="19" height="12" >
+		<layer group="177" image="6"/>
+	</image>
 	<!-- Note: Empire map icons for Roman trade towns and non-trade towns respectively -->
-	<image id="Empire_Icon_Roman_01" src="Empire_Icon_Roman_01"/>
-	<image id="Empire_Icon_Roman_02" src="Empire_Icon_Roman_02"/>
+	<image id="Empire_Icon_Roman_01" src="Empire_Icon_Roman_01">
+		<animation speed="6" reversible="false" x="3" y="5">
+			<frame group="this" image="city_flag_red_01"/>
+			<frame group="this" image="city_flag_red_02"/>
+			<frame group="this" image="city_flag_red_03"/>
+			<frame group="this" image="city_flag_red_04"/>
+			<frame group="this" image="city_flag_red_05"/>
+			<frame group="this" image="city_flag_red_06"/>
+		</animation>
+	</image>
+	<image id="Empire_Icon_Roman_02" src="Empire_Icon_Roman_02">
+		<animation speed="6" reversible="false" x="3" y="5">
+			<frame group="this" image="city_flag_blue_01"/>
+			<frame group="this" image="city_flag_blue_02"/>
+			<frame group="this" image="city_flag_blue_03"/>
+			<frame group="this" image="city_flag_blue_04"/>
+			<frame group="this" image="city_flag_blue_05"/>
+			<frame group="this" image="city_flag_blue_06"/>
+		</animation>
+	</image>
 	<!-- Note: Empire map icons for Roman trade villages and non-trade villages respectively -->
-	<image id="Empire_Icon_Roman_03" src="Empire_Icon_Roman_03"/>
-	<image id="Empire_Icon_Roman_04" src="Empire_Icon_Roman_04"/>
+	<image id="Empire_Icon_Roman_03" src="Empire_Icon_Roman_03">
+		<animation speed="6" reversible="false" x="17" y="5">
+			<frame group="this" image="city_flag_red_01"/>
+			<frame group="this" image="city_flag_red_02"/>
+			<frame group="this" image="city_flag_red_03"/>
+			<frame group="this" image="city_flag_red_04"/>
+			<frame group="this" image="city_flag_red_05"/>
+			<frame group="this" image="city_flag_red_06"/>
+		</animation>
+	</image>
+	<image id="Empire_Icon_Roman_04" src="Empire_Icon_Roman_04">
+		<animation speed="6" reversible="false" x="17" y="5">
+			<frame group="this" image="city_flag_blue_01"/>
+			<frame group="this" image="city_flag_blue_02"/>
+			<frame group="this" image="city_flag_blue_03"/>
+			<frame group="this" image="city_flag_blue_04"/>
+			<frame group="this" image="city_flag_blue_05"/>
+			<frame group="this" image="city_flag_blue_06"/>
+		</animation>
+	</image>
 	<!-- Note: Empire map icon for the City of Rome -->
-	<image id="Empire_Icon_Roman_05" src="Empire_Icon_Roman_05"/>
+	<image id="Empire_Icon_Roman_05" src="Empire_Icon_Roman_05">
+		<animation speed="6" reversible="false" x="8" y="5">
+			<frame group="this" image="Empire_Icon_Flag_01"/>
+			<frame group="this" image="Empire_Icon_Flag_02"/>
+			<frame group="this" image="Empire_Icon_Flag_03"/>
+			<frame group="this" image="Empire_Icon_Flag_04"/>
+			<frame group="this" image="Empire_Icon_Flag_05"/>
+			<frame group="this" image="Empire_Icon_Flag_06"/>
+		</animation>
+	</image>
 	<!-- Note: Empire map icons for distant towns -->
-	<image id="Empire_Icon_Distant_01" src="Empire_Icon_Distant_01"/>
+	<image id="Empire_Icon_Distant_01" src="Empire_Icon_Distant_01">
+		<animation speed="6" reversible="false" x="17" y="5">
+			<frame group="this" image="city_flag_yellow_01"/>
+			<frame group="this" image="city_flag_yellow_02"/>
+			<frame group="this" image="city_flag_yellow_03"/>
+			<frame group="this" image="city_flag_yellow_04"/>
+			<frame group="this" image="city_flag_yellow_05"/>
+			<frame group="this" image="city_flag_yellow_06"/>
+		</animation>
+	</image>
 	<!-- Note: Empire map icons for distant villages -->
-	<image id="Empire_Icon_Distant_02" src="Empire_Icon_Distant_02"/>
+	<image id="Empire_Icon_Distant_02" src="Empire_Icon_Distant_02">
+		<animation speed="6" reversible="false" x="17" y="5">
+			<frame group="this" image="city_flag_yellow_01"/>
+			<frame group="this" image="city_flag_yellow_02"/>
+			<frame group="this" image="city_flag_yellow_03"/>
+			<frame group="this" image="city_flag_yellow_04"/>
+			<frame group="this" image="city_flag_yellow_05"/>
+			<frame group="this" image="city_flag_yellow_06"/>
+		</animation>
+	</image>
 	<!-- Note: Empire map icon for construction site -->
-	<image id="Empire_Icon_Construction_01" src="Empire_Icon_Construction_01"/>
+	<image id="Empire_Icon_Construction_01" src="Empire_Icon_Construction_01">
+		<animation speed="6" reversible="false" x="3" y="5">
+			<frame group="this" image="city_flag_blue_01"/>
+			<frame group="this" image="city_flag_blue_02"/>
+			<frame group="this" image="city_flag_blue_03"/>
+			<frame group="this" image="city_flag_blue_04"/>
+			<frame group="this" image="city_flag_blue_05"/>
+			<frame group="this" image="city_flag_blue_06"/>
+		</animation>
+	</image>
 	<!-- Note: Empire map icon for farm and quarry resource nodes respectively -->
-	<image id="Empire_Icon_Resource_01" src="Empire_Icon_Resource_01"/>
-	<image id="Empire_Icon_Resource_02" src="Empire_Icon_Resource_02"/>
+	<image id="Empire_Icon_Resource_01" src="Empire_Icon_Resource_01">
+		<animation speed="6" reversible="false" x="3" y="5">
+			<frame group="this" image="city_flag_red_01"/>
+			<frame group="this" image="city_flag_red_02"/>
+			<frame group="this" image="city_flag_red_03"/>
+			<frame group="this" image="city_flag_red_04"/>
+			<frame group="this" image="city_flag_red_05"/>
+			<frame group="this" image="city_flag_red_06"/>
+		</animation>
+	</image>
+	<image id="Empire_Icon_Resource_02" src="Empire_Icon_Resource_02">
+		<animation speed="6" reversible="false" x="3" y="5">
+			<frame group="this" image="city_flag_red_01"/>
+			<frame group="this" image="city_flag_red_02"/>
+			<frame group="this" image="city_flag_red_03"/>
+			<frame group="this" image="city_flag_red_04"/>
+			<frame group="this" image="city_flag_red_05"/>
+			<frame group="this" image="city_flag_red_06"/>
+		</animation>
+	</image>
 	<!-- Note: Empire map icon for off-map trade emporium water and land variants respectively -->
-	<image id="Empire_Icon_Trade_01" src="Empire_Icon_Trade_01"/>
-	<image id="Empire_Icon_Trade_02" src="Empire_Icon_Trade_02"/>
+	<image id="Empire_Icon_Trade_01" src="Empire_Icon_Trade_01">
+		<animation speed="6" reversible="false" x="17" y="5">
+			<frame group="this" image="city_flag_red_01"/>
+			<frame group="this" image="city_flag_red_02"/>
+			<frame group="this" image="city_flag_red_03"/>
+			<frame group="this" image="city_flag_red_04"/>
+			<frame group="this" image="city_flag_red_05"/>
+			<frame group="this" image="city_flag_red_06"/>
+		</animation>
+	</image>
+	<image id="Empire_Icon_Trade_02" src="Empire_Icon_Trade_02">
+		<animation speed="6" reversible="false" x="17" y="5">
+			<frame group="this" image="city_flag_red_01"/>
+			<frame group="this" image="city_flag_red_02"/>
+			<frame group="this" image="city_flag_red_03"/>
+			<frame group="this" image="city_flag_red_04"/>
+			<frame group="this" image="city_flag_red_05"/>
+			<frame group="this" image="city_flag_red_06"/>
+		</animation>
+	</image>
+	<image id="Empire_Icon_Watchtower" width="13" height="25" >
+		<layer group="176" image="60"/>
+		<animation speed="6" reversible="false" x="3" y="1">
+			<frame group="this" image="Empire_Icon_Flag_01"/>
+			<frame group="this" image="Empire_Icon_Flag_02"/>
+			<frame group="this" image="Empire_Icon_Flag_03"/>
+			<frame group="this" image="Empire_Icon_Flag_04"/>
+			<frame group="this" image="Empire_Icon_Flag_05"/>
+			<frame group="this" image="Empire_Icon_Flag_06"/>
+		</animation>
+	</image>
+	</image>
 	<!-- Note: Empire map flag for the City of Rome -->
 	<image id="Empire_Icon_Flag_01">
 		<layer group="174" image="1"/>
