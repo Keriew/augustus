@@ -65,11 +65,25 @@ void assets_init(int force_reload, color_t **main_images, int *main_image_widths
     data.asset_lookup[ASSET_UI_COPY_ICON] = assets_get_image_id("UI", "copy_icon");
     data.asset_lookup[ASSET_UI_PASTE_ICON] = assets_get_image_id("UI", "paste_icon");
     data.asset_lookup[ASSET_UI_ASCEPIUS] = assets_get_image_id("UI", "Asclepius Button");
-    // font assets
+    // empire icons
+    data.asset_lookup[ASSET_UI_EMP_ICON_1] = assets_get_image_id("UI", "Empire_Icon_Roman_01");         // tr_town
+    data.asset_lookup[ASSET_UI_EMP_ICON_2] = assets_get_image_id("UI", "Empire_Icon_Roman_02");         // ro_town
+    data.asset_lookup[ASSET_UI_EMP_ICON_3] = assets_get_image_id("UI", "Empire_Icon_Roman_03");         // tr_village
+    data.asset_lookup[ASSET_UI_EMP_ICON_4] = assets_get_image_id("UI", "Empire_Icon_Roman_04");         // ro_village
+    data.asset_lookup[ASSET_UI_EMP_ICON_5] = assets_get_image_id("UI", "Empire_Icon_Roman_05");         // ro_capital
+    data.asset_lookup[ASSET_UI_EMP_ICON_6] = assets_get_image_id("UI", "Empire_Icon_Distant_01");       // dis_town
+    data.asset_lookup[ASSET_UI_EMP_ICON_7] = assets_get_image_id("UI", "Empire_Icon_Distant_02");       // dis_village
+    data.asset_lookup[ASSET_UI_EMP_ICON_8] = assets_get_image_id("UI", "Empire_Icon_Construction_01");  // construction
+    data.asset_lookup[ASSET_UI_EMP_ICON_9] = assets_get_image_id("UI", "Empire_Icon_Resource_01");      // res_food
+    data.asset_lookup[ASSET_UI_EMP_ICON_10] = assets_get_image_id("UI", "Empire_Icon_Resource_02");      // res_goods
+    data.asset_lookup[ASSET_UI_EMP_ICON_11] = assets_get_image_id("UI", "Empire_Icon_Trade_01");         // tr_sea
+    data.asset_lookup[ASSET_UI_EMP_ICON_12] = assets_get_image_id("UI", "Empire_Icon_Trade_02");         // tr_land
+    // font assets - keep last
     data.font_lookup[ASSET_FONT_SQ_BRACKET_LEFT] = assets_get_image_id("UI", "leftbracket_white_l");
     data.font_lookup[ASSET_FONT_SQ_BRACKET_RIGHT] = assets_get_image_id("UI", "rightbracket_white_l");
     data.font_lookup[ASSET_FONT_CRLY_BRACKET_LEFT] = assets_get_image_id("UI", "curlybracket_white_left");
     data.font_lookup[ASSET_FONT_CRLY_BRACKET_RIGHT] = assets_get_image_id("UI", "curlybracket_white_right");
+
 }
 
 int assets_load_single_group(const char *file_name, color_t **main_images, int *main_image_widths)

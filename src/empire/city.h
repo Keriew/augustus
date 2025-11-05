@@ -7,6 +7,26 @@
 
 #define EMPIRE_CITY_MAX_TRADERS 3
 
+typedef enum {
+    EMPIRE_CITY_ICON_CONSTRUCTION,
+    EMPIRE_CITY_ICON_DISTANT_TOWN,
+    EMPIRE_CITY_ICON_DISTANT_VILLAGE,
+    EMPIRE_CITY_ICON_RESOURCE_FOOD,
+    EMPIRE_CITY_ICON_RESOURCE_GOODS,
+    EMPIRE_CITY_ICON_TRADE_TOWN,
+    EMPIRE_CITY_ICON_ROMAN_TOWN,
+    EMPIRE_CITY_ICON_TRADE_VILLAGE,
+    EMPIRE_CITY_ICON_ROMAN_VILLAGE,
+    EMPIRE_CITY_ICON_ROMAN_CAPITAL,
+    EMPIRE_CITY_ICON_TRADE_SEA,
+    EMPIRE_CITY_ICON_TRADE_LAND,
+    EMPIRE_CITY_ICON_OUR_CITY,
+    EMPIRE_CITY_ICON_TRADE_CITY,
+    EMPIRE_CITY_ICON_ROMAN_CITY,
+    EMPIRE_CITY_ICON_DISTANT_CITY,
+    EMPIRE_CITY_ICON_TOWER,
+} empire_city_icon_type;
+
 typedef struct {
     int in_use;
     empire_city_type type;
@@ -20,6 +40,7 @@ typedef struct {
     int empire_object_id;
     int is_sea_trade;
     int trader_figure_ids[EMPIRE_CITY_MAX_TRADERS];
+    empire_city_icon_type empire_city_icon;
 } empire_city;
 
 void empire_city_clear_all(void);
