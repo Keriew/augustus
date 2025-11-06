@@ -594,8 +594,10 @@ void building_update_state(void)
                 city_population_remove_home_removed(b->house_population);
                 b->house_population = 0;
             }
-            if (building_is_fort(b->type)) {
+            if (building_is_fort(b->type) || b->type == BUILDING_FORT_GROUND) {
                 b->state = BUILDING_STATE_DELETED_BY_GAME;
+                map_building_tiles_remove(b->id, b->x, b->y);
+                map_building_set_rubble_grid_building_id(b->grid_offset, 0, b->size);
             }
             // building_delete(b); // keep the rubbled building as a reference for reconstruction
 

@@ -185,6 +185,9 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
                                 if (!ruins_left) { //dont remove buildings until their last rubble is gone
                                     rubble_building->state = BUILDING_STATE_DELETED_BY_GAME;
                                 }
+                            } else if (rubble_building->state == BUILDING_STATE_UNUSED) {
+                                // intentional fallthrough - unused buildings are corrupt if they exist on the grid. 
+                                // dont change state, just remove reference on the grid - addressed after if {} block 
                             } else {
                                 rubble_building->state = BUILDING_STATE_DELETED_BY_GAME;
                             }
