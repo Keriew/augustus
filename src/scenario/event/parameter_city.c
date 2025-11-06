@@ -27,7 +27,7 @@
 
 #define RESOURCE_ALL_BUYS RESOURCE_MAX + 1 // max +1 indicates all resources that this trade route buys
 #define RESOURCE_ALL_SELLS RESOURCE_MAX + 2 // max +2 indicates all resources that this trade route sells
-//above mirros the defines in select_city_trade_route.c
+//above mirrors the defines in select_city_trade_route.c
 
 static int resource_count(scenario_action_t *action)
 {
