@@ -52,7 +52,7 @@ int scenario_condition_type_trade_sell_price_met(const scenario_condition_t *con
 
 int scenario_condition_type_tax_rate_met(const scenario_condition_t *condition);
 
-int scenario_condition_type_custom_variable_check_formula(const scenario_condition_t *condition);
+int scenario_condition_type_check_formulas(const scenario_condition_t *condition);
 
 int scenario_condition_type_terrain_count_area_met(const scenario_condition_t *condition);
 

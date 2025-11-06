@@ -176,14 +176,15 @@ int scenario_condition_type_building_count_any_met(const scenario_condition_t *c
     return comparison_helper_compare_values(comparison, total_active_count, value);
 }
 
-int scenario_condition_type_custom_variable_check_formula(const scenario_condition_t *condition)
+int scenario_condition_type_check_formulas(const scenario_condition_t *condition)
 {
-    int target_variable_val = scenario_custom_variable_get_value(condition->parameter1);
+    int formula_id1 = condition->parameter1;
     int comparison = condition->parameter2;
-    int formula_id = condition->parameter3;
-    int formula_evaluation = scenario_formula_evaluate_formula(formula_id);
+    int formula_id2 = condition->parameter3;
+    int formula_evaluation1 = scenario_formula_evaluate_formula(formula_id1);
+    int formula_evaluation2 = scenario_formula_evaluate_formula(formula_id2);
 
-    return comparison_helper_compare_values(comparison, target_variable_val, formula_evaluation);
+    return comparison_helper_compare_values(comparison, formula_evaluation1, formula_evaluation2);
 }
 
 int scenario_condition_type_terrain_count_area_met(const scenario_condition_t *condition)

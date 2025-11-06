@@ -1752,7 +1752,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_GP_CH_STORAGE_REQUESTS_RESPECT_MAINTAIN, "Caesar's requests respect 'Maintaining'"},
     {TR_CONFIG_ENABLE_MARKET_RANGE, "Enable market range"},
     {TR_PARAMETER_TYPE_FORMULA, "Formula" },
-    {TR_CONDITION_TYPE_CUSTOM_VARIABLE_CHECK_FORMULA, "Custom variable value (formula)" },
+    {TR_CONDITION_TYPE_CHECK_FORMULA, "Formulas evaluation" },
     {TR_ACTION_TYPE_CUSTOM_VARIABLE_FORMULA, "Change custom variable value (formula)" },
     {TR_EDITOR_REPEAT_INTERVAL_TYPE, "TIME"},
     {TR_PLACEHOLDER, "Placeholder" },

@@ -139,13 +139,13 @@ static scenario_condition_data_t scenario_condition_data[CONDITION_TYPE_MAX] = {
                                         .xml_parm3 = {.name = "building",            .type = PARAMETER_TYPE_BUILDING,         .key = TR_PARAMETER_TYPE_BUILDING_COUNTING },
                                         .xml_parm4 = {.name = "check",               .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
                                         .xml_parm5 = {.name = "value",               .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
-    [CONDITION_TYPE_CUSTOM_VARIABLE_CHECK_FORMULA] = {.type = CONDITION_TYPE_CUSTOM_VARIABLE_CHECK_FORMULA,
-                                        .xml_attr = {.name = "variable_check_formula",       .type = PARAMETER_TYPE_TEXT,             .key = TR_CONDITION_TYPE_CUSTOM_VARIABLE_CHECK_FORMULA },
-                                        .xml_parm1 = {.name = "variable_uid",   .type = PARAMETER_TYPE_CUSTOM_VARIABLE,  .min_limit = 0,         .max_limit = 99,       .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
-                                        .xml_parm2 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,        .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm3 = {.name = "formula",        .type = PARAMETER_TYPE_FORMULA,          .min_limit = NEGATIVE_UNLIMITED,         .max_limit = UNLIMITED,       .key = TR_PARAMETER_TYPE_FORMULA }, },
+    [CONDITION_TYPE_CHECK_FORMULA] = {.type = CONDITION_TYPE_CHECK_FORMULA,
+                                        .xml_attr = {.name = "check_formulas",       .type = PARAMETER_TYPE_TEXT,             .key = TR_CONDITION_TYPE_CHECK_FORMULA },
+                                        .xml_parm1 = {.name = "formula",            .type = PARAMETER_TYPE_FORMULA,          .min_limit = NEGATIVE_UNLIMITED,         .max_limit = UNLIMITED,       .key = TR_PARAMETER_TYPE_FORMULA },
+                                        .xml_parm2 = {.name = "check",              .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,        .key = TR_PARAMETER_TYPE_CHECK },
+                                        .xml_parm3 = {.name = "formula",            .type = PARAMETER_TYPE_FORMULA,          .min_limit = NEGATIVE_UNLIMITED,         .max_limit = UNLIMITED,       .key = TR_PARAMETER_TYPE_FORMULA }, },
     [CONDITION_TYPE_TERRAIN_IN_AREA] = {.type = CONDITION_TYPE_TERRAIN_IN_AREA,
-                                        .xml_attr = {.name = "terrain_in_area", .type = PARAMETER_TYPE_TEXT,             .key = TR_CONDITION_TYPE_TERRAIN_IN_AREA },
+                                        .xml_attr = {.name = "terrain_in_area",      .type = PARAMETER_TYPE_TEXT,             .key = TR_CONDITION_TYPE_TERRAIN_IN_AREA },
                                         .xml_parm1 = {.name = "grid_offset",         .type = PARAMETER_TYPE_GRID_SLICE,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET_CORNER1 },
                                         .xml_parm2 = {.name = "grid_offset2",        .type = PARAMETER_TYPE_GRID_SLICE,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET_CORNER2 },
                                         .xml_parm3 = {.name = "terrain_type",        .type = PARAMETER_TYPE_TERRAIN,          .key = TR_PARAMETER_TERRAIN },
@@ -1434,6 +1434,17 @@ static uint8_t *translation_for_formula_index(int index, uint8_t *result_text, i
     return result_text;
 }
 
+static uint8_t *translation_for_grid_offset(int value, uint8_t *result_text, int *maxlength)
+{
+    result_text = append_text(string_from_ascii(" "), result_text, maxlength);
+
+    int number_length = string_from_int(result_text, value, 0);
+    result_text += number_length;
+    *maxlength -= number_length;
+
+    return result_text;
+}
+
 static uint8_t *translation_for_attr_mapping_text(parameter_type type, int value, uint8_t *result_text, int *maxlength)
 {
     result_text = append_text(string_from_ascii(" "), result_text, maxlength);
@@ -1878,14 +1889,16 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
             return;
         }
         case CONDITION_TYPE_BUILDING_COUNT_AREA:
+        case CONDITION_TYPE_TERRAIN_IN_AREA:
         {
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(TR_PARAMETER_GRID_OFFSET), result_text, &maxlength);
-            result_text = translation_for_formula_index(condition->parameter1, result_text, &maxlength);
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = append_text(translation_for(TR_PARAMETER_RADIUS), result_text, &maxlength);
-            result_text = translation_for_formula_index(condition->parameter2, result_text, &maxlength);
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_BUILDING, condition->parameter3, result_text, &maxlength);
+            result_text = translation_for_grid_offset(condition->parameter1, result_text, &maxlength);
+            result_text = append_text(string_from_ascii("-"), result_text, &maxlength);
+            result_text = append_text(translation_for(TR_PARAMETER_GRID_OFFSET), result_text, &maxlength);
+            result_text = translation_for_grid_offset(condition->parameter2, result_text, &maxlength);
+            int param_type = condition->type == CONDITION_TYPE_BUILDING_COUNT_AREA ? PARAMETER_TYPE_BUILDING : PARAMETER_TYPE_TERRAIN;
+            result_text = translation_for_type_lookup_by_value(param_type, condition->parameter3, result_text, &maxlength);
             result_text = translation_for_attr_mapping_text(xml_info->xml_parm4.type, condition->parameter4, result_text, &maxlength);
             result_text = translation_for_formula_index(condition->parameter5, result_text, &maxlength);
             return;
@@ -1933,19 +1946,19 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
             result_text = translation_for_formula_index(condition->parameter3, result_text, &maxlength);
             return;
         }
+        case CONDITION_TYPE_CHECK_FORMULA:
+        {
+            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter1, result_text, &maxlength);
+            result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
+            result_text = translation_for_formula_index(condition->parameter3, result_text, &maxlength);
+            return;
+        }
+
         default:
         {
             result_text = append_text(string_from_ascii(" UNHANDLED CONDITION TYPE!"), result_text, &maxlength);
             return;
         }
     }
-}
-
-void scenario_events_parameter_data_migrate_to_formulas(void)
-{
-    // array_foreach(group->conditions, condition)
-    // {
-    //     scenario_condition_data_t *xml_info = scenario_events_parameter_data_get_conditions_xml_attributes(condition->type);
-    // }
-
 }
