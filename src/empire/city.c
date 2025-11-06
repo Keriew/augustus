@@ -314,7 +314,7 @@ int empire_city_is_trade_route_open(int route_id)
 int empire_city_is_trade_route_sea(int route_id)
 {
     int city_id = empire_city_get_for_trade_route(route_id);
-    if (!city_id) {
+    if (city_id <= 0) {
         return -1;
     }
     empire_city *city = empire_city_get(city_id);

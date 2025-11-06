@@ -346,6 +346,9 @@ static int xml_start_city(void)
 
     int city_type = xml_parser_get_attribute_enum("type", city_types, 6, EMPIRE_CITY_DISTANT_ROMAN);
     int city_icon_type = xml_parser_get_attribute_enum("icon", city_icons, 17, EMPIRE_CITY_ICON_DEFAULT + 1);
+    if (city_icon_type == EMPIRE_CITY_ICON_DEFAULT) {
+        city_icon_type = empire_object_get_random_icon_for_empire_object(city_obj);
+    }
     city_obj->empire_city_icon = city_icon_type;
     city_obj->obj.empire_city_icon = city_icon_type;
     if (city_type < EMPIRE_CITY_DISTANT_ROMAN) {

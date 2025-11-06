@@ -4,6 +4,8 @@
 #include "core/calc.h"
 #include "core/image.h"
 #include "core/log.h"
+#include "core/random.h"
+#include "core/string.h"
 #include "empire/city.h"
 #include "empire/trade_route.h"
 #include "empire/type.h"
@@ -19,7 +21,7 @@
 #define LEGACY_EMPIRE_OBJECTS 200
 
 static array(full_empire_object) objects;
-
+empire_city_icon_type empire_object_get_random_icon_for_empire_object(full_empire_object *full_obj);
 static void fix_image_ids(void)
 {
     int image_id = 0;
@@ -168,8 +170,9 @@ void empire_object_load(buffer *buf, int version)
             obj->empire_city_icon = buffer_read_u8(buf);
             full->empire_city_icon = buffer_read_u8(buf);
         } else {
-            obj->empire_city_icon = EMPIRE_CITY_ICON_DEFAULT;
-            full->empire_city_icon = EMPIRE_CITY_ICON_DEFAULT;
+            // TODO: Config option
+            obj->empire_city_icon = empire_object_get_random_icon_for_empire_object(full);
+            full->empire_city_icon = empire_object_get_random_icon_for_empire_object(full);
         }
         if (version <= SCENARIO_LAST_UNVERSIONED) {
             int trade40 = buffer_read_u16(buf);
@@ -621,4 +624,93 @@ static int get_animation_offset(int image_id, int current_index)
 int empire_object_update_animation(const empire_object *obj, int image_id)
 {
     return array_item(objects, obj->id)->obj.animation_index = get_animation_offset(image_id, obj->animation_index);
+}
+
+empire_city_icon_type empire_object_get_random_icon_for_empire_object(full_empire_object *full_obj)
+{
+    /* Our town */
+    static const empire_city_icon_type alloc_our_town[] = {
+        EMPIRE_CITY_ICON_OUR_CITY,
+    };
+
+    /* Trade (Sea) */
+    static const empire_city_icon_type alloc_trade_sea[] = {
+        EMPIRE_CITY_ICON_RESOURCE_FOOD,
+        EMPIRE_CITY_ICON_RESOURCE_GOODS,
+        EMPIRE_CITY_ICON_TRADE_TOWN,
+        EMPIRE_CITY_ICON_TRADE_VILLAGE,
+        EMPIRE_CITY_ICON_ROMAN_CAPITAL,
+        EMPIRE_CITY_ICON_TRADE_SEA,
+        EMPIRE_CITY_ICON_TRADE_CITY,
+    };
+
+    /* Trade (Land) */
+    static const empire_city_icon_type alloc_trade_land[] = {
+        EMPIRE_CITY_ICON_RESOURCE_FOOD,
+        EMPIRE_CITY_ICON_RESOURCE_GOODS,
+        EMPIRE_CITY_ICON_TRADE_TOWN,
+        EMPIRE_CITY_ICON_TRADE_VILLAGE,
+        EMPIRE_CITY_ICON_ROMAN_CAPITAL,
+        EMPIRE_CITY_ICON_TRADE_LAND,
+        EMPIRE_CITY_ICON_TRADE_CITY,
+    };
+
+    /* Roman town (Roman settlement) */
+    static const empire_city_icon_type alloc_roman_town[] = {
+        EMPIRE_CITY_ICON_ROMAN_TOWN,
+        EMPIRE_CITY_ICON_ROMAN_VILLAGE,
+        EMPIRE_CITY_ICON_ROMAN_CITY,
+    };
+
+    /* Rome (capital only) */
+    static const empire_city_icon_type alloc_rome[] = {
+        EMPIRE_CITY_ICON_ROMAN_CAPITAL,
+    };
+
+    /* Far away settlement (distant) */
+    static const empire_city_icon_type alloc_far_away_town[] = {
+        EMPIRE_CITY_ICON_DISTANT_TOWN,
+        EMPIRE_CITY_ICON_DISTANT_VILLAGE,
+        EMPIRE_CITY_ICON_DISTANT_CITY,
+    };
+
+    /* Future Trade */
+    static const empire_city_icon_type alloc_future_trade[] = {
+        EMPIRE_CITY_ICON_CONSTRUCTION,
+        EMPIRE_CITY_ICON_DISTANT_CITY,
+    };
+    int array_size = 0;
+    static const empire_city_icon_type *random_array;
+
+    if ((const uint8_t *) full_obj->city_custom_name == string_from_ascii("Rome")) {
+        // case: Rome
+        array_size = sizeof(alloc_rome) / sizeof(empire_city_icon_type);
+        random_array = alloc_rome;
+    } else if (full_obj->city_type == EMPIRE_CITY_OURS) {
+        // case: Ours
+        array_size = sizeof(alloc_our_town) / sizeof(empire_city_icon_type);
+        random_array = alloc_our_town;
+    } else if (full_obj->city_type == EMPIRE_CITY_TRADE) {
+        int is_sea = empire_city_is_trade_route_sea(full_obj->obj.trade_route_id);
+        if (is_sea) {
+            array_size = sizeof(alloc_trade_sea) / sizeof(empire_city_icon_type); //sea
+            random_array = alloc_trade_sea;
+        } else {
+            array_size = sizeof(alloc_trade_land) / sizeof(empire_city_icon_type); //land
+            random_array = alloc_trade_land;
+        }
+    } else if (full_obj->city_type == EMPIRE_CITY_FUTURE_ROMAN || full_obj->city_type == EMPIRE_CITY_DISTANT_FOREIGN) {
+        array_size = sizeof(alloc_far_away_town) / sizeof(empire_city_icon_type); //foreign
+        random_array = alloc_far_away_town;
+    } else if (full_obj->city_type == EMPIRE_CITY_FUTURE_TRADE) {
+        array_size = sizeof(alloc_future_trade) / sizeof(empire_city_icon_type); //future trade
+        random_array = alloc_future_trade;
+    } else {
+        array_size = sizeof(alloc_roman_town) / sizeof(empire_city_icon_type); //foreign
+        random_array = alloc_roman_town;
+    }
+    // all other roman
+
+    empire_city_icon_type random_icon = random_array[random_between_from_stdlib(0, array_size)];
+    return random_icon;
 }

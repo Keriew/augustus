@@ -262,16 +262,16 @@
 	<image id="city_flag_red_02" width="19" height="12" >
 		<layer group="175" image="2"/>
 	</image>
-	<image id="city_flag_red_03" width="19" height="12" >
+	<image id="city_flag_red_03" width="18" height="12" >
 		<layer group="175" image="3"/>
 	</image>
 	<image id="city_flag_red_04" width="19" height="12" >
 		<layer group="175" image="4"/>
 	</image>
-	<image id="city_flag_red_05" width="19" height="12" >
+	<image id="city_flag_red_05" width="18" height="12" >
 		<layer group="175" image="5"/>
 	</image>
-	<image id="city_flag_red_06" width="19" height="12" >
+	<image id="city_flag_red_06" width="18" height="12" >
 		<layer group="175" image="6"/>
 	</image>
 	<!-- Blue flags - Roman-->
@@ -281,40 +281,65 @@
 	<image id="city_flag_blue_02" width="19" height="12" >
 		<layer group="176" image="2"/>
 	</image>
-	<image id="city_flag_blue_03" width="19" height="12" >
+	<image id="city_flag_blue_03" width="18" height="12" >
 		<layer group="176" image="3"/>
 	</image>
 	<image id="city_flag_blue_04" width="19" height="12" >
 		<layer group="176" image="4"/>
 	</image>
-	<image id="city_flag_blue_05" width="19" height="12" >
+	<image id="city_flag_blue_05" width="18" height="12" >
 		<layer group="176" image="5"/>
 	</image>
-	<image id="city_flag_blue_06" width="19" height="12" >
+	<image id="city_flag_blue_06" width="18" height="12" >
 		<layer group="176" image="6"/>
 	</image>
 	<!-- Yellow flags - Distant -->
 	<image id="city_flag_yellow_01" width="19" height="12" >
-		<layer group="177" image="1"/>
+		<layer group="223" image="1"/>
 	</image>
 	<image id="city_flag_yellow_02" width="19" height="12" >
-		<layer group="177" image="2"/>
+		<layer group="223" image="2"/>
 	</image>
-	<image id="city_flag_yellow_03" width="19" height="12" >
-		<layer group="177" image="3"/>
+	<image id="city_flag_yellow_03" width="18" height="12" >
+		<layer group="223" image="3"/>
 	</image>
 	<image id="city_flag_yellow_04" width="19" height="12" >
-		<layer group="177" image="4"/>
+		<layer group="223" image="4"/>
 	</image>
-	<image id="city_flag_yellow_05" width="19" height="12" >
-		<layer group="177" image="5"/>
+	<image id="city_flag_yellow_05" width="18" height="12" >
+		<layer group="223" image="5"/>
 	</image>
-	<image id="city_flag_yellow_06" width="19" height="12" >
-		<layer group="177" image="6"/>
+	<image id="city_flag_yellow_06" width="18" height="12" >
+		<layer group="223" image="6"/>
+	</image>
+	<!-- Note: Empire map flag for the City of Rome -->
+	<image id="Empire_Icon_Flag_01">
+		<layer group="174" image="1"/>
+		<layer src="Empire_Icon_Flag_01"/>
+	</image>
+	<image id="Empire_Icon_Flag_02">
+		<layer group="174" image="2"/>
+		<layer src="Empire_Icon_Flag_02"/>
+	</image>
+	<image id="Empire_Icon_Flag_03">
+		<layer group="174" image="3"/>
+		<layer src="Empire_Icon_Flag_03"/>
+	</image>
+	<image id="Empire_Icon_Flag_04">
+		<layer group="174" image="4"/>
+		<layer src="Empire_Icon_Flag_04"/>
+	</image>
+	<image id="Empire_Icon_Flag_05">
+		<layer group="174" image="5"/>
+		<layer src="Empire_Icon_Flag_05"/>
+	</image>
+	<image id="Empire_Icon_Flag_06">
+		<layer group="174" image="6"/>
+		<layer src="Empire_Icon_Flag_06"/>
 	</image>
 	<!-- Note: Empire map icons for Roman trade towns and non-trade towns respectively -->
 	<image id="Empire_Icon_Roman_01" src="Empire_Icon_Roman_01">
-		<animation speed="6" reversible="false" x="3" y="5">
+		<animation speed="6" reversible="false" x="7" y="5">
 			<frame group="this" image="city_flag_red_01"/>
 			<frame group="this" image="city_flag_red_02"/>
 			<frame group="this" image="city_flag_red_03"/>
@@ -324,7 +349,7 @@
 		</animation>
 	</image>
 	<image id="Empire_Icon_Roman_02" src="Empire_Icon_Roman_02">
-		<animation speed="6" reversible="false" x="3" y="5">
+		<animation speed="6" reversible="false" x="7" y="5">
 			<frame group="this" image="city_flag_blue_01"/>
 			<frame group="this" image="city_flag_blue_02"/>
 			<frame group="this" image="city_flag_blue_03"/>
@@ -356,7 +381,7 @@
 	</image>
 	<!-- Note: Empire map icon for the City of Rome -->
 	<image id="Empire_Icon_Roman_05" src="Empire_Icon_Roman_05">
-		<animation speed="6" reversible="false" x="8" y="5">
+		<animation speed="6" reversible="false" x="12" y="5">
 			<frame group="this" image="Empire_Icon_Flag_01"/>
 			<frame group="this" image="Empire_Icon_Flag_02"/>
 			<frame group="this" image="Empire_Icon_Flag_03"/>
@@ -367,7 +392,7 @@
 	</image>
 	<!-- Note: Empire map icons for distant towns -->
 	<image id="Empire_Icon_Distant_01" src="Empire_Icon_Distant_01">
-		<animation speed="6" reversible="false" x="17" y="5">
+		<animation speed="6" reversible="false" x="13" y="5">
 			<frame group="this" image="city_flag_yellow_01"/>
 			<frame group="this" image="city_flag_yellow_02"/>
 			<frame group="this" image="city_flag_yellow_03"/>
@@ -378,7 +403,7 @@
 	</image>
 	<!-- Note: Empire map icons for distant villages -->
 	<image id="Empire_Icon_Distant_02" src="Empire_Icon_Distant_02">
-		<animation speed="6" reversible="false" x="17" y="5">
+		<animation speed="6" reversible="false" x="13" y="5">
 			<frame group="this" image="city_flag_yellow_01"/>
 			<frame group="this" image="city_flag_yellow_02"/>
 			<frame group="this" image="city_flag_yellow_03"/>
@@ -450,32 +475,6 @@
 			<frame group="this" image="Empire_Icon_Flag_05"/>
 			<frame group="this" image="Empire_Icon_Flag_06"/>
 		</animation>
-	</image>
-	</image>
-	<!-- Note: Empire map flag for the City of Rome -->
-	<image id="Empire_Icon_Flag_01">
-		<layer group="174" image="1"/>
-		<layer src="Empire_Icon_Flag_01"/>
-	</image>
-	<image id="Empire_Icon_Flag_02">
-		<layer group="174" image="2"/>
-		<layer src="Empire_Icon_Flag_02"/>
-	</image>
-	<image id="Empire_Icon_Flag_03">
-		<layer group="174" image="3"/>
-		<layer src="Empire_Icon_Flag_03"/>
-	</image>
-	<image id="Empire_Icon_Flag_04">
-		<layer group="174" image="4"/>
-		<layer src="Empire_Icon_Flag_04"/>
-	</image>
-	<image id="Empire_Icon_Flag_05">
-		<layer group="174" image="5"/>
-		<layer src="Empire_Icon_Flag_05"/>
-	</image>
-	<image id="Empire_Icon_Flag_06">
-		<layer group="174" image="6"/>
-		<layer src="Empire_Icon_Flag_06"/>
 	</image>
 	<!-- Note: Legion banner base -->
 	<image id="Legion_Banner_Base" width="32" height="29">
