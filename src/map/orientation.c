@@ -294,8 +294,10 @@ void map_orientation_update_buildings(void)
                 map_terrain_add_roadblock_road(b->x, b->y);
                 break;
             case BUILDING_HOUSE_VACANT_LOT:
-                map_building_tiles_add(i, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
-                building_house_vacant_lot_mark_draw(i);
+                if (b->house_population == 0) {
+                    map_building_tiles_add(i, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
+                    building_house_vacant_lot_mark_draw(i);
+                }
         }
     }
 }

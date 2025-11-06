@@ -424,7 +424,7 @@ static int map_can_place_initial_reservoir(int grid_offset)
     
     return 0;
 
-    return 0;
+    return 1;
 }
 
 static int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aqueduct)
