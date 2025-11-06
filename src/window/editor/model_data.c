@@ -251,7 +251,6 @@ static void draw_model_item(const grid_box_item *item)
         button_border_draw(item->x + data_buttons[i].x, item->y + data_buttons[i].y,
             data_buttons[i].width, data_buttons[i].height, item->is_focused && data.data_buttons_focus_id == i + 1);
 
-        uint8_t data_string[8];
         int value = 0;
         switch (i) {
             case 0:
@@ -269,8 +268,7 @@ static void draw_model_item(const grid_box_item *item)
             case 6:
                 value = resource_get_data(resource_get_from_industry(b_type))->production_per_month;
         }
-        string_from_int(data_string, value, 0);
-        text_draw(data_string, item->x + data_buttons[i].x + 8, item->y + data_buttons[i].y + 6,
+        text_draw_number(value, 0, NULL, item->x + data_buttons[i].x + 8, item->y + data_buttons[i].y + 6,
                   FONT_SMALL_PLAIN, 0);
     }
 
