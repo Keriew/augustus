@@ -220,6 +220,11 @@ void city_building_ghost_draw_fountain_range(int x, int y, int grid_offset)
     image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_BLUE, data.scale);
 }
 
+void city_building_ghost_draw_reservoir_range(int x, int y, int grid_offset)
+{
+    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_RESERVOIR_RANGE, data.scale);
+}
+
 void city_building_ghost_draw_latrines_range(int x, int y, int grid_offset)
 {
     image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_DARK_GREEN & ALPHA_FONT_SEMI_TRANSPARENT, data.scale);
@@ -1566,12 +1571,18 @@ void city_building_ghost_draw(const map_tile *tile)
             draw_aqueduct(tile, x, y);
             break;
         case BUILDING_FOUNTAIN:
+            if (config_get(CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES)) {
+                city_water_ghost_draw_reservoir_ranges();
+            }
             draw_fountain(tile, x, y);
             break;
         case BUILDING_WELL:
             draw_well(tile, x, y);
             break;
         case BUILDING_BATHHOUSE:
+            if (config_get(CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES)) {
+                city_water_ghost_draw_reservoir_ranges();
+            }
             draw_bathhouse(tile, x, y);
             break;
         case BUILDING_SMALL_POND:
@@ -1604,6 +1615,9 @@ void city_building_ghost_draw(const map_tile *tile)
             draw_market(tile, x, y);
             break;
         case BUILDING_CONCRETE_MAKER:
+            if (config_get(CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES)) {
+                city_water_ghost_draw_reservoir_ranges();
+            }
             draw_concrete_maker(tile, x, y);
             break;
         case BUILDING_HOUSE_VACANT_LOT:

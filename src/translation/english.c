@@ -1908,6 +1908,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_HOUSE_MEDIUM_PALACE, "Medium Palace"},
     {TR_BUILDING_HOUSE_LARGE_PALACE,  "Large Palace"},
     {TR_BUILDING_HOUSE_LUXURY_PALACE, "Luxury Palace"},
+    {TR_CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES, "Show reservoir range when building fountains"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

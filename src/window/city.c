@@ -64,8 +64,7 @@ static void draw_topleft_label_with_fragments(int x, int y, const lang_fragment 
 
 int window_city_is_window_cityview(void)
 {
-    return ((window_get_id() >= WINDOW_CITY && window_get_id() <= WINDOW_SLIDING_SIDEBAR)
-            || window_is(WINDOW_CITY_MAIN_MENU));
+    return ((window_get_id() >= WINDOW_CITY && window_get_id() <= WINDOW_RACE_BET));
 }
 
 static void draw_background(void)
