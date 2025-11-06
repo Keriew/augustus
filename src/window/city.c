@@ -61,7 +61,6 @@ static int time_left_label_shown;
 
 
 static void draw_topleft_label_with_fragments(int x, int y, const lang_fragment *fragments, int fragment_count, font_t font, color_t color_ver);
-static void draw_topleft_label_short(int x, int y, const uint8_t *label_text, int value, font_t font);
 
 int window_city_is_window_cityview(void)
 {
@@ -256,16 +255,8 @@ static void draw_topleft_label_with_fragments(int x, int y, const lang_fragment 
     lang_text_draw_sequence(fragments, fragment_count, x + 6, y + 4, font, COLOR_MASK_NONE);
 }
 
-//wrapper for the common case of a single text + value
-static void draw_topleft_label_short(int x, int y, const uint8_t *label_text, int value, font_t font)
-{
-    lang_fragment frags[2] = {
-        {.type = LANG_FRAG_TEXT, .text = label_text },
-        {.type = LANG_FRAG_NUMBER, .number = value }
-    };
-    color_t color = COLOR_MASK_NONE;
-    draw_topleft_label_with_fragments(x, y, frags, 2, font, color);
-}
+
+
 
 static void draw_speedrun_info(void)
 {

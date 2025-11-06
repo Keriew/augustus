@@ -106,7 +106,7 @@ static complex_button color_dropdown_options[MAX_VISIBLE_GRID_ITEMS][COLOR_BUTTO
 
 // static array because adding a new complex structure to the gridbox exceeds my abilities
 // as a dynamic structure more akin to an object, it needs to be initialized per item in the gridbox
-
+// if anyone fancies making this a proper dynamic structure, i'd appreciate it. Sephirex
 
 static grid_box_type variable_buttons = {
     .x = 26,
@@ -141,7 +141,6 @@ static void init_color_dropdown(void)
             color_dropdown_options[dd_anchors][j].sequence_size = 1;
             color_dropdown_options[dd_anchors][j].left_click_handler = dropdown_button_default_option_click;
             color_dropdown_options[dd_anchors][j].user_data = &color_dropdowns[dd_anchors]; //backref to parent dropdown
-            //color_dropdown_options[dd_anchors][j].style = COMPLEX_BUTTON_STYLE_DEFAULT;
             color_dropdown_options[dd_anchors][j].parameters[0] = dd_anchors;
             // draw_variable_item will reestablish the correct variable id with scroll offset
             color_dropdown_options[dd_anchors][j].color_mask = complex_button_basic_colors(j - 1);

@@ -9,8 +9,8 @@
 #include "editor/tool_restriction.h"
 #include "graphics/image.h"
 #include "input/scroll.h"
-#include "map/terrain.h"
 #include "map/grid.h"
+#include "map/terrain.h"
 #include "scenario/property.h"
 
 #define MAX_TILES 16

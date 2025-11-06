@@ -30,9 +30,9 @@
 #include "scenario/editor.h"
 #include "scenario/custom_messages_export_xml.h"
 #include "scenario/custom_messages_import_xml.h"
-#include "scenario/model_xml.h"
 #include "scenario/event/export_xml.h"
 #include "scenario/event/import_xml.h"
+#include "scenario/model_xml.h"
 #include "translation/translation.h"
 #include "widget/input_box.h"
 #include "window/city.h"
@@ -56,7 +56,7 @@ static void button_ok_cancel(int is_ok, int param2);
 static void input_box_changed(int is_addition_at_end);
 static void draw_file(const list_box_item *item);
 static void select_file(unsigned int index, int is_double_click);
-static void file_tooltip(const list_box_item *item, tooltip_context *c);  
+static void file_tooltip(const list_box_item *item, tooltip_context *c);
 
 static image_button image_buttons[] = {
     {536, 440, 39, 26, IB_NORMAL, GROUP_OK_CANCEL_SCROLL_BUTTONS, 0, button_ok_cancel, button_none, 1, 0, 1},
@@ -305,7 +305,7 @@ static void draw_mission_info(int x_offset, int y_offset, int box_size)
                 mission_type = TR_SAVE_DIALOG_PEACEFUL;
             }
             cursor = string_copy(translation_for(mission_type), cursor, FILE_NAME_MAX);
-            cursor = string_copy(string_from_ascii(" "), cursor, FILE_NAME_MAX - (int) (cursor - text));            
+            cursor = string_copy(string_from_ascii(" "), cursor, FILE_NAME_MAX - (int) (cursor - text));
             cursor += string_from_int(cursor, (data.info.origin.mission + 4) / 2, 0);
             cursor = string_copy(string_from_ascii(" - "), cursor, FILE_NAME_MAX - (int) (cursor - text));
             string_copy(lang_get_string(21, MISSION_ID_TO_CITY_ID[data.info.origin.mission]), cursor,

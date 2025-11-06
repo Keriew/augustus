@@ -343,9 +343,6 @@ int window_advisors_show_advisor(advisor_type advisor)
     window_advisors_show();
     return 1;
 }
-
-// Building coverage rating functions
-
 // Entertainment building coverage functions
 
 int window_advisors_get_tavern_coverage(void)
