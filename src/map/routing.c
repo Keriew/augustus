@@ -421,8 +421,6 @@ static int map_can_place_initial_reservoir(int grid_offset)
             return 0;
         }
     }
-    
-    return 0;
 
     return 1;
 }

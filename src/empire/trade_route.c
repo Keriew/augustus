@@ -114,8 +114,7 @@ void trade_routes_save_state(buffer *limit, buffer *traded)
     buffer_init(traded, buf_data, buf_size);
 
     route_resource *route;
-    array_foreach(routes, route)
-    {
+    array_foreach(routes, route){
         for (resource_type r = 0; r < RESOURCE_MAX; r++) {
             buffer_write_i32(limit, route->limit[r]);
             buffer_write_i32(traded, route->traded[r]);

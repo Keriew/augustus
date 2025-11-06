@@ -26,8 +26,7 @@ static void fix_image_ids(void)
 {
     int image_id = 0;
     full_empire_object *obj;
-    array_foreach(objects, obj)
-    {
+    array_foreach(objects, obj) {
         if (obj->in_use && obj->obj.type == EMPIRE_OBJECT_CITY && obj->city_type == EMPIRE_CITY_OURS) {
             image_id = obj->obj.image_id;
             break;
@@ -36,8 +35,7 @@ static void fix_image_ids(void)
     if (image_id > 0 && image_id != image_group(GROUP_EMPIRE_CITY)) {
         // empire map uses old version of graphics: increase every graphic id
         int offset = image_group(GROUP_EMPIRE_CITY) - image_id;
-        array_foreach(objects, obj)
-        {
+        array_foreach(objects, obj) {
             if (obj->obj.image_id > 0 && obj->obj.image_id < IMAGE_MAIN_ENTRIES) {
                 obj->obj.image_id += offset;
                 if (obj->obj.expanded.image_id) {
@@ -232,8 +230,7 @@ void empire_object_save(buffer *buf)
     int total_size = 0;
 
     full_empire_object *full;
-    array_foreach(objects, full)
-    {
+    array_foreach(objects, full) {
         if (full->in_use && full->obj.type == EMPIRE_OBJECT_CITY) {
             total_size += size_per_city;
         } else if (full->in_use) {
@@ -246,8 +243,7 @@ void empire_object_save(buffer *buf)
     buffer_init(buf, buf_data, total_size + sizeof(uint32_t));
     buffer_write_i32(buf, objects.size);
 
-    array_foreach(objects, full)
-    {
+    array_foreach(objects, full) {
         empire_object *obj = &full->obj;
         buffer_write_u8(buf, obj->type);
         buffer_write_u8(buf, full->in_use);
@@ -293,8 +289,7 @@ void empire_object_init_cities(int empire_id)
         return;
     }
     full_empire_object *obj;
-    array_foreach(objects, obj)
-    {
+    array_foreach(objects, obj) {
         if (!obj->in_use || obj->obj.type != EMPIRE_OBJECT_CITY) {
             continue;
         }
@@ -378,8 +373,7 @@ int empire_object_init_distant_battle_travel_months(empire_object_type object_ty
 {
     int month = 0;
     full_empire_object *obj;
-    array_foreach(objects, obj)
-    {
+    array_foreach(objects, obj) {
         if (obj->in_use && obj->obj.type == object_type) {
             month++;
             obj->obj.distant_battle_travel_months = month;
@@ -408,8 +402,7 @@ empire_object *empire_object_get(int object_id)
 const empire_object *empire_object_get_our_city(void)
 {
     full_empire_object *obj;
-    array_foreach(objects, obj)
-    {
+    array_foreach(objects, obj) {
         if (obj->in_use) {
             if (obj->obj.type == EMPIRE_OBJECT_CITY && obj->city_type == EMPIRE_CITY_OURS) {
                 return &obj->obj;
@@ -422,8 +415,7 @@ const empire_object *empire_object_get_our_city(void)
 const empire_object *empire_object_get_trade_city(int trade_route_id)
 {
     full_empire_object *obj;
-    array_foreach(objects, obj)
-    {
+    array_foreach(objects, obj) {
         if (obj->in_use) {
             if (obj->obj.type == EMPIRE_OBJECT_CITY && obj->obj.trade_route_id == trade_route_id) {
                 return &obj->obj;
@@ -436,8 +428,7 @@ const empire_object *empire_object_get_trade_city(int trade_route_id)
 void empire_object_foreach(void (*callback)(const empire_object *))
 {
     full_empire_object *obj;
-    array_foreach(objects, obj)
-    {
+    array_foreach(objects, obj) {
         if (obj->in_use) {
             callback(&obj->obj);
         }
@@ -446,8 +437,7 @@ void empire_object_foreach(void (*callback)(const empire_object *))
 void empire_object_foreach_of_type(void (*callback)(const empire_object *), empire_object_type type)
 {
     full_empire_object *obj;
-    array_foreach(objects, obj)
-    {
+    array_foreach(objects, obj) {
         if (obj->in_use && obj->obj.type == type) {
             callback(&obj->obj);
         }
@@ -457,8 +447,7 @@ void empire_object_foreach_of_type(void (*callback)(const empire_object *), empi
 const empire_object *empire_object_get_battle_icon(int path_id, int year)
 {
     full_empire_object *obj;
-    array_foreach(objects, obj)
-    {
+    array_foreach(objects, obj) {
         if (obj->in_use) {
             if (obj->obj.type == EMPIRE_OBJECT_BATTLE_ICON &&
                 obj->obj.invasion_path_id == path_id && obj->obj.invasion_years == year) {
@@ -473,8 +462,7 @@ int empire_object_get_max_invasion_path(void)
 {
     int max_path = 0;
     full_empire_object *obj;
-    array_foreach(objects, obj)
-    {
+    array_foreach(objects, obj) {
         if (obj->in_use && obj->obj.type == EMPIRE_OBJECT_BATTLE_ICON) {
             if (obj->obj.invasion_path_id > max_path) {
                 max_path = obj->obj.invasion_path_id;
@@ -490,8 +478,7 @@ int empire_object_get_closest(int x, int y)
     int min_obj_id = 0;
     int city_is_selected = 0;
     full_empire_object *full;
-    array_foreach(objects, full)
-    {
+    array_foreach(objects, full) {
         const empire_object *obj = &full->obj;
         int obj_x, obj_y;
         if (city_is_selected && obj->type != EMPIRE_OBJECT_CITY) {
@@ -562,8 +549,7 @@ void empire_object_city_force_sell_resource(int object_id, int resource)
 int empire_object_is_sea_trade_route(int route_id)
 {
     full_empire_object *obj;
-    array_foreach(objects, obj)
-    {
+    array_foreach(objects, obj) {
         if (obj->in_use && obj->obj.trade_route_id == route_id) {
             if (obj->obj.type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
                 return 1;
@@ -629,14 +615,17 @@ int empire_object_update_animation(const empire_object *obj, int image_id)
 static int is_name_rome(const uint8_t *name)
 {
     if (strcmp((const char *) name, "Rome") == 0 || strcmp((const char *) name, "Roma") == 0 ||
-        strcmp((const char *) name, "Rom") == 0 || strcmp((const char *) name, "Rzym") == 0) {
+        strcmp((const char *) name, "Rom") == 0 || strcmp((const char *) name, "Rzym") == 0 ||
+        strcmp((const char *) name, "Рим") == 0) {
         return 1;
     }
     return 0;
 }
 empire_city_icon_type empire_object_get_random_icon_for_empire_object(full_empire_object *full_obj)
 {
-
+    if (full_obj->obj.type != EMPIRE_OBJECT_CITY) {
+        return EMPIRE_CITY_ICON_DEFAULT; //early return for non-city objects
+    }
     static const empire_city_icon_type alloc_our_town[] = { // our town
         EMPIRE_CITY_ICON_OUR_CITY,
     };
@@ -673,17 +662,17 @@ empire_city_icon_type empire_object_get_random_icon_for_empire_object(full_empir
         EMPIRE_CITY_ICON_CONSTRUCTION,
         EMPIRE_CITY_ICON_DISTANT_CITY,
     };
+
     int array_size = 0;
     static const empire_city_icon_type *random_array;
     const uint8_t *cityname = NULL;
-    if (full_obj->obj.type != EMPIRE_OBJECT_CITY) {
-        return EMPIRE_CITY_ICON_DEFAULT;
-    }
+
     if (full_obj->city_name_id) {
         cityname = lang_get_string(21, full_obj->city_name_id);
     } else if (full_obj->city_custom_name[0] != 0) {
         cityname = full_obj->city_custom_name;
-    }
+    } // fetch name
+
     if (is_name_rome(cityname)) { // Rome
         array_size = sizeof(alloc_rome) / sizeof(empire_city_icon_type);
         random_array = alloc_rome;
@@ -693,16 +682,16 @@ empire_city_icon_type empire_object_get_random_icon_for_empire_object(full_empir
     } else if (full_obj->city_type == EMPIRE_CITY_TRADE) { // trade town
         int is_sea = empire_city_is_trade_route_sea(full_obj->obj.trade_route_id);
         if (is_sea) {
-            array_size = sizeof(alloc_trade_sea) / sizeof(empire_city_icon_type); //sea
+            array_size = sizeof(alloc_trade_sea) / sizeof(empire_city_icon_type); // sea
             random_array = alloc_trade_sea;
         } else {
-            array_size = sizeof(alloc_trade_land) / sizeof(empire_city_icon_type); //land
+            array_size = sizeof(alloc_trade_land) / sizeof(empire_city_icon_type); // land
             random_array = alloc_trade_land;
         }
     } else if (full_obj->city_type == EMPIRE_CITY_FUTURE_ROMAN || full_obj->city_type == EMPIRE_CITY_DISTANT_FOREIGN) {
-        array_size = sizeof(alloc_far_away_town) / sizeof(empire_city_icon_type); //foreign
+        array_size = sizeof(alloc_far_away_town) / sizeof(empire_city_icon_type); // foreign
         random_array = alloc_far_away_town;
-    } else if (full_obj->city_type == EMPIRE_CITY_FUTURE_TRADE) {//future trade
+    } else if (full_obj->city_type == EMPIRE_CITY_FUTURE_TRADE) { // future trade
         array_size = sizeof(alloc_future_trade) / sizeof(empire_city_icon_type);
         random_array = alloc_future_trade;
     } else { // all other roman

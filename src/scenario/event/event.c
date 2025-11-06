@@ -46,9 +46,8 @@ void scenario_event_init(scenario_event_t *event)
         }
     }
     scenario_action_t *action;
-    array_foreach(event->actions, action)
-    {
-        action->parent_event_id = event_id;
+    array_foreach(event->actions, action) {
+       scenario_action_type_init(action);
     }
 }
 
@@ -184,10 +183,9 @@ static int conditions_fulfilled(scenario_event_t *event)
     if (event->actions.size == 0) {
         return 0;
     }
-
+    
     scenario_condition_group_t *group;
-    array_foreach(event->condition_groups, group)
-    {
+    array_foreach(event->condition_groups, group) {
         int group_fulfilled = 0;
         for (unsigned int i = 0; i < group->conditions.size; i++) {
             scenario_condition_t *condition = array_item(group->conditions, i);
@@ -229,8 +227,7 @@ int scenario_event_count_conditions(const scenario_event_t *event)
 {
     int total_conditions = 0;
     const scenario_condition_group_t *group;
-    array_foreach(event->condition_groups, group)
-    {
+    array_foreach(event->condition_groups, group) {
         total_conditions += group->conditions.size;
     }
     return total_conditions;
@@ -258,8 +255,7 @@ int scenario_event_execute(scenario_event_t *event)
     int actioned = 1;
 
     scenario_action_t *current;
-    array_foreach(event->actions, current)
-    {
+    array_foreach(event->actions, current) {
         int action_result = scenario_action_type_execute(current);
         actioned &= action_result;
     }
@@ -282,8 +278,7 @@ int scenario_event_uses_custom_variable(const scenario_event_t *event, int custo
     }
 
     scenario_action_t *action;
-    array_foreach(event->actions, action)
-    {
+    array_foreach(event->actions, action) {
         if (scenario_action_uses_custom_variable(action, custom_variable_id)) {
             return 1;
         }

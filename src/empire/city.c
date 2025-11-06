@@ -70,8 +70,7 @@ int empire_city_get_route_id(int city_id)
 int empire_city_get_id_by_name(const uint8_t *city_name)
 {
     empire_city *city;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         if (!city->in_use) {
             continue;
         }
@@ -86,8 +85,7 @@ int empire_city_get_id_by_name(const uint8_t *city_name)
 int empire_can_import_resource(int resource)
 {
     empire_city *city;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         if (city->in_use && city->type == EMPIRE_CITY_TRADE && city->is_open && city->sells_resource[resource] == 1) {
             return 1;
         }
@@ -98,8 +96,7 @@ int empire_can_import_resource(int resource)
 int empire_can_import_resource_potentially(int resource)
 {
     empire_city *city;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         if (city->in_use && city->type == EMPIRE_CITY_TRADE && city->sells_resource[resource] == 1) {
             return 1;
         }
@@ -110,8 +107,7 @@ int empire_can_import_resource_potentially(int resource)
 int empire_has_access_to_resource(int resource)
 {
     empire_city *city;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         if (city->in_use && (city->type == EMPIRE_CITY_OURS || city->type == EMPIRE_CITY_TRADE) &&
             city->sells_resource[resource] == 1) {
             return 1;
@@ -123,8 +119,7 @@ int empire_has_access_to_resource(int resource)
 int empire_can_export_resource_potentially(int resource)
 {
     empire_city *city;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         if (city->in_use && city->type == EMPIRE_CITY_TRADE && city->buys_resource[resource] == 1) {
             return 1;
         }
@@ -135,8 +130,7 @@ int empire_can_export_resource_potentially(int resource)
 int empire_can_export_resource(int resource)
 {
     empire_city *city;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         if (city->in_use && city->type == EMPIRE_CITY_TRADE && city->is_open && city->buys_resource[resource] == 1) {
             return 1;
         }
@@ -147,8 +141,7 @@ int empire_can_export_resource(int resource)
 static int can_produce_resource_naturally(resource_type resource)
 {
     empire_city *city;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         if (city->in_use && city->type == EMPIRE_CITY_OURS && city->sells_resource[resource] == 1) {
             return 1;
         }
@@ -247,8 +240,7 @@ int empire_can_produce_resource_potentially(int resource)
 int empire_city_get_for_object(int empire_object_id)
 {
     empire_city *city;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         if (city->in_use && city->empire_object_id == empire_object_id) {
             return array_index;
         }
@@ -259,8 +251,7 @@ int empire_city_get_for_object(int empire_object_id)
 int empire_city_get_for_trade_route(int route_id)
 {
     empire_city *city;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         if (city->in_use && city->route_id == route_id) {
             return array_index;
         }
@@ -290,8 +281,7 @@ int empire_city_get_trade_routes_count(int is_sea_trade, int is_route_open)
 {
     const empire_city *city;
     int count = 0;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         if (city->in_use && city->is_sea_trade == is_sea_trade && city->is_open == is_route_open) {
             count++;
         }
@@ -302,8 +292,7 @@ int empire_city_get_trade_routes_count(int is_sea_trade, int is_route_open)
 int empire_city_is_trade_route_open(int route_id)
 {
     empire_city *city;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         if (city->in_use && city->route_id == route_id) {
             return city->is_open ? 1 : 0;
         }
@@ -325,8 +314,7 @@ int empire_city_is_trade_route_sea(int route_id)
 int empire_city_get_trade_route_cost(int route_id)
 {
     empire_city *city;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         if (city->in_use && city->route_id == route_id) {
             return city->cost_to_open;
         }
@@ -341,8 +329,7 @@ void empire_city_set_trade_route_cost(int route_id, int new_cost)
     }
 
     empire_city *city;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         if (city->in_use && city->route_id == route_id) {
             city->cost_to_open = new_cost;
             return;
@@ -353,8 +340,7 @@ void empire_city_set_trade_route_cost(int route_id, int new_cost)
 void empire_city_reset_yearly_trade_amounts(void)
 {
     empire_city *city;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         if (city->in_use && city->is_open) {
             trade_route_reset_traded(city->route_id);
         }
@@ -385,8 +371,7 @@ int empire_city_count_wine_sources(void)
 {
     int sources = 0;
     empire_city *city;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         if (city->in_use && city->is_open && city->sells_resource[RESOURCE_WINE]) {
             sources++;
         }
@@ -398,8 +383,7 @@ int empire_city_get_vulnerable_roman(void)
 {
     int city_id = 0;
     empire_city *city;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         if (city->in_use && city->type == EMPIRE_CITY_VULNERABLE_ROMAN) {
             city_id = array_index;
         }
@@ -410,8 +394,7 @@ int empire_city_get_vulnerable_roman(void)
 void empire_city_expand_empire(void)
 {
     empire_city *city;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         if (!city->in_use) {
             continue;
         }
@@ -491,8 +474,7 @@ void empire_city_open_trade(int city_id, int apply_cost)
 void empire_city_generate_trader(void)
 {
     empire_city *city;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         if (!city->in_use || !city->is_open) {
             continue;
         }
@@ -536,8 +518,7 @@ void empire_city_set_foreign(int city_id)
 int empire_unlock_all_resources(void)
 {
     empire_city *city;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         if (city->in_use && (city->type == EMPIRE_CITY_OURS)) {
             for (int resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
                 city->sells_resource[resource] = 1;
@@ -551,8 +532,7 @@ int empire_unlock_all_resources(void)
 int empire_city_change_own_resource_availability(resource_type resource, int is_available)
 {
     empire_city *city;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         if (city->in_use && (city->type == EMPIRE_CITY_OURS)) {
             city->sells_resource[resource] = is_available;
             return 1;
@@ -578,8 +558,7 @@ void empire_city_save_state(buffer *buf)
     buffer_write_i32(buf, EMPIRE_CITY_CURRENT_BUF_SIZE);
 
     empire_city *city;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         buffer_write_u8(buf, city->in_use);
         buffer_write_u8(buf, city->type);
         buffer_write_u8(buf, city->name_id);
@@ -671,8 +650,7 @@ void empire_city_update_our_fish_and_meat_production(void)
 {
     empire_city *city;
 
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         if (city->type != EMPIRE_CITY_OURS) {
             continue;
         }
@@ -691,8 +669,7 @@ void empire_city_update_trading_data(int empire_id)
         return;
     }
     empire_city *city;
-    array_foreach(cities, city)
-    {
+    array_foreach(cities, city) {
         set_gold_production(city);
         set_new_monument_elements_production(empire_id, city);
     }

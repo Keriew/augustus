@@ -107,8 +107,7 @@ void scenario_condition_type_delete(scenario_condition_t *condition)
 static void save_conditions_in_group(buffer *buf, const scenario_condition_group_t *group)
 {
     const scenario_condition_t *condition;
-    array_foreach(group->conditions, condition)
-    {
+    array_foreach(group->conditions, condition) {
         buffer_write_i16(buf, condition->type);
         buffer_write_i32(buf, condition->parameter1);
         buffer_write_i32(buf, condition->parameter2);

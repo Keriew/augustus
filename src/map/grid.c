@@ -56,13 +56,19 @@ static int grid_slice_pool_next = 0;
 
 static grid_slice *grid_slice_pool_commit(const int *offsets, int count)
 {
-    if (count < 0) count = 0;
-    if (count > MAX_SLICE_SIZE) count = MAX_SLICE_SIZE;
-
+    if (count < 0) {
+        count = 0;
+    }
+    if (count > MAX_SLICE_SIZE) {
+        count = MAX_SLICE_SIZE;
+    }
     /* find free slot first */
     int slot = -1;
     for (int i = 0; i < GRID_SLICE_POOL_CAP; i++) {
-        if (!grid_slice_pool_used[i]) { slot = i; break; }
+        if (!grid_slice_pool_used[i]) {
+            slot = i;
+            break;
+        }
     }
 
     /* none free -> evict oldest (ring) */

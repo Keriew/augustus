@@ -30,8 +30,7 @@ campaign_mission *campaign_mission_new(void)
 campaign_mission *campaign_mission_current(int index)
 {
     campaign_mission *mission;
-    array_foreach(data.missions, mission)
-    {
+    array_foreach(data.missions, mission) {
         if (mission->first_scenario <= index && mission->last_scenario >= index) {
             return mission;
         }
@@ -42,8 +41,7 @@ campaign_mission *campaign_mission_current(int index)
 campaign_mission *campaign_mission_next(int last_index)
 {
     campaign_mission *mission;
-    array_foreach(data.missions, mission)
-    {
+    array_foreach(data.missions, mission) {
         if (mission->first_scenario > last_index) {
             return mission;
         }
@@ -72,8 +70,7 @@ void campaign_mission_clear(void)
 {
     if (game_campaign_is_custom()) {
         campaign_mission *mission;
-        array_foreach(data.missions, mission)
-        {
+        array_foreach(data.missions, mission) {
             free((uint8_t *) mission->title);
             free((char *) mission->background_image.path);
             free((char *) mission->intro_video);
@@ -81,8 +78,7 @@ void campaign_mission_clear(void)
     }
     array_clear(data.missions);
     campaign_scenario *camp_scenario;
-    array_foreach(data.scenarios, camp_scenario)
-    {
+    array_foreach(data.scenarios, camp_scenario) {
         free((uint8_t *) camp_scenario->name);
         if (game_campaign_is_custom()) {
             free((uint8_t *) camp_scenario->description);

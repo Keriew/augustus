@@ -168,9 +168,6 @@ void complex_button_draw(const complex_button *button)
         case COMPLEX_BUTTON_STYLE_GRAY:
             draw_grey_style(button);
             break;
-            // case COMPLEX_BUTTON_STANDARD_COLORFUL:
-            //     draw_default_style(button, FONT_SMALL_PLAIN, button->color_mask);
-            //     break;
         case COMPLEX_BUTTON_STYLE_DEFAULT:
         default:
             draw_default_style(button, base_font, base_color);

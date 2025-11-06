@@ -21,7 +21,7 @@ enum {
     BIT_NO_REPAIR = 0xffbf,
     BIT_PLAZA_EARTHQUAKE_OR_OVERGROWN_GARDEN = 0x80,
     BIT_NO_PLAZA = 0xff7f,
-    BIT_NO_CONSTRUCTION_AND_DELETED = 0xffaf, // hope that's right please controll and it's actually OR not AND
+    BIT_NO_CONSTRUCTION_AND_DELETED = 0xffaf,
     BIT_FUTURE_EARTHQUAKE = 0x100,
     BIT_NO_FUTURE_EARTHQUAKE = 0xfeff,
     EDGE_MASK_X = 0x7,
@@ -272,7 +272,7 @@ void map_property_load_state_u8(buffer *bitfields, buffer *edge)
     uint8_t buf[GRID_SIZE * GRID_SIZE];
     map_grid_load_state_u8(buf, bitfields);
     for (int i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
-        uint16_t value = (uint16_t)buf[i];
+        uint16_t value = (uint16_t) buf[i];
         bitfields_grid.items[i] = value &= BIT_NO_FUTURE_EARTHQUAKE;
     }
     map_grid_load_state_u8(edge_grid.items, edge);

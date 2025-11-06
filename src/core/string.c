@@ -3,7 +3,6 @@
 #include "core/calc.h"
 
 #include <ctype.h>
-#include "string.h"
 
 int string_equals(const uint8_t *a, const uint8_t *b)
 {
@@ -60,7 +59,7 @@ int string_length(const uint8_t *str)
     if (!str) {
         return 0;
     }
-
+    
     int length = 0;
     while (*str) {
         length++;
