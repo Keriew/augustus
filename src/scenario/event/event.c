@@ -45,7 +45,6 @@ void scenario_event_init(scenario_event_t *event)
             condition->parent_event_id = event_id;
         }
     }
-    scenario_action_t *action;
 }
 
 void scenario_event_save_state(buffer *buf, scenario_event_t *event)

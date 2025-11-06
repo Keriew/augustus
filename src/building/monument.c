@@ -179,7 +179,7 @@ static const monument_type *MONUMENT_TYPES[BUILDING_TYPE_MAX] = {
 
 typedef struct {
     int walker_id;
-    int destination_id;
+    unsigned int destination_id;
     int resource;
     int cartloads;
 } monument_delivery;
