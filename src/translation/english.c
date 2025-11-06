@@ -1746,6 +1746,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_UI_CV_CURSOR_SHADOW, "Enable cursor shadow"},
     {TR_CONFIG_GENERAL_UNLOCK_MOUSE, "Lock mouse in Fullscreen mode"},
     {TR_CONFIG_GP_CH_HOUSING_PRE_MERGE_VACANT_LOTS, "Houses always merge in 2x2"},
+    {TR_CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES, "Show reservoir range when building fountains"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
