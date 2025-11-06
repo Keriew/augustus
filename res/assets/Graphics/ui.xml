@@ -339,7 +339,7 @@
 	</image>
 	<!-- Note: Empire map icons for Roman trade towns and non-trade towns respectively -->
 	<image id="Empire_Icon_Roman_01" src="Empire_Icon_Roman_01">
-		<animation speed="6" reversible="false" x="7" y="5">
+		<animation speed="6" reversible="false" x="17" y="6">
 			<frame group="this" image="city_flag_red_01"/>
 			<frame group="this" image="city_flag_red_02"/>
 			<frame group="this" image="city_flag_red_03"/>
@@ -349,7 +349,7 @@
 		</animation>
 	</image>
 	<image id="Empire_Icon_Roman_02" src="Empire_Icon_Roman_02">
-		<animation speed="6" reversible="false" x="7" y="5">
+		<animation speed="6" reversible="false" x="17" y="6">
 			<frame group="this" image="city_flag_blue_01"/>
 			<frame group="this" image="city_flag_blue_02"/>
 			<frame group="this" image="city_flag_blue_03"/>
@@ -360,7 +360,7 @@
 	</image>
 	<!-- Note: Empire map icons for Roman trade villages and non-trade villages respectively -->
 	<image id="Empire_Icon_Roman_03" src="Empire_Icon_Roman_03">
-		<animation speed="6" reversible="false" x="17" y="5">
+		<animation speed="6" reversible="false" x="17" y="6">
 			<frame group="this" image="city_flag_red_01"/>
 			<frame group="this" image="city_flag_red_02"/>
 			<frame group="this" image="city_flag_red_03"/>
@@ -370,7 +370,7 @@
 		</animation>
 	</image>
 	<image id="Empire_Icon_Roman_04" src="Empire_Icon_Roman_04">
-		<animation speed="6" reversible="false" x="17" y="5">
+		<animation speed="6" reversible="false" x="17" y="6">
 			<frame group="this" image="city_flag_blue_01"/>
 			<frame group="this" image="city_flag_blue_02"/>
 			<frame group="this" image="city_flag_blue_03"/>
@@ -381,7 +381,7 @@
 	</image>
 	<!-- Note: Empire map icon for the City of Rome -->
 	<image id="Empire_Icon_Roman_05" src="Empire_Icon_Roman_05">
-		<animation speed="6" reversible="false" x="12" y="5">
+		<animation speed="6" reversible="false" x="16" y="6">
 			<frame group="this" image="Empire_Icon_Flag_01"/>
 			<frame group="this" image="Empire_Icon_Flag_02"/>
 			<frame group="this" image="Empire_Icon_Flag_03"/>
@@ -392,7 +392,7 @@
 	</image>
 	<!-- Note: Empire map icons for distant towns -->
 	<image id="Empire_Icon_Distant_01" src="Empire_Icon_Distant_01">
-		<animation speed="6" reversible="false" x="13" y="5">
+		<animation speed="6" reversible="false" x="11" y="5">
 			<frame group="this" image="city_flag_yellow_01"/>
 			<frame group="this" image="city_flag_yellow_02"/>
 			<frame group="this" image="city_flag_yellow_03"/>
@@ -403,7 +403,7 @@
 	</image>
 	<!-- Note: Empire map icons for distant villages -->
 	<image id="Empire_Icon_Distant_02" src="Empire_Icon_Distant_02">
-		<animation speed="6" reversible="false" x="13" y="5">
+		<animation speed="6" reversible="false" x="11" y="5">
 			<frame group="this" image="city_flag_yellow_01"/>
 			<frame group="this" image="city_flag_yellow_02"/>
 			<frame group="this" image="city_flag_yellow_03"/>
@@ -414,7 +414,7 @@
 	</image>
 	<!-- Note: Empire map icon for construction site -->
 	<image id="Empire_Icon_Construction_01" src="Empire_Icon_Construction_01">
-		<animation speed="6" reversible="false" x="3" y="5">
+		<animation speed="6" reversible="false" x="1" y="6">
 			<frame group="this" image="city_flag_blue_01"/>
 			<frame group="this" image="city_flag_blue_02"/>
 			<frame group="this" image="city_flag_blue_03"/>
@@ -425,7 +425,7 @@
 	</image>
 	<!-- Note: Empire map icon for farm and quarry resource nodes respectively -->
 	<image id="Empire_Icon_Resource_01" src="Empire_Icon_Resource_01">
-		<animation speed="6" reversible="false" x="3" y="5">
+		<animation speed="6" reversible="false" x="1" y="6">
 			<frame group="this" image="city_flag_red_01"/>
 			<frame group="this" image="city_flag_red_02"/>
 			<frame group="this" image="city_flag_red_03"/>
@@ -435,7 +435,7 @@
 		</animation>
 	</image>
 	<image id="Empire_Icon_Resource_02" src="Empire_Icon_Resource_02">
-		<animation speed="6" reversible="false" x="3" y="5">
+		<animation speed="6" reversible="false" x="1" y="6">
 			<frame group="this" image="city_flag_red_01"/>
 			<frame group="this" image="city_flag_red_02"/>
 			<frame group="this" image="city_flag_red_03"/>
@@ -446,7 +446,7 @@
 	</image>
 	<!-- Note: Empire map icon for off-map trade emporium water and land variants respectively -->
 	<image id="Empire_Icon_Trade_01" src="Empire_Icon_Trade_01">
-		<animation speed="6" reversible="false" x="17" y="5">
+		<animation speed="6" reversible="false" x="19" y="6">
 			<frame group="this" image="city_flag_red_01"/>
 			<frame group="this" image="city_flag_red_02"/>
 			<frame group="this" image="city_flag_red_03"/>
@@ -456,7 +456,7 @@
 		</animation>
 	</image>
 	<image id="Empire_Icon_Trade_02" src="Empire_Icon_Trade_02">
-		<animation speed="6" reversible="false" x="17" y="5">
+		<animation speed="6" reversible="false" x="19" y="6">
 			<frame group="this" image="city_flag_red_01"/>
 			<frame group="this" image="city_flag_red_02"/>
 			<frame group="this" image="city_flag_red_03"/>
@@ -467,7 +467,7 @@
 	</image>
 	<image id="Empire_Icon_Watchtower" width="13" height="25" >
 		<layer group="176" image="60"/>
-		<animation speed="6" reversible="false" x="3" y="1">
+		<animation speed="6" reversible="false" x="1" y="1">
 			<frame group="this" image="Empire_Icon_Flag_01"/>
 			<frame group="this" image="Empire_Icon_Flag_02"/>
 			<frame group="this" image="Empire_Icon_Flag_03"/>
