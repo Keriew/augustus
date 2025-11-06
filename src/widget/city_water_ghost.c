@@ -58,8 +58,9 @@ static void update_reservoir_access(void)
     memset(has_reservoir_access, 0, sizeof(uint8_t) * GRID_SIZE * GRID_SIZE);
     for (building *b = building_first_of_type(BUILDING_RESERVOIR); b; b = b->next_of_type) {
         if (b->state == BUILDING_STATE_IN_USE && b->has_water_access) {
-            city_view_foreach_tile_in_range(b->grid_offset, 0, map_water_supply_reservoir_radius(), set_reservoir_access);
-            set_reservoir_access(b->x, b->y, b->grid_offset); // include the reservoir main tile itself
+            city_view_foreach_tile_in_range(b->grid_offset, 3, map_water_supply_reservoir_radius(), set_reservoir_access);
+            city_view_foreach_tile_in_range(b->grid_offset, 0, 3, set_reservoir_access);// include the reservoir tiles
+            set_reservoir_access(b->x, b->y, b->grid_offset); // include the reservoir main tile
         }
     }
 }
