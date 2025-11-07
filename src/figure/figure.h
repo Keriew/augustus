@@ -4,6 +4,7 @@
 #include "core/buffer.h"
 #include "core/direction.h"
 #include "figure/action.h"
+#include "figure/properties.h"
 #include "figure/type.h"
 
 #define FIGURE_FACTION_ROAMER_PREVIEW 2
@@ -147,6 +148,8 @@ int figure_is_enemy(const figure *f);
 int figure_is_legion(const figure *f);
 
 int figure_is_herd(const figure *f);
+
+int figure_is_category(figure *f, figure_category category);
 
 void figure_init_scenario(void);
 

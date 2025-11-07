@@ -10,6 +10,7 @@
 #include "game/save_version.h"
 #include "empire/city.h"
 #include "figure/name.h"
+#include "figure/properties.h"
 #include "figure/route.h"
 #include "figure/trader.h"
 #include "figure/visited_buildings.h"
@@ -225,6 +226,12 @@ int figure_is_legion(const figure *f)
 int figure_is_herd(const figure *f)
 {
     return f->type >= FIGURE_SHEEP && f->type <= FIGURE_ZEBRA;
+}
+
+int figure_is_category(figure *f, figure_category category)
+{
+    const figure_properties *f_props = figure_properties_for_type(f->type);
+    return f_props->category & category;
 }
 
 static void initialize_new_figure(figure *f, unsigned int position)
