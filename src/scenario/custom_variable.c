@@ -244,7 +244,7 @@ void scenario_custom_variable_load_state(buffer *buf, int version)
             variable->allow_display = 0; //initialize to not visible
         }
 
-        if (version > SCENARIO_TESTING_VERSION_BUMP_2) {
+        if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
             variable->color_group = buffer_read_u8(buf);
         } else {
             variable->color_group = (unsigned char) -1;

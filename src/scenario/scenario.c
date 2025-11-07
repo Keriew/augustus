@@ -99,7 +99,7 @@ static void calculate_buffer_offsets(int scenario_version)
 
     buffer_offsets.image = next_start_offset;
     next_start_offset = buffer_offsets.image + 6;
-    if (scenario_version > SCENARIO_TESTING_VERSION_BUMP_7) {
+    if (scenario_version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         next_start_offset += 2;// favour reset monthly pattern is +2 bytes
     }
     buffer_offsets.herds = next_start_offset;
@@ -150,7 +150,7 @@ static void calculate_buffer_offsets(int scenario_version)
 
     buffer_offsets.win_criteria = next_start_offset;
     next_start_offset = buffer_offsets.win_criteria + 52;
-    if (scenario_version > SCENARIO_TESTING_VERSION_BUMP_7) {
+    if (scenario_version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         next_start_offset += 1;// earthkek pattern is +1 byte
     }
     buffer_offsets.map_points = next_start_offset;
@@ -209,8 +209,8 @@ int scenario_get_state_buffer_size_by_savegame_version(int savegame_version)
         calculate_buffer_offsets(SCENARIO_LAST_NO_ALT_NATIVE_HUTS);
     } else if (savegame_version <= SAVE_GAME_LAST_NO_EXTRA_NATIVE_BUILDINGS) {
         calculate_buffer_offsets(SCENARIO_LAST_NO_EXTRA_NATIVE_BUILDINGS);
-    } else if (savegame_version <= SAVE_GAME_TESTING_VERSION_BUMP_7) {
-        calculate_buffer_offsets(SCENARIO_TESTING_VERSION_BUMP_7);
+    } else if (savegame_version <= SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
+        calculate_buffer_offsets(SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA);
     } else {
         calculate_buffer_offsets(SCENARIO_CURRENT_VERSION);
     }
@@ -407,7 +407,7 @@ void scenario_load_state(buffer *buf, int version)
 
     scenario.image_id = buffer_read_i16(buf);
     scenario.is_open_play = buffer_read_i16(buf);
-    if (version > SCENARIO_TESTING_VERSION_BUMP_1) { //<INTERNAL_VERSION_TEST>
+    if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         scenario.reset_favour_monthly = buffer_read_i16(buf);
     } else {
         scenario.reset_favour_monthly = 1;
@@ -489,12 +489,11 @@ void scenario_load_state(buffer *buf, int version)
 
     scenario.earthquake.severity = buffer_read_i32(buf);
     scenario.earthquake.year = buffer_read_i32(buf);
-    if (version > SCENARIO_TESTING_VERSION_BUMP_7) {
+    if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         scenario.earthquake.pattern = buffer_read_u8(buf);
     } else {
         scenario.earthquake.pattern = 0;
     }
-
     scenario.win_criteria.population.enabled = buffer_read_i32(buf);
     scenario.win_criteria.population.goal = buffer_read_i32(buf);
 

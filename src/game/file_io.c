@@ -367,7 +367,7 @@ static void init_scenario_data(scenario_version_t version)
     state->graphic_ids = create_scenario_piece(GRID_SIZE_BUF_U16, 0);
     state->edge = create_scenario_piece(GRID_SIZE_BUF_U8, 0);
     state->terrain = create_scenario_piece(GRID_SIZE_BUF_U16, 0);
-    if (version > SCENARIO_TESTING_VERSION_BUMP_4) { //Decrease to SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA before merge
+    if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         state->bitfields = create_scenario_piece(GRID_SIZE_BUF_U16, 0);
     } else {
         state->bitfields = create_scenario_piece(GRID_SIZE_BUF_U8, 0);
@@ -409,8 +409,6 @@ static void init_scenario_data(scenario_version_t version)
     if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         state->model_data = create_scenario_piece(PIECE_SIZE_DYNAMIC, 0);
         state->scenario_formulas = create_scenario_piece(PIECE_SIZE_DYNAMIC, 1);
-    }
-    if (version > SCENARIO_TESTING_VERSION_BUMP_6) { // Put into upper if before merge
         state->production_rates = create_scenario_piece(PIECE_SIZE_DYNAMIC, 1);
     }
     state->end_marker = create_scenario_piece(4, 0);
@@ -535,7 +533,7 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
     version_data->features.dynamic_scenario_objects = version > SAVE_GAME_LAST_STATIC_SCENARIO_ORIGINAL_DATA;
     version_data->features.custom_model_data = version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA;
     version_data->features.rubble_grid = version > SAVE_GAME_LAST_U16_GRIDS;
-    version_data->features.custom_production_rates = version > SAVE_GAME_TESTING_VERSION_BUMP_6; // change to SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA before merge
+    version_data->features.custom_production_rates = version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA;
 }
 
 static void init_savegame_data(savegame_version_t version)
@@ -562,7 +560,7 @@ static void init_savegame_data(savegame_version_t version)
     state->terrain_grid = create_savegame_piece(version_data.piece_sizes.terrain_grid, 1);
     state->aqueduct_grid = create_savegame_piece(GRID_SIZE_BUF_U8, 1);
     state->figure_grid = create_savegame_piece(GRID_SIZE_BUF_U16, 1);
-    if (version > SAVE_GAME_TESTING_VERSION_BUMP_4) { //Decrease to SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA before merge
+    if (version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         state->bitfields_grid = create_savegame_piece(GRID_SIZE_BUF_U16, 1);
     } else {
         state->bitfields_grid = create_savegame_piece(GRID_SIZE_BUF_U8, 1);
@@ -721,7 +719,7 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
 
     map_image_load_state_legacy(file->graphic_ids);
     map_terrain_load_state(file->terrain, 0, file->graphic_ids, 1);
-    if (version > SCENARIO_TESTING_VERSION_BUMP_5) { //Decrease to SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA before merge
+    if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         map_property_load_state(file->bitfields, file->edge);
     } else {
         map_property_load_state_u8(file->bitfields, file->edge);
@@ -769,15 +767,11 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
     } else {
         scenario_events_migrate_to_formulas();
         scenario_events_migrate_to_resolved_display_names();
-    }
-    if (version <= SCENARIO_TESTING_VERSION_BUMP_4) {
         scenario_events_migrate_to_grid_slices();
-    }
-    if (version <= SCENARIO_TESTING_VERSION_BUMP_8) {
         scenario_events_min_max_migrate_to_formulas();
     }
     resource_init();
-    if (version > SCENARIO_TESTING_VERSION_BUMP_6) { // Decrease before merge
+    if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) { // Decrease before merge
         production_rates_load(file->production_rates);
     }
     scenario_events_assign_parent_event_ids();
@@ -872,7 +866,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     map_aqueduct_load_state(state->aqueduct_grid, state->aqueduct_backup_grid);
     map_figure_load_state(state->figure_grid);
     map_sprite_load_state(state->sprite_grid, state->sprite_backup_grid);
-    if (version > SAVE_GAME_TESTING_VERSION_BUMP_5) { //Decrease to SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA before merge
+    if (version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         map_property_load_state(state->bitfields_grid, state->edge_grid);
     } else {
         map_property_load_state_u8(state->bitfields_grid, state->edge_grid);
@@ -901,7 +895,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     }
 
     resource_init();
-    if (version > SAVE_GAME_TESTING_VERSION_BUMP_6) { // Decrease before merge
+    if (version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         production_rates_load(state->production_rates);
     }
 
@@ -971,10 +965,8 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
         scenario_events_migrate_to_resolved_display_names();
 
     }
-    if (version <= SAVE_GAME_TESTING_VERSION_BUMP_4) {
+    if (version <= SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         scenario_events_migrate_to_grid_slices();
-    }
-    if (version <= SAVE_GAME_TESTING_VERSION_BUMP_8) {
         scenario_events_min_max_migrate_to_formulas();
     }
     scenario_events_assign_parent_event_ids();
@@ -1449,7 +1441,7 @@ int game_file_io_write_scenario(const char *filename)
 {
     log_info("Saving scenario", filename, 0);
     resource_set_mapping(RESOURCE_CURRENT_VERSION);
-    init_scenario_data(SCENARIO_CURRENT_VERSION);
+    init_scenario_data(SCENARIO_CURRENT_VERSION);// SCENARIO_CURRENT_VERSION
     scenario_save_to_state(&scenario_data.state);
 
     FILE *fp = file_open(filename, "wb");
@@ -1462,7 +1454,7 @@ int game_file_io_write_scenario(const char *filename)
     uint8_t header[8];
     string_copy(string_from_ascii("VERSION"), header, sizeof(header));
     fwrite(header, 1, 8, fp);
-    write_int32(fp, SCENARIO_CURRENT_VERSION);
+    write_int32(fp, SCENARIO_CURRENT_VERSION); // SCENARIO_CURRENT_VERSION
     for (int i = 0; i < scenario_data.num_pieces; i++) {
         file_piece *piece = &scenario_data.pieces[i];
         if (piece->dynamic) {

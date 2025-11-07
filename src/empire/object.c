@@ -202,11 +202,10 @@ void empire_object_load(buffer *buf, int version)
         if (version > SCENARIO_LAST_UNVERSIONED) {
             buffer_read_raw(buf, full->city_custom_name, sizeof(full->city_custom_name));
         }
-        if (version > SCENARIO_TESTING_VERSION_BUMP_9) {
+        if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
             obj->empire_city_icon = buffer_read_u8(buf);
             full->empire_city_icon = buffer_read_u8(buf);
         } else {
-            // TODO: Config option
             obj->empire_city_icon = empire_object_get_random_icon_for_empire_object(full);
             full->empire_city_icon = empire_object_get_random_icon_for_empire_object(full);
         }
