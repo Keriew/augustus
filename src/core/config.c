@@ -109,6 +109,10 @@ static const char *ini_keys[] = {
     [CONFIG_GP_CH_MARKET_RANGE] = "gameplay_market_range",
     [CONFIG_UI_CV_BUILD_MENU_ICONS] = "ui_cv_build_menu_icons",
     [CONFIG_UI_WT_ENABLE_SNOW_CENTRAL] = "ui_wt_enable_snow_central",
+    [CONFIG_UI_CV_CURSOR_SHADOW] = "ui_cv_cursor_shadow",
+    [CONFIG_GENERAL_UNLOCK_MOUSE] = "general_unlock_mouse",
+    [CONFIG_GP_CH_HOUSING_PRE_MERGE_VACANT_LOTS] = "gp_ch_housing_pre_merge_vacant_lots",
+    [CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES] = "ui_build_show_reservoir_ranges",
 };
 
 static const char *ini_string_keys[] = {
@@ -167,6 +171,10 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
 
     [CONFIG_UI_CV_BUILD_MENU_ICONS] = 1,
     [CONFIG_UI_WT_ENABLE_SNOW_CENTRAL] = 0,
+    [CONFIG_UI_CV_CURSOR_SHADOW] = 1,
+    [CONFIG_GENERAL_UNLOCK_MOUSE] = 1,
+    [CONFIG_GP_CH_HOUSING_PRE_MERGE_VACANT_LOTS] = 1,
+    [CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES] = 1,
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };

@@ -219,8 +219,11 @@ static int has_devolve_delay(building *house, evolve_status status)
 
 static int evolve_small_tent(building *house, house_demands *demands)
 {
-    if (house->house_population > 0) {
+    int premerge = config_get(CONFIG_GP_CH_HOUSING_PRE_MERGE_VACANT_LOTS);
+    if (premerge || house->house_population > 0) {
         building_house_merge(house);
+    }
+    if (house->house_population > 0) {
         evolve_status status = check_requirements(house, demands);
         if (status == EVOLVE) {
             building_house_change_to(house, BUILDING_HOUSE_LARGE_TENT);

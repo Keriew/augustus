@@ -17,7 +17,9 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "map/building.h"
+#include "map/desirability.h"
 #include "map/grid.h"
+#include "map/image.h"
 #include "map/property.h"
 #include "map/terrain.h"
 #include "scenario/criteria.h"
@@ -431,9 +433,13 @@ static void draw_tile_tooltip(tooltip_context *c)
 
         int x, y, width, height;
         switch (debug_tooltip_type) {
-            case 3:// terrain flags and other info included
+            case 4: // desirability per tile
                 width = 110;
-                height = 47 + (b_id_at ? 14 : 0) + (rubble_id_at ? 14 : 0) + (num_flags * 14);
+                height = 61;
+                break;
+            case 3: // terrain flags and other info included
+                width = 110;
+                height = 61 + (b_id_at ? 14 : 0) + (rubble_id_at ? 14 : 0) + (num_flags * 14);
                 break;
             case 2:
                 width = 90;
@@ -479,7 +485,7 @@ static void draw_tile_tooltip(tooltip_context *c)
             text_draw_label_and_number(
                 string_from_ascii("grid: "), grid_offset, " ", 2, 33, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
         }
-        if (debug_tooltip_type >= 3) {
+        if (debug_tooltip_type == 3) { // dont show flags for 4 (desirability)
             int y_offset = 47;
             if (b_id_at) {
                 text_draw_label_and_number(string_from_ascii("b_grid: "), b_id_at,
@@ -495,6 +501,16 @@ static void draw_tile_tooltip(tooltip_context *c)
                 text_draw(string_from_ascii(flags[i]), 2, y_offset, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
                 y_offset += 14;
             }
+            int image_id = map_image_at(grid_offset); // to avoid unused function warning
+            if (image_id) {
+                text_draw_label_and_number(string_from_ascii("img id: "), image_id,
+                    "", 2, y_offset, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
+            }
+        }
+        if (debug_tooltip_type >= 4) {
+            int desirability = map_desirability_get(grid_offset);
+            text_draw_label_and_number(string_from_ascii("desirability: "), desirability,
+                "", 2, 47, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
         }
         graphics_renderer()->finish_tooltip_creation();
 

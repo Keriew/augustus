@@ -417,11 +417,12 @@ static int map_can_place_initial_reservoir(int grid_offset)
     } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
         if (building_get(map_building_at(grid_offset))->type == BUILDING_RESERVOIR) {
             return 1;
+        } else {
+            return 0;
         }
-    } else {
-        return 0;
     }
 
+    return 1;
 }
 
 static int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aqueduct)
@@ -478,7 +479,7 @@ int map_routing_calculate_distances_for_building(routed_building_type type, int 
         route_queue_all_from(source_offset, DIRECTIONS_NO_DIAGONALS, callback_calc_distance_build_highway, 0);
         return 1;
     }
-    if (type == BUILDING_DRAGGABLE_RESERVOIR) {
+    if (type == ROUTED_BUILDING_DRAGGABLE_RESERVOIR) {
         if (map_can_place_initial_reservoir(source_offset)) {
             return 1;
         } else {

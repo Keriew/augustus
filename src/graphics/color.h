@@ -50,6 +50,8 @@ typedef uint32_t color_t;
 #define COLOR_MASK_DARK_PINK 0x88402060
 #define COLOR_MASK_BLUE 0x663377ff
 #define COLOR_MASK_GRAY 0x66aaaaaa
+#define COLOR_MASK_LIGHT_GRAY 0xbbaaaaaa
+#define COLOR_MASK_HOVER 0xeee0e0e0
 #define COLOR_MASK_PINK 0x99fa94ff
 #define COLOR_MASK_LEGION_HIGHLIGHT 0xffff6633
 #define COLOR_MASK_FOOTPRINT_GHOST 0x22ffffff
@@ -72,7 +74,8 @@ typedef uint32_t color_t;
 #define COLOR_MASK_SKY_BLUE 0xff90aaff
 #define COLOR_MASK_POSITIVE_RANGE 0x80005100    //50% transparent DARK_GREEN
 #define COLOR_MASK_NEGATIVE_RANGE 0x40ff0000    //25% transparent COLOR_RED
-#define COLOR_MASK_REPAIR_RANGE 0x4000ff00    //25% transparent COLOR_GREEN
+#define COLOR_MASK_REPAIR_RANGE 0x4000ff00      //25% transparent COLOR_GREEN
+#define COLOR_MASK_RESERVOIR_RANGE 0x6633ddff   //40% transparent cyan blue
 
 #define COLOR_MINIMAP_VIEWPORT 0xffe7e75a
 #define COLOR_MINIMAP_DARK 0xff424242

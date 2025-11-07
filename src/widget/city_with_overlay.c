@@ -229,7 +229,7 @@ static color_t get_building_color_mask(const building *b)
     return color_mask;
 }
 
-static int is_building_selected(const building *b)
+static int is_building_selected(building *b)
 {
     if (!config_get(CONFIG_UI_HIGHLIGHT_SELECTED_BUILDING)) { // if option not selected in config, abandon
         return 0;
@@ -491,7 +491,7 @@ static void draw_footprint(int x, int y, int grid_offset)
     if (map_property_is_draw_tile(grid_offset)) {
         int terrain = map_terrain_get(grid_offset);
         if (terrain & TERRAIN_HIGHWAY && !(terrain & TERRAIN_GATEHOUSE)) {
-            city_draw_highway_footprint(x, y, scale, grid_offset);
+            city_draw_highway_footprint(x, y, scale, grid_offset, COLOR_MASK_NONE);
         } else if (terrain & (TERRAIN_AQUEDUCT | TERRAIN_WALL)) {
             if (terrain & TERRAIN_ROAD) {
                 // Draw the equivalent road tile.

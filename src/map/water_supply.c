@@ -113,7 +113,7 @@ static void set_all_aqueducts_to_no_water(void)
                 int image_id = map_image_at(grid_offset);
                 if (image_id < image_group(GROUP_BUILDING_AQUEDUCT_NO_WATER)) {
                     map_image_set(grid_offset, image_id + 15);
-                } else if(map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+                } else if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
                     image_id = map_tiles_highway_get_aqueduct_image(grid_offset);
                     map_image_set(grid_offset, image_id);
                 }

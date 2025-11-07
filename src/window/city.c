@@ -69,6 +69,11 @@ static void draw_topleft_label(int x, int y, const uint8_t *label_text, const ui
     int segment_count, font_t font);
 static void draw_topleft_label_short(int x, int y, const uint8_t *label_text, int value, font_t font);
 
+int window_city_is_window_cityview(void)
+{
+    return ((window_get_id() >= WINDOW_CITY && window_get_id() <= WINDOW_RACE_BET));
+}
+
 static void draw_background(void)
 {
     if (window_is(WINDOW_CITY)) {

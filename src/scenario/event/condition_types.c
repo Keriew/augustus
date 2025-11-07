@@ -338,7 +338,6 @@ int scenario_condition_type_resource_storage_available_met(const scenario_condit
     int comparison = condition->parameter2;
     int value = condition->parameter3;
     storage_types storage_type = condition->parameter4;
-    int respect_settings = condition->parameter5; //for empty storage, respecting settings doesn't currently make sense
 
     if (resource < RESOURCE_MIN || resource > RESOURCE_MAX) {
         return 0;

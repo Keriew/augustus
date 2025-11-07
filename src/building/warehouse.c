@@ -450,7 +450,6 @@ int building_warehouse_maximum_receptible_amount(building *b, int resource)
     unsigned char max_receptible = MIN(remaining_allowed, available_space);
     // Max the building is allowed to receive, considering all limits
     // allowed remaining is the amount that can be added to the warehouse considering set limit and current storage
-    max_receptible = max_receptible < 0 ? 0 : max_receptible; // in case current storage exceeds limits, 0
 
     return max_receptible;
 }

@@ -86,7 +86,7 @@ static void determine_meeting_center(void)
     }
 }
 
-int native_hut_alt_get_image_id() {
+static int native_hut_alt_get_image_id(void) {
     switch (scenario_property_climate()) {
         case CLIMATE_NORTHERN:
             return assets_get_image_id("Terrain_Maps", "Native_Hut_Northern_01");

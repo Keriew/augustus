@@ -10,7 +10,7 @@ void window_city_draw(void);
 void window_city_show(void);
 
 void window_city_military_show(int legion_formation_id);
-
+int window_city_is_window_cityview(void);
 void window_city_return(void);
 
 #endif // WINDOW_CITY_H

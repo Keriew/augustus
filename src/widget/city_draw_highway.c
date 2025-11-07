@@ -49,7 +49,7 @@ static int is_highway_access(int grid_offset, int direction_index)
     return 0;
 }
 
-static void draw_barrier_image(int grid_offset, int direction_index, int x, int y, float scale)
+static void draw_barrier_image(int grid_offset, int direction_index, int x, int y, float scale, color_t color_mask)
 {
     int direction = highway_barrier_direction_offsets[direction_index];
 
@@ -74,20 +74,20 @@ static void draw_barrier_image(int grid_offset, int direction_index, int x, int 
         barrier_offset += 4;
     }
     int barrier_image_id = assets_lookup_image_id(ASSET_HIGHWAY_BARRIER_START) + barrier_offset;
-    image_draw_isometric_footprint_from_draw_tile(barrier_image_id, x, y, 0, scale);
+    image_draw_isometric_footprint_from_draw_tile(barrier_image_id, x, y, color_mask, scale);
 }
 
-void city_draw_highway_footprint(int x, int y, float scale, int grid_offset)
+void city_draw_highway_footprint(int x, int y, float scale, int grid_offset, color_t color_mask)
 {
     int random_offset = map_random_get(grid_offset) & 15;
     int base_image_id = assets_lookup_image_id(ASSET_HIGHWAY_BASE_START) + random_offset;
-    image_draw_isometric_footprint_from_draw_tile(base_image_id, x, y, 0, scale);
-    draw_barrier_image(grid_offset, 1, x, y, scale);
-    draw_barrier_image(grid_offset, 2, x, y, scale);
+    image_draw_isometric_footprint_from_draw_tile(base_image_id, x, y, color_mask, scale);
+    draw_barrier_image(grid_offset, 1, x, y, scale, color_mask);
+    draw_barrier_image(grid_offset, 2, x, y, scale, color_mask);
     if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
         int aqueduct_image_id = map_tiles_highway_get_aqueduct_image(grid_offset);
-        image_draw_isometric_footprint_from_draw_tile(aqueduct_image_id, x, y, 0, scale);
+        image_draw_isometric_footprint_from_draw_tile(aqueduct_image_id, x, y, color_mask, scale);
     }
-    draw_barrier_image(grid_offset, 0, x, y, scale);
-    draw_barrier_image(grid_offset, 3, x, y, scale);
+    draw_barrier_image(grid_offset, 0, x, y, scale, color_mask);
+    draw_barrier_image(grid_offset, 3, x, y, scale, color_mask);
 }

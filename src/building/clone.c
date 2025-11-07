@@ -47,7 +47,9 @@ static building_type get_clone_type_from_building(building *b, building_type clo
             return BUILDING_NONE;
         case BUILDING_BURNING_RUIN:
             if (b) {
-                return get_clone_type_from_building(b, building_get(map_building_rubble_building_id(b->grid_offset))->type);
+                building *before_fire = building_get(map_building_rubble_building_id(b->grid_offset));
+                building_type type = building_clone_type_from_building_type(before_fire->data.rubble.og_type);
+                return type;
             } else {
                 return BUILDING_NONE;
             }
@@ -113,7 +115,9 @@ building_type building_clone_type_from_grid_offset(int grid_offset)
             return get_clone_type_from_building(b, b->type);
         }
     } else if (terrain & TERRAIN_RUBBLE) {
-        return get_clone_type_from_building(0, building_get(map_building_rubble_building_id(grid_offset))->type);
+        building *old_building = building_get(map_building_rubble_building_id(grid_offset));
+        building_type type = building_clone_type_from_building_type(old_building->data.rubble.og_type);
+        return type;
     } else if (terrain & TERRAIN_AQUEDUCT) {
         return BUILDING_AQUEDUCT;
     } else if (terrain & TERRAIN_WALL) {
