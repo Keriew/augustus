@@ -1697,8 +1697,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         }
         case ACTION_TYPE_CHANGE_MODEL_DATA:
         {
-            result_text = append_text(string_from_ascii(":"), result_text, &maxlength);
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+            result_text = append_text(string_from_ascii(": "), result_text, &maxlength);
             result_text = append_text(translation_for(action->parameter4 ? TR_PARAMETER_SET : TR_PARAMETER_CHANGE), result_text, &maxlength);
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_DATA_TYPE, action->parameter2, result_text, &maxlength);
@@ -1707,8 +1706,8 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_MODEL, action->parameter1, result_text, &maxlength);
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(action->parameter4 ? TR_PARAMETER_TO : TR_PARAMETER_BY), result_text, &maxlength);
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = translation_for_number_value(action->parameter3, result_text, &maxlength);
+            result_text = translation_for_formula_index(action->parameter3, result_text, &maxlength);
+            return;
         case ACTION_TYPE_CUSTOM_VARIABLE_FORMULA:
         {
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
