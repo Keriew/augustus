@@ -980,7 +980,7 @@ void window_building_get_tooltip_storage_orders(int *group_id, int *text_id, int
             city_resource_get_potential_foods() : city_resource_get_potential();
 
         // Ensure valid index
-        if (index >= 0 && index < list->size) {
+        if (index < list->size) {
             resource_type resource = list->items[index];
             const resource_storage_entry *entry = &s->resource_state[resource];
 

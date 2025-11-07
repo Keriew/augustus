@@ -69,7 +69,6 @@ static list_box_type list_box = {
 };
 
 static input_box player_name_input = { 304, 52, 20, 2, FONT_NORMAL_WHITE, 1, data.player_name, PLAYER_NAME_LENGTH };
-static scrollbar_type desc_scroll = { 0 };
 
 static void calculate_input_box_width(void)
 {

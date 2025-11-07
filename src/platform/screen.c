@@ -57,6 +57,23 @@ static int get_max_scale_percentage(int pixel_width, int pixel_height)
     return SDL_min(width_scale_pct, height_scale_pct);
 }
 
+static void update_window_grab(void)
+{
+#if !defined(__APPLE__)
+    // On multi-monitor setups in fullscreen, confine the cursor if the config option is enabled
+    if (setting_fullscreen() && SDL_GetNumVideoDisplays() > 1 && config_get(CONFIG_GENERAL_UNLOCK_MOUSE)) {
+        SDL_SetWindowGrab(SDL.window, SDL_TRUE);
+    } else {
+        SDL_SetWindowGrab(SDL.window, SDL_FALSE);
+    }
+#endif
+}
+
+void platform_screen_update_window_grab(void)
+{
+    update_window_grab();
+}
+
 static void apply_max_scale(int pixel_width, int pixel_height)
 {
     scale.percentage = scale.requested_percentage;
@@ -165,14 +182,10 @@ int platform_screen_create(const char *title, int display_scale_percentage, int 
         return 0;
     }
 
-#if !defined(__APPLE__)
-    if (fullscreen && SDL_GetNumVideoDisplays() > 1) {
-        SDL_SetWindowGrab(SDL.window, SDL_TRUE);
-    }
-#endif
+    update_window_grab();
     set_scale_percentage(display_scale_percentage, width, height);
     return platform_screen_resize(width, height, 1);
-    }
+}
 
 void platform_screen_destroy(void)
 {
@@ -265,11 +278,7 @@ void platform_screen_set_fullscreen(void)
     }
     SDL_SetWindowDisplayMode(SDL.window, &mode);
 
-#if !defined(__APPLE__)
-    if (SDL_GetNumVideoDisplays() > 1) {
-        SDL_SetWindowGrab(SDL.window, SDL_TRUE);
-    }
-#endif
+    update_window_grab();
     setting_set_display(1, mode.w, mode.h);
 }
 
@@ -289,9 +298,7 @@ void platform_screen_set_windowed(void)
     if (window_pos.centered) {
         platform_screen_center_window();
     }
-    if (SDL_GetWindowGrab(SDL.window) == SDL_TRUE) {
-        SDL_SetWindowGrab(SDL.window, SDL_FALSE);
-    }
+    update_window_grab();
     setting_set_display(0, pixel_width, pixel_height);
 }
 

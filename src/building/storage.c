@@ -205,7 +205,7 @@ int building_storage_get_storage_state_quantity(building *b, resource_type resou
     return entry->quantity;
 }
 
-const building_storage_state building_storage_get_state(building *b, int resource, int relative)
+building_storage_state building_storage_get_state(building *b, int resource, int relative)
 {
     if (b->has_plague || (b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_CREATED)) {
         return BUILDING_STORAGE_STATE_NOT_ACCEPTING;
@@ -351,6 +351,7 @@ int building_storage_accepts_storage(building *b, resource_type resource, int *u
     } else if (b->type == BUILDING_GRANARY) {
         return building_granary_accepts_storage(b, resource, understaffed);
     }
+    return 0;
 }
 
 void building_storage_accept_none(int storage_id)

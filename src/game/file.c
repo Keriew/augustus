@@ -478,11 +478,13 @@ int game_file_make_yearly_autosave(void)
         next_autosave_slot, ".svx");
 
     platform_file_manager_copy_file(current_save_name, backup_save_name);
-    game_file_write_saved_game(current_save_name);
+    int result = game_file_write_saved_game(current_save_name);
 
     next_autosave_slot++;
     config_set(CONFIG_GENERAL_NEXT_AUTOSAVE_SLOT,next_autosave_slot);
     config_save();
+
+    return result;
 }
 
 int game_file_delete_saved_game(const char *filename)

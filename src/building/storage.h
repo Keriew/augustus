@@ -158,7 +158,7 @@ const building_storage *building_storage_get(int storage_id);
  * @param relative If 1, returns state relative to the amount in the building, otherwise return raw state
  * @return Read-only storage state
  */
-const building_storage_state building_storage_get_state(building *b, int resource, int relative);
+building_storage_state building_storage_get_state(building *b, int resource, int relative);
 
 /**
  * Sets values of a building storage to that of another building storage

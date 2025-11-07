@@ -83,7 +83,7 @@ static int load_text(const char *filename, int localizable, uint8_t *buf_data)
     return 1;
 }
 
-static uint8_t *get_message_text(int32_t offset)
+static const uint8_t *get_message_text(int32_t offset)
 {
     if (!offset) {
         return 0;

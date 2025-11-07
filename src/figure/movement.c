@@ -273,7 +273,7 @@ static void advance_route_tile(figure *f, int roaming_enabled)
         }
     } else if (map_terrain_is(target_grid_offset, TERRAIN_BUILDING)) {
         if ((map_routing_citizen_is_passable_terrain(target_grid_offset) ||
-            map_routing_citizen_is_road(target_grid_offset) && !roaming_enabled)) {
+            (map_routing_citizen_is_road(target_grid_offset) && !roaming_enabled))) {
             return; // passable terrain - no reroute
         }
         building *b = building_get(map_building_at(target_grid_offset));
