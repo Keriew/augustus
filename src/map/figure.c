@@ -32,6 +32,20 @@ int map_has_figure_category_at(int grid_offset, figure_category category)
     return result;
 }
 
+int map_has_figure_category_in_area(int minx, int miny, int maxx, int maxy, figure_category category)
+{
+    int grid_offset;
+    for (int yy = miny; yy <= maxy; yy++) {
+        for (int xx = minx; xx <= maxx; xx++) {
+            if (map_has_figure_category_at(grid_offset, category)) {
+                return 1;
+            }
+            grid_offset = map_grid_offset(minx, miny);
+        }
+    }
+    return 0;
+}
+
 static void cap_figures_on_same_tile_index(figure *f)
 {
     if (f->figures_on_same_tile_index > 20) {

@@ -21,9 +21,16 @@ int map_has_figure_at(int grid_offset);
 /**
  * Returns whether there is a figure of a given category or category mix at a give offset
  * @param grid_offset Map offset
- * @param category The categories to be counted for e.g. FIGURE_CATEGORY_HOSTILE | FIGURE_CATEGORY_NATIVE
+ * @param category The categories to be checked for e.g. FIGURE_CATEGORY_HOSTILE | FIGURE_CATEGORY_NATIVE
  */
 int map_has_figure_category_at(int grid_offset, figure_category category);
+
+/**
+ * Calls map_has_figure_category_at for every tile in a given area
+ * @params minx, miny, maxx, maxy Specify the area
+ * @param category The categories to be checked for
+ */
+int map_has_figure_category_in_area(int minx, int miny, int maxx, int maxy, figure_category category)
 
 void map_figure_add(figure *f);
 
