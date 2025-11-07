@@ -16,7 +16,7 @@ int group_create_all(int total)
 {
     total += 1; // Create extra group for external files
     for (int i = 0; i < data.total_groups; i++) {
-        free((char *)data.groups[i].name);
+        free((char *) data.groups[i].name);
     }
     if (data.groups_in_memory < total) {
         free(data.groups);
@@ -63,7 +63,7 @@ void group_unload_current(void)
 {
     image_groups *group = group_get_current();
     asset_image *img = asset_image_get_from_id(group->last_image_index);
-    while (img && img->index >= group->first_image_index) {
+    while (img && img->index >= (unsigned int) group->first_image_index) {
         asset_image_unload(img);
         img = asset_image_get_from_id(img->index - 1);
     }

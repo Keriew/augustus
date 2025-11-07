@@ -5,6 +5,8 @@
 #include "game/system.h"
 #include "graphics/text.h"
 
+#include <string.h>
+
 static struct {
     int insert;
     int capture;
@@ -19,6 +21,7 @@ static struct {
     int length;
     int max_length;
     int allow_punctuation;
+    const char *allowed_chars;
 
     int viewport_start;
     int viewport_end;
@@ -103,7 +106,8 @@ static void update_viewport(int has_changed)
     data.viewport_cursor_position = data.cursor_position;
 }
 
-void keyboard_start_capture(uint8_t *text, int max_length, int allow_punctuation, int box_width, font_t font)
+void keyboard_start_capture(uint8_t *text, int max_length, int allow_punctuation,
+                            int box_width, font_t font, const char *allowed_chars)
 {
     data.capture = 1;
     data.text = text;
@@ -114,6 +118,7 @@ void keyboard_start_capture(uint8_t *text, int max_length, int allow_punctuation
     data.accepted = 0;
     data.box_width = box_width;
     data.font = font;
+    data.allowed_chars = allowed_chars;  // can be NULL or empty string
     update_viewport(1);
     system_start_text_input();
 }
@@ -321,31 +326,41 @@ void keyboard_end(void)
     }
 }
 
+
+static int is_character_allowed(uint8_t c)
+{
+    // 1. If a whitelist is defined, use it
+    if (data.allowed_chars && data.allowed_chars[0] != '\0') {
+        return strchr(data.allowed_chars, c) != NULL;
+    }
+
+    // 2. Legacy behavior (allow_punctuation flag)
+    if (c == ' ' || c == '-') {
+        return 1;
+    } else if (c >= '0' && c <= '9') {
+        return 1;
+    } else if (c >= 'a' && c <= 'z') {
+        return 1;
+    } else if (c >= 'A' && c <= 'Z') {
+        return 1;
+    } else if (c == ',' || c == '.' || c == '?' || c == '!') {
+        return data.allow_punctuation;
+    } else if (c == '"' || c == '%' || c == '\'' || c == '(' || c == ')' ||
+               c == '*' || c == '+' || c == '/' || c == ':' || c == ';' ||
+               c == '=' || c == '_' || c == '[' || c == ']' || c == '{' || c == '}') { // fully supported punctuation
+        return data.allow_punctuation;
+    } else if (c >= 0x80) { // non-ASCII (UTF-8 continuation, etc.)
+        return 1;
+    }
+
+    return 0;
+}
+
 static int keyboard_character(uint8_t *text)
 {
     uint8_t c = text[0];
-
-    int add = 0;
-    if (c == ' ' || c == '-') {
-        add = 1;
-    } else if (c >= '0' && c <= '9') {
-        add = 1;
-    } else if (c >= 'a' && c <= 'z') {
-        add = 1;
-    } else if (c >= 'A' && c <= 'Z') {
-        add = 1;
-    } else if (c == ',' || c == '.' || c == '?' || c == '!') {
-        add = data.allow_punctuation;
-    } else if (c == '"' || c == '%' || c == '\'' || c == '(' || c == ')' ||
-               c == '*' || c == '+' || c == '/' || c == ':' || c == ';' ||
-               c == '=' || c == '_') { //other punctuation supported in current font files
-        add = data.allow_punctuation;
-    } else if (c >= 0x80) { // do not check non-ascii for valid characters
-        add = 1;
-    }
-
     int bytes = get_char_bytes(text);
-    if (add) {
+    if (is_character_allowed(c)) {
         add_char(text, bytes);
         update_viewport(1);
     }

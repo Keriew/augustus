@@ -5,7 +5,7 @@
 #include "building/construction.h"
 #include "building/granary.h"
 #include "building/industry.h"
-#include "building/model.h"
+#include "building/properties.h"
 #include "building/storage.h"
 #include "building/type.h"
 #include "city/view.h"
@@ -234,7 +234,7 @@ static int is_building_selected(building *b)
     if (!config_get(CONFIG_UI_HIGHLIGHT_SELECTED_BUILDING)) { // if option not selected in config, abandon
         return 0;
     }
-    int main_part_id = building_main(b)->id; //check if side or main part is selected
+    unsigned int main_part_id = building_main(b)->id; //check if side or main part is selected
     if (b->id == city_roamer_preview_selected_building_id || main_part_id == city_roamer_preview_selected_building_id) {
         return 1;
     } else {

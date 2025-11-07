@@ -4,7 +4,7 @@
 #include "building/count.h"
 #include "building/house.h"
 #include "building/house_population.h"
-#include "building/model.h"
+#include "building/properties.h"
 #include "city/migration.h"
 #include "city/population.h"
 #include "city/resource.h"

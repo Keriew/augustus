@@ -74,10 +74,10 @@ typedef struct {
     short cc_delta_xy;
     unsigned char cc_direction; // 1 = x, 2 = y
     unsigned char speed_multiplier;
-    short building_id;
-    short immigrant_building_id;
-    short destination_building_id;
-    short formation_id;
+    unsigned int building_id;
+    unsigned int immigrant_building_id;
+    unsigned int destination_building_id;
+    unsigned int formation_id;
     unsigned char index_in_formation;
     unsigned char formation_at_rest;
     unsigned char migrant_num_people;
@@ -112,9 +112,9 @@ typedef struct {
     unsigned short target_figure_created_sequence;
     unsigned char figures_on_same_tile_index;
     unsigned char num_attackers;
-    short attacker_id1;
-    short attacker_id2;
-    short opponent_id;
+    unsigned int attacker_id1;
+    unsigned int attacker_id2;
+    unsigned int opponent_id;
     short last_visited_index; //can only be used if figure goes through initialization process
     int last_destinatation_id; //can be used for any figure, holds only one value
     struct {
@@ -144,6 +144,14 @@ void figure_delete(figure *f);
 int figure_is_dead(const figure *f);
 
 int figure_is_enemy(const figure *f);
+
+int figure_is_melee_enemy(const figure *f);
+
+int figure_is_ranged_enemy(const figure *f);
+
+int figure_is_mounted_enemy(const figure *f);
+
+int figure_is_caesar_enemy(const figure *f);
 
 int figure_is_legion(const figure *f);
 

@@ -208,6 +208,7 @@ void building_destroy_by_earthquake(building *b)
 {
     int grid_offset = b->grid_offset; // save before destroying building
     int size = b->size;
+    b->state = BUILDING_STATE_DELETED_BY_GAME;
     map_building_tiles_set_rubble(b->id, b->x, b->y, b->size);
     destroy_linked_parts(b, DESTROY_EARTHQUAKE, 0);
     map_building_set_rubble_grid_building_id(grid_offset, 0, size);

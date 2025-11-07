@@ -151,7 +151,7 @@ static void generate_list(void)
     int mission_id = 1;
     int rank = info->starting_rank;
 
-    for (int item = 0, mission = 0; mission < missions_to_show; mission++, item++) {
+    for (unsigned int item = 0, mission = 0; mission < missions_to_show; mission++, item++) {
         int scenarios_on_last_mission = mission_info ? mission_info->total_scenarios : 0;
 
         mission_info = game_campaign_get_current_mission(current_scenario_id);
@@ -211,18 +211,18 @@ static void init(void)
     }
 }
 
-static void draw_scenario_selection_button(const campaign_scenario *scenario, int x_offset, int y_offset, float scale)
+static void draw_scenario_selection_button(const campaign_scenario *camp_scenario, int x_offset, int y_offset, float scale)
 {
-    if (!scenario) {
+    if (!camp_scenario) {
         return;
     }
 
-    if (scenario->x == 0 && scenario->y == 0) {
+    if (camp_scenario->x == 0 && camp_scenario->y == 0) {
         return;
     }
 
     image_draw(image_group(GROUP_SELECT_MISSION_BUTTON),
-        x_offset * scale + scenario->x, y_offset * scale + scenario->y, COLOR_MASK_NONE, scale);
+        x_offset * scale + camp_scenario->x, y_offset * scale + camp_scenario->y, COLOR_MASK_NONE, scale);
 }
 
 static int draw_mission_selection_map(void)
@@ -383,7 +383,7 @@ static void draw_foreground(void)
 {
     graphics_in_dialog();
     list_box_draw(&list_box);
-    for (int i = 0; i < NUM_BOTTOM_BUTTONS; i++) {
+    for (unsigned int i = 0; i < NUM_BOTTOM_BUTTONS; i++) {
         button_border_draw(bottom_buttons[i].x, bottom_buttons[i].y, bottom_buttons[i].width, bottom_buttons[i].height,
             data.bottom_button_focus_id == i + 1);
     }
@@ -483,7 +483,7 @@ static void item_tooltip(const list_box_item *item, tooltip_context *c)
     }
 
     static uint8_t text[300];
-    static int last_selection;
+    static unsigned int last_selection;
 
     if (last_selection != item->index + 1) {
         uint8_t *cursor = string_copy(lang_get_string(CUSTOM_TRANSLATION, TR_SAVE_DIALOG_MISSION), text, 300);

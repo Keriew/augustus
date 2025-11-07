@@ -5,8 +5,8 @@
 #include "building/dock.h"
 #include "building/granary.h"
 #include "building/lighthouse.h"
-#include "building/model.h"
 #include "building/monument.h"
+#include "building/properties.h"
 #include "building/warehouse.h"
 #include "building/storage.h"
 #include "city/buildings.h"
@@ -360,10 +360,11 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
         for (building *b = building_first_of_type(building_types[t]); b; b = b->next_of_type) {
             // Skip buildings
             if (b->state != BUILDING_STATE_IN_USE || b->has_plague || !b->has_road_access
-            || (figure_visited_building_in_list(f->last_visited_index, b->id)) || b->id == f->destination_building_id ||
+            || (figure_visited_building_in_list(f->last_visited_index, b->id)) || b->id == (unsigned int) f->destination_building_id ||
             !building_storage_get_permission(permissions, b)) {
                 continue; // Not active, infected, unreachable by road, recently visited, currenty at, not accepted
             }
+
             int sell_score = 0; // Score for how many units the trader can sell to this building
             int buy_score = 0;  // Score for how many units the trader can buy from this building
             // Loop through all resource types
@@ -745,7 +746,7 @@ static int trade_dock_ignoring_ship(figure *f)
 {
     building *b = building_get(f->destination_building_id);
     if (b->state == BUILDING_STATE_IN_USE && b->type == BUILDING_DOCK && b->num_workers > 0 &&
-        b->data.dock.trade_ship_id == f->id) {
+        (unsigned int) b->data.dock.trade_ship_id == f->id) {
         for (int i = 0; i < 3; i++) {
             if (b->data.distribution.cartpusher_ids[i]) {
                 figure *docker = figure_get(b->data.distribution.cartpusher_ids[i]);
@@ -767,7 +768,7 @@ static int trade_dock_ignoring_ship(figure *f)
 static int record_dock(figure *ship, int dock_id)
 {
     building *dock = building_get(dock_id);
-    if (dock->data.dock.trade_ship_id != 0 && dock->data.dock.trade_ship_id != ship->id) {
+    if (dock->data.dock.trade_ship_id != 0 && (unsigned int) dock->data.dock.trade_ship_id != ship->id) {
         return 0;
     }
     ship->last_visited_index = figure_visited_buildings_add(ship->last_visited_index, dock_id);
@@ -930,7 +931,7 @@ void figure_trade_ship_action(figure *f)
                 !building_dock_accepts_ship(f->id, f->destination_building_id) ||
                 trade_dock_ignoring_ship(f)) {
                 building *dock = building_get(f->destination_building_id);
-                if (dock->data.dock.trade_ship_id == f->id) {
+                if ((unsigned int) dock->data.dock.trade_ship_id == f->id) {
                     dock->data.dock.trade_ship_id = 0;
                 }
                 map_point tile;
@@ -1073,7 +1074,7 @@ int figure_trader_ship_can_queue_for_export(figure *ship)
     return 1;
 }
 
-int figure_trader_ship_get_distance_to_dock(const figure *ship, int dock_id)
+int figure_trader_ship_get_distance_to_dock(const figure *ship, unsigned int dock_id)
 {
     if (ship->destination_building_id == dock_id) {
         return ship->routing_path_length - ship->routing_path_current_tile;
@@ -1087,7 +1088,7 @@ int figure_trader_ship_get_distance_to_dock(const figure *ship, int dock_id)
     return path_length;
 }
 
-int figure_trader_ship_other_ship_closer_to_dock(int dock_id, int distance)
+int figure_trader_ship_other_ship_closer_to_dock(unsigned int dock_id, int distance)
 {
     for (int route_id = 0; route_id < 20; route_id++) {
         if (empire_object_is_sea_trade_route(route_id) && empire_city_is_trade_route_open(route_id)) {

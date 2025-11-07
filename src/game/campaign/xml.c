@@ -136,7 +136,7 @@ static const char *create_full_regular_path(const char *path, const char *file)
         free(full_path);
         return 0;
     }
-    return full_path; 
+    return full_path;
 }
 
 static int xml_start_mission(void)
@@ -153,7 +153,7 @@ static int xml_start_mission(void)
     data.info->number_of_missions++;
     data.current_mission->title = copy_string_from_xml(xml_parser_get_attribute_string("title"));
     const char *background_image = xml_parser_get_attribute_string("background_image");
-    if (background_image) {        
+    if (background_image) {
         data.current_mission->background_image.path = create_full_campaign_path("image", background_image);
     }
     const char *intro_video = xml_parser_get_attribute_string("video");
@@ -185,16 +185,16 @@ static int xml_start_scenario(void)
     if (!data.success) {
         return 0;
     }
-    campaign_scenario *scenario = campaign_mission_new_scenario();
-    if (!scenario) {
+    campaign_scenario *camp_scenario = campaign_mission_new_scenario();
+    if (!camp_scenario) {
         log_error("Problem parsing campaign file - memory full", 0, 0);
         data.success = 0;
         return 0;
     }
-    scenario->x = xml_parser_get_attribute_int("x");
-    scenario->y = xml_parser_get_attribute_int("y");
-    scenario->name = copy_string_from_xml(xml_parser_get_attribute_string("name"));
-    scenario->description = copy_string_from_xml(xml_parser_get_attribute_string("description"));
+    camp_scenario->x = xml_parser_get_attribute_int("x");
+    camp_scenario->y = xml_parser_get_attribute_int("y");
+    camp_scenario->name = copy_string_from_xml(xml_parser_get_attribute_string("name"));
+    camp_scenario->description = copy_string_from_xml(xml_parser_get_attribute_string("description"));
     if (xml_parser_has_attribute("fanfare")) {
         const char *fanfare = 0;
         int default_fanfare = xml_parser_get_attribute_enum("fanfare", FANFARE_TYPES, 3, 0);
@@ -204,12 +204,12 @@ static int xml_start_scenario(void)
             fanfare = xml_parser_get_attribute_string("fanfare");
         }
         if (fanfare) {
-            scenario->fanfare = create_full_campaign_path("audio", fanfare);
-            if (!scenario->fanfare) {
+            camp_scenario->fanfare = create_full_campaign_path("audio", fanfare);
+            if (!camp_scenario->fanfare) {
                 if (file_has_extension(fanfare, "wav")) {
-                    scenario->fanfare = create_full_regular_path("wavs", fanfare);
+                    camp_scenario->fanfare = create_full_regular_path("wavs", fanfare);
                 } else if (file_has_extension(fanfare, "mp3")) {
-                    scenario->fanfare = create_full_regular_path("mp3", fanfare);
+                    camp_scenario->fanfare = create_full_regular_path("mp3", fanfare);
                 }
             }
         }
@@ -222,8 +222,8 @@ static int xml_start_scenario(void)
         data.success = 0;
         return 0;
     }
-    scenario->path = create_full_campaign_path("scenario", scenario_path);
-    if (!scenario->path) {
+    camp_scenario->path = create_full_campaign_path("scenario", scenario_path);
+    if (!camp_scenario->path) {
         log_error("Problem parsing campaign file - scenario file does not exist", scenario_path, 0);
         // Files in directories are debug only - don't prevent opening them even if files are missing
         if (campaign_file_is_zip()) {
@@ -232,17 +232,17 @@ static int xml_start_scenario(void)
         }
     }
 
-    if (!scenario->name) {
+    if (!camp_scenario->name) {
         char name[FILE_NAME_MAX];
-        snprintf(name, FILE_NAME_MAX, "Scenario %d", scenario->id);
-        scenario->name = copy_string_from_xml(name);
-        if (!scenario->name) {
+        snprintf(name, FILE_NAME_MAX, "Scenario %d", camp_scenario->id);
+        camp_scenario->name = copy_string_from_xml(name);
+        if (!camp_scenario->name) {
             log_error("Problem parsing campaign file - memory full", 0, 0);
             data.success = 0;
             return 0;
         }
     }
-    data.current_mission->last_scenario = scenario->id;
+    data.current_mission->last_scenario = camp_scenario->id;
     return 1;
 }
 

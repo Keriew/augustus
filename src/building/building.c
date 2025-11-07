@@ -10,7 +10,6 @@
 #include "building/industry.h"
 #include "building/granary.h"
 #include "building/menu.h"
-#include "building/model.h"
 #include "building/monument.h"
 #include "building/properties.h"
 #include "building/rotation.h"
@@ -61,10 +60,11 @@ static struct {
     int unfixable_houses;
 } extra;
 
-building *building_get(int id)
+building *building_get(unsigned int id)
 {
     return array_item(data.buildings, id);
 }
+
 int building_can_repair_type(building_type type)
 {
     if (building_monument_is_limited(type) || type == BUILDING_AQUEDUCT || building_is_fort(type)) {
@@ -600,6 +600,12 @@ void building_update_state(void)
                 map_building_set_rubble_grid_building_id(b->grid_offset, 0, b->size);
             }
             // building_delete(b); // keep the rubbled building as a reference for reconstruction
+
+            // monuments clear
+            if (building_monument_is_limited(b->type) || building_monument_is_unfinished_monument(b)) {
+                building_delete(b);
+            }
+
         } else if (b->state == BUILDING_STATE_DELETED_BY_GAME) {
             building_delete(b);
         } else if (b->immigrant_figure_id) {
@@ -697,6 +703,46 @@ int building_is_primary_product_producer(building_type type)
 int building_is_house(building_type type)
 {
     return type >= BUILDING_HOUSE_VACANT_LOT && type <= BUILDING_HOUSE_LUXURY_PALACE;
+}
+
+int building_get_house_group(building_type type)
+{
+    switch (type) {
+        case BUILDING_HOUSE_SMALL_TENT:
+        case BUILDING_HOUSE_LARGE_TENT:
+            return HOUSE_GROUP_TENT;
+        case BUILDING_HOUSE_SMALL_SHACK:
+        case BUILDING_HOUSE_LARGE_SHACK:
+            return HOUSE_GROUP_SHACK;
+        case BUILDING_HOUSE_SMALL_HOVEL:
+        case BUILDING_HOUSE_LARGE_HOVEL:
+            return HOUSE_GROUP_HOVEL;
+        case BUILDING_HOUSE_SMALL_CASA:
+        case BUILDING_HOUSE_LARGE_CASA:
+            return HOUSE_GROUP_CASA;
+        case BUILDING_HOUSE_SMALL_INSULA:
+        case BUILDING_HOUSE_MEDIUM_INSULA:
+        case BUILDING_HOUSE_LARGE_INSULA:
+        case BUILDING_HOUSE_GRAND_INSULA:
+            return HOUSE_GROUP_INSULA;
+        case BUILDING_HOUSE_SMALL_VILLA:
+        case BUILDING_HOUSE_MEDIUM_VILLA:
+        case BUILDING_HOUSE_LARGE_VILLA:
+        case BUILDING_HOUSE_GRAND_VILLA:
+            return HOUSE_GROUP_VILLA;
+        case BUILDING_HOUSE_SMALL_PALACE:
+        case BUILDING_HOUSE_MEDIUM_PALACE:
+        case BUILDING_HOUSE_LARGE_PALACE:
+        case BUILDING_HOUSE_LUXURY_PALACE:
+            return HOUSE_GROUP_PALACE;
+        default:
+            return 0; // Not a house
+    }
+}
+
+int building_is_house_group(house_groups group, building_type type)
+{
+    return building_get_house_group(type) == group;
 }
 
 // For Venus GT base bonus

@@ -1,5 +1,6 @@
 #include "font.h"
 
+#include "assets/assets.h"
 #include "core/encoding_japanese.h"
 #include "core/encoding_trad_chinese.h"
 #include "core/image.h"
@@ -549,8 +550,29 @@ int font_can_display(const uint8_t *character)
     return font_letter_id(&data.font_definitions[FONT_NORMAL_BLACK], character, &dummy) >= 0;
 }
 
+static int font_character_beyond_mapping(const uint8_t *str)
+{
+    switch (str[0]) { //always passing 1st char only
+        case '[':
+            return IMAGE_FONT_CUSTOM_OFFSET + ASSET_FONT_SQ_BRACKET_LEFT;
+        case ']':
+            return IMAGE_FONT_CUSTOM_OFFSET + ASSET_FONT_SQ_BRACKET_RIGHT;
+        case '{':
+            return IMAGE_FONT_CUSTOM_OFFSET + ASSET_FONT_CRLY_BRACKET_LEFT;
+        case '}':
+            return IMAGE_FONT_CUSTOM_OFFSET + ASSET_FONT_CRLY_BRACKET_RIGHT;
+        default:
+            return -1;
+    }
+}
+
 int font_letter_id(const font_definition *def, const uint8_t *str, int *num_bytes)
 {
+    int custom_char_id = font_character_beyond_mapping(str);
+    if (custom_char_id > 0) { //instead of changing the basic mapping, intercept characters here
+        *num_bytes = 1;
+        return custom_char_id;
+    }
     if (data.multibyte != MULTIBYTE_NONE && *str >= 0x80) {
         *num_bytes = 2;
         if (data.multibyte == MULTIBYTE_TRADITIONAL_CHINESE) {

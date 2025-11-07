@@ -125,12 +125,12 @@ static void draw_background(void)
         text_draw(data.mission.title, 20, 410, FONT_LARGE_BLACK, 0);
     }
     if (data.choice) {
-        const campaign_scenario *scenario = data.mission.scenarios[data.choice - 1];
-        if (scenario->name) {
-            text_draw_multiline(scenario->name, 20, 440, 560, 0, FONT_NORMAL_BLACK, 0);
+        const campaign_scenario *camp_scenario = data.mission.scenarios[data.choice - 1];
+        if (camp_scenario->name) {
+            text_draw_multiline(camp_scenario->name, 20, 440, 560, 0, FONT_NORMAL_BLACK, 0);
         }
-        if (scenario->description) {
-            text_draw_multiline(scenario->description, 20, 456, 560, 0, FONT_NORMAL_BLACK, 0);
+        if (camp_scenario->description) {
+            text_draw_multiline(camp_scenario->description, 20, 456, 560, 0, FONT_NORMAL_BLACK, 0);
         }
     } else {
         lang_text_draw_multiline(144, 0, 20, 440, 560, FONT_NORMAL_BLACK);
@@ -154,8 +154,8 @@ static void draw_foreground(void)
     for (int i = 0; i < data.mission.total_scenarios; i++) {
         int offset = data.choice == i + 1 ? 2 : 0;
         offset = data.focus_button == i + 1 ? 1 : offset;
-        const campaign_scenario *scenario = data.mission.scenarios[i];
-        image_draw(image_id + offset, scenario->x, scenario->y, COLOR_MASK_NONE, SCALE_NONE);
+        const campaign_scenario *camp_scenario = data.mission.scenarios[i];
+        image_draw(image_id + offset, camp_scenario->x, camp_scenario->y, COLOR_MASK_NONE, SCALE_NONE);
     }
 
     graphics_reset_dialog();
@@ -167,8 +167,8 @@ static void handle_input(const mouse *m, const hotkeys *h)
 
     data.focus_button = 0;
     for (int i = 0; i < data.mission.total_scenarios; i++) {
-        const campaign_scenario *scenario = data.mission.scenarios[i];
-        if (is_mouse_hit(m_dialog, scenario->x, scenario->y, 44)) {
+        const campaign_scenario *camp_scenario = data.mission.scenarios[i];
+        if (is_mouse_hit(m_dialog, camp_scenario->x, camp_scenario->y, 44)) {
             data.focus_button = i + 1;
         }
     }
@@ -189,17 +189,17 @@ static void handle_input(const mouse *m, const hotkeys *h)
 
     if (m_dialog->left.went_up) {
         for (int i = 0; i < data.mission.total_scenarios; i++) {
-            const campaign_scenario *scenario = data.mission.scenarios[i];
-            if (is_mouse_hit(m_dialog, scenario->x, scenario->y, 44)) {
-                scenario_set_campaign_mission(scenario->id);
+            const campaign_scenario *camp_scenario = data.mission.scenarios[i];
+            if (is_mouse_hit(m_dialog, camp_scenario->x, camp_scenario->y, 44)) {
+                scenario_set_campaign_mission(camp_scenario->id);
                 data.choice = i + 1;
                 if (m_dialog->left.double_click) {
                     button_start(0, 0);
                     return;
                 }
                 window_invalidate();
-                if (scenario->fanfare) {
-                    sound_device_play_file_on_channel(scenario->fanfare, SOUND_TYPE_SPEECH,
+                if (camp_scenario->fanfare) {
+                    sound_device_play_file_on_channel(camp_scenario->fanfare, SOUND_TYPE_SPEECH,
                         setting_sound(SOUND_TYPE_SPEECH)->volume);
                 } else {
                     sound_speech_stop();

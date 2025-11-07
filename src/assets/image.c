@@ -345,7 +345,7 @@ static int load_image(asset_image *img, color_t **main_images, int *main_image_w
                 unload_image_layers(img);
                 return 0;
             }
-            memset(new_data, 0, sizeof(color_t) * (footprint_height + img->img.top->height) *img->img.width);
+            memset(new_data, 0, sizeof(color_t) * (footprint_height + img->img.top->height) * img->img.width);
             split_top_and_footprint(&img->img, new_data, pixels, img->img.height);
 
             img->img.height = footprint_height;
@@ -441,7 +441,7 @@ int asset_image_add_layer(asset_image *img,
     return 1;
 }
 
-asset_image *asset_image_get_from_id(int image_id)
+asset_image *asset_image_get_from_id(unsigned int image_id)
 {
     asset_image *last = array_last(data.asset_images);
     if (image_id < 0 || !last || image_id > last->index) {
@@ -500,7 +500,7 @@ int asset_image_load_all(color_t **main_images, int *main_image_widths)
     int max_width, max_height;
     graphics_renderer()->get_max_image_size(&max_width, &max_height);
     if (image_packer_init(&packer, data.asset_images.size + data.total_isometric_images,
-            max_width, max_height) != IMAGE_PACKER_OK) {
+        max_width, max_height) != IMAGE_PACKER_OK) {
         log_error("Failed to init image packer", 0, 0);
         return 0;
     }

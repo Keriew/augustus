@@ -4,6 +4,12 @@
 #include "core/buffer.h"
 #include "game/resource.h"
 
+typedef enum {
+    RESOURCE_BUYS = -1,
+    RESOURCE_SELLS = 1,
+    RESOURCE_NOT_TRADED = 0
+} city_resource_state;
+
 #define LEGACY_MAX_ROUTES 20
 
 int trade_route_init(void);

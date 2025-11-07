@@ -1383,6 +1383,9 @@ const image *image_get(int id)
 
 const image *image_letter(int letter_id)
 {
+    if (letter_id > IMAGE_FONT_CUSTOM_OFFSET) {
+        return assets_get_font_image(letter_id); // Custom font image intercept
+    }
     if (data.fonts_enabled == FULL_CHARSET_IN_FONT) {
         return &data.font[data.font_base_offset + letter_id];
     } else if (data.fonts_enabled == MULTIBYTE_IN_FONT && letter_id >= IMAGE_FONT_MULTIBYTE_OFFSET) {

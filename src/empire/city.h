@@ -7,6 +7,27 @@
 
 #define EMPIRE_CITY_MAX_TRADERS 3
 
+typedef enum {
+    EMPIRE_CITY_ICON_DEFAULT, // not specified
+    EMPIRE_CITY_ICON_CONSTRUCTION, //construction
+    EMPIRE_CITY_ICON_DISTANT_TOWN, //dis_town
+    EMPIRE_CITY_ICON_DISTANT_VILLAGE, //dis_village
+    EMPIRE_CITY_ICON_RESOURCE_FOOD, //res_food
+    EMPIRE_CITY_ICON_RESOURCE_GOODS, //res_goods
+    EMPIRE_CITY_ICON_TRADE_TOWN, // tr_town
+    EMPIRE_CITY_ICON_ROMAN_TOWN, // ro_town
+    EMPIRE_CITY_ICON_TRADE_VILLAGE, // tr_village
+    EMPIRE_CITY_ICON_ROMAN_VILLAGE, // ro_village
+    EMPIRE_CITY_ICON_ROMAN_CAPITAL, // ro_capital
+    EMPIRE_CITY_ICON_TRADE_SEA, // tr_sea
+    EMPIRE_CITY_ICON_TRADE_LAND, // tr_land
+    EMPIRE_CITY_ICON_OUR_CITY, // our_city
+    EMPIRE_CITY_ICON_TRADE_CITY, //tr_city
+    EMPIRE_CITY_ICON_ROMAN_CITY, //ro_city
+    EMPIRE_CITY_ICON_DISTANT_CITY, //dis_city
+    EMPIRE_CITY_ICON_TOWER, // tower
+} empire_city_icon_type;
+
 typedef struct {
     int in_use;
     empire_city_type type;
@@ -54,6 +75,10 @@ int empire_city_get_for_object(int empire_object_id);
 
 int empire_city_get_for_trade_route(int route_id);
 
+int empire_city_buys_resource(int city_id, int resource);
+
+int empire_city_sells_resource(int city_id, int resource);
+
 int empire_city_get_trade_routes_count(int is_sea_trade, int is_route_open);
 
 int empire_city_is_trade_route_open(int route_id);
@@ -100,5 +125,7 @@ void empire_city_update_trading_data(int empire_id);
 void empire_city_load_state(buffer *buf, int version);
 
 int empire_city_get_array_size(void);
+
+int empire_city_get_icon_image_id(empire_city_icon_type type);
 
 #endif // EMPIRE_CITY_H

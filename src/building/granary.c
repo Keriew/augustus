@@ -1,7 +1,7 @@
 #include "granary.h"
 
 #include "building/destruction.h"
-#include "building/model.h"
+#include "building/properties.h"
 #include "building/storage.h"
 #include "building/warehouse.h"
 #include "city/finance.h"
@@ -61,6 +61,7 @@ int building_granary_add_import(building *granary, int resource, int amount, int
     }
     building_storage_permission_states permission;
     switch (land_trader) {
+        default:
         case 0: // sea trader
             permission = BUILDING_STORAGE_PERMISSION_DOCK;
             break;
@@ -92,6 +93,7 @@ int building_granary_remove_export(building *granary, int resource, int amount, 
     }
     building_storage_permission_states permission;
     switch (land_trader) {
+        default:
         case 0: // sea trader
             permission = BUILDING_STORAGE_PERMISSION_DOCK;
             break;

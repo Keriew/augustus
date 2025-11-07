@@ -4,6 +4,8 @@
 #include "core/calc.h"
 #include "core/image.h"
 #include "core/log.h"
+#include "core/random.h"
+#include "core/string.h"
 #include "empire/city.h"
 #include "empire/trade_route.h"
 #include "empire/type.h"
@@ -19,7 +21,7 @@
 #define LEGACY_EMPIRE_OBJECTS 200
 
 static array(full_empire_object) objects;
-
+empire_city_icon_type empire_object_get_random_icon_for_empire_object(full_empire_object *full_obj);
 static void fix_image_ids(void)
 {
     int image_id = 0;
@@ -200,6 +202,13 @@ void empire_object_load(buffer *buf, int version)
         if (version > SCENARIO_LAST_UNVERSIONED) {
             buffer_read_raw(buf, full->city_custom_name, sizeof(full->city_custom_name));
         }
+        if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
+            obj->empire_city_icon = buffer_read_u8(buf);
+            full->empire_city_icon = buffer_read_u8(buf);
+        } else {
+            obj->empire_city_icon = empire_object_get_random_icon_for_empire_object(full);
+            full->empire_city_icon = empire_object_get_random_icon_for_empire_object(full);
+        }
     }
     objects.size = highest_id_in_use + 1;
     fix_image_ids();
@@ -215,8 +224,8 @@ void empire_object_save(buffer *buf)
         buffer_write_i32(buf, 0);
         return;
     }
-    int size_per_obj = 78;
-    int size_per_city = 138 + 4 * (RESOURCE_MAX - RESOURCE_MAX_LEGACY);
+    int size_per_obj = 80; // +2 bytes for empire_city_icon fields
+    int size_per_city = 140 + 4 * (RESOURCE_MAX - RESOURCE_MAX_LEGACY); // +2 bytes for empire_city_icon fields
     int total_size = 0;
 
     full_empire_object *full;
@@ -267,6 +276,8 @@ void empire_object_save(buffer *buf)
         buffer_write_u8(buf, obj->invasion_path_id);
         buffer_write_u8(buf, obj->invasion_years);
         buffer_write_raw(buf, full->city_custom_name, sizeof(full->city_custom_name));
+        buffer_write_u8(buf, obj->empire_city_icon);
+        buffer_write_u8(buf, full->empire_city_icon);
     }
 }
 
@@ -598,4 +609,94 @@ static int get_animation_offset(int image_id, int current_index)
 int empire_object_update_animation(const empire_object *obj, int image_id)
 {
     return array_item(objects, obj->id)->obj.animation_index = get_animation_offset(image_id, obj->animation_index);
+}
+
+static int is_name_rome(const uint8_t *name)
+{
+    if (strcmp((const char *) name, "Rome") == 0 || strcmp((const char *) name, "Roma") == 0 ||
+        strcmp((const char *) name, "Rom") == 0 || strcmp((const char *) name, "Rzym") == 0 ||
+        strcmp((const char *) name, "Рим") == 0) {
+        return 1;
+    }
+    return 0;
+}
+empire_city_icon_type empire_object_get_random_icon_for_empire_object(full_empire_object *full_obj)
+{
+    if (full_obj->obj.type != EMPIRE_OBJECT_CITY) {
+        return EMPIRE_CITY_ICON_DEFAULT; //early return for non-city objects
+    }
+    static const empire_city_icon_type alloc_our_town[] = { // our town
+        EMPIRE_CITY_ICON_OUR_CITY,
+    };
+    static const empire_city_icon_type alloc_trade_sea[] = { // sea trade
+        EMPIRE_CITY_ICON_RESOURCE_FOOD,
+        EMPIRE_CITY_ICON_RESOURCE_GOODS,
+        EMPIRE_CITY_ICON_TRADE_TOWN,
+        EMPIRE_CITY_ICON_TRADE_VILLAGE,
+        EMPIRE_CITY_ICON_TRADE_SEA,
+        EMPIRE_CITY_ICON_TRADE_CITY,
+    };
+    static const empire_city_icon_type alloc_trade_land[] = { // land trade
+        EMPIRE_CITY_ICON_RESOURCE_FOOD,
+        EMPIRE_CITY_ICON_RESOURCE_GOODS,
+        EMPIRE_CITY_ICON_TRADE_TOWN,
+        EMPIRE_CITY_ICON_TRADE_VILLAGE,
+        EMPIRE_CITY_ICON_TRADE_LAND,
+        EMPIRE_CITY_ICON_TRADE_CITY,
+    };
+    static const empire_city_icon_type alloc_roman_town[] = { // all other roman
+        EMPIRE_CITY_ICON_ROMAN_TOWN,
+        EMPIRE_CITY_ICON_ROMAN_VILLAGE,
+        EMPIRE_CITY_ICON_ROMAN_CITY,
+    };
+    static const empire_city_icon_type alloc_rome[] = { // rome
+        EMPIRE_CITY_ICON_ROMAN_CAPITAL,
+    };
+    static const empire_city_icon_type alloc_far_away_town[] = { // foreign
+        EMPIRE_CITY_ICON_DISTANT_TOWN,
+        EMPIRE_CITY_ICON_DISTANT_VILLAGE,
+        EMPIRE_CITY_ICON_DISTANT_CITY,
+    };
+    static const empire_city_icon_type alloc_future_trade[] = { // future trade
+        EMPIRE_CITY_ICON_CONSTRUCTION,
+        EMPIRE_CITY_ICON_DISTANT_CITY,
+    };
+
+    int array_size = 0;
+    static const empire_city_icon_type *random_array;
+    const uint8_t *cityname = NULL;
+
+    if (full_obj->city_name_id) {
+        cityname = lang_get_string(21, full_obj->city_name_id);
+    } else if (full_obj->city_custom_name[0] != 0) {
+        cityname = full_obj->city_custom_name;
+    } // fetch name
+
+    if (is_name_rome(cityname)) { // Rome
+        array_size = sizeof(alloc_rome) / sizeof(empire_city_icon_type);
+        random_array = alloc_rome;
+    } else if (full_obj->city_type == EMPIRE_CITY_OURS) { // our town
+        array_size = sizeof(alloc_our_town) / sizeof(empire_city_icon_type);
+        random_array = alloc_our_town;
+    } else if (full_obj->city_type == EMPIRE_CITY_TRADE) { // trade town
+        int is_sea = empire_city_is_trade_route_sea(full_obj->obj.trade_route_id);
+        if (is_sea) {
+            array_size = sizeof(alloc_trade_sea) / sizeof(empire_city_icon_type); // sea
+            random_array = alloc_trade_sea;
+        } else {
+            array_size = sizeof(alloc_trade_land) / sizeof(empire_city_icon_type); // land
+            random_array = alloc_trade_land;
+        }
+    } else if (full_obj->city_type == EMPIRE_CITY_FUTURE_ROMAN || full_obj->city_type == EMPIRE_CITY_DISTANT_FOREIGN) {
+        array_size = sizeof(alloc_far_away_town) / sizeof(empire_city_icon_type); // foreign
+        random_array = alloc_far_away_town;
+    } else if (full_obj->city_type == EMPIRE_CITY_FUTURE_TRADE) { // future trade
+        array_size = sizeof(alloc_future_trade) / sizeof(empire_city_icon_type);
+        random_array = alloc_future_trade;
+    } else { // all other roman
+        array_size = sizeof(alloc_roman_town) / sizeof(empire_city_icon_type);
+        random_array = alloc_roman_town;
+    }
+    empire_city_icon_type random_icon = random_array[random_between_from_stdlib(0, array_size)];
+    return random_icon;
 }

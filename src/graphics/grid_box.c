@@ -161,7 +161,7 @@ void grid_box_draw(grid_box_type *grid_box)
     }
 }
 
-void grid_box_set_bounds(grid_box_type *grid_box, int new_x, int new_y, int new_width, int new_height)
+void grid_box_set_bounds(grid_box_type *grid_box, int new_x, int new_y, unsigned int new_width, unsigned int new_height)
 {
     //Compare against the existing values, if no change, do nothing
     if (new_x != grid_box->x
@@ -217,8 +217,8 @@ static int determine_focus(grid_box_type *grid_box, int x, int y)
     unsigned int inner_padding = grid_box->draw_inner_panel ? BLOCK_SIZE / 2 : 0;
     unsigned int width = get_usable_width(grid_box);
     unsigned int old_index = grid_box->focused_item.index;
-    if (x < grid_box->x + inner_padding || x >= grid_box->x + width - inner_padding ||
-        y < grid_box->y + inner_padding || y >= grid_box->y + grid_box->height - inner_padding) {
+    if (x < (int) (grid_box->x + inner_padding) || x >= (int) (grid_box->x + width - inner_padding) ||
+        y < (int) (grid_box->y + inner_padding) || y >= (int) (grid_box->y + grid_box->height - inner_padding)) {
         grid_box->focused_item.index = NO_POSITION;
         grid_box->focused_item.is_focused = 0;
         return old_index != NO_POSITION;
@@ -249,9 +249,9 @@ static int determine_focus(grid_box_type *grid_box, int x, int y)
     mouse_x %= item_width;
     mouse_y %= grid_box->item_height;
 
-    if (mouse_x < grid_box->item_margin.horizontal / 2 ||
+    if (mouse_x < (unsigned int) grid_box->item_margin.horizontal / 2 ||
         mouse_x >= item_width - grid_box->item_margin.horizontal + grid_box->item_margin.horizontal / 2 ||
-        mouse_y < grid_box->item_margin.vertical / 2 ||
+        mouse_y < (unsigned int) grid_box->item_margin.vertical / 2 ||
         mouse_y >= grid_box->item_height - grid_box->item_margin.vertical + grid_box->item_margin.vertical / 2) {
         grid_box->focused_item.index = NO_POSITION;
         grid_box->focused_item.is_focused = 0;

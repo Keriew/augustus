@@ -7,7 +7,7 @@
 
 typedef struct {
     int needed;
-    int building_id;
+    unsigned int building_id;
     int min_distance;
 } resource_storage_info;
 

@@ -41,7 +41,7 @@ static image_button buttons_build[] = {
     {13, 339, 39, 26, IB_NORMAL, GROUP_EDITOR_SIDEBAR_BUTTONS, 18, button_build_tool, button_none, TOOL_MEADOW, 0, 1},
     {63, 339, 39, 26, IB_NORMAL, GROUP_EDITOR_SIDEBAR_BUTTONS, 30, button_build_tool, button_none, TOOL_ROAD, 0, 1},
     {113, 339, 39, 26, IB_BUILD, GROUP_EDITOR_SIDEBAR_BUTTONS, 24, button_build_menu, button_none, MENU_BRUSH_SIZE, 0, 1},
-    {13, 375, 39, 26, IB_NORMAL, GROUP_EDITOR_SIDEBAR_BUTTONS, 9, button_build_tool, button_none, TOOL_EARTHQUAKE_POINT, 0, 1},
+    {13, 375, 39, 26, IB_NORMAL, GROUP_EDITOR_SIDEBAR_BUTTONS, 9, button_build_menu, button_none, MENU_EARTHQUAKE, 0, 1},
     {63, 375, 39, 26, IB_BUILD, GROUP_EDITOR_SIDEBAR_BUTTONS, 39, button_build_menu, button_none, MENU_INVASION_POINTS, 0, 1},
     {113, 375, 39, 26, IB_BUILD, GROUP_EDITOR_SIDEBAR_BUTTONS, 42, button_build_menu, button_none, MENU_PEOPLE_POINTS, 0, 1},
     {13, 411, 39, 26, IB_BUILD, GROUP_EDITOR_SIDEBAR_BUTTONS, 33, button_build_menu, button_none, MENU_RIVER_POINTS, 0, 1},
@@ -126,9 +126,11 @@ static void draw_status(void)
 
     if (scenario_editor_earthquake_severity() > 0) {
         map_point earthquake = scenario_editor_earthquake_point();
-        if (earthquake.x == -1 || earthquake.y == -1) {
+        if (scenario_editor_earthquake_severity() == EARTHQUAKE_CUSTOM) {
+            lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_EARTHQUAKE_CUSTOM_SET, text_offset, 269, FONT_NORMAL_GREEN);
+        } else if (earthquake.x == -1 || earthquake.y == -1) {
             lang_text_draw(44, 57, text_offset, 269, FONT_NORMAL_RED);
-        } else {
+        } else{
             lang_text_draw(44, 58, text_offset, 269, FONT_NORMAL_GREEN);
         }
     }

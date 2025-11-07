@@ -1,6 +1,7 @@
 #include "scenario_action_edit.h"
 
 #include "core/string.h"
+#include "editor/tool.h"
 #include "game/resource.h"
 #include "graphics/button.h"
 #include "graphics/generic_button.h"
@@ -11,8 +12,14 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
-#include "scenario/event/parameter_data.h"
+#include "map/grid.h"
 #include "scenario/event/action_handler.h"
+#include "scenario/event/controller.h"
+#include "scenario/event/formula.h"
+#include "scenario/event/parameter_data.h"
+#include "scenario/event/parameter_city.h"
+#include "widget/input_box.h"
+#include "widget/map_editor.h"
 #include "window/editor/allowed_buildings.h"
 #include "window/editor/custom_variables.h"
 #include "window/editor/map.h"
@@ -24,6 +31,7 @@
 #include "window/editor/select_special_attribute_mapping.h"
 #include "window/numeric_input.h"
 #include "window/select_list.h"
+#include "window/text_input.h"
 
 #define BUTTON_LEFT_PADDING 32
 #define BUTTON_WIDTH 608
@@ -60,7 +68,11 @@ static struct {
     int parameter_being_edited_current_value;
 
     uint8_t display_text[MAX_TEXT_LENGTH];
-
+    uint8_t formula[MAX_FORMULA_LENGTH];
+    uint8_t route_resource_name[MAX_TEXT_LENGTH];
+    int formula_min_limit;
+    int formula_max_limit;
+    unsigned int formula_index;
     scenario_action_t *action;
     scenario_action_data_t *xml_info;
 } data;
@@ -75,6 +87,39 @@ static uint8_t *translation_for_param_value(parameter_type type, int value)
 static void init(scenario_action_t *action)
 {
     data.action = action;
+    memset(data.formula, 0, MAX_TEXT_LENGTH);
+    data.formula_index = 0;  // Reset formula index when switching actions
+    data.parameter_being_edited = 0;
+    data.parameter_being_edited_current_value = 0;
+}
+
+static parameter_type get_resolved_parameter_type(xml_data_attribute_t *param_attr, int param_number)
+{
+    // If the parameter is not flexible, return its type directly
+    if (param_attr->type != PARAMETER_TYPE_FLEXIBLE) {
+        return param_attr->type;
+    }
+
+    // Resolve the flexible type based on the action context
+    return scenario_events_parameter_data_resolve_flexible_type(data.action, param_number);
+}
+
+static translation_key get_resolved_parameter_key(xml_data_attribute_t *param_attr, int param_number)
+{
+    if (param_attr->type != PARAMETER_TYPE_FLEXIBLE) {
+        return param_attr->key;
+    }
+    // For flexible parameters in city property actions, get the key from city_property_info_t
+    if (data.action->type == ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY && param_number >= 3 && param_number <= 5) {
+        city_property_t city_property = data.action->parameter2;
+        city_property_info_t info = city_property_get_param_info(city_property);
+        int param_index = param_number - 3;
+        if (param_index < info.count) {// Return the translation key if this parameter is needed
+            return info.param_keys[param_index];
+        }
+    }
+    // Fallback to the original key if resolution fails
+    return param_attr->key;
 }
 
 static void draw_background(void)
@@ -98,61 +143,66 @@ static void draw_foreground(void)
     text_draw_centered(translation_for(data.xml_info->xml_attr.key), 32, 72, BUTTON_WIDTH, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
 
     unsigned int button_id = 0;
-    if (data.xml_info->xml_parm1.type > PARAMETER_TYPE_UNDEFINED) {
+    parameter_type resolved_type1 = get_resolved_parameter_type(&data.xml_info->xml_parm1, 1);
+    if (resolved_type1 > PARAMETER_TYPE_UNDEFINED) {
         large_label_draw(buttons[button_id].x, buttons[button_id].y, buttons[button_id].width / 16,
             data.focus_button_id == button_id + 1 ? 1 : 0);
         text_draw_centered(translation_for(data.xml_info->xml_parm1.key),
             buttons[button_id].x, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
-        text_draw_centered(translation_for_param_value(data.xml_info->xml_parm1.type, data.action->parameter1),
+        text_draw_centered(translation_for_param_value(resolved_type1, data.action->parameter1),
             buttons[button_id].x + BUTTON_WIDTH / 2, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     }
     button_id++;
 
-    if (data.xml_info->xml_parm2.type > PARAMETER_TYPE_UNDEFINED) {
+    parameter_type resolved_type2 = get_resolved_parameter_type(&data.xml_info->xml_parm2, 2);
+    if (resolved_type2 > PARAMETER_TYPE_UNDEFINED) {
         large_label_draw(buttons[button_id].x, buttons[button_id].y, buttons[button_id].width / 16,
             data.focus_button_id == button_id + 1 ? 1 : 0);
         text_draw_centered(translation_for(data.xml_info->xml_parm2.key),
             buttons[button_id].x, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
-        text_draw_centered(translation_for_param_value(data.xml_info->xml_parm2.type, data.action->parameter2),
+        text_draw_centered(translation_for_param_value(resolved_type2, data.action->parameter2),
             buttons[button_id].x + BUTTON_WIDTH / 2, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     }
     button_id++;
 
-    if (data.xml_info->xml_parm3.type > PARAMETER_TYPE_UNDEFINED) {
+    parameter_type resolved_type3 = get_resolved_parameter_type(&data.xml_info->xml_parm3, 3);
+    if (resolved_type3 > PARAMETER_TYPE_UNDEFINED) {
         large_label_draw(buttons[button_id].x, buttons[button_id].y, buttons[button_id].width / 16,
             data.focus_button_id == button_id + 1 ? 1 : 0);
-        text_draw_centered(translation_for(data.xml_info->xml_parm3.key),
+        text_draw_centered(translation_for(get_resolved_parameter_key(&data.xml_info->xml_parm3, 3)),
             buttons[button_id].x, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
-        text_draw_centered(translation_for_param_value(data.xml_info->xml_parm3.type, data.action->parameter3),
+        text_draw_centered(translation_for_param_value(resolved_type3, data.action->parameter3),
             buttons[button_id].x + BUTTON_WIDTH / 2, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     }
     button_id++;
 
-    if (data.xml_info->xml_parm4.type > PARAMETER_TYPE_UNDEFINED) {
+    parameter_type resolved_type4 = get_resolved_parameter_type(&data.xml_info->xml_parm4, 4);
+    if (resolved_type4 > PARAMETER_TYPE_UNDEFINED) {
         large_label_draw(buttons[button_id].x, buttons[button_id].y, buttons[button_id].width / 16,
             data.focus_button_id == button_id + 1 ? 1 : 0);
-        text_draw_centered(translation_for(data.xml_info->xml_parm4.key),
+        text_draw_centered(translation_for(get_resolved_parameter_key(&data.xml_info->xml_parm4, 4)),
             buttons[button_id].x, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
-        text_draw_centered(translation_for_param_value(data.xml_info->xml_parm4.type, data.action->parameter4),
+        text_draw_centered(translation_for_param_value(resolved_type4, data.action->parameter4),
             buttons[button_id].x + BUTTON_WIDTH / 2, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     }
     button_id++;
 
-    if (data.xml_info->xml_parm5.type > PARAMETER_TYPE_UNDEFINED) {
+    parameter_type resolved_type5 = get_resolved_parameter_type(&data.xml_info->xml_parm5, 5);
+    if (resolved_type5 > PARAMETER_TYPE_UNDEFINED) {
         large_label_draw(buttons[button_id].x, buttons[button_id].y, buttons[button_id].width / 16,
             data.focus_button_id == button_id + 1 ? 1 : 0);
-        text_draw_centered(translation_for(data.xml_info->xml_parm5.key),
+        text_draw_centered(translation_for(get_resolved_parameter_key(&data.xml_info->xml_parm5, 5)),
             buttons[button_id].x, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
-        text_draw_centered(translation_for_param_value(data.xml_info->xml_parm5.type, data.action->parameter5),
+        text_draw_centered(translation_for_param_value(resolved_type5, data.action->parameter5),
             buttons[button_id].x + BUTTON_WIDTH / 2, buttons[button_id].y + 8, buttons[button_id].width / 2,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     }
@@ -164,7 +214,6 @@ static void draw_foreground(void)
 
 static void close_window(void)
 {
-    scenario_action_type_init(data.action);
     window_go_back();
 }
 
@@ -192,12 +241,37 @@ static void button_change_type(const generic_button *button)
 
 static void button_amount(const generic_button *button)
 {
+    // For flexible parameters, we need to resolve their actual types
+    xml_data_attribute_t resolved_param;
+    xml_data_attribute_t *param_ptr;
+
     switch (button->parameter1) {
-        case 1: change_parameter(&data.xml_info->xml_parm1, button); break;
-        case 2: change_parameter(&data.xml_info->xml_parm2, button); break;
-        case 3: change_parameter(&data.xml_info->xml_parm3, button); break;
-        case 4: change_parameter(&data.xml_info->xml_parm4, button); break;
-        case 5: change_parameter(&data.xml_info->xml_parm5, button); break;
+        case 1:
+            param_ptr = &data.xml_info->xml_parm1;
+            break;
+        case 2:
+            param_ptr = &data.xml_info->xml_parm2;
+            break;
+        case 3:
+            param_ptr = &data.xml_info->xml_parm3;
+            break;
+        case 4:
+            param_ptr = &data.xml_info->xml_parm4;
+            break;
+        case 5:
+            param_ptr = &data.xml_info->xml_parm5;
+            break;
+        default:
+            return;
+    }
+
+    // If it's a flexible type, create a resolved copy
+    if (param_ptr->type == PARAMETER_TYPE_FLEXIBLE) {
+        resolved_param = *param_ptr;
+        resolved_param.type = scenario_events_parameter_data_resolve_flexible_type(data.action, button->parameter1);
+        change_parameter(&resolved_param, button);
+    } else {
+        change_parameter(param_ptr, button);
     }
 }
 
@@ -209,6 +283,27 @@ static void set_param_value(int value)
             return;
         case 2:
             data.action->parameter2 = value;
+            // For ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY, when parameter2 (city_property) changes,
+            // we need to reset parameters 3-5 to their default values based on the newly resolved flexible types
+            if (data.action->type == ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY) {
+                // Reset parameters 3-5 using the resolved flexible types
+                xml_data_attribute_t resolved_param;
+
+                // Parameter 3
+                resolved_param = data.xml_info->xml_parm3;
+                resolved_param.type = scenario_events_parameter_data_resolve_flexible_type(data.action, 3);
+                data.action->parameter3 = scenario_events_parameter_data_get_default_value_for_parameter(&resolved_param);
+
+                // Parameter 4
+                resolved_param = data.xml_info->xml_parm4;
+                resolved_param.type = scenario_events_parameter_data_resolve_flexible_type(data.action, 4);
+                data.action->parameter4 = scenario_events_parameter_data_get_default_value_for_parameter(&resolved_param);
+
+                // Parameter 5
+                resolved_param = data.xml_info->xml_parm5;
+                resolved_param.type = scenario_events_parameter_data_resolve_flexible_type(data.action, 5);
+                data.action->parameter5 = scenario_events_parameter_data_get_default_value_for_parameter(&resolved_param);
+            }
             return;
         case 3:
             data.action->parameter3 = value;
@@ -222,6 +317,12 @@ static void set_param_value(int value)
         default:
             return;
     }
+}
+
+static void set_parameter_route_resource(int value, const uint8_t *name)
+{
+    string_copy(name, data.route_resource_name, MAX_TEXT_LENGTH);
+    set_param_value(value);
 }
 
 static void set_parameter_being_edited(int value)
@@ -309,6 +410,65 @@ static void set_param_custom_variable(unsigned int id)
     }
 }
 
+static int get_param_value(void)
+{
+    switch (data.parameter_being_edited) {
+        case 1:
+            return data.action->parameter1;
+        case 2:
+            return data.action->parameter2;
+        case 3:
+            return data.action->parameter3;
+        case 4:
+            return data.action->parameter4;
+        case 5:
+            return data.action->parameter5;
+        default:
+            return -1;
+    }
+}
+
+static void set_formula_value(const uint8_t *formula)
+{
+    strncpy((char *) data.formula, (const char *) formula, MAX_FORMULA_LENGTH - 1);
+    data.formula[MAX_FORMULA_LENGTH - 1] = 0;
+    // Add formula to list and get its index
+    if (!data.formula_index) {
+        data.formula_index = scenario_formula_add(data.formula, data.formula_min_limit, data.formula_max_limit);
+        set_param_value(data.formula_index);
+    } else {
+        // Update existing formula
+        scenario_formula_change(data.formula_index, data.formula, data.formula_min_limit, data.formula_max_limit);
+        set_param_value(data.formula_index);
+    }
+    window_invalidate();
+}
+
+static void create_evaluation_formula(xml_data_attribute_t *parameter)
+{
+    int current_index = get_param_value();
+    data.formula_min_limit = parameter->min_limit;
+    data.formula_max_limit = parameter->max_limit;
+    if (current_index > 0) { // a formula already exists
+        const uint8_t *src = scenario_formula_get_string((unsigned int) current_index);
+        if (src) {
+            if (!scenario_event_formula_is_error((unsigned int) current_index)) {
+                strncpy((char *) data.formula, (const char *) src, MAX_FORMULA_LENGTH - 1);
+                data.formula[MAX_FORMULA_LENGTH - 1] = '\0';
+                data.formula_index = current_index;
+            }
+        } else {
+            memset(data.formula, 0, MAX_FORMULA_LENGTH);
+            data.formula_index = 0;  // Reset if formula not found
+        }
+    } else {
+        memset(data.formula, 0, MAX_FORMULA_LENGTH); //clear if not assigned to prevent last formula from peeking through
+        data.formula_index = 0;  // Reset formula index for new formulas
+    }
+    window_text_input_expanded_show(string_from_ascii("FORMULA"), string_from_ascii("..."), data.formula, MAX_FORMULA_LENGTH,
+         set_formula_value, INPUT_BOX_CHARS_FORMULAS);
+}
+
 static void custom_variable_selection(void)
 {
     window_editor_custom_variables_show(set_param_custom_variable);
@@ -337,6 +497,41 @@ static void set_param_allowed_building(int type)
     }
 }
 
+static void on_grid_slice_selected(grid_slice *selection)
+{
+    if (!selection || selection->size == 0) {
+        // User cancelled or invalid selection
+        editor_tool_clear_selection_callback();
+        window_go_back();
+        return;
+    }
+    // Get the start and end grid offsets (opposite corners of the rectangle)
+    int start_offset = 0;
+    int end_offset = 0;
+    editor_tool_get_selection_offsets(&start_offset, &end_offset);
+
+    for (int i = 0; i < selection->size; i++) {
+        if (selection->grid_offsets[i]) {
+            widget_map_editor_add_draw_context_event_tile(selection->grid_offsets[i], data.action->parent_event_id);
+        }
+    }
+    data.action->parameter1 = start_offset;
+    data.action->parameter2 = end_offset;
+    scenario_events_fetch_event_tiles_to_editor();
+    editor_tool_clear_selection_callback();
+    window_go_back();
+}
+
+static void start_grid_slice_selection(void)
+{
+    // Set up the callback
+    editor_tool_set_selection_callback(on_grid_slice_selected);
+    // Activate the land selection tool
+    editor_tool_set_type(TOOL_SELECT_LAND);
+    // Switch to the editor map window to allow selection
+    window_editor_map_show();
+}
+
 static void change_parameter(xml_data_attribute_t *parameter, const generic_button *button)
 {
     set_parameter_being_edited(button->parameter1);
@@ -361,6 +556,16 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
         case PARAMETER_TYPE_GOD:
         case PARAMETER_TYPE_CLIMATE:
         case PARAMETER_TYPE_TERRAIN:
+        case PARAMETER_TYPE_DATA_TYPE:
+        case PARAMETER_TYPE_MODEL:
+        case PARAMETER_TYPE_CITY_PROPERTY:
+        case PARAMETER_TYPE_PERCENTAGE:
+        case PARAMETER_TYPE_HOUSING_TYPE:
+        case PARAMETER_TYPE_AGE_GROUP:
+        case PARAMETER_TYPE_PLAYER_TROOPS:
+        case PARAMETER_TYPE_ENEMY_CLASS:
+        case PARAMETER_TYPE_COVERAGE_BUILDINGS:
+        case PARAMETER_TYPE_RANK:
             window_editor_select_special_attribute_mapping_show(parameter->type, set_param_value, data.parameter_being_edited_current_value);
             return;
         case PARAMETER_TYPE_ALLOWED_BUILDING:
@@ -384,6 +589,18 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
         case PARAMETER_TYPE_CUSTOM_VARIABLE:
             custom_variable_selection();
             return;
+        case PARAMETER_TYPE_FORMULA:
+            create_evaluation_formula(parameter);
+            return;
+        case PARAMETER_TYPE_ROUTE_RESOURCE:
+            // Pass the route_id from parameter3 to the window
+            window_editor_select_city_resources_for_route_show(set_param_value, data.action->parameter3);
+            return;
+        case PARAMETER_TYPE_GRID_SLICE:
+        {
+            start_grid_slice_selection();
+            return;
+        }
         default:
             return;
     }

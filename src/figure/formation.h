@@ -137,7 +137,7 @@ typedef struct {
         int y_home;
     } prev;
 
-    int target_formation_id;
+    unsigned int target_formation_id;
 
 } formation;
 
@@ -153,7 +153,7 @@ int formation_create_enemy(figure_type type, int x, int y, int layout, int orien
 formation *formation_get(int formation_id);
 int formation_count(void);
 
-int formation_get_selected(void);
+unsigned int formation_get_selected(void);
 void formation_set_selected(int formation_id);
 
 int formation_update_halted_state(formation *m);
@@ -203,6 +203,7 @@ void formation_set_home(formation *m, int x, int y);
 void formation_retreat(formation *m);
 
 int formation_legion_count_alive_soldiers(int formation_id);
+int formation_legion_count_alive_soldiers_by_type(figure_type type);
 void formation_move_herds_away(int x, int y);
 
 void formation_calculate_figures(void);

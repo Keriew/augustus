@@ -26,8 +26,30 @@ typedef enum {
 	ASSET_UI_COPY_ICON,
 	ASSET_UI_PASTE_ICON,
 	ASSET_UI_ASCEPIUS,
+	ASSET_UI_EMP_ICON_1,
+	ASSET_UI_EMP_ICON_2,
+	ASSET_UI_EMP_ICON_3,
+	ASSET_UI_EMP_ICON_4,
+	ASSET_UI_EMP_ICON_5,
+	ASSET_UI_EMP_ICON_6,
+	ASSET_UI_EMP_ICON_7,
+	ASSET_UI_EMP_ICON_8,
+	ASSET_UI_EMP_ICON_9,
+	ASSET_UI_EMP_ICON_10,
+	ASSET_UI_EMP_ICON_11,
+	ASSET_UI_EMP_ICON_12,
+	ASSET_UI_EMP_ICON_OLD_WATCHTOWER,
 	ASSET_MAX_KEY
 } asset_id;
+
+typedef enum {
+	ASSET_FONT_NONE, // 14000 - equal to IMAGE_FONT_CUSTOM_OFFSET
+	ASSET_FONT_SQ_BRACKET_LEFT,
+	ASSET_FONT_SQ_BRACKET_RIGHT,
+	ASSET_FONT_CRLY_BRACKET_LEFT,
+	ASSET_FONT_CRLY_BRACKET_RIGHT,
+	ASSET_FONT_MAX_KEY
+} asset_font_id;
 
 void assets_init(int force_reload, color_t **main_images, int *main_image_widths);
 
@@ -42,6 +64,8 @@ int assets_get_external_image(const char *path, int force_reload);
 int assets_lookup_image_id(asset_id id);
 
 const image *assets_get_image(int image_id);
+
+const image *assets_get_font_image(int letter_id);
 
 void assets_load_unpacked_asset(int image_id);
 

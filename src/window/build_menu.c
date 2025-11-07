@@ -4,7 +4,7 @@
 #include "building/construction.h"
 #include "building/menu.h"
 #include "building/monument.h"
-#include "building/model.h"
+#include "building/properties.h"
 #include "building/rotation.h"
 #include "city/view.h"
 #include "city/warning.h"
@@ -306,6 +306,7 @@ static void draw_menu_buttons(void)
 static void draw_foreground(void)
 {
     window_city_draw();
+    window_city_draw_custom_variables_text_display();
     draw_menu_buttons();
 }
 

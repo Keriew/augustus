@@ -1,7 +1,7 @@
 #include "house.h"
 
 #include "building/building.h"
-#include "building/model.h"
+#include "building/properties.h"
 #include "city/constants.h"
 #include "city/finance.h"
 #include "city/sentiment.h"

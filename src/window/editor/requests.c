@@ -77,7 +77,7 @@ static void limit_and_sort_list(void)
 
 static void update_request_list(void)
 {
-    int current_requests = scenario_request_count_total();
+    unsigned int current_requests = scenario_request_count_total();
     if (current_requests != data.total_requests) {
         free(data.requests);
         data.requests = 0;

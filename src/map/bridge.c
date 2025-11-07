@@ -289,7 +289,7 @@ int map_bridge_find_start_and_direction(int grid_offset, int *axis, int *axis_di
     if (!b) return -1;
 
     int start = map_grid_offset(b->x, b->y);
-    int building_id = b->id;
+    unsigned int building_id = b->id;
 
     static const int dirs[4][2] = {
         {  0, -1 }, // north
@@ -333,7 +333,7 @@ void map_bridge_remove(int grid_offset, int mark_deleted)
         ? map_grid_delta(dir, 0)  // horizontal
         : map_grid_delta(0, dir); // vertical
 
-    int building_id = map_building_at(start);
+    unsigned int building_id = map_building_at(start);
     int current = start;
 
     int bridge_x_start = map_grid_offset_to_x(start);
@@ -376,7 +376,7 @@ int map_bridge_count_figures(int grid_offset)
         ? map_grid_delta(dir, 0)  // horizontal
         : map_grid_delta(0, dir); // vertical
 
-    int building_id = map_building_at(start);
+    unsigned int building_id = map_building_at(start);
     int current = start;
     int figures = 0;
     // find lower end of the bridge

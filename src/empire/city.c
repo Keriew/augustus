@@ -1,5 +1,6 @@
 #include "city.h"
 
+#include "assets/assets.h"
 #include "building/monument.h"
 #include "core/array.h"
 #include "core/calc.h"
@@ -258,11 +259,30 @@ int empire_city_get_for_trade_route(int route_id)
     return -1; //should this be 0 for consitency? I think -1 can cause overflow?
 }
 
-int empire_city_get_trade_routes_count(int is_sea_trade, int is_route_open){
+int empire_city_buys_resource(int city_id, int resource)
+{
+    empire_city *city = empire_city_get(city_id);
+    if (city && city->in_use) {
+        return city->buys_resource[resource];
+    }
+    return 0;
+}
+
+int empire_city_sells_resource(int city_id, int resource)
+{
+    empire_city *city = empire_city_get(city_id);
+    if (city && city->in_use) {
+        return city->sells_resource[resource];
+    }
+    return 0;
+}
+
+int empire_city_get_trade_routes_count(int is_sea_trade, int is_route_open)
+{
     const empire_city *city;
     int count = 0;
     array_foreach(cities, city) {
-        if (city->in_use && city->is_sea_trade == is_sea_trade && city->is_open == is_route_open){
+        if (city->in_use && city->is_sea_trade == is_sea_trade && city->is_open == is_route_open) {
             count++;
         }
     }
@@ -283,7 +303,7 @@ int empire_city_is_trade_route_open(int route_id)
 int empire_city_is_trade_route_sea(int route_id)
 {
     int city_id = empire_city_get_for_trade_route(route_id);
-    if (!city_id){
+    if (city_id <= 0) {
         return -1;
     }
     empire_city *city = empire_city_get(city_id);
@@ -720,4 +740,51 @@ void empire_city_load_state(buffer *buf, int version)
 int empire_city_get_array_size(void)
 {
     return cities.size;
+}
+
+int empire_city_get_icon_image_id(empire_city_icon_type type)
+{
+    switch (type) {
+        case EMPIRE_CITY_ICON_TRADE_TOWN:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_1);  // tr_town
+        case EMPIRE_CITY_ICON_ROMAN_TOWN:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_2);  // ro_town
+        case EMPIRE_CITY_ICON_TRADE_VILLAGE:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_3);  // tr_village
+        case EMPIRE_CITY_ICON_ROMAN_VILLAGE:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_4);  // ro_village
+        case EMPIRE_CITY_ICON_ROMAN_CAPITAL:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_5);  // ro_capital
+
+        case EMPIRE_CITY_ICON_DISTANT_TOWN:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_6);  // dis_town
+        case EMPIRE_CITY_ICON_DISTANT_VILLAGE:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_7);  // dis_village
+
+        case EMPIRE_CITY_ICON_CONSTRUCTION:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_8);  // construction
+
+        case EMPIRE_CITY_ICON_RESOURCE_FOOD:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_9);  // res_food
+        case EMPIRE_CITY_ICON_RESOURCE_GOODS:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_10); // res_goods
+
+        case EMPIRE_CITY_ICON_TRADE_SEA:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_11); // tr_sea
+        case EMPIRE_CITY_ICON_TRADE_LAND:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_12); // tr_land
+
+        case EMPIRE_CITY_ICON_OUR_CITY:
+            return image_group(GROUP_EMPIRE_CITY);
+        case EMPIRE_CITY_ICON_TRADE_CITY:
+            return image_group(GROUP_EMPIRE_CITY_TRADE);
+        case EMPIRE_CITY_ICON_ROMAN_CITY:
+            return image_group(GROUP_EMPIRE_CITY_DISTANT_ROMAN);
+        case EMPIRE_CITY_ICON_DISTANT_CITY:
+            return image_group(GROUP_EMPIRE_FOREIGN_CITY);
+        case EMPIRE_CITY_ICON_TOWER:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_OLD_WATCHTOWER); // old_watchtower
+        default:
+            return -1;
+    }
 }

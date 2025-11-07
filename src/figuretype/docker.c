@@ -123,7 +123,7 @@ static int get_distance_penalty_exports(building *b, int resource)
 }
 
 
-static int get_closest_building_for_import(int x, int y, int city_id, building *dock,
+static unsigned int get_closest_building_for_import(int x, int y, int city_id, building *dock,
     map_point *dst, int *import_resource)
 {
     int resource = *import_resource;
@@ -254,7 +254,7 @@ static int deliver_import_resource(figure *f, building *dock)
     }
     map_point tile;
     int resource = f->resource_id;
-    int destination_id = get_closest_building_for_import(f->x, f->y, ship->empire_city_id,
+    unsigned int destination_id = get_closest_building_for_import(f->x, f->y, ship->empire_city_id,
         dock, &tile, &resource);
     if (!destination_id) {
         return 0;
@@ -289,7 +289,7 @@ static int fetch_export_resource(figure *f, building *dock, int add_to_bought)
     }
     map_point tile;
     int resource = f->resource_id;
-    int destination_id = get_closest_building_for_export(f->x, f->y, ship->empire_city_id,
+    unsigned int destination_id = get_closest_building_for_export(f->x, f->y, ship->empire_city_id,
         dock, &tile, &resource);
     if (!destination_id) {
         return 0;
@@ -368,7 +368,7 @@ void figure_docker_action(figure *f)
                 b->data.dock.queued_docker_id = f->id;
                 f->wait_ticks = 0;
             }
-            if (b->data.dock.queued_docker_id == f->id) {
+            if ((unsigned int) b->data.dock.queued_docker_id == f->id) {
                 b->data.dock.num_ships = 120;
                 f->wait_ticks++;
                 if (f->wait_ticks >= 0) {
@@ -382,7 +382,7 @@ void figure_docker_action(figure *f)
                 for (int i = 0; i < 3; i++) {
                     if (b->data.distribution.cartpusher_ids[i]) {
                         figure *docker = figure_get(b->data.distribution.cartpusher_ids[i]);
-                        if (docker->id == b->data.dock.queued_docker_id && docker->state == FIGURE_STATE_ALIVE) {
+                        if (docker->id == (unsigned int) b->data.dock.queued_docker_id && docker->state == FIGURE_STATE_ALIVE) {
                             if (docker->action_state == FIGURE_ACTION_133_DOCKER_IMPORT_QUEUE ||
                                 docker->action_state == FIGURE_ACTION_134_DOCKER_EXPORT_QUEUE) {
                                 has_queued_docker = 1;
@@ -401,7 +401,7 @@ void figure_docker_action(figure *f)
                 b->data.dock.queued_docker_id = f->id;
                 f->wait_ticks = 0;
             }
-            if (b->data.dock.queued_docker_id == f->id) {
+            if ((unsigned int) b->data.dock.queued_docker_id == f->id) {
                 b->data.dock.num_ships = 120;
                 f->wait_ticks++;
                 if (f->wait_ticks >= 80) {

@@ -54,7 +54,7 @@ void scenario_distant_battle_process(void)
             city_military_init_distant_battle(random_between_from_stdlib(invasion->amount.min, invasion->amount.max));
 
             if (invasion->repeat.times != 0) {
-                repeat_invasion_without_warnings(invasion); // FIXME - we are passing a const value to a non-const function
+                repeat_invasion_without_warnings((invasion_t *) invasion);
             }
 
             return;

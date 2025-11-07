@@ -44,7 +44,7 @@ static void make_request_visible_and_send_message(scenario_request *request)
 {
     request->visible = 1;
     request->amount.requested = random_between_from_stdlib(request->amount.min, request->amount.max);
-    if (city_resource_count_warehouses_amount(request->resource) >= request->amount.requested) {
+    if (city_resource_count_warehouses_amount(request->resource) >= (int) request->amount.requested) {
         request->can_comply_dialog_shown = 1;
     }
     int requested = request->amount.requested;
@@ -255,12 +255,12 @@ void scenario_request_remap_resource(void)
     }
 }
 
-int scenario_request_count_total(void)
+unsigned int scenario_request_count_total(void)
 {
     return requests.size;
 }
 
-int scenario_request_count_active(void)
+unsigned int scenario_request_count_active(void)
 {
     int num_requests = 0;
     const scenario_request *request;
@@ -317,7 +317,7 @@ const scenario_request *scenario_request_get_visible(int index)
 
 int scenario_request_is_ongoing(int id)
 {
-    if (id < 0 || id >= requests.size) {
+    if (id < 0 || (unsigned int) id >= requests.size) {
         return 0;
     }
 
@@ -346,7 +346,7 @@ int scenario_request_is_ongoing(int id)
 
 int scenario_request_force_start(int id)
 {
-    if (id < 0 || id >= requests.size) {
+    if (id < 0 || (unsigned int) id >= requests.size) {
         return 0;
     }
 

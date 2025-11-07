@@ -11,6 +11,8 @@ void city_victory_reset(void);
 
 void city_victory_force_win(void);
 
+void city_victory_force_lose(void);
+
 int city_victory_state(void);
 
 void city_victory_check(void);

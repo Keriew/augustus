@@ -387,7 +387,7 @@ static int get_gatehouse_building_id(int grid_offset)
     return 0;
 }
 
-static int get_gatehouse_position(int grid_offset, int direction, int building_id)
+static int get_gatehouse_position(int grid_offset, int direction, unsigned int building_id)
 {
     int result = 0;
     if (direction == DIR_0_TOP) {

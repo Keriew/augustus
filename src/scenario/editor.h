@@ -41,6 +41,8 @@ void scenario_editor_set_start_year(int year);
 
 void scenario_editor_toggle_open_play(void);
 
+void scenario_editor_toggle_favour_reset(void);
+
 void scenario_editor_toggle_culture(void);
 void scenario_editor_set_culture(int goal);
 void scenario_editor_toggle_prosperity(void);

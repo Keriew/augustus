@@ -99,7 +99,9 @@ static void calculate_buffer_offsets(int scenario_version)
 
     buffer_offsets.image = next_start_offset;
     next_start_offset = buffer_offsets.image + 6;
-
+    if (scenario_version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
+        next_start_offset += 2;// favour reset monthly pattern is +2 bytes
+    }
     buffer_offsets.herds = next_start_offset;
     next_start_offset = buffer_offsets.herds + MAX_HERD_POINTS * 4;
 
@@ -148,7 +150,9 @@ static void calculate_buffer_offsets(int scenario_version)
 
     buffer_offsets.win_criteria = next_start_offset;
     next_start_offset = buffer_offsets.win_criteria + 52;
-
+    if (scenario_version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
+        next_start_offset += 1;// earthkek pattern is +1 byte
+    }
     buffer_offsets.map_points = next_start_offset;
     next_start_offset = buffer_offsets.map_points + 12;
 
@@ -205,10 +209,12 @@ int scenario_get_state_buffer_size_by_savegame_version(int savegame_version)
         calculate_buffer_offsets(SCENARIO_LAST_NO_ALT_NATIVE_HUTS);
     } else if (savegame_version <= SAVE_GAME_LAST_NO_EXTRA_NATIVE_BUILDINGS) {
         calculate_buffer_offsets(SCENARIO_LAST_NO_EXTRA_NATIVE_BUILDINGS);
+    } else if (savegame_version <= SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
+        calculate_buffer_offsets(SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA);
     } else {
         calculate_buffer_offsets(SCENARIO_CURRENT_VERSION);
     }
-    return buffer_offsets.end;
+    return (int) buffer_offsets.end;
 }
 
 int scenario_get_state_buffer_size_by_scenario_version(int scenario_version)
@@ -219,7 +225,7 @@ int scenario_get_state_buffer_size_by_scenario_version(int scenario_version)
         return 1830;
     } else {
         calculate_buffer_offsets(scenario_version);
-        return buffer_offsets.end;
+        return (int) buffer_offsets.end;
     }
 }
 
@@ -252,6 +258,7 @@ void scenario_save_state(buffer *buf)
 
     buffer_write_i16(buf, scenario.image_id);
     buffer_write_i16(buf, scenario.is_open_play);
+    buffer_write_i16(buf, scenario.reset_favour_monthly);
     buffer_write_i16(buf, scenario.player_rank);
 
     for (int i = 0; i < MAX_HERD_POINTS; i++) {
@@ -304,6 +311,7 @@ void scenario_save_state(buffer *buf)
 
     buffer_write_i32(buf, scenario.earthquake.severity);
     buffer_write_i32(buf, scenario.earthquake.year);
+    buffer_write_u8(buf, scenario.earthquake.pattern);
 
     buffer_write_i32(buf, scenario.win_criteria.population.enabled);
     buffer_write_i32(buf, scenario.win_criteria.population.goal);
@@ -399,6 +407,11 @@ void scenario_load_state(buffer *buf, int version)
 
     scenario.image_id = buffer_read_i16(buf);
     scenario.is_open_play = buffer_read_i16(buf);
+    if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
+        scenario.reset_favour_monthly = buffer_read_i16(buf);
+    } else {
+        scenario.reset_favour_monthly = 1;
+    }
     scenario.player_rank = buffer_read_i16(buf);
 
     for (int i = 0; i < MAX_HERD_POINTS; i++) {
@@ -476,7 +489,11 @@ void scenario_load_state(buffer *buf, int version)
 
     scenario.earthquake.severity = buffer_read_i32(buf);
     scenario.earthquake.year = buffer_read_i32(buf);
-
+    if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
+        scenario.earthquake.pattern = buffer_read_u8(buf);
+    } else {
+        scenario.earthquake.pattern = 0;
+    }
     scenario.win_criteria.population.enabled = buffer_read_i32(buf);
     scenario.win_criteria.population.goal = buffer_read_i32(buf);
 
@@ -535,13 +552,13 @@ void scenario_load_state(buffer *buf, int version)
     }
 
     if (version > SCENARIO_LAST_NO_CUSTOM_VARIABLES && version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
-        buffer_set(buf, buffer_offsets.custom_variables);
+        buffer_set(buf, (int) buffer_offsets.custom_variables);
         scenario_custom_variable_load_state_old_version(buf);
     } else {
         scenario_custom_variable_delete_all();
     }
 
-    buffer_set(buf, buffer_offsets.custom_name);
+    buffer_set(buf, (int) buffer_offsets.custom_name);
     if (version > SCENARIO_LAST_UNVERSIONED) {
         buffer_read_raw(buf, scenario.empire.custom_name, sizeof(scenario.empire.custom_name));
     }
@@ -559,7 +576,7 @@ void scenario_load_state(buffer *buf, int version)
 void scenario_description_from_buffer(buffer *buf, uint8_t *description, int version)
 {
     calculate_buffer_offsets(version);
-    buffer_set(buf, buffer_offsets.briefing);
+    buffer_set(buf, (int) buffer_offsets.briefing);
     buffer_read_raw(buf, description, MAX_BRIEF_DESCRIPTION);
 }
 
@@ -571,7 +588,7 @@ int scenario_climate_from_buffer(buffer *buf, int version)
     } else if (version <= SCENARIO_LAST_NO_WAGE_LIMITS) {
         buffer_set(buf, 1764);
     } else {
-        buffer_set(buf, buffer_offsets.misc + 36);
+        buffer_set(buf, (int) buffer_offsets.misc + 36); // measure offsets to make sure they match
     }
     return buffer_read_u8(buf);
 }
@@ -584,7 +601,7 @@ int scenario_invasions_from_buffer(buffer *buf, int version)
         return scenario_invasion_count_active_from_buffer(buf);
     } else {
         calculate_buffer_offsets(version);
-        buffer_set(buf, buffer_offsets.original_invasions_part1 + (MAX_ORIGINAL_INVASIONS * 2));
+        buffer_set(buf, (int) buffer_offsets.original_invasions_part1 + (MAX_ORIGINAL_INVASIONS * 2));
         for (int i = 0; i < MAX_ORIGINAL_INVASIONS; i++) {
             if (buffer_read_i16(buf)) {
                 num_invasions++;
@@ -594,24 +611,24 @@ int scenario_invasions_from_buffer(buffer *buf, int version)
     return num_invasions;
 }
 
-int scenario_image_id_from_buffer(buffer *buf, int version)
+int scenario_image_id_from_buffer(buffer *buf, int scenario_version)
 {
-    calculate_buffer_offsets(version);
-    buffer_set(buf, buffer_offsets.image);
+    calculate_buffer_offsets(scenario_version);
+    buffer_set(buf, (int) buffer_offsets.image);
     return buffer_read_i16(buf);
 }
 
 int scenario_rank_from_buffer(buffer *buf, int version)
 {
     calculate_buffer_offsets(version);
-    buffer_set(buf, buffer_offsets.image + 4);
+    buffer_set(buf, (int) buffer_offsets.image + 4);
     return buffer_read_i16(buf);
 }
 
 void scenario_open_play_info_from_buffer(buffer *buf, int version, int *is_open_play, int *open_play_id)
 {
     calculate_buffer_offsets(version);
-    buffer_set(buf, buffer_offsets.image + 2);
+    buffer_set(buf, (int) buffer_offsets.image + 2);
     *is_open_play = buffer_read_i16(buf);
 
     if (version <= SCENARIO_LAST_UNVERSIONED) {
@@ -619,7 +636,7 @@ void scenario_open_play_info_from_buffer(buffer *buf, int version, int *is_open_
     } else if (version <= SCENARIO_LAST_NO_WAGE_LIMITS) {
         buffer_set(buf, 1778);
     } else {
-        buffer_set(buf, buffer_offsets.misc + 50);
+        buffer_set(buf, (int) buffer_offsets.misc + 50);
     }
     *open_play_id = buffer_read_u8(buf);
 }
@@ -627,7 +644,7 @@ void scenario_open_play_info_from_buffer(buffer *buf, int version, int *is_open_
 int scenario_start_year_from_buffer(buffer *buf, int version)
 {
     calculate_buffer_offsets(version);
-    buffer_set(buf, buffer_offsets.start_info);
+    buffer_set(buf, (int) buffer_offsets.start_info);
     return buffer_read_i16(buf);
 }
 
@@ -639,7 +656,7 @@ void scenario_objectives_from_buffer(buffer *buf, int version, scenario_win_crit
     } else if (version <= SCENARIO_LAST_NO_WAGE_LIMITS) {
         buffer_set(buf, 1632);
     } else {
-        buffer_set(buf, buffer_offsets.win_criteria);
+        buffer_set(buf, (int) buffer_offsets.win_criteria); // 2 bits for favour reset
     }
     win_criteria->culture.goal = buffer_read_i32(buf);
     win_criteria->prosperity.goal = buffer_read_i32(buf);
@@ -661,7 +678,7 @@ void scenario_objectives_from_buffer(buffer *buf, int version, scenario_win_crit
 void scenario_map_data_from_buffer(buffer *buf, int *width, int *height, int *grid_start, int *grid_border_size, int version)
 {
     calculate_buffer_offsets(version);
-    buffer_set(buf, buffer_offsets.map_size);
+    buffer_set(buf, (int) buffer_offsets.map_size);
     *width = buffer_read_i32(buf);
     *height = buffer_read_i32(buf);
     *grid_start = buffer_read_i32(buf);

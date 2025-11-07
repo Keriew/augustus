@@ -144,7 +144,7 @@ static void draw_background(void)
         data.available_buttons = info->current_mission > 0 ? 3 : 2;
     }
 
-    for (int i = 0; i < NUM_BOTTOM_BUTTONS; i++) {
+    for (unsigned int i = 0; i < NUM_BOTTOM_BUTTONS; i++) {
         int disabled = i >= data.available_buttons;
         text_draw_centered(lang_get_string(CUSTOM_TRANSLATION, bottom_buttons[i].parameter1), bottom_buttons[i].x,
             bottom_buttons[i].y + 9, bottom_buttons[i].width,
@@ -179,7 +179,7 @@ static void draw_foreground(void)
     graphics_in_dialog();
     list_box_draw(&list_box);
     input_box_draw(&player_name_input);
-    for (int i = 0; i < NUM_BOTTOM_BUTTONS; i++) {
+    for (unsigned int i = 0; i < NUM_BOTTOM_BUTTONS; i++) {
         button_border_draw(bottom_buttons[i].x, bottom_buttons[i].y, bottom_buttons[i].width, bottom_buttons[i].height,
             data.bottom_button_focus_id == i + 1);
     }

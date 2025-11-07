@@ -26,7 +26,7 @@ static void enemy_initial(figure *f, formation *m)
     figure_route_remove(f);
     f->wait_ticks--;
     if (f->wait_ticks <= 0) {
-        if (f->is_ghost && f->index_in_formation == 0 && m->figures[0] == f->id) {
+        if (f->is_ghost && f->index_in_formation == 0 && (unsigned int) m->figures[0] == f->id) {
             if (m->layout == FORMATION_ENEMY_MOB) {
                 sound_speech_play_file("wavs/drums.wav");
             } else if (m->layout == FORMATION_ENEMY12) {
@@ -598,7 +598,7 @@ void figure_enemy_gladiator_action(figure *f)
         case FIGURE_ACTION_158_NATIVE_CREATED:
             f->image_offset = 0;
             f->wait_ticks++;
-            if (f->wait_ticks > 10 + (f->id & 3)) {
+            if ((unsigned int) f->wait_ticks > 10 + (f->id & 3)) {
                 f->wait_ticks = 0;
                 f->action_state = FIGURE_ACTION_159_NATIVE_ATTACKING;
                 int x_tile, y_tile;
@@ -638,7 +638,7 @@ void figure_enemy_gladiator_action(figure *f)
         f->image_id = image_group(GROUP_FIGURE_GLADIATOR) + 96 + figure_image_corpse_offset(f);
     } else if (f->action_state == FIGURE_ACTION_150_ATTACK || f->direction == DIR_FIGURE_ATTACK) {
         f->image_id = image_group(GROUP_FIGURE_GLADIATOR) + dir + 104 + 8 * (f->image_offset / 2);
-    }  else {
+    } else {
         f->image_id = image_group(GROUP_FIGURE_GLADIATOR) + dir + 8 * f->image_offset;
     }
 }
@@ -676,8 +676,8 @@ void figure_enemy_caesar_legionary_action(figure *f)
             break;
         default:
             if (f->direction == DIR_FIGURE_ATTACK) {
-                    f->image_id = image_group(GROUP_FIGURE_CAESAR_LEGIONARY) + dir +
-                        8 * ((f->image_offset) / 2);
+                f->image_id = image_group(GROUP_FIGURE_CAESAR_LEGIONARY) + dir +
+                    8 * ((f->image_offset) / 2);
             } else {
                 f->image_id = image_group(GROUP_FIGURE_CAESAR_LEGIONARY) + 48 + dir + 8 * f->image_offset;
             }

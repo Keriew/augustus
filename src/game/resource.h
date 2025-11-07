@@ -3,6 +3,7 @@
 
 #include "building/type.h"
 #include "city/warning.h"
+#include "core/buffer.h"
 #include "core/lang.h"
 
 /**
@@ -138,7 +139,9 @@ resource_type resource_get_from_industry(building_type industry);
 int resource_get_supply_chain_for_good(resource_supply_chain *chain, resource_type good);
 int resource_get_supply_chain_for_raw_material(resource_supply_chain *chain, resource_type raw_material);
 
-const resource_data *resource_get_data(resource_type resource);
+resource_data *resource_get_data(resource_type resource);
+
+resource_data *resource_get_defaults(resource_type resource);
 
 void resource_set_mapping(resource_version_t version);
 
@@ -153,5 +156,8 @@ resource_type resource_remap(int id);
 int resource_total_mapped(void);
 
 int resource_total_food_mapped(void);
+
+void production_rates_load(buffer *buf);
+void production_rates_save(buffer *buf);
 
 #endif // GAME_RESOURCE_H

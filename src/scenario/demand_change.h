@@ -33,7 +33,7 @@ void scenario_demand_change_delete(int id);
 
 void scenario_demand_change_remap_resource(void);
 
-int scenario_demand_change_count_total(void);
+unsigned int scenario_demand_change_count_total(void);
 
 void scenario_demand_change_save_state(buffer *buf);
 

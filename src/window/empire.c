@@ -1525,6 +1525,9 @@ static void draw_empire_object(const empire_object *obj)
             image_id = assets_lookup_image_id(ASSET_FIRST_ORNAMENT) - 1 - image_id;
         }
     }
+    if (obj->type == EMPIRE_OBJECT_CITY && obj->empire_city_icon != EMPIRE_CITY_ICON_DEFAULT) {
+        image_id = empire_city_get_icon_image_id(obj->empire_city_icon); // fetch custom city icon
+    }
     const image *img = image_get(image_id);
     if ((((unsigned int) data.hovered_object == obj->id + 1) && obj->type == EMPIRE_OBJECT_CITY) ||
         ((empire_selected_object() == obj->id + 1) && obj->type == EMPIRE_OBJECT_CITY)) {

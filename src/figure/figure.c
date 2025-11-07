@@ -16,11 +16,12 @@
 #include "figure/visited_buildings.h"
 #include "map/figure.h"
 #include "map/grid.h"
+#include "figure.h"
 
 #define FIGURE_ARRAY_SIZE_STEP 1000
 
 #define FIGURE_ORIGINAL_BUFFER_SIZE 128
-#define FIGURE_CURRENT_BUFFER_SIZE 146
+#define FIGURE_CURRENT_BUFFER_SIZE 164
 // around 12 bytes left free in the current buffer size - save version 0xa7, August 2025
 static struct {
     int created_sequence;
@@ -218,6 +219,71 @@ int figure_is_enemy(const figure *f)
     return (f->type >= FIGURE_ENEMY43_SPEAR && f->type <= FIGURE_ENEMY_CAESAR_LEGIONARY) || f->type == FIGURE_ENEMY_CATAPULT;
 }
 
+int figure_is_melee_enemy(const figure *f)
+{
+    switch (f->type) { //only invading melee types, no gladiators or caesars troops
+        case FIGURE_ENEMY44_SWORD:
+        case FIGURE_ENEMY45_SWORD:
+        case FIGURE_ENEMY49_FAST_SWORD:
+        case FIGURE_ENEMY50_SWORD:
+        case FIGURE_ENEMY53_AXE:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+int figure_is_ranged_enemy(const figure *f)
+{
+    switch (f->type) {
+        /* Spear-throwers / javelin / bows / siege */
+        case FIGURE_ENEMY43_SPEAR:
+        case FIGURE_ENEMY51_SPEAR:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+int figure_is_mounted_enemy(const figure *f)
+{
+    switch (f->type) {
+        /* Animal-mounted or vehicle types */
+        case FIGURE_ENEMY46_CAMEL:
+        case FIGURE_ENEMY47_ELEPHANT:
+        case FIGURE_ENEMY48_CHARIOT:
+        case FIGURE_ENEMY52_MOUNTED_ARCHER:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+int figure_is_caesar_enemy(const figure *f)
+{
+    switch (f->type) {
+        case FIGURE_ENEMY_CAESAR_JAVELIN:
+        case FIGURE_ENEMY_CAESAR_MOUNTED:
+        case FIGURE_ENEMY_CAESAR_LEGIONARY:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+int figure_enemy_class(const figure *f)
+{
+    if (figure_is_melee_enemy(f)) {
+        return ENEMY_CLASS_MELEE;
+    } else if (figure_is_ranged_enemy(f)) {
+        return ENEMY_CLASS_RANGED;
+    } else if (figure_is_mounted_enemy(f)) {
+        return ENEMY_CLASS_MOUNTED;
+    } else { //not an enemy or unknown type
+        return ENEMY_CLASS_ALL;
+    }
+}
+
 int figure_is_legion(const figure *f)
 {
     return (f->type >= FIGURE_FORT_JAVELIN && f->type <= FIGURE_FORT_LEGIONARY) || f->type == FIGURE_FORT_INFANTRY || f->type == FIGURE_FORT_ARCHER;
@@ -290,8 +356,8 @@ static void figure_save(buffer *buf, const figure *f)
     buffer_write_u8(buf, f->image_offset);
     buffer_write_u8(buf, f->is_enemy_image);
     buffer_write_u8(buf, f->flotsam_visible);
-    buffer_write_i16(buf, f->image_id);
-    buffer_write_i16(buf, f->cart_image_id);
+    buffer_write_i32(buf, f->image_id);
+    buffer_write_i32(buf, f->cart_image_id);
     buffer_write_i16(buf, f->next_figure_id_on_same_tile);
     buffer_write_u8(buf, f->type);
     buffer_write_u8(buf, f->resource_id);
@@ -341,10 +407,10 @@ static void figure_save(buffer *buf, const figure *f)
     buffer_write_i16(buf, f->cc_delta_xy);
     buffer_write_u8(buf, f->cc_direction);
     buffer_write_u8(buf, f->speed_multiplier);
-    buffer_write_i16(buf, f->building_id);
-    buffer_write_i16(buf, f->immigrant_building_id);
-    buffer_write_i16(buf, f->destination_building_id);
-    buffer_write_i16(buf, f->formation_id);
+    buffer_write_i32(buf, f->building_id);
+    buffer_write_i32(buf, f->immigrant_building_id);
+    buffer_write_i32(buf, f->destination_building_id);
+    buffer_write_i32(buf, f->formation_id);
     buffer_write_u8(buf, f->index_in_formation);
     buffer_write_u8(buf, f->formation_at_rest);
     buffer_write_u8(buf, f->migrant_num_people);
@@ -379,9 +445,9 @@ static void figure_save(buffer *buf, const figure *f)
     buffer_write_u16(buf, f->target_figure_created_sequence);
     buffer_write_u8(buf, f->figures_on_same_tile_index);
     buffer_write_u8(buf, f->num_attackers);
-    buffer_write_i16(buf, f->attacker_id1);
-    buffer_write_i16(buf, f->attacker_id2);
-    buffer_write_i16(buf, f->opponent_id);
+    buffer_write_i32(buf, f->attacker_id1);
+    buffer_write_i32(buf, f->attacker_id2);
+    buffer_write_i32(buf, f->opponent_id);
     buffer_write_i16(buf, f->last_visited_index);
     buffer_write_i16(buf, f->last_destinatation_id);
 }
@@ -411,8 +477,13 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     f->image_offset = buffer_read_u8(buf);
     f->is_enemy_image = buffer_read_u8(buf);
     f->flotsam_visible = buffer_read_u8(buf);
-    f->image_id = buffer_read_i16(buf);
-    f->cart_image_id = buffer_read_i16(buf);
+    if (version <= SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
+        f->image_id = buffer_read_i16(buf);
+        f->cart_image_id = buffer_read_i16(buf);
+    } else {
+        f->image_id = buffer_read_i32(buf);
+        f->cart_image_id = buffer_read_i32(buf);
+    }
     f->next_figure_id_on_same_tile = buffer_read_i16(buf);
     f->type = buffer_read_u8(buf);
     int resource = buffer_read_u8(buf);
@@ -467,10 +538,17 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     f->cc_delta_xy = buffer_read_i16(buf);
     f->cc_direction = buffer_read_u8(buf);
     f->speed_multiplier = buffer_read_u8(buf);
-    f->building_id = buffer_read_i16(buf);
-    f->immigrant_building_id = buffer_read_i16(buf);
-    f->destination_building_id = buffer_read_i16(buf);
-    f->formation_id = buffer_read_i16(buf);
+    if (version <= SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
+        f->building_id = buffer_read_i16(buf);
+        f->immigrant_building_id = buffer_read_i16(buf);
+        f->destination_building_id = buffer_read_i16(buf);
+        f->formation_id = buffer_read_i16(buf);
+    } else {
+        f->building_id = buffer_read_i32(buf);
+        f->immigrant_building_id = buffer_read_i32(buf);
+        f->destination_building_id = buffer_read_i32(buf);
+        f->formation_id = buffer_read_i32(buf);
+    }
     f->index_in_formation = buffer_read_u8(buf);
     f->formation_at_rest = buffer_read_u8(buf);
     f->migrant_num_people = buffer_read_u8(buf);
@@ -506,9 +584,15 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     f->target_figure_created_sequence = buffer_read_u16(buf);
     f->figures_on_same_tile_index = buffer_read_u8(buf);
     f->num_attackers = buffer_read_u8(buf);
-    f->attacker_id1 = buffer_read_i16(buf);
-    f->attacker_id2 = buffer_read_i16(buf);
-    f->opponent_id = buffer_read_i16(buf);
+    if (version <= SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
+        f->attacker_id1 = buffer_read_i16(buf);
+        f->attacker_id2 = buffer_read_i16(buf);
+        f->opponent_id = buffer_read_i16(buf);
+    } else {
+        f->attacker_id1 = buffer_read_i32(buf);
+        f->attacker_id2 = buffer_read_i32(buf);
+        f->opponent_id = buffer_read_i32(buf);
+    }
     if (version > SAVE_GAME_LAST_GLOBAL_BUILDING_INFO) {
         f->last_visited_index = buffer_read_i16(buf);
     }

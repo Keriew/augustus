@@ -2,7 +2,7 @@
 
 #include "building/house.h"
 #include "building/house_population.h"
-#include "building/model.h"
+#include "building/properties.h"
 #include "city/map.h"
 #include "city/population.h"
 #include "core/calc.h"
@@ -96,7 +96,7 @@ static int closest_house_with_room(int x, int y)
     return min_building_id;
 }
 
-static int house_is_valid(const building *b, int figure_id)
+static int house_is_valid(const building *b, unsigned int figure_id)
 {
     return b && b->state == BUILDING_STATE_IN_USE &&
         b->immigrant_figure_id == figure_id && b->house_size > 0 && !b->has_plague;
@@ -315,21 +315,21 @@ void figure_homeless_action(figure *f)
                     if (room < 0) {
                         room = 0;
                     }
-                        if (room < f->migrant_num_people) {
-                            f->migrant_num_people = room;
-                        }
-                        int is_empty = b->house_population == 0;
-                        b->house_population += f->migrant_num_people;
-                        b->house_population_room = max_people - b->house_population;
-                        city_population_add_homeless(f->migrant_num_people);
-                        if (is_empty) {
-                            building_house_change_to(b, BUILDING_HOUSE_SMALL_TENT);
-                        }
-                        b->immigrant_figure_id = 0;
-                        game_undo_disable();
+                    if (room < f->migrant_num_people) {
+                        f->migrant_num_people = room;
                     }
+                    int is_empty = b->house_population == 0;
+                    b->house_population += f->migrant_num_people;
+                    b->house_population_room = max_people - b->house_population;
+                    city_population_add_homeless(f->migrant_num_people);
+                    if (is_empty) {
+                        building_house_change_to(b, BUILDING_HOUSE_SMALL_TENT);
+                    }
+                    b->immigrant_figure_id = 0;
+                    game_undo_disable();
                 }
-                break;
+            }
+            break;
         case FIGURE_ACTION_10_HOMELESS_LEAVING:
             figure_movement_move_ticks(f, 1);
             if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
@@ -356,6 +356,6 @@ void figure_homeless_action(figure *f)
                 }
             }
             break;
-            }
-            figure_image_update(f, image_group(GROUP_FIGURE_HOMELESS));
+    }
+    figure_image_update(f, image_group(GROUP_FIGURE_HOMELESS));
 }

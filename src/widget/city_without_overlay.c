@@ -9,7 +9,6 @@
 #include "building/granary.h"
 #include "building/image.h"
 #include "building/industry.h"
-#include "building/model.h"
 #include "building/monument.h"
 #include "building/properties.h"
 #include "building/rotation.h"
@@ -76,8 +75,8 @@ static struct {
 
     int image_id_water_first;
     int image_id_water_last;
-    int selected_figure_id;
-    int highlighted_formation;
+    unsigned int selected_figure_id;
+    unsigned int highlighted_formation;
     unsigned int selected_building_id;
     unsigned int hovered_building_id;
     const map_tile *cursor_tile;
@@ -254,7 +253,7 @@ static void draw_footprint(int x, int y, int grid_offset)
     }
 
     // Apply hover effect to non-building tiles if cursor is on them, config enabled, and not scrolling
-    if (!building_id && is_cursor_tile && !map_property_is_deleted(grid_offset) && 
+    if (!building_id && is_cursor_tile && !map_property_is_deleted(grid_offset) &&
         config_get(CONFIG_UI_CV_CURSOR_SHADOW) && !scroll_in_progress()) {
         color_mask = COLOR_MASK_HOVER;
     }
@@ -545,7 +544,7 @@ static void draw_top(int x, int y, int grid_offset)
 
 static void draw_figures(int x, int y, int grid_offset)
 {
-    int figure_id = map_figure_at(grid_offset);
+    unsigned int figure_id = map_figure_at(grid_offset);
     while (figure_id) {
         figure *f = figure_get(figure_id);
         if (figure_id == draw_context.selected_figure_id) {
@@ -944,7 +943,7 @@ static void draw_elevated_figures(int x, int y, int grid_offset)
         if ((f->use_cross_country && !f->is_ghost && !f->dont_draw_elevated) || f->height_adjusted_ticks) {
             int highlight = f->formation_id > 0 && f->formation_id == draw_context.highlighted_formation;
             city_draw_figure(f, x, y, draw_context.scale, highlight);
-        } else if (f->building_id == draw_context.selected_building_id) { //figure originates from selected building
+        } else if ((unsigned int) f->building_id == draw_context.selected_building_id) { //figure originates from selected building
             if (config_get(CONFIG_UI_SHOW_ROAMING_PATH)) {
                 int highlight = FIGURE_HIGHLIGHT_GREEN;
                 if (f->type == FIGURE_MARKET_SUPPLIER || f->type == FIGURE_DELIVERY_BOY) {
@@ -1144,7 +1143,7 @@ static void update_clouds(void)
 void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_coord, const map_tile *tile, unsigned int roamer_preview_building_id)
 {
     int highlighted_formation_id = get_highlighted_formation_id(tile);
-    draw_context.cursor_tile = tile; //store the tile under the cursor
+    draw_context.cursor_tile = (map_tile *) tile;//store the tile under the cursor
     init_draw_context(selected_figure_id, figure_coord, highlighted_formation_id);
 
     if (roamer_preview_building_id) {

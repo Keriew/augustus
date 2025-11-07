@@ -4,26 +4,6 @@
 #include "scenario/allowed_building.h"
 #include "scenario/event/action_types.h"
 
-void scenario_action_type_init(scenario_action_t *action)
-{
-    switch (action->type) {
-        case ACTION_TYPE_ADJUST_CITY_HEALTH:
-            scenario_action_type_city_health_init(action);
-            break;
-        case ACTION_TYPE_ADJUST_MONEY:
-            scenario_action_type_money_add_init(action);
-            break;
-        case ACTION_TYPE_ADJUST_ROME_WAGES:
-            scenario_action_type_rome_wages_init(action);
-            break;
-        case ACTION_TYPE_ADJUST_SAVINGS:
-            scenario_action_type_savings_add_init(action);
-            break;
-        default:
-            break;
-    }
-}
-
 int scenario_action_type_execute(scenario_action_t *action)
 {
     switch (action->type) {
@@ -95,6 +75,24 @@ int scenario_action_type_execute(scenario_action_t *action)
             return scenario_action_type_change_climate_execute(action);
         case ACTION_TYPE_CHANGE_TERRAIN:
             return scenario_action_type_change_terrain_execute(action);
+        case ACTION_TYPE_CHANGE_MODEL_DATA:
+            return scenario_action_type_change_model_data_execute(action);
+        case ACTION_TYPE_CUSTOM_VARIABLE_FORMULA:
+            return scenario_action_type_custom_variable_formula_execute(action);
+        case ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY:
+            return scenario_action_type_custom_variable_city_property_execute(action);
+        case ACTION_TYPE_GOD_SENTIMENT_CHANGE:
+            return scenario_action_type_change_god_sentiment_execute(action);
+        case ACTION_TYPE_POP_SENTIMENT_CHANGE:
+            return scenario_action_type_change_pop_sentiment_execute(action);
+        case ACTION_TYPE_WIN:
+            return scenario_action_type_win_execute(action);
+        case ACTION_TYPE_LOSE:
+            return scenario_action_type_lose_execute(action);
+        case ACTION_TYPE_CHANGE_RANK:
+            return scenario_action_type_change_rank_execute(action);
+        case ACTION_TYPE_CHANGE_PRODUCTION_RATE:
+            return scenario_action_type_change_production_rate_execute(action);
         default:
             return 0;
     }

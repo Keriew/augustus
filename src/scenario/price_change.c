@@ -102,7 +102,7 @@ void scenario_price_change_remap_resource(void)
     }
 }
 
-int scenario_price_change_count_total(void)
+unsigned int scenario_price_change_count_total(void)
 {
     return price_changes.size;
 }
