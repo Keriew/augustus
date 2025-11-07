@@ -1882,7 +1882,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_UI_WT_ENABLE_SNOW_CENTRAL, "Schalte Schnee in zentralen Provinzen an"},
     {TR_EDITOR_UNABLE_TO_LOAD_MODEL_DATA_TITLE, "Es ist unmöglich dieses model data xml zu lesen"},
     {TR_EDITOR_MODEL_DATA_IMPORT_FULL, "Modeldaten importieren"},
-    {TR_EDITOR_MODEL_DATA_EXPORT_FULL, "Modeldaten exportieren},
+    {TR_EDITOR_MODEL_DATA_EXPORT_FULL, "Modeldaten exportieren"},
     {TR_EDITOR_COLOR_LABEL, "Farbe"},
     {TR_EDITOR_COLOR_NONE, "Keine" },
     {TR_EDITOR_COLOR_BLUE, "Blau" },
