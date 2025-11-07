@@ -30,7 +30,7 @@ int map_has_figure_category_at(int grid_offset, figure_category category);
  * @params minx, miny, maxx, maxy Specify the area
  * @param category The categories to be checked for
  */
-int map_has_figure_category_in_area(int minx, int miny, int maxx, int maxy, figure_category category)
+int map_has_figure_category_in_area(int minx, int miny, int maxx, int maxy, figure_category category);
 
 void map_figure_add(figure *f);
 
