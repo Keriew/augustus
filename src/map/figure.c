@@ -1,8 +1,13 @@
 #include "figure.h"
 
+#include "figure/figure.h"
 #include "map/grid.h"
 
 static grid_u16 figures;
+
+static struct {
+    figure_category category;
+} data;
 
 int map_has_figure_at(int grid_offset)
 {
@@ -12,6 +17,19 @@ int map_has_figure_at(int grid_offset)
 int map_figure_at(int grid_offset)
 {
     return map_grid_is_valid_offset(grid_offset) ? figures.items[grid_offset] : 0;
+}
+
+static int has_category(figure *f)
+{
+    return figure_is_category(f, data.category);
+}
+
+int map_has_figure_category_at(int grid_offset, figure_category category)
+{
+    data.category = category;
+    int result = map_figure_foreach_until(grid_offset, has_category);
+    data.category = 0;
+    return result;
 }
 
 static void cap_figures_on_same_tile_index(figure *f)
