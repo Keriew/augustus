@@ -771,7 +771,7 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
         scenario_events_min_max_migrate_to_formulas();
     }
     resource_init();
-    if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) { // Decrease before merge
+    if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         production_rates_load(file->production_rates);
     }
     scenario_events_assign_parent_event_ids();
