@@ -916,8 +916,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .draw_desirability_range = 1,
         .event_data.attr = "large_temple_ceres",
         .event_data.key = TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_CERES,
-        .building_model_data = {.cost = 150, .desirability_value = 6, .desirability_step = 1,
-            .desirability_step_size = 2, .desirability_range = 3, .laborers = 5}
+        .building_model_data = {.cost = 150, .desirability_value = 14, .desirability_step = 2,
+            .desirability_step_size = -2, .desirability_range = 5, .laborers = 5}
     },
     [BUILDING_LARGE_TEMPLE_NEPTUNE] = {
         .venus_gt_bonus = 1,
@@ -929,8 +929,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .draw_desirability_range = 1,
         .event_data.attr = "large_temple_neptune",
         .event_data.key = TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_NEPTUNE,
-        .building_model_data = {.cost = 150, .desirability_value = 6, .desirability_step = 1,
-            .desirability_step_size = 2, .desirability_range = 3, .laborers = 5}
+        .building_model_data = {.cost = 150, .desirability_value = 14, .desirability_step = 2,
+            .desirability_step_size = -2, .desirability_range = 5, .laborers = 5}
     },
     [BUILDING_LARGE_TEMPLE_MERCURY] = {
         .venus_gt_bonus = 1,
@@ -942,8 +942,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .draw_desirability_range = 1,
         .event_data.attr = "large_temple_mercury",
         .event_data.key = TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_MERCURY,
-        .building_model_data = {.cost = 150, .desirability_value = 6, .desirability_step = 1,
-            .desirability_step_size = 2, .desirability_range = 3, .laborers = 5}
+        .building_model_data = {.cost = 150, .desirability_value = 14, .desirability_step = 2,
+            .desirability_step_size = -2, .desirability_range = 5, .laborers = 5}
     },
     [BUILDING_LARGE_TEMPLE_MARS] = {
         .venus_gt_bonus = 1,
@@ -955,8 +955,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .draw_desirability_range = 1,
         .event_data.attr = "large_temple_mars",
         .event_data.key = TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_MARS,
-        .building_model_data = {.cost = 150, .desirability_value = 6, .desirability_step = 1,
-            .desirability_step_size = 2, .desirability_range = 3, .laborers = 5}
+        .building_model_data = {.cost = 150, .desirability_value = 14, .desirability_step = 2,
+            .desirability_step_size = -2, .desirability_range = 5, .laborers = 5}
     },
     [BUILDING_LARGE_TEMPLE_VENUS] = {
         .venus_gt_bonus = 1,
@@ -968,8 +968,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .draw_desirability_range = 1,
         .event_data.attr = "large_temple_venus",
         .event_data.key = TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_VENUS,
-        .building_model_data = {.cost = 150, .desirability_value = 6, .desirability_step = 1,
-            .desirability_step_size = 2, .desirability_range = 3, .laborers = 5}
+        .building_model_data = {.cost = 150, .desirability_value = 14, .desirability_step = 2,
+            .desirability_step_size = -2, .desirability_range = 5, .laborers = 5}
     },
     [BUILDING_MARKET] = {
         .size = 2,
