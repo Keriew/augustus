@@ -1493,11 +1493,11 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         case ACTION_TYPE_BUILDING_FORCE_COLLAPSE:
         {
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = append_text(translation_for(TR_PARAMETER_GRID_OFFSET), result_text, &maxlength);
-            result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
+            result_text = append_text(translation_for(TR_PARAMETER_GRID_OFFSET_CORNER1), result_text, &maxlength);
+            result_text = translation_for_grid_offset(action->parameter1, result_text, &maxlength);
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = append_text(translation_for(TR_PARAMETER_RADIUS), result_text, &maxlength);
-            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
+            result_text = append_text(translation_for(TR_PARAMETER_GRID_OFFSET_CORNER2), result_text, &maxlength);
+            result_text = translation_for_grid_offset(action->parameter2, result_text, &maxlength);
             if (action->parameter4) {
                 result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
                 result_text = append_text(translation_for(TR_PARAMETER_DISPLAY_DESTROY_ALL_TYPES), result_text, &maxlength);
@@ -1679,11 +1679,11 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         case ACTION_TYPE_CHANGE_TERRAIN:
         {
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = append_text(translation_for(TR_PARAMETER_GRID_OFFSET), result_text, &maxlength);
-            result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
+            result_text = append_text(translation_for(TR_PARAMETER_GRID_OFFSET_CORNER1), result_text, &maxlength);
+            result_text = translation_for_grid_offset(action->parameter1, result_text, &maxlength);
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = append_text(translation_for(TR_PARAMETER_RADIUS), result_text, &maxlength);
-            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
+            result_text = append_text(translation_for(TR_PARAMETER_GRID_OFFSET_CORNER2), result_text, &maxlength);
+            result_text = translation_for_grid_offset(action->parameter2, result_text, &maxlength);
             if (action->parameter4) {
                 result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_TERRAIN, action->parameter3, result_text, &maxlength);
                 result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
