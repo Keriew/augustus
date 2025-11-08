@@ -673,7 +673,7 @@ empire_city_icon_type empire_object_get_random_icon_for_empire_object(full_empir
     } else {
         cityname = string_from_ascii("Invalid city name");
     } // fetch name
-    
+
     if (is_name_rome(cityname)) { // Rome
         array_size = sizeof(alloc_rome) / sizeof(empire_city_icon_type);
         random_array = alloc_rome;
