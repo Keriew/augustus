@@ -22,7 +22,7 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_CART_PUSHER] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
     .max_damage = 20, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
@@ -32,7 +32,7 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_EXPLOSION] = {
-    .category = FIGURE_CATEGORY_INACTIVE,
+    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_EFFECT,
     .max_damage = 0, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
@@ -47,27 +47,27 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_WAREHOUSEMAN] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
     .max_damage = 20, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_PREFECT] = {
-    .category = FIGURE_CATEGORY_ARMED,
+    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
     .max_damage = 50, .attack_value = 5, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_FORT_JAVELIN] = {
-    .category = FIGURE_CATEGORY_ARMED,
+    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
     .max_damage = 80, .attack_value = 4, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 4, .missile_delay = 100
     },
     [FIGURE_FORT_MOUNTED] = {
-    .category = FIGURE_CATEGORY_ARMED,
+    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
     .max_damage = 120, .attack_value = 8, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_FORT_LEGIONARY] = {
-    .category = FIGURE_CATEGORY_ARMED,
+    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
     .max_damage = 150, .attack_value = 10, .defense_value = 2,
     .missile_defense_value = 0, .missile_attack_value = 2, .missile_delay = 150
     },
@@ -77,57 +77,57 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_ACTOR] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT,
     .max_damage = 20, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_GLADIATOR] = {
-    .category = FIGURE_CATEGORY_ARMED,
+    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT,
     .max_damage = 100, .attack_value = 9, .defense_value = 2,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_LION_TAMER] = {
-    .category = FIGURE_CATEGORY_ARMED,
+    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT,
     .max_damage = 100, .attack_value = 15, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_CHARIOTEER] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT,
     .max_damage = 20, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_TRADE_CARAVAN] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
     .max_damage = 10, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_TRADE_SHIP] = {
-    .category = FIGURE_CATEGORY_INACTIVE,
+    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_INDUSTRY,
     .max_damage = 0, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_TRADE_CARAVAN_DONKEY] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
     .max_damage = 10, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_PROTESTER] = {
-    .category = FIGURE_CATEGORY_CRIMINAL,
+    .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_HOSTILE | FIGURE_CATEGORY_CITIZEN,
     .max_damage = 12, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_CRIMINAL] = {
-    .category = FIGURE_CATEGORY_CRIMINAL,
+    .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_HOSTILE | FIGURE_CATEGORY_CITIZEN,
     .max_damage = 12, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_RIOTER] = {
-    .category = FIGURE_CATEGORY_CRIMINAL,
+    .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_HOSTILE | FIGURE_CATEGORY_CITIZEN,
     .max_damage = 12, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_FISHING_BOAT] = {
-    .category = FIGURE_CATEGORY_INACTIVE,
+    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_INDUSTRY,
     .max_damage = 0, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
@@ -142,37 +142,37 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_SCHOOL_CHILD] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_EDUCATION,
     .max_damage = 10, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_TEACHER] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_EDUCATION,
     .max_damage = 20, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_LIBRARIAN] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_EDUCATION,
     .max_damage = 20, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_BARBER] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_HEALTH,
     .max_damage = 20, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_BATHHOUSE_WORKER] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_HEALTH,
     .max_damage = 20, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_DOCTOR] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_HEALTH,
     .max_damage = 20, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_SURGEON] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_HEALTH,
     .max_damage = 20, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
@@ -187,12 +187,12 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_FLOTSAM] = {
-    .category = FIGURE_CATEGORY_INACTIVE,
+    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_EFFECT,
     .max_damage = 0, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_DOCKER] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
     .max_damage = 20, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
@@ -207,12 +207,12 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_INDIGENOUS_NATIVE] = {
-    .category = FIGURE_CATEGORY_NATIVE,
+    .category = FIGURE_CATEGORY_NATIVE | FIGURE_CATEGORY_HOSTILE,
     .max_damage = 40, .attack_value = 6, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_TOWER_SENTRY] = {
-    .category = FIGURE_CATEGORY_ARMED,
+    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
     .max_damage = 50, .attack_value = 6, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 6, .missile_delay = 50
     },
@@ -292,27 +292,27 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
     .missile_defense_value = 2, .missile_attack_value = 2, .missile_delay = 150
     },
     [FIGURE_NATIVE_TRADER] = {
-    .category = FIGURE_CATEGORY_NATIVE,
+    .category = FIGURE_CATEGORY_NATIVE | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
     .max_damage = 40, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_ARROW] = {
-    .category = FIGURE_CATEGORY_INACTIVE,
+    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_PROJECTILE,
     .max_damage = 100, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 12, .missile_delay = 0
     },
     [FIGURE_JAVELIN] = {
-    .category = FIGURE_CATEGORY_INACTIVE,
+    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_PROJECTILE,
     .max_damage = 100, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 20, .missile_delay = 0
     },
     [FIGURE_BOLT] = {
-    .category = FIGURE_CATEGORY_INACTIVE,
+    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_PROJECTILE,
     .max_damage = 100, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 200, .missile_delay = 0
     },
     [FIGURE_BALLISTA] = {
-    .category = FIGURE_CATEGORY_INACTIVE,
+    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_PROJECTILE,
     .max_damage = 100, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 200
     },
@@ -322,12 +322,12 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_MISSIONARY] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_EDUCATION,
     .max_damage = 20, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_FISH_GULLS] = {
-    .category = FIGURE_CATEGORY_INACTIVE,
+    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_EFFECT,
     .max_damage = 100, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
@@ -347,7 +347,7 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_WOLF] = {
-    .category = FIGURE_CATEGORY_AGGRESSIVE_ANIMAL,
+    .category = FIGURE_CATEGORY_AGGRESSIVE_ANIMAL | FIGURE_CATEGORY_ANIMAL,
     .max_damage = 80, .attack_value = 8, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
@@ -357,32 +357,32 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_SPEAR] = {
-    .category = FIGURE_CATEGORY_INACTIVE,
+    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_PROJECTILE,
     .max_damage = 100, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 10, .missile_delay = 0
     },
     [FIGURE_HIPPODROME_HORSES] = {
-    .category = FIGURE_CATEGORY_INACTIVE,
+    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_EFFECT,
     .max_damage = 100, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_WORK_CAMP_WORKER] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
     .max_damage = 20, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_WORK_CAMP_SLAVE] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
     .max_damage = 20, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_WORK_CAMP_ARCHITECT] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
     .max_damage = 20, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_MESS_HALL_SUPPLIER] = {
-    .category = FIGURE_CATEGORY_ARMED,
+    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
     .max_damage = 70, .attack_value = 8, .defense_value = 1,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
@@ -397,12 +397,12 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_BARKEEP] = {
-    .category = FIGURE_CATEGORY_INACTIVE,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT,
     .max_damage = 100, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_BARKEEP_SUPPLIER] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT,
     .max_damage = 20, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
@@ -412,42 +412,42 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_WATCHMAN] = {
-    .category = FIGURE_CATEGORY_ARMED,
+    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
     .max_damage = 50, .attack_value = 6, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 6, .missile_delay = 50
     },
     [FIGURE_WATCHTOWER_ARCHER] = {
-    .category = FIGURE_CATEGORY_ARMED,
+    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
     .max_damage = 10, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 40
     },
     [FIGURE_FRIENDLY_ARROW] = {
-    .category = FIGURE_CATEGORY_INACTIVE,
+    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_PROJECTILE,
     .max_damage = 100, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 10, .missile_delay = 0
     },
     [FIGURE_CARAVANSERAI_SUPPLIER] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
     .max_damage = 20, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_CRIMINAL_ROBBER] = {
-    .category = FIGURE_CATEGORY_CRIMINAL,
+    .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_HOSTILE,
     .max_damage = 12, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_CRIMINAL_LOOTER] = {
-    .category = FIGURE_CATEGORY_CRIMINAL,
+    .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_HOSTILE,
     .max_damage = 12, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_CARAVANSERAI_COLLECTOR] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
     .max_damage = 20, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_LIGHTHOUSE_SUPPLIER] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
     .max_damage = 20, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
@@ -457,12 +457,12 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_DEPOT_CART_PUSHER] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
     .max_damage = 20, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_FORT_INFANTRY] = {
-    .category = FIGURE_CATEGORY_ARMED,
+    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
     .max_damage = 110, .attack_value = 8, .defense_value = 1,
     .missile_defense_value = 2, .missile_attack_value = 0, .missile_delay = 0
     },
@@ -472,7 +472,7 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_FORT_ARCHER] = {
-    .category = FIGURE_CATEGORY_ARMED,
+    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
     .max_damage = 90, .attack_value = 6, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 4, .missile_delay = 50
     },
@@ -482,7 +482,7 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
     .missile_defense_value = 20, .missile_attack_value = 100, .missile_delay = 200
     },
     [FIGURE_CATAPULT_MISSILE] = {
-    .category = FIGURE_CATEGORY_INACTIVE,
+    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_PROJECTILE,
     .max_damage = 100, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 200, .missile_delay = 0
     },
