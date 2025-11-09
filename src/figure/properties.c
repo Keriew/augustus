@@ -112,17 +112,17 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_PROTESTER] = {
-    .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_HOSTILE | FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_HOSTILE,
     .max_damage = 12, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_CRIMINAL] = {
-    .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_HOSTILE | FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_HOSTILE,
     .max_damage = 12, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_RIOTER] = {
-    .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_HOSTILE | FIGURE_CATEGORY_CITIZEN,
+    .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_HOSTILE,
     .max_damage = 12, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
@@ -432,12 +432,12 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_CRIMINAL_ROBBER] = {
-    .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_HOSTILE,
+    .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_HOSTILE,
     .max_damage = 12, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
     [FIGURE_CRIMINAL_LOOTER] = {
-    .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_HOSTILE,
+    .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_HOSTILE,
     .max_damage = 12, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     },
