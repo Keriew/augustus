@@ -363,7 +363,7 @@ static void draw_rain(void)
     }
 }
 
-void update_weather()
+void update_weather(void)
 {
 
     render_weather_overlay();

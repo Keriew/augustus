@@ -203,6 +203,24 @@ static int xml_import_create_custom_variable(void)
         return 0;
     }
 
+    // Import optional fields
+    if (xml_parser_has_attribute("visible")) {
+        int visible = xml_parser_get_attribute_int("visible");
+        scenario_custom_variable_set_visibility(id, visible);
+    }
+
+    if (xml_parser_has_attribute("text")) {
+        const char *text = xml_parser_get_attribute_string("text");
+        uint8_t encoded_text[300];
+        encoding_from_utf8(text, encoded_text, 300);
+        scenario_custom_variable_set_text_display(id, encoded_text);
+    }
+
+    if (xml_parser_has_attribute("colour_group")) {
+        int colour_group = xml_parser_get_attribute_int("colour_group");
+        scenario_custom_variable_set_color_group(id, colour_group);
+    }
+
     return 1;
 }
 

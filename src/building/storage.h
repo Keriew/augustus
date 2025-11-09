@@ -229,7 +229,7 @@ void building_storage_toggle_empty_all(int storage_id);
 
 /**
  * Check the empty all flag for the storage
- * @param storage_id Storage id
+ * @param building_id Building id
  */
 int building_storage_get_empty_all(int building_id);
 

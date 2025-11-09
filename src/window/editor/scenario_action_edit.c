@@ -319,12 +319,6 @@ static void set_param_value(int value)
     }
 }
 
-static void set_parameter_route_resource(int value, const uint8_t *name)
-{
-    string_copy(name, data.route_resource_name, MAX_TEXT_LENGTH);
-    set_param_value(value);
-}
-
 static void set_parameter_being_edited(int value)
 {
     data.parameter_being_edited = value;

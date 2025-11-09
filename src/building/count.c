@@ -511,19 +511,19 @@ static void get_min_map_xy(void)
     min_y = map_grid_offset_to_y(map_data.start_offset);
 }
 
-int building_count_roads()
+int building_count_roads(void)
 {
     get_min_map_xy();
     return building_count_roads_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height);
 }
 
-int building_count_highway()
+int building_count_highway(void)
 {
     get_min_map_xy();
     return building_count_highway_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height);
 }
 
-int building_count_plaza()
+int building_count_plaza(void)
 {
     get_min_map_xy();
     return building_count_plaza_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height);

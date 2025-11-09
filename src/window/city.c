@@ -64,7 +64,10 @@ static void draw_topleft_label_with_fragments(int x, int y, const lang_fragment 
 
 int window_city_is_window_cityview(void)
 {
-    return ((window_get_id() >= WINDOW_CITY && window_get_id() <= WINDOW_RACE_BET));
+    int is_regular_cityview = ((window_get_id() >= WINDOW_CITY && window_get_id() <= WINDOW_RACE_BET)
+        && window_get_id() != WINDOW_TOP_MENU);
+    int is_cart_depo_window = 0; // placeholder
+    return is_regular_cityview || is_cart_depo_window;
 }
 
 static void draw_background(void)
@@ -215,12 +218,14 @@ static void draw_time_left(void)
             : TR_CONDITION_TEXT_TIME_LEFT_UNTIL_VICTORY;
         const uint8_t *label_str = lang_get_string(CUSTOM_TRANSLATION, label_id);
 
-        lang_fragment frags[3] = {
+        lang_fragment frags[5] = {
             {.type = LANG_FRAG_TEXT, .text = label_str },
-            {.type = LANG_FRAG_AMOUNT, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_REPEAT_FREQUENCY_YEARS, .number = years_left },
-            {.type = LANG_FRAG_AMOUNT, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_REPEAT_FREQUENCY_MONTHS, .number = months_left }
+            {.type = LANG_FRAG_NUMBER, .text_group = CUSTOM_TRANSLATION, .number = years_left },
+            {.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_REPEAT_FREQUENCY_YEARS},
+            {.type = LANG_FRAG_NUMBER, .text_group = CUSTOM_TRANSLATION, .number = months_left},
+            {.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_REPEAT_FREQUENCY_MONTHS}
         };
-        draw_topleft_label_with_fragments(fps_offset + TOPLEFT_MESSAGES_X, 25, frags, 3, font, COLOR_MASK_NONE);
+        draw_topleft_label_with_fragments(fps_offset + TOPLEFT_MESSAGES_X, 25, frags, 5, font, COLOR_MASK_NONE);
     }
 }
 

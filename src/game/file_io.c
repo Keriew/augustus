@@ -515,6 +515,7 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
         version_data->features.scenario_events = 0;
         version_data->features.scenario_conditions = 0;
         version_data->features.scenario_actions = 0;
+        version_data->features.scenario_formulas = 0;
     }
 
     if (version > SAVE_GAME_LAST_NO_CUSTOM_MESSAGES) {

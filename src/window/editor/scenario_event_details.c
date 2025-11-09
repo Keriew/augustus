@@ -344,17 +344,6 @@ static void stop_input(void)
     string_copy(data.event_name, data.event->name, EVENT_NAME_LENGTH);
 }
 
-static void convert_repeat_interval(void)
-{
-    if (data.event->repeat_interval == REPEAT_INTERVAL_MONTHS) {
-        data.event->repeat_days_min *= 16;
-        data.event->repeat_days_max *= 16;
-    } else if (data.event->repeat_interval == REPEAT_INTERVAL_YEARS) {
-        data.event->repeat_days_min *= 16 * 12;
-        data.event->repeat_days_max *= 16 * 12;
-    }
-}
-
 static void prepare_event(int event_id)
 {
     data.event = scenario_event_get(event_id);

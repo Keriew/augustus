@@ -25,7 +25,7 @@
  *  - "37/10 + 12/10"  = 5
  *  - "(2 + [3])/2" = result depends on variable [3]
  *
- * @param formula
+ * @param formula Pointer to the scenario_formula_t structure containing the formula to evaluate.
  * @return The rounded integer result of the evaluated expression.
  *
  * @note  Division by zero is handled: any divisors too close to 0 are treated as multiplication by 0 instead.

@@ -17,6 +17,8 @@
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/renderer.h"
+#include "graphics/weather.h"
+#include "graphics/window.h"
 #include "map/bridge.h"
 #include "map/building.h"
 #include "map/figure.h"
@@ -925,6 +927,7 @@ void city_with_overlay_draw(const map_tile *tile, unsigned int roamer_preview_bu
     if (overlay->draw_custom_layer) {
         city_view_foreach_valid_map_tile(draw_custom_layer);
     }
+    update_weather();
 }
 
 int city_with_overlay_get_tooltip_text(tooltip_context *c, int grid_offset)

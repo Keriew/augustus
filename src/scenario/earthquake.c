@@ -200,8 +200,8 @@ void scenario_earthquake_process(void)
 {
     // Check if earthquake is disabled or not set
     if (scenario.earthquake.severity == EARTHQUAKE_NONE ||
-        (scenario.earthquake_point.x == -1 || scenario.earthquake_point.y == -1) &&
-        scenario.earthquake.severity != EARTHQUAKE_CUSTOM) {
+        ((scenario.earthquake_point.x == -1 || scenario.earthquake_point.y == -1) &&
+        scenario.earthquake.severity != EARTHQUAKE_CUSTOM)) {
         return;
     }
     // --- Custom earthquake ---

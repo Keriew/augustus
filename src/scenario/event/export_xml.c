@@ -367,6 +367,9 @@ static void export_scenario_variables(buffer *buf)
 
         xml_exporter_add_attribute_encoded_text("name", scenario_custom_variable_get_name(i));
         xml_exporter_add_attribute_int("value", scenario_custom_variable_get_value(i));
+        xml_exporter_add_attribute_int("visible", scenario_custom_variable_is_visible(i));
+        xml_exporter_add_attribute_encoded_text("text", scenario_custom_variable_get_text_display(i));
+        xml_exporter_add_attribute_int("colour_group", scenario_custom_variable_get_color_group(i));
 
         xml_exporter_close_element();
     }

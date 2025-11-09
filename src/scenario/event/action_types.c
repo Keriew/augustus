@@ -345,11 +345,14 @@ int scenario_action_type_building_force_collapse_execute(scenario_action_t *acti
         if (!map_grid_is_valid_offset(current_grid_offset)) {
             continue;
         }
-        if (type == BUILDING_OVERGROWN_GARDENS || type == BUILDING_PLAZA) {
+        if (map_terrain_is(current_grid_offset, (TERRAIN_IMPASSABLE_ENEMY ^ TERRAIN_GARDEN) | TERRAIN_ACCESS_RAMP)) {
+            continue;
+        }
+        if (type == BUILDING_OVERGROWN_GARDENS || type == BUILDING_PLAZA || destroy_all) {
             map_property_clear_plaza_earthquake_or_overgrown_garden(current_grid_offset);
         }
-        if ((type == BUILDING_ROAD || type == BUILDING_GARDENS || type == BUILDING_HIGHWAY ||
-            type == BUILDING_OVERGROWN_GARDENS) && !map_terrain_is(current_grid_offset, TERRAIN_BUILDING)) {
+        if (((type == BUILDING_ROAD || type == BUILDING_GARDENS || type == BUILDING_HIGHWAY ||
+            type == BUILDING_OVERGROWN_GARDENS) && !map_terrain_is(current_grid_offset, TERRAIN_BUILDING)) || destroy_all) {
             int terrain = TERRAIN_ROAD;
             switch (type) {
                 case BUILDING_GARDENS:
@@ -362,30 +365,32 @@ int scenario_action_type_building_force_collapse_execute(scenario_action_t *acti
                 default:
                     break;
             }
-            if (type == BUILDING_HIGHWAY) {
+            if (type == BUILDING_HIGHWAY || destroy_all) {
                 map_tiles_clear_highway(current_grid_offset, 0);
-
-                map_terrain_remove(current_grid_offset, terrain);
             }
-            int building_id = map_building_at(current_grid_offset);
-            if (!building_id) {
-                continue;
+            if (destroy_all) {
+                terrain = TERRAIN_ROAD | TERRAIN_GARDEN | TERRAIN_HIGHWAY;
             }
-            building *b = building_main(building_get(building_id));
-            if (b->type == BUILDING_BURNING_RUIN) {
-                continue;
-            }
-            if ((b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_MOTHBALLED) || b->is_deleted) {
-                continue;
-            }
-            if (destroy_all || b->type == type || (type == BUILDING_MENU_FORT && building_is_fort(b->type))) {
-                building_destroy_by_collapse(b);
-            }
+            map_terrain_remove(current_grid_offset, terrain);
+        }
+        int building_id = map_building_at(current_grid_offset);
+        if (!building_id) {
+            continue;
+        }
+        building *b = building_main(building_get(building_id));
+        if (b->type == BUILDING_BURNING_RUIN) {
+            continue;
+        }
+        if ((b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_MOTHBALLED) || b->is_deleted) {
+            continue;
+        }
+        if (destroy_all || b->type == type || (type == BUILDING_MENU_FORT && building_is_fort(b->type))) {
+            building_destroy_by_collapse(b);
         }
     }
 
     if (type == BUILDING_ROAD || type == BUILDING_GARDENS || type == BUILDING_HIGHWAY ||
-        type == BUILDING_OVERGROWN_GARDENS || type == BUILDING_PLAZA) {
+        type == BUILDING_OVERGROWN_GARDENS || type == BUILDING_PLAZA || destroy_all) {
         map_tiles_update_all_empty_land();
         map_tiles_update_all_meadow();
         map_tiles_update_all_highways();

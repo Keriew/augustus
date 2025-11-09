@@ -54,13 +54,13 @@ int building_granary_get_free_space_amount(building *b)
 }
 
 
-int building_granary_add_import(building *granary, int resource, int amount, int land_trader)
+int building_granary_add_import(building *granary, int resource, int amount, int trader_type)
 {
     if (!resource) {
         return 0; // invalid resource
     }
     building_storage_permission_states permission;
-    switch (land_trader) {
+    switch (trader_type) {
         default:
         case 0: // sea trader
             permission = BUILDING_STORAGE_PERMISSION_DOCK;
@@ -70,7 +70,7 @@ int building_granary_add_import(building *granary, int resource, int amount, int
             break;
         case -1: //native trader
             permission = BUILDING_STORAGE_PERMISSION_NATIVES;
-            land_trader = 1; // native trader is always land trader
+            trader_type = 1; // native trader is always land trader
             break;
     }
     if (!building_storage_get_permission(permission, granary)) {
@@ -81,18 +81,18 @@ int building_granary_add_import(building *granary, int resource, int amount, int
         return 0;
     }
 
-    int price = trade_price_buy(resource, land_trader);
+    int price = trade_price_buy(resource, trader_type);
     city_finance_process_import(price * amount_added);
     return amount_added;
 }
 
-int building_granary_remove_export(building *granary, int resource, int amount, int land_trader)
+int building_granary_remove_export(building *granary, int resource, int amount, int trader_type)
 {
     if (!resource) {
         return 0; // invalid resource
     }
     building_storage_permission_states permission;
-    switch (land_trader) {
+    switch (trader_type) {
         default:
         case 0: // sea trader
             permission = BUILDING_STORAGE_PERMISSION_DOCK;
@@ -102,7 +102,7 @@ int building_granary_remove_export(building *granary, int resource, int amount, 
             break;
         case -1: //native trader
             permission = BUILDING_STORAGE_PERMISSION_NATIVES;
-            land_trader = 1; // native trader is always land trader
+            trader_type = 1; // native trader is always land trader
             break;
     }
     if (!building_storage_get_permission(permission, granary)) {
@@ -112,7 +112,7 @@ int building_granary_remove_export(building *granary, int resource, int amount, 
     if (!removed) {
         return 0;
     }
-    int price = trade_price_sell(resource, land_trader) * removed;
+    int price = trade_price_sell(resource, trader_type) * removed;
     city_finance_process_export(price);
     return removed;
 }
@@ -429,8 +429,7 @@ building *building_granary_get_granary_needing_food(building *source, int resour
 {
 
     int max_distance = config_get(CONFIG_GP_CH_FARMS_DELIVER_CLOSE) ? 64 : INFINITE;
-    building *b;
-    for (b = building_first_of_type(BUILDING_GRANARY); b; b = b->next_of_type) {
+    for (building *b = building_first_of_type(BUILDING_GRANARY); b; b = b->next_of_type) {
         if (b->road_network_id != source->road_network_id || !building_granary_accepts_storage(b, resource, 0)) {
             continue;
         }
@@ -445,7 +444,7 @@ building *building_granary_get_granary_needing_food(building *source, int resour
 
         }
     }
-    return b; // null
+    return 0;
 }
 
 int building_granary_for_storing(int x, int y, int resource, int road_network_id,

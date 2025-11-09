@@ -410,21 +410,6 @@ static int callback_calc_distance_build_aqueduct(int next_offset, int dist, int 
     return 1;
 }
 
-static int map_can_place_initial_reservoir(int grid_offset)
-{
-    if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
-        return 1;
-    } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
-        if (building_get(map_building_at(grid_offset))->type == BUILDING_RESERVOIR) {
-            return 1;
-        } else {
-            return 0;
-        }
-    }
-
-    return 1;
-}
-
 static int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aqueduct)
 {
     if (is_aqueduct && !map_can_place_aqueduct_on_highway(grid_offset, 0)) {

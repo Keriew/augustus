@@ -670,6 +670,8 @@ empire_city_icon_type empire_object_get_random_icon_for_empire_object(full_empir
         cityname = lang_get_string(21, full_obj->city_name_id);
     } else if (full_obj->city_custom_name[0] != 0) {
         cityname = full_obj->city_custom_name;
+    } else {
+        cityname = string_from_ascii("Invalid city name");
     } // fetch name
 
     if (is_name_rome(cityname)) { // Rome
