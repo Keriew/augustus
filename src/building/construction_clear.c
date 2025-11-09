@@ -158,7 +158,7 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
                 items_placed++;
                 map_aqueduct_remove(grid_offset);
             } else if (map_terrain_is(grid_offset, TERRAIN_WATER)) { //only bridges fall here
-                if (!measure_only && map_bridge_has_figures(grid_offset)) {
+                if (!measure_only && (map_bridge_has_figures(grid_offset) && !config_get(CONFIG_GP_CH_ALWAYS_DESTROY_BRIDGES))) {
                     city_warning_show(WARNING_PEOPLE_ON_BRIDGE, NEW_WARNING_SLOT);
                 } else if (confirm.bridge_confirmed == 1) {
                     map_bridge_remove(grid_offset, measure_only);

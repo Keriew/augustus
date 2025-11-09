@@ -1775,7 +1775,9 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_FULL, "Alle"},
     {TR_CONFIG_CLEAR_WARNINGS_RIGHTCLICK, "Rechtsklick löscht alle Warnungen"},
     {TR_CONFIG_GP_CH_STORAGE_REQUESTS_RESPECT_MAINTAIN, "Caesars Forderungen respektieren 'Behalten'"},
-    {TR_CONFIG_ENABLE_MARKET_RANGE, "Schalte Reichweite von Märkten ein"}
+    {TR_CONFIG_ENABLE_MARKET_RANGE, "Schalte Reichweite von Märkten ein"},
+    {TR_CONFIG_GP_CH_ALWAYS_DESTROY_BRIDGES, "Immer in der Lage sein Brücken abzureißen"},
+    {TR_CONFIG_CATEGORY_MANAGEMENT_DESTRUCTION, "Zerstörung"}
 };
 
 void translation_german(const translation_string **strings, int *num_strings)

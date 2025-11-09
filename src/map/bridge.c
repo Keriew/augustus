@@ -3,7 +3,9 @@
 #include "building/building.h"
 #include "building/type.h"
 #include "city/view.h"
+#include "core/config.h"
 #include "core/direction.h"
+#include "figure/figure.h"
 #include "game/undo.h"
 #include "map/building.h"
 #include "map/building_tiles.h"
@@ -315,7 +317,12 @@ int map_bridge_find_start_and_direction(int grid_offset, int *axis, int *axis_di
     return start;
 }
 
-
+static int figure_on_bridge_delete(figure *f) {
+    if (!figure_is_category(f, FIGURE_CATEGORY_INACTIVE)) {
+        figure_delete(f);
+    }
+    return 0;
+}
 
 void map_bridge_remove(int grid_offset, int mark_deleted)
 {
@@ -343,6 +350,9 @@ void map_bridge_remove(int grid_offset, int mark_deleted)
         if (mark_deleted) {
             map_property_mark_deleted(current);
         } else {
+            if (config_get(CONFIG_GP_CH_ALWAYS_DESTROY_BRIDGES)) {
+                map_figure_foreach_until(current, figure_on_bridge_delete);
+            }
             map_sprite_clear_tile(current);
             map_terrain_remove(current, TERRAIN_ROAD);
             map_terrain_remove(current, TERRAIN_BUILDING);
