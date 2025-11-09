@@ -132,7 +132,7 @@ static int show_figure_crime(const figure *f)
 {
     const figure_properties *props = figure_properties_for_type(f->type);
     return props->category == FIGURE_CATEGORY_ARMED || props->category == FIGURE_CATEGORY_CRIMINAL
-        || f->type == FIGURE_ARROW || f->type == FIGURE_JAVELIN || f->type == FIGURE_BOLT;
+        || props->category == FIGURE_CATEGORY_PROJECTILE;
 }
 
 static int show_figure_problems(const figure *f)
@@ -157,12 +157,8 @@ static int show_figure_native(const figure *f)
 static int show_figure_enemy(const figure *f)
 {
     const figure_properties *props = figure_properties_for_type(f->type);
-    return props->category == FIGURE_CATEGORY_HOSTILE || props->category == FIGURE_CATEGORY_NATIVE
-        || props->category == FIGURE_CATEGORY_AGGRESSIVE_ANIMAL
-        || props->category == FIGURE_CATEGORY_ARMED
-        || f->type == FIGURE_BALLISTA
-        || f->type == FIGURE_ARROW || f->type == FIGURE_JAVELIN || f->type == FIGURE_BOLT
-        || f->type == FIGURE_CATAPULT_MISSILE;
+    return props->category == FIGURE_CATEGORY_HOSTILE || props->category == FIGURE_CATEGORY_AGGRESSIVE_ANIMAL
+        || props->category == FIGURE_CATEGORY_ARMED || props->category == FIGURE_CATEGORY_PROJECTILE;
 }
 
 static int get_column_height_fire(const building *b)
