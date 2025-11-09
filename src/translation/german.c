@@ -1777,7 +1777,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_GP_CH_STORAGE_REQUESTS_RESPECT_MAINTAIN, "Caesars Forderungen respektieren 'Behalten'"},
     {TR_CONFIG_ENABLE_MARKET_RANGE, "Schalte Reichweite von Märkten ein"},
     {TR_CONFIG_GP_CH_ALWAYS_DESTROY_BRIDGES, "Immer in der Lage sein Brücken abzureißen"},
-    {TR_CONFIG_CATEGORY_MANAGEMENT_DESTRUCTION, "Zerstörung"}
+    {TR_CONFIG_CATEGORY_MANAGEMENT_DESTRUCTION, "Zerstörung"},
     {TR_PARAMETER_TYPE_FORMULA, "Formel" },
     {TR_CONDITION_TYPE_CHECK_FORMULA, "Formel Berechnung" },
     {TR_ACTION_TYPE_CUSTOM_VARIABLE_FORMULA, "Wert der benutzerdefinierten Variablen änderen (Formel)" },
