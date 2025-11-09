@@ -360,7 +360,7 @@ void map_bridge_remove(int grid_offset, int mark_deleted)
 }
 
 
-int map_bridge_count_figures(int grid_offset)
+int map_bridge_has_figures(int grid_offset)
 {
     if (!map_is_bridge(grid_offset)) {
         return 0;
@@ -378,18 +378,14 @@ int map_bridge_count_figures(int grid_offset)
 
     unsigned int building_id = map_building_at(start);
     int current = start;
-    int figures = 0;
     // find lower end of the bridge
     while (map_is_bridge(current) && map_building_at(current) == building_id) {
-        if (map_has_figure_at(current)) {
-            figure *f = figure_get(map_figure_at(current));
-            if (f->type != FIGURE_FLOTSAM && f->type != FIGURE_FISH_GULLS) {
-                figures++;
-            }
+        if (map_has_figure_category_at(current, FIGURE_CATEGORY_ALL ^ FIGURE_CATEGORY_INACTIVE)) {
+            return 1;
         }
         current += delta;
     }
-    return figures;
+    return 0;
 }
 
 void map_bridge_update_after_rotate(int counter_clockwise)
