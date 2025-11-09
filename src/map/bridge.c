@@ -317,13 +317,6 @@ int map_bridge_find_start_and_direction(int grid_offset, int *axis, int *axis_di
     return start;
 }
 
-static int figure_on_bridge_delete(figure *f) {
-    if (!figure_is_category(f, FIGURE_CATEGORY_INACTIVE)) {
-        figure_delete(f);
-    }
-    return 0;
-}
-
 void map_bridge_remove(int grid_offset, int mark_deleted)
 {
     if (!map_is_bridge(grid_offset)) {
@@ -351,7 +344,7 @@ void map_bridge_remove(int grid_offset, int mark_deleted)
             map_property_mark_deleted(current);
         } else {
             if (config_get(CONFIG_GP_CH_ALWAYS_DESTROY_BRIDGES)) {
-                map_figure_foreach_until(current, figure_on_bridge_delete);
+                map_kill_figures_category_at(current, FIGURE_CATEGORY_ALL ^ FIGURE_CATEGORY_INACTIVE);
             }
             map_sprite_clear_tile(current);
             map_terrain_remove(current, TERRAIN_ROAD);

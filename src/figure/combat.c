@@ -414,7 +414,7 @@ static int can_attack_animal(figure_category category, figure_category opponent_
     if (config_get(CONFIG_GP_CH_AUTO_KILL_ANIMALS)) {
         return 1;
     }
-    if (l->target_formation_id && l->target_formation_id == opponent->formation_id || FIGURE_CATEGORY_AGGRESSIVE_ANIMAL) {
+    if ((l->target_formation_id && l->target_formation_id == opponent->formation_id) || FIGURE_CATEGORY_AGGRESSIVE_ANIMAL) {
         return 1;
     }
     return 0;

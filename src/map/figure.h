@@ -50,6 +50,20 @@ int map_count_figures_category_at(int grid_offset, figure_category category);
  */
 int map_count_figures_category_in_area(int minx, int miny, int maxx, int maxy, figure_category category);
 
+/**
+ * Kills all figures of a given category at a given grid_offset
+ * @param grid_offset Map offset
+ * @param category The categories to be checked for
+ */
+void map_kill_figures_category_at(int grid_offset, figure_category category);
+
+/**
+ * Calls map_kill_figures_category_at for every tile in a given area
+ * @params minx, miny, maxx, maxy Specify the area
+ * @param category The categories to be checked for
+ */
+void map_kill_figures_category_in_area(int minx, int miny, int maxx, int maxy, figure_category category);
+
 void map_figure_add(figure *f);
 
 void map_figure_update(figure *f);
@@ -57,6 +71,8 @@ void map_figure_update(figure *f);
 void map_figure_delete(figure *f);
 
 int map_figure_foreach_until(int grid_offset, int (*callback)(figure *f));
+
+void map_figure_foreach(int grid_offset, void (*callback)(figure *f));
 
 /**
  * Clears the map

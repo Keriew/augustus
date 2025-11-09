@@ -25,12 +25,20 @@ static int has_category(figure *f)
     return figure_is_category(f, data.category);
 }
 
-static int count_category(figure *f)
+static void count_category(figure *f)
 {
     if (figure_is_category(f, data.category)) {
         data.count++;
     }
-    return 0;
+}
+
+static void kill_category(figure *f)
+{
+    map_figure_update(f);
+    if (figure_is_category(f, data.category)) {
+        figure_delete(f);
+    }
+    map_figure_update(f);
 }
 
 int map_has_figure_category_at(int grid_offset, figure_category category)
@@ -58,7 +66,7 @@ int map_count_figures_category_at(int grid_offset, figure_category category)
 {
     data.count = 0;
     data.category = category;
-    map_figure_foreach_until(grid_offset, count_category);
+    map_figure_foreach(grid_offset, count_category);
     return data.count;
 }
 
@@ -73,6 +81,23 @@ int map_count_figures_category_in_area(int minx, int miny, int maxx, int maxy, f
         }
     }
     return count;
+}
+
+void map_kill_figures_category_at(int grid_offset, figure_category category)
+{
+    data.category = category;
+    map_figure_foreach(grid_offset, kill_category);
+}
+
+void map_kill_figures_category_in_area(int minx, int miny, int maxx, int maxy, figure_category category)
+{
+    int grid_offset;
+    for (int yy = miny; yy <= maxy; yy++) {
+        for (int xx = minx; xx <= maxx; xx++) {
+            grid_offset = map_grid_offset(minx, miny);
+            map_kill_figures_category_at(grid_offset, category);
+        }
+    }
 }
 
 static void cap_figures_on_same_tile_index(figure *f)
@@ -155,6 +180,18 @@ int map_figure_foreach_until(int grid_offset, int (*callback)(figure *f))
         }
     }
     return 0;
+}
+
+void map_figure_foreach(int grid_offset, void (*callback)(figure *f))
+{
+    if (figures.items[grid_offset] > 0) {
+        int figure_id = figures.items[grid_offset];
+        while (figure_id) {
+            figure *f = figure_get(figure_id);
+            callback(f);
+            figure_id = f->next_figure_id_on_same_tile;
+        }
+    }
 }
 
 void map_figure_clear(void)
