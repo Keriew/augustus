@@ -34,11 +34,9 @@ static void count_category(figure *f)
 
 static void kill_category(figure *f)
 {
-    map_figure_update(f);
     if (figure_is_category(f, data.category)) {
         figure_delete(f);
     }
-    map_figure_update(f);
 }
 
 int map_has_figure_category_at(int grid_offset, figure_category category)
