@@ -170,11 +170,12 @@ int map_figure_foreach_until(int grid_offset, int (*callback)(figure *f))
         int figure_id = figures.items[grid_offset];
         while (figure_id) {
             figure *f = figure_get(figure_id);
+            unsigned int next_id_on_tile = f->next_figure_id_on_same_tile;
             int result = callback(f);
             if (result) {
                 return result;
             }
-            figure_id = f->next_figure_id_on_same_tile;
+            figure_id = next_id_on_tile;
         }
     }
     return 0;
@@ -186,8 +187,9 @@ void map_figure_foreach(int grid_offset, void (*callback)(figure *f))
         int figure_id = figures.items[grid_offset];
         while (figure_id) {
             figure *f = figure_get(figure_id);
+            unsigned int next_id_on_tile = f->next_figure_id_on_same_tile;
             callback(f);
-            figure_id = f->next_figure_id_on_same_tile;
+            figure_id = next_id_on_tile;
         }
     }
 }
