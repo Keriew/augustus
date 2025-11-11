@@ -1,6 +1,7 @@
 #include "properties.h"
 
 #include "assets/assets.h"
+#include "building/building.h"
 #include "core/image_group.h"
 #include "sound/city.h"
 #include "translation/translation.h"
@@ -9,7 +10,15 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#define NUM_HOUSES 20
+
+#define SIZE_BUILDINGS sizeof(model_building) * BUILDING_TYPE_MAX
+#define SIZE_HOUSES sizeof(model_house) * NUM_HOUSES
+
+#define BUFFER_SIZE SIZE_BUILDINGS + SIZE_HOUSES
+
 static model_building buildings[BUILDING_TYPE_MAX];
+static model_house houses[NUM_HOUSES];
 
 // PROPERTIES
 
@@ -2223,7 +2232,7 @@ const building_properties *building_properties_for_type(building_type type)
 static model_building NOTHING = { .cost = 0, .desirability_value = 0, .desirability_step = 0,
  .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
 
-void model_reset(void)
+void model_reset_buildings(void)
 {
     for (building_type type = BUILDING_ANY; type < BUILDING_TYPE_MAX; type++) {
         const building_properties *props = &properties[type];
@@ -2231,29 +2240,46 @@ void model_reset(void)
             ((type != BUILDING_GRAND_GARDEN && type != BUILDING_DOLPHIN_FOUNTAIN) ||
             type == BUILDING_CLEAR_LAND || type == BUILDING_REPAIR_LAND)) {
             buildings[type] = props->building_model_data;
+            if (building_is_house(type)) {
+                houses[type] = props->house_model_data;
+            }
         } else {
             buildings[type] = NOTHING;
         }
     }
 }
 
+void model_reset_houses(void)
+{
+    for (house_level level = HOUSE_MIN; level < HOUSE_MAX; level++) {
+        const building_properties *props = &properties[level + 10];
+        houses[level] = props->house_model_data;
+    }
+}
+
+void model_reset(void)
+{
+    model_reset_buildings();
+    model_reset_houses();
+}
+
 void model_save_model_data(buffer *buf)
 {
-    int buf_size = sizeof(model_building) * BUILDING_TYPE_MAX;
-    uint8_t *buf_data = malloc(buf_size);
+    uint8_t *buf_data = malloc(BUFFER_SIZE);
 
-    buffer_init(buf, buf_data, buf_size);
+    buffer_init(buf, buf_data, BUFFER_SIZE);
 
-    buffer_write_raw(buf, buildings, buf_size);
+    buffer_write_raw(buf, buildings, BUFFER_SIZE - SIZE_HOUSES);
+    buffer_write_raw(buf, houses, BUFFER_SIZE - SIZE_BUILDINGS);
 }
+
 void model_load_model_data(buffer *buf)
 {
-    int buf_size = sizeof(model_building) * BUILDING_TYPE_MAX;
-
-    buffer_read_raw(buf, buildings, buf_size);
+    buffer_read_raw(buf, buildings, BUFFER_SIZE - SIZE_HOUSES);
+    buffer_read_raw(buf, houses, BUFFER_SIZE - SIZE_BUILDINGS);
 }
 
-const model_house *model_get_house(house_level level)
+model_house *model_get_house(house_level level)
 {
     return &properties[level + 10].house_model_data;
 }

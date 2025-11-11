@@ -1909,6 +1909,25 @@ static translation_string all_strings[] = {
     {TR_BUILDING_HOUSE_LARGE_PALACE,  "Large Palace"},
     {TR_BUILDING_HOUSE_LUXURY_PALACE, "Luxury Palace"},
     {TR_CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES, "Show reservoir range when building fountains"},
+    {TR_ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA, "Change house model data"},
+    {TR_PARAMETER_DEVOLVE_DESIRABILITY, "Devolve desirability"},
+    {TR_PARAMETER_EVOLVE_DESIRABILITY, "Evolve desirability"},
+    {TR_PARAMETER_ENTERTAINMENT, "Entertainment"},
+    {TR_PARAMETER_WATER, "Water"},
+    {TR_PARAMETER_RELIGION, "Religion"},
+    {TR_PARAMETER_EDUCATION, "Education"},
+    {TR_PARAMETER_BARBER, "Barber"},
+    {TR_PARAMETER_BATHHOUSE, "Bathhouse"},
+    {TR_PARAMETER_HEALTH, "Health"},
+    {TR_PARAMETER_FOOD_TYPES, "Food types"},
+    {TR_PARAMETER_POTTERY, "Pottery"},
+    {TR_PARAMETER_FURNITURE, "Furniture"},
+    {TR_PARAMETER_OIL, "Oil"},
+    {TR_PARAMETER_WINE, "Wine"},
+    {TR_PARAMETER_PROSPERITY, "Prosperity"},
+    {TR_PARAMETER_MAX_PEOPLE, "Max people"},
+    {TR_PARAMETER_TAX_MULTIPLIER, "Tax multiplier"},
+    {TR_PARAMETER_TYPE_HOUSING_TYPE, "Housing level"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

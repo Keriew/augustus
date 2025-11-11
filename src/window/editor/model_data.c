@@ -111,7 +111,7 @@ static void button_static_click(const generic_button *button)
             window_file_dialog_show(FILE_TYPE_MODEL_DATA, FILE_DIALOG_SAVE);
             break;
         case 1:
-            model_reset();
+            model_reset_buildings();
             resource_init();
             window_request_refresh();
             break;

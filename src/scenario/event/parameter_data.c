@@ -301,12 +301,10 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm3 = {.name = "terrain",            .type = PARAMETER_TYPE_TERRAIN,    .key = TR_PARAMETER_TERRAIN },
                                         .xml_parm4 = {.name = "add",                .type = PARAMETER_TYPE_BOOLEAN,    .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_ADD }, },
     [ACTION_TYPE_CHANGE_MODEL_DATA] = {.type = ACTION_TYPE_CHANGE_MODEL_DATA,
-                                        .xml_attr = {.name = "change_model_data",   .type =
-                                        PARAMETER_TYPE_TEXT,       .key = TR_ACTION_TYPE_CHANGE_MODEL_DATA },
+                                        .xml_attr = {.name = "change_model_data",   .type = PARAMETER_TYPE_TEXT,       .key = TR_ACTION_TYPE_CHANGE_MODEL_DATA },
                                         .xml_parm1 = {.name = "model",              .type =
                                         PARAMETER_TYPE_MODEL,   .key = TR_PARAMETER_MODEL },
-                                        .xml_parm2 = {.name = "data_type",          .type =
-                                        PARAMETER_TYPE_DATA_TYPE,          .key = TR_PARAMETER_DATA_TYPE },
+                                        .xml_parm2 = {.name = "data_type",          .type = PARAMETER_TYPE_DATA_TYPE,          .key = TR_PARAMETER_DATA_TYPE },
                                         .xml_parm3 = {.name = "amount",        .type = PARAMETER_TYPE_FORMULA,          .min_limit = NEGATIVE_UNLIMITED,      .max_limit = UNLIMITED, .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm4 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,            .min_limit = 0,           .max_limit = 1,                    .key = TR_PARAMETER_SET_TO_VALUE }, },
     [ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY] = {.type = ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY,
@@ -347,6 +345,14 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm2 = {.name = "rate",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = 0,
                                             .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
                                         .xml_parm3 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,
+                                            .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, },
+    [ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA] = {.type = ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA,
+                                        .xml_attr = {.name = "change_house_model_data",  .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA},
+                                        .xml_parm1 = {.name = "housing_level",       .type = PARAMETER_TYPE_HOUSING_TYPE,   .key = TR_PARAMETER_TYPE_HOUSING_TYPE },
+                                        .xml_parm2 = {.name = "house_data_type",     .type = PARAMETER_TYPE_HOUSE_DATA_TYPE, .key = TR_PARAMETER_DATA_TYPE},
+                                        .xml_parm3 = {.name = "value",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = 0,
+                                            .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm4 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,
                                             .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, }
 };
 
@@ -681,25 +687,48 @@ static special_attribute_mapping_t special_attribute_mappings_climate[] =
 static special_attribute_mapping_t special_attribute_mappings_terrain[] =
 {
     {.type = PARAMETER_TYPE_TERRAIN,            .text = "Water",            .value = TERRAIN_WATER,   .key = TR_PARAMETER_TERRAIN_WATER },
-    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Rock",             .value = TERRAIN_ROCK,  .key = TR_PARAMETER_TERRAIN_ROCK },
-    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Fertile Ground",   .value = TERRAIN_MEADOW,    .key = TR_PARAMETER_TERRAIN_MEADOW },
-    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Tree",             .value = TERRAIN_TREE,     .key = TR_PARAMETER_TERRAIN_TREE },
-    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Shrub",            .value = TERRAIN_SHRUB,    .key = TR_PARAMETER_TERRAIN_SHRUB },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Rock",             .value = TERRAIN_ROCK,    .key = TR_PARAMETER_TERRAIN_ROCK },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Fertile Ground",   .value = TERRAIN_MEADOW,  .key = TR_PARAMETER_TERRAIN_MEADOW },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Tree",             .value = TERRAIN_TREE,    .key = TR_PARAMETER_TERRAIN_TREE },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Shrub",            .value = TERRAIN_SHRUB,   .key = TR_PARAMETER_TERRAIN_SHRUB },
 };
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_TERRAIN_SIZE (sizeof(special_attribute_mappings_terrain) / sizeof(special_attribute_mapping_t))
 
 special_attribute_mapping_t special_attribute_mappings_data_type[] =
 {
-    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "cost",                     .value = MODEL_COST,                                                   .key = TR_PARAMETER_COST },
-    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "desirability_value",       .value = MODEL_DESIRABILITY_VALUE,                   .key = TR_PARAMETER_DESIRABILITY_VALUE },
-    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "desirability_step",        .value = MODEL_DESIRABILITY_STEP,                    .key = TR_PARAMETER_DESIRABILITY_STEP },
-    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "desirability_step_size",   .value = MODEL_DESIRABILITY_STEP_SIZE,               .key = TR_PARAMETER_DESIRABILITY_STEP_SIZE },
-    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "desirability_range",       .value = MODEL_DESIRABILITY_RANGE,                   .key = TR_PARAMETER_DESIRABILITY_RANGE },
-    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "laborers",                 .value = MODEL_LABORERS,                                               .key = TR_PARAMETER_LABORERS },
+    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "cost",                     .value = MODEL_COST,                    .key = TR_PARAMETER_COST },
+    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "desirability_value",       .value = MODEL_DESIRABILITY_VALUE,      .key = TR_PARAMETER_DESIRABILITY_VALUE },
+    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "desirability_step",        .value = MODEL_DESIRABILITY_STEP,       .key = TR_PARAMETER_DESIRABILITY_STEP },
+    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "desirability_step_size",   .value = MODEL_DESIRABILITY_STEP_SIZE,  .key = TR_PARAMETER_DESIRABILITY_STEP_SIZE },
+    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "desirability_range",       .value = MODEL_DESIRABILITY_RANGE,      .key = TR_PARAMETER_DESIRABILITY_RANGE },
+    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "laborers",                 .value = MODEL_LABORERS,                .key = TR_PARAMETER_LABORERS },
 };
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_DATA_TYPE_SIZE (sizeof(special_attribute_mappings_data_type) / sizeof(special_attribute_mapping_t))
+
+special_attribute_mapping_t special_attribute_mappings_house_data_type[] =
+{
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "devolve_desirability",   .value = MODEL_DEVOLVE_DESIRABILITY,    .key = TR_PARAMETER_DEVOLVE_DESIRABILITY },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "evolve_desirability",    .value = MODEL_EVOLVE_DESIRABILITY,     .key = TR_PARAMETER_EVOLVE_DESIRABILITY },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "entertainment",          .value = MODEL_ENTERTAINMENT,           .key = TR_PARAMETER_ENTERTAINMENT },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "water",                  .value = MODEL_WATER,                   .key = TR_PARAMETER_WATER },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "religion",               .value = MODEL_RELIGION,                .key = TR_PARAMETER_RELIGION },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "education",              .value = MODEL_EDUCATION,               .key = TR_PARAMETER_EDUCATION },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "barber",                 .value = MODEL_BARBER,                  .key = TR_PARAMETER_BARBER },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "bathhouse",              .value = MODEL_BATHHOUSE,               .key = TR_PARAMETER_BATHHOUSE },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "health",                 .value = MODEL_HEALTH,                  .key = TR_PARAMETER_HEALTH },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "food_types",             .value = MODEL_FOOD_TYPES,              .key = TR_PARAMETER_FOOD_TYPES },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "pottery",                .value = MODEL_POTTERY,                 .key = TR_PARAMETER_POTTERY },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "oil",                    .value = MODEL_OIL,                     .key = TR_PARAMETER_OIL },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "furniture",              .value = MODEL_FURNITURE,               .key = TR_PARAMETER_FURNITURE },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "wine",                   .value = MODEL_WINE,                    .key = TR_PARAMETER_WINE },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "prosperity",             .value = MODEL_PROSPERITY,              .key = TR_PARAMETER_PROSPERITY },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "max_people",             .value = MODEL_MAX_PEOPLE,              .key = TR_PARAMETER_MAX_PEOPLE },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "tax_multiplier",         .value = MODEL_TAX_MULTIPLIER,          .key = TR_PARAMETER_TAX_MULTIPLIER },
+};
+
+#define SPECIAL_ATTRIBUTE_MAPPINGS_HOUSE_DATA_TYPE_SIZE (sizeof(special_attribute_mappings_house_data_type) / sizeof(special_attribute_mapping_t))
 
 static special_attribute_mapping_t special_attribute_mappings_percentage[] = {
     {.type = PARAMETER_TYPE_PERCENTAGE, .text = "Percentage", .value = 0, .key = TR_PARAMETER_PERCENTAGE },
@@ -968,6 +997,8 @@ special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mappin
             return &special_attribute_mappings_terrain[index];
         case PARAMETER_TYPE_DATA_TYPE:
             return &special_attribute_mappings_data_type[index];
+        case PARAMETER_TYPE_HOUSE_DATA_TYPE:
+            return &special_attribute_mappings_house_data_type[index];
         case PARAMETER_TYPE_MODEL:
             generate_model_mappings();
             return &special_attribute_mappings_model_buildings[index];
@@ -1032,6 +1063,8 @@ int scenario_events_parameter_data_get_mappings_size(parameter_type type)
             return SPECIAL_ATTRIBUTE_MAPPINGS_TERRAIN_SIZE;
         case PARAMETER_TYPE_DATA_TYPE:
             return SPECIAL_ATTRIBUTE_MAPPINGS_DATA_TYPE_SIZE;
+        case PARAMETER_TYPE_HOUSE_DATA_TYPE:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_HOUSE_DATA_TYPE_SIZE;
         case PARAMETER_TYPE_MODEL:
             generate_model_mappings();
             return special_attribute_mappings_model_buildings_size;
@@ -1130,6 +1163,8 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
             return TERRAIN_WATER;
         case PARAMETER_TYPE_DATA_TYPE:
             return MODEL_COST;
+        case PARAMETER_TYPE_HOUSE_DATA_TYPE:
+            return MODEL_EVOLVE_DESIRABILITY;
         case PARAMETER_TYPE_HOUSING_TYPE:
             return BUILDING_HOUSE_SMALL_TENT;
         case PARAMETER_TYPE_CITY_PROPERTY:

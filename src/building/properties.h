@@ -52,8 +52,36 @@ enum {
     MODEL_LABORERS,
 };
 
+enum {
+    MODEL_DEVOLVE_DESIRABILITY,
+    MODEL_EVOLVE_DESIRABILITY,
+    MODEL_ENTERTAINMENT,
+    MODEL_WATER,
+    MODEL_RELIGION,
+    MODEL_EDUCATION,
+    MODEL_BARBER,
+    MODEL_BATHHOUSE,
+    MODEL_HEALTH,
+    MODEL_FOOD_TYPES,
+    MODEL_POTTERY,
+    MODEL_OIL,
+    MODEL_FURNITURE,
+    MODEL_WINE,
+    MODEL_PROSPERITY,
+    MODEL_MAX_PEOPLE,
+    MODEL_TAX_MULTIPLIER
+};
+
 /**
- * Resets model data from properties
+ * Resets house model data from properties
+ */
+void model_reset_houses(void);
+/**
+ * Resets building model data from properties
+ */
+void model_reset_buildings(void);
+/**
+ * Resets all model data from properties
  */
 void model_reset(void);
 
@@ -72,7 +100,7 @@ model_building *model_get_building(building_type type);
  * @param level House level
  * @return Read-only model
  */
-const model_house *model_get_house(house_level level);
+model_house *model_get_house(house_level level);
 
 /**
  * Checks whether house level requires resource
