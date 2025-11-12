@@ -2240,9 +2240,6 @@ void model_reset_buildings(void)
             ((type != BUILDING_GRAND_GARDEN && type != BUILDING_DOLPHIN_FOUNTAIN) ||
             type == BUILDING_CLEAR_LAND || type == BUILDING_REPAIR_LAND)) {
             buildings[type] = props->building_model_data;
-            if (building_is_house(type)) {
-                houses[type] = props->house_model_data;
-            }
         } else {
             buildings[type] = NOTHING;
         }

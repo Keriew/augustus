@@ -22,7 +22,7 @@
 #define STORAGE_STATIC_BUFFER_SIZE 10
 #define STORAGE_CURRENT_BUFFER_SIZE (STORAGE_STATIC_BUFFER_SIZE + RESOURCE_MAX * 2)
 
-static array(data_storage) storages;
+static array(data_storage) storages = {0};
 
 static void storage_create(data_storage *storage, unsigned int position)
 {
