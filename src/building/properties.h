@@ -26,7 +26,7 @@ typedef struct {
     int devolve_desirability; /**< Desirability at which the house devolves */
     int evolve_desirability; /**< Desirability at which the house evolves */
     int entertainment; /**< Entertainment points required */
-    int water; /**< Water required: 1 = well, 2 = fountain */
+    int water; /**< Water required: 1 = well, 2 = latrine or fountain, 3 = fountain */
     int religion; /**< Number of gods required */
     int education; /**< Education required:
         1 = school or library, 2 = school and library, 3 = school, library and academy */

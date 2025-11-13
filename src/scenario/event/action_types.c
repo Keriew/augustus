@@ -860,7 +860,7 @@ int scenario_action_type_change_house_model_data_execute(scenario_action_t *acti
     int amount = scenario_formula_evaluate_formula(action->parameter3);
     int set_to_value = action->parameter4;
 
-    model_house *model_ptr = model_get_house(model);
+    model_house *model_ptr = model_get_house(model - 10); // convert from building type to housing
 
     switch (data_type) {
         case MODEL_DEVOLVE_DESIRABILITY:
