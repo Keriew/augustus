@@ -255,6 +255,9 @@ static void calculate_available_storages(int building_id)
         building *store = building_get(storage->building_id);
         int max_storable = building_storage_resource_max_storable(store, data.target_resource_id);
         int active = storage->in_use;
+        if (store->state == BUILDING_STATE_RUBBLE) {
+            continue; // skip rubble buildings
+        }
         if (!store || !building_id || (!resource_is_food(data.target_resource_id) && store->type == BUILDING_GRANARY)) {
             continue;
         }
@@ -571,6 +574,7 @@ void window_building_draw_depot_select_source_destination(building_info_context 
         const data_storage *storage = building_storage_get_array_entry(i);
         building *store_building = building_get(storage->building_id);
         if (!storage->in_use || !storage->building_id || store_building->state == BUILDING_STATE_MOTHBALLED ||
+            store_building->state == BUILDING_STATE_RUBBLE ||
             (!resource_is_food(data.target_resource_id) && store_building->type == BUILDING_GRANARY)) {
             continue;
         }
@@ -646,8 +650,8 @@ void window_building_draw_depot_select_source_destination(building_info_context 
 
         // Only include inactive storages that have a valid storage_id and weren't already counted in first pass
         int max_storable = building_storage_resource_max_storable(store_building, data.target_resource_id);
-        if ((max_storable == 0 || !storage->in_use || store_building->state == BUILDING_STATE_MOTHBALLED)
-            && store_building->storage_id > 0) {
+        if ((max_storable == 0 || store_building->state == BUILDING_STATE_MOTHBALLED)
+            && store_building->storage_id > 0 && store_building->state != BUILDING_STATE_RUBBLE) {
             row_count++;
             if (row_count <= scrollbar.scroll_position) {
                 continue;

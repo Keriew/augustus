@@ -1927,7 +1927,8 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_PROSPERITY, "Prosperity"},
     {TR_PARAMETER_MAX_PEOPLE, "Max people"},
     {TR_PARAMETER_TAX_MULTIPLIER, "Tax multiplier"},
-    {TR_PARAMETER_TYPE_HOUSING_TYPE, "Housing level"}
+    {TR_PARAMETER_TYPE_HOUSING_TYPE, "Housing level"},
+    {TR_CHEAT_DESTROYED_BUILDING, "Destroyed building"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

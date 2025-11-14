@@ -11,20 +11,20 @@
 #define QUARTER_WAREHOUSE 8
 
 enum {
-    WAREHOUSE_REMOVING_RESOURCE = 0,
-    WAREHOUSE_ADDING_RESOURCE = 1
+  WAREHOUSE_REMOVING_RESOURCE = 0,
+  WAREHOUSE_ADDING_RESOURCE = 1
 };
 
 enum {
-    WAREHOUSE_ROOM = 0,
-    WAREHOUSE_FULL = 1,
-    WAREHOUSE_SOME_ROOM = 2
+  WAREHOUSE_ROOM = 0,
+  WAREHOUSE_FULL = 1,
+  WAREHOUSE_SOME_ROOM = 2
 };
 
 enum {
-    WAREHOUSE_TASK_NONE = -1,
-    WAREHOUSE_TASK_GETTING = 0,
-    WAREHOUSE_TASK_DELIVERING = 1
+  WAREHOUSE_TASK_NONE = -1,
+  WAREHOUSE_TASK_GETTING = 0,
+  WAREHOUSE_TASK_DELIVERING = 1
 };
 
 /*---------------------------------------*
@@ -37,6 +37,22 @@ enum {
   * @return One of WAREHOUSE_ROOM, WAREHOUSE_SOME_ROOM, WAREHOUSE_FULL.
   */
 int building_warehouse_get_space_info(building *warehouse);
+
+/**
+ * @brief Get the grid offset of the warehouse, around which the building is oriented. NOT TOWER OFFSET!
+ * the grid_offset of individual building object that make up the warehouse are their own positions.
+ * in general, buildings grid_offset is the corner with lowest x and y coordinates, as for square buildings all tiles
+ * along the edges have the same x or y coordinate respectively.
+ * One corner has x<= all others and y<= all others, that corner's grid_offset is used.
+ * @param warehouse Pointer to any of the building parts of the warehouse
+ */
+int building_warehouse_get_main_grid_offset(building *warehouse);
+
+/**
+ * @brief Get the grid offset of the warehouse tower building.
+ * @param warehouse Pointer to any of the building parts of the warehouse
+ */
+int building_warehouse_get_tower_grid_offset(building *warehouse);
 
 /**
  * @brief Get the amount of a specific resource in a warehouse.
@@ -71,8 +87,6 @@ int building_warehouse_get_available_amount(building *warehouse, int resource);
  * @return amount that can be added, 0 if none
  */
 int building_warehouse_maximum_receptible_amount(building *warehouse, int resource);
-
-
 
 /**
  * @brief Sum available amounts across all warehouses.
