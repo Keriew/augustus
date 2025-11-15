@@ -1,6 +1,5 @@
 #include "house_model_data.h"
 
-#include "building/industry.h"
 #include "building/properties.h"
 #include "building/type.h"
 #include "core/lang.h"
@@ -27,7 +26,6 @@
 #define NO_SELECTION (unsigned int) -1
 #define NUM_DATA_BUTTONS (sizeof(data_buttons) / sizeof(generic_button))
 
-static void button_edit_production(const generic_button *button);
 static void button_edit_model_value(const generic_button *button);
 
 static void button_static_click(const generic_button *button);
@@ -36,26 +34,38 @@ static void populate_list(void);
 static void draw_model_item(const grid_box_item *item);
 static void model_item_click(const grid_box_item *item);
 
-static void building_tooltip(const grid_box_item *item, tooltip_context *c);
+static void house_tooltip(const grid_box_item *item, tooltip_context *c);
 
 
 static struct {
     unsigned int total_items;
-    building_type items[BUILDING_TYPE_MAX];
+    house_level items[HOUSE_MAX];
 
     unsigned int data_buttons_focus_id;
     unsigned int static_buttons_focus_id;
     unsigned int target_index;
-    building_model_data_type data_type;
+    house_model_data_type data_type;
 } data;
 
 static generic_button data_buttons[] = {
-    {200, 2, 48, 20, button_edit_model_value, 0, MODEL_COST},
-    {260, 2, 48, 20, button_edit_model_value, 0, MODEL_DESIRABILITY_VALUE},
-    {315, 2, 48, 20, button_edit_model_value, 0, MODEL_DESIRABILITY_STEP},
-    {370, 2, 48, 20, button_edit_model_value, 0, MODEL_DESIRABILITY_STEP_SIZE},
-    {425, 2, 48, 20, button_edit_model_value, 0, MODEL_DESIRABILITY_RANGE},
-    {480, 2, 48, 20, button_edit_model_value, 0, MODEL_LABORERS},
+    {205, 2, 48, 20, button_edit_model_value, 0, MODEL_DEVOLVE_DESIRABILITY},
+    {260, 2, 48, 20, button_edit_model_value, 0, MODEL_EVOLVE_DESIRABILITY},
+    {315, 2, 48, 20, button_edit_model_value, 0, MODEL_ENTERTAINMENT},
+    {370, 2, 48, 20, button_edit_model_value, 0, MODEL_WATER},
+    {425, 2, 48, 20, button_edit_model_value, 0, MODEL_RELIGION},
+    {480, 2, 48, 20, button_edit_model_value, 0, MODEL_EDUCATION},
+    {535, 2, 48, 20, button_edit_model_value, 0, MODEL_BARBER},
+    {590, 2, 48, 20, button_edit_model_value, 0, MODEL_BATHHOUSE},
+    {645, 2, 48, 20, button_edit_model_value, 0, MODEL_HEALTH},
+    {700, 2, 48, 20, button_edit_model_value, 0, MODEL_FOOD_TYPES},
+    {755, 2, 48, 20, button_edit_model_value, 0, MODEL_POTTERY},
+    {810, 2, 48, 20, button_edit_model_value, 0, MODEL_LABORERS},
+    {865, 2, 48, 20, button_edit_model_value, 0, MODEL_OIL},
+    {920, 2, 48, 20, button_edit_model_value, 0, MODEL_FURNITURE},
+    {975, 2, 48, 20, button_edit_model_value, 0, MODEL_WINE},
+    {1030, 2, 48, 20, button_edit_model_value, 0, MODEL_PROSPERITY},
+    {1085, 2, 48, 20, button_edit_model_value, 0, MODEL_MAX_PEOPLE},
+    {1140, 2, 48, 20, button_edit_model_value, 0, MODEL_TAX_MULTIPLIER}
 };
 #define MAX_DATA_BUTTONS (sizeof(data_buttons) / sizeof(generic_button))
 
@@ -77,7 +87,7 @@ static grid_box_type model_buttons = {
     .extend_to_hidden_scrollbar = 1,
     .on_click = model_item_click,
     .draw_item = draw_model_item,
-    .handle_tooltip = building_tooltip
+    .handle_tooltip = house_tooltip
 };
 
 static void init(void)
@@ -90,21 +100,15 @@ static void init(void)
 static void populate_list(void)
 {
     data.total_items = 0;
-    for (int i = 0; i < BUILDING_TYPE_MAX; i++) {
-        const building_properties *props = building_properties_for_type(i);
-        if (((props->size && props->event_data.attr) &&
-            (i != BUILDING_GRAND_GARDEN && i != BUILDING_DOLPHIN_FOUNTAIN)) ||
-            i == BUILDING_CLEAR_LAND || i == BUILDING_REPAIR_LAND) {
-            data.items[data.total_items++] = i;
-        }
+    for (int i = HOUSE_MIN; i < HOUSE_MAX; i++) {
+        data.items[i] = i;
     }
 }
 
 static void reset_confirmed(int accepted, int checked)
 {
     if (accepted) {
-        model_reset_buildings();
-        resource_init();
+        model_reset_houses();
         window_request_refresh();
     }
 }
@@ -117,7 +121,7 @@ static void button_static_click(const generic_button *button)
             break;
         case 1:
             window_popup_dialog_show_confirmation(translation_for(TR_BUTTON_RESET_DEFAULTS),
-                translation_for(TR_PARAMETER_BUILDING_MODEL_REST_CONFIRMATION), NULL, reset_confirmed);
+                translation_for(TR_PARAMETER_HOUSE_MODEL_REST_CONFIRMATION), NULL, reset_confirmed);
             break;
         case 2:
             window_file_dialog_show(FILE_TYPE_MODEL_DATA, FILE_DIALOG_LOAD);
@@ -129,8 +133,8 @@ static void button_static_click(const generic_button *button)
 
 static void set_model_value(int value)
 {
-    model_building *model = model_get_building(data.items[data.target_index]);
-    *get_ptr_for_building_data_type(model, data.data_type) = value;
+    model_house *model = model_get_house(data.items[data.target_index]);
+    *get_ptr_for_house_data_type(model, data.data_type) = value;
     data.target_index = NO_SELECTION;
 }
 
@@ -146,50 +150,21 @@ static void model_item_click(const grid_box_item *item)
     data.target_index = item->index;
 }
 
-static void get_building_translation(building_type b_type, uint8_t *buffer, int buffer_size)
-{
-    const uint8_t *b_type_string = lang_get_building_type_string(b_type);
-
-    if (BUILDING_SMALL_TEMPLE_CERES <= b_type && b_type <= BUILDING_SMALL_TEMPLE_VENUS) {
-        const uint8_t *temple_prefix = lang_get_building_type_string(BUILDING_MENU_SMALL_TEMPLES);
-        snprintf((char *) buffer, buffer_size, "%s %s", temple_prefix, b_type_string);
-    } else if (BUILDING_LARGE_TEMPLE_CERES <= b_type && b_type <= BUILDING_LARGE_TEMPLE_VENUS) {
-        const uint8_t *temple_prefix = lang_get_building_type_string(BUILDING_MENU_LARGE_TEMPLES);
-        snprintf((char *) buffer, buffer_size, "%s %s", temple_prefix, b_type_string);
-    } else {
-        string_copy(b_type_string, buffer, buffer_size);
-    }
-}
-
 static void draw_model_item(const grid_box_item *item)
 {
     button_border_draw(item->x, item->y, item->width, item->height, 0);
-    int b_type = data.items[item->index];
-    uint8_t b_string[128];
+    int h_level = data.items[item->index];
 
-    get_building_translation(b_type, b_string, sizeof(b_string));
-    text_draw_ellipsized(b_string, item->x + 8, item->y + 8, 12 * BLOCK_SIZE, FONT_NORMAL_BLACK, 0);
+    const uint8_t *h_string = lang_get_building_type_string(h_level + 10); // Conversion from house_level to building_type
+    text_draw_ellipsized(h_string, item->x + 8, item->y + 8, 12 * BLOCK_SIZE, FONT_NORMAL_BLACK, 0);
 
-    for (unsigned int i = 0; i < MAX_DATA_BUTTONS - (!(building_is_raw_resource_producer(b_type) ||
-        building_is_workshop(b_type) || b_type == BUILDING_WHARF || building_is_farm(b_type))); i++) {
+    for (unsigned int i = 0; i < MAX_DATA_BUTTONS; i++) {
         button_border_draw(item->x + data_buttons[i].x, item->y + data_buttons[i].y,
             data_buttons[i].width, data_buttons[i].height, item->is_focused && data.data_buttons_focus_id == i + 1);
+        
+        model_house *model = model_get_house(h_level);
+        int value = *get_ptr_for_house_data_type(model, i);
 
-        int value = 0;
-        switch (i) {
-            case 0:
-                value = model_get_building(b_type)->cost; break;
-            case 1:
-                value = model_get_building(b_type)->desirability_value; break;
-            case 2:
-                value = model_get_building(b_type)->desirability_step; break;
-            case 3:
-                value = model_get_building(b_type)->desirability_step_size; break;
-            case 4:
-                value = model_get_building(b_type)->desirability_range; break;
-            case 5:
-                value = model_get_building(b_type)->laborers; break;
-        }
         text_draw_number(value, 0, NULL, item->x + data_buttons[i].x + 8, item->y + data_buttons[i].y + 6,
                   FONT_SMALL_PLAIN, 0);
     }
@@ -207,13 +182,12 @@ static void draw_background(void)
     lang_text_draw_centered(13, 3, 16, 27 * BLOCK_SIZE + 8, 42 * BLOCK_SIZE, FONT_NORMAL_BLACK);
 
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_MODEL, 80, 75, 30, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_COST, 235, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_COST, 240, 75, 30, FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_VALUE, 295, 75, 30, FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_STEP, 350, 75, 30, FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_STEP_SIZE, 405, 75, 30, FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_RANGE, 460, 75, 30, FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_LABORERS, 505, 75, 30, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_PRODUCTION, 570, 75, 30, FONT_SMALL_PLAIN);
 
     graphics_reset_dialog();
 
@@ -308,11 +282,10 @@ static int desirability_tooltip(tooltip_context *c)
     return 0;
 }
 
-static void building_tooltip(const grid_box_item *item, tooltip_context *c)
+static void house_tooltip(const grid_box_item *item, tooltip_context *c)
 {
-    uint8_t text[128];
-    get_building_translation(data.items[item->index], text, 128);
-    if (text_get_width(text, FONT_SMALL_PLAIN) > 12 * BLOCK_SIZE - 32 && !data.data_buttons_focus_id) {
+    const uint8_t *text = lang_get_building_type_string(data.items[item->index]);
+    if (text_get_width(text, FONT_SMALL_PLAIN) > 12 * BLOCK_SIZE + 5 - 32 && !data.data_buttons_focus_id) {
         c->precomposed_text = text;
         c->type = TOOLTIP_BUTTON;
     }

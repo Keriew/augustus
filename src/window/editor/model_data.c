@@ -50,7 +50,7 @@ static struct {
 } data;
 
 static generic_button data_buttons[] = {
-    {200, 2, 48, 20, button_edit_model_value, 0, MODEL_COST},
+    {205, 2, 48, 20, button_edit_model_value, 0, MODEL_COST},
     {260, 2, 48, 20, button_edit_model_value, 0, MODEL_DESIRABILITY_VALUE},
     {315, 2, 48, 20, button_edit_model_value, 0, MODEL_DESIRABILITY_STEP},
     {370, 2, 48, 20, button_edit_model_value, 0, MODEL_DESIRABILITY_STEP_SIZE},
@@ -194,7 +194,7 @@ static void draw_model_item(const grid_box_item *item)
 
         model_building *model = model_get_building(b_type);
         int value = *get_ptr_for_building_data_type(model, i);
-        if (i == 6) { 
+        if (i == 6) {
             value = resource_get_data(resource_get_from_industry(b_type))->production_per_month;
         }
         text_draw_number(value, 0, NULL, item->x + data_buttons[i].x + 8, item->y + data_buttons[i].y + 6,
@@ -214,7 +214,7 @@ static void draw_background(void)
     lang_text_draw_centered(13, 3, 16, 27 * BLOCK_SIZE + 8, 42 * BLOCK_SIZE, FONT_NORMAL_BLACK);
 
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_MODEL, 80, 75, 30, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_COST, 235, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_COST, 240, 75, 30, FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_VALUE, 295, 75, 30, FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_STEP, 350, 75, 30, FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_STEP_SIZE, 405, 75, 30, FONT_SMALL_PLAIN);
@@ -319,7 +319,7 @@ static void building_tooltip(const grid_box_item *item, tooltip_context *c)
 {
     uint8_t text[128];
     get_building_translation(data.items[item->index], text, 128);
-    if (text_get_width(text, FONT_SMALL_PLAIN) > 12 * BLOCK_SIZE - 32 && !data.data_buttons_focus_id) {
+    if (text_get_width(text, FONT_SMALL_PLAIN) > 12 * BLOCK_SIZE  + 5 - 32 && !data.data_buttons_focus_id) {
         c->precomposed_text = text;
         c->type = TOOLTIP_BUTTON;
     }
