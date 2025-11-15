@@ -1930,7 +1930,6 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_TYPE_HOUSING_TYPE, "Housing level"},
     {TR_PARAMETER_BUILDING_MODEL_REST_CONFIRMATION, "This only resets the building model data."},
     {TR_CHEAT_DESTROYED_BUILDING, "Destroyed building"}
->>>>>>> b0deaa96553dc51284c23b328c3c24c1ed57d479
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
