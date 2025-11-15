@@ -100,8 +100,8 @@ static void init(void)
 static void populate_list(void)
 {
     data.total_items = 0;
-    for (int i = HOUSE_MIN; i < HOUSE_MAX; i++) {
-        data.items[i] = i;
+    while (data.total_items < HOUSE_MAX) {
+        data.items[data.total_items] = data.total_items++;
     }
 }
 
@@ -177,7 +177,7 @@ static void draw_background(void)
 
     graphics_in_dialog();
 
-    outer_panel_draw(16, 32, 42, 27);
+    outer_panel_draw(16, 32, 84, 27);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_ACTION_TYPE_CHANGE_MODEL_DATA, 26, 42, 38 * BLOCK_SIZE, FONT_LARGE_BLACK);
     lang_text_draw_centered(13, 3, 16, 27 * BLOCK_SIZE + 8, 42 * BLOCK_SIZE, FONT_NORMAL_BLACK);
 
