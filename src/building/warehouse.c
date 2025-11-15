@@ -15,6 +15,7 @@
 #include "empire/trade_prices.h"
 #include "figure/figure.h"
 #include "game/tutorial.h"
+#include "map/grid.h"
 #include "map/image.h"
 #include "scenario/property.h"
 
@@ -48,6 +49,33 @@ int building_warehouse_get_space_info(building *warehouse)
     } else {
         return WAREHOUSE_FULL;
     }
+}
+
+int building_warehouse_get_main_grid_offset(building *warehouse)
+{
+    int lowest_x = warehouse->x;
+    int lowest_y = warehouse->y;
+    building *next = building_main(warehouse);
+    for (int i = 0; i < 9; i++) {
+        next = building_next(next);
+        if (next->id <= 0) {
+            break;
+        }
+        if (next->x < lowest_x) {
+            lowest_x = next->x;
+        }
+        if (next->y < lowest_y) {
+            lowest_y = next->y;
+        }
+
+    }
+    return map_grid_offset(lowest_x, lowest_y);
+}
+
+int building_warehouse_get_tower_grid_offset(building *warehouse)
+{
+    building *tower = building_main(warehouse);
+    return tower->grid_offset;
 }
 
 int building_warehouse_get_amount(building *warehouse, int resource)

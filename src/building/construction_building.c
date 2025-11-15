@@ -152,29 +152,34 @@ static int add_warehouse_space(int x, int y, int prev_id)
     return b->id;
 }
 
-static void add_warehouse(building *b)
+static void add_warehouse(building *b, int orientation)
 {
-    int x_offset[9] = { 0, 0, 1, 1, 0, 2, 1, 2, 2 };
-    int y_offset[9] = { 0, 1, 0, 1, 2, 0, 2, 1, 2 };
-    int corner = building_rotation_get_corner(2 * building_rotation_get_rotation());
-
     b->storage_id = building_storage_create(b->id);
     b->prev_part_building_id = 0;
-    map_building_tiles_add(b->id, b->x + x_offset[corner], b->y + y_offset[corner], 1,
+    // assert orientation. orientation points to the tower's location (0-3), out of 4 possible corners
+    b->subtype.orientation = orientation;
+
+    int x_offset[9] = { 0, 0, 1, 1, 0, 2, 1, 2, 2 };
+    int y_offset[9] = { 0, 1, 0, 1, 2, 0, 2, 1, 2 };
+    // can skip  building_rotation_get_rotation(), set upstream
+    int tower = building_rotation_get_corner(2 * orientation);
+    map_building_tiles_add(b->id, b->x + x_offset[tower], b->y + y_offset[tower], 1,
         image_group(GROUP_BUILDING_WAREHOUSE), TERRAIN_BUILDING);
-    map_tiles_update_area_roads(b->x + x_offset[corner], b->y + y_offset[corner], 3);
+    map_tiles_update_area_roads(b->x + x_offset[tower], b->y + y_offset[tower], 3);
+
     int id = b->id;
     int prev = id;
     for (int i = 0; i < 9; i++) {
-        if (i == corner) {
+        if (i == tower) {
             continue;
         }
         prev = add_warehouse_space(b->x + x_offset[i], b->y + y_offset[i], prev);
     }
+
     b = building_get(id);
-    // adjust BUILDING_WAREHOUSE
-    b->x = b->x + x_offset[corner];
-    b->y = b->y + y_offset[corner];
+    // Adjust BUILDING_WAREHOUSE to tower position
+    b->x = b->x + x_offset[tower];
+    b->y = b->y + y_offset[tower];
     b->grid_offset = map_grid_offset(b->x, b->y);
     game_undo_adjust_building(b);
 
@@ -300,7 +305,7 @@ static void add_to_map(int type, building *b, int size, int orientation, int wat
             building_construction_clear_type();
             break;
         case BUILDING_WAREHOUSE:
-            add_warehouse(b);
+            add_warehouse(b, orientation);
             break;
         case BUILDING_HIPPODROME:
             add_hippodrome(b);
@@ -450,11 +455,14 @@ int building_construction_place_building(building_type type, int x, int y, int e
     int building_orientation = 0;
     if (type == BUILDING_GATEHOUSE || type == BUILDING_WAREHOUSE) {
         //check if there's a preset orientation from old building
-        building *old_b = building_get(map_building_rubble_building_id(map_grid_offset(x, y)));
-        if (old_b && (old_b->type == BUILDING_GATEHOUSE || old_b->type == BUILDING_WAREHOUSE)) {
+        building *old_b = building_main(building_get(map_building_rubble_building_id(map_grid_offset(x, y))));
+        if (old_b && (old_b->type == BUILDING_GATEHOUSE ||
+            old_b->type == BUILDING_WAREHOUSE || old_b->type == BUILDING_WAREHOUSE_SPACE)) {
             building_orientation = old_b->subtype.orientation;
         } else if (type == BUILDING_GATEHOUSE) {
             building_orientation = map_orientation_for_gatehouse(x, y);
+        } else if (type == BUILDING_WAREHOUSE) {
+            building_orientation = building_rotation_get_rotation();
         }
     } else if (type == BUILDING_TRIUMPHAL_ARCH) {
         building_orientation = map_orientation_for_triumphal_arch(x, y);

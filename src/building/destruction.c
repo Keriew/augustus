@@ -184,22 +184,31 @@ static void destroy_linked_parts(building *b, int destruction_method, int plague
     }
 
     // Unlink the buildings to prevent corrupting the building table
-    part = building_main(b);
-    for (int i = 0; i < 9 && part->id > 0; i++) {
-        building *next_part = building_next(part);
-        part->next_part_building_id = 0;
-        part->prev_part_building_id = 0;
-        part = next_part;
+    if (destruction_method != DESTROY_COLLAPSE) { // collapse leaves rubble which needs the links for repair
+        // destroy fire would be on the same boat, but warehouses are fire-resistant so no need to include them here
+        // same applies to hippodromes, which are also further non-repairable
+        part = building_main(b);
+        for (int i = 0; i < 9 && part->id > 0; i++) {
+            building *next_part = building_next(part);
+            part->next_part_building_id = 0;
+            part->prev_part_building_id = 0;
+            part = next_part;
+        }
     }
+
 }
 
 void building_destroy_by_collapse(building *b)
 {
     b->state = BUILDING_STATE_RUBBLE;
+    if (b->type == BUILDING_TOWER) {
+        figure_kill_tower_sentries_in_building(b);
+    }
     set_rubble_grid_info_for_all_parts(b);
     map_building_tiles_set_rubble(b->id, b->x, b->y, b->size);
     figure_create_explosion_cloud(b->x, b->y, b->size, 0);
     destroy_linked_parts(b, DESTROY_COLLAPSE, 0);
+
 }
 
 void building_destroy_by_fire(building *b)
@@ -207,6 +216,7 @@ void building_destroy_by_fire(building *b)
     destroy_on_fire(b, 0);
     destroy_linked_parts(b, DESTROY_FIRE, 0);
 }
+
 void building_destroy_by_earthquake(building *b)
 {
     int grid_offset = b->grid_offset; // save before destroying building
