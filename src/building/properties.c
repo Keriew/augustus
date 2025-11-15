@@ -2305,3 +2305,65 @@ int model_house_uses_inventory(house_level level, resource_type inventory)
             return 0;
     }
 }
+
+int *get_ptr_for_building_data_type(model_building *model, building_model_data_type data_type)
+{
+    switch (data_type) {
+        case MODEL_COST:
+            return &model->cost;
+        case MODEL_DESIRABILITY_VALUE:
+            return &model->desirability_value;
+        case MODEL_DESIRABILITY_STEP:
+            return &model->desirability_step;
+        case MODEL_DESIRABILITY_STEP_SIZE:
+            return &model->desirability_step_size;
+        case MODEL_DESIRABILITY_RANGE:
+            return &model->desirability_range;
+        case MODEL_LABORERS:
+            return &model->laborers;
+        default:
+            return NULL;
+    }
+}
+
+int *get_ptr_for_house_data_type(model_house *model, house_model_data_type data_type)
+{
+    switch (data_type) {
+        case MODEL_DEVOLVE_DESIRABILITY:
+            return &model->devolve_desirability;
+        case MODEL_EVOLVE_DESIRABILITY:
+            return &model->evolve_desirability;
+        case MODEL_ENTERTAINMENT:
+            return &model->entertainment;
+        case MODEL_WATER:
+            return &model->water;
+        case MODEL_RELIGION:
+            return &model->religion;
+        case MODEL_EDUCATION:
+            return &model->education;
+        case MODEL_BARBER:
+            return &model->barber;
+        case MODEL_BATHHOUSE:
+            return &model->bathhouse;
+        case MODEL_HEALTH:
+            return &model->health;
+        case MODEL_FOOD_TYPES:
+            return &model->food_types;
+        case MODEL_POTTERY:
+            return &model->pottery;
+        case MODEL_OIL:
+            return &model->oil;
+        case MODEL_FURNITURE:
+            return &model->furniture;
+        case MODEL_WINE:
+            return &model->wine;
+        case MODEL_PROSPERITY:
+            return &model->prosperity;
+        case MODEL_MAX_PEOPLE:
+            return &model->max_people;
+        case MODEL_TAX_MULTIPLIER:
+            return &model->tax_multiplier;
+        default:
+            return NULL;
+    }
+}

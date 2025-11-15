@@ -763,28 +763,9 @@ int scenario_action_type_change_model_data_execute(scenario_action_t *action)
 
     model_building *model_ptr = model_get_building(model);
 
-    switch (data_type) {
-        case MODEL_COST:
-            model_ptr->cost = set_to_value ? amount : amount + model_ptr->cost;
-            break;
-        case MODEL_DESIRABILITY_VALUE:
-            model_ptr->desirability_value = set_to_value ? amount : amount + model_ptr->desirability_value;
-            break;
-        case MODEL_DESIRABILITY_STEP:
-            model_ptr->desirability_step = set_to_value ? amount : amount + model_ptr->desirability_step;
-            break;
-        case MODEL_DESIRABILITY_STEP_SIZE:
-            model_ptr->desirability_step_size = set_to_value ? amount : amount + model_ptr->desirability_step_size;
-            break;
-        case MODEL_DESIRABILITY_RANGE:
-            model_ptr->desirability_range = set_to_value ? amount : amount + model_ptr->desirability_range;
-            break;
-        case MODEL_LABORERS:
-            model_ptr->laborers = set_to_value ? amount : amount + model_ptr->laborers;
-            break;
-        default:
-            break;
-    }
+    int *value = get_ptr_for_building_data_type(model_ptr, data_type);
+    *value = amount + set_to_value ? 0 : *value;
+    
     return 1;
 }
 
@@ -862,61 +843,8 @@ int scenario_action_type_change_house_model_data_execute(scenario_action_t *acti
 
     model_house *model_ptr = model_get_house(model - 10); // convert from building type to housing
 
-    switch (data_type) {
-        case MODEL_DEVOLVE_DESIRABILITY:
-            model_ptr->devolve_desirability = set_to_value ? amount : amount + model_ptr->devolve_desirability;
-            break;
-        case MODEL_EVOLVE_DESIRABILITY:
-            model_ptr->evolve_desirability = set_to_value ? amount : amount + model_ptr->evolve_desirability;
-            break;
-        case MODEL_ENTERTAINMENT:
-            model_ptr->entertainment = set_to_value ? amount : amount + model_ptr->entertainment;
-            break;
-        case MODEL_WATER:
-            model_ptr->water = set_to_value ? amount : amount + model_ptr->water;
-            break;
-        case MODEL_RELIGION:
-            model_ptr->religion = set_to_value ? amount : amount + model_ptr->religion;
-            break;
-        case MODEL_EDUCATION:
-            model_ptr->education = set_to_value ? amount : amount + model_ptr->education;
-            break;
-        case MODEL_BARBER:
-            model_ptr->barber = set_to_value ? amount : amount + model_ptr->barber;
-            break;
-        case MODEL_BATHHOUSE:
-            model_ptr->bathhouse = set_to_value ? amount : amount + model_ptr->bathhouse;
-            break;
-        case MODEL_HEALTH:
-            model_ptr->health = set_to_value ? amount : amount + model_ptr->health;
-            break;
-        case MODEL_FOOD_TYPES:
-            model_ptr->food_types = set_to_value ? amount : amount + model_ptr->food_types;
-            break;
-        case MODEL_POTTERY:
-            model_ptr->pottery = set_to_value ? amount : amount + model_ptr->pottery;
-            break;
-        case MODEL_OIL:
-            model_ptr->oil = set_to_value ? amount : amount + model_ptr->oil;
-            break;
-        case MODEL_FURNITURE:
-            model_ptr->furniture = set_to_value ? amount : amount + model_ptr->furniture;
-            break;
-        case MODEL_WINE:
-            model_ptr->wine = set_to_value ? amount : amount + model_ptr->wine;
-            break;
-        case MODEL_PROSPERITY:
-            model_ptr->prosperity = set_to_value ? amount : amount + model_ptr->prosperity;
-            break;
-        case MODEL_MAX_PEOPLE:
-            model_ptr->max_people = set_to_value ? amount : amount + model_ptr->max_people;
-            break;
-        case MODEL_TAX_MULTIPLIER:
-            model_ptr->tax_multiplier = set_to_value ? amount : amount + model_ptr->tax_multiplier;
-            break;
-        default:
-            break;
-    }
+    int *value = get_ptr_for_house_data_type(model_ptr, data_type);
+    *value = amount + set_to_value ? 0 : *value;
     
     return 1;
 }

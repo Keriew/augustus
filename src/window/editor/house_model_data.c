@@ -1,6 +1,5 @@
-#include "model_data.h"
+#include "house_model_data.h"
 
-#include "building/industry.h"
 #include "building/properties.h"
 #include "building/type.h"
 #include "core/lang.h"
@@ -33,7 +32,6 @@ static void button_edit_step(const generic_button *button);
 static void button_edit_step_size(const generic_button *button);
 static void button_edit_range(const generic_button *button);
 static void button_edit_laborers(const generic_button *button);
-static void button_edit_production(const generic_button *button);
 
 static void button_static_click(const generic_button *button);
 
@@ -51,7 +49,6 @@ static struct {
     unsigned int data_buttons_focus_id;
     unsigned int static_buttons_focus_id;
     unsigned int target_index;
-    building_model_data_type data_type;
 } data;
 
 static generic_button data_buttons[] = {
@@ -61,7 +58,6 @@ static generic_button data_buttons[] = {
     {370, 2, 48, 20, button_edit_step_size},
     {425, 2, 48, 20, button_edit_range},
     {480, 2, 48, 20, button_edit_laborers},
-    {535, 2, 48, 20, button_edit_production}
 };
 #define MAX_DATA_BUTTONS (sizeof(data_buttons) / sizeof(generic_button))
 
@@ -109,7 +105,7 @@ static void populate_list(void)
 static void reset_confirmed(int accepted, int checked)
 {
     if (accepted) {
-        model_reset_buildings();
+        model_reset_houses();
         resource_init();
         window_request_refresh();
     }
@@ -133,69 +129,82 @@ static void button_static_click(const generic_button *button)
     }
 }
 
-static void set_model_value(int value)
+static void set_cost_value(int value)
 {
     model_building *model = model_get_building(data.items[data.target_index]);
-    *get_ptr_for_building_data_type(model, data.data_type) = value;
-    data.target_index = NO_SELECTION;
-}
-
-static void set_production(int value)
-{
-    resource_data *resource = resource_get_data(resource_get_from_industry(data.items[data.target_index]));
-    resource->production_per_month = value;
+    model->cost = value;
     data.target_index = NO_SELECTION;
 }
 
 static void button_edit_cost(const generic_button *button)
 {
-    data.data_type = MODEL_COST;
     window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
-        9, -1000000000, 1000000000, set_model_value);
+        9, -1000000000, 1000000000, set_cost_value);
+}
+
+static void set_desirability_value(int value)
+{
+    model_building *model = model_get_building(data.items[data.target_index]);
+    model->desirability_value = value;
+    data.target_index = NO_SELECTION;
 }
 
 static void button_edit_value(const generic_button *button)
 {
-    data.data_type = MODEL_DESIRABILITY_VALUE;
     window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
-        9, -1000000000, 1000000000, set_model_value);
+        9, -1000000000, 1000000000, set_desirability_value);
+}
+
+static void set_desirability_step(int value)
+{
+    model_building *model = model_get_building(data.items[data.target_index]);
+    model->desirability_step = value;
+    data.target_index = NO_SELECTION;
 }
 
 static void button_edit_step(const generic_button *button)
 {
-    data.data_type = MODEL_DESIRABILITY_STEP;
     window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
-        9, -1000000000, 1000000000, set_model_value);
+        9, -1000000000, 1000000000, set_desirability_step);
+}
+
+static void set_desirability_step_size(int value)
+{
+    model_building *model = model_get_building(data.items[data.target_index]);
+    model->desirability_step_size = value;
+    data.target_index = NO_SELECTION;
 }
 
 static void button_edit_step_size(const generic_button *button)
 {
-    data.data_type = MODEL_DESIRABILITY_STEP_SIZE;
     window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
-        9, -1000000000, 1000000000, set_model_value);
+        9, -1000000000, 1000000000, set_desirability_step_size);
+}
+
+static void set_desirability_range(int value)
+{
+    model_building *model = model_get_building(data.items[data.target_index]);
+    model->desirability_range = value;
+    data.target_index = NO_SELECTION;
 }
 
 static void button_edit_range(const generic_button *button)
 {
-    data.data_type = MODEL_DESIRABILITY_RANGE;
     window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
-        9, -1000000000, 1000000000, set_model_value);
+        9, -1000000000, 1000000000, set_desirability_range);
+}
+
+static void set_laborers(int value)
+{
+    model_building *model = model_get_building(data.items[data.target_index]);
+    model->laborers = value;
+    data.target_index = NO_SELECTION;
 }
 
 static void button_edit_laborers(const generic_button *button)
 {
-    data.data_type = MODEL_LABORERS;
     window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
-        9, -1000000000, 1000000000, set_model_value);
-}
-
-static void button_edit_production(const generic_button *button)
-{
-    building_type type = data.items[data.target_index];
-    if (building_is_raw_resource_producer(type) || building_is_workshop(type) || type == BUILDING_WHARF || building_is_farm(type)) {
-        window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
-            9, -1000000000, 1000000000, set_production);
-    }
+        9, -1000000000, 1000000000, set_laborers);
 }
 
 static void model_item_click(const grid_box_item *item)
@@ -227,8 +236,7 @@ static void draw_model_item(const grid_box_item *item)
     get_building_translation(b_type, b_string, sizeof(b_string));
     text_draw_ellipsized(b_string, item->x + 8, item->y + 8, 12 * BLOCK_SIZE, FONT_NORMAL_BLACK, 0);
 
-    for (unsigned int i = 0; i < MAX_DATA_BUTTONS - (!(building_is_raw_resource_producer(b_type) ||
-        building_is_workshop(b_type) || b_type == BUILDING_WHARF || building_is_farm(b_type))); i++) {
+    for (unsigned int i = 0; i < MAX_DATA_BUTTONS; i++) {
         button_border_draw(item->x + data_buttons[i].x, item->y + data_buttons[i].y,
             data_buttons[i].width, data_buttons[i].height, item->is_focused && data.data_buttons_focus_id == i + 1);
 
@@ -384,7 +392,7 @@ static void get_tooltip(tooltip_context *c)
     }
 }
 
-void window_model_data_show(void)
+void window_house_model_data_show(void)
 {
     init();
     window_type window = {
