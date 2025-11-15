@@ -2322,7 +2322,7 @@ int *get_ptr_for_building_data_type(model_building *model, building_model_data_t
         case MODEL_LABORERS:
             return &model->laborers;
         default:
-            return NULL;
+            return &model->cost;
     }
 }
 
@@ -2364,6 +2364,6 @@ int *get_ptr_for_house_data_type(model_house *model, house_model_data_type data_
         case MODEL_TAX_MULTIPLIER:
             return &model->tax_multiplier;
         default:
-            return NULL;
+            return &model->devolve_desirability;
     }
 }

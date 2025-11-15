@@ -192,22 +192,10 @@ static void draw_model_item(const grid_box_item *item)
         button_border_draw(item->x + data_buttons[i].x, item->y + data_buttons[i].y,
             data_buttons[i].width, data_buttons[i].height, item->is_focused && data.data_buttons_focus_id == i + 1);
 
-        int value = 0;
-        switch (i) {
-            case 0:
-                value = model_get_building(b_type)->cost; break;
-            case 1:
-                value = model_get_building(b_type)->desirability_value; break;
-            case 2:
-                value = model_get_building(b_type)->desirability_step; break;
-            case 3:
-                value = model_get_building(b_type)->desirability_step_size; break;
-            case 4:
-                value = model_get_building(b_type)->desirability_range; break;
-            case 5:
-                value = model_get_building(b_type)->laborers; break;
-            case 6:
-                value = resource_get_data(resource_get_from_industry(b_type))->production_per_month;
+        model_building *model = model_get_building(b_type);
+        int value = *get_ptr_for_building_data_type(model, i);
+        if (i == 6) { 
+            value = resource_get_data(resource_get_from_industry(b_type))->production_per_month;
         }
         text_draw_number(value, 0, NULL, item->x + data_buttons[i].x + 8, item->y + data_buttons[i].y + 6,
                   FONT_SMALL_PLAIN, 0);
