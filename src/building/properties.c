@@ -1,6 +1,7 @@
 #include "properties.h"
 
 #include "assets/assets.h"
+#include "building/building.h"
 #include "core/image_group.h"
 #include "sound/city.h"
 #include "translation/translation.h"
@@ -9,7 +10,15 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#define NUM_HOUSES 20
+
+#define SIZE_BUILDINGS sizeof(model_building) * BUILDING_TYPE_MAX
+#define SIZE_HOUSES sizeof(model_house) * NUM_HOUSES
+
+#define BUFFER_SIZE SIZE_BUILDINGS + SIZE_HOUSES
+
 static model_building buildings[BUILDING_TYPE_MAX];
+static model_house houses[NUM_HOUSES];
 
 // PROPERTIES
 
@@ -260,7 +269,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
             .devolve_desirability = 14,
             .evolve_desirability = 20,
             .entertainment = 10,
-            .water = 2,
+            .water = 3,
             .religion = 1,
             .education = 1,
             .barber = 0,
@@ -285,7 +294,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
             .devolve_desirability = 18,
             .evolve_desirability = 25,
             .entertainment = 25,
-            .water = 2,
+            .water = 3,
             .religion = 1,
             .education = 1,
             .barber = 0,
@@ -310,7 +319,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
             .devolve_desirability = 22,
             .evolve_desirability = 32,
             .entertainment = 25,
-            .water = 2,
+            .water = 3,
             .religion = 1,
             .education = 1,
             .barber = 0,
@@ -335,7 +344,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
             .devolve_desirability = 29,
             .evolve_desirability = 40,
             .entertainment = 25,
-            .water = 2,
+            .water = 3,
             .religion = 1,
             .education = 2,
             .barber = 1,
@@ -360,7 +369,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
             .devolve_desirability = 37,
             .evolve_desirability = 48,
             .entertainment = 35,
-            .water = 2,
+            .water = 3,
             .religion = 1,
             .education = 2,
             .barber = 1,
@@ -385,7 +394,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
             .devolve_desirability = 45,
             .evolve_desirability = 53,
             .entertainment = 35,
-            .water = 2,
+            .water = 3,
             .religion = 2,
             .education = 2,
             .barber = 1,
@@ -410,7 +419,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
             .devolve_desirability = 50,
             .evolve_desirability = 58,
             .entertainment = 40,
-            .water = 2,
+            .water = 3,
             .religion = 2,
             .education = 2,
             .barber = 1,
@@ -435,7 +444,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
             .devolve_desirability = 55,
             .evolve_desirability = 63,
             .entertainment = 45,
-            .water = 2,
+            .water = 3,
             .religion = 2,
             .education = 3,
             .barber = 1,
@@ -460,7 +469,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
             .devolve_desirability = 60,
             .evolve_desirability = 68,
             .entertainment = 50,
-            .water = 2,
+            .water = 3,
             .religion = 3,
             .education = 3,
             .barber = 1,
@@ -485,7 +494,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
             .devolve_desirability = 65,
             .evolve_desirability = 74,
             .entertainment = 55,
-            .water = 2,
+            .water = 3,
             .religion = 3,
             .education = 3,
             .barber = 1,
@@ -510,7 +519,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
             .devolve_desirability = 70,
             .evolve_desirability = 80,
             .entertainment = 60,
-            .water = 2,
+            .water = 3,
             .religion = 4,
             .education = 3,
             .barber = 1,
@@ -535,7 +544,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
             .devolve_desirability = 76,
             .evolve_desirability = 90,
             .entertainment = 70,
-            .water = 2,
+            .water = 3,
             .religion = 4,
             .education = 3,
             .barber = 1,
@@ -560,7 +569,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
             .devolve_desirability = 85,
             .evolve_desirability = 100,
             .entertainment = 80,
-            .water = 2,
+            .water = 3,
             .religion = 4,
             .education = 3,
             .barber = 1,
@@ -2223,7 +2232,7 @@ const building_properties *building_properties_for_type(building_type type)
 static model_building NOTHING = { .cost = 0, .desirability_value = 0, .desirability_step = 0,
  .desirability_step_size = 0, .desirability_range = 0, .laborers = 0 };
 
-void model_reset(void)
+void model_reset_buildings(void)
 {
     for (building_type type = BUILDING_ANY; type < BUILDING_TYPE_MAX; type++) {
         const building_properties *props = &properties[type];
@@ -2237,25 +2246,39 @@ void model_reset(void)
     }
 }
 
+void model_reset_houses(void)
+{
+    for (house_level level = HOUSE_MIN; level < HOUSE_MAX; level++) {
+        const building_properties *props = &properties[level + 10];
+        houses[level] = props->house_model_data;
+    }
+}
+
+void model_reset(void)
+{
+    model_reset_buildings();
+    model_reset_houses();
+}
+
 void model_save_model_data(buffer *buf)
 {
-    int buf_size = sizeof(model_building) * BUILDING_TYPE_MAX;
-    uint8_t *buf_data = malloc(buf_size);
+    uint8_t *buf_data = malloc(BUFFER_SIZE);
 
-    buffer_init(buf, buf_data, buf_size);
+    buffer_init(buf, buf_data, BUFFER_SIZE);
 
-    buffer_write_raw(buf, buildings, buf_size);
+    buffer_write_raw(buf, buildings, BUFFER_SIZE - SIZE_HOUSES);
+    buffer_write_raw(buf, houses, BUFFER_SIZE - SIZE_BUILDINGS);
 }
+
 void model_load_model_data(buffer *buf)
 {
-    int buf_size = sizeof(model_building) * BUILDING_TYPE_MAX;
-
-    buffer_read_raw(buf, buildings, buf_size);
+    buffer_read_raw(buf, buildings, BUFFER_SIZE - SIZE_HOUSES);
+    buffer_read_raw(buf, houses, BUFFER_SIZE - SIZE_BUILDINGS);
 }
 
-const model_house *model_get_house(house_level level)
+model_house *model_get_house(house_level level)
 {
-    return &properties[level + 10].house_model_data;
+    return &houses[level];
 }
 
 model_building *model_get_building(building_type type)
@@ -2280,5 +2303,67 @@ int model_house_uses_inventory(house_level level, resource_type inventory)
             return house->pottery;
         default:
             return 0;
+    }
+}
+
+int *get_ptr_for_building_data_type(model_building *model, building_model_data_type data_type)
+{
+    switch (data_type) {
+        case MODEL_COST:
+            return &model->cost;
+        case MODEL_DESIRABILITY_VALUE:
+            return &model->desirability_value;
+        case MODEL_DESIRABILITY_STEP:
+            return &model->desirability_step;
+        case MODEL_DESIRABILITY_STEP_SIZE:
+            return &model->desirability_step_size;
+        case MODEL_DESIRABILITY_RANGE:
+            return &model->desirability_range;
+        case MODEL_LABORERS:
+            return &model->laborers;
+        default:
+            return &model->cost;
+    }
+}
+
+int *get_ptr_for_house_data_type(model_house *model, house_model_data_type data_type)
+{
+    switch (data_type) {
+        case MODEL_DEVOLVE_DESIRABILITY:
+            return &model->devolve_desirability;
+        case MODEL_EVOLVE_DESIRABILITY:
+            return &model->evolve_desirability;
+        case MODEL_ENTERTAINMENT:
+            return &model->entertainment;
+        case MODEL_WATER:
+            return &model->water;
+        case MODEL_RELIGION:
+            return &model->religion;
+        case MODEL_EDUCATION:
+            return &model->education;
+        case MODEL_BARBER:
+            return &model->barber;
+        case MODEL_BATHHOUSE:
+            return &model->bathhouse;
+        case MODEL_HEALTH:
+            return &model->health;
+        case MODEL_FOOD_TYPES:
+            return &model->food_types;
+        case MODEL_POTTERY:
+            return &model->pottery;
+        case MODEL_OIL:
+            return &model->oil;
+        case MODEL_FURNITURE:
+            return &model->furniture;
+        case MODEL_WINE:
+            return &model->wine;
+        case MODEL_PROSPERITY:
+            return &model->prosperity;
+        case MODEL_MAX_PEOPLE:
+            return &model->max_people;
+        case MODEL_TAX_MULTIPLIER:
+            return &model->tax_multiplier;
+        default:
+            return &model->devolve_desirability;
     }
 }

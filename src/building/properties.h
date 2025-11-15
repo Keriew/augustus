@@ -26,7 +26,7 @@ typedef struct {
     int devolve_desirability; /**< Desirability at which the house devolves */
     int evolve_desirability; /**< Desirability at which the house evolves */
     int entertainment; /**< Entertainment points required */
-    int water; /**< Water required: 1 = well, 2 = fountain */
+    int water; /**< Water required: 1 = well, 2 = latrine or fountain, 3 = fountain */
     int religion; /**< Number of gods required */
     int education; /**< Education required:
         1 = school or library, 2 = school and library, 3 = school, library and academy */
@@ -43,17 +43,45 @@ typedef struct {
     int tax_multiplier; /**< Tax rate multiplier */
 } model_house;
 
-enum {
+typedef enum {
     MODEL_COST,
     MODEL_DESIRABILITY_VALUE,
     MODEL_DESIRABILITY_STEP,
     MODEL_DESIRABILITY_STEP_SIZE,
     MODEL_DESIRABILITY_RANGE,
     MODEL_LABORERS,
-};
+} building_model_data_type;
+
+typedef enum {
+    MODEL_DEVOLVE_DESIRABILITY,
+    MODEL_EVOLVE_DESIRABILITY,
+    MODEL_ENTERTAINMENT,
+    MODEL_WATER,
+    MODEL_RELIGION,
+    MODEL_EDUCATION,
+    MODEL_BARBER,
+    MODEL_BATHHOUSE,
+    MODEL_HEALTH,
+    MODEL_FOOD_TYPES,
+    MODEL_POTTERY,
+    MODEL_OIL,
+    MODEL_FURNITURE,
+    MODEL_WINE,
+    MODEL_PROSPERITY,
+    MODEL_MAX_PEOPLE,
+    MODEL_TAX_MULTIPLIER
+} house_model_data_type;
 
 /**
- * Resets model data from properties
+ * Resets house model data from properties
+ */
+void model_reset_houses(void);
+/**
+ * Resets building model data from properties
+ */
+void model_reset_buildings(void);
+/**
+ * Resets all model data from properties
  */
 void model_reset(void);
 
@@ -72,7 +100,7 @@ model_building *model_get_building(building_type type);
  * @param level House level
  * @return Read-only model
  */
-const model_house *model_get_house(house_level level);
+model_house *model_get_house(house_level level);
 
 /**
  * Checks whether house level requires resource
@@ -81,6 +109,14 @@ const model_house *model_get_house(house_level level);
  * @return 0/1 required/not required
  */
 int model_house_uses_inventory(house_level level, resource_type inventory);
+
+/**
+ * Return a pointer to read or edit model data for a given data_type
+ * @param model A pointer to a model to read the data from
+ * @param data_type The data_type to return the pointer for
+ */
+int *get_ptr_for_building_data_type(model_building *model, building_model_data_type data_type);
+int *get_ptr_for_house_data_type(model_house *model, house_model_data_type data_type);
 
 // PROPERTIES
 
