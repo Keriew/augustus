@@ -27,13 +27,8 @@
 #define NO_SELECTION (unsigned int) -1
 #define NUM_DATA_BUTTONS (sizeof(data_buttons) / sizeof(generic_button))
 
-static void button_edit_cost(const generic_button *button);
-static void button_edit_value(const generic_button *button);
-static void button_edit_step(const generic_button *button);
-static void button_edit_step_size(const generic_button *button);
-static void button_edit_range(const generic_button *button);
-static void button_edit_laborers(const generic_button *button);
 static void button_edit_production(const generic_button *button);
+static void button_edit_model_value(const generic_button *button);
 
 static void button_static_click(const generic_button *button);
 
@@ -55,12 +50,12 @@ static struct {
 } data;
 
 static generic_button data_buttons[] = {
-    {200, 2, 48, 20, button_edit_cost},
-    {260, 2, 48, 20, button_edit_value},
-    {315, 2, 48, 20, button_edit_step},
-    {370, 2, 48, 20, button_edit_step_size},
-    {425, 2, 48, 20, button_edit_range},
-    {480, 2, 48, 20, button_edit_laborers},
+    {200, 2, 48, 20, button_edit_model_value, 0, MODEL_COST},
+    {260, 2, 48, 20, button_edit_model_value, 0, MODEL_DESIRABILITY_VALUE},
+    {315, 2, 48, 20, button_edit_model_value, 0, MODEL_DESIRABILITY_STEP},
+    {370, 2, 48, 20, button_edit_model_value, 0, MODEL_DESIRABILITY_STEP_SIZE},
+    {425, 2, 48, 20, button_edit_model_value, 0, MODEL_DESIRABILITY_RANGE},
+    {480, 2, 48, 20, button_edit_model_value, 0, MODEL_LABORERS},
     {535, 2, 48, 20, button_edit_production}
 };
 #define MAX_DATA_BUTTONS (sizeof(data_buttons) / sizeof(generic_button))
@@ -140,53 +135,18 @@ static void set_model_value(int value)
     data.target_index = NO_SELECTION;
 }
 
+static void button_edit_model_value(const generic_button *button)
+{
+    data.data_type = button->parameter1;
+    window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
+        9, -1000000000, 1000000000, set_model_value);
+}
+
 static void set_production(int value)
 {
     resource_data *resource = resource_get_data(resource_get_from_industry(data.items[data.target_index]));
     resource->production_per_month = value;
     data.target_index = NO_SELECTION;
-}
-
-static void button_edit_cost(const generic_button *button)
-{
-    data.data_type = MODEL_COST;
-    window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
-        9, -1000000000, 1000000000, set_model_value);
-}
-
-static void button_edit_value(const generic_button *button)
-{
-    data.data_type = MODEL_DESIRABILITY_VALUE;
-    window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
-        9, -1000000000, 1000000000, set_model_value);
-}
-
-static void button_edit_step(const generic_button *button)
-{
-    data.data_type = MODEL_DESIRABILITY_STEP;
-    window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
-        9, -1000000000, 1000000000, set_model_value);
-}
-
-static void button_edit_step_size(const generic_button *button)
-{
-    data.data_type = MODEL_DESIRABILITY_STEP_SIZE;
-    window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
-        9, -1000000000, 1000000000, set_model_value);
-}
-
-static void button_edit_range(const generic_button *button)
-{
-    data.data_type = MODEL_DESIRABILITY_RANGE;
-    window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
-        9, -1000000000, 1000000000, set_model_value);
-}
-
-static void button_edit_laborers(const generic_button *button)
-{
-    data.data_type = MODEL_LABORERS;
-    window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
-        9, -1000000000, 1000000000, set_model_value);
 }
 
 static void button_edit_production(const generic_button *button)
