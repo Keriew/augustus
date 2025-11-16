@@ -202,10 +202,10 @@ static void draw_foreground(void)
             " ", 470, 205, FONT_NORMAL_BLACK, 0);
         lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_DESELECT_VICTORY, 490, 205, 230, FONT_NORMAL_BLACK);
     }
-    
+
     button_border_draw(470, 236, 250, 30, data.focus_button_id == 15);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_ACTION_TYPE_CHANGE_MODEL_DATA, 470, 245, 250, FONT_NORMAL_BLACK);
-    
+
     button_border_draw(470, 276, 250, 30, data.focus_button_id == 16);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA, 470, 285, 250, FONT_NORMAL_BLACK);
 
