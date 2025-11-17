@@ -55,15 +55,14 @@ static generic_button data_buttons[] = {
     {471, 2, 48, 20, button_edit_model_value, 0, MODEL_BARBER},
     {526, 2, 48, 20, button_edit_model_value, 0, MODEL_BATHHOUSE},
     {581, 2, 48, 20, button_edit_model_value, 0, MODEL_HEALTH},
-    {636, 2, 48, 20, button_edit_model_value, 0, MODEL_FOOD_TYPES},
-    {691, 2, 48, 20, button_edit_model_value, 0, MODEL_POTTERY},
-    {746, 2, 48, 20, button_edit_model_value, 0, MODEL_LABORERS},
-    {801, 2, 48, 20, button_edit_model_value, 0, MODEL_OIL},
-    {856, 2, 48, 20, button_edit_model_value, 0, MODEL_FURNITURE},
-    {911, 2, 48, 20, button_edit_model_value, 0, MODEL_WINE},
-    {966, 2, 48, 20, button_edit_model_value, 0, MODEL_PROSPERITY},
-    {1021, 2, 48, 20, button_edit_model_value, 0, MODEL_MAX_PEOPLE},
-    {1076, 2, 48, 20, button_edit_model_value, 0, MODEL_TAX_MULTIPLIER}
+    {141, 30, 48, 20, button_edit_model_value, 0, MODEL_FOOD_TYPES},
+    {196, 30, 48, 20, button_edit_model_value, 0, MODEL_POTTERY},
+    {251, 30, 48, 20, button_edit_model_value, 0, MODEL_OIL},
+    {306, 30, 48, 20, button_edit_model_value, 0, MODEL_FURNITURE},
+    {361, 30, 48, 20, button_edit_model_value, 0, MODEL_WINE},
+    {416, 30, 48, 20, button_edit_model_value, 0, MODEL_PROSPERITY},
+    {471, 30, 48, 20, button_edit_model_value, 0, MODEL_MAX_PEOPLE},
+    {526, 30, 48, 20, button_edit_model_value, 0, MODEL_TAX_MULTIPLIER}
 };
 #define MAX_DATA_BUTTONS (sizeof(data_buttons) / sizeof(generic_button))
 
@@ -77,7 +76,7 @@ static generic_button static_buttons[] = {
 static grid_box_type model_buttons = {
     .x = 25,
     .y = 88,
-    .width = 80 * BLOCK_SIZE ,
+    .width = 42 * BLOCK_SIZE ,
     .height = 20 * BLOCK_SIZE,
     .item_height = 56,
     .item_margin.horizontal = 8,
@@ -175,7 +174,7 @@ static void draw_background(void)
 
     graphics_in_dialog();
 
-    outer_panel_draw(16, 32, 84, 27);
+    outer_panel_draw(16, 32, 46, 27);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_ACTION_TYPE_CHANGE_MODEL_DATA, 26, 42, 38 * BLOCK_SIZE, FONT_LARGE_BLACK);
     lang_text_draw_centered(13, 3, 16, 27 * BLOCK_SIZE + 8, 42 * BLOCK_SIZE, FONT_NORMAL_BLACK);
 

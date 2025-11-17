@@ -2248,7 +2248,7 @@ void model_reset_buildings(void)
 
 void model_reset_houses(void)
 {
-    for (house_level level = HOUSE_MIN; level < HOUSE_MAX; level++) {
+    for (house_level level = HOUSE_MIN; level < HOUSE_MAX + 1; level++) {
         const building_properties *props = &properties[level + 10];
         houses[level] = props->house_model_data;
     }
