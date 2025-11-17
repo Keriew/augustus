@@ -34,12 +34,10 @@ static void populate_list(void);
 static void draw_model_item(const grid_box_item *item);
 static void model_item_click(const grid_box_item *item);
 
-static void house_tooltip(const grid_box_item *item, tooltip_context *c);
-
 
 static struct {
     unsigned int total_items;
-    house_level items[HOUSE_MAX];
+    house_level items[HOUSE_MAX + 1];
 
     unsigned int data_buttons_focus_id;
     unsigned int static_buttons_focus_id;
@@ -48,24 +46,24 @@ static struct {
 } data;
 
 static generic_button data_buttons[] = {
-    {205, 2, 48, 20, button_edit_model_value, 0, MODEL_DEVOLVE_DESIRABILITY},
-    {260, 2, 48, 20, button_edit_model_value, 0, MODEL_EVOLVE_DESIRABILITY},
-    {315, 2, 48, 20, button_edit_model_value, 0, MODEL_ENTERTAINMENT},
-    {370, 2, 48, 20, button_edit_model_value, 0, MODEL_WATER},
-    {425, 2, 48, 20, button_edit_model_value, 0, MODEL_RELIGION},
-    {480, 2, 48, 20, button_edit_model_value, 0, MODEL_EDUCATION},
-    {535, 2, 48, 20, button_edit_model_value, 0, MODEL_BARBER},
-    {590, 2, 48, 20, button_edit_model_value, 0, MODEL_BATHHOUSE},
-    {645, 2, 48, 20, button_edit_model_value, 0, MODEL_HEALTH},
-    {700, 2, 48, 20, button_edit_model_value, 0, MODEL_FOOD_TYPES},
-    {755, 2, 48, 20, button_edit_model_value, 0, MODEL_POTTERY},
-    {810, 2, 48, 20, button_edit_model_value, 0, MODEL_LABORERS},
-    {865, 2, 48, 20, button_edit_model_value, 0, MODEL_OIL},
-    {920, 2, 48, 20, button_edit_model_value, 0, MODEL_FURNITURE},
-    {975, 2, 48, 20, button_edit_model_value, 0, MODEL_WINE},
-    {1030, 2, 48, 20, button_edit_model_value, 0, MODEL_PROSPERITY},
-    {1085, 2, 48, 20, button_edit_model_value, 0, MODEL_MAX_PEOPLE},
-    {1140, 2, 48, 20, button_edit_model_value, 0, MODEL_TAX_MULTIPLIER}
+    {141, 2, 48, 20, button_edit_model_value, 0, MODEL_DEVOLVE_DESIRABILITY},
+    {196, 2, 48, 20, button_edit_model_value, 0, MODEL_EVOLVE_DESIRABILITY},
+    {251, 2, 48, 20, button_edit_model_value, 0, MODEL_ENTERTAINMENT},
+    {306, 2, 48, 20, button_edit_model_value, 0, MODEL_WATER},
+    {361, 2, 48, 20, button_edit_model_value, 0, MODEL_RELIGION},
+    {416, 2, 48, 20, button_edit_model_value, 0, MODEL_EDUCATION},
+    {471, 2, 48, 20, button_edit_model_value, 0, MODEL_BARBER},
+    {526, 2, 48, 20, button_edit_model_value, 0, MODEL_BATHHOUSE},
+    {581, 2, 48, 20, button_edit_model_value, 0, MODEL_HEALTH},
+    {636, 2, 48, 20, button_edit_model_value, 0, MODEL_FOOD_TYPES},
+    {691, 2, 48, 20, button_edit_model_value, 0, MODEL_POTTERY},
+    {746, 2, 48, 20, button_edit_model_value, 0, MODEL_LABORERS},
+    {801, 2, 48, 20, button_edit_model_value, 0, MODEL_OIL},
+    {856, 2, 48, 20, button_edit_model_value, 0, MODEL_FURNITURE},
+    {911, 2, 48, 20, button_edit_model_value, 0, MODEL_WINE},
+    {966, 2, 48, 20, button_edit_model_value, 0, MODEL_PROSPERITY},
+    {1021, 2, 48, 20, button_edit_model_value, 0, MODEL_MAX_PEOPLE},
+    {1076, 2, 48, 20, button_edit_model_value, 0, MODEL_TAX_MULTIPLIER}
 };
 #define MAX_DATA_BUTTONS (sizeof(data_buttons) / sizeof(generic_button))
 
@@ -81,13 +79,12 @@ static grid_box_type model_buttons = {
     .y = 88,
     .width = 80 * BLOCK_SIZE ,
     .height = 20 * BLOCK_SIZE,
-    .item_height = 28,
+    .item_height = 56,
     .item_margin.horizontal = 8,
     .item_margin.vertical = 2,
     .extend_to_hidden_scrollbar = 1,
     .on_click = model_item_click,
     .draw_item = draw_model_item,
-    .handle_tooltip = house_tooltip
 };
 
 static void init(void)
@@ -100,8 +97,9 @@ static void init(void)
 static void populate_list(void)
 {
     data.total_items = 0;
-    while (data.total_items < HOUSE_MAX) {
-        data.items[data.total_items] = data.total_items++;
+    while (data.total_items < HOUSE_MAX + 1) {
+        data.items[data.total_items] = data.total_items;
+        data.total_items++;
     }
 }
 
@@ -156,7 +154,7 @@ static void draw_model_item(const grid_box_item *item)
     int h_level = data.items[item->index];
 
     const uint8_t *h_string = lang_get_building_type_string(h_level + 10); // Conversion from house_level to building_type
-    text_draw_ellipsized(h_string, item->x + 8, item->y + 8, 12 * BLOCK_SIZE, FONT_NORMAL_BLACK, 0);
+    text_draw_multiline(h_string, item->x + 8, item->y + 8, 8 * BLOCK_SIZE, 0, FONT_NORMAL_BLACK, 0);
 
     for (unsigned int i = 0; i < MAX_DATA_BUTTONS; i++) {
         button_border_draw(item->x + data_buttons[i].x, item->y + data_buttons[i].y,
@@ -282,20 +280,9 @@ static int desirability_tooltip(tooltip_context *c)
     return 0;
 }
 
-static void house_tooltip(const grid_box_item *item, tooltip_context *c)
-{
-    const uint8_t *text = lang_get_building_type_string(data.items[item->index]);
-    if (text_get_width(text, FONT_SMALL_PLAIN) > 12 * BLOCK_SIZE + 5 - 32 && !data.data_buttons_focus_id) {
-        c->precomposed_text = text;
-        c->type = TOOLTIP_BUTTON;
-    }
-}
-
 static void get_tooltip(tooltip_context *c)
 {
-    if (!desirability_tooltip(c)) {
-        grid_box_handle_tooltip(&model_buttons, c);
-    }
+    desirability_tooltip(c);
 }
 
 void window_house_model_data_show(void)
