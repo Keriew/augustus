@@ -40,8 +40,6 @@ static void model_item_click(const grid_box_item *item);
 static void building_tooltip(const grid_box_item *item, tooltip_context *c);
 
 static struct {
-    struct min_max{int min; int max;} min_max_per_data_type[6];
-
     unsigned int total_items;
     building_type items[BUILDING_TYPE_MAX];
 
@@ -49,14 +47,7 @@ static struct {
     unsigned int static_buttons_focus_id;
     unsigned int target_index;
     building_model_data_type data_type;
-} data = { {
-        [MODEL_COST] = {.min = NEGATIVE_UNLIMITED, .max = UNLIMITED},
-        [MODEL_DESIRABILITY_VALUE] = {.min = -100, .max = 100},
-        [MODEL_DESIRABILITY_STEP] = {.min = 0, .max = 8},
-        [MODEL_DESIRABILITY_STEP_SIZE] = {.min = -100, .max = 100},
-        [MODEL_DESIRABILITY_RANGE] = {.min = 0, .max = 8},
-        [MODEL_LABORERS] = {.min = 0, .max = UNLIMITED}
-    } };
+} data;
 
 
 static generic_button data_buttons[] = {
@@ -141,7 +132,7 @@ static void button_static_click(const generic_button *button)
 static void set_model_value(int value)
 {
     model_building *model = model_get_building(data.items[data.target_index]);
-    *get_ptr_for_building_data_type(model, data.data_type) = value;
+    *model_get_ptr_for_building_data_type(model, data.data_type) = value;
     data.target_index = NO_SELECTION;
 }
 
@@ -149,7 +140,7 @@ static void button_edit_model_value(const generic_button *button)
 {
     data.data_type = button->parameter1;
     window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button, 9,
-        data.min_max_per_data_type[data.data_type].min, data.min_max_per_data_type[data.data_type].max, set_model_value);
+        model_get_min_for_data_type(data.data_type), model_get_max_for_data_type(data.data_type), set_model_value);
 }
 
 static void set_production(int value)
@@ -203,7 +194,7 @@ static void draw_model_item(const grid_box_item *item)
             data_buttons[i].width, data_buttons[i].height, item->is_focused && data.data_buttons_focus_id == i + 1);
 
         model_building *model = model_get_building(b_type);
-        int value = *get_ptr_for_building_data_type(model, i);
+        int value = *model_get_ptr_for_building_data_type(model, i);
         if (i == 6) {
             value = resource_get_data(resource_get_from_industry(b_type))->production_per_month;
         }

@@ -115,8 +115,17 @@ int model_house_uses_inventory(house_level level, resource_type inventory);
  * @param model A pointer to a model to read the data from
  * @param data_type The data_type to return the pointer for
  */
-int *get_ptr_for_building_data_type(model_building *model, building_model_data_type data_type);
-int *get_ptr_for_house_data_type(model_house *model, house_model_data_type data_type);
+int *model_get_ptr_for_building_data_type(model_building *model, building_model_data_type data_type);
+int *model_get_ptr_for_house_data_type(model_house *model, house_model_data_type data_type);
+
+/**
+ * Get min or max values for a specific data type
+ * @param data_type The data type
+ */
+int model_get_min_for_data_type(building_model_data_type data_type);
+int model_get_max_for_data_type(building_model_data_type data_type);
+int model_get_min_for_house_data_type(house_model_data_type data_type);
+int model_get_max_for_house_data_type(house_model_data_type data_type);
 
 // PROPERTIES
 

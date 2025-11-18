@@ -131,15 +131,15 @@ static void button_static_click(const generic_button *button)
 static void set_model_value(int value)
 {
     model_house *model = model_get_house(data.items[data.target_index]);
-    *get_ptr_for_house_data_type(model, data.data_type) = value;
+    *model_get_ptr_for_house_data_type(model, data.data_type) = value;
     data.target_index = NO_SELECTION;
 }
 
 static void button_edit_model_value(const generic_button *button)
 {
     data.data_type = button->parameter1;
-    window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
-        9, -1000000000, 1000000000, set_model_value);
+    window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button, 9,
+        model_get_min_for_house_data_type(data.data_type), model_get_max_for_house_data_type(data.data_type), set_model_value);
 }
 
 static void model_item_click(const grid_box_item *item)
@@ -160,7 +160,7 @@ static void draw_model_item(const grid_box_item *item)
             data_buttons[i].width, data_buttons[i].height, item->is_focused && data.data_buttons_focus_id == i + 1);
         
         model_house *model = model_get_house(h_level);
-        int value = *get_ptr_for_house_data_type(model, i);
+        int value = *model_get_ptr_for_house_data_type(model, i);
 
         text_draw_number(value, 0, NULL, item->x + data_buttons[i].x + 8, item->y + data_buttons[i].y + 6,
                   FONT_SMALL_PLAIN, 0);

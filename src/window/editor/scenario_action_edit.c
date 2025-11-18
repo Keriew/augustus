@@ -1,5 +1,6 @@
 #include "scenario_action_edit.h"
 
+#include "building/properties.h"
 #include "core/string.h"
 #include "editor/tool.h"
 #include "game/resource.h"
@@ -443,6 +444,14 @@ static void create_evaluation_formula(xml_data_attribute_t *parameter)
     int current_index = get_param_value();
     data.formula_min_limit = parameter->min_limit;
     data.formula_max_limit = parameter->max_limit;
+    if (data.action->type == ACTION_TYPE_CHANGE_MODEL_DATA) {
+        data.formula_min_limit = model_get_min_for_data_type(data.action->parameter2);
+        data.formula_max_limit = model_get_max_for_data_type(data.action->parameter2);
+    }
+    if (data.action->type == ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA) {
+        data.formula_min_limit = model_get_min_for_house_data_type(data.action->parameter2);
+        data.formula_max_limit = model_get_max_for_house_data_type(data.action->parameter2);
+    }
     if (current_index > 0) { // a formula already exists
         const uint8_t *src = scenario_formula_get_string((unsigned int) current_index);
         if (src) {

@@ -150,7 +150,7 @@ static scenario_condition_data_t scenario_condition_data[CONDITION_TYPE_MAX] = {
                                         .xml_parm2 = {.name = "grid_offset2",        .type = PARAMETER_TYPE_GRID_SLICE,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET_CORNER2 },
                                         .xml_parm3 = {.name = "terrain_type",        .type = PARAMETER_TYPE_TERRAIN,          .key = TR_PARAMETER_TERRAIN },
                                         .xml_parm4 = {.name = "check",               .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm5 = {.name = "value",               .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
+                                        .xml_parm5 = {.name = "value",               .type = PARAMETER_TYPE_FORMULA,          .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
 
 
 

@@ -17,8 +17,45 @@
 
 #define BUFFER_SIZE SIZE_BUILDINGS + SIZE_HOUSES
 
+#define UNLIMITED 1000000000
+#define NEGATIVE_UNLIMITED -1000000000
+
 static model_building buildings[BUILDING_TYPE_MAX];
 static model_house houses[NUM_HOUSES];
+
+struct min_max {
+    int min;
+    int max;
+};
+
+static struct min_max min_max_for_data_types[MODEL_LABORERS + 1] = {
+    [MODEL_COST] = {.min = NEGATIVE_UNLIMITED, .max = UNLIMITED},
+    [MODEL_DESIRABILITY_VALUE] = {.min = -100, .max = 100},
+    [MODEL_DESIRABILITY_STEP] = {.min = 0, .max = 8},
+    [MODEL_DESIRABILITY_STEP_SIZE] = {.min = -100, .max = 100},
+    [MODEL_DESIRABILITY_RANGE] = {.min = 0, .max = 8},
+    [MODEL_LABORERS] = {.min = 0, .max = UNLIMITED}
+};
+
+static struct min_max min_max_for_house_data_types[MODEL_TAX_MULTIPLIER + 1] = {
+    [MODEL_DEVOLVE_DESIRABILITY] = {.min = -101, .max = 100},
+    [MODEL_EVOLVE_DESIRABILITY] = {.min = -101, .max = 100},
+    [MODEL_ENTERTAINMENT] = {.min = 0, .max = 116},
+    [MODEL_WATER] = {.min = 0, .max = 3},
+    [MODEL_RELIGION] = {.min = 0, .max = 5},
+    [MODEL_EDUCATION] = {.min = 0, .max = 3},
+    [MODEL_BARBER] = {.min = 0, .max = 1},
+    [MODEL_BATHHOUSE] = {.min = 0, .max = 1},
+    [MODEL_HEALTH] = {.min = 0, .max = 2},
+    [MODEL_FOOD_TYPES] = {.min = 0, .max = 5},
+    [MODEL_POTTERY] = {.min = 0, .max = 1},
+    [MODEL_OIL] = {.min = 0, .max = 1},
+    [MODEL_FURNITURE] = {.min = 0, .max = 1},
+    [MODEL_WINE] = {.min = 0, .max = 2},
+    [MODEL_PROSPERITY] = {.min = NEGATIVE_UNLIMITED, .max = UNLIMITED},
+    [MODEL_MAX_PEOPLE] = {.min = 0, .max = UNLIMITED},
+    [MODEL_TAX_MULTIPLIER] = {.min = NEGATIVE_UNLIMITED, .max = UNLIMITED}
+};
 
 // PROPERTIES
 
@@ -2306,7 +2343,7 @@ int model_house_uses_inventory(house_level level, resource_type inventory)
     }
 }
 
-int *get_ptr_for_building_data_type(model_building *model, building_model_data_type data_type)
+int *model_get_ptr_for_building_data_type(model_building *model, building_model_data_type data_type)
 {
     switch (data_type) {
         case MODEL_COST:
@@ -2326,7 +2363,7 @@ int *get_ptr_for_building_data_type(model_building *model, building_model_data_t
     }
 }
 
-int *get_ptr_for_house_data_type(model_house *model, house_model_data_type data_type)
+int *model_get_ptr_for_house_data_type(model_house *model, house_model_data_type data_type)
 {
     switch (data_type) {
         case MODEL_DEVOLVE_DESIRABILITY:
@@ -2366,4 +2403,24 @@ int *get_ptr_for_house_data_type(model_house *model, house_model_data_type data_
         default:
             return &model->devolve_desirability;
     }
+}
+
+int model_get_min_for_data_type(building_model_data_type data_type)
+{
+    return min_max_for_data_types[data_type].min;
+}
+
+int model_get_max_for_data_type(building_model_data_type data_type)
+{
+    return min_max_for_data_types[data_type].max;
+}
+
+int model_get_min_for_house_data_type(house_model_data_type data_type)
+{
+    return min_max_for_house_data_types[data_type].min;
+}
+
+int model_get_max_for_house_data_type(house_model_data_type data_type)
+{
+    return min_max_for_house_data_types[data_type].max;
 }
