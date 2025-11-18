@@ -597,7 +597,15 @@ void building_house_process_evolve_and_consume_goods(void)
             // 1x1 houses only consume a quarter of the goods
             if (game_time_day() == 0 && game_time_month() % 2 == 0
             || game_time_day() == 0 && b->house_size > 1
-            || (game_time_day() == 7 && b->house_size > 1)) {
+            || game_time_day() == 7 && b->house_size > 1
+            || game_time_day() == 3 && b->house_size > 2
+            || game_time_day() == 11 && b->house_size > 2
+            || game_time_day() == 13 && b->house_size = 3 && game_time_month() % 2 == 0
+            || game_time_day() == 2 && b->house_size > 3
+            || game_time_day() == 5 && b->house_size > 3
+            || game_time_day() == 9 && b->house_size > 3
+            || game_time_day() == 13 && b->house_size > 3
+) {
                 consume_resources(b);
             }
             b->last_update = last_update;
