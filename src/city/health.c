@@ -346,7 +346,7 @@ int city_health_get_house_health_level(const building *b, int update_city_data)
         // Update city_data
         if (update_city_data) {
             if (b->data.house.clinic) {
-                city_data.health.population_access.clinic += b->house_population}
+                city_data.health.population_access.clinic += b->house_population;
             }
             if (b->data.house.barber) {
                 city_data.health.population_access.barber += b->house_population;
