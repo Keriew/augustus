@@ -308,11 +308,11 @@ int city_health_get_house_health_level(const building *b, int update_city_data)
         
         // Healthcare: Do they have access to a Clinic and/or Hospital?
         if (b->data.house.clinic && b->data.house.hospital) {
-            house_health += 50 // Hospital + Clinic is best
+            house_health += 50; // Hospital + Clinic is best
         } else if (b->data.house.hospital) {
-            house_health += 40 // Hospital alone is still good
+            house_health += 40; // Hospital alone is still good
         } else if (b->data.house.clinic) {
-            house_health += 30 // Clinics are better than nothing
+            house_health += 30; // Clinics are better than nothing
         }
 
         // Bathhouse: Do they have access to a bathhouse?
