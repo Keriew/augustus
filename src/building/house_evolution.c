@@ -594,11 +594,8 @@ void building_house_process_evolve_and_consume_goods(void)
             if (!b->has_plague) {
                 has_expanded |= evolve_callback[b->type - BUILDING_HOUSE_VACANT_LOT](b, demands);
             }
-            // 1x1 houses only consume a quarter of the goods
-            if (game_time_day() == 0
-                || (game_time_day() == 4 && b->house_size > 1)
-                || (game_time_day() == 8 && b->house_size > 1)
-                || (game_time_day() == 12 && b->house_size > 1)) {
+            // 1x1 houses only consume half of the goods
+            if (game_time_day() == 0 || (game_time_day() == 7 && b->house_size > 1)) {
                 consume_resources(b);
             }
             b->last_update = last_update;
