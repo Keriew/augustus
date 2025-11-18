@@ -295,51 +295,66 @@ static void adjust_sickness_level_in_plague_buildings(int hospital_coverage_bonu
     }
 }
 
+// House Health Calculation
 int city_health_get_house_health_level(const building *b, int update_city_data)
 {
+    // Define house health to be 0 as a starting point
     int house_health = 0;
 
+    // Check if the building is a house
     if (building_is_house(b->type)) {
+        // House Level: What is the level of the house?
         house_health = calc_bound(b->subtype.house_level, 0, 10);
+        
+        // Healthcare: Do they have access to a Clinic and/or Hospital?
         if (b->data.house.clinic && b->data.house.hospital) {
-            house_health += 50;
-            if (update_city_data) {
-                city_data.health.population_access.clinic += b->house_population;
-            }
+            house_health += 50 // Hospital + Clinic is best
         } else if (b->data.house.hospital) {
-            house_health += 40;
+            house_health += 40 // Hospital alone is still good
         } else if (b->data.house.clinic) {
-            house_health += 30;
-            if (update_city_data) {
-                city_data.health.population_access.clinic += b->house_population;
-            }
+            house_health += 30 // Clinics are better than nothing
         }
 
+        // Bathhouse: Do they have access to a bathhouse?
         if (b->data.house.bathhouse) {
             house_health += 15;
-            if (update_city_data) {
-                city_data.health.population_access.baths += b->house_population;
-            }
         }
+
+        // Barber: Do they have access to a barber?
         if (b->data.house.barber) {
             house_health += 10;
-            if (update_city_data) {
-                city_data.health.population_access.barber += b->house_population;
-            }
         }
-        if (b->has_latrines_access || b->has_water_access) {
+
+        // Hygiene: Do they have access to clean water or latrines?
+        if (b->has_water_access || b->has_latrines_access) {
             house_health += 10;
         }
-        house_health += b->data.house.num_foods * 10;
 
+        // Mausoleum: Are they in range of a Mausoleum so they may bury their dead?
         int mausoleum_health = building_count_active(BUILDING_SMALL_MAUSOLEUM) * 2;
         mausoleum_health += building_count_active(BUILDING_LARGE_MAUSOLEUM) * 5;
-
+        // Sums the combined health from all Mausoleums and clamps it between 0 and 10
         house_health += calc_bound(mausoleum_health, 0, 10);
 
+        // Diet: How many foods do they have access to?
+        house_health += b->data.house.num_foods * 10;
+        // Cap health to 40 if their house level requires food but they don't have any
         int health_cap = (model_get_house(b->subtype.house_level)->food_types && !b->data.house.num_foods) ?
             40 : 100;
         house_health = calc_bound(house_health, 0, health_cap);
+
+        // Update city_data
+        if (update_city_data) {
+            if (b->data.house.clinic) {
+                city_data.health.population_access.clinic += b->house_population}
+            }
+            if (b->data.house.barber) {
+                city_data.health.population_access.barber += b->house_population;
+            }
+            if (b->data.house.bathhouse) {
+                city_data.health.population_access.baths += b->house_population;
+            }
+        }
     }
     return house_health;
 }
