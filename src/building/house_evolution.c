@@ -599,7 +599,7 @@ void building_house_process_evolve_and_consume_goods(void)
             || game_time_day() % 8 && b->house_size = 2
             || game_time_day() % 4 && b->house_size = 3
             || game_time_day() % 2 && b->house_size = 4
-) {
+            ) {
                 consume_resources(b);
             }
             b->last_update = last_update;
