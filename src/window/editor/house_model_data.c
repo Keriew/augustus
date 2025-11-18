@@ -75,7 +75,7 @@ static generic_button static_buttons[] = {
 
 static grid_box_type model_buttons = {
     .x = 25,
-    .y = 88,
+    .y = 108,
     .width = 42 * BLOCK_SIZE ,
     .height = 20 * BLOCK_SIZE,
     .item_height = 56,
@@ -174,9 +174,9 @@ static void draw_background(void)
 
     graphics_in_dialog();
 
-    outer_panel_draw(16, 32, 46, 27);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_ACTION_TYPE_CHANGE_MODEL_DATA, 26, 42, 38 * BLOCK_SIZE, FONT_LARGE_BLACK);
-    lang_text_draw_centered(13, 3, 16, 27 * BLOCK_SIZE + 8, 42 * BLOCK_SIZE, FONT_NORMAL_BLACK);
+    outer_panel_draw(16, 32, 45, 27);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_ACTION_TYPE_CHANGE_MODEL_DATA, 56, 45, 40 * BLOCK_SIZE, FONT_LARGE_BLACK);
+    lang_text_draw_centered(13, 3, 16, 27 * BLOCK_SIZE + 8, 45 * BLOCK_SIZE, FONT_NORMAL_BLACK);
 
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_MODEL, 80, 75, 30, FONT_SMALL_PLAIN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_COST, 240, 75, 30, FONT_SMALL_PLAIN);
