@@ -34,7 +34,7 @@ static struct {
     int next_delay;
 } data;
 
-struct field{
+struct field {
     int x;
     int y;
 };

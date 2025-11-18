@@ -25,6 +25,8 @@
 #include <stdio.h>
 
 #define NO_SELECTION (unsigned int) -1
+#define UNLIMITED 1000000000 //fits in 32bit signed/unsigned int
+#define NEGATIVE_UNLIMITED -1000000000 //fits in 32bit signed int
 
 static void button_edit_production(const generic_button *button);
 static void button_edit_model_value(const generic_button *button);
@@ -37,8 +39,9 @@ static void model_item_click(const grid_box_item *item);
 
 static void building_tooltip(const grid_box_item *item, tooltip_context *c);
 
-
 static struct {
+    struct min_max{int min; int max;} min_max_per_data_type[6];
+
     unsigned int total_items;
     building_type items[BUILDING_TYPE_MAX];
 
@@ -46,7 +49,15 @@ static struct {
     unsigned int static_buttons_focus_id;
     unsigned int target_index;
     building_model_data_type data_type;
-} data;
+} data = { {
+        [MODEL_COST] = {.min = NEGATIVE_UNLIMITED, .max = UNLIMITED},
+        [MODEL_DESIRABILITY_VALUE] = {.min = -100, .max = 100},
+        [MODEL_DESIRABILITY_STEP] = {.min = 0, .max = 8},
+        [MODEL_DESIRABILITY_STEP_SIZE] = {.min = -100, .max = 100},
+        [MODEL_DESIRABILITY_RANGE] = {.min = 0, .max = 8},
+        [MODEL_LABORERS] = {.min = 0, .max = UNLIMITED}
+    } };
+
 
 static generic_button data_buttons[] = {
     {205, 2, 48, 20, button_edit_model_value, 0, MODEL_COST},
@@ -137,8 +148,8 @@ static void set_model_value(int value)
 static void button_edit_model_value(const generic_button *button)
 {
     data.data_type = button->parameter1;
-    window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
-        9, -1000000000, 1000000000, set_model_value);
+    window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button, 9,
+        data.min_max_per_data_type[data.data_type].min, data.min_max_per_data_type[data.data_type].max, set_model_value);
 }
 
 static void set_production(int value)
@@ -153,7 +164,7 @@ static void button_edit_production(const generic_button *button)
     building_type type = data.items[data.target_index];
     if (building_is_raw_resource_producer(type) || building_is_workshop(type) || type == BUILDING_WHARF || building_is_farm(type)) {
         window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
-            9, -1000000000, 1000000000, set_production);
+            9, NEGATIVE_UNLIMITED, UNLIMITED, set_production);
     }
 }
 
