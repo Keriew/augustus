@@ -178,13 +178,14 @@ static void draw_background(void)
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_ACTION_TYPE_CHANGE_MODEL_DATA, 16, 42, 45 * BLOCK_SIZE, FONT_LARGE_BLACK);
     lang_text_draw_centered(13, 3, 16, 27 * BLOCK_SIZE + 8, 45 * BLOCK_SIZE, FONT_NORMAL_BLACK);
 
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_MODEL, 80, 75, 30, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_COST, 240, 75, 30, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_VALUE, 295, 75, 30, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_STEP, 350, 75, 30, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_STEP_SIZE, 405, 75, 30, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_RANGE, 460, 75, 30, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_LABORERS, 505, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_MODEL, 28, 85, 8 * BLOCK_SIZE, FONT_SMALL_PLAIN);
+    
+    for (int i = 0; i < NUM_DATA_BUTTONS; i++) {
+        int x = data_buttons[i].x + 35;
+        int y = i > 8 ? 95 : 75;
+        lang_text_draw_centered_without_bounds(CUSTOM_TRANSLATION,
+            TR_EDITOR_HOUSE_MODEL_DEVOLVE_DESIRABILITY + i, x, y, 30, FONT_SMALL_PLAIN);
+    }
 
     graphics_reset_dialog();
 
