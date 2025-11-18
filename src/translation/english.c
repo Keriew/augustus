@@ -1948,6 +1948,23 @@ static translation_string all_strings[] = {
     {TR_EDITOR_HOUSE_MODEL_PROSPERITY, "PSP"},
     {TR_EDITOR_HOUSE_MODEL_MAX_PEOPLE, "MPO"},
     {TR_EDITOR_HOUSE_MODEL_TAX_MULTIPLIER, "TMP"},
+    {TR_EDITOR_HOUSE_MODEL_EXPLANATION_DEVOLVE_DESIRABILITY, "Devolve Desirability\nThe desirability that must be undercut for the house to devolve"},
+    {TR_EDITOR_HOUSE_MODEL_EXPLANATION_EVOLVE_DESIRABILITY, "Evolve Desirability\nThe desirability that must be exceeded for the house to evolve"},
+    {TR_EDITOR_HOUSE_MODEL_EXPLANATION_ENTERTAINMENT, "Entertainment\nThe entertainment value needed\ne.g. 10 is the value a theater provides"},
+    {TR_EDITOR_HOUSE_MODEL_EXPLANATION_WATER, "Water\nWater level the house needs\n0: None, 1 = Well, 2 = Well + Latrine, 3 = Fountain"},
+    {TR_EDITOR_HOUSE_MODEL_EXPLANATION_RELIGION, "Religion\nNumber of gods the house needs"},
+    {TR_EDITOR_HOUSE_MODEL_EXPLANATION_EDUCATION, "Education\nEducational facilities needed\n0: None, 1 = School or Library, 2 = School and Library, 3 = School, Library and Academy"},
+    {TR_EDITOR_HOUSE_MODEL_EXPLANATION_BARBER, "Barber\nWhether the house needs a barber 0 or 1"},
+    {TR_EDITOR_HOUSE_MODEL_EXPLANATION_BATHHOUSE, "Bathhouse\nWhether the house needs bathhouse access 0 or 1"},
+    {TR_EDITOR_HOUSE_MODEL_EXPLANATION_HEALTH, "Health\nHealth services needed\n1 = doctor or hospital, 2 = doctor and hospital"},
+    {TR_EDITOR_HOUSE_MODEL_EXPLANATION_FOOD_TYPES, "Foodtypes\nThe number of different food types required"},
+    {TR_EDITOR_HOUSE_MODEL_EXPLANATION_POTTERY, "Pottery\nWhether the house needs pottery 0 or 1"},
+    {TR_EDITOR_HOUSE_MODEL_EXPLANATION_FURNITURE, "Furniture\nWhether the house needs furniture 0 or 1"},
+    {TR_EDITOR_HOUSE_MODEL_EXPLANATION_OIL, "Oil\nWhether the house needs oil 0 or 1"},
+    {TR_EDITOR_HOUSE_MODEL_EXPLANATION_WINE, "Wine\nWhether the house needs wine 0 or 1"},
+    {TR_EDITOR_HOUSE_MODEL_EXPLANATION_PROSPERITY, "Prosperity\nThe amount the house distributes to the desirability cap"},
+    {TR_EDITOR_HOUSE_MODEL_EXPLANATION_MAX_PEOPLE, "Max people\nHow many people can live in that housing type"},
+    {TR_EDITOR_HOUSE_MODEL_EXPLANATION_TAX_MULTIPLIER, "Tax multiplier\nA multiplier for taxes"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

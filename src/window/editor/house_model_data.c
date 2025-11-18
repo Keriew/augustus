@@ -163,7 +163,7 @@ static void draw_model_item(const grid_box_item *item)
         int value = *model_get_ptr_for_house_data_type(model, i);
 
         text_draw_number(value, 0, NULL, item->x + data_buttons[i].x + 8, item->y + data_buttons[i].y + 6,
-                  FONT_SMALL_PLAIN, 0);
+            FONT_SMALL_PLAIN, 0);
     }
 
 }
@@ -175,7 +175,7 @@ static void draw_background(void)
     graphics_in_dialog();
 
     outer_panel_draw(16, 32, 45, 27);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_ACTION_TYPE_CHANGE_MODEL_DATA, 16, 42, 45 * BLOCK_SIZE, FONT_LARGE_BLACK);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA, 16, 42, 45 * BLOCK_SIZE, FONT_LARGE_BLACK);
     lang_text_draw_centered(13, 3, 16, 27 * BLOCK_SIZE + 8, 45 * BLOCK_SIZE, FONT_NORMAL_BLACK);
 
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_MODEL, 28, 85, 8 * BLOCK_SIZE, FONT_SMALL_PLAIN);
@@ -248,31 +248,16 @@ static int desirability_tooltip(tooltip_context *c)
     const mouse *m_global = mouse_get();
     const mouse *m = mouse_in_dialog(m_global);
 
-    for (int i = 0; i < 4; i++) {
-        const uint8_t *text = translation_for(TR_EDITOR_MODEL_DATA_DES_VALUE + i);
+    for (int i = 0; i < NUM_DATA_BUTTONS; i++) {
+        const uint8_t *text = translation_for(TR_EDITOR_HOUSE_MODEL_DEVOLVE_DESIRABILITY + i);
         int width = text_get_width(text, FONT_SMALL_PLAIN);
-        int x;
-
-        switch (i) {
-            default:
-            case 0:
-                x = 295;
-                break;
-            case 1:
-                x = 350;
-                break;
-            case 2:
-                x = 405;
-                break;
-            case 3:
-                x = 460;
-                break;
-        }
+        int x = data_buttons[i].x + 35;
+        int y = i > 8 ? 95 : 75;
 
         if (x <= m->x && x + width > m->x &&
-            75 <= m->y && 75 + 10 > m->y) {
+            y <= m->y && y + 10 > m->y) {
             c->text_group = CUSTOM_TRANSLATION;
-            c->text_id = TR_EDITOR_DESIRABILITY_VALUE + i;
+            c->text_id = TR_EDITOR_HOUSE_MODEL_EXPLANATION_DEVOLVE_DESIRABILITY + i;
             c->type = TOOLTIP_BUTTON;
             return 1;
         }
