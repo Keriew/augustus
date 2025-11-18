@@ -25,7 +25,6 @@
 #include <stdio.h>
 
 #define NO_SELECTION (unsigned int) -1
-#define NUM_DATA_BUTTONS (sizeof(data_buttons) / sizeof(generic_button))
 
 static void button_edit_production(const generic_button *button);
 static void button_edit_model_value(const generic_button *button);
@@ -58,7 +57,7 @@ static generic_button data_buttons[] = {
     {480, 2, 48, 20, button_edit_model_value, 0, MODEL_LABORERS},
     {535, 2, 48, 20, button_edit_production}
 };
-#define MAX_DATA_BUTTONS (sizeof(data_buttons) / sizeof(generic_button))
+#define NUM_DATA_BUTTONS (sizeof(data_buttons) / sizeof(generic_button))
 
 static generic_button static_buttons[] = {
     {28, 25 * BLOCK_SIZE, 12 * BLOCK_SIZE, 24, button_static_click, 0, 0},
@@ -187,7 +186,7 @@ static void draw_model_item(const grid_box_item *item)
     get_building_translation(b_type, b_string, sizeof(b_string));
     text_draw_ellipsized(b_string, item->x + 8, item->y + 8, 12 * BLOCK_SIZE, FONT_NORMAL_BLACK, 0);
 
-    for (unsigned int i = 0; i < MAX_DATA_BUTTONS - (!(building_is_raw_resource_producer(b_type) ||
+    for (unsigned int i = 0; i < NUM_DATA_BUTTONS - (!(building_is_raw_resource_producer(b_type) ||
         building_is_workshop(b_type) || b_type == BUILDING_WHARF || building_is_farm(b_type))); i++) {
         button_border_draw(item->x + data_buttons[i].x, item->y + data_buttons[i].y,
             data_buttons[i].width, data_buttons[i].height, item->is_focused && data.data_buttons_focus_id == i + 1);
@@ -212,15 +211,15 @@ static void draw_background(void)
     outer_panel_draw(16, 32, 42, 27);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_ACTION_TYPE_CHANGE_MODEL_DATA, 26, 42, 38 * BLOCK_SIZE, FONT_LARGE_BLACK);
     lang_text_draw_centered(13, 3, 16, 27 * BLOCK_SIZE + 8, 42 * BLOCK_SIZE, FONT_NORMAL_BLACK);
-
+    
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_MODEL, 80, 75, 30, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_COST, 240, 75, 30, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_VALUE, 295, 75, 30, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_STEP, 350, 75, 30, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_STEP_SIZE, 405, 75, 30, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_RANGE, 460, 75, 30, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_LABORERS, 505, 75, 30, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_PRODUCTION, 570, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered_without_bounds(CUSTOM_TRANSLATION, TR_PARAMETER_COST, data_buttons[0].x + 35, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_VALUE, data_buttons[1].x + 35, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_STEP, data_buttons[2].x + 35, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_STEP_SIZE, data_buttons[3].x + 35, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_DATA_DES_RANGE, data_buttons[4].x + 35, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered_without_bounds(CUSTOM_TRANSLATION, TR_PARAMETER_LABORERS, data_buttons[5].x + 35, 75, 30, FONT_SMALL_PLAIN);
+    lang_text_draw_centered_without_bounds(CUSTOM_TRANSLATION, TR_EDITOR_MODEL_PRODUCTION, data_buttons[6].x + 35, 75, 30, FONT_SMALL_PLAIN);
 
     graphics_reset_dialog();
 
@@ -286,23 +285,7 @@ static int desirability_tooltip(tooltip_context *c)
     for (int i = 0; i < 4; i++) {
         const uint8_t *text = translation_for(TR_EDITOR_MODEL_DATA_DES_VALUE + i);
         int width = text_get_width(text, FONT_SMALL_PLAIN);
-        int x;
-
-        switch (i) {
-            default:
-            case 0:
-                x = 295;
-                break;
-            case 1:
-                x = 350;
-                break;
-            case 2:
-                x = 405;
-                break;
-            case 3:
-                x = 460;
-                break;
-        }
+        int x = data_buttons[i + 1].x + 35;
 
         if (x <= m->x && x + width > m->x &&
             75 <= m->y && 75 + 10 > m->y) {
