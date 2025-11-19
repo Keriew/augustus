@@ -301,8 +301,8 @@ static void split_size2(building *house, building_type new_type)
     int inventory_per_tile[RESOURCE_MAX];
     int inventory_remainder[RESOURCE_MAX];
     for (int i = 0; i < RESOURCE_MAX; i++) {
-        inventory_per_tile[i] = house->resources[i] / 4;
-        inventory_remainder[i] = house->resources[i] % 4;
+        inventory_per_tile[i] = house->resources[i];
+        inventory_remainder[i] = house->resources[i];
     }
     int population_per_tile = house->house_population / 4;
     int population_remainder = house->house_population % 4;
@@ -335,8 +335,8 @@ static void split_size3(building *house)
     int inventory_per_tile[RESOURCE_MAX];
     int inventory_remainder[RESOURCE_MAX];
     for (int i = 0; i < RESOURCE_MAX; i++) {
-        inventory_per_tile[i] = house->resources[i] / 9;
-        inventory_remainder[i] = house->resources[i] % 9;
+        inventory_per_tile[i] = house->resources[i];
+        inventory_remainder[i] = house->resources[i];
     }
     int population_per_tile = house->house_population / 9;
     int population_remainder = house->house_population % 9;
@@ -516,8 +516,8 @@ void building_house_devolve_from_large_villa(building *house)
     int inventory_per_tile[RESOURCE_MAX];
     int inventory_remainder[RESOURCE_MAX];
     for (int i = 0; i < RESOURCE_MAX; i++) {
-        inventory_per_tile[i] = house->resources[i] / 6;
-        inventory_remainder[i] = house->resources[i] % 6;
+        inventory_per_tile[i] = house->resources[i];
+        inventory_remainder[i] = house->resources[i];
     }
     int population_per_tile = house->house_population / 6;
     int population_remainder = house->house_population % 6;
@@ -557,8 +557,8 @@ void building_house_devolve_from_large_palace(building *house)
     int inventory_per_tile[RESOURCE_MAX];
     int inventory_remainder[RESOURCE_MAX];
     for (int i = 0; i < RESOURCE_MAX; i++) {
-        inventory_per_tile[i] = house->resources[i] / 8;
-        inventory_remainder[i] = house->resources[i] % 8;
+        inventory_per_tile[i] = house->resources[i];
+        inventory_remainder[i] = house->resources[i];
     }
     int population_per_tile = house->house_population / 8;
     int population_remainder = house->house_population % 8;
