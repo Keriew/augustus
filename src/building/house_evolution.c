@@ -594,15 +594,14 @@ void building_house_process_evolve_and_consume_goods(void)
             if (!b->has_plague) {
                 has_expanded |= evolve_callback[b->type - BUILDING_HOUSE_VACANT_LOT](b, demands);
             }
-            // 1x1 houses only consume a quarter of the goods
-            if (game_time_day() == 0 && game_time_month() % 2 == 0
-            || game_time_day() % 8 && b->house_size = 2
-            || game_time_day() % 4 && b->house_size = 3
-            || game_time_day() % 2 && b->house_size = 4
-            ) {
+            // Goods may be consumed any given day at a 6.25% probability per day per house area
+            const int building_area = b->house_size * b-> house_size
+            // random_byte has 128 potential outcomes, that's 8 per house area ie once every 16 days
+            const int threshold = building_area * 8
+            int random = random_byte();
+            if (random < threshold) {
                 consume_resources(b);
             }
-            b->last_update = last_update;
         }
     }
     if (has_expanded) {
