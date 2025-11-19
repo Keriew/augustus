@@ -600,7 +600,7 @@ void building_house_process_evolve_and_consume_goods(void)
             if (b->house_size == 1 && game_time_day() % 8 && random % 4 // ie every 32 days average
             || b->house_size == 2 && game_time_day() % 8
             || b->house_size == 3 && game_time_day() % 4
-            || b->house_size == 3 && game_time_day() % 16 && random % 2 // 3x3 consumes 4.5 times a month not 4
+            || b->house_size == 3 && game_time_day() % 16 && game_time_month() % 2 // 3x3 consumes 4.5 times a month not 4
             || b->house_size == 4 && game_time_day() % 2
             ) {
             {
