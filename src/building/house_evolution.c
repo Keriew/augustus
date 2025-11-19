@@ -606,6 +606,7 @@ void building_house_process_evolve_and_consume_goods(void)
             {
                 consume_resources(b);
             }
+            b->last_update = last_update;
         }
     }
     if (has_expanded) {
