@@ -624,17 +624,17 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
     }
     // water
     int water = model->water;
-    if (water == 1 && !house->has_water_access) {
+    if (water == 1 && !house->has_water_access) { // House needs at least a well
         if (!house->has_well_access) {
             house->data.house.evolve_text_id = 1;
             return;
-        } else if (!house->has_latrines_access) {
+        } else if (!house->has_latrines_access && level == HOUSE_LARGE_SHACK) {
             house->data.house.evolve_text_id = 68;
             return;
         }
     }
 
-    if (water == 2 && !house->has_water_access) {
+    if (water == 2 && !house->has_water_access) { // House needs at least a well and latrines
         if (!house->has_latrines_access) {
             house->data.house.evolve_text_id = 67;
             return;
