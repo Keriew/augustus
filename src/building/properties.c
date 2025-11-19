@@ -813,8 +813,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
     },
     [BUILDING_PREFECTURE] = {
         .size = 1,
-        .fire_proof = 1,
         .image_group = 64,
+        .fire_proof = 1,
         .sound_id = SOUND_CITY_PREFECTURE,
         .draw_desirability_range = 1,
         .event_data.attr = "prefecture",
@@ -1836,8 +1836,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
      },
      [BUILDING_NYMPHAEUM] = {
         .venus_gt_bonus = 1,
-        .fire_proof = 1,
         .size = 3,
+        .fire_proof = 1,
         .sound_id = SOUND_CITY_ORACLE,
         .draw_desirability_range = 1,
         .custom_asset.group = "Monuments",
@@ -1848,8 +1848,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
      },
      [BUILDING_SMALL_MAUSOLEUM] = {
         .venus_gt_bonus = 1,
-        .fire_proof = 1,
         .size = 2,
+        .fire_proof = 1,
         .sound_id = SOUND_CITY_ORACLE,
         .draw_desirability_range = 1,
         .rotation_offset = 1,
@@ -1861,8 +1861,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
      },
      [BUILDING_LARGE_MAUSOLEUM] = {
         .venus_gt_bonus = 1,
-        .fire_proof = 1,
         .size = 3,
+        .fire_proof = 1,
         .sound_id = SOUND_CITY_ORACLE,
         .draw_desirability_range = 1,
         .custom_asset.group = "Monuments",
