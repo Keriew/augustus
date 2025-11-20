@@ -32,7 +32,8 @@
 // Defines how a figure will move on a given tick (tiles take 15 ticks to move through)
 static void advance_tick(figure *f)
 {
-    const point_2d DIR_DELTAS[8] = {
+    const point_2d DIR_DELTAS[10] = {
+    {0, 0}, // Null
     {-1, 1}, // Top left
     {0, 1}, // Top
     {1, 1}, // Top right
