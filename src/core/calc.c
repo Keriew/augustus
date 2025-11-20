@@ -72,30 +72,36 @@ int calc_box_distance(int ax, int ay, int aw, int ah, int bx, int by, int bw, in
 
 direction_type calc_general_direction(int x_from, int y_from, int x_to, int y_to)
 {
-    if (x_from < x_to) {
-        if (y_from > y_to) {
-            return DIR_1_TOP_RIGHT;
-        } else if (y_from == y_to) {
-            return DIR_2_RIGHT;
-        } else if (y_from < y_to) {
-            return DIR_3_BOTTOM_RIGHT;
+    // A. Target is UP
+    if (y_to > y_from) {
+        if (x_to < x_from) {
+            return DIR_TOP_LEFT;
+        } else if (x_to == x_from) {
+            return DIR_TOP;
+        } else { // x_to > x_from
+            return DIR_RIGHT;
         }
-    } else if (x_from == x_to) {
-        if (y_from > y_to) {
-            return DIR_0_TOP;
-        } else if (y_from < y_to) {
-            return DIR_4_BOTTOM;
+
+    // B. Target is MIDDLE
+    } else if (y_to == y_from) {
+        if (x_to < x_from) {
+            return DIR_LEFT;
+        } else if (x_to == x_from) {
+            return DIR_CENTER;
+        } else { // x_to > x_from
+            return DIR_RIGHT;
         }
-    } else if (x_from > x_to) {
-        if (y_from > y_to) {
-            return DIR_7_TOP_LEFT;
-        } else if (y_from == y_to) {
-            return DIR_6_LEFT;
-        } else if (y_from < y_to) {
-            return DIR_5_BOTTOM_LEFT;
+
+    // C. Target is DOWN
+    } else { // y_to < y_from
+        if (x_to < x_from) {
+            return DIR_BOTTOM_LEFT;
+        } else if (x_to == x_from) {
+            return DIR_BOTTOM;
+        } else { // x_to > x_from
+            return DIR_BOTTOM_RIGHT;
         }
     }
-    return DIR_8_NONE;
 }
 
 direction_type calc_missile_shooter_direction(int x_from, int y_from, int x_to, int y_to)
