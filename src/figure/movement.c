@@ -1,4 +1,5 @@
 #include "movement.h"
+#include "direction.h"
 
 #include "core/log.h"
 #include "SDL.h"
@@ -22,12 +23,28 @@
 #include "map/routing_terrain.h"
 #include "map/terrain.h"
 
-#define TICKS_PER_TILE 15
-#define ROAM_DECISION_INTERVAL 5
-#define PALISADE_HP   60
-#define BUILDING_HP   10
-#define WALL_HP      200
-#define GATEHOUSE_HP 150
+// Direction Deltas
+    const point_2d DIR_DELTAS[10] = {
+    {0, 0}, // Null
+    {-1, 1}, // Top left
+    {0, 1}, // Top
+    {1, 1}, // Top right
+    {-1, 0}, // Left
+    {0, 0}, // Center
+    {1, 0}, // Right
+    {-1, -1}, // Bottom left
+    {0, -1}, // Bottom
+    {1, -1} // Bottom right
+    }
+    if (f->direction < 8) {
+        f->cross_country_x += DIR_DELTAS[f->direction].x;
+        f->cross_country_y += DIR_DELTAS[f->direction].y;
+    }
+
+// Defines the sequence: Top (2), Left (4), Right (6), Bottom (8)
+static const int ROAM_CARDINAL_DIRECTIONS[4] = {
+    DIR_TOP, DIR_LEFT, DIR_RIGHT, DIR_BOTTOM
+};
 
 // Roadblock Permissions
 static const roadblock_permission FIGURE_PERMISSIONS[FIGURE_TYPE_COUNT] = {
@@ -66,24 +83,6 @@ static const roadblock_permission FIGURE_PERMISSIONS[FIGURE_TYPE_COUNT] = {
 // Defines how a figure will move on a given tick (tiles take 15 ticks to move through)
 static void advance_tick(figure *f)
 {
-    // Should this constant be here or elsewhere?
-    const point_2d DIR_DELTAS[10] = {
-    {0, 0}, // Null
-    {-1, 1}, // Top left
-    {0, 1}, // Top
-    {1, 1}, // Top right
-    {-1, 0}, // Left
-    {0, 0}, // Center
-    {1, 0}, // Right
-    {-1, -1}, // Bottom left
-    {0, -1}, // Bottom
-    {1, -1} // Bottom right
-    }
-    if (f->direction < 8) {
-        f->cross_country_x += DIR_DELTAS[f->direction].x;
-        f->cross_country_y += DIR_DELTAS[f->direction].y;
-    }
-
     if (f->height_adjusted_ticks) {
         f->height_adjusted_ticks--;
         if (f->height_adjusted_ticks > 0) {
@@ -130,34 +129,9 @@ static void move_to_next_tile(figure *f)
         map_figure_delete(f);
     }
     // Changes direction based on where it is moving to
-    switch (f->direction) {
-        default:
-            return;
-        case DIR_0_TOP:
-            f->y--;
-            break;
-        case DIR_1_TOP_RIGHT:
-            f->x++; f->y--;
-            break;
-        case DIR_2_RIGHT:
-            f->x++;
-            break;
-        case DIR_3_BOTTOM_RIGHT:
-            f->x++; f->y++;
-            break;
-        case DIR_4_BOTTOM:
-            f->y++;
-            break;
-        case DIR_5_BOTTOM_LEFT:
-            f->x--; f->y++;
-            break;
-        case DIR_6_LEFT:
-            f->x--;
-            break;
-        case DIR_7_TOP_LEFT:
-            f->x--; f->y--;
-            break;
-    }
+    f->x += DIR_DELTAS[f->direction].x;
+    f->y += DIR_DELTAS[f->direction].y;
+
     // Adds the figure to its new position
     f->grid_offset += map_grid_direction_delta(f->direction);
     if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
@@ -177,6 +151,7 @@ static void move_to_next_tile(figure *f)
     if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
         figure_combat_attack_figure_at(f, f->grid_offset);
     }
+    // Updates the previous tile (variable? or what?)
     f->previous_tile_x = old_x;
     f->previous_tile_y = old_y;
 }
@@ -309,14 +284,14 @@ static void advance_route_tile(figure *f, int roaming_enabled)
 // Unclear?
 static void walk_ticks(figure *f, int num_ticks, int roaming_enabled)
 {
-    // Highways double their number of walk ticks
+    // Terrain speed check
     int terrain = map_terrain_get(map_grid_offset(f->x, f->y));
     if (terrain & TERRAIN_HIGHWAY) {
         num_ticks *= 2;
     }
-    // The figure this to move so long as it has ticks left
-    while (num_ticks > 0) {
-        num_ticks--;
+
+    // Figure moves until it runs out of ticks
+    while (num_ticks-- > 0) {
         f->progress_on_tile++;
         // Figure hasn't fully moved onto the next tile
         if (f->progress_on_tile < TICKS_PER_TILE) {
@@ -327,7 +302,6 @@ static void walk_ticks(figure *f, int num_ticks, int roaming_enabled)
             if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
                 figure_service_provide_coverage(f);
             }
-            f->progress_on_tile = TICKS_PER_TILE; // Redundant, ensures the figure has fully moved into the new tile
             // Assigns a route to the figure
             if (f->routing_path_id <= 0) {
                 figure_route_add(f);
@@ -336,8 +310,8 @@ static void walk_ticks(figure *f, int num_ticks, int roaming_enabled)
             set_next_route_tile_direction(f);
             // Checks if the figure can move into the next tile in the route
             advance_route_tile(f, roaming_enabled);
-            // Stop moving at all if they try to move to a non-adjacent tile somehow
-            if (f->direction >= 8) {
+            // Stop moving at all (???) if they try to move to a non-adjacent tile somehow
+            if (f->direction > DIR_MAX_MOVEMENT) { 
                 break;
             }
             f->routing_path_current_tile++;
@@ -352,29 +326,51 @@ static void walk_ticks(figure *f, int num_ticks, int roaming_enabled)
     }
 }
 
+// Initializes the first roaming destination
 void figure_movement_init_roaming(figure *f)
 {
     building *b = building_get(f->building_id);
     f->progress_on_tile = TICKS_PER_TILE;
     f->roam_choose_destination = 0;
     f->roam_ticks_until_next_turn = -1;
-    f->roam_turn_direction = 2;
+    f->roam_turn_direction = ROAM_TURN_LEFT;
+    // Disables corner skipping for roamers depending on configuration
     if (config_get(CONFIG_GP_CH_ROAMERS_DONT_SKIP_CORNERS)) {
         f->disallow_diagonal = 1;
     }
-    int roam_dir = b->figure_roam_direction;
+    // Get the current cycle index (0, 1, 2, or 3) from the building's direction field.
     b->figure_roam_direction += 2;
     if (b->figure_roam_direction > 6) {
         b->figure_roam_direction = 0;
     }
+     
+    // Map the cycle index (0-3) to the correct new Keypad direction index (2, 6, 8, 4)
+    int new_dir_keypad = ROAM_CARDINAL_DIRECTIONS[roam_dir_index % 4];
+
+    // Get the position from the figure object
     int x = f->x;
     int y = f->y;
-    // Stops the movement if the figure attempts to roam to a non-adjacent tile
+
+    switch (new_dir_keypad) {
+        case DIR_TOP:       
+            y += ROAM_INITIAL_OFFSET;
+            break; 
+        case DIR_BOTTOM:    
+            y -= ROAM_INITIAL_OFFSET;
+            break; 
+        case DIR_RIGHT:     
+            x += ROAM_INITIAL_OFFSET; 
+            break;
+        case DIR_LEFT:      
+            x -= ROAM_INITIAL_OFFSET; 
+            break;
+    }
+    // Provides an offset so they don't spawn inside the building (?)
     switch (roam_dir) {
-        case DIR_0_TOP: y -= 8; break;
-        case DIR_2_RIGHT: x += 8; break;
-        case DIR_4_BOTTOM: y += 8; break;
-        case DIR_6_LEFT: x -= 8; break;
+        case DIR_TOP: y += ROAM_INITIAL_OFFSET; break;
+        case DIR_BOTTOM: y -= ROAM_INITIAL_OFFSET; break;
+        case DIR_RIGHT: x += ROAM_INITIAL_OFFSET; break;
+        case DIR_LEFT: x -= ROAM_INITIAL_OFFSET; break;
     }
     // Sets destination for the closest road, if it is within 6 tiles
     map_grid_bound(&x, &y);

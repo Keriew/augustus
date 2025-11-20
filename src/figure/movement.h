@@ -1,10 +1,19 @@
 #ifndef FIGURE_MOVEMENT_H
-#define FIGURE_MOVEMENT_H
 
 #include "figure/figure.h"
 
+#define FIGURE_MOVEMENT_H
+#define TICKS_PER_TILE 15
+#define ROAM_DECISION_INTERVAL 5
+#define PALISADE_HP   60
+#define BUILDING_HP   10
+#define WALL_HP      200
+#define GATEHOUSE_HP 150
 #define FIGURE_REROUTE_DESTINATION_TICKS 120
 #define FIGURE_TYPE_COUNT (FIGURE_LAST_DEFINED_TYPE + 1)
+#define ROAM_INITIAL_OFFSET 8
+#define ROAM_TURN_LEFT 4
+#define ROAM_TURN_RIGHT 6
 
 void figure_movement_init_roaming(figure *f);
 
