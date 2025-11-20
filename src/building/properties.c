@@ -1062,6 +1062,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
     },
     [BUILDING_LOW_BRIDGE] = {
         .size = 1,
+        .fire_proof = 1,
         .event_data.attr = "low_bridge",
         .building_model_data = {.cost = 40, .desirability_value = 0, .desirability_step = 0,
             .desirability_step_size = 0, .desirability_range = 0, .laborers = 0}
