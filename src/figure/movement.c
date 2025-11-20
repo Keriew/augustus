@@ -32,38 +32,22 @@
 // Defines how a figure will move on a given tick (tiles take 15 ticks to move through)
 static void advance_tick(figure *f)
 {
-    switch (f->direction) {
-        case DIR_0_TOP:
-            f->cross_country_y--;
-            break;
-        case DIR_1_TOP_RIGHT:
-            f->cross_country_x++;
-            f->cross_country_y--;
-            break;
-        case DIR_2_RIGHT:
-            f->cross_country_x++;
-            break;
-        case DIR_3_BOTTOM_RIGHT:
-            f->cross_country_x++;
-            f->cross_country_y++;
-            break;
-        case DIR_4_BOTTOM:
-            f->cross_country_y++;
-            break;
-        case DIR_5_BOTTOM_LEFT:
-            f->cross_country_x--;
-            f->cross_country_y++;
-            break;
-        case DIR_6_LEFT:
-            f->cross_country_x--;
-            break;
-        case DIR_7_TOP_LEFT:
-            f->cross_country_x--;
-            f->cross_country_y--;
-            break;
-        default:
-            break;
+    const point_2d DIR_DELTAS[8] = {
+    {-1, 1}, // Top left
+    {0, 1}, // Top
+    {1, 1}, // Top right
+    {-1, 0}, // Left
+    {0, 0}, // Center
+    {1, 0}, // Right
+    {-1, -1}, // Bottom left
+    {0, -1}, // Bottom
+    {1, -1} // Bottom right
     }
+    if (f->direction < 8) {
+        f->cross_country_x += DIR_DELTAS[f->direction].x;
+        f->cross_country_y += DIR_DELTAS[f->direction].y;
+    }
+
     if (f->height_adjusted_ticks) {
         f->height_adjusted_ticks--;
         if (f->height_adjusted_ticks > 0) {
@@ -767,6 +751,7 @@ void figure_movement_set_cross_country_destination(figure *f, int x_dst, int y_d
 }
 
 // Calculates the direction when travelling cross country (no roads)
+// Be very careful with this, it is an algorithm from somewhere else
 static void cross_country_update_delta(figure *f)
 {
     if (f->cc_direction == 1) { // x
