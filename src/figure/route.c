@@ -52,10 +52,12 @@ void figure_route_add(figure *f)
     f->routing_path_id = 0;
     f->routing_path_current_tile = 0;
     f->routing_path_length = 0;
-    int direction_limit = 8;
+    int direction_limit = 8; // Limits directions to just adjacent ones so they don't try to teleport
+    // Forbids diagonal movement, as is the case for roamers
     if (f->disallow_diagonal) {
         direction_limit = 4;
     }
+    // Technical error if the game somehow manages to create a paths array
     if (!paths.blocks && !array_init(paths, ARRAY_SIZE_STEP, create_new_path, path_is_used)) {
         log_error("Unable to create paths array. The game will likely crash.", 0, 0);
         return;
@@ -65,7 +67,9 @@ void figure_route_add(figure *f)
     if (!path) {
         return;
     }
+    // Calculates a route depending on the figure data
     int path_length;
+    // Figure is a boat
     if (f->is_boat) {
         if (f->is_boat == 2) { // flotsam
             map_routing_calculate_distances_water_flotsam(f->x, f->y);
@@ -76,10 +80,11 @@ void figure_route_add(figure *f)
             path_length = map_routing_get_path_on_water(path->directions,
                 f->destination_x, f->destination_y, 0);
         }
+    // Figure is on land
     } else {
-        // land figure
         int can_travel;
         switch (f->terrain_usage) {
+            // Figure is an enemy
             case TERRAIN_USAGE_ENEMY:
                 // check to see if we can reach our destination by going around the city walls
                 can_travel = map_routing_noncitizen_can_travel_over_land(f->x, f->y,
@@ -93,14 +98,17 @@ void figure_route_add(figure *f)
                     }
                 }
                 break;
+            // Figure is a sentry walking over a wall
             case TERRAIN_USAGE_WALLS:
                 can_travel = map_routing_can_travel_over_walls(f->x, f->y,
                     f->destination_x, f->destination_y, 4);
                 break;
+            // Figure is an animal
             case TERRAIN_USAGE_ANIMAL:
                 can_travel = map_routing_noncitizen_can_travel_over_land(f->x, f->y,
                     f->destination_x, f->destination_y, direction_limit, -1, 5000);
                 break;
+            // Figure can travel over roads and gardens, but may also travel directly over land
             case TERRAIN_USAGE_PREFER_ROADS:
                 can_travel = map_routing_citizen_can_travel_over_road_garden(f->x, f->y,
                     f->destination_x, f->destination_y, direction_limit);
@@ -109,10 +117,12 @@ void figure_route_add(figure *f)
                         f->destination_x, f->destination_y, direction_limit);
                 }
                 break;
+            // Figure only travels over roads and gardens
             case TERRAIN_USAGE_ROADS:
                 can_travel = map_routing_citizen_can_travel_over_road_garden(f->x, f->y,
                     f->destination_x, f->destination_y, direction_limit);
                 break;
+            // Figure can travel over roads, gardens and highways, but may also travel directly over land
             case TERRAIN_USAGE_PREFER_ROADS_HIGHWAY:
                 can_travel = map_routing_citizen_can_travel_over_road_garden_highway(f->x, f->y,
                     f->destination_x, f->destination_y, direction_limit);
@@ -121,6 +131,7 @@ void figure_route_add(figure *f)
                         f->destination_x, f->destination_y, direction_limit);
                 }
                 break;
+            // Figure can only travel over roads, gardens and highways
             case TERRAIN_USAGE_ROADS_HIGHWAY:
                 can_travel = map_routing_citizen_can_travel_over_road_garden_highway(f->x, f->y,
                     f->destination_x, f->destination_y, direction_limit);
@@ -141,10 +152,12 @@ void figure_route_add(figure *f)
                 path_length = map_routing_get_path(path->directions,
                     f->destination_x, f->destination_y, direction_limit);
             }
-        } else { // cannot travel
+        // Figure cannot travel
+        } else {
             path_length = 0;
         }
     }
+    // Calculates route length
     if (path_length) {
         path->figure_id = f->id;
         f->routing_path_id = path->id;

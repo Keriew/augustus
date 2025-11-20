@@ -1,5 +1,8 @@
 #include "movement.h"
 
+#include "core/log.h"
+#include "SDL.h"
+
 #include "building/building.h"
 #include "building/destruction.h"
 #include "building/roadblock.h"
@@ -19,11 +22,14 @@
 #include "map/routing_terrain.h"
 #include "map/terrain.h"
 
+#define TICKS_PER_TILE 15
+#define ROAM_DECISION_INTERVAL 5
 #define PALISADE_HP   60
 #define BUILDING_HP   10
 #define WALL_HP      200
 #define GATEHOUSE_HP 150
 
+// Defines how a figure will move on a given tick (tiles take 15 ticks to move through)
 static void advance_tick(figure *f)
 {
     switch (f->direction) {
@@ -84,6 +90,7 @@ static void set_target_height_bridge(figure *f)
     f->target_height = map_bridge_height(f->grid_offset);
 }
 
+// Assigns roadblock permissions for each figure type
 static roadblock_permission get_permission_for_figure_type(figure *f)
 {
     switch (f->type) {
@@ -127,13 +134,16 @@ static roadblock_permission get_permission_for_figure_type(figure *f)
     }
 }
 
+// Moves the figure to the next tile
 static void move_to_next_tile(figure *f)
 {
     int old_x = f->x;
     int old_y = f->y;
+    // Removes the figure
     if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
         map_figure_delete(f);
     }
+    // Changes direction based on where it is moving to
     switch (f->direction) {
         default:
             return;
@@ -162,18 +172,22 @@ static void move_to_next_tile(figure *f)
             f->x--; f->y--;
             break;
     }
+    // Adds the figure to its new position
     f->grid_offset += map_grid_direction_delta(f->direction);
     if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
         map_figure_add(f);
     }
+    // Adds to the figure if it is on a road, and if it is on a bridge it adjusts its height to match
     if (map_terrain_is(f->grid_offset, TERRAIN_ROAD)) {
         f->is_on_road = 1;
         if (map_terrain_is(f->grid_offset, TERRAIN_WATER)) { // bridge
             set_target_height_bridge(f);
         }
+    // Makes it clear the figure is NOT on a road
     } else {
         f->is_on_road = 0;
     }
+    // Attacks a figure if it detects (?) it
     if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
         figure_combat_attack_figure_at(f, f->grid_offset);
     }
@@ -183,6 +197,7 @@ static void move_to_next_tile(figure *f)
 
 static void set_next_route_tile_direction(figure *f)
 {
+    // Figure hasn't reached destination yet
     if (f->routing_path_id > 0) {
         if (f->routing_path_current_tile < f->routing_path_length) {
             f->direction = figure_route_get_direction(f->routing_path_id, f->routing_path_current_tile);
@@ -190,7 +205,8 @@ static void set_next_route_tile_direction(figure *f)
             figure_route_remove(f);
             f->direction = DIR_FIGURE_AT_DESTINATION;
         }
-    } else { // should be at destination
+    // Figure has reached its destination
+    } else {
         f->direction = calc_general_direction(f->x, f->y, f->destination_x, f->destination_y);
         if (f->direction != DIR_FIGURE_AT_DESTINATION) {
             f->direction = DIR_FIGURE_LOST;
@@ -200,14 +216,20 @@ static void set_next_route_tile_direction(figure *f)
 
 static void advance_route_tile(figure *f, int roaming_enabled)
 {
-    if (f->direction >= 8) {
+    // The figure is trying to go through non-adjacent terrain
+    if (f->direction > 8) { // >=8 was a bug right?
         return;
     }
+    // Defines the target tile they're trying to move into
     int target_grid_offset = f->grid_offset + map_grid_direction_delta(f->direction);
+    // Defines the tile immediately after the target tile they're trying to move into
+    int next_target_grid_offset = target_grid_offset + map_grid_direction_delta(f->direction);
+    // The figure is a boat
     if (f->is_boat) {
         if (!map_terrain_is(target_grid_offset, TERRAIN_WATER)) {
             f->direction = DIR_FIGURE_REROUTE;
         }
+    // The figure is trying to go through enemy terrain (to them)
     } else if (f->terrain_usage == TERRAIN_USAGE_ENEMY) {
         if (!map_routing_noncitizen_is_passable(target_grid_offset)) {
             f->direction = DIR_FIGURE_REROUTE;
@@ -251,11 +273,14 @@ static void advance_route_tile(figure *f, int roaming_enabled)
                 }
             }
         }
+    // The figure is trying to go into a wall
     } else if (f->terrain_usage == TERRAIN_USAGE_WALLS) {
         if (!map_routing_is_wall_passable(target_grid_offset)) {
             f->direction = DIR_FIGURE_REROUTE;
         }
+    // The figure is trying to go into a road, highway or access ramp e.g stairs
     } else if (map_terrain_is(target_grid_offset, TERRAIN_ROAD | TERRAIN_HIGHWAY | TERRAIN_ACCESS_RAMP)) {
+        // The figure is trying to go through a building such as a roadblock, warehouse or granary
         if (roaming_enabled && map_terrain_is(target_grid_offset, TERRAIN_BUILDING)) {
             building *b = building_get(map_building_at(target_grid_offset));
             if (b->type == BUILDING_GRANARY) {
@@ -271,6 +296,7 @@ static void advance_route_tile(figure *f, int roaming_enabled)
                 }
             }
         }
+    // The figure is trying to go into a building
     } else if (map_terrain_is(target_grid_offset, TERRAIN_BUILDING)) {
         if ((map_routing_citizen_is_passable_terrain(target_grid_offset) ||
             (map_routing_citizen_is_road(target_grid_offset) && !roaming_enabled))) {
@@ -288,38 +314,50 @@ static void advance_route_tile(figure *f, int roaming_enabled)
             }
 
         }
+    // The figure is trying to go into impassable terrain
     } else if (map_terrain_is(target_grid_offset, TERRAIN_IMPASSABLE)) {
         f->direction = DIR_FIGURE_REROUTE;
     }
 }
 
+// Unclear?
 static void walk_ticks(figure *f, int num_ticks, int roaming_enabled)
 {
+    // Highways double their number of walk ticks
     int terrain = map_terrain_get(map_grid_offset(f->x, f->y));
     if (terrain & TERRAIN_HIGHWAY) {
         num_ticks *= 2;
     }
+    // The figure this to move so long as it has ticks left
     while (num_ticks > 0) {
         num_ticks--;
         f->progress_on_tile++;
-        if (f->progress_on_tile < 15) {
+        // Figure hasn't fully moved onto the next tile
+        if (f->progress_on_tile < TICKS_PER_TILE) {
             advance_tick(f);
+        // Figure has reached the next tile
         } else {
+            // Figure provides coverage to its surroundings
             if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
                 figure_service_provide_coverage(f);
             }
-            f->progress_on_tile = 15;
+            f->progress_on_tile = TICKS_PER_TILE; // Redundant, ensures the figure has fully moved into the new tile
+            // Assigns a route to the figure
             if (f->routing_path_id <= 0) {
                 figure_route_add(f);
-            }
+            }  
+            // Replaces the current direction by a new one
             set_next_route_tile_direction(f);
+            // Checks if the figure can move into the next tile in the route
             advance_route_tile(f, roaming_enabled);
+            // Stop moving at all if they try to move to a non-adjacent tile somehow
             if (f->direction >= 8) {
                 break;
             }
             f->routing_path_current_tile++;
             f->previous_tile_direction = f->direction;
-            f->progress_on_tile = 0;
+            f->progress_on_tile = 0; // Reset progress on tile as it is moving onto a next one
+            // Finally moves into the next tile
             move_to_next_tile(f);
             if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
                 advance_tick(f);
@@ -331,7 +369,7 @@ static void walk_ticks(figure *f, int num_ticks, int roaming_enabled)
 void figure_movement_init_roaming(figure *f)
 {
     building *b = building_get(f->building_id);
-    f->progress_on_tile = 15;
+    f->progress_on_tile = TICKS_PER_TILE;
     f->roam_choose_destination = 0;
     f->roam_ticks_until_next_turn = -1;
     f->roam_turn_direction = 2;
@@ -345,12 +383,14 @@ void figure_movement_init_roaming(figure *f)
     }
     int x = f->x;
     int y = f->y;
+    // Stops the movement if the figure attempts to roam to a non-adjacent tile
     switch (roam_dir) {
         case DIR_0_TOP: y -= 8; break;
         case DIR_2_RIGHT: x += 8; break;
         case DIR_4_BOTTOM: y += 8; break;
         case DIR_6_LEFT: x -= 8; break;
     }
+    // Sets destination for the closest road, if it is within 6 tiles
     map_grid_bound(&x, &y);
     int x_road, y_road;
     if (map_closest_road_within_radius(x, y, 1, 6, &x_road, &y_road)) {
@@ -364,24 +404,25 @@ void figure_movement_init_roaming(figure *f)
 static int is_valid_road_for_roaming(int grid_offset, int permission)
 {
     int valid = 0;
+    // If terrain is not a road it is never valid
     if (!map_terrain_is(grid_offset, TERRAIN_ROAD)) {
         return 0;
     }
+    // If the road is not under a building then it is valid outright
     if (!map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
         return 1;
     }
+    // If the road is under a building which is NOT a roadblock then it is not valid
     building *b = building_get(map_building_at(grid_offset));
     if (!building_type_is_roadblock(b->type)) {
         return 0;
     } else {
+        // If the figure has permission, it is valid unless it is a granary, in which case special conditions apply
         valid = building_roadblock_get_permission(permission, b);
         if (valid) {
-            if (b->type == BUILDING_GRANARY) { // granary has road and non-road tiles
-                if (!map_terrain_is(grid_offset, TERRAIN_ROAD)) {
-                    valid = 0; // do not roam outside of granary cross
-                } else if (map_road_get_granary_inner_road_tiles_count(b) < 3) {
-                    valid = 0; // do not roam into dead-end granaries
-                }
+            // We don't want figures to wander into dead ends
+            if (b->type == BUILDING_GRANARY) {
+                // granary stuff goes here
             }
         }
 
@@ -389,10 +430,12 @@ static int is_valid_road_for_roaming(int grid_offset, int permission)
     return valid;
 }
 
+// Sets roam direction
 static void roam_set_direction(figure *f, int permission)
 {
     int grid_offset = map_grid_offset(f->x, f->y);
     int direction = calc_general_direction(f->x, f->y, f->destination_x, f->destination_y);
+    // If direction is none (8) or invalid (>8) it returns top direction (which does nothing?)
     if (direction >= 8) {
         direction = 0;
     }
@@ -404,6 +447,7 @@ static void roam_set_direction(figure *f, int permission)
             break;
         }
         dir++;
+        // Invalid direction
         if (dir > 7) {
             dir = 0;
         }
@@ -417,6 +461,7 @@ static void roam_set_direction(figure *f, int permission)
             break;
         }
         dir--;
+        // Wraps directions around (-1 ie invalid to 7 ie top left)
         if (dir < 0) {
             dir = 7;
         }
@@ -429,7 +474,7 @@ static void roam_set_direction(figure *f, int permission)
         f->direction = road_dir2;
         f->roam_turn_direction = -2;
     }
-    f->roam_ticks_until_next_turn = 5;
+    f->roam_ticks_until_next_turn = ROAM_DECISION_INTERVAL;
 }
 
 void figure_movement_move_ticks(figure *f, int num_ticks)
@@ -458,10 +503,10 @@ void figure_movement_move_ticks_tower_sentry(figure *f, int num_ticks)
     while (num_ticks > 0) {
         num_ticks--;
         f->progress_on_tile++;
-        if (f->progress_on_tile < 15) {
+        if (f->progress_on_tile < TICKS_PER_TILE) {
             advance_tick(f);
         } else {
-            f->progress_on_tile = 15;
+            f->progress_on_tile = TICKS_PER_TILE;
         }
     }
 }
@@ -478,10 +523,10 @@ void figure_movement_follow_ticks(figure *f, int num_ticks)
     while (num_ticks > 0) {
         num_ticks--;
         f->progress_on_tile++;
-        if (f->progress_on_tile < 15) {
+        if (f->progress_on_tile < TICKS_PER_TILE) {
             advance_tick(f);
         } else {
-            f->progress_on_tile = 15;
+            f->progress_on_tile = TICKS_PER_TILE;
             f->direction = calc_general_direction(f->x, f->y,
                 leader->previous_tile_x, leader->previous_tile_y);
             if (f->direction >= 8) {
@@ -519,10 +564,10 @@ void figure_movement_follow_ticks_with_percentage(figure *f, int num_ticks, int 
     while (num_ticks > 0) {
         num_ticks--;
         f->progress_on_tile++;
-        if (f->progress_on_tile < 15) {
+        if (f->progress_on_tile < TICKS_PER_TILE) {
             advance_tick(f);
         } else {
-            f->progress_on_tile = 15;
+            f->progress_on_tile = TICKS_PER_TILE;
             f->direction = calc_general_direction(f->x, f->y,
                 leader->previous_tile_x, leader->previous_tile_y);
             if (f->direction >= 8) {
@@ -536,19 +581,24 @@ void figure_movement_follow_ticks_with_percentage(figure *f, int num_ticks, int 
     }
 }
 
+// Determines roaming movement
 void figure_movement_roam_ticks(figure *f, int num_ticks)
 {
+    // Does not need to choose destination, walks one tick then decides what to do
     if (f->roam_choose_destination == 0) {
         walk_ticks(f, num_ticks, 1);
+        // Figure arrives
         if (f->direction == DIR_FIGURE_AT_DESTINATION) {
             f->roam_choose_destination = 1;
             f->roam_length = 0;
+        // Figure is forced to reroute or is lost, changing destination
         } else if (f->direction == DIR_FIGURE_REROUTE || f->direction == DIR_FIGURE_LOST) {
             f->roam_choose_destination = 1;
         }
+        // The figure needs to choose destination
         if (f->roam_choose_destination) {
             f->roam_ticks_until_next_turn = 100;
-            f->direction = f->previous_tile_direction;
+            f->direction = f->previous_tile_direction; // unclear where?
         } else {
             return;
         }
@@ -557,10 +607,12 @@ void figure_movement_roam_ticks(figure *f, int num_ticks)
     while (num_ticks > 0) {
         num_ticks--;
         f->progress_on_tile++;
-        if (f->progress_on_tile < 15) {
+        // Moves to the end of the tile if it hasn't already
+        if (f->progress_on_tile < TICKS_PER_TILE) {
             advance_tick(f);
+        // Arrives at the next tile
         } else {
-            f->progress_on_tile = 15;
+            f->progress_on_tile = TICKS_PER_TILE;
             f->roam_random_counter++;
             int came_from_direction = (f->previous_tile_direction + 4) % 8;
             if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
@@ -597,8 +649,9 @@ void figure_movement_roam_ticks(figure *f, int num_ticks)
                     road_tiles[0] = road_tiles[4] = 0;
                 }
             }
+            // Ends the roaming walk if there are no road tiles around
             if (adjacent_road_tiles <= 0) {
-                f->roam_length = f->max_roam_length; // end roaming walk
+                f->roam_length = f->max_roam_length;
                 return;
             }
             if (adjacent_road_tiles == 1) {
@@ -710,9 +763,10 @@ void figure_movement_set_cross_country_destination(figure *f, int x_dst, int y_d
     f->destination_y = y_dst;
     figure_movement_set_cross_country_direction(
         f, f->cross_country_x, f->cross_country_y,
-        15 * x_dst, 15 * y_dst, 0);
+        TICKS_PER_TILE * x_dst, TICKS_PER_TILE * y_dst, 0);
 }
 
+// Calculates the direction when travelling cross country (no roads)
 static void cross_country_update_delta(figure *f)
 {
     if (f->cc_direction == 1) { // x
@@ -731,7 +785,6 @@ static void cross_country_update_delta(figure *f)
         f->cc_delta_y--;
     }
 }
-
 static void cross_country_advance_x(figure *f)
 {
     if (f->cross_country_x < f->cc_destination_x) {
@@ -740,7 +793,6 @@ static void cross_country_advance_x(figure *f)
         f->cross_country_x--;
     }
 }
-
 static void cross_country_advance_y(figure *f)
 {
     if (f->cross_country_y < f->cc_destination_y) {
@@ -749,6 +801,7 @@ static void cross_country_advance_y(figure *f)
         f->cross_country_y--;
     }
 }
+
 
 static void cross_country_advance(figure *f)
 {
@@ -785,8 +838,8 @@ int figure_movement_move_ticks_cross_country(figure *f, int num_ticks)
         }
         cross_country_advance(f);
     }
-    f->x = f->cross_country_x / 15;
-    f->y = f->cross_country_y / 15;
+    f->x = f->cross_country_x / TICKS_PER_TILE;
+    f->y = f->cross_country_y / TICKS_PER_TILE;
     f->grid_offset = map_grid_offset(f->x, f->y);
     if (map_terrain_is(f->grid_offset, TERRAIN_BUILDING)) {
         f->in_building_wait_ticks = 8;
@@ -797,17 +850,18 @@ int figure_movement_move_ticks_cross_country(figure *f, int num_ticks)
     return is_at_destination;
 }
 
+// Checks if the figure can launch a missile (cross country)
 int figure_movement_can_launch_cross_country_missile(int x_src, int y_src, int x_dst, int y_dst)
 {
     int height = 0;
     figure *f = figure_get(0); // abuse unused figure 0 as scratch
-    f->cross_country_x = 15 * x_src;
-    f->cross_country_y = 15 * y_src;
+    f->cross_country_x = TICKS_PER_TILE * x_src;
+    f->cross_country_y = TICKS_PER_TILE * y_src;
     if (map_terrain_is(map_grid_offset(x_src, y_src), TERRAIN_WALL_OR_GATEHOUSE) ||
         building_get(map_building_at(map_grid_offset(x_src, y_src)))->type == BUILDING_WATCHTOWER) {
         height = 6;
     }
-    figure_movement_set_cross_country_direction(f, 15 * x_src, 15 * y_src, 15 * x_dst, 15 * y_dst, 0);
+    figure_movement_set_cross_country_direction(f, TICKS_PER_TILE * x_src, TICKS_PER_TILE * y_src, TICKS_PER_TILE * x_dst, TICKS_PER_TILE * y_dst, 0);
 
     for (int guard = 0; guard < 1000; guard++) {
         for (int i = 0; i < 8; i++) {
@@ -816,8 +870,8 @@ int figure_movement_can_launch_cross_country_missile(int x_src, int y_src, int x
             }
             cross_country_advance(f);
         }
-        f->x = f->cross_country_x / 15;
-        f->y = f->cross_country_y / 15;
+        f->x = f->cross_country_x / TICKS_PER_TILE;
+        f->y = f->cross_country_y / TICKS_PER_TILE;
         if (height) {
             height--;
         } else {

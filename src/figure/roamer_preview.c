@@ -183,6 +183,7 @@ static void init_roaming(figure *f, int roam_dir, int x, int y)
     }
 }
 
+// Determines road access for buildings
 static int determine_road_access(int x, int y, int size, building_type type, map_point *road)
 {
     int building_orientation = 0;
