@@ -385,31 +385,32 @@ void figure_movement_init_roaming(figure *f)
 
 static int is_valid_road_for_roaming(int grid_offset, int permission)
 {
-    int valid = 0;
     // If terrain is not a road it is never valid
     if (!map_terrain_is(grid_offset, TERRAIN_ROAD)) {
         return 0;
     }
-    // If the road is not under a building then it is valid outright
+    // If the road is clear (not under a building) then it is valid
     if (!map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
         return 1;
     }
-    // If the road is under a building which is NOT a roadblock then it is not valid
+    // If the road is NOT under a roadblock then it is not valid
     building *b = building_get(map_building_at(grid_offset));
     if (!building_type_is_roadblock(b->type)) {
         return 0;
-    } else {
-        // If the figure has permission, it is valid unless it is a granary, in which case special conditions apply
-        valid = building_roadblock_get_permission(permission, b);
-        if (valid) {
-            // We don't want figures to wander into dead ends
-            if (b->type == BUILDING_GRANARY) {
-                // granary stuff goes here
-            }
-        }
-
     }
-    return valid;
+    // Check for figure permissions to enter the roadblock
+    int has_permission = building_roadblock_get_permission(permission, b);
+    if (has_permission) {
+        // If the building would be a dead-end, do not wander into it
+        if (b->type == BUILDING_GRANARY) {
+            // granary stuff goes here
+            // prevents them from wandering into dead ends within the granary
+        }
+        // Permission is valid
+        return 1;
+    }
+    // Permission is not valid
+    return 0;
 }
 
 // Sets roam direction
