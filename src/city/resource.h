@@ -42,6 +42,7 @@ const resource_list *city_resource_get_potential_foods(void);
 int city_resource_multiple_wine_available(void);
 
 int city_resource_food_types_available(void);
+int city_resource_food_types_eaten(void);
 int city_resource_food_stored(void);
 int city_resource_food_needed(void);
 int city_resource_food_supply_months(void);

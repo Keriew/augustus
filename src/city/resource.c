@@ -163,6 +163,11 @@ int city_resource_food_types_available(void)
     return city_data.resource.food_types_available;
 }
 
+int city_resource_food_types_eaten(void)
+{
+    return city_data.resource.food_types_eaten;
+}
+
 int city_resource_food_stored(void)
 {
     return city_data.resource.granary_total_stored;
