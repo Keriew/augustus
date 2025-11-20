@@ -29,6 +29,40 @@
 #define WALL_HP      200
 #define GATEHOUSE_HP 150
 
+// Roadblock Permissions
+static const roadblock_permission FIGURE_PERMISSIONS[FIGURE_TYPE_COUNT] = {
+    
+    // Maintenance
+    [FIGURE_ENGINEER]= PERMISSION_MAINTENANCE,
+    [FIGURE_PREFECT]= PERMISSION_MAINTENANCE,
+
+    // Entertainers
+    [FIGURE_GLADIATOR] = PERMISSION_ENTERTAINER,
+    [FIGURE_CHARIOTEER]= PERMISSION_ENTERTAINER,
+    [FIGURE_ACTOR] = PERMISSION_ENTERTAINER,
+    [FIGURE_LION_TAMER]= PERMISSION_ENTERTAINER,
+    [FIGURE_BARKEEP] = PERMISSION_ENTERTAINER,
+
+    // Medicine
+    [FIGURE_SURGEON] = PERMISSION_MEDICINE,
+    [FIGURE_DOCTOR]= PERMISSION_MEDICINE,
+    [FIGURE_BARBER]= PERMISSION_MEDICINE,
+    [FIGURE_BATHHOUSE_WORKER]= PERMISSION_MEDICINE,
+
+    // Education
+    [FIGURE_SCHOOL_CHILD]= PERMISSION_EDUCATION,
+    [FIGURE_TEACHER] = PERMISSION_EDUCATION,
+    [FIGURE_LIBRARIAN] = PERMISSION_EDUCATION,
+
+    // Unique Walkers
+    [FIGURE_PRIEST]= PERMISSION_PRIEST,
+    [FIGURE_MARKET_TRADER] = PERMISSION_MARKET,
+    [FIGURE_TAX_COLLECTOR] = PERMISSION_TAX_COLLECTOR,
+    [FIGURE_LABOR_SEEKER]= PERMISSION_LABOR_SEEKER,
+    [FIGURE_MISSIONARY]= PERMISSION_MISSIONARY,
+    [FIGURE_WATCHMAN]= PERMISSION_WATCHMAN
+};
+
 // Defines how a figure will move on a given tick (tiles take 15 ticks to move through)
 static void advance_tick(figure *f)
 {
@@ -77,47 +111,13 @@ static void set_target_height_bridge(figure *f)
 }
 
 // Assigns roadblock permissions for each figure type
-static roadblock_permission get_permission_for_figure_type(figure *f)
-{
-    switch (f->type) {
-        case FIGURE_ENGINEER:
-        case FIGURE_PREFECT:
-            return PERMISSION_MAINTENANCE;
-            break;
-        case FIGURE_PRIEST:
-            return PERMISSION_PRIEST;
-            break;
-        case FIGURE_MARKET_TRADER:
-            return PERMISSION_MARKET;
-            break;
-        case FIGURE_GLADIATOR:
-        case FIGURE_CHARIOTEER:
-        case FIGURE_ACTOR:
-        case FIGURE_LION_TAMER:
-        case FIGURE_BARKEEP:
-            return PERMISSION_ENTERTAINER;
-            break;
-        case FIGURE_SURGEON:
-        case FIGURE_DOCTOR:
-        case FIGURE_BARBER:
-        case FIGURE_BATHHOUSE_WORKER:
-            return PERMISSION_MEDICINE;
-        case FIGURE_SCHOOL_CHILD:
-        case FIGURE_TEACHER:
-        case FIGURE_LIBRARIAN:
-            return PERMISSION_EDUCATION;
-        case FIGURE_TAX_COLLECTOR:
-            return PERMISSION_TAX_COLLECTOR;
-        case FIGURE_LABOR_SEEKER:
-            return PERMISSION_LABOR_SEEKER;
-        case FIGURE_MISSIONARY:
-            return PERMISSION_MISSIONARY;
-        case FIGURE_WATCHMAN:
-            return PERMISSION_WATCHMAN;
-        default:
-            return PERMISSION_NONE;
-            break;
+roadblock_permission get_permission_for_figure_type(figure *f) {
+    // Safety check: Ensures the figure type is a valid index for the array.
+    if (f->type >= 0 && f->type < FIGURE_TYPE_COUNT) {
+        return FIGURE_PERMISSIONS[f->type];
     }
+    // Default case
+    return PERMISSION_NONE;
 }
 
 // Moves the figure to the next tile
