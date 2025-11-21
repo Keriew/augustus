@@ -185,20 +185,28 @@ static void move_to_next_tile(figure *f)
     f->previous_tile_y = old_y;
 }
 
+// Calculates the next movement direction
 static void set_next_route_tile_direction(figure *f)
 {
-    // Figure hasn't reached destination yet
+    // The figure currently has a route established (Path ID > 0)
     if (f->routing_path_id > 0) {
+        // If the figure still has tiles left in the route
         if (f->routing_path_current_tile < f->routing_path_length) {
+            // Get the next direction from the route data
             f->direction = figure_route_get_direction(f->routing_path_id, f->routing_path_current_tile);
         } else {
+            // Figure has reached the end of the route
             figure_route_remove(f);
             f->direction = DIR_FIGURE_AT_DESTINATION;
         }
-    // Figure has reached its destination
+    
+    // The figure is not currently following a route (Path ID <= 0)
     } else {
-        f->direction = calc_general_direction(f->x, f->y, f->destination_x, f->destination_y);
-        if (f->direction != DIR_FIGURE_AT_DESTINATION) {
+        // Check if the figure is currently on the destination tile
+        if (calc_general_direction(f->x, f->y, f->destination_x, f->destination_y) == DIR_FIGURE_AT_DESTINATION) {
+            f->direction = DIR_FIGURE_AT_DESTINATION;
+        } else {
+            // Route is finished/missing, and figure is NOT at destination -> consider it lost
             f->direction = DIR_FIGURE_LOST;
         }
     }
@@ -207,7 +215,7 @@ static void set_next_route_tile_direction(figure *f)
 static void advance_route_tile(figure *f, int roaming_enabled)
 {
     // The figure is trying to go through non-adjacent terrain
-    if (f->direction > 8) { // >=8 was a bug right?
+    if (f->direction >= 8) {
         return;
     }
     // Defines the target tile they're trying to move into
