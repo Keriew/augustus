@@ -18,18 +18,16 @@
 #define UNTIL_STOP 0
 #define UNTIL_CONTINUE 1
 
-// Enables parallel pathfinding
-// No clue if I can pull it off
+// Contains the routing context (as opposed to a global object)
 typedef struct {
+    // Core Pathfinding Data
     map_routing_distance_grid distance;
-    struct {
-        int head;
-        int tail;
-        int items[MAX_QUEUE];
-    } queue;
-    int stats_total_routes; // Move stats here if you want per-thread stats
+    struct { int head; int tail; int items[MAX_QUEUE]; } queue;
+    // Specialized Working Buffers
+    map_routing_distance_grid water_drag;
+    map_routing_distance_grid fighting_data;
+    // ... possibly other single-use flags or temporary data ...
 } RoutingContext;
-
 // Used for callbacks (?)
 typedef int (*RoutingCallback)(RoutingContext *ctx, int offset, int next_offset, int direction);
 
@@ -83,13 +81,13 @@ const map_routing_distance_grid *map_routing_get_distance_grid(void)
     return &distance;
 }
 
-static void clear_data(void)
+static void clear_data(RoutingContext *ctx)
 {
     reset_fighting_status();
     map_grid_clear_i16(distance.possible.items);
     map_grid_clear_i16(distance.determined.items);
-    queue.head = 0;
-    queue.tail = 0;
+    ctx->queue.head = 0;
+    ctx->queue.tail = 0;
 }
 
 // ???
@@ -136,26 +134,34 @@ static inline void ordered_queue_swap(RoutingContext *ctx, int first, int second
     ctx->queue.items[second] = temp;
 }
 
-static void ordered_queue_reorder(int start_index)
+static void ordered_queue_reorder(RoutingContext *ctx, int start_index)
 {
     int left_child = 2 * start_index + 1;
-    if (left_child >= queue.tail) {
+    if (left_child >= ctx->queue.tail) {
         return;
     }
     int right_child = left_child + 1;
     int smallest = start_index;
-    int16_t *offset_smallest = &distance.possible.items[queue.items[smallest]];
-    if (distance.possible.items[queue.items[left_child]] < *offset_smallest) {
+
+    // Store the distance of the current parent (or smallest node)
+    int smallest_dist = ctx->distance.possible.items[ctx->queue.items[smallest]];
+    // Compare with Left Child
+    int left_dist = ctx->distance.possible.items[ctx->queue.items[left_child]];
+    if (left_dist < smallest_dist) {
         smallest = left_child;
-        offset_smallest = &distance.possible.items[queue.items[smallest]];
+        smallest_dist = left_dist; // Update the reference value
     }
-    if (right_child < queue.tail &&
-        distance.possible.items[queue.items[right_child]] < *offset_smallest) {
-        smallest = right_child;
+    // Compare with Right Child
+    if (right_child < ctx->queue.tail) {
+        int right_dist = ctx->distance.possible.items[ctx->queue.items[right_child]];
+        if (right_dist < smallest_dist) {
+            smallest = right_child;
+        }
     }
+
     if (smallest != start_index) {
-        ordered_queue_swap(start_index, smallest);
-        ordered_queue_reorder(smallest);
+        ordered_queue_swap(RoutingContext * ctx, start_index, smallest);
+        ordered_queue_reorder(RoutingContext * ctx, smallest);
     }
 }
 
@@ -179,32 +185,32 @@ static inline int ordered_queue_pop(RoutingContext *ctx)
     return min_item_offset;
 }
 
-static inline void ordered_queue_reduce_index(int index, int offset, int dist)
+static inline void ordered_queue_reduce_index(RoutingContext *ctx, int index, int offset, int dist)
 {
-    queue.items[index] = offset;
-    while (index && distance.possible.items[queue.items[ordered_queue_parent(index)]] > dist) {
+    ctx->queue.items[index] = offset;
+    while (index && distance.possible.items[ctx->queue.items[ordered_queue_parent(index)]] > dist) {
         ordered_queue_swap(index, ordered_queue_parent(index));
         index = ordered_queue_parent(index);
     }
 }
 
-static void ordered_enqueue(int next_offset, int current_dist, int remaining_dist)
+static void ordered_enqueue(RoutingContext *ctx, int next_offset, int current_dist, int remaining_dist)
 {
     int possible_dist = remaining_dist + current_dist;
-    int index = queue.tail;
+    int index = ctx->queue.tail;
     if (distance.possible.items[next_offset]) {
         if (distance.possible.items[next_offset] <= possible_dist) {
             return;
         } else {
-            for (int i = 0; i < queue.tail; i++) {
-                if (queue.items[i] == next_offset) {
+            for (int i = 0; i < ctx->queue.tail; i++) {
+                if (ctx->queue.items[i] == next_offset) {
                     index = i;
                     break;
                 }
             }
         }
     } else {
-        queue.tail++;
+        ctx->queue.tail++;
     }
     distance.determined.items[next_offset] = current_dist;
     distance.possible.items[next_offset] = possible_dist;
@@ -252,7 +258,7 @@ static void route_queue_from_to(RoutingContext *ctx, int src, int dst, RoutingCa
     distance.dst_x = dst_x;
     distance.dst_y = dst_y;
     int dest = map_grid_offset(dst_x, dst_y);
-    ordered_enqueue(map_grid_offset(src_x, src_y), 1, 0);
+    ordered_enqueue(ctx, map_grid_offset(src_x, src_y), 1, 0);
     int tiles = 0;
     while (ctx->queue.tail) {
         int offset = ordered_queue_pop();
@@ -273,20 +279,20 @@ static void route_queue_from_to(RoutingContext *ctx, int src, int dst, RoutingCa
                 dist--;
             }
             if (valid_offset(next_offset, dist) && callback(offset, next_offset, i)) {
-                ordered_enqueue(next_offset, dist, remaining_dist);
+                ordered_enqueue(ctx, next_offset, dist, remaining_dist);
             }
         }
     }
 }
 
-static void route_queue_all_from(int source, max_directions directions,
+static void route_queue_all_from(RoutingContext *ctx, int source, max_directions directions,
     int (*callback)(int next_offset, int dist, int direction), int is_boat)
 {
     clear_data();
     map_grid_clear_u8(water_drag.items);
     enqueue(source, 1);
     int tiles = 0;
-    while (queue.head != queue.tail) {
+    while (ctx->queue.head != ctx->queue.tail) {
         if (++tiles > MAX_SEARCH_ITERATIONS) {
             break;
         }
@@ -294,9 +300,9 @@ static void route_queue_all_from(int source, max_directions directions,
         int drag = is_boat && terrain_water.items[offset] == WATER_N2_MAP_EDGE ? 4 : 0;
         if (water_drag.items[offset] < drag) {
             water_drag.items[offset]++;
-            queue.items[queue.tail++] = offset;
-            if (queue.tail >= MAX_QUEUE) {
-                queue.tail = 0;
+            ctx->queue.items[ctx->queue.tail++] = offset;
+            if (ctx->queue.tail >= MAX_QUEUE) {
+                ctx->queue.tail = 0;
             }
         } else {
             int dist = 1 + distance.determined.items[offset];
@@ -349,10 +355,10 @@ void map_routing_calculate_distances_water_boat(int x, int y)
     }
 }
 
-static int callback_calc_distance_water_flotsam(int next_offset, int dist, int direction)
+static int callback_calc_distance_water_flotsam(RoutingContext *ctx, int next_offset, int dist, int direction)
 {
     if (terrain_water.items[next_offset] != WATER_N1_BLOCKED) {
-        enqueue(next_offset, dist);
+        enqueue(ctx, next_offset, dist);
     }
     return 1;
 }
@@ -367,10 +373,10 @@ void map_routing_calculate_distances_water_flotsam(int x, int y)
     }
 }
 
-static int callback_calc_distance_build_wall(int next_offset, int dist, int direction)
+static int callback_calc_distance_build_wall(RoutingContext *ctx, int next_offset, int dist, int direction)
 {
     if (terrain_land_citizen.items[next_offset] == CITIZEN_4_CLEAR_TERRAIN) {
-        enqueue(next_offset, dist);
+        enqueue(ctx, next_offset, dist);
     }
     return 1;
 }
@@ -393,15 +399,15 @@ static int can_build_highway(int next_offset, int check_highway_routing)
     return 1;
 }
 
-static int callback_calc_distance_build_highway(int next_offset, int dist, int direction)
+static int callback_calc_distance_build_highway(RoutingContext *ctx, int next_offset, int dist, int direction)
 {
     if (can_build_highway(next_offset, 1)) {
-        enqueue(next_offset, dist);
+        enqueue(ctx, next_offset, dist);
     }
     return 1;
 }
 
-static int callback_calc_distance_build_road(int next_offset, int dist, int direction)
+static int callback_calc_distance_build_road(RoutingContext *ctx, int next_offset, int dist, int direction)
 {
     int blocked = 0;
     switch (terrain_land_citizen.items[next_offset]) {
@@ -422,12 +428,12 @@ static int callback_calc_distance_build_road(int next_offset, int dist, int dire
             break;
     }
     if (!blocked) {
-        enqueue(next_offset, dist);
+        enqueue(ctx, next_offset, dist);
     }
     return 1;
 }
 
-static int callback_calc_distance_build_aqueduct(int next_offset, int dist, int direction)
+static int callback_calc_distance_build_aqueduct(RoutingContext *ctx, int next_offset, int dist, int direction)
 {
     // check for existing highway/aqueduct tiles that won't work with this one
     if (!map_can_place_aqueduct_on_highway(next_offset, 1)) {
@@ -454,7 +460,7 @@ static int callback_calc_distance_build_aqueduct(int next_offset, int dist, int 
         blocked = 1;
     }
     if (!blocked) {
-        enqueue(next_offset, dist);
+        enqueue(ctx, next_offset, dist);
     }
     return 1;
 }
@@ -530,7 +536,7 @@ int map_routing_calculate_distances_for_building(routed_building_type type, int 
     return 1;
 }
 
-static int callback_delete_wall_aqueduct(int next_offset, int dist, int direction)
+static int callback_delete_wall_aqueduct(RoutingContext *ctx, int next_offset, int dist, int direction)
 {
     if (terrain_land_citizen.items[next_offset] < CITIZEN_0_ROAD) {
         if (map_terrain_is(next_offset, TERRAIN_AQUEDUCT | TERRAIN_WALL)) {
@@ -538,7 +544,7 @@ static int callback_delete_wall_aqueduct(int next_offset, int dist, int directio
             return UNTIL_STOP;
         }
     } else {
-        enqueue(next_offset, dist);
+        enqueue(ctx, next_offset, dist);
     }
     return UNTIL_CONTINUE;
 }
