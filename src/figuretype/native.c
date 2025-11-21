@@ -35,7 +35,7 @@ void figure_indigenous_native_action(figure *f)
             figure_combat_handle_corpse(f);
             break;
         case FIGURE_ACTION_156_NATIVE_GOING_TO_MEETING_CENTER:
-            figure_movement_move_ticks(f, 1, 0);
+            figure_movement_path(f, 1);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_157_NATIVE_RETURNING_FROM_MEETING;
                 f->destination_x = f->source_x;
@@ -45,7 +45,7 @@ void figure_indigenous_native_action(figure *f)
             }
             break;
         case FIGURE_ACTION_157_NATIVE_RETURNING_FROM_MEETING:
-            figure_movement_move_ticks(f, 1, 0);
+            figure_movement_path(f, 1);
             if (f->direction == DIR_FIGURE_AT_DESTINATION ||
                 f->direction == DIR_FIGURE_REROUTE ||
                 f->direction == DIR_FIGURE_LOST) {
@@ -83,7 +83,7 @@ void figure_indigenous_native_action(figure *f)
         case FIGURE_ACTION_159_NATIVE_ATTACKING:
             city_figures_add_attacking_native();
             f->terrain_usage = TERRAIN_USAGE_ENEMY;
-            figure_movement_move_ticks(f, 1, 0);
+            figure_movement_path(f, 1);
             if (f->direction == DIR_FIGURE_AT_DESTINATION ||
                 f->direction == DIR_FIGURE_REROUTE ||
                 f->direction == DIR_FIGURE_LOST) {

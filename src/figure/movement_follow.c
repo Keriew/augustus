@@ -9,7 +9,7 @@ void figure_movement_follow_ticks_with_percentage(figure *f, int num_ticks, int 
 {
     // 1. Handle Sub-Tick Accumulator (Variable Speed)
     // Adds the percentage variance. If it crosses 100, we gain/lose a whole tick.
-    int progress = f->progress_to_next_tick + tick_percentage;
+    int progress = f->progress_to_next_movement + tick_percentage;
 
     if (progress >= 100) {
         progress -= 100;
@@ -19,7 +19,7 @@ void figure_movement_follow_ticks_with_percentage(figure *f, int num_ticks, int 
         num_ticks--;
     }
     // Cast back to the storage type (likely char or short)
-    f->progress_to_next_tick = (char) progress;
+    f->progress_to_next_movement = (char) progress;
 
     // 2. Get Leader with Safety Check
     const figure *leader = figure_get(f->leading_figure_id);

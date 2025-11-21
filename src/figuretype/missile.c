@@ -116,7 +116,7 @@ void figure_explosion_cloud_action(figure *f)
     if (f->progress_on_tile > 44) {
         f->state = FIGURE_STATE_DEAD;
     }
-    figure_movement_move_ticks_cross_country(f, f->speed_multiplier);
+    figure_movement_cross_country(f, f->speed_multiplier);
     if (f->progress_on_tile < 48) {
         f->image_id = image_group(GROUP_FIGURE_EXPLOSION) +
             CLOUD_IMAGE_OFFSETS[f->progress_on_tile / 2];
@@ -168,7 +168,7 @@ void figure_arrow_action(figure *f)
     if (f->progress_on_tile > 120) {
         f->state = FIGURE_STATE_DEAD;
     }
-    int should_die = figure_movement_move_ticks_cross_country(f, 4);
+    int should_die = figure_movement_cross_country(f, 4);
     int target_id = get_citizen_on_tile(f->grid_offset);
     if (target_id) {
         missile_hit_target(f, target_id, FIGURE_FORT_LEGIONARY);
@@ -187,7 +187,7 @@ void figure_spear_action(figure *f)
     if (f->progress_on_tile > 120) {
         f->state = FIGURE_STATE_DEAD;
     }
-    int should_die = figure_movement_move_ticks_cross_country(f, 4);
+    int should_die = figure_movement_cross_country(f, 4);
     int target_id = get_citizen_on_tile(f->grid_offset);
     if (target_id) {
         missile_hit_target(f, target_id, FIGURE_FORT_LEGIONARY);
@@ -206,7 +206,7 @@ void figure_friendly_arrow_action(figure *f)
     if (f->progress_on_tile > 120) {
         f->state = FIGURE_STATE_DEAD;
     }
-    int should_die = figure_movement_move_ticks_cross_country(f, 4);
+    int should_die = figure_movement_cross_country(f, 4);
     int target_id = get_non_citizen_on_tile(f->grid_offset);
     if (target_id) {
         missile_hit_target(f, target_id, FIGURE_ENEMY_CAESAR_LEGIONARY);
@@ -226,7 +226,7 @@ void figure_javelin_action(figure *f)
     if (f->progress_on_tile > 120) {
         f->state = FIGURE_STATE_DEAD;
     }
-    int should_die = figure_movement_move_ticks_cross_country(f, 4);
+    int should_die = figure_movement_cross_country(f, 4);
     int target_id = get_non_citizen_on_tile(f->grid_offset);
     if (target_id) {
         missile_hit_target(f, target_id, FIGURE_ENEMY_CAESAR_LEGIONARY);
@@ -245,7 +245,7 @@ void figure_bolt_action(figure *f)
     if (f->progress_on_tile > 120) {
         f->state = FIGURE_STATE_DEAD;
     }
-    int should_die = figure_movement_move_ticks_cross_country(f, 4);
+    int should_die = figure_movement_cross_country(f, 4);
     int target_id = get_non_citizen_on_tile(f->grid_offset);
     if (target_id) {
         figure *target = figure_get(target_id);
@@ -284,7 +284,7 @@ void figure_catapult_missile_action(figure *f)
     if (f->progress_on_tile > 120) {
         f->state = FIGURE_STATE_DEAD;
     }
-    int should_die = figure_movement_move_ticks_cross_country(f, 4);
+    int should_die = figure_movement_cross_country(f, 4);
     int target_id = get_citizen_on_tile(f->grid_offset);
     if (target_id) {
         missile_hit_target(f, target_id, FIGURE_NONE);

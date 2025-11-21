@@ -177,7 +177,7 @@ static void cross_country_advance(figure *f)
     }
 }
 // What does this do?
-int figure_movement_move_ticks_cross_country(figure *f, int num_ticks)
+int figure_movement_cross_country(figure *f, int num_ticks)
 {
     map_figure_delete(f);
     int is_at_destination = 0;

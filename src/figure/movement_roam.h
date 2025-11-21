@@ -9,3 +9,5 @@
 
 void figure_movement_init_roaming(figure *f);
 void figure_movement_roam_ticks(figure *f, int num_ticks);
+
+#endif

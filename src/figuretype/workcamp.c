@@ -150,7 +150,7 @@ void figure_workcamp_worker_action(figure *f)
                 f->state = FIGURE_STATE_DEAD;
                 break;
             }
-            figure_movement_move_ticks(f, 1, 0);
+            figure_movement_path(f, 1);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 building_monument_remove_delivery(f->id);
                 warehouse_id = f->destination_building_id;
@@ -180,7 +180,7 @@ void figure_workcamp_worker_action(figure *f)
                 f->state = FIGURE_STATE_DEAD;
                 break;
             }
-            figure_movement_move_ticks(f, 1, 0);
+            figure_movement_path(f, 1);
             if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                 f->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
                 f->action_state = FIGURE_ACTION_216_WORK_CAMP_WORKER_ENTERING_MONUMENT;
@@ -202,7 +202,7 @@ void figure_workcamp_worker_action(figure *f)
             f->terrain_usage = TERRAIN_USAGE_ANY;
             f->use_cross_country = 1;
             f->dont_draw_elevated = 1;
-            if (figure_movement_move_ticks_cross_country(f, 1)) {
+            if (figure_movement_cross_country(f, 1)) {
                 f->state = FIGURE_STATE_DEAD;
             } else {
                 if (f->direction == DIR_FIGURE_REROUTE) {
@@ -264,7 +264,7 @@ void figure_workcamp_slave_action(figure *f)
                 f->state = FIGURE_STATE_DEAD;
                 break;
             }
-            figure_movement_move_ticks(f, 1, 0);
+            figure_movement_path(f, 1);
             if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                 f->action_state = FIGURE_ACTION_211_WORK_CAMP_SLAVE_DELIVERING_RESOURCES;
                 building *monument = building_get(f->destination_building_id);
@@ -286,7 +286,7 @@ void figure_workcamp_slave_action(figure *f)
             f->terrain_usage = TERRAIN_USAGE_ANY;
             f->use_cross_country = 1;
             f->dont_draw_elevated = 1;
-            if (figure_movement_move_ticks_cross_country(f, 1)) {
+            if (figure_movement_cross_country(f, 1)) {
                 building *monument = building_get(f->destination_building_id);
                 building_monument_deliver_resource(monument, f->collecting_item_id);
                 f->state = FIGURE_STATE_DEAD;
@@ -366,7 +366,7 @@ void figure_workcamp_architect_action(figure *f)
                 f->state = FIGURE_STATE_DEAD;
                 break;
             }
-            figure_movement_move_ticks(f, 1, 0);
+            figure_movement_path(f, 1);
             monument = building_get(f->destination_building_id);
             if (monument->state == BUILDING_STATE_UNUSED || !building_monument_access_point(monument, &dst) ||
                 b->monument.phase == MONUMENT_FINISHED) {
@@ -385,7 +385,7 @@ void figure_workcamp_architect_action(figure *f)
             f->terrain_usage = TERRAIN_USAGE_ANY;
             f->use_cross_country = 1;
             f->dont_draw_elevated = 1;
-            if (figure_movement_move_ticks_cross_country(f, 1)) {
+            if (figure_movement_cross_country(f, 1)) {
                 if (f->wait_ticks >= 384) {
                     f->state = FIGURE_STATE_DEAD;
                     monument = building_get(f->destination_building_id);

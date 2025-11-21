@@ -1,5 +1,17 @@
+// Internal
+#include "movement.h"
+#include "figure.h"
+
+// Advances the figure during an attack animation
+void figure_movement_advance_attack(figure *f)
+{
+    if (f->progress_on_tile <= 5) {
+        f->progress_on_tile++;
+        advance_tick(f);
+    }
+}
 // Animates Tower Sentry movement (sub-coordinates within a tile boundary only)
-void figure_movement_move_ticks_tower_sentry(figure *f, int num_ticks)
+void figure_movement_tower_sentry(figure *f, int num_ticks)
 {
     while (num_ticks-- > 0) {
         f->progress_on_tile++;

@@ -109,7 +109,7 @@ static void enemy_marching(figure *f, const formation *m)
         f->destination_building_id = m->destination_building_id;
         figure_route_remove(f);
     }
-    figure_movement_move_ticks(f, f->speed_multiplier, 0);
+    figure_movement_path(f, f->speed_multiplier);
     if (f->direction == DIR_FIGURE_AT_DESTINATION ||
         f->direction == DIR_FIGURE_REROUTE ||
         f->direction == DIR_FIGURE_LOST) {
@@ -151,7 +151,7 @@ static void enemy_fighting(figure *f, const formation *m)
         }
     }
     if (target_id > 0) {
-        figure_movement_move_ticks(f, f->speed_multiplier, 0);
+        figure_movement_path(f, f->speed_multiplier);
         if (f->direction == DIR_FIGURE_AT_DESTINATION) {
             figure *target = figure_get(f->target_figure_id);
             f->destination_x = target->x;
@@ -184,7 +184,7 @@ static void enemy_action(figure *f, formation *m)
         case FIGURE_ACTION_148_FLEEING:
             f->destination_x = f->source_x;
             f->destination_y = f->source_y;
-            figure_movement_move_ticks(f, f->speed_multiplier, 0);
+            figure_movement_path(f, f->speed_multiplier);
             if (f->direction == DIR_FIGURE_AT_DESTINATION ||
                 f->direction == DIR_FIGURE_REROUTE ||
                 f->direction == DIR_FIGURE_LOST) {
@@ -616,7 +616,7 @@ void figure_enemy_gladiator_action(figure *f)
         case FIGURE_ACTION_159_NATIVE_ATTACKING:
             city_figures_set_gladiator_revolt();
             f->terrain_usage = TERRAIN_USAGE_ENEMY;
-            figure_movement_move_ticks(f, 1, 0);
+            figure_movement_path(f, 1);
             if (f->direction == DIR_FIGURE_AT_DESTINATION ||
                 f->direction == DIR_FIGURE_REROUTE ||
                 f->direction == DIR_FIGURE_LOST) {

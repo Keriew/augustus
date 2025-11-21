@@ -356,7 +356,7 @@ void figure_entertainer_action(figure *f)
         case FIGURE_ACTION_91_ENTERTAINER_EXITING_SCHOOL:
             f->use_cross_country = 1;
             f->is_ghost = 1;
-            if (figure_movement_move_ticks_cross_country(f, 1) == 1) {
+            if (figure_movement_cross_country(f, 1) == 1) {
                 building *b_dst = determine_destination(f);
                 if (b_dst) {
                     int x_road, y_road;
@@ -388,7 +388,7 @@ void figure_entertainer_action(figure *f)
             if (f->roam_length >= 3200) {
                 f->state = FIGURE_STATE_DEAD;
             }
-            figure_movement_move_ticks(f, speed_factor, 0);
+            figure_movement_path(f, speed_factor);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 update_shows(f);
                 f->state = FIGURE_STATE_DEAD;
@@ -417,7 +417,7 @@ void figure_entertainer_action(figure *f)
             break;
         case FIGURE_ACTION_95_ENTERTAINER_RETURNING:
             f->terrain_usage = TERRAIN_USAGE_ROADS;
-            figure_movement_move_ticks(f, speed_factor, 0);
+            figure_movement_path(f, speed_factor);
             if (f->direction == DIR_FIGURE_AT_DESTINATION ||
                 f->direction == DIR_FIGURE_REROUTE || f->direction == DIR_FIGURE_LOST) {
                 f->state = FIGURE_STATE_DEAD;
@@ -429,7 +429,7 @@ void figure_entertainer_action(figure *f)
                 !fight_enemy(f)) {
                 f->state = FIGURE_STATE_DEAD;
             }
-            figure_movement_move_ticks(f, 1, 50);
+            figure_movement_path(f, 1 + 0.50);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 figure *target = figure_get(f->target_figure_id);
                 f->destination_x = target->x;
@@ -466,7 +466,7 @@ void figure_tourist_action(figure *f)
             f->use_cross_country = 1;
             f->is_ghost = 1;
             int dst_building_id = 0;
-            if (figure_movement_move_ticks_cross_country(f, 1) == 1) {
+            if (figure_movement_cross_country(f, 1) == 1) {
                 dst_building_id = determine_tourist_destination(f->x, f->y);
                 if (dst_building_id) {
                     building *b_dst = building_get(dst_building_id);
@@ -489,7 +489,7 @@ void figure_tourist_action(figure *f)
 
         case FIGURE_ACTION_219_TOURIST_GOING_TO_VENUE:
             f->is_ghost = 0;
-            figure_movement_move_ticks(f, 1, 0);
+            figure_movement_path(f, 1);
             for (int i = 0; i < 12; ++i) {
                 if (f->tourist.visited_building_type_ids[i]) {
                     f->tourist.ticks_since_last_visited_id[i]++;

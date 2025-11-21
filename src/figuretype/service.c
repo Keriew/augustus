@@ -14,8 +14,8 @@
 #include "map/building.h"
 #include "map/road_access.h"
 
-static const int DOCTOR_HEALING_OFFSETS[] = { 0, 1, 2, 3, 4, 5, 4, 3, 2, 1};
-static const int BEGGAR_OFFSETS[] = { 104, 105, 106, 107, 108, 109, 110, 111};
+static const int DOCTOR_HEALING_OFFSETS[] = { 0, 1, 2, 3, 4, 5, 4, 3, 2, 1 };
+static const int BEGGAR_OFFSETS[] = { 104, 105, 106, 107, 108, 109, 110, 111 };
 
 static int beggar_frame_count = sizeof(BEGGAR_OFFSETS) / sizeof(*BEGGAR_OFFSETS);
 
@@ -47,7 +47,7 @@ static void roamer_action(figure *f, int num_ticks)
             figure_movement_roam_ticks(f, num_ticks);
             break;
         case FIGURE_ACTION_126_ROAMER_RETURNING:
-            figure_movement_move_ticks(f, num_ticks, 0);
+            figure_movement_path(f, num_ticks);
             if (f->direction == DIR_FIGURE_AT_DESTINATION ||
                 f->direction == DIR_FIGURE_REROUTE || f->direction == DIR_FIGURE_LOST) {
                 f->state = FIGURE_STATE_DEAD;
@@ -139,7 +139,7 @@ void figure_destination_priest_action(figure *f)
             break;
 
         case FIGURE_ACTION_213_PRIEST_GOING_TO_PANTHEON:
-            figure_movement_move_ticks(f, 1, 0);
+            figure_movement_path(f, 1);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->state = FIGURE_STATE_DEAD;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
@@ -150,7 +150,7 @@ void figure_destination_priest_action(figure *f)
             break;
         case FIGURE_ACTION_215_PRIEST_GOING_TO_MESS_HALL:
             f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS_HIGHWAY;
-            figure_movement_move_ticks(f, 1, 0);
+            figure_movement_path(f, 1);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->state = FIGURE_STATE_DEAD;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
@@ -370,7 +370,7 @@ void figure_doctor_action(figure *f)
     switch (f->action_state) {
         case FIGURE_ACTION_231_DOCTOR_GOING_TO_PLAGUE:
             f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS_HIGHWAY;
-            figure_movement_move_ticks(f, 1, 0);
+            figure_movement_path(f, 1);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_232_DOCTOR_AT_PLAGUE;
                 figure_route_remove(f);
@@ -494,7 +494,7 @@ void figure_tax_collector_action(figure *f)
         case FIGURE_ACTION_41_TAX_COLLECTOR_ENTERING_EXITING:
             f->use_cross_country = 1;
             f->is_ghost = 1;
-            if (figure_movement_move_ticks_cross_country(f, 1) == 1) {
+            if (figure_movement_cross_country(f, 1) == 1) {
                 if (map_building_at(f->grid_offset) == f->building_id) {
                     // returned to own building
                     f->state = FIGURE_STATE_DEAD;
@@ -522,7 +522,7 @@ void figure_tax_collector_action(figure *f)
             figure_movement_roam_ticks(f, 1);
             break;
         case FIGURE_ACTION_43_TAX_COLLECTOR_RETURNING:
-            figure_movement_move_ticks(f, 1, 0);
+            figure_movement_path(f, 1);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_41_TAX_COLLECTOR_ENTERING_EXITING;
                 figure_movement_set_cross_country_destination(f, b->x, b->y);

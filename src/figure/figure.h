@@ -82,7 +82,7 @@ typedef struct {
     unsigned char migrant_num_people;
     unsigned char is_ghost;
     unsigned char min_max_seen;
-    char progress_to_next_tick;
+    char progress_to_next_movement;
     short leading_figure_id;
     unsigned char attack_image_offset;
     unsigned char wait_ticks_missile;

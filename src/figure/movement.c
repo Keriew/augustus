@@ -3,6 +3,7 @@
 #include "SDL.h"
 // Internal
 #include "movement.h"
+#include "figure.h"
 #include "movement_internal.h"
 #include "direction.h"
 #include "combat.h"
@@ -383,7 +384,7 @@ static void handle_tile_boundary_logic(figure *f, int roaming_enabled)
     }
 }
 // Defines the standard, path-following movement for non-roaming non-following figures
-static void walk_ticks(figure *f, int num_ticks, int roaming_enabled)
+static void walk_ticks(figure *f, int num_ticks, int roaming_enabled) // The last one indicates the figure is NOT following a leader (???)
 {
     // 1. Terrain Speed Check (Highway doubles tick speed)
     int terrain = map_terrain_get(map_grid_offset(f->x, f->y));
@@ -407,33 +408,34 @@ static void walk_ticks(figure *f, int num_ticks, int roaming_enabled)
     }
 }
 
-// --- PUBLIC FUNCTIONS ---
-/* Handles variable speed accumulator, then calls walk_ticks. */
-void figure_movement_move_ticks(figure *f, int num_ticks, int tick_percentage)
+// --- CORE FUNCTION ---
+/**
+ * @brief Handles figure movement on a path.
+ *
+ * This function accumulates percent ticks based on speed.
+ *
+ * When it reaches 100%, the figure moves 1 tick.
+ *
+ * @param f The figure that will move.
+ * @param speed The speed of the figure in movements per tick.
+ */
+void figure_movement_path(figure *f, int speed)
 {
-    // Sub-Tick Accumulator Logic:
-    // Handles speed variation by accumulating leftover percentage.
-    // If the accumulation hits 100%, we gain 1 full movement tick.
-    int progress = f->progress_to_next_tick + tick_percentage;
+    // Defines how many times will the figure move this tick
+    int num_movements = 0;
 
-    if (progress >= TICK_PERCENTAGE_BASE) {
+    // Adds progress based on speed
+    int progress = f->progress_to_next_movement + speed;
+
+    // Converts accumulated progress into movements (actual movement happens later)
+    while (progress >= TICK_PERCENTAGE_BASE) {
         progress -= TICK_PERCENTAGE_BASE;
-        num_ticks++;
-    } else if (progress <= -TICK_PERCENTAGE_BASE) {
-        progress += TICK_PERCENTAGE_BASE;
-        num_ticks--;
+        num_movements++;
     }
-    f->progress_to_next_tick = (char) progress;
 
-    // Delegate the actual movement to the main tick function.
-    // The '0' indicates the figure is NOT following a leader.
-    walk_ticks(f, num_ticks, 0);
-}
-// Advances the figure during an attack animation
-void figure_movement_advance_attack(figure *f)
-{
-    if (f->progress_on_tile <= 5) {
-        f->progress_on_tile++;
-        advance_tick(f);
-    }
+    // Stores the updated movements (must be a signed char if it can be negative)
+    f->progress_to_next_movement = (char) progress;
+
+    // Moves the figure the total number of ticks
+    walk_ticks(f, num_movements, 0);
 }

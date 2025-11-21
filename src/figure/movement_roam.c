@@ -292,9 +292,10 @@ static void roam_set_direction(figure *f, int permission)
     f->roam_ticks_until_next_turn = ROAM_DECISION_INTERVAL;
 }
 
-void figure_movement_move_ticks(figure *f, int num_ticks, 0)
+// Outdated???
+void figure_movement_path(figure *f, int num_ticks)
 {
-    walk_ticks(f, num_ticks, 0);
+    walk_ticks(f, num_ticks, 1);
 }
 
 // -- CORE FUNCTION --
