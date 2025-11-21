@@ -1,5 +1,6 @@
 #include "movement.h"
 #include "direction.h"
+#include "building/properties.h"
 
 #include "core/log.h"
 #include "SDL.h"
@@ -738,44 +739,69 @@ void figure_movement_advance_attack(figure *f)
     }
 }
 
-void figure_movement_set_cross_country_direction(figure *f, int x_src, int y_src, int x_dst, int y_dst, int is_missile)
-{
-    // all x/y are in 1/15th of a tile
+// --- CROSS COUNTRY DIRECTION --- //
+// Not sure what this does?
+void figure_movement_set_cross_country_direction(figure *f, int x_src, int y_src, int x_dst, int y_dst, int is_missile) {
+    // All x/y are in 1/15th of a tile
     f->cc_destination_x = x_dst;
     f->cc_destination_y = y_dst;
+
+    // Calculate absolute deltas
     f->cc_delta_x = (x_src > x_dst) ? (x_src - x_dst) : (x_dst - x_src);
     f->cc_delta_y = (y_src > y_dst) ? (y_src - y_dst) : (y_dst - y_src);
+
+    // Calculate initial Bresenham error term (2 * minor_delta - major_delta)
     if (f->cc_delta_x < f->cc_delta_y) {
+        // Y is major axis, X is minor
         f->cc_delta_xy = 2 * f->cc_delta_x - f->cc_delta_y;
     } else if (f->cc_delta_y < f->cc_delta_x) {
+        // X is major axis, Y is minor
         f->cc_delta_xy = 2 * f->cc_delta_y - f->cc_delta_x;
-    } else { // equal
+    } else { // Deltas are equal (perfect diagonal)
         f->cc_delta_xy = 0;
     }
+
     if (is_missile) {
+        // Missiles use a continuous direction calculation
         f->direction = calc_missile_direction(x_src, y_src, x_dst, y_dst);
     } else {
+        // Figures use snapped 9-way direction
         f->direction = calc_general_direction(x_src, y_src, x_dst, y_dst);
+        
+        // Direction Snapping Logic: If the path is highly vertical (Y-dominant)
         if (f->cc_delta_y > 2 * f->cc_delta_x) {
             switch (f->direction) {
-                case DIR_1_TOP_RIGHT: case DIR_7_TOP_LEFT: f->direction = DIR_0_TOP; break;
-                case DIR_3_BOTTOM_RIGHT: case DIR_5_BOTTOM_LEFT: f->direction = DIR_4_BOTTOM; break;
+                // Diagonal directions snap to vertical direction (Top or Bottom)
+                case DIR_TOP_RIGHT: case DIR_TOP_LEFT: 
+                    f->direction = DIR_TOP; 
+                    break;
+                case DIR_BOTTOM_RIGHT: case DIR_BOTTOM_LEFT: 
+                    f->direction = DIR_BOTTOM; 
+                    break;
             }
         }
+
+        // Direction Snapping Logic: If the path is highly horizontal (X-dominant)
         if (f->cc_delta_x > 2 * f->cc_delta_y) {
             switch (f->direction) {
-                case DIR_1_TOP_RIGHT: case DIR_3_BOTTOM_RIGHT: f->direction = DIR_2_RIGHT; break;
-                case DIR_5_BOTTOM_LEFT: case DIR_7_TOP_LEFT: f->direction = DIR_6_LEFT; break;
+                // Diagonal directions snap to horizontal direction (Right or Left)
+                case DIR_TOP_RIGHT: case DIR_BOTTOM_RIGHT: 
+                    f->direction = DIR_RIGHT; 
+                    break;
+                case DIR_BOTTOM_LEFT: case DIR_TOP_LEFT: 
+                    f->direction = DIR_LEFT; 
+                    break;
             }
         }
-    }
+
+    // Set the major axis for Bresenham's algorithm
     if (f->cc_delta_x >= f->cc_delta_y) {
-        f->cc_direction = 1;
+        f->cc_direction = CC_MAJOR_X;
     } else {
-        f->cc_direction = 2;
+        f->cc_direction = CC_MAJOR_Y;
     }
 }
-
+// ???
 void figure_movement_set_cross_country_destination(figure *f, int x_dst, int y_dst)
 {
     f->destination_x = x_dst;
@@ -784,27 +810,39 @@ void figure_movement_set_cross_country_destination(figure *f, int x_dst, int y_d
         f, f->cross_country_x, f->cross_country_y,
         TICKS_PER_TILE * x_dst, TICKS_PER_TILE * y_dst, 0);
 }
-
 // Calculates the direction when travelling cross country (no roads)
-// Be very careful with this, it is an algorithm from somewhere else
 static void cross_country_update_delta(figure *f)
 {
-    if (f->cc_direction == 1) { // x
+    // The X-axis is the major axis
+    if (f->cc_direction == CC_MAJOR_X) { 
+        // Case 1: Error term is positive (or zero, meaning step diagonally)
         if (f->cc_delta_xy >= 0) {
+            // Update error term: E_new = E_old + 2 * (dy - dx)
             f->cc_delta_xy += 2 * (f->cc_delta_y - f->cc_delta_x);
         } else {
+            // Case 2: Error term is negative (meaning step only on major axis)
+            // Update error term: E_new = E_old + 2 * dy
             f->cc_delta_xy += 2 * f->cc_delta_y;
         }
+        // Decrement the total distance remaining on the major axis (X)
         f->cc_delta_x--;
-    } else { // y
+        
+    // The Y-axis is the major axis
+    } else { // Implicitly f->cc_direction == CC_MAJOR_Y
+        // Case 1: Error term is positive (or zero, meaning step diagonally)
         if (f->cc_delta_xy >= 0) {
+            // Update error term: E_new = E_old + 2 * (dx - dy)
             f->cc_delta_xy += 2 * (f->cc_delta_x - f->cc_delta_y);
         } else {
+            // Case 2: Error term is negative (meaning step only on major axis)
+            // Update error term: E_new = E_old + 2 * dx
             f->cc_delta_xy += 2 * f->cc_delta_x;
         }
+        // Decrement the total distance remaining on the major axis (Y)
         f->cc_delta_y--;
     }
 }
+// Moves the figure one sub-tile step in the x direction
 static void cross_country_advance_x(figure *f)
 {
     if (f->cross_country_x < f->cc_destination_x) {
@@ -813,6 +851,7 @@ static void cross_country_advance_x(figure *f)
         f->cross_country_x--;
     }
 }
+// Moves the figure one sub-tile step in the y direction
 static void cross_country_advance_y(figure *f)
 {
     if (f->cross_country_y < f->cc_destination_y) {
@@ -821,26 +860,35 @@ static void cross_country_advance_y(figure *f)
         f->cross_country_y--;
     }
 }
-
-
+// Calculates in which direction should the figure move towards
 static void cross_country_advance(figure *f)
 {
     cross_country_update_delta(f);
-    if (f->cc_direction == 2) { // y
+    
+    // Check if the Y-axis is the major axis
+    if (f->cc_direction == CC_MAJOR_Y) { 
+        // Always advance the major axis (Y)
         cross_country_advance_y(f);
+        
+        // If the error term >= 0, also advance the minor axis (X)
         if (f->cc_delta_xy >= 0) {
-            f->cc_delta_x--;
+            // Decrement the remaining distance on the minor axis
+            f->cc_delta_x--; 
             cross_country_advance_x(f);
         }
-    } else {
+    } else { // The X-axis is the major axis (f->cc_direction == CC_MAJOR_X)
+        // Always advance the major axis (X)
         cross_country_advance_x(f);
+        
+        // If the error term >= 0, also advance the minor axis (Y)
         if (f->cc_delta_xy >= 0) {
-            f->cc_delta_y--;
+            // Decrement the remaining distance on the minor axis
+            f->cc_delta_y--; 
             cross_country_advance_y(f);
         }
     }
 }
-
+// What does this do?
 int figure_movement_move_ticks_cross_country(figure *f, int num_ticks)
 {
     map_figure_delete(f);
