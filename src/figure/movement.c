@@ -39,7 +39,7 @@ const point_2d DIR_DELTAS[10] = {
 {-1, -1}, // Bottom left
 {0, -1}, // Bottom
 {1, -1} // Bottom right
-}
+};
 // Defines the opposite direction for 1-9 indices
 static const direction_type DIR_OPPOSITE_MAP[10] = {
     // Index 0: Unused
@@ -409,7 +409,7 @@ static void walk_ticks(figure *f, int num_ticks, int roaming_enabled)
 
 // --- PUBLIC FUNCTIONS ---
 /* Handles variable speed accumulator, then calls walk_ticks. */
-void figure_movement_move_ticks_with_percentage(figure *f, int num_ticks, int tick_percentage)
+void figure_movement_move_ticks(figure *f, int num_ticks, int tick_percentage)
 {
     // Sub-Tick Accumulator Logic:
     // Handles speed variation by accumulating leftover percentage.
@@ -436,11 +436,4 @@ void figure_movement_advance_attack(figure *f)
         f->progress_on_tile++;
         advance_tick(f);
     }
-}
-
-// --- WRAPPERS --
-/* Walkers without speed variation */
-void figure_movement_move_ticks(figure *f, int num_ticks)
-{
-    figure_movement_move_ticks_with_percentage(f, num_ticks, 0); // 0 represents 0% speed variation.
 }

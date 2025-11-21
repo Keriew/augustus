@@ -168,7 +168,7 @@ void figure_sheep_action(figure *f)
             }
             break;
         case FIGURE_ACTION_197_HERD_ANIMAL_MOVING:
-            figure_movement_move_ticks(f, 1);
+            figure_movement_move_ticks(f, 1, 0);
             if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                 f->direction = f->previous_tile_direction;
                 f->action_state = FIGURE_ACTION_196_HERD_ANIMAL_AT_REST;
@@ -220,7 +220,7 @@ void figure_wolf_action(figure *f)
             }
             break;
         case FIGURE_ACTION_197_HERD_ANIMAL_MOVING:
-            figure_movement_move_ticks(f, 2);
+            figure_movement_move_ticks(f, 2, 0);
             if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                 f->direction = f->previous_tile_direction;
                 f->action_state = FIGURE_ACTION_196_HERD_ANIMAL_AT_REST;
@@ -230,7 +230,7 @@ void figure_wolf_action(figure *f)
             }
             break;
         case FIGURE_ACTION_199_WOLF_ATTACKING:
-            figure_movement_move_ticks(f, 2);
+            figure_movement_move_ticks(f, 2, 0);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 int target_id = figure_combat_get_target_for_wolf(f->x, f->y, 6);
                 if (target_id) {
@@ -324,7 +324,7 @@ void figure_zebra_action(figure *f)
             }
             break;
         case FIGURE_ACTION_197_HERD_ANIMAL_MOVING:
-            figure_movement_move_ticks(f, 2);
+            figure_movement_move_ticks(f, 2, 0);
             if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                 f->direction = f->previous_tile_direction;
                 f->action_state = FIGURE_ACTION_196_HERD_ANIMAL_AT_REST;

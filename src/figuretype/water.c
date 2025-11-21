@@ -83,7 +83,7 @@ void figure_flotsam_action(figure *f)
             } else {
                 f->flotsam_visible = 1;
                 f->wait_ticks++;
-                figure_movement_move_ticks(f, 1);
+                figure_movement_move_ticks(f, 1, 0);
                 f->is_ghost = 0;
                 f->height_adjusted_ticks = 0;
                 if (f->direction == DIR_FIGURE_AT_DESTINATION ||
@@ -222,7 +222,7 @@ void figure_fishing_boat_action(figure *f)
             }
             break;
         case FIGURE_ACTION_191_FISHING_BOAT_GOING_TO_FISH:
-            figure_movement_move_ticks_with_percentage(f, speed, percentage_speed);
+            figure_movement_move_ticks(f, speed, percentage_speed);
             f->height_adjusted_ticks = 0;
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 map_point tile;
@@ -252,7 +252,7 @@ void figure_fishing_boat_action(figure *f)
             }
             break;
         case FIGURE_ACTION_193_FISHING_BOAT_GOING_TO_WHARF:
-            figure_movement_move_ticks_with_percentage(f, speed, percentage_speed);
+            figure_movement_move_ticks(f, speed, percentage_speed);
             f->height_adjusted_ticks = 0;
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_194_FISHING_BOAT_AT_WHARF;
@@ -288,7 +288,7 @@ void figure_fishing_boat_action(figure *f)
             }
             break;
         case FIGURE_ACTION_195_FISHING_BOAT_RETURNING_WITH_FISH:
-            figure_movement_move_ticks_with_percentage(f, speed, percentage_speed);
+            figure_movement_move_ticks(f, speed, percentage_speed);
             f->height_adjusted_ticks = 0;
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_194_FISHING_BOAT_AT_WHARF;

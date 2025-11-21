@@ -84,7 +84,7 @@ void figure_engineer_action(figure *f)
             figure_movement_roam_ticks(f, 1);
             break;
         case FIGURE_ACTION_63_ENGINEER_RETURNING:
-            figure_movement_move_ticks(f, 1);
+            figure_movement_move_ticks(f, 1, 0);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_61_ENGINEER_ENTERING_EXITING;
                 figure_movement_set_cross_country_destination(f, b->x, b->y);
@@ -333,7 +333,7 @@ void figure_prefect_action(figure *f)
             figure_movement_roam_ticks(f, 1);
             break;
         case FIGURE_ACTION_73_PREFECT_RETURNING:
-            figure_movement_move_ticks(f, 1);
+            figure_movement_move_ticks(f, 1, 0);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_71_PREFECT_ENTERING_EXITING;
                 figure_movement_set_cross_country_destination(f, b->x, b->y);
@@ -344,7 +344,7 @@ void figure_prefect_action(figure *f)
             break;
         case FIGURE_ACTION_74_PREFECT_GOING_TO_FIRE:
             f->terrain_usage = TERRAIN_USAGE_ANY;
-            figure_movement_move_ticks(f, 1);
+            figure_movement_move_ticks(f, 1, 0);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_75_PREFECT_AT_FIRE;
                 figure_route_remove(f);
@@ -381,7 +381,7 @@ void figure_prefect_action(figure *f)
                     f->state = FIGURE_STATE_DEAD;
                 }
             }
-            figure_movement_move_ticks_with_percentage(f, 1, 20);
+            figure_movement_move_ticks(f, 1, 20);
             if (f->direction == DIR_FIGURE_AT_DESTINATION || f->wait_ticks++ > RECALCULATE_ENEMY_LOCATION_TICKS) {
                 figure *target = figure_get(f->target_figure_id);
                 f->destination_x = target->x;

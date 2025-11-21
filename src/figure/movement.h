@@ -9,8 +9,7 @@
 #define FIGURE_REROUTE_DESTINATION_TICKS 120
 
 // Public functions
-void figure_movement_move_ticks_with_percentage(figure *f, int num_ticks, int tick_percentage);
-void figure_movement_move_ticks(figure *f, int num_ticks);
+void figure_movement_move_ticks(figure *f, int num_ticks, int tick_percentage);
 void figure_movement_advance_attack(figure *f);
 
 // Function prototypes

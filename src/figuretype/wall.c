@@ -260,7 +260,7 @@ void figure_tower_sentry_action(figure *f)
             }
             break;
         case FIGURE_ACTION_171_TOWER_SENTRY_PATROLLING:
-            figure_movement_move_ticks(f, 1);
+            figure_movement_move_ticks(f, 1, 0);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_173_TOWER_SENTRY_RETURNING;
                 f->destination_x = f->source_x;
@@ -290,7 +290,7 @@ void figure_tower_sentry_action(figure *f)
             }
             break;
         case FIGURE_ACTION_173_TOWER_SENTRY_RETURNING:
-            figure_movement_move_ticks(f, 1);
+            figure_movement_move_ticks(f, 1, 0);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_170_TOWER_SENTRY_AT_REST;
             } else if (f->direction == DIR_FIGURE_REROUTE || f->direction == DIR_FIGURE_LOST) {
@@ -304,7 +304,7 @@ void figure_tower_sentry_action(figure *f)
             }
 
             f->is_ghost = 0;
-            figure_movement_move_ticks(f, 1);
+            figure_movement_move_ticks(f, 1, 0);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 if (b->type == BUILDING_WATCHTOWER) {
                     figure_watchtower_archer_spawn(b);
@@ -437,7 +437,7 @@ void figure_watchman_action(figure *f)
             figure_movement_roam_ticks(f, 1);
             break;
         case FIGURE_ACTION_222_WATCHMAN_RETURNING:
-            figure_movement_move_ticks(f, 1);
+            figure_movement_move_ticks(f, 1, 0);
             if (f->direction == DIR_FIGURE_REROUTE || f->direction == DIR_FIGURE_LOST || f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->state = FIGURE_STATE_DEAD;
             }
