@@ -390,7 +390,7 @@ static void figure_save(buffer *buf, const figure *f)
     buffer_write_u8(buf, f->roam_choose_destination);
     buffer_write_u8(buf, f->roam_random_counter);
     buffer_write_i8(buf, f->roam_turn_direction);
-    buffer_write_i8(buf, f->roam_ticks_until_next_turn);
+    buffer_write_i8(buf, f->roam_movements_until_next_turn);
     buffer_write_i16(buf, f->cross_country_x);
     buffer_write_i16(buf, f->cross_country_y);
     buffer_write_i16(buf, f->cc_destination_x);
@@ -521,7 +521,7 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     f->roam_choose_destination = buffer_read_u8(buf);
     f->roam_random_counter = buffer_read_u8(buf);
     f->roam_turn_direction = buffer_read_i8(buf);
-    f->roam_ticks_until_next_turn = buffer_read_i8(buf);
+    f->roam_movements_until_next_turn = buffer_read_i8(buf);
     f->cross_country_x = buffer_read_i16(buf);
     f->cross_country_y = buffer_read_i16(buf);
     f->cc_destination_x = buffer_read_i16(buf);

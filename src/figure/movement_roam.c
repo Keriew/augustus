@@ -59,14 +59,12 @@ static const direction_type DIR_CCW_ROTOR[10] = {
 };
 
 // --- HELPER FUNCTIONS ---
-/* Filters road options for complex shapes (Double-wide roads, Plazas) */
-// Also returns the new count of valid roads.
-// You can word these comments better right?
+/* Identifies complex road shapes to force straight movement on them */
 static int filter_complex_road_topology(int grid_offset, int adjacent_count, int *road_tiles, direction_type came_from)
 {
     // Check for Double-Wide Roads (3 exits, specific diagonals)
     if (adjacent_count == 3 && map_get_diagonal_road_tiles_for_roaming(grid_offset, road_tiles) >= 5) {
-        // Force straight movement on double-wide roads
+        // Force straight movement
         if (came_from == DIR_TOP || came_from == DIR_BOTTOM) {
             road_tiles[DIR_LEFT] = road_tiles[DIR_RIGHT] = 0;
         } else {
@@ -88,6 +86,7 @@ static int filter_complex_road_topology(int grid_offset, int adjacent_count, int
 
     return adjacent_count;
 }
+
 // Determines if a road can be roamed through or not
 static int is_valid_road_for_roaming(int grid_offset, int permission)
 {
@@ -118,14 +117,10 @@ static int is_valid_road_for_roaming(int grid_offset, int permission)
     // Permission is not valid
     return 0;
 }
+
 // Determines the next direction based on available roads
 static direction_type pick_next_roam_direction(figure *f, int *road_tiles, int adjacent_count, direction_type came_from, int permission)
 {
-    // Case 0: Dead End
-    if (adjacent_count <= 0) {
-        return DIR_NULL;
-    }
-
     // Case 1: Only one way out (Cul-de-sac or corner)
     if (adjacent_count == 1) {
         // Find the only valid cardinal direction
@@ -138,7 +133,7 @@ static direction_type pick_next_roam_direction(figure *f, int *road_tiles, int a
     // Case 2: Two ways out (Straight or simple corner)
     if (adjacent_count == 2) {
         // Initialize decision logic if needed
-        if (f->roam_ticks_until_next_turn == -1) {
+        if (f->roam_movements_until_next_turn == -1) {
             roam_set_direction(f, permission);
             // Reset came_from so we don't filter based on it immediately
             came_from = DIR_NULL;
@@ -166,28 +161,25 @@ static direction_type pick_next_roam_direction(figure *f, int *road_tiles, int a
 
     // Case 3: Intersection (> 2 ways)
     // Use random walker logic
-    direction_type random_dir = (f->roam_random_counter + map_random_get(f->grid_offset)) & 3;
-    // Note: You'll need a way to map 0-3 back to Cardinal directions (2, 6, 8, 4)
-    // For now, we assume existing logic handles the randomness, or we iterate.
-
-    // ... (Simplified logic for brevity: Use existing logic or roam_set_direction)
-
-    // Fallback: Re-run direction logic
-    f->roam_ticks_until_next_turn--;
-    if (f->roam_ticks_until_next_turn <= 0) {
+    direction_type random_index = (f->roam_random_counter + map_random_get(f->grid_offset)) & 3;
+    // Map the random index (0, 1, 2, or 3) to one of the 4 cardinal directions.
+    direction_type chosen_dir = CARDINAL_DIRECTIONS[random_index];
+    // Fallback: Use existing logic if the simple random choice isn't valid for the spot
+    f->roam_movements_until_next_turn--;
+    if (f->roam_movements_until_next_turn <= 0) {
+        // This function likely handles the final decision, including the complex checks.
         roam_set_direction(f, permission);
-        return f->direction; // roam_set_direction sets f->direction
+        return f->direction;
     }
-
-    return f->direction;
 }
+
 // Initializes the first roaming destination
 void figure_movement_init_roaming(figure *f)
 {
     building *b = building_get(f->building_id);
     f->progress_on_tile = MOV_PER_TILE;
     f->roam_choose_destination = 0;
-    f->roam_ticks_until_next_turn = -1;
+    f->roam_movements_until_next_turn = -1;
     f->roam_turn_direction = ROAM_TURN_LEFT;
     // Disables corner skipping for roamers depending on configuration
     if (config_get(CONFIG_GP_CH_ROAMERS_DONT_SKIP_CORNERS)) {
@@ -202,10 +194,9 @@ void figure_movement_init_roaming(figure *f)
     // Map the cycle index (0-3) to the correct new Keypad direction index (2, 6, 8, 4)
     int new_dir_keypad = ROAM_CARDINAL_DIRECTIONS[roam_dir_index % 4];
 
-    // Get the position from the figure object
+    // Get the position of the roaming destination from the figure object
     int x = f->x;
     int y = f->y;
-
     switch (new_dir_keypad) {
         case DIR_TOP:
             y += ROAM_INITIAL_OFFSET;
@@ -288,8 +279,8 @@ static void roam_set_direction(figure *f, int permission)
         f->roam_turn_direction = ROAM_TURN_CCW;
     }
 
-    // Assuming ROAM_DECISION_INTERVAL is defined in a header
-    f->roam_ticks_until_next_turn = ROAM_DECISION_INTERVAL;
+    // Assign the default number of roaming movements until nex tturn (what is a turn?)
+    f->roam_movements_until_next_turn = ROAM_DECISION_INTERVAL;
 }
 
 // Outdated???
@@ -298,89 +289,109 @@ void figure_movement_path(figure *f, int num_ticks)
     move_figure_path(f, num_ticks, 1);
 }
 
-// -- CORE FUNCTION --
-/* Handles roaming movement */
-void figure_movement_roam_ticks(figure *f, int num_ticks)
+/**
+ * @brief Handles logic when a roaming figure reaches a tile boundary.
+ *
+ * Checks for service completion, dead ends, and picks the next direction.
+ *
+ * @param f The figure.
+ * @return 1 if movement should continue
+ *
+ * 0 if the figure has finished its task or hit a dead end, and the calling function should return
+ */
+static int roam_process_tile_exit(figure *f)
 {
-    // 1. Check if we need to initialize a new roam destination
-    if (f->roam_choose_destination == 0) {
-        move_figure_path(f, num_ticks, 1); // Walk a bit to see if we hit something
+    // End-of-tile Initialization
+    f->progress_on_tile = MOV_PER_TILE;
+    f->roam_random_counter++;
 
-        // If status changed to Arrived, Reroute, or Lost
-        if (f->direction == DIR_FIGURE_AT_DESTINATION ||
-            f->direction == DIR_FIGURE_REROUTE ||
-            f->direction == DIR_FIGURE_LOST) {
-            f->roam_choose_destination = 1;
+    // JOB DONE: Stop roaming
+    if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
+        if (figure_service_provide_coverage(f)) {
+            return 0;
         }
+    }
 
-        if (f->roam_choose_destination) {
-            f->roam_ticks_until_next_turn = 100;
-            f->roam_length = 0; // Reset length
-            // Assuming previous_tile_direction is valid 1-9
+    // TOO FAR: Stop roaming
+    if (++f->roam_length >= f->max_roam_length) {
+        return 0;
+    }
+
+    // Analyze environment
+    int road_tiles[10] = { 0 };
+    int permission = get_permission_for_figure_type(f);
+
+    int adjacent_count = map_get_adjacent_road_tiles_for_roaming(f->grid_offset, road_tiles, permission);
+    direction_type came_from = get_opposite_direction(f->previous_tile_direction);
+    adjacent_count = filter_complex_road_topology(f->grid_offset, adjacent_count, road_tiles, came_from);
+
+    // ISOLATED: Stop roaming
+    if (adjacent_count <= 0) {
+        f->roam_length = f->max_roam_length;
+        return 0;
+    }
+
+    // Pick new direction
+    direction_type next_dir = pick_next_roam_direction(f, road_tiles, adjacent_count, came_from, permission);
+
+    if (next_dir == DIR_NULL) {
+        f->roam_length = f->max_roam_length;
+        return 0;
+    }
+
+    // Apply New Direction (Prepare for the actual move)
+    f->direction = next_dir;
+    f->routing_path_current_tile++;
+    f->previous_tile_direction = f->direction;
+    f->progress_on_tile = 0;
+
+    return 1; // Movement should continue
+}
+
+// --- CORE FUNCTION ---
+/** @brief Handles roaming movement
+    @param num_mov Number of movements
+**/
+void figure_movement_roam_ticks(figure *f, int num_mov)
+{
+    // 1. Initial Path Completion Check (Transition from short path to roaming)
+    if (f->roam_choose_destination == 0) {
+        // Attempt to complete the short path
+        move_figure_path(f, num_ticks, 1);
+
+        // Check if path is finished (Arrived, Reroute, or Lost are end states)
+        const int path_finished = (f->direction == DIR_FIGURE_AT_DESTINATION
+            || f->direction == DIR_FIGURE_REROUTE
+            || f->direction == DIR_FIGURE_LOST);
+
+        if (path_finished) {
+            // Transition to full roaming state
+            f->roam_choose_destination = 1;
+            f->roam_movements_until_next_turn = 100;
+            f->roam_length = 0;
             f->direction = f->previous_tile_direction;
         } else {
-            return; // Continue walking current path
+            return; // Still on defined path, skip main loop this frame.
         }
     }
 
     // 2. Main Movement Loop
-    while (num_ticks-- > 0) {
+    while (num_mov-- > 0) {
         f->progress_on_tile++;
 
         // A. Mid-tile movement
-        if (f->progress_on_tile < MOV_PER_TILE) {
+        while (f->progress_on_tile < MOV_PER_TILE) {
             advance_mov(f);
-            continue;
         }
 
-        // B. End-of-tile Logic (The Decision Point)
-        f->progress_on_tile = MOV_PER_TILE;
-        f->roam_random_counter++;
-
-        // Provide service coverage (if applicable)
-        if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
-            if (figure_service_provide_coverage(f)) {
-                return; // Walker finished job (e.g., Market Lady found food)
-            }
+        // B. End-of-tile Logic (Decision Point)
+        // Keep going unless the helper returns 0 (e.g finished job, dead end, etc.)
+        if (!roam_process_tile_exit(f)) {
+            return; // Stop roaming (wait, what do they do now?)
         }
-
-        // Analyze surroundings
-        // IMPORTANT: Ensure road_tiles is size 10 to handle indices 1-9
-        int road_tiles[10] = { 0 };
-        int permission = get_permission_for_figure_type(f);
-
-        // NOTE: map_get_adjacent... likely needs updating to fill indices 2,4,6,8 
-        // instead of 0,2,4,6. Wrapper needed if map.c isn't updated.
-        int adjacent_count = map_get_adjacent_road_tiles_for_roaming(f->grid_offset, road_tiles, permission);
-
-        direction_type came_from = get_opposite_direction(f->previous_tile_direction);
-
-        // Filter topology (Plazas/Double-wide roads)
-        adjacent_count = filter_complex_road_topology(f->grid_offset, adjacent_count, road_tiles, came_from);
-
-        // Dead End Check
-        if (adjacent_count <= 0) {
-            f->roam_length = f->max_roam_length; // Trigger end of roam
-            return;
-        }
-
-        // Pick new direction
-        direction_type next_dir = pick_next_roam_direction(f, road_tiles, adjacent_count, came_from, permission);
-
-        if (next_dir == DIR_NULL) {
-            // Fallback if logic failed to find path
-            f->roam_length = f->max_roam_length;
-            return;
-        }
-
-        // Apply Move
-        f->direction = next_dir;
-        f->routing_path_current_tile++;
-        f->previous_tile_direction = f->direction;
-        f->progress_on_tile = 0;
-
+        // Move to the next tile
         move_to_next_tile(f);
-
+        // Move to a sub-tile within the new tile
         if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
             advance_mov(f);
         }

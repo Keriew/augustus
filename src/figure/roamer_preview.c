@@ -160,7 +160,7 @@ static void init_roaming(figure *f, int roam_dir, int x, int y)
 {
     f->progress_on_tile = 15;
     f->roam_choose_destination = 0;
-    f->roam_ticks_until_next_turn = -1;
+    f->roam_movements_until_next_turn = -1;
     f->roam_turn_direction = 2;
     f->roam_length = 0;
 
