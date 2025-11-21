@@ -46,8 +46,8 @@ void figure_movement_follow_ticks_with_percentage(figure *f, int num_ticks, int 
         f->progress_on_tile++;
 
         // Mid-tile movement
-        if (f->progress_on_tile < TICKS_PER_TILE) {
-            advance_tick(f);
+        if (f->progress_on_tile < MOV_PER_TILE) {
+            advance_mov(f);
         }
         // End of tile reached
         else {
@@ -57,7 +57,7 @@ void figure_movement_follow_ticks_with_percentage(figure *f, int num_ticks, int 
 
             // Stop if the direction is invalid (e.g., Status Flag or No Move)
             if (next_dir > DIR_MAX_MOVEMENT) {
-                f->progress_on_tile = TICKS_PER_TILE; // Clamp progress
+                f->progress_on_tile = MOV_PER_TILE; // Clamp progress
                 break;
             }
 
@@ -69,7 +69,7 @@ void figure_movement_follow_ticks_with_percentage(figure *f, int num_ticks, int 
             move_to_next_tile(f);
 
             // Advance the sub-coordinate tick immediately after entering the new tile
-            advance_tick(f);
+            advance_mov(f);
         }
     }
 }

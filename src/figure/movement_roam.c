@@ -185,7 +185,7 @@ static direction_type pick_next_roam_direction(figure *f, int *road_tiles, int a
 void figure_movement_init_roaming(figure *f)
 {
     building *b = building_get(f->building_id);
-    f->progress_on_tile = TICKS_PER_TILE;
+    f->progress_on_tile = MOV_PER_TILE;
     f->roam_choose_destination = 0;
     f->roam_ticks_until_next_turn = -1;
     f->roam_turn_direction = ROAM_TURN_LEFT;
@@ -295,7 +295,7 @@ static void roam_set_direction(figure *f, int permission)
 // Outdated???
 void figure_movement_path(figure *f, int num_ticks)
 {
-    walk_ticks(f, num_ticks, 1);
+    move_figure_path(f, num_ticks, 1);
 }
 
 // -- CORE FUNCTION --
@@ -304,7 +304,7 @@ void figure_movement_roam_ticks(figure *f, int num_ticks)
 {
     // 1. Check if we need to initialize a new roam destination
     if (f->roam_choose_destination == 0) {
-        walk_ticks(f, num_ticks, 1); // Walk a bit to see if we hit something
+        move_figure_path(f, num_ticks, 1); // Walk a bit to see if we hit something
 
         // If status changed to Arrived, Reroute, or Lost
         if (f->direction == DIR_FIGURE_AT_DESTINATION ||
@@ -328,13 +328,13 @@ void figure_movement_roam_ticks(figure *f, int num_ticks)
         f->progress_on_tile++;
 
         // A. Mid-tile movement
-        if (f->progress_on_tile < TICKS_PER_TILE) {
-            advance_tick(f);
+        if (f->progress_on_tile < MOV_PER_TILE) {
+            advance_mov(f);
             continue;
         }
 
         // B. End-of-tile Logic (The Decision Point)
-        f->progress_on_tile = TICKS_PER_TILE;
+        f->progress_on_tile = MOV_PER_TILE;
         f->roam_random_counter++;
 
         // Provide service coverage (if applicable)
@@ -382,7 +382,7 @@ void figure_movement_roam_ticks(figure *f, int num_ticks)
         move_to_next_tile(f);
 
         if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
-            advance_tick(f);
+            advance_mov(f);
         }
     }
 }

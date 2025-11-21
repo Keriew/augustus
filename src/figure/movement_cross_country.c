@@ -96,7 +96,7 @@ void figure_movement_set_cross_country_destination(figure *f, int x_dst, int y_d
     f->destination_y = y_dst;
     figure_movement_set_cross_country_direction(
         f, f->cross_country_x, f->cross_country_y,
-        TICKS_PER_TILE * x_dst, TICKS_PER_TILE * y_dst, 0);
+        MOV_PER_TILE * x_dst, MOV_PER_TILE * y_dst, 0);
 }
 // Calculates the direction when travelling cross country (no roads)
 static void cross_country_update_delta(figure *f)
@@ -177,7 +177,7 @@ static void cross_country_advance(figure *f)
     }
 }
 // What does this do?
-int figure_movement_cross_country(figure *f, int num_ticks)
+int move_figure_cross_country(figure *f, int num_ticks)
 {
     map_figure_delete(f);
     int is_at_destination = 0;
@@ -194,8 +194,8 @@ int figure_movement_cross_country(figure *f, int num_ticks)
         }
         cross_country_advance(f);
     }
-    f->x = f->cross_country_x / TICKS_PER_TILE;
-    f->y = f->cross_country_y / TICKS_PER_TILE;
+    f->x = f->cross_country_x / MOV_PER_TILE;
+    f->y = f->cross_country_y / MOV_PER_TILE;
     f->grid_offset = map_grid_offset(f->x, f->y);
     if (map_terrain_is(f->grid_offset, TERRAIN_BUILDING)) {
         f->in_building_wait_ticks = 8;
@@ -211,13 +211,13 @@ int figure_movement_can_launch_cross_country_missile(int x_src, int y_src, int x
 {
     int height = 0;
     figure *f = figure_get(0); // abuse unused figure 0 as scratch
-    f->cross_country_x = TICKS_PER_TILE * x_src;
-    f->cross_country_y = TICKS_PER_TILE * y_src;
+    f->cross_country_x = MOV_PER_TILE * x_src;
+    f->cross_country_y = MOV_PER_TILE * y_src;
     if (map_terrain_is(map_grid_offset(x_src, y_src), TERRAIN_WALL_OR_GATEHOUSE) ||
         building_get(map_building_at(map_grid_offset(x_src, y_src)))->type == BUILDING_WATCHTOWER) {
         height = 6;
     }
-    figure_movement_set_cross_country_direction(f, TICKS_PER_TILE * x_src, TICKS_PER_TILE * y_src, TICKS_PER_TILE * x_dst, TICKS_PER_TILE * y_dst, 0);
+    figure_movement_set_cross_country_direction(f, MOV_PER_TILE * x_src, MOV_PER_TILE * y_src, MOV_PER_TILE * x_dst, MOV_PER_TILE * y_dst, 0);
 
     for (int guard = 0; guard < 1000; guard++) {
         for (int i = 0; i < 8; i++) {
@@ -226,8 +226,8 @@ int figure_movement_can_launch_cross_country_missile(int x_src, int y_src, int x
             }
             cross_country_advance(f);
         }
-        f->x = f->cross_country_x / TICKS_PER_TILE;
-        f->y = f->cross_country_y / TICKS_PER_TILE;
+        f->x = f->cross_country_x / MOV_PER_TILE;
+        f->y = f->cross_country_y / MOV_PER_TILE;
         if (height) {
             height--;
         } else {
