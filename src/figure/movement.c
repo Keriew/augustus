@@ -25,8 +25,8 @@
 #include "map/terrain.h"
 
 // ---------- MAPS ----------
-// Defines the sequence: Top (2), Left (4), Right (6), Bottom (8)
-static const int ROAM_CARDINAL_DIRECTIONS[4] = {
+// Defines the 4 Cardinal Directions
+static const int CARDINAL_DIRECTIONS[4] = {
     DIR_TOP, DIR_LEFT, DIR_RIGHT, DIR_BOTTOM
 };
 // Defines the clockwise rotation sequence for 1-9 indices
@@ -57,17 +57,21 @@ static const direction_type DIR_CCW_ROTOR[10] = {
 };
 // Defines the opposite direction for 1-9 indices
 static const direction_type DIR_OPPOSITE_MAP[10] = {
-    0, // Null/Error
-    DIR_BOTTOM_RIGHT,
-    DIR_BOTTOM,
-    DIR_BOTTOM_LEFT,
-    DIR_RIGHT,
-    DIR_CENTER,
-    DIR_LEFT,
-    DIR_TOP_RIGHT,
-    DIR_TOP,
-    DIR_TOP_LEFT,
-}
+    // Index 0: Unused
+    [0] = 0, 
+    // Corners (Diagonals)
+    [DIR_TOP_LEFT] = DIR_BOTTOM_RIGHT,
+    [DIR_TOP_RIGHT] = DIR_BOTTOM_LEFT,
+    [DIR_BOTTOM_LEFT] = DIR_TOP_RIGHT,
+    [DIR_BOTTOM_RIGHT] = DIR_TOP_LEFT,
+    // Cardinals
+    [DIR_TOP] = DIR_BOTTOM,
+    [DIR_BOTTOM] = DIR_TOP,
+    [DIR_LEFT] = DIR_RIGHT,
+    [DIR_RIGHT] = DIR_LEFT,
+    // Center
+    [DIR_CENTER] = DIR_CENTER
+};
 
 // Direction Deltas
     const point_2d DIR_DELTAS[10] = {
@@ -121,6 +125,85 @@ static const roadblock_permission FIGURE_PERMISSIONS[FIGURE_TYPE_COUNT] = {
     [FIGURE_MISSIONARY]= PERMISSION_MISSIONARY,
     [FIGURE_WATCHMAN]= PERMISSION_WATCHMAN
 };
+
+// --- HELPER FUNCTIONS ---
+// Determines the HP of a destroyable building
+static int get_obstacle_hp(building_type type) {
+    switch (type) {
+        case BUILDING_PALISADE:
+        case BUILDING_PALISADE_GATE:
+            return PALISADE_HP;
+        case BUILDING_WALL:
+            return WALL_HP;
+        case BUILDING_GATEHOUSE:
+            return GATEHOUSE_HP;
+        default:
+            return BUILDING_HP;
+    }
+}
+
+// Handles enemy interaction with obstacles
+static void attempt_obstacle_destruction(figure *f, int target_grid_offset) {
+    if (!map_routing_is_destroyable(target_grid_offset)) {
+        return;
+    }
+
+    int max_damage = 0;
+    int cause_damage = 1;
+    int destroyable_type = map_routing_get_destroyable(target_grid_offset);
+
+    // 1. Calculate Max Damage based on type
+    if (destroyable_type == DESTROYABLE_BUILDING) {
+        building *b = building_get(map_building_at(target_grid_offset));
+        max_damage = get_obstacle_hp(b->type);
+    } else if (destroyable_type == DESTROYABLE_AQUEDUCT_GARDEN) {
+        if (map_terrain_is(target_grid_offset, TERRAIN_ACCESS_RAMP | TERRAIN_RUBBLE)) {
+            cause_damage = 0;
+        } else {
+            max_damage = BUILDING_HP;
+        }
+    } else if (destroyable_type == DESTROYABLE_WALL) {
+        max_damage = WALL_HP;
+    } else if (destroyable_type == DESTROYABLE_GATEHOUSE) {
+        max_damage = GATEHOUSE_HP;
+    }
+
+    // 2. Apply Attack
+    if (cause_damage && max_damage > 0) {
+        f->attack_direction = f->direction;
+        f->direction = DIR_FIGURE_ATTACK;
+        // Apply damage on specific ticks (bitmask 3 checks every 4th tick)
+        if (!(game_time_tick() & 3)) {
+            building_destroy_increase_enemy_damage(target_grid_offset, max_damage);
+        }
+    }
+}
+
+// Checks if a roaming figure is blocked by a building (Roadblock/Granary)
+static int is_roaming_blocked_by_building(figure *f, int grid_offset) {
+    if (!map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+        return 0; // Not blocked by a building if there isn't one
+    }
+
+    building *b = building_get(map_building_at(grid_offset));
+
+    // 1. Granary Dead-End Check
+    if (b->type == BUILDING_GRANARY) {
+        if (map_road_get_granary_inner_road_tiles_count(b) < 3) {
+            return 1; // Blocked: Don't roam into dead-end granaries
+        }
+    }
+
+    // 2. Roadblock Permission Check
+    if (building_type_is_roadblock(b->type)) {
+        int permission = get_permission_for_figure_type(f);
+        if (!building_roadblock_get_permission(permission, b)) {
+            return 1; // Blocked: No permission
+        }
+    }
+
+    return 0; // Not blocked
+}
 
 // Defines how a figure will move on a given tick (tiles take 15 ticks to move through)
 static void advance_tick(figure *f)
@@ -227,14 +310,82 @@ static void set_next_route_tile_direction(figure *f)
 
 static void advance_route_tile(figure *f, int roaming_enabled)
 {
+    // 1. Sanity Check (Use your new constant)
+    if (f->direction > DIR_MAX_MOVEMENT) {
+        return;
+    }
+
+    int target_offset = f->grid_offset + map_grid_direction_delta(f->direction);
+
+    // --- CASE A: BOAT ---
+    if (f->is_boat) {
+        if (!map_terrain_is(target_offset, TERRAIN_WATER)) {
+            f->direction = DIR_FIGURE_REROUTE;
+        }
+        return;
+    }
+
+    // --- CASE B: ENEMY ---
+    if (f->terrain_usage == TERRAIN_USAGE_ENEMY) {
+        if (!map_routing_noncitizen_is_passable(target_offset)) {
+            f->direction = DIR_FIGURE_REROUTE;
+        } else {
+            // Extracted combat logic
+            attempt_obstacle_destruction(f, target_offset);
+        }
+        return;
+    }
+
+    // --- CASE C: WALL WALKER ---
+    if (f->terrain_usage == TERRAIN_USAGE_WALLS) {
+        if (!map_routing_is_wall_passable(target_offset)) {
+            f->direction = DIR_FIGURE_REROUTE;
+        }
+        return;
+    }
+
+    // --- CASE D: STANDARD WALKER (Roads & Terrain) ---
+    
+    // 1. Check Impassable Terrain
+    if (map_terrain_is(target_offset, TERRAIN_IMPASSABLE)) {
+        f->direction = DIR_FIGURE_REROUTE;
+        return;
+    }
+
+    // 2. Check Roaming Restrictions (Roadblocks & Granaries)
+    // This handles both buildings-on-roads and buildings-on-terrain
+    if (roaming_enabled && is_roaming_blocked_by_building(f, target_offset)) {
+        f->direction = DIR_FIGURE_REROUTE;
+        return;
+    }
+
+    // 3. Check Generic Building Blocking
+    // If it's a building, and it's NOT passable for citizens, block it.
+    if (map_terrain_is(target_offset, TERRAIN_BUILDING)) {
+        int is_passable = map_routing_citizen_is_passable_terrain(target_offset);
+        int is_road = map_routing_citizen_is_road(target_offset);
+        
+        // Allow passage if it's defined as passable or if it's a road (unless roaming was disabled)
+        if (is_passable || (is_road && !roaming_enabled)) {
+            return; 
+        }
+
+        // Special exception for Fort Grounds (troops can walk there)
+        building *b = building_get(map_building_at(target_offset));
+        if (b->type != BUILDING_FORT_GROUND) {
+            f->direction = DIR_FIGURE_REROUTE;
+        }
+    }
+}
+
+static void advance_route_tile(figure *f, int roaming_enabled)
+{
     // The figure is trying to go through non-adjacent terrain
     if (f->direction >= 8) {
         return;
     }
     // Defines the target tile they're trying to move into
     int target_grid_offset = f->grid_offset + map_grid_direction_delta(f->direction);
-    // Defines the tile immediately after the target tile they're trying to move into
-    int next_target_grid_offset = target_grid_offset + map_grid_direction_delta(f->direction);
     // The figure is a boat
     if (f->is_boat) {
         if (!map_terrain_is(target_grid_offset, TERRAIN_WATER)) {
