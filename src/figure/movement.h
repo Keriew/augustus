@@ -12,8 +12,8 @@
 #define FIGURE_REROUTE_DESTINATION_TICKS 120
 #define FIGURE_TYPE_COUNT (FIGURE_LAST_DEFINED_TYPE + 1)
 #define ROAM_INITIAL_OFFSET 8
-#define ROAM_TURN_LEFT 4
-#define ROAM_TURN_RIGHT 6
+#define ROAM_TURN_CW 2
+#define ROAM_TURN_CCW -2
 
 void figure_movement_init_roaming(figure *f);
 

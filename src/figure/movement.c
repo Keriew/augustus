@@ -46,6 +46,34 @@ static const int ROAM_CARDINAL_DIRECTIONS[4] = {
     DIR_TOP, DIR_LEFT, DIR_RIGHT, DIR_BOTTOM
 };
 
+// Defines the clockwise rotation sequence for 1-9 indices
+static const direction_type DIR_CW_ROTOR[10] = {
+    0, // Null/Error
+    DIR_TOP, // DIR_TOP_LEFT rotates to DIR_TOP
+    DIR_TOP_RIGHT, // DIR_TOP rotates to DIR_TOP_RIGHT
+    DIR_RIGHT, // DIR_TOP_RIGHT rotates to DIR_RIGHT
+    DIR_TOP_LEFT, // DIR_LEFT rotates to DIR_TOP_LEFT
+    DIR_CENTER, // Stays DIR_CENTER
+    DIR_BOTTOM_RIGHT, // DIR_RIGHT rotates to DIR_BOTTOM_RIGHT
+    DIR_LEFT, // DIR_BOTTOM_LEFT rotates to DIR_LEFT
+    DIR_BOTTOM_LEFT, // DIR_BOTTOM rotates to DIR_BOTTOM_LEFT
+    DIR_BOTTOM // DIR_BOTTOM_RIGHT rotates to DIR_BOTTOM
+};
+
+// Defines the counter-clockwise rotation sequence for 1-9 indices
+static const direction_type DIR_CCW_ROTOR[10] = {
+    0, // Null/Error
+    DIR_LEFT, // DIR_TOP_LEFT rotates to DIR_LEFT
+    DIR_TOP_LEFT, // DIR_TOP rotates to DIR_TOP_LEFT
+    DIR_TOP, // DIR_TOP_RIGHT rotates to DIR_TOP
+    DIR_BOTTOM_LEFT, // DIR_LEFT rotates to DIR_BOTTOM_LEFT
+    DIR_CENTER, // Stays DIR_CENTER
+    DIR_TOP_RIGHT, // DIR_RIGHT rotates to DIR_TOP_RIGHT
+    DIR_BOTTOM, // DIR_BOTTOM_LEFT rotates to DIR_BOTTOM
+    DIR_BOTTOM_RIGHT, // DIR_BOTTOM rotates to DIR_BOTTOM_RIGHT
+    DIR_RIGHT // DIR_BOTTOM_RIGHT rotates to DIR_RIGHT
+};
+
 // Roadblock Permissions
 static const roadblock_permission FIGURE_PERMISSIONS[FIGURE_TYPE_COUNT] = {
     
@@ -416,47 +444,55 @@ static int is_valid_road_for_roaming(int grid_offset, int permission)
 // Sets roam direction
 static void roam_set_direction(figure *f, int permission)
 {
+    // Calculate position (grid_offset) and direction
     int grid_offset = map_grid_offset(f->x, f->y);
-    int direction = calc_general_direction(f->x, f->y, f->destination_x, f->destination_y);
-    // If direction is none (8) or invalid (>8) it returns top direction (which does nothing?)
-    if (direction >= 8) {
-        direction = 0;
+    direction_type target_dir = calc_general_direction(f->x, f->y, f->destination_x, f->destination_y);
+
+    // Handle Invalid/Non-Movement Fallback (If direction > 9, it's a status flag)
+    if (target_dir > DIR_MAX_MOVEMENT) {
+        target_dir = DIR_NULL; 
     }
-    int road_offset_dir1 = 0;
-    int road_dir1 = 0;
-    for (int i = 0, dir = direction; i < 8; i++) {
-        if (dir % 2 == 0 && is_valid_road_for_roaming(grid_offset + map_grid_direction_delta(dir), permission)) {
-            road_dir1 = dir;
+
+    // Define Angular offset (clockwise and counter-clockwise)
+    int cw_angular_offset = 0; // Angular distance (clockwise)
+    int ccw_angular_offset = 0; // Angular distance (counter-clockwise)
+    direction_type cw_direction = DIR_NULL; // Best direction found (clockwise)
+    direction_type ccw_direction = DIR_NULL; // Best direction found (counter-clockwise)
+
+    // Loop 1: Search clockwise (cw)
+    for (int i = 0, current_dir = target_dir; i < DIR_INDEX_WRAP; i++) {
+        // Check only cardinal directions (2, 4, 6, 8)
+        if (CARDINAL_CHECK(current_dir) && is_valid_road_for_roaming(grid_offset + map_grid_direction_delta((direction_type)current_dir), permission)) {
+            cw_direction = (direction_type)current_dir;
             break;
         }
-        dir++;
-        // Invalid direction
-        if (dir > 7) {
-            dir = 0;
-        }
-        road_offset_dir1++;
+        // Correct Rotation: Use the lookup table for the next direction
+        current_dir = DIR_CW_ROTOR[current_dir]; 
+        cw_angular_offset++;
     }
-    int road_offset_dir2 = 0;
-    int road_dir2 = 0;
-    for (int i = 0, dir = direction; i < 8; i++) {
-        if (dir % 2 == 0 && is_valid_road_for_roaming(grid_offset + map_grid_direction_delta(dir), permission)) {
-            road_dir2 = dir;
+
+    // Loop 2: Search counter-clockwise (ccw)
+    for (int i = 0, current_dir = target_dir; i < DIR_INDEX_WRAP; i++) {
+        // Check only cardinal directions (2, 4, 6, 8)
+        if (CARDINAL_CHECK(current_dir) && is_valid_road_for_roaming(grid_offset + map_grid_direction_delta((direction_type)current_dir), permission)) {
+            ccw_direction = (direction_type)current_dir;
             break;
         }
-        dir--;
-        // Wraps directions around (-1 ie invalid to 7 ie top left)
-        if (dir < 0) {
-            dir = 7;
-        }
-        road_offset_dir2++;
+        // Correct Rotation: Use the lookup table for the next direction
+        current_dir = DIR_CCW_ROTOR[current_dir]; 
+        ccw_angular_offset++;
     }
-    if (road_offset_dir1 <= road_offset_dir2) {
-        f->direction = road_dir1;
-        f->roam_turn_direction = 2;
+
+    // 3. Final Decision: Choose the smaller offset
+    if (cw_angular_offset <= ccw_angular_offset) {
+        f->direction = cw_direction;
+        f->roam_turn_direction = ROAM_TURN_CW;
     } else {
-        f->direction = road_dir2;
-        f->roam_turn_direction = -2;
+        f->direction = ccw_direction;
+        f->roam_turn_direction = ROAM_TURN_CCW;
     }
+    
+    // Assuming ROAM_DECISION_INTERVAL is defined in a header
     f->roam_ticks_until_next_turn = ROAM_DECISION_INTERVAL;
 }
 
