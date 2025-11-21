@@ -324,7 +324,7 @@ void figure_zebra_action(figure *f)
             }
             break;
         case FIGURE_ACTION_197_HERD_ANIMAL_MOVING:
-            figure_movement_path(f, 2, 1);
+            figure_movement_path(f, 2);
             if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                 f->direction = f->previous_tile_direction;
                 f->action_state = FIGURE_ACTION_196_HERD_ANIMAL_AT_REST;
