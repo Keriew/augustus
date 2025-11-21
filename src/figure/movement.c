@@ -59,29 +59,24 @@ static const direction_type DIR_OPPOSITE_MAP[10] = {
 };
 // Defines roadblock permissions
 static const roadblock_permission FIGURE_PERMISSIONS[FIGURE_TYPE_COUNT] = {
-
     // Maintenance
     [FIGURE_ENGINEER] = PERMISSION_MAINTENANCE,
     [FIGURE_PREFECT] = PERMISSION_MAINTENANCE,
-
     // Entertainers
     [FIGURE_GLADIATOR] = PERMISSION_ENTERTAINER,
     [FIGURE_CHARIOTEER] = PERMISSION_ENTERTAINER,
     [FIGURE_ACTOR] = PERMISSION_ENTERTAINER,
     [FIGURE_LION_TAMER] = PERMISSION_ENTERTAINER,
     [FIGURE_BARKEEP] = PERMISSION_ENTERTAINER,
-
     // Medicine
     [FIGURE_SURGEON] = PERMISSION_MEDICINE,
     [FIGURE_DOCTOR] = PERMISSION_MEDICINE,
     [FIGURE_BARBER] = PERMISSION_MEDICINE,
     [FIGURE_BATHHOUSE_WORKER] = PERMISSION_MEDICINE,
-
     // Education
     [FIGURE_SCHOOL_CHILD] = PERMISSION_EDUCATION,
     [FIGURE_TEACHER] = PERMISSION_EDUCATION,
     [FIGURE_LIBRARIAN] = PERMISSION_EDUCATION,
-
     // Unique Walkers
     [FIGURE_PRIEST] = PERMISSION_PRIEST,
     [FIGURE_MARKET_TRADER] = PERMISSION_MARKET,
@@ -160,21 +155,6 @@ static int is_roaming_blocked_by_building(figure *f, int grid_offset)
 
     return 0; // Not blocked
 }
-// Determines the HP of a destroyable building
-static int get_obstacle_hp(building_type type)
-{
-    switch (type) {
-        case BUILDING_PALISADE:
-        case BUILDING_PALISADE_GATE:
-            return PALISADE_HP;
-        case BUILDING_WALL:
-            return WALL_HP;
-        case BUILDING_GATEHOUSE:
-            return GATEHOUSE_HP;
-        default:
-            return BUILDING_HP;
-    }
-}
 // Handles enemy interaction with obstacles
 static void attempt_obstacle_destruction(figure *f, int target_grid_offset)
 {
@@ -215,7 +195,7 @@ static void attempt_obstacle_destruction(figure *f, int target_grid_offset)
 
 // --- CORE MOVEMENT & STATE FUNCTIONS ---
 /* Gets roadblock permissions for the figure */
-roadblock_permission get_permission_for_figure_type(figure *f)
+static roadblock_permission get_permission_for_figure_type(figure *f)
 {
     // Safety check: Ensures the figure type is a valid index for the array.
     if (f->type >= 0 && f->type < FIGURE_TYPE_COUNT) {
@@ -225,7 +205,7 @@ roadblock_permission get_permission_for_figure_type(figure *f)
     return PERMISSION_NONE;
 }
 // Moves the figure to the next tile
-void move_to_next_tile(figure *f)
+static void move_to_next_tile(figure *f)
 {
     int old_x = f->x;
     int old_y = f->y;
@@ -449,96 +429,6 @@ void figure_movement_move_ticks_with_percentage(figure *f, int num_ticks, int ti
     // The '0' indicates the figure is NOT following a leader.
     walk_ticks(f, num_ticks, 0);
 }
-// Animates Tower Sentry movement (sub-coordinates within a tile boundary only)
-void figure_movement_move_ticks_tower_sentry(figure *f, int num_ticks)
-{
-    while (num_ticks-- > 0) {
-        f->progress_on_tile++;
-        // If we haven't reached the tile edge, continue animating sub-tile movement.
-        if (f->progress_on_tile < TICKS_PER_TILE) {
-            advance_tick(f);
-        } else {
-            // Reached the end of the tile walk (e.g., end of the tower wall).
-            // Clamp the progress to prevent overflow and stop movement.
-            f->progress_on_tile = TICKS_PER_TILE;
-            // Note: No call to move_to_next_tile(f); the figure remains on its grid tile.
-        }
-    }
-}
-// Handles variable speed accumulator for snake followers
-void figure_movement_follow_ticks_with_percentage(figure *f, int num_ticks, int tick_percentage)
-{
-    // 1. Handle Sub-Tick Accumulator (Variable Speed)
-    // Adds the percentage variance. If it crosses 100, we gain/lose a whole tick.
-    int progress = f->progress_to_next_tick + tick_percentage;
-
-    if (progress >= 100) {
-        progress -= 100;
-        num_ticks++;
-    } else if (progress <= -100) {
-        progress += 100;
-        num_ticks--;
-    }
-    // Cast back to the storage type (likely char or short)
-    f->progress_to_next_tick = (char) progress;
-
-    // 2. Get Leader with Safety Check
-    const figure *leader = figure_get(f->leading_figure_id);
-    if (!leader) {
-        // If the leader is gone, the follower should probably stop or vanish.
-        // For now, we just return to prevent a crash.
-        return;
-    }
-
-    // 3. Handle "Spawn Ghosting"
-    // If at the source coordinate, remain a ghost (prevents clipping at spawn structures)
-    if (f->x == f->source_x && f->y == f->source_y) {
-        f->is_ghost = 1;
-    }
-
-    // 4. Highway Rubber-Banding
-    // If the leader is speeding on a highway, the follower matches speed to stay connected.
-    if (map_terrain_is(map_grid_offset(leader->x, leader->y), TERRAIN_HIGHWAY)) {
-        num_ticks *= 2;
-    }
-
-    // 5. Movement Loop
-    while (num_ticks-- > 0) {
-        f->progress_on_tile++;
-
-        // Mid-tile movement
-        if (f->progress_on_tile < TICKS_PER_TILE) {
-            advance_tick(f);
-        }
-        // End of tile reached
-        else {
-            // SNAKE LOGIC: Target the tile the leader JUST left
-            direction_type next_dir = calc_general_direction(f->x, f->y,
-                leader->previous_tile_x, leader->previous_tile_y);
-
-            // Stop if the direction is invalid (e.g., Status Flag or No Move)
-            if (next_dir > DIR_MAX_MOVEMENT) {
-                f->progress_on_tile = TICKS_PER_TILE; // Clamp progress
-                break;
-            }
-
-            // Apply Movement
-            f->direction = next_dir;
-            f->previous_tile_direction = f->direction;
-            f->progress_on_tile = 0;
-
-            move_to_next_tile(f);
-
-            // Advance the sub-coordinate tick immediately after entering the new tile
-            advance_tick(f);
-        }
-    }
-}
-// Wrapper for followers without speed variation (which?)
-void figure_movement_follow_ticks(figure *f, int num_ticks)
-{
-    figure_movement_follow_ticks_with_percentage(f, num_ticks, 0); // 0 represents 0% speed variation.
-}
 // Advances the figure during an attack animation
 void figure_movement_advance_attack(figure *f)
 {
@@ -546,4 +436,11 @@ void figure_movement_advance_attack(figure *f)
         f->progress_on_tile++;
         advance_tick(f);
     }
+}
+
+// --- WRAPPERS --
+/* Walkers without speed variation */
+void figure_movement_move_ticks(figure *f, int num_ticks)
+{
+    figure_movement_move_ticks_with_percentage(f, num_ticks, 0); // 0 represents 0% speed variation.
 }
