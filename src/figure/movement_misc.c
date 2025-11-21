@@ -11,9 +11,9 @@ void figure_movement_advance_attack(figure *f)
     }
 }
 // Animates Tower Sentry movement (sub-coordinates within a tile boundary only)
-void figure_movement_tower_sentry(figure *f, int num_ticks)
+void figure_movement_tower_sentry(figure *f, int num_mov)
 {
-    while (num_ticks-- > 0) {
+    while (num_mov-- > 0) {
         f->progress_on_tile++;
         // If we haven't reached the tile edge, continue animating sub-tile movement.
         if (f->progress_on_tile < MOV_PER_TILE) {

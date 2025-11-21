@@ -163,21 +163,32 @@ void figure_route_add(figure *f)
         f->routing_path_length = path_length;
     }
 }
-// Removes a specific route???
+
+// Removes the route from the figure
 void figure_route_remove(figure *f)
 {
-    if (f->routing_path_id > 0) {
-        if (f->routing_path_id < (short) paths.size &&
-            (unsigned int) array_item(paths, f->routing_path_id)->figure_id == f->id) {
-            array_item(paths, f->routing_path_id)->figure_id = 0;
-        }
-        f->routing_path_id = 0;
+    // 1. Early exit if no route is assigned.
+    if (f->routing_path_id <= 0) {
+        return;
     }
+
+    // 2. Safety Check: Validate path ID and ownership before modification.
+    // Prevents issues if the path ID was recycled before this figure was cleaned up.
+    const short path_id = f->routing_path_id;
+    const int is_path_id_valid = (path_id < (short) paths.size);
+    if (is_path_id_valid) {
+        // Ensures the path slot is owned by this figure before marking it free. 
+        figure_path_data *path_slot = array_item(paths, path_id);
+        if (path_slot->figure_id == (int) f->id) {
+            path_slot->figure_id = 0; // Mark the slot as free (soft deallocation).
+        }
+    }
+
+    // 3. Clear the path ID from the figure's state.
+    f->routing_path_id = 0;
+
+    // 4. Attempt to reclaim memory (this can be performance heavy if called often)
     array_trim(paths);
-}
-int figure_route_get_direction(int path_id, int index)
-{
-    return array_item(paths, path_id)->directions[index];
 }
 
 // -- CLEANUP AND UTILITY FUNCTIONS --
@@ -245,4 +256,10 @@ void figure_route_load_state(buffer *figures, buffer *buf_paths)
         }
     }
     paths.size = highest_id_in_use + 1;
+}
+
+// --- WRAPPERS ---
+int figure_route_get_direction(int path_id, int index)
+{
+    return array_item(paths, path_id)->directions[index];
 }

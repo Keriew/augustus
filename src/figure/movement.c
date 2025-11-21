@@ -381,7 +381,7 @@ static void handle_tile_boundary_logic(figure *f, int roaming_enabled)
         figure_service_provide_coverage(f);
     }
 
-    // Pathfinding Check: If figure lost its route, re-add it
+    // Pathfinding Check: If the figure does not have a route, add it
     if (f->routing_path_id <= 0) {
         figure_route_add(f);
     }
