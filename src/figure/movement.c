@@ -349,9 +349,54 @@ static void advance_route_tile(figure *f, int roaming_enabled)
     }
 }
 
+// New Helper: Handles all the complex logic when a figure reaches a tile boundary
+static void handle_tile_boundary_logic(figure *f, int roaming_enabled) {
+    // Service Logic: Provide coverage (e.g., Prefect checks houses)
+    // This is skipped for "preview" figures (Ghosting)
+    if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
+        figure_service_provide_coverage(f);
+    }
+    
+    // Pathfinding Check: If figure lost its route, re-add it
+    if (f->routing_path_id <= 0) {
+        figure_route_add(f);
+    }  
+    
+    // State Transition 1: Determine the next step's direction
+    set_next_route_tile_direction(f);
+    
+    // State Transition 2: Check collision for the chosen direction
+    // This might change f->direction to DIR_FIGURE_REROUTE or DIR_FIGURE_ATTACK
+    advance_route_tile(f, roaming_enabled);
+    
+    // Halt Movement Check: Stop if the status is not a valid movement direction
+    if (f->direction > DIR_MAX_MOVEMENT) { 
+        // This breaks the while loop if the figure is AT_DESTINATION, REROUTE, LOST, or ATTACKING
+        break;
+    }
+    
+    // 3. Commit to the new tile
+    
+    // Update route progress
+    f->routing_path_current_tile++;
+    
+    // Store direction for snake followers or next tile decision
+    f->previous_tile_direction = f->direction;
+    
+    // Reset progress for the new tile
+    f->progress_on_tile = 0; 
+    
+    // Change the figure's main grid coordinate (x, y, grid_offset)
+    move_to_next_tile(f);
+    
+    // Take the first sub-coordinate step on the new tile
+    if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
+        advance_tick(f);
+    }
+}
+
 // Defines the standard, path-following movement for non-roaming non-following figures
-static void walk_ticks(figure *f, int num_ticks, int roaming_enabled)
-{
+static void walk_ticks(figure *f, int num_ticks, int roaming_enabled) {
     // 1. Terrain Speed Check (Highway doubles tick speed)
     int terrain = map_terrain_get(map_grid_offset(f->x, f->y));
     if (terrain & TERRAIN_HIGHWAY) {
@@ -361,55 +406,14 @@ static void walk_ticks(figure *f, int num_ticks, int roaming_enabled)
     // 2. Main Movement Loop: Process all available ticks
     while (num_ticks-- > 0) {
         f->progress_on_tile++;
-        
         // A. Mid-Tile Movement (Sub-coordinate step)
         if (f->progress_on_tile < TICKS_PER_TILE) {
             advance_tick(f);
-        } 
-        
         // B. End-of-Tile Logic (Tile Boundary Reached)
-        else {
-            // Service Logic: Provide coverage (e.g., Prefect checks houses)
-            // This is skipped for "preview" figures (Ghosting)
-            if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
-                figure_service_provide_coverage(f);
-            }
-            
-            // Pathfinding Check: If figure lost its route, re-add it
-            if (f->routing_path_id <= 0) {
-                figure_route_add(f);
-            }  
-            
-            // State Transition 1: Determine the next step's direction
-            set_next_route_tile_direction(f);
-            
-            // State Transition 2: Check collision for the chosen direction
-            // This might change f->direction to DIR_FIGURE_REROUTE or DIR_FIGURE_ATTACK
-            advance_route_tile(f, roaming_enabled);
-            
-            // Halt Movement Check: Stop if the status is not a valid movement direction
-            if (f->direction > DIR_MAX_MOVEMENT) { 
-                // This breaks the while loop if the figure is AT_DESTINATION, REROUTE, LOST, or ATTACKING
+        } else {
+            handle_tile_boundary_logic(f, roaming_enabled);
+            if (f->direction > DIR_MAX_MOVEMENT) {
                 break;
-            }
-            
-            // 3. Commit to the new tile
-            
-            // Update route progress
-            f->routing_path_current_tile++;
-            
-            // Store direction for snake followers or next tile decision
-            f->previous_tile_direction = f->direction;
-            
-            // Reset progress for the new tile
-            f->progress_on_tile = 0; 
-            
-            // Change the figure's main grid coordinate (x, y, grid_offset)
-            move_to_next_tile(f);
-            
-            // Take the first sub-coordinate step on the new tile
-            if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
-                advance_tick(f);
             }
         }
     }
