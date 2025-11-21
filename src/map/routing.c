@@ -13,10 +13,25 @@
 #include <stdlib.h>
 
 #define MAX_QUEUE GRID_SIZE * GRID_SIZE
-#define GUARD 50000
+#define MAX_SEARCH_ITERATIONS 50000 // What does this do?
 
 #define UNTIL_STOP 0
 #define UNTIL_CONTINUE 1
+
+// Enables parallel pathfinding
+// No clue if I can pull it off
+typedef struct {
+    map_routing_distance_grid distance;
+    struct {
+        int head;
+        int tail;
+        int items[MAX_QUEUE];
+    } queue;
+    int stats_total_routes; // Move stats here if you want per-thread stats
+} RoutingContext;
+
+// Used for callbacks (?)
+typedef int (*RoutingCallback)(RoutingContext *ctx, int offset, int next_offset, int direction);
 
 typedef enum {
     DIRECTIONS_NO_DIAGONALS = 4,
@@ -37,18 +52,10 @@ static const int HIGHWAY_DIRECTIONS[] = {
     0
 };
 
-static map_routing_distance_grid distance;
-
 static struct {
     int total_routes_calculated;
     int enemy_routes_calculated;
 } stats;
-
-static struct {
-    int head;
-    int tail;
-    int items[MAX_QUEUE];
-} queue;
 
 static grid_u8 water_drag;
 
@@ -85,21 +92,35 @@ static void clear_data(void)
     queue.tail = 0;
 }
 
-static inline void enqueue(int next_offset, int dist)
+// ???
+static void enqueue(RoutingContext *ctx, int next_offset, int dist)
 {
-    distance.determined.items[next_offset] = dist;
-    queue.items[queue.tail++] = next_offset;
-    if (queue.tail >= MAX_QUEUE) {
-        queue.tail = 0;
+    // 1. Update the distance grid via the context
+    ctx->distance.determined.items[next_offset] = dist;
+
+    // 2. Add item to the queue via the context
+    ctx->queue.items[ctx->queue.tail++] = next_offset;
+
+    // 3. Ring Buffer Wrap-around (Must check the CONTEXT'S tail)
+    if (ctx->queue.tail >= MAX_QUEUE) {
+        ctx->queue.tail = 0;
     }
 }
 
-static inline int queue_pop(void)
+// ???
+static inline int queue_pop(RoutingContext *ctx)
 {
-    int result = queue.items[queue.head];
-    if (++queue.head >= MAX_QUEUE) {
-        queue.head = 0;
+    // Read the result from the context queue
+    int result = ctx->queue.items[ctx->queue.head];
+
+    // Advance the head pointer
+    ctx->queue.head++;
+
+    // Check for wrap-around (using the context head)
+    if (ctx->queue.head >= MAX_QUEUE) {
+        ctx->queue.head = 0;
     }
+
     return result;
 }
 
@@ -108,11 +129,11 @@ static inline int ordered_queue_parent(int index)
     return (index - 1) / 2;
 }
 
-static inline void ordered_queue_swap(int first, int second)
+static inline void ordered_queue_swap(RoutingContext *ctx, int first, int second)
 {
-    int temp = queue.items[first];
-    queue.items[first] = queue.items[second];
-    queue.items[second] = temp;
+    int temp = ctx->queue.items[first];
+    ctx->queue.items[first] = ctx->queue.items[second];
+    ctx->queue.items[second] = temp;
 }
 
 static void ordered_queue_reorder(int start_index)
@@ -138,12 +159,24 @@ static void ordered_queue_reorder(int start_index)
     }
 }
 
-static inline int ordered_queue_pop(void)
+// ??
+static inline int ordered_queue_pop(RoutingContext *ctx)
 {
-    int min = queue.items[0];
-    queue.items[0] = queue.items[--queue.tail];
-    ordered_queue_reorder(0);
-    return min;
+    // 1. Store the smallest element (at index 0)
+    int min_item_offset = ctx->queue.items[0];
+
+    // 2. Decrement the tail pointer (queue size)
+    ctx->queue.tail--;
+
+    // 3. Move the item from the now-last position to the head (index 0)
+    // The original last item is now at ctx->queue.tail
+    ctx->queue.items[0] = ctx->queue.items[ctx->queue.tail];
+
+    // 4. Reorder the heap to fix the heap property
+    // MUST pass the context pointer to the helper function!
+    ordered_queue_reorder(ctx, 0);
+
+    return min_item_offset;
 }
 
 static inline void ordered_queue_reduce_index(int index, int offset, int dist)
@@ -199,8 +232,21 @@ static int receive_highway_bonus(int offset, int direction)
     return 0;
 }
 
-static void route_queue_from_to(int src_x, int src_y, int dst_x, int dst_y, int num_directions, int max_tiles,
-    int (*callback)(int offset, int next_offset, int direction))
+static void route_queue_from_to()
+{
+    // ... setup ...
+    while (ctx->queue.tail) {
+        // ... pop logic ...
+        if (callback(ctx, offset, next_offset, i)) {
+            ordered_enqueue(ctx, next_offset, dist, remaining);
+        }
+    }
+}
+
+static void route_queue_from_to(RoutingContext *ctx, int src, int dst, RoutingCallback callback)
+// Previous contents
+// int src_x, int src_y, int dst_x, int dst_y, int num_directions, int max_tiles,
+//    int (*callback)(int offset, int next_offset, int direction)
 {
     clear_data();
     distance.dst_x = dst_x;
@@ -208,11 +254,14 @@ static void route_queue_from_to(int src_x, int src_y, int dst_x, int dst_y, int 
     int dest = map_grid_offset(dst_x, dst_y);
     ordered_enqueue(map_grid_offset(src_x, src_y), 1, 0);
     int tiles = 0;
-    while (queue.tail) {
+    while (ctx->queue.tail) {
         int offset = ordered_queue_pop();
-        if (offset == dest || (max_tiles && ++tiles > max_tiles)) {
-            break;
+        if (callback(ctx, offset, next_offset, i)) {
+            ordered_enqueue(ctx, next_offset, dist, remaining);
         }
+        // if (offset == dest || (max_tiles && ++tiles > max_tiles)) {
+        //     break;
+        // }
         int x = map_grid_offset_to_x(offset);
         int y = map_grid_offset_to_y(offset);
         distance.possible.items[offset] = 1;
@@ -238,7 +287,7 @@ static void route_queue_all_from(int source, max_directions directions,
     enqueue(source, 1);
     int tiles = 0;
     while (queue.head != queue.tail) {
-        if (++tiles > GUARD) {
+        if (++tiles > MAX_SEARCH_ITERATIONS) {
             break;
         }
         int offset = queue_pop();
@@ -264,10 +313,10 @@ static void route_queue_all_from(int source, max_directions directions,
     }
 }
 
-static int callback_calc_distance(int next_offset, int dist, int direction)
+static int callback_calc_distance(RoutingContext *ctx, int next_offset, int dist, int direction)
 {
     if (terrain_land_citizen.items[next_offset] >= CITIZEN_0_ROAD) {
-        enqueue(next_offset, dist);
+        enqueue(ctx, next_offset, dist);
     }
     return 1;
 }
