@@ -1,19 +1,20 @@
+// Logging
+#include "core/log.h"
+#include "SDL.h"
+// Internal
 #include "movement.h"
 #include "movement_internal.h"
 #include "direction.h"
+#include "combat.h"
+#include "route.h"
+#include "service.h"
+// External
 #include "building/properties.h"
-
-#include "core/log.h"
-#include "SDL.h"
-
 #include "building/building.h"
 #include "building/destruction.h"
 #include "building/roadblock.h"
 #include "core/calc.h"
 #include "core/config.h"
-#include "figure/combat.h"
-#include "figure/route.h"
-#include "figure/service.h"
 #include "game/time.h"
 #include "map/bridge.h"
 #include "map/building.h"
@@ -25,7 +26,20 @@
 #include "map/routing_terrain.h"
 #include "map/terrain.h"
 
-// ---------- MAPS ----------
+// --- STATIC CONSTANTS ---
+/* Direction Deltas */
+const point_2d DIR_DELTAS[10] = {
+{0, 0}, // Null
+{-1, 1}, // Top left
+{0, 1}, // Top
+{1, 1}, // Top right
+{-1, 0}, // Left
+{0, 0}, // Center
+{1, 0}, // Right
+{-1, -1}, // Bottom left
+{0, -1}, // Bottom
+{1, -1} // Bottom right
+}
 // Defines the opposite direction for 1-9 indices
 static const direction_type DIR_OPPOSITE_MAP[10] = {
     // Index 0: Unused
@@ -43,27 +57,7 @@ static const direction_type DIR_OPPOSITE_MAP[10] = {
     // Center
     [DIR_CENTER] = DIR_CENTER
 };
-
-// Direction Deltas
-    const point_2d DIR_DELTAS[10] = {
-    {0, 0}, // Null
-    {-1, 1}, // Top left
-    {0, 1}, // Top
-    {1, 1}, // Top right
-    {-1, 0}, // Left
-    {0, 0}, // Center
-    {1, 0}, // Right
-    {-1, -1}, // Bottom left
-    {0, -1}, // Bottom
-    {1, -1} // Bottom right
-    }
-    if (f->direction <= DIR_MAX_MOVEMENT) {
-        f->cross_country_x += DIR_DELTAS[f->direction].x;
-        f->cross_country_y += DIR_DELTAS[f->direction].y;
-    }
-
-
-// Roadblock Permissions
+// Defines roadblock permissions
 static const roadblock_permission FIGURE_PERMISSIONS[FIGURE_TYPE_COUNT] = {
     
     // Maintenance
@@ -98,6 +92,73 @@ static const roadblock_permission FIGURE_PERMISSIONS[FIGURE_TYPE_COUNT] = {
 };
 
 // --- HELPER FUNCTIONS ---
+/* Updates the figure's sub-tile coordinates based on its current direction. */
+static void apply_sub_tile_movement(figure *f)
+{
+    // Only apply movement if the direction is a valid movement direction (1 to 8).
+    // Directions > DIR_MAX_MOVEMENT (like ATTACK or REROUTE) should not change position.
+    if (f->direction <= DIR_MAX_MOVEMENT) {
+        // DIR_DELTAS is the map of sub-tile coordinate changes for each direction.
+        f->cross_country_x += DIR_DELTAS[f->direction].x;
+        f->cross_country_y += DIR_DELTAS[f->direction].y;
+    }
+}
+// Defines how a figure will move on a given tick (tiles take 15 ticks to move through)
+static void advance_tick(figure *f)
+{
+    // 1. Apply the core physics movement for this tick
+    apply_sub_tile_movement(f);
+
+    // 2. Handle height adjustments and ghost state
+    if (f->height_adjusted_ticks) {
+        f->height_adjusted_ticks--;
+        if (f->height_adjusted_ticks > 0) {
+            f->is_ghost = 1;
+            if (f->current_height < f->target_height) {
+                f->current_height++;
+            }
+            if (f->current_height > f->target_height) {
+                f->current_height--;
+            }
+        } else {
+            f->is_ghost = 0;
+        }
+    } else {
+        if (f->current_height) {
+            f->current_height--;
+        }
+    }
+}
+static void set_target_height_bridge(figure *f)
+{
+    f->height_adjusted_ticks = 18;
+    f->target_height = map_bridge_height(f->grid_offset);
+}
+// Checks if a roaming figure is blocked by a building (Roadblock/Granary)
+static int is_roaming_blocked_by_building(figure *f, int grid_offset) {
+    if (!map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+        return 0; // Not blocked by a building if there isn't one
+    }
+
+    building *b = building_get(map_building_at(grid_offset));
+
+    // 1. Granary Dead-End Check
+    if (b->type == BUILDING_GRANARY) {
+        if (map_road_get_granary_inner_road_tiles_count(b) < 3) {
+            return 1; // Blocked: Don't roam into dead-end granaries
+        }
+    }
+
+    // 2. Roadblock Permission Check
+    if (building_type_is_roadblock(b->type)) {
+        int permission = get_permission_for_figure_type(f);
+        if (!building_roadblock_get_permission(permission, b)) {
+            return 1; // Blocked: No permission
+        }
+    }
+
+    return 0; // Not blocked
+}
 // Determines the HP of a destroyable building
 static int get_obstacle_hp(building_type type) {
     switch (type) {
@@ -112,7 +173,6 @@ static int get_obstacle_hp(building_type type) {
             return BUILDING_HP;
     }
 }
-
 // Handles enemy interaction with obstacles
 static void attempt_obstacle_destruction(figure *f, int target_grid_offset) {
     if (!map_routing_is_destroyable(target_grid_offset)) {
@@ -150,62 +210,8 @@ static void attempt_obstacle_destruction(figure *f, int target_grid_offset) {
     }
 }
 
-// Checks if a roaming figure is blocked by a building (Roadblock/Granary)
-static int is_roaming_blocked_by_building(figure *f, int grid_offset) {
-    if (!map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
-        return 0; // Not blocked by a building if there isn't one
-    }
-
-    building *b = building_get(map_building_at(grid_offset));
-
-    // 1. Granary Dead-End Check
-    if (b->type == BUILDING_GRANARY) {
-        if (map_road_get_granary_inner_road_tiles_count(b) < 3) {
-            return 1; // Blocked: Don't roam into dead-end granaries
-        }
-    }
-
-    // 2. Roadblock Permission Check
-    if (building_type_is_roadblock(b->type)) {
-        int permission = get_permission_for_figure_type(f);
-        if (!building_roadblock_get_permission(permission, b)) {
-            return 1; // Blocked: No permission
-        }
-    }
-
-    return 0; // Not blocked
-}
-
-// Defines how a figure will move on a given tick (tiles take 15 ticks to move through)
-static void advance_tick(figure *f)
-{
-    if (f->height_adjusted_ticks) {
-        f->height_adjusted_ticks--;
-        if (f->height_adjusted_ticks > 0) {
-            f->is_ghost = 1;
-            if (f->current_height < f->target_height) {
-                f->current_height++;
-            }
-            if (f->current_height > f->target_height) {
-                f->current_height--;
-            }
-        } else {
-            f->is_ghost = 0;
-        }
-    } else {
-        if (f->current_height) {
-            f->current_height--;
-        }
-    }
-}
-
-static void set_target_height_bridge(figure *f)
-{
-    f->height_adjusted_ticks = 18;
-    f->target_height = map_bridge_height(f->grid_offset);
-}
-
-// Assigns roadblock permissions for each figure type
+// --- CORE MOVEMENT & STATE FUNCTIONS ---
+/* Gets roadblock permissions for the figure */
 roadblock_permission get_permission_for_figure_type(figure *f) {
     // Safety check: Ensures the figure type is a valid index for the array.
     if (f->type >= 0 && f->type < FIGURE_TYPE_COUNT) {
@@ -214,7 +220,6 @@ roadblock_permission get_permission_for_figure_type(figure *f) {
     // Default case
     return PERMISSION_NONE;
 }
-
 // Moves the figure to the next tile
 void move_to_next_tile(figure *f)
 {
@@ -251,8 +256,7 @@ void move_to_next_tile(figure *f)
     f->previous_tile_x = old_x;
     f->previous_tile_y = old_y;
 }
-
-// Calculates the next movement direction
+// Calculates the next movement direction, unless it is at the destination or lost
 static void set_next_route_tile_direction(figure *f)
 {
     // The figure currently has a route established (Path ID > 0)
@@ -278,8 +282,8 @@ static void set_next_route_tile_direction(figure *f)
         }
     }
 }
-
-static void advance_route_tile(figure *f, int roaming_enabled)
+// Checks for collisions (also handles rerouting and destruction)
+static void check_collision(figure *f, int roaming_enabled)
 {
     // 1. Sanity Check (Use your new constant)
     if (f->direction > DIR_MAX_MOVEMENT) {
@@ -348,8 +352,7 @@ static void advance_route_tile(figure *f, int roaming_enabled)
         }
     }
 }
-
-// New Helper: Handles all the complex logic when a figure reaches a tile boundary
+// Handles all the complex logic when a figure reaches a tile boundary
 static void handle_tile_boundary_logic(figure *f, int roaming_enabled) {
     // Service Logic: Provide coverage (e.g., Prefect checks houses)
     // This is skipped for "preview" figures (Ghosting)
@@ -367,7 +370,7 @@ static void handle_tile_boundary_logic(figure *f, int roaming_enabled) {
     
     // State Transition 2: Check collision for the chosen direction
     // This might change f->direction to DIR_FIGURE_REROUTE or DIR_FIGURE_ATTACK
-    advance_route_tile(f, roaming_enabled);
+    check_collision(f, roaming_enabled);
     
     // Halt Movement Check: Stop if the status is not a valid movement direction
     if (f->direction > DIR_MAX_MOVEMENT) { 
@@ -394,7 +397,6 @@ static void handle_tile_boundary_logic(figure *f, int roaming_enabled) {
         advance_tick(f);
     }
 }
-
 // Defines the standard, path-following movement for non-roaming non-following figures
 static void walk_ticks(figure *f, int num_ticks, int roaming_enabled) {
     // 1. Terrain Speed Check (Highway doubles tick speed)
@@ -419,6 +421,8 @@ static void walk_ticks(figure *f, int num_ticks, int roaming_enabled) {
     }
 }
 
+// --- PUBLIC FUNCTIONS ---
+/* Handles variable speed accumulator, then calls walk_ticks. */
 void figure_movement_move_ticks_with_percentage(figure *f, int num_ticks, int tick_percentage)
 {
     // Sub-Tick Accumulator Logic:
@@ -439,8 +443,7 @@ void figure_movement_move_ticks_with_percentage(figure *f, int num_ticks, int ti
     // The '0' indicates the figure is NOT following a leader.
     walk_ticks(f, num_ticks, 0);
 }
-
-// Animates sentry movement within a tile boundary without changing grid coordinates.
+// Animates Tower Sentry movement (sub-coordinates within a tile boundary only)
 void figure_movement_move_ticks_tower_sentry(figure *f, int num_ticks)
 {
     while (num_ticks-- > 0) {
@@ -456,12 +459,7 @@ void figure_movement_move_ticks_tower_sentry(figure *f, int num_ticks)
         }
     }
 }
-
-void figure_movement_follow_ticks(figure *f, int num_ticks)
-{
-    figure_movement_follow_ticks_with_percentage(f, num_ticks, 0); // 0 represents 0% speed variation.
-}
-
+// Handles variable speed accumulator for snake followers
 void figure_movement_follow_ticks_with_percentage(figure *f, int num_ticks, int tick_percentage)
 {
     // 1. Handle Sub-Tick Accumulator (Variable Speed)
@@ -530,7 +528,12 @@ void figure_movement_follow_ticks_with_percentage(figure *f, int num_ticks, int 
         }
     }
 }
-
+// Wrapper for followers without speed variation (which?)
+void figure_movement_follow_ticks(figure *f, int num_ticks)
+{
+    figure_movement_follow_ticks_with_percentage(f, num_ticks, 0); // 0 represents 0% speed variation.
+}
+// Advances the figure during an attack animation
 void figure_movement_advance_attack(figure *f)
 {
     if (f->progress_on_tile <= 5) {
@@ -538,4 +541,3 @@ void figure_movement_advance_attack(figure *f)
         advance_tick(f);
     }
 }
-
