@@ -43,7 +43,7 @@ const point_2d DIR_DELTAS[10] = {
 // Defines the opposite direction for 1-9 indices
 static const direction_type DIR_OPPOSITE_MAP[10] = {
     // Index 0: Unused
-    [0] = 0, 
+    [0] = 0,
     // Corners (Diagonals)
     [DIR_TOP_LEFT] = DIR_BOTTOM_RIGHT,
     [DIR_TOP_RIGHT] = DIR_BOTTOM_LEFT,
@@ -59,36 +59,36 @@ static const direction_type DIR_OPPOSITE_MAP[10] = {
 };
 // Defines roadblock permissions
 static const roadblock_permission FIGURE_PERMISSIONS[FIGURE_TYPE_COUNT] = {
-    
+
     // Maintenance
-    [FIGURE_ENGINEER]= PERMISSION_MAINTENANCE,
-    [FIGURE_PREFECT]= PERMISSION_MAINTENANCE,
+    [FIGURE_ENGINEER] = PERMISSION_MAINTENANCE,
+    [FIGURE_PREFECT] = PERMISSION_MAINTENANCE,
 
     // Entertainers
     [FIGURE_GLADIATOR] = PERMISSION_ENTERTAINER,
-    [FIGURE_CHARIOTEER]= PERMISSION_ENTERTAINER,
+    [FIGURE_CHARIOTEER] = PERMISSION_ENTERTAINER,
     [FIGURE_ACTOR] = PERMISSION_ENTERTAINER,
-    [FIGURE_LION_TAMER]= PERMISSION_ENTERTAINER,
+    [FIGURE_LION_TAMER] = PERMISSION_ENTERTAINER,
     [FIGURE_BARKEEP] = PERMISSION_ENTERTAINER,
 
     // Medicine
     [FIGURE_SURGEON] = PERMISSION_MEDICINE,
-    [FIGURE_DOCTOR]= PERMISSION_MEDICINE,
-    [FIGURE_BARBER]= PERMISSION_MEDICINE,
-    [FIGURE_BATHHOUSE_WORKER]= PERMISSION_MEDICINE,
+    [FIGURE_DOCTOR] = PERMISSION_MEDICINE,
+    [FIGURE_BARBER] = PERMISSION_MEDICINE,
+    [FIGURE_BATHHOUSE_WORKER] = PERMISSION_MEDICINE,
 
     // Education
-    [FIGURE_SCHOOL_CHILD]= PERMISSION_EDUCATION,
+    [FIGURE_SCHOOL_CHILD] = PERMISSION_EDUCATION,
     [FIGURE_TEACHER] = PERMISSION_EDUCATION,
     [FIGURE_LIBRARIAN] = PERMISSION_EDUCATION,
 
     // Unique Walkers
-    [FIGURE_PRIEST]= PERMISSION_PRIEST,
+    [FIGURE_PRIEST] = PERMISSION_PRIEST,
     [FIGURE_MARKET_TRADER] = PERMISSION_MARKET,
     [FIGURE_TAX_COLLECTOR] = PERMISSION_TAX_COLLECTOR,
-    [FIGURE_LABOR_SEEKER]= PERMISSION_LABOR_SEEKER,
-    [FIGURE_MISSIONARY]= PERMISSION_MISSIONARY,
-    [FIGURE_WATCHMAN]= PERMISSION_WATCHMAN
+    [FIGURE_LABOR_SEEKER] = PERMISSION_LABOR_SEEKER,
+    [FIGURE_MISSIONARY] = PERMISSION_MISSIONARY,
+    [FIGURE_WATCHMAN] = PERMISSION_WATCHMAN
 };
 
 // --- HELPER FUNCTIONS ---
@@ -135,7 +135,8 @@ static void set_target_height_bridge(figure *f)
     f->target_height = map_bridge_height(f->grid_offset);
 }
 // Checks if a roaming figure is blocked by a building (Roadblock/Granary)
-static int is_roaming_blocked_by_building(figure *f, int grid_offset) {
+static int is_roaming_blocked_by_building(figure *f, int grid_offset)
+{
     if (!map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
         return 0; // Not blocked by a building if there isn't one
     }
@@ -160,7 +161,8 @@ static int is_roaming_blocked_by_building(figure *f, int grid_offset) {
     return 0; // Not blocked
 }
 // Determines the HP of a destroyable building
-static int get_obstacle_hp(building_type type) {
+static int get_obstacle_hp(building_type type)
+{
     switch (type) {
         case BUILDING_PALISADE:
         case BUILDING_PALISADE_GATE:
@@ -174,7 +176,8 @@ static int get_obstacle_hp(building_type type) {
     }
 }
 // Handles enemy interaction with obstacles
-static void attempt_obstacle_destruction(figure *f, int target_grid_offset) {
+static void attempt_obstacle_destruction(figure *f, int target_grid_offset)
+{
     if (!map_routing_is_destroyable(target_grid_offset)) {
         return;
     }
@@ -212,7 +215,8 @@ static void attempt_obstacle_destruction(figure *f, int target_grid_offset) {
 
 // --- CORE MOVEMENT & STATE FUNCTIONS ---
 /* Gets roadblock permissions for the figure */
-roadblock_permission get_permission_for_figure_type(figure *f) {
+roadblock_permission get_permission_for_figure_type(figure *f)
+{
     // Safety check: Ensures the figure type is a valid index for the array.
     if (f->type >= 0 && f->type < FIGURE_TYPE_COUNT) {
         return FIGURE_PERMISSIONS[f->type];
@@ -244,7 +248,7 @@ void move_to_next_tile(figure *f)
         if (map_terrain_is(f->grid_offset, TERRAIN_WATER)) { // bridge
             set_target_height_bridge(f);
         }
-    // Makes it clear the figure is NOT on a road
+        // Makes it clear the figure is NOT on a road
     } else {
         f->is_on_road = 0;
     }
@@ -270,8 +274,8 @@ static void set_next_route_tile_direction(figure *f)
             figure_route_remove(f);
             f->direction = DIR_FIGURE_AT_DESTINATION;
         }
-    
-    // The figure is not currently following a route (Path ID <= 0)
+
+        // The figure is not currently following a route (Path ID <= 0)
     } else {
         // Check if the figure is currently on the destination tile
         if (calc_general_direction(f->x, f->y, f->destination_x, f->destination_y) == DIR_FIGURE_AT_DESTINATION) {
@@ -320,7 +324,7 @@ static void check_collision(figure *f, int roaming_enabled)
     }
 
     // --- CASE D: STANDARD WALKER (Roads & Terrain) ---
-    
+
     // 1. Check Impassable Terrain
     if (map_terrain_is(target_offset, TERRAIN_IMPASSABLE)) {
         f->direction = DIR_FIGURE_REROUTE;
@@ -339,10 +343,10 @@ static void check_collision(figure *f, int roaming_enabled)
     if (map_terrain_is(target_offset, TERRAIN_BUILDING)) {
         int is_passable = map_routing_citizen_is_passable_terrain(target_offset);
         int is_road = map_routing_citizen_is_road(target_offset);
-        
+
         // Allow passage if it's defined as passable or if it's a road (unless roaming was disabled)
         if (is_passable || (is_road && !roaming_enabled)) {
-            return; 
+            return;
         }
 
         // Special exception for Fort Grounds (troops can walk there)
@@ -353,52 +357,54 @@ static void check_collision(figure *f, int roaming_enabled)
     }
 }
 // Handles all the complex logic when a figure reaches a tile boundary
-static void handle_tile_boundary_logic(figure *f, int roaming_enabled) {
+static void handle_tile_boundary_logic(figure *f, int roaming_enabled)
+{
     // Service Logic: Provide coverage (e.g., Prefect checks houses)
     // This is skipped for "preview" figures (Ghosting)
     if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
         figure_service_provide_coverage(f);
     }
-    
+
     // Pathfinding Check: If figure lost its route, re-add it
     if (f->routing_path_id <= 0) {
         figure_route_add(f);
-    }  
-    
+    }
+
     // State Transition 1: Determine the next step's direction
     set_next_route_tile_direction(f);
-    
+
     // State Transition 2: Check collision for the chosen direction
     // This might change f->direction to DIR_FIGURE_REROUTE or DIR_FIGURE_ATTACK
     check_collision(f, roaming_enabled);
-    
+
     // Halt Movement Check: Stop if the status is not a valid movement direction
-    if (f->direction > DIR_MAX_MOVEMENT) { 
+    if (f->direction > DIR_MAX_MOVEMENT) {
         // This breaks the while loop if the figure is AT_DESTINATION, REROUTE, LOST, or ATTACKING
         break;
     }
-    
+
     // 3. Commit to the new tile
-    
+
     // Update route progress
     f->routing_path_current_tile++;
-    
+
     // Store direction for snake followers or next tile decision
     f->previous_tile_direction = f->direction;
-    
+
     // Reset progress for the new tile
-    f->progress_on_tile = 0; 
-    
+    f->progress_on_tile = 0;
+
     // Change the figure's main grid coordinate (x, y, grid_offset)
     move_to_next_tile(f);
-    
+
     // Take the first sub-coordinate step on the new tile
     if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
         advance_tick(f);
     }
 }
 // Defines the standard, path-following movement for non-roaming non-following figures
-static void walk_ticks(figure *f, int num_ticks, int roaming_enabled) {
+static void walk_ticks(figure *f, int num_ticks, int roaming_enabled)
+{
     // 1. Terrain Speed Check (Highway doubles tick speed)
     int terrain = map_terrain_get(map_grid_offset(f->x, f->y));
     if (terrain & TERRAIN_HIGHWAY) {
@@ -411,7 +417,7 @@ static void walk_ticks(figure *f, int num_ticks, int roaming_enabled) {
         // A. Mid-Tile Movement (Sub-coordinate step)
         if (f->progress_on_tile < TICKS_PER_TILE) {
             advance_tick(f);
-        // B. End-of-Tile Logic (Tile Boundary Reached)
+            // B. End-of-Tile Logic (Tile Boundary Reached)
         } else {
             handle_tile_boundary_logic(f, roaming_enabled);
             if (f->direction > DIR_MAX_MOVEMENT) {
@@ -474,7 +480,7 @@ void figure_movement_follow_ticks_with_percentage(figure *f, int num_ticks, int 
         num_ticks--;
     }
     // Cast back to the storage type (likely char or short)
-    f->progress_to_next_tick = (char)progress;
+    f->progress_to_next_tick = (char) progress;
 
     // 2. Get Leader with Safety Check
     const figure *leader = figure_get(f->leading_figure_id);
@@ -503,7 +509,7 @@ void figure_movement_follow_ticks_with_percentage(figure *f, int num_ticks, int 
         // Mid-tile movement
         if (f->progress_on_tile < TICKS_PER_TILE) {
             advance_tick(f);
-        } 
+        }
         // End of tile reached
         else {
             // SNAKE LOGIC: Target the tile the leader JUST left
@@ -522,7 +528,7 @@ void figure_movement_follow_ticks_with_percentage(figure *f, int num_ticks, int 
             f->progress_on_tile = 0;
 
             move_to_next_tile(f);
-            
+
             // Advance the sub-coordinate tick immediately after entering the new tile
             advance_tick(f);
         }
