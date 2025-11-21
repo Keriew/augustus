@@ -37,7 +37,7 @@
     {0, -1}, // Bottom
     {1, -1} // Bottom right
     }
-    if (f->direction < 8) {
+    if (f->direction <= DIR_MAX_MOVEMENT) {
         f->cross_country_x += DIR_DELTAS[f->direction].x;
         f->cross_country_y += DIR_DELTAS[f->direction].y;
     }
