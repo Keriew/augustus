@@ -349,44 +349,65 @@ static void advance_route_tile(figure *f, int roaming_enabled)
     }
 }
 
-// Unclear?
+// Defines the standard, path-following movement for non-roaming non-following figures
 static void walk_ticks(figure *f, int num_ticks, int roaming_enabled)
 {
-    // Terrain speed check
+    // 1. Terrain Speed Check (Highway doubles tick speed)
     int terrain = map_terrain_get(map_grid_offset(f->x, f->y));
     if (terrain & TERRAIN_HIGHWAY) {
         num_ticks *= 2;
     }
 
-    // Figure moves until it runs out of ticks
+    // 2. Main Movement Loop: Process all available ticks
     while (num_ticks-- > 0) {
         f->progress_on_tile++;
-        // Figure hasn't fully moved onto the next tile
+        
+        // A. Mid-Tile Movement (Sub-coordinate step)
         if (f->progress_on_tile < TICKS_PER_TILE) {
             advance_tick(f);
-        // Figure has reached the next tile
-        } else {
-            // Figure provides coverage to its surroundings
+        } 
+        
+        // B. End-of-Tile Logic (Tile Boundary Reached)
+        else {
+            // Service Logic: Provide coverage (e.g., Prefect checks houses)
+            // This is skipped for "preview" figures (Ghosting)
             if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
                 figure_service_provide_coverage(f);
             }
-            // Assigns a route to the figure
+            
+            // Pathfinding Check: If figure lost its route, re-add it
             if (f->routing_path_id <= 0) {
                 figure_route_add(f);
             }  
-            // Replaces the current direction by a new one
+            
+            // State Transition 1: Determine the next step's direction
             set_next_route_tile_direction(f);
-            // Checks if the figure can move into the next tile in the route
+            
+            // State Transition 2: Check collision for the chosen direction
+            // This might change f->direction to DIR_FIGURE_REROUTE or DIR_FIGURE_ATTACK
             advance_route_tile(f, roaming_enabled);
-            // Stop moving at all (???) if they try to move to a non-adjacent tile somehow
+            
+            // Halt Movement Check: Stop if the status is not a valid movement direction
             if (f->direction > DIR_MAX_MOVEMENT) { 
+                // This breaks the while loop if the figure is AT_DESTINATION, REROUTE, LOST, or ATTACKING
                 break;
             }
+            
+            // 3. Commit to the new tile
+            
+            // Update route progress
             f->routing_path_current_tile++;
+            
+            // Store direction for snake followers or next tile decision
             f->previous_tile_direction = f->direction;
-            f->progress_on_tile = 0; // Reset progress on tile as it is moving onto a next one
-            // Finally moves into the next tile
+            
+            // Reset progress for the new tile
+            f->progress_on_tile = 0; 
+            
+            // Change the figure's main grid coordinate (x, y, grid_offset)
             move_to_next_tile(f);
+            
+            // Take the first sub-coordinate step on the new tile
             if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
                 advance_tick(f);
             }
@@ -394,64 +415,47 @@ static void walk_ticks(figure *f, int num_ticks, int roaming_enabled)
     }
 }
 
-
-
 void figure_movement_move_ticks_with_percentage(figure *f, int num_ticks, int tick_percentage)
 {
+    // Sub-Tick Accumulator Logic:
+    // Handles speed variation by accumulating leftover percentage.
+    // If the accumulation hits 100%, we gain 1 full movement tick.
     int progress = f->progress_to_next_tick + tick_percentage;
 
-    if (progress >= 100) {
-        progress -= 100;
+    if (progress >= TICK_PERCENTAGE_BASE) {
+        progress -= TICK_PERCENTAGE_BASE;
         num_ticks++;
-    } else if (progress <= -100) {
-        progress += 100;
+    } else if (progress <= -TICK_PERCENTAGE_BASE) {
+        progress += TICK_PERCENTAGE_BASE;
         num_ticks--;
     }
     f->progress_to_next_tick = (char) progress;
 
+    // Delegate the actual movement to the main tick function.
+    // The '0' indicates the figure is NOT following a leader.
     walk_ticks(f, num_ticks, 0);
 }
 
+// Animates sentry movement within a tile boundary without changing grid coordinates.
 void figure_movement_move_ticks_tower_sentry(figure *f, int num_ticks)
 {
-    while (num_ticks > 0) {
-        num_ticks--;
+    while (num_ticks-- > 0) {
         f->progress_on_tile++;
+        // If we haven't reached the tile edge, continue animating sub-tile movement.
         if (f->progress_on_tile < TICKS_PER_TILE) {
             advance_tick(f);
         } else {
+            // Reached the end of the tile walk (e.g., end of the tower wall).
+            // Clamp the progress to prevent overflow and stop movement.
             f->progress_on_tile = TICKS_PER_TILE;
+            // Note: No call to move_to_next_tile(f); the figure remains on its grid tile.
         }
     }
 }
 
 void figure_movement_follow_ticks(figure *f, int num_ticks)
 {
-    const figure *leader = figure_get(f->leading_figure_id);
-    if (f->x == f->source_x && f->y == f->source_y) {
-        f->is_ghost = 1;
-    }
-    if (map_terrain_is(map_grid_offset(leader->x, leader->y), TERRAIN_HIGHWAY)) {
-        num_ticks *= 2;
-    }
-    while (num_ticks > 0) {
-        num_ticks--;
-        f->progress_on_tile++;
-        if (f->progress_on_tile < TICKS_PER_TILE) {
-            advance_tick(f);
-        } else {
-            f->progress_on_tile = TICKS_PER_TILE;
-            f->direction = calc_general_direction(f->x, f->y,
-                leader->previous_tile_x, leader->previous_tile_y);
-            if (f->direction >= 8) {
-                break;
-            }
-            f->previous_tile_direction = f->direction;
-            f->progress_on_tile = 0;
-            move_to_next_tile(f);
-            advance_tick(f);
-        }
-    }
+    figure_movement_follow_ticks_with_percentage(f, num_ticks, 0); // 0 represents 0% speed variation.
 }
 
 void figure_movement_follow_ticks_with_percentage(figure *f, int num_ticks, int tick_percentage)

@@ -12,6 +12,7 @@
 #define ROAM_TURN_CCW -2
 #define CC_MAJOR_X 1
 #define CC_MAJOR_Y 2
+#define TICK_PERCENTAGE_BASE 100 // Shouldn't this be part of movement_internal.h?
 
 void figure_movement_init_roaming(figure *f);
 
