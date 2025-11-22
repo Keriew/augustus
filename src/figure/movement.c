@@ -479,3 +479,12 @@ void figure_movement_path(figure *f, int speed)
     // Moves the figure the total number of ticks
     move_figure_path(f, num_mov, 0);
 }
+
+// --- UNUSED FUNCTIONS ---
+// Find a nice place to add this functionality
+// This is how figures would read the distance of their own chosen route, if you ever need this
+int figure_path_distance(figure *f, int grid_offset)
+{
+    // Reads the distance from its own reserved map in the global pool
+    return route_map_pool[f->route_map_id].items[grid_offset];
+}

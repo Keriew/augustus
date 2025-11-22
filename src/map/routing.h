@@ -20,6 +20,24 @@ typedef struct map_routing_distance_grid {
     int dst_y;
 } map_routing_distance_grid;
 
+typedef enum {
+    // Land
+    ROUTE_TYPE_CITIZEN, // placeholder?
+    ROUTE_TYPE_TOWER_SENTRY,
+    ROUTE_TYPE_FRIENDLY,
+    ROUTE_TYPE_ENEMY,
+    // Water
+    ROUTE_TYPE_BOAT,
+    ROUTE_TYPE_FLOTSAM,
+    // Buildings
+    ROUTE_TYPE_ROAD,
+    ROUTE_TYPE_HIGHWAY,
+    ROUTE_TYPE_WALL,
+    ROUTE_TYPE_AQUEDUCT,
+    // Misc
+    ROUTE_TYPE_UNBLOCKING_ROME,
+} RouteType;
+
 const map_routing_distance_grid *map_routing_get_distance_grid(void);
 
 void map_routing_calculate_distances(int x, int y);
