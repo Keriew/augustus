@@ -26,6 +26,8 @@ typedef struct {
     // Specialized Working Buffers
     map_routing_distance_grid water_drag;
     map_routing_distance_grid fighting_data;
+    // Stores the position (index) within the queue.items array for every grid offset.
+    int node_index[GRID_SIZE * GRID_SIZE];
     // ... possibly other single-use flags or temporary data ...
 } RoutingContext;
 // Used for callbacks (?)
@@ -66,6 +68,15 @@ static struct {
     int through_building_id;
     int dest_building_id;
 } state;
+
+// Defines which rules apply (to what? or whom?)
+typedef struct {
+    int allow_road : 1;
+    int allow_garden : 1;
+    int allow_highway : 1;
+    // etc.
+    int required_permission; // e.g., for roadblocks
+} TravelRules;
 
 static void reset_fighting_status(void)
 {
@@ -127,11 +138,19 @@ static inline int ordered_queue_parent(int index)
     return (index - 1) / 2;
 }
 
+
+// Corrected ordered_queue_swap (assuming you add a helper that uses this)
 static inline void ordered_queue_swap(RoutingContext *ctx, int first, int second)
 {
-    int temp = ctx->queue.items[first];
+    int temp_offset = ctx->queue.items[first];
+
+    // 1. Swap the offsets in the main queue array
     ctx->queue.items[first] = ctx->queue.items[second];
-    ctx->queue.items[second] = temp;
+    ctx->queue.items[second] = temp_offset;
+
+    // 2. Update the lookup table with the NEW positions
+    ctx->node_index[ctx->queue.items[first]] = first;
+    ctx->node_index[ctx->queue.items[second]] = second;
 }
 
 static void ordered_queue_reorder(RoutingContext *ctx, int start_index)
@@ -238,48 +257,59 @@ static int receive_highway_bonus(int offset, int direction)
     return 0;
 }
 
-static void route_queue_from_to()
-{
-    // ... setup ...
-    while (ctx->queue.tail) {
-        // ... pop logic ...
-        if (callback(ctx, offset, next_offset, i)) {
-            ordered_enqueue(ctx, next_offset, dist, remaining);
-        }
-    }
-}
 
-static void route_queue_from_to(RoutingContext *ctx, int src, int dst, RoutingCallback callback)
-// Previous contents
-// int src_x, int src_y, int dst_x, int dst_y, int num_directions, int max_tiles,
-//    int (*callback)(int offset, int next_offset, int direction)
+
+
+// Using the simplified master travel function based on your flags
+// Put this instead of the others
+// Wai tthat's what this does right???
+static int callback_travel_master(RoutingContext *ctx, int offset, int next_offset,
+ int direction_index, const TravelRules *rules);
+
+
+// Finds the best route? (???)
+static void route_queue_from_to(RoutingContext *ctx, int src_x, int src_y, int dst_x, int dst_y, const TravelRules *rules)
 {
-    clear_data();
-    distance.dst_x = dst_x;
-    distance.dst_y = dst_y;
-    int dest = map_grid_offset(dst_x, dst_y);
-    ordered_enqueue(ctx, map_grid_offset(src_x, src_y), 1, 0);
-    int tiles = 0;
-    while (ctx->queue.tail) {
-        int offset = ordered_queue_pop();
-        if (callback(ctx, offset, next_offset, i)) {
-            ordered_enqueue(ctx, next_offset, dist, remaining);
+    // 1. Setup Phase (Clear queues, initialize distances, enqueue source)
+    int MAX_SEARCH_ITERATIONS = 0;
+    int destination_offset = map_grid_offset(dst_x, dst_y);
+    // Assign the number of directions based on the rules (wait... does this really handle the diagonal stuff???)
+    int num_directions = rules->num_directions;
+
+    while (ctx->queue.head != ctx->queue.tail && guard_count++ < MAX_SEARCH_ITERATIONS) {
+
+        // 2. Pop the current best node (offset)
+        int current_offset = ordered_queue_pop(ctx);
+        int current_distance = ctx->distance.determined.items[current_offset];
+
+        // Early exit if destination found
+        if (current_offset == destination_offset) {
+            return;
         }
-        // if (offset == dest || (max_tiles && ++tiles > max_tiles)) {
-        //     break;
-        // }
-        int x = map_grid_offset_to_x(offset);
-        int y = map_grid_offset_to_y(offset);
-        distance.possible.items[offset] = 1;
+
+        // 3. Iterate Neighbors
         for (int i = 0; i < num_directions; i++) {
-            int next_offset = offset + ROUTE_OFFSETS[i];
-            int remaining_dist = distance_left(x + ROUTE_OFFSETS_X[i], y + ROUTE_OFFSETS_Y[i]);
-            int dist = 2 + distance.determined.items[offset];
-            if (receive_highway_bonus(next_offset, i)) {
-                dist--;
+
+            int next_offset = current_offset + ROUTE_OFFSETS[i];
+            int next_x = current_offset % MAP_WIDTH + ROUTE_OFFSETS_X[i]; // Assuming map width is used
+            int next_y = current_offset / MAP_WIDTH + ROUTE_OFFSETS_Y[i];
+
+            // Boundary Check
+            if (!map_grid_is_inside(next_x, next_y, 1)) {
+                continue;
             }
-            if (valid_offset(next_offset, dist) && callback(offset, next_offset, i)) {
-                ordered_enqueue(ctx, next_offset, dist, remaining_dist);
+
+            // --- The Refactored Logic: Use the master function ---
+            int travel_cost = 0;
+            if (callback_travel_master(ctx, current_offset, next_offset, i, rules, &travel_cost)) {
+
+                // If the master function returns success (1), calculate new cost
+                int new_dist = current_distance + travel_cost;
+
+                // If path is better, enqueue it
+                if (new_dist < ctx->distance.determined.items[next_offset]) {
+                    ordered_enqueue(ctx, next_offset, new_dist);
+                }
             }
         }
     }
@@ -319,30 +349,195 @@ static void route_queue_all_from(RoutingContext *ctx, int source, max_directions
     }
 }
 
-static int callback_calc_distance(RoutingContext *ctx, int next_offset, int dist, int direction)
+/** @brief Helper function to calculate the travel cost and check permission
+* Returns 1 if travel is permitted, 0 otherwise
+* @param RoutingContext
+* @param current_offset
+* @param next_offset
+* @param direction_index
+* @param rules
+* @param out_cost
+**/
+static int callback_travel_master(RoutingContext *ctx, int current_offset, int next_offset,
+int direction_index, const TravelRules *rules, int *out_cost)
 {
-    if (terrain_land_citizen.items[next_offset] >= CITIZEN_0_ROAD) {
-        enqueue(ctx, next_offset, dist);
+    // Default base cost for a cardinal move (or set based on rules)
+    // Prep in case diagonal movement gets added
+    int cost = (direction_index < 4) ? 100 : 141;
+    int cost_multiplier = 1
+
+        // Rule 1: Always check for impassable geometry (must be first)
+        if (!rules->terrain_passable_func(next_offset)) {
+            return 0;
+        }
+
+    // Rule 2: Check Road Access (e.g., roadblock permission)
+    if (rules->required_permission > 0 &&
+        !map_roadblock_check(next_offset, rules->required_permission)) {
+        return 0;
     }
+
+    int base_cost = 0;
+
+    if (rules->is_tower_sentry) {
+        switch (terrain_wall.items[next_offset]) {
+            case WALL_0_PASSABLE:
+                BASE_TERRAIN_COST(terrain_wall.items[next_offset]);
+                return 1;
+            case WALL_N1_BLOCKED:
+                return 0;
+        }
+    }
+
+    if (rules->is_citizen) {
+        switch (terrain_land_citizen.items[next_offset]) {
+            case CITIZEN_0_ROAD:
+                if (!rules->travel_roads) return 0;
+                base_cost = BASE_TERRAIN_COST(CITIZEN_0_ROAD);
+                break;
+            case CITIZEN_1_HIGHWAY:
+                if (!rules->travel_highways) return 0;
+                base_cost = BASE_TERRAIN_COST(CITIZEN_1_HIGHWAY);
+                break;
+            case CITIZEN_2_PASSABLE_TERRAIN:
+                if (!rules->travel_gardens) return 0;
+                base_cost = BASE_TERRAIN_COST(CITIZEN_2_PASSABLE_TERRAIN);
+                break;
+            case CITIZEN_4_CLEAR_TERRAIN:
+                if (!rules->travel_land) return 0;
+                base_cost = BASE_TERRAIN_COST(CITIZEN_4_CLEAR_TERRAIN);
+                break;
+            case CITIZEN_N1_BLOCKED:
+                if (!rules->travel_blocked) return 0; // Nobody allowed
+                base_cost = BASE_TERRAIN_COST(CITIZEN_N1_BLOCKED);
+                break;
+            case CITIZEN_N3_AQUEDUCT:
+                if (!rules->travel_aqueduct) return 0; // Nobody allowed
+                base_cost = BASE_TERRAIN_COST(CITIZEN_N3_AQUEDUCT);
+                break;
+            case CITIZEN_N4_RESERVOIR_CONNECTOR:
+                if (!rules->travel_reservoir_connector) return 0; // Nobody allowed
+                base_cost = BASE_TERRAIN_COST(CITIZEN_N4_RESERVOIR_CONNECTOR);
+                break;
+            default:
+                return 0;
+        }
+    }
+
+    if (rules->is_noncitizen) {
+        if (terrain_land_noncitizen.items[next_offset] == NONCITIZEN_N1_BLOCKED) {
+            return 0;
+        }
+        base_cost = BASE_TERRAIN_COST(terrain_land_noncitizen.items[next_offset])
+            return 1;
+    }
+
+    // Boats
+    if (rules->is_boat) {
+        // Passability Check
+        // Next position must be water AND must not be blocked (low bridge or explicit block).
+        if (!map_terrain_is_water(next_offset) ||
+            terrain_water.items[next_offset] == WATER_N1_BLOCKED ||
+            terrain_water.items[next_offset] == WATER_N3_LOW_BRIDGE) {
+            return 0;
+        }
+
+        // Base Cost
+        base_cost = BASE_TERRAIN_COST(terrain_water.items[next_offset]);
+
+        // Water drag (in the form of a cost multiplier for simplicity)
+        cost_multiplier = 3;
+        // Discourages boats from sailing across the map's edge
+        if (terrain_water.items[next_offset] == WATER_N2_MAP_EDGE) {
+            cost_multiplier += 12;
+        }
+        return 1;
+    }
+
+    // Flotsam
+    if (rules->is_flotsam) {
+        // Next position must be water and not blocked
+        if (map_terrain_is_water(next_offset) && terrain_water.items[next_offset] != = WATER_N1_BLOCKED) {
+            return 1;
+        }
+        return 0;
+    }
+
+    // Highway
+    if (rules->is_highway) {
+        // Next position must be a valid placement for a highway
+        if (can_build_highway(next_offset, 1)) {
+            return 1;
+        }
+        return 0;
+    }
+
+    // Not fighting friendly (criminals???)
+    if (rules->not_fighting_friendly) {
+        if (!has_fighting_friendly(next_offset)) {
+            return 1;
+        }
+        return 0;
+    }
+
+
+
+
+    // Rule 3: Speed/Cost Modifiers (e.g., highway or water)
+    if (rules->allow_highway && map_terrain_is_highway(next_offset)) {
+        cost_multiplier = 0.5;
+    }
+
+    // ... add all other specific movement/cost logic here ...
+
+    *out_cost = cost * cost_multiplier;
     return 1;
 }
+
+static int callback_travel_walls(int offset, int next_offset, int direction)
+{
+    if (terrain_walls.items[next_offset] >= WALL_0_PASSABLE &&
+        terrain_walls.items[next_offset] <= 2) {
+        return 1;
+    }
+    return 0;
+}
+
+static int callback_travel_noncitizen_land_through_building(int offset, int next_offset, int direction)
+{
+    if (has_fighting_enemy(next_offset)) {
+        return 0;
+    }
+    int8_t terrain = terrain_land_noncitizen.items[next_offset];
+    if (terrain == NONCITIZEN_0_PASSABLE || terrain == NONCITIZEN_2_CLEARABLE) {
+        return 1;
+    }
+    int map_building_id = map_building_at(next_offset);
+    if (terrain == NONCITIZEN_1_BUILDING && (map_building_id == state.through_building_id || map_building_id == state.dest_building_id)) {
+        return 1;
+    }
+    return 0;
+}
+
+static int callback_travel_noncitizen_land(int offset, int next_offset, int direction)
+{
+    if (has_fighting_enemy(next_offset)) {
+        return 0;
+    }
+    uint8_t terrain = terrain_land_noncitizen.items[next_offset];
+    if (terrain < NONCITIZEN_5_FORT) {
+        return 1;
+    }
+    return 0;
+}
+
+
+
 
 void map_routing_calculate_distances(int x, int y)
 {
     ++stats.total_routes_calculated;
     route_queue_all_from(map_grid_offset(x, y), DIRECTIONS_NO_DIAGONALS, callback_calc_distance, 0);
-}
-
-static int callback_calc_distance_water_boat(int next_offset, int dist, int direction)
-{
-    if (terrain_water.items[next_offset] != WATER_N1_BLOCKED &&
-        terrain_water.items[next_offset] != WATER_N3_LOW_BRIDGE) {
-        enqueue(next_offset, dist);
-        if (terrain_water.items[next_offset] == WATER_N2_MAP_EDGE) {
-            distance.determined.items[next_offset] += 4;
-        }
-    }
-    return 1;
 }
 
 void map_routing_calculate_distances_water_boat(int x, int y)
@@ -353,14 +548,6 @@ void map_routing_calculate_distances_water_boat(int x, int y)
     } else {
         route_queue_all_from(grid_offset, DIRECTIONS_NO_DIAGONALS, callback_calc_distance_water_boat, 1);
     }
-}
-
-static int callback_calc_distance_water_flotsam(RoutingContext *ctx, int next_offset, int dist, int direction)
-{
-    if (terrain_water.items[next_offset] != WATER_N1_BLOCKED) {
-        enqueue(ctx, next_offset, dist);
-    }
-    return 1;
 }
 
 void map_routing_calculate_distances_water_flotsam(int x, int y)
@@ -396,14 +583,6 @@ static int can_build_highway(int next_offset, int check_highway_routing)
         }
     }
 
-    return 1;
-}
-
-static int callback_calc_distance_build_highway(RoutingContext *ctx, int next_offset, int dist, int direction)
-{
-    if (can_build_highway(next_offset, 1)) {
-        enqueue(ctx, next_offset, dist);
-    }
     return 1;
 }
 
@@ -581,28 +760,11 @@ static inline int has_fighting_enemy(int grid_offset)
     return fighting_data.status.items[grid_offset] & 2;
 }
 
-static int callback_travel_citizen_land(int offset, int next_offset, int direction)
-{
-    if (terrain_land_citizen.items[next_offset] >= 0 && !has_fighting_friendly(next_offset)) {
-        return 1;
-    }
-    return 0;
-}
-
 int map_routing_citizen_can_travel_over_land(int src_x, int src_y, int dst_x, int dst_y, int num_directions)
 {
     ++stats.total_routes_calculated;
     route_queue_from_to(src_x, src_y, dst_x, dst_y, num_directions, 0, callback_travel_citizen_land);
     return distance.determined.items[map_grid_offset(dst_x, dst_y)] != 0;
-}
-
-static int callback_travel_citizen_road_garden(int offset, int next_offset, int direction)
-{
-    if (terrain_land_citizen.items[next_offset] == CITIZEN_0_ROAD ||
-        terrain_land_citizen.items[next_offset] == CITIZEN_2_PASSABLE_TERRAIN) {
-        return 1;
-    }
-    return 0;
 }
 
 int map_routing_citizen_can_travel_over_road_garden(int src_x, int src_y, int dst_x, int dst_y, int num_directions)
@@ -617,15 +779,6 @@ int map_routing_citizen_can_travel_over_road_garden(int src_x, int src_y, int ds
     return distance.determined.items[dst_offset] != 0;
 }
 
-static int callback_travel_citizen_road_garden_highway(int offset, int next_offset, int direction)
-{
-    if (terrain_land_citizen.items[next_offset] >= CITIZEN_0_ROAD &&
-        terrain_land_citizen.items[next_offset] <= CITIZEN_2_PASSABLE_TERRAIN) {
-        return 1;
-    }
-    return 0;
-}
-
 int map_routing_citizen_can_travel_over_road_garden_highway(int src_x, int src_y, int dst_x, int dst_y, int num_directions)
 {
     int dst_offset = map_grid_offset(dst_x, dst_y);
@@ -638,48 +791,11 @@ int map_routing_citizen_can_travel_over_road_garden_highway(int src_x, int src_y
     return distance.determined.items[dst_offset] != 0;
 }
 
-static int callback_travel_walls(int offset, int next_offset, int direction)
-{
-    if (terrain_walls.items[next_offset] >= WALL_0_PASSABLE &&
-        terrain_walls.items[next_offset] <= 2) {
-        return 1;
-    }
-    return 0;
-}
-
 int map_routing_can_travel_over_walls(int src_x, int src_y, int dst_x, int dst_y, int num_directions)
 {
     ++stats.total_routes_calculated;
     route_queue_from_to(src_x, src_y, dst_x, dst_y, num_directions, 0, callback_travel_walls);
     return distance.determined.items[map_grid_offset(dst_x, dst_y)] != 0;
-}
-
-static int callback_travel_noncitizen_land_through_building(int offset, int next_offset, int direction)
-{
-    if (has_fighting_enemy(next_offset)) {
-        return 0;
-    }
-    int8_t terrain = terrain_land_noncitizen.items[next_offset];
-    if (terrain == NONCITIZEN_0_PASSABLE || terrain == NONCITIZEN_2_CLEARABLE) {
-        return 1;
-    }
-    int map_building_id = map_building_at(next_offset);
-    if (terrain == NONCITIZEN_1_BUILDING && (map_building_id == state.through_building_id || map_building_id == state.dest_building_id)) {
-        return 1;
-    }
-    return 0;
-}
-
-static int callback_travel_noncitizen_land(int offset, int next_offset, int direction)
-{
-    if (has_fighting_enemy(next_offset)) {
-        return 0;
-    }
-    uint8_t terrain = terrain_land_noncitizen.items[next_offset];
-    if (terrain < NONCITIZEN_5_FORT) {
-        return 1;
-    }
-    return 0;
 }
 
 int map_routing_noncitizen_can_travel_over_land(
