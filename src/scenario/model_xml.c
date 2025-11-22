@@ -26,6 +26,68 @@ static struct {
     int error_line_number;
 } data;
 
+static const char *string_for_building_data_type(building_model_data_type data_type)
+{
+    switch (data_type) {
+        case MODEL_COST:
+            return "cost";
+        case MODEL_DESIRABILITY_VALUE:
+            return "desirability_value";
+        case MODEL_DESIRABILITY_STEP:
+            return "desirability_step";
+        case MODEL_DESIRABILITY_STEP_SIZE:
+            return "desirability_step_size";
+        case MODEL_DESIRABILITY_RANGE:
+            return "desirability_range";
+        case MODEL_LABORERS:
+            return "laborers";
+        default:
+            return "cost";
+    }
+}
+
+static const char *string_for_house_data_type(house_model_data_type data_type)
+{
+    switch (data_type) {
+        case MODEL_DEVOLVE_DESIRABILITY:
+            return "devolve_desirability";
+        case MODEL_EVOLVE_DESIRABILITY:
+            return "evolve_desirability";
+        case MODEL_ENTERTAINMENT:
+            return "entertainment";
+        case MODEL_WATER:
+            return "water";
+        case MODEL_RELIGION:
+            return "religion";
+        case MODEL_EDUCATION:
+            return "education";
+        case MODEL_BARBER:
+            return "barber";
+        case MODEL_BATHHOUSE:
+            return "bathhouse";
+        case MODEL_HEALTH:
+            return "health";
+        case MODEL_FOOD_TYPES:
+            return "food_types";
+        case MODEL_POTTERY:
+            return "pottery";
+        case MODEL_OIL:
+            return "oil";
+        case MODEL_FURNITURE:
+            return "furniture";
+        case MODEL_WINE:
+            return "wine";
+        case MODEL_PROSPERITY:
+            return "prosperity";
+        case MODEL_MAX_PEOPLE:
+            return "max_people";
+        case MODEL_TAX_MULTIPLIER:
+            return "tax_multiplier";
+        default:
+            return "devolve_desirability";
+    }
+}
+
 // EXPORT
 
 static void export_model_data(buffer *buf)
@@ -66,12 +128,10 @@ static void export_model_data(buffer *buf)
 
         xml_exporter_new_element("building_model");
         xml_exporter_add_attribute_text("building_type", props->event_data.attr);
-        xml_exporter_add_attribute_int("cost", model->cost);
-        xml_exporter_add_attribute_int("desirability_value", model->desirability_value);
-        xml_exporter_add_attribute_int("desirability_step", model->desirability_step);
-        xml_exporter_add_attribute_int("desirability_step_size", model->desirability_step_size);
-        xml_exporter_add_attribute_int("desirability_range", model->desirability_range);
-        xml_exporter_add_attribute_int("laborers", model->laborers);
+        
+        for (building_model_data_type data_type = MODEL_COST; data_type < MODEL_BUILDING_MAX; data_type++) {
+            xml_exporter_add_attribute_int(string_for_building_data_type(data_type), *model_get_ptr_for_building_data_type(model, data_type));
+        }
         if ((building_is_raw_resource_producer(type) || building_is_workshop(type) || type == BUILDING_WHARF)) {
             if (resource->production_per_month != resource_get_defaults(resource_get_from_industry(type))->production_per_month) {
                 xml_exporter_add_attribute_int("production_rate", resource->production_per_month);
@@ -111,10 +171,12 @@ int scenario_model_export_to_xml(const char *filename)
 // IMPORT
 
 static int start_building_model(void);
+static int start_house_model(void);
 
-static const xml_parser_element xml_elements[2] = {
+static const xml_parser_element xml_elements[3] = {
     {"model_data"},
-    {"building_model", start_building_model, 0, "model_data"}
+    {"building_model", start_building_model, 0, "model_data"},
+    {"house_model", start_house_model, 0, "model_data"}
 };
 #define MAX_XML_ELEMENTS sizeof(xml_elements)/sizeof(xml_parser_element)
 
@@ -140,45 +202,30 @@ static int start_building_model(void)
         return 0;
     }
     building_type type = found->value;
-
-    if (!xml_parser_has_attribute("cost")) {
-        xml_import_log_error("Attribute missing. 'cost' not given");
-        return 0;
-    }
-    if (!xml_parser_has_attribute("desirability_value")) {
-        xml_import_log_error("Attribute missing. 'desirability_value' not given");
-        return 0;
-    }
-    if (!xml_parser_has_attribute("desirability_step")) {
-        xml_import_log_error("Attribute missing. 'desirability_step' not given");
-        return 0;
-    }
-    if (!xml_parser_has_attribute("desirability_step_size")) {
-        xml_import_log_error("Attribute missing. 'desirability_step_size' not given");
-        return 0;
-    }
-    if (!xml_parser_has_attribute("desirability_range")) {
-        xml_import_log_error("Attribute missing. 'desirability_range' not given");
-        return 0;
-    }
-    if (!xml_parser_has_attribute("laborers")) {
-        xml_import_log_error("Attribute missing. 'laborers' not given");
-        return 0;
+    
+    for (building_model_data_type data_type = MODEL_COST; data_type < MODEL_BUILDING_MAX; data_type++) {
+        if (!xml_parser_has_attribute(string_for_building_data_type(data_type))) {
+            char *error_msg;
+            snprintf(error_msg, 256, "Attribute missing. '%s' not given", string_for_building_data_type(data_type));
+            return 0;
+        }
     }
 
     model_building *model_ptr = model_get_building(type);
 
-    model_ptr->cost = xml_parser_get_attribute_int("cost");
-    model_ptr->desirability_value = xml_parser_get_attribute_int("desirability_value");
-    model_ptr->desirability_step = xml_parser_get_attribute_int("desirability_step");
-    model_ptr->desirability_step_size = xml_parser_get_attribute_int("desirability_step_size");
-    model_ptr->desirability_range = xml_parser_get_attribute_int("desirability_range");
-    model_ptr->laborers = xml_parser_get_attribute_int("laborers");
+    for (building_model_data_type data_type = MODEL_COST; data_type < MODEL_BUILDING_MAX; data_type++) {
+        *model_get_ptr_for_building_data_type(model_ptr, data_type) = xml_parser_get_attribute_int(string_for_building_data_type(data_type));
+    }
     if (xml_parser_has_attribute("production_rate")) {
         resource_data *resource = resource_get_data(resource_get_from_industry(type));
         resource->production_per_month = xml_parser_get_attribute_int("production_rate");
     }
 
+    return 1;
+}
+
+static int start_house_model(void)
+{
     return 1;
 }
 

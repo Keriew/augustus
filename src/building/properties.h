@@ -50,6 +50,8 @@ typedef enum {
     MODEL_DESIRABILITY_STEP_SIZE,
     MODEL_DESIRABILITY_RANGE,
     MODEL_LABORERS,
+    
+    MODEL_BUILDING_MAX
 } building_model_data_type;
 
 typedef enum {
@@ -69,7 +71,9 @@ typedef enum {
     MODEL_WINE,
     MODEL_PROSPERITY,
     MODEL_MAX_PEOPLE,
-    MODEL_TAX_MULTIPLIER
+    MODEL_TAX_MULTIPLIER,
+    
+    MODEL_HOUSE_MAX
 } house_model_data_type;
 
 /**

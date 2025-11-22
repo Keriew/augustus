@@ -28,7 +28,7 @@ struct min_max {
     int max;
 };
 
-static struct min_max min_max_for_data_types[MODEL_LABORERS + 1] = {
+static struct min_max min_max_for_data_types[MODEL_BUILDING_MAX] = {
     [MODEL_COST] = {.min = NEGATIVE_UNLIMITED, .max = UNLIMITED},
     [MODEL_DESIRABILITY_VALUE] = {.min = -100, .max = 100},
     [MODEL_DESIRABILITY_STEP] = {.min = 0, .max = 8},
@@ -37,7 +37,7 @@ static struct min_max min_max_for_data_types[MODEL_LABORERS + 1] = {
     [MODEL_LABORERS] = {.min = 0, .max = UNLIMITED}
 };
 
-static struct min_max min_max_for_house_data_types[MODEL_TAX_MULTIPLIER + 1] = {
+static struct min_max min_max_for_house_data_types[MODEL_HOUSE_MAX] = {
     [MODEL_DEVOLVE_DESIRABILITY] = {.min = -101, .max = 100},
     [MODEL_EVOLVE_DESIRABILITY] = {.min = -101, .max = 100},
     [MODEL_ENTERTAINMENT] = {.min = 0, .max = 116},
