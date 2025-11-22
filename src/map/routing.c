@@ -22,7 +22,6 @@ typedef struct {
     map_routing_distance_grid route_map_pool[MAX_CONCURRENT_ROUTES];
     struct { int head; int tail; int items[MAX_QUEUE]; } queue;
     // Specialized Working Buffers
-    map_routing_distance_grid water_drag;
     map_routing_distance_grid fighting_data;
     // Stores the position (index) within the queue.items array for every grid offset.
     int node_index[GRID_SIZE * GRID_SIZE];
@@ -31,31 +30,14 @@ typedef struct {
 // Used for callbacks (?)
 typedef int (*RoutingCallback)(RoutingContext *ctx, int offset, int next_offset, int direction);
 
-typedef enum {
-    DIRECTIONS_NO_DIAGONALS = 4,
-    DIRECTIONS_DIAGONALS = 8
-} max_directions;
-
 static const int ROUTE_OFFSETS[] = { -162, 1, 162, -1, -161, 163, 161, -163 };
 static const int ROUTE_OFFSETS_X[] = { 0, 1, 0, -1,  1, 1, -1, -1 };
 static const int ROUTE_OFFSETS_Y[] = { -1, 0, 1,  0, -1, 1,  1, -1 };
-static const int HIGHWAY_DIRECTIONS[] = {
-    TERRAIN_HIGHWAY_TOP_RIGHT | TERRAIN_HIGHWAY_BOTTOM_RIGHT, // up
-    TERRAIN_HIGHWAY_BOTTOM_LEFT | TERRAIN_HIGHWAY_BOTTOM_RIGHT, // right
-    TERRAIN_HIGHWAY_TOP_LEFT | TERRAIN_HIGHWAY_BOTTOM_LEFT, // down
-    TERRAIN_HIGHWAY_TOP_LEFT | TERRAIN_HIGHWAY_TOP_RIGHT, // left
-    0,
-    0,
-    0,
-    0
-};
 
 static struct {
     int total_routes_calculated;
     int enemy_routes_calculated;
 } stats;
-
-static grid_u8 water_drag;
 
 static struct {
     grid_u8 status;
@@ -309,18 +291,6 @@ static inline int distance_left(int x, int y)
     return abs(distance.dst_x - x) + abs(distance.dst_y - y);
 }
 
-static int receive_highway_bonus(int offset, int direction)
-{
-    int highway_directions = HIGHWAY_DIRECTIONS[direction];
-    if (map_terrain_is(offset, highway_directions)) {
-        return 1;
-    }
-    return 0;
-}
-
-
-
-
 // Using the simplified master travel function based on your flags
 // Put this instead of the others
 // Wai tthat's what this does right???
@@ -437,11 +407,11 @@ void route_queue_all_from(RoutingContext *ctx, int source, const TravelRules *ru
 static int callback_travel_master(RoutingContext *ctx, int current_offset, int next_offset,
 int direction_index, const TravelRules *rules, int *out_cost)
 {
-    // Default base cost for a cardinal move (or set based on rules)
-    // Prep in case diagonal movement gets added
+    // Defaults
     int base_cost = 0;
-    int direction_cost_multiplier = (direction_index < 4) ? 100 : 141;
     int cost_multiplier = 1;
+    // Incorrect, instead this must detect if the direction is cardinal or not then apply
+    int direction_cost_multiplier = (direction_index < 4) ? 100 : 141;
 
     // If impassable, return
     if (!rules->terrain_passable_func(next_offset)) {
@@ -449,8 +419,9 @@ int direction_index, const TravelRules *rules, int *out_cost)
     }
 
     // If not allowed through, return (roadblocks)
-    if (rules->requires_permission > 0 &&
-        !map_roadblock_check(next_offset, rules->required_permission)) {
+    if (rules->ignores_roadblocks == 0 &&
+        // You will need to create this function
+        !map_roadblock_check(next_offset, rules->ignores_roadblocks)) {
         return 0;
     }
 
@@ -462,6 +433,7 @@ int direction_index, const TravelRules *rules, int *out_cost)
     }
 
     // Speed Modifiers (e.g highways)
+    // MUST be walking in a cardinal direction, or this bonus won't apply
     if (rules->allow_highway && map_terrain_is_highway(next_offset)) {
         cost_multiplier = 0.5;
     }
@@ -670,6 +642,9 @@ static void map_routing_calculate_distances(int x, int y, RouteType type)
 
     // --- 3. Start Search ---
     ++stats.total_routes_calculated;
+    if (rules->is_enemy) {
+        ++stats.enemy_routes_calculated
+    }
 
     // Call Generic Core Routing Function, passing the static rules
     route_queue_all_from(&ctx, grid_offset, rules);
@@ -684,10 +659,6 @@ static void map_routing_calculate_distances(int x, int y, RouteType type)
 if (!map_can_place_initial_road_or_aqueduct(source_offset, type != ROUTED_BUILDING_ROAD)) {
     return 0;
 }
-
-// There are two types of total routes???
-++stats.total_routes_calculated;
-++stats.enemy_routes_calculated;
 
 // What to do about this
 if (only_through_building_id) {
@@ -746,32 +717,6 @@ static int can_build_highway(int next_offset, int check_highway_routing)
     return 1;
 }
 
-static int is_fighting_friendly(figure * f)
-{
-    return f->is_friendly && f->action_state == FIGURE_ACTION_150_ATTACK;
-}
-
-static inline int has_fighting_friendly(int grid_offset)
-{
-    if (!(fighting_data.status.items[grid_offset] & 0x80)) {
-        fighting_data.status.items[grid_offset] |= 0x80 | map_figure_foreach_until(grid_offset, is_fighting_friendly);
-    }
-    return fighting_data.status.items[grid_offset] & 1;
-}
-
-static int is_fighting_enemy(figure * f)
-{
-    return !f->is_friendly && f->action_state == FIGURE_ACTION_150_ATTACK;
-}
-
-static inline int has_fighting_enemy(int grid_offset)
-{
-    if (!(fighting_data.status.items[grid_offset] & 0x40)) {
-        fighting_data.status.items[grid_offset] |= 0x40 | (map_figure_foreach_until(grid_offset, is_fighting_enemy) << 1);
-    }
-    return fighting_data.status.items[grid_offset] & 2;
-}
-
 static int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aqueduct)
 {
     if (is_aqueduct && !map_can_place_aqueduct_on_highway(grid_offset, 0)) {
@@ -809,3 +754,28 @@ static int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aquedu
         return 1;
     }
 }
+
+// Fighting related
+static int is_fighting_friendly(figure * f)
+{
+    return f->is_friendly && f->action_state == FIGURE_ACTION_150_ATTACK;
+}
+static inline int has_fighting_friendly(int grid_offset)
+{
+    if (!(fighting_data.status.items[grid_offset] & 0x80)) {
+        fighting_data.status.items[grid_offset] |= 0x80 | map_figure_foreach_until(grid_offset, is_fighting_friendly);
+    }
+    return fighting_data.status.items[grid_offset] & 1;
+}
+static int is_fighting_enemy(figure * f)
+{
+    return !f->is_friendly && f->action_state == FIGURE_ACTION_150_ATTACK;
+}
+static inline int has_fighting_enemy(int grid_offset)
+{
+    if (!(fighting_data.status.items[grid_offset] & 0x40)) {
+        fighting_data.status.items[grid_offset] |= 0x40 | (map_figure_foreach_until(grid_offset, is_fighting_enemy) << 1);
+    }
+    return fighting_data.status.items[grid_offset] & 2;
+}
+
