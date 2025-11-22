@@ -34,7 +34,7 @@ static struct {
     int next_delay;
 } data;
 
-struct field{
+struct field {
     int x;
     int y;
 };
@@ -123,8 +123,7 @@ static void advance_earthquake_to_tile(int x, int y)
     map_tiles_update_all_highways();
     map_tiles_update_all_plazas();
 
-    map_routing_update_land();
-    map_routing_update_walls();
+    map_routing_update_access();
 
     figure_create_explosion_cloud(x, y, 1, 0);
 }
@@ -136,11 +135,11 @@ static struct field custom_earthquake_find_next_tile(void)
             int grid_offset = map_grid_offset(x, y);
             if (map_property_is_future_earthquake(grid_offset) &&
                 can_advance_earthquake_to_tile(x, y)) {
-                return (struct field){x, y};
+                return (struct field) { x, y };
             }
         }
     }
-    return (struct field){0, 0};
+    return (struct field) { 0, 0 };
 }
 
 static int custom_earthquake_advance_next_tile(void)
@@ -201,7 +200,7 @@ void scenario_earthquake_process(void)
     // Check if earthquake is disabled or not set
     if (scenario.earthquake.severity == EARTHQUAKE_NONE ||
         ((scenario.earthquake_point.x == -1 || scenario.earthquake_point.y == -1) &&
-        scenario.earthquake.severity != EARTHQUAKE_CUSTOM)) {
+            scenario.earthquake.severity != EARTHQUAKE_CUSTOM)) {
         return;
     }
     // --- Custom earthquake ---
@@ -220,8 +219,8 @@ void scenario_earthquake_process(void)
                 custom_delay = 0;
                 // Generate new random delay for next tile
                 data.next_delay = 10 + (random_byte() % (scenario.earthquake.pattern == EARTHQUAKE_PATTERN_RIGHT_LEFT ? 15 : 90) + 1); // 10 to 25 or 100 ticks
-                
-                if (!(scenario.earthquake.pattern == EARTHQUAKE_PATTERN_RIGHT_LEFT ? custom_earthquake_advance_next_tile() : 
+
+                if (!(scenario.earthquake.pattern == EARTHQUAKE_PATTERN_RIGHT_LEFT ? custom_earthquake_advance_next_tile() :
                     custom_earthquake_advance_random_tiles())) { // If no tiles left, finish the event
                     data.state = EVENT_FINISHED;
                 }

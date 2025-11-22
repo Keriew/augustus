@@ -150,7 +150,7 @@ static int get_height_id(void)
         }
 
         switch (b->type) {
-                //256px
+            //256px
             case BUILDING_SMALL_STATUE:
             case BUILDING_MEDIUM_STATUE:
             case BUILDING_LARGE_STATUE:
@@ -405,7 +405,7 @@ static void init(int grid_offset)
             case BUILDING_FORT_ARCHERS:
                 context.formation_id = b->formation_id;
                 break;
-                case BUILDING_WAREHOUSE_SPACE:
+            case BUILDING_WAREHOUSE_SPACE:
             case BUILDING_HIPPODROME:
                 b = building_main(b);
                 context.building_id = b->id;
