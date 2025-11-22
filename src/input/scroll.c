@@ -223,7 +223,7 @@ static int direction_from_sides(int top, int left, int bottom, int right)
         return DIR_BOTTOM;
     }
     // none of them
-    return DIR_8_NONE;
+    return DIR_CENTER;
 }
 
 void scroll_set_custom_margins(int x, int y, int width, int height)
@@ -349,7 +349,7 @@ static int get_direction(const mouse *m, int window_scroll)
         is_inside_window = 1;
     }
     if (!is_inside_window && !m->is_touch) {
-        return DIR_8_NONE;
+        return DIR_CENTER;
     }
     int top = 0;
     int bottom = 0;
@@ -436,7 +436,7 @@ static int set_scroll_speed_from_input(const mouse *m, scroll_type type)
         return 1;
     }
     int direction = get_direction(m, 1);
-    if (direction == DIR_8_NONE) {
+    if (direction == DIR_CENTER) {
         time_millis time = config_get(CONFIG_UI_SMOOTH_SCROLLING) ? SCROLL_REGULAR_DECAY_TIME : SPEED_CHANGE_IMMEDIATE;
         speed_set_target(&data.speed.x, 0, time, 1);
         speed_set_target(&data.speed.y, 0, time, 1);
@@ -491,7 +491,7 @@ static int set_scroll_speed_from_input(const mouse *m, scroll_type type)
 int scroll_for_menu(const mouse *m)
 {
     if (!should_scroll()) {
-        return DIR_8_NONE;
+        return DIR_CENTER;
     }
     return get_direction(m, 0);
 }

@@ -57,7 +57,7 @@ static int place_routed_building(int x_start, int y_start, int x_end, int y_end,
                 break;
         }
         int direction = calc_general_direction(x_end, y_end, x_start, y_start);
-        if (direction == DIR_8_NONE) {
+        if (direction == DIR_CENTER) {
             return 1; // destination reached
         }
         int routed = 0;

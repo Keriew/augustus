@@ -9,6 +9,7 @@
 #include "map/grid.h"
 #include "map/road_aqueduct.h"
 #include "map/routing_data.h"
+#include "map/routing.h"
 #include "map/terrain.h"
 #include "map/tiles.h"
 #include <stdlib.h>

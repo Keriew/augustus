@@ -251,7 +251,7 @@ static void update_image_legionary(figure *f, const formation *m, int dir)
         int missile_offset = figure_image_missile_launcher_offset(f);
         if (m->is_halted && m->layout == FORMATION_COLUMN && m->missile_attack_timeout) {
             f->image_id = image_id + dir + 144;
-        } else if (legionary_can_throw_javelin(f) && missile_offset >= 0 && dir < DIR_8_NONE) {
+        } else if (legionary_can_throw_javelin(f) && missile_offset >= 0 && dir < DIR_CENTER) {
             f->image_id = assets_get_image_id("Warriors", "legionary_fr_ne_01") + dir * 5 + missile_offset;
         } else {
             f->image_id = image_id + dir;

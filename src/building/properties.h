@@ -1,10 +1,6 @@
 #ifndef BUILDING_PROPERTIES_H
 
 #define BUILDING_PROPERTIES_H
-#define PALISADE_HP   60
-#define BUILDING_HP   10
-#define WALL_HP      200
-#define GATEHOUSE_HP 150
 
 #include "building/type.h"
 #include "city/resource.h"

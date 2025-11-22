@@ -10,6 +10,7 @@
 #include "map/property.h"
 #include "map/random.h"
 #include "map/routing_data.h"
+#include "map/routing.h"
 #include "map/sprite.h"
 #include "map/terrain.h"
 

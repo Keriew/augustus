@@ -298,7 +298,7 @@ void city_view_get_camera_absolute(int *x_abs, int *y_abs)
     int x_center = data.camera.tile.x + x_offset;
     int y_center = data.camera.tile.y + y_offset;
     int x_center_abs, y_center_abs;
-    int to_rotate = (DIR_8_NONE - data.orientation) % DIR_8_NONE;
+    int to_rotate = (DIR_CENTER - data.orientation) % DIR_CENTER;
     adjust_for_orientation(x_center, y_center, to_rotate, &x_center_abs, &y_center_abs);
     *x_abs = x_center_abs - x_offset;
     *y_abs = y_center_abs - y_offset;

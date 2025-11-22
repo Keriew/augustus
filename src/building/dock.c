@@ -14,7 +14,7 @@
 #include "map/figure.h"
 #include "map/grid.h"
 #include "map/routing.h"
-#include "map/routing_data.h"
+#include "map/routing_terrain.h"
 #include "map/terrain.h"
 #include "scenario/map.h"
 

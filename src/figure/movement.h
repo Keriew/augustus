@@ -6,6 +6,14 @@
 #define FIGURE_TYPE_COUNT (FIGURE_LAST_DEFINED_TYPE + 1)
 #define FIGURE_REROUTE_DESTINATION_TICKS 120
 
+// Building HP
+#define BUILDING_HP_TERRAIN_MOD 0
+#define BUILDING_HP_CLEARABLE    1
+#define BUILDING_HP_DEFAULT      10
+#define BUILDING_HP_PALISADE     60
+#define BUILDING_HP_WALL         200
+#define BUILDING_HP_GATEHOUSE    150
+
 // Public functions
 void figure_movement_path(figure *f, int speed);
 

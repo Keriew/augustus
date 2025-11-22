@@ -221,7 +221,7 @@ int formation_update_halted_state(formation *m)
         int figure_id = m->figures[i];
         if (figure_id) {
             const figure *f = figure_get(figure_id);
-            if (f->direction != DIR_8_NONE) {
+            if (f->direction != DIR_CENTER) {
                 all_figures_idle = 0;
                 break;
             }

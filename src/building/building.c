@@ -1060,19 +1060,3 @@ void building_load_state(buffer *buf, buffer *sequence, buffer *corrupt_houses, 
     extra.incorrect_houses = buffer_read_i32(corrupt_houses);
     extra.unfixable_houses = buffer_read_i32(corrupt_houses);
 }
-
-// Determines the HP of a destroyable building
-static int get_obstacle_hp(building_type type)
-{
-    switch (type) {
-        case BUILDING_PALISADE:
-        case BUILDING_PALISADE_GATE:
-            return PALISADE_HP;
-        case BUILDING_WALL:
-            return WALL_HP;
-        case BUILDING_GATEHOUSE:
-            return GATEHOUSE_HP;
-        default:
-            return BUILDING_HP;
-    }
-}

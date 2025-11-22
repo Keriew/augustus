@@ -30,6 +30,7 @@
 #include "map/orientation.h"
 #include "map/routing.h"
 #include "map/routing_terrain.h"
+#include "map/road_aqueduct.h"
 #include "map/terrain.h"
 #include "map/tiles.h"
 #include "map/water.h"
@@ -645,6 +646,9 @@ int building_construction_place_building(building_type type, int x, int y, int e
     add_to_map(type, b, size, building_orientation, waterside_orientation_abs);
     return 1;
 }
+
+
+
 
 int can_build_highway(int next_offset, int check_highway_routing)
 {

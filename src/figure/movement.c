@@ -160,23 +160,34 @@ static int is_roaming_blocked_by_building(figure *f, int target_position, int af
 
     return 0; // Not blocked
 }
-
-// Determine how the building reacts to damage
-static int determine_destroyable_type(int grid_offset)
+// Determines the HP of a building
+static int get_obstacle_hp(target_position)
 {
-    // Check the terrain access grid to see what's there
-    switch (terrain_access.items[grid_offset]) {
-        case TERRAIN_ACCESS_BUILDING:
-            return DESTROYABLE_BUILDING;
-        case NONCITIZEN_2_CLEARABLE: // Aqueducts, Gardens, etc.
-            return DESTROYABLE_AQUEDUCT_GARDEN;
-        case NONCITIZEN_3_WALL:
-            return DESTROYABLE_WALL;
-        case TERRAIN_ACCESS_GATEHOUSE:
-            return DESTROYABLE_GATEHOUSE;
-        default:
-            return DESTROYABLE_NONE;
-    }
+    // Unless you change it, all this stuff will be in the terrain_citizen memory or whatever it's called
+    type = terrain_access.items[target_position]
+        switch (type) {
+            case TERRAIN_RUBBLE:
+            case TERRAIN_ACCESS_RAMP:
+                return BUILDING_HP_TERRAIN_MOD
+            case BUILDING_AQUEDUCT:
+            case BUILDING_GARDENS:
+            case BUILDING_OVERGROWN_GARDENS:
+            case BUILDING_ROOFED_GARDEN_WALL_GATE:
+            case BUILDING_LOOPED_GARDEN_GATE:
+            case BUILDING_PANELLED_GARDEN_GATE:
+            case BUILDING_HEDGE_GATE_DARK:
+            case BUILDING_HEDGE_GATE_LIGHT:
+                return BUILDING_HP_CLEARABLE
+            case BUILDING_PALISADE:
+            case BUILDING_PALISADE_GATE:
+                return BUILDING_HP_PALISADE;
+            case BUILDING_WALL:
+                return BUILDING_HP_WALL;
+            case BUILDING_GATEHOUSE:
+                return BUILDING_HP_GATEHOUSE;
+            default:
+                return BUILDING_HP_DEFAULT;
+        }
 }
 // Handles enemy interaction with obstacles
 static void attempt_obstacle_destruction(figure *f, int target_position)
@@ -187,9 +198,9 @@ static void attempt_obstacle_destruction(figure *f, int target_position)
     }
 
     // 2. Determine the type of the obstacle
-    int type = determine_destroyable_type(target_position);
-    if (type == DESTROYABLE_NONE) {
-        return;
+    int hp = get_obstacle_hp(target_position);
+    if (hp == 0) {
+        return; // Cannot be destroyed (e.g rubble, access ramp)
     }
 
     // 3. Calculate Max HP (Damage cap)

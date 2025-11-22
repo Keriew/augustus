@@ -71,7 +71,7 @@ static int get_roaming_destination(formation *m, int distance, int *x_tile, int 
     int direction = m->herd_direction;
     int allow_negative_desirability = m->figure_type == FIGURE_WOLF;
     int target_direction = (formation_id + random_byte()) & 7;
-    if (direction >= DIR_TOP && direction < DIR_8_NONE) {
+    if (direction >= DIR_TOP && direction < DIR_CENTER) {
         target_direction = direction;
         allow_negative_desirability = 1;
     }
@@ -233,7 +233,7 @@ static void update_herd_formation(formation *m, int infinite_wolves_spawning)
         } else {
             int x_tile, y_tile;
             if (get_roaming_destination(m, roam_distance, &x_tile, &y_tile)) {
-                m->herd_direction = DIR_8_NONE;
+                m->herd_direction = DIR_CENTER;
                 if (formation_enemy_move_formation_to(m, x_tile, y_tile, &x_tile, &y_tile)) {
                     formation_set_destination(m, x_tile, y_tile);
                     if (m->figure_type == FIGURE_WOLF && city_sound_update_march_wolf()) {
