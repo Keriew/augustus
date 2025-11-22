@@ -18,6 +18,9 @@
 #define MAX_CONCURRENT_ROUTES 32
 #define BASE_TERRAIN_COST(x) ((int)(x))
 
+// From routing_data.c
+grid_i8 terrain_type
+
 // Routing Context
 typedef struct {
     // Core Pathfinding Data
