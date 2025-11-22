@@ -161,43 +161,79 @@ static int is_roaming_blocked_by_building(figure *f, int target_position, int af
     return 0; // Not blocked
 }
 
+// Determine how the building reacts to damage
+static int determine_destroyable_type(int grid_offset)
+{
+    // Check the terrain access grid to see what's there
+    switch (terrain_access.items[grid_offset]) {
+        case TERRAIN_ACCESS_BUILDING:
+            return DESTROYABLE_BUILDING;
+        case NONCITIZEN_2_CLEARABLE: // Aqueducts, Gardens, etc.
+            return DESTROYABLE_AQUEDUCT_GARDEN;
+        case NONCITIZEN_3_WALL:
+            return DESTROYABLE_WALL;
+        case TERRAIN_ACCESS_GATEHOUSE:
+            return DESTROYABLE_GATEHOUSE;
+        default:
+            return DESTROYABLE_NONE;
+    }
+}
 // Handles enemy interaction with obstacles
 static void attempt_obstacle_destruction(figure *f, int target_position)
 {
+    // 1. Early Exit: Is there anything to destroy?
     if (!map_routing_is_destroyable(target_position)) {
         return;
     }
 
-    int max_damage = 0;
-    int cause_damage = 1;
-    int destroyable_type = map_routing_get_destroyable(target_position);
-
-    // 1. Calculate Max Damage based on type
-    if (destroyable_type == DESTROYABLE_BUILDING) {
-        building *b = building_get(map_building_at(target_position));
-        max_damage = get_obstacle_hp(b->type);
-    } else if (destroyable_type == DESTROYABLE_AQUEDUCT_GARDEN) {
-        if (map_terrain_is(target_position, TERRAIN_ACCESS_RAMP | TERRAIN_RUBBLE)) {
-            cause_damage = 0;
-        } else {
-            max_damage = BUILDING_HP;
-        }
-    } else if (destroyable_type == DESTROYABLE_WALL) {
-        max_damage = WALL_HP;
-    } else if (destroyable_type == DESTROYABLE_GATEHOUSE) {
-        max_damage = GATEHOUSE_HP;
+    // 2. Determine the type of the obstacle
+    int type = determine_destroyable_type(target_position);
+    if (type == DESTROYABLE_NONE) {
+        return;
     }
 
-    // 2. Apply Attack
-    if (cause_damage && max_damage > 0) {
+    // 3. Calculate Max HP (Damage cap)
+    int max_damage = 0;
+
+    switch (type) {
+        case DESTROYABLE_BUILDING:
+        {
+            building *b = building_get(map_building_at(target_position));
+            if (b) {
+                max_damage = get_obstacle_hp(b->type);
+            }
+            break;
+        }
+        case DESTROYABLE_AQUEDUCT_GARDEN:
+            // Special Check: Enemies cannot "destroy" rubble or ramps, only clear structures
+            if (map_terrain_is(target_position, TERRAIN_ACCESS_RAMP | TERRAIN_RUBBLE)) {
+                return; // Cannot damage this
+            }
+            max_damage = BUILDING_HP;
+            break;
+
+        case DESTROYABLE_WALL:
+            max_damage = WALL_HP;
+            break;
+
+        case DESTROYABLE_GATEHOUSE:
+            max_damage = GATEHOUSE_HP;
+            break;
+    }
+
+    // 4. Apply Attack Animation and Damage
+    if (max_damage > 0) {
+        // Store the direction we were facing before playing attack animation
         f->attack_direction = f->direction;
-        f->direction = DIR_FIGURE_ATTACK;
-        // Apply damage on specific ticks (bitmask 3 checks every 4th tick)
+        f->direction = DIR_FIGURE_ATTACK; // Switch sprite to attack animation
+
+        // Apply damage on specific ticks (bitmask 3 = every 4th tick)
         if (!(game_time_tick() & 3)) {
             building_destroy_increase_enemy_damage(target_position, max_damage);
         }
     }
 }
+
 // Updates the figure coordinates given their new direction
 static void update_figure_coordinates(figure *f)
 {
@@ -286,7 +322,7 @@ static void check_collision(figure *f, int roaming_enabled, int target_position,
 
     // CASE B: BOAT
     if (f->is_boat) {
-        if (!map_terrain_is(target_position, TERRAIN_WATER)) {
+        if (!map_terrain_is(target_position, terrain_access)) {
             f->direction DIR_FIGURE_REROUTE; // Target is not water, reroute
         }
         return; // No further calculations for boats

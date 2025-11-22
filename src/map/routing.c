@@ -433,41 +433,41 @@ void route_queue_all_from(RoutingContext *ctx, int source, const TravelRules *ru
 static inline int check_citizen_passability(RoutingContext *ctx, int next_offset)
 {
     // Common 
-    switch (terrain_land_citizen.items[next_offset]) {
-        case CITIZEN_0_ROAD:
+    switch (terrain_access.items[next_offset]) {
+        case TERRAIN_ACCESS_ROAD:
             if (!rules->travel_roads) return -1;
             break;
-        case CITIZEN_1_HIGHWAY:
+        case TERRAIN_ACCESS_HIGHWAY:
             if (!rules->travel_highways) return -1;
             break;
-        case CITIZEN_2_PASSABLE_TERRAIN:
+        case TERRAIN_ACCESS_PASSABLE:
             if (!rules->travel_gardens) return -1;
             break;
-        case CITIZEN_4_CLEAR_TERRAIN:
+        case TERRAIN_ACCESS_EMPTY:
             if (!rules->travel_land) return -1;
             break;
-        case CITIZEN_N1_BLOCKED:
+        case TERRAIN_ACCESS_BLOCKED:
             if (!rules->travel_blocked) return -1; // Nobody allowed
             break;
-        case CITIZEN_N3_AQUEDUCT:
+        case TERRAIN_ACCESS_AQUEDUCT:
             if (!rules->travel_aqueduct) return -1; // Nobody allowed
             break;
-        case CITIZEN_N4_RESERVOIR_CONNECTOR:
+        case TERRAIN_ACCESS_RESERVOIR_CONNECTOR:
             if (!rules->travel_reservoir_connector) return -1; // Nobody allowed
             break;
     }
     // Walls
     switch (terrain_wall.items[next_offset]) {
-        case WALL_0_PASSABLE:
+        case TERRAIN_ACCESS_WALL_PASSABLE:
             if (!rules->is_tower_sentry) {
                 return -1;
             }
 
-        case WALL_N1_BLOCKED:
+        case TERRAIN_ACCESS_WALL_BLOCKED:
             return -1;
     }
     // Base Cost (if valid)
-    base_cost = BASE_TERRAIN_COST(terrain_land_citizen.items[next_offset]);
+    base_cost = BASE_TERRAIN_COST(terrain_access.items[next_offset]);
     base_cost = BASE_TERRAIN_COST(terrain_wall.items[next_offset]);
 }
 
@@ -516,14 +516,16 @@ int direction_index, const TravelRules *rules, int *out_cost)
     // Noncitizen (traders, enemies, etc.)
     if (rules->is_noncitizen) {
         // Friendly noncitizens may pass through all terrain except fort and blocked
-        switch (terrain_land_noncitizen.items[next_offset]) {
+        switch (terrain_access.items[next_offset]) {
             // --- Strictly passable/attackable terrain --- ///
-            case NONCITIZEN_0_PASSABLE:
+            case TERRAIN_ACCESS_PASSABLE:
             case NONCITIZEN_2_CLEARABLE:
-            case NONCITIZEN_3_WALL:
-            case NONCITIZEN_4_GATEHOUSE:
+            case TERRAIN_ACCESS_AQUEDUCT:
+            case TERRAIN_ACCESS_WALL_PASSABLE:
+            case TERRAIN_ACCESS_WALL_BLOCKED:
+            case TERRAIN_ACCESS_GATEHOUSE:
                 break;
-            case NONCITIZEN_1_BUILDING:
+            case TERRAIN_ACCESS_BUILDING:
                 // Friendlies can pass through fine
                 if (rules->is_friendly) { break; }
                 // If your enemies can't pass through or attack, return
@@ -531,13 +533,13 @@ int direction_index, const TravelRules *rules, int *out_cost)
                 if (map_building_id != ctx->through_building_id && map_building_id != ctx->target_building_id) {
                     return 0;
                 }
-            case NONCITIZEN_5_FORT:
+            case TERRAIN_ACCESS_FORT:
                 if (rules->is_friendly) { return 0 }; // Friendlies can't travel through forts
-            case NONCITIZEN_N1_BLOCKED:
-                return 0; // May never pass through blocked terrain
+            case TERRAIN_ACCESS_BLOCKED:
+                return 0; // May never pass through impassable terrain
         }
         // Base Cost
-        base_cost = BASE_TERRAIN_COST(terrain_land_noncitizen.items[next_offset]);
+        base_cost = BASE_TERRAIN_COST(terrain_access.items[next_offset]);
     }
 
     // Boats
@@ -545,18 +547,18 @@ int direction_index, const TravelRules *rules, int *out_cost)
         // Passability Check
         // Next position must be water AND must not be blocked (low bridge or explicit block).
         if (!map_terrain_is_water(next_offset) ||
-            terrain_water.items[next_offset] == WATER_N1_BLOCKED ||
-            terrain_water.items[next_offset] == WATER_N3_LOW_BRIDGE) {
+            terrain_access.items[next_offset] == TERRAIN_ACCESS_WATER_BLOCKED ||
+            terrain_access.items[next_offset] == TERRAIN_ACCESS_WATER_LOW_BRIDGE) {
             return 0;
         }
 
         // Base Cost
-        base_cost = BASE_TERRAIN_COST(terrain_water.items[next_offset]);
+        base_cost = BASE_TERRAIN_COST(terrain_access.items[next_offset]);
 
         // Water drag (in the form of a cost multiplier for simplicity)
         cost_multiplier = 3;
         // Discourages boats from sailing across the map's edge
-        if (terrain_water.items[next_offset] == WATER_N2_MAP_EDGE) {
+        if (terrain_access.items[next_offset] == TERRAIN_ACCESS_WATER_EDGE) {
             cost_multiplier += 12;
         }
     }
@@ -578,7 +580,7 @@ int direction_index, const TravelRules *rules, int *out_cost)
     // Flotsam
     if (rules->is_flotsam) {
         // Next position must be water and not blocked
-        if (map_terrain_is_water(next_offset) && terrain_water.items[next_offset] != = WATER_N1_BLOCKED) {
+        if (map_terrain_is_water(next_offset) && terrain_access.items[next_offset] != = TERRAIN_ACCESS_WATER_BLOCKED) {
             return 1;
         }
         return 0;
@@ -587,11 +589,11 @@ int direction_index, const TravelRules *rules, int *out_cost)
     // --- BUILDINGS --- (drag build)
     // Road
     if (rules->is_road) {
-        switch (terrain_land_citizen.items[next_offset]) {
-            case CITIZEN_2_PASSABLE_TERRAIN: // rubble, garden, access ramp
-            case CITIZEN_N1_BLOCKED: // non-empty land
+        switch (terrain_access.items[next_offset]) {
+            case TERRAIN_ACCESS_PASSABLE: // rubble, garden, access ramp
+            case TERRAIN_ACCESS_BLOCKED: // non-empty land
                 return 0;
-            case CITIZEN_N3_AQUEDUCT:
+            case TERRAIN_ACCESS_AQUEDUCT:
                 if (!map_can_place_road_under_aqueduct(next_offset)) {
                     distance.determined.items[next_offset] = -1;
                     return 0;
@@ -625,15 +627,15 @@ int direction_index, const TravelRules *rules, int *out_cost)
             return 0;
         }
         // Check for other invalid terrain
-        switch (terrain_land_citizen.items[next_offset]) {
-            case CITIZEN_N3_AQUEDUCT:
-            case CITIZEN_2_PASSABLE_TERRAIN: // rubble, garden, access ramp
-            case CITIZEN_N1_BLOCKED: // non-empty land
+        switch (terrain_access.items[next_offset]) {
+            case TERRAIN_ACCESS_AQUEDUCT:
+            case TERRAIN_ACCESS_PASSABLE: // rubble, garden, access ramp
+            case TERRAIN_ACCESS_BLOCKED: // non-empty land
                 return 0;
         }
         // Check if the terrain is a building, in which case only reservoir connectors are allowed
         if (map_terrain_is(next_offset, TERRAIN_BUILDING)) {
-            if (terrain_land_citizen.items[next_offset] != CITIZEN_N4_RESERVOIR_CONNECTOR) {
+            if (terrain_access.items[next_offset] != TERRAIN_ACCESS_RESERVOIR_CONNECTOR) {
                 return 0;
             }
         }
@@ -642,7 +644,7 @@ int direction_index, const TravelRules *rules, int *out_cost)
     // Wall
     if (rules->is_wall) {
         // Next position must be clear terrain
-        if (terrain_land_citizen.items[next_offset] == CITIZEN_4_CLEAR_TERRAIN) {
+        if (terrain_access.items[next_offset] == TERRAIN_ACCESS_EMPTY) {
             return 1;
         }
         return 0;
