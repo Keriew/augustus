@@ -368,11 +368,11 @@ void figure_soldier_action(figure *f)
     int speed_factor;
     int speed_factor_percentage = soldier_percentage_speed(f->type);
     if (f->type == FIGURE_FORT_MOUNTED) {
-        speed_factor = 3;
+        speed_factor = 300;
     } else if (f->type == FIGURE_FORT_JAVELIN) {
-        speed_factor = 2;
+        speed_factor = 200;
     } else {
-        speed_factor = 1;
+        speed_factor = 100;
     }
     int layout = m->layout;
     if (f->formation_at_rest || f->action_state == FIGURE_ACTION_81_SOLDIER_GOING_TO_FORT) {
@@ -405,7 +405,7 @@ void figure_soldier_action(figure *f)
             f->destination_x = f->formation_position_x.soldier;
             f->destination_y = f->formation_position_y.soldier;
             f->destination_grid_offset = map_grid_offset(f->destination_x, f->destination_y);
-            figure_movement_path(f, speed_factor + speed_factor_percentage / 100);
+            figure_movement_path(f, speed_factor + speed_factor_percentage);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_80_SOLDIER_AT_REST;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
@@ -418,7 +418,7 @@ void figure_soldier_action(figure *f)
             f->formation_at_rest = 1;
             f->destination_x = f->source_x;
             f->destination_y = f->source_y;
-            figure_movement_path(f, speed_factor + speed_factor_percentage / 100);
+            figure_movement_path(f, speed_factor + speed_factor_percentage);
             if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                 f->state = FIGURE_STATE_DEAD;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
@@ -435,7 +435,7 @@ void figure_soldier_action(figure *f)
                 f->destination_y += ALTERNATIVE_POINTS[f->alternative_location_index].y;
             }
             f->destination_grid_offset = map_grid_offset(f->destination_x, f->destination_y);
-            figure_movement_path(f, speed_factor + speed_factor_percentage / 100);
+            figure_movement_path(f, speed_factor + speed_factor_percentage);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_84_SOLDIER_AT_STANDARD;
                 f->image_offset = 0;
@@ -483,7 +483,7 @@ void figure_soldier_action(figure *f)
         case FIGURE_ACTION_85_SOLDIER_GOING_TO_MILITARY_ACADEMY:
             m->has_military_training = 1;
             f->formation_at_rest = 1;
-            figure_movement_path(f, speed_factor + speed_factor_percentage / 100);
+            figure_movement_path(f, speed_factor + speed_factor_percentage);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_81_SOLDIER_GOING_TO_FORT;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
@@ -495,7 +495,7 @@ void figure_soldier_action(figure *f)
         case FIGURE_ACTION_86_SOLDIER_MOPPING_UP:
             f->formation_at_rest = 0;
             if (find_mop_up_target(f)) {
-                figure_movement_path(f, speed_factor + speed_factor_percentage / 100);
+                figure_movement_path(f, speed_factor + speed_factor_percentage);
                 if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                     figure *target = figure_get(f->target_figure_id);
                     f->destination_x = target->x;
@@ -514,7 +514,7 @@ void figure_soldier_action(figure *f)
             f->formation_at_rest = 0;
             f->destination_x = exit->x;
             f->destination_y = exit->y;
-            figure_movement_path(f, speed_factor + speed_factor_percentage / 100);
+            figure_movement_path(f, speed_factor + speed_factor_percentage);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_89_SOLDIER_AT_DISTANT_BATTLE;
                 figure_route_remove(f);
@@ -532,7 +532,7 @@ void figure_soldier_action(figure *f)
             f->destination_x = f->formation_position_x.soldier;
             f->destination_y = f->formation_position_y.soldier;
             f->destination_grid_offset = map_grid_offset(f->destination_x, f->destination_y);
-            figure_movement_path(f, speed_factor + speed_factor_percentage / 100);
+            figure_movement_path(f, speed_factor + speed_factor_percentage);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_80_SOLDIER_AT_REST;
             } else if (f->direction == DIR_FIGURE_REROUTE) {

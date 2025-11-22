@@ -289,7 +289,7 @@ void figure_roamer_preview_create(building_type b_type, int x, int y)
                 data.travelled_tiles.items[roamer.grid_offset]++;
             }
             roamer.progress_on_tile = 15;
-            figure_movement_path(&roamer, 1);
+            figure_movement_path(&roamer, 100);
         }
         figure_route_remove(&roamer);
         if (roamer.direction == DIR_FIGURE_AT_DESTINATION) {

@@ -237,7 +237,7 @@ void figure_enemy43_spear_action(figure *f)
     formation *m = formation_get(f->formation_id);
     figure_image_increase_offset(f, 12);
     f->cart_image_id = 0;
-    f->speed_multiplier = 1;
+    f->speed_multiplier = 100;
     enemy_action(f, m);
 
     int dir = get_missile_direction(f, m);
@@ -616,7 +616,7 @@ void figure_enemy_gladiator_action(figure *f)
         case FIGURE_ACTION_159_NATIVE_ATTACKING:
             city_figures_set_gladiator_revolt();
             f->terrain_usage = TERRAIN_USAGE_ENEMY;
-            figure_movement_path(f, 1);
+            figure_movement_path(f, 100);
             if (f->direction == DIR_FIGURE_AT_DESTINATION ||
                 f->direction == DIR_FIGURE_REROUTE ||
                 f->direction == DIR_FIGURE_LOST) {

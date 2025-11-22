@@ -328,7 +328,7 @@ void figure_entertainer_action(figure *f)
             return;
         }
     }
-    int speed_factor = f->type == FIGURE_CHARIOTEER ? 2 : 1;
+    int speed_factor = f->type == FIGURE_CHARIOTEER ? 200 : 100;
     switch (f->action_state) {
         case FIGURE_ACTION_150_ATTACK:
             figure_combat_handle_attack(f);
@@ -429,7 +429,7 @@ void figure_entertainer_action(figure *f)
                 !fight_enemy(f)) {
                 f->state = FIGURE_STATE_DEAD;
             }
-            figure_movement_path(f, 1 + 0.50);
+            figure_movement_path(f, 150);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 figure *target = figure_get(f->target_figure_id);
                 f->destination_x = target->x;
@@ -489,7 +489,7 @@ void figure_tourist_action(figure *f)
 
         case FIGURE_ACTION_219_TOURIST_GOING_TO_VENUE:
             f->is_ghost = 0;
-            figure_movement_path(f, 1);
+            figure_movement_path(f, 100);
             for (int i = 0; i < 12; ++i) {
                 if (f->tourist.visited_building_type_ids[i]) {
                     f->tourist.ticks_since_last_visited_id[i]++;

@@ -150,7 +150,7 @@ void figure_workcamp_worker_action(figure *f)
                 f->state = FIGURE_STATE_DEAD;
                 break;
             }
-            figure_movement_path(f, 1);
+            figure_movement_path(f, 100);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 building_monument_remove_delivery(f->id);
                 warehouse_id = f->destination_building_id;
@@ -180,7 +180,7 @@ void figure_workcamp_worker_action(figure *f)
                 f->state = FIGURE_STATE_DEAD;
                 break;
             }
-            figure_movement_path(f, 1);
+            figure_movement_path(f, 100);
             if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                 f->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
                 f->action_state = FIGURE_ACTION_216_WORK_CAMP_WORKER_ENTERING_MONUMENT;
@@ -264,7 +264,7 @@ void figure_workcamp_slave_action(figure *f)
                 f->state = FIGURE_STATE_DEAD;
                 break;
             }
-            figure_movement_path(f, 1);
+            figure_movement_path(f, 100);
             if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                 f->action_state = FIGURE_ACTION_211_WORK_CAMP_SLAVE_DELIVERING_RESOURCES;
                 building *monument = building_get(f->destination_building_id);
@@ -366,7 +366,7 @@ void figure_workcamp_architect_action(figure *f)
                 f->state = FIGURE_STATE_DEAD;
                 break;
             }
-            figure_movement_path(f, 1);
+            figure_movement_path(f, 100);
             monument = building_get(f->destination_building_id);
             if (monument->state == BUILDING_STATE_UNUSED || !building_monument_access_point(monument, &dst) ||
                 b->monument.phase == MONUMENT_FINISHED) {

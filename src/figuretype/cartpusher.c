@@ -387,7 +387,7 @@ void figure_cartpusher_action(figure *f)
             break;
         case FIGURE_ACTION_21_CARTPUSHER_DELIVERING_TO_WAREHOUSE:
             set_cart_graphic(f, 1);
-            figure_movement_path(f, 1 + percentage_speed);
+            figure_movement_path(f, 100 + percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_24_CARTPUSHER_AT_WAREHOUSE;
                 f->wait_ticks = 0;
@@ -407,7 +407,7 @@ void figure_cartpusher_action(figure *f)
             break;
         case FIGURE_ACTION_22_CARTPUSHER_DELIVERING_TO_GRANARY:
             set_cart_graphic(f, 1);
-            figure_movement_path(f, 1 + percentage_speed);
+            figure_movement_path(f, 100 + percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_25_CARTPUSHER_AT_GRANARY;
                 f->wait_ticks = 0;
@@ -428,7 +428,7 @@ void figure_cartpusher_action(figure *f)
             break;
         case FIGURE_ACTION_23_CARTPUSHER_DELIVERING_TO_WORKSHOP:
             set_cart_graphic(f, 1);
-            figure_movement_path(f, 1 + percentage_speed);
+            figure_movement_path(f, 100 + percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_26_CARTPUSHER_AT_WORKSHOP;
                 f->wait_ticks = 0;
@@ -447,7 +447,7 @@ void figure_cartpusher_action(figure *f)
                 f->wait_ticks = 0;
             }
             set_cart_graphic(f, 1);
-            figure_movement_path(f, 1 + percentage_speed);
+            figure_movement_path(f, 100 + percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_247_CARTPUSHER_AT_MONUMENT;
                 f->wait_ticks = 0;
@@ -525,7 +525,7 @@ void figure_cartpusher_action(figure *f)
             break;
         case FIGURE_ACTION_27_CARTPUSHER_RETURNING:
             f->cart_image_id = image_group(GROUP_FIGURE_CARTPUSHER_CART);
-            figure_movement_path(f, 1 + percentage_speed);
+            figure_movement_path(f, 100 + percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_20_CARTPUSHER_INITIAL;
                 f->state = FIGURE_STATE_DEAD;
@@ -545,7 +545,7 @@ void figure_cartpusher_action(figure *f)
         case FIGURE_ACTION_235_CARTPUSHER_GOING_TO_ROME:
             set_cart_graphic(f, 0);
             f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS_HIGHWAY;
-            figure_movement_path(f, 1 + percentage_speed);
+            figure_movement_path(f, 100 + percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                 f->state = FIGURE_STATE_DEAD;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
@@ -832,7 +832,7 @@ void figure_warehouseman_action(figure *f)
         }
         case FIGURE_ACTION_51_WAREHOUSEMAN_DELIVERING_RESOURCE:
             set_cart_graphic(f, 1);
-            figure_movement_path(f, 1 + percentage_speed);
+            figure_movement_path(f, 100 + percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_52_WAREHOUSEMAN_AT_DELIVERY_BUILDING;
                 f->wait_ticks = 0;
@@ -884,7 +884,7 @@ void figure_warehouseman_action(figure *f)
             break;
         case FIGURE_ACTION_53_WAREHOUSEMAN_RETURNING_EMPTY:
             f->cart_image_id = image_group(GROUP_FIGURE_CARTPUSHER_CART); // empty
-            figure_movement_path(f, 1 + percentage_speed);
+            figure_movement_path(f, 100 + percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                 f->state = FIGURE_STATE_DEAD;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
@@ -896,7 +896,7 @@ void figure_warehouseman_action(figure *f)
                 f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS_HIGHWAY;
             }
             f->cart_image_id = image_group(GROUP_FIGURE_CARTPUSHER_CART); // empty
-            figure_movement_path(f, 1 + percentage_speed);
+            figure_movement_path(f, 100 + percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_55_WAREHOUSEMAN_AT_GRANARY;
                 f->wait_ticks = 0;
@@ -935,7 +935,7 @@ void figure_warehouseman_action(figure *f)
             }
             // update graphic
             set_cart_graphic(f, 0);
-            figure_movement_path(f, 1 + percentage_speed);
+            figure_movement_path(f, 100 + percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 int delivered_loads = building_granary_try_add_resource(
                     building_get(f->building_id), f->resource_id, f->loads_sold_or_carrying, 0, 1);
@@ -950,7 +950,7 @@ void figure_warehouseman_action(figure *f)
         case FIGURE_ACTION_57_WAREHOUSEMAN_GETTING_RESOURCE:
             f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS_HIGHWAY;
             f->cart_image_id = image_group(GROUP_FIGURE_CARTPUSHER_CART); // empty
-            figure_movement_path(f, 1 + percentage_speed);
+            figure_movement_path(f, 100 + percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_58_WAREHOUSEMAN_AT_WAREHOUSE;
                 f->wait_ticks = 0;
@@ -986,7 +986,7 @@ void figure_warehouseman_action(figure *f)
         case FIGURE_ACTION_59_WAREHOUSEMAN_RETURNING_WITH_RESOURCE:
             f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS_HIGHWAY;
             set_cart_graphic(f, 0);
-            figure_movement_path(f, 1 + percentage_speed);
+            figure_movement_path(f, 100 + percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 building_warehouse_try_add_resource(building_get(f->building_id),
                     f->resource_id, f->loads_sold_or_carrying, 1);
@@ -999,7 +999,7 @@ void figure_warehouseman_action(figure *f)
             break;
         case FIGURE_ACTION_248_ARMOURY_SUPPLIER_GETTING_WEAPONS:
             f->cart_image_id = image_group(GROUP_FIGURE_CARTPUSHER_CART); // empty
-            figure_movement_path(f, 1 + percentage_speed);
+            figure_movement_path(f, 100 + percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_249_ARMOURY_SUPPLIER_AT_WAREHOUSE;
                 f->wait_ticks = 0;
