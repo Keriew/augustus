@@ -390,7 +390,7 @@ static int get_gatehouse_building_id(int grid_offset)
 static int get_gatehouse_position(int grid_offset, int direction, unsigned int building_id)
 {
     int result = 0;
-    if (direction == DIR_0_TOP) {
+    if (direction == DIR_TOP) {
         if (map_terrain_is(grid_offset + map_grid_delta(1, -1), TERRAIN_GATEHOUSE) &&
             map_building_at(grid_offset + map_grid_delta(1, -1)) == building_id) {
             result = 1;
@@ -424,7 +424,7 @@ static int get_gatehouse_position(int grid_offset, int direction, unsigned int b
                 result = 0;
             }
         }
-    } else if (direction == DIR_6_LEFT) {
+    } else if (direction == DIR_LEFT) {
         if (map_terrain_is(grid_offset + map_grid_delta(-1, 1), TERRAIN_GATEHOUSE) &&
             map_building_at(grid_offset + map_grid_delta(-1, 1)) == building_id) {
             result = 1;
@@ -458,7 +458,7 @@ static int get_gatehouse_position(int grid_offset, int direction, unsigned int b
                 result = 0;
             }
         }
-    } else if (direction == DIR_4_BOTTOM) {
+    } else if (direction == DIR_BOTTOM) {
         if (map_terrain_is(grid_offset + map_grid_delta(1, 1), TERRAIN_GATEHOUSE) &&
             map_building_at(grid_offset + map_grid_delta(1, 1)) == building_id) {
             result = 1;
@@ -492,7 +492,7 @@ static int get_gatehouse_position(int grid_offset, int direction, unsigned int b
                 result = 0;
             }
         }
-    } else if (direction == DIR_2_RIGHT) {
+    } else if (direction == DIR_RIGHT) {
         if (map_terrain_is(grid_offset + map_grid_delta(1, 1), TERRAIN_GATEHOUSE) &&
             map_building_at(grid_offset + map_grid_delta(1, 1)) == building_id) {
             result = 1;
@@ -538,9 +538,9 @@ static void set_wall_gatehouse_image_manually(int grid_offset)
     int gatehouse_right = get_gatehouse_building_id(grid_offset + map_grid_delta(1, 0));
     int image_offset = 0;
     int map_orientation = city_view_orientation();
-    if (map_orientation == DIR_0_TOP) {
+    if (map_orientation == DIR_TOP) {
         if (gatehouse_up && !gatehouse_left) {
-            int pos = get_gatehouse_position(grid_offset, DIR_0_TOP, gatehouse_up);
+            int pos = get_gatehouse_position(grid_offset, DIR_TOP, gatehouse_up);
             if (pos > 0) {
                 if (pos <= 2) {
                     image_offset = 29;
@@ -551,7 +551,7 @@ static void set_wall_gatehouse_image_manually(int grid_offset)
                 }
             }
         } else if (gatehouse_left && !gatehouse_up) {
-            int pos = get_gatehouse_position(grid_offset, DIR_6_LEFT, gatehouse_left);
+            int pos = get_gatehouse_position(grid_offset, DIR_LEFT, gatehouse_left);
             if (pos > 0) {
                 if (pos <= 2) {
                     image_offset = 30;
@@ -562,9 +562,9 @@ static void set_wall_gatehouse_image_manually(int grid_offset)
                 }
             }
         }
-    } else if (map_orientation == DIR_2_RIGHT) {
+    } else if (map_orientation == DIR_RIGHT) {
         if (gatehouse_up && !gatehouse_right) {
-            int pos = get_gatehouse_position(grid_offset, DIR_0_TOP, gatehouse_up);
+            int pos = get_gatehouse_position(grid_offset, DIR_TOP, gatehouse_up);
             if (pos > 0) {
                 if (pos == 1) {
                     image_offset = 32;
@@ -575,7 +575,7 @@ static void set_wall_gatehouse_image_manually(int grid_offset)
                 }
             }
         } else if (gatehouse_right && !gatehouse_up) {
-            int pos = get_gatehouse_position(grid_offset, DIR_2_RIGHT, gatehouse_right);
+            int pos = get_gatehouse_position(grid_offset, DIR_RIGHT, gatehouse_right);
             if (pos > 0) {
                 if (pos <= 2) {
                     image_offset = 29;
@@ -586,9 +586,9 @@ static void set_wall_gatehouse_image_manually(int grid_offset)
                 }
             }
         }
-    } else if (map_orientation == DIR_4_BOTTOM) {
+    } else if (map_orientation == DIR_BOTTOM) {
         if (gatehouse_down && !gatehouse_right) {
-            int pos = get_gatehouse_position(grid_offset, DIR_4_BOTTOM, gatehouse_down);
+            int pos = get_gatehouse_position(grid_offset, DIR_BOTTOM, gatehouse_down);
             if (pos > 0) {
                 if (pos == 1) {
                     image_offset = 31;
@@ -599,7 +599,7 @@ static void set_wall_gatehouse_image_manually(int grid_offset)
                 }
             }
         } else if (gatehouse_right && !gatehouse_down) {
-            int pos = get_gatehouse_position(grid_offset, DIR_2_RIGHT, gatehouse_right);
+            int pos = get_gatehouse_position(grid_offset, DIR_RIGHT, gatehouse_right);
             if (pos > 0) {
                 if (pos == 1) {
                     image_offset = 32;
@@ -610,9 +610,9 @@ static void set_wall_gatehouse_image_manually(int grid_offset)
                 }
             }
         }
-    } else if (map_orientation == DIR_6_LEFT) {
+    } else if (map_orientation == DIR_LEFT) {
         if (gatehouse_down && !gatehouse_left) {
-            int pos = get_gatehouse_position(grid_offset, DIR_4_BOTTOM, gatehouse_down);
+            int pos = get_gatehouse_position(grid_offset, DIR_BOTTOM, gatehouse_down);
             if (pos > 0) {
                 if (pos <= 2) {
                     image_offset = 30;
@@ -623,7 +623,7 @@ static void set_wall_gatehouse_image_manually(int grid_offset)
                 }
             }
         } else if (gatehouse_left && !gatehouse_down) {
-            int pos = get_gatehouse_position(grid_offset, DIR_6_LEFT, gatehouse_left);
+            int pos = get_gatehouse_position(grid_offset, DIR_LEFT, gatehouse_left);
             if (pos > 0) {
                 if (pos == 1) {
                     image_offset = 31;
@@ -736,7 +736,7 @@ int map_tiles_highway_get_aqueduct_image(int grid_offset)
     if (map_terrain_is(grid_offset - 1, TERRAIN_AQUEDUCT) || map_terrain_is(grid_offset + 1, TERRAIN_AQUEDUCT)) {
         image_offset++;
     }
-    if (city_view_orientation() == DIR_6_LEFT || city_view_orientation() == DIR_2_RIGHT) {
+    if (city_view_orientation() == DIR_LEFT || city_view_orientation() == DIR_RIGHT) {
         image_offset = (image_offset + 1) % 2;
     }
     if (!map_aqueduct_has_water_access_at(grid_offset)) {
@@ -1239,10 +1239,10 @@ static int get_access_ramp_image_offset(int x, int y)
         return -1;
     }
     switch (city_view_orientation()) {
-        case DIR_0_TOP: break;
-        case DIR_6_LEFT: image_offset += 1; break;
-        case DIR_4_BOTTOM: image_offset += 2; break;
-        case DIR_2_RIGHT: image_offset += 3; break;
+        case DIR_TOP: break;
+        case DIR_LEFT: image_offset += 1; break;
+        case DIR_BOTTOM: image_offset += 2; break;
+        case DIR_RIGHT: image_offset += 3; break;
     }
     if (image_offset >= 4) {
         image_offset -= 4;
@@ -1345,26 +1345,26 @@ void map_tiles_add_entry_exit_flags(void)
     int entry_orientation;
     map_point entry_point = scenario_map_entry();
     if (entry_point.x == 0) {
-        entry_orientation = DIR_2_RIGHT;
+        entry_orientation = DIR_RIGHT;
     } else if (entry_point.x == map_data.width - 1) {
-        entry_orientation = DIR_6_LEFT;
+        entry_orientation = DIR_LEFT;
     } else if (entry_point.y == 0) {
-        entry_orientation = DIR_0_TOP;
+        entry_orientation = DIR_TOP;
     } else if (entry_point.y == map_data.height - 1) {
-        entry_orientation = DIR_4_BOTTOM;
+        entry_orientation = DIR_BOTTOM;
     } else {
         entry_orientation = -1;
     }
     int exit_orientation;
     map_point exit_point = scenario_map_exit();
     if (exit_point.x == 0) {
-        exit_orientation = DIR_2_RIGHT;
+        exit_orientation = DIR_RIGHT;
     } else if (exit_point.x == map_data.width - 1) {
-        exit_orientation = DIR_6_LEFT;
+        exit_orientation = DIR_LEFT;
     } else if (exit_point.y == 0) {
-        exit_orientation = DIR_0_TOP;
+        exit_orientation = DIR_TOP;
     } else if (exit_point.y == map_data.height - 1) {
-        exit_orientation = DIR_4_BOTTOM;
+        exit_orientation = DIR_BOTTOM;
     } else {
         exit_orientation = -1;
     }

@@ -23,7 +23,7 @@ static struct {
 void figure_create_immigrant(building *house, int num_people)
 {
     const map_tile *entry = city_map_entry_point();
-    figure *f = figure_create(FIGURE_IMMIGRANT, entry->x, entry->y, DIR_0_TOP);
+    figure *f = figure_create(FIGURE_IMMIGRANT, entry->x, entry->y, DIR_TOP);
     f->action_state = FIGURE_ACTION_1_IMMIGRANT_CREATED;
     f->immigrant_building_id = house->id;
     house->immigrant_figure_id = f->id;
@@ -39,7 +39,7 @@ void figure_create_emigrant(building *house, int num_people)
     } else {
         building_house_change_to_vacant_lot(house);
     }
-    figure *f = figure_create(FIGURE_EMIGRANT, house->x, house->y, DIR_0_TOP);
+    figure *f = figure_create(FIGURE_EMIGRANT, house->x, house->y, DIR_TOP);
     f->action_state = FIGURE_ACTION_4_EMIGRANT_CREATED;
     f->wait_ticks = 0;
     f->migrant_num_people = num_people;
@@ -47,7 +47,7 @@ void figure_create_emigrant(building *house, int num_people)
 
 figure *figure_create_homeless(building *house, int num_people)
 {
-    figure *f = figure_create(FIGURE_HOMELESS, house->x, house->y, DIR_0_TOP);
+    figure *f = figure_create(FIGURE_HOMELESS, house->x, house->y, DIR_TOP);
     f->building_id = house->id;
     f->action_state = FIGURE_ACTION_7_HOMELESS_CREATED;
     f->wait_ticks = 0;

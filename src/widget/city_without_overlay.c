@@ -304,49 +304,49 @@ static void draw_hippodrome_spectators(const building *b, int x, int y, color_t 
     if ((building_part == 0) && population > 2000) {
         // first building part
         switch (orientation) {
-            case DIR_0_TOP:
+            case DIR_TOP:
                 image_draw(image_group(GROUP_BUILDING_HIPPODROME_2) + 6, x + 147, y - 72,
                     color_mask, draw_context.scale);
                 break;
-            case DIR_2_RIGHT:
+            case DIR_RIGHT:
                 image_draw(image_group(GROUP_BUILDING_HIPPODROME_1) + 8, x + 58, y - 79,
                     color_mask, draw_context.scale);
                 break;
-            case DIR_4_BOTTOM:
+            case DIR_BOTTOM:
                 image_draw(image_group(GROUP_BUILDING_HIPPODROME_2) + 8, x + 119, y - 80,
                     color_mask, draw_context.scale);
                 break;
-            case DIR_6_LEFT:
+            case DIR_LEFT:
                 image_draw(image_group(GROUP_BUILDING_HIPPODROME_1) + 6, x, y - 72,
                     color_mask, draw_context.scale);
         }
     } else if ((building_part == 1) && population > 100) {
         // middle building part
         switch (orientation) {
-            case DIR_0_TOP:
-            case DIR_4_BOTTOM:
+            case DIR_TOP:
+            case DIR_BOTTOM:
                 image_draw(image_group(GROUP_BUILDING_HIPPODROME_2) + 7, x + 122, y - 79,
                     color_mask, draw_context.scale);
                 break;
-            case DIR_2_RIGHT:
-            case DIR_6_LEFT:
+            case DIR_RIGHT:
+            case DIR_LEFT:
                 image_draw(image_group(GROUP_BUILDING_HIPPODROME_1) + 7, x, y - 80, color_mask, draw_context.scale);
         }
     } else if ((building_part == 2) && population > 1000) {
         // last building part
         switch (orientation) {
-            case DIR_0_TOP:
+            case DIR_TOP:
                 image_draw(image_group(GROUP_BUILDING_HIPPODROME_2) + 8, x + 119, y - 80,
                     color_mask, draw_context.scale);
                 break;
-            case DIR_2_RIGHT:
+            case DIR_RIGHT:
                 image_draw(image_group(GROUP_BUILDING_HIPPODROME_1) + 6, x, y - 72, color_mask, draw_context.scale);
                 break;
-            case DIR_4_BOTTOM:
+            case DIR_BOTTOM:
                 image_draw(image_group(GROUP_BUILDING_HIPPODROME_2) + 6, x + 147, y - 72, color_mask,
                     draw_context.scale);
                 break;
-            case DIR_6_LEFT:
+            case DIR_LEFT:
                 image_draw(image_group(GROUP_BUILDING_HIPPODROME_1) + 8, x + 58, y - 79, color_mask,
                     draw_context.scale);
                 break;
@@ -908,21 +908,21 @@ static void draw_animation(int x, int y, int grid_offset)
     } else if (b->type == BUILDING_GATEHOUSE) {
         int xy = map_property_multi_tile_xy(grid_offset);
         int orientation = city_view_orientation();
-        if ((orientation == DIR_0_TOP && xy == EDGE_X1Y1) ||
-            (orientation == DIR_2_RIGHT && xy == EDGE_X0Y1) ||
-            (orientation == DIR_4_BOTTOM && xy == EDGE_X0Y0) ||
-            (orientation == DIR_6_LEFT && xy == EDGE_X1Y0)) {
+        if ((orientation == DIR_TOP && xy == EDGE_X1Y1) ||
+            (orientation == DIR_RIGHT && xy == EDGE_X0Y1) ||
+            (orientation == DIR_BOTTOM && xy == EDGE_X0Y0) ||
+            (orientation == DIR_LEFT && xy == EDGE_X1Y0)) {
             building *gate = building_get(map_building_at(grid_offset));
             image_id = image_group(GROUP_BUILDING_GATEHOUSE);
             color_mask = draw_building_as_deleted(gate) ? building_construction_clear_color() : 0;
             if (gate->subtype.orientation == 1) {
-                if (orientation == DIR_0_TOP || orientation == DIR_4_BOTTOM) {
+                if (orientation == DIR_TOP || orientation == DIR_BOTTOM) {
                     image_draw(image_id, x - 22, y - 80, color_mask, draw_context.scale);
                 } else {
                     image_draw(image_id + 1, x - 18, y - 81, color_mask, draw_context.scale);
                 }
             } else if (gate->subtype.orientation == 2) {
-                if (orientation == DIR_0_TOP || orientation == DIR_4_BOTTOM) {
+                if (orientation == DIR_TOP || orientation == DIR_BOTTOM) {
                     image_draw(image_id + 1, x - 18, y - 81, color_mask, draw_context.scale);
                 } else {
                     image_draw(image_id, x - 22, y - 80, color_mask, draw_context.scale);

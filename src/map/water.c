@@ -20,18 +20,18 @@ void map_water_add_building(int building_id, int x, int y, int size)
     }
     map_point leftmost;
     switch (city_view_orientation()) {
-        case DIR_0_TOP:
+        case DIR_TOP:
             leftmost.x = 0;
             leftmost.y = size - 1;
             break;
-        case DIR_2_RIGHT:
+        case DIR_RIGHT:
             leftmost.x = leftmost.y = 0;
             break;
-        case DIR_4_BOTTOM:
+        case DIR_BOTTOM:
             leftmost.x = size - 1;
             leftmost.y = 0;
             break;
-        case DIR_6_LEFT:
+        case DIR_LEFT:
             leftmost.x = leftmost.y = size - 1;
             break;
         default:
@@ -73,16 +73,16 @@ int map_water_determine_orientation(int x, int y, int size, int adjust_xy,
         unadjusted_base_offset = map_grid_offset(x, y);
         switch (city_view_orientation()) {
             default: break;
-            case DIR_2_RIGHT: x -= edge; break;
-            case DIR_6_LEFT: y -= edge; break;
-            case DIR_4_BOTTOM: x -= edge; y -= edge; break;
+            case DIR_RIGHT: x -= edge; break;
+            case DIR_LEFT: y -= edge; break;
+            case DIR_BOTTOM: x -= edge; y -= edge; break;
         }
     } else {
         switch (city_view_orientation()) {
             default: unadjusted_base_offset = map_grid_offset(x, y); break;
-            case DIR_2_RIGHT: unadjusted_base_offset = map_grid_offset(x + edge, y); break;
-            case DIR_6_LEFT: unadjusted_base_offset = map_grid_offset(x, y + edge); break;
-            case DIR_4_BOTTOM: unadjusted_base_offset = map_grid_offset(x + edge, y + edge); break;
+            case DIR_RIGHT: unadjusted_base_offset = map_grid_offset(x + edge, y); break;
+            case DIR_LEFT: unadjusted_base_offset = map_grid_offset(x, y + edge); break;
+            case DIR_BOTTOM: unadjusted_base_offset = map_grid_offset(x + edge, y + edge); break;
         }
     }
     if (!map_grid_is_inside(x, y, size)) {
@@ -214,10 +214,10 @@ int map_water_has_water_in_front(int x, int y, int adjust_xy, const waterside_ti
     if (adjust_xy == 1) {
         int edge = loop->inner_length - 3;
         switch (city_view_orientation()) {
-            case DIR_0_TOP: break;
-            case DIR_2_RIGHT: x -= edge; break;
-            case DIR_6_LEFT: y -= edge; break;
-            case DIR_4_BOTTOM: x -= edge; y -= edge; break;
+            case DIR_TOP: break;
+            case DIR_RIGHT: x -= edge; break;
+            case DIR_LEFT: y -= edge; break;
+            case DIR_BOTTOM: x -= edge; y -= edge; break;
         }
     }
     int base_offset = map_grid_offset(x, y);

@@ -35,7 +35,7 @@ int map_can_place_road_under_aqueduct(int grid_offset)
         default: // not a straight aqueduct
             return 0;
     }
-    if (city_view_orientation() == DIR_6_LEFT || city_view_orientation() == DIR_2_RIGHT) {
+    if (city_view_orientation() == DIR_LEFT || city_view_orientation() == DIR_RIGHT) {
         check_y = !check_y;
     }
     if (check_y) {
@@ -75,7 +75,7 @@ int map_can_place_aqueduct_on_road(int grid_offset)
     }
 
     int check_y = image_id == 0 || image_id == 49;
-    if (city_view_orientation() == DIR_6_LEFT || city_view_orientation() == DIR_2_RIGHT) {
+    if (city_view_orientation() == DIR_LEFT || city_view_orientation() == DIR_RIGHT) {
         check_y = !check_y;
     }
     if (check_y) {

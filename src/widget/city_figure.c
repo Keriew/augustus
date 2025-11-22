@@ -36,7 +36,7 @@ static void draw_hippodrome_horse(const figure *f, int x, int y, color_t color_m
 {
     int val = f->wait_ticks_missile;
     switch (city_view_orientation()) {
-        case DIR_0_TOP:
+        case DIR_TOP:
             x += 10;
             if (val <= 10) {
                 y -= 2;
@@ -54,7 +54,7 @@ static void draw_hippodrome_horse(const figure *f, int x, int y, color_t color_m
                 y -= 2;
             }
             break;
-        case DIR_2_RIGHT:
+        case DIR_RIGHT:
             x -= 10;
             if (val <= 9) {
                 y -= 12;
@@ -73,7 +73,7 @@ static void draw_hippodrome_horse(const figure *f, int x, int y, color_t color_m
                 y -= 12;
             }
             break;
-        case DIR_4_BOTTOM:
+        case DIR_BOTTOM:
             x += 20;
             if (val <= 9) {
                 y += 4;
@@ -93,7 +93,7 @@ static void draw_hippodrome_horse(const figure *f, int x, int y, color_t color_m
                 y -= 2;
             }
             break;
-        case DIR_6_LEFT:
+        case DIR_LEFT:
             x -= 10;
             if (val <= 9) {
                 y -= 12;
@@ -154,16 +154,16 @@ static void tile_cross_country_offset_to_pixel_offset(int cross_country_x, int c
     int *pixel_x, int *pixel_y)
 {
     int dir = city_view_orientation();
-    if (dir == DIR_0_TOP || dir == DIR_4_BOTTOM) {
+    if (dir == DIR_TOP || dir == DIR_BOTTOM) {
         int base_pixel_x = 2 * cross_country_x - 2 * cross_country_y;
         int base_pixel_y = cross_country_x + cross_country_y;
-        *pixel_x = dir == DIR_0_TOP ? base_pixel_x : -base_pixel_x;
-        *pixel_y = dir == DIR_0_TOP ? base_pixel_y : -base_pixel_y;
+        *pixel_x = dir == DIR_TOP ? base_pixel_x : -base_pixel_x;
+        *pixel_y = dir == DIR_TOP ? base_pixel_y : -base_pixel_y;
     } else {
         int base_pixel_x = 2 * cross_country_x + 2 * cross_country_y;
         int base_pixel_y = cross_country_x - cross_country_y;
-        *pixel_x = dir == DIR_2_RIGHT ? base_pixel_x : -base_pixel_x;
-        *pixel_y = dir == DIR_6_LEFT ? base_pixel_y : -base_pixel_y;
+        *pixel_x = dir == DIR_RIGHT ? base_pixel_x : -base_pixel_x;
+        *pixel_y = dir == DIR_LEFT ? base_pixel_y : -base_pixel_y;
     }
 }
 
@@ -173,15 +173,15 @@ static int tile_progress_to_pixel_offset_x(int direction, int progress)
         return 0;
     }
     switch (direction) {
-        case DIR_0_TOP:
-        case DIR_2_RIGHT:
+        case DIR_TOP:
+        case DIR_RIGHT:
             return 2 * progress - 28;
-        case DIR_1_TOP_RIGHT:
+        case DIR_TOP_RIGHT:
             return 4 * progress - 56;
-        case DIR_4_BOTTOM:
-        case DIR_6_LEFT:
+        case DIR_BOTTOM:
+        case DIR_LEFT:
             return 28 - 2 * progress;
-        case DIR_5_BOTTOM_LEFT:
+        case DIR_BOTTOM_LEFT:
             return 56 - 4 * progress;
         default:
             return 0;
@@ -194,15 +194,15 @@ static int tile_progress_to_pixel_offset_y(int direction, int progress)
         return 0;
     }
     switch (direction) {
-        case DIR_0_TOP:
-        case DIR_6_LEFT:
+        case DIR_TOP:
+        case DIR_LEFT:
             return 14 - progress;
-        case DIR_2_RIGHT:
-        case DIR_4_BOTTOM:
+        case DIR_RIGHT:
+        case DIR_BOTTOM:
             return progress - 14;
-        case DIR_3_BOTTOM_RIGHT:
+        case DIR_BOTTOM_RIGHT:
             return 2 * progress - 28;
-        case DIR_7_TOP_LEFT:
+        case DIR_TOP_LEFT:
             return 28 - 2 * progress;
         default:
             return 0;

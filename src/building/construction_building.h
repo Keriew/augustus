@@ -30,8 +30,8 @@ int building_construction_is_granary_cross_tile(int tile_no);
 int building_construction_is_warehouse_corner(int tile_no);
 
 // New!
-int can_build_highway(int next_offset, int check_highway_routing)
-int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aqueduct)
+int can_build_highway(int next_offset, int check_highway_routing);
+int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aqueduct);
 
 /**
  *@brief Uses building_construction_place to fill all vacant lots in the specified area

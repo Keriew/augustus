@@ -1,6 +1,8 @@
+// Guard
 #ifndef CORE_DIRECTION_H
 #define CORE_DIRECTION_H
-#define DIR_MAX_MOVEMENT 9
+
+#define DIR_MAX_MOVEMENT 9 // Defines the boundary for movement checks
 
 /**
  * @file
@@ -30,9 +32,6 @@ typedef enum {
     DIR_FIGURE_LOST = 11,
     DIR_FIGURE_ATTACK = 12,
     DIR_AT_DESTINATION = 13,
-
-    // Defines the boundary for movement checks
-    DIR_MAX_MOVEMENT = 9
 } direction_type;
 
 #endif // CORE_DIRECTION_H

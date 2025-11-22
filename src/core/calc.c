@@ -82,7 +82,7 @@ direction_type calc_general_direction(int x_from, int y_from, int x_to, int y_to
             return DIR_RIGHT;
         }
 
-    // B. Target is MIDDLE
+        // B. Target is MIDDLE
     } else if (y_to == y_from) {
         if (x_to < x_from) {
             return DIR_LEFT;
@@ -92,7 +92,7 @@ direction_type calc_general_direction(int x_from, int y_from, int x_to, int y_to
             return DIR_RIGHT;
         }
 
-    // C. Target is DOWN
+        // C. Target is DOWN
     } else { // y_to < y_from
         if (x_to < x_from) {
             return DIR_BOTTOM_LEFT;
@@ -118,48 +118,48 @@ direction_type calc_missile_shooter_direction(int x_from, int y_from, int x_to, 
     }
     if (x_from == x_to) {
         if (y_from < y_to) {
-            return DIR_4_BOTTOM;
+            return DIR_BOTTOM;
         } else {
-            return DIR_0_TOP;
+            return DIR_TOP;
         }
     } else if (x_from > x_to) {
         if (y_from == y_to) {
-            return DIR_6_LEFT;
+            return DIR_LEFT;
         } else if (y_from > y_to) {
             if (percentage >= 400) {
-                return DIR_6_LEFT;
+                return DIR_LEFT;
             } else if (percentage > -400) {
-                return DIR_7_TOP_LEFT;
+                return DIR_TOP_LEFT;
             } else {
-                return DIR_0_TOP;
+                return DIR_TOP;
             }
         } else {
             if (percentage >= 400) {
-                return DIR_6_LEFT;
+                return DIR_LEFT;
             } else if (percentage > -400) {
-                return DIR_5_BOTTOM_LEFT;
+                return DIR_BOTTOM_LEFT;
             } else {
-                return DIR_4_BOTTOM;
+                return DIR_BOTTOM;
             }
         }
     } else { // x_from < x_to
         if (y_from == y_to) {
-            return DIR_2_RIGHT;
+            return DIR_RIGHT;
         } else if (y_from > y_to) {
             if (percentage >= 400) {
-                return DIR_2_RIGHT;
+                return DIR_RIGHT;
             } else if (percentage > -400) {
-                return DIR_1_TOP_RIGHT;
+                return DIR_TOP_RIGHT;
             } else {
-                return DIR_0_TOP;
+                return DIR_TOP;
             }
         } else {
             if (percentage >= 400) {
-                return DIR_2_RIGHT;
+                return DIR_RIGHT;
             } else if (percentage > -400) {
-                return DIR_3_BOTTOM_RIGHT;
+                return DIR_BOTTOM_RIGHT;
             } else {
-                return DIR_4_BOTTOM;
+                return DIR_BOTTOM;
             }
         }
     }
@@ -257,11 +257,9 @@ double calc_bound_double(double value, double min, double max)
 {
     if (value < min) {
         return min;
-    }
-    else if (value > max) {
+    } else if (value > max) {
         return max;
-    }
-    else {
+    } else {
         return value;
     }
 }

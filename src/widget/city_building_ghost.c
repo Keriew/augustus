@@ -314,7 +314,7 @@ static int get_building_image_id(int map_x, int map_y, building_type type, const
             image_offset = building_rotation_get_road_orientation() == 2 ? 1 : 0;
         }
         int map_orientation = city_view_orientation();
-        if (map_orientation == DIR_6_LEFT || map_orientation == DIR_2_RIGHT) {
+        if (map_orientation == DIR_LEFT || map_orientation == DIR_RIGHT) {
             image_offset = 1 - image_offset;
         }
         image_id += image_offset;
@@ -329,7 +329,7 @@ static int get_building_image_id(int map_x, int map_y, building_type type, const
             image_offset = building_rotation_get_road_orientation() == 2 ? 2 : 0;
         }
         int map_orientation = city_view_orientation();
-        if (map_orientation == DIR_6_LEFT || map_orientation == DIR_2_RIGHT) {
+        if (map_orientation == DIR_LEFT || map_orientation == DIR_RIGHT) {
             image_offset = 2 - image_offset;
         }
         image_id += image_offset;
@@ -358,19 +358,19 @@ static int get_new_building_image_id(int grid_offset, building_type type)
 static void get_building_base_xy(int map_x, int map_y, int building_size, int *x, int *y)
 {
     switch (city_view_orientation()) {
-        case DIR_0_TOP:
+        case DIR_TOP:
             *x = map_x;
             *y = map_y;
             break;
-        case DIR_2_RIGHT:
+        case DIR_RIGHT:
             *x = map_x - building_size + 1;
             *y = map_y;
             break;
-        case DIR_4_BOTTOM:
+        case DIR_BOTTOM:
             *x = map_x - building_size + 1;
             *y = map_y - building_size + 1;
             break;
-        case DIR_6_LEFT:
+        case DIR_LEFT:
             *x = map_x;
             *y = map_y - building_size + 1;
             break;
@@ -677,16 +677,16 @@ static void draw_draggable_reservoir(const map_tile *tile, int x, int y)
                     map_x_start - 1, map_y_start - 1, 5, TERRAIN_WATER);
             }
             switch (city_view_orientation()) {
-                case DIR_0_TOP:
+                case DIR_TOP:
                     draw_later = map_x_start > map_x || map_y_start > map_y;
                     break;
-                case DIR_2_RIGHT:
+                case DIR_RIGHT:
                     draw_later = map_x_start < map_x || map_y_start > map_y;
                     break;
-                case DIR_4_BOTTOM:
+                case DIR_BOTTOM:
                     draw_later = map_x_start < map_x || map_y_start < map_y;
                     break;
-                case DIR_6_LEFT:
+                case DIR_LEFT:
                     draw_later = map_x_start > map_x || map_y_start < map_y;
                     break;
             }
@@ -970,19 +970,19 @@ static void draw_bridge(const map_tile *tile, int x, int y, building_type type)
     }
     int x_delta, y_delta;
     switch (dir) {
-        case DIR_0_TOP:
+        case DIR_TOP:
             x_delta = 29;
             y_delta = -15;
             break;
-        case DIR_2_RIGHT:
+        case DIR_RIGHT:
             x_delta = 29;
             y_delta = 15;
             break;
-        case DIR_4_BOTTOM:
+        case DIR_BOTTOM:
             x_delta = -29;
             y_delta = 15;
             break;
-        case DIR_6_LEFT:
+        case DIR_LEFT:
             x_delta = -29;
             y_delta = -15;
             break;
@@ -1001,7 +1001,7 @@ static void draw_bridge(const map_tile *tile, int x, int y, building_type type)
     } else {
         color_mask = COLOR_MASK_BUILDING_GHOST;
     }
-    if (dir == DIR_0_TOP || dir == DIR_6_LEFT) {
+    if (dir == DIR_TOP || dir == DIR_LEFT) {
         for (int i = length - 1; i >= 0; i--) {
             int sprite_id = map_bridge_get_sprite_id(i, length, dir, type == BUILDING_SHIP_BRIDGE);
             city_draw_bridge_tile(x + x_delta * i, y + y_delta * i, data.scale, sprite_id, color_mask);
@@ -1535,19 +1535,19 @@ void city_building_ghost_draw(const map_tile *tile)
         } else if (type == BUILDING_DRAGGABLE_RESERVOIR) {
             map_tile shifted_tile = *tile;
             switch (city_view_orientation()) {
-                case DIR_0_TOP:
+                case DIR_TOP:
                     shifted_tile.x -= 1;
                     shifted_tile.y -= 1;
                     break;
-                case DIR_2_RIGHT:
+                case DIR_RIGHT:
                     shifted_tile.x += 1;
                     shifted_tile.y -= 1;
                     break;
-                case DIR_4_BOTTOM:
+                case DIR_BOTTOM:
                     shifted_tile.x += 1;
                     shifted_tile.y += 1;
                     break;
-                case DIR_6_LEFT:
+                case DIR_LEFT:
                     shifted_tile.x -= 1;
                     shifted_tile.y += 1;
                     break;

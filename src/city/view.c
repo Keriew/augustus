@@ -16,8 +16,8 @@
 #define HALF_TILE_WIDTH_PIXELS 30
 #define HALF_TILE_HEIGHT_PIXELS 15
 
-static const int X_DIRECTION_FOR_ORIENTATION[] = {1,  1, -1, -1};
-static const int Y_DIRECTION_FOR_ORIENTATION[] = {1, -1, -1,  1};
+static const int X_DIRECTION_FOR_ORIENTATION[] = { 1,  1, -1, -1 };
+static const int Y_DIRECTION_FOR_ORIENTATION[] = { 1, -1, -1,  1 };
 
 static struct {
     int screen_width;
@@ -77,14 +77,14 @@ static void check_camera_boundaries(void)
         data.camera.pixel.y = TILE_HEIGHT_PIXELS -
             (((calc_adjust_with_percentage(data.viewport.height_pixels, data.scale) + TILE_HEIGHT_PIXELS) / 2) %
             TILE_HEIGHT_PIXELS);
-    } else {    
+    } else {
         if (data.camera.tile.y < y_min - 2) {
             data.camera.tile.y = y_min - 1;
             data.camera.pixel.y = 0;
         }
         int max_y_tile = (VIEW_Y_MAX - y_min - data.viewport.height_tiles) & ~1;
         int max_y_pixel = TILE_HEIGHT_PIXELS -
-                (calc_adjust_with_percentage(data.viewport.height_pixels, data.scale) % TILE_HEIGHT_PIXELS);
+            (calc_adjust_with_percentage(data.viewport.height_pixels, data.scale) % TILE_HEIGHT_PIXELS);
         if (data.camera.tile.y > max_y_tile || (data.camera.tile.y == max_y_tile && data.camera.pixel.y > max_y_pixel)) {
             data.camera.tile.y = max_y_tile;
             data.camera.pixel.y = max_y_pixel;
@@ -113,7 +113,7 @@ static void calculate_lookup(void)
     int x_view_step;
     switch (data.orientation) {
         default:
-        case DIR_0_TOP:
+        case DIR_TOP:
             x_view_start = VIEW_X_MAX - 1;
             x_view_skip = -1;
             x_view_step = 1;
@@ -121,7 +121,7 @@ static void calculate_lookup(void)
             y_view_skip = 1;
             y_view_step = 1;
             break;
-        case DIR_2_RIGHT:
+        case DIR_RIGHT:
             x_view_start = 3;
             x_view_skip = 1;
             x_view_step = 1;
@@ -129,7 +129,7 @@ static void calculate_lookup(void)
             y_view_skip = 1;
             y_view_step = -1;
             break;
-        case DIR_4_BOTTOM:
+        case DIR_BOTTOM:
             x_view_start = VIEW_X_MAX - 1;
             x_view_skip = 1;
             x_view_step = -1;
@@ -137,7 +137,7 @@ static void calculate_lookup(void)
             y_view_skip = -1;
             y_view_step = -1;
             break;
-        case DIR_6_LEFT:
+        case DIR_LEFT:
             x_view_start = VIEW_Y_MAX;
             x_view_skip = -1;
             x_view_step = -1;
@@ -153,9 +153,9 @@ static void calculate_lookup(void)
         for (int x = 0; x < GRID_SIZE; x++) {
             int grid_offset = x + GRID_SIZE * y;
             if (map_image_at(grid_offset) < 6) {
-                view_to_grid_offset_lookup[x_view/2][y_view] = -1;
+                view_to_grid_offset_lookup[x_view / 2][y_view] = -1;
             } else {
-                view_to_grid_offset_lookup[x_view/2][y_view] = grid_offset;
+                view_to_grid_offset_lookup[x_view / 2][y_view] = grid_offset;
             }
             x_view += x_view_step;
             y_view += y_view_step;
@@ -272,19 +272,19 @@ static void adjust_for_orientation(int x, int y, int orientation, int *x_out, in
 {
     switch (orientation) {
         default:
-        case DIR_0_TOP:
+        case DIR_TOP:
             *x_out = x;
             *y_out = y;
             break;
-        case DIR_2_RIGHT:
+        case DIR_RIGHT:
             *x_out = y / 2;
             *y_out = (VIEW_X_MAX - x) * 2;
             break;
-        case DIR_4_BOTTOM:
+        case DIR_BOTTOM:
             *x_out = VIEW_X_MAX - x;
             *y_out = VIEW_Y_MAX - y;
             break;
-        case DIR_6_LEFT:
+        case DIR_LEFT:
             *x_out = (VIEW_Y_MAX - y) / 2;
             *y_out = x * 2;
             break;
@@ -341,7 +341,7 @@ void city_view_adjust_camera_from_obstruction(int grid_offset, int size, const p
     if (!objective_is_obstructed(&objective, obstruction)) {
         return;
     }
-    
+
     enum {
         LEFT = 0,
         RIGHT = 1,
@@ -550,7 +550,7 @@ void city_view_rotate_left(void)
 
     data.orientation += 2;
     if (data.orientation > 6) {
-        data.orientation = DIR_0_TOP;
+        data.orientation = DIR_TOP;
     }
     calculate_lookup();
     if (center_grid_offset >= 0) {
@@ -568,7 +568,7 @@ void city_view_rotate_right(void)
 
     data.orientation -= 2;
     if (data.orientation < 0) {
-        data.orientation = DIR_6_LEFT;
+        data.orientation = DIR_LEFT;
     }
     calculate_lookup();
     if (center_grid_offset >= 0) {

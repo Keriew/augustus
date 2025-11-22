@@ -129,6 +129,7 @@ static void populate_fighting_data(RoutingContext *ctx)
     // You need a way to loop all figures. Assuming 'figure_foreach' exists:
     int total_figures = figure_count();
     for (int i = 1; i < total_figures; i++) {
+        // Check if the figure is alive
         figure *f = figure_get(i);
         if (f->state != FIGURE_STATE_ALIVE) continue;
 
@@ -746,7 +747,6 @@ static inline int has_fighting_enemy(int grid_offset)
 }
 
 // Save/Load (unused)
-
 void map_routing_save_state(buffer * buf)
 {
     buffer_write_i32(buf, 0); // unused counter

@@ -25,10 +25,10 @@ void figure_spawn_tourist(void)
     const map_tile *entry = city_map_entry_point();
     const map_tile *exit = city_map_exit_point();
     if (random_byte() % 2) {
-        figure *tourist = figure_create(FIGURE_TOURIST, entry->x, entry->y, DIR_0_TOP);
+        figure *tourist = figure_create(FIGURE_TOURIST, entry->x, entry->y, DIR_TOP);
         tourist->action_state = FIGURE_ACTION_217_TOURIST_CREATED;
     } else {
-        figure *tourist = figure_create(FIGURE_TOURIST, exit->x, exit->y, DIR_0_TOP);
+        figure *tourist = figure_create(FIGURE_TOURIST, exit->x, exit->y, DIR_TOP);
         tourist->action_state = FIGURE_ACTION_217_TOURIST_CREATED;
     }
 }

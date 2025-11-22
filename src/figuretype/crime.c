@@ -122,7 +122,7 @@ static void generate_striker(building *b)
 {
     int x_road, y_road;
     if (map_closest_road_within_radius(b->x, b->y, b->size, 2, &x_road, &y_road) && b->figure_id4 == 0) {
-        figure *f = figure_create(FIGURE_PROTESTER, x_road, y_road, DIR_4_BOTTOM);
+        figure *f = figure_create(FIGURE_PROTESTER, x_road, y_road, DIR_BOTTOM);
         f->building_id = b->id;
         b->figure_id4 = f->id;
     }
@@ -144,7 +144,7 @@ static void generate_rioter(building *b, int amount)
     city_sentiment_add_criminal();
 
     for (int i = 0; i < amount; i++) {
-        figure *f = figure_create(FIGURE_RIOTER, x_road, y_road, DIR_4_BOTTOM);
+        figure *f = figure_create(FIGURE_RIOTER, x_road, y_road, DIR_BOTTOM);
         f->action_state = FIGURE_ACTION_120_RIOTER_CREATED;
         f->roam_length = 0;
         f->wait_ticks = 10 + 4 * i;
@@ -168,7 +168,7 @@ static void generate_looter(building *b, int amount)
     city_sentiment_add_criminal();
 
     for (int i = 0; i < amount; i++) {
-        figure *f = figure_create(FIGURE_CRIMINAL_LOOTER, x_road, y_road, DIR_4_BOTTOM);
+        figure *f = figure_create(FIGURE_CRIMINAL_LOOTER, x_road, y_road, DIR_BOTTOM);
         f->terrain_usage = TERRAIN_USAGE_ANY;
         f->action_state = FIGURE_ACTION_226_CRIMINAL_LOOTER_CREATED;
         f->roam_length = 0;
@@ -192,7 +192,7 @@ static void generate_robber(building *b, int amount)
     b->house_criminal_active = 1;
 
     for (int i = 0; i < amount; i++) {
-        figure *f = figure_create(FIGURE_CRIMINAL_ROBBER, x_road, y_road, DIR_4_BOTTOM);
+        figure *f = figure_create(FIGURE_CRIMINAL_ROBBER, x_road, y_road, DIR_BOTTOM);
         f->action_state = FIGURE_ACTION_227_CRIMINAL_ROBBER_CREATED;
         f->roam_length = 0;
         f->wait_ticks = 10 + 4 * i;
@@ -207,7 +207,7 @@ static void generate_protestor(building *b)
         b->house_criminal_active = 1;
         int x_road, y_road;
         if (map_closest_road_within_radius(b->x, b->y, b->size, 2, &x_road, &y_road)) {
-            figure *f = figure_create(FIGURE_PROTESTER, x_road, y_road, DIR_4_BOTTOM);
+            figure *f = figure_create(FIGURE_PROTESTER, x_road, y_road, DIR_BOTTOM);
             f->wait_ticks = 10 + (b->house_figure_generation_delay & 0xf);
             city_ratings_peace_record_criminal();
         }

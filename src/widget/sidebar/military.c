@@ -171,7 +171,7 @@ static int available_layouts_for_legion(const formation *m)
 static void draw_layout_buttons(int x, int y, int background, const formation *m)
 {
     int index = 0;
-    if (city_view_orientation() == DIR_6_LEFT || city_view_orientation() == DIR_2_RIGHT) {
+    if (city_view_orientation() == DIR_LEFT || city_view_orientation() == DIR_RIGHT) {
         index = 1;
     }
     const int *offsets = (m->figure_type == FIGURE_FORT_LEGIONARY || m->figure_type == FIGURE_FORT_INFANTRY) ?
@@ -639,7 +639,7 @@ static void button_select_formation_layout(const generic_button *button)
         return;
     }
     const int *layout_indexes;
-    int swap_lines = city_view_orientation() == DIR_6_LEFT || city_view_orientation() == DIR_2_RIGHT;
+    int swap_lines = city_view_orientation() == DIR_LEFT || city_view_orientation() == DIR_RIGHT;
     if (m->figure_type == FIGURE_FORT_LEGIONARY || m->figure_type == FIGURE_FORT_INFANTRY) {
         int index_increase = m->has_military_training ? 1 : 2;
         if (index > 4 - index_increase) {

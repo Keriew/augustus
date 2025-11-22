@@ -61,16 +61,16 @@ int map_bridge_calculate_length_direction(int x, int y, int *length, int *direct
     }
     if (!map_terrain_is(grid_offset + map_grid_delta(0, -1), TERRAIN_WATER)) {
         bridge.direction_grid_delta = map_grid_delta(0, 1);
-        bridge.direction = DIR_4_BOTTOM;
+        bridge.direction = DIR_BOTTOM;
     } else if (!map_terrain_is(grid_offset + map_grid_delta(1, 0), TERRAIN_WATER)) {
         bridge.direction_grid_delta = map_grid_delta(-1, 0);
-        bridge.direction = DIR_6_LEFT;
+        bridge.direction = DIR_LEFT;
     } else if (!map_terrain_is(grid_offset + map_grid_delta(0, 1), TERRAIN_WATER)) {
         bridge.direction_grid_delta = map_grid_delta(0, -1);
-        bridge.direction = DIR_0_TOP;
+        bridge.direction = DIR_TOP;
     } else if (!map_terrain_is(grid_offset + map_grid_delta(-1, 0), TERRAIN_WATER)) {
         bridge.direction_grid_delta = map_grid_delta(1, 0);
-        bridge.direction = DIR_2_RIGHT;
+        bridge.direction = DIR_RIGHT;
     } else {
         return 0;
     }
@@ -149,36 +149,36 @@ int map_bridge_get_sprite_id(int index, int length, int direction, int is_ship_b
         } else if (index == 0) {
             // ramp at start
             switch (direction) {
-                case DIR_0_TOP:
+                case DIR_TOP:
                     return 7;
-                case DIR_2_RIGHT:
+                case DIR_RIGHT:
                     return 8;
-                case DIR_4_BOTTOM:
+                case DIR_BOTTOM:
                     return 9;
-                case DIR_6_LEFT:
+                case DIR_LEFT:
                     return 10;
             }
         } else if (index == length - 1) {
             // ramp at end
             switch (direction) {
-                case DIR_0_TOP:
+                case DIR_TOP:
                     return 9;
-                case DIR_2_RIGHT:
+                case DIR_RIGHT:
                     return 10;
-                case DIR_4_BOTTOM:
+                case DIR_BOTTOM:
                     return 7;
-                case DIR_6_LEFT:
+                case DIR_LEFT:
                     return 8;
             }
         } else if ((index - pillar_shift) % pillar_distance == 0) {
-            if (direction == DIR_0_TOP || direction == DIR_4_BOTTOM) {
+            if (direction == DIR_TOP || direction == DIR_BOTTOM) {
                 return 14;
             } else {
                 return 15;
             }
         } else {
             // middle of the bridge
-            if (direction == DIR_0_TOP || direction == DIR_4_BOTTOM) {
+            if (direction == DIR_TOP || direction == DIR_BOTTOM) {
                 return 11;
             } else {
                 return 12;
@@ -188,30 +188,30 @@ int map_bridge_get_sprite_id(int index, int length, int direction, int is_ship_b
         if (index == 0) {
             // ramp at start
             switch (direction) {
-                case DIR_0_TOP:
+                case DIR_TOP:
                     return 1;
-                case DIR_2_RIGHT:
+                case DIR_RIGHT:
                     return 2;
-                case DIR_4_BOTTOM:
+                case DIR_BOTTOM:
                     return 3;
-                case DIR_6_LEFT:
+                case DIR_LEFT:
                     return 4;
             }
         } else if (index == length - 1) {
             // ramp at end
             switch (direction) {
-                case DIR_0_TOP:
+                case DIR_TOP:
                     return 3;
-                case DIR_2_RIGHT:
+                case DIR_RIGHT:
                     return 4;
-                case DIR_4_BOTTOM:
+                case DIR_BOTTOM:
                     return 1;
-                case DIR_6_LEFT:
+                case DIR_LEFT:
                     return 2;
             }
         } else {
             // middle part
-            if (direction == DIR_0_TOP || direction == DIR_4_BOTTOM) {
+            if (direction == DIR_TOP || direction == DIR_BOTTOM) {
                 return 5;
             } else {
                 return 6;

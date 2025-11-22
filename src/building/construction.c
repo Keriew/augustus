@@ -1017,9 +1017,9 @@ figure_type building_construction_nearby_enemy_type(grid_slice *slice)
 void building_construction_offset_start_from_orientation(int *x, int *y, int size)
 {
     switch (city_view_orientation()) {
-        case DIR_2_RIGHT: *x = *x - size + 1; break;
-        case DIR_4_BOTTOM: *x = *x - size + 1; *y = *y - size + 1; break;
-        case DIR_6_LEFT: *y = *y - size + 1; break;
+        case DIR_RIGHT: *x = *x - size + 1; break;
+        case DIR_BOTTOM: *x = *x - size + 1; *y = *y - size + 1; break;
+        case DIR_LEFT: *y = *y - size + 1; break;
     }
 }
 

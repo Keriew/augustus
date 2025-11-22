@@ -362,11 +362,11 @@ static void scroll_map(const mouse *m)
 static int adjust_offset_for_orientation(int grid_offset, int size)
 {
     switch (city_view_orientation()) {
-        case DIR_0_TOP:
+        case DIR_TOP:
             return map_grid_add_delta(grid_offset, -size + 1, -size + 1);
-        case DIR_2_RIGHT:
+        case DIR_RIGHT:
             return map_grid_add_delta(grid_offset, 0, -size + 1);
-        case DIR_6_LEFT:
+        case DIR_LEFT:
             return map_grid_add_delta(grid_offset, -size + 1, 0);
         default:
             return grid_offset;

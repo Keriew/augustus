@@ -61,10 +61,10 @@ void figure_ballista_action(figure *f)
     }
     map_figure_delete(f);
     switch (city_view_orientation()) {
-        case DIR_0_TOP: f->x = b->x; f->y = b->y; break;
-        case DIR_2_RIGHT: f->x = b->x + 1; f->y = b->y; break;
-        case DIR_4_BOTTOM: f->x = b->x + 1; f->y = b->y + 1; break;
-        case DIR_6_LEFT: f->x = b->x; f->y = b->y + 1; break;
+        case DIR_TOP: f->x = b->x; f->y = b->y; break;
+        case DIR_RIGHT: f->x = b->x + 1; f->y = b->y; break;
+        case DIR_BOTTOM: f->x = b->x + 1; f->y = b->y + 1; break;
+        case DIR_LEFT: f->x = b->x; f->y = b->y + 1; break;
     }
     f->grid_offset = map_grid_offset(f->x, f->y);
     map_figure_add(f);
@@ -142,10 +142,10 @@ static int tower_sentry_init_patrol(building *b, int *x_tile, int *y_tile)
     int x = b->x;
     int y = b->y;
     switch (dir) {
-        case DIR_0_TOP: y -= 8; break;
-        case DIR_2_RIGHT: x += 8; break;
-        case DIR_4_BOTTOM: y += 8; break;
-        case DIR_6_LEFT: x -= 8; break;
+        case DIR_TOP: y -= 8; break;
+        case DIR_RIGHT: x += 8; break;
+        case DIR_BOTTOM: y += 8; break;
+        case DIR_LEFT: x -= 8; break;
     }
     map_grid_bound(&x, &y);
 
@@ -165,10 +165,10 @@ static int tower_sentry_init_patrol(building *b, int *x_tile, int *y_tile)
         x = b->x;
         y = b->y;
         switch (dir) {
-            case DIR_0_TOP: y -= 3; break;
-            case DIR_2_RIGHT: x += 3; break;
-            case DIR_4_BOTTOM: y += 3; break;
-            case DIR_6_LEFT: x -= 3; break;
+            case DIR_TOP: y -= 3; break;
+            case DIR_RIGHT: x += 3; break;
+            case DIR_BOTTOM: y += 3; break;
+            case DIR_LEFT: x -= 3; break;
         }
         map_grid_bound(&x, &y);
         if (map_routing_wall_tile_in_radius(x, y, 6, x_tile, y_tile)) {
@@ -183,7 +183,7 @@ static void figure_watchtower_archer_spawn(building *b)
     if (b->figure_id4 || b->type != BUILDING_WATCHTOWER) {
         return;
     }
-    figure *f = figure_create(FIGURE_WATCHTOWER_ARCHER, b->x, b->y, DIR_0_TOP);
+    figure *f = figure_create(FIGURE_WATCHTOWER_ARCHER, b->x, b->y, DIR_TOP);
     f->building_id = b->id;
     f->action_state = FIGURE_ACTION_223_ARCHER_GUARDING;
     b->figure_id4 = f->id;

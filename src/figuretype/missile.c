@@ -35,7 +35,7 @@ void figure_create_explosion_cloud(int x, int y, int size, int alt_sound)
     int cc_offset = CLOUD_CC_OFFSETS[size];
     for (int i = 0; i < 16; i++) {
         figure *f = figure_create(FIGURE_EXPLOSION,
-            x + tile_offset, y + tile_offset, DIR_0_TOP);
+            x + tile_offset, y + tile_offset, DIR_TOP);
         if (f->id) {
             f->cross_country_x += cc_offset;
             f->cross_country_y += cc_offset;
@@ -53,7 +53,7 @@ void figure_create_explosion_cloud(int x, int y, int size, int alt_sound)
 
 void figure_create_missile(int figure_id, int x, int y, int x_dst, int y_dst, figure_type type)
 {
-    figure *f = figure_create(type, x, y, DIR_0_TOP);
+    figure *f = figure_create(type, x, y, DIR_TOP);
     figure *launcher = figure_get(figure_id);
     if (f->id) {
         if (launcher->type == FIGURE_BALLISTA || launcher->type == FIGURE_WATCHTOWER_ARCHER) {

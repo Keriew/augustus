@@ -39,8 +39,8 @@ static void determine_leftmost_tile(void)
                 continue;
             }
             map_property_clear_draw_tile(grid_offset);
-            int dx = orientation == DIR_4_BOTTOM || orientation == DIR_6_LEFT ? size - 1 : 0;
-            int dy = orientation == DIR_0_TOP || orientation == DIR_6_LEFT ? size - 1 : 0;
+            int dx = orientation == DIR_BOTTOM || orientation == DIR_LEFT ? size - 1 : 0;
+            int dy = orientation == DIR_TOP || orientation == DIR_LEFT ? size - 1 : 0;
             if (map_property_is_multi_tile_xy(grid_offset, dx, dy)) {
                 map_property_mark_draw_tile(grid_offset);
             }
@@ -86,9 +86,9 @@ void map_orientation_change(int counter_clockwise)
 int map_orientation_for_gatehouse(int x, int y)
 {
     switch (city_view_orientation()) {
-        case DIR_2_RIGHT: x--; break;
-        case DIR_4_BOTTOM: x--; y--; break;
-        case DIR_6_LEFT: y--; break;
+        case DIR_RIGHT: x--; break;
+        case DIR_BOTTOM: x--; y--; break;
+        case DIR_LEFT: y--; break;
     }
     int grid_offset = map_grid_offset(x, y);
     int num_road_tiles_within = 0;
@@ -176,9 +176,9 @@ int map_orientation_for_gatehouse(int x, int y)
 int map_orientation_for_triumphal_arch(int x, int y)
 {
     switch (city_view_orientation()) {
-        case DIR_2_RIGHT: x -= 2; break;
-        case DIR_4_BOTTOM: x -= 2; y -= 2; break;
-        case DIR_6_LEFT: y -= 2; break;
+        case DIR_RIGHT: x -= 2; break;
+        case DIR_BOTTOM: x -= 2; y -= 2; break;
+        case DIR_LEFT: y -= 2; break;
     }
     int num_road_tiles_top_bottom = 0;
     int num_road_tiles_left_right = 0;

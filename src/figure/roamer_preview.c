@@ -168,10 +168,10 @@ static void init_roaming(figure *f, int roam_dir, int x, int y)
         f->disallow_diagonal = 1;
     }
     switch (roam_dir) {
-        case DIR_0_TOP: y -= 8; break;
-        case DIR_2_RIGHT: x += 8; break;
-        case DIR_4_BOTTOM: y += 8; break;
-        case DIR_6_LEFT: x -= 8; break;
+        case DIR_TOP: y -= 8; break;
+        case DIR_RIGHT: x += 8; break;
+        case DIR_BOTTOM: y += 8; break;
+        case DIR_LEFT: x -= 8; break;
     }
     map_grid_bound(&x, &y);
     int x_road, y_road;
@@ -252,7 +252,7 @@ void figure_roamer_preview_create(building_type b_type, int x, int y)
         roamer.source_x = roamer.destination_x = roamer.previous_tile_x = road.x;
         roamer.source_y = roamer.destination_y = roamer.previous_tile_y = road.y;
         roamer.terrain_usage = TERRAIN_USAGE_ROADS;
-        roamer.direction = DIR_0_TOP;
+        roamer.direction = DIR_TOP;
         roamer.faction_id = FIGURE_FACTION_ROAMER_PREVIEW;
         roamer.type = fig_type;
         roamer.max_roam_length = roam_length;

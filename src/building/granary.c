@@ -229,7 +229,7 @@ static void try_create_cart_to_rome(building *b, int resource, int loads)
 {
     map_point road;
     if (map_has_road_access_rotation(b->subtype.orientation, b->x, b->y, 3, &road)) {
-        figure *f = figure_create(FIGURE_CART_PUSHER, road.x, road.y, DIR_4_BOTTOM);
+        figure *f = figure_create(FIGURE_CART_PUSHER, road.x, road.y, DIR_BOTTOM);
         f->action_state = FIGURE_ACTION_234_CARTPUSHER_GOING_TO_ROME_CREATED;
         f->resource_id = resource;
         f->loads_sold_or_carrying = loads;

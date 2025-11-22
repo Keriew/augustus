@@ -24,18 +24,18 @@ void map_building_tiles_add_remove(unsigned int building_id, int x, int y, int s
     }
     int x_leftmost, y_leftmost;
     switch (city_view_orientation()) {
-        case DIR_0_TOP:
+        case DIR_TOP:
             x_leftmost = 0;
             y_leftmost = size - 1;
             break;
-        case DIR_2_RIGHT:
+        case DIR_RIGHT:
             x_leftmost = y_leftmost = 0;
             break;
-        case DIR_4_BOTTOM:
+        case DIR_BOTTOM:
             x_leftmost = size - 1;
             y_leftmost = 0;
             break;
-        case DIR_6_LEFT:
+        case DIR_LEFT:
             x_leftmost = y_leftmost = size - 1;
             break;
         default:
@@ -80,19 +80,19 @@ void map_building_tiles_add_farm(unsigned int building_id, int x, int y, int cro
     // farmhouse
     int x_leftmost, y_leftmost;
     switch (city_view_orientation()) {
-        case DIR_0_TOP:
+        case DIR_TOP:
             x_leftmost = 0;
             y_leftmost = 1;
             break;
-        case DIR_2_RIGHT:
+        case DIR_RIGHT:
             x_leftmost = 0;
             y_leftmost = 0;
             break;
-        case DIR_4_BOTTOM:
+        case DIR_BOTTOM:
             x_leftmost = 1;
             y_leftmost = 0;
             break;
-        case DIR_6_LEFT:
+        case DIR_LEFT:
             x_leftmost = 1;
             y_leftmost = 1;
             break;
@@ -239,13 +239,13 @@ void map_building_tiles_set_rubble(unsigned int building_id, int x, int y, int s
 static void adjust_to_absolute_xy(int *x, int *y, int size)
 {
     switch (city_view_orientation()) {
-        case DIR_2_RIGHT:
+        case DIR_RIGHT:
             *x = *x - size + 1;
             break;
-        case DIR_4_BOTTOM:
+        case DIR_BOTTOM:
             *x = *x - size + 1;
             // fall-through
-        case DIR_6_LEFT:
+        case DIR_LEFT:
             *y = *y - size + 1;
             break;
     }

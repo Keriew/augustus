@@ -78,7 +78,7 @@ static void generate_labor_seeker(building *b, int x, int y)
             b->figure_id2 = 0;
         }
     } else {
-        figure *f = figure_create(FIGURE_LABOR_SEEKER, x, y, DIR_0_TOP);
+        figure *f = figure_create(FIGURE_LABOR_SEEKER, x, y, DIR_TOP);
         f->action_state = FIGURE_ACTION_125_ROAMING;
         f->building_id = b->id;
         b->figure_id2 = f->id;
@@ -139,7 +139,7 @@ static int default_spawn_delay(building *b)
 
 static void create_roaming_figure(building *b, int x, int y, figure_type type)
 {
-    figure *f = figure_create(type, x, y, DIR_0_TOP);
+    figure *f = figure_create(type, x, y, DIR_TOP);
     f->action_state = FIGURE_ACTION_125_ROAMING;
     f->building_id = b->id;
     b->figure_id = f->id;
@@ -180,7 +180,7 @@ static void spawn_beggar(building *b)
                 data.beggar_counter++;
                 return;
             }
-            figure *f = figure_create(FIGURE_BEGGAR, road.x, road.y, DIR_4_BOTTOM);
+            figure *f = figure_create(FIGURE_BEGGAR, road.x, road.y, DIR_BOTTOM);
             f->building_id = b->id;
         }
     }
@@ -194,7 +194,7 @@ static int spawn_patrician(building *b, int spawned)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > 40 && !spawned) {
             b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_PATRICIAN, road.x, road.y, DIR_4_BOTTOM);
+            figure *f = figure_create(FIGURE_PATRICIAN, road.x, road.y, DIR_BOTTOM);
             f->action_state = FIGURE_ACTION_125_ROAMING;
             f->building_id = b->id;
             figure_movement_init_roaming(f);
@@ -223,7 +223,7 @@ static void spawn_figure_warehouse(building *b)
         int resource;
         int task = building_warehouse_determine_worker_task(b, &resource);
         if (task != WAREHOUSE_TASK_NONE) {
-            figure *f = figure_create(FIGURE_WAREHOUSEMAN, road.x, road.y, DIR_4_BOTTOM);
+            figure *f = figure_create(FIGURE_WAREHOUSEMAN, road.x, road.y, DIR_BOTTOM);
             f->action_state = FIGURE_ACTION_50_WAREHOUSEMAN_CREATED;
             f->loads_sold_or_carrying = 0; // spawn with 0, load is decided by the action. 
             //this way we transfer resources from buildings to figures directly, without having to keep track
@@ -251,7 +251,7 @@ static void spawn_figure_granary(building *b)
         }
         int task = building_granary_determine_worker_task(b);
         if (task != GRANARY_TASK_NONE) {
-            figure *f = figure_create(FIGURE_WAREHOUSEMAN, b->x + 1, b->y + 1, DIR_4_BOTTOM);
+            figure *f = figure_create(FIGURE_WAREHOUSEMAN, b->x + 1, b->y + 1, DIR_BOTTOM);
             //spawn in the center of the granary
             f->action_state = FIGURE_ACTION_50_WAREHOUSEMAN_CREATED;
             //f->loads_sold_or_carrying = 1; //set loads at action, not spawn
@@ -272,7 +272,7 @@ static void spawn_figure_tower(building *b)
             return;
         }
         if (!b->figure_id4 && b->figure_id) { // has sentry but no ballista -> create
-            figure *f = figure_create(FIGURE_BALLISTA, b->x, b->y, DIR_0_TOP);
+            figure *f = figure_create(FIGURE_BALLISTA, b->x, b->y, DIR_TOP);
             b->figure_id4 = f->id;
             f->building_id = b->id;
             f->action_state = FIGURE_ACTION_180_BALLISTA_CREATED;
@@ -307,7 +307,7 @@ static void spawn_figure_engineers_post(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_ENGINEER, road.x, road.y, DIR_0_TOP);
+            figure *f = figure_create(FIGURE_ENGINEER, road.x, road.y, DIR_TOP);
             f->action_state = FIGURE_ACTION_60_ENGINEER_CREATED;
             f->building_id = b->id;
             b->figure_id = f->id;
@@ -342,7 +342,7 @@ static void spawn_figure_prefecture(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_PREFECT, road.x, road.y, DIR_0_TOP);
+            figure *f = figure_create(FIGURE_PREFECT, road.x, road.y, DIR_TOP);
             f->action_state = FIGURE_ACTION_70_PREFECT_CREATED;
             f->building_id = b->id;
             b->figure_id = f->id;
@@ -363,7 +363,7 @@ static void spawn_figure_actor_colony(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_ACTOR, road.x, road.y, DIR_0_TOP);
+            figure *f = figure_create(FIGURE_ACTOR, road.x, road.y, DIR_TOP);
             f->action_state = FIGURE_ACTION_90_ENTERTAINER_AT_SCHOOL_CREATED;
             f->building_id = b->id;
             b->figure_id = f->id;
@@ -384,7 +384,7 @@ static void spawn_figure_gladiator_school(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_GLADIATOR, road.x, road.y, DIR_0_TOP);
+            figure *f = figure_create(FIGURE_GLADIATOR, road.x, road.y, DIR_TOP);
             f->action_state = FIGURE_ACTION_90_ENTERTAINER_AT_SCHOOL_CREATED;
             f->building_id = b->id;
             b->figure_id = f->id;
@@ -417,7 +417,7 @@ static void spawn_figure_lion_house(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_LION_TAMER, road.x, road.y, DIR_0_TOP);
+            figure *f = figure_create(FIGURE_LION_TAMER, road.x, road.y, DIR_TOP);
             f->action_state = FIGURE_ACTION_90_ENTERTAINER_AT_SCHOOL_CREATED;
             f->building_id = b->id;
             b->figure_id = f->id;
@@ -427,7 +427,7 @@ static void spawn_figure_lion_house(building *b)
 
 static void spawn_figure_chariot(building *b, map_point road, int use_figure_2)
 {
-    figure *f = figure_create(FIGURE_CHARIOTEER, road.x, road.y, DIR_0_TOP);
+    figure *f = figure_create(FIGURE_CHARIOTEER, road.x, road.y, DIR_TOP);
     f->action_state = FIGURE_ACTION_90_ENTERTAINER_AT_SCHOOL_CREATED;
     f->building_id = b->id;
     if (!use_figure_2) {
@@ -507,9 +507,9 @@ static void spawn_figure_amphitheater(building *b)
             set_amphitheater_graphic(b);
             figure *f;
             if (b->data.entertainment.days1 > 0) {
-                f = figure_create(FIGURE_GLADIATOR, road.x, road.y, DIR_0_TOP);
+                f = figure_create(FIGURE_GLADIATOR, road.x, road.y, DIR_TOP);
             } else {
-                f = figure_create(FIGURE_ACTOR, road.x, road.y, DIR_0_TOP);
+                f = figure_create(FIGURE_ACTOR, road.x, road.y, DIR_TOP);
             }
             f->action_state = FIGURE_ACTION_94_ENTERTAINER_ROAMING;
             f->building_id = b->id;
@@ -547,7 +547,7 @@ static void spawn_figure_theater(building *b)
         if (b->figure_spawn_delay > spawn_delay) {
             set_theater_graphic(b);
             b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_ACTOR, road.x, road.y, DIR_0_TOP);
+            figure *f = figure_create(FIGURE_ACTOR, road.x, road.y, DIR_TOP);
             f->action_state = FIGURE_ACTION_94_ENTERTAINER_ROAMING;
             f->building_id = b->id;
             b->figure_id = f->id;
@@ -595,7 +595,7 @@ static void spawn_figure_hippodrome(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_CHARIOTEER, road.x, road.y, DIR_0_TOP);
+            figure *f = figure_create(FIGURE_CHARIOTEER, road.x, road.y, DIR_TOP);
             f->action_state = FIGURE_ACTION_94_ENTERTAINER_ROAMING;
             f->building_id = b->id;
             b->figure_id = f->id;
@@ -603,13 +603,13 @@ static void spawn_figure_hippodrome(building *b)
 
             if (!city_entertainment_hippodrome_has_race()) {
                 // create mini-horses
-                figure *horse1 = figure_create(FIGURE_HIPPODROME_HORSES, b->x + 2, b->y + 1, DIR_2_RIGHT);
+                figure *horse1 = figure_create(FIGURE_HIPPODROME_HORSES, b->x + 2, b->y + 1, DIR_RIGHT);
                 horse1->action_state = FIGURE_ACTION_200_HIPPODROME_HORSE_CREATED;
                 horse1->building_id = b->id;
                 horse1->resource_id = 0;
                 horse1->speed_multiplier = 3;
 
-                figure *horse2 = figure_create(FIGURE_HIPPODROME_HORSES, b->x + 2, b->y + 2, DIR_2_RIGHT);
+                figure *horse2 = figure_create(FIGURE_HIPPODROME_HORSES, b->x + 2, b->y + 2, DIR_RIGHT);
                 horse2->action_state = FIGURE_ACTION_200_HIPPODROME_HORSE_CREATED;
                 horse2->building_id = b->id;
                 horse2->resource_id = 1;
@@ -671,18 +671,18 @@ static void spawn_figure_colosseum(building *b)
 
             figure *f;
             if (b->data.entertainment.days1 > 0) {
-                f = figure_create(FIGURE_LION_TAMER, road.x, road.y, DIR_0_TOP);
+                f = figure_create(FIGURE_LION_TAMER, road.x, road.y, DIR_TOP);
             } else {
-                f = figure_create(FIGURE_GLADIATOR, road.x, road.y, DIR_0_TOP);
+                f = figure_create(FIGURE_GLADIATOR, road.x, road.y, DIR_TOP);
             }
             f->action_state = FIGURE_ACTION_94_ENTERTAINER_ROAMING;
             f->building_id = b->id;
             b->figure_id = f->id;
             figure_movement_init_roaming(f);
             if (b->type == BUILDING_COLOSSEUM && city_games_executions_active()) {
-                f = figure_create(FIGURE_LION_TAMER, road.x, road.y, DIR_0_TOP);
+                f = figure_create(FIGURE_LION_TAMER, road.x, road.y, DIR_TOP);
                 f->action_state = FIGURE_ACTION_230_LION_TAMERS_HUNTING_ENEMIES;
-                f = figure_create(FIGURE_LION_TAMER, road.x, road.y, DIR_0_TOP);
+                f = figure_create(FIGURE_LION_TAMER, road.x, road.y, DIR_TOP);
                 f->action_state = FIGURE_ACTION_230_LION_TAMERS_HUNTING_ENEMIES;
             }
             if (b->type == BUILDING_COLOSSEUM &&
@@ -756,7 +756,7 @@ static void spawn_temple_supplier(building *b, int x, int y)
     if (dst_building_id == 0) {
         return;
     }
-    figure *f = figure_create(FIGURE_PRIEST_SUPPLIER, x, y, DIR_0_TOP);
+    figure *f = figure_create(FIGURE_PRIEST_SUPPLIER, x, y, DIR_TOP);
     f->building_id = b->id;
     b->figure_id2 = f->id;
     f->collecting_item_id = b->data.market.fetch_inventory_id;
@@ -776,7 +776,7 @@ static void spawn_tavern_supplier(building *b, int x, int y)
     if (dst_building_id == 0) {
         return;
     }
-    figure *f = figure_create(FIGURE_BARKEEP_SUPPLIER, x, y, DIR_0_TOP);
+    figure *f = figure_create(FIGURE_BARKEEP_SUPPLIER, x, y, DIR_TOP);
     f->building_id = b->id;
     b->figure_id2 = f->id;
     f->collecting_item_id = b->data.market.fetch_inventory_id;
@@ -803,7 +803,7 @@ static void spawn_mess_hall_supplier(building *b, int x, int y, int figure_id_to
     if (dst_building_id == 0) {
         return;
     }
-    figure *f = figure_create(FIGURE_MESS_HALL_SUPPLIER, x, y, DIR_0_TOP);
+    figure *f = figure_create(FIGURE_MESS_HALL_SUPPLIER, x, y, DIR_TOP);
     f->building_id = b->id;
     if (figure_id_to_use == 1) {
         b->figure_id = f->id;
@@ -828,7 +828,7 @@ static void spawn_market_supplier(building *b, int x, int y)
     if (dst_building_id == 0) {
         return;
     }
-    figure *f = figure_create(FIGURE_MARKET_SUPPLIER, x, y, DIR_0_TOP);
+    figure *f = figure_create(FIGURE_MARKET_SUPPLIER, x, y, DIR_TOP);
     f->building_id = b->id;
     b->figure_id2 = f->id;
     f->collecting_item_id = b->data.market.fetch_inventory_id;
@@ -885,7 +885,7 @@ static void spawn_caravanserai_supplier(building *b, int x, int y)
     if (dst_building_id == 0) {
         return;
     }
-    figure *f = figure_create(FIGURE_CARAVANSERAI_SUPPLIER, x, y, DIR_0_TOP);
+    figure *f = figure_create(FIGURE_CARAVANSERAI_SUPPLIER, x, y, DIR_TOP);
     f->building_id = b->id;
     b->figure_id = f->id;
     f->collecting_item_id = b->data.market.fetch_inventory_id;
@@ -906,7 +906,7 @@ static void spawn_lighthouse_supplier(building *b, int x, int y)
     if (dst_building_id == 0) {
         return;
     }
-    figure *f = figure_create(FIGURE_LIGHTHOUSE_SUPPLIER, x, y, DIR_0_TOP);
+    figure *f = figure_create(FIGURE_LIGHTHOUSE_SUPPLIER, x, y, DIR_TOP);
     f->building_id = b->id;
     b->figure_id = f->id;
     f->collecting_item_id = RESOURCE_TIMBER; // Raw Resource
@@ -975,23 +975,23 @@ static void spawn_figure_school(building *b)
             b->figure_spawn_delay = 0;
             set_school_graphic(b);
 
-            figure *child1 = figure_create(FIGURE_SCHOOL_CHILD, road.x, road.y, DIR_0_TOP);
+            figure *child1 = figure_create(FIGURE_SCHOOL_CHILD, road.x, road.y, DIR_TOP);
             child1->action_state = FIGURE_ACTION_125_ROAMING;
             child1->building_id = b->id;
             b->figure_id = child1->id;
             figure_movement_init_roaming(child1);
 
-            figure *child2 = figure_create(FIGURE_SCHOOL_CHILD, road.x, road.y, DIR_0_TOP);
+            figure *child2 = figure_create(FIGURE_SCHOOL_CHILD, road.x, road.y, DIR_TOP);
             child2->action_state = FIGURE_ACTION_125_ROAMING;
             child2->building_id = b->id;
             figure_movement_init_roaming(child2);
 
-            figure *child3 = figure_create(FIGURE_SCHOOL_CHILD, road.x, road.y, DIR_0_TOP);
+            figure *child3 = figure_create(FIGURE_SCHOOL_CHILD, road.x, road.y, DIR_TOP);
             child3->action_state = FIGURE_ACTION_125_ROAMING;
             child3->building_id = b->id;
             figure_movement_init_roaming(child3);
 
-            figure *child4 = figure_create(FIGURE_SCHOOL_CHILD, road.x, road.y, DIR_0_TOP);
+            figure *child4 = figure_create(FIGURE_SCHOOL_CHILD, road.x, road.y, DIR_TOP);
             child4->action_state = FIGURE_ACTION_125_ROAMING;
             child4->building_id = b->id;
             figure_movement_init_roaming(child4);
@@ -1177,7 +1177,7 @@ static void spawn_figure_grand_temple_mars(building *b)
 
         // Pantheon Module 1 Bonus
         if (!b->figure_id4 && building_monument_pantheon_module_is_active(PANTHEON_MODULE_1_DESTINATION_PRIESTS)) {
-            figure *f = figure_create(FIGURE_PRIEST, road.x, road.y, DIR_4_BOTTOM);
+            figure *f = figure_create(FIGURE_PRIEST, road.x, road.y, DIR_BOTTOM);
             int pantheon_id = building_monument_working(BUILDING_PANTHEON);
             b->figure_id4 = f->id;
             f->destination_building_id = pantheon_id;
@@ -1276,7 +1276,7 @@ static void spawn_figure_temple(building *b)
                 }
                 int food_to_deliver = building_temple_mars_food_to_deliver(b, mess_hall_id);
                 if (food_to_deliver >= 0) {
-                    figure *priest = figure_create(FIGURE_PRIEST, road.x, road.y, DIR_4_BOTTOM);
+                    figure *priest = figure_create(FIGURE_PRIEST, road.x, road.y, DIR_BOTTOM);
 
                     priest->collecting_item_id = food_to_deliver;
                     b->figure_id2 = priest->id;
@@ -1299,7 +1299,7 @@ static void spawn_figure_temple(building *b)
 
         // Pantheon Module 1 Bonus
         if (b->type != BUILDING_PANTHEON && !b->figure_id4 && building_monument_pantheon_module_is_active(PANTHEON_MODULE_1_DESTINATION_PRIESTS)) {
-            figure *f = figure_create(FIGURE_PRIEST, road.x, road.y, DIR_4_BOTTOM);
+            figure *f = figure_create(FIGURE_PRIEST, road.x, road.y, DIR_BOTTOM);
             int pantheon_id = building_monument_working(BUILDING_PANTHEON);
             b->figure_id4 = f->id;
             f->destination_building_id = pantheon_id;
@@ -1360,7 +1360,7 @@ static void spawn_figure_senate_forum(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_TAX_COLLECTOR, road.x, road.y, DIR_0_TOP);
+            figure *f = figure_create(FIGURE_TAX_COLLECTOR, road.x, road.y, DIR_TOP);
             f->action_state = FIGURE_ACTION_40_TAX_COLLECTOR_CREATED;
             f->building_id = b->id;
             b->figure_id = f->id;
@@ -1406,7 +1406,7 @@ static void spawn_figure_industry(building *b)
         }
         if (building_industry_has_produced_resource(b)) {
             building_industry_start_new_production(b);
-            figure *f = figure_create(FIGURE_CART_PUSHER, road.x, road.y, DIR_4_BOTTOM);
+            figure *f = figure_create(FIGURE_CART_PUSHER, road.x, road.y, DIR_BOTTOM);
             f->action_state = FIGURE_ACTION_20_CARTPUSHER_INITIAL;
             f->resource_id = b->output_resource_id;
             f->building_id = b->id;
@@ -1435,7 +1435,7 @@ static void spawn_figure_wharf(building *b)
         if (b->figure_spawn_delay) {
             b->figure_spawn_delay = 0;
             b->data.industry.has_fish = 0;
-            figure *f = figure_create(FIGURE_CART_PUSHER, road.x, road.y, DIR_4_BOTTOM);
+            figure *f = figure_create(FIGURE_CART_PUSHER, road.x, road.y, DIR_BOTTOM);
             f->action_state = FIGURE_ACTION_20_CARTPUSHER_INITIAL;
             f->resource_id = RESOURCE_FISH;
             f->building_id = b->id;
@@ -1471,7 +1471,7 @@ static void spawn_figure_shipyard(building *b)
             b->data.industry.progress = 0;
             map_point boat;
             if (map_water_can_spawn_fishing_boat(b->x, b->y, b->size, &boat)) {
-                figure *f = figure_create(FIGURE_FISHING_BOAT, boat.x, boat.y, DIR_0_TOP);
+                figure *f = figure_create(FIGURE_FISHING_BOAT, boat.x, boat.y, DIR_TOP);
                 f->action_state = FIGURE_ACTION_190_FISHING_BOAT_CREATED;
                 f->building_id = b->id;
                 b->figure_id = f->id;
@@ -1517,7 +1517,7 @@ static void spawn_figure_dock(building *b)
                 }
             }
         } else if (existing_dockers < max_dockers) {
-            figure *f = figure_create(FIGURE_DOCKER, road.x, road.y, DIR_4_BOTTOM);
+            figure *f = figure_create(FIGURE_DOCKER, road.x, road.y, DIR_BOTTOM);
             f->action_state = FIGURE_ACTION_132_DOCKER_IDLING;
             f->building_id = b->id;
             for (int i = 0; i < 3; i++) {
@@ -1558,7 +1558,7 @@ static void spawn_figure_native_hut(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > 4) {
             b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_INDIGENOUS_NATIVE, x_out, y_out, DIR_0_TOP);
+            figure *f = figure_create(FIGURE_INDIGENOUS_NATIVE, x_out, y_out, DIR_TOP);
             f->action_state = FIGURE_ACTION_158_NATIVE_CREATED;
             f->building_id = b->id;
             b->figure_id = f->id;
@@ -1576,7 +1576,7 @@ static void spawn_figure_native_meeting(building *b)
             b->figure_spawn_delay++;
             if (b->figure_spawn_delay > 8) {
                 b->figure_spawn_delay = 0;
-                figure *f = figure_create(FIGURE_NATIVE_TRADER, x_out, y_out, DIR_0_TOP);
+                figure *f = figure_create(FIGURE_NATIVE_TRADER, x_out, y_out, DIR_TOP);
                 f->action_state = FIGURE_ACTION_162_NATIVE_TRADER_CREATED;
                 f->building_id = b->id;
                 b->figure_id = f->id;
@@ -1660,7 +1660,7 @@ static void spawn_figure_work_camp(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_WORK_CAMP_WORKER, road.x, road.y, DIR_4_BOTTOM);
+            figure *f = figure_create(FIGURE_WORK_CAMP_WORKER, road.x, road.y, DIR_BOTTOM);
             f->action_state = FIGURE_ACTION_203_WORK_CAMP_WORKER_CREATED;
             b->figure_id = f->id;
             f->building_id = b->id;
@@ -1686,7 +1686,7 @@ static void spawn_figure_architect_guild(building *b)
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
             if (building_monument_get_monument(road.x, road.y, RESOURCE_NONE, b->road_network_id, 0)) {
-                figure *f = figure_create(FIGURE_WORK_CAMP_ARCHITECT, road.x, road.y, DIR_4_BOTTOM);
+                figure *f = figure_create(FIGURE_WORK_CAMP_ARCHITECT, road.x, road.y, DIR_BOTTOM);
                 f->action_state = FIGURE_ACTION_206_WORK_CAMP_ARCHITECT_CREATED;
                 b->figure_id = f->id;
                 f->building_id = b->id;
@@ -1726,7 +1726,7 @@ static void spawn_figure_fort_supplier(building *fort)
     fort->figure_spawn_delay = 0;
     map_point road;
     if (map_has_road_access(supply_post->x, supply_post->y, supply_post->size, &road)) {
-        figure *f = figure_create(FIGURE_MESS_HALL_FORT_SUPPLIER, road.x, road.y, DIR_4_BOTTOM);
+        figure *f = figure_create(FIGURE_MESS_HALL_FORT_SUPPLIER, road.x, road.y, DIR_BOTTOM);
         f->action_state = FIGURE_ACTION_236_SUPPLY_POST_GOING_TO_FORT;
         f->destination_x = fort->road_access_x;
         f->destination_y = fort->road_access_y;
@@ -1847,11 +1847,11 @@ static void spawn_figure_watchtower(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_WATCHMAN, road.x, road.y, DIR_0_TOP);
+            figure *f = figure_create(FIGURE_WATCHMAN, road.x, road.y, DIR_TOP);
             f->action_state = FIGURE_ACTION_220_WATCHMAN_PATROL_INITIATE;
             f->building_id = b->id;
             b->figure_id = f->id;
-            f = figure_create(FIGURE_WATCHMAN, road.x, road.y, DIR_0_TOP);
+            f = figure_create(FIGURE_WATCHMAN, road.x, road.y, DIR_TOP);
             f->action_state = FIGURE_ACTION_220_WATCHMAN_PATROL_INITIATE;
             f->building_id = b->id;
             b->figure_id2 = f->id;
@@ -1898,7 +1898,7 @@ static void spawn_figure_depot(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_DEPOT_CART_PUSHER, road.x, road.y, DIR_0_TOP);
+            figure *f = figure_create(FIGURE_DEPOT_CART_PUSHER, road.x, road.y, DIR_TOP);
             f->action_state = FIGURE_ACTION_238_DEPOT_CART_PUSHER_INITIAL;
             f->building_id = b->id;
 
@@ -1954,7 +1954,7 @@ static void spawn_figure_armoury(building *b)
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
             if (building_armoury_is_needed(b)) {
-                figure *f = figure_create(FIGURE_WAREHOUSEMAN, road.x, road.y, DIR_4_BOTTOM);
+                figure *f = figure_create(FIGURE_WAREHOUSEMAN, road.x, road.y, DIR_BOTTOM);
                 f->action_state = FIGURE_ACTION_50_WAREHOUSEMAN_CREATED;
                 f->collecting_item_id = RESOURCE_WEAPONS;
                 if (figure_id_to_use == 1) {

@@ -106,7 +106,7 @@ static int get_closest_legion_needing_soldiers(const building *barracks)
     int required_recruitment = recruit_type;
 
     switch (barracks->subtype.barracks_priority) {
-        case PRIORITY_FORT: 
+        case PRIORITY_FORT:
             required_recruitment = LEGION_RECRUIT_LEGIONARY;
             break;
         case PRIORITY_FORT_JAVELIN:
@@ -173,7 +173,7 @@ int building_barracks_create_soldier(building *barracks, int x, int y)
     int formation_id = get_closest_legion_needing_soldiers(barracks);
     if (formation_id > 0) {
         formation *m = formation_get(formation_id);
-        figure *f = figure_create(m->figure_type, x, y, DIR_0_TOP);
+        figure *f = figure_create(m->figure_type, x, y, DIR_TOP);
         f->formation_id = formation_id;
         f->formation_at_rest = 1;
         if (m->figure_type == FIGURE_FORT_LEGIONARY) {
@@ -243,7 +243,7 @@ int building_barracks_create_tower_sentry(building *barracks, int x, int y)
     if (!tower) {
         return 0;
     }
-    figure *f = figure_create(FIGURE_TOWER_SENTRY, x, y, DIR_0_TOP);
+    figure *f = figure_create(FIGURE_TOWER_SENTRY, x, y, DIR_TOP);
     f->action_state = FIGURE_ACTION_174_TOWER_SENTRY_GOING_TO_TOWER;
     if (map_has_road_access(tower->x, tower->y, tower->size, &road)) {
         f->destination_x = road.x;
@@ -258,7 +258,7 @@ int building_barracks_create_tower_sentry(building *barracks, int x, int y)
 
 void building_barracks_set_priority(building *barracks, int priority)
 {
-        barracks->subtype.barracks_priority = priority;
+    barracks->subtype.barracks_priority = priority;
 }
 
 void building_barracks_toggle_delivery(building *barracks)

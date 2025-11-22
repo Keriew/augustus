@@ -134,17 +134,17 @@ static int sea_trader_bonus_speed(void)
 
 int figure_create_trade_caravan(int x, int y, int city_id)
 {
-    figure *caravan = figure_create(FIGURE_TRADE_CARAVAN, x, y, DIR_0_TOP);
+    figure *caravan = figure_create(FIGURE_TRADE_CARAVAN, x, y, DIR_TOP);
     caravan->empire_city_id = city_id;
     caravan->action_state = FIGURE_ACTION_100_TRADE_CARAVAN_CREATED;
     random_generate_next();
     caravan->wait_ticks = random_byte() & TRADER_INITIAL_WAIT;
     // donkey 1
-    figure *donkey1 = figure_create(FIGURE_TRADE_CARAVAN_DONKEY, x, y, DIR_0_TOP);
+    figure *donkey1 = figure_create(FIGURE_TRADE_CARAVAN_DONKEY, x, y, DIR_TOP);
     donkey1->action_state = FIGURE_ACTION_100_TRADE_CARAVAN_CREATED;
     donkey1->leading_figure_id = caravan->id;
     // donkey 2
-    figure *donkey2 = figure_create(FIGURE_TRADE_CARAVAN_DONKEY, x, y, DIR_0_TOP);
+    figure *donkey2 = figure_create(FIGURE_TRADE_CARAVAN_DONKEY, x, y, DIR_TOP);
     donkey2->action_state = FIGURE_ACTION_100_TRADE_CARAVAN_CREATED;
     donkey2->leading_figure_id = donkey1->id;
     return caravan->id;
@@ -152,7 +152,7 @@ int figure_create_trade_caravan(int x, int y, int city_id)
 
 int figure_create_trade_ship(int x, int y, int city_id)
 {
-    figure *ship = figure_create(FIGURE_TRADE_SHIP, x, y, DIR_0_TOP);
+    figure *ship = figure_create(FIGURE_TRADE_SHIP, x, y, DIR_TOP);
     ship->empire_city_id = city_id;
     ship->action_state = FIGURE_ACTION_110_TRADE_SHIP_CREATED;
     random_generate_next();
@@ -873,10 +873,10 @@ void figure_trade_ship_action(figure *f)
                         f->destination_x = river_exit.x;
                         f->destination_y = river_exit.y;
                         switch (building_get(f->destination_building_id)->data.dock.orientation) {
-                            case 0: f->direction = DIR_2_RIGHT; break;
-                            case 1: f->direction = DIR_4_BOTTOM; break;
-                            case 2: f->direction = DIR_6_LEFT; break;
-                            default:f->direction = DIR_0_TOP; break;
+                            case 0: f->direction = DIR_RIGHT; break;
+                            case 1: f->direction = DIR_BOTTOM; break;
+                            case 2: f->direction = DIR_LEFT; break;
+                            default:f->direction = DIR_TOP; break;
                         }
                         f->image_offset = 0;
                         city_message_reset_category_count(MESSAGE_CAT_BLOCKED_DOCK);
@@ -955,10 +955,10 @@ void figure_trade_ship_action(figure *f)
                 }
             } else {
                 switch (building_get(f->destination_building_id)->data.dock.orientation) {
-                    case 0: f->direction = DIR_2_RIGHT; break;
-                    case 1: f->direction = DIR_4_BOTTOM; break;
-                    case 2: f->direction = DIR_6_LEFT; break;
-                    default:f->direction = DIR_0_TOP; break;
+                    case 0: f->direction = DIR_RIGHT; break;
+                    case 1: f->direction = DIR_BOTTOM; break;
+                    case 2: f->direction = DIR_LEFT; break;
+                    default:f->direction = DIR_TOP; break;
                 }
             }
             f->image_offset = 0;

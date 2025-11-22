@@ -46,7 +46,7 @@ void figure_create_flotsam(void)
 
     map_point river_entry = scenario_map_river_entry();
     for (int i = 0; i < 20; i++) {
-        figure *f = figure_create(FIGURE_FLOTSAM, river_entry.x, river_entry.y, DIR_0_TOP);
+        figure *f = figure_create(FIGURE_FLOTSAM, river_entry.x, river_entry.y, DIR_TOP);
         f->action_state = FIGURE_ACTION_128_FLOTSAM_CREATED;
         f->resource_id = FLOTSAM_RESOURCE_IDS[i];
         f->wait_ticks = FLOTSAM_WAIT_TICKS[i];

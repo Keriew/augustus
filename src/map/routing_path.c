@@ -14,33 +14,33 @@ static int direction_path[MAX_PATH];
 static void adjust_tile_in_direction(int direction, int *x, int *y, int *grid_offset)
 {
     switch (direction) {
-        case DIR_0_TOP:
-            -- *y;
+        case DIR_TOP:
+            --*y;
             break;
-        case DIR_1_TOP_RIGHT:
-            ++ *x;
-            -- *y;
+        case DIR_TOP_RIGHT:
+            ++*x;
+            --*y;
             break;
-        case DIR_2_RIGHT:
-            ++ *x;
+        case DIR_RIGHT:
+            ++*x;
             break;
-        case DIR_3_BOTTOM_RIGHT:
-            ++ *x;
-            ++ *y;
+        case DIR_BOTTOM_RIGHT:
+            ++*x;
+            ++*y;
             break;
-        case DIR_4_BOTTOM:
-            ++ *y;
+        case DIR_BOTTOM:
+            ++*y;
             break;
-        case DIR_5_BOTTOM_LEFT:
-            -- *x;
-            ++ *y;
+        case DIR_BOTTOM_LEFT:
+            --*x;
+            ++*y;
             break;
-        case DIR_6_LEFT:
-            -- *x;
+        case DIR_LEFT:
+            --*x;
             break;
-        case DIR_7_TOP_LEFT:
-            -- *x;
-            -- *y;
+        case DIR_TOP_LEFT:
+            --*x;
+            --*y;
             break;
     }
     *grid_offset += map_grid_direction_delta(direction);
@@ -52,11 +52,11 @@ static int is_equal_distance_but_better_direction(int distance, int next_distanc
         return 0;
     } else if (direction == -1) {
         return 1;
-    // prefer going in "straight" directions as opposed to diagonals if the distances are equal.
-    // this helps prevent units from zig-zagging instead of moving in a straight line and makes
-    // up for the removal of the general_direction calculation, which tended to make unit movement
-    // look weird as units would try to move directly towards their destination even if there was
-    // an obstacle in the way.
+        // prefer going in "straight" directions as opposed to diagonals if the distances are equal.
+        // this helps prevent units from zig-zagging instead of moving in a straight line and makes
+        // up for the removal of the general_direction calculation, which tended to make unit movement
+        // look weird as units would try to move directly towards their destination even if there was
+        // an obstacle in the way.
     } else if (direction % 2 == 1 && next_direction % 2 == 0) {
         return 1;
     }
@@ -112,7 +112,7 @@ int map_routing_get_path(uint8_t *path, int dst_x, int dst_y, int num_directions
                 int next_distance = map_routing_distance(next_offset);
                 int next_is_highway = map_terrain_is(next_offset, TERRAIN_HIGHWAY);
                 if (next_distance && next_is_better(base_distance, distance, next_distance,
-                        direction, next_direction, is_highway, next_is_highway)) {
+                    direction, next_direction, is_highway, next_is_highway)) {
                     distance = next_distance;
                     direction = next_direction;
                     is_highway = next_is_highway;

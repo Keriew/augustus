@@ -115,7 +115,7 @@ void list_box_draw(list_box_type *list_box)
 {
     draw_scrollbar(list_box);
 
-    if(!list_box->refresh_requested) {
+    if (!list_box->refresh_requested) {
         return;
     }
     list_box->refresh_requested = 0;
@@ -156,14 +156,14 @@ static int handle_arrow_keys(list_box_type *list_box, int direction)
 {
     int delta;
     switch (direction) {
-        case DIR_0_TOP:
-        case DIR_1_TOP_RIGHT:
-        case DIR_7_TOP_LEFT:
+        case DIR_TOP:
+        case DIR_TOP_RIGHT:
+        case DIR_TOP_LEFT:
             delta = -1;
             break;
-        case DIR_4_BOTTOM:
-        case DIR_3_BOTTOM_RIGHT:
-        case DIR_5_BOTTOM_LEFT:
+        case DIR_BOTTOM:
+        case DIR_BOTTOM_RIGHT:
+        case DIR_BOTTOM_LEFT:
             delta = 1;
             break;
         default:

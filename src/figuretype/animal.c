@@ -58,7 +58,7 @@ enum {
 static void create_fishing_point(int x, int y)
 {
     random_generate_next();
-    figure *fish = figure_create(FIGURE_FISH_GULLS, x, y, DIR_0_TOP);
+    figure *fish = figure_create(FIGURE_FISH_GULLS, x, y, DIR_TOP);
     fish->image_offset = random_byte() & 0x1f;
     fish->progress_on_tile = random_byte() & 7;
     figure_movement_set_cross_country_direction(fish,
@@ -95,7 +95,7 @@ static void create_herd(int x, int y)
     if (formation_id > 0) {
         for (int fig = 0; fig < num_animals; fig++) {
             random_generate_next();
-            figure *f = figure_create(herd_type, x, y, DIR_0_TOP);
+            figure *f = figure_create(herd_type, x, y, DIR_TOP);
             f->action_state = FIGURE_ACTION_196_HERD_ANIMAL_AT_REST;
             f->formation_id = formation_id;
             f->wait_ticks = f->id & 0x1f;
@@ -357,7 +357,7 @@ static void set_horse_destination(figure *f, int state)
     if (state == HORSE_CREATED) {
         map_figure_delete(f);
         if (rotation == 0) {
-            if (orientation == DIR_0_TOP || orientation == DIR_6_LEFT) {
+            if (orientation == DIR_TOP || orientation == DIR_LEFT) {
                 f->destination_x = b->x + HORSE_DESTINATION_1[f->wait_ticks_missile].x;
                 f->destination_y = b->y + HORSE_DESTINATION_1[f->wait_ticks_missile].y;
             } else {
@@ -365,7 +365,7 @@ static void set_horse_destination(figure *f, int state)
                 f->destination_y = b->y + HORSE_DESTINATION_2[f->wait_ticks_missile].y;
             }
         } else {
-            if (orientation == DIR_0_TOP || orientation == DIR_2_RIGHT) {
+            if (orientation == DIR_TOP || orientation == DIR_RIGHT) {
                 f->destination_x = b->x + HORSE_DESTINATION_1[f->wait_ticks_missile].y;
                 f->destination_y = b->y + HORSE_DESTINATION_1[f->wait_ticks_missile].x;
             } else {
@@ -384,7 +384,7 @@ static void set_horse_destination(figure *f, int state)
         map_figure_add(f);
     } else if (state == HORSE_RACING) {
         if (rotation == 0) {
-            if (orientation == DIR_0_TOP || orientation == DIR_6_LEFT) {
+            if (orientation == DIR_TOP || orientation == DIR_LEFT) {
                 f->destination_x = b->x + HORSE_DESTINATION_1[f->wait_ticks_missile].x;
                 f->destination_y = b->y + HORSE_DESTINATION_1[f->wait_ticks_missile].y;
             } else {
@@ -392,7 +392,7 @@ static void set_horse_destination(figure *f, int state)
                 f->destination_y = b->y + HORSE_DESTINATION_2[f->wait_ticks_missile].y;
             }
         } else {
-            if (orientation == DIR_0_TOP || orientation == DIR_2_RIGHT) {
+            if (orientation == DIR_TOP || orientation == DIR_RIGHT) {
                 f->destination_x = b->x + HORSE_DESTINATION_1[f->wait_ticks_missile].y;
                 f->destination_y = b->y + HORSE_DESTINATION_1[f->wait_ticks_missile].x;
             } else {
@@ -402,7 +402,7 @@ static void set_horse_destination(figure *f, int state)
         }
     } else if (state == HORSE_FINISHED) {
         if (rotation == 0) {
-            if (orientation == DIR_0_TOP || orientation == DIR_6_LEFT) {
+            if (orientation == DIR_TOP || orientation == DIR_LEFT) {
                 if (f->resource_id) {
                     f->destination_x = b->x + 1;
                     f->destination_y = b->y + 2;
@@ -420,7 +420,7 @@ static void set_horse_destination(figure *f, int state)
                 }
             }
         } else {
-            if (orientation == DIR_0_TOP || orientation == DIR_2_RIGHT) {
+            if (orientation == DIR_TOP || orientation == DIR_RIGHT) {
                 if (f->resource_id) {
                     f->destination_x = b->x + 2;
                     f->destination_y = b->y + 1;

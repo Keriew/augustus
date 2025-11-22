@@ -435,7 +435,7 @@ int building_image_get(const building *b)
         case BUILDING_GATEHOUSE:
         {
             int map_orientation = city_view_orientation();
-            int orientation_is_top_bottom = map_orientation == DIR_0_TOP || map_orientation == DIR_4_BOTTOM;
+            int orientation_is_top_bottom = map_orientation == DIR_TOP || map_orientation == DIR_BOTTOM;
             if (b->subtype.orientation == 1) {
                 if (orientation_is_top_bottom) {
                     return image_group(GROUP_BUILDING_TOWER) + 1;
@@ -453,7 +453,7 @@ int building_image_get(const building *b)
         case BUILDING_TRIUMPHAL_ARCH:
         {
             int map_orientation = city_view_orientation();
-            int orientation_is_top_bottom = map_orientation == DIR_0_TOP || map_orientation == DIR_4_BOTTOM;
+            int orientation_is_top_bottom = map_orientation == DIR_TOP || map_orientation == DIR_BOTTOM;
             if (b->subtype.orientation == 1) {
                 if (orientation_is_top_bottom) {
                     return image_group(GROUP_BUILDING_TRIUMPHAL_ARCH);
@@ -498,13 +498,13 @@ int building_image_get(const building *b)
             int image_id;
 
             if (phase == MONUMENT_FINISHED) {
-                if (orientation == DIR_0_TOP || orientation == DIR_4_BOTTOM) {
+                if (orientation == DIR_TOP || orientation == DIR_BOTTOM) {
                     image_id = image_group(GROUP_BUILDING_HIPPODROME_2);
                 } else {
                     image_id = image_group(GROUP_BUILDING_HIPPODROME_1);
                 }
             } else {
-                if (orientation == DIR_0_TOP || orientation == DIR_4_BOTTOM) {
+                if (orientation == DIR_TOP || orientation == DIR_BOTTOM) {
                     image_id = assets_get_image_id("Monuments", "Circus NWSE 01") +
                         ((phase - 1) * phase_offset);
                 } else {
@@ -521,25 +521,25 @@ int building_image_get(const building *b)
                 building_part = 1; // part 2
             }
 
-            if (orientation == DIR_0_TOP) {
+            if (orientation == DIR_TOP) {
                 switch (building_part) {
                     case 0: image_id += 0; break; // part 1
                     case 1: image_id += 2; break; // part 2
                     case 2: image_id += 4; break; // part 3, same for switch cases below
                 }
-            } else if (orientation == DIR_4_BOTTOM) {
+            } else if (orientation == DIR_BOTTOM) {
                 switch (building_part) {
                     case 0: image_id += 4; break;
                     case 1: image_id += 2; break;
                     case 2: image_id += 0; break;
                 }
-            } else if (orientation == DIR_6_LEFT) {
+            } else if (orientation == DIR_LEFT) {
                 switch (building_part) {
                     case 0: image_id += 0; break;
                     case 1: image_id += 2; break;
                     case 2: image_id += 4; break;
                 }
-            } else { // DIR_2_RIGHT
+            } else { // DIR_RIGHT
                 switch (building_part) {
                     case 0: image_id += 4; break;
                     case 1: image_id += 2; break;

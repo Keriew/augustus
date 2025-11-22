@@ -118,9 +118,9 @@ typedef struct {
     int last_destinatation_id; //can be used for any figure, holds only one value
 
     // New!
-    int route_map_id // Stores the index (0-7) of the map in the pool
+    int route_map_id; // Stores the index (0-7) of the map in the pool
 
-        struct {
+    struct {
         unsigned short tourist_money_spent;
         unsigned short ticks_since_last_visited_id[12];
         unsigned short visited_building_type_ids[12];
