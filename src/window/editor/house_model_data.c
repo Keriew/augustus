@@ -17,6 +17,7 @@
 #include "input/input.h"
 #include "translation/translation.h"
 #include "window/editor/map.h"
+#include "window/editor/attributes.h"
 #include "window/file_dialog.h"
 #include "window/numeric_input.h"
 #include "window/popup_dialog.h"
@@ -239,7 +240,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 
     if (input_go_back_requested(m, h)) {
-        window_go_back();
+        window_editor_attributes_show();
     }
 }
 
