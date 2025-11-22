@@ -1,0 +1,36 @@
+#ifndef MAP_ROUTING_DATA_H
+#define MAP_ROUTING_DATA_H
+
+#include "map/grid.h"
+
+enum { // Includes movement cost
+    TERRAIN_ACCESS_ROAD = 100,
+    TERRAIN_ACCESS_HIGHWAY = 50,
+    TERRAIN_ACCESS_PASSABLE = 100,
+    TERRAIN_ACCESS_EMPTY = 200,
+    TERRAIN_ACCESS_BLOCKED = 200, // Might be destroyable
+    TERRAIN_ACCESS_AQUEDUCT = 200,
+    TERRAIN_ACCESS_RESERVOIR_CONNECTOR = 200,
+
+    TERRAIN_ACCESS_PASSABLE = 100,
+    TERRAIN_ACCESS_BUILDING = 200,
+    NONCITIZEN_2_CLEARABLE = 200,
+    TERRAIN_ACCESS_GATEHOUSE = 200,
+    TERRAIN_ACCESS_FORT = 200,
+    TERRAIN_ACCESS_IMPASSABLE = 200,
+
+    TERRAIN_ACCESS_WATER = 100,
+    TERRAIN_ACCESS_WATER_LOW_BRIDGE = 100, // Small boats can be added!
+    TERRAIN_ACCESS_WATER_BLOCKED = 100,
+    TERRAIN_ACCESS_WATER_EDGE = 200,
+
+    TERRAIN_ACCESS_WALL_PASSABLE = 100,
+    TERRAIN_ACCESS_WALL_BLOCKED = 200,
+};
+
+extern grid_i8 terrain_land_citizen;
+extern grid_i8 terrain_land_noncitizen;
+extern grid_i8 terrain_water;
+extern grid_i8 terrain_walls;
+
+#endif // MAP_ROUTING_DATA_H

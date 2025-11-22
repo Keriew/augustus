@@ -38,32 +38,6 @@ typedef enum {
     ROUTE_TYPE_UNBLOCKING_ROME,
 } RouteType;
 
-enum { // Includes movement cost
-    TERRAIN_ACCESS_ROAD = 100,
-    TERRAIN_ACCESS_HIGHWAY = 50,
-    TERRAIN_ACCESS_PASSABLE = 100,
-    TERRAIN_ACCESS_EMPTY = 200,
-    TERRAIN_ACCESS_BLOCKED = 200, // Might be destroyable
-    TERRAIN_ACCESS_AQUEDUCT = 200,
-    TERRAIN_ACCESS_RESERVOIR_CONNECTOR = 200,
-
-    TERRAIN_ACCESS_PASSABLE = 100,
-    TERRAIN_ACCESS_BUILDING = 200,
-    NONCITIZEN_2_CLEARABLE = 200,
-    TERRAIN_ACCESS_GATEHOUSE = 200,
-    TERRAIN_ACCESS_FORT = 200,
-    TERRAIN_ACCESS_IMPASSABLE = 200,
-
-    TERRAIN_ACCESS_WATER = 100,
-    TERRAIN_ACCESS_WATER_LOW_BRIDGE = 100, // Small boats can be added!
-    TERRAIN_ACCESS_WATER_BLOCKED = 100,
-    TERRAIN_ACCESS_WATER_EDGE = 200,
-
-    TERRAIN_ACCESS_WALL_PASSABLE = 100,
-    TERRAIN_ACCESS_WALL_BLOCKED = 200,
-};
-extern grid_i8 terrain_access
-
 const map_routing_distance_grid *map_routing_get_distance_grid(void);
 
 void map_routing_calculate_distances(int x, int y);
