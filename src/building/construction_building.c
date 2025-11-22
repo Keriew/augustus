@@ -379,8 +379,7 @@ static void add_to_map(int type, building *b, int size, int orientation, int wat
             add_building(b);
             break;
     }
-    map_routing_update_land();
-    map_routing_update_walls();
+    map_routing_update_access();
 }
 
 int building_construction_is_granary_cross_tile(int tile_no)
@@ -420,7 +419,7 @@ int building_construction_fill_vacant_lots(grid_slice *area)
     }
     if (items_placed > 0) {
         building_construction_warning_check_food_stocks(BUILDING_HOUSE_VACANT_LOT);
-        map_routing_update_land();
+        map_routing_update_access();
     }
     return items_placed;
 }
@@ -670,7 +669,7 @@ int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aqueduct)
     if (is_aqueduct && !map_can_place_aqueduct_on_highway(grid_offset, 0)) {
         return 0;
     }
-    if (terrain_land_citizen.items[grid_offset] == CITIZEN_N1_BLOCKED) {
+    if (terrain_access.items[grid_offset] == TERRAIN_ACCESS_BLOCKED) {
         // not open land, can only if:
         // - aqueduct should be placed, and:
         // - land is a reservoir building OR an aqueduct
@@ -687,10 +686,10 @@ int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aqueduct)
             }
         }
         return 0;
-    } else if (terrain_land_citizen.items[grid_offset] == CITIZEN_2_PASSABLE_TERRAIN) {
+    } else if (terrain_access.items[grid_offset] == TERRAIN_ACCESS_PASSABLE) {
         // rubble, access ramp, garden
         return 0;
-    } else if (terrain_land_citizen.items[grid_offset] == CITIZEN_N3_AQUEDUCT) {
+    } else if (terrain_access.items[grid_offset] == TERRAIN_ACCESS_AQUEDUCT) {
         if (is_aqueduct) {
             return 0;
         }

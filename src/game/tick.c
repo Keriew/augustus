@@ -100,7 +100,8 @@ static void advance_month(void)
     map_tiles_update_all_roads();
     map_tiles_update_all_highways();
     map_tiles_update_all_water();
-    map_routing_update_land_citizen();
+    map_routing_update_access(); // Routing
+
     city_message_sort_and_compact();
 
     if (game_time_advance_month()) {

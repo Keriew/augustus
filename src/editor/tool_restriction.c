@@ -154,7 +154,8 @@ int editor_tool_can_place_building(const map_tile *tile, int num_tiles, int *blo
     return !blocked;
 }
 
-int editor_tool_can_place_custom_earthquake(const map_tile *tile) {
+int editor_tool_can_place_custom_earthquake(const map_tile *tile)
+{
     int result = !map_terrain_is(tile->grid_offset, TERRAIN_IMPASSABLE_EARTHQUAKE);
     return result;
 }

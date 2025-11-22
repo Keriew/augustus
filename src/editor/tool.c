@@ -138,7 +138,7 @@ void editor_tool_start_use(const map_tile *tile)
     data.start_tile = *tile;
     if (data.type == TOOL_ROAD) {
         game_undo_start_build(BUILDING_ROAD);
-        map_routing_update_land();
+        map_routing_update_access();
     }
 }
 

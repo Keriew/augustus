@@ -646,7 +646,7 @@ void building_granary_warehouse_curse(int big)
         city_message_post(0, MESSAGE_FIRE, max_building->type, max_building->grid_offset);
         building_destroy_by_fire(max_building);
         sound_effect_play(SOUND_EFFECT_EXPLOSION);
-        map_routing_update_land();
+        map_routing_update_access();
     } else {
         if (max_building->type == BUILDING_WAREHOUSE) {
             building_warehouse_remove_resource_curse(max_building, CURSE_LOADS);

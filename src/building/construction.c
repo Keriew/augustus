@@ -280,7 +280,7 @@ static int place_houses(int measure_only, int x_start, int y_start, int x_end, i
         if (needs_road_warning) {
             city_warning_show(WARNING_HOUSE_TOO_FAR_FROM_ROAD, NEW_WARNING_SLOT);
         }
-        map_routing_update_land();
+        map_routing_update_access();
         window_invalidate();
     }
     return items_placed;
@@ -362,8 +362,7 @@ static int place_wall(int x_start, int y_start, int x_end, int y_end, int measur
             }
         }
     }
-    map_routing_update_land();
-    map_routing_update_walls();
+    map_routing_update_access();
     map_tiles_update_all_walls();
     return items_placed;
 }
@@ -454,7 +453,7 @@ static int place_draggable_building(int x_start, int y_start, int x_end, int y_e
         }
     }
 
-    map_routing_update_land();
+    map_routing_update_access();
     return items_placed;
 }
 
@@ -1094,10 +1093,10 @@ void building_construction_place(void)
         placement_cost *= place_plaza(x_start, y_start, x_end, y_end);
     } else if (type == BUILDING_GARDENS) {
         placement_cost *= place_garden(x_start, y_start, x_end, y_end, 0);
-        map_routing_update_land();
+        map_routing_update_access();
     } else if (type == BUILDING_OVERGROWN_GARDENS) {
         placement_cost *= place_garden(x_start, y_start, x_end, y_end, 1);
-        map_routing_update_land();
+        map_routing_update_access();
     } else if (type == BUILDING_LOW_BRIDGE) {
         int length = map_bridge_add(x_end, y_end, 0);
         if (length <= 1) {
@@ -1120,7 +1119,7 @@ void building_construction_place(void)
         }
         placement_cost = cost;
         map_tiles_update_all_aqueducts(0);
-        map_routing_update_land();
+        map_routing_update_access();
     } else if (type == BUILDING_DRAGGABLE_RESERVOIR) {
         struct reservoir_info info;
         if (!place_reservoir_and_aqueducts(0, x_start, y_start, x_end, y_end, &info)) {
@@ -1149,7 +1148,7 @@ void building_construction_place(void)
         }
         placement_cost = info.cost;
         map_tiles_update_all_aqueducts(0);
-        map_routing_update_land();
+        map_routing_update_access();
     } else if (type >= BUILDING_PINE_TREE && type <= BUILDING_DATE_TREE) {
         placement_cost *= place_draggable_building(x_start, y_start, x_end, y_end, type, 0);
     } else if (type >= BUILDING_PINE_PATH && type <= BUILDING_DATE_PATH) {

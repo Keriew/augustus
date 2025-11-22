@@ -278,8 +278,7 @@ void game_undo_perform(void)
         }
         building_update_state();
     }
-    map_routing_update_land();
-    map_routing_update_walls();
+    map_routing_update_access();
     figure_roamer_preview_reset(building_construction_type());
     data.num_buildings = 0;
 }

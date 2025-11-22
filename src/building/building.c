@@ -685,7 +685,7 @@ void building_update_state(void)
         map_tiles_update_all_aqueducts(0);
     }
     if (land_recalc) {
-        map_routing_update_land();
+        map_routing_update_access();
     }
     if (road_recalc) {
         map_tiles_update_all_roads();

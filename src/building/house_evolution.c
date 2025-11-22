@@ -602,7 +602,7 @@ void building_house_process_evolve_and_consume_goods(void)
         }
     }
     if (has_expanded) {
-        map_routing_update_land();
+        map_routing_update_access();
     }
 }
 

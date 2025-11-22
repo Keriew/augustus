@@ -110,7 +110,7 @@ void building_maintenance_update_burning_ruins(void)
         }
     }
     if (recalculate_terrain) {
-        map_routing_update_land();
+        map_routing_update_access();
     }
 }
 
@@ -231,7 +231,7 @@ void building_maintenance_check_fire_collapse(void)
     }
 
     if (recalculate_terrain) {
-        map_routing_update_land();
+        map_routing_update_access();
     }
 }
 
@@ -351,8 +351,7 @@ void building_maintenance_check_rome_access(void)
             map_tiles_update_all_empty_land();
             map_tiles_update_all_meadow();
 
-            map_routing_update_land();
-            map_routing_update_walls();
+            map_routing_update_access();
 
             if (map_routing_distance(exit_point->grid_offset)) {
                 city_message_post(1, MESSAGE_ROAD_TO_ROME_OBSTRUCTED, 0, 0);

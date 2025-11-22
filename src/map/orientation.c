@@ -75,7 +75,7 @@ void map_orientation_change(int counter_clockwise)
 
     map_orientation_update_buildings();
     map_bridge_update_after_rotate(counter_clockwise);
-    map_routing_update_walls();
+    map_routing_update_access();
 
     map_natives_check_land(0);
 

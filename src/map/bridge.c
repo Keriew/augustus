@@ -249,7 +249,7 @@ int map_bridge_add(int x, int y, int is_ship_bridge)
     }
 
 
-    map_routing_update_land();
+    map_routing_update_access();
     map_routing_update_water();
     map_tiles_update_region_water(x, y, map_grid_offset_to_x(grid_offset), map_grid_offset_to_y(grid_offset));
     return bridge.length;
