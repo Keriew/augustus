@@ -12,8 +12,8 @@
 #include "map/tiles.h"
 #include <stdlib.h>
 
-#define MAX_QUEUE GRID_SIZE * GRID_SIZE
-#define MAX_SEARCH_ITERATIONS 50000 // What does this do?
+#define MAX_QUEUE GRID_SIZE * GRID_SIZE // why is it this number instead of another?
+#define MAX_SEARCH_ITERATIONS 50000 // higher? lower?
 #define MAX_CONCURRENT_ROUTES 32
 
 // Contains the routing context (as opposed to a global object)
@@ -307,6 +307,7 @@ static void route_queue_from_to(RoutingContext *ctx, int src_x, int src_y, int d
     // Assign the number of directions based on the rules (wait... does this really handle the diagonal stuff???)
     int num_directions = rules->num_directions;
 
+    // Wait where's the guard count int???
     while (ctx->queue.head != ctx->queue.tail && guard_count++ < MAX_SEARCH_ITERATIONS) {
 
         // 2. Pop the current best node (offset)
@@ -655,11 +656,6 @@ static void map_routing_calculate_distances(int x, int y, RouteType type)
     // map_routing_copy_results(&ctx);
 }
 
-// This needs to go somewhere... but where?
-if (!map_can_place_initial_road_or_aqueduct(source_offset, type != ROUTED_BUILDING_ROAD)) {
-    return 0;
-}
-
 // What to do about this
 if (only_through_building_id) {
     state.through_building_id = only_through_building_id;
@@ -683,21 +679,7 @@ void map_routing_block(int x, int y, int size)
     }
 }
 
-void map_routing_save_state(buffer * buf)
-{
-    buffer_write_i32(buf, 0); // unused counter
-    buffer_write_i32(buf, stats.enemy_routes_calculated);
-    buffer_write_i32(buf, stats.total_routes_calculated);
-    buffer_write_i32(buf, 0); // unused counter
-}
 
-void map_routing_load_state(buffer * buf)
-{
-    buffer_skip(buf, 4); // unused counter
-    stats.enemy_routes_calculated = buffer_read_i32(buf);
-    stats.total_routes_calculated = buffer_read_i32(buf);
-    buffer_skip(buf, 4); // unused counter
-}
 
 static int can_build_highway(int next_offset, int check_highway_routing)
 {
@@ -715,6 +697,13 @@ static int can_build_highway(int next_offset, int check_highway_routing)
     }
 
     return 1;
+}
+
+
+
+// This needs to go somewhere... but where?
+if (!map_can_place_initial_road_or_aqueduct(source_offset, type != ROUTED_BUILDING_ROAD)) {
+    return 0;
 }
 
 static int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aqueduct)
@@ -755,6 +744,9 @@ static int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aquedu
     }
 }
 
+
+
+
 // Fighting related
 static int is_fighting_friendly(figure * f)
 {
@@ -779,3 +771,20 @@ static inline int has_fighting_enemy(int grid_offset)
     return fighting_data.status.items[grid_offset] & 2;
 }
 
+// Save/Load (unused)
+
+void map_routing_save_state(buffer * buf)
+{
+    buffer_write_i32(buf, 0); // unused counter
+    buffer_write_i32(buf, 0); // unused counter
+    buffer_write_i32(buf, 0); // unused counter
+    buffer_write_i32(buf, 0); // unused counter
+}
+
+void map_routing_load_state(buffer * buf)
+{
+    buffer_skip(buf, 4); // unused counter
+    buffer_skip(buf, 4); // unused counter
+    buffer_skip(buf, 4); // unused counter    
+    buffer_skip(buf, 4); // unused counter
+}
