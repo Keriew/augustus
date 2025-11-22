@@ -2,6 +2,7 @@
 #include "routing.h"
 // External
 #include "building/building.h"
+#include "building/construction_building.h"
 #include "core/time.h"
 #include "map/building.h"
 #include "map/figure.h"
@@ -15,8 +16,9 @@
 #define MAX_QUEUE GRID_SIZE * GRID_SIZE // why is it this number instead of another?
 #define MAX_SEARCH_ITERATIONS 50000 // higher? lower?
 #define MAX_CONCURRENT_ROUTES 32
+#define BASE_TERRAIN_COST(x) ((int)(x))
 
-// Contains the routing context (as opposed to a global object)
+// Routing Context
 typedef struct {
     // Core Pathfinding Data
     map_routing_distance_grid route_map_pool[MAX_CONCURRENT_ROUTES];
@@ -43,11 +45,6 @@ static struct {
     grid_u8 status;
     time_millis last_check;
 } fighting_data;
-
-static struct {
-    int through_building_id;
-    int dest_building_id;
-} state;
 
 // Defines routing rules
 typedef struct {
@@ -76,6 +73,8 @@ typedef struct {
     // Misc
     int unblocking_rome = 0;
     int water_cost_multiplier = 3; // Base cost for water
+    int target_building_id;  // target building to attack
+    int through_building_id; // building allowed to pass through
 } TravelRules;
 
 // Static configuration table, indexed by the RouteType enum.
@@ -119,6 +118,36 @@ static const TravelRules ROUTE_RULE_CONFIG[] = {
     }
 };
 
+// Populates the fighting data thing (?) inside the routing context
+static void populate_fighting_data(RoutingContext *ctx)
+{
+    // 1. Clear the grid first (reset all tiles to 0)
+    // Assuming 'fighting_data' inside ctx is a full grid array
+    map_grid_clear_u8(ctx->fighting_data.items);
+
+    // 2. Iterate over all figures
+    // You need a way to loop all figures. Assuming 'figure_foreach' exists:
+    int total_figures = figure_count();
+    for (int i = 1; i < total_figures; i++) {
+        figure *f = figure_get(i);
+        if (f->state != FIGURE_STATE_ALIVE) continue;
+
+        // Check if this figure is fighting
+        int is_fighting = (f->action_state == FIGURE_ACTION_150_ATTACK);
+        if (!is_fighting) continue;
+
+        // Mark the tile
+        int grid_offset = f->grid_offset;
+
+        if (f->is_friendly) {
+            // Set Bit 0 for Friendly Fighters
+            ctx->fighting_data.items[grid_offset] |= 1;
+        } else {
+            // Set Bit 1 for Enemy Fighters
+            ctx->fighting_data.items[grid_offset] |= 2;
+        }
+    }
+}
 
 static void reset_fighting_status(void)
 {
@@ -396,6 +425,48 @@ void route_queue_all_from(RoutingContext *ctx, int source, const TravelRules *ru
     }
 }
 
+// Returns the cost of a citizen passing through a tile, returns -1 if impassable
+static inline int check_citizen_passability(RoutingContext *ctx, int next_offset)
+{
+    // Common 
+    switch (terrain_land_citizen.items[next_offset]) {
+        case CITIZEN_0_ROAD:
+            if (!rules->travel_roads) return -1;
+            break;
+        case CITIZEN_1_HIGHWAY:
+            if (!rules->travel_highways) return -1;
+            break;
+        case CITIZEN_2_PASSABLE_TERRAIN:
+            if (!rules->travel_gardens) return -1;
+            break;
+        case CITIZEN_4_CLEAR_TERRAIN:
+            if (!rules->travel_land) return -1;
+            break;
+        case CITIZEN_N1_BLOCKED:
+            if (!rules->travel_blocked) return -1; // Nobody allowed
+            break;
+        case CITIZEN_N3_AQUEDUCT:
+            if (!rules->travel_aqueduct) return -1; // Nobody allowed
+            break;
+        case CITIZEN_N4_RESERVOIR_CONNECTOR:
+            if (!rules->travel_reservoir_connector) return -1; // Nobody allowed
+            break;
+    }
+    // Walls
+    switch (terrain_wall.items[next_offset]) {
+        case WALL_0_PASSABLE:
+            if (!rules->is_tower_sentry) {
+                return -1;
+            }
+
+        case WALL_N1_BLOCKED:
+            return -1;
+    }
+    // Base Cost (if valid)
+    base_cost = BASE_TERRAIN_COST(terrain_land_citizen.items[next_offset]);
+    base_cost = BASE_TERRAIN_COST(terrain_wall.items[next_offset]);
+}
+
 /** @brief Helper function to calculate the travel cost and check permission
 * Returns 1 if travel is permitted, 0 otherwise
 * @param RoutingContext
@@ -426,61 +497,16 @@ int direction_index, const TravelRules *rules, int *out_cost)
         return 0;
     }
 
-    // If fighting, return
-    if (has_fighting_friendly(next_offset) || has_fighting_enemy(next_offset)) {
-        return 0;
-    } else {
-        return 1;
-    }
-
-    // Speed Modifiers (e.g highways)
-    // MUST be walking in a cardinal direction, or this bonus won't apply
-    if (rules->allow_highway && map_terrain_is_highway(next_offset)) {
-        cost_multiplier = 0.5;
-    }
+    // If there's anyone fighting in the tile, return
+    // Bit 0 = Friendly Fighting, Bit 1 = Enemy Fighting
+    uint8_t fight_status = ctx->fighting_data.items[next_offset];
+    if (fight_status & 1) { /* Avoid Friendly Fight */ return 0; }
+    if (fight_status & 2) { /* Avoid Enemy Fight */ return 0; }
 
     // Citizen
     if (rules->is_citizen) {
-        // Tower Sentries when wall-walking
-        if (rules->is_tower_sentry) {
-            switch (terrain_wall.items[next_offset]) {
-                case WALL_0_PASSABLE:
-                    base_cost = BASE_TERRAIN_COST(terrain_wall.items[next_offset]);
-                case WALL_N1_BLOCKED:
-                    return 0;
-            }
-        }
-        // All citizens
-        switch (terrain_land_citizen.items[next_offset]) {
-            case CITIZEN_0_ROAD:
-                if (!rules->travel_roads) return 0;
-                base_cost = BASE_TERRAIN_COST(CITIZEN_0_ROAD);
-                break;
-            case CITIZEN_1_HIGHWAY:
-                if (!rules->travel_highways) return 0;
-                base_cost = BASE_TERRAIN_COST(CITIZEN_1_HIGHWAY);
-                break;
-            case CITIZEN_2_PASSABLE_TERRAIN:
-                if (!rules->travel_gardens) return 0;
-                base_cost = BASE_TERRAIN_COST(CITIZEN_2_PASSABLE_TERRAIN);
-                break;
-            case CITIZEN_4_CLEAR_TERRAIN:
-                if (!rules->travel_land) return 0;
-                base_cost = BASE_TERRAIN_COST(CITIZEN_4_CLEAR_TERRAIN);
-                break;
-            case CITIZEN_N1_BLOCKED:
-                if (!rules->travel_blocked) return 0; // Nobody allowed
-                base_cost = BASE_TERRAIN_COST(CITIZEN_N1_BLOCKED);
-                break;
-            case CITIZEN_N3_AQUEDUCT:
-                if (!rules->travel_aqueduct) return 0; // Nobody allowed
-                base_cost = BASE_TERRAIN_COST(CITIZEN_N3_AQUEDUCT);
-                break;
-            case CITIZEN_N4_RESERVOIR_CONNECTOR:
-                if (!rules->travel_reservoir_connector) return 0; // Nobody allowed
-                base_cost = BASE_TERRAIN_COST(CITIZEN_N4_RESERVOIR_CONNECTOR);
-                break;
-        }
+        base_cost = check_citizen_passability(ctx, next_offset);
+        if (base_cost == -1) { return 0 };
     }
 
     // Noncitizen (traders, enemies, etc.)
@@ -498,7 +524,7 @@ int direction_index, const TravelRules *rules, int *out_cost)
                 if (rules->is_friendly) { break; }
                 // If your enemies can't pass through or attack, return
                 int map_building_id = map_building_at(next_offset);
-                if (map_building_id != state.through_building_id && map_building_id != state.dest_building_id) {
+                if (map_building_id != ctx->through_building_id && map_building_id != ctx->target_building_id) {
                     return 0;
                 }
             case NONCITIZEN_5_FORT:
@@ -530,7 +556,17 @@ int direction_index, const TravelRules *rules, int *out_cost)
             cost_multiplier += 12;
         }
     }
+
+    // Speed Modifiers (e.g highways)
+    // MUST be walking in a cardinal direction, or this bonus won't apply
+    if (rules->allow_highway && map_terrain_is_highway(next_offset)) {
+        if is_cardinal(direction) // Mockup placeholder, actually make it
+        {
+            cost_multiplier = 0.5;
+        }
+    }
     // Calculate cost
+    if (base_cost == -1) { return 0 }
     *out_cost = base_cost * direction_cost_multiplier * cost_multiplier;
     return 1;
 
@@ -625,7 +661,7 @@ static void map_routing_calculate_distances(int x, int y, RouteType type)
 {
     int grid_offset = map_grid_offset(x, y);
 
-    // 1. Blocked Tile Check (We can use the rules pointer for this check)
+    // Blocked Tile Check (We can use the rules pointer for this check)
     // Assuming the array lookup is safe (i.e., you check 'type' is valid)
     const TravelRules *rules = &ROUTE_RULE_CONFIG[type];
 
@@ -634,15 +670,18 @@ static void map_routing_calculate_distances(int x, int y, RouteType type)
     // ctx.distance.determined.items[grid_offset] = 0; // If using Dijkstra/A*
     // ordered_enqueue(&ctx, grid_offset, 0); 
 
-    // --- 2. Initialize Context & Load Rules ---
+    // --- Initialize Context & Load Rules ---
     RoutingContext ctx;
     memset(&ctx, 0, sizeof(RoutingContext));
 
     // NOTE: 'rules' is already a pointer to the static config data.
     // We pass this pointer directly to the core routing function.
 
-    // --- 3. Start Search ---
-    ++stats.total_routes_calculated;
+    // Populate Fighting Data
+    populate_fighting_data(&ctx)
+
+        // --- Start Search ---
+        ++stats.total_routes_calculated;
     if (rules->is_enemy) {
         ++stats.enemy_routes_calculated
     }
@@ -650,7 +689,7 @@ static void map_routing_calculate_distances(int x, int y, RouteType type)
     // Call Generic Core Routing Function, passing the static rules
     route_queue_all_from(&ctx, grid_offset, rules);
 
-    // --- 4. Copy Results ---
+    // --- Copy Results ---
     // The result is in 'ctx.distance'. It MUST be copied out 
     // to the external storage (the global/figure distance map).
     // map_routing_copy_results(&ctx);
@@ -658,89 +697,24 @@ static void map_routing_calculate_distances(int x, int y, RouteType type)
 
 // What to do about this
 if (only_through_building_id) {
-    state.through_building_id = only_through_building_id;
+    ctx->through_building_id = only_through_building_id;
     // due to formation offsets, the destination building may not be the same as the "through building" (a.k.a. target building)
-    state.dest_building_id = map_building_at(map_grid_offset(dst_x, dst_y));
+    ctx->target_building_id = map_building_at(map_grid_offset(dst_x, dst_y));
     route_queue_from_to(src_x, src_y, dst_x, dst_y, num_directions, 0, callback_travel_noncitizen_land_through_building);
 } else {
     route_queue_from_to(src_x, src_y, dst_x, dst_y, num_directions, max_tiles, callback_travel_noncitizen_land);
 }
 
-// This should go somewhere too
-void map_routing_block(int x, int y, int size)
+// Marks an area as the start for the search
+void map_routing_add_source_area(int x, int y, int size)
 {
     if (!map_grid_is_inside(x, y, size)) {
         return;
     }
     for (int dy = 0; dy < size; dy++) {
         for (int dx = 0; dx < size; dx++) {
-            distance.determined.items[map_grid_offset(x + dx, y + dy)] = 0;
+            distance.determined.items[map_grid_offset(x + dx, y + dy)] = 0; // Replace distance by whatever appropriate
         }
-    }
-}
-
-
-
-static int can_build_highway(int next_offset, int check_highway_routing)
-{
-    int size = 2;
-    for (int x = 0; x < size; x++) {
-        for (int y = 0; y < size; y++) {
-            int offset = next_offset + map_grid_delta(x, y);
-            int terrain = map_terrain_get(offset);
-            if (terrain & TERRAIN_NOT_CLEAR & ~TERRAIN_HIGHWAY & ~TERRAIN_AQUEDUCT & ~TERRAIN_ROAD) {
-                return 0;
-            } else if (!map_can_place_highway_under_aqueduct(offset, check_highway_routing)) {
-                return 0;
-            }
-        }
-    }
-
-    return 1;
-}
-
-
-
-// This needs to go somewhere... but where?
-if (!map_can_place_initial_road_or_aqueduct(source_offset, type != ROUTED_BUILDING_ROAD)) {
-    return 0;
-}
-
-static int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aqueduct)
-{
-    if (is_aqueduct && !map_can_place_aqueduct_on_highway(grid_offset, 0)) {
-        return 0;
-    }
-    if (terrain_land_citizen.items[grid_offset] == CITIZEN_N1_BLOCKED) {
-        // not open land, can only if:
-        // - aqueduct should be placed, and:
-        // - land is a reservoir building OR an aqueduct
-
-        if (!is_aqueduct) {
-            return 0;
-        }
-        if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
-            return 1;
-        }
-        if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
-            if (building_get(map_building_at(grid_offset))->type == BUILDING_RESERVOIR) {
-                return 1;
-            }
-        }
-        return 0;
-    } else if (terrain_land_citizen.items[grid_offset] == CITIZEN_2_PASSABLE_TERRAIN) {
-        // rubble, access ramp, garden
-        return 0;
-    } else if (terrain_land_citizen.items[grid_offset] == CITIZEN_N3_AQUEDUCT) {
-        if (is_aqueduct) {
-            return 0;
-        }
-        if (map_can_place_road_under_aqueduct(grid_offset)) {
-            return 1;
-        }
-        return 0;
-    } else {
-        return 1;
     }
 }
 

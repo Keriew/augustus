@@ -59,7 +59,7 @@ int map_routing_noncitizen_can_travel_over_land(
     int src_x, int src_y, int dst_x, int dst_y, int num_directions, int only_through_building_id, int max_tiles);
 int map_routing_noncitizen_can_travel_through_everything(int src_x, int src_y, int dst_x, int dst_y, int num_directions);
 
-void map_routing_block(int x, int y, int size);
+void map_routing_add_source_area(int x, int y, int size);
 
 void map_routing_save_state(buffer *buf);
 

@@ -506,11 +506,11 @@ static int place_reservoir_and_aqueducts(int measure_only, int x_start, int y_st
         return 0;
     }
     if (info->place_reservoir_at_start != PLACE_RESERVOIR_NO) {
-        map_routing_block(x_start - 1, y_start - 1, 3);
+        map_routing_add_source_area(x_start - 1, y_start - 1, 3);
         mark_construction(x_start - 1, y_start - 1, 3, terrain_mask, 1);
     }
     if (info->place_reservoir_at_end != PLACE_RESERVOIR_NO) {
-        map_routing_block(x_end - 1, y_end - 1, 3);
+        map_routing_add_source_area(x_end - 1, y_end - 1, 3);
         mark_construction(x_end - 1, y_end - 1, 3, terrain_mask, 1);
     }
     const int aqueduct_offsets_x[] = { 0, 2, 0, -2 };

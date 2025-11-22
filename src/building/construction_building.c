@@ -646,3 +646,59 @@ int building_construction_place_building(building_type type, int x, int y, int e
     add_to_map(type, b, size, building_orientation, waterside_orientation_abs);
     return 1;
 }
+
+int can_build_highway(int next_offset, int check_highway_routing)
+{
+    int size = 2;
+    for (int x = 0; x < size; x++) {
+        for (int y = 0; y < size; y++) {
+            int offset = next_offset + map_grid_delta(x, y);
+            int terrain = map_terrain_get(offset);
+            if (terrain & TERRAIN_NOT_CLEAR & ~TERRAIN_HIGHWAY & ~TERRAIN_AQUEDUCT & ~TERRAIN_ROAD) {
+                return 0;
+            } else if (!map_can_place_highway_under_aqueduct(offset, check_highway_routing)) {
+                return 0;
+            }
+        }
+    }
+
+    return 1;
+}
+
+int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aqueduct)
+{
+    if (is_aqueduct && !map_can_place_aqueduct_on_highway(grid_offset, 0)) {
+        return 0;
+    }
+    if (terrain_land_citizen.items[grid_offset] == CITIZEN_N1_BLOCKED) {
+        // not open land, can only if:
+        // - aqueduct should be placed, and:
+        // - land is a reservoir building OR an aqueduct
+
+        if (!is_aqueduct) {
+            return 0;
+        }
+        if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
+            return 1;
+        }
+        if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+            if (building_get(map_building_at(grid_offset))->type == BUILDING_RESERVOIR) {
+                return 1;
+            }
+        }
+        return 0;
+    } else if (terrain_land_citizen.items[grid_offset] == CITIZEN_2_PASSABLE_TERRAIN) {
+        // rubble, access ramp, garden
+        return 0;
+    } else if (terrain_land_citizen.items[grid_offset] == CITIZEN_N3_AQUEDUCT) {
+        if (is_aqueduct) {
+            return 0;
+        }
+        if (map_can_place_road_under_aqueduct(grid_offset)) {
+            return 1;
+        }
+        return 0;
+    } else {
+        return 1;
+    }
+}
