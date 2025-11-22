@@ -363,33 +363,45 @@ int direction_index, const TravelRules *rules, int *out_cost)
 {
     // Default base cost for a cardinal move (or set based on rules)
     // Prep in case diagonal movement gets added
-    int cost = (direction_index < 4) ? 100 : 141;
-    int cost_multiplier = 1
+    int base_cost = 0;
+    int direction_cost_multiplier = (direction_index < 4) ? 100 : 141;
+    int cost_multiplier = 1;
 
-        // Rule 1: Always check for impassable geometry (must be first)
-        if (!rules->terrain_passable_func(next_offset)) {
-            return 0;
-        }
+    // If impassable, return
+    if (!rules->terrain_passable_func(next_offset)) {
+        return 0;
+    }
 
-    // Rule 2: Check Road Access (e.g., roadblock permission)
+    // If not allowed through, return (roadblocks)
     if (rules->required_permission > 0 &&
         !map_roadblock_check(next_offset, rules->required_permission)) {
         return 0;
     }
 
-    int base_cost = 0;
-
-    if (rules->is_tower_sentry) {
-        switch (terrain_wall.items[next_offset]) {
-            case WALL_0_PASSABLE:
-                BASE_TERRAIN_COST(terrain_wall.items[next_offset]);
-                return 1;
-            case WALL_N1_BLOCKED:
-                return 0;
-        }
+    // If fighting, return
+    if (has_fighting_friendly(next_offset) || has_fighting_enemy(next_offset)) {
+        return 0;
+    } else {
+        return 1;
     }
 
+    // Speed Modifiers (e.g highways)
+    if (rules->allow_highway && map_terrain_is_highway(next_offset)) {
+        cost_multiplier = 0.5;
+    }
+
+    // Citizen
     if (rules->is_citizen) {
+        // Tower Sentries wall-walking
+        if (rules->is_tower_sentry) {
+            switch (terrain_wall.items[next_offset]) {
+                case WALL_0_PASSABLE:
+                    base_cost = BASE_TERRAIN_COST(terrain_wall.items[next_offset]);
+                case WALL_N1_BLOCKED:
+                    return 0;
+            }
+        }
+        // All citizens
         switch (terrain_land_citizen.items[next_offset]) {
             case CITIZEN_0_ROAD:
                 if (!rules->travel_roads) return 0;
@@ -420,18 +432,40 @@ int direction_index, const TravelRules *rules, int *out_cost)
                 base_cost = BASE_TERRAIN_COST(CITIZEN_N4_RESERVOIR_CONNECTOR);
                 break;
             default:
-                return 0;
+                return 0; // Includes walls if not a tower sentry
         }
     }
 
+    // Noncitizen (traders, enemies, etc.)
     if (rules->is_noncitizen) {
+        // Friendly noncitizens may pass through all terrain except fort and blocked
+        if (rules->is_friendly) {
+            if (terrain < NONCITIZEN_5_FORT) {
+                return 1;
+            }
+        }
+
+        // May pass through passable or clearable terrain
+        if (terrain == NONCITIZEN_0_PASSABLE || terrain == NONCITIZEN_2_CLEARABLE) {
+            base_cost = BASE_TERRAIN_COST(terrain_land_noncitizen.items[next_offset])
+                return 1;
+        }
+        // May pass through passable or destructible buildings (ie they will attack them then pass through)
+        if (terrain == NONCITIZEN_1_BUILDING) {
+            int map_building_id = map_building_at(next_offset);
+            if (map_building_id == state.through_building_id || map_building_id == state.dest_building_id) {
+                base_cost = BASE_TERRAIN_COST(NONCITIZEN_1_BUILDING)
+                    return 1;
+            }
+        }
+        // May never pass through blocked terrain
         if (terrain_land_noncitizen.items[next_offset] == NONCITIZEN_N1_BLOCKED) {
             return 0;
         }
-        base_cost = BASE_TERRAIN_COST(terrain_land_noncitizen.items[next_offset])
+        // Any other terrain (walls, gatehouses and forts) is passable (they will attack them)
+        BASE_TERRAIN_COST(NONCITIZEN_1_BUILDING)
             return 1;
     }
-
     // Boats
     if (rules->is_boat) {
         // Passability Check
@@ -453,7 +487,11 @@ int direction_index, const TravelRules *rules, int *out_cost)
         }
         return 1;
     }
+    // Calculate cost
+    *out_cost = base_cost * direction_cost_multiplier * cost_multiplier;
+    return 1;
 
+    // --- FLOTSAM --- (no cost it just floats towards non-blocked tiles)
     // Flotsam
     if (rules->is_flotsam) {
         // Next position must be water and not blocked
@@ -463,6 +501,26 @@ int direction_index, const TravelRules *rules, int *out_cost)
         return 0;
     }
 
+    // --- BUILDINGS --- (drag build)
+    // Road
+    if (rules->is_road) {
+        switch (terrain_land_citizen.items[next_offset]) {
+            case CITIZEN_2_PASSABLE_TERRAIN: // rubble, garden, access ramp
+            case CITIZEN_N1_BLOCKED: // non-empty land
+                return 0;
+            case CITIZEN_N3_AQUEDUCT:
+                if (!map_can_place_road_under_aqueduct(next_offset)) {
+                    distance.determined.items[next_offset] = -1;
+                    return 0;
+                }
+                break;
+            default:
+                if (map_terrain_is(next_offset, TERRAIN_BUILDING)) {
+                    return 0;
+                }
+        }
+        return 1;
+    }
     // Highway
     if (rules->is_highway) {
         // Next position must be a valid placement for a highway
@@ -471,68 +529,56 @@ int direction_index, const TravelRules *rules, int *out_cost)
         }
         return 0;
     }
-
-    // Not fighting friendly (criminals???)
-    if (rules->not_fighting_friendly) {
-        if (!has_fighting_friendly(next_offset)) {
+    // Aqueduct
+    if (rules->is_aqueduct) {
+        // If the aqueduct cannot be placed on this specific road tile, return
+        if (map_terrain_is(next_offset, TERRAIN_ROAD) && !map_can_place_aqueduct_on_road(next_offset)) {
+            distance.determined.items[next_offset] = -1;
+            return 0;
+        }
+        // If the aqueduct cannot be placed on this specific highway tile, return
+        if (map_terrain_is(next_offset, TERRAIN_HIGHWAY) && !map_can_place_aqueduct_on_highway(next_offset, 1)) {
+            return 0;
+        }
+        // Check for other invalid terrain
+        switch (terrain_land_citizen.items[next_offset]) {
+            case CITIZEN_N3_AQUEDUCT:
+            case CITIZEN_2_PASSABLE_TERRAIN: // rubble, garden, access ramp
+            case CITIZEN_N1_BLOCKED: // non-empty land
+                return 0;
+        }
+        // Check if the terrain is a building, in which case only reservoir connectors are allowed
+        if (map_terrain_is(next_offset, TERRAIN_BUILDING)) {
+            if (terrain_land_citizen.items[next_offset] != CITIZEN_N4_RESERVOIR_CONNECTOR) {
+                return 0;
+            }
+        }
+        return 1;
+    }
+    // Wall
+    if (rules->is_wall) {
+        // Next position must be clear terrain
+        if (terrain_land_citizen.items[next_offset] == CITIZEN_4_CLEAR_TERRAIN) {
             return 1;
         }
         return 0;
     }
 
-
-
-
-    // Rule 3: Speed/Cost Modifiers (e.g., highway or water)
-    if (rules->allow_highway && map_terrain_is_highway(next_offset)) {
-        cost_multiplier = 0.5;
+    // --- PATH TO ROME BLOCKED ---
+    // Delete wall/aqueduct
+    // UNTIL_STOP and UNTIL_CONTINUE will only ever be handled by the right routing... right???
+    if (rules->unblocking_rome && (rules->is_wall || rules->is_aqueduct)) {
+        if (terrain_land_citizen.items[next_offset] < CITIZEN_0_ROAD) { // Wait what???
+            if (map_terrain_is(next_offset, TERRAIN_AQUEDUCT | TERRAIN_WALL)) {
+                map_terrain_remove(next_offset, TERRAIN_CLEARABLE);
+                return UNTIL_STOP;
+            }
+        } else {
+            return 1
+        }
+        return UNTIL_CONTINUE;
     }
-
-    // ... add all other specific movement/cost logic here ...
-
-    *out_cost = cost * cost_multiplier;
-    return 1;
 }
-
-static int callback_travel_walls(int offset, int next_offset, int direction)
-{
-    if (terrain_walls.items[next_offset] >= WALL_0_PASSABLE &&
-        terrain_walls.items[next_offset] <= 2) {
-        return 1;
-    }
-    return 0;
-}
-
-static int callback_travel_noncitizen_land_through_building(int offset, int next_offset, int direction)
-{
-    if (has_fighting_enemy(next_offset)) {
-        return 0;
-    }
-    int8_t terrain = terrain_land_noncitizen.items[next_offset];
-    if (terrain == NONCITIZEN_0_PASSABLE || terrain == NONCITIZEN_2_CLEARABLE) {
-        return 1;
-    }
-    int map_building_id = map_building_at(next_offset);
-    if (terrain == NONCITIZEN_1_BUILDING && (map_building_id == state.through_building_id || map_building_id == state.dest_building_id)) {
-        return 1;
-    }
-    return 0;
-}
-
-static int callback_travel_noncitizen_land(int offset, int next_offset, int direction)
-{
-    if (has_fighting_enemy(next_offset)) {
-        return 0;
-    }
-    uint8_t terrain = terrain_land_noncitizen.items[next_offset];
-    if (terrain < NONCITIZEN_5_FORT) {
-        return 1;
-    }
-    return 0;
-}
-
-
-
 
 void map_routing_calculate_distances(int x, int y)
 {
@@ -557,127 +603,6 @@ void map_routing_calculate_distances_water_flotsam(int x, int y)
         clear_data();
     } else {
         route_queue_all_from(grid_offset, DIRECTIONS_DIAGONALS, callback_calc_distance_water_flotsam, 0);
-    }
-}
-
-static int callback_calc_distance_build_wall(RoutingContext *ctx, int next_offset, int dist, int direction)
-{
-    if (terrain_land_citizen.items[next_offset] == CITIZEN_4_CLEAR_TERRAIN) {
-        enqueue(ctx, next_offset, dist);
-    }
-    return 1;
-}
-
-static int can_build_highway(int next_offset, int check_highway_routing)
-{
-    int size = 2;
-    for (int x = 0; x < size; x++) {
-        for (int y = 0; y < size; y++) {
-            int offset = next_offset + map_grid_delta(x, y);
-            int terrain = map_terrain_get(offset);
-            if (terrain & TERRAIN_NOT_CLEAR & ~TERRAIN_HIGHWAY & ~TERRAIN_AQUEDUCT & ~TERRAIN_ROAD) {
-                return 0;
-            } else if (!map_can_place_highway_under_aqueduct(offset, check_highway_routing)) {
-                return 0;
-            }
-        }
-    }
-
-    return 1;
-}
-
-static int callback_calc_distance_build_road(RoutingContext *ctx, int next_offset, int dist, int direction)
-{
-    int blocked = 0;
-    switch (terrain_land_citizen.items[next_offset]) {
-        case CITIZEN_N3_AQUEDUCT:
-            if (!map_can_place_road_under_aqueduct(next_offset)) {
-                distance.determined.items[next_offset] = -1;
-                blocked = 1;
-            }
-            break;
-        case CITIZEN_2_PASSABLE_TERRAIN: // rubble, garden, access ramp
-        case CITIZEN_N1_BLOCKED: // non-empty land
-            blocked = 1;
-            break;
-        default:
-            if (map_terrain_is(next_offset, TERRAIN_BUILDING)) {
-                blocked = 1;
-            }
-            break;
-    }
-    if (!blocked) {
-        enqueue(ctx, next_offset, dist);
-    }
-    return 1;
-}
-
-static int callback_calc_distance_build_aqueduct(RoutingContext *ctx, int next_offset, int dist, int direction)
-{
-    // check for existing highway/aqueduct tiles that won't work with this one
-    if (!map_can_place_aqueduct_on_highway(next_offset, 1)) {
-        return 1;
-    }
-
-    int blocked = 0;
-    switch (terrain_land_citizen.items[next_offset]) {
-        case CITIZEN_N3_AQUEDUCT:
-        case CITIZEN_2_PASSABLE_TERRAIN: // rubble, garden, access ramp
-        case CITIZEN_N1_BLOCKED: // non-empty land
-            blocked = 1;
-            break;
-        default:
-            if (map_terrain_is(next_offset, TERRAIN_BUILDING)) {
-                if (terrain_land_citizen.items[next_offset] != CITIZEN_N4_RESERVOIR_CONNECTOR) {
-                    blocked = 1;
-                }
-            }
-            break;
-    }
-    if (map_terrain_is(next_offset, TERRAIN_ROAD) && !map_can_place_aqueduct_on_road(next_offset)) {
-        distance.determined.items[next_offset] = -1;
-        blocked = 1;
-    }
-    if (!blocked) {
-        enqueue(ctx, next_offset, dist);
-    }
-    return 1;
-}
-
-static int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aqueduct)
-{
-    if (is_aqueduct && !map_can_place_aqueduct_on_highway(grid_offset, 0)) {
-        return 0;
-    }
-    if (terrain_land_citizen.items[grid_offset] == CITIZEN_N1_BLOCKED) {
-        // not open land, can only if:
-        // - aqueduct should be placed, and:
-        // - land is a reservoir building OR an aqueduct
-        if (!is_aqueduct) {
-            return 0;
-        }
-        if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
-            return 1;
-        }
-        if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
-            if (building_get(map_building_at(grid_offset))->type == BUILDING_RESERVOIR) {
-                return 1;
-            }
-        }
-        return 0;
-    } else if (terrain_land_citizen.items[grid_offset] == CITIZEN_2_PASSABLE_TERRAIN) {
-        // rubble, access ramp, garden
-        return 0;
-    } else if (terrain_land_citizen.items[grid_offset] == CITIZEN_N3_AQUEDUCT) {
-        if (is_aqueduct) {
-            return 0;
-        }
-        if (map_can_place_road_under_aqueduct(grid_offset)) {
-            return 1;
-        }
-        return 0;
-    } else {
-        return 1;
     }
 }
 
@@ -713,51 +638,6 @@ int map_routing_calculate_distances_for_building(routed_building_type type, int 
         route_queue_all_from(source_offset, DIRECTIONS_NO_DIAGONALS, callback_calc_distance_build_aqueduct, 0);
     }
     return 1;
-}
-
-static int callback_delete_wall_aqueduct(RoutingContext *ctx, int next_offset, int dist, int direction)
-{
-    if (terrain_land_citizen.items[next_offset] < CITIZEN_0_ROAD) {
-        if (map_terrain_is(next_offset, TERRAIN_AQUEDUCT | TERRAIN_WALL)) {
-            map_terrain_remove(next_offset, TERRAIN_CLEARABLE);
-            return UNTIL_STOP;
-        }
-    } else {
-        enqueue(ctx, next_offset, dist);
-    }
-    return UNTIL_CONTINUE;
-}
-
-void map_routing_delete_first_wall_or_aqueduct(int x, int y)
-{
-    ++stats.total_routes_calculated;
-    route_queue_all_from(map_grid_offset(x, y), DIRECTIONS_NO_DIAGONALS, callback_delete_wall_aqueduct, 0);
-}
-
-static int is_fighting_friendly(figure *f)
-{
-    return f->is_friendly && f->action_state == FIGURE_ACTION_150_ATTACK;
-}
-
-static inline int has_fighting_friendly(int grid_offset)
-{
-    if (!(fighting_data.status.items[grid_offset] & 0x80)) {
-        fighting_data.status.items[grid_offset] |= 0x80 | map_figure_foreach_until(grid_offset, is_fighting_friendly);
-    }
-    return fighting_data.status.items[grid_offset] & 1;
-}
-
-static int is_fighting_enemy(figure *f)
-{
-    return !f->is_friendly && f->action_state == FIGURE_ACTION_150_ATTACK;
-}
-
-static inline int has_fighting_enemy(int grid_offset)
-{
-    if (!(fighting_data.status.items[grid_offset] & 0x40)) {
-        fighting_data.status.items[grid_offset] |= 0x40 | (map_figure_foreach_until(grid_offset, is_fighting_enemy) << 1);
-    }
-    return fighting_data.status.items[grid_offset] & 2;
 }
 
 int map_routing_citizen_can_travel_over_land(int src_x, int src_y, int dst_x, int dst_y, int num_directions)
@@ -815,14 +695,6 @@ int map_routing_noncitizen_can_travel_over_land(
     return distance.determined.items[map_grid_offset(dst_x, dst_y)] != 0;
 }
 
-static int callback_travel_noncitizen_through_everything(int offset, int next_offset, int direction)
-{
-    if (terrain_land_noncitizen.items[next_offset] >= NONCITIZEN_0_PASSABLE) {
-        return 1;
-    }
-    return 0;
-}
-
 int map_routing_noncitizen_can_travel_through_everything(int src_x, int src_y, int dst_x, int dst_y, int num_directions)
 {
     ++stats.total_routes_calculated;
@@ -861,4 +733,92 @@ void map_routing_load_state(buffer *buf)
     stats.enemy_routes_calculated = buffer_read_i32(buf);
     stats.total_routes_calculated = buffer_read_i32(buf);
     buffer_skip(buf, 4); // unused counter
+}
+
+void map_routing_delete_first_wall_or_aqueduct(int x, int y)
+{
+    ++stats.total_routes_calculated;
+    route_queue_all_from(map_grid_offset(x, y), DIRECTIONS_NO_DIAGONALS, callback_delete_wall_aqueduct, 0);
+}
+
+static int can_build_highway(int next_offset, int check_highway_routing)
+{
+    int size = 2;
+    for (int x = 0; x < size; x++) {
+        for (int y = 0; y < size; y++) {
+            int offset = next_offset + map_grid_delta(x, y);
+            int terrain = map_terrain_get(offset);
+            if (terrain & TERRAIN_NOT_CLEAR & ~TERRAIN_HIGHWAY & ~TERRAIN_AQUEDUCT & ~TERRAIN_ROAD) {
+                return 0;
+            } else if (!map_can_place_highway_under_aqueduct(offset, check_highway_routing)) {
+                return 0;
+            }
+        }
+    }
+
+    return 1;
+}
+
+static int is_fighting_friendly(figure *f)
+{
+    return f->is_friendly && f->action_state == FIGURE_ACTION_150_ATTACK;
+}
+
+static inline int has_fighting_friendly(int grid_offset)
+{
+    if (!(fighting_data.status.items[grid_offset] & 0x80)) {
+        fighting_data.status.items[grid_offset] |= 0x80 | map_figure_foreach_until(grid_offset, is_fighting_friendly);
+    }
+    return fighting_data.status.items[grid_offset] & 1;
+}
+
+static int is_fighting_enemy(figure *f)
+{
+    return !f->is_friendly && f->action_state == FIGURE_ACTION_150_ATTACK;
+}
+
+static inline int has_fighting_enemy(int grid_offset)
+{
+    if (!(fighting_data.status.items[grid_offset] & 0x40)) {
+        fighting_data.status.items[grid_offset] |= 0x40 | (map_figure_foreach_until(grid_offset, is_fighting_enemy) << 1);
+    }
+    return fighting_data.status.items[grid_offset] & 2;
+}
+
+static int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aqueduct)
+{
+    if (is_aqueduct && !map_can_place_aqueduct_on_highway(grid_offset, 0)) {
+        return 0;
+    }
+    if (terrain_land_citizen.items[grid_offset] == CITIZEN_N1_BLOCKED) {
+        // not open land, can only if:
+        // - aqueduct should be placed, and:
+        // - land is a reservoir building OR an aqueduct
+
+        if (!is_aqueduct) {
+            return 0;
+        }
+        if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
+            return 1;
+        }
+        if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+            if (building_get(map_building_at(grid_offset))->type == BUILDING_RESERVOIR) {
+                return 1;
+            }
+        }
+        return 0;
+    } else if (terrain_land_citizen.items[grid_offset] == CITIZEN_2_PASSABLE_TERRAIN) {
+        // rubble, access ramp, garden
+        return 0;
+    } else if (terrain_land_citizen.items[grid_offset] == CITIZEN_N3_AQUEDUCT) {
+        if (is_aqueduct) {
+            return 0;
+        }
+        if (map_can_place_road_under_aqueduct(grid_offset)) {
+            return 1;
+        }
+        return 0;
+    } else {
+        return 1;
+    }
 }
