@@ -592,7 +592,7 @@ static void confirm_save_file(int accepted, int checked)
         window_editor_custom_messages_show();
     } else if (data.type == FILE_TYPE_MODEL_DATA) {
         scenario_model_export_to_xml(filename);
-        window_model_data_show();
+        window_go_back();
     }
     snprintf(data.file_data->last_loaded_file, FILE_NAME_MAX, "%s", data.selected_file);
 }
@@ -678,7 +678,7 @@ static void button_ok_cancel(int is_ok, int param2)
         } else if (data.type == FILE_TYPE_MODEL_DATA) {
             int result = scenario_model_xml_parse_file(filename);
             if (result) {
-                window_model_data_show();
+                window_go_back();
             } else {
                 window_plain_message_dialog_show(TR_EDITOR_UNABLE_TO_LOAD_MODEL_DATA_TITLE, TR_EDITOR_CHECK_LOG_MESSAGE, 1);
                 return;

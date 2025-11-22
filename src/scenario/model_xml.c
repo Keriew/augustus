@@ -120,7 +120,6 @@ static void export_model_data(buffer *buf)
             if (model == prop_model) {
                 continue;
             }
-
             if (memcmp(model, prop_model, sizeof(*model)) == 0) {
                 continue;
             }
@@ -137,6 +136,33 @@ static void export_model_data(buffer *buf)
                 xml_exporter_add_attribute_int("production_rate", resource->production_per_month);
             }
         }
+        xml_exporter_close_element();
+
+        edited_models++;
+    }
+    
+    for (house_level level = HOUSE_MIN; level <= HOUSE_MAX; level++) {
+        const building_properties *props = building_properties_for_type(level + 10);
+        model_house *model = model_get_house(level);
+        model_house *prop_model = (model_house *) &props->house_model_data;
+        if (!model || !prop_model) {
+            continue;
+        }
+
+        if (model == prop_model) {
+            continue;
+        }
+        if (memcmp(model, prop_model, sizeof(*model)) == 0) {
+            continue;
+        }
+        
+        xml_exporter_new_element("house_model");
+        xml_exporter_add_attribute_text("house_level", props->event_data.attr);
+        
+        for (house_model_data_type data_type = MODEL_DEVOLVE_DESIRABILITY; data_type < MODEL_HOUSE_MAX; data_type++) {
+            xml_exporter_add_attribute_int(string_for_house_data_type(data_type), *model_get_ptr_for_house_data_type(model, data_type));
+        }
+
         xml_exporter_close_element();
 
         edited_models++;
@@ -207,6 +233,7 @@ static int start_building_model(void)
         if (!xml_parser_has_attribute(string_for_building_data_type(data_type))) {
             char *error_msg;
             snprintf(error_msg, 256, "Attribute missing. '%s' not given", string_for_building_data_type(data_type));
+            xml_import_log_error(error_msg);
             return 0;
         }
     }
@@ -226,6 +253,29 @@ static int start_building_model(void)
 
 static int start_house_model(void)
 {
+    const char *value = xml_parser_get_attribute_string("house_level");
+    special_attribute_mapping_t *found = scenario_events_parameter_data_get_attribute_mapping_by_text(PARAMETER_TYPE_MODEL, value);
+    if (found == 0) {
+        xml_import_log_error("Could not resolve the given value. Invalid house_level");
+        return 0;
+    }
+    house_level level = found->value - 10;
+    
+    for (house_model_data_type data_type = MODEL_DEVOLVE_DESIRABILITY; data_type < MODEL_HOUSE_MAX; data_type++) {
+        if (!xml_parser_has_attribute(string_for_house_data_type(data_type))) {
+            char *error_msg;
+            snprintf(error_msg, 256, "Attribute missing. '%s' not given", string_for_house_data_type(data_type));
+            xml_import_log_error(error_msg);
+            return 0;
+        }
+    }
+
+    model_house *model_ptr = model_get_house(level);
+
+    for (house_model_data_type data_type = MODEL_DEVOLVE_DESIRABILITY; data_type < MODEL_HOUSE_MAX; data_type++) {
+        *model_get_ptr_for_house_data_type(model_ptr, data_type) = xml_parser_get_attribute_int(string_for_house_data_type(data_type));
+    }
+    
     return 1;
 }
 
