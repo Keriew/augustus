@@ -63,7 +63,7 @@ enum { // Includes movement cost
     WALL_0_PASSABLE = 100,
     WALL_N1_BLOCKED = 200,
 };
-extern grid_i8 terrain_type
+extern grid_i8 terrain_access
 
 const map_routing_distance_grid *map_routing_get_distance_grid(void);
 

@@ -19,7 +19,7 @@
 #define BASE_TERRAIN_COST(x) ((int)(x))
 
 // From routing_data.c
-grid_i8 terrain_type
+grid_i8 terrain_access
 
 // Routing Context
 typedef struct {
