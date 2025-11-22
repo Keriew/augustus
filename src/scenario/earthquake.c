@@ -12,6 +12,7 @@
 #include "map/building.h"
 #include "map/data.h"
 #include "map/grid.h"
+#include "map/point.h"
 #include "map/property.h"
 #include "map/routing_terrain.h"
 #include "map/terrain.h"
@@ -33,11 +34,6 @@ static struct {
     } expand[4];
     int next_delay;
 } data;
-
-struct field {
-    int x;
-    int y;
-};
 
 void scenario_earthquake_init(void)
 {
@@ -129,23 +125,23 @@ static void advance_earthquake_to_tile(int x, int y)
     figure_create_explosion_cloud(x, y, 1, 0);
 }
 
-static struct field custom_earthquake_find_next_tile(void)
+static map_point custom_earthquake_find_next_tile(void)
 {
     for (int y = 0; y < map_data.height; y++) {
         for (int x = 0; x < map_data.width; x++) {
             int grid_offset = map_grid_offset(x, y);
             if (map_property_is_future_earthquake(grid_offset) &&
                 can_advance_earthquake_to_tile(x, y)) {
-                return (struct field){x, y};
+                return (map_point) {x, y};
             }
         }
     }
-    return (struct field){0, 0};
+    return (map_point){0, 0};
 }
 
 static int custom_earthquake_advance_next_tile(void)
 {
-    struct field coords = custom_earthquake_find_next_tile();
+    map_point coords = custom_earthquake_find_next_tile();
     if (coords.x) {
         advance_earthquake_to_tile(coords.x, coords.y);
         int grid_offset = map_grid_offset(coords.x, coords.y);
@@ -160,7 +156,7 @@ static int custom_earthquake_advance_next_tile(void)
 static int custom_earthquake_advance_random_tiles(void)
 {
     // 1. Collect all tiles that can be affected by the earthquake
-    struct field candidates[GRID_SIZE * GRID_SIZE];
+    map_point candidates[GRID_SIZE * GRID_SIZE];
     int count = 0;
 
     for (int y = 0; y < map_data.height; y++) {
@@ -168,7 +164,7 @@ static int custom_earthquake_advance_random_tiles(void)
             int grid_offset = map_grid_offset(x, y);
             if (map_property_is_future_earthquake(grid_offset) &&
                 can_advance_earthquake_to_tile(x, y)) {
-                candidates[count++] = (struct field) { x, y };
+                candidates[count++] = (map_point) { x, y };
             }
         }
     }
@@ -181,7 +177,7 @@ static int custom_earthquake_advance_random_tiles(void)
 
     for (int i = 0; i < tiles_to_process; i++) {
         int index = (scenario.earthquake.pattern == EARTHQUAKE_PATTERN_RANDOM ? random_short() : random_byte()) % count; // choose random out of candidates
-        struct field coords = candidates[index];
+        map_point coords = candidates[index];
 
         // Process the selected tile
         advance_earthquake_to_tile(coords.x, coords.y);
@@ -210,7 +206,7 @@ void scenario_earthquake_process(void)
         if (data.state == EVENT_NOT_STARTED) { // Start event
             if (game_time_year() == data.game_year && game_time_month() == data.month) {
                 data.state = EVENT_IN_PROGRESS;
-                struct field coords = custom_earthquake_find_next_tile();
+                map_point coords = custom_earthquake_find_next_tile();
                 city_message_post(1, MESSAGE_EARTHQUAKE, 0,
                     map_grid_offset(coords.x, coords.y));
             }
