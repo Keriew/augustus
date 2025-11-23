@@ -151,7 +151,7 @@ void figure_workcamp_worker_action(figure *f)
                 break;
             }
             figure_movement_path(f, 100);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            if (f->direction == DIR_AT_DESTINATION) {
                 building_monument_remove_delivery(f->id);
                 warehouse_id = f->destination_building_id;
                 monument_id = building_monument_get_monument(b->x, b->y, f->collecting_item_id, b->road_network_id, &dst);
@@ -181,7 +181,7 @@ void figure_workcamp_worker_action(figure *f)
                 break;
             }
             figure_movement_path(f, 100);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
+            if (f->direction == DIR_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                 f->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
                 f->action_state = FIGURE_ACTION_216_WORK_CAMP_WORKER_ENTERING_MONUMENT;
                 building *monument = building_get(f->destination_building_id);
@@ -254,7 +254,7 @@ void figure_workcamp_slave_action(figure *f)
                     f->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
                 }
             }
-            if (leader->is_ghost && !leader->height_adjusted_ticks) {
+            if (leader->is_ghost && !leader->height_adjusted_mov) {
                 f->is_ghost = 1;
             }
             break;
@@ -265,7 +265,7 @@ void figure_workcamp_slave_action(figure *f)
                 break;
             }
             figure_movement_path(f, 100);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
+            if (f->direction == DIR_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                 f->action_state = FIGURE_ACTION_211_WORK_CAMP_SLAVE_DELIVERING_RESOURCES;
                 building *monument = building_get(f->destination_building_id);
                 if (!building_monument_access_point(monument, &dst)) {
@@ -372,7 +372,7 @@ void figure_workcamp_architect_action(figure *f)
                 b->monument.phase == MONUMENT_FINISHED) {
                 f->state = FIGURE_STATE_DEAD;
             } else {
-                if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
+                if (f->direction == DIR_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                     f->action_state = FIGURE_ACTION_208_WORK_CAMP_ARCHITECT_WORKING_ON_MONUMENT;
                     figure_movement_set_cross_country_destination(f, dst.x, dst.y);
                     f->wait_ticks = 1;

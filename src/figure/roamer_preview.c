@@ -6,6 +6,7 @@
 #include "core/config.h"
 #include "figure/figure.h"
 #include "figure/movement.h"
+#include "figure/movement_roam.h"
 #include "figure/route.h"
 #include "map/building.h"
 #include "map/grid.h"
@@ -283,7 +284,7 @@ void figure_roamer_preview_create(building_type b_type, int x, int y)
         }
         roamer.destination_x = x_road;
         roamer.destination_y = y_road;
-        while (roamer.direction != DIR_FIGURE_AT_DESTINATION &&
+        while (roamer.direction != DIR_AT_DESTINATION &&
             roamer.direction != DIR_FIGURE_REROUTE && roamer.direction != DIR_FIGURE_LOST) {
             if (data.travelled_tiles.items[roamer.grid_offset] < FIGURE_ROAMER_PREVIEW_MAX_PASSAGES) {
                 data.travelled_tiles.items[roamer.grid_offset]++;
@@ -292,7 +293,7 @@ void figure_roamer_preview_create(building_type b_type, int x, int y)
             figure_movement_path(&roamer, 100);
         }
         figure_route_remove(&roamer);
-        if (roamer.direction == DIR_FIGURE_AT_DESTINATION) {
+        if (roamer.direction == DIR_AT_DESTINATION) {
             int tile_type = data.travelled_tiles.items[roamer.grid_offset];
             data.travelled_tiles.items[roamer.grid_offset] = tile_type < FIGURE_ROAMER_PREVIEW_EXIT_TILE ?
                 FIGURE_ROAMER_PREVIEW_ENTRY_TILE : FIGURE_ROAMER_PREVIEW_ENTRY_EXIT_TILE;

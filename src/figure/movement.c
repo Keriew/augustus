@@ -23,6 +23,7 @@
 #include "map/property.h"
 #include "map/random.h"
 #include "map/road_access.h"
+#include "map/routing_data.h"
 #include "map/routing_terrain.h"
 #include "map/terrain.h"
 
@@ -100,7 +101,7 @@ static void apply_sub_tile_movement(figure *f)
 }
 static void set_target_height_bridge(figure *f)
 {
-    f->height_adjusted_ticks = 18;
+    f->height_adjusted_mov = 18;
     f->target_height = map_bridge_height(f->grid_offset);
 }
 
@@ -134,78 +135,54 @@ static int is_roaming_blocked_by_building(figure *f, int target_position, int af
     return 0; // Not blocked
 }
 // Determines the HP of a building
-static int get_obstacle_hp(int target_position)
+static int get_obstacle_hp(int target_position, int building_type)
 {
-    // Unless you change it, all this stuff will be in the terrain_citizen memory or whatever it's called
-    type = terrain_access.items[int target_position]
-        switch (type) {
-            case TERRAIN_RUBBLE:
-            case TERRAIN_ACCESS_RAMP:
-                return BUILDING_HP_TERRAIN_MOD
-            case BUILDING_AQUEDUCT:
-            case BUILDING_GARDENS:
-            case BUILDING_OVERGROWN_GARDENS:
-            case BUILDING_ROOFED_GARDEN_WALL_GATE:
-            case BUILDING_LOOPED_GARDEN_GATE:
-            case BUILDING_PANELLED_GARDEN_GATE:
-            case BUILDING_HEDGE_GATE_DARK:
-            case BUILDING_HEDGE_GATE_LIGHT:
-                return BUILDING_HP_CLEARABLE
-            case BUILDING_PALISADE:
-            case BUILDING_PALISADE_GATE:
-                return BUILDING_HP_PALISADE;
-            case BUILDING_WALL:
-                return BUILDING_HP_WALL;
-            case BUILDING_GATEHOUSE:
-                return BUILDING_HP_GATEHOUSE;
-            default:
-                return BUILDING_HP_DEFAULT;
-        }
+    int terrain = map_terrain_is(target_position, building_type);
+    if (terrain == TERRAIN_RUBBLE || terrain == TERRAIN_ACCESS_RAMP) {
+        return BUILDING_HP_TERRAIN_MOD;
+    }
+    switch (building_type) {
+        case BUILDING_AQUEDUCT:
+        case BUILDING_GARDENS:
+        case BUILDING_OVERGROWN_GARDENS:
+        case BUILDING_ROOFED_GARDEN_WALL_GATE:
+        case BUILDING_LOOPED_GARDEN_GATE:
+        case BUILDING_PANELLED_GARDEN_GATE:
+        case BUILDING_HEDGE_GATE_DARK:
+        case BUILDING_HEDGE_GATE_LIGHT:
+            return BUILDING_HP_CLEARABLE;
+        case BUILDING_PALISADE:
+        case BUILDING_PALISADE_GATE:
+            return BUILDING_HP_PALISADE;
+        case BUILDING_WALL:
+            return BUILDING_HP_WALL;
+        case BUILDING_GATEHOUSE:
+            return BUILDING_HP_GATEHOUSE;
+        default:
+            return BUILDING_HP_DEFAULT;
+    }
 }
 // Handles enemy interaction with obstacles
 static void attempt_obstacle_destruction(figure *f, int target_position)
 {
     // 1. Early Exit: Is there anything to destroy?
-    if (!map_routing_is_destroyable(int target_position)) {
+    if (!map_routing_is_destroyable(target_position)) {
         return;
     }
 
-    // 2. Determine the type of the obstacle
-    int hp = get_obstacle_hp(int target_position);
-    if (hp == 0) {
-        return; // Cannot be destroyed (e.g rubble, access ramp)
+    // Get the building hp
+    building *b = building_get(map_building_at(target_position));
+    int building_hp = get_obstacle_hp(target_position, b->type);
+
+    // If the building cannot be destroyed return (e.g rubble, access ramp)
+    if (building_hp == 0) {
+        return;
     }
 
-    // 3. Calculate Max HP (Damage cap)
-    int max_damage = 0;
+    // Cap damage to the maximum hp
+    int max_damage = building_hp;
 
-    switch (type) {
-        case DESTROYABLE_BUILDING:
-        {
-            building *b = building_get(map_building_at(int target_position));
-            if (b) {
-                max_damage = get_obstacle_hp(b->type);
-            }
-            break;
-        }
-        case DESTROYABLE_AQUEDUCT_GARDEN:
-            // Special Check: Enemies cannot "destroy" rubble or ramps, only clear structures
-            if (map_terrain_is(target_position, TERRAIN_ACCESS_RAMP | TERRAIN_RUBBLE)) {
-                return; // Cannot damage this
-            }
-            max_damage = BUILDING_HP;
-            break;
-
-        case DESTROYABLE_WALL:
-            max_damage = WALL_HP;
-            break;
-
-        case DESTROYABLE_GATEHOUSE:
-            max_damage = GATEHOUSE_HP;
-            break;
-    }
-
-    // 4. Apply Attack Animation and Damage
+    // Apply Attack Animation and Damage
     if (max_damage > 0) {
         // Store the direction we were facing before playing attack animation
         f->attack_direction = f->direction;
@@ -291,7 +268,7 @@ void advance_mov(figure *f)
 
 // --- CORE MOVEMENT & STATE FUNCTIONS ---
 // Moves the figure to the next tile
-static void move_to_next_tile(figure *f)
+void move_to_next_tile(figure *f)
 {
     // A. Store old state for subsequent logic
     const int old_x = f->x;
@@ -324,8 +301,8 @@ static void check_collision(figure *f, int roaming_enabled, int target_position,
 
     // CASE B: BOAT
     if (f->is_boat) {
-        if (!map_terrain_is(target_position, terrain_access)) {
-            f->direction DIR_FIGURE_REROUTE; // Target is not water, reroute
+        if (!map_terrain_is(target_position, TERRAIN_WATER)) {
+            f->direction = DIR_FIGURE_REROUTE; // Target is not water, reroute
         }
         return; // No further calculations for boats
     }
@@ -386,28 +363,28 @@ static void check_collision(figure *f, int roaming_enabled, int target_position,
 }
 
 // Calculates the next movement direction, unless it is at the destination or lost
-static void set_next_route_tile_direction(figure *f)
+static int set_next_route_tile_direction(figure *f)
 {
     // The figure currently has a route established (Path ID > 0)
     if (f->routing_path_id > 0) {
         // If the figure still has tiles left in the route
         if (f->routing_path_current_tile < f->routing_path_length) {
             // Get the next direction from the route data
-            return = figure_route_get_direction(f->routing_path_id, f->routing_path_current_tile);
+            return figure_route_get_direction(f->routing_path_id, f->routing_path_current_tile);
         } else {
             // Figure has reached the end of the route
             figure_route_remove(f);
-            return = DIR_FIGURE_AT_DESTINATION;
+            return DIR_AT_DESTINATION;
         }
 
     } else {
         // The figure is not currently following a route (Path ID <= 0)
-        if (calc_general_direction(f->x, f->y, f->destination_x, f->destination_y) == DIR_FIGURE_AT_DESTINATION) {
+        if (calc_general_direction(f->x, f->y, f->destination_x, f->destination_y) == DIR_AT_DESTINATION) {
             // The figure is currently on the destination tile
-            return = DIR_FIGURE_AT_DESTINATION;
+            return DIR_AT_DESTINATION;
         } else {
             // Route is finished/missing, and figure is NOT at destination -> consider it lost
-            return = DIR_FIGURE_LOST;
+            return DIR_FIGURE_LOST;
         }
     }
 }
@@ -427,15 +404,9 @@ static void handle_tile_boundary_logic(figure *f, int roaming_enabled)
     // Determine the next step's direction
     f->direction = set_next_route_tile_direction(f);
     // Check for Collision in the chosen direction
-    target_position = f->grid_offset + map_grid_direction_delta(f->direction);
-    after_target_position = target_position + map_grid_direction_delta(f->direction);
+    int target_position = f->grid_offset + map_grid_direction_delta(f->direction);
+    int after_target_position = target_position + map_grid_direction_delta(f->direction);
     check_collision(f, roaming_enabled, target_position, after_target_position);
-
-    // Halt Movement Check: Stop if the status is not a valid movement direction
-    if (f->direction > DIR_MAX_MOVEMENT) {
-        // This breaks the while loop if the figure is AT_DESTINATION, REROUTE, LOST, or ATTACKING
-        break;
-    }
 
     // Commit to the new tile
     // Update route progress
@@ -479,6 +450,7 @@ static void move_figure_path(figure *f, int num_mov, int roaming_enabled)
         } else {
             // B. End-of-Tile Logic (Tile Boundary Reached)
             handle_tile_boundary_logic(f, roaming_enabled);
+            // Stop if the figure is AT_DESTINATION, REROUTE, LOST, or ATTACKING
             if (f->direction > DIR_MAX_MOVEMENT) {
                 break;
             }
@@ -516,13 +488,4 @@ void figure_movement_path(figure *f, int speed)
 
     // Moves the figure the total number of ticks
     move_figure_path(f, num_mov, 0);
-}
-
-// --- UNUSED FUNCTIONS ---
-// Find a nice place to add this functionality
-// This is how figures would read the distance of their own chosen route, if you ever need this
-int figure_path_distance(figure *f, int grid_offset)
-{
-    // Reads the distance from its own reserved map in the global pool
-    return route_map_pool[f->route_map_id].items[grid_offset];
 }

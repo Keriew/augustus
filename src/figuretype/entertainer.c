@@ -389,7 +389,7 @@ void figure_entertainer_action(figure *f)
                 f->state = FIGURE_STATE_DEAD;
             }
             figure_movement_path(f, speed_factor);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            if (f->direction == DIR_AT_DESTINATION) {
                 update_shows(f);
                 f->state = FIGURE_STATE_DEAD;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
@@ -418,7 +418,7 @@ void figure_entertainer_action(figure *f)
         case FIGURE_ACTION_95_ENTERTAINER_RETURNING:
             f->terrain_usage = TERRAIN_USAGE_ROADS;
             figure_movement_path(f, speed_factor);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION ||
+            if (f->direction == DIR_AT_DESTINATION ||
                 f->direction == DIR_FIGURE_REROUTE || f->direction == DIR_FIGURE_LOST) {
                 f->state = FIGURE_STATE_DEAD;
             }
@@ -430,7 +430,7 @@ void figure_entertainer_action(figure *f)
                 f->state = FIGURE_STATE_DEAD;
             }
             figure_movement_path(f, 150);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            if (f->direction == DIR_AT_DESTINATION) {
                 figure *target = figure_get(f->target_figure_id);
                 f->destination_x = target->x;
                 f->destination_y = target->y;
@@ -495,7 +495,7 @@ void figure_tourist_action(figure *f)
                     f->tourist.ticks_since_last_visited_id[i]++;
                 }
             }
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            if (f->direction == DIR_AT_DESTINATION) {
                 f->state = FIGURE_STATE_DEAD;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
                 figure_route_remove(f);

@@ -16,6 +16,14 @@ typedef struct {
 } figure_path_data;
 
 // -- PRIVATE FUNCTIONS --
+// Calculate the current path assigned to the figure
+int figure_path_distance(figure *f, int grid_offset)
+{
+    RoutingContext *ctx = f-> // ???
+
+        // Reads the distance from its own reserved map in the global pool
+        return ctx->route_map_pool[f->route_map_id].items[grid_offset];
+}
 // Contains every path that ???
 static array(figure_path_data) paths;
 // Creates a new path ???
@@ -29,7 +37,7 @@ static int path_is_used(const figure_path_data *path)
     return path->figure_id != 0;
 }
 // Calculates the length of a path
-static in calculate_path_length(figure *f, figure_path_data *path)
+static in calculate_path_length(figure *f, const figure_path_data *path)
 {
     // Limits directions to just adjacent ones so they don't try to teleport
     int direction_limit = DIR_MAX_MOVEMENT;
@@ -154,7 +162,7 @@ void figure_route_add(figure *f)
     }
 
     // 4. Calculate route length
-    int path_length = calculate_figure_path_length(f, path);
+    int path_length = figure_path_distance(f, path);
 
     // 5. Commit route to figure state
     if (path_length) {

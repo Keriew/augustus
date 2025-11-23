@@ -421,7 +421,7 @@ static void figure_save(buffer *buf, const figure *f)
     buffer_write_u8(buf, f->terrain_usage);
     buffer_write_u8(buf, f->loads_sold_or_carrying);
     buffer_write_u8(buf, f->is_boat);
-    buffer_write_u8(buf, f->height_adjusted_ticks);
+    buffer_write_u8(buf, f->height_adjusted_mov);
     buffer_write_u8(buf, f->current_height);
     buffer_write_u8(buf, f->target_height);
     buffer_write_u8(buf, f->collecting_item_id);
@@ -559,7 +559,7 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     f->terrain_usage = buffer_read_u8(buf);
     f->loads_sold_or_carrying = buffer_read_u8(buf);
     f->is_boat = buffer_read_u8(buf);
-    f->height_adjusted_ticks = buffer_read_u8(buf);
+    f->height_adjusted_mov = buffer_read_u8(buf);
     f->current_height = buffer_read_u8(buf);
     f->target_height = buffer_read_u8(buf);
     f->collecting_item_id = (version <= SAVE_GAME_LAST_STATIC_RESOURCES) ?

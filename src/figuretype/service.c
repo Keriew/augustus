@@ -48,7 +48,7 @@ static void roamer_action(figure *f, int num_ticks)
             break;
         case FIGURE_ACTION_126_ROAMER_RETURNING:
             figure_movement_path(f, 100); // This used to be num_ticks... hopefully it works fine?
-            if (f->direction == DIR_FIGURE_AT_DESTINATION ||
+            if (f->direction == DIR_AT_DESTINATION ||
                 f->direction == DIR_FIGURE_REROUTE || f->direction == DIR_FIGURE_LOST) {
                 f->state = FIGURE_STATE_DEAD;
             }
@@ -140,7 +140,7 @@ void figure_destination_priest_action(figure *f)
 
         case FIGURE_ACTION_213_PRIEST_GOING_TO_PANTHEON:
             figure_movement_path(f, 100);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            if (f->direction == DIR_AT_DESTINATION) {
                 f->state = FIGURE_STATE_DEAD;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
                 figure_route_remove(f);
@@ -151,7 +151,7 @@ void figure_destination_priest_action(figure *f)
         case FIGURE_ACTION_215_PRIEST_GOING_TO_MESS_HALL:
             f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS_HIGHWAY;
             figure_movement_path(f, 100);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            if (f->direction == DIR_AT_DESTINATION) {
                 f->state = FIGURE_STATE_DEAD;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
                 figure_route_remove(f);
@@ -371,7 +371,7 @@ void figure_doctor_action(figure *f)
         case FIGURE_ACTION_231_DOCTOR_GOING_TO_PLAGUE:
             f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS_HIGHWAY;
             figure_movement_path(f, 100);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            if (f->direction == DIR_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_232_DOCTOR_AT_PLAGUE;
                 figure_route_remove(f);
                 f->roam_length = 0;
@@ -523,7 +523,7 @@ void figure_tax_collector_action(figure *f)
             break;
         case FIGURE_ACTION_43_TAX_COLLECTOR_RETURNING:
             figure_movement_path(f, 100);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            if (f->direction == DIR_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_41_TAX_COLLECTOR_ENTERING_EXITING;
                 figure_movement_set_cross_country_destination(f, b->x, b->y);
                 f->roam_length = 0;

@@ -169,7 +169,7 @@ void figure_sheep_action(figure *f)
             break;
         case FIGURE_ACTION_197_HERD_ANIMAL_MOVING:
             figure_movement_path(f, 100);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
+            if (f->direction == DIR_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                 f->direction = f->previous_tile_direction;
                 f->action_state = FIGURE_ACTION_196_HERD_ANIMAL_AT_REST;
                 f->wait_ticks = f->id & 0x1f;
@@ -221,7 +221,7 @@ void figure_wolf_action(figure *f)
             break;
         case FIGURE_ACTION_197_HERD_ANIMAL_MOVING:
             figure_movement_path(f, 200);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
+            if (f->direction == DIR_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                 f->direction = f->previous_tile_direction;
                 f->action_state = FIGURE_ACTION_196_HERD_ANIMAL_AT_REST;
                 f->wait_ticks = f->id & 0x1f;
@@ -231,7 +231,7 @@ void figure_wolf_action(figure *f)
             break;
         case FIGURE_ACTION_199_WOLF_ATTACKING:
             figure_movement_path(f, 200);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            if (f->direction == DIR_AT_DESTINATION) {
                 int target_id = figure_combat_get_target_for_wolf(f->x, f->y, 6);
                 if (target_id) {
                     figure *target = figure_get(target_id);
@@ -325,7 +325,7 @@ void figure_zebra_action(figure *f)
             break;
         case FIGURE_ACTION_197_HERD_ANIMAL_MOVING:
             figure_movement_path(f, 200);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
+            if (f->direction == DIR_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                 f->direction = f->previous_tile_direction;
                 f->action_state = FIGURE_ACTION_196_HERD_ANIMAL_AT_REST;
                 f->wait_ticks = f->id & 0x1f;
@@ -469,7 +469,7 @@ void figure_hippodrome_horse_action(figure *f)
             break;
         case FIGURE_ACTION_201_HIPPODROME_HORSE_RACING:
             f->direction = calc_general_direction(f->x, f->y, f->destination_x, f->destination_y);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            if (f->direction == DIR_AT_DESTINATION) {
                 f->wait_ticks_missile++;
                 if (f->wait_ticks_missile >= 24) {
                     f->wait_ticks_missile = 0;
@@ -507,7 +507,7 @@ void figure_hippodrome_horse_action(figure *f)
                 figure_movement_set_cross_country_direction(f,
                     f->cross_country_x, f->cross_country_y, 15 * f->destination_x, 15 * f->destination_y, 0);
             }
-            if (f->direction != DIR_FIGURE_AT_DESTINATION) {
+            if (f->direction != DIR_AT_DESTINATION) {
                 figure_movement_cross_country(f, 1);
             }
             f->wait_ticks++;

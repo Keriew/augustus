@@ -9,41 +9,28 @@
 #include "map/grid.h"
 #include "map/road_aqueduct.h"
 #include "map/routing_data.h"
-#include "map/routing.h"
 #include "map/terrain.h"
 #include "map/tiles.h"
 #include <stdlib.h>
+#include <string.h> // Required for memset
 
-#define MAX_QUEUE GRID_SIZE * GRID_SIZE // why is it this number instead of another?
-#define MAX_SEARCH_ITERATIONS 50000 // higher? lower?
-#define MAX_CONCURRENT_ROUTES 32
-#define BASE_TERRAIN_COST(x) ((int)(x))
-
-// Routing Context
-typedef struct {
-    // Core Pathfinding Data
-    map_routing_distance_grid route_map_pool[MAX_CONCURRENT_ROUTES];
-    struct { int head; int tail; int items[MAX_QUEUE]; } queue;
-    // Specialized Working Buffers
-    map_routing_distance_grid fighting_data;
-    // Stores the position (index) within the queue.items array for every grid offset.
-    int node_index[GRID_SIZE * GRID_SIZE];
-    // ... possibly other single-use flags or temporary data ...
-} RoutingContext;
-// Used for callbacks (?)
-typedef int (*RoutingCallback)(RoutingContext *ctx, int offset, int next_offset, int direction);
-
+// --- CONSTANTS AND OFFSETS ---
+// Standard 8-directional movement offsets
 static const int ROUTE_OFFSETS[] = { -162, 1, 162, -1, -161, 163, 161, -163 };
 static const int ROUTE_OFFSETS_X[] = { 0, 1, 0, -1,  1, 1, -1, -1 };
 static const int ROUTE_OFFSETS_Y[] = { -1, 0, 1,  0, -1, 1,  1, -1 };
 
+
+// --- GLOBAL STATS AND CACHE ---
+// Global stats
 static struct {
     int total_routes_calculated;
     int enemy_routes_calculated;
 } stats;
 
+// Fighting Data Grid
 static struct {
-    grid_u8 status;
+    grid_u8 status; // 
     time_millis last_check;
 } fighting_data;
 
@@ -72,13 +59,14 @@ typedef struct {
     int is_aqueduct = 0;
     int is_wall = 0;
     // Misc
+    int boost_highway = 0;
     int unblocking_rome = 0;
     int water_cost_multiplier = 3; // Base cost for water
     int target_building_id;  // target building to attack
     int through_building_id; // building allowed to pass through
 } TravelRules;
 
-// Static configuration table, indexed by the RouteType enum.
+// Defines route configuration (indexed by the RouteType enum.)
 static const TravelRules ROUTE_RULE_CONFIG[] = {
     // Moving entities
     [ROUTE_TYPE_CITIZEN] = {
@@ -107,24 +95,25 @@ static const TravelRules ROUTE_RULE_CONFIG[] = {
     // Buildings (drag build)
     [ROUTE_TYPE_ROAD] = {
         .is_road = 1,
-    }
+    },
     [ROUTE_TYPE_HIGHWAY] = {
-        .is_road = 1,
-    }
+        .is_highway = 1,
+    },
     [ROUTE_TYPE_AQUEDUCT] = {
-        .is_road = 1,
-    }
+        .is_aqueduct = 1,
+    },
     [ROUTE_TYPE_WALL] = {
-        .is_road = 1,
-    }
+        .is_wall = 1,
+    },
 };
 
-// Populates the fighting data thing (?) inside the routing context
+// Populates the fighting data cache inside the routing context
+// This cache allows the pathfinder to quickly check if a tile is under attack. 
 static void populate_fighting_data(RoutingContext *ctx)
 {
     // 1. Clear the grid first (reset all tiles to 0)
     // Assuming 'fighting_data' inside ctx is a full grid array
-    map_grid_clear_u8(ctx->fighting_data.items);
+    map_grid_clear_u8(ctx->fighting_data.status.items);
 
     // 2. Iterate over all figures
     // You need a way to loop all figures. Assuming 'figure_foreach' exists:
@@ -132,7 +121,7 @@ static void populate_fighting_data(RoutingContext *ctx)
     for (int i = 1; i < total_figures; i++) {
         // Check if the figure is alive
         figure *f = figure_get(i);
-        if (f->state != FIGURE_STATE_ALIVE) continue;
+        if (f == NULL || f->state != FIGURE_STATE_ALIVE) continue;
 
         // Check if this figure is fighting
         int is_fighting = (f->action_state == FIGURE_ACTION_150_ATTACK);
@@ -151,6 +140,7 @@ static void populate_fighting_data(RoutingContext *ctx)
     }
 }
 
+// Reset the external global cache 'fighting_data' if a new frame/tick has started
 static void reset_fighting_status(void)
 {
     time_millis current_time = time_get_millis();
@@ -160,22 +150,24 @@ static void reset_fighting_status(void)
     }
 }
 
+
+
+// Returns the distance grid (should point to the global distance struct)
 const map_routing_distance_grid *map_routing_get_distance_grid(void)
 {
+    // FIX: Using the global 'distance' struct (must be defined in routing.c or similar)
     return &distance;
 }
 
-// Clears the... map grid?
+// Clears the fighting status map and resets the queue pointers
 static void clear_data(RoutingContext *ctx)
 {
     reset_fighting_status();
-    map_grid_clear_i16(distance.possible.items);
-    map_grid_clear_i16(distance.determined.items);
     ctx->queue.head = 0;
     ctx->queue.tail = 0;
 }
 
-// ???
+// Enqueues an item for a simple (non-ordered) queue (e.g., Breadth-First Search)
 static void enqueue(RoutingContext *ctx, int next_offset, int dist)
 {
     // 1. Update the distance grid via the context
@@ -190,7 +182,7 @@ static void enqueue(RoutingContext *ctx, int next_offset, int dist)
     }
 }
 
-// ???
+// Pops an item for a simple (non-ordered) queue
 static inline int queue_pop(RoutingContext *ctx)
 {
     // Read the result from the context queue
@@ -207,13 +199,16 @@ static inline int queue_pop(RoutingContext *ctx)
     return result;
 }
 
+// --- PRIORITY QUEUE (HEAP) HELPERS ---
+
 static inline int ordered_queue_parent(int index)
 {
+    // FIX: Use integer division (no need for float cast)
     return (index - 1) / 2;
 }
 
 
-// Corrected ordered_queue_swap (assuming you add a helper that uses this)
+// Corrected ordered_queue_swap
 static inline void ordered_queue_swap(RoutingContext *ctx, int first, int second)
 {
     int temp_offset = ctx->queue.items[first];
@@ -222,11 +217,13 @@ static inline void ordered_queue_swap(RoutingContext *ctx, int first, int second
     ctx->queue.items[first] = ctx->queue.items[second];
     ctx->queue.items[second] = temp_offset;
 
-    // 2. Update the lookup table with the NEW positions
+    // 2. Update the lookup table (node_index) with the NEW positions
+    // This allows O(1) lookups to find an item's position in the queue
     ctx->node_index[ctx->queue.items[first]] = first;
     ctx->node_index[ctx->queue.items[second]] = second;
 }
 
+// Maintains the Min-Heap property (sifts down the value at start_index)
 static void ordered_queue_reorder(RoutingContext *ctx, int start_index)
 {
     int left_child = 2 * start_index + 1;
@@ -236,29 +233,32 @@ static void ordered_queue_reorder(RoutingContext *ctx, int start_index)
     int right_child = left_child + 1;
     int smallest = start_index;
 
-    // Store the distance of the current parent (or smallest node)
-    int smallest_dist = ctx->distance.possible.items[ctx->queue.items[smallest]];
+    // NOTE: Accessing distances via the global 'distance' struct here
+    int smallest_dist = distance.possible.items[ctx->queue.items[smallest]];
+    // int smallest_dist = ctx->distance.possible.items[ctx->queue.items[smallest]];
+    // which of these two?
+
     // Compare with Left Child
-    int left_dist = ctx->distance.possible.items[ctx->queue.items[left_child]];
+    int left_dist = distance.possible.items[ctx->queue.items[left_child]];
     if (left_dist < smallest_dist) {
         smallest = left_child;
         smallest_dist = left_dist; // Update the reference value
     }
     // Compare with Right Child
     if (right_child < ctx->queue.tail) {
-        int right_dist = ctx->distance.possible.items[ctx->queue.items[right_child]];
+        int right_dist = distance.possible.items[ctx->queue.items[right_child]];
         if (right_dist < smallest_dist) {
             smallest = right_child;
         }
     }
 
     if (smallest != start_index) {
-        ordered_queue_swap(RoutingContext * ctx, start_index, smallest);
-        ordered_queue_reorder(RoutingContext * ctx, smallest);
+        ordered_queue_swap(ctx, start_index, smallest);
+        ordered_queue_reorder(ctx, smallest);
     }
 }
 
-// ??
+// Pops the smallest element (the next node to visit) from the Min-Heap
 static inline int ordered_queue_pop(RoutingContext *ctx)
 {
     // 1. Store the smallest element (at index 0)
@@ -268,82 +268,108 @@ static inline int ordered_queue_pop(RoutingContext *ctx)
     ctx->queue.tail--;
 
     // 3. Move the item from the now-last position to the head (index 0)
-    // The original last item is now at ctx->queue.tail
     ctx->queue.items[0] = ctx->queue.items[ctx->queue.tail];
+    // 4. Update the lookup table for the new head position
+    ctx->node_index[ctx->queue.items[0]] = 0;
 
-    // 4. Reorder the heap to fix the heap property
-    // MUST pass the context pointer to the helper function!
+    // 5. Reorder the heap to fix the heap property
     ordered_queue_reorder(ctx, 0);
 
     return min_item_offset;
 }
 
+// Reduces the key (distance) of an existing node and bubbles it up the heap (used in Dijkstra/A*)
 static inline void ordered_queue_reduce_index(RoutingContext *ctx, int index, int offset, int dist)
 {
-    ctx->queue.items[index] = offset;
-    while (index && distance.possible.items[ctx->queue.items[ordered_queue_parent(index)]] > dist) {
-        ordered_queue_swap(index, ordered_queue_parent(index));
+    // The given 'offset' is already placed at 'index' in the queue by ordered_enqueue.
+    // The parameter 'dist' is the new possible distance.
+
+    // While not at the root (index > 0) AND new distance is smaller than parent's distance
+    while (index > 0 && distance.possible.items[ctx->queue.items[ordered_queue_parent(index)]] > dist) {
+        // FIX: The original was missing the 'ctx' argument.
+        ordered_queue_swap(ctx, index, ordered_queue_parent(index));
         index = ordered_queue_parent(index);
     }
 }
 
+// Enqueues a new item into the Priority Queue (Min-Heap)
 static void ordered_enqueue(RoutingContext *ctx, int next_offset, int current_dist, int remaining_dist)
 {
-    int possible_dist = remaining_dist + current_dist;
-    int index = ctx->queue.tail;
+    int possible_dist = remaining_dist + current_dist; // G + H (A* total distance)
+    int index;
+
+    // Check if the node is ALREADY in the priority queue
     if (distance.possible.items[next_offset]) {
+        // Node is in the queue. Is the new path better?
         if (distance.possible.items[next_offset] <= possible_dist) {
-            return;
-        } else {
-            for (int i = 0; i < ctx->queue.tail; i++) {
-                if (ctx->queue.items[i] == next_offset) {
-                    index = i;
-                    break;
-                }
-            }
+            return; // New path is worse or equal, do nothing
         }
+        // New path is better: Get its current position in the heap
+        index = ctx->node_index[next_offset];
     } else {
+        // Node is NOT in the queue (or distance is 0). Add it to the end.
+        index = ctx->queue.tail;
         ctx->queue.tail++;
+        // Set the index in the lookup table
+        ctx->node_index[next_offset] = index;
     }
+
+    // Set the new (G) and possible (G+H) distances
     distance.determined.items[next_offset] = current_dist;
     distance.possible.items[next_offset] = possible_dist;
 
-    ordered_queue_reduce_index(index, next_offset, possible_dist);
+    // Use the reduce index function to bubble the new (or updated) node up the heap
+    ordered_queue_reduce_index(ctx, index, next_offset, possible_dist);
 }
 
+// Checks if an offset is valid AND if the path to it hasn't been determined yet, or the new path is better.
 static inline int valid_offset(int grid_offset, int possible_dist)
 {
+    // FIX: 'distance' must be accessed globally
     int determined = distance.determined.items[grid_offset];
+    // FIX: Should compare against 'distance.possible' for A* (or just determined for Dijkstra)
+    // Assuming 'distance.determined' stores the G-cost (path found so far)
     return map_grid_is_valid_offset(grid_offset) && (determined == 0 || possible_dist < determined);
 }
 
+// Manhattan distance (Heuristic for A*)
 static inline int distance_left(int x, int y)
 {
+    // FIX: 'distance' must be accessed globally
+    // Wait, from one of the 32 buffers or however many you want right?
     return abs(distance.dst_x - x) + abs(distance.dst_y - y);
 }
 
-// Using the simplified master travel function based on your flags
-// Put this instead of the others
-// Wai tthat's what this does right???
+// Declaration of the master travel function
 static int callback_travel_master(RoutingContext *ctx, int offset, int next_offset,
- int direction_index, const TravelRules *rules);
+ int direction_index, const TravelRules *rules, int *out_cost);
 
-
-// Finds the best route? (???)
+// Finds the best route from A to B (A* Search)
 static void route_queue_from_to(RoutingContext *ctx, int src_x, int src_y, int dst_x, int dst_y, const TravelRules *rules)
 {
     // 1. Setup Phase (Clear queues, initialize distances, enqueue source)
-    int MAX_SEARCH_ITERATIONS = 0;
+    // FIX: MAX_SEARCH_ITERATIONS must be defined externally (or use the #define from routing.h)
+    int guard_count = 0;
     int destination_offset = map_grid_offset(dst_x, dst_y);
-    // Assign the number of directions based on the rules (wait... does this really handle the diagonal stuff???)
-    int num_directions = rules->num_directions;
+    int source_offset = map_grid_offset(src_x, src_y);
 
-    // Wait where's the guard count int???
-    while (ctx->queue.head != ctx->queue.tail && guard_count++ < MAX_SEARCH_ITERATIONS) {
+    // FIX: Assign target position to global distance struct for heuristic calculation
+    distance.dst_x = dst_x;
+    distance.dst_y = dst_y;
 
-        // 2. Pop the current best node (offset)
+    // Initial enqueue using A* heuristic
+    ordered_enqueue(ctx, source_offset, 0, distance_left(src_x, src_y));
+
+    // Determine number of directions (4 for cardinal, 8 for all)
+    int num_directions = rules->cardinal_travel ? 4 : 8;
+
+    // 2. Search Loop (While queue is not empty and guard count is not exceeded)
+    while (ctx->queue.tail > 0 && guard_count++ < MAX_SEARCH_ITERATIONS) {
+
+        // Pop the current best node (offset)
         int current_offset = ordered_queue_pop(ctx);
-        int current_distance = ctx->distance.determined.items[current_offset];
+        // FIX: The cost is now stored in 'distance.determined' not 'ctx->distance'
+        int current_distance = distance.determined.items[current_offset];
 
         // Early exit if destination found
         if (current_offset == destination_offset) {
@@ -354,83 +380,89 @@ static void route_queue_from_to(RoutingContext *ctx, int src_x, int src_y, int d
         for (int i = 0; i < num_directions; i++) {
 
             int next_offset = current_offset + ROUTE_OFFSETS[i];
-            int next_x = current_offset % MAP_WIDTH + ROUTE_OFFSETS_X[i]; // Assuming map width is used
-            int next_y = current_offset / MAP_WIDTH + ROUTE_OFFSETS_Y[i];
 
-            // Boundary Check
+            // Assuming map width is a constant like GRID_SIZE, not MAP_WIDTH
+            int next_x = (current_offset % GRID_SIZE) + ROUTE_OFFSETS_X[i];
+            int next_y = (current_offset / GRID_SIZE) + ROUTE_OFFSETS_Y[i];
+
+            // Boundary Check (using a border size of 1 for safety)
             if (!map_grid_is_inside(next_x, next_y, 1)) {
                 continue;
             }
 
             // --- The Refactored Logic: Use the master function ---
             int travel_cost = 0;
+            // FIX: Remove redundant parameter and pass the pointer to the cost variable
             if (callback_travel_master(ctx, current_offset, next_offset, i, rules, &travel_cost)) {
 
                 // If the master function returns success (1), calculate new cost
                 int new_dist = current_distance + travel_cost;
 
-                // If path is better, enqueue it
-                if (new_dist < ctx->distance.determined.items[next_offset]) {
-                    ordered_enqueue(ctx, next_offset, new_dist);
-                }
+                // Manhattan Heuristic (H) for A*
+                int remaining_dist = distance_left(next_x, next_y);
+
+                // If path is better, enqueue/update it
+                // FIX: Use 'ordered_enqueue' which handles the path update
+                ordered_enqueue(ctx, next_offset, new_dist, remaining_dist);
             }
         }
     }
 }
 
-// ???
-void route_queue_all_from(RoutingContext *ctx, int source, const TravelRules *rules)
+// Finds the best route from A to ALL (Dijkstra's Search)
+void route_queue_all_from(RoutingContext *ctx, int source_offset, const TravelRules *rules)
 {
     int tiles_processed = 0;
-    int num_directions = rules->num_directions;
+    int num_directions = rules->cardinal_travel ? 4 : 8; // Determine number of directions
 
-    // Use the queue head/tail to check if the queue is empty
-    while (ctx->queue.head != ctx->queue.tail) {
+    // Initial enqueue (Dijkstra does not need the remaining_dist heuristic, so it's 0)
+    ordered_enqueue(ctx, source_offset, 0, 0);
+
+    // Use the queue tail to check if the queue is empty (head is always 0 in a Min-Heap)
+    while (ctx->queue.tail > 0) {
 
         if (++tiles_processed > MAX_SEARCH_ITERATIONS) {
             break; // Guard against excessively long searches
         }
 
         // 1. Pop the next best tile from the priority queue
-        int offset = ordered_queue_pop(ctx);
-        int current_distance = ctx->distance.determined.items[offset]; // Get current path cost
+        int current_offset = ordered_queue_pop(ctx);
+        // FIX: Get current path cost from the determined distance map
+        int current_distance = distance.determined.items[current_offset];
 
         // 2. Iterate through all neighbors
         for (int i = 0; i < num_directions; i++) {
 
             // Calculate neighbor tile offset
-            int next_offset = offset + ROUTE_OFFSETS[i];
+            int next_offset = current_offset + ROUTE_OFFSETS[i];
 
-            // Boundary/Basic Validity Check
-            if (!valid_offset(next_offset, current_distance)) {
-                continue;
-            }
+            // Check if the tile is already determined (if so, any path through it is done)
+            // FIX: This check is redundant with the check at step 5/inside ordered_enqueue, 
+            // but is a common optimization. Let's keep it simple and rely on the distance check.
 
             // 3. Determine Cost and Passability using the Master function
             int travel_cost = 0;
-            if (callback_travel_master(ctx, offset, next_offset, i, rules, &travel_cost)) {
+            if (callback_travel_master(ctx, current_offset, next_offset, i, rules, &travel_cost)) {
 
                 // 4. Calculate new path distance
                 int new_dist = current_distance + travel_cost;
 
-                // 5. Standard A* / Dijkstra Check (Is this a better path?)
-                if (new_dist < ctx->distance.determined.items[next_offset]) {
-
-                    // Update distance map in the context
-                    ctx->distance.determined.items[next_offset] = new_dist;
-
-                    // Enqueue/Re-enqueue (ordered_enqueue handles the priority queue update)
-                    ordered_enqueue(ctx, next_offset, new_dist);
-                }
+                // 5. Standard Dijkstra Check (Is this a better path?)
+                // If new_dist is better, it will be added/updated in the priority queue (heuristic is 0)
+                ordered_enqueue(ctx, next_offset, new_dist, 0);
             }
         }
     }
 }
 
+// --- PASSABILITY AND COST HELPER FUNCTIONS ---
 // Returns the cost of a citizen passing through a tile, returns -1 if impassable
-static inline int check_citizen_passability(RoutingContext *ctx, int next_offset)
+// NOTE: This function needs access to the rules (pass them in or use the global rules).
+static inline int check_citizen_passability(int next_offset, const TravelRules *rules) // Added rules pointer
 {
-    // Common 
+    int base_cost = 100; // Default base cost
+
+    // Common Terrain Access Checks
     switch (terrain_access.items[next_offset]) {
         case TERRAIN_ACCESS_ROAD:
             if (!rules->travel_roads) return -1;
@@ -438,36 +470,48 @@ static inline int check_citizen_passability(RoutingContext *ctx, int next_offset
         case TERRAIN_ACCESS_HIGHWAY:
             if (!rules->travel_highways) return -1;
             break;
-        case TERRAIN_ACCESS_PASSABLE:
+        case TERRAIN_ACCESS_PASSABLE: // Gardens, rubble, access ramps
             if (!rules->travel_gardens) return -1;
             break;
-        case TERRAIN_ACCESS_EMPTY:
+        case TERRAIN_ACCESS_EMPTY: // Open land
             if (!rules->travel_land) return -1;
             break;
-        case TERRAIN_ACCESS_BLOCKED:
-            if (!rules->travel_blocked) return -1; // Nobody allowed
+        case TERRAIN_ACCESS_BLOCKED: // Completely impassable terrain
+            if (!rules->travel_blocked) return -1;
+            return -1; // Should always return -1 regardless of flag
+        case TERRAIN_ACCESS_AQUEDUCT: // Top of an aqueduct
+            if (!rules->travel_aqueduct) return -1;
             break;
-        case TERRAIN_ACCESS_AQUEDUCT:
-            if (!rules->travel_aqueduct) return -1; // Nobody allowed
+        case TERRAIN_ACCESS_RESERVOIR_CONNECTOR: // Reservoir structure
+            if (!rules->travel_reservoir_connector) return -1;
             break;
-        case TERRAIN_ACCESS_RESERVOIR_CONNECTOR:
-            if (!rules->travel_reservoir_connector) return -1; // Nobody allowed
-            break;
-    }
-    // Walls
-    switch (terrain_wall.items[next_offset]) {
-        case TERRAIN_ACCESS_WALL_PASSABLE:
-            if (!rules->is_tower_sentry) {
+        default:
+            // If it's a building and none of the above, assume blocked
+            if (map_terrain_is(next_offset, TERRAIN_BUILDING)) {
                 return -1;
             }
+    }
 
-        case TERRAIN_ACCESS_WALL_BLOCKED:
+    // Walls Check
+    switch (terrain_wall.items[next_offset]) {
+        case TERRAIN_ACCESS_WALL_PASSABLE: // Walkable wall (like a gatehouse top)
+            if (!rules->is_tower_sentry) {
+                return -1; // Only sentries/specific units allowed
+            }
+            break;
+
+        case TERRAIN_ACCESS_WALL_BLOCKED: // Impassable wall
             return -1;
     }
-    // Base Cost (if valid)
-    base_cost = BASE_TERRAIN_COST(terrain_access.items[next_offset]);
-    base_cost = BASE_TERRAIN_COST(terrain_wall.items[next_offset]);
+
+    // FIX: You had duplicated BASE_TERRAIN_COST calls. Use the base cost of 100 or a formula.
+    // Assuming the base cost for movement is a fixed value (e.g., 100 for a tile step)
+    // You can adjust this based on the terrain type if needed.
+    return base_cost;
 }
+
+
+
 
 /** @brief Helper function to calculate the travel cost and check permission
 * Returns 1 if travel is permitted, 0 otherwise
@@ -563,7 +607,7 @@ int direction_index, const TravelRules *rules, int *out_cost)
 
     // Speed Modifiers (e.g highways)
     // MUST be walking in a cardinal direction, or this bonus won't apply
-    if (rules->allow_highway && map_terrain_is_highway(next_offset)) {
+    if (rules->boost_highway && map_terrain_is_highway(next_offset)) {
         if is_cardinal(direction) // Mockup placeholder, actually make it
         {
             cost_multiplier = 0.5;
@@ -749,19 +793,19 @@ static inline int has_fighting_enemy(int grid_offset)
     return fighting_data.status.items[grid_offset] & 2;
 }
 
-// Save/Load (unused)
+// Save/Load Buffers
 void map_routing_save_state(buffer * buf)
 {
     buffer_write_i32(buf, 0); // unused counter
-    buffer_write_i32(buf, 0); // unused counter
-    buffer_write_i32(buf, 0); // unused counter
+    buffer_write_i32(buf, stats.enemy_routes_calculated);
+    buffer_write_i32(buf, stats.total_routes_calculated);
     buffer_write_i32(buf, 0); // unused counter
 }
 
 void map_routing_load_state(buffer * buf)
 {
     buffer_skip(buf, 4); // unused counter
-    buffer_skip(buf, 4); // unused counter
-    buffer_skip(buf, 4); // unused counter    
+    stats.enemy_routes_calculated = buffer_read_i32(buf);
+    stats.total_routes_calculated = buffer_read_i32(buf);
     buffer_skip(buf, 4); // unused counter
 }

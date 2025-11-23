@@ -141,7 +141,7 @@ void figure_immigrant_action(figure *f)
             f->is_ghost = 0;
             figure_movement_path(f, 100);
             switch (f->direction) {
-                case DIR_FIGURE_AT_DESTINATION:
+                case DIR_AT_DESTINATION:
                     f->action_state = FIGURE_ACTION_3_IMMIGRANT_ENTERING_HOUSE;
                     figure_movement_set_cross_country_destination(f, b->x, b->y);
                     f->roam_length = 0;
@@ -231,7 +231,7 @@ void figure_emigrant_action(figure *f)
             f->use_cross_country = 0;
             f->is_ghost = 0;
             figure_movement_path(f, 100);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION ||
+            if (f->direction == DIR_AT_DESTINATION ||
                 f->direction == DIR_FIGURE_REROUTE ||
                 f->direction == DIR_FIGURE_LOST) {
                 f->state = FIGURE_STATE_DEAD;
@@ -291,7 +291,7 @@ void figure_homeless_action(figure *f)
             } else if (f->direction == DIR_FIGURE_REROUTE || f->direction == DIR_FIGURE_LOST) {
                 building_get(f->immigrant_building_id)->immigrant_figure_id = 0;
                 f->state = FIGURE_STATE_DEAD;
-            } else if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            } else if (f->direction == DIR_AT_DESTINATION) {
                 building *b = building_get(f->immigrant_building_id);
                 f->action_state = FIGURE_ACTION_9_HOMELESS_ENTERING_HOUSE;
                 figure_movement_set_cross_country_destination(f, b->x, b->y);
@@ -332,7 +332,7 @@ void figure_homeless_action(figure *f)
             break;
         case FIGURE_ACTION_10_HOMELESS_LEAVING:
             figure_movement_path(f, 100);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
+            if (f->direction == DIR_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                 f->state = FIGURE_STATE_DEAD;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
                 figure_route_remove(f);

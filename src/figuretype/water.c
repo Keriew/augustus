@@ -85,8 +85,8 @@ void figure_flotsam_action(figure *f)
                 f->wait_ticks++;
                 figure_movement_path(f, 100);
                 f->is_ghost = 0;
-                f->height_adjusted_ticks = 0;
-                if (f->direction == DIR_FIGURE_AT_DESTINATION ||
+                f->height_adjusted_mov = 0;
+                if (f->direction == DIR_AT_DESTINATION ||
                     f->direction == DIR_FIGURE_REROUTE || f->direction == DIR_FIGURE_LOST) {
                     f->action_state = FIGURE_ACTION_130_FLOTSAM_OFF_MAP;
                 }
@@ -142,7 +142,7 @@ void figure_flotsam_action(figure *f)
 void figure_shipwreck_action(figure *f)
 {
     f->is_ghost = 0;
-    f->height_adjusted_ticks = 0;
+    f->height_adjusted_mov = 0;
     f->is_boat = 1;
     figure_image_increase_offset(f, 128);
     if (f->wait_ticks < 1000) {
@@ -223,8 +223,8 @@ void figure_fishing_boat_action(figure *f)
             break;
         case FIGURE_ACTION_191_FISHING_BOAT_GOING_TO_FISH:
             figure_movement_path(f, speed + percentage_speed);
-            f->height_adjusted_ticks = 0;
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            f->height_adjusted_mov = 0;
+            if (f->direction == DIR_AT_DESTINATION) {
                 map_point tile;
                 if (map_water_find_alternative_fishing_boat_tile(f, &tile)) {
                     figure_route_remove(f);
@@ -253,8 +253,8 @@ void figure_fishing_boat_action(figure *f)
             break;
         case FIGURE_ACTION_193_FISHING_BOAT_GOING_TO_WHARF:
             figure_movement_path(f, speed + percentage_speed);
-            f->height_adjusted_ticks = 0;
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            f->height_adjusted_mov = 0;
+            if (f->direction == DIR_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_194_FISHING_BOAT_AT_WHARF;
                 f->wait_ticks = 0;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
@@ -289,8 +289,8 @@ void figure_fishing_boat_action(figure *f)
         break;
         case FIGURE_ACTION_195_FISHING_BOAT_RETURNING_WITH_FISH:
             figure_movement_path(f, speed + percentage_speed);
-            f->height_adjusted_ticks = 0;
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            f->height_adjusted_mov = 0;
+            if (f->direction == DIR_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_194_FISHING_BOAT_AT_WHARF;
                 f->wait_ticks = 0;
                 b->figure_spawn_delay = 1;

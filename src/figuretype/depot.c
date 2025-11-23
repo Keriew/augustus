@@ -293,7 +293,7 @@ void figure_depot_cartpusher_action(figure *f)
             set_cart_graphic(f);
             if (f->wait_ticks > DEPOT_CART_REROUTE_DELAY) {
                 figure_movement_path(f, speed_factor + percentage_speed);
-                if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+                if (f->direction == DIR_AT_DESTINATION) {
                     f->action_state = FIGURE_ACTION_240_DEPOT_CART_PUSHER_AT_SOURCE;
                     f->wait_ticks = 0;
                 } else if (f->direction == DIR_FIGURE_LOST) {
@@ -347,7 +347,7 @@ void figure_depot_cartpusher_action(figure *f)
             set_cart_graphic(f);
             if (f->wait_ticks > DEPOT_CART_REROUTE_DELAY) {
                 figure_movement_path(f, speed_factor + percentage_speed);
-                if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+                if (f->direction == DIR_AT_DESTINATION) {
                     f->action_state = FIGURE_ACTION_242_DEPOT_CART_PUSHER_AT_DESTINATION;
                     f->wait_ticks = 0;
                 } else if (f->direction == DIR_FIGURE_LOST) {
@@ -387,7 +387,7 @@ void figure_depot_cartpusher_action(figure *f)
         case FIGURE_ACTION_243_DEPOT_CART_PUSHER_RETURNING:
             set_cart_graphic(f);
             figure_movement_path(f, speed_factor + percentage_speed);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            if (f->direction == DIR_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_238_DEPOT_CART_PUSHER_INITIAL;
                 f->state = FIGURE_STATE_DEAD;
             } else if (f->direction == DIR_FIGURE_LOST) {

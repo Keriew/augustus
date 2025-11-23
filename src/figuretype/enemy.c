@@ -102,7 +102,7 @@ static void enemy_marching(figure *f, const formation *m)
         f->wait_ticks = 50;
         f->destination_x = m->destination_x + f->formation_position_x.enemy;
         f->destination_y = m->destination_y + f->formation_position_y.enemy;
-        if (calc_general_direction(f->x, f->y, f->destination_x, f->destination_y) == DIR_FIGURE_AT_DESTINATION) {
+        if (calc_general_direction(f->x, f->y, f->destination_x, f->destination_y) == DIR_AT_DESTINATION) {
             f->action_state = FIGURE_ACTION_151_ENEMY_INITIAL;
             return;
         }
@@ -110,7 +110,7 @@ static void enemy_marching(figure *f, const formation *m)
         figure_route_remove(f);
     }
     figure_movement_path(f, f->speed_multiplier);
-    if (f->direction == DIR_FIGURE_AT_DESTINATION ||
+    if (f->direction == DIR_AT_DESTINATION ||
         f->direction == DIR_FIGURE_REROUTE ||
         f->direction == DIR_FIGURE_LOST) {
         f->action_state = FIGURE_ACTION_151_ENEMY_INITIAL;
@@ -152,7 +152,7 @@ static void enemy_fighting(figure *f, const formation *m)
     }
     if (target_id > 0) {
         figure_movement_path(f, f->speed_multiplier);
-        if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+        if (f->direction == DIR_AT_DESTINATION) {
             figure *target = figure_get(f->target_figure_id);
             f->destination_x = target->x;
             f->destination_y = target->y;
@@ -185,7 +185,7 @@ static void enemy_action(figure *f, formation *m)
             f->destination_x = f->source_x;
             f->destination_y = f->source_y;
             figure_movement_path(f, f->speed_multiplier);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION ||
+            if (f->direction == DIR_AT_DESTINATION ||
                 f->direction == DIR_FIGURE_REROUTE ||
                 f->direction == DIR_FIGURE_LOST) {
                 f->state = FIGURE_STATE_DEAD;
@@ -617,7 +617,7 @@ void figure_enemy_gladiator_action(figure *f)
             city_figures_set_gladiator_revolt();
             f->terrain_usage = TERRAIN_USAGE_ENEMY;
             figure_movement_path(f, 100);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION ||
+            if (f->direction == DIR_AT_DESTINATION ||
                 f->direction == DIR_FIGURE_REROUTE ||
                 f->direction == DIR_FIGURE_LOST) {
                 f->action_state = FIGURE_ACTION_158_NATIVE_CREATED;

@@ -361,7 +361,7 @@ void figure_rioter_action(figure *f)
         case FIGURE_ACTION_121_RIOTER_MOVING:
             figure_image_increase_offset(f, 12);
             figure_movement_path(f, 100);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            if (f->direction == DIR_AT_DESTINATION) {
                 figure_rioter_collapse_building(f);
 
                 int x_tile, y_tile;
@@ -426,7 +426,7 @@ void figure_robber_action(figure *f)
         case FIGURE_ACTION_229_CRIMINAL_GOING_TO_ROB:
             figure_image_increase_offset(f, 12);
             figure_movement_path(f, 100);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            if (f->direction == DIR_AT_DESTINATION) {
                 figure_crime_steal_money(f);
                 f->state = FIGURE_STATE_DEAD;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
@@ -473,7 +473,7 @@ void figure_looter_action(figure *f)
         case FIGURE_ACTION_228_CRIMINAL_GOING_TO_LOOT:
             figure_image_increase_offset(f, 12);
             figure_movement_path(f, 100);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            if (f->direction == DIR_AT_DESTINATION) {
                 loot_storage(f, f->collecting_item_id, f->destination_building_id);
                 f->state = FIGURE_STATE_DEAD;
             } else if (f->direction == DIR_FIGURE_REROUTE) {

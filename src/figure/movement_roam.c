@@ -359,7 +359,7 @@ void figure_movement_roam_ticks(figure *f, int num_mov)
         move_figure_path(f, num_ticks, 1);
 
         // Check if path is finished (Arrived, Reroute, or Lost are end states)
-        const int path_finished = (f->direction == DIR_FIGURE_AT_DESTINATION
+        const int path_finished = (f->direction == DIR_AT_DESTINATION
             || f->direction == DIR_FIGURE_REROUTE
             || f->direction == DIR_FIGURE_LOST);
 

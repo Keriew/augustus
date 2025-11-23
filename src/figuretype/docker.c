@@ -421,7 +421,7 @@ void figure_docker_action(figure *f)
             set_cart_graphic(f);
             figure_movement_path(f, 100);
             f->loads_sold_or_carrying = 1;
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            if (f->direction == DIR_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_139_DOCKER_IMPORT_AT_STORAGE;
                 f->wait_ticks = 0;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
@@ -437,7 +437,7 @@ void figure_docker_action(figure *f)
         case FIGURE_ACTION_136_DOCKER_EXPORT_GOING_TO_STORAGE:
             f->cart_image_id = image_group(GROUP_FIGURE_CARTPUSHER_CART); // empty
             figure_movement_path(f, 100);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            if (f->direction == DIR_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_140_DOCKER_EXPORT_AT_STORAGE;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
                 figure_route_remove(f);
@@ -453,7 +453,7 @@ void figure_docker_action(figure *f)
             set_cart_graphic(f);
             figure_movement_path(f, 100);
             f->loads_sold_or_carrying = 1;
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            if (f->direction == DIR_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_134_DOCKER_EXPORT_QUEUE;
                 f->wait_ticks = 0;
             } else if (f->direction == DIR_FIGURE_REROUTE) {
@@ -472,7 +472,7 @@ void figure_docker_action(figure *f)
                 f->cart_image_id = image_group(GROUP_FIGURE_CARTPUSHER_CART); // empty cart
             }
             figure_movement_path(f, 100);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            if (f->direction == DIR_AT_DESTINATION) {
                 set_docker_as_idle(f);
             } else if (f->direction == DIR_FIGURE_REROUTE) {
                 figure_route_remove(f);

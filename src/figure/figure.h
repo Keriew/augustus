@@ -94,7 +94,7 @@ typedef struct {
     unsigned char terrain_usage;
     unsigned char loads_sold_or_carrying;
     unsigned char is_boat; // 1 for boat, 2 for flotsam
-    unsigned char height_adjusted_ticks;
+    unsigned char height_adjusted_mov;
     unsigned char current_height;
     unsigned char target_height;
     unsigned char collecting_item_id; // NOT a resource ID for cartpushers! IS a resource ID for warehousemen or lighthouse supplier

@@ -4,6 +4,32 @@
 #include "core/buffer.h"
 #include "map/grid.h"
 
+#define MAX_QUEUE GRID_SIZE * GRID_SIZE // why is it this number instead of another?
+#define MAX_SEARCH_ITERATIONS 50000 // higher? lower?
+#define BASE_TERRAIN_COST(x) ((int)(x))
+#define MAX_CONCURRENT_ROUTES 32
+
+typedef struct map_routing_distance_grid {
+    grid_i16 possible;
+    grid_i16 determined;
+    int dst_x;
+    int dst_y;
+} map_routing_distance_grid;
+
+// Routing Context
+typedef struct {
+    // Core Pathfinding Data
+    map_routing_distance_grid route_map_pool[MAX_CONCURRENT_ROUTES];
+    struct { int head; int tail; int items[MAX_QUEUE]; } queue;
+    // Specialized Working Buffers
+    map_routing_distance_grid fighting_data;
+    // Stores the position (index) within the queue.items array for every grid offset.
+    int node_index[GRID_SIZE * GRID_SIZE];
+    // ... possibly other single-use flags or temporary data ...
+} RoutingContext;
+// Provides context to ctx (?)
+typedef int (*RoutingCallback)(RoutingContext *ctx, int offset, int next_offset, int direction);
+
 typedef enum {
     ROUTED_BUILDING_ROAD = 0,
     ROUTED_BUILDING_WALL = 1,
@@ -13,12 +39,6 @@ typedef enum {
     ROUTED_BUILDING_DRAGGABLE_RESERVOIR = 6
 } routed_building_type;
 
-typedef struct map_routing_distance_grid {
-    grid_i16 possible;
-    grid_i16 determined;
-    int dst_x;
-    int dst_y;
-} map_routing_distance_grid;
 
 typedef enum {
     // Land
@@ -64,5 +84,9 @@ void map_routing_add_source_area(int x, int y, int size);
 void map_routing_save_state(buffer *buf);
 
 void map_routing_load_state(buffer *buf);
+
+// Extern
+extern map_routing_distance_grid distance; // Global Distance Map --> Shouldn't there be multiple???
+extern RoutingContext g_context; // NOTE: Global Routing Context (required by fix for previous error)
 
 #endif // MAP_ROUTING_H

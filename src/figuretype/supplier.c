@@ -249,7 +249,7 @@ void figure_supplier_action(figure *f)
             break;
         case FIGURE_ACTION_145_SUPPLIER_GOING_TO_STORAGE:
             figure_movement_path(f, 100);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            if (f->direction == DIR_AT_DESTINATION) {
                 f->wait_ticks = 0;
                 f->previous_tile_x = f->x;
                 f->previous_tile_y = f->y;
@@ -286,8 +286,8 @@ void figure_supplier_action(figure *f)
             break;
         case FIGURE_ACTION_146_SUPPLIER_RETURNING:
             figure_movement_path(f, 100);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
-                if (f->direction == DIR_FIGURE_AT_DESTINATION && f->type == FIGURE_LIGHTHOUSE_SUPPLIER) {
+            if (f->direction == DIR_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
+                if (f->direction == DIR_AT_DESTINATION && f->type == FIGURE_LIGHTHOUSE_SUPPLIER) {
                     building_get(f->building_id)->resources[RESOURCE_TIMBER] += 100;
                 }
                 f->state = FIGURE_STATE_DEAD;
@@ -390,7 +390,7 @@ void figure_delivery_boy_action(figure *f)
             f->state = FIGURE_STATE_DEAD;
         }
     }
-    if (leader->is_ghost && !leader->height_adjusted_ticks) {
+    if (leader->is_ghost && !leader->height_adjusted_mov) {
         f->is_ghost = 1;
     }
     int dir = figure_image_normalize_direction(f->direction < 8 ? f->direction : f->previous_tile_direction);
@@ -441,7 +441,7 @@ void figure_fort_supplier_action(figure *f)
             break;
         case FIGURE_ACTION_236_SUPPLY_POST_GOING_TO_FORT:
             figure_movement_path(f, 100);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+            if (f->direction == DIR_AT_DESTINATION) {
                 f->action_state = FIGURE_ACTION_237_SUPPLY_POST_RETURNING_FROM_FORT;
                 f->destination_x = f->source_x;
                 f->destination_y = f->source_y;
@@ -459,7 +459,7 @@ void figure_fort_supplier_action(figure *f)
                 figure_movement_path(f, 100);
                 if (f->direction == DIR_FIGURE_REROUTE) {
                     figure_route_remove(f);
-                } else if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
+                } else if (f->direction == DIR_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                     f->state = FIGURE_STATE_DEAD;
                 }
             }
