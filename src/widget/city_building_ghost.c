@@ -520,8 +520,8 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
                 discouraged_terrain &= ~TERRAIN_ROAD;
             }
             if (type == BUILDING_GATEHOUSE) {
-                forbidden_terrain &= ~(TERRAIN_HIGHWAY | TERRAIN_WALL | TERRAIN_ROAD);
-                discouraged_terrain &= ~(TERRAIN_HIGHWAY | TERRAIN_WALL | TERRAIN_ROAD);
+                forbidden_terrain &= ~(TERRAIN_HIGHWAY | TERRAIN_WALL | TERRAIN_ROAD | TERRAIN_BUILDING);
+                discouraged_terrain &= ~(TERRAIN_HIGHWAY | TERRAIN_WALL | TERRAIN_ROAD | TERRAIN_BUILDING);
             }
             if (type == BUILDING_TOWER) {
                 forbidden_terrain &= ~TERRAIN_WALL & ~TERRAIN_BUILDING;
@@ -553,7 +553,6 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
             } else {
                 blocked_tiles[i] = TILE_ALLOWED;
             }
-
         }
     }
     if (type >= BUILDING_ROADBLOCK ||
