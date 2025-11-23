@@ -333,7 +333,7 @@ int map_water_find_shipwreck_tile(figure *wreck, map_point *tile)
 static int num_surrounding_water_tiles(int grid_offset)
 {
     int amount = 0;
-    for (int i = 0; i < DIR_CENTER; i++) {
+    for (int i = 0; i < DIR_MAX_MOVEMENT; i++) {
         if (map_terrain_is(grid_offset + map_grid_direction_delta(i), TERRAIN_WATER)) {
             amount++;
         }

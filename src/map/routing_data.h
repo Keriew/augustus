@@ -28,9 +28,9 @@ enum { // Includes movement cost
     TERRAIN_ACCESS_WALL_BLOCKED = 200,
 };
 
-extern grid_i8 terrain_land_citizen;
-extern grid_i8 terrain_land_noncitizen;
-extern grid_i8 terrain_water;
-extern grid_i8 terrain_walls;
+extern grid_i8 terrain_access_citizen;
+extern grid_i8 terrain_access_noncitizen;
+extern grid_i8 terrain_access_water;
+extern grid_i8 terrain_access_walls;
 
 #endif // MAP_ROUTING_DATA_H

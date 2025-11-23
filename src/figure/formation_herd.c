@@ -71,7 +71,11 @@ static int get_roaming_destination(formation *m, int distance, int *x_tile, int 
     int direction = m->herd_direction;
     int allow_negative_desirability = m->figure_type == FIGURE_WOLF;
     int target_direction = (formation_id + random_byte()) & 7;
-    if (direction >= DIR_TOP && direction < DIR_CENTER) {
+    if (direction == DIR_TOP
+        || direction == DIR_TOP_RIGHT
+        || direction == RIGHT
+        || direction == DIR_BOTTOM_RIGHT
+        || direction == DIR_BOTTOM) {
         target_direction = direction;
         allow_negative_desirability = 1;
     }
