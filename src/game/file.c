@@ -277,7 +277,7 @@ static void initialize_saved_game(void)
 
     city_view_init();
 
-    map_routing_update_all();
+    map_routing_update_terrain_access();
 
     map_orientation_update_buildings();
     figure_route_clean();

@@ -3,7 +3,6 @@
 #include "SDL.h"
 // Internal
 #include "movement.h"
-#include "movement_internal.h"
 #include "direction.h"
 #include "combat.h"
 #include "route.h"

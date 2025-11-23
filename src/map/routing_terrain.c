@@ -108,7 +108,7 @@ void map_terrain_access_citizen(int grid_offset)
         terrain_access_citizen.items[grid_offset] = TERRAIN_ACCESS_CITIZEN_PASSABLE;
     } else if (terrain & (TERRAIN_BUILDING | TERRAIN_GATEHOUSE)) {
         if (!map_building_at(grid_offset)) {
-            // shouldn't happen
+            // legacy: fixes a bug that might no longer happen, but leaving this here just in case
             terrain_access_citizen.items[grid_offset] = TERRAIN_ACCESS_CITIZEN_CLEAR;
             repair_ghost_building(grid_offset)
                 continue;

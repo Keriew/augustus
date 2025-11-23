@@ -100,7 +100,7 @@ static void advance_month(void)
     map_tiles_update_all_roads();
     map_tiles_update_all_highways();
     map_tiles_update_all_water();
-    map_routing_update_access(); // Routing
+    map_routing_update_terrain_access();
 
     city_message_sort_and_compact();
 

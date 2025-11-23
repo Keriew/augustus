@@ -29,6 +29,7 @@
 #include "map/grid.h"
 #include "map/orientation.h"
 #include "map/routing.h"
+#include "map/routing_data.h"
 #include "map/routing_terrain.h"
 #include "map/road_aqueduct.h"
 #include "map/terrain.h"
@@ -673,7 +674,7 @@ int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aqueduct)
     if (is_aqueduct && !map_can_place_aqueduct_on_highway(grid_offset, 0)) {
         return 0;
     }
-    if (terrain_access.items[grid_offset] == TERRAIN_ACCESS_BLOCKED) {
+    if (terrain_access_citizen.items[grid_offset] == TERRAIN_ACCESS_CITIZEN_BLOCKED) {
         // not open land, can only if:
         // - aqueduct should be placed, and:
         // - land is a reservoir building OR an aqueduct
@@ -690,10 +691,10 @@ int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aqueduct)
             }
         }
         return 0;
-    } else if (terrain_access.items[grid_offset] == TERRAIN_ACCESS_PASSABLE) {
+    } else if (terrain_access_citizen.items[grid_offset] == TERRAIN_ACCESS_CITIZEN_PASSABLE) {
         // rubble, access ramp, garden
         return 0;
-    } else if (terrain_access.items[grid_offset] == TERRAIN_ACCESS_AQUEDUCT) {
+    } else if (terrain_access_citizen.items[grid_offset] == TERRAIN_ACCESS_CITIZEN_AQUEDUCT) {
         if (is_aqueduct) {
             return 0;
         }

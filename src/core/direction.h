@@ -34,4 +34,10 @@ typedef enum {
     DIR_AT_DESTINATION = 13,
 } direction_type;
 
+// Structures
+typedef struct {
+    int x;
+    int y;
+} point_2d;
+
 #endif // CORE_DIRECTION_H

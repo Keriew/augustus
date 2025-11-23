@@ -4,8 +4,6 @@
 // Internal
 #include "movement.h"
 #include "figure.h"
-#include "movement_internal.h"
-#include "direction.h"
 #include "combat.h"
 #include "route.h"
 #include "service.h"
@@ -16,6 +14,7 @@
 #include "building/roadblock.h"
 #include "core/calc.h"
 #include "core/config.h"
+#include "core/direction.h"
 #include "game/time.h"
 #include "map/bridge.h"
 #include "map/building.h"
@@ -59,7 +58,7 @@ static const direction_type DIR_OPPOSITE_MAP[10] = {
     [DIR_CENTER] = DIR_CENTER
 };
 // Defines roadblock permissions
-static const roadblock_permission FIGURE_PERMISSIONS[FIGURE_TYPE_COUNT] = {
+static const roadblock_permission FIGURE_PERMISSIONS[] = {
     // Maintenance
     [FIGURE_ENGINEER] = PERMISSION_MAINTENANCE,
     [FIGURE_PREFECT] = PERMISSION_MAINTENANCE,
@@ -84,7 +83,7 @@ static const roadblock_permission FIGURE_PERMISSIONS[FIGURE_TYPE_COUNT] = {
     [FIGURE_TAX_COLLECTOR] = PERMISSION_TAX_COLLECTOR,
     [FIGURE_LABOR_SEEKER] = PERMISSION_LABOR_SEEKER,
     [FIGURE_MISSIONARY] = PERMISSION_MISSIONARY,
-    [FIGURE_WATCHMAN] = PERMISSION_WATCHMAN
+    [FIGURE_WATCHMAN] = PERMISSION_WATCHMAN,
 };
 
 // --- HELPER FUNCTIONS ---
@@ -97,32 +96,6 @@ static void apply_sub_tile_movement(figure *f)
         // DIR_DELTAS is the map of sub-tile coordinate changes for each direction.
         f->cross_country_x += DIR_DELTAS[f->direction].x;
         f->cross_country_y += DIR_DELTAS[f->direction].y;
-    }
-}
-// Defines how a figure will move on a given movement (tiles take 15 movements to move through)
-static void advance_mov(figure *f)
-{
-    // 1. Apply the core physics movement for this tick
-    apply_sub_tile_movement(f);
-
-    // 2. Handle height adjustments and ghost state
-    if (f->height_adjusted_mov) {
-        f->height_adjusted_mov--;
-        if (f->height_adjusted_mov > 0) {
-            f->is_ghost = 1;
-            if (f->current_height < f->target_height) {
-                f->current_height++;
-            }
-            if (f->current_height > f->target_height) {
-                f->current_height--;
-            }
-        } else {
-            f->is_ghost = 0;
-        }
-    } else {
-        if (f->current_height) {
-            f->current_height--;
-        }
     }
 }
 static void set_target_height_bridge(figure *f)
@@ -152,7 +125,7 @@ static int is_roaming_blocked_by_building(figure *f, int target_position, int af
 
     // 2. Roadblock Permission Check
     if (building_type_is_roadblock(b->type)) {
-        int permission = get_permission_for_figure_type(f);
+        int permission = FIGURE_PERMISSIONS[f->type];
         if (!building_roadblock_get_permission(permission, b)) {
             return 1; // Blocked: No permission
         }
@@ -161,10 +134,10 @@ static int is_roaming_blocked_by_building(figure *f, int target_position, int af
     return 0; // Not blocked
 }
 // Determines the HP of a building
-static int get_obstacle_hp(target_position)
+static int get_obstacle_hp(int target_position)
 {
     // Unless you change it, all this stuff will be in the terrain_citizen memory or whatever it's called
-    type = terrain_access.items[target_position]
+    type = terrain_access.items[int target_position]
         switch (type) {
             case TERRAIN_RUBBLE:
             case TERRAIN_ACCESS_RAMP:
@@ -193,12 +166,12 @@ static int get_obstacle_hp(target_position)
 static void attempt_obstacle_destruction(figure *f, int target_position)
 {
     // 1. Early Exit: Is there anything to destroy?
-    if (!map_routing_is_destroyable(target_position)) {
+    if (!map_routing_is_destroyable(int target_position)) {
         return;
     }
 
     // 2. Determine the type of the obstacle
-    int hp = get_obstacle_hp(target_position);
+    int hp = get_obstacle_hp(int target_position);
     if (hp == 0) {
         return; // Cannot be destroyed (e.g rubble, access ramp)
     }
@@ -209,7 +182,7 @@ static void attempt_obstacle_destruction(figure *f, int target_position)
     switch (type) {
         case DESTROYABLE_BUILDING:
         {
-            building *b = building_get(map_building_at(target_position));
+            building *b = building_get(map_building_at(int target_position));
             if (b) {
                 max_damage = get_obstacle_hp(b->type);
             }
@@ -288,17 +261,35 @@ static void handle_new_tile_environment(figure *f)
     }
 }
 
-// --- CORE MOVEMENT & STATE FUNCTIONS ---
-/* Gets roadblock permissions for the figure */
-static roadblock_permission get_permission_for_figure_type(figure *f)
+// --- SHARED HELPER FUNCTIONS ---
+// Defines how a figure will move on a given movement (tiles take 15 movements to move through)
+void advance_mov(figure *f)
 {
-    // Safety check: Ensures the figure type is a valid index for the array.
-    if (f->type >= 0 && f->type < FIGURE_TYPE_COUNT) {
-        return FIGURE_PERMISSIONS[f->type];
+    // 1. Apply the core physics movement for this tick
+    apply_sub_tile_movement(f);
+
+    // 2. Handle height adjustments and ghost state
+    if (f->height_adjusted_mov) {
+        f->height_adjusted_mov--;
+        if (f->height_adjusted_mov > 0) {
+            f->is_ghost = 1;
+            if (f->current_height < f->target_height) {
+                f->current_height++;
+            }
+            if (f->current_height > f->target_height) {
+                f->current_height--;
+            }
+        } else {
+            f->is_ghost = 0;
+        }
+    } else {
+        if (f->current_height) {
+            f->current_height--;
+        }
     }
-    // Default case
-    return PERMISSION_NONE;
 }
+
+// --- CORE MOVEMENT & STATE FUNCTIONS ---
 // Moves the figure to the next tile
 static void move_to_next_tile(figure *f)
 {

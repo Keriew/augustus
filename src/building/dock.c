@@ -14,6 +14,7 @@
 #include "map/figure.h"
 #include "map/grid.h"
 #include "map/routing.h"
+#include "map/routing_data.h"
 #include "map/routing_terrain.h"
 #include "map/terrain.h"
 #include "scenario/map.h"
@@ -455,7 +456,7 @@ void building_dock_get_ship_request_tile(const building *dock, ship_dock_request
                 default: dx = -2; dy = 2; break;
             }
             grid_offset = map_grid_offset(dock->x + dx, dock->y + dy);
-            if (!map_terrain_is(grid_offset, TERRAIN_WATER) || terrain_water.items[grid_offset] == TERRAIN_ACCESS_WATER_BLOCKED) {
+            if (!map_terrain_is(grid_offset, TERRAIN_WATER) || terrain_access_water.items[grid_offset] == TERRAIN_ACCESS_WATER_BLOCKED) {
                 // fallback 1
                 switch (dock->data.dock.orientation) {
                     case 0: dx = 0; dy = -1; break;
@@ -465,7 +466,7 @@ void building_dock_get_ship_request_tile(const building *dock, ship_dock_request
                 }
                 grid_offset = map_grid_offset(dock->x + dx, dock->y + dy);
             }
-            if (!map_terrain_is(grid_offset, TERRAIN_WATER) || terrain_water.items[grid_offset] == TERRAIN_ACCESS_WATER_BLOCKED) {
+            if (!map_terrain_is(grid_offset, TERRAIN_WATER) || terrain_access_water.items[grid_offset] == TERRAIN_ACCESS_WATER_BLOCKED) {
                 // fallback 2
                 switch (dock->data.dock.orientation) {
                     case 0: dx = 1; dy = 0; break;
@@ -484,7 +485,7 @@ void building_dock_get_ship_request_tile(const building *dock, ship_dock_request
                 default: dx = -3; dy = 2; break;
             }
             grid_offset = map_grid_offset(dock->x + dx, dock->y + dy);
-            if (!map_terrain_is(grid_offset, TERRAIN_WATER) || terrain_water.items[grid_offset] == TERRAIN_ACCESS_WATER_BLOCKED) {
+            if (!map_terrain_is(grid_offset, TERRAIN_WATER) || terrain_access_water.items[grid_offset] == TERRAIN_ACCESS_WATER_BLOCKED) {
                 // fallback 1
                 switch (dock->data.dock.orientation) {
                     case 0: dx = 2; dy = -1; break;
@@ -494,7 +495,7 @@ void building_dock_get_ship_request_tile(const building *dock, ship_dock_request
                 }
                 grid_offset = map_grid_offset(dock->x + dx, dock->y + dy);
             }
-            if (!map_terrain_is(grid_offset, TERRAIN_WATER) || terrain_water.items[grid_offset] == TERRAIN_ACCESS_WATER_BLOCKED) {
+            if (!map_terrain_is(grid_offset, TERRAIN_WATER) || terrain_access_water.items[grid_offset] == TERRAIN_ACCESS_WATER_BLOCKED) {
                 // fallback 2
                 switch (dock->data.dock.orientation) {
                     case 0: dx = 0; dy = -3; break;

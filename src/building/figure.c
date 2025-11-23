@@ -27,6 +27,7 @@
 #include "figure/figure.h"
 #include "figure/formation_legion.h"
 #include "figure/movement.h"
+#include "figure/movement_roam.h"
 #include "game/resource.h"
 #include "map/building_tiles.h"
 #include "map/desirability.h"

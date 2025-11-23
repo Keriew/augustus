@@ -5,6 +5,8 @@
 #include "core/config.h"
 #include "figure/formation.h"
 #include "figure/movement.h"
+#include "figure/movement_cross_country.h"
+#include "figure/movement_misc.h"
 #include "figure/properties.h"
 #include "figure/route.h"
 #include "figure/sound.h"

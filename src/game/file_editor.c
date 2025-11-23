@@ -138,7 +138,7 @@ static void prepare_map_for_editing(void)
     map_tiles_update_all_aqueducts(0);
     widget_map_editor_custom_earthquake_request_refresh();
     map_natives_init_editor();
-    map_routing_update_all();
+    map_routing_update_terrain_access();
 
     scenario_editor_set_as_saved();
 
