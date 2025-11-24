@@ -651,24 +651,6 @@ int building_construction_place_building(building_type type, int x, int y, int e
 
 
 
-int can_build_highway(int next_offset, int check_highway_routing)
-{
-    int size = 2;
-    for (int x = 0; x < size; x++) {
-        for (int y = 0; y < size; y++) {
-            int offset = next_offset + map_grid_delta(x, y);
-            int terrain = map_terrain_get(offset);
-            if (terrain & TERRAIN_NOT_CLEAR & ~TERRAIN_HIGHWAY & ~TERRAIN_AQUEDUCT & ~TERRAIN_ROAD) {
-                return 0;
-            } else if (!map_can_place_highway_under_aqueduct(offset, check_highway_routing)) {
-                return 0;
-            }
-        }
-    }
-
-    return 1;
-}
-
 int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aqueduct)
 {
     if (is_aqueduct && !map_can_place_aqueduct_on_highway(grid_offset, 0)) {

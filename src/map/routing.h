@@ -7,29 +7,47 @@
 #define MAX_QUEUE GRID_SIZE * GRID_SIZE // why is it this number instead of another?
 #define MAX_SEARCH_ITERATIONS 50000 // higher? lower?
 #define BASE_TERRAIN_COST(x) ((int)(x))
-#define MAX_CONCURRENT_ROUTES 32
+#define MAX_CONCURRENT_ROUTES 32 // Could be higher but would take memory for no good reason?
 
+// --- 1. TYPE DEFINITIONS ---
+// Defines the structure of a single distance map (G, H, and destination coordinates)
 typedef struct map_routing_distance_grid {
-    grid_i16 possible;
-    grid_i16 determined;
-    int dst_x;
-    int dst_y;
+    grid_i16 possible;   // F-cost (G+H) or Priority Queue cost
+    grid_i16 determined; // G-cost (Actual cost from source)
+    int dst_x;           // Destination X coordinate (used for A* heuristic)
+    int dst_y;           // Destination Y coordinate (used for A* heuristic)
 } map_routing_distance_grid;
-
-// Routing Context
+// Defines the master context struct that holds all working data for the pathfinder
 typedef struct {
-    // Core Pathfinding Data
+    // Core Pathfinding Data (The 32-map pool)
     map_routing_distance_grid route_map_pool[MAX_CONCURRENT_ROUTES];
+
+    // Priority Queue (Used by all searches)
     struct { int head; int tail; int items[MAX_QUEUE]; } queue;
-    // Specialized Working Buffers
-    map_routing_distance_grid fighting_data;
+
     // Stores the position (index) within the queue.items array for every grid offset.
     int node_index[GRID_SIZE * GRID_SIZE];
+
+    // Specialized Working Buffers (e.g., cached fighting status)
+    map_routing_distance_grid fighting_data;
+
+    // Reserved status
+    int route_map_pool_is_reserved[MAX_CONCURRENT_ROUTES]; // 0: Free, 1: Reserved
+
     // ... possibly other single-use flags or temporary data ...
 } RoutingContext;
-// Provides context to ctx (?)
+// Defines a function pointer type for custom cost/passability checks
 typedef int (*RoutingCallback)(RoutingContext *ctx, int offset, int next_offset, int direction);
 
+// --- 2. GLOBAL DECLARATIONS (Externs) ---
+// This declares the single global instance of the Routing Context.
+extern RoutingContext g_context;
+
+
+// Path ID assigner
+int get_path_id(void)
+
+// Unclear?
 typedef enum {
     ROUTED_BUILDING_ROAD = 0,
     ROUTED_BUILDING_WALL = 1,
@@ -39,7 +57,19 @@ typedef enum {
     ROUTED_BUILDING_DRAGGABLE_RESERVOIR = 6
 } routed_building_type;
 
+// Entity types (used for the rules)
+typedef enum {
+    ENTITY_TYPE_CITIZEN,
+    ENTITY_TYPE_NONCITIZEN,
+    ENTITY_TYPE_BOAT,
+    ENTITY_TYPE_FLOTSAM,
+    ENTITY_TYPE_ROAD,
+    ENTITY_TYPE_HIGHWAY,
+    ENTITY_TYPE_AQUEDUCT,
+    ENTITY_TYPE_WALL,
+} RouteType;
 
+// Route types (used for the rules)
 typedef enum {
     // Land
     ROUTE_TYPE_CITIZEN, // placeholder?
@@ -63,6 +93,7 @@ const map_routing_distance_grid *map_routing_get_distance_grid(void);
 void map_routing_calculate_distances(int x, int y);
 void map_routing_calculate_distances_water_boat(int x, int y);
 void map_routing_calculate_distances_water_flotsam(int x, int y);
+void map_routing_init_offsets(int grid_width); // Initial offsets based on map size, must run only ONCE on map load
 
 int map_routing_calculate_distances_for_building(routed_building_type type, int x, int y);
 
@@ -84,9 +115,5 @@ void map_routing_add_source_area(int x, int y, int size);
 void map_routing_save_state(buffer *buf);
 
 void map_routing_load_state(buffer *buf);
-
-// Extern
-extern map_routing_distance_grid distance; // Global Distance Map --> Shouldn't there be multiple???
-extern RoutingContext g_context; // NOTE: Global Routing Context (required by fix for previous error)
 
 #endif // MAP_ROUTING_H

@@ -26,10 +26,6 @@
 #include "map/terrain.h"
 
 // --- MAPS ---
-/* Defines the 4 Cardinal Directions */
-static const int CARDINAL_DIRECTIONS[4] = {
-    DIR_TOP, DIR_LEFT, DIR_RIGHT, DIR_BOTTOM
-};
 // Defines the clockwise rotation sequence for 1-9 indices
 static const direction_type DIR_CW_ROTOR[10] = {
     0, // Null/Error

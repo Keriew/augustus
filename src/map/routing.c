@@ -3,6 +3,7 @@
 // External
 #include "building/building.h"
 #include "building/construction_building.h"
+#include "core/direction.h"
 #include "core/time.h"
 #include "map/building.h"
 #include "map/figure.h"
@@ -14,12 +15,48 @@
 #include <stdlib.h>
 #include <string.h> // Required for memset
 
-// --- CONSTANTS AND OFFSETS ---
-// Standard 8-directional movement offsets
-static const int ROUTE_OFFSETS[] = { -162, 1, 162, -1, -161, 163, 161, -163 };
-static const int ROUTE_OFFSETS_X[] = { 0, 1, 0, -1,  1, 1, -1, -1 };
-static const int ROUTE_OFFSETS_Y[] = { -1, 0, 1,  0, -1, 1,  1, -1 };
 
+
+
+
+// --- ROUTE OFFSETS ---
+// This can be easily improved to allow for custom grid sizes, but I have no idea how loading and scenario files work
+static int ROUTE_OFFSETS[10];
+static const int DIRECTION_X_OFFSETS[10] = {
+    0, // [0] DIR_NULL
+    -1, // [1] DIR_TOP_LEFT
+    0, // [2] DIR_TOP
+    +1, // [3] DIR_TOP_RIGHT
+    -1, // [4] DIR_LEFT
+    0, // [5] DIR_CENTER
+    +1, // [6] DIR_RIGHT
+    -1, // [7] DIR_BOTTOM_LEFT
+    0, // [8] DIR_BOTTOM
+    +1, // [9] DIR_BOTTOM_RIGHT
+};
+static const int DIRECTION_Y_OFFSETS[10] = {
+    0, // [0] DIR_NULL
+    1, // [1] DIR_TOP_LEFT
+    1, // [2] DIR_TOP
+    1, // [3] DIR_TOP_RIGHT
+    0, // [4] DIR_LEFT
+    0, // [5] DIR_CENTER
+    0, // [6] DIR_RIGHT
+    -1, // [7] DIR_BOTTOM_LEFT
+    -1, // [8] DIR_BOTTOM
+    -1 // [9] DIR_BOTTOM_RIGHT
+};
+int grid_size = 162 // default for vanilla maps
+void map_routing_init_offsets(int grid_width)
+{
+    // We only need to calculate the offsets for the 8 movement directions (1 to 4, and 6 to 9)
+    for (int i = 1; i <= 9; i++) {
+        // Skip DIR_CENTER, as it's not a movement direction
+        if (i == DIR_CENTER) continue;
+        // The core calculation now uses the new DIRECTION_X/Y_OFFSETS
+        ROUTE_OFFSETS[i] = DIRECTION_X_OFFSETS[i] + (DIRECTION_Y_OFFSETS[i] * grid_width);
+    }
+}
 
 // --- GLOBAL STATS AND CACHE ---
 // Global stats
@@ -37,31 +74,27 @@ static struct {
 // Defines routing rules
 typedef struct {
     int cardinal_travel = 0; // forces travelling in only four directions
-    // Moving entities
-    int is_citizen = 0;
-    int is_tower_sentry = 0;
+    // Entity
+    int entity_type = ENTITY_TYPE_CITIZEN;
     int is_friendly = 0;
     int is_enemy = 0;
-    int is_boat = 0;
-    int is_flotsam = 0;
+    int boost_highway = 0; // determines if the entity moves faster on highways
     // Citizen permissions
-    int ignores_roadblocks = 0;
     int travel_roads = 0;
     int travel_highways = 0;
-    int travel_gardens = 0;
+    int travel_passable = 0;
     int travel_land = 0;
     int travel_blocked = 0;
     int travel_aqueduct = 0;
     int travel_reservoir_connector = 0;
+    int travel_walls = 0;
     // Buildings (drag build)
     int is_road = 0;
     int is_highway = 0;
     int is_aqueduct = 0;
     int is_wall = 0;
     // Misc
-    int boost_highway = 0;
     int unblocking_rome = 0;
-    int water_cost_multiplier = 3; // Base cost for water
     int target_building_id;  // target building to attack
     int through_building_id; // building allowed to pass through
 } TravelRules;
@@ -70,39 +103,47 @@ typedef struct {
 static const TravelRules ROUTE_RULE_CONFIG[] = {
     // Moving entities
     [ROUTE_TYPE_CITIZEN] = {
-        .is_citizen = 1,
+        .entity_type = ENTITY_TYPE_CITIZEN,
         .travel_roads = 1,
-        .travel_gardens = 1,
+        .travel_passable = 1,
     },
     [ROUTE_TYPE_TOWER_SENTRY] = {
-        .is_citizen = 1,
-        .is_tower_sentry = 1,
+        .entity_type = ENTITY_TYPE_CITIZEN,
         .travel_roads = 1,
-        .travel_gardens = 1,
+        .travel_passable = 1,
+        .travel_walls = 1,
     },
     [ROUTE_TYPE_FRIENDLY] = {
-        .is_friendly = 1,
+        .entity_type = ENTITY_TYPE_NONCITIZEN,
+        .is_friendly
     },
     [ROUTE_TYPE_ENEMY] = {
+        .entity_type = ENTITY_TYPE_NONCITIZEN,
         .is_enemy = 1,
     },
     [ROUTE_TYPE_BOAT] = {
+        .entity_type = ENTITY_TYPE_BOAT,
         .is_boat = 1,
     },
     [ROUTE_TYPE_FLOTSAM] = {
+        .entity_type = ENTITY_TYPE_FLOTSAM,
         .is_flotsam = 1,
     },
     // Buildings (drag build)
     [ROUTE_TYPE_ROAD] = {
+        .entity_type = ENTITY_TYPE_ROAD,
         .is_road = 1,
     },
     [ROUTE_TYPE_HIGHWAY] = {
+        .entity_type = ENTITY_TYPE_HIGHWAY,
         .is_highway = 1,
     },
     [ROUTE_TYPE_AQUEDUCT] = {
+        .entity_type = ENTITY_TYPE_AQUEDUCT,
         .is_aqueduct = 1,
     },
     [ROUTE_TYPE_WALL] = {
+        .entity_type = ENTITY_TYPE_WALL,
         .is_wall = 1,
     },
 };
@@ -152,26 +193,54 @@ static void reset_fighting_status(void)
 
 
 
-// Returns the distance grid (should point to the global distance struct)
-const map_routing_distance_grid *map_routing_get_distance_grid(void)
-{
-    // FIX: Using the global 'distance' struct (must be defined in routing.c or similar)
-    return &distance;
-}
 
-// Clears the fighting status map and resets the queue pointers
-static void clear_data(RoutingContext *ctx)
+
+// Global Routing Context
+RoutingContext g_context;
+// Get path id
+iint get_path_id(void)
+{
+    RoutingContext *ctx = map_routing_get_context();
+
+    // Iterate through all 32 possible map slots
+    for (int i = 0; i < MAX_CONCURRENT_ROUTES; i++) {
+        if (ctx->route_map_pool_is_reserved[i] == 0) {
+            // Found a free map ID! Reserve it and return the ID.
+            ctx->route_map_pool_is_reserved[i] = 1;
+            return i;
+        }
+    }
+
+    // No free path found, MAX_CONCURRENT_ROUTES is too low or something is clogging them
+    return -1;
+}
+// Release path id
+void release_path_id(int path_id)
+{
+    if (path_id >= 0 && path_id < MAX_CONCURRENT_ROUTES) {
+        RoutingContext *ctx = map_routing_get_context();
+        ctx->route_map_pool_is_reserved[path_id] = 0;
+    }
+}
+// Clears the routing maps and resets the queue pointers
+static void clear_data(RoutingContext *ctx, map_routing_distance_grid *dm) // dm = distance map
 {
     reset_fighting_status();
+    // Clears the specified map in the pool (dm)
+    map_grid_clear_i16(dm->possible.items);
+    map_grid_clear_i16(dm->determined.items);
+    // Queue is context-specific, so it stays on ctx
     ctx->queue.head = 0;
     ctx->queue.tail = 0;
 }
 
+
+
 // Enqueues an item for a simple (non-ordered) queue (e.g., Breadth-First Search)
-static void enqueue(RoutingContext *ctx, int next_offset, int dist)
+static void enqueue(RoutingContext *ctx, map_routing_distance_grid *dm, int next_offset, int dist)
 {
     // 1. Update the distance grid via the context
-    ctx->distance.determined.items[next_offset] = dist;
+    dm->determined.items[next_offset] = dist;
 
     // 2. Add item to the queue via the context
     ctx->queue.items[ctx->queue.tail++] = next_offset;
@@ -200,15 +269,11 @@ static inline int queue_pop(RoutingContext *ctx)
 }
 
 // --- PRIORITY QUEUE (HEAP) HELPERS ---
-
-static inline int ordered_queue_parent(int index)
+// Gets the parent in the priority queue
+static inline int get_ordered_queue_parent(int index)
 {
-    // FIX: Use integer division (no need for float cast)
     return (index - 1) / 2;
 }
-
-
-// Corrected ordered_queue_swap
 static inline void ordered_queue_swap(RoutingContext *ctx, int first, int second)
 {
     int temp_offset = ctx->queue.items[first];
@@ -224,7 +289,7 @@ static inline void ordered_queue_swap(RoutingContext *ctx, int first, int second
 }
 
 // Maintains the Min-Heap property (sifts down the value at start_index)
-static void ordered_queue_reorder(RoutingContext *ctx, int start_index)
+static void ordered_queue_reorder(RoutingContext *ctx, map_routing_distance_grid *dm, int start_index)
 {
     int left_child = 2 * start_index + 1;
     if (left_child >= ctx->queue.tail) {
@@ -233,20 +298,17 @@ static void ordered_queue_reorder(RoutingContext *ctx, int start_index)
     int right_child = left_child + 1;
     int smallest = start_index;
 
-    // NOTE: Accessing distances via the global 'distance' struct here
-    int smallest_dist = distance.possible.items[ctx->queue.items[smallest]];
-    // int smallest_dist = ctx->distance.possible.items[ctx->queue.items[smallest]];
-    // which of these two?
+    int smallest_dist = dm->possible.items[ctx->queue.items[smallest]];
 
     // Compare with Left Child
-    int left_dist = distance.possible.items[ctx->queue.items[left_child]];
+    int left_dist = dm->possible.items[ctx->queue.items[left_child]];
     if (left_dist < smallest_dist) {
         smallest = left_child;
         smallest_dist = left_dist; // Update the reference value
     }
     // Compare with Right Child
     if (right_child < ctx->queue.tail) {
-        int right_dist = distance.possible.items[ctx->queue.items[right_child]];
+        int right_dist = dm->possible.items[ctx->queue.items[right_child]];
         if (right_dist < smallest_dist) {
             smallest = right_child;
         }
@@ -279,65 +341,58 @@ static inline int ordered_queue_pop(RoutingContext *ctx)
 }
 
 // Reduces the key (distance) of an existing node and bubbles it up the heap (used in Dijkstra/A*)
-static inline void ordered_queue_reduce_index(RoutingContext *ctx, int index, int offset, int dist)
+static inline void ordered_queue_reduce_index(RoutingContext *ctx, map_routing_distance_grid *dm, int index, int offset, int dist)
 {
     // The given 'offset' is already placed at 'index' in the queue by ordered_enqueue.
     // The parameter 'dist' is the new possible distance.
 
     // While not at the root (index > 0) AND new distance is smaller than parent's distance
-    while (index > 0 && distance.possible.items[ctx->queue.items[ordered_queue_parent(index)]] > dist) {
+    while (index > 0 && dm->possible.items[ctx->queue.items[get_ordered_queue_parent(index)]] > dist) {
         // FIX: The original was missing the 'ctx' argument.
-        ordered_queue_swap(ctx, index, ordered_queue_parent(index));
-        index = ordered_queue_parent(index);
+        ordered_queue_swap(ctx, index, get_ordered_queue_parent(index));
+        index = get_ordered_queue_parent(index);
     }
 }
 
 // Enqueues a new item into the Priority Queue (Min-Heap)
-static void ordered_enqueue(RoutingContext *ctx, int next_offset, int current_dist, int remaining_dist)
+// Signature updated to accept map pointer 'dm'
+static void ordered_enqueue(RoutingContext *ctx, map_routing_distance_grid *dm, int next_offset, int current_dist, int remaining_dist)
 {
-    int possible_dist = remaining_dist + current_dist; // G + H (A* total distance)
+    int possible_dist = remaining_dist + current_dist;
     int index;
 
-    // Check if the node is ALREADY in the priority queue
-    if (distance.possible.items[next_offset]) {
-        // Node is in the queue. Is the new path better?
-        if (distance.possible.items[next_offset] <= possible_dist) {
-            return; // New path is worse or equal, do nothing
+    if (dm->possible.items[next_offset]) {
+        if (dm->possible.items[next_offset] <= possible_dist) {
+            return;
         }
-        // New path is better: Get its current position in the heap
         index = ctx->node_index[next_offset];
     } else {
-        // Node is NOT in the queue (or distance is 0). Add it to the end.
         index = ctx->queue.tail;
         ctx->queue.tail++;
-        // Set the index in the lookup table
         ctx->node_index[next_offset] = index;
     }
 
-    // Set the new (G) and possible (G+H) distances
-    distance.determined.items[next_offset] = current_dist;
-    distance.possible.items[next_offset] = possible_dist;
+    // Write to dm->determined and dm->possible
+    dm->determined.items[next_offset] = current_dist;
+    dm->possible.items[next_offset] = possible_dist;
 
-    // Use the reduce index function to bubble the new (or updated) node up the heap
-    ordered_queue_reduce_index(ctx, index, next_offset, possible_dist);
+    // NOTE: ordered_queue_reduce_index must also be updated to accept 'dm'
+    ordered_queue_reduce_index(ctx, dm, index, next_offset, possible_dist);
 }
 
 // Checks if an offset is valid AND if the path to it hasn't been determined yet, or the new path is better.
-static inline int valid_offset(int grid_offset, int possible_dist)
+static inline int valid_offset(int grid_offset, map_routing_distance_grid *dm, int possible_dist)
 {
-    // FIX: 'distance' must be accessed globally
-    int determined = distance.determined.items[grid_offset];
-    // FIX: Should compare against 'distance.possible' for A* (or just determined for Dijkstra)
-    // Assuming 'distance.determined' stores the G-cost (path found so far)
+    int determined = dm->determined.items[grid_offset];
+    // FIX: Should compare against 'dm->possible' for A* (or just determined for Dijkstra)
+    // Assuming 'dm->determined' stores the G-cost (path found so far)
     return map_grid_is_valid_offset(grid_offset) && (determined == 0 || possible_dist < determined);
 }
 
 // Manhattan distance (Heuristic for A*)
 static inline int distance_left(int x, int y)
 {
-    // FIX: 'distance' must be accessed globally
-    // Wait, from one of the 32 buffers or however many you want right?
-    return abs(distance.dst_x - x) + abs(distance.dst_y - y);
+    return abs(dm->dst_x - x) + abs(dm->dst_y - y);
 }
 
 // Declaration of the master travel function
@@ -345,7 +400,7 @@ static int callback_travel_master(RoutingContext *ctx, int offset, int next_offs
  int direction_index, const TravelRules *rules, int *out_cost);
 
 // Finds the best route from A to B (A* Search)
-static void route_queue_from_to(RoutingContext *ctx, int src_x, int src_y, int dst_x, int dst_y, const TravelRules *rules)
+static void route_queue_from_to(RoutingContext *ctx, map_routing_distance_grid *dm, int src_x, int src_y, int dst_x, int dst_y, const TravelRules *rules)
 {
     // 1. Setup Phase (Clear queues, initialize distances, enqueue source)
     // FIX: MAX_SEARCH_ITERATIONS must be defined externally (or use the #define from routing.h)
@@ -354,22 +409,18 @@ static void route_queue_from_to(RoutingContext *ctx, int src_x, int src_y, int d
     int source_offset = map_grid_offset(src_x, src_y);
 
     // FIX: Assign target position to global distance struct for heuristic calculation
-    distance.dst_x = dst_x;
-    distance.dst_y = dst_y;
+    dm->dst_x = dst_x;
+    dm->dst_y = dst_y;
 
     // Initial enqueue using A* heuristic
     ordered_enqueue(ctx, source_offset, 0, distance_left(src_x, src_y));
-
-    // Determine number of directions (4 for cardinal, 8 for all)
-    int num_directions = rules->cardinal_travel ? 4 : 8;
 
     // 2. Search Loop (While queue is not empty and guard count is not exceeded)
     while (ctx->queue.tail > 0 && guard_count++ < MAX_SEARCH_ITERATIONS) {
 
         // Pop the current best node (offset)
         int current_offset = ordered_queue_pop(ctx);
-        // FIX: The cost is now stored in 'distance.determined' not 'ctx->distance'
-        int current_distance = distance.determined.items[current_offset];
+        int current_distance = dm->determined.items[current_offset];
 
         // Early exit if destination found
         if (current_offset == destination_offset) {
@@ -377,7 +428,7 @@ static void route_queue_from_to(RoutingContext *ctx, int src_x, int src_y, int d
         }
 
         // 3. Iterate Neighbors
-        for (int i = 0; i < num_directions; i++) {
+        for (int i = 0; i < num_directions; i++) {// replace num_directions by cardinal_travel however appropriate
 
             int next_offset = current_offset + ROUTE_OFFSETS[i];
 
@@ -410,79 +461,96 @@ static void route_queue_from_to(RoutingContext *ctx, int src_x, int src_y, int d
 }
 
 // Finds the best route from A to ALL (Dijkstra's Search)
-void route_queue_all_from(RoutingContext *ctx, int source_offset, const TravelRules *rules)
+// Slow but guarantees best route by removing the remaining_dist heuristic
+void route_queue_all_from(RoutingContext *ctx, map_routing_distance_grid *dm, int source_offset, const TravelRules *rules)
 {
     int tiles_processed = 0;
-    int num_directions = rules->cardinal_travel ? 4 : 8; // Determine number of directions
+    int num_directions = rules->num_directions ? 4 : 8;
 
-    // Initial enqueue (Dijkstra does not need the remaining_dist heuristic, so it's 0)
-    ordered_enqueue(ctx, source_offset, 0, 0);
+    // Initial enqueue: Pass the map pointer 'dm'
+    ordered_enqueue(ctx, dm, source_offset, 0, 0);
 
-    // Use the queue tail to check if the queue is empty (head is always 0 in a Min-Heap)
     while (ctx->queue.tail > 0) {
 
+        // Guards against excessively long searches
         if (++tiles_processed > MAX_SEARCH_ITERATIONS) {
-            break; // Guard against excessively long searches
+            break;
         }
 
-        // 1. Pop the next best tile from the priority queue
+        // Pop the next best tile from the priority queue
         int current_offset = ordered_queue_pop(ctx);
-        // FIX: Get current path cost from the determined distance map
-        int current_distance = distance.determined.items[current_offset];
+        // Get current path cost from the determined distance map
+        int current_distance = dm->determined.items[current_offset];
 
-        // 2. Iterate through all neighbors
+        // Get the allowed directions to use (cardinal or all)
+        const int *directions_to_use = rules->cardinal_travel ? CARDINAL_DIRECTIONS : MOVEMENT_DIRECTIONS;
+        const int num_directions = rules->cardinal_travel ? 4 : 8;
+
+        // Iterate through all neighbors
         for (int i = 0; i < num_directions; i++) {
+            // Get the direction enum value (e.g., 2 for DIR_TOP)
+            const int direction_enum = directions_to_use[i];
 
             // Calculate neighbor tile offset
-            int next_offset = current_offset + ROUTE_OFFSETS[i];
+            int next_offset = current_offset + ROUTE_OFFSETS[direction_enum];
 
-            // Check if the tile is already determined (if so, any path through it is done)
-            // FIX: This check is redundant with the check at step 5/inside ordered_enqueue, 
-            // but is a common optimization. Let's keep it simple and rely on the distance check.
-
-            // 3. Determine Cost and Passability using the Master function
+            // Determine Cost and Passability using the Master function
             int travel_cost = 0;
-            if (callback_travel_master(ctx, current_offset, next_offset, i, rules, &travel_cost)) {
-
-                // 4. Calculate new path distance
+            // callback_travel_master does not read/write map data, so its signature is fine.
+            if (callback_travel_master(ctx, current_offset, next_offset, direction_enum, rules, &travel_cost)) {
+                // Calculate new path distance
                 int new_dist = current_distance + travel_cost;
 
-                // 5. Standard Dijkstra Check (Is this a better path?)
+                // Standard Dijkstra Check (ie is this a better path?)
                 // If new_dist is better, it will be added/updated in the priority queue (heuristic is 0)
-                ordered_enqueue(ctx, next_offset, new_dist, 0);
+                ordered_enqueue(ctx, dm, next_offset, new_dist, 0);
             }
         }
     }
 }
 
+
+
+
+// ???
+static inline int valid_offset(map_routing_distance_grid *dm, int grid_offset, int possible_dist)
+{
+    // Use dm-> determined map for the check.
+    int determined = dm->determined.items[grid_offset];
+    return map_grid_is_valid_offset(grid_offset) && (determined == 0 || possible_dist < determined);
+}
+
+
+
+
+
 // --- PASSABILITY AND COST HELPER FUNCTIONS ---
 // Returns the cost of a citizen passing through a tile, returns -1 if impassable
-// NOTE: This function needs access to the rules (pass them in or use the global rules).
-static inline int check_citizen_passability(int next_offset, const TravelRules *rules) // Added rules pointer
+static inline int get_citizen_base_cost(int next_offset, const TravelRules *rules)
 {
     int base_cost = 100; // Default base cost
 
     // Common Terrain Access Checks
-    switch (terrain_access.items[next_offset]) {
-        case TERRAIN_ACCESS_ROAD:
+    switch (terrain_access_citizen.items[next_offset]) {
+        case TERRAIN_ACCESS_CITIZEN_ROAD:
             if (!rules->travel_roads) return -1;
             break;
-        case TERRAIN_ACCESS_HIGHWAY:
+        case TERRAIN_ACCESS_CITIZEN_HIGHWAY:
             if (!rules->travel_highways) return -1;
             break;
-        case TERRAIN_ACCESS_PASSABLE: // Gardens, rubble, access ramps
-            if (!rules->travel_gardens) return -1;
+        case TERRAIN_ACCESS_CITIZEN_PASSABLE: // Gardens, rubble, access ramps
+            if (!rules->travel_passable) return -1;
             break;
-        case TERRAIN_ACCESS_EMPTY: // Open land
+        case TERRAIN_ACCESS_CITIZEN_EMPTY: // Open land
             if (!rules->travel_land) return -1;
             break;
-        case TERRAIN_ACCESS_BLOCKED: // Completely impassable terrain
+        case TERRAIN_ACCESS_CITIZEN_BLOCKED: // Completely impassable terrain
             if (!rules->travel_blocked) return -1;
             return -1; // Should always return -1 regardless of flag
-        case TERRAIN_ACCESS_AQUEDUCT: // Top of an aqueduct
+        case TERRAIN_ACCESS_CITIZEN_AQUEDUCT: // Top of an aqueduct
             if (!rules->travel_aqueduct) return -1;
             break;
-        case TERRAIN_ACCESS_RESERVOIR_CONNECTOR: // Reservoir structure
+        case TERRAIN_ACCESS_CITIZEN_RESERVOIR_CONNECTOR: // Reservoir structure
             if (!rules->travel_reservoir_connector) return -1;
             break;
         default:
@@ -495,7 +563,7 @@ static inline int check_citizen_passability(int next_offset, const TravelRules *
     // Walls Check
     switch (terrain_wall.items[next_offset]) {
         case TERRAIN_ACCESS_WALL_PASSABLE: // Walkable wall (like a gatehouse top)
-            if (!rules->is_tower_sentry) {
+            if (!rules->travel_walls) {
                 return -1; // Only sentries/specific units allowed
             }
             break;
@@ -509,292 +577,281 @@ static inline int check_citizen_passability(int next_offset, const TravelRules *
     // You can adjust this based on the terrain type if needed.
     return base_cost;
 }
-
-
+// Returns the cost of a noncitizen passing through a tile, returns -1 if impassable
+static inline int get_noncitizen_base_cost(RoutingContext *ctx, int next_offset)
+{
+    // Friendly noncitizens may pass through all terrain except fort and blocked
+    switch (terrain_access_noncitizen.items[next_offset]) {
+        case TERRAIN_ACCESS_NONCITIZEN_PASSABLE:
+        case TERRAIN_ACCESS_NONCITIZEN_CLEARABLE: // Assuming this is defined
+        case TERRAIN_ACCESS_GATEHOUSE:
+            break;
+        case TERRAIN_ACCESS_BUILDING:
+            // Friendlies can pass through fine
+            if (rules->is_friendly) { break; }
+            // Enemies must be able to pass attack their target building
+            int map_building_id = map_building_at(next_offset);
+            if (map_building_id != ctx->target_building_id) {
+                return -1;
+            }
+            break;
+        case TERRAIN_ACCESS_FORT:
+            if (rules->is_friendly) { return -1; } // Friendlies can't travel through forts
+            break;
+        case TERRAIN_ACCESS_BLOCKED:
+            return -1; // May never pass through impassable terrain
+    }
+    // Base Cost
+    base_cost = BASE_TERRAIN_COST(terrain_access_noncitizen.items[next_offset]);
+    return base_cost
+}
+// Returns the cost of a boat passing through a tile, returns -1 if impassable
+static inline int get_boat_base_cost(int next_offset)
+{
+    // Next position must be water AND must not be blocked (low bridge or explicit block).
+    if (!map_terrain_is_water(next_offset) ||
+        terrain_access.items[next_offset] == TERRAIN_ACCESS_WATER_BLOCKED ||
+        terrain_access.items[next_offset] == TERRAIN_ACCESS_WATER_LOW_BRIDGE) {
+        return -1;
+    }
+    // Small boats can be easily added here as an extra condition
+    // Base Cost
+    base_cost = BASE_TERRAIN_COST(terrain_access_water.items[next_offset]);
+}
+// Flotsam
+static inline int get_flotsam_base_cost(int next_offset)
+{
+    // Next position must be water and not blocked
+    if (map_terrain_is_water(next_offset) && terrain_access_water.items[next_offset] != = TERRAIN_ACCESS_WATER_BLOCKED) {
+        return 1;
+    }
+    return 100; // flotsam ignores terrain costs
+}
+// --- BUILDING BASE COST --- (building routing exists for drag build)
+// Road
+static inline int get_road_base_cost(map_routing_distance_grid *dm, int next_offset)
+{
+    switch (terrain_access_citizen.items[next_offset]) {
+        case TERRAIN_ACCESS_CITIZEN_AQUEDUCT:
+            if (!map_can_place_road_under_aqueduct(next_offset)) {
+                dm->determined.items[next_offset] = -1;
+                return -1;
+            }
+        case TERRAIN_ACCESS_CITIZEN_EMPTY:
+            return 100; // drag build ignores terrain costs
+    }
+    return -1;
+}
+// Highway
+static inline int get_highway_base_cost(int next_offset)
+{
+    // Next position must be a valid placement for a highway
+    int size = 2;
+    for (int x = 0; x < size; x++) {
+        for (int y = 0; y < size; y++) {
+            int offset = next_offset + map_grid_delta(x, y);
+            int terrain = map_terrain_get(offset);
+            if (terrain & TERRAIN_NOT_CLEAR & ~TERRAIN_HIGHWAY & ~TERRAIN_AQUEDUCT & ~TERRAIN_ROAD) {
+                return -1;
+            } else if (!map_can_place_highway_under_aqueduct(offset, check_highway_routing)) {
+                return -1;
+            }
+        }
+    }
+    return 100; // drag build ignores terrain costs
+}
+// Aqueduct
+static inline int get_aqueduct_base_cost(map_routing_distance_grid *dm, int next_offset)
+{
+    // If the aqueduct cannot be placed on this specific road tile, return
+    if (map_terrain_is(next_offset, TERRAIN_ROAD) && !map_can_place_aqueduct_on_road(next_offset)) {
+        dm->determined.items[next_offset] = -1;
+        return -1;
+    }
+    // If the aqueduct cannot be placed on this specific highway tile, return
+    if (map_terrain_is(next_offset, TERRAIN_HIGHWAY) && !map_can_place_aqueduct_on_highway(next_offset, 1)) {
+        return -1;
+    }
+    // Check for other invalid terrain
+    switch (terrain_access_citizen.items[next_offset]) {
+        case TERRAIN_ACCESS_CITIZEN_AQUEDUCT:
+        case TERRAIN_ACCESS_CITIZEN_PASSABLE: // rubble, garden, access ramp
+        case TERRAIN_ACCESS_CITIZEN_BLOCKED: // non-empty land
+            return -1;
+    }
+    // Check if the terrain is a building, in which case only reservoir connectors are allowed
+    if (map_terrain_is(next_offset, TERRAIN_BUILDING)) {
+        if (terrain_access_citizen.items[next_offset] != TERRAIN_ACCESS_CITIZEN_RESERVOIR_CONNECTOR) {
+            return -1;
+        }
+    }
+    return 100; // drag build ignores terrain costs
+}
+// Wall
+static inline int get_wall_base_cost(int next_offset)
+{
+    // Next position must be clear terrain
+    if (terrain_access_wall.items[next_offset] != TERRAIN_ACCESS_WALL_EMPTY) {
+        return -1;
+    }
+    return 100; // drag build ignores terrain costs
+}
 
 
 /** @brief Helper function to calculate the travel cost and check permission
 * Returns 1 if travel is permitted, 0 otherwise
-* @param RoutingContext
+* @param ctx
 * @param current_offset
 * @param next_offset
 * @param direction_index
 * @param rules
-* @param out_cost
+* @param out_cost - Calculated cost is stored here
 **/
 static int callback_travel_master(RoutingContext *ctx, int current_offset, int next_offset,
 int direction_index, const TravelRules *rules, int *out_cost)
 {
     // Defaults
     int base_cost = 0;
-    int cost_multiplier = 1;
+    int cost_multiplier = 100; // Better than using float
     // Incorrect, instead this must detect if the direction is cardinal or not then apply
-    int direction_cost_multiplier = (direction_index < 4) ? 100 : 141;
+    int direction_cost_multiplier = is_cardinal(direction_index) ? 100 : 141;
+
+    // --- IMPASSABILITY CHECKS ---
 
     // If impassable, return
     if (!rules->terrain_passable_func(next_offset)) {
         return 0;
     }
 
-    // If not allowed through, return (roadblocks)
-    if (rules->ignores_roadblocks == 0 &&
-        // You will need to create this function
-        !map_roadblock_check(next_offset, rules->ignores_roadblocks)) {
-        return 0;
-    }
-
     // If there's anyone fighting in the tile, return
     // Bit 0 = Friendly Fighting, Bit 1 = Enemy Fighting
-    uint8_t fight_status = ctx->fighting_data.items[next_offset];
+    uint8_t fight_status = ctx->fighting_data.status.items[next_offset];
     if (fight_status & 1) { /* Avoid Friendly Fight */ return 0; }
     if (fight_status & 2) { /* Avoid Enemy Fight */ return 0; }
 
-    // Citizen
-    if (rules->is_citizen) {
-        base_cost = check_citizen_passability(ctx, next_offset);
-        if (base_cost == -1) { return 0 };
-    }
-
-    // Noncitizen (traders, enemies, etc.)
-    if (rules->is_noncitizen) {
-        // Friendly noncitizens may pass through all terrain except fort and blocked
-        switch (terrain_access.items[next_offset]) {
-            // --- Strictly passable/attackable terrain --- ///
-            case TERRAIN_ACCESS_PASSABLE:
-            case NONCITIZEN_2_CLEARABLE:
-            case TERRAIN_ACCESS_AQUEDUCT:
-            case TERRAIN_ACCESS_WALL_PASSABLE:
-            case TERRAIN_ACCESS_WALL_BLOCKED:
-            case TERRAIN_ACCESS_GATEHOUSE:
+    // --- RULES-BASED COST/PASSABILITY ---
+    // Get the base cost
+    switch (rules->entity_type) {
+        case ENTITY_CITIZEN:
+            base_cost = get_citizen_base_cost(next_offset, rules);
+            break;
+        case ENTITY_NONCITIZEN: // traders, enemies, etc.
+            base_cost = get_noncitizen_base_cost(next_offset);
+            break;
+        case ENTITY_BOAT:
+            base_cost = get_boat_base_cost(next_offset);
+            break;
+        case ENTITY_FLOTSAM:
+            base_cost = get_flotsam_base_cost(next_offset)
                 break;
-            case TERRAIN_ACCESS_BUILDING:
-                // Friendlies can pass through fine
-                if (rules->is_friendly) { break; }
-                // If your enemies can't pass through or attack, return
-                int map_building_id = map_building_at(next_offset);
-                if (map_building_id != ctx->through_building_id && map_building_id != ctx->target_building_id) {
-                    return 0;
-                }
-            case TERRAIN_ACCESS_FORT:
-                if (rules->is_friendly) { return 0 }; // Friendlies can't travel through forts
-            case TERRAIN_ACCESS_BLOCKED:
-                return 0; // May never pass through impassable terrain
-        }
-        // Base Cost
-        base_cost = BASE_TERRAIN_COST(terrain_access.items[next_offset]);
+        case ENTITY_ROAD:
+            base_cost = get_road_base_cost(next_offset)
+        case ENTITY_HIGHWAY:
+            base_cost = get_highway_base_cost(next_offset)
+        case ENTITY_AQUEDUCT:
+            base_cost = get_aqueduct_base_cost(next_offset)
+        case ENTITY_WALL:
+            base_cost = get_wall_base_cost(next_offset)
     }
 
-    // Boats
-    if (rules->is_boat) {
-        // Passability Check
-        // Next position must be water AND must not be blocked (low bridge or explicit block).
-        if (!map_terrain_is_water(next_offset) ||
-            terrain_access.items[next_offset] == TERRAIN_ACCESS_WATER_BLOCKED ||
-            terrain_access.items[next_offset] == TERRAIN_ACCESS_WATER_LOW_BRIDGE) {
-            return 0;
-        }
-
-        // Base Cost
-        base_cost = BASE_TERRAIN_COST(terrain_access.items[next_offset]);
-
-        // Water drag (in the form of a cost multiplier for simplicity)
-        cost_multiplier = 3;
-        // Discourages boats from sailing across the map's edge
-        if (terrain_access.items[next_offset] == TERRAIN_ACCESS_WATER_EDGE) {
-            cost_multiplier += 12;
-        }
-    }
-
+    // Return if blocked
+    if (base_cost == -1) { return 0 };
     // Speed Modifiers (e.g highways)
-    // MUST be walking in a cardinal direction, or this bonus won't apply
     if (rules->boost_highway && map_terrain_is_highway(next_offset)) {
-        if is_cardinal(direction) // Mockup placeholder, actually make it
+        if is_cardinal_direction(direction) // cannot move fast diagonally on highways
         {
-            cost_multiplier = 0.5;
+            cost_multiplier = 50;
         }
     }
     // Calculate cost
-    if (base_cost == -1) { return 0 }
     *out_cost = base_cost * direction_cost_multiplier * cost_multiplier;
     return 1;
 
-    // --- FLOTSAM --- (no cost it just floats towards non-blocked tiles)
-    // Flotsam
-    if (rules->is_flotsam) {
-        // Next position must be water and not blocked
-        if (map_terrain_is_water(next_offset) && terrain_access.items[next_offset] != = TERRAIN_ACCESS_WATER_BLOCKED) {
-            return 1;
-        }
-        return 0;
-    }
-
-    // --- BUILDINGS --- (drag build)
-    // Road
-    if (rules->is_road) {
-        switch (terrain_access.items[next_offset]) {
-            case TERRAIN_ACCESS_PASSABLE: // rubble, garden, access ramp
-            case TERRAIN_ACCESS_BLOCKED: // non-empty land
-                return 0;
-            case TERRAIN_ACCESS_AQUEDUCT:
-                if (!map_can_place_road_under_aqueduct(next_offset)) {
-                    distance.determined.items[next_offset] = -1;
-                    return 0;
-                }
-                break;
-            default:
-                if (map_terrain_is(next_offset, TERRAIN_BUILDING)) {
-                    return 0;
-                }
-        }
-        return 1;
-    }
-
-    // Highway
-    if (rules->is_highway) {
-        // Next position must be a valid placement for a highway
-        if (can_build_highway(next_offset, 1)) {
-            return 1;
-        }
-        return 0;
-    }
-    // Aqueduct
-    if (rules->is_aqueduct) {
-        // If the aqueduct cannot be placed on this specific road tile, return
-        if (map_terrain_is(next_offset, TERRAIN_ROAD) && !map_can_place_aqueduct_on_road(next_offset)) {
-            distance.determined.items[next_offset] = -1;
-            return 0;
-        }
-        // If the aqueduct cannot be placed on this specific highway tile, return
-        if (map_terrain_is(next_offset, TERRAIN_HIGHWAY) && !map_can_place_aqueduct_on_highway(next_offset, 1)) {
-            return 0;
-        }
-        // Check for other invalid terrain
-        switch (terrain_access.items[next_offset]) {
-            case TERRAIN_ACCESS_AQUEDUCT:
-            case TERRAIN_ACCESS_PASSABLE: // rubble, garden, access ramp
-            case TERRAIN_ACCESS_BLOCKED: // non-empty land
-                return 0;
-        }
-        // Check if the terrain is a building, in which case only reservoir connectors are allowed
-        if (map_terrain_is(next_offset, TERRAIN_BUILDING)) {
-            if (terrain_access.items[next_offset] != TERRAIN_ACCESS_RESERVOIR_CONNECTOR) {
-                return 0;
-            }
-        }
-        return 1;
-    }
-    // Wall
-    if (rules->is_wall) {
-        // Next position must be clear terrain
-        if (terrain_access.items[next_offset] == TERRAIN_ACCESS_EMPTY) {
-            return 1;
-        }
-        return 0;
-    }
-
-    // --- SPECIAL --- (causes side effects from the search itself, such as destroying buildings)
+    // --- SPECIAL ---
+    // These routes cause side-effects, such as destroying buildings
     // Unblock Path To Rome (delete walls/aqueducts blocking the path to rome)
     if (rules->unblocking_rome) {
         // Check if the current tile contains a blockage (wall/aqueduct)
         if (map_terrain_is(next_offset, TERRAIN_AQUEDUCT | TERRAIN_WALL)) {
-
             // ACTION: Remove the blockage (side effect)
             map_terrain_remove(next_offset, TERRAIN_CLEARABLE);
         }
+        *out_cost = 100; // Just to be safe
+        return 1;
     }
+
+    // Unsupported rule type
+    return 0;
 }
+
+
+
+
+
 
 // Internal helper function that handles all routing types
-static void map_routing_calculate_distances(int x, int y, RouteType type)
+// Signature updated to accept path_id
+void map_routing_calculate_distances(int path_id, int x, int y, RouteType type)
 {
-    int grid_offset = map_grid_offset(x, y);
+    // 1. Safety check (ensures only paths 0 to 31 are accessed)
+    if (path_id < 0 || path_id >= MAX_CONCURRENT_ROUTES) return;
 
-    // Blocked Tile Check (We can use the rules pointer for this check)
-    // Assuming the array lookup is safe (i.e., you check 'type' is valid)
+    // 2. Load Rules
     const TravelRules *rules = &ROUTE_RULE_CONFIG[type];
 
-    // We must initialize the source tile's distance and enqueue it.
-    // Assuming 0 is the start distance and ordered_enqueue is used for the first node.
-    // ctx.distance.determined.items[grid_offset] = 0; // If using Dijkstra/A*
-    // ordered_enqueue(&ctx, grid_offset, 0); 
+    // 3. Get Context and Map Pointer
+    RoutingContext *ctx = map_routing_get_context();
+    // CRITICAL: Get a pointer to the specific map slot in the pool
+    map_routing_distance_grid *dist_map = &ctx->route_map_pool[path_id];
 
-    // --- Initialize Context & Load Rules ---
-    RoutingContext ctx;
-    memset(&ctx, 0, sizeof(RoutingContext));
+    // 4. Clear Data (Queue and the specific map)
+    clear_data(ctx, dist_map);
 
-    // NOTE: 'rules' is already a pointer to the static config data.
-    // We pass this pointer directly to the core routing function.
+    // 5. Populate Fighting Data (cache)
+    populate_fighting_data(ctx);
 
-    // Populate Fighting Data
-    populate_fighting_data(&ctx)
-
-        // --- Start Search ---
-        ++stats.total_routes_calculated;
+    // 6. Start Search Stats
+    ++stats.total_routes_calculated;
     if (rules->is_enemy) {
-        ++stats.enemy_routes_calculated
+        ++stats.enemy_routes_calculated;
     }
 
-    // Call Generic Core Routing Function, passing the static rules
-    route_queue_all_from(&ctx, grid_offset, rules);
+    // 7. Assign Target Coordinates (if this were an A* search)
+    // Even for Dijkstra, setting these can be useful for debugging or later use.
+    dist_map->dst_x = x;
+    dist_map->dst_y = y;
 
-    // --- Copy Results ---
-    // The result is in 'ctx.distance'. It MUST be copied out 
-    // to the external storage (the global/figure distance map).
-    // map_routing_copy_results(&ctx);
+    // 8. Call Generic Core Routing Function, passing the specific map pointer
+    // Signature of route_queue_all_from must be updated!
+    route_queue_all_from(ctx, dist_map, map_grid_offset(x, y), rules);
 }
 
-// What to do about this
-if (only_through_building_id) {
-    ctx->through_building_id = only_through_building_id;
-    // due to formation offsets, the destination building may not be the same as the "through building" (a.k.a. target building)
-    ctx->target_building_id = map_building_at(map_grid_offset(dst_x, dst_y));
-    route_queue_from_to(src_x, src_y, dst_x, dst_y, num_directions, 0, callback_travel_noncitizen_land_through_building);
-} else {
-    route_queue_from_to(src_x, src_y, dst_x, dst_y, num_directions, max_tiles, callback_travel_noncitizen_land);
-}
 
-// Marks an area as the start for the search
-void map_routing_add_source_area(int x, int y, int size)
+
+
+
+
+
+
+
+
+
+
+// Marks an area as the start for the search (for multi-source pathfinding)
+void map_routing_add_source_area(map_routing_distance_grid *dm, int x, int y, int size)
 {
     if (!map_grid_is_inside(x, y, size)) {
         return;
     }
     for (int dy = 0; dy < size; dy++) {
         for (int dx = 0; dx < size; dx++) {
-            distance.determined.items[map_grid_offset(x + dx, y + dy)] = 0; // Replace distance by whatever appropriate
+            dm->determined.items[map_grid_offset(x + dx, y + dy)] = 0;
         }
     }
 }
 
-
-
-
-// Fighting related
-static int is_fighting_friendly(figure * f)
-{
-    return f->is_friendly && f->action_state == FIGURE_ACTION_150_ATTACK;
-}
-static inline int has_fighting_friendly(int grid_offset)
-{
-    if (!(fighting_data.status.items[grid_offset] & 0x80)) {
-        fighting_data.status.items[grid_offset] |= 0x80 | map_figure_foreach_until(grid_offset, is_fighting_friendly);
-    }
-    return fighting_data.status.items[grid_offset] & 1;
-}
-static int is_fighting_enemy(figure * f)
-{
-    return !f->is_friendly && f->action_state == FIGURE_ACTION_150_ATTACK;
-}
-static inline int has_fighting_enemy(int grid_offset)
-{
-    if (!(fighting_data.status.items[grid_offset] & 0x40)) {
-        fighting_data.status.items[grid_offset] |= 0x40 | (map_figure_foreach_until(grid_offset, is_fighting_enemy) << 1);
-    }
-    return fighting_data.status.items[grid_offset] & 2;
-}
-
 // Save/Load Buffers
-void map_routing_save_state(buffer * buf)
+void map_routing_save_state(buffer *buf)
 {
     buffer_write_i32(buf, 0); // unused counter
     buffer_write_i32(buf, stats.enemy_routes_calculated);
@@ -802,7 +859,7 @@ void map_routing_save_state(buffer * buf)
     buffer_write_i32(buf, 0); // unused counter
 }
 
-void map_routing_load_state(buffer * buf)
+void map_routing_load_state(buffer *buf)
 {
     buffer_skip(buf, 4); // unused counter
     stats.enemy_routes_calculated = buffer_read_i32(buf);

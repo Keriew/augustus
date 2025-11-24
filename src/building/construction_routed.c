@@ -97,7 +97,8 @@ int building_construction_place_road(int measure_only, int x_start, int y_start,
     }
 
     int items_placed = 0;
-    if (map_routing_calculate_distances_for_building(ROUTED_BUILDING_ROAD, x_start, y_start) &&
+
+    if (map_routing_calculate_distances_for_building(path_id, ROUTED_BUILDING_ROAD, x_start, y_start) &&
             place_routed_building(x_start, y_start, x_end, y_end, ROUTED_BUILDING_ROAD, &items_placed)) {
         if (!measure_only) {
             map_routing_update_access();

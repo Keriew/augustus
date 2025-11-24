@@ -116,9 +116,7 @@ typedef struct {
     unsigned int opponent_id;
     short last_visited_index; //can only be used if figure goes through initialization process
     int last_destinatation_id; //can be used for any figure, holds only one value
-
-    // New!
-    int route_map_id; // Stores the index (0-7) of the map in the pool
+    int route_map_id; // Stores the index (0-31) of the map in the pool
 
     struct {
         unsigned short tourist_money_spent;
