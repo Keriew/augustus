@@ -88,6 +88,34 @@ typedef enum {
     ROUTE_TYPE_UNBLOCKING_ROME,
 } RouteType;
 
+// Defines routing rules
+typedef struct {
+    int cardinal_travel; // forces travelling in only four directions
+    // Entity
+    int entity_type = ENTITY_TYPE_CITIZEN;
+    int is_friendly;
+    int is_enemy;
+    int boost_highway; // determines if the entity moves faster on highways
+    // Citizen permissions
+    int travel_roads;
+    int travel_highways;
+    int travel_passable;
+    int travel_land;
+    int travel_blocked;
+    int travel_aqueduct;
+    int travel_reservoir_connector;
+    int travel_walls;
+    // Buildings (drag build)
+    int is_road;
+    int is_highway;
+    int is_aqueduct;
+    int is_wall;
+    // Misc
+    int unblocking_rome;
+    int target_building_id;  // target building to attack
+    int through_building_id; // building allowed to pass through
+} TravelRules;
+
 const map_routing_distance_grid *map_routing_get_distance_grid(void);
 
 void map_routing_calculate_distances(int x, int y);

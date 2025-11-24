@@ -71,35 +71,35 @@ static struct {
     time_millis last_check;
 } fighting_data;
 
-// Defines routing rules
-typedef struct {
-    int cardinal_travel = 0; // forces travelling in only four directions
+// Default travel rules
+static const TravelRules DEFAULT_TRAVEL_RULES = {
+    .cardinal_travel = 0, // forces travelling in only four directions
     // Entity
-    int entity_type = ENTITY_TYPE_CITIZEN;
-    int is_friendly = 0;
-    int is_enemy = 0;
-    int boost_highway = 0; // determines if the entity moves faster on highways
+    .entity_type = ENTITY_TYPE_CITIZEN,
+    .is_friendly = 0,
+    .is_enemy = 0,
+    .boost_highway = 0, // determines if the entity moves faster on highways
     // Citizen permissions
-    int travel_roads = 0;
-    int travel_highways = 0;
-    int travel_passable = 0;
-    int travel_land = 0;
-    int travel_blocked = 0;
-    int travel_aqueduct = 0;
-    int travel_reservoir_connector = 0;
-    int travel_walls = 0;
+    .travel_roads = 0,
+    .travel_highways = 0,
+    .travel_passable = 0,
+    .travel_land = 0,
+    .travel_blocked = 0,
+    .travel_aqueduct = 0,
+    .travel_reservoir_connector = 0,
+    .travel_walls = 0,
     // Buildings (drag build)
-    int is_road = 0;
-    int is_highway = 0;
-    int is_aqueduct = 0;
-    int is_wall = 0;
+    .is_road = 0,
+    .is_highway = 0,
+    .is_aqueduct = 0,
+    .is_wall = 0,
     // Misc
-    int unblocking_rome = 0;
-    int target_building_id;  // target building to attack
-    int through_building_id; // building allowed to pass through
-} TravelRules;
+    .unblocking_rome = 0,
+    .target_building_id,  // target building to attack
+    .through_building_id, // building allowed to pass through
+};
 
-// Defines route configuration (indexed by the RouteType enum.)
+// Defines route configuration (indexed by RouteType, these override the defaults)
 static const TravelRules ROUTE_RULE_CONFIG[] = {
     // Moving entities
     [ROUTE_TYPE_CITIZEN] = {
@@ -796,8 +796,10 @@ void map_routing_calculate_distances(int path_id, int x, int y, RouteType type)
     // 1. Safety check (ensures only paths 0 to 31 are accessed)
     if (path_id < 0 || path_id >= MAX_CONCURRENT_ROUTES) return;
 
-    // 2. Load Rules
-    const TravelRules *rules = &ROUTE_RULE_CONFIG[type];
+    // 2. Load Rules (applying defaults)
+    TravelRules rules = DEFAULT_TRAVEL_RULES;
+    const TravelRules *type_config = &ROUTE_RULE_CONFIG[type];
+    rules = *type_config;
 
     // 3. Get Context and Map Pointer
     RoutingContext *ctx = map_routing_get_context();
