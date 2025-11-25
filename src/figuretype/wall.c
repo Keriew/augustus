@@ -255,7 +255,7 @@ void figure_tower_sentry_action(figure *f)
                     f->destination_y = y_tile;
                     figure_route_remove(f);
                 } else {
-                    f->state = FIGURE_STATE_DEAD;            
+                    f->state = FIGURE_STATE_DEAD;
                 }
             }
             break;
@@ -508,6 +508,16 @@ void figure_kill_tower_sentries_at(int x, int y)
             if (calc_maximum_distance(f->x, f->y, x, y) <= 1) {
                 f->state = FIGURE_STATE_DEAD;
             }
+        }
+    }
+}
+
+void figure_kill_tower_sentries_in_building(building *b)
+{
+    for (int i = 0; i < figure_count(); i++) {
+        figure *f = figure_get(i);
+        if (!figure_is_dead(f) && f->type == FIGURE_TOWER_SENTRY && f->building_id == b->id) {
+            f->state = FIGURE_STATE_DEAD;
         }
     }
 }

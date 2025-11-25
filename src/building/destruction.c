@@ -84,32 +84,35 @@ static void destroy_on_fire(building *b, int plagued)
     }
     map_building_tiles_remove(b->id, b->x, b->y);
     if (map_terrain_is(b->grid_offset, TERRAIN_WATER)) {
-        b->state = BUILDING_STATE_DELETED_BY_GAME;
+        b->state = BUILDING_STATE_RUBBLE;
     } else {
         building_change_type(b, BUILDING_BURNING_RUIN);
-        b->figure_id4 = 0;
-        b->tax_income_or_storage = 0;
-        b->fire_duration = (b->house_figure_generation_delay & 7) + 1;
-        b->fire_proof = 1;
-        b->size = 1;
-        b->has_plague = plagued;
-        if (!building_can_repair_type(og_type)) {
-            memset(&b->data, 0, sizeof(b->data)); // removes all data - don't do it for repairable buildings
-        }
-        map_building_set_rubble_grid_building_id(og_grid_offset, b->id, og_size);
-        b->data.rubble.og_type = og_type;
-        b->data.rubble.og_grid_offset = og_grid_offset;
-        b->data.rubble.og_size = og_size;
-        b->data.rubble.og_orientation = og_orientation;
+    }
+    b->figure_id4 = 0;
+    b->tax_income_or_storage = 0;
+    b->fire_duration = (b->house_figure_generation_delay & 7) + 1;
+    b->fire_proof = 1;
+    b->size = 1;
+    b->has_plague = plagued;
+    if (!building_can_repair_type(og_type)) {
+        memset(&b->data, 0, sizeof(b->data)); // removes all data - don't do it for repairable buildings
+    }
+    map_building_set_rubble_grid_building_id(og_grid_offset, b->id, og_size);
+    b->data.rubble.og_type = og_type;
+    b->data.rubble.og_grid_offset = og_grid_offset;
+    b->data.rubble.og_size = og_size;
+    b->data.rubble.og_orientation = og_orientation;
+    if (!waterside_building) {
         map_building_tiles_add(b->id, b->x, b->y, 1, building_image_get(b), TERRAIN_BUILDING);
     }
+
     static const int x_tiles[] = {
         0, 1, 1, 0, 2, 2, 2, 1, 0, 3, 3, 3, 3, 2, 1, 0, 4, 4, 4, 4, 4, 3, 2, 1, 0, 5, 5, 5, 5, 5, 5, 4, 3, 2, 1, 0
     };
     static const int y_tiles[] = {
         0, 0, 1, 1, 0, 1, 2, 2, 2, 0, 1, 2, 3, 3, 3, 3, 0, 1, 2, 3, 4, 4, 4, 4, 4, 0, 1, 2, 3, 4, 5, 5, 5, 5, 5, 5
     };
-    for (int tile = 1; tile < num_tiles; tile++) {
+    for (int tile = waterside_building ? 0 : 1; tile < num_tiles; tile++) {
         int x = x_tiles[tile] + b->x;
         int y = y_tiles[tile] + b->y;
         if (map_terrain_is(map_grid_offset(x, y), TERRAIN_WATER)) {
@@ -181,22 +184,31 @@ static void destroy_linked_parts(building *b, int destruction_method, int plague
     }
 
     // Unlink the buildings to prevent corrupting the building table
-    part = building_main(b);
-    for (int i = 0; i < 9 && part->id > 0; i++) {
-        building *next_part = building_next(part);
-        part->next_part_building_id = 0;
-        part->prev_part_building_id = 0;
-        part = next_part;
+    if (destruction_method != DESTROY_COLLAPSE) { // collapse leaves rubble which needs the links for repair
+        // destroy fire would be on the same boat, but warehouses are fire-resistant so no need to include them here
+        // same applies to hippodromes, which are also further non-repairable
+        part = building_main(b);
+        for (int i = 0; i < 9 && part->id > 0; i++) {
+            building *next_part = building_next(part);
+            part->next_part_building_id = 0;
+            part->prev_part_building_id = 0;
+            part = next_part;
+        }
     }
+
 }
 
 void building_destroy_by_collapse(building *b)
 {
     b->state = BUILDING_STATE_RUBBLE;
+    if (b->type == BUILDING_TOWER) {
+        figure_kill_tower_sentries_in_building(b);
+    }
     set_rubble_grid_info_for_all_parts(b);
     map_building_tiles_set_rubble(b->id, b->x, b->y, b->size);
     figure_create_explosion_cloud(b->x, b->y, b->size, 0);
     destroy_linked_parts(b, DESTROY_COLLAPSE, 0);
+
 }
 
 void building_destroy_by_fire(building *b)
@@ -204,6 +216,7 @@ void building_destroy_by_fire(building *b)
     destroy_on_fire(b, 0);
     destroy_linked_parts(b, DESTROY_FIRE, 0);
 }
+
 void building_destroy_by_earthquake(building *b)
 {
     int grid_offset = b->grid_offset; // save before destroying building

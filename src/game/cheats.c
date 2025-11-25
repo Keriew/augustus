@@ -1,6 +1,7 @@
 #include "cheats.h"
 
 #include "building/construction.h"
+#include "building/destruction.h"
 #include "building/menu.h"
 #include "building/monument.h"
 #include "building/type.h"
@@ -56,6 +57,7 @@ static void game_cheat_unlock_legions(uint8_t *);
 static void game_cheat_disable_legions_consumption(uint8_t *);
 static void game_cheat_disable_invasions(uint8_t *);
 static void game_cheat_change_weather(uint8_t *);
+static void game_cheat_destroy_building(uint8_t *);
 
 static void (*const execute_command[])(uint8_t *args) = {
     game_cheat_add_money,
@@ -77,28 +79,30 @@ static void (*const execute_command[])(uint8_t *args) = {
     game_cheat_disable_legions_consumption,
     game_cheat_disable_invasions,
     game_cheat_change_weather,
+    game_cheat_destroy_building
 };
 
 static const char *commands[] = {
-    "addmoney",
-    "startinvasion",
+    "addmoney",                 // syntax: addmoney <amount>
+    "startinvasion",            // syntax: startinvasion <invasion_type> <size> <invasion_point>
     "nextyear",
-    "blessing",
-    "showtooltip",
+    "blessing",                 // syntax: blessing <god_id>
+    "showtooltip",              // syntax: showtooltip <enabled>
     "killall",
     "finishmonuments",
-    "monumentphase",
+    "monumentphase",            // syntax: monumentphase <phase>
     "whathaveromansdoneforus",
     "nike",
     "debug.customevents",
     "debug.showeditor",
-    "curse",
+    "curse",                    // syntax: curse <god_id> <is_major>
     "romanconcrete",
-    "globalwarming",
+    "globalwarming",            // syntax: globalwarming <climate>
     "ihaveanarmy",
     "breadandfish",
     "leavemealone",
-    "weather"
+    "weather",                   // syntax: weather <weather_type> <intensity>
+    "destroy"                   // syntax: destroy <building_id> <destruction_type>
 };
 
 #define NUMBER_OF_COMMANDS sizeof (commands) / sizeof (commands[0])
@@ -207,6 +211,7 @@ static void show_warning(translation_key key)
 
 static void game_cheat_add_money(uint8_t *args)
 {
+    // correct syntax = addmoney <amount>
     int money = 0;
     parse_integer(args, &money);
     city_finance_process_console(money);
@@ -220,8 +225,8 @@ static void game_cheat_start_invasion(uint8_t *args)
     int size = 0;
     int invasion_point = 0;
     int index = parse_integer(args, &invasion_type);
-    index = parse_integer(args + index, &size);
-    parse_integer(args + index, &invasion_point);
+    index += parse_integer(args + index, &size);
+    index += parse_integer(args + index, &invasion_point);
     scenario_invasion_start_from_console(invasion_type, size, invasion_point);
     show_warning(TR_CHEAT_STARTED_INVASION);
 }
@@ -234,6 +239,7 @@ static void game_cheat_advance_year(uint8_t *args)
 
 static void game_cheat_cast_blessing(uint8_t *args)
 {
+    // correct syntax = blessing <god_id>
     int god_id = 0;
     parse_integer(args, &god_id);
     city_god_blessing(god_id);
@@ -242,6 +248,7 @@ static void game_cheat_cast_blessing(uint8_t *args)
 
 static void game_cheat_cast_curse(uint8_t *args)
 {
+    // correct syntax = curse <god_id> <is_major>
     int god_id = 0;
     int is_major = 0;
     int index = parse_integer(args, &god_id);
@@ -258,6 +265,7 @@ static void game_cheat_make_buildings_invincible(uint8_t *args)
 
 static void game_cheat_change_climate(uint8_t *args)
 {
+    // correct syntax = globalwarming <climate>
     int climate = 0;
     parse_integer(args, &climate);
     scenario_change_climate(climate);
@@ -266,6 +274,7 @@ static void game_cheat_change_climate(uint8_t *args)
 
 static void game_cheat_show_tooltip(uint8_t *args)
 {
+    // correct syntax = showtooltip <enabled>
     parse_integer(args, &data.tooltip_enabled);
     show_warning(TR_CHEAT_TOGGLE_TOOLTIPS);
 }
@@ -284,6 +293,7 @@ static void game_cheat_finish_monuments(uint8_t *args)
 
 static void game_cheat_set_monument_phase(uint8_t *args)
 {
+    // correct syntax = monumentphase <phase>
     int phase = 0;
     parse_integer(args, &phase);
     building_monuments_set_construction_phase(phase);
@@ -343,6 +353,7 @@ static void game_cheat_show_editor(uint8_t *args)
 
 static void game_cheat_change_weather(uint8_t *args)
 {
+    // correct syntax = weather <weather_type> <intensity>
     int weather = WEATHER_NONE; //is actually weather type so either 0(WEATHER_NONE), 1(RAIN), 2(SNOW), 3(SAND)
     int intensity = 0; //note that intesity only changes particles for Thunder set weather to rain with intesity higher ca. 900, rain sounds start at 500
     int index = parse_integer(args, &weather);
@@ -352,6 +363,32 @@ static void game_cheat_change_weather(uint8_t *args)
     }
     set_weather(1, intensity, weather);
     show_warning(TR_CHEAT_CHANGE_WEATHER);
+}
+
+static void game_cheat_destroy_building(uint8_t *args)
+{
+    //COLLAPSE = 0, FIRE = 1, NO_RUBBLE = 2, EARTHQUAKE = 3
+    int destroy_type = 0;
+    int building_id = 0;
+    int index = parse_integer(args, &building_id);
+    index += parse_integer(args + index, &destroy_type);
+    switch (destroy_type) {
+        case 0:
+            building_destroy_by_collapse(building_get(building_id));
+            break;
+        case 1:
+            building_destroy_by_fire(building_get(building_id));
+            break;
+        case 2:
+            building_destroy_without_rubble(building_get(building_id));
+            break;
+        case 3:
+            building_destroy_by_earthquake(building_get(building_id));
+            break;
+        default:
+            break;
+    }
+    show_warning(TR_CHEAT_DESTROYED_BUILDING);
 }
 
 void game_cheat_parse_command(uint8_t *command)
