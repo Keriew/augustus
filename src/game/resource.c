@@ -109,7 +109,7 @@ int resource_is_food(resource_type resource)
 int resource_is_raw_material(resource_type resource)
 {
     return resource != RESOURCE_NONE && !resource_is_food(resource) &&
-        resource_get_supply_chain_for_good(0, resource) == 0;
+        resource_get_supply_chain_for_good(0, resource) == 0 && resource < RESOURCE_DENARII;
 }
 
 int resource_is_inventory(resource_type resource)
