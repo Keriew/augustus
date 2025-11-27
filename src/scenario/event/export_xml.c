@@ -77,7 +77,7 @@ static int export_attribute_route(xml_data_attribute_t *attr, int target)
 
 static int export_attribute_resource(xml_data_attribute_t *attr, int target)
 {
-    if (target < RESOURCE_MIN || target > RESOURCE_MAX) {
+    if (target < RESOURCE_MIN || target > RESOURCE_ALL) {
         log_exporting_error("Error while exporting resource.");
         return 0;
     }
@@ -169,6 +169,7 @@ static int export_parse_attribute_with_resolved_type(xml_data_attribute_t *attr,
         case PARAMETER_TYPE_NUMBER:
             return export_attribute_number(attr, target);
         case PARAMETER_TYPE_RESOURCE:
+        case PARAMETER_TYPE_RESOURCE_ALL:
             return export_attribute_resource(attr, target);
         case PARAMETER_TYPE_ROUTE:
             return export_attribute_route(attr, target);

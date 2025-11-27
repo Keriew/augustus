@@ -341,7 +341,7 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm1 = {.name = "rank",           .type = PARAMETER_TYPE_RANK,      .key = TR_PARAMETER_TYPE_RANK }, },
     [ACTION_TYPE_CHANGE_PRODUCTION_RATE] = {.type = ACTION_TYPE_CHANGE_PRODUCTION_RATE,
                                         .xml_attr = {.name = "change_production_rate",  .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_PRODUCTION_RATE},
-                                        .xml_parm1 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE,   .key = TR_PARAMETER_TYPE_RESOURCE },
+                                        .xml_parm1 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE_ALL,   .key = TR_PARAMETER_TYPE_RESOURCE },
                                         .xml_parm2 = {.name = "rate",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = 0,
                                             .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
                                         .xml_parm3 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,
@@ -1139,6 +1139,7 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
         case PARAMETER_TYPE_ENEMY_TYPE:
             return ENEMY_UNDEFINED;
         case PARAMETER_TYPE_RESOURCE:
+        case PARAMETER_TYPE_RESOURCE_ALL:
             return RESOURCE_WHEAT;
         case PARAMETER_TYPE_POP_CLASS:
             return POP_CLASS_ALL;
@@ -1359,6 +1360,7 @@ void scenario_events_parameter_data_get_display_string_for_value(parameter_type 
             return;
         }
         case PARAMETER_TYPE_RESOURCE:
+        case PARAMETER_TYPE_RESOURCE_ALL:
         {
             const uint8_t *text = resource_get_data(value)->text;
             result_text = string_copy(text, result_text, maxlength);
@@ -1830,7 +1832,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         {
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(TR_PARAMETER_OF), result_text, &maxlength);
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter1, result_text, &maxlength);
+            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE_ALL, action->parameter1, result_text, &maxlength);
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(action->parameter3 ? TR_PARAMETER_BY : TR_PARAMETER_TO), result_text, &maxlength);
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);

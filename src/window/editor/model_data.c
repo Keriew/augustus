@@ -103,6 +103,12 @@ static void populate_list(void)
     }
 }
 
+static int building_produces_resource(building_type type)
+{
+    return building_is_raw_resource_producer(type) || building_is_workshop(type) || type == BUILDING_WHARF
+        || building_is_farm(type) || type == BUILDING_CITY_MINT || type == BUILDING_BARRACKS;
+}
+
 static void reset_confirmed(int accepted, int checked)
 {
     if (accepted) {
@@ -154,7 +160,7 @@ static void set_production(int value)
 static void button_edit_production(const generic_button *button)
 {
     building_type type = data.items[data.target_index];
-    if (building_is_raw_resource_producer(type) || building_is_workshop(type) || type == BUILDING_WHARF || building_is_farm(type)) {
+    if (building_produces_resource(type)) {
         window_numeric_input_bound_show(model_buttons.focused_item.x, model_buttons.focused_item.y, button,
             9, NEGATIVE_UNLIMITED, UNLIMITED, set_production);
     }
@@ -167,17 +173,10 @@ static void model_item_click(const grid_box_item *item)
 
 static void get_building_translation(building_type b_type, uint8_t *buffer, int buffer_size)
 {
-    const uint8_t *b_type_string = lang_get_building_type_string(b_type);
+    const building_properties *props = building_properties_for_type(b_type);
+    const uint8_t *b_type_string = props->event_data.key ? translation_for(props->event_data.key) : lang_get_building_type_string(b_type);
 
-    if (BUILDING_SMALL_TEMPLE_CERES <= b_type && b_type <= BUILDING_SMALL_TEMPLE_VENUS) {
-        const uint8_t *temple_prefix = lang_get_building_type_string(BUILDING_MENU_SMALL_TEMPLES);
-        snprintf((char *) buffer, buffer_size, "%s %s", temple_prefix, b_type_string);
-    } else if (BUILDING_LARGE_TEMPLE_CERES <= b_type && b_type <= BUILDING_LARGE_TEMPLE_VENUS) {
-        const uint8_t *temple_prefix = lang_get_building_type_string(BUILDING_MENU_LARGE_TEMPLES);
-        snprintf((char *) buffer, buffer_size, "%s %s", temple_prefix, b_type_string);
-    } else {
-        string_copy(b_type_string, buffer, buffer_size);
-    }
+    string_copy(b_type_string, buffer, buffer_size);
 }
 
 static void draw_model_item(const grid_box_item *item)
@@ -189,8 +188,7 @@ static void draw_model_item(const grid_box_item *item)
     get_building_translation(b_type, b_string, sizeof(b_string));
     text_draw_ellipsized(b_string, item->x + 8, item->y + 8, 12 * BLOCK_SIZE, FONT_NORMAL_BLACK, 0);
 
-    for (unsigned int i = 0; i < NUM_DATA_BUTTONS - (!(building_is_raw_resource_producer(b_type) ||
-        building_is_workshop(b_type) || b_type == BUILDING_WHARF || building_is_farm(b_type))); i++) {
+    for (unsigned int i = 0; i < NUM_DATA_BUTTONS - !building_produces_resource(b_type); i++) {
         button_border_draw(item->x + data_buttons[i].x, item->y + data_buttons[i].y,
             data_buttons[i].width, data_buttons[i].height, item->is_focused && data.data_buttons_focus_id == i + 1);
 
@@ -202,7 +200,6 @@ static void draw_model_item(const grid_box_item *item)
         text_draw_number(value, 0, NULL, item->x + data_buttons[i].x + 8, item->y + data_buttons[i].y + 6,
                   FONT_SMALL_PLAIN, 0);
     }
-
 }
 
 static void draw_background(void)

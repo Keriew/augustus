@@ -13,8 +13,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define RESOURCE_ALL (RESOURCE_MAX + RESOURCE_TOTAL_SPECIAL)
-
 static const resource_type resource_mappings[][RESOURCE_ALL] = {
     {
         RESOURCE_NONE, RESOURCE_WHEAT, RESOURCE_VEGETABLES, RESOURCE_FRUIT, RESOURCE_OLIVES, RESOURCE_VINES,
@@ -85,8 +83,8 @@ static resource_data resource_info_defaults[RESOURCE_ALL] = {
     [RESOURCE_WEAPONS]    = { .type = RESOURCE_WEAPONS,    .xml_attr_name = "weapons",     .flags = RESOURCE_FLAG_STORABLE,                       .industry = BUILDING_WEAPONS_WORKSHOP,   .production_per_month = 40,  .default_trade_price = { 250, 180 } },
     [RESOURCE_CONCRETE]   = { .type = RESOURCE_CONCRETE,   .xml_attr_name = "concrete",    .flags = RESOURCE_FLAG_NONE,                           .industry = BUILDING_CONCRETE_MAKER,     .production_per_month = 120 },
     [RESOURCE_BRICKS]     = { .type = RESOURCE_BRICKS,     .xml_attr_name = "bricks",      .flags = RESOURCE_FLAG_STORABLE,                       .industry = BUILDING_BRICKWORKS,         .production_per_month = 60,  .default_trade_price = { 200, 150 } },
-    [RESOURCE_DENARII]    = { .type = RESOURCE_DENARII,    .industry = BUILDING_CITY_MINT, .production_per_month = 200 },
-    [RESOURCE_TROOPS]     = { .type = RESOURCE_TROOPS  }
+    [RESOURCE_DENARII]    = { .type = RESOURCE_DENARII,    .xml_attr_name = "denarii",     .industry = BUILDING_CITY_MINT, .production_per_month = 200 },
+    [RESOURCE_TROOPS]     = { .type = RESOURCE_TROOPS,     .xml_attr_name = "troops",      .industry = BUILDING_BARRACKS,  .production_per_month = 100 }
 };
 
 static resource_data resource_info[RESOURCE_ALL];
@@ -126,10 +124,7 @@ int resource_is_storable(resource_type resource)
 
 resource_type resource_get_from_industry(building_type industry)
 {
-    if (industry == resource_info[RESOURCE_DENARII].industry) {
-        return RESOURCE_DENARII;
-    }
-    for (resource_type resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
+    for (resource_type resource = RESOURCE_MIN; resource < RESOURCE_ALL; resource++) {
         if (resource_info[resource].industry == industry) {
             return resource;
         }
@@ -167,7 +162,7 @@ int resource_get_supply_chain_for_raw_material(resource_supply_chain *chain, res
 
 void resource_init(void)
 {
-    memcpy(resource_info, resource_info_defaults, sizeof(resource_info_defaults));
+    memcpy(resource_info, resource_info_defaults, sizeof(resource_data) * RESOURCE_ALL);
     
     int food_index = 0;
     int good_index = 0;

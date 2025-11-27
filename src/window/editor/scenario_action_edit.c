@@ -377,6 +377,16 @@ static void resource_selection(const generic_button *button)
         resource_texts, RESOURCE_MAX - 1, set_resource_value);
 }
 
+static void all_resource_selection(const generic_button *button)
+{
+    static const uint8_t *resource_texts[RESOURCE_ALL];
+    for (resource_type resource = RESOURCE_MIN; resource < RESOURCE_ALL; resource++) {
+        resource_texts[resource - 1] = resource_get_data(resource)->text;
+    }
+    window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y(), button,
+        resource_texts, RESOURCE_ALL - 1, set_resource_value);
+}
+
 static void custom_message_selection(void)
 {
     window_editor_select_custom_message_show(set_param_value);
@@ -601,10 +611,11 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             window_editor_select_city_resources_for_route_show(set_param_value, data.action->parameter3);
             return;
         case PARAMETER_TYPE_GRID_SLICE:
-        {
             start_grid_slice_selection();
             return;
-        }
+        case PARAMETER_TYPE_RESOURCE_ALL:
+            all_resource_selection(button);
+            return;
         default:
             return;
     }
