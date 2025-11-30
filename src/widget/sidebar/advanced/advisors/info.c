@@ -51,7 +51,6 @@ static image_button health_buttons[] = {
     {0, 0, 27, 27, IB_NORMAL,0, 0, button_advisor, button_none, 0, 0, 1}
 };
 
-
 static struct {
     int x_offset;
     int y_offset;
@@ -188,9 +187,49 @@ void draw_health_table(void)
     y_offset = draw_health_building_info(data.x_offset, y_offset, BUILDING_HOSPITAL, people_covered, city_culture_coverage_hospital());
 }
 
-void draw_education_table(const int x_offset, int y_offset)
+static int draw_education_section(const int building_type, const int person_coverage, const int population, const int coverage, int y_offset)
 {
-    lang_text_draw_amount(8, 18, building_count_total(BUILDING_SCHOOL), 40, 105, FONT_NORMAL_WHITE);
+    lang_text_draw_amount(8, 18, building_count_total(building_type), data.x_offset, y_offset, FONT_NORMAL_WHITE);
+    y_offset += LINE_HEIGHT;
+
+    int number = 10;
+    if (coverage == 0) {
+        number = 10;
+    } else if (coverage < 100) {
+        number = coverage / 10 + 11;
+    } else {
+        number = 21;
+    }
+
+    lang_text_draw(57, number, data.x_offset, y_offset, VALUE_FONT);
+    y_offset += LINE_HEIGHT;
+
+    y_offset = add_info_number_with_subsection(
+        person_coverage,
+        population,
+        data.x_offset,
+        y_offset
+    );
+
+    y_offset += LINE_HEIGHT;
+
+    return y_offset;
+}
+
+void draw_education_table(void)
+{
+    place_button_at_bottom(ADVISOR_EDUCATION, MESSAGE_DIALOG_ADVISOR_EDUCATION);
+
+    int y_offset = data.y_offset;
+
+    y_offset = draw_education_section(BUILDING_SCHOOL, city_culture_get_school_person_coverage(),
+        city_population_school_age(), city_culture_coverage_school(), y_offset);
+
+    y_offset = draw_education_section(BUILDING_ACADEMY, city_culture_get_academy_person_coverage(),
+       city_population_academy_age(), city_culture_coverage_academy(), y_offset);
+
+    draw_education_section(BUILDING_LIBRARY, city_culture_get_library_person_coverage(),
+        city_population(), city_culture_coverage_library(), y_offset);
 }
 
 void draw_housing_table(void)
