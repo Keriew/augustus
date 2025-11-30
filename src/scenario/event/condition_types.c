@@ -62,15 +62,6 @@ int scenario_condition_type_building_count_active_met(const scenario_condition_t
         case BUILDING_ANY:
             total_active_count = building_count_any_total(1);
             break;
-        case BUILDING_FORT_LEGIONARIES:
-            total_active_count += building_count_active_fort_type(FIGURE_FORT_LEGIONARY);
-            break;
-        case BUILDING_FORT_JAVELIN:
-            total_active_count += building_count_active_fort_type(FIGURE_FORT_JAVELIN);
-            break;
-        case BUILDING_FORT_MOUNTED:
-            total_active_count += building_count_active_fort_type(FIGURE_FORT_MOUNTED);
-            break;
         case BUILDING_ROAD:
             total_active_count = building_count_roads();
             break;
@@ -137,15 +128,6 @@ int scenario_condition_type_building_count_any_met(const scenario_condition_t *c
             break;
         case BUILDING_ANY:
             total_active_count = building_count_any_total(0);
-            break;
-        case BUILDING_FORT_LEGIONARIES:
-            total_active_count += building_count_fort_type_total(FIGURE_FORT_LEGIONARY);
-            break;
-        case BUILDING_FORT_JAVELIN:
-            total_active_count += building_count_fort_type_total(FIGURE_FORT_JAVELIN);
-            break;
-        case BUILDING_FORT_MOUNTED:
-            total_active_count += building_count_fort_type_total(FIGURE_FORT_MOUNTED);
             break;
         case BUILDING_ROAD:
             total_active_count = building_count_roads();
@@ -246,15 +228,6 @@ int scenario_condition_type_building_count_area_met(const scenario_condition_t *
             break;
         case BUILDING_MENU_PARKS:
             buildings_in_area = building_set_area_count_deco_statues(minx, miny, maxx, maxy);
-            break;
-        case BUILDING_FORT_LEGIONARIES:
-            buildings_in_area = building_count_fort_type_in_area(minx, miny, maxx, maxy, FIGURE_FORT_LEGIONARY);
-            break;
-        case BUILDING_FORT_JAVELIN:
-            buildings_in_area = building_count_fort_type_in_area(minx, miny, maxx, maxy, FIGURE_FORT_JAVELIN);
-            break;
-        case BUILDING_FORT_MOUNTED:
-            buildings_in_area = building_count_fort_type_in_area(minx, miny, maxx, maxy, FIGURE_FORT_MOUNTED);
             break;
         case BUILDING_ROAD:
             buildings_in_area = building_count_roads_in_area(minx, miny, maxx + 1, maxy + 1);

@@ -86,6 +86,9 @@ static const building_type all_fort_types[] = {
     BUILDING_FORT_AUXILIA_INFANTRY,
     BUILDING_FORT_ARCHERS,
 };
+
+#define BUILDING_SET_SIZE_FORTS (sizeof(all_fort_types) / sizeof(building_type))
+
 int building_count_forts(int active_only);
 
 int building_count_grand_temples(void)
@@ -108,10 +111,15 @@ int building_count_grand_temples_active(void)
         building_count_active(BUILDING_PANTHEON);
 }
 
+static int count_forts_per_type(building_type type, int active_only);
+
 int building_count_active(building_type type)
 {
     if (type == BUILDING_MENU_FORT) {
         return building_count_forts(1); // 1 means check active only
+    }
+    if (building_is_fort(type)) {
+        return count_forts_per_type(type, 1);
     }
     int active = 0;
     for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
@@ -126,6 +134,9 @@ int building_count_total(building_type type)
 {
     if (type == BUILDING_MENU_FORT) {
         return building_count_forts(0); // 0 means do not check active only
+    }
+    if (building_is_fort(type)) {
+        return count_forts_per_type(type, 0);
     }
     int total = 0;
     for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
@@ -169,6 +180,9 @@ int building_count_upgraded(building_type type)
 
 int building_count_in_area(building_type type, int minx, int miny, int maxx, int maxy)
 {
+    if (building_is_fort(type) || type == BUILDING_MENU_FORT) {
+        return building_count_fort_type_in_area(minx, miny, maxx, maxy, type);
+    }
     int grid_area = (abs(maxx - minx) + 1) * (abs(maxy - miny) + 1);
     int array_size = grid_area < building_count() ? grid_area : building_count();
     unsigned int *found_buildings = (unsigned int *) malloc(array_size * sizeof(unsigned int));
@@ -211,7 +225,7 @@ int building_count_in_area(building_type type, int minx, int miny, int maxx, int
     return total;
 }
 
-int building_count_fort_type_in_area(int minx, int miny, int maxx, int maxy, figure_type type)
+int building_count_fort_type_in_area(int minx, int miny, int maxx, int maxy, building_type type)
 {
     int grid_area = abs((maxx - minx) * (maxy - miny));
     int array_size = grid_area < building_count() ? grid_area : building_count();
@@ -224,7 +238,8 @@ int building_count_fort_type_in_area(int minx, int miny, int maxx, int maxy, fig
             int building_id = map_building_at(grid_offset);
             if (building_id) {
                 building *b = building_main(building_get(building_id));
-                if (!building_is_fort(b->type) || b->subtype.fort_figure_type != type) {
+                if (!building_is_fort(b->type) || (b->subtype.fort_figure_type != 
+                    building_count_forts_get_figure_type_from_building(type) && type != BUILDING_MENU_FORT)) {
                     continue;
                 }
                 if (b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_CREATED) {
@@ -368,42 +383,22 @@ int building_set_area_count_deco_statues(int minx, int miny, int maxx, int maxy)
     return count_all_types_in_set_in_area(building_set_deco_statues, BUILDING_SET_SIZE_DECO_STATUES, minx, miny, maxx, maxy);
 }
 
-static int count_forts_per_type(building_type b_type, figure_type type, int active_only)
+static int count_forts_per_type(building_type type, int active_only)
 {
     int count = 0;
     //if active_only is 1, only count buildings that are active, otherwise count all valid forts of the type
-    for (building *b = building_first_of_type(b_type); b; b = b->next_of_type) {
+    for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
         if (!active_only) {
             if (!(b->state == BUILDING_STATE_IN_USE || b->state == BUILDING_STATE_CREATED)) {
                 continue; // if not couting active buildings, check if building at least in use or created
             }
         }
         int increase_count = ((building_is_active(b) >= active_only) && b == building_main(b));
-        if (b->subtype.fort_figure_type == type && increase_count) {
+        if (b->subtype.fort_figure_type == building_count_forts_get_figure_type_from_building(type) && increase_count) {
             count++;
         }
     }
     return count;
-}
-
-int building_count_active_fort_type(figure_type type)
-{
-
-    int total = 0;
-    for (size_t i = 0; i < sizeof(all_fort_types) / sizeof(all_fort_types[0]); i++) {
-        total += count_forts_per_type(all_fort_types[i], type, 1);
-    }
-    return total;
-}
-
-int building_count_fort_type_total(figure_type type)
-{
-    // these functions might be deprecated due to the change of BUILDING_FORT to BUILDING_MENU_FORT
-    int total = 0;
-    for (size_t i = 0; i < sizeof(all_fort_types) / sizeof(all_fort_types[0]); i++) {
-        total += count_forts_per_type(all_fort_types[i], type, 0);
-    }
-    return total;
 }
 
 figure_type building_count_forts_get_figure_type_from_building(building_type type)
@@ -427,10 +422,9 @@ figure_type building_count_forts_get_figure_type_from_building(building_type typ
 int building_count_forts(int active_only)
 {
     int total = 0;
-    for (size_t i = 0; i < sizeof(all_fort_types) / sizeof(all_fort_types[0]); i++) {
+    for (size_t i = 0; i < BUILDING_SET_SIZE_FORTS; i++) {
         // adjust the figure type here
-        figure_type f_type = building_count_forts_get_figure_type_from_building(all_fort_types[i]);
-        total += count_forts_per_type(all_fort_types[i], f_type, active_only);
+        total += count_forts_per_type(all_fort_types[i], active_only);
     }
     return total;
 }
