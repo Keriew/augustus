@@ -201,8 +201,12 @@ void draw_advanced_sidebar_background(const int x_offset)
         break;
     case BUILD_MENU_TEMPLES:
         draw_gods_table();
+        break;
     case BUILD_MENU_EDUCATION:
         draw_education_table();
+        break;
+    case BUILD_MENU_ENTERTAINMENT:
+        draw_entertainment_table();
         break;
     default: ;
     }
@@ -233,6 +237,9 @@ void draw_advanced_sidebar_foreground(void)
             break;
         case BUILD_MENU_EDUCATION:
             draw_education_table();
+            break;
+        case BUILD_MENU_ENTERTAINMENT:
+            draw_entertainment_table();
             break;
         default: ;
     }
@@ -327,7 +334,8 @@ static void button_build(const int submenu, int param2)
     if (submenu == BUILD_MENU_VACANT_HOUSE ||
         submenu == BUILD_MENU_TEMPLES ||
         submenu == BUILD_MENU_HEALTH ||
-        submenu == BUILD_MENU_EDUCATION){
+        submenu == BUILD_MENU_EDUCATION ||
+        submenu == BUILD_MENU_ENTERTAINMENT){
         data.show_info_for = submenu;
     }
 

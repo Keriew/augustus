@@ -12,6 +12,8 @@ void draw_health_table(void);
 
 void draw_education_table(void);
 
+void draw_entertainment_table(void);
+
 int info_panel_mouse_handle(const mouse *m);
 
 #endif

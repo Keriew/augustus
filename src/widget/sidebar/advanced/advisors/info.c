@@ -232,6 +232,83 @@ void draw_education_table(void)
         city_population(), city_culture_coverage_library(), y_offset);
 }
 
+static int draw_entertainment_section(const int building_type, const int building_text_number, const int person_coverage, const int population, const int coverage, int y_offset)
+{
+    const int group = (building_type == BUILDING_TAVERN || building_type == BUILDING_ARENA) ? CUSTOM_TRANSLATION : 8;
+    lang_text_draw_amount(group, building_text_number, building_count_total(building_type), data.x_offset, y_offset, FONT_NORMAL_WHITE);
+    y_offset += LINE_HEIGHT;
+
+    int number = 10;
+    if (coverage == 0) {
+        number = 10;
+    } else if (coverage < 100) {
+        number = coverage / 10 + 11;
+    } else {
+        number = 21;
+    }
+
+    lang_text_draw(57, number, data.x_offset, y_offset, VALUE_FONT);
+    y_offset += LINE_HEIGHT;
+
+    y_offset = add_info_number_with_subsection(
+        person_coverage,
+        population,
+        data.x_offset,
+        y_offset
+    );
+
+    y_offset += LINE_HEIGHT;
+
+    return y_offset;
+}
+
+void draw_entertainment_table(void)
+{
+    place_button_at_bottom(ADVISOR_ENTERTAINMENT, MESSAGE_DIALOG_ADVISOR_ENTERTAINMENT);
+    int y_offset = data.y_offset;
+
+    const int population =  city_population();
+
+    y_offset = draw_entertainment_section(
+        BUILDING_THEATER,
+        34,
+        city_culture_get_theatre_person_coverage(),
+        population,
+        city_culture_coverage_theater(),
+        y_offset
+    );
+
+    y_offset = draw_entertainment_section(
+        BUILDING_AMPHITHEATER,
+        36,
+        city_culture_get_ampitheatre_person_coverage(),
+        population,
+        city_culture_coverage_amphitheater(),
+        y_offset
+    );
+
+    y_offset = draw_entertainment_section(
+        BUILDING_ARENA,
+        TR_WINDOW_ADVISOR_ENTERTAINMENT_ARENA_COVERAGE,
+        city_culture_get_arena_person_coverage(),
+        population,
+        city_culture_coverage_arena(),
+        y_offset
+    );
+
+    draw_entertainment_section(
+        BUILDING_TAVERN,
+        TR_WINDOW_ADVISOR_ENTERTAINMENT_TAVERN_COVERAGE,
+        city_culture_get_tavern_person_coverage(),
+        population,
+        city_culture_coverage_tavern(),
+        y_offset
+    );
+
+    // colosseum and hippodrome are not included here as they provider global coverage
+    // and players are expected to know about them from the city
+}
+
 void draw_housing_table(void)
 {
     place_button_at_bottom(ADVISOR_HOUSING, MESSAGE_DIALOG_ADVISOR_POPULATION);
