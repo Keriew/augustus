@@ -405,7 +405,7 @@ int building_repair_cost(building *b)
 
     if (building_is_house(og_type)) {
         grid_slice *house_slice = map_grid_get_grid_slice_house(b->id, 1);
-        int clear_cost = house_slice->size * (11 + 3); // 10.5 per new house tile + 3 per rubble tile to clear
+        int clear_cost = house_slice->size * (11 + model_get_building(BUILDING_REPAIR_LAND)->cost); // 10.5 per new house tile + cost of repair land per rubble tile to clear
         return clear_cost;
     }
     if (b->type == BUILDING_WAREHOUSE_SPACE) {
