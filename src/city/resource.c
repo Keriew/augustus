@@ -158,11 +158,6 @@ int city_resource_multiple_wine_available(void)
     return city_data.resource.wine_types_available >= 2;
 }
 
-int city_resource_food_types_available(void)
-{
-    return city_data.resource.food_types_available;
-}
-
 int city_resource_food_types_eaten(void)
 {
     return city_data.resource.food_types_eaten;
