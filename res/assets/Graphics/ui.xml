@@ -1408,4 +1408,5 @@
 	<image id="rightbracket_white_l" src="rightbracket_white_l"/>
 	<image id="curlybracket_white_left" src="curlybracket_white_left"/>
 	<image id="curlybracket_white_right" src="curlybracket_white_right"/>
+    <image id="abstract_caret_symbol" src="abstract_caret_symbol"/>
 </assetlist>

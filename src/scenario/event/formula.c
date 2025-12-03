@@ -98,7 +98,8 @@ double parse_power(const char **s)
     
     while (**s == '^') {
         (*s)++;
-        val = pow(val, parse_factor(s));
+        double right = parse_factor(s);
+        val = pow(val, right);
     }
     
     return val;
