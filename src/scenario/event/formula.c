@@ -73,8 +73,9 @@ double parse_factor(const char **s)
         if (**s == ',') {
             (*s)++;
             double val2 = parse_expr(s);
-            val = val1 < val2 ? random_between_from_stdlib(val1, val2) : random_between_from_stdlib(val2, val1);
+            val = val1 < val2 ? random_between_from_stdlib(val1, val2 + 1) : random_between_from_stdlib(val2, val1 + 1);
             // random_between_from_stdlib does only work if min <= max otherwise it return min so the values have to be switched
+            // +1 to make {0,3} have the possible results 0 1 2 and 3
         }
         if (**s == '}') {
             (*s)++;
@@ -90,15 +91,28 @@ double parse_factor(const char **s)
     return 0.0; // fallback
 }
 
-double parse_term(const char **s)
+double parse_power(const char **s)
 {
     double val = parse_factor(s);
+    skip_spaces(s);
+    
+    while (**s == '^') {
+        (*s)++;
+        val = pow(val, parse_factor(s));
+    }
+    
+    return val;
+}
+
+double parse_term(const char **s)
+{
+    double val = parse_power(s);
     skip_spaces(s);
 
     while (**s == '*' || **s == '/') {
         char op = **s;
         (*s)++;
-        double right = parse_factor(s);
+        double right = parse_power(s);
         skip_spaces(s);
 
         if (op == '*') {
