@@ -208,7 +208,11 @@ int scenario_action_type_empire_map_convert_future_trade_city_execute(scenario_a
     empire_city *city = empire_city_get(target_city_id);
     if (city->type == EMPIRE_CITY_FUTURE_TRADE) {
         city->type = EMPIRE_CITY_TRADE;
-        empire_object_set_expanded(city->empire_object_id, city->type);
+        full_empire_object *full = empire_object_get_full(city->empire_object_id);
+        full->city_type = city->type;
+        if (!full->obj.future_trade_after_icon) {
+            full->obj.future_trade_after_icon = empire_object_get_random_icon_for_empire_object(full);
+        }
         building_menu_update();
 
         if (show_message) {

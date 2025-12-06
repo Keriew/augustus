@@ -209,6 +209,11 @@ void empire_object_load(buffer *buf, int version)
             obj->empire_city_icon = empire_object_get_random_icon_for_empire_object(full);
             full->empire_city_icon = empire_object_get_random_icon_for_empire_object(full);
         }
+        if (version > SCENARIO_LAST_NO_FUTURE_TRADE_ICONS) {
+            obj->future_trade_after_icon = buffer_read_u8(buf);
+        } else {
+            obj->future_trade_after_icon = empire_object_get_random_icon_for_empire_object(full);
+        }
     }
     objects.size = highest_id_in_use + 1;
     fix_image_ids();
@@ -278,6 +283,7 @@ void empire_object_save(buffer *buf)
         buffer_write_raw(buf, full->city_custom_name, sizeof(full->city_custom_name));
         buffer_write_u8(buf, obj->empire_city_icon);
         buffer_write_u8(buf, full->empire_city_icon);
+        buffer_write_u8(buf, obj->future_trade_after_icon);
     }
 }
 
@@ -657,9 +663,10 @@ empire_city_icon_type empire_object_get_random_icon_for_empire_object(full_empir
         EMPIRE_CITY_ICON_DISTANT_VILLAGE,
         EMPIRE_CITY_ICON_DISTANT_CITY,
     };
-    static const empire_city_icon_type alloc_future_trade[] = { // future trade
+    static const empire_city_icon_type alloc_future_trade[] = { // future trade before conversion
         EMPIRE_CITY_ICON_CONSTRUCTION,
         EMPIRE_CITY_ICON_DISTANT_CITY,
+        EMPIRE_CITY_ICON_ROMAN_VILLAGE,
     };
 
     int array_size = 0;
