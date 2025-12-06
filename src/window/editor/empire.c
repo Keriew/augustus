@@ -125,6 +125,7 @@ static void init(void)
     }
     data.focus_button_id = 0;
     empire_center_on_our_city(map_viewport_width(), map_viewport_height());
+    window_empire_collect_trade_edges();
 }
 
 static void draw_paneling(void)
@@ -230,6 +231,9 @@ static void draw_shadowed_number(int value, int x, int y, color_t color)
 
 static void draw_empire_object(const empire_object *obj)
 {
+    if (obj->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE || obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
+        int debug; // debug
+    }
     int x = obj->x;
     int y = obj->y;
     int image_id = obj->image_id;
@@ -360,6 +364,7 @@ static void draw_map(void)
     int viewport_height = map_viewport_height();
     graphics_set_clip_rectangle(data.x_min + 16, data.y_min + 16, viewport_width, viewport_height);
 
+    empire_reset_route_drawn_flags();
     empire_set_viewport(viewport_width, viewport_height);
 
     data.x_draw_offset = data.x_min + 16;
@@ -518,6 +523,7 @@ static void refresh_empire(void)
         return;
     }
     empire_xml_parse_file(filename);
+    window_empire_collect_trade_edges();
     window_invalidate();
 }
 

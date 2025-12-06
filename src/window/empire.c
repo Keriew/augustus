@@ -797,12 +797,7 @@ void window_empire_collect_trade_edges(void)
 
 void window_empire_draw_static_trade_waypoints(const empire_object *route_object, int x_offset, int y_offset)
 {
-    int is_sea_route = 0;
-    if (route_object->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
-        is_sea_route = 1;
-    } else {
-        is_sea_route = 0; // treat anything else here as land (caller should pass a valid route)
-    }
+    int is_sea_route = route_object->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE;
 
     int image_id = assets_get_image_id("UI", is_sea_route ? "SeaRouteDot" : "LandRouteDot");
     int route_id = route_object->trade_route_id;
@@ -1624,6 +1619,13 @@ static void draw_invasion_warning(int x, int y, int image_id)
     image_draw(image_id, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, SCALE_NONE);
 }
 
+void empire_reset_route_drawn_flags(void)
+{
+    for (int i = 0; i < g_trade_edge_count; i++) {
+        g_trade_edges[i].drawn = 0;
+    }
+}
+
 static void draw_map(void)
 {
     // Recalculate inner bounds (same as draw_background)
@@ -1634,9 +1636,8 @@ static void draw_map(void)
 
     graphics_set_clip_rectangle(map_clip_x_min, map_clip_y_min, map_clip_x_max - map_clip_x_min, map_clip_y_max - map_clip_y_min);
     // Reset all edge drawn flags for this frame
-    for (int i = 0; i < g_trade_edge_count; i++) {
-        g_trade_edges[i].drawn = 0;
-    }
+    empire_reset_route_drawn_flags();
+
     empire_set_viewport(map_clip_x_max - map_clip_x_min, map_clip_y_max - map_clip_y_min);
 
     data.x_draw_offset = map_clip_x_min;
