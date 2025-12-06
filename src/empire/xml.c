@@ -352,7 +352,7 @@ static int xml_start_city(void)
     }
     
     int city_icon_type = EMPIRE_CITY_ICON_DEFAULT;
-    int future_trade_after_icon = EMPIRE_CITY_ICON_TRADE_CITY;
+    int future_trade_after_icon = EMPIRE_CITY_ICON_DEFAULT;
     if (city_type == EMPIRE_CITY_FUTURE_TRADE) {
         if (xml_parser_has_attribute("icon_before")) {
             city_icon_type = xml_parser_get_attribute_enum("icon_before", city_icons, 17, EMPIRE_CITY_ICON_DEFAULT + 1);

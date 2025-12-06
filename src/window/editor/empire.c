@@ -231,9 +231,6 @@ static void draw_shadowed_number(int value, int x, int y, color_t color)
 
 static void draw_empire_object(const empire_object *obj)
 {
-    if (obj->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE || obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
-        int debug; // debug
-    }
     int x = obj->x;
     int y = obj->y;
     int image_id = obj->image_id;
@@ -251,7 +248,7 @@ static void draw_empire_object(const empire_object *obj)
     }
     if (obj->type == EMPIRE_OBJECT_CITY) {
         const empire_city *city = empire_city_get(empire_city_get_for_object(obj->id));
-        image_id = empire_city_get_icon_image_id(empire_object_get(city->empire_object_id)->empire_city_icon);
+        image_id = empire_city_get_icon_image_id(obj->empire_city_icon);
     } else if (obj->type == EMPIRE_OBJECT_BATTLE_ICON) {
         draw_shadowed_number(obj->invasion_path_id,
             data.x_draw_offset + x - 9, data.y_draw_offset + y - 9, COLOR_WHITE);
