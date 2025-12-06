@@ -247,10 +247,7 @@ static void draw_empire_object(const empire_object *obj)
     }
     if (obj->type == EMPIRE_OBJECT_CITY) {
         const empire_city *city = empire_city_get(empire_city_get_for_object(obj->id));
-        if (city->type == EMPIRE_CITY_DISTANT_FOREIGN ||
-            city->type == EMPIRE_CITY_FUTURE_ROMAN) {
-            image_id = image_group(GROUP_EDITOR_EMPIRE_FOREIGN_CITY);
-        }
+        image_id = empire_city_get_icon_image_id(empire_object_get(city->empire_object_id)->empire_city_icon);
     } else if (obj->type == EMPIRE_OBJECT_BATTLE_ICON) {
         draw_shadowed_number(obj->invasion_path_id,
             data.x_draw_offset + x - 9, data.y_draw_offset + y - 9, COLOR_WHITE);
