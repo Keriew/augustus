@@ -665,7 +665,6 @@ empire_city_icon_type empire_object_get_random_icon_for_empire_object(full_empir
     };
     static const empire_city_icon_type alloc_future_trade[] = { // future trade before conversion
         EMPIRE_CITY_ICON_CONSTRUCTION,
-        EMPIRE_CITY_ICON_DISTANT_CITY,
         EMPIRE_CITY_ICON_ROMAN_VILLAGE,
     };
 
