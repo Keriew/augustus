@@ -769,6 +769,9 @@ static void draw_animation(int x, int y, int grid_offset)
                 if (btype == BUILDING_PREFECTURE || btype == BUILDING_BURNING_RUIN) {
                     draw = 1;
                 }
+                if (overlay->type == OVERLAY_ENEMY && btype == BUILDING_WATCHTOWER) {
+                    draw = 1;
+                }
                 break;
             case OVERLAY_DAMAGE:
                 if (btype == BUILDING_ENGINEERS_POST) {
