@@ -3,6 +3,7 @@
 #include "assets/assets.h"
 #include "building/animation.h"
 #include "building/construction.h"
+#include "building/construction_clear.h"
 #include "building/granary.h"
 #include "building/industry.h"
 #include "building/properties.h"
@@ -670,7 +671,7 @@ static void draw_warehouse_ornaments(int x, int y, color_t color_mask)
 
 static void draw_building_top(int grid_offset, building *b, int x, int y)
 {
-    color_t color_mask = draw_building_as_deleted(b) ? COLOR_MASK_RED : 0;
+    color_t color_mask = draw_building_as_deleted(b) ? building_construction_clear_color() : 0;
     if (is_building_selected(b)) {
         color_mask = get_building_color_mask(b);
     }
@@ -749,7 +750,7 @@ static void draw_top(int x, int y, int grid_offset)
         if (!map_terrain_is(grid_offset, TERRAIN_WALL | TERRAIN_AQUEDUCT | TERRAIN_ROAD)) {
             color_t color_mask = 0;
             if (map_property_is_deleted(grid_offset) && !is_multi_tile_terrain(grid_offset)) {
-                color_mask = building_construction_type() == BUILDING_CLEAR_LAND ? COLOR_MASK_RED : COLOR_MASK_GREEN;
+                color_mask = building_construction_clear_color();
             }
             // terrain
             image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
@@ -794,7 +795,7 @@ static void draw_animation(int x, int y, int grid_offset)
     } else if (img->animation && draw) {
         if (map_property_is_draw_tile(grid_offset)) {
             building *b = building_get(map_building_at(grid_offset));
-            int color_mask = draw_building_as_deleted(b) ? COLOR_MASK_RED : 0;
+            int color_mask = draw_building_as_deleted(b) ? building_construction_clear_color() : 0;
             if (is_building_selected(b)) {
                 color_mask = get_building_color_mask(b);
             }
@@ -883,7 +884,7 @@ static void deletion_draw_terrain_top(int x, int y, int grid_offset)
 static void deletion_draw_animations(int x, int y, int grid_offset)
 {
     if (map_property_is_deleted(grid_offset) || draw_building_as_deleted(building_get(map_building_at(grid_offset)))) {
-        image_blend_footprint_color(x, y, COLOR_MASK_RED, scale);
+        image_blend_footprint_color(x, y, building_construction_clear_color(), scale);
     }
     if (!should_draw_top_before_deletion(grid_offset)) {
         draw_top(x, y, grid_offset);
