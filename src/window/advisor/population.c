@@ -338,7 +338,7 @@ static void print_history_info(void)
 
     // food types eaten
     width = lang_text_draw(55, 16, 75, 360, FONT_NORMAL_WHITE);
-    text_draw_number(city_resource_food_types_available(), '@', " ", 75 + width, 360, FONT_NORMAL_WHITE, 0);
+    text_draw_number(city_resource_food_types_eaten(), '@', " ", 75 + width, 360, FONT_NORMAL_WHITE, 0);
 
     // immigration
     int newcomers = city_migration_newcomers();
