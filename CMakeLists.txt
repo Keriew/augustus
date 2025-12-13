@@ -394,6 +394,7 @@ set(CITY_FILES
 )
 set(EMPIRE_FILES
     ${PROJECT_SOURCE_DIR}/src/empire/city.c
+    ${PROJECT_SOURCE_DIR}/src/empire/editor.c
     ${PROJECT_SOURCE_DIR}/src/empire/empire.c
     ${PROJECT_SOURCE_DIR}/src/empire/xml.c
     ${PROJECT_SOURCE_DIR}/src/empire/object.c

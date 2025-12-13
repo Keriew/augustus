@@ -4,6 +4,7 @@
 #include "core/image_group_editor.h"
 #include "core/string.h"
 #include "empire/city.h"
+#include "empire/editor.h"
 #include "empire/empire.h"
 #include "empire/object.h"
 #include "empire/trade_route.h"
@@ -60,7 +61,6 @@ static struct {
     int is_scrolling;
     int finished_scroll;
     int show_battle_objects;
-    int preview_image_group;
     unsigned int preview_button_focused;
     struct {
         int x;
@@ -116,7 +116,6 @@ static void init(void)
     update_screen_size();
     data.selected_button = 0;
     data.coordinates.active = 0;
-    data.preview_image_group = 0;
     int selected_object = empire_selected_object();
     if (selected_object) {
         data.selected_city = empire_city_get_for_object(selected_object - 1);
@@ -185,18 +184,44 @@ static void draw_paneling(void)
     }
 }
 
+static int get_preview_image_group(empire_tool tool) {
+    switch (tool) {
+        case EMPIRE_TOOL_OUR_CITY:
+            return GROUP_EMPIRE_CITY;
+        case EMPIRE_TOOL_TRADE_CITY:
+            return GROUP_EMPIRE_CITY_TRADE;
+        case EMPIRE_TOOL_ROMAN_CITY:
+        case EMPIRE_TOOL_VULNERABLE_CITY:
+        case EMPIRE_TOOL_FUTURE_TRADE_CITY:
+            return GROUP_EMPIRE_CITY_DISTANT_ROMAN;
+        case EMPIRE_TOOL_DISTANT_CITY:
+            return GROUP_EMPIRE_FOREIGN_CITY;
+        case EMPIRE_TOOL_BORDER:
+            return GROUP_EMPIRE_BORDER_EDGE;
+        case EMPIRE_TOOL_BATTLE:
+            return GROUP_EMPIRE_BATTLE;
+        case EMPIRE_TOOL_DISTANT_BABARIAN:
+            return GROUP_EMPIRE_ENEMY_ARMY;
+        case EMPIRE_TOOL_DISTANT_LEGION:
+            return GROUP_EMPIRE_ROMAN_ARMY;
+        default:
+            return 0;
+    }
+}
+
 static int draw_preview_image(int x, int y, int center, color_t color_mask, int draw_borders)
 {
-    if (!data.preview_image_group) {
+    int preview_image_group = get_preview_image_group(empire_editor_get_tool());
+    
+    if (!preview_image_group) {
         return 0;
     }
-
-    if (data.preview_image_group == GROUP_EMPIRE_BORDER_EDGE) {
+    
+    if (preview_image_group == GROUP_EMPIRE_BORDER_EDGE) {
         draw_borders = 0;
     }
-
-    int image_id = image_group(data.preview_image_group);
-
+    
+    int image_id = image_group(preview_image_group);
     const image *img = image_get(image_id);
     int x_offset = x + (center - img->width) / 2;
     int y_offset = y + (center - img->height) / 2;
@@ -616,35 +641,7 @@ static void button_toggle_invasions(const generic_button *button)
 
 static void button_cycle_preview(const generic_button *button)
 {
-    switch (data.preview_image_group) {
-        case GROUP_EMPIRE_CITY:
-            data.preview_image_group = GROUP_EMPIRE_CITY_DISTANT_ROMAN;
-            break;
-        case GROUP_EMPIRE_CITY_DISTANT_ROMAN:
-            data.preview_image_group = GROUP_EMPIRE_FOREIGN_CITY;
-            break;
-        case GROUP_EMPIRE_FOREIGN_CITY:
-            data.preview_image_group = GROUP_EMPIRE_CITY_TRADE;
-            break;
-        case GROUP_EMPIRE_CITY_TRADE:
-            data.preview_image_group = GROUP_EMPIRE_BATTLE;
-            break;
-        case GROUP_EMPIRE_BATTLE:
-            data.preview_image_group = GROUP_EMPIRE_ROMAN_ARMY;
-            break;
-        case GROUP_EMPIRE_ROMAN_ARMY:
-            data.preview_image_group = GROUP_EMPIRE_ENEMY_ARMY;
-            break;
-        case GROUP_EMPIRE_ENEMY_ARMY:
-            data.preview_image_group = GROUP_EMPIRE_BORDER_EDGE;
-            break;
-        case GROUP_EMPIRE_BORDER_EDGE:
-            data.preview_image_group = 0;
-            break;
-        default:
-            data.preview_image_group = GROUP_EMPIRE_CITY;
-            break;
-    }
+    empire_editor_change_tool(1);
     window_request_refresh();
 }
 
