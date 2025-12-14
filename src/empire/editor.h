@@ -1,6 +1,8 @@
 #ifndef EMPIRE_EDITOR_H
 #define EMPIRE_EDITOR_H
 
+#include "input/mouse.h"
+
 typedef enum {
     EMPIRE_TOOL_MIN = 0,
     EMPIRE_TOOL_OUR_CITY = 0,
@@ -19,5 +21,7 @@ typedef enum {
 int empire_editor_get_tool(void);
 void empire_editor_set_tool(empire_tool value);
 void empire_editor_change_tool(int amount);
+
+int empire_editor_handle_placement(const mouse *m);
 
 #endif // EMPIRE_EDITOR_H

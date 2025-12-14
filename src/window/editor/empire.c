@@ -244,7 +244,9 @@ static void draw_background(void)
         graphics_shade_rect(0, 0, screen_width(), screen_height(), 7);
     }
     draw_paneling();
-    draw_preview_image(data.panel.x_max - 92, data.y_max - 100, 72, COLOR_MASK_NONE, 0);
+    if (scenario_empire_id() == SCENARIO_CUSTOM_EMPIRE) {
+        draw_preview_image(data.panel.x_max - 92, data.y_max - 100, 72, COLOR_MASK_NONE, 0);
+    }
 }
 
 static void draw_shadowed_number(int value, int x, int y, color_t color)
@@ -335,6 +337,34 @@ static int is_outside_map(int x, int y)
             y < data.y_min + 16 || y >= data.y_max - 120);
 }
 
+int editor_empire_mouse_to_empire_x(int x)
+{
+    int x_coord = 0;
+    
+    if (x < data.x_min + 16) {
+        x_coord = data.x_min + 16 - data.x_draw_offset;
+    } else if (x >= data.x_max - 16) {
+        x_coord = data.x_max - 17 - data.x_draw_offset;
+    } else {
+        x_coord = x - data.x_draw_offset;
+    }
+    return x_coord;
+}
+
+int editor_empire_mouse_to_empire_y(int y)
+{
+    int y_coord = 0;
+    
+    if (y < data.y_min + 16) {
+        y_coord = data.y_min + 16 - data.y_draw_offset;
+    } else if (y >= data.y_max - 16) {
+        y_coord = data.y_max - 17 - data.y_draw_offset;
+    } else {
+        y_coord = y - data.y_draw_offset;
+    }
+    return y_coord;
+}
+
 static void draw_coordinates(void)
 {
     if (scenario.empire.id != SCENARIO_CUSTOM_EMPIRE) {
@@ -342,23 +372,8 @@ static void draw_coordinates(void)
     }
     const mouse *m = mouse_get();
 
-    int x_coord;
-    int y_coord;
-
-    if (m->x < data.x_min + 16) {
-        x_coord = data.x_min + 16 - data.x_draw_offset;
-    } else if (m->x >= data.x_max - 16) {
-        x_coord = data.x_max - 17 - data.x_draw_offset;
-    } else {
-        x_coord = m->x - data.x_draw_offset;
-    }
-    if (m->y < data.y_min + 16) {
-        y_coord = data.y_min + 16 - data.y_draw_offset;
-    } else if (m->y >= data.y_max - 120) {
-        y_coord = data.y_max - 121 - data.y_draw_offset;
-    } else {
-        y_coord = m->y - data.y_draw_offset;
-    }
+    int x_coord = editor_empire_mouse_to_empire_x(m->x);
+    int y_coord = editor_empire_mouse_to_empire_y(m->y);
 
     empire_restore_coordinates(&x_coord, &y_coord);
 
@@ -587,6 +602,9 @@ static void handle_input(const mouse *m, const hotkeys *h)
     if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE &&
         generic_buttons_handle_mouse(m, data.panel.x_max - 92, data.y_max - 100,
             preview_button, 1, &data.preview_button_focused)) {
+        return;
+    }
+    if (empire_editor_handle_placement(m)) {
         return;
     }
     determine_selected_object(m);

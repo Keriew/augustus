@@ -48,6 +48,11 @@ void empire_object_load(buffer *buf, int version);
 
 void empire_object_save(buffer *buf);
 
+/* Function used for adding an empire object to the city array
+ * Only functions with custom empires
+ */
+void empire_object_add_to_cities(full_empire_object *full);
+
 void empire_object_init_cities(int empire_id);
 
 int empire_object_init_distant_battle_travel_months(empire_object_type object_type);

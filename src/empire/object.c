@@ -281,6 +281,61 @@ void empire_object_save(buffer *buf)
     }
 }
 
+void empire_object_add_to_cities(full_empire_object *full)
+{
+    if (!full->in_use || full->obj.type != EMPIRE_OBJECT_CITY) {
+        return;
+    }
+    empire_city *city = empire_city_get_new();
+    if (!city) {
+        log_error("Unable to allocate enough memory for the empire cities array. The game will now crash.", 0, 0);
+        return;
+    }
+    
+    city->in_use = 1;
+    city->type = full->city_type;
+    city->name_id = full->city_name_id;
+    if (city->type == EMPIRE_CITY_TRADE || city->type == EMPIRE_CITY_FUTURE_TRADE) {
+        // create trade route
+        full->obj.trade_route_id = trade_route_new();
+        array_item(objects, full->obj.id + 1)->obj.trade_route_id = full->obj.trade_route_id;
+        
+        city->route_id = full->obj.trade_route_id;
+        city->is_open = full->trade_route_open;
+        city->cost_to_open = full->trade_route_cost;
+        city->is_sea_trade = empire_object_is_sea_trade_route(full->obj.trade_route_id);
+        
+        // set sell/buy resources and set trade route accordingly
+        for (int resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
+            city->sells_resource[resource] = 0;
+            city->buys_resource[resource] = 0;
+            if (empire_object_city_sells_resource(full->obj.id, resource)) {
+                city->sells_resource[resource] = 1;
+            }
+            if (empire_object_city_buys_resource(full->obj.id, resource)) {
+                city->buys_resource[resource] = 1;
+            }
+            int amount = 0;
+            if (full->city_buys_resource[resource]) {
+                amount = full->city_buys_resource[resource];
+            } else if (full->city_sells_resource[resource]) {
+                amount = full->city_sells_resource[resource];
+            }
+            trade_route_set(city->route_id, resource, amount);
+        }
+    }
+    if (city->type == EMPIRE_CITY_OURS) {
+        // When it's our city set the sell resources but don't create route
+        for (int resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
+            city->sells_resource[resource] = 0;
+            city->buys_resource[resource] = 0;
+            if (empire_object_city_sells_resource(full->obj.id, resource)) {
+                city->sells_resource[resource] = 1;
+            }
+        }
+    }
+}
+
 void empire_object_init_cities(int empire_id)
 {
     empire_city_clear_all();
