@@ -334,6 +334,11 @@ void empire_object_add_to_cities(full_empire_object *full)
             }
         }
     }
+    city->trader_entry_delay = 4;
+    city->trader_figure_ids[0] = 0;
+    city->trader_figure_ids[1] = 0;
+    city->trader_figure_ids[2] = 0;
+    city->empire_object_id = full->obj.id;
 }
 
 void empire_object_init_cities(int empire_id)
