@@ -906,7 +906,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .event_data.attr = "small_temple_ceres",
         .event_data.key = TR_PARAMETER_VALUE_BUILDING_SMALL_TEMPLE_CERES,
         .building_model_data = {.cost = 50, .desirability_value = 4, .desirability_step = 2,
-            .desirability_step_size = 6, .desirability_range = 2, .laborers = 2}
+            .desirability_step_size = -1, .desirability_range = 6, .laborers = 2}
     },
     [BUILDING_SMALL_TEMPLE_NEPTUNE] = {
         .venus_gt_bonus = 1,
@@ -917,7 +917,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .event_data.attr = "small_temple_neptune",
         .event_data.key = TR_PARAMETER_VALUE_BUILDING_SMALL_TEMPLE_NEPTUNE,
         .building_model_data = {.cost = 50, .desirability_value = 4, .desirability_step = 2,
-            .desirability_step_size = 6, .desirability_range = 2, .laborers = 2}
+            .desirability_step_size = -1, .desirability_range = 6, .laborers = 2}
     },
     [BUILDING_SMALL_TEMPLE_MERCURY] = {
         .venus_gt_bonus = 1,
@@ -928,7 +928,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .event_data.attr = "small_temple_mercury",
         .event_data.key = TR_PARAMETER_VALUE_BUILDING_SMALL_TEMPLE_MERCURY,
         .building_model_data = {.cost = 50, .desirability_value = 4, .desirability_step = 2,
-            .desirability_step_size = 6, .desirability_range = 2, .laborers = 2}
+            .desirability_step_size = -1, .desirability_range = 6, .laborers = 2}
     },
     [BUILDING_SMALL_TEMPLE_MARS] = {
         .venus_gt_bonus = 1,
@@ -939,7 +939,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .event_data.attr = "small_temple_mars",
         .event_data.key = TR_PARAMETER_VALUE_BUILDING_SMALL_TEMPLE_MARS,
         .building_model_data = {.cost = 50, .desirability_value = 4, .desirability_step = 2,
-            .desirability_step_size = 6, .desirability_range = 2, .laborers = 2}
+            .desirability_step_size = -1, .desirability_range = 6, .laborers = 2}
     },
     [BUILDING_SMALL_TEMPLE_VENUS] = {
         .venus_gt_bonus = 1,
@@ -950,7 +950,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .event_data.attr = "small_temple_venus",
         .event_data.key = TR_PARAMETER_VALUE_BUILDING_SMALL_TEMPLE_VENUS,
         .building_model_data = {.cost = 50, .desirability_value = 4, .desirability_step = 2,
-            .desirability_step_size = 6, .desirability_range = 2, .laborers = 2}
+            .desirability_step_size = -1, .desirability_range = 6, .laborers = 2}
     },
     [BUILDING_LARGE_TEMPLE_CERES] = {
         .venus_gt_bonus = 1,
