@@ -8,6 +8,9 @@
 #include "empire/object.h"
 #include "window/editor/empire.h"
 
+#define BASE_BORDER_FLAG_IMAGE_ID 3323
+#define BORDER_EDGE_DEFAULT_SPACING 50
+
 static struct {
     empire_tool current_tool;
 } data = {
@@ -108,75 +111,97 @@ static int place_object(int mouse_x, int mouse_y)
     return 1;
 }
 
-static void create_trade_route_default(full_empire_object *full) {
+static int create_trade_route_default(full_empire_object *full) {
     full_empire_object *route_obj = empire_object_get_new();
     if (!route_obj) {
         log_error("Error creating new object - out of memory", 0, 0);
-        return;
+        return 0;
     }
     route_obj->in_use = 1;
     route_obj->obj.type = EMPIRE_OBJECT_LAND_TRADE_ROUTE;
     full->trade_route_cost = 500;
+    
+    return 1;
 }
 
-static int place_city(full_empire_object *full)
+static int place_city(full_empire_object *city_obj)
 {
-    full->in_use = 1;
-    full->obj.type = EMPIRE_OBJECT_CITY;
+    city_obj->in_use = 1;
+    city_obj->obj.type = EMPIRE_OBJECT_CITY;
     
     switch (data.current_tool) {
         case EMPIRE_TOOL_OUR_CITY:
             if (empire_object_get_our_city()) {
                 return 0;
             }
-            full->city_type = EMPIRE_CITY_OURS;
-            full->obj.image_id = image_group(GROUP_EMPIRE_CITY);
+            city_obj->city_type = EMPIRE_CITY_OURS;
+            city_obj->obj.image_id = image_group(GROUP_EMPIRE_CITY);
             break;
         case EMPIRE_TOOL_TRADE_CITY:
-            full->city_type = EMPIRE_CITY_TRADE;
-            full->obj.image_id = image_group(GROUP_EMPIRE_CITY_TRADE);
-            create_trade_route_default(full);
+            city_obj->city_type = EMPIRE_CITY_TRADE;
+            city_obj->obj.image_id = image_group(GROUP_EMPIRE_CITY_TRADE);
+            if (!create_trade_route_default(city_obj)) {
+                return 0;
+            }
             break;
         case EMPIRE_TOOL_ROMAN_CITY:
-            full->city_type = EMPIRE_CITY_DISTANT_ROMAN;
-            full->obj.image_id = image_group(GROUP_EMPIRE_CITY_DISTANT_ROMAN);
+            city_obj->city_type = EMPIRE_CITY_DISTANT_ROMAN;
+            city_obj->obj.image_id = image_group(GROUP_EMPIRE_CITY_DISTANT_ROMAN);
             break;
         case EMPIRE_TOOL_VULNERABLE_CITY:
             if (empire_city_get_vulnerable_roman()) {
                 return 0;
             }
-            full->city_type = EMPIRE_CITY_VULNERABLE_ROMAN;
-            full->obj.image_id = image_group(GROUP_EMPIRE_CITY_DISTANT_ROMAN);
+            city_obj->city_type = EMPIRE_CITY_VULNERABLE_ROMAN;
+            city_obj->obj.image_id = image_group(GROUP_EMPIRE_CITY_DISTANT_ROMAN);
             break;
         case EMPIRE_TOOL_FUTURE_TRADE_CITY:
-            full->city_type = EMPIRE_CITY_FUTURE_TRADE;
-            full->obj.image_id = image_group(GROUP_EMPIRE_CITY_DISTANT_ROMAN);
-            create_trade_route_default(full);
+            city_obj->city_type = EMPIRE_CITY_FUTURE_TRADE;
+            city_obj->obj.image_id = image_group(GROUP_EMPIRE_CITY_DISTANT_ROMAN);
+            if (!create_trade_route_default(city_obj)) {
+                return 0;
+            }
             break;
         case EMPIRE_TOOL_DISTANT_CITY:
-            full->city_type = EMPIRE_CITY_DISTANT_FOREIGN;
-            full->obj.image_id = image_group(GROUP_EMPIRE_FOREIGN_CITY);
+            city_obj->city_type = EMPIRE_CITY_DISTANT_FOREIGN;
+            city_obj->obj.image_id = image_group(GROUP_EMPIRE_FOREIGN_CITY);
             break;
         default:
             return 0; 
     }
     
-    empire_object_add_to_cities(full);
+    empire_object_add_to_cities(city_obj);
     
     return 1;
 }
 
-static int place_border(full_empire_object *full)
+static int place_border(full_empire_object *edge)
+{
+    if (!empire_object_get_border()) {
+        // create border
+        full_empire_object *border = empire_object_get_new();
+        if (!border) {
+            log_error("Error creating new object - out of memory", 0, 0);
+            return 0;
+        }
+        border->in_use = 1;
+        border->obj.type = EMPIRE_OBJECT_BORDER;
+        border->obj.width = BORDER_EDGE_DEFAULT_SPACING;
+    }
+    // place border edge
+    edge->in_use = 1;
+    edge->obj.type = EMPIRE_OBJECT_BORDER_EDGE;
+    edge->obj.image_id = BASE_BORDER_FLAG_IMAGE_ID;
+    
+    return 1;
+}
+
+static int place_battle(full_empire_object *battle)
 {
     return 1;
 }
 
-static int place_battle(full_empire_object *full)
-{
-    return 1;
-}
-
-static int place_distant_battle(full_empire_object *full)
+static int place_distant_battle(full_empire_object *distant_battle)
 {
     return 1;
 }

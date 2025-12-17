@@ -471,6 +471,19 @@ const empire_object *empire_object_get_our_city(void)
     return 0;
 }
 
+const empire_object *empire_object_get_border(void)
+{
+    full_empire_object *obj;
+    array_foreach(objects, obj) {
+        if (obj->in_use) {
+            if (obj->obj.type == EMPIRE_OBJECT_BORDER) {
+                return &obj->obj;
+            }
+        }
+    }
+    return 0;
+}
+
 const empire_object *empire_object_get_trade_city(int trade_route_id)
 {
     full_empire_object *obj;

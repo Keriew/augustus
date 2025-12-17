@@ -604,8 +604,10 @@ static void handle_input(const mouse *m, const hotkeys *h)
             preview_button, 1, &data.preview_button_focused)) {
         return;
     }
-    if (empire_editor_handle_placement(m)) {
-        return;
+    if (!is_outside_map(m->x, m->y)) {
+        if (empire_editor_handle_placement(m)) {
+            return;
+        }
     }
     determine_selected_object(m);
     int selected_object = empire_selected_object();
