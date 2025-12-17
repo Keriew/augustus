@@ -25,6 +25,7 @@ typedef struct {
     int invasion_path_id;
     int invasion_years;
     empire_city_icon_type empire_city_icon;
+    empire_city_icon_type future_trade_after_icon;
 } empire_object;
 
 typedef struct {
