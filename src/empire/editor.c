@@ -100,8 +100,8 @@ static int place_object(int mouse_x, int mouse_y)
             return 0;
     }
     
-    full->obj.x = editor_empire_mouse_to_empire_x(mouse_x) - ((full->obj.width / 2) * full->obj.type == EMPIRE_OBJECT_CITY);
-    full->obj.y = editor_empire_mouse_to_empire_y(mouse_y) - ((full->obj.height / 2) * full->obj.type == EMPIRE_OBJECT_CITY);
+    full->obj.x = editor_empire_mouse_to_empire_x(mouse_x) - ((full->obj.width / 2) * (full->obj.type == EMPIRE_OBJECT_CITY));
+    full->obj.y = editor_empire_mouse_to_empire_y(mouse_y) - ((full->obj.height / 2) * (full->obj.type == EMPIRE_OBJECT_CITY));
     empire_transform_coordinates(&full->obj.x, &full->obj.y);
     
     return 1;
