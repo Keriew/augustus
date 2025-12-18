@@ -69,6 +69,43 @@ int empire_object_count(void)
     return objects.size;
 }
 
+static int find_parent(empire_object *obj) {
+    for (int i = obj->id; i >= 0; i--) {
+        const empire_object *current_obj = empire_object_get(i);
+        int condition = 0;
+        if (obj->type == EMPIRE_OBJECT_TRADE_WAYPOINT) {
+            condition = current_obj->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE || current_obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE;
+        } else if (obj->type == EMPIRE_OBJECT_BORDER_EDGE) {
+            condition = current_obj->type == EMPIRE_OBJECT_BORDER;
+        } else {
+            return 0;
+        }
+        if (condition) {
+            return i;
+        }
+
+        if (current_obj->type != obj->type) {
+            return 0;
+        }
+    }
+    return 0;
+}
+
+static void migrate_orders(empire_object *obj)
+{
+    if (obj->type != EMPIRE_OBJECT_TRADE_WAYPOINT && obj->type != EMPIRE_OBJECT_BORDER_EDGE) {
+        return;
+    }
+
+    unsigned int parent_id = find_parent(obj);
+    if (!parent_id) {
+        return;
+    }
+    
+    obj->parent_object_id = parent_id;
+    obj->order_index = obj->id - parent_id;
+}
+
 void empire_object_load(buffer *buf, int version)
 {
     // we're loading a scenario that does not have a custom empire
@@ -214,6 +251,12 @@ void empire_object_load(buffer *buf, int version)
         } else {
             obj->future_trade_after_icon = empire_object_get_random_icon_for_empire_object(full);
         }
+        if (version > SCENARIO_TESTING_VERSION_BUMP_1) {
+            obj->order_index = buffer_read_i16(buf);
+            obj->parent_object_id = buffer_read_i16(buf);
+        } else {
+            migrate_orders(obj);
+        }
     }
     objects.size = highest_id_in_use + 1;
     fix_image_ids();
@@ -284,6 +327,8 @@ void empire_object_save(buffer *buf)
         buffer_write_u8(buf, obj->empire_city_icon);
         buffer_write_u8(buf, full->empire_city_icon);
         buffer_write_u8(buf, obj->future_trade_after_icon);
+        buffer_write_i16(buf, obj->order_index);
+        buffer_write_i16(buf, obj->parent_object_id);
     }
 }
 

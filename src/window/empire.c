@@ -103,7 +103,7 @@ typedef struct {
 typedef struct {
     int sidebar_item_id; // number on the list
     int empire_object_id; // empire object id of the city
-    int city_id; //city index in the empire's array of cities
+    int city_id; // city index in the empire's array of cities
     int x;
     int y;
     int width;
