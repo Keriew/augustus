@@ -350,7 +350,7 @@ static int xml_start_city(void)
     } else {
         city_obj->city_type = city_type;
     }
-    
+
     int city_icon_type = EMPIRE_CITY_ICON_DEFAULT;
     int future_trade_after_icon = EMPIRE_CITY_ICON_DEFAULT;
     if (city_type == EMPIRE_CITY_FUTURE_TRADE) {

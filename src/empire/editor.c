@@ -100,12 +100,8 @@ static int place_object(int mouse_x, int mouse_y)
             return 0;
     }
     
-    const image *img = image_get(full->obj.image_id);
-    full->obj.width = img->width;
-    full->obj.height = img->height;
-    
-    full->obj.x = editor_empire_mouse_to_empire_x(mouse_x) - full->obj.width / 2;
-    full->obj.y = editor_empire_mouse_to_empire_y(mouse_y) - full->obj.height / 2;
+    full->obj.x = editor_empire_mouse_to_empire_x(mouse_x) - ((full->obj.width / 2) * full->obj.type == EMPIRE_OBJECT_CITY);
+    full->obj.y = editor_empire_mouse_to_empire_y(mouse_y) - ((full->obj.height / 2) * full->obj.type == EMPIRE_OBJECT_CITY);
     empire_transform_coordinates(&full->obj.x, &full->obj.y);
     
     return 1;
@@ -135,41 +131,53 @@ static int place_city(full_empire_object *city_obj)
                 return 0;
             }
             city_obj->city_type = EMPIRE_CITY_OURS;
-            city_obj->obj.image_id = image_group(GROUP_EMPIRE_CITY);
+            city_obj->obj.empire_city_icon = EMPIRE_CITY_ICON_OUR_CITY;
+            city_obj->empire_city_icon = EMPIRE_CITY_ICON_OUR_CITY;
             break;
         case EMPIRE_TOOL_TRADE_CITY:
             city_obj->city_type = EMPIRE_CITY_TRADE;
-            city_obj->obj.image_id = image_group(GROUP_EMPIRE_CITY_TRADE);
+            city_obj->obj.empire_city_icon = EMPIRE_CITY_ICON_TRADE_CITY;
+            city_obj->empire_city_icon = EMPIRE_CITY_ICON_TRADE_CITY;
             if (!create_trade_route_default(city_obj)) {
                 return 0;
             }
             break;
         case EMPIRE_TOOL_ROMAN_CITY:
             city_obj->city_type = EMPIRE_CITY_DISTANT_ROMAN;
-            city_obj->obj.image_id = image_group(GROUP_EMPIRE_CITY_DISTANT_ROMAN);
+            city_obj->obj.empire_city_icon = EMPIRE_CITY_ICON_ROMAN_CITY;
+            city_obj->empire_city_icon = EMPIRE_CITY_ICON_ROMAN_CITY;
             break;
         case EMPIRE_TOOL_VULNERABLE_CITY:
             if (empire_city_get_vulnerable_roman()) {
                 return 0;
             }
             city_obj->city_type = EMPIRE_CITY_VULNERABLE_ROMAN;
-            city_obj->obj.image_id = image_group(GROUP_EMPIRE_CITY_DISTANT_ROMAN);
+            city_obj->obj.empire_city_icon = EMPIRE_CITY_ICON_ROMAN_CITY;
+            city_obj->empire_city_icon = EMPIRE_CITY_ICON_ROMAN_CITY;
             break;
         case EMPIRE_TOOL_FUTURE_TRADE_CITY:
             city_obj->city_type = EMPIRE_CITY_FUTURE_TRADE;
-            city_obj->obj.image_id = image_group(GROUP_EMPIRE_CITY_DISTANT_ROMAN);
+            city_obj->obj.empire_city_icon = EMPIRE_CITY_ICON_ROMAN_CITY;
+            city_obj->empire_city_icon = EMPIRE_CITY_ICON_ROMAN_CITY;
+            city_obj->obj.future_trade_after_icon = EMPIRE_CITY_ICON_TRADE_CITY;
             if (!create_trade_route_default(city_obj)) {
                 return 0;
             }
             break;
         case EMPIRE_TOOL_DISTANT_CITY:
             city_obj->city_type = EMPIRE_CITY_DISTANT_FOREIGN;
-            city_obj->obj.image_id = image_group(GROUP_EMPIRE_FOREIGN_CITY);
+            city_obj->obj.empire_city_icon = EMPIRE_CITY_ICON_DISTANT_CITY;
+            city_obj->empire_city_icon = EMPIRE_CITY_ICON_DISTANT_CITY;
             break;
         default:
             return 0; 
     }
     
+    city_obj->obj.image_id = empire_city_get_icon_image_id(city_obj->empire_city_icon);
+    const image *img = image_get(city_obj->obj.image_id);
+    city_obj->obj.width = img->width;
+    city_obj->obj.height = img->height;
+
     empire_object_add_to_cities(city_obj);
     
     return 1;
