@@ -66,6 +66,8 @@ full_empire_object *empire_object_get_new(void);
 
 empire_object *empire_object_get(int object_id);
 
+empire_object *empire_object_get_in_order(int parent_id, int object_index);
+
 const empire_object *empire_object_get_our_city(void);
 
 const empire_object *empire_object_get_border(void);

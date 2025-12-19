@@ -509,6 +509,19 @@ empire_object *empire_object_get(int object_id)
     return &array_item(objects, object_id)->obj;
 }
 
+empire_object *empire_object_get_in_order(int parent_id, int order_index)
+{
+    full_empire_object *obj;
+    array_foreach(objects, obj) {
+        if (obj->in_use) {
+            if (obj->obj.parent_object_id == parent_id && obj->obj.order_index == order_index) {
+                return &obj->obj;
+            }
+        }
+    }
+    return 0;
+}
+
 const empire_object *empire_object_get_our_city(void)
 {
     full_empire_object *obj;

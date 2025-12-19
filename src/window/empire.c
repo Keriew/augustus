@@ -1406,7 +1406,10 @@ static int draw_images_at_interval(int image_id, int x_draw_offset, int y_draw_o
 
 void window_empire_draw_border(const empire_object *border, int x_offset, int y_offset)
 {
-    const empire_object *first_edge = empire_object_get(border->id + 1);
+    const empire_object *first_edge = empire_object_get_in_order(border->id, 1);
+    if (!first_edge) {
+        return;
+    }
     if (first_edge->type != EMPIRE_OBJECT_BORDER_EDGE) {
         return;
     }
@@ -1419,8 +1422,11 @@ void window_empire_draw_border(const empire_object *border, int x_offset, int y_
     x_offset -= 0;
     y_offset -= 14;
 
-    for (int i = first_edge->id + 1; i < empire_object_count(); i++) {
-        empire_object *obj = empire_object_get(i);
+    for (int i = 2; i < empire_object_count(); i++) {
+        empire_object *obj = empire_object_get_in_order(border->id, i);
+        if (!obj) {
+            break;
+        }
         if (obj->type != EMPIRE_OBJECT_BORDER_EDGE) {
             break;
         }
