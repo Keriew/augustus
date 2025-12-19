@@ -68,6 +68,8 @@ empire_object *empire_object_get(int object_id);
 
 empire_object *empire_object_get_in_order(int parent_id, int object_index);
 
+int empire_object_get_highest_index(int parent);
+
 const empire_object *empire_object_get_our_city(void);
 
 const empire_object *empire_object_get_border(void);

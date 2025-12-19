@@ -522,6 +522,20 @@ empire_object *empire_object_get_in_order(int parent_id, int order_index)
     return 0;
 }
 
+int empire_object_get_highest_index(int parent_id)
+{
+    int highest_index = 0;
+    full_empire_object *obj;
+    array_foreach(objects, obj) {
+        if (obj->in_use) {
+            if (obj->obj.parent_object_id == parent_id) {
+                highest_index = obj->obj.order_index > highest_index ? obj->obj.order_index : highest_index;
+            }
+        }
+    }
+    return highest_index;
+}
+
 const empire_object *empire_object_get_our_city(void)
 {
     full_empire_object *obj;

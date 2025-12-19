@@ -185,7 +185,9 @@ static int place_city(full_empire_object *city_obj)
 
 static int place_border(full_empire_object *edge)
 {
-    if (!empire_object_get_border()) {
+    unsigned int parent_id = 0; 
+    const empire_object *current_border = empire_object_get_border();
+    if (!current_border) {
         // create border
         full_empire_object *border = empire_object_get_new();
         if (!border) {
@@ -195,10 +197,16 @@ static int place_border(full_empire_object *edge)
         border->in_use = 1;
         border->obj.type = EMPIRE_OBJECT_BORDER;
         border->obj.width = BORDER_EDGE_DEFAULT_SPACING;
+        
+        parent_id = border->obj.id;
+    } else {
+        parent_id = current_border->id;
     }
     // place border edge
     edge->in_use = 1;
     edge->obj.type = EMPIRE_OBJECT_BORDER_EDGE;
+    edge->obj.parent_object_id = parent_id;
+    edge->obj.order_index = empire_object_get_highest_index(parent_id) + 1;
     edge->obj.image_id = BASE_BORDER_FLAG_IMAGE_ID;
     
     return 1;
