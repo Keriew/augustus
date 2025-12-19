@@ -312,6 +312,8 @@ static int xml_start_border_edge(void)
     obj->obj.x = xml_parser_get_attribute_int("x");
     obj->obj.y = xml_parser_get_attribute_int("y");
     empire_transform_coordinates(&obj->obj.x, &obj->obj.y);
+    obj->obj.parent_object_id = empire_object_get_border()->id;
+    obj->obj.order_index = obj->obj.id - obj->obj.parent_object_id;
     obj->obj.image_id = xml_parser_get_attribute_bool("hidden") ? 0 : BASE_BORDER_FLAG_IMAGE_ID;
 
     return 1;
