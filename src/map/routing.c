@@ -447,6 +447,18 @@ static int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aquedu
     }
 }
 
+static int aqueduct_in_reservoir(int center_offset) {
+    for (int y = map_grid_offset_to_y(center_offset) - 1; y < map_grid_offset_to_y(center_offset) + 2; y++) {
+        for (int x = map_grid_offset_to_x(center_offset) - 1; x < map_grid_offset_to_x(center_offset) + 2; x++) {
+            if (map_terrain_is(map_grid_offset(x, y), TERRAIN_AQUEDUCT)) {
+                return 1;
+            }
+        }
+    }
+    
+    return 0;
+}
+
 int map_routing_calculate_distances_for_building(routed_building_type type, int x, int y)
 {
     int source_offset = map_grid_offset(x, y);
@@ -464,8 +476,15 @@ int map_routing_calculate_distances_for_building(routed_building_type type, int 
         route_queue_all_from(source_offset, DIRECTIONS_NO_DIAGONALS, callback_calc_distance_build_highway, 0);
         return 1;
     }
+    
+    if (type == ROUTED_BUILDING_DRAGGABLE_RESERVOIR) {
+        if (!map_terrain_is(source_offset, TERRAIN_AQUEDUCT) && aqueduct_in_reservoir(source_offset)) {
+            return 0;
+        }
+    }
 
-    if (!map_can_place_initial_road_or_aqueduct(source_offset, type != ROUTED_BUILDING_ROAD)) {
+    if (!map_can_place_initial_road_or_aqueduct(source_offset, type != ROUTED_BUILDING_ROAD &&
+        type != ROUTED_BUILDING_DRAGGABLE_RESERVOIR)) {
         return 0;
     }
     if (map_terrain_is(source_offset, TERRAIN_ROAD) &&
