@@ -6,6 +6,7 @@
 #include "input/mouse.h"
 #include "empire/empire.h"
 #include "empire/object.h"
+#include "empire/xml.h"
 #include "window/editor/empire.h"
 
 #define BASE_BORDER_FLAG_IMAGE_ID 3323
@@ -100,8 +101,8 @@ static int place_object(int mouse_x, int mouse_y)
             return 0;
     }
     
-    full->obj.x = editor_empire_mouse_to_empire_x(mouse_x) - ((full->obj.width / 2) * (full->obj.type == EMPIRE_OBJECT_CITY));
-    full->obj.y = editor_empire_mouse_to_empire_y(mouse_y) - ((full->obj.height / 2) * (full->obj.type == EMPIRE_OBJECT_CITY));
+    full->obj.x = editor_empire_mouse_to_empire_x(mouse_x) - ((full->obj.width / 2) * (full->obj.type != EMPIRE_OBJECT_BORDER_EDGE));
+    full->obj.y = editor_empire_mouse_to_empire_y(mouse_y) - ((full->obj.height / 2) * (full->obj.type != EMPIRE_OBJECT_BORDER_EDGE));
     empire_transform_coordinates(&full->obj.x, &full->obj.y);
     
     return 1;
@@ -212,8 +213,19 @@ static int place_border(full_empire_object *edge)
     return 1;
 }
 
-static int place_battle(full_empire_object *battle)
+static int place_battle(full_empire_object *battle_obj)
 {
+    set_battles_shown(1); // toggle the show invasions as you want see your placed object otherwise
+    
+    battle_obj->in_use = 1;
+    battle_obj->obj.type = EMPIRE_OBJECT_BATTLE_ICON;
+    battle_obj->obj.invasion_path_id = ++*get_current_invasion_path_id();
+    
+    battle_obj->obj.image_id = image_group(GROUP_EMPIRE_BATTLE);
+    const image *img = image_get(battle_obj->obj.image_id);
+    battle_obj->obj.width = img->width;
+    battle_obj->obj.height = img->height;
+    
     return 1;
 }
 

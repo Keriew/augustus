@@ -127,6 +127,11 @@ static void init(void)
     window_empire_collect_trade_edges();
 }
 
+void set_battles_shown(int show)
+{
+    data.show_battle_objects = show;
+}
+
 static void draw_paneling(void)
 {
     int image_base = image_group(GROUP_EDITOR_EMPIRE_PANELS);

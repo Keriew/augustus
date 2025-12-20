@@ -149,6 +149,11 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "waypoint", xml_start_distant_battle_waypoint, 0, "path" },
 };
 
+int *get_current_invasion_path_id(void)
+{
+    return &data.current_invasion_path_id;
+}
+
 static resource_type get_resource_from_attr(const char *key)
 {
     const char *value = xml_parser_get_attribute_string(key);
