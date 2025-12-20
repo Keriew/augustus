@@ -93,6 +93,7 @@ static struct {
     int success;
     int version;
     int current_city_id;
+    int current_trade_route_id;
     city_list current_city_list;
     int has_vulnerable_city;
     int current_invasion_path_id;
@@ -403,6 +404,7 @@ static int xml_start_city(void)
 
     if (city_obj->city_type == EMPIRE_CITY_TRADE || city_obj->city_type == EMPIRE_CITY_FUTURE_TRADE) {
         full_empire_object *route_obj = empire_object_get_new();
+        data.current_trade_route_id = route_obj->obj.id;
         if (!route_obj) {
             data.success = 0;
             log_error("Error creating new object - out of memory", 0, 0);
@@ -514,6 +516,8 @@ static int xml_start_trade_point(void)
     obj->obj.x = xml_parser_get_attribute_int("x");
     obj->obj.y = xml_parser_get_attribute_int("y");
     empire_transform_coordinates(&obj->obj.x, &obj->obj.y);
+    obj->obj.parent_object_id = data.current_trade_route_id;
+    obj->obj.order_index = obj->obj.id - obj->obj.parent_object_id;
 
     return 1;
 }
@@ -641,6 +645,7 @@ static void xml_end_city(void)
 {
     data.current_city_id = -1;
     data.current_city_list = LIST_NONE;
+    data.current_trade_route_id = -1;
 }
 
 static void xml_end_sells_buys_or_waypoints(void)

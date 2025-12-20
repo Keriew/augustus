@@ -754,9 +754,12 @@ void window_empire_collect_trade_edges(void)
         int route_edge_count = 0;
 
         // Waypoints belonging to this route are contiguous after the route object
-        for (int waypoint_index = object_index + 1; waypoint_index < empire_object_count(); waypoint_index++) {
-            const empire_object *waypoint_object = empire_object_get(waypoint_index);
-
+        for (int waypoint_index = 1; waypoint_index < empire_object_count(); waypoint_index++) {
+            const empire_object *waypoint_object = empire_object_get_in_order(object_index, waypoint_index);
+            if (!waypoint_object) {
+                break;
+            }
+            
             if (waypoint_object->type != EMPIRE_OBJECT_TRADE_WAYPOINT || waypoint_object->trade_route_id != route_id) {
                 break; // reached non-waypoint or different route; waypoint sequence ends
             }
