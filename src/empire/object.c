@@ -504,6 +504,11 @@ full_empire_object *empire_object_get_new(void)
     return obj;
 }
 
+void empire_object_remove(int id)
+{
+    array_remove_item(objects, id);
+}
+
 empire_object *empire_object_get(int object_id)
 {
     return &array_item(objects, object_id)->obj;

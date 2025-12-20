@@ -64,6 +64,8 @@ full_empire_object *empire_object_get_full(int object_id);
 
 full_empire_object *empire_object_get_new(void);
 
+void empire_object_remove(int id);
+
 empire_object *empire_object_get(int object_id);
 
 empire_object *empire_object_get_in_order(int parent_id, int object_index);

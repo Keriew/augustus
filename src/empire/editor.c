@@ -78,26 +78,31 @@ static int place_object(int mouse_x, int mouse_y)
         case EMPIRE_TOOL_FUTURE_TRADE_CITY:
         case EMPIRE_TOOL_DISTANT_CITY:
             if (!place_city(full)) {
+                empire_object_remove(full->obj.id);
                 return 0;
             }
             break;
         case EMPIRE_TOOL_BORDER:
             if (!place_border(full)) {
+                empire_object_remove(full->obj.id);
                 return 0;
             }
             break;
         case EMPIRE_TOOL_BATTLE:
             if (!place_battle(full)) {
+                empire_object_remove(full->obj.id);
                 return 0;
             }
             break;
         case EMPIRE_TOOL_DISTANT_BABARIAN:
         case EMPIRE_TOOL_DISTANT_LEGION:
             if (!place_distant_battle(full)) {
+                empire_object_remove(full->obj.id);
                 return 0;
             }
             break;
         default:
+            empire_object_remove(full->obj.id);
             return 0;
     }
     
