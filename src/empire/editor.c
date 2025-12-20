@@ -224,7 +224,7 @@ static int place_battle(full_empire_object *battle_obj)
     
     battle_obj->in_use = 1;
     battle_obj->obj.type = EMPIRE_OBJECT_BATTLE_ICON;
-    battle_obj->obj.invasion_path_id = ++*get_current_invasion_path_id();
+    battle_obj->obj.invasion_path_id = *get_current_invasion_path_id();
     
     battle_obj->obj.image_id = image_group(GROUP_EMPIRE_BATTLE);
     const image *img = image_get(battle_obj->obj.image_id);

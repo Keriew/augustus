@@ -291,10 +291,7 @@ static void draw_empire_object(const empire_object *obj)
             data.x_draw_offset + x + 7, data.y_draw_offset + y - 9,
             obj->type == EMPIRE_OBJECT_ROMAN_ARMY ? COLOR_WHITE : COLOR_FONT_RED);
     }
-    if (scenario_empire_id() == SCENARIO_CUSTOM_EMPIRE &&
-        (obj->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE || obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE)) {
-        window_empire_draw_static_trade_waypoints(obj, data.x_draw_offset, data.y_draw_offset);
-    }
+
     if (obj->type == EMPIRE_OBJECT_ORNAMENT) {
         if (image_id < 0) {
             image_id = assets_lookup_image_id(ASSET_FIRST_ORNAMENT) - 1 - image_id;
@@ -400,6 +397,11 @@ static void draw_coordinates(void)
     }
 }
 
+static void draw_trade_waypoints(const empire_object *obj)
+{
+    window_empire_draw_static_trade_waypoints(obj, data.x_draw_offset, data.y_draw_offset);
+}
+
 static void draw_map(void)
 {
     int viewport_width = map_viewport_width();
@@ -416,6 +418,11 @@ static void draw_map(void)
         COLOR_MASK_NONE, SCALE_NONE);
 
     empire_object_foreach(draw_empire_object);
+    empire_object_foreach_of_type(draw_trade_waypoints, EMPIRE_OBJECT_SEA_TRADE_ROUTE);
+    empire_object_foreach_of_type(draw_trade_waypoints, EMPIRE_OBJECT_LAND_TRADE_ROUTE);
+    empire_object_foreach_of_type(draw_empire_object, EMPIRE_OBJECT_LAND_TRADE_ROUTE);
+    empire_object_foreach_of_type(draw_empire_object, EMPIRE_OBJECT_SEA_TRADE_ROUTE);
+    empire_object_foreach_of_type(draw_empire_object, EMPIRE_OBJECT_CITY);
 
     draw_coordinates();
 
