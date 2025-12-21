@@ -143,6 +143,9 @@ int map_grid_get_corner_offsets_from_grid_slice(const grid_slice *slice, int *to
         int offset = slice->grid_offsets[i];
         int x = map_grid_offset_to_x(offset);
         int y = map_grid_offset_to_y(offset);
+        if (x > 0 || y > 0) {
+            int debug;
+        }
         if (x < x_min) x_min = x;
         if (y < y_min) y_min = y;
         if (x > x_max) x_max = x;
@@ -226,6 +229,12 @@ grid_slice *map_grid_get_grid_slice_ring(int center_grid_offset, int inner_radiu
             if (distance > inner_radius && distance <= outer_radius) {
                 int x = center_x + dx;
                 int y = center_y + dy;
+                if (x < 0 || y < 0) {
+                    continue;
+                }
+                if (x > GRID_SIZE || y > GRID_SIZE) {
+                    continue;
+                }
                 int offset = map_grid_offset(x, y);
                 if (map_grid_is_valid_offset(offset)) {
                     tmp[count++] = offset;

@@ -751,6 +751,9 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
     } else {
         scenario_events_clear();
     }
+    
+    scenario_map_init();
+    
     if (version > SCENARIO_LAST_UNVERSIONED) {
         empire_object_load(file->empire, version);
         if (resource_mapping_get_version() < RESOURCE_SEPARATE_FISH_AND_MEAT_VERSION) {
