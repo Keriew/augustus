@@ -143,9 +143,6 @@ int map_grid_get_corner_offsets_from_grid_slice(const grid_slice *slice, int *to
         int offset = slice->grid_offsets[i];
         int x = map_grid_offset_to_x(offset);
         int y = map_grid_offset_to_y(offset);
-        if (x > 0 || y > 0) {
-            int debug;
-        }
         if (x < x_min) x_min = x;
         if (y < y_min) y_min = y;
         if (x > x_max) x_max = x;
