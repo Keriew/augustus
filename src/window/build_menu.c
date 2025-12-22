@@ -262,15 +262,6 @@ static void draw_menu_buttons(void)
             type = BUILDING_RESERVOIR;
         }
         int cost = model_get_building(type)->cost;
-        if (type == BUILDING_MENU_FORT) {
-            cost = 0;
-        }
-        if (type == BUILDING_MENU_GRAND_TEMPLES) {
-            cost = 0;
-        }
-        if (type == BUILDING_REPAIR_LAND) {
-            cost = 3; // it's 50% more expensive than clearing land
-        }
         if (cost) {
             text_draw_money(cost, x_offset - MENU_ITEM_MONEY_OFFSET,
                 data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
