@@ -20,6 +20,7 @@
 #include "map/image_context.h"
 #include "map/property.h"
 #include "map/random.h"
+#include "map/road_access.h"
 #include "map/terrain.h"
 #include "scenario/map.h"
 
@@ -838,6 +839,18 @@ void map_tiles_update_area_roads(int x, int y, int size)
     foreach_region_tile(x - 1, y - 1, x + size - 2, y + size - 2, set_road_image);
 }
 
+static void update_granaries(int x, int y)
+{
+    for (int yy = y - 1; yy <= y + 1; yy++) {
+        for (int xx = x - 1; xx <= x + 1; xx++) {
+            building *b = building_get(map_building_at(map_grid_offset(xx, yy)));
+            if (b->type == BUILDING_GRANARY) {
+                map_update_granary_internal_roads(b);
+            }
+        }
+    }
+}
+
 int map_tiles_set_road(int x, int y)
 {
     int grid_offset = map_grid_offset(x, y);
@@ -850,6 +863,8 @@ int map_tiles_set_road(int x, int y)
     }
     map_terrain_add(grid_offset, TERRAIN_ROAD);
     map_property_clear_constructing(grid_offset);
+    
+    update_granaries(x, y);
 
     foreach_region_tile(x - 1, y - 1, x + 1, y + 1, set_road_image);
     foreach_region_tile(x - 1, y - 1, x + 1, y + 1, set_highway_image);
