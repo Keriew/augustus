@@ -580,6 +580,31 @@ const empire_object *empire_object_get_trade_city(int trade_route_id)
     return 0;
 }
 
+const empire_object *empire_object_get_battle(int path_id, int year)
+{
+    full_empire_object *obj;
+    array_foreach(objects, obj) {
+        if (obj->obj.type == EMPIRE_OBJECT_BATTLE_ICON && obj->obj.invasion_path_id == path_id
+            && obj->obj.invasion_years == year) {
+            return &obj->obj;
+        }
+    }
+    return 0;
+}
+
+const empire_object *empire_object_get_latest_battle(int path_id)
+{
+    int highest_year = 0;
+    full_empire_object *obj;
+    array_foreach(objects, obj) {
+        if (obj->obj.type == EMPIRE_OBJECT_BATTLE_ICON && obj->obj.invasion_path_id == path_id
+            && obj->obj.invasion_years > highest_year) {
+            highest_year = obj->obj.invasion_years;
+        }
+    }
+    return empire_object_get_battle(path_id, highest_year);
+}
+
 void empire_object_foreach(void (*callback)(const empire_object *))
 {
     full_empire_object *obj;

@@ -78,6 +78,10 @@ const empire_object *empire_object_get_border(void);
 
 const empire_object *empire_object_get_trade_city(int trade_route_id);
 
+const empire_object *empire_object_get_battle(int path_id, int year);
+
+const empire_object *empire_object_get_latest_battle(int path_id);
+
 void empire_object_foreach(void (*callback)(const empire_object *));
 
 void empire_object_foreach_of_type(void (*callback)(const empire_object *), empire_object_type type);

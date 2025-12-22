@@ -220,11 +220,12 @@ static int place_border(full_empire_object *edge)
 
 static int place_battle(full_empire_object *battle_obj)
 {
-    set_battles_shown(1); // toggle the show invasions as you want see your placed object otherwise
+    set_battles_shown(1); // toggle the show invasions as you wont see your placed object otherwise
     
     battle_obj->in_use = 1;
     battle_obj->obj.type = EMPIRE_OBJECT_BATTLE_ICON;
     battle_obj->obj.invasion_path_id = *get_current_invasion_path_id();
+    battle_obj->obj.invasion_years = empire_object_get_latest_battle(battle_obj->obj.invasion_path_id)->invasion_years + 1;
     
     battle_obj->obj.image_id = image_group(GROUP_EMPIRE_BATTLE);
     const image *img = image_get(battle_obj->obj.image_id);
