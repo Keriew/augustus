@@ -237,5 +237,26 @@ static int place_battle(full_empire_object *battle_obj)
 
 static int place_distant_battle(full_empire_object *distant_battle)
 {
+    set_battles_shown(1); // toggle the show invasions as you wont see your placed object otherwise
+    
+    distant_battle->in_use = 1;
+    distant_battle->obj.type = EMPIRE_OBJECT_BATTLE_ICON;
+    
+    if (data.current_tool == EMPIRE_TOOL_DISTANT_BABARIAN) {
+        distant_battle->obj.type = EMPIRE_OBJECT_ENEMY_ARMY;
+        distant_battle->obj.image_id = image_group(GROUP_EMPIRE_ENEMY_ARMY);
+        distant_battle->obj.distant_battle_travel_months = empire_object_get_latest_distant_battle(1)->distant_battle_travel_months + 1;
+    } else if (data.current_tool == EMPIRE_TOOL_DISTANT_LEGION) {
+        distant_battle->obj.type = EMPIRE_OBJECT_ROMAN_ARMY;
+        distant_battle->obj.image_id = image_group(GROUP_EMPIRE_ROMAN_ARMY);
+        distant_battle->obj.distant_battle_travel_months = empire_object_get_latest_distant_battle(0)->distant_battle_travel_months + 1;
+    } else {
+        return 0;
+    }
+    
+    const image *img = image_get(distant_battle->obj.image_id);
+    distant_battle->obj.width = img->width;
+    distant_battle->obj.height = img->height;
+    
     return 1;
 }

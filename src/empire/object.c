@@ -605,6 +605,31 @@ const empire_object *empire_object_get_latest_battle(int path_id)
     return empire_object_get_battle(path_id, highest_year);
 }
 
+const empire_object *empire_object_get_distant_battle(int month, int enemy)
+{
+    full_empire_object *obj;
+    array_foreach(objects, obj) {
+        if (obj->obj.type == (enemy ? EMPIRE_OBJECT_ENEMY_ARMY : EMPIRE_OBJECT_ROMAN_ARMY) &&
+            obj->obj.distant_battle_travel_months == month) {
+            return &obj->obj;
+        }
+    }
+    return 0;
+}
+
+const empire_object *empire_object_get_latest_distant_battle(int enemy)
+{
+    int highest_month = 0;
+    full_empire_object *obj;
+    array_foreach(objects, obj) {
+        if (obj->obj.type == (enemy ? EMPIRE_OBJECT_ENEMY_ARMY : EMPIRE_OBJECT_ROMAN_ARMY) &&
+            obj->obj.distant_battle_travel_months > highest_month) {
+            highest_month = obj->obj.distant_battle_travel_months;
+        }
+    }
+    return empire_object_get_distant_battle(highest_month, enemy);
+}
+
 void empire_object_foreach(void (*callback)(const empire_object *))
 {
     full_empire_object *obj;
