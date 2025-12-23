@@ -38,6 +38,7 @@ static void button_ok(const generic_button *button);
 static void button_toggle_invasions(const generic_button *button);
 static void button_refresh(const generic_button *button);
 static void button_cycle_preview(const generic_button *button);
+static void button_recycle_preview(const generic_button *button);
 
 static arrow_button arrow_buttons_empire[] = {
     {8, 48, 17, 24, button_change_empire, 1},
@@ -49,7 +50,7 @@ static generic_button generic_buttons[] = {
     {294, 48, 150, 24, button_refresh},
 };
 static generic_button preview_button[] = {
-    {0, 0, 72, 72, button_cycle_preview},
+    {0, 0, 72, 72, button_cycle_preview, button_recycle_preview},
 };
 
 static struct {
@@ -616,8 +617,9 @@ static void handle_input(const mouse *m, const hotkeys *h)
             preview_button, 1, &data.preview_button_focused)) {
         return;
     }
+    
     if (!is_outside_map(m->x, m->y)) {
-        if (empire_editor_handle_placement(m)) {
+        if (empire_editor_handle_placement(m, h)) {
             return;
         }
     }
@@ -632,6 +634,9 @@ static void handle_input(const mouse *m, const hotkeys *h)
             window_invalidate();
         }
     } else {
+        if (is_outside_map(m->x, m->y)) {
+            return;
+        }
         if (m->right.went_down) {
             scroll_drag_start(0);
         }
@@ -674,6 +679,12 @@ static void button_toggle_invasions(const generic_button *button)
 static void button_cycle_preview(const generic_button *button)
 {
     empire_editor_change_tool(1);
+    window_request_refresh();
+}
+
+static void button_recycle_preview(const generic_button *button)
+{
+    empire_editor_change_tool(-1);
     window_request_refresh();
 }
 

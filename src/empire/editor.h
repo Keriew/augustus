@@ -2,6 +2,7 @@
 #define EMPIRE_EDITOR_H
 
 #include "input/mouse.h"
+#include "input/hotkey.h"
 
 typedef enum {
     EMPIRE_TOOL_MIN = 0,
@@ -22,6 +23,6 @@ int empire_editor_get_tool(void);
 void empire_editor_set_tool(empire_tool value);
 void empire_editor_change_tool(int amount);
 
-int empire_editor_handle_placement(const mouse *m);
+int empire_editor_handle_placement(const mouse *m, const hotkeys *h);
 
 #endif // EMPIRE_EDITOR_H

@@ -4,6 +4,8 @@
 #include "core/image_group.h"
 #include "core/log.h"
 #include "input/mouse.h"
+#include "input/hotkey.h"
+#include "input/input.h"
 #include "empire/empire.h"
 #include "empire/object.h"
 #include "empire/xml.h"
@@ -39,11 +41,15 @@ void empire_editor_set_tool(empire_tool tool)
 
 void empire_editor_change_tool(int amount)
 {
-    data.current_tool += amount;
+    if ((int)data.current_tool + amount < EMPIRE_TOOL_MIN) {
+        data.current_tool = EMPIRE_TOOL_MAX - ((int)data.current_tool - amount);
+    } else {
+        data.current_tool += amount;
+    }
     update_tool_bounds();
 }
 
-int empire_editor_handle_placement(const mouse *m)
+int empire_editor_handle_placement(const mouse *m, const hotkeys *h)
 {
     if (m->left.went_down) {
         if (!place_object(m->x, m->y)) {
