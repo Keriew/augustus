@@ -216,6 +216,10 @@ static int get_preview_image_group(empire_tool tool) {
     }
 }
 
+static int get_preview_translation_key(empire_tool tool) {
+    return TR_EMPIRE_TOOL_OUR_CITY + tool;
+}
+
 static int draw_preview_image(int x, int y, int center, color_t color_mask, int draw_borders)
 {
     int preview_image_group = get_preview_image_group(empire_editor_get_tool());
@@ -530,7 +534,9 @@ static void draw_panel_buttons(const empire_city *city)
 
         if (data.panel.x_min + 564 + width < data.panel.x_max) {
             lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_CITY_PREVIEW,
-                data.panel.x_max - 96 - width, data.y_max - 45, FONT_NORMAL_GREEN);
+                data.panel.x_max - 96 - width, data.y_max - 85, FONT_NORMAL_GREEN);
+            lang_text_draw_centered(CUSTOM_TRANSLATION, get_preview_translation_key(empire_editor_get_tool()),
+                data.panel.x_max - 96 - width, data.y_max - 45, width, FONT_NORMAL_GREEN);
         }
 
         button_border_draw(data.panel.x_max - 92, data.y_max - 100, 72, 72, data.preview_button_focused);
