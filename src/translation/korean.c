@@ -1042,7 +1042,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SHORT_ROUTE_TEXT, "rt"},
     {TR_EDITOR_TOGGLE_INVASIONS, "침략 전환"},
     {TR_EDITOR_REFRESH_EMPIRE, "새로고침 (F5)"},
-    {TR_EDITOR_CITY_PREVIEW, "도시 이미지 미리보기: "},
     {TR_EDITOR_CURRENT_COORDS, "현재 좌표: "},
     {TR_EDITOR_SELECTED_COORDS, "선택된 좌표: "},
     {TR_EDITOR_MAX_WAGES, "상한"},

@@ -1324,7 +1324,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_CAESAR_SALARY, "Cäsars Lohn"},
     {TR_EDITOR_CHECK_LOG_MESSAGE, "Bitte prüfen Sie die Datei augustus-log.txt in Ihrem Augustus-Verzeichnis für Details."},
     {TR_EDITOR_CHOOSE_CUSTOM_EMPIRE, "Benutzerdefiniertes Imperium wählen"},
-    {TR_EDITOR_CITY_PREVIEW, "Vorschau auf die Stadt: " },
+    {TR_EDITOR_EMPIRE_TOOL, "Aktuelles Werkzeug: " },
     {TR_EDITOR_CURRENT_COORDS, "Aktuelle Koordinaten: " },
     {TR_EDITOR_CUSTOM_EMPIRE_TITLE, "Laden eines Imperiums"},
     {TR_EDITOR_CUSTOM_MESSAGES_CLEAR, "Botschaften leeren" },

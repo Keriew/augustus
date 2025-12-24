@@ -1037,7 +1037,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SHORT_ROUTE_TEXT, "rt"},
     {TR_EDITOR_TOGGLE_INVASIONS, "Toggle invasions"},
     {TR_EDITOR_REFRESH_EMPIRE, "刷新 (F5)"},
-    {TR_EDITOR_CITY_PREVIEW, "城市視圖預覽："},
     {TR_EDITOR_CURRENT_COORDS, "當前坐標："},
     {TR_EDITOR_SELECTED_COORDS, "選擇坐標："},
     {TR_EDITOR_MAX_WAGES, "Up to"},

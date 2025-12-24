@@ -996,7 +996,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SHORT_ROUTE_TEXT, "rt"},
     {TR_EDITOR_TOGGLE_INVASIONS, "Εναλλαγή εισβολών"},
     {TR_EDITOR_REFRESH_EMPIRE, "Ανανέωση (F5)"},
-    {TR_EDITOR_CITY_PREVIEW, "Προεπισκόπηση εικόνας πόλης: "},
     {TR_EDITOR_CURRENT_COORDS, "Τρέχουσες συντεταγμένες: "},
     {TR_EDITOR_SELECTED_COORDS, "Επιλεγμένες συντεταγμένες: "},
     {TR_EDITOR_MAX_WAGES, "Μέχρι"},

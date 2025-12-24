@@ -1043,7 +1043,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SHORT_ROUTE_TEXT, "rt"},
     {TR_EDITOR_TOGGLE_INVASIONS, "Invasions on/off"},
     {TR_EDITOR_REFRESH_EMPIRE, "Actualiser (F5)"},
-    {TR_EDITOR_CITY_PREVIEW, "Aperçu icône de la cité: "},
     {TR_EDITOR_CURRENT_COORDS, "Coord. actuelles: "},
     {TR_EDITOR_SELECTED_COORDS, "Coord. cliquées: "},
     {TR_EDITOR_MAX_WAGES, "max"},

@@ -530,10 +530,10 @@ static void draw_panel_buttons(const empire_city *city)
         lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REFRESH_EMPIRE,
             data.panel.x_min + 314, data.y_max - 45, 150, FONT_NORMAL_GREEN);
 
-        int width = lang_text_get_width(CUSTOM_TRANSLATION, TR_EDITOR_CITY_PREVIEW, FONT_NORMAL_GREEN);
+        int width = lang_text_get_width(CUSTOM_TRANSLATION, TR_EDITOR_EMPIRE_TOOL, FONT_NORMAL_GREEN);
 
         if (data.panel.x_min + 564 + width < data.panel.x_max) {
-            lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_CITY_PREVIEW,
+            lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_EMPIRE_TOOL,
                 data.panel.x_max - 96 - width, data.y_max - 85, FONT_NORMAL_GREEN);
             lang_text_draw_centered(CUSTOM_TRANSLATION, get_preview_translation_key(empire_editor_get_tool()),
                 data.panel.x_max - 96 - width, data.y_max - 45, width, FONT_NORMAL_GREEN);
