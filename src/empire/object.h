@@ -96,6 +96,8 @@ int empire_object_get_max_invasion_path(void);
 
 int empire_object_get_closest(int x, int y);
 
+int empire_object_get_at(int x, int y);
+
 void empire_object_set_expanded(int object_id, int new_city_type);
 
 int empire_object_city_buys_resource(int object_id, int resource);

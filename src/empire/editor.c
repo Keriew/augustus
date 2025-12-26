@@ -21,6 +21,7 @@ static struct {
 };
 
 static int place_object(int mouse_x, int mouse_y);
+static int delete_object(int mouse_x, int mouse_y);
 
 static void update_tool_bounds(void)
 {
@@ -42,7 +43,7 @@ void empire_editor_set_tool(empire_tool tool)
 void empire_editor_change_tool(int amount)
 {
     if ((int)data.current_tool + amount < EMPIRE_TOOL_MIN) {
-        data.current_tool = EMPIRE_TOOL_MAX - ((int)data.current_tool - amount);
+        data.current_tool = EMPIRE_TOOL_MAX - ((int)data.current_tool - amount) + 1;
     } else {
         data.current_tool += amount;
     }
@@ -51,7 +52,13 @@ void empire_editor_change_tool(int amount)
 
 int empire_editor_handle_placement(const mouse *m, const hotkeys *h)
 {
+    if (h->delete_empire_object && m->left.is_down) {
+        return delete_object(m->x, m->y);
+    }
     if (m->left.went_down) {
+        if (h->delete_empire_object) {
+            return delete_object(m->x, m->y);
+        }
         if (!place_object(m->x, m->y)) {
             return 0;
         } else {
@@ -264,5 +271,17 @@ static int place_distant_battle(full_empire_object *distant_battle)
     distant_battle->obj.width = img->width;
     distant_battle->obj.height = img->height;
     
+    return 1;
+}
+
+static int delete_object(int mouse_x, int mouse_y)
+{
+    int empire_x = editor_empire_mouse_to_empire_x(mouse_x);
+    int empire_y = editor_empire_mouse_to_empire_y(mouse_y);
+    unsigned int obj_id = empire_object_get_at(empire_x, empire_y);
+    if (!obj_id) {
+        return 0;
+    }
+    empire_object_remove(obj_id);
     return 1;
 }

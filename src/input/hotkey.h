@@ -42,6 +42,7 @@ typedef struct {
     int show_messages;
     int mothball_toggle;
     int storage_order;
+    int delete_empire_object;
 } hotkeys;
 
 void hotkey_install_mapping(hotkey_mapping *mappings, int num_mappings);

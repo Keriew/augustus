@@ -449,6 +449,9 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
         case HOTKEY_NEXT_TRACK:
             def->action = &data.global_hotkey_state.next_track;
             break;
+        case HOTKEY_EDITOR_EMPIRE_DELETE_OBJECT:
+            def->action = &data.hotkey_state.delete_empire_object;
+            break;
         default:
             def->action = 0;
     }

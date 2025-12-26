@@ -717,6 +717,31 @@ int empire_object_get_closest(int x, int y)
     return min_obj_id;
 }
 
+int empire_object_get_at(int x, int y)
+{
+    full_empire_object *full;
+    array_foreach(objects, full) {
+        const empire_object *obj = &full->obj;
+        if (obj->type == EMPIRE_OBJECT_BORDER || obj->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE
+            || obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
+            continue;
+        }
+        int obj_x, obj_y;
+        if (scenario_empire_is_expanded()) {
+            obj_x = obj->expanded.x;
+            obj_y = obj->expanded.y;
+        } else {
+            obj_x = obj->x;
+            obj_y = obj->y;
+        }
+        if ((x >= obj_x && x <= obj_x + obj->width) &&
+            (y >= obj_y && y <= obj_y + obj->height)) {
+            return obj->id;
+        }
+    }
+    return 0;
+}
+
 void empire_object_set_expanded(int object_id, int new_city_type)
 {
     full_empire_object *obj = array_item(objects, object_id);
