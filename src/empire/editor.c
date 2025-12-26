@@ -6,8 +6,10 @@
 #include "input/mouse.h"
 #include "input/hotkey.h"
 #include "input/input.h"
+#include "empire/city.h"
 #include "empire/empire.h"
 #include "empire/object.h"
+#include "empire/trade_route.h"
 #include "empire/xml.h"
 #include "window/editor/empire.h"
 
@@ -16,8 +18,10 @@
 
 static struct {
     empire_tool current_tool;
+    int current_route_obj_id;
 } data = {
-    .current_tool = EMPIRE_TOOL_OUR_CITY
+    .current_tool = EMPIRE_TOOL_OUR_CITY,
+    .current_route_obj_id = -1
 };
 
 static int place_object(int mouse_x, int mouse_y);
@@ -274,6 +278,13 @@ static int place_distant_battle(full_empire_object *distant_battle)
     return 1;
 }
 
+static void remove_trade_waypoints(const empire_object *obj)
+{
+    if (obj->parent_object_id == data.current_route_obj_id) {
+        empire_object_remove(obj->id);
+    }
+}
+
 static int delete_object(int mouse_x, int mouse_y)
 {
     int empire_x = editor_empire_mouse_to_empire_x(mouse_x);
@@ -281,6 +292,21 @@ static int delete_object(int mouse_x, int mouse_y)
     unsigned int obj_id = empire_object_get_at(empire_x, empire_y);
     if (!obj_id) {
         return 0;
+    }
+    full_empire_object *full = empire_object_get_full(obj_id);
+    if (full->obj.type == EMPIRE_OBJECT_CITY) {
+        if (full->city_type == EMPIRE_CITY_FUTURE_TRADE || full->city_type == EMPIRE_CITY_TRADE) {
+            trade_route_remove(full->obj.trade_route_id);
+            empire_object *route_obj = empire_object_get(full->obj.id + 1);
+            if (route_obj->type != EMPIRE_OBJECT_LAND_TRADE_ROUTE && route_obj->type != EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
+                return 0;
+            }
+            data.current_route_obj_id = route_obj->id;
+            empire_object_foreach_of_type(remove_trade_waypoints, EMPIRE_OBJECT_TRADE_WAYPOINT);
+            data.current_route_obj_id = -1;
+            empire_object_remove(route_obj->id);
+        }
+        empire_city_remove(empire_city_get_for_object(full->obj.id));
     }
     empire_object_remove(obj_id);
     return 1;

@@ -16,6 +16,8 @@ int trade_route_init(void);
 
 int trade_route_new(void);
 
+void trade_route_remove(int route_id);
+
 int trade_route_count(void);
 
 int trade_route_is_valid(int route_id);

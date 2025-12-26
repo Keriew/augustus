@@ -28,6 +28,8 @@ empire_city *empire_city_get(int city_id);
 
 empire_city *empire_city_get_new(void);
 
+void empire_city_remove(int city_id);
+
 int empire_city_get_route_id(int city_id);
 
 int empire_city_get_id_by_name(const uint8_t *city_name);

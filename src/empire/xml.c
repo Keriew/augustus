@@ -93,7 +93,7 @@ static struct {
     int success;
     int version;
     int current_city_id;
-    int current_trade_route_id;
+    int current_trade_route_id; // This is not an actual route id but an empire object id 
     city_list current_city_list;
     int has_vulnerable_city;
     int current_invasion_path_id;

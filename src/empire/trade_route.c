@@ -30,6 +30,11 @@ int trade_route_new(void)
     return routes.size - 1;
 }
 
+void trade_route_remove(int route_id)
+{
+    array_remove_item(routes, route_id);
+}
+
 int trade_route_count(void)
 {
     return routes.size;
