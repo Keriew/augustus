@@ -140,6 +140,7 @@ static int create_trade_route_default(full_empire_object *full) {
     route_obj->in_use = 1;
     route_obj->obj.type = EMPIRE_OBJECT_LAND_TRADE_ROUTE;
     full->trade_route_cost = 500;
+    empire_object_set_trade_route_coords(empire_object_get_our_city());
     
     return 1;
 }
@@ -316,6 +317,7 @@ static int delete_object(int mouse_x, int mouse_y)
     
     if (full->obj.type == EMPIRE_OBJECT_TRADE_WAYPOINT) {
         window_empire_collect_trade_edges();
+        empire_object_set_trade_route_coords(empire_object_get_our_city());
     }
     return 1;
 }

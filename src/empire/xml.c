@@ -19,7 +19,6 @@
 #include "scenario/data.h"
 #include "scenario/empire.h"
 
-#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -723,91 +722,6 @@ static void reset_data(void)
     memset(data.added_ornaments, 0, sizeof(data.added_ornaments));
 }
 
-static void set_trade_coords(const empire_object *our_city)
-{
-    int *section_distances = 0;
-    for (int i = 0; i < empire_object_count(); i++) {
-        full_empire_object *trade_city = empire_object_get_full(i);
-        if (
-            !trade_city->in_use ||
-            trade_city->obj.type != EMPIRE_OBJECT_CITY ||
-            trade_city->city_type == EMPIRE_CITY_OURS ||
-            (trade_city->city_type != EMPIRE_CITY_TRADE && trade_city->city_type != EMPIRE_CITY_FUTURE_TRADE)
-            ) {
-            continue;
-        }
-        empire_object *trade_route = empire_object_get(i + 1);
-
-        if (!section_distances) {
-            section_distances = malloc(sizeof(int) * (empire_object_count() - 1));
-        }
-        int sections = 0;
-        int distance = 0;
-        int last_x = our_city->x + 25;
-        int last_y = our_city->y + 25;
-        int x_diff, y_diff;
-        for (int j = i + 2; j < empire_object_count(); j++) {
-            empire_object *obj = empire_object_get(j);
-            if (obj->type != EMPIRE_OBJECT_TRADE_WAYPOINT) {
-                break;
-            }
-            x_diff = obj->x - last_x;
-            y_diff = obj->y - last_y;
-            section_distances[sections] = (int) sqrt(x_diff * x_diff + y_diff * y_diff);
-            distance += section_distances[sections];
-            last_x = obj->x;
-            last_y = obj->y;
-            sections++;
-        }
-        x_diff = trade_city->obj.x + 25 - last_x;
-        y_diff = trade_city->obj.y + 25 - last_y;
-        section_distances[sections] = (int) sqrt(x_diff * x_diff + y_diff * y_diff);
-        distance += section_distances[sections];
-        sections++;
-
-        last_x = our_city->x + 25;
-        last_y = our_city->y + 25;
-        int next_x = trade_city->obj.x + 25;
-        int next_y = trade_city->obj.y + 25;
-
-        if (sections == 1) {
-            trade_route->x = (next_x + last_x) / 2 - 16;
-            trade_route->y = (next_y + last_y) / 2 - 10;
-            continue;
-        }
-        int crossed_distance = 0;
-        int current_section = 0;
-        int remaining_distance = 0;
-        while (current_section < sections) {
-            if (current_section == sections - 1) {
-                next_x = trade_city->obj.x + 25;
-                next_y = trade_city->obj.y + 25;
-            } else {
-                empire_object *obj = empire_object_get(current_section + i + 2);
-                next_x = obj->x;
-                next_y = obj->y;
-            }
-            if (section_distances[current_section] + crossed_distance > distance / 2) {
-                remaining_distance = distance / 2 - crossed_distance;
-                break;
-            }
-            last_x = next_x;
-            last_y = next_y;
-            crossed_distance += section_distances[current_section];
-            current_section++;
-        }
-        x_diff = next_x - last_x;
-        y_diff = next_y - last_y;
-        int x_factor = calc_percentage(x_diff, section_distances[current_section]);
-        int y_factor = calc_percentage(y_diff, section_distances[current_section]);
-        trade_route->x = calc_adjust_with_percentage(remaining_distance, x_factor) + last_x - 16;
-        trade_route->y = calc_adjust_with_percentage(remaining_distance, y_factor) + last_y - 10;
-
-        i += sections; // We know the following objects are waypoints so we skip them
-    }
-    free(section_distances);
-}
-
 static int parse_xml(char *buf, int buffer_length)
 {
     reset_data();
@@ -830,7 +744,7 @@ static int parse_xml(char *buf, int buffer_length)
         return 0;
     }
 
-    set_trade_coords(our_city);
+    empire_object_set_trade_route_coords(our_city);
     empire_object_init_cities(SCENARIO_CUSTOM_EMPIRE);
 
     return data.success;
