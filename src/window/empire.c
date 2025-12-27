@@ -734,6 +734,9 @@ void window_empire_collect_trade_edges(void)
     // Pre-fill per-route edge lists with -1 (sentinel terminator).
     for (int object_index = 0; object_index < empire_object_count(); object_index++) {
         const empire_object *route_object = empire_object_get(object_index);
+        if (!empire_object_get_full(object_index)->in_use) {
+            continue;
+        }
         int is_sea_route = -1;
         if (route_object->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
             is_sea_route = 1;

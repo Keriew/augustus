@@ -284,7 +284,6 @@ static void draw_empire_object(const empire_object *obj)
         window_empire_draw_border(obj, data.x_draw_offset, data.y_draw_offset);
     }
     if (obj->type == EMPIRE_OBJECT_CITY) {
-        const empire_city *city = empire_city_get(empire_city_get_for_object(obj->id));
         image_id = empire_city_get_icon_image_id(obj->empire_city_icon);
     } else if (obj->type == EMPIRE_OBJECT_BATTLE_ICON) {
         draw_shadowed_number(obj->invasion_path_id,

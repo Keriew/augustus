@@ -12,6 +12,7 @@
 #include "empire/trade_route.h"
 #include "empire/xml.h"
 #include "window/editor/empire.h"
+#include "window/empire.h"
 
 #define BASE_BORDER_FLAG_IMAGE_ID 3323
 #define BORDER_EDGE_DEFAULT_SPACING 50
@@ -307,9 +308,14 @@ static int delete_object(int mouse_x, int mouse_y)
             empire_object_foreach_of_type(remove_trade_waypoints, EMPIRE_OBJECT_TRADE_WAYPOINT);
             data.current_route_obj_id = -1;
             empire_object_remove(route_obj->id);
+            window_empire_collect_trade_edges();
         }
         empire_city_remove(empire_city_get_for_object(obj_id));
     }
     empire_object_remove(obj_id);
+    
+    if (full->obj.type == EMPIRE_OBJECT_TRADE_WAYPOINT) {
+        window_empire_collect_trade_edges();
+    }
     return 1;
 }

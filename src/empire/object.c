@@ -721,12 +721,15 @@ int empire_object_get_at(int x, int y)
 {
     full_empire_object *full;
     array_foreach(objects, full) {
+        if (!full->in_use) {
+            continue;
+        }
         const empire_object *obj = &full->obj;
         if (obj->type == EMPIRE_OBJECT_BORDER || obj->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE
             || obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
             continue;
         }
-        int obj_x, obj_y;
+        int obj_x, obj_y, width, height;
         if (scenario_empire_is_expanded()) {
             obj_x = obj->expanded.x;
             obj_y = obj->expanded.y;
@@ -734,8 +737,16 @@ int empire_object_get_at(int x, int y)
             obj_x = obj->x;
             obj_y = obj->y;
         }
-        if ((x >= obj_x && x <= obj_x + obj->width) &&
-            (y >= obj_y && y <= obj_y + obj->height)) {
+        if (obj->height) {
+            width = obj->width;
+            height = obj->height;
+        } else {
+            const image *img = image_get(obj->image_id);
+            width = img->width;
+            height = img->height;
+        }
+        if ((x >= obj_x && x <= obj_x + width) &&
+            (y >= obj_y && y <= obj_y + height)) {
             return obj->id;
         }
     }
