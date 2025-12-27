@@ -506,7 +506,7 @@ full_empire_object *empire_object_get_new(void)
 
 void empire_object_remove(int id)
 {
-    array_remove_item(objects, id);
+    array_item(objects, id)->in_use = 0;
 }
 
 empire_object *empire_object_get(int object_id)

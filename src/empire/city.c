@@ -64,7 +64,7 @@ empire_city *empire_city_get_new(void)
 
 void empire_city_remove(int city_id)
 {
-    array_remove_item(cities, city_id);
+    array_item(cities, city_id)->in_use = 0;
 }
 
 int empire_city_get_route_id(int city_id)

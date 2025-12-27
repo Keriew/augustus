@@ -294,9 +294,11 @@ static int delete_object(int mouse_x, int mouse_y)
         return 0;
     }
     full_empire_object *full = empire_object_get_full(obj_id);
+    if (full->city_type == EMPIRE_CITY_OURS) {
+        return 0;
+    }
     if (full->obj.type == EMPIRE_OBJECT_CITY) {
         if (full->city_type == EMPIRE_CITY_FUTURE_TRADE || full->city_type == EMPIRE_CITY_TRADE) {
-            trade_route_remove(full->obj.trade_route_id);
             empire_object *route_obj = empire_object_get(full->obj.id + 1);
             if (route_obj->type != EMPIRE_OBJECT_LAND_TRADE_ROUTE && route_obj->type != EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
                 return 0;
@@ -306,7 +308,7 @@ static int delete_object(int mouse_x, int mouse_y)
             data.current_route_obj_id = -1;
             empire_object_remove(route_obj->id);
         }
-        empire_city_remove(empire_city_get_for_object(full->obj.id));
+        empire_city_remove(empire_city_get_for_object(obj_id));
     }
     empire_object_remove(obj_id);
     return 1;
