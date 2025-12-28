@@ -841,7 +841,7 @@ void empire_object_set_trade_route_coords(const empire_object *our_city)
         int last_x = our_city->x + 25;
         int last_y = our_city->y + 25;
         int x_diff, y_diff;
-        for (int j = 0; j < empire_object_count(); j++) {
+        for (int j = 0; j < empire_object_count(); ) {
             int obj_id = empire_object_get_next_in_order(i + 1, &j);
             if (!obj_id) {
                 break;

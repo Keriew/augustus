@@ -757,7 +757,7 @@ void window_empire_collect_trade_edges(void)
         int route_edge_count = 0;
 
         // Waypoints belonging to this route are contiguous after the route object
-        for (int waypoint_index = 0; waypoint_index < empire_object_count(); waypoint_index++) {
+        for (int waypoint_index = 0; waypoint_index < empire_object_count(); ) {
             int waypoint_object_id = empire_object_get_next_in_order(object_index, &waypoint_index);
             if (!waypoint_object_id) {
                 break;
@@ -1430,8 +1430,11 @@ void window_empire_draw_border(const empire_object *border, int x_offset, int y_
     x_offset -= 0;
     y_offset -= 14;
 
-    for (int i = first; i < empire_object_count(); i++) {
+    for (int i = first; i < empire_object_count(); ) {
         int obj_id = empire_object_get_next_in_order(border->id, &i);
+        if (obj_id == 48) {
+            int debug;
+        }
         if (!obj_id) {
             break;
         }
