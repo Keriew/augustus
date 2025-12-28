@@ -757,12 +757,12 @@ void window_empire_collect_trade_edges(void)
         int route_edge_count = 0;
 
         // Waypoints belonging to this route are contiguous after the route object
-        for (int waypoint_index = 1; waypoint_index < empire_object_count(); waypoint_index++) {
-            const empire_object *waypoint_object = empire_object_get_in_order(object_index, waypoint_index);
-            if (!waypoint_object) {
+        for (int waypoint_index = 0; waypoint_index < empire_object_count(); waypoint_index++) {
+            int waypoint_object_id = empire_object_get_next_in_order(object_index, &waypoint_index);
+            if (!waypoint_object_id) {
                 break;
             }
-            
+            const empire_object *waypoint_object = empire_object_get(waypoint_object_id);
             if (waypoint_object->type != EMPIRE_OBJECT_TRADE_WAYPOINT || waypoint_object->trade_route_id != route_id) {
                 break; // reached non-waypoint or different route; waypoint sequence ends
             }
@@ -1412,10 +1412,12 @@ static int draw_images_at_interval(int image_id, int x_draw_offset, int y_draw_o
 
 void window_empire_draw_border(const empire_object *border, int x_offset, int y_offset)
 {
-    const empire_object *first_edge = empire_object_get_in_order(border->id, 1);
-    if (!first_edge) {
+    int first = 0;
+    int first_edge_id = empire_object_get_next_in_order(border->id, &first);
+    if (!first_edge_id) {
         return;
     }
+    const empire_object *first_edge = empire_object_get(first_edge_id);
     if (first_edge->type != EMPIRE_OBJECT_BORDER_EDGE) {
         return;
     }
@@ -1428,11 +1430,12 @@ void window_empire_draw_border(const empire_object *border, int x_offset, int y_
     x_offset -= 0;
     y_offset -= 14;
 
-    for (int i = 2; i < empire_object_count(); i++) {
-        empire_object *obj = empire_object_get_in_order(border->id, i);
-        if (!obj) {
+    for (int i = first; i < empire_object_count(); i++) {
+        int obj_id = empire_object_get_next_in_order(border->id, &i);
+        if (!obj_id) {
             break;
         }
+        empire_object *obj = empire_object_get(obj_id);
         if (obj->type != EMPIRE_OBJECT_BORDER_EDGE) {
             break;
         }

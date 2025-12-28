@@ -515,17 +515,28 @@ empire_object *empire_object_get(int object_id)
     return &array_item(objects, object_id)->obj;
 }
 
-empire_object *empire_object_get_in_order(int parent_id, int order_index)
+int empire_object_get_in_order(int parent_id, int order_index)
 {
     full_empire_object *obj;
     array_foreach(objects, obj) {
-        if (obj->in_use) {
-            if (obj->obj.parent_object_id == parent_id && obj->obj.order_index == order_index) {
-                return &obj->obj;
+        if (obj->obj.parent_object_id == parent_id && obj->obj.order_index == order_index) {
+            if (obj->in_use) {
+                return obj->obj.id;
+            } else {
+                return -1;
             }
         }
     }
     return 0;
+}
+
+int empire_object_get_next_in_order(int parent_id, int *current_order_index)
+{
+    int id;
+    do {
+        id = empire_object_get_in_order(parent_id, ++*current_order_index);
+    } while (id < 0);
+    return id;
 }
 
 int empire_object_get_highest_index(int parent_id)
@@ -830,11 +841,12 @@ void empire_object_set_trade_route_coords(const empire_object *our_city)
         int last_x = our_city->x + 25;
         int last_y = our_city->y + 25;
         int x_diff, y_diff;
-        for (int j = 1; j < empire_object_count(); j++) {
-            empire_object *obj = empire_object_get_in_order(i + 1, j);
-            if (!obj) {
+        for (int j = 0; j < empire_object_count(); j++) {
+            int obj_id = empire_object_get_next_in_order(i + 1, &j);
+            if (!obj_id) {
                 break;
             }
+            empire_object *obj = empire_object_get(obj_id);
             if (obj->type != EMPIRE_OBJECT_TRADE_WAYPOINT) {
                 break;
             }
