@@ -882,7 +882,11 @@ void empire_object_set_trade_route_coords(const empire_object *our_city)
                 next_x = trade_city->obj.x + 25;
                 next_y = trade_city->obj.y + 25;
             } else {
-                empire_object *obj = empire_object_get(current_section + i + 2);
+                int obj_id = empire_object_get_next_in_order(i + 1, &current_section);
+                if (!obj_id) {
+                    break;
+                }
+                empire_object *obj = empire_object_get(obj_id);
                 next_x = obj->x;
                 next_y = obj->y;
             }
@@ -893,7 +897,6 @@ void empire_object_set_trade_route_coords(const empire_object *our_city)
             last_x = next_x;
             last_y = next_y;
             crossed_distance += section_distances[current_section];
-            current_section++;
         }
         x_diff = next_x - last_x;
         y_diff = next_y - last_y;
