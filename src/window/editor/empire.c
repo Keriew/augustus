@@ -29,7 +29,7 @@
 #include "window/empire.h"
 
 #define WIDTH_BORDER 32
-#define HEIGHT_BORDER 136
+#define HEIGHT_BORDER 176
 
 #define OUR_CITY -1
 
@@ -144,6 +144,7 @@ static void draw_paneling(void)
 
     // bottom panel background
     for (int x = data.panel.x_min; x < data.panel.x_max; x += 70) {
+        image_draw(image_base + 3, x, data.y_max - 160, COLOR_MASK_NONE, SCALE_NONE);
         image_draw(image_base + 3, x, data.y_max - 120, COLOR_MASK_NONE, SCALE_NONE);
         image_draw(image_base + 3, x, data.y_max - 80, COLOR_MASK_NONE, SCALE_NONE);
         image_draw(image_base + 3, x, data.y_max - 40, COLOR_MASK_NONE, SCALE_NONE);
@@ -151,7 +152,8 @@ static void draw_paneling(void)
 
     // horizontal bar borders
     for (int x = data.panel.x_min; x < data.panel.x_max; x += 86) {
-        image_draw(image_base + 1, x, data.y_max - 120, COLOR_MASK_NONE, SCALE_NONE);
+        image_draw(image_base + 1, x, data.y_max - 10, COLOR_MASK_NONE, SCALE_NONE);
+        image_draw(image_base + 1, x, data.y_max - 160, COLOR_MASK_NONE, SCALE_NONE);
         image_draw(image_base + 1, x, data.y_max - 16, COLOR_MASK_NONE, SCALE_NONE);
     }
 
@@ -179,10 +181,10 @@ static void draw_paneling(void)
 
     // crossbars
     image_draw(image_base + 2, data.x_min, data.y_min, COLOR_MASK_NONE, SCALE_NONE);
-    image_draw(image_base + 2, data.x_min, data.y_max - 120, COLOR_MASK_NONE, SCALE_NONE);
+    image_draw(image_base + 2, data.x_min, data.y_max - 160, COLOR_MASK_NONE, SCALE_NONE);
     image_draw(image_base + 2, data.panel.x_min, data.y_max - 16, COLOR_MASK_NONE, SCALE_NONE);
     image_draw(image_base + 2, data.x_max - 16, data.y_min, COLOR_MASK_NONE, SCALE_NONE);
-    image_draw(image_base + 2, data.x_max - 16, data.y_max - 120, COLOR_MASK_NONE, SCALE_NONE);
+    image_draw(image_base + 2, data.x_max - 16, data.y_max - 160, COLOR_MASK_NONE, SCALE_NONE);
     image_draw(image_base + 2, data.panel.x_max - 16, data.y_max - 16, COLOR_MASK_NONE, SCALE_NONE);
 
     if (bottom_panel_is_larger) {
