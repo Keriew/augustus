@@ -453,16 +453,16 @@ static int draw_resource(resource_type resource, int trade_max, int x_offset, in
 static void draw_city_info(const empire_city *city)
 {
     int x_offset = data.panel.x_min + 28;
-    int y_offset = data.y_max - 85;
+    int y_offset = data.y_max - 125;
     const uint8_t *city_name = empire_city_get_name(city);
     int width = text_draw(city_name, x_offset, y_offset, FONT_NORMAL_WHITE, 0);
+    int width_after_name = width;
 
     switch (city->type) {
         case EMPIRE_CITY_DISTANT_ROMAN:
         case EMPIRE_CITY_VULNERABLE_ROMAN:
             lang_text_draw(47, 12, x_offset + 20 + width, y_offset, FONT_NORMAL_GREEN);
             break;
-        case EMPIRE_CITY_FUTURE_TRADE:
         case EMPIRE_CITY_DISTANT_FOREIGN:
         case EMPIRE_CITY_FUTURE_ROMAN:
             lang_text_draw(47, 0, x_offset + 20 + width, y_offset, FONT_NORMAL_GREEN);
@@ -480,8 +480,10 @@ static void draw_city_info(const empire_city *city)
             break;
         }
         case EMPIRE_CITY_TRADE:
+        case EMPIRE_CITY_FUTURE_TRADE:
         {
-            width += lang_text_draw(47, 5, x_offset + 20 + width, y_offset, FONT_NORMAL_GREEN);
+            int text_width = lang_text_draw(47, 5, x_offset + 20 + width, y_offset, FONT_NORMAL_GREEN);
+            width += text_width;
             int resource_x_offset = x_offset + 30 + width;
             for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
                 if (empire_object_city_sells_resource(city->empire_object_id, r)) {
@@ -489,9 +491,11 @@ static void draw_city_info(const empire_city *city)
                     resource_x_offset += 32 + width;
                 }
             }
-            resource_x_offset += 50;
-            resource_x_offset += lang_text_draw(47, 4, resource_x_offset, y_offset, FONT_NORMAL_GREEN);
-            resource_x_offset += 10;
+            y_offset = data.y_max - 85;
+            resource_x_offset = x_offset + 20 + width_after_name;
+            text_width = lang_text_draw(47, 4, resource_x_offset, y_offset, FONT_NORMAL_GREEN);
+            width = width_after_name + text_width;
+            resource_x_offset = x_offset + 30 + width;
             for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
                 if (empire_object_city_buys_resource(city->empire_object_id, r)) {
                     width = draw_resource(r, trade_route_limit(city->route_id, r), resource_x_offset, y_offset - 9);
