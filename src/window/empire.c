@@ -803,6 +803,9 @@ void window_empire_collect_trade_edges(void)
 
 void window_empire_draw_static_trade_waypoints(const empire_object *route_object, int x_offset, int y_offset)
 {
+    if (scenario_empire_id() != SCENARIO_CUSTOM_EMPIRE) {
+        return;
+    }
     int is_sea_route = route_object->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE;
 
     int image_id = assets_get_image_id("UI", is_sea_route ? "SeaRouteDot" : "LandRouteDot");
