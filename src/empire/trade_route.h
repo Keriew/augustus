@@ -20,13 +20,13 @@ int trade_route_count(void);
 
 int trade_route_is_valid(int route_id);
 
-void trade_route_set(int route_id, resource_type resource, int limit);
+void trade_route_set(int route_id, resource_type resource, int limit, int buying);
 
-int trade_route_limit(int route_id, resource_type resource);
+int trade_route_limit(int route_id, resource_type resource, int buying);
 
-int trade_route_traded(int route_id, resource_type resource);
+int trade_route_traded(int route_id, resource_type resource, int buying);
 
-void trade_route_set_limit(int route_id, resource_type resource, int amount);
+void trade_route_set_limit(int route_id, resource_type resource, int amount, int buying);
 
 /**
  * Increases the trade limit of the resource
@@ -34,7 +34,7 @@ void trade_route_set_limit(int route_id, resource_type resource, int amount);
  * @param resource Resource
  * @return True on success, false if the limit couldn't be increased
  */
-int trade_route_legacy_increase_limit(int route_id, resource_type resource);
+int trade_route_legacy_increase_limit(int route_id, resource_type resource, int buying);
 
 /**
  * Decreases the trade limit of the resource
@@ -42,16 +42,18 @@ int trade_route_legacy_increase_limit(int route_id, resource_type resource);
  * @param resource Resource
  * @return True on success, false if the limit couldn't be decreased
  */
-int trade_route_legacy_decrease_limit(int route_id, resource_type resource);
+int trade_route_legacy_decrease_limit(int route_id, resource_type resource, int buying);
 
-void trade_route_increase_traded(int route_id, resource_type resource);
+void trade_route_increase_traded(int route_id, resource_type resource, int buying);
 
 void trade_route_reset_traded(int route_id);
 
-int trade_route_limit_reached(int route_id, resource_type resource);
+int trade_route_limit_reached(int route_id, resource_type resource, int buying);
 
-void trade_routes_save_state(buffer *limit, buffer *traded);
+void trade_routes_save_state(buffer *trade_routes);
 
-void trade_routes_load_state(buffer *limit, buffer *traded, int version);
+void trade_routes_load_state(buffer *trade_routes);
+
+void trade_routes_migrate_to_buys_sells(buffer *limit, buffer *traded, int version);
 
 #endif // EMPIRE_TRADE_ROUTE_H

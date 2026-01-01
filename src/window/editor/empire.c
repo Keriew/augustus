@@ -487,7 +487,7 @@ static void draw_city_info(const empire_city *city)
             int resource_x_offset = x_offset + 30 + width;
             for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
                 if (empire_object_city_sells_resource(city->empire_object_id, r)) {
-                    width = draw_resource(r, trade_route_limit(city->route_id, r), resource_x_offset, y_offset - 9);
+                    width = draw_resource(r, trade_route_limit(city->route_id, r, 0), resource_x_offset, y_offset - 9);
                     resource_x_offset += 32 + width;
                 }
             }
@@ -498,7 +498,7 @@ static void draw_city_info(const empire_city *city)
             resource_x_offset = x_offset + 30 + width;
             for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
                 if (empire_object_city_buys_resource(city->empire_object_id, r)) {
-                    width = draw_resource(r, trade_route_limit(city->route_id, r), resource_x_offset, y_offset - 9);
+                    width = draw_resource(r, trade_route_limit(city->route_id, r, 1), resource_x_offset, y_offset - 9);
                     resource_x_offset += 32 + width;
                 }
             }

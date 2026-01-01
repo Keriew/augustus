@@ -620,6 +620,7 @@ int scenario_action_type_trade_route_amount_execute(scenario_action_t *action)
     int resource = action->parameter2;
     int amount = scenario_formula_evaluate_formula(action->parameter3);
     int show_message = action->parameter4;
+    int buys = action->parameter5;
 
     if (!trade_route_is_valid(route_id)) {
         return 0;
@@ -633,7 +634,7 @@ int scenario_action_type_trade_route_amount_execute(scenario_action_t *action)
         if (city_id < 0) {
             city_id = 0;
         }
-        int last_amount = trade_route_limit(route_id, resource);
+        int last_amount = trade_route_limit(route_id, resource, buys);
 
         int change = amount - last_amount;
         if (amount > 0 && change > 0) {
@@ -644,7 +645,7 @@ int scenario_action_type_trade_route_amount_execute(scenario_action_t *action)
             city_message_post(1, MESSAGE_TRADE_STOPPED, city_id, resource);
         }
     }
-    trade_route_set_limit(route_id, resource, amount);
+    trade_route_set_limit(route_id, resource, amount, buys);
     building_menu_update();
 
     return 1;

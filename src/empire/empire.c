@@ -314,7 +314,7 @@ int empire_can_export_resource_to_city(int city_id, int resource)
         return 0;
     }
     empire_city *city = empire_city_get(city_id);
-    if (city_id && trade_route_limit_reached(city->route_id, resource)) {
+    if (city_id && trade_route_limit_reached(city->route_id, resource, 1)) {
         // quota reached
         return 0;
     }
@@ -362,7 +362,7 @@ int empire_can_import_resource_from_city(int city_id, int resource)
     if (!(city_resource_trade_status(resource) & TRADE_STATUS_IMPORT)) {
         return 0;
     }
-    if (trade_route_limit_reached(city->route_id, resource)) {
+    if (trade_route_limit_reached(city->route_id, resource, 0)) {
         return 0;
     }
 

@@ -556,12 +556,12 @@ static int measure_trade_row_width(const empire_city *city, int is_sell, const t
         if (!resource_is_storable(r)) continue;
         if ((is_sell && !city->sells_resource[r]) || (!is_sell && !city->buys_resource[r])) continue;
 
-        int w_max = text_get_number_width(trade_route_limit(city->route_id, r), '\0', "", FONT_NORMAL_GREEN);
+        int w_max = text_get_number_width(trade_route_limit(city->route_id, r, !is_sell), '\0', "", FONT_NORMAL_GREEN);
         int segment_width;
 
         if (city->is_open) {
             // Also need width of current amount and "of" label
-            int w_now = text_get_number_width(trade_route_traded(city->route_id, r), '\0', "", FONT_NORMAL_GREEN);
+            int w_now = text_get_number_width(trade_route_traded(city->route_id, r, !is_sell), '\0', "", FONT_NORMAL_GREEN);
             int w_of = lang_text_get_width(47, 11, FONT_NORMAL_GREEN);
 
             segment_width =
@@ -1069,8 +1069,8 @@ static int draw_trade_row(const empire_city *city, int is_sell, int x, int y, co
         if (!resource_is_storable(r)) continue;
         if ((is_sell && !city->sells_resource[r]) || (!is_sell && !city->buys_resource[r])) continue;
 
-        int trade_max = trade_route_limit(city->route_id, r);
-        int trade_now = trade_route_traded(city->route_id, r);
+        int trade_max = trade_route_limit(city->route_id, r, !is_sell);
+        int trade_now = trade_route_traded(city->route_id, r, !is_sell);
         int icon_y = y + style->y_offset_icon;
 
         int segment_width, text_x;

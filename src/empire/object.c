@@ -364,7 +364,8 @@ void empire_object_add_to_cities(full_empire_object *full)
             if (empire_object_city_sells_resource(full->obj.id, resource)) {
                 city->sells_resource[resource] = 1;
             }
-            if (empire_object_city_buys_resource(full->obj.id, resource)) {
+            int buys = empire_object_city_buys_resource(full->obj.id, resource);
+            if (buys) {
                 city->buys_resource[resource] = 1;
             }
             int amount = 0;
@@ -373,7 +374,7 @@ void empire_object_add_to_cities(full_empire_object *full)
             } else if (full->city_sells_resource[resource]) {
                 amount = full->city_sells_resource[resource];
             }
-            trade_route_set(city->route_id, resource, amount);
+            trade_route_set(city->route_id, resource, amount, buys);
         }
     }
     if (city->type == EMPIRE_CITY_OURS) {
@@ -455,7 +456,8 @@ void empire_object_init_cities(int empire_id)
             if (empire_object_city_sells_resource(array_index, resource)) {
                 city->sells_resource[resource] = 1;
             }
-            if (empire_object_city_buys_resource(array_index, resource)) {
+            int buys = empire_object_city_buys_resource(array_index, resource);
+            if (buys) {
                 city->buys_resource[resource] = 1;
             }
             if (city->type != EMPIRE_CITY_OURS) {
@@ -465,7 +467,7 @@ void empire_object_init_cities(int empire_id)
                 } else if (obj->city_sells_resource[resource]) {
                     amount = obj->city_sells_resource[resource];
                 }
-                trade_route_set(city->route_id, resource, amount);
+                trade_route_set(city->route_id, resource, amount, buys);
             }
         }
         city->trader_entry_delay = 4;

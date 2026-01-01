@@ -1921,7 +1921,8 @@ static translation_string all_strings[] = {
     {TR_EMPIRE_TOOL_DISTANT_BABARIAN, "Distant battle enemy"},
     {TR_EMPIRE_TOOL_DISTANT_LEGION, "Distant battle legion"},
     {TR_EMPIRE_TOOL_SELECT, "Selection tool"},
-    {TR_HOTKEY_EDITOR_EMPIRE_DELETE_OBJECT, "Delete empire object"}
+    {TR_HOTKEY_EDITOR_EMPIRE_DELETE_OBJECT, "Delete empire object"},
+    {TR_PARAMETER_BUYING, "Increase buying"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

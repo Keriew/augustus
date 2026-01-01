@@ -131,7 +131,7 @@ static void get_change_amount(unsigned int index, demand_change_amount_t *amount
 {
     const demand_change_t *new_demand_change = data.demand_changes[index];
     int previous_value = 0;
-    amount->value = trade_route_limit(new_demand_change->route_id, new_demand_change->resource);
+    amount->value = trade_route_limit(new_demand_change->route_id, new_demand_change->resource, new_demand_change->buys);
     for (unsigned int i = 0; i <= index; i++) {
         const demand_change_t *current_demand_change = data.demand_changes[i];
         if (current_demand_change->resource != new_demand_change->resource ||

@@ -358,7 +358,7 @@ void empire_city_change_buying_of_resource(empire_city *city, resource_type reso
     city->buys_resource[resource] = buys;
     empire_object_get_full(city->empire_object_id)->city_buys_resource[resource] = amount;
     if (city->type != EMPIRE_CITY_OURS) {
-        trade_route_set_limit(city->route_id, resource, amount);
+        trade_route_set_limit(city->route_id, resource, amount, 1);
     }
 }
 
@@ -368,7 +368,7 @@ void empire_city_change_selling_of_resource(empire_city *city, resource_type res
     city->sells_resource[resource] = sells;
     empire_object_get_full(city->empire_object_id)->city_sells_resource[resource] = amount;
     if (city->type != EMPIRE_CITY_OURS) {
-        trade_route_set_limit(city->route_id, resource, amount);
+        trade_route_set_limit(city->route_id, resource, amount, 0);
     }
 }
 
@@ -427,7 +427,7 @@ static int generate_trader(int city_id, empire_city *city)
     int trade_potential = 0;
     for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
         if (city->buys_resource[r] || city->sells_resource[r]) {
-            trade_potential += trade_route_limit(city->route_id, r);
+            trade_potential += trade_route_limit(city->route_id, r, city->buys_resource[r]);
         }
     }
     if (trade_potential <= 0) {

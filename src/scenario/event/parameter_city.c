@@ -292,13 +292,14 @@ static int city_trade_quota_fill_percentage(scenario_action_t *action)
             int sells = empire_city_sells_resource(city_id, r);
 
             if ((resource_id == RESOURCE_ALL_BUYS && buys) || (resource_id == RESOURCE_ALL_SELLS && sells)) {
-                traded += trade_route_traded(trade_route_id, r);
-                limit += trade_route_limit(trade_route_id, r);
+                traded += trade_route_traded(trade_route_id, r, buys);
+                limit += trade_route_limit(trade_route_id, r, buys);
             }
         }
     } else {
-        traded = trade_route_traded(trade_route_id, resource_id);
-        limit = trade_route_limit(trade_route_id, resource_id);
+        int buys = empire_city_buys_resource(city_id, resource_id);
+        traded = trade_route_traded(trade_route_id, resource_id, buys);
+        limit = trade_route_limit(trade_route_id, resource_id, buys);
     }
     if (is_absolute) {
         return traded;
