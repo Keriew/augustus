@@ -685,9 +685,8 @@ static void init_savegame_data(savegame_version_t version)
     state->routing_counters = create_savegame_piece(16, 0);
     if (version_data.features.static_building_counts) {
         state->building_count_culture3 = create_savegame_piece(version_data.building_counts.culture3, 0);
-    } else {
-        state->enemy_armies = create_savegame_piece(version_data.piece_sizes.enemy_armies, 0);
     }
+    state->enemy_armies = create_savegame_piece(version_data.piece_sizes.enemy_armies, 0);
     state->city_entry_exit_xy = create_savegame_piece(16, 0);
     state->last_invasion_id = create_savegame_piece(2, 0);
     state->building_extra_corrupt_houses = create_savegame_piece(8, 0);
