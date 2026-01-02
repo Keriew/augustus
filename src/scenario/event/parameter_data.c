@@ -1617,6 +1617,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         case ACTION_TYPE_TRADE_ADJUST_ROUTE_AMOUNT:
         {
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, action->parameter1, result_text, &maxlength);
+            result_text = translation_for_boolean_text(action->parameter5, TR_EDITOR_DEMAND_CHANGE_BUYS, TR_EDITOR_DEMAND_CHANGE_SELLS, result_text, &maxlength);
             result_text = translation_for_formula_index(action->parameter3, result_text, &maxlength);
             result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter2, result_text, &maxlength);
             result_text = translation_for_boolean_text(action->parameter4, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
