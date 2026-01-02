@@ -672,9 +672,12 @@ static void init_savegame_data(savegame_version_t version)
     }
     state->tutorial_part2 = create_savegame_piece(4, 0);
     state->gladiator_revolt = create_savegame_piece(16, 0);
-    state->trade_route_limit = create_savegame_piece(version_data.piece_sizes.trade_route_limit, 1);
-    state->trade_route_traded = create_savegame_piece(version_data.piece_sizes.trade_route_traded, 1);
-    state->trade_routes = create_savegame_piece(PIECE_SIZE_DYNAMIC, 1);
+    if (version > SAVE_GAME_TESTING_VERSION_BUMP_2) {
+        state->trade_routes = create_savegame_piece(PIECE_SIZE_DYNAMIC, 1);
+    } else {
+        state->trade_route_limit = create_savegame_piece(version_data.piece_sizes.trade_route_limit, 1);
+        state->trade_route_traded = create_savegame_piece(version_data.piece_sizes.trade_route_traded, 1);
+    }
     if (version_data.features.barracks_tower_sentry_request) {
         state->building_barracks_tower_sentry = create_savegame_piece(4, 0);
     }
@@ -682,8 +685,9 @@ static void init_savegame_data(savegame_version_t version)
     state->routing_counters = create_savegame_piece(16, 0);
     if (version_data.features.static_building_counts) {
         state->building_count_culture3 = create_savegame_piece(version_data.building_counts.culture3, 0);
+    } else {
+        state->enemy_armies = create_savegame_piece(version_data.piece_sizes.enemy_armies, 0);
     }
-    state->enemy_armies = create_savegame_piece(version_data.piece_sizes.enemy_armies, 0);
     state->city_entry_exit_xy = create_savegame_piece(16, 0);
     state->last_invasion_id = create_savegame_piece(2, 0);
     state->building_extra_corrupt_houses = create_savegame_piece(8, 0);
