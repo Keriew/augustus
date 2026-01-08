@@ -1419,4 +1419,7 @@
 	<image id="rightbracket_white_l" src="rightbracket_white_l"/>
 	<image id="curlybracket_white_left" src="curlybracket_white_left"/>
 	<image id="curlybracket_white_right" src="curlybracket_white_right"/>
+    <image src="Plus_Button_Idle" id="Plus_Button_Idle"/>
+    <image src="Plus_Button_Idle"/>
+    <image src="Plus_Button_Click"/>
 </assetlist>

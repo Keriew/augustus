@@ -15,6 +15,7 @@
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
+#include "graphics/image_button.h"
 #include "graphics/lang_text.h"
 #include "graphics/screen.h"
 #include "graphics/text.h"
@@ -39,6 +40,7 @@ static void button_toggle_invasions(const generic_button *button);
 static void button_refresh(const generic_button *button);
 static void button_cycle_preview(const generic_button *button);
 static void button_recycle_preview(const generic_button *button);
+static void button_add_resource(int param1, int param2);
 
 static arrow_button arrow_buttons_empire[] = {
     {8, 48, 17, 24, button_change_empire, 1},
@@ -52,6 +54,12 @@ static generic_button generic_buttons[] = {
 static generic_button preview_button[] = {
     {0, 0, 72, 72, button_cycle_preview, button_recycle_preview},
 };
+
+static image_button add_resource_buttons[] = {
+    {0, 0, 39, 26, IB_NORMAL, 0, 0, button_add_resource, NULL, 0, 0, 1, "UI", "Plus_Button_Idle"},
+    {0, 0, 39, 26, IB_NORMAL, 0, 0, button_add_resource, NULL, 1, 0, 1, "UI", "Plus_Button_Idle"}
+};
+#define NUM_PLUS_BUTTONS sizeof(add_resource_buttons) / sizeof(image_button)
 
 static struct {
     unsigned int selected_button;
@@ -112,6 +120,12 @@ static int map_viewport_height(void)
     return data.y_max - data.y_min - HEIGHT_BORDER;
 }
 
+static void add_resource_buttons_init(void)
+{
+    add_resource_buttons[0].y_offset = data.y_max - 135;
+    add_resource_buttons[1].y_offset = data.y_max - 95;
+}
+
 static void init(void)
 {
     update_screen_size();
@@ -124,6 +138,7 @@ static void init(void)
         data.selected_city = 0;
     }
     data.focus_button_id = 0;
+    add_resource_buttons_init();
     empire_center_on_our_city(map_viewport_width(), map_viewport_height());
     window_empire_collect_trade_edges();
 }
@@ -343,7 +358,7 @@ static void show_coords(int x_offset, int y_offset, const uint8_t *title, int x_
 static int is_outside_map(int x, int y)
 {
     return (x < data.x_min + 16 || x >= data.x_max - 16 ||
-            y < data.y_min + 16 || y >= data.y_max - 120);
+            y < data.y_min + 16 || y >= data.y_max - 160);
 }
 
 int editor_empire_mouse_to_empire_x(int x)
@@ -469,6 +484,7 @@ static void draw_city_info(const empire_city *city)
             break;
         case EMPIRE_CITY_OURS:
         {
+            add_resource_buttons[1].dont_draw = 1;
             width += lang_text_draw(47, 1, x_offset + 20 + width, y_offset, FONT_NORMAL_GREEN);
             int resource_x_offset = x_offset + 30 + width;
             for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
@@ -477,11 +493,16 @@ static void draw_city_info(const empire_city *city)
                     resource_x_offset += 32;
                 }
             }
+            add_resource_buttons[0].x_offset = resource_x_offset;
+            if (scenario_empire_id() == SCENARIO_CUSTOM_EMPIRE) {
+                image_buttons_draw(0, 0, add_resource_buttons, NUM_PLUS_BUTTONS);
+            }
             break;
         }
         case EMPIRE_CITY_TRADE:
         case EMPIRE_CITY_FUTURE_TRADE:
         {
+            add_resource_buttons[1].dont_draw = 0;
             int text_width = lang_text_draw(47, 5, x_offset + 20 + width, y_offset, FONT_NORMAL_GREEN);
             width += text_width;
             int resource_x_offset = x_offset + 30 + width;
@@ -491,6 +512,7 @@ static void draw_city_info(const empire_city *city)
                     resource_x_offset += 32 + width;
                 }
             }
+            add_resource_buttons[0].x_offset = resource_x_offset;
             y_offset = data.y_max - 85;
             resource_x_offset = x_offset + 20 + width_after_name;
             text_width = lang_text_draw(47, 4, resource_x_offset, y_offset, FONT_NORMAL_GREEN);
@@ -501,6 +523,10 @@ static void draw_city_info(const empire_city *city)
                     width = draw_resource(r, trade_route_limit(city->route_id, r, 1), resource_x_offset, y_offset - 9);
                     resource_x_offset += 32 + width;
                 }
+            }
+            add_resource_buttons[1].x_offset = resource_x_offset;
+            if (scenario_empire_id() == SCENARIO_CUSTOM_EMPIRE) {
+                image_buttons_draw(0, 0, add_resource_buttons, NUM_PLUS_BUTTONS);
             }
             break;
         }
@@ -631,6 +657,10 @@ static void handle_input(const mouse *m, const hotkeys *h)
             preview_button, 1, &data.preview_button_focused)) {
         return;
     }
+    if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE && 
+        image_buttons_handle_mouse(m, 0, 0, add_resource_buttons, NUM_PLUS_BUTTONS, NULL)) {
+        return;
+    }
     
     if (!is_outside_map(m->x, m->y)) {
         if (empire_editor_handle_placement(m, h)) {
@@ -700,6 +730,11 @@ static void button_recycle_preview(const generic_button *button)
 {
     empire_editor_change_tool(-1);
     window_request_refresh();
+}
+
+static void button_add_resource(int param1, int param2)
+{
+    
 }
 
 static void button_refresh(const generic_button *button)
