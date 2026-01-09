@@ -28,11 +28,14 @@
 #include "scenario/empire.h"
 #include "window/editor/map.h"
 #include "window/empire.h"
+#include "window/select_list.h"
 
 #define WIDTH_BORDER 32
 #define HEIGHT_BORDER 176
 
 #define OUR_CITY -1
+
+#define DEFAULT_TRADE_QUOTA 25
 
 static void button_change_empire(int is_down, int param2);
 static void button_ok(const generic_button *button);
@@ -64,6 +67,8 @@ static image_button add_resource_buttons[] = {
 static struct {
     unsigned int selected_button;
     int selected_city;
+    int add_to_buying;
+    int available_resources[RESOURCE_MAX];
     int x_min, x_max, y_min, y_max;
     int x_draw_offset, y_draw_offset;
     unsigned int focus_button_id;
@@ -732,9 +737,34 @@ static void button_recycle_preview(const generic_button *button)
     window_request_refresh();
 }
 
+static void add_resource(int value)
+{
+    resource_type resource = data.available_resources[value];
+    empire_city *city = empire_city_get(data.selected_city);
+    if (data.add_to_buying) {
+        empire_city_change_buying_of_resource(city, resource, DEFAULT_TRADE_QUOTA);
+    } else {
+        empire_city_change_selling_of_resource(city, resource, DEFAULT_TRADE_QUOTA);
+    }
+}
+
 static void button_add_resource(int param1, int param2)
 {
-    
+    data.add_to_buying = param1;
+    static const uint8_t *resource_texts[RESOURCE_MAX];
+    static int total_resources = 0;
+    if (!total_resources) {
+        for (resource_type resource = RESOURCE_NONE; resource < RESOURCE_MAX; resource++) {
+            if (!resource_is_storable(resource)) {
+                continue;
+            }
+            resource_texts[total_resources] = resource_get_data(resource)->text;
+            data.available_resources[total_resources] = resource;
+            total_resources++;
+        }
+    }
+    window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y(), NULL,
+        resource_texts, total_resources, add_resource);
 }
 
 static void button_refresh(const generic_button *button)
