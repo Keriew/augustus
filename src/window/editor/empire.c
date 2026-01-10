@@ -28,7 +28,10 @@
 #include "scenario/empire.h"
 #include "window/editor/map.h"
 #include "window/empire.h"
+#include "window/numeric_input.h"
 #include "window/select_list.h"
+
+#include <math.h>
 
 #define WIDTH_BORDER 32
 #define HEIGHT_BORDER 176
@@ -36,6 +39,16 @@
 #define OUR_CITY -1
 
 #define DEFAULT_TRADE_QUOTA 25
+
+#define RESOURCE_ICON_WIDTH 26 //resource icon width in px
+#define RESOURCE_ICON_HEIGHT 26
+
+typedef struct {
+    int x;
+    int y;
+    int enabled;
+    int highlighted;
+} resource_button;
 
 static void button_change_empire(int is_down, int param2);
 static void button_ok(const generic_button *button);
@@ -64,10 +77,14 @@ static image_button add_resource_buttons[] = {
 };
 #define NUM_PLUS_BUTTONS sizeof(add_resource_buttons) / sizeof(image_button)
 
+static resource_button sell_buttons[RESOURCE_MAX] = { 0 };
+static resource_button buy_buttons[RESOURCE_MAX] = { 0 };
+
 static struct {
     unsigned int selected_button;
     int selected_city;
     int add_to_buying;
+    int selected_resource;
     int available_resources[RESOURCE_MAX];
     int x_min, x_max, y_min, y_max;
     int x_draw_offset, y_draw_offset;
@@ -76,6 +93,7 @@ static struct {
     int finished_scroll;
     int show_battle_objects;
     unsigned int preview_button_focused;
+    int resource_pulse_start;
     struct {
         int x;
         int y;
@@ -133,6 +151,7 @@ static void add_resource_buttons_init(void)
 
 static void init(void)
 {
+    data.resource_pulse_start = 0;
     update_screen_size();
     data.selected_button = 0;
     data.coordinates.active = 0;
@@ -146,6 +165,7 @@ static void init(void)
     add_resource_buttons_init();
     empire_center_on_our_city(map_viewport_width(), map_viewport_height());
     window_empire_collect_trade_edges();
+    data.resource_pulse_start = time_get_millis();
 }
 
 void set_battles_shown(int show)
@@ -445,6 +465,10 @@ static void draw_map(void)
     empire_adjust_scroll(&data.x_draw_offset, &data.y_draw_offset);
     image_draw(empire_get_image_id(), data.x_draw_offset, data.y_draw_offset,
         COLOR_MASK_NONE, SCALE_NONE);
+    
+    if (data.resource_pulse_start == 0) {
+        data.resource_pulse_start = time_get_millis();
+    }
 
     empire_object_foreach(draw_empire_object);
     empire_object_foreach_of_type(draw_trade_waypoints, EMPIRE_OBJECT_SEA_TRADE_ROUTE);
@@ -458,11 +482,19 @@ static void draw_map(void)
     graphics_reset_clip_rectangle();
 }
 
-static int draw_resource(resource_type resource, int trade_max, int x_offset, int y_offset)
+static int draw_resource(resource_type resource, int trade_max, int x_offset, int y_offset, int is_highlighted)
 {
-    graphics_draw_inset_rect(x_offset, y_offset, 26, 26, COLOR_INSET_DARK, COLOR_INSET_LIGHT);
+    graphics_draw_inset_rect(x_offset, y_offset, RESOURCE_ICON_WIDTH, RESOURCE_ICON_HEIGHT, COLOR_INSET_DARK, COLOR_INSET_LIGHT);
     image_draw(resource_get_data(resource)->image.editor.empire, x_offset + 1, y_offset + 1,
         COLOR_MASK_NONE, SCALE_NONE);
+    if (is_highlighted) {
+        time_millis elapsed = time_get_millis() - data.resource_pulse_start;
+        float time_seconds = elapsed / 1000.0f; // Convert to seconds
+        float pulse = sinf(time_seconds * 1.0f * 3.14f); // 1 full cycle per second
+        int alpha = 96 + (int) (pulse * 64); // Range: 32–160
+        graphics_tint_rect(x_offset, y_offset, RESOURCE_ICON_WIDTH - 1, RESOURCE_ICON_HEIGHT - 1,
+            COLOR_MASK_DARK_PINK, alpha);
+    }
     if (trade_max == OUR_CITY) {
         return 0;
     }
@@ -494,7 +526,8 @@ static void draw_city_info(const empire_city *city)
             int resource_x_offset = x_offset + 30 + width;
             for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
                 if (empire_object_city_sells_resource(city->empire_object_id, r)) {
-                    draw_resource(r, OUR_CITY, resource_x_offset, y_offset - 9);
+                    draw_resource(r, OUR_CITY, resource_x_offset, y_offset - 9, sell_buttons[r].highlighted);
+                    sell_buttons[r] = (resource_button){resource_x_offset, y_offset, 1, 0};
                     resource_x_offset += 32;
                 }
             }
@@ -513,7 +546,8 @@ static void draw_city_info(const empire_city *city)
             int resource_x_offset = x_offset + 30 + width;
             for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
                 if (empire_object_city_sells_resource(city->empire_object_id, r)) {
-                    width = draw_resource(r, trade_route_limit(city->route_id, r, 0), resource_x_offset, y_offset - 9);
+                    width = draw_resource(r, trade_route_limit(city->route_id, r, 0), resource_x_offset, y_offset - 9, sell_buttons[r].highlighted);
+                    sell_buttons[r] = (resource_button){resource_x_offset, y_offset, 1, 0};
                     resource_x_offset += 32 + width;
                 }
             }
@@ -525,7 +559,8 @@ static void draw_city_info(const empire_city *city)
             resource_x_offset = x_offset + 30 + width;
             for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
                 if (empire_object_city_buys_resource(city->empire_object_id, r)) {
-                    width = draw_resource(r, trade_route_limit(city->route_id, r, 1), resource_x_offset, y_offset - 9);
+                    width = draw_resource(r, trade_route_limit(city->route_id, r, 1), resource_x_offset, y_offset - 9, buy_buttons[r].highlighted);
+                    buy_buttons[r] = (resource_button){resource_x_offset, y_offset, 1, 0};
                     resource_x_offset += 32 + width;
                 }
             }
@@ -622,6 +657,11 @@ static void refresh_empire(void)
     window_invalidate();
 }
 
+static void set_quota(int value)
+{
+    trade_route_set_limit(empire_city_get(data.selected_city)->route_id, data.selected_resource, value, data.add_to_buying);
+}
+
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     pixel_offset position;
@@ -665,6 +705,23 @@ static void handle_input(const mouse *m, const hotkeys *h)
     if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE && 
         image_buttons_handle_mouse(m, 0, 0, add_resource_buttons, NUM_PLUS_BUTTONS, NULL)) {
         return;
+    }
+    for (int i = 0; i < 2; i++) {
+        for (resource_type r = RESOURCE_NONE; r < RESOURCE_MAX; r++) {
+            resource_button *btn = i ? &buy_buttons[r] : &sell_buttons[r];
+            if (m->x >= btn->x && m->x < btn->x + RESOURCE_ICON_WIDTH &&
+                m->y >= btn->y && m->y < btn->y + RESOURCE_ICON_HEIGHT) {
+                btn->highlighted = 1;
+                if (m->left.went_up) {
+                    data.add_to_buying = i;
+                    data.selected_resource = r;
+                    window_numeric_input_bound_show(screen_dialog_offset_x(), screen_dialog_offset_y(), NULL, 5, 0, 99999, set_quota);
+                    return;
+                }
+            } else {
+                btn->highlighted = 0;
+            }
+        }
     }
     
     if (!is_outside_map(m->x, m->y)) {

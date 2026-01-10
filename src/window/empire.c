@@ -921,7 +921,7 @@ static void window_empire_draw_trade_route_pulses(const empire_object *route_obj
 //                                              FOREGROUND ELEMENTS DRAWING 
 // -------------------------------------------------------------------------------------------------------
 
-void draw_trade_resource(resource_type r, int trade_max, int x, int y)
+static void draw_trade_resource(resource_type r, int trade_max, int x, int y)
 {
     graphics_draw_inset_rect(x - 1, y - 1, 26, 26, COLOR_INSET_DARK, COLOR_INSET_LIGHT);
     image_draw(resource_get_data(r)->image.empire, x, y, COLOR_MASK_NONE, SCALE_NONE);
@@ -1750,8 +1750,7 @@ static void draw_trade_button_highlights(void)
             float pulse = sinf(time_seconds * 1.0f * 3.14f); // 1 full cycle per second
             int alpha = 96 + (int) (pulse * 64); // Range: 32–160
             graphics_tint_rect(btn->x, btn->y, RESOURCE_ICON_WIDTH - 1, RESOURCE_ICON_HEIGHT - 1,
-                COLOR_MASK_DARK_PINK, alpha
-            );
+                COLOR_MASK_DARK_PINK, alpha);
         }
 
     }
