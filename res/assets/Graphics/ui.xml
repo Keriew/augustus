@@ -1422,4 +1422,7 @@
     <image src="Plus_Button_Idle" id="Plus_Button_Idle"/>
     <image src="Plus_Button_Idle"/>
     <image src="Plus_Button_Click"/>
+    <image src="Edit_Button_Idle" id="Edit_Button_Idle"/>
+    <image src="Edit_Button_Idle"/>
+    <image src="Edit_Button_Click"/>
 </assetlist>
