@@ -30,6 +30,7 @@
 #include "window/empire.h"
 #include "window/numeric_input.h"
 #include "window/select_list.h"
+#include "window/text_input.h"
 
 #include <math.h>
 
@@ -57,6 +58,7 @@ static void button_refresh(const generic_button *button);
 static void button_cycle_preview(const generic_button *button);
 static void button_recycle_preview(const generic_button *button);
 static void button_add_resource(int param1, int param2);
+static void button_edit_city_name(int param1, int param2);
 
 static arrow_button arrow_buttons_empire[] = {
     {8, 48, 17, 24, button_change_empire, 1},
@@ -72,10 +74,14 @@ static generic_button preview_button[] = {
 };
 
 static image_button add_resource_buttons[] = {
-    {0, 0, 39, 26, IB_NORMAL, 0, 0, button_add_resource, NULL, 0, 0, 1, "UI", "Plus_Button_Idle"},
-    {0, 0, 39, 26, IB_NORMAL, 0, 0, button_add_resource, NULL, 1, 0, 1, "UI", "Plus_Button_Idle"}
+    {0, 0, 39, 24, IB_NORMAL, 0, 0, button_add_resource, NULL, 0, 0, 1, "UI", "Plus_Button_Idle"},
+    {0, 0, 39, 24, IB_NORMAL, 0, 0, button_add_resource, NULL, 1, 0, 1, "UI", "Plus_Button_Idle"}
 };
 #define NUM_PLUS_BUTTONS sizeof(add_resource_buttons) / sizeof(image_button)
+
+static image_button edit_city_name_button[] = {
+    {0, 0, 24, 24, IB_NORMAL, 0, 0, button_edit_city_name, NULL, 0, 0, 1, "UI", "Edit_Button_Idle"}
+};
 
 static resource_button sell_buttons[RESOURCE_MAX] = { 0 };
 static resource_button buy_buttons[RESOURCE_MAX] = { 0 };
@@ -143,10 +149,11 @@ static int map_viewport_height(void)
     return data.y_max - data.y_min - HEIGHT_BORDER;
 }
 
-static void add_resource_buttons_init(void)
+static void image_buttons_init(void)
 {
     add_resource_buttons[0].y_offset = data.y_max - 133;
     add_resource_buttons[1].y_offset = data.y_max - 93;
+    edit_city_name_button[0].y_offset = data.y_max - 133;
 }
 
 static void init(void)
@@ -162,7 +169,7 @@ static void init(void)
         data.selected_city = 0;
     }
     data.focus_button_id = 0;
-    add_resource_buttons_init();
+    image_buttons_init();
     empire_center_on_our_city(map_viewport_width(), map_viewport_height());
     window_empire_collect_trade_edges();
     data.resource_pulse_start = time_get_millis();
@@ -508,6 +515,9 @@ static void draw_city_info(const empire_city *city)
     int y_offset = data.y_max - 125;
     const uint8_t *city_name = empire_city_get_name(city);
     int width = text_draw(city_name, x_offset, y_offset, FONT_NORMAL_WHITE, 0);
+    width += 10;
+    edit_city_name_button[0].x_offset = width + x_offset;
+    width += 24;
     int width_after_name = width;
 
     switch (city->type) {
@@ -571,6 +581,7 @@ static void draw_city_info(const empire_city *city)
             break;
         }
     }
+    image_buttons_draw(0, 0, edit_city_name_button, 1);
 }
 
 static void draw_panel_buttons(const empire_city *city)
@@ -702,7 +713,11 @@ static void handle_input(const mouse *m, const hotkeys *h)
             preview_button, 1, &data.preview_button_focused)) {
         return;
     }
-    if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE && 
+    if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE &&
+        image_buttons_handle_mouse(m, 0, 0, edit_city_name_button, 1, NULL)) {
+        return;
+    }
+    if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE &&
         image_buttons_handle_mouse(m, 0, 0, add_resource_buttons, NUM_PLUS_BUTTONS, NULL)) {
         return;
     }
@@ -822,6 +837,16 @@ static void button_add_resource(int param1, int param2)
     }
     window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y(), NULL,
         resource_texts, total_resources, add_resource);
+}
+
+static void set_city_name(const uint8_t *name) {
+    full_empire_object *city_obj = empire_object_get_full(empire_city_get(data.selected_city)->empire_object_id);
+    string_copy(name, city_obj->city_custom_name, 50);
+}
+
+static void button_edit_city_name(int param1, int param2) {
+    // 49 because city_custom_name is declared as uint8_t [50]
+    window_text_input_show(string_from_ascii("Edit city name"), NULL, NULL, 49, set_city_name);
 }
 
 static void button_refresh(const generic_button *button)
