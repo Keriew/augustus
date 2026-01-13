@@ -145,8 +145,8 @@ static int map_viewport_height(void)
 
 static void add_resource_buttons_init(void)
 {
-    add_resource_buttons[0].y_offset = data.y_max - 135;
-    add_resource_buttons[1].y_offset = data.y_max - 95;
+    add_resource_buttons[0].y_offset = data.y_max - 133;
+    add_resource_buttons[1].y_offset = data.y_max - 93;
 }
 
 static void init(void)
