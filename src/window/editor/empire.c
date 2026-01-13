@@ -839,12 +839,14 @@ static void button_add_resource(int param1, int param2)
         resource_texts, total_resources, add_resource);
 }
 
-static void set_city_name(const uint8_t *name) {
+static void set_city_name(const uint8_t *name)
+{
     full_empire_object *city_obj = empire_object_get_full(empire_city_get(data.selected_city)->empire_object_id);
     string_copy(name, city_obj->city_custom_name, 50);
 }
 
-static void button_edit_city_name(int param1, int param2) {
+static void button_edit_city_name(int param1, int param2)
+{
     // 49 because city_custom_name is declared as uint8_t [50]
     window_text_input_show(string_from_ascii("Edit city name"), NULL, NULL, 49, set_city_name);
 }

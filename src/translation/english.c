@@ -1924,7 +1924,9 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_EDITOR_EMPIRE_DELETE_OBJECT, "Delete empire object"},
     {TR_PARAMETER_BUYING, "Adjust buying"},
     {TR_EDITOR_DEMAND_CHANGE_BUYS, "buying"},
-    {TR_EDITOR_DEMAND_CHANGE_SELLS, "selling"}
+    {TR_EDITOR_DEMAND_CHANGE_SELLS, "selling"},
+    {TR_EDITOR_VIEW_CURRENT_EMPIRE, "View current empire"},
+    {TR_EDITOR_CREATE_NEW_EMPIRE, "Create new empire"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

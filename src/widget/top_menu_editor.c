@@ -42,6 +42,8 @@ static void menu_resets_invasions(int param);
 
 static void menu_empire_choose(int param);
 static void menu_empire_custom(int param);
+static void menu_empire_view(int param);
+static void menu_empire_create(int param);
 
 static menu_item menu_file[] = {
     {7, 1, menu_file_new_map, 0},
@@ -71,6 +73,8 @@ static menu_item menu_resets[] = {
 static menu_item menu_empire[] = {
     {149, 1, menu_empire_choose, 0},
     {CUSTOM_TRANSLATION, TR_EDITOR_CHOOSE_CUSTOM_EMPIRE, menu_empire_custom, 0},
+    {CUSTOM_TRANSLATION, TR_EDITOR_VIEW_CURRENT_EMPIRE, menu_empire_view, 0},
+    {CUSTOM_TRANSLATION, TR_EDITOR_CREATE_NEW_EMPIRE, menu_empire_create, 0}
 };
 
 static menu_bar_item menu[] = {
@@ -78,7 +82,7 @@ static menu_bar_item menu[] = {
     {2, menu_options, 3},
     {3, menu_help, 2},
     {10, menu_resets, 3},
-    {149, menu_empire, 2},
+    {149, menu_empire, 4},
 };
 
 static struct {
@@ -315,4 +319,26 @@ static void menu_empire_custom(int param)
     window_go_back();
     resource_set_mapping(RESOURCE_CURRENT_VERSION);
     window_file_dialog_show(FILE_TYPE_EMPIRE, FILE_DIALOG_LOAD);
+}
+
+static void menu_empire_view(int param)
+{
+    clear_state();
+    window_go_back();
+    resource_set_mapping(RESOURCE_CURRENT_VERSION);
+    window_editor_empire_show();
+}
+
+static void menu_empire_create(int param)
+{
+    clear_state();
+    window_go_back();
+    if (scenario_empire_id() == SCENARIO_CUSTOM_EMPIRE) {
+        resource_set_mapping(RESOURCE_CURRENT_VERSION);
+    } else {
+        resource_set_mapping(RESOURCE_CURRENT_VERSION);
+    }
+    empire_clear();
+    empire_object_clear();
+    window_editor_empire_show();
 }
