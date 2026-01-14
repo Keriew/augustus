@@ -113,6 +113,7 @@ static const char *ini_keys[] = {
     [CONFIG_GENERAL_UNLOCK_MOUSE] = "general_unlock_mouse",
     [CONFIG_GP_CH_HOUSING_PRE_MERGE_VACANT_LOTS] = "gp_ch_housing_pre_merge_vacant_lots",
     [CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES] = "ui_build_show_reservoir_ranges",
+    [CONFIG_UI_EMPIRE_SMART_BORDER_PLACMENT] = "ui_empire_smart_border_placement"
 };
 
 static const char *ini_string_keys[] = {
@@ -175,6 +176,7 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_GENERAL_UNLOCK_MOUSE] = 1,
     [CONFIG_GP_CH_HOUSING_PRE_MERGE_VACANT_LOTS] = 1,
     [CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES] = 1,
+    [CONFIG_UI_EMPIRE_SMART_BORDER_PLACMENT] = 1
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };
