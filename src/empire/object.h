@@ -100,6 +100,8 @@ int empire_object_get_closest(int x, int y);
 
 int empire_object_get_at(int x, int y);
 
+int empire_object_get_nearest_of_type(int x, int y, empire_object_type type);
+
 void empire_object_set_expanded(int object_id, int new_city_type);
 
 int empire_object_city_buys_resource(int object_id, int resource);

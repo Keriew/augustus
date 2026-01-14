@@ -1,5 +1,6 @@
 #include "top_menu_editor.h"
 
+#include "core/string.h"
 #include "empire/empire.h"
 #include "empire/object.h"
 #include "game/file_editor.h"
@@ -9,6 +10,7 @@
 #include "graphics/menu.h"
 #include "graphics/screen.h"
 #include "graphics/window.h"
+#include "scenario/data.h"
 #include "scenario/editor.h"
 #include "scenario/editor_map.h"
 #include "scenario/empire.h"
@@ -325,7 +327,11 @@ static void menu_empire_view(int param)
 {
     clear_state();
     window_go_back();
-    resource_set_mapping(RESOURCE_CURRENT_VERSION);
+    if (scenario_empire_id() == SCENARIO_CUSTOM_EMPIRE) {
+        resource_set_mapping(RESOURCE_CURRENT_VERSION);
+    } else {
+        resource_set_mapping(RESOURCE_ORIGINAL_VERSION);
+    }
     window_editor_empire_show();
 }
 
@@ -333,11 +339,9 @@ static void menu_empire_create(int param)
 {
     clear_state();
     window_go_back();
-    if (scenario_empire_id() == SCENARIO_CUSTOM_EMPIRE) {
-        resource_set_mapping(RESOURCE_CURRENT_VERSION);
-    } else {
-        resource_set_mapping(RESOURCE_CURRENT_VERSION);
-    }
+    scenario.empire.id = SCENARIO_CUSTOM_EMPIRE;
+    string_copy(string_from_ascii("\0"), (uint8_t *)scenario.empire.custom_name, 300);
+    resource_set_mapping(RESOURCE_CURRENT_VERSION);
     empire_clear();
     empire_object_clear();
     window_editor_empire_show();

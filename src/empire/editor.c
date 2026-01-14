@@ -20,9 +20,11 @@
 static struct {
     empire_tool current_tool;
     int current_route_obj_id;
+    int current_object_index;
 } data = {
     .current_tool = EMPIRE_TOOL_OUR_CITY,
-    .current_route_obj_id = -1
+    .current_route_obj_id = -1,
+    .current_object_index = 0
 };
 
 static int place_object(int mouse_x, int mouse_y);
@@ -79,6 +81,18 @@ static int place_border(full_empire_object *full);
 static int place_battle(full_empire_object *full);
 static int place_distant_battle(full_empire_object *full);
 
+static void shift_edge_indices(const empire_object *const_obj)
+{
+    if (const_obj->order_index < data.current_object_index) {
+        return;
+    }
+    if (const_obj->parent_object_id != empire_object_get_border()->id) {
+        return;
+    }
+    empire_object *obj = empire_object_get(const_obj->id);
+    obj->order_index++;
+}
+
 static int place_object(int mouse_x, int mouse_y)
 {
     full_empire_object *full = empire_object_get_new();
@@ -124,9 +138,16 @@ static int place_object(int mouse_x, int mouse_y)
             return 0;
     }
     
-    full->obj.x = editor_empire_mouse_to_empire_x(mouse_x) - ((full->obj.width / 2) * (full->obj.type != EMPIRE_OBJECT_BORDER_EDGE));
-    full->obj.y = editor_empire_mouse_to_empire_y(mouse_y) - ((full->obj.height / 2) * (full->obj.type != EMPIRE_OBJECT_BORDER_EDGE));
+    int is_edge = full->obj.type != EMPIRE_OBJECT_BORDER_EDGE;
+    full->obj.x = editor_empire_mouse_to_empire_x(mouse_x) - ((full->obj.width / 2) * is_edge);
+    full->obj.y = editor_empire_mouse_to_empire_y(mouse_y) - ((full->obj.height / 2) * is_edge);
     empire_transform_coordinates(&full->obj.x, &full->obj.y);
+    
+    if (is_edge) {
+        data.current_object_index = empire_object_get_nearest_of_type(full->obj.x, full->obj.y, EMPIRE_OBJECT_BORDER_EDGE);
+        empire_object_foreach_of_type(shift_edge_indices, EMPIRE_OBJECT_BORDER_EDGE);
+        full->obj.order_index = data.current_object_index;
+    }
     
     return 1;
 }
@@ -210,6 +231,7 @@ static int place_city(full_empire_object *city_obj)
 
 static int place_border(full_empire_object *edge)
 {
+    edge->in_use = 1;
     unsigned int parent_id = 0; 
     const empire_object *current_border = empire_object_get_border();
     if (!current_border) {
@@ -228,7 +250,6 @@ static int place_border(full_empire_object *edge)
         parent_id = current_border->id;
     }
     // place border edge
-    edge->in_use = 1;
     edge->obj.type = EMPIRE_OBJECT_BORDER_EDGE;
     edge->obj.parent_object_id = parent_id;
     edge->obj.order_index = empire_object_get_highest_index(parent_id) + 1;

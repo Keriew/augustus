@@ -770,6 +770,39 @@ int empire_object_get_at(int x, int y)
     return 0;
 }
 
+int empire_object_get_nearest_of_type(int x, int y, empire_object_type type)
+{
+    int min_dist = 9999;
+    int min_id = 0;
+    full_empire_object *full;
+    array_foreach(objects, full) {
+        if (!full->in_use) {
+            continue;
+        }
+        const empire_object *obj = &full->obj;
+        if (obj->type != type) {
+            continue;
+        }
+        int obj_x, obj_y;
+        if (scenario_empire_is_expanded()) {
+            obj_x = obj->expanded.x;
+            obj_y = obj->expanded.y;
+        } else {
+            obj_x = obj->x;
+            obj_y = obj->y;
+        }
+        int dist = calc_euclidean_distance(obj_x, obj_y, x, y);
+        if (dist < min_dist) {
+            min_dist = dist;
+            min_id = obj->id;
+        }
+    }
+    if (min_dist != 9999 && min_id) {
+        return min_id;
+    }
+    return 0;
+}
+
 void empire_object_set_expanded(int object_id, int new_city_type)
 {
     full_empire_object *obj = array_item(objects, object_id);
