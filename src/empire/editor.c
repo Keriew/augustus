@@ -138,18 +138,20 @@ static int place_object(int mouse_x, int mouse_y)
             return 0;
     }
     
-    int is_edge = full->obj.type != EMPIRE_OBJECT_BORDER_EDGE;
-    full->obj.x = editor_empire_mouse_to_empire_x(mouse_x) - ((full->obj.width / 2) * is_edge);
-    full->obj.y = editor_empire_mouse_to_empire_y(mouse_y) - ((full->obj.height / 2) * is_edge);
-    empire_transform_coordinates(&full->obj.x, &full->obj.y);
-    
+    int is_edge = full->obj.type == EMPIRE_OBJECT_BORDER_EDGE;
+    int x = editor_empire_mouse_to_empire_x(mouse_x) - ((full->obj.width / 2) * !is_edge);
+    int y = editor_empire_mouse_to_empire_y(mouse_y) - ((full->obj.height / 2) * !is_edge);
+    empire_transform_coordinates(&x, &y);
+    // find nearest before assigning coordinates so it doesn't always find itself
     if (is_edge) {
-        int nearest_id = empire_object_get_nearest_of_type(full->obj.x, full->obj.y, EMPIRE_OBJECT_BORDER_EDGE);
+        int nearest_id = empire_object_get_nearest_of_type(x, y, EMPIRE_OBJECT_BORDER_EDGE);
         data.foreach_param1 = empire_object_get(nearest_id)->order_index;
         data.foreach_param2 = 1;
         empire_object_foreach_of_type(shift_edge_indices, EMPIRE_OBJECT_BORDER_EDGE);
         full->obj.order_index = data.foreach_param1;
     }
+    full->obj.x = x;
+    full->obj.y = y;
     
     return 1;
 }
