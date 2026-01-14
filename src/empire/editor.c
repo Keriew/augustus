@@ -19,12 +19,12 @@
 
 static struct {
     empire_tool current_tool;
-    int current_route_obj_id;
-    int current_object_index;
+    int foreach_param1; // used for empire_object_foreach callbacks
+    int foreach_param2;
 } data = {
     .current_tool = EMPIRE_TOOL_OUR_CITY,
-    .current_route_obj_id = -1,
-    .current_object_index = 0
+    .foreach_param1 = -1,
+    .foreach_param2 = 0
 };
 
 static int place_object(int mouse_x, int mouse_y);
@@ -83,14 +83,14 @@ static int place_distant_battle(full_empire_object *full);
 
 static void shift_edge_indices(const empire_object *const_obj)
 {
-    if (const_obj->order_index < data.current_object_index) {
+    if (const_obj->order_index < data.foreach_param1) {
         return;
     }
     if (const_obj->parent_object_id != empire_object_get_border()->id) {
         return;
     }
     empire_object *obj = empire_object_get(const_obj->id);
-    obj->order_index++;
+    obj->order_index += data.foreach_param2;
 }
 
 static int place_object(int mouse_x, int mouse_y)
@@ -144,9 +144,11 @@ static int place_object(int mouse_x, int mouse_y)
     empire_transform_coordinates(&full->obj.x, &full->obj.y);
     
     if (is_edge) {
-        data.current_object_index = empire_object_get_nearest_of_type(full->obj.x, full->obj.y, EMPIRE_OBJECT_BORDER_EDGE);
+        int nearest_id = empire_object_get_nearest_of_type(full->obj.x, full->obj.y, EMPIRE_OBJECT_BORDER_EDGE);
+        data.foreach_param1 = empire_object_get(nearest_id)->order_index;
+        data.foreach_param2 = 1;
         empire_object_foreach_of_type(shift_edge_indices, EMPIRE_OBJECT_BORDER_EDGE);
-        full->obj.order_index = data.current_object_index;
+        full->obj.order_index = data.foreach_param1;
     }
     
     return 1;
@@ -161,6 +163,7 @@ static int create_trade_route_default(full_empire_object *full) {
     route_obj->in_use = 1;
     route_obj->obj.type = EMPIRE_OBJECT_LAND_TRADE_ROUTE;
     full->trade_route_cost = 500;
+    window_empire_collect_trade_edges();
     empire_object_set_trade_route_coords(empire_object_get_our_city());
     
     return 1;
@@ -303,9 +306,21 @@ static int place_distant_battle(full_empire_object *distant_battle)
 
 static void remove_trade_waypoints(const empire_object *obj)
 {
-    if (obj->parent_object_id == data.current_route_obj_id) {
+    if (obj->parent_object_id == data.foreach_param1) {
         empire_object_remove(obj->id);
     }
+}
+
+static void shift_trade_waypoints(const empire_object *const_obj)
+{
+    if (const_obj->order_index < data.foreach_param1) {
+        return;
+    }
+    if (const_obj->parent_object_id != data.foreach_param2) {
+        return;
+    }
+    empire_object *obj = empire_object_get(const_obj->id);
+    obj->order_index--;
 }
 
 static int delete_object(int mouse_x, int mouse_y)
@@ -326,9 +341,9 @@ static int delete_object(int mouse_x, int mouse_y)
             if (route_obj->type != EMPIRE_OBJECT_LAND_TRADE_ROUTE && route_obj->type != EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
                 return 0;
             }
-            data.current_route_obj_id = route_obj->id;
+            data.foreach_param1 = route_obj->id;
             empire_object_foreach_of_type(remove_trade_waypoints, EMPIRE_OBJECT_TRADE_WAYPOINT);
-            data.current_route_obj_id = -1;
+            data.foreach_param1 = -1;
             empire_object_remove(route_obj->id);
             window_empire_collect_trade_edges();
         }
@@ -337,8 +352,18 @@ static int delete_object(int mouse_x, int mouse_y)
     empire_object_remove(obj_id);
     
     if (full->obj.type == EMPIRE_OBJECT_TRADE_WAYPOINT) {
+        data.foreach_param1 = empire_object_get(obj_id)->order_index;
+        data.foreach_param2 = full->obj.parent_object_id;
+        empire_object_foreach_of_type(shift_trade_waypoints, EMPIRE_OBJECT_TRADE_WAYPOINT);
         window_empire_collect_trade_edges();
         empire_object_set_trade_route_coords(empire_object_get_our_city());
     }
+    
+    if (full->obj.type == EMPIRE_OBJECT_BORDER_EDGE) {
+        data.foreach_param1 = empire_object_get(obj_id)->order_index;
+        data.foreach_param2 = -1;
+        empire_object_foreach_of_type(shift_edge_indices, EMPIRE_OBJECT_BORDER_EDGE);
+    }
+    
     return 1;
 }

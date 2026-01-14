@@ -524,8 +524,6 @@ int empire_object_get_in_order(int parent_id, int order_index)
         if (obj->obj.parent_object_id == parent_id && obj->obj.order_index == order_index) {
             if (obj->in_use) {
                 return obj->obj.id;
-            } else {
-                return -1;
             }
         }
     }
@@ -534,11 +532,7 @@ int empire_object_get_in_order(int parent_id, int order_index)
 
 int empire_object_get_next_in_order(int parent_id, int *current_order_index)
 {
-    int id;
-    do {
-        id = empire_object_get_in_order(parent_id, ++*current_order_index);
-    } while (id < 0);
-    return id;
+    return empire_object_get_in_order(parent_id, ++*current_order_index);
 }
 
 int empire_object_get_highest_index(int parent_id)
