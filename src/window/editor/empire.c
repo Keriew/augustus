@@ -539,6 +539,8 @@ static void draw_city_info(const empire_city *city)
                     draw_resource(r, OUR_CITY, resource_x_offset, y_offset - 9, sell_buttons[r].highlighted);
                     sell_buttons[r] = (resource_button){resource_x_offset, y_offset, 1, 0};
                     resource_x_offset += 32;
+                } else {
+                    sell_buttons[r] = (resource_button){0, 0, 0, 0};
                 }
             }
             add_resource_buttons[0].x_offset = resource_x_offset;
@@ -559,6 +561,8 @@ static void draw_city_info(const empire_city *city)
                     width = draw_resource(r, trade_route_limit(city->route_id, r, 0), resource_x_offset, y_offset - 9, sell_buttons[r].highlighted);
                     sell_buttons[r] = (resource_button){resource_x_offset, y_offset, 1, 0};
                     resource_x_offset += 32 + width;
+                } else {
+                    sell_buttons[r] = (resource_button){0, 0, 0, 0};
                 }
             }
             add_resource_buttons[0].x_offset = resource_x_offset;
@@ -572,6 +576,8 @@ static void draw_city_info(const empire_city *city)
                     width = draw_resource(r, trade_route_limit(city->route_id, r, 1), resource_x_offset, y_offset - 9, buy_buttons[r].highlighted);
                     buy_buttons[r] = (resource_button){resource_x_offset, y_offset, 1, 0};
                     resource_x_offset += 32 + width;
+                } else {
+                    buy_buttons[r] = (resource_button){0, 0, 0, 0};
                 }
             }
             add_resource_buttons[1].x_offset = resource_x_offset;
@@ -731,6 +737,17 @@ static void handle_input(const mouse *m, const hotkeys *h)
                     data.add_to_buying = i;
                     data.selected_resource = r;
                     window_numeric_input_bound_show(screen_dialog_offset_x(), screen_dialog_offset_y(), NULL, 5, 0, 99999, set_quota);
+                    window_request_refresh();
+                    return;
+                }
+                if (m->right.went_up) {
+                    empire_city *city = empire_city_get(data.selected_city);
+                    if (i) {
+                        empire_city_change_buying_of_resource(city, r, 0);
+                    } else {
+                        empire_city_change_selling_of_resource(city, r, 0);
+                    }
+                    window_request_refresh();
                     return;
                 }
             } else {
