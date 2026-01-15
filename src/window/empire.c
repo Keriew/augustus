@@ -1435,9 +1435,6 @@ void window_empire_draw_border(const empire_object *border, int x_offset, int y_
 
     for (int i = first; i < empire_object_count(); ) {
         int obj_id = empire_object_get_next_in_order(border->id, &i);
-        if (obj_id == 48) {
-            int debug;
-        }
         if (!obj_id) {
             break;
         }
