@@ -320,9 +320,7 @@ static void draw_empire_object(const empire_object *obj)
     int x = obj->x;
     int y = obj->y;
     int image_id = obj->image_id;
-    if (obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
-        int debug;
-    }
+
     if (obj->type == EMPIRE_OBJECT_TRADE_WAYPOINT || obj->type == EMPIRE_OBJECT_BORDER_EDGE) {
         return;
     }
