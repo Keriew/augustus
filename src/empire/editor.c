@@ -11,7 +11,7 @@
 #include "empire/empire.h"
 #include "empire/object.h"
 #include "empire/trade_route.h"
-#include "empire/xml.h"
+#include "empire/import_xml.h"
 #include "window/editor/empire.h"
 #include "window/empire.h"
 

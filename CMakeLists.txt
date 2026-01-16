@@ -396,7 +396,8 @@ set(EMPIRE_FILES
     ${PROJECT_SOURCE_DIR}/src/empire/city.c
     ${PROJECT_SOURCE_DIR}/src/empire/editor.c
     ${PROJECT_SOURCE_DIR}/src/empire/empire.c
-    ${PROJECT_SOURCE_DIR}/src/empire/xml.c
+    ${PROJECT_SOURCE_DIR}/src/empire/import_xml.c
+    ${PROJECT_SOURCE_DIR}/src/empire/export_xml.c
     ${PROJECT_SOURCE_DIR}/src/empire/object.c
     ${PROJECT_SOURCE_DIR}/src/empire/trade_prices.c
     ${PROJECT_SOURCE_DIR}/src/empire/trade_route.c
