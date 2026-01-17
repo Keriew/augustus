@@ -344,5 +344,6 @@ static void menu_empire_create(int param)
     resource_set_mapping(RESOURCE_CURRENT_VERSION);
     empire_clear();
     empire_object_clear();
+    empire_object_init_cities(SCENARIO_CUSTOM_EMPIRE);
     window_editor_empire_show();
 }
