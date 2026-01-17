@@ -102,7 +102,7 @@ int empire_object_get_at(int x, int y);
 
 int empire_object_get_nearest_of_type(int x, int y, empire_object_type type);
 
-int empire_get_ireland(void);
+int empire_object_get_ireland(void);
 
 int empire_object_count_ornaments(void);
 

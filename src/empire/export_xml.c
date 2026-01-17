@@ -5,6 +5,7 @@
 #include "core/image.h"
 #include "core/io.h"
 #include "core/log.h"
+#include "core/string.h"
 #include "core/xml_exporter.h"
 #include "editor/editor.h"
 #include "empire/empire.h"
@@ -86,14 +87,14 @@ static void export_border(void)
         return;
     }
     xml_exporter_new_element("border");
-    xml_exporter_add_attribute_int("density", border->obj.width);
+    xml_exporter_add_attribute_int("density", border->width);
     for (int edge_index = 0; edge_index < empire_object_count(); ) {
-        edge_id = empire_object_get_next_in_order(border->id, &edge_index);
+        int edge_id = empire_object_get_next_in_order(border->id, &edge_index);
         if (!edge_id) {
             break;
         }
         empire_object *edge = empire_object_get(edge_id);
-        if (!edge->type != EMPIRE_OBJECT_BORDER_EDGE) {
+        if (edge->type != EMPIRE_OBJECT_BORDER_EDGE) {
             break;
         }
         xml_exporter_new_element("edge");
@@ -117,18 +118,18 @@ static void export_city(const empire_object *obj)
     }
     xml_exporter_new_element("city");
     uint8_t city_name[50];
-    if (city->custom_city_name) {
-        string_copy(city->custom_city_name, city_name, 50);
+    if (string_length(city->city_custom_name)) {
+        string_copy(city->city_custom_name, city_name, 50);
     } else {
         string_copy(lang_get_string(21, city->city_name_id), city_name, 50);
     }
-    xml_exporter_add_attribute_int("name", city_name);
+    xml_exporter_add_attribute_encoded_text("name", city_name);
     xml_exporter_add_attribute_int("x", city->obj.x);
     xml_exporter_add_attribute_int("y", city->obj.y);
-    xml_exporter_add_attribute_encoded_text("type", city_types[city->city_type]);
+    xml_exporter_add_attribute_text("type", city_types[city->city_type]);
     if (city->city_type == EMPIRE_CITY_TRADE || city->city_type == EMPIRE_CITY_FUTURE_TRADE) {
         xml_exporter_add_attribute_int("trade_route_cost", city->trade_route_cost);
-        const char *route_type = empire_object_is_sea_trade_route(city->trade_route_id) ? "sea" : "land";
+        const char *route_type = empire_object_is_sea_trade_route(city->obj.trade_route_id) ? "sea" : "land";
         xml_exporter_add_attribute_text("trade_route_type", route_type);
     }
 }

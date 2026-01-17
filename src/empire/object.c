@@ -810,7 +810,7 @@ int empire_object_get_ireland(void)
 
 int empire_object_count_ornaments(void)
 {
-    total_ornaments = 0;
+    int total_ornaments = 0;
     full_empire_object *full;
     array_foreach(objects, full) {
         if (full->in_use && full->obj.type == EMPIRE_OBJECT_ORNAMENT && full->obj.image_id == -1) {
