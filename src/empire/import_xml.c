@@ -75,7 +75,8 @@ static const char *ORNAMENTS[] = {
     "East Desert Wheat",
     "Trade Camel",
     "Mount Etna",
-    "Colossus of Rhodes"
+    "Colossus of Rhodes",
+    "The Temple"
 };
 
 #define TOTAL_ORNAMENTS (sizeof(ORNAMENTS) / sizeof(const char *))
@@ -85,7 +86,7 @@ map_point ORNAMENT_POSITIONS[TOTAL_ORNAMENTS] = {
     {  423, 802 }, { 1465, 883 }, {  518, 764 }, {  691, 618 }, {  742, 894 },
     {  726, 468 }, {  502, 280 }, {  855, 551 }, { 1014, 443 }, { 1158, 698 },
     { 1431, 961 }, { 1300, 500 }, { 1347, 648 }, { 1707, 783 }, { 1704, 876 },
-    {  829, 720 }, { 1347, 745 }
+    {  829, 720 }, { 1347, 745 }, { 1640, 922 }
 };
 
 static struct {
@@ -176,7 +177,7 @@ static int xml_start_empire(void)
         log_error("No version set", 0, 0);
         return 0;
     }
-    if (data.version == 1 && xml_parser_get_attribute_bool("show_ireland")) {
+    if (data.version < 2 && xml_parser_get_attribute_bool("show_ireland")) {
         full_empire_object *obj = empire_object_get_new();
         obj->in_use = 1;
         obj->obj.type = EMPIRE_OBJECT_ORNAMENT;

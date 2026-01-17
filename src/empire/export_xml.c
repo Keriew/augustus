@@ -10,7 +10,11 @@
 
 static void export_empire(buffer *buf)
 {
+    xml_exporter_new_element("empire");
+    xml_exporter_add_attribute_int("version", 2);
     
+    xml_exporter_new_element("map");
+    xml_exporter_add_attribute_int("show_ireland", 1);
 }
 
 int empire_export_xml(const char *filename)
