@@ -797,6 +797,40 @@ int empire_object_get_nearest_of_type(int x, int y, empire_object_type type)
     return 0;
 }
 
+int empire_object_get_ireland(void)
+{
+    full_empire_object *full;
+    array_foreach(objects, full) {
+        if (full->in_use && full->obj.type == EMPIRE_OBJECT_ORNAMENT && full->obj.image_id == -1) {
+            return full->obj.id;
+        }
+    }
+    return 0;
+}
+
+int empire_object_count_ornaments(void)
+{
+    total_ornaments = 0;
+    full_empire_object *full;
+    array_foreach(objects, full) {
+        if (full->in_use && full->obj.type == EMPIRE_OBJECT_ORNAMENT && full->obj.image_id == -1) {
+            total_ornaments++;
+        }
+    }
+    return total_ornaments;
+}
+
+int empire_object_get_ornament(int image_id)
+{
+    full_empire_object *full;
+    array_foreach(objects, full) {
+        if (full->in_use && full->obj.type == EMPIRE_OBJECT_ORNAMENT && full->obj.image_id == image_id) {
+            return full->obj.id;
+        }
+    }
+    return 0;
+}
+
 void empire_object_set_expanded(int object_id, int new_city_type)
 {
     full_empire_object *obj = array_item(objects, object_id);

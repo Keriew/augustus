@@ -102,6 +102,12 @@ int empire_object_get_at(int x, int y);
 
 int empire_object_get_nearest_of_type(int x, int y, empire_object_type type);
 
+int empire_get_ireland(void);
+
+int empire_object_count_ornaments(void);
+
+int empire_object_get_ornament(int image_id);
+
 void empire_object_set_expanded(int object_id, int new_city_type);
 
 int empire_object_city_buys_resource(int object_id, int resource);

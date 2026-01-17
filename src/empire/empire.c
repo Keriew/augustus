@@ -223,6 +223,17 @@ void empire_get_map_size(int *width, int *height)
     *height = data.image.height;
 }
 
+void empire_get_coordinates(int *x_offset, int *y_offset)
+{
+    *x_offset = data.image.offset_x;
+    *y_offset = data.image.offset_y;
+}
+
+char *empire_get_image_path(void)
+{
+    return data.image.path;
+}
+
 void empire_set_coordinates(int relative, int x_offset, int y_offset)
 {
     data.coordinates.relative = relative;
