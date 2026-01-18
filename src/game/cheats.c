@@ -48,8 +48,6 @@ static void game_cheat_finish_monuments(uint8_t *);
 static void game_cheat_set_monument_phase(uint8_t *);
 static void game_cheat_unlock_all_buildings(uint8_t *);
 static void game_cheat_incite_riot(uint8_t *);
-static void game_cheat_show_custom_events(uint8_t *);
-static void game_cheat_show_editor(uint8_t *);
 static void game_cheat_cast_curse(uint8_t *);
 static void game_cheat_make_buildings_invincible(uint8_t *);
 static void game_cheat_change_climate(uint8_t *);
@@ -337,17 +335,21 @@ static void game_cheat_incite_riot(uint8_t *args)
     city_sentiment_change_happiness(50);
 }
 
-static void game_cheat_show_custom_events(uint8_t *args)
+void game_cheat_show_custom_events(uint8_t *args)
 {
-    window_editor_scenario_events_show();
+    if (data.is_cheating) {
+        window_editor_scenario_events_show();
+    }
 }
 
-static void game_cheat_show_editor(uint8_t *args)
+void game_cheat_show_editor(uint8_t *args)
 {
-    window_editor_attributes_show();
-    if (!map_editor_warning_shown) {
-        window_plain_message_dialog_show(TR_CHEAT_EDITOR_WARNING_TITLE, TR_CHEAT_EDITOR_WARNING_TEXT, 1);
-        map_editor_warning_shown = 1;
+    if (data.is_cheating) {
+        window_editor_attributes_show();
+        if (!map_editor_warning_shown) {
+            window_plain_message_dialog_show(TR_CHEAT_EDITOR_WARNING_TITLE, TR_CHEAT_EDITOR_WARNING_TEXT, 1);
+            map_editor_warning_shown = 1;
+        }
     }
 }
 

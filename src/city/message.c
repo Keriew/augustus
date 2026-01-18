@@ -12,6 +12,7 @@
 #include "game/settings.h"
 #include "game/time.h"
 #include "graphics/window.h"
+#include "scenario/request.h"
 #include "sound/effect.h"
 #include "window/message_dialog.h"
 
@@ -161,6 +162,13 @@ static void show_message_popup(int message_id)
         int text_id = city_message_get_text_id(msg->message_type);
         if (!has_video(text_id)) {
             play_sound(text_id);
+        }
+        if (msg->message_type == MESSAGE_REQUEST_CAN_COMPLY && msg->param1) {
+            // param1 = request id
+            const scenario_request *request = scenario_request_get(msg->param1);
+            if (request->can_comply_dialog_shown == 1 || request->state > 2) { // dispatched or ignored
+                return;  // nothing to show
+            }
         }
         window_message_dialog_show_city_message(text_id,
             msg->year, msg->month, msg->param1, msg->param2,

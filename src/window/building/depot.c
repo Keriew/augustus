@@ -43,6 +43,7 @@ static void tooltip_style_changed(dropdown_button *button);
 #define ROW_HEIGHT 22
 #define ROW_HEIGHT_RESOURCE 26
 #define ROW_WIDTH_RESOURCE 193
+#define SMALL_ICON_SIDE 24 // help button size - used to position dropdown in line with parent window's help button
 #define MAX_VISIBLE_ROWS 15
 #define MAX_RESOURCE_ROWS 24
 
@@ -321,6 +322,7 @@ static void tooltip_style_changed(dropdown_button *button)
 static void window_building_depot_init_tooltip_style_dropdown(building_info_context *c)
 {
     static lang_fragment frags[4]; // fragments array - keep static to ensure it remains valid
+
     for (int i = 0; i < 4; i++) {
         frags[i].type = LANG_FRAG_LABEL;
         frags[i].text_group = CUSTOM_TRANSLATION;
@@ -329,8 +331,10 @@ static void window_building_depot_init_tooltip_style_dropdown(building_info_cont
     frags[0].text_id = config_get(CONFIG_UI_CART_DEPOT_TOOLTIP_STYLE) + TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE + 1;
 
     int btn_width = 150;
+    // actual c->height_blocks should be 28, but it's passed as 22. This should be fixed globally at some point.
     int dropdown_x = c->x_offset + (c->width_blocks * BLOCK_SIZE) / 2 - btn_width / 2; // Center the button
-    int dropdown_y = c->y_offset + (c->height_blocks + 1) * BLOCK_SIZE - 7;
+    int dropdown_y = window_building_get_vertical_offset(c, 28) + 28 * BLOCK_SIZE - 16 - SMALL_ICON_SIDE;
+
     tooltip_style_dropdown_button.width = btn_width;
     dropdown_button_init_simple(dropdown_x, dropdown_y, frags, 4, &tooltip_style_dropdown_button);
     tooltip_style_dropdown_button.selected_callback = tooltip_style_changed; // Set the callback function
@@ -617,7 +621,7 @@ void window_building_draw_depot_select_source_destination(building_info_context 
     }
     if (!data.advanced_mode) {
         int label_x = c->x_offset + 45;
-        int label_y = c->y_offset + (c->height_blocks + 1) * BLOCK_SIZE - 3; // Same line as dropdown
+        int label_y = c->y_offset + c->height_blocks * BLOCK_SIZE - 13 - SMALL_ICON_SIDE;
         lang_text_draw_ellipsized(CUSTOM_TRANSLATION, TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE,
             label_x, label_y, tooltip_style_dropdown_button.buttons[0].x - label_x, FONT_NORMAL_BLACK);
         dropdown_button_draw(&tooltip_style_dropdown_button);
@@ -688,7 +692,7 @@ void window_building_draw_depot_select_source_destination(building_info_context 
     }
 
     int label_x = c->x_offset + 45;
-    int label_y = c->y_offset + (c->height_blocks + 1) * BLOCK_SIZE - 3; // Same line as dropdown
+    int label_y = window_building_get_vertical_offset(c, 28) + 28 * BLOCK_SIZE - 13 - SMALL_ICON_SIDE;
     lang_text_draw_ellipsized(CUSTOM_TRANSLATION, TR_BUILDING_INFO_CART_DEPOT_TOOLTIP_STYLE,
         label_x, label_y, tooltip_style_dropdown_button.buttons[0].x - label_x, FONT_NORMAL_BLACK);
     dropdown_button_draw(&tooltip_style_dropdown_button);

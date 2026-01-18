@@ -543,7 +543,7 @@ static int house_consume_food(void)
 static int mess_hall_consume_food(void)
 {
     int total_consumed = 0;
-    building *b = building_get(building_find(BUILDING_MESS_HALL));
+    building *b = building_get(building_find_with_mothballed(BUILDING_MESS_HALL));
     if (!b || (b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_MOTHBALLED)) {
         return 0;
     }

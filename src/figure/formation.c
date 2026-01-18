@@ -1037,7 +1037,7 @@ void formations_load_state(buffer *buf, buffer *totals, int version)
     // old saves did not write formations to a zeroed out buffer, so check for invalid target_formation_ids
     for (unsigned int i = 0; i < formations.size; i++) {
         formation *f = array_item(formations, i);
-        if (f->target_formation_id < 0 || (unsigned int) f->target_formation_id >= formations.size) {
+        if (f->target_formation_id >= formations.size) {
             f->target_formation_id = 0;
         }
     }
