@@ -26,23 +26,24 @@ typedef enum {
 
 typedef enum {
     EMPIRE_CITY_ICON_DEFAULT, // not specified
-    EMPIRE_CITY_ICON_CONSTRUCTION, //construction
-    EMPIRE_CITY_ICON_DISTANT_TOWN, //dis_town
-    EMPIRE_CITY_ICON_DISTANT_VILLAGE, //dis_village
-    EMPIRE_CITY_ICON_RESOURCE_FOOD, //res_food
-    EMPIRE_CITY_ICON_RESOURCE_GOODS, //res_goods
-    EMPIRE_CITY_ICON_TRADE_TOWN, // tr_town
-    EMPIRE_CITY_ICON_ROMAN_TOWN, // ro_town
-    EMPIRE_CITY_ICON_TRADE_VILLAGE, // tr_village
-    EMPIRE_CITY_ICON_ROMAN_VILLAGE, // ro_village
-    EMPIRE_CITY_ICON_ROMAN_CAPITAL, // ro_capital
-    EMPIRE_CITY_ICON_TRADE_SEA, // tr_sea
-    EMPIRE_CITY_ICON_TRADE_LAND, // tr_land
+    EMPIRE_CITY_ICON_CONSTRUCTION, // construction   Empire_Icon_Construction_01.png
+    EMPIRE_CITY_ICON_DISTANT_TOWN, // dis_town       Empire_Icon_Distant_01.png
+    EMPIRE_CITY_ICON_DISTANT_VILLAGE, // dis_village Empire_Icon_Distant_02.png
+    EMPIRE_CITY_ICON_RESOURCE_FOOD, // res_food      Empire_Icon_Resource_01.png
+    EMPIRE_CITY_ICON_RESOURCE_GOODS, // res_goods    Empire_Icon_Resource_02.png
+    EMPIRE_CITY_ICON_RESOURCE_SEA, // res_sea        Empire_Icon_Resource_03.png
+    EMPIRE_CITY_ICON_TRADE_TOWN, // tr_town          Empire_Icon_Roman_01.png
+    EMPIRE_CITY_ICON_ROMAN_TOWN, // ro_town          Empire_Icon_Roman_02.png
+    EMPIRE_CITY_ICON_TRADE_VILLAGE, // tr_village    Empire_Icon_Roman_03.png
+    EMPIRE_CITY_ICON_ROMAN_VILLAGE, // ro_village    Empire_Icon_Roman_04.png
+    EMPIRE_CITY_ICON_ROMAN_CAPITAL, // ro_capital    Empire_Icon_Roman_05.png
+    EMPIRE_CITY_ICON_TRADE_SEA, // tr_sea            Empire_Icon_Trade_01.png
+    EMPIRE_CITY_ICON_TRADE_LAND, // tr_land          Empire_Icon_Trade_02.png
     EMPIRE_CITY_ICON_OUR_CITY, // our_city
-    EMPIRE_CITY_ICON_TRADE_CITY, //tr_city
-    EMPIRE_CITY_ICON_ROMAN_CITY, //ro_city
-    EMPIRE_CITY_ICON_DISTANT_CITY, //dis_city
-    EMPIRE_CITY_ICON_TOWER, // tower
+    EMPIRE_CITY_ICON_TRADE_CITY, // tr_city
+    EMPIRE_CITY_ICON_ROMAN_CITY, // ro_city
+    EMPIRE_CITY_ICON_DISTANT_CITY, // dis_city
+    EMPIRE_CITY_ICON_TOWER, // tower                Empire_Icon_Flag_01.png - Empire_Icon_Flag_06.png
 } empire_city_icon_type;
 
 #endif // EMPIRE_TYPE_H

@@ -773,11 +773,13 @@ int empire_city_get_icon_image_id(empire_city_icon_type type)
             return assets_lookup_image_id(ASSET_UI_EMP_ICON_9);  // res_food
         case EMPIRE_CITY_ICON_RESOURCE_GOODS:
             return assets_lookup_image_id(ASSET_UI_EMP_ICON_10); // res_goods
+        case EMPIRE_CITY_ICON_RESOURCE_SEA:
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_11); // res_sea
 
         case EMPIRE_CITY_ICON_TRADE_SEA:
-            return assets_lookup_image_id(ASSET_UI_EMP_ICON_11); // tr_sea
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_12); // tr_sea
         case EMPIRE_CITY_ICON_TRADE_LAND:
-            return assets_lookup_image_id(ASSET_UI_EMP_ICON_12); // tr_land
+            return assets_lookup_image_id(ASSET_UI_EMP_ICON_13); // tr_land
 
         case EMPIRE_CITY_ICON_OUR_CITY:
             return image_group(GROUP_EMPIRE_CITY);

@@ -117,7 +117,7 @@ static void export_border(void)
 static void export_city(const empire_object *obj)
 {
     static const char *city_types[6] = { "roman", "ours", "trade", "future_trade", "distant", "vulnerable" };
-    static const char *city_icons[17] = { "construction", "dis_town", "dis_village", "res_food", "res_goods",
+    static const char *city_icons[18] = { "construction", "dis_town", "dis_village", "res_food", "res_goods", "res_sea",
                                           "tr_town", "ro_town", "tr_village", "ro_village", "ro_capital", "tr_sea",
                                           "tr_land", "our_city", "tr_city", "ro_city", "dis_city", "tower" };
 

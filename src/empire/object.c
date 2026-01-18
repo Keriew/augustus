@@ -1043,6 +1043,7 @@ empire_city_icon_type empire_object_get_random_icon_for_empire_object(full_empir
     static const empire_city_icon_type alloc_trade_sea[] = { // sea trade
         EMPIRE_CITY_ICON_RESOURCE_FOOD,
         EMPIRE_CITY_ICON_RESOURCE_GOODS,
+        EMPIRE_CITY_ICON_RESOURCE_SEA,
         EMPIRE_CITY_ICON_TRADE_TOWN,
         EMPIRE_CITY_ICON_TRADE_VILLAGE,
         EMPIRE_CITY_ICON_TRADE_SEA,

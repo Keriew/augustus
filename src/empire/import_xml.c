@@ -344,7 +344,7 @@ static int xml_start_city(void)
 
     static const char *city_types[6] = { "roman", "ours", "trade", "future_trade", "distant", "vulnerable" };
     static const char *trade_route_types[2] = { "land", "sea" };
-    static const char *city_icons[17] = { "construction", "dis_town", "dis_village", "res_food", "res_goods",
+    static const char *city_icons[18] = { "construction", "dis_town", "dis_village", "res_food", "res_goods", "res_sea",
                                           "tr_town", "ro_town", "tr_village", "ro_village", "ro_capital", "tr_sea",
                                           "tr_land", "our_city", "tr_city", "ro_city", "dis_city", "tower" };
     const char *name = xml_parser_get_attribute_string("name");
@@ -363,13 +363,13 @@ static int xml_start_city(void)
     int future_trade_after_icon = EMPIRE_CITY_ICON_DEFAULT;
     if (city_type == EMPIRE_CITY_FUTURE_TRADE) {
         if (xml_parser_has_attribute("icon_before")) {
-            city_icon_type = xml_parser_get_attribute_enum("icon_before", city_icons, 17, EMPIRE_CITY_ICON_DEFAULT + 1);
+            city_icon_type = xml_parser_get_attribute_enum("icon_before", city_icons, 18, EMPIRE_CITY_ICON_DEFAULT + 1);
         } else {
-            city_icon_type = xml_parser_get_attribute_enum("icon", city_icons, 17, EMPIRE_CITY_ICON_DEFAULT + 1);
+            city_icon_type = xml_parser_get_attribute_enum("icon", city_icons, 18, EMPIRE_CITY_ICON_DEFAULT + 1);
         }
-        future_trade_after_icon = xml_parser_get_attribute_enum("icon_after", city_icons, 17, EMPIRE_CITY_ICON_DEFAULT + 1);
+        future_trade_after_icon = xml_parser_get_attribute_enum("icon_after", city_icons, 18, EMPIRE_CITY_ICON_DEFAULT + 1);
     } else {
-        city_icon_type = xml_parser_get_attribute_enum("icon", city_icons, 17, EMPIRE_CITY_ICON_DEFAULT + 1);
+        city_icon_type = xml_parser_get_attribute_enum("icon", city_icons, 18, EMPIRE_CITY_ICON_DEFAULT + 1);
     }
     if (city_icon_type == EMPIRE_CITY_ICON_DEFAULT) {
         city_icon_type = empire_object_get_random_icon_for_empire_object(city_obj);
