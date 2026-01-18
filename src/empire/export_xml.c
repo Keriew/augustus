@@ -117,7 +117,10 @@ static void export_border(void)
 static void export_city(const empire_object *obj)
 {
     static const char *city_types[6] = { "roman", "ours", "trade", "future_trade", "distant", "vulnerable" };
-    
+    static const char *city_icons[17] = { "construction", "dis_town", "dis_village", "res_food", "res_goods",
+                                          "tr_town", "ro_town", "tr_village", "ro_village", "ro_capital", "tr_sea",
+                                          "tr_land", "our_city", "tr_city", "ro_city", "dis_city", "tower" };
+
     full_empire_object *city = empire_object_get_full(obj->id);
     if (city->city_type == EMPIRE_CITY_FUTURE_ROMAN) {
         return;
@@ -138,6 +141,12 @@ static void export_city(const empire_object *obj)
         xml_exporter_add_attribute_int("trade_route_cost", city->trade_route_cost);
         const char *route_type = empire_object_is_sea_trade_route(obj->trade_route_id) ? "sea" : "land";
         xml_exporter_add_attribute_text("trade_route_type", route_type);
+        if (obj->empire_city_icon) {
+            xml_exporter_add_attribute_text("icon", city_icons[obj->empire_city_icon - 1]);
+        }
+        if (city->city_type == EMPIRE_CITY_FUTURE_TRADE && obj->future_trade_after_icon) {
+            xml_exporter_add_attribute_text("icon_after", city_icons[obj->future_trade_after_icon - 1]);
+        }
         
         xml_exporter_new_element("sells");
         for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
