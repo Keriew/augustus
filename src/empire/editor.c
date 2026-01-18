@@ -277,7 +277,7 @@ static int place_battle(full_empire_object *battle_obj)
     battle_obj->obj.type = EMPIRE_OBJECT_BATTLE_ICON;
     battle_obj->obj.invasion_path_id = *get_current_invasion_path_id();
     battle_obj->obj.invasion_years = empire_object_get_latest_battle(battle_obj->obj.invasion_path_id)->invasion_years + 1;
-    
+
     battle_obj->obj.image_id = image_group(GROUP_EMPIRE_BATTLE);
     const image *img = image_get(battle_obj->obj.image_id);
     battle_obj->obj.width = img->width;
@@ -333,6 +333,8 @@ static void shift_trade_waypoints(const empire_object *const_obj)
 
 static int delete_object(int mouse_x, int mouse_y)
 {
+    empire_clear_selected_object();
+    
     int empire_x = editor_empire_mouse_to_empire_x(mouse_x);
     int empire_y = editor_empire_mouse_to_empire_y(mouse_y);
     unsigned int obj_id = empire_object_get_at(empire_x, empire_y);
