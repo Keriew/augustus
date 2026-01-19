@@ -7,9 +7,28 @@
 #include "map/routing.h"
 #include "map/terrain.h"
 
-#define MAX_PATH 500
+#define PATH_SIZE_STEP 500
 
-static int direction_path[MAX_PATH];
+static struct {
+    uint8_t *path;
+    size_t index;
+    size_t size;
+} directions;
+
+static int increase_direction_path_size(void)
+{
+    if (directions.index >= directions.size) {
+        size_t new_size = directions.size + PATH_SIZE_STEP;
+        uint8_t *new_path = realloc(directions.path, new_size * sizeof(uint8_t));
+        if (!new_path) {
+            return 0;
+        }
+        directions.path = new_path;
+        directions.size = new_size;
+    }
+
+    return 1;
+}
 
 static void adjust_tile_in_direction(int direction, int *x, int *y, int *grid_offset)
 {
@@ -86,12 +105,18 @@ static int next_is_better(
     return 0;
 }
 
-int map_routing_get_path(uint8_t *path, int dst_x, int dst_y, int num_directions)
+int map_routing_get_path(figure_path_data *path, int dst_x, int dst_y, int num_directions)
 {
     int dst_grid_offset = map_grid_offset(dst_x, dst_y);
     int distance = map_routing_distance(dst_grid_offset);
-    if (distance <= 0 || distance >= 998) {
+    if (distance <= 0) {
         return 0;
+    }
+
+    directions.index = 0;
+
+    if (path) {
+        increase_direction_path_size();
     }
 
     int num_tiles = 0;
@@ -100,6 +125,7 @@ int map_routing_get_path(uint8_t *path, int dst_x, int dst_y, int num_directions
     int y = dst_y;
     int grid_offset = dst_grid_offset;
     int step = num_directions == 8 ? 1 : 2;
+    uint8_t same_direction_count = 0;
 
     while (distance > 1) {
         int base_distance = map_routing_distance(grid_offset);
@@ -112,7 +138,7 @@ int map_routing_get_path(uint8_t *path, int dst_x, int dst_y, int num_directions
                 int next_distance = map_routing_distance(next_offset);
                 int next_is_highway = map_terrain_is(next_offset, TERRAIN_HIGHWAY);
                 if (next_distance && next_is_better(base_distance, distance, next_distance,
-                        direction, next_direction, is_highway, next_is_highway)) {
+                    direction, next_direction, is_highway, next_is_highway)) {
                     distance = next_distance;
                     direction = next_direction;
                     is_highway = next_is_highway;
@@ -124,19 +150,33 @@ int map_routing_get_path(uint8_t *path, int dst_x, int dst_y, int num_directions
         }
         adjust_tile_in_direction(direction, &x, &y, &grid_offset);
         int forward_direction = (direction + 4) % 8;
-        direction_path[num_tiles++] = forward_direction;
-        last_direction = forward_direction;
-        if (num_tiles >= MAX_PATH) {
-            return 0;
+        if (path) {
+            if (forward_direction == last_direction && same_direction_count < 32) {
+                same_direction_count++;
+            } else {
+                if (last_direction != -1) {
+                    if (!increase_direction_path_size()) {
+                        return 0;
+                    }
+                    directions.path[directions.index] = (last_direction << 5) & same_direction_count;
+                    directions.index++;
+                }
+
+                same_direction_count = 0;
+            }
         }
+        last_direction = forward_direction;
+        num_tiles++;
     }
-    for (int i = 0; i < num_tiles; i++) {
-        path[i] = direction_path[num_tiles - i - 1];
+    if (path) {
+        for (int i = 0; i < num_tiles; i++) {
+            path[i] = direction_path[num_tiles - i - 1];
+        }
     }
     return num_tiles;
 }
 
-int map_routing_get_path_on_water(uint8_t *path, int dst_x, int dst_y, int is_flotsam)
+int map_routing_get_path_on_water(figure_path_data *path, int dst_x, int dst_y, int is_flotsam)
 {
     int rand = random_byte() & 3;
     int dst_grid_offset = map_grid_offset(dst_x, dst_y);
@@ -184,8 +224,10 @@ int map_routing_get_path_on_water(uint8_t *path, int dst_x, int dst_y, int is_fl
             return 0;
         }
     }
-    for (int i = 0; i < num_tiles; i++) {
-        path[i] = direction_path[num_tiles - i - 1];
+    if (path) {
+        for (int i = 0; i < num_tiles; i++) {
+            path[i] = direction_path[num_tiles - i - 1];
+        }
     }
     return num_tiles;
 }

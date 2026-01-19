@@ -8,12 +8,6 @@
 #define ARRAY_SIZE_STEP 600
 #define MAX_PATH_LENGTH 500
 
-typedef struct {
-    unsigned int id;
-    int figure_id;
-    uint8_t directions[MAX_PATH_LENGTH];
-} figure_path_data;
-
 static array(figure_path_data) paths;
 
 static void create_new_path(figure_path_data *path, unsigned int position)
@@ -26,23 +20,20 @@ static int path_is_used(const figure_path_data *path)
     return path->figure_id != 0;
 }
 
-void figure_route_clear_all(void)
-{
-    paths.size = 0;
-    array_trim(paths);
-}
-
 void figure_route_clean(void)
 {
     figure_path_data *path;
     array_foreach(paths, path) {
-        int figure_id = path->figure_id;
+        unsigned int figure_id = path->figure_id;
         if (figure_id > 0 && figure_id < figure_count()) {
             const figure *f = figure_get(figure_id);
-            if (f->state != FIGURE_STATE_ALIVE || f->routing_path_id != (short) array_index) {
+            if (f->state != FIGURE_STATE_ALIVE || f->routing_path_id != array_index) {
                 path->figure_id = 0;
             }
         }
+        free(path->directions);
+        path->directions = 0;
+        path->total_directions = 0;
     }
     array_trim(paths);
 }
@@ -69,12 +60,10 @@ void figure_route_add(figure *f)
     if (f->is_boat) {
         if (f->is_boat == 2) { // flotsam
             map_routing_calculate_distances_water_flotsam(f->x, f->y);
-            path_length = map_routing_get_path_on_water(path->directions,
-                f->destination_x, f->destination_y, 1);
+            path_length = map_routing_get_path_on_water(path, f->destination_x, f->destination_y, 1);
         } else {
             map_routing_calculate_distances_water_boat(f->x, f->y);
-            path_length = map_routing_get_path_on_water(path->directions,
-                f->destination_x, f->destination_y, 0);
+            path_length = map_routing_get_path_on_water(path, f->destination_x, f->destination_y, 0);
         }
     } else {
         // land figure
@@ -132,14 +121,12 @@ void figure_route_add(figure *f)
         }
         if (can_travel) {
             if (f->terrain_usage == TERRAIN_USAGE_WALLS) {
-                path_length = map_routing_get_path(path->directions, f->destination_x, f->destination_y, 4);
+                path_length = map_routing_get_path(path, f->destination_x, f->destination_y, 4);
                 if (path_length <= 0) {
-                    path_length = map_routing_get_path(path->directions,
-                        f->destination_x, f->destination_y, direction_limit);
+                    path_length = map_routing_get_path(path, f->destination_x, f->destination_y, direction_limit);
                 }
             } else {
-                path_length = map_routing_get_path(path->directions,
-                    f->destination_x, f->destination_y, direction_limit);
+                path_length = map_routing_get_path(path, f->destination_x, f->destination_y, direction_limit);
             }
         } else { // cannot travel
             path_length = 0;
@@ -155,9 +142,12 @@ void figure_route_add(figure *f)
 void figure_route_remove(figure *f)
 {
     if (f->routing_path_id > 0) {
-        if (f->routing_path_id < (short) paths.size &&
-            (unsigned int) array_item(paths, f->routing_path_id)->figure_id == f->id) {
-            array_item(paths, f->routing_path_id)->figure_id = 0;
+        figure_path_data *path = array_item(paths, f->routing_path_id);
+        if (path->figure_id == f->id) {
+            path->figure_id = 0;
+            free(path->directions);
+            path->directions = 0;
+            path->total_directions = 0;
         }
         f->routing_path_id = 0;
     }
@@ -166,7 +156,16 @@ void figure_route_remove(figure *f)
 
 int figure_route_get_direction(int path_id, int index)
 {
-    return array_item(paths, path_id)->directions[index];
+    figure_path_data *path = array_item(paths, path_id);
+    for (unsigned int i = 0; i < path->total_directions; i++) {
+        int tiles_in_direction = (path->directions[i] & 0x1f) + 1;
+        if (tiles_in_direction >= index) {
+            return path->directions[i] >> 5;
+        }
+        index -= tiles_in_direction;
+    }
+
+    return 8;
 }
 
 void figure_route_save_state(buffer *figures, buffer *buf_paths)
