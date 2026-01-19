@@ -29,6 +29,7 @@
 #include "scenario/empire.h"
 #include "window/editor/map.h"
 #include "window/empire.h"
+#include "window/file_dialog.h"
 #include "window/numeric_input.h"
 #include "window/select_list.h"
 #include "window/text_input.h"
@@ -56,6 +57,7 @@ static void button_change_empire(int is_down, int param2);
 static void button_ok(const generic_button *button);
 static void button_toggle_invasions(const generic_button *button);
 static void button_refresh(const generic_button *button);
+static void button_export_xml(const generic_button *button);
 static void button_cycle_preview(const generic_button *button);
 static void button_recycle_preview(const generic_button *button);
 static void button_add_resource(int param1, int param2);
@@ -69,6 +71,7 @@ static generic_button generic_buttons[] = {
     {4, 48, 100, 24, button_ok},
     {124, 48, 150, 24, button_toggle_invasions},
     {294, 48, 150, 24, button_refresh},
+    {464, 48, 150, 24, button_export_xml},
 };
 static generic_button preview_button[] = {
     {0, 0, 72, 72, button_cycle_preview, button_recycle_preview},
@@ -619,6 +622,10 @@ static void draw_panel_buttons(const empire_city *city)
         button_border_draw(data.panel.x_min + 314, data.y_max - 52, 150, 24, data.focus_button_id == 3);
         lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REFRESH_EMPIRE,
             data.panel.x_min + 314, data.y_max - 45, 150, FONT_NORMAL_GREEN);
+        
+        button_border_draw(data.panel.x_min + 484, data.y_max - 52, 150, 24, data.focus_button_id == 4);
+        lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_EMPIRE_EXPORT,
+            data.panel.x_min + 484, data.y_max - 45, 150, FONT_NORMAL_GREEN);
 
         int width = lang_text_get_width(CUSTOM_TRANSLATION, TR_EDITOR_EMPIRE_TOOL, FONT_NORMAL_GREEN);
 
@@ -710,7 +717,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         return;
     }
     if (generic_buttons_handle_mouse(m, data.panel.x_min + x_offset, data.y_max - 100, generic_buttons,
-        scenario.empire.id == SCENARIO_CUSTOM_EMPIRE ? 3 : 1, &data.focus_button_id)) {
+        scenario.empire.id == SCENARIO_CUSTOM_EMPIRE ? 4 : 1, &data.focus_button_id)) {
         return;
     }
     if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE &&
@@ -870,6 +877,11 @@ static void button_edit_city_name(int param1, int param2)
 static void button_refresh(const generic_button *button)
 {
     refresh_empire();
+}
+
+static void button_export_xml(const generic_button *button)
+{
+    window_file_dialog_show(FILE_TYPE_EMPIRE, FILE_DIALOG_SAVE);
 }
 
 void window_editor_empire_show(void)

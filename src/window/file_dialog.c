@@ -366,7 +366,11 @@ static void draw_foreground(void)
         if (data.dialog_type == FILE_DIALOG_DELETE) {
             lang_text_draw_centered(43, 6, 32, 14, 554, FONT_LARGE_BLACK);
         } else if (data.type == FILE_TYPE_EMPIRE) {
-            lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_EMPIRE_TITLE, 32, 14, 554, FONT_LARGE_BLACK);
+            int message_id = TR_EDITOR_CUSTOM_EMPIRE_TITLE;
+            if (data.dialog_type == FILE_DIALOG_SAVE) {
+                message_id = TR_EDITOR_CUSTOM_EMPIRE_TITLE_SAVE;
+            }
+            lang_text_draw_centered(CUSTOM_TRANSLATION, message_id, 32, 14, 554, FONT_LARGE_BLACK);
         } else if (data.type == FILE_TYPE_SCENARIO_EVENTS) {
             int message_id = TR_EDITOR_SCENARIO_EVENTS_IMPORT_FULL;
             if (data.dialog_type == FILE_DIALOG_SAVE) {
@@ -594,6 +598,9 @@ static void confirm_save_file(int accepted, int checked)
     } else if (data.type == FILE_TYPE_MODEL_DATA) {
         scenario_model_export_to_xml(filename);
         window_model_data_show();
+    } else if (data.type == FILE_TYPE_EMPIRE) {
+        empire_export_xml(filename);
+        window_editor_empire_show();
     }
     snprintf(data.file_data->last_loaded_file, FILE_NAME_MAX, "%s", data.selected_file);
 }

@@ -35,7 +35,7 @@ static const char *ORNAMENTS[] = {
     "West Desert Palm Trees",
     "Trade Ship",
     "Waterside Palm Trees",
-    "Colosseum|The Colosseum",
+    "Colosseum",
     "The Alps",
     "Roman Tree",
     "Greek Mountain Range",
@@ -133,20 +133,19 @@ static void export_city(const empire_object *obj)
         string_copy(lang_get_string(21, city->city_name_id), city_name, 50);
     }
     xml_exporter_add_attribute_encoded_text("name", city_name);
-    xml_exporter_add_attribute_int("x", obj->x);
-    xml_exporter_add_attribute_int("y", obj->y);
+    xml_exporter_add_attribute_int("x", obj->x + obj->width / 2);
+    xml_exporter_add_attribute_int("y", obj->y + obj->height / 2);
     xml_exporter_add_attribute_text("type", city_types[city->city_type]);
-
+    if (obj->empire_city_icon) {
+        xml_exporter_add_attribute_text("icon", city_icons[obj->empire_city_icon - 1]);
+    }
     if (city->city_type == EMPIRE_CITY_TRADE || city->city_type == EMPIRE_CITY_FUTURE_TRADE) {
-        xml_exporter_add_attribute_int("trade_route_cost", city->trade_route_cost);
-        const char *route_type = empire_object_is_sea_trade_route(obj->trade_route_id) ? "sea" : "land";
-        xml_exporter_add_attribute_text("trade_route_type", route_type);
-        if (obj->empire_city_icon) {
-            xml_exporter_add_attribute_text("icon", city_icons[obj->empire_city_icon - 1]);
-        }
         if (city->city_type == EMPIRE_CITY_FUTURE_TRADE && obj->future_trade_after_icon) {
             xml_exporter_add_attribute_text("icon_after", city_icons[obj->future_trade_after_icon - 1]);
         }
+        xml_exporter_add_attribute_int("trade_route_cost", city->trade_route_cost);
+        const char *route_type = empire_object_is_sea_trade_route(obj->trade_route_id) ? "sea" : "land";
+        xml_exporter_add_attribute_text("trade_route_type", route_type);
         
         xml_exporter_new_element("sells");
         for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
@@ -177,7 +176,7 @@ static void export_city(const empire_object *obj)
                 break;
             }
             empire_object *waypoint = empire_object_get(point_id);
-            if (waypoint->type != EMPIRE_OBJECT_BORDER_EDGE) {
+            if (waypoint->type != EMPIRE_OBJECT_TRADE_WAYPOINT) {
                 break;
             }
             xml_exporter_new_element("point");
@@ -210,7 +209,7 @@ static void export_cities(void)
 
 static void export_battle(const empire_object *obj)
 {
-    if (data.invasion_path_id != obj->invasion_path_id) {
+    if (data.invasion_path_id + 1 != obj->invasion_path_id) {
         return;
     }
     xml_exporter_new_element("battle");
@@ -222,7 +221,7 @@ static void export_battle(const empire_object *obj)
 static void export_invasion_paths(void)
 {
     xml_exporter_new_element("invasion_paths");
-    for (int invasion_id = 0; invasion_id < scenario_invasion_count_total(); invasion_id++) {
+    for (int invasion_id = 0; invasion_id < empire_object_get_max_invasion_path(); invasion_id++) {
         data.invasion_path_id = invasion_id;
         xml_exporter_new_element("path");
         empire_object_foreach_of_type(export_battle, EMPIRE_OBJECT_BATTLE_ICON);
@@ -231,40 +230,61 @@ static void export_invasion_paths(void)
     xml_exporter_close_element();
 }
 
-static void export_distant_battles(void)
+static void export_roman_path(void)
 {
-    xml_exporter_new_element("distant_battle_paths");
-    
+    const empire_object *first_roman = empire_object_get_distant_battle(1, 0);
+    if (!first_roman) {
+        return;
+    }
     xml_exporter_new_element("path");
-    const empire_object *first_roman = empire_object_get_distant_battle(0, 0);
     xml_exporter_add_attribute_text("type", "roman");
     xml_exporter_add_attribute_int("start_x", first_roman->x);
     xml_exporter_add_attribute_int("start_y", first_roman->y);
-    for (int month = 1; month <= empire_object_get_latest_distant_battle(0)->distant_battle_travel_months; month++) {
-        xml_exporter_new_element("waypoint");
+    for (int month = 2; month <= empire_object_get_latest_distant_battle(0)->distant_battle_travel_months; month++) {
         const empire_object *roman_army = empire_object_get_distant_battle(month, 0);
+        if (!roman_army) {
+            return;
+        }
+        xml_exporter_new_element("waypoint");
         xml_exporter_add_attribute_int("num_months", 1);
         xml_exporter_add_attribute_int("x", roman_army->x);
         xml_exporter_add_attribute_int("y", roman_army->y);
         xml_exporter_close_element();
     }
     xml_exporter_close_element();
-    
+}
+
+static void export_enemy_path(void)
+{
+    const empire_object *first_enemy = empire_object_get_distant_battle(1, 1);
+    if (!first_enemy) {
+        return;
+    }
     xml_exporter_new_element("path");
-    const empire_object *first_enemy = empire_object_get_distant_battle(0, 1);
     xml_exporter_add_attribute_text("type", "enemy");
     xml_exporter_add_attribute_int("start_x", first_enemy->x);
     xml_exporter_add_attribute_int("start_y", first_enemy->y);
-    for (int month = 1; month <= empire_object_get_latest_distant_battle(1)->distant_battle_travel_months; month++) {
-        xml_exporter_new_element("waypoint");
+    for (int month = 2; month <= empire_object_get_latest_distant_battle(1)->distant_battle_travel_months; month++) {
         const empire_object *enemy_army = empire_object_get_distant_battle(month, 1);
+        if (!enemy_army) {
+            return;
+        }
+        xml_exporter_new_element("waypoint");
         xml_exporter_add_attribute_int("num_months", 1);
         xml_exporter_add_attribute_int("x", enemy_army->x);
         xml_exporter_add_attribute_int("y", enemy_army->y);
         xml_exporter_close_element();
     }
     xml_exporter_close_element();
-    
+}
+
+static void export_distant_battles(void)
+{
+    xml_exporter_new_element("distant_battle_paths");
+
+    export_roman_path();
+    export_enemy_path();
+
     xml_exporter_close_element();
 }
 

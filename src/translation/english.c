@@ -1928,7 +1928,9 @@ static translation_string all_strings[] = {
     {TR_EDITOR_VIEW_CURRENT_EMPIRE, "View current empire"},
     {TR_EDITOR_CREATE_NEW_EMPIRE, "Create new empire"},
     {TR_CONFIG_UI_EMPIRE_SMART_BORDER_PLACMENT, "Enable smart border placement"},
-    {TR_CONFIG_CATEGORY_UI_EMPIRE, "Empire"}
+    {TR_CONFIG_CATEGORY_UI_EMPIRE, "Empire"},
+    {TR_EDITOR_CUSTOM_EMPIRE_TITLE_SAVE, "Saving an empire"},
+    {TR_EDITOR_EMPIRE_EXPORT, "Export Empire"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

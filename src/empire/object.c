@@ -813,7 +813,7 @@ int empire_object_count_ornaments(void)
     int total_ornaments = 0;
     full_empire_object *full;
     array_foreach(objects, full) {
-        if (full->in_use && full->obj.type == EMPIRE_OBJECT_ORNAMENT && full->obj.image_id == -1) {
+        if (full->in_use && full->obj.type == EMPIRE_OBJECT_ORNAMENT && full->obj.image_id != -1) {
             total_ornaments++;
         }
     }
