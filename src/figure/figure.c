@@ -20,7 +20,7 @@
 #define FIGURE_ARRAY_SIZE_STEP 1000
 
 #define FIGURE_ORIGINAL_BUFFER_SIZE 128
-#define FIGURE_CURRENT_BUFFER_SIZE 164
+#define FIGURE_CURRENT_BUFFER_SIZE 170
 // around 12 bytes left free in the current buffer size - save version 0xa7, August 2025
 static struct {
     int created_sequence;
@@ -380,9 +380,9 @@ static void figure_save(buffer *buf, const figure *f)
     buffer_write_i16(buf, f->wait_ticks);
     buffer_write_u8(buf, f->action_state);
     buffer_write_u8(buf, f->progress_on_tile);
-    buffer_write_i16(buf, f->routing_path_id);
-    buffer_write_i16(buf, f->routing_path_current_tile);
-    buffer_write_i16(buf, f->routing_path_length);
+    buffer_write_u32(buf, f->routing_path_id);
+    buffer_write_u32(buf, f->routing_path_current_tile);
+    buffer_write_u32(buf, f->routing_path_length);
     buffer_write_u8(buf, f->in_building_wait_ticks);
     buffer_write_u8(buf, f->is_on_road);
     buffer_write_i16(buf, f->max_roam_length);
@@ -400,10 +400,10 @@ static void figure_save(buffer *buf, const figure *f)
     buffer_write_i16(buf, f->cc_delta_xy);
     buffer_write_u8(buf, f->cc_direction);
     buffer_write_u8(buf, f->speed_multiplier);
-    buffer_write_i32(buf, f->building_id);
-    buffer_write_i32(buf, f->immigrant_building_id);
-    buffer_write_i32(buf, f->destination_building_id);
-    buffer_write_i32(buf, f->formation_id);
+    buffer_write_u32(buf, f->building_id);
+    buffer_write_u32(buf, f->immigrant_building_id);
+    buffer_write_u32(buf, f->destination_building_id);
+    buffer_write_u32(buf, f->formation_id);
     buffer_write_u8(buf, f->index_in_formation);
     buffer_write_u8(buf, f->formation_at_rest);
     buffer_write_u8(buf, f->migrant_num_people);
@@ -511,9 +511,15 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     f->wait_ticks = buffer_read_i16(buf);
     f->action_state = buffer_read_u8(buf);
     f->progress_on_tile = buffer_read_u8(buf);
-    f->routing_path_id = buffer_read_i16(buf);
-    f->routing_path_current_tile = buffer_read_i16(buf);
-    f->routing_path_length = buffer_read_i16(buf);
+    if (version <= SAVE_GAME_LAST_STATIC_PATHS_AND_ROUTES) {
+        f->routing_path_id = buffer_read_i16(buf);
+        f->routing_path_current_tile = buffer_read_i16(buf);
+        f->routing_path_length = buffer_read_i16(buf);
+    } else {
+        f->routing_path_id = buffer_read_u32(buf);
+        f->routing_path_current_tile = buffer_read_u32(buf);
+        f->routing_path_length = buffer_read_u32(buf);
+    }
     f->in_building_wait_ticks = buffer_read_u8(buf);
     f->is_on_road = buffer_read_u8(buf);
     f->max_roam_length = buffer_read_i16(buf);
@@ -537,10 +543,10 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
         f->destination_building_id = buffer_read_i16(buf);
         f->formation_id = buffer_read_i16(buf);
     } else {
-        f->building_id = buffer_read_i32(buf);
-        f->immigrant_building_id = buffer_read_i32(buf);
-        f->destination_building_id = buffer_read_i32(buf);
-        f->formation_id = buffer_read_i32(buf);
+        f->building_id = buffer_read_u32(buf);
+        f->immigrant_building_id = buffer_read_u32(buf);
+        f->destination_building_id = buffer_read_u32(buf);
+        f->formation_id = buffer_read_u32(buf);
     }
     f->index_in_formation = buffer_read_u8(buf);
     f->formation_at_rest = buffer_read_u8(buf);

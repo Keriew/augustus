@@ -7,9 +7,9 @@
 #include "map/routing.h"
 #include "map/terrain.h"
 
+#include <stdlib.h>
+
 #define PATH_SIZE_STEP 500
-#define ROUTING_PATH_DIRECTION_BIT_OFFSET 5
-#define ROUTING_PATH_DIRECTION_COUNT_BIT_MASK ((uint8_t) (1u << ROUTING_PATH_DIRECTION_BIT_OFFSET) - 1)
 
 static struct {
     uint8_t *path;
@@ -66,7 +66,7 @@ static int add_direction_to_path(int direction)
      * This allows for efficient storage of paths with many consecutive moves in the same direction,
      * reducing the overall memory footprint of the path data.
      */
-    if (direction == directions.current && directions.same_direction_count < 31) {
+    if (direction == directions.current && directions.same_direction_count < ROUTING_PATH_DIRECTION_COUNT_BIT_MASK) {
         directions.path[directions.total - 1]++;
         directions.same_direction_count++;
     } else {

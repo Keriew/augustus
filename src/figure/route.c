@@ -7,7 +7,7 @@
 #include "map/routing_path.h"
 
 #define ARRAY_SIZE_STEP 600
-#define MAX_PATH_LENGTH 500
+#define MAX_ORIGINAL_PATH_LENGTH 500
 
 static array(figure_path_data) paths;
 
@@ -35,6 +35,8 @@ void figure_route_clean(void)
         free(path->directions);
         path->directions = 0;
         path->total_directions = 0;
+        path->current_step = 0;
+        path->same_direction_count = 0;
     }
     array_trim(paths);
 }
@@ -157,23 +159,6 @@ void figure_route_remove(figure *f)
     array_trim(paths);
 }
 
-static void set_direction_to_tile_index(int path_id, int index)
-{
-    figure_path_data *path = array_item(paths, path_id);
-    for (unsigned int i = 0; i < path->total_directions; i++) {
-        int tiles_in_direction = (path->directions[i] & ROUTING_PATH_DIRECTION_COUNT_BIT_MASK) + 1;
-        if (tiles_in_direction >= index) {
-            path->current_step = i;
-            path->same_direction_count = index - 1;
-            return;
-        }
-        index -= tiles_in_direction;
-    }
-
-    path->current_step = path->total_directions;
-    path->same_direction_count = 0;
-}
-
 int figure_route_get_next_direction(int path_id)
 {
     figure_path_data *path = array_item(paths, path_id);
@@ -217,12 +202,78 @@ void figure_route_save_state(buffer *figures, buffer *buf_paths)
     }
 }
 
+int convert_old_directions_to_new_format(figure_path_data *path, const uint8_t *directions)
+{
+    figure *f = figure_get(path->figure_id);
+
+    // Invalid figure or no path
+    if (!f || f->id == 0 || f->routing_path_length == 0) {
+        return 1;
+    }
+
+    uint8_t new_directions[MAX_ORIGINAL_PATH_LENGTH] = { 0 };
+
+    int current_direction = -1;
+    unsigned int total_direction_changes = 0;
+    uint8_t current_count = 0;
+
+    for (unsigned int index = 0; index < f->routing_path_length; index++) {
+        if (directions[index] != current_direction || current_count == ROUTING_PATH_DIRECTION_COUNT_BIT_MASK) {
+            new_directions[total_direction_changes] = (directions[index] << ROUTING_PATH_DIRECTION_BIT_OFFSET);
+            total_direction_changes++;
+            current_direction = directions[index];
+            current_count = 0;
+        } else {
+            new_directions[total_direction_changes - 1]++;
+            current_count++;
+        }
+    }
+
+    path->total_directions = total_direction_changes;
+    path->directions = malloc(path->total_directions * sizeof(uint8_t));
+
+    if (!path->directions) {
+        log_error("Unable to allocate memory for routing path directions. The game will likely crash.", 0, 0);
+        return 0;
+    }
+
+    memcpy(path->directions, new_directions, path->total_directions * sizeof(uint8_t));
+
+    return 1;
+}
+
+static void update_current_tile(figure_path_data *path)
+{
+    figure *f = figure_get(path->figure_id);
+
+    // Invalid figure or no path
+    if (!f || f->id == 0 || f->routing_path_length == 0) {
+        return;
+    }
+
+    unsigned int index = f->routing_path_current_tile + 1;
+
+    for (unsigned int i = 0; i < path->total_directions; i++) {
+        unsigned int tiles_in_direction = (path->directions[i] & ROUTING_PATH_DIRECTION_COUNT_BIT_MASK) + 1;
+        if (tiles_in_direction >= index) {
+            path->current_step = i;
+            path->same_direction_count = index - 1;
+            return;
+        }
+        index -= tiles_in_direction;
+    }
+
+    path->current_step = path->total_directions;
+    path->same_direction_count = 0;
+}
+
+
 void figure_route_load_state(buffer *figures, buffer *buf_paths, int version)
 {
     size_t elements_to_load;
 
     if (version <= SAVE_GAME_LAST_STATIC_PATHS_AND_ROUTES) {
-        elements_to_load = buf_paths->size / MAX_PATH_LENGTH;
+        elements_to_load = buf_paths->size / MAX_ORIGINAL_PATH_LENGTH;
     } else {
         elements_to_load = buffer_read_u32(buf_paths);
     }
@@ -240,19 +291,15 @@ void figure_route_load_state(buffer *figures, buffer *buf_paths, int version)
         if (version <= SAVE_GAME_LAST_STATIC_PATHS_AND_ROUTES) {
             path->figure_id = buffer_read_i16(figures);
             if (path->figure_id) {
-                figure *f = figure_get(path->figure_id);
-                path->total_directions = f->routing_path_length;
-                path->directions = malloc(path->total_directions * sizeof(uint8_t));
-                if (!path->directions) {
-                    log_error("Unable to allocate memory for routing path directions. The game will likely crash.", 0, 0);
+                uint8_t directions[MAX_ORIGINAL_PATH_LENGTH];
+                buffer_read_raw(buf_paths, directions, MAX_ORIGINAL_PATH_LENGTH);
+
+                if (!convert_old_directions_to_new_format(path, directions)) {
+                    log_error("Unable to convert old routing path directions. The game will likely crash.", 0, 0);
                     return;
                 }
-                uint8_t directions[MAX_PATH_LENGTH];
-                buffer_read_raw(buf_paths, directions, MAX_PATH_LENGTH);
-
-                convert_old_directions_to_new(path, directions);
             } else {
-                buffer_skip(buf_paths, MAX_PATH_LENGTH);
+                buffer_skip(buf_paths, MAX_ORIGINAL_PATH_LENGTH);
             }
         } else {
             path->figure_id = buffer_read_u32(figures);
@@ -269,6 +316,7 @@ void figure_route_load_state(buffer *figures, buffer *buf_paths, int version)
             }
         }
         if (path->figure_id) {
+            update_current_tile(path);
             highest_id_in_use = i;
         }
     }

@@ -10,7 +10,7 @@ void figure_route_add(figure *f);
 
 void figure_route_remove(figure *f);
 
-int figure_route_get_direction(int path_id, int index);
+int figure_route_get_next_direction(int path_id);
 
 void figure_route_save_state(buffer *figures, buffer *buf_paths);
 

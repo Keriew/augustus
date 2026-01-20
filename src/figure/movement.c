@@ -185,7 +185,7 @@ static void set_next_route_tile_direction(figure *f)
 {
     if (f->routing_path_id > 0) {
         if (f->routing_path_current_tile < f->routing_path_length) {
-            f->direction = figure_route_get_direction(f->routing_path_id, f->routing_path_current_tile);
+            f->direction = figure_route_get_next_direction(f->routing_path_id);
         } else {
             figure_route_remove(f);
             f->direction = DIR_FIGURE_AT_DESTINATION;
