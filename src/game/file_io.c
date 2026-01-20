@@ -876,7 +876,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     map_desirability_load_state(state->desirability_grid);
     map_elevation_load_state(state->elevation_grid);
     figure_load_state(state->figures, state->figure_sequence, version);
-    figure_route_load_state(state->route_figures, state->route_paths);
+    figure_route_load_state(state->route_figures, state->route_paths, version);
     formations_load_state(state->formations, state->formation_totals, version);
 
     city_data_load_state(state->city_data, state->city_graph_order, state->city_entry_exit_xy,

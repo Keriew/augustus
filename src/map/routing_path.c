@@ -8,18 +8,22 @@
 #include "map/terrain.h"
 
 #define PATH_SIZE_STEP 500
-#define DIRECTION_BIT_OFFSET 5
-#define DIRECTION_COUNT_MASK ((uint8_t) (1u << DIRECTION_BIT_OFFSET) - 1)
+#define ROUTING_PATH_DIRECTION_BIT_OFFSET 5
+#define ROUTING_PATH_DIRECTION_COUNT_BIT_MASK ((uint8_t) (1u << ROUTING_PATH_DIRECTION_BIT_OFFSET) - 1)
 
 static struct {
     uint8_t *path;
     size_t total;
     size_t size;
+    int current;
+    uint8_t same_direction_count;
 } directions;
 
 static void reset_directions(void)
 {
     directions.total = 0;
+    directions.current = -1;
+    directions.same_direction_count = 0;
 }
 
 static int increase_direction_path_size(void)
@@ -62,16 +66,17 @@ static int add_direction_to_path(int direction)
      * This allows for efficient storage of paths with many consecutive moves in the same direction,
      * reducing the overall memory footprint of the path data.
      */
-    if (directions.total > 0 &&
-        direction == ((directions.path[directions.total - 1] >> DIRECTION_BIT_OFFSET) & 0x07) &&
-        (directions.path[directions.total - 1] & DIRECTION_COUNT_MASK) < 31) {
+    if (direction == directions.current && directions.same_direction_count < 31) {
         directions.path[directions.total - 1]++;
+        directions.same_direction_count++;
     } else {
         if (!increase_direction_path_size()) {
             return 0;
         }
         directions.total++;
-        directions.path[directions.total - 1] = (direction << DIRECTION_BIT_OFFSET);
+        directions.path[directions.total - 1] = (direction << ROUTING_PATH_DIRECTION_BIT_OFFSET);
+        directions.current = direction;
+        directions.same_direction_count = 0;
     }
     return 1;
 }
