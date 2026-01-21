@@ -677,7 +677,7 @@ int text_measure_multiline(const uint8_t *str, int box_width, font_t font, int *
     return num_lines;
 }
 
-int text_draw_build_menu_with_index(const uint8_t *str, int index, int x_offset, int y_offset, int box_width, font_t font, color_t color)
+void text_draw_build_menu_with_index(const uint8_t *str, int index, int x_offset, int y_offset, int box_width, font_t font, color_t color)
 {
     uint8_t strx[NUMBER_BUFFER_LENGTH];
     uint8_t *current = string_copy(str, strx, NUMBER_BUFFER_LENGTH - 5);
