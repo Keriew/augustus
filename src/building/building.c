@@ -117,6 +117,16 @@ int building_find(building_type type)
     return 0;
 }
 
+int building_find_with_mothballed(building_type type)
+{
+    for (building *b = data.first_of_type[type]; b; b = b->next_of_type) {
+        if (b->state == BUILDING_STATE_IN_USE || b->state == BUILDING_STATE_MOTHBALLED) {
+            return b->id;
+        }
+    }
+    return 0;
+}
+
 building *building_first_of_type(building_type type)
 {
     return data.first_of_type[type];

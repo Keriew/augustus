@@ -165,8 +165,8 @@ static int export_parse_attribute_with_resolved_type(xml_data_attribute_t *attr,
         case PARAMETER_TYPE_FUTURE_CITY:
             return export_attribute_future_city(attr, target);
         case PARAMETER_TYPE_MIN_MAX_NUMBER:
-            return export_attribute_number(attr, target);
         case PARAMETER_TYPE_NUMBER:
+        case PARAMETER_TYPE_GRID_SLICE:
             return export_attribute_number(attr, target);
         case PARAMETER_TYPE_RESOURCE:
         case PARAMETER_TYPE_RESOURCE_ALL:

@@ -236,6 +236,7 @@
 	<image id="First Ornament" src="Hibernia"/>
 	<image src="Etna"/>
 	<image src="Rhodes"/>
+	<image src="Temple"/>
 	<!-- Center Camera button by Ouaz -->
 	<image id="Center Camera Button" src="Center_Camera_Button"/>
 	<!-- Risk UI Widgets -->
@@ -423,7 +424,7 @@
 			<frame group="this" image="city_flag_blue_06"/>
 		</animation>
 	</image>
-	<!-- Note: Empire map icon for farm and quarry resource nodes respectively -->
+	<!-- Note: Empire map icon for farm, quarry and fishing resource nodes respectively -->
 	<image id="Empire_Icon_Resource_01" src="Empire_Icon_Resource_01">
 		<animation speed="6" reversible="false" x="1" y="6">
 			<frame group="this" image="city_flag_red_01"/>
@@ -436,6 +437,16 @@
 	</image>
 	<image id="Empire_Icon_Resource_02" src="Empire_Icon_Resource_02">
 		<animation speed="6" reversible="false" x="1" y="6">
+			<frame group="this" image="city_flag_red_01"/>
+			<frame group="this" image="city_flag_red_02"/>
+			<frame group="this" image="city_flag_red_03"/>
+			<frame group="this" image="city_flag_red_04"/>
+			<frame group="this" image="city_flag_red_05"/>
+			<frame group="this" image="city_flag_red_06"/>
+		</animation>
+	</image>
+	<image id="Empire_Icon_Resource_03" src="Empire_Icon_Resource_03">
+		<animation speed="6" reversible="false" x="9" y="6">
 			<frame group="this" image="city_flag_red_01"/>
 			<frame group="this" image="city_flag_red_02"/>
 			<frame group="this" image="city_flag_red_03"/>

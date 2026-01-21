@@ -167,7 +167,7 @@ int building_storage_get_empty_all(int building_id)
 {
     building *b = building_get(building_id);
     unsigned int storage_id = b->storage_id;
-    if (storage_id < 0 || storage_id >= storages.size) {
+    if (storage_id >= storages.size) {
         return 0;
     }
     return array_item(storages, storage_id)->storage.empty_all;

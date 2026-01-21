@@ -427,6 +427,8 @@ int building_construction_fill_vacant_lots(grid_slice *area)
 
 int building_construction_place_building(building_type type, int x, int y, int exact_coordinates)
 {
+    int grid_offset = map_grid_offset(x, y);
+    
     int terrain_mask = TERRAIN_ALL;
     if (building_type_is_roadblock(type)) {
         terrain_mask = type == BUILDING_GATEHOUSE ? ~TERRAIN_WALL & ~TERRAIN_ROAD &
@@ -455,7 +457,7 @@ int building_construction_place_building(building_type type, int x, int y, int e
     int building_orientation = 0;
     if (type == BUILDING_GATEHOUSE || type == BUILDING_WAREHOUSE) {
         //check if there's a preset orientation from old building
-        building *old_b = building_main(building_get(map_building_rubble_building_id(map_grid_offset(x, y))));
+        building *old_b = building_main(building_get(map_building_rubble_building_id(grid_offset)));
         if (old_b && (old_b->type == BUILDING_GATEHOUSE ||
             old_b->type == BUILDING_WAREHOUSE || old_b->type == BUILDING_WAREHOUSE_SPACE)) {
             building_orientation = old_b->subtype.orientation;
@@ -492,7 +494,7 @@ int building_construction_place_building(building_type type, int x, int y, int e
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return 0;
         }
-        if (!check_gatehouse_tiles(map_grid_offset(x, y))) { //helper to make sure all building tiles are on walls
+        if (!check_gatehouse_tiles(grid_offset)) { //helper to make sure all building tiles are on walls
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return 0;
         }

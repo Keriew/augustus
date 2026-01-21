@@ -213,6 +213,7 @@ void scenario_request_dispatch(int id)
     }
     request->months_to_comply = (random_byte() & 3) + 1;
     request->visible = 0;
+    request->can_comply_dialog_shown = 1;
     int amount = request->amount.requested;
     if (request->resource == RESOURCE_DENARII) {
         city_finance_process_sundry(amount);

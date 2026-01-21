@@ -244,12 +244,12 @@ static void draw_footprint(int x, int y, int grid_offset)
             if (building_monument_is_unfinished_monument(b)) {
                 sound_city_mark_construction_site_view(direction);
             } else {
-                sound_city_mark_building_view(b->type, b->num_workers, direction);
+                sound_city_mark_building_view(b->type, b->num_workers, direction, b->has_water_access);
             }
         }
     }
     if (map_terrain_is(grid_offset, TERRAIN_GARDEN)) {
-        sound_city_mark_building_view(BUILDING_GARDENS, 0, SOUND_DIRECTION_CENTER);
+        sound_city_mark_building_view(BUILDING_GARDENS, 0, SOUND_DIRECTION_CENTER, 0);
     }
 
     // Apply hover effect to non-building tiles if cursor is on them, config enabled, and not scrolling

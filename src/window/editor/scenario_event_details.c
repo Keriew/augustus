@@ -746,8 +746,7 @@ static int convert_display_to_days(int display)
 static void set_repeat_interval_min(int value)
 {
     int days = convert_display_to_days(value);// store always in days
-    data.event->repeat_days_min =
-        data.event->repeat_days_min = days;
+    data.event->repeat_days_min = days;
     if (data.event->repeat_days_max < days) {
         data.event->repeat_days_max = days;
     }
@@ -758,7 +757,7 @@ static void set_repeat_interval_max(int value)
     int days = convert_display_to_days(value);// store always in days
     data.event->repeat_days_max = days;
     if (data.event->repeat_days_min > days) {
-        data.event->repeat_days_min = days;;
+        data.event->repeat_days_min = days;
     }
 }
 

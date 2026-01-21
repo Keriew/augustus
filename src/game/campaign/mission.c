@@ -56,7 +56,7 @@ campaign_scenario *campaign_mission_new_scenario(void)
 
 campaign_scenario *campaign_mission_get_scenario(unsigned int scenario_id)
 {
-    return scenario_id >= 0 && scenario_id < data.scenarios.size ? array_item(data.scenarios, scenario_id) : 0;
+    return scenario_id < data.scenarios.size ? array_item(data.scenarios, scenario_id) : 0;
 }
 
 int campaign_mission_init(void)

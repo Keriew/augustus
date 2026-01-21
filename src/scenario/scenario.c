@@ -670,7 +670,7 @@ void scenario_objectives_from_buffer(buffer *buf, int version, scenario_win_crit
     win_criteria->time_limit.years = buffer_read_i32(buf);
     win_criteria->survival_time.enabled = buffer_read_i32(buf);
     win_criteria->survival_time.years = buffer_read_i32(buf);
-    buffer_skip(buf, 8);
+    buffer_skip(buf, 8 + (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA));
     win_criteria->population.enabled = buffer_read_i32(buf);
     win_criteria->population.goal = buffer_read_i32(buf);
 }

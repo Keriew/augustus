@@ -383,6 +383,7 @@ static void draw_foreground(void)
             if (data.dialog_type == FILE_DIALOG_SAVE) {
                 message_id = TR_EDITOR_MODEL_DATA_EXPORT_FULL;
             }
+            // TODO Something is missing here...
         } else {
             int text_id = data.dialog_type + (data.type == FILE_TYPE_SCENARIO ? 3 : 0);
             lang_text_draw_centered(43, text_id, 32, 14, 554, FONT_LARGE_BLACK);

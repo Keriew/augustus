@@ -109,6 +109,38 @@ static int show_building_native(const building *b)
         b->type == BUILDING_NATIVE_WATCHTOWER;
 }
 
+static int draw_footprint_enemy(int x, int y, float scale, int grid_offset)
+{
+    if (!map_property_is_draw_tile(grid_offset)) {
+        return 0;
+    }
+    int drawn = 0;
+    // 1. If there is a highway, draw it
+    if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY) &&
+        !map_terrain_is(grid_offset, TERRAIN_GATEHOUSE)) {
+        city_draw_highway_footprint(x, y, scale, grid_offset, COLOR_MASK_NONE);
+        drawn = 1;
+    }
+    // 2. On top: an aqueduct / wall
+    if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT | TERRAIN_WALL)) {
+        image_draw_isometric_footprint_from_draw_tile(
+            map_image_at(grid_offset), x, y, 0, scale
+        );
+        drawn = 1;
+    }
+    // If nothing was drawn, let the engine draw the ground itself
+    return drawn;
+}
+
+static int draw_top_enemy(int x, int y, float scale, int grid_offset)
+{
+    if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT | TERRAIN_WALL)) {
+        image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, 0, scale);
+        return 1;
+    }
+    return 0;
+}
+
 static int show_building_enemy(const building *b)
 {
     return b->type == BUILDING_PREFECTURE
@@ -157,11 +189,14 @@ static int show_figure_native(const figure *f)
 static int show_figure_enemy(const figure *f)
 {
     const figure_properties *props = figure_properties_for_type(f->type);
-    return props->category == FIGURE_CATEGORY_HOSTILE || props->category == FIGURE_CATEGORY_NATIVE
+    return props->category == FIGURE_CATEGORY_HOSTILE
+        || props->category == FIGURE_CATEGORY_NATIVE
         || props->category == FIGURE_CATEGORY_AGGRESSIVE_ANIMAL
         || props->category == FIGURE_CATEGORY_ARMED
+        || f->type == FIGURE_FORT_STANDARD
         || f->type == FIGURE_BALLISTA
-        || f->type == FIGURE_ARROW || f->type == FIGURE_JAVELIN || f->type == FIGURE_BOLT
+        || f->type == FIGURE_ARROW || f->type == FIGURE_FRIENDLY_ARROW
+        || f->type == FIGURE_JAVELIN || f->type == FIGURE_BOLT
         || f->type == FIGURE_CATAPULT_MISSILE;
 }
 
@@ -501,7 +536,6 @@ const city_overlay *city_overlay_for_native(void)
     return &overlay;
 }
 
-
 const city_overlay *city_overlay_for_enemy(void)
 {
     static city_overlay overlay = {
@@ -512,8 +546,8 @@ const city_overlay *city_overlay_for_enemy(void)
         get_column_height_none,
         0,
         0,
-        0,
-        0
+        draw_footprint_enemy,
+        draw_top_enemy
     };
     return &overlay;
 }

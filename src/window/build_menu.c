@@ -251,9 +251,11 @@ static void draw_menu_buttons(void)
         int resource_icon = produced_resource_icon(type);
         int text_offset = MENU_TEXT_X_OFFSET;
         if (resource_icon >= 0 && config_get(CONFIG_UI_CV_BUILD_MENU_ICONS)) {
-            draw_resource_icon_scaled(resource_icon, item_x_align + MENU_TEXT_X_OFFSET + 2,
+            draw_resource_icon_scaled(resource_icon, item_x_align + MENU_TEXT_X_OFFSET + 2 + 
+                (building_monument_type_is_monument(type) + building_rotation_type_has_rotations(type)) * MENU_ICON_WIDTH,
                 data.y_offset + MENU_Y_OFFSET + MENU_ITEM_HEIGHT * i + 2, MENU_RESOURCE_ICON_SIZE);
             text_offset += MENU_RESOURCE_ICON_SIZE + 4; // Shift text right to make room for icon + padding
+
         }
 
         lang_text_draw_centered(28, type, item_x_align + text_offset, data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
@@ -282,7 +284,7 @@ static void draw_menu_buttons(void)
 
         if (building_monument_type_is_monument(type)) {
             int image_id = assets_get_image_id("UI", "Monument Build Icon");
-            image_draw(image_id, item_x_align + icons_drawn * MENU_ICON_WIDTH + MENU_ICON_X_OFFSET,
+            image_draw(image_id, item_x_align + icons_drawn * (MENU_ICON_WIDTH + 3) + MENU_ICON_X_OFFSET,
                 data.y_offset + MENU_Y_OFFSET + MENU_ICON_Y_OFFSET + MENU_ITEM_HEIGHT * i, COLOR_MASK_NONE, SCALE_NONE);
             icons_drawn++;
         }
