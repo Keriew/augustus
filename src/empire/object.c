@@ -273,8 +273,8 @@ void empire_object_save(buffer *buf)
         buffer_write_i32(buf, 0);
         return;
     }
-    int size_per_obj = 80; // +2 bytes for empire_city_icon fields
-    int size_per_city = 140 + 4 * (RESOURCE_MAX - RESOURCE_MAX_LEGACY); // +2 bytes for empire_city_icon fields
+    int size_per_obj = 81; // +2 bytes for empire_city_icon fields
+    int size_per_city = 141 + 4 * (RESOURCE_MAX - RESOURCE_MAX_LEGACY); // +2 bytes for empire_city_icon fields
     int total_size = 0;
 
     full_empire_object *full;
