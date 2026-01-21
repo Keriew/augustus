@@ -70,7 +70,7 @@ void game_file_editor_clear_data(void)
     enemy_armies_clear();
     figure_name_init();
     formations_clear();
-    figure_route_clean();
+    figure_route_clear_all();
     traders_clear();
     game_time_init(2098);
     scenario_invasion_clear();

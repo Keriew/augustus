@@ -21,6 +21,22 @@ static int path_is_used(const figure_path_data *path)
     return path->figure_id != 0;
 }
 
+void figure_route_clear_all(void)
+{
+    figure_path_data *path;
+
+    array_foreach(paths, path) {
+        free(path->directions);
+        path->directions = 0;
+        path->directions = 0;
+        path->total_directions = 0;
+        path->current_step = 0;
+        path->same_direction_count = 0;
+
+    }
+    paths.size = 0;
+}
+
 void figure_route_clean(void)
 {
     figure_path_data *path;
@@ -30,13 +46,13 @@ void figure_route_clean(void)
             const figure *f = figure_get(figure_id);
             if (f->state != FIGURE_STATE_ALIVE || f->routing_path_id != array_index) {
                 path->figure_id = 0;
+                free(path->directions);
+                path->directions = 0;
+                path->total_directions = 0;
+                path->current_step = 0;
+                path->same_direction_count = 0;
             }
         }
-        free(path->directions);
-        path->directions = 0;
-        path->total_directions = 0;
-        path->current_step = 0;
-        path->same_direction_count = 0;
     }
     array_trim(paths);
 }

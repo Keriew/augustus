@@ -4,6 +4,8 @@
 #include "core/buffer.h"
 #include "figure/figure.h"
 
+void figure_route_clear_all(void);
+
 void figure_route_clean(void);
 
 void figure_route_add(figure *f);
