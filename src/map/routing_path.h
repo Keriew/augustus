@@ -1,6 +1,7 @@
 #ifndef MAP_ROUTING_PATH_H
 #define MAP_ROUTING_PATH_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 #define ROUTING_PATH_DIRECTION_BIT_OFFSET 5
