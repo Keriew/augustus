@@ -688,5 +688,4 @@ void text_draw_build_menu_with_index(const uint8_t *str, int index, int x_offset
     *current = 0;
 
     text_draw_centered(strx, x_offset, y_offset, box_width, font, color);
-    return current - strx;
 }
