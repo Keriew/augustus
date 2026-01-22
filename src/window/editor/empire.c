@@ -80,13 +80,13 @@ static generic_button preview_button[] = {
 };
 
 static image_button add_resource_buttons[] = {
-    {0, 0, 39, 24, IB_NORMAL, 0, 0, button_add_resource, NULL, 0, 0, 1, "UI", "Plus_Button_Idle"},
-    {0, 0, 39, 24, IB_NORMAL, 0, 0, button_add_resource, NULL, 1, 0, 1, "UI", "Plus_Button_Idle"}
+    {0, 0, 39, 24, IB_NORMAL, 0, 0, button_add_resource, button_none, 0, 0, 1, "UI", "Plus_Button_Idle"},
+    {0, 0, 39, 24, IB_NORMAL, 0, 0, button_add_resource, button_none, 1, 0, 1, "UI", "Plus_Button_Idle"}
 };
 #define NUM_PLUS_BUTTONS sizeof(add_resource_buttons) / sizeof(image_button)
 
 static image_button edit_city_name_button[] = {
-    {0, 0, 24, 24, IB_NORMAL, 0, 0, button_edit_city_name, NULL, 0, 0, 1, "UI", "Edit_Button_Idle"}
+    {0, 0, 24, 24, IB_NORMAL, 0, 0, button_edit_city_name, button_none, 0, 0, 1, "UI", "Edit_Button_Idle"}
 };
 
 static resource_button sell_buttons[RESOURCE_MAX] = { 0 };

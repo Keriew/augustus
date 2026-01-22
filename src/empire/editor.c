@@ -192,6 +192,9 @@ static int place_city(full_empire_object *city_obj)
             city_obj->empire_city_icon = EMPIRE_CITY_ICON_OUR_CITY;
             break;
         case EMPIRE_TOOL_TRADE_CITY:
+            if (!empire_object_get_our_city()) {
+                return 0;
+            }
             city_obj->city_type = EMPIRE_CITY_TRADE;
             city_obj->obj.empire_city_icon = EMPIRE_CITY_ICON_TRADE_CITY;
             city_obj->empire_city_icon = EMPIRE_CITY_ICON_TRADE_CITY;
@@ -213,6 +216,9 @@ static int place_city(full_empire_object *city_obj)
             city_obj->empire_city_icon = EMPIRE_CITY_ICON_ROMAN_CITY;
             break;
         case EMPIRE_TOOL_FUTURE_TRADE_CITY:
+            if (!empire_object_get_our_city()) {
+                return 0;
+            }
             city_obj->city_type = EMPIRE_CITY_FUTURE_TRADE;
             city_obj->obj.empire_city_icon = EMPIRE_CITY_ICON_ROMAN_CITY;
             city_obj->empire_city_icon = EMPIRE_CITY_ICON_ROMAN_CITY;
