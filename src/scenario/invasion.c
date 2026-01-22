@@ -879,6 +879,9 @@ void scenario_invasion_load_state(buffer *buf)
         invasion->repeat.interval.max = buffer_read_u16(buf);
     }
     array_trim(data.invasions);
+    if (!invasion_in_use(array_item(data.invasions, 0))) {
+        array_remove_item(data.invasions, 0);
+    }
 }
 
 int scenario_invasion_count_active_from_buffer(buffer *buf)
@@ -935,5 +938,8 @@ void scenario_invasion_load_state_old_version(buffer *buf, invasion_old_state_se
             invasion->month = buffer_read_u8(buf);
         }
         array_trim(data.invasions);
+        if (!invasion_in_use(array_item(data.invasions, 0))) {
+            array_remove_item(data.invasions, 0);
+        }
     }
 }

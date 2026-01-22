@@ -1964,7 +1964,9 @@ static translation_string all_strings[] = {
     {TR_EDITOR_HOUSE_MODEL_EXPLANATION_WINE, "Wine\nWhether the house needs wine 0 or 1"},
     {TR_EDITOR_HOUSE_MODEL_EXPLANATION_PROSPERITY, "Prosperity\nThe amount the house distributes to the desirability cap"},
     {TR_EDITOR_HOUSE_MODEL_EXPLANATION_MAX_PEOPLE, "Max people\nHow many people can live in that housing type"},
-    {TR_EDITOR_HOUSE_MODEL_EXPLANATION_TAX_MULTIPLIER, "Tax multiplier\nA multiplier for taxes"}
+    {TR_EDITOR_HOUSE_MODEL_EXPLANATION_TAX_MULTIPLIER, "Tax multiplier\nA multiplier for taxes"},
+    {TR_CHEAT_DESTROYED_BUILDING, "Destroyed building"},
+    {TR_CONFIG_ENABLE_BUILD_MENU_SHORTCUTS, "Enable build menu shortcuts"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

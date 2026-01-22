@@ -685,3 +685,16 @@ int text_measure_multiline(const uint8_t *str, int box_width, font_t font, int *
     }
     return num_lines;
 }
+
+void text_draw_build_menu_with_index(const uint8_t *str, int index, int x_offset, int y_offset, int box_width, font_t font, color_t color)
+{
+    uint8_t strx[NUMBER_BUFFER_LENGTH];
+    uint8_t *current = string_copy(str, strx, NUMBER_BUFFER_LENGTH - 5);
+
+    *current++ = '(';
+    current += string_from_int(current, index, 0);
+    *current++ = ')';
+    *current = 0;
+
+    text_draw_centered(strx, x_offset, y_offset, box_width, font, color);
+}
