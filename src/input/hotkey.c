@@ -39,6 +39,10 @@ typedef struct {
     int next_track;
 } global_hotkeys;
 
+typedef struct {
+    key_type keys[10];
+} build_menu_hotkeys;
+
 static struct {
     global_hotkeys global_hotkey_state;
     hotkeys hotkey_state;
@@ -47,6 +51,7 @@ static struct {
     arrow_definition *arrows;
     int num_arrows;
     key_modifier_type modifiers;
+    build_menu_hotkeys build_menu_hotkeys;
 } data;
 
 static void set_definition_for_action(hotkey_action action, hotkey_definition *def)
@@ -569,6 +574,11 @@ void hotkey_install_mapping(hotkey_mapping *mappings, int num_mappings)
             add_definition(&mappings[i]);
         }
     }
+
+    for (int i = 0; i < 10; i++) {
+        int k = KEY_TYPE_1 + i;
+        data.build_menu_hotkeys.keys[i] = k;
+    }
 }
 
 const hotkeys *hotkey_state(void)
@@ -602,6 +612,12 @@ void hotkey_key_pressed(key_type key, key_modifier_type modifiers, int repeat)
         }
         if (def->key == key && def->modifiers == modifiers && (!repeat || def->repeatable)) {
             *(def->action) = def->value;
+            found_action = 1;
+        }
+    }
+    for (int i = 0; i < 10; i++) {
+        if (data.build_menu_hotkeys.keys[i] == key) {
+            data.hotkey_state.build_menu_index_num = (key - KEY_TYPE_1) + 1;
             found_action = 1;
         }
     }

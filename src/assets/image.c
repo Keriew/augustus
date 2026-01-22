@@ -444,7 +444,7 @@ int asset_image_add_layer(asset_image *img,
 asset_image *asset_image_get_from_id(unsigned int image_id)
 {
     asset_image *last = array_last(data.asset_images);
-    if (image_id < 0 || !last || image_id > last->index) {
+    if (!last || image_id > last->index) {
         return 0;
     }
     return array_item(data.asset_images, image_id);

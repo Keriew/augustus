@@ -756,6 +756,9 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
     } else {
         scenario_events_clear();
     }
+    
+    scenario_map_init();
+    
     if (version > SCENARIO_LAST_UNVERSIONED) {
         empire_object_load(file->empire, version);
         if (resource_mapping_get_version() < RESOURCE_SEPARATE_FISH_AND_MEAT_VERSION) {
@@ -1737,8 +1740,8 @@ static savegame_load_status savegame_read_file_info(saved_game_info *info, saveg
     const savegame_state *state = &savegame_data.state;
     scenario_version_t scenario_version = save_version_to_scenario_version(version, state->scenario_version);
 
-    city_data_load_basic_info(state->city_data, &info->population, &info->treasury, &minimap_data.caravanserai_id,
-        version);
+    city_data_load_basic_info(state->city_data, &info->population, &info->treasury,
+        &minimap_data.caravanserai_id, version);
     game_time_load_basic_info(state->game_time, &info->month, &info->year);
 
     scenario_description_from_buffer(state->scenario, info->description, scenario_version);

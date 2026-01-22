@@ -385,6 +385,7 @@ parameter_type scenario_events_parameter_data_get_action_parameter_type(
         case 5:
             *min_limit = action->xml_parm5.min_limit;
             *max_limit = action->xml_parm5.max_limit;
+            return action->xml_parm5.type;
         default:
             *min_limit = 0;
             *max_limit = 0;
@@ -1392,17 +1393,6 @@ static uint8_t *translation_for_min_max_values(int min, int max, uint8_t *result
     result_text = append_text(string_from_ascii(".."), result_text, maxlength);
 
     number_length = string_from_int(result_text, max, 0);
-    result_text += number_length;
-    *maxlength -= number_length;
-
-    return result_text;
-}
-
-static uint8_t *translation_for_number_value(int value, uint8_t *result_text, int *maxlength)
-{
-    result_text = append_text(string_from_ascii(" "), result_text, maxlength);
-
-    int number_length = string_from_int(result_text, value, 0);
     result_text += number_length;
     *maxlength -= number_length;
 

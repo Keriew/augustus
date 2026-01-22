@@ -99,21 +99,6 @@ int widget_map_editor_add_draw_context_event_tile(int grid_offset, int event_id)
     return 0;
 }
 
-static void draw_event_area_highlight(int x, int y, int grid_offset)
-{
-    for (int grid_x = 0; x < GRID_SIZE; x++) {
-        for (int grid_y = 0; y < GRID_SIZE; y++) {
-            grid_offset = map_grid_offset(grid_x, grid_y);
-            if (event_tiles[grid_offset][0] == -1) {
-                continue; // no event tiles here
-            }
-            color_t color_mask = complex_button_basic_colors((event_tiles[grid_offset][0] % 10) + 1);
-            image_draw_isometric_footprint_from_draw_tile(
-                image_group(GROUP_TERRAIN_OVERLAY), x, y, color_mask, draw_context.scale);
-        }
-    }
-}
-
 static void draw_footprint(int x, int y, int grid_offset)
 {
     if (grid_offset < 0 || !map_property_is_draw_tile(grid_offset)) {

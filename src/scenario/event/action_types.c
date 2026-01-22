@@ -111,9 +111,6 @@ int scenario_action_type_custom_variable_formula_execute(scenario_action_t *acti
     int variable_id = action->parameter1;
     unsigned int formula_id = (unsigned int) action->parameter2; //cast 
 
-    if (formula_id < 0) {
-        return 0;
-    }
     int evaluation = scenario_formula_evaluate_formula(formula_id);
     scenario_custom_variable_set_value(variable_id, evaluation);
     return 1;
@@ -278,7 +275,7 @@ int scenario_action_type_request_immediately_start_execute(scenario_action_t *ac
     }
 
     unsigned int request_id = action->parameter1;
-    if (request_id < 0 || request_id >= scenario_request_count_total()) {
+    if (request_id >= scenario_request_count_total()) {
         return 0;
     }
 
