@@ -27,12 +27,14 @@
 #include "map/terrain.h"
 #include "scenario/custom_variable.h"
 #include "scenario/event/controller.h"
+#include "scenario/empire.h" 
 #include "sound/city.h"
 #include "sound/effect.h"
 #include "translation/translation.h"
 #include "widget/city_figure.h"
 #include "widget/map_editor_pause_menu.h"
 #include "widget/map_editor_tool.h"
+#include "window/editor/empire.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -484,6 +486,16 @@ void widget_map_editor_handle_input(const mouse *m, const hotkeys *h)
                 editor_tool_deactivate();
             }
         }
+    }
+    
+    if (h->show_empire_map) {
+        if (scenario_empire_id() == SCENARIO_CUSTOM_EMPIRE) {
+            resource_set_mapping(RESOURCE_CURRENT_VERSION);
+        } else {
+            resource_set_mapping(RESOURCE_ORIGINAL_VERSION);
+        }
+        window_editor_empire_show();
+        return;
     }
 
     if (h->escape_pressed) {
