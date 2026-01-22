@@ -1932,7 +1932,8 @@ static translation_string all_strings[] = {
     {TR_EDITOR_CUSTOM_EMPIRE_TITLE_SAVE, "Saving an empire"},
     {TR_EDITOR_EMPIRE_EXPORT, "Export Empire"},
     {TR_EDITOR_EMPIRE_IMPORT, "Import Empire"},
-    {TR_CONFIG_ENABLE_BUILD_MENU_SHORTCUTS, "Enable build menu shortcuts"}
+    {TR_CONFIG_ENABLE_BUILD_MENU_SHORTCUTS, "Enable build menu shortcuts"},
+    {TR_EDITOR_CURRENT_ICON, "Current city icon:"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

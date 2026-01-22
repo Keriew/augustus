@@ -63,6 +63,7 @@ static void button_cycle_preview(const generic_button *button);
 static void button_recycle_preview(const generic_button *button);
 static void button_add_resource(int param1, int param2);
 static void button_edit_city_name(int param1, int param2);
+static void button_icon_preview(const generic_button *button);
 
 static arrow_button arrow_buttons_empire[] = {
     {8, 48, 17, 24, button_change_empire, 1},
@@ -74,6 +75,7 @@ static generic_button generic_buttons[] = {
     {294, 48, 150, 24, button_refresh},
     {464, 48, 150, 24, button_export_xml, 0},
     {654, 48, 150, 24, button_import_xml, 0},
+    {0, 0, 0, 24, button_icon_preview, 0}
 };
 static generic_button preview_button[] = {
     {0, 0, 72, 72, button_cycle_preview, button_recycle_preview},
@@ -105,6 +107,7 @@ static struct {
     int finished_scroll;
     int show_battle_objects;
     unsigned int preview_button_focused;
+    unsigned int button_is_preview;
     int resource_pulse_start;
     struct {
         int x;
@@ -167,6 +170,7 @@ static void image_buttons_init(void)
 
 static void init(void)
 {
+    data.button_is_preview = 1;
     data.resource_pulse_start = 0;
     update_screen_size();
     data.selected_button = 0;
@@ -527,7 +531,8 @@ static void draw_city_info(const empire_city *city)
     width += 24;
     int width_after_name = width;
     int etc_width = text_get_width(string_from_ascii("..."), FONT_NORMAL_GREEN);
-    int tool_width = lang_text_get_width(CUSTOM_TRANSLATION, TR_EDITOR_EMPIRE_TOOL, FONT_NORMAL_GREEN);
+    int tool_width = lang_text_get_width(CUSTOM_TRANSLATION, data.button_is_preview ?
+        TR_EDITOR_EMPIRE_TOOL : TR_EDITOR_CURRENT_ICON, FONT_NORMAL_GREEN);
 
     switch (city->type) {
         case EMPIRE_CITY_DISTANT_ROMAN:
@@ -649,7 +654,8 @@ static void draw_panel_buttons(const empire_city *city)
         lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REFRESH_EMPIRE,
             data.panel.x_min + 314, data.y_max - 45, 150, FONT_NORMAL_GREEN);
         
-        int width = lang_text_get_width(CUSTOM_TRANSLATION, TR_EDITOR_EMPIRE_TOOL, FONT_NORMAL_GREEN);
+        int width = lang_text_get_width(CUSTOM_TRANSLATION, data.button_is_preview ?
+            TR_EDITOR_EMPIRE_TOOL : TR_EDITOR_CURRENT_ICON, FONT_NORMAL_GREEN);
         if (data.panel.x_min + 484 + 150 + width + 96 < data.panel.x_max) {
             generic_buttons[3].parameter1 = 0;
             button_border_draw(data.panel.x_min + 484, data.y_max - 52, 150, 24, data.focus_button_id == 4);
@@ -667,11 +673,17 @@ static void draw_panel_buttons(const empire_city *city)
             generic_buttons[4].parameter1 = 1;
         }
 
-        if (data.panel.x_min + 564 + width < data.panel.x_max) {
-            lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_EMPIRE_TOOL,
-                data.panel.x_max - 96 - width, data.y_max - 85, FONT_NORMAL_GREEN);
+        if (data.panel.x_min + 564 + width + 16 < data.panel.x_max) {
+            generic_buttons[5].parameter1 = 0;
+            generic_buttons[5].x = data.panel.x_max - 96 - width - 16 - 20;
+            generic_buttons[5].width = width + 16;
+            button_border_draw(generic_buttons[5].x + 20, data.y_max - 92, width + 16, 24, data.focus_button_id == 6);
+            lang_text_draw_centered(CUSTOM_TRANSLATION, data.button_is_preview ? TR_EDITOR_EMPIRE_TOOL : TR_EDITOR_CURRENT_ICON,
+                generic_buttons[5].x + 20, data.y_max - 85, width + 16, FONT_NORMAL_GREEN);
             lang_text_draw_centered(CUSTOM_TRANSLATION, get_preview_translation_key(empire_editor_get_tool()),
-                data.panel.x_max - 96 - width, data.y_max - 45, width, FONT_NORMAL_GREEN);
+                generic_buttons[5].x + 20, data.y_max - 45, width + 16, FONT_NORMAL_GREEN);
+        } else {
+            generic_buttons[5].parameter1 = 1;
         }
 
         button_border_draw(data.panel.x_max - 92, data.y_max - 100, 72, 72, data.preview_button_focused);
@@ -755,7 +767,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         return;
     }
     if (generic_buttons_handle_mouse(m, data.panel.x_min + x_offset, data.y_max - 100, generic_buttons,
-        scenario.empire.id == SCENARIO_CUSTOM_EMPIRE ? 5 : 1, &data.focus_button_id)) {
+        scenario.empire.id == SCENARIO_CUSTOM_EMPIRE ? 6 : 1, &data.focus_button_id)) {
         if (!generic_buttons[data.focus_button_id - 1].parameter1) {
             return;
         }
@@ -869,6 +881,12 @@ static void button_cycle_preview(const generic_button *button)
 static void button_recycle_preview(const generic_button *button)
 {
     empire_editor_change_tool(-1);
+    window_request_refresh();
+}
+
+static void button_icon_preview(const generic_button *button)
+{
+    data.button_is_preview = 1 - data.button_is_preview;
     window_request_refresh();
 }
 
