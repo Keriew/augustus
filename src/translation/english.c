@@ -1933,7 +1933,26 @@ static translation_string all_strings[] = {
     {TR_EDITOR_EMPIRE_EXPORT, "Export Empire"},
     {TR_EDITOR_EMPIRE_IMPORT, "Import Empire"},
     {TR_CONFIG_ENABLE_BUILD_MENU_SHORTCUTS, "Enable build menu shortcuts"},
-    {TR_EDITOR_CURRENT_ICON, "Current city icon:"}
+    {TR_EDITOR_CURRENT_ICON, "Current city icon:"},
+    {TR_EMPIRE_CITY_ICON_DEFAULT, "No Icon"},
+    {TR_EMPIRE_CITY_ICON_CONSTRUCTION, "Constuction"},
+    {TR_EMPIRE_CITY_ICON_DISTANT_TOWN, "Distant town"},
+    {TR_EMPIRE_CITY_ICON_DISTANT_VILLAGE, "Distant village"},
+    {TR_EMPIRE_CITY_ICON_RESOURCE_FOOD, "Resource food"},
+    {TR_EMPIRE_CITY_ICON_RESOURCE_GOODS, "Resource goods"},
+    {TR_EMPIRE_CITY_ICON_RESOURCE_SEA, "Resource sea"},
+    {TR_EMPIRE_CITY_ICON_TRADE_TOWN, "Trade town"},
+    {TR_EMPIRE_CITY_ICON_ROMAN_TOWN, "Roman town"},
+    {TR_EMPIRE_CITY_ICON_TRADE_VILLAGE, "Trade village"},
+    {TR_EMPIRE_CITY_ICON_ROMAN_VILLAGE, "Roman village"},
+    {TR_EMPIRE_CITY_ICON_ROMAN_CAPITAL, "Capital"},
+    {TR_EMPIRE_CITY_ICON_TRADE_SEA, "Trade sea"},
+    {TR_EMPIRE_CITY_ICON_TRADE_LAND, "Trade land"},
+    {TR_EMPIRE_CITY_ICON_OUR_CITY, "Our City"},
+    {TR_EMPIRE_CITY_ICON_TRADE_CITY, "Trade city"},
+    {TR_EMPIRE_CITY_ICON_ROMAN_CITY, "Roman city"},
+    {TR_EMPIRE_CITY_ICON_DISTANT_CITY, "Distant city"},
+    {TR_EMPIRE_CITY_ICON_TOWER, "Tower"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

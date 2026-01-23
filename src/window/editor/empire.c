@@ -278,23 +278,34 @@ static int get_preview_image_group(empire_tool tool) {
     }
 }
 
-static int get_preview_translation_key(empire_tool tool) {
-    return TR_EMPIRE_TOOL_OUR_CITY + tool;
+static int get_preview_translation_key(int tool_or_icon) {
+    if (data.button_is_preview) {
+        return TR_EMPIRE_TOOL_OUR_CITY + tool_or_icon;
+    } else {
+        return TR_EMPIRE_CITY_ICON_DEFAULT + tool_or_icon;
+    }
 }
 
-static int draw_preview_image(int x, int y, int center, color_t color_mask, int draw_borders)
+static int draw_preview_image(int x, int y, int center, color_t color_mask, int draw_borders, int is_icon)
 {
     int preview_image_group = get_preview_image_group(empire_editor_get_tool());
     
-    if (!preview_image_group) {
+    if (!preview_image_group && !is_icon) {
         return 0;
     }
     
     if (preview_image_group == GROUP_EMPIRE_BORDER_EDGE) {
         draw_borders = 0;
     }
+    if (is_icon && !empire_selected_object()) {
+        return 0;
+    }
     
-    int image_id = image_group(preview_image_group);
+    int image_id = is_icon ? empire_city_get_icon_image_id(
+        empire_object_get(empire_selected_object() - 1)->empire_city_icon) : image_group(preview_image_group);
+    if (!image_id) {
+        return 0;
+    }
     const image *img = image_get(image_id);
     int x_offset = x + (center - img->width) / 2;
     int y_offset = y + (center - img->height) / 2;
@@ -318,7 +329,7 @@ static void draw_background(void)
     }
     draw_paneling();
     if (scenario_empire_id() == SCENARIO_CUSTOM_EMPIRE) {
-        draw_preview_image(data.panel.x_max - 92, data.y_max - 100, 72, COLOR_MASK_NONE, 0);
+        draw_preview_image(data.panel.x_max - 92, data.y_max - 100, 72, COLOR_MASK_NONE, 0, !data.button_is_preview);
     }
 }
 
@@ -447,7 +458,7 @@ static void draw_coordinates(void)
     show_coords(data.x_min + 20, data.y_min + 20,
         lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_CURRENT_COORDS), x_coord, y_coord);
     if (!(m->left.is_down && !is_outside_map(m->x, m->y))) {
-        draw_preview_image(m->x, m->y, 0, ALPHA_FONT_SEMI_TRANSPARENT, 0);
+        draw_preview_image(m->x, m->y, 0, ALPHA_FONT_SEMI_TRANSPARENT, 0, 0);
     }
 
     if (data.coordinates.active) {
@@ -457,7 +468,7 @@ static void draw_coordinates(void)
         show_coords(data.x_min + 20, data.y_min + 50,
             lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_SELECTED_COORDS),
                 data.coordinates.x, data.coordinates.y);
-        if (!draw_preview_image(x_coord, y_coord, 0, ALPHA_FONT_SEMI_TRANSPARENT, 1)) {
+        if (!draw_preview_image(x_coord, y_coord, 0, ALPHA_FONT_SEMI_TRANSPARENT, 1, 0)) {
             graphics_draw_rect(x_coord - 3, y_coord - 3, 7, 7, COLOR_BLACK);
             graphics_draw_rect(x_coord - 1, y_coord - 1, 3, 3, COLOR_WHITE);
         }
@@ -680,7 +691,8 @@ static void draw_panel_buttons(const empire_city *city)
             button_border_draw(generic_buttons[5].x + 20, data.y_max - 92, width + 16, 24, data.focus_button_id == 6);
             lang_text_draw_centered(CUSTOM_TRANSLATION, data.button_is_preview ? TR_EDITOR_EMPIRE_TOOL : TR_EDITOR_CURRENT_ICON,
                 generic_buttons[5].x + 20, data.y_max - 85, width + 16, FONT_NORMAL_GREEN);
-            lang_text_draw_centered(CUSTOM_TRANSLATION, get_preview_translation_key(empire_editor_get_tool()),
+            empire_city_icon_type icon = empire_selected_object() ? empire_object_get(empire_selected_object() - 1)->empire_city_icon : 0;
+            lang_text_draw_centered(CUSTOM_TRANSLATION, get_preview_translation_key(data.button_is_preview ? empire_editor_get_tool() : icon),
                 generic_buttons[5].x + 20, data.y_max - 45, width + 16, FONT_NORMAL_GREEN);
         } else {
             generic_buttons[5].parameter1 = 1;
@@ -874,13 +886,33 @@ static void button_toggle_invasions(const generic_button *button)
 
 static void button_cycle_preview(const generic_button *button)
 {
-    empire_editor_change_tool(1);
+    if (data.button_is_preview) {
+        empire_editor_change_tool(1);
+    } else if (empire_selected_object()) {
+        empire_object *obj = empire_object_get(empire_selected_object() - 1);
+        full_empire_object *full = empire_object_get_full(empire_selected_object() - 1);
+        obj->empire_city_icon++;
+        full->empire_city_icon++;
+        if (obj->empire_city_icon > EMPIRE_CITY_ICON_TOWER) {
+            obj->empire_city_icon = full->empire_city_icon = EMPIRE_CITY_ICON_CONSTRUCTION;
+        }
+    }
     window_request_refresh();
 }
 
 static void button_recycle_preview(const generic_button *button)
 {
-    empire_editor_change_tool(-1);
+    if (data.button_is_preview) {
+        empire_editor_change_tool(-1);
+    } else if (empire_selected_object()) {
+        empire_object *obj = empire_object_get(empire_selected_object() - 1);
+        full_empire_object *full = empire_object_get_full(empire_selected_object() - 1);
+        obj->empire_city_icon--;
+        full->empire_city_icon--;
+        if (obj->empire_city_icon < EMPIRE_CITY_ICON_CONSTRUCTION) {
+            obj->empire_city_icon = full->empire_city_icon = EMPIRE_CITY_ICON_TOWER;
+        }
+    }
     window_request_refresh();
 }
 
