@@ -537,9 +537,13 @@ static void draw_city_info(const empire_city *city)
     int y_offset = data.y_max - 125;
     const uint8_t *city_name = empire_city_get_name(city);
     int width = text_draw(city_name, x_offset, y_offset, FONT_NORMAL_WHITE, 0);
-    width += 10;
+    if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE) {
+        width += 10;
+    }
     edit_city_name_button[0].x_offset = width + x_offset;
-    width += 24;
+    if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE) {
+        width += 24;
+    }
     int width_after_name = width;
     int etc_width = text_get_width(string_from_ascii("..."), FONT_NORMAL_GREEN);
     int tool_width = lang_text_get_width(CUSTOM_TRANSLATION, data.button_is_preview ?
@@ -631,7 +635,9 @@ static void draw_city_info(const empire_city *city)
             break;
         }
     }
-    image_buttons_draw(0, 0, edit_city_name_button, 1);
+    if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE) {
+        image_buttons_draw(0, 0, edit_city_name_button, 1);
+    }
 }
 
 static void draw_panel_buttons(const empire_city *city)
@@ -803,14 +809,15 @@ static void handle_input(const mouse *m, const hotkeys *h)
             if (m->x >= btn->x && m->x < btn->x + RESOURCE_ICON_WIDTH &&
                 m->y >= btn->y && m->y < btn->y + RESOURCE_ICON_HEIGHT) {
                 btn->highlighted = 1;
-                if (m->left.went_up) {
+                if (m->left.went_up && scenario.empire.id == SCENARIO_CUSTOM_EMPIRE && 
+                    empire_city_get(data.selected_city)->type != EMPIRE_CITY_OURS) {
                     data.add_to_buying = i;
                     data.selected_resource = r;
                     window_numeric_input_bound_show(screen_dialog_offset_x(), screen_dialog_offset_y(), NULL, 5, 0, 99999, set_quota);
                     window_request_refresh();
                     return;
                 }
-                if (m->right.went_up) {
+                if (m->right.went_up && scenario.empire.id == SCENARIO_CUSTOM_EMPIRE) {
                     empire_city *city = empire_city_get(data.selected_city);
                     if (i) {
                         empire_city_change_buying_of_resource(city, r, 0);
@@ -826,7 +833,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         }
     }
     
-    if (!is_outside_map(m->x, m->y)) {
+    if (!is_outside_map(m->x, m->y) && scenario.empire.id == SCENARIO_CUSTOM_EMPIRE) {
         if (empire_editor_handle_placement(m, h)) {
             return;
         }
