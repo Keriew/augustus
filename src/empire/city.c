@@ -520,6 +520,13 @@ void empire_city_set_foreign(int city_id)
     array_item(cities, city_id)->type = EMPIRE_CITY_DISTANT_FOREIGN;
 }
 
+void empire_city_set_type(int city_id, empire_city_type type)
+{
+    empire_city *city = array_item(cities, city_id);
+    city->type = type;
+    empire_object_get_full(city->empire_object_id)->city_type = type;
+}
+
 int empire_unlock_all_resources(void)
 {
     empire_city *city;

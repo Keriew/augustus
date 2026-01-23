@@ -348,7 +348,12 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm2 = {.name = "rate",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = 0,
                                             .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
                                         .xml_parm3 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,
-                                            .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, }
+                                            .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, },
+    [ACTION_TYPE_LOCK_TRADE_ROUTE]     = {.type = ACTION_TYPE_LOCK_TRADE_ROUTE,
+                                         .xml_attr = {.name = "lock_trade_route",   .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_LOCK_TRADE_ROUTE},
+                                         .xml_parm1 = {.name = "target_city",       .type = PARAMETER_TYPE_ROUTE,   .key = TR_PARAMETER_TYPE_ROUTE }, 
+                                         .xml_parm2 = {.name = "lock",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,    .max_limit = 1,         .key = TR_PARAMETER_LOCK },
+                                         .xml_parm3 = {.name = "show_message",      .type = PARAMETER_TYPE_BOOLEAN,     .min_limit = 0,     .max_limit = 1,         .key = TR_PARAMETER_SHOW_MESSAGE } }
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)
@@ -1791,6 +1796,14 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
             result_text = append_text(translation_for(action->parameter3 ? TR_PARAMETER_BY : TR_PARAMETER_TO), result_text, &maxlength);
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
+            return;
+        }
+        case ACTION_TYPE_LOCK_TRADE_ROUTE:
+        {
+            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, action->parameter1, result_text, &maxlength);
+            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+            result_text = append_text(translation_for(action->parameter2 ? TR_PARAMETER_LOCK : TR_PARAMETER_UNLOCK), result_text, &maxlength);
+            result_text = translation_for_boolean_text(action->parameter3, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
             return;
         }
         default:

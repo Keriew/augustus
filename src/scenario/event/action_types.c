@@ -854,3 +854,33 @@ int scenario_action_type_change_production_rate_execute(scenario_action_t *actio
 
     return 1;
 }
+
+int scenario_action_type_lock_trade_route_execute(scenario_action_t *action)
+{
+    int route_id = action->parameter1;
+    int lock = action->parameter2;
+    int show_message = action->parameter3;
+    
+    if (!trade_route_is_valid(route_id)) {
+        return 0;
+    }
+    
+    int city_id = empire_city_get_for_trade_route(route_id);
+    
+    if (show_message) {
+        if (lock && empire_city_is_trade_route_open(route_id)) {
+            city_message_post(1, MESSAGE_TRADE_STOPPED, city_id, RESOURCE_NONE);
+        } else if (!lock) {
+            city_message_post(1, MESSAGE_INCREASED_TRADING, city_id, RESOURCE_NONE);
+        }
+    }
+    empire_city_set_type(city_id, lock ? EMPIRE_CITY_DISTANT_ROMAN : EMPIRE_CITY_TRADE);
+    if (lock) {
+        empire_city_get(city_id)->is_open = 0;
+    } else {
+        empire_city_open_trade(city_id, 0);
+    }
+    building_menu_update();
+    
+    return 1;
+}
