@@ -3,6 +3,7 @@
 
 #include "input/mouse.h"
 #include "input/hotkey.h"
+#include "empire/object.h"
 
 typedef enum {
     EMPIRE_TOOL_MIN = 0,
@@ -23,7 +24,13 @@ int empire_editor_get_tool(void);
 void empire_editor_set_tool(empire_tool value);
 void empire_editor_change_tool(int amount);
 
-int empire_editor_delete_object(int obj_id);
+empire_tool empire_editor_get_tool_for_object(const full_empire_object *full);
+
+int empire_editor_delete_object(unsigned int obj_id);
+
+void empire_editor_move_object_start(unsigned int obj_id);
+void empire_editor_move_object_end(int mouse_x, int mouse_y);
+void empire_editor_move_object_stopp(void);
 
 int empire_editor_handle_placement(const mouse *m, const hotkeys *h);
 

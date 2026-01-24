@@ -872,6 +872,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
             data.selected_city = empire_city_get_for_object(selected_object - 1);
         }
         if (input_go_back_requested(m, h)) {
+            empire_editor_move_object_stopp();
             empire_clear_selected_object();
             window_invalidate();
         }
@@ -885,6 +886,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         if (m->right.went_up) {
             int has_scrolled = scroll_drag_end();
             if (!has_scrolled && input_go_back_requested(m, h)) {
+                empire_editor_move_object_stopp();
                 if (data.coordinates.active) {
                     data.coordinates.active = 0;
                 } else {
@@ -922,6 +924,7 @@ static void button_cycle_preview(const generic_button *button)
 {
     if (data.button_is_preview) {
         empire_editor_change_tool(1);
+        empire_editor_move_object_stopp();
     } else if (empire_selected_object()) {
         empire_object *obj = empire_object_get(empire_selected_object() - 1);
         full_empire_object *full = empire_object_get_full(empire_selected_object() - 1);
@@ -938,6 +941,7 @@ static void button_recycle_preview(const generic_button *button)
 {
     if (data.button_is_preview) {
         empire_editor_change_tool(-1);
+        empire_editor_move_object_stopp();
     } else if (empire_selected_object()) {
         empire_object *obj = empire_object_get(empire_selected_object() - 1);
         full_empire_object *full = empire_object_get_full(empire_selected_object() - 1);
@@ -1006,7 +1010,7 @@ static void button_delete_object(const generic_button *button)
 
 static void button_move_object(const generic_button *button)
 {
-    
+    empire_editor_move_object_start(empire_selected_object() - 1);
 }
 
 static void button_draw_route(const generic_button *button)

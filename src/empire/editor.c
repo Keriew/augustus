@@ -14,6 +14,7 @@
 #include "empire/import_xml.h"
 #include "window/editor/empire.h"
 #include "window/empire.h"
+#include "graphics/window.h"
 
 #define BASE_BORDER_FLAG_IMAGE_ID 3323
 #define BORDER_EDGE_DEFAULT_SPACING 50
@@ -22,10 +23,14 @@ static struct {
     empire_tool current_tool;
     int foreach_param1; // used for empire_object_foreach callbacks
     int foreach_param2;
+    int currently_moving;
+    int move_id;
 } data = {
     .current_tool = EMPIRE_TOOL_OUR_CITY,
     .foreach_param1 = -1,
-    .foreach_param2 = 0
+    .foreach_param2 = 0,
+    .currently_moving = 0,
+    .move_id = 0
 };
 
 static int place_object(int mouse_x, int mouse_y);
@@ -58,12 +63,45 @@ void empire_editor_change_tool(int amount)
     update_tool_bounds();
 }
 
+empire_tool empire_editor_get_tool_for_object(const full_empire_object *full)
+{
+    switch (full->obj.type) {
+        case EMPIRE_OBJECT_CITY:
+            switch (full->city_type) {
+                case EMPIRE_CITY_DISTANT_ROMAN:
+                    return EMPIRE_TOOL_ROMAN_CITY;
+                case EMPIRE_CITY_OURS:
+                    return EMPIRE_TOOL_OUR_CITY;
+                case EMPIRE_CITY_TRADE:
+                    return EMPIRE_TOOL_TRADE_CITY;
+                case EMPIRE_CITY_FUTURE_TRADE:
+                    return EMPIRE_TOOL_FUTURE_TRADE_CITY;
+                case EMPIRE_CITY_DISTANT_FOREIGN:
+                    return EMPIRE_TOOL_DISTANT_CITY;
+                case EMPIRE_CITY_VULNERABLE_ROMAN:
+                    return EMPIRE_TOOL_VULNERABLE_CITY;
+                default:
+                    return 0;
+            }
+        case EMPIRE_OBJECT_BATTLE_ICON:
+            return EMPIRE_TOOL_BATTLE;
+        case EMPIRE_OBJECT_BORDER_EDGE:
+            return EMPIRE_TOOL_BORDER;
+        case EMPIRE_OBJECT_ROMAN_ARMY:
+            return EMPIRE_TOOL_DISTANT_LEGION;
+        case EMPIRE_OBJECT_ENEMY_ARMY:
+            return EMPIRE_TOOL_DISTANT_BABARIAN;
+        default:
+            return 0;
+    }
+}
+
 int empire_editor_handle_placement(const mouse *m, const hotkeys *h)
 {
+    if (h->delete_empire_object && m->left.is_down) {
+        return delete_object_at(m->x, m->y);
+    }
     if (m->left.went_down) {
-        if (h->delete_empire_object) {
-            return delete_object_at(m->x, m->y);
-        }
         if (!place_object(m->x, m->y)) {
             return 0;
         } else {
@@ -93,6 +131,10 @@ static void shift_edge_indices(const empire_object *const_obj)
 
 static int place_object(int mouse_x, int mouse_y)
 {
+    if (data.currently_moving && data.current_tool == empire_editor_get_tool_for_object(empire_object_get_full(data.move_id))) {
+        empire_editor_move_object_end(mouse_x, mouse_y);
+        return 1;
+    }
     full_empire_object *full = empire_object_get_new();
     
     if (!full) {
@@ -340,9 +382,9 @@ static int delete_object_at(int mouse_x, int mouse_y)
     return empire_editor_delete_object(obj_id);
 }
 
-int empire_editor_delete_object(int obj_id)
+int empire_editor_delete_object(unsigned int obj_id)
 {
-    if (obj_id <= 0) {
+    if (!obj_id) {
         return 0;
     }
     full_empire_object *full = empire_object_get_full(obj_id);
@@ -381,4 +423,33 @@ int empire_editor_delete_object(int obj_id)
     }
     
     return 1;
+}
+
+void empire_editor_move_object_start(unsigned int obj_id)
+{
+    data.currently_moving = 1;
+    data.move_id = obj_id;
+    data.current_tool = empire_editor_get_tool_for_object(empire_object_get_full(obj_id));
+    window_request_refresh();
+}
+
+void empire_editor_move_object_end(int mouse_x, int mouse_y)
+{
+    if (!data.currently_moving) {
+        return;
+    }
+    data.currently_moving = 0;
+    empire_object *obj = empire_object_get(data.move_id);
+    int is_edge = obj->type == EMPIRE_OBJECT_BORDER_EDGE;
+    obj->x = editor_empire_mouse_to_empire_x(mouse_x) - ((obj->width / 2) * !is_edge);
+    obj->y = editor_empire_mouse_to_empire_y(mouse_y) - ((obj->height / 2) * !is_edge);
+    data.move_id = 0;
+    window_empire_collect_trade_edges();
+    empire_object_set_trade_route_coords(empire_object_get_our_city());
+}
+
+void empire_editor_move_object_stopp(void)
+{
+    data.currently_moving = 0;
+    data.move_id = 0;
 }
