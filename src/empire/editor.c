@@ -29,7 +29,7 @@ static struct {
 };
 
 static int place_object(int mouse_x, int mouse_y);
-static int delete_object(int mouse_x, int mouse_y);
+static int delete_object_at(int mouse_x, int mouse_y);
 
 static void update_tool_bounds(void)
 {
@@ -60,14 +60,9 @@ void empire_editor_change_tool(int amount)
 
 int empire_editor_handle_placement(const mouse *m, const hotkeys *h)
 {
-    if (h->delete_empire_object) {
-        if (m->left.is_down) {
-            return delete_object(m->x, m->y);
-        }
-    }
     if (m->left.went_down) {
         if (h->delete_empire_object) {
-            return delete_object(m->x, m->y);
+            return delete_object_at(m->x, m->y);
         }
         if (!place_object(m->x, m->y)) {
             return 0;
@@ -337,20 +332,24 @@ static void shift_trade_waypoints(const empire_object *const_obj)
     obj->order_index--;
 }
 
-static int delete_object(int mouse_x, int mouse_y)
-{
-    empire_clear_selected_object();
-    
+static int delete_object_at(int mouse_x, int mouse_y)
+{    
     int empire_x = editor_empire_mouse_to_empire_x(mouse_x);
     int empire_y = editor_empire_mouse_to_empire_y(mouse_y);
     unsigned int obj_id = empire_object_get_at(empire_x, empire_y);
-    if (!obj_id) {
+    return empire_editor_delete_object(obj_id);
+}
+
+int empire_editor_delete_object(int obj_id)
+{
+    if (obj_id <= 0) {
         return 0;
     }
     full_empire_object *full = empire_object_get_full(obj_id);
     if (full->city_type == EMPIRE_CITY_OURS) {
         return 0;
     }
+    empire_clear_selected_object();
     if (full->obj.type == EMPIRE_OBJECT_CITY) {
         if (full->city_type == EMPIRE_CITY_FUTURE_TRADE || full->city_type == EMPIRE_CITY_TRADE) {
             empire_object *route_obj = empire_object_get(full->obj.id + 1);

@@ -64,6 +64,9 @@ static void button_recycle_preview(const generic_button *button);
 static void button_add_resource(int param1, int param2);
 static void button_edit_city_name(int param1, int param2);
 static void button_icon_preview(const generic_button *button);
+static void button_delete_object(const generic_button *button);
+static void button_move_object(const generic_button *button);
+static void button_draw_route(const generic_button *button);
 
 static arrow_button arrow_buttons_empire[] = {
     {8, 48, 17, 24, button_change_empire, 1},
@@ -75,7 +78,7 @@ static generic_button generic_buttons[] = {
     {294, 48, 150, 24, button_refresh},
     {464, 48, 150, 24, button_export_xml, 0},
     {654, 48, 150, 24, button_import_xml, 0},
-    {0, 0, 0, 24, button_icon_preview, 0}
+    {0, 0, 0, 24, button_icon_preview, 0},
 };
 static generic_button preview_button[] = {
     {0, 0, 72, 72, button_cycle_preview, button_recycle_preview},
@@ -91,6 +94,12 @@ static image_button edit_city_name_button[] = {
     {0, 0, 24, 24, IB_NORMAL, 0, 0, button_edit_city_name, button_none, 0, 0, 1, "UI", "Edit_Button_Idle"}
 };
 
+static generic_button top_buttons[] = {
+    {280, 0, 120, 24, button_delete_object},
+    {140, 0, 120, 24, button_move_object},
+    {0, 0, 120, 24, button_draw_route}
+};
+
 static resource_button sell_buttons[RESOURCE_MAX] = { 0 };
 static resource_button buy_buttons[RESOURCE_MAX] = { 0 };
 
@@ -103,6 +112,7 @@ static struct {
     int x_min, x_max, y_min, y_max;
     int x_draw_offset, y_draw_offset;
     unsigned int focus_button_id;
+    unsigned int focus_top_button_id; 
     int is_scrolling;
     int finished_scroll;
     int show_battle_objects;
@@ -640,6 +650,16 @@ static void draw_city_info(const empire_city *city)
     }
 }
 
+static void draw_object_info(void)
+{
+    button_border_draw(data.panel.x_max - 140, data.y_max - 133, 120, 24, data.focus_top_button_id == 1);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EMPIRE_DELETE_OBJECT,
+        data.panel.x_max - 140, data.y_max - 126, 120, FONT_NORMAL_GREEN);
+    button_border_draw(data.panel.x_max - 280, data.y_max - 133, 120, 24, data.focus_top_button_id == 2);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EMPIRE_MOVE_OBJECT,
+        data.panel.x_max - 280, data.y_max - 126, 120, FONT_NORMAL_GREEN);
+}
+
 static void draw_panel_buttons(const empire_city *city)
 {
     int x_offset;
@@ -657,7 +677,10 @@ static void draw_panel_buttons(const empire_city *city)
             data.panel.x_min, data.y_max - 85, data.x_max - data.x_min, FONT_NORMAL_GREEN);
     }
     lang_text_draw(151, scenario_empire_id(), data.panel.x_min + 220, data.y_max - 45, FONT_NORMAL_GREEN);
-
+    
+    if (empire_selected_object() && scenario.empire.id == SCENARIO_CUSTOM_EMPIRE) {
+        draw_object_info();
+    }
 
     button_border_draw(data.panel.x_min + x_offset, data.y_max - 52, 100, 24, data.focus_button_id == 1);
     lang_text_draw_centered(44, 7, data.panel.x_min + x_offset, data.y_max - 45, 100, FONT_NORMAL_GREEN);
@@ -789,6 +812,10 @@ static void handle_input(const mouse *m, const hotkeys *h)
         if (!generic_buttons[data.focus_button_id - 1].parameter1) {
             return;
         }
+    }
+    if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE && 
+        generic_buttons_handle_mouse(m, data.panel.x_max - 420, data.y_max - 133, top_buttons, 3, &data.focus_top_button_id)) {
+        return;
     }
     if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE &&
         generic_buttons_handle_mouse(m, data.panel.x_max - 92, data.y_max - 100,
@@ -969,6 +996,22 @@ static void button_edit_city_name(int param1, int param2)
 {
     // 49 because city_custom_name is declared as uint8_t [50]
     window_text_input_show(string_from_ascii("Edit city name"), NULL, NULL, 49, set_city_name);
+}
+
+static void button_delete_object(const generic_button *button)
+{
+    empire_editor_delete_object(empire_selected_object() - 1);
+    window_request_refresh();
+}
+
+static void button_move_object(const generic_button *button)
+{
+    
+}
+
+static void button_draw_route(const generic_button *button)
+{
+    
 }
 
 static void button_refresh(const generic_button *button)

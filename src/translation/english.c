@@ -1955,7 +1955,9 @@ static translation_string all_strings[] = {
     {TR_EMPIRE_CITY_ICON_TOWER, "Tower"},
     {TR_ACTION_TYPE_LOCK_TRADE_ROUTE, "Lock Trade route"},
     {TR_PARAMETER_LOCK, "Lock"},
-    {TR_PARAMETER_UNLOCK, "Unlock"}
+    {TR_PARAMETER_UNLOCK, "Unlock"},
+    {TR_EMPIRE_DELETE_OBJECT, "Delete Object"},
+    {TR_EMPIRE_MOVE_OBJECT, "Move Object"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

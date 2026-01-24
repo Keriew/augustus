@@ -23,6 +23,8 @@ int empire_editor_get_tool(void);
 void empire_editor_set_tool(empire_tool value);
 void empire_editor_change_tool(int amount);
 
+int empire_editor_delete_object(int obj_id);
+
 int empire_editor_handle_placement(const mouse *m, const hotkeys *h);
 
 #endif // EMPIRE_EDITOR_H
