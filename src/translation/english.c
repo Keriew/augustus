@@ -1960,8 +1960,11 @@ static translation_string all_strings[] = {
     {TR_EMPIRE_MOVE_OBJECT, "Move Object"},
     {TR_CONFIG_UI_EMPIRE_CLICK_TO_DELETE, "Must click to delete object"},
     {TR_PARAMETER_TERRAIN_RUBBLE, "Rubble"},
-    {TR_EMPIRE_DRAW_TRADE_ROUTE, "Draw route"},
-    {TR_CONFIG_UI_EMPIRE_CONFIRM_DELETE, "Confirm object deletion"}
+    {TR_EMPIRE_DRAW_TRADE_ROUTE, "Redraw route"},
+    {TR_CONFIG_UI_EMPIRE_CONFIRM_DELETE, "Confirm object deletion"},
+    {TR_EMPIRE_TOOL_LAND_ROUTE, "Land trade route"},
+    {TR_EMPIRE_TOOL_SEA_ROUTE, "Sea trade route"},
+    {TR_EMPIRE_TOGGLE_EDGES, "Toggle edges"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

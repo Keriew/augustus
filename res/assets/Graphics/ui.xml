@@ -1425,4 +1425,7 @@
     <image src="Edit_Button_Idle" id="Edit_Button_Idle"/>
     <image src="Edit_Button_Idle"/>
     <image src="Edit_Button_Click"/>
+    <image src="LandWaypoint" id="LandWaypoint"/>
+    <image src="SeaWaypoint" id="SeaWaypoint"/>
+    <image src="LandWaypoint" id="BorderWaypoint"/>
 </assetlist>

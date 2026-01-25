@@ -97,6 +97,12 @@ empire_tool empire_editor_get_tool_for_object(const full_empire_object *full)
             return EMPIRE_TOOL_DISTANT_LEGION;
         case EMPIRE_OBJECT_ENEMY_ARMY:
             return EMPIRE_TOOL_DISTANT_BABARIAN;
+        case EMPIRE_OBJECT_TRADE_WAYPOINT:
+            if (empire_object_get(full->obj.parent_object_id)->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE) {
+                return EMPIRE_TOOL_LAND_ROUTE;
+            } else {
+                return EMPIRE_TOOL_SEA_ROUTE;
+            }
         default:
             return 0;
     }
@@ -387,6 +393,9 @@ static int delete_object_at(int mouse_x, int mouse_y)
     int empire_x = editor_empire_mouse_to_empire_x(mouse_x);
     int empire_y = editor_empire_mouse_to_empire_y(mouse_y);
     data.deletion_id = empire_object_get_at(empire_x, empire_y);
+    if (!data.deletion_id) {
+        return 0;
+    }
     if (config_get(CONFIG_UI_EMPIRE_CONFIRM_DELETE)) {
         window_popup_dialog_show_confirmation(translation_for(TR_EMPIRE_DELETE_OBJECT), 0, 0, deletion_confirmed);
     } else {

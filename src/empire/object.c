@@ -745,19 +745,20 @@ int empire_object_get_at(int x, int y)
             obj_x = obj->x;
             obj_y = obj->y;
         }
+        int is_edge = obj->type == EMPIRE_OBJECT_TRADE_WAYPOINT || obj->type == EMPIRE_OBJECT_BORDER_EDGE;
         if (obj->height) {
             width = obj->width;
             height = obj->height;
-        } else if (obj->type == EMPIRE_OBJECT_TRADE_WAYPOINT || obj->type == EMPIRE_OBJECT_BORDER_EDGE) {
-            width = 8;
-            height = 8;
+        } else if (is_edge) {
+            width = 19;
+            height = 18;
         } else {
             const image *img = image_get(obj->image_id);
             width = img->width;
             height = img->height;
         }
-        if ((x >= obj_x && x <= obj_x + width) &&
-            (y >= obj_y && y <= obj_y + height)) {
+        if ((x >= obj_x - (width / 2 * is_edge) && x <= obj_x + width / 1 + is_edge) &&
+            (y >= obj_y - (height / 2 * is_edge) && y <= obj_y + height / 1 + is_edge)) {
             return obj->id;
         }
     }

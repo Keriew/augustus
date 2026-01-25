@@ -17,7 +17,9 @@ typedef enum {
     EMPIRE_TOOL_BATTLE = 7,
     EMPIRE_TOOL_DISTANT_BABARIAN = 8,
     EMPIRE_TOOL_DISTANT_LEGION = 9,
-    EMPIRE_TOOL_MAX = 10
+    EMPIRE_TOOL_LAND_ROUTE = 10,
+    EMPIRE_TOOL_SEA_ROUTE = 11,
+    EMPIRE_TOOL_MAX = 12
 } empire_tool;
 
 int empire_editor_get_tool(void);
