@@ -354,6 +354,11 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                             .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
                                         .xml_parm4 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,
                                             .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, }
+    [ACTION_TYPE_LOCK_TRADE_ROUTE]     = {.type = ACTION_TYPE_LOCK_TRADE_ROUTE,
+                                        .xml_attr = {.name = "lock_trade_route",   .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_LOCK_TRADE_ROUTE},
+                                        .xml_parm1 = {.name = "target_city",       .type = PARAMETER_TYPE_ROUTE,   .key = TR_PARAMETER_TYPE_ROUTE }, 
+                                        .xml_parm2 = {.name = "lock",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,    .max_limit = 1,         .key = TR_PARAMETER_LOCK },
+                                        .xml_parm3 = {.name = "show_message",      .type = PARAMETER_TYPE_BOOLEAN,     .min_limit = 0,     .max_limit = 1,         .key = TR_PARAMETER_SHOW_MESSAGE } }
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)
@@ -687,11 +692,12 @@ static special_attribute_mapping_t special_attribute_mappings_climate[] =
 
 static special_attribute_mapping_t special_attribute_mappings_terrain[] =
 {
-    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Water",            .value = TERRAIN_WATER,   .key = TR_PARAMETER_TERRAIN_WATER },
-    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Rock",             .value = TERRAIN_ROCK,    .key = TR_PARAMETER_TERRAIN_ROCK },
-    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Fertile Ground",   .value = TERRAIN_MEADOW,  .key = TR_PARAMETER_TERRAIN_MEADOW },
-    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Tree",             .value = TERRAIN_TREE,    .key = TR_PARAMETER_TERRAIN_TREE },
-    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Shrub",            .value = TERRAIN_SHRUB,   .key = TR_PARAMETER_TERRAIN_SHRUB },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Water",            .value = TERRAIN_WATER,    .key = TR_PARAMETER_TERRAIN_WATER },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Rock",             .value = TERRAIN_ROCK,     .key = TR_PARAMETER_TERRAIN_ROCK },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Fertile Ground",   .value = TERRAIN_MEADOW,   .key = TR_PARAMETER_TERRAIN_MEADOW },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Tree",             .value = TERRAIN_TREE,     .key = TR_PARAMETER_TERRAIN_TREE },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Shrub",            .value = TERRAIN_SHRUB,    .key = TR_PARAMETER_TERRAIN_SHRUB },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Rubble",           .value = TERRAIN_RUBBLE,   .key = TR_PARAMETER_TERRAIN_RUBBLE },
 };
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_TERRAIN_SIZE (sizeof(special_attribute_mappings_terrain) / sizeof(special_attribute_mapping_t))
@@ -896,6 +902,8 @@ static void generate_building_type_mappings(void)
         mapping->key = props->event_data.key ? props->event_data.key : TR_PARAMETER_VALUE_DYNAMIC_RESOLVE;
         special_attribute_mappings_building_type_size++;
     }
+    special_attribute_mappings_buildings[special_attribute_mappings_building_type_size++] =
+        (special_attribute_mapping_t){PARAMETER_TYPE_BUILDING, "rubble", -1, TR_PARAMETER_TERRAIN_RUBBLE};
 }
 
 static void generate_model_mappings(void)
@@ -1841,6 +1849,13 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
             result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
             result_text = append_text(translation_for(action->parameter4 ? TR_PARAMETER_TO : TR_PARAMETER_BY), result_text, &maxlength);
             result_text = translation_for_formula_index(action->parameter3, result_text, &maxlength);
+            return;
+        case ACTION_TYPE_LOCK_TRADE_ROUTE:
+        {
+            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, action->parameter1, result_text, &maxlength);
+            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+            result_text = append_text(translation_for(action->parameter2 ? TR_PARAMETER_LOCK : TR_PARAMETER_UNLOCK), result_text, &maxlength);
+            result_text = translation_for_boolean_text(action->parameter3, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
             return;
         }
         default:

@@ -118,17 +118,12 @@ int building_set_area_count_deco_statues(int minx, int miny, int maxx, int maxy)
 figure_type building_count_forts_get_figure_type_from_building(building_type type);
 
 /**
- * Special counting functions for buildings which are actually terrain
+ * Special counting functions for buildings which are special
  */
-int building_count_roads(void);
-int building_count_highway(void);
-int building_count_plaza(void);
-int building_count_gardens(int overgrown);
+int building_count_terrain_in_area(int minx, int miny, int maxx, int maxy, int terrain, int (*condition)(int));
+int building_count_terrain(int terrain, int (*condition)(int));
+
 int building_count_bridges(int ship);
-int building_count_roads_in_area(int minx, int miny, int maxx, int maxy);
-int building_count_highway_in_area(int minx, int miny, int maxx, int maxy);
-int building_count_plaza_in_area(int minx, int miny, int maxx, int maxy);
-int building_count_gardens_in_area(int minx, int miny, int maxx, int maxy, int overgrown);
 int building_count_bridges_in_area(int minx, int miny, int maxx, int maxy, int ship);
 
 #endif // BUILDING_COUNT_H

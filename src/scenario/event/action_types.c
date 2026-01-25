@@ -45,6 +45,8 @@
 
 #include <stdlib.h>
 
+#define BUILDING_RUBBLE -1
+
 int scenario_action_type_change_allowed_buildings_execute(scenario_action_t *action)
 {
     int building_id = action->parameter1;
@@ -334,7 +336,7 @@ int scenario_action_type_building_force_collapse_execute(scenario_action_t *acti
 {
     int grid_offset1 = action->parameter1;
     int grid_offset2 = action->parameter2;
-    building_type type = action->parameter3;
+    int type = action->parameter3;
     int destroy_all = action->parameter4;
     grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
 
@@ -343,14 +345,14 @@ int scenario_action_type_building_force_collapse_execute(scenario_action_t *acti
         if (!map_grid_is_valid_offset(current_grid_offset)) {
             continue;
         }
-        if (map_terrain_is(current_grid_offset, (TERRAIN_IMPASSABLE_ENEMY ^ TERRAIN_GARDEN) | TERRAIN_ACCESS_RAMP)) {
+        if (map_terrain_is(current_grid_offset, (TERRAIN_IMPASSABLE_ENEMY ^ TERRAIN_GARDEN ^ TERRAIN_RUBBLE) | TERRAIN_ACCESS_RAMP)) {
             continue;
         }
         if (type == BUILDING_OVERGROWN_GARDENS || type == BUILDING_PLAZA || destroy_all) {
             map_property_clear_plaza_earthquake_or_overgrown_garden(current_grid_offset);
         }
         if (((type == BUILDING_ROAD || type == BUILDING_GARDENS || type == BUILDING_HIGHWAY ||
-            type == BUILDING_OVERGROWN_GARDENS) && !map_terrain_is(current_grid_offset, TERRAIN_BUILDING)) || destroy_all) {
+            type == BUILDING_OVERGROWN_GARDENS || type == BUILDING_RUBBLE) && !map_terrain_is(current_grid_offset, TERRAIN_BUILDING)) || destroy_all) {
             int terrain = TERRAIN_ROAD;
             switch (type) {
                 case BUILDING_GARDENS:
@@ -360,6 +362,9 @@ int scenario_action_type_building_force_collapse_execute(scenario_action_t *acti
                 case BUILDING_HIGHWAY:
                     terrain = TERRAIN_HIGHWAY;
                     break;
+                case BUILDING_RUBBLE:
+                    terrain = TERRAIN_RUBBLE;
+                    break;
                 default:
                     break;
             }
@@ -367,7 +372,7 @@ int scenario_action_type_building_force_collapse_execute(scenario_action_t *acti
                 map_tiles_clear_highway(current_grid_offset, 0);
             }
             if (destroy_all) {
-                terrain = TERRAIN_ROAD | TERRAIN_GARDEN | TERRAIN_HIGHWAY;
+                terrain = TERRAIN_ROAD | TERRAIN_GARDEN | TERRAIN_HIGHWAY | TERRAIN_RUBBLE;
             }
             map_terrain_remove(current_grid_offset, terrain);
         }
@@ -388,7 +393,7 @@ int scenario_action_type_building_force_collapse_execute(scenario_action_t *acti
     }
 
     if (type == BUILDING_ROAD || type == BUILDING_GARDENS || type == BUILDING_HIGHWAY ||
-        type == BUILDING_OVERGROWN_GARDENS || type == BUILDING_PLAZA || destroy_all) {
+        type == BUILDING_OVERGROWN_GARDENS || type == BUILDING_PLAZA || type == BUILDING_RUBBLE || destroy_all) {
         map_tiles_update_all_empty_land();
         map_tiles_update_all_meadow();
         map_tiles_update_all_highways();
@@ -847,6 +852,36 @@ int scenario_action_type_change_house_model_data_execute(scenario_action_t *acti
 
     int *value = model_get_ptr_for_house_data_type(model_ptr, data_type);
     *value = amount + (set_to_value ? 0 : *value);
+    
+    return 1;
+}
+
+int scenario_action_type_lock_trade_route_execute(scenario_action_t *action)
+{
+    int route_id = action->parameter1;
+    int lock = action->parameter2;
+    int show_message = action->parameter3;
+    
+    if (!trade_route_is_valid(route_id)) {
+        return 0;
+    }
+    
+    int city_id = empire_city_get_for_trade_route(route_id);
+    
+    if (show_message) {
+        if (lock && empire_city_is_trade_route_open(route_id)) {
+            city_message_post(1, MESSAGE_TRADE_STOPPED, city_id, RESOURCE_NONE);
+        } else if (!lock) {
+            city_message_post(1, MESSAGE_INCREASED_TRADING, city_id, RESOURCE_NONE);
+        }
+    }
+    empire_city_set_type(city_id, lock ? EMPIRE_CITY_DISTANT_ROMAN : EMPIRE_CITY_TRADE);
+    if (lock) {
+        empire_city_get(city_id)->is_open = 0;
+    } else {
+        empire_city_open_trade(city_id, 0);
+    }
+    building_menu_update();
     
     return 1;
 }
