@@ -649,6 +649,11 @@ static void draw_city_info(const empire_city *city)
     }
     if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE) {
         image_buttons_draw(0, 0, edit_city_name_button, 1);
+        if (!top_buttons[2].parameter1) {
+            button_border_draw(data.panel.x_max - 420, data.y_max - 133, 120, 24, data.focus_top_button_id == 3);
+            lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EMPIRE_DRAW_TRADE_ROUTE,
+                data.panel.x_max - 420, data.y_max - 126, 120, FONT_NORMAL_GREEN);
+        }
     }
 }
 

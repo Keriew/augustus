@@ -12,9 +12,11 @@
 #include "empire/object.h"
 #include "empire/trade_route.h"
 #include "empire/import_xml.h"
+#include "graphics/window.h"
+#include "translation/translation.h"
 #include "window/editor/empire.h"
 #include "window/empire.h"
-#include "graphics/window.h"
+#include "window/popup_dialog.h"
 
 #define BASE_BORDER_FLAG_IMAGE_ID 3323
 #define BORDER_EDGE_DEFAULT_SPACING 50
@@ -25,12 +27,16 @@ static struct {
     int foreach_param2;
     int currently_moving;
     int move_id;
+    int deletion_success;
+    int deletion_id;
 } data = {
     .current_tool = EMPIRE_TOOL_OUR_CITY,
     .foreach_param1 = -1,
     .foreach_param2 = 0,
     .currently_moving = 0,
-    .move_id = 0
+    .move_id = 0,
+    .deletion_success = 0,
+    .deletion_id = 0
 };
 
 static int place_object(int mouse_x, int mouse_y);
@@ -374,12 +380,27 @@ static void shift_trade_waypoints(const empire_object *const_obj)
     obj->order_index--;
 }
 
+static void deletion_confirmed(int confirmed, int checked);
+
 static int delete_object_at(int mouse_x, int mouse_y)
 {    
     int empire_x = editor_empire_mouse_to_empire_x(mouse_x);
     int empire_y = editor_empire_mouse_to_empire_y(mouse_y);
-    unsigned int obj_id = empire_object_get_at(empire_x, empire_y);
-    return empire_editor_delete_object(obj_id);
+    data.deletion_id = empire_object_get_at(empire_x, empire_y);
+    if (config_get(CONFIG_UI_EMPIRE_CONFIRM_DELETE)) {
+        window_popup_dialog_show_confirmation(translation_for(TR_EMPIRE_DELETE_OBJECT), 0, 0, deletion_confirmed);
+    } else {
+        deletion_confirmed(1, 0);
+    }
+    return data.deletion_success;
+}
+
+static void deletion_confirmed(int confirmed, int checked)
+{
+    if (!confirmed) {
+        return;
+    }
+    data.deletion_success = empire_editor_delete_object(data.deletion_id);
 }
 
 int empire_editor_delete_object(unsigned int obj_id)
