@@ -687,11 +687,12 @@ static special_attribute_mapping_t special_attribute_mappings_climate[] =
 
 static special_attribute_mapping_t special_attribute_mappings_terrain[] =
 {
-    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Water",            .value = TERRAIN_WATER,   .key = TR_PARAMETER_TERRAIN_WATER },
-    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Rock",             .value = TERRAIN_ROCK,  .key = TR_PARAMETER_TERRAIN_ROCK },
-    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Fertile Ground",   .value = TERRAIN_MEADOW,    .key = TR_PARAMETER_TERRAIN_MEADOW },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Water",            .value = TERRAIN_WATER,    .key = TR_PARAMETER_TERRAIN_WATER },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Rock",             .value = TERRAIN_ROCK,     .key = TR_PARAMETER_TERRAIN_ROCK },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Fertile Ground",   .value = TERRAIN_MEADOW,   .key = TR_PARAMETER_TERRAIN_MEADOW },
     {.type = PARAMETER_TYPE_TERRAIN,            .text = "Tree",             .value = TERRAIN_TREE,     .key = TR_PARAMETER_TERRAIN_TREE },
     {.type = PARAMETER_TYPE_TERRAIN,            .text = "Shrub",            .value = TERRAIN_SHRUB,    .key = TR_PARAMETER_TERRAIN_SHRUB },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Rubble",           .value = TERRAIN_RUBBLE,   .key = TR_PARAMETER_TERRAIN_RUBBLE },
 };
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_TERRAIN_SIZE (sizeof(special_attribute_mappings_terrain) / sizeof(special_attribute_mapping_t))
@@ -873,6 +874,8 @@ static void generate_building_type_mappings(void)
         mapping->key = props->event_data.key ? props->event_data.key : TR_PARAMETER_VALUE_DYNAMIC_RESOLVE;
         special_attribute_mappings_building_type_size++;
     }
+    special_attribute_mappings_buildings[special_attribute_mappings_building_type_size++] =
+        (special_attribute_mapping_t){PARAMETER_TYPE_BUILDING, "rubble", -1, TR_PARAMETER_TERRAIN_RUBBLE};
 }
 
 static void generate_model_mappings(void)

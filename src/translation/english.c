@@ -1958,7 +1958,8 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_UNLOCK, "Unlock"},
     {TR_EMPIRE_DELETE_OBJECT, "Delete Object"},
     {TR_EMPIRE_MOVE_OBJECT, "Move Object"},
-    {TR_CONFIG_UI_EMPIRE_CLICK_TO_DELETE, "Must click to delete object"}
+    {TR_CONFIG_UI_EMPIRE_CLICK_TO_DELETE, "Must click to delete object"},
+    {TR_PARAMETER_TERRAIN_RUBBLE, "Rubble"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
