@@ -36,6 +36,7 @@
 #include "window/text_input.h"
 
 #include <math.h>
+#include <stdio.h>
 
 #define WIDTH_BORDER 32
 #define HEIGHT_BORDER 176
@@ -98,7 +99,7 @@ static image_button edit_city_name_button[] = {
 static generic_button top_buttons[] = {
     {280, 0, 120, 24, button_delete_object},
     {140, 0, 120, 24, button_move_object},
-    {0, 0, 120, 24, button_draw_route}
+    {0, 0, 120, 24, button_draw_route, 0}
 };
 
 static resource_button sell_buttons[RESOURCE_MAX] = { 0 };
@@ -569,8 +570,8 @@ static void draw_city_info(const empire_city *city)
             break;
         case EMPIRE_CITY_OURS:
         {
+            top_buttons[2].parameter1 = 1;
             add_resource_buttons[1].dont_draw = 1;
-            add_resource_buttons[1].enabled = 0;
             width += lang_text_draw(47, 1, x_offset + 20 + width, y_offset, FONT_NORMAL_GREEN);
             int resource_x_offset = x_offset + 30 + width;
             for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
@@ -596,8 +597,8 @@ static void draw_city_info(const empire_city *city)
         case EMPIRE_CITY_TRADE:
         case EMPIRE_CITY_FUTURE_TRADE:
         {
+            top_buttons[2].parameter1 = 0;
             add_resource_buttons[1].dont_draw = 0;
-            add_resource_buttons[1].enabled = 1;
             int text_width = lang_text_draw(47, 5, x_offset + 20 + width, y_offset, FONT_NORMAL_GREEN);
             width += text_width;
             int resource_x_offset = x_offset + 30 + width;
@@ -816,7 +817,9 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
     if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE && 
         generic_buttons_handle_mouse(m, data.panel.x_max - 420, data.y_max - 133, top_buttons, 3, &data.focus_top_button_id)) {
-        return;
+        if (!top_buttons[data.focus_top_button_id - 1].parameter1) {
+            return;
+        }
     }
     if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE &&
         generic_buttons_handle_mouse(m, data.panel.x_max - 92, data.y_max - 100,
