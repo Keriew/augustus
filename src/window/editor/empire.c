@@ -18,6 +18,7 @@
 #include "graphics/image.h"
 #include "graphics/image_button.h"
 #include "graphics/lang_text.h"
+#include "graphics/panel.h"
 #include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
@@ -556,8 +557,6 @@ static void draw_city_info(const empire_city *city)
     }
     int width_after_name = width;
     int etc_width = text_get_width(string_from_ascii("..."), FONT_NORMAL_GREEN);
-    int tool_width = lang_text_get_width(CUSTOM_TRANSLATION, data.button_is_preview ?
-        TR_EDITOR_EMPIRE_TOOL : TR_EDITOR_CURRENT_ICON, FONT_NORMAL_GREEN);
 
     switch (city->type) {
         case EMPIRE_CITY_DISTANT_ROMAN:
@@ -571,11 +570,12 @@ static void draw_city_info(const empire_city *city)
         case EMPIRE_CITY_OURS:
         {
             add_resource_buttons[1].dont_draw = 1;
+            add_resource_buttons[1].enabled = 0;
             width += lang_text_draw(47, 1, x_offset + 20 + width, y_offset, FONT_NORMAL_GREEN);
             int resource_x_offset = x_offset + 30 + width;
             for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
                 if (empire_object_city_sells_resource(city->empire_object_id, r)) {
-                    if (resource_x_offset + etc_width + 32 + 8 + 39 >= data.panel.x_max) {
+                    if (resource_x_offset + etc_width + 32 + 8 + 39 >= data.panel.x_max - 280) {
                         text_draw(string_from_ascii("..."), resource_x_offset + 2, y_offset + 4, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
                         resource_x_offset += etc_width + 8;
                         break;
@@ -597,6 +597,7 @@ static void draw_city_info(const empire_city *city)
         case EMPIRE_CITY_FUTURE_TRADE:
         {
             add_resource_buttons[1].dont_draw = 0;
+            add_resource_buttons[1].enabled = 1;
             int text_width = lang_text_draw(47, 5, x_offset + 20 + width, y_offset, FONT_NORMAL_GREEN);
             width += text_width;
             int resource_x_offset = x_offset + 30 + width;
@@ -604,7 +605,7 @@ static void draw_city_info(const empire_city *city)
                 if (empire_object_city_sells_resource(city->empire_object_id, r)) {
                     int max_trade = trade_route_limit(city->route_id, r, 0);
                     int resource_width = 32 + text_get_number_width(max_trade, '\0', "", FONT_NORMAL_GREEN);
-                    if (resource_x_offset + etc_width + resource_width + 8 + 39 >= data.panel.x_max) {
+                    if (resource_x_offset + etc_width + resource_width + 8 + 39 >= data.panel.x_max - 420) {
                         text_draw(string_from_ascii("..."), resource_x_offset + 2, y_offset + 4, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
                         resource_x_offset += etc_width + 8;
                         break;
@@ -626,7 +627,7 @@ static void draw_city_info(const empire_city *city)
                 if (empire_object_city_buys_resource(city->empire_object_id, r)) {
                     int max_trade = trade_route_limit(city->route_id, r, 1);
                     int resource_width = 32 + text_get_number_width(max_trade, '\0', "", FONT_NORMAL_GREEN);
-                    if (resource_x_offset + etc_width + tool_width + 96 + resource_width + 8 + 39 >= data.panel.x_max) {
+                    if (resource_x_offset + etc_width + generic_buttons[5].width + 96 + resource_width + 8 + 39 >= data.panel.x_max) {
                         text_draw(string_from_ascii("..."), resource_x_offset + 2, y_offset + 4, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
                         resource_x_offset += etc_width + 8;
                         break;
@@ -840,7 +841,8 @@ static void handle_input(const mouse *m, const hotkeys *h)
                     empire_city_get(data.selected_city)->type != EMPIRE_CITY_OURS) {
                     data.add_to_buying = i;
                     data.selected_resource = r;
-                    window_numeric_input_bound_show(screen_dialog_offset_x(), screen_dialog_offset_y(), NULL, 5, 0, 99999, set_quota);
+                    window_numeric_input_bound_show((data.x_min + data.x_max) / 2 - 4 * BLOCK_SIZE - screen_dialog_offset_x(),
+                        ((data.y_min + data.y_max) - 15 * BLOCK_SIZE) / 2 - screen_dialog_offset_y(), NULL, 5, 0, 99999, set_quota);
                     window_request_refresh();
                     return;
                 }
@@ -986,8 +988,8 @@ static void button_add_resource(int param1, int param2)
             total_resources++;
         }
     }
-    window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y(), NULL,
-        resource_texts, total_resources, add_resource);
+    window_select_list_show_text((data.x_min + data.x_max) / 2 - 100, ((data.y_min + data.y_max) -
+        (20 * total_resources + 24)) / 2, NULL, resource_texts, total_resources, add_resource);
 }
 
 static void set_city_name(const uint8_t *name)

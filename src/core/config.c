@@ -114,7 +114,8 @@ static const char *ini_keys[] = {
     [CONFIG_GP_CH_HOUSING_PRE_MERGE_VACANT_LOTS] = "gp_ch_housing_pre_merge_vacant_lots",
     [CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES] = "ui_build_show_reservoir_ranges",
     [CONFIG_UI_EMPIRE_SMART_BORDER_PLACMENT] = "ui_empire_smart_border_placement",
-    [CONFIG_UI_ENABLE_BUILD_MENU_SHORTCUTS] = "ui_enable_build_menu_shortcuts"
+    [CONFIG_UI_ENABLE_BUILD_MENU_SHORTCUTS] = "ui_enable_build_menu_shortcuts",
+    [CONFIG_UI_EMPIRE_CLICK_TO_DELETE] = "ui_empire_must_click_to_delete"
 };
 
 static const char *ini_string_keys[] = {
@@ -178,7 +179,8 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_GP_CH_HOUSING_PRE_MERGE_VACANT_LOTS] = 1,
     [CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES] = 1,
     [CONFIG_UI_EMPIRE_SMART_BORDER_PLACMENT] = 1,
-    [CONFIG_UI_ENABLE_BUILD_MENU_SHORTCUTS] = 1
+    [CONFIG_UI_ENABLE_BUILD_MENU_SHORTCUTS] = 1,
+    [CONFIG_UI_EMPIRE_CLICK_TO_DELETE] = 0,
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };

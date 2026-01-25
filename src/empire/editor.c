@@ -98,7 +98,7 @@ empire_tool empire_editor_get_tool_for_object(const full_empire_object *full)
 
 int empire_editor_handle_placement(const mouse *m, const hotkeys *h)
 {
-    if (h->delete_empire_object && m->left.is_down) {
+    if (h->delete_empire_object && (m->left.is_down || !config_get(CONFIG_UI_EMPIRE_CLICK_TO_DELETE))) {
         return delete_object_at(m->x, m->y);
     }
     if (m->left.went_down) {
