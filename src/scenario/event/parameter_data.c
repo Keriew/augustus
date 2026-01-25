@@ -353,7 +353,7 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm3 = {.name = "value",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = 0,
                                             .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
                                         .xml_parm4 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,
-                                            .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, }
+                                            .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, },
     [ACTION_TYPE_LOCK_TRADE_ROUTE]     = {.type = ACTION_TYPE_LOCK_TRADE_ROUTE,
                                         .xml_attr = {.name = "lock_trade_route",   .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_LOCK_TRADE_ROUTE},
                                         .xml_parm1 = {.name = "target_city",       .type = PARAMETER_TYPE_ROUTE,   .key = TR_PARAMETER_TYPE_ROUTE }, 
@@ -1862,6 +1862,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         {
             result_text = append_text(string_from_ascii(" UNHANDLED ACTION TYPE!"), result_text, &maxlength);
             return;
+        }
         }
     }
 }
