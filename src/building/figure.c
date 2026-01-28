@@ -1611,6 +1611,8 @@ static void spawn_figure_barracks(building *b)
         if (city_data.mess_hall.food_stress_cumulative > 20) {
             spawn_delay += city_data.mess_hall.food_stress_cumulative - 20;
         }
+        
+        spawn_delay = calc_adjust_with_percentage(spawn_delay, resource_get_data(RESOURCE_TROOPS)->production_per_month);
 
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
