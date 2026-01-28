@@ -24,7 +24,10 @@ typedef struct {
     int trade_route_id;
     int invasion_path_id;
     int invasion_years;
+    int order_index;
+    int parent_object_id;
     empire_city_icon_type empire_city_icon;
+    empire_city_icon_type future_trade_after_icon;
 } empire_object;
 
 typedef struct {
@@ -48,6 +51,11 @@ void empire_object_load(buffer *buf, int version);
 
 void empire_object_save(buffer *buf);
 
+/* Function used for adding an empire object to the city array
+ * Only functions with custom empires
+ */
+void empire_object_add_to_cities(full_empire_object *full);
+
 void empire_object_init_cities(int empire_id);
 
 int empire_object_init_distant_battle_travel_months(empire_object_type object_type);
@@ -56,11 +64,29 @@ full_empire_object *empire_object_get_full(int object_id);
 
 full_empire_object *empire_object_get_new(void);
 
+void empire_object_remove(int id);
+
 empire_object *empire_object_get(int object_id);
+
+int empire_object_get_in_order(int parent_id, int object_index);
+
+int empire_object_get_next_in_order(int parent_id, int *current_order_index);
+
+int empire_object_get_highest_index(int parent);
 
 const empire_object *empire_object_get_our_city(void);
 
+const empire_object *empire_object_get_border(void);
+
 const empire_object *empire_object_get_trade_city(int trade_route_id);
+
+const empire_object *empire_object_get_battle(int path_id, int year);
+
+const empire_object *empire_object_get_latest_battle(int path_id);
+
+const empire_object *empire_object_get_distant_battle(int month, int enemy);
+
+const empire_object *empire_object_get_latest_distant_battle(int enemy);
 
 void empire_object_foreach(void (*callback)(const empire_object *));
 
@@ -72,6 +98,16 @@ int empire_object_get_max_invasion_path(void);
 
 int empire_object_get_closest(int x, int y);
 
+int empire_object_get_at(int x, int y);
+
+int empire_object_get_nearest_of_type(int x, int y, empire_object_type type);
+
+int empire_object_get_ireland(void);
+
+int empire_object_count_ornaments(void);
+
+int empire_object_get_ornament(int image_id);
+
 void empire_object_set_expanded(int object_id, int new_city_type);
 
 int empire_object_city_buys_resource(int object_id, int resource);
@@ -82,6 +118,8 @@ void empire_object_city_force_sell_resource(int object_id, int resource);
 int empire_object_update_animation(const empire_object *obj, int image_id);
 
 int empire_object_is_sea_trade_route(int route_id);
+
+void empire_object_set_trade_route_coords(const empire_object *our_city);
 
 empire_city_icon_type empire_object_get_random_icon_for_empire_object(full_empire_object *full_obj);
 

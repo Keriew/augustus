@@ -223,6 +223,17 @@ void empire_get_map_size(int *width, int *height)
     *height = data.image.height;
 }
 
+void empire_get_coordinates(int *x_offset, int *y_offset)
+{
+    *x_offset = data.image.offset_x;
+    *y_offset = data.image.offset_y;
+}
+
+char *empire_get_image_path(void)
+{
+    return data.image.path;
+}
+
 void empire_set_coordinates(int relative, int x_offset, int y_offset)
 {
     data.coordinates.relative = relative;
@@ -314,7 +325,7 @@ int empire_can_export_resource_to_city(int city_id, int resource)
         return 0;
     }
     empire_city *city = empire_city_get(city_id);
-    if (city_id && trade_route_limit_reached(city->route_id, resource)) {
+    if (city_id && trade_route_limit_reached(city->route_id, resource, 1)) {
         // quota reached
         return 0;
     }
@@ -362,7 +373,7 @@ int empire_can_import_resource_from_city(int city_id, int resource)
     if (!(city_resource_trade_status(resource) & TRADE_STATUS_IMPORT)) {
         return 0;
     }
-    if (trade_route_limit_reached(city->route_id, resource)) {
+    if (trade_route_limit_reached(city->route_id, resource, 0)) {
         return 0;
     }
 

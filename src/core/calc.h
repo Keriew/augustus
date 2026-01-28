@@ -49,6 +49,15 @@ int calc_value_in_step(int value, int step);
 int calc_maximum_distance(int x1, int y1, int x2, int y2);
 
 /**
+ * Calculates the Euclidean (straight-line) distance between two points
+ * using pythagorean theorem
+ * @params x1, y1 coordinates decribing point a
+ * @params x2, y2 coordinates decribing point b
+ * @return The distance rounded to an integer
+ */
+int calc_euclidean_distance(int x1, int y1, int x2, int y2);
+
+/**
  * Gets the distance between two boxes
  */
 int calc_box_distance(int ax, int ay, int aw, int ah, int bx, int by, int bw, int bh);

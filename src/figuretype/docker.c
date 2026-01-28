@@ -45,12 +45,12 @@ static int try_import_resource(int building_id, int resource, int city_id, int q
     if (b->type == BUILDING_GRANARY) {
         result = building_granary_add_import(b, resource, 1, 0);
         if (result) {
-            trade_route_increase_traded(route_id, resource);
+            trade_route_increase_traded(route_id, resource, 0);
         }
     } else if (b->type == BUILDING_WAREHOUSE) {
         result = building_warehouse_add_import(b, resource, quantity, 0);
         if (result) {
-            trade_route_increase_traded(route_id, resource);
+            trade_route_increase_traded(route_id, resource, 0);
         }
     }
     return result;
@@ -70,12 +70,12 @@ static int try_export_resource(int building_id, int resource, int city_id)
     if (b->type == BUILDING_GRANARY) {
         result = building_granary_remove_export(b, resource, 1, 0);
         if (result) {
-            trade_route_increase_traded(empire_city_get_route_id(city_id), resource);
+            trade_route_increase_traded(empire_city_get_route_id(city_id), resource, 1);
         }
     } else if (b->type == BUILDING_WAREHOUSE) {
         result = building_warehouse_remove_export(b, resource, 1, 0);
         if (result) {
-            trade_route_increase_traded(empire_city_get_route_id(city_id), resource);
+            trade_route_increase_traded(empire_city_get_route_id(city_id), resource, 1);
         }
     }
     return result;

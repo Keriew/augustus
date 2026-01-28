@@ -2,6 +2,7 @@
 #define SCENARIO_DEMAND_CHANGE_H
 
 #include "core/buffer.h"
+#include "game/save_version.h"
 
 #define DEMAND_CHANGE_LEGACY_IS_RISE 9999
 #define DEMAND_CHANGE_LEGACY_IS_FALL -9999
@@ -15,6 +16,7 @@ typedef struct {
     int resource;
     int route_id;
     int amount;
+    int buys;
 } demand_change_t;
 
 void scenario_demand_change_init(void);
@@ -37,7 +39,7 @@ unsigned int scenario_demand_change_count_total(void);
 
 void scenario_demand_change_save_state(buffer *buf);
 
-void scenario_demand_change_load_state(buffer *buf);
+void scenario_demand_change_load_state(buffer *buf, scenario_version_t version);
 
 void scenario_demand_change_load_state_old_version(buffer *buf, int is_legacy_change);
 
