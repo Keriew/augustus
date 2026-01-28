@@ -1081,10 +1081,9 @@ int figure_trader_ship_get_distance_to_dock(const figure *ship, unsigned int doc
     }
     building *dock = building_get(dock_id);
     map_routing_calculate_distances_water_boat(ship->x, ship->y);
-    uint8_t path[500];
     map_point tile;
     building_dock_get_ship_request_tile(dock, SHIP_DOCK_REQUEST_1_DOCKING, &tile);
-    int path_length = map_routing_get_path_on_water(&path[0], tile.x, tile.y, 0);
+    int path_length = map_routing_get_path_on_water(0, tile.x, tile.y, 0);
     return path_length;
 }
 
