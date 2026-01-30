@@ -100,6 +100,7 @@ int empire_object_get_closest(int x, int y);
 
 int empire_object_get_at(int x, int y);
 
+int empire_object_get_nearest_of_type_with_condition(int x, int y, empire_object_type type, int (*condition)(const empire_object *));
 int empire_object_get_nearest_of_type(int x, int y, empire_object_type type);
 
 int empire_object_get_ireland(void);

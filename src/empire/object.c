@@ -765,7 +765,7 @@ int empire_object_get_at(int x, int y)
     return 0;
 }
 
-int empire_object_get_nearest_of_type(int x, int y, empire_object_type type)
+int empire_object_get_nearest_of_type_with_condition(int x, int y, empire_object_type type, int (*condition)(const empire_object *))
 {
     int min_dist = 9999;
     int min_id = 0;
@@ -776,6 +776,12 @@ int empire_object_get_nearest_of_type(int x, int y, empire_object_type type)
         }
         const empire_object *obj = &full->obj;
         if (obj->type != type) {
+            continue;
+        }
+        if (obj->id == 144) {
+            int debug;
+        }
+        if (!condition(obj)) {
             continue;
         }
         int obj_x, obj_y;
@@ -796,6 +802,16 @@ int empire_object_get_nearest_of_type(int x, int y, empire_object_type type)
         return min_id;
     }
     return 0;
+}
+
+static int object_no_condition(const empire_object *obj)
+{
+    return 1;
+}
+
+int empire_object_get_nearest_of_type(int x, int y, empire_object_type type)
+{
+    return empire_object_get_nearest_of_type_with_condition(x, y, type, object_no_condition);
 }
 
 int empire_object_get_ireland(void)

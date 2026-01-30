@@ -34,6 +34,9 @@ void empire_editor_move_object_start(unsigned int obj_id);
 void empire_editor_move_object_end(int mouse_x, int mouse_y);
 void empire_editor_move_object_stopp(void);
 
+void empire_editor_set_trade_point_parent(int parent_id);
+void empire_editor_clear_trade_point_parent(void);
+
 int empire_editor_handle_placement(const mouse *m, const hotkeys *h);
 
 #endif // EMPIRE_EDITOR_H
