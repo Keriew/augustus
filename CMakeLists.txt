@@ -746,6 +746,7 @@ set(TRANSLATION_FILES
     ${PROJECT_SOURCE_DIR}/src/translation/swedish.c
     ${PROJECT_SOURCE_DIR}/src/translation/traditional_chinese.c
     ${PROJECT_SOURCE_DIR}/src/translation/translation.c
+    ${PROJECT_SOURCE_DIR}/src/translation/ukrainian.c
 )
 
 set(MACOSX_FILES "")
