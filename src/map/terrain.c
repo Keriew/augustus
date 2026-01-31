@@ -361,7 +361,7 @@ int map_terrain_get_adjacent_road_or_clear_land(int x, int y, int size, int *x_t
     int base_offset = map_grid_offset(x, y);
     for (const int *tile_delta = map_grid_adjacent_offsets(size); *tile_delta; tile_delta++) {
         int grid_offset = base_offset + *tile_delta;
-        if (map_terrain_is(grid_offset, TERRAIN_ROAD) ||
+        if (map_terrain_is(grid_offset, TERRAIN_ROAD | TERRAIN_RUBBLE | TERRAIN_GARDEN | TERRAIN_HIGHWAY) ||
             !map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
             *x_tile = map_grid_offset_to_x(grid_offset);
             *y_tile = map_grid_offset_to_y(grid_offset);

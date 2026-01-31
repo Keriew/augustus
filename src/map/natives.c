@@ -51,7 +51,8 @@ static int has_building_on_native_land(int x, int y, int size, int radius)
                     type != BUILDING_NATIVE_MONUMENT &&
                     type != BUILDING_NATIVE_WATCHTOWER &&
                     (!building_type_is_roadblock(type) || type == BUILDING_PALISADE_GATE ||
-                        type == BUILDING_TRIUMPHAL_ARCH || type == BUILDING_GATEHOUSE)) {
+                        type == BUILDING_TRIUMPHAL_ARCH || type == BUILDING_GATEHOUSE ||
+                        type == BUILDING_GRANARY)) {
                     return 1;
                 }
             } else if (map_terrain_is(map_grid_offset(xx, yy), TERRAIN_AQUEDUCT | TERRAIN_WALL | TERRAIN_GARDEN)) {
