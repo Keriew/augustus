@@ -85,6 +85,9 @@ void translation_load(language_type language)
         case LANGUAGE_CZECH:
             translation_czech(&strings, &num_strings);
             break;
+        case LANGUAGE_UKRAINIAN:
+            translation_ukrainian(&strings, &num_strings);
+            break;
         default:
             log_error("Invalid translation selected", 0, 0);
     }
