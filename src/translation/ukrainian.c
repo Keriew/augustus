@@ -1910,7 +1910,7 @@ URL_EDITOR},
 {TR_PARAMETER_TERRAIN_RUBBLE, "Руїни"},
 };
 
-translation_ukrainian(const translation_string **strings, int *num_strings)
+void translation_ukrainian(const translation_string **strings, int *num_strings)
 {
 *strings = all_strings;
 *num_strings = sizeof(all_strings) / sizeof(translation_string);
