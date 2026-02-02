@@ -155,7 +155,7 @@ static void shift_trade_point_indices(const empire_object *const_obj)
         return;
     }
     empire_object *obj = empire_object_get(const_obj->id);
-    obj->order_index ++;
+    obj->order_index++;
 }
 
 static int condition_is_trade_type(const empire_object *obj)
@@ -465,6 +465,9 @@ static int delete_object_at(int mouse_x, int mouse_y)
     int empire_y = editor_empire_mouse_to_empire_y(mouse_y);
     data.deletion_id = empire_object_get_at(empire_x, empire_y);
     if (!data.deletion_id) {
+        return 0;
+    }
+    if (empire_object_get_full(data.deletion_id)->city_type == EMPIRE_CITY_OURS) {
         return 0;
     }
     if (config_get(CONFIG_UI_EMPIRE_CONFIRM_DELETE)) {

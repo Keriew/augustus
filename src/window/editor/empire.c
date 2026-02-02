@@ -124,6 +124,7 @@ static struct {
     unsigned int preview_button_focused;
     unsigned int button_is_preview;
     int resource_pulse_start;
+    int object_coords_x;
     struct {
         int x;
         int y;
@@ -202,6 +203,7 @@ static void init(void)
     empire_center_on_our_city(map_viewport_width(), map_viewport_height());
     window_empire_collect_trade_edges();
     data.resource_pulse_start = time_get_millis();
+    data.object_coords_x = 0;
 }
 
 void set_battles_shown(int show)
@@ -655,8 +657,12 @@ static void draw_city_info(const empire_city *city)
             add_resource_buttons[0].x_offset = resource_x_offset;
             y_offset = data.y_max - 85;
             resource_x_offset = x_offset + 20 + width_after_name;
-            text_width = lang_text_draw(47, 4, resource_x_offset, y_offset, FONT_NORMAL_GREEN);
-            width = width_after_name + text_width;
+            int coords_bonus = 0;
+            if (data.object_coords_x >= resource_x_offset) {
+                coords_bonus = data.object_coords_x - resource_x_offset;
+            }
+            text_width = lang_text_draw(47, 4, resource_x_offset + coords_bonus, y_offset, FONT_NORMAL_GREEN);
+            width = width_after_name + text_width + coords_bonus;
             resource_x_offset = x_offset + 30 + width;
             for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
                 if (empire_object_city_buys_resource(city->empire_object_id, r)) {
@@ -693,6 +699,14 @@ static void draw_city_info(const empire_city *city)
 
 static void draw_object_info(void)
 {
+    empire_object *obj = empire_object_get(empire_selected_object() - 1);
+    if (!obj) {
+        return;
+    }
+    uint8_t coords_string[16];
+    snprintf((char *)coords_string, 16, "%i, %i", obj->x, obj->y);
+    data.object_coords_x = data.panel.x_min + 28 +
+        text_draw(coords_string, data.panel.x_min + 28, data.y_max - 85, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     button_border_draw(data.panel.x_max - 140, data.y_max - 133, 120, 24, data.focus_top_button_id == 1);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EMPIRE_DELETE_OBJECT,
         data.panel.x_max - 140, data.y_max - 126, 120, FONT_NORMAL_GREEN);
