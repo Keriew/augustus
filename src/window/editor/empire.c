@@ -713,6 +713,23 @@ static void draw_object_info(void)
     button_border_draw(data.panel.x_max - 280, data.y_max - 133, 120, 24, data.focus_top_button_id == 2);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EMPIRE_MOVE_OBJECT,
         data.panel.x_max - 280, data.y_max - 126, 120, FONT_NORMAL_GREEN);
+    if (obj->type == EMPIRE_OBJECT_BORDER_EDGE) {
+        int width = lang_text_draw(CUSTOM_TRANSLATION, TR_EMPIRE_EDGE_INDEX, data.panel.x_min + 28,
+            data.y_max - 125, FONT_NORMAL_GREEN);
+        text_draw_number(obj->order_index, '\0', NULL, data.panel.x_min + 28 + width, data.y_max - 125,
+            FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+    }
+    if (obj->type == EMPIRE_OBJECT_TRADE_WAYPOINT) {
+        int width = lang_text_draw(CUSTOM_TRANSLATION, TR_EMPIRE_WAYPOINT_INDEX, data.panel.x_min + 28,
+            data.y_max - 125, FONT_NORMAL_GREEN);
+        width += text_draw_number(obj->order_index, '\0', NULL, data.panel.x_min + 28 + width, data.y_max - 125,
+            FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+        width += lang_text_draw(CUSTOM_TRANSLATION, TR_EMPIRE_ROUTE_PARENT, data.panel.x_min + 28 + width,
+            data.y_max - 125, FONT_NORMAL_GREEN);
+        empire_city *route_city = empire_city_get(empire_city_get_for_object(obj->parent_object_id - 1));
+        text_draw(empire_city_get_name(route_city), data.panel.x_min + 28 + width, data.y_max - 125,
+            FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+    }
 }
 
 static void draw_panel_buttons(const empire_city *city)

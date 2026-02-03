@@ -1964,7 +1964,10 @@ static translation_string all_strings[] = {
     {TR_CONFIG_UI_EMPIRE_CONFIRM_DELETE, "Confirm object deletion"},
     {TR_EMPIRE_TOOL_LAND_ROUTE, "Land trade route"},
     {TR_EMPIRE_TOOL_SEA_ROUTE, "Sea trade route"},
-    {TR_EMPIRE_TOGGLE_EDGES, "Toggle edges"}
+    {TR_EMPIRE_TOGGLE_EDGES, "Toggle edges"},
+    {TR_EMPIRE_EDGE_INDEX, "Edge no."},
+    {TR_EMPIRE_WAYPOINT_INDEX, "Waypoint no."},
+    {TR_EMPIRE_ROUTE_PARENT, "Of"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
