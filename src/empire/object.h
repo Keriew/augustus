@@ -6,6 +6,9 @@
 #include "empire/type.h"
 #include "game/resource.h"
 
+#define BASE_ORNAMENT_IMAGE_ID 3356
+#define ORIGINAL_ORNAMENTS 20
+
 typedef struct {
     unsigned int id;
     empire_object_type type;

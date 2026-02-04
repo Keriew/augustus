@@ -17,9 +17,6 @@
 
 #define XML_EXPORT_MAX_SIZE 5000000
 
-#define BASE_ORNAMENT_IMAGE_ID 3356
-#define ORIGINAL_ORNAMENTS 20
-
 static struct {
     int invasion_path_id;
 } data;

@@ -594,6 +594,8 @@ static void draw_city_info(const empire_city *city)
     }
     int width_after_name = width;
     int etc_width = text_get_width(string_from_ascii("..."), FONT_NORMAL_GREEN);
+    
+    top_buttons[2].parameter1 = 1;
 
     switch (city->type) {
         case EMPIRE_CITY_DISTANT_ROMAN:
@@ -606,7 +608,6 @@ static void draw_city_info(const empire_city *city)
             break;
         case EMPIRE_CITY_OURS:
         {
-            top_buttons[2].parameter1 = 1;
             add_resource_buttons[1].dont_draw = 1;
             width += lang_text_draw(47, 1, x_offset + 20 + width, y_offset, FONT_NORMAL_GREEN);
             int resource_x_offset = x_offset + 30 + width;
@@ -684,16 +685,18 @@ static void draw_city_info(const empire_city *city)
             if (scenario_empire_id() == SCENARIO_CUSTOM_EMPIRE) {
                 image_buttons_draw(0, 0, add_resource_buttons, NUM_PLUS_BUTTONS);
             }
+            
+            if (!top_buttons[2].parameter1) {
+                button_border_draw(data.panel.x_max - 420, data.y_max - 133, 120, 24, data.focus_top_button_id == 3);
+                lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EMPIRE_DRAW_TRADE_ROUTE,
+                    data.panel.x_max - 420, data.y_max - 126, 120, FONT_NORMAL_GREEN);
+            }
+            
             break;
         }
     }
     if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE) {
         image_buttons_draw(0, 0, edit_city_name_button, 1);
-        if (!top_buttons[2].parameter1) {
-            button_border_draw(data.panel.x_max - 420, data.y_max - 133, 120, 24, data.focus_top_button_id == 3);
-            lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EMPIRE_DRAW_TRADE_ROUTE,
-                data.panel.x_max - 420, data.y_max - 126, 120, FONT_NORMAL_GREEN);
-        }
     }
 }
 
@@ -701,6 +704,9 @@ static void draw_object_info(void)
 {
     empire_object *obj = empire_object_get(empire_selected_object() - 1);
     if (!obj) {
+        return;
+    }
+    if (obj->image_id == -1) {
         return;
     }
     if (obj->type == EMPIRE_OBJECT_ROMAN_ARMY || obj->type == EMPIRE_OBJECT_ENEMY_ARMY) {
@@ -734,6 +740,12 @@ static void draw_object_info(void)
         empire_city *route_city = empire_city_get(empire_city_get_for_object(obj->parent_object_id - 1));
         text_draw(empire_city_get_name(route_city), data.panel.x_min + 28 + width, data.y_max - 125,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+    }
+    if (obj->type == EMPIRE_OBJECT_ORNAMENT) {
+        int ornament_number = obj->image_id >= BASE_ORNAMENT_IMAGE_ID ? obj->image_id - BASE_ORNAMENT_IMAGE_ID :
+            obj->image_id + ORIGINAL_ORNAMENTS - 2;
+        translation_key key = TR_EMPIRE_ORNAMENT_STONEHENGE + ornament_number;
+        lang_text_draw(CUSTOM_TRANSLATION, key, data.panel.x_min + 28, data.y_max - 125, FONT_NORMAL_GREEN);
     }
 }
 
@@ -1119,6 +1131,9 @@ static void remove_trade_waypoints(const empire_object *obj)
 
 static void button_draw_route(const generic_button *button)
 {
+    if (button->parameter1) {
+        return;
+    }
     int obj_id = empire_selected_object() - 1;
     if (obj_id < 0) {
         return;
@@ -1135,6 +1150,9 @@ static void button_draw_route(const generic_button *button)
 
 static void button_refresh(const generic_button *button)
 {
+    if (button->parameter1) {
+        return;
+    }
     refresh_empire();
 }
 
