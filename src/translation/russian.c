@@ -1869,7 +1869,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_COLOR_GRAY, "Серый"},
     {TR_EDITOR_COLOR_BLACK, "Черный"},
     {TR_EDITOR_COLOR_DARK_BLUE, "Темно-синий"},
-    {TR_EDITOR_RUBBLE, "Обломки"},
+    {TR_EDITOR_RUBBLE, "Развалины"},
     {TR_PARAMETER_GRID_OFFSET_CORNER1, "Угол 1"},
     {TR_PARAMETER_GRID_OFFSET_CORNER2, "Угол 2"},
     {TR_CONDITION_TYPE_TERRAIN_IN_AREA, "Рельеф в области"},
@@ -1905,9 +1905,15 @@ static translation_string all_strings[] = {
     {TR_BUILDING_HOUSE_GRAND_VILLA, "Роскошная вилла"},
     {TR_BUILDING_HOUSE_SMALL_PALACE, "Маленький дворец"},
     {TR_BUILDING_HOUSE_MEDIUM_PALACE, "Средний дворец"},
-    {TR_BUILDING_HOUSE_LARGE_PALACE,  "Большой дворец"},
+    {TR_BUILDING_HOUSE_LARGE_PALACE, "Большой дворец"},
     {TR_BUILDING_HOUSE_LUXURY_PALACE, "Роскошный дворец"},
     {TR_CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES, "Показывать радиус резервуара при строительстве фонтанов"},
+    {TR_CHEAT_DESTROYED_BUILDING, "Здание разрушено"},
+    {TR_CONFIG_ENABLE_BUILD_MENU_SHORTCUTS, "Включить быстрые клавиши меню строительства"},
+    {TR_ACTION_TYPE_LOCK_TRADE_ROUTE, "Торговый путь: Закрыть путь"},
+    {TR_PARAMETER_LOCK, "Закрыть"},
+    {TR_PARAMETER_UNLOCK, "Открыть"},
+    {TR_PARAMETER_TERRAIN_RUBBLE, "Развалины"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
