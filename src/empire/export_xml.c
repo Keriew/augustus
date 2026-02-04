@@ -64,7 +64,7 @@ static void export_map(void)
         xml_exporter_add_attribute_int("width", empire_width);
         xml_exporter_add_attribute_int("height", empire_height);
     } else {
-        xml_exporter_add_attribute_int("show_ireland", empire_object_get_ireland());
+        xml_exporter_add_attribute_int("show_ireland", empire_object_get_ornament(-1));
     }
     if (empire_object_count_ornaments() == TOTAL_ORNAMENTS) {
         xml_exporter_new_element("ornament");

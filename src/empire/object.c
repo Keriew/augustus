@@ -839,17 +839,6 @@ int empire_object_get_nearest_of_type(int x, int y, empire_object_type type)
     return empire_object_get_nearest_of_type_with_condition(x, y, type, object_no_condition);
 }
 
-int empire_object_get_ireland(void)
-{
-    full_empire_object *full;
-    array_foreach(objects, full) {
-        if (full->in_use && full->obj.type == EMPIRE_OBJECT_ORNAMENT && full->obj.image_id == -1) {
-            return full->obj.id;
-        }
-    }
-    return 0;
-}
-
 int empire_object_count_ornaments(void)
 {
     int total_ornaments = 0;

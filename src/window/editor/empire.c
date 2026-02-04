@@ -742,8 +742,7 @@ static void draw_object_info(void)
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     }
     if (obj->type == EMPIRE_OBJECT_ORNAMENT) {
-        int ornament_number = obj->image_id >= BASE_ORNAMENT_IMAGE_ID ? obj->image_id - BASE_ORNAMENT_IMAGE_ID :
-            obj->image_id + ORIGINAL_ORNAMENTS - 2;
+        int ornament_number = obj->image_id < 0 ? ORIGINAL_ORNAMENTS - 2 - obj->image_id : obj->image_id - BASE_ORNAMENT_IMAGE_ID;
         translation_key key = TR_EMPIRE_ORNAMENT_STONEHENGE + ornament_number;
         lang_text_draw(CUSTOM_TRANSLATION, key, data.panel.x_min + 28, data.y_max - 125, FONT_NORMAL_GREEN);
     }
