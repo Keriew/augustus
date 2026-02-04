@@ -703,6 +703,11 @@ static void draw_object_info(void)
     if (!obj) {
         return;
     }
+    if (obj->type == EMPIRE_OBJECT_ROMAN_ARMY || obj->type == EMPIRE_OBJECT_ENEMY_ARMY) {
+        if (!data.show_battle_objects) {
+            return;
+        }
+    }
     uint8_t coords_string[16];
     snprintf((char *)coords_string, 16, "%i, %i", obj->x, obj->y);
     data.object_coords_x = data.panel.x_min + 28 +
@@ -957,6 +962,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         }
         if (input_go_back_requested(m, h)) {
             empire_editor_move_object_stopp();
+            empire_editor_clear_trade_point_parent();
             empire_clear_selected_object();
             window_invalidate();
         }
@@ -1014,6 +1020,7 @@ static void button_cycle_preview(const generic_button *button)
     if (data.button_is_preview) {
         empire_editor_change_tool(1);
         empire_editor_move_object_stopp();
+        empire_editor_clear_trade_point_parent();
     } else if (empire_selected_object()) {
         empire_object *obj = empire_object_get(empire_selected_object() - 1);
         full_empire_object *full = empire_object_get_full(empire_selected_object() - 1);
@@ -1031,6 +1038,7 @@ static void button_recycle_preview(const generic_button *button)
     if (data.button_is_preview) {
         empire_editor_change_tool(-1);
         empire_editor_move_object_stopp();
+        empire_editor_clear_trade_point_parent();
     } else if (empire_selected_object()) {
         empire_object *obj = empire_object_get(empire_selected_object() - 1);
         full_empire_object *full = empire_object_get_full(empire_selected_object() - 1);
@@ -1102,9 +1110,27 @@ static void button_move_object(const generic_button *button)
     empire_editor_move_object_start(empire_selected_object() - 1);
 }
 
+static void remove_trade_waypoints(const empire_object *obj)
+{
+    if (obj->parent_object_id == empire_editor_get_trade_point_parent()) {
+        empire_object_remove(obj->id);
+    }
+}
+
 static void button_draw_route(const generic_button *button)
 {
-    
+    int obj_id = empire_selected_object() - 1;
+    if (obj_id < 0) {
+        return;
+    }
+    empire_object *route_obj = empire_object_get(obj_id + 1);
+    int is_sea = route_obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE;
+    empire_editor_set_trade_point_parent(obj_id + 1);
+    empire_editor_set_tool(is_sea ? EMPIRE_TOOL_SEA_ROUTE : EMPIRE_TOOL_LAND_ROUTE);
+    empire_object_foreach(remove_trade_waypoints);
+    window_empire_collect_trade_edges();
+    empire_object_set_trade_route_coords(empire_object_get_our_city());
+    window_request_refresh();
 }
 
 static void button_refresh(const generic_button *button)

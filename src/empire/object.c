@@ -352,6 +352,18 @@ void empire_object_add_to_cities(full_empire_object *full)
         full->obj.trade_route_id = trade_route_new();
         array_item(objects, full->obj.id + 1)->obj.trade_route_id = full->obj.trade_route_id;
         
+        for (int point_index; point_index < objects.size; ) {
+            unsigned int point_id = empire_object_get_next_in_order(full->obj.id + 1, &point_index);
+            if (!point_id) {
+                break;
+            }
+            full_empire_object *trade_point = array_item(objects, point_id);
+            if (trade_point->obj.type != EMPIRE_OBJECT_TRADE_WAYPOINT) {
+                break;
+            }
+            trade_point->obj.trade_route_id = full->obj.trade_route_id;
+        }
+        
         city->route_id = full->obj.trade_route_id;
         city->is_open = full->trade_route_open;
         city->cost_to_open = full->trade_route_cost;
@@ -692,6 +704,9 @@ int empire_object_get_closest(int x, int y)
     int city_is_selected = 0;
     full_empire_object *full;
     array_foreach(objects, full) {
+        if (!full->in_use) {
+            continue;
+        }
         const empire_object *obj = &full->obj;
         int obj_x, obj_y;
         if (city_is_selected && obj->type != EMPIRE_OBJECT_CITY) {
@@ -777,9 +792,6 @@ int empire_object_get_nearest_of_type_with_condition(int x, int y, empire_object
         const empire_object *obj = &full->obj;
         if (obj->type != type) {
             continue;
-        }
-        if (obj->id == 144) {
-            int debug;
         }
         if (!condition(obj)) {
             continue;

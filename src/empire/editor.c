@@ -178,6 +178,26 @@ static int condition_is_trade_type(const empire_object *obj)
     return 1;
 }
 
+static int condition_is_trade_city(const empire_object *obj)
+{
+    if (data.current_tool != EMPIRE_TOOL_LAND_ROUTE && data.current_tool != EMPIRE_TOOL_SEA_ROUTE) {
+        return 0;
+    }
+    empire_city_type type = empire_object_get_full(obj->id)->city_type;
+    if (type != EMPIRE_CITY_FUTURE_TRADE && type != EMPIRE_CITY_TRADE) {
+        return 0;
+    }
+    if (data.current_tool == EMPIRE_TOOL_LAND_ROUTE &&
+        empire_object_get(obj->parent_object_id)->type != EMPIRE_OBJECT_LAND_TRADE_ROUTE) {
+        return 0;
+    }
+    if (data.current_tool == EMPIRE_TOOL_SEA_ROUTE &&
+        empire_object_get(obj->parent_object_id)->type != EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
+        return 0;
+    }
+    return 1;
+}
+
 static int place_object(int mouse_x, int mouse_y)
 {
     if (data.currently_moving && data.current_tool == empire_editor_get_tool_for_object(empire_object_get_full(data.move_id))) {
@@ -254,15 +274,22 @@ static int place_object(int mouse_x, int mouse_y)
                 EMPIRE_OBJECT_TRADE_WAYPOINT, condition_is_trade_type);
             data.trade_waypoint_parent_id = empire_object_get(data.nearest_trade_waypoint)->parent_object_id;
         }
-        if (!data.trade_waypoint_parent_id || !data.nearest_trade_waypoint) {
+        int no_waypoint_found = !data.trade_waypoint_parent_id || !data.nearest_trade_waypoint;
+        if (no_waypoint_found) {
+            data.trade_waypoint_parent_id = empire_object_get_nearest_of_type_with_condition(x, y,
+                EMPIRE_OBJECT_CITY, condition_is_trade_city) + 1;
+        }
+        if (data.trade_waypoint_parent_id <= 1) {
             empire_object_remove(full->obj.id);
             return 0;
         }
+
         full->obj.parent_object_id = data.trade_waypoint_parent_id;
-        data.foreach_param1 = empire_object_get(data.nearest_trade_waypoint)->order_index;
+        data.foreach_param1 = no_waypoint_found ? 1 : empire_object_get(data.nearest_trade_waypoint)->order_index;
         data.foreach_param2 = full->obj.parent_object_id;
         empire_object_foreach_of_type(shift_trade_point_indices, EMPIRE_OBJECT_TRADE_WAYPOINT);
         full->obj.order_index = data.foreach_param1;
+        full->obj.trade_route_id = empire_object_get(full->obj.parent_object_id)->trade_route_id;
     }
     
     full->obj.x = x;
@@ -566,4 +593,9 @@ void empire_editor_set_trade_point_parent(int parent_id)
 void empire_editor_clear_trade_point_parent(void)
 {
     data.trade_waypoint_parent_id = 0;
+}
+
+int empire_editor_get_trade_point_parent(void)
+{
+    return data.trade_waypoint_parent_id;
 }
