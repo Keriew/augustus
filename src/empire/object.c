@@ -708,7 +708,7 @@ int empire_object_get_closest(int x, int y)
             continue;
         }
         const empire_object *obj = &full->obj;
-        int obj_x, obj_y;
+        int obj_x, obj_y, width, height;
         if (city_is_selected && obj->type != EMPIRE_OBJECT_CITY) {
             //Prioritize selecting cities if available
             continue;
@@ -720,10 +720,23 @@ int empire_object_get_closest(int x, int y)
             obj_x = obj->x;
             obj_y = obj->y;
         }
-        if (obj_x - 8 > x || obj_x + obj->width + 8 <= x) {
+        int is_edge = obj->type == EMPIRE_OBJECT_TRADE_WAYPOINT || obj->type == EMPIRE_OBJECT_BORDER_EDGE;
+        if (obj->height) {
+            width = obj->width;
+            height = obj->height;
+        } else if (is_edge) {
+            width = 19;
+            height = 18;
+        } else {
+            const image *img = image_get(obj->image_id);
+            width = img->width;
+            height = img->height;
+        }
+        
+        if (obj_x - (is_edge * width / 2) > x || obj_x + width / 1 + is_edge <= x) {
             continue;
         }
-        if (obj_y - 8 > y || obj_y + obj->height + 8 <= y) {
+        if (obj_y - (is_edge * height / 2) > y || obj_y + height / 1 + is_edge <= y) {
             continue;
         }
         int dist = calc_maximum_distance(x, y, obj_x + obj->width / 2, obj_y + obj->height / 2);
