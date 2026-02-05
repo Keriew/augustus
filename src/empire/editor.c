@@ -31,7 +31,6 @@ static struct {
     int deletion_id;
     int trade_waypoint_parent_id;
     int nearest_trade_waypoint;
-    int update_nearest_point;
 } data = {
     .current_tool = EMPIRE_TOOL_OUR_CITY,
     .foreach_param1 = -1,
@@ -42,7 +41,6 @@ static struct {
     .deletion_id = 0,
     .trade_waypoint_parent_id = 0,
     .nearest_trade_waypoint = 0,
-    .update_nearest_point = 1
 };
 
 static int place_object(int mouse_x, int mouse_y);
@@ -271,10 +269,9 @@ static int place_object(int mouse_x, int mouse_y)
     }
     
     if (is_trade_waypoint) {
-        if (!data.trade_waypoint_parent_id || !data.nearest_trade_waypoint || data.update_nearest_point) {
-            data.update_nearest_point = 0;
-            data.nearest_trade_waypoint = empire_object_get_nearest_of_type_with_condition(x, y,
-                EMPIRE_OBJECT_TRADE_WAYPOINT, condition_is_trade_type);
+        data.nearest_trade_waypoint = empire_object_get_nearest_of_type_with_condition(x, y,
+            EMPIRE_OBJECT_TRADE_WAYPOINT, condition_is_trade_type);
+        if (!data.trade_waypoint_parent_id && data.nearest_trade_waypoint) {
             data.trade_waypoint_parent_id = empire_object_get(data.nearest_trade_waypoint)->parent_object_id;
         }
         int no_waypoint_found = !data.trade_waypoint_parent_id || !data.nearest_trade_waypoint;
@@ -591,14 +588,12 @@ void empire_editor_move_object_stopp(void)
 void empire_editor_set_trade_point_parent(int parent_id)
 {
     data.trade_waypoint_parent_id = parent_id;
-    data.update_nearest_point = 1;
 }
 
 void empire_editor_clear_trade_route_data(void)
 {
     data.trade_waypoint_parent_id = 0;
     data.nearest_trade_waypoint = 0;
-    data.update_nearest_point = 1;
 }
 
 int empire_editor_get_trade_point_parent(void)
