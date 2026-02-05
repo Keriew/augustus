@@ -933,7 +933,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         for (resource_type r = RESOURCE_NONE; r < RESOURCE_MAX; r++) {
             resource_button *btn = i ? &buy_buttons[r] : &sell_buttons[r];
             if (m->x >= btn->x && m->x < btn->x + RESOURCE_ICON_WIDTH &&
-                m->y >= btn->y && m->y < btn->y + RESOURCE_ICON_HEIGHT) {
+                m->y >= btn->y && m->y < btn->y + RESOURCE_ICON_HEIGHT && btn->enabled) {
                 btn->highlighted = 1;
                 if (m->left.went_up && scenario.empire.id == SCENARIO_CUSTOM_EMPIRE && 
                     empire_city_get(data.selected_city)->type != EMPIRE_CITY_OURS) {
@@ -973,7 +973,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         }
         if (input_go_back_requested(m, h)) {
             empire_editor_move_object_stopp();
-            empire_editor_clear_trade_point_parent();
+            empire_editor_clear_trade_route_data();
             empire_clear_selected_object();
             window_invalidate();
         }
@@ -1031,7 +1031,7 @@ static void button_cycle_preview(const generic_button *button)
     if (data.button_is_preview) {
         empire_editor_change_tool(1);
         empire_editor_move_object_stopp();
-        empire_editor_clear_trade_point_parent();
+        empire_editor_clear_trade_route_data();
     } else if (empire_selected_object()) {
         empire_object *obj = empire_object_get(empire_selected_object() - 1);
         full_empire_object *full = empire_object_get_full(empire_selected_object() - 1);
@@ -1049,7 +1049,7 @@ static void button_recycle_preview(const generic_button *button)
     if (data.button_is_preview) {
         empire_editor_change_tool(-1);
         empire_editor_move_object_stopp();
-        empire_editor_clear_trade_point_parent();
+        empire_editor_clear_trade_route_data();
     } else if (empire_selected_object()) {
         empire_object *obj = empire_object_get(empire_selected_object() - 1);
         full_empire_object *full = empire_object_get_full(empire_selected_object() - 1);
@@ -1168,6 +1168,8 @@ static void button_import_xml(const generic_button *button)
     if (button->parameter1) {
         return;
     }
+    empire_editor_clear_trade_route_data();
+    empire_editor_move_object_stopp();
     resource_set_mapping(RESOURCE_CURRENT_VERSION);
     window_file_dialog_show(FILE_TYPE_EMPIRE, FILE_DIALOG_LOAD);
 }

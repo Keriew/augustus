@@ -31,6 +31,7 @@ static struct {
     int deletion_id;
     int trade_waypoint_parent_id;
     int nearest_trade_waypoint;
+    int update_nearest_point;
 } data = {
     .current_tool = EMPIRE_TOOL_OUR_CITY,
     .foreach_param1 = -1,
@@ -40,7 +41,8 @@ static struct {
     .deletion_success = 0,
     .deletion_id = 0,
     .trade_waypoint_parent_id = 0,
-    .nearest_trade_waypoint = 0
+    .nearest_trade_waypoint = 0,
+    .update_nearest_point = 1
 };
 
 static int place_object(int mouse_x, int mouse_y);
@@ -188,11 +190,11 @@ static int condition_is_trade_city(const empire_object *obj)
         return 0;
     }
     if (data.current_tool == EMPIRE_TOOL_LAND_ROUTE &&
-        empire_object_get(obj->parent_object_id)->type != EMPIRE_OBJECT_LAND_TRADE_ROUTE) {
+        empire_object_get(obj->id + 1)->type != EMPIRE_OBJECT_LAND_TRADE_ROUTE) {
         return 0;
     }
     if (data.current_tool == EMPIRE_TOOL_SEA_ROUTE &&
-        empire_object_get(obj->parent_object_id)->type != EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
+        empire_object_get(obj->id + 1)->type != EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
         return 0;
     }
     return 1;
@@ -269,7 +271,8 @@ static int place_object(int mouse_x, int mouse_y)
     }
     
     if (is_trade_waypoint) {
-        if (!data.trade_waypoint_parent_id || !data.nearest_trade_waypoint) {
+        if (!data.trade_waypoint_parent_id || !data.nearest_trade_waypoint || data.update_nearest_point) {
+            data.update_nearest_point = 0;
             data.nearest_trade_waypoint = empire_object_get_nearest_of_type_with_condition(x, y,
                 EMPIRE_OBJECT_TRADE_WAYPOINT, condition_is_trade_type);
             data.trade_waypoint_parent_id = empire_object_get(data.nearest_trade_waypoint)->parent_object_id;
@@ -278,10 +281,10 @@ static int place_object(int mouse_x, int mouse_y)
         if (no_waypoint_found) {
             data.trade_waypoint_parent_id = empire_object_get_nearest_of_type_with_condition(x, y,
                 EMPIRE_OBJECT_CITY, condition_is_trade_city) + 1;
-        }
-        if (data.trade_waypoint_parent_id <= 1) {
-            empire_object_remove(full->obj.id);
-            return 0;
+            if (data.trade_waypoint_parent_id <= 1) {
+                empire_object_remove(full->obj.id);
+                return 0;
+            }
         }
 
         full->obj.parent_object_id = data.trade_waypoint_parent_id;
@@ -588,11 +591,14 @@ void empire_editor_move_object_stopp(void)
 void empire_editor_set_trade_point_parent(int parent_id)
 {
     data.trade_waypoint_parent_id = parent_id;
+    data.update_nearest_point = 1;
 }
 
-void empire_editor_clear_trade_point_parent(void)
+void empire_editor_clear_trade_route_data(void)
 {
     data.trade_waypoint_parent_id = 0;
+    data.nearest_trade_waypoint = 0;
+    data.update_nearest_point = 1;
 }
 
 int empire_editor_get_trade_point_parent(void)
