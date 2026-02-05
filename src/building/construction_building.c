@@ -430,7 +430,9 @@ int building_construction_place_building(building_type type, int x, int y, int e
     int grid_offset = map_grid_offset(x, y);
     
     int terrain_mask = TERRAIN_ALL;
-    if (building_type_is_roadblock(type)) {
+    if ((building_type_is_roadblock(type) && !(type == BUILDING_GRANARY || type == BUILDING_WAREHOUSE)) ||
+        (config_get(CONFIG_GP_CH_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT) &&
+        (type == BUILDING_GRANARY || type == BUILDING_WAREHOUSE))) {
         terrain_mask = type == BUILDING_GATEHOUSE ? ~TERRAIN_WALL & ~TERRAIN_ROAD &
             ~TERRAIN_HIGHWAY & ~TERRAIN_BUILDING : ~TERRAIN_ROAD & ~TERRAIN_HIGHWAY;
         //allow building gatehouses over walls and roads, other non-bridge roadblocks over roads and highways
@@ -438,11 +440,6 @@ int building_construction_place_building(building_type type, int x, int y, int e
         terrain_mask = ~TERRAIN_WALL & ~TERRAIN_BUILDING;
     } else if (type == BUILDING_RESERVOIR || type == BUILDING_DRAGGABLE_RESERVOIR) {
         terrain_mask = ~TERRAIN_AQUEDUCT;
-    }
-    if (config_get(CONFIG_GP_CH_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT)) {
-        if (type == BUILDING_GRANARY || type == BUILDING_WAREHOUSE) {
-            terrain_mask = ~TERRAIN_ROAD;
-        }
     }
     //allow building granaries and warehouses over all road, BUT, 
     //the building ghost is set up to SUGGEST placing it over crossroads only

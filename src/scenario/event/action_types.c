@@ -643,7 +643,7 @@ int scenario_action_type_trade_route_amount_execute(scenario_action_t *action)
             city_message_post(1, MESSAGE_INCREASED_TRADING, city_id, resource);
         } else if (amount > 0 && change < 0) {
             city_message_post(1, MESSAGE_DECREASED_TRADING, city_id, resource);
-        } else if (amount <= 0) {
+        } else if (amount <= 0 && change < 0) {
             city_message_post(1, MESSAGE_TRADE_STOPPED, city_id, resource);
         }
     }

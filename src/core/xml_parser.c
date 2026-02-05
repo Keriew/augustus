@@ -56,15 +56,15 @@ static void dummy_element_on_exit(void)
 
 int xml_parser_compare_multiple(const char *string, const char *match)
 {
-    const char *next;
-    do {
-        next = strchr(string, '|');
-        size_t length = next ? (size_t) (next - string) : strlen(string);
-        if (strncmp(string, match, length) == 0) {
+    const char *next = string;
+    while (next && *next) {
+        const char *sep = strchr(next, '|');
+        size_t len = sep ? (size_t)(sep - next) : strlen(next);
+        if (strncmp(next, match, len) == 0 && match[len] == '\0') {
             return 1;
         }
-        string = next + 1;
-    } while (next);
+        next = sep ? (sep + 1) : NULL;
+    }
     return 0;
 }
 

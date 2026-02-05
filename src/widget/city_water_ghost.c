@@ -2,6 +2,8 @@
 
 #include "building/building.h"
 #include "building/construction.h"
+#include "building/count.h"
+#include "building/monument.h"
 #include "city/view.h"
 #include "map/grid.h"
 #include "map/water_supply.h"
@@ -63,6 +65,16 @@ static void update_reservoir_access(void)
             set_reservoir_access(b->x, b->y, b->grid_offset); // include the reservoir main tile
         }
     }
+    int neptune_id = building_monument_upgraded(BUILDING_GRAND_TEMPLE_NEPTUNE);
+    if (!neptune_id) {
+        return;
+    }
+    building *b = building_get(neptune_id);
+    if (b->monument.upgrades == 2) {
+        city_view_foreach_tile_in_range(b->grid_offset, 7, map_water_supply_reservoir_radius(), set_reservoir_access);
+        city_view_foreach_tile_in_range(b->grid_offset, 0, 7, set_reservoir_access); // include the Grand Temple tiles
+        set_reservoir_access(b->x, b->y, b->grid_offset); // include the reservoir main tile
+    }
 }
 
 static void draw_water_access(int x, int y, int grid_offset)
@@ -116,6 +128,10 @@ void city_water_ghost_draw_reservoir_ranges(void)
         if (b->state == BUILDING_STATE_IN_USE && b->has_water_access) {
             num_reservoirs++;
         }
+    }
+    if (building_count_active(BUILDING_GRAND_TEMPLE_NEPTUNE) &&
+        building_monument_module_type(BUILDING_GRAND_TEMPLE_NEPTUNE) == 2) {
+        num_reservoirs++;
     }
     if (type != last_reservoir_building_type || num_reservoirs != last_reservoir_count) {
         update_reservoir_access();
