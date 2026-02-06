@@ -84,7 +84,7 @@ static generic_button generic_buttons[] = {
     {464, 48, 150, 24, button_refresh, 0},
     {654, 48, 150, 24, button_export_xml, 0},
     {824, 48, 150, 24, button_import_xml, 0},
-    {974, 48, 150, 24, button_empire_properties},
+    {994, 48, 150, 24, button_empire_properties},
     {0, 0, 0, 24, button_icon_preview, 0},
 };
 static generic_button preview_button[] = {
@@ -672,7 +672,7 @@ static void draw_city_info(const empire_city *city)
                 if (empire_object_city_buys_resource(city->empire_object_id, r)) {
                     int max_trade = trade_route_limit(city->route_id, r, 1);
                     int resource_width = 32 + text_get_number_width(max_trade, '\0', "", FONT_NORMAL_GREEN);
-                    if (resource_x_offset + etc_width + generic_buttons[6].width + 96 + resource_width + 8 + 39 >= data.panel.x_max) {
+                    if (resource_x_offset + etc_width + generic_buttons[7].width + 96 + resource_width + 8 + 39 >= data.panel.x_max) {
                         text_draw(string_from_ascii("..."), resource_x_offset + 2, y_offset + 4, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
                         resource_x_offset += etc_width + 8;
                         break;
@@ -824,19 +824,27 @@ static void draw_panel_buttons(const empire_city *city)
         } else {
             generic_buttons[5].parameter1 = 1;
         }
-
-        if (data.panel.x_min + 564 + width + 16 < data.panel.x_max) {
+        if (data.panel.x_min + 994 + 150 + width + 96 < data.panel.x_max) {
             generic_buttons[6].parameter1 = 0;
-            generic_buttons[6].x = data.panel.x_max - 96 - width - 16 - 20;
-            generic_buttons[6].width = width + 16;
-            button_border_draw(generic_buttons[6].x + 20, data.y_max - 92, width + 16, 24, data.focus_button_id == 7);
-            lang_text_draw_centered(CUSTOM_TRANSLATION, data.button_is_preview ? TR_EDITOR_EMPIRE_TOOL : TR_EDITOR_CURRENT_ICON,
-                generic_buttons[6].x + 20, data.y_max - 85, width + 16, FONT_NORMAL_GREEN);
-            empire_city_icon_type icon = empire_selected_object() ? empire_object_get(empire_selected_object() - 1)->empire_city_icon : 0;
-            lang_text_draw_centered(CUSTOM_TRANSLATION, get_preview_translation_key(data.button_is_preview ? empire_editor_get_tool() : icon),
-                generic_buttons[6].x + 20, data.y_max - 45, width + 16, FONT_NORMAL_GREEN);
+            button_border_draw(data.panel.x_min + 994, data.y_max - 52, 150, 24, data.focus_button_id == 7);
+            lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_EMPIRE_PROPERTIES,
+                data.panel.x_min + 994, data.y_max - 45, 150, FONT_NORMAL_GREEN);
         } else {
             generic_buttons[6].parameter1 = 1;
+        }
+
+        if (data.panel.x_min + 564 + width + 16 < data.panel.x_max) {
+            generic_buttons[7].parameter1 = 0;
+            generic_buttons[7].x = data.panel.x_max - 96 - width - 16 - 20;
+            generic_buttons[7].width = width + 16;
+            button_border_draw(generic_buttons[7].x + 20, data.y_max - 92, width + 16, 24, data.focus_button_id == 8);
+            lang_text_draw_centered(CUSTOM_TRANSLATION, data.button_is_preview ? TR_EDITOR_EMPIRE_TOOL : TR_EDITOR_CURRENT_ICON,
+                generic_buttons[7].x + 20, data.y_max - 85, width + 16, FONT_NORMAL_GREEN);
+            empire_city_icon_type icon = empire_selected_object() ? empire_object_get(empire_selected_object() - 1)->empire_city_icon : 0;
+            lang_text_draw_centered(CUSTOM_TRANSLATION, get_preview_translation_key(data.button_is_preview ? empire_editor_get_tool() : icon),
+                generic_buttons[7].x + 20, data.y_max - 45, width + 16, FONT_NORMAL_GREEN);
+        } else {
+            generic_buttons[7].parameter1 = 1;
         }
 
         button_border_draw(data.panel.x_max - 92, data.y_max - 100, 72, 72, data.preview_button_focused);
@@ -920,7 +928,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         return;
     }
     if (generic_buttons_handle_mouse(m, data.panel.x_min + x_offset, data.y_max - 100, generic_buttons,
-        scenario.empire.id == SCENARIO_CUSTOM_EMPIRE ? 7 : 1, &data.focus_button_id)) {
+        scenario.empire.id == SCENARIO_CUSTOM_EMPIRE ? 8 : 1, &data.focus_button_id)) {
         if (!generic_buttons[data.focus_button_id - 1].parameter1) {
             return;
         }

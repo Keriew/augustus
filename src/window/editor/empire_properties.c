@@ -1,11 +1,18 @@
 #include "empire_properties.h"
 
+#include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/panel.h"
 #include "graphics/window.h"
 #include "input/hotkey.h"
 #include "input/input.h"
 #include "input/mouse.h"
+
+
+
+static generic_button generic_buttons[] = {
+    {}
+};
 
 static void init(void)
 {
@@ -17,7 +24,7 @@ static void draw_background(void)
     window_draw_underlying_window();
     graphics_in_dialog();
 
-    outer_panel_draw(16, 32, 26, 18);
+    outer_panel_draw(64, 32, 32, 18);
 
 
     graphics_reset_dialog();
@@ -40,7 +47,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
 }
 
 
-int window_empire_properties_show(void)
+void window_empire_properties_show(void)
 {
     init();
     window_type window = {
