@@ -39,7 +39,7 @@ static void draw_foreground(void)
 
 static void handle_input(const mouse *m, const hotkeys *h)
 {
-    const mouse *m_dialog = mouse_in_dialog(m);
+    //const mouse *m_dialog = mouse_in_dialog(m);
     
     if (input_go_back_requested(m, h)) {
         window_go_back();
