@@ -53,9 +53,9 @@ typedef struct {
     short wait_ticks;
     unsigned char action_state;
     unsigned char progress_on_tile;
-    short routing_path_id;
-    short routing_path_current_tile;
-    short routing_path_length;
+    unsigned int routing_path_id;
+    unsigned int routing_path_current_tile;
+    unsigned int routing_path_length;
     unsigned char in_building_wait_ticks;
     unsigned char is_on_road;
     short max_roam_length;

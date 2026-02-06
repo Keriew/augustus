@@ -336,6 +336,8 @@ static void set_native_target_building(formation *m)
             case BUILDING_LOOPED_GARDEN_GATE:
             case BUILDING_HEDGE_GATE_DARK:
             case BUILDING_HEDGE_GATE_LIGHT:
+            case BUILDING_LOW_BRIDGE:
+            case BUILDING_SHIP_BRIDGE:
                 break;
             default:
             {
