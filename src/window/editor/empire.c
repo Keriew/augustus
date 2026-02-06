@@ -28,6 +28,7 @@
 #include "scenario/data.h"
 #include "scenario/editor.h"
 #include "scenario/empire.h"
+#include "window/editor/empire_properties.h"
 #include "window/editor/map.h"
 #include "window/empire.h"
 #include "window/file_dialog.h"
@@ -70,6 +71,7 @@ static void button_icon_preview(const generic_button *button);
 static void button_delete_object(const generic_button *button);
 static void button_move_object(const generic_button *button);
 static void button_draw_route(const generic_button *button);
+static void button_empire_properties(const generic_button *button);
 
 static arrow_button arrow_buttons_empire[] = {
     {8, 48, 17, 24, button_change_empire, 1},
@@ -82,6 +84,7 @@ static generic_button generic_buttons[] = {
     {464, 48, 150, 24, button_refresh, 0},
     {654, 48, 150, 24, button_export_xml, 0},
     {824, 48, 150, 24, button_import_xml, 0},
+    {974, 48, 150, 24, button_empire_properties},
     {0, 0, 0, 24, button_icon_preview, 0},
 };
 static generic_button preview_button[] = {
@@ -1184,6 +1187,14 @@ static void button_import_xml(const generic_button *button)
     empire_editor_move_object_stopp();
     resource_set_mapping(RESOURCE_CURRENT_VERSION);
     window_file_dialog_show(FILE_TYPE_EMPIRE, FILE_DIALOG_LOAD);
+}
+
+static void button_empire_properties(const generic_button *button)
+{
+    if (button->parameter1) {
+        return;
+    }
+    window_empire_properties_show();
 }
 
 void window_editor_empire_show(void)
