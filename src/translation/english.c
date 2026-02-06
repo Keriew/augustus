@@ -1991,6 +1991,7 @@ static translation_string all_strings[] = {
     {TR_EMPIRE_ORNAMENT_MOUNT_ETNA, "Mount Etna"},
     {TR_EMPIRE_ORNAMENT_COLOSSUS_RHODES, "Colossus of Rhodes"},
     {TR_EMPIRE_ORNAMENT_THE_TEMPLE, "The Temple"},
+    {TR_EMPIRE_BATTLE_PARENT, "Of path"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

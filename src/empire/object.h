@@ -89,7 +89,7 @@ const empire_object *empire_object_get_latest_battle(int path_id);
 
 const empire_object *empire_object_get_distant_battle(int month, int enemy);
 
-const empire_object *empire_object_get_latest_distant_battle(int enemy);
+int empire_object_get_latest_distant_battle(int enemy);
 
 void empire_object_foreach(void (*callback)(const empire_object *));
 

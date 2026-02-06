@@ -709,11 +709,22 @@ static void draw_object_info(void)
     if (obj->image_id == -1) {
         return;
     }
-    if (obj->type == EMPIRE_OBJECT_ROMAN_ARMY || obj->type == EMPIRE_OBJECT_ENEMY_ARMY) {
+    int is_battle_icon = obj->type == EMPIRE_OBJECT_BATTLE_ICON;
+    if (obj->type == EMPIRE_OBJECT_ROMAN_ARMY || obj->type == EMPIRE_OBJECT_ENEMY_ARMY || is_battle_icon) {
         if (!data.show_battle_objects) {
             return;
         }
+        int width = lang_text_draw(CUSTOM_TRANSLATION, is_battle_icon ? TR_EMPIRE_TOOL_BATTLE :
+            TR_EMPIRE_TOOL_DISTANT_BABARIAN, data.panel.x_min + 28, data.y_max - 125, FONT_NORMAL_GREEN);
+        width += text_draw_number(is_battle_icon ? obj->invasion_years : obj->distant_battle_travel_months, '\0', NULL,
+            data.panel.x_min + 28 + width, data.y_max - 125, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+        width += lang_text_draw(CUSTOM_TRANSLATION, is_battle_icon ? TR_EMPIRE_BATTLE_PARENT : TR_EMPIRE_ROUTE_PARENT,
+            data.panel.x_min + 28 + width, data.y_max - 125, FONT_NORMAL_GREEN);
+        text_draw_number(is_battle_icon ? obj->invasion_path_id : empire_object_get_latest_distant_battle(
+            obj->type == EMPIRE_OBJECT_ENEMY_ARMY), '\0', NULL, data.panel.x_min + 28 + width, data.y_max - 125,
+            FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     }
+    
     uint8_t coords_string[16];
     snprintf((char *)coords_string, 16, "%i, %i", obj->x, obj->y);
     data.object_coords_x = data.panel.x_min + 28 +
@@ -742,7 +753,8 @@ static void draw_object_info(void)
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     }
     if (obj->type == EMPIRE_OBJECT_ORNAMENT) {
-        int ornament_number = obj->image_id < 0 ? ORIGINAL_ORNAMENTS - 2 - obj->image_id : obj->image_id - BASE_ORNAMENT_IMAGE_ID;
+        int ornament_number = obj->image_id < 0 ? ORIGINAL_ORNAMENTS - 2 - obj->image_id :
+            obj->image_id - BASE_ORNAMENT_IMAGE_ID;
         translation_key key = TR_EMPIRE_ORNAMENT_STONEHENGE + ornament_number;
         lang_text_draw(CUSTOM_TRANSLATION, key, data.panel.x_min + 28, data.y_max - 125, FONT_NORMAL_GREEN);
     }

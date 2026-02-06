@@ -637,7 +637,7 @@ const empire_object *empire_object_get_distant_battle(int month, int enemy)
     return 0;
 }
 
-const empire_object *empire_object_get_latest_distant_battle(int enemy)
+int empire_object_get_latest_distant_battle(int enemy)
 {
     int highest_month = 0;
     full_empire_object *obj;
@@ -647,7 +647,7 @@ const empire_object *empire_object_get_latest_distant_battle(int enemy)
             highest_month = obj->obj.distant_battle_travel_months;
         }
     }
-    return empire_object_get_distant_battle(highest_month, enemy);
+    return highest_month;
 }
 
 void empire_object_foreach(void (*callback)(const empire_object *))

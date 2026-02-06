@@ -237,7 +237,7 @@ static void export_roman_path(void)
     xml_exporter_add_attribute_text("type", "roman");
     xml_exporter_add_attribute_int("start_x", first_roman->x);
     xml_exporter_add_attribute_int("start_y", first_roman->y);
-    for (int month = 2; month <= empire_object_get_latest_distant_battle(0)->distant_battle_travel_months; month++) {
+    for (int month = 2; month <= empire_object_get_latest_distant_battle(0); month++) {
         const empire_object *roman_army = empire_object_get_distant_battle(month, 0);
         if (!roman_army) {
             return;
@@ -261,7 +261,7 @@ static void export_enemy_path(void)
     xml_exporter_add_attribute_text("type", "enemy");
     xml_exporter_add_attribute_int("start_x", first_enemy->x);
     xml_exporter_add_attribute_int("start_y", first_enemy->y);
-    for (int month = 2; month <= empire_object_get_latest_distant_battle(1)->distant_battle_travel_months; month++) {
+    for (int month = 2; month <= empire_object_get_latest_distant_battle(1); month++) {
         const empire_object *enemy_army = empire_object_get_distant_battle(month, 1);
         if (!enemy_army) {
             return;
