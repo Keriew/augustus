@@ -266,7 +266,7 @@ static void menu_options_hotkeys(int param)
 {
     clear_state();
     window_go_back();
-    window_hotkey_config_show();
+    window_hotkey_config_show(0);
 }
 
 static void menu_help_help(int param)

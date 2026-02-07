@@ -1770,7 +1770,7 @@ static int apply_changed_configs(void)
 
 static void button_hotkeys(const generic_button *button)
 {
-    window_hotkey_config_show();
+    window_hotkey_config_show(0);
 }
 static void button_reset_defaults(const generic_button *button)
 {

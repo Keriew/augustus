@@ -1,5 +1,6 @@
 #include "empire_properties.h"
 
+#include "core/hotkey_config.h"
 #include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
@@ -8,15 +9,20 @@
 #include "input/hotkey.h"
 #include "input/input.h"
 #include "input/mouse.h"
+#include "window/hotkey_config.h"
 
 static struct {
     unsigned int focus_button_id;
 } data;
 
 static void button_select_image(const generic_button *button);
+static void button_empire_settings(const generic_button *button);
+static void button_hotkeys(const generic_button *button);
 
 static generic_button generic_buttons[] = {
-    {16, 16, 200, 30, button_select_image}
+    {16, 16, 200, 30, button_select_image},
+    {16, 56, 200, 30, button_empire_settings},
+    {16, 96, 200, 30, button_hotkeys},
 };
 #define NUM_GENERIC_BUTTONS sizeof(generic_buttons) / sizeof(generic_button)
 
@@ -42,7 +48,7 @@ static void draw_foreground(void)
     
     for (int i = 0; i < NUM_GENERIC_BUTTONS; i++) {
         button_border_draw(generic_buttons[i].x, generic_buttons[i].y, generic_buttons[i].width,
-            generic_buttons[i].height, data.focus_button_id == 1);
+            generic_buttons[i].height, data.focus_button_id == i + 1);
     }
     
     graphics_reset_dialog();
@@ -64,6 +70,16 @@ static void handle_input(const mouse *m, const hotkeys *h)
 static void button_select_image(const generic_button *button)
 {
     
+}
+
+static void button_empire_settings(const generic_button *button)
+{
+    
+}
+
+static void button_hotkeys(const generic_button *button)
+{
+    window_hotkey_config_show(105);
 }
 
 void window_empire_properties_show(void)

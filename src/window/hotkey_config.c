@@ -217,9 +217,9 @@ static struct {
     hotkey_mapping mappings[HOTKEY_MAX_ITEMS][2];
 } data;
 
-static void init(void)
+static void init(int position)
 {
-    scrollbar_init(&scrollbar, 0, sizeof(hotkey_widgets) / sizeof(hotkey_widget));
+    scrollbar_init(&scrollbar, position, sizeof(hotkey_widgets) / sizeof(hotkey_widget));
 
     for (int i = 0; i < HOTKEY_MAX_ITEMS; i++) {
         hotkey_mapping empty = { KEY_TYPE_NONE, KEY_MOD_NONE, i };
@@ -431,7 +431,7 @@ static void button_close(const generic_button *button)
     window_go_back();
 }
 
-void window_hotkey_config_show(void)
+void window_hotkey_config_show(int position)
 {
     window_type window = {
         WINDOW_HOTKEY_CONFIG,
@@ -439,6 +439,6 @@ void window_hotkey_config_show(void)
         draw_foreground,
         handle_input
     };
-    init();
+    init(position);
     window_show(&window);
 }
