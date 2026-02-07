@@ -42,6 +42,7 @@ typedef struct {
     int show_messages;
     int mothball_toggle;
     int storage_order;
+    int delete_empire_object;
     int build_menu_index_num;
 } hotkeys;
 

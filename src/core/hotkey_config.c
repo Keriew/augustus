@@ -130,6 +130,7 @@ static const char *ini_keys[] = {
     "show_overlay_enemy",
     "next_track",
     "build_repair_land",
+    "editor_empire_delete_object",
 };
 
 static struct {
@@ -237,6 +238,7 @@ static void init_defaults(void)
     set_mapping(KEY_TYPE_F12, KEY_MOD_ALT, HOTKEY_SAVE_SCREENSHOT); // mac specific
     set_mapping(KEY_TYPE_F12, KEY_MOD_CTRL, HOTKEY_SAVE_CITY_SCREENSHOT);
     set_mapping(KEY_TYPE_F12, KEY_MOD_SHIFT, HOTKEY_SAVE_MINIMAP_SCREENSHOT);
+    set_layout_mapping("X", KEY_TYPE_X, KEY_MOD_CTRL, HOTKEY_EDITOR_EMPIRE_DELETE_OBJECT);
 }
 
 const hotkey_mapping *hotkey_for_action(hotkey_action action, int index)

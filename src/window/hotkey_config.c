@@ -160,6 +160,7 @@ static hotkey_widget hotkey_widgets[] = {
     {HOTKEY_SET_BOOKMARK_4, TR_HOTKEY_SET_BOOKMARK_4},
     {HOTKEY_HEADER, TR_HOTKEY_HEADER_EDITOR},
     {HOTKEY_EDITOR_TOGGLE_BATTLE_INFO, TR_HOTKEY_EDITOR_TOGGLE_BATTLE_INFO},
+    {HOTKEY_EDITOR_EMPIRE_DELETE_OBJECT, TR_HOTKEY_EDITOR_EMPIRE_DELETE_OBJECT},
 };
 
 #define HOTKEY_X_OFFSET_1 290
@@ -216,9 +217,9 @@ static struct {
     hotkey_mapping mappings[HOTKEY_MAX_ITEMS][2];
 } data;
 
-static void init(void)
+static void init(int position)
 {
-    scrollbar_init(&scrollbar, 0, sizeof(hotkey_widgets) / sizeof(hotkey_widget));
+    scrollbar_init(&scrollbar, position, sizeof(hotkey_widgets) / sizeof(hotkey_widget));
 
     for (int i = 0; i < HOTKEY_MAX_ITEMS; i++) {
         hotkey_mapping empty = { KEY_TYPE_NONE, KEY_MOD_NONE, i };
@@ -430,7 +431,7 @@ static void button_close(const generic_button *button)
     window_go_back();
 }
 
-void window_hotkey_config_show(void)
+void window_hotkey_config_show(int position)
 {
     window_type window = {
         WINDOW_HOTKEY_CONFIG,
@@ -438,6 +439,6 @@ void window_hotkey_config_show(void)
         draw_foreground,
         handle_input
     };
-    init();
+    init(position);
     window_show(&window);
 }

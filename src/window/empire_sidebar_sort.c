@@ -85,8 +85,8 @@ static int get_city_trade_quota_fill(const empire_city *city, int is_sell)
 
         if ((is_sell && !city->sells_resource[r]) || (!is_sell && !city->buys_resource[r])) continue;
 
-        int max = trade_route_limit(city->route_id, r);
-        int now = trade_route_traded(city->route_id, r);
+        int max = trade_route_limit(city->route_id, r, !is_sell);
+        int now = trade_route_traded(city->route_id, r, !is_sell);
 
         total_max += max;
         total_now += now;
@@ -206,23 +206,23 @@ int window_empire_sidebar_sort_sidebar_city_sorter(const void *a, const void *b)
                 if (!resource_is_storable(r)) continue;
 
                 if (city_a->sells_resource[r]) {
-                    int amount = trade_route_traded(city_a->route_id, r);
+                    int amount = trade_route_traded(city_a->route_id, r, 0);
                     int price = trade_price_sell(r, !city_a->is_sea_trade);
                     profit_a += amount * price;
                 }
                 if (city_a->buys_resource[r]) {
-                    int amount = trade_route_traded(city_a->route_id, r);
+                    int amount = trade_route_traded(city_a->route_id, r, 1);
                     int price = trade_price_buy(r, !city_a->is_sea_trade);
                     profit_a -= amount * price;
                 }
 
                 if (city_b->sells_resource[r]) {
-                    int amount = trade_route_traded(city_b->route_id, r);
+                    int amount = trade_route_traded(city_b->route_id, r, 0);
                     int price = trade_price_sell(r, !city_b->is_sea_trade);
                     profit_b += amount * price;
                 }
                 if (city_b->buys_resource[r]) {
-                    int amount = trade_route_traded(city_b->route_id, r);
+                    int amount = trade_route_traded(city_b->route_id, r, 1);
                     int price = trade_price_buy(r, !city_b->is_sea_trade);
                     profit_b -= amount * price;
                 }
