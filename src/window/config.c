@@ -1182,13 +1182,17 @@ static void init_list_boxes(void)
     ui_list_box.on_select = handle_list_box_select;
     ui_list_box.handle_tooltip = list_box_tooltip;
     list_box_init(&ui_list_box, CATEGORY_UI_COUNT);
-
+    
     //  City management
     city_mgmt_list_box = ui_list_box; //  copy layout
     list_box_init(&city_mgmt_list_box, CATEGORY_CITY_COUNT);
-
+    window_config_page original_page = data.page;
+    data.page = CONFIG_PAGE_UI_CHANGES;
     list_box_select_index(&ui_list_box, selected_categories.ui_category);
+    data.page = CONFIG_PAGE_CITY_MANAGEMENT_CHANGES;
     list_box_select_index(&city_mgmt_list_box, selected_categories.city_mgmt_category);
+    data.page = original_page;
+    
 }
 
 static void draw_list_box_item(const list_box_item *item)
@@ -1937,10 +1941,21 @@ static void set_page(unsigned int page)
     window_invalidate();
 }
 
-static void init(unsigned int page, int show_background_image)
+static void init(unsigned int page, unsigned int category, int show_background_image)
 {
     memset(&data, 0, sizeof(data));
     data.page = page;
+    if (page == CONFIG_PAGE_UI_CHANGES) {
+        if (category >= CATEGORY_UI_COUNT) {
+            category = 0;
+        }
+        selected_categories.ui_category = category;
+    } else if (page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
+        if (category >= CATEGORY_CITY_COUNT) {
+            category = 0;
+        }
+        selected_categories.city_mgmt_category = category;
+    }
     data.show_background_image = show_background_image;
 
     //  init volume prefix
@@ -2001,7 +2016,7 @@ static void init(unsigned int page, int show_background_image)
 
     init_list_boxes();
 }
-void window_config_show(window_config_page page, int show_background_image)
+void window_config_show(window_config_page page, unsigned int category, int show_background_image)
 {
     window_type window = {
         WINDOW_CONFIG,
@@ -2010,6 +2025,6 @@ void window_config_show(window_config_page page, int show_background_image)
         handle_input,
         get_tooltip
     };
-    init(page, show_background_image);
+    init(page, category, show_background_image);
     window_show(&window);
 }

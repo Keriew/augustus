@@ -114,7 +114,7 @@ static void button_click(const generic_button *button)
     } else if (type == 5) {
         window_editor_attributes_show();
     } else if (type == 6) {
-        window_config_show(CONFIG_FIRST_PAGE, 0);
+        window_config_show(CONFIG_FIRST_PAGE, 0, 0);
     } else if (type == 7) {
         window_popup_dialog_show_confirmation(translation_for(TR_BUTTON_BACK_TO_MAIN_MENU), 0, 0, main_menu_confirmed); 
     }

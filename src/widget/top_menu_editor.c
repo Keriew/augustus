@@ -252,14 +252,14 @@ static void menu_options_general(int param)
 {
     clear_state();
     window_editor_map_show();
-    window_config_show(CONFIG_PAGE_GENERAL, 0);
+    window_config_show(CONFIG_PAGE_GENERAL, 0, 0);
 }
 
 static void menu_options_user_interface(int param)
 {
     clear_state();
     window_go_back();
-    window_config_show(CONFIG_PAGE_UI_CHANGES, 0);
+    window_config_show(CONFIG_PAGE_UI_CHANGES, CATEGORY_UI_GENERAL, 0);
 }
 
 static void menu_options_hotkeys(int param)
