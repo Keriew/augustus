@@ -131,6 +131,7 @@ static void prepare_map_for_editing(void)
     map_tiles_update_all_rocks();
     map_tiles_update_all_empty_land();
     map_tiles_update_all_meadow();
+    map_tiles_update_all_rubble();
     map_tiles_update_all_roads();
     map_tiles_update_all_highways();
     map_tiles_update_all_plazas();

@@ -515,7 +515,7 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
         // discouraged terrain can be built on, but is still highlighted red,
         // to suggest e.g. that it will become unusable/be overwritten
         if (!fully_blocked) {
-            if (type == BUILDING_PLAZA || building_type_is_roadblock(type)) {
+            if (type == BUILDING_PLAZA || building_type_is_roadblock(type) && !(type == BUILDING_GRANARY || type == BUILDING_WAREHOUSE)) {
                 forbidden_terrain &= ~TERRAIN_ROAD;
                 discouraged_terrain &= ~TERRAIN_ROAD;
             }

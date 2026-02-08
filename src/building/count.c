@@ -429,7 +429,7 @@ int building_count_forts(int active_only)
     return total;
 }
 
-int building_count_roads_in_area(int minx, int miny, int maxx, int maxy)
+int building_count_terrain_in_area(int minx, int miny, int maxx, int maxy, int terrain, int (*condition)(int))
 {
     int total = 0;
     int grid_offset;
@@ -437,59 +437,8 @@ int building_count_roads_in_area(int minx, int miny, int maxx, int maxy)
         for (int x = minx; x < maxx; x++) {
             grid_offset = map_grid_offset(x, y);
 
-            if (map_terrain_is(grid_offset, TERRAIN_ROAD)) {
+            if (map_terrain_is(grid_offset, terrain) && condition(grid_offset)) {
                 total++;
-            }
-        }
-    }
-    return total;
-}
-
-int building_count_highway_in_area(int minx, int miny, int maxx, int maxy)
-{
-    int total = 0;
-    int grid_offset;
-    for (int y = miny; y < maxy; y++) {
-        for (int x = minx; x < maxx; x++) {
-            grid_offset = map_grid_offset(x, y);
-
-            if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
-                total++;
-            }
-        }
-    }
-    return total;
-}
-
-int building_count_plaza_in_area(int minx, int miny, int maxx, int maxy)
-{
-    int total = 0;
-    int grid_offset;
-    for (int y = miny; y < maxy; y++) {
-        for (int x = minx; x < maxx; x++) {
-            grid_offset = map_grid_offset(x, y);
-
-            if (map_terrain_is(grid_offset, TERRAIN_ROAD) && map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset)) {
-                total++;
-            }
-        }
-    }
-    return total;
-}
-
-int building_count_gardens_in_area(int minx, int miny, int maxx, int maxy, int overgrown)
-{
-    int total = 0;
-    int grid_offset;
-    for (int y = miny; y < maxy; y++) {
-        for (int x = minx; x < maxx; x++) {
-            grid_offset = map_grid_offset(x, y);
-
-            if (map_terrain_is(grid_offset, TERRAIN_GARDEN)) {
-                int is_overgrown = map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset) != 0;
-                if (is_overgrown == overgrown) {
-                    total++;
-                }
             }
         }
     }
@@ -505,28 +454,10 @@ static void get_min_map_xy(void)
     min_y = map_grid_offset_to_y(map_data.start_offset);
 }
 
-int building_count_roads(void)
+int building_count_terrain(int terrain, int (*condition)(int))
 {
     get_min_map_xy();
-    return building_count_roads_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height);
-}
-
-int building_count_highway(void)
-{
-    get_min_map_xy();
-    return building_count_highway_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height);
-}
-
-int building_count_plaza(void)
-{
-    get_min_map_xy();
-    return building_count_plaza_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height);
-}
-
-int building_count_gardens(int overgrown)
-{
-    get_min_map_xy();
-    return building_count_gardens_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height, overgrown);
+    return building_count_terrain_in_area(min_x, min_y, min_x + map_data.width, min_y + map_data.height, terrain, condition);
 }
 
 int building_count_bridges(int ship)

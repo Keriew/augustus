@@ -18,6 +18,7 @@
 #include "figure/figure.h"
 #include "figure/formation.h"
 #include "map/grid.h"
+#include "map/property.h"
 #include "map/terrain.h"
 #include "scenario/event/parameter_data.h"
 #include "game/settings.h"
@@ -160,6 +161,16 @@ static int population_by_age(scenario_action_t *action)
     return is_absolute ? value : calc_percentage(value, total_pop);
 }
 
+static int count_no_condition(int grid_offset)
+{
+    return 1;
+}
+
+static int count_not_overgrown(int grid_offset)
+{
+    return !map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset);
+}
+
 static int get_building_count(scenario_action_t *action)
 {
     building_type type = action->parameter3;
@@ -197,19 +208,19 @@ static int get_building_count(scenario_action_t *action)
             total_count = building_count_any_total(active_only);
             break;
         case BUILDING_ROAD:
-            total_count = building_count_roads();
+            total_count = building_count_terrain(TERRAIN_ROAD, count_no_condition);
             break;
         case BUILDING_HIGHWAY:
-            total_count = building_count_highway();
+            total_count = building_count_terrain(TERRAIN_HIGHWAY, count_no_condition);
             break;
         case BUILDING_PLAZA:
-            total_count = building_count_plaza();
+            total_count = building_count_terrain(TERRAIN_ROAD, map_property_is_plaza_earthquake_or_overgrown_garden);
             break;
         case BUILDING_GARDENS:
-            total_count = building_count_gardens(0);
+            total_count = building_count_terrain(TERRAIN_GARDEN, count_not_overgrown);
             break;
         case BUILDING_OVERGROWN_GARDENS:
-            total_count = building_count_gardens(1);
+            total_count = building_count_terrain(TERRAIN_GARDEN, map_property_is_plaza_earthquake_or_overgrown_garden);
             break;
         case BUILDING_LOW_BRIDGE:
             total_count = building_count_bridges(0);
@@ -259,20 +270,8 @@ static int get_enemy_troops_count(scenario_action_t *action)
 
 static int get_terrain_tiles_count(scenario_action_t *action)
 {
-    // TODO: this probably should go as global somewhere
     int terrain_type = action->parameter3;
-    int count = 0;
-    int width, height;
-    map_grid_size(&width, &height);
-    for (int y = 0; y < height; y++) {    // Iterate through all map tiles
-        for (int x = 0; x < width; x++) {
-            int grid_offset = map_grid_offset(x, y);
-            if (map_terrain_is(grid_offset, terrain_type)) {
-                count++;
-            }
-        }
-    }
-    return count;
+    return building_count_terrain(terrain_type, count_no_condition);
 }
 
 static int city_trade_quota_fill_percentage(scenario_action_t *action)

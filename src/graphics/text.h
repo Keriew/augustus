@@ -55,4 +55,5 @@ int text_draw_multiline(const uint8_t *str, int x_offset, int y_offset, int box_
  */
 int text_measure_multiline(const uint8_t *str, int box_width, font_t font, int *largest_width);
 
+void text_draw_build_menu_with_index(const uint8_t *str, int index, int x_offset, int y_offset, int box_width, font_t font, color_t color);
 #endif // GRAPHICS_TEXT_H
