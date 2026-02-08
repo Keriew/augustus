@@ -17,16 +17,16 @@
 
 static message_media_text_blob_t message_media_text_blob;
 
-static void resize_text_blob(int needed_space)
+static void resize_text_blob(size_t needed_space)
 {
     if (!message_media_text_blob.max_size_text_blob) {
-        int size = MESSAGE_MEDIA_TEXT_BLOB_INITIAL_SIZE * sizeof(uint8_t);
+        size_t size = MESSAGE_MEDIA_TEXT_BLOB_INITIAL_SIZE * sizeof(uint8_t);
         message_media_text_blob.text_blob = (uint8_t *) malloc(size);
         message_media_text_blob.max_size_text_blob = size;
     }
-    int needed_max_size = message_media_text_blob.size + needed_space;
+    size_t needed_max_size = message_media_text_blob.size + needed_space;
     if (message_media_text_blob.max_size_text_blob < needed_max_size) {
-        int size = (needed_max_size + MESSAGE_MEDIA_TEXT_BLOB_SIZE_INCREASE_OVERSHOOT) * sizeof(uint8_t);
+        size_t size = (needed_max_size + MESSAGE_MEDIA_TEXT_BLOB_SIZE_INCREASE_OVERSHOOT) * sizeof(uint8_t);
         uint8_t *new_blob = realloc(message_media_text_blob.text_blob, size);
         if (new_blob) {
             message_media_text_blob.text_blob = new_blob;
@@ -37,14 +37,14 @@ static void resize_text_blob(int needed_space)
     }
 }
 
-static void resize_text_entries(int needed_entries)
+static void resize_text_entries(size_t needed_entries)
 {
     if (!message_media_text_blob.max_size_text_entries) {
         size_t size = MESSAGE_MEDIA_TEXT_BLOB_INITIAL_ENTRIES * sizeof(text_blob_string_t);
         message_media_text_blob.text_entries = (text_blob_string_t *) malloc(size);
         message_media_text_blob.max_size_text_entries = size;
     }
-    int needed_max_count = message_media_text_blob.entry_count + needed_entries;
+    size_t needed_max_count = message_media_text_blob.entry_count + needed_entries;
     if (message_media_text_blob.max_size_text_entries < needed_max_count * sizeof(text_blob_string_t)) {
         size_t size = (needed_max_count + MESSAGE_MEDIA_TEXT_BLOB_ENTRIES_INCREASE_OVERSHOOT) * sizeof(text_blob_string_t);
         text_blob_string_t *new_blob = realloc(message_media_text_blob.text_entries, size);
@@ -57,7 +57,7 @@ static void resize_text_entries(int needed_entries)
     }
 }
 
-static int get_highest_entry_id(void)
+static size_t get_highest_entry_id(void)
 {
     message_media_text_blob.highest_id = 0;
     for (int i = 0; i < message_media_text_blob.entry_count; i++) {
@@ -112,12 +112,12 @@ const uint8_t *message_media_text_blob_get_text(int offset)
     return &message_media_text_blob.text_blob[offset];
 }
 
-static text_blob_string_t *create_text_blob(int length)
+static text_blob_string_t *create_text_blob(size_t length)
 {
     resize_text_entries(1);
     resize_text_blob(length);
-    int offset = message_media_text_blob.size;
-    int index = message_media_text_blob.entry_count;
+    size_t offset = message_media_text_blob.size;
+    size_t index = message_media_text_blob.entry_count;
 
     if (offset + length >= message_media_text_blob.max_size_text_blob ||
         index * sizeof(text_blob_string_t) >= message_media_text_blob.max_size_text_entries) {
@@ -170,7 +170,7 @@ const text_blob_string_t *message_media_text_blob_add_encoded(const char *text)
 void message_media_text_blob_save_state(buffer *blob_buffer, buffer *meta_buffer)
 {
     message_media_text_blob_remove_unused();
-    uint32_t array_size = message_media_text_blob.size;
+    size_t array_size = message_media_text_blob.size;
     uint32_t struct_size = sizeof(uint8_t);
     buffer_init_dynamic_array(blob_buffer, array_size, struct_size);
 
@@ -183,15 +183,15 @@ void message_media_text_blob_save_state(buffer *blob_buffer, buffer *meta_buffer
     buffer_init_dynamic_array(meta_buffer, array_size, struct_size);
 
     for (unsigned int i = 0; i < array_size; i++) {
-        buffer_write_i32(meta_buffer, message_media_text_blob.text_entries[i].id);
-        buffer_write_i32(meta_buffer, message_media_text_blob.text_entries[i].offset);
-        buffer_write_i32(meta_buffer, message_media_text_blob.text_entries[i].length);
+        buffer_write_u32(meta_buffer, (unsigned int) message_media_text_blob.text_entries[i].id);
+        buffer_write_u32(meta_buffer, (unsigned int) message_media_text_blob.text_entries[i].offset);
+        buffer_write_u32(meta_buffer, (unsigned int) message_media_text_blob.text_entries[i].length);
     }
 }
 
 void message_media_text_blob_load_state(buffer *blob_buffer, buffer *meta_buffer)
 {
-    unsigned int size = buffer_load_dynamic_array(blob_buffer);
+    size_t size = buffer_load_dynamic_array(blob_buffer);
 
     message_media_text_blob_clear();
     resize_text_blob(size);
@@ -203,7 +203,7 @@ void message_media_text_blob_load_state(buffer *blob_buffer, buffer *meta_buffer
 
     resize_text_entries(size);
     message_media_text_blob.entry_count = size;
-    for (unsigned int i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) {
         message_media_text_blob.text_entries[i].id = buffer_read_i32(meta_buffer);
         message_media_text_blob.text_entries[i].index = i;
         message_media_text_blob.text_entries[i].in_use = 1;
@@ -250,19 +250,19 @@ void message_media_text_blob_remove_unused(void)
     text_blob_string_t *new_text_entries = (text_blob_string_t *) malloc(message_media_text_blob.max_size_text_entries);
     uint8_t *new_text_blob = (uint8_t *) malloc(message_media_text_blob.max_size_text_blob);
 
-    int index = 0;
-    int new_size = 0;
-    int new_offset = 0;
-    for (int i = 0; i < message_media_text_blob.entry_count; i++) {
+    size_t index = 0;
+    size_t new_size = 0;
+    size_t new_offset = 0;
+    for (size_t i = 0; i < message_media_text_blob.entry_count; i++) {
         if (message_media_text_blob.text_entries[i].in_use == 0) {
             continue;
         }
-        int text_id = message_media_text_blob.text_entries[i].id;
+        size_t text_id = message_media_text_blob.text_entries[i].id;
         new_text_entries[index].id = text_id;
         new_text_entries[index].index = index;
         new_text_entries[index].in_use = 1;
-        int length = message_media_text_blob.text_entries[i].length;
-        int offset = message_media_text_blob.text_entries[i].offset;
+        size_t length = message_media_text_blob.text_entries[i].length;
+        size_t offset = message_media_text_blob.text_entries[i].offset;
         new_text_entries[index].length = length;
         new_text_entries[index].offset = new_offset;
 

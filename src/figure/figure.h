@@ -53,9 +53,9 @@ typedef struct {
     short wait_ticks;
     unsigned char action_state;
     unsigned char progress_on_tile;
-    short routing_path_id;
-    short routing_path_current_tile;
-    short routing_path_length;
+    unsigned int routing_path_id;
+    unsigned int routing_path_current_tile;
+    unsigned int routing_path_length;
     unsigned char in_building_wait_ticks;
     unsigned char is_on_road;
     short max_roam_length;
@@ -105,8 +105,8 @@ typedef struct {
     unsigned char trader_id;
     unsigned char wait_ticks_next_target; //used for retargetting for fighting figures, and destination for pushers
     unsigned char dont_draw_elevated;
-    short target_figure_id;
-    short targeted_by_figure_id;
+    unsigned short target_figure_id;
+    unsigned short targeted_by_figure_id;
     unsigned short created_sequence;
     unsigned short target_figure_created_sequence;
     unsigned char figures_on_same_tile_index;
@@ -124,9 +124,9 @@ typedef struct {
     } tourist;
 } figure;
 
-figure *figure_get(int id);
+figure *figure_get(unsigned int id);
 
-int figure_count(void);
+unsigned int figure_count(void);
 
 /**
  * Creates a figure

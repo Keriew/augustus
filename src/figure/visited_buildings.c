@@ -96,7 +96,7 @@ void figure_visited_buildings_migrate(void)
     if (!array_init(visited_buildings, VISITED_BUILDINGS_ARRAY_SIZE_STEP, visited_building_create, visited_building_in_use)) {
         log_error("Unable to allocate enough memory for the visited docks array. The game will now crash.", 0, 0);
     }
-    for (int i = 0; i < figure_count(); i++) {
+    for (unsigned int i = 0; i < figure_count(); i++) {
         figure *f = figure_get(i);
         if (f->type != FIGURE_TRADE_SHIP || f->state == FIGURE_STATE_DEAD || !f->building_id) {
             continue;

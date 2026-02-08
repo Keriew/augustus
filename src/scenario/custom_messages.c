@@ -157,12 +157,12 @@ static void link_media(custom_media_t *media, custom_media_link_type link_type, 
 
 void custom_messages_load_state(buffer *messages_buffer, buffer *media_buffer)
 {
-    unsigned int array_size = buffer_load_dynamic_array(messages_buffer);
+    size_t array_size = buffer_load_dynamic_array(messages_buffer);
 
     // Entry 0 is kept empty.
     buffer_skip(messages_buffer, (4 * sizeof(int32_t)));
     // Expects the media text blob to be loaded already.
-    for (unsigned int i = 1; i < array_size; i++) {
+    for (size_t i = 1; i < array_size; i++) {
         custom_message_t *entry = custom_messages_create_blank();
 
         int linked_text_blob_id = buffer_read_i32(messages_buffer);

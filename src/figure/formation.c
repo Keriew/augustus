@@ -706,7 +706,7 @@ void formation_move_herds_away(int x, int y)
 void formation_calculate_figures(void)
 {
     clear_figures();
-    for (int i = 1; i < figure_count(); i++) {
+    for (unsigned int i = 1; i < figure_count(); i++) {
         figure *f = figure_get(i);
         if (f->state != FIGURE_STATE_ALIVE) {
             continue;

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void buffer_init(buffer *buf, void *data, int size)
+void buffer_init(buffer *buf, void *data, size_t size)
 {
     buf->data = data;
     buf->size = size;
@@ -17,7 +17,7 @@ void buffer_reset(buffer *buf)
     buf->overflow = 0;
 }
 
-void buffer_set(buffer *buf, int offset)
+void buffer_set(buffer *buf, size_t offset)
 {
     buf->index = offset;
 }
@@ -176,36 +176,36 @@ int buffer_at_end(buffer *buf)
     return buf->index >= buf->size;
 }
 
-void buffer_init_dynamic(buffer *buf, uint32_t size)
+void buffer_init_dynamic(buffer *buf, size_t size)
 {
     size += sizeof(uint32_t); // Add space for the buffer size
     uint8_t *buf_data = malloc(size);
     buffer_init(buf, buf_data, size);
-    buffer_write_u32(buf, size);
+    buffer_write_u32(buf, (uint32_t) size);
 }
 
-uint32_t buffer_load_dynamic(buffer *buf)
+size_t buffer_load_dynamic(buffer *buf)
 {
     buffer_set(buf, 0);
-    uint32_t size = buffer_read_u32(buf) - sizeof(uint32_t);
+    size_t size = buffer_read_u32(buf) - sizeof(uint32_t);
     return size;
 }
 
-void buffer_init_dynamic_array(buffer *buf, uint32_t array_size, uint32_t element_size)
+void buffer_init_dynamic_array(buffer *buf, size_t array_size, size_t element_size)
 {
-    uint32_t buf_size = (3 * sizeof(uint32_t)) + (array_size * element_size);
+    size_t buf_size = (3 * sizeof(uint32_t)) + (array_size * element_size);
     buffer_init_dynamic(buf, buf_size);
 
     buffer_write_i32(buf, 0); // Skip
-    buffer_write_u32(buf, array_size);
-    buffer_write_u32(buf, element_size);
+    buffer_write_u32(buf, (uint32_t) array_size);
+    buffer_write_u32(buf, (uint32_t) element_size);
 }
 
-uint32_t buffer_load_dynamic_array(buffer *buf)
+size_t buffer_load_dynamic_array(buffer *buf)
 {
     buffer_set(buf, 0);
     buffer_skip(buf, 8); // Skip the buffer size and version
-    uint32_t array_size = buffer_read_u32(buf);
+    size_t array_size = buffer_read_u32(buf);
     buffer_skip(buf, 4); // Skip the element size
     return array_size;
 }

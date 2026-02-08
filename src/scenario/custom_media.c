@@ -67,12 +67,12 @@ void custom_media_save_state(buffer *buf)
         buffer_write_i32(buf, entry_id);
         int entry_type = entry && entry->type ? entry->type : 0;
         buffer_write_i32(buf, entry_type);
-        int entry_filename_id = entry && entry->filename && entry->filename->id ? entry->filename->id : 0;
-        buffer_write_i32(buf, entry_filename_id);
-        int entry_link_type = entry && entry->link_type ? entry->link_type : 0;
-        buffer_write_i16(buf, entry_link_type);
-        int entry_link_id = entry && entry->link_id ? entry->link_id : 0;
-        buffer_write_i32(buf, entry_link_id);
+        size_t entry_filename_id = entry && entry->filename && entry->filename->id ? entry->filename->id : 0;
+        buffer_write_u32(buf, (unsigned int) entry_filename_id);
+        uint16_t entry_link_type = entry && entry->link_type ? entry->link_type : 0;
+        buffer_write_u16(buf, entry_link_type);
+        size_t entry_link_id = entry && entry->link_id ? entry->link_id : 0;
+        buffer_write_u32(buf, (unsigned int) entry_link_id);
     }
 }
 
