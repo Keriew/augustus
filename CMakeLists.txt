@@ -232,6 +232,41 @@ set(ZIP_FILES
     ${PROJECT_SOURCE_DIR}/ext/zip/zip.c
 )
 
+set(LUA_FILES
+    ${PROJECT_SOURCE_DIR}/ext/lua/lapi.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/lauxlib.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/lbaselib.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/lcode.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/lcorolib.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/lctype.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/ldblib.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/ldebug.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/ldo.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/ldump.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/lfunc.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/lgc.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/linit.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/liolib.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/llex.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/lmathlib.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/lmem.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/loadlib.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/lobject.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/lopcodes.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/loslib.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/lparser.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/lstate.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/lstring.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/lstrlib.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/ltable.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/ltablib.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/ltm.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/lundump.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/lutf8lib.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/lvm.c
+    ${PROJECT_SOURCE_DIR}/ext/lua/lzio.c
+)
+
 set(PLATFORM_FILES
     ${PROJECT_SOURCE_DIR}/src/platform/arguments.c
     ${PROJECT_SOURCE_DIR}/src/platform/augustus.c
@@ -557,6 +592,14 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/event/condition_comparison_helper.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/condition_handler.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/condition_types.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_state.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_hooks.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_game.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_city.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_finance.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_scenario.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_map.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_ui.c
 )
 set(GRAPHICS_FILES
     ${PROJECT_SOURCE_DIR}/src/graphics/arrow_button.c
@@ -813,6 +856,7 @@ set(SOURCE_FILES
     ${SPNG_FILES}
     ${SXML_FILES}
     ${ZIP_FILES}
+    ${LUA_FILES}
     ${PROJECT_SOURCE_DIR}/res/augustus.rc
     ${MACOSX_FILES}
     ${IOS_FILES}
@@ -888,6 +932,9 @@ if(MSVC)
     set_source_files_properties(${SOURCE_FILES} PROPERTIES COMPILE_FLAGS "/W4")
     set_source_files_properties(${PROJECT_SOURCE_DIR}/res/augustus.rc PROPERTIES COMPILE_FLAGS "")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /utf-8 /wd4100 /wd4244 /we4013")
+    set_source_files_properties(${LUA_FILES} PROPERTIES COMPILE_FLAGS "/W0")
+else()
+    set_source_files_properties(${LUA_FILES} PROPERTIES COMPILE_FLAGS "-w")
 endif()
 
 # Show debug info on crash on 32 bit builds compiled with MinGW

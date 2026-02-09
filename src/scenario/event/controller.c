@@ -2,7 +2,7 @@
 
 #include "core/array.h"
 #include "core/log.h"
-#include "core/string.h"   
+#include "core/string.h"
 #include "game/save_version.h"
 #include "map/grid.h"
 #include "scenario/custom_variable.h"
@@ -11,6 +11,7 @@
 #include "scenario/event/event.h"
 #include "scenario/event/formula.h"
 #include "scenario/event/parameter_data.h"
+#include "scenario/lua/lua_hooks.h"
 #include "scenario/scenario.h"
 #include "widget/map_editor.h"
 
@@ -425,7 +426,11 @@ void scenario_events_process_all(void)
 {
     scenario_event_t *current;
     array_foreach(scenario_events, current) {
-        scenario_event_conditional_execute(current);
+        if (scenario_event_conditional_execute(current)) {
+            if (current->name[0] != '\0') {
+                scenario_lua_hook_on_event((const char *) current->name);
+            }
+        }
     }
 }
 

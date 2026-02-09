@@ -57,6 +57,7 @@
 #include "scenario/empire.h"
 #include "scenario/event/controller.h"
 #include "scenario/gladiator_revolt.h"
+#include "scenario/lua/lua_hooks.h"
 #include "scenario/invasion.h"
 #include "scenario/price_change.h"
 #include "scenario/random_event.h"
@@ -74,6 +75,7 @@ static void advance_year(void)
     empire_city_reset_yearly_trade_amounts();
     building_maintenance_update_fire_direction();
     city_ratings_update(1, 0);
+    scenario_lua_hook_on_year();
 }
 
 static void advance_month(void)
@@ -119,6 +121,7 @@ static void advance_month(void)
     }
 
     city_weather_update(game_time_month());
+    scenario_lua_hook_on_month();
 }
 
 static void advance_day(void)
@@ -140,6 +143,7 @@ static void advance_day(void)
     }
     scenario_events_progress_paused(1);
     scenario_events_process_all();
+    scenario_lua_hook_on_tick();
 }
 
 static void advance_tick(void)

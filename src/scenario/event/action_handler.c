@@ -4,6 +4,8 @@
 #include "scenario/allowed_building.h"
 #include "scenario/event/action_types.h"
 
+extern int scenario_lua_execute_custom_action(int index);
+
 int scenario_action_type_execute(scenario_action_t *action)
 {
     switch (action->type) {
@@ -95,6 +97,8 @@ int scenario_action_type_execute(scenario_action_t *action)
             return scenario_action_type_change_production_rate_execute(action);
         case ACTION_TYPE_LOCK_TRADE_ROUTE:
             return scenario_action_type_lock_trade_route_execute(action);
+        case ACTION_TYPE_LUA_CUSTOM:
+            return scenario_lua_execute_custom_action(action->parameter1);
         default:
             return 0;
     }
