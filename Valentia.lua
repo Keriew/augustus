@@ -1,3 +1,5 @@
+---@see augustus_api
+
 local monthly_tax_bonus = 75
 
 function on_load()
