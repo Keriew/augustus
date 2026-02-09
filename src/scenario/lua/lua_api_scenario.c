@@ -4,6 +4,7 @@
 #include "core/log.h"
 #include "scenario/custom_variable.h"
 #include "scenario/data.h"
+#include "scenario/event/action_handler.h"
 #include "scenario/event/controller.h"
 #include "scenario/event/data.h"
 #include "scenario/event/event.h"
@@ -270,6 +271,20 @@ static int l_scenario_create_event(lua_State *L)
     return 1;
 }
 
+static int l_scenario_execute_action(lua_State *L)
+{
+    scenario_action_t action = {0};
+    action.type = (int) luaL_checkinteger(L, 1);
+    action.parameter1 = (int) luaL_optinteger(L, 2, 0);
+    action.parameter2 = (int) luaL_optinteger(L, 3, 0);
+    action.parameter3 = (int) luaL_optinteger(L, 4, 0);
+    action.parameter4 = (int) luaL_optinteger(L, 5, 0);
+    action.parameter5 = (int) luaL_optinteger(L, 6, 0);
+    int result = scenario_action_type_execute(&action);
+    lua_pushboolean(L, result);
+    return 1;
+}
+
 static const luaL_Reg scenario_funcs[] = {
     {"name", l_scenario_name},
     {"start_year", l_scenario_start_year},
@@ -281,6 +296,7 @@ static const luaL_Reg scenario_funcs[] = {
     {"register_action", l_scenario_register_action},
     {"event_count", l_scenario_event_count},
     {"create_event", l_scenario_create_event},
+    {"execute_action", l_scenario_execute_action},
     {NULL, NULL}
 };
 

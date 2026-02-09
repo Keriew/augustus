@@ -9,7 +9,8 @@ function on_load()
 end
 
 function on_tick()
-    if game.day() == 0 and finance.treasury() < 2000 then
+    -- Use condition API to check treasury < 2000
+    if game.day() == 0 and condition.money(COMPARE.LESS_THAN, 2000) then
         ui.show_warning("Treasury running low!")
     end
 end
@@ -20,12 +21,13 @@ function on_month()
         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     }
     local name = months[game.month() + 1] or "?"
-
+    action.win()
     ui.show_warning(name .. " " .. game.year() .. " - Pop: " .. city.population())
 
     finance.add_treasury(monthly_tax_bonus)
 
-    if city.population() > 1500 then
+    -- Use condition API: population > 1500
+    if condition.city_population(COMPARE.GREATER_THAN, 1500) then
         city.change_favor(1)
         ui.show_warning("Growing city pleased Caesar!")
     end

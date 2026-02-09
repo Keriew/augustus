@@ -600,6 +600,8 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_scenario.c
     ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_map.c
     ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_ui.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_action.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_condition.c
 )
 set(GRAPHICS_FILES
     ${PROJECT_SOURCE_DIR}/src/graphics/arrow_button.c
