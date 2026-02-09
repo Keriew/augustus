@@ -1,5 +1,5 @@
 ---@meta augustus
--- Augustus Lua Scripting API
+-- Augustus Lua Scripting API - Core APIs
 -- Place this file in your workspace for IDE autocomplete. Do NOT load it in scripts.
 
 ----------------------------------------------------------------
@@ -74,9 +74,17 @@ function city.rating_culture() end
 ---@return integer rating
 function city.rating_prosperity() end
 
+--- Change prosperity rating by amount (positive or negative)
+---@param amount integer
+function city.change_prosperity(amount) end
+
 --- Get current peace rating
 ---@return integer rating
 function city.rating_peace() end
+
+--- Change peace rating by amount (positive or negative)
+---@param amount integer
+function city.change_peace(amount) end
 
 --- Get current favor rating
 ---@return integer rating
@@ -85,6 +93,18 @@ function city.rating_favor() end
 --- Change Caesar's favor by amount (positive or negative)
 ---@param amount integer
 function city.change_favor(amount) end
+
+--- Get Rome's wages
+---@return integer wages
+function city.rome_wages() end
+
+--- Change Rome's wages by amount (positive or negative)
+---@param amount integer
+function city.change_rome_wages(amount) end
+
+--- Set Rome's wages to a specific value
+---@param amount integer
+function city.set_rome_wages(amount) end
 
 ----------------------------------------------------------------
 -- finance.*  –  Treasury and taxes
@@ -235,419 +255,6 @@ function ui.show_warning(text) end
 function ui.post_message(message_type, param1, param2) end
 
 ----------------------------------------------------------------
--- action.*  –  Execute built-in scenario actions with named parameters
-----------------------------------------------------------------
-
----@class action
-action = {}
-
---- Adjust Caesar's favor by amount (positive or negative)
----@param amount integer
----@return boolean success
-function action.adjust_favor(amount) end
-
---- Add or subtract denarii from the treasury
----@param amount integer Positive to add, negative to subtract
----@return boolean success
-function action.adjust_money(amount) end
-
---- Add or subtract from emperor's personal savings
----@param amount integer
----@return boolean success
-function action.adjust_savings(amount) end
-
---- Adjust or set city health
----@param amount integer Health value
----@param hard_set? boolean If true, sets health to amount; if false/nil, adjusts by amount
----@return boolean success
-function action.adjust_city_health(amount, hard_set) end
-
---- Adjust or set Rome's wages
----@param amount integer Wage value
----@param hard_set? boolean If true, sets wages to amount; if false/nil, adjusts by amount
----@return boolean success
-function action.adjust_rome_wages(amount, hard_set) end
-
---- Trigger a gladiator revolt in the city
----@return boolean success
-function action.gladiator_revolt() end
-
---- Allow or disallow a building type
----@param building_id integer Building type (see BUILDING constants)
----@param allowed boolean True to allow, false to disallow
----@return boolean success
-function action.change_allowed_building(building_id, allowed) end
-
---- Change a city rating (prosperity or peace)
----@param rating_type integer 0=prosperity, 1=peace
----@param value integer Rating value
----@param hard_set? boolean If true, sets rating; if false/nil, adjusts by value
----@return boolean success
-function action.change_city_rating(rating_type, value, hard_set) end
-
---- Enable or disable production of a resource
----@param resource_type integer Resource id
----@param enabled boolean True to enable, false to disable
----@return boolean success
-function action.change_resource_produced(resource_type, enabled) end
-
---- Add or remove resource stockpiles
----@param resource_type integer Resource id
----@param amount integer Positive to add, negative to remove
----@param storage_type? integer 0=all, 1=granaries, 2=warehouses (default 0)
----@param respect_settings? boolean Respect storage limits (default false)
----@return boolean success
-function action.change_resource_stockpiles(resource_type, amount, storage_type, respect_settings) end
-
---- Send a predefined standard message (see MESSAGE constants)
----@param text_id integer Message type id
----@return boolean success
-function action.send_standard_message(text_id) end
-
---- Show a custom scenario message
----@param message_id integer Custom message id
----@return boolean success
-function action.show_custom_message(message_id) end
-
---- Set the city tax rate
----@param rate integer Tax rate percentage
----@return boolean success
-function action.tax_rate_set(rate) end
-
---- Trigger a blessing from a god
----@param god_id integer God id (1=Ceres, 2=Neptune, 3=Mercury, 4=Mars, 5=Venus)
----@return boolean success
-function action.cause_blessing(god_id) end
-
---- Trigger a minor curse from a god
----@param god_id integer God id (1=Ceres, 2=Neptune, 3=Mercury, 4=Mars, 5=Venus)
----@return boolean success
-function action.cause_minor_curse(god_id) end
-
---- Trigger a major curse from a god
----@param god_id integer God id (1=Ceres, 2=Neptune, 3=Mercury, 4=Mars, 5=Venus)
----@return boolean success
-function action.cause_major_curse(god_id) end
-
---- Change the map climate
----@param climate_type integer See CLIMATE constants (0=central, 1=northern, 2=desert)
----@return boolean success
-function action.change_climate(climate_type) end
-
---- Change a god's sentiment/happiness
----@param god_id integer God id (1=Ceres, 2=Neptune, 3=Mercury, 4=Mars, 5=Venus)
----@param amount integer Sentiment value
----@param hard_set? boolean If true, sets sentiment; if false/nil, adjusts by amount
----@return boolean success
-function action.god_sentiment_change(god_id, amount, hard_set) end
-
---- Change population sentiment/happiness
----@param amount integer Sentiment value
----@param hard_set? boolean If true, sets sentiment; if false/nil, adjusts by amount
----@return boolean success
-function action.pop_sentiment_change(amount, hard_set) end
-
---- Force a scenario victory
----@return boolean success
-function action.win() end
-
---- Force a scenario defeat
----@return boolean success
-function action.lose() end
-
---- Change the player's rank
----@param rank integer New rank value
----@return boolean success
-function action.change_rank(rank) end
-
---- Change production rate for a resource
----@param resource_type integer Resource id
----@param rate integer Production rate per month
----@param hard_set? boolean If true, sets rate; if false/nil, adjusts by rate
----@return boolean success
-function action.change_production_rate(resource_type, rate, hard_set) end
-
---- Trigger an immediate invasion
----@param attack_type integer Type of invasion/attack
----@param size integer Number of enemy units
----@param invasion_point? integer Map invasion point (default 0)
----@param target_type? integer Target type (default 0)
----@param enemy_id? integer Enemy identifier (default 0)
----@return boolean success
-function action.invasion(attack_type, size, invasion_point, target_type, enemy_id) end
-
---- Force collapse of buildings in an area
----@param grid_offset1 integer Corner 1 of area
----@param grid_offset2 integer Corner 2 of area
----@param building_type? integer Building type to collapse (default 0 = any)
----@param destroy_all? boolean If true, destroys all buildings regardless of type
----@return boolean success
-function action.building_force_collapse(grid_offset1, grid_offset2, building_type, destroy_all) end
-
---- Adjust a resource's trade price
----@param resource_type integer Resource id
----@param amount integer Price adjustment
----@param show_message? boolean Show price change message (default false)
----@return boolean success
-function action.trade_adjust_price(resource_type, amount, show_message) end
-
---- Set a resource's trade price (buy and sell)
----@param resource_type integer Resource id
----@param price integer New price
----@return boolean success
-function action.trade_set_price(resource_type, price) end
-
---- Set a resource's buy price only
----@param resource_type integer Resource id
----@param price integer New buy price
----@return boolean success
-function action.trade_set_buy_price(resource_type, price) end
-
---- Set a resource's sell price only
----@param resource_type integer Resource id
----@param price integer New sell price
----@return boolean success
-function action.trade_set_sell_price(resource_type, price) end
-
---- Open a trade route
----@param route_id integer Trade route id
----@param apply_cost? boolean Apply opening cost (default false)
----@return boolean success
-function action.trade_route_set_open(route_id, apply_cost) end
-
---- Adjust trade route amount for a resource
----@param route_id integer Trade route id
----@param resource_type integer Resource id
----@param amount integer Amount adjustment
----@return boolean success
-function action.trade_adjust_route_amount(route_id, resource_type, amount) end
-
---- Add a new resource to a trade route
----@param route_id integer Trade route id
----@param resource_type integer Resource id
----@return boolean success
-function action.trade_route_add_resource(route_id, resource_type) end
-
---- Adjust the opening price of a trade route
----@param route_id integer Trade route id
----@param amount integer Price adjustment
----@return boolean success
-function action.trade_adjust_route_open_price(route_id, amount) end
-
---- Cause land trade problems
----@return boolean success
-function action.trade_problem_land() end
-
---- Cause sea trade problems
----@return boolean success
-function action.trade_problem_sea() end
-
---- Lock a trade route
----@param route_id integer Trade route id
----@return boolean success
-function action.lock_trade_route(route_id) end
-
---- Convert a future trade city on the empire map
----@param city_id integer Empire city id
----@return boolean success
-function action.empire_map_convert_future_trade_city(city_id) end
-
---- Start a request immediately
----@param request_id integer Request id
----@return boolean success
-function action.request_immediately_start(request_id) end
-
-----------------------------------------------------------------
--- condition.*  –  Evaluate built-in scenario conditions
--- All functions return boolean. Use COMPARE constants for comparison parameter.
-----------------------------------------------------------------
-
----@class condition
-condition = {}
-
---- Check if enough game time has passed
----@param comparison integer COMPARE constant
----@param months integer Total months to compare against
----@return boolean met
-function condition.time_passed(comparison, months) end
-
---- Check the current difficulty setting
----@param comparison integer COMPARE constant
----@param value integer Difficulty value (0=very easy, 1=easy, 2=normal, 3=hard, 4=very hard)
----@return boolean met
-function condition.difficulty(comparison, value) end
-
---- Check treasury balance
----@param comparison integer COMPARE constant
----@param value integer Amount of denarii
----@return boolean met
-function condition.money(comparison, value) end
-
---- Check emperor's personal savings
----@param comparison integer COMPARE constant
----@param value integer Amount of denarii
----@return boolean met
-function condition.savings(comparison, value) end
-
---- Check Caesar's favor rating
----@param comparison integer COMPARE constant
----@param value integer Favor value
----@return boolean met
-function condition.favor(comparison, value) end
-
---- Check prosperity rating
----@param comparison integer COMPARE constant
----@param value integer Prosperity value
----@return boolean met
-function condition.prosperity(comparison, value) end
-
---- Check culture rating
----@param comparison integer COMPARE constant
----@param value integer Culture value
----@return boolean met
-function condition.culture(comparison, value) end
-
---- Check peace rating
----@param comparison integer COMPARE constant
----@param value integer Peace value
----@return boolean met
-function condition.peace(comparison, value) end
-
---- Check city health value
----@param comparison integer COMPARE constant
----@param value integer Health value
----@return boolean met
-function condition.city_health(comparison, value) end
-
---- Check Rome's wages
----@param comparison integer COMPARE constant
----@param value integer Wage value
----@return boolean met
-function condition.rome_wages(comparison, value) end
-
---- Check current tax rate
----@param comparison integer COMPARE constant
----@param value integer Tax rate percentage
----@return boolean met
-function condition.tax_rate(comparison, value) end
-
---- Check city population
----@param comparison integer COMPARE constant
----@param value integer Population value
----@param pop_class? integer POP_CLASS constant (default POP_CLASS.ALL)
----@return boolean met
-function condition.city_population(comparison, value, pop_class) end
-
---- Check unemployment
----@param use_percentage boolean If true, compares percentage; if false, compares absolute count
----@param comparison integer COMPARE constant
----@param value integer Unemployment value
----@return boolean met
-function condition.unemployment(use_percentage, comparison, value) end
-
---- Check trade sell price of a resource
----@param resource_type integer Resource id
----@param comparison integer COMPARE constant
----@param value integer Price value
----@return boolean met
-function condition.trade_sell_price(resource_type, comparison, value) end
-
---- Check count of active (working) buildings of a type
----@param comparison integer COMPARE constant
----@param value integer Count to compare against
----@param building_type integer Building type (see BUILDING constants)
----@return boolean met
-function condition.building_count_active(comparison, value, building_type) end
-
---- Check count of any buildings of a type (including non-working)
----@param comparison integer COMPARE constant
----@param value integer Count to compare against
----@param building_type integer Building type (see BUILDING constants)
----@return boolean met
-function condition.building_count_any(comparison, value, building_type) end
-
---- Check count of buildings of a type within an area
----@param grid_offset1 integer Corner 1 of area
----@param grid_offset2 integer Corner 2 of area
----@param building_type integer Building type
----@param comparison integer COMPARE constant
----@param value integer Count to compare against
----@return boolean met
-function condition.building_count_area(grid_offset1, grid_offset2, building_type, comparison, value) end
-
---- Check count of own troops
----@param comparison integer COMPARE constant
----@param value integer Soldier count
----@param in_city_only? boolean Only count soldiers in city (default false)
----@return boolean met
-function condition.count_own_troops(comparison, value, in_city_only) end
-
---- Check a custom variable against a value
----@param variable_id integer Custom variable id
----@param comparison integer COMPARE constant
----@param value integer Value to compare against
----@return boolean met
-function condition.custom_variable_check(variable_id, comparison, value) end
-
---- Check if a request is ongoing
----@param request_id integer Request id
----@param check_for_ongoing boolean If true, checks request IS ongoing; if false, checks it is NOT ongoing
----@return boolean met
-function condition.request_is_ongoing(request_id, check_for_ongoing) end
-
---- Check if a trade route is open
----@param route_id integer Trade route id
----@param check_for_open boolean If true, checks route IS open; if false, checks it is NOT open
----@return boolean met
-function condition.trade_route_open(route_id, check_for_open) end
-
---- Check trade route opening price
----@param route_id integer Trade route id
----@param comparison integer COMPARE constant
----@param value integer Price value
----@return boolean met
-function condition.trade_route_price(route_id, comparison, value) end
-
---- Check amount of a resource stored
----@param resource_type integer Resource id
----@param comparison integer COMPARE constant
----@param value integer Amount to compare against
----@param storage_type? integer 0=all, 1=granaries, 2=warehouses (default 0)
----@return boolean met
-function condition.resource_stored_count(resource_type, comparison, value, storage_type) end
-
---- Check available storage space for a resource
----@param resource_type integer Resource id
----@param comparison integer COMPARE constant
----@param value integer Space to compare against
----@param storage_type? integer 0=all, 1=granaries, 2=warehouses (default 0)
----@return boolean met
-function condition.resource_storage_available(resource_type, comparison, value, storage_type) end
-
---- Check count of terrain tiles in an area
----@param grid_offset1 integer Corner 1 of area
----@param grid_offset2 integer Corner 2 of area
----@param terrain_type integer Terrain flag
----@param comparison integer COMPARE constant
----@param value integer Count to compare against
----@return boolean met
-function condition.terrain_in_area(grid_offset1, grid_offset2, terrain_type, comparison, value) end
-
-----------------------------------------------------------------
--- Constants: Comparison types (for condition.* functions)
-----------------------------------------------------------------
-
----@enum COMPARE
-COMPARE = {
-    EQUAL         = 1,
-    EQUAL_OR_LESS = 2,
-    EQUAL_OR_MORE = 3,
-    NOT_EQUAL     = 4,
-    LESS_THAN     = 5,
-    GREATER_THAN  = 6,
-}
-
-----------------------------------------------------------------
 -- Constants: Population class (for condition.city_population)
 ----------------------------------------------------------------
 
@@ -673,6 +280,15 @@ CLIMATE = {
 ----------------------------------------------------------------
 -- Constants: Building types
 ----------------------------------------------------------------
+
+---@enum GODS
+GODS = {
+    CERES = 1,
+    NEPTUNE = 2,
+    MERCURY = 3,
+    MARS = 4,
+    VENUS = 5,
+}
 
 ---@enum BUILDING
 BUILDING = {
@@ -864,6 +480,38 @@ BUILDING = {
 }
 
 ----------------------------------------------------------------
+-- Constants: Resource types
+----------------------------------------------------------------
+
+---@enum RESOURCE
+RESOURCE = {
+    NONE       = 0,
+    WHEAT      = 1,
+    VEGETABLES = 2,
+    FRUIT      = 3,
+    MEAT       = 4,
+    FISH       = 5,
+    CLAY       = 6,
+    TIMBER     = 7,
+    OLIVES     = 8,
+    VINES      = 9,
+    IRON       = 10,
+    MARBLE     = 11,
+    GOLD       = 12,
+    SAND       = 13,
+    STONE      = 14,
+    POTTERY    = 15,
+    FURNITURE  = 16,
+    OIL        = 17,
+    WINE       = 18,
+    WEAPONS    = 19,
+    CONCRETE   = 20,
+    BRICKS     = 21,
+    DENARII    = 22,
+    TROOPS     = 23,
+}
+
+----------------------------------------------------------------
 -- Constants: City message types (for ui.post_message)
 ----------------------------------------------------------------
 
@@ -999,94 +647,6 @@ MESSAGE = {
 }
 
 ----------------------------------------------------------------
--- Constants: Scenario event condition types
-----------------------------------------------------------------
-
----@enum CONDITION
-CONDITION = {
-    TIME_PASSED                = 1,
-    DIFFICULTY                 = 2,
-    MONEY                      = 3,
-    SAVINGS                    = 4,
-    STATS_FAVOR                = 5,
-    STATS_PROSPERITY           = 6,
-    STATS_CULTURE              = 7,
-    STATS_PEACE                = 8,
-    TRADE_SELL_PRICE           = 9,
-    POPS_UNEMPLOYMENT          = 10,
-    ROME_WAGES                 = 11,
-    CITY_POPULATION            = 12,
-    BUILDING_COUNT_ACTIVE      = 13,
-    STATS_CITY_HEALTH          = 14,
-    COUNT_OWN_TROOPS           = 15,
-    REQUEST_IS_ONGOING         = 16,
-    TAX_RATE                   = 17,
-    BUILDING_COUNT_ANY         = 18,
-    CUSTOM_VARIABLE_CHECK      = 19,
-    TRADE_ROUTE_OPEN           = 20,
-    TRADE_ROUTE_PRICE          = 21,
-    RESOURCE_STORED_COUNT      = 22,
-    RESOURCE_STORAGE_AVAILABLE = 23,
-    BUILDING_COUNT_AREA        = 24,
-    CHECK_FORMULA              = 25,
-    TERRAIN_IN_AREA            = 26,
-    LUA_CUSTOM                 = 27,
-}
-
-----------------------------------------------------------------
--- Constants: Scenario event action types
-----------------------------------------------------------------
-
----@enum ACTION
-ACTION = {
-    ADJUST_FAVOR                          = 1,
-    ADJUST_MONEY                          = 2,
-    ADJUST_SAVINGS                        = 3,
-    TRADE_ADJUST_PRICE                    = 4,
-    TRADE_PROBLEM_LAND                    = 5,
-    TRADE_PROBLEM_SEA                     = 6,
-    TRADE_ADJUST_ROUTE_AMOUNT             = 7,
-    ADJUST_ROME_WAGES                     = 8,
-    GLADIATOR_REVOLT                      = 9,
-    CHANGE_RESOURCE_PRODUCED              = 10,
-    CHANGE_ALLOWED_BUILDINGS              = 11,
-    SEND_STANDARD_MESSAGE                 = 12,
-    ADJUST_CITY_HEALTH                    = 13,
-    TRADE_SET_PRICE                       = 14,
-    EMPIRE_MAP_CONVERT_FUTURE_TRADE_CITY  = 15,
-    REQUEST_IMMEDIATELY_START             = 16,
-    SHOW_CUSTOM_MESSAGE                   = 17,
-    TAX_RATE_SET                          = 18,
-    CHANGE_CUSTOM_VARIABLE                = 19,
-    TRADE_ADJUST_ROUTE_OPEN_PRICE         = 20,
-    CHANGE_CITY_RATING                    = 21,
-    CHANGE_RESOURCE_STOCKPILES            = 22,
-    TRADE_ROUTE_SET_OPEN                  = 23,
-    TRADE_ROUTE_ADD_NEW_RESOURCE          = 24,
-    TRADE_SET_BUY_PRICE_ONLY              = 25,
-    TRADE_SET_SELL_PRICE_ONLY             = 26,
-    BUILDING_FORCE_COLLAPSE               = 27,
-    INVASION_IMMEDIATE                    = 28,
-    CAUSE_BLESSING                        = 29,
-    CAUSE_MINOR_CURSE                     = 30,
-    CAUSE_MAJOR_CURSE                     = 31,
-    CHANGE_CLIMATE                        = 32,
-    CHANGE_TERRAIN                        = 33,
-    CHANGE_CUSTOM_VARIABLE_VISIBILITY     = 34,
-    CUSTOM_VARIABLE_FORMULA               = 35,
-    CUSTOM_VARIABLE_CITY_PROPERTY         = 36,
-    GOD_SENTIMENT_CHANGE                  = 37,
-    POP_SENTIMENT_CHANGE                  = 38,
-    WIN                                   = 39,
-    LOSE                                  = 40,
-    CHANGE_RANK                           = 41,
-    CHANGE_MODEL_DATA                     = 42,
-    CHANGE_PRODUCTION_RATE                = 43,
-    LOCK_TRADE_ROUTE                      = 44,
-    LUA_CUSTOM                            = 45,
-}
-
-----------------------------------------------------------------
 -- Hooks  –  Define these functions in your script
 ----------------------------------------------------------------
 
@@ -1125,3 +685,12 @@ function on_victory() end
 
 --- Called when the player loses the scenario
 function on_defeat() end
+
+---@enum DIFFICULTY
+DIFFICULTY = {
+    VERY_EASY = 0,
+    EASY      = 1,
+    NORMAL    = 2,
+    HARD      = 3,
+    VERY_HARD = 4,
+}
