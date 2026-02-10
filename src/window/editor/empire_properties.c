@@ -11,6 +11,7 @@
 #include "input/mouse.h"
 #include "window/hotkey_config.h"
 #include "window/config.h"
+#include "window/file_dialog.h"
 
 static struct {
     unsigned int focus_button_id;
@@ -70,7 +71,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
 
 static void button_select_image(const generic_button *button)
 {
-     
+     window_file_dialog_show(FILE_TYPE_EMPIRE_IMAGE, FILE_DIALOG_LOAD);
 }
 
 static void button_empire_settings(const generic_button *button)

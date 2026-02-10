@@ -338,7 +338,7 @@ static void draw_background(void)
     window_draw_underlying_window();
     if (*data.selected_file) {
         const char *filename = dir_get_file_at_location(data.selected_file, data.file_data->location);
-        if (filename) {
+        if (filename && data.type != FILE_TYPE_EMPIRE_IMAGE) {
             if (data.type == FILE_TYPE_SAVED_GAME) {
                 data.savegame_info_status = game_file_io_read_saved_game_info(filename, 0, &data.info);
             } else {
@@ -709,7 +709,7 @@ static void button_ok_cancel(int is_ok, int param2)
             int result = filename && file_exists(filename, MAY_BE_LOCALIZED);
             if (result) {
                 const image *img = image_get(assets_get_external_image(filename, 1));
-                empire_set_custom_map(filename, img->x_offset, img->y_offset, img->width, img->height);
+                empire_set_custom_map(data.selected_file, img->x_offset, img->y_offset, img->width, img->height);
                 window_empire_properties_show();
             } else {
                 window_plain_message_dialog_show(TR_EDITOR_UNABLE_TO_LOAD_MODEL_DATA_TITLE, TR_EDITOR_CHECK_LOG_MESSAGE, 1);
