@@ -51,18 +51,18 @@ static void draw_foreground(void)
         button_border_draw(generic_buttons[i].x, generic_buttons[i].y, generic_buttons[i].width,
             generic_buttons[i].height, data.focus_button_id == i + 1);
     }
-    
+
     graphics_reset_dialog();
 }
 
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
-    
+
     if (generic_buttons_handle_mouse(m_dialog, 0, 0, generic_buttons, NUM_GENERIC_BUTTONS, &data.focus_button_id)) {
         return;
     }
-    
+
     if (input_go_back_requested(m, h)) {
         window_go_back();
     }

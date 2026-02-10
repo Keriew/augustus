@@ -1992,7 +1992,9 @@ static translation_string all_strings[] = {
     {TR_EMPIRE_ORNAMENT_COLOSSUS_RHODES, "Colossus of Rhodes"},
     {TR_EMPIRE_ORNAMENT_THE_TEMPLE, "The Temple"},
     {TR_EMPIRE_BATTLE_PARENT, "Of path"},
-    {TR_EDITOR_EMPIRE_PROPERTIES, "Empire Properties"}
+    {TR_EDITOR_EMPIRE_PROPERTIES, "Empire Properties"},
+    {TR_EDITOR_IMAGE_IMPORT, "Import image"},
+    {TR_EDITOR_UNABLE_TO_SET_EMPIRE_IMAGE, "Unable to set empire image"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

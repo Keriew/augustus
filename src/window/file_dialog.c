@@ -1,17 +1,20 @@
 #include "file_dialog.h"
 
+#include "assets/assets.h"
 #include "core/calc.h"
 #include "core/config.h"
 #include "core/dir.h"
 #include "core/encoding.h"
 #include "core/file.h"
+#include "core/image.h"
 #include "core/image_group.h"
 #include "core/lang.h"
 #include "core/log.h"
 #include "core/string.h"
 #include "editor/empire.h"
-#include "empire/import_xml.h"
+#include "empire/empire.h"
 #include "empire/export_xml.h"
+#include "empire/import_xml.h"
 #include "game/file.h"
 #include "game/file_editor.h"
 #include "game/file_io.h"
@@ -38,6 +41,7 @@
 #include "widget/input_box.h"
 #include "window/city.h"
 #include "window/editor/custom_messages.h"
+#include "window/editor/empire_properties.h"
 #include "window/editor/map.h"
 #include "window/editor/model_data.h"
 #include "window/editor/scenario_events.h"
@@ -132,6 +136,7 @@ static file_type_data empire_data = { "xml", PATH_LOCATION_EDITOR_CUSTOM_EMPIRES
 static file_type_data scenario_event_data = { "xml", PATH_LOCATION_EDITOR_CUSTOM_EVENTS };
 static file_type_data custom_messages_data = { "xml", PATH_LOCATION_EDITOR_CUSTOM_MESSAGES };
 static file_type_data model_data = { "xml", PATH_LOCATION_EDITOR_MODEL_DATA };
+static file_type_data image_data = { "png", PATH_LOCATION_COMMUNITY_IMAGE };
 
 static int compare_name(const void *va, const void *vb)
 {
@@ -218,6 +223,8 @@ static void init(file_type type, file_dialog_type dialog_type)
         data.file_data = &custom_messages_data;
     } else if (type == FILE_TYPE_MODEL_DATA) {
         data.file_data = &model_data;
+    } else if (type == FILE_TYPE_EMPIRE_IMAGE) {
+        data.file_data = &image_data;
     } else {
         data.file_data = &saved_game_data_expanded;
     }
@@ -255,6 +262,8 @@ static void init(file_type type, file_dialog_type dialog_type)
             data.file_list = dir_find_files_with_extension_at_location(custom_messages_data.location, custom_messages_data.extension);
         } else if (type == FILE_TYPE_MODEL_DATA) {
             data.file_list = dir_find_files_with_extension_at_location(model_data.location, model_data.extension);
+        } else if (type == FILE_TYPE_EMPIRE_IMAGE) {
+            data.file_list = dir_find_files_with_extension_at_location(image_data.location, image_data.extension);
         } else {
             data.file_list = dir_find_files_with_extension_at_location(saved_game_data.location, saved_game_data.extension);
             data.file_list = dir_append_files_with_extension(saved_game_data_expanded.extension);
@@ -388,7 +397,9 @@ static void draw_foreground(void)
             if (data.dialog_type == FILE_DIALOG_SAVE) {
                 message_id = TR_EDITOR_MODEL_DATA_EXPORT_FULL;
             }
-            // TODO Something is missing here...
+            lang_text_draw_centered(CUSTOM_TRANSLATION, message_id, 32, 14, 554, FONT_LARGE_BLACK);
+        } else if (data.type == FILE_TYPE_EMPIRE_IMAGE) {
+            lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_IMAGE_IMPORT, 32, 14, 554, FONT_LARGE_BLACK);
         } else {
             int text_id = data.dialog_type + (data.type == FILE_TYPE_SCENARIO ? 3 : 0);
             lang_text_draw_centered(43, text_id, 32, 14, 554, FONT_LARGE_BLACK);
@@ -409,8 +420,8 @@ static void draw_foreground(void)
         );
 
         // Saved game info
-        if (*data.selected_file && data.type != FILE_TYPE_EMPIRE && data.type != FILE_TYPE_SCENARIO_EVENTS
-            && data.type != FILE_TYPE_CUSTOM_MESSAGES && data.type != FILE_TYPE_MODEL_DATA) {
+        if (*data.selected_file && data.type != FILE_TYPE_EMPIRE && data.type != FILE_TYPE_SCENARIO_EVENTS &&
+            data.type != FILE_TYPE_CUSTOM_MESSAGES && data.type != FILE_TYPE_MODEL_DATA && data.type != FILE_TYPE_EMPIRE_IMAGE) {
             if (data.savegame_info_status == SAVEGAME_STATUS_OK) {
                 if (data.dialog_type != FILE_DIALOG_SAVE) {
                     if (text_get_width(data.typed_name, FONT_NORMAL_BLACK) > 246) {
@@ -433,6 +444,8 @@ static void draw_foreground(void)
                 } else {
                     widget_minimap_draw(352, 80, 266, 352);
                 }
+            } else if (*data.selected_file && data.type == FILE_TYPE_EMPIRE_IMAGE) {
+            
             } else {
                 if (data.dialog_type == FILE_DIALOG_SAVE) {
                     if (*data.typed_name) {
@@ -688,6 +701,16 @@ static void button_ok_cancel(int is_ok, int param2)
             int result = scenario_model_xml_parse_file(filename);
             if (result) {
                 window_model_data_show();
+            } else {
+                window_plain_message_dialog_show(TR_EDITOR_UNABLE_TO_LOAD_MODEL_DATA_TITLE, TR_EDITOR_CHECK_LOG_MESSAGE, 1);
+                return;
+            }
+        } else if (data.type == FILE_TYPE_EMPIRE_IMAGE) {
+            int result = filename && file_exists(filename, MAY_BE_LOCALIZED);
+            if (result) {
+                const image *img = image_get(assets_get_external_image(filename, 1));
+                empire_set_custom_map(filename, img->x_offset, img->y_offset, img->width, img->height);
+                window_empire_properties_show();
             } else {
                 window_plain_message_dialog_show(TR_EDITOR_UNABLE_TO_LOAD_MODEL_DATA_TITLE, TR_EDITOR_CHECK_LOG_MESSAGE, 1);
                 return;
