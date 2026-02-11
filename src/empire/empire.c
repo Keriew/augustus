@@ -85,6 +85,10 @@ static void set_image_id(const char *path)
 
 void empire_set_custom_map(const char *path, int offset_x, int offset_y, int width, int height)
 {
+    char log_message[196];
+    snprintf(log_message, 196, "Loading empire background image %s with x: %i, y: %i, width: %i, height: %i",
+        path, offset_x, offset_y, width, height);
+    log_info(log_message, NULL, 0);
     set_image_id(path);
     if (offset_x < 0) {
         offset_x = 0;

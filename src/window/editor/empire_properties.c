@@ -11,6 +11,7 @@
 #include "input/mouse.h"
 #include "window/hotkey_config.h"
 #include "window/config.h"
+#include "window/editor/empire.h"
 #include "window/file_dialog.h"
 
 static struct {
@@ -65,7 +66,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 
     if (input_go_back_requested(m, h)) {
-        window_go_back();
+        window_editor_empire_show();
     }
 }
 

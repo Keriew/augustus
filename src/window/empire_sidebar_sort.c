@@ -19,7 +19,6 @@
 #include <string.h>
 
 #define NO_POSITION ((unsigned int) -1)
-#define BLOCK_SIZE 16
 #define WIDTH_BORDER 16
 
 // Forward declaration of sidebar_city_entry structure
