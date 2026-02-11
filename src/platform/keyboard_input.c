@@ -1,5 +1,6 @@
 #include "keyboard_input.h"
 
+#include "core/terminal.h"
 #include "game/cheats.h"
 #include "game/system.h"
 #include "input/hotkey.h"
@@ -228,6 +229,40 @@ static key_modifier_type get_modifier(int mod)
 
 void platform_handle_key_down(SDL_KeyboardEvent *event)
 {
+    // Quake terminal: backtick toggles, block all other input when active
+    if (event->keysym.scancode == SDL_SCANCODE_GRAVE && !(event->keysym.mod & (KMOD_CTRL | KMOD_ALT | KMOD_GUI))) {
+        terminal_toggle();
+        return;
+    }
+    if (terminal_is_active()) {
+        switch (event->keysym.scancode) {
+            case SDL_SCANCODE_PAGEUP:
+                terminal_scroll_up();
+                break;
+            case SDL_SCANCODE_PAGEDOWN:
+                terminal_scroll_down();
+                break;
+            case SDL_SCANCODE_ESCAPE:
+                terminal_toggle();
+                break;
+            case SDL_SCANCODE_RETURN:
+            case SDL_SCANCODE_KP_ENTER:
+                terminal_submit();
+                break;
+            case SDL_SCANCODE_BACKSPACE:
+            case SDL_SCANCODE_DELETE:
+            case SDL_SCANCODE_LEFT:
+            case SDL_SCANCODE_RIGHT:
+            case SDL_SCANCODE_HOME:
+            case SDL_SCANCODE_END:
+                terminal_handle_key_down(event->keysym.scancode, event->keysym.sym, event->keysym.mod);
+                break;
+            default:
+                break;
+        }
+        return;
+    }
+
     // handle keyboard input keys
     switch (event->keysym.sym) {
         case SDLK_RETURN:
@@ -357,6 +392,10 @@ void platform_handle_editing_text(SDL_TextEditingEvent *event)
 
 void platform_handle_text(SDL_TextInputEvent *event)
 {
+    if (terminal_is_active()) {
+        terminal_handle_text(event->text);
+        return;
+    }
     keyboard_text(event->text);
 }
 

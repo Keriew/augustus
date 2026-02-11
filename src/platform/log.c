@@ -1,4 +1,5 @@
 #include "core/log.h"
+#include "core/terminal.h"
 #include "SDL.h"
 
 #include <stdio.h>
@@ -62,6 +63,7 @@ void log_repeated_messages(void)
 void log_info(const char *msg, const char *param_str, int param_int)
 {
     build_message(msg, param_str, param_int);
+    terminal_add_line(log_buffer);
     if (!count_archived_message()) {
         SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", log_buffer);
     }
@@ -70,6 +72,7 @@ void log_info(const char *msg, const char *param_str, int param_int)
 void log_error(const char *msg, const char *param_str, int param_int)
 {
     build_message(msg, param_str, param_int);
+    terminal_add_line(log_buffer);
     if (!count_archived_message()) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", log_buffer);
     }

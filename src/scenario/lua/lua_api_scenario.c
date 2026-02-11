@@ -271,6 +271,13 @@ static int l_scenario_create_event(lua_State *L)
     return 1;
 }
 
+static int l_scenario_change_climate(lua_State *L)
+{
+    int climate = (int) luaL_checkinteger(L, 1);
+    scenario_change_climate(climate);
+    return 0;
+}
+
 static int l_scenario_execute_action(lua_State *L)
 {
     scenario_action_t action = {0};
@@ -289,6 +296,7 @@ static const luaL_Reg scenario_funcs[] = {
     {"name", l_scenario_name},
     {"start_year", l_scenario_start_year},
     {"climate", l_scenario_climate},
+    {"change_climate", l_scenario_change_climate},
     {"get_variable", l_scenario_get_variable},
     {"set_variable", l_scenario_set_variable},
     {"create_variable", l_scenario_create_variable},

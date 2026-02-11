@@ -21,6 +21,10 @@ function scenario.start_year() end
 ---@return integer climate
 function scenario.climate() end
 
+--- Change the scenario climate (reloads terrain graphics)
+---@param id integer Climate id: 0=central, 1=northern, 2=desert (see CLIMATE constants)
+function scenario.change_climate(id) end
+
 --- Get a custom variable value by id or name
 ---@param id_or_name integer|string Variable id (integer) or name (string)
 ---@return integer value

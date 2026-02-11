@@ -18,7 +18,7 @@ static int l_sound_play_effect(lua_State *L)
 static int l_sound_play_music(lua_State *L)
 {
     int track = (int) luaL_checkinteger(L, 1);
-    sound_music_play_track_by_id(track);
+    // sound_music_play_track_by_id(track);
     return 0;
 }
 

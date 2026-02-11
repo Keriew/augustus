@@ -341,6 +341,7 @@ set(CORE_FILES
     ${PROJECT_SOURCE_DIR}/src/core/smacker.c
     ${PROJECT_SOURCE_DIR}/src/core/speed.c
     ${PROJECT_SOURCE_DIR}/src/core/string.c
+    ${PROJECT_SOURCE_DIR}/src/core/terminal.c
     ${PROJECT_SOURCE_DIR}/src/core/time.c
     ${PROJECT_SOURCE_DIR}/src/core/xml_parser.c
     ${PROJECT_SOURCE_DIR}/src/core/xml_exporter.c
