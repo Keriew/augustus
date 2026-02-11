@@ -12,6 +12,7 @@
 #include "game/difficulty.h"
 #include "game/time.h"
 #include "scenario/criteria.h"
+#include "scenario/lua/lua_hooks.h"
 #include "scenario/property.h"
 
 #define MONUMENT_CULTURE_BONUS 6
@@ -119,17 +120,29 @@ int city_ratings_peace_num_rioters(void)
 
 void city_ratings_change_favor(int amount)
 {
+    int old = city_data.ratings.favor;
     city_data.ratings.favor = calc_bound(city_data.ratings.favor + amount, 0, 100);
+    if (city_data.ratings.favor != old) {
+        scenario_lua_hook_on_rating_changed(0, old, city_data.ratings.favor);
+    }
 }
 
 void city_ratings_change_peace(int amount)
 {
+    int old = city_data.ratings.peace;
     city_ratings_set_peace(city_data.ratings.peace + amount);
+    if (city_data.ratings.peace != old) {
+        scenario_lua_hook_on_rating_changed(1, old, city_data.ratings.peace);
+    }
 }
 
 void city_ratings_change_prosperity(int amount)
 {
+    int old = city_data.ratings.prosperity;
     city_ratings_set_prosperity(city_data.ratings.prosperity + amount);
+    if (city_data.ratings.prosperity != old) {
+        scenario_lua_hook_on_rating_changed(2, old, city_data.ratings.prosperity);
+    }
 }
 
 static void update_peace_explanation(void)

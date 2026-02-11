@@ -7,6 +7,7 @@
 #include "city/message.h"
 #include "core/calc.h"
 #include "game/tutorial.h"
+#include "scenario/lua/lua_hooks.h"
 
 static void update_status(void)
 {
@@ -65,6 +66,9 @@ static void update_status(void)
 static void create_immigrants(int num_people)
 {
     int immigrated = house_population_create_immigrants(num_people);
+    if (immigrated > 0) {
+        scenario_lua_hook_on_migration(immigrated, 1);
+    }
     city_data.migration.immigrated_today += immigrated;
     city_data.migration.newcomers += city_data.migration.immigrated_today;
     if (immigrated == 0) {
@@ -74,7 +78,11 @@ static void create_immigrants(int num_people)
 
 static void create_emigrants(int num_people)
 {
-    city_data.migration.emigrated_today += house_population_create_emigrants(num_people);
+    int emigrated = house_population_create_emigrants(num_people);
+    if (emigrated > 0) {
+        scenario_lua_hook_on_migration(emigrated, -1);
+    }
+    city_data.migration.emigrated_today += emigrated;
 }
 
 static void create_migrants(void)

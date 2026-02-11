@@ -4,6 +4,7 @@
 #include "city/victory.h"
 #include "game/settings.h"
 #include "game/time.h"
+#include "scenario/lua/lua_state.h"
 
 static int l_game_year(lua_State *L)
 {
@@ -54,6 +55,12 @@ static int l_game_lose(lua_State *L)
     return 0;
 }
 
+static int l_game_api_version(lua_State *L)
+{
+    lua_pushinteger(L, LUA_API_VERSION);
+    return 1;
+}
+
 static const luaL_Reg game_funcs[] = {
     {"year", l_game_year},
     {"month", l_game_month},
@@ -63,6 +70,7 @@ static const luaL_Reg game_funcs[] = {
     {"set_speed", l_game_set_speed},
     {"win", l_game_win},
     {"lose", l_game_lose},
+    {"api_version", l_game_api_version},
     {NULL, NULL}
 };
 

@@ -20,6 +20,7 @@
 #include "game/time.h"
 #include "scenario/property.h"
 #include "scenario/invasion.h"
+#include "scenario/lua/lua_hooks.h"
 
 #define TIE 10
 
@@ -211,12 +212,18 @@ static void update_god_moods(void)
         } else if (god->happiness < 40) {
             if (god->happy_bolts > 0) {
                 god->happy_bolts -= 1;
-            } else if (god->happiness >= 20) {
-                god->wrath_bolts += 1;
-            } else if (god->happiness >= 10) {
-                god->wrath_bolts += 2;
             } else {
-                god->wrath_bolts += 5;
+                int old_wrath = god->wrath_bolts;
+                if (god->happiness >= 20) {
+                    god->wrath_bolts += 1;
+                } else if (god->happiness >= 10) {
+                    god->wrath_bolts += 2;
+                } else {
+                    god->wrath_bolts += 5;
+                }
+                if (god->wrath_bolts > old_wrath) {
+                    scenario_lua_hook_on_god_angry(god_id);
+                }
             }
         }
         if (god->wrath_bolts > 50) {

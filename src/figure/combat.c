@@ -10,6 +10,7 @@
 #include "figure/sound.h"
 #include "game/difficulty.h"
 #include "map/figure.h"
+#include "scenario/lua/lua_hooks.h"
 #include "sound/effect.h"
 
 static int is_attacking_native(const figure *f)
@@ -130,11 +131,13 @@ static void hit_opponent(figure *f)
         net_attack = 0;
     }
     opponent->damage += net_attack;
+    scenario_lua_hook_on_combat(f->type, opponent->type);
     if (opponent->damage <= max_damage) {
         figure_play_hit_sound(f->type);
     } else {
         opponent->action_state = FIGURE_ACTION_149_CORPSE;
         opponent->wait_ticks = 0;
+        scenario_lua_hook_on_figure_died(opponent->type, opponent->x, opponent->y);
         figure_play_die_sound(opponent);
         formation_update_morale_after_death(opponent_formation);
     }
