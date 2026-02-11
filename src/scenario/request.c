@@ -13,6 +13,7 @@
 #include "game/resource.h"
 #include "game/save_version.h"
 #include "game/time.h"
+#include "scenario/lua/lua_hooks.h"
 #include "game/tutorial.h"
 #include "scenario/property.h"
 
@@ -147,6 +148,7 @@ static void process_request(scenario_request *request)
                 city_message_post(1, MESSAGE_REQUEST_RECEIVED_LATE, request->id, requested_amount);
                 city_ratings_change_favor(request->favor / 2);
             }
+            scenario_lua_hook_on_request_fulfilled(request->id);
             request->state = REQUEST_STATE_RECEIVED;
             request->visible = 0;
             schedule_request_again(request);
@@ -163,6 +165,7 @@ static void process_request(scenario_request *request)
                 city_message_post(1, MESSAGE_REQUEST_REMINDER, request->id, 0);
             } else if (request->months_to_comply <= 0) {
                 city_message_post(1, MESSAGE_REQUEST_REFUSED, request->id, 0);
+                scenario_lua_hook_on_request_failed(request->id);
                 request->state = REQUEST_STATE_OVERDUE;
                 request->months_to_comply = request->extension_months_to_comply;
                 city_ratings_reduce_favor_missed_request(request->extension_disfavor);
@@ -170,6 +173,7 @@ static void process_request(scenario_request *request)
         } else if (state == REQUEST_STATE_OVERDUE) {
             if (request->months_to_comply <= 0) {
                 city_message_post(1, MESSAGE_REQUEST_REFUSED_OVERDUE, request->id, 0);
+                scenario_lua_hook_on_request_failed(request->id);
                 request->state = REQUEST_STATE_IGNORED;
                 request->visible = 0;
                 city_ratings_reduce_favor_missed_request(request->ignored_disfavor);

@@ -20,6 +20,7 @@
 #include "map/terrain.h"
 #include "scenario/data.h"
 #include "scenario/map.h"
+#include "scenario/lua/lua_hooks.h"
 #include "scenario/property.h"
 
 #include <string.h>
@@ -703,6 +704,8 @@ void scenario_invasion_start_from_action(invasion_type_enum invasion_type, int s
     if (attack_type > FORMATION_ATTACK_RANDOM) {
         attack_type = FORMATION_ATTACK_RANDOM;
     }
+
+    scenario_lua_hook_on_invasion_start(invasion_type, size);
 
     data.last_action_army_id++;
     if (data.last_action_army_id < ACTION_ARMY_ID_START || data.last_action_army_id >= MAX_ENEMY_ARMIES) {

@@ -3,133 +3,6 @@
 -- Place this file in your workspace for IDE autocomplete. Do NOT load it in scripts.
 
 ----------------------------------------------------------------
--- game.*  –  Game time and flow control
-----------------------------------------------------------------
-
----@class game
-game = {}
-
---- Get the current in-game year
----@return integer year
-function game.year() end
-
---- Get the current in-game month (0-11)
----@return integer month
-function game.month() end
-
---- Get the current in-game day (0-15)
----@return integer day
-function game.day() end
-
---- Get the current tick within the day
----@return integer tick
-function game.tick() end
-
---- Get the current game speed setting
----@return integer speed
-function game.speed() end
-
---- Set the game speed
----@param speed integer
-function game.set_speed(speed) end
-
---- Force a scenario victory
-function game.win() end
-
---- Force a scenario defeat
-function game.lose() end
-
-----------------------------------------------------------------
--- city.*  –  City stats and ratings
-----------------------------------------------------------------
-
----@class city
-city = {}
-
---- Get current city population
----@return integer population
-function city.population() end
-
---- Get current city health value
----@return integer health
-function city.health() end
-
---- Change city health by amount (positive or negative)
----@param amount integer
-function city.change_health(amount) end
-
---- Get current city sentiment (happiness)
----@return integer sentiment
-function city.sentiment() end
-
---- Change city sentiment by amount (positive or negative)
----@param amount integer
-function city.change_sentiment(amount) end
-
---- Get current culture rating
----@return integer rating
-function city.rating_culture() end
-
---- Get current prosperity rating
----@return integer rating
-function city.rating_prosperity() end
-
---- Change prosperity rating by amount (positive or negative)
----@param amount integer
-function city.change_prosperity(amount) end
-
---- Get current peace rating
----@return integer rating
-function city.rating_peace() end
-
---- Change peace rating by amount (positive or negative)
----@param amount integer
-function city.change_peace(amount) end
-
---- Get current favor rating
----@return integer rating
-function city.rating_favor() end
-
---- Change Caesar's favor by amount (positive or negative)
----@param amount integer
-function city.change_favor(amount) end
-
---- Get Rome's wages
----@return integer wages
-function city.rome_wages() end
-
---- Change Rome's wages by amount (positive or negative)
----@param amount integer
-function city.change_rome_wages(amount) end
-
---- Set Rome's wages to a specific value
----@param amount integer
-function city.set_rome_wages(amount) end
-
-----------------------------------------------------------------
--- finance.*  –  Treasury and taxes
-----------------------------------------------------------------
-
----@class finance
-finance = {}
-
---- Get current treasury balance (denarii)
----@return integer amount
-function finance.treasury() end
-
---- Add (or subtract) denarii from the treasury
----@param amount integer Positive to add, negative to subtract
-function finance.add_treasury(amount) end
-
---- Get current tax percentage
----@return integer percentage
-function finance.tax_percentage() end
-
---- Set the tax percentage
----@param percentage integer
-function finance.set_tax_percentage(percentage) end
-
-----------------------------------------------------------------
 -- scenario.*  –  Scenario properties, variables, and events
 ----------------------------------------------------------------
 
@@ -203,37 +76,6 @@ function scenario.create_event(params) end
 function scenario.execute_action(action_type, p1, p2, p3, p4, p5) end
 
 ----------------------------------------------------------------
--- map.*  –  Map queries
-----------------------------------------------------------------
-
----@class map
-map = {}
-
---- Get the map width in tiles
----@return integer width
-function map.width() end
-
---- Get the map height in tiles
----@return integer height
-function map.height() end
-
---- Get terrain flags at a grid offset
----@param grid_offset integer
----@return integer terrain_flags
-function map.terrain_at(grid_offset) end
-
---- Get the building id at a grid offset (0 if none)
----@param grid_offset integer
----@return integer building_id
-function map.building_at(grid_offset) end
-
---- Convert tile x,y to a grid offset
----@param x integer
----@param y integer
----@return integer grid_offset
-function map.grid_offset(x, y) end
-
-----------------------------------------------------------------
 -- ui.*  –  Logging and in-game messages
 ----------------------------------------------------------------
 
@@ -254,16 +96,13 @@ function ui.show_warning(text) end
 ---@param param2? integer Optional parameter 2 (default 0)
 function ui.post_message(message_type, param1, param2) end
 
-----------------------------------------------------------------
--- Constants: Population class (for condition.city_population)
-----------------------------------------------------------------
-
----@enum POP_CLASS
-POP_CLASS = {
-    ALL       = 1,
-    PATRICIAN = 2,
-    PLEBEIAN  = 3,
-    SLUMS     = 4,
+--@enum GODS
+GODS = {
+    CERES = 1,
+    NEPTUNE = 2,
+    MERCURY = 3,
+    MARS = 4,
+    VENUS = 5,
 }
 
 ----------------------------------------------------------------
@@ -275,240 +114,6 @@ CLIMATE = {
     CENTRAL  = 0,
     NORTHERN = 1,
     DESERT   = 2,
-}
-
-----------------------------------------------------------------
--- Constants: Building types
-----------------------------------------------------------------
-
----@enum GODS
-GODS = {
-    CERES = 1,
-    NEPTUNE = 2,
-    MERCURY = 3,
-    MARS = 4,
-    VENUS = 5,
-}
-
----@enum BUILDING
-BUILDING = {
-    NONE                    = 0,
-    ROAD                    = 5,
-    WALL                    = 6,
-    DRAGGABLE_RESERVOIR     = 7,
-    AQUEDUCT                = 8,
-    CLEAR_LAND              = 9,
-    HOUSE_VACANT_LOT        = 10,
-    HOUSE_SMALL_TENT        = 10,
-    HOUSE_LARGE_TENT        = 11,
-    HOUSE_SMALL_SHACK       = 12,
-    HOUSE_LARGE_SHACK       = 13,
-    HOUSE_SMALL_HOVEL       = 14,
-    HOUSE_LARGE_HOVEL       = 15,
-    HOUSE_SMALL_CASA        = 16,
-    HOUSE_LARGE_CASA        = 17,
-    HOUSE_SMALL_INSULA      = 18,
-    HOUSE_MEDIUM_INSULA     = 19,
-    HOUSE_LARGE_INSULA      = 20,
-    HOUSE_GRAND_INSULA      = 21,
-    HOUSE_SMALL_VILLA       = 22,
-    HOUSE_MEDIUM_VILLA      = 23,
-    HOUSE_LARGE_VILLA       = 24,
-    HOUSE_GRAND_VILLA       = 25,
-    HOUSE_SMALL_PALACE      = 26,
-    HOUSE_MEDIUM_PALACE     = 27,
-    HOUSE_LARGE_PALACE      = 28,
-    HOUSE_LUXURY_PALACE     = 29,
-    AMPHITHEATER            = 30,
-    THEATER                 = 31,
-    HIPPODROME              = 32,
-    COLOSSEUM               = 33,
-    GLADIATOR_SCHOOL        = 34,
-    LION_HOUSE              = 35,
-    ACTOR_COLONY            = 36,
-    CHARIOT_MAKER           = 37,
-    PLAZA                   = 38,
-    GARDENS                 = 39,
-    FORT_LEGIONARIES        = 40,
-    SMALL_STATUE            = 41,
-    MEDIUM_STATUE           = 42,
-    LARGE_STATUE            = 43,
-    FORT_JAVELIN            = 44,
-    FORT_MOUNTED            = 45,
-    DOCTOR                  = 46,
-    HOSPITAL                = 47,
-    BATHHOUSE               = 48,
-    BARBER                  = 49,
-    SCHOOL                  = 51,
-    ACADEMY                 = 52,
-    LIBRARY                 = 53,
-    PREFECTURE              = 55,
-    TRIUMPHAL_ARCH          = 56,
-    GATEHOUSE               = 58,
-    TOWER                   = 59,
-    SMALL_TEMPLE_CERES      = 60,
-    SMALL_TEMPLE_NEPTUNE    = 61,
-    SMALL_TEMPLE_MERCURY    = 62,
-    SMALL_TEMPLE_MARS       = 63,
-    SMALL_TEMPLE_VENUS      = 64,
-    LARGE_TEMPLE_CERES      = 65,
-    LARGE_TEMPLE_NEPTUNE    = 66,
-    LARGE_TEMPLE_MERCURY    = 67,
-    LARGE_TEMPLE_MARS       = 68,
-    LARGE_TEMPLE_VENUS      = 69,
-    MARKET                  = 70,
-    GRANARY                 = 71,
-    WAREHOUSE               = 72,
-    WAREHOUSE_SPACE         = 73,
-    SHIPYARD                = 74,
-    DOCK                    = 75,
-    WHARF                   = 76,
-    GOVERNORS_HOUSE         = 77,
-    GOVERNORS_VILLA         = 78,
-    GOVERNORS_PALACE        = 79,
-    MISSION_POST            = 80,
-    ENGINEERS_POST          = 81,
-    LOW_BRIDGE              = 82,
-    SHIP_BRIDGE             = 83,
-    SENATE                  = 85,
-    FORUM                   = 86,
-    NATIVE_HUT              = 88,
-    NATIVE_MEETING          = 89,
-    RESERVOIR               = 90,
-    FOUNTAIN                = 91,
-    WELL                    = 92,
-    NATIVE_CROPS            = 93,
-    MILITARY_ACADEMY        = 94,
-    BARRACKS                = 95,
-    ORACLE                  = 98,
-    BURNING_RUIN            = 99,
-    WHEAT_FARM              = 100,
-    VEGETABLE_FARM          = 101,
-    FRUIT_FARM              = 102,
-    OLIVE_FARM              = 103,
-    VINES_FARM              = 104,
-    PIG_FARM                = 105,
-    MARBLE_QUARRY           = 106,
-    IRON_MINE               = 107,
-    TIMBER_YARD             = 108,
-    CLAY_PIT                = 109,
-    WINE_WORKSHOP           = 110,
-    OIL_WORKSHOP            = 111,
-    WEAPONS_WORKSHOP        = 112,
-    FURNITURE_WORKSHOP      = 113,
-    POTTERY_WORKSHOP        = 114,
-    ROADBLOCK               = 115,
-    WORKCAMP                = 116,
-    GRAND_TEMPLE_CERES      = 117,
-    GRAND_TEMPLE_NEPTUNE    = 118,
-    GRAND_TEMPLE_MERCURY    = 119,
-    GRAND_TEMPLE_MARS       = 120,
-    GRAND_TEMPLE_VENUS      = 121,
-    SMALL_POND              = 126,
-    LARGE_POND              = 127,
-    PINE_TREE               = 128,
-    FIR_TREE                = 129,
-    OAK_TREE                = 130,
-    ELM_TREE                = 131,
-    FIG_TREE                = 132,
-    PLUM_TREE               = 133,
-    PALM_TREE               = 134,
-    DATE_TREE               = 135,
-    PAVILION_BLUE           = 144,
-    PAVILION_RED            = 145,
-    PAVILION_ORANGE         = 146,
-    PAVILION_YELLOW         = 147,
-    PAVILION_GREEN          = 148,
-    GODDESS_STATUE          = 149,
-    SENATOR_STATUE          = 150,
-    OBELISK                 = 151,
-    PANTHEON                = 152,
-    ARCHITECT_GUILD         = 153,
-    MESS_HALL               = 154,
-    LIGHTHOUSE              = 155,
-    TAVERN                  = 158,
-    GRAND_GARDEN            = 159,
-    ARENA                   = 160,
-    HORSE_STATUE            = 161,
-    DOLPHIN_FOUNTAIN        = 162,
-    HEDGE_DARK              = 163,
-    HEDGE_LIGHT             = 164,
-    LOOPED_GARDEN_WALL      = 165,
-    LEGION_STATUE           = 166,
-    DECORATIVE_COLUMN       = 167,
-    COLONNADE               = 168,
-    LARARIUM                = 169,
-    NYMPHAEUM               = 170,
-    SMALL_MAUSOLEUM         = 171,
-    LARGE_MAUSOLEUM         = 172,
-    WATCHTOWER              = 173,
-    PALISADE                = 174,
-    GARDEN_PATH             = 175,
-    CARAVANSERAI            = 176,
-    ROOFED_GARDEN_WALL      = 177,
-    ROOFED_GARDEN_WALL_GATE = 178,
-    HEDGE_GATE_DARK         = 179,
-    HEDGE_GATE_LIGHT        = 180,
-    PALISADE_GATE           = 181,
-    GLADIATOR_STATUE        = 182,
-    HIGHWAY                 = 183,
-    GOLD_MINE               = 184,
-    CITY_MINT               = 185,
-    DEPOT                   = 186,
-    SAND_PIT                = 187,
-    STONE_QUARRY            = 188,
-    CONCRETE_MAKER          = 189,
-    BRICKWORKS              = 190,
-    PANELLED_GARDEN_WALL    = 191,
-    PANELLED_GARDEN_GATE    = 192,
-    LOOPED_GARDEN_GATE      = 193,
-    SHRINE_CERES            = 194,
-    SHRINE_NEPTUNE          = 195,
-    SHRINE_MERCURY          = 196,
-    SHRINE_MARS             = 197,
-    SHRINE_VENUS            = 198,
-    OVERGROWN_GARDENS       = 201,
-    FORT_AUXILIA_INFANTRY   = 202,
-    ARMOURY                 = 203,
-    FORT_ARCHERS            = 204,
-    LATRINES                = 205,
-    NATIVE_HUT_ALT          = 206,
-    NATIVE_WATCHTOWER       = 207,
-    NATIVE_MONUMENT         = 208,
-    NATIVE_DECORATION       = 209,
-    TYPE_MAX                = 211,
-}
-
-----------------------------------------------------------------
--- Constants: Resource types
-----------------------------------------------------------------
-
----@enum RESOURCE
-RESOURCE = {
-    NONE       = 0,
-    WHEAT      = 1,
-    VEGETABLES = 2,
-    FRUIT      = 3,
-    MEAT       = 4,
-    FISH       = 5,
-    CLAY       = 6,
-    TIMBER     = 7,
-    OLIVES     = 8,
-    VINES      = 9,
-    IRON       = 10,
-    MARBLE     = 11,
-    GOLD       = 12,
-    SAND       = 13,
-    STONE      = 14,
-    POTTERY    = 15,
-    FURNITURE  = 16,
-    OIL        = 17,
-    WINE       = 18,
-    WEAPONS    = 19,
-    CONCRETE   = 20,
-    BRICKS     = 21,
-    DENARII    = 22,
-    TROOPS     = 23,
 }
 
 ----------------------------------------------------------------
@@ -685,6 +290,56 @@ function on_victory() end
 
 --- Called when the player loses the scenario
 function on_defeat() end
+
+--- Called when an invasion starts
+---@param type integer Invasion type
+---@param size integer Number of invaders
+function on_invasion_start(type, size) end
+
+--- Called when a figure dies in combat
+---@param type integer Figure type
+---@param x integer Tile x
+---@param y integer Tile y
+function on_figure_died(type, x, y) end
+
+--- Called when a trade resource is sold to a warehouse
+---@param route_id integer Trade route id
+---@param resource integer RESOURCE type constant
+---@param amount integer Amount traded (1 load)
+function on_trade_completed(route_id, resource, amount) end
+
+--- Called when a Caesar's request is fulfilled
+---@param id integer Request id
+function on_request_fulfilled(id) end
+
+--- Called when a Caesar's request is refused or ignored
+---@param id integer Request id
+function on_request_failed(id) end
+
+--- Called when a building catches fire
+---@param building_id integer
+---@param type integer BUILDING type constant
+function on_building_fire(building_id, type) end
+
+--- Called when people immigrate or emigrate
+---@param count integer Number of people
+---@param direction integer 1 = immigration, -1 = emigration
+function on_migration(count, direction) end
+
+--- Called when a city rating changes
+---@param type integer 0=favor, 1=peace, 2=prosperity
+---@param old_value integer Previous rating value
+---@param new_value integer New rating value
+function on_rating_changed(type, old_value, new_value) end
+
+--- Called when a god becomes angry (wrath bolts increase)
+---@param god_id integer God id (0=Ceres, 1=Neptune, 2=Mercury, 3=Mars, 4=Venus)
+function on_god_angry(god_id) end
+
+--- Called when combat damage is dealt
+---@param attacker_type integer Attacker figure type
+---@param defender_type integer Defender figure type
+function on_combat(attacker_type, defender_type) end
 
 ---@enum DIFFICULTY
 DIFFICULTY = {

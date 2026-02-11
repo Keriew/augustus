@@ -3,6 +3,8 @@
 
 #include "lua/lua.h"
 
+#define LUA_API_VERSION 1
+
 /**
  * Load and execute a Lua script derived from the scenario filename.
  * Replaces the .map/.mapx extension with .lua and looks for it in the scenario directory.
