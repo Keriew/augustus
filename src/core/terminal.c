@@ -17,6 +17,7 @@
 #define MAX_LINES 200
 #define MAX_LINE_LENGTH 200
 #define MAX_INPUT_LENGTH 512
+#define MAX_HISTORY 50
 #define LINE_HEIGHT 13
 #define INPUT_HEIGHT 16
 #define PADDING 4
@@ -37,11 +38,19 @@ static struct {
     char input[MAX_INPUT_LENGTH];
     int input_len;
     int cursor_pos;
+    // Command history
+    char history[MAX_HISTORY][MAX_INPUT_LENGTH];
+    int history_count;
+    int history_write;
+    int history_browse;  // -1 = not browsing
+    char saved_input[MAX_INPUT_LENGTH];
+    int saved_input_len;
 } data;
 
 void terminal_init(void)
 {
     memset(&data, 0, sizeof(data));
+    data.history_browse = -1;
 }
 
 void terminal_add_line(const char *text)
@@ -116,6 +125,15 @@ void terminal_submit(void)
     if (data.input_len == 0) {
         return;
     }
+    // Save to history
+    strncpy(data.history[data.history_write], data.input, MAX_INPUT_LENGTH - 1);
+    data.history[data.history_write][MAX_INPUT_LENGTH - 1] = '\0';
+    data.history_write = (data.history_write + 1) % MAX_HISTORY;
+    if (data.history_count < MAX_HISTORY) {
+        data.history_count++;
+    }
+    data.history_browse = -1;
+
     execute_lua(data.input);
     data.input[0] = '\0';
     data.input_len = 0;
@@ -165,8 +183,18 @@ void terminal_scroll_down(void)
 #define SCAN_DELETE 0x4C
 #define SCAN_RIGHT 0x4F
 #define SCAN_LEFT 0x50
+#define SCAN_UP 0x52
+#define SCAN_DOWN 0x51
 #define SCAN_HOME 0x4A
 #define SCAN_END 0x4D
+
+static void set_input(const char *text)
+{
+    strncpy(data.input, text, MAX_INPUT_LENGTH - 1);
+    data.input[MAX_INPUT_LENGTH - 1] = '\0';
+    data.input_len = (int)strlen(data.input);
+    data.cursor_pos = data.input_len;
+}
 
 void terminal_handle_key_down(int scancode, int sym, int mod)
 {
@@ -196,6 +224,34 @@ void terminal_handle_key_down(int scancode, int sym, int mod)
         case SCAN_LEFT:
             if (data.cursor_pos > 0) {
                 data.cursor_pos--;
+            }
+            break;
+        case SCAN_UP:
+            if (data.history_count > 0) {
+                if (data.history_browse == -1) {
+                    // Save current input before browsing
+                    strncpy(data.saved_input, data.input, MAX_INPUT_LENGTH - 1);
+                    data.saved_input[MAX_INPUT_LENGTH - 1] = '\0';
+                    data.saved_input_len = data.input_len;
+                    data.history_browse = 0;
+                } else if (data.history_browse < data.history_count - 1) {
+                    data.history_browse++;
+                }
+                int idx = (data.history_write - 1 - data.history_browse + MAX_HISTORY) % MAX_HISTORY;
+                set_input(data.history[idx]);
+            }
+            break;
+        case SCAN_DOWN:
+            if (data.history_browse >= 0) {
+                data.history_browse--;
+                if (data.history_browse < 0) {
+                    // Restore saved input
+                    set_input(data.saved_input);
+                    data.history_browse = -1;
+                } else {
+                    int idx = (data.history_write - 1 - data.history_browse + MAX_HISTORY) % MAX_HISTORY;
+                    set_input(data.history[idx]);
+                }
             }
             break;
         case SCAN_HOME:

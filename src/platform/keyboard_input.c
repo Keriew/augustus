@@ -253,6 +253,8 @@ void platform_handle_key_down(SDL_KeyboardEvent *event)
             case SDL_SCANCODE_DELETE:
             case SDL_SCANCODE_LEFT:
             case SDL_SCANCODE_RIGHT:
+            case SDL_SCANCODE_UP:
+            case SDL_SCANCODE_DOWN:
             case SDL_SCANCODE_HOME:
             case SDL_SCANCODE_END:
                 terminal_handle_key_down(event->keysym.scancode, event->keysym.sym, event->keysym.mod);
