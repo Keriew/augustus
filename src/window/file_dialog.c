@@ -13,6 +13,7 @@
 #include "core/string.h"
 #include "editor/empire.h"
 #include "empire/empire.h"
+#include "empire/object.h"
 #include "empire/export_xml.h"
 #include "empire/import_xml.h"
 #include "game/file.h"
@@ -31,9 +32,10 @@
 #include "graphics/window.h"
 #include "input/input.h"
 #include "platform/file_manager.h"
-#include "scenario/editor.h"
 #include "scenario/custom_messages_export_xml.h"
 #include "scenario/custom_messages_import_xml.h"
+#include "scenario/editor.h"
+#include "scenario/empire.h"
 #include "scenario/event/export_xml.h"
 #include "scenario/event/import_xml.h"
 #include "scenario/model_xml.h"
@@ -41,7 +43,7 @@
 #include "widget/input_box.h"
 #include "window/city.h"
 #include "window/editor/custom_messages.h"
-#include "window/editor/empire_properties.h"
+#include "window/editor/empire.h"
 #include "window/editor/map.h"
 #include "window/editor/model_data.h"
 #include "window/editor/scenario_events.h"
@@ -624,10 +626,16 @@ static void confirm_small_image(int accepted, int checked)
     if (!accepted) {
         return;
     }
+    scenario.empire.id = SCENARIO_CUSTOM_EMPIRE;
+    string_copy(string_from_ascii("\0"), (uint8_t *)scenario.empire.custom_name, 300);
+    resource_set_mapping(RESOURCE_CURRENT_VERSION);
+    empire_clear();
+    empire_object_clear();
+    empire_object_init_cities(SCENARIO_CUSTOM_EMPIRE);
     const char *filename = dir_get_file_at_location(data.selected_file, data.file_data->location);
     const image *img = image_get(assets_get_external_image(filename, 1));
     empire_set_custom_map(data.selected_file, img->x_offset, img->y_offset, img->width, img->height);
-    window_empire_properties_show();
+    window_editor_empire_show();
 }
 
 static void button_ok_cancel(int is_ok, int param2)
