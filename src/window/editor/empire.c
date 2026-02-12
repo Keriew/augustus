@@ -82,9 +82,9 @@ static generic_button generic_buttons[] = {
     {124, 48, 150, 24, button_toggle_invasions},
     {294, 48, 150, 24, button_toggle_waypoints},
     {464, 48, 150, 24, button_refresh, 0},
-    {654, 48, 150, 24, button_export_xml, 0},
-    {824, 48, 150, 24, button_import_xml, 0},
-    {994, 48, 150, 24, button_empire_properties},
+    {634, 48, 150, 24, button_export_xml, 0},
+    {794, 48, 150, 24, button_import_xml, 0},
+    {974, 48, 150, 24, button_empire_properties},
     {0, 0, 0, 24, button_icon_preview, 0},
 };
 static generic_button preview_button[] = {

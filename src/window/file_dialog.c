@@ -619,6 +619,17 @@ static void confirm_save_file(int accepted, int checked)
     snprintf(data.file_data->last_loaded_file, FILE_NAME_MAX, "%s", data.selected_file);
 }
 
+static void confirm_small_image(int accepted, int checked)
+{
+    if (!accepted) {
+        return;
+    }
+    const char *filename = dir_get_file_at_location(data.selected_file, data.file_data->location);
+    const image *img = image_get(assets_get_external_image(filename, 1));
+    empire_set_custom_map(data.selected_file, img->x_offset, img->y_offset, img->width, img->height);
+    window_empire_properties_show();
+}
+
 static void button_ok_cancel(int is_ok, int param2)
 {
     if (!is_ok) {
@@ -708,9 +719,12 @@ static void button_ok_cancel(int is_ok, int param2)
         } else if (data.type == FILE_TYPE_EMPIRE_IMAGE) {
             int result = filename && file_exists(filename, MAY_BE_LOCALIZED);
             if (result) {
-                const image *img = image_get(assets_get_external_image(filename, 1));
-                empire_set_custom_map(data.selected_file, img->x_offset, img->y_offset, img->width, img->height);
-                window_empire_properties_show();
+                if (image_get(assets_get_external_image(filename, 1))->width < 1440) {
+                    window_popup_dialog_show_confirmation(translation_for(TR_EDITOR_IMAGE_TO_SMALL),
+                        translation_for(TR_EDITOR_IMAGE_TO_SMALL_EXPLANATION), NULL, confirm_small_image);
+                } else {
+                    confirm_small_image(1, 0);
+                }
             } else {
                 window_plain_message_dialog_show(TR_EDITOR_UNABLE_TO_LOAD_MODEL_DATA_TITLE, TR_EDITOR_CHECK_LOG_MESSAGE, 1);
                 return;
