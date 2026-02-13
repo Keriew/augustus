@@ -1,6 +1,7 @@
 #include "hotkey_config.h"
 
 #include "building/type.h"
+#include "core/calc.h"
 #include "core/hotkey_config.h"
 #include "core/image_group.h"
 #include "core/lang.h"
@@ -163,6 +164,8 @@ static hotkey_widget hotkey_widgets[] = {
     {HOTKEY_EDITOR_EMPIRE_DELETE_OBJECT, TR_HOTKEY_EDITOR_EMPIRE_DELETE_OBJECT},
 };
 
+#define NUM_WIDGETS sizeof(hotkey_widgets) / sizeof(hotkey_widget)
+
 #define HOTKEY_X_OFFSET_1 290
 #define HOTKEY_X_OFFSET_2 430
 #define HOTKEY_BTN_WIDTH 140
@@ -216,6 +219,16 @@ static struct {
     unsigned int bottom_focus_button;
     hotkey_mapping mappings[HOTKEY_MAX_ITEMS][2];
 } data;
+
+int get_position_for_widget(translation_key key)
+{
+    for (int i = 0; i < NUM_WIDGETS; i++) {
+        if (hotkey_widgets[i].name_translation == key) {
+            return calc_bound(i, 0, NUM_WIDGETS);
+        }
+    }
+    return 0;
+}
 
 static void init(int position)
 {

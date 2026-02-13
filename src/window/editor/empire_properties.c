@@ -34,7 +34,7 @@ static generic_button generic_buttons[] = {
     {16, 16, 200, 30, button_select_image},
     {16, 56, 200, 30, button_default_image},
     {16, 96, 200, 30, button_empire_settings},
-    {16, 146, 200, 30, button_hotkeys},
+    {16, 136, 200, 30, button_hotkeys},
 };
 #define NUM_GENERIC_BUTTONS sizeof(generic_buttons) / sizeof(generic_button)
 
@@ -105,7 +105,7 @@ static void button_empire_settings(const generic_button *button)
 
 static void button_hotkeys(const generic_button *button)
 {
-    window_hotkey_config_show(105);
+    window_hotkey_config_show(get_position_for_widget(TR_HOTKEY_HEADER_EDITOR));
 }
 
 void window_empire_properties_show(void)
