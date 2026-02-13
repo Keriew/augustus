@@ -446,8 +446,6 @@ static void draw_foreground(void)
                 } else {
                     widget_minimap_draw(352, 80, 266, 352);
                 }
-            } else if (*data.selected_file && data.type == FILE_TYPE_EMPIRE_IMAGE) {
-            
             } else {
                 if (data.dialog_type == FILE_DIALOG_SAVE) {
                     if (*data.typed_name) {
@@ -462,6 +460,29 @@ static void draw_foreground(void)
                         TR_SAVE_DIALOG_INVALID_FILE : TR_SAVE_DIALOG_INCOMPATIBLE_VERSION;
                     text_draw_centered(translation_for(key), 362, 241, 246, FONT_LARGE_BLACK, 0);
                 }
+            }
+        } else if (*data.selected_file && data.type == FILE_TYPE_EMPIRE_IMAGE) {
+            const char *filename = dir_get_file_at_location(data.selected_file, data.file_data->location);
+            int image_id = assets_get_external_image(filename, 1);
+            const image *img = image_get(image_id);
+            
+            // Calculate scale to fit image within 266x352 box
+            float x_scale = img->width / 266.0f;
+            float y_scale = img->height / 352.0f;
+            float scale = x_scale > y_scale ? x_scale : y_scale;  // Use SMALLER ratio to fit
+            
+            if (scale <= 1.0f) {
+                // Image is smaller than box, just center it without scaling
+                int centered_x = 352 + (266 - img->width) / 2;
+                int centered_y = 80 + (352 - img->height) / 2;
+                image_draw(image_id, centered_x, centered_y, COLOR_MASK_NONE, SCALE_NONE);
+            } else {
+                // Image is larger than box, scale it down to fit
+                int scaled_width = (int)(img->width / scale);
+                int scaled_height = (int)(img->height / scale);
+                int centered_x = 352 + (266 - scaled_width) / 2;
+                int centered_y = 80 + (352 - scaled_height) / 2;
+                image_draw(image_id, centered_x, centered_y, COLOR_MASK_NONE, scale);
             }
         } else {
             text_draw_centered(translation_for(TR_SAVE_DIALOG_SELECT_FILE), 362, 246, 246, FONT_NORMAL_BLACK, 0);
