@@ -87,10 +87,10 @@ static int fill_path_with_directions(figure_path_data *path)
     if (!path->directions) {
         return 0;
     }
-    for (int i = 0; i < directions.total; i++) {
+    for (size_t i = 0; i < directions.total; i++) {
         path->directions[i] = directions.path[directions.total - i - 1];
     }
-    path->total_directions = directions.total;
+    path->total_directions = (unsigned int) directions.total;
     return 1;
 }
 

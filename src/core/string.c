@@ -3,6 +3,7 @@
 #include "core/calc.h"
 
 #include <ctype.h>
+#include <stddef.h>
 
 int string_equals(const uint8_t *a, const uint8_t *b)
 {
@@ -17,12 +18,12 @@ int string_equals(const uint8_t *a, const uint8_t *b)
     }
 }
 
-int string_equals_until(const uint8_t *a, const uint8_t *b, unsigned int limit)
+int string_equals_until(const uint8_t *a, const uint8_t *b, size_t limit)
 {
     if (!limit) {
         return 1;
     }
-    unsigned int cursor = 0;
+    size_t cursor = 0;
     while (*a && *b && *a == *b) {
         ++a;
         ++b;
@@ -38,9 +39,9 @@ int string_equals_until(const uint8_t *a, const uint8_t *b, unsigned int limit)
     }
 }
 
-uint8_t *string_copy(const uint8_t *src, uint8_t *dst, int maxlength)
+uint8_t *string_copy(const uint8_t *src, uint8_t *dst, size_t maxlength)
 {
-    int length = 0;
+    size_t length = 0;
     while (length < maxlength && *src) {
         *dst = *src;
         src++;

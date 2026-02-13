@@ -344,7 +344,8 @@ static int button_index_to_submenu_item(int index)
 
 static int handle_input_build_menu_index(const hotkeys *h)
 {
-    if (config_get(CONFIG_UI_ENABLE_BUILD_MENU_SHORTCUTS) && h->build_menu_index_num && h->build_menu_index_num <= data.num_items) {
+    if (config_get(CONFIG_UI_ENABLE_BUILD_MENU_SHORTCUTS) && h->build_menu_index_num &&
+        h->build_menu_index_num <= (int) data.num_items) {
         button_menu_item(button_index_to_submenu_item(h->build_menu_index_num - 1));
         return h->build_menu_index_num;
     }

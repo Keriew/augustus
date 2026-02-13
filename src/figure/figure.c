@@ -27,12 +27,12 @@ static struct {
     array(figure) figures;
 } data;
 
-figure *figure_get(int id)
+figure *figure_get(unsigned int id)
 {
     return array_item(data.figures, id);
 }
 
-int figure_count(void)
+unsigned int figure_count(void)
 {
     return data.figures.size;
 }
@@ -432,8 +432,8 @@ static void figure_save(buffer *buf, const figure *f)
     buffer_write_u8(buf, f->trader_id);
     buffer_write_u8(buf, f->wait_ticks_next_target);
     buffer_write_u8(buf, f->dont_draw_elevated);
-    buffer_write_i16(buf, f->target_figure_id);
-    buffer_write_i16(buf, f->targeted_by_figure_id);
+    buffer_write_u16(buf, f->target_figure_id);
+    buffer_write_u16(buf, f->targeted_by_figure_id);
     buffer_write_u16(buf, f->created_sequence);
     buffer_write_u16(buf, f->target_figure_created_sequence);
     buffer_write_u8(buf, f->figures_on_same_tile_index);
@@ -577,8 +577,8 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     f->trader_id = buffer_read_u8(buf);
     f->wait_ticks_next_target = buffer_read_u8(buf);
     f->dont_draw_elevated = buffer_read_u8(buf);
-    f->target_figure_id = buffer_read_i16(buf);
-    f->targeted_by_figure_id = buffer_read_i16(buf);
+    f->target_figure_id = buffer_read_u16(buf);
+    f->targeted_by_figure_id = buffer_read_u16(buf);
     f->created_sequence = buffer_read_u16(buf);
     f->target_figure_created_sequence = buffer_read_u16(buf);
     f->figures_on_same_tile_index = buffer_read_u8(buf);

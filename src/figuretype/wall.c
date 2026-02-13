@@ -338,7 +338,7 @@ void figure_tower_sentry_action(figure *f)
 
 void figure_tower_sentry_reroute(void)
 {
-    for (int i = 1; i < figure_count(); i++) {
+    for (unsigned int i = 1; i < figure_count(); i++) {
         figure *f = figure_get(i);
         if (f->type != FIGURE_TOWER_SENTRY || map_routing_is_wall_passable(f->grid_offset)) {
             continue;
@@ -502,7 +502,7 @@ void figure_watchtower_archer_action(figure *f)
 
 void figure_kill_tower_sentries_at(int x, int y)
 {
-    for (int i = 0; i < figure_count(); i++) {
+    for (unsigned int i = 0; i < figure_count(); i++) {
         figure *f = figure_get(i);
         if (!figure_is_dead(f) && f->type == FIGURE_TOWER_SENTRY) {
             if (calc_maximum_distance(f->x, f->y, x, y) <= 1) {
@@ -514,7 +514,7 @@ void figure_kill_tower_sentries_at(int x, int y)
 
 void figure_kill_tower_sentries_in_building(building *b)
 {
-    for (int i = 0; i < figure_count(); i++) {
+    for (unsigned int i = 0; i < figure_count(); i++) {
         figure *f = figure_get(i);
         if (!figure_is_dead(f) && f->type == FIGURE_TOWER_SENTRY && f->building_id == b->id) {
             f->state = FIGURE_STATE_DEAD;

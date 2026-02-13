@@ -105,8 +105,8 @@ typedef struct {
     unsigned char trader_id;
     unsigned char wait_ticks_next_target; //used for retargetting for fighting figures, and destination for pushers
     unsigned char dont_draw_elevated;
-    short target_figure_id;
-    short targeted_by_figure_id;
+    unsigned short target_figure_id;
+    unsigned short targeted_by_figure_id;
     unsigned short created_sequence;
     unsigned short target_figure_created_sequence;
     unsigned char figures_on_same_tile_index;
@@ -124,9 +124,9 @@ typedef struct {
     } tourist;
 } figure;
 
-figure *figure_get(int id);
+figure *figure_get(unsigned int id);
 
-int figure_count(void);
+unsigned int figure_count(void);
 
 /**
  * Creates a figure
