@@ -1996,7 +1996,11 @@ static translation_string all_strings[] = {
     {TR_EDITOR_IMAGE_IMPORT, "Import image"},
     {TR_EDITOR_UNABLE_TO_SET_EMPIRE_IMAGE, "Unable to set empire image"},
     {TR_EDITOR_IMAGE_TO_SMALL, "Image too small"},
-    {TR_EDITOR_IMAGE_TO_SMALL_EXPLANATION, "The image is so small that it might bug out the empire editor. Do you still want to load it?"}
+    {TR_EDITOR_IMAGE_TO_SMALL_EXPLANATION, "The image is so small that it might bug out the empire editor. Do you still want to load it?"},
+    {TR_EDITOR_EMPIRE_PROPERTIES_SELECT_IAMGE, "Select empire image"},
+    {TR_EDITOR_EMPIRE_PROPERTIES_DEFAULT_IAMGE, "Default image"},
+    {TR_EDITOR_EMPIRE_PROPERTIES_SETTINGS, "Empire settings"},
+    {TR_EDITOR_EMPIRE_PROPERTIES_HOTKEYS, "Empire hotkeys"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
