@@ -8,9 +8,11 @@
 #include "core/file.h"
 #include "core/image.h"
 #include "core/image_group.h"
+#include "core/image_group_editor.h"
 #include "core/lang.h"
 #include "core/log.h"
 #include "core/string.h"
+#include "editor/editor.h"
 #include "editor/empire.h"
 #include "empire/empire.h"
 #include "empire/object.h"
@@ -99,6 +101,7 @@ static struct {
     saved_game_info info;
     savegame_load_status savegame_info_status;
     int redraw_full_window;
+    int preview_image_id;
 } data;
 
 static input_box main_input = {
@@ -168,6 +171,7 @@ static void sort_file_list(void)
 
 static void init_filtered_file_list(void)
 {
+    data.preview_image_id = 0;
     if (data.filtered_file_list.num_files > 0) {
         free(data.filtered_file_list.files);
         data.filtered_file_list.files = 0;
@@ -461,10 +465,8 @@ static void draw_foreground(void)
                     text_draw_centered(translation_for(key), 362, 241, 246, FONT_LARGE_BLACK, 0);
                 }
             }
-        } else if (*data.selected_file && data.type == FILE_TYPE_EMPIRE_IMAGE) {
-            const char *filename = dir_get_file_at_location(data.selected_file, data.file_data->location);
-            int image_id = assets_get_external_image(filename, 1);
-            const image *img = image_get(image_id);
+        } else if (*data.selected_file && (data.type == FILE_TYPE_EMPIRE_IMAGE || data.type == FILE_TYPE_EMPIRE)) {
+            const image *img = image_get(data.preview_image_id);
             
             // Calculate scale to fit image within 266x352 box
             float x_scale = img->width / 266.0f;
@@ -475,10 +477,10 @@ static void draw_foreground(void)
                 // Image is smaller than box, just center it without scaling
                 int centered_x = 352 + (266 - img->width) / 2;
                 int centered_y = 80 + (352 - img->height) / 2;
-                image_draw(image_id, centered_x, centered_y, COLOR_MASK_NONE, SCALE_NONE);
+                image_draw(data.preview_image_id, centered_x, centered_y, COLOR_MASK_NONE, SCALE_NONE);
             } else {
                 // Image is larger than box, scale it down to fit
-                image_draw(image_id, 352 * scale, 80 * scale, COLOR_MASK_NONE, scale);
+                image_draw(data.preview_image_id, 352 * scale, 80 * scale, COLOR_MASK_NONE, scale);
             }
         } else {
             text_draw_centered(translation_for(TR_SAVE_DIALOG_SELECT_FILE), 362, 246, 246, FONT_NORMAL_BLACK, 0);
@@ -707,7 +709,7 @@ static void button_ok_cancel(int is_ok, int param2)
                 return;
             }
         } else if (data.type == FILE_TYPE_EMPIRE) {
-            int result = empire_xml_parse_file(filename);
+            int result = empire_xml_parse_file(filename, 0);
             if (result) {
                 scenario_editor_set_custom_empire(data.selected_file);
                 window_editor_empire_show();
@@ -793,6 +795,33 @@ static void button_toggle_sort_type(const generic_button *button)
     data.redraw_full_window = 1;
 }
 
+static void update_preview_image(void)
+{
+    if (data.type != FILE_TYPE_EMPIRE && data.type != FILE_TYPE_EMPIRE_IMAGE) {
+        return;
+    }
+    char *filename = (char *)dir_get_file_at_location(data.selected_file, data.file_data->location);
+    if (data.type == FILE_TYPE_EMPIRE) {
+        empire_xml_parse_file(filename, 1);
+        const char *custom_filename = empire_xml_read_info();
+        if (custom_filename && *custom_filename) {
+            const char *got_filename = dir_get_file_at_location(custom_filename, PATH_LOCATION_COMMUNITY_IMAGE);
+            if (got_filename && *got_filename) {
+                string_copy(string_from_ascii(got_filename), (uint8_t *)filename, 128);
+            } else {
+                *filename = '\0';
+            }
+        } else {
+            *filename = '\0';
+        }
+    }
+    if (!filename || !*filename) {
+        data.preview_image_id = image_group(editor_is_active() ? GROUP_EDITOR_EMPIRE_MAP : GROUP_EMPIRE_MAP);
+    } else {
+        data.preview_image_id = assets_get_external_image(filename, 1);
+    }
+}
+
 static void select_file(unsigned int index, int is_double_click)
 {
     if (index == LIST_BOX_NO_SELECTION) {
@@ -813,6 +842,7 @@ static void select_file(unsigned int index, int is_double_click)
     if (data.dialog_type != FILE_DIALOG_DELETE && is_double_click) {
         button_ok_cancel(1, 0);
     }
+    update_preview_image();
 }
 
 static void file_tooltip(const list_box_item *item, tooltip_context *c)

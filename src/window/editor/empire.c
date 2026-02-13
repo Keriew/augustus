@@ -886,7 +886,7 @@ static void refresh_empire(void)
     if (!filename) {
         return;
     }
-    empire_xml_parse_file(filename);
+    empire_xml_parse_file(filename, 0);
     window_empire_collect_trade_edges();
     window_invalidate();
 }

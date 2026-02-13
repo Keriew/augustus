@@ -90,6 +90,7 @@ map_point ORNAMENT_POSITIONS[TOTAL_ORNAMENTS] = {
 static struct {
     int success;
     int version;
+    int info_only;
     int current_city_id;
     int current_trade_route_id; // This is not an actual route id but an empire object id 
     city_list current_city_list;
@@ -100,6 +101,7 @@ static struct {
     array(waypoint) distant_battle_waypoints;
     int border_status;
     char added_ornaments[TOTAL_ORNAMENTS];
+    char info_filename[128];
 } data;
 
 static int xml_start_empire(void);
@@ -125,6 +127,8 @@ static void xml_end_sells_buys_or_waypoints(void);
 static void xml_end_invasion_path(void);
 static void xml_end_distant_battle_path(void);
 
+static int xml_read_info(void);
+
 static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "empire", xml_start_empire },
     { "map", xml_start_map, 0, "empire" },
@@ -146,6 +150,38 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "path", xml_start_distant_battle_path, xml_end_distant_battle_path, "distant_battle_paths" },
     { "waypoint", xml_start_distant_battle_waypoint, 0, "path" },
 };
+
+static const xml_parser_element xml_info_elements[XML_TOTAL_ELEMENTS] = {
+    { "empire", 0 },
+    { "map", xml_read_info, 0, "empire" },
+    { "coordinates", 0, 0, "map" },
+    { "ornament", 0, 0, "empire|map" },
+    { "border", 0, 0, "empire" },
+    { "edge", 0, 0, "border" },
+    { "cities", 0, 0, "empire" },
+    { "city", 0, 0, "cities" },
+    { "buys", 0, 0, "city" },
+    { "sells", 0, 0, "city" },
+    { "resource", 0, 0, "buys|sells" },
+    { "trade_points", 0, 0, "city" },
+    { "point", 0, 0, "trade_points" },
+    { "invasion_paths", 0, 0, "empire" },
+    { "path", 0, 0, "invasion_paths"},
+    { "battle", 0, 0, "path"},
+    { "distant_battle_paths", 0, 0, "empire" },
+    { "path", 0, 0, "distant_battle_paths" },
+    { "waypoint", 0, 0, "path" },
+};
+
+static int xml_read_info(void)
+{
+    const char *filename = xml_parser_get_attribute_string("image");
+    if (!filename) {
+        return 0;
+    }
+    string_copy(string_from_ascii(filename), (uint8_t *)data.info_filename, 128);
+    return 0;
+}
 
 int *get_current_invasion_path_id(void)
 {
@@ -709,6 +745,7 @@ static void xml_end_distant_battle_path(void)
 
 static void reset_data(void)
 {
+    *data.info_filename = '\0';
     data.success = 1;
     data.current_city_id = -1;
     data.current_city_list = LIST_NONE;
@@ -724,9 +761,11 @@ static void reset_data(void)
 static int parse_xml(char *buf, int buffer_length)
 {
     reset_data();
-    empire_clear();
-    empire_object_clear();
-    if (!xml_parser_init(xml_elements, XML_TOTAL_ELEMENTS, 0)) {
+    if (!data.info_only) {
+        empire_clear();
+        empire_object_clear();
+    }
+    if (!xml_parser_init(data.info_only ? xml_info_elements : xml_elements, XML_TOTAL_ELEMENTS, 0)) {
         return 0;
     }
     if (!xml_parser_parse(buf, buffer_length, 1)) {
@@ -779,8 +818,9 @@ static char *file_to_buffer(const char *filename, int *output_length)
     return buf;
 }
 
-int empire_xml_parse_file(const char *filename)
+int empire_xml_parse_file(const char *filename, int info_only)
 {
+    data.info_only = info_only;
     int output_length = 0;
     char *xml_contents = file_to_buffer(filename, &output_length);
     if (!xml_contents) {
@@ -792,4 +832,9 @@ int empire_xml_parse_file(const char *filename)
         log_error("Error parsing file", filename, 0);
     }
     return success;
+}
+
+const char *empire_xml_read_info(void)
+{
+    return data.info_filename;
 }
