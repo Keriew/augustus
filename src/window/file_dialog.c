@@ -478,11 +478,7 @@ static void draw_foreground(void)
                 image_draw(image_id, centered_x, centered_y, COLOR_MASK_NONE, SCALE_NONE);
             } else {
                 // Image is larger than box, scale it down to fit
-                int scaled_width = (int)(img->width / scale);
-                int scaled_height = (int)(img->height / scale);
-                int centered_x = 352 + (266 - scaled_width) / 2;
-                int centered_y = 80 + (352 - scaled_height) / 2;
-                image_draw(image_id, centered_x, centered_y, COLOR_MASK_NONE, scale);
+                image_draw(image_id, 352 * scale, 80 * scale, COLOR_MASK_NONE, scale);
             }
         } else {
             text_draw_centered(translation_for(TR_SAVE_DIALOG_SELECT_FILE), 362, 246, 246, FONT_NORMAL_BLACK, 0);
