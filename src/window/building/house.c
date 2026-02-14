@@ -12,6 +12,7 @@
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
 #include "graphics/text.h"
+#include "map/desirability.h"
 #include "map/road_access.h"
 #include "sound/speech.h"
 #include "translation/translation.h"
@@ -128,6 +129,31 @@ static void draw_happiness_info(building_info_context *c, int y_offset)
     }
 }
 
+static void draw_debug_info(building_info_context *c, int y_offset)
+{
+    // DEBUG: Display entertainment and desirability values
+    building *b = building_get(c->building_id);
+
+    // Entertainment value
+    int width = text_draw(string_from_ascii("DEBUG - Entertainment: "),
+        c->x_offset + 36, y_offset, FONT_NORMAL_RED, 0);
+    text_draw_number(b->data.house.entertainment, '@', " ",
+        c->x_offset + 36 + width, y_offset, FONT_NORMAL_RED, 0);
+
+    // Desirability (from building)
+    width = text_draw(string_from_ascii("Desirability (cached): "),
+        c->x_offset + 36, y_offset + 16, FONT_NORMAL_RED, 0);
+    text_draw_number(b->desirability, '@', " ",
+        c->x_offset + 36 + width, y_offset + 16, FONT_NORMAL_RED, 0);
+
+    // Desirability (from map)
+    int map_desir = map_desirability_get(b->grid_offset);
+    width = text_draw(string_from_ascii("Desirability (map): "),
+        c->x_offset + 36, y_offset + 32, FONT_NORMAL_RED, 0);
+    text_draw_number(map_desir, '@', " ",
+        c->x_offset + 36 + width, y_offset + 32, FONT_NORMAL_RED, 0);
+}
+
 void window_building_draw_house(building_info_context *c)
 {
     c->advisor_button = ADVISOR_HOUSING;
@@ -147,6 +173,7 @@ void window_building_draw_house(building_info_context *c)
     draw_population_info(c, c->y_offset + 134);
     draw_tax_info(c, c->y_offset + 174);
     draw_happiness_info(c, c->y_offset + 194);
+    //draw_debug_info(c, c->y_offset + 305);
 
     int x_offset = 32;
     int y_content = 259;

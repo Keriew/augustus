@@ -244,6 +244,7 @@ static int get_height_id(void)
             case BUILDING_GRAND_TEMPLE_NEPTUNE:
             case BUILDING_GRAND_TEMPLE_MERCURY:
             case BUILDING_GRAND_TEMPLE_VENUS:
+            case BUILDING_GRAND_TEMPLE_VENUS_REWORKED:
             case BUILDING_PANTHEON:
             case BUILDING_HIPPODROME:
             case BUILDING_COLOSSEUM:
@@ -721,6 +722,8 @@ static void draw_background(void)
             window_building_draw_grand_temple_mars(&context);
         } else if (btype == BUILDING_GRAND_TEMPLE_VENUS) {
             window_building_draw_grand_temple_venus(&context);
+        } else if (btype == BUILDING_GRAND_TEMPLE_VENUS_REWORKED) {
+            window_building_draw_grand_temple_venus_reworked(&context);
         } else if (btype == BUILDING_PANTHEON) {
             window_building_draw_pantheon(&context);
         } else if (btype == BUILDING_LIGHTHOUSE) {
@@ -920,7 +923,7 @@ static void draw_foreground(void)
         } else if (btype == BUILDING_BARRACKS) {
             window_building_draw_barracks_foreground(&context);
         } else if ((btype >= BUILDING_GRAND_TEMPLE_CERES && btype <= BUILDING_GRAND_TEMPLE_VENUS) ||
-            btype == BUILDING_PANTHEON) {
+            btype == BUILDING_PANTHEON || btype == BUILDING_GRAND_TEMPLE_VENUS_REWORKED) {
             window_building_draw_grand_temple_foreground(&context);
         } else if (btype == BUILDING_CARAVANSERAI &&
             b->monument.phase == MONUMENT_FINISHED) {
@@ -1034,7 +1037,7 @@ static int handle_specific_building_info_mouse(const mouse *m)
                 return window_building_handle_mouse_storage(m, &context);
             }
         } else if ((btype >= BUILDING_GRAND_TEMPLE_CERES && btype <= BUILDING_GRAND_TEMPLE_VENUS) ||
-            btype == BUILDING_PANTHEON) {
+            btype == BUILDING_PANTHEON || btype == BUILDING_GRAND_TEMPLE_VENUS_REWORKED) {
             return window_building_handle_mouse_grand_temple(m, &context);
         } else if (btype == BUILDING_DEPOT) {
             if (context.depot_selection == 2) {

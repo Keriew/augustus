@@ -272,6 +272,8 @@ int building_is_mars_temple(building_type type);
 
 int building_is_venus_temple(building_type type);
 
+int building_is_temple(building_type type);
+
 int building_has_supplier_inventory(building_type type);
 
 int building_is_house_group(house_groups group, building_type type);

@@ -51,7 +51,7 @@ static const building_type building_set_large_temples[] = {
 
 static const building_type building_set_grand_temples[] = {
     BUILDING_GRAND_TEMPLE_CERES, BUILDING_GRAND_TEMPLE_NEPTUNE, BUILDING_GRAND_TEMPLE_MERCURY, BUILDING_GRAND_TEMPLE_MARS,
-    BUILDING_GRAND_TEMPLE_VENUS, BUILDING_PANTHEON
+    BUILDING_GRAND_TEMPLE_VENUS, BUILDING_GRAND_TEMPLE_VENUS_REWORKED, BUILDING_PANTHEON
 };
 
 #define BUILDING_SET_SIZE_GRAND_TEMPLES (sizeof(building_set_grand_temples) / sizeof(building_type))

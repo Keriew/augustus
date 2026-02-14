@@ -1395,6 +1395,18 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .building_model_data = {.cost = 2500, .desirability_value = 20, .desirability_step = 2,
             .desirability_step_size = -4, .desirability_range = 8, .laborers = 50}
      },
+     [BUILDING_GRAND_TEMPLE_VENUS_REWORKED] = {
+        .venus_gt_bonus = 1,
+        .size = 7,
+        .fire_proof = 1,
+        .sound_id = SOUND_CITY_TEMPLE_VENUS,
+        .draw_desirability_range = 1,
+        .custom_asset.group = "Monuments",
+        .custom_asset.id = "Venus Complex Off",
+        .event_data.attr = "grand_temple_venus_reworked",
+        .building_model_data = {.cost = 2500, .desirability_value = 20, .desirability_step = 2,
+            .desirability_step_size = -4, .desirability_range = 8, .laborers = 50}
+     },
      [BUILDING_MENU_GRAND_TEMPLES] = {
         .event_data.attr = "grand_temples|all_grand_temples",
         .event_data.key = TR_PARAMETER_VALUE_BUILDING_MENU_GRAND_TEMPLES

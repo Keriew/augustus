@@ -160,6 +160,7 @@ static const monument_type *MONUMENT_TYPES[BUILDING_TYPE_MAX] = {
     [BUILDING_GRAND_TEMPLE_MERCURY] = &grand_temple,
     [BUILDING_GRAND_TEMPLE_MARS]    = &grand_temple,
     [BUILDING_GRAND_TEMPLE_VENUS]   = &grand_temple,
+    [BUILDING_GRAND_TEMPLE_VENUS_REWORKED] = &grand_temple,
     [BUILDING_PANTHEON]             = &pantheon,
     [BUILDING_ORACLE]               = &oracle,
     [BUILDING_LARGE_TEMPLE_CERES]   = &large_temple,
@@ -283,6 +284,7 @@ int building_monument_is_limited(building_type type)
         case BUILDING_GRAND_TEMPLE_MERCURY:
         case BUILDING_GRAND_TEMPLE_MARS:
         case BUILDING_GRAND_TEMPLE_VENUS:
+        case BUILDING_GRAND_TEMPLE_VENUS_REWORKED:
         case BUILDING_PANTHEON:
         case BUILDING_LIGHTHOUSE:
         case BUILDING_CARAVANSERAI:
@@ -398,6 +400,7 @@ int building_monument_is_grand_temple(building_type type)
         case BUILDING_GRAND_TEMPLE_MERCURY:
         case BUILDING_GRAND_TEMPLE_MARS:
         case BUILDING_GRAND_TEMPLE_VENUS:
+        case BUILDING_GRAND_TEMPLE_VENUS_REWORKED:
             return 1;
         default:
             return 0;
@@ -721,6 +724,12 @@ int building_monument_gt_module_is_active(int module)
 {
     int module_num = module % MODULES_PER_TEMPLE + 1;
     int temple_type = module / MODULES_PER_TEMPLE + BUILDING_GRAND_TEMPLE_CERES;
+
+    // Special handling for reworked Venus temple modules
+    if (module == VENUS_MODULE_3_WINE_TEMPLE || module == VENUS_MODULE_4_THEATER_TAVERN) {
+        temple_type = BUILDING_GRAND_TEMPLE_VENUS_REWORKED;
+        module_num = (module == VENUS_MODULE_3_WINE_TEMPLE) ? 1 : 2;
+    }
 
     return building_monument_module_type(temple_type) == module_num;
 }

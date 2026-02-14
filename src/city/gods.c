@@ -324,7 +324,7 @@ void city_gods_calculate_moods(int update_moods)
                 num_temples = building_count_active(BUILDING_SMALL_TEMPLE_MARS) + building_count_active(BUILDING_LARGE_TEMPLE_MARS) + building_count_active(BUILDING_GRAND_TEMPLE_MARS);
                 break;
             case GOD_VENUS:
-                num_temples = building_count_active(BUILDING_SMALL_TEMPLE_VENUS) + building_count_active(BUILDING_LARGE_TEMPLE_VENUS) + building_count_active(BUILDING_GRAND_TEMPLE_VENUS);
+                num_temples = building_count_active(BUILDING_SMALL_TEMPLE_VENUS) + building_count_active(BUILDING_LARGE_TEMPLE_VENUS) + building_count_active(BUILDING_GRAND_TEMPLE_VENUS)+ building_count_active(BUILDING_GRAND_TEMPLE_VENUS_REWORKED);
                 break;
         }
         if (num_temples == max_temples) {

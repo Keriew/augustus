@@ -59,7 +59,7 @@ static struct {
     option_menu_item option;
     const building_type required_building;
     const char image_id[32];
-} temple_module_options[12] = {
+} temple_module_options[14] = {
     {
         { TR_BUILDING_GRAND_TEMPLE_CERES_DESC_MODULE_1, TR_BUILDING_GRAND_TEMPLE_CERES_MODULE_1_DESC },
         BUILDING_NONE,
@@ -119,6 +119,16 @@ static struct {
         { TR_BUILDING_PANTHEON_DESC_MODULE_2, TR_BUILDING_PANTHEON_MODULE_2_DESC },
         BUILDING_NONE,
         "Panth M2 Icon"
+    },
+    {
+        { TR_BUILDING_GRAND_TEMPLE_VENUS_DESC_MODULE_3, TR_BUILDING_GRAND_TEMPLE_VENUS_MODULE_3_DESC },
+        BUILDING_NONE,
+        "Venus M Icon"
+    },
+    {
+        { TR_BUILDING_GRAND_TEMPLE_VENUS_DESC_MODULE_4, TR_BUILDING_GRAND_TEMPLE_VENUS_MODULE_4_DESC },
+        BUILDING_NONE,
+        "Venus M2 Icon"
     }
 };
 
@@ -746,7 +756,12 @@ static void draw_grand_temple(building_info_context *c, const char *sound_file,
         window_building_draw_monument_temple_construction_process(c);
     }
     if (b->monument.upgrades) {
-        int module_name = temple_module_options[data.god_id * 2 + (b->monument.upgrades - 1)].option.header;
+        int module_index = data.god_id * 2 + (b->monument.upgrades - 1);
+        // Special handling for reworked Venus temple
+        if (b->type == BUILDING_GRAND_TEMPLE_VENUS_REWORKED) {
+            module_index = 12 + (b->monument.upgrades - 1);
+        }
+        int module_name = temple_module_options[module_index].option.header;
         text_draw_centered(translation_for(module_name),
             c->x_offset, c->y_offset + 12, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK, 0);
     } else {
@@ -762,7 +777,12 @@ static void draw_grand_temple(building_info_context *c, const char *sound_file,
             height = text_draw_multiline(translation_for(bonus_desc),
                 c->x_offset + 22, c->y_offset + 56 + extra_y, 15 * c->width_blocks, 0, FONT_NORMAL_BLACK, 0);
             if (b->monument.upgrades) {
-                int module_desc = temple_module_options[data.god_id * 2 + (b->monument.upgrades - 1)].option.desc;
+                int module_index = data.god_id * 2 + (b->monument.upgrades - 1);
+                // Special handling for reworked Venus temple
+                if (b->type == BUILDING_GRAND_TEMPLE_VENUS_REWORKED) {
+                    module_index = 12 + (b->monument.upgrades - 1);
+                }
+                int module_desc = temple_module_options[module_index].option.desc;
                 height += text_draw_multiline(translation_for(module_desc),
                     c->x_offset + 22, c->y_offset + 66 + height + extra_y, 15 * c->width_blocks,
                     0, FONT_NORMAL_GREEN, 0);
@@ -771,7 +791,7 @@ static void draw_grand_temple(building_info_context *c, const char *sound_file,
         if (b->type == BUILDING_GRAND_TEMPLE_MARS) {
             draw_grand_temple_mars_military(c);
         } else if (b->type == BUILDING_GRAND_TEMPLE_VENUS &&
-            (building_monument_gt_module_is_active(VENUS_MODULE_1_DISTRIBUTE_WINE))) {
+            building_monument_gt_module_is_active(VENUS_MODULE_1_DISTRIBUTE_WINE)) {
             draw_grand_temple_venus_wine(c);
         }
         inner_panel_draw(c->x_offset + 16, c->y_offset + 86 + height + extra_y, c->width_blocks - 2, 4);
@@ -859,6 +879,14 @@ void window_building_draw_grand_temple_venus(building_info_context *c)
 {
     draw_grand_temple(c, "wavs/temple_love.wav", TR_BUILDING_GRAND_TEMPLE_VENUS_DESC,
         TR_BUILDING_GRAND_TEMPLE_VENUS_BONUS_DESC,
+        assets_get_image_id("UI", "Venus L Banner"),
+        TR_BUILDING_VENUS_TEMPLE_QUOTE, GOD_VENUS, 20);
+}
+
+void window_building_draw_grand_temple_venus_reworked(building_info_context *c)
+{
+    draw_grand_temple(c, "wavs/temple_love.wav", TR_BUILDING_GRAND_TEMPLE_VENUS_DESC,
+        TR_BUILDING_GRAND_TEMPLE_VENUS_REWORKED_BONUS_DESC,
         assets_get_image_id("UI", "Venus L Banner"),
         TR_BUILDING_VENUS_TEMPLE_QUOTE, GOD_VENUS, 20);
 }
@@ -1339,6 +1367,12 @@ static void button_add_module_prompt(const generic_button *button)
 {
     int num_options = 0;
     int option_id = data.god_id * 2;
+
+    // Special handling for reworked Venus temple
+    building *b = building_get(data.building_id);
+    if (b->type == BUILDING_GRAND_TEMPLE_VENUS_REWORKED) {
+        option_id = 12;
+    }
 
     static option_menu_item options[2];
 

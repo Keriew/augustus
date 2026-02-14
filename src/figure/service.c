@@ -613,6 +613,7 @@ int figure_service_provide_coverage(figure *f)
                     }
                     break;
                 case BUILDING_GRAND_TEMPLE_VENUS:
+                case BUILDING_GRAND_TEMPLE_VENUS_REWORKED:
                     houses_serviced = provide_culture(x, y, religion_coverage_venus);
                     break;
                 case BUILDING_PANTHEON:

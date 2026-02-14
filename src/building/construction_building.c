@@ -327,6 +327,7 @@ static void add_to_map(int type, building *b, int size, int orientation, int wat
         case BUILDING_GRAND_TEMPLE_MERCURY:
         case BUILDING_GRAND_TEMPLE_MARS:
         case BUILDING_GRAND_TEMPLE_VENUS:
+        case BUILDING_GRAND_TEMPLE_VENUS_REWORKED:
         case BUILDING_PANTHEON:
             map_tiles_update_area_roads(b->x, b->y, 9);
             building_monument_set_phase(b, MONUMENT_START);

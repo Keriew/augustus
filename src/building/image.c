@@ -668,6 +668,7 @@ int building_image_get(const building *b)
                     }
             }
         case BUILDING_GRAND_TEMPLE_VENUS:
+        case BUILDING_GRAND_TEMPLE_VENUS_REWORKED:
             switch (b->monument.phase) {
                 case MONUMENT_START:
                     return assets_get_image_id("Monuments", "Venus Complex Const 01");
