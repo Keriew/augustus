@@ -262,6 +262,19 @@ grid_slice *map_grid_get_grid_slice_from_center(int center_grid_offset, int radi
     return map_grid_get_grid_slice_ring(center_grid_offset, 0, radius);
 }
 
+grid_slice *map_grid_slice_contains(int grid_offset, const grid_slice *slice)
+{
+    if (!slice) {
+        return NULL;
+    }
+    for (int i = 0; i < slice->size; i++) {
+        if (slice->grid_offsets[i] == grid_offset) {
+            return slice;
+        }
+    }
+    return NULL;
+}
+
 int map_grid_is_valid_offset(int grid_offset)
 {
     return grid_offset >= 0 && grid_offset < GRID_SIZE * GRID_SIZE;

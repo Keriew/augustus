@@ -255,9 +255,9 @@ void scenario_events_save_state(buffer *buf_events, buffer *buf_conditions, buff
 
 static void info_load_state(buffer *buf, int scenario_version)
 {
-    unsigned int array_size = buffer_load_dynamic_array(buf);
+    size_t array_size = buffer_load_dynamic_array(buf);
 
-    for (unsigned int i = 0; i < array_size; i++) {
+    for (size_t i = 0; i < array_size; i++) {
         scenario_event_t *event = scenario_event_create(0, 0, 0);
         scenario_event_load_state(buf, event, scenario_version);
     }
@@ -265,9 +265,9 @@ static void info_load_state(buffer *buf, int scenario_version)
 
 static void conditions_load_state_old_version(buffer *buf)
 {
-    unsigned int total_conditions = buffer_load_dynamic_array(buf);
+    size_t total_conditions = buffer_load_dynamic_array(buf);
 
-    for (unsigned int i = 0; i < total_conditions; i++) {
+    for (size_t i = 0; i < total_conditions; i++) {
         buffer_skip(buf, 2); // Skip the link type
         int event_id = buffer_read_i32(buf);
         scenario_event_t *event = scenario_event_get(event_id);
@@ -327,7 +327,7 @@ static void load_link_action(scenario_action_t *action, int link_type, int32_t l
 
 static void actions_load_state(buffer *buf, int is_new_version)
 {
-    unsigned int array_size = buffer_load_dynamic_array(buf);
+    size_t array_size = buffer_load_dynamic_array(buf);
 
     int link_type = 0;
     int32_t link_id = 0;
@@ -368,17 +368,17 @@ static void formulas_save_state(buffer *buf)
 
 static void formulas_load_state(buffer *buf)
 {
-    unsigned int array_size = buffer_load_dynamic_array(buf);
+    size_t array_size = buffer_load_dynamic_array(buf);
     memset(scenario_formulas, 0, sizeof(scenario_formulas));
     scenario_formulas_size = 0;
     unsigned int max_id = 0;
-    for (unsigned int i = 0; i < array_size; ++i) {
+    for (size_t i = 0; i < array_size; ++i) {
 
         unsigned int id = buffer_read_u32(buf);
         scenario_formulas[id].id = id;
         if (id >= MAX_FORMULAS) {// Sanity guard: discard out-of-range IDs
             // Skip payload for this bad entry
-            buffer_skip(buf, MAX_FORMULA_LENGTH + (unsigned int) sizeof(int32_t));
+            buffer_skip(buf, MAX_FORMULA_LENGTH + sizeof(int32_t));
             continue;
         }
         buffer_read_raw(buf, scenario_formulas[id].formatted_calculation, MAX_FORMULA_LENGTH);

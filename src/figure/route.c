@@ -195,11 +195,11 @@ int figure_route_get_next_direction(int path_id)
 
 void figure_route_save_state(buffer *figures, buffer *buf_paths)
 {
-    size_t size = paths.size * sizeof(uint32_t);
+    unsigned int size = paths.size * sizeof(uint32_t);
     uint8_t *buf_data = malloc(size);
     buffer_init(figures, buf_data, size);
 
-    size_t paths_memory_size = 0;
+    unsigned int paths_memory_size = 0;
 
     figure_path_data *path;
     array_foreach(paths, path) {
@@ -218,7 +218,7 @@ void figure_route_save_state(buffer *figures, buffer *buf_paths)
     }
 }
 
-int convert_old_directions_to_new_format(figure_path_data *path, const uint8_t *directions)
+static int convert_old_directions_to_new_format(figure_path_data *path, const uint8_t *directions)
 {
     figure *f = figure_get(path->figure_id);
 
@@ -286,10 +286,10 @@ static void update_current_tile(figure_path_data *path)
 
 void figure_route_load_state(buffer *figures, buffer *buf_paths, int version)
 {
-    size_t elements_to_load;
+    unsigned int elements_to_load;
 
     if (version <= SAVE_GAME_LAST_STATIC_PATHS_AND_ROUTES) {
-        elements_to_load = buf_paths->size / MAX_ORIGINAL_PATH_LENGTH;
+        elements_to_load = (unsigned int) buf_paths->size / MAX_ORIGINAL_PATH_LENGTH;
     } else {
         elements_to_load = buffer_read_u32(buf_paths);
     }
@@ -300,9 +300,7 @@ void figure_route_load_state(buffer *figures, buffer *buf_paths, int version)
         return;
     }
 
-    unsigned int highest_id_in_use = 0;
-
-    for (size_t i = 0; i < elements_to_load; i++) {
+    for (unsigned int i = 0; i < elements_to_load; i++) {
         figure_path_data *path = array_next(paths);
         if (version <= SAVE_GAME_LAST_STATIC_PATHS_AND_ROUTES) {
             path->figure_id = buffer_read_i16(figures);
@@ -333,8 +331,7 @@ void figure_route_load_state(buffer *figures, buffer *buf_paths, int version)
         }
         if (path->figure_id) {
             update_current_tile(path);
-            highest_id_in_use = i;
         }
     }
-    paths.size = highest_id_in_use + 1;
+    array_trim(paths);
 }
