@@ -27,6 +27,8 @@
 #define COLOR_STDOUT 0xFFB3B3B3
 #define COLOR_INPUT 0xFFCC9955
 #define COLOR_RETURN 0xFF77BBDD
+#define COLOR_ERROR 0xFFFF4444
+#define COLOR_LUA 0xFF44DDDD
 
 static struct {
     char lines[MAX_LINES][MAX_LINE_LENGTH];
@@ -344,6 +346,11 @@ void terminal_draw(void)
             line_color = COLOR_INPUT;
         } else if (data.lines[buffer_index][0] == '=') {
             line_color = COLOR_RETURN;
+        } else if (strstr(data.lines[buffer_index], "[error]") ||
+                   strstr(data.lines[buffer_index], "ERROR:")) {
+            line_color = COLOR_ERROR;
+        } else if (strstr(data.lines[buffer_index], "[Lua]")) {
+            line_color = COLOR_LUA;
         }
         text_draw((const uint8_t *) data.lines[buffer_index],
             PADDING, y, FONT_NORMAL_PLAIN, line_color);
