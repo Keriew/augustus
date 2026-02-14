@@ -605,6 +605,7 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_resource.c
     ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_population.c
     ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_sound.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_empire.c
 )
 set(GRAPHICS_FILES
     ${PROJECT_SOURCE_DIR}/src/graphics/arrow_button.c
