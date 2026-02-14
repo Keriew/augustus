@@ -72,6 +72,7 @@ static void button_delete_object(const generic_button *button);
 static void button_move_object(const generic_button *button);
 static void button_draw_route(const generic_button *button);
 static void button_empire_properties(const generic_button *button);
+static void button_change_index(int is_down, int param2);
 
 static arrow_button arrow_buttons_empire[] = {
     {8, 48, 17, 24, button_change_empire, 1},
@@ -105,6 +106,11 @@ static generic_button top_buttons[] = {
     {280, 0, 120, 24, button_delete_object},
     {140, 0, 120, 24, button_move_object},
     {0, 0, 120, 24, button_draw_route, 0}
+};
+
+static arrow_button order_buttons[] = {
+    {0, 27, 17, 24, button_change_index, 1, 0},
+    {0, 27, 15, 24, button_change_index, 0, 0}
 };
 
 static resource_button sell_buttons[RESOURCE_MAX] = { 0 };
@@ -592,6 +598,7 @@ static void draw_city_info(const empire_city *city)
         width += 10;
     }
     edit_city_name_button[0].x_offset = width + x_offset;
+    edit_city_name_button[0].dont_draw = 0;
     if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE) {
         width += 24;
     }
@@ -611,6 +618,7 @@ static void draw_city_info(const empire_city *city)
             break;
         case EMPIRE_CITY_OURS:
         {
+            add_resource_buttons[0].dont_draw = 0;
             add_resource_buttons[1].dont_draw = 1;
             width += lang_text_draw(47, 1, x_offset + 20 + width, y_offset, FONT_NORMAL_GREEN);
             int resource_x_offset = x_offset + 30 + width;
@@ -638,6 +646,7 @@ static void draw_city_info(const empire_city *city)
         case EMPIRE_CITY_FUTURE_TRADE:
         {
             top_buttons[2].parameter1 = 0;
+            add_resource_buttons[0].dont_draw = 0;
             add_resource_buttons[1].dont_draw = 0;
             int text_width = lang_text_draw(47, 5, x_offset + 20 + width, y_offset, FONT_NORMAL_GREEN);
             width += text_width;
@@ -727,7 +736,7 @@ static void draw_object_info(void)
             obj->type == EMPIRE_OBJECT_ENEMY_ARMY), '\0', NULL, data.panel.x_min + 28 + width, data.y_max - 125,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     }
-    
+
     uint8_t coords_string[16];
     snprintf((char *)coords_string, 16, "%i, %i", obj->x, obj->y);
     data.object_coords_x = data.panel.x_min + 28 +
@@ -741,14 +750,25 @@ static void draw_object_info(void)
     if (obj->type == EMPIRE_OBJECT_BORDER_EDGE) {
         int width = lang_text_draw(CUSTOM_TRANSLATION, TR_EMPIRE_EDGE_INDEX, data.panel.x_min + 28,
             data.y_max - 125, FONT_NORMAL_GREEN);
-        text_draw_number(obj->order_index, '\0', NULL, data.panel.x_min + 28 + width, data.y_max - 125,
+        width += text_draw_number(obj->order_index, '\0', NULL, data.panel.x_min + 28 + width, data.y_max - 125,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+        order_buttons[0].x_offset = data.panel.x_min + 28 + width;
+        order_buttons[1].x_offset = data.panel.x_min + 28 + width + 24;
+        order_buttons[0].parameter2 = 1;
+        order_buttons[1].parameter2 = 1;
+        arrow_buttons_draw(data.panel.x_min, data.y_max - 160, order_buttons, 2);
     }
     if (obj->type == EMPIRE_OBJECT_TRADE_WAYPOINT) {
         int width = lang_text_draw(CUSTOM_TRANSLATION, TR_EMPIRE_WAYPOINT_INDEX, data.panel.x_min + 28,
             data.y_max - 125, FONT_NORMAL_GREEN);
         width += text_draw_number(obj->order_index, '\0', NULL, data.panel.x_min + 28 + width, data.y_max - 125,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+        order_buttons[0].x_offset = data.panel.x_min + 28 + width;
+        order_buttons[1].x_offset = data.panel.x_min + 28 + width + 24;
+        order_buttons[0].parameter2 = 1;
+        order_buttons[1].parameter2 = 1;
+        arrow_buttons_draw(data.panel.x_min, data.y_max - 160, order_buttons, 2);
+        width += 2 * 24 + 4;
         width += lang_text_draw(CUSTOM_TRANSLATION, TR_EMPIRE_ROUTE_PARENT, data.panel.x_min + 28 + width,
             data.y_max - 125, FONT_NORMAL_GREEN);
         empire_city *route_city = empire_city_get(empire_city_get_for_object(obj->parent_object_id - 1));
@@ -765,6 +785,11 @@ static void draw_object_info(void)
 
 static void draw_panel_buttons(const empire_city *city)
 {
+    order_buttons[0].parameter2 = 0;
+    order_buttons[1].parameter2 = 0;
+    add_resource_buttons[0].dont_draw = 1;
+    add_resource_buttons[1].dont_draw = 1;
+    edit_city_name_button[0].dont_draw = 1;
     int x_offset;
     if (scenario_empire_id() != SCENARIO_CUSTOM_EMPIRE) {
         arrow_buttons_draw(data.panel.x_min + 20, data.y_max - 100, arrow_buttons_empire, 2);
@@ -930,6 +955,13 @@ static void handle_input(const mouse *m, const hotkeys *h)
     if (generic_buttons_handle_mouse(m, data.panel.x_min + x_offset, data.y_max - 100, generic_buttons,
         scenario.empire.id == SCENARIO_CUSTOM_EMPIRE ? 8 : 1, &data.focus_button_id)) {
         if (!generic_buttons[data.focus_button_id - 1].parameter1) {
+            return;
+        }
+    }
+    if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE) {
+        unsigned int order_focus = 0;
+        arrow_buttons_handle_mouse(m, data.panel.x_min, data.y_max - 160, order_buttons, 2, &order_focus);
+        if (order_focus && order_buttons[order_focus - 1].parameter2) {
             return;
         }
     }
@@ -1203,6 +1235,33 @@ static void button_empire_properties(const generic_button *button)
         return;
     }
     window_empire_properties_show();
+}
+
+static void button_change_index(int is_down, int param2)
+{
+    if (!param2) {
+        return;
+    }
+    int selected_id = empire_selected_object();
+    if (!selected_id) {
+        return;
+    }
+    int change = is_down ? -1 : 1;
+    empire_object *obj = empire_object_get(selected_id - 1);
+    if (obj->order_index <= 1 && is_down) {
+        return;
+    }
+    empire_object *other_obj = empire_object_get(empire_object_get_in_order(obj->parent_object_id,
+        obj->order_index + change));
+    other_obj->order_index = obj->order_index;
+    obj->order_index += change;
+    
+    if (obj->type == EMPIRE_OBJECT_TRADE_WAYPOINT) {
+        window_empire_collect_trade_edges();
+        empire_object_set_trade_route_coords(empire_object_get_our_city());
+    }
+    
+    window_request_refresh();
 }
 
 void window_editor_empire_show(void)
