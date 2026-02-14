@@ -21,6 +21,10 @@ function scenario.start_year() end
 ---@return integer climate
 function scenario.climate() end
 
+--- Change the scenario climate (reloads terrain graphics)
+---@param id integer Climate id: 0=central, 1=northern, 2=desert (see CLIMATE constants)
+function scenario.change_climate(id) end
+
 --- Get a custom variable value by id or name
 ---@param id_or_name integer|string Variable id (integer) or name (string)
 ---@return integer value
@@ -74,27 +78,6 @@ function scenario.create_event(params) end
 ---@param p5? integer Parameter 5 (default 0)
 ---@return boolean success
 function scenario.execute_action(action_type, p1, p2, p3, p4, p5) end
-
-----------------------------------------------------------------
--- ui.*  –  Logging and in-game messages
-----------------------------------------------------------------
-
----@class ui
-ui = {}
-
---- Log a message (visible in Augustus log output)
----@param message string
-function ui.log(message) end
-
---- Show a warning banner at the top of the screen (lasts ~15 seconds)
----@param text string
-function ui.show_warning(text) end
-
---- Post a city message to the player's message list
----@param message_type integer Message type id
----@param param1? integer Optional parameter 1 (default 0)
----@param param2? integer Optional parameter 2 (default 0)
-function ui.post_message(message_type, param1, param2) end
 
 --@enum GODS
 GODS = {
