@@ -855,10 +855,13 @@ int building_is_temple(building_type type)
     return building_is_ceres_temple(type) || building_is_neptune_temple(type) ||
            building_is_mercury_temple(type) || building_is_mars_temple(type) ||
            building_is_venus_temple(type) ||
-           type == BUILDING_GRAND_TEMPLE_CERES || type == BUILDING_GRAND_TEMPLE_NEPTUNE ||
+           type == BUILDING_GRAND_TEMPLE_CERES || type == BUILDING_GRAND_TEMPLE_NEPTUNE || type == BUILDING_PANTHEON ||
            type == BUILDING_GRAND_TEMPLE_MERCURY || type == BUILDING_GRAND_TEMPLE_MARS ||
-           type == BUILDING_GRAND_TEMPLE_VENUS || type == BUILDING_GRAND_TEMPLE_VENUS_REWORKED;
-}
+           type == BUILDING_GRAND_TEMPLE_VENUS || type == BUILDING_GRAND_TEMPLE_VENUS_REWORKED || 
+           type == BUILDING_ORACLE  || type == BUILDING_LARARIUM  || type == BUILDING_NYMPHAEUM  || 
+           type == BUILDING_SHRINE_CERES || type == BUILDING_SHRINE_NEPTUNE || type == BUILDING_SHRINE_MERCURY || 
+           type == BUILDING_SHRINE_MARS || type == BUILDING_SHRINE_VENUS;
+        }
 
 // All buildings capable of collecting and storing goods as a market
 int building_has_supplier_inventory(building_type type)

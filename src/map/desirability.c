@@ -136,9 +136,10 @@ static void update_buildings(void)
 
             // Venus Module 3 Temple Bonus
             if (building_is_temple(b->type) && venus_module3) {
-                value += value;
-                step += 1;
-                range += 2;
+                value = (value * 3) / 2;
+                if (b->size > 1) {
+                    range += 1;
+                }
             }
 
             add_to_terrain(

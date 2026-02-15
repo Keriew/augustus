@@ -230,7 +230,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .sound_id = SOUND_CITY_HOUSE_POOR,
         .event_data.attr = "house_small_casa",
         .building_model_data = {.cost = 0, .desirability_value = -1, .desirability_step = 1,
-            .desirability_step_size = 1, .desirability_range = 1, .laborers = 0},
+            .desirability_step_size = 0, .desirability_range = 1, .laborers = 0},
         .house_model_data = {
             .devolve_desirability = 10,
             .evolve_desirability = 16,
@@ -255,7 +255,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .sound_id = SOUND_CITY_HOUSE_POOR,
         .event_data.attr = "house_large_casa",
         .building_model_data = {.cost = 0, .desirability_value = -1, .desirability_step = 1,
-            .desirability_step_size = 1, .desirability_range = 1, .laborers = 0},
+            .desirability_step_size = 0, .desirability_range = 1, .laborers = 0},
         .house_model_data = {
             .devolve_desirability = 14,
             .evolve_desirability = 20,
@@ -280,7 +280,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .sound_id = SOUND_CITY_HOUSE_MEDIUM,
         .event_data.attr = "house_small_insula",
         .building_model_data = {.cost = 0, .desirability_value = 0, .desirability_step = 1,
-            .desirability_step_size = 1, .desirability_range = 1, .laborers = 0},
+            .desirability_step_size = 0, .desirability_range = 1, .laborers = 0},
         .house_model_data = {
             .devolve_desirability = 18,
             .evolve_desirability = 25,
@@ -305,7 +305,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .sound_id = SOUND_CITY_HOUSE_MEDIUM,
         .event_data.attr = "house_medium_insula",
         .building_model_data = {.cost = 0, .desirability_value = 0, .desirability_step = 1,
-            .desirability_step_size = 1, .desirability_range = 1, .laborers = 0},
+            .desirability_step_size = 0, .desirability_range = 1, .laborers = 0},
         .house_model_data = {
             .devolve_desirability = 22,
             .evolve_desirability = 32,
@@ -380,7 +380,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .sound_id = SOUND_CITY_HOUSE_GOOD,
         .event_data.attr = "house_small_villa",
         .building_model_data = {.cost = 0, .desirability_value = 1, .desirability_step = 2,
-            .desirability_step_size = -1, .desirability_range = 2, .laborers = 0},
+            .desirability_step_size = 0, .desirability_range = 2, .laborers = 0},
         .house_model_data = {
             .devolve_desirability = 45,
             .evolve_desirability = 53,
@@ -405,7 +405,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .sound_id = SOUND_CITY_HOUSE_GOOD,
         .event_data.attr = "house_medium_villa",
         .building_model_data = {.cost = 0, .desirability_value = 1, .desirability_step = 2,
-            .desirability_step_size = -1, .desirability_range = 2, .laborers = 0},
+            .desirability_step_size = 0, .desirability_range = 2, .laborers = 0},
         .house_model_data = {
             .devolve_desirability = 50,
             .evolve_desirability = 58,
@@ -430,7 +430,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .sound_id = SOUND_CITY_HOUSE_GOOD,
         .event_data.attr = "house_large_villa",
         .building_model_data = {.cost = 0, .desirability_value = 2, .desirability_step = 2,
-            .desirability_step_size = -2, .desirability_range = 2, .laborers = 0},
+            .desirability_step_size = 0, .desirability_range = 2, .laborers = 0},
         .house_model_data = {
             .devolve_desirability = 55,
             .evolve_desirability = 63,
@@ -455,7 +455,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .sound_id = SOUND_CITY_HOUSE_GOOD,
         .event_data.attr = "house_grand_villa",
         .building_model_data = {.cost = 0, .desirability_value = 2, .desirability_step = 2,
-            .desirability_step_size = -2, .desirability_range = 2, .laborers = 0},
+            .desirability_step_size = 0, .desirability_range = 2, .laborers = 0},
         .house_model_data = {
             .devolve_desirability = 60,
             .evolve_desirability = 68,
@@ -860,8 +860,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .draw_desirability_range = 1,
         .event_data.attr = "small_temple_ceres",
         .event_data.key = TR_PARAMETER_VALUE_BUILDING_SMALL_TEMPLE_CERES,
-        .building_model_data = {.cost = 50, .desirability_value = 4, .desirability_step = 2,
-            .desirability_step_size = 6, .desirability_range = 2, .laborers = 2}
+        .building_model_data = {.cost = 50, .desirability_value = 4, .desirability_step = 1,
+            .desirability_step_size = -1, .desirability_range = 4, .laborers = 2}
     },
     [BUILDING_SMALL_TEMPLE_NEPTUNE] = {
         .venus_gt_bonus = 1,
@@ -871,8 +871,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .draw_desirability_range = 1,
         .event_data.attr = "small_temple_neptune",
         .event_data.key = TR_PARAMETER_VALUE_BUILDING_SMALL_TEMPLE_NEPTUNE,
-        .building_model_data = {.cost = 50, .desirability_value = 4, .desirability_step = 2,
-            .desirability_step_size = 6, .desirability_range = 2, .laborers = 2}
+        .building_model_data = {.cost = 50, .desirability_value = 4, .desirability_step = 1,
+            .desirability_step_size = -1, .desirability_range = 4, .laborers = 2}
     },
     [BUILDING_SMALL_TEMPLE_MERCURY] = {
         .venus_gt_bonus = 1,
@@ -882,8 +882,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .draw_desirability_range = 1,
         .event_data.attr = "small_temple_mercury",
         .event_data.key = TR_PARAMETER_VALUE_BUILDING_SMALL_TEMPLE_MERCURY,
-        .building_model_data = {.cost = 50, .desirability_value = 4, .desirability_step = 2,
-            .desirability_step_size = 6, .desirability_range = 2, .laborers = 2}
+        .building_model_data = {.cost = 50, .desirability_value = 4, .desirability_step = 1,
+            .desirability_step_size = -1, .desirability_range = 4, .laborers = 2}
     },
     [BUILDING_SMALL_TEMPLE_MARS] = {
         .venus_gt_bonus = 1,
@@ -893,8 +893,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .draw_desirability_range = 1,
         .event_data.attr = "small_temple_mars",
         .event_data.key = TR_PARAMETER_VALUE_BUILDING_SMALL_TEMPLE_MARS,
-        .building_model_data = {.cost = 50, .desirability_value = 4, .desirability_step = 2,
-            .desirability_step_size = 6, .desirability_range = 2, .laborers = 2}
+        .building_model_data = {.cost = 50, .desirability_value = 4, .desirability_step = 1,
+            .desirability_step_size = -1, .desirability_range = 4, .laborers = 2}
     },
     [BUILDING_SMALL_TEMPLE_VENUS] = {
         .venus_gt_bonus = 1,
@@ -904,8 +904,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .draw_desirability_range = 1,
         .event_data.attr = "small_temple_venus",
         .event_data.key = TR_PARAMETER_VALUE_BUILDING_SMALL_TEMPLE_VENUS,
-        .building_model_data = {.cost = 50, .desirability_value = 4, .desirability_step = 2,
-            .desirability_step_size = 6, .desirability_range = 2, .laborers = 2}
+        .building_model_data = {.cost = 50, .desirability_value = 4, .desirability_step = 1,
+            .desirability_step_size = -1, .desirability_range = 4, .laborers = 2}
     },
     [BUILDING_LARGE_TEMPLE_CERES] = {
         .venus_gt_bonus = 1,
@@ -1095,8 +1095,8 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .image_group = 63,
         .sound_id = SOUND_CITY_FORUM,
         .event_data.attr = "forum",
-        .building_model_data = {.cost = 75, .desirability_value = 3, .desirability_step = 2,
-            .desirability_step_size = -1, .desirability_range = 2, .laborers = 6}
+        .building_model_data = {.cost = 75, .desirability_value = 3, .desirability_step = 1,
+            .desirability_step_size = -1, .desirability_range = 3, .laborers = 6}
     },
     [BUILDING_NATIVE_HUT] = {
         .size = 1,
