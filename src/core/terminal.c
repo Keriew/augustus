@@ -36,6 +36,7 @@ static struct {
     int total_lines;
     int scroll_offset;
     int active;
+    int skip_next_text; // suppress text event from toggle key
     // Input line
     char input[MAX_INPUT_LENGTH];
     int input_len;
@@ -147,6 +148,7 @@ void terminal_toggle(void)
     data.active = !data.active;
     if (data.active) {
         data.scroll_offset = 0;
+        data.skip_next_text = 1;
     }
     window_invalidate();
 }
@@ -194,14 +196,14 @@ static void set_input(const char *text)
 {
     strncpy(data.input, text, MAX_INPUT_LENGTH - 1);
     data.input[MAX_INPUT_LENGTH - 1] = '\0';
-    data.input_len = (int)strlen(data.input);
+    data.input_len = (int) strlen(data.input);
     data.cursor_pos = data.input_len;
 }
 
 void terminal_handle_key_down(int scancode, int sym, int mod)
 {
-    (void)sym;
-    (void)mod;
+    (void) sym;
+    (void) mod;
     switch (scancode) {
         case SCAN_BACKSPACE:
             if (data.cursor_pos > 0) {
@@ -272,7 +274,11 @@ void terminal_handle_text(const char *text_utf8)
     if (!text_utf8) {
         return;
     }
-    int len = (int)strlen(text_utf8);
+    if (data.skip_next_text) {
+        data.skip_next_text = 0;
+        return;
+    }
+    int len = (int) strlen(text_utf8);
     if (data.input_len + len >= MAX_INPUT_LENGTH - 1) {
         return;
     }
