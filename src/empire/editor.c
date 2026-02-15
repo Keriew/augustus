@@ -436,7 +436,6 @@ static int place_distant_battle(full_empire_object *distant_battle)
     set_battles_shown(1); // toggle the show invasions as you wont see your placed object otherwise
     
     distant_battle->in_use = 1;
-    distant_battle->obj.type = EMPIRE_OBJECT_BATTLE_ICON;
     
     if (data.current_tool == EMPIRE_TOOL_DISTANT_BABARIAN) {
         distant_battle->obj.type = EMPIRE_OBJECT_ENEMY_ARMY;

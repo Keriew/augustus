@@ -730,6 +730,14 @@ static void draw_object_info(void)
             TR_EMPIRE_TOOL_DISTANT_BABARIAN, data.panel.x_min + 28, data.y_max - 125, FONT_NORMAL_GREEN);
         width += text_draw_number(is_battle_icon ? obj->invasion_years : obj->distant_battle_travel_months, '\0', NULL,
             data.panel.x_min + 28 + width, data.y_max - 125, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+        if (is_battle_icon) {
+            order_buttons[0].x_offset = data.panel.x_min + 28 + width;
+            order_buttons[1].x_offset = data.panel.x_min + 28 + width + 24;
+            order_buttons[0].parameter2 = 1;
+            order_buttons[1].parameter2 = 1;
+            arrow_buttons_draw(data.panel.x_min, data.y_max - 160, order_buttons, 2);
+            width += 2 * 24 + 4;
+        }
         width += lang_text_draw(CUSTOM_TRANSLATION, is_battle_icon ? TR_EMPIRE_BATTLE_PARENT : TR_EMPIRE_ROUTE_PARENT,
             data.panel.x_min + 28 + width, data.y_max - 125, FONT_NORMAL_GREEN);
         text_draw_number(is_battle_icon ? obj->invasion_path_id : empire_object_get_latest_distant_battle(
@@ -1248,13 +1256,23 @@ static void button_change_index(int is_down, int param2)
     }
     int change = is_down ? -1 : 1;
     empire_object *obj = empire_object_get(selected_id - 1);
-    if (obj->order_index <= 1 && is_down) {
+    int is_battle = obj->type == EMPIRE_OBJECT_BATTLE_ICON;
+    if ((is_battle ? obj->invasion_years : obj->order_index) <= 1 && is_down) {
         return;
     }
-    empire_object *other_obj = empire_object_get(empire_object_get_in_order(obj->parent_object_id,
-        obj->order_index + change));
-    other_obj->order_index = obj->order_index;
-    obj->order_index += change;
+    if (is_battle) {
+        empire_object *other_obj = (empire_object *)empire_object_get_battle(obj->invasion_path_id,
+            obj->invasion_years + change);
+        if (other_obj) {
+            other_obj->invasion_years = obj->invasion_years;
+        }
+        obj->invasion_years += change;
+    } else {
+        empire_object *other_obj = empire_object_get(empire_object_get_in_order(obj->parent_object_id,
+            obj->order_index + change));
+        other_obj->order_index = obj->order_index;
+        obj->order_index += change;
+    }
     
     if (obj->type == EMPIRE_OBJECT_TRADE_WAYPOINT) {
         window_empire_collect_trade_edges();
