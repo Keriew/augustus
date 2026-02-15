@@ -30,4 +30,11 @@ int scenario_lua_is_active(void);
  */
 lua_State *scenario_lua_get_state(void);
 
+/**
+ * Ensure a Lua state exists. If no script was loaded, creates a bare state
+ * with all API bindings registered so the terminal can execute commands.
+ * @return 1 if a Lua state is available, 0 on failure
+ */
+int scenario_lua_ensure_state(void);
+
 #endif // SCENARIO_LUA_STATE_H

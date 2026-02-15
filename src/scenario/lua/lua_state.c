@@ -129,3 +129,41 @@ lua_State *scenario_lua_get_state(void)
 {
     return global_lua_state;
 }
+
+int scenario_lua_ensure_state(void)
+{
+    if (global_lua_state) {
+        return 1;
+    }
+
+    global_lua_state = luaL_newstate();
+    if (!global_lua_state) {
+        log_error("Failed to create Lua state", 0, 0);
+        return 0;
+    }
+
+    // Open safe standard libraries (no io, os, debug for security)
+    luaL_requiref(global_lua_state, "_G", luaopen_base, 1);
+    lua_pop(global_lua_state, 1);
+    luaL_requiref(global_lua_state, "table", luaopen_table, 1);
+    lua_pop(global_lua_state, 1);
+    luaL_requiref(global_lua_state, "string", luaopen_string, 1);
+    lua_pop(global_lua_state, 1);
+    luaL_requiref(global_lua_state, "math", luaopen_math, 1);
+    lua_pop(global_lua_state, 1);
+    luaL_requiref(global_lua_state, "utf8", luaopen_utf8, 1);
+    lua_pop(global_lua_state, 1);
+    luaL_requiref(global_lua_state, "coroutine", luaopen_coroutine, 1);
+    lua_pop(global_lua_state, 1);
+
+    // Remove dangerous base functions
+    lua_pushnil(global_lua_state);
+    lua_setglobal(global_lua_state, "dofile");
+    lua_pushnil(global_lua_state);
+    lua_setglobal(global_lua_state, "loadfile");
+
+    register_all_apis(global_lua_state);
+
+    log_info("Lua state created for terminal (no script)", 0, 0);
+    return 1;
+}

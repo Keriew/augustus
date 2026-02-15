@@ -76,16 +76,12 @@ static void execute_lua(const char *code)
     snprintf(echo, MAX_LINE_LENGTH, "> %s", code);
     terminal_add_line(echo);
 
-    if (!scenario_lua_is_active()) {
-        terminal_add_line("[error] No Lua state active (load a scenario with a .lua script)");
+    if (!scenario_lua_ensure_state()) {
+        terminal_add_line("[error] Failed to initialize Lua state");
         return;
     }
 
     lua_State *L = scenario_lua_get_state();
-    if (!L) {
-        terminal_add_line("[error] Lua state is NULL");
-        return;
-    }
 
     int top = lua_gettop(L);
 
