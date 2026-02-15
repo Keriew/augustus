@@ -1,6 +1,11 @@
 #include "lua_input_dialog.h"
 
+#include "assets/assets.h"
+#include "core/dir.h"
+#include "core/encoding.h"
+#include "core/file.h"
 #include "core/image.h"
+#include "core/string.h"
 #include "graphics/complex_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
@@ -188,9 +193,22 @@ static void handle_input(const mouse *m, const hotkeys *h)
 static void resolve_image(void)
 {
     image_id = 0;
-    if (data.image[0]) {
-        const uint8_t *img_text = data.image;
-        image_id = rich_text_parse_image_id(&img_text, 0, 1);
+    if (!data.image[0]) {
+        return;
+    }
+    // First try the standard rich_text paths (campaigns/image/, image/)
+    const uint8_t *img_text = data.image;
+    image_id = rich_text_parse_image_id(&img_text, 0, 1);
+    if (image_id) {
+        return;
+    }
+    // Fallback: search in the scenario directory
+    int length = string_length(data.image) + 1;
+    char filename[FILE_NAME_MAX];
+    encoding_to_utf8(data.image, filename, length, encoding_system_uses_decomposed());
+    const char *found = dir_get_file_at_location(filename, PATH_LOCATION_SCENARIO);
+    if (found) {
+        image_id = assets_get_external_image(found, 0);
     }
 }
 

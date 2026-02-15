@@ -4,6 +4,7 @@ function on_load()
         title = "The Senate's Offer",
         subtitle = "Choose wisely",
         text = "Accept a gift or gain favor with the gods?",
+        image = "augustus16.png",
         buttons = {
             { label = "Accept Gold",  on_click = function() finance.add_treasury(1000) end },
             { label = "Pray to Gods", on_click = function() city.change_favor(10) end },
