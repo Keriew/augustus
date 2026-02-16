@@ -13,6 +13,7 @@
 #include "core/zlib_helper.h"
 #include "editor/editor.h"
 #include "empire/city.h"
+#include "empire/editor.h"
 #include "empire/empire.h"
 #include "empire/object.h"
 #include "empire/trade_route.h"
@@ -181,11 +182,6 @@ static int xml_read_info(void)
     }
     string_copy(string_from_ascii(filename), (uint8_t *)data.info_filename, 128);
     return 0;
-}
-
-int *get_current_invasion_path_id(void)
-{
-    return &data.current_invasion_path_id;
 }
 
 static resource_type get_resource_from_attr(const char *key)
@@ -784,6 +780,7 @@ static int parse_xml(char *buf, int buffer_length)
 
     empire_object_set_trade_route_coords(our_city);
     empire_object_init_cities(SCENARIO_CUSTOM_EMPIRE);
+    empire_editor_set_current_invasion_path(data.current_invasion_path_id + 1);
 
     return data.success;
 }

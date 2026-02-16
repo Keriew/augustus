@@ -604,9 +604,11 @@ const empire_object *empire_object_get_battle(int path_id, int year)
 {
     full_empire_object *obj;
     array_foreach(objects, obj) {
-        if (obj->obj.type == EMPIRE_OBJECT_BATTLE_ICON && obj->obj.invasion_path_id == path_id
-            && obj->obj.invasion_years == year) {
-            return &obj->obj;
+        if (obj->in_use) {
+            if (obj->obj.type == EMPIRE_OBJECT_BATTLE_ICON && obj->obj.invasion_path_id == path_id
+                && obj->obj.invasion_years == year) {
+                return &obj->obj;
+            }
         }
     }
     return 0;
@@ -667,20 +669,6 @@ void empire_object_foreach_of_type(void (*callback)(const empire_object *), empi
             callback(&obj->obj);
         }
     }
-}
-
-const empire_object *empire_object_get_battle_icon(int path_id, int year)
-{
-    full_empire_object *obj;
-    array_foreach(objects, obj) {
-        if (obj->in_use) {
-            if (obj->obj.type == EMPIRE_OBJECT_BATTLE_ICON &&
-                obj->obj.invasion_path_id == path_id && obj->obj.invasion_years == year) {
-                return &obj->obj;
-            }
-        }
-    }
-    return 0;
 }
 
 int empire_object_get_max_invasion_path(void)

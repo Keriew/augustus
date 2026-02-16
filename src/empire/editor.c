@@ -31,20 +31,25 @@ static struct {
     int deletion_id;
     int trade_waypoint_parent_id;
     int nearest_trade_waypoint;
-} data = {
-    .current_tool = EMPIRE_TOOL_OUR_CITY,
-    .foreach_param1 = -1,
-    .foreach_param2 = 0,
-    .currently_moving = 0,
-    .move_id = 0,
-    .deletion_success = 0,
-    .deletion_id = 0,
-    .trade_waypoint_parent_id = 0,
-    .nearest_trade_waypoint = 0,
-};
+    int current_invasion_path;
+} data;
 
 static int place_object(int mouse_x, int mouse_y);
 static int delete_object_at(int mouse_x, int mouse_y);
+
+void empire_editor_init(int is_new)
+{
+    data.current_tool = EMPIRE_TOOL_OUR_CITY;
+    data.foreach_param1 = -1;
+    data.foreach_param2 = 0;
+    data.currently_moving = 0;
+    data.move_id = 0;
+    data.deletion_success = 0;
+    data.deletion_id = 0;
+    data.trade_waypoint_parent_id = 0;
+    data.nearest_trade_waypoint = 0;
+    data.current_invasion_path = is_new ? 1 : empire_object_get_max_invasion_path() + 1;
+}
 
 static void update_tool_bounds(void)
 {
@@ -420,8 +425,8 @@ static int place_battle(full_empire_object *battle_obj)
     
     battle_obj->in_use = 1;
     battle_obj->obj.type = EMPIRE_OBJECT_BATTLE_ICON;
-    battle_obj->obj.invasion_path_id = *get_current_invasion_path_id();
-    battle_obj->obj.invasion_years = empire_object_get_latest_battle(battle_obj->obj.invasion_path_id)->invasion_years + 1;
+    battle_obj->obj.invasion_path_id = data.current_invasion_path;
+    battle_obj->obj.invasion_years = empire_object_get_latest_battle(data.current_invasion_path)->invasion_years + 1;
 
     battle_obj->obj.image_id = image_group(GROUP_EMPIRE_BATTLE);
     const image *img = image_get(battle_obj->obj.image_id);
@@ -598,4 +603,14 @@ void empire_editor_clear_trade_route_data(void)
 int empire_editor_get_trade_point_parent(void)
 {
     return data.trade_waypoint_parent_id;
+}
+
+void empire_editor_set_current_invasion_path(int path_id)
+{
+    data.current_invasion_path = path_id;
+}
+
+int empire_editor_get_current_invasion_path(void)
+{
+    return data.current_invasion_path;
 }

@@ -2000,7 +2000,9 @@ static translation_string all_strings[] = {
     {TR_EDITOR_EMPIRE_PROPERTIES_SELECT_IAMGE, "Select empire image"},
     {TR_EDITOR_EMPIRE_PROPERTIES_DEFAULT_IAMGE, "Default image"},
     {TR_EDITOR_EMPIRE_PROPERTIES_SETTINGS, "Empire settings"},
-    {TR_EDITOR_EMPIRE_PROPERTIES_HOTKEYS, "Empire hotkeys"}
+    {TR_EDITOR_EMPIRE_PROPERTIES_HOTKEYS, "Empire hotkeys"},
+    {TR_EDITOR_EMPIRE_PROPERTIES_BORDER_DENSITY, "Change border density"},
+    {TR_EDITOR_EMPIRE_PROPERTIES_NEW_PATH, "Change invasion path"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

@@ -7,6 +7,4 @@ int empire_xml_parse_file(const char *filename, int info_only);
 
 const char *empire_xml_read_info(void);
 
-int *get_current_invasion_path_id(void);
-
 #endif // EMPIRE_IMPORT_XML_H

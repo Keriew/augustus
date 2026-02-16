@@ -1,6 +1,7 @@
 #include "top_menu_editor.h"
 
 #include "core/string.h"
+#include "empire/editor.h"
 #include "empire/empire.h"
 #include "empire/object.h"
 #include "game/file_editor.h"
@@ -332,6 +333,7 @@ static void menu_empire_view(int param)
     } else {
         resource_set_mapping(RESOURCE_ORIGINAL_VERSION);
     }
+    empire_editor_init(0);
     window_editor_empire_show();
 }
 
@@ -345,5 +347,6 @@ static void menu_empire_create(int param)
     empire_clear();
     empire_object_clear();
     empire_object_init_cities(SCENARIO_CUSTOM_EMPIRE);
+    empire_editor_init(1);
     window_editor_empire_show();
 }

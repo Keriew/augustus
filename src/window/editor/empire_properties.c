@@ -2,6 +2,7 @@
 
 #include "core/hotkey_config.h"
 #include "core/string.h"
+#include "empire/editor.h"
 #include "empire/empire.h"
 #include "empire/object.h"
 #include "graphics/button.h"
@@ -20,6 +21,7 @@
 #include "window/config.h"
 #include "window/editor/empire.h"
 #include "window/file_dialog.h"
+#include "window/numeric_input.h"
 
 static struct {
     unsigned int focus_button_id;
@@ -27,14 +29,18 @@ static struct {
 
 static void button_select_image(const generic_button *button);
 static void button_default_image(const generic_button *button);
+static void button_border_density(const generic_button *button);
+static void button_change_invasion_path(const generic_button *button);
 static void button_empire_settings(const generic_button *button);
 static void button_hotkeys(const generic_button *button);
 
 static generic_button generic_buttons[] = {
     {16, 16, 200, 30, button_select_image},
     {16, 56, 200, 30, button_default_image},
-    {16, 96, 200, 30, button_empire_settings},
-    {16, 136, 200, 30, button_hotkeys},
+    {16, 106, 200, 30, button_border_density},
+    {16, 146, 200, 30, button_change_invasion_path},
+    {16, 196, 200, 30, button_empire_settings},
+    {16, 236, 200, 30, button_hotkeys},
 };
 #define NUM_GENERIC_BUTTONS sizeof(generic_buttons) / sizeof(generic_button)
 
@@ -96,6 +102,30 @@ static void button_default_image(const generic_button *button)
     empire_object_init_cities(SCENARIO_CUSTOM_EMPIRE);
 
     window_editor_empire_show();
+}
+
+static void set_density(int value)
+{
+    empire_object *border = (empire_object *)empire_object_get_border();
+    if (!border) {
+        return;
+    }
+    border->width = value;
+}
+
+static void button_border_density(const generic_button *button)
+{
+    window_numeric_input_bound_show(0, 0, button, 3, 4, 300, set_density);
+}
+
+static void set_path(int value)
+{
+    empire_editor_set_current_invasion_path(value);
+}
+
+static void button_change_invasion_path(const generic_button *button)
+{
+    window_numeric_input_bound_show(0, 0, button, 2, 1, 50, set_path);
 }
 
 static void button_empire_settings(const generic_button *button)

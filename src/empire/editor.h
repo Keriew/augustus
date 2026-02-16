@@ -22,6 +22,8 @@ typedef enum {
     EMPIRE_TOOL_MAX = 12
 } empire_tool;
 
+void empire_editor_init(int is_new);
+
 int empire_editor_get_tool(void);
 void empire_editor_set_tool(empire_tool value);
 void empire_editor_change_tool(int amount);
@@ -37,6 +39,9 @@ void empire_editor_move_object_stopp(void);
 void empire_editor_set_trade_point_parent(int parent_id);
 void empire_editor_clear_trade_route_data(void);
 int empire_editor_get_trade_point_parent(void);
+
+void empire_editor_set_current_invasion_path(int path_id);
+int empire_editor_get_current_invasion_path(void);
 
 int empire_editor_handle_placement(const mouse *m, const hotkeys *h);
 
