@@ -1,6 +1,7 @@
 #ifndef MAP_BRIDGE_H
 #define MAP_BRIDGE_H
 #include "building/type.h"
+#include "map/grid.h"
 
 int map_bridge_building_length(void);
 
@@ -9,7 +10,7 @@ int building_type_is_bridge(building_type type);
 //similarly to roadblocks, which also have a building_type check in roadblock.c
 void map_bridge_reset_building_length(void);
 
-int map_bridge_calculate_length_direction(int x, int y, int *length, int *direction);
+int map_bridge_calculate_length_direction(int x, int y, int *length, int *direction, grid_slice *blocking_tiles);
 
 int map_bridge_get_sprite_id(int index, int length, int direction, int is_ship_bridge);
 /**

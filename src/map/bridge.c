@@ -42,7 +42,7 @@ void map_bridge_reset_building_length(void)
     bridge.length = 0;
 }
 
-int map_bridge_calculate_length_direction(int x, int y, int *length, int *direction)
+int map_bridge_calculate_length_direction(int x, int y, int *length, int *direction, grid_slice *blocking_tiles)
 {
     int grid_offset = map_grid_offset(x, y);
     bridge.end_grid_offset = 0;
@@ -79,22 +79,37 @@ int map_bridge_calculate_length_direction(int x, int y, int *length, int *direct
     for (int i = 0; i < 64; i++) { //longer bridges
         grid_offset += bridge.direction_grid_delta;
         bridge.length++;
+        if (i == 0) {
+            //check for an inaccessible tile before the bridge starts
+            int previous_offset = grid_offset - 2 * bridge.direction_grid_delta;
+            if (map_terrain_is(previous_offset, TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_SHRUB | TERRAIN_BUILDING)) {
+                blocking_tiles->grid_offsets[blocking_tiles->size++] = previous_offset;
+                bridge.end_grid_offset = 0;
+            }
+        }
         int next_offset = grid_offset + bridge.direction_grid_delta;
-        if (map_terrain_is(next_offset, TERRAIN_TREE)) {
+        if (map_terrain_is(next_offset, TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_SHRUB | TERRAIN_BUILDING)) {
+            blocking_tiles->grid_offsets[blocking_tiles->size++] = next_offset;
+            bridge.end_grid_offset = 0;
             break;
         }
         if (!map_terrain_is(next_offset, TERRAIN_WATER)) {
             bridge.end_grid_offset = grid_offset;
             if (map_terrain_count_directly_adjacent_with_type(grid_offset, TERRAIN_WATER) != 3) {
+                blocking_tiles->grid_offsets[blocking_tiles->size++] = grid_offset;
                 bridge.end_grid_offset = 0;
             }
             *length = bridge.length;
             return bridge.end_grid_offset;
         }
-        if (map_terrain_is(next_offset, TERRAIN_ROAD | TERRAIN_BUILDING)) {
+        if (map_is_bridge(grid_offset)) {
+            blocking_tiles->grid_offsets[blocking_tiles->size++] = grid_offset;
+            bridge.end_grid_offset = 0;
             break;
         }
         if (map_terrain_count_diagonally_adjacent_with_type(grid_offset, TERRAIN_WATER) != 4) {
+            blocking_tiles->grid_offsets[blocking_tiles->size++] = grid_offset;
+            bridge.end_grid_offset = 0;
             break;
         }
     }
@@ -315,8 +330,6 @@ int map_bridge_find_start_and_direction(int grid_offset, int *axis, int *axis_di
     return start;
 }
 
-
-
 void map_bridge_remove(int grid_offset, int mark_deleted)
 {
     if (!map_is_bridge(grid_offset)) {
@@ -358,7 +371,6 @@ void map_bridge_remove(int grid_offset, int mark_deleted)
     map_tiles_update_region_water(bridge_x_start, bridge_y_start, bridge_x_end, bridge_y_end);
     map_tiles_update_region_empty_land(bridge_x_start, bridge_y_start, bridge_x_end, bridge_y_end);
 }
-
 
 int map_bridge_count_figures(int grid_offset)
 {
