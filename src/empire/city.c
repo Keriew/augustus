@@ -802,3 +802,22 @@ int empire_city_get_icon_image_id(empire_city_icon_type type)
             return -1;
     }
 }
+
+int empire_city_get_at(int x, int y, const uint8_t *name)
+{
+    empire_city *city;
+    array_foreach(cities, city) {
+        if (city->in_use) {
+            empire_object *obj = empire_object_get(city->empire_object_id);
+            int name_condition = 1;
+            if (name) {
+                name_condition = string_equals(name, empire_city_get_name(city));
+            }
+            if (obj->x == x && obj->y == y && name_condition) {
+                return array_index;
+            }
+        }
+    }
+    
+    return 0;
+}
