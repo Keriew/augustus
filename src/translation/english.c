@@ -2004,7 +2004,9 @@ static translation_string all_strings[] = {
     {TR_EDITOR_EMPIRE_PROPERTIES_BORDER_DENSITY, "Change border density"},
     {TR_EDITOR_EMPIRE_PROPERTIES_NEW_PATH, "Change invasion path"},
     {TR_EDITOR_EMPIRE_PROPERTIES_ADD_ORNAMENT, "Add ornament"},
-    {TR_EDITOR_EMPIRE_PROPERTIES_ALL_ORNAMENTS, "Add all ornaments"}
+    {TR_EDITOR_EMPIRE_PROPERTIES_ALL_ORNAMENTS, "Add all ornaments"},
+    {TR_EMPIRE_TOOLTIP_EDIT_NAME, "Edit city name"},
+    {TR_EMPIRE_TOOLTIP_ADD_RESOURCE, "Add resource"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

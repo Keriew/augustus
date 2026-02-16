@@ -1282,13 +1282,45 @@ static void button_change_index(int is_down, int param2)
     window_request_refresh();
 }
 
+static int image_button_tooltips(tooltip_context *c)
+{
+    image_button *btn;
+    const mouse *m = mouse_get();
+    for (int i = 0; i < 3; i++) {
+        switch (i) {
+            case 0:
+                btn = &edit_city_name_button[0]; break;
+            case 1:
+                btn = &add_resource_buttons[0]; break;
+            case 2:
+                btn = &add_resource_buttons[1]; break;
+            default:
+                return 0;
+        }
+        if (btn->x_offset <= m->x && btn->x_offset + btn->width > m->x &&
+            btn->y_offset <= m->y && btn->y_offset + btn->height > m->y) {
+            c->text_group = CUSTOM_TRANSLATION;
+            c->text_id = !i ? TR_EMPIRE_TOOLTIP_EDIT_NAME : TR_EMPIRE_TOOLTIP_ADD_RESOURCE;
+            c->type = TOOLTIP_BUTTON;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static void get_tooltip(tooltip_context *c)
+{
+    image_button_tooltips(c);
+}
+
 void window_editor_empire_show(void)
 {
     window_type window = {
         WINDOW_EDITOR_EMPIRE,
         draw_background,
         draw_foreground,
-        handle_input
+        handle_input,
+        get_tooltip
     };
     init();
     window_show(&window);
