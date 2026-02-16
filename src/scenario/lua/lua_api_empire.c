@@ -1,6 +1,7 @@
 #include "lua/lua.h"
 #include "lua/lauxlib.h"
 
+#include "core/image.h"
 #include "core/log.h"
 #include "core/string.h"
 #include "empire/city.h"
@@ -9,6 +10,8 @@
 #include "empire/trade_prices.h"
 #include "empire/trade_route.h"
 #include "empire/type.h"
+
+#define BASE_BORDER_FLAG_IMAGE_ID 3323
 
 // ---------------------------------------------------------------------------
 // Empire city queries
@@ -159,6 +162,86 @@ static int l_empire_can_export_to_city(lua_State *L)
 }
 
 // ---------------------------------------------------------------------------
+// City attribute setters
+// ---------------------------------------------------------------------------
+
+// empire.set_city_type(city_id, type)
+static int l_empire_set_city_type(lua_State *L)
+{
+    int city_id = (int) luaL_checkinteger(L, 1);
+    int type = (int) luaL_checkinteger(L, 2);
+    empire_city_set_type(city_id, type);
+    return 0;
+}
+
+// empire.set_city_vulnerable(city_id)
+static int l_empire_set_city_vulnerable(lua_State *L)
+{
+    int city_id = (int) luaL_checkinteger(L, 1);
+    empire_city_set_vulnerable(city_id);
+    return 0;
+}
+
+// empire.set_city_foreign(city_id)
+static int l_empire_set_city_foreign(lua_State *L)
+{
+    int city_id = (int) luaL_checkinteger(L, 1);
+    empire_city_set_foreign(city_id);
+    return 0;
+}
+
+// empire.expand_empire()
+static int l_empire_expand_empire(lua_State *L)
+{
+    empire_city_expand_empire();
+    return 0;
+}
+
+// empire.set_city_sells(city_id, resource, enabled)
+static int l_empire_set_city_sells(lua_State *L)
+{
+    int city_id = (int) luaL_checkinteger(L, 1);
+    int resource = (int) luaL_checkinteger(L, 2);
+    int enabled = lua_toboolean(L, 3);
+    empire_city *city = empire_city_get(city_id);
+    if (!city || !city->in_use) {
+        return 0;
+    }
+    empire_city_change_selling_of_resource(city, resource, enabled);
+    return 0;
+}
+
+// empire.set_city_buys(city_id, resource, enabled)
+static int l_empire_set_city_buys(lua_State *L)
+{
+    int city_id = (int) luaL_checkinteger(L, 1);
+    int resource = (int) luaL_checkinteger(L, 2);
+    int enabled = lua_toboolean(L, 3);
+    empire_city *city = empire_city_get(city_id);
+    if (!city || !city->in_use) {
+        return 0;
+    }
+    empire_city_change_buying_of_resource(city, resource, enabled);
+    return 0;
+}
+
+// empire.unlock_all_resources()
+static int l_empire_unlock_all_resources(lua_State *L)
+{
+    lua_pushboolean(L, empire_unlock_all_resources());
+    return 1;
+}
+
+// empire.set_own_resource(resource, available)
+static int l_empire_set_own_resource(lua_State *L)
+{
+    int resource = (int) luaL_checkinteger(L, 1);
+    int available = lua_toboolean(L, 2);
+    lua_pushboolean(L, empire_city_change_own_resource_availability(resource, available));
+    return 1;
+}
+
+// ---------------------------------------------------------------------------
 // Trade routes
 // ---------------------------------------------------------------------------
 
@@ -279,6 +362,269 @@ static int l_empire_object_count(lua_State *L)
 static int l_empire_selected_object(lua_State *L)
 {
     lua_pushinteger(L, empire_selected_object());
+    return 1;
+}
+
+// empire.object_type(object_id) -> integer|nil
+static int l_empire_object_type(lua_State *L)
+{
+    int object_id = (int) luaL_checkinteger(L, 1);
+    full_empire_object *obj = empire_object_get_full(object_id);
+    if (!obj || !obj->in_use) {
+        lua_pushnil(L);
+        return 1;
+    }
+    lua_pushinteger(L, obj->obj.type);
+    return 1;
+}
+
+// empire.object_position(object_id) -> x, y | nil
+static int l_empire_object_position(lua_State *L)
+{
+    int object_id = (int) luaL_checkinteger(L, 1);
+    full_empire_object *obj = empire_object_get_full(object_id);
+    if (!obj || !obj->in_use) {
+        lua_pushnil(L);
+        return 1;
+    }
+    lua_pushinteger(L, obj->obj.x);
+    lua_pushinteger(L, obj->obj.y);
+    return 2;
+}
+
+// empire.object_invasion_path(object_id) -> integer|nil
+static int l_empire_object_invasion_path(lua_State *L)
+{
+    int object_id = (int) luaL_checkinteger(L, 1);
+    full_empire_object *obj = empire_object_get_full(object_id);
+    if (!obj || !obj->in_use) {
+        lua_pushnil(L);
+        return 1;
+    }
+    lua_pushinteger(L, obj->obj.invasion_path_id);
+    return 1;
+}
+
+// ---------------------------------------------------------------------------
+// Empire object creation
+// ---------------------------------------------------------------------------
+
+// empire.create_object({ type, x, y, ... }) -> object_id | nil
+// General-purpose empire object factory supporting all object types.
+static int l_empire_create_object(lua_State *L)
+{
+    luaL_checktype(L, 1, LUA_TTABLE);
+
+    // Required: type
+    lua_getfield(L, 1, "type");
+    int type = (int) luaL_checkinteger(L, -1);
+    lua_pop(L, 1);
+
+    // Common optional fields
+    lua_getfield(L, 1, "x");
+    int x = lua_isnil(L, -1) ? 0 : (int) lua_tointeger(L, -1);
+    lua_pop(L, 1);
+
+    lua_getfield(L, 1, "y");
+    int y = lua_isnil(L, -1) ? 0 : (int) lua_tointeger(L, -1);
+    lua_pop(L, 1);
+
+    lua_getfield(L, 1, "width");
+    int width = lua_isnil(L, -1) ? 0 : (int) lua_tointeger(L, -1);
+    lua_pop(L, 1);
+
+    lua_getfield(L, 1, "height");
+    int height = lua_isnil(L, -1) ? 0 : (int) lua_tointeger(L, -1);
+    lua_pop(L, 1);
+
+    lua_getfield(L, 1, "image_id");
+    int image_id = lua_isnil(L, -1) ? 0 : (int) lua_tointeger(L, -1);
+    lua_pop(L, 1);
+
+    if (type == EMPIRE_OBJECT_BORDER) {
+        // Border: allocate parent object, then iterate edges array
+        lua_getfield(L, 1, "density");
+        int density = lua_isnil(L, -1) ? 50 : (int) lua_tointeger(L, -1);
+        lua_pop(L, 1);
+
+        full_empire_object *border_obj = empire_object_get_new();
+        if (!border_obj) {
+            log_error("Lua: create_object(BORDER) failed - out of memory", 0, 0);
+            lua_pushnil(L);
+            return 1;
+        }
+        border_obj->in_use = 1;
+        border_obj->obj.type = EMPIRE_OBJECT_BORDER;
+        border_obj->obj.width = density;
+        int border_id = (int) border_obj->obj.id;
+
+        // Process edges array
+        lua_getfield(L, 1, "edges");
+        if (lua_istable(L, -1)) {
+            int n = (int) lua_rawlen(L, -1);
+            for (int i = 1; i <= n; i++) {
+                lua_rawgeti(L, -1, i);
+                if (lua_istable(L, -1)) {
+                    full_empire_object *edge = empire_object_get_new();
+                    if (edge) {
+                        edge->in_use = 1;
+                        edge->obj.type = EMPIRE_OBJECT_BORDER_EDGE;
+
+                        lua_getfield(L, -1, "x");
+                        edge->obj.x = lua_isnil(L, -1) ? 0 : (int) lua_tointeger(L, -1);
+                        lua_pop(L, 1);
+
+                        lua_getfield(L, -1, "y");
+                        edge->obj.y = lua_isnil(L, -1) ? 0 : (int) lua_tointeger(L, -1);
+                        lua_pop(L, 1);
+
+                        lua_getfield(L, -1, "hidden");
+                        int hidden = lua_toboolean(L, -1);
+                        lua_pop(L, 1);
+
+                        edge->obj.image_id = hidden ? 0 : BASE_BORDER_FLAG_IMAGE_ID;
+                    }
+                }
+                lua_pop(L, 1); // pop the edge table
+            }
+        }
+        lua_pop(L, 1); // pop edges
+
+        lua_pushinteger(L, border_id);
+        return 1;
+    }
+
+    // All other types: allocate a single object
+    full_empire_object *obj = empire_object_get_new();
+    if (!obj) {
+        log_error("Lua: create_object failed - out of memory", 0, 0);
+        lua_pushnil(L);
+        return 1;
+    }
+
+    obj->in_use = 1;
+    obj->obj.type = type;
+    obj->obj.x = x;
+    obj->obj.y = y;
+    obj->obj.width = width;
+    obj->obj.height = height;
+    obj->obj.image_id = image_id;
+
+    switch (type) {
+        case EMPIRE_OBJECT_ORNAMENT:
+            break;
+
+        case EMPIRE_OBJECT_BATTLE_ICON:
+            lua_getfield(L, 1, "invasion_path_id");
+            obj->obj.invasion_path_id = lua_isnil(L, -1) ? 0 : (int) lua_tointeger(L, -1);
+            lua_pop(L, 1);
+
+            lua_getfield(L, 1, "invasion_years");
+            obj->obj.invasion_years = lua_isnil(L, -1) ? 0 : (int) lua_tointeger(L, -1);
+            lua_pop(L, 1);
+
+            if (!obj->obj.image_id) {
+                obj->obj.image_id = image_group(GROUP_EMPIRE_BATTLE);
+            }
+            break;
+
+        case EMPIRE_OBJECT_ROMAN_ARMY:
+        case EMPIRE_OBJECT_ENEMY_ARMY:
+            lua_getfield(L, 1, "distant_battle_travel_months");
+            obj->obj.distant_battle_travel_months = lua_isnil(L, -1) ? 0 : (int) lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            break;
+
+        case EMPIRE_OBJECT_LAND_TRADE_ROUTE:
+        case EMPIRE_OBJECT_SEA_TRADE_ROUTE:
+            lua_getfield(L, 1, "trade_route_id");
+            obj->obj.trade_route_id = lua_isnil(L, -1) ? 0 : (int) lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            break;
+
+        case EMPIRE_OBJECT_TRADE_WAYPOINT:
+            break;
+
+        case EMPIRE_OBJECT_BORDER_EDGE: {
+            lua_getfield(L, 1, "hidden");
+            int hidden = lua_toboolean(L, -1);
+            lua_pop(L, 1);
+            obj->obj.image_id = hidden ? 0 : BASE_BORDER_FLAG_IMAGE_ID;
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    lua_pushinteger(L, (int) obj->obj.id);
+    return 1;
+}
+
+// ---------------------------------------------------------------------------
+// Invasion path creation
+// ---------------------------------------------------------------------------
+
+// empire.create_invasion_path({ {x, y}, {x, y}, ... }) -> path_id | nil
+static int l_empire_create_invasion_path(lua_State *L)
+{
+    luaL_checktype(L, 1, LUA_TTABLE);
+
+    int n = (int) lua_rawlen(L, 1);
+    if (n <= 0) {
+        lua_pushnil(L);
+        return 1;
+    }
+
+    int path_id = empire_object_get_max_invasion_path() + 1;
+    int battle_image = image_group(GROUP_EMPIRE_BATTLE);
+
+    // First pass: allocate all battle icon objects
+    int *object_ids = lua_newuserdata(L, sizeof(int) * n);
+
+    for (int i = 1; i <= n; i++) {
+        lua_rawgeti(L, 1, i);
+        if (!lua_istable(L, -1)) {
+            lua_pop(L, 1);
+            lua_pushnil(L);
+            return 1;
+        }
+
+        lua_getfield(L, -1, "x");
+        int bx = (int) luaL_checkinteger(L, -1);
+        lua_pop(L, 1);
+
+        lua_getfield(L, -1, "y");
+        int by = (int) luaL_checkinteger(L, -1);
+        lua_pop(L, 1);
+
+        full_empire_object *battle = empire_object_get_new();
+        if (!battle) {
+            log_error("Lua: create_invasion_path failed - out of memory", 0, 0);
+            lua_pushnil(L);
+            return 1;
+        }
+
+        battle->in_use = 1;
+        battle->obj.type = EMPIRE_OBJECT_BATTLE_ICON;
+        battle->obj.invasion_path_id = path_id;
+        battle->obj.image_id = battle_image;
+        battle->obj.x = bx;
+        battle->obj.y = by;
+        object_ids[i - 1] = (int) battle->obj.id;
+
+        lua_pop(L, 1); // pop the battle table
+    }
+
+    // Set invasion_years in reverse order (last battle = 1, first = n)
+    for (int i = 0; i < n; i++) {
+        full_empire_object *battle = empire_object_get_full(object_ids[i]);
+        if (battle) {
+            battle->obj.invasion_years = n - i;
+        }
+    }
+
+    lua_pushinteger(L, path_id);
     return 1;
 }
 
@@ -459,6 +805,15 @@ static const luaL_Reg empire_funcs[] = {
     {"can_export",           l_empire_can_export},
     {"can_import_from_city", l_empire_can_import_from_city},
     {"can_export_to_city",   l_empire_can_export_to_city},
+    // City attribute setters
+    {"set_city_type",        l_empire_set_city_type},
+    {"set_city_vulnerable",  l_empire_set_city_vulnerable},
+    {"set_city_foreign",     l_empire_set_city_foreign},
+    {"expand_empire",        l_empire_expand_empire},
+    {"set_city_sells",       l_empire_set_city_sells},
+    {"set_city_buys",        l_empire_set_city_buys},
+    {"unlock_all_resources", l_empire_unlock_all_resources},
+    {"set_own_resource",     l_empire_set_own_resource},
     // Trade routes
     {"route_limit",          l_empire_route_limit},
     {"route_traded",         l_empire_route_traded},
@@ -475,6 +830,13 @@ static const luaL_Reg empire_funcs[] = {
     // Objects
     {"object_count",         l_empire_object_count},
     {"selected_object",      l_empire_selected_object},
+    {"object_type",          l_empire_object_type},
+    {"object_position",      l_empire_object_position},
+    {"object_invasion_path", l_empire_object_invasion_path},
+    // Object creation
+    {"create_object",        l_empire_create_object},
+    // Invasion path creation
+    {"create_invasion_path", l_empire_create_invasion_path},
     // City creation
     {"create_city",          l_empire_create_city},
     {NULL, NULL}

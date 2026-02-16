@@ -98,6 +98,48 @@ function empire.can_import_from_city(city_id, resource) end
 function empire.can_export_to_city(city_id, resource) end
 
 ----------------------------------------------------------------
+-- City attribute setters
+----------------------------------------------------------------
+
+--- Set the type of an empire city
+---@param city_id integer
+---@param type integer empire.CITY_TYPE constant
+function empire.set_city_type(city_id, type) end
+
+--- Mark an empire city as vulnerable roman
+---@param city_id integer
+function empire.set_city_vulnerable(city_id) end
+
+--- Mark an empire city as distant foreign
+---@param city_id integer
+function empire.set_city_foreign(city_id) end
+
+--- Expand the empire: converts FUTURE_TRADE cities to TRADE, FUTURE_ROMAN to DISTANT_ROMAN
+function empire.expand_empire() end
+
+--- Toggle whether a city sells a specific resource
+---@param city_id integer
+---@param resource integer RESOURCE constant
+---@param enabled boolean true to enable selling, false to disable
+function empire.set_city_sells(city_id, resource, enabled) end
+
+--- Toggle whether a city buys a specific resource
+---@param city_id integer
+---@param resource integer RESOURCE constant
+---@param enabled boolean true to enable buying, false to disable
+function empire.set_city_buys(city_id, resource, enabled) end
+
+--- Make all resources available from our city
+---@return boolean success
+function empire.unlock_all_resources() end
+
+--- Toggle resource availability for our own city
+---@param resource integer RESOURCE constant
+---@param available boolean true to make available, false to remove
+---@return boolean success
+function empire.set_own_resource(resource, available) end
+
+----------------------------------------------------------------
 -- Trade route quantities
 ----------------------------------------------------------------
 
@@ -170,8 +212,76 @@ function empire.set_buy_price(resource, price) end
 function empire.set_sell_price(resource, price) end
 
 ----------------------------------------------------------------
--- Empire objects
+-- Empire objects – queries
 ----------------------------------------------------------------
+
+--- Get the total number of empire objects
+---@return integer count
+function empire.object_count() end
+
+--- Get the id of the currently selected empire object
+---@return integer object_id
+function empire.selected_object() end
+
+--- Get the type of an empire object
+---@param object_id integer
+---@return integer|nil type empire.OBJECT_TYPE constant, or nil if invalid
+function empire.object_type(object_id) end
+
+--- Get the position of an empire object
+---@param object_id integer
+---@return integer|nil x X coordinate, or nil if invalid
+---@return integer|nil y Y coordinate (only returned when x is non-nil)
+function empire.object_position(object_id) end
+
+--- Get the invasion path id of an empire object
+---@param object_id integer
+---@return integer|nil path_id Invasion path id, or nil if invalid
+function empire.object_invasion_path(object_id) end
+
+----------------------------------------------------------------
+-- Empire object creation
+----------------------------------------------------------------
+
+--- Create a new empire object on the empire map.
+--- Accepts a table with the following fields:
+---   type                         (integer) — empire.OBJECT_TYPE constant (required)
+---   x                            (integer) — x position on empire map (default 0)
+---   y                            (integer) — y position on empire map (default 0)
+---   width                        (integer) — object width (default 0)
+---   height                       (integer) — object height (default 0)
+---   image_id                     (integer) — image id (default 0, auto-set for some types)
+---
+--- Type-specific fields:
+---   BORDER:
+---     density                    (integer) — spacing between edge flags (default 50)
+---     edges                      (table)   — array of {x, y, hidden?} edge definitions
+---   BATTLE_ICON:
+---     invasion_path_id           (integer) — invasion path this battle belongs to
+---     invasion_years             (integer) — year offset in invasion sequence
+---   ROMAN_ARMY / ENEMY_ARMY:
+---     distant_battle_travel_months (integer) — travel time in months
+---   LAND_TRADE_ROUTE / SEA_TRADE_ROUTE:
+---     trade_route_id             (integer) — associated trade route id
+---   BORDER_EDGE:
+---     hidden                     (boolean) — if true, border flag is invisible
+---
+--- Returns the empire object id of the newly created object, or nil on failure.
+---@param opts table
+---@return integer|nil object_id
+function empire.create_object(opts) end
+
+----------------------------------------------------------------
+-- Invasion path creation
+----------------------------------------------------------------
+
+--- Create a new invasion path with a sequence of battle icons.
+--- Each entry in the array defines a battle location: { x = integer, y = integer }
+--- Battle icons are created with invasion_years set automatically (first = farthest, last = 1).
+--- Returns the invasion path id, or nil on failure.
+---@param battles {x: integer, y: integer}[]
+---@return integer|nil path_id
+function empire.create_invasion_path(battles) end
 
 ----------------------------------------------------------------
 -- City creation
@@ -191,18 +301,6 @@ function empire.set_sell_price(resource, price) end
 ---@param opts {name: string, x: integer, y: integer, type?: integer, trade_route_type?: string, trade_route_cost?: integer, buys?: integer[], sells?: integer[]}
 ---@return integer|nil object_id
 function empire.create_city(opts) end
-
-----------------------------------------------------------------
--- Empire objects
-----------------------------------------------------------------
-
---- Get the total number of empire objects
----@return integer count
-function empire.object_count() end
-
---- Get the id of the currently selected empire object
----@return integer object_id
-function empire.selected_object() end
 
 ----------------------------------------------------------------
 -- Constants
