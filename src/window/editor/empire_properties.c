@@ -111,6 +111,9 @@ static const default_city default_cities[] = {
 };
 #define NUM_DEFAULT_CITIES sizeof(default_cities) / sizeof(default_city)
 
+#define IS_DEFAULT_IMAGE empire_get_image_id() == image_group(editor_is_active() ?\
+    GROUP_EDITOR_EMPIRE_MAP : GROUP_EMPIRE_MAP)
+
 static list_box_type default_cities_list_box = {
     240, // x
     16, // y
@@ -185,12 +188,13 @@ static void draw_foreground(void)
     graphics_in_dialog();
     
     for (int i = 0; i < NUM_GENERIC_BUTTONS; i++) {
+        font_t font = !(IS_DEFAULT_IMAGE) && i >= 4 && i <= 6 ? FONT_NORMAL_RED : FONT_NORMAL_BLACK;
         button_border_draw(generic_buttons[i].x, generic_buttons[i].y, generic_buttons[i].width,
-            generic_buttons[i].height, data.focus_button_id == i + 1);
+            generic_buttons[i].height, data.focus_button_id == i + 1 && (i >= 4 && i <= 6 ? IS_DEFAULT_IMAGE : 1));
         lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_EMPIRE_PROPERTIES_SELECT_IAMGE + i, generic_buttons[i].x,
-            generic_buttons[i].y + 8, generic_buttons[i].width, FONT_NORMAL_BLACK);
+            generic_buttons[i].y + 8, generic_buttons[i].width, font);
     }
-    if (empire_get_image_id() == image_group(editor_is_active() ? GROUP_EDITOR_EMPIRE_MAP : GROUP_EMPIRE_MAP)) {
+    if (IS_DEFAULT_IMAGE) {
         list_box_request_refresh(&default_cities_list_box);
         list_box_draw(&default_cities_list_box);
     }
@@ -204,10 +208,11 @@ static void handle_input(const mouse *m, const hotkeys *h)
     if (generic_buttons_handle_mouse(m_dialog, 0, 0, generic_buttons, NUM_GENERIC_BUTTONS, &data.focus_button_id)) {
         return;
     }
-    if (list_box_handle_input(&default_cities_list_box, m_dialog, 1)) {
-        return;
+    if (IS_DEFAULT_IMAGE) {
+        if (list_box_handle_input(&default_cities_list_box, m_dialog, 1)) {
+            return;
+        }
     }
-
     if (input_go_back_requested(m, h)) {
         window_editor_empire_show();
     }
@@ -261,6 +266,9 @@ static void add_ornament(int value)
 
 static void button_add_ornament(const generic_button *button)
 {
+    if (!(IS_DEFAULT_IMAGE)) {
+        return;
+    }
     static const uint8_t *ornament_texts[TOTAL_ORNAMENTS];
     int ornament_count = 0;
     for (int ornament_id = 0; ornament_id < TOTAL_ORNAMENTS; ornament_id++) {
@@ -279,6 +287,9 @@ static void button_add_ornament(const generic_button *button)
 
 static void button_add_all_ornaments(const generic_button *button)
 {
+    if (!(IS_DEFAULT_IMAGE)) {
+        return;
+    }
     for (int ornament_id = 0; ornament_id < TOTAL_ORNAMENTS; ornament_id++) {
         empire_object_add_ornament(ornament_id);
     }
@@ -287,6 +298,9 @@ static void button_add_all_ornaments(const generic_button *button)
 
 static void button_add_all_cities(const generic_button *button)
 {
+    if (!(IS_DEFAULT_IMAGE)) {
+        return;
+    }
     for (int i = 0; i < NUM_DEFAULT_CITIES; i++) {
         add_city(&default_cities[i]);
     }
