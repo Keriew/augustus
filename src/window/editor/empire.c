@@ -1297,6 +1297,9 @@ static int image_button_tooltips(tooltip_context *c)
             default:
                 return 0;
         }
+        if (btn->dont_draw) {
+            continue;
+        }
         if (btn->x_offset <= m->x && btn->x_offset + btn->width > m->x &&
             btn->y_offset <= m->y && btn->y_offset + btn->height > m->y) {
             c->text_group = CUSTOM_TRANSLATION;
