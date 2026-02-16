@@ -21,34 +21,6 @@ static struct {
     int invasion_path_id;
 } data;
 
-static const char *ORNAMENTS[] = {
-    "The Stonehenge",
-    "Gallic Wheat",
-    "The Pyrenees",
-    "Iberian Aqueduct",
-    "Triumphal Arch",
-    "West Desert Wheat",
-    "Lighthouse of Alexandria",
-    "West Desert Palm Trees",
-    "Trade Ship",
-    "Waterside Palm Trees",
-    "Colosseum",
-    "The Alps",
-    "Roman Tree",
-    "Greek Mountain Range",
-    "The Parthenon",
-    "The Pyramids",
-    "The Hagia Sophia",
-    "East Desert Palm Trees",
-    "East Desert Wheat",
-    "Trade Camel",
-    "Mount Etna",
-    "Colossus of Rhodes",
-    "The Temple"
-};
-
-#define TOTAL_ORNAMENTS (sizeof(ORNAMENTS) / sizeof(const char *))
-
 static void export_map(void)
 {
     xml_exporter_new_element("map");
@@ -72,10 +44,9 @@ static void export_map(void)
         xml_exporter_close_element();
     } else {
         for (int i = 0; i < TOTAL_ORNAMENTS; i++) {
-            int ornament_image_id = i < ORIGINAL_ORNAMENTS ? BASE_ORNAMENT_IMAGE_ID + i : ORIGINAL_ORNAMENTS - i - 2;
-            if (empire_object_get_ornament(ornament_image_id)) {
+            if (empire_object_get_ornament(empire_object_ornament_image_id_get(i))) {
                 xml_exporter_new_element("ornament");
-                xml_exporter_add_attribute_text("type", ORNAMENTS[i]);
+                xml_exporter_add_attribute_text("type", XML_ORNAMENTS[i]);
                 xml_exporter_close_element();
             }
         }

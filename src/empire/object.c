@@ -827,6 +827,12 @@ int empire_object_get_nearest_of_type(int x, int y, empire_object_type type)
     return empire_object_get_nearest_of_type_with_condition(x, y, type, object_no_condition);
 }
 
+int empire_object_ornament_image_id_get(int ornament_id)
+{
+    return ornament_id < ORIGINAL_ORNAMENTS ? BASE_ORNAMENT_IMAGE_ID + ornament_id :
+        ORIGINAL_ORNAMENTS - ornament_id - 2;
+}
+
 int empire_object_count_ornaments(void)
 {
     int total_ornaments = 0;
@@ -848,6 +854,28 @@ int empire_object_get_ornament(int image_id)
         }
     }
     return 0;
+}
+
+int empire_object_add_ornament(int ornament_id)
+{
+    if (empire_object_get_ornament(empire_object_ornament_image_id_get(ornament_id))) {
+        return 1;
+    }
+    full_empire_object *obj = empire_object_get_new();
+    if (!obj) {
+        log_error("Error creating new object - out of memory", 0, 0);
+        return 0;
+    }
+    obj->in_use = 1;
+    obj->obj.type = EMPIRE_OBJECT_ORNAMENT;
+    if (ornament_id < ORIGINAL_ORNAMENTS) {
+        obj->obj.image_id = BASE_ORNAMENT_IMAGE_ID + ornament_id;
+    } else {
+        obj->obj.image_id = ORIGINAL_ORNAMENTS - ornament_id - 2;
+    }
+    obj->obj.x = ORNAMENT_POSITIONS[ornament_id].x;
+    obj->obj.y = ORNAMENT_POSITIONS[ornament_id].y;
+    return 1;
 }
 
 void empire_object_set_expanded(int object_id, int new_city_type)

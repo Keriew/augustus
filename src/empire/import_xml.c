@@ -52,42 +52,6 @@ typedef struct {
     int num_months;
 } waypoint;
 
-static const char *ORNAMENTS[] = {
-    "The Stonehenge",
-    "Gallic Wheat",
-    "The Pyrenees",
-    "Iberian Aqueduct",
-    "Triumphal Arch",
-    "West Desert Wheat",
-    "Lighthouse of Alexandria",
-    "West Desert Palm Trees",
-    "Trade Ship",
-    "Waterside Palm Trees",
-    "Colosseum|The Colosseum",
-    "The Alps",
-    "Roman Tree",
-    "Greek Mountain Range",
-    "The Parthenon",
-    "The Pyramids",
-    "The Hagia Sophia",
-    "East Desert Palm Trees",
-    "East Desert Wheat",
-    "Trade Camel",
-    "Mount Etna",
-    "Colossus of Rhodes",
-    "The Temple"
-};
-
-#define TOTAL_ORNAMENTS (sizeof(ORNAMENTS) / sizeof(const char *))
-
-map_point ORNAMENT_POSITIONS[TOTAL_ORNAMENTS] = {
-    {  247,  81 }, {  361, 356 }, {  254, 428 }, {  199, 590 }, {  275, 791 },
-    {  423, 802 }, { 1465, 883 }, {  518, 764 }, {  691, 618 }, {  742, 894 },
-    {  726, 468 }, {  502, 280 }, {  855, 551 }, { 1014, 443 }, { 1158, 698 },
-    { 1431, 961 }, { 1300, 500 }, { 1347, 648 }, { 1707, 783 }, { 1704, 876 },
-    {  829, 720 }, { 1347, 745 }, { 1640, 922 }
-};
-
 static struct {
     int success;
     int version;
@@ -254,29 +218,6 @@ static int xml_start_coords(void)
     return 1;
 }
 
-static void add_ornament(int ornament_id)
-{
-    if (data.added_ornaments[ornament_id]) {
-        return;
-    }
-    data.added_ornaments[ornament_id] = 1;
-    full_empire_object *obj = empire_object_get_new();
-    if (!obj) {
-        data.success = 0;
-        log_error("Error creating new object - out of memory", 0, 0);
-        return;
-    }
-    obj->in_use = 1;
-    obj->obj.type = EMPIRE_OBJECT_ORNAMENT;
-    if (ornament_id < ORIGINAL_ORNAMENTS) {
-        obj->obj.image_id = BASE_ORNAMENT_IMAGE_ID + ornament_id;
-    } else {
-        obj->obj.image_id = ORIGINAL_ORNAMENTS - ornament_id - 2;
-    }
-    obj->obj.x = ORNAMENT_POSITIONS[ornament_id].x;
-    obj->obj.y = ORNAMENT_POSITIONS[ornament_id].y;
-}
-
 static int xml_start_ornament(void)
 {
     const char *parent_name = xml_parser_get_parent_element_name();
@@ -292,17 +233,23 @@ static int xml_start_ornament(void)
         log_info("No ornament type specified", 0, 0);
         return 1;
     }
-    int ornament_id = xml_parser_get_attribute_enum("type", ORNAMENTS, TOTAL_ORNAMENTS, 0);
+    int ornament_id = xml_parser_get_attribute_enum("type", XML_ORNAMENTS, TOTAL_ORNAMENTS, 0);
     if (ornament_id == -1) {
         if (strcmp("all", xml_parser_get_attribute_string("type")) == 0) {
             for (int i = 0; i < (int) TOTAL_ORNAMENTS; i++) {
-                add_ornament(i);
+                if (!empire_object_add_ornament(i)) {
+                    data.success = 0;
+                    return 0;
+                }
             }
         } else {
             log_info("Invalid ornament type specified", 0, 0);
         }
     } else {
-        add_ornament(ornament_id);
+        if (!empire_object_add_ornament(ornament_id)) {
+            data.success = 0;
+            return 0;
+        }
     }
     return 1;
 }

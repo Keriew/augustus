@@ -22,15 +22,19 @@
 #include "window/editor/empire.h"
 #include "window/file_dialog.h"
 #include "window/numeric_input.h"
+#include "window/select_list.h"
 
 static struct {
     unsigned int focus_button_id;
+    int listed_ornaments[TOTAL_ORNAMENTS];
 } data;
 
 static void button_select_image(const generic_button *button);
 static void button_default_image(const generic_button *button);
 static void button_border_density(const generic_button *button);
 static void button_change_invasion_path(const generic_button *button);
+static void button_add_ornament(const generic_button *button);
+static void button_add_all_ornaments(const generic_button *button);
 static void button_empire_settings(const generic_button *button);
 static void button_hotkeys(const generic_button *button);
 
@@ -39,8 +43,10 @@ static generic_button generic_buttons[] = {
     {16, 56, 200, 30, button_default_image},
     {16, 106, 200, 30, button_border_density},
     {16, 146, 200, 30, button_change_invasion_path},
-    {16, 196, 200, 30, button_empire_settings},
-    {16, 236, 200, 30, button_hotkeys},
+    {16, 196, 200, 30, button_add_ornament},
+    {16, 236, 200, 30, button_add_all_ornaments},
+    {16, 286, 200, 30, button_empire_settings},
+    {16, 326, 200, 30, button_hotkeys},
 };
 #define NUM_GENERIC_BUTTONS sizeof(generic_buttons) / sizeof(generic_button)
 
@@ -126,6 +132,37 @@ static void set_path(int value)
 static void button_change_invasion_path(const generic_button *button)
 {
     window_numeric_input_bound_show(0, 0, button, 2, 1, 50, set_path);
+}
+
+static void add_ornament(int value)
+{
+    empire_object_add_ornament(data.listed_ornaments[value]);
+}
+
+static void button_add_ornament(const generic_button *button)
+{
+    static const uint8_t *ornament_texts[TOTAL_ORNAMENTS];
+    int ornament_count = 0;
+    for (int ornament_id = 0; ornament_id < TOTAL_ORNAMENTS; ornament_id++) {
+        if (empire_object_get_ornament(empire_object_ornament_image_id_get(ornament_id))) {
+            continue;
+        }
+        ornament_texts[ornament_count] = translation_for(TR_EMPIRE_ORNAMENT_STONEHENGE + ornament_id);
+        data.listed_ornaments[ornament_count] = ornament_id;
+        ornament_count++;
+    }
+    if (!ornament_count) {
+        return;
+    }
+    window_select_list_show_text(0, 0, button, ornament_texts, ornament_count, add_ornament);
+}
+
+static void button_add_all_ornaments(const generic_button *button)
+{
+    for (int ornament_id = 0; ornament_id < TOTAL_ORNAMENTS; ornament_id++) {
+        empire_object_add_ornament(ornament_id);
+    }
+    window_request_refresh();
 }
 
 static void button_empire_settings(const generic_button *button)

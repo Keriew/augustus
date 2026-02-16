@@ -5,9 +5,7 @@
 #include "empire/city.h"
 #include "empire/type.h"
 #include "game/resource.h"
-
-#define BASE_ORNAMENT_IMAGE_ID 3356
-#define ORIGINAL_ORNAMENTS 20
+#include "map/point.h"
 
 typedef struct {
     unsigned int id;
@@ -45,6 +43,45 @@ typedef struct {
     empire_object obj;
     empire_city_icon_type empire_city_icon;
 } full_empire_object;
+
+#define BASE_ORNAMENT_IMAGE_ID 3356
+#define ORIGINAL_ORNAMENTS 20
+
+static const char *XML_ORNAMENTS[] = {
+    "The Stonehenge",
+    "Gallic Wheat",
+    "The Pyrenees",
+    "Iberian Aqueduct",
+    "Triumphal Arch",
+    "West Desert Wheat",
+    "Lighthouse of Alexandria",
+    "West Desert Palm Trees",
+    "Trade Ship",
+    "Waterside Palm Trees",
+    "Colosseum|The Colosseum",
+    "The Alps",
+    "Roman Tree",
+    "Greek Mountain Range",
+    "The Parthenon",
+    "The Pyramids",
+    "The Hagia Sophia",
+    "East Desert Palm Trees",
+    "East Desert Wheat",
+    "Trade Camel",
+    "Mount Etna",
+    "Colossus of Rhodes",
+    "The Temple"
+};
+
+#define TOTAL_ORNAMENTS (sizeof(XML_ORNAMENTS) / sizeof(const char *))
+
+static const map_point ORNAMENT_POSITIONS[TOTAL_ORNAMENTS] = {
+    {  247,  81 }, {  361, 356 }, {  254, 428 }, {  199, 590 }, {  275, 791 },
+    {  423, 802 }, { 1465, 883 }, {  518, 764 }, {  691, 618 }, {  742, 894 },
+    {  726, 468 }, {  502, 280 }, {  855, 551 }, { 1014, 443 }, { 1158, 698 },
+    { 1431, 961 }, { 1300, 500 }, { 1347, 648 }, { 1707, 783 }, { 1704, 876 },
+    {  829, 720 }, { 1347, 745 }, { 1640, 922 }
+};
 
 void empire_object_clear(void);
 
@@ -104,9 +141,10 @@ int empire_object_get_at(int x, int y);
 int empire_object_get_nearest_of_type_with_condition(int x, int y, empire_object_type type, int (*condition)(const empire_object *));
 int empire_object_get_nearest_of_type(int x, int y, empire_object_type type);
 
+int empire_object_ornament_image_id_get(int ornament_id);
 int empire_object_count_ornaments(void);
-
 int empire_object_get_ornament(int image_id);
+int empire_object_add_ornament(int ornament_id);
 
 void empire_object_set_expanded(int object_id, int new_city_type);
 
