@@ -32,6 +32,7 @@ static struct {
     int trade_waypoint_parent_id;
     int nearest_trade_waypoint;
     int current_invasion_path;
+    int move_ornament_id;
 } data;
 
 static int place_object(int mouse_x, int mouse_y);
@@ -49,6 +50,7 @@ void empire_editor_init(int is_new)
     data.trade_waypoint_parent_id = 0;
     data.nearest_trade_waypoint = 0;
     data.current_invasion_path = is_new ? 1 : empire_object_get_max_invasion_path() + 1;
+    data.move_ornament_id = -1;
 }
 
 static void update_tool_bounds(void)
@@ -205,7 +207,9 @@ static int condition_is_trade_city(const empire_object *obj)
 
 static int place_object(int mouse_x, int mouse_y)
 {
-    if (data.currently_moving && data.current_tool == empire_editor_get_tool_for_object(empire_object_get_full(data.move_id))) {
+    if (data.currently_moving && (data.current_tool == empire_editor_get_tool_for_object(
+        empire_object_get_full(data.move_id))) ||
+        (data.move_ornament_id >= 0 && empire_object_get(data.move_id)->type == EMPIRE_OBJECT_ORNAMENT)) {
         empire_editor_move_object_end(mouse_x, mouse_y);
         return 1;
     }
@@ -564,7 +568,12 @@ void empire_editor_move_object_start(unsigned int obj_id)
 {
     data.currently_moving = 1;
     data.move_id = obj_id;
-    data.current_tool = empire_editor_get_tool_for_object(empire_object_get_full(obj_id));
+    full_empire_object *full = empire_object_get_full(obj_id);
+    if (full->obj.type == EMPIRE_OBJECT_ORNAMENT && full->obj.image_id != -1) {
+        data.move_ornament_id = empire_object_ornament_id_get(full->obj.image_id);
+    } else {
+        data.current_tool = empire_editor_get_tool_for_object(full);
+    }
     window_request_refresh();
 }
 
@@ -574,10 +583,20 @@ void empire_editor_move_object_end(int mouse_x, int mouse_y)
         return;
     }
     data.currently_moving = 0;
+    data.move_ornament_id = -1;
     empire_object *obj = empire_object_get(data.move_id);
     int is_edge = obj->type == EMPIRE_OBJECT_BORDER_EDGE;
-    obj->x = editor_empire_mouse_to_empire_x(mouse_x) - ((obj->width / 2) * !is_edge);
-    obj->y = editor_empire_mouse_to_empire_y(mouse_y) - ((obj->height / 2) * !is_edge);
+    int width, height;
+    if (obj->type == EMPIRE_OBJECT_ORNAMENT) {
+        const image *img = image_get(obj->image_id);
+        width = img->width;
+        height = img->height;
+    } else {
+        width = obj->width;
+        height = obj->height;
+    }
+    obj->x = editor_empire_mouse_to_empire_x(mouse_x) - ((width / 2) * !is_edge);
+    obj->y = editor_empire_mouse_to_empire_y(mouse_y) - ((height / 2) * !is_edge);
     data.move_id = 0;
     window_empire_collect_trade_edges();
     empire_object_set_trade_route_coords(empire_object_get_our_city());
@@ -587,6 +606,12 @@ void empire_editor_move_object_stopp(void)
 {
     data.currently_moving = 0;
     data.move_id = 0;
+    data.move_ornament_id = -1;
+}
+
+int empire_editor_get_moving_ornament_id(void)
+{
+    return data.move_ornament_id;
 }
 
 void empire_editor_set_trade_point_parent(int parent_id)

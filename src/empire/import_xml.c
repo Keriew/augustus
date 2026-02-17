@@ -195,7 +195,7 @@ static int xml_start_map(void)
     empire_set_custom_map(filename, x_offset, y_offset, width, height);
 
     if (xml_parser_get_attribute_bool("show_ireland")) {
-        if (empire_get_image_id() != image_group(editor_is_active() ? GROUP_EDITOR_EMPIRE_MAP : GROUP_EMPIRE_MAP)) {
+        if (!(EMPIRE_IS_DEFAULT_IMAGE)) {
             log_info("Ireland image cannot be enabled on custom maps", 0, 0);
             return 1;
         }
@@ -225,7 +225,7 @@ static int xml_start_ornament(void)
         log_info("Ornaments should go inside the map tag on version 2 and later", 0, 0);
         return 1;
     }
-    if (empire_get_image_id() != image_group(editor_is_active() ? GROUP_EDITOR_EMPIRE_MAP : GROUP_EMPIRE_MAP)) {
+    if (!(EMPIRE_IS_DEFAULT_IMAGE)) {
         log_info("Ornaments are not shown on custom maps", 0, 0);
         return 1;
     }

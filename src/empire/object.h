@@ -142,6 +142,7 @@ int empire_object_get_nearest_of_type_with_condition(int x, int y, empire_object
 int empire_object_get_nearest_of_type(int x, int y, empire_object_type type);
 
 int empire_object_ornament_image_id_get(int ornament_id);
+int empire_object_ornament_id_get(int image_id);
 int empire_object_count_ornaments(void);
 int empire_object_get_ornament(int image_id);
 int empire_object_add_ornament(int ornament_id);

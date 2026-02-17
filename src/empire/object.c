@@ -833,6 +833,11 @@ int empire_object_ornament_image_id_get(int ornament_id)
         ORIGINAL_ORNAMENTS - ornament_id - 2;
 }
 
+int empire_object_ornament_id_get(int image_id)
+{
+    return image_id < 0 ? ORIGINAL_ORNAMENTS - 2 - image_id : image_id - BASE_ORNAMENT_IMAGE_ID;
+}
+
 int empire_object_count_ornaments(void)
 {
     int total_ornaments = 0;
@@ -858,7 +863,8 @@ int empire_object_get_ornament(int image_id)
 
 int empire_object_add_ornament(int ornament_id)
 {
-    if (empire_object_get_ornament(empire_object_ornament_image_id_get(ornament_id))) {
+    int image_id = empire_object_ornament_image_id_get(ornament_id);
+    if (empire_object_get_ornament(image_id)) {
         return 1;
     }
     full_empire_object *obj = empire_object_get_new();
@@ -868,11 +874,7 @@ int empire_object_add_ornament(int ornament_id)
     }
     obj->in_use = 1;
     obj->obj.type = EMPIRE_OBJECT_ORNAMENT;
-    if (ornament_id < ORIGINAL_ORNAMENTS) {
-        obj->obj.image_id = BASE_ORNAMENT_IMAGE_ID + ornament_id;
-    } else {
-        obj->obj.image_id = ORIGINAL_ORNAMENTS - ornament_id - 2;
-    }
+    obj->obj.image_id = image_id;
     obj->obj.x = ORNAMENT_POSITIONS[ornament_id].x;
     obj->obj.y = ORNAMENT_POSITIONS[ornament_id].y;
     return 1;

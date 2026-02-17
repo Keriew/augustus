@@ -321,7 +321,7 @@ static int draw_preview_image(int x, int y, int center, color_t color_mask, int 
 {
     int preview_image_group = get_preview_image_group(empire_editor_get_tool());
     
-    if (!preview_image_group && !is_icon) {
+    if (!preview_image_group && !is_icon && empire_editor_get_moving_ornament_id() < 0) {
         return 0;
     }
     
@@ -335,11 +335,15 @@ static int draw_preview_image(int x, int y, int center, color_t color_mask, int 
     if (is_icon) {
         image_id = empire_city_get_icon_image_id(empire_object_get(empire_selected_object() - 1)->empire_city_icon);
     } else {
-        image_id = image_group(preview_image_group);
-        if (preview_image_group == GROUP_EMPIRE_TRADE_LAND) {
-            image_id = assets_get_image_id("UI", "LandWaypoint");
-        } else if (preview_image_group == GROUP_EMPIRE_TRADE_SEA) {
-            image_id = assets_get_image_id("UI", "SeaWaypoint");
+        if (empire_editor_get_moving_ornament_id() < 0) {
+            image_id = image_group(preview_image_group);
+            if (preview_image_group == GROUP_EMPIRE_TRADE_LAND) {
+                image_id = assets_get_image_id("UI", "LandWaypoint");
+            } else if (preview_image_group == GROUP_EMPIRE_TRADE_SEA) {
+                image_id = assets_get_image_id("UI", "SeaWaypoint");
+            }
+        } else {
+            image_id = empire_object_ornament_image_id_get(empire_editor_get_moving_ornament_id());
         }
     }
     
@@ -784,9 +788,8 @@ static void draw_object_info(void)
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     }
     if (obj->type == EMPIRE_OBJECT_ORNAMENT) {
-        int ornament_number = obj->image_id < 0 ? ORIGINAL_ORNAMENTS - 2 - obj->image_id :
-            obj->image_id - BASE_ORNAMENT_IMAGE_ID;
-        translation_key key = TR_EMPIRE_ORNAMENT_STONEHENGE + ornament_number;
+        int ornament_id = empire_object_ornament_id_get(obj->image_id);
+        translation_key key = TR_EMPIRE_ORNAMENT_STONEHENGE + ornament_id;
         lang_text_draw(CUSTOM_TRANSLATION, key, data.panel.x_min + 28, data.y_max - 125, FONT_NORMAL_GREEN);
     }
 }
