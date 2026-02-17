@@ -255,6 +255,9 @@ void empire_object_load(buffer *buf, int version)
             obj->future_trade_after_icon = buffer_read_u8(buf);
             obj->order_index = buffer_read_i16(buf);
             obj->parent_object_id = buffer_read_i16(buf);
+            if (version <= SCENARIO_LAST_NO_EMPIRE_EDITOR && obj->future_trade_after_icon > EMPIRE_CITY_ICON_RESOURCE_GOODS) {
+                obj->future_trade_after_icon++;
+            }
         } else {
             obj->future_trade_after_icon = empire_object_get_random_icon_for_empire_object(full);
             migrate_orders(obj);
