@@ -243,19 +243,20 @@ void empire_object_load(buffer *buf, int version)
         if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
             obj->empire_city_icon = buffer_read_u8(buf);
             full->empire_city_icon = buffer_read_u8(buf);
+            if (version <= SCENARIO_LAST_NO_EMPIRE_EDITOR && obj->empire_city_icon > EMPIRE_CITY_ICON_RESOURCE_GOODS) {
+                obj->empire_city_icon++;
+                full->empire_city_icon++;
+            }
         } else {
             obj->empire_city_icon = empire_object_get_random_icon_for_empire_object(full);
             full->empire_city_icon = empire_object_get_random_icon_for_empire_object(full);
         }
-        if (version > SCENARIO_LAST_NO_FUTURE_TRADE_ICONS) {
+        if (version > SCENARIO_LAST_NO_EMPIRE_EDITOR) {
             obj->future_trade_after_icon = buffer_read_u8(buf);
-        } else {
-            obj->future_trade_after_icon = empire_object_get_random_icon_for_empire_object(full);
-        }
-        if (version > SCENARIO_TESTING_VERSION_BUMP_1) {
             obj->order_index = buffer_read_i16(buf);
             obj->parent_object_id = buffer_read_i16(buf);
         } else {
+            obj->future_trade_after_icon = empire_object_get_random_icon_for_empire_object(full);
             migrate_orders(obj);
         }
     }

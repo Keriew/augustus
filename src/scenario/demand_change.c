@@ -157,7 +157,7 @@ void scenario_demand_change_load_state(buffer *buf, scenario_version_t version)
         demand_change->resource = buffer_read_u8(buf);
         demand_change->route_id = buffer_read_u8(buf);
         demand_change->amount = buffer_read_i32(buf);
-        if (version > SCENARIO_TESTING_VERSION_BUMP_2) {
+        if (version > SCENARIO_LAST_NO_EMPIRE_EDITOR) {
             demand_change->buys = buffer_read_u8(buf);
         } else {
             // Migration not guaranteed to be right (wasn't before as well though)

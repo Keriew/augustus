@@ -672,7 +672,7 @@ static void init_savegame_data(savegame_version_t version)
     }
     state->tutorial_part2 = create_savegame_piece(4, 0);
     state->gladiator_revolt = create_savegame_piece(16, 0);
-    if (version > SAVE_GAME_TESTING_VERSION_BUMP_2) {
+    if (version > SAVE_GAME_LAST_NO_EMPIRE_EDITOR) {
         state->trade_routes = create_savegame_piece(PIECE_SIZE_DYNAMIC, 1);
     } else {
         state->trade_route_limit = create_savegame_piece(version_data.piece_sizes.trade_route_limit, 1);
@@ -784,7 +784,7 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
         production_rates_load(file->production_rates);
     }
     scenario_events_assign_parent_event_ids();
-    if (version <= SCENARIO_TESTING_VERSION_BUMP_2) {
+    if (version <= SCENARIO_LAST_NO_EMPIRE_EDITOR) {
         scenario_events_migrate_to_buys_sells();
     }
 
@@ -937,7 +937,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
 
     building_storage_load_state(state->building_storages, version);
     scenario_gladiator_revolt_load_state(state->gladiator_revolt);
-    if (scenario_version > SCENARIO_TESTING_VERSION_BUMP_2) {
+    if (scenario_version > SCENARIO_LAST_NO_EMPIRE_EDITOR) {
         trade_routes_load_state(state->trade_routes);
     } else {
         trade_routes_migrate_to_buys_sells(state->trade_route_limit, state->trade_route_traded, version);
@@ -983,7 +983,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
         scenario_events_min_max_migrate_to_formulas();
     }
     scenario_events_assign_parent_event_ids();
-    if (version <= SAVE_GAME_TESTING_VERSION_BUMP_2) {
+    if (version <= SAVE_GAME_LAST_NO_EMPIRE_EDITOR) {
         scenario_events_migrate_to_buys_sells();
     }
 }
