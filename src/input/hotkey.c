@@ -2,6 +2,7 @@
 
 #include "building/type.h"
 #include "city/constants.h"
+#include "empire/editor.h"
 #include "game/settings.h"
 #include "game/state.h"
 #include "game/system.h"
@@ -456,6 +457,58 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
             break;
         case HOTKEY_EDITOR_EMPIRE_DELETE_OBJECT:
             def->action = &data.hotkey_state.delete_empire_object;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_OUR_CITY:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_OUR_CITY + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_TRADE_CITY:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_TRADE_CITY + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_ROMAN_CITY:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_ROMAN_CITY + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_VULNERABLE_CITY:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_VULNERABLE_CITY + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_FUTURE_TRADE_CITY:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_FUTURE_TRADE_CITY + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_DISTANT_CITY:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_DISTANT_CITY + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_BORDER:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_BORDER + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_BATTLE:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_BATTLE + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_BABRIAN:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_DISTANT_BABARIAN + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_LEGION:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_DISTANT_LEGION + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_LAND_POINT:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_LAND_ROUTE + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_SEA_POINT:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_SEA_ROUTE + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_SELECTION:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_MAX + 1;
             break;
         default:
             def->action = 0;

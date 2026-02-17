@@ -131,6 +131,18 @@ static const char *ini_keys[] = {
     "next_track",
     "build_repair_land",
     "editor_empire_delete_object",
+    "editor_empire_tool_our_city",
+    "editor_empire_tool_trade_city",
+    "editor_empire_tool_vulnerable_city",
+    "editor_empire_tool_future_trade_city",
+    "editor_empire_tool_distant_city",
+    "editor_empire_tool_border",
+    "editor_empire_tool_battle",
+    "editor_empire_tool_babarian",
+    "editor_empire_tool_legion",
+    "editor_empire_tool_land_point",
+    "editor_empire_tool_sea_point",
+    "editor_empire_tool_selection"
 };
 
 static struct {

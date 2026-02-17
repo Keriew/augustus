@@ -124,6 +124,11 @@ int empire_editor_handle_placement(const mouse *m, const hotkeys *h)
     if (h->delete_empire_object && (m->left.is_down || !config_get(CONFIG_UI_EMPIRE_CLICK_TO_DELETE))) {
         return delete_object_at(m->x, m->y);
     }
+    if (h->empire_tool) {
+        data.current_tool = h->empire_tool - 1;
+        window_request_refresh();
+        return 1;
+    }
     if (m->left.went_down) {
         if (!place_object(m->x, m->y)) {
             return 0;
