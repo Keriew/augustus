@@ -193,6 +193,11 @@ static translation_string all_strings[] = {
     {TR_BUILDING_GRAND_TEMPLE_MERCURY, "Mercury grand temple" },
     {TR_BUILDING_GRAND_TEMPLE_MARS, "Mars grand temple" },
     {TR_BUILDING_GRAND_TEMPLE_VENUS, "Venus grand temple" },
+    {TR_BUILDING_GRAND_TEMPLE_CERES_LEGACY, "Ceres ancient temple" },
+    {TR_BUILDING_GRAND_TEMPLE_NEPTUNE_LEGACY, "Neptune ancient temple" },
+    {TR_BUILDING_GRAND_TEMPLE_MERCURY_LEGACY, "Mercury ancient temple" },
+    {TR_BUILDING_GRAND_TEMPLE_MARS_LEGACY, "Mars ancient temple" },
+    {TR_BUILDING_PANTHEON_LEGACY, "Ancient Pantheon" },
     {TR_BUILDING_GRAND_TEMPLE_VENUS_LEGACY, "Venus ancient temple" },
     {TR_BUILDING_PANTHEON, "Pantheon" },
     {TR_BUILDING_GRAND_TEMPLE_CERES_DESC, "Grand temple of Ceres" },
@@ -207,6 +212,11 @@ static translation_string all_strings[] = {
     {TR_BUILDING_GRAND_TEMPLE_MARS_BONUS_DESC, "Mars exhorts your citizens to enlist, dispatching recruits to your city's forts, and allowing four additional forts to be built." }, // Note to translators: This one changed from the previous version, please update.
     {TR_BUILDING_GRAND_TEMPLE_VENUS_BONUS_DESC, "Venus graces your city's gardens, statues and temples to glow with beauty, improving their desirability. Houses also hold more goods, and devolve more slowly." }, // Note to translators: This one changed from the previous version, please update.
     {TR_BUILDING_GRAND_TEMPLE_VENUS_REWORKED_BONUS_DESC, "Priests of Venus bless houses to glow with additional desirability." },
+    {TR_BUILDING_GRAND_TEMPLE_CERES_REWORKED_BONUS_DESC, "Placeholder bonus description for Ceres."},
+    {TR_BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED_BONUS_DESC, "Placeholder bonus description for Neptune."},
+    {TR_BUILDING_GRAND_TEMPLE_MERCURY_REWORKED_BONUS_DESC, "Placeholder bonus description for Mercury."},
+    {TR_BUILDING_GRAND_TEMPLE_MARS_REWORKED_BONUS_DESC, "Placeholder bonus description for Mars."},
+    {TR_BUILDING_PANTHEON_REWORKED_BONUS_DESC, "Placeholder bonus description for Pantheon."},
     {TR_BUILDING_PANTHEON_BONUS_DESC, "The Pantheon provides access to your citizens to worship all the gods. Annual festivals are also held here, and religious and cultural building levies are reduced by 25%." }, // Note to translators: This one changed from the previous version, please update.
     {TR_BUILDING_GRAND_TEMPLE_CERES_MODULE_1_DESC, "Priests reduce food consumption by 20%." },
     {TR_BUILDING_GRAND_TEMPLE_NEPTUNE_MODULE_1_DESC, "Temples produce charioteers for the Hippodrome." },
@@ -1659,7 +1669,7 @@ static translation_string all_strings[] = {
     {TR_CONDITION_TEXT_TIME_LEFT_UNTIL_VICTORY, "Time until victory:" },
     {TR_CHEAT_DISABLE_INVASIONS, "Disable invasions"},
     {TR_CHEAT_DISABLE_LEGIONS_CONSUMPTION, "Disable soldier food consumption"},
-    {TR_CHEAT_LEGACY_VENUS_ENABLED, "Legacy Venus Grand Temple unlocked in build menu"},
+    {TR_CHEAT_LEGACY_GTS_ENABLED, "Ancient grand temples unlocked"},
     {TR_ACTION_TYPE_CHANGE_TERRAIN, "Add/remove terrain" },
     {TR_PARAMETER_TERRAIN, "Terrain" },
     {TR_PARAMETER_ADD, "Add" },

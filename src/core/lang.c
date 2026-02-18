@@ -411,19 +411,29 @@ const uint8_t *lang_get_string(int group, int index)
             case BUILDING_WORKCAMP:
                 return translation_for(TR_BUILDING_WORK_CAMP);
             case BUILDING_GRAND_TEMPLE_CERES:
-                return translation_for(TR_BUILDING_GRAND_TEMPLE_CERES);
+                return translation_for(TR_BUILDING_GRAND_TEMPLE_CERES_LEGACY);
             case BUILDING_GRAND_TEMPLE_NEPTUNE:
-                return translation_for(TR_BUILDING_GRAND_TEMPLE_NEPTUNE);
+                return translation_for(TR_BUILDING_GRAND_TEMPLE_NEPTUNE_LEGACY);
             case BUILDING_GRAND_TEMPLE_MERCURY:
-                return translation_for(TR_BUILDING_GRAND_TEMPLE_MERCURY);
+                return translation_for(TR_BUILDING_GRAND_TEMPLE_MERCURY_LEGACY);
             case BUILDING_GRAND_TEMPLE_MARS:
-                return translation_for(TR_BUILDING_GRAND_TEMPLE_MARS);
+                return translation_for(TR_BUILDING_GRAND_TEMPLE_MARS_LEGACY);
             case BUILDING_GRAND_TEMPLE_VENUS:
                 return translation_for(TR_BUILDING_GRAND_TEMPLE_VENUS_LEGACY);
             case BUILDING_GRAND_TEMPLE_VENUS_REWORKED:
                 return translation_for(TR_BUILDING_GRAND_TEMPLE_VENUS);
-            case BUILDING_PANTHEON:
+            case BUILDING_GRAND_TEMPLE_CERES_REWORKED:
+                return translation_for(TR_BUILDING_GRAND_TEMPLE_CERES);
+            case BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED:
+                return translation_for(TR_BUILDING_GRAND_TEMPLE_NEPTUNE);
+            case BUILDING_GRAND_TEMPLE_MERCURY_REWORKED:
+                return translation_for(TR_BUILDING_GRAND_TEMPLE_MERCURY);
+            case BUILDING_GRAND_TEMPLE_MARS_REWORKED:
+                return translation_for(TR_BUILDING_GRAND_TEMPLE_MARS);
+            case BUILDING_PANTHEON_REWORKED:
                 return translation_for(TR_BUILDING_PANTHEON);
+            case BUILDING_PANTHEON:
+                return translation_for(TR_BUILDING_PANTHEON_LEGACY);
             case BUILDING_MENU_GRAND_TEMPLES:
                 return translation_for(TR_BUILDING_GRAND_TEMPLE_MENU);
             case BUILDING_ARCHITECT_GUILD:

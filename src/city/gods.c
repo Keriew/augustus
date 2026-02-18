@@ -312,16 +312,16 @@ void city_gods_calculate_moods(int update_moods)
         int num_temples = 0;
         switch (i) {
             case GOD_CERES:
-                num_temples = building_count_active(BUILDING_SMALL_TEMPLE_CERES) + building_count_active(BUILDING_LARGE_TEMPLE_CERES) + building_count_active(BUILDING_GRAND_TEMPLE_CERES);
+                num_temples = building_count_active(BUILDING_SMALL_TEMPLE_CERES) + building_count_active(BUILDING_LARGE_TEMPLE_CERES) + building_count_active(BUILDING_GRAND_TEMPLE_CERES) + building_count_active(BUILDING_GRAND_TEMPLE_CERES_REWORKED);
                 break;
             case GOD_NEPTUNE:
-                num_temples = building_count_active(BUILDING_SMALL_TEMPLE_NEPTUNE) + building_count_active(BUILDING_LARGE_TEMPLE_NEPTUNE) + building_count_active(BUILDING_GRAND_TEMPLE_NEPTUNE);
+                num_temples = building_count_active(BUILDING_SMALL_TEMPLE_NEPTUNE) + building_count_active(BUILDING_LARGE_TEMPLE_NEPTUNE) + building_count_active(BUILDING_GRAND_TEMPLE_NEPTUNE) + building_count_active(BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED);
                 break;
             case GOD_MERCURY:
-                num_temples = building_count_active(BUILDING_SMALL_TEMPLE_MERCURY) + building_count_active(BUILDING_LARGE_TEMPLE_MERCURY) + building_count_active(BUILDING_GRAND_TEMPLE_MERCURY);
+                num_temples = building_count_active(BUILDING_SMALL_TEMPLE_MERCURY) + building_count_active(BUILDING_LARGE_TEMPLE_MERCURY) + building_count_active(BUILDING_GRAND_TEMPLE_MERCURY) + building_count_active(BUILDING_GRAND_TEMPLE_MERCURY_REWORKED);
                 break;
             case GOD_MARS:
-                num_temples = building_count_active(BUILDING_SMALL_TEMPLE_MARS) + building_count_active(BUILDING_LARGE_TEMPLE_MARS) + building_count_active(BUILDING_GRAND_TEMPLE_MARS);
+                num_temples = building_count_active(BUILDING_SMALL_TEMPLE_MARS) + building_count_active(BUILDING_LARGE_TEMPLE_MARS) + building_count_active(BUILDING_GRAND_TEMPLE_MARS) + building_count_active(BUILDING_GRAND_TEMPLE_MARS_REWORKED);
                 break;
             case GOD_VENUS:
                 num_temples = building_count_active(BUILDING_SMALL_TEMPLE_VENUS) + building_count_active(BUILDING_LARGE_TEMPLE_VENUS) + building_count_active(BUILDING_GRAND_TEMPLE_VENUS)+ building_count_active(BUILDING_GRAND_TEMPLE_VENUS_REWORKED);

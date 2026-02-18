@@ -114,7 +114,7 @@ static struct {
     int extra_legions_unlocked;
     int disabled_legions_consumption;
     int disabled_invasions;
-    int legacy_venus_temple_enabled;
+    int legacy_gts_enabled;
 } data;
 
 static int parse_word(uint8_t *string, uint8_t *word)
@@ -420,14 +420,15 @@ int game_cheat_disabled_invasions(void)
     return data.disabled_invasions;
 }
 
+// Enables all 6 legacy grand temples in the building menu
 static void game_cheat_enable_legacy_venus(uint8_t *args)
 {
-    data.legacy_venus_temple_enabled = 1;
+    data.legacy_gts_enabled = 1;
     building_menu_update();
-    show_warning(TR_CHEAT_LEGACY_VENUS_ENABLED);
+    show_warning(TR_CHEAT_LEGACY_GTS_ENABLED);
 }
 
-int game_cheat_legacy_venus_enabled(void)
+int game_cheat_legacy_gts_enabled(void)
 {
-    return data.legacy_venus_temple_enabled;
+    return data.legacy_gts_enabled;
 }

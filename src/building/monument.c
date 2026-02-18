@@ -161,6 +161,11 @@ static const monument_type *MONUMENT_TYPES[BUILDING_TYPE_MAX] = {
     [BUILDING_GRAND_TEMPLE_MARS]    = &grand_temple,
     [BUILDING_GRAND_TEMPLE_VENUS]   = &grand_temple,
     [BUILDING_GRAND_TEMPLE_VENUS_REWORKED] = &grand_temple,
+    [BUILDING_GRAND_TEMPLE_CERES_REWORKED]   = &grand_temple,
+    [BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED] = &grand_temple,
+    [BUILDING_GRAND_TEMPLE_MERCURY_REWORKED] = &grand_temple,
+    [BUILDING_GRAND_TEMPLE_MARS_REWORKED]    = &grand_temple,
+    [BUILDING_PANTHEON_REWORKED]    = &pantheon,
     [BUILDING_PANTHEON]             = &pantheon,
     [BUILDING_ORACLE]               = &oracle,
     [BUILDING_LARGE_TEMPLE_CERES]   = &large_temple,
@@ -285,7 +290,12 @@ int building_monument_is_limited(building_type type)
         case BUILDING_GRAND_TEMPLE_MARS:
         case BUILDING_GRAND_TEMPLE_VENUS:
         case BUILDING_GRAND_TEMPLE_VENUS_REWORKED:
+        case BUILDING_GRAND_TEMPLE_CERES_REWORKED:
+        case BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED:
+        case BUILDING_GRAND_TEMPLE_MERCURY_REWORKED:
+        case BUILDING_GRAND_TEMPLE_MARS_REWORKED:
         case BUILDING_PANTHEON:
+        case BUILDING_PANTHEON_REWORKED:
         case BUILDING_LIGHTHOUSE:
         case BUILDING_CARAVANSERAI:
         case BUILDING_COLOSSEUM:
@@ -401,6 +411,10 @@ int building_monument_is_grand_temple(building_type type)
         case BUILDING_GRAND_TEMPLE_MARS:
         case BUILDING_GRAND_TEMPLE_VENUS:
         case BUILDING_GRAND_TEMPLE_VENUS_REWORKED:
+        case BUILDING_GRAND_TEMPLE_CERES_REWORKED:
+        case BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED:
+        case BUILDING_GRAND_TEMPLE_MERCURY_REWORKED:
+        case BUILDING_GRAND_TEMPLE_MARS_REWORKED:
             return 1;
         default:
             return 0;

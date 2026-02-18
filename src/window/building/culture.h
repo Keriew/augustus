@@ -79,6 +79,16 @@ void window_building_draw_grand_temple_venus(building_info_context* c);
 
 void window_building_draw_grand_temple_venus_reworked(building_info_context* c);
 
+void window_building_draw_grand_temple_ceres_reworked(building_info_context* c);
+
+void window_building_draw_grand_temple_neptune_reworked(building_info_context* c);
+
+void window_building_draw_grand_temple_mercury_reworked(building_info_context* c);
+
+void window_building_draw_grand_temple_mars_reworked(building_info_context* c);
+
+void window_building_draw_pantheon_reworked(building_info_context* c);
+
 void window_building_draw_pantheon(building_info_context* c);
 
 void window_building_draw_work_camp(building_info_context* c);

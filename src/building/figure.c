@@ -2132,7 +2132,12 @@ void building_figure_generate(void)
                 case BUILDING_GRAND_TEMPLE_MERCURY:
                 case BUILDING_GRAND_TEMPLE_VENUS:
                 case BUILDING_GRAND_TEMPLE_VENUS_REWORKED:
+                case BUILDING_GRAND_TEMPLE_CERES_REWORKED:
+                case BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED:
+                case BUILDING_GRAND_TEMPLE_MERCURY_REWORKED:
+                case BUILDING_GRAND_TEMPLE_MARS_REWORKED:
                 case BUILDING_PANTHEON:
+                case BUILDING_PANTHEON_REWORKED:
                     spawn_figure_temple(b);
                     break;
                 case BUILDING_LIGHTHOUSE:

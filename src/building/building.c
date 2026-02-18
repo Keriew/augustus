@@ -857,9 +857,12 @@ int building_is_temple(building_type type)
            building_is_venus_temple(type) ||
            type == BUILDING_GRAND_TEMPLE_CERES || type == BUILDING_GRAND_TEMPLE_NEPTUNE || type == BUILDING_PANTHEON ||
            type == BUILDING_GRAND_TEMPLE_MERCURY || type == BUILDING_GRAND_TEMPLE_MARS ||
-           type == BUILDING_GRAND_TEMPLE_VENUS || type == BUILDING_GRAND_TEMPLE_VENUS_REWORKED || 
-           type == BUILDING_ORACLE  || type == BUILDING_LARARIUM  || type == BUILDING_NYMPHAEUM  || 
-           type == BUILDING_SHRINE_CERES || type == BUILDING_SHRINE_NEPTUNE || type == BUILDING_SHRINE_MERCURY || 
+           type == BUILDING_GRAND_TEMPLE_VENUS || type == BUILDING_GRAND_TEMPLE_VENUS_REWORKED ||
+           type == BUILDING_GRAND_TEMPLE_CERES_REWORKED || type == BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED ||
+           type == BUILDING_GRAND_TEMPLE_MERCURY_REWORKED || type == BUILDING_GRAND_TEMPLE_MARS_REWORKED ||
+           type == BUILDING_PANTHEON_REWORKED ||
+           type == BUILDING_ORACLE  || type == BUILDING_LARARIUM  || type == BUILDING_NYMPHAEUM  ||
+           type == BUILDING_SHRINE_CERES || type == BUILDING_SHRINE_NEPTUNE || type == BUILDING_SHRINE_MERCURY ||
            type == BUILDING_SHRINE_MARS || type == BUILDING_SHRINE_VENUS;
         }
 

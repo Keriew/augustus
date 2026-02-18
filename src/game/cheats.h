@@ -28,7 +28,7 @@ int game_cheat_disabled_legions_consumption(void);
 
 int game_cheat_disabled_invasions(void);
 
-int game_cheat_legacy_venus_enabled(void);
+int game_cheat_legacy_gts_enabled(void);
 
 void game_cheat_show_custom_events(uint8_t *args);
 

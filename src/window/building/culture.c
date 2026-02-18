@@ -891,6 +891,46 @@ void window_building_draw_grand_temple_venus_reworked(building_info_context *c)
         TR_BUILDING_VENUS_TEMPLE_QUOTE, GOD_VENUS, 20);
 }
 
+void window_building_draw_grand_temple_ceres_reworked(building_info_context *c)
+{
+    draw_grand_temple(c, "wavs/temple_farm.wav", TR_BUILDING_GRAND_TEMPLE_CERES_DESC,
+        TR_BUILDING_GRAND_TEMPLE_CERES_REWORKED_BONUS_DESC,
+        assets_get_image_id("UI", "Ceres L Banner"),
+        TR_BUILDING_CERES_TEMPLE_QUOTE, GOD_CERES, 20);
+}
+
+void window_building_draw_grand_temple_neptune_reworked(building_info_context *c)
+{
+    draw_grand_temple(c, "wavs/temple_ship.wav", TR_BUILDING_GRAND_TEMPLE_NEPTUNE_DESC,
+        TR_BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED_BONUS_DESC,
+        assets_get_image_id("UI", "Nept L Banner"),
+        TR_BUILDING_NEPTUNE_TEMPLE_QUOTE, GOD_NEPTUNE, 20);
+}
+
+void window_building_draw_grand_temple_mercury_reworked(building_info_context *c)
+{
+    draw_grand_temple(c, "wavs/temple_comm.wav", TR_BUILDING_GRAND_TEMPLE_MERCURY_DESC,
+        TR_BUILDING_GRAND_TEMPLE_MERCURY_REWORKED_BONUS_DESC,
+        assets_get_image_id("UI", "Merc L Banner"),
+        TR_BUILDING_MERCURY_TEMPLE_QUOTE, GOD_MERCURY, 20);
+}
+
+void window_building_draw_grand_temple_mars_reworked(building_info_context *c)
+{
+    draw_grand_temple(c, "wavs/temple_war.wav", TR_BUILDING_GRAND_TEMPLE_MARS_DESC,
+        TR_BUILDING_GRAND_TEMPLE_MARS_REWORKED_BONUS_DESC,
+        assets_get_image_id("UI", "Mars L Banner"),
+        TR_BUILDING_MARS_TEMPLE_QUOTE, GOD_MARS, 20);
+}
+
+void window_building_draw_pantheon_reworked(building_info_context *c)
+{
+    draw_grand_temple(c, "wavs/oracle.wav", TR_BUILDING_PANTHEON_DESC,
+        TR_BUILDING_PANTHEON_REWORKED_BONUS_DESC,
+        assets_get_image_id("UI", "Panth L Banner"),
+        TR_BUILDING_PANTHEON_QUOTE, GOD_PANTHEON, 0);
+}
+
 void window_building_draw_pantheon(building_info_context *c)
 {
     draw_grand_temple(c, "wavs/oracle.wav", TR_BUILDING_PANTHEON_DESC, TR_BUILDING_PANTHEON_BONUS_DESC,
