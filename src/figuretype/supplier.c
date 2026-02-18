@@ -5,6 +5,7 @@
 #include "building/distribution.h"
 #include "building/granary.h"
 #include "building/market.h"
+#include "building/monument.h"
 #include "building/storage.h"
 #include "building/warehouse.h"
 #include "core/config.h"
@@ -228,6 +229,16 @@ static int recalculate_market_supplier_destination(figure *f)
     return change_market_supplier_destination(f, info[fetch_inventory].building_id);
 }
 
+// Ceres Reworked module 2: market supplier speed bonus
+static int market_supplier_bonus_speed(figure *f)
+{
+    if (f->type == FIGURE_MARKET_SUPPLIER &&
+        building_monument_gt_module_is_active(CERES_MODULE_4_MARKET_SPEED)) {
+        return 20;
+    }
+    return 0;
+}
+
 void figure_supplier_action(figure *f)
 {
     f->terrain_usage = TERRAIN_USAGE_ROADS_HIGHWAY;
@@ -247,8 +258,9 @@ void figure_supplier_action(figure *f)
         case FIGURE_ACTION_149_CORPSE:
             figure_combat_handle_corpse(f);
             break;
-        case FIGURE_ACTION_145_SUPPLIER_GOING_TO_STORAGE:
-            figure_movement_move_ticks(f, 1);
+        case FIGURE_ACTION_145_SUPPLIER_GOING_TO_STORAGE: {
+            int speed_bonus = market_supplier_bonus_speed(f);
+            figure_movement_move_ticks_with_percentage(f, 1, speed_bonus);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
                 f->wait_ticks = 0;
                 f->previous_tile_x = f->x;
@@ -284,8 +296,10 @@ void figure_supplier_action(figure *f)
                 }
             }
             break;
-        case FIGURE_ACTION_146_SUPPLIER_RETURNING:
-            figure_movement_move_ticks(f, 1);
+        }
+        case FIGURE_ACTION_146_SUPPLIER_RETURNING: {
+            int speed_bonus = market_supplier_bonus_speed(f);
+            figure_movement_move_ticks_with_percentage(f, 1, speed_bonus);
             if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
                 if (f->direction == DIR_FIGURE_AT_DESTINATION && f->type == FIGURE_LIGHTHOUSE_SUPPLIER) {
                     building_get(f->building_id)->resources[RESOURCE_TIMBER] += 100;
@@ -295,6 +309,7 @@ void figure_supplier_action(figure *f)
                 figure_route_remove(f);
             }
             break;
+        }
     }
     if (f->type == FIGURE_MESS_HALL_SUPPLIER) {
         int dir = figure_image_normalize_direction(f->direction < 8 ? f->direction : f->previous_tile_direction);

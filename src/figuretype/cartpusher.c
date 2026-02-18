@@ -320,12 +320,16 @@ static void update_image(figure *f)
 
 static int cartpusher_percentage_speed(figure *f)
 {
-    // Ceres grand temple base bonus
+    // Ceres grand temple base bonus (old temple)
     building *src_building = building_get(f->building_id);
     int src_building_type = src_building->type;
     if (src_building_type >= BUILDING_WHEAT_FARM && src_building_type <= BUILDING_PIG_FARM) {
         if (building_monument_working(BUILDING_GRAND_TEMPLE_CERES)) {
             return 50;
+        }
+        // Ceres Reworked module 1: farm cart speed bonus
+        if (building_monument_gt_module_is_active(CERES_MODULE_3_FARM_SPEED)) {
+            return 40;
         }
     }
     return 0;

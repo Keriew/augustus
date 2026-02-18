@@ -744,6 +744,11 @@ int building_monument_gt_module_is_active(int module)
         temple_type = BUILDING_GRAND_TEMPLE_VENUS_REWORKED;
         module_num = (module == VENUS_MODULE_3_WINE_TEMPLE) ? 1 : 2;
     }
+    // Special handling for reworked Ceres temple modules
+    if (module == CERES_MODULE_3_FARM_SPEED || module == CERES_MODULE_4_MARKET_SPEED) {
+        temple_type = BUILDING_GRAND_TEMPLE_CERES_REWORKED;
+        module_num = (module == CERES_MODULE_3_FARM_SPEED) ? 1 : 2;
+    }
 
     return building_monument_module_type(temple_type) == module_num;
 }

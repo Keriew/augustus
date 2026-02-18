@@ -212,7 +212,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_GRAND_TEMPLE_MARS_BONUS_DESC, "Mars exhorts your citizens to enlist, dispatching recruits to your city's forts, and allowing four additional forts to be built." }, // Note to translators: This one changed from the previous version, please update.
     {TR_BUILDING_GRAND_TEMPLE_VENUS_BONUS_DESC, "Venus graces your city's gardens, statues and temples to glow with beauty, improving their desirability. Houses also hold more goods, and devolve more slowly." }, // Note to translators: This one changed from the previous version, please update.
     {TR_BUILDING_GRAND_TEMPLE_VENUS_REWORKED_BONUS_DESC, "Priests of Venus bless houses to glow with additional desirability." },
-    {TR_BUILDING_GRAND_TEMPLE_CERES_REWORKED_BONUS_DESC, "Placeholder bonus description for Ceres."},
+    {TR_BUILDING_GRAND_TEMPLE_CERES_REWORKED_BONUS_DESC, "Priests of Ceres bless houses to consume less food based on variety available."},
     {TR_BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED_BONUS_DESC, "Placeholder bonus description for Neptune."},
     {TR_BUILDING_GRAND_TEMPLE_MERCURY_REWORKED_BONUS_DESC, "Placeholder bonus description for Mercury."},
     {TR_BUILDING_GRAND_TEMPLE_MARS_REWORKED_BONUS_DESC, "Placeholder bonus description for Mars."},
@@ -244,6 +244,10 @@ static translation_string all_strings[] = {
     {TR_BUILDING_GRAND_TEMPLE_VENUS_DESC_MODULE_2, "Temple of Venus Genetrix" },
     {TR_BUILDING_GRAND_TEMPLE_VENUS_DESC_MODULE_3, "Temple of Venus Cloacina" },
     {TR_BUILDING_GRAND_TEMPLE_VENUS_DESC_MODULE_4, "Temple of Venus Felix" },
+    {TR_BUILDING_GRAND_TEMPLE_CERES_DESC_MODULE_3, "Temple of Ceres Pervinca" },
+    {TR_BUILDING_GRAND_TEMPLE_CERES_MODULE_3_DESC, "Farm carts from all farms move 40% faster." },
+    {TR_BUILDING_GRAND_TEMPLE_CERES_DESC_MODULE_4, "Temple of Ceres Abundantia" },
+    {TR_BUILDING_GRAND_TEMPLE_CERES_MODULE_4_DESC, "Market buyers collecting from granaries and warehouses move 20% faster." },
     {TR_BUILDING_PANTHEON_DESC_MODULE_1, "Pantheum Ara Maxima" },
     {TR_BUILDING_PANTHEON_DESC_MODULE_2, "Pantheum Roma Aeterna" },
     {TR_BUILDING_GRAND_TEMPLE_MENU, "Grand temple" },
