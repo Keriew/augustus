@@ -223,7 +223,6 @@ static void button_select_image(const generic_button *button)
 static void button_default_image(const generic_button *button)
 {
     scenario.empire.id = SCENARIO_CUSTOM_EMPIRE;
-    string_copy(string_from_ascii("\0"), (uint8_t *)scenario.empire.custom_name, 300);
     resource_set_mapping(RESOURCE_CURRENT_VERSION);
     empire_clear();
     empire_object_clear();

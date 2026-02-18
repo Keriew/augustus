@@ -325,6 +325,7 @@ static int create_trade_route_default(full_empire_object *full) {
     }
     route_obj->in_use = 1;
     route_obj->obj.type = EMPIRE_OBJECT_LAND_TRADE_ROUTE;
+    route_obj->obj.image_id = image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE) + 1;
     full->trade_route_cost = 500;
     
     return 1;

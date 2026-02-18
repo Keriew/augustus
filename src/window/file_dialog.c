@@ -634,6 +634,7 @@ static void confirm_save_file(int accepted, int checked)
         scenario_model_export_to_xml(filename);
         window_model_data_show();
     } else if (data.type == FILE_TYPE_EMPIRE) {
+        scenario_editor_set_custom_empire(data.selected_file);
         empire_export_xml(filename);
         window_editor_empire_show();
     }
@@ -646,7 +647,6 @@ static void confirm_small_image(int accepted, int checked)
         return;
     }
     scenario.empire.id = SCENARIO_CUSTOM_EMPIRE;
-    string_copy(string_from_ascii("\0"), (uint8_t *)scenario.empire.custom_name, 300);
     resource_set_mapping(RESOURCE_CURRENT_VERSION);
     empire_clear();
     empire_object_clear();
