@@ -357,6 +357,7 @@ static int xml_start_city(void)
     if (city_icon_type == EMPIRE_CITY_ICON_DEFAULT) {
         city_icon_type = empire_object_get_random_icon_for_empire_object(city_obj);
     }
+
     city_obj->empire_city_icon = city_icon_type;
     city_obj->obj.empire_city_icon = city_icon_type;
     city_obj->obj.future_trade_after_icon = future_trade_after_icon;

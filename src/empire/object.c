@@ -260,7 +260,7 @@ void empire_object_load(buffer *buf, int version)
                 obj->future_trade_after_icon++;
             }
         } else {
-            obj->future_trade_after_icon = empire_object_get_random_icon_for_empire_object(full);
+            obj->future_trade_after_icon = EMPIRE_CITY_ICON_DEFAULT;
             migrate_orders(obj);
         }
     }
