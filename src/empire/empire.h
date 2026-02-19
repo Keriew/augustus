@@ -3,6 +3,9 @@
 
 #include "core/buffer.h"
 
+#define EMPIRE_IS_DEFAULT_IMAGE empire_get_image_id() == image_group(editor_is_active() ?\
+    GROUP_EDITOR_EMPIRE_MAP : GROUP_EMPIRE_MAP)
+
 void empire_set_custom_map(const char *path, int offset_x, int offset_y, int width, int height);
 void empire_reset_map(void);
 
@@ -15,6 +18,8 @@ void empire_scroll_map(int x, int y);
 void empire_set_viewport(int width, int height);
 int empire_get_image_id(void);
 void empire_get_map_size(int *width, int *height);
+void empire_get_coordinates(int *x_offset, int *y_offset);
+char *empire_get_image_path(void);
 void empire_set_coordinates(int relative, int x_offset, int y_offset);
 void empire_transform_coordinates(int *x_coord, int *y_coord);
 void empire_restore_coordinates(int *x_coord, int *y_coord);

@@ -1001,35 +1001,35 @@ static void menu_options_general(int param)
 {
     clear_state();
     window_go_back();
-    window_config_show(CONFIG_PAGE_GENERAL, 0);
+    window_config_show(CONFIG_PAGE_GENERAL, 0, 0);
 }
 
 static void menu_options_user_interface(int param)
 {
     clear_state();
     window_go_back();
-    window_config_show(CONFIG_PAGE_UI_CHANGES, 0);
+    window_config_show(CONFIG_PAGE_UI_CHANGES, CATEGORY_UI_GENERAL, 0);
 }
 
 static void menu_options_gameplay(int param)
 {
     clear_state();
     window_go_back();
-    window_config_show(CONFIG_PAGE_GAMEPLAY_CHANGES, 0);
+    window_config_show(CONFIG_PAGE_GAMEPLAY_CHANGES, 0, 0);
 }
 
 static void menu_options_city_management(int param)
 {
     clear_state();
     window_go_back();
-    window_config_show(CONFIG_PAGE_CITY_MANAGEMENT_CHANGES, 0);
+    window_config_show(CONFIG_PAGE_CITY_MANAGEMENT_CHANGES, CATEGORY_CITY_MANAGEMENT_STORAGE, 0);
 }
 
 static void menu_options_hotkeys(int param)
 {
     clear_state();
     window_go_back();
-    window_hotkey_config_show();
+    window_hotkey_config_show(0);
 }
 
 static void menu_options_monthly_autosave(int param)

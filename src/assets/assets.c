@@ -75,9 +75,10 @@ void assets_init(int force_reload, color_t **main_images, int *main_image_widths
     data.asset_lookup[ASSET_UI_EMP_ICON_7] = assets_get_image_id("UI", "Empire_Icon_Distant_02");       // dis_village
     data.asset_lookup[ASSET_UI_EMP_ICON_8] = assets_get_image_id("UI", "Empire_Icon_Construction_01");  // construction
     data.asset_lookup[ASSET_UI_EMP_ICON_9] = assets_get_image_id("UI", "Empire_Icon_Resource_01");      // res_food
-    data.asset_lookup[ASSET_UI_EMP_ICON_10] = assets_get_image_id("UI", "Empire_Icon_Resource_02");      // res_goods
-    data.asset_lookup[ASSET_UI_EMP_ICON_11] = assets_get_image_id("UI", "Empire_Icon_Trade_01");         // tr_sea
-    data.asset_lookup[ASSET_UI_EMP_ICON_12] = assets_get_image_id("UI", "Empire_Icon_Trade_02");         // tr_land
+    data.asset_lookup[ASSET_UI_EMP_ICON_10] = assets_get_image_id("UI", "Empire_Icon_Resource_02");     // res_goods
+    data.asset_lookup[ASSET_UI_EMP_ICON_11] = assets_get_image_id("UI", "Empire_Icon_Resource_03");     // res_sea
+    data.asset_lookup[ASSET_UI_EMP_ICON_12] = assets_get_image_id("UI", "Empire_Icon_Trade_01");        // tr_sea
+    data.asset_lookup[ASSET_UI_EMP_ICON_13] = assets_get_image_id("UI", "Empire_Icon_Trade_02");        // tr_land
     data.asset_lookup[ASSET_UI_EMP_ICON_OLD_WATCHTOWER] = assets_get_image_id("UI", "Empire_Icon_Watchtower"); // tower
     // font assets - keep last
     data.font_lookup[ASSET_FONT_SQ_BRACKET_LEFT] = assets_get_image_id("UI", "leftbracket_white_l");
