@@ -593,13 +593,13 @@ void empire_editor_move_object_end(int mouse_x, int mouse_y)
     empire_object *obj = empire_object_get(data.move_id);
     int is_edge = obj->type == EMPIRE_OBJECT_BORDER_EDGE;
     int width, height;
-    if (obj->type == EMPIRE_OBJECT_ORNAMENT) {
+    if (obj->width) {
+        width = obj->width;
+        height = obj->height;
+    } else {
         const image *img = image_get(obj->image_id);
         width = img->width;
         height = img->height;
-    } else {
-        width = obj->width;
-        height = obj->height;
     }
     obj->x = editor_empire_mouse_to_empire_x(mouse_x) - ((width / 2) * !is_edge);
     obj->y = editor_empire_mouse_to_empire_y(mouse_y) - ((height / 2) * !is_edge);

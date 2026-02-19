@@ -2007,7 +2007,8 @@ static translation_string all_strings[] = {
     {TR_EDITOR_EMPIRE_PROPERTIES_ALL_ORNAMENTS, "Add all ornaments"},
     {TR_EMPIRE_TOOLTIP_EDIT_NAME, "Edit city name"},
     {TR_EMPIRE_TOOLTIP_ADD_RESOURCE, "Add resource"},
-    {TR_EDITOR_EMPIRE_PROPERTIES_ALL_CITIES, "Add all default cities"}
+    {TR_EDITOR_EMPIRE_PROPERTIES_ALL_CITIES, "Add all default cities"},
+    {TR_EDITOR_EMPIRE_PROPERTIES_IRELAND, "Toggle Ireland"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

@@ -1,5 +1,6 @@
 #include "empire_properties.h"
 
+#include "assets/assets.h"
 #include "core/hotkey_config.h"
 #include "core/image.h"
 #include "core/image_group.h"
@@ -41,6 +42,7 @@ static void button_border_density(const generic_button *button);
 static void button_change_invasion_path(const generic_button *button);
 static void button_add_ornament(const generic_button *button);
 static void button_add_all_ornaments(const generic_button *button);
+static void button_toggle_ireland(const generic_button *button);
 static void button_add_all_cities(const generic_button *button);
 static void button_empire_settings(const generic_button *button);
 static void button_hotkeys(const generic_button *button);
@@ -52,9 +54,10 @@ static generic_button generic_buttons[] = {
     {16, 146, 200, 30, button_change_invasion_path},
     {16, 196, 200, 30, button_add_ornament},
     {16, 236, 200, 30, button_add_all_ornaments},
-    {16, 276, 200, 30, button_add_all_cities},
-    {16, 326, 200, 30, button_empire_settings},
-    {16, 366, 200, 30, button_hotkeys},
+    {16, 276, 200, 30, button_toggle_ireland},
+    {16, 316, 200, 30, button_add_all_cities},
+    {16, 366, 200, 30, button_empire_settings},
+    {16, 406, 200, 30, button_hotkeys},
 };
 #define NUM_GENERIC_BUTTONS sizeof(generic_buttons) / sizeof(generic_button)
 
@@ -185,9 +188,9 @@ static void draw_foreground(void)
     graphics_in_dialog();
     
     for (int i = 0; i < NUM_GENERIC_BUTTONS; i++) {
-        font_t font = !(EMPIRE_IS_DEFAULT_IMAGE) && i >= 4 && i <= 6 ? FONT_NORMAL_RED : FONT_NORMAL_BLACK;
+        font_t font = !(EMPIRE_IS_DEFAULT_IMAGE) && i >= 4 && i <= 7 ? FONT_NORMAL_RED : FONT_NORMAL_BLACK;
         button_border_draw(generic_buttons[i].x, generic_buttons[i].y, generic_buttons[i].width,
-            generic_buttons[i].height, data.focus_button_id == i + 1 && (i >= 4 && i <= 6 ? EMPIRE_IS_DEFAULT_IMAGE : 1));
+            generic_buttons[i].height, data.focus_button_id == i + 1 && (i >= 4 && i <= 7 ? EMPIRE_IS_DEFAULT_IMAGE : 1));
         lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_EMPIRE_PROPERTIES_SELECT_IAMGE + i, generic_buttons[i].x,
             generic_buttons[i].y + 8, generic_buttons[i].width, font);
     }
@@ -288,6 +291,25 @@ static void button_add_all_ornaments(const generic_button *button)
     }
     for (int ornament_id = 0; ornament_id < TOTAL_ORNAMENTS; ornament_id++) {
         empire_object_add_ornament(ornament_id);
+    }
+    window_request_refresh();
+}
+
+static void button_toggle_ireland(const generic_button *button)
+{
+    if (!(EMPIRE_IS_DEFAULT_IMAGE)) {
+        return;
+    }
+    if (empire_object_get_ornament(-1)) {
+        empire_object_remove(empire_object_get_ornament(-1));
+    } else {
+        full_empire_object *obj = empire_object_get_new();
+        obj->in_use = 1;
+        obj->obj.type = EMPIRE_OBJECT_ORNAMENT;
+        obj->obj.image_id = -1;
+        const image *img = image_get(assets_lookup_image_id(ASSET_FIRST_ORNAMENT));
+        obj->obj.width = img->width;
+        obj->obj.height = img->height;
     }
     window_request_refresh();
 }

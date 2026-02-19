@@ -176,6 +176,9 @@ static int xml_start_empire(void)
         obj->in_use = 1;
         obj->obj.type = EMPIRE_OBJECT_ORNAMENT;
         obj->obj.image_id = -1;
+        const image *img = image_get(assets_lookup_image_id(ASSET_FIRST_ORNAMENT));
+        obj->obj.width = img->width;
+        obj->obj.height = img->height;
     }
     return 1;
 }
@@ -203,6 +206,9 @@ static int xml_start_map(void)
         obj->in_use = 1;
         obj->obj.type = EMPIRE_OBJECT_ORNAMENT;
         obj->obj.image_id = -1;
+        const image *img = image_get(assets_lookup_image_id(ASSET_FIRST_ORNAMENT));
+        obj->obj.width = img->width;
+        obj->obj.height = img->height;
     }
 
     return 1;

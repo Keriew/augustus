@@ -1,5 +1,6 @@
 #include "object.h"
 
+#include "assets/assets.h"
 #include "core/array.h"
 #include "core/calc.h"
 #include "core/image.h"
@@ -881,6 +882,9 @@ int empire_object_add_ornament(int ornament_id)
     obj->obj.image_id = image_id;
     obj->obj.x = ORNAMENT_POSITIONS[ornament_id].x;
     obj->obj.y = ORNAMENT_POSITIONS[ornament_id].y;
+    const image *img = image_get(assets_lookup_image_id(ASSET_FIRST_ORNAMENT) - 1 - image_id);
+    obj->obj.width = img->width;
+    obj->obj.height = img->height;
     return 1;
 }
 
