@@ -1214,8 +1214,8 @@ static void storage_buttons_init(building_info_context *c)
     }
     for (int i = 2; i < 4; i++) { //permissions all and none buttons
         storage_image_buttons[i].static_image = 1; // dont handle focus or press natively
-        storage_image_buttons[i].x_offset = c->width_blocks * BLOCK_SIZE - 12 - 73; // 73px from right edge
-        storage_image_buttons[i].y_offset = c->height_blocks * BLOCK_SIZE - 12 - 18; // 18px from bottom edge
+        storage_image_buttons[i].x_offset = c->width_blocks * BLOCK_SIZE - 12 - 77; // 77px from right edge
+        storage_image_buttons[i].y_offset = c->height_blocks * BLOCK_SIZE - 12 - 21; // 21px from bottom edge
     }
     //roadblock orders button
     storage_image_buttons[4].x_offset = 62; // 62px from left edge
@@ -1244,12 +1244,26 @@ void window_building_draw_storage_foreground(building_info_context *c)
         storage_image_buttons[0].dont_draw = 1;
         storage_image_buttons[1].dont_draw = 1;
     }
-    int x_border = c->x_offset + storage_image_buttons[2].x_offset - 4;
-    int y_border = c->y_offset + storage_image_buttons[2].y_offset - 4;
+    int x_border = c->x_offset + storage_image_buttons[2].x_offset;
+    int y_border = c->y_offset + storage_image_buttons[2].y_offset;
     int index = data.image_button_focus_id - 1; // convert to 0-based index
     int focused = index >= 2 && index <= 3;
     button_border_draw(x_border, y_border, 20, 20, focused);
-    image_buttons_draw(c->x_offset, c->y_offset, storage_image_buttons, 5);
+
+    for (int i = 2; i <= 3; i++) {
+        if (!storage_image_buttons[i].dont_draw) {
+            image_buttons_draw(c->x_offset + 4, c->y_offset + 4, &storage_image_buttons[i], 1);
+        }
+    }
+
+    for (int i = 0; i < 5; i++) {
+        if (i == 2 || i == 3) {
+            continue;
+        }
+        if (!storage_image_buttons[i].dont_draw) {
+            image_buttons_draw(c->x_offset, c->y_offset, &storage_image_buttons[i], 1);
+        }
+    }
 }
 
 void window_building_draw_storage_orders(building_info_context *c)
@@ -1320,8 +1334,8 @@ void window_building_draw_storage_orders_foreground(building_info_context *c)
     image_button *btn = &distribution_orders_buttons[button_state];
     distribution_orders_buttons[!button_state].dont_draw = 1; // hide the irrelevant button
     int focused = distribution_orders_buttons[!button_state].focused || distribution_orders_buttons[button_state].focused;
-    button_border_draw(c->x_offset + btn->x_offset, c->y_offset + btn->y_offset - 4, btn->width, btn->height, focused);
-    image_buttons_draw(c->x_offset + 4, c->y_offset, distribution_orders_buttons, 2);
+    button_border_draw(c->x_offset + btn->x_offset - 4, c->y_offset + btn->y_offset - 4, btn->width, btn->height, focused);
+    image_buttons_draw(c->x_offset, c->y_offset, distribution_orders_buttons, 2);
 
     scrollbar_draw(&scrollbar);
 
