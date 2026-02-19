@@ -212,9 +212,9 @@ static translation_string all_strings[] = {
     {TR_BUILDING_GRAND_TEMPLE_MARS_BONUS_DESC, "Mars exhorts your citizens to enlist, dispatching recruits to your city's forts, and allowing four additional forts to be built." }, // Note to translators: This one changed from the previous version, please update.
     {TR_BUILDING_GRAND_TEMPLE_VENUS_BONUS_DESC, "Venus graces your city's gardens, statues and temples to glow with beauty, improving their desirability. Houses also hold more goods, and devolve more slowly." }, // Note to translators: This one changed from the previous version, please update.
     {TR_BUILDING_GRAND_TEMPLE_VENUS_REWORKED_BONUS_DESC, "Priests of Venus bless houses to glow with additional desirability." },
-    {TR_BUILDING_GRAND_TEMPLE_CERES_REWORKED_BONUS_DESC, "Priests of Ceres bless houses to consume less food based on variety available."},
+    {TR_BUILDING_GRAND_TEMPLE_CERES_REWORKED_BONUS_DESC, "Houses visited by priests of Ceres consume less total food for each food type provided."},
     {TR_BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED_BONUS_DESC, "Placeholder bonus description for Neptune."},
-    {TR_BUILDING_GRAND_TEMPLE_MERCURY_REWORKED_BONUS_DESC, "Placeholder bonus description for Mercury."},
+    {TR_BUILDING_GRAND_TEMPLE_MERCURY_REWORKED_BONUS_DESC, "Houses visited by priests of Mercury will consume fewer goods when sentiment is high."},
     {TR_BUILDING_GRAND_TEMPLE_MARS_REWORKED_BONUS_DESC, "Placeholder bonus description for Mars."},
     {TR_BUILDING_PANTHEON_REWORKED_BONUS_DESC, "Placeholder bonus description for Pantheon."},
     {TR_BUILDING_PANTHEON_BONUS_DESC, "The Pantheon provides access to your citizens to worship all the gods. Annual festivals are also held here, and religious and cultural building levies are reduced by 25%." }, // Note to translators: This one changed from the previous version, please update.
@@ -244,10 +244,14 @@ static translation_string all_strings[] = {
     {TR_BUILDING_GRAND_TEMPLE_VENUS_DESC_MODULE_2, "Temple of Venus Genetrix" },
     {TR_BUILDING_GRAND_TEMPLE_VENUS_DESC_MODULE_3, "Temple of Venus Cloacina" },
     {TR_BUILDING_GRAND_TEMPLE_VENUS_DESC_MODULE_4, "Temple of Venus Felix" },
-    {TR_BUILDING_GRAND_TEMPLE_CERES_DESC_MODULE_3, "Temple of Ceres Pervinca" },
+    {TR_BUILDING_GRAND_TEMPLE_CERES_DESC_MODULE_3, "Temple of Ceres Frugifera" },
     {TR_BUILDING_GRAND_TEMPLE_CERES_MODULE_3_DESC, "Farm carts from all farms move 40% faster." },
     {TR_BUILDING_GRAND_TEMPLE_CERES_DESC_MODULE_4, "Temple of Ceres Abundantia" },
     {TR_BUILDING_GRAND_TEMPLE_CERES_MODULE_4_DESC, "Market buyers collecting from granaries and warehouses move 20% faster." },
+    {TR_BUILDING_GRAND_TEMPLE_MERCURY_DESC_MODULE_3, "Temple of Mercury Mercator" },
+    {TR_BUILDING_GRAND_TEMPLE_MERCURY_MODULE_3_DESC, "Land traders and caravans move 20% faster." },
+    {TR_BUILDING_GRAND_TEMPLE_MERCURY_DESC_MODULE_4, "Temple of Mercury Fortunus" },
+    {TR_BUILDING_GRAND_TEMPLE_MERCURY_MODULE_4_DESC, "Sea traders and ships move 20% faster." },
     {TR_BUILDING_PANTHEON_DESC_MODULE_1, "Pantheum Ara Maxima" },
     {TR_BUILDING_PANTHEON_DESC_MODULE_2, "Pantheum Roma Aeterna" },
     {TR_BUILDING_GRAND_TEMPLE_MENU, "Grand temple" },

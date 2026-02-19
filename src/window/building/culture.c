@@ -59,7 +59,7 @@ static struct {
     option_menu_item option;
     const building_type required_building;
     const char image_id[32];
-} temple_module_options[16] = {
+} temple_module_options[18] = {
     {
         { TR_BUILDING_GRAND_TEMPLE_CERES_DESC_MODULE_1, TR_BUILDING_GRAND_TEMPLE_CERES_MODULE_1_DESC },
         BUILDING_NONE,
@@ -139,6 +139,16 @@ static struct {
         { TR_BUILDING_GRAND_TEMPLE_CERES_DESC_MODULE_4, TR_BUILDING_GRAND_TEMPLE_CERES_MODULE_4_DESC },
         BUILDING_NONE,
         "Ceres M2 Icon"
+    },
+    {
+        { TR_BUILDING_GRAND_TEMPLE_MERCURY_DESC_MODULE_3, TR_BUILDING_GRAND_TEMPLE_MERCURY_MODULE_3_DESC },
+        BUILDING_NONE,
+        "Merc M Icon"
+    },
+    {
+        { TR_BUILDING_GRAND_TEMPLE_MERCURY_DESC_MODULE_4, TR_BUILDING_GRAND_TEMPLE_MERCURY_MODULE_4_DESC },
+        BUILDING_NONE,
+        "Merc M2 Icon"
     }
 };
 
@@ -775,6 +785,10 @@ static void draw_grand_temple(building_info_context *c, const char *sound_file,
         if (b->type == BUILDING_GRAND_TEMPLE_CERES_REWORKED) {
             module_index = 14 + (b->monument.upgrades - 1);
         }
+        // Special handling for reworked Mercury temple
+        if (b->type == BUILDING_GRAND_TEMPLE_MERCURY_REWORKED) {
+            module_index = 18 + (b->monument.upgrades - 1);
+        }
         int module_name = temple_module_options[module_index].option.header;
         text_draw_centered(translation_for(module_name),
             c->x_offset, c->y_offset + 12, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK, 0);
@@ -799,6 +813,10 @@ static void draw_grand_temple(building_info_context *c, const char *sound_file,
                 // Special handling for reworked Ceres temple
                 if (b->type == BUILDING_GRAND_TEMPLE_CERES_REWORKED) {
                     module_index = 14 + (b->monument.upgrades - 1);
+                }
+                // Special handling for reworked Mercury temple
+                if (b->type == BUILDING_GRAND_TEMPLE_MERCURY_REWORKED) {
+                    module_index = 18 + (b->monument.upgrades - 1);
                 }
                 int module_desc = temple_module_options[module_index].option.desc;
                 height += text_draw_multiline(translation_for(module_desc),
@@ -1434,6 +1452,10 @@ static void button_add_module_prompt(const generic_button *button)
     // Special handling for reworked Ceres temple
     if (b->type == BUILDING_GRAND_TEMPLE_CERES_REWORKED) {
         option_id = 14;
+    }
+    // Special handling for reworked Mercury temple
+    if (b->type == BUILDING_GRAND_TEMPLE_MERCURY_REWORKED) {
+        option_id = 18;
     }
 
     static option_menu_item options[2];

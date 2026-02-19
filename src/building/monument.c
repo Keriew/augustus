@@ -749,6 +749,11 @@ int building_monument_gt_module_is_active(int module)
         temple_type = BUILDING_GRAND_TEMPLE_CERES_REWORKED;
         module_num = (module == CERES_MODULE_3_FARM_SPEED) ? 1 : 2;
     }
+    // Special handling for reworked Mercury temple modules
+    if (module == MERCURY_MODULE_3_LAND_TRADER || module == MERCURY_MODULE_4_SEA_TRADER) {
+        temple_type = BUILDING_GRAND_TEMPLE_MERCURY_REWORKED;
+        module_num = (module == MERCURY_MODULE_3_LAND_TRADER) ? 1 : 2;
+    }
 
     return building_monument_module_type(temple_type) == module_num;
 }

@@ -542,12 +542,20 @@ static void consume_resources(building *b)
         consumption_reduction[RESOURCE_WINE] += 20;
         consumption_reduction[RESOURCE_OIL] += 20;
     }
-    // mars module 2 - all goods reduced by 10% 
+    // mars module 2 - all goods reduced by 10%
     if (b->data.house.temple_mars && building_monument_gt_module_is_active(MARS_MODULE_2_ALL_GOODS)) {
         consumption_reduction[RESOURCE_WINE] += 10;
         consumption_reduction[RESOURCE_OIL] += 10;
         consumption_reduction[RESOURCE_POTTERY] += 10;
         consumption_reduction[RESOURCE_FURNITURE] += 10;
+    }
+    // Mercury Reworked base bonus - all goods reduced by (house happiness / 10)%
+    if (b->data.house.temple_mercury && building_monument_working(BUILDING_GRAND_TEMPLE_MERCURY_REWORKED)) {
+        int sentiment_reduction = b->sentiment.house_happiness / 10;  // 0-10% based on house happiness
+        consumption_reduction[RESOURCE_WINE] += sentiment_reduction;
+        consumption_reduction[RESOURCE_OIL] += sentiment_reduction;
+        consumption_reduction[RESOURCE_POTTERY] += sentiment_reduction;
+        consumption_reduction[RESOURCE_FURNITURE] += sentiment_reduction;
     }
 
     for (resource_type r = RESOURCE_MIN_NON_FOOD; r < RESOURCE_MAX_NON_FOOD; r++) {
