@@ -580,6 +580,7 @@ int building_image_get(const building *b)
         case BUILDING_NATIVE_CROPS:
             return image_group(GROUP_BUILDING_FARM_CROPS);
         case BUILDING_GRAND_TEMPLE_CERES:
+        case BUILDING_GRAND_TEMPLE_CERES_REWORKED:
             switch (b->monument.phase) {
                 case MONUMENT_START:
                     return assets_get_image_id("Monuments", "Ceres Complex Const 01");
@@ -602,6 +603,7 @@ int building_image_get(const building *b)
                     }
             }
         case BUILDING_GRAND_TEMPLE_NEPTUNE:
+        case BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED:
             switch (b->monument.phase) {
                 case MONUMENT_START:
                     return assets_get_image_id("Monuments", "Neptune Complex Const 01");
@@ -624,6 +626,7 @@ int building_image_get(const building *b)
                     }
             }
         case BUILDING_GRAND_TEMPLE_MERCURY:
+        case BUILDING_GRAND_TEMPLE_MERCURY_REWORKED:
             switch (b->monument.phase) {
                 case MONUMENT_START:
                     return assets_get_image_id("Monuments", "Mercury Complex Const 01");
@@ -646,6 +649,7 @@ int building_image_get(const building *b)
                     }
             }
         case BUILDING_GRAND_TEMPLE_MARS:
+        case BUILDING_GRAND_TEMPLE_MARS_REWORKED:
             switch (b->monument.phase) {
                 case MONUMENT_START:
                     return assets_get_image_id("Monuments", "Mars Complex Const 01");
@@ -668,6 +672,7 @@ int building_image_get(const building *b)
                     }
             }
         case BUILDING_GRAND_TEMPLE_VENUS:
+        case BUILDING_GRAND_TEMPLE_VENUS_REWORKED:
             switch (b->monument.phase) {
                 case MONUMENT_START:
                     return assets_get_image_id("Monuments", "Venus Complex Const 01");
@@ -690,6 +695,7 @@ int building_image_get(const building *b)
                     }
             }
         case BUILDING_PANTHEON:
+        case BUILDING_PANTHEON_REWORKED:
             switch (b->monument.phase) {
                 case MONUMENT_START:
                     return assets_get_image_id("Monuments", "Pantheon Const 01");

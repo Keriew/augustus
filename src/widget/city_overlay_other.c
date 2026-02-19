@@ -49,6 +49,9 @@ static int show_building_religion(const building *b)
         b->type == BUILDING_LARGE_TEMPLE_VENUS || b->type == BUILDING_GRAND_TEMPLE_CERES ||
         b->type == BUILDING_GRAND_TEMPLE_NEPTUNE || b->type == BUILDING_GRAND_TEMPLE_MERCURY ||
         b->type == BUILDING_GRAND_TEMPLE_MARS || b->type == BUILDING_GRAND_TEMPLE_VENUS ||
+        b->type == BUILDING_GRAND_TEMPLE_CERES_REWORKED || b->type == BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED ||
+        b->type == BUILDING_GRAND_TEMPLE_MERCURY_REWORKED || b->type == BUILDING_GRAND_TEMPLE_MARS_REWORKED ||
+        b->type == BUILDING_GRAND_TEMPLE_VENUS_REWORKED || b->type == BUILDING_PANTHEON_REWORKED ||
         b->type == BUILDING_PANTHEON || b->type == BUILDING_NYMPHAEUM ||
         b->type == BUILDING_SHRINE_CERES || b->type == BUILDING_SHRINE_MARS ||
         b->type == BUILDING_SHRINE_MERCURY || b->type == BUILDING_SHRINE_VENUS ||
