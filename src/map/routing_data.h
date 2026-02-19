@@ -2,11 +2,13 @@
 #define MAP_ROUTING_DATA_H
 
 #include "map/grid.h"
-
+// if a tile is passable, it gets value > 0
+// if a tile is blocked, it gets value < 0
+// the exact value is used to determine what type of passable/blocked tile it is
 enum {
     CITIZEN_0_ROAD = 0,
     CITIZEN_1_HIGHWAY = 1,
-    CITIZEN_2_PASSABLE_TERRAIN = 2,
+    CITIZEN_2_PASSABLE_TERRAIN = 2, //applies only to rubble, garden, access ramp etc.
     CITIZEN_4_CLEAR_TERRAIN = 4,
     CITIZEN_N1_BLOCKED = -1,
     CITIZEN_N3_AQUEDUCT = -3,
@@ -27,6 +29,8 @@ enum {
 
     WALL_0_PASSABLE = 0,
     WALL_N1_BLOCKED = -1,
+
+    GATE_0_TRANSFORMABLE = -5 // For parks that have a gate variant - currently not passable but can be changed to gate
 };
 
 extern grid_i8 terrain_land_citizen;

@@ -90,10 +90,14 @@ int building_construction_place_road(int measure_only, int x_start, int y_start,
         TERRAIN_SHRUB | TERRAIN_GARDEN | TERRAIN_ELEVATION |
         TERRAIN_RUBBLE | TERRAIN_BUILDING | TERRAIN_WALL;
     if (map_terrain_is(start_offset, forbidden_terrain_mask)) {
-        return 0;
+        if (!(map_routing_is_gate_transformable(start_offset))) {
+            return 0;
+        }
     }
     if (map_terrain_is(end_offset, forbidden_terrain_mask)) {
-        return 0;
+        if (!(map_routing_is_gate_transformable(end_offset))) {
+            return 0;
+        }
     }
 
     int items_placed = 0;

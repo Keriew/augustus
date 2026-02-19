@@ -49,6 +49,14 @@ static int get_land_type_citizen_building(int grid_offset)
         case BUILDING_ROADBLOCK:
             type = CITIZEN_0_ROAD;
             break;
+        case BUILDING_ROOFED_GARDEN_WALL:
+        case BUILDING_LOOPED_GARDEN_WALL:
+        case BUILDING_PANELLED_GARDEN_WALL:
+        case BUILDING_HEDGE_DARK:
+        case BUILDING_HEDGE_LIGHT:
+            // case BUILDING_COLONNADE: // can be enabled if we add a gate variant
+            type = GATE_0_TRANSFORMABLE;
+            break;
         case BUILDING_FORT_GROUND:
             type = CITIZEN_2_PASSABLE_TERRAIN;
             break;
@@ -181,6 +189,14 @@ static int get_land_type_noncitizen(int grid_offset)
         case BUILDING_SHIP_BRIDGE:
         case BUILDING_LOW_BRIDGE:
             type = NONCITIZEN_0_PASSABLE;
+            break;
+        case BUILDING_ROOFED_GARDEN_WALL:
+        case BUILDING_LOOPED_GARDEN_WALL:
+        case BUILDING_PANELLED_GARDEN_WALL:
+        case BUILDING_HEDGE_DARK:
+        case BUILDING_HEDGE_LIGHT:
+            // case BUILDING_COLONNADE: // can be enabled if we add a gate variant
+            type = GATE_0_TRANSFORMABLE;
             break;
         case BUILDING_WALL:
             type = NONCITIZEN_3_WALL;
@@ -364,6 +380,12 @@ int map_routing_citizen_is_highway(int grid_offset)
 int map_routing_citizen_is_passable_terrain(int grid_offset)
 {
     return terrain_land_citizen.items[grid_offset] == CITIZEN_2_PASSABLE_TERRAIN;
+}
+
+int map_routing_is_gate_transformable(int grid_offset)
+{
+    return terrain_land_citizen.items[grid_offset] == GATE_0_TRANSFORMABLE ||
+        terrain_land_noncitizen.items[grid_offset] == GATE_0_TRANSFORMABLE;
 }
 
 int map_routing_noncitizen_is_passable(int grid_offset)

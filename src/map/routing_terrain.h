@@ -14,7 +14,7 @@ int map_routing_citizen_is_passable(int grid_offset);
 int map_routing_citizen_is_road(int grid_offset);
 int map_routing_citizen_is_highway(int grid_offset);
 int map_routing_citizen_is_passable_terrain(int grid_offset);
-
+int map_routing_is_gate_transformable(int grid_offset);
 int map_routing_noncitizen_is_passable(int grid_offset);
 int map_routing_is_destroyable(int grid_offset);
 
