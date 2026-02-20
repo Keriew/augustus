@@ -14,6 +14,7 @@
 #include "graphics/window.h"
 #include "input/input.h"
 #include "map/grid.h"
+#include "scenario/criteria.h"
 #include "scenario/event/action_handler.h"
 #include "scenario/event/controller.h"
 #include "scenario/event/formula.h"
@@ -462,6 +463,9 @@ static void create_evaluation_formula(xml_data_attribute_t *parameter)
         data.formula_min_limit = model_get_min_for_house_data_type(data.action->parameter2);
         data.formula_max_limit = model_get_max_for_house_data_type(data.action->parameter2);
     }
+    if (data.action->type == ACTION_TYPE_CHANGE_GOAL) {
+        data.formula_max_limit = scenario_criteria_get_max_value(data.action->parameter1);
+    }
     if (current_index > 0) { // a formula already exists
         const uint8_t *src = scenario_formula_get_string((unsigned int) current_index);
         if (src) {
@@ -580,6 +584,7 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
         case PARAMETER_TYPE_ENEMY_CLASS:
         case PARAMETER_TYPE_COVERAGE_BUILDINGS:
         case PARAMETER_TYPE_RANK:
+        case PARAMETER_TYPE_WIN_CONDITION:
             window_editor_select_special_attribute_mapping_show(parameter->type, set_param_value, data.parameter_being_edited_current_value);
             return;
         case PARAMETER_TYPE_ALLOWED_BUILDING:

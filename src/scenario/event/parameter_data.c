@@ -16,6 +16,7 @@
 #include "map/terrain.h"
 #include "scenario/event/controller.h"
 #include "scenario/event/parameter_city.h"
+#include "scenario/criteria.h"
 #include "scenario/custom_messages.h"
 #include "scenario/custom_variable.h"
 #include "scenario/invasion.h"
@@ -343,7 +344,7 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_attr = {.name = "change_production_rate",  .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_PRODUCTION_RATE},
                                         .xml_parm1 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE_ALL,   .key = TR_PARAMETER_TYPE_RESOURCE },
                                         .xml_parm2 = {.name = "rate",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = 0,
-                                            .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                            .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm3 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,
                                             .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, },
     [ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA] = {.type = ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA,
@@ -358,7 +359,14 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_attr = {.name = "lock_trade_route",   .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_LOCK_TRADE_ROUTE},
                                         .xml_parm1 = {.name = "target_city",       .type = PARAMETER_TYPE_ROUTE,   .key = TR_PARAMETER_TYPE_ROUTE }, 
                                         .xml_parm2 = {.name = "lock",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,    .max_limit = 1,         .key = TR_PARAMETER_LOCK },
-                                        .xml_parm3 = {.name = "show_message",      .type = PARAMETER_TYPE_BOOLEAN,     .min_limit = 0,     .max_limit = 1,         .key = TR_PARAMETER_SHOW_MESSAGE } }
+                                        .xml_parm3 = {.name = "show_message",      .type = PARAMETER_TYPE_BOOLEAN,     .min_limit = 0,     .max_limit = 1,         .key = TR_PARAMETER_SHOW_MESSAGE }, },
+    [ACTION_TYPE_CHANGE_GOAL]          = {.type = ACTION_TYPE_CHANGE_GOAL, 
+                                        .xml_attr = {.name = "change_goal",   .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_CHANGE_GOAL},
+                                        .xml_parm1 = {.name = "win_condition",   .type = PARAMETER_TYPE_WIN_CONDITION,    .key = TR_PARAMETER_TYPE_WIN_CONDITION},
+                                        .xml_parm2 = {.name = "value",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = 0,
+                                            .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
+                                        .xml_parm3 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,
+                                            .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, }
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)
@@ -885,6 +893,17 @@ static special_attribute_mapping_t special_attribute_mappings_rank[] = {
 };
 #define SPECIAL_ATTRIBUTE_MAPPINGS_RANK_SIZE (sizeof(special_attribute_mappings_rank) / sizeof(special_attribute_mapping_t))
 
+static special_attribute_mapping_t special_attribute_mappings_win_condition[] = {
+    {.type = PARAMETER_TYPE_WIN_CONDITION, .text = "culture",         .value = SCENARIO_WIN_CONDITION_CULTURE,        .key = TR_SCENARIO_WIN_CONDITION_CULTURE },
+    {.type = PARAMETER_TYPE_WIN_CONDITION, .text = "properity",       .value = SCENARIO_WIN_CONDITION_PROSPERITY,     .key = TR_SCENARIO_WIN_CONDITION_PROSPERITY },
+    {.type = PARAMETER_TYPE_WIN_CONDITION, .text = "peace",           .value = SCENARIO_WIN_CONDITION_PEACE,          .key = TR_SCENARIO_WIN_CONDITION_PEACE },
+    {.type = PARAMETER_TYPE_WIN_CONDITION, .text = "favor",           .value = SCENARIO_WIN_CONDITION_FAVOR,          .key = TR_SCENARIO_WIN_CONDITION_FAVOR },
+    {.type = PARAMETER_TYPE_WIN_CONDITION, .text = "loosing time",    .value = SCENARIO_WIN_CONDITION_LOOSING_TIME,   .key = TR_SCENARIO_WIN_CONDITION_LOOSING_TIME },
+    {.type = PARAMETER_TYPE_WIN_CONDITION, .text = "winning time",    .value = SCENARIO_WIN_CONDITION_WINNING_TIME,   .key = TR_SCENARIO_WIN_CONDITION_WINNING_TIME },
+    {.type = PARAMETER_TYPE_WIN_CONDITION, .text = "population",      .value = SCENARIO_WIN_CONDITION_POPULATION,     .key = TR_SCENARIO_WIN_CONDITION_POPULATION },
+};
+#define SPECIAL_ATTRIBUTE_MAPPINGS_WIN_CONDITION_SIZE (sizeof(special_attribute_mappings_win_condition) / sizeof(special_attribute_mapping_t))
+
 static void generate_building_type_mappings(void)
 {
     if (special_attribute_mappings_building_type_size > 0) {
@@ -1027,6 +1046,8 @@ special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mappin
             return &special_attribute_mappings_coverage_buildings[index];
         case PARAMETER_TYPE_RANK:
             return &special_attribute_mappings_rank[index];
+        case PARAMETER_TYPE_WIN_CONDITION:
+            return &special_attribute_mappings_win_condition[index];
         default:
             return 0;
     }
@@ -1093,6 +1114,8 @@ int scenario_events_parameter_data_get_mappings_size(parameter_type type)
             return SPECIAL_ATTRIBUTE_MAPPINGS_COVERAGE_BUILDINGS_SIZE;
         case PARAMETER_TYPE_RANK:
             return SPECIAL_ATTRIBUTE_MAPPINGS_RANK_SIZE;
+        case PARAMETER_TYPE_WIN_CONDITION:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_WIN_CONDITION_SIZE;
         default:
             return 0;
     }

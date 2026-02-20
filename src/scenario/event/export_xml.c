@@ -152,6 +152,7 @@ static int export_parse_attribute_with_resolved_type(xml_data_attribute_t *attr,
         case PARAMETER_TYPE_RANK:
         case PARAMETER_TYPE_CITY_PROPERTY:
         case PARAMETER_TYPE_MEDIA_TYPE:
+        case PARAMETER_TYPE_WIN_CONDITION:
             return export_attribute_by_type(attr, resolved_type, target);
         case PARAMETER_TYPE_BUILDING_COUNTING:
             return export_attribute_by_type(attr, PARAMETER_TYPE_BUILDING, target);

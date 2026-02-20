@@ -97,6 +97,8 @@ int scenario_action_type_execute(scenario_action_t *action)
             return scenario_action_type_change_house_model_data_execute(action);
         case ACTION_TYPE_LOCK_TRADE_ROUTE:
             return scenario_action_type_lock_trade_route_execute(action);
+        case ACTION_TYPE_CHANGE_GOAL:
+            return scenario_action_type_change_goal_execute(action);
         default:
             return 0;
     }

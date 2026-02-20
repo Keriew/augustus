@@ -32,7 +32,9 @@
 #include "map/terrain.h"
 #include "map/tiles.h"
 #include "scenario/allowed_building.h"
+#include "scenario/criteria.h"
 #include "scenario/custom_variable.h"
+#include "scenario/data.h"
 #include "scenario/event/controller.h"
 #include "scenario/event/formula.h"
 #include "scenario/event/parameter_city.h"
@@ -852,7 +854,7 @@ int scenario_action_type_change_house_model_data_execute(scenario_action_t *acti
 
     int *value = model_get_ptr_for_house_data_type(model_ptr, data_type);
     *value = amount + (set_to_value ? 0 : *value);
-    
+
     return 1;
 }
 
@@ -882,6 +884,54 @@ int scenario_action_type_lock_trade_route_execute(scenario_action_t *action)
         empire_city_open_trade(city_id, 0);
     }
     building_menu_update();
+
+    return 1;
+}
+
+int scenario_action_type_change_goal_execute(scenario_action_t *action)
+{
+    int win_condition = action->parameter1;
+    int value = scenario_formula_evaluate_formula(action->parameter2);
+    int set_to_value = action->parameter3;
     
+    value = calc_bound(value, 0, scenario_criteria_get_max_value(win_condition));
+    switch(win_condition) {
+        case SCENARIO_WIN_CONDITION_CULTURE:
+            if (scenario_criteria_culture_enabled()) {
+                scenario.win_criteria.culture.goal = value + scenario.win_criteria.culture.goal * !set_to_value;
+            }
+            break;
+        case SCENARIO_WIN_CONDITION_PROSPERITY:
+            if (scenario_criteria_prosperity_enabled()) {
+                scenario.win_criteria.prosperity.goal = value + scenario.win_criteria.culture.goal * !set_to_value;
+            }
+            break;
+        case SCENARIO_WIN_CONDITION_PEACE:
+            if (scenario_criteria_peace_enabled()) {
+                scenario.win_criteria.peace.goal = value + scenario.win_criteria.culture.goal * !set_to_value;
+            }
+            break;
+        case SCENARIO_WIN_CONDITION_FAVOR:
+            if (scenario_criteria_favor_enabled()) {
+                scenario.win_criteria.favor.goal = value + scenario.win_criteria.culture.goal * !set_to_value;
+            }
+            break;
+        case SCENARIO_WIN_CONDITION_LOOSING_TIME:
+            if (scenario_criteria_time_limit_enabled()) {
+                scenario.win_criteria.time_limit.years = value + scenario.win_criteria.culture.goal * !set_to_value;
+            }
+            break;
+        case SCENARIO_WIN_CONDITION_WINNING_TIME:
+            if (scenario_criteria_survival_enabled()) {
+                scenario.win_criteria.survival_time.years = value + scenario.win_criteria.culture.goal * !set_to_value;
+            }
+            break;
+        case SCENARIO_WIN_CONDITION_POPULATION:
+            if (scenario_criteria_population_enabled()) {
+                scenario.win_criteria.population.goal = value + scenario.win_criteria.culture.goal * !set_to_value;
+            }
+            break;
+    }
+
     return 1;
 }

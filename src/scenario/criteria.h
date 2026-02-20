@@ -3,6 +3,18 @@
 
 #include "core/buffer.h"
 
+typedef enum {
+    SCENARIO_WIN_CONDITION_CULTURE,
+    SCENARIO_WIN_CONDITION_PROSPERITY,
+    SCENARIO_WIN_CONDITION_PEACE,
+    SCENARIO_WIN_CONDITION_FAVOR,
+    SCENARIO_WIN_CONDITION_LOOSING_TIME,
+    SCENARIO_WIN_CONDITION_WINNING_TIME,
+    SCENARIO_WIN_CONDITION_POPULATION,
+} scenario_win_condition_type;
+
+int scenario_criteria_get_max_value(scenario_win_condition_type condition);
+
 int scenario_criteria_population_enabled(void);
 int scenario_criteria_population(void);
 
