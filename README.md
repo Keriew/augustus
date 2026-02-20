@@ -74,6 +74,83 @@ Augustus changes are explained in detail in the comprehensive manual. Below you 
 |Polish   |[Download](https://github.com/Keriew/augustus/raw/master/res/translated_manuals/augustus_manual_polish_3.0.pdf)|
 |Russian   |[Download](https://github.com/Keriew/augustus/raw/master/res/translated_manuals/augustus_manual_russian_3.0.pdf)|
 
+## Lua Scripting
+
+Augustus supports **Lua scripting** for maps and scenarios, allowing you to add custom logic, dynamic events, and interactive dialogs to your scenarios.
+
+### Getting started
+
+1. Create a `.lua` file with the same name as your scenario (e.g. `valentia.lua` for `valentia.map`).
+2. Place the script file next to the scenario file or in the game data directory.
+3. The script is automatically loaded when the scenario starts.
+
+### Lifecycle hooks
+
+Define any of these functions in your script to react to game events:
+
+| Hook | Called when |
+|------|------------|
+| `on_load()` | Scenario starts (after script is loaded) |
+| `on_tick()` | Every game day |
+| `on_month()` | Start of each month |
+| `on_year()` | Start of each year |
+| `on_event(event_name)` | A scenario event fires |
+| `on_building_placed(type, x, y, id)` | Player places a building |
+| `on_building_destroyed(type, x, y, id)` | A building is destroyed |
+| `on_victory()` | Player wins |
+| `on_defeat()` | Player loses |
+| `on_invasion_start(type, size)` | An invasion starts |
+| `on_trade_completed(route_id, resource, amount)` | A trade is completed |
+
+### Available APIs
+
+The following API modules are available in your scripts:
+
+| Module | Description |
+|--------|-------------|
+| `scenario.*` | Scenario properties, variables, and events |
+| `game.*` | Game time and flow control |
+| `city.*` | City status and ratings |
+| `building.*` | Building queries and counts |
+| `map.*` | Map tiles and terrain |
+| `resource.*` | Resource and trade goods |
+| `finance.*` | Treasury and tax control |
+| `population.*` | Population statistics |
+| `empire.*` | Empire cities and trade routes |
+| `ui.*` | Dialogs, messages, and log output |
+| `sound.*` | Sound effects and music |
+
+### Example script
+
+```lua
+function on_load()
+    ui.log("Scenario loaded!")
+    ui.input_dialog({
+        title = "The Senate's Offer",
+        text = "Accept a gift or gain favor with the gods?",
+        buttons = {
+            { label = "Accept Gold",  on_click = function() finance.add_treasury(1000) end },
+            { label = "Pray to Gods", on_click = function() city.change_favor(10) end },
+            { label = "Decline" },
+        }
+    })
+end
+
+function on_year()
+    local pop = city.population()
+    if pop >= 500 then
+        ui.show_custom_message({
+            title = "Growing City",
+            text = "Your city has reached " .. pop .. " citizens!",
+        })
+    end
+end
+```
+
+### IDE autocomplete
+
+Copy the API definition files from [`res/lua/`](res/lua/) into your workspace to get full autocomplete and type hints in editors that support Lua Language Server (e.g. VS Code with the [Lua extension](https://marketplace.visualstudio.com/items?itemName=sumneko.lua)).
+
 ## Bugs
 
 See the list of [Bugs & idiosyncrasies](https://github.com/bvschaik/julius/wiki/Caesar-3-bugs) to find out more about some known bugs.
