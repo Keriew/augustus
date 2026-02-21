@@ -6,6 +6,7 @@
 #include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
+#include "game/system.h"
 #include "scenario/lua/lua_state.h"
 
 #include "lua/lua.h"
@@ -147,6 +148,9 @@ void terminal_toggle(void)
     if (data.active) {
         data.scroll_offset = 0;
         data.skip_next_text = 1;
+        system_start_text_input();
+    } else {
+        system_stop_text_input();
     }
     window_invalidate();
 }
