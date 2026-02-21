@@ -1436,82 +1436,6 @@ static uint8_t *append_text(const uint8_t *text_to_append, uint8_t *result_text,
     return result_text;
 }
 
-static uint8_t *translation_for_set_or_add_text(int parameter, uint8_t *result_text, int *maxlength)
-{
-    result_text = append_text(string_from_ascii(" "), result_text, maxlength);
-    if (parameter) {
-        result_text = append_text(translation_for(TR_PARAMETER_DISPLAY_SET_TO), result_text, maxlength);
-    } else {
-        result_text = append_text(translation_for(TR_PARAMETER_DISPLAY_ADD_TO), result_text, maxlength);
-    }
-    return result_text;
-}
-
-static uint8_t *translation_for_min_max_values(int min, int max, uint8_t *result_text, int *maxlength)
-{
-    result_text = append_text(string_from_ascii(" "), result_text, maxlength);
-    result_text = append_text(translation_for(TR_PARAMETER_DISPLAY_BETWEEN), result_text, maxlength);
-    result_text = append_text(string_from_ascii(" "), result_text, maxlength);
-
-    int number_length = string_from_int(result_text, min, 0);
-    result_text += number_length;
-    *maxlength -= number_length;
-
-    result_text = append_text(string_from_ascii(".."), result_text, maxlength);
-
-    number_length = string_from_int(result_text, max, 0);
-    result_text += number_length;
-    *maxlength -= number_length;
-
-    return result_text;
-}
-
-static uint8_t *translation_for_boolean_text(int value, translation_key true_key, translation_key false_key, uint8_t *result_text, int *maxlength)
-{
-    result_text = append_text(string_from_ascii(" "), result_text, maxlength);
-    if (value) {
-        result_text = append_text(translation_for(true_key), result_text, maxlength);
-    } else {
-        result_text = append_text(translation_for(false_key), result_text, maxlength);
-    }
-
-    return result_text;
-}
-
-static uint8_t *translation_for_formula_index(int index, uint8_t *result_text, int *maxlength)
-{
-    result_text = append_text(string_from_ascii(" "), result_text, maxlength);
-
-    const uint8_t *text = scenario_formula_get_string(index);
-    if (text) {
-        result_text = append_text(text, result_text, maxlength);
-    } else {
-        result_text = append_text(string_from_ascii("???"), result_text, maxlength);
-    }
-
-    return result_text;
-}
-
-static uint8_t *translation_for_grid_offset(int value, uint8_t *result_text, int *maxlength)
-{
-    result_text = append_text(string_from_ascii(" "), result_text, maxlength);
-
-    int number_length = string_from_int(result_text, value, 0);
-    result_text += number_length;
-    *maxlength -= number_length;
-
-    return result_text;
-}
-
-static uint8_t *translation_for_attr_mapping_text(parameter_type type, int value, uint8_t *result_text, int *maxlength)
-{
-    result_text = append_text(string_from_ascii(" "), result_text, maxlength);
-    special_attribute_mapping_t *attr_mapping = scenario_events_parameter_data_get_attribute_mapping_by_value(type, value);
-
-    result_text = append_text(translation_for(attr_mapping->key), result_text, maxlength);
-    return result_text;
-}
-
 static uint8_t *translation_for_type_lookup_by_value(parameter_type type, int value, uint8_t *result_text, int *maxlength)
 {
     result_text = append_text(string_from_ascii(" "), result_text, maxlength);
@@ -1519,20 +1443,24 @@ static uint8_t *translation_for_type_lookup_by_value(parameter_type type, int va
     uint8_t text[50];
     memset(text, 0, 50);
     scenario_events_parameter_data_get_display_string_for_value(type, value, text, 50);
+    if (!*text) {
+        *result_text = '\0';
+        maxlength++;
+        return --result_text;
+    }
     result_text = append_text(text, result_text, maxlength);
 
     return result_text;
 }
 
-void scenario_events_parameter_data_get_display_string_for_action(const scenario_action_t *action, uint8_t *result_text,
-    int maxlength)
+void scenario_events_parameter_data_get_display_string_for_action(const scenario_action_t *action, uint8_t *result_text, int maxlength)
 {
     scenario_action_data_t *xml_info = scenario_events_parameter_data_get_actions_xml_attributes(action->type);
     result_text = append_text(translation_for(xml_info->xml_attr.key), result_text, &maxlength);
     int values[5] = {action->parameter1, action->parameter2, action->parameter3, action->parameter4, action->parameter5};
     xml_data_attribute_t attributes[5] = {xml_info->xml_parm1, xml_info->xml_parm2, xml_info->xml_parm3, xml_info->xml_parm4, xml_info->xml_parm5};
     for (int i = 0; i < 5; i++) {
-        if (!attributes[i].type) {
+        if (!attributes[i].type || (action->type == ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY && i >= 2)) {
             return;
         }
         result_text = append_text(string_from_ascii("\n"), result_text, &maxlength);
@@ -1542,8 +1470,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
     }
 }
 
-void scenario_events_parameter_data_get_display_string_for_condition(const scenario_condition_t *condition,
-    uint8_t *result_text, int maxlength)
+void scenario_events_parameter_data_get_display_string_for_condition(const scenario_condition_t *condition, uint8_t *result_text, int maxlength)
 {
     scenario_condition_data_t *xml_info = scenario_events_parameter_data_get_conditions_xml_attributes(condition->type);
     result_text = append_text(translation_for(xml_info->xml_attr.key), result_text, &maxlength);
