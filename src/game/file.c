@@ -348,8 +348,8 @@ static int start_scenario(const uint8_t *scenario_name, const char *scenario_fil
 
     if (!is_save_game) {
         scenario_events_init();
+        scenario_lua_load_script(scenario_file);
     }
-    scenario_lua_load_script(scenario_file);
     building_menu_update();
     city_message_init_scenario();
     scenario_lua_hook_on_load();
@@ -422,8 +422,8 @@ int game_file_start_scenario_from_buffer(uint8_t *data, int length, int is_save_
 
     if (!is_save_game) {
         scenario_events_init();
+        scenario_lua_load_script(game_campaign_get_scenario(mission)->path);
     }
-    scenario_lua_load_script(game_campaign_get_scenario(mission)->path);
     building_menu_update();
     city_message_init_scenario();
     scenario_lua_hook_on_load();

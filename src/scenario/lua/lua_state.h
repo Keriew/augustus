@@ -1,6 +1,7 @@
 #ifndef SCENARIO_LUA_STATE_H
 #define SCENARIO_LUA_STATE_H
 
+#include "core/buffer.h"
 #include "lua/lua.h"
 
 #define LUA_API_VERSION 1
@@ -36,5 +37,24 @@ lua_State *scenario_lua_get_state(void);
  * @return 1 if a Lua state is available, 0 on failure
  */
 int scenario_lua_ensure_state(void);
+
+/**
+ * Load and execute a Lua script from in-memory source (used when restoring from savegame).
+ * Creates a new Lua state, registers all API bindings, and executes the source.
+ * Also stores the source so it can be re-saved.
+ * @return 1 on success, 0 on error
+ */
+int scenario_lua_load_script_from_source(const char *source, int length);
+
+/**
+ * Serialize the Lua script source and global variables to a buffer for savegame persistence.
+ */
+void scenario_lua_save_state(buffer *buf);
+
+/**
+ * Restore the Lua script and global variables from a savegame buffer.
+ * Creates a new Lua state, executes the embedded script, and restores globals.
+ */
+void scenario_lua_load_state(buffer *buf);
 
 #endif // SCENARIO_LUA_STATE_H
