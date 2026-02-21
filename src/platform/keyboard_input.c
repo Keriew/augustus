@@ -249,6 +249,13 @@ void platform_handle_key_down(SDL_KeyboardEvent *event)
             case SDL_SCANCODE_KP_ENTER:
                 terminal_submit();
                 break;
+            case SDL_SCANCODE_C:
+            case SDL_SCANCODE_V:
+            case SDL_SCANCODE_X:
+                if (event->keysym.mod & (KMOD_CTRL | KMOD_GUI)) {
+                    terminal_handle_key_down(event->keysym.scancode, event->keysym.sym, event->keysym.mod);
+                }
+                break;
             case SDL_SCANCODE_BACKSPACE:
             case SDL_SCANCODE_DELETE:
             case SDL_SCANCODE_LEFT:

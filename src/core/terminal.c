@@ -11,6 +11,8 @@
 #include "lua/lua.h"
 #include "lua/lauxlib.h"
 
+#include "SDL.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -187,6 +189,9 @@ void terminal_scroll_down(void)
 #define SCAN_DOWN 0x51
 #define SCAN_HOME 0x4A
 #define SCAN_END 0x4D
+#define SCAN_C 0x06
+#define SCAN_V 0x19
+#define SCAN_X 0x1B
 
 static void set_input(const char *text)
 {
@@ -196,10 +201,61 @@ static void set_input(const char *text)
     data.cursor_pos = data.input_len;
 }
 
+static void terminal_paste(void)
+{
+    data.skip_next_text = 0;
+    char *clipboard = SDL_GetClipboardText();
+    if (!clipboard || clipboard[0] == '\0') {
+        SDL_free(clipboard);
+        return;
+    }
+    // Replace newlines with spaces
+    for (char *c = clipboard; *c; c++) {
+        if (*c == '\n' || *c == '\r') {
+            *c = ' ';
+        }
+    }
+    terminal_handle_text(clipboard);
+    SDL_free(clipboard);
+}
+
+static void terminal_copy(void)
+{
+    if (data.input_len > 0) {
+        SDL_SetClipboardText(data.input);
+    }
+}
+
+static void terminal_cut(void)
+{
+    terminal_copy();
+    data.input[0] = '\0';
+    data.input_len = 0;
+    data.cursor_pos = 0;
+}
+
 void terminal_handle_key_down(int scancode, int sym, int mod)
 {
     (void) sym;
-    (void) mod;
+    if (mod & (KMOD_CTRL | KMOD_GUI)) {
+        switch (scancode) {
+            case SCAN_V:
+                terminal_paste();
+                data.skip_next_text = 1;
+                break;
+            case SCAN_C:
+                terminal_copy();
+                data.skip_next_text = 1;
+                break;
+            case SCAN_X:
+                terminal_cut();
+                data.skip_next_text = 1;
+                break;
+            default:
+                break;
+        }
+        return;
+    }
     switch (scancode) {
         case SCAN_BACKSPACE:
             if (data.cursor_pos > 0) {
