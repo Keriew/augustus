@@ -149,7 +149,7 @@ end
 
 ### IDE autocomplete
 
-Copy the API definition files from [`res/lua/`](res/lua/) into your workspace to get full autocomplete and type hints in editors that support Lua Language Server (e.g. VS Code with the [Lua extension](https://marketplace.visualstudio.com/items?itemName=sumneko.lua)).
+Download the **Lua API** artifact from the latest [GitHub Actions build](https://github.com/Keriew/augustus/actions) and extract the API definition files into your workspace to get full autocomplete and type hints in editors that support Lua Language Server (e.g. VS Code with the [Lua extension](https://marketplace.visualstudio.com/items?itemName=sumneko.lua)).
 
 ## Bugs
 
