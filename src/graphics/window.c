@@ -1,5 +1,6 @@
 #include "window.h"
 
+#include "core/terminal.h"
 #include "game/system.h"
 #include "graphics/graphics.h"
 #include "graphics/warning.h"
@@ -145,6 +146,7 @@ void window_draw(int force)
     w->handle_input(m, h);
     tooltip_handle(m, w->get_tooltip);
     warning_draw();
+    terminal_draw();
     update_input_after();
 }
 

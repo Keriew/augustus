@@ -36,6 +36,7 @@
 #include "game/time.h"
 #include "map/routing.h"
 #include "map/routing_path.h"
+#include "scenario/lua/lua_hooks.h"
 #include "scenario/map.h"
 #include "scenario/property.h"
 
@@ -528,6 +529,7 @@ void figure_trade_caravan_action(figure *f)
                     int resource = trader_get_sell_resource(f->destination_building_id, f->empire_city_id);
                     if (resource) {
                         trade_route_increase_traded(empire_city_get_route_id(f->empire_city_id), resource);
+                        scenario_lua_hook_on_trade_completed(empire_city_get_route_id(f->empire_city_id), resource, 1);
                         trader_record_sold_resource(f->trader_id, resource);
                         city_health_update_sickness_level_in_building(f->destination_building_id);
                         f->loads_sold_or_carrying++;

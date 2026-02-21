@@ -18,6 +18,7 @@
 #include "map/routing_terrain.h"
 #include "map/terrain.h"
 #include "map/tiles.h"
+#include "scenario/lua/lua_hooks.h"
 #include "sound/effect.h"
 
 #include <string.h>
@@ -213,6 +214,7 @@ void building_destroy_by_collapse(building *b)
 
 void building_destroy_by_fire(building *b)
 {
+    scenario_lua_hook_on_building_fire(b->id, b->type);
     destroy_on_fire(b, 0);
     destroy_linked_parts(b, DESTROY_FIRE, 0);
 }
