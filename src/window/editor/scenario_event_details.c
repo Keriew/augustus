@@ -591,7 +591,8 @@ static void draw_condition_button(const grid_box_item *item)
 
     const scenario_condition_t *condition = data.conditions.list[item->index].condition;
     uint8_t text[MAX_TEXT_LENGTH];
-    scenario_events_parameter_data_get_display_string_for_condition(condition, text, MAX_TEXT_LENGTH);
+    scenario_condition_data_t *xml_info = scenario_events_parameter_data_get_conditions_xml_attributes(condition->type);
+    string_copy(translation_for(xml_info->xml_attr.key), text, MAX_TEXT_LENGTH);
     if (text_get_width(text, FONT_NORMAL_BLACK) > item->width - 32) {
         text_draw_ellipsized(text, item->x + 28, item->y + 7, item->width - 32, FONT_NORMAL_BLACK, 0);
     } else {
@@ -615,7 +616,8 @@ static void draw_action_button(const grid_box_item *item)
     button_border_draw(item->x + 24, item->y, item->width - 24, item->height, item->is_focused && item->mouse.x >= 24);
     const scenario_action_t *action = data.actions.list[item->index];
     uint8_t text[MAX_TEXT_LENGTH];
-    scenario_events_parameter_data_get_display_string_for_action(action, text, MAX_TEXT_LENGTH);
+    scenario_action_data_t *xml_info = scenario_events_parameter_data_get_actions_xml_attributes(action->type);
+    string_copy(translation_for(xml_info->xml_attr.key), text, MAX_TEXT_LENGTH);
     if (text_get_width(text, FONT_NORMAL_BLACK) > item->width - 32) {
         text_draw_ellipsized(text, item->x + 28, item->y + 7, item->width - 32, FONT_NORMAL_BLACK, 0);
     } else {
@@ -1042,10 +1044,8 @@ static void handle_condition_tooltip(const grid_box_item *item, tooltip_context 
     }
     static uint8_t text[MAX_TEXT_LENGTH * 2];
     scenario_events_parameter_data_get_display_string_for_condition(list_item->condition, text, MAX_TEXT_LENGTH * 2);
-    if (text_get_width(text, FONT_NORMAL_BLACK) > item->width - 32) {
-        c->precomposed_text = text;
-        c->type = TOOLTIP_BUTTON;
-    }
+    c->precomposed_text = text;
+    c->type = TOOLTIP_BUTTON;
 }
 
 static void handle_action_tooltip(const grid_box_item *item, tooltip_context *c)
@@ -1056,10 +1056,8 @@ static void handle_action_tooltip(const grid_box_item *item, tooltip_context *c)
     }
     static uint8_t text[MAX_TEXT_LENGTH * 2];
     scenario_events_parameter_data_get_display_string_for_action(action, text, MAX_TEXT_LENGTH * 2);
-    if (text_get_width(text, FONT_NORMAL_BLACK) > item->width - 32) {
-        c->precomposed_text = text;
-        c->type = TOOLTIP_BUTTON;
-    }
+    c->precomposed_text = text;
+    c->type = TOOLTIP_BUTTON;
 }
 
 static void handle_check_all_none_tooltip(tooltip_context *c)
