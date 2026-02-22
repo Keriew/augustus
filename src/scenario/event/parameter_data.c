@@ -385,27 +385,39 @@ parameter_type scenario_events_parameter_data_get_action_parameter_type(
 
     switch (parameter_index) {
         case 1:
+            if (min_limit)
             *min_limit = action->xml_parm1.min_limit;
+            if (max_limit)
             *max_limit = action->xml_parm1.max_limit;
             return action->xml_parm1.type;
         case 2:
+            if (min_limit)
             *min_limit = action->xml_parm2.min_limit;
+            if (max_limit)
             *max_limit = action->xml_parm2.max_limit;
             return action->xml_parm2.type;
         case 3:
+            if (min_limit)
             *min_limit = action->xml_parm3.min_limit;
+            if (max_limit)
             *max_limit = action->xml_parm3.max_limit;
             return action->xml_parm3.type;
         case 4:
+            if (min_limit)
             *min_limit = action->xml_parm4.min_limit;
+            if (max_limit)
             *max_limit = action->xml_parm4.max_limit;
             return action->xml_parm4.type;
         case 5:
+            if (min_limit)
             *min_limit = action->xml_parm5.min_limit;
+            if (max_limit)
             *max_limit = action->xml_parm5.max_limit;
             return action->xml_parm5.type;
         default:
+            if (min_limit)
             *min_limit = 0;
+            if (max_limit)
             *max_limit = 0;
             return PARAMETER_TYPE_UNDEFINED;
     }

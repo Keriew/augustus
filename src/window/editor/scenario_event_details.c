@@ -1,6 +1,7 @@
 #include "scenario_event_details.h"
 
 #include "assets/assets.h"
+#include "core/array.h"
 #include "core/lang.h"
 #include "core/log.h"
 #include "core/string.h"
@@ -18,6 +19,7 @@
 #include "input/input.h"
 #include "scenario/event/event.h"
 #include "scenario/event/controller.h"
+#include "scenario/event/data.h"
 #include "scenario/event/parameter_data.h"
 #include "widget/dropdown_button.h"
 #include "widget/input_box.h"
@@ -76,6 +78,8 @@ static void button_add_new_condition(const generic_button *button);
 static void button_delete_selected(const generic_button *button);
 static void button_add_new_action(const generic_button *button);
 static void button_delete_event(const generic_button *button);
+static void button_copy_event(const generic_button *button);
+static void button_paste_event(const generic_button *button);
 static void button_repeat_type(const generic_button *button);
 static void button_repeat_times(const generic_button *button);
 static void button_repeat_between(const generic_button *button);
@@ -101,6 +105,8 @@ typedef struct {
 static struct {
     uint8_t event_name[EVENT_NAME_LENGTH];
     scenario_event_t *event;
+    scenario_event_t copied_event;
+    int did_copy_event;
     int repeat_type;
     struct {
         condition_list_item *list;
@@ -188,7 +194,9 @@ static generic_button bottom_buttons[] = {
     {16, 409, 192, 25, button_add_new_condition},
     {224, 409, 192, 25, button_delete_selected, 0, 0, DISABLE_ON_NO_SELECTION},
     {432, 409, 192, 25, button_add_new_action},
-    {16, 439, 200, 25, button_delete_event},
+    {16, 439, 192, 25, button_delete_event},
+    {224, 439, 134, 25, button_copy_event},
+    {374, 439, 134, 25, button_paste_event},
     {524, 439, 100, 25, button_ok},
 };
 
@@ -562,7 +570,11 @@ static void draw_background(void)
     // Bottom buttons
     lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_DELETE, bottom_buttons[3].x, bottom_buttons[3].y + 6,
         bottom_buttons[3].width, FONT_NORMAL_PLAIN, COLOR_RED);
-    lang_text_draw_centered(18, 3, bottom_buttons[4].x, bottom_buttons[4].y + 6, bottom_buttons[4].width,
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_COPY, bottom_buttons[4].x, bottom_buttons[4].y + 6,
+        bottom_buttons[4].width, FONT_NORMAL_BLACK);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_PASTE, bottom_buttons[5].x, bottom_buttons[5].y + 6,
+        bottom_buttons[5].width, FONT_NORMAL_BLACK);
+    lang_text_draw_centered(18, 3, bottom_buttons[6].x, bottom_buttons[6].y + 6, bottom_buttons[6].width,
         FONT_NORMAL_BLACK);
 
     graphics_reset_dialog();
@@ -943,6 +955,64 @@ static void button_delete_event(const generic_button *button)
     scenario_event_delete(data.event);
     stop_input();
     window_go_back();
+}
+
+static void button_copy_event(const generic_button *button)
+{
+    data.copied_event.state = data.event->state;
+    data.copied_event.repeat_days_min = data.event->repeat_days_min;
+    data.copied_event.repeat_days_max = data.event->repeat_days_max;
+    data.copied_event.repeat_interval = data.event->repeat_interval;
+    data.copied_event.max_number_of_repeats = data.event->max_number_of_repeats;
+    data.copied_event.execution_count = data.event->execution_count;
+    data.copied_event.days_until_active = data.event->days_until_active;
+    string_copy(data.event->name, data.copied_event.name, EVENT_NAME_LENGTH);
+    array_init(data.copied_event.actions, SCENARIO_ACTIONS_ARRAY_SIZE_STEP, data.event->actions.constructor,
+        data.event->actions.in_use);
+    array_init(data.copied_event.condition_groups, SCENARIO_CONDITION_GROUPS_ARRAY_SIZE_STEP,
+        data.event->condition_groups.constructor, data.event->condition_groups.in_use);
+    for (unsigned int i = 0; i < data.event->actions.size; i++) {
+        scenario_action_t *action;
+        array_new_item(data.copied_event.actions, action);
+        *action = *array_item(data.event->actions, i);
+
+        // copy formulas correctly
+        parameter_type p_type;
+        int *params[] = {    // Collect addresses of the fields
+            &action->parameter1,
+            &action->parameter2,
+            &action->parameter3,
+            &action->parameter4,
+            &action->parameter5
+        };
+        for (int i = 1; i <= 5; ++i) {
+            int *param_value = params[i - 1];
+            p_type = scenario_events_parameter_data_get_action_parameter_type(action->type, i, NULL, NULL);
+            if (p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) {
+                scenario_formula_t *formula = scenario_formula_get(*param_value);
+                if (!formula) {
+                    return;
+                }
+                unsigned int id = scenario_formula_add(scenario_formula_get_string(*param_value),
+                    formula->min_evaluation, formula->max_evaluation);
+                *param_value = id;
+            }
+        }
+    }
+    data.did_copy_event = 1;
+}
+
+static void button_paste_event(const generic_button *button)
+{
+    if (!data.did_copy_event) {
+        return;
+    }
+    data.did_copy_event = 0;
+    int event_id = data.event->id;
+    *data.event = data.copied_event;
+    data.event->id = event_id;
+    scenario_events_assign_parent_single_event_ids(data.event);
+    window_request_refresh();
 }
 
 static void set_repeat_type(void)

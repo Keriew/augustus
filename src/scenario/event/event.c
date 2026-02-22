@@ -6,10 +6,7 @@
 #include "game/save_version.h"
 #include "scenario/event/action_handler.h"
 #include "scenario/event/condition_handler.h"
-
-#define SCENARIO_ACTIONS_ARRAY_SIZE_STEP 20
-#define SCENARIO_CONDITIONS_ARRAY_SIZE_STEP 20
-#define SCENARIO_CONDITION_GROUPS_ARRAY_SIZE_STEP 2
+#include "scenario/event/data.h"
 
 static int action_in_use(const scenario_action_t *action)
 {

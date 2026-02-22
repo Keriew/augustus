@@ -1979,7 +1979,9 @@ static translation_string all_strings[] = {
     {TR_SCENARIO_WIN_CONDITION_FAVOR, "Favor"},
     {TR_SCENARIO_WIN_CONDITION_LOOSING_TIME, "Time limit"},
     {TR_SCENARIO_WIN_CONDITION_WINNING_TIME, "Survival time"},
-    {TR_SCENARIO_WIN_CONDITION_POPULATION, "Population"}
+    {TR_SCENARIO_WIN_CONDITION_POPULATION, "Population"},
+    {TR_EDITOR_COPY, "Copy"},
+    {TR_EDITOR_PASTE, "Paste"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
