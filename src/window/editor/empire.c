@@ -105,8 +105,8 @@ static image_button edit_city_name_button[] = {
 };
 
 static generic_button top_buttons[] = {
-    {280, 0, 120, 24, button_delete_object},
-    {140, 0, 120, 24, button_move_object},
+    {280, 0, 120, 24, button_delete_object, 0},
+    {140, 0, 120, 24, button_move_object, 0},
     {0, 0, 120, 24, button_draw_route, 0}
 };
 
@@ -760,6 +760,8 @@ static void draw_city_info(const empire_city *city)
 
 static void draw_object_info(void)
 {
+    top_buttons[0].parameter1 = 0;
+    top_buttons[1].parameter1 = 0;
     empire_object *obj = empire_object_get(empire_selected_object() - 1);
     if (!obj) {
         return;
@@ -840,6 +842,8 @@ static void draw_panel_buttons(const empire_city *city)
 {
     trade_city_buttons[0].parameter1 = 1;
     trade_city_buttons[1].parameter1 = 1;
+    top_buttons[0].parameter1 = 1;
+    top_buttons[1].parameter1 = 1;
     top_buttons[2].parameter1 = 1;
     order_buttons[0].parameter2 = 0;
     order_buttons[1].parameter2 = 0;
@@ -1229,6 +1233,9 @@ static void button_edit_city_name(int param1, int param2)
 
 static void button_delete_object(const generic_button *button)
 {
+    if (button->parameter1) {
+        return;
+    }
     empire_editor_delete_object(empire_selected_object() - 1);
     window_request_refresh();
 }
