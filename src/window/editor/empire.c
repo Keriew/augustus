@@ -73,6 +73,7 @@ static void button_move_object(const generic_button *button);
 static void button_draw_route(const generic_button *button);
 static void button_empire_properties(const generic_button *button);
 static void button_change_index(int is_down, int param2);
+static void button_set_index(const generic_button *button);
 static void button_after_icon(const generic_button *button);
 static void button_route_type(const generic_button *button);
 
@@ -118,6 +119,10 @@ static generic_button trade_city_buttons[] = {
 static arrow_button order_buttons[] = {
     {0, 27, 17, 24, button_change_index, 1, 0},
     {0, 27, 15, 24, button_change_index, 0, 0}
+};
+
+static generic_button set_order_button[] = {
+    {0, 27, 48, 24, 0, button_set_index}
 };
 
 static resource_button sell_buttons[RESOURCE_MAX] = { 0 };
@@ -779,6 +784,7 @@ static void draw_object_info(void)
         width += text_draw_number(is_battle_icon ? obj->invasion_years : obj->distant_battle_travel_months, '\0', NULL,
             data.panel.x_min + 28 + width, data.y_max - 125, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
         if (is_battle_icon) {
+            set_order_button[0].x = data.panel.x_min + 28 + width;
             order_buttons[0].x_offset = data.panel.x_min + 28 + width;
             order_buttons[1].x_offset = data.panel.x_min + 28 + width + 24;
             order_buttons[0].parameter2 = 1;
@@ -808,6 +814,7 @@ static void draw_object_info(void)
             data.y_max - 125, FONT_NORMAL_GREEN);
         width += text_draw_number(obj->order_index, '\0', NULL, data.panel.x_min + 28 + width, data.y_max - 125,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+        set_order_button[0].x = data.panel.x_min + 28 + width;
         order_buttons[0].x_offset = data.panel.x_min + 28 + width;
         order_buttons[1].x_offset = data.panel.x_min + 28 + width + 24;
         order_buttons[0].parameter2 = 1;
@@ -819,6 +826,7 @@ static void draw_object_info(void)
             data.y_max - 125, FONT_NORMAL_GREEN);
         width += text_draw_number(obj->order_index, '\0', NULL, data.panel.x_min + 28 + width, data.y_max - 125,
             FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+        set_order_button[0].x = data.panel.x_min + 28 + width;
         order_buttons[0].x_offset = data.panel.x_min + 28 + width;
         order_buttons[1].x_offset = data.panel.x_min + 28 + width + 24;
         order_buttons[0].parameter2 = 1;
@@ -1015,6 +1023,11 @@ static void handle_input(const mouse *m, const hotkeys *h)
     if (generic_buttons_handle_mouse(m, data.panel.x_min + x_offset, data.y_max - 100, generic_buttons,
         scenario.empire.id == SCENARIO_CUSTOM_EMPIRE ? 8 : 1, &data.focus_button_id)) {
         if (!generic_buttons[data.focus_button_id - 1].parameter1) {
+            return;
+        }
+    }
+    if (order_buttons[0].parameter2) {
+        if (generic_buttons_handle_mouse(m, data.panel.x_min, data.y_max - 160, set_order_button, 1, NULL)) {
             return;
         }
     }
@@ -1306,17 +1319,9 @@ static void button_empire_properties(const generic_button *button)
     window_empire_properties_show();
 }
 
-static void button_change_index(int is_down, int param2)
+static void change_index(int is_down, empire_object *obj)
 {
-    if (!param2) {
-        return;
-    }
-    int selected_id = empire_selected_object();
-    if (!selected_id) {
-        return;
-    }
     int change = is_down ? -1 : 1;
-    empire_object *obj = empire_object_get(selected_id - 1);
     int is_battle = obj->type == EMPIRE_OBJECT_BATTLE_ICON;
     if ((is_battle ? obj->invasion_years : obj->order_index) <= 1 && is_down) {
         return;
@@ -1334,6 +1339,19 @@ static void button_change_index(int is_down, int param2)
         other_obj->order_index = obj->order_index;
         obj->order_index += change;
     }
+}
+
+static void button_change_index(int is_down, int param2)
+{
+    if (!param2) {
+        return;
+    }
+    int selected_id = empire_selected_object();
+    if (!selected_id) {
+        return;
+    }
+    empire_object *obj = empire_object_get(selected_id - 1);
+    change_index(is_down, obj);
     
     if (obj->type == EMPIRE_OBJECT_TRADE_WAYPOINT) {
         window_empire_collect_trade_edges();
@@ -1341,6 +1359,33 @@ static void button_change_index(int is_down, int param2)
     }
     
     window_request_refresh();
+}
+
+static void set_index(int value)
+{
+    int selected_id = empire_selected_object();
+    if (!selected_id) {
+        return;
+    }
+    empire_object *obj = empire_object_get(selected_id - 1);
+    int current = (obj->type == EMPIRE_OBJECT_BATTLE_ICON ? obj->invasion_years : obj->order_index);
+    int iterations = abs(value - current);
+    for (int i = 0; i < iterations; i++) {
+        change_index(value < current, obj);
+    }
+    
+    if (obj->type == EMPIRE_OBJECT_TRADE_WAYPOINT) {
+        window_empire_collect_trade_edges();
+        empire_object_set_trade_route_coords(empire_object_get_our_city());
+    }
+    
+    window_request_refresh();
+}
+
+static void button_set_index(const generic_button *button)
+{
+    window_numeric_input_bound_show((data.x_min + data.x_max) / 2 - 4 * BLOCK_SIZE - screen_dialog_offset_x(),
+        ((data.y_min + data.y_max) - 15 * BLOCK_SIZE) / 2 - screen_dialog_offset_y(), NULL, 4, 1, 9999, set_index);
 }
 
 static void set_after_icon(int value)
