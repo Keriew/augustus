@@ -84,11 +84,11 @@ static generic_button generic_buttons[] = {
     {4, 48, 100, 24, button_ok},
     {124, 48, 150, 24, button_toggle_invasions},
     {294, 48, 150, 24, button_toggle_waypoints},
-    {464, 48, 150, 24, button_refresh, 0},
-    {634, 48, 150, 24, button_export_xml, 0},
-    {794, 48, 150, 24, button_import_xml, 0},
+    {464, 48, 150, 24, button_refresh},
+    {634, 48, 150, 24, button_export_xml},
+    {794, 48, 150, 24, button_import_xml},
     {974, 48, 150, 24, button_empire_properties},
-    {0, 0, 0, 24, button_icon_preview, 0},
+    {0, 0, 0, 24, button_icon_preview},
 };
 static generic_button preview_button[] = {
     {0, 0, 72, 72, button_cycle_preview, button_recycle_preview},
@@ -105,14 +105,14 @@ static image_button edit_city_name_button[] = {
 };
 
 static generic_button top_buttons[] = {
-    {280, 0, 120, 24, button_delete_object, 0},
-    {140, 0, 120, 24, button_move_object, 0},
-    {0, 0, 120, 24, button_draw_route, 0}
+    {280, 0, 120, 24, button_delete_object},
+    {140, 0, 120, 24, button_move_object},
+    {0, 0, 120, 24, button_draw_route}
 };
 
 static generic_button trade_city_buttons[] = {
-    {96, 0, 24, 24, button_route_type, 0},
-    {0, 0, 24, 24, button_after_icon, 0}
+    {96, 0, 24, 24, button_route_type},
+    {0, 0, 24, 24, button_after_icon}
 };
 
 static arrow_button order_buttons[] = {
