@@ -51,6 +51,7 @@ static struct {
     size_t introduction;
     size_t custom_variables;
     size_t custom_name;
+    size_t lua_script_path;
     size_t end;
 
     // Cache info
@@ -186,6 +187,11 @@ static void calculate_buffer_offsets(int scenario_version)
     next_start_offset = buffer_offsets.custom_name +
         (scenario_version > SCENARIO_LAST_WRONG_END_OFFSET ? sizeof(scenario.empire.custom_name) : 50);
 
+    if (scenario_version > SCENARIO_LAST_NO_LUA_SCRIPT) {
+        buffer_offsets.lua_script_path = next_start_offset;
+        next_start_offset = buffer_offsets.lua_script_path + MAX_LUA_SCRIPT_PATH;
+    }
+
     buffer_offsets.end = next_start_offset + 1;
 
     buffer_offsets.version = scenario_version;
@@ -211,6 +217,8 @@ int scenario_get_state_buffer_size_by_savegame_version(int savegame_version)
         calculate_buffer_offsets(SCENARIO_LAST_NO_EXTRA_NATIVE_BUILDINGS);
     } else if (savegame_version <= SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         calculate_buffer_offsets(SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA);
+    } else if (savegame_version <= SAVE_GAME_LAST_NO_LUA_SCRIPT) {
+        calculate_buffer_offsets(SCENARIO_LAST_NO_LUA_SCRIPT);
     } else {
         calculate_buffer_offsets(SCENARIO_CURRENT_VERSION);
     }
@@ -365,6 +373,9 @@ void scenario_save_state(buffer *buf)
     buffer_write_i32(buf, scenario.intro_custom_message_id);
 
     buffer_write_raw(buf, scenario.empire.custom_name, sizeof(scenario.empire.custom_name));
+
+    buffer_write_raw(buf, scenario.lua_script_path, MAX_LUA_SCRIPT_PATH);
+
     buffer_write_u8(buf, 0);
 }
 
@@ -562,6 +573,12 @@ void scenario_load_state(buffer *buf, int version)
     if (version > SCENARIO_LAST_UNVERSIONED) {
         buffer_read_raw(buf, scenario.empire.custom_name, sizeof(scenario.empire.custom_name));
     }
+
+    memset(scenario.lua_script_path, 0, MAX_LUA_SCRIPT_PATH);
+    if (version > SCENARIO_LAST_NO_LUA_SCRIPT) {
+        buffer_read_raw(buf, scenario.lua_script_path, MAX_LUA_SCRIPT_PATH);
+    }
+
     buffer_skip(buf, 1);
 
     // We can only remap resources at the end of the scenario load as the remapping relies on the allowed building list

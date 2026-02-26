@@ -4,6 +4,8 @@
 #include "game/resource.h"
 #include "scenario/event/condition_types.h"
 
+extern int scenario_lua_evaluate_custom_condition(int index);
+
 static int condition_in_use(const scenario_condition_t *condition)
 {
     return condition->type != CONDITION_TYPE_UNDEFINED;
@@ -92,6 +94,8 @@ int scenario_condition_type_is_met(scenario_condition_t *condition)
             return scenario_condition_type_check_formulas(condition);
         case CONDITION_TYPE_TERRAIN_IN_AREA:
             return scenario_condition_type_terrain_count_area_met(condition);
+        case CONDITION_TYPE_LUA_CUSTOM:
+            return scenario_lua_evaluate_custom_condition(condition->parameter1);
         default:
             // If we cannot figure condition type (such as with deleted conditions) then default to passed.
             return 1;

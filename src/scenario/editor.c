@@ -412,3 +412,17 @@ void scenario_editor_set_custom_victory_message(int id)
 {
     scenario.victory_custom_message_id = id;
 }
+
+const char *scenario_editor_get_lua_script_path(void)
+{
+    return scenario.lua_script_path;
+}
+
+void scenario_editor_set_lua_script_path(const char *path)
+{
+    if (path) {
+        string_copy((const uint8_t *) path, (uint8_t *) scenario.lua_script_path, MAX_LUA_SCRIPT_PATH);
+    } else {
+        scenario.lua_script_path[0] = '\0';
+    }
+}

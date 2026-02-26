@@ -130,7 +130,7 @@ int text_get_number_width(int value, char prefix, const char *postfix, font_t fo
 
         if (*str >= ' ') {
             int letter_id = font_letter_id(def, str, &num_bytes);
-            if (*str == ' ' || *str == '_' || letter_id < 0) {
+            if (*str == ' ' || letter_id < 0) {
                 width += def->space_width;
             } else {
                 const image *img = image_letter(letter_id);
@@ -346,7 +346,7 @@ int text_draw_scaled(const uint8_t *str, int x, int y, font_t font, color_t colo
         } else if (*str >= ' ') {
             int letter_id = font_letter_id(def, str, &num_bytes);
             int width;
-            if (*str == ' ' || *str == '_' || letter_id < 0) {
+            if (*str == ' ' || letter_id < 0) {
                 width = def->space_width;
             } else {
                 const image *img = image_letter(letter_id);
@@ -420,7 +420,7 @@ int text_draw_number_scaled(int value, char prefix, const uint8_t *postfix,
         if (*str >= ' ') {
             int letter_id = font_letter_id(def, str, &num_bytes);
             int width;
-            if (*str == ' ' || *str == '_' || letter_id < 0) {
+            if (*str == ' ' || letter_id < 0) {
                 width = def->space_width;
             } else {
                 const image *img = image_letter(letter_id);

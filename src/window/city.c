@@ -50,6 +50,7 @@
 #include "window/empire.h"
 #include "window/file_dialog.h"
 #include "window/message_list.h"
+#include "window/lua_input_dialog.h"
 #include "window/overlay_menu.h"
 
 #define TOPLEFT_MESSAGES_X 5
@@ -288,6 +289,7 @@ static void draw_foreground(void)
     widget_city_draw_construction_cost_and_size();
     if (window_is(WINDOW_CITY)) {
         city_message_process_queue();
+        window_lua_input_dialog_process_pending();
     }
 }
 

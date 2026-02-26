@@ -66,4 +66,7 @@ void scenario_editor_set_custom_message_introduction(int id);
 int scenario_editor_get_custom_victory_message(void);
 void scenario_editor_set_custom_victory_message(int id);
 
+const char *scenario_editor_get_lua_script_path(void);
+void scenario_editor_set_lua_script_path(const char *path);
+
 #endif // SCENARIO_EDITOR_H

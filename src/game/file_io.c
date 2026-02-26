@@ -64,6 +64,7 @@
 #include "scenario/price_change.h"
 #include "scenario/request.h"
 #include "scenario/scenario.h"
+#include "scenario/lua/lua_state.h"
 #include "sound/city.h"
 #include "widget/minimap.h"
 
@@ -231,6 +232,7 @@ typedef struct {
     buffer *building_model_data;
     buffer *rubble_grid;
     buffer *production_rates;
+    buffer *lua_state;
 } savegame_state;
 
 typedef struct {
@@ -291,6 +293,7 @@ typedef struct {
         int custom_model_data;
         int rubble_grid;
         int custom_production_rates;
+        int lua_state;
     } features;
 } savegame_version_data;
 
@@ -535,6 +538,7 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
     version_data->features.custom_model_data = version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA;
     version_data->features.rubble_grid = version > SAVE_GAME_LAST_U16_GRIDS;
     version_data->features.custom_production_rates = version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA;
+    version_data->features.lua_state = version > SAVE_GAME_LAST_NO_LUA_STATE;
 }
 
 static void init_savegame_data(savegame_version_t version)
@@ -707,6 +711,9 @@ static void init_savegame_data(savegame_version_t version)
     }
     if (version_data.features.custom_production_rates) {
         state->production_rates = create_savegame_piece(PIECE_SIZE_DYNAMIC, 1);
+    }
+    if (version_data.features.lua_state) {
+        state->lua_state = create_savegame_piece(PIECE_SIZE_DYNAMIC, 0);
     }
 }
 
@@ -974,6 +981,10 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
         scenario_events_min_max_migrate_to_formulas();
     }
     scenario_events_assign_parent_event_ids();
+
+    if (version > SAVE_GAME_LAST_NO_LUA_STATE && state->lua_state) {
+        scenario_lua_load_state(state->lua_state);
+    }
 }
 
 static void savegame_save_to_state(savegame_state *state)
@@ -1065,6 +1076,8 @@ static void savegame_save_to_state(savegame_state *state)
     figure_visited_buildings_save_state(state->visited_buildings);
 
     production_rates_save(state->production_rates);
+
+    scenario_lua_save_state(state->lua_state);
 }
 
 static int get_scenario_version(FILE *fp)
