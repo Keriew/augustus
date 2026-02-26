@@ -66,6 +66,7 @@ static figure_type building_type_to_figure_type(building_type type)
         case BUILDING_GRAND_TEMPLE_MERCURY:
         case BUILDING_GRAND_TEMPLE_NEPTUNE:
         case BUILDING_GRAND_TEMPLE_VENUS:
+        case BUILDING_GRAND_TEMPLE_VENUS_REWORKED:
         case BUILDING_LARGE_TEMPLE_CERES:
         case BUILDING_LARGE_TEMPLE_MARS:
         case BUILDING_LARGE_TEMPLE_MERCURY:

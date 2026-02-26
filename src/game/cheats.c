@@ -56,6 +56,7 @@ static void game_cheat_disable_legions_consumption(uint8_t *);
 static void game_cheat_disable_invasions(uint8_t *);
 static void game_cheat_change_weather(uint8_t *);
 static void game_cheat_destroy_building(uint8_t *);
+static void game_cheat_enable_legacy_venus(uint8_t *);
 
 static void (*const execute_command[])(uint8_t *args) = {
     game_cheat_add_money,
@@ -77,7 +78,8 @@ static void (*const execute_command[])(uint8_t *args) = {
     game_cheat_disable_legions_consumption,
     game_cheat_disable_invasions,
     game_cheat_change_weather,
-    game_cheat_destroy_building
+    game_cheat_destroy_building,
+    game_cheat_enable_legacy_venus
 };
 
 static const char *commands[] = {
@@ -100,7 +102,8 @@ static const char *commands[] = {
     "breadandfish",
     "leavemealone",
     "weather",                   // syntax: weather <weather_type> <intensity>
-    "destroy"                   // syntax: destroy <building_id> <destruction_type>
+    "destroy",                   // syntax: destroy <building_id> <destruction_type>
+    "genetrix"
 };
 
 #define NUMBER_OF_COMMANDS sizeof (commands) / sizeof (commands[0])
@@ -111,6 +114,7 @@ static struct {
     int extra_legions_unlocked;
     int disabled_legions_consumption;
     int disabled_invasions;
+    int legacy_gts_enabled;
 } data;
 
 static int parse_word(uint8_t *string, uint8_t *word)
@@ -414,4 +418,17 @@ int game_cheat_disabled_legions_consumption(void)
 int game_cheat_disabled_invasions(void)
 {
     return data.disabled_invasions;
+}
+
+// Enables all 6 legacy grand temples in the building menu
+static void game_cheat_enable_legacy_venus(uint8_t *args)
+{
+    data.legacy_gts_enabled = 1;
+    building_menu_update();
+    show_warning(TR_CHEAT_LEGACY_GTS_ENABLED);
+}
+
+int game_cheat_legacy_gts_enabled(void)
+{
+    return data.legacy_gts_enabled;
 }
