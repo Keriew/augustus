@@ -212,9 +212,9 @@ static int condition_is_trade_city(const empire_object *obj)
 
 static int place_object(int mouse_x, int mouse_y)
 {
-    if (data.currently_moving && (data.current_tool == empire_editor_get_tool_for_object(
+    if (data.currently_moving && ((data.current_tool == empire_editor_get_tool_for_object(
         empire_object_get_full(data.move_id))) ||
-        (data.move_ornament_id >= 0 && empire_object_get(data.move_id)->type == EMPIRE_OBJECT_ORNAMENT)) {
+        (data.move_ornament_id >= 0 && empire_object_get(data.move_id)->type == EMPIRE_OBJECT_ORNAMENT))) {
         empire_editor_move_object_end(mouse_x, mouse_y);
         return 1;
     }

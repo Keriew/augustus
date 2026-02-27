@@ -136,7 +136,7 @@ static void init(void)
 static void default_cities_list_box_draw_item(const list_box_item *item)
 {
     font_t font = item->is_selected ? FONT_NORMAL_WHITE : FONT_NORMAL_GREEN;
-    const uint8_t display_text[256];
+    const uint8_t display_text[256] = "Roma";
     const default_city *city = &default_cities[item->index];
     color_t color = empire_city_get_at(city->x, city->y, string_from_ascii(city->name)) ? COLOR_FONT_GRAY : COLOR_MASK_NONE;
     snprintf((char *)display_text, 256, "%s: %i, %i", city->name, city->x, city->y);

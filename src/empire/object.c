@@ -357,7 +357,7 @@ void empire_object_add_to_cities(full_empire_object *full)
         full->obj.trade_route_id = trade_route_new();
         array_item(objects, full->obj.id + 1)->obj.trade_route_id = full->obj.trade_route_id;
         
-        for (int point_index; point_index < objects.size; ) {
+        for (int point_index = 0; point_index < objects.size; ) {
             unsigned int point_id = empire_object_get_next_in_order(full->obj.id + 1, &point_index);
             if (!point_id) {
                 break;
