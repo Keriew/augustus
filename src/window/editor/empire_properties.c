@@ -67,8 +67,8 @@ typedef struct {
     int y;
 } default_city;
 
-static void lb_draw_item(const list_box_item *item);
-static void lb_on_select(unsigned int index, int is_double_click);
+static void default_cities_list_box_draw_item(const list_box_item *item);
+static void default_cities_list_box_on_select(unsigned int index, int is_double_click);
 
 static const default_city default_cities[] = {
     {"Roma", 752, 504},
@@ -123,8 +123,8 @@ static list_box_type default_cities_list_box = {
     1, // inner panel
     0, // extend to hidden scrollbar
     1, // decorate scrollbar
-    lb_draw_item,
-    lb_on_select,
+    default_cities_list_box_draw_item,
+    default_cities_list_box_on_select,
     NULL
 };
 
@@ -133,7 +133,7 @@ static void init(void)
     list_box_init(&default_cities_list_box, NUM_DEFAULT_CITIES);
 }
 
-static void lb_draw_item(const list_box_item *item)
+static void default_cities_list_box_draw_item(const list_box_item *item)
 {
     font_t font = item->is_selected ? FONT_NORMAL_WHITE : FONT_NORMAL_GREEN;
     const uint8_t display_text[256];
@@ -161,7 +161,7 @@ static void add_city(const default_city *city)
     empire_object_add_to_cities(full);
 }
 
-static void lb_on_select(unsigned int index, int is_double_click)
+static void default_cities_list_box_on_select(unsigned int index, int is_double_click)
 {
     if (!is_double_click) {
         return;
@@ -178,7 +178,6 @@ static void draw_background(void)
     graphics_in_dialog();
 
     outer_panel_draw(0, 0, 40, 30);
-
 
     graphics_reset_dialog();
 }
@@ -234,18 +233,9 @@ static void button_default_image(const generic_button *button)
     window_editor_empire_show();
 }
 
-static void set_density(int value)
-{
-    empire_object *border = (empire_object *)empire_object_get_border();
-    if (!border) {
-        return;
-    }
-    border->width = value;
-}
-
 static void button_border_density(const generic_button *button)
 {
-    window_numeric_input_bound_show(0, 0, button, 3, 4, 300, set_density);
+    window_numeric_input_bound_show(0, 0, button, 3, 4, 300, empire_object_change_border_width);
 }
 
 static void set_path(int value)

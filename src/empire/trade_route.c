@@ -167,12 +167,13 @@ void trade_routes_load_state(buffer *trade_routes)
         trade_route *route = array_next(routes);
         for (int i = 0; i < 2; i++) {
             for (int r = 0; r < resource_total_mapped(); r++) {
+                resource_type remapped = resource_remap(r);
                 if (i) {
-                    route->buys.limit[resource_remap(r)] = buffer_read_i32(trade_routes);
-                    route->buys.traded[resource_remap(r)] = buffer_read_i32(trade_routes);
+                    route->buys.limit[remapped] = buffer_read_i32(trade_routes);
+                    route->buys.traded[remapped] = buffer_read_i32(trade_routes);
                 } else {
-                    route->sells.limit[resource_remap(r)] = buffer_read_i32(trade_routes);
-                    route->sells.traded[resource_remap(r)] = buffer_read_i32(trade_routes);
+                    route->sells.limit[remapped] = buffer_read_i32(trade_routes);
+                    route->sells.traded[remapped] = buffer_read_i32(trade_routes);
                 }
             }
         }
@@ -193,17 +194,18 @@ void trade_routes_migrate_to_buys_sells(buffer *limit, buffer *traded, int versi
             continue;
         }
         for (int r = 0; r < resource_total_mapped(); r++) {
-            if (empire_city_buys_resource(city_id, resource_remap(r))) {
-                route->buys.limit[resource_remap(r)] = buffer_read_i32(limit);
-                route->buys.traded[resource_remap(r)] = buffer_read_i32(traded);
-                route->sells.limit[resource_remap(r)] = route->sells.traded[resource_remap(r)] = 0;
-            } else if (empire_city_sells_resource(city_id, resource_remap(r))) {
-                route->sells.limit[resource_remap(r)] = buffer_read_i32(limit);
-                route->sells.traded[resource_remap(r)] = buffer_read_i32(traded);
-                route->buys.limit[resource_remap(r)] = route->buys.traded[resource_remap(r)] = 0;
+            resource_type remapped = resource_remap(r);
+            if (empire_city_buys_resource(city_id, remapped)) {
+                route->buys.limit[remapped] = buffer_read_i32(limit);
+                route->buys.traded[remapped] = buffer_read_i32(traded);
+                route->sells.limit[remapped] = route->sells.traded[remapped] = 0;
+            } else if (empire_city_sells_resource(city_id, remapped)) {
+                route->sells.limit[remapped] = buffer_read_i32(limit);
+                route->sells.traded[remapped] = buffer_read_i32(traded);
+                route->buys.limit[remapped] = route->buys.traded[remapped] = 0;
             } else {
-                route->sells.limit[resource_remap(r)] = route->sells.traded[resource_remap(r)] =
-                    route->buys.limit[resource_remap(r)] = route->buys.traded[resource_remap(r)] = 0;
+                route->sells.limit[remapped] = route->sells.traded[remapped] =
+                    route->buys.limit[remapped] = route->buys.traded[remapped] = 0;
             }
         }
     }

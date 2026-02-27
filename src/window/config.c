@@ -1181,7 +1181,7 @@ static void init_list_boxes(void)
     ui_list_box.on_select = handle_list_box_select;
     ui_list_box.handle_tooltip = list_box_tooltip;
     list_box_init(&ui_list_box, CATEGORY_UI_COUNT);
-    
+
     //  City management
     city_mgmt_list_box = ui_list_box; //  copy layout
     list_box_init(&city_mgmt_list_box, CATEGORY_CITY_COUNT);

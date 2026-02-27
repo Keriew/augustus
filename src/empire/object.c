@@ -278,8 +278,8 @@ void empire_object_save(buffer *buf)
         buffer_write_i32(buf, 0);
         return;
     }
-    int size_per_obj = 81; // +2 bytes for empire_city_icon fields
-    int size_per_city = 141 + 4 * (RESOURCE_MAX - RESOURCE_MAX_LEGACY); // +2 bytes for empire_city_icon fields
+    int size_per_obj = 85; // +2 bytes for empire_city_icon fields
+    int size_per_city = 145 + 4 * (RESOURCE_MAX - RESOURCE_MAX_LEGACY); // +2 bytes for empire_city_icon fields
     int total_size = 0;
 
     full_empire_object *full;
@@ -590,6 +590,18 @@ const empire_object *empire_object_get_border(void)
         }
     }
     return 0;
+}
+
+void empire_object_change_border_width(int width)
+{
+    full_empire_object *obj;
+    array_foreach(objects, obj) {
+        if (obj->in_use) {
+            if (obj->obj.type == EMPIRE_OBJECT_BORDER) {
+                obj->obj.width = width;
+            }
+        }
+    }
 }
 
 const empire_object *empire_object_get_trade_city(int trade_route_id)

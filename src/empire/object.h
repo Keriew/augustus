@@ -117,6 +117,7 @@ int empire_object_get_highest_index(int parent);
 const empire_object *empire_object_get_our_city(void);
 
 const empire_object *empire_object_get_border(void);
+void empire_object_change_border_width(int width);
 
 const empire_object *empire_object_get_trade_city(int trade_route_id);
 

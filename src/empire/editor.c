@@ -38,6 +38,12 @@ static struct {
 static int place_object(int mouse_x, int mouse_y);
 static int delete_object_at(int mouse_x, int mouse_y);
 
+static int place_city(full_empire_object *full);
+static int place_border(full_empire_object *full);
+static int place_battle(full_empire_object *full);
+static int place_distant_battle(full_empire_object *full);
+static int place_trade_waypoint(full_empire_object *full);
+
 void empire_editor_init(int is_new)
 {
     data.current_tool = EMPIRE_TOOL_OUR_CITY;
@@ -139,12 +145,6 @@ int empire_editor_handle_placement(const mouse *m, const hotkeys *h)
 
     return 0;
 }
-
-static int place_city(full_empire_object *full);
-static int place_border(full_empire_object *full);
-static int place_battle(full_empire_object *full);
-static int place_distant_battle(full_empire_object *full);
-static int place_trade_waypoint(full_empire_object *full);
 
 static void shift_edge_indices(const empire_object *const_obj)
 {
@@ -498,7 +498,13 @@ static void shift_trade_waypoints(const empire_object *const_obj)
     obj->order_index--;
 }
 
-static void deletion_confirmed(int confirmed, int checked);
+static void deletion_confirmed(int confirmed, int checked)
+{
+    if (!confirmed) {
+        return;
+    }
+    data.deletion_success = empire_editor_delete_object(data.deletion_id);
+}
 
 static int delete_object_at(int mouse_x, int mouse_y)
 {    
@@ -517,14 +523,6 @@ static int delete_object_at(int mouse_x, int mouse_y)
         deletion_confirmed(1, 0);
     }
     return data.deletion_success;
-}
-
-static void deletion_confirmed(int confirmed, int checked)
-{
-    if (!confirmed) {
-        return;
-    }
-    data.deletion_success = empire_editor_delete_object(data.deletion_id);
 }
 
 int empire_editor_delete_object(unsigned int obj_id)
@@ -608,7 +606,7 @@ void empire_editor_move_object_end(int mouse_x, int mouse_y)
     empire_object_set_trade_route_coords(empire_object_get_our_city());
 }
 
-void empire_editor_move_object_stopp(void)
+void empire_editor_move_object_stop(void)
 {
     data.currently_moving = 0;
     data.move_id = 0;

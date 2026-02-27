@@ -756,7 +756,6 @@ void window_empire_collect_trade_edges(void)
         int segment_start_y = our_city_object->y + 25;
         int route_edge_count = 0;
 
-        // Waypoints belonging to this route are contiguous after the route object
         for (int waypoint_index = 0; waypoint_index < empire_object_count(); ) {
             int waypoint_object_id = empire_object_get_next_in_order(object_index, &waypoint_index);
             if (!waypoint_object_id) {
