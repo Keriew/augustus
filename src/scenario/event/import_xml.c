@@ -21,7 +21,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#define XML_TOTAL_ELEMENTS 77
+#define XML_TOTAL_ELEMENTS 78
 #define ERROR_MESSAGE_LENGTH 200
 
 static struct {
@@ -142,6 +142,7 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "change_rank", xml_import_create_action, 0, "actions"},
     { "change_production_rate", xml_import_create_action, 0, "actions"},
     { "lock_trade_route", xml_import_create_action, 0, "actions"},
+    { "change_goal", xml_import_create_action, 0, "actions"}
 };
 
 static int xml_import_start_scenario_events(void)
@@ -502,6 +503,7 @@ static int xml_import_special_parse_attribute_with_resolved_type(xml_data_attrib
         case PARAMETER_TYPE_CLIMATE:
         case PARAMETER_TYPE_TERRAIN:
         case PARAMETER_TYPE_DATA_TYPE:
+        case PARAMETER_TYPE_HOUSE_DATA_TYPE:
         case PARAMETER_TYPE_MODEL:
         case PARAMETER_TYPE_PERCENTAGE:
         case PARAMETER_TYPE_HOUSING_TYPE:
@@ -512,6 +514,7 @@ static int xml_import_special_parse_attribute_with_resolved_type(xml_data_attrib
         case PARAMETER_TYPE_RANK:
         case PARAMETER_TYPE_CITY_PROPERTY:
         case PARAMETER_TYPE_MEDIA_TYPE:
+        case PARAMETER_TYPE_WIN_CONDITION:
             return xml_import_special_parse_type(attr, resolved_type, target);
         case PARAMETER_TYPE_ROUTE_RESOURCE:
             return xml_import_special_parse_number(attr, target);
@@ -526,6 +529,7 @@ static int xml_import_special_parse_attribute_with_resolved_type(xml_data_attrib
         case PARAMETER_TYPE_MIN_MAX_NUMBER:
             return xml_import_special_parse_min_max_number(attr, target);
         case PARAMETER_TYPE_RESOURCE:
+        case PARAMETER_TYPE_RESOURCE_ALL:
             return xml_import_special_parse_resource(attr, target);
         case PARAMETER_TYPE_ROUTE:
             return xml_import_special_parse_route(attr, target);
@@ -629,7 +633,7 @@ static int xml_import_special_parse_resource(xml_data_attribute_t *attr, int *ta
     }
 
     const char *value = xml_parser_get_attribute_string(attr->name);
-    for (resource_type i = RESOURCE_MIN; i < RESOURCE_MAX; i++) {
+    for (resource_type i = RESOURCE_MIN; i < RESOURCE_ALL; i++) {
         const char *resource_name = resource_get_data(i)->xml_attr_name;
         if (xml_parser_compare_multiple(resource_name, value)) {
             *target = (int) i;

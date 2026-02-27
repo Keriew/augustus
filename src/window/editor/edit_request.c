@@ -382,10 +382,10 @@ static void set_resource(int value)
 
 static void button_resource(const generic_button *button)
 {
-    static const uint8_t *resource_texts[RESOURCE_MAX + RESOURCE_TOTAL_SPECIAL];
+    static const uint8_t *resource_texts[RESOURCE_ALL];
     static int total_resources = 0;
     if (!total_resources) {
-        for (resource_type resource = RESOURCE_NONE; resource < RESOURCE_MAX + RESOURCE_TOTAL_SPECIAL; resource++) {
+        for (resource_type resource = RESOURCE_NONE; resource < RESOURCE_ALL; resource++) {
             if ((!resource_is_storable(resource) && resource < RESOURCE_MAX) || resource == RESOURCE_TROOPS) {
                 continue;
             }

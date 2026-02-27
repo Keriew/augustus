@@ -4,6 +4,22 @@
 
 static int max_game_year;
 
+int scenario_criteria_get_max_value(scenario_win_condition_type condition)
+{
+    switch (condition) {
+        case SCENARIO_WIN_CONDITION_CULTURE:
+        case SCENARIO_WIN_CONDITION_PROSPERITY:
+        case SCENARIO_WIN_CONDITION_PEACE:
+        case SCENARIO_WIN_CONDITION_FAVOR:
+            return 100;
+        case SCENARIO_WIN_CONDITION_LOOSING_TIME:
+        case SCENARIO_WIN_CONDITION_WINNING_TIME:
+            return 999;
+        case SCENARIO_WIN_CONDITION_POPULATION:
+            return 99999;
+    }
+}
+
 int scenario_criteria_population_enabled(void)
 {
     return scenario.win_criteria.population.enabled;

@@ -50,6 +50,9 @@ typedef enum {
     PARAMETER_TYPE_ROUTE_RESOURCE, //dynamic mapping of resource available on a route
     PARAMETER_TYPE_RANK,
     PARAMETER_TYPE_GRID_SLICE,
+    PARAMETER_TYPE_HOUSE_DATA_TYPE,
+    PARAMETER_TYPE_RESOURCE_ALL,
+    PARAMETER_TYPE_WIN_CONDITION
 } parameter_type;
 
 typedef struct {
