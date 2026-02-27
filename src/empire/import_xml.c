@@ -66,7 +66,7 @@ static struct {
     array(waypoint) distant_battle_waypoints;
     int border_status;
     char added_ornaments[TOTAL_ORNAMENTS];
-    char info_filename[128];
+    char info_filename[FILE_NAME_MAX];
 } data;
 
 static int xml_start_empire(void);
