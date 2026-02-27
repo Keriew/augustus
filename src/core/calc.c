@@ -57,9 +57,7 @@ int calc_maximum_distance(int x1, int y1, int x2, int y2)
 
 int calc_euclidean_distance(int x1, int y1, int x2, int y2)
 {
-    double dx = (double)x1 - (double)x2;
-    double dy = (double)y1 - (double)y2;
-    return (int)sqrt(dx * dx + dy * dy);
+  return (int) sqrt((double) (x * x + y * y));
 }
 
 int calc_box_distance(int ax, int ay, int aw, int ah, int bx, int by, int bw, int bh)
