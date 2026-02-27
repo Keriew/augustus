@@ -59,7 +59,7 @@ static generic_button generic_buttons[] = {
     {16, 366, 200, 30, button_empire_settings},
     {16, 406, 200, 30, button_hotkeys},
 };
-#define NUM_GENERIC_BUTTONS sizeof(generic_buttons) / sizeof(generic_button)
+#define NUM_GENERIC_BUTTONS (sizeof(generic_buttons) / sizeof(generic_button))
 
 typedef struct {
     const char name[50];

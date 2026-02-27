@@ -375,7 +375,7 @@ void empire_object_add_to_cities(full_empire_object *full)
         city->is_sea_trade = empire_object_is_sea_trade_route(full->obj.trade_route_id);
         
         // set sell/buy resources and set trade route accordingly
-        for (int resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
+        for (resource_type resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
             city->sells_resource[resource] = 0;
             city->buys_resource[resource] = 0;
             if (empire_object_city_sells_resource(full->obj.id, resource)) {
