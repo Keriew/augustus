@@ -4,6 +4,7 @@
 #include "building/image.h"
 #include "building/properties.h"
 #include "city/view.h"
+#include "core/image_group.h"
 #include "core/image_group_editor.h"
 #include "editor/tool.h"
 #include "editor/tool_restriction.h"
@@ -120,18 +121,49 @@ static void draw_road(const map_tile *tile, int x, int y)
     }
 }
 
+typedef struct {
+    int x;
+    int y;
+    tool_type type;
+} brush_draw_data;
+
+static void draw_terrain_preview(int x, int y, tool_type type)
+{
+    int image_id;
+    switch (type) {
+        case TOOL_TREES:
+            image_id = image_group(GROUP_TERRAIN_TREE);
+            break;
+        case TOOL_ROCKS:
+            image_id = image_group(GROUP_TERRAIN_ROCK);
+            break;
+        case TOOL_SHRUB:
+            image_id = image_group(GROUP_TERRAIN_SHRUB);
+            break;
+        case TOOL_MEADOW:
+            image_id = image_group(GROUP_TERRAIN_MEADOW);
+            break;
+        default:
+            draw_flat_tile(x, y, COLOR_MASK_GREEN);
+            return;
+    }
+    draw_flat_tile(x, y, COLOR_MASK_GREEN);
+    image_draw_isometric_footprint(image_id, x, y, COLOR_MASK_BUILDING_GHOST, scale);
+    image_draw_isometric_top(image_id, x, y, COLOR_MASK_BUILDING_GHOST, scale);
+}
+
 static void draw_brush_tile(const void *data, int dx, int dy)
 {
-    view_tile *view = (view_tile *) data;
+    brush_draw_data *brush = (brush_draw_data *) data;
     int view_dx, view_dy;
     offset_to_view_offset(dx, dy, &view_dx, &view_dy);
-    draw_flat_tile(view->x + view_dx, view->y + view_dy, COLOR_MASK_GREEN);
+    draw_terrain_preview(brush->x + view_dx, brush->y + view_dy, brush->type);
 }
 
 static void draw_brush(const map_tile *tile, int x, int y)
 {
-    view_tile vt = { x, y };
-    editor_tool_foreach_brush_tile(draw_brush_tile, &vt);
+    brush_draw_data bd = { x, y, editor_tool_type() };
+    editor_tool_foreach_brush_tile(draw_brush_tile, &bd);
 }
 
 static void draw_access_ramp(const map_tile *tile, int x, int y)
