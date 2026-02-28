@@ -62,7 +62,7 @@ static generic_button generic_buttons[] = {
 #define NUM_GENERIC_BUTTONS (sizeof(generic_buttons) / sizeof(generic_button))
 
 typedef struct {
-    const char name[50];
+    int name_id;
     int x;
     int y;
 } default_city;
@@ -71,46 +71,46 @@ static void default_cities_list_box_draw_item(const list_box_item *item);
 static void default_cities_list_box_on_select(unsigned int index, int is_double_click);
 
 static const default_city default_cities[] = {
-    {"Roma", 752, 504},
-    {"Tarentum", 905, 558},
-    {"Brundisium", 945, 543},
-    {"Syracusae", 835, 733},
-    {"Carthago Nova", 225, 728},
-    {"Mediolanum", 614, 310},
-    {"Tarraco", 382, 494},
-    {"Valentia", 277, 617},
-    {"Toletum", 114, 603},
-    {"Tingis", 115, 794},
-    {"Sinope", 1625, 491},
-    {"Tarsus", 1657, 733},
-    {"Leptis Magna", 835, 894},
-    {"Cyrene", 1128, 883},
-    {"Lutetia", 373, 191},
-    {"Massilia", 473, 400},
-    {"Narbo", 395, 426},
-    {"Lugdunum", 473, 284},
-    {"Caesarea", 382, 755},
-    {"Alexandria", 1508, 929},
-    {"Augusta Trevorum", 506, 125},
-    {"Argentoratum", 552, 157},
-    {"Volubilis", 61, 903},
-    {"Lindum", 266, 16},
-    {"Byzantium", 1380, 521},
-    {"Sarmizegetusa", 1041, 307},
-    {"Thamugadi", 579, 857},
-    {"Calleva", 210, 77},
-    {"Londinium", 322, 67},
-    {"Antiocha", 1718, 755},
-    {"Heliopolis", 1739, 785},
-    {"Damascus", 1742, 815},
-    {"Hierosolyma", 1698, 875},
-    {"Pergamum", 1366, 613},
-    {"Ephesus", 1337, 678},
-    {"Miletus", 1353, 712},
-    {"Athenae", 1172, 659},
-    {"Corinthus", 1133, 681},
-    {"Carthago", 656, 735},
-    {"Capua", 802, 517}
+    {0, 752, 504}, // Roma
+    {1, 905, 558}, // Tarentum
+    {3, 945, 543}, // Brundisium
+    {10, 835, 733}, // Syracusae
+    {5, 225, 728}, // Carthago Nova
+    {4, 614, 310}, // Mediolanum
+    {7, 382, 494}, // Tarraco
+    {16, 277, 617}, // Valentia
+    {11, 114, 603}, // Toletum
+    {14, 115, 794}, // Tingis
+    {19, 1625, 491}, // Sinope
+    {12, 1657, 733}, // Tarsus
+    {13, 835, 894}, // Leptis Magna
+    {20, 1128, 883}, // Cyrene
+    {27, 373, 191}, // Lutetia
+    {28, 473, 400}, // Massilia
+    {29, 395, 426}, // Narbo
+    {30, 473, 284}, // Lugdunum
+    {31, 382, 755}, // Caesarea
+    {32, 1508, 929}, // Alexandria
+    {33, 506, 125}, // Augusta Trevorum
+    {34, 552, 157}, // Argentoratum
+    {35, 61, 903}, // Volubilis
+    {25, 266, 16}, // Lindum
+    {39, 1380, 521}, // Byzantinum
+    {38, 1041, 307}, // Sarmizegetusa
+    {37, 579, 857}, // Thamugadi
+    {26, 210, 77}, // Calleva
+    {36, 322, 67},
+    {21, 1718, 755}, // Antiochia
+    {22, 1739, 785}, // Heliopolis
+    {23, 1742, 815}, // Damascus
+    {24, 1698, 875}, // Hierosolyma
+    {9, 1366, 613}, // Pergamum
+    {17, 1337, 678}, // Ephesus
+    {18, 1353, 712}, // Miletus
+    {8, 1172, 659}, // Athenae
+    {15, 1133, 681}, // Corinthus
+    {6, 656, 735}, // Carthago
+    {2, 802, 517} // Capua
 };
 #define NUM_DEFAULT_CITIES sizeof(default_cities) / sizeof(default_city)
 
@@ -138,14 +138,14 @@ static void default_cities_list_box_draw_item(const list_box_item *item)
     font_t font = item->is_selected ? FONT_NORMAL_WHITE : FONT_NORMAL_GREEN;
     const uint8_t display_text[256] = "Roma";
     const default_city *city = &default_cities[item->index];
-    color_t color = empire_city_get_at(city->x, city->y, string_from_ascii(city->name)) ? COLOR_FONT_GRAY : COLOR_MASK_NONE;
-    snprintf((char *)display_text, 256, "%s: %i, %i", city->name, city->x, city->y);
+    color_t color = empire_city_get_at(city->x, city->y, lang_get_string(21, city->name_id)) ? COLOR_FONT_GRAY : COLOR_MASK_NONE;
+    snprintf((char *)display_text, 256, "%s: %i, %i", (char *)lang_get_string(21, city->name_id), city->x, city->y);
     text_draw_ellipsized(display_text, item->x + 5, item->y + 4, item->width - 10, font, color);
 }
 
 static void add_city(const default_city *city)
 {
-    if (empire_city_get_at(city->x, city->y, string_from_ascii(city->name))) {
+    if (empire_city_get_at(city->x, city->y, lang_get_string(21, city->name_id))) {
         return;
     }
     full_empire_object *full = empire_object_get_new();
@@ -157,7 +157,7 @@ static void add_city(const default_city *city)
     full->obj.empire_city_icon = EMPIRE_CITY_ICON_ROMAN_CITY;
     full->empire_city_icon = EMPIRE_CITY_ICON_ROMAN_CITY;
     full->obj.image_id = empire_city_get_icon_image_id(EMPIRE_CITY_ICON_ROMAN_CITY);
-    string_copy(string_from_ascii(city->name), full->city_custom_name, 50);
+    full->city_name_id = city->name_id;
     empire_object_add_to_cities(full);
 }
 

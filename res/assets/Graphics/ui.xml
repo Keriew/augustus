@@ -166,10 +166,10 @@
 	<!-- Note: Buttons for play/pause game -->
 	<!-- Button assets created by Ouaz -->
 	<image src="Play_Button_Idle" id="Play Button"/>
-	<image src="Play_Button_Idle"/>
+	<image group="this" image="Play Button"/>
 	<image src="Play_Button_Click"/>
 	<image src="Pause_Button_Idle" id="Pause Button"/>
-	<image src="Pause_Button_Idle"/>
+	<image group="this" image="Pause Button"/>
 	<image src="Pause_Button_Click"/>
 	<!-- Note: Buttons for show/hide grid -->
 	<!-- Button assets created by Ouaz -->
@@ -1420,10 +1420,10 @@
 	<image id="curlybracket_white_left" src="curlybracket_white_left"/>
 	<image id="curlybracket_white_right" src="curlybracket_white_right"/>
     <image src="Plus_Button_Idle" id="Plus_Button_Idle"/>
-    <image src="Plus_Button_Idle"/>
+    <image group="this" image="Plus_Button_Idle"/>
     <image src="Plus_Button_Click"/>
     <image src="Edit_Button_Idle" id="Edit_Button_Idle"/>
-    <image src="Edit_Button_Idle"/>
+    <image group="this" image="Edit_Button_Idle"/>
     <image src="Edit_Button_Click"/>
     <image src="LandWaypoint" id="LandWaypoint"/>
     <image src="SeaWaypoint" id="SeaWaypoint"/>
