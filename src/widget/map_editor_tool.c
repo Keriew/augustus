@@ -147,7 +147,7 @@ static void draw_terrain_preview(int x, int y, tool_type type)
             draw_flat_tile(x, y, COLOR_MASK_GREEN);
             return;
     }
-    draw_flat_tile(x, y, COLOR_MASK_GREEN);
+    image_blend_footprint_color(x, y, COLOR_MASK_GREEN, scale);
     image_draw_isometric_footprint(image_id, x, y, COLOR_MASK_BUILDING_GHOST, scale);
     image_draw_isometric_top(image_id, x, y, COLOR_MASK_BUILDING_GHOST, scale);
 }
