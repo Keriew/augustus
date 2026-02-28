@@ -511,3 +511,10 @@ int widget_map_editor_get_grid_offset(void)
 {
     return data.cursor_grid_offset;
 }
+
+void widget_map_editor_get_current_tile(int *x, int *y, int *grid_offset)
+{
+    *x = data.current_tile.x;
+    *y = data.current_tile.y;
+    *grid_offset = data.current_tile.grid_offset;
+}
