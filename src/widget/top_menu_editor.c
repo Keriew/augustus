@@ -1,6 +1,5 @@
 #include "top_menu_editor.h"
 
-#include "assets/assets.h"
 #include "empire/empire.h"
 #include "empire/object.h"
 #include "game/file_editor.h"
@@ -9,6 +8,7 @@
 #include "graphics/color.h"
 #include "graphics/image.h"
 #include "graphics/menu.h"
+#include "graphics/panel.h"
 #include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
@@ -122,36 +122,6 @@ static void top_menu_window_show(void)
     window_show(&window);
 }
 
-#define BLACK_PANEL_BLOCK_WIDTH 20
-#define BLACK_PANEL_MIDDLE_BLOCKS 4
-
-static int draw_black_panel(int x, int y, int width)
-{
-    int blocks = ((width + BLACK_PANEL_BLOCK_WIDTH - 1) / BLACK_PANEL_BLOCK_WIDTH) - 2;
-    if (blocks < BLACK_PANEL_MIDDLE_BLOCKS) {
-        blocks = BLACK_PANEL_MIDDLE_BLOCKS;
-    }
-    int actual_width = (blocks + 2) * BLACK_PANEL_BLOCK_WIDTH;
-
-    image_draw(image_group(GROUP_TOP_MENU) + 14, x, y, COLOR_MASK_NONE, SCALE_NONE);
-    x += BLACK_PANEL_BLOCK_WIDTH;
-
-    static int black_panel_base_id;
-    if (!black_panel_base_id) {
-        black_panel_base_id = assets_get_image_id("UI", "Top_UI_Panel");
-    }
-
-    for (int i = 0; i < blocks; i++) {
-        image_draw(black_panel_base_id + (i % BLACK_PANEL_MIDDLE_BLOCKS) + 1, x, y,
-            COLOR_MASK_NONE, SCALE_NONE);
-        x += BLACK_PANEL_BLOCK_WIDTH;
-    }
-
-    image_draw(black_panel_base_id + 5, x, y, COLOR_MASK_NONE, SCALE_NONE);
-
-    return actual_width;
-}
-
 void widget_top_menu_editor_draw(void)
 {
     int block_width = 24;
@@ -176,7 +146,7 @@ void widget_top_menu_editor_draw_panels(void)
     int actual_w;
 
     // Offset panel (rightmost)
-    actual_w = draw_black_panel(right_x - panel_width, 0, panel_width);
+    actual_w = top_menu_black_panel_draw(right_x - panel_width, 0, panel_width);
     right_x -= actual_w;
     int label_x = right_x + BLACK_PANEL_BLOCK_WIDTH + 14;
     int label_w = text_draw((const uint8_t *) "O:", label_x, 6, FONT_NORMAL_PLAIN, COLOR_FONT_YELLOW);
@@ -186,7 +156,7 @@ void widget_top_menu_editor_draw_panels(void)
 
     // Y panel
     right_x -= panel_gap;
-    actual_w = draw_black_panel(right_x - panel_width, 0, panel_width);
+    actual_w = top_menu_black_panel_draw(right_x - panel_width, 0, panel_width);
     right_x -= actual_w;
     label_x = right_x + BLACK_PANEL_BLOCK_WIDTH + 14;
     label_w = text_draw((const uint8_t *) "Y:", label_x, 6, FONT_NORMAL_PLAIN, COLOR_FONT_YELLOW);
@@ -196,7 +166,7 @@ void widget_top_menu_editor_draw_panels(void)
 
     // X panel (leftmost of the three)
     right_x -= panel_gap;
-    actual_w = draw_black_panel(right_x - panel_width, 0, panel_width);
+    actual_w = top_menu_black_panel_draw(right_x - panel_width, 0, panel_width);
     right_x -= actual_w;
     label_x = right_x + BLACK_PANEL_BLOCK_WIDTH + 14;
     label_w = text_draw((const uint8_t *) "X:", label_x, 6, FONT_NORMAL_PLAIN, COLOR_FONT_YELLOW);

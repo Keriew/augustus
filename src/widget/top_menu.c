@@ -23,6 +23,7 @@
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
 #include "graphics/menu.h"
+#include "graphics/panel.h"
 #include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
@@ -60,10 +61,6 @@ typedef enum {
     WIDGET_LAYOUT_BASIC = 1,   // treasury, population, date
     WIDGET_LAYOUT_FULL = 2    // + ratings and savings
 } widget_layout_case_t;
-
-#define BLACK_PANEL_BLOCK_WIDTH 20
-#define BLACK_PANEL_MIDDLE_BLOCKS 4
-#define BLACK_PANEL_TOTAL_BLOCKS 6
 
 #define PANEL_MARGIN 10
 #define DATE_FIELD_WIDTH 140
@@ -272,39 +269,6 @@ static void refresh_background(void)
     }
 }
 
-static int draw_black_panel(int x, int y, int width)
-{
-    if (width < BLACK_PANEL_BLOCK_WIDTH * BLACK_PANEL_TOTAL_BLOCKS) {
-        width = BLACK_PANEL_BLOCK_WIDTH * BLACK_PANEL_TOTAL_BLOCKS;  // enforce minimum panel size
-    }
-
-    int blocks = ((width + BLACK_PANEL_BLOCK_WIDTH - 1) / BLACK_PANEL_BLOCK_WIDTH) - 2;
-    int actual_width = (blocks + 2) * BLACK_PANEL_BLOCK_WIDTH;
-
-    // Step 1: Draw start cap
-    image_draw(image_group(GROUP_TOP_MENU) + 14, x, y, COLOR_MASK_NONE, SCALE_NONE);
-    x += BLACK_PANEL_BLOCK_WIDTH;
-
-    // Step 2: Load base panel images
-    static int black_panel_base_id;
-    if (!black_panel_base_id) {
-        black_panel_base_id = assets_get_image_id("UI", "Top_UI_Panel");
-    }
-
-    // Step 3: Draw middle blocks
-    for (int i = 0; i < blocks; i++) {
-        image_draw(black_panel_base_id + (i % BLACK_PANEL_MIDDLE_BLOCKS) + 1, x, y,
-            COLOR_MASK_NONE, SCALE_NONE);
-        x += BLACK_PANEL_BLOCK_WIDTH;
-    }
-
-    // Step 4: Draw end cap
-    image_draw(black_panel_base_id + 5, x, y, COLOR_MASK_NONE, SCALE_NONE);
-
-    return actual_width;
-}
-
-
 static int get_black_panel_actual_width(int desired_width)
 {
     int blocks = (desired_width / BLACK_PANEL_BLOCK_WIDTH) - 1;
@@ -479,7 +443,7 @@ static int draw_panel_with_text_and_number(int offset, int lang_section, int lan
     // Compute required usable width + total panel width (adds end caps)
     int black_panel_width = (fixed_width > 0) ? fixed_width : text_width;
 
-    int panel_width = draw_black_panel(offset, 0, black_panel_width);
+    int panel_width = top_menu_black_panel_draw(offset, 0, black_panel_width);
     int end_of_panel = offset + panel_width;
     int usable_width = end_of_panel - offset - 2 * BLACK_PANEL_BLOCK_WIDTH;
     int draw_x = offset + BLACK_PANEL_BLOCK_WIDTH + (usable_width / 2) - text_width / 2;
@@ -662,7 +626,7 @@ void widget_top_menu_draw(int force)
          pop_color, pop_color);
         // --- Draw Date ---
         int date_x = data.date.start;
-        draw_black_panel(date_x, 0, DATE_FIELD_WIDTH + data.extra_space);
+        top_menu_black_panel_draw(date_x, 0, DATE_FIELD_WIDTH + data.extra_space);
         int month_offset = date_x + data.extra_space / 2 + BLACK_PANEL_BLOCK_WIDTH + 14; // 14px is enough for day
         text_draw_number(get_cosmetic_day_of_month(), 0, "", date_x + PANEL_MARGIN + data.extra_space / 2, 5, font,
          date_color);
@@ -687,7 +651,7 @@ void widget_top_menu_draw(int force)
         int x = data.ratings.start;
 
 
-        draw_black_panel(x, 0, block_w);
+        top_menu_black_panel_draw(x, 0, block_w);
         x += data.extra_space / 2;
         const int rating_ids[] = { INFO_CULTURE, INFO_PROSPERITY, INFO_PEACE, INFO_FAVOR };
         top_menu_tooltip_range *targets[] = { &data.culture, &data.prosperity, &data.peace, &data.favor };
