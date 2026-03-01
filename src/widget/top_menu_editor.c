@@ -179,9 +179,9 @@ void widget_top_menu_editor_draw_panels(void)
     actual_w = draw_black_panel(right_x - panel_width, 0, panel_width);
     right_x -= actual_w;
     int label_x = right_x + BLACK_PANEL_BLOCK_WIDTH + 14;
-    int label_w = text_draw((const uint8_t *) "O:", label_x, 5, FONT_NORMAL_PLAIN, COLOR_FONT_YELLOW);
+    int label_w = text_draw((const uint8_t *) "O:", label_x, 6, FONT_NORMAL_PLAIN, COLOR_FONT_YELLOW);
     if (in_bounds) {
-        text_draw_number(grid_offset, ' ', "", label_x + label_w, 5, FONT_NORMAL_PLAIN, COLOR_WHITE);
+        text_draw_number(grid_offset, ' ', "", label_x + label_w, 6, FONT_NORMAL_PLAIN, COLOR_WHITE);
     }
 
     // Y panel
@@ -189,9 +189,9 @@ void widget_top_menu_editor_draw_panels(void)
     actual_w = draw_black_panel(right_x - panel_width, 0, panel_width);
     right_x -= actual_w;
     label_x = right_x + BLACK_PANEL_BLOCK_WIDTH + 14;
-    label_w = text_draw((const uint8_t *) "Y:", label_x, 5, FONT_NORMAL_PLAIN, COLOR_FONT_YELLOW);
+    label_w = text_draw((const uint8_t *) "Y:", label_x, 6, FONT_NORMAL_PLAIN, COLOR_FONT_YELLOW);
     if (in_bounds) {
-        text_draw_number(tile_y, ' ', "", label_x + label_w, 5, FONT_NORMAL_PLAIN, COLOR_WHITE);
+        text_draw_number(tile_y, ' ', "", label_x + label_w, 6, FONT_NORMAL_PLAIN, COLOR_WHITE);
     }
 
     // X panel (leftmost of the three)
@@ -199,9 +199,9 @@ void widget_top_menu_editor_draw_panels(void)
     actual_w = draw_black_panel(right_x - panel_width, 0, panel_width);
     right_x -= actual_w;
     label_x = right_x + BLACK_PANEL_BLOCK_WIDTH + 14;
-    label_w = text_draw((const uint8_t *) "X:", label_x, 5, FONT_NORMAL_PLAIN, COLOR_FONT_YELLOW);
+    label_w = text_draw((const uint8_t *) "X:", label_x, 6, FONT_NORMAL_PLAIN, COLOR_FONT_YELLOW);
     if (in_bounds) {
-        text_draw_number(tile_x, ' ', "", label_x + label_w, 5, FONT_NORMAL_PLAIN, COLOR_WHITE);
+        text_draw_number(tile_x, ' ', "", label_x + label_w, 6, FONT_NORMAL_PLAIN, COLOR_WHITE);
     }
 }
 
