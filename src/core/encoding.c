@@ -857,7 +857,7 @@ encoding_type encoding_determine(language_type language)
 {
     // Determine encoding based on language:
     // - Windows-1250 (Central/Eastern Europe) is used in Polish only
-    // - Windows-1251 (Cyrillic) is used in Russian only
+    // - Windows-1251 (Cyrillic) is used in Ukrainian and Russian only
     // - Windows-1253 (Greek) is used in Greek only
     // - Windows-950 (Big5) is used in Traditional Chinese only
     // - Combination of Windows-1250/1252 is used in Czech fan translation
@@ -890,7 +890,11 @@ encoding_type encoding_determine(language_type language)
         encoding_japanese_init();
         data.to_utf8_table = NULL;
         data.encoding = ENCODING_JAPANESE;
-    } else { // assume Western encoding
+    } else if (language == LANGUAGE_UKRAINIAN) {
+        data.to_utf8_table = HIGH_TO_UTF8_CYRILLIC;
+        data.encoding = ENCODING_CYRILLIC;
+    }
+    else { // assume Western encoding
         data.to_utf8_table = HIGH_TO_UTF8_DEFAULT;
         data.encoding = ENCODING_WESTERN_EUROPE;
     }
