@@ -1,5 +1,6 @@
 #include "undo.h"
 
+#include "building/connectable.h"
 #include "building/construction.h"
 #include "building/house.h"
 #include "building/image.h"
@@ -255,6 +256,13 @@ void game_undo_perform(void)
         map_terrain_restore();
         map_aqueduct_restore();
         restore_map_images();
+        for (int i = 0; i < data.num_buildings; i++) { // for roads passing through walls and gardens
+            if (data.buildings[i].id) {
+                building_restore_from_undo(&data.buildings[i]);
+                building *b = building_get(data.buildings[i].id);
+                building_connectable_update_connections_for_type(b->type);
+            }
+        }
     } else if (data.type == BUILDING_LOW_BRIDGE || data.type == BUILDING_SHIP_BRIDGE) {
         map_terrain_restore();
         map_sprite_restore();

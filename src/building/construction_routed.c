@@ -1,10 +1,12 @@
 #include "construction_routed.h"
 
 #include "core/calc.h"
+#include "core/config.h"
 #include "building/building.h"
 #include "building/connectable.h"
 #include "building/construction.h"
 #include "building/properties.h"
+#include "building/roadblock.h"
 #include "game/undo.h"
 #include "map/building.h"
 #include "map/building_tiles.h"
@@ -18,7 +20,8 @@
 
 #include <stdlib.h>
 
-static int place_routed_building(int x_start, int y_start, int x_end, int y_end, routed_building_type type, int *items)
+static int place_routed_building(int x_start, int y_start, int x_end, int y_end,
+    routed_building_type type, int *items, int measure_only)
 {
     static const int direction_indices[8][4] = {
         {0, 2, 6, 4},
@@ -46,11 +49,17 @@ static int place_routed_building(int x_start, int y_start, int x_end, int y_end,
         switch (type) {
             default:
             case ROUTED_BUILDING_ROAD:
-                if (map_routing_is_gate_transformable(grid_offset)) {
+                if (!measure_only && map_routing_is_gate_transformable(grid_offset)) {
                     building *b = building_get(map_building_at(grid_offset));
                     building_type gate_type = building_connectable_gate_type(b->type);
                     if (gate_type) {
+                        game_undo_add_building(b);
                         building_change_type(b, gate_type);
+                        if (config_get(CONFIG_GP_CH_GATES_DEFAULT_TO_PASS_ALL_WALKERS)) {
+                            building_roadblock_accept_all(b);
+                        } else {
+                            building_roadblock_accept_none(b);
+                        }
                     }
                 }
                 *items += map_tiles_set_road(x_end, y_end);
@@ -111,7 +120,7 @@ int building_construction_place_road(int measure_only, int x_start, int y_start,
 
     int items_placed = 0;
     if (map_routing_calculate_distances_for_building(ROUTED_BUILDING_ROAD, x_start, y_start) &&
-            place_routed_building(x_start, y_start, x_end, y_end, ROUTED_BUILDING_ROAD, &items_placed)) {
+            place_routed_building(x_start, y_start, x_end, y_end, ROUTED_BUILDING_ROAD, &items_placed, measure_only)) {
         if (!measure_only) {
             map_routing_update_land();
             building_connectable_update_connections();
@@ -139,7 +148,7 @@ int building_construction_place_highway(int measure_only, int x_start, int y_sta
 
     int items_placed = 0;
     if (map_routing_calculate_distances_for_building(ROUTED_BUILDING_HIGHWAY, x_start, y_start) &&
-        place_routed_building(x_start, y_start, x_end, y_end, ROUTED_BUILDING_HIGHWAY, &items_placed)) {
+        place_routed_building(x_start, y_start, x_end, y_end, ROUTED_BUILDING_HIGHWAY, &items_placed, measure_only)) {
         map_tiles_update_all_plazas();
         if (!measure_only) {
             map_routing_update_land();
@@ -186,7 +195,7 @@ int building_construction_place_aqueduct(int x_start, int y_start, int x_end, in
         return 0;
     }
     int num_items;
-    place_routed_building(x_start, y_start, x_end, y_end, ROUTED_BUILDING_AQUEDUCT, &num_items);
+    place_routed_building(x_start, y_start, x_end, y_end, ROUTED_BUILDING_AQUEDUCT, &num_items, 0);
     *cost = item_cost * num_items;
     return 1;
 }
@@ -195,5 +204,5 @@ int building_construction_place_aqueduct_for_reservoir(
     int measure_only, int x_start, int y_start, int x_end, int y_end, int *items)
 {
     routed_building_type type = measure_only ? ROUTED_BUILDING_AQUEDUCT_WITHOUT_GRAPHIC : ROUTED_BUILDING_AQUEDUCT;
-    return place_routed_building(x_start, y_start, x_end, y_end, type, items);
+    return place_routed_building(x_start, y_start, x_end, y_end, type, items, measure_only);
 }

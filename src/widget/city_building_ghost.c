@@ -565,10 +565,8 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
             }
         }
     }
-    if (type >= BUILDING_ROADBLOCK ||
-        type == BUILDING_LIBRARY ||
-        type == BUILDING_SMALL_STATUE ||
-        type == BUILDING_MEDIUM_STATUE) {
+    if (type >= BUILDING_ROADBLOCK || // >= because all buildings after ROADBLOCK have 'new' images
+        type == BUILDING_LIBRARY || type == BUILDING_SMALL_STATUE || type == BUILDING_MEDIUM_STATUE) {
         image_id = get_new_building_image_id(grid_offset, type);
         draw_regular_building(type, image_id, x_view, y_view, grid_offset, num_tiles, blocked_tiles);
     } else {
@@ -1246,7 +1244,7 @@ static void draw_road(const map_tile *tile, int x, int y)
             blocked = 1;
         }
     } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING) && map_routing_is_gate_transformable(grid_offset)) {
-        building_connectable_update_connections();
+        image_id = building_image_get_park_or_gate_ghost_image(grid_offset);
     } else if (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
         blocked = 1;
     } else {
