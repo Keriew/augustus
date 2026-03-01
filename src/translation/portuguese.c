@@ -881,7 +881,6 @@ static translation_string all_strings[] = {
     {TR_CONFIG_SHOW_ROAMING_PATH, "Revela previamente os caminhos feitos pelos andarilhos" },
     {TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE_HOUSES, "Mostra o alcance de fontes e poços ao construir moradias" },
     {TR_EDITOR_CHOOSE_CUSTOM_EMPIRE, "Escolhe império personalizado" },
-    {TR_EDITOR_CITY_PREVIEW, "Visualização da cidade: " },
     {TR_EDITOR_CURRENT_COORDS, "Coordenadas atuais: " },
     {TR_EDITOR_CUSTOM_EMPIRE_TITLE, "Carregando um império" },
     {TR_EDITOR_FAVOUR_DISFAVOR, "Apreço perdido por prorrogação" },

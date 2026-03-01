@@ -1,6 +1,7 @@
 #include "hotkey_config.h"
 
 #include "building/type.h"
+#include "core/calc.h"
 #include "core/hotkey_config.h"
 #include "core/image_group.h"
 #include "core/lang.h"
@@ -160,7 +161,23 @@ static hotkey_widget hotkey_widgets[] = {
     {HOTKEY_SET_BOOKMARK_4, TR_HOTKEY_SET_BOOKMARK_4},
     {HOTKEY_HEADER, TR_HOTKEY_HEADER_EDITOR},
     {HOTKEY_EDITOR_TOGGLE_BATTLE_INFO, TR_HOTKEY_EDITOR_TOGGLE_BATTLE_INFO},
+    {HOTKEY_EDITOR_EMPIRE_DELETE_OBJECT, TR_HOTKEY_EDITOR_EMPIRE_DELETE_OBJECT},
+    {HOTKEY_EDITOR_EMPIRE_TOOL_OUR_CITY, TR_EMPIRE_TOOL_OUR_CITY},
+    {HOTKEY_EDITOR_EMPIRE_TOOL_TRADE_CITY, TR_EMPIRE_TOOL_TRADE_CITY},
+    {HOTKEY_EDITOR_EMPIRE_TOOL_ROMAN_CITY, TR_EMPIRE_TOOL_ROMAN_CITY},
+    {HOTKEY_EDITOR_EMPIRE_TOOL_VULNERABLE_CITY, TR_EMPIRE_TOOL_VULNERABLE_CITY},
+    {HOTKEY_EDITOR_EMPIRE_TOOL_FUTURE_TRADE_CITY, TR_EMPIRE_TOOL_FUTURE_TRADE_CITY},
+    {HOTKEY_EDITOR_EMPIRE_TOOL_DISTANT_CITY, TR_EMPIRE_TOOL_DISTANT_CITY},
+    {HOTKEY_EDITOR_EMPIRE_TOOL_BORDER, TR_EMPIRE_TOOL_BORDER},
+    {HOTKEY_EDITOR_EMPIRE_TOOL_BATTLE, TR_EMPIRE_TOOL_BATTLE},
+    {HOTKEY_EDITOR_EMPIRE_TOOL_BABRIAN, TR_EMPIRE_TOOL_DISTANT_BABARIAN},
+    {HOTKEY_EDITOR_EMPIRE_TOOL_LEGION, TR_EMPIRE_TOOL_DISTANT_LEGION},
+    {HOTKEY_EDITOR_EMPIRE_TOOL_LAND_POINT, TR_EMPIRE_TOOL_LAND_ROUTE},
+    {HOTKEY_EDITOR_EMPIRE_TOOL_SEA_POINT, TR_EMPIRE_TOOL_SEA_ROUTE},
+    {HOTKEY_EDITOR_EMPIRE_TOOL_SELECTION, TR_EMPIRE_TOOL_SELECT}
 };
+
+#define NUM_WIDGETS sizeof(hotkey_widgets) / sizeof(hotkey_widget)
 
 #define HOTKEY_X_OFFSET_1 290
 #define HOTKEY_X_OFFSET_2 430
@@ -216,9 +233,19 @@ static struct {
     hotkey_mapping mappings[HOTKEY_MAX_ITEMS][2];
 } data;
 
-static void init(void)
+int get_position_for_widget(translation_key key)
 {
-    scrollbar_init(&scrollbar, 0, sizeof(hotkey_widgets) / sizeof(hotkey_widget));
+    for (int i = 0; i < NUM_WIDGETS; i++) {
+        if (hotkey_widgets[i].name_translation == key) {
+            return calc_bound(i, 0, NUM_WIDGETS);
+        }
+    }
+    return 0;
+}
+
+static void init(int position)
+{
+    scrollbar_init(&scrollbar, position, sizeof(hotkey_widgets) / sizeof(hotkey_widget));
 
     for (int i = 0; i < HOTKEY_MAX_ITEMS; i++) {
         hotkey_mapping empty = { KEY_TYPE_NONE, KEY_MOD_NONE, i };
@@ -430,7 +457,7 @@ static void button_close(const generic_button *button)
     window_go_back();
 }
 
-void window_hotkey_config_show(void)
+void window_hotkey_config_show(int position)
 {
     window_type window = {
         WINDOW_HOTKEY_CONFIG,
@@ -438,6 +465,6 @@ void window_hotkey_config_show(void)
         draw_foreground,
         handle_input
     };
-    init();
+    init(position);
     window_show(&window);
 }

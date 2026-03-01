@@ -5,6 +5,7 @@
 #include "empire/city.h"
 #include "empire/type.h"
 #include "game/resource.h"
+#include "map/point.h"
 
 typedef struct {
     unsigned int id;
@@ -24,7 +25,10 @@ typedef struct {
     int trade_route_id;
     int invasion_path_id;
     int invasion_years;
+    int order_index;
+    int parent_object_id;
     empire_city_icon_type empire_city_icon;
+    empire_city_icon_type future_trade_after_icon;
 } empire_object;
 
 typedef struct {
@@ -40,6 +44,45 @@ typedef struct {
     empire_city_icon_type empire_city_icon;
 } full_empire_object;
 
+#define BASE_ORNAMENT_IMAGE_ID 3356
+#define ORIGINAL_ORNAMENTS 20
+
+static const char *XML_ORNAMENTS[] = {
+    "The Stonehenge",
+    "Gallic Wheat",
+    "The Pyrenees",
+    "Iberian Aqueduct",
+    "Triumphal Arch",
+    "West Desert Wheat",
+    "Lighthouse of Alexandria",
+    "West Desert Palm Trees",
+    "Trade Ship",
+    "Waterside Palm Trees",
+    "Colosseum|The Colosseum",
+    "The Alps",
+    "Roman Tree",
+    "Greek Mountain Range",
+    "The Parthenon",
+    "The Pyramids",
+    "The Hagia Sophia",
+    "East Desert Palm Trees",
+    "East Desert Wheat",
+    "Trade Camel",
+    "Mount Etna",
+    "Colossus of Rhodes",
+    "The Temple"
+};
+
+#define TOTAL_ORNAMENTS (sizeof(XML_ORNAMENTS) / sizeof(const char *))
+
+static const map_point ORNAMENT_POSITIONS[TOTAL_ORNAMENTS] = {
+    {  247,  81 }, {  361, 356 }, {  254, 428 }, {  199, 590 }, {  275, 791 },
+    {  423, 802 }, { 1465, 883 }, {  518, 764 }, {  691, 618 }, {  742, 894 },
+    {  726, 468 }, {  502, 280 }, {  855, 551 }, { 1014, 443 }, { 1158, 698 },
+    { 1431, 961 }, { 1300, 500 }, { 1347, 648 }, { 1707, 783 }, { 1704, 876 },
+    {  829, 720 }, { 1347, 745 }, { 1640, 922 }
+};
+
 void empire_object_clear(void);
 
 int empire_object_count(void);
@@ -47,6 +90,11 @@ int empire_object_count(void);
 void empire_object_load(buffer *buf, int version);
 
 void empire_object_save(buffer *buf);
+
+/* Function used for adding an empire object to the city array
+ * Only functions with custom empires
+ */
+void empire_object_add_to_cities(full_empire_object *full);
 
 void empire_object_init_cities(int empire_id);
 
@@ -56,21 +104,49 @@ full_empire_object *empire_object_get_full(int object_id);
 
 full_empire_object *empire_object_get_new(void);
 
+void empire_object_remove(int id);
+
 empire_object *empire_object_get(int object_id);
+
+int empire_object_get_in_order(int parent_id, int object_index);
+
+int empire_object_get_next_in_order(int parent_id, int *current_order_index);
+
+int empire_object_get_highest_index(int parent);
 
 const empire_object *empire_object_get_our_city(void);
 
+const empire_object *empire_object_get_border(void);
+void empire_object_change_border_width(int width);
+
 const empire_object *empire_object_get_trade_city(int trade_route_id);
+
+const empire_object *empire_object_get_battle(int path_id, int year);
+
+const empire_object *empire_object_get_latest_battle(int path_id);
+
+const empire_object *empire_object_get_distant_battle(int month, int enemy);
+
+int empire_object_get_latest_distant_battle(int enemy);
 
 void empire_object_foreach(void (*callback)(const empire_object *));
 
 void empire_object_foreach_of_type(void (*callback)(const empire_object *), empire_object_type type);
 
-const empire_object *empire_object_get_battle_icon(int path_id, int year);
-
 int empire_object_get_max_invasion_path(void);
 
 int empire_object_get_closest(int x, int y);
+
+int empire_object_get_at(int x, int y);
+
+int empire_object_get_nearest_of_type_with_condition(int x, int y, empire_object_type type, int (*condition)(const empire_object *));
+int empire_object_get_nearest_of_type(int x, int y, empire_object_type type);
+
+int empire_object_ornament_image_id_get(int ornament_id);
+int empire_object_ornament_id_get(int image_id);
+int empire_object_count_ornaments(void);
+int empire_object_get_ornament(int image_id);
+int empire_object_add_ornament(int ornament_id);
 
 void empire_object_set_expanded(int object_id, int new_city_type);
 
@@ -82,6 +158,8 @@ void empire_object_city_force_sell_resource(int object_id, int resource);
 int empire_object_update_animation(const empire_object *obj, int image_id);
 
 int empire_object_is_sea_trade_route(int route_id);
+
+void empire_object_set_trade_route_coords(const empire_object *our_city);
 
 empire_city_icon_type empire_object_get_random_icon_for_empire_object(full_empire_object *full_obj);
 

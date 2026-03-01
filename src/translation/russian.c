@@ -1043,7 +1043,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SHORT_ROUTE_TEXT, "из"},
     {TR_EDITOR_TOGGLE_INVASIONS, "Показ. вторжения"},
     {TR_EDITOR_REFRESH_EMPIRE, "Обновить (F5)"},
-    {TR_EDITOR_CITY_PREVIEW, "Изображение города: "},
     {TR_EDITOR_CURRENT_COORDS, "Текущ. позиция: "},
     {TR_EDITOR_SELECTED_COORDS, "Выбр. позиция: "},
     {TR_EDITOR_MAX_WAGES, "Макс. до"},

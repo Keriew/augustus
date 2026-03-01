@@ -1,0 +1,6 @@
+#ifndef WINDOW_EDITOR_EMPIRE_PROPERTIES_H
+#define WINDOW_EDITOR_EMPIRE_PROPERTIES_H
+
+void window_empire_properties_show(void);
+
+#endif // WINDOW_EDITOR_EMPIRE_PROPERTIES_H

@@ -1,5 +1,6 @@
 #include "object.h"
 
+#include "assets/assets.h"
 #include "core/array.h"
 #include "core/calc.h"
 #include "core/image.h"
@@ -16,6 +17,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #define EMPIRE_OBJECT_SIZE_STEP 200
 #define LEGACY_EMPIRE_OBJECTS 200
@@ -67,6 +69,43 @@ void empire_object_clear(void)
 int empire_object_count(void)
 {
     return objects.size;
+}
+
+static int find_parent(empire_object *obj) {
+    for (int i = obj->id; i >= 0; i--) {
+        const empire_object *current_obj = empire_object_get(i);
+        int condition = 0;
+        if (obj->type == EMPIRE_OBJECT_TRADE_WAYPOINT) {
+            condition = current_obj->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE || current_obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE;
+        } else if (obj->type == EMPIRE_OBJECT_BORDER_EDGE) {
+            condition = current_obj->type == EMPIRE_OBJECT_BORDER;
+        } else {
+            return 0;
+        }
+        if (condition) {
+            return i;
+        }
+
+        if (current_obj->type != obj->type) {
+            return 0;
+        }
+    }
+    return 0;
+}
+
+static void migrate_orders(empire_object *obj)
+{
+    if (obj->type != EMPIRE_OBJECT_TRADE_WAYPOINT && obj->type != EMPIRE_OBJECT_BORDER_EDGE) {
+        return;
+    }
+
+    unsigned int parent_id = find_parent(obj);
+    if (!parent_id) {
+        return;
+    }
+    
+    obj->parent_object_id = parent_id;
+    obj->order_index = obj->id - parent_id;
 }
 
 void empire_object_load(buffer *buf, int version)
@@ -205,9 +244,24 @@ void empire_object_load(buffer *buf, int version)
         if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
             obj->empire_city_icon = buffer_read_u8(buf);
             full->empire_city_icon = buffer_read_u8(buf);
+            if (version <= SCENARIO_LAST_NO_EMPIRE_EDITOR && obj->empire_city_icon > EMPIRE_CITY_ICON_RESOURCE_GOODS) {
+                obj->empire_city_icon++;
+                full->empire_city_icon++;
+            }
         } else {
             obj->empire_city_icon = empire_object_get_random_icon_for_empire_object(full);
             full->empire_city_icon = empire_object_get_random_icon_for_empire_object(full);
+        }
+        if (version > SCENARIO_LAST_NO_EMPIRE_EDITOR) {
+            obj->future_trade_after_icon = buffer_read_u8(buf);
+            obj->order_index = buffer_read_i16(buf);
+            obj->parent_object_id = buffer_read_i16(buf);
+            if (version <= SCENARIO_LAST_NO_EMPIRE_EDITOR && obj->future_trade_after_icon > EMPIRE_CITY_ICON_RESOURCE_GOODS) {
+                obj->future_trade_after_icon++;
+            }
+        } else {
+            obj->future_trade_after_icon = EMPIRE_CITY_ICON_DEFAULT;
+            migrate_orders(obj);
         }
     }
     objects.size = highest_id_in_use + 1;
@@ -224,8 +278,8 @@ void empire_object_save(buffer *buf)
         buffer_write_i32(buf, 0);
         return;
     }
-    int size_per_obj = 80; // +2 bytes for empire_city_icon fields
-    int size_per_city = 140 + 4 * (RESOURCE_MAX - RESOURCE_MAX_LEGACY); // +2 bytes for empire_city_icon fields
+    int size_per_obj = 85; // +2 bytes for empire_city_icon fields
+    int size_per_city = 145 + 4 * (RESOURCE_MAX - RESOURCE_MAX_LEGACY); // +2 bytes for empire_city_icon fields
     int total_size = 0;
 
     full_empire_object *full;
@@ -278,7 +332,83 @@ void empire_object_save(buffer *buf)
         buffer_write_raw(buf, full->city_custom_name, sizeof(full->city_custom_name));
         buffer_write_u8(buf, obj->empire_city_icon);
         buffer_write_u8(buf, full->empire_city_icon);
+        buffer_write_u8(buf, obj->future_trade_after_icon);
+        buffer_write_i16(buf, obj->order_index);
+        buffer_write_i16(buf, obj->parent_object_id);
     }
+}
+
+void empire_object_add_to_cities(full_empire_object *full)
+{
+    if (!full->in_use || full->obj.type != EMPIRE_OBJECT_CITY) {
+        return;
+    }
+    empire_city *city = empire_city_get_new();
+    if (!city) {
+        log_error("Unable to allocate enough memory for the empire cities array. The game will now crash.", 0, 0);
+        return;
+    }
+    
+    city->in_use = 1;
+    city->type = full->city_type;
+    city->name_id = full->city_name_id;
+    if (city->type == EMPIRE_CITY_TRADE || city->type == EMPIRE_CITY_FUTURE_TRADE) {
+        // create trade route
+        full->obj.trade_route_id = trade_route_new();
+        array_item(objects, full->obj.id + 1)->obj.trade_route_id = full->obj.trade_route_id;
+        
+        for (int point_index = 0; point_index < objects.size; ) {
+            unsigned int point_id = empire_object_get_next_in_order(full->obj.id + 1, &point_index);
+            if (!point_id) {
+                break;
+            }
+            full_empire_object *trade_point = array_item(objects, point_id);
+            if (trade_point->obj.type != EMPIRE_OBJECT_TRADE_WAYPOINT) {
+                break;
+            }
+            trade_point->obj.trade_route_id = full->obj.trade_route_id;
+        }
+        
+        city->route_id = full->obj.trade_route_id;
+        city->is_open = full->trade_route_open;
+        city->cost_to_open = full->trade_route_cost;
+        city->is_sea_trade = empire_object_is_sea_trade_route(full->obj.trade_route_id);
+        
+        // set sell/buy resources and set trade route accordingly
+        for (resource_type resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
+            city->sells_resource[resource] = 0;
+            city->buys_resource[resource] = 0;
+            if (empire_object_city_sells_resource(full->obj.id, resource)) {
+                city->sells_resource[resource] = 1;
+            }
+            int buys = empire_object_city_buys_resource(full->obj.id, resource);
+            if (buys) {
+                city->buys_resource[resource] = 1;
+            }
+            int amount = 0;
+            if (full->city_buys_resource[resource]) {
+                amount = full->city_buys_resource[resource];
+            } else if (full->city_sells_resource[resource]) {
+                amount = full->city_sells_resource[resource];
+            }
+            trade_route_set(city->route_id, resource, amount, buys);
+        }
+    }
+    if (city->type == EMPIRE_CITY_OURS) {
+        // When it's our city set the sell resources but don't create route
+        for (int resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
+            city->sells_resource[resource] = 0;
+            city->buys_resource[resource] = 0;
+            if (empire_object_city_sells_resource(full->obj.id, resource)) {
+                city->sells_resource[resource] = 1;
+            }
+        }
+    }
+    city->trader_entry_delay = 4;
+    city->trader_figure_ids[0] = 0;
+    city->trader_figure_ids[1] = 0;
+    city->trader_figure_ids[2] = 0;
+    city->empire_object_id = full->obj.id;
 }
 
 void empire_object_init_cities(int empire_id)
@@ -343,7 +473,8 @@ void empire_object_init_cities(int empire_id)
             if (empire_object_city_sells_resource(array_index, resource)) {
                 city->sells_resource[resource] = 1;
             }
-            if (empire_object_city_buys_resource(array_index, resource)) {
+            int buys = empire_object_city_buys_resource(array_index, resource);
+            if (buys) {
                 city->buys_resource[resource] = 1;
             }
             if (city->type != EMPIRE_CITY_OURS) {
@@ -353,7 +484,7 @@ void empire_object_init_cities(int empire_id)
                 } else if (obj->city_sells_resource[resource]) {
                     amount = obj->city_sells_resource[resource];
                 }
-                trade_route_set(city->route_id, resource, amount);
+                trade_route_set(city->route_id, resource, amount, buys);
             }
         }
         city->trader_entry_delay = 4;
@@ -393,9 +524,46 @@ full_empire_object *empire_object_get_new(void)
     return obj;
 }
 
+void empire_object_remove(int id)
+{
+    array_item(objects, id)->in_use = 0;
+}
+
 empire_object *empire_object_get(int object_id)
 {
     return &array_item(objects, object_id)->obj;
+}
+
+int empire_object_get_in_order(int parent_id, int order_index)
+{
+    full_empire_object *obj;
+    array_foreach(objects, obj) {
+        if (obj->obj.parent_object_id == parent_id && obj->obj.order_index == order_index) {
+            if (obj->in_use) {
+                return obj->obj.id;
+            }
+        }
+    }
+    return 0;
+}
+
+int empire_object_get_next_in_order(int parent_id, int *current_order_index)
+{
+    return empire_object_get_in_order(parent_id, ++*current_order_index);
+}
+
+int empire_object_get_highest_index(int parent_id)
+{
+    int highest_index = 0;
+    full_empire_object *obj;
+    array_foreach(objects, obj) {
+        if (obj->in_use) {
+            if (obj->obj.parent_object_id == parent_id) {
+                highest_index = obj->obj.order_index > highest_index ? obj->obj.order_index : highest_index;
+            }
+        }
+    }
+    return highest_index;
 }
 
 const empire_object *empire_object_get_our_city(void)
@@ -411,6 +579,31 @@ const empire_object *empire_object_get_our_city(void)
     return 0;
 }
 
+const empire_object *empire_object_get_border(void)
+{
+    full_empire_object *obj;
+    array_foreach(objects, obj) {
+        if (obj->in_use) {
+            if (obj->obj.type == EMPIRE_OBJECT_BORDER) {
+                return &obj->obj;
+            }
+        }
+    }
+    return 0;
+}
+
+void empire_object_change_border_width(int width)
+{
+    full_empire_object *obj;
+    array_foreach(objects, obj) {
+        if (obj->in_use) {
+            if (obj->obj.type == EMPIRE_OBJECT_BORDER) {
+                obj->obj.width = width;
+            }
+        }
+    }
+}
+
 const empire_object *empire_object_get_trade_city(int trade_route_id)
 {
     full_empire_object *obj;
@@ -422,6 +615,58 @@ const empire_object *empire_object_get_trade_city(int trade_route_id)
         }
     }
     return 0;
+}
+
+const empire_object *empire_object_get_battle(int path_id, int year)
+{
+    full_empire_object *obj;
+    array_foreach(objects, obj) {
+        if (obj->in_use) {
+            if (obj->obj.type == EMPIRE_OBJECT_BATTLE_ICON && obj->obj.invasion_path_id == path_id
+                && obj->obj.invasion_years == year) {
+                return &obj->obj;
+            }
+        }
+    }
+    return 0;
+}
+
+const empire_object *empire_object_get_latest_battle(int path_id)
+{
+    int highest_year = 0;
+    full_empire_object *obj;
+    array_foreach(objects, obj) {
+        if (obj->obj.type == EMPIRE_OBJECT_BATTLE_ICON && obj->obj.invasion_path_id == path_id
+            && obj->obj.invasion_years > highest_year) {
+            highest_year = obj->obj.invasion_years;
+        }
+    }
+    return empire_object_get_battle(path_id, highest_year);
+}
+
+const empire_object *empire_object_get_distant_battle(int month, int enemy)
+{
+    full_empire_object *obj;
+    array_foreach(objects, obj) {
+        if (obj->obj.type == (enemy ? EMPIRE_OBJECT_ENEMY_ARMY : EMPIRE_OBJECT_ROMAN_ARMY) &&
+            obj->obj.distant_battle_travel_months == month) {
+            return &obj->obj;
+        }
+    }
+    return 0;
+}
+
+int empire_object_get_latest_distant_battle(int enemy)
+{
+    int highest_month = 0;
+    full_empire_object *obj;
+    array_foreach(objects, obj) {
+        if (obj->obj.type == (enemy ? EMPIRE_OBJECT_ENEMY_ARMY : EMPIRE_OBJECT_ROMAN_ARMY) &&
+            obj->obj.distant_battle_travel_months > highest_month) {
+            highest_month = obj->obj.distant_battle_travel_months;
+        }
+    }
+    return highest_month;
 }
 
 void empire_object_foreach(void (*callback)(const empire_object *))
@@ -441,20 +686,6 @@ void empire_object_foreach_of_type(void (*callback)(const empire_object *), empi
             callback(&obj->obj);
         }
     }
-}
-
-const empire_object *empire_object_get_battle_icon(int path_id, int year)
-{
-    full_empire_object *obj;
-    array_foreach(objects, obj) {
-        if (obj->in_use) {
-            if (obj->obj.type == EMPIRE_OBJECT_BATTLE_ICON &&
-                obj->obj.invasion_path_id == path_id && obj->obj.invasion_years == year) {
-                return &obj->obj;
-            }
-        }
-    }
-    return 0;
 }
 
 int empire_object_get_max_invasion_path(void)
@@ -478,8 +709,11 @@ int empire_object_get_closest(int x, int y)
     int city_is_selected = 0;
     full_empire_object *full;
     array_foreach(objects, full) {
+        if (!full->in_use) {
+            continue;
+        }
         const empire_object *obj = &full->obj;
-        int obj_x, obj_y;
+        int obj_x, obj_y, width, height;
         if (city_is_selected && obj->type != EMPIRE_OBJECT_CITY) {
             //Prioritize selecting cities if available
             continue;
@@ -491,10 +725,23 @@ int empire_object_get_closest(int x, int y)
             obj_x = obj->x;
             obj_y = obj->y;
         }
-        if (obj_x - 8 > x || obj_x + obj->width + 8 <= x) {
+        int is_edge = obj->type == EMPIRE_OBJECT_TRADE_WAYPOINT || obj->type == EMPIRE_OBJECT_BORDER_EDGE;
+        if (obj->height) {
+            width = obj->width;
+            height = obj->height;
+        } else if (is_edge) {
+            width = 19;
+            height = 18;
+        } else {
+            const image *img = image_get(obj->image_id);
+            width = img->width;
+            height = img->height;
+        }
+        
+        if (obj_x - (is_edge * width / 2) > x || obj_x + width / 1 + is_edge <= x) {
             continue;
         }
-        if (obj_y - 8 > y || obj_y + obj->height + 8 <= y) {
+        if (obj_y - (is_edge * height / 2) > y || obj_y + height / 1 + is_edge <= y) {
             continue;
         }
         int dist = calc_maximum_distance(x, y, obj_x + obj->width / 2, obj_y + obj->height / 2);
@@ -509,6 +756,148 @@ int empire_object_get_closest(int x, int y)
         }
     }
     return min_obj_id;
+}
+
+int empire_object_get_at(int x, int y)
+{
+    full_empire_object *full;
+    array_foreach(objects, full) {
+        if (!full->in_use) {
+            continue;
+        }
+        const empire_object *obj = &full->obj;
+        if (obj->type == EMPIRE_OBJECT_BORDER || obj->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE
+            || obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
+            continue;
+        }
+        int obj_x, obj_y, width, height;
+        if (scenario_empire_is_expanded()) {
+            obj_x = obj->expanded.x;
+            obj_y = obj->expanded.y;
+        } else {
+            obj_x = obj->x;
+            obj_y = obj->y;
+        }
+        int is_edge = obj->type == EMPIRE_OBJECT_TRADE_WAYPOINT || obj->type == EMPIRE_OBJECT_BORDER_EDGE;
+        if (obj->height) {
+            width = obj->width;
+            height = obj->height;
+        } else if (is_edge) {
+            width = 19;
+            height = 18;
+        } else {
+            const image *img = image_get(obj->image_id);
+            width = img->width;
+            height = img->height;
+        }
+        if ((x >= obj_x - (width / 2 * is_edge) && x <= obj_x + width / 1 + is_edge) &&
+            (y >= obj_y - (height / 2 * is_edge) && y <= obj_y + height / 1 + is_edge)) {
+            return obj->id;
+        }
+    }
+    return 0;
+}
+
+int empire_object_get_nearest_of_type_with_condition(int x, int y, empire_object_type type, int (*condition)(const empire_object *))
+{
+    int min_dist = 9999;
+    int min_id = 0;
+    full_empire_object *full;
+    array_foreach(objects, full) {
+        if (!full->in_use) {
+            continue;
+        }
+        const empire_object *obj = &full->obj;
+        if (obj->type != type) {
+            continue;
+        }
+        if (!condition(obj)) {
+            continue;
+        }
+        int obj_x, obj_y;
+        if (scenario_empire_is_expanded()) {
+            obj_x = obj->expanded.x;
+            obj_y = obj->expanded.y;
+        } else {
+            obj_x = obj->x;
+            obj_y = obj->y;
+        }
+        int dist = calc_euclidean_distance(obj_x, obj_y, x, y);
+        if (dist < min_dist) {
+            min_dist = dist;
+            min_id = obj->id;
+        }
+    }
+    if (min_dist != 9999 && min_id) {
+        return min_id;
+    }
+    return 0;
+}
+
+static int object_no_condition(const empire_object *obj)
+{
+    return 1;
+}
+
+int empire_object_get_nearest_of_type(int x, int y, empire_object_type type)
+{
+    return empire_object_get_nearest_of_type_with_condition(x, y, type, object_no_condition);
+}
+
+int empire_object_ornament_image_id_get(int ornament_id)
+{
+    return ornament_id < ORIGINAL_ORNAMENTS ? BASE_ORNAMENT_IMAGE_ID + ornament_id :
+        ORIGINAL_ORNAMENTS - ornament_id - 2;
+}
+
+int empire_object_ornament_id_get(int image_id)
+{
+    return image_id < 0 ? ORIGINAL_ORNAMENTS - 2 - image_id : image_id - BASE_ORNAMENT_IMAGE_ID;
+}
+
+int empire_object_count_ornaments(void)
+{
+    int total_ornaments = 0;
+    full_empire_object *full;
+    array_foreach(objects, full) {
+        if (full->in_use && full->obj.type == EMPIRE_OBJECT_ORNAMENT && full->obj.image_id != -1) {
+            total_ornaments++;
+        }
+    }
+    return total_ornaments;
+}
+
+int empire_object_get_ornament(int image_id)
+{
+    full_empire_object *full;
+    array_foreach(objects, full) {
+        if (full->in_use && full->obj.type == EMPIRE_OBJECT_ORNAMENT && full->obj.image_id == image_id) {
+            return full->obj.id;
+        }
+    }
+    return 0;
+}
+
+int empire_object_add_ornament(int ornament_id)
+{
+    int image_id = empire_object_ornament_image_id_get(ornament_id);
+    if (empire_object_get_ornament(image_id)) {
+        return 1;
+    }
+    full_empire_object *obj = empire_object_get_new();
+    if (!obj) {
+        log_error("Error creating new object - out of memory", 0, 0);
+        return 0;
+    }
+    obj->in_use = 1;
+    obj->obj.type = EMPIRE_OBJECT_ORNAMENT;
+    obj->obj.image_id = image_id;
+    obj->obj.x = ORNAMENT_POSITIONS[ornament_id].x;
+    obj->obj.y = ORNAMENT_POSITIONS[ornament_id].y;
+    const image *img = image_get(assets_lookup_image_id(ASSET_FIRST_ORNAMENT) - 1 - image_id);
+    obj->obj.width = img->width;
+    obj->obj.height = img->height;
+    return 1;
 }
 
 void empire_object_set_expanded(int object_id, int new_city_type)
@@ -559,6 +948,98 @@ int empire_object_is_sea_trade_route(int route_id)
         }
     }
     return 0;
+}
+
+void empire_object_set_trade_route_coords(const empire_object *our_city)
+{
+    int *section_distances = 0;
+    for (int i = 0; i < empire_object_count(); i++) {
+        full_empire_object *trade_city = empire_object_get_full(i);
+        if (
+            !trade_city->in_use ||
+            trade_city->obj.type != EMPIRE_OBJECT_CITY ||
+            trade_city->city_type == EMPIRE_CITY_OURS ||
+            (trade_city->city_type != EMPIRE_CITY_TRADE && trade_city->city_type != EMPIRE_CITY_FUTURE_TRADE)
+            ) {
+            continue;
+        }
+        empire_object *trade_route = empire_object_get(i + 1);
+
+        if (!section_distances) {
+            section_distances = malloc(sizeof(int) * (empire_object_count() - 1));
+        }
+        int sections = 0;
+        int distance = 0;
+        int last_x = our_city->x + 25;
+        int last_y = our_city->y + 25;
+        int x_diff, y_diff;
+        for (int j = 0; j < empire_object_count(); ) {
+            int obj_id = empire_object_get_next_in_order(i + 1, &j);
+            if (!obj_id) {
+                break;
+            }
+            empire_object *obj = empire_object_get(obj_id);
+            if (obj->type != EMPIRE_OBJECT_TRADE_WAYPOINT) {
+                break;
+            }
+            x_diff = obj->x - last_x;
+            y_diff = obj->y - last_y;
+            section_distances[sections] = (int) sqrt(x_diff * x_diff + y_diff * y_diff);
+            distance += section_distances[sections];
+            last_x = obj->x;
+            last_y = obj->y;
+            sections++;
+        }
+        x_diff = trade_city->obj.x + 25 - last_x;
+        y_diff = trade_city->obj.y + 25 - last_y;
+        section_distances[sections] = (int) sqrt(x_diff * x_diff + y_diff * y_diff);
+        distance += section_distances[sections];
+        sections++;
+
+        last_x = our_city->x + 25;
+        last_y = our_city->y + 25;
+        int next_x = trade_city->obj.x + 25;
+        int next_y = trade_city->obj.y + 25;
+
+        if (sections == 1) {
+            trade_route->x = (next_x + last_x) / 2 - 16;
+            trade_route->y = (next_y + last_y) / 2 - 10;
+            continue;
+        }
+        int crossed_distance = 0;
+        int current_section = 0;
+        int remaining_distance = 0;
+        while (current_section < sections) {
+            if (current_section == sections - 1) {
+                next_x = trade_city->obj.x + 25;
+                next_y = trade_city->obj.y + 25;
+            } else {
+                int obj_id = empire_object_get_next_in_order(i + 1, &current_section);
+                if (!obj_id) {
+                    break;
+                }
+                empire_object *obj = empire_object_get(obj_id);
+                next_x = obj->x;
+                next_y = obj->y;
+            }
+            if (section_distances[current_section] + crossed_distance > distance / 2) {
+                remaining_distance = distance / 2 - crossed_distance;
+                break;
+            }
+            last_x = next_x;
+            last_y = next_y;
+            crossed_distance += section_distances[current_section];
+        }
+        x_diff = next_x - last_x;
+        y_diff = next_y - last_y;
+        int x_factor = calc_percentage(x_diff, section_distances[current_section]);
+        int y_factor = calc_percentage(y_diff, section_distances[current_section]);
+        trade_route->x = calc_adjust_with_percentage(remaining_distance, x_factor) + last_x - 16;
+        trade_route->y = calc_adjust_with_percentage(remaining_distance, y_factor) + last_y - 10;
+
+        i += sections; // We know the following objects are waypoints so we skip them
+    }
+    free(section_distances);
 }
 
 static int get_animation_offset(int image_id, int current_index)
@@ -631,6 +1112,7 @@ empire_city_icon_type empire_object_get_random_icon_for_empire_object(full_empir
     static const empire_city_icon_type alloc_trade_sea[] = { // sea trade
         EMPIRE_CITY_ICON_RESOURCE_FOOD,
         EMPIRE_CITY_ICON_RESOURCE_GOODS,
+        EMPIRE_CITY_ICON_RESOURCE_SEA,
         EMPIRE_CITY_ICON_TRADE_TOWN,
         EMPIRE_CITY_ICON_TRADE_VILLAGE,
         EMPIRE_CITY_ICON_TRADE_SEA,
@@ -657,9 +1139,9 @@ empire_city_icon_type empire_object_get_random_icon_for_empire_object(full_empir
         EMPIRE_CITY_ICON_DISTANT_VILLAGE,
         EMPIRE_CITY_ICON_DISTANT_CITY,
     };
-    static const empire_city_icon_type alloc_future_trade[] = { // future trade
+    static const empire_city_icon_type alloc_future_trade[] = { // future trade before conversion
         EMPIRE_CITY_ICON_CONSTRUCTION,
-        EMPIRE_CITY_ICON_DISTANT_CITY,
+        EMPIRE_CITY_ICON_ROMAN_VILLAGE,
     };
 
     int array_size = 0;

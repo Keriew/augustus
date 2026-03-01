@@ -103,7 +103,7 @@ typedef struct {
 typedef struct {
     int sidebar_item_id; // number on the list
     int empire_object_id; // empire object id of the city
-    int city_id; //city index in the empire's array of cities
+    int city_id; // city index in the empire's array of cities
     int x;
     int y;
     int width;
@@ -556,12 +556,12 @@ static int measure_trade_row_width(const empire_city *city, int is_sell, const t
         if (!resource_is_storable(r)) continue;
         if ((is_sell && !city->sells_resource[r]) || (!is_sell && !city->buys_resource[r])) continue;
 
-        int w_max = text_get_number_width(trade_route_limit(city->route_id, r), '\0', "", FONT_NORMAL_GREEN);
+        int w_max = text_get_number_width(trade_route_limit(city->route_id, r, !is_sell), '\0', "", FONT_NORMAL_GREEN);
         int segment_width;
 
         if (city->is_open) {
             // Also need width of current amount and "of" label
-            int w_now = text_get_number_width(trade_route_traded(city->route_id, r), '\0', "", FONT_NORMAL_GREEN);
+            int w_now = text_get_number_width(trade_route_traded(city->route_id, r, !is_sell), '\0', "", FONT_NORMAL_GREEN);
             int w_of = lang_text_get_width(47, 11, FONT_NORMAL_GREEN);
 
             segment_width =
@@ -734,6 +734,9 @@ void window_empire_collect_trade_edges(void)
     // Pre-fill per-route edge lists with -1 (sentinel terminator).
     for (int object_index = 0; object_index < empire_object_count(); object_index++) {
         const empire_object *route_object = empire_object_get(object_index);
+        if (!empire_object_get_full(object_index)->in_use) {
+            continue;
+        }
         int is_sea_route = -1;
         if (route_object->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
             is_sea_route = 1;
@@ -753,10 +756,12 @@ void window_empire_collect_trade_edges(void)
         int segment_start_y = our_city_object->y + 25;
         int route_edge_count = 0;
 
-        // Waypoints belonging to this route are contiguous after the route object
-        for (int waypoint_index = object_index + 1; waypoint_index < empire_object_count(); waypoint_index++) {
-            const empire_object *waypoint_object = empire_object_get(waypoint_index);
-
+        for (int waypoint_index = 0; waypoint_index < empire_object_count(); ) {
+            int waypoint_object_id = empire_object_get_next_in_order(object_index, &waypoint_index);
+            if (!waypoint_object_id) {
+                break;
+            }
+            const empire_object *waypoint_object = empire_object_get(waypoint_object_id);
             if (waypoint_object->type != EMPIRE_OBJECT_TRADE_WAYPOINT || waypoint_object->trade_route_id != route_id) {
                 break; // reached non-waypoint or different route; waypoint sequence ends
             }
@@ -797,12 +802,10 @@ void window_empire_collect_trade_edges(void)
 
 void window_empire_draw_static_trade_waypoints(const empire_object *route_object, int x_offset, int y_offset)
 {
-    int is_sea_route = 0;
-    if (route_object->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
-        is_sea_route = 1;
-    } else {
-        is_sea_route = 0; // treat anything else here as land (caller should pass a valid route)
+    if (scenario_empire_id() != SCENARIO_CUSTOM_EMPIRE) {
+        return;
     }
+    int is_sea_route = route_object->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE;
 
     int image_id = assets_get_image_id("UI", is_sea_route ? "SeaRouteDot" : "LandRouteDot");
     int route_id = route_object->trade_route_id;
@@ -917,7 +920,7 @@ static void window_empire_draw_trade_route_pulses(const empire_object *route_obj
 //                                              FOREGROUND ELEMENTS DRAWING 
 // -------------------------------------------------------------------------------------------------------
 
-void draw_trade_resource(resource_type r, int trade_max, int x, int y)
+static void draw_trade_resource(resource_type r, int trade_max, int x, int y)
 {
     graphics_draw_inset_rect(x - 1, y - 1, 26, 26, COLOR_INSET_DARK, COLOR_INSET_LIGHT);
     image_draw(resource_get_data(r)->image.empire, x, y, COLOR_MASK_NONE, SCALE_NONE);
@@ -1065,8 +1068,8 @@ static int draw_trade_row(const empire_city *city, int is_sell, int x, int y, co
         if (!resource_is_storable(r)) continue;
         if ((is_sell && !city->sells_resource[r]) || (!is_sell && !city->buys_resource[r])) continue;
 
-        int trade_max = trade_route_limit(city->route_id, r);
-        int trade_now = trade_route_traded(city->route_id, r);
+        int trade_max = trade_route_limit(city->route_id, r, !is_sell);
+        int trade_now = trade_route_traded(city->route_id, r, !is_sell);
         int icon_y = y + style->y_offset_icon;
 
         int segment_width, text_x;
@@ -1411,7 +1414,12 @@ static int draw_images_at_interval(int image_id, int x_draw_offset, int y_draw_o
 
 void window_empire_draw_border(const empire_object *border, int x_offset, int y_offset)
 {
-    const empire_object *first_edge = empire_object_get(border->id + 1);
+    int first = 0;
+    int first_edge_id = empire_object_get_next_in_order(border->id, &first);
+    if (!first_edge_id) {
+        return;
+    }
+    const empire_object *first_edge = empire_object_get(first_edge_id);
     if (first_edge->type != EMPIRE_OBJECT_BORDER_EDGE) {
         return;
     }
@@ -1424,8 +1432,12 @@ void window_empire_draw_border(const empire_object *border, int x_offset, int y_
     x_offset -= 0;
     y_offset -= 14;
 
-    for (int i = first_edge->id + 1; i < empire_object_count(); i++) {
-        empire_object *obj = empire_object_get(i);
+    for (int i = first; i < empire_object_count(); ) {
+        int obj_id = empire_object_get_next_in_order(border->id, &i);
+        if (!obj_id) {
+            break;
+        }
+        empire_object *obj = empire_object_get(obj_id);
         if (obj->type != EMPIRE_OBJECT_BORDER_EDGE) {
             break;
         }
@@ -1525,8 +1537,12 @@ static void draw_empire_object(const empire_object *obj)
             image_id = assets_lookup_image_id(ASSET_FIRST_ORNAMENT) - 1 - image_id;
         }
     }
-    if (obj->type == EMPIRE_OBJECT_CITY && obj->empire_city_icon != EMPIRE_CITY_ICON_DEFAULT) {
-        image_id = empire_city_get_icon_image_id(obj->empire_city_icon); // fetch custom city icon
+    if (obj->type == EMPIRE_OBJECT_CITY) {
+        if (empire_object_get_full(obj->id)->city_type == EMPIRE_CITY_TRADE && obj->future_trade_after_icon) {
+            image_id = empire_city_get_icon_image_id(obj->future_trade_after_icon);
+        } else if (obj->empire_city_icon != EMPIRE_CITY_ICON_DEFAULT) {
+            image_id = empire_city_get_icon_image_id(obj->empire_city_icon); // fetch custom city icon
+        }
     }
     const image *img = image_get(image_id);
     if ((((unsigned int) data.hovered_object == obj->id + 1) && obj->type == EMPIRE_OBJECT_CITY) ||
@@ -1620,6 +1636,13 @@ static void draw_invasion_warning(int x, int y, int image_id)
     image_draw(image_id, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, SCALE_NONE);
 }
 
+void empire_reset_route_drawn_flags(void)
+{
+    for (int i = 0; i < g_trade_edge_count; i++) {
+        g_trade_edges[i].drawn = 0;
+    }
+}
+
 static void draw_map(void)
 {
     // Recalculate inner bounds (same as draw_background)
@@ -1630,9 +1653,8 @@ static void draw_map(void)
 
     graphics_set_clip_rectangle(map_clip_x_min, map_clip_y_min, map_clip_x_max - map_clip_x_min, map_clip_y_max - map_clip_y_min);
     // Reset all edge drawn flags for this frame
-    for (int i = 0; i < g_trade_edge_count; i++) {
-        g_trade_edges[i].drawn = 0;
-    }
+    empire_reset_route_drawn_flags();
+
     empire_set_viewport(map_clip_x_max - map_clip_x_min, map_clip_y_max - map_clip_y_min);
 
     data.x_draw_offset = map_clip_x_min;
@@ -1724,8 +1746,7 @@ static void draw_trade_button_highlights(void)
             float pulse = sinf(time_seconds * 1.0f * 3.14f); // 1 full cycle per second
             int alpha = 96 + (int) (pulse * 64); // Range: 32–160
             graphics_tint_rect(btn->x, btn->y, RESOURCE_ICON_WIDTH - 1, RESOURCE_ICON_HEIGHT - 1,
-                COLOR_MASK_DARK_PINK, alpha
-            );
+                COLOR_MASK_DARK_PINK, alpha);
         }
 
     }

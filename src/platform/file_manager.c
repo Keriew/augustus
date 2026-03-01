@@ -237,6 +237,7 @@ static struct {
     const char *editor_custom_messages;
     const char *editor_custom_events;
     const char *editor_model_data;
+    const char *community_image;
 } paths = {
     "",
     "config/",
@@ -249,7 +250,8 @@ static struct {
     "editor/empires/",
     "editor/messages/",
     "editor/events/",
-    "editor/model/"
+    "editor/model/",
+    "community/image"
 };
 
 static void set_assets_directory(void)
@@ -585,6 +587,9 @@ const char *platform_file_manager_get_directory_for_location(int location, const
             break;
         case PATH_LOCATION_EDITOR_MODEL_DATA:
             cursor = snprintf(full_path, FILE_NAME_MAX, "%s%s%s", user_directory, slash, paths.editor_model_data);
+            break;
+        case PATH_LOCATION_COMMUNITY_IMAGE:
+            cursor = snprintf(full_path, FILE_NAME_MAX, "%s%s%s", user_directory, slash, paths.community_image);
             break;
     }
 
