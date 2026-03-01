@@ -75,7 +75,7 @@ static int is_citizen(figure *f)
     const figure_properties *target_props = figure_properties_for_type(f->type);
     const figure_category category = target_props->category;
     if (f->action_state != FIGURE_ACTION_149_CORPSE) {
-        if (category == FIGURE_CATEGORY_CITIZEN || category == FIGURE_CATEGORY_ARMED || category == FIGURE_CATEGORY_CRIMINAL) {
+        if (category == FIGURE_CATEGORY_CITIZEN || category == FIGURE_CATEGORY_CRIMINAL) {
             return f->id;
         }
     }
