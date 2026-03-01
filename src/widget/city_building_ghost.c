@@ -37,7 +37,6 @@
 #include "map/orientation.h"
 #include "map/property.h"
 #include "map/road_aqueduct.h"
-#include "map/routing_terrain.h"
 #include "map/terrain.h"
 #include "map/tiles.h"
 #include "map/water.h"
@@ -1246,21 +1245,7 @@ static void draw_road(const map_tile *tile, int x, int y)
             blocked = 1;
         }
     } else if (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
-        if (map_routing_is_gate_transformable(grid_offset)) {
-            // Wall can be transformed into a gate: show gate ghost instead of blocked
-            building *wall_b = building_get(map_building_at(grid_offset));
-            int gate_type = building_connectable_gate_type(wall_b->type);
-            if (gate_type) {
-                building_type saved_type = wall_b->type;
-                wall_b->type = gate_type;
-                image_id = building_image_get(wall_b);
-                wall_b->type = saved_type;
-            } else {
-                blocked = 1;
-            }
-        } else {
-            blocked = 1;
-        }
+        blocked = 1;
     } else {
         image_id = image_group(GROUP_TERRAIN_ROAD);
         if (!map_terrain_has_adjacent_x_with_type(grid_offset, TERRAIN_ROAD) &&

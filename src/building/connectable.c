@@ -499,14 +499,6 @@ void building_connectable_update_connections_for_type(building_type type)
         if (b->state == BUILDING_STATE_RUBBLE) {
             continue;
         }
-        if (is_garden_wall_or_gate(b->type) && map_property_is_constructing(b->grid_offset)) {
-            if (map_terrain_is(b->grid_offset, TERRAIN_ROAD)) {
-                building_change_type(b, BUILDING_HEDGE_GATE_DARK);
-                continue;
-            }
-            continue;
-
-        }
         map_image_set(b->grid_offset, building_image_get(b));
     }
 }
