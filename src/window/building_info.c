@@ -231,6 +231,7 @@ static int get_height_id(void)
             case BUILDING_TRIUMPHAL_ARCH:
             case BUILDING_SHIP_BRIDGE:
             case BUILDING_LOW_BRIDGE:
+            case BUILDING_DEPOT:
                 return HEIGHT_5_24_BLOCKS;
 
                 //608px
