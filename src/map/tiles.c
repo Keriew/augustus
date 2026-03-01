@@ -792,7 +792,7 @@ static void set_road_with_aqueduct_image(int grid_offset)
 
 static void set_road_with_garden_gate_image(int grid_offset)
 {
-    int new_image_id = building_image_get_park_or_gate_ghost_image(grid_offset);
+    int new_image_id = building_image_get_garden_gate_image(grid_offset);
     building_connectable_update_connections();
     map_image_set(grid_offset, new_image_id);
     map_property_mark_draw_tile(grid_offset);

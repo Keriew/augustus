@@ -5,7 +5,7 @@
 
 int building_image_get_base_farm_crop(building_type type);
 
-int building_image_get_park_or_gate_ghost_image(int grid_offset);
+int building_image_get_garden_gate_image(int grid_offset);
 
 int building_image_get(const building *b);
 

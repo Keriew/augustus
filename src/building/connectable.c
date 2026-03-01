@@ -501,7 +501,7 @@ void building_connectable_update_connections_for_type(building_type type)
         }
         int image_id;
         if (building_connectable_gate_type(b->type) && map_terrain_is(b->grid_offset, TERRAIN_ROAD)) {
-            image_id = building_image_get_park_or_gate_ghost_image(b->grid_offset);
+            image_id = building_image_get_garden_gate_image(b->grid_offset);
         } else {
             image_id = building_image_get(b);
         }

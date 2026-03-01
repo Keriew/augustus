@@ -56,31 +56,12 @@ int building_image_get_base_farm_crop(building_type type)
     }
 }
 
-int building_image_get_park_or_gate_ghost_image(int grid_offset)
+int building_image_get_garden_gate_image(int grid_offset)
 {
     building_type b_type = map_building_type_at(grid_offset);
     b_type = building_connectable_gate_type(b_type);
 
-
     switch (b_type) {
-        // case BUILDING_HEDGE_DARK:
-        //     return assets_get_image_id("Aesthetics", "D Hedge 01") +
-        //         building_connectable_get_hedge_offset(grid_offset);
-        // case BUILDING_HEDGE_LIGHT:
-        //     return assets_get_image_id("Aesthetics", "L Hedge 01") +
-        //         building_connectable_get_hedge_offset(grid_offset);
-        // case BUILDING_COLONNADE:
-        //     return assets_get_image_id("Aesthetics", "G Colonnade 01") +
-        //         building_connectable_get_colonnade_offset(grid_offset);
-        // case BUILDING_LOOPED_GARDEN_WALL:
-        //     return assets_get_image_id("Aesthetics", "C Garden Wall 01") +
-        //         building_connectable_get_garden_wall_offset(grid_offset);
-        // case BUILDING_ROOFED_GARDEN_WALL:
-        //     return assets_get_image_id("Aesthetics", "R Garden Wall 01") +
-        //         building_connectable_get_garden_wall_offset(grid_offset);
-        // case BUILDING_PANELLED_GARDEN_WALL:
-        //     return assets_get_image_id("Aesthetics", "Garden_Wall_C_01") +
-        //         building_connectable_get_garden_wall_offset(grid_offset);
         case BUILDING_ROOFED_GARDEN_WALL_GATE:
             return assets_get_image_id("Aesthetics", "Garden_Gate_B") + building_connectable_get_garden_gate_offset(grid_offset);
         case BUILDING_LOOPED_GARDEN_GATE:

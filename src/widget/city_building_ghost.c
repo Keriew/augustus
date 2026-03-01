@@ -1244,7 +1244,7 @@ static void draw_road(const map_tile *tile, int x, int y)
             blocked = 1;
         }
     } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING) && map_routing_is_gate_transformable(grid_offset)) {
-        image_id = building_image_get_park_or_gate_ghost_image(grid_offset);
+        image_id = building_image_get_garden_gate_image(grid_offset);
     } else if (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
         blocked = 1;
     } else {
