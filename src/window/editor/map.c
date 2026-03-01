@@ -48,6 +48,7 @@ static void draw_foreground(void)
 {
     widget_sidebar_editor_draw_foreground();
     widget_map_editor_draw();
+    widget_top_menu_editor_draw_panels();
     if (window_is(WINDOW_EDITOR_MAP)) {
         draw_cancel_construction();
     }
