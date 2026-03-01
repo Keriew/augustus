@@ -99,7 +99,7 @@ static const default_city default_cities[] = {
     {38, 1041, 307}, // Sarmizegetusa
     {37, 579, 857}, // Thamugadi
     {26, 210, 77}, // Calleva
-    {36, 322, 67},
+    {36, 322, 67}, // Londinium
     {21, 1718, 755}, // Antiochia
     {22, 1739, 785}, // Heliopolis
     {23, 1742, 815}, // Damascus
