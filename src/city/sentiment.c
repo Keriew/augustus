@@ -200,6 +200,8 @@ static int get_sentiment_modifier_for_tax_rate(int tax)
     return tax_differential;
 }
 
+// Average housing Level
+// Determines the level under which houses will suffer squalor (inequality) sentiment penalty
 static int get_average_housing_level(void)
 {
     int avg = 0;
@@ -207,6 +209,7 @@ static int get_average_housing_level(void)
     int multiplier = 1;
 
     for (building_type type = BUILDING_HOUSE_SMALL_TENT; type <= BUILDING_HOUSE_LUXURY_PALACE; type++) {
+        // Higher level houses impact average housing level more
         if (type == BUILDING_HOUSE_LARGE_CASA) {
             multiplier = 10;
         } else if (type == BUILDING_HOUSE_SMALL_VILLA) {
@@ -261,6 +264,7 @@ static int extra_food_bonus(int types, int required)
     return calc_bound(extra, 0, MAX_SENTIMENT_FROM_EXTRA_FOOD);
 }
 
+// Updates city sentiment (daily)
 void city_sentiment_update(void)
 {
     city_population_check_consistency();
@@ -281,7 +285,9 @@ void city_sentiment_update(void)
     int total_houses = 0;
     int house_level_sentiment_multiplier = 3;
 
+    // Loops through every house type
     for (building_type type = BUILDING_HOUSE_SMALL_TENT; type <= BUILDING_HOUSE_LUXURY_PALACE; type++) {
+        // Reduces the sentiment multiplier if the house reaches a certain level
         if (type == BUILDING_HOUSE_SMALL_SHACK) {
             house_level_sentiment_multiplier = 2;
         } else if (type == BUILDING_HOUSE_LARGE_CASA) {
@@ -289,6 +295,7 @@ void city_sentiment_update(void)
         } else if (type == BUILDING_HOUSE_SMALL_VILLA) {
             house_level_sentiment_multiplier = 0;
         }
+
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
             if (b->state != BUILDING_STATE_IN_USE || !b->house_size) {
                 continue;
@@ -300,17 +307,20 @@ void city_sentiment_update(void)
 
             int sentiment = default_sentiment;
 
+            // Taxes
             if (b->house_tax_coverage) {
                 sentiment += sentiment_contribution_taxes;
             } else {
                 sentiment += sentiment_contribution_no_tax;
             }
 
+            // Wages and Unemployment
             if (b->subtype.house_level <= HOUSE_GRAND_INSULA) {
                 sentiment += sentiment_contribution_wages;
                 sentiment -= sentiment_contribution_unemployment;
             }
 
+            // Squalor
             int house_level_sentiment = house_level_sentiment_modifier(b->subtype.house_level, average_housing_level);
             if (house_level_sentiment < 0) {
                 house_level_sentiment *= house_level_sentiment_multiplier;
@@ -318,18 +328,23 @@ void city_sentiment_update(void)
             }
             sentiment += house_level_sentiment;
 
+            // Desirability
             int max_desirability = b->subtype.house_level + 1;
             int desirability_bonus = extra_desirability_bonus(b->desirability, max_desirability);
+            sentiment += desirability_bonus;
+
+            // Entertainment
             int entertainment_bonus = extra_entertainment_bonus(b->data.house.entertainment,
                 model_get_house(b->subtype.house_level)->entertainment);
+            sentiment += entertainment_bonus;
+
+            // Food Variety
             int food_bonus = extra_food_bonus(b->data.house.num_foods,
                 model_get_house(b->subtype.house_level)->food_types);
-
-            sentiment += desirability_bonus;
-            sentiment += entertainment_bonus;
             sentiment += food_bonus;
-            sentiment += games_bonus;
 
+            // Games and Festivals (calculated earlier)
+            sentiment += games_bonus;
             sentiment += blessing_festival_boost;
 
             // Change sentiment gradually to the new value
@@ -345,11 +360,14 @@ void city_sentiment_update(void)
             int worst_sentiment = 0;
             b->house_sentiment_message = LOW_MOOD_CAUSE_NONE;
 
+            // If the house is under 80 happiness, its worst sentiment is used to show the player why
             if (b->sentiment.house_happiness < 80) {
+                // Taxes
                 if (b->house_tax_coverage) {
                     worst_sentiment = sentiment_contribution_taxes;
                     b->house_sentiment_message = LOW_MOOD_CAUSE_HIGH_TAXES;
                 }
+                // Unemployment, low Wages and Squalor
                 if (b->subtype.house_level <= HOUSE_GRAND_INSULA) {
                     if (-sentiment_contribution_unemployment < worst_sentiment) {
                         worst_sentiment = -sentiment_contribution_unemployment;
@@ -364,16 +382,20 @@ void city_sentiment_update(void)
                         b->house_sentiment_message = LOW_MOOD_CAUSE_SQUALOR;
                     }
                 }
-
+                // If the worst sentiment isn't that bad, suggest a way to improve it directly instead
                 if (worst_sentiment > -15) {
+                    // Suggest more entertainment
                     if (entertainment_bonus < SENTIMENT_PER_EXTRA_FOOD ||
                         (entertainment_bonus < food_bonus && entertainment_bonus < desirability_bonus)) {
                         b->house_sentiment_message = SUGGEST_MORE_ENT;
+                    // Suggest more desirability
                     } else if (desirability_bonus < max_desirability && desirability_bonus < food_bonus) {
                         b->house_sentiment_message = SUGGEST_MORE_DESIRABILITY;
+                    // Suggest more food types
                     } else if (model_get_house(b->subtype.house_level)->food_types > 0 &&
                         food_bonus < MAX_SENTIMENT_FROM_EXTRA_FOOD && b->data.house.num_foods < 3) {
                         b->house_sentiment_message = SUGGEST_MORE_FOOD;
+                    // Suggest... nothing?
                     } else {
                         b->house_sentiment_message = LOW_MOOD_CAUSE_NONE;
                     }
