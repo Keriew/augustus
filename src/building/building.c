@@ -341,6 +341,20 @@ building *building_restore_from_undo(building *to_restore)
     return b;
 }
 
+void building_clear_after_undo(int building_id)
+{
+    building *b = building_get(building_id);
+    if (!b->id) {
+        return;
+    }
+    building_clear_related_data(b);
+    remove_adjacent_types(b);
+    int id = b->id;
+    memset(b, 0, sizeof(building));
+    b->id = id;
+    array_trim(data.buildings);
+}
+
 void building_trim(void)
 {
     array_trim(data.buildings);

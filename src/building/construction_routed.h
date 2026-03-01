@@ -9,6 +9,8 @@ int building_construction_place_highway(int measure_only, int x_start, int y_sta
 
 int building_construction_place_aqueduct(int x_start, int y_start, int x_end, int y_end, int *cost);
 
+void building_construction_restore_gate_previews(void);
+
 int building_construction_place_aqueduct_for_reservoir(
     int measure_only, int x_start, int y_start, int x_end, int y_end, int *items);
 

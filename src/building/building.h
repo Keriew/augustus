@@ -252,6 +252,8 @@ void building_clear_related_data(building *b);
 
 building *building_restore_from_undo(building *to_restore);
 
+void building_clear_after_undo(int building_id);
+
 void building_trim(void);
 
 void building_update_state(void);

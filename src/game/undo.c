@@ -1,5 +1,7 @@
 #include "undo.h"
 
+#include "building/building.h"
+#include "building/connectable.h"
 #include "building/construction.h"
 #include "building/house.h"
 #include "building/image.h"
@@ -254,6 +256,29 @@ void game_undo_perform(void)
         data.type == BUILDING_WALL || data.type == BUILDING_HIGHWAY) {
         map_terrain_restore();
         map_aqueduct_restore();
+        map_building_restore();
+        if (data.type == BUILDING_ROAD && data.num_buildings > 0) {
+            // Restore any wall→gate transformations that happened along the road path
+            for (int i = 0; i < MAX_UNDO_BUILDINGS; i++) {
+                if (!data.buildings[i].id) {
+                    continue;
+                }
+                building *saved = &data.buildings[i];
+                if (saved->state == BUILDING_STATE_IN_USE) {
+                    // Was a wall before the transformation: restore it
+                    building_restore_from_undo(saved);
+                    // Fix the image: restore_map_images skips tiles with buildings,
+                    // so we restore the wall image from backup manually
+                    map_image_restore_at(saved->grid_offset);
+                } else {
+                    // Was a newly created gate: it is now orphaned (map_building_restore
+                    // put the wall's ID back at the tile), so clean it up
+                    building_clear_after_undo(saved->id);
+                }
+            }
+            // Re-compute connectable images so wall neighbours show correct sprites
+            building_connectable_update_connections();
+        }
         restore_map_images();
     } else if (data.type == BUILDING_LOW_BRIDGE || data.type == BUILDING_SHIP_BRIDGE) {
         map_terrain_restore();
