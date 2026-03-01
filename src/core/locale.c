@@ -76,8 +76,7 @@ static language_type determine_language(void)
         return LANGUAGE_JAPANESE;
     } else if (string_equals(NEW_GAME_UKRAINIAN, new_game_string)) {
         return LANGUAGE_UKRAINIAN;
-    } 
-    else {
+    } else {
         return LANGUAGE_UNKNOWN;
     }
 }
