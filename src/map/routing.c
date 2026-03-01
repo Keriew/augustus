@@ -1,6 +1,7 @@
 #include "routing.h"
 
 #include "building/building.h"
+#include "building/connectable.h"
 #include "core/time.h"
 #include "map/building.h"
 #include "map/figure.h"

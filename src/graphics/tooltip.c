@@ -403,7 +403,7 @@ static void draw_senate_tooltip(tooltip_context *c)
     graphics_renderer()->finish_tooltip_creation();
 }
 
-// tooltip.c
+
 static int terrain_info_string(int grid_offset, const char **out_flags, int max_flags)
 {
     const terrain_flags_array *flags_array = map_terrain_to_array(grid_offset);
@@ -438,7 +438,7 @@ static void draw_tile_tooltip(tooltip_context *c)
                 height = 61;
                 break;
             case 3: // terrain flags and other info included
-                width = 110;
+                width = 160;
                 height = 61 + (b_id_at ? 14 : 0) + (rubble_id_at ? 14 : 0) + (num_flags * 14);
                 break;
             case 2:
@@ -488,8 +488,10 @@ static void draw_tile_tooltip(tooltip_context *c)
         if (debug_tooltip_type == 3) { // dont show flags for 4 (desirability)
             int y_offset = 47;
             if (b_id_at) {
-                text_draw_label_and_number(string_from_ascii("b_grid: "), b_id_at,
+                int drawn_width = text_draw_label_and_number(string_from_ascii("b_grid: "), b_id_at,
                 "", 2, y_offset, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
+                text_draw_label_and_number(string_from_ascii(" (type: "), map_building_type_at(grid_offset),
+                    ")", 2 + drawn_width, y_offset, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
                 y_offset += 14;
             }
             if (map_building_rubble_building_id(grid_offset)) {

@@ -37,6 +37,7 @@
 #include "map/orientation.h"
 #include "map/property.h"
 #include "map/road_aqueduct.h"
+#include "map/routing_terrain.h"
 #include "map/terrain.h"
 #include "map/tiles.h"
 #include "map/water.h"
@@ -1244,6 +1245,8 @@ static void draw_road(const map_tile *tile, int x, int y)
         } else {
             blocked = 1;
         }
+    } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING) && map_routing_is_gate_transformable(grid_offset)) {
+        building_connectable_update_connections();
     } else if (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
         blocked = 1;
     } else {

@@ -1,6 +1,8 @@
 #include "construction_routed.h"
 
 #include "core/calc.h"
+#include "building/building.h"
+#include "building/connectable.h"
 #include "building/construction.h"
 #include "building/properties.h"
 #include "game/undo.h"
@@ -44,6 +46,13 @@ static int place_routed_building(int x_start, int y_start, int x_end, int y_end,
         switch (type) {
             default:
             case ROUTED_BUILDING_ROAD:
+                if (map_routing_is_gate_transformable(grid_offset)) {
+                    building *b = building_get(map_building_at(grid_offset));
+                    building_type gate_type = building_connectable_gate_type(b->type);
+                    if (gate_type) {
+                        building_change_type(b, gate_type);
+                    }
+                }
                 *items += map_tiles_set_road(x_end, y_end);
                 break;
             case ROUTED_BUILDING_AQUEDUCT:
@@ -105,6 +114,7 @@ int building_construction_place_road(int measure_only, int x_start, int y_start,
             place_routed_building(x_start, y_start, x_end, y_end, ROUTED_BUILDING_ROAD, &items_placed)) {
         if (!measure_only) {
             map_routing_update_land();
+            building_connectable_update_connections();
             window_invalidate();
         }
     }
