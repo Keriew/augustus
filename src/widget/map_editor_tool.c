@@ -151,6 +151,11 @@ static void draw_terrain_preview(int x, int y, tool_type type, int ring)
             if (ring >= 2) image_id += 8;
             else if (ring >= 1) image_id += 4;
             break;
+        case TOOL_EARTHQUAKE_CUSTOM:
+            image_id = image_group(GROUP_TERRAIN_EARTHQUAKE);
+            if (ring >= 1) image_id += 29;
+            else image_id += 24;
+            break;
         default:
             draw_flat_tile(x, y, COLOR_MASK_GREEN);
             return;
