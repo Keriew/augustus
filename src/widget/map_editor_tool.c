@@ -140,6 +140,8 @@ static void draw_terrain_preview(int x, int y, tool_type type, int ring)
             break;
         case TOOL_ROCKS:
             image_id = image_group(GROUP_TERRAIN_ROCK);
+            if (ring >= 2) image_id += 12;
+            else if (ring >= 1) image_id += 8;
             break;
         case TOOL_SHRUB:
             image_id = image_group(GROUP_TERRAIN_SHRUB);
