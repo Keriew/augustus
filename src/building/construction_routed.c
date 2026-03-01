@@ -53,7 +53,7 @@ static int place_routed_building(int x_start, int y_start, int x_end, int y_end,
                     building *b = building_get(map_building_at(grid_offset));
                     building_type gate_type = building_connectable_gate_type(b->type);
                     if (gate_type) {
-                        game_undo_add_building(b);
+                        game_undo_record_building_type(b);
                         building_change_type(b, gate_type);
                         if (config_get(CONFIG_GP_CH_GATES_DEFAULT_TO_PASS_ALL_WALKERS)) {
                             building_roadblock_accept_all(b);
@@ -125,6 +125,8 @@ int building_construction_place_road(int measure_only, int x_start, int y_start,
             map_routing_update_land();
             building_connectable_update_connections();
             window_invalidate();
+        } else {
+            building_connectable_update_connections();
         }
     }
     return items_placed;
