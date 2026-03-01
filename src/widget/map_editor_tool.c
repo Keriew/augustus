@@ -125,14 +125,18 @@ typedef struct {
     int x;
     int y;
     tool_type type;
+    int brush_size;
 } brush_draw_data;
 
-static void draw_terrain_preview(int x, int y, tool_type type)
+static void draw_terrain_preview(int x, int y, tool_type type, int ring)
 {
     int image_id;
     switch (type) {
         case TOOL_TREES:
             image_id = image_group(GROUP_TERRAIN_TREE);
+            if (ring >= 3) image_id += 24;
+            else if (ring >= 2) image_id += 16;
+            else if (ring >= 1) image_id += 8;
             break;
         case TOOL_ROCKS:
             image_id = image_group(GROUP_TERRAIN_ROCK);
@@ -142,6 +146,8 @@ static void draw_terrain_preview(int x, int y, tool_type type)
             break;
         case TOOL_MEADOW:
             image_id = image_group(GROUP_TERRAIN_MEADOW);
+            if (ring >= 2) image_id += 8;
+            else if (ring >= 1) image_id += 4;
             break;
         default:
             draw_flat_tile(x, y, COLOR_MASK_GREEN);
@@ -157,12 +163,13 @@ static void draw_brush_tile(const void *data, int dx, int dy)
     brush_draw_data *brush = (brush_draw_data *) data;
     int view_dx, view_dy;
     offset_to_view_offset(dx, dy, &view_dx, &view_dy);
-    draw_terrain_preview(brush->x + view_dx, brush->y + view_dy, brush->type);
+    int ring = (brush->brush_size - 1) - ((dx < 0 ? -dx : dx) + (dy < 0 ? -dy : dy));
+    draw_terrain_preview(brush->x + view_dx, brush->y + view_dy, brush->type, ring);
 }
 
 static void draw_brush(const map_tile *tile, int x, int y)
 {
-    brush_draw_data bd = { x, y, editor_tool_type() };
+    brush_draw_data bd = { x, y, editor_tool_type(), editor_tool_brush_size() };
     editor_tool_foreach_brush_tile(draw_brush_tile, &bd);
 }
 
