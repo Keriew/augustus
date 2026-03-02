@@ -221,7 +221,10 @@ static void show_saved_notice(const char *filename)
     const uint8_t *prefix = translation_for(TR_WARNING_SCREENSHOT_SAVED);
     string_copy(prefix, notice_text, FILE_NAME_MAX);
     int prefix_length = string_length(prefix);
-    string_copy(string_from_ascii(filename), &notice_text[prefix_length], FILE_NAME_MAX - prefix_length);
+    const uint8_t *ascii_filename = string_from_ascii(filename);
+    if (ascii_filename) {
+      string_copy(ascii_filename, &notice_text[prefix_length], FILE_NAME_MAX - prefix_length);
+    }
 
     city_warning_show_custom(notice_text, 0);
 }
