@@ -87,7 +87,7 @@ static generic_button generic_buttons[] = {
     {294, 48, 150, 24, button_toggle_waypoints},
     {464, 48, 150, 24, button_refresh},     // parameter1 determines whether hidden
     {634, 48, 150, 24, button_export_xml},
-    {794, 48, 150, 24, button_import_xml},
+    {804, 48, 150, 24, button_import_xml},
     {974, 48, 150, 24, button_empire_properties},
     {0, 0, 0, 24, button_icon_preview},
 };
