@@ -1593,15 +1593,16 @@ static void empire_draw_object_trade_route(const empire_object *obj)
 
 static void animation_draw_scaled(const image *img, int image_id, int new_animation, int x, int y, color_t color, int draw_scale_percent)
 {
-    float obj_draw_scale = 100.0f / draw_scale_percent;
-    float base_scaled_x = (((x) +img->width / 2.0f) - (img->width / obj_draw_scale) / 2.0f) * obj_draw_scale;
-    float base_scaled_y = (((y) +img->height / 2.0f) - (img->height / obj_draw_scale) / 2.0f) * obj_draw_scale;
+    int anim_x = ((x + img->width - img->width * draw_scale_percent) / 2) / draw_scale_percent;
+    int anim_y = ((y + img->height - img->height * draw_scale_percent) / 2) / draw_scale_percent;
 
-    // Apply animation sprite offset and draw
-    float anim_x = base_scaled_x + img->animation->sprite_offset_x;
-    float anim_y = base_scaled_y + img->animation->sprite_offset_y;
+    // Apply animation sprite offset if present, to the already centered position
+    if (img->animation) {
+         anim_x += img->animation->sprite_offset_x;
+         anim_y += img->animation->sprite_offset_y;
+    }
 
-    image_draw(image_id + new_animation, anim_x, anim_y, COLOR_MASK_NONE, obj_draw_scale);
+    image_draw(image_id + new_animation, anim_x, anim_y, color, 100.0f / draw_scale_percent);
 }
 
 static void image_draw_silh_scaled_centered(int image_id, int x, int y, color_t color, int draw_scale_percent)

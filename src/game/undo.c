@@ -1,5 +1,6 @@
 #include "undo.h"
 
+#include "building/connectable.h"
 #include "building/construction.h"
 #include "building/house.h"
 #include "building/image.h"
@@ -31,6 +32,7 @@
 #include <string.h>
 
 #define MAX_UNDO_BUILDINGS 50
+#define MAX_UNDO_TYPE_CHANGES 50
 
 static struct {
     int available;
@@ -40,6 +42,13 @@ static struct {
     int num_buildings;
     building_type type;
     building buildings[MAX_UNDO_BUILDINGS];
+    struct {
+        int num;
+        struct {
+            unsigned int building_id;
+            building_type original_type;
+        } items[MAX_UNDO_TYPE_CHANGES];
+    } type_changes;
 } data;
 
 int game_can_undo(void)
@@ -109,6 +118,34 @@ static void clear_buildings(void)
 {
     data.num_buildings = 0;
     memset(data.buildings, 0, MAX_UNDO_BUILDINGS * sizeof(building));
+    data.type_changes.num = 0;
+}
+
+void game_undo_record_building_type(building *b)
+{
+    if (!b || b->id <= 0 || data.type_changes.num >= MAX_UNDO_TYPE_CHANGES) {
+        return;
+    }
+    // Only record the first snapshot (before any change this build action)
+    for (int i = 0; i < data.type_changes.num; i++) {
+        if (data.type_changes.items[i].building_id == b->id) {
+            return;
+        }
+    }
+    data.type_changes.items[data.type_changes.num].building_id = b->id;
+    data.type_changes.items[data.type_changes.num].original_type = b->type;
+    data.type_changes.num++;
+}
+
+void game_undo_restore_building_types(void)
+{
+    for (int i = 0; i < data.type_changes.num; i++) {
+        building *b = building_get(data.type_changes.items[i].building_id);
+        if (b && b->id > 0) {
+            building_change_type(b, data.type_changes.items[i].original_type);
+        }
+    }
+    data.type_changes.num = 0;
 }
 
 int game_undo_start_build(building_type type)
@@ -255,6 +292,9 @@ void game_undo_perform(void)
         map_terrain_restore();
         map_aqueduct_restore();
         restore_map_images();
+        game_undo_restore_building_types();
+        building_connectable_update_connections();
+
     } else if (data.type == BUILDING_LOW_BRIDGE || data.type == BUILDING_SHIP_BRIDGE) {
         map_terrain_restore();
         map_sprite_restore();

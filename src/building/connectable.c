@@ -499,7 +499,13 @@ void building_connectable_update_connections_for_type(building_type type)
         if (b->state == BUILDING_STATE_RUBBLE) {
             continue;
         }
-        map_image_set(b->grid_offset, building_image_get(b));
+        int image_id;
+        if (building_connectable_gate_type(b->type) && map_terrain_is(b->grid_offset, TERRAIN_ROAD)) {
+            image_id = building_image_get_garden_gate_image(b->grid_offset);
+        } else {
+            image_id = building_image_get(b);
+        }
+        map_image_set(b->grid_offset, image_id);
     }
 }
 
