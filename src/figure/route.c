@@ -175,13 +175,23 @@ void figure_route_remove(figure *f)
     array_trim(paths);
 }
 
-int figure_route_get_next_direction(int path_id)
+int figure_route_get_current_direction(int path_id)
 {
     figure_path_data *path = array_item(paths, path_id);
     if (path->current_step >= path->total_directions) {
         return 8;
     }
-    int direction = path->directions[path->current_step] >> ROUTING_PATH_DIRECTION_BIT_OFFSET;
+    return path->directions[path->current_step] >> ROUTING_PATH_DIRECTION_BIT_OFFSET;
+}
+
+void figure_route_advance_tile(int path_id)
+{
+    figure_path_data *path = array_item(paths, path_id);
+
+    if (path->current_step >= path->total_directions) {
+        return;
+    }
+
     int tiles_in_direction = (path->directions[path->current_step] & ROUTING_PATH_DIRECTION_COUNT_BIT_MASK) + 1;
 
     path->same_direction_count++;
@@ -189,8 +199,6 @@ int figure_route_get_next_direction(int path_id)
         path->current_step++;
         path->same_direction_count = 0;
     }
-
-    return direction;
 }
 
 void figure_route_save_state(buffer *figures, buffer *buf_paths)

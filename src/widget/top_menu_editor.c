@@ -7,9 +7,12 @@
 #include "game/file_editor.h"
 #include "game/game.h"
 #include "game/system.h"
+#include "graphics/color.h"
 #include "graphics/image.h"
 #include "graphics/menu.h"
+#include "graphics/panel.h"
 #include "graphics/screen.h"
+#include "graphics/text.h"
 #include "graphics/window.h"
 #include "scenario/data.h"
 #include "scenario/editor.h"
@@ -17,6 +20,7 @@
 #include "scenario/empire.h"
 #include "scenario/scenario.h"
 #include "translation/translation.h"
+#include "widget/map_editor.h"
 #include "window/config.h"
 #include "window/file_dialog.h"
 #include "window/hotkey_config.h"
@@ -134,6 +138,48 @@ void widget_top_menu_editor_draw(void)
         image_draw(image_base + i % 8, i * block_width, 0, COLOR_MASK_NONE, SCALE_NONE);
     }
     menu_bar_draw(menu, 5, s_width);
+}
+
+void widget_top_menu_editor_draw_panels(void)
+{
+    int tile_x, tile_y, grid_offset;
+    widget_map_editor_get_current_tile(&tile_x, &tile_y, &grid_offset);
+    int in_bounds = grid_offset > 0;
+
+    int panel_width = 100;
+    int panel_gap = 5;
+    int s_width = screen_width();
+    int right_x = s_width - 17;
+    int actual_w;
+
+    // Offset panel (rightmost)
+    actual_w = top_menu_black_panel_draw(right_x - panel_width, 0, panel_width);
+    right_x -= actual_w;
+    int label_x = right_x + BLACK_PANEL_BLOCK_WIDTH + 14;
+    int label_w = text_draw((const uint8_t *) "O:", label_x, 6, FONT_NORMAL_PLAIN, COLOR_FONT_YELLOW);
+    if (in_bounds) {
+        text_draw_number(grid_offset, ' ', "", label_x + label_w, 6, FONT_NORMAL_PLAIN, COLOR_WHITE);
+    }
+
+    // Y panel
+    right_x -= panel_gap;
+    actual_w = top_menu_black_panel_draw(right_x - panel_width, 0, panel_width);
+    right_x -= actual_w;
+    label_x = right_x + BLACK_PANEL_BLOCK_WIDTH + 14;
+    label_w = text_draw((const uint8_t *) "Y:", label_x, 6, FONT_NORMAL_PLAIN, COLOR_FONT_YELLOW);
+    if (in_bounds) {
+        text_draw_number(tile_y, ' ', "", label_x + label_w, 6, FONT_NORMAL_PLAIN, COLOR_WHITE);
+    }
+
+    // X panel (leftmost of the three)
+    right_x -= panel_gap;
+    actual_w = top_menu_black_panel_draw(right_x - panel_width, 0, panel_width);
+    right_x -= actual_w;
+    label_x = right_x + BLACK_PANEL_BLOCK_WIDTH + 14;
+    label_w = text_draw((const uint8_t *) "X:", label_x, 6, FONT_NORMAL_PLAIN, COLOR_FONT_YELLOW);
+    if (in_bounds) {
+        text_draw_number(tile_x, ' ', "", label_x + label_w, 6, FONT_NORMAL_PLAIN, COLOR_WHITE);
+    }
 }
 
 static int handle_input_submenu(const mouse *m, const hotkeys *h)

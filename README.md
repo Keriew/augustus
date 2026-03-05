@@ -44,7 +44,7 @@ Because of gameplay changes and additions, save files from Augustus are NOT comp
 
 Augustus, like Julius, requires the original assets (graphics, sounds, etc) from Caesar 3 to run. Augustus optionally [supports the high-quality MP3 files](https://github.com/bvschaik/julius/wiki/MP3-Support) once provided on the Sierra website.
 
-[![](doc/main-image.png)](https://ppb.chymera.eu/fefa2d.png)
+[![](doc/main-image.png)](https://github.com/user-attachments/assets/5027579d-4277-4b1f-9eca-297a04cb1c79)
 
 ## Running the game
 

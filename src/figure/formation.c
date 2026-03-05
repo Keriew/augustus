@@ -28,6 +28,7 @@
 #define ORIGINAL_BUFFER_SIZE_PER_FORMATION 128
 #define BUFFER_SIZE_FOR_10_LEGIONS 128
 #define CURRENT_BUFFER_SIZE_PER_FORMATION 256
+#define MAX_LEGIONS_REGALIA 20 + 1 // +1 to keep indexing simple with 1 start
 
 static array(formation) formations;
 static struct {
@@ -36,7 +37,7 @@ static struct {
     int num_legions;
     unsigned int selected_formation;
 } data;
-
+static int8_t available_regalia[MAX_LEGIONS_REGALIA] = { 1 };
 static void initialize_new_formation(formation *m, unsigned int position)
 {
     m->id = position;
@@ -63,6 +64,56 @@ void formation_clear(int formation_id)
 {
     array_item(formations, formation_id)->in_use = 0;
     array_trim(formations);
+}
+
+int formation_assign_available_legion_regalia(formation *m, int preferred_regalia_id)
+{
+    if (preferred_regalia_id >= 0 && preferred_regalia_id < MAX_LEGIONS_REGALIA) {// Try preferred first
+        if (available_regalia[preferred_regalia_id]) {
+            available_regalia[preferred_regalia_id] = 0;
+            m->legion_flag_id = widget_sidebar_military_get_standard_image(preferred_regalia_id);
+            m->legion_name_id = widget_sidebar_military_get_legion_name_id(preferred_regalia_id);
+            m->legion_name_group = widget_sidebar_military_get_legion_name_group(preferred_regalia_id);
+            return preferred_regalia_id;
+        }
+    }
+
+    for (int i = 0; i < MAX_LEGIONS_REGALIA; i++) {//if not, first available
+        if (available_regalia[i]) {
+            available_regalia[i] = 0;
+            m->legion_flag_id = widget_sidebar_military_get_standard_image(i);
+            m->legion_name_id = widget_sidebar_military_get_legion_name_id(i);
+            m->legion_name_group = widget_sidebar_military_get_legion_name_group(i);
+            return i;
+        }
+    }
+    return 0;// no available regalia
+}
+
+void formation_release_legion_regalia(formation *m)
+{
+    int regalia_id = m->legion_id;
+    if (regalia_id > 0 && regalia_id <= MAX_LEGIONS_REGALIA) {
+        available_regalia[regalia_id] = 1; //mark regalia as available again
+    }
+}
+
+static void formation_release_all_legion_regalia(void)
+{
+    for (int i = 0; i < MAX_LEGIONS_REGALIA; i++) {
+        available_regalia[i] = 1;
+    }
+}
+
+void formation_refresh_regalia(void)
+{
+    formation_release_all_legion_regalia();
+    for (int i = 1; i < formation_count(); i++) {
+        formation *m = formation_get(i);
+        if (m->in_use && m->is_legion) {
+            formation_assign_available_legion_regalia(m, m->legion_id);
+        }
+    }
 }
 
 formation *formation_create_legion(int building_id, figure_type type)
@@ -95,10 +146,7 @@ formation *formation_create_legion(int building_id, figure_type type)
     }
 
     //standards and name
-
-    m->legion_flag_id = widget_sidebar_military_get_standard_image(m->legion_id);
-    m->legion_name_id = widget_sidebar_military_get_legion_name_id(m->legion_id);
-    m->legion_name_group = widget_sidebar_military_get_legion_name_group(m->legion_id);
+    formation_assign_available_legion_regalia(m, m->legion_id);
     return m;
 }
 
@@ -361,6 +409,7 @@ void formation_calculate_legion_totals(void)
             }
         }
     }
+    formation_refresh_regalia();
 }
 
 int formation_get_num_legions(void)

@@ -1,5 +1,6 @@
 #include "panel.h"
 
+#include "assets/assets.h"
 #include "graphics/image.h"
 
 void outer_panel_draw(int x, int y, int width_blocks, int height_blocks)
@@ -155,4 +156,28 @@ void large_label_draw(int x, int y, int width_blocks, int type)
         }
         image_draw(image_base + image_id, x + BLOCK_SIZE * i, y, COLOR_MASK_NONE, SCALE_NONE);
     }
+}
+
+int top_menu_black_panel_draw(int x, int y, int width)
+{
+    int blocks = ((width + BLACK_PANEL_BLOCK_WIDTH - 1) / BLACK_PANEL_BLOCK_WIDTH) - 2;
+    if (blocks < BLACK_PANEL_MIDDLE_BLOCKS) {
+        blocks = BLACK_PANEL_MIDDLE_BLOCKS;
+    }
+    int actual_width = (blocks + 2) * BLACK_PANEL_BLOCK_WIDTH;
+
+    image_draw(image_group(GROUP_TOP_MENU) + 14, x, y, COLOR_MASK_NONE, SCALE_NONE);
+    x += BLACK_PANEL_BLOCK_WIDTH;
+
+    int black_panel_base_id = assets_get_image_id("UI", "Top_UI_Panel");
+
+    for (int i = 0; i < blocks; i++) {
+        image_draw(black_panel_base_id + (i % BLACK_PANEL_MIDDLE_BLOCKS) + 1, x, y,
+            COLOR_MASK_NONE, SCALE_NONE);
+        x += BLACK_PANEL_BLOCK_WIDTH;
+    }
+
+    image_draw(black_panel_base_id + 5, x, y, COLOR_MASK_NONE, SCALE_NONE);
+
+    return actual_width;
 }
