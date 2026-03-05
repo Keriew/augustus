@@ -2,7 +2,7 @@
 #include "translation/translation.h"
 
 static translation_string all_strings[] = {
-{TR_NO_PATCH_TITLE, "Патч 1.0.1.0 не встановлений"},
+    {TR_NO_PATCH_TITLE, "Патч 1.0.1.0 не встановлений"},
 {TR_NO_PATCH_MESSAGE,
 "Патч 1.0.1.0 у вашій версії гри Caesar 3 відсутній."
 "Ви можете завантажити патч тут:\n"
