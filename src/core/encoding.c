@@ -893,8 +893,7 @@ encoding_type encoding_determine(language_type language)
     } else if (language == LANGUAGE_UKRAINIAN) {
         data.to_utf8_table = HIGH_TO_UTF8_CYRILLIC;
         data.encoding = ENCODING_CYRILLIC;
-    }
-    else { // assume Western encoding
+    } else { // assume Western encoding
         data.to_utf8_table = HIGH_TO_UTF8_DEFAULT;
         data.encoding = ENCODING_WESTERN_EUROPE;
     }
