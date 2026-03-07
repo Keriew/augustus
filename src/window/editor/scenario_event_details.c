@@ -1,6 +1,7 @@
 #include "scenario_event_details.h"
 
 #include "assets/assets.h"
+#include "core/array.h"
 #include "core/lang.h"
 #include "core/log.h"
 #include "core/string.h"
@@ -18,6 +19,7 @@
 #include "input/input.h"
 #include "scenario/event/event.h"
 #include "scenario/event/controller.h"
+#include "scenario/event/data.h"
 #include "scenario/event/parameter_data.h"
 #include "widget/dropdown_button.h"
 #include "widget/input_box.h"
@@ -73,9 +75,13 @@ typedef enum {
 } checkbox_selection_type;
 
 static void button_add_new_condition(const generic_button *button);
-static void button_delete_selected(const generic_button *button);
 static void button_add_new_action(const generic_button *button);
+static void button_copy_selected(const generic_button *button);
+static void button_delete_selected(const generic_button *button);
+static void button_paste_selected(const generic_button *button);
 static void button_delete_event(const generic_button *button);
+static void button_copy_event(const generic_button *button);
+static void button_paste_event(const generic_button *button);
 static void button_repeat_type(const generic_button *button);
 static void button_repeat_times(const generic_button *button);
 static void button_repeat_between(const generic_button *button);
@@ -101,6 +107,11 @@ typedef struct {
 static struct {
     uint8_t event_name[EVENT_NAME_LENGTH];
     scenario_event_t *event;
+    scenario_event_t copied_event;
+    int did_copy_event;
+    array(scenario_condition_group_t) copied_condition_groups;
+    array(scenario_action_t) copied_actions;
+    int did_copy_selected;
     int repeat_type;
     struct {
         condition_list_item *list;
@@ -137,7 +148,7 @@ static grid_box_type conditions_grid_box = {
     .x = 16,
     .y = 188,
     .width = 18 * BLOCK_SIZE,
-    .height = 13 * BLOCK_SIZE + 2,
+    .height = 12 * BLOCK_SIZE - 2,
     .num_columns = 1,
     .item_height = 30,
     .item_margin.horizontal = 10,
@@ -152,7 +163,7 @@ static grid_box_type actions_grid_box = {
     .x = 320,
     .y = 188,
     .width = 18 * BLOCK_SIZE,
-    .height = 13 * BLOCK_SIZE + 2,
+    .height = 12 * BLOCK_SIZE - 2,
     .num_columns = 1,
     .item_height = 30,
     .item_margin.horizontal = 10,
@@ -185,10 +196,14 @@ static dropdown_button repeat_interval_dropdown;
 #define NUM_BOTTOM_BUTTONS (sizeof(bottom_buttons) / sizeof(generic_button))
 
 static generic_button bottom_buttons[] = {
-    {16, 409, 192, 25, button_add_new_condition},
+    {16, 379, 192, 25, button_add_new_condition},
+    {432, 379, 192, 25, button_add_new_action},
+    {16, 409, 192, 25, button_copy_selected},
     {224, 409, 192, 25, button_delete_selected, 0, 0, DISABLE_ON_NO_SELECTION},
-    {432, 409, 192, 25, button_add_new_action},
-    {16, 439, 200, 25, button_delete_event},
+    {432, 409, 192, 25, button_paste_selected},
+    {16, 439, 192, 25, button_delete_event},
+    {224, 439, 134, 25, button_copy_event},
+    {374, 439, 134, 25, button_paste_event},
     {524, 439, 100, 25, button_ok},
 };
 
@@ -545,24 +560,32 @@ static void draw_background(void)
             y_offset, actions_grid_box.width, FONT_NORMAL_BLACK);
     }
 
-    // New condition button label
+    // New action and condition buttons
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_CONDITION_ADD,
         bottom_buttons[0].x, bottom_buttons[0].y + 6, bottom_buttons[0].width, FONT_NORMAL_BLACK);
-
-    // Delete selected button label
-    color = data.conditions.selection_type == CHECKBOX_NO_SELECTION &&
-        data.actions.selection_type == CHECKBOX_NO_SELECTION ? COLOR_FONT_LIGHT_GRAY : COLOR_RED;
-    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED,
-        bottom_buttons[1].x, bottom_buttons[1].y + 6, bottom_buttons[1].width, FONT_NORMAL_PLAIN, color);
-
-    // Add action button label
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_ACTION_ADD,
-        bottom_buttons[2].x, bottom_buttons[2].y + 6, bottom_buttons[2].width, FONT_NORMAL_BLACK);
+        bottom_buttons[1].x, bottom_buttons[1].y + 6, bottom_buttons[1].width, FONT_NORMAL_BLACK);
+
+    // Selected operation buttons
+    color_t color_copy = data.conditions.selection_type == CHECKBOX_NO_SELECTION &&
+        data.actions.selection_type == CHECKBOX_NO_SELECTION ? COLOR_FONT_LIGHT_GRAY : 0;
+    color_t color_delete = data.conditions.selection_type == CHECKBOX_NO_SELECTION &&
+        data.actions.selection_type == CHECKBOX_NO_SELECTION ? COLOR_FONT_LIGHT_GRAY : COLOR_RED;
+    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_COPY_SELECTED,
+        bottom_buttons[2].x, bottom_buttons[2].y + 6, bottom_buttons[2].width, FONT_NORMAL_PLAIN, color_delete);
+    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED,
+        bottom_buttons[3].x, bottom_buttons[3].y + 6, bottom_buttons[3].width, FONT_NORMAL_PLAIN, color_delete);
+    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_PASTE_SELECTED,
+        bottom_buttons[4].x, bottom_buttons[4].y + 6, bottom_buttons[4].width, FONT_NORMAL_PLAIN, color_delete);
 
     // Bottom buttons
-    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_DELETE, bottom_buttons[3].x, bottom_buttons[3].y + 6,
-        bottom_buttons[3].width, FONT_NORMAL_PLAIN, COLOR_RED);
-    lang_text_draw_centered(18, 3, bottom_buttons[4].x, bottom_buttons[4].y + 6, bottom_buttons[4].width,
+    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_DELETE, bottom_buttons[5].x, bottom_buttons[5].y + 6,
+        bottom_buttons[5].width, FONT_NORMAL_PLAIN, COLOR_RED);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_COPY, bottom_buttons[6].x, bottom_buttons[6].y + 6,
+        bottom_buttons[6].width, FONT_NORMAL_BLACK);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_PASTE, bottom_buttons[7].x, bottom_buttons[7].y + 6,
+        bottom_buttons[7].width, FONT_NORMAL_BLACK);
+    lang_text_draw_centered(18, 3, bottom_buttons[8].x, bottom_buttons[8].y + 6, bottom_buttons[8].width,
         FONT_NORMAL_BLACK);
 
     graphics_reset_dialog();
@@ -591,7 +614,8 @@ static void draw_condition_button(const grid_box_item *item)
 
     const scenario_condition_t *condition = data.conditions.list[item->index].condition;
     uint8_t text[MAX_TEXT_LENGTH];
-    scenario_events_parameter_data_get_display_string_for_condition(condition, text, MAX_TEXT_LENGTH);
+    scenario_condition_data_t *xml_info = scenario_events_parameter_data_get_conditions_xml_attributes(condition->type);
+    string_copy(translation_for(xml_info->xml_attr.key), text, MAX_TEXT_LENGTH);
     if (text_get_width(text, FONT_NORMAL_BLACK) > item->width - 32) {
         text_draw_ellipsized(text, item->x + 28, item->y + 7, item->width - 32, FONT_NORMAL_BLACK, 0);
     } else {
@@ -615,7 +639,8 @@ static void draw_action_button(const grid_box_item *item)
     button_border_draw(item->x + 24, item->y, item->width - 24, item->height, item->is_focused && item->mouse.x >= 24);
     const scenario_action_t *action = data.actions.list[item->index];
     uint8_t text[MAX_TEXT_LENGTH];
-    scenario_events_parameter_data_get_display_string_for_action(action, text, MAX_TEXT_LENGTH);
+    scenario_action_data_t *xml_info = scenario_events_parameter_data_get_actions_xml_attributes(action->type);
+    string_copy(translation_for(xml_info->xml_attr.key), text, MAX_TEXT_LENGTH);
     if (text_get_width(text, FONT_NORMAL_BLACK) > item->width - 32) {
         text_draw_ellipsized(text, item->x + 28, item->y + 7, item->width - 32, FONT_NORMAL_BLACK, 0);
     } else {
@@ -943,6 +968,186 @@ static void button_delete_event(const generic_button *button)
     window_go_back();
 }
 
+static void button_copy_selected(const generic_button *button)
+{
+    array_init(data.copied_actions, SCENARIO_ACTIONS_ARRAY_SIZE_STEP, data.event->actions.constructor,
+        data.event->actions.in_use);
+    array_init(data.copied_condition_groups, SCENARIO_CONDITION_GROUPS_ARRAY_SIZE_STEP,
+        data.event->condition_groups.constructor, data.event->condition_groups.in_use);
+    for (unsigned int i = 0; i < data.event->actions.size; i++) {
+        if (!data.actions.selected[i]) {
+            continue;
+        }
+        scenario_action_t *action;
+        array_new_item(data.copied_actions, action);
+        *action = *array_item(data.event->actions, i);
+
+        // copy formulas correctly
+        parameter_type p_type;
+        int *params[] = {    // Collect addresses of the fields
+            &action->parameter1,
+            &action->parameter2,
+            &action->parameter3,
+            &action->parameter4,
+            &action->parameter5
+        };
+        for (int j = 1; j <= 5; ++j) {
+            int *param_value = params[j - 1];
+            p_type = scenario_events_parameter_data_get_action_parameter_type(action->type, j, NULL, NULL);
+            if (p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) {
+                scenario_formula_t *formula = scenario_formula_get(*param_value);
+                if (!formula) {
+                    break;
+                }
+                unsigned int id = scenario_formula_add(scenario_formula_get_string(*param_value),
+                    formula->min_evaluation, formula->max_evaluation);
+                *param_value = id;
+            }
+        }
+    }
+    
+    for (unsigned int i = 0; i < data.event->condition_groups.size; i++) {
+        scenario_condition_group_t *group;
+        array_new_item(data.copied_event.condition_groups, group);
+        scenario_condition_group_t *original_group = array_item(data.event->condition_groups, i);
+        group->type = original_group->type;
+        array_init(group->conditions, SCENARIO_CONDITIONS_ARRAY_SIZE_STEP, original_group->conditions.constructor,
+            original_group->conditions.in_use);
+        for (unsigned int j = 0; j < original_group->conditions.size; j++) {
+            scenario_condition_t *condition;
+            array_new_item(group->conditions, condition);
+            *condition = *array_item(original_group->conditions, j);
+
+            // copy formulas correctly
+            parameter_type p_type;
+            int *params[] = {    // Collect addresses of the fields
+                &condition->parameter1,
+                &condition->parameter2,
+                &condition->parameter3,
+                &condition->parameter4,
+                &condition->parameter5
+            };
+            for (int k = 1; k <= 5; ++k) {
+                int *param_value = params[k - 1];
+                p_type = scenario_events_parameter_data_get_condition_parameter_type(condition->type, k, NULL, NULL);
+                if (p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) {
+                    scenario_formula_t *formula = scenario_formula_get(*param_value);
+                    if (!formula) {
+                        break;
+                    }
+                    unsigned int id = scenario_formula_add(scenario_formula_get_string(*param_value),
+                        formula->min_evaluation, formula->max_evaluation);
+                    *param_value = id;
+                }
+            }
+        }
+        
+    }
+    data.did_copy_event = 1;
+}
+
+static void button_paste_selected(const generic_button *button)
+{
+    
+}
+
+static void button_copy_event(const generic_button *button)
+{
+    data.copied_event.state = data.event->state;
+    data.copied_event.repeat_days_min = data.event->repeat_days_min;
+    data.copied_event.repeat_days_max = data.event->repeat_days_max;
+    data.copied_event.repeat_interval = data.event->repeat_interval;
+    data.copied_event.max_number_of_repeats = data.event->max_number_of_repeats;
+    data.copied_event.execution_count = data.event->execution_count;
+    data.copied_event.days_until_active = data.event->days_until_active;
+    string_copy(data.event->name, data.copied_event.name, EVENT_NAME_LENGTH);
+    array_init(data.copied_event.actions, SCENARIO_ACTIONS_ARRAY_SIZE_STEP, data.event->actions.constructor,
+        data.event->actions.in_use);
+    array_init(data.copied_event.condition_groups, SCENARIO_CONDITION_GROUPS_ARRAY_SIZE_STEP,
+        data.event->condition_groups.constructor, data.event->condition_groups.in_use);
+    for (unsigned int i = 0; i < data.event->actions.size; i++) {
+        scenario_action_t *action;
+        array_new_item(data.copied_event.actions, action);
+        *action = *array_item(data.event->actions, i);
+
+        // copy formulas correctly
+        parameter_type p_type;
+        int *params[] = {    // Collect addresses of the fields
+            &action->parameter1,
+            &action->parameter2,
+            &action->parameter3,
+            &action->parameter4,
+            &action->parameter5
+        };
+        for (int j = 1; j <= 5; ++j) {
+            int *param_value = params[j - 1];
+            p_type = scenario_events_parameter_data_get_action_parameter_type(action->type, j, NULL, NULL);
+            if (p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) {
+                scenario_formula_t *formula = scenario_formula_get(*param_value);
+                if (!formula) {
+                    break;
+                }
+                unsigned int id = scenario_formula_add(scenario_formula_get_string(*param_value),
+                    formula->min_evaluation, formula->max_evaluation);
+                *param_value = id;
+            }
+        }
+    }
+    
+    for (unsigned int i = 0; i < data.event->condition_groups.size; i++) {
+        scenario_condition_group_t *group;
+        array_new_item(data.copied_event.condition_groups, group);
+        scenario_condition_group_t *original_group = array_item(data.event->condition_groups, i);
+        group->type = original_group->type;
+        array_init(group->conditions, SCENARIO_CONDITIONS_ARRAY_SIZE_STEP, original_group->conditions.constructor,
+            original_group->conditions.in_use);
+        for (unsigned int j = 0; j < original_group->conditions.size; j++) {
+            scenario_condition_t *condition;
+            array_new_item(group->conditions, condition);
+            *condition = *array_item(original_group->conditions, j);
+
+            // copy formulas correctly
+            parameter_type p_type;
+            int *params[] = {    // Collect addresses of the fields
+                &condition->parameter1,
+                &condition->parameter2,
+                &condition->parameter3,
+                &condition->parameter4,
+                &condition->parameter5
+            };
+            for (int k = 1; k <= 5; ++k) {
+                int *param_value = params[k - 1];
+                p_type = scenario_events_parameter_data_get_condition_parameter_type(condition->type, k, NULL, NULL);
+                if (p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) {
+                    scenario_formula_t *formula = scenario_formula_get(*param_value);
+                    if (!formula) {
+                        break;
+                    }
+                    unsigned int id = scenario_formula_add(scenario_formula_get_string(*param_value),
+                        formula->min_evaluation, formula->max_evaluation);
+                    *param_value = id;
+                }
+            }
+        }
+        
+    }
+    data.did_copy_event = 1;
+}
+
+static void button_paste_event(const generic_button *button)
+{
+    if (!data.did_copy_event) {
+        return;
+    }
+    data.did_copy_event = 0;
+    int event_id = data.event->id;
+    *data.event = data.copied_event;
+    data.event->id = event_id;
+    scenario_events_assign_parent_single_event_ids(data.event);
+    update_groups();
+    window_request_refresh();
+}
+
 static void set_repeat_type(void)
 {
     if (data.repeat_type == EVENT_REPEAT_NEVER) {
@@ -1042,10 +1247,8 @@ static void handle_condition_tooltip(const grid_box_item *item, tooltip_context 
     }
     static uint8_t text[MAX_TEXT_LENGTH * 2];
     scenario_events_parameter_data_get_display_string_for_condition(list_item->condition, text, MAX_TEXT_LENGTH * 2);
-    if (text_get_width(text, FONT_NORMAL_BLACK) > item->width - 32) {
-        c->precomposed_text = text;
-        c->type = TOOLTIP_BUTTON;
-    }
+    c->precomposed_text = text;
+    c->type = TOOLTIP_BUTTON;
 }
 
 static void handle_action_tooltip(const grid_box_item *item, tooltip_context *c)
@@ -1056,10 +1259,8 @@ static void handle_action_tooltip(const grid_box_item *item, tooltip_context *c)
     }
     static uint8_t text[MAX_TEXT_LENGTH * 2];
     scenario_events_parameter_data_get_display_string_for_action(action, text, MAX_TEXT_LENGTH * 2);
-    if (text_get_width(text, FONT_NORMAL_BLACK) > item->width - 32) {
-        c->precomposed_text = text;
-        c->type = TOOLTIP_BUTTON;
-    }
+    c->precomposed_text = text;
+    c->type = TOOLTIP_BUTTON;
 }
 
 static void handle_check_all_none_tooltip(tooltip_context *c)

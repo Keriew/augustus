@@ -16,6 +16,7 @@
 #include "map/terrain.h"
 #include "scenario/event/controller.h"
 #include "scenario/event/parameter_city.h"
+#include "scenario/criteria.h"
 #include "scenario/custom_messages.h"
 #include "scenario/custom_variable.h"
 #include "scenario/invasion.h"
@@ -150,7 +151,7 @@ static scenario_condition_data_t scenario_condition_data[CONDITION_TYPE_MAX] = {
                                         .xml_parm2 = {.name = "grid_offset2",        .type = PARAMETER_TYPE_GRID_SLICE,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET_CORNER2 },
                                         .xml_parm3 = {.name = "terrain_type",        .type = PARAMETER_TYPE_TERRAIN,          .key = TR_PARAMETER_TERRAIN },
                                         .xml_parm4 = {.name = "check",               .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm5 = {.name = "value",               .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
+                                        .xml_parm5 = {.name = "value",               .type = PARAMETER_TYPE_FORMULA,          .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
 
 
 
@@ -301,12 +302,10 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm3 = {.name = "terrain",            .type = PARAMETER_TYPE_TERRAIN,    .key = TR_PARAMETER_TERRAIN },
                                         .xml_parm4 = {.name = "add",                .type = PARAMETER_TYPE_BOOLEAN,    .min_limit = 0,      .max_limit = 1,      .key = TR_PARAMETER_ADD }, },
     [ACTION_TYPE_CHANGE_MODEL_DATA] = {.type = ACTION_TYPE_CHANGE_MODEL_DATA,
-                                        .xml_attr = {.name = "change_model_data",   .type =
-                                        PARAMETER_TYPE_TEXT,       .key = TR_ACTION_TYPE_CHANGE_MODEL_DATA },
+                                        .xml_attr = {.name = "change_model_data",   .type = PARAMETER_TYPE_TEXT,       .key = TR_ACTION_TYPE_CHANGE_MODEL_DATA },
                                         .xml_parm1 = {.name = "model",              .type =
                                         PARAMETER_TYPE_MODEL,   .key = TR_PARAMETER_MODEL },
-                                        .xml_parm2 = {.name = "data_type",          .type =
-                                        PARAMETER_TYPE_DATA_TYPE,          .key = TR_PARAMETER_DATA_TYPE },
+                                        .xml_parm2 = {.name = "data_type",          .type = PARAMETER_TYPE_DATA_TYPE,          .key = TR_PARAMETER_DATA_TYPE },
                                         .xml_parm3 = {.name = "amount",        .type = PARAMETER_TYPE_FORMULA,          .min_limit = NEGATIVE_UNLIMITED,      .max_limit = UNLIMITED, .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm4 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,            .min_limit = 0,           .max_limit = 1,                    .key = TR_PARAMETER_SET_TO_VALUE }, },
     [ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY] = {.type = ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY,
@@ -343,16 +342,31 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm1 = {.name = "rank",           .type = PARAMETER_TYPE_RANK,      .key = TR_PARAMETER_TYPE_RANK }, },
     [ACTION_TYPE_CHANGE_PRODUCTION_RATE] = {.type = ACTION_TYPE_CHANGE_PRODUCTION_RATE,
                                         .xml_attr = {.name = "change_production_rate",  .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_PRODUCTION_RATE},
-                                        .xml_parm1 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE,   .key = TR_PARAMETER_TYPE_RESOURCE },
+                                        .xml_parm1 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE_ALL,   .key = TR_PARAMETER_TYPE_RESOURCE },
                                         .xml_parm2 = {.name = "rate",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = 0,
-                                            .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                            .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm3 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,
                                             .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, },
+    [ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA] = {.type = ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA,
+                                        .xml_attr = {.name = "change_house_model_data",  .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA},
+                                        .xml_parm1 = {.name = "housing_level",       .type = PARAMETER_TYPE_HOUSING_TYPE,   .key = TR_PARAMETER_TYPE_HOUSING_TYPE },
+                                        .xml_parm2 = {.name = "house_data_type",     .type = PARAMETER_TYPE_HOUSE_DATA_TYPE, .key = TR_PARAMETER_DATA_TYPE},
+                                        .xml_parm3 = {.name = "value",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = 0,
+                                            .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm4 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,
+                                            .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, },
     [ACTION_TYPE_LOCK_TRADE_ROUTE]     = {.type = ACTION_TYPE_LOCK_TRADE_ROUTE,
-                                         .xml_attr = {.name = "lock_trade_route",   .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_LOCK_TRADE_ROUTE},
-                                         .xml_parm1 = {.name = "target_city",       .type = PARAMETER_TYPE_ROUTE,   .key = TR_PARAMETER_TYPE_ROUTE }, 
-                                         .xml_parm2 = {.name = "lock",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,    .max_limit = 1,         .key = TR_PARAMETER_LOCK },
-                                         .xml_parm3 = {.name = "show_message",      .type = PARAMETER_TYPE_BOOLEAN,     .min_limit = 0,     .max_limit = 1,         .key = TR_PARAMETER_SHOW_MESSAGE } }
+                                        .xml_attr = {.name = "lock_trade_route",   .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_LOCK_TRADE_ROUTE},
+                                        .xml_parm1 = {.name = "target_city",       .type = PARAMETER_TYPE_ROUTE,   .key = TR_PARAMETER_TYPE_ROUTE }, 
+                                        .xml_parm2 = {.name = "lock",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,    .max_limit = 1,         .key = TR_PARAMETER_LOCK },
+                                        .xml_parm3 = {.name = "show_message",      .type = PARAMETER_TYPE_BOOLEAN,     .min_limit = 0,     .max_limit = 1,         .key = TR_PARAMETER_SHOW_MESSAGE }, },
+    [ACTION_TYPE_CHANGE_GOAL]          = {.type = ACTION_TYPE_CHANGE_GOAL, 
+                                        .xml_attr = {.name = "change_goal",   .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_CHANGE_GOAL},
+                                        .xml_parm1 = {.name = "win_condition",   .type = PARAMETER_TYPE_WIN_CONDITION,    .key = TR_PARAMETER_TYPE_WIN_CONDITION},
+                                        .xml_parm2 = {.name = "value",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = 0,
+                                            .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
+                                        .xml_parm3 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,
+                                            .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, }
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)
@@ -371,27 +385,39 @@ parameter_type scenario_events_parameter_data_get_action_parameter_type(
 
     switch (parameter_index) {
         case 1:
+            if (min_limit)
             *min_limit = action->xml_parm1.min_limit;
+            if (max_limit)
             *max_limit = action->xml_parm1.max_limit;
             return action->xml_parm1.type;
         case 2:
+            if (min_limit)
             *min_limit = action->xml_parm2.min_limit;
+            if (max_limit)
             *max_limit = action->xml_parm2.max_limit;
             return action->xml_parm2.type;
         case 3:
+            if (min_limit)
             *min_limit = action->xml_parm3.min_limit;
+            if (max_limit)
             *max_limit = action->xml_parm3.max_limit;
             return action->xml_parm3.type;
         case 4:
+            if (min_limit)
             *min_limit = action->xml_parm4.min_limit;
+            if (max_limit)
             *max_limit = action->xml_parm4.max_limit;
             return action->xml_parm4.type;
         case 5:
+            if (min_limit)
             *min_limit = action->xml_parm5.min_limit;
+            if (max_limit)
             *max_limit = action->xml_parm5.max_limit;
             return action->xml_parm5.type;
         default:
+            if (min_limit)
             *min_limit = 0;
+            if (max_limit)
             *max_limit = 0;
             return PARAMETER_TYPE_UNDEFINED;
     }
@@ -408,27 +434,39 @@ parameter_type scenario_events_parameter_data_get_condition_parameter_type(
 
     switch (parameter_index) {
         case 1:
+            if (min_limit)
             *min_limit = condition->xml_parm1.min_limit;
+            if (max_limit)
             *max_limit = condition->xml_parm1.max_limit;
             return condition->xml_parm1.type;
         case 2:
+            if (min_limit)
             *min_limit = condition->xml_parm2.min_limit;
+            if (max_limit)
             *max_limit = condition->xml_parm2.max_limit;
             return condition->xml_parm2.type;
         case 3:
+            if (min_limit)
             *min_limit = condition->xml_parm3.min_limit;
+            if (max_limit)
             *max_limit = condition->xml_parm3.max_limit;
             return condition->xml_parm3.type;
         case 4:
+            if (min_limit)
             *min_limit = condition->xml_parm4.min_limit;
+            if (max_limit)
             *max_limit = condition->xml_parm4.max_limit;
             return condition->xml_parm4.type;
         case 5:
+            if (min_limit)
             *min_limit = condition->xml_parm5.min_limit;
+            if (max_limit)
             *max_limit = condition->xml_parm5.max_limit;
             return condition->xml_parm5.type;
         default:
+            if (min_limit)
             *min_limit = 0;
+            if (max_limit)
             *max_limit = 0;
             return PARAMETER_TYPE_UNDEFINED;
     }
@@ -698,15 +736,38 @@ static special_attribute_mapping_t special_attribute_mappings_terrain[] =
 
 special_attribute_mapping_t special_attribute_mappings_data_type[] =
 {
-    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "cost",                     .value = MODEL_COST,                                                   .key = TR_PARAMETER_COST },
-    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "desirability_value",       .value = MODEL_DESIRABILITY_VALUE,                   .key = TR_PARAMETER_DESIRABILITY_VALUE },
-    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "desirability_step",        .value = MODEL_DESIRABILITY_STEP,                    .key = TR_PARAMETER_DESIRABILITY_STEP },
-    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "desirability_step_size",   .value = MODEL_DESIRABILITY_STEP_SIZE,               .key = TR_PARAMETER_DESIRABILITY_STEP_SIZE },
-    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "desirability_range",       .value = MODEL_DESIRABILITY_RANGE,                   .key = TR_PARAMETER_DESIRABILITY_RANGE },
-    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "laborers",                 .value = MODEL_LABORERS,                                               .key = TR_PARAMETER_LABORERS },
+    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "cost",                     .value = MODEL_COST,                    .key = TR_PARAMETER_COST },
+    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "desirability_value",       .value = MODEL_DESIRABILITY_VALUE,      .key = TR_PARAMETER_DESIRABILITY_VALUE },
+    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "desirability_step",        .value = MODEL_DESIRABILITY_STEP,       .key = TR_PARAMETER_DESIRABILITY_STEP },
+    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "desirability_step_size",   .value = MODEL_DESIRABILITY_STEP_SIZE,  .key = TR_PARAMETER_DESIRABILITY_STEP_SIZE },
+    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "desirability_range",       .value = MODEL_DESIRABILITY_RANGE,      .key = TR_PARAMETER_DESIRABILITY_RANGE },
+    {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "laborers",                 .value = MODEL_LABORERS,                .key = TR_PARAMETER_LABORERS },
 };
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_DATA_TYPE_SIZE (sizeof(special_attribute_mappings_data_type) / sizeof(special_attribute_mapping_t))
+
+special_attribute_mapping_t special_attribute_mappings_house_data_type[] =
+{
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "devolve_desirability",   .value = MODEL_DEVOLVE_DESIRABILITY,    .key = TR_PARAMETER_DEVOLVE_DESIRABILITY },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "evolve_desirability",    .value = MODEL_EVOLVE_DESIRABILITY,     .key = TR_PARAMETER_EVOLVE_DESIRABILITY },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "entertainment",          .value = MODEL_ENTERTAINMENT,           .key = TR_PARAMETER_ENTERTAINMENT },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "water",                  .value = MODEL_WATER,                   .key = TR_PARAMETER_WATER },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "religion",               .value = MODEL_RELIGION,                .key = TR_PARAMETER_RELIGION },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "education",              .value = MODEL_EDUCATION,               .key = TR_PARAMETER_EDUCATION },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "barber",                 .value = MODEL_BARBER,                  .key = TR_PARAMETER_BARBER },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "bathhouse",              .value = MODEL_BATHHOUSE,               .key = TR_PARAMETER_BATHHOUSE },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "health",                 .value = MODEL_HEALTH,                  .key = TR_PARAMETER_HEALTH },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "food_types",             .value = MODEL_FOOD_TYPES,              .key = TR_PARAMETER_FOOD_TYPES },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "pottery",                .value = MODEL_POTTERY,                 .key = TR_PARAMETER_POTTERY },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "oil",                    .value = MODEL_OIL,                     .key = TR_PARAMETER_OIL },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "furniture",              .value = MODEL_FURNITURE,               .key = TR_PARAMETER_FURNITURE },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "wine",                   .value = MODEL_WINE,                    .key = TR_PARAMETER_WINE },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "prosperity",             .value = MODEL_PROSPERITY,              .key = TR_PARAMETER_PROSPERITY },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "max_people",             .value = MODEL_MAX_PEOPLE,              .key = TR_PARAMETER_MAX_PEOPLE },
+    {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "tax_multiplier",         .value = MODEL_TAX_MULTIPLIER,          .key = TR_PARAMETER_TAX_MULTIPLIER },
+};
+
+#define SPECIAL_ATTRIBUTE_MAPPINGS_HOUSE_DATA_TYPE_SIZE (sizeof(special_attribute_mappings_house_data_type) / sizeof(special_attribute_mapping_t))
 
 static special_attribute_mapping_t special_attribute_mappings_percentage[] = {
     {.type = PARAMETER_TYPE_PERCENTAGE, .text = "Percentage", .value = 0, .key = TR_PARAMETER_PERCENTAGE },
@@ -856,6 +917,17 @@ static special_attribute_mapping_t special_attribute_mappings_rank[] = {
 };
 #define SPECIAL_ATTRIBUTE_MAPPINGS_RANK_SIZE (sizeof(special_attribute_mappings_rank) / sizeof(special_attribute_mapping_t))
 
+static special_attribute_mapping_t special_attribute_mappings_win_condition[] = {
+    {.type = PARAMETER_TYPE_WIN_CONDITION, .text = "culture",         .value = SCENARIO_WIN_CONDITION_CULTURE,        .key = TR_SCENARIO_WIN_CONDITION_CULTURE },
+    {.type = PARAMETER_TYPE_WIN_CONDITION, .text = "properity",       .value = SCENARIO_WIN_CONDITION_PROSPERITY,     .key = TR_SCENARIO_WIN_CONDITION_PROSPERITY },
+    {.type = PARAMETER_TYPE_WIN_CONDITION, .text = "peace",           .value = SCENARIO_WIN_CONDITION_PEACE,          .key = TR_SCENARIO_WIN_CONDITION_PEACE },
+    {.type = PARAMETER_TYPE_WIN_CONDITION, .text = "favor",           .value = SCENARIO_WIN_CONDITION_FAVOR,          .key = TR_SCENARIO_WIN_CONDITION_FAVOR },
+    {.type = PARAMETER_TYPE_WIN_CONDITION, .text = "loosing time",    .value = SCENARIO_WIN_CONDITION_LOOSING_TIME,   .key = TR_SCENARIO_WIN_CONDITION_LOOSING_TIME },
+    {.type = PARAMETER_TYPE_WIN_CONDITION, .text = "winning time",    .value = SCENARIO_WIN_CONDITION_WINNING_TIME,   .key = TR_SCENARIO_WIN_CONDITION_WINNING_TIME },
+    {.type = PARAMETER_TYPE_WIN_CONDITION, .text = "population",      .value = SCENARIO_WIN_CONDITION_POPULATION,     .key = TR_SCENARIO_WIN_CONDITION_POPULATION },
+};
+#define SPECIAL_ATTRIBUTE_MAPPINGS_WIN_CONDITION_SIZE (sizeof(special_attribute_mappings_win_condition) / sizeof(special_attribute_mapping_t))
+
 static void generate_building_type_mappings(void)
 {
     if (special_attribute_mappings_building_type_size > 0) {
@@ -977,6 +1049,8 @@ special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mappin
             return &special_attribute_mappings_terrain[index];
         case PARAMETER_TYPE_DATA_TYPE:
             return &special_attribute_mappings_data_type[index];
+        case PARAMETER_TYPE_HOUSE_DATA_TYPE:
+            return &special_attribute_mappings_house_data_type[index];
         case PARAMETER_TYPE_MODEL:
             generate_model_mappings();
             return &special_attribute_mappings_model_buildings[index];
@@ -996,6 +1070,8 @@ special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mappin
             return &special_attribute_mappings_coverage_buildings[index];
         case PARAMETER_TYPE_RANK:
             return &special_attribute_mappings_rank[index];
+        case PARAMETER_TYPE_WIN_CONDITION:
+            return &special_attribute_mappings_win_condition[index];
         default:
             return 0;
     }
@@ -1041,6 +1117,8 @@ int scenario_events_parameter_data_get_mappings_size(parameter_type type)
             return SPECIAL_ATTRIBUTE_MAPPINGS_TERRAIN_SIZE;
         case PARAMETER_TYPE_DATA_TYPE:
             return SPECIAL_ATTRIBUTE_MAPPINGS_DATA_TYPE_SIZE;
+        case PARAMETER_TYPE_HOUSE_DATA_TYPE:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_HOUSE_DATA_TYPE_SIZE;
         case PARAMETER_TYPE_MODEL:
             generate_model_mappings();
             return special_attribute_mappings_model_buildings_size;
@@ -1060,6 +1138,8 @@ int scenario_events_parameter_data_get_mappings_size(parameter_type type)
             return SPECIAL_ATTRIBUTE_MAPPINGS_COVERAGE_BUILDINGS_SIZE;
         case PARAMETER_TYPE_RANK:
             return SPECIAL_ATTRIBUTE_MAPPINGS_RANK_SIZE;
+        case PARAMETER_TYPE_WIN_CONDITION:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_WIN_CONDITION_SIZE;
         default:
             return 0;
     }
@@ -1115,6 +1195,7 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
         case PARAMETER_TYPE_ENEMY_TYPE:
             return ENEMY_UNDEFINED;
         case PARAMETER_TYPE_RESOURCE:
+        case PARAMETER_TYPE_RESOURCE_ALL:
             return RESOURCE_WHEAT;
         case PARAMETER_TYPE_POP_CLASS:
             return POP_CLASS_ALL;
@@ -1139,6 +1220,8 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
             return TERRAIN_WATER;
         case PARAMETER_TYPE_DATA_TYPE:
             return MODEL_COST;
+        case PARAMETER_TYPE_HOUSE_DATA_TYPE:
+            return MODEL_EVOLVE_DESIRABILITY;
         case PARAMETER_TYPE_HOUSING_TYPE:
             return BUILDING_HOUSE_SMALL_TENT;
         case PARAMETER_TYPE_CITY_PROPERTY:
@@ -1333,6 +1416,7 @@ void scenario_events_parameter_data_get_display_string_for_value(parameter_type 
             return;
         }
         case PARAMETER_TYPE_RESOURCE:
+        case PARAMETER_TYPE_RESOURCE_ALL:
         {
             const uint8_t *text = resource_get_data(value)->text;
             result_text = string_copy(text, result_text, maxlength);
@@ -1376,82 +1460,6 @@ static uint8_t *append_text(const uint8_t *text_to_append, uint8_t *result_text,
     return result_text;
 }
 
-static uint8_t *translation_for_set_or_add_text(int parameter, uint8_t *result_text, int *maxlength)
-{
-    result_text = append_text(string_from_ascii(" "), result_text, maxlength);
-    if (parameter) {
-        result_text = append_text(translation_for(TR_PARAMETER_DISPLAY_SET_TO), result_text, maxlength);
-    } else {
-        result_text = append_text(translation_for(TR_PARAMETER_DISPLAY_ADD_TO), result_text, maxlength);
-    }
-    return result_text;
-}
-
-static uint8_t *translation_for_min_max_values(int min, int max, uint8_t *result_text, int *maxlength)
-{
-    result_text = append_text(string_from_ascii(" "), result_text, maxlength);
-    result_text = append_text(translation_for(TR_PARAMETER_DISPLAY_BETWEEN), result_text, maxlength);
-    result_text = append_text(string_from_ascii(" "), result_text, maxlength);
-
-    int number_length = string_from_int(result_text, min, 0);
-    result_text += number_length;
-    *maxlength -= number_length;
-
-    result_text = append_text(string_from_ascii(".."), result_text, maxlength);
-
-    number_length = string_from_int(result_text, max, 0);
-    result_text += number_length;
-    *maxlength -= number_length;
-
-    return result_text;
-}
-
-static uint8_t *translation_for_boolean_text(int value, translation_key true_key, translation_key false_key, uint8_t *result_text, int *maxlength)
-{
-    result_text = append_text(string_from_ascii(" "), result_text, maxlength);
-    if (value) {
-        result_text = append_text(translation_for(true_key), result_text, maxlength);
-    } else {
-        result_text = append_text(translation_for(false_key), result_text, maxlength);
-    }
-
-    return result_text;
-}
-
-static uint8_t *translation_for_formula_index(int index, uint8_t *result_text, int *maxlength)
-{
-    result_text = append_text(string_from_ascii(" "), result_text, maxlength);
-
-    const uint8_t *text = scenario_formula_get_string(index);
-    if (text) {
-        result_text = append_text(text, result_text, maxlength);
-    } else {
-        result_text = append_text(string_from_ascii("???"), result_text, maxlength);
-    }
-
-    return result_text;
-}
-
-static uint8_t *translation_for_grid_offset(int value, uint8_t *result_text, int *maxlength)
-{
-    result_text = append_text(string_from_ascii(" "), result_text, maxlength);
-
-    int number_length = string_from_int(result_text, value, 0);
-    result_text += number_length;
-    *maxlength -= number_length;
-
-    return result_text;
-}
-
-static uint8_t *translation_for_attr_mapping_text(parameter_type type, int value, uint8_t *result_text, int *maxlength)
-{
-    result_text = append_text(string_from_ascii(" "), result_text, maxlength);
-    special_attribute_mapping_t *attr_mapping = scenario_events_parameter_data_get_attribute_mapping_by_value(type, value);
-
-    result_text = append_text(translation_for(attr_mapping->key), result_text, maxlength);
-    return result_text;
-}
-
 static uint8_t *translation_for_type_lookup_by_value(parameter_type type, int value, uint8_t *result_text, int *maxlength)
 {
     result_text = append_text(string_from_ascii(" "), result_text, maxlength);
@@ -1459,511 +1467,46 @@ static uint8_t *translation_for_type_lookup_by_value(parameter_type type, int va
     uint8_t text[50];
     memset(text, 0, 50);
     scenario_events_parameter_data_get_display_string_for_value(type, value, text, 50);
+    if (!*text) {
+        *result_text = '\0';
+        maxlength++;
+        return --result_text;
+    }
     result_text = append_text(text, result_text, maxlength);
 
     return result_text;
 }
 
-void scenario_events_parameter_data_get_display_string_for_action(const scenario_action_t *action, uint8_t *result_text,
-    int maxlength)
+void scenario_events_parameter_data_get_display_string_for_action(const scenario_action_t *action, uint8_t *result_text, int maxlength)
 {
     scenario_action_data_t *xml_info = scenario_events_parameter_data_get_actions_xml_attributes(action->type);
     result_text = append_text(translation_for(xml_info->xml_attr.key), result_text, &maxlength);
-    switch (action->type) {
-        case ACTION_TYPE_ADJUST_CITY_HEALTH:
-        case ACTION_TYPE_ADJUST_ROME_WAGES:
-        {
-            result_text = translation_for_set_or_add_text(action->parameter2, result_text, &maxlength);
-            result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
+    int values[5] = {action->parameter1, action->parameter2, action->parameter3, action->parameter4, action->parameter5};
+    xml_data_attribute_t attributes[5] = {xml_info->xml_parm1, xml_info->xml_parm2, xml_info->xml_parm3, xml_info->xml_parm4, xml_info->xml_parm5};
+    for (int i = 0; i < 5; i++) {
+        if (!attributes[i].type || (action->type == ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY && i >= 2)) {
             return;
         }
-        case ACTION_TYPE_ADJUST_FAVOR:
-        {
-            result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_ADJUST_MONEY:
-        case ACTION_TYPE_ADJUST_SAVINGS:
-        {
-            result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_BUILDING_FORCE_COLLAPSE:
-        {
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = append_text(translation_for(TR_PARAMETER_GRID_OFFSET_CORNER1), result_text, &maxlength);
-            result_text = translation_for_grid_offset(action->parameter1, result_text, &maxlength);
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = append_text(translation_for(TR_PARAMETER_GRID_OFFSET_CORNER2), result_text, &maxlength);
-            result_text = translation_for_grid_offset(action->parameter2, result_text, &maxlength);
-            if (action->parameter4) {
-                result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-                result_text = append_text(translation_for(TR_PARAMETER_DISPLAY_DESTROY_ALL_TYPES), result_text, &maxlength);
-            } else {
-                result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_BUILDING, action->parameter3, result_text, &maxlength);
-            }
-            return;
-        }
-        case ACTION_TYPE_CHANGE_ALLOWED_BUILDINGS:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ALLOWED_BUILDING, action->parameter1, result_text, &maxlength);
-            result_text = translation_for_boolean_text(action->parameter2, TR_PARAMETER_DISPLAY_ALLOWED, TR_PARAMETER_DISPLAY_DISALLOWED, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_CHANGE_CITY_RATING:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RATING_TYPE, action->parameter1, result_text, &maxlength);
-            result_text = translation_for_set_or_add_text(action->parameter3, result_text, &maxlength);
-            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_CHANGE_CUSTOM_VARIABLE:
-        {
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-
-            if (scenario_custom_variable_exists(action->parameter1) &&
-                scenario_custom_variable_get_name(action->parameter1)) {
-                result_text = append_text(scenario_custom_variable_get_name(action->parameter1),
-                    result_text, &maxlength);
-            } else {
-                result_text = append_text(string_from_ascii("???"), result_text, &maxlength);
-            }
-
-            result_text = translation_for_set_or_add_text(action->parameter3, result_text, &maxlength);
-            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_CHANGE_CUSTOM_VARIABLE_VISIBILITY:
-        {
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-
-            if (scenario_custom_variable_exists(action->parameter1) &&
-                scenario_custom_variable_get_name(action->parameter1)) {
-                result_text = append_text(scenario_custom_variable_get_name(action->parameter1),
-                    result_text, &maxlength);
-            } else {
-                result_text = append_text(string_from_ascii("???"), result_text, &maxlength);
-            }
-
-            result_text = translation_for_boolean_text(action->parameter2, TR_PARAMETER_VALUE_BOOLEAN_TRUE, TR_PARAMETER_VALUE_BOOLEAN_FALSE, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_CHANGE_RESOURCE_PRODUCED:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter1, result_text, &maxlength);
-            result_text = translation_for_boolean_text(action->parameter2, TR_PARAMETER_DISPLAY_ALLOWED, TR_PARAMETER_DISPLAY_DISALLOWED, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_CHANGE_RESOURCE_STOCKPILES:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_STORAGE_TYPE, action->parameter3, result_text, &maxlength);
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter1, result_text, &maxlength);
-            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
-            result_text = translation_for_boolean_text(action->parameter4, TR_PARAMETER_DISPLAY_RESPECT_SETTINGS, TR_PARAMETER_DISPLAY_IGNORE_SETTINGS, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_EMPIRE_MAP_CONVERT_FUTURE_TRADE_CITY:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_FUTURE_CITY, action->parameter1, result_text, &maxlength);
-            result_text = translation_for_boolean_text(action->parameter2, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_GLADIATOR_REVOLT:
-        {
-            return;
-        }
-        case ACTION_TYPE_INVASION_IMMEDIATE:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_INVASION_TYPE, action->parameter1, result_text, &maxlength);
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = append_text(translation_for(TR_PARAMETER_TYPE_INVASION_SIZE), result_text, &maxlength);
-            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ENEMY_TYPE, action->parameter5, result_text, &maxlength);
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = append_text(translation_for(TR_PARAMETER_TYPE_INVASION_POINT), result_text, &maxlength);
-            result_text = translation_for_formula_index(action->parameter3, result_text, &maxlength);
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_TARGET_TYPE, action->parameter4, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_REQUEST_IMMEDIATELY_START:
-        case ACTION_TYPE_TAX_RATE_SET:
-        {
-            result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_TRADE_PROBLEM_LAND:
-        case ACTION_TYPE_TRADE_PROBLEM_SEA:
-        {
-            result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = append_text(translation_for(TR_PARAMETER_DISPLAY_DAYS), result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_SEND_STANDARD_MESSAGE:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_STANDARD_MESSAGE, action->parameter1, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_TRADE_ADJUST_PRICE:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter1, result_text, &maxlength);
-            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
-            result_text = translation_for_boolean_text(action->parameter3, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_TRADE_ADJUST_ROUTE_AMOUNT:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, action->parameter1, result_text, &maxlength);
-            result_text = translation_for_formula_index(action->parameter3, result_text, &maxlength);
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter2, result_text, &maxlength);
-            result_text = translation_for_boolean_text(action->parameter4, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_TRADE_ROUTE_ADD_NEW_RESOURCE:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, action->parameter1, result_text, &maxlength);
-            result_text = translation_for_boolean_text(action->parameter4, TR_PARAMETER_DISPLAY_ADD_AS_BUYING, TR_PARAMETER_DISPLAY_ADD_AS_SELLING, result_text, &maxlength);
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter2, result_text, &maxlength);
-            result_text = translation_for_formula_index(action->parameter3, result_text, &maxlength);
-            result_text = translation_for_boolean_text(action->parameter5, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_TRADE_ADJUST_ROUTE_OPEN_PRICE:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, action->parameter1, result_text, &maxlength);
-            result_text = translation_for_set_or_add_text(action->parameter3, result_text, &maxlength);
-            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
-            result_text = translation_for_boolean_text(action->parameter4, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_TRADE_ROUTE_SET_OPEN:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, action->parameter1, result_text, &maxlength);
-            result_text = translation_for_boolean_text(action->parameter2, TR_PARAMETER_DISPLAY_APPLY_COST, TR_PARAMETER_DISPLAY_NO_COST, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_TRADE_SET_PRICE:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter1, result_text, &maxlength);
-            result_text = translation_for_boolean_text(action->parameter3, TR_PARAMETER_DISPLAY_BUY_PRICE, TR_PARAMETER_DISPLAY_SELL_PRICE, result_text, &maxlength);
-            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
-            result_text = translation_for_boolean_text(action->parameter4, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_TRADE_SET_BUY_PRICE_ONLY:
-        case ACTION_TYPE_TRADE_SET_SELL_PRICE_ONLY:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter1, result_text, &maxlength);
-            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_SHOW_CUSTOM_MESSAGE:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_CUSTOM_MESSAGE, action->parameter1, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_CAUSE_BLESSING:
-        case ACTION_TYPE_CAUSE_MINOR_CURSE:
-        case ACTION_TYPE_CAUSE_MAJOR_CURSE:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_GOD, action->parameter1, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_CHANGE_CLIMATE:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_CLIMATE, action->parameter1, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_CHANGE_TERRAIN:
-        {
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = append_text(translation_for(TR_PARAMETER_GRID_OFFSET_CORNER1), result_text, &maxlength);
-            result_text = translation_for_grid_offset(action->parameter1, result_text, &maxlength);
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = append_text(translation_for(TR_PARAMETER_GRID_OFFSET_CORNER2), result_text, &maxlength);
-            result_text = translation_for_grid_offset(action->parameter2, result_text, &maxlength);
-            if (action->parameter4) {
-                result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_TERRAIN, action->parameter3, result_text, &maxlength);
-                result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-                result_text = append_text(translation_for(TR_PARAMETER_ADD), result_text, &maxlength);
-            } else {
-                result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_TERRAIN, action->parameter3, result_text, &maxlength);
-                result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-                result_text = append_text(translation_for(TR_EDITOR_DELETE), result_text, &maxlength);
-            }
-            return;
-        }
-        case ACTION_TYPE_CHANGE_MODEL_DATA:
-        {
-            result_text = append_text(string_from_ascii(": "), result_text, &maxlength);
-            result_text = append_text(translation_for(action->parameter4 ? TR_PARAMETER_SET : TR_PARAMETER_CHANGE), result_text, &maxlength);
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_DATA_TYPE, action->parameter2, result_text, &maxlength);
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = append_text(translation_for(TR_PARAMETER_OF), result_text, &maxlength);
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_MODEL, action->parameter1, result_text, &maxlength);
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = append_text(translation_for(action->parameter4 ? TR_PARAMETER_TO : TR_PARAMETER_BY), result_text, &maxlength);
-            result_text = translation_for_formula_index(action->parameter3, result_text, &maxlength);
-            return;
-        case ACTION_TYPE_CUSTOM_VARIABLE_FORMULA:
-        {
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            if (scenario_custom_variable_exists(action->parameter1) &&
-                scenario_custom_variable_get_name(action->parameter1)) {
-                result_text = append_text(scenario_custom_variable_get_name(action->parameter1),
-                    result_text, &maxlength);
-            } else {
-                result_text = append_text(string_from_ascii("???"), result_text, &maxlength);
-            }
-            result_text = append_text(string_from_ascii(" = "), result_text, &maxlength);
-            // Get the formula string from the formula array
-            if (action->parameter2 > 0) {
-                const uint8_t *formula_str = scenario_formula_get_string(action->parameter2);
-                if (formula_str) {
-                    result_text = append_text(formula_str, result_text, &maxlength);
-                } else {
-                    result_text = append_text(string_from_ascii("???"), result_text, &maxlength);
-                }
-            } else {
-                result_text = append_text(string_from_ascii("0"), result_text, &maxlength);
-            }
-            return;
-        }
-        case ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY:
-        {
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            if (scenario_custom_variable_exists(action->parameter1) &&
-                scenario_custom_variable_get_name(action->parameter1)) {
-                result_text = append_text(scenario_custom_variable_get_name(action->parameter1),
-                    result_text, &maxlength);
-            } else {
-                result_text = append_text(string_from_ascii("???"), result_text, &maxlength);
-            }
-            result_text = append_text(string_from_ascii(" = "), result_text, &maxlength);
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_CITY_PROPERTY, action->parameter2, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_GOD_SENTIMENT_CHANGE:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_GOD, action->parameter1, result_text, &maxlength);
-            result_text = translation_for_set_or_add_text(action->parameter3, result_text, &maxlength);
-            // Get the formula string if parameter2 is a formula index
-            if (action->parameter2 > 0) {
-                const uint8_t *formula_str = scenario_formula_get_string(action->parameter2);
-                if (formula_str) {
-                    result_text = append_text(formula_str, result_text, &maxlength);
-                } else {
-                    result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
-                }
-            } else {
-                result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
-            }
-            return;
-        }
-        case ACTION_TYPE_POP_SENTIMENT_CHANGE:
-        {
-            result_text = translation_for_set_or_add_text(action->parameter2, result_text, &maxlength);
-            // Get the formula string if parameter1 is a formula index
-            if (action->parameter1 > 0) {
-                const uint8_t *formula_str = scenario_formula_get_string(action->parameter1);
-                if (formula_str) {
-                    result_text = append_text(formula_str, result_text, &maxlength);
-                } else {
-                    result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
-                }
-            } else {
-                result_text = translation_for_formula_index(action->parameter1, result_text, &maxlength);
-            }
-            return;
-        }
-        case ACTION_TYPE_WIN:
-        case ACTION_TYPE_LOSE:
-        {
-            // No parameters to display
-            return;
-        }
-        case ACTION_TYPE_CHANGE_RANK:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RANK, action->parameter1, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_CHANGE_PRODUCTION_RATE:
-        {
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = append_text(translation_for(TR_PARAMETER_OF), result_text, &maxlength);
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, action->parameter1, result_text, &maxlength);
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = append_text(translation_for(action->parameter3 ? TR_PARAMETER_BY : TR_PARAMETER_TO), result_text, &maxlength);
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = translation_for_formula_index(action->parameter2, result_text, &maxlength);
-            return;
-        }
-        case ACTION_TYPE_LOCK_TRADE_ROUTE:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, action->parameter1, result_text, &maxlength);
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = append_text(translation_for(action->parameter2 ? TR_PARAMETER_LOCK : TR_PARAMETER_UNLOCK), result_text, &maxlength);
-            result_text = translation_for_boolean_text(action->parameter3, TR_PARAMETER_DISPLAY_SHOW_MESSAGE, TR_PARAMETER_DISPLAY_DO_NOT_SHOW_MESSAGE, result_text, &maxlength);
-            return;
-        }
-        default:
-        {
-            result_text = append_text(string_from_ascii(" UNHANDLED ACTION TYPE!"), result_text, &maxlength);
-            return;
-        }
-        }
+        result_text = append_text(string_from_ascii("\n"), result_text, &maxlength);
+        result_text = append_text(translation_for(attributes[i].key), result_text, &maxlength);
+        result_text = append_text(string_from_ascii(":"), result_text, &maxlength);
+        result_text = translation_for_type_lookup_by_value(attributes[i].type , values[i], result_text, &maxlength);
     }
 }
-void scenario_events_parameter_data_get_display_string_for_condition(const scenario_condition_t *condition,
-    uint8_t *result_text, int maxlength)
+
+void scenario_events_parameter_data_get_display_string_for_condition(const scenario_condition_t *condition, uint8_t *result_text, int maxlength)
 {
     scenario_condition_data_t *xml_info = scenario_events_parameter_data_get_conditions_xml_attributes(condition->type);
     result_text = append_text(translation_for(xml_info->xml_attr.key), result_text, &maxlength);
-
-    switch (condition->type) {
-        case CONDITION_TYPE_BUILDING_COUNT_ACTIVE:
-        case CONDITION_TYPE_BUILDING_COUNT_ANY:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_BUILDING_COUNTING, condition->parameter3, result_text, &maxlength);
-            result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
-            result_text = translation_for_formula_index(condition->parameter2, result_text, &maxlength);
+    int values[5] = {condition->parameter1, condition->parameter2, condition->parameter3, condition->parameter4, condition->parameter5};
+    xml_data_attribute_t attributes[5] = {xml_info->xml_parm1, xml_info->xml_parm2, xml_info->xml_parm3, xml_info->xml_parm4, xml_info->xml_parm5};
+    for (int i = 0; i < 5; i++) {
+        if (!attributes[i].type) {
             return;
         }
-        case CONDITION_TYPE_CITY_POPULATION:
-        {
-            result_text = translation_for_attr_mapping_text(xml_info->xml_parm3.type, condition->parameter3, result_text, &maxlength);
-            result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
-            result_text = translation_for_formula_index(condition->parameter2, result_text, &maxlength);
-            return;
-        }
-        case CONDITION_TYPE_COUNT_OWN_TROOPS:
-        {
-            result_text = translation_for_boolean_text(condition->parameter3, TR_PARAMETER_DISPLAY_IN_CITY, TR_PARAMETER_DISPLAY_ANYWHERE, result_text, &maxlength);
-            result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
-            result_text = translation_for_formula_index(condition->parameter2, result_text, &maxlength);
-            return;
-        }
-        case CONDITION_TYPE_CUSTOM_VARIABLE_CHECK:
-        {
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-
-            if (scenario_custom_variable_exists(condition->parameter1) &&
-                scenario_custom_variable_get_name(condition->parameter1)) {
-                result_text = append_text(scenario_custom_variable_get_name(condition->parameter1), result_text, &maxlength);
-            } else {
-                result_text = append_text(string_from_ascii("???"), result_text, &maxlength);
-            }
-
-            result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
-            result_text = translation_for_formula_index(condition->parameter3, result_text, &maxlength);
-            return;
-        }
-        case CONDITION_TYPE_DIFFICULTY:
-        {
-            result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
-            result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
-            return;
-        }
-        case CONDITION_TYPE_MONEY:
-        case CONDITION_TYPE_SAVINGS:
-        case CONDITION_TYPE_STATS_FAVOR:
-        case CONDITION_TYPE_STATS_PROSPERITY:
-        case CONDITION_TYPE_STATS_CULTURE:
-        case CONDITION_TYPE_STATS_PEACE:
-        case CONDITION_TYPE_ROME_WAGES:
-        case CONDITION_TYPE_TAX_RATE:
-        case CONDITION_TYPE_STATS_CITY_HEALTH:
-        {
-            result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
-            result_text = translation_for_formula_index(condition->parameter2, result_text, &maxlength);
-            return;
-        }
-        case CONDITION_TYPE_POPS_UNEMPLOYMENT:
-        {
-            result_text = translation_for_boolean_text(condition->parameter1, TR_PARAMETER_DISPLAY_PERCENTAGE, TR_PARAMETER_DISPLAY_FLAT_NUMBER, result_text, &maxlength);
-            result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
-            result_text = translation_for_formula_index(condition->parameter3, result_text, &maxlength);
-            return;
-        }
-        case CONDITION_TYPE_REQUEST_IS_ONGOING:
-        {
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = translation_for_request_value(condition->parameter1, result_text, &maxlength);
-            result_text = translation_for_boolean_text(condition->parameter2, TR_PARAMETER_DISPLAY_ONGOING, TR_PARAMETER_DISPLAY_NOT_ONGOING, result_text, &maxlength);
-            return;
-        }
-        case CONDITION_TYPE_BUILDING_COUNT_AREA:
-        case CONDITION_TYPE_TERRAIN_IN_AREA:
-        {
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = append_text(translation_for(TR_PARAMETER_GRID_OFFSET), result_text, &maxlength);
-            result_text = translation_for_grid_offset(condition->parameter1, result_text, &maxlength);
-            result_text = append_text(string_from_ascii("-"), result_text, &maxlength);
-            result_text = append_text(translation_for(TR_PARAMETER_GRID_OFFSET), result_text, &maxlength);
-            result_text = translation_for_grid_offset(condition->parameter2, result_text, &maxlength);
-            int param_type = condition->type == CONDITION_TYPE_BUILDING_COUNT_AREA ? PARAMETER_TYPE_BUILDING : PARAMETER_TYPE_TERRAIN;
-            result_text = translation_for_type_lookup_by_value(param_type, condition->parameter3, result_text, &maxlength);
-            result_text = translation_for_attr_mapping_text(xml_info->xml_parm4.type, condition->parameter4, result_text, &maxlength);
-            result_text = translation_for_formula_index(condition->parameter5, result_text, &maxlength);
-            return;
-        }
-        case CONDITION_TYPE_RESOURCE_STORAGE_AVAILABLE:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_STORAGE_TYPE, condition->parameter4, result_text, &maxlength);
-            result_text = translation_for_boolean_text(condition->parameter5, TR_PARAMETER_DISPLAY_RESPECT_SETTINGS, TR_PARAMETER_DISPLAY_IGNORE_SETTINGS, result_text, &maxlength);
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, condition->parameter1, result_text, &maxlength);
-            result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
-            result_text = translation_for_formula_index(condition->parameter3, result_text, &maxlength);
-            return;
-        }
-        case CONDITION_TYPE_RESOURCE_STORED_COUNT:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_STORAGE_TYPE, condition->parameter4, result_text, &maxlength);
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, condition->parameter1, result_text, &maxlength);
-            result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
-            result_text = translation_for_formula_index(condition->parameter3, result_text, &maxlength);
-            return;
-        }
-        case CONDITION_TYPE_TIME_PASSED:
-        {
-            result_text = translation_for_attr_mapping_text(xml_info->xml_parm1.type, condition->parameter1, result_text, &maxlength);
-            result_text = translation_for_min_max_values(condition->parameter2, condition->parameter3, result_text, &maxlength);
-            return;
-        }
-        case CONDITION_TYPE_TRADE_ROUTE_OPEN:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, condition->parameter1, result_text, &maxlength);
-            result_text = translation_for_boolean_text(condition->parameter2, TR_PARAMETER_DISPLAY_ROUTE_OPEN, TR_PARAMETER_DISPLAY_ROUTE_CLOSED, result_text, &maxlength);
-            return;
-        }
-        case CONDITION_TYPE_TRADE_ROUTE_PRICE:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_ROUTE, condition->parameter1, result_text, &maxlength);
-            result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
-            result_text = translation_for_formula_index(condition->parameter3, result_text, &maxlength);
-            return;
-        }
-        case CONDITION_TYPE_TRADE_SELL_PRICE:
-        {
-            result_text = translation_for_type_lookup_by_value(PARAMETER_TYPE_RESOURCE, condition->parameter1, result_text, &maxlength);
-            result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
-            result_text = translation_for_formula_index(condition->parameter3, result_text, &maxlength);
-            return;
-        }
-        case CONDITION_TYPE_CHECK_FORMULA:
-        {
-            result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
-            result_text = translation_for_formula_index(condition->parameter1, result_text, &maxlength);
-            result_text = translation_for_attr_mapping_text(xml_info->xml_parm2.type, condition->parameter2, result_text, &maxlength);
-            result_text = translation_for_formula_index(condition->parameter3, result_text, &maxlength);
-            return;
-        }
-
-        default:
-        {
-            result_text = append_text(string_from_ascii(" UNHANDLED CONDITION TYPE!"), result_text, &maxlength);
-            return;
-        }
+        result_text = append_text(string_from_ascii("\n"), result_text, &maxlength);
+        result_text = append_text(translation_for(attributes[i].key), result_text, &maxlength);
+        result_text = append_text(string_from_ascii(":"), result_text, &maxlength);
+        result_text = translation_for_type_lookup_by_value(attributes[i].type , values[i], result_text, &maxlength);
     }
 }

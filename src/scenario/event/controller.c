@@ -475,13 +475,7 @@ static void migrate_parameters_action(scenario_action_t *action)
             memset(buffer, 0, sizeof(buffer));
             string_from_int((uint8_t *) buffer, *param_value, 0);
             unsigned int id = scenario_formula_add((const uint8_t *) buffer, min_limit, max_limit);
-            switch (i) {
-                case 1: action->parameter1 = id; break;
-                case 2: action->parameter2 = id; break;
-                case 3: action->parameter3 = id; break;
-                case 4: action->parameter4 = id; break;
-                case 5: action->parameter5 = id; break;
-            }
+            *param_value = id;
         }
     }
 }
@@ -510,13 +504,7 @@ static void migrate_parameters_condition(scenario_condition_t *condition)
             memset(buffer, 0, sizeof(buffer));
             string_from_int(buffer, *param_value, 0);
             unsigned int id = scenario_formula_add((const uint8_t *) buffer, min_limit, max_limit);
-            switch (i) {
-                case 1: condition->parameter1 = id; break;
-                case 2: condition->parameter2 = id; break;
-                case 3: condition->parameter3 = id; break;
-                case 4: condition->parameter4 = id; break;
-                case 5: condition->parameter5 = id; break;
-            }
+            *param_value = id;
         }
     }
 }
@@ -590,26 +578,31 @@ void scenario_events_min_max_migrate_to_formulas(void)
     }
 }
 
+void scenario_events_assign_parent_single_event_ids(scenario_event_t *event)
+{
+    int event_id = event->id;
+    scenario_action_t *action;
+    for (unsigned int i = 0; i < event->actions.size; i++) {
+        action = array_item(event->actions, i);
+        action->parent_event_id = event_id;
+    }
+    scenario_condition_group_t *group;
+    scenario_condition_t *condition;
+    for (unsigned int j = 0; j < event->condition_groups.size; j++) {
+        group = array_item(event->condition_groups, j);
+        for (unsigned int k = 0; k < group->conditions.size; k++) {
+            condition = array_item(group->conditions, k);
+            condition->parent_event_id = event_id;
+        }
+    }
+}
+
 void scenario_events_assign_parent_event_ids(void)
 {
     scenario_event_t *current;
     array_foreach(scenario_events, current) //go through all events
     {
-        int event_id = current->id;
-        scenario_action_t *action;
-        for (unsigned int j = 0; j < current->actions.size; j++) {
-            action = array_item(current->actions, j);
-            action->parent_event_id = event_id;
-        }
-        scenario_condition_group_t *group;
-        scenario_condition_t *condition;
-        for (unsigned int j = 0; j < current->condition_groups.size; j++) {
-            group = array_item(current->condition_groups, j);
-            for (unsigned int k = 0; k < group->conditions.size; k++) {
-                condition = array_item(group->conditions, k);
-                condition->parent_event_id = event_id;
-            }
-        }
+        scenario_events_assign_parent_single_event_ids(current);
     }
 }
 

@@ -77,7 +77,7 @@ static int export_attribute_route(xml_data_attribute_t *attr, int target)
 
 static int export_attribute_resource(xml_data_attribute_t *attr, int target)
 {
-    if (target < RESOURCE_MIN || target > RESOURCE_MAX) {
+    if (target < RESOURCE_MIN || target > RESOURCE_ALL) {
         log_exporting_error("Error while exporting resource.");
         return 0;
     }
@@ -141,6 +141,7 @@ static int export_parse_attribute_with_resolved_type(xml_data_attribute_t *attr,
         case PARAMETER_TYPE_CLIMATE:
         case PARAMETER_TYPE_TERRAIN:
         case PARAMETER_TYPE_DATA_TYPE:
+        case PARAMETER_TYPE_HOUSE_DATA_TYPE:
         case PARAMETER_TYPE_MODEL:
         case PARAMETER_TYPE_PERCENTAGE:
         case PARAMETER_TYPE_HOUSING_TYPE:
@@ -151,6 +152,7 @@ static int export_parse_attribute_with_resolved_type(xml_data_attribute_t *attr,
         case PARAMETER_TYPE_RANK:
         case PARAMETER_TYPE_CITY_PROPERTY:
         case PARAMETER_TYPE_MEDIA_TYPE:
+        case PARAMETER_TYPE_WIN_CONDITION:
             return export_attribute_by_type(attr, resolved_type, target);
         case PARAMETER_TYPE_BUILDING_COUNTING:
             return export_attribute_by_type(attr, PARAMETER_TYPE_BUILDING, target);
@@ -168,6 +170,7 @@ static int export_parse_attribute_with_resolved_type(xml_data_attribute_t *attr,
         case PARAMETER_TYPE_GRID_SLICE:
             return export_attribute_number(attr, target);
         case PARAMETER_TYPE_RESOURCE:
+        case PARAMETER_TYPE_RESOURCE_ALL:
             return export_attribute_resource(attr, target);
         case PARAMETER_TYPE_ROUTE:
             return export_attribute_route(attr, target);
