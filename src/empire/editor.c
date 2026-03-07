@@ -126,12 +126,12 @@ empire_tool empire_editor_get_tool_for_object(const full_empire_object *full)
     }
 }
 
-int empire_editor_handle_placement(const mouse *m, const hotkeys *h)
+int empire_editor_handle_placement(const mouse *m, const hotkeys *h, int outside_map)
 {
     if (h->pick_empire_tool) {
         return pick_empire_tool(m->x, m->y);
     }
-    if (h->delete_empire_object && (m->left.is_down || !config_get(CONFIG_UI_EMPIRE_CLICK_TO_DELETE))) {
+    if (h->delete_empire_object && (m->left.is_down || !config_get(CONFIG_UI_EMPIRE_CLICK_TO_DELETE)) && !outside_map) {
         return delete_object_at(m->x, m->y);
     }
     if (h->empire_tool) {
@@ -139,7 +139,7 @@ int empire_editor_handle_placement(const mouse *m, const hotkeys *h)
         window_request_refresh();
         return 1;
     }
-    if (m->left.went_down) {
+    if (m->left.went_down && !outside_map) {
         if (!place_object(m->x, m->y)) {
             return 0;
         } else {

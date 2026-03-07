@@ -44,6 +44,6 @@ int empire_editor_get_trade_point_parent(void);
 void empire_editor_set_current_invasion_path(int path_id);
 int empire_editor_get_current_invasion_path(void);
 
-int empire_editor_handle_placement(const mouse *m, const hotkeys *h);
+int empire_editor_handle_placement(const mouse *m, const hotkeys *h, int outside_map);
 
 #endif // EMPIRE_EDITOR_H
