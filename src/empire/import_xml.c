@@ -1,4 +1,4 @@
-#include "xml.h"
+#include "import_xml.h"
 
 #include "assets/assets.h"
 #include "core/array.h"
@@ -13,21 +13,19 @@
 #include "core/zlib_helper.h"
 #include "editor/editor.h"
 #include "empire/city.h"
+#include "empire/editor.h"
 #include "empire/empire.h"
 #include "empire/object.h"
 #include "empire/trade_route.h"
 #include "scenario/data.h"
 #include "scenario/empire.h"
 
-#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
 #define XML_TOTAL_ELEMENTS 19
 #define BASE_BORDER_FLAG_IMAGE_ID 3323
-#define BASE_ORNAMENT_IMAGE_ID 3356
 #define BORDER_EDGE_DEFAULT_SPACING 50
-#define ORIGINAL_ORNAMENTS 20
 
 typedef enum {
     LIST_NONE = -1,
@@ -54,45 +52,12 @@ typedef struct {
     int num_months;
 } waypoint;
 
-static const char *ORNAMENTS[] = {
-    "The Stonehenge",
-    "Gallic Wheat",
-    "The Pyrenees",
-    "Iberian Aqueduct",
-    "Triumphal Arch",
-    "West Desert Wheat",
-    "Lighthouse of Alexandria",
-    "West Desert Palm Trees",
-    "Trade Ship",
-    "Waterside Palm Trees",
-    "Colosseum|The Colosseum",
-    "The Alps",
-    "Roman Tree",
-    "Greek Mountain Range",
-    "The Parthenon",
-    "The Pyramids",
-    "The Hagia Sophia",
-    "East Desert Palm Trees",
-    "East Desert Wheat",
-    "Trade Camel",
-    "Mount Etna",
-    "Colossus of Rhodes"
-};
-
-#define TOTAL_ORNAMENTS (sizeof(ORNAMENTS) / sizeof(const char *))
-
-map_point ORNAMENT_POSITIONS[TOTAL_ORNAMENTS] = {
-    {  247,  81 }, {  361, 356 }, {  254, 428 }, {  199, 590 }, {  275, 791 },
-    {  423, 802 }, { 1465, 883 }, {  518, 764 }, {  691, 618 }, {  742, 894 },
-    {  726, 468 }, {  502, 280 }, {  855, 551 }, { 1014, 443 }, { 1158, 698 },
-    { 1431, 961 }, { 1300, 500 }, { 1347, 648 }, { 1707, 783 }, { 1704, 876 },
-    {  829, 720 }, { 1347, 745 }
-};
-
 static struct {
     int success;
     int version;
+    int info_only;
     int current_city_id;
+    int current_trade_route_id; // This is not an actual route id but an empire object id 
     city_list current_city_list;
     int has_vulnerable_city;
     int current_invasion_path_id;
@@ -101,6 +66,7 @@ static struct {
     array(waypoint) distant_battle_waypoints;
     int border_status;
     char added_ornaments[TOTAL_ORNAMENTS];
+    char info_filename[FILE_NAME_MAX];
 } data;
 
 static int xml_start_empire(void);
@@ -126,6 +92,8 @@ static void xml_end_sells_buys_or_waypoints(void);
 static void xml_end_invasion_path(void);
 static void xml_end_distant_battle_path(void);
 
+static int xml_read_info(void);
+
 static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "empire", xml_start_empire },
     { "map", xml_start_map, 0, "empire" },
@@ -147,6 +115,38 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "path", xml_start_distant_battle_path, xml_end_distant_battle_path, "distant_battle_paths" },
     { "waypoint", xml_start_distant_battle_waypoint, 0, "path" },
 };
+
+static const xml_parser_element xml_info_elements[XML_TOTAL_ELEMENTS] = {
+    { "empire", 0 },
+    { "map", xml_read_info, 0, "empire" },
+    { "coordinates", 0, 0, "map" },
+    { "ornament", 0, 0, "empire|map" },
+    { "border", 0, 0, "empire" },
+    { "edge", 0, 0, "border" },
+    { "cities", 0, 0, "empire" },
+    { "city", 0, 0, "cities" },
+    { "buys", 0, 0, "city" },
+    { "sells", 0, 0, "city" },
+    { "resource", 0, 0, "buys|sells" },
+    { "trade_points", 0, 0, "city" },
+    { "point", 0, 0, "trade_points" },
+    { "invasion_paths", 0, 0, "empire" },
+    { "path", 0, 0, "invasion_paths"},
+    { "battle", 0, 0, "path"},
+    { "distant_battle_paths", 0, 0, "empire" },
+    { "path", 0, 0, "distant_battle_paths" },
+    { "waypoint", 0, 0, "path" },
+};
+
+static int xml_read_info(void)
+{
+    const char *filename = xml_parser_get_attribute_string("image");
+    if (!filename) {
+        return 0;
+    }
+    string_copy(string_from_ascii(filename), (uint8_t *)data.info_filename, 128);
+    return 0;
+}
 
 static resource_type get_resource_from_attr(const char *key)
 {
@@ -171,11 +171,14 @@ static int xml_start_empire(void)
         log_error("No version set", 0, 0);
         return 0;
     }
-    if (data.version == 1 && xml_parser_get_attribute_bool("show_ireland")) {
+    if (data.version < 2 && xml_parser_get_attribute_bool("show_ireland")) {
         full_empire_object *obj = empire_object_get_new();
         obj->in_use = 1;
         obj->obj.type = EMPIRE_OBJECT_ORNAMENT;
         obj->obj.image_id = -1;
+        const image *img = image_get(assets_lookup_image_id(ASSET_FIRST_ORNAMENT));
+        obj->obj.width = img->width;
+        obj->obj.height = img->height;
     }
     return 1;
 }
@@ -195,7 +198,7 @@ static int xml_start_map(void)
     empire_set_custom_map(filename, x_offset, y_offset, width, height);
 
     if (xml_parser_get_attribute_bool("show_ireland")) {
-        if (empire_get_image_id() != image_group(editor_is_active() ? GROUP_EDITOR_EMPIRE_MAP : GROUP_EMPIRE_MAP)) {
+        if (!(EMPIRE_IS_DEFAULT_IMAGE)) {
             log_info("Ireland image cannot be enabled on custom maps", 0, 0);
             return 1;
         }
@@ -203,6 +206,9 @@ static int xml_start_map(void)
         obj->in_use = 1;
         obj->obj.type = EMPIRE_OBJECT_ORNAMENT;
         obj->obj.image_id = -1;
+        const image *img = image_get(assets_lookup_image_id(ASSET_FIRST_ORNAMENT));
+        obj->obj.width = img->width;
+        obj->obj.height = img->height;
     }
 
     return 1;
@@ -218,29 +224,6 @@ static int xml_start_coords(void)
     return 1;
 }
 
-static void add_ornament(int ornament_id)
-{
-    if (data.added_ornaments[ornament_id]) {
-        return;
-    }
-    data.added_ornaments[ornament_id] = 1;
-    full_empire_object *obj = empire_object_get_new();
-    if (!obj) {
-        data.success = 0;
-        log_error("Error creating new object - out of memory", 0, 0);
-        return;
-    }
-    obj->in_use = 1;
-    obj->obj.type = EMPIRE_OBJECT_ORNAMENT;
-    if (ornament_id < ORIGINAL_ORNAMENTS) {
-        obj->obj.image_id = BASE_ORNAMENT_IMAGE_ID + ornament_id;
-    } else {
-        obj->obj.image_id = ORIGINAL_ORNAMENTS - ornament_id - 2;
-    }
-    obj->obj.x = ORNAMENT_POSITIONS[ornament_id].x;
-    obj->obj.y = ORNAMENT_POSITIONS[ornament_id].y;
-}
-
 static int xml_start_ornament(void)
 {
     const char *parent_name = xml_parser_get_parent_element_name();
@@ -248,7 +231,7 @@ static int xml_start_ornament(void)
         log_info("Ornaments should go inside the map tag on version 2 and later", 0, 0);
         return 1;
     }
-    if (empire_get_image_id() != image_group(editor_is_active() ? GROUP_EDITOR_EMPIRE_MAP : GROUP_EMPIRE_MAP)) {
+    if (!(EMPIRE_IS_DEFAULT_IMAGE)) {
         log_info("Ornaments are not shown on custom maps", 0, 0);
         return 1;
     }
@@ -256,17 +239,23 @@ static int xml_start_ornament(void)
         log_info("No ornament type specified", 0, 0);
         return 1;
     }
-    int ornament_id = xml_parser_get_attribute_enum("type", ORNAMENTS, TOTAL_ORNAMENTS, 0);
+    int ornament_id = xml_parser_get_attribute_enum("type", XML_ORNAMENTS, TOTAL_ORNAMENTS, 0);
     if (ornament_id == -1) {
         if (strcmp("all", xml_parser_get_attribute_string("type")) == 0) {
             for (int i = 0; i < (int) TOTAL_ORNAMENTS; i++) {
-                add_ornament(i);
+                if (!empire_object_add_ornament(i)) {
+                    data.success = 0;
+                    return 0;
+                }
             }
         } else {
             log_info("Invalid ornament type specified", 0, 0);
         }
     } else {
-        add_ornament(ornament_id);
+        if (!empire_object_add_ornament(ornament_id)) {
+            data.success = 0;
+            return 0;
+        }
     }
     return 1;
 }
@@ -312,6 +301,8 @@ static int xml_start_border_edge(void)
     obj->obj.x = xml_parser_get_attribute_int("x");
     obj->obj.y = xml_parser_get_attribute_int("y");
     empire_transform_coordinates(&obj->obj.x, &obj->obj.y);
+    obj->obj.parent_object_id = empire_object_get_border()->id;
+    obj->obj.order_index = obj->obj.id - obj->obj.parent_object_id;
     obj->obj.image_id = xml_parser_get_attribute_bool("hidden") ? 0 : BASE_BORDER_FLAG_IMAGE_ID;
 
     return 1;
@@ -336,7 +327,7 @@ static int xml_start_city(void)
 
     static const char *city_types[6] = { "roman", "ours", "trade", "future_trade", "distant", "vulnerable" };
     static const char *trade_route_types[2] = { "land", "sea" };
-    static const char *city_icons[17] = { "construction", "dis_town", "dis_village", "res_food", "res_goods",
+    static const char *city_icons[18] = { "construction", "dis_town", "dis_village", "res_food", "res_goods", "res_sea",
                                           "tr_town", "ro_town", "tr_village", "ro_village", "ro_capital", "tr_sea",
                                           "tr_land", "our_city", "tr_city", "ro_city", "dis_city", "tower" };
     const char *name = xml_parser_get_attribute_string("name");
@@ -345,17 +336,32 @@ static int xml_start_city(void)
     }
 
     int city_type = xml_parser_get_attribute_enum("type", city_types, 6, EMPIRE_CITY_DISTANT_ROMAN);
-    int city_icon_type = xml_parser_get_attribute_enum("icon", city_icons, 17, EMPIRE_CITY_ICON_DEFAULT + 1);
-    if (city_icon_type == EMPIRE_CITY_ICON_DEFAULT) {
-        city_icon_type = empire_object_get_random_icon_for_empire_object(city_obj);
-    }
-    city_obj->empire_city_icon = city_icon_type;
-    city_obj->obj.empire_city_icon = city_icon_type;
     if (city_type < EMPIRE_CITY_DISTANT_ROMAN) {
         city_obj->city_type = EMPIRE_CITY_TRADE;
     } else {
         city_obj->city_type = city_type;
     }
+
+    int city_icon_type = EMPIRE_CITY_ICON_DEFAULT;
+    int future_trade_after_icon = EMPIRE_CITY_ICON_DEFAULT;
+    if (city_type == EMPIRE_CITY_FUTURE_TRADE) {
+        if (xml_parser_has_attribute("icon_before")) {
+            city_icon_type = xml_parser_get_attribute_enum("icon_before", city_icons, 18, EMPIRE_CITY_ICON_DEFAULT + 1);
+        } else {
+            city_icon_type = xml_parser_get_attribute_enum("icon", city_icons, 18, EMPIRE_CITY_ICON_DEFAULT + 1);
+        }
+        future_trade_after_icon = xml_parser_get_attribute_enum("icon_after", city_icons, 18, EMPIRE_CITY_ICON_DEFAULT + 1);
+    } else {
+        city_icon_type = xml_parser_get_attribute_enum("icon", city_icons, 18, EMPIRE_CITY_ICON_DEFAULT + 1);
+    }
+    if (city_icon_type == EMPIRE_CITY_ICON_DEFAULT) {
+        city_icon_type = empire_object_get_random_icon_for_empire_object(city_obj);
+    }
+
+    city_obj->empire_city_icon = city_icon_type;
+    city_obj->obj.empire_city_icon = city_icon_type;
+    city_obj->obj.future_trade_after_icon = future_trade_after_icon;
+
     switch (city_obj->city_type) {
         case EMPIRE_CITY_OURS:
             city_obj->obj.image_id = image_group(GROUP_EMPIRE_CITY);
@@ -387,6 +393,7 @@ static int xml_start_city(void)
 
     if (city_obj->city_type == EMPIRE_CITY_TRADE || city_obj->city_type == EMPIRE_CITY_FUTURE_TRADE) {
         full_empire_object *route_obj = empire_object_get_new();
+        data.current_trade_route_id = route_obj->obj.id;
         if (!route_obj) {
             data.success = 0;
             log_error("Error creating new object - out of memory", 0, 0);
@@ -498,6 +505,8 @@ static int xml_start_trade_point(void)
     obj->obj.x = xml_parser_get_attribute_int("x");
     obj->obj.y = xml_parser_get_attribute_int("y");
     empire_transform_coordinates(&obj->obj.x, &obj->obj.y);
+    obj->obj.parent_object_id = data.current_trade_route_id;
+    obj->obj.order_index = obj->obj.id - obj->obj.parent_object_id;
 
     return 1;
 }
@@ -625,6 +634,7 @@ static void xml_end_city(void)
 {
     data.current_city_id = -1;
     data.current_city_list = LIST_NONE;
+    data.current_trade_route_id = -1;
 }
 
 static void xml_end_sells_buys_or_waypoints(void)
@@ -685,6 +695,7 @@ static void xml_end_distant_battle_path(void)
 
 static void reset_data(void)
 {
+    *data.info_filename = '\0';
     data.success = 1;
     data.current_city_id = -1;
     data.current_city_list = LIST_NONE;
@@ -697,97 +708,14 @@ static void reset_data(void)
     memset(data.added_ornaments, 0, sizeof(data.added_ornaments));
 }
 
-static void set_trade_coords(const empire_object *our_city)
-{
-    int *section_distances = 0;
-    for (int i = 0; i < empire_object_count(); i++) {
-        full_empire_object *trade_city = empire_object_get_full(i);
-        if (
-            !trade_city->in_use ||
-            trade_city->obj.type != EMPIRE_OBJECT_CITY ||
-            trade_city->city_type == EMPIRE_CITY_OURS ||
-            (trade_city->city_type != EMPIRE_CITY_TRADE && trade_city->city_type != EMPIRE_CITY_FUTURE_TRADE)
-            ) {
-            continue;
-        }
-        empire_object *trade_route = empire_object_get(i + 1);
-
-        if (!section_distances) {
-            section_distances = malloc(sizeof(int) * (empire_object_count() - 1));
-        }
-        int sections = 0;
-        int distance = 0;
-        int last_x = our_city->x + 25;
-        int last_y = our_city->y + 25;
-        int x_diff, y_diff;
-        for (int j = i + 2; j < empire_object_count(); j++) {
-            empire_object *obj = empire_object_get(j);
-            if (obj->type != EMPIRE_OBJECT_TRADE_WAYPOINT) {
-                break;
-            }
-            x_diff = obj->x - last_x;
-            y_diff = obj->y - last_y;
-            section_distances[sections] = (int) sqrt(x_diff * x_diff + y_diff * y_diff);
-            distance += section_distances[sections];
-            last_x = obj->x;
-            last_y = obj->y;
-            sections++;
-        }
-        x_diff = trade_city->obj.x + 25 - last_x;
-        y_diff = trade_city->obj.y + 25 - last_y;
-        section_distances[sections] = (int) sqrt(x_diff * x_diff + y_diff * y_diff);
-        distance += section_distances[sections];
-        sections++;
-
-        last_x = our_city->x + 25;
-        last_y = our_city->y + 25;
-        int next_x = trade_city->obj.x + 25;
-        int next_y = trade_city->obj.y + 25;
-
-        if (sections == 1) {
-            trade_route->x = (next_x + last_x) / 2 - 16;
-            trade_route->y = (next_y + last_y) / 2 - 10;
-            continue;
-        }
-        int crossed_distance = 0;
-        int current_section = 0;
-        int remaining_distance = 0;
-        while (current_section < sections) {
-            if (current_section == sections - 1) {
-                next_x = trade_city->obj.x + 25;
-                next_y = trade_city->obj.y + 25;
-            } else {
-                empire_object *obj = empire_object_get(current_section + i + 2);
-                next_x = obj->x;
-                next_y = obj->y;
-            }
-            if (section_distances[current_section] + crossed_distance > distance / 2) {
-                remaining_distance = distance / 2 - crossed_distance;
-                break;
-            }
-            last_x = next_x;
-            last_y = next_y;
-            crossed_distance += section_distances[current_section];
-            current_section++;
-        }
-        x_diff = next_x - last_x;
-        y_diff = next_y - last_y;
-        int x_factor = calc_percentage(x_diff, section_distances[current_section]);
-        int y_factor = calc_percentage(y_diff, section_distances[current_section]);
-        trade_route->x = calc_adjust_with_percentage(remaining_distance, x_factor) + last_x - 16;
-        trade_route->y = calc_adjust_with_percentage(remaining_distance, y_factor) + last_y - 10;
-
-        i += sections; // We know the following objects are waypoints so we skip them
-    }
-    free(section_distances);
-}
-
 static int parse_xml(char *buf, int buffer_length)
 {
     reset_data();
-    empire_clear();
-    empire_object_clear();
-    if (!xml_parser_init(xml_elements, XML_TOTAL_ELEMENTS, 0)) {
+    if (!data.info_only) {
+        empire_clear();
+        empire_object_clear();
+    }
+    if (!xml_parser_init(data.info_only ? xml_info_elements : xml_elements, XML_TOTAL_ELEMENTS, 0)) {
         return 0;
     }
     if (!xml_parser_parse(buf, buffer_length, 1)) {
@@ -804,8 +732,9 @@ static int parse_xml(char *buf, int buffer_length)
         return 0;
     }
 
-    set_trade_coords(our_city);
+    empire_object_set_trade_route_coords(our_city);
     empire_object_init_cities(SCENARIO_CUSTOM_EMPIRE);
+    empire_editor_set_current_invasion_path(data.current_invasion_path_id + 1);
 
     return data.success;
 }
@@ -840,8 +769,9 @@ static char *file_to_buffer(const char *filename, int *output_length)
     return buf;
 }
 
-int empire_xml_parse_file(const char *filename)
+int empire_xml_parse_file(const char *filename, int info_only)
 {
+    data.info_only = info_only;
     int output_length = 0;
     char *xml_contents = file_to_buffer(filename, &output_length);
     if (!xml_contents) {
@@ -853,4 +783,9 @@ int empire_xml_parse_file(const char *filename)
         log_error("Error parsing file", filename, 0);
     }
     return success;
+}
+
+const char *empire_xml_read_info(void)
+{
+    return data.info_filename;
 }

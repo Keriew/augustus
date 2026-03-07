@@ -1043,7 +1043,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SHORT_ROUTE_TEXT, "std"}, // si suppone abbreviazione di "road" rt, quindi std 
     {TR_EDITOR_TOGGLE_INVASIONS, "Disabilita le invasioni"},
     {TR_EDITOR_REFRESH_EMPIRE, "Aggiorna (F5)"},
-    {TR_EDITOR_CITY_PREVIEW, "Anteprima immagine città: "},
     {TR_EDITOR_CURRENT_COORDS, "Coordinate Correnti: "},
     {TR_EDITOR_SELECTED_COORDS, "Coordinate Selezionate: "},
     {TR_EDITOR_MAX_WAGES, "Fino a"},

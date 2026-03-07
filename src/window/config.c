@@ -233,7 +233,6 @@ static config_widget ui_widgets_by_category[CATEGORY_UI_COUNT][MAX_WIDGETS] = {
         {TYPE_CHECKBOX, CONFIG_UI_DISABLE_MOUSE_EDGE_SCROLLING, TR_CONFIG_DISABLE_MOUSE_EDGE_SCROLLING, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_UI_DISABLE_RIGHT_CLICK_MAP_DRAG, TR_CONFIG_DISABLE_RIGHT_CLICK_MAP_DRAG, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_UI_INVERSE_MAP_DRAG, TR_CONFIG_UI_INVERSE_MAP_DRAG, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
-        {TYPE_CHECKBOX, CONFIG_UI_ANIMATE_TRADE_ROUTES, TR_CONFIG_UI_ANIMATE_TRADE_ROUTES, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     },
     // Building
@@ -271,6 +270,14 @@ static config_widget ui_widgets_by_category[CATEGORY_UI_COUNT][MAX_WIDGETS] = {
         {TYPE_CHECKBOX, CONFIG_UI_DRAW_CLOUD_SHADOWS, TR_CONFIG_DRAW_CLOUD_SHADOWS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_UI_DRAW_WEATHER, TR_CONFIG_DRAW_WEATHER, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_UI_WT_ENABLE_SNOW_CENTRAL, TR_CONFIG_UI_WT_ENABLE_SNOW_CENTRAL, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_NONE}
+    },
+    // Empire
+    {
+        {TYPE_CHECKBOX, CONFIG_UI_ANIMATE_TRADE_ROUTES, TR_CONFIG_UI_ANIMATE_TRADE_ROUTES, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_EMPIRE_SMART_BORDER_PLACMENT, TR_CONFIG_UI_EMPIRE_SMART_BORDER_PLACMENT, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_EMPIRE_CLICK_TO_DELETE, TR_CONFIG_UI_EMPIRE_CLICK_TO_DELETE, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_EMPIRE_CONFIRM_DELETE, TR_CONFIG_UI_EMPIRE_CONFIRM_DELETE, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     }
 };
@@ -462,6 +469,7 @@ static const translation_key ui_category_keys[CATEGORY_UI_COUNT] = {
     TR_CONFIG_CATEGORY_UI_BUILDING,
     TR_CONFIG_CATEGORY_UI_CITY,
     TR_CONFIG_CATEGORY_UI_WEATHER,
+    TR_CONFIG_CATEGORY_UI_EMPIRE
 };
 
 static const translation_key city_mgmt_category_keys[CATEGORY_CITY_COUNT] = {
@@ -1177,9 +1185,13 @@ static void init_list_boxes(void)
     //  City management
     city_mgmt_list_box = ui_list_box; //  copy layout
     list_box_init(&city_mgmt_list_box, CATEGORY_CITY_COUNT);
-
+    window_config_page original_page = data.page;
+    data.page = CONFIG_PAGE_UI_CHANGES;
     list_box_select_index(&ui_list_box, selected_categories.ui_category);
+    data.page = CONFIG_PAGE_CITY_MANAGEMENT_CHANGES;
     list_box_select_index(&city_mgmt_list_box, selected_categories.city_mgmt_category);
+    data.page = original_page;
+    
 }
 
 static void draw_list_box_item(const list_box_item *item)
@@ -1765,7 +1777,7 @@ static int apply_changed_configs(void)
 
 static void button_hotkeys(const generic_button *button)
 {
-    window_hotkey_config_show();
+    window_hotkey_config_show(0);
 }
 static void button_reset_defaults(const generic_button *button)
 {
@@ -1932,10 +1944,21 @@ static void set_page(unsigned int page)
     window_invalidate();
 }
 
-static void init(unsigned int page, int show_background_image)
+static void init(unsigned int page, unsigned int category, int show_background_image)
 {
     memset(&data, 0, sizeof(data));
     data.page = page;
+    if (page == CONFIG_PAGE_UI_CHANGES) {
+        if (category >= CATEGORY_UI_COUNT) {
+            category = 0;
+        }
+        selected_categories.ui_category = category;
+    } else if (page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
+        if (category >= CATEGORY_CITY_COUNT) {
+            category = 0;
+        }
+        selected_categories.city_mgmt_category = category;
+    }
     data.show_background_image = show_background_image;
 
     //  init volume prefix
@@ -1996,7 +2019,7 @@ static void init(unsigned int page, int show_background_image)
 
     init_list_boxes();
 }
-void window_config_show(window_config_page page, int show_background_image)
+void window_config_show(window_config_page page, unsigned int category, int show_background_image)
 {
     window_type window = {
         WINDOW_CONFIG,
@@ -2005,6 +2028,6 @@ void window_config_show(window_config_page page, int show_background_image)
         handle_input,
         get_tooltip
     };
-    init(page, show_background_image);
+    init(page, category, show_background_image);
     window_show(&window);
 }

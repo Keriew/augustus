@@ -11,6 +11,7 @@
 #include "city/view.h"
 #include "core/image.h"
 #include "core/image_group_editor.h"
+#include "empire/editor.h"
 #include "empire/empire.h"
 #include "empire/object.h"
 #include "figure/enemy_army.h"
@@ -120,6 +121,7 @@ static void prepare_map_for_editing(void)
     int empire_id = scenario_empire_id();
     empire_load(1, empire_id);
     empire_object_init_cities(empire_id);
+    empire_editor_init(0);
 
     figure_init_scenario();
     figure_create_editor_flags();
