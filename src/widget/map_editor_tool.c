@@ -4,6 +4,7 @@
 #include "building/image.h"
 #include "building/properties.h"
 #include "city/view.h"
+#include "core/image_group.h"
 #include "core/image_group_editor.h"
 #include "editor/tool.h"
 #include "editor/tool_restriction.h"
@@ -120,18 +121,61 @@ static void draw_road(const map_tile *tile, int x, int y)
     }
 }
 
+typedef struct {
+    int x;
+    int y;
+    tool_type type;
+    int brush_size;
+} brush_draw_data;
+
+static void draw_terrain_preview(int x, int y, tool_type type, int ring)
+{
+    int image_id;
+    switch (type) {
+        case TOOL_TREES:
+            image_id = image_group(GROUP_TERRAIN_TREE);
+            if (ring >= 3) image_id += 24;
+            else if (ring >= 2) image_id += 16;
+            else if (ring >= 1) image_id += 8;
+            break;
+        case TOOL_ROCKS:
+            image_id = image_group(GROUP_TERRAIN_ROCK);
+            break;
+        case TOOL_SHRUB:
+            image_id = image_group(GROUP_TERRAIN_SHRUB);
+            break;
+        case TOOL_MEADOW:
+            image_id = image_group(GROUP_TERRAIN_MEADOW);
+            if (ring >= 2) image_id += 8;
+            else if (ring >= 1) image_id += 4;
+            break;
+        case TOOL_EARTHQUAKE_CUSTOM:
+            image_id = image_group(GROUP_TERRAIN_EARTHQUAKE);
+            if (ring >= 1) image_id += 29;
+            else image_id += 24;
+            break;
+        default:
+            draw_flat_tile(x, y, COLOR_MASK_GREEN);
+            return;
+    }
+    image_blend_footprint_color(x, y, COLOR_MASK_GREEN, scale);
+    image_draw_isometric_footprint(image_id, x, y, COLOR_MASK_BUILDING_GHOST, scale);
+    image_draw_isometric_top(image_id, x, y, COLOR_MASK_BUILDING_GHOST, scale);
+}
+
 static void draw_brush_tile(const void *data, int dx, int dy)
 {
-    view_tile *view = (view_tile *) data;
+    brush_draw_data *brush = (brush_draw_data *) data;
     int view_dx, view_dy;
     offset_to_view_offset(dx, dy, &view_dx, &view_dy);
-    draw_flat_tile(view->x + view_dx, view->y + view_dy, COLOR_MASK_GREEN);
+    int ring = (brush->brush_size - 1) - ((dx < 0 ? -dx : dx) + (dy < 0 ? -dy : dy));
+    draw_terrain_preview(brush->x + view_dx, brush->y + view_dy, brush->type, ring);
 }
 
 static void draw_brush(const map_tile *tile, int x, int y)
 {
-    view_tile vt = { x, y };
-    editor_tool_foreach_brush_tile(draw_brush_tile, &vt);
+    brush_draw_data bd = { x, y, editor_tool_type(), editor_tool_brush_size() };
+    editor_tool_foreach_brush_tile(draw_brush_tile, &bd);
 }
 
 static void draw_access_ramp(const map_tile *tile, int x, int y)
