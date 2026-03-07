@@ -37,6 +37,7 @@ static struct {
 
 static int place_object(int mouse_x, int mouse_y);
 static int delete_object_at(int mouse_x, int mouse_y);
+static int pick_empire_tool(int mouse_x, int mouse_y);
 
 static int place_city(full_empire_object *full);
 static int place_border(full_empire_object *full);
@@ -127,6 +128,9 @@ empire_tool empire_editor_get_tool_for_object(const full_empire_object *full)
 
 int empire_editor_handle_placement(const mouse *m, const hotkeys *h)
 {
+    if (h->pick_empire_tool) {
+        return pick_empire_tool(m->x, m->y);
+    }
     if (h->delete_empire_object && (m->left.is_down || !config_get(CONFIG_UI_EMPIRE_CLICK_TO_DELETE))) {
         return delete_object_at(m->x, m->y);
     }
@@ -565,6 +569,24 @@ int empire_editor_delete_object(unsigned int obj_id)
         empire_object_foreach_of_type(shift_edge_indices, EMPIRE_OBJECT_BORDER_EDGE);
     }
     
+    return 1;
+}
+
+static int pick_empire_tool(int mouse_x, int mouse_y)
+{    
+    int empire_x = editor_empire_mouse_to_empire_x(mouse_x);
+    int empire_y = editor_empire_mouse_to_empire_y(mouse_y);
+    int picked_id = empire_object_get_at(empire_x, empire_y);
+    if (!picked_id) {
+        return 0;
+    }
+    full_empire_object *full = empire_object_get_full(picked_id);
+    empire_tool object_tool = empire_editor_get_tool_for_object(full);
+    if (!object_tool && full->city_type != EMPIRE_CITY_OURS) {
+        return 0;   
+    }
+    data.current_tool = object_tool;
+    window_request_refresh();
     return 1;
 }
 

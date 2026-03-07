@@ -142,7 +142,8 @@ static const char *ini_keys[] = {
     "editor_empire_tool_legion",
     "editor_empire_tool_land_point",
     "editor_empire_tool_sea_point",
-    "editor_empire_tool_selection"
+    "editor_empire_tool_selection",
+    "editor_empire_pick_tool"
 };
 
 static struct {

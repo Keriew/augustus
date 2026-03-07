@@ -45,6 +45,7 @@ typedef struct {
     int delete_empire_object;
     int build_menu_index_num;
     int empire_tool;
+    int pick_empire_tool;
 } hotkeys;
 
 void hotkey_install_mapping(hotkey_mapping *mappings, int num_mappings);

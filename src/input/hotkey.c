@@ -510,6 +510,9 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
             def->action = &data.hotkey_state.empire_tool;
             def->value = EMPIRE_TOOL_MAX + 1;
             break;
+        case HOTKEY_EDITOR_EMPIRE_PICK_TOOL:
+            def->action = &data.hotkey_state.pick_empire_tool;
+            break;
         default:
             def->action = 0;
     }
