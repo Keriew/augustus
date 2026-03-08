@@ -189,6 +189,6 @@ grid_slice *map_grid_get_grid_slice_ring(int center_grid_offset, int inner_radiu
  */
 grid_slice *map_grid_get_grid_slice_from_center(int center_grid_offset, int radius);
 
-grid_slice *map_grid_slice_contains(int grid_offset, const grid_slice *slice);
+grid_slice *map_grid_slice_contains(int grid_offset, grid_slice *slice);
 
 #endif // MAP_GRID_H

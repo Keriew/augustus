@@ -1,6 +1,7 @@
 #include "construction_clear.h"
 
 #include "building/building.h"
+#include "building/connectable.h"
 #include "building/construction.h"
 #include "building/monument.h"
 #include "city/warning.h"
@@ -67,6 +68,7 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
 
     int visual_feedback_on_delete = 1;
     int highways_removed = 0;
+    int radius = 0;
 
     for (int y = y_min; y <= y_max; y++) {
         for (int x = x_min; x <= x_max; x++) {
@@ -201,7 +203,6 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
         }
     }
     if (!measure_only || !visual_feedback_on_delete) {
-        int radius;
         if (x_max - x_min <= y_max - y_min) {
             radius = y_max - y_min + 3;
         } else {
@@ -220,14 +221,15 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
         map_tiles_update_area_roads(x_min, y_min, radius);
         map_tiles_update_area_highways(x_min - 1, y_min - 1, radius);
         map_tiles_update_all_plazas();
-        map_tiles_update_area_walls(x_min, y_min, radius);
         map_tiles_update_region_aqueducts(x_min - 3, y_min - 3, x_max + 3, y_max + 3);
     }
     if (!measure_only) {
         map_routing_update_land();
         map_routing_update_walls();
         map_routing_update_water();
-        building_update_state();
+        building_update_state(); // the update of b state is needed to determine the right images for walls/palisades
+        map_tiles_update_area_walls(x_min, y_min, radius + 1);
+        building_connectable_update_connections();
         figure_roamer_preview_reset(BUILDING_CLEAR_LAND);
         window_invalidate();
     }

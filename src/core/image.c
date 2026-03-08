@@ -1383,13 +1383,18 @@ const image *image_get(int id)
 
 const image *image_letter(int letter_id)
 {
+    // IMPORTANT: multibyte font check must come BEFORE the custom offset check.
+    // For simplified Chinese, letter_id can exceed IMAGE_FONT_CUSTOM_OFFSET (14000)
+    // because multibyte_image_offset (2229) + large char_id (e.g. 1874) pushes
+    // letter_id to 14103, which is above the custom font threshold.
+    if (data.fonts_enabled == MULTIBYTE_IN_FONT && letter_id >= IMAGE_FONT_MULTIBYTE_OFFSET) {
+        return &data.font[data.font_base_offset + letter_id - IMAGE_FONT_MULTIBYTE_OFFSET];
+    }
     if (letter_id > IMAGE_FONT_CUSTOM_OFFSET) {
         return assets_get_font_image(letter_id); // Custom font image intercept
     }
     if (data.fonts_enabled == FULL_CHARSET_IN_FONT) {
         return &data.font[data.font_base_offset + letter_id];
-    } else if (data.fonts_enabled == MULTIBYTE_IN_FONT && letter_id >= IMAGE_FONT_MULTIBYTE_OFFSET) {
-        return &data.font[data.font_base_offset + letter_id - IMAGE_FONT_MULTIBYTE_OFFSET];
     } else if (letter_id < IMAGE_FONT_MULTIBYTE_OFFSET) {
         return &data.main[data.group_image_ids[GROUP_FONT] + letter_id];
     } else {

@@ -363,7 +363,7 @@ scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attribute
 parameter_type scenario_events_parameter_data_get_action_parameter_type(
     action_types action_type, int parameter_index, int *min_limit, int *max_limit)
 {
-    if (action_type < 0 || action_type >= ACTION_TYPE_MAX) {
+    if (action_type >= ACTION_TYPE_MAX) {
         return PARAMETER_TYPE_UNDEFINED;
     }
 
@@ -400,7 +400,7 @@ parameter_type scenario_events_parameter_data_get_action_parameter_type(
 parameter_type scenario_events_parameter_data_get_condition_parameter_type(
     condition_types condition_type, int parameter_index, int *min_limit, int *max_limit)
 {
-    if (condition_type < 0 || condition_type >= CONDITION_TYPE_MAX) {
+    if (condition_type >= CONDITION_TYPE_MAX) {
         return PARAMETER_TYPE_UNDEFINED;
     }
 
@@ -884,7 +884,7 @@ static void generate_model_mappings(void)
     }
     for (building_type type = BUILDING_NONE; type < BUILDING_TYPE_MAX; type++) {
         const building_properties *props = building_properties_for_type(type);
-        if ((!props->size || !props->event_data.attr) && type != BUILDING_CLEAR_LAND && type != BUILDING_REPAIR_LAND ||
+        if (((!props->size || !props->event_data.attr) && type != BUILDING_CLEAR_LAND && type != BUILDING_REPAIR_LAND) ||
             (type == BUILDING_GRAND_GARDEN || type == BUILDING_DOLPHIN_FOUNTAIN)) {
             continue;
         }

@@ -37,6 +37,7 @@
 #include "map/orientation.h"
 #include "map/property.h"
 #include "map/road_aqueduct.h"
+#include "map/routing_terrain.h"
 #include "map/terrain.h"
 #include "map/tiles.h"
 #include "map/water.h"
@@ -520,7 +521,7 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
         // discouraged terrain can be built on, but is still highlighted red,
         // to suggest e.g. that it will become unusable/be overwritten
         if (!fully_blocked) {
-            if (type == BUILDING_PLAZA || building_type_is_roadblock(type) && !(type == BUILDING_GRANARY || type == BUILDING_WAREHOUSE)) {
+            if (type == BUILDING_PLAZA || (building_type_is_roadblock(type) && !(type == BUILDING_GRANARY || type == BUILDING_WAREHOUSE))) {
                 forbidden_terrain &= ~TERRAIN_ROAD;
                 discouraged_terrain &= ~TERRAIN_ROAD;
             }
@@ -564,10 +565,8 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
             }
         }
     }
-    if (type >= BUILDING_ROADBLOCK ||
-        type == BUILDING_LIBRARY ||
-        type == BUILDING_SMALL_STATUE ||
-        type == BUILDING_MEDIUM_STATUE) {
+    if (type >= BUILDING_ROADBLOCK || // >= because all buildings after ROADBLOCK have 'new' images
+        type == BUILDING_LIBRARY || type == BUILDING_SMALL_STATUE || type == BUILDING_MEDIUM_STATUE) {
         image_id = get_new_building_image_id(grid_offset, type);
         draw_regular_building(type, image_id, x_view, y_view, grid_offset, num_tiles, blocked_tiles);
     } else {
@@ -1244,6 +1243,8 @@ static void draw_road(const map_tile *tile, int x, int y)
         } else {
             blocked = 1;
         }
+    } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING) && map_routing_is_gate_transformable(grid_offset)) {
+        image_id = building_image_get_garden_gate_image(grid_offset);
     } else if (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
         blocked = 1;
     } else {
@@ -1542,7 +1543,7 @@ void city_building_ghost_draw(const map_tile *tile)
     city_view_get_selected_tile_pixels(&x, &y);
 
     const building_properties *props = building_properties_for_type(type);
-    if ((config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL) && type >= BUILDING_ANY && type <= BUILDING_TYPE_MAX) ||
+    if ((config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL) && type <= BUILDING_TYPE_MAX) ||
         (config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE) && props->draw_desirability_range)) {
         int building_size = (type == BUILDING_DRAGGABLE_RESERVOIR || type == BUILDING_WAREHOUSE) ? 3 : props->size;
 
