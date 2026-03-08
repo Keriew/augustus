@@ -46,15 +46,13 @@ int map_has_figure_category_at(int grid_offset, figure_category category)
     return result;
 }
 
-int map_has_figure_category_in_area(int minx, int miny, int maxx, int maxy, figure_category category)
+int map_has_figure_category_in_area(grid_slice *slice, figure_category category)
 {
     int grid_offset;
-    for (int yy = miny; yy <= maxy; yy++) {
-        for (int xx = minx; xx <= maxx; xx++) {
-            grid_offset = map_grid_offset(minx, miny);
-            if (map_has_figure_category_at(grid_offset, category)) {
-                return 1;
-            }
+    for (int i = 0; i < slice->size; i++) {
+        grid_offset = slice->grid_offsets[i];
+        if (map_has_figure_category_at(grid_offset, category)) {
+            return 1;
         }
     }
     return 0;
@@ -68,15 +66,13 @@ int map_count_figures_category_at(int grid_offset, figure_category category)
     return data.count;
 }
 
-int map_count_figures_category_in_area(int minx, int miny, int maxx, int maxy, figure_category category)
+int map_count_figures_category_in_area(grid_slice *slice, figure_category category)
 {
     int count = 0;
     int grid_offset;
-    for (int yy = miny; yy <= maxy; yy++) {
-        for (int xx = minx; xx <= maxx; xx++) {
-            grid_offset = map_grid_offset(minx, miny);
-            count += map_count_figures_category_at(grid_offset, category);
-        }
+    for (int i = 0; i < slice->size; i++) {
+        grid_offset = slice->grid_offsets[i];
+        count += map_count_figures_category_at(grid_offset, category);
     }
     return count;
 }
@@ -87,14 +83,12 @@ void map_kill_figures_category_at(int grid_offset, figure_category category)
     map_figure_foreach(grid_offset, kill_category);
 }
 
-void map_kill_figures_category_in_area(int minx, int miny, int maxx, int maxy, figure_category category)
+void map_kill_figures_category_in_area(grid_slice *slice, figure_category category)
 {
     int grid_offset;
-    for (int yy = miny; yy <= maxy; yy++) {
-        for (int xx = minx; xx <= maxx; xx++) {
-            grid_offset = map_grid_offset(minx, miny);
-            map_kill_figures_category_at(grid_offset, category);
-        }
+    for (int i = 0; i < slice->size; i++) {
+        grid_offset = slice->grid_offsets[i];
+        map_kill_figures_category_at(grid_offset, category);
     }
 }
 
