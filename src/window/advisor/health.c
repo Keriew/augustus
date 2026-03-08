@@ -57,7 +57,7 @@ static void print_health_building_info(int y_offset, building_type type, int pop
 
 int window_advisor_health_get_rating_text_id(void)
 {
-    //the group id is 56
+    // the group id is 56
     return city_health() / 10 + 16;
 }
 
