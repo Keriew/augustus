@@ -2038,7 +2038,6 @@ static void handle_input(const mouse *m, const hotkeys *h)
 
             switch (obj->type) {
                 case EMPIRE_OBJECT_CITY:
-
                     empire_clear_selected_object();
                     window_invalidate();
                     break;
