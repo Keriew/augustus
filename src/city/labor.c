@@ -1,6 +1,7 @@
 #include "labor.h"
 
 #include "building/building.h"
+#include "building/count.h"
 #include "building/monument.h"
 #include "building/properties.h"
 #include "core/config.h"
@@ -230,6 +231,11 @@ void city_labor_calculate_workers(int num_plebs, int num_patricians)
         city_data.population.working_age = calc_adjust_with_percentage(city_population_people_of_working_age(), 60);
         city_data.labor.workers_available = calc_adjust_with_percentage(
             city_data.population.working_age, city_data.population.percentage_plebs);
+    }
+    // Pantheon Reworked Module 2: each Luxury Palace grants 30 workers
+    if (building_monument_gt_module_is_active(PANTHEON_MODULE_4_LUXURY_PALACE)) {
+        city_data.labor.workers_available +=
+            building_count_active(BUILDING_HOUSE_LUXURY_PALACE) * 30;
     }
 }
 

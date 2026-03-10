@@ -133,8 +133,8 @@ static int sea_trader_bonus_speed(void)
     if (building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE)) {
         return 25;
     }
-    // Mercury Reworked module 2: sea trader speed bonus
-    if (building_monument_gt_module_is_active(MERCURY_MODULE_4_SEA_TRADER)) {
+    // Neptune Reworked module 2: sea trader speed bonus
+    if (building_monument_gt_module_is_active(NEPTUNE_MODULE_4_SEA_TRADE)) {
         return 20;
     }
     return 0;

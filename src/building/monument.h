@@ -24,9 +24,15 @@ typedef enum {
     CERES_MODULE_3_FARM_SPEED,
     CERES_MODULE_4_MARKET_SPEED,
     MERCURY_MODULE_3_LAND_TRADER,
-    MERCURY_MODULE_4_SEA_TRADER,
+    MERCURY_MODULE_4_PROSPERITY,
+    NEPTUNE_MODULE_3_FOUNTAIN_RESERVOIR,
+    NEPTUNE_MODULE_4_SEA_TRADE,
     PANTHEON_MODULE_1_DESTINATION_PRIESTS,
-    PANTHEON_MODULE_2_HOUSING_EVOLUTION
+    PANTHEON_MODULE_2_HOUSING_EVOLUTION,
+    PANTHEON_MODULE_3_SENATE,
+    PANTHEON_MODULE_4_LUXURY_PALACE,
+    MARS_MODULE_3_SUPPLY_CHAIN,
+    MARS_MODULE_4_BARRACKS_VICTORY
 } module_type;
 
 int building_monument_access_point(building *b, map_point *dst);
@@ -63,6 +69,7 @@ void building_monument_finish_monuments(void);
 void building_monuments_set_construction_phase(int phase);
 int building_monument_get_venus_gt(void);
 int building_monument_get_neptune_gt(void);
+int building_monument_get_neptune_reworked_gt(void);
 void building_monument_initialize_deliveries(void);
 int building_monument_count_grand_temples(void);
 void building_monument_delivery_save_state(buffer *list);

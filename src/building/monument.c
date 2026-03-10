@@ -453,6 +453,12 @@ int building_monument_get_neptune_gt(void)
     return monument ? monument->id : 0;
 }
 
+int building_monument_get_neptune_reworked_gt(void)
+{
+    building *monument = building_first_of_type(BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED);
+    return monument ? monument->id : 0;
+}
+
 int building_monument_phases(building_type type)
 {
     return MONUMENT_TYPES[type] ? MONUMENT_TYPES[type]->phases : 0;
@@ -750,9 +756,24 @@ int building_monument_gt_module_is_active(int module)
         module_num = (module == CERES_MODULE_3_FARM_SPEED) ? 1 : 2;
     }
     // Special handling for reworked Mercury temple modules
-    if (module == MERCURY_MODULE_3_LAND_TRADER || module == MERCURY_MODULE_4_SEA_TRADER) {
+    if (module == MERCURY_MODULE_3_LAND_TRADER || module == MERCURY_MODULE_4_PROSPERITY) {
         temple_type = BUILDING_GRAND_TEMPLE_MERCURY_REWORKED;
         module_num = (module == MERCURY_MODULE_3_LAND_TRADER) ? 1 : 2;
+    }
+    // Special handling for reworked Neptune temple modules
+    if (module == NEPTUNE_MODULE_3_FOUNTAIN_RESERVOIR || module == NEPTUNE_MODULE_4_SEA_TRADE) {
+        temple_type = BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED;
+        module_num = (module == NEPTUNE_MODULE_3_FOUNTAIN_RESERVOIR) ? 1 : 2;
+    }
+    // Special handling for reworked Pantheon modules
+    if (module == PANTHEON_MODULE_3_SENATE || module == PANTHEON_MODULE_4_LUXURY_PALACE) {
+        temple_type = BUILDING_PANTHEON_REWORKED;
+        module_num = (module == PANTHEON_MODULE_3_SENATE) ? 1 : 2;
+    }
+    // Special handling for reworked Mars temple modules
+    if (module == MARS_MODULE_3_SUPPLY_CHAIN || module == MARS_MODULE_4_BARRACKS_VICTORY) {
+        temple_type = BUILDING_GRAND_TEMPLE_MARS_REWORKED;
+        module_num = (module == MARS_MODULE_3_SUPPLY_CHAIN) ? 1 : 2;
     }
 
     return building_monument_module_type(temple_type) == module_num;

@@ -233,6 +233,11 @@ void map_water_supply_update_reservoir_fountain(void)
         building *b = building_get(building_monument_get_neptune_gt());
         map_terrain_add_with_radius(b->x, b->y, 7, map_water_supply_reservoir_radius(), TERRAIN_RESERVOIR_RANGE);
     }
+    // Neptune Reworked base bonus - grand temple provides water access like a filled reservoir
+    if (building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED)) {
+        building *b = building_get(building_monument_get_neptune_reworked_gt());
+        map_terrain_add_with_radius(b->x, b->y, 7, map_water_supply_reservoir_radius(), TERRAIN_RESERVOIR_RANGE);
+    }
 
     // fountains
     for (building *b = building_first_of_type(BUILDING_FOUNTAIN); b; b = b->next_of_type) {
@@ -346,7 +351,8 @@ int map_water_supply_is_building_unnecessary(int building_id, int radius)
 int map_water_supply_fountain_radius(void)
 {
     int radius = scenario_property_climate() == CLIMATE_DESERT ? FOUNTAIN_RADIUS - 1 : FOUNTAIN_RADIUS;
-    if (building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE)) {
+    if (building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE) ||
+            building_monument_gt_module_is_active(NEPTUNE_MODULE_3_FOUNTAIN_RESERVOIR)) {
         radius++;
     }
 
@@ -356,7 +362,8 @@ int map_water_supply_fountain_radius(void)
 int map_water_supply_reservoir_radius(void)
 {
     int radius = RESERVOIR_RADIUS;
-    if (building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE)) {
+    if (building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE) ||
+            building_monument_gt_module_is_active(NEPTUNE_MODULE_3_FOUNTAIN_RESERVOIR)) {
         radius += 2;
     }
 

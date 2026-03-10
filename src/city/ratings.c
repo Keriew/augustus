@@ -2,6 +2,7 @@
 
 #include "building/building.h"
 #include "building/count.h"
+#include "building/monument.h"
 #include "building/properties.h"
 #include "city/culture.h"
 #include "city/data_private.h"
@@ -448,6 +449,11 @@ static void update_culture_rating(void)
     city_data.ratings.culture += building_count_active(BUILDING_GRAND_TEMPLE_MARS_REWORKED) * MONUMENT_CULTURE_BONUS;
     city_data.ratings.culture += building_count_active(BUILDING_PANTHEON) * MONUMENT_CULTURE_BONUS;
     city_data.ratings.culture += building_count_active(BUILDING_PANTHEON_REWORKED) * MONUMENT_CULTURE_BONUS;
+    // Pantheon Reworked Module 2: each Luxury Palace grants +2 culture
+    if (building_monument_gt_module_is_active(PANTHEON_MODULE_4_LUXURY_PALACE)) {
+        city_data.ratings.culture +=
+            building_count_active(BUILDING_HOUSE_LUXURY_PALACE) * 2;
+    }
     city_data.ratings.culture += building_count_active(BUILDING_COLOSSEUM) * MONUMENT_CULTURE_BONUS;
     city_data.ratings.culture += building_count_active(BUILDING_HIPPODROME) * MONUMENT_CULTURE_BONUS;
 

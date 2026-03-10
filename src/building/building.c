@@ -937,7 +937,7 @@ int building_get_levy(const building *b)
 
 
     // Pantheon base bonus
-    if (building_monument_working(BUILDING_PANTHEON) &&
+    if ((building_monument_working(BUILDING_PANTHEON) || building_monument_working(BUILDING_PANTHEON_REWORKED)) &&
         ((b->type >= BUILDING_SMALL_TEMPLE_CERES && b->type <= BUILDING_LARGE_TEMPLE_VENUS) ||
             (b->type >= BUILDING_GRAND_TEMPLE_CERES && b->type <= BUILDING_GRAND_TEMPLE_VENUS) ||
             b->type == BUILDING_ORACLE || b->type == BUILDING_NYMPHAEUM || b->type == BUILDING_SMALL_MAUSOLEUM ||

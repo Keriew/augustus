@@ -629,6 +629,16 @@ int figure_service_provide_coverage(figure *f)
                     provide_culture(x, y, religion_coverage_venus);
                     provide_culture(x, y, religion_coverage_pantheon);
                     break;
+                case BUILDING_SENATE:
+                    if (building_monument_gt_module_is_active(PANTHEON_MODULE_3_SENATE)) {
+                        houses_serviced = provide_culture(x, y, religion_coverage_ceres);
+                        provide_culture(x, y, religion_coverage_neptune);
+                        provide_culture(x, y, religion_coverage_mercury);
+                        provide_culture(x, y, religion_coverage_mars);
+                        provide_culture(x, y, religion_coverage_venus);
+                        provide_culture(x, y, religion_coverage_pantheon);
+                    }
+                    break;
                 default:
                     break;
             }

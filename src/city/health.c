@@ -264,6 +264,10 @@ static void adjust_sickness_level_in_house(building *b, int health, int populati
         if (building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE)) {
             delta -= 5;
         }
+        // Neptune Reworked GT reduces the delta by 5 for houses with Neptune access
+        if (building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED) && b->data.house.temple_neptune) {
+            delta -= 5;
+        }
 
         // If delta is positive, it is reduced depending on house health, global health and hospital access
         if (delta > 0) {

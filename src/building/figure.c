@@ -1336,11 +1336,26 @@ static void spawn_figure_senate_forum(building *b)
         set_forum_graphic(b);
     }
     check_labor_problem(b);
+
+    map_point road;
+    int has_road = map_has_road_access(b->x, b->y, b->size, &road);
+
+    // Module 1: Senate sends a roaming Pantheon priest (tracked in figure_id2)
+    if (b->type == BUILDING_SENATE && has_road &&
+        building_monument_gt_module_is_active(PANTHEON_MODULE_3_SENATE)) {
+        if (!b->figure_id2 || figure_get(b->figure_id2)->state == FIGURE_STATE_DEAD) {
+            figure *priest = figure_create(FIGURE_PRIEST, road.x, road.y, DIR_0_TOP);
+            priest->action_state = FIGURE_ACTION_125_ROAMING;
+            priest->building_id = b->id;
+            b->figure_id2 = priest->id;
+            figure_movement_init_roaming(priest);
+        }
+    }
+
     if (has_figure_of_type(b, FIGURE_TAX_COLLECTOR)) {
         return;
     }
-    map_point road;
-    if (map_has_road_access(b->x, b->y, b->size, &road)) {
+    if (has_road) {
         spawn_labor_seeker(b, road.x, road.y, 50);
         int pct_workers = worker_percentage(b);
         int spawn_delay;
@@ -1610,6 +1625,17 @@ static void spawn_figure_barracks(building *b)
         // recruitment penalty for no food
         if (city_data.mess_hall.food_stress_cumulative > 20) {
             spawn_delay += city_data.mess_hall.food_stress_cumulative - 20;
+        }
+
+        // Mars Reworked Module 2: barracks trains 12% faster per food type at supply post
+        if (building_monument_gt_module_is_active(MARS_MODULE_4_BARRACKS_VICTORY)) {
+            int reduction = 12 * city_data.mess_hall.food_types;
+            if (reduction > 0) {
+                spawn_delay = calc_adjust_with_percentage(spawn_delay, 100 - reduction);
+                if (spawn_delay < 1) {
+                    spawn_delay = 1;
+                }
+            }
         }
 
         b->figure_spawn_delay++;
