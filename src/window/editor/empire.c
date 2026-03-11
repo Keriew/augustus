@@ -1009,7 +1009,11 @@ static void refresh_empire(void)
 
 static void set_quota(int value)
 {
-    trade_route_set_limit(empire_city_get(data.selected_city)->route_id, data.selected_resource, value, data.add_to_buying);
+    if (data.add_to_buying) {
+        empire_city_change_buying_of_resource(empire_city_get(data.selected_city), data.selected_resource, value);
+    } else {
+        empire_city_change_selling_of_resource(empire_city_get(data.selected_city), data.selected_resource, value);   
+    }
 }
 
 static void handle_input(const mouse *m, const hotkeys *h)
