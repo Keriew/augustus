@@ -76,6 +76,7 @@ static void button_change_index(int is_down, int param2);
 static void button_set_index(const generic_button *button);
 static void button_after_icon(const generic_button *button);
 static void button_route_type(const generic_button *button);
+static void button_route_cost(const generic_button *button);
 static void button_empire_tools(int param1, int param2);
 
 static arrow_button arrow_buttons_empire[] = {
@@ -117,8 +118,9 @@ static generic_button top_buttons[] = {
 };
 
 static generic_button trade_city_buttons[] = {
-    {44, 0, 24, 24, button_route_type},
-    {0, 0, 24, 24, button_after_icon}
+    {184, 0, 24, 24, button_route_type},
+    {0, 0, 120, 24, button_route_cost},
+    {140, 0, 24, 24, button_after_icon}
 };
 
 static arrow_button order_buttons[] = {
@@ -694,7 +696,9 @@ static void draw_city_info(const empire_city *city)
             add_resource_buttons[0].dont_draw = 0;
             add_resource_buttons[1].dont_draw = 0;
             trade_city_buttons[0].parameter1 = 0;
-            trade_city_buttons[1].parameter1 = city->type != EMPIRE_CITY_FUTURE_TRADE;
+            trade_city_buttons[2].parameter1 = city->type != EMPIRE_CITY_FUTURE_TRADE;
+            trade_city_buttons[1].parameter1 = 0;
+            trade_city_buttons[1].x = 44 * (city->type != EMPIRE_CITY_FUTURE_TRADE);
             int text_width = lang_text_draw(47, 5, x_offset + 20 + width, y_offset, FONT_NORMAL_GREEN);
             width += text_width;
             int resource_x_offset = x_offset + 30 + width;
@@ -732,14 +736,15 @@ static void draw_city_info(const empire_city *city)
             if (resource_x_offset + etc_width + 32 + 8 + 39 >= data.panel.x_max - 360) {
                 // if even the add resource button doesn't fit hide the trade city buttons so it can be shown
                 trade_city_buttons[0].parameter1 = 1;
+                trade_city_buttons[2].parameter1 = 1;
                 trade_city_buttons[1].parameter1 = 1;
             }
             for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
                 if (empire_object_city_buys_resource(city->empire_object_id, r)) {
                     int max_trade = trade_route_limit(city->route_id, r, 1);
                     int resource_width = 32 + text_get_number_width(max_trade, '\0', "", FONT_NORMAL_GREEN);
-                    if (resource_x_offset + etc_width + 360 - ((!trade_city_buttons[1].parameter1) ?
-                        trade_city_buttons[1].x : 0) + resource_width + 8 + 39 >= data.panel.x_max) {
+                    if (resource_x_offset + etc_width + 500 - ((!trade_city_buttons[2].parameter1) ?
+                        trade_city_buttons[2].x : 0) + resource_width + 8 + 39 >= data.panel.x_max) {
                         // if resources hit the buttons on the other side replace the resources with ...
                         text_draw(string_from_ascii("..."), resource_x_offset + 2, y_offset + 4, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
                         resource_x_offset += etc_width + 8;
@@ -766,30 +771,39 @@ static void draw_city_info(const empire_city *city)
             
             if (!trade_city_buttons[0].parameter1) {
                 // if the switch trade route type button isn't hidden draw it
-                button_border_draw(data.panel.x_max - 360 + trade_city_buttons[0].x, data.y_max - 93,
+                button_border_draw(data.panel.x_max - 500 + trade_city_buttons[0].x, data.y_max - 93,
                     24, 24, data.focus_city_button_id == 1);
                 int image_id = assets_get_image_id("UI", empire_object_is_sea_trade_route(city->route_id) ?
                     "SeaWaypoint" : "LandWaypoint");
-                image_draw(image_id, data.panel.x_max - 360 + trade_city_buttons[0].x + 3,
+                image_draw(image_id, data.panel.x_max - 500 + trade_city_buttons[0].x + 3,
                     data.y_max - 93 + 3, COLOR_MASK_NONE, SCALE_NONE);
             }
-            if (!trade_city_buttons[1].parameter1) {
+            if (!trade_city_buttons[2].parameter1) {
                 // if the future trade after icon button isn't hidden draw it
-                button_border_draw(data.panel.x_max - 360 + trade_city_buttons[1].x, data.y_max - 93,
-                    24, 24, data.focus_city_button_id == 2);
+                button_border_draw(data.panel.x_max - 500 + trade_city_buttons[2].x, data.y_max - 93,
+                    24, 24, data.focus_city_button_id == 3);
                 const empire_object *obj = empire_object_get(city->empire_object_id);
                 int image_id = empire_city_get_icon_image_id(obj->future_trade_after_icon);
                 if (image_id > 0) {
                     float scale = obj->width > obj->height ? obj->width : obj->height / 24.0f;
-                    image_draw(image_id, (data.panel.x_max - 360 + trade_city_buttons[1].x) * scale,
+                    image_draw(image_id, (data.panel.x_max - 500 + trade_city_buttons[2].x) * scale,
                         (data.y_max - 93) * scale, COLOR_MASK_NONE, scale);
                     const image *img = image_get(image_id);
                     if (img->animation && img->animation->speed_id) {
                         image_draw(image_id + obj->animation_index,
-                        (data.panel.x_max - 360 + trade_city_buttons[1].x + img->animation->sprite_offset_x / 2) * scale,
+                        (data.panel.x_max - 500 + trade_city_buttons[2].x + img->animation->sprite_offset_x / 2) * scale,
                         (data.y_max - 93 + img->animation->sprite_offset_y / 2) * scale, COLOR_MASK_NONE, scale);
                     }
                 }
+            }
+            if (!trade_city_buttons[1].parameter1) {
+                // if the change trade route cost button isn't hidden draw it
+                button_border_draw(data.panel.x_max - 500 + trade_city_buttons[1].x, data.y_max - 93,
+                    120, 24, data.focus_city_button_id == 2);
+                const uint8_t cost_text[32];
+                snprintf((char *)cost_text, 32, "%i %s", city->cost_to_open, lang_get_string(6, 0));
+                text_draw_centered(cost_text, data.panel.x_max - 500 + trade_city_buttons[1].x, data.y_max - 85,
+                    120, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
             }
             
             break;
@@ -887,6 +901,7 @@ static void draw_object_info(void)
 static void draw_panel_buttons(const empire_city *city)
 {
     trade_city_buttons[0].parameter1 = 1;
+    trade_city_buttons[2].parameter1 = 1;
     trade_city_buttons[1].parameter1 = 1;
     top_buttons[0].parameter1 = 1;
     top_buttons[1].parameter1 = 1;
@@ -1072,7 +1087,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         }
     }
     if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE && 
-        generic_buttons_handle_mouse(m, data.panel.x_max - 360, data.y_max - 93, trade_city_buttons, 2, &data.focus_city_button_id)) {
+        generic_buttons_handle_mouse(m, data.panel.x_max - 500, data.y_max - 93, trade_city_buttons, 3, &data.focus_city_button_id)) {
         if (!trade_city_buttons[data.focus_city_button_id - 1].parameter1) {
             return;
         }
@@ -1460,6 +1475,20 @@ static void button_route_type(const generic_button *button)
     route_obj->image_id = image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE) + !city->is_sea_trade;
 }
 
+static void set_opening_cost(int value)
+{
+    empire_city_get(data.selected_city)->cost_to_open = value;
+}
+
+static void button_route_cost(const generic_button *button)
+{
+    if (button->parameter1) {
+        return;
+    }
+    window_numeric_input_bound_show((data.x_min + data.x_max) / 2 - 4 * BLOCK_SIZE - screen_dialog_offset_x(),
+        ((data.y_min + data.y_max) - 15 * BLOCK_SIZE) / 2 - screen_dialog_offset_y(), NULL, 6, 1, 999999, set_opening_cost);
+}
+
 static void set_tool(int value)
 {
     empire_editor_set_tool(value);
@@ -1513,23 +1542,32 @@ static int generic_button_tooltips(tooltip_context *c)
 {
     generic_button *btn;
     const mouse *m = mouse_get();
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 3; i++) {
         btn = &trade_city_buttons[i];
         if (btn->parameter1) {
             continue;
         }
-        if (btn->x + data.panel.x_max - 360 <= m->x && btn->x + data.panel.x_max - 360 + btn->width > m->x &&
+        if (btn->x + data.panel.x_max - 500 <= m->x && btn->x + data.panel.x_max - 500 + btn->width > m->x &&
             btn->y + data.y_max - 93 <= m->y && btn->y + data.y_max - 93 + btn->height > m->y) {
-            if (i) {
-                const uint8_t *raw_text = translation_for(TR_EMPIRE_TOOLTIP_AFTER_ICON);
-                const uint8_t *icon_text = translation_for(TR_EMPIRE_CITY_ICON_DEFAULT + empire_object_get(
-                    empire_city_get(data.selected_city)->empire_object_id)->future_trade_after_icon);
-                static char formatted_text[512];
-                snprintf(formatted_text, sizeof(formatted_text), "%s %s", raw_text, icon_text);
-                c->precomposed_text = (const uint8_t *) formatted_text;
-            } else {
-                c->text_group = CUSTOM_TRANSLATION;
-                c->text_id = TR_EMPIRE_TOOLTIP_ROUTE_TYPE;
+            switch (i) {
+                case 0:
+                    c->text_group = CUSTOM_TRANSLATION;
+                    c->text_id = TR_EMPIRE_TOOLTIP_ROUTE_TYPE;
+                    break;
+                case 1:
+                    c->text_group = CUSTOM_TRANSLATION;
+                    c->text_id = TR_EMPIRE_TOOLTIP_ROUTE_COST;
+                    break;
+                case 2:
+                {
+                    const uint8_t *raw_text = translation_for(TR_EMPIRE_TOOLTIP_AFTER_ICON);
+                    const uint8_t *icon_text = translation_for(TR_EMPIRE_CITY_ICON_DEFAULT + empire_object_get(
+                        empire_city_get(data.selected_city)->empire_object_id)->future_trade_after_icon);
+                    static char formatted_text[512];
+                    snprintf(formatted_text, sizeof(formatted_text), "%s %s", raw_text, icon_text);
+                    c->precomposed_text = (const uint8_t *) formatted_text;
+                    break;
+                }
             }
             c->type = TOOLTIP_BUTTON;
             return 1;

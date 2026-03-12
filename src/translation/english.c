@@ -2012,7 +2012,8 @@ static translation_string all_strings[] = {
     {TR_EMPIRE_TOOLTIP_ROUTE_TYPE, "Switch route type"},
     {TR_EMPIRE_TOOLTIP_AFTER_ICON, "Change icon of city after conversion\nCurrent icon:"},
     {TR_EMPIRE_TOOL_PICK, "Pick empire tool"},
-    {TR_EMPIRE_TOOLTIP_SHOW_TOOLS, "Show all tools"}
+    {TR_EMPIRE_TOOLTIP_SHOW_TOOLS, "Show all tools"},
+    {TR_EMPIRE_TOOLTIP_ROUTE_COST, "Change route cost"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
