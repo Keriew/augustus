@@ -25,7 +25,7 @@ typedef struct {
  * @param data Data to use
  * @param size Size of the data
  */
-void buffer_init(buffer *buffer, void *data, int size);
+void buffer_init(buffer *buffer, void *data, size_t size);
 
 /**
  * Resets the buffer so that reading/writing starts at the beginning again
@@ -38,7 +38,7 @@ void buffer_reset(buffer *buffer);
  * @param buffer Buffer
  * @param offset Offset to set it to
  */
-void buffer_set(buffer *buffer, int offset);
+void buffer_set(buffer *buffer, size_t offset);
 
 /**
  * Writes an unsigned 8-bit integer
@@ -162,7 +162,7 @@ int buffer_at_end(buffer *buffer);
  * @param buf Buffer
  * @param size Size in bytes of the buffer to be saved
  */
-void buffer_init_dynamic(buffer *buf, uint32_t size);
+void buffer_init_dynamic(buffer *buf, size_t size);
 
 /**
  * Initializes a buffer for saving a dynamic state piece / file piece.
@@ -171,7 +171,7 @@ void buffer_init_dynamic(buffer *buf, uint32_t size);
  * @param buf Buffer
  * @return The size of the buffer in bytes.
  */
-uint32_t buffer_load_dynamic(buffer *buf);
+size_t buffer_load_dynamic(buffer *buf);
 
 /**
  * Initializes a buffer for saving a dynamic state piece / file piece.
@@ -181,13 +181,13 @@ uint32_t buffer_load_dynamic(buffer *buf);
  * @param array_size Number of elements in the array. If you are saving only a single struct, then this must be 1.
  * @param element_size Size in bytes of a single entry of the array.
  */
-void buffer_init_dynamic_array(buffer *buf, uint32_t array_size, uint32_t element_size);
+void buffer_init_dynamic_array(buffer *buf, size_t array_size, size_t element_size);
 
 /**
  * Reads the size, version, array_size and struct_size headers from the piece buffer.
  * @param buf Buffer
  * @return Number of array items.
  */
-uint32_t buffer_load_dynamic_array(buffer *buf);
+size_t buffer_load_dynamic_array(buffer *buf);
 
 #endif // CORE_BUFFER_H

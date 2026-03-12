@@ -435,7 +435,7 @@ static void mars_kill_enemies(void)
         return;
     }
     int grid_offset = 0;
-    for (int i = 1; i < figure_count() && to_kill > 0; i++) {
+    for (unsigned int i = 1; i < figure_count() && to_kill > 0; i++) {
         figure *f = figure_get(i);
         if (f->state != FIGURE_STATE_ALIVE) {
             continue;

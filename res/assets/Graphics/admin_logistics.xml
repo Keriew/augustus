@@ -24,6 +24,30 @@
 		<layer group="this" image="roadblock" x="0" y="0"/>
 		<layer src="Roadblock_New_Orange" x="10" y="4"/>
 	</image>
+	<image id="roadblock_black" isometric="true">
+		<layer group="this" image="roadblock" x="0" y="0"/>
+		<layer src="Roadblock_New_Black" x="10" y="4"/>
+	</image>
+	<image id="roadblock_emerald" isometric="true">
+		<layer group="this" image="roadblock" x="0" y="0"/>
+		<layer src="Roadblock_New_Emerald" x="10" y="4"/>
+	</image>
+	<image id="roadblock_pink" isometric="true">
+		<layer group="this" image="roadblock" x="0" y="0"/>
+		<layer src="Roadblock_New_Pink" x="10" y="4"/>
+	</image>
+	<image id="roadblock_brown" isometric="true">
+		<layer group="this" image="roadblock" x="0" y="0"/>
+		<layer src="Roadblock_New_Brown" x="10" y="4"/>
+	</image>
+	<image id="roadblock_grey" isometric="true">
+		<layer group="this" image="roadblock" x="0" y="0"/>
+		<layer src="Roadblock_New_Grey" x="10" y="4"/>
+	</image>
+	<image id="roadblock_lime" isometric="true">
+		<layer group="this" image="roadblock" x="0" y="0"/>
+		<layer src="Roadblock_New_Lime" x="10" y="4"/>
+	</image>
 	<!-- Note: Architect ON animation reference DO NOT USE! -->
 	<image id="Architects_Guild_On_01" width="95" height="28">
 		<layer src="Architects_Guild_ON_Layer" x="22" y="6"/>

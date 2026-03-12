@@ -245,7 +245,7 @@ static int get_enemy_troops_count(scenario_action_t *action)
 {
     enemy_class_t enemy_class = action->parameter3;
     int count = 0;
-    for (int i = 1; i < figure_count(); i++) {    // Iterate through all figures to count enemy troops
+    for (unsigned int i = 1; i < figure_count(); i++) {    // Iterate through all figures to count enemy troops
         figure *f = figure_get(i);
         if (!figure_is_enemy(f) || figure_is_dead(f)) {
             continue;

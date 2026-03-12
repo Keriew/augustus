@@ -37,7 +37,7 @@ void figure_create_flotsam(void)
     if (!scenario_map_has_river_entry() || !scenario_map_has_river_exit() || !scenario_map_has_flotsam()) {
         return;
     }
-    for (int i = 1; i < figure_count(); i++) {
+    for (unsigned int i = 1; i < figure_count(); i++) {
         figure *f = figure_get(i);
         if (f->state && f->type == FIGURE_FLOTSAM) {
             figure_delete(f);
@@ -314,7 +314,7 @@ void figure_fishing_boat_action(figure *f)
 
 void figure_sink_all_ships(void)
 {
-    for (int i = 1; i < figure_count(); i++) {
+    for (unsigned int i = 1; i < figure_count(); i++) {
         figure *f = figure_get(i);
         if (f->state != FIGURE_STATE_ALIVE) {
             continue;
@@ -336,7 +336,7 @@ void figure_sink_half_ships(void)
 {
     int fishing_to_destroy = 0;
     int trade_to_destroy = 0;
-    for (int i = 1; i < figure_count(); i++) {
+    for (unsigned int i = 1; i < figure_count(); i++) {
         figure *f = figure_get(i);
         if (f->state != FIGURE_STATE_ALIVE) {
             continue;
@@ -349,7 +349,7 @@ void figure_sink_half_ships(void)
     }
     int fishing_destroyed = 0;
     int trade_destroyed = 0;
-    for (int i = 1; i < figure_count(); i++) {
+    for (unsigned int i = 1; i < figure_count(); i++) {
         figure *f = figure_get(i);
         if (f->state != FIGURE_STATE_ALIVE) {
             continue;

@@ -4,6 +4,7 @@
 #include "core/buffer.h"
 #include "core/direction.h"
 #include "figure/action.h"
+#include "figure/properties.h"
 #include "figure/type.h"
 
 #define FIGURE_FACTION_ROAMER_PREVIEW 2
@@ -105,8 +106,8 @@ typedef struct {
     unsigned char trader_id;
     unsigned char wait_ticks_next_target; //used for retargetting for fighting figures, and destination for pushers
     unsigned char dont_draw_elevated;
-    short target_figure_id;
-    short targeted_by_figure_id;
+    unsigned short target_figure_id;
+    unsigned short targeted_by_figure_id;
     unsigned short created_sequence;
     unsigned short target_figure_created_sequence;
     unsigned char figures_on_same_tile_index;
@@ -124,9 +125,9 @@ typedef struct {
     } tourist;
 } figure;
 
-figure *figure_get(int id);
+figure *figure_get(unsigned int id);
 
-int figure_count(void);
+unsigned int figure_count(void);
 
 /**
  * Creates a figure
@@ -155,6 +156,8 @@ int figure_is_caesar_enemy(const figure *f);
 int figure_is_legion(const figure *f);
 
 int figure_is_herd(const figure *f);
+
+int figure_is_category(figure *f, figure_category category);
 
 void figure_init_scenario(void);
 

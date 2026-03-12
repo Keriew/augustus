@@ -12,6 +12,13 @@
  */
 unsigned int map_building_at(int grid_offset);
 
+/**
+ * Returns the building type at the given offset
+ * @param grid_offset Map offset
+ * @return Building type of building at offset, BUILDING_NONE means no building or unknown building type
+ */
+building_type map_building_type_at(int grid_offset);
+
 unsigned int map_building_from_buffer(buffer *buildings, int grid_offset);
 
 void map_building_set(int grid_offset, unsigned int building_id);

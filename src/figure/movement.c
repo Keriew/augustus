@@ -185,7 +185,7 @@ static void set_next_route_tile_direction(figure *f)
 {
     if (f->routing_path_id > 0) {
         if (f->routing_path_current_tile < f->routing_path_length) {
-            f->direction = figure_route_get_next_direction(f->routing_path_id);
+            f->direction = figure_route_get_current_direction(f->routing_path_id);
         } else {
             figure_route_remove(f);
             f->direction = DIR_FIGURE_AT_DESTINATION;
@@ -318,6 +318,7 @@ static void walk_ticks(figure *f, int num_ticks, int roaming_enabled)
                 break;
             }
             f->routing_path_current_tile++;
+            figure_route_advance_tile(f->routing_path_id);
             f->previous_tile_direction = f->direction;
             f->progress_on_tile = 0;
             move_to_next_tile(f);
@@ -648,6 +649,7 @@ void figure_movement_roam_ticks(figure *f, int num_ticks)
                 }
             }
             f->routing_path_current_tile++;
+            figure_route_advance_tile(f->routing_path_id);
             f->previous_tile_direction = f->direction;
             f->progress_on_tile = 0;
             move_to_next_tile(f);

@@ -78,9 +78,6 @@ static void draw_status(void)
             break;
     }
 
-    text_draw_number_scaled(widget_map_editor_get_grid_offset(), 0, translation_for(TR_EDITOR_GRID_OFFSET),
-        text_offset, 209, FONT_NORMAL_GREEN, 0, SCALE_NONE);
-
     map_point entry = scenario_map_entry();
     map_point exit = scenario_map_exit();
     int people_text;

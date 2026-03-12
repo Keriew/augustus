@@ -10,7 +10,7 @@
 typedef struct {
     unsigned int id;
     unsigned int figure_id;
-    unsigned short total_directions;
+    unsigned int total_directions;
     uint8_t *directions;
 
     size_t current_step;
