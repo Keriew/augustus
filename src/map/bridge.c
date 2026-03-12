@@ -3,7 +3,9 @@
 #include "building/building.h"
 #include "building/type.h"
 #include "city/view.h"
+#include "core/config.h"
 #include "core/direction.h"
+#include "figure/figure.h"
 #include "game/undo.h"
 #include "map/building.h"
 #include "map/building_tiles.h"
@@ -356,6 +358,9 @@ void map_bridge_remove(int grid_offset, int mark_deleted)
         if (mark_deleted) {
             map_property_mark_deleted(current);
         } else {
+            if (config_get(CONFIG_GP_CH_ALWAYS_DESTROY_BRIDGES)) {
+                map_kill_figures_category_at(current, FIGURE_CATEGORY_ALL ^ FIGURE_CATEGORY_INACTIVE);
+            }
             map_sprite_clear_tile(current);
             map_terrain_remove(current, TERRAIN_ROAD);
             map_terrain_remove(current, TERRAIN_BUILDING);
@@ -372,7 +377,8 @@ void map_bridge_remove(int grid_offset, int mark_deleted)
     map_tiles_update_region_empty_land(bridge_x_start, bridge_y_start, bridge_x_end, bridge_y_end);
 }
 
-int map_bridge_count_figures(int grid_offset)
+
+int map_bridge_has_figures(int grid_offset)
 {
     if (!map_is_bridge(grid_offset)) {
         return 0;
@@ -390,15 +396,14 @@ int map_bridge_count_figures(int grid_offset)
 
     unsigned int building_id = map_building_at(start);
     int current = start;
-    int figures = 0;
     // find lower end of the bridge
     while (map_is_bridge(current) && map_building_at(current) == building_id) {
-        if (map_has_figure_at(current)) {
-            figures++;
+        if (map_has_figure_category_at(current, FIGURE_CATEGORY_ALL ^ FIGURE_CATEGORY_INACTIVE)) {
+            return 1;
         }
         current += delta;
     }
-    return figures;
+    return 0;
 }
 
 void map_bridge_update_after_rotate(int counter_clockwise)

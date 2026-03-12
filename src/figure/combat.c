@@ -64,7 +64,7 @@ static void hit_opponent(figure *f)
     const figure_properties *props = figure_properties_for_type(f->type);
     const figure_properties *opponent_props = figure_properties_for_type(opponent->type);
     int cat = opponent_props->category;
-    if (cat == FIGURE_CATEGORY_CITIZEN || cat == FIGURE_CATEGORY_CRIMINAL) {
+    if (cat & FIGURE_CATEGORY_CITIZEN || cat & FIGURE_CATEGORY_CRIMINAL) {
         f->attack_image_offset = 12;
     } else {
         f->attack_image_offset = 0;
@@ -405,13 +405,16 @@ int figure_combat_get_missile_target_for_enemy(figure *enemy, int max_distance, 
 
 static int can_attack_animal(figure_category category, figure_category opponent_category, formation *l, figure *opponent)
 {
-    if (category != FIGURE_CATEGORY_ARMED || opponent_category != FIGURE_CATEGORY_ANIMAL) {
+    if (!(category & FIGURE_CATEGORY_ARMED || category & FIGURE_CATEGORY_HOSTILE) || !(opponent_category & FIGURE_CATEGORY_ANIMAL)) {
         return 0;
+    }
+    if (category & FIGURE_CATEGORY_HOSTILE) {
+        return 1;
     }
     if (config_get(CONFIG_GP_CH_AUTO_KILL_ANIMALS)) {
         return 1;
     }
-    if (l->target_formation_id && l->target_formation_id == opponent->formation_id) {
+    if ((l->target_formation_id && l->target_formation_id == opponent->formation_id) || FIGURE_CATEGORY_AGGRESSIVE_ANIMAL) {
         return 1;
     }
     return 0;
@@ -445,35 +448,21 @@ void figure_combat_attack_figure_at(figure *f, int grid_offset)
             attack = 0;
         } else if (opponent->action_state == FIGURE_ACTION_149_CORPSE) {
             attack = 0;
-        } else if (category == FIGURE_CATEGORY_ARMED && opponent_category == FIGURE_CATEGORY_NATIVE) {
+        } else if (category & FIGURE_CATEGORY_ARMED && opponent_category & FIGURE_CATEGORY_NATIVE) {
             if (opponent->action_state == FIGURE_ACTION_159_NATIVE_ATTACKING) {
                 attack = 1;
             }
-        } else if (category == FIGURE_CATEGORY_ARMED && opponent_category == FIGURE_CATEGORY_CRIMINAL) {
+        } else if (category & FIGURE_CATEGORY_ARMED && opponent_category & FIGURE_CATEGORY_HOSTILE) {
             attack = 1;
-        } else if (category == FIGURE_CATEGORY_ARMED && opponent_category == FIGURE_CATEGORY_HOSTILE) {
+        } else if (category & FIGURE_CATEGORY_HOSTILE && opponent_category & FIGURE_CATEGORY_CITIZEN) {
             attack = 1;
-        } else if (category == FIGURE_CATEGORY_ARMED && opponent_category == FIGURE_CATEGORY_AGGRESSIVE_ANIMAL) {
+        } else if (category & FIGURE_CATEGORY_HOSTILE && opponent_category & FIGURE_CATEGORY_CRIMINAL) {
             attack = 1;
-        } else if (category == FIGURE_CATEGORY_HOSTILE && opponent_category == FIGURE_CATEGORY_CITIZEN) {
+        } else if (category & FIGURE_CATEGORY_AGGRESSIVE_ANIMAL && opponent_category & FIGURE_CATEGORY_CITIZEN) {
             attack = 1;
-        } else if (category == FIGURE_CATEGORY_HOSTILE && opponent_category == FIGURE_CATEGORY_ARMED) {
+        } else if (category & FIGURE_CATEGORY_AGGRESSIVE_ANIMAL && opponent_category & FIGURE_CATEGORY_ARMED) {
             attack = 1;
-        } else if (category == FIGURE_CATEGORY_HOSTILE && opponent_category == FIGURE_CATEGORY_CRIMINAL) {
-            attack = 1;
-        } else if (category == FIGURE_CATEGORY_HOSTILE && opponent_category == FIGURE_CATEGORY_ANIMAL) {
-            attack = 1;
-        } else if (category == FIGURE_CATEGORY_HOSTILE && opponent_category == FIGURE_CATEGORY_AGGRESSIVE_ANIMAL) {
-            attack = 1;
-        } else if (category == FIGURE_CATEGORY_AGGRESSIVE_ANIMAL && opponent_category == FIGURE_CATEGORY_CITIZEN) {
-            attack = 1;
-        } else if (category == FIGURE_CATEGORY_AGGRESSIVE_ANIMAL && opponent_category == FIGURE_CATEGORY_ARMED) {
-            attack = 1;
-        } else if (category == FIGURE_CATEGORY_AGGRESSIVE_ANIMAL && opponent_category == FIGURE_CATEGORY_CRIMINAL) {
-            attack = 1;
-        } else if (category == FIGURE_CATEGORY_AGGRESSIVE_ANIMAL && opponent_category == FIGURE_CATEGORY_ANIMAL) {
-            attack = 1;
-        } else if (category == FIGURE_CATEGORY_AGGRESSIVE_ANIMAL && opponent_category == FIGURE_CATEGORY_HOSTILE) {
+        } else if (category & FIGURE_CATEGORY_AGGRESSIVE_ANIMAL && opponent_category & FIGURE_CATEGORY_HOSTILE) {
             attack = 1;
         } else if (can_attack_animal(category, opponent_category, l, opponent)) {
             attack = 1;

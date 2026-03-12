@@ -222,7 +222,9 @@ void figure_route_save_state(buffer *figures, buffer *buf_paths)
     array_foreach(paths, path) {
         buffer_write_u32(figures, path->figure_id);
         buffer_write_u32(buf_paths, path->total_directions);
-        buffer_write_raw(buf_paths, path->directions, path->total_directions * sizeof(uint8_t));
+        if (path->total_directions) {
+            buffer_write_raw(buf_paths, path->directions, path->total_directions * sizeof(uint8_t));
+        }
     }
 }
 

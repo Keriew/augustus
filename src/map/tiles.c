@@ -156,6 +156,7 @@ static void set_rock_image(int x, int y, int grid_offset)
                     image_id += image_group(GROUP_TERRAIN_ROCK);
                 }
                 map_image_set(grid_offset, image_id);
+                map_building_tiles_add(0, x, y, 1, image_id, TERRAIN_ROCK);
             }
         }
     }
