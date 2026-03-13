@@ -132,6 +132,17 @@ jobs:
         with:
           name: ${{ matrix.name }}
           path: deploy/
+  lua-api:
+    name: Lua API
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Upload Lua API artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lua API
+          path: res/lua/
   windows:
     strategy:
       fail-fast: false

@@ -16,6 +16,7 @@
 #define MAX_SCENARIO_NAME 65
 #define MAX_BRIEF_DESCRIPTION 64
 #define MAX_BRIEFING 522
+#define MAX_LUA_SCRIPT_PATH 128
 
 enum {
     EVENT_NOT_STARTED = 0,
@@ -146,6 +147,8 @@ extern struct scenario_t {
         /** Temp storage for carrying over player name to next campaign mission */
         uint8_t player_name[MAX_PLAYER_NAME];
     } campaign;
+
+    char lua_script_path[MAX_LUA_SCRIPT_PATH];
 } scenario;
 
 #endif // SCENARIO_DATA_H
