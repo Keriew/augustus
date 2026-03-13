@@ -207,7 +207,11 @@ int scenario_action_type_empire_map_convert_future_trade_city_execute(scenario_a
     empire_city *city = empire_city_get(target_city_id);
     if (city->type == EMPIRE_CITY_FUTURE_TRADE) {
         city->type = EMPIRE_CITY_TRADE;
-        empire_object_set_expanded(city->empire_object_id, city->type);
+        full_empire_object *full = empire_object_get_full(city->empire_object_id);
+        full->city_type = city->type;
+        if (!full->obj.future_trade_after_icon) {
+            full->obj.future_trade_after_icon = empire_object_get_random_icon_for_empire_object(full);
+        }
         building_menu_update();
 
         if (show_message) {
@@ -618,6 +622,7 @@ int scenario_action_type_trade_route_amount_execute(scenario_action_t *action)
     int resource = action->parameter2;
     int amount = scenario_formula_evaluate_formula(action->parameter3);
     int show_message = action->parameter4;
+    int buys = action->parameter5;
 
     if (!trade_route_is_valid(route_id)) {
         return 0;
@@ -631,7 +636,7 @@ int scenario_action_type_trade_route_amount_execute(scenario_action_t *action)
         if (city_id < 0) {
             city_id = 0;
         }
-        int last_amount = trade_route_limit(route_id, resource);
+        int last_amount = trade_route_limit(route_id, resource, buys);
 
         int change = amount - last_amount;
         if (amount > 0 && change > 0) {
@@ -642,7 +647,7 @@ int scenario_action_type_trade_route_amount_execute(scenario_action_t *action)
             city_message_post(1, MESSAGE_TRADE_STOPPED, city_id, resource);
         }
     }
-    trade_route_set_limit(route_id, resource, amount);
+    trade_route_set_limit(route_id, resource, amount, buys);
     building_menu_update();
 
     return 1;

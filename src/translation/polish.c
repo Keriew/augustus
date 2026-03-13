@@ -1028,7 +1028,6 @@ static translation_string all_strings[] = {
     {TR_CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS, "Zawsze pokazuj przyciski rotacji"},
     {TR_EDITOR_CHECK_LOG_MESSAGE, "Aby uzyskać szczegółowe informacje, sprawdź plik augustus-log.txt w katalogu Augustus."},
     {TR_EDITOR_CHOOSE_CUSTOM_EMPIRE, "Wybierz niestandardowe imperium"},
-    {TR_EDITOR_CITY_PREVIEW, "Podgląd obrazu miasta: "},
     {TR_EDITOR_CURRENT_COORDS, "Aktualne współrzędne: "},
     {TR_EDITOR_CUSTOM_EMPIRE_TITLE, "Ładuje cesarstwo"},
     {TR_EDITOR_CUSTOM_MESSAGES_CLEAR, "Wyczyść wiadomości"},

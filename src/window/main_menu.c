@@ -138,7 +138,7 @@ static void button_click(const generic_button *button)
             sound_music_play_editor();
         }
     } else if (type == 5) {
-        window_config_show(CONFIG_FIRST_PAGE, 1);
+        window_config_show(CONFIG_FIRST_PAGE, 0, 1);
     } else if (type == 6) {
         window_popup_dialog_show(POPUP_DIALOG_QUIT, confirm_exit, 1);
     }
