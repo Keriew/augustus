@@ -93,6 +93,7 @@ static void set_scale_percentage(int new_scale, int pixel_width, int pixel_heigh
 #endif
 
     if (!pixel_width || !pixel_height) {
+        scale.percentage = scale.requested_percentage;
         return;
     }
 

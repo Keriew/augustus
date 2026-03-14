@@ -222,15 +222,15 @@ void scenario_custom_variable_save_state(buffer *buf)
 
 void scenario_custom_variable_load_state(buffer *buf, int version)
 {
-    unsigned int total_variables = buffer_load_dynamic_array(buf);
+    size_t total_variables = buffer_load_dynamic_array(buf);
 
     if (!array_init(custom_variables, CUSTOM_VARIABLES_SIZE_STEP, new_variable, variable_in_use) ||
-        !array_expand(custom_variables, total_variables)) {
+        !array_expand(custom_variables, (unsigned int) total_variables)) {
         log_error("Failed to initialize custom variables array - out of memory. The game will probably crash.", 0, 0);
         return;
     }
 
-    for (unsigned int i = 0; i < total_variables; i++) {
+    for (size_t i = 0; i < total_variables; i++) {
         custom_variable_t *variable = array_next(custom_variables);
         variable->in_use = buffer_read_u8(buf);
         variable->value = buffer_read_i32(buf);

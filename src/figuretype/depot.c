@@ -317,9 +317,11 @@ void figure_depot_cartpusher_action(figure *f)
                 int src_amount = src->type == BUILDING_GRANARY ?
                     building_granary_get_amount(src, b->data.depot.current_order.resource_type) :
                     building_warehouse_get_amount(src, b->data.depot.current_order.resource_type);
-                if (b->data.depot.current_order.condition.condition_type == ORDER_CONDITION_SOURCE_HAS_MORE_THAN &&
-                    src_amount < b->data.depot.current_order.condition.threshold) {
-                    break;
+                int condition_type = b->data.depot.current_order.condition.condition_type;
+                int threshold = b->data.depot.current_order.condition.threshold;
+                if ((condition_type == ORDER_CONDITION_SOURCE_HAS_MORE_THAN && src_amount < threshold) ||
+                    (condition_type == ORDER_CONDITION_DESTINATION_HAS_LESS_THAN && src_amount < threshold)) {
+                    break; // wait at source
                 }
 
                 // TODO upgradable?

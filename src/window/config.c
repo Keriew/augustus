@@ -336,6 +336,10 @@ static config_widget city_mgmt_widgets_by_category[CATEGORY_CITY_COUNT][MAX_WIDG
         {TYPE_CHECKBOX, CONFIG_GP_CH_HOUSES_DONT_EXPAND_INTO_GARDENS, TR_CONFIG_HOUSES_DONT_EXPAND_INTO_GARDENS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_GP_CH_HOUSING_PRE_MERGE_VACANT_LOTS, TR_CONFIG_GP_CH_HOUSING_PRE_MERGE_VACANT_LOTS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
+    },
+    // Destruction
+    {
+        {TYPE_CHECKBOX, CONFIG_GP_CH_ALWAYS_DESTROY_BRIDGES, TR_CONFIG_GP_CH_ALWAYS_DESTROY_BRIDGES, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     }
 };
 
@@ -359,7 +363,7 @@ typedef struct {
     list_box_type *lb;
     int count;
     int page_id;
-    int *selected_ref; //  points into selected_categories
+    int is_ui;
 } category_page_properties;
 
 //    Widget ops (measure / draw / input)
@@ -469,6 +473,7 @@ static const translation_key city_mgmt_category_keys[CATEGORY_CITY_COUNT] = {
     TR_CONFIG_CATEGORY_MANAGEMENT_ROADS,
     TR_CONFIG_CATEGORY_MANAGEMENT_ROADBLOCKS,
     TR_CONFIG_CATEGORY_MANAGEMENT_HOUSING,
+    TR_CONFIG_CATEGORY_MANAGEMENT_DESTRUCTION,
 };
 
 
@@ -1150,11 +1155,10 @@ static category_page_properties current_category_properties(void)
 {
     category_page_properties properties;
     if (data.page == CONFIG_PAGE_UI_CHANGES) {
-        properties = (category_page_properties) { &ui_list_box, CATEGORY_UI_COUNT, CONFIG_PAGE_UI_CHANGES,
-                (int *) &selected_categories.ui_category };
+        properties = (category_page_properties) { &ui_list_box, CATEGORY_UI_COUNT, CONFIG_PAGE_UI_CHANGES, 1 };
     } else {
         properties = (category_page_properties) { &city_mgmt_list_box, CATEGORY_CITY_COUNT,
-             CONFIG_PAGE_CITY_MANAGEMENT_CHANGES,  (int *) &selected_categories.city_mgmt_category };
+             CONFIG_PAGE_CITY_MANAGEMENT_CHANGES, 0 };
     }
     return properties;
 }
@@ -1220,7 +1224,11 @@ static void handle_list_box_select(unsigned int index, int is_double_click)
 {
     category_page_properties properties = current_category_properties();
     if (index < (unsigned) properties.count) {
-        *properties.selected_ref = (int) index;
+        if (properties.is_ui) {
+            selected_categories.ui_category = index;
+        } else {
+            selected_categories.city_mgmt_category = index;
+        }
         scrollbar.scroll_position = 0;
         int count = get_widget_count_for(data.page);
         scrollbar_init(&scrollbar, 0, count);

@@ -18,10 +18,10 @@
 #include <string.h>
 
 #define SCENARIO_EVENTS_SIZE_STEP 50
+#define SCENARIO_FORMULAS_SIZE_STEP 500
 
 static array(scenario_event_t) scenario_events;
-static scenario_formula_t scenario_formulas[MAX_FORMULAS];
-static unsigned int scenario_formulas_size;
+static array(scenario_formula_t) scenario_formulas;
 
 static void formulas_save_state(buffer *buf);
 static void formulas_load_state(buffer *buf);
@@ -34,74 +34,79 @@ void scenario_events_init(void)
     }
 }
 
+static void new_formula(scenario_formula_t *formula, unsigned int id)
+{
+    formula->id = id;
+}
+
 unsigned int scenario_formula_add(const uint8_t *formatted_calculation, int min_limit, int max_limit)
 {
-    scenario_formulas_size++;
-    if (scenario_formulas_size >= MAX_FORMULAS) {
-        log_error("Maximum number of custom formulas reached.", 0, 0);
+    scenario_formula_t *calculation = array_advance(scenario_formulas);
+
+    if (!calculation) {
+        log_error("Unable to allocate memory for a new formula. The game will now crash.", 0, 0);
         return 0;
     }
-    scenario_formula_t calculation;
-    calculation.min_evaluation = min_limit;
-    calculation.max_evaluation = max_limit;
-    calculation.id = scenario_formulas_size;
-    calculation.evaluation = 0;
-    strncpy((char *) calculation.formatted_calculation, (const char *) formatted_calculation, MAX_FORMULA_LENGTH - 1);
-    scenario_formulas[scenario_formulas_size] = calculation;
-    scenario_event_formula_check(&scenario_formulas[scenario_formulas_size]);
+    calculation->min_evaluation = min_limit;
+    calculation->max_evaluation = max_limit;
+    calculation->evaluation = 0;
+    strncpy((char *) calculation->formatted_calculation, (const char *) formatted_calculation, MAX_FORMULA_LENGTH - 1);
+    scenario_event_formula_check(calculation);
     // null termination on last char-  treating as string 
-    return calculation.id;
+    return calculation->id;
 }
 
 void scenario_formula_change(unsigned int id, const uint8_t *formatted_calculation, int min_eval, int max_eval)
 {
-    if (id <= 0 || id > scenario_formulas_size) {
+    if (id == 0 || id >= scenario_formulas.size) {
         log_error("Invalid formula ID.", 0, 0);
         return;
     }
-    strncpy((char *) scenario_formulas[id].formatted_calculation,
+    scenario_formula_t *formula = array_item(scenario_formulas, id);
+    strncpy((char *) formula->formatted_calculation,
         (const char *) formatted_calculation, MAX_FORMULA_LENGTH - 1);
-    scenario_formulas[id].min_evaluation = min_eval; //update limits too
-    scenario_formulas[id].max_evaluation = max_eval;
-    if (!scenario_event_formula_check(&scenario_formulas[id])) {
-        scenario_formulas[id].evaluation = 0;
-        scenario_formulas[id].is_error = 1;
-        scenario_formulas[id].is_static = 0;
+    formula->min_evaluation = min_eval; //update limits too
+    formula->max_evaluation = max_eval;
+    if (!scenario_event_formula_check(formula)) {
+        formula->evaluation = 0;
+        formula->is_error = 1;
+        formula->is_static = 0;
     }
 }
 
 const uint8_t *scenario_formula_get_string(unsigned int id)
 {
-    if (id == 0 || id > scenario_formulas_size) {
+    if (id == 0 || id >= scenario_formulas.size) {
         log_error("Invalid formula index.", 0, 0);
         return NULL;
     }
-    if (scenario_formulas[id].is_error) {
+    scenario_formula_t *formula = array_item(scenario_formulas, id);
+    if (formula->is_error) {
         return (const uint8_t *) "Error";
-    } else if (scenario_formulas[id].is_static) {
+    } else if (formula->is_static) {
         static uint8_t buffer[16];
-        snprintf((char *) buffer, sizeof(buffer), "%d", scenario_formulas[id].evaluation);
+        snprintf((char *) buffer, sizeof(buffer), "%d", formula->evaluation);
         return buffer;
     }
-    return scenario_formulas[id].formatted_calculation;
+    return formula->formatted_calculation;
 }
 
 scenario_formula_t *scenario_formula_get(unsigned int id)
 {
-    if (id == 0 || id > scenario_formulas_size) {
+    if (id == 0 || id >= scenario_formulas.size) {
         log_error("Invalid formula index.", 0, 0);
         return NULL;
     }
-    return &scenario_formulas[id];
+    return array_item(scenario_formulas, id);
 }
 
 int scenario_formula_evaluate_formula(unsigned int id)
 {
-    if (id == 0 || id > scenario_formulas_size) {
+    if (id == 0 || id >= scenario_formulas.size) {
         log_error("Invalid formula index.", 0, 0);
         return 0;
     }
-    int evaluation = scenario_event_formula_evaluate(&scenario_formulas[id]);
+    int evaluation = scenario_event_formula_evaluate(array_item(scenario_formulas, id));
     return evaluation;
 }
 
@@ -111,14 +116,16 @@ void scenario_events_clear(void)
     array_foreach(scenario_events, current) {
         scenario_event_delete(current);
     }
-    scenario_events.size = 0;
     if (!array_init(scenario_events, SCENARIO_EVENTS_SIZE_STEP, scenario_event_new, scenario_event_is_active)) {
         log_error("Unable to allocate enough memory for the scenario events array. The game will now crash.", 0, 0);
     }
 
     // Clear formulas
-    scenario_formulas_size = 0;
-    memset(scenario_formulas, 0, sizeof(scenario_formulas));
+    if (!array_init(scenario_formulas, SCENARIO_FORMULAS_SIZE_STEP, new_formula, 0)) {
+        log_error("Unable to allocate enough memory for the scenario formulas array. The game will now crash.", 0, 0);
+    }
+
+    array_advance(scenario_formulas); // Reserve ID 0 as invalid
 }
 
 scenario_event_t *scenario_event_get(int event_id)
@@ -255,9 +262,9 @@ void scenario_events_save_state(buffer *buf_events, buffer *buf_conditions, buff
 
 static void info_load_state(buffer *buf, int scenario_version)
 {
-    unsigned int array_size = buffer_load_dynamic_array(buf);
+    size_t array_size = buffer_load_dynamic_array(buf);
 
-    for (unsigned int i = 0; i < array_size; i++) {
+    for (size_t i = 0; i < array_size; i++) {
         scenario_event_t *event = scenario_event_create(0, 0, 0);
         scenario_event_load_state(buf, event, scenario_version);
     }
@@ -265,9 +272,9 @@ static void info_load_state(buffer *buf, int scenario_version)
 
 static void conditions_load_state_old_version(buffer *buf)
 {
-    unsigned int total_conditions = buffer_load_dynamic_array(buf);
+    size_t total_conditions = buffer_load_dynamic_array(buf);
 
-    for (unsigned int i = 0; i < total_conditions; i++) {
+    for (size_t i = 0; i < total_conditions; i++) {
         buffer_skip(buf, 2); // Skip the link type
         int event_id = buffer_read_i32(buf);
         scenario_event_t *event = scenario_event_get(event_id);
@@ -327,7 +334,7 @@ static void load_link_action(scenario_action_t *action, int link_type, int32_t l
 
 static void actions_load_state(buffer *buf, int is_new_version)
 {
-    unsigned int array_size = buffer_load_dynamic_array(buf);
+    size_t array_size = buffer_load_dynamic_array(buf);
 
     int link_type = 0;
     int32_t link_id = 0;
@@ -353,46 +360,53 @@ static void formulas_save_state(buffer *buf)
         + sizeof(int32_t)             // evaluation
         + sizeof(uint8_t) * 2         // is_static + is_error
         + sizeof(int32_t) * 2;        // min_evaluation + max_evaluation
-    buffer_init_dynamic_array(buf, scenario_formulas_size, struct_size);
+    buffer_init_dynamic_array(buf, scenario_formulas.size, struct_size);
 
-    for (unsigned int id = 1; id <= scenario_formulas_size; ++id) {
-        buffer_write_u32(buf, id);
-        buffer_write_raw(buf, scenario_formulas[id].formatted_calculation, MAX_FORMULA_LENGTH);
-        buffer_write_i32(buf, scenario_formulas[id].evaluation);
-        buffer_write_u8(buf, scenario_formulas[id].is_static);
-        buffer_write_u8(buf, scenario_formulas[id].is_error);
-        buffer_write_i32(buf, scenario_formulas[id].min_evaluation);
-        buffer_write_i32(buf, scenario_formulas[id].max_evaluation);
+    scenario_formula_t *formula;
+
+    array_foreach(scenario_formulas, formula) {
+        if (array_index == 0) {
+            continue; // Skip index 0 as it's reserved for invalid formulas
+        }
+        buffer_write_u32(buf, formula->id);
+        buffer_write_raw(buf, formula->formatted_calculation, MAX_FORMULA_LENGTH);
+        buffer_write_i32(buf, formula->evaluation);
+        buffer_write_u8(buf, formula->is_static);
+        buffer_write_u8(buf, formula->is_error);
+        buffer_write_i32(buf, formula->min_evaluation);
+        buffer_write_i32(buf, formula->max_evaluation);
     }
 }
 
 static void formulas_load_state(buffer *buf)
 {
-    unsigned int array_size = buffer_load_dynamic_array(buf);
-    memset(scenario_formulas, 0, sizeof(scenario_formulas));
-    scenario_formulas_size = 0;
-    unsigned int max_id = 0;
-    for (unsigned int i = 0; i < array_size; ++i) {
+    size_t array_size = buffer_load_dynamic_array(buf);
 
-        unsigned int id = buffer_read_u32(buf);
-        scenario_formulas[id].id = id;
-        if (id >= MAX_FORMULAS) {// Sanity guard: discard out-of-range IDs
-            // Skip payload for this bad entry
-            buffer_skip(buf, MAX_FORMULA_LENGTH + (unsigned int) sizeof(int32_t));
-            continue;
-        }
-        buffer_read_raw(buf, scenario_formulas[id].formatted_calculation, MAX_FORMULA_LENGTH);
-        scenario_formulas[id].formatted_calculation[MAX_FORMULA_LENGTH - 1] = '\0'; // ensure safety
-        scenario_formulas[id].evaluation = buffer_read_i32(buf);
-        scenario_formulas[id].is_static = buffer_read_u8(buf);
-        scenario_formulas[id].is_error = buffer_read_u8(buf);
-        scenario_formulas[id].min_evaluation = buffer_read_i32(buf);
-        scenario_formulas[id].max_evaluation = buffer_read_i32(buf);
-        max_id = id > max_id ? id : max_id;
+    if (!array_init(scenario_formulas, SCENARIO_FORMULAS_SIZE_STEP, new_formula, 0) ||
+        !array_expand(scenario_formulas, array_size)) {
+        log_error("Unable to allocate enough memory for the scenario formulas array. The game will now crash.", 0, 0);
     }
 
-    // Make size reflect the highest valid ID loaded (your IDs are 1-based)
-    scenario_formulas_size = max_id; // should be also equal to array_size unless there were bad IDs
+    array_advance(scenario_formulas); // Advance once to skip index 0, which is reserved for invalid formulas
+
+    for (size_t i = 0; i < array_size; ++i) {
+
+        scenario_formula_t *formula = array_advance(scenario_formulas);
+        
+        unsigned int id = buffer_read_u32(buf);
+        if (id != formula->id) {
+            log_error("Formula ID mismatch during loading. Something has gone wrong.", 0, 0);
+            return;
+        }
+
+        buffer_read_raw(buf, formula->formatted_calculation, MAX_FORMULA_LENGTH);
+        formula->formatted_calculation[MAX_FORMULA_LENGTH - 1] = '\0'; // ensure safety
+        formula->evaluation = buffer_read_i32(buf);
+        formula->is_static = buffer_read_u8(buf);
+        formula->is_error = buffer_read_u8(buf);
+        formula->min_evaluation = buffer_read_i32(buf);
+        formula->max_evaluation = buffer_read_i32(buf);
+    }
 }
 
 void scenario_events_load_state(buffer *buf_events, buffer *buf_conditions, buffer *buf_actions, buffer *buf_formulas,
@@ -408,9 +422,6 @@ void scenario_events_load_state(buffer *buf_events, buffer *buf_conditions, buff
     actions_load_state(buf_actions, scenario_version > SCENARIO_LAST_STATIC_ORIGINAL_DATA);
     if (scenario_version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         formulas_load_state(buf_formulas);
-    } else {
-        scenario_formulas_size = 0;
-        memset(scenario_formulas, 0, sizeof(scenario_formulas));
     }
 
     scenario_event_t *current;

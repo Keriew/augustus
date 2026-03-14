@@ -455,18 +455,15 @@ static int draw_request_buttons(int y_offset)
             image_draw(image_id, width, y_offset + image_y_offset, COLOR_MASK_NONE, SCALE_NONE);
 
             width += img->width + 6;
+            int request_index = data.requests[i].index;
+            if (city_request_has_troop_request() && i != 0) {
+                request_index++;
+            }
 
+            int status = city_request_get_status(request_index);
             if (r->resource != RESOURCE_DENARII) {
                 int is_stockpiled = city_resource_is_stockpiled(r->resource);
                 int enough_resource = 0;
-
-                int request_index = data.requests[i].index;
-                if (city_request_has_troop_request() && i != 0) {
-                    request_index++;
-                }
-
-                int status = city_request_get_status(request_index);
-
                 // button text
                 if (status) {
                     if (status == CITY_REQUEST_STATUS_NOT_ENOUGH_RESOURCES) {
@@ -493,11 +490,12 @@ static int draw_request_buttons(int y_offset)
                     width - 5, y_offset + 2, enough_resource ? FONT_NORMAL_GREEN : FONT_NORMAL_RED, 0);
 
             } else {
+                color_t color = status == CITY_REQUEST_STATUS_NOT_ENOUGH_RESOURCES ? FONT_NORMAL_RED : FONT_NORMAL_GREEN;
                 width += text_draw_number(r->amount, 0, "",
-                    width, y_offset + 2, FONT_NORMAL_GREEN, 0);
+                    width, y_offset + 2, color, 0);
 
                 text_draw_centered(translation_for(TR_SIDEBAR_EXTRA_REQUESTS_SEND),
-                    data.x_offset + 2, y_offset + 25, 158, FONT_NORMAL_GREEN, 0);
+                    data.x_offset + 2, y_offset + 25, 158, color, 0);
             }
 
             font_t font_color = r->time <= REQUEST_MONTHS_LEFT_FOR_RED_WARNING ? FONT_NORMAL_RED : FONT_NORMAL_GREEN;

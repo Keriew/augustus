@@ -13,7 +13,9 @@
 #include "core/image_group.h"
 #include "core/random.h"
 #include "game/resource.h"
+#include "map/building.h"
 #include "map/random.h"
+#include "map/terrain.h"
 #include "scenario/property.h"
 
 static const struct {
@@ -49,6 +51,27 @@ int building_image_get_base_farm_crop(building_type type)
             return image_group(GROUP_BUILDING_FARM_CROPS) + 20;
         case BUILDING_PIG_FARM:
             return image_group(GROUP_BUILDING_FARM_CROPS) + 25;
+        default:
+            return 0;
+    }
+}
+
+int building_image_get_garden_gate_image(int grid_offset)
+{
+    building_type b_type = map_building_type_at(grid_offset);
+    b_type = building_connectable_gate_type(b_type);
+
+    switch (b_type) {
+        case BUILDING_ROOFED_GARDEN_WALL_GATE:
+            return assets_get_image_id("Aesthetics", "Garden_Gate_B") + building_connectable_get_garden_gate_offset(grid_offset);
+        case BUILDING_LOOPED_GARDEN_GATE:
+            return assets_get_image_id("Aesthetics", "Garden_Gate_A") + building_connectable_get_garden_gate_offset(grid_offset);
+        case BUILDING_PANELLED_GARDEN_GATE:
+            return assets_get_image_id("Aesthetics", "Garden_Gate_C") + building_connectable_get_garden_gate_offset(grid_offset);
+        case BUILDING_HEDGE_GATE_LIGHT:
+            return assets_get_image_id("Aesthetics", "L Hedge Gate") + building_connectable_get_hedge_gate_offset(grid_offset);
+        case BUILDING_HEDGE_GATE_DARK:
+            return assets_get_image_id("Aesthetics", "D Hedge Gate") + building_connectable_get_hedge_gate_offset(grid_offset);
         default:
             return 0;
     }

@@ -2,6 +2,7 @@
 #define CORE_STRING_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 /**
  * @file
@@ -23,7 +24,7 @@ int string_equals(const uint8_t *a, const uint8_t *b);
  * @param limit Limit of chars to check
  * @return Boolean true if the strings are equal until the limit, false if they differ
  */
-int string_equals_until(const uint8_t *a, const uint8_t *b, unsigned int limit);
+int string_equals_until(const uint8_t *a, const uint8_t *b, size_t limit);
 
 /**
  * Copies a string
@@ -32,7 +33,7 @@ int string_equals_until(const uint8_t *a, const uint8_t *b, unsigned int limit);
  * @param maxlength Maximum length of the destination string
  * @return Position of the last copied character (null-terminator in dst)
  */
-uint8_t *string_copy(const uint8_t *src, uint8_t *dst, int maxlength);
+uint8_t *string_copy(const uint8_t *src, uint8_t *dst, size_t maxlength);
 
 /**
  * Determines the length of the string

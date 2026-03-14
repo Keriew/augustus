@@ -37,6 +37,7 @@
 #include "map/orientation.h"
 #include "map/property.h"
 #include "map/road_aqueduct.h"
+#include "map/routing_terrain.h"
 #include "map/terrain.h"
 #include "map/tiles.h"
 #include "map/water.h"
@@ -198,6 +199,11 @@ static void draw_building(int image_id, int x, int y, color_t color)
 {
     image_draw_isometric_footprint(image_id, x, y, color, data.scale);
     image_draw_isometric_top(image_id, x, y, color, data.scale);
+}
+
+static void draw_blocked_tile(int x, int y, int grid_offset)
+{
+    image_blend_footprint_color(x, y, COLOR_MASK_RED, data.scale);
 }
 
 static void city_building_ghost_draw_malus_range(int x, int y, int grid_offset)
@@ -515,7 +521,7 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
         // discouraged terrain can be built on, but is still highlighted red,
         // to suggest e.g. that it will become unusable/be overwritten
         if (!fully_blocked) {
-            if (type == BUILDING_PLAZA || building_type_is_roadblock(type) && !(type == BUILDING_GRANARY || type == BUILDING_WAREHOUSE)) {
+            if (type == BUILDING_PLAZA || (building_type_is_roadblock(type) && !(type == BUILDING_GRANARY || type == BUILDING_WAREHOUSE))) {
                 forbidden_terrain &= ~TERRAIN_ROAD;
                 discouraged_terrain &= ~TERRAIN_ROAD;
             }
@@ -559,10 +565,8 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
             }
         }
     }
-    if (type >= BUILDING_ROADBLOCK ||
-        type == BUILDING_LIBRARY ||
-        type == BUILDING_SMALL_STATUE ||
-        type == BUILDING_MEDIUM_STATUE) {
+    if (type >= BUILDING_ROADBLOCK || // >= because all buildings after ROADBLOCK have 'new' images
+        type == BUILDING_LIBRARY || type == BUILDING_SMALL_STATUE || type == BUILDING_MEDIUM_STATUE) {
         image_id = get_new_building_image_id(grid_offset, type);
         draw_regular_building(type, image_id, x_view, y_view, grid_offset, num_tiles, blocked_tiles);
     } else {
@@ -956,7 +960,8 @@ static void draw_pond(const map_tile *tile, int x, int y, int type)
 static void draw_bridge(const map_tile *tile, int x, int y, building_type type)
 {
     int length, direction;
-    int end_grid_offset = map_bridge_calculate_length_direction(tile->x, tile->y, &length, &direction);
+    grid_slice blocked_tiles = { .size = 0 };
+    int end_grid_offset = map_bridge_calculate_length_direction(tile->x, tile->y, &length, &direction, &blocked_tiles);
 
     int dir = direction - city_view_orientation();
     if (dir < 0) {
@@ -966,6 +971,8 @@ static void draw_bridge(const map_tile *tile, int x, int y, building_type type)
     if (type == BUILDING_SHIP_BRIDGE && length < 5) {
         blocked = 1;
     } else if (!end_grid_offset) {
+        blocked = 1;
+    } else if (blocked_tiles.size > 0) {
         blocked = 1;
     }
     if (city_finance_out_of_money()) {
@@ -996,8 +1003,10 @@ static void draw_bridge(const map_tile *tile, int x, int y, building_type type)
     if (blocked) {
         image_blend_footprint_color(x, y, length > 0 ? COLOR_MASK_GREEN : COLOR_MASK_RED, data.scale);
         if (length > 1) {
+            color_t end_tile_colour = map_grid_slice_contains(end_grid_offset, &blocked_tiles) ?
+                COLOR_MASK_RED : COLOR_MASK_GREEN;
             image_blend_footprint_color(x + x_delta * (length - 1), y + y_delta * (length - 1),
-                COLOR_MASK_RED, data.scale);
+                end_tile_colour, data.scale);
         }
         building_construction_set_cost(0);
         color_mask = COLOR_MASK_BUILDING_GHOST_RED;
@@ -1014,6 +1023,9 @@ static void draw_bridge(const map_tile *tile, int x, int y, building_type type)
             int sprite_id = map_bridge_get_sprite_id(i, length, dir, type == BUILDING_SHIP_BRIDGE);
             city_draw_bridge_tile(x + x_delta * i, y + y_delta * i, data.scale, sprite_id, color_mask);
         }
+    }
+    for (int i = 0; i < blocked_tiles.size; i++) {
+        city_view_foreach_tile_in_range(blocked_tiles.grid_offsets[i], 0, 0, draw_blocked_tile);
     }
     building_construction_set_cost(model_get_building(type)->cost * length);
 }
@@ -1231,6 +1243,8 @@ static void draw_road(const map_tile *tile, int x, int y)
         } else {
             blocked = 1;
         }
+    } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING) && map_routing_is_gate_transformable(grid_offset)) {
+        image_id = building_image_get_garden_gate_image(grid_offset);
     } else if (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
         blocked = 1;
     } else {
@@ -1529,7 +1543,7 @@ void city_building_ghost_draw(const map_tile *tile)
     city_view_get_selected_tile_pixels(&x, &y);
 
     const building_properties *props = building_properties_for_type(type);
-    if ((config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL) && type >= BUILDING_ANY && type <= BUILDING_TYPE_MAX) ||
+    if ((config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL) && type <= BUILDING_TYPE_MAX) ||
         (config_get(CONFIG_UI_SHOW_DESIRABILITY_RANGE) && props->draw_desirability_range)) {
         int building_size = (type == BUILDING_DRAGGABLE_RESERVOIR || type == BUILDING_WAREHOUSE) ? 3 : props->size;
 

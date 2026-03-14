@@ -1924,6 +1924,8 @@ typedef enum {
     TR_PARAMETER_TYPE_HOUSING_TYPE,
     TR_PARAMETER_BUILDING_MODEL_REST_CONFIRMATION,
     TR_PARAMETER_HOUSE_MODEL_REST_CONFIRMATION,
+    TR_CONFIG_GP_CH_ALWAYS_DESTROY_BRIDGES,
+    TR_CONFIG_CATEGORY_MANAGEMENT_DESTRUCTION,
     TR_CHEAT_DESTROYED_BUILDING,
     TR_EDITOR_HOUSE_MODEL_DEVOLVE_DESIRABILITY,             // Order is important
     TR_EDITOR_HOUSE_MODEL_EVOLVE_DESIRABILITY,              //
@@ -2004,5 +2006,6 @@ void translation_spanish(const translation_string **strings, int *num_strings);
 void translation_simplified_chinese(const translation_string **strings, int *num_strings);
 void translation_swedish(const translation_string **strings, int *num_strings);
 void translation_traditional_chinese(const translation_string **strings, int *num_strings);
+void translation_ukrainian(const translation_string **strings, int *num_strings);
 
 #endif // TRANSLATION_TRANSLATION_H

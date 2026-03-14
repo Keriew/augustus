@@ -116,9 +116,9 @@ void scenario_allowed_building_load_state(buffer *buf)
 {
     scenario_allowed_building_enable_all();
 
-    unsigned int buildings = buffer_load_dynamic_array(buf);
+    size_t buildings = buffer_load_dynamic_array(buf);
 
-    for (unsigned int i = 0; i < buildings; i++) {
+    for (size_t i = 0; i < buildings; i++) {
         allowed_buildings[i] = buffer_read_i8(buf);
     }
 }
