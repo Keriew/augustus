@@ -1055,7 +1055,7 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_TYPE_ROUTE, "Εμπορική διαδρομή-στόχος"},
     {TR_PARAMETER_TYPE_STANDARD_MESSAGE, "Κανονικό μήνυμα"},
     {TR_PARAMETER_TYPE_FUTURE_CITY, "Στόχος μελλοντικής εμπορικής πόλης"},
-    {TR_PARAMETER_USE_PERCENTAGE, "Χρήση ποσοστού?"},
+    {TR_PARAMETER_USE_PERCENTAGE, "Χρήση ποσοστού"},
     {TR_PARAMETER_IN_CITY_ONLY, "Να μετράτε μόνο τους στρατιώτες στην πόλη;"},
     {TR_PARAMETER_CHECK_FOR_ONGOING, "Ελέγξτε ότι είναι σε εξέλιξη;"},
     {TR_PARAMETER_SHOW_MESSAGE, "Εμφάνιση μηνύματος;"},

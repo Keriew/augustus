@@ -31,10 +31,12 @@ void scenario_events_load_state(buffer *buf_events, buffer *buf_conditions, buff
 void scenario_events_process_all(void);
 void scenario_events_progress_paused(int days_passed);
 scenario_event_t *scenario_events_get_using_custom_variable(int custom_variable_id);
+
 void scenario_events_migrate_to_resolved_display_names(void);
 void scenario_events_migrate_to_formulas(void);
 void scenario_events_min_max_migrate_to_formulas(void);
 
+void scenario_events_assign_parent_single_event_ids(scenario_event_t *event);
 void scenario_events_assign_parent_event_ids(void);
 
 void scenario_events_fetch_event_tiles_to_editor(void);
