@@ -454,11 +454,6 @@ static void migrate_parameters_action(scenario_action_t *action)
     // migration for older actions (pre-formulas)
     int min_limit = 0, max_limit = 0;
     parameter_type p_type;
-    action_types action_type = action->type;
-    if (action_type == ACTION_TYPE_ADJUST_CITY_HEALTH || action_type == ACTION_TYPE_ADJUST_ROME_WAGES ||
-        action_type == ACTION_TYPE_ADJUST_MONEY || action_type == ACTION_TYPE_ADJUST_SAVINGS) {
-        return;
-    }
     int *params[] = {    // Collect addresses of the fields
         &action->parameter1,
         &action->parameter2,
@@ -469,7 +464,7 @@ static void migrate_parameters_action(scenario_action_t *action)
     for (int i = 1; i <= 5; ++i) {
         int *param_value = params[i - 1];
         p_type = scenario_events_parameter_data_get_action_parameter_type(
-            action_type, i, &min_limit, &max_limit);
+            action->type, i, &min_limit, &max_limit);
         if ((p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) && param_value != NULL) {
             char buffer[16];  // Make sure buffer is large enough
             memset(buffer, 0, sizeof(buffer));
@@ -528,6 +523,10 @@ void scenario_events_migrate_to_formulas(void)
         scenario_action_t *action;
         for (unsigned int j = 0; j < current->actions.size; j++) {
             action = array_item(current->actions, j);
+            if (action->type == ACTION_TYPE_ADJUST_CITY_HEALTH || action->type == ACTION_TYPE_ADJUST_ROME_WAGES ||
+                action->type == ACTION_TYPE_ADJUST_MONEY || action->type == ACTION_TYPE_ADJUST_SAVINGS) {
+                return;
+            }
             migrate_parameters_action(action); //migrate parameters if needed
         }
         scenario_condition_group_t *group;

@@ -120,6 +120,9 @@ special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mappin
 special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mapping_by_text(parameter_type type, const char *value);
 int scenario_events_parameter_data_get_mappings_size(parameter_type type);
 
+void scenario_parameters_foreach_in_action(scenario_action_t *action, void (*callback)(scenario_action_t *, int **, int));
+void scenario_parameters_foreach_in_condition(scenario_condition_t *condition, void (*callback)(scenario_condition_t *, int **, int));
+
 void scenario_events_parameter_data_sort_alphabetically(void);
 
 int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attribute_t *attribute_data);

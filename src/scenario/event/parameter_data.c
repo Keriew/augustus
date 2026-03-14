@@ -1261,6 +1261,34 @@ parameter_type scenario_events_parameter_data_resolve_flexible_type(const scenar
     return info.param_types[param_index];
 }
 
+void scenario_parameters_foreach_in_action(scenario_action_t *action, void (*callback)(scenario_action_t *, int **, int))
+{
+    int *params[] = {   // Collect addresses of the fields
+        &action->parameter1,
+        &action->parameter2,
+        &action->parameter3,
+        &action->parameter4,
+        &action->parameter5
+    };
+    for (int i = 0; i < 5; i++) {
+        callback(action, params, i);
+    }
+}
+
+void scenario_parameters_foreach_in_condition(scenario_condition_t *condition, void (*callback)(scenario_condition_t *, int **, int))
+{
+    int *params[] = {   // Collect addresses of the fields
+        &condition->parameter1,
+        &condition->parameter2,
+        &condition->parameter3,
+        &condition->parameter4,
+        &condition->parameter5
+    };
+    for (int i = 0; i < 5; i++) {
+        callback(condition, params, i);
+    }
+}
+
 static const uint8_t *get_allowed_building_name(building_type type)
 {
     if (type == BUILDING_HOUSE_VACANT_LOT) {
