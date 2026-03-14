@@ -1049,7 +1049,7 @@ int figure_trade_sea_trade_units(void)
     }
 
     if (building_monument_gt_module_is_active(NEPTUNE_MODULE_4_SEA_TRADE)) {
-        unit += 4;
+        unit += 6;
     }
 
     if (building_lighthouse_is_fully_functional()) {

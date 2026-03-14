@@ -777,6 +777,24 @@ void window_building_draw_shrine_mars(building_info_context *c)
         c->x_offset + 180, c->y_offset + 45, COLOR_MASK_NONE, SCALE_NONE);
 }
 
+static int reworked_temple_option_id(building_type type)
+{
+    static const struct { building_type type; int option_id; } reworked_options[] = {
+        { BUILDING_GRAND_TEMPLE_VENUS_REWORKED,   12 },
+        { BUILDING_GRAND_TEMPLE_CERES_REWORKED,   14 },
+        { BUILDING_GRAND_TEMPLE_MERCURY_REWORKED, 16 },
+        { BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED, 18 },
+        { BUILDING_PANTHEON_REWORKED,             20 },
+        { BUILDING_GRAND_TEMPLE_MARS_REWORKED,    22 },
+    };
+    for (int i = 0; i < (int)(sizeof(reworked_options) / sizeof(reworked_options[0])); i++) {
+        if (reworked_options[i].type == type) {
+            return reworked_options[i].option_id;
+        }
+    }
+    return -1;
+}
+
 void window_building_draw_shrine_venus(building_info_context *c)
 {
     c->advisor_button = ADVISOR_RELIGION;
@@ -1447,23 +1465,6 @@ static void generate_module_image_id(int index)
         temple_module_options[index].image_id);
 }
 
-static int reworked_temple_option_id(building_type type)
-{
-    static const struct { building_type type; int option_id; } reworked_options[] = {
-        { BUILDING_GRAND_TEMPLE_VENUS_REWORKED,   12 },
-        { BUILDING_GRAND_TEMPLE_CERES_REWORKED,   14 },
-        { BUILDING_GRAND_TEMPLE_MERCURY_REWORKED, 16 },
-        { BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED, 18 },
-        { BUILDING_PANTHEON_REWORKED,             20 },
-        { BUILDING_GRAND_TEMPLE_MARS_REWORKED,    22 },
-    };
-    for (int i = 0; i < (int)(sizeof(reworked_options) / sizeof(reworked_options[0])); i++) {
-        if (reworked_options[i].type == type) {
-            return reworked_options[i].option_id;
-        }
-    }
-    return -1;
-}
 
 static void button_add_module_prompt(const generic_button *button)
 {
