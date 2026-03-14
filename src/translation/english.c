@@ -1947,6 +1947,8 @@ static translation_string all_strings[] = {
     {TR_BUILDING_HOUSE_LUXURY_PALACE, "Luxury Palace"},
     {TR_CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES, "Show reservoir range when building fountains"},
     {TR_CHEAT_DESTROYED_BUILDING, "Destroyed building"},
+    {TR_CHEAT_GT_BONUSES_TITLE, "Grand Temple Bonuses"},
+    {TR_CHEAT_GT_BONUSES_TEXT, ""},
     {TR_CONFIG_ENABLE_BUILD_MENU_SHORTCUTS, "Enable build menu shortcuts"},
     {TR_ACTION_TYPE_LOCK_TRADE_ROUTE, "Lock Trade route"},
     {TR_PARAMETER_LOCK, "Lock"},

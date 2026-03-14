@@ -938,7 +938,10 @@ static void draw_foreground(void)
         } else if (btype == BUILDING_BARRACKS) {
             window_building_draw_barracks_foreground(&context);
         } else if ((btype >= BUILDING_GRAND_TEMPLE_CERES && btype <= BUILDING_GRAND_TEMPLE_VENUS) ||
-            btype == BUILDING_PANTHEON || btype == BUILDING_GRAND_TEMPLE_VENUS_REWORKED) {
+            btype == BUILDING_PANTHEON || btype == BUILDING_GRAND_TEMPLE_VENUS_REWORKED ||
+            btype == BUILDING_GRAND_TEMPLE_CERES_REWORKED || btype == BUILDING_GRAND_TEMPLE_MERCURY_REWORKED ||
+            btype == BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED || btype == BUILDING_PANTHEON_REWORKED ||
+            btype == BUILDING_GRAND_TEMPLE_MARS_REWORKED) {
             window_building_draw_grand_temple_foreground(&context);
         } else if (btype == BUILDING_CARAVANSERAI &&
             b->monument.phase == MONUMENT_FINISHED) {
@@ -1052,7 +1055,10 @@ static int handle_specific_building_info_mouse(const mouse *m)
                 return window_building_handle_mouse_storage(m, &context);
             }
         } else if ((btype >= BUILDING_GRAND_TEMPLE_CERES && btype <= BUILDING_GRAND_TEMPLE_VENUS) ||
-            btype == BUILDING_PANTHEON || btype == BUILDING_GRAND_TEMPLE_VENUS_REWORKED) {
+            btype == BUILDING_PANTHEON || btype == BUILDING_GRAND_TEMPLE_VENUS_REWORKED ||
+            btype == BUILDING_GRAND_TEMPLE_CERES_REWORKED || btype == BUILDING_GRAND_TEMPLE_MERCURY_REWORKED ||
+            btype == BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED || btype == BUILDING_PANTHEON_REWORKED ||
+            btype == BUILDING_GRAND_TEMPLE_MARS_REWORKED) {
             return window_building_handle_mouse_grand_temple(m, &context);
         } else if (btype == BUILDING_DEPOT) {
             if (context.depot_selection == 2) {

@@ -8,6 +8,7 @@
 #include "city/gods.h"
 #include "city/finance.h"
 #include "city/data_private.h"
+#include "city/health.h"
 #include "city/sentiment.h"
 #include "city/victory.h"
 #include "city/warning.h"
@@ -32,8 +33,10 @@
 #include "window/console.h"
 #include "window/editor/attributes.h"
 #include "window/editor/scenario_events.h"
+#include "map/water_supply.h"
 #include "window/plain_message_dialog.h"
 
+#include <stdio.h>
 #include <string.h>
 
 static int map_editor_warning_shown;
@@ -57,6 +60,7 @@ static void game_cheat_disable_invasions(uint8_t *);
 static void game_cheat_change_weather(uint8_t *);
 static void game_cheat_destroy_building(uint8_t *);
 static void game_cheat_enable_legacy_venus(uint8_t *);
+static void game_cheat_show_gt_bonuses(uint8_t *);
 
 static void (*const execute_command[])(uint8_t *args) = {
     game_cheat_add_money,
@@ -79,7 +83,8 @@ static void (*const execute_command[])(uint8_t *args) = {
     game_cheat_disable_invasions,
     game_cheat_change_weather,
     game_cheat_destroy_building,
-    game_cheat_enable_legacy_venus
+    game_cheat_enable_legacy_venus,
+    game_cheat_show_gt_bonuses
 };
 
 static const char *commands[] = {
@@ -103,7 +108,8 @@ static const char *commands[] = {
     "leavemealone",
     "weather",                   // syntax: weather <weather_type> <intensity>
     "destroy",                   // syntax: destroy <building_id> <destruction_type>
-    "genetrix"
+    "genetrix",
+    "gtbonus"
 };
 
 #define NUMBER_OF_COMMANDS sizeof (commands) / sizeof (commands[0])
@@ -431,4 +437,106 @@ static void game_cheat_enable_legacy_venus(uint8_t *args)
 int game_cheat_legacy_gts_enabled(void)
 {
     return data.legacy_gts_enabled;
+}
+
+static void game_cheat_show_gt_bonuses(uint8_t *args)
+{
+    if (!data.is_cheating) {
+        return;
+    }
+
+    static uint8_t lines[14][80];
+    static const uint8_t *texts[14];
+    int n = 0;
+
+    // Venus Reworked
+    {
+        int working = building_monument_working(BUILDING_GRAND_TEMPLE_VENUS_REWORKED);
+        int mod = building_monument_module_type(BUILDING_GRAND_TEMPLE_VENUS_REWORKED);
+        const char *mod_name = mod == 1 ? "Wine Temple" : mod == 2 ? "Theater+Tavern" : "none";
+        snprintf((char *) lines[n], 80, "Venus:    %s | Module: %s",
+            working ? "ACTIVE" : "off", mod_name);
+        texts[n] = lines[n]; n++;
+        snprintf((char *) lines[n], 80, "  Base: +desirability to nearby houses%s",
+            working ? "" : " (inactive)");
+        texts[n] = lines[n]; n++;
+    }
+    // Ceres Reworked
+    {
+        int working = building_monument_working(BUILDING_GRAND_TEMPLE_CERES_REWORKED);
+        int mod = building_monument_module_type(BUILDING_GRAND_TEMPLE_CERES_REWORKED);
+        const char *mod_name = mod == 1 ? "Farm Speed +40%" : mod == 2 ? "Market Speed +20%" : "none";
+        int food_types = city_data.resource.food_types_eaten;
+        snprintf((char *) lines[n], 80, "Ceres:    %s | Module: %s",
+            working ? "ACTIVE" : "off", mod_name);
+        texts[n] = lines[n]; n++;
+        snprintf((char *) lines[n], 80, "  Base: -%d%% food consumed (%d food types eaten)",
+            5 * food_types, food_types);
+        texts[n] = lines[n]; n++;
+    }
+    // Mercury Reworked
+    {
+        int working = building_monument_working(BUILDING_GRAND_TEMPLE_MERCURY_REWORKED);
+        int mod = building_monument_module_type(BUILDING_GRAND_TEMPLE_MERCURY_REWORKED);
+        const char *mod_name = mod == 1 ? "Land Trader +20%" : mod == 2 ? "Prosperity" : "none";
+        int sentiment = city_data.sentiment.value;
+        snprintf((char *) lines[n], 80, "Mercury:  %s | Module: %s",
+            working ? "ACTIVE" : "off", mod_name);
+        texts[n] = lines[n]; n++;
+        snprintf((char *) lines[n], 80, "  Base: -%d%% goods consumed (sentiment=%d)",
+            sentiment / 10, sentiment);
+        texts[n] = lines[n]; n++;
+    }
+    // Neptune Reworked
+    {
+        int working = building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED);
+        int mod = building_monument_module_type(BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED);
+        if (mod == 1) {
+            snprintf((char *) lines[n], 80, "Neptune:  %s | Fountain r=%d  Reservoir r=%d",
+                working ? "ACTIVE" : "off",
+                map_water_supply_fountain_radius(), map_water_supply_reservoir_radius());
+        } else {
+            snprintf((char *) lines[n], 80, "Neptune:  %s | Module: %s",
+                working ? "ACTIVE" : "off", mod == 2 ? "Sea Trade +20%" : "none");
+        }
+        texts[n] = lines[n]; n++;
+        snprintf((char *) lines[n], 80, "  Base: -5 disease delta (health=%d)",
+            city_health());
+        texts[n] = lines[n]; n++;
+    }
+    // Pantheon Reworked
+    {
+        int working = building_monument_working(BUILDING_PANTHEON_REWORKED);
+        int mod = building_monument_module_type(BUILDING_PANTHEON_REWORKED);
+        const char *mod_name = mod == 1 ? "Senate priests" : mod == 2 ? "Luxury Palace +10%" : "none";
+        snprintf((char *) lines[n], 80, "Pantheon: %s | Module: %s",
+            working ? "ACTIVE" : "off", mod_name);
+        texts[n] = lines[n]; n++;
+        snprintf((char *) lines[n], 80, "  Base: all-god access + house evo bonus%s",
+            working ? "" : " (inactive)");
+        texts[n] = lines[n]; n++;
+    }
+    // Mars Reworked
+    {
+        int working = building_monument_working(BUILDING_GRAND_TEMPLE_MARS_REWORKED);
+        int mod = building_monument_module_type(BUILDING_GRAND_TEMPLE_MARS_REWORKED);
+        int foods = city_data.mess_hall.food_types;
+        int boost = city_data.sentiment.mars_victory_boost;
+        if (mod == 1) {
+            snprintf((char *) lines[n], 80, "Mars:     %s | Supply Chain | leg +%d%% (%d foods)",
+                working ? "ACTIVE" : "off", 7 * foods, foods);
+        } else if (mod == 2) {
+            snprintf((char *) lines[n], 80, "Mars:     %s | Barracks -%d%% delay | victory=%d",
+                working ? "ACTIVE" : "off", 12 * foods, boost);
+        } else {
+            snprintf((char *) lines[n], 80, "Mars:     %s | no module | foods=%d victory_boost=%d",
+                working ? "ACTIVE" : "off", foods, boost);
+        }
+        texts[n] = lines[n]; n++;
+        snprintf((char *) lines[n], 80, "  Base: +5%% pop capacity (houses w/ Mars access)%s",
+            working ? "" : " (inactive)");
+        texts[n] = lines[n]; n++;
+    }
+
+    window_plain_message_dialog_show_text_list(TR_CHEAT_GT_BONUSES_TITLE, TR_CHEAT_GT_BONUSES_TEXT, texts, n);
 }

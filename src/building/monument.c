@@ -745,35 +745,19 @@ int building_monument_gt_module_is_active(int module)
     int module_num = module % MODULES_PER_TEMPLE + 1;
     int temple_type = module / MODULES_PER_TEMPLE + BUILDING_GRAND_TEMPLE_CERES;
 
-    // Special handling for reworked Venus temple modules
-    if (module == VENUS_MODULE_3_WINE_TEMPLE || module == VENUS_MODULE_4_THEATER_TAVERN) {
-        temple_type = BUILDING_GRAND_TEMPLE_VENUS_REWORKED;
-        module_num = (module == VENUS_MODULE_3_WINE_TEMPLE) ? 1 : 2;
-    }
-    // Special handling for reworked Ceres temple modules
-    if (module == CERES_MODULE_3_FARM_SPEED || module == CERES_MODULE_4_MARKET_SPEED) {
-        temple_type = BUILDING_GRAND_TEMPLE_CERES_REWORKED;
-        module_num = (module == CERES_MODULE_3_FARM_SPEED) ? 1 : 2;
-    }
-    // Special handling for reworked Mercury temple modules
-    if (module == MERCURY_MODULE_3_LAND_TRADER || module == MERCURY_MODULE_4_PROSPERITY) {
-        temple_type = BUILDING_GRAND_TEMPLE_MERCURY_REWORKED;
-        module_num = (module == MERCURY_MODULE_3_LAND_TRADER) ? 1 : 2;
-    }
-    // Special handling for reworked Neptune temple modules
-    if (module == NEPTUNE_MODULE_3_FOUNTAIN_RESERVOIR || module == NEPTUNE_MODULE_4_SEA_TRADE) {
-        temple_type = BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED;
-        module_num = (module == NEPTUNE_MODULE_3_FOUNTAIN_RESERVOIR) ? 1 : 2;
-    }
-    // Special handling for reworked Pantheon modules
-    if (module == PANTHEON_MODULE_3_SENATE || module == PANTHEON_MODULE_4_LUXURY_PALACE) {
-        temple_type = BUILDING_PANTHEON_REWORKED;
-        module_num = (module == PANTHEON_MODULE_3_SENATE) ? 1 : 2;
-    }
-    // Special handling for reworked Mars temple modules
-    if (module == MARS_MODULE_3_SUPPLY_CHAIN || module == MARS_MODULE_4_BARRACKS_VICTORY) {
-        temple_type = BUILDING_GRAND_TEMPLE_MARS_REWORKED;
-        module_num = (module == MARS_MODULE_3_SUPPLY_CHAIN) ? 1 : 2;
+    if (module >= VENUS_MODULE_3_WINE_TEMPLE) {
+        static const building_type reworked_temples[] = {
+            BUILDING_GRAND_TEMPLE_VENUS_REWORKED,    // 10, 11
+            BUILDING_GRAND_TEMPLE_CERES_REWORKED,    // 12, 13
+            BUILDING_GRAND_TEMPLE_MERCURY_REWORKED,  // 14, 15
+            BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED,  // 16, 17
+            BUILDING_NONE,                           // 18, 19 (Pantheon original — unused here)
+            BUILDING_PANTHEON_REWORKED,              // 20, 21
+            BUILDING_GRAND_TEMPLE_MARS_REWORKED,     // 22, 23
+        };
+        int idx = (module - VENUS_MODULE_3_WINE_TEMPLE) / MODULES_PER_TEMPLE;
+        temple_type = reworked_temples[idx];
+        module_num = (module - VENUS_MODULE_3_WINE_TEMPLE) % MODULES_PER_TEMPLE + 1;
     }
 
     return building_monument_module_type(temple_type) == module_num;

@@ -233,7 +233,7 @@ void map_water_supply_update_reservoir_fountain(void)
         building *b = building_get(building_monument_get_neptune_gt());
         map_terrain_add_with_radius(b->x, b->y, 7, map_water_supply_reservoir_radius(), TERRAIN_RESERVOIR_RANGE);
     }
-    // Neptune Reworked base bonus - grand temple provides water access like a filled reservoir
+    // Neptune Reworked base bonus
     if (building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED)) {
         building *b = building_get(building_monument_get_neptune_reworked_gt());
         map_terrain_add_with_radius(b->x, b->y, 7, map_water_supply_reservoir_radius(), TERRAIN_RESERVOIR_RANGE);
