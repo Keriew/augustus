@@ -1008,6 +1008,10 @@ int figure_trade_land_trade_units(void)
         unit += add_unit;
     }
 
+    if (building_monument_gt_module_is_active(MERCURY_MODULE_3_LAND_TRADER)) {
+        unit += 4;
+    }
+
     if (building_caravanserai_is_fully_functional()) {
         building *b = building_get(city_buildings_get_caravanserai());
 
@@ -1030,6 +1034,7 @@ int figure_trade_land_trade_units(void)
 int figure_trade_sea_trade_units(void)
 {
     int unit = 12;
+
     if (building_monument_working(BUILDING_GRAND_TEMPLE_MERCURY)) {
         int add_unit = 0;
         building *b = building_get(building_find(BUILDING_GRAND_TEMPLE_MERCURY));
@@ -1041,6 +1046,10 @@ int figure_trade_sea_trade_units(void)
             add_unit = 3;
         }
         unit += add_unit;
+    }
+
+    if (building_monument_gt_module_is_active(NEPTUNE_MODULE_4_SEA_TRADE)) {
+        unit += 4;
     }
 
     if (building_lighthouse_is_fully_functional()) {

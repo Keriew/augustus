@@ -9,6 +9,7 @@
 #include "city/finance.h"
 #include "city/data_private.h"
 #include "city/health.h"
+#include "city/population.h"
 #include "city/sentiment.h"
 #include "city/victory.h"
 #include "city/warning.h"
@@ -478,7 +479,7 @@ static void game_cheat_show_gt_bonuses(uint8_t *args)
     {
         int working = building_monument_working(BUILDING_GRAND_TEMPLE_MERCURY_REWORKED);
         int mod = building_monument_module_type(BUILDING_GRAND_TEMPLE_MERCURY_REWORKED);
-        const char *mod_name = mod == 1 ? "Land Trader +20%" : mod == 2 ? "Prosperity" : "none";
+        const char *mod_name = mod == 1 ? "Land Trader +20spd +4cap" : mod == 2 ? "Prosperity" : "none";
         int sentiment = city_data.sentiment.value;
         snprintf((char *) lines[n], 80, "Mercury:  %s | Module: %s",
             working ? "ACTIVE" : "off", mod_name);
@@ -497,10 +498,12 @@ static void game_cheat_show_gt_bonuses(uint8_t *args)
                 map_water_supply_fountain_radius(), map_water_supply_reservoir_radius());
         } else {
             snprintf((char *) lines[n], 80, "Neptune:  %s | Module: %s",
-                working ? "ACTIVE" : "off", mod == 2 ? "Sea Trade +20%" : "none");
+                working ? "ACTIVE" : "off", mod == 2 ? "Sea Trade +20spd +4cap" : "none");
         }
         texts[n] = lines[n]; n++;
-        snprintf((char *) lines[n], 80, "  Base: -5 disease delta (health=%d)",
+        snprintf((char *) lines[n], 80, "  Base: -5 disease | retire age %d+%d (health=%d)",
+            config_get(CONFIG_GP_CH_RETIRE_AT_60) ? 60 : 50,
+            city_population_neptune_reworked_retirement_bonus_years(),
             city_health());
         texts[n] = lines[n]; n++;
     }

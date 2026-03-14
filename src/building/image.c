@@ -603,7 +603,6 @@ int building_image_get(const building *b)
                     }
             }
         case BUILDING_GRAND_TEMPLE_NEPTUNE:
-        case BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED:
             switch (b->monument.phase) {
                 case MONUMENT_START:
                     return assets_get_image_id("Monuments", "Neptune Complex Const 01");
@@ -621,6 +620,28 @@ int building_image_get(const building *b)
                             return assets_get_image_id("Monuments", "Neptune Complex Module");
                         case 2:
                             return assets_get_image_id("Monuments", "Neptune Complex Module2");
+                        default:
+                            return assets_get_image_id("Monuments", "Neptune Complex On");
+                    }
+            }
+        case BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED:
+            switch (b->monument.phase) {
+                case MONUMENT_START:
+                    return assets_get_image_id("Monuments", "Neptune Complex Const 01");
+                case 2:
+                    return assets_get_image_id("Monuments", "Neptune Complex Const 02");
+                case 3:
+                    return assets_get_image_id("Monuments", "Neptune Complex Const 03");
+                case 4:
+                    return assets_get_image_id("Monuments", "Neptune Complex Const 04");
+                case 5:
+                    return assets_get_image_id("Monuments", "Neptune Complex Const 05");
+                default:
+                    switch (b->monument.upgrades) {
+                        case 1: 
+                            return assets_get_image_id("Monuments", "Neptune Complex Module2");
+                        case 2:
+                            return assets_get_image_id("Monuments", "Neptune Complex Module");
                         default:
                             return assets_get_image_id("Monuments", "Neptune Complex On");
                     }

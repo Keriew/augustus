@@ -220,7 +220,7 @@ void city_population_remove_for_troop_request(int num_people)
 
 // Neptune Reworked base bonus: extends retirement age by
 // ceil(0.5 * (city_health/10) * (neptune_houses / total_houses)) years
-static int neptune_reworked_retirement_bonus_years(void)
+int city_population_neptune_reworked_retirement_bonus_years(void)
 {
     if (!building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED)) {
         return 0;
@@ -256,7 +256,7 @@ int city_population_people_of_working_age(void)
         total_working_people += city_population_in_age_decennium(5);
     }
     int base_retirement = config_get(CONFIG_GP_CH_RETIRE_AT_60) ? 60 : 50;
-    int health_bonus = neptune_reworked_retirement_bonus_years();
+    int health_bonus = city_population_neptune_reworked_retirement_bonus_years();
     for (int age = base_retirement; age < base_retirement + health_bonus && age < 100; age++) {
         total_working_people += city_population_at_age(age);
     }
@@ -271,7 +271,7 @@ int city_population_retired_people(void)
         total_retired_people += city_population_in_age_decennium(5);
     }
     int base_retirement = config_get(CONFIG_GP_CH_RETIRE_AT_60) ? 60 : 50;
-    int health_bonus = neptune_reworked_retirement_bonus_years();
+    int health_bonus = city_population_neptune_reworked_retirement_bonus_years();
     for (int age = base_retirement; age < base_retirement + health_bonus && age < 100; age++) {
         total_retired_people -= city_population_at_age(age);
     }

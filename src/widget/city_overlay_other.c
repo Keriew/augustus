@@ -72,7 +72,8 @@ static int show_building_tax_income(const building *b)
 static int show_building_water(const building *b)
 {
     return b->type == BUILDING_WELL || b->type == BUILDING_FOUNTAIN || b->type == BUILDING_RESERVOIR ||
-        (b->type == BUILDING_GRAND_TEMPLE_NEPTUNE && building_monument_gt_module_is_active(NEPTUNE_MODULE_2_CAPACITY_AND_WATER));
+        (b->type == BUILDING_GRAND_TEMPLE_NEPTUNE && building_monument_gt_module_is_active(NEPTUNE_MODULE_2_CAPACITY_AND_WATER)) ||
+        (b->type == BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED && building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED));
 }
 
 static int show_building_sentiment(const building *b)

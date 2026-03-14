@@ -806,31 +806,8 @@ static void draw_grand_temple(building_info_context *c, const char *sound_file,
         window_building_draw_monument_temple_construction_process(c);
     }
     if (b->monument.upgrades) {
-        int module_index = data.god_id * 2 + (b->monument.upgrades - 1);
-        // Special handling for reworked Venus temple
-        if (b->type == BUILDING_GRAND_TEMPLE_VENUS_REWORKED) {
-            module_index = 12 + (b->monument.upgrades - 1);
-        }
-        // Special handling for reworked Ceres temple
-        if (b->type == BUILDING_GRAND_TEMPLE_CERES_REWORKED) {
-            module_index = 14 + (b->monument.upgrades - 1);
-        }
-        // Special handling for reworked Mercury temple
-        if (b->type == BUILDING_GRAND_TEMPLE_MERCURY_REWORKED) {
-            module_index = 18 + (b->monument.upgrades - 1);
-        }
-        // Special handling for reworked Neptune temple
-        if (b->type == BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED) {
-            module_index = 16 + (b->monument.upgrades - 1);
-        }
-        // Special handling for reworked Pantheon
-        if (b->type == BUILDING_PANTHEON_REWORKED) {
-            module_index = 20 + (b->monument.upgrades - 1);
-        }
-        // Special handling for reworked Mars temple
-        if (b->type == BUILDING_GRAND_TEMPLE_MARS_REWORKED) {
-            module_index = 22 + (b->monument.upgrades - 1);
-        }
+        int reworked_base = reworked_temple_option_id(b->type);
+        int module_index = (reworked_base >= 0 ? reworked_base : data.god_id * 2) + (b->monument.upgrades - 1);
         int module_name = temple_module_options[module_index].option.header;
         text_draw_centered(translation_for(module_name),
             c->x_offset, c->y_offset + 12, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK, 0);
@@ -847,31 +824,8 @@ static void draw_grand_temple(building_info_context *c, const char *sound_file,
             height = text_draw_multiline(translation_for(bonus_desc),
                 c->x_offset + 22, c->y_offset + 56 + extra_y, 15 * c->width_blocks, 0, FONT_NORMAL_BLACK, 0);
             if (b->monument.upgrades) {
-                int module_index = data.god_id * 2 + (b->monument.upgrades - 1);
-                // Special handling for reworked Venus temple
-                if (b->type == BUILDING_GRAND_TEMPLE_VENUS_REWORKED) {
-                    module_index = 12 + (b->monument.upgrades - 1);
-                }
-                // Special handling for reworked Ceres temple
-                if (b->type == BUILDING_GRAND_TEMPLE_CERES_REWORKED) {
-                    module_index = 14 + (b->monument.upgrades - 1);
-                }
-                // Special handling for reworked Mercury temple
-                if (b->type == BUILDING_GRAND_TEMPLE_MERCURY_REWORKED) {
-                    module_index = 18 + (b->monument.upgrades - 1);
-                }
-                // Special handling for reworked Neptune temple
-                if (b->type == BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED) {
-                    module_index = 16 + (b->monument.upgrades - 1);
-                }
-                // Special handling for reworked Pantheon
-                if (b->type == BUILDING_PANTHEON_REWORKED) {
-                    module_index = 20 + (b->monument.upgrades - 1);
-                }
-                // Special handling for reworked Mars temple
-                if (b->type == BUILDING_GRAND_TEMPLE_MARS_REWORKED) {
-                    module_index = 22 + (b->monument.upgrades - 1);
-                }
+                int reworked_base = reworked_temple_option_id(b->type);
+                int module_index = (reworked_base >= 0 ? reworked_base : data.god_id * 2) + (b->monument.upgrades - 1);
                 int module_desc = temple_module_options[module_index].option.desc;
                 height += text_draw_multiline(translation_for(module_desc),
                     c->x_offset + 22, c->y_offset + 66 + height + extra_y, 15 * c->width_blocks,
@@ -1493,36 +1447,30 @@ static void generate_module_image_id(int index)
         temple_module_options[index].image_id);
 }
 
+static int reworked_temple_option_id(building_type type)
+{
+    static const struct { building_type type; int option_id; } reworked_options[] = {
+        { BUILDING_GRAND_TEMPLE_VENUS_REWORKED,   12 },
+        { BUILDING_GRAND_TEMPLE_CERES_REWORKED,   14 },
+        { BUILDING_GRAND_TEMPLE_MERCURY_REWORKED, 16 },
+        { BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED, 18 },
+        { BUILDING_PANTHEON_REWORKED,             20 },
+        { BUILDING_GRAND_TEMPLE_MARS_REWORKED,    22 },
+    };
+    for (int i = 0; i < (int)(sizeof(reworked_options) / sizeof(reworked_options[0])); i++) {
+        if (reworked_options[i].type == type) {
+            return reworked_options[i].option_id;
+        }
+    }
+    return -1;
+}
+
 static void button_add_module_prompt(const generic_button *button)
 {
     int num_options = 0;
-    int option_id = data.god_id * 2;
-
-    // Special handling for reworked Venus temple
     building *b = building_get(data.building_id);
-    if (b->type == BUILDING_GRAND_TEMPLE_VENUS_REWORKED) {
-        option_id = 12;
-    }
-    // Special handling for reworked Ceres temple
-    if (b->type == BUILDING_GRAND_TEMPLE_CERES_REWORKED) {
-        option_id = 14;
-    }
-    // Special handling for reworked Mercury temple
-    if (b->type == BUILDING_GRAND_TEMPLE_MERCURY_REWORKED) {
-        option_id = 18;
-    }
-    // Special handling for reworked Neptune temple
-    if (b->type == BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED) {
-        option_id = 16;
-    }
-    // Special handling for reworked Pantheon
-    if (b->type == BUILDING_PANTHEON_REWORKED) {
-        option_id = 20;
-    }
-    // Special handling for reworked Mars temple
-    if (b->type == BUILDING_GRAND_TEMPLE_MARS_REWORKED) {
-        option_id = 22;
-    }
+    int reworked_id = reworked_temple_option_id(b->type);
+    int option_id = reworked_id >= 0 ? reworked_id : data.god_id * 2;
 
     static option_menu_item options[2];
 
