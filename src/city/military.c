@@ -5,6 +5,7 @@
 #include "city/data_private.h"
 #include "city/message.h"
 #include "city/ratings.h"
+#include "city/sentiment.h"
 #include "city/resource.h"
 #include "core/calc.h"
 #include "empire/city.h"
@@ -308,6 +309,7 @@ static void fight_distant_battle(void)
         building_menu_update();
         city_data.distant_battle.won_count++;
         city_data.distant_battle.city_foreign_months_left = 0;
+        city_sentiment_apply_mars_victory();
         city_data.distant_battle.roman_months_to_travel_back = city_data.distant_battle.roman_months_traveled;
     }
     city_data.distant_battle.months_until_battle = 0;

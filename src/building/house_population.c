@@ -66,6 +66,16 @@ int house_population_get_capacity(building *house)
         house->data.house.temple_neptune) {
         max_pop += (max_pop + 1) / 20;
     }
+    // Pantheon Reworked Module 2: Luxury Palaces +10% capacity
+    if (building_monument_gt_module_is_active(PANTHEON_MODULE_4_LUXURY_PALACE) &&
+        house->type == BUILDING_HOUSE_LUXURY_PALACE) {
+        max_pop += max_pop / 10;
+    }
+    // Mars Reworked base: +5% capacity for houses with Mars temple access
+    if (building_monument_working(BUILDING_GRAND_TEMPLE_MARS_REWORKED) &&
+        house->data.house.temple_mars) {
+        max_pop += (max_pop + 1) / 20;
+    }
     return max_pop;
 }
 

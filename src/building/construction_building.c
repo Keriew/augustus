@@ -327,10 +327,16 @@ static void add_to_map(int type, building *b, int size, int orientation, int wat
         case BUILDING_GRAND_TEMPLE_MERCURY:
         case BUILDING_GRAND_TEMPLE_MARS:
         case BUILDING_GRAND_TEMPLE_VENUS:
+        case BUILDING_GRAND_TEMPLE_VENUS_REWORKED:
+        case BUILDING_GRAND_TEMPLE_CERES_REWORKED:
+        case BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED:
+        case BUILDING_GRAND_TEMPLE_MERCURY_REWORKED:
+        case BUILDING_GRAND_TEMPLE_MARS_REWORKED:
         case BUILDING_PANTHEON:
+        case BUILDING_PANTHEON_REWORKED:
             map_tiles_update_area_roads(b->x, b->y, 9);
             building_monument_set_phase(b, MONUMENT_START);
-            if (type == BUILDING_GRAND_TEMPLE_MARS) {
+            if (type == BUILDING_GRAND_TEMPLE_MARS || type == BUILDING_GRAND_TEMPLE_MARS_REWORKED) {
                 b->accepted_goods[RESOURCE_WEAPONS] = 1;
                 b->accepted_goods[RESOURCE_NONE] = 1;
             }
@@ -574,11 +580,6 @@ int building_construction_place_building(building_type type, int x, int y, int e
         return 0;
     }
 
-    if (building_monument_is_grand_temple(type) &&
-        building_monument_count_grand_temples() >= config_get(CONFIG_GP_CH_MAX_GRAND_TEMPLES)) {
-        city_warning_show(WARNING_MAX_GRAND_TEMPLES, NEW_WARNING_SLOT);
-        return 0;
-    }
     if (type == BUILDING_COLOSSEUM) {
         if (building_count_total(BUILDING_COLOSSEUM)) {
             city_warning_show(WARNING_ONE_BUILDING_OF_TYPE, NEW_WARNING_SLOT);

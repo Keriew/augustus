@@ -49,6 +49,9 @@ static int show_building_religion(const building *b)
         b->type == BUILDING_LARGE_TEMPLE_VENUS || b->type == BUILDING_GRAND_TEMPLE_CERES ||
         b->type == BUILDING_GRAND_TEMPLE_NEPTUNE || b->type == BUILDING_GRAND_TEMPLE_MERCURY ||
         b->type == BUILDING_GRAND_TEMPLE_MARS || b->type == BUILDING_GRAND_TEMPLE_VENUS ||
+        b->type == BUILDING_GRAND_TEMPLE_CERES_REWORKED || b->type == BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED ||
+        b->type == BUILDING_GRAND_TEMPLE_MERCURY_REWORKED || b->type == BUILDING_GRAND_TEMPLE_MARS_REWORKED ||
+        b->type == BUILDING_GRAND_TEMPLE_VENUS_REWORKED || b->type == BUILDING_PANTHEON_REWORKED ||
         b->type == BUILDING_PANTHEON || b->type == BUILDING_NYMPHAEUM ||
         b->type == BUILDING_SHRINE_CERES || b->type == BUILDING_SHRINE_MARS ||
         b->type == BUILDING_SHRINE_MERCURY || b->type == BUILDING_SHRINE_VENUS ||
@@ -69,7 +72,8 @@ static int show_building_tax_income(const building *b)
 static int show_building_water(const building *b)
 {
     return b->type == BUILDING_WELL || b->type == BUILDING_FOUNTAIN || b->type == BUILDING_RESERVOIR ||
-        (b->type == BUILDING_GRAND_TEMPLE_NEPTUNE && building_monument_gt_module_is_active(NEPTUNE_MODULE_2_CAPACITY_AND_WATER));
+        (b->type == BUILDING_GRAND_TEMPLE_NEPTUNE && building_monument_gt_module_is_active(NEPTUNE_MODULE_2_CAPACITY_AND_WATER)) ||
+        (b->type == BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED && building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED));
 }
 
 static int show_building_sentiment(const building *b)

@@ -582,16 +582,19 @@ int figure_service_provide_coverage(figure *f)
                     provide_market_goods(f->building_id, x, y);
                     break;
                 case BUILDING_GRAND_TEMPLE_CERES:
+                case BUILDING_GRAND_TEMPLE_CERES_REWORKED:
                     houses_serviced = provide_culture(x, y, religion_coverage_ceres);
                     break;
                 case BUILDING_SMALL_TEMPLE_NEPTUNE:
                 case BUILDING_LARGE_TEMPLE_NEPTUNE:
                 case BUILDING_GRAND_TEMPLE_NEPTUNE:
+                case BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED:
                     houses_serviced = provide_culture(x, y, religion_coverage_neptune);
                     break;
                 case BUILDING_SMALL_TEMPLE_MERCURY:
                 case BUILDING_LARGE_TEMPLE_MERCURY:
                 case BUILDING_GRAND_TEMPLE_MERCURY:
+                case BUILDING_GRAND_TEMPLE_MERCURY_REWORKED:
                     houses_serviced = provide_culture(x, y, religion_coverage_mercury);
                     break;
                 case BUILDING_SMALL_TEMPLE_MARS:
@@ -602,6 +605,7 @@ int figure_service_provide_coverage(figure *f)
                     houses_serviced = provide_culture(x, y, religion_coverage_mars);
                     break;
                 case BUILDING_GRAND_TEMPLE_MARS:
+                case BUILDING_GRAND_TEMPLE_MARS_REWORKED:
                     houses_serviced = provide_culture(x, y, religion_coverage_mars);
                     break;
                 case BUILDING_SMALL_TEMPLE_VENUS:
@@ -613,15 +617,27 @@ int figure_service_provide_coverage(figure *f)
                     }
                     break;
                 case BUILDING_GRAND_TEMPLE_VENUS:
+                case BUILDING_GRAND_TEMPLE_VENUS_REWORKED:
                     houses_serviced = provide_culture(x, y, religion_coverage_venus);
                     break;
                 case BUILDING_PANTHEON:
+                case BUILDING_PANTHEON_REWORKED:
                     houses_serviced = provide_culture(x, y, religion_coverage_ceres);
                     provide_culture(x, y, religion_coverage_neptune);
                     provide_culture(x, y, religion_coverage_mercury);
                     provide_culture(x, y, religion_coverage_mars);
                     provide_culture(x, y, religion_coverage_venus);
                     provide_culture(x, y, religion_coverage_pantheon);
+                    break;
+                case BUILDING_SENATE:
+                    if (building_monument_gt_module_is_active(PANTHEON_MODULE_3_SENATE)) {
+                        houses_serviced = provide_culture(x, y, religion_coverage_ceres);
+                        provide_culture(x, y, religion_coverage_neptune);
+                        provide_culture(x, y, religion_coverage_mercury);
+                        provide_culture(x, y, religion_coverage_mars);
+                        provide_culture(x, y, religion_coverage_venus);
+                        provide_culture(x, y, religion_coverage_pantheon);
+                    }
                     break;
                 default:
                     break;

@@ -2,6 +2,7 @@
 
 #include "assets/assets.h"
 #include "building/building.h"
+#include "building/monument.h"
 #include "building/market.h"
 #include "city/buildings.h"
 #include "city/health.h"
@@ -170,9 +171,29 @@ void figure_priest_action(figure *f)
 {
     if (f->destination_building_id) {
         figure_destination_priest_action(f);
-    } else {
-        culture_action(f, GROUP_FIGURE_PRIEST);
+        return;
     }
+    building *b = building_get(f->building_id);
+    f->terrain_usage = TERRAIN_USAGE_ROADS;
+    f->use_cross_country = 0;
+    figure_image_increase_offset(f, 12);
+
+    int figure_slot_id = b->figure_id;
+    int max_roam = 384;
+
+    if (b->type == BUILDING_PANTHEON_REWORKED) {
+        max_roam = 768;
+    } else if (b->type == BUILDING_SENATE &&
+               building_monument_gt_module_is_active(PANTHEON_MODULE_3_SENATE)) {
+        figure_slot_id = b->figure_id2;
+    }
+
+    f->max_roam_length = max_roam;
+    if (b->state != BUILDING_STATE_IN_USE || figure_slot_id != f->id) {
+        f->state = FIGURE_STATE_DEAD;
+    }
+    roamer_action(f, 1);
+    figure_image_update(f, image_group(GROUP_FIGURE_PRIEST));
 }
 
 void figure_school_child_action(figure *f)

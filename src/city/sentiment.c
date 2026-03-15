@@ -1,6 +1,7 @@
 #include "sentiment.h"
 
 #include "building/building.h"
+#include "building/monument.h"
 #include "building/properties.h"
 #include "city/constants.h"
 #include "city/data_private.h"
@@ -165,6 +166,20 @@ void city_sentiment_decrement_blessing_boost(void)
     city_data.sentiment.blessing_festival_boost = new_sentiment;
 }
 
+void city_sentiment_apply_mars_victory(void)
+{
+    if (building_monument_gt_module_is_active(MARS_MODULE_4_BARRACKS_VICTORY)) {
+        city_data.sentiment.mars_victory_boost = 12;
+    }
+}
+
+void city_sentiment_decrement_mars_victory_boost(void)
+{
+    if (city_data.sentiment.mars_victory_boost > 0) {
+        city_data.sentiment.mars_victory_boost--;
+    }
+}
+
 static int get_games_bonus(void)
 {
     int bonus = 0;
@@ -277,6 +292,7 @@ void city_sentiment_update(void)
     int sentiment_contribution_unemployment = get_unemployment_sentiment_modifier();
     int average_housing_level = get_average_housing_level();
     int blessing_festival_boost = city_data.sentiment.blessing_festival_boost;
+    int mars_victory_boost = city_data.sentiment.mars_victory_boost;
     int average_squalor_penalty = 0;
     int games_bonus = get_games_bonus();
 
@@ -346,6 +362,7 @@ void city_sentiment_update(void)
             // Games and Festivals (calculated earlier)
             sentiment += games_bonus;
             sentiment += blessing_festival_boost;
+            sentiment += mars_victory_boost;
 
             // Change sentiment gradually to the new value
             int sentiment_delta = sentiment - b->sentiment.house_happiness;

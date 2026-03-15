@@ -32,6 +32,7 @@ void city_figures_add_attacking_native(void)
 void city_figures_add_enemy(void)
 {
     city_data.figure.enemies++;
+    city_data.figure.had_enemies_this_month = 1;
 }
 
 void city_figures_add_imperial_soldier(void)

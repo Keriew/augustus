@@ -26,6 +26,8 @@ void city_sentiment_set_crime_cooldown(void);
 void city_sentiment_reduce_crime_cooldown(void);
 int city_sentiment_get_blessing_festival_boost(void);
 void city_sentiment_decrement_blessing_boost(void);
+void city_sentiment_apply_mars_victory(void);
+void city_sentiment_decrement_mars_victory_boost(void);
 
 void city_sentiment_update(void);
 

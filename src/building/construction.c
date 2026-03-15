@@ -784,9 +784,6 @@ static int should_mark_for_construction(building_type type)
         return 0;
     } else if (building_monument_get_id(type)) {
         return 0;
-    } else if (building_monument_is_grand_temple(type) &&
-        building_monument_count_grand_temples() >= config_get(CONFIG_GP_CH_MAX_GRAND_TEMPLES)) {
-        return 0;
     } else if (type == BUILDING_AQUEDUCT) {
         return 0;
     }

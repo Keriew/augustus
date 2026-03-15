@@ -1,6 +1,8 @@
 #include "soldier.h"
 
 #include "assets/assets.h"
+#include "building/monument.h"
+#include "city/data_private.h"
 #include "city/figures.h"
 #include "city/games.h"
 #include "city/map.h"
@@ -351,6 +353,10 @@ static int soldier_percentage_speed(figure_type type)
         return 50;
     } else if (type == FIGURE_FORT_ARCHER) {
         return 25;
+    }
+    if (type == FIGURE_FORT_LEGIONARY &&
+        building_monument_gt_module_is_active(MARS_MODULE_3_SUPPLY_CHAIN)) {
+        return 7 * city_data.mess_hall.food_types;
     }
     return 0;
 }

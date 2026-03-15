@@ -489,6 +489,7 @@ static void save_main_data(buffer *main)
     buffer_write_i32(main, city_data.mission.tutorial_fire_message_shown);
     buffer_write_i32(main, city_data.mission.tutorial_disease_message_shown);
     buffer_write_i32(main, city_data.figure.attacking_natives);
+    buffer_write_i8(main, city_data.sentiment.mars_victory_boost);
 }
 
 static void load_main_data(buffer *main, int version)
@@ -1013,8 +1014,9 @@ static void load_main_data(buffer *main, int version)
     city_data.mission.tutorial_fire_message_shown = buffer_read_i32(main);
     city_data.mission.tutorial_disease_message_shown = buffer_read_i32(main);
     city_data.figure.attacking_natives = buffer_read_i32(main);
+    city_data.sentiment.mars_victory_boost = buffer_read_i8(main);
     if (!discard_unused_values) {
-        buffer_skip(main, 232);
+        buffer_skip(main, 231);
     }
     if (!has_separate_import_limits) {
         for (int i = RESOURCE_MIN; i < RESOURCE_MAX_LEGACY; i++) {

@@ -33,6 +33,7 @@ extern struct city_data_t {
         int16_t animals;
         int32_t attacking_natives;
         int32_t enemies;
+        int8_t had_enemies_this_month;
         int32_t imperial_soldiers;
         int32_t rioters;
         int32_t robbers;
@@ -209,6 +210,7 @@ extern struct city_data_t {
         int32_t wages;
         int32_t low_mood_cause;
         int16_t blessing_festival_boost;
+        int8_t mars_victory_boost;
 
         int32_t protesters;
         int32_t criminals; // muggers+rioters

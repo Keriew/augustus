@@ -418,10 +418,6 @@ static int is_fully_blocked(int map_x, int map_y, building_type type, int buildi
     if (!building_monument_type_is_mini_monument(type) && building_monument_get_id(type)) {
         return 1;
     }
-    if (building_monument_is_grand_temple(type) &&
-        building_monument_count_grand_temples() >= config_get(CONFIG_GP_CH_MAX_GRAND_TEMPLES)) {
-        return 1;
-    }
     if (city_finance_out_of_money()) {
         return 1;
     }
@@ -1326,9 +1322,9 @@ static void draw_grand_temple_neptune_range(int x, int y, int grid_offset)
     image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_BLUE, data.scale);
 }
 
-static void draw_grand_temple_neptune(const map_tile *tile, int x, int y)
+static void draw_grand_temple_neptune_type(const map_tile *tile, int x, int y, building_type type)
 {
-    const building_properties *props = building_properties_for_type(BUILDING_GRAND_TEMPLE_NEPTUNE);
+    const building_properties *props = building_properties_for_type(type);
     int num_tiles = props->size * props->size;
     int blocked[MAX_TILES];
     if (city_finance_out_of_money() || is_blocked_for_building(tile->grid_offset, props->size, blocked, 1)) {
@@ -1336,13 +1332,18 @@ static void draw_grand_temple_neptune(const map_tile *tile, int x, int y)
     }
     int radius = map_water_supply_reservoir_radius();
     // need to add 2 for the bonus the Neptune GT will add
-    if (!building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE)) {
+    if (!building_monument_working(type)) {
         radius += 2;
     }
     city_view_foreach_tile_in_range(tile->grid_offset, props->size, radius, draw_grand_temple_neptune_range);
-    int image_id = get_new_building_image_id(tile->grid_offset, BUILDING_GRAND_TEMPLE_NEPTUNE);
-    draw_regular_building(BUILDING_GRAND_TEMPLE_NEPTUNE, image_id, x, y, tile->grid_offset, num_tiles, blocked);
-    set_roamer_path(BUILDING_GRAND_TEMPLE_NEPTUNE, props->size, tile, has_blocked_tiles(num_tiles, blocked));
+    int image_id = get_new_building_image_id(tile->grid_offset, type);
+    draw_regular_building(type, image_id, x, y, tile->grid_offset, num_tiles, blocked);
+    set_roamer_path(type, props->size, tile, has_blocked_tiles(num_tiles, blocked));
+}
+
+static void draw_grand_temple_neptune(const map_tile *tile, int x, int y)
+{
+    draw_grand_temple_neptune_type(tile, x, y, BUILDING_GRAND_TEMPLE_NEPTUNE);
 }
 
 static void draw_concrete_maker(const map_tile *tile, int x, int y)
@@ -1648,6 +1649,9 @@ void city_building_ghost_draw(const map_tile *tile)
             break;
         case BUILDING_GRAND_TEMPLE_NEPTUNE:
             draw_grand_temple_neptune(tile, x, y);
+            break;
+        case BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED:
+            draw_grand_temple_neptune_type(tile, x, y, BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED);
             break;
         case BUILDING_LATRINES:
             draw_latrines(tile, x, y);

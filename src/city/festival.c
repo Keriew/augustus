@@ -220,7 +220,7 @@ void city_festival_update(void)
         }
     }
 
-    if (building_monument_working(BUILDING_PANTHEON)) {
+    if (building_monument_working(BUILDING_PANTHEON) || building_monument_working(BUILDING_PANTHEON_REWORKED)) {
         for (int god = 0; god <= 4; ++god) {
             if (game_time_total_years() % 5 == god && game_time_month() == autofestivals[god].month) {
                 throw_auto_festival(god);

@@ -86,4 +86,6 @@ int city_population_percentage_in_tents_shacks(void);
 
 int city_population_percentage_in_villas_palaces(void);
 
+int city_population_neptune_reworked_retirement_bonus_years(void);
+
 #endif // CITY_POPULATION_H

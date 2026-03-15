@@ -4,6 +4,7 @@
 #include "building/monument.h"
 #include "building/properties.h"
 #include "city/houses.h"
+#include "city/ratings.h"
 #include "city/resource.h"
 #include "core/calc.h"
 #include "core/config.h"
@@ -194,7 +195,8 @@ static int has_required_goods_and_services(building *house, int for_upgrade, int
 static int check_requirements(building *house, house_demands *demands)
 {
     int bonus = 0;
-    if (building_monument_pantheon_module_is_active(PANTHEON_MODULE_2_HOUSING_EVOLUTION) && house->house_pantheon_access) {
+    if ((building_monument_pantheon_module_is_active(PANTHEON_MODULE_2_HOUSING_EVOLUTION) ||
+         building_monument_working(BUILDING_PANTHEON_REWORKED)) && house->house_pantheon_access) {
         bonus++;
     }
     int status = check_evolve_desirability(house, bonus);
@@ -506,7 +508,8 @@ static int evolve_large_palace(building *house, house_demands *demands)
 
 static int evolve_luxury_palace(building *house, house_demands *demands)
 {
-    int bonus = (int) (building_monument_pantheon_module_is_active(PANTHEON_MODULE_2_HOUSING_EVOLUTION) && house->house_pantheon_access);
+    int bonus = (int) ((building_monument_pantheon_module_is_active(PANTHEON_MODULE_2_HOUSING_EVOLUTION) ||
+        building_monument_working(BUILDING_PANTHEON_REWORKED)) && house->house_pantheon_access);
     int status = check_evolve_desirability(house, bonus);
     if (!has_required_goods_and_services(house, 0, bonus, demands)) {
         status = DEVOLVE;
@@ -542,12 +545,28 @@ static void consume_resources(building *b)
         consumption_reduction[RESOURCE_WINE] += 20;
         consumption_reduction[RESOURCE_OIL] += 20;
     }
-    // mars module 2 - all goods reduced by 10% 
+    // mars module 2 - all goods reduced by 10%
     if (b->data.house.temple_mars && building_monument_gt_module_is_active(MARS_MODULE_2_ALL_GOODS)) {
         consumption_reduction[RESOURCE_WINE] += 10;
         consumption_reduction[RESOURCE_OIL] += 10;
         consumption_reduction[RESOURCE_POTTERY] += 10;
         consumption_reduction[RESOURCE_FURNITURE] += 10;
+    }
+    // Mercury Reworked base bonus - all goods reduced by (house happiness / 10)%
+    if (b->data.house.temple_mercury && building_monument_working(BUILDING_GRAND_TEMPLE_MERCURY_REWORKED)) {
+        int sentiment_reduction = b->sentiment.house_happiness / 10;  // 0-10% based on house happiness
+        consumption_reduction[RESOURCE_WINE] += sentiment_reduction;
+        consumption_reduction[RESOURCE_OIL] += sentiment_reduction;
+        consumption_reduction[RESOURCE_POTTERY] += sentiment_reduction;
+        consumption_reduction[RESOURCE_FURNITURE] += sentiment_reduction;
+    }
+    // Mercury Reworked module 4 bonus - all goods reduced by (city prosperity / 10)%
+    if (b->data.house.temple_mercury && building_monument_gt_module_is_active(MERCURY_MODULE_4_PROSPERITY)) {
+        int prosperity_reduction = city_rating_prosperity() / 10;
+        consumption_reduction[RESOURCE_WINE] += prosperity_reduction;
+        consumption_reduction[RESOURCE_OIL] += prosperity_reduction;
+        consumption_reduction[RESOURCE_POTTERY] += prosperity_reduction;
+        consumption_reduction[RESOURCE_FURNITURE] += prosperity_reduction;
     }
 
     for (resource_type r = RESOURCE_MIN_NON_FOOD; r < RESOURCE_MAX_NON_FOOD; r++) {
@@ -609,7 +628,8 @@ void building_house_process_evolve_and_consume_goods(void)
 void building_house_determine_evolve_text(building *house, int worst_desirability_building)
 {
     int level = house->subtype.house_level;
-    if (building_monument_pantheon_module_is_active(PANTHEON_MODULE_2_HOUSING_EVOLUTION) && house->house_pantheon_access) {
+    if ((building_monument_pantheon_module_is_active(PANTHEON_MODULE_2_HOUSING_EVOLUTION) ||
+         building_monument_working(BUILDING_PANTHEON_REWORKED)) && house->house_pantheon_access) {
         level--;
     }
     level = calc_bound(level, HOUSE_MIN, HOUSE_MAX);
