@@ -248,6 +248,7 @@ static int get_height_id(void)
             case BUILDING_GRAND_TEMPLE_CERES_REWORKED:
             case BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED:
             case BUILDING_GRAND_TEMPLE_MERCURY_REWORKED:
+            case BUILDING_GRAND_TEMPLE_MARS_REWORKED:
             case BUILDING_PANTHEON:
             case BUILDING_PANTHEON_REWORKED:
             case BUILDING_HIPPODROME:
@@ -256,7 +257,6 @@ static int get_height_id(void)
 
                 //736px
             case BUILDING_GRAND_TEMPLE_MARS:
-            case BUILDING_GRAND_TEMPLE_MARS_REWORKED:
                 return HEIGHT_10_46_BLOCKS;
 
                 //448px
