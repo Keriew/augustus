@@ -845,9 +845,21 @@ static void draw_grand_temple(building_info_context *c, const char *sound_file,
                 int reworked_base = reworked_temple_option_id(b->type);
                 int module_index = (reworked_base >= 0 ? reworked_base : data.god_id * 2) + (b->monument.upgrades - 1);
                 int module_desc = temple_module_options[module_index].option.desc;
+                // Venus M4 desc adapts to scenario (theater/tavern availability)
+                if (b->type == BUILDING_GRAND_TEMPLE_VENUS_REWORKED && b->monument.upgrades == 2) {
+                    switch (building_monument_venus_m4_variant()) {
+                        case VENUS_M4_THEATER_BATHHOUSE:
+                            module_desc = TR_BUILDING_GRAND_TEMPLE_VENUS_MODULE_4_THEATER_BATHHOUSE_DESC;
+                            break;
+                        case VENUS_M4_BATHHOUSE_TAVERN:
+                            module_desc = TR_BUILDING_GRAND_TEMPLE_VENUS_MODULE_4_BATHHOUSE_TAVERN_DESC;
+                            break;
+                        default: break;
+                    }
+                }
                 height += text_draw_multiline(translation_for(module_desc),
                     c->x_offset + 22, c->y_offset + 66 + height + extra_y, 15 * c->width_blocks,
-                    0, FONT_NORMAL_GREEN, 0);
+                    0, FONT_NORMAL_BLACK, 0);
             }
         }
         if (b->type == BUILDING_GRAND_TEMPLE_MARS) {
@@ -1483,7 +1495,20 @@ static void button_add_module_prompt(const generic_button *button)
     if (scenario_allowed_building(temple_module_options[option_id + 1].required_building)) {
         generate_module_image_id(option_id + 1);
         data.module_choices[num_options] = 2;
-        options[num_options++] = temple_module_options[option_id + 1].option;
+        options[num_options] = temple_module_options[option_id + 1].option;
+        // Venus Reworked M4: adapt desc to scenario (theater/tavern availability)
+        if (b->type == BUILDING_GRAND_TEMPLE_VENUS_REWORKED) {
+            switch (building_monument_venus_m4_variant()) {
+                case VENUS_M4_THEATER_BATHHOUSE:
+                    options[num_options].desc = TR_BUILDING_GRAND_TEMPLE_VENUS_MODULE_4_THEATER_BATHHOUSE_DESC;
+                    break;
+                case VENUS_M4_BATHHOUSE_TAVERN:
+                    options[num_options].desc = TR_BUILDING_GRAND_TEMPLE_VENUS_MODULE_4_BATHHOUSE_TAVERN_DESC;
+                    break;
+                default: break;
+            }
+        }
+        num_options++;
     }
 
     if (num_options) {

@@ -78,4 +78,12 @@ int building_monument_is_construction_halted(building *b);
 int building_monument_toggle_construction_halted(building *b);
 int building_monument_is_unfinished_monument(const building *b);
 
+typedef enum {
+    VENUS_M4_THEATER_TAVERN = 0,
+    VENUS_M4_THEATER_BATHHOUSE,
+    VENUS_M4_BATHHOUSE_TAVERN,
+} venus_m4_variant;
+
+venus_m4_variant building_monument_venus_m4_variant(void);
+
 #endif // BUILDING_MONUMENT_H 

@@ -215,7 +215,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_GRAND_TEMPLE_CERES_REWORKED_BONUS_DESC, "Houses visited by priests of Ceres consume less total food for each food type provided."},
     {TR_BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED_BONUS_DESC, "Provides water access like a filled reservoir, and priests prevent disease and extend citizens' working years based on city health."},
     {TR_BUILDING_GRAND_TEMPLE_MERCURY_REWORKED_BONUS_DESC, "Houses visited by priests of Mercury will consume fewer goods when sentiment is high."},
-    {TR_BUILDING_GRAND_TEMPLE_MARS_REWORKED_BONUS_DESC, "Houses visited by priests of Mars receive a blessing of martial strength, housing 5% more residents." },
+    {TR_BUILDING_GRAND_TEMPLE_MARS_REWORKED_BONUS_DESC, "Houses visited by priests of Mars receive a blessing of martial strength, housing more residents. Four additional forts may be constructed." },
     {TR_BUILDING_PANTHEON_REWORKED_BONUS_DESC, "The Pantheon provides all citizens with access to all gods and allows house to evolve one additional step. Annual festivals are held and religious building levies are reduced." },
     {TR_BUILDING_PANTHEON_BONUS_DESC, "The Pantheon provides access to your citizens to worship all the gods. Annual festivals are also held here, and religious and cultural building levies are reduced by 25%." }, // Note to translators: This one changed from the previous version, please update.
     {TR_BUILDING_GRAND_TEMPLE_CERES_MODULE_1_DESC, "Priests reduce food consumption by 20%." },
@@ -225,6 +225,8 @@ static translation_string all_strings[] = {
     {TR_BUILDING_GRAND_TEMPLE_VENUS_MODULE_1_DESC, "The Grand temple produces wine in a quantity scaled to city population with Venus temple access. Temples collect and distribute it to houses and taverns." },
     {TR_BUILDING_GRAND_TEMPLE_VENUS_MODULE_3_DESC, "Provides a second wine type. All small, large, and grand temples gain increased desirability." },
     {TR_BUILDING_GRAND_TEMPLE_VENUS_MODULE_4_DESC, "All houses gain additional entertainment from theaters and working taverns." },
+    {TR_BUILDING_GRAND_TEMPLE_VENUS_MODULE_4_THEATER_BATHHOUSE_DESC, "All houses gain additional entertainment from theaters and bathhouses." },
+    {TR_BUILDING_GRAND_TEMPLE_VENUS_MODULE_4_BATHHOUSE_TAVERN_DESC, "All houses gain additional entertainment from bathhouses and working taverns." },
     {TR_BUILDING_GRAND_TEMPLE_CERES_MODULE_2_DESC, "Priests collect and distribute both oil and one food type from city storage." },
     {TR_BUILDING_GRAND_TEMPLE_NEPTUNE_MODULE_2_DESC, "Priests expand housing capacity by 5%. Grand temple provides water like a filled reservoir." },
     {TR_BUILDING_GRAND_TEMPLE_MERCURY_MODULE_2_DESC, "Priests reduce oil and wine consumption by 20%." },

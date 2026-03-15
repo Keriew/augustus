@@ -15,6 +15,7 @@
 #include "map/orientation.h"
 #include "map/road_access.h"
 #include "map/terrain.h"
+#include "scenario/allowed_building.h"
 #include "scenario/property.h"
 
 #define DELIVERY_ARRAY_SIZE_STEP 200
@@ -842,4 +843,17 @@ int building_monument_toggle_construction_halted(building *b)
 int building_monument_is_unfinished_monument(const building *b)
 {
     return building_monument_is_monument(b) && b->monument.phase != MONUMENT_FINISHED;
+}
+
+venus_m4_variant building_monument_venus_m4_variant(void)
+{
+    int has_theater = scenario_allowed_building(BUILDING_THEATER);
+    int has_tavern = scenario_allowed_building(BUILDING_TAVERN);
+    if (has_theater && has_tavern) {
+        return VENUS_M4_THEATER_TAVERN;
+    } else if (!has_tavern) {
+        return VENUS_M4_THEATER_BATHHOUSE;
+    } else {
+        return VENUS_M4_BATHHOUSE_TAVERN;
+    }
 }

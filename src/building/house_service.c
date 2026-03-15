@@ -79,6 +79,7 @@ void house_service_calculate_culture_aggregates(void)
 {
     int venus_module2 = building_monument_gt_module_is_active(VENUS_MODULE_2_DESIRABILITY_ENTERTAINMENT);
     int venus_module4 = building_monument_gt_module_is_active(VENUS_MODULE_4_THEATER_TAVERN);
+    venus_m4_variant venus_m4_type = venus_module4 ? building_monument_venus_m4_variant() : VENUS_M4_THEATER_TAVERN;
     int completed_colosseum = building_monument_working(BUILDING_COLOSSEUM);
     int completed_hippodrome = building_monument_working(BUILDING_HIPPODROME);
 
@@ -139,13 +140,21 @@ void house_service_calculate_culture_aggregates(void)
                 b->data.house.entertainment += 10;
             }
 
-            // Venus Module 4 Theater/Tavern Bonus
+            // Venus Module 4 Bonus (variant depends on scenario)
             if (venus_module4) {
-                if (b->data.house.theater) {
-                    b->data.house.entertainment += 5;
-                }
-                if (b->house_tavern_wine_access) {
-                    b->data.house.entertainment += 5;
+                switch (venus_m4_type) {
+                    case VENUS_M4_THEATER_TAVERN:
+                        if (b->data.house.theater) { b->data.house.entertainment += 5; }
+                        if (b->house_tavern_wine_access) { b->data.house.entertainment += 5; }
+                        break;
+                    case VENUS_M4_THEATER_BATHHOUSE:
+                        if (b->data.house.theater) { b->data.house.entertainment += 5; }
+                        if (b->data.house.bathhouse) { b->data.house.entertainment += 5; }
+                        break;
+                    case VENUS_M4_BATHHOUSE_TAVERN:
+                        if (b->data.house.bathhouse) { b->data.house.entertainment += 5; }
+                        if (b->house_tavern_wine_access) { b->data.house.entertainment += 5; }
+                        break;
                 }
             }
 
