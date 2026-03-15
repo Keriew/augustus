@@ -318,14 +318,63 @@ static void update_image(figure *f)
     }
 }
 
+static int is_workshop_type(building_type type)
+{
+    return type == BUILDING_WINE_WORKSHOP || type == BUILDING_OIL_WORKSHOP ||
+           type == BUILDING_WEAPONS_WORKSHOP || type == BUILDING_FURNITURE_WORKSHOP ||
+           type == BUILDING_POTTERY_WORKSHOP || type == BUILDING_BRICKWORKS ||
+           type == BUILDING_CONCRETE_MAKER;
+}
+
+static int is_raw_material_for_workshop(building_type type)
+{
+    return type == BUILDING_TIMBER_YARD || type == BUILDING_CLAY_PIT ||
+           type == BUILDING_SAND_PIT || type == BUILDING_IRON_MINE ||
+           type == BUILDING_OLIVE_FARM || type == BUILDING_VINES_FARM;
+}
+
 static int cartpusher_percentage_speed(figure *f)
 {
-    // Ceres grand temple base bonus
+    // Ceres grand temple base bonus (old temple)
     building *src_building = building_get(f->building_id);
     int src_building_type = src_building->type;
     if (src_building_type >= BUILDING_WHEAT_FARM && src_building_type <= BUILDING_PIG_FARM) {
         if (building_monument_working(BUILDING_GRAND_TEMPLE_CERES)) {
             return 50;
+        }
+        // Ceres Reworked module 3: food farm cart speed bonus (wheat, vegetables, fruit, pig only)
+        if (src_building_type != BUILDING_OLIVE_FARM && src_building_type != BUILDING_VINES_FARM) {
+            if (building_monument_gt_module_is_active(CERES_MODULE_3_FARM_SPEED)) {
+                return 40;
+            }
+        }
+    }
+    // Mars Reworked Module 1: workshop supply chain speed bonus
+    if (building_monument_gt_module_is_active(MARS_MODULE_3_SUPPLY_CHAIN)) {
+        if (is_workshop_type(src_building_type)) {
+            return 10;
+        }
+        if (is_raw_material_for_workshop(src_building_type)) {
+            if (f->action_state == FIGURE_ACTION_23_CARTPUSHER_DELIVERING_TO_WORKSHOP) {
+                return 10;
+            }
+            if (f->action_state == FIGURE_ACTION_27_CARTPUSHER_RETURNING &&
+                f->last_destinatation_id &&
+                is_workshop_type(building_get(f->last_destinatation_id)->type)) {
+                return 10;
+            }
+        }
+        if (f->type == FIGURE_WAREHOUSEMAN) {
+            if (f->action_state == FIGURE_ACTION_51_WAREHOUSEMAN_DELIVERING_RESOURCE &&
+                f->destination_building_id &&
+                is_workshop_type(building_get(f->destination_building_id)->type)) {
+                return 10;
+            }
+            if (f->action_state == FIGURE_ACTION_53_WAREHOUSEMAN_RETURNING_EMPTY &&
+                f->last_destinatation_id &&
+                is_workshop_type(building_get(f->last_destinatation_id)->type)) {
+                return 10;
+            }
         }
     }
     return 0;

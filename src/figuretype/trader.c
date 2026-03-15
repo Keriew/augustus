@@ -115,21 +115,29 @@ static void resource_multiplier_reset(void)
 // Mercury Grand Temple base bonus to trader speed
 static int trader_bonus_speed(void)
 {
+    // Old Mercury grand temple base bonus
     if (building_monument_working(BUILDING_GRAND_TEMPLE_MERCURY)) {
         return 25;
-    } else {
-        return 0;
     }
+    // Mercury Reworked module 1: land trader speed bonus
+    if (building_monument_gt_module_is_active(MERCURY_MODULE_3_LAND_TRADER)) {
+        return 20;
+    }
+    return 0;
 }
 
 // Neptune Grand Temple base bonus to trader speed
 static int sea_trader_bonus_speed(void)
 {
+    // Neptune grand temple base bonus
     if (building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE)) {
         return 25;
-    } else {
-        return 0;
     }
+    // Neptune Reworked module 2: sea trader speed bonus
+    if (building_monument_gt_module_is_active(NEPTUNE_MODULE_4_SEA_TRADE)) {
+        return 20;
+    }
+    return 0;
 }
 
 int figure_create_trade_caravan(int x, int y, int city_id)
@@ -1000,6 +1008,10 @@ int figure_trade_land_trade_units(void)
         unit += add_unit;
     }
 
+    if (building_monument_gt_module_is_active(MERCURY_MODULE_3_LAND_TRADER)) {
+        unit += 4;
+    }
+
     if (building_caravanserai_is_fully_functional()) {
         building *b = building_get(city_buildings_get_caravanserai());
 
@@ -1022,6 +1034,7 @@ int figure_trade_land_trade_units(void)
 int figure_trade_sea_trade_units(void)
 {
     int unit = 12;
+
     if (building_monument_working(BUILDING_GRAND_TEMPLE_MERCURY)) {
         int add_unit = 0;
         building *b = building_get(building_find(BUILDING_GRAND_TEMPLE_MERCURY));
@@ -1033,6 +1046,10 @@ int figure_trade_sea_trade_units(void)
             add_unit = 3;
         }
         unit += add_unit;
+    }
+
+    if (building_monument_gt_module_is_active(NEPTUNE_MODULE_4_SEA_TRADE)) {
+        unit += 6;
     }
 
     if (building_lighthouse_is_fully_functional()) {

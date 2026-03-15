@@ -66,11 +66,17 @@ static void update_reservoir_access(void)
         }
     }
     int neptune_id = building_monument_upgraded(BUILDING_GRAND_TEMPLE_NEPTUNE);
-    if (!neptune_id) {
-        return;
+    if (neptune_id) {
+        building *b = building_get(neptune_id);
+        if (b->monument.upgrades == 2) {
+            city_view_foreach_tile_in_range(b->grid_offset, 7, map_water_supply_reservoir_radius(), set_reservoir_access);
+            city_view_foreach_tile_in_range(b->grid_offset, 0, 7, set_reservoir_access); // include the Grand Temple tiles
+            set_reservoir_access(b->x, b->y, b->grid_offset); // include the reservoir main tile
+        }
     }
-    building *b = building_get(neptune_id);
-    if (b->monument.upgrades == 2) {
+    int neptune_reworked_id = building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED);
+    if (neptune_reworked_id) {
+        building *b = building_get(neptune_reworked_id);
         city_view_foreach_tile_in_range(b->grid_offset, 7, map_water_supply_reservoir_radius(), set_reservoir_access);
         city_view_foreach_tile_in_range(b->grid_offset, 0, 7, set_reservoir_access); // include the Grand Temple tiles
         set_reservoir_access(b->x, b->y, b->grid_offset); // include the reservoir main tile
@@ -131,6 +137,9 @@ void city_water_ghost_draw_reservoir_ranges(void)
     }
     if (building_count_active(BUILDING_GRAND_TEMPLE_NEPTUNE) &&
         building_monument_module_type(BUILDING_GRAND_TEMPLE_NEPTUNE) == 2) {
+        num_reservoirs++;
+    }
+    if (building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED)) {
         num_reservoirs++;
     }
     if (type != last_reservoir_building_type || num_reservoirs != last_reservoir_count) {

@@ -76,7 +76,9 @@ static void update_buildings(void)
     int step_size;
     int range;
     int venus_module2 = building_monument_gt_module_is_active(VENUS_MODULE_2_DESIRABILITY_ENTERTAINMENT);
+    int venus_module3 = building_monument_gt_module_is_active(VENUS_MODULE_3_WINE_TEMPLE);
     int venus_gt = building_monument_working(BUILDING_GRAND_TEMPLE_VENUS);
+    int venus_gt_reworked = building_monument_working(BUILDING_GRAND_TEMPLE_VENUS_REWORKED);
     for (int i = 1; i < building_count(); i++) {
         building *b = building_get(i);
         if (b->state == BUILDING_STATE_IN_USE) {
@@ -86,6 +88,18 @@ static void update_buildings(void)
             step = model->desirability_step;
             step_size = model->desirability_step_size;
             range = model->desirability_range;
+
+            // Venus GT Reworked Base Bonus
+            if (building_is_house(b->type) && b->data.house.temple_venus && venus_gt_reworked) {
+                if (b->subtype.house_level >= HOUSE_SMALL_VILLA) {
+                    value += 4;
+                    range += 1;
+                } else if (b->subtype.house_level >= HOUSE_SMALL_CASA) {
+                    value += 2;
+                }
+                
+            }
+
 
             // Venus Module 2 House Desirability Bonus
             if (building_is_house(b->type) && b->data.house.temple_venus && venus_module2) {
@@ -112,12 +126,20 @@ static void update_buildings(void)
                 range = 0;
             }
 
-            // Venus GT Base Bonus
+            // Legacy Venus GT Base Bonus
             if (building_is_statue_garden_temple(b->type) && venus_gt) {
                 value_bonus = ((value / 4) > 1) ? (value / 4) : 1;
                 value += value_bonus;
                 step += 1;
                 range += 1;
+            }
+
+            // Venus Module 3 Temple Bonus
+            if (building_is_temple(b->type) && venus_module3) {
+                value = (value * 3) / 2;
+                if (b->size > 1) {
+                    range += 1;
+                }
             }
 
             add_to_terrain(

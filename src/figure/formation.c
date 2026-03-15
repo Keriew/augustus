@@ -430,7 +430,7 @@ int formation_get_max_legions(void)
     // Mars base bonus
     if (game_cheat_extra_legions()) {
         return MAX_LEGIONS + 14;
-    } else if (building_monument_working(BUILDING_GRAND_TEMPLE_MARS)) {
+    } else if (building_monument_working(BUILDING_GRAND_TEMPLE_MARS) || building_monument_working(BUILDING_GRAND_TEMPLE_MARS_REWORKED)) {
         return MAX_LEGIONS + 4;
     } else {
         return MAX_LEGIONS;

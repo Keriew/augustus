@@ -201,8 +201,15 @@ void city_culture_update_coverage(void)
         SMALL_TEMPLE_COVERAGE * building_count_active(BUILDING_SMALL_TEMPLE_VENUS) +
         LARGE_TEMPLE_COVERAGE * building_count_active(BUILDING_LARGE_TEMPLE_VENUS) +
         PANTHEON_COVERAGE * building_count_active(BUILDING_PANTHEON) +
-        GRAND_TEMPLE_COVERAGE * building_count_active(BUILDING_GRAND_TEMPLE_VENUS),
+        GRAND_TEMPLE_COVERAGE * building_count_active(BUILDING_GRAND_TEMPLE_VENUS)+
+        GRAND_TEMPLE_COVERAGE * building_count_active(BUILDING_GRAND_TEMPLE_VENUS_REWORKED) +
+        GRAND_TEMPLE_COVERAGE * building_count_active(BUILDING_GRAND_TEMPLE_CERES_REWORKED) +
+        GRAND_TEMPLE_COVERAGE * building_count_active(BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED) +
+        GRAND_TEMPLE_COVERAGE * building_count_active(BUILDING_GRAND_TEMPLE_MERCURY_REWORKED) +
+        GRAND_TEMPLE_COVERAGE * building_count_active(BUILDING_GRAND_TEMPLE_MARS_REWORKED) +
+        GRAND_TEMPLE_COVERAGE * building_count_active(BUILDING_PANTHEON_REWORKED),
         population));
+        
     coverage.oracle = top(calc_percentage(ORACLE_COVERAGE * oracles, population));
 
     city_data.culture.religion_coverage =

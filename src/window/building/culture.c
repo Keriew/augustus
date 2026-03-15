@@ -59,7 +59,7 @@ static struct {
     option_menu_item option;
     const building_type required_building;
     const char image_id[32];
-} temple_module_options[12] = {
+} temple_module_options[24] = {
     {
         { TR_BUILDING_GRAND_TEMPLE_CERES_DESC_MODULE_1, TR_BUILDING_GRAND_TEMPLE_CERES_MODULE_1_DESC },
         BUILDING_NONE,
@@ -119,6 +119,66 @@ static struct {
         { TR_BUILDING_PANTHEON_DESC_MODULE_2, TR_BUILDING_PANTHEON_MODULE_2_DESC },
         BUILDING_NONE,
         "Panth M2 Icon"
+    },
+    {
+        { TR_BUILDING_GRAND_TEMPLE_VENUS_DESC_MODULE_3, TR_BUILDING_GRAND_TEMPLE_VENUS_MODULE_3_DESC },
+        BUILDING_NONE,
+        "Venus M Icon"
+    },
+    {
+        { TR_BUILDING_GRAND_TEMPLE_VENUS_DESC_MODULE_4, TR_BUILDING_GRAND_TEMPLE_VENUS_MODULE_4_DESC },
+        BUILDING_NONE,
+        "Venus M2 Icon"
+    },
+    {
+        { TR_BUILDING_GRAND_TEMPLE_CERES_DESC_MODULE_3, TR_BUILDING_GRAND_TEMPLE_CERES_MODULE_3_DESC },
+        BUILDING_NONE,
+        "Ceres M Icon"
+    },
+    {
+        { TR_BUILDING_GRAND_TEMPLE_CERES_DESC_MODULE_4, TR_BUILDING_GRAND_TEMPLE_CERES_MODULE_4_DESC },
+        BUILDING_NONE,
+        "Ceres M2 Icon"
+    },
+    {
+        { TR_BUILDING_GRAND_TEMPLE_MERCURY_DESC_MODULE_3, TR_BUILDING_GRAND_TEMPLE_MERCURY_MODULE_3_DESC },
+        BUILDING_NONE,
+        "Merc M Icon"
+    },
+    {
+        { TR_BUILDING_GRAND_TEMPLE_MERCURY_DESC_MODULE_4, TR_BUILDING_GRAND_TEMPLE_MERCURY_MODULE_4_DESC },
+        BUILDING_NONE,
+        "Merc M2 Icon"
+    },
+    {
+        { TR_BUILDING_GRAND_TEMPLE_NEPTUNE_DESC_MODULE_3, TR_BUILDING_GRAND_TEMPLE_NEPTUNE_MODULE_3_DESC },
+        BUILDING_NONE,
+        "Nept M Icon"
+    },
+    {
+        { TR_BUILDING_GRAND_TEMPLE_NEPTUNE_DESC_MODULE_4, TR_BUILDING_GRAND_TEMPLE_NEPTUNE_MODULE_4_DESC },
+        BUILDING_NONE,
+        "Nept M2 Icon"
+    },
+    {
+        { TR_BUILDING_PANTHEON_DESC_MODULE_3, TR_BUILDING_PANTHEON_MODULE_3_DESC },
+        BUILDING_NONE,
+        "Panth M Icon"
+    },
+    {
+        { TR_BUILDING_PANTHEON_DESC_MODULE_4, TR_BUILDING_PANTHEON_MODULE_4_DESC },
+        BUILDING_NONE,
+        "Panth M2 Icon"
+    },
+    {
+        { TR_BUILDING_GRAND_TEMPLE_MARS_DESC_MODULE_3, TR_BUILDING_GRAND_TEMPLE_MARS_MODULE_3_DESC },
+        BUILDING_NONE,
+        "Mars M Icon"
+    },
+    {
+        { TR_BUILDING_GRAND_TEMPLE_MARS_DESC_MODULE_4, TR_BUILDING_GRAND_TEMPLE_MARS_MODULE_4_DESC },
+        BUILDING_NONE,
+        "Mars M2 Icon"
     }
 };
 
@@ -717,6 +777,24 @@ void window_building_draw_shrine_mars(building_info_context *c)
         c->x_offset + 180, c->y_offset + 45, COLOR_MASK_NONE, SCALE_NONE);
 }
 
+static int reworked_temple_option_id(building_type type)
+{
+    static const struct { building_type type; int option_id; } reworked_options[] = {
+        { BUILDING_GRAND_TEMPLE_VENUS_REWORKED,   12 },
+        { BUILDING_GRAND_TEMPLE_CERES_REWORKED,   14 },
+        { BUILDING_GRAND_TEMPLE_MERCURY_REWORKED, 16 },
+        { BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED, 18 },
+        { BUILDING_PANTHEON_REWORKED,             20 },
+        { BUILDING_GRAND_TEMPLE_MARS_REWORKED,    22 },
+    };
+    for (int i = 0; i < (int)(sizeof(reworked_options) / sizeof(reworked_options[0])); i++) {
+        if (reworked_options[i].type == type) {
+            return reworked_options[i].option_id;
+        }
+    }
+    return -1;
+}
+
 void window_building_draw_shrine_venus(building_info_context *c)
 {
     c->advisor_button = ADVISOR_RELIGION;
@@ -746,7 +824,9 @@ static void draw_grand_temple(building_info_context *c, const char *sound_file,
         window_building_draw_monument_temple_construction_process(c);
     }
     if (b->monument.upgrades) {
-        int module_name = temple_module_options[data.god_id * 2 + (b->monument.upgrades - 1)].option.header;
+        int reworked_base = reworked_temple_option_id(b->type);
+        int module_index = (reworked_base >= 0 ? reworked_base : data.god_id * 2) + (b->monument.upgrades - 1);
+        int module_name = temple_module_options[module_index].option.header;
         text_draw_centered(translation_for(module_name),
             c->x_offset, c->y_offset + 12, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK, 0);
     } else {
@@ -762,16 +842,30 @@ static void draw_grand_temple(building_info_context *c, const char *sound_file,
             height = text_draw_multiline(translation_for(bonus_desc),
                 c->x_offset + 22, c->y_offset + 56 + extra_y, 15 * c->width_blocks, 0, FONT_NORMAL_BLACK, 0);
             if (b->monument.upgrades) {
-                int module_desc = temple_module_options[data.god_id * 2 + (b->monument.upgrades - 1)].option.desc;
+                int reworked_base = reworked_temple_option_id(b->type);
+                int module_index = (reworked_base >= 0 ? reworked_base : data.god_id * 2) + (b->monument.upgrades - 1);
+                int module_desc = temple_module_options[module_index].option.desc;
+                // Venus M4 desc adapts to scenario (theater/tavern availability)
+                if (b->type == BUILDING_GRAND_TEMPLE_VENUS_REWORKED && b->monument.upgrades == 2) {
+                    switch (building_monument_venus_m4_variant()) {
+                        case VENUS_M4_THEATER_BATHHOUSE:
+                            module_desc = TR_BUILDING_GRAND_TEMPLE_VENUS_MODULE_4_THEATER_BATHHOUSE_DESC;
+                            break;
+                        case VENUS_M4_BATHHOUSE_TAVERN:
+                            module_desc = TR_BUILDING_GRAND_TEMPLE_VENUS_MODULE_4_BATHHOUSE_TAVERN_DESC;
+                            break;
+                        default: break;
+                    }
+                }
                 height += text_draw_multiline(translation_for(module_desc),
                     c->x_offset + 22, c->y_offset + 66 + height + extra_y, 15 * c->width_blocks,
-                    0, FONT_NORMAL_GREEN, 0);
+                    0, FONT_NORMAL_BLACK, 0);
             }
         }
         if (b->type == BUILDING_GRAND_TEMPLE_MARS) {
             draw_grand_temple_mars_military(c);
         } else if (b->type == BUILDING_GRAND_TEMPLE_VENUS &&
-            (building_monument_gt_module_is_active(VENUS_MODULE_1_DISTRIBUTE_WINE))) {
+            building_monument_gt_module_is_active(VENUS_MODULE_1_DISTRIBUTE_WINE)) {
             draw_grand_temple_venus_wine(c);
         }
         inner_panel_draw(c->x_offset + 16, c->y_offset + 86 + height + extra_y, c->width_blocks - 2, 4);
@@ -861,6 +955,54 @@ void window_building_draw_grand_temple_venus(building_info_context *c)
         TR_BUILDING_GRAND_TEMPLE_VENUS_BONUS_DESC,
         assets_get_image_id("UI", "Venus L Banner"),
         TR_BUILDING_VENUS_TEMPLE_QUOTE, GOD_VENUS, 20);
+}
+
+void window_building_draw_grand_temple_venus_reworked(building_info_context *c)
+{
+    draw_grand_temple(c, "wavs/temple_love.wav", TR_BUILDING_GRAND_TEMPLE_VENUS_DESC,
+        TR_BUILDING_GRAND_TEMPLE_VENUS_REWORKED_BONUS_DESC,
+        assets_get_image_id("UI", "Venus L Banner"),
+        TR_BUILDING_VENUS_TEMPLE_QUOTE, GOD_VENUS, 20);
+}
+
+void window_building_draw_grand_temple_ceres_reworked(building_info_context *c)
+{
+    draw_grand_temple(c, "wavs/temple_farm.wav", TR_BUILDING_GRAND_TEMPLE_CERES_DESC,
+        TR_BUILDING_GRAND_TEMPLE_CERES_REWORKED_BONUS_DESC,
+        assets_get_image_id("UI", "Ceres L Banner"),
+        TR_BUILDING_CERES_TEMPLE_QUOTE, GOD_CERES, 20);
+}
+
+void window_building_draw_grand_temple_neptune_reworked(building_info_context *c)
+{
+    draw_grand_temple(c, "wavs/temple_ship.wav", TR_BUILDING_GRAND_TEMPLE_NEPTUNE_DESC,
+        TR_BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED_BONUS_DESC,
+        assets_get_image_id("UI", "Nept L Banner"),
+        TR_BUILDING_NEPTUNE_TEMPLE_QUOTE, GOD_NEPTUNE, 20);
+}
+
+void window_building_draw_grand_temple_mercury_reworked(building_info_context *c)
+{
+    draw_grand_temple(c, "wavs/temple_comm.wav", TR_BUILDING_GRAND_TEMPLE_MERCURY_DESC,
+        TR_BUILDING_GRAND_TEMPLE_MERCURY_REWORKED_BONUS_DESC,
+        assets_get_image_id("UI", "Merc L Banner"),
+        TR_BUILDING_MERCURY_TEMPLE_QUOTE, GOD_MERCURY, 20);
+}
+
+void window_building_draw_grand_temple_mars_reworked(building_info_context *c)
+{
+    draw_grand_temple(c, "wavs/temple_war.wav", TR_BUILDING_GRAND_TEMPLE_MARS_DESC,
+        TR_BUILDING_GRAND_TEMPLE_MARS_REWORKED_BONUS_DESC,
+        assets_get_image_id("UI", "Mars L Banner"),
+        TR_BUILDING_MARS_TEMPLE_QUOTE, GOD_MARS, 20);
+}
+
+void window_building_draw_pantheon_reworked(building_info_context *c)
+{
+    draw_grand_temple(c, "wavs/oracle.wav", TR_BUILDING_PANTHEON_DESC,
+        TR_BUILDING_PANTHEON_REWORKED_BONUS_DESC,
+        assets_get_image_id("UI", "Panth L Banner"),
+        TR_BUILDING_PANTHEON_QUOTE, GOD_PANTHEON, 0);
 }
 
 void window_building_draw_pantheon(building_info_context *c)
@@ -1335,10 +1477,13 @@ static void generate_module_image_id(int index)
         temple_module_options[index].image_id);
 }
 
+
 static void button_add_module_prompt(const generic_button *button)
 {
     int num_options = 0;
-    int option_id = data.god_id * 2;
+    building *b = building_get(data.building_id);
+    int reworked_id = reworked_temple_option_id(b->type);
+    int option_id = reworked_id >= 0 ? reworked_id : data.god_id * 2;
 
     static option_menu_item options[2];
 
@@ -1350,7 +1495,20 @@ static void button_add_module_prompt(const generic_button *button)
     if (scenario_allowed_building(temple_module_options[option_id + 1].required_building)) {
         generate_module_image_id(option_id + 1);
         data.module_choices[num_options] = 2;
-        options[num_options++] = temple_module_options[option_id + 1].option;
+        options[num_options] = temple_module_options[option_id + 1].option;
+        // Venus Reworked M4: adapt desc to scenario (theater/tavern availability)
+        if (b->type == BUILDING_GRAND_TEMPLE_VENUS_REWORKED) {
+            switch (building_monument_venus_m4_variant()) {
+                case VENUS_M4_THEATER_BATHHOUSE:
+                    options[num_options].desc = TR_BUILDING_GRAND_TEMPLE_VENUS_MODULE_4_THEATER_BATHHOUSE_DESC;
+                    break;
+                case VENUS_M4_BATHHOUSE_TAVERN:
+                    options[num_options].desc = TR_BUILDING_GRAND_TEMPLE_VENUS_MODULE_4_BATHHOUSE_TAVERN_DESC;
+                    break;
+                default: break;
+            }
+        }
+        num_options++;
     }
 
     if (num_options) {

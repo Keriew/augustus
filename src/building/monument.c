@@ -15,6 +15,7 @@
 #include "map/orientation.h"
 #include "map/road_access.h"
 #include "map/terrain.h"
+#include "scenario/allowed_building.h"
 #include "scenario/property.h"
 
 #define DELIVERY_ARRAY_SIZE_STEP 200
@@ -160,6 +161,12 @@ static const monument_type *MONUMENT_TYPES[BUILDING_TYPE_MAX] = {
     [BUILDING_GRAND_TEMPLE_MERCURY] = &grand_temple,
     [BUILDING_GRAND_TEMPLE_MARS]    = &grand_temple,
     [BUILDING_GRAND_TEMPLE_VENUS]   = &grand_temple,
+    [BUILDING_GRAND_TEMPLE_VENUS_REWORKED] = &grand_temple,
+    [BUILDING_GRAND_TEMPLE_CERES_REWORKED]   = &grand_temple,
+    [BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED] = &grand_temple,
+    [BUILDING_GRAND_TEMPLE_MERCURY_REWORKED] = &grand_temple,
+    [BUILDING_GRAND_TEMPLE_MARS_REWORKED]    = &grand_temple,
+    [BUILDING_PANTHEON_REWORKED]    = &pantheon,
     [BUILDING_PANTHEON]             = &pantheon,
     [BUILDING_ORACLE]               = &oracle,
     [BUILDING_LARGE_TEMPLE_CERES]   = &large_temple,
@@ -283,7 +290,13 @@ int building_monument_is_limited(building_type type)
         case BUILDING_GRAND_TEMPLE_MERCURY:
         case BUILDING_GRAND_TEMPLE_MARS:
         case BUILDING_GRAND_TEMPLE_VENUS:
+        case BUILDING_GRAND_TEMPLE_VENUS_REWORKED:
+        case BUILDING_GRAND_TEMPLE_CERES_REWORKED:
+        case BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED:
+        case BUILDING_GRAND_TEMPLE_MERCURY_REWORKED:
+        case BUILDING_GRAND_TEMPLE_MARS_REWORKED:
         case BUILDING_PANTHEON:
+        case BUILDING_PANTHEON_REWORKED:
         case BUILDING_LIGHTHOUSE:
         case BUILDING_CARAVANSERAI:
         case BUILDING_COLOSSEUM:
@@ -398,6 +411,11 @@ int building_monument_is_grand_temple(building_type type)
         case BUILDING_GRAND_TEMPLE_MERCURY:
         case BUILDING_GRAND_TEMPLE_MARS:
         case BUILDING_GRAND_TEMPLE_VENUS:
+        case BUILDING_GRAND_TEMPLE_VENUS_REWORKED:
+        case BUILDING_GRAND_TEMPLE_CERES_REWORKED:
+        case BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED:
+        case BUILDING_GRAND_TEMPLE_MERCURY_REWORKED:
+        case BUILDING_GRAND_TEMPLE_MARS_REWORKED:
             return 1;
         default:
             return 0;
@@ -433,6 +451,12 @@ int building_monument_get_venus_gt(void)
 int building_monument_get_neptune_gt(void)
 {
     building *monument = building_first_of_type(BUILDING_GRAND_TEMPLE_NEPTUNE);
+    return monument ? monument->id : 0;
+}
+
+int building_monument_get_neptune_reworked_gt(void)
+{
+    building *monument = building_first_of_type(BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED);
     return monument ? monument->id : 0;
 }
 
@@ -722,6 +746,21 @@ int building_monument_gt_module_is_active(int module)
     int module_num = module % MODULES_PER_TEMPLE + 1;
     int temple_type = module / MODULES_PER_TEMPLE + BUILDING_GRAND_TEMPLE_CERES;
 
+    if (module >= VENUS_MODULE_3_WINE_TEMPLE) {
+        static const building_type reworked_temples[] = {
+            BUILDING_GRAND_TEMPLE_VENUS_REWORKED,    // 10, 11
+            BUILDING_GRAND_TEMPLE_CERES_REWORKED,    // 12, 13
+            BUILDING_GRAND_TEMPLE_MERCURY_REWORKED,  // 14, 15
+            BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED,  // 16, 17
+            BUILDING_NONE,                           // 18, 19 (Pantheon original — unused here)
+            BUILDING_PANTHEON_REWORKED,              // 20, 21
+            BUILDING_GRAND_TEMPLE_MARS_REWORKED,     // 22, 23
+        };
+        int idx = (module - VENUS_MODULE_3_WINE_TEMPLE) / MODULES_PER_TEMPLE;
+        temple_type = reworked_temples[idx];
+        module_num = (module - VENUS_MODULE_3_WINE_TEMPLE) % MODULES_PER_TEMPLE + 1;
+    }
+
     return building_monument_module_type(temple_type) == module_num;
 }
 
@@ -804,4 +843,17 @@ int building_monument_toggle_construction_halted(building *b)
 int building_monument_is_unfinished_monument(const building *b)
 {
     return building_monument_is_monument(b) && b->monument.phase != MONUMENT_FINISHED;
+}
+
+venus_m4_variant building_monument_venus_m4_variant(void)
+{
+    int has_theater = scenario_allowed_building(BUILDING_THEATER);
+    int has_tavern = scenario_allowed_building(BUILDING_TAVERN);
+    if (has_theater && has_tavern) {
+        return VENUS_M4_THEATER_TAVERN;
+    } else if (!has_tavern) {
+        return VENUS_M4_THEATER_BATHHOUSE;
+    } else {
+        return VENUS_M4_BATHHOUSE_TAVERN;
+    }
 }

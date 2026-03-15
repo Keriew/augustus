@@ -487,24 +487,40 @@ static int house_consume_food(void)
 {
     int total_consumed = 0;
     int ceres_module = (building_monument_gt_module_is_active(CERES_MODULE_1_REDUCE_FOOD));
+    int ceres_reworked_base = building_monument_working(BUILDING_GRAND_TEMPLE_CERES_REWORKED);
+
     for (building_type type = BUILDING_HOUSE_SMALL_TENT; type <= BUILDING_HOUSE_LUXURY_PALACE; type++) {
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
             if (b->state != BUILDING_STATE_IN_USE || !b->house_size) {
                 continue;
             }
             int num_types = model_get_house(b->subtype.house_level)->food_types;
-            int amount_per_type;
+
+            // Calculate base consumption percentage (default 50%)
+            int consumption_percentage = 50;
+
+            // Old Ceres module: 20% reduction (to 40%)
             if (ceres_module && b->data.house.temple_ceres) {
-                amount_per_type = calc_adjust_with_percentage(b->house_population, 40);
-            } else {
-                amount_per_type = calc_adjust_with_percentage(b->house_population, 50);
+                consumption_percentage = 40;
             }
+
+            // Count available food types (this happens before actual consumption)
             int foodtypes_available = 0;
             for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
                 if (b->resources[r] && resource_is_inventory(r)) {
                     foodtypes_available++;
                 }
             }
+
+            // Ceres Reworked base bonus: 5% reduction per food type available
+            if (ceres_reworked_base && b->data.house.temple_ceres && foodtypes_available > 0) {
+                int reduction_pct = 5 * foodtypes_available;
+                consumption_percentage = calc_adjust_with_percentage(consumption_percentage, 100 - reduction_pct);
+            }
+
+            int amount_per_type = calc_adjust_with_percentage(b->house_population, consumption_percentage);
+
+            // Divide by actual food types available
             if (foodtypes_available) {
                 amount_per_type /= foodtypes_available;
             }

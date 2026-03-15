@@ -1,6 +1,7 @@
 #include "labor.h"
 
 #include "building/building.h"
+#include "building/count.h"
 #include "building/monument.h"
 #include "building/properties.h"
 #include "core/config.h"
@@ -118,7 +119,13 @@ static const int CATEGORY_FOR_BUILDING_TYPE[BUILDING_TYPE_MAX] = {
     [BUILDING_GRAND_TEMPLE_MERCURY] = LABOR_CATEGORY_GOVERNANCE_RELIGION,
     [BUILDING_GRAND_TEMPLE_MARS]    = LABOR_CATEGORY_GOVERNANCE_RELIGION,
     [BUILDING_GRAND_TEMPLE_VENUS]   = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_GRAND_TEMPLE_VENUS_REWORKED]   = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_GRAND_TEMPLE_CERES_REWORKED]   = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_GRAND_TEMPLE_NEPTUNE_REWORKED] = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_GRAND_TEMPLE_MERCURY_REWORKED] = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_GRAND_TEMPLE_MARS_REWORKED]    = LABOR_CATEGORY_GOVERNANCE_RELIGION,
     [BUILDING_PANTHEON]             = LABOR_CATEGORY_GOVERNANCE_RELIGION,
+    [BUILDING_PANTHEON_REWORKED]    = LABOR_CATEGORY_GOVERNANCE_RELIGION,
     [BUILDING_SENATE]               = LABOR_CATEGORY_GOVERNANCE_RELIGION,
     [BUILDING_FORUM]                = LABOR_CATEGORY_GOVERNANCE_RELIGION,
     [BUILDING_ORACLE]               = LABOR_CATEGORY_GOVERNANCE_RELIGION,
@@ -224,6 +231,11 @@ void city_labor_calculate_workers(int num_plebs, int num_patricians)
         city_data.population.working_age = calc_adjust_with_percentage(city_population_people_of_working_age(), 60);
         city_data.labor.workers_available = calc_adjust_with_percentage(
             city_data.population.working_age, city_data.population.percentage_plebs);
+    }
+    // Pantheon Reworked Module 2: each Luxury Palace grants 20 workers
+    if (building_monument_gt_module_is_active(PANTHEON_MODULE_4_LUXURY_PALACE)) {
+        city_data.labor.workers_available +=
+            building_count_active(BUILDING_HOUSE_LUXURY_PALACE) * 20;
     }
 }
 

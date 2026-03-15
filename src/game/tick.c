@@ -16,6 +16,8 @@
 #include "building/warehouse.h"
 #include "city/buildings.h"
 #include "city/culture.h"
+#include "city/data_private.h"
+#include "city/figures.h"
 #include "city/emperor.h"
 #include "city/festival.h"
 #include "city/finance.h"
@@ -83,6 +85,8 @@ static void advance_month(void)
     scenario_random_event_process();
     city_finance_handle_month_change();
     city_resource_consume_food();
+    city_sentiment_decrement_blessing_boost();
+    city_sentiment_decrement_mars_victory_boost();
     scenario_distant_battle_process();
     scenario_invasion_process();
     scenario_request_process();
@@ -91,7 +95,11 @@ static void advance_month(void)
     city_victory_update_months_to_govern();
     formation_update_monthly_morale_at_rest();
     city_message_decrease_delays();
-    city_sentiment_decrement_blessing_boost();
+    // Mars Reworked Module 2: on-map military victory detection
+    if (city_data.figure.had_enemies_this_month && city_figures_enemies() == 0) {
+        city_sentiment_apply_mars_victory();
+    }
+    city_data.figure.had_enemies_this_month = 0;
     building_industry_advance_stats();
     building_industry_start_strikes();
     building_trim();
