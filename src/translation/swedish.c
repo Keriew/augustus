@@ -339,7 +339,6 @@ static translation_string all_strings[] = {
     {TR_TEMPLE_SPECIAL_ORDERS_HEADER, "Tempelinstruktioner"},
     {TR_TAVERN_SPECIAL_ORDERS_HEADER, "Kroginstruktioner"},	
 
-    {TR_WARNING_MAX_GRAND_TEMPLES, "Endast två storslagna tempel kan byggas." },
     {TR_CITY_MESSAGE_TITLE_GRAND_TEMPLE_COMPLETE, "Storslaget tempel färdigbyggt"},
     {TR_CITY_MESSAGE_TEXT_GRAND_TEMPLE_COMPLETE, "Präster och tillbedjare flockas till det nya storslagna templet för invigningsritualerna. Ditt folk beundrar ditt storslagna arbete, och templets tillägnade gud öser sin ynnest över dig."},
     {TR_CITY_MESSAGE_TITLE_MERCURY_BLESSING, "En välsignelse från Merkurius" },
@@ -704,7 +703,6 @@ static translation_string all_strings[] = {
     {TR_WINDOW_BUILDING_DISTRIBUTION_CART_PUSHER_GETTING, "Vagndragaren hämtar varor från ett annat varuhus."},
     {TR_BUILDING_PALISADE, "Palissad" },
     {TR_BUILDING_PALISADE_DESC, "Detta gedigna pålverk av trä kommer skydda oss från angripare och fientliga djur."},	
-    {TR_CONFIG_MAX_GRAND_TEMPLES, "Maximalt antal storslagna tempel per stad:" },
     {TR_CONFIG_USE_COLOR_CURSORS, "Använd färgade muspekare" },
     {TR_OVERLAY_MOTHBALL, "Ur bruk" },
     {TR_OVERLAY_ENEMY, "Fiender" },

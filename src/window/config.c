@@ -95,7 +95,6 @@ enum {
     RANGE_VIDEO_VOLUME,
     RANGE_SCROLL_SPEED,
     RANGE_DIFFICULTY,
-    RANGE_MAX_GRAND_TEMPLES,
     RANGE_MAX_AUTOSAVE_SLOTS,
     RANGE_DEFAULT_GAME_SPEED,
 };
@@ -152,7 +151,6 @@ static const uint8_t *display_text_city_sounds_volume(void);
 static const uint8_t *display_text_video_volume(void);
 static const uint8_t *display_text_scroll_speed(void);
 static const uint8_t *display_text_difficulty(void);
-static const uint8_t *display_text_max_grand_temples(void);
 static const uint8_t *display_text_autosave_slots(void);
 static const uint8_t *display_text_default_game_speed(void);
 
@@ -290,8 +288,6 @@ static config_widget page_difficulty[] = {
     {TYPE_CHECKBOX, CONFIG_GP_CH_MULTIPLE_BARRACKS, TR_CONFIG_MULTIPLE_BARRACKS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_CHECKBOX, CONFIG_GP_CH_RANDOM_COLLAPSES_TAKE_MONEY, TR_CONFIG_RANDOM_COLLAPSES_TAKE_MONEY, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     {TYPE_CHECKBOX, CONFIG_GP_CH_DISABLE_INFINITE_WOLVES_SPAWNING, TR_CONFIG_GP_CH_DISABLE_INFINITE_WOLVES_SPAWNING, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
-    {TYPE_NUMERICAL_DESC, RANGE_MAX_GRAND_TEMPLES, TR_CONFIG_MAX_GRAND_TEMPLES, NULL, 0, 1, ITEM_BASE_H, 10},
-    {TYPE_NUMERICAL_RANGE, RANGE_MAX_GRAND_TEMPLES, 0, display_text_max_grand_temples, 0, 1, ITEM_BASE_H, 2},
     {TYPE_SPACE, 0, 0, NULL, 0, 1, ITEM_BASE_H, 0},
     {TYPE_SPACE, 0, 0, NULL, 0, 1, ITEM_BASE_H, 0}, //two spaces to visually match the padding to the general settings
     {TYPE_NONE}
@@ -421,7 +417,6 @@ static numerical_range_widget ranges[] = {
     {130, 25,   0, 100,  1, 0},   //  video %
     { 50, 18,   0, 100, 10, 0},   //  scroll speed %
     {146, 24,   0,   4,  1, 0},   //  difficulty enum index (0..4)
-    { 50, 30,   0,   5,  1, 0},   //  max grand temples
     { 50, 30,   1,  20,  1, 0},   //  autosave slots
     { 50, 30,   0,  TOTAL_GAME_SPEEDS - 1,  1, 0},   //  default game speed index
 
@@ -872,11 +867,6 @@ static const uint8_t *display_text_difficulty(void)
 {
     return lang_get_string(153, data.config_values[CONFIG_ORIGINAL_DIFFICULTY].new_value + 1);
 }
-static const uint8_t *display_text_max_grand_temples(void)
-{
-    string_from_int(data.display_text, data.config_values[CONFIG_GP_CH_MAX_GRAND_TEMPLES].new_value, 0);
-    return data.display_text;
-}
 static const uint8_t *display_text_autosave_slots(void)
 {
     string_from_int(data.display_text, data.config_values[CONFIG_GP_CH_MAX_AUTOSAVE_SLOTS].new_value, 0);
@@ -903,7 +893,6 @@ static void set_range_values(void)
     ranges[RANGE_VIDEO_VOLUME].value = &data.config_values[CONFIG_GENERAL_VIDEO_VOLUME].new_value;
     ranges[RANGE_SCROLL_SPEED].value = &data.config_values[CONFIG_ORIGINAL_SCROLL_SPEED].new_value;
     ranges[RANGE_DIFFICULTY].value = &data.config_values[CONFIG_ORIGINAL_DIFFICULTY].new_value;
-    ranges[RANGE_MAX_GRAND_TEMPLES].value = &data.config_values[CONFIG_GP_CH_MAX_GRAND_TEMPLES].new_value;
     ranges[RANGE_MAX_AUTOSAVE_SLOTS].value = &data.config_values[CONFIG_GP_CH_MAX_AUTOSAVE_SLOTS].new_value;
     ranges[RANGE_DEFAULT_GAME_SPEED].value = &data.config_values[CONFIG_GP_CH_DEFAULT_GAME_SPEED].new_value;
 }

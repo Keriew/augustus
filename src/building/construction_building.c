@@ -580,11 +580,6 @@ int building_construction_place_building(building_type type, int x, int y, int e
         return 0;
     }
 
-    if (building_monument_is_grand_temple(type) &&
-        building_monument_count_grand_temples() >= config_get(CONFIG_GP_CH_MAX_GRAND_TEMPLES)) {
-        city_warning_show(WARNING_MAX_GRAND_TEMPLES, NEW_WARNING_SLOT);
-        return 0;
-    }
     if (type == BUILDING_COLOSSEUM) {
         if (building_count_total(BUILDING_COLOSSEUM)) {
             city_warning_show(WARNING_ONE_BUILDING_OF_TYPE, NEW_WARNING_SLOT);
