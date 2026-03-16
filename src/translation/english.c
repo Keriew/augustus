@@ -1912,7 +1912,6 @@ static translation_string all_strings[] = {
     {TR_CONFIG_GP_CH_ALWAYS_DESTROY_BRIDGES, "Always be able to destroy bridges"},
     {TR_CONFIG_CATEGORY_MANAGEMENT_DESTRUCTION, "Destruction"},
     {TR_CHEAT_DESTROYED_BUILDING, "Destroyed building"},
-    {TR_CHEAT_DESTROYED_BUILDING, "Destroyed building"},
     {TR_CONFIG_ENABLE_BUILD_MENU_SHORTCUTS, "Enable build menu shortcuts"},
     {TR_ACTION_TYPE_LOCK_TRADE_ROUTE, "Lock Trade route"},
     {TR_PARAMETER_LOCK, "Lock"},
