@@ -3,6 +3,7 @@
 #include "core/array.h"
 #include "core/log.h"
 #include "core/string.h"   
+#include "empire/city.h"
 #include "game/save_version.h"
 #include "map/grid.h"
 #include "scenario/custom_variable.h"
@@ -578,6 +579,28 @@ void scenario_events_assign_parent_single_event_ids(scenario_event_t *event)
         for (unsigned int k = 0; k < group->conditions.size; k++) {
             condition = array_item(group->conditions, k);
             condition->parent_event_id = event_id;
+        }
+    }
+}
+
+void scenario_events_migrate_to_buys_sells(void)
+{
+    scenario_event_t *current;
+    array_foreach(scenario_events, current) //go through all events
+    {
+        scenario_action_t *action;
+        for (unsigned int j = 0; j < current->actions.size; j++) { // go through all actions in event
+            action = array_item(current->actions, j);
+            action_types type = action->type;
+            if (type != ACTION_TYPE_TRADE_ADJUST_ROUTE_AMOUNT) {
+                continue;
+            }
+            int city_id = empire_city_get_for_trade_route(action->parameter1);
+            if (city_id < 0) {
+                action->parameter5 = 1;
+                continue;
+            }
+            action->parameter5 = empire_city_get(city_id)->buys_resource[action->parameter2];
         }
     }
 }

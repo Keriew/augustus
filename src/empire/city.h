@@ -7,27 +7,6 @@
 
 #define EMPIRE_CITY_MAX_TRADERS 3
 
-typedef enum {
-    EMPIRE_CITY_ICON_DEFAULT, // not specified
-    EMPIRE_CITY_ICON_CONSTRUCTION, //construction
-    EMPIRE_CITY_ICON_DISTANT_TOWN, //dis_town
-    EMPIRE_CITY_ICON_DISTANT_VILLAGE, //dis_village
-    EMPIRE_CITY_ICON_RESOURCE_FOOD, //res_food
-    EMPIRE_CITY_ICON_RESOURCE_GOODS, //res_goods
-    EMPIRE_CITY_ICON_TRADE_TOWN, // tr_town
-    EMPIRE_CITY_ICON_ROMAN_TOWN, // ro_town
-    EMPIRE_CITY_ICON_TRADE_VILLAGE, // tr_village
-    EMPIRE_CITY_ICON_ROMAN_VILLAGE, // ro_village
-    EMPIRE_CITY_ICON_ROMAN_CAPITAL, // ro_capital
-    EMPIRE_CITY_ICON_TRADE_SEA, // tr_sea
-    EMPIRE_CITY_ICON_TRADE_LAND, // tr_land
-    EMPIRE_CITY_ICON_OUR_CITY, // our_city
-    EMPIRE_CITY_ICON_TRADE_CITY, //tr_city
-    EMPIRE_CITY_ICON_ROMAN_CITY, //ro_city
-    EMPIRE_CITY_ICON_DISTANT_CITY, //dis_city
-    EMPIRE_CITY_ICON_TOWER, // tower
-} empire_city_icon_type;
-
 typedef struct {
     int in_use;
     empire_city_type type;
@@ -48,6 +27,8 @@ void empire_city_clear_all(void);
 empire_city *empire_city_get(int city_id);
 
 empire_city *empire_city_get_new(void);
+
+void empire_city_remove(int city_id);
 
 int empire_city_get_route_id(int city_id);
 
@@ -129,5 +110,7 @@ void empire_city_load_state(buffer *buf, int version);
 int empire_city_get_array_size(void);
 
 int empire_city_get_icon_image_id(empire_city_icon_type type);
+
+int empire_city_get_at(int x, int y, const uint8_t *name);
 
 #endif // EMPIRE_CITY_H

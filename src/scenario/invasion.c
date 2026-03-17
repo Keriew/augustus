@@ -171,7 +171,7 @@ static void init_warnings(void)
             continue;
         }
         for (int year = 1; year < 8; year++) {
-            const empire_object *obj = empire_object_get_battle_icon(path_current, year);
+            const empire_object *obj = empire_object_get_battle(path_current, year);
             if (!obj) {
                 continue;
             }
@@ -530,7 +530,7 @@ static void repeat_invasion_with_warnings(invasion_t *invasion)
     // Iterate from year 1 to 7 (inclusive) to schedule warnings for up to 7 years ahead
     for (int year = 1; year < 8; year++) {
         // Get the empire object (e.g., icon or location) for this path and year. Skip if none found.
-        const empire_object *obj = empire_object_get_battle_icon(path_current, year);
+        const empire_object *obj = empire_object_get_battle(path_current, year);
         if (!obj) {
             continue;
         }
