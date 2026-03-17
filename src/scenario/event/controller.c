@@ -460,58 +460,33 @@ void scenario_events_progress_paused(int days_passed)
     }
 }
 
-static void migrate_parameters_action(scenario_action_t *action)
+static void migrate_parameters_action(scenario_action_t *action, int **params, int index)
 {
-    // migration for older actions (pre-formulas)
     int min_limit = 0, max_limit = 0;
-    parameter_type p_type;
-    int *params[] = {    // Collect addresses of the fields
-        &action->parameter1,
-        &action->parameter2,
-        &action->parameter3,
-        &action->parameter4,
-        &action->parameter5
-    };
-    for (int i = 1; i <= 5; ++i) {
-        int *param_value = params[i - 1];
-        p_type = scenario_events_parameter_data_get_action_parameter_type(
-            action->type, i, &min_limit, &max_limit);
-        if ((p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) && param_value != NULL) {
-            char buffer[16];  // Make sure buffer is large enough
-            memset(buffer, 0, sizeof(buffer));
-            string_from_int((uint8_t *) buffer, *param_value, 0);
-            unsigned int id = scenario_formula_add((const uint8_t *) buffer, min_limit, max_limit);
-            *param_value = id;
-        }
+    int *param_value = params[index - 1];
+    parameter_type p_type = scenario_events_parameter_data_get_action_parameter_type(
+        action->type, index, &min_limit, &max_limit);
+    if ((p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) && param_value != NULL) {
+        char buffer[16];  // Make sure buffer is large enough
+        memset(buffer, 0, sizeof(buffer));
+        string_from_int((uint8_t *) buffer, *param_value, 0);
+        unsigned int id = scenario_formula_add((const uint8_t *) buffer, min_limit, max_limit);
+        *param_value = id;
     }
 }
 
-static void migrate_parameters_condition(scenario_condition_t *condition)
+static void migrate_parameters_condition(scenario_condition_t *condition, int **params, int index)
 {
-    // migration for older conditions (pre-formulas)
     int min_limit = 0, max_limit = 0;
-    parameter_type p_type;
-    condition_types condition_type = condition->type;
-
-    int *params[] = {    // Collect addresses of the fields
-        &condition->parameter1,
-        &condition->parameter2,
-        &condition->parameter3,
-        &condition->parameter4,
-        &condition->parameter5
-    };
-
-    for (int i = 1; i <= 5; ++i) {
-        int *param_value = params[i - 1];
-        p_type = scenario_events_parameter_data_get_condition_parameter_type(
-            condition_type, i, &min_limit, &max_limit);
-        if ((p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) && param_value != NULL) {
-            uint8_t buffer[16];  // Make sure buffer is large enough
-            memset(buffer, 0, sizeof(buffer));
-            string_from_int(buffer, *param_value, 0);
-            unsigned int id = scenario_formula_add((const uint8_t *) buffer, min_limit, max_limit);
-            *param_value = id;
-        }
+    int *param_value = params[index - 1];
+    parameter_type p_type = scenario_events_parameter_data_get_condition_parameter_type(
+        condition->type, index, &min_limit, &max_limit);
+    if ((p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) && param_value != NULL) {
+        uint8_t buffer[16];  // Make sure buffer is large enough
+        memset(buffer, 0, sizeof(buffer));
+        string_from_int(buffer, *param_value, 0);
+        unsigned int id = scenario_formula_add((const uint8_t *) buffer, min_limit, max_limit);
+        *param_value = id;
     }
 }
 
@@ -538,7 +513,7 @@ void scenario_events_migrate_to_formulas(void)
                 action->type == ACTION_TYPE_ADJUST_MONEY || action->type == ACTION_TYPE_ADJUST_SAVINGS) {
                 return;
             }
-            migrate_parameters_action(action); //migrate parameters if needed
+            scenario_parameters_foreach_in_action(action, migrate_parameters_action); //migrate parameters if needed
         }
         scenario_condition_group_t *group;
         scenario_condition_t *condition;
@@ -546,7 +521,7 @@ void scenario_events_migrate_to_formulas(void)
             group = array_item(current->condition_groups, j);
             for (unsigned int k = 0; k < group->conditions.size; k++) {
                 condition = array_item(group->conditions, k);
-                migrate_parameters_condition(condition); //migrate parameters if needed
+                scenario_parameters_foreach_in_condition(condition, migrate_parameters_condition); //migrate parameters if needed
             }
         }
     }
