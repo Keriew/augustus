@@ -252,7 +252,7 @@ static void draw_snow(void)
         count = max_particles;
     }
     for (int i = 0; i < count; ++i) {
-        if (window_city_is_window_cityview()) {
+        if (window_city_is_window_cityview() || window_city_simulated_weather(WEATHER_SNOW)) {
             int drift = ((data.elements[i].y + data.elements[i].drift_offset) % 10) - 5;
             data.elements[i].x += (drift / 10) * data.elements[i].drift_direction;
             data.elements[i].y += data.elements[i].speed;
@@ -292,7 +292,7 @@ static void draw_sandstorm(void)
     }
 
     for (int i = 0; i < count; ++i) {
-        if (window_city_is_window_cityview()) {
+        if (window_city_is_window_cityview() || window_city_simulated_weather(WEATHER_SAND)) {
             int wave = ((data.elements[i].y + data.elements[i].offset) % 10) - 5;
             data.elements[i].x += data.elements[i].speed + (wave / 10);
         }
@@ -317,7 +317,8 @@ static void draw_rain(void)
         return;
     }
 
-    if (data.weather_config.intensity < 600 && window_city_is_window_cityview()) {
+    if (data.weather_config.intensity < 600 &&
+        (window_city_is_window_cityview() || window_city_simulated_weather(WEATHER_RAIN))) {
         update_wind();
     }
 
@@ -345,7 +346,7 @@ static void draw_rain(void)
             data.elements[i].y + data.elements[i].length,
             COLOR_WEATHER_DROPS);
 
-        if (window_city_is_window_cityview()) {
+        if (window_city_is_window_cityview() || window_city_simulated_weather(WEATHER_RAIN)) {
             data.elements[i].x += dx;
 
             int dy = base_speed + data.elements[i].speed + (((data.elements[i].x + data.elements[i].y) % 10) / 10);
@@ -368,6 +369,25 @@ void update_weather(void)
 
     render_weather_overlay();
     update_displayed_intensity();
+    int is_preview_on = config_get(CONFIG_UI_WT_PREVIEW_RAIN) ||
+        config_get(CONFIG_UI_WT_PREVIEW_SNOW) || config_get(CONFIG_UI_WT_PREVIEW_SANDSTORM);
+
+    if (config_get(CONFIG_UI_WT_PREVIEW_RAIN)) {
+        data.weather_config.type = WEATHER_RAIN;
+        data.weather_config.active = 1;
+        set_weather(1, data.weather_config.intensity, WEATHER_RAIN);
+    } else if (config_get(CONFIG_UI_WT_PREVIEW_SNOW)) {
+        data.weather_config.type = WEATHER_SNOW;
+        data.weather_config.active = 1;
+        set_weather(1, data.weather_config.intensity, WEATHER_SNOW);
+    } else if (config_get(CONFIG_UI_WT_PREVIEW_SANDSTORM)) {
+        data.weather_config.type = WEATHER_SAND;
+        data.weather_config.active = 1;
+        set_weather(1, data.weather_config.intensity, WEATHER_SAND);
+    } else {
+        data.weather_config.type = WEATHER_NONE;
+        data.weather_config.active = 0;
+    }
 
     if (!config_get(CONFIG_UI_DRAW_WEATHER)) {
         if (data.is_sound_playing) {

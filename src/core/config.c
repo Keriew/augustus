@@ -118,6 +118,10 @@ static const char *ini_keys[] = {
     [CONFIG_UI_EMPIRE_CLICK_TO_DELETE] = "ui_empire_must_click_to_delete",
     [CONFIG_UI_EMPIRE_CONFIRM_DELETE] = "ui_empire_confirm_deletion",
     [CONFIG_GP_CH_ALWAYS_DESTROY_BRIDGES] = "always_be_able_to_destroy_bridges",
+    [CONFIG_UI_WT_PREVIEW_RAIN] = "ui_wt_preview_rain",
+    [CONFIG_UI_WT_PREVIEW_SNOW] = "ui_wt_snow_preview",
+    [CONFIG_UI_WT_PREVIEW_SANDSTORM] = "ui_wt_sandstorm_preview",
+    [CONFIG_UI_WT_PREVIEW_HEAVY_RAIN] = "ui_wt_preview_heavy_rain",
 };
 
 static const char *ini_string_keys[] = {
@@ -185,6 +189,10 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_UI_EMPIRE_CLICK_TO_DELETE] = 0,
     [CONFIG_UI_EMPIRE_CONFIRM_DELETE] = 1,
     [CONFIG_GP_CH_ALWAYS_DESTROY_BRIDGES] = 0,
+    [CONFIG_UI_WT_PREVIEW_RAIN] = 0,
+    [CONFIG_UI_WT_PREVIEW_SNOW] = 0,
+    [CONFIG_UI_WT_PREVIEW_SANDSTORM] = 0,
+    [CONFIG_UI_WT_PREVIEW_HEAVY_RAIN] = 0,
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };
