@@ -1,15 +1,17 @@
 #include "terrain.h"
 
-#include <string.h>
 #include "building/building.h"
 #include "city/map.h"
 #include "core/image.h"
 #include "map/bridge.h"
 #include "map/building.h"
 #include "map/grid.h"
+#include "map/property.h"
 #include "map/ring.h"
 #include "map/routing.h"
 #include "map/sprite.h"
+
+#include <string.h>
 
 static grid_u32 terrain_grid;
 static grid_u32 terrain_grid_backup;
@@ -622,11 +624,21 @@ void map_terrain_migrate_old_walls(void)
             if (!map_grid_is_valid_offset(grid_offset)) {
                 continue;
             }
-            if (map_terrain_is(grid_offset, TERRAIN_WALL) && !map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
-                // Create wall building for each wall tile
-                building *b = building_create(BUILDING_WALL, x, y);
-                map_building_set(grid_offset, b->id);
-                map_terrain_add(grid_offset, TERRAIN_BUILDING);
+            if (map_terrain_is(grid_offset, TERRAIN_WALL)) {
+                if (!map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+                    // Create wall building for each wall tile
+                    building *wall = building_create(BUILDING_WALL, x, y);
+                    map_building_set(grid_offset, wall->id);
+                    map_terrain_add(grid_offset, TERRAIN_BUILDING);
+                } else {
+                    building *wall = building_get(map_building_at(grid_offset));
+                    // Recreate the wall if pointing to a wrong building
+                    if (!wall || wall->type != BUILDING_WALL) {
+                        wall = building_create(BUILDING_WALL, x, y);
+                        map_building_set(grid_offset, wall->id);
+                    }
+                }
+                map_property_clear_multi_tile_xy(grid_offset);
             }
         }
     }

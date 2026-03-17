@@ -973,9 +973,9 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     if (version <= SAVE_GAME_LAST_SPRITE_BRIDGES_MIGRATION_FIX) {
         map_terrain_migrate_old_bridges();
     }
-    if (version <= SAVE_GAME_LAST_U16_GRIDS) {
-        map_terrain_migrate_old_walls();
-    }
+
+    map_terrain_migrate_old_walls();
+
     if (version <= SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         scenario_events_migrate_to_formulas();
         scenario_events_migrate_to_resolved_display_names();

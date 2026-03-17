@@ -358,6 +358,7 @@ static int place_wall(int x_start, int y_start, int x_end, int y_end, int measur
                     map_building_set(grid_offset, wall->id);
                     map_terrain_add(grid_offset, TERRAIN_BUILDING);
                     map_terrain_add(grid_offset, TERRAIN_WALL);
+                    map_property_clear_multi_tile_xy(grid_offset);
                 }
             }
         }

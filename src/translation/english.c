@@ -2017,6 +2017,8 @@ static translation_string all_strings[] = {
     {TR_EMPIRE_TOOL_PICK, "Pick empire tool"},
     {TR_EMPIRE_TOOLTIP_SHOW_TOOLS, "Show all tools"},
     {TR_EMPIRE_TOOLTIP_ROUTE_COST, "Change route cost"}
+    {TR_PARAMETER_TERRAIN_RUBBLE, "Rubble" },
+    {TR_RESOURCE_SETTINGS_IN_GRANARIES, "in granaries" },
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
