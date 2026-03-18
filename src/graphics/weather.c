@@ -369,21 +369,25 @@ void update_weather(void)
 
     render_weather_overlay();
     update_displayed_intensity();
-    int is_preview_on = config_get(CONFIG_UI_WT_PREVIEW_RAIN) ||
-        config_get(CONFIG_UI_WT_PREVIEW_SNOW) || config_get(CONFIG_UI_WT_PREVIEW_SANDSTORM);
 
     if (config_get(CONFIG_UI_WT_PREVIEW_RAIN)) {
         data.weather_config.type = WEATHER_RAIN;
         data.weather_config.active = 1;
-        set_weather(1, data.weather_config.intensity, WEATHER_RAIN);
+        // Use default intensity for preview
+        set_weather(1, 600, WEATHER_RAIN);
+    } else if (config_get(CONFIG_UI_WT_PREVIEW_HEAVY_RAIN)) {
+        data.weather_config.type = WEATHER_RAIN;
+        data.weather_config.active = 1;
+        // Use high intensity for heavy rain preview to show lightning
+        set_weather(1, 1000, WEATHER_RAIN);
     } else if (config_get(CONFIG_UI_WT_PREVIEW_SNOW)) {
         data.weather_config.type = WEATHER_SNOW;
         data.weather_config.active = 1;
-        set_weather(1, data.weather_config.intensity, WEATHER_SNOW);
+        set_weather(1, 600, WEATHER_SNOW);
     } else if (config_get(CONFIG_UI_WT_PREVIEW_SANDSTORM)) {
         data.weather_config.type = WEATHER_SAND;
         data.weather_config.active = 1;
-        set_weather(1, data.weather_config.intensity, WEATHER_SAND);
+        set_weather(1, 600, WEATHER_SAND);
     } else {
         data.weather_config.type = WEATHER_NONE;
         data.weather_config.active = 0;

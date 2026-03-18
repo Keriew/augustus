@@ -101,6 +101,13 @@ enum {
     RANGE_MAX_GRAND_TEMPLES,
     RANGE_MAX_AUTOSAVE_SLOTS,
     RANGE_DEFAULT_GAME_SPEED,
+    RANGE_RAIN_INTENSITY,
+    RANGE_RAIN_SPEED,
+    RANGE_RAIN_LENGTH,
+    RANGE_SNOW_INTENSITY,
+    RANGE_SNOW_SPEED,
+    RANGE_SANDSTORM_INTENSITY,
+    RANGE_SANDSTORM_SPEED,
 };
 
 enum {
@@ -158,6 +165,13 @@ static const uint8_t *display_text_difficulty(void);
 static const uint8_t *display_text_max_grand_temples(void);
 static const uint8_t *display_text_autosave_slots(void);
 static const uint8_t *display_text_default_game_speed(void);
+static const uint8_t *display_text_rain_intensity(void);
+static const uint8_t *display_text_rain_speed(void);
+static const uint8_t *display_text_rain_length(void);
+static const uint8_t *display_text_snow_intensity(void);
+static const uint8_t *display_text_snow_speed(void);
+static const uint8_t *display_text_sandstorm_intensity(void);
+static const uint8_t *display_text_sandstorm_speed(void);
 
 
 // page-related helpers
@@ -275,13 +289,28 @@ static config_widget ui_widgets_by_category[CATEGORY_UI_COUNT][MAX_WIDGETS] = {
     {
         {TYPE_CHECKBOX, CONFIG_UI_DRAW_CLOUD_SHADOWS, TR_CONFIG_DRAW_CLOUD_SHADOWS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_UI_DRAW_WEATHER, TR_CONFIG_DRAW_WEATHER, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
-        {TYPE_HEADER, 0, TR_CONFIG_HEADER_SNOW, NULL, 0, 1, ITEM_BASE_H, 14},
-        {TYPE_CHECKBOX, CONFIG_UI_WT_ENABLE_SNOW_CENTRAL, TR_CONFIG_UI_WT_ENABLE_SNOW_CENTRAL, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_HEADER, 0, TR_CONFIG_HEADER_RAIN, NULL, 0, 1, ITEM_BASE_H, 14},
         {TYPE_CHECKBOX, CONFIG_UI_WT_PREVIEW_RAIN, TR_CONFIG_UI_WT_PREVIEW_RAIN, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
-        {TYPE_CHECKBOX, CONFIG_UI_WT_PREVIEW_SNOW, TR_CONFIG_UI_WT_PREVIEW_SNOW, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
-        {TYPE_CHECKBOX, CONFIG_UI_WT_PREVIEW_SANDSTORM, TR_CONFIG_UI_WT_PREVIEW_SANDSTORM, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_UI_WT_PREVIEW_HEAVY_RAIN, TR_CONFIG_UI_WT_PREVIEW_HEAVY_RAIN, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_NUMERICAL_DESC, RANGE_RAIN_INTENSITY, TR_CONFIG_WT_RAIN_INTENSITY, NULL, 0, 1, ITEM_BASE_H, 10},
+        {TYPE_NUMERICAL_RANGE, RANGE_RAIN_INTENSITY, 0, display_text_rain_intensity, 0, 1, ITEM_BASE_H, 2},
+        {TYPE_NUMERICAL_DESC, RANGE_RAIN_SPEED, TR_CONFIG_WT_RAIN_SPEED, NULL, 0, 1, ITEM_BASE_H, 10},
+        {TYPE_NUMERICAL_RANGE, RANGE_RAIN_SPEED, 0, display_text_rain_speed, 0, 1, ITEM_BASE_H, 2},
+        {TYPE_NUMERICAL_DESC, RANGE_RAIN_LENGTH, TR_CONFIG_WT_RAIN_LENGTH, NULL, 0, 1, ITEM_BASE_H, 10},
+        {TYPE_NUMERICAL_RANGE, RANGE_RAIN_LENGTH, 0, display_text_rain_length, 0, 1, ITEM_BASE_H, 2},
+        {TYPE_HEADER, 0, TR_CONFIG_HEADER_SNOW, NULL, 0, 1, ITEM_BASE_H, 14},
+        {TYPE_CHECKBOX, CONFIG_UI_WT_PREVIEW_SNOW, TR_CONFIG_UI_WT_PREVIEW_SNOW, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_WT_ENABLE_SNOW_CENTRAL, TR_CONFIG_UI_WT_ENABLE_SNOW_CENTRAL, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_NUMERICAL_DESC, RANGE_SNOW_INTENSITY, TR_CONFIG_WT_SNOW_INTENSITY, NULL, 0, 1, ITEM_BASE_H, 10},
+        {TYPE_NUMERICAL_RANGE, RANGE_SNOW_INTENSITY, 0, display_text_snow_intensity, 0, 1, ITEM_BASE_H, 2},
+        {TYPE_NUMERICAL_DESC, RANGE_SNOW_SPEED, TR_CONFIG_WT_SNOW_SPEED, NULL, 0, 1, ITEM_BASE_H, 10},
+        {TYPE_NUMERICAL_RANGE, RANGE_SNOW_SPEED, 0, display_text_snow_speed, 0, 1, ITEM_BASE_H, 2},
+        {TYPE_HEADER, 0, TR_CONFIG_HEADER_SAND, NULL, 0, 1, ITEM_BASE_H, 14},
+        {TYPE_CHECKBOX, CONFIG_UI_WT_PREVIEW_SANDSTORM, TR_CONFIG_UI_WT_PREVIEW_SANDSTORM, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_NUMERICAL_DESC, RANGE_SANDSTORM_INTENSITY, TR_CONFIG_WT_SANDSTORM_INTENSITY, NULL, 0, 1, ITEM_BASE_H, 10},
+        {TYPE_NUMERICAL_RANGE, RANGE_SANDSTORM_INTENSITY, 0, display_text_sandstorm_intensity, 0, 1, ITEM_BASE_H, 2},
+        {TYPE_NUMERICAL_DESC, RANGE_SANDSTORM_SPEED, TR_CONFIG_WT_SANDSTORM_SPEED, NULL, 0, 1, ITEM_BASE_H, 10},
+        {TYPE_NUMERICAL_RANGE, RANGE_SANDSTORM_SPEED, 0, display_text_sandstorm_speed, 0, 1, ITEM_BASE_H, 2},
         {TYPE_NONE}
     },
     // Empire
@@ -450,7 +479,13 @@ static numerical_range_widget ranges[] = {
     { 50, 30,   0,   5,  1, 0},   //  max grand temples
     { 50, 30,   1,  20,  1, 0},   //  autosave slots
     { 50, 30,   0,  TOTAL_GAME_SPEEDS - 1,  1, 0},   //  default game speed index
-
+    { 50, 18,   0, 100,  5, 0},   //  rain overlay intensity %
+    { 50, 18,   1,  20,  1, 0},   //  rain drop speed
+    { 50, 18,   1,  30,  1, 0},   //  rain drop length
+    { 50, 18,   0, 100,  5, 0},   //  snow overlay intensity %
+    { 50, 18,   1,  10,  1, 0},   //  snow flake speed
+    { 50, 18,   0, 100,  5, 0},   //  sandstorm overlay intensity %
+    { 50, 18,   1,  10,  1, 0},   //  sandstorm particle speed
 };
 
 //  Bottom buttons & page tabs
@@ -916,6 +951,38 @@ static const uint8_t *display_text_default_game_speed(void)
 {
     return percentage_string(data.display_text, game_speed_get_speed(data.config_values[CONFIG_GP_CH_DEFAULT_GAME_SPEED].new_value));
 }
+static const uint8_t *display_text_rain_intensity(void)
+{
+    return percent_buf(CONFIG_WT_RAIN_INTENSITY);
+}
+static const uint8_t *display_text_rain_speed(void)
+{
+    string_from_int(data.display_text, data.config_values[CONFIG_WT_RAIN_SPEED].new_value, 0);
+    return data.display_text;
+}
+static const uint8_t *display_text_rain_length(void)
+{
+    string_from_int(data.display_text, data.config_values[CONFIG_WT_RAIN_LENGTH].new_value, 0);
+    return data.display_text;
+}
+static const uint8_t *display_text_snow_intensity(void)
+{
+    return percent_buf(CONFIG_WT_SNOW_INTENSITY);
+}
+static const uint8_t *display_text_snow_speed(void)
+{
+    string_from_int(data.display_text, data.config_values[CONFIG_WT_SNOW_SPEED].new_value, 0);
+    return data.display_text;
+}
+static const uint8_t *display_text_sandstorm_intensity(void)
+{
+    return percent_buf(CONFIG_WT_SANDSTORM_INTENSITY);
+}
+static const uint8_t *display_text_sandstorm_speed(void)
+{
+    string_from_int(data.display_text, data.config_values[CONFIG_WT_SANDSTORM_SPEED].new_value, 0);
+    return data.display_text;
+}
 
 //    Range value binding, custom change-action table, init
 
@@ -936,6 +1003,13 @@ static void set_range_values(void)
     ranges[RANGE_MAX_GRAND_TEMPLES].value = &data.config_values[CONFIG_GP_CH_MAX_GRAND_TEMPLES].new_value;
     ranges[RANGE_MAX_AUTOSAVE_SLOTS].value = &data.config_values[CONFIG_GP_CH_MAX_AUTOSAVE_SLOTS].new_value;
     ranges[RANGE_DEFAULT_GAME_SPEED].value = &data.config_values[CONFIG_GP_CH_DEFAULT_GAME_SPEED].new_value;
+    ranges[RANGE_RAIN_INTENSITY].value = &data.config_values[CONFIG_WT_RAIN_INTENSITY].new_value;
+    ranges[RANGE_RAIN_SPEED].value = &data.config_values[CONFIG_WT_RAIN_SPEED].new_value;
+    ranges[RANGE_RAIN_LENGTH].value = &data.config_values[CONFIG_WT_RAIN_LENGTH].new_value;
+    ranges[RANGE_SNOW_INTENSITY].value = &data.config_values[CONFIG_WT_SNOW_INTENSITY].new_value;
+    ranges[RANGE_SNOW_SPEED].value = &data.config_values[CONFIG_WT_SNOW_SPEED].new_value;
+    ranges[RANGE_SANDSTORM_INTENSITY].value = &data.config_values[CONFIG_WT_SANDSTORM_INTENSITY].new_value;
+    ranges[RANGE_SANDSTORM_SPEED].value = &data.config_values[CONFIG_WT_SANDSTORM_SPEED].new_value;
 }
 
 static void set_custom_config_changes(void)
@@ -1680,6 +1754,7 @@ static void draw_background(void)
     } else {
         window_draw_underlying_window();
     }
+    update_weather();
     graphics_in_dialog();
 
     outer_panel_draw(0, 0, 40, 30);
@@ -1776,7 +1851,6 @@ static void draw_foreground(void)
     }
 
     graphics_reset_dialog();
-    update_weather();
 }
 
 static int preview_weather_radio_buttons(int selected_key)
@@ -1788,12 +1862,12 @@ static int preview_weather_radio_buttons(int selected_key)
             CONFIG_UI_WT_PREVIEW_HEAVY_RAIN, CONFIG_UI_WT_PREVIEW_SANDSTORM };
         for (size_t i = 0; i < sizeof(radio_buttons) / sizeof(*radio_buttons); i++) {
             if (radio_buttons[i] != selected_key) {
-                config_set(radio_buttons[i], 0);
-                widget
+                //config_set(radio_buttons[i], 0);
+                data.config_values[radio_buttons[i]].new_value = 0;
             }
         }
     }
-    update_weather();
+    //update_weather();
     window_invalidate();
     return 1;
 }
