@@ -3,6 +3,7 @@
 
 #include "graphics/color.h"
 #include "graphics/font.h"
+#include "graphics/image_button.h"
 #include "input/mouse.h"
 
 typedef struct {
@@ -21,6 +22,9 @@ typedef struct {
     int scrollbar_dot_drag_offset;
     int touch_drag_state;
     int position_on_touch;
+    
+    image_button image_button_scroll_up;
+    image_button image_button_scroll_down;
 } scrollbar_type;
 
 /**
