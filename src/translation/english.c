@@ -2017,6 +2017,21 @@ static translation_string all_strings[] = {
     {TR_EMPIRE_TOOLTIP_ROUTE_COST, "Change route cost"},
     {TR_PARAMETER_TERRAIN_RUBBLE, "Rubble" },
     {TR_RESOURCE_SETTINGS_IN_GRANARIES, "in granaries" },
+    {TR_CONFIG_HEADER_RAIN, "Rain" },
+    {TR_CONFIG_HEADER_SNOW, "Snow" },
+    {TR_CONFIG_HEADER_SAND, "Sandstorms" },
+    {TR_CONFIG_HEADER_EMPIRE_EDITOR, "Empire Editor" },
+    {TR_CONFIG_UI_WT_PREVIEW_RAIN, "Preview Rain"},
+    {TR_CONFIG_UI_WT_PREVIEW_SNOW, "Preview Snow"},
+    {TR_CONFIG_UI_WT_PREVIEW_SANDSTORM, "Preview Sandstorm" },
+    { TR_CONFIG_UI_WT_PREVIEW_HEAVY_RAIN, "Preview Heavy Rain" },
+    {TR_CONFIG_WT_RAIN_INTENSITY, "Overlay intensity"},
+    {TR_CONFIG_WT_RAIN_SPEED, "Drop speed"},
+    {TR_CONFIG_WT_RAIN_LENGTH, "Drop length"},
+    {TR_CONFIG_WT_SNOW_INTENSITY, "Overlay intensity"},
+    {TR_CONFIG_WT_SNOW_SPEED, "Flake speed"},
+    {TR_CONFIG_WT_SANDSTORM_INTENSITY, "Overlay intensity"},
+    {TR_CONFIG_WT_SANDSTORM_SPEED, "Particle speed"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
