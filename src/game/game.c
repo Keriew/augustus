@@ -183,6 +183,24 @@ int game_init_editor(void)
     return 1;
 }
 
+int game_init_editor_generated(int size, int generator_algorithm)
+{
+    if (!reload_language(1, 0)) {
+        return 0;
+    }
+
+    game_file_editor_clear_data();
+    game_file_editor_create_scenario_generated(size, generator_algorithm);
+
+    if (city_view_is_sidebar_collapsed()) {
+        city_view_toggle_sidebar();
+    }
+
+    editor_set_active(1);
+    window_editor_map_show();
+    return 1;
+}
+
 void game_exit_editor(void)
 {
     if (!reload_language(0, 0)) {
