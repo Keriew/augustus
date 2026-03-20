@@ -211,13 +211,22 @@ static void remove_adjacent_types(building *b)
 building *building_create(building_type type, int x, int y)
 {
     building *b;
+
+    const building_properties *props = building_properties_for_type(type);
+
+    if (props->shared) {
+        b = building_first_of_type(type);
+        if (b) {
+            return b;
+        }
+    }
+
     array_new_item_after_index(data.buildings, 1, b);
+
     if (!b) {
         city_warning_show(WARNING_DATA_LIMIT_REACHED, NEW_WARNING_SLOT);
         return array_first(data.buildings);
     }
-
-    const building_properties *props = building_properties_for_type(type);
 
     b->state = BUILDING_STATE_CREATED;
     b->faction_id = 1;
@@ -280,9 +289,12 @@ building *building_create(building_type type, int x, int y)
         building_distribution_accept_all_goods(b);
     }
 
-    b->x = x;
-    b->y = y;
-    b->grid_offset = map_grid_offset(x, y);
+    if (!props->shared) {
+        b->x = x;
+        b->y = y;
+        b->grid_offset = map_grid_offset(x, y);
+    }
+
     b->house_figure_generation_delay = map_random_get(b->grid_offset) & 0x7f;
     b->figure_roam_direction = b->house_figure_generation_delay & 6;
     b->fire_proof = props->fire_proof;
@@ -301,8 +313,14 @@ void building_change_type(building *b, building_type type)
     fill_adjacent_types(b);
 }
 
-static void building_delete(building *b)
+void building_delete(building *b)
 {
+    if (building_properties_for_type(b->type)->shared && b == building_first_of_type(b->type)) {
+        if (b->subtype.instances > 0) {
+            b->subtype.instances--;
+        }
+        return; // shared building types should never be deleted, unless the building type is repeated
+    }
     building_clear_related_data(b);
     remove_adjacent_types(b);
     int id = b->id;

@@ -359,6 +359,8 @@ static int place_wall(int x_start, int y_start, int x_end, int y_end, int measur
                     map_terrain_add(grid_offset, TERRAIN_BUILDING);
                     map_terrain_add(grid_offset, TERRAIN_WALL);
                     map_property_clear_multi_tile_xy(grid_offset);
+                    game_undo_add_building(wall);
+                    wall->subtype.instances++;
                 }
             }
         }
@@ -818,7 +820,7 @@ void building_construction_update(int x, int y, int grid_offset)
     int current_cost = model_get_building(type)->cost;
     int repaired_buildings = 0;
     if (type == BUILDING_CLEAR_LAND) {
-        int items_placed = last_items_cleared = building_construction_clear_land(1, data.start.x, data.start.y, x, y);
+        int items_placed = last_items_cleared = building_construction_clear_select(data.start.x, data.start.y, x, y);
         if (items_placed >= 0) {
             current_cost *= items_placed;
         }
@@ -1074,8 +1076,8 @@ void building_construction_place(void)
         // the previous cost is deducted from treasury and if user chooses 'no', they still pay for removal.
         // If we don't do it this way, the user doesn't pay for the removal at all since we don't come back
         // here when the user says yes.
-        int items_placed = building_construction_clear_land(0, x_start, y_start, x_end, y_end);
-        if (items_placed < 0) {
+        int items_placed = building_construction_clear_land(x_start, y_start, x_end, y_end);
+        if (items_placed == BUILDING_CONSTRUCTION_CLEAR_LAND_INTERRUPTED) {
             items_placed = last_items_cleared;
         }
         placement_cost *= items_placed;

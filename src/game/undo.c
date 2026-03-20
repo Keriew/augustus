@@ -255,6 +255,11 @@ void game_undo_perform(void)
     if (data.type == BUILDING_CLEAR_LAND) {
         for (int i = 0; i < data.num_buildings; i++) {
             if (data.buildings[i].id) {
+                if (building_properties_for_type(data.buildings[i].type)->shared) {
+                    building *original = building_get(data.buildings[i].id);
+                    original->subtype.instances = data.buildings[i].subtype.instances;
+                    continue;
+                }
                 building *b = building_restore_from_undo(&data.buildings[i]);
                 switch (b->type) {
                     default:
@@ -287,36 +292,48 @@ void game_undo_perform(void)
         map_property_restore();
         map_building_restore();
         map_property_clear_constructing_and_deleted();
-    } else if (data.type == BUILDING_AQUEDUCT || data.type == BUILDING_ROAD ||
-        data.type == BUILDING_WALL || data.type == BUILDING_HIGHWAY) {
-        map_terrain_restore();
-        map_aqueduct_restore();
-        restore_map_images();
-        game_undo_restore_building_types();
-        building_connectable_update_connections();
-
-    } else if (data.type == BUILDING_LOW_BRIDGE || data.type == BUILDING_SHIP_BRIDGE) {
-        map_terrain_restore();
-        map_sprite_restore();
-        restore_map_images();
-    } else if (data.type == BUILDING_PLAZA || data.type == BUILDING_GARDENS ||
-        data.type == BUILDING_OVERGROWN_GARDENS) {
-        map_terrain_restore();
-        map_aqueduct_restore();
-        map_property_restore();
-        restore_map_images();
-    } else if (data.num_buildings) {
-        if (data.type == BUILDING_DRAGGABLE_RESERVOIR) {
+    } else {
+        int restore_map_buildings = 0;
+        for (int i = 0; i < data.num_buildings; i++) {
+            if (data.buildings[i].id && building_properties_for_type(data.buildings[i].type)->shared) {
+                building *original = building_get(data.buildings[i].id);
+                original->subtype.instances = data.buildings[i].subtype.instances;
+                restore_map_buildings = 1;
+            }
+        }
+        if (restore_map_buildings) {
+            map_building_restore();
+        }
+        if (data.type == BUILDING_AQUEDUCT || data.type == BUILDING_ROAD ||
+            data.type == BUILDING_WALL || data.type == BUILDING_HIGHWAY) {
             map_terrain_restore();
             map_aqueduct_restore();
             restore_map_images();
-        }
-        for (int i = 0; i < data.num_buildings; i++) {
-            if (data.buildings[i].id) {
-                building_get(data.buildings[i].id)->state = BUILDING_STATE_UNDO;
+            game_undo_restore_building_types();
+            building_connectable_update_connections();
+        } else if (data.type == BUILDING_LOW_BRIDGE || data.type == BUILDING_SHIP_BRIDGE) {
+            map_terrain_restore();
+            map_sprite_restore();
+            restore_map_images();
+        } else if (data.type == BUILDING_PLAZA || data.type == BUILDING_GARDENS ||
+            data.type == BUILDING_OVERGROWN_GARDENS) {
+            map_terrain_restore();
+            map_aqueduct_restore();
+            map_property_restore();
+            restore_map_images();
+        } else if (data.num_buildings) {
+            if (data.type == BUILDING_DRAGGABLE_RESERVOIR) {
+                map_terrain_restore();
+                map_aqueduct_restore();
+                restore_map_images();
             }
+            for (int i = 0; i < data.num_buildings; i++) {
+                if (data.buildings[i].id && !building_properties_for_type(data.buildings[i].type)->shared) {
+                    building_get(data.buildings[i].id)->state = BUILDING_STATE_UNDO;
+                }
+            }
+            building_update_state();
         }
-        building_update_state();
     }
     map_routing_update_land();
     map_routing_update_walls();

@@ -49,6 +49,7 @@ typedef struct building {
         short fort_figure_type;
         short native_meeting_center_id;
         short barracks_priority;
+        unsigned short instances;
     } subtype;
     unsigned char road_network_id;
     unsigned short created_sequence;
@@ -249,6 +250,8 @@ int building_can_repair(building *b);
 int building_repair_cost(building *b);
 
 void building_clear_related_data(building *b);
+
+void building_delete(building *b);
 
 building *building_restore_from_undo(building *to_restore);
 

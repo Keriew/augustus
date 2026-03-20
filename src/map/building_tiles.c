@@ -2,6 +2,7 @@
 
 #include "building/building.h"
 #include "building/industry.h"
+#include "building/properties.h"
 #include "city/view.h"
 #include "core/direction.h"
 #include "core/image.h"
@@ -277,13 +278,19 @@ int map_building_tiles_mark_construction(int x, int y, int size, int terrain, in
     return 1;
 }
 
+static int is_shared_building(int building_id)
+{
+    building *b = building_main(building_get(building_id));
+    return b && building_properties_for_type(b->type)->shared;
+}
+
 void map_building_tiles_mark_deleting(int grid_offset)
 {
     int building_id = map_building_at(grid_offset);
     if (map_is_bridge(grid_offset)) {
         // previous version triggered map_bridge_remove with an early exit condition for regular terrain.
         map_bridge_remove(grid_offset, 1);
-    } else if (building_id) {
+    } else if (building_id && !is_shared_building(building_id)) {
         grid_offset = building_main(building_get(building_id))->grid_offset;
     }
     map_property_mark_deleted(grid_offset);
