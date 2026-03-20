@@ -23,6 +23,9 @@ static int random_between(int min_value, int max_value)
     return random_between_from_stdlib(min_value, max_value);
 }
 
+static int use_fixed_seed = 0;
+static unsigned int fixed_seed = 0;
+
 static void clear_base_terrain(void)
 {
     int width = map_grid_width();
@@ -115,6 +118,11 @@ static void generate_river_valley(void)
 
 void terrain_generator_generate(terrain_generator_algorithm algorithm)
 {
+    if (use_fixed_seed) {
+        random_set_stdlib_seed(fixed_seed);
+    } else {
+        random_clear_stdlib_seed();
+    }
     clear_base_terrain();
 
     switch (algorithm) {
@@ -126,4 +134,12 @@ void terrain_generator_generate(terrain_generator_algorithm algorithm)
             generate_flat_plains();
             break;
     }
+
+    random_clear_stdlib_seed();
+}
+
+void terrain_generator_set_seed(int enabled, unsigned int seed)
+{
+    use_fixed_seed = enabled != 0;
+    fixed_seed = seed;
 }
