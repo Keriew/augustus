@@ -12,7 +12,6 @@
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/panel.h"
-#include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
@@ -50,7 +49,7 @@
 #define WINDOW_HEIGHT 480
 
 #define CONTROL_LABEL_X 32
-#define CONTROL_VALUE_X 170
+#define CONTROL_VALUE_X 120
 #define CONTROL_BUTTON_WIDTH 180
 #define CONTROL_BUTTON_HEIGHT 24
 
@@ -119,7 +118,7 @@ static generic_button buttons[] = {
 static input_box seed_input = {
     CONTROL_VALUE_X,
     SEED_INPUT_Y,
-    12,
+    11,
     2,
     FONT_NORMAL_WHITE,
     0,
