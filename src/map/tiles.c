@@ -216,6 +216,12 @@ void map_tiles_update_region_shrub(int x_min, int y_min, int x_max, int y_max)
     foreach_region_tile(x_min, y_min, x_max, y_max, set_shrub_image);
 }
 
+void map_tiles_update_all_trees_shrubs(void)
+{
+    foreach_map_tile(set_tree_image);
+    foreach_map_tile(set_shrub_image);
+}
+
 static void clear_garden_image(int x, int y, int grid_offset)
 {
     if (map_terrain_is(grid_offset, TERRAIN_GARDEN) &&

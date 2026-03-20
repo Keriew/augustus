@@ -128,11 +128,11 @@ static void prepare_map_for_editing(void)
     figure_create_editor_flags();
     figure_create_flotsam();
 
-    map_tiles_update_all();
     map_tiles_update_all_elevation_editor();
     map_tiles_update_all_water();
     map_tiles_update_all_earthquake();
     map_tiles_update_all_rocks();
+    map_tiles_update_all_trees_shrubs();
     map_tiles_update_all_empty_land();
     map_tiles_update_all_meadow();
     map_tiles_update_all_rubble();
