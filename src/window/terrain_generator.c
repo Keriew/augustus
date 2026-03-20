@@ -20,6 +20,7 @@
 #include "map/desirability.h"
 #include "map/elevation.h"
 #include "map/figure.h"
+#include "map/grid.h"
 #include "map/image.h"
 #include "map/image_context.h"
 #include "map/property.h"
@@ -33,7 +34,7 @@
 #include "scenario/data.h"
 #include "scenario/map.h"
 #include "scenario/property.h"
-#include "scenario/terrain_generator.h"
+#include "scenario/terrain_generator/terrain_generator.h"
 #include "sound/music.h"
 #include "translation/translation.h"
 #include "widget/input_box.h"
@@ -140,6 +141,8 @@ static struct {
 
 static minimap_functions preview_minimap_functions;
 
+static uint8_t preview_road_flags[GRID_SIZE * GRID_SIZE];
+
 static void preview_viewport(int *x, int *y, int *width, int *height)
 {
     *x = 0;
@@ -193,7 +196,29 @@ static void generate_preview_map(void)
     int use_seed = get_seed_value(&seed);
     terrain_generator_set_seed(use_seed, seed);
     terrain_generator_generate((terrain_generator_algorithm) data.algorithm_index);
+    int width = map_grid_width();
+    int height = map_grid_height();
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            int grid_offset = map_grid_offset(x, y);
+            preview_road_flags[grid_offset] = map_terrain_is(grid_offset, TERRAIN_ROAD) ? 1 : 0;
+            if (preview_road_flags[grid_offset]) {
+                map_terrain_remove(grid_offset, TERRAIN_ROAD);
+            }
+        }
+    }
+
     map_tiles_update_all();
+
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            int grid_offset = map_grid_offset(x, y);
+            if (preview_road_flags[grid_offset]) {
+                map_terrain_add(grid_offset, TERRAIN_ROAD);
+            }
+        }
+    }
+    map_tiles_update_all_roads();
 
     preview_minimap_functions.climate = scenario_property_climate;
     preview_minimap_functions.map.width = map_grid_width;

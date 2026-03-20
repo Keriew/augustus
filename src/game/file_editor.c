@@ -50,7 +50,7 @@
 #include "scenario/invasion.h"
 #include "scenario/map.h"
 #include "scenario/property.h"
-#include "scenario/terrain_generator.h"
+#include "scenario/terrain_generator/terrain_generator.h"
 #include "sound/city.h"
 #include "sound/music.h"
 #include "widget/map_editor.h"
