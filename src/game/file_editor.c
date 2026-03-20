@@ -129,6 +129,18 @@ static void prepare_map_for_editing(void)
     figure_create_flotsam();
 
     map_tiles_update_all();
+    map_tiles_update_all_elevation_editor();
+    map_tiles_update_all_water();
+    map_tiles_update_all_earthquake();
+    map_tiles_update_all_rocks();
+    map_tiles_update_all_empty_land();
+    map_tiles_update_all_meadow();
+    map_tiles_update_all_rubble();
+    map_tiles_update_all_roads();
+    map_tiles_update_all_highways();
+    map_tiles_update_all_plazas();
+    map_tiles_update_all_walls();
+    map_tiles_update_all_aqueducts(0);
     widget_map_editor_custom_earthquake_request_refresh();
     map_natives_init_editor();
     map_routing_update_all();
