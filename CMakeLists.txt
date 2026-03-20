@@ -535,7 +535,9 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/editor.c
     ${PROJECT_SOURCE_DIR}/src/scenario/editor_events.c
     ${PROJECT_SOURCE_DIR}/src/scenario/editor_map.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/terrain_generator.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/terrain_generator/terrain_generator.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/terrain_generator/flat_plains.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/terrain_generator/river_valley.c
     ${PROJECT_SOURCE_DIR}/src/scenario/emperor_change.c
     ${PROJECT_SOURCE_DIR}/src/scenario/empire.c
     ${PROJECT_SOURCE_DIR}/src/scenario/gladiator_revolt.c
