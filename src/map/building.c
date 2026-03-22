@@ -55,7 +55,9 @@ unsigned int map_building_rubble_building_id(int grid_offset)
 void map_building_set_rubble_grid_building_id(int grid_offset, unsigned int building_id, int size)
 {
     if (size == 1) {
-        rubble_info_grid.items[grid_offset] = building_id;
+        if (!building_id || !map_terrain_is(grid_offset, TERRAIN_WATER)) {
+            rubble_info_grid.items[grid_offset] = building_id;
+        }
         return;
     }
     int x = map_grid_offset_to_x(grid_offset);

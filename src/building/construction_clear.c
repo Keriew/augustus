@@ -215,10 +215,10 @@ static unsigned int clear_land_confirmed(int x_start, int y_start, int x_end, in
                     //rubble state handling:
 
                     if (map_building_rubble_building_id(grid_offset)) {
+
                         int rubble_id = map_building_rubble_building_id(grid_offset);
                         if (rubble_id) {
                             map_building_set_rubble_grid_building_id(grid_offset, 0, 1); // remove rubble marker
-
                             building *rubble_building = building_get(rubble_id);
 
                             if (rubble_building->state == BUILDING_STATE_RUBBLE ||
