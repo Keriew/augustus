@@ -2,6 +2,7 @@
 
 #include "building/data_transfer.h"
 #include "building/image.h"
+#include "building/properties.h"
 #include "city/message.h"
 #include "city/population.h"
 #include "city/ratings.h"
@@ -308,14 +309,17 @@ void building_destroy_by_enemy(int x, int y, int grid_offset)
     int building_id = map_building_at(grid_offset);
     if (building_id > 0) {
         building *b = building_get(building_id);
+        if (building_properties_for_type(b->type)->shared) {
+            if (map_terrain_is(grid_offset, TERRAIN_WALL)) {
+                figure_kill_tower_sentries_at(x, y);
+            }
+            building_destroy_by_collapse(b);
+        }
         if (b->state == BUILDING_STATE_IN_USE || b->state == BUILDING_STATE_MOTHBALLED) {
             city_ratings_peace_building_destroyed(b->type);
             building_destroy_by_collapse(b);
         }
     } else {
-        if (map_terrain_is(grid_offset, TERRAIN_WALL)) {
-            figure_kill_tower_sentries_at(x, y);
-        }
         if (map_terrain_is(grid_offset, TERRAIN_GARDEN)) {
             map_terrain_remove(grid_offset, TERRAIN_CLEARABLE);
             map_tiles_update_region_empty_land(x, y, x, y);
