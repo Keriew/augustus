@@ -2077,6 +2077,13 @@ static translation_string all_strings[] = {
     {TR_MP_MENU_HOST_FAILED, "Failed to start host session"},
     {TR_MP_MENU_BUTTON_MULTIPLAYER, "Multiplayer"},
     {TR_MP_PAUSE_MENU_MP_STATUS, "Multiplayer Status"},
+    {TR_MP_HOST_SETUP_TITLE, "Host Game Setup"},
+    {TR_MP_HOST_SETUP_SELECT_SCENARIO, "Select a scenario to play:"},
+    {TR_MP_HOST_SETUP_SELECTED, "Selected:"},
+    {TR_MP_HOST_SETUP_NO_SCENARIO, "No scenario selected"},
+    {TR_MP_HOST_SETUP_BUTTON_SELECT, "Select Scenario"},
+    {TR_MP_HOST_SETUP_BUTTON_CONTINUE, "Continue to Lobby"},
+    {TR_MP_HOST_SETUP_BUTTON_BACK, "Back"},
 #endif
 };
 

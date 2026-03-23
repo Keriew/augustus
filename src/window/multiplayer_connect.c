@@ -12,6 +12,7 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
+#include "multiplayer/bootstrap.h"
 #include "multiplayer/mp_debug_log.h"
 #include "network/discovery_lan.h"
 #include "network/protocol.h"
@@ -309,6 +310,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
             net_session_clear_join_status();
             input_box_stop(&address_input);
             net_discovery_stop_listening();
+            mp_bootstrap_init(); /* Initialize bootstrap for client-side game start */
             window_multiplayer_lobby_show();
             return;
         }

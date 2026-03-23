@@ -21,7 +21,10 @@ static const char *MESSAGE_NAMES[] = {
     "RESYNC_GRANTED",
     "DISCONNECT_NOTICE",
     "HEARTBEAT",
-    "CHAT"
+    "CHAT",
+    "GAME_PREPARE",
+    "GAME_LOAD_COMPLETE",
+    "GAME_START_FINAL"
 };
 
 int net_protocol_validate_header(const net_packet_header *header)

@@ -3,6 +3,7 @@
 #include "multiplayer_lobby.h"
 
 #include "core/string.h"
+#include "multiplayer/bootstrap.h"
 #include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
@@ -186,7 +187,13 @@ static void button_start(const generic_button *button)
     if (!net_session_all_peers_ready()) {
         return;
     }
-    net_session_start_game();
+    /* Use the bootstrap pipeline instead of raw net_session_start_game().
+     * This loads the scenario, initializes subsystems, generates spawns,
+     * broadcasts to clients, and transitions to WINDOW_CITY. */
+    if (!mp_bootstrap_host_start_game()) {
+        /* Bootstrap failed — stay in lobby */
+        return;
+    }
 }
 
 static void button_leave(const generic_button *button)

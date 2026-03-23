@@ -33,6 +33,9 @@ typedef enum {
     NET_MSG_DISCONNECT_NOTICE,
     NET_MSG_HEARTBEAT,
     NET_MSG_CHAT,
+    NET_MSG_GAME_PREPARE,       /* Host → Client: manifest with scenario info */
+    NET_MSG_GAME_LOAD_COMPLETE, /* Client → Host: scenario loaded locally */
+    NET_MSG_GAME_START_FINAL,   /* Host → Client: all loaded, begin gameplay */
     NET_MSG_COUNT
 } net_message_type;
 

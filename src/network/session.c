@@ -9,6 +9,7 @@
 #include "multiplayer/player_registry.h"
 #include "multiplayer/ownership.h"
 #include "multiplayer/empire_sync.h"
+#include "multiplayer/time_sync.h"
 #include "multiplayer/worldgen.h"
 #include "multiplayer/mp_debug_log.h"
 #include "core/config.h"
@@ -554,6 +555,12 @@ static void handle_client_message(net_peer *peer, const net_packet_header *heade
             }
             break;
         }
+        case NET_MSG_GAME_LOAD_COMPLETE: {
+            /* Client reports scenario loaded — track for loading barrier */
+            MP_LOG_INFO("BOOT", "Peer '%s' (player %d) reports scenario loaded",
+                        peer->name, (int)peer->player_id);
+            break;
+        }
         default:
             if (header->message_type >= NET_MSG_COUNT) {
                 log_error("Invalid message type from peer", peer->name,
@@ -608,9 +615,18 @@ static void handle_host_message(const net_packet_header *header,
         return;
     }
 
-    MP_LOG_TRACE("NET", "Message from host: type=%s(%d) size=%u seq=%u",
+    /* TIME SYNC: Every packet header carries the host's authoritative tick.
+     * Update the client's confirmed tick so the simulation can advance.
+     * This is the core mechanism for client tick synchronization. */
+    if (session.state == NET_SESSION_CLIENT_GAME && header->game_tick > 0) {
+        mp_time_sync_set_confirmed_tick(header->game_tick);
+        session.authoritative_tick = header->game_tick;
+    }
+
+    MP_LOG_TRACE("NET", "Message from host: type=%s(%d) size=%u seq=%u tick=%u",
                  net_protocol_message_name(header->message_type),
-                 (int)header->message_type, size, header->sequence_id);
+                 (int)header->message_type, size, header->sequence_id,
+                 header->game_tick);
 
     switch (header->message_type) {
         case NET_MSG_JOIN_ACCEPT: {
@@ -733,6 +749,27 @@ static void handle_host_message(const net_packet_header *header,
         case NET_MSG_DISCONNECT_NOTICE: {
             log_info("Host disconnected", 0, 0);
             session.state = NET_SESSION_DISCONNECTING;
+            break;
+        }
+        case NET_MSG_GAME_PREPARE: {
+            extern int mp_bootstrap_client_prepare(const uint8_t *payload, uint32_t size);
+            if (mp_bootstrap_client_prepare(payload, size)) {
+                /* Notify host that we loaded successfully */
+                uint8_t ack_buf[1];
+                net_serializer ls;
+                net_serializer_init(&ls, ack_buf, sizeof(ack_buf));
+                net_write_u8(&ls, session.local_player_id);
+                net_session_send_to_host(NET_MSG_GAME_LOAD_COMPLETE,
+                                         ack_buf, (uint32_t)net_serializer_position(&ls));
+            } else {
+                MP_LOG_ERROR("BOOT", "Failed to prepare game — disconnecting");
+                session.state = NET_SESSION_DISCONNECTING;
+            }
+            break;
+        }
+        case NET_MSG_GAME_START_FINAL: {
+            extern int mp_bootstrap_client_enter_game(void);
+            mp_bootstrap_client_enter_game();
             break;
         }
         default:

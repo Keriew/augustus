@@ -16,6 +16,7 @@
 #include "translation/translation.h"
 #include "widget/input_box.h"
 #include "window/multiplayer_connect.h"
+#include "window/multiplayer_host_setup.h"
 #include "window/multiplayer_lobby.h"
 #include "window/plain_message_dialog.h"
 
@@ -123,8 +124,8 @@ static void button_host(const generic_button *button)
     input_box_stop(&nickname_input);
 
     if (net_session_host(net_session_get_local_name(), NET_DEFAULT_PORT)) {
-        MP_LOG_INFO("UI", "Host created successfully — transitioning to lobby");
-        window_multiplayer_lobby_show();
+        MP_LOG_INFO("UI", "Host created successfully — transitioning to host setup");
+        window_multiplayer_host_setup_show();
     } else {
         MP_LOG_ERROR("UI", "Host creation FAILED on port %d", NET_DEFAULT_PORT);
         data.host_attempted = 0;

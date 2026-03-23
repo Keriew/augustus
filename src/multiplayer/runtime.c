@@ -2,6 +2,7 @@
 
 #ifdef ENABLE_MULTIPLAYER
 
+#include "bootstrap.h"
 #include "mp_debug_log.h"
 #include "network/session.h"
 #include "network/discovery_lan.h"
@@ -50,6 +51,7 @@ void multiplayer_runtime_shutdown(void)
     if (!runtime_initialized) {
         return;
     }
+    mp_bootstrap_reset();
     runtime_initialized = 0;
     MP_LOG_INFO("SESSION", "Multiplayer runtime shutdown");
 }

@@ -66,53 +66,17 @@ void scenario_empire_multiplayer_init(void)
         return;
     }
 
-    /* Initialize all multiplayer subsystems */
-    mp_player_registry_init();
-    mp_ownership_init();
-    mp_empire_sync_init();
-    mp_time_sync_init();
-    mp_command_bus_init();
-    mp_checksum_init();
-    mp_resync_init();
+    /* The bootstrap module (mp_bootstrap_bind_loaded_scenario) now handles:
+     * - Subsystem initialization (ownership, empire_sync, time_sync, etc.)
+     * - City assignment from the spawn table
+     *
+     * This function is called from game_state_init() during scenario load.
+     * In the new bootstrap flow, subsystems are already initialized by
+     * mp_bootstrap_bind_loaded_scenario() AFTER the scenario loads,
+     * so we only log here. The old init-and-assign logic is replaced
+     * by the bootstrap pipeline to avoid destroying the lobby roster. */
 
-    /* Register the local player */
-    uint8_t local_id = net_session_get_local_player_id();
-    mp_player_registry_add(local_id,
-                           net_session_get()->local_player_name,
-                           1, /* is_local */
-                           net_session_is_host());
-
-    /* Find and register player cities based on empire XML multiplayer slots.
-       Cities with replicated_flags containing valid slot data are player slots. */
-    int array_size = empire_city_get_array_size();
-    for (int i = 0; i < array_size; i++) {
-        empire_city *city = empire_city_get(i);
-        if (!city || !city->in_use) {
-            continue;
-        }
-
-        int slot = city->replicated_flags & 0xFF;
-        if (slot == 0) {
-            continue; /* Not a multiplayer slot */
-        }
-
-        int is_host_start = (city->replicated_flags & 0x100) != 0;
-
-        if (net_session_is_host() && is_host_start) {
-            /* This is the host's city */
-            empire_city_set_owner(i, CITY_OWNER_LOCAL, local_id);
-            mp_ownership_set_city(i, MP_OWNER_LOCAL_PLAYER, local_id);
-            mp_player_registry_set_city(local_id, i);
-            log_info("Host city assigned", 0, i);
-        } else if (!net_session_is_host() && slot == local_id) {
-            /* This is our city as a client */
-            empire_city_set_owner(i, CITY_OWNER_LOCAL, local_id);
-            mp_ownership_set_city(i, MP_OWNER_LOCAL_PLAYER, local_id);
-            mp_player_registry_set_city(local_id, i);
-        }
-    }
-
-    log_info("Multiplayer scenario initialized", 0, 0);
+    log_info("Multiplayer scenario mode active (bootstrap handles init)", 0, 0);
 }
 
 #endif /* ENABLE_MULTIPLAYER */
