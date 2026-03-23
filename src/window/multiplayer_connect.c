@@ -12,6 +12,7 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
+#include "multiplayer/mp_debug_log.h"
 #include "network/discovery_lan.h"
 #include "network/session.h"
 #include "translation/translation.h"
@@ -119,9 +120,13 @@ static void try_connect(const char *address)
         snprintf(host, sizeof(host), "%s", address);
     }
 
+    MP_LOG_INFO("UI", "Attempting connection to %s:%d", host, (int)port);
     if (net_session_join("Player", host, port)) {
         data.is_connecting = 1;
+        MP_LOG_INFO("UI", "Connection initiated — waiting for handshake");
         window_invalidate();
+    } else {
+        MP_LOG_ERROR("UI", "net_session_join failed immediately for %s:%d", host, (int)port);
     }
 }
 
@@ -269,6 +274,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
     if (data.is_connecting) {
         net_session_state state = net_session_get_state();
         if (state == NET_SESSION_CLIENT_LOBBY) {
+            MP_LOG_INFO("UI", "Connection succeeded — transitioning to lobby");
             data.is_connecting = 0;
             input_box_stop(&address_input);
             net_discovery_stop_listening();
@@ -277,6 +283,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         }
         if (state == NET_SESSION_IDLE) {
             /* Connection failed or rejected */
+            MP_LOG_WARN("UI", "Connection failed — session returned to IDLE");
             data.is_connecting = 0;
             window_invalidate();
         }

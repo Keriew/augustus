@@ -782,6 +782,7 @@ if(ENABLE_MULTIPLAYER)
         ${PROJECT_SOURCE_DIR}/src/multiplayer/resync.c
         ${PROJECT_SOURCE_DIR}/src/multiplayer/session_save.c
         ${PROJECT_SOURCE_DIR}/src/multiplayer/worldgen.c
+        ${PROJECT_SOURCE_DIR}/src/multiplayer/mp_debug_log.c
         ${PROJECT_SOURCE_DIR}/src/window/multiplayer_menu.c
         ${PROJECT_SOURCE_DIR}/src/window/multiplayer_connect.c
         ${PROJECT_SOURCE_DIR}/src/window/multiplayer_lobby.c
@@ -1153,7 +1154,7 @@ else()
     if(WIN32)
        target_link_libraries(${SHORT_NAME} dbghelp shlwapi)
        if(ENABLE_MULTIPLAYER)
-           target_link_libraries(${SHORT_NAME} ws2_32)
+           target_link_libraries(${SHORT_NAME} ws2_32 iphlpapi)
        endif()
     endif()
 

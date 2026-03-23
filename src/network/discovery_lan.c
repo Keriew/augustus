@@ -7,11 +7,27 @@
 #include "serialize.h"
 #include "session.h"
 #include "core/log.h"
+#include "multiplayer/mp_debug_log.h"
 
 #include <string.h>
+#include <stdio.h>
+
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
+#include <arpa/inet.h>
+#endif
 
 #define ANNOUNCE_PACKET_SIZE 64
-#define HOST_EXPIRY_MS 6000
+
+/*
+ * HOST_EXPIRY_MS must be > 2 * NET_DISCOVERY_BROADCAST_MS to tolerate
+ * at least one dropped packet. With broadcast at 2000ms, 8000ms gives
+ * a 4:1 ratio — 3 consecutive missed packets before expiry.
+ */
+#define HOST_EXPIRY_MS 8000
 
 typedef struct {
     int announcing;
@@ -37,12 +53,15 @@ void net_discovery_init(void)
 {
     memset(&data, 0, sizeof(discovery_data));
     data.udp_fd = -1;
+    MP_LOG_INFO("DISCOVERY", "Discovery system initialized (port=%d, broadcast_ms=%d, expiry_ms=%d)",
+                NET_DISCOVERY_PORT, NET_DISCOVERY_BROADCAST_MS, HOST_EXPIRY_MS);
 }
 
 void net_discovery_shutdown(void)
 {
     net_discovery_stop_announcing();
     net_discovery_stop_listening();
+    MP_LOG_INFO("DISCOVERY", "Discovery system shutdown");
 }
 
 int net_discovery_start_announcing(const char *host_name, uint16_t game_port,
@@ -57,9 +76,13 @@ int net_discovery_start_announcing(const char *host_name, uint16_t game_port,
         data.udp_fd = net_udp_create(0); /* Ephemeral port for sending */
         if (data.udp_fd < 0) {
             log_error("Failed to create discovery broadcast socket", 0, 0);
+            MP_LOG_ERROR("DISCOVERY", "Failed to create broadcast socket (ephemeral)");
             return 0;
         }
-        net_udp_enable_broadcast(data.udp_fd);
+        if (!net_udp_enable_broadcast(data.udp_fd)) {
+            MP_LOG_ERROR("DISCOVERY", "Failed to enable broadcast on discovery socket — "
+                         "host will not be visible on LAN");
+        }
     }
 
     strncpy(data.host_name, host_name, sizeof(data.host_name) - 1);
@@ -72,6 +95,8 @@ int net_discovery_start_announcing(const char *host_name, uint16_t game_port,
     data.last_broadcast_ms = 0;
 
     log_info("LAN discovery announcing started", host_name, 0);
+    MP_LOG_INFO("DISCOVERY", "Start announcing: name='%s' port=%d session=0x%08x players=%d/%d",
+                host_name, (int)game_port, session_id, player_count, max_players);
     return 1;
 }
 
@@ -81,6 +106,7 @@ void net_discovery_stop_announcing(void)
         return;
     }
     data.announcing = 0;
+    MP_LOG_INFO("DISCOVERY", "Stop announcing");
     if (!data.listening && data.udp_fd >= 0) {
         net_udp_close(data.udp_fd);
         data.udp_fd = -1;
@@ -102,9 +128,14 @@ int net_discovery_start_listening(void)
         data.udp_fd = net_udp_create(NET_DISCOVERY_PORT);
         if (data.udp_fd < 0) {
             log_error("Failed to create discovery listen socket", 0, 0);
+            MP_LOG_ERROR("DISCOVERY", "Failed to bind listen socket on port %d — "
+                         "another instance may be running or port is blocked by firewall",
+                         NET_DISCOVERY_PORT);
             return 0;
         }
-        net_udp_enable_broadcast(data.udp_fd);
+        if (!net_udp_enable_broadcast(data.udp_fd)) {
+            MP_LOG_WARN("DISCOVERY", "Failed to enable broadcast on listen socket");
+        }
     }
 
     data.listening = 1;
@@ -112,6 +143,7 @@ int net_discovery_start_listening(void)
     memset(data.hosts, 0, sizeof(data.hosts));
 
     log_info("LAN discovery listening started", 0, 0);
+    MP_LOG_INFO("DISCOVERY", "Start listening on UDP port %d", NET_DISCOVERY_PORT);
     return 1;
 }
 
@@ -121,6 +153,7 @@ void net_discovery_stop_listening(void)
         return;
     }
     data.listening = 0;
+    MP_LOG_INFO("DISCOVERY", "Stop listening");
     if (!data.announcing && data.udp_fd >= 0) {
         net_udp_close(data.udp_fd);
         data.udp_fd = -1;
@@ -141,14 +174,17 @@ static void send_announcement(void)
     net_write_raw(&s, data.host_name, 32);
 
     if (!net_serializer_has_overflow(&s)) {
-        net_udp_send_broadcast(data.udp_fd, NET_DISCOVERY_PORT,
-                               buf, (size_t)net_serializer_position(&s));
+        int sent = net_udp_send_broadcast(data.udp_fd, NET_DISCOVERY_PORT,
+                                          buf, (size_t)net_serializer_position(&s));
+        MP_LOG_TRACE("DISCOVERY", "Broadcast announcement sent (%d bytes, result=%d)",
+                     (int)net_serializer_position(&s), sent);
     }
 }
 
 static void process_announcement(const uint8_t *buf, size_t size, const net_udp_addr *from)
 {
     if (size < 44) {
+        MP_LOG_WARN("DISCOVERY", "Received undersized announcement: %d bytes (need >= 44)", (int)size);
         return;
     }
 
@@ -157,6 +193,8 @@ static void process_announcement(const uint8_t *buf, size_t size, const net_udp_
 
     uint32_t magic = net_read_u32(&s);
     if (magic != NET_DISCOVERY_MAGIC) {
+        MP_LOG_DEBUG("DISCOVERY", "Received packet with wrong magic: 0x%08x (expected 0x%08x)",
+                     magic, NET_DISCOVERY_MAGIC);
         return;
     }
 
@@ -168,13 +206,27 @@ static void process_announcement(const uint8_t *buf, size_t size, const net_udp_
     net_read_raw(&s, host_name, 32);
     host_name[31] = '\0';
 
+    /* Extract sender IP directly from the UDP address using inet_ntop.
+     * This avoids the old colon-stripping hack which would break IPv6. */
+    char sender_ip[INET_ADDRSTRLEN];
+    struct in_addr sender_in;
+    sender_in.s_addr = from->addr;
+    inet_ntop(AF_INET, &sender_in, sender_ip, sizeof(sender_ip));
+
     uint32_t now = net_tcp_get_timestamp_ms();
+
+    /* Ignore our own announcements */
+    if (data.announcing && data.session_id == sess_id) {
+        return;
+    }
 
     /* Check if we already know this host */
     for (int i = 0; i < NET_MAX_DISCOVERED_HOSTS; i++) {
         if (data.hosts[i].active && data.hosts[i].session_id == sess_id) {
             data.hosts[i].player_count = player_count;
             data.hosts[i].last_seen_ms = now;
+            MP_LOG_TRACE("DISCOVERY", "Updated known host '%s' at %s (players=%d/%d)",
+                         host_name, sender_ip, player_count, max_players);
             return;
         }
     }
@@ -203,12 +255,9 @@ static void process_announcement(const uint8_t *buf, size_t size, const net_udp_
         h->active = 1;
         strncpy(h->host_name, host_name, sizeof(h->host_name) - 1);
         h->host_name[sizeof(h->host_name) - 1] = '\0';
-        net_udp_addr_to_string(from, h->host_ip, sizeof(h->host_ip));
-        /* Remove port from the IP string - we use game_port instead */
-        char *colon = strchr(h->host_ip, ':');
-        if (colon) {
-            *colon = '\0';
-        }
+        /* Store clean IP (no port suffix) from inet_ntop */
+        strncpy(h->host_ip, sender_ip, sizeof(h->host_ip) - 1);
+        h->host_ip[sizeof(h->host_ip) - 1] = '\0';
         h->port = game_port;
         h->player_count = player_count;
         h->max_players = max_players;
@@ -217,6 +266,9 @@ static void process_announcement(const uint8_t *buf, size_t size, const net_udp_
         if (slot >= data.host_count) {
             data.host_count = slot + 1;
         }
+
+        MP_LOG_INFO("DISCOVERY", "New host discovered: '%s' at %s:%d (session=0x%08x, players=%d/%d)",
+                    host_name, sender_ip, (int)game_port, sess_id, player_count, max_players);
     }
 }
 
@@ -224,6 +276,9 @@ static void expire_old_hosts(uint32_t now)
 {
     for (int i = 0; i < NET_MAX_DISCOVERED_HOSTS; i++) {
         if (data.hosts[i].active && (now - data.hosts[i].last_seen_ms) > HOST_EXPIRY_MS) {
+            MP_LOG_INFO("DISCOVERY", "Host expired: '%s' at %s (last seen %ums ago)",
+                        data.hosts[i].host_name, data.hosts[i].host_ip,
+                        now - data.hosts[i].last_seen_ms);
             data.hosts[i].active = 0;
         }
     }

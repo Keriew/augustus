@@ -10,6 +10,7 @@
 #include "multiplayer/ownership.h"
 #include "multiplayer/empire_sync.h"
 #include "multiplayer/worldgen.h"
+#include "multiplayer/mp_debug_log.h"
 #include "core/log.h"
 
 #include <string.h>
@@ -251,7 +252,12 @@ static void handle_hello(net_peer *peer, const uint8_t *payload, uint32_t size)
         }
     }
 
+    MP_LOG_INFO("HANDSHAKE", "HELLO received: name='%s' magic=0x%08x version=%d "
+                "save_ver=%u map_hash=0x%08x scenario_hash=0x%08x flags=0x%08x",
+                name, magic, (int)version, save_version, map_hash, scenario_hash, feature_flags);
+
     if (magic != NET_MAGIC) {
+        MP_LOG_ERROR("HANDSHAKE", "REJECT: invalid magic 0x%08x (expected 0x%08x)", magic, NET_MAGIC);
         log_error("Invalid magic in HELLO", 0, 0);
         uint8_t reject_buf[2];
         net_serializer rs;
@@ -263,6 +269,8 @@ static void handle_hello(net_peer *peer, const uint8_t *payload, uint32_t size)
     }
 
     if (!net_protocol_check_version(version)) {
+        MP_LOG_ERROR("HANDSHAKE", "REJECT: version mismatch, remote=%d local=%d",
+                     (int)version, NET_PROTOCOL_VERSION);
         log_error("Protocol version mismatch", 0, (int)version);
         uint8_t reject_buf[2];
         net_serializer rs;
@@ -284,11 +292,16 @@ static void handle_hello(net_peer *peer, const uint8_t *payload, uint32_t size)
             }
         }
 
+        MP_LOG_INFO("HANDSHAKE", "Game in progress, has_uuid=%d — attempting reconnect for '%s'",
+                    has_uuid, name);
+
         if (has_uuid && try_reconnect_player(peer, player_uuid, reconnect_token)) {
+            MP_LOG_INFO("HANDSHAKE", "Reconnect succeeded for '%s'", name);
             return; /* Reconnect succeeded */
         }
 
         /* No reconnect possible — reject */
+        MP_LOG_WARN("HANDSHAKE", "REJECT: game in progress, no valid UUID for reconnect (name='%s')", name);
         uint8_t reject_buf[2];
         net_serializer rs;
         net_serializer_init(&rs, reject_buf, sizeof(reject_buf));
@@ -314,6 +327,7 @@ static void handle_hello(net_peer *peer, const uint8_t *payload, uint32_t size)
     }
     /* Also check against host name */
     if (strncmp(session.local_player_name, name, NET_MAX_PLAYER_NAME - 1) == 0) {
+        MP_LOG_WARN("HANDSHAKE", "REJECT: name '%s' conflicts with host name", name);
         uint8_t reject_buf[2];
         net_serializer rs;
         net_serializer_init(&rs, reject_buf, sizeof(reject_buf));
@@ -373,6 +387,9 @@ static void handle_hello(net_peer *peer, const uint8_t *payload, uint32_t size)
     }
     send_raw_to_peer(peer, NET_MSG_JOIN_ACCEPT, accept_buf,
                      (uint32_t)net_serializer_position(&as));
+
+    MP_LOG_INFO("HANDSHAKE", "JOIN_ACCEPT sent: player_id=%d slot=%d session=0x%08x seed=%u",
+                (int)new_player_id, slot, session.session_id, session_seed);
 
     /* Broadcast player joined event to other peers */
     uint8_t event_buf[64];
@@ -560,6 +577,11 @@ static void handle_host_message(const net_packet_header *header,
             session.host_peer.state = PEER_STATE_JOINED;
             session.state = NET_SESSION_CLIENT_LOBBY;
 
+            MP_LOG_INFO("HANDSHAKE", "JOIN_ACCEPT received: player_id=%d slot=%d "
+                        "session=0x%08x seed=%u player_count=%d",
+                        (int)session.local_player_id, (int)slot_id,
+                        session.session_id, session_seed, (int)player_count);
+
             /* Register self in player registry with assigned UUID */
             mp_player_registry_add_with_uuid(session.local_player_id,
                 session.local_player_name, assigned_uuid, 1, 0);
@@ -584,7 +606,16 @@ static void handle_host_message(const net_packet_header *header,
                 net_serializer s;
                 net_serializer_init(&s, (uint8_t *)payload, size);
                 uint8_t reason = net_read_u8(&s);
-                log_error("Join rejected", 0, reason);
+                const char *reason_str = "unknown";
+                switch (reason) {
+                    case NET_REJECT_VERSION_MISMATCH: reason_str = "VERSION_MISMATCH"; break;
+                    case NET_REJECT_SESSION_FULL: reason_str = "SESSION_FULL"; break;
+                    case NET_REJECT_GAME_IN_PROGRESS: reason_str = "GAME_IN_PROGRESS"; break;
+                    case NET_REJECT_NAME_TAKEN: reason_str = "NAME_TAKEN"; break;
+                    case NET_REJECT_BANNED: reason_str = "BANNED"; break;
+                }
+                MP_LOG_ERROR("HANDSHAKE", "JOIN_REJECT received: reason=%s (%d)", reason_str, (int)reason);
+                log_error("Join rejected", reason_str, reason);
             }
             session.state = NET_SESSION_DISCONNECTING;
             break;
@@ -684,6 +715,8 @@ static void host_accept_connections(void)
     session.peer_count++;
 
     log_info("New connection accepted in slot", 0, slot);
+    MP_LOG_INFO("SESSION", "New TCP connection accepted: slot=%d fd=%d total_peers=%d",
+                slot, client_fd, session.peer_count);
 }
 
 static void host_process_peers(void)
@@ -813,15 +846,19 @@ int net_session_init(void)
     }
     net_udp_init();
 
+    mp_debug_log_init();
     log_info("Network session system initialized", 0, 0);
+    MP_LOG_INFO("SESSION", "Network session system initialized");
     return 1;
 }
 
 void net_session_shutdown(void)
 {
+    MP_LOG_INFO("SESSION", "Session shutdown");
     net_session_disconnect();
     net_tcp_shutdown();
     net_udp_shutdown();
+    mp_debug_log_shutdown();
 }
 
 int net_session_host(const char *player_name, uint16_t port)
@@ -861,6 +898,8 @@ int net_session_host(const char *player_name, uint16_t port)
     net_discovery_start_announcing(player_name, port, 1, NET_MAX_PLAYERS, session.session_id);
 
     log_info("Hosting session", player_name, (int)port);
+    MP_LOG_INFO("SESSION", "Hosting session: name='%s' port=%d session_id=0x%08x",
+                player_name, (int)port, session.session_id);
     return 1;
 }
 
@@ -935,6 +974,10 @@ int net_session_join(const char *player_name, const char *host_address, uint16_t
     net_session_send_to_host(NET_MSG_HELLO, hello_buf, (uint32_t)net_serializer_position(&s));
 
     log_info("Joining session at", host_address, (int)port);
+    MP_LOG_INFO("SESSION", "Joining session: host='%s' port=%d name='%s' hello_size=%d",
+                host_address, (int)port, player_name, (int)net_serializer_position(&s));
+    MP_LOG_INFO("HANDSHAKE", "HELLO sent to host (magic=0x%08x version=%d)",
+                NET_MAGIC, NET_PROTOCOL_VERSION);
     return 1;
 }
 
@@ -989,6 +1032,7 @@ void net_session_disconnect(void)
     session.peer_count = 0;
 
     log_info("Session disconnected", 0, 0);
+    MP_LOG_INFO("SESSION", "Session disconnected — state reset to IDLE");
 }
 
 void net_session_update(void)
@@ -1115,6 +1159,8 @@ int net_session_start_game(void)
     }
 
     log_info("Game started", 0, 0);
+    MP_LOG_INFO("SESSION", "Game started: tick=%u speed=%d peers=%d",
+                session.authoritative_tick, (int)session.game_speed, session.peer_count);
     return 1;
 }
 

@@ -10,6 +10,7 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
+#include "multiplayer/mp_debug_log.h"
 #include "network/session.h"
 #include "translation/translation.h"
 #include "window/multiplayer_connect.h"
@@ -54,14 +55,19 @@ static void button_host(const generic_button *button)
     }
     data.host_attempted = 1;
 
+    MP_LOG_INFO("UI", "Host LAN Game button pressed");
+
     /* Initialize networking if not already done */
     if (!net_session_is_active()) {
+        MP_LOG_INFO("UI", "Initializing network session (first time)");
         net_session_init();
     }
 
     if (net_session_host("Player", NET_DEFAULT_PORT)) {
+        MP_LOG_INFO("UI", "Host created successfully — transitioning to lobby");
         window_multiplayer_lobby_show();
     } else {
+        MP_LOG_ERROR("UI", "Host creation FAILED on port %d — showing error dialog", NET_DEFAULT_PORT);
         data.host_attempted = 0;
         window_plain_message_dialog_show(
             TR_MP_MENU_HOST_FAILED, TR_MP_MENU_HOST_FAILED, 0);
@@ -70,10 +76,14 @@ static void button_host(const generic_button *button)
 
 static void button_join(const generic_button *button)
 {
+    MP_LOG_INFO("UI", "Join LAN Game button pressed");
+
     /* Initialize networking if not already done */
     if (!net_session_is_active()) {
+        MP_LOG_INFO("UI", "Initializing network session (first time)");
         net_session_init();
     }
+    MP_LOG_INFO("UI", "Transitioning to connect window");
     window_multiplayer_connect_show();
 }
 

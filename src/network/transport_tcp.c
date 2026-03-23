@@ -4,6 +4,7 @@
 
 #include "core/log.h"
 #include "protocol.h"
+#include "multiplayer/mp_debug_log.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -90,12 +91,22 @@ int net_tcp_listen(uint16_t port)
     addr.sin_port = htons(port);
 
     if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) == SOCKET_ERROR) {
+#ifdef _WIN32
+        MP_LOG_ERROR("NET", "TCP bind failed on port %d, WSAError=%d", (int)port, WSAGetLastError());
+#else
+        MP_LOG_ERROR("NET", "TCP bind failed on port %d, errno=%d", (int)port, errno);
+#endif
         log_error("Failed to bind listen socket", 0, (int)port);
         NET_CLOSE_SOCKET(fd);
         return -1;
     }
 
     if (listen(fd, NET_MAX_PLAYERS) == SOCKET_ERROR) {
+#ifdef _WIN32
+        MP_LOG_ERROR("NET", "TCP listen failed on port %d, WSAError=%d", (int)port, WSAGetLastError());
+#else
+        MP_LOG_ERROR("NET", "TCP listen failed on port %d, errno=%d", (int)port, errno);
+#endif
         log_error("Failed to listen on socket", 0, (int)port);
         NET_CLOSE_SOCKET(fd);
         return -1;
@@ -104,6 +115,8 @@ int net_tcp_listen(uint16_t port)
     net_tcp_set_nonblocking(fd);
 
     log_info("TCP listening on port", 0, (int)port);
+    MP_LOG_INFO("NET", "TCP listening on port %d (fd=%d, backlog=%d)",
+                (int)port, fd, NET_MAX_PLAYERS);
     return fd;
 }
 
@@ -180,6 +193,7 @@ int net_tcp_connect(const char *host, uint16_t port)
 
     if (fd < 0) {
         log_error("Failed to connect to host", host, (int)port);
+        MP_LOG_ERROR("NET", "TCP connect failed: host='%s' port=%d — all addresses exhausted", host, (int)port);
         return -1;
     }
 
@@ -194,6 +208,7 @@ int net_tcp_connect(const char *host, uint16_t port)
 #endif
 
     log_info("TCP connected to host", host, (int)port);
+    MP_LOG_INFO("NET", "TCP connected: host='%s' port=%d fd=%d (TCP_NODELAY enabled)", host, (int)port, fd);
     return fd;
 }
 
