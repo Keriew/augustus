@@ -28,7 +28,7 @@ jobs:
           cmake --build build --config Release
       - name: Upload artifact (Linux)
         if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: augustus-linux
           path: build/augustus  # ajuste se o binário tiver nome diferente
@@ -54,7 +54,7 @@ jobs:
           cmake --build build --config Release
       - name: Upload artifact (Windows)
         if: matrix.os == 'windows-latest'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: augustus-windows
           path: build/augustus.exe  # ajuste se o executável tiver nome diferente
