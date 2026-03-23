@@ -113,6 +113,9 @@ typedef enum {
 
 typedef enum {
     CONFIG_STRING_UI_LANGUAGE_DIR,
+#ifdef ENABLE_MULTIPLAYER
+    CONFIG_STRING_MP_PLAYER_NAME,
+#endif
     CONFIG_STRING_MAX_ENTRIES
 } config_string_key;
 

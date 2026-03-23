@@ -122,6 +122,9 @@ static const char *ini_keys[] = {
 
 static const char *ini_string_keys[] = {
     "ui_language_dir",
+#ifdef ENABLE_MULTIPLAYER
+    "multiplayer_player_name",
+#endif
 };
 
 static int values[CONFIG_MAX_ENTRIES];
@@ -187,7 +190,12 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_GP_CH_ALWAYS_DESTROY_BRIDGES] = 0,
 };
 
-static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };
+static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = {
+    [CONFIG_STRING_UI_LANGUAGE_DIR] = "",
+#ifdef ENABLE_MULTIPLAYER
+    [CONFIG_STRING_MP_PLAYER_NAME] = "Player",
+#endif
+};
 
 int config_get(config_key key)
 {
@@ -228,8 +236,9 @@ static void set_defaults(void)
     for (int i = 0; i < CONFIG_MAX_ENTRIES; ++i) {
         values[i] = default_values[i];
     }
-    snprintf(string_values[CONFIG_STRING_UI_LANGUAGE_DIR], CONFIG_STRING_VALUE_MAX, "%s",
-        default_string_values[CONFIG_STRING_UI_LANGUAGE_DIR]);
+    for (int i = 0; i < CONFIG_STRING_MAX_ENTRIES; ++i) {
+        snprintf(string_values[i], CONFIG_STRING_VALUE_MAX, "%s", default_string_values[i]);
+    }
 }
 
 void config_load(void)

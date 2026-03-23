@@ -20,30 +20,29 @@ void multiplayer_runtime_init(void)
 
 void multiplayer_runtime_update(void)
 {
-    if (!net_session_is_active()) {
-        return;
+    /* IMPORTANT: discovery and session are updated independently.
+     *
+     * Discovery must run even when there is no active session, because:
+     * - The connect window opens the listener to find LAN hosts BEFORE joining
+     * - The host announces BEFORE a client has connected
+     *
+     * Session update only runs when there is an active session (host or client).
+     * Discovery update always runs — it self-checks whether its socket is open. */
+
+    /* 1. Session I/O (TCP handshake, data, heartbeats, timeouts) */
+    if (net_session_is_active()) {
+        net_session_update();
+
+        /* Host: keep the announced player count in sync with reality */
+        if (net_session_is_host()) {
+            int peer_count = net_session_get_peer_count();
+            net_discovery_update_announcing((uint8_t)(peer_count + 1)); /* +1 for host */
+        }
     }
 
-    /* Process network I/O every frame — this is the critical fix.
-     * In lobby/connect windows, simulation ticks don't run, but
-     * net_session_update() must still be called so that:
-     *   - Host accepts new TCP connections
-     *   - Host/client process incoming packets (HELLO, JOIN_ACCEPT, etc.)
-     *   - Heartbeats are sent/received
-     *   - Timeout detection works
-     *   - DISCONNECTING state transitions to IDLE
-     */
-    net_session_update();
-
-    /* Update LAN discovery: send announcements (host) and receive them (client).
-     * This runs globally rather than being tied to a specific window. */
+    /* 2. Discovery I/O (UDP announce/listen) — runs unconditionally.
+     * net_discovery_update() is a no-op if its socket is not open. */
     net_discovery_update();
-
-    /* Host: keep the announced player count in sync with reality */
-    if (net_session_is_host()) {
-        int peer_count = net_session_get_peer_count();
-        net_discovery_update_announcing((uint8_t)(peer_count + 1)); /* +1 for host */
-    }
 }
 
 void multiplayer_runtime_shutdown(void)

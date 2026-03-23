@@ -2,6 +2,8 @@
 
 #ifdef ENABLE_MULTIPLAYER
 
+#include "multiplayer/mp_debug_log.h"
+
 #include <string.h>
 
 void net_codec_init(net_packet_codec *codec)
@@ -13,6 +15,7 @@ void net_codec_init(net_packet_codec *codec)
 void net_codec_reset(net_packet_codec *codec)
 {
     codec->recv_fill = 0;
+    codec->decode_payload_size = 0;
 }
 
 size_t net_codec_encode(net_packet_codec *codec,
@@ -100,6 +103,8 @@ net_codec_result net_codec_decode(net_packet_codec *codec,
     uint32_t frame_size = net_read_u32(&s);
 
     if (magic != NET_FRAME_MAGIC) {
+        MP_LOG_WARN("NET", "Invalid frame magic: 0x%08x at recv_fill=%u (expected 0x%08x)",
+                    magic, (unsigned)codec->recv_fill, NET_FRAME_MAGIC);
         /* Try to find the next valid frame magic by scanning forward */
         size_t scan = 1;
         int found = 0;
@@ -130,6 +135,7 @@ net_codec_result net_codec_decode(net_packet_codec *codec,
     }
 
     if (frame_size > NET_MAX_FRAME_SIZE) {
+        MP_LOG_ERROR("NET", "Frame size too large: %u bytes (max %u)", frame_size, NET_MAX_FRAME_SIZE);
         /* Corrupt frame - skip past this magic */
         size_t remaining = codec->recv_fill - 4;
         memmove(codec->recv_buffer, codec->recv_buffer + 4, remaining);
@@ -161,17 +167,31 @@ net_codec_result net_codec_decode(net_packet_codec *codec,
         return CODEC_INVALID_FRAME;
     }
 
-    /* Extract payload pointer */
+    /* Copy payload to stable decode buffer BEFORE consuming the frame.
+     * This is the critical fix: the recv_buffer will be compacted by memmove
+     * below, which would invalidate any pointer into it. By copying first,
+     * the caller gets a pointer that remains valid until the next decode call. */
     uint32_t actual_payload_size = header->payload_size;
     if (actual_payload_size > 0) {
-        *payload_out = codec->recv_buffer + NET_FRAME_PREFIX_SIZE + NET_PACKET_HEADER_SIZE;
+        if (actual_payload_size > NET_MAX_PAYLOAD_SIZE) {
+            /* Payload claims to be larger than protocol allows — reject */
+            size_t remaining = codec->recv_fill - total_needed;
+            memmove(codec->recv_buffer, codec->recv_buffer + total_needed, remaining);
+            codec->recv_fill = remaining;
+            return CODEC_INVALID_FRAME;
+        }
+        memcpy(codec->decode_buffer,
+               codec->recv_buffer + NET_FRAME_PREFIX_SIZE + NET_PACKET_HEADER_SIZE,
+               actual_payload_size);
+        *payload_out = codec->decode_buffer;
         *payload_size_out = actual_payload_size;
     }
+    codec->decode_payload_size = actual_payload_size;
 
     /* Update tracking */
     codec->last_recv_sequence = header->sequence_id;
 
-    /* Consume this frame from the buffer */
+    /* NOW consume the frame — the payload is safely in decode_buffer */
     size_t remaining = codec->recv_fill - total_needed;
     if (remaining > 0) {
         memmove(codec->recv_buffer, codec->recv_buffer + total_needed, remaining);

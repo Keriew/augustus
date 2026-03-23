@@ -35,6 +35,16 @@ typedef struct {
     size_t recv_fill;
     uint32_t next_send_sequence;
     uint32_t last_recv_sequence;
+
+    /**
+     * Stable decode buffer: payload is copied here BEFORE the recv_buffer
+     * is compacted by memmove. This guarantees that the pointer returned
+     * by net_codec_decode() remains valid until the next decode call on
+     * the same codec instance. Ownership: codec owns this buffer.
+     * Lifetime: valid until the next call to net_codec_decode() or reset.
+     */
+    uint8_t decode_buffer[NET_MAX_PAYLOAD_SIZE];
+    uint32_t decode_payload_size;
 } net_packet_codec;
 
 void net_codec_init(net_packet_codec *codec);
@@ -61,8 +71,16 @@ size_t net_codec_feed(net_packet_codec *codec, const uint8_t *data, size_t size)
 
 /**
  * Try to extract a complete packet from the codec's internal buffer.
- * On success, fills header and sets payload_out to point within recv_buffer.
+ * On CODEC_OK: header is filled; payload_out points to a stable internal
+ * buffer (decode_buffer) that remains valid until the next call to
+ * net_codec_decode() or net_codec_reset() on the same codec instance.
  * Returns CODEC_OK if a packet was extracted, CODEC_NEED_MORE_DATA if incomplete.
+ *
+ * OWNERSHIP CONTRACT:
+ * - The codec owns the payload memory.
+ * - The pointer is valid until the next decode/reset call on this codec.
+ * - The caller must NOT store or cache the pointer across decode calls.
+ * - Each peer has its own codec, so payloads from different peers don't conflict.
  */
 net_codec_result net_codec_decode(net_packet_codec *codec,
                                   net_packet_header *header,

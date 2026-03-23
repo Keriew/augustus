@@ -11,6 +11,7 @@
 #include "multiplayer/empire_sync.h"
 #include "multiplayer/worldgen.h"
 #include "multiplayer/mp_debug_log.h"
+#include "core/config.h"
 #include "core/log.h"
 
 #include <string.h>
@@ -27,6 +28,7 @@ static int persistent_name_set;
 static net_join_status join_status;
 static uint8_t join_reject_reason;
 static uint32_t join_start_ms;
+static uint32_t join_correlation_id; /* Unique ID per join attempt for log correlation */
 
 #define NET_JOIN_TIMEOUT_MS 10000 /* 10 seconds to complete handshake */
 
@@ -223,6 +225,13 @@ static int try_reconnect_player(net_peer *peer, const uint8_t *uuid,
 
 static void handle_hello(net_peer *peer, const uint8_t *payload, uint32_t size)
 {
+    /* Minimum HELLO size: magic(4) + version(2) + name(32) = 38 bytes */
+    if (size < 38) {
+        MP_LOG_ERROR("HANDSHAKE", "HELLO too small: %u bytes (minimum 38)", size);
+        log_error("HELLO packet too small", 0, (int)size);
+        return;
+    }
+
     net_serializer s;
     net_serializer_init(&s, (uint8_t *)payload, size);
 
@@ -258,8 +267,20 @@ static void handle_hello(net_peer *peer, const uint8_t *payload, uint32_t size)
         memset(reconnect_token, 0, 16);
 
         if (net_serializer_has_overflow(&s)) {
+            MP_LOG_ERROR("HANDSHAKE", "Malformed HELLO: payload size=%u, overflow after legacy parse", size);
             log_error("Malformed HELLO from peer", 0, 0);
             return;
+        }
+    }
+
+    /* Defensive: trim trailing spaces and ensure valid name */
+    {
+        int len = (int)strlen(name);
+        while (len > 0 && (name[len - 1] == ' ' || name[len - 1] == '\0')) {
+            name[--len] = '\0';
+        }
+        if (len == 0) {
+            strncpy(name, "Unknown", NET_MAX_PLAYER_NAME - 1);
         }
     }
 
@@ -453,11 +474,21 @@ static void handle_chat_from_client(net_peer *peer, const uint8_t *payload, uint
 static void handle_client_message(net_peer *peer, const net_packet_header *header,
                                   const uint8_t *payload, uint32_t size)
 {
-    /* Validate payload size against header */
+    /* Validate payload size */
     if (size > NET_MAX_PAYLOAD_SIZE) {
-        log_error("Payload too large from peer", peer->name, (int)size);
+        MP_LOG_ERROR("NET", "Payload too large from peer '%s': %u bytes (max %u)",
+                     peer->name, size, NET_MAX_PAYLOAD_SIZE);
         return;
     }
+    if (size != header->payload_size) {
+        MP_LOG_ERROR("NET", "Payload size mismatch from peer '%s': header says %u, got %u",
+                     peer->name, header->payload_size, size);
+        return;
+    }
+
+    MP_LOG_TRACE("NET", "Message from peer '%s': type=%s(%d) size=%u seq=%u",
+                 peer->name, net_protocol_message_name(header->message_type),
+                 (int)header->message_type, size, header->sequence_id);
 
     switch (header->message_type) {
         case NET_MSG_HELLO:
@@ -567,9 +598,19 @@ static void handle_host_message(const net_packet_header *header,
 {
     /* Validate payload size */
     if (size > NET_MAX_PAYLOAD_SIZE) {
-        log_error("Payload too large from host", 0, (int)size);
+        MP_LOG_ERROR("NET", "Payload too large from host: %u bytes (max %u)",
+                     size, NET_MAX_PAYLOAD_SIZE);
         return;
     }
+    if (size != header->payload_size) {
+        MP_LOG_ERROR("NET", "Payload size mismatch from host: header says %u, got %u",
+                     header->payload_size, size);
+        return;
+    }
+
+    MP_LOG_TRACE("NET", "Message from host: type=%s(%d) size=%u seq=%u",
+                 net_protocol_message_name(header->message_type),
+                 (int)header->message_type, size, header->sequence_id);
 
     switch (header->message_type) {
         case NET_MSG_JOIN_ACCEPT: {
@@ -589,9 +630,9 @@ static void handle_host_message(const net_packet_header *header,
             session.state = NET_SESSION_CLIENT_LOBBY;
             join_status = NET_JOIN_STATUS_CONNECTED;
 
-            MP_LOG_INFO("HANDSHAKE", "JOIN_ACCEPT received: player_id=%d slot=%d "
+            MP_LOG_INFO("HANDSHAKE", "[join:%04x] JOIN_ACCEPT received: player_id=%d slot=%d "
                         "session=0x%08x seed=%u player_count=%d",
-                        (int)session.local_player_id, (int)slot_id,
+                        join_correlation_id, (int)session.local_player_id, (int)slot_id,
                         session.session_id, session_seed, (int)player_count);
 
             /* Register self in player registry with assigned UUID */
@@ -626,7 +667,8 @@ static void handle_host_message(const net_packet_header *header,
                     case NET_REJECT_NAME_TAKEN: reason_str = "NAME_TAKEN"; break;
                     case NET_REJECT_BANNED: reason_str = "BANNED"; break;
                 }
-                MP_LOG_ERROR("HANDSHAKE", "JOIN_REJECT received: reason=%s (%d)", reason_str, (int)reason);
+                MP_LOG_ERROR("HANDSHAKE", "[join:%04x] JOIN_REJECT received: reason=%s (%d)",
+                             join_correlation_id, reason_str, (int)reason);
                 log_error("Join rejected", reason_str, reason);
                 join_reject_reason = reason;
             }
@@ -803,7 +845,8 @@ static void client_process_host(void)
     /* Check handshake timeout while joining */
     if (session.state == NET_SESSION_JOINING &&
         join_start_ms > 0 && (now - join_start_ms) > NET_JOIN_TIMEOUT_MS) {
-        MP_LOG_ERROR("HANDSHAKE", "Join handshake timed out after %u ms", now - join_start_ms);
+        MP_LOG_ERROR("HANDSHAKE", "[join:%04x] Handshake timed out after %u ms",
+                     join_correlation_id, now - join_start_ms);
         log_error("Join handshake timed out", 0, 0);
         join_status = NET_JOIN_STATUS_TIMEOUT;
         session.state = NET_SESSION_DISCONNECTING;
@@ -822,7 +865,11 @@ static void client_process_host(void)
     /* Receive data */
     int received = net_tcp_recv(peer->socket_fd, recv_buf, sizeof(recv_buf));
     if (received < 0) {
+        MP_LOG_ERROR("NET", "Host connection lost (recv returned %d)", received);
         log_error("Host connection lost", 0, 0);
+        if (session.state == NET_SESSION_JOINING) {
+            join_status = NET_JOIN_STATUS_FAILED;
+        }
         session.state = NET_SESSION_DISCONNECTING;
         return;
     }
@@ -872,8 +919,20 @@ int net_session_init(void)
     net_discovery_init();
 
     mp_debug_log_init();
+
+    /* Load persistent player name from config.
+     * If the user has never set a name, the default "Player" is used. */
+    if (!persistent_name_set) {
+        const char *saved_name = config_get_string(CONFIG_STRING_MP_PLAYER_NAME);
+        if (saved_name && saved_name[0]) {
+            strncpy(persistent_player_name, saved_name, NET_MAX_PLAYER_NAME - 1);
+            persistent_player_name[NET_MAX_PLAYER_NAME - 1] = '\0';
+        }
+        persistent_name_set = 1;
+    }
+
     log_info("Network session system initialized", 0, 0);
-    MP_LOG_INFO("SESSION", "Network session system initialized");
+    MP_LOG_INFO("SESSION", "Network session initialized, player_name='%s'", persistent_player_name);
     return 1;
 }
 
@@ -978,6 +1037,7 @@ int net_session_join(const char *player_name, const char *host_address, uint16_t
     join_status = NET_JOIN_STATUS_CONNECTING;
     join_reject_reason = 0;
     join_start_ms = net_tcp_get_timestamp_ms();
+    join_correlation_id = (uint32_t)(join_start_ms ^ (uint32_t)(size_t)&session) & 0xFFFF;
 
     /* Send extended HELLO with UUID (if reconnecting) and protocol info.
      * Use a zeroed buffer for the player name to avoid reading past
@@ -1012,10 +1072,11 @@ int net_session_join(const char *player_name, const char *host_address, uint16_t
     net_session_send_to_host(NET_MSG_HELLO, hello_buf, (uint32_t)net_serializer_position(&s));
 
     log_info("Joining session at", host_address, (int)port);
-    MP_LOG_INFO("SESSION", "Joining session: host='%s' port=%d name='%s' hello_size=%d",
-                host_address, (int)port, player_name, (int)net_serializer_position(&s));
-    MP_LOG_INFO("HANDSHAKE", "HELLO sent to host (magic=0x%08x version=%d)",
-                NET_MAGIC, NET_PROTOCOL_VERSION);
+    MP_LOG_INFO("SESSION", "[join:%04x] Joining session: host='%s' port=%d name='%s' hello_size=%d",
+                join_correlation_id, host_address, (int)port, player_name,
+                (int)net_serializer_position(&s));
+    MP_LOG_INFO("HANDSHAKE", "[join:%04x] HELLO sent to host (magic=0x%08x version=%d)",
+                join_correlation_id, NET_MAGIC, NET_PROTOCOL_VERSION);
     return 1;
 }
 
@@ -1024,6 +1085,11 @@ void net_session_disconnect(void)
     if (session.state == NET_SESSION_IDLE) {
         return;
     }
+
+    MP_LOG_INFO("SESSION", "Disconnecting: state=%s role=%s join_status=%d",
+                net_session_state_name(session.state),
+                session.role == NET_ROLE_HOST ? "HOST" : "CLIENT",
+                (int)join_status);
 
     if (session.role == NET_ROLE_HOST) {
         /* Notify all peers */
@@ -1383,15 +1449,37 @@ void net_session_set_local_name(const char *name)
     if (!name || !name[0]) {
         return;
     }
-    strncpy(persistent_player_name, name, NET_MAX_PLAYER_NAME - 1);
+
+    /* Trim leading/trailing spaces */
+    const char *start = name;
+    while (*start == ' ') {
+        start++;
+    }
+    if (!*start) {
+        return; /* All spaces — reject */
+    }
+
+    strncpy(persistent_player_name, start, NET_MAX_PLAYER_NAME - 1);
     persistent_player_name[NET_MAX_PLAYER_NAME - 1] = '\0';
+
+    /* Trim trailing spaces */
+    int len = (int)strlen(persistent_player_name);
+    while (len > 0 && persistent_player_name[len - 1] == ' ') {
+        persistent_player_name[--len] = '\0';
+    }
+
     persistent_name_set = 1;
+
+    /* Persist to config file */
+    config_set_string(CONFIG_STRING_MP_PLAYER_NAME, persistent_player_name);
 
     /* Also update the active session name if one exists */
     if (session.state != NET_SESSION_IDLE) {
         strncpy(session.local_player_name, persistent_player_name, NET_MAX_PLAYER_NAME - 1);
         session.local_player_name[NET_MAX_PLAYER_NAME - 1] = '\0';
     }
+
+    MP_LOG_INFO("SESSION", "Player name set to '%s'", persistent_player_name);
 }
 
 const char *net_session_get_local_name(void)
