@@ -27,9 +27,30 @@
 #include "window/mission_selection.h"
 #include "window/plain_message_dialog.h"
 
+#ifdef ENABLE_MULTIPLAYER
+#include "network/session.h"
+#include "window/multiplayer_status.h"
+#endif
+
 static void button_click(const generic_button *button);
 
 static unsigned int focus_button_id;
+
+#ifdef ENABLE_MULTIPLAYER
+/* Extended button array: 9 buttons when multiplayer session is active */
+static generic_button buttons_mp[] = {
+        {192,  80, 192, 25, button_click, 0, 1},
+        {192, 114, 192, 25, button_click, 0, 2},
+        {192, 148, 192, 25, button_click, 0, 3},
+        {192, 182, 192, 25, button_click, 0, 4},
+        {192, 216, 192, 25, button_click, 0, 5},
+        {192, 250, 192, 25, button_click, 0, 6},
+        {192, 284, 192, 25, button_click, 0, 9},  /* Multiplayer Status */
+        {192, 318, 192, 25, button_click, 0, 7},
+        {192, 352, 192, 25, button_click, 0, 8},
+};
+#define MAX_BUTTONS_MP (sizeof(buttons_mp) / sizeof(generic_button))
+#endif
 
 static generic_button buttons[] = {
         {192, 100, 192, 25, button_click, 0, 1},
@@ -44,10 +65,38 @@ static generic_button buttons[] = {
 
 #define MAX_BUTTONS (sizeof(buttons) / sizeof(generic_button))
 
+#ifdef ENABLE_MULTIPLAYER
+static int is_mp_active(void)
+{
+    return net_session_is_active();
+}
+#endif
+
 static void draw_foreground(void)
 {
     graphics_in_dialog();
 
+#ifdef ENABLE_MULTIPLAYER
+    if (is_mp_active()) {
+        outer_panel_draw(160, 28, 16, 26);
+
+        for (size_t i = 0; i < MAX_BUTTONS_MP; i++) {
+            large_label_draw(buttons_mp[i].x, buttons_mp[i].y, buttons_mp[i].width / 16,
+                focus_button_id == i + 1 ? 1 : 0);
+        }
+
+        text_draw_centered(translation_for(TR_LABEL_PAUSE_MENU), 192, 42, 192, FONT_LARGE_BLACK, 0);
+        lang_text_draw_centered(13, 5, 192, 88, 192, FONT_NORMAL_GREEN);
+        lang_text_draw_centered(1, 2, 192, 122, 192, FONT_NORMAL_GREEN);
+        lang_text_draw_centered(1, 3, 192, 156, 192, FONT_NORMAL_GREEN);
+        lang_text_draw_centered(1, 4, 192, 190, 192, FONT_NORMAL_GREEN);
+        lang_text_draw_centered(1, 6, 192, 224, 192, FONT_NORMAL_GREEN);
+        lang_text_draw_centered(1, 7, 192, 258, 192, FONT_NORMAL_GREEN);
+        text_draw_centered(translation_for(TR_MP_PAUSE_MENU_MP_STATUS), 192, 292, 192, FONT_NORMAL_GREEN, 0);
+        text_draw_centered(translation_for(TR_BUTTON_BACK_TO_MAIN_MENU), 192, 326, 192, FONT_NORMAL_GREEN, 0);
+        lang_text_draw_centered(1, 5, 192, 360, 192, FONT_NORMAL_GREEN);
+    } else {
+#endif
     outer_panel_draw(160, 44, 16, 24);
 
     for (size_t i = 0; i < MAX_BUTTONS; i++) {
@@ -63,13 +112,23 @@ static void draw_foreground(void)
     lang_text_draw_centered(1, 7, 192, 308, 192, FONT_NORMAL_GREEN);
     text_draw_centered(translation_for(TR_BUTTON_BACK_TO_MAIN_MENU), 192, 348, 192, FONT_NORMAL_GREEN, 0);
     lang_text_draw_centered(1, 5, 192, 388, 192, FONT_NORMAL_GREEN);
-    
+#ifdef ENABLE_MULTIPLAYER
+    }
+#endif
+
     graphics_reset_dialog();
 }
 
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
+#ifdef ENABLE_MULTIPLAYER
+    if (is_mp_active()) {
+        if (generic_buttons_handle_mouse(m_dialog, 0, 0, buttons_mp, MAX_BUTTONS_MP, &focus_button_id)) {
+            return;
+        }
+    } else
+#endif
     if (generic_buttons_handle_mouse(m_dialog, 0, 0, buttons, MAX_BUTTONS, &focus_button_id)) {
         return;
     }
@@ -143,6 +202,11 @@ static void button_click(const generic_button *button)
     } else if (type == 8) {
         window_popup_dialog_show(POPUP_DIALOG_QUIT, confirm_exit, 1);
     }
+#ifdef ENABLE_MULTIPLAYER
+    else if (type == 9) {
+        window_multiplayer_status_show();
+    }
+#endif
 }
 
 void window_city_pause_menu_show(void)

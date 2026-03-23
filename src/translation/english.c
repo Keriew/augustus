@@ -2070,6 +2070,13 @@ static translation_string all_strings[] = {
     {TR_MP_TRADE_ADVISOR_P2P_ROUTE, "P2P"},
     {TR_MP_TRADE_ADVISOR_AI_ROUTE, "AI"},
     {TR_MP_TRADE_ADVISOR_ROUTE_STATE, "Route:"},
+    {TR_MP_MENU_TITLE, "Multiplayer"},
+    {TR_MP_MENU_HOST_LAN, "Host LAN Game"},
+    {TR_MP_MENU_JOIN_LAN, "Join LAN Game"},
+    {TR_MP_MENU_BACK, "Back"},
+    {TR_MP_MENU_HOST_FAILED, "Failed to start host session"},
+    {TR_MP_MENU_BUTTON_MULTIPLAYER, "Multiplayer"},
+    {TR_MP_PAUSE_MENU_MP_STATUS, "Multiplayer Status"},
 #endif
 };
 

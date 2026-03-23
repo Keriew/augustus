@@ -5,6 +5,7 @@
 #include "transport_tcp.h"
 #include "transport_udp.h"
 #include "serialize.h"
+#include "discovery_lan.h"
 #include "multiplayer/player_registry.h"
 #include "multiplayer/ownership.h"
 #include "multiplayer/empire_sync.h"
@@ -856,6 +857,9 @@ int net_session_host(const char *player_name, uint16_t port)
     mp_player_registry_set_connection_state(0, MP_CONNECTION_CONNECTED);
     mp_player_registry_assign_slot(0);
 
+    /* Start LAN discovery broadcasting so clients can find this host */
+    net_discovery_start_announcing(player_name, port, 1, NET_MAX_PLAYERS, session.session_id);
+
     log_info("Hosting session", player_name, (int)port);
     return 1;
 }
@@ -970,6 +974,10 @@ void net_session_disconnect(void)
             net_peer_reset(&session.host_peer);
         }
     }
+
+    /* Stop LAN discovery */
+    net_discovery_stop_announcing();
+    net_discovery_stop_listening();
 
     if (session.udp_fd >= 0) {
         net_udp_close(session.udp_fd);

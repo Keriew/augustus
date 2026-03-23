@@ -28,6 +28,30 @@
 #include "window/select_campaign.h"
 #include "window/video.h"
 
+#ifdef ENABLE_MULTIPLAYER
+#include "window/multiplayer_menu.h"
+
+#define MAX_BUTTONS 7
+
+static void button_click(const generic_button *button);
+
+static struct {
+    unsigned int focus_button_id;
+    int logo_image_id;
+} data;
+
+static generic_button buttons[] = {
+    {192, 130, 256, 25, button_click, 0, 1},
+    {192, 164, 256, 25, button_click, 0, 2},
+    {192, 198, 256, 25, button_click, 0, 3},
+    {192, 232, 256, 25, button_click, 0, 4},
+    {192, 266, 256, 25, button_click, 0, 5},
+    {192, 300, 256, 25, button_click, 0, 6},
+    {192, 334, 256, 25, button_click, 0, 7},
+};
+
+#else
+
 #define MAX_BUTTONS 6
 
 static void button_click(const generic_button *button);
@@ -45,6 +69,8 @@ static generic_button buttons[] = {
     {192, 290, 256, 25, button_click, 0, 5},
     {192, 330, 256, 25, button_click, 0, 6},
 };
+
+#endif
 
 static void draw_version_string(void)
 {
@@ -88,12 +114,22 @@ static void draw_foreground(void)
             data.focus_button_id == i + 1 ? 1 : 0);
     }
 
+#ifdef ENABLE_MULTIPLAYER
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_MAIN_MENU_SELECT_CAMPAIGN, 192, 137, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(30, 2, 192, 171, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(30, 3, 192, 205, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(9, 8, 192, 239, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_MP_MENU_BUTTON_MULTIPLAYER, 192, 273, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(2, 0, 192, 307, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(30, 5, 192, 341, 256, FONT_NORMAL_GREEN);
+#else
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_MAIN_MENU_SELECT_CAMPAIGN, 192, 137, 256, FONT_NORMAL_GREEN);
     lang_text_draw_centered(30, 2, 192, 177, 256, FONT_NORMAL_GREEN);
     lang_text_draw_centered(30, 3, 192, 217, 256, FONT_NORMAL_GREEN);
     lang_text_draw_centered(9, 8, 192, 257, 256, FONT_NORMAL_GREEN);
     lang_text_draw_centered(2, 0, 192, 297, 256, FONT_NORMAL_GREEN);
     lang_text_draw_centered(30, 5, 192, 337, 256, FONT_NORMAL_GREEN);
+#endif
 
     graphics_reset_dialog();
 }
@@ -137,11 +173,21 @@ static void button_click(const generic_button *button)
             if (config_get(CONFIG_UI_SHOW_INTRO_VIDEO)) window_video_show("map_intro.smk", window_editor_map_show);
             sound_music_play_editor();
         }
+#ifdef ENABLE_MULTIPLAYER
+    } else if (type == 5) {
+        window_multiplayer_menu_show();
+    } else if (type == 6) {
+        window_config_show(CONFIG_FIRST_PAGE, 0, 1);
+    } else if (type == 7) {
+        window_popup_dialog_show(POPUP_DIALOG_QUIT, confirm_exit, 1);
+    }
+#else
     } else if (type == 5) {
         window_config_show(CONFIG_FIRST_PAGE, 0, 1);
     } else if (type == 6) {
         window_popup_dialog_show(POPUP_DIALOG_QUIT, confirm_exit, 1);
     }
+#endif
 }
 
 void window_main_menu_show(int restart_music)
