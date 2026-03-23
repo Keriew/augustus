@@ -214,8 +214,8 @@ void game_tick_run(void)
 
 #ifdef ENABLE_MULTIPLAYER
     if (net_session_is_active()) {
-        /* Update network state every frame */
-        net_session_update();
+        /* Network I/O is now handled per-frame in multiplayer_runtime_update()
+         * (called from game_run), so we do NOT call net_session_update() here. */
 
         if (net_session_is_in_game()) {
             /* Check if we're allowed to advance the simulation */
@@ -232,7 +232,7 @@ void game_tick_run(void)
                     multiplayer_time_get_authoritative_tick());
             }
         } else {
-            /* In lobby - just handle network, don't advance game */
+            /* In lobby - don't advance game simulation */
             return;
         }
     }

@@ -63,7 +63,7 @@ static void button_host(const generic_button *button)
         net_session_init();
     }
 
-    if (net_session_host("Player", NET_DEFAULT_PORT)) {
+    if (net_session_host(net_session_get_local_name(), NET_DEFAULT_PORT)) {
         MP_LOG_INFO("UI", "Host created successfully — transitioning to lobby");
         window_multiplayer_lobby_show();
     } else {

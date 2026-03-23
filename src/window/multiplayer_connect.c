@@ -14,6 +14,7 @@
 #include "input/input.h"
 #include "multiplayer/mp_debug_log.h"
 #include "network/discovery_lan.h"
+#include "network/protocol.h"
 #include "network/session.h"
 #include "translation/translation.h"
 #include "widget/input_box.h"
@@ -76,6 +77,8 @@ static struct {
     unsigned int focus_button_id;
     int is_connecting;
     uint32_t connecting_start_ms;
+    uint8_t reject_reason;
+    int timed_out;
 } data;
 
 static input_box address_input = {
@@ -120,8 +123,13 @@ static void try_connect(const char *address)
         snprintf(host, sizeof(host), "%s", address);
     }
 
+    /* Clear previous error state */
+    data.reject_reason = 0;
+    data.timed_out = 0;
+    net_session_clear_join_status();
+
     MP_LOG_INFO("UI", "Attempting connection to %s:%d", host, (int)port);
-    if (net_session_join("Player", host, port)) {
+    if (net_session_join(net_session_get_local_name(), host, port)) {
         data.is_connecting = 1;
         MP_LOG_INFO("UI", "Connection initiated — waiting for handshake");
         window_invalidate();
@@ -246,6 +254,27 @@ static void draw_foreground(void)
             CONNECT_BUTTON_X, CONNECT_BUTTON_Y + 5, BUTTON_WIDTH, FONT_NORMAL_GREEN);
     }
 
+    /* Show rejection or timeout status messages */
+    if (data.reject_reason) {
+        const char *reason_text = "Connection rejected";
+        switch (data.reject_reason) {
+            case NET_REJECT_VERSION_MISMATCH: reason_text = "Version mismatch"; break;
+            case NET_REJECT_SESSION_FULL: reason_text = "Session full"; break;
+            case NET_REJECT_GAME_IN_PROGRESS: reason_text = "Game in progress"; break;
+            case NET_REJECT_NAME_TAKEN: reason_text = "Name already taken"; break;
+            case NET_REJECT_BANNED: reason_text = "Banned"; break;
+        }
+        uint8_t reject_buf[64];
+        string_copy(string_from_ascii(reason_text), reject_buf, 64);
+        text_draw_centered(reject_buf, PANEL_X, INPUT_Y + 36,
+            PANEL_WIDTH_BLOCKS * 16, FONT_NORMAL_RED, 0);
+    } else if (data.timed_out) {
+        uint8_t timeout_buf[64];
+        string_copy(string_from_ascii("Connection timed out"), timeout_buf, 64);
+        text_draw_centered(timeout_buf, PANEL_X, INPUT_Y + 36,
+            PANEL_WIDTH_BLOCKS * 16, FONT_NORMAL_RED, 0);
+    }
+
     /* Back button */
     large_label_draw(BACK_BUTTON_X, BACK_BUTTON_Y,
         BUTTON_WIDTH / 16, data.focus_button_id == 2 ? 1 : 0);
@@ -270,21 +299,41 @@ static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
 
-    /* Check if connection succeeded */
+    /* Check if connection succeeded, was rejected, or timed out */
     if (data.is_connecting) {
-        net_session_state state = net_session_get_state();
-        if (state == NET_SESSION_CLIENT_LOBBY) {
+        net_join_status jstatus = net_session_get_join_status();
+
+        if (jstatus == NET_JOIN_STATUS_CONNECTED) {
             MP_LOG_INFO("UI", "Connection succeeded — transitioning to lobby");
             data.is_connecting = 0;
+            net_session_clear_join_status();
             input_box_stop(&address_input);
             net_discovery_stop_listening();
             window_multiplayer_lobby_show();
             return;
         }
-        if (state == NET_SESSION_IDLE) {
-            /* Connection failed or rejected */
+
+        if (jstatus == NET_JOIN_STATUS_REJECTED) {
+            uint8_t reason = net_session_get_reject_reason();
+            MP_LOG_WARN("UI", "Connection rejected: reason=%d", (int)reason);
+            data.is_connecting = 0;
+            data.reject_reason = reason;
+            net_session_clear_join_status();
+            window_invalidate();
+        } else if (jstatus == NET_JOIN_STATUS_TIMEOUT) {
+            MP_LOG_WARN("UI", "Connection timed out");
+            data.is_connecting = 0;
+            data.timed_out = 1;
+            net_session_clear_join_status();
+            window_invalidate();
+        }
+
+        net_session_state state = net_session_get_state();
+        if (state == NET_SESSION_IDLE && data.is_connecting) {
+            /* Connection failed at TCP level */
             MP_LOG_WARN("UI", "Connection failed — session returned to IDLE");
             data.is_connecting = 0;
+            net_session_clear_join_status();
             window_invalidate();
         }
     }
@@ -310,8 +359,8 @@ static void handle_input(const mouse *m, const hotkeys *h)
         button_back(0);
     }
 
-    /* Refresh discovery */
-    net_discovery_update();
+    /* Discovery is updated globally in multiplayer_runtime_update().
+     * Just refresh the list box to reflect any newly discovered hosts. */
     list_box_request_refresh(&server_list);
 }
 

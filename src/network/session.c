@@ -19,6 +19,17 @@
 
 static net_session session;
 
+/* Persistent player name — survives session init/shutdown cycles */
+static char persistent_player_name[NET_MAX_PLAYER_NAME] = "Player";
+static int persistent_name_set;
+
+/* Join status tracking for UI feedback */
+static net_join_status join_status;
+static uint8_t join_reject_reason;
+static uint32_t join_start_ms;
+
+#define NET_JOIN_TIMEOUT_MS 10000 /* 10 seconds to complete handshake */
+
 /* Chat message ring buffer for client-side display */
 #define MP_CHAT_HISTORY_SIZE 64
 #define MP_CHAT_MESSAGE_MAX 128
@@ -576,6 +587,7 @@ static void handle_host_message(const net_packet_header *header,
 
             session.host_peer.state = PEER_STATE_JOINED;
             session.state = NET_SESSION_CLIENT_LOBBY;
+            join_status = NET_JOIN_STATUS_CONNECTED;
 
             MP_LOG_INFO("HANDSHAKE", "JOIN_ACCEPT received: player_id=%d slot=%d "
                         "session=0x%08x seed=%u player_count=%d",
@@ -616,7 +628,9 @@ static void handle_host_message(const net_packet_header *header,
                 }
                 MP_LOG_ERROR("HANDSHAKE", "JOIN_REJECT received: reason=%s (%d)", reason_str, (int)reason);
                 log_error("Join rejected", reason_str, reason);
+                join_reject_reason = reason;
             }
+            join_status = NET_JOIN_STATUS_REJECTED;
             session.state = NET_SESSION_DISCONNECTING;
             break;
         }
@@ -786,7 +800,17 @@ static void client_process_host(void)
     uint32_t now = net_tcp_get_timestamp_ms();
     uint8_t recv_buf[4096];
 
-    /* Check timeout */
+    /* Check handshake timeout while joining */
+    if (session.state == NET_SESSION_JOINING &&
+        join_start_ms > 0 && (now - join_start_ms) > NET_JOIN_TIMEOUT_MS) {
+        MP_LOG_ERROR("HANDSHAKE", "Join handshake timed out after %u ms", now - join_start_ms);
+        log_error("Join handshake timed out", 0, 0);
+        join_status = NET_JOIN_STATUS_TIMEOUT;
+        session.state = NET_SESSION_DISCONNECTING;
+        return;
+    }
+
+    /* Check timeout for established connections */
     if (peer->state != PEER_STATE_CONNECTING &&
         peer->state != PEER_STATE_HELLO_SENT &&
         net_peer_is_timed_out(peer, now)) {
@@ -845,6 +869,7 @@ int net_session_init(void)
         return 0;
     }
     net_udp_init();
+    net_discovery_init();
 
     mp_debug_log_init();
     log_info("Network session system initialized", 0, 0);
@@ -856,6 +881,7 @@ void net_session_shutdown(void)
 {
     MP_LOG_INFO("SESSION", "Session shutdown");
     net_session_disconnect();
+    net_discovery_shutdown();
     net_tcp_shutdown();
     net_udp_shutdown();
     mp_debug_log_shutdown();
@@ -948,7 +974,14 @@ int net_session_join(const char *player_name, const char *host_address, uint16_t
     session.host_peer.state = PEER_STATE_HELLO_SENT;
     session.host_peer.last_heartbeat_recv_ms = net_tcp_get_timestamp_ms();
 
-    /* Send extended HELLO with UUID (if reconnecting) and protocol info */
+    /* Track join status for UI feedback */
+    join_status = NET_JOIN_STATUS_CONNECTING;
+    join_reject_reason = 0;
+    join_start_ms = net_tcp_get_timestamp_ms();
+
+    /* Send extended HELLO with UUID (if reconnecting) and protocol info.
+     * Use a zeroed buffer for the player name to avoid reading past
+     * the source string if it's shorter than NET_MAX_PLAYER_NAME. */
     uint8_t hello_buf[128];
     net_serializer s;
     net_serializer_init(&s, hello_buf, sizeof(hello_buf));
@@ -958,7 +991,12 @@ int net_session_join(const char *player_name, const char *host_address, uint16_t
     net_write_u32(&s, 0); /* map_hash */
     net_write_u32(&s, 0); /* scenario_hash */
     net_write_u32(&s, 0); /* feature_flags */
-    net_write_raw(&s, player_name, NET_MAX_PLAYER_NAME);
+
+    /* Fixed-size name field: zero-padded to NET_MAX_PLAYER_NAME bytes */
+    char name_buf[NET_MAX_PLAYER_NAME];
+    memset(name_buf, 0, sizeof(name_buf));
+    strncpy(name_buf, player_name, NET_MAX_PLAYER_NAME - 1);
+    net_write_raw(&s, name_buf, NET_MAX_PLAYER_NAME);
 
     /* If we have a previous UUID (for reconnect), send it */
     mp_player *local = mp_player_registry_get_local();
@@ -1336,6 +1374,48 @@ int net_session_send_chat(const char *message)
         net_session_send_to_host(NET_MSG_CHAT, buf, (uint32_t)net_serializer_position(&s));
     }
     return 1;
+}
+
+/* ---- Player name management ---- */
+
+void net_session_set_local_name(const char *name)
+{
+    if (!name || !name[0]) {
+        return;
+    }
+    strncpy(persistent_player_name, name, NET_MAX_PLAYER_NAME - 1);
+    persistent_player_name[NET_MAX_PLAYER_NAME - 1] = '\0';
+    persistent_name_set = 1;
+
+    /* Also update the active session name if one exists */
+    if (session.state != NET_SESSION_IDLE) {
+        strncpy(session.local_player_name, persistent_player_name, NET_MAX_PLAYER_NAME - 1);
+        session.local_player_name[NET_MAX_PLAYER_NAME - 1] = '\0';
+    }
+}
+
+const char *net_session_get_local_name(void)
+{
+    return persistent_player_name;
+}
+
+/* ---- Join status tracking ---- */
+
+net_join_status net_session_get_join_status(void)
+{
+    return join_status;
+}
+
+uint8_t net_session_get_reject_reason(void)
+{
+    return join_reject_reason;
+}
+
+void net_session_clear_join_status(void)
+{
+    join_status = NET_JOIN_STATUS_NONE;
+    join_reject_reason = 0;
+    join_start_ms = 0;
 }
 
 #endif /* ENABLE_MULTIPLAYER */

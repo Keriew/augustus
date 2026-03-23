@@ -192,6 +192,7 @@ static void button_start(const generic_button *button)
 static void button_leave(const generic_button *button)
 {
     net_session_disconnect();
+    net_session_clear_join_status();
     window_go_back();
 }
 

@@ -109,12 +109,30 @@ int net_session_all_peers_ready(void);
 /* Access to session for multiplayer integration */
 net_session *net_session_get(void);
 
+/* Player name management */
+void net_session_set_local_name(const char *name);
+const char *net_session_get_local_name(void);
+
 /* Chat API (out-of-simulation, relayed through host) */
 int net_session_send_chat(const char *message);
 int net_session_chat_get_count(void);
 const char *net_session_chat_get_message(int index, uint8_t *out_sender_id);
 int net_session_chat_get_unread(void);
 void net_session_chat_mark_read(void);
+
+/* Join rejection reason (set on JOIN_REJECT, cleared on next join attempt) */
+typedef enum {
+    NET_JOIN_STATUS_NONE = 0,
+    NET_JOIN_STATUS_CONNECTING,
+    NET_JOIN_STATUS_CONNECTED,
+    NET_JOIN_STATUS_REJECTED,
+    NET_JOIN_STATUS_TIMEOUT,
+    NET_JOIN_STATUS_FAILED
+} net_join_status;
+
+net_join_status net_session_get_join_status(void);
+uint8_t net_session_get_reject_reason(void);
+void net_session_clear_join_status(void);
 
 #endif /* ENABLE_MULTIPLAYER */
 

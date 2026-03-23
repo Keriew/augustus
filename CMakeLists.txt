@@ -783,6 +783,7 @@ if(ENABLE_MULTIPLAYER)
         ${PROJECT_SOURCE_DIR}/src/multiplayer/session_save.c
         ${PROJECT_SOURCE_DIR}/src/multiplayer/worldgen.c
         ${PROJECT_SOURCE_DIR}/src/multiplayer/mp_debug_log.c
+        ${PROJECT_SOURCE_DIR}/src/multiplayer/runtime.c
         ${PROJECT_SOURCE_DIR}/src/window/multiplayer_menu.c
         ${PROJECT_SOURCE_DIR}/src/window/multiplayer_connect.c
         ${PROJECT_SOURCE_DIR}/src/window/multiplayer_lobby.c

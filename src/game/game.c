@@ -38,6 +38,10 @@
 #include "window/logo.h"
 #include "window/main_menu.h"
 
+#ifdef ENABLE_MULTIPLAYER
+#include "multiplayer/runtime.h"
+#endif
+
 static void errlog(const char *msg)
 {
     log_error(msg, 0, 0);
@@ -199,6 +203,13 @@ int game_reload_language(void)
 
 void game_run(void)
 {
+#ifdef ENABLE_MULTIPLAYER
+    /* Process network I/O every frame, regardless of simulation state.
+     * This ensures handshakes, discovery, and heartbeats work even when
+     * the game is in lobby/connect/menu windows where ticks don't run. */
+    multiplayer_runtime_update();
+#endif
+
     game_animation_update();
     int num_ticks = game_speed_get_elapsed_ticks();
     for (int i = 0; i < num_ticks; i++) {
@@ -230,6 +241,9 @@ void game_display_fps(int fps)
 
 void game_exit(void)
 {
+#ifdef ENABLE_MULTIPLAYER
+    multiplayer_runtime_shutdown();
+#endif
     video_shutdown();
     settings_save();
     config_save();
