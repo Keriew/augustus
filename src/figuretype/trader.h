@@ -41,4 +41,10 @@ int figure_trader_ship_other_ship_closer_to_dock(unsigned int dock_id, int dista
 
 #define IMAGE_CAMEL 4922
 
+#ifdef ENABLE_MULTIPLAYER
+int figure_trade_is_authoritative(const figure *f);
+void figure_trade_apply_host_result(int figure_id, int resource, int amount, int buying);
+void figure_trade_emit_event_if_host(const figure *f, int event_type);
+#endif
+
 #endif // FIGURETYPE_TRADER_H

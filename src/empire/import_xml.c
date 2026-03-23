@@ -23,7 +23,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef ENABLE_MULTIPLAYER
+#define XML_TOTAL_ELEMENTS 20
+#else
 #define XML_TOTAL_ELEMENTS 19
+#endif
 #define BASE_BORDER_FLAG_IMAGE_ID 3323
 #define BORDER_EDGE_DEFAULT_SPACING 50
 
@@ -92,6 +96,10 @@ static void xml_end_sells_buys_or_waypoints(void);
 static void xml_end_invasion_path(void);
 static void xml_end_distant_battle_path(void);
 
+#ifdef ENABLE_MULTIPLAYER
+static int xml_start_multiplayer(void);
+#endif
+
 static int xml_read_info(void);
 
 static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
@@ -114,6 +122,9 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "distant_battle_paths", 0, 0, "empire" },
     { "path", xml_start_distant_battle_path, xml_end_distant_battle_path, "distant_battle_paths" },
     { "waypoint", xml_start_distant_battle_waypoint, 0, "path" },
+#ifdef ENABLE_MULTIPLAYER
+    { "multiplayer", xml_start_multiplayer, 0, "city" },
+#endif
 };
 
 static const xml_parser_element xml_info_elements[XML_TOTAL_ELEMENTS] = {
@@ -789,3 +800,39 @@ const char *empire_xml_read_info(void)
 {
     return data.info_filename;
 }
+
+#ifdef ENABLE_MULTIPLAYER
+
+static int xml_start_multiplayer(void)
+{
+    if (data.info_only) {
+        return 1;
+    }
+
+    full_empire_object *city_obj = empire_object_get(data.current_city_id);
+    if (!city_obj) {
+        return 1;
+    }
+
+    int slot = xml_parser_get_attribute_int("slot");
+    int host_start = xml_parser_get_attribute_bool("host_start");
+    int allow_human = xml_parser_get_attribute_bool("allow_human");
+
+    /* Store multiplayer metadata in the empire city */
+    int city_data_id = empire_city_get_for_object(data.current_city_id);
+    if (city_data_id >= 0) {
+        empire_city *city = empire_city_get(city_data_id);
+        if (city && city->in_use) {
+            /* Use replicated_flags to store the player slot for now.
+               Bit layout: bits 0-7 = slot, bit 8 = host_start, bit 9 = allow_human */
+            city->replicated_flags = (slot & 0xFF)
+                                   | (host_start ? 0x100 : 0)
+                                   | (allow_human ? 0x200 : 0);
+        }
+    }
+
+    log_info("Multiplayer city slot parsed", 0, slot);
+    return 1;
+}
+
+#endif /* ENABLE_MULTIPLAYER */

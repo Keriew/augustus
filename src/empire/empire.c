@@ -17,6 +17,9 @@
 #include "empire/city.h"
 #include "empire/object.h"
 #include "empire/trade_route.h"
+#ifdef ENABLE_MULTIPLAYER
+#include "multiplayer/empire_sync.h"
+#endif
 #include "game/campaign.h"
 #include "game/save_version.h"
 #include "scenario/empire.h"
@@ -328,6 +331,12 @@ int empire_can_export_resource_to_city(int city_id, int resource)
     if (!resource_is_storable(resource)) {
         return 0;
     }
+#ifdef ENABLE_MULTIPLAYER
+    /* For remote player cities, use the replicated trade view */
+    if (empire_city_is_remote_player_city(city_id)) {
+        return empire_can_export_resource_to_remote_city(city_id, resource);
+    }
+#endif
     empire_city *city = empire_city_get(city_id);
     if (city_id && trade_route_limit_reached(city->route_id, resource, 1)) {
         // quota reached
@@ -370,6 +379,12 @@ int empire_can_import_resource_from_city(int city_id, int resource)
     if (!resource_is_storable(resource)) {
         return 0;
     }
+#ifdef ENABLE_MULTIPLAYER
+    /* For remote player cities, use the replicated trade view */
+    if (empire_city_is_remote_player_city(city_id)) {
+        return empire_can_import_resource_from_remote_city(city_id, resource);
+    }
+#endif
     empire_city *city = empire_city_get(city_id);
     if (!city->sells_resource[resource]) {
         return 0;
@@ -478,3 +493,109 @@ void empire_load_custom_map(buffer *buf)
 
     empire_set_custom_map(path, offset_x, offset_y, width, height);
 }
+
+#ifdef ENABLE_MULTIPLAYER
+
+void empire_register_remote_player_city(int city_id, int player_id,
+                                         int empire_object_id)
+{
+    empire_city *city = empire_city_get(city_id);
+    if (!city || !city->in_use) {
+        return;
+    }
+    city->owner_type = CITY_OWNER_REMOTE;
+    city->owner_player_id = player_id;
+    city->remote_online = 1;
+
+    mp_empire_sync_register_player_city(city_id, (uint8_t)player_id, empire_object_id);
+}
+
+void empire_unregister_remote_player_city(int player_id)
+{
+    int array_size = empire_city_get_array_size();
+    for (int i = 0; i < array_size; i++) {
+        empire_city *city = empire_city_get(i);
+        if (city && city->in_use && city->owner_player_id == player_id &&
+            city->owner_type == CITY_OWNER_REMOTE) {
+            city->remote_online = 0;
+        }
+    }
+    mp_empire_sync_unregister_player_city((uint8_t)player_id);
+}
+
+int empire_get_city_id_for_player(int player_id)
+{
+    int array_size = empire_city_get_array_size();
+    for (int i = 0; i < array_size; i++) {
+        empire_city *city = empire_city_get(i);
+        if (city && city->in_use && city->owner_player_id == player_id &&
+            empire_city_is_player_owned(i)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void empire_apply_remote_city_trade_view(int city_id, const int *exportable,
+                                          const int *importable, int resource_count)
+{
+    empire_city *city = empire_city_get(city_id);
+    if (!city || !city->in_use) {
+        return;
+    }
+    /* Update the city's buys/sells based on the replicated trade view.
+       In multiplayer, a remote player's "buys" are what they want to import,
+       and their "sells" are what they export. */
+    for (int r = 0; r < resource_count && r < RESOURCE_MAX; r++) {
+        city->buys_resource[r] = importable[r];
+        city->sells_resource[r] = exportable[r];
+    }
+}
+
+int empire_can_export_resource_to_remote_city(int city_id, int resource)
+{
+    /* For remote cities, defer to the replicated trade view */
+    const mp_city_trade_view *view = mp_empire_sync_get_trade_view(city_id);
+    if (!view || !view->online) {
+        return 0;
+    }
+    if (resource < RESOURCE_MIN || resource >= RESOURCE_MAX) {
+        return 0;
+    }
+    /* Can we export if the remote city can import this resource? */
+    if (!view->importable[resource]) {
+        return 0;
+    }
+    /* Check our local stock and trade status */
+    int in_stock;
+    if (!resource_is_food(resource) || config_get(CONFIG_GP_CH_ALLOW_EXPORTING_FROM_GRANARIES)) {
+        in_stock = city_resource_get_total_amount(resource, 1);
+    } else {
+        in_stock = city_resource_count_warehouses_amount(resource);
+    }
+    if (in_stock <= city_resource_export_over(resource)) {
+        return 0;
+    }
+    return (city_resource_trade_status((resource_type)resource) & TRADE_STATUS_EXPORT) == TRADE_STATUS_EXPORT;
+}
+
+int empire_can_import_resource_from_remote_city(int city_id, int resource)
+{
+    const mp_city_trade_view *view = mp_empire_sync_get_trade_view(city_id);
+    if (!view || !view->online) {
+        return 0;
+    }
+    if (resource < RESOURCE_MIN || resource >= RESOURCE_MAX) {
+        return 0;
+    }
+    /* Can we import if the remote city can export this resource? */
+    if (!view->exportable[resource]) {
+        return 0;
+    }
+    if (!(city_resource_trade_status(resource) & TRADE_STATUS_IMPORT)) {
+        return 0;
+    }
+    return 1;
+}
+
+#endif /* ENABLE_MULTIPLAYER */

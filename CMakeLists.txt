@@ -12,6 +12,7 @@ option(DRAW_HIGHWAY_TERRAIN "Draw highway debug information." OFF)
 option(DRAW_ROAD_NETWORK_IDS "Draw road network IDs for debugging." OFF)
 option(DRAW_TILE_COORDS "Draw tile coordinates." OFF)
 option(AV1_VIDEO_SUPPORT "Enable AV1 video support." OFF)
+option(ENABLE_MULTIPLAYER "Enable experimental LAN multiplayer" OFF)
 
 if(${TARGET_PLATFORM} STREQUAL "vita" AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if(DEFINED ENV{VITASDK})
@@ -209,6 +210,9 @@ if(DRAW_TILE_COORDS)
 endif()
 if(DRAW_ROAD_NETWORK_IDS)
     add_definitions(-DDRAW_ROAD_NETWORK_IDS)
+endif()
+if(ENABLE_MULTIPLAYER)
+    add_definitions(-DENABLE_MULTIPLAYER)
 endif()
 
 set(ASSETS_DIR ${PROJECT_SOURCE_DIR}/res/assets)
@@ -752,6 +756,37 @@ set(TRANSLATION_FILES
     ${PROJECT_SOURCE_DIR}/src/translation/ukrainian.c
 )
 
+set(NETWORK_FILES "")
+set(MULTIPLAYER_FILES "")
+if(ENABLE_MULTIPLAYER)
+    set(NETWORK_FILES
+        ${PROJECT_SOURCE_DIR}/src/network/protocol.c
+        ${PROJECT_SOURCE_DIR}/src/network/serialize.c
+        ${PROJECT_SOURCE_DIR}/src/network/packet_codec.c
+        ${PROJECT_SOURCE_DIR}/src/network/peer.c
+        ${PROJECT_SOURCE_DIR}/src/network/transport_tcp.c
+        ${PROJECT_SOURCE_DIR}/src/network/transport_udp.c
+        ${PROJECT_SOURCE_DIR}/src/network/session.c
+        ${PROJECT_SOURCE_DIR}/src/network/discovery_lan.c
+    )
+    set(MULTIPLAYER_FILES
+        ${PROJECT_SOURCE_DIR}/src/multiplayer/player_registry.c
+        ${PROJECT_SOURCE_DIR}/src/multiplayer/ownership.c
+        ${PROJECT_SOURCE_DIR}/src/multiplayer/command_bus.c
+        ${PROJECT_SOURCE_DIR}/src/multiplayer/command_types.c
+        ${PROJECT_SOURCE_DIR}/src/multiplayer/snapshot.c
+        ${PROJECT_SOURCE_DIR}/src/multiplayer/checksum.c
+        ${PROJECT_SOURCE_DIR}/src/multiplayer/empire_sync.c
+        ${PROJECT_SOURCE_DIR}/src/multiplayer/trade_sync.c
+        ${PROJECT_SOURCE_DIR}/src/multiplayer/time_sync.c
+        ${PROJECT_SOURCE_DIR}/src/multiplayer/resync.c
+        ${PROJECT_SOURCE_DIR}/src/multiplayer/session_save.c
+        ${PROJECT_SOURCE_DIR}/src/window/multiplayer_connect.c
+        ${PROJECT_SOURCE_DIR}/src/window/multiplayer_lobby.c
+        ${PROJECT_SOURCE_DIR}/src/window/multiplayer_status.c
+    )
+endif()
+
 set(MACOSX_FILES "")
 if(APPLE)
     function(resource VAR SOURCE_PATH DESTINATION PATTERN)
@@ -813,6 +848,8 @@ set(SOURCE_FILES
     ${WINDOW_FILES}
     ${EDITOR_FILES}
     ${TRANSLATION_FILES}
+    ${NETWORK_FILES}
+    ${MULTIPLAYER_FILES}
     ${TINYFD_FILES}
     ${SPNG_FILES}
     ${SXML_FILES}
@@ -1112,6 +1149,9 @@ else()
 
     if(WIN32)
        target_link_libraries(${SHORT_NAME} dbghelp shlwapi)
+       if(ENABLE_MULTIPLAYER)
+           target_link_libraries(${SHORT_NAME} ws2_32)
+       endif()
     endif()
 
     if(UNIX AND NOT APPLE)

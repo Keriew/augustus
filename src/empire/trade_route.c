@@ -212,3 +212,105 @@ void trade_routes_migrate_to_buys_sells(buffer *limit, buffer *traded, int versi
         }
     }
 }
+
+#ifdef ENABLE_MULTIPLAYER
+
+#include <string.h>
+
+#define MAX_ROUTE_BINDINGS 200
+
+typedef struct {
+    int in_use;
+    int route_id;
+    int origin_player_id;
+    int destination_player_id;
+    trade_route_player_mode mode;
+    int network_route_id;
+} route_player_binding;
+
+static route_player_binding route_bindings[MAX_ROUTE_BINDINGS];
+
+static route_player_binding *find_binding(int route_id)
+{
+    for (int i = 0; i < MAX_ROUTE_BINDINGS; i++) {
+        if (route_bindings[i].in_use && route_bindings[i].route_id == route_id) {
+            return &route_bindings[i];
+        }
+    }
+    return NULL;
+}
+
+static route_player_binding *alloc_binding(int route_id)
+{
+    route_player_binding *existing = find_binding(route_id);
+    if (existing) {
+        return existing;
+    }
+    for (int i = 0; i < MAX_ROUTE_BINDINGS; i++) {
+        if (!route_bindings[i].in_use) {
+            memset(&route_bindings[i], 0, sizeof(route_player_binding));
+            route_bindings[i].in_use = 1;
+            route_bindings[i].route_id = route_id;
+            return &route_bindings[i];
+        }
+    }
+    return NULL;
+}
+
+int trade_route_is_player_to_player(int route_id)
+{
+    route_player_binding *b = find_binding(route_id);
+    return b && b->mode == ROUTE_MODE_PLAYER_TO_PLAYER;
+}
+
+void trade_route_bind_players(int route_id, int origin_player_id, int destination_player_id)
+{
+    route_player_binding *b = alloc_binding(route_id);
+    if (!b) {
+        return;
+    }
+    b->origin_player_id = origin_player_id;
+    b->destination_player_id = destination_player_id;
+
+    if (origin_player_id >= 0 && destination_player_id >= 0) {
+        b->mode = ROUTE_MODE_PLAYER_TO_PLAYER;
+    } else if (origin_player_id >= 0) {
+        b->mode = ROUTE_MODE_PLAYER_TO_AI;
+    } else {
+        b->mode = ROUTE_MODE_AI_TO_PLAYER;
+    }
+}
+
+int trade_route_get_network_id(int route_id)
+{
+    route_player_binding *b = find_binding(route_id);
+    return b ? b->network_route_id : 0;
+}
+
+void trade_route_set_network_id(int route_id, int network_route_id)
+{
+    route_player_binding *b = alloc_binding(route_id);
+    if (b) {
+        b->network_route_id = network_route_id;
+    }
+}
+
+int trade_route_get_origin_player(int route_id)
+{
+    route_player_binding *b = find_binding(route_id);
+    return b ? b->origin_player_id : -1;
+}
+
+int trade_route_get_dest_player(int route_id)
+{
+    route_player_binding *b = find_binding(route_id);
+    return b ? b->destination_player_id : -1;
+}
+
+trade_route_player_mode trade_route_get_player_mode(int route_id)
+{
+    route_player_binding *b = find_binding(route_id);
+    return b ? b->mode : ROUTE_MODE_AI_TO_PLAYER;
+}
+
+#endif /* ENABLE_MULTIPLAYER */

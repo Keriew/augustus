@@ -24,6 +24,14 @@ typedef enum {
     EMPIRE_CITY_FUTURE_ROMAN = 6,
 } empire_city_type;
 
+#ifdef ENABLE_MULTIPLAYER
+typedef enum {
+    CITY_OWNER_AI = 0,
+    CITY_OWNER_LOCAL = 1,
+    CITY_OWNER_REMOTE = 2
+} city_owner_type;
+#endif
+
 typedef enum {
     EMPIRE_CITY_ICON_DEFAULT, // not specified
     EMPIRE_CITY_ICON_CONSTRUCTION, // construction   Empire_Icon_Construction_01.png

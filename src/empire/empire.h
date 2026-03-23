@@ -43,4 +43,15 @@ void empire_load_custom_map(buffer *buf);
 
 void empire_clear(void);
 
+#ifdef ENABLE_MULTIPLAYER
+void empire_register_remote_player_city(int city_id, int player_id,
+                                         int empire_object_id);
+void empire_unregister_remote_player_city(int player_id);
+int empire_get_city_id_for_player(int player_id);
+void empire_apply_remote_city_trade_view(int city_id, const int *exportable,
+                                          const int *importable, int resource_count);
+int empire_can_export_resource_to_remote_city(int city_id, int resource);
+int empire_can_import_resource_from_remote_city(int city_id, int resource);
+#endif
+
 #endif // EMPIRE_EMPIRE_H

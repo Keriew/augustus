@@ -8,6 +8,9 @@
 #include "map/building.h"
 #include "map/tiles.h"
 #include "map/water_supply.h"
+#ifdef ENABLE_MULTIPLAYER
+#include "scenario/empire.h"
+#endif
 
 static struct {
     int paused;
@@ -26,6 +29,12 @@ void game_state_init(void)
     random_generate_pool();
 
     city_warning_clear_all();
+
+#ifdef ENABLE_MULTIPLAYER
+    if (scenario_empire_is_multiplayer_mode()) {
+        scenario_empire_multiplayer_init();
+    }
+#endif
 }
 
 int game_state_is_paused(void)

@@ -27,6 +27,11 @@
 #include "empire/object.h"
 #include "empire/trade_prices.h"
 #include "empire/trade_route.h"
+#ifdef ENABLE_MULTIPLAYER
+#include "multiplayer/trade_sync.h"
+#include "multiplayer/ownership.h"
+#include "network/session.h"
+#endif
 #include "figure/combat.h"
 #include "figure/image.h"
 #include "figure/movement.h"
@@ -1118,3 +1123,42 @@ int figure_trader_ship_other_ship_closer_to_dock(unsigned int dock_id, int dista
     }
     return 0;
 }
+
+#ifdef ENABLE_MULTIPLAYER
+
+int figure_trade_is_authoritative(const figure *f)
+{
+    /* Only the host performs authoritative trade operations.
+       Clients animate traders but never confirm economic mutations. */
+    return net_session_is_host() || !net_session_is_active();
+}
+
+void figure_trade_apply_host_result(int figure_id, int resource, int amount, int buying)
+{
+    /* Called on clients when the host sends a TRADER_TRADE_EXECUTED event.
+       Updates trade route counters to match the host's authoritative state. */
+    int route_id = mp_ownership_get_trader_route(figure_id);
+    if (route_id >= 0 && trade_route_is_valid(route_id)) {
+        trade_route_increase_traded(route_id, resource, buying);
+    }
+}
+
+void figure_trade_emit_event_if_host(const figure *f, int event_type)
+{
+    if (!net_session_is_active() || !net_session_is_host()) {
+        return;
+    }
+
+    switch (event_type) {
+        case 1: /* TRADER_SPAWNED */
+            mp_trade_sync_emit_trader_spawned(f->id, f->empire_city_id, -1);
+            break;
+        case 5: /* TRADER_DESPAWNED */
+            mp_trade_sync_emit_trader_despawned(f->id);
+            break;
+        default:
+            break;
+    }
+}
+
+#endif /* ENABLE_MULTIPLAYER */

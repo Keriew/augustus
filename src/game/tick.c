@@ -64,6 +64,15 @@
 #include "sound/music.h"
 #include "widget/minimap.h"
 
+#ifdef ENABLE_MULTIPLAYER
+#include "multiplayer/time_sync.h"
+#include "multiplayer/command_bus.h"
+#include "multiplayer/checksum.h"
+#include "multiplayer/empire_sync.h"
+#include "multiplayer/trade_sync.h"
+#include "network/session.h"
+#endif
+
 static void advance_year(void)
 {
     game_undo_disable();
@@ -202,6 +211,33 @@ void game_tick_run(void)
         figure_action_handle(); // just update the flag figures
         return;
     }
+
+#ifdef ENABLE_MULTIPLAYER
+    if (net_session_is_active()) {
+        /* Update network state every frame */
+        net_session_update();
+
+        if (net_session_is_in_game()) {
+            /* Check if we're allowed to advance the simulation */
+            if (!multiplayer_time_can_advance_tick()) {
+                /* Client is ahead of confirmed tick or game is paused.
+                   Still handle figure rendering/interpolation and local events. */
+                figure_action_handle();
+                return;
+            }
+
+            /* Host: process pending commands before advancing */
+            if (net_session_is_host()) {
+                mp_command_bus_process_pending(
+                    multiplayer_time_get_authoritative_tick());
+            }
+        } else {
+            /* In lobby - just handle network, don't advance game */
+            return;
+        }
+    }
+#endif
+
     random_generate_next();
     game_undo_reduce_time_available();
     advance_tick();
@@ -210,9 +246,49 @@ void game_tick_run(void)
     scenario_gladiator_revolt_process();
     scenario_emperor_change_process();
     city_victory_check();
+
+#ifdef ENABLE_MULTIPLAYER
+    if (net_session_is_active() && net_session_is_in_game()) {
+        multiplayer_time_on_tick_advanced();
+
+        if (net_session_is_host()) {
+            uint32_t tick = multiplayer_time_get_authoritative_tick();
+
+            /* Periodically update and broadcast trade views */
+            if (tick % 50 == 0) {
+                mp_empire_sync_update_trade_views();
+                mp_empire_sync_broadcast_views();
+            }
+
+            /* Periodic checksum verification */
+            if (mp_checksum_should_check(tick)) {
+                mp_checksum_request_from_clients(tick);
+            }
+        }
+    }
+#endif
 }
 
 void game_tick_cheat_year(void)
 {
     advance_year();
 }
+
+#ifdef ENABLE_MULTIPLAYER
+
+int multiplayer_time_can_advance_tick(void)
+{
+    return mp_time_sync_can_advance_tick();
+}
+
+void multiplayer_time_on_tick_advanced(void)
+{
+    mp_time_sync_on_tick_advanced();
+}
+
+uint32_t multiplayer_time_get_authoritative_tick(void)
+{
+    return mp_time_sync_get_authoritative_tick();
+}
+
+#endif /* ENABLE_MULTIPLAYER */

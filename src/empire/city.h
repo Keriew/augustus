@@ -20,6 +20,13 @@ typedef struct {
     int empire_object_id;
     int is_sea_trade;
     int trader_figure_ids[EMPIRE_CITY_MAX_TRADERS];
+#ifdef ENABLE_MULTIPLAYER
+    int owner_type;           /* city_owner_type: AI, LOCAL, REMOTE */
+    int owner_player_id;      /* player ID of the owner, -1 if AI */
+    int authoritative_city_id;/* city ID on the host for reference */
+    int replicated_flags;     /* bitmask of replicated state flags */
+    int remote_online;        /* 1 if the remote player is online */
+#endif
 } empire_city;
 
 void empire_city_clear_all(void);
@@ -112,5 +119,13 @@ int empire_city_get_array_size(void);
 int empire_city_get_icon_image_id(empire_city_icon_type type);
 
 int empire_city_get_at(int x, int y, const uint8_t *name);
+
+#ifdef ENABLE_MULTIPLAYER
+int empire_city_is_player_owned(int city_id);
+int empire_city_get_owner_player_id(int city_id);
+void empire_city_set_owner(int city_id, int owner_type, int player_id);
+int empire_city_is_remote_player_city(int city_id);
+int empire_city_can_trade_with_player(int city_id, int player_id);
+#endif
 
 #endif // EMPIRE_CITY_H

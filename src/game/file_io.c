@@ -66,6 +66,9 @@
 #include "scenario/scenario.h"
 #include "sound/city.h"
 #include "widget/minimap.h"
+#ifdef ENABLE_MULTIPLAYER
+#include "multiplayer/session_save.h"
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -232,6 +235,9 @@ typedef struct {
     buffer *building_model_data;
     buffer *rubble_grid;
     buffer *production_rates;
+#ifdef ENABLE_MULTIPLAYER
+    buffer *multiplayer_session;
+#endif
 } savegame_state;
 
 typedef struct {
@@ -292,6 +298,9 @@ typedef struct {
         int custom_model_data;
         int rubble_grid;
         int custom_production_rates;
+#ifdef ENABLE_MULTIPLAYER
+        int multiplayer_session;
+#endif
     } features;
 } savegame_version_data;
 
@@ -536,6 +545,9 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
     version_data->features.custom_model_data = version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA;
     version_data->features.rubble_grid = version > SAVE_GAME_LAST_U16_GRIDS;
     version_data->features.custom_production_rates = version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA;
+#ifdef ENABLE_MULTIPLAYER
+    version_data->features.multiplayer_session = version > SAVE_GAME_LAST_NO_MULTIPLAYER;
+#endif
 }
 
 static void init_savegame_data(savegame_version_t version)
@@ -713,6 +725,11 @@ static void init_savegame_data(savegame_version_t version)
     if (version_data.features.custom_production_rates) {
         state->production_rates = create_savegame_piece(PIECE_SIZE_DYNAMIC, 1);
     }
+#ifdef ENABLE_MULTIPLAYER
+    if (version_data.features.multiplayer_session) {
+        state->multiplayer_session = create_savegame_piece(PIECE_SIZE_DYNAMIC, 1);
+    }
+#endif
 }
 
 static void scenario_load_from_state(scenario_state *file, scenario_version_t version)
@@ -986,6 +1003,15 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     if (version <= SAVE_GAME_LAST_NO_EMPIRE_EDITOR) {
         scenario_events_migrate_to_buys_sells();
     }
+
+#ifdef ENABLE_MULTIPLAYER
+    if (version > SAVE_GAME_LAST_NO_MULTIPLAYER && state->multiplayer_session) {
+        if (state->multiplayer_session->size > 0) {
+            mp_session_load_from_buffer(state->multiplayer_session->data,
+                (uint32_t)state->multiplayer_session->size);
+        }
+    }
+#endif
 }
 
 static void savegame_save_to_state(savegame_state *state)
@@ -1077,6 +1103,16 @@ static void savegame_save_to_state(savegame_state *state)
     figure_visited_buildings_save_state(state->visited_buildings);
 
     production_rates_save(state->production_rates);
+
+#ifdef ENABLE_MULTIPLAYER
+    if (scenario_empire_is_multiplayer_mode()) {
+        uint8_t mp_buf[262144]; /* 256KB max */
+        uint32_t mp_size = 0;
+        if (mp_session_save_to_buffer(mp_buf, sizeof(mp_buf), &mp_size) && mp_size > 0) {
+            buffer_write_raw(state->multiplayer_session, mp_buf, mp_size);
+        }
+    }
+#endif
 }
 
 static int get_scenario_version(FILE *fp)

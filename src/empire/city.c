@@ -819,6 +819,65 @@ int empire_city_get_at(int x, int y, const uint8_t *name)
             }
         }
     }
-    
+
     return 0;
 }
+
+#ifdef ENABLE_MULTIPLAYER
+
+int empire_city_is_player_owned(int city_id)
+{
+    empire_city *city = empire_city_get(city_id);
+    if (!city || !city->in_use) {
+        return 0;
+    }
+    return city->owner_type == CITY_OWNER_LOCAL || city->owner_type == CITY_OWNER_REMOTE;
+}
+
+int empire_city_get_owner_player_id(int city_id)
+{
+    empire_city *city = empire_city_get(city_id);
+    if (!city || !city->in_use) {
+        return -1;
+    }
+    return city->owner_player_id;
+}
+
+void empire_city_set_owner(int city_id, int owner_type, int player_id)
+{
+    empire_city *city = empire_city_get(city_id);
+    if (!city || !city->in_use) {
+        return;
+    }
+    city->owner_type = owner_type;
+    city->owner_player_id = player_id;
+}
+
+int empire_city_is_remote_player_city(int city_id)
+{
+    empire_city *city = empire_city_get(city_id);
+    if (!city || !city->in_use) {
+        return 0;
+    }
+    return city->owner_type == CITY_OWNER_REMOTE;
+}
+
+int empire_city_can_trade_with_player(int city_id, int player_id)
+{
+    empire_city *city = empire_city_get(city_id);
+    if (!city || !city->in_use) {
+        return 0;
+    }
+    /* A city can trade with a player if:
+       1. The city is open for trade
+       2. The city is not owned by the same player */
+    if (!city->is_open) {
+        return 0;
+    }
+    if (city->owner_player_id == player_id && empire_city_is_player_owned(city_id)) {
+        return 0; /* Can't trade with yourself */
+    }
+    return 1;
+}
+
+#endif /* ENABLE_MULTIPLAYER */

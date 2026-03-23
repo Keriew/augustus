@@ -56,4 +56,22 @@ void trade_routes_load_state(buffer *trade_routes);
 
 void trade_routes_migrate_to_buys_sells(buffer *limit, buffer *traded, int version);
 
+#ifdef ENABLE_MULTIPLAYER
+
+typedef enum {
+    ROUTE_MODE_AI_TO_PLAYER = 0,
+    ROUTE_MODE_PLAYER_TO_AI,
+    ROUTE_MODE_PLAYER_TO_PLAYER
+} trade_route_player_mode;
+
+int trade_route_is_player_to_player(int route_id);
+void trade_route_bind_players(int route_id, int origin_player_id, int destination_player_id);
+int trade_route_get_network_id(int route_id);
+void trade_route_set_network_id(int route_id, int network_route_id);
+int trade_route_get_origin_player(int route_id);
+int trade_route_get_dest_player(int route_id);
+trade_route_player_mode trade_route_get_player_mode(int route_id);
+
+#endif /* ENABLE_MULTIPLAYER */
+
 #endif // EMPIRE_TRADE_ROUTE_H
