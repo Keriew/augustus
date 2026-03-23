@@ -3,6 +3,7 @@
 #include "multiplayer_connect.h"
 
 #include "core/string.h"
+#include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/lang_text.h"
@@ -17,6 +18,7 @@
 #include "widget/input_box.h"
 #include "window/multiplayer_lobby.h"
 
+#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -44,7 +46,7 @@
 
 static void button_connect(const generic_button *button);
 static void button_back(const generic_button *button);
-static void button_connect_lan(const generic_button *button);
+
 static void draw_server_item(const list_box_item *item);
 static void select_server(unsigned int index, int is_double_click);
 static void on_input_changed(int is_addition_at_end);
@@ -148,10 +150,6 @@ static void button_back(const generic_button *button)
     window_go_back();
 }
 
-static void button_connect_lan(const generic_button *button)
-{
-    /* Handled via list double-click */
-}
 
 static void draw_server_item(const list_box_item *item)
 {

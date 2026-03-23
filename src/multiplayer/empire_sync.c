@@ -6,12 +6,14 @@
 #include "player_registry.h"
 #include "trade_sync.h"
 #include "time_sync.h"
+#include "worldgen.h"
 #include "network/serialize.h"
 #include "network/session.h"
 #include "network/protocol.h"
 #include "empire/city.h"
 #include "empire/trade_route.h"
 #include "city/resource.h"
+#include "building/count.h"
 #include "building/dock.h"
 #include "core/log.h"
 
@@ -117,7 +119,7 @@ void mp_empire_sync_update_trade_views(void)
         }
 
         /* Update infrastructure status */
-        view->dock_available = city->is_sea_trade ? building_dock_count_available() > 0 : 0;
+        view->dock_available = city->is_sea_trade ? building_count_active(BUILDING_DOCK) > 0 : 0;
         view->land_route_available = !city->is_sea_trade;
     }
 
@@ -254,7 +256,8 @@ static void handle_route_lifecycle_event(uint16_t event_type, net_serializer *s)
     switch (event_type) {
         case NET_EVENT_ROUTE_CREATED: {
             /* Client-side: create ownership record to mirror host state */
-            int dest_city_id = net_read_i32(s);
+            /* dest_city_id read but used only on host side for route creation */
+            (void)net_read_i32(s);
             uint8_t dest_player_id = net_read_u8(s);
             uint8_t mode = net_read_u8(s);
 

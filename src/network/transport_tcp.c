@@ -3,7 +3,9 @@
 #ifdef ENABLE_MULTIPLAYER
 
 #include "core/log.h"
+#include "protocol.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #ifdef _WIN32

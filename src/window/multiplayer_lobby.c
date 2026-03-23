@@ -84,15 +84,6 @@ static void refresh_player_list(void)
     list_box_update_total_items(&player_list, data.player_count);
 }
 
-static const char *status_text_key(mp_player_status status)
-{
-    switch (status) {
-        case MP_PLAYER_READY: return 0;
-        case MP_PLAYER_IN_GAME: return 0;
-        case MP_PLAYER_DISCONNECTED: return 0;
-        default: return 0;
-    }
-}
 
 static translation_key status_translation(mp_player_status status)
 {

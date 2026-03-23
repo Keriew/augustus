@@ -216,10 +216,10 @@ static void handle_input(const mouse *m, const hotkeys *h)
     if (max_scroll_back < 0) {
         max_scroll_back = 0;
     }
-    if (m->scroll_delta.y > 0 && data.scroll_offset > -max_scroll_back) {
+    if (m->scrolled == SCROLL_UP && data.scroll_offset > -max_scroll_back) {
         data.scroll_offset--;
     }
-    if (m->scroll_delta.y < 0 && data.scroll_offset < 0) {
+    if (m->scrolled == SCROLL_DOWN && data.scroll_offset < 0) {
         data.scroll_offset++;
     }
 }

@@ -6,6 +6,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "protocol.h"
+
 /**
  * Network serialization with explicit endianness (little-endian wire format).
  * Never dumps raw structs - all fields are written individually with known sizes.
@@ -47,9 +49,6 @@ void net_read_string(net_serializer *s, char *dest, size_t max_len);
 /* Packet header serialization */
 void net_write_packet_header(net_serializer *s, const net_packet_header *header);
 void net_read_packet_header(net_serializer *s, net_packet_header *header);
-
-/* Forward declaration */
-#include "protocol.h"
 
 #endif /* ENABLE_MULTIPLAYER */
 

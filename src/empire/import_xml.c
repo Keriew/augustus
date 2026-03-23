@@ -809,7 +809,7 @@ static int xml_start_multiplayer(void)
         return 1;
     }
 
-    full_empire_object *city_obj = empire_object_get(data.current_city_id);
+    empire_object *city_obj = empire_object_get(data.current_city_id);
     if (!city_obj) {
         return 1;
     }
