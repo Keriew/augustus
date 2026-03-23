@@ -4,6 +4,11 @@
 
 #include "transport_tcp.h"
 #include "transport_udp.h"
+#include "serialize.h"
+#include "multiplayer/player_registry.h"
+#include "multiplayer/ownership.h"
+#include "multiplayer/empire_sync.h"
+#include "multiplayer/worldgen.h"
 #include "core/log.h"
 
 #include <string.h>
@@ -11,6 +16,23 @@
 #include <time.h>
 
 static net_session session;
+
+/* Chat message ring buffer for client-side display */
+#define MP_CHAT_HISTORY_SIZE 64
+#define MP_CHAT_MESSAGE_MAX 128
+
+typedef struct {
+    uint8_t sender_id;
+    char message[MP_CHAT_MESSAGE_MAX];
+    uint32_t timestamp_tick;
+} mp_chat_entry;
+
+static struct {
+    mp_chat_entry entries[MP_CHAT_HISTORY_SIZE];
+    int write_index;
+    int count;
+    int unread;
+} chat_history;
 
 static uint32_t generate_session_id(void)
 {
@@ -42,6 +64,45 @@ static void close_peer(int index)
     session.peer_count--;
 }
 
+static void handle_peer_disconnect(int peer_index)
+{
+    net_peer *peer = &session.peers[peer_index];
+    if (!peer->active) {
+        return;
+    }
+
+    uint8_t player_id = peer->player_id;
+
+    /* Mark player as disconnected in registry */
+    mp_player *player = mp_player_registry_get(player_id);
+    if (player && player->active) {
+        uint32_t timeout_ticks = 3000; /* ~5 minutes at normal speed */
+        mp_player_registry_mark_disconnected(player_id,
+            session.authoritative_tick, timeout_ticks);
+
+        /* Set all routes involving this player to offline */
+        mp_ownership_set_player_routes_offline(player_id);
+
+        /* Mark city offline in empire sync */
+        mp_empire_sync_unregister_player_city(player_id);
+        mp_ownership_set_city_online(player->assigned_city_id, 0);
+
+        /* Broadcast player disconnected event to remaining peers */
+        uint8_t event_buf[32];
+        net_serializer es;
+        net_serializer_init(&es, event_buf, sizeof(event_buf));
+        net_write_u16(&es, NET_EVENT_PLAYER_LEFT);
+        net_write_u32(&es, session.authoritative_tick);
+        net_write_u8(&es, player_id);
+        net_session_broadcast(NET_MSG_HOST_EVENT, event_buf,
+                              (uint32_t)net_serializer_position(&es));
+
+        log_info("Player disconnected, city frozen", peer->name, (int)player_id);
+    }
+
+    close_peer(peer_index);
+}
+
 static void send_raw_to_peer(net_peer *peer, uint16_t message_type,
                              const uint8_t *payload, uint32_t size)
 {
@@ -66,20 +127,127 @@ static void send_raw_to_peer(net_peer *peer, uint16_t message_type,
     peer->packets_sent++;
 }
 
+static int try_reconnect_player(net_peer *peer, const uint8_t *uuid,
+                                const uint8_t *reconnect_token)
+{
+    /* Check if a player with this UUID is awaiting reconnect */
+    mp_player *existing = mp_player_registry_get_by_uuid(uuid);
+    if (!existing || !existing->active) {
+        return 0;
+    }
+    if (existing->status != MP_PLAYER_AWAITING_RECONNECT &&
+        existing->connection_state != MP_CONNECTION_DISCONNECTED) {
+        return 0;
+    }
+
+    /* Validate reconnect token */
+    if (!mp_player_registry_validate_reconnect(uuid, reconnect_token)) {
+        log_error("Invalid reconnect token", 0, 0);
+        return 0;
+    }
+
+    /* Reconnect the player */
+    uint8_t old_player_id = existing->player_id;
+    int peer_index = -1;
+    for (int i = 0; i < NET_MAX_PEERS; i++) {
+        if (&session.peers[i] == peer) {
+            peer_index = i;
+            break;
+        }
+    }
+    if (peer_index < 0) {
+        return 0;
+    }
+
+    mp_player_registry_handle_reconnect(uuid, (uint8_t)peer_index);
+
+    /* Restore routes */
+    mp_ownership_set_player_routes_online(old_player_id);
+
+    /* Mark city back online */
+    if (existing->assigned_city_id >= 0) {
+        mp_ownership_set_city_online(existing->assigned_city_id, 1);
+    }
+
+    /* Update peer state */
+    strncpy(peer->name, existing->name, NET_MAX_PLAYER_NAME - 1);
+    peer->name[NET_MAX_PLAYER_NAME - 1] = '\0';
+    net_peer_set_player_id(peer, old_player_id);
+    peer->state = PEER_STATE_IN_GAME;
+
+    log_info("Player reconnected", existing->name, (int)old_player_id);
+
+    /* Send JOIN_ACCEPT with reconnect info */
+    uint8_t accept_buf[128];
+    net_serializer as;
+    net_serializer_init(&as, accept_buf, sizeof(accept_buf));
+    net_write_u8(&as, old_player_id);
+    net_write_u8(&as, existing->slot_id);
+    net_write_u32(&as, session.session_id);
+    net_write_u32(&as, mp_worldgen_get_spawn_table_mutable()->session_seed);
+    net_write_u8(&as, (uint8_t)(session.peer_count + 1));
+    net_write_raw(&as, existing->player_uuid, MP_PLAYER_UUID_SIZE);
+    net_write_raw(&as, existing->reconnect_token, MP_RECONNECT_TOKEN_SIZE);
+    send_raw_to_peer(peer, NET_MSG_JOIN_ACCEPT, accept_buf,
+                     (uint32_t)net_serializer_position(&as));
+
+    /* Broadcast reconnect event */
+    uint8_t event_buf[32];
+    net_serializer es;
+    net_serializer_init(&es, event_buf, sizeof(event_buf));
+    net_write_u16(&es, NET_EVENT_PLAYER_RECONNECTED);
+    net_write_u32(&es, session.authoritative_tick);
+    net_write_u8(&es, old_player_id);
+    net_session_broadcast(NET_MSG_HOST_EVENT, event_buf,
+                          (uint32_t)net_serializer_position(&es));
+
+    /* Send full snapshot to reconnecting player so they can resync */
+    extern void multiplayer_resync_handle_request(uint8_t player_id);
+    multiplayer_resync_handle_request(old_player_id);
+
+    return 1;
+}
+
 static void handle_hello(net_peer *peer, const uint8_t *payload, uint32_t size)
 {
     net_serializer s;
     net_serializer_init(&s, (uint8_t *)payload, size);
 
+    /* Read extended hello */
     uint32_t magic = net_read_u32(&s);
     uint16_t version = net_read_u16(&s);
+    uint32_t save_version = net_read_u32(&s);
+    uint32_t map_hash = net_read_u32(&s);
+    uint32_t scenario_hash = net_read_u32(&s);
+    uint32_t feature_flags = net_read_u32(&s);
     char name[NET_MAX_PLAYER_NAME];
     net_read_raw(&s, name, NET_MAX_PLAYER_NAME);
     name[NET_MAX_PLAYER_NAME - 1] = '\0';
+    uint8_t player_uuid[16];
+    net_read_raw(&s, player_uuid, 16);
+    uint8_t reconnect_token[16];
+    net_read_raw(&s, reconnect_token, 16);
+
+    /* Suppress unused variable warnings for forward compatibility */
+    (void)save_version;
+    (void)map_hash;
+    (void)scenario_hash;
+    (void)feature_flags;
 
     if (net_serializer_has_overflow(&s)) {
-        log_error("Malformed HELLO from peer", 0, 0);
-        return;
+        /* Fall back to legacy hello (magic + version + name only) */
+        net_serializer_init(&s, (uint8_t *)payload, size);
+        magic = net_read_u32(&s);
+        version = net_read_u16(&s);
+        net_read_raw(&s, name, NET_MAX_PLAYER_NAME);
+        name[NET_MAX_PLAYER_NAME - 1] = '\0';
+        memset(player_uuid, 0, 16);
+        memset(reconnect_token, 0, 16);
+
+        if (net_serializer_has_overflow(&s)) {
+            log_error("Malformed HELLO from peer", 0, 0);
+            return;
+        }
     }
 
     if (magic != NET_MAGIC) {
@@ -88,7 +256,8 @@ static void handle_hello(net_peer *peer, const uint8_t *payload, uint32_t size)
         net_serializer rs;
         net_serializer_init(&rs, reject_buf, sizeof(reject_buf));
         net_write_u8(&rs, NET_REJECT_VERSION_MISMATCH);
-        send_raw_to_peer(peer, NET_MSG_JOIN_REJECT, reject_buf, (uint32_t)net_serializer_position(&rs));
+        send_raw_to_peer(peer, NET_MSG_JOIN_REJECT, reject_buf,
+                         (uint32_t)net_serializer_position(&rs));
         return;
     }
 
@@ -98,16 +267,58 @@ static void handle_hello(net_peer *peer, const uint8_t *payload, uint32_t size)
         net_serializer rs;
         net_serializer_init(&rs, reject_buf, sizeof(reject_buf));
         net_write_u8(&rs, NET_REJECT_VERSION_MISMATCH);
-        send_raw_to_peer(peer, NET_MSG_JOIN_REJECT, reject_buf, (uint32_t)net_serializer_position(&rs));
+        send_raw_to_peer(peer, NET_MSG_JOIN_REJECT, reject_buf,
+                         (uint32_t)net_serializer_position(&rs));
         return;
     }
 
+    /* If game is in progress, try reconnect by UUID */
     if (session.state == NET_SESSION_HOSTING_GAME) {
+        /* Check for non-zero UUID */
+        int has_uuid = 0;
+        for (int i = 0; i < 16; i++) {
+            if (player_uuid[i] != 0) {
+                has_uuid = 1;
+                break;
+            }
+        }
+
+        if (has_uuid && try_reconnect_player(peer, player_uuid, reconnect_token)) {
+            return; /* Reconnect succeeded */
+        }
+
+        /* No reconnect possible — reject */
         uint8_t reject_buf[2];
         net_serializer rs;
         net_serializer_init(&rs, reject_buf, sizeof(reject_buf));
         net_write_u8(&rs, NET_REJECT_GAME_IN_PROGRESS);
-        send_raw_to_peer(peer, NET_MSG_JOIN_REJECT, reject_buf, (uint32_t)net_serializer_position(&rs));
+        send_raw_to_peer(peer, NET_MSG_JOIN_REJECT, reject_buf,
+                         (uint32_t)net_serializer_position(&rs));
+        return;
+    }
+
+    /* Check for duplicate name */
+    for (int i = 0; i < NET_MAX_PEERS; i++) {
+        if (session.peers[i].active && session.peers[i].player_id != peer->player_id) {
+            if (strncmp(session.peers[i].name, name, NET_MAX_PLAYER_NAME - 1) == 0) {
+                uint8_t reject_buf[2];
+                net_serializer rs;
+                net_serializer_init(&rs, reject_buf, sizeof(reject_buf));
+                net_write_u8(&rs, NET_REJECT_NAME_TAKEN);
+                send_raw_to_peer(peer, NET_MSG_JOIN_REJECT, reject_buf,
+                                 (uint32_t)net_serializer_position(&rs));
+                return;
+            }
+        }
+    }
+    /* Also check against host name */
+    if (strncmp(session.local_player_name, name, NET_MAX_PLAYER_NAME - 1) == 0) {
+        uint8_t reject_buf[2];
+        net_serializer rs;
+        net_serializer_init(&rs, reject_buf, sizeof(reject_buf));
+        net_write_u8(&rs, NET_REJECT_NAME_TAKEN);
+        send_raw_to_peer(peer, NET_MSG_JOIN_REJECT, reject_buf,
+                         (uint32_t)net_serializer_position(&rs));
         return;
     }
 
@@ -131,21 +342,94 @@ static void handle_hello(net_peer *peer, const uint8_t *payload, uint32_t size)
     uint32_t now = net_tcp_get_timestamp_ms();
     peer->last_heartbeat_recv_ms = now;
 
+    /* Register in player registry */
+    mp_player_registry_add(new_player_id, name, 0, 0);
+    mp_player_registry_set_status(new_player_id, MP_PLAYER_LOBBY);
+    mp_player_registry_set_connection_state(new_player_id, MP_CONNECTION_CONNECTED);
+    int slot = mp_player_registry_assign_slot(new_player_id);
+
     log_info("Player joined", name, (int)new_player_id);
 
-    /* Send JOIN_ACCEPT */
-    uint8_t accept_buf[16];
+    /* Build extended JOIN_ACCEPT */
+    mp_player *new_player = mp_player_registry_get(new_player_id);
+    uint32_t session_seed = mp_worldgen_get_spawn_table_mutable()->session_seed;
+
+    uint8_t accept_buf[128];
     net_serializer as;
     net_serializer_init(&as, accept_buf, sizeof(accept_buf));
     net_write_u8(&as, new_player_id);
+    net_write_u8(&as, (uint8_t)slot);
     net_write_u32(&as, session.session_id);
+    net_write_u32(&as, session_seed);
     net_write_u8(&as, (uint8_t)(session.peer_count + 1)); /* +1 includes host */
-    send_raw_to_peer(peer, NET_MSG_JOIN_ACCEPT, accept_buf, (uint32_t)net_serializer_position(&as));
+    if (new_player) {
+        net_write_raw(&as, new_player->player_uuid, MP_PLAYER_UUID_SIZE);
+        net_write_raw(&as, new_player->reconnect_token, MP_RECONNECT_TOKEN_SIZE);
+    } else {
+        uint8_t zeros[16] = {0};
+        net_write_raw(&as, zeros, 16);
+        net_write_raw(&as, zeros, 16);
+    }
+    send_raw_to_peer(peer, NET_MSG_JOIN_ACCEPT, accept_buf,
+                     (uint32_t)net_serializer_position(&as));
+
+    /* Broadcast player joined event to other peers */
+    uint8_t event_buf[64];
+    net_serializer es;
+    net_serializer_init(&es, event_buf, sizeof(event_buf));
+    net_write_u16(&es, NET_EVENT_PLAYER_JOINED);
+    net_write_u32(&es, session.authoritative_tick);
+    net_write_u8(&es, new_player_id);
+    net_write_raw(&es, name, NET_MAX_PLAYER_NAME);
+    net_session_broadcast(NET_MSG_HOST_EVENT, event_buf,
+                          (uint32_t)net_serializer_position(&es));
+}
+
+static void handle_chat_from_client(net_peer *peer, const uint8_t *payload, uint32_t size)
+{
+    /* Host received a chat message from client — relay to all */
+    uint8_t relay_buf[256];
+    net_serializer s;
+    net_serializer_init(&s, relay_buf, sizeof(relay_buf));
+
+    /* Override sender_id with peer's verified player_id */
+    net_write_u8(&s, peer->player_id);
+
+    /* Read original message */
+    net_serializer rs;
+    net_serializer_init(&rs, (uint8_t *)payload, size);
+    net_read_u8(&rs); /* skip client-provided sender_id */
+
+    char message[MP_CHAT_MESSAGE_MAX];
+    net_read_string(&rs, message, sizeof(message));
+    net_write_string(&s, message, sizeof(message));
+
+    /* Broadcast to all peers (including sender for confirmation) */
+    net_session_broadcast(NET_MSG_CHAT, relay_buf,
+                          (uint32_t)net_serializer_position(&s));
+
+    /* Also store in host's chat history */
+    mp_chat_entry *entry = &chat_history.entries[chat_history.write_index];
+    entry->sender_id = peer->player_id;
+    strncpy(entry->message, message, MP_CHAT_MESSAGE_MAX - 1);
+    entry->message[MP_CHAT_MESSAGE_MAX - 1] = '\0';
+    entry->timestamp_tick = session.authoritative_tick;
+    chat_history.write_index = (chat_history.write_index + 1) % MP_CHAT_HISTORY_SIZE;
+    if (chat_history.count < MP_CHAT_HISTORY_SIZE) {
+        chat_history.count++;
+    }
+    chat_history.unread++;
 }
 
 static void handle_client_message(net_peer *peer, const net_packet_header *header,
                                   const uint8_t *payload, uint32_t size)
 {
+    /* Validate payload size against header */
+    if (size > NET_MAX_PAYLOAD_SIZE) {
+        log_error("Payload too large from peer", peer->name, (int)size);
+        return;
+    }
+
     switch (header->message_type) {
         case NET_MSG_HELLO:
             handle_hello(peer, payload, size);
@@ -157,16 +441,20 @@ static void handle_client_message(net_peer *peer, const net_packet_header *heade
                 net_read_u8(&s); /* player_id - use peer's known id instead */
                 uint8_t ready = net_read_u8(&s);
                 peer->state = ready ? PEER_STATE_READY : PEER_STATE_JOINED;
+                mp_player_registry_set_status(peer->player_id,
+                    ready ? MP_PLAYER_READY : MP_PLAYER_LOBBY);
                 log_info("Player ready state changed", peer->name, ready);
             }
             break;
         }
         case NET_MSG_CLIENT_COMMAND: {
-            /* Forward to multiplayer command bus for validation and application */
-            /* The command_bus module will handle this via its own interface */
             extern void multiplayer_command_bus_receive(uint8_t player_id,
                                                        const uint8_t *data, uint32_t size);
             multiplayer_command_bus_receive(peer->player_id, payload, size);
+            break;
+        }
+        case NET_MSG_CHAT: {
+            handle_chat_from_client(peer, payload, size);
             break;
         }
         case NET_MSG_HEARTBEAT: {
@@ -190,38 +478,102 @@ static void handle_client_message(net_peer *peer, const net_packet_header *heade
         case NET_MSG_RESYNC_REQUEST: {
             extern void multiplayer_resync_handle_request(uint8_t player_id);
             multiplayer_resync_handle_request(peer->player_id);
+            mp_player *p = mp_player_registry_get(peer->player_id);
+            if (p) {
+                p->resyncs_requested++;
+            }
             break;
         }
         case NET_MSG_DISCONNECT_NOTICE: {
-            log_info("Peer disconnecting", peer->name, 0);
-            /* Find peer index */
+            log_info("Peer disconnecting gracefully", peer->name, 0);
             for (int i = 0; i < NET_MAX_PEERS; i++) {
                 if (&session.peers[i] == peer) {
-                    close_peer(i);
+                    handle_peer_disconnect(i);
                     break;
                 }
             }
             break;
         }
         default:
-            log_error("Unknown message from peer",
-                     net_protocol_message_name(header->message_type), header->message_type);
+            if (header->message_type >= NET_MSG_COUNT) {
+                log_error("Invalid message type from peer", peer->name,
+                         header->message_type);
+            } else {
+                log_error("Unhandled message from peer",
+                         net_protocol_message_name(header->message_type),
+                         header->message_type);
+            }
             break;
     }
+}
+
+static void handle_chat_from_host(const uint8_t *payload, uint32_t size)
+{
+    net_serializer s;
+    net_serializer_init(&s, (uint8_t *)payload, size);
+
+    uint8_t sender_id = net_read_u8(&s);
+    char message[MP_CHAT_MESSAGE_MAX];
+    net_read_string(&s, message, sizeof(message));
+
+    if (net_serializer_has_overflow(&s)) {
+        return;
+    }
+
+    /* Store in chat history */
+    mp_chat_entry *entry = &chat_history.entries[chat_history.write_index];
+    entry->sender_id = sender_id;
+    strncpy(entry->message, message, MP_CHAT_MESSAGE_MAX - 1);
+    entry->message[MP_CHAT_MESSAGE_MAX - 1] = '\0';
+    entry->timestamp_tick = session.authoritative_tick;
+    chat_history.write_index = (chat_history.write_index + 1) % MP_CHAT_HISTORY_SIZE;
+    if (chat_history.count < MP_CHAT_HISTORY_SIZE) {
+        chat_history.count++;
+    }
+    chat_history.unread++;
 }
 
 static void handle_host_message(const net_packet_header *header,
                                 const uint8_t *payload, uint32_t size)
 {
+    /* Validate payload size */
+    if (size > NET_MAX_PAYLOAD_SIZE) {
+        log_error("Payload too large from host", 0, (int)size);
+        return;
+    }
+
     switch (header->message_type) {
         case NET_MSG_JOIN_ACCEPT: {
             net_serializer s;
             net_serializer_init(&s, (uint8_t *)payload, size);
             session.local_player_id = net_read_u8(&s);
+            uint8_t slot_id = net_read_u8(&s);
             session.session_id = net_read_u32(&s);
+            uint32_t session_seed = net_read_u32(&s);
             uint8_t player_count = net_read_u8(&s);
+            uint8_t assigned_uuid[16];
+            uint8_t assigned_token[16];
+            net_read_raw(&s, assigned_uuid, 16);
+            net_read_raw(&s, assigned_token, 16);
+
             session.host_peer.state = PEER_STATE_JOINED;
             session.state = NET_SESSION_CLIENT_LOBBY;
+
+            /* Register self in player registry with assigned UUID */
+            mp_player_registry_add_with_uuid(session.local_player_id,
+                session.local_player_name, assigned_uuid, 1, 0);
+            mp_player *self = mp_player_registry_get(session.local_player_id);
+            if (self) {
+                self->slot_id = slot_id;
+                memcpy(self->reconnect_token, assigned_token, MP_RECONNECT_TOKEN_SIZE);
+                self->status = MP_PLAYER_LOBBY;
+                self->connection_state = MP_CONNECTION_CONNECTED;
+            }
+
+            /* Store session seed for worldgen */
+            mp_spawn_table *table = mp_worldgen_get_spawn_table_mutable();
+            table->session_seed = session_seed;
+
             log_info("Joined session as player", 0, session.local_player_id);
             (void)player_count;
             break;
@@ -243,6 +595,10 @@ static void handle_host_message(const net_packet_header *header,
             session.game_speed = net_read_u8(&s);
             session.state = NET_SESSION_CLIENT_GAME;
             session.host_peer.state = PEER_STATE_IN_GAME;
+
+            /* Update local player status */
+            mp_player_registry_set_status(session.local_player_id, MP_PLAYER_IN_GAME);
+
             log_info("Game started by host", 0, 0);
             break;
         }
@@ -276,6 +632,10 @@ static void handle_host_message(const net_packet_header *header,
             multiplayer_resync_apply_full_snapshot(payload, size);
             break;
         }
+        case NET_MSG_CHAT: {
+            handle_chat_from_host(payload, size);
+            break;
+        }
         case NET_MSG_HEARTBEAT: {
             uint32_t now = net_tcp_get_timestamp_ms();
             net_peer_update_heartbeat_recv(&session.host_peer, now);
@@ -288,8 +648,13 @@ static void handle_host_message(const net_packet_header *header,
             break;
         }
         default:
-            log_error("Unknown message from host",
-                     net_protocol_message_name(header->message_type), header->message_type);
+            if (header->message_type >= NET_MSG_COUNT) {
+                log_error("Invalid message type from host", 0, header->message_type);
+            } else {
+                log_error("Unhandled message from host",
+                         net_protocol_message_name(header->message_type),
+                         header->message_type);
+            }
             break;
     }
 }
@@ -334,7 +699,7 @@ static void host_process_peers(void)
         /* Check timeout */
         if (peer->state != PEER_STATE_CONNECTING && net_peer_is_timed_out(peer, now)) {
             log_error("Peer timed out", peer->name, i);
-            close_peer(i);
+            handle_peer_disconnect(i);
             continue;
         }
 
@@ -342,7 +707,7 @@ static void host_process_peers(void)
         int received = net_tcp_recv(peer->socket_fd, recv_buf, sizeof(recv_buf));
         if (received < 0) {
             log_error("Peer connection lost", peer->name, i);
-            close_peer(i);
+            handle_peer_disconnect(i);
             continue;
         }
         if (received > 0) {
@@ -369,6 +734,11 @@ static void host_process_peers(void)
             send_raw_to_peer(peer, NET_MSG_HEARTBEAT, hb_buf, 4);
             net_peer_update_heartbeat_sent(peer, now);
         }
+    }
+
+    /* Periodic cleanup of expired reconnect slots */
+    if (session.state == NET_SESSION_HOSTING_GAME) {
+        mp_player_registry_cleanup_expired(session.authoritative_tick);
     }
 }
 
@@ -428,6 +798,7 @@ static void client_process_host(void)
 int net_session_init(void)
 {
     memset(&session, 0, sizeof(net_session));
+    memset(&chat_history, 0, sizeof(chat_history));
     session.listen_fd = -1;
     session.udp_fd = -1;
 
@@ -478,6 +849,13 @@ int net_session_host(const char *player_name, uint16_t port)
     strncpy(session.local_player_name, player_name, NET_MAX_PLAYER_NAME - 1);
     session.local_player_name[NET_MAX_PLAYER_NAME - 1] = '\0';
 
+    /* Register host in player registry */
+    mp_player_registry_init();
+    mp_player_registry_add(0, player_name, 1, 1);
+    mp_player_registry_set_status(0, MP_PLAYER_LOBBY);
+    mp_player_registry_set_connection_state(0, MP_CONNECTION_CONNECTED);
+    mp_player_registry_assign_slot(0);
+
     log_info("Hosting session", player_name, (int)port);
     return 1;
 }
@@ -494,6 +872,10 @@ void net_session_kick_peer(uint8_t player_id)
             net_write_u8(&s, 0); /* reason: kicked */
             send_raw_to_peer(&session.peers[i], NET_MSG_DISCONNECT_NOTICE,
                            buf, (uint32_t)net_serializer_position(&s));
+
+            /* Remove from registry (kicked players don't get reconnect) */
+            mp_player_registry_remove(player_id);
+
             close_peer(i);
             break;
         }
@@ -523,13 +905,28 @@ int net_session_join(const char *player_name, const char *host_address, uint16_t
     session.host_peer.state = PEER_STATE_HELLO_SENT;
     session.host_peer.last_heartbeat_recv_ms = net_tcp_get_timestamp_ms();
 
-    /* Send HELLO */
-    uint8_t hello_buf[4 + 2 + NET_MAX_PLAYER_NAME];
+    /* Send extended HELLO with UUID (if reconnecting) and protocol info */
+    uint8_t hello_buf[128];
     net_serializer s;
     net_serializer_init(&s, hello_buf, sizeof(hello_buf));
     net_write_u32(&s, NET_MAGIC);
     net_write_u16(&s, NET_PROTOCOL_VERSION);
+    net_write_u32(&s, 0); /* save_version: filled by caller if needed */
+    net_write_u32(&s, 0); /* map_hash */
+    net_write_u32(&s, 0); /* scenario_hash */
+    net_write_u32(&s, 0); /* feature_flags */
     net_write_raw(&s, player_name, NET_MAX_PLAYER_NAME);
+
+    /* If we have a previous UUID (for reconnect), send it */
+    mp_player *local = mp_player_registry_get_local();
+    if (local && local->active) {
+        net_write_raw(&s, local->player_uuid, 16);
+        net_write_raw(&s, local->reconnect_token, 16);
+    } else {
+        uint8_t zeros[16] = {0};
+        net_write_raw(&s, zeros, 16);
+        net_write_raw(&s, zeros, 16);
+    }
 
     net_session_send_to_host(NET_MSG_HELLO, hello_buf, (uint32_t)net_serializer_position(&s));
 
@@ -688,6 +1085,9 @@ int net_session_start_game(void)
     session.authoritative_tick = 0;
     session.game_speed = 2; /* Normal speed */
 
+    /* Update all player statuses */
+    mp_player_registry_set_status(0, MP_PLAYER_IN_GAME);
+
     /* Send START_GAME to all peers */
     uint8_t buf[8];
     net_serializer s;
@@ -700,6 +1100,7 @@ int net_session_start_game(void)
             (session.peers[i].state == PEER_STATE_READY ||
              session.peers[i].state == PEER_STATE_JOINED)) {
             session.peers[i].state = PEER_STATE_IN_GAME;
+            mp_player_registry_set_status(session.peers[i].player_id, MP_PLAYER_IN_GAME);
             send_raw_to_peer(&session.peers[i], NET_MSG_START_GAME,
                            buf, (uint32_t)net_serializer_position(&s));
         }
@@ -711,12 +1112,38 @@ int net_session_start_game(void)
 
 void net_session_set_game_speed(uint8_t speed)
 {
+    if (speed > 3) {
+        speed = 3;
+    }
     session.game_speed = speed;
+
+    /* Broadcast speed change event */
+    if (session.role == NET_ROLE_HOST) {
+        uint8_t event_buf[16];
+        net_serializer s;
+        net_serializer_init(&s, event_buf, sizeof(event_buf));
+        net_write_u16(&s, NET_EVENT_SPEED_CHANGED);
+        net_write_u32(&s, session.authoritative_tick);
+        net_write_u8(&s, speed);
+        net_session_broadcast(NET_MSG_HOST_EVENT, event_buf,
+                              (uint32_t)net_serializer_position(&s));
+    }
 }
 
 void net_session_set_paused(int paused)
 {
     session.game_paused = paused;
+
+    /* Broadcast pause/resume event */
+    if (session.role == NET_ROLE_HOST) {
+        uint8_t event_buf[16];
+        net_serializer s;
+        net_serializer_init(&s, event_buf, sizeof(event_buf));
+        net_write_u16(&s, paused ? NET_EVENT_GAME_PAUSED : NET_EVENT_GAME_RESUMED);
+        net_write_u32(&s, session.authoritative_tick);
+        net_session_broadcast(NET_MSG_HOST_EVENT, event_buf,
+                              (uint32_t)net_serializer_position(&s));
+    }
 }
 
 void net_session_advance_tick(void)
@@ -789,6 +1216,72 @@ int net_session_all_peers_ready(void)
 net_session *net_session_get(void)
 {
     return &session;
+}
+
+/* ---- Chat API ---- */
+
+int net_session_chat_get_count(void)
+{
+    return chat_history.count;
+}
+
+const char *net_session_chat_get_message(int index, uint8_t *out_sender_id)
+{
+    if (index < 0 || index >= chat_history.count) {
+        return NULL;
+    }
+    /* Convert from logical index to ring buffer index */
+    int ring_index;
+    if (chat_history.count >= MP_CHAT_HISTORY_SIZE) {
+        ring_index = (chat_history.write_index + index) % MP_CHAT_HISTORY_SIZE;
+    } else {
+        ring_index = index;
+    }
+    if (out_sender_id) {
+        *out_sender_id = chat_history.entries[ring_index].sender_id;
+    }
+    return chat_history.entries[ring_index].message;
+}
+
+int net_session_chat_get_unread(void)
+{
+    return chat_history.unread;
+}
+
+void net_session_chat_mark_read(void)
+{
+    chat_history.unread = 0;
+}
+
+int net_session_send_chat(const char *message)
+{
+    if (!net_session_is_active()) {
+        return 0;
+    }
+
+    uint8_t buf[256];
+    net_serializer s;
+    net_serializer_init(&s, buf, sizeof(buf));
+    net_write_u8(&s, session.local_player_id);
+    net_write_string(&s, message, MP_CHAT_MESSAGE_MAX);
+
+    if (net_session_is_host()) {
+        /* Host: store locally and broadcast */
+        mp_chat_entry *entry = &chat_history.entries[chat_history.write_index];
+        entry->sender_id = session.local_player_id;
+        strncpy(entry->message, message, MP_CHAT_MESSAGE_MAX - 1);
+        entry->message[MP_CHAT_MESSAGE_MAX - 1] = '\0';
+        entry->timestamp_tick = session.authoritative_tick;
+        chat_history.write_index = (chat_history.write_index + 1) % MP_CHAT_HISTORY_SIZE;
+        if (chat_history.count < MP_CHAT_HISTORY_SIZE) {
+            chat_history.count++;
+        }
+        net_session_broadcast(NET_MSG_CHAT, buf, (uint32_t)net_serializer_position(&s));
+    } else {
+        /* Client: send to host for relay */
+        net_session_send_to_host(NET_MSG_CHAT, buf, (uint32_t)net_serializer_position(&s));
+    }
+    return 1;
 }
 
 #endif /* ENABLE_MULTIPLAYER */

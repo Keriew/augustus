@@ -75,6 +75,19 @@ uint8_t mp_time_sync_get_speed(void)
     return time_data.speed;
 }
 
+void mp_time_sync_set_paused(int paused)
+{
+    time_data.paused = paused;
+}
+
+void mp_time_sync_set_speed(uint8_t speed)
+{
+    if (speed > 3) {
+        speed = 3;
+    }
+    time_data.speed = speed;
+}
+
 void mp_time_sync_serialize(uint8_t *buffer, uint32_t *size)
 {
     net_serializer s;

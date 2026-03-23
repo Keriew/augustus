@@ -27,7 +27,15 @@
 #include "window/resource_settings.h"
 #include "window/trade_prices.h"
 
+#ifdef ENABLE_MULTIPLAYER
+#include "empire/trade_route.h"
+#include "multiplayer/ownership.h"
+#include "multiplayer/player_registry.h"
+#include "network/session.h"
+#endif
+
 #include <string.h>
+#include <stdio.h>
 
 #define ADVISOR_HEIGHT 27
 #define RESOURCE_Y_OFFSET 54
@@ -221,6 +229,79 @@ static void draw_resource_status_text(int resource, int x, int y, int box_width)
     }
 }
 
+#ifdef ENABLE_MULTIPLAYER
+/**
+ * Draw multiplayer route indicators for a resource.
+ * Shows P2P/AI tag and route state for resources that have active trade routes
+ * involving player-owned cities.
+ */
+static void draw_mp_route_indicator(int resource, int x, int y, int width)
+{
+    if (!net_session_is_active()) {
+        return;
+    }
+
+    /* Check all trade cities to see if this resource is traded through a player route */
+    int array_size = empire_city_get_array_size();
+    int found_p2p_route = 0;
+    int found_route_id = -1;
+    mp_route_state worst_state = MP_ROUTE_STATE_ACTIVE;
+
+    for (int i = 0; i < array_size; i++) {
+        const empire_city *city = empire_city_get(i);
+        if (!city->in_use || city->type != EMPIRE_CITY_TRADE || !city->is_open) {
+            continue;
+        }
+        if (!empire_city_is_player_owned(i)) {
+            continue;
+        }
+        int route_id = city->route_id;
+        if (route_id < 0) {
+            continue;
+        }
+        /* Check if this route trades this resource */
+        int buys = city->buys_resource[resource];
+        int sells = city->sells_resource[resource];
+        if (!buys && !sells) {
+            continue;
+        }
+        /* Found a player route that trades this resource */
+        found_route_id = route_id;
+        if (mp_ownership_is_route_player_to_player(route_id)) {
+            found_p2p_route = 1;
+        }
+        mp_route_state rstate = mp_ownership_get_route_state(route_id);
+        if (rstate > worst_state) {
+            worst_state = rstate;
+        }
+    }
+
+    if (found_route_id < 0) {
+        return;
+    }
+
+    /* Draw P2P or AI tag */
+    int tag_x = x + width - 50;
+    if (found_p2p_route) {
+        const uint8_t *p2p_text = translation_for(TR_MP_TRADE_ADVISOR_P2P_ROUTE);
+        text_draw(p2p_text, tag_x, y, FONT_NORMAL_BROWN, 0);
+    }
+
+    /* Draw route state if not active */
+    if (worst_state != MP_ROUTE_STATE_ACTIVE) {
+        translation_key state_key;
+        font_t state_font;
+        switch (worst_state) {
+            case MP_ROUTE_STATE_PENDING:  state_key = TR_MP_EMPIRE_ROUTE_PENDING;  state_font = FONT_NORMAL_BROWN; break;
+            case MP_ROUTE_STATE_DISABLED: state_key = TR_MP_EMPIRE_ROUTE_DISABLED; state_font = FONT_NORMAL_RED;   break;
+            case MP_ROUTE_STATE_OFFLINE:  state_key = TR_MP_EMPIRE_ROUTE_OFFLINE;  state_font = FONT_NORMAL_RED;   break;
+            default:                      state_key = TR_MP_EMPIRE_ROUTE_ACTIVE;   state_font = FONT_NORMAL_PLAIN; break;
+        }
+        text_draw(translation_for(state_key), tag_x + (found_p2p_route ? 30 : 0), y, state_font, 0);
+    }
+}
+#endif
+
 static void draw_resource_info(const grid_box_item *item)
 {
     resource_type resource = data.list.items[item->index];
@@ -248,6 +329,10 @@ static void draw_resource_info(const grid_box_item *item)
         lang_text_draw_centered(18, 5, item->x + 160, item->y + 15, 100, FONT_NORMAL_WHITE);
     }
     draw_resource_status_text(resource, item->x + 176, item->y + 5, item->width - 206);
+
+#ifdef ENABLE_MULTIPLAYER
+    draw_mp_route_indicator(resource, item->x, item->y + 28, item->width);
+#endif
 
     if (item->position < resource_grid.scrollbar.elements_in_view - 1) {
         graphics_draw_inset_rect(item->x, item->y + item->height - 2, item->width, 2,

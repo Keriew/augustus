@@ -7,6 +7,7 @@
 #include "trade_sync.h"
 #include "empire_sync.h"
 #include "time_sync.h"
+#include "worldgen.h"
 #include "network/serialize.h"
 #include "network/session.h"
 #include "core/log.h"
@@ -83,6 +84,12 @@ int mp_snapshot_build_full(uint8_t *buffer, uint32_t buffer_size, uint32_t *out_
     header.domain_sizes[MP_SNAPSHOT_TRADER_ENTITIES] = domain_size;
     write_pos += domain_size;
 
+    /* Domain: Worldgen (spawn table) */
+    header.domain_offsets[MP_SNAPSHOT_WORLDGEN] = write_pos;
+    mp_worldgen_serialize(buffer + write_pos, &domain_size);
+    header.domain_sizes[MP_SNAPSHOT_WORLDGEN] = domain_size;
+    write_pos += domain_size;
+
     /* Domain: Time */
     header.domain_offsets[MP_SNAPSHOT_TIME] = write_pos;
     mp_time_sync_serialize(buffer + write_pos, &domain_size);
@@ -144,6 +151,12 @@ int mp_snapshot_apply_full(const uint8_t *buffer, uint32_t size)
         mp_trade_sync_deserialize_traders(
             buffer + header.domain_offsets[MP_SNAPSHOT_TRADER_ENTITIES],
             header.domain_sizes[MP_SNAPSHOT_TRADER_ENTITIES]);
+    }
+
+    if (header.domain_sizes[MP_SNAPSHOT_WORLDGEN] > 0) {
+        mp_worldgen_deserialize(
+            buffer + header.domain_offsets[MP_SNAPSHOT_WORLDGEN],
+            header.domain_sizes[MP_SNAPSHOT_WORLDGEN]);
     }
 
     if (header.domain_sizes[MP_SNAPSHOT_TIME] > 0) {

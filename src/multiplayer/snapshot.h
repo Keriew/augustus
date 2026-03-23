@@ -19,6 +19,7 @@ typedef enum {
     MP_SNAPSHOT_TIME,
     MP_SNAPSHOT_OWNERSHIP,
     MP_SNAPSHOT_PLAYER_REGISTRY,
+    MP_SNAPSHOT_WORLDGEN,
     MP_SNAPSHOT_COUNT
 } mp_snapshot_domain;
 

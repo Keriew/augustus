@@ -72,6 +72,12 @@ int trade_route_get_origin_player(int route_id);
 int trade_route_get_dest_player(int route_id);
 trade_route_player_mode trade_route_get_player_mode(int route_id);
 
+/* Extended lifecycle API for command_bus */
+void trade_route_set_player_binding(int route_id, uint8_t origin_player_id, uint8_t dest_player_id);
+void trade_route_clear_player_binding(int route_id);
+void trade_route_set_export_enabled(int route_id, int resource, int enabled);
+void trade_route_set_import_enabled(int route_id, int resource, int enabled);
+
 #endif /* ENABLE_MULTIPLAYER */
 
 #endif // EMPIRE_TRADE_ROUTE_H

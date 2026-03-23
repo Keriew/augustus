@@ -18,15 +18,19 @@ typedef struct {
     int city_id;
     mp_owner_type owner_type;
     uint8_t player_id;
+    int is_online;
 } city_ownership;
 
 typedef struct {
     int in_use;
     int route_id;
     mp_route_owner_mode mode;
+    mp_route_state state;
     uint8_t origin_player_id;
     uint8_t dest_player_id;
     uint32_t network_route_id;
+    uint32_t route_state_version;
+    uint32_t authoritative_open_tick;
 } route_ownership;
 
 typedef struct {
@@ -43,11 +47,15 @@ static struct {
     city_ownership cities[MAX_OWNED_CITIES];
     route_ownership routes[MAX_OWNED_ROUTES];
     trader_ownership traders[MAX_OWNED_TRADERS];
+    uint32_t next_network_route_id;
+    uint32_t next_network_entity_id;
 } ownership_data;
 
 void mp_ownership_init(void)
 {
     memset(&ownership_data, 0, sizeof(ownership_data));
+    ownership_data.next_network_route_id = 1;
+    ownership_data.next_network_entity_id = 1;
 }
 
 void mp_ownership_clear(void)
@@ -64,7 +72,7 @@ static city_ownership *find_city_entry(int city_id)
             return &ownership_data.cities[i];
         }
     }
-    return NULL;
+    return 0;
 }
 
 static city_ownership *alloc_city_entry(int city_id)
@@ -77,11 +85,12 @@ static city_ownership *alloc_city_entry(int city_id)
         if (!ownership_data.cities[i].in_use) {
             ownership_data.cities[i].in_use = 1;
             ownership_data.cities[i].city_id = city_id;
+            ownership_data.cities[i].is_online = 1;
             return &ownership_data.cities[i];
         }
     }
     log_error("City ownership table full", 0, city_id);
-    return NULL;
+    return 0;
 }
 
 void mp_ownership_set_city(int city_id, mp_owner_type owner_type, uint8_t player_id)
@@ -127,11 +136,15 @@ int mp_ownership_is_city_remote_player(int city_id)
     if (!entry) {
         return 0;
     }
-    if (entry->owner_type != MP_OWNER_REMOTE_PLAYER) {
+    if (entry->owner_type != MP_OWNER_REMOTE_PLAYER &&
+        entry->owner_type != MP_OWNER_LOCAL_PLAYER) {
         return 0;
     }
     mp_player *local = mp_player_registry_get_local();
-    return !local || local->player_id != entry->player_id;
+    if (!local) {
+        return entry->owner_type == MP_OWNER_REMOTE_PLAYER;
+    }
+    return local->player_id != entry->player_id;
 }
 
 int mp_ownership_is_city_player_owned(int city_id)
@@ -144,6 +157,23 @@ int mp_ownership_is_city_player_owned(int city_id)
            entry->owner_type == MP_OWNER_REMOTE_PLAYER;
 }
 
+int mp_ownership_is_city_online(int city_id)
+{
+    city_ownership *entry = find_city_entry(city_id);
+    if (!entry) {
+        return 0;
+    }
+    return entry->is_online;
+}
+
+void mp_ownership_set_city_online(int city_id, int online)
+{
+    city_ownership *entry = find_city_entry(city_id);
+    if (entry) {
+        entry->is_online = online;
+    }
+}
+
 /* ---- Route Ownership ---- */
 
 static route_ownership *find_route_entry(int route_id)
@@ -153,7 +183,7 @@ static route_ownership *find_route_entry(int route_id)
             return &ownership_data.routes[i];
         }
     }
-    return NULL;
+    return 0;
 }
 
 static route_ownership *alloc_route_entry(int route_id)
@@ -170,11 +200,53 @@ static route_ownership *alloc_route_entry(int route_id)
         }
     }
     log_error("Route ownership table full", 0, route_id);
-    return NULL;
+    return 0;
+}
+
+int mp_ownership_create_route(int route_id, mp_route_owner_mode mode,
+                               uint8_t origin_player_id, uint8_t dest_player_id,
+                               uint32_t network_route_id)
+{
+    route_ownership *entry = alloc_route_entry(route_id);
+    if (!entry) {
+        return -1;
+    }
+    entry->mode = mode;
+    entry->state = MP_ROUTE_STATE_PENDING;
+    entry->origin_player_id = origin_player_id;
+    entry->dest_player_id = dest_player_id;
+    entry->network_route_id = network_route_id;
+    entry->route_state_version = 1;
+    entry->authoritative_open_tick = 0;
+    return 1;
+}
+
+void mp_ownership_delete_route(int route_id)
+{
+    route_ownership *entry = find_route_entry(route_id);
+    if (entry) {
+        entry->state = MP_ROUTE_STATE_DELETED;
+        /* Don't clear in_use yet — let the cleanup cycle handle it */
+    }
+}
+
+void mp_ownership_set_route_state(int route_id, mp_route_state state)
+{
+    route_ownership *entry = find_route_entry(route_id);
+    if (entry) {
+        entry->state = state;
+        entry->route_state_version++;
+    }
+}
+
+mp_route_state mp_ownership_get_route_state(int route_id)
+{
+    route_ownership *entry = find_route_entry(route_id);
+    return entry ? entry->state : MP_ROUTE_STATE_INACTIVE;
 }
 
 void mp_ownership_set_route(int route_id, mp_route_owner_mode mode,
-                            uint8_t origin_player_id, uint8_t dest_player_id)
+                             uint8_t origin_player_id, uint8_t dest_player_id)
 {
     route_ownership *entry = alloc_route_entry(route_id);
     if (entry) {
@@ -208,6 +280,109 @@ int mp_ownership_is_route_player_to_player(int route_id)
     return entry && entry->mode == MP_ROUTE_PLAYER_TO_PLAYER;
 }
 
+int mp_ownership_is_route_active(int route_id)
+{
+    route_ownership *entry = find_route_entry(route_id);
+    return entry && entry->state == MP_ROUTE_STATE_ACTIVE;
+}
+
+void mp_ownership_increment_route_version(int route_id)
+{
+    route_ownership *entry = find_route_entry(route_id);
+    if (entry) {
+        entry->route_state_version++;
+    }
+}
+
+uint32_t mp_ownership_get_route_version(int route_id)
+{
+    route_ownership *entry = find_route_entry(route_id);
+    return entry ? entry->route_state_version : 0;
+}
+
+void mp_ownership_set_route_open_tick(int route_id, uint32_t tick)
+{
+    route_ownership *entry = find_route_entry(route_id);
+    if (entry) {
+        entry->authoritative_open_tick = tick;
+    }
+}
+
+uint32_t mp_ownership_get_route_open_tick(int route_id)
+{
+    route_ownership *entry = find_route_entry(route_id);
+    return entry ? entry->authoritative_open_tick : 0;
+}
+
+int mp_ownership_find_route_between(int city_a, int city_b)
+{
+    for (int i = 0; i < MAX_OWNED_ROUTES; i++) {
+        route_ownership *r = &ownership_data.routes[i];
+        if (!r->in_use || r->state == MP_ROUTE_STATE_DELETED) {
+            continue;
+        }
+        /* Check city ownership to find the route */
+        city_ownership *ca = find_city_entry(city_a);
+        city_ownership *cb = find_city_entry(city_b);
+        if (!ca || !cb) {
+            continue;
+        }
+        if ((r->origin_player_id == ca->player_id && r->dest_player_id == cb->player_id) ||
+            (r->origin_player_id == cb->player_id && r->dest_player_id == ca->player_id)) {
+            return r->route_id;
+        }
+    }
+    return -1;
+}
+
+int mp_ownership_count_player_routes(uint8_t player_id)
+{
+    int count = 0;
+    for (int i = 0; i < MAX_OWNED_ROUTES; i++) {
+        route_ownership *r = &ownership_data.routes[i];
+        if (!r->in_use || r->state == MP_ROUTE_STATE_DELETED) {
+            continue;
+        }
+        if (r->origin_player_id == player_id || r->dest_player_id == player_id) {
+            count++;
+        }
+    }
+    return count;
+}
+
+void mp_ownership_set_player_routes_offline(uint8_t player_id)
+{
+    for (int i = 0; i < MAX_OWNED_ROUTES; i++) {
+        route_ownership *r = &ownership_data.routes[i];
+        if (!r->in_use) {
+            continue;
+        }
+        if (r->state != MP_ROUTE_STATE_ACTIVE && r->state != MP_ROUTE_STATE_PENDING) {
+            continue;
+        }
+        if (r->origin_player_id == player_id || r->dest_player_id == player_id) {
+            r->state = MP_ROUTE_STATE_OFFLINE;
+            r->route_state_version++;
+            log_info("Route set offline due to player disconnect", 0, r->route_id);
+        }
+    }
+}
+
+void mp_ownership_set_player_routes_online(uint8_t player_id)
+{
+    for (int i = 0; i < MAX_OWNED_ROUTES; i++) {
+        route_ownership *r = &ownership_data.routes[i];
+        if (!r->in_use || r->state != MP_ROUTE_STATE_OFFLINE) {
+            continue;
+        }
+        if (r->origin_player_id == player_id || r->dest_player_id == player_id) {
+            r->state = MP_ROUTE_STATE_ACTIVE;
+            r->route_state_version++;
+            log_info("Route restored after player reconnect", 0, r->route_id);
+        }
+    }
+}
+
 /* ---- Trader Ownership ---- */
 
 static trader_ownership *find_trader_entry(int figure_id)
@@ -218,7 +393,7 @@ static trader_ownership *find_trader_entry(int figure_id)
             return &ownership_data.traders[i];
         }
     }
-    return NULL;
+    return 0;
 }
 
 static trader_ownership *alloc_trader_entry(int figure_id)
@@ -235,11 +410,11 @@ static trader_ownership *alloc_trader_entry(int figure_id)
         }
     }
     log_error("Trader ownership table full", 0, figure_id);
-    return NULL;
+    return 0;
 }
 
 void mp_ownership_set_trader(int figure_id, uint8_t owner_player_id,
-                             int origin_city_id, int dest_city_id, int route_id)
+                              int origin_city_id, int dest_city_id, int route_id)
 {
     trader_ownership *entry = alloc_trader_entry(figure_id);
     if (entry) {
@@ -312,26 +487,47 @@ uint32_t mp_ownership_get_network_entity_id(int figure_id)
     return entry ? entry->network_entity_id : 0;
 }
 
+uint32_t mp_ownership_allocate_network_route_id(void)
+{
+    return ownership_data.next_network_route_id++;
+}
+
+uint32_t mp_ownership_allocate_network_entity_id(void)
+{
+    return ownership_data.next_network_entity_id++;
+}
+
 /* ---- Trade Permission ---- */
 
 int mp_ownership_can_trade(int city_a, int city_b)
 {
-    /* AI cities can always trade with players */
     int a_player = mp_ownership_is_city_player_owned(city_a);
     int b_player = mp_ownership_is_city_player_owned(city_b);
 
+    /* AI to AI is always allowed */
     if (!a_player && !b_player) {
-        return 1; /* AI to AI */
-    }
-    if (a_player && !b_player) {
-        return 1; /* Player to AI */
-    }
-    if (!a_player && b_player) {
-        return 1; /* AI to Player */
+        return 1;
     }
 
-    /* Player to Player - both must have trade enabled and routes open */
-    return 1; /* Allow by default; route-level checks apply elsewhere */
+    /* Player to AI or AI to Player is always allowed */
+    if (a_player != b_player) {
+        return 1;
+    }
+
+    /* Player to Player: both must be online */
+    if (!mp_ownership_is_city_online(city_a)) {
+        return 0;
+    }
+    if (!mp_ownership_is_city_online(city_b)) {
+        return 0;
+    }
+
+    /* Check if a route exists and is active */
+    int route_id = mp_ownership_find_route_between(city_a, city_b);
+    if (route_id < 0) {
+        return 0;
+    }
+    return mp_ownership_is_route_active(route_id);
 }
 
 /* ---- Serialization ---- */
@@ -340,6 +536,10 @@ void mp_ownership_serialize(uint8_t *buffer, uint32_t *size)
 {
     net_serializer s;
     net_serializer_init(&s, buffer, 65536);
+
+    /* Global state */
+    net_write_u32(&s, ownership_data.next_network_route_id);
+    net_write_u32(&s, ownership_data.next_network_entity_id);
 
     /* Cities */
     uint16_t city_count = 0;
@@ -357,6 +557,7 @@ void mp_ownership_serialize(uint8_t *buffer, uint32_t *size)
         net_write_i32(&s, c->city_id);
         net_write_u8(&s, (uint8_t)c->owner_type);
         net_write_u8(&s, c->player_id);
+        net_write_u8(&s, (uint8_t)c->is_online);
     }
 
     /* Routes */
@@ -374,9 +575,12 @@ void mp_ownership_serialize(uint8_t *buffer, uint32_t *size)
         }
         net_write_i32(&s, r->route_id);
         net_write_u8(&s, (uint8_t)r->mode);
+        net_write_u8(&s, (uint8_t)r->state);
         net_write_u8(&s, r->origin_player_id);
         net_write_u8(&s, r->dest_player_id);
         net_write_u32(&s, r->network_route_id);
+        net_write_u32(&s, r->route_state_version);
+        net_write_u32(&s, r->authoritative_open_tick);
     }
 
     /* Traders */
@@ -410,13 +614,19 @@ void mp_ownership_deserialize(const uint8_t *buffer, uint32_t size)
     net_serializer s;
     net_serializer_init(&s, (uint8_t *)buffer, size);
 
+    /* Global state */
+    ownership_data.next_network_route_id = net_read_u32(&s);
+    ownership_data.next_network_entity_id = net_read_u32(&s);
+
     /* Cities */
     uint16_t city_count = net_read_u16(&s);
     for (int i = 0; i < city_count && !net_serializer_has_overflow(&s); i++) {
         int city_id = net_read_i32(&s);
         mp_owner_type otype = (mp_owner_type)net_read_u8(&s);
         uint8_t pid = net_read_u8(&s);
+        uint8_t online = net_read_u8(&s);
         mp_ownership_set_city(city_id, otype, pid);
+        mp_ownership_set_city_online(city_id, online);
     }
 
     /* Routes */
@@ -424,11 +634,21 @@ void mp_ownership_deserialize(const uint8_t *buffer, uint32_t size)
     for (int i = 0; i < route_count && !net_serializer_has_overflow(&s); i++) {
         int route_id = net_read_i32(&s);
         mp_route_owner_mode mode = (mp_route_owner_mode)net_read_u8(&s);
+        mp_route_state state = (mp_route_state)net_read_u8(&s);
         uint8_t origin = net_read_u8(&s);
         uint8_t dest = net_read_u8(&s);
         uint32_t net_id = net_read_u32(&s);
-        mp_ownership_set_route(route_id, mode, origin, dest);
-        mp_ownership_set_network_route_id(route_id, net_id);
+        uint32_t version = net_read_u32(&s);
+        uint32_t open_tick = net_read_u32(&s);
+
+        mp_ownership_create_route(route_id, mode, origin, dest, net_id);
+        mp_ownership_set_route_state(route_id, state);
+
+        route_ownership *entry = find_route_entry(route_id);
+        if (entry) {
+            entry->route_state_version = version;
+            entry->authoritative_open_tick = open_tick;
+        }
     }
 
     /* Traders */

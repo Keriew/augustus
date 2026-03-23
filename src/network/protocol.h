@@ -59,7 +59,18 @@ typedef enum {
     NET_EVENT_PLAYER_LEFT,
     NET_EVENT_GAME_PAUSED,
     NET_EVENT_GAME_RESUMED,
-    NET_EVENT_SPEED_CHANGED
+    NET_EVENT_SPEED_CHANGED,
+    NET_EVENT_ROUTE_CREATED,
+    NET_EVENT_ROUTE_DELETED,
+    NET_EVENT_ROUTE_ENABLED,
+    NET_EVENT_ROUTE_DISABLED,
+    NET_EVENT_ROUTE_POLICY_SET,
+    NET_EVENT_ROUTE_LIMIT_SET,
+    NET_EVENT_PLAYER_RECONNECTED,
+    NET_EVENT_PLAYER_CITY_OFFLINE,
+    NET_EVENT_PLAYER_CITY_ONLINE,
+    NET_EVENT_SPAWN_TABLE_UPDATED,
+    NET_EVENT_COUNT
 } net_host_event_type;
 
 typedef struct {
@@ -77,13 +88,23 @@ typedef struct {
 typedef struct {
     uint32_t magic;
     uint16_t protocol_version;
+    uint32_t save_version;       /* savegame version for compat check */
+    uint32_t map_hash;           /* Hash of empire map for desync prevention */
+    uint32_t scenario_hash;      /* Hash of scenario data */
+    uint32_t feature_flags;      /* Bitmask of enabled features */
     char player_name[NET_MAX_PLAYER_NAME];
+    uint8_t player_uuid[16];     /* For reconnect identification */
+    uint8_t reconnect_token[16]; /* Optional: for rejoin after disconnect */
 } net_msg_hello;
 
 typedef struct {
     uint8_t player_id;
+    uint8_t slot_id;
     uint32_t session_id;
+    uint32_t session_seed;
     uint8_t player_count;
+    uint8_t player_uuid[16];       /* Assigned UUID */
+    uint8_t reconnect_token[16];   /* For future reconnect */
 } net_msg_join_accept;
 
 typedef struct {

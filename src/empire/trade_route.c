@@ -313,4 +313,60 @@ trade_route_player_mode trade_route_get_player_mode(int route_id)
     return b ? b->mode : ROUTE_MODE_AI_TO_PLAYER;
 }
 
+void trade_route_set_player_binding(int route_id, uint8_t origin_player_id, uint8_t dest_player_id)
+{
+    route_player_binding *b = alloc_binding(route_id);
+    if (!b) {
+        return;
+    }
+    b->origin_player_id = origin_player_id;
+    b->destination_player_id = (dest_player_id == 0xFF) ? -1 : dest_player_id;
+
+    if (origin_player_id < 0xFF && dest_player_id < 0xFF) {
+        b->mode = ROUTE_MODE_PLAYER_TO_PLAYER;
+    } else if (origin_player_id < 0xFF) {
+        b->mode = ROUTE_MODE_PLAYER_TO_AI;
+    } else {
+        b->mode = ROUTE_MODE_AI_TO_PLAYER;
+    }
+}
+
+void trade_route_clear_player_binding(int route_id)
+{
+    route_player_binding *b = find_binding(route_id);
+    if (b) {
+        memset(b, 0, sizeof(route_player_binding));
+    }
+}
+
+void trade_route_set_export_enabled(int route_id, int resource, int enabled)
+{
+    if (!trade_route_is_valid(route_id)) {
+        return;
+    }
+    if (resource < 0 || resource >= RESOURCE_MAX) {
+        return;
+    }
+    if (enabled) {
+        trade_route_set(route_id, resource, 1500, 0); /* default limit of 15 loads */
+    } else {
+        trade_route_set_limit(route_id, resource, 0, 0);
+    }
+}
+
+void trade_route_set_import_enabled(int route_id, int resource, int enabled)
+{
+    if (!trade_route_is_valid(route_id)) {
+        return;
+    }
+    if (resource < 0 || resource >= RESOURCE_MAX) {
+        return;
+    }
+    if (enabled) {
+        trade_route_set(route_id, resource, 1500, 1); /* default limit of 15 loads */
+    } else {
+        trade_route_set_limit(route_id, resource, 0, 1);
+    }
+}
+
 #endif /* ENABLE_MULTIPLAYER */

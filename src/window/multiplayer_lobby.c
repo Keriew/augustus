@@ -148,8 +148,7 @@ static void draw_player_item(const list_box_item *item)
     /* Ping (for remote players) */
     if (!player->is_local) {
         const net_peer *peer = 0;
-        int peer_count = net_session_get_peer_count();
-        for (int i = 0; i < peer_count; i++) {
+        for (int i = 0; i < NET_MAX_PEERS; i++) {
             const net_peer *p = net_session_get_peer(i);
             if (p && p->active && p->player_id == player->player_id) {
                 peer = p;

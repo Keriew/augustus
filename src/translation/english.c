@@ -2056,6 +2056,20 @@ static translation_string all_strings[] = {
     {TR_MP_STATUS_BUTTON_DISCONNECT, "Disconnect"},
     {TR_MP_STATUS_BUTTON_CLOSE, "Close"},
     {TR_MP_HOST, "Host"},
+    /* Phase 5: Empire window and trade advisor multiplayer UI */
+    {TR_MP_EMPIRE_PLAYER_CITY, "Player City"},
+    {TR_MP_EMPIRE_OWNER, "Owner:"},
+    {TR_MP_EMPIRE_OFFLINE, "Offline"},
+    {TR_MP_EMPIRE_ONLINE, "Online"},
+    {TR_MP_EMPIRE_ROUTE_PENDING, "Pending"},
+    {TR_MP_EMPIRE_ROUTE_ACTIVE, "Active"},
+    {TR_MP_EMPIRE_ROUTE_DISABLED, "Disabled"},
+    {TR_MP_EMPIRE_ROUTE_OFFLINE, "Offline"},
+    {TR_MP_EMPIRE_ROUTE_P2P, "Player Trade"},
+    {TR_MP_EMPIRE_ROUTE_AI, "Trade Route"},
+    {TR_MP_TRADE_ADVISOR_P2P_ROUTE, "P2P"},
+    {TR_MP_TRADE_ADVISOR_AI_ROUTE, "AI"},
+    {TR_MP_TRADE_ADVISOR_ROUTE_STATE, "Route:"},
 #endif
 };
 

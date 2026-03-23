@@ -109,6 +109,13 @@ int net_session_all_peers_ready(void);
 /* Access to session for multiplayer integration */
 net_session *net_session_get(void);
 
+/* Chat API (out-of-simulation, relayed through host) */
+int net_session_send_chat(const char *message);
+int net_session_chat_get_count(void);
+const char *net_session_chat_get_message(int index, uint8_t *out_sender_id);
+int net_session_chat_get_unread(void);
+void net_session_chat_mark_read(void);
+
 #endif /* ENABLE_MULTIPLAYER */
 
 #endif /* NETWORK_SESSION_H */

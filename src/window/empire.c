@@ -6,6 +6,7 @@
 #include "city/warning.h"
 #include "core/calc.h"
 #include "core/config.h"
+#include "core/string.h"
 #include "core/image_group.h"
 #include "empire/city.h"
 #include "empire/empire.h"
@@ -42,10 +43,18 @@
 #include "window/trade_opened.h"
 #include "window/trade_prices.h"
 
+#ifdef ENABLE_MULTIPLAYER
+#include "multiplayer/command_bus.h"
+#include "multiplayer/ownership.h"
+#include "multiplayer/player_registry.h"
+#include "network/session.h"
+#include "translation/translation.h"
+#endif
+
 #include <math.h>
 #include <stdio.h>
-#include <stdlib.h>  
-#include <string.h>  
+#include <stdlib.h>
+#include <string.h>
 
 #define WIDTH_BORDER 16 //dimensions the border image in px, informative only
 #define HEIGHT_BORDER 136 
@@ -1246,6 +1255,47 @@ static void draw_sidebar_city_item(const grid_box_item *item)
     } else { // Not enough room for badge + icon
         text_draw(name, x_offset + badge_margin, y_offset + 9, FONT_LARGE_BLACK, 0);
     }
+#ifdef ENABLE_MULTIPLAYER
+    /* Draw multiplayer owner tag in sidebar */
+    if (net_session_is_active() && empire_city_is_player_owned(entry->city_id)) {
+        uint8_t owner_pid = mp_ownership_get_city_player_id(entry->city_id);
+        mp_player *owner = mp_player_registry_get(owner_pid);
+        int tag_y = y_offset + 32;
+        int tag_x = x_offset + 8;
+
+        if (owner && owner->active) {
+            /* "[PlayerName]" */
+            char tag_str[48];
+            snprintf(tag_str, sizeof(tag_str), "[%s]", owner->name);
+            uint8_t tag_buf[48];
+            string_copy(string_from_ascii(tag_str), tag_buf, 48);
+            font_t tag_font = mp_ownership_is_city_local(entry->city_id)
+                ? FONT_NORMAL_GREEN : FONT_NORMAL_WHITE;
+            int tag_w = text_draw(tag_buf, tag_x, tag_y, tag_font, 0);
+
+            /* Online/Offline dot */
+            int is_online = mp_ownership_is_city_online(entry->city_id);
+            color_t dot_color = is_online ? COLOR_MASK_GREEN : COLOR_MASK_RED;
+            graphics_fill_rect(tag_x + tag_w + 4, tag_y + 4, 6, 6, dot_color);
+        }
+
+        /* Route state */
+        if (city->route_id >= 0) {
+            mp_route_state rstate = mp_ownership_get_route_state(city->route_id);
+            translation_key rkey;
+            font_t rfont;
+            switch (rstate) {
+                case MP_ROUTE_STATE_PENDING:  rkey = TR_MP_EMPIRE_ROUTE_PENDING;  rfont = FONT_NORMAL_BROWN; break;
+                case MP_ROUTE_STATE_ACTIVE:   rkey = TR_MP_EMPIRE_ROUTE_ACTIVE;   rfont = FONT_NORMAL_GREEN; break;
+                case MP_ROUTE_STATE_DISABLED: rkey = TR_MP_EMPIRE_ROUTE_DISABLED; rfont = FONT_NORMAL_RED;   break;
+                case MP_ROUTE_STATE_OFFLINE:  rkey = TR_MP_EMPIRE_ROUTE_OFFLINE;  rfont = FONT_NORMAL_RED;   break;
+                default:                      rkey = TR_MP_EMPIRE_ROUTE_ACTIVE;   rfont = FONT_NORMAL_PLAIN; break;
+            }
+            int state_x = x_offset + item_usable_width - 60;
+            text_draw(translation_for(rkey), state_x, tag_y, rfont, 0);
+        }
+    }
+#endif
     // Move y_offset down for trade info rows
     y_offset += 44;
     if (city->is_open) {
@@ -1294,6 +1344,78 @@ static void draw_city_info(const empire_object *object)
             draw_trade_city_info(object, city);
             break;
     }
+
+#ifdef ENABLE_MULTIPLAYER
+    /* Draw multiplayer ownership info below the city info */
+    if (net_session_is_active() && data.selected_city >= 0 &&
+        empire_city_is_player_owned(data.selected_city)) {
+        int mp_y = data.y_max - 198;
+        int mp_x = (data.panel.x_min + data.panel.x_max) / 2;
+
+        uint8_t owner_pid = mp_ownership_get_city_player_id(data.selected_city);
+        mp_player *owner = mp_player_registry_get(owner_pid);
+        int is_online = mp_ownership_is_city_online(data.selected_city);
+
+        /* "Owner: PlayerName" */
+        const uint8_t *owner_label = translation_for(TR_MP_EMPIRE_OWNER);
+        int label_width = text_draw(owner_label, mp_x - 100, mp_y, FONT_NORMAL_BLACK, 0);
+
+        if (owner && owner->active) {
+            uint8_t name_buf[64];
+            string_copy(string_from_ascii(owner->name), name_buf, 64);
+            font_t name_font = mp_ownership_is_city_local(data.selected_city)
+                ? FONT_NORMAL_GREEN : FONT_NORMAL_WHITE;
+            text_draw(name_buf, mp_x - 100 + label_width + 4, mp_y, name_font, 0);
+        }
+
+        /* Online/Offline status */
+        translation_key status_key = is_online ? TR_MP_EMPIRE_ONLINE : TR_MP_EMPIRE_OFFLINE;
+        const uint8_t *status_text = translation_for(status_key);
+        font_t status_font = is_online ? FONT_NORMAL_GREEN : FONT_NORMAL_RED;
+        text_draw(status_text, mp_x + 40, mp_y, status_font, 0);
+
+        /* Route state indicator for trade cities */
+        if (city->type == EMPIRE_CITY_TRADE && city->route_id >= 0) {
+            mp_route_state rstate = mp_ownership_get_route_state(city->route_id);
+            translation_key route_key;
+            font_t route_font;
+            switch (rstate) {
+                case MP_ROUTE_STATE_PENDING:
+                    route_key = TR_MP_EMPIRE_ROUTE_PENDING;
+                    route_font = FONT_NORMAL_BROWN;
+                    break;
+                case MP_ROUTE_STATE_ACTIVE:
+                    route_key = TR_MP_EMPIRE_ROUTE_ACTIVE;
+                    route_font = FONT_NORMAL_GREEN;
+                    break;
+                case MP_ROUTE_STATE_DISABLED:
+                    route_key = TR_MP_EMPIRE_ROUTE_DISABLED;
+                    route_font = FONT_NORMAL_RED;
+                    break;
+                case MP_ROUTE_STATE_OFFLINE:
+                    route_key = TR_MP_EMPIRE_ROUTE_OFFLINE;
+                    route_font = FONT_NORMAL_RED;
+                    break;
+                default:
+                    route_key = TR_MP_EMPIRE_ROUTE_ACTIVE;
+                    route_font = FONT_NORMAL_PLAIN;
+                    break;
+            }
+
+            /* "Route: Active/Disabled/Offline/Pending" */
+            const uint8_t *route_label = translation_for(TR_MP_TRADE_ADVISOR_ROUTE_STATE);
+            int rlabel_w = text_draw(route_label, mp_x - 100, mp_y + 16, FONT_NORMAL_BLACK, 0);
+            text_draw(translation_for(route_key), mp_x - 100 + rlabel_w + 4, mp_y + 16, route_font, 0);
+
+            /* P2P vs AI route indicator */
+            int is_p2p = mp_ownership_is_route_player_to_player(city->route_id);
+            translation_key type_key = is_p2p ? TR_MP_EMPIRE_ROUTE_P2P : TR_MP_EMPIRE_ROUTE_AI;
+            const uint8_t *type_text = translation_for(type_key);
+            font_t type_font = is_p2p ? FONT_NORMAL_BROWN : FONT_NORMAL_PLAIN;
+            text_draw(type_text, mp_x + 40, mp_y + 16, type_font, 0);
+        }
+    }
+#endif
 }
 
 static void draw_roman_army_info(const empire_object *object)
@@ -1593,6 +1715,57 @@ static void draw_empire_object(const empire_object *obj)
         image_id = assets_lookup_image_id(ASSET_HAGIA_SOPHIA_FIX);
         image_draw(image_id, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, SCALE_NONE);
     }
+
+#ifdef ENABLE_MULTIPLAYER
+    /* Draw player ownership badge on player-owned cities */
+    if (obj->type == EMPIRE_OBJECT_CITY && net_session_is_active()) {
+        int city_id = empire_city_get_for_object(obj->id);
+        if (city_id >= 0 && empire_city_is_player_owned(city_id)) {
+            int badge_x = data.x_draw_offset + x + img->width - 8;
+            int badge_y = data.x_draw_offset != 0 ? data.y_draw_offset + y - 4 : data.y_draw_offset + y - 4;
+            uint8_t owner_pid = mp_ownership_get_city_player_id(city_id);
+            int is_online = mp_ownership_is_city_online(city_id);
+
+            /* Draw colored dot: green = online local, blue = online remote, red = offline */
+            color_t badge_color;
+            if (mp_ownership_is_city_local(city_id)) {
+                badge_color = COLOR_MASK_GREEN;
+            } else if (is_online) {
+                badge_color = COLOR_MASK_BLUE;
+            } else {
+                badge_color = COLOR_MASK_RED;
+            }
+
+            /* Draw a small filled circle as ownership indicator */
+            graphics_draw_rect(badge_x, badge_y, 8, 8, badge_color);
+            graphics_draw_rect(badge_x + 1, badge_y + 1, 6, 6, badge_color);
+
+            /* Draw player initial on top */
+            mp_player *owner = mp_player_registry_get(owner_pid);
+            if (owner && owner->active && owner->name[0]) {
+                char initial[2] = { owner->name[0], '\0' };
+                uint8_t initial_buf[4];
+                string_copy(string_from_ascii(initial), initial_buf, 4);
+                text_draw(initial_buf, badge_x + 1, badge_y - 1, FONT_SMALL_PLAIN, 0);
+            }
+
+            /* Draw route state indicator if trade city has a route */
+            const empire_city *city = empire_city_get(city_id);
+            if (city && city->type == EMPIRE_CITY_TRADE && city->route_id >= 0) {
+                mp_route_state rstate = mp_ownership_get_route_state(city->route_id);
+                if (rstate == MP_ROUTE_STATE_DISABLED || rstate == MP_ROUTE_STATE_OFFLINE) {
+                    /* Draw small X or slash over route indicator */
+                    int rx = data.x_draw_offset + x - 4;
+                    int ry = data.y_draw_offset + y - 4;
+                    color_t state_color = (rstate == MP_ROUTE_STATE_OFFLINE)
+                        ? COLOR_MASK_RED : COLOR_MASK_LEGION_HIGHLIGHT;
+                    graphics_draw_line(rx, rx + 6, ry, ry + 6, state_color);
+                    graphics_draw_line(rx + 6, rx, ry, ry + 6, state_color);
+                }
+            }
+        }
+    }
+#endif
 }
 
 static void empire_draw_object_trade_route(const empire_object *obj)
@@ -1784,6 +1957,25 @@ static void draw_foreground(void)
     draw_object_info();
     draw_panel_buttons();
     draw_trade_button_highlights();
+
+#ifdef ENABLE_MULTIPLAYER
+    /* Draw command feedback indicator */
+    if (net_session_is_active()) {
+        mp_command_status last_status = mp_command_bus_get_last_status();
+        if (last_status == MP_CMD_STATUS_PENDING) {
+            const uint8_t *pending_text = translation_for(TR_MP_EMPIRE_ROUTE_PENDING);
+            text_draw_centered(pending_text,
+                data.panel.x_min, data.y_max - 16, data.panel.x_max - data.panel.x_min,
+                FONT_NORMAL_BROWN, 0);
+        } else if (last_status == MP_CMD_STATUS_REJECTED) {
+            uint8_t reject_buf[32];
+            string_copy(string_from_ascii("Command Rejected"), reject_buf, 32);
+            text_draw_centered(reject_buf,
+                data.panel.x_min, data.y_max - 16, data.panel.x_max - data.panel.x_min,
+                FONT_NORMAL_RED, 0);
+        }
+    }
+#endif
 }
 
 static void determine_selected_object(const mouse *m)
@@ -2189,6 +2381,20 @@ static void confirmed_open_trade_by_route(int accepted, int checked)
 {
     if (accepted) {
         int city_id = empire_city_get_for_trade_route(data.selected_trade_route);
+#ifdef ENABLE_MULTIPLAYER
+        if (net_session_is_active()) {
+            /* Route trade through the command bus for authoritative validation */
+            mp_command cmd;
+            memset(&cmd, 0, sizeof(cmd));
+            cmd.command_type = MP_CMD_OPEN_TRADE_ROUTE;
+            cmd.player_id = net_session_get_local_player_id();
+            cmd.data.open_route.route_id = data.selected_trade_route;
+            cmd.data.open_route.city_id = city_id;
+            mp_command_bus_submit(&cmd);
+            /* Don't show trade_opened window immediately — wait for host ack */
+            return;
+        }
+#endif
         empire_city_open_trade(city_id, 1);
         building_menu_update();
         window_trade_opened_show(city_id);
@@ -2197,6 +2403,24 @@ static void confirmed_open_trade_by_route(int accepted, int checked)
 
 static void button_open_trade_by_route(int route_id)
 {
+#ifdef ENABLE_MULTIPLAYER
+    if (net_session_is_active()) {
+        /* Check if the city for this route is offline */
+        int city_id = empire_city_get_for_trade_route(route_id);
+        if (city_id >= 0 && empire_city_is_player_owned(city_id)) {
+            if (!mp_ownership_is_city_online(city_id)) {
+                /* City is offline — don't allow trade opening */
+                city_warning_show(WARNING_NOT_AVAILABLE, NEW_WARNING_SLOT);
+                return;
+            }
+            mp_route_state rstate = mp_ownership_get_route_state(route_id);
+            if (rstate == MP_ROUTE_STATE_DISABLED || rstate == MP_ROUTE_STATE_OFFLINE) {
+                city_warning_show(WARNING_NOT_AVAILABLE, NEW_WARNING_SLOT);
+                return;
+            }
+        }
+    }
+#endif
     data.selected_trade_route = route_id;
     window_popup_dialog_show(POPUP_DIALOG_OPEN_TRADE, confirmed_open_trade_by_route, 2);
 }

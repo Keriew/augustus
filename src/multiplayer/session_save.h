@@ -9,22 +9,34 @@
  * Multiplayer session save/load.
  * Only the host creates authoritative saves.
  * Saves include multiplayer metadata alongside the normal save data.
+ *
+ * Saved domains:
+ *   - Session metadata (seed, protocol, checksums)
+ *   - Player registry (UUIDs, slots, reconnect tokens)
+ *   - Ownership tables (cities, routes with lifecycle, traders)
+ *   - Spawn table (worldgen results)
+ *   - Empire sync (trade views)
+ *   - Trade sync (route state, trader replicas)
+ *   - Time sync (authoritative tick)
  */
 
 #define MP_SAVE_MAGIC       0x4D504C59  /* "MPLY" */
-#define MP_SAVE_VERSION     1
+#define MP_SAVE_VERSION     2
 
 typedef struct {
     uint32_t magic;
     uint32_t version;
     uint32_t protocol_version;
     uint32_t session_id;
+    uint32_t session_seed;
     uint8_t host_player_id;
     uint8_t player_count;
     uint32_t snapshot_tick;
     uint32_t checksum;
+    /* Domain sizes */
     uint32_t player_registry_size;
     uint32_t ownership_size;
+    uint32_t worldgen_size;
     uint32_t empire_sync_size;
     uint32_t trade_sync_routes_size;
     uint32_t trade_sync_traders_size;

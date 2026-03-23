@@ -92,10 +92,10 @@ static void refresh_player_list(void)
 static translation_key quality_translation(net_peer_quality quality)
 {
     switch (quality) {
-        case NET_PEER_QUALITY_GOOD: return TR_MP_STATUS_QUALITY_GOOD;
-        case NET_PEER_QUALITY_DEGRADED: return TR_MP_STATUS_QUALITY_DEGRADED;
-        case NET_PEER_QUALITY_POOR: return TR_MP_STATUS_QUALITY_POOR;
-        case NET_PEER_QUALITY_CRITICAL: return TR_MP_STATUS_QUALITY_CRITICAL;
+        case PEER_QUALITY_GOOD: return TR_MP_STATUS_QUALITY_GOOD;
+        case PEER_QUALITY_DEGRADED: return TR_MP_STATUS_QUALITY_DEGRADED;
+        case PEER_QUALITY_POOR: return TR_MP_STATUS_QUALITY_POOR;
+        case PEER_QUALITY_CRITICAL: return TR_MP_STATUS_QUALITY_CRITICAL;
         default: return TR_MP_STATUS_QUALITY_UNKNOWN;
     }
 }
@@ -103,10 +103,10 @@ static translation_key quality_translation(net_peer_quality quality)
 static font_t quality_font(net_peer_quality quality)
 {
     switch (quality) {
-        case NET_PEER_QUALITY_GOOD: return FONT_NORMAL_GREEN;
-        case NET_PEER_QUALITY_DEGRADED: return FONT_NORMAL_BROWN;
-        case NET_PEER_QUALITY_POOR: return FONT_NORMAL_RED;
-        case NET_PEER_QUALITY_CRITICAL: return FONT_NORMAL_RED;
+        case PEER_QUALITY_GOOD: return FONT_NORMAL_GREEN;
+        case PEER_QUALITY_DEGRADED: return FONT_NORMAL_BROWN;
+        case PEER_QUALITY_POOR: return FONT_NORMAL_RED;
+        case PEER_QUALITY_CRITICAL: return FONT_NORMAL_RED;
         default: return FONT_NORMAL_PLAIN;
     }
 }
@@ -139,8 +139,7 @@ static void draw_player_item(const list_box_item *item)
     /* Ping / quality for remote players */
     if (!player->is_local) {
         const net_peer *peer = 0;
-        int peer_count = net_session_get_peer_count();
-        for (int i = 0; i < peer_count; i++) {
+        for (int i = 0; i < NET_MAX_PEERS; i++) {
             const net_peer *p = net_session_get_peer(i);
             if (p && p->active && p->player_id == player->player_id) {
                 peer = p;
@@ -179,7 +178,7 @@ static void select_player(unsigned int index, int is_double_click)
 static void button_resync(const generic_button *button)
 {
     if (net_session_is_client()) {
-        mp_resync_request();
+        mp_resync_request_full_snapshot();
     }
 }
 

@@ -27,6 +27,8 @@ void mp_time_sync_set_confirmed_tick(uint32_t tick);
 /* Speed/pause control */
 int mp_time_sync_is_paused(void);
 uint8_t mp_time_sync_get_speed(void);
+void mp_time_sync_set_paused(int paused);
+void mp_time_sync_set_speed(uint8_t speed);
 
 /* Serialization */
 void mp_time_sync_serialize(uint8_t *buffer, uint32_t *size);

@@ -8,12 +8,14 @@
 #include "trade_sync.h"
 #include "time_sync.h"
 #include "checksum.h"
+#include "worldgen.h"
 #include "network/session.h"
 #include "network/serialize.h"
 #include "network/protocol.h"
 #include "core/log.h"
 
 #include <string.h>
+#include <stdlib.h>
 
 #define DOMAIN_BUFFER_SIZE 32768
 
@@ -30,13 +32,14 @@ int mp_session_save_to_buffer(uint8_t *buffer, uint32_t buffer_size, uint32_t *o
     header.version = MP_SAVE_VERSION;
     header.protocol_version = NET_PROTOCOL_VERSION;
     header.session_id = net_session_get()->session_id;
+    header.session_seed = mp_worldgen_get_spawn_table()->session_seed;
     header.host_player_id = net_session_get_local_player_id();
     header.player_count = (uint8_t)mp_player_registry_get_count();
     header.snapshot_tick = net_session_get_authoritative_tick();
     header.checksum = mp_checksum_compute();
 
     /* Serialize each domain into temporary buffers */
-    uint8_t *temp = (uint8_t *)malloc(DOMAIN_BUFFER_SIZE * 6);
+    uint8_t *temp = (uint8_t *)malloc(DOMAIN_BUFFER_SIZE * 7);
     if (!temp) {
         log_error("Failed to allocate save buffer", 0, 0);
         return 0;
@@ -44,22 +47,28 @@ int mp_session_save_to_buffer(uint8_t *buffer, uint32_t buffer_size, uint32_t *o
 
     uint8_t *player_buf = temp;
     uint8_t *ownership_buf = temp + DOMAIN_BUFFER_SIZE;
-    uint8_t *empire_buf = temp + DOMAIN_BUFFER_SIZE * 2;
-    uint8_t *routes_buf = temp + DOMAIN_BUFFER_SIZE * 3;
-    uint8_t *traders_buf = temp + DOMAIN_BUFFER_SIZE * 4;
-    uint8_t *time_buf = temp + DOMAIN_BUFFER_SIZE * 5;
+    uint8_t *worldgen_buf = temp + DOMAIN_BUFFER_SIZE * 2;
+    uint8_t *empire_buf = temp + DOMAIN_BUFFER_SIZE * 3;
+    uint8_t *routes_buf = temp + DOMAIN_BUFFER_SIZE * 4;
+    uint8_t *traders_buf = temp + DOMAIN_BUFFER_SIZE * 5;
+    uint8_t *time_buf = temp + DOMAIN_BUFFER_SIZE * 6;
 
     mp_player_registry_serialize(player_buf, &header.player_registry_size);
     mp_ownership_serialize(ownership_buf, &header.ownership_size);
+    mp_worldgen_serialize(worldgen_buf, &header.worldgen_size);
     mp_empire_sync_serialize(empire_buf, &header.empire_sync_size);
     mp_trade_sync_serialize_routes(routes_buf, &header.trade_sync_routes_size);
     mp_trade_sync_serialize_traders(traders_buf, &header.trade_sync_traders_size);
     mp_time_sync_serialize(time_buf, &header.time_sync_size);
 
     /* Calculate total size */
-    uint32_t total = sizeof(mp_save_header)
+    /* Header fields: magic(4) + version(4) + proto(4) + session_id(4) + seed(4) +
+       host_id(1) + count(1) + tick(4) + checksum(4) + 7*domain_size(28) = 58 bytes */
+    uint32_t header_wire_size = 58;
+    uint32_t total = header_wire_size
                    + header.player_registry_size
                    + header.ownership_size
+                   + header.worldgen_size
                    + header.empire_sync_size
                    + header.trade_sync_routes_size
                    + header.trade_sync_traders_size
@@ -78,20 +87,23 @@ int mp_session_save_to_buffer(uint8_t *buffer, uint32_t buffer_size, uint32_t *o
     net_write_u32(&s, header.version);
     net_write_u32(&s, header.protocol_version);
     net_write_u32(&s, header.session_id);
+    net_write_u32(&s, header.session_seed);
     net_write_u8(&s, header.host_player_id);
     net_write_u8(&s, header.player_count);
     net_write_u32(&s, header.snapshot_tick);
     net_write_u32(&s, header.checksum);
     net_write_u32(&s, header.player_registry_size);
     net_write_u32(&s, header.ownership_size);
+    net_write_u32(&s, header.worldgen_size);
     net_write_u32(&s, header.empire_sync_size);
     net_write_u32(&s, header.trade_sync_routes_size);
     net_write_u32(&s, header.trade_sync_traders_size);
     net_write_u32(&s, header.time_sync_size);
 
-    /* Write domains */
+    /* Write domains in order */
     net_write_raw(&s, player_buf, header.player_registry_size);
     net_write_raw(&s, ownership_buf, header.ownership_size);
+    net_write_raw(&s, worldgen_buf, header.worldgen_size);
     net_write_raw(&s, empire_buf, header.empire_sync_size);
     net_write_raw(&s, routes_buf, header.trade_sync_routes_size);
     net_write_raw(&s, traders_buf, header.trade_sync_traders_size);
@@ -114,9 +126,9 @@ int mp_session_load_from_buffer(const uint8_t *buffer, uint32_t size)
     net_serializer s;
     net_serializer_init(&s, (uint8_t *)buffer, size);
 
-    /* Skip past header (we already read it) */
-    size_t header_bytes = 4 + 4 + 4 + 4 + 1 + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4;
-    s.position = header_bytes;
+    /* Skip past header */
+    uint32_t header_wire_size = 58;
+    s.position = header_wire_size;
 
     /* Read each domain */
     if (header.player_registry_size > 0) {
@@ -129,6 +141,12 @@ int mp_session_load_from_buffer(const uint8_t *buffer, uint32_t size)
         const uint8_t *data = buffer + s.position;
         mp_ownership_deserialize(data, header.ownership_size);
         s.position += header.ownership_size;
+    }
+
+    if (header.worldgen_size > 0) {
+        const uint8_t *data = buffer + s.position;
+        mp_worldgen_deserialize(data, header.worldgen_size);
+        s.position += header.worldgen_size;
     }
 
     if (header.empire_sync_size > 0) {
@@ -155,6 +173,15 @@ int mp_session_load_from_buffer(const uint8_t *buffer, uint32_t size)
         s.position += header.time_sync_size;
     }
 
+    /* Mark all players as awaiting_reconnect (except host on restore) */
+    for (int i = 0; i < MP_MAX_PLAYERS; i++) {
+        mp_player *p = mp_player_registry_get((uint8_t)i);
+        if (p && p->active && !p->is_host) {
+            p->status = MP_PLAYER_AWAITING_RECONNECT;
+            p->connection_state = MP_CONNECTION_DISCONNECTED;
+        }
+    }
+
     log_info("Multiplayer session loaded", 0, 0);
     return 1;
 }
@@ -173,7 +200,7 @@ int mp_session_save_is_multiplayer(const uint8_t *buffer, uint32_t size)
 
 int mp_session_save_read_header(const uint8_t *buffer, uint32_t size, mp_save_header *header)
 {
-    if (size < sizeof(mp_save_header)) {
+    if (size < 58) {
         return 0;
     }
 
@@ -184,12 +211,14 @@ int mp_session_save_read_header(const uint8_t *buffer, uint32_t size, mp_save_he
     header->version = net_read_u32(&s);
     header->protocol_version = net_read_u32(&s);
     header->session_id = net_read_u32(&s);
+    header->session_seed = net_read_u32(&s);
     header->host_player_id = net_read_u8(&s);
     header->player_count = net_read_u8(&s);
     header->snapshot_tick = net_read_u32(&s);
     header->checksum = net_read_u32(&s);
     header->player_registry_size = net_read_u32(&s);
     header->ownership_size = net_read_u32(&s);
+    header->worldgen_size = net_read_u32(&s);
     header->empire_sync_size = net_read_u32(&s);
     header->trade_sync_routes_size = net_read_u32(&s);
     header->trade_sync_traders_size = net_read_u32(&s);
@@ -201,6 +230,12 @@ int mp_session_save_read_header(const uint8_t *buffer, uint32_t size, mp_save_he
     if (header->version > MP_SAVE_VERSION) {
         log_error("Unsupported multiplayer save version", 0, (int)header->version);
         return 0;
+    }
+
+    /* Handle v1 saves that don't have worldgen */
+    if (header->version < 2) {
+        header->worldgen_size = 0;
+        header->session_seed = 0;
     }
 
     return 1;

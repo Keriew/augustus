@@ -781,9 +781,11 @@ if(ENABLE_MULTIPLAYER)
         ${PROJECT_SOURCE_DIR}/src/multiplayer/time_sync.c
         ${PROJECT_SOURCE_DIR}/src/multiplayer/resync.c
         ${PROJECT_SOURCE_DIR}/src/multiplayer/session_save.c
+        ${PROJECT_SOURCE_DIR}/src/multiplayer/worldgen.c
         ${PROJECT_SOURCE_DIR}/src/window/multiplayer_connect.c
         ${PROJECT_SOURCE_DIR}/src/window/multiplayer_lobby.c
         ${PROJECT_SOURCE_DIR}/src/window/multiplayer_status.c
+        ${PROJECT_SOURCE_DIR}/src/window/multiplayer_chat.c
     )
 endif()
 
