@@ -33,7 +33,7 @@ static int write_and_validate(const char *path, const uint8_t *data, uint32_t si
 
     size_t written = fwrite(data, 1, size, fp);
     if (written != size) {
-        log_error("mp_safe_file: fwrite incomplete", (int)written, (int)size);
+        log_error("mp_safe_file: fwrite incomplete", 0, (int)size);
         fclose(fp);
         platform_file_manager_remove_file(path);
         return 0;
@@ -78,7 +78,7 @@ static int write_and_validate(const char *path, const uint8_t *data, uint32_t si
     fclose(fp);
 
     if (file_size != (long)size) {
-        log_error("mp_safe_file: size mismatch after write", (int)file_size, (int)size);
+        log_error("mp_safe_file: size mismatch after write", 0, (int)size);
         platform_file_manager_remove_file(path);
         return 0;
     }
@@ -150,7 +150,7 @@ int mp_safe_file_read(const char *path, uint8_t *buffer,
     fseek(fp, 0, SEEK_SET);
 
     if (file_size <= 0 || (uint32_t)file_size > max_size) {
-        log_error("mp_safe_file: file too large or empty", (int)file_size, (int)max_size);
+        log_error("mp_safe_file: file too large or empty", 0, (int)file_size);
         fclose(fp);
         return 0;
     }
@@ -159,7 +159,7 @@ int mp_safe_file_read(const char *path, uint8_t *buffer,
     fclose(fp);
 
     if (read != (size_t)file_size) {
-        log_error("mp_safe_file: incomplete read", (int)read, (int)file_size);
+        log_error("mp_safe_file: incomplete read", 0, (int)file_size);
         return 0;
     }
 

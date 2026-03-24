@@ -526,7 +526,7 @@ int mp_bootstrap_host_resume_game(void)
 
     MP_LOG_INFO("BOOT", "Loading saved game: '%s'", boot_data.save_filename);
 
-    int load_result = game_file_load_saved_game(name_buf);
+    int load_result = game_file_load_saved_game((const char *)name_buf);
     if (load_result != 1) {
         MP_LOG_ERROR("BOOT", "Failed to load saved game: '%s' (result=%d)",
                      boot_data.save_filename, load_result);
