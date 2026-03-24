@@ -2,6 +2,7 @@
 
 #ifdef ENABLE_MULTIPLAYER
 
+#include "mp_trade_route.h"
 #include "ownership.h"
 #include "network/session.h"
 #include "network/serialize.h"
@@ -166,7 +167,23 @@ void mp_trade_sync_emit_trader_trade_executed(int figure_id, int resource,
         t->state_version++;
     }
 
-    uint8_t buf[48];
+    /* Resolve route_instance_id from the Augustus route */
+    uint32_t route_instance_id = 0;
+    int route_id = t ? t->route_id : mp_ownership_get_trader_route(figure_id);
+    if (route_id >= 0) {
+        mp_trade_route_instance *mpr = mp_trade_route_find_by_augustus_route(route_id);
+        if (mpr) {
+            route_instance_id = mpr->instance_id;
+            /* Also record in the mp_trade_route counters */
+            if (buying) {
+                mp_trade_route_record_import(route_instance_id, resource, amount);
+            } else {
+                mp_trade_route_record_export(route_instance_id, resource, amount);
+            }
+        }
+    }
+
+    uint8_t buf[64];
     net_serializer s;
     net_serializer_init(&s, buf, sizeof(buf));
     net_write_u16(&s, NET_EVENT_TRADER_TRADE_EXECUTED);
@@ -177,6 +194,7 @@ void mp_trade_sync_emit_trader_trade_executed(int figure_id, int resource,
     net_write_i32(&s, amount);
     net_write_u8(&s, (uint8_t)buying);
     net_write_i32(&s, building_id);
+    net_write_u32(&s, route_instance_id);
     net_write_u32(&s, t ? t->state_version : 0);
 
     net_session_broadcast(NET_MSG_HOST_EVENT, buf, (uint32_t)net_serializer_position(&s));
@@ -366,6 +384,7 @@ void mp_trade_sync_handle_event(uint16_t event_type,
             int amount = net_read_i32(&s);
             uint8_t buying = net_read_u8(&s);
             int building_id = net_read_i32(&s);
+            uint32_t route_instance_id = net_read_u32(&s);
             uint32_t version = net_read_u32(&s);
 
             /* Client applies the trade result from host */
@@ -373,6 +392,14 @@ void mp_trade_sync_handle_event(uint16_t event_type,
             int route_id = t ? t->route_id : mp_ownership_get_trader_route(figure_id);
             if (trade_route_is_valid(route_id) && resource >= RESOURCE_MIN && resource < RESOURCE_MAX) {
                 trade_route_increase_traded(route_id, resource, buying);
+            }
+            /* Update mp_trade_route_instance counters on client */
+            if (route_instance_id > 0) {
+                if (buying) {
+                    mp_trade_route_record_import(route_instance_id, resource, amount);
+                } else {
+                    mp_trade_route_record_export(route_instance_id, resource, amount);
+                }
             }
 
             /* Apply warehouse/granary mutation on client so stock stays in sync */

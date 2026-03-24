@@ -3,6 +3,8 @@
 #ifdef ENABLE_MULTIPLAYER
 
 #include "game_manifest.h"
+#include "mp_trade_route.h"
+#include "trade_execution.h"
 #include "scenario_selection.h"
 #include "mp_debug_log.h"
 #include "player_registry.h"
@@ -106,6 +108,8 @@ void mp_bootstrap_bind_loaded_scenario(void)
 
     /* 2. Initialize subsystems (but NOT player_registry — preserve lobby roster) */
     mp_ownership_init();
+    mp_trade_route_init();
+    mp_trade_execution_init();
     mp_empire_sync_init();
     mp_time_sync_init();
     mp_command_bus_init();

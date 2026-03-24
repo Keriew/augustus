@@ -70,6 +70,8 @@
 #include "multiplayer/checksum.h"
 #include "multiplayer/empire_sync.h"
 #include "multiplayer/trade_sync.h"
+#include "multiplayer/trade_execution.h"
+#include "multiplayer/mp_trade_route.h"
 #include "multiplayer/snapshot.h"
 #include "network/session.h"
 #include <stdlib.h>
@@ -83,6 +85,9 @@ static void advance_year(void)
     city_population_request_yearly_update();
     city_finance_handle_year_change();
     empire_city_reset_yearly_trade_amounts();
+#ifdef ENABLE_MULTIPLAYER
+    mp_trade_execution_on_year_change();
+#endif
     building_maintenance_update_fire_direction();
     city_ratings_update(1, 0);
 }

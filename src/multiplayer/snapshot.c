@@ -5,6 +5,7 @@
 #include "player_registry.h"
 #include "ownership.h"
 #include "trade_sync.h"
+#include "mp_trade_route.h"
 #include "empire_sync.h"
 #include "time_sync.h"
 #include "worldgen.h"
@@ -84,6 +85,12 @@ int mp_snapshot_build_full(uint8_t *buffer, uint32_t buffer_size, uint32_t *out_
     header.domain_sizes[MP_SNAPSHOT_TRADER_ENTITIES] = domain_size;
     write_pos += domain_size;
 
+    /* Domain: P2P Routes (mp_trade_route_instance table) */
+    header.domain_offsets[MP_SNAPSHOT_P2P_ROUTES] = write_pos;
+    mp_trade_route_serialize(buffer + write_pos, &domain_size, buffer_size - write_pos);
+    header.domain_sizes[MP_SNAPSHOT_P2P_ROUTES] = domain_size;
+    write_pos += domain_size;
+
     /* Domain: Worldgen (spawn table) */
     header.domain_offsets[MP_SNAPSHOT_WORLDGEN] = write_pos;
     mp_worldgen_serialize(buffer + write_pos, &domain_size);
@@ -151,6 +158,12 @@ int mp_snapshot_apply_full(const uint8_t *buffer, uint32_t size)
         mp_trade_sync_deserialize_traders(
             buffer + header.domain_offsets[MP_SNAPSHOT_TRADER_ENTITIES],
             header.domain_sizes[MP_SNAPSHOT_TRADER_ENTITIES]);
+    }
+
+    if (header.domain_sizes[MP_SNAPSHOT_P2P_ROUTES] > 0) {
+        mp_trade_route_deserialize(
+            buffer + header.domain_offsets[MP_SNAPSHOT_P2P_ROUTES],
+            header.domain_sizes[MP_SNAPSHOT_P2P_ROUTES]);
     }
 
     if (header.domain_sizes[MP_SNAPSHOT_WORLDGEN] > 0) {

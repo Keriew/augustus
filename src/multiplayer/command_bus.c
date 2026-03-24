@@ -2,6 +2,7 @@
 
 #ifdef ENABLE_MULTIPLAYER
 
+#include "mp_trade_route.h"
 #include "ownership.h"
 #include "player_registry.h"
 #include "trade_policy.h"
@@ -456,6 +457,28 @@ static void apply_command(mp_command *cmd)
             trade_route_set_player_binding(route_id, cmd->player_id,
                 dest_is_player ? dest_player : 0xFF);
 
+            /* Create the independent P2P route instance */
+            {
+                empire_city *dest_ec = empire_city_get(data->dest_city_id);
+                mp_trade_route_transport transport_type = MP_TROUTE_LAND;
+                if (dest_ec && dest_ec->is_sea_trade) {
+                    transport_type = MP_TROUTE_SEA;
+                }
+                uint32_t inst_id = mp_trade_route_create(
+                    cmd->player_id, data->origin_city_id,
+                    dest_is_player ? dest_player : 0xFF, data->dest_city_id,
+                    route_id, network_id, transport_type);
+                if (inst_id != MP_TRADE_ROUTE_INVALID_ID) {
+                    /* Set initial resource policies matching the Augustus route defaults */
+                    for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+                        if (resource_is_storable(r)) {
+                            mp_trade_route_set_resource_export(inst_id, r, 1, 40);
+                            mp_trade_route_set_resource_import(inst_id, r, 1, 40);
+                        }
+                    }
+                }
+            }
+
             log_info("Trade route created", 0, route_id);
             broadcast_route_created_event(route_id, cmd->player_id, network_id,
                 data->dest_city_id,
@@ -475,6 +498,13 @@ static void apply_command(mp_command *cmd)
 
         case MP_CMD_DELETE_TRADE_ROUTE: {
             int route_id = cmd->data.delete_route.route_id;
+            /* Also delete the mp_trade_route_instance if it exists */
+            {
+                mp_trade_route_instance *mpr = mp_trade_route_find_by_augustus_route(route_id);
+                if (mpr) {
+                    mp_trade_route_delete(mpr->instance_id);
+                }
+            }
             mp_ownership_delete_route(route_id);
             trade_route_clear_player_binding(route_id);
             log_info("Trade route deleted", 0, route_id);
