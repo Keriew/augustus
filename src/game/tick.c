@@ -72,6 +72,7 @@
 #include "multiplayer/trade_sync.h"
 #include "multiplayer/trade_execution.h"
 #include "multiplayer/mp_trade_route.h"
+#include "multiplayer/mp_autosave.h"
 #include "multiplayer/snapshot.h"
 #include "network/session.h"
 #include <stdlib.h>
@@ -131,7 +132,15 @@ static void advance_month(void)
     city_gods_update_blessings();
     tutorial_on_month_tick();
     if (setting_monthly_autosave()) {
+#ifdef ENABLE_MULTIPLAYER
+        /* In multiplayer, the host uses its own autosave system (real-time based).
+         * Skip the standard monthly autosave to avoid save conflicts. */
+        if (!net_session_is_active()) {
+            game_file_write_saved_game(dir_append_location("autosave.svx", PATH_LOCATION_SAVEGAME));
+        }
+#else
         game_file_write_saved_game(dir_append_location("autosave.svx", PATH_LOCATION_SAVEGAME));
+#endif
     }
 
     city_weather_update(game_time_month());
@@ -282,6 +291,13 @@ void game_tick_run(void)
             /* Periodic checksum verification */
             if (mp_checksum_should_check(tick)) {
                 mp_checksum_request_from_clients(tick);
+            }
+
+            /* Mark session dirty on significant time advancement.
+             * Every 50 ticks (~1 game-minute) is frequent enough to ensure
+             * the dirty flag is set for any period of active gameplay. */
+            if (tick % 50 == 0) {
+                mp_autosave_mark_dirty(MP_DIRTY_TIME_ADVANCE);
             }
         }
     }

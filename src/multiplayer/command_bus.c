@@ -3,6 +3,7 @@
 #ifdef ENABLE_MULTIPLAYER
 
 #include "mp_trade_route.h"
+#include "mp_autosave.h"
 #include "trade_execution.h"
 #include "ownership.h"
 #include "player_registry.h"
@@ -36,6 +37,14 @@ void mp_command_bus_init(void)
 {
     memset(&bus, 0, sizeof(bus));
     bus.next_sequence_id = 1;
+}
+
+void mp_command_bus_init_from_save(uint32_t next_sequence_id)
+{
+    /* Clear queue and status but preserve the sequence counter from save.
+     * This ensures command IDs never repeat after resume. */
+    memset(&bus, 0, sizeof(bus));
+    bus.next_sequence_id = (next_sequence_id > 0) ? next_sequence_id : 1;
 }
 
 void mp_command_bus_clear(void)
@@ -709,6 +718,9 @@ static void apply_command(mp_command *cmd)
     }
 
     cmd->status = MP_CMD_STATUS_APPLIED;
+
+    /* Mark session dirty: a gameplay command was applied, state has changed */
+    mp_autosave_mark_dirty(MP_DIRTY_CONSTRUCTION | MP_DIRTY_ROUTE_CHANGED);
 }
 
 static void send_ack(uint8_t player_id, uint32_t sequence_id, int accepted, uint8_t reason)

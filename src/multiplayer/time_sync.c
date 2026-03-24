@@ -22,6 +22,22 @@ void mp_time_sync_init(void)
     time_data.speed = 2;
 }
 
+void mp_time_sync_init_from_save(void)
+{
+    /* After deserialize, confirmed_tick and local_tick are restored from save.
+     * Ensure they are unified: the authoritative tick is the single source of truth.
+     * Do NOT reset to zero — that would cause tick divergence on resume. */
+    if (time_data.confirmed_tick > 0 || time_data.local_tick > 0) {
+        /* Unify: both should match the max of the two (the authoritative value) */
+        uint32_t auth_tick = time_data.confirmed_tick > time_data.local_tick
+                           ? time_data.confirmed_tick
+                           : time_data.local_tick;
+        time_data.confirmed_tick = auth_tick;
+        time_data.local_tick = auth_tick;
+        log_info("Time sync restored from save", "tick", (int)auth_tick);
+    }
+}
+
 int mp_time_sync_can_advance_tick(void)
 {
     if (time_data.paused) {

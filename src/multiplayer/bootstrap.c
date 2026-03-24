@@ -4,6 +4,7 @@
 
 #include "game_manifest.h"
 #include "mp_trade_route.h"
+#include "mp_autosave.h"
 #include "trade_execution.h"
 #include "scenario_selection.h"
 #include "mp_debug_log.h"
@@ -54,6 +55,7 @@ void mp_bootstrap_reset(void)
     memset(boot_data.scenario_name, 0, sizeof(boot_data.scenario_name));
     mp_game_manifest_clear();
     scenario_empire_set_multiplayer_mode(0);
+    mp_autosave_reset();
 }
 
 mp_boot_state mp_bootstrap_get_state(void)
@@ -164,6 +166,11 @@ void mp_bootstrap_bind_loaded_scenario(void)
         MP_LOG_INFO("BOOT", "City %d assigned to player %d (slot %d, %s)",
                     city_id, (int)player->player_id, (int)spawn->slot_id,
                     player->player_id == local_id ? "local" : "remote");
+    }
+
+    /* 4. Initialize autosave system on host */
+    if (net_session_is_host()) {
+        mp_autosave_init();
     }
 
     MP_LOG_INFO("BOOT", "Multiplayer subsystems bound to scenario");
@@ -329,31 +336,27 @@ int mp_bootstrap_client_prepare(const uint8_t *payload, uint32_t size)
 
     /* Check if this is a resume from save */
     if (manifest->mode == MP_GAME_MODE_SAVED_GAME) {
-        MP_LOG_INFO("BOOT", "Client resume mode: loading saved game '%s'",
-                    manifest->scenario_name);
+        MP_LOG_INFO("BOOT", "Client resume mode: waiting for host snapshot (no local save needed)");
         strncpy(boot_data.save_filename, manifest->scenario_name,
                 MP_MANIFEST_SCENARIO_NAME_MAX - 1);
         boot_data.is_resume = 1;
         boot_data.state = MP_BOOT_PREPARING;
 
-        /* Load the same save file locally */
-        uint8_t name_buf[MP_MANIFEST_SCENARIO_NAME_MAX];
-        string_copy(string_from_ascii(manifest->scenario_name), name_buf,
-                    MP_MANIFEST_SCENARIO_NAME_MAX);
+        /* CLIENT DOES NOT LOAD SAVE LOCALLY.
+         * In the new architecture, the client receives all state from the host
+         * via snapshot. This eliminates the dependency on having the .sav file
+         * on the client machine.
+         *
+         * Instead, we just enable multiplayer mode and wait for the snapshot
+         * and GAME_START_FINAL from host. */
+        scenario_empire_set_multiplayer_mode(1);
 
-        int load_result = game_file_load_saved_game(name_buf);
-        if (load_result != 1) {
-            MP_LOG_ERROR("BOOT", "Client failed to load saved game '%s' (result=%d)",
-                         manifest->scenario_name, load_result);
-            return 0;
-        }
-
-        /* Rebind from save (not fresh scenario) */
-        mp_bootstrap_rebind_loaded_save();
+        /* Initialize minimal stateless subsystems for receiving snapshot */
+        mp_checksum_init();
+        mp_resync_init();
 
         boot_data.state = MP_BOOT_LOADED;
-        MP_LOG_INFO("BOOT", "Client prepared: save '%s' loaded, waiting for snapshot",
-                    manifest->scenario_name);
+        MP_LOG_INFO("BOOT", "Client prepared for resume: waiting for snapshot from host");
         return 1;
     }
 
@@ -401,9 +404,15 @@ int mp_bootstrap_client_enter_game(void)
     MP_LOG_INFO("BOOT", "GAME_START_FINAL received — entering game");
 
     if (boot_data.is_resume) {
-        /* Resume mode: subsystems already bound from save, snapshot applied.
-         * Skip worldgen/spawn binding. */
-        MP_LOG_INFO("BOOT", "Client entering resumed game");
+        /* Resume mode: client did NOT load a save locally.
+         * All state comes from the host snapshot that was sent before
+         * GAME_START_FINAL. The snapshot apply handler already set up
+         * ownership, routes, traders, time sync, etc.
+         *
+         * We just need to re-apply city ownership flags from the snapshot data
+         * so the empire map reflects the correct owners. */
+        mp_ownership_reapply_city_owners();
+        MP_LOG_INFO("BOOT", "Client entering resumed game (state from host snapshot)");
     } else {
         /* The spawn table should have arrived via HOST_EVENT before this message.
          * Bind subsystems now that we have both scenario and spawn data. */
@@ -460,17 +469,34 @@ void mp_bootstrap_rebind_loaded_save(void)
     /* 1. Enable multiplayer mode flag */
     scenario_empire_set_multiplayer_mode(1);
 
-    /* 2. Only init stateless/queue subsystems — ownership, routes, etc. come from save */
-    mp_command_bus_init();
+    /* 2. Only init stateless/queue subsystems — ownership, routes, etc. come from save.
+     *
+     * CRITICAL FIX: Do NOT call mp_command_bus_init() here, because it resets
+     * next_sequence_id to 1, destroying the value restored from the save.
+     * The command bus was already initialized with the correct sequence ID
+     * by mp_session_load_from_buffer() -> mp_command_bus_init_from_save().
+     *
+     * Similarly, do NOT call mp_time_sync_init() — the ticks were restored
+     * from the save and must be preserved. Instead, call init_from_save()
+     * to unify the tick values. */
     mp_checksum_init();
     mp_resync_init();
 
-    /* 3. Re-apply empire city ownership flags from deserialized data */
+    /* 3. Unify restored tick values */
+    mp_time_sync_init_from_save();
+
+    /* 4. Re-apply empire city ownership flags from deserialized data */
     mp_ownership_reapply_city_owners();
 
-    /* 4. Re-register cities for trade view replication */
+    /* 5. Re-register cities for trade view replication */
     if (net_session_is_host()) {
         mp_empire_sync_reregister_all_player_cities();
+    }
+
+    /* 6. Initialize autosave system on host */
+    if (net_session_is_host()) {
+        mp_autosave_init();
+        mp_autosave_mark_dirty(MP_DIRTY_RECONNECT); /* Mark dirty so first autosave captures state */
     }
 
     MP_LOG_INFO("BOOT", "Multiplayer subsystems rebound from save");
@@ -490,7 +516,10 @@ int mp_bootstrap_host_resume_game(void)
 
     boot_data.state = MP_BOOT_PREPARING;
 
-    /* 1. Load the saved game — this restores base game state */
+    /* 1. Load the saved game — this restores base game state.
+     *    mp_session_load_from_buffer() is called internally by the save system
+     *    and restores all 7 MP domains + command sequence ID.
+     *    Non-host players are marked AWAITING_RECONNECT. */
     uint8_t name_buf[MP_MANIFEST_SCENARIO_NAME_MAX];
     string_copy(string_from_ascii(boot_data.save_filename), name_buf,
                 MP_MANIFEST_SCENARIO_NAME_MAX);
@@ -505,13 +534,10 @@ int mp_bootstrap_host_resume_game(void)
         return 0;
     }
 
-    /* 2. mp_session_load_from_buffer() was called internally and restored
-     *    all 7 MP domains + marked non-host players as AWAITING_RECONNECT */
-
-    /* 3. Rebind stateless subsystems */
+    /* 2. Rebind stateless subsystems (preserves command bus seq and ticks) */
     mp_bootstrap_rebind_loaded_save();
 
-    /* 4. Mark host player as local and connected */
+    /* 3. Mark host player as local and connected */
     {
         uint8_t host_id = net_session_get_local_player_id();
         mp_player *host_player = mp_player_registry_get(host_id);
@@ -522,12 +548,14 @@ int mp_bootstrap_host_resume_game(void)
         }
     }
 
-    /* 5. Transition to resume lobby */
+    /* 4. Transition to resume lobby */
     boot_data.state = MP_BOOT_RESUME_LOBBY;
 
-    MP_LOG_INFO("BOOT", "Save loaded — entering resume lobby");
+    MP_LOG_INFO("BOOT", "Save loaded — entering resume lobby (tick=%u, seq=%u)",
+                mp_time_sync_get_authoritative_tick(),
+                mp_command_bus_get_next_sequence_id());
 
-    /* 6. Open the resume lobby window */
+    /* 5. Open the resume lobby window */
     extern void window_multiplayer_resume_lobby_show(void);
     window_multiplayer_resume_lobby_show();
 
@@ -576,7 +604,9 @@ int mp_bootstrap_host_launch_resumed_game(void)
         }
     }
 
-    /* 5. Send full snapshot so clients get current MP state */
+    /* 5. Send full snapshot so clients get current MP state.
+     *    This is the authoritative snapshot that clients use to reconstruct
+     *    their entire game state. Clients do NOT load a save file locally. */
     {
         uint8_t *snap_buf = (uint8_t *)malloc(MP_SNAPSHOT_MAX_SIZE);
         if (snap_buf) {
@@ -589,13 +619,13 @@ int mp_bootstrap_host_launch_resumed_game(void)
         }
     }
 
-    /* 6. Send GAME_START_FINAL */
+    /* 6. Send GAME_START_FINAL with restored authoritative tick */
     {
         uint8_t start_buf[8];
         net_serializer ss;
         net_serializer_init(&ss, start_buf, sizeof(start_buf));
-        net_write_u32(&ss, net_session_get_authoritative_tick());
-        net_write_u8(&ss, 2); /* normal speed */
+        net_write_u32(&ss, mp_time_sync_get_authoritative_tick());
+        net_write_u8(&ss, mp_time_sync_get_speed());
         net_session_broadcast(NET_MSG_GAME_START_FINAL, start_buf,
                               (uint32_t)net_serializer_position(&ss));
     }
@@ -607,7 +637,8 @@ int mp_bootstrap_host_launch_resumed_game(void)
     boot_data.state = MP_BOOT_IN_GAME;
     window_city_show();
 
-    MP_LOG_INFO("BOOT", "=== Resumed game launched successfully ===");
+    MP_LOG_INFO("BOOT", "=== Resumed game launched successfully (tick=%u) ===",
+                mp_time_sync_get_authoritative_tick());
     return 1;
 }
 

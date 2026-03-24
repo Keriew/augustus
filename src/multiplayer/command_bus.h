@@ -15,6 +15,7 @@
  */
 
 void mp_command_bus_init(void);
+void mp_command_bus_init_from_save(uint32_t next_sequence_id);
 void mp_command_bus_clear(void);
 
 /**

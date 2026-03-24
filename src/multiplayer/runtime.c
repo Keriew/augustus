@@ -3,6 +3,7 @@
 #ifdef ENABLE_MULTIPLAYER
 
 #include "bootstrap.h"
+#include "mp_autosave.h"
 #include "mp_debug_log.h"
 #include "network/session.h"
 #include "network/discovery_lan.h"
@@ -56,6 +57,12 @@ void multiplayer_runtime_update(void)
     /* Detect session drop while in-game: gracefully return to main menu */
     if (was_playing && !net_session_is_active()) {
         MP_LOG_INFO("SESSION", "Session lost while in-game — returning to main menu");
+
+        /* Attempt final save before cleaning up (host only) */
+        if (scenario_empire_is_multiplayer_mode()) {
+            mp_autosave_final_save();
+        }
+
         mp_bootstrap_reset();
         was_in_game = 0;
         window_main_menu_show(1);
@@ -64,6 +71,10 @@ void multiplayer_runtime_update(void)
     /* 2. Discovery I/O (UDP announce/listen) — runs unconditionally.
      * net_discovery_update() is a no-op if its socket is not open. */
     net_discovery_update();
+
+    /* 3. Autosave timer — runs per-frame, only meaningful on host in-game.
+     * mp_autosave_update() checks all preconditions internally. */
+    mp_autosave_update();
 }
 
 void multiplayer_runtime_shutdown(void)
@@ -71,6 +82,14 @@ void multiplayer_runtime_shutdown(void)
     if (!runtime_initialized) {
         return;
     }
+
+    /* Perform final save on clean shutdown (host only) */
+    if (net_session_is_active() && net_session_is_host() &&
+        scenario_empire_is_multiplayer_mode()) {
+        MP_LOG_INFO("SESSION", "Performing final save before shutdown");
+        mp_autosave_final_save();
+    }
+
     mp_bootstrap_reset();
     was_in_game = 0;
     runtime_initialized = 0;

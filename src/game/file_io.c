@@ -68,6 +68,8 @@
 #include "widget/minimap.h"
 #ifdef ENABLE_MULTIPLAYER
 #include "multiplayer/session_save.h"
+#include "multiplayer/mp_autosave.h"
+#include "network/session.h"
 #endif
 
 #include <stdio.h>
@@ -1007,8 +1009,20 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
 #ifdef ENABLE_MULTIPLAYER
     if (version > SAVE_GAME_LAST_NO_MULTIPLAYER && state->multiplayer_session) {
         if (state->multiplayer_session->size > 0) {
-            mp_session_load_from_buffer(state->multiplayer_session->data,
-                (uint32_t)state->multiplayer_session->size);
+            /* Validate the multiplayer blob before loading */
+            const uint8_t *mp_data = state->multiplayer_session->data;
+            uint32_t mp_size = (uint32_t)state->multiplayer_session->size;
+
+            if (!mp_session_save_is_multiplayer(mp_data, mp_size)) {
+                log_error("Multiplayer save blob has invalid magic — skipping MP load", 0, 0);
+            } else {
+                mp_save_header mp_header;
+                if (!mp_session_save_read_header(mp_data, mp_size, &mp_header)) {
+                    log_error("Multiplayer save header validation failed — skipping MP load", 0, 0);
+                } else if (!mp_session_load_from_buffer(mp_data, mp_size)) {
+                    log_error("Multiplayer session load failed — session may be incomplete", 0, 0);
+                }
+            }
         }
     }
 #endif
@@ -1106,10 +1120,18 @@ static void savegame_save_to_state(savegame_state *state)
 
 #ifdef ENABLE_MULTIPLAYER
     if (scenario_empire_is_multiplayer_mode()) {
-        uint8_t mp_buf[262144]; /* 256KB max */
-        uint32_t mp_size = 0;
-        if (mp_session_save_to_buffer(mp_buf, sizeof(mp_buf), &mp_size) && mp_size > 0) {
-            buffer_write_raw(state->multiplayer_session, mp_buf, mp_size);
+        /* Only the host creates authoritative multiplayer saves.
+         * Clients must NEVER write MP session data — they receive state
+         * from the host via snapshot on reconnect/resume. */
+        if (net_session_is_host()) {
+            uint8_t mp_buf[262144]; /* 256KB max */
+            uint32_t mp_size = 0;
+            if (mp_session_save_to_buffer(mp_buf, sizeof(mp_buf), &mp_size) && mp_size > 0) {
+                buffer_write_raw(state->multiplayer_session, mp_buf, mp_size);
+            }
+            /* Dirty flags are cleared by the autosave system after successful saves */
+        } else {
+            log_info("Skipping multiplayer session save on client", 0, 0);
         }
     }
 #endif

@@ -12,6 +12,13 @@
 
 void mp_time_sync_init(void);
 
+/**
+ * Initialize time sync from a saved session.
+ * Preserves the authoritative tick from the save instead of resetting to zero.
+ * Call after mp_time_sync_deserialize() to ensure ticks are unified.
+ */
+void mp_time_sync_init_from_save(void);
+
 /* Check if the simulation can advance a tick */
 int mp_time_sync_can_advance_tick(void);
 

@@ -18,10 +18,21 @@
  *   - Empire sync (trade views)
  *   - Trade sync (route state, trader replicas)
  *   - Time sync (authoritative tick)
+ *
+ * v4 additions:
+ *   - Total payload size for integrity check
+ *   - Domain count field for forward compatibility
+ *   - Compatibility flags
+ *   - Stronger validation on load
  */
 
 #define MP_SAVE_MAGIC       0x4D504C59  /* "MPLY" */
-#define MP_SAVE_VERSION     3
+#define MP_SAVE_VERSION     4
+#define MP_SAVE_DOMAIN_COUNT 7
+
+/* Compatibility flags */
+#define MP_SAVE_FLAG_HAS_P2P_ROUTES   0x0001
+#define MP_SAVE_FLAG_HAS_TRADE_SYNC   0x0002
 
 typedef struct {
     uint32_t magic;
@@ -42,6 +53,11 @@ typedef struct {
     uint32_t trade_sync_traders_size;
     uint32_t time_sync_size;
     uint32_t next_command_sequence_id;
+    /* v4 fields */
+    uint32_t total_payload_size;    /* Total size of all domain data after header */
+    uint8_t  domain_count;          /* Number of domains (for forward compat) */
+    uint16_t compat_flags;          /* Compatibility flags */
+    uint32_t payload_checksum;      /* Simple checksum of domain payload bytes */
 } mp_save_header;
 
 /* Save multiplayer metadata to buffer */
