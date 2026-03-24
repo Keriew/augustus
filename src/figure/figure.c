@@ -17,6 +17,10 @@
 #include "map/figure.h"
 #include "map/grid.h"
 #include "figure.h"
+#ifdef ENABLE_MULTIPLAYER
+#include "multiplayer/trade_execution.h"
+#include "network/session.h"
+#endif
 
 #define FIGURE_ARRAY_SIZE_STEP 1000
 
@@ -192,6 +196,14 @@ void figure_delete(figure *f)
             }
             break;
     }
+#ifdef ENABLE_MULTIPLAYER
+    if (net_session_is_active() && net_session_is_host()) {
+        if (f->type == FIGURE_TRADE_CARAVAN || f->type == FIGURE_TRADE_SHIP ||
+            f->type == FIGURE_NATIVE_TRADER) {
+            mp_trade_recover_trader_cargo(f->id);
+        }
+    }
+#endif
     if (f->empire_city_id) {
         empire_city_remove_trader(f->empire_city_id, f->id);
     }

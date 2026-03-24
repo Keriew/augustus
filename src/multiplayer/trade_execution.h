@@ -109,6 +109,9 @@ void mp_trade_execute_tick(uint32_t current_tick);
 const mp_trade_transaction *mp_trade_get_last_transaction(void);
 uint32_t mp_trade_get_transaction_count(void);
 
+/* ---- Trader cargo recovery (host-only) ---- */
+void mp_trade_recover_trader_cargo(int figure_id);
+
 /* ---- Annual reset hook ---- */
 void mp_trade_execution_on_year_change(void);
 

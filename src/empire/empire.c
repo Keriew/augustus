@@ -566,7 +566,7 @@ int empire_can_export_resource_to_remote_city(int city_id, int resource)
     if (!view->importable[resource]) {
         return 0;
     }
-    /* Check our local stock and trade status */
+    /* Check our local stock */
     int in_stock;
     if (!resource_is_food(resource) || config_get(CONFIG_GP_CH_ALLOW_EXPORTING_FROM_GRANARIES)) {
         in_stock = city_resource_get_total_amount(resource, 1);
@@ -576,7 +576,9 @@ int empire_can_export_resource_to_remote_city(int city_id, int resource)
     if (in_stock <= city_resource_export_over(resource)) {
         return 0;
     }
-    return (city_resource_trade_status((resource_type)resource) & TRADE_STATUS_EXPORT) == TRADE_STATUS_EXPORT;
+    /* P2P route configuration is the export authorization — no need to check
+     * city_resource_trade_status, which is only set via the trade advisor UI. */
+    return 1;
 }
 
 int empire_can_import_resource_from_remote_city(int city_id, int resource)
@@ -592,9 +594,8 @@ int empire_can_import_resource_from_remote_city(int city_id, int resource)
     if (!view->exportable[resource]) {
         return 0;
     }
-    if (!(city_resource_trade_status(resource) & TRADE_STATUS_IMPORT)) {
-        return 0;
-    }
+    /* P2P route configuration is the import authorization — no need to check
+     * city_resource_trade_status, which is only set via the trade advisor UI. */
     return 1;
 }
 

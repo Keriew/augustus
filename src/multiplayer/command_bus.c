@@ -3,6 +3,7 @@
 #ifdef ENABLE_MULTIPLAYER
 
 #include "mp_trade_route.h"
+#include "trade_execution.h"
 #include "ownership.h"
 #include "player_registry.h"
 #include "trade_policy.h"
@@ -381,6 +382,22 @@ static void apply_command(mp_command *cmd)
         case MP_CMD_CREATE_TRADE_ROUTE: {
             const mp_cmd_create_trade_route *data = &cmd->data.create_route;
 
+            /* Re-validate to guard against same-tick race */
+            {
+                int existing = mp_ownership_find_route_between(data->origin_city_id, data->dest_city_id);
+                if (existing >= 0) {
+                    cmd->status = MP_CMD_STATUS_REJECTED;
+                    cmd->reject_reason = MP_CMD_REJECT_DUPLICATE_ROUTE;
+                    return;
+                }
+                int player_routes = mp_ownership_count_player_routes(cmd->player_id);
+                if (player_routes >= MAX_PLAYER_ROUTES) {
+                    cmd->status = MP_CMD_STATUS_REJECTED;
+                    cmd->reject_reason = MP_CMD_REJECT_ROUTE_CAP_REACHED;
+                    return;
+                }
+            }
+
             /* Determine route owner mode */
             int dest_is_player = mp_ownership_is_city_player_owned(data->dest_city_id);
             uint8_t dest_player = mp_ownership_get_city_player_id(data->dest_city_id);
@@ -498,6 +515,9 @@ static void apply_command(mp_command *cmd)
 
         case MP_CMD_DELETE_TRADE_ROUTE: {
             int route_id = cmd->data.delete_route.route_id;
+            /* Clean up in-transit traders before deleting the route */
+            mp_trade_sync_cleanup_route_traders(route_id);
+            mp_ownership_clear_route_traders(route_id);
             /* Also delete the mp_trade_route_instance if it exists */
             {
                 mp_trade_route_instance *mpr = mp_trade_route_find_by_augustus_route(route_id);
@@ -750,7 +770,10 @@ void multiplayer_command_bus_receive(uint8_t player_id,
 {
     mp_command cmd;
     memset(&cmd, 0, sizeof(cmd));
-    mp_command_deserialize(&cmd, data, size);
+    if (!mp_command_deserialize(&cmd, data, size)) {
+        send_ack(player_id, 0, 0, MP_CMD_REJECT_INVALID);
+        return;
+    }
     cmd.player_id = player_id; /* Override with verified peer player_id */
 
     /* Check player is connected */
@@ -832,6 +855,16 @@ mp_command_status mp_command_bus_get_last_status(void)
 uint8_t mp_command_bus_get_last_reject_reason(void)
 {
     return bus.last_reject_reason;
+}
+
+uint32_t mp_command_bus_get_next_sequence_id(void)
+{
+    return bus.next_sequence_id;
+}
+
+void mp_command_bus_set_next_sequence_id(uint32_t id)
+{
+    bus.next_sequence_id = id > 0 ? id : 1;
 }
 
 #endif /* ENABLE_MULTIPLAYER */

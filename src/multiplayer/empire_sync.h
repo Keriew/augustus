@@ -56,6 +56,9 @@ int mp_empire_sync_can_import_from_remote(int city_id, int resource);
 void mp_empire_sync_serialize(uint8_t *buffer, uint32_t *size);
 void mp_empire_sync_deserialize(const uint8_t *buffer, uint32_t size);
 
+/* Re-register all player cities after save load */
+void mp_empire_sync_reregister_all_player_cities(void);
+
 /* Called from session.c */
 void multiplayer_empire_sync_receive_event(const uint8_t *data, uint32_t size);
 

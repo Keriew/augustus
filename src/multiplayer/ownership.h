@@ -105,6 +105,7 @@ int mp_ownership_get_trader_origin_city(int figure_id);
 int mp_ownership_get_trader_dest_city(int figure_id);
 int mp_ownership_get_trader_route(int figure_id);
 void mp_ownership_clear_trader(int figure_id);
+void mp_ownership_clear_route_traders(int route_id);
 
 /* ---- Network IDs for replication ---- */
 
@@ -120,6 +121,9 @@ uint32_t mp_ownership_allocate_network_entity_id(void);
 /* ---- Trade permission ---- */
 
 int mp_ownership_can_trade(int city_a, int city_b);
+
+/* ---- Reapply after save load ---- */
+void mp_ownership_reapply_city_owners(void);
 
 /* ---- Serialization ---- */
 

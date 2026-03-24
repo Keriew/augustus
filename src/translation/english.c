@@ -2118,6 +2118,15 @@ static translation_string all_strings[] = {
     {TR_MP_P2P_TRADE_THEY_BUY, "They Buy:"},
     {TR_MP_P2P_TRADE_NOTHING, "Nothing configured"},
     {TR_MP_P2P_TRADE_MY_TRADE, "My Trade Settings"},
+    {TR_MP_RESUME_TITLE, "Resume Multiplayer Game"},
+    {TR_MP_RESUME_RECONNECTED, "Reconnected"},
+    {TR_MP_RESUME_AWAITING, "Awaiting..."},
+    {TR_MP_RESUME_WILL_BE_OFFLINE, "Will be Offline"},
+    {TR_MP_RESUME_BUTTON_RESUME, "Resume Game"},
+    {TR_MP_RESUME_BUTTON_LEAVE, "Leave"},
+    {TR_MP_RESUME_PLAYERS, "Players"},
+    {TR_MP_RESUME_STATUS, "Status"},
+    {TR_MP_MENU_RESUME_SAVED, "Resume Saved Game"},
 #endif
 };
 

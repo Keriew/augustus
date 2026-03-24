@@ -265,6 +265,27 @@ void mp_empire_sync_deserialize(const uint8_t *buffer, uint32_t size)
     }
 }
 
+/* ---- Re-register after save load ---- */
+
+void mp_empire_sync_reregister_all_player_cities(void)
+{
+    /* Re-register all existing trade views as player cities.
+     * This is used after loading a save — the views were deserialized,
+     * but the runtime registration needs to happen again. */
+    for (int i = 0; i < sync_data.view_count; i++) {
+        mp_city_trade_view *v = &sync_data.views[i];
+        if (v->city_id <= 0) {
+            continue;
+        }
+        empire_city *ec = empire_city_get(v->city_id);
+        if (ec && ec->in_use) {
+            mp_player_registry_set_city((uint8_t)v->player_id, v->city_id);
+            log_info("Re-registered player city from save", 0, v->city_id);
+        }
+    }
+    sync_data.dirty = 1;
+}
+
 /* ---- Event dispatch from host ---- */
 
 static void handle_route_lifecycle_event(uint16_t event_type, net_serializer *s)

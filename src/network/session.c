@@ -314,6 +314,78 @@ static void handle_hello(net_peer *peer, const uint8_t *payload, uint32_t size)
         return;
     }
 
+    /* If in resume lobby, try reconnect by UUID */
+    if (session.state == NET_SESSION_HOSTING_LOBBY) {
+        extern int mp_bootstrap_is_resume(void);
+        if (mp_bootstrap_is_resume()) {
+            int has_uuid = 0;
+            for (int i = 0; i < 16; i++) {
+                if (player_uuid[i] != 0) {
+                    has_uuid = 1;
+                    break;
+                }
+            }
+            if (has_uuid) {
+                mp_player *existing = mp_player_registry_get_by_uuid(player_uuid);
+                if (existing && existing->active &&
+                    existing->status == MP_PLAYER_AWAITING_RECONNECT) {
+                    /* Reconnect to saved player slot */
+                    uint8_t old_player_id = existing->player_id;
+                    int peer_index = -1;
+                    for (int i = 0; i < NET_MAX_PEERS; i++) {
+                        if (&session.peers[i] == peer) {
+                            peer_index = i;
+                            break;
+                        }
+                    }
+                    if (peer_index >= 0) {
+                        mp_player_registry_handle_reconnect(player_uuid, (uint8_t)peer_index);
+
+                        strncpy(peer->name, existing->name, NET_MAX_PLAYER_NAME - 1);
+                        peer->name[NET_MAX_PLAYER_NAME - 1] = '\0';
+                        net_peer_set_player_id(peer, old_player_id);
+                        peer->state = PEER_STATE_JOINED;
+
+                        /* Mark city online */
+                        if (existing->assigned_city_id >= 0) {
+                            mp_ownership_set_city_online(existing->assigned_city_id, 1);
+                        }
+                        mp_ownership_set_player_routes_online(old_player_id);
+
+                        log_info("Player reconnected in resume lobby", existing->name,
+                                 (int)old_player_id);
+
+                        /* Send JOIN_ACCEPT with reconnect info */
+                        uint8_t accept_buf[128];
+                        net_serializer as;
+                        net_serializer_init(&as, accept_buf, sizeof(accept_buf));
+                        net_write_u8(&as, old_player_id);
+                        net_write_u8(&as, existing->slot_id);
+                        net_write_u32(&as, session.session_id);
+                        net_write_u32(&as, mp_worldgen_get_spawn_table_mutable()->session_seed);
+                        net_write_u8(&as, (uint8_t)(session.peer_count + 1));
+                        net_write_raw(&as, existing->player_uuid, MP_PLAYER_UUID_SIZE);
+                        net_write_raw(&as, existing->reconnect_token, MP_RECONNECT_TOKEN_SIZE);
+                        send_raw_to_peer(peer, NET_MSG_JOIN_ACCEPT, accept_buf,
+                                         (uint32_t)net_serializer_position(&as));
+
+                        /* Broadcast reconnect event */
+                        uint8_t event_buf[32];
+                        net_serializer es;
+                        net_serializer_init(&es, event_buf, sizeof(event_buf));
+                        net_write_u16(&es, NET_EVENT_PLAYER_RECONNECTED);
+                        net_write_u32(&es, session.authoritative_tick);
+                        net_write_u8(&es, old_player_id);
+                        net_session_broadcast(NET_MSG_HOST_EVENT, event_buf,
+                                              (uint32_t)net_serializer_position(&es));
+                        return;
+                    }
+                }
+            }
+            /* Fall through to normal lobby join if UUID didn't match */
+        }
+    }
+
     /* If game is in progress, try reconnect by UUID */
     if (session.state == NET_SESSION_HOSTING_GAME) {
         /* Check for non-zero UUID */

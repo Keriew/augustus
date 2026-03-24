@@ -123,7 +123,7 @@ void mp_command_serialize(const mp_command *cmd, uint8_t *buffer, uint32_t *size
     *size = (uint32_t)net_serializer_position(&s);
 }
 
-void mp_command_deserialize(mp_command *cmd, const uint8_t *buffer, uint32_t size)
+int mp_command_deserialize(mp_command *cmd, const uint8_t *buffer, uint32_t size)
 {
     net_serializer s;
     net_serializer_init(&s, (uint8_t *)buffer, size);
@@ -212,6 +212,11 @@ void mp_command_deserialize(mp_command *cmd, const uint8_t *buffer, uint32_t siz
         default:
             break;
     }
+
+    if (net_serializer_has_overflow(&s)) {
+        return 0;
+    }
+    return 1;
 }
 
 const char *mp_command_type_name(mp_command_type type)

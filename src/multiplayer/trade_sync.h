@@ -40,6 +40,9 @@ void mp_trade_sync_broadcast_route_policy(int route_id, int resource,
 void mp_trade_sync_broadcast_route_limit(int route_id, int resource,
                                           int is_buying, int amount);
 
+/* Host: cleanup all traders on a route being deleted */
+void mp_trade_sync_cleanup_route_traders(int route_id);
+
 /* Client: handle events from host */
 void mp_trade_sync_handle_event(uint16_t event_type,
                                  const uint8_t *data, uint32_t size);

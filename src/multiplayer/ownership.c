@@ -5,6 +5,7 @@
 #include "player_registry.h"
 #include "network/serialize.h"
 #include "network/session.h"
+#include "empire/city.h"
 #include "core/log.h"
 
 #include <string.h>
@@ -477,6 +478,16 @@ void mp_ownership_clear_trader(int figure_id)
     }
 }
 
+void mp_ownership_clear_route_traders(int route_id)
+{
+    for (int i = 0; i < MAX_OWNED_TRADERS; i++) {
+        trader_ownership *t = &ownership_data.traders[i];
+        if (t->in_use && t->route_id == route_id) {
+            memset(t, 0, sizeof(trader_ownership));
+        }
+    }
+}
+
 /* ---- Network IDs ---- */
 
 void mp_ownership_set_network_route_id(int route_id, uint32_t network_id)
@@ -548,6 +559,26 @@ int mp_ownership_can_trade(int city_a, int city_b)
         return 0;
     }
     return mp_ownership_is_route_active(route_id);
+}
+
+/* ---- Reapply after save load ---- */
+
+void mp_ownership_reapply_city_owners(void)
+{
+    uint8_t local_id = net_session_get_local_player_id();
+    for (int i = 0; i < MAX_OWNED_CITIES; i++) {
+        city_ownership *c = &ownership_data.cities[i];
+        if (!c->in_use) {
+            continue;
+        }
+        if (c->owner_type == MP_OWNER_LOCAL_PLAYER || c->owner_type == MP_OWNER_REMOTE_PLAYER) {
+            if (c->player_id == local_id) {
+                empire_city_set_owner(c->city_id, CITY_OWNER_LOCAL, c->player_id);
+            } else {
+                empire_city_set_owner(c->city_id, CITY_OWNER_REMOTE, c->player_id);
+            }
+        }
+    }
 }
 
 /* ---- Serialization ---- */

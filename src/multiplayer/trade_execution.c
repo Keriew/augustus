@@ -14,6 +14,8 @@
 #include "building/building.h"
 #include "building/warehouse.h"
 #include "building/granary.h"
+#include "figure/figure.h"
+#include "figure/trader.h"
 #include "city/resource.h"
 #include "empire/city.h"
 #include "empire/trade_route.h"
@@ -200,11 +202,17 @@ mp_trade_exec_result mp_trade_commit_transaction(uint32_t route_instance_id,
         return import_result;
     }
 
+    /* 2b. Reserve quota before any mutation */
+    mp_trade_route_record_export(route_instance_id, resource, amount);
+    mp_trade_route_record_import(route_instance_id, resource, amount);
+
     /* 3. Remove from source (atomic: if this fails, abort) */
     int removed = 0;
     if (source_building_id > 0) {
         building *src = building_get(source_building_id);
         if (!src) {
+            mp_trade_route_rollback_export(route_instance_id, resource, amount);
+            mp_trade_route_rollback_import(route_instance_id, resource, amount);
             return MP_TRADE_ERR_STORAGE_NOT_FOUND;
         }
         int trader_type = (route->transport == MP_TROUTE_SEA) ? 0 : 1;
@@ -214,6 +222,8 @@ mp_trade_exec_result mp_trade_commit_transaction(uint32_t route_instance_id,
             removed = building_warehouse_remove_export(src, resource, amount, trader_type);
         }
         if (removed <= 0) {
+            mp_trade_route_rollback_export(route_instance_id, resource, amount);
+            mp_trade_route_rollback_import(route_instance_id, resource, amount);
             MP_LOG_WARN("TRADE_EXEC", "Remove from source failed: bld=%d res=%d amt=%d",
                         source_building_id, resource, amount);
             return MP_TRADE_ERR_NO_STOCK;
@@ -239,6 +249,8 @@ mp_trade_exec_result mp_trade_commit_transaction(uint32_t route_instance_id,
                     }
                 }
             }
+            mp_trade_route_rollback_export(route_instance_id, resource, amount);
+            mp_trade_route_rollback_import(route_instance_id, resource, amount);
             return MP_TRADE_ERR_STORAGE_NOT_FOUND;
         }
         int trader_type = (route->transport == MP_TROUTE_SEA) ? 0 : 1;
@@ -246,6 +258,20 @@ mp_trade_exec_result mp_trade_commit_transaction(uint32_t route_instance_id,
             added = building_granary_add_import(dst, resource, removed, trader_type);
         } else {
             added = building_warehouse_add_import(dst, resource, removed, trader_type);
+        }
+        if (added > 0 && added < removed && source_building_id > 0) {
+            /* Partial delivery: return shortfall to source */
+            int shortfall = removed - added;
+            building *src = building_get(source_building_id);
+            if (src) {
+                if (src->type == BUILDING_GRANARY) {
+                    building_granary_add_import(src, resource, shortfall, trader_type);
+                } else {
+                    building_warehouse_add_import(src, resource, shortfall, trader_type);
+                }
+            }
+            MP_LOG_INFO("TRADE_EXEC", "Partial delivery: %d/%d returned %d to source bld=%d",
+                        added, removed, shortfall, source_building_id);
         }
         if (added <= 0) {
             /* Rollback: re-add to source */
@@ -259,6 +285,8 @@ mp_trade_exec_result mp_trade_commit_transaction(uint32_t route_instance_id,
                     }
                 }
             }
+            mp_trade_route_rollback_export(route_instance_id, resource, amount);
+            mp_trade_route_rollback_import(route_instance_id, resource, amount);
             MP_LOG_WARN("TRADE_EXEC", "Add to dest failed: bld=%d res=%d amt=%d",
                         dest_building_id, resource, removed);
             return MP_TRADE_ERR_NO_CAPACITY;
@@ -267,9 +295,12 @@ mp_trade_exec_result mp_trade_commit_transaction(uint32_t route_instance_id,
         added = removed; /* virtual import (e.g., remote player city) */
     }
 
-    /* 5. Update route quotas */
-    mp_trade_route_record_export(route_instance_id, resource, removed);
-    mp_trade_route_record_import(route_instance_id, resource, added);
+    /* 5. Adjust reservation to actual amount (we reserved `amount`, actual is `added`) */
+    if (added < amount) {
+        int diff = amount - added;
+        mp_trade_route_rollback_export(route_instance_id, resource, diff);
+        mp_trade_route_rollback_import(route_instance_id, resource, diff);
+    }
 
     /* Also update the underlying Augustus trade route if it exists */
     if (route->augustus_route_id >= 0 && trade_route_is_valid(route->augustus_route_id)) {
@@ -327,6 +358,88 @@ mp_trade_exec_result mp_trade_commit_transaction(uint32_t route_instance_id,
     }
 
     return MP_TRADE_OK;
+}
+
+/* ---- Trader cargo recovery ---- */
+
+void mp_trade_recover_trader_cargo(int figure_id)
+{
+    if (!net_session_is_host()) {
+        return;
+    }
+
+    int route_id = mp_ownership_get_trader_route(figure_id);
+    if (route_id < 0) {
+        /* Already cleared (e.g., by route deletion cleanup) */
+        return;
+    }
+
+    figure *f = figure_get(figure_id);
+    if (!f) {
+        return;
+    }
+
+    /* Find a warehouse in the origin city to return cargo to */
+    int origin_city_id = mp_ownership_get_trader_origin_city(figure_id);
+    mp_trade_route_instance *mpr = mp_trade_route_find_by_augustus_route(route_id);
+
+    /* Check trader's loaded resources and return them */
+    if (f->trader_id > 0) {
+        for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+            int amount = trader_bought_resources(f->trader_id, r);
+            if (amount <= 0) {
+                continue;
+            }
+
+            /* Find any warehouse with capacity in the origin player's city */
+            int returned = 0;
+            for (int bid = 1; bid < building_count(); bid++) {
+                building *b = building_get(bid);
+                if (!b || b->state != BUILDING_STATE_IN_USE) {
+                    continue;
+                }
+                if (b->type != BUILDING_WAREHOUSE && b->type != BUILDING_GRANARY) {
+                    continue;
+                }
+                /* Only return to buildings in the origin city's area */
+                if (origin_city_id >= 0) {
+                    uint8_t owner = mp_ownership_get_city_player_id(origin_city_id);
+                    /* Simple heuristic: any storage building works for the host */
+                    (void)owner;
+                }
+                if (b->type == BUILDING_GRANARY) {
+                    int cap = building_granary_maximum_receptible_amount(b, r);
+                    if (cap > 0) {
+                        int to_add = amount < cap ? amount : cap;
+                        building_granary_add_import(b, r, to_add, 0);
+                        returned += to_add;
+                    }
+                } else {
+                    int cap = building_warehouse_maximum_receptible_amount(b, r);
+                    if (cap > 0) {
+                        int to_add = amount < cap ? amount : cap;
+                        building_warehouse_add_import(b, r, to_add, 0);
+                        returned += to_add;
+                    }
+                }
+                if (returned >= amount) {
+                    break;
+                }
+            }
+
+            if (returned > 0) {
+                MP_LOG_INFO("TRADE_EXEC", "Recovered %d of resource %d from dead trader %d",
+                            returned, r, figure_id);
+                /* Rollback the quota for recovered goods */
+                if (mpr) {
+                    mp_trade_route_rollback_export(mpr->instance_id, r, returned);
+                }
+            }
+        }
+    }
+
+    mp_trade_sync_emit_trader_despawned(figure_id);
+    mp_ownership_clear_trader(figure_id);
 }
 
 /* ---- Per-tick processing ---- */

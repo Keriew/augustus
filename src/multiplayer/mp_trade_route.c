@@ -283,6 +283,38 @@ int mp_trade_route_record_import(uint32_t instance_id, int resource, int amount)
     return 1;
 }
 
+int mp_trade_route_rollback_export(uint32_t instance_id, int resource, int amount)
+{
+    mp_trade_route_instance *r = mp_trade_route_get(instance_id);
+    if (!r || resource < RESOURCE_MIN || resource >= RESOURCE_MAX || amount <= 0) return 0;
+    r->resources[resource].exported_this_year -= amount;
+    if (r->resources[resource].exported_this_year < 0) {
+        r->resources[resource].exported_this_year = 0;
+    }
+    r->total_exported -= amount;
+    if (r->total_exported < 0) {
+        r->total_exported = 0;
+    }
+    r->state_version++;
+    return 1;
+}
+
+int mp_trade_route_rollback_import(uint32_t instance_id, int resource, int amount)
+{
+    mp_trade_route_instance *r = mp_trade_route_get(instance_id);
+    if (!r || resource < RESOURCE_MIN || resource >= RESOURCE_MAX || amount <= 0) return 0;
+    r->resources[resource].imported_this_year -= amount;
+    if (r->resources[resource].imported_this_year < 0) {
+        r->resources[resource].imported_this_year = 0;
+    }
+    r->total_imported -= amount;
+    if (r->total_imported < 0) {
+        r->total_imported = 0;
+    }
+    r->state_version++;
+    return 1;
+}
+
 /* ---- Annual reset ---- */
 
 void mp_trade_route_reset_annual_counters(void)

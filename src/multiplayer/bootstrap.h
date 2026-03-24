@@ -34,8 +34,10 @@
 typedef enum {
     MP_BOOT_IDLE = 0,
     MP_BOOT_SCENARIO_SELECTED,  /* Host has chosen a scenario */
+    MP_BOOT_SAVE_SELECTED,      /* Host has chosen a save file to resume */
     MP_BOOT_PREPARING,          /* GAME_PREPARE sent, loading locally */
     MP_BOOT_LOADED,             /* Scenario loaded, subsystems bound */
+    MP_BOOT_RESUME_LOBBY,       /* Waiting for players to reconnect */
     MP_BOOT_IN_GAME             /* Playing */
 } mp_boot_state;
 
@@ -104,6 +106,34 @@ int mp_bootstrap_client_enter_game(void);
  *   3. Assign empire cities to players based on spawn table
  */
 void mp_bootstrap_bind_loaded_scenario(void);
+
+/**
+ * HOST: Set save filename for resume flow.
+ */
+void mp_bootstrap_set_save(const char *save_filename);
+
+/**
+ * HOST: Resume game from a saved multiplayer session.
+ * @return 1 on success, 0 on failure
+ */
+int mp_bootstrap_host_resume_game(void);
+
+/**
+ * HOST: Launch the resumed game after players reconnect in resume lobby.
+ * @return 1 on success, 0 on failure
+ */
+int mp_bootstrap_host_launch_resumed_game(void);
+
+/**
+ * COMMON: Rebind subsystems after loading a save (NOT a fresh scenario).
+ * Only reinitializes stateless subsystems; ownership/routes come from save.
+ */
+void mp_bootstrap_rebind_loaded_save(void);
+
+/**
+ * Query whether the current bootstrap is a resume (not fresh start).
+ */
+int mp_bootstrap_is_resume(void);
 
 #endif /* ENABLE_MULTIPLAYER */
 

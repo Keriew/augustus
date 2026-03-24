@@ -7,9 +7,11 @@
 #include "network/session.h"
 #include "network/serialize.h"
 #include "network/protocol.h"
+#include "trade_execution.h"
 #include "building/building.h"
 #include "building/granary.h"
 #include "building/warehouse.h"
+#include "figure/figure.h"
 #include "empire/city.h"
 #include "empire/trade_route.h"
 #include "figure/figure.h"
@@ -271,6 +273,32 @@ void mp_trade_sync_emit_trader_despawned(int figure_id)
     net_write_i32(&s, figure_id);
 
     net_session_broadcast(NET_MSG_HOST_EVENT, buf, (uint32_t)net_serializer_position(&s));
+}
+
+/* ---- Host: cleanup route traders ---- */
+
+void mp_trade_sync_cleanup_route_traders(int route_id)
+{
+    if (!net_session_is_host()) {
+        return;
+    }
+
+    for (int i = 0; i < MAX_REPLICATED_TRADERS; i++) {
+        replicated_trader *t = &trade_data.traders[i];
+        if (!t->active || t->route_id != route_id) {
+            continue;
+        }
+
+        /* Recover cargo from the figure before despawning */
+        figure *f = figure_get(t->figure_id);
+        if (f && f->state == FIGURE_STATE_ALIVE) {
+            mp_trade_recover_trader_cargo(t->figure_id);
+        }
+
+        /* Emit despawn event and free the replicated entry */
+        mp_trade_sync_emit_trader_despawned(t->figure_id);
+        /* Note: emit_trader_despawned already frees the entry */
+    }
 }
 
 /* ---- Host: broadcast route state ---- */

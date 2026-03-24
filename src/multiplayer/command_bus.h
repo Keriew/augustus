@@ -46,6 +46,12 @@ void mp_command_bus_process_pending(uint32_t current_tick);
 mp_command_status mp_command_bus_get_last_status(void);
 uint8_t mp_command_bus_get_last_reject_reason(void);
 
+/**
+ * Get/set the next sequence ID (for save/restore).
+ */
+uint32_t mp_command_bus_get_next_sequence_id(void);
+void mp_command_bus_set_next_sequence_id(uint32_t id);
+
 #endif /* ENABLE_MULTIPLAYER */
 
 #endif /* MULTIPLAYER_COMMAND_BUS_H */

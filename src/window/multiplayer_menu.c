@@ -15,10 +15,13 @@
 #include "network/session.h"
 #include "translation/translation.h"
 #include "widget/input_box.h"
+#include "multiplayer/bootstrap.h"
 #include "window/multiplayer_connect.h"
 #include "window/multiplayer_host_setup.h"
 #include "window/multiplayer_lobby.h"
+#include "window/multiplayer_resume_lobby.h"
 #include "window/plain_message_dialog.h"
+#include "window/file_dialog.h"
 
 #include <string.h>
 
@@ -35,20 +38,23 @@
 #define BUTTON_WIDTH 224
 #define BUTTON_HEIGHT 25
 #define BUTTON_Y_HOST (PANEL_Y + 100)
-#define BUTTON_Y_JOIN (PANEL_Y + 140)
-#define BUTTON_Y_BACK (PANEL_Y + 180)
+#define BUTTON_Y_JOIN (PANEL_Y + 130)
+#define BUTTON_Y_RESUME (PANEL_Y + 160)
+#define BUTTON_Y_BACK (PANEL_Y + 190)
 
-#define MAX_BUTTONS 3
+#define MAX_BUTTONS 4
 #define MAX_NICKNAME_LENGTH 31  /* NET_MAX_PLAYER_NAME - 1 */
 
 static void button_host(const generic_button *button);
 static void button_join(const generic_button *button);
+static void button_resume_saved(const generic_button *button);
 static void button_back(const generic_button *button);
 static void on_name_changed(int is_addition_at_end);
 
 static generic_button buttons[] = {
     {BUTTON_X, BUTTON_Y_HOST, BUTTON_WIDTH, BUTTON_HEIGHT, button_host, 0, 0},
     {BUTTON_X, BUTTON_Y_JOIN, BUTTON_WIDTH, BUTTON_HEIGHT, button_join, 0, 0},
+    {BUTTON_X, BUTTON_Y_RESUME, BUTTON_WIDTH, BUTTON_HEIGHT, button_resume_saved, 0, 0},
     {BUTTON_X, BUTTON_Y_BACK, BUTTON_WIDTH, BUTTON_HEIGHT, button_back, 0, 0},
 };
 
@@ -152,6 +158,42 @@ static void button_join(const generic_button *button)
     window_multiplayer_connect_show();
 }
 
+static void on_resume_file_selected(const char *filename)
+{
+    mp_bootstrap_set_save(filename);
+    if (!mp_bootstrap_host_resume_game()) {
+        net_session_disconnect();
+        net_session_clear_join_status();
+        window_plain_message_dialog_show(
+            TR_MP_MENU_HOST_FAILED, TR_MP_MENU_HOST_FAILED, 0);
+    }
+}
+
+static void button_resume_saved(const generic_button *button)
+{
+    if (!validate_and_apply_name()) {
+        return;
+    }
+
+    MP_LOG_INFO("UI", "Resume Saved Game: name='%s'", net_session_get_local_name());
+
+    if (!net_session_is_active()) {
+        net_session_init();
+    }
+
+    input_box_stop(&nickname_input);
+
+    if (net_session_host(net_session_get_local_name(), NET_DEFAULT_PORT)) {
+        window_file_dialog_show_with_callback(
+            FILE_TYPE_SAVED_GAME, FILE_DIALOG_LOAD, on_resume_file_selected);
+    } else {
+        MP_LOG_ERROR("UI", "Host creation FAILED for resume on port %d", NET_DEFAULT_PORT);
+        input_box_start(&nickname_input);
+        window_plain_message_dialog_show(
+            TR_MP_MENU_HOST_FAILED, TR_MP_MENU_HOST_FAILED, 0);
+    }
+}
+
 static void button_back(const generic_button *button)
 {
     /* Save the nickname before leaving (in case user typed but didn't host/join) */
@@ -202,6 +244,8 @@ static void draw_foreground(void)
         BUTTON_X, BUTTON_Y_HOST + 6, BUTTON_WIDTH, FONT_NORMAL_GREEN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_MP_MENU_JOIN_LAN,
         BUTTON_X, BUTTON_Y_JOIN + 6, BUTTON_WIDTH, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_MP_MENU_RESUME_SAVED,
+        BUTTON_X, BUTTON_Y_RESUME + 6, BUTTON_WIDTH, FONT_NORMAL_GREEN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_MP_MENU_BACK,
         BUTTON_X, BUTTON_Y_BACK + 6, BUTTON_WIDTH, FONT_NORMAL_GREEN);
 

@@ -8,6 +8,7 @@
 #include "trade_sync.h"
 #include "time_sync.h"
 #include "checksum.h"
+#include "command_bus.h"
 #include "worldgen.h"
 #include "network/session.h"
 #include "network/serialize.h"
@@ -37,6 +38,7 @@ int mp_session_save_to_buffer(uint8_t *buffer, uint32_t buffer_size, uint32_t *o
     header.player_count = (uint8_t)mp_player_registry_get_count();
     header.snapshot_tick = net_session_get_authoritative_tick();
     header.checksum = mp_checksum_compute();
+    header.next_command_sequence_id = mp_command_bus_get_next_sequence_id();
 
     /* Serialize each domain into temporary buffers */
     uint8_t *temp = (uint8_t *)malloc(DOMAIN_BUFFER_SIZE * 7);
@@ -63,8 +65,9 @@ int mp_session_save_to_buffer(uint8_t *buffer, uint32_t buffer_size, uint32_t *o
 
     /* Calculate total size */
     /* Header fields: magic(4) + version(4) + proto(4) + session_id(4) + seed(4) +
-       host_id(1) + count(1) + tick(4) + checksum(4) + 7*domain_size(28) = 58 bytes */
-    uint32_t header_wire_size = 58;
+       host_id(1) + count(1) + tick(4) + checksum(4) + 7*domain_size(28) +
+       next_command_sequence_id(4) = 62 bytes */
+    uint32_t header_wire_size = 62;
     uint32_t total = header_wire_size
                    + header.player_registry_size
                    + header.ownership_size
@@ -99,6 +102,7 @@ int mp_session_save_to_buffer(uint8_t *buffer, uint32_t buffer_size, uint32_t *o
     net_write_u32(&s, header.trade_sync_routes_size);
     net_write_u32(&s, header.trade_sync_traders_size);
     net_write_u32(&s, header.time_sync_size);
+    net_write_u32(&s, header.next_command_sequence_id);
 
     /* Write domains in order */
     net_write_raw(&s, player_buf, header.player_registry_size);
@@ -126,8 +130,8 @@ int mp_session_load_from_buffer(const uint8_t *buffer, uint32_t size)
     net_serializer s;
     net_serializer_init(&s, (uint8_t *)buffer, size);
 
-    /* Skip past header */
-    uint32_t header_wire_size = 58;
+    /* Skip past header — v3 header is 62 bytes, v2 is 58 */
+    uint32_t header_wire_size = header.version >= 3 ? 62 : 58;
     s.position = header_wire_size;
 
     /* Read each domain */
@@ -171,6 +175,11 @@ int mp_session_load_from_buffer(const uint8_t *buffer, uint32_t size)
         const uint8_t *data = buffer + s.position;
         mp_time_sync_deserialize(data, header.time_sync_size);
         s.position += header.time_sync_size;
+    }
+
+    /* Restore command bus sequence ID for continuity */
+    if (header.next_command_sequence_id > 0) {
+        mp_command_bus_set_next_sequence_id(header.next_command_sequence_id);
     }
 
     /* Mark all players as awaiting_reconnect (except host on restore) */
@@ -236,6 +245,13 @@ int mp_session_save_read_header(const uint8_t *buffer, uint32_t size, mp_save_he
     if (header->version < 2) {
         header->worldgen_size = 0;
         header->session_seed = 0;
+    }
+
+    /* Handle v2 saves that don't have command sequence ID */
+    if (header->version >= 3 && size >= 62) {
+        header->next_command_sequence_id = net_read_u32(&s);
+    } else {
+        header->next_command_sequence_id = 1;
     }
 
     return 1;

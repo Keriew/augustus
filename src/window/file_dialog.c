@@ -82,6 +82,8 @@ typedef struct {
     char last_loaded_file[FILE_NAME_MAX];
 } file_type_data;
 
+static void (*load_file_callback)(const char *filename);
+
 static struct {
     file_type type;
     file_dialog_type dialog_type;
@@ -683,6 +685,12 @@ static void button_ok_cancel(int is_ok, int param2)
     }
 
     if (data.dialog_type == FILE_DIALOG_LOAD) {
+        if (load_file_callback) {
+            input_box_stop(&main_input);
+            load_file_callback(filename);
+            load_file_callback = 0;
+            return;
+        }
         if (data.type == FILE_TYPE_SAVED_GAME) {
             int result = game_file_load_saved_game(filename);
             if (result == FILE_LOAD_SUCCESS) {
@@ -863,6 +871,22 @@ static void handle_tooltip(tooltip_context *c)
 
 void window_file_dialog_show(file_type type, file_dialog_type dialog_type)
 {
+    load_file_callback = 0;
+    window_type window = {
+        WINDOW_FILE_DIALOG,
+        draw_background,
+        draw_foreground,
+        handle_input,
+        handle_tooltip
+    };
+    init(type, dialog_type);
+    window_show(&window);
+}
+
+void window_file_dialog_show_with_callback(file_type type, file_dialog_type dialog_type,
+                                           void (*callback)(const char *filename))
+{
+    load_file_callback = callback;
     window_type window = {
         WINDOW_FILE_DIALOG,
         draw_background,

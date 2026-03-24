@@ -18,5 +18,7 @@ typedef enum {
 } file_type;
 
 void window_file_dialog_show(file_type type, file_dialog_type dialog_type);
+void window_file_dialog_show_with_callback(file_type type, file_dialog_type dialog_type,
+                                           void (*callback)(const char *filename));
 
 #endif // WINDOW_FILE_DIALOG_H

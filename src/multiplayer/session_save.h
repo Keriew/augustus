@@ -21,7 +21,7 @@
  */
 
 #define MP_SAVE_MAGIC       0x4D504C59  /* "MPLY" */
-#define MP_SAVE_VERSION     2
+#define MP_SAVE_VERSION     3
 
 typedef struct {
     uint32_t magic;
@@ -41,6 +41,7 @@ typedef struct {
     uint32_t trade_sync_routes_size;
     uint32_t trade_sync_traders_size;
     uint32_t time_sync_size;
+    uint32_t next_command_sequence_id;
 } mp_save_header;
 
 /* Save multiplayer metadata to buffer */

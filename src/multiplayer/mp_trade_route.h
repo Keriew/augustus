@@ -123,6 +123,8 @@ int mp_trade_route_import_remaining(uint32_t instance_id, int resource);
 /* ---- Trade execution (host-only) ---- */
 int mp_trade_route_record_export(uint32_t instance_id, int resource, int amount);
 int mp_trade_route_record_import(uint32_t instance_id, int resource, int amount);
+int mp_trade_route_rollback_export(uint32_t instance_id, int resource, int amount);
+int mp_trade_route_rollback_import(uint32_t instance_id, int resource, int amount);
 
 /* ---- Annual reset ---- */
 void mp_trade_route_reset_annual_counters(void);

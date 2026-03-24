@@ -219,7 +219,7 @@ typedef struct {
 
 /* Serialization helpers */
 void mp_command_serialize(const mp_command *cmd, uint8_t *buffer, uint32_t *size);
-void mp_command_deserialize(mp_command *cmd, const uint8_t *buffer, uint32_t size);
+int mp_command_deserialize(mp_command *cmd, const uint8_t *buffer, uint32_t size);
 
 const char *mp_command_type_name(mp_command_type type);
 
