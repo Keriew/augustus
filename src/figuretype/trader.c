@@ -534,10 +534,10 @@ void figure_trade_caravan_action(figure *f)
                 int is_auth = !net_session_is_active() || net_session_is_host();
 #endif
                 if (figure_trade_caravan_can_buy(f, f->destination_building_id, f->empire_city_id)) {
-                    int resource = trader_get_buy_resource(f->destination_building_id, f->empire_city_id);
-                    if (resource) {
 #ifdef ENABLE_MULTIPLAYER
-                        if (is_auth) {
+                    if (is_auth) {
+                        int resource = trader_get_buy_resource(f->destination_building_id, f->empire_city_id);
+                        if (resource) {
                             trade_route_increase_traded(empire_city_get_route_id(f->empire_city_id), resource, 1);
                             trader_record_bought_resource(f->trader_id, resource);
                             city_health_update_sickness_level_in_building(f->destination_building_id);
@@ -545,25 +545,31 @@ void figure_trade_caravan_action(figure *f)
                             if (net_session_is_active()) {
                                 mp_trade_sync_emit_trader_trade_executed(f->id, resource, 1, 1, f->destination_building_id);
                             }
+                        } else {
+                            move_on++;
                         }
-                        /* Clients skip mutation — they apply via TRADE_EXECUTED event */
+                    }
+                    /* Client: waits for host TRADE_EXECUTED events to update trader_amount_bought.
+                     * figure_trade_caravan_can_buy() will return false once counter reaches limit. */
 #else
+                    int resource = trader_get_buy_resource(f->destination_building_id, f->empire_city_id);
+                    if (resource) {
                         trade_route_increase_traded(empire_city_get_route_id(f->empire_city_id), resource, 1);
                         trader_record_bought_resource(f->trader_id, resource);
                         city_health_update_sickness_level_in_building(f->destination_building_id);
                         f->trader_amount_bought++;
-#endif
                     } else {
                         move_on++;
                     }
+#endif
                 } else {
                     move_on++;
                 }
                 if (figure_trade_caravan_can_sell(f, f->destination_building_id, f->empire_city_id)) {
-                    int resource = trader_get_sell_resource(f->destination_building_id, f->empire_city_id);
-                    if (resource) {
 #ifdef ENABLE_MULTIPLAYER
-                        if (is_auth) {
+                    if (is_auth) {
+                        int resource = trader_get_sell_resource(f->destination_building_id, f->empire_city_id);
+                        if (resource) {
                             trade_route_increase_traded(empire_city_get_route_id(f->empire_city_id), resource, 0);
                             trader_record_sold_resource(f->trader_id, resource);
                             city_health_update_sickness_level_in_building(f->destination_building_id);
@@ -571,16 +577,22 @@ void figure_trade_caravan_action(figure *f)
                             if (net_session_is_active()) {
                                 mp_trade_sync_emit_trader_trade_executed(f->id, resource, 1, 0, f->destination_building_id);
                             }
+                        } else {
+                            move_on++;
                         }
+                    }
+                    /* Client: waits for host TRADE_EXECUTED events to update loads_sold_or_carrying */
 #else
+                    int resource = trader_get_sell_resource(f->destination_building_id, f->empire_city_id);
+                    if (resource) {
                         trade_route_increase_traded(empire_city_get_route_id(f->empire_city_id), resource, 0);
                         trader_record_sold_resource(f->trader_id, resource);
                         city_health_update_sickness_level_in_building(f->destination_building_id);
                         f->loads_sold_or_carrying++;
-#endif
                     } else {
                         move_on++;
                     }
+#endif
                 } else {
                     move_on++;
                 }

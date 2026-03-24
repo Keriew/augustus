@@ -12,6 +12,9 @@
 #include "building/warehouse.h"
 #include "empire/city.h"
 #include "empire/trade_route.h"
+#include "figure/figure.h"
+#include "figure/trader.h"
+#include "city/health.h"
 #include "game/resource.h"
 #include "core/log.h"
 
@@ -402,7 +405,9 @@ void mp_trade_sync_handle_event(uint16_t event_type,
                 }
             }
 
-            /* Apply warehouse/granary mutation on client so stock stays in sync */
+            /* Apply warehouse/granary mutation on client so stock stays in sync.
+             * This is the ONLY place clients apply warehouse mutations for trades —
+             * trader_get_buy/sell_resource() is gated behind is_auth in trader.c. */
             if (building_id > 0) {
                 building *b = building_get(building_id);
                 if (b && b->state == BUILDING_STATE_IN_USE) {
@@ -420,6 +425,23 @@ void mp_trade_sync_handle_event(uint16_t event_type,
                         } else if (b->type == BUILDING_WAREHOUSE) {
                             building_warehouse_add_import(b, resource, amount, 0);
                         }
+                    }
+                    city_health_update_sickness_level_in_building(building_id);
+                }
+            }
+
+            /* Sync figure state so client's trader knows when to stop trading.
+             * Without this, figure_trade_caravan_can_buy/sell never returns false
+             * on clients because trader_amount_bought/loads_sold_or_carrying stay 0. */
+            if (figure_id > 0) {
+                figure *f = figure_get(figure_id);
+                if (f && f->state == FIGURE_STATE_ALIVE) {
+                    if (buying) {
+                        f->trader_amount_bought++;
+                        trader_record_bought_resource(f->trader_id, resource);
+                    } else {
+                        f->loads_sold_or_carrying++;
+                        trader_record_sold_resource(f->trader_id, resource);
                     }
                 }
             }
