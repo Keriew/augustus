@@ -500,6 +500,11 @@ void figure_trade_caravan_action(figure *f)
             switch (f->direction) {
                 case DIR_FIGURE_AT_DESTINATION:
                     f->action_state = FIGURE_ACTION_102_TRADE_CARAVAN_TRADING;
+#ifdef ENABLE_MULTIPLAYER
+                    if (net_session_is_active() && net_session_is_host()) {
+                        mp_trade_sync_emit_trader_reached_storage(f->id, f->destination_building_id);
+                    }
+#endif
                     break;
                 case DIR_FIGURE_REROUTE:
                     figure_route_remove(f);

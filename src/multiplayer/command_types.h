@@ -42,6 +42,9 @@ typedef enum {
     MP_CMD_OPEN_TRADE_ROUTE,      /* Opens city route (AI cities) */
     MP_CMD_CLOSE_TRADE_ROUTE,     /* Closes city route (AI cities) */
 
+    /* City resource settings (import/export/stockpile) */
+    MP_CMD_SET_RESOURCE_SETTING,
+
     /* Chat */
     MP_CMD_CHAT_MESSAGE,
 
@@ -149,6 +152,16 @@ typedef struct {
     uint8_t speed;
 } mp_cmd_request_speed;
 
+/**
+ * Change a city resource setting (import/export toggle or stockpile threshold).
+ * Setting types: 0=export, 1=import, 2=stockpile threshold.
+ */
+typedef struct {
+    int resource;
+    uint8_t setting_type;   /* MP_TRADE_SETTING_EXPORT/IMPORT/STOCKPILE */
+    int value;              /* 0/1 for toggles, threshold amount for stockpile */
+} mp_cmd_set_resource_setting;
+
 typedef struct {
     char message[128];
     uint8_t sender_id;
@@ -173,6 +186,7 @@ typedef struct {
         mp_cmd_set_route_limit route_limit;
         mp_cmd_open_trade_route open_route;
         mp_cmd_close_trade_route close_route;
+        mp_cmd_set_resource_setting resource_setting;
         mp_cmd_request_speed speed;
         mp_cmd_chat_message chat;
     } data;

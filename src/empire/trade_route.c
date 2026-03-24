@@ -36,6 +36,14 @@ int trade_route_new(void)
     return routes.size - 1;
 }
 
+int trade_route_ensure_id(int route_id)
+{
+    while ((unsigned int)route_id >= routes.size) {
+        array_advance(routes);
+    }
+    return route_id >= 0 && (unsigned int)route_id < routes.size;
+}
+
 int trade_route_count(void)
 {
     return routes.size;

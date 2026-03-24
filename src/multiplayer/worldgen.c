@@ -177,10 +177,22 @@ static int compute_ai_min_distance(int x, int y, const int *ai_xs, const int *ai
     return min_dist;
 }
 
+static int city_has_any_trade_resource(const empire_city *city)
+{
+    for (int r = 0; r < RESOURCE_MAX; r++) {
+        if (city->buys_resource[r] || city->sells_resource[r]) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 static int collect_procedural_candidates(spawn_candidate *candidates, int max_candidates,
                                           const int *ai_xs, const int *ai_ys, int ai_count)
 {
     int count = 0;
+    int rejected_no_route = 0;
+    int rejected_no_trade = 0;
     int num_cities = empire_city_get_array_size();
 
     /* Look for trade cities (AI) that could be repurposed or cities near good positions */
@@ -193,6 +205,20 @@ static int collect_procedural_candidates(spawn_candidate *candidates, int max_ca
         if (city->type != EMPIRE_CITY_TRADE &&
             city->type != EMPIRE_CITY_FUTURE_TRADE &&
             city->type != EMPIRE_CITY_DISTANT_ROMAN) {
+            continue;
+        }
+
+        /* HARDENING: Reject cities without a valid route_id.
+         * A city without a route_id cannot participate in trade mechanics. */
+        if (city->route_id < 0) {
+            rejected_no_route++;
+            continue;
+        }
+
+        /* HARDENING: Reject cities that don't buy or sell any resource.
+         * A city with no trade resources has no economic viability. */
+        if (!city_has_any_trade_resource(city)) {
+            rejected_no_trade++;
             continue;
         }
 
@@ -214,6 +240,13 @@ static int collect_procedural_candidates(spawn_candidate *candidates, int max_ca
         candidates[count].xml_slot_id = -1;
         candidates[count].ai_distance = ai_dist;
         count++;
+    }
+
+    if (rejected_no_route > 0) {
+        log_info("Worldgen: rejected cities without route_id", 0, rejected_no_route);
+    }
+    if (rejected_no_trade > 0) {
+        log_info("Worldgen: rejected cities without trade resources", 0, rejected_no_trade);
     }
 
     return count;

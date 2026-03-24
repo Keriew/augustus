@@ -57,6 +57,9 @@ int mp_game_manifest_deserialize(const uint8_t *buffer, uint32_t size);
 /* Validate that local game data matches the manifest */
 int mp_game_manifest_validate_local(void);
 
+/* Check if the manifest contains non-zero hashes */
+int mp_game_manifest_has_hashes(void);
+
 #endif /* ENABLE_MULTIPLAYER */
 
 #endif /* MULTIPLAYER_GAME_MANIFEST_H */

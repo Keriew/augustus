@@ -16,6 +16,7 @@
 #include "graphics/window.h"
 #include "input/input.h"
 #include "multiplayer/bootstrap.h"
+#include "multiplayer/scenario_selection.h"
 #include "multiplayer/mp_debug_log.h"
 #include "translation/translation.h"
 #include "window/multiplayer_lobby.h"
@@ -71,6 +72,8 @@ static struct {
     char selected_filename[FILE_NAME_MAX];
     uint8_t selected_display[FILE_NAME_MAX];
     int has_selection;
+    int eligible_cities;    /* Eligible trade cities for selected scenario (-1 = unknown) */
+    int validation_done;    /* 1 if eligibility has been checked */
 } data;
 
 static void init(void)
@@ -81,6 +84,8 @@ static void init(void)
     data.has_selection = 0;
     data.selected_filename[0] = '\0';
     data.selected_display[0] = 0;
+    data.eligible_cities = -1;
+    data.validation_done = 0;
 
     list_box_init(&scenario_list, data.scenarios->num_files);
 
@@ -123,6 +128,8 @@ static void select_scenario(unsigned int index, int is_double_click)
                        FILE_NAME_MAX);
     file_remove_extension((char *)data.selected_display);
     data.has_selection = 1;
+    data.eligible_cities = -1;
+    data.validation_done = 0;
 
     /* Store in bootstrap for later use */
     char ascii_name[FILE_NAME_MAX];
@@ -146,6 +153,8 @@ static void button_continue(const generic_button *button)
     MP_LOG_INFO("UI", "Host setup: proceeding to lobby with scenario '%s'",
                 data.selected_filename);
 
+    /* Scenario validation will happen at game start time (in bootstrap)
+     * when we know the actual player count. Proceed to lobby. */
     window_multiplayer_lobby_show();
 }
 

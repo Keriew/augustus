@@ -20,6 +20,7 @@ static const char *COMMAND_NAMES[] = {
     "SET_ROUTE_LIMIT",
     "OPEN_TRADE_ROUTE",
     "CLOSE_TRADE_ROUTE",
+    "SET_RESOURCE_SETTING",
     "CHAT_MESSAGE"
 };
 
@@ -83,6 +84,12 @@ void mp_command_serialize(const mp_command *cmd, uint8_t *buffer, uint32_t *size
 
         case MP_CMD_REQUEST_SPEED:
             net_write_u8(&s, cmd->data.speed.speed);
+            break;
+
+        case MP_CMD_SET_RESOURCE_SETTING:
+            net_write_i32(&s, cmd->data.resource_setting.resource);
+            net_write_u8(&s, cmd->data.resource_setting.setting_type);
+            net_write_i32(&s, cmd->data.resource_setting.value);
             break;
 
         case MP_CMD_CHAT_MESSAGE:
@@ -165,6 +172,12 @@ void mp_command_deserialize(mp_command *cmd, const uint8_t *buffer, uint32_t siz
 
         case MP_CMD_REQUEST_SPEED:
             cmd->data.speed.speed = net_read_u8(&s);
+            break;
+
+        case MP_CMD_SET_RESOURCE_SETTING:
+            cmd->data.resource_setting.resource = net_read_i32(&s);
+            cmd->data.resource_setting.setting_type = net_read_u8(&s);
+            cmd->data.resource_setting.value = net_read_i32(&s);
             break;
 
         case MP_CMD_CHAT_MESSAGE:

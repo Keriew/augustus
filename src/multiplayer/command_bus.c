@@ -4,6 +4,7 @@
 
 #include "ownership.h"
 #include "player_registry.h"
+#include "trade_policy.h"
 #include "trade_sync.h"
 #include "network/session.h"
 #include "network/serialize.h"
@@ -277,6 +278,18 @@ static int validate_command(const mp_command *cmd)
             return MP_CMD_REJECT_NONE;
         }
 
+        case MP_CMD_SET_RESOURCE_SETTING: {
+            int res = cmd->data.resource_setting.resource;
+            if (res < RESOURCE_MIN || res >= RESOURCE_MAX) {
+                return MP_CMD_REJECT_RESOURCE_INVALID;
+            }
+            uint8_t st = cmd->data.resource_setting.setting_type;
+            if (st > 2) { /* MP_TRADE_SETTING_STOCKPILE = 2 */
+                return MP_CMD_REJECT_INVALID;
+            }
+            return MP_CMD_REJECT_NONE;
+        }
+
         case MP_CMD_REQUEST_PAUSE:
         case MP_CMD_REQUEST_RESUME:
         case MP_CMD_REQUEST_SPEED:
@@ -348,11 +361,17 @@ static void apply_command(mp_command *cmd)
             /* Allocate network route ID */
             uint32_t network_id = mp_ownership_allocate_network_route_id();
 
-            /* Find or create a trade route in the Augustus system */
+            /* Find or create a trade route in the Augustus system.
+             * AI cities already have a route_id from the scenario data.
+             * Player-to-player routes need a freshly allocated route entry. */
             int route_id = empire_city_get_route_id(data->dest_city_id);
             if (route_id < 0) {
-                /* For new P2P routes, we need a route entry */
-                route_id = data->dest_city_id; /* Use city_id as route proxy */
+                route_id = trade_route_new();
+                if (route_id < 0) {
+                    log_error("Failed to allocate trade route for P2P", 0, 0);
+                    cmd->status = MP_CMD_STATUS_REJECTED;
+                    return;
+                }
             }
 
             /* Register in ownership */
@@ -483,6 +502,26 @@ static void apply_command(mp_command *cmd)
         case MP_CMD_REQUEST_SPEED:
             net_session_set_game_speed(cmd->data.speed.speed);
             break;
+
+        case MP_CMD_SET_RESOURCE_SETTING: {
+            const mp_cmd_set_resource_setting *data = &cmd->data.resource_setting;
+            mp_trade_policy_apply_remote_setting(cmd->player_id, data->resource,
+                                                   data->setting_type, data->value);
+
+            /* Broadcast as host event so all clients update their trade views */
+            uint8_t event_buf[32];
+            net_serializer es;
+            net_serializer_init(&es, event_buf, sizeof(event_buf));
+            net_write_u16(&es, NET_EVENT_CITY_RESOURCE_SETTING);
+            net_write_u32(&es, tick);
+            net_write_u8(&es, cmd->player_id);
+            net_write_i32(&es, data->resource);
+            net_write_u8(&es, data->setting_type);
+            net_write_i32(&es, data->value);
+            net_session_broadcast(NET_MSG_HOST_EVENT, event_buf,
+                                  (uint32_t)net_serializer_position(&es));
+            break;
+        }
 
         case MP_CMD_CHAT_MESSAGE:
             /* Chat is handled directly by the session layer (net_session_send_chat).

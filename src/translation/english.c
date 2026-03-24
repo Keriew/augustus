@@ -2084,6 +2084,8 @@ static translation_string all_strings[] = {
     {TR_MP_HOST_SETUP_BUTTON_SELECT, "Select Scenario"},
     {TR_MP_HOST_SETUP_BUTTON_CONTINUE, "Continue to Lobby"},
     {TR_MP_HOST_SETUP_BUTTON_BACK, "Back"},
+    {TR_MP_EMPIRE_MY_CITY, "My Kingdom"},
+    {TR_MP_EMPIRE_CITY_OF, "City of "},
 #endif
 };
 

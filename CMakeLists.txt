@@ -786,6 +786,8 @@ if(ENABLE_MULTIPLAYER)
         ${PROJECT_SOURCE_DIR}/src/multiplayer/runtime.c
         ${PROJECT_SOURCE_DIR}/src/multiplayer/bootstrap.c
         ${PROJECT_SOURCE_DIR}/src/multiplayer/game_manifest.c
+        ${PROJECT_SOURCE_DIR}/src/multiplayer/scenario_selection.c
+        ${PROJECT_SOURCE_DIR}/src/multiplayer/trade_policy.c
         ${PROJECT_SOURCE_DIR}/src/window/multiplayer_menu.c
         ${PROJECT_SOURCE_DIR}/src/window/multiplayer_host_setup.c
         ${PROJECT_SOURCE_DIR}/src/window/multiplayer_connect.c

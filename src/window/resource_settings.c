@@ -2,6 +2,7 @@
 
 #include "building/count.h"
 #include "city/resource.h"
+#include "city/constants.h"
 #include "core/calc.h"
 #include "core/image_group.h"
 #include "empire/city.h"
@@ -19,6 +20,11 @@
 #include "window/advisor/trade.h"
 #include "window/message_dialog.h"
 #include "window/empire.h"
+
+#ifdef ENABLE_MULTIPLAYER
+#include "multiplayer/trade_policy.h"
+#include "network/session.h"
+#endif
 
 static void button_help(int param1, int param2);
 static void button_ok(int param1, int param2);
@@ -271,6 +277,18 @@ static void button_trade_up_down(int trade_type, int is_down)
     } else if (trade_type == TRADE_STATUS_EXPORT) {
         city_resource_change_export_over(data.resource, is_down ? -1 : 1);
     }
+
+#ifdef ENABLE_MULTIPLAYER
+    /* Notify host of threshold change */
+    if (net_session_is_active()) {
+        int setting_type = (trade_type == TRADE_STATUS_EXPORT)
+            ? MP_TRADE_SETTING_EXPORT : MP_TRADE_SETTING_IMPORT;
+        int threshold = (trade_type == TRADE_STATUS_EXPORT)
+            ? city_resource_export_over(data.resource)
+            : city_resource_import_over(data.resource);
+        mp_trade_policy_notify_setting_changed(data.resource, setting_type, threshold);
+    }
+#endif
 }
 
 static void button_toggle_industry(const generic_button *button)
@@ -292,12 +310,34 @@ static void button_toggle_trade(const generic_button *button)
         return;
     }
     city_resource_cycle_trade_status(data.resource, status);
+
+#ifdef ENABLE_MULTIPLAYER
+    /* Notify the host that our city's trade settings changed.
+     * The change is applied locally above (responsive UI).
+     * The notification ensures other players' trade views are updated. */
+    if (net_session_is_active()) {
+        int setting_type = (status == TRADE_STATUS_EXPORT)
+            ? MP_TRADE_SETTING_EXPORT : MP_TRADE_SETTING_IMPORT;
+        int current = city_resource_trade_status(data.resource);
+        int enabled = (current & status) != 0;
+        mp_trade_policy_notify_setting_changed(data.resource, setting_type, enabled);
+    }
+#endif
 }
 
 static void button_toggle_stockpile(const generic_button *button)
 {
     if (resource_is_storable(data.resource)) {
         city_resource_toggle_stockpiled(data.resource);
+
+#ifdef ENABLE_MULTIPLAYER
+        /* Notify host of stockpile toggle change */
+        if (net_session_is_active()) {
+            int is_stockpiled = city_resource_is_stockpiled(data.resource);
+            mp_trade_policy_notify_setting_changed(data.resource,
+                MP_TRADE_SETTING_STOCKPILE, is_stockpiled);
+        }
+#endif
     }
 }
 

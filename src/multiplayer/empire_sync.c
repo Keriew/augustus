@@ -4,6 +4,7 @@
 
 #include "ownership.h"
 #include "player_registry.h"
+#include "trade_policy.h"
 #include "trade_sync.h"
 #include "time_sync.h"
 #include "worldgen.h"
@@ -255,11 +256,17 @@ static void handle_route_lifecycle_event(uint16_t event_type, net_serializer *s)
 
     switch (event_type) {
         case NET_EVENT_ROUTE_CREATED: {
-            /* Client-side: create ownership record to mirror host state */
-            /* dest_city_id read but used only on host side for route creation */
-            (void)net_read_i32(s);
+            /* Client-side: mirror host-allocated route in local trade_route array */
+            int dest_city_id = net_read_i32(s);
             uint8_t dest_player_id = net_read_u8(s);
             uint8_t mode = net_read_u8(s);
+            (void)dest_city_id;
+
+            /* Ensure the route entry exists locally (host allocated via trade_route_new) */
+            if (!trade_route_ensure_id(route_id)) {
+                log_error("Failed to ensure route_id for P2P route", 0, route_id);
+                break;
+            }
 
             mp_ownership_create_route(route_id, (mp_route_owner_mode)mode,
                                        player_id, dest_player_id, network_route_id);
@@ -496,6 +503,19 @@ void multiplayer_empire_sync_receive_event(const uint8_t *data, uint32_t size)
             uint32_t pos = (uint32_t)net_serializer_position(&s);
             if (pos < size) {
                 mp_trade_sync_handle_event(event_type, data + pos, size - pos);
+            }
+            break;
+        }
+
+        /* City resource setting changed (import/export/stockpile) */
+        case NET_EVENT_CITY_RESOURCE_SETTING: {
+            uint8_t player_id = net_read_u8(&s);
+            int resource = net_read_i32(&s);
+            uint8_t setting_type = net_read_u8(&s);
+            int value = net_read_i32(&s);
+            if (!net_serializer_has_overflow(&s)) {
+                mp_trade_policy_apply_remote_setting(player_id, resource,
+                                                      setting_type, value);
             }
             break;
         }

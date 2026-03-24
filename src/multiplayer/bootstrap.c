@@ -3,6 +3,7 @@
 #ifdef ENABLE_MULTIPLAYER
 
 #include "game_manifest.h"
+#include "scenario_selection.h"
 #include "mp_debug_log.h"
 #include "player_registry.h"
 #include "ownership.h"
@@ -195,12 +196,17 @@ int mp_bootstrap_host_start_game(void)
 
     boot_data.state = MP_BOOT_PREPARING;
 
-    /* 1. Build the manifest */
+    /* 1. Build the manifest with real scenario hash */
     uint32_t seed = generate_session_seed();
     int player_count = net_session_get_peer_count() + 1; /* +1 for host */
 
+    uint32_t scenario_hash = 0;
+    if (!mp_scenario_compute_file_hash(boot_data.scenario_name, &scenario_hash)) {
+        MP_LOG_WARN("BOOT", "Could not compute scenario hash — continuing without");
+    }
+
     mp_game_manifest_set(MP_GAME_MODE_SCENARIO, boot_data.scenario_name,
-                         0, 0, 0, seed, NET_MAX_PLAYERS);
+                         scenario_hash, scenario_hash, 0, seed, NET_MAX_PLAYERS);
     mp_game_manifest_set_player_count((uint8_t)player_count);
 
     /* Store seed in spawn table for worldgen */
@@ -228,6 +234,14 @@ int mp_bootstrap_host_start_game(void)
     /* 3. Load scenario locally */
     if (!load_scenario_locally(boot_data.scenario_name)) {
         MP_LOG_ERROR("BOOT", "Host failed to load scenario — aborting game start");
+        boot_data.state = MP_BOOT_SCENARIO_SELECTED;
+        return 0;
+    }
+
+    /* 3b. Validate scenario has enough eligible cities for player count */
+    if (!mp_scenario_validate_for_multiplayer(player_count)) {
+        MP_LOG_ERROR("BOOT", "Scenario '%s' does not support %d players — aborting",
+                     boot_data.scenario_name, player_count);
         boot_data.state = MP_BOOT_SCENARIO_SELECTED;
         return 0;
     }
@@ -304,6 +318,20 @@ int mp_bootstrap_client_prepare(const uint8_t *payload, uint32_t size)
         MP_LOG_ERROR("BOOT", "Client failed to load scenario '%s'",
                      manifest->scenario_name);
         return 0;
+    }
+
+    /* 4b. Validate scenario hash matches host's manifest */
+    if (manifest->scenario_hash != 0) {
+        uint32_t local_hash = 0;
+        if (mp_scenario_compute_file_hash(manifest->scenario_name, &local_hash)) {
+            if (!mp_scenario_hashes_match(local_hash, manifest->scenario_hash)) {
+                MP_LOG_ERROR("BOOT", "Scenario hash mismatch — client has different "
+                             "version of '%s'", manifest->scenario_name);
+                return 0;
+            }
+        } else {
+            MP_LOG_WARN("BOOT", "Could not compute local hash for validation");
+        }
     }
 
     /* 5. Initialize worldgen (client doesn't generate, waits for spawn table) */

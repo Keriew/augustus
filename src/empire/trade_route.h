@@ -16,6 +16,14 @@ int trade_route_init(void);
 
 int trade_route_new(void);
 
+/**
+ * Ensure a route entry exists for the given route_id.
+ * Advances the internal array as needed. Used by multiplayer clients
+ * to mirror host-allocated route IDs.
+ * @return 1 if the route_id is now valid, 0 on failure
+ */
+int trade_route_ensure_id(int route_id);
+
 int trade_route_count(void);
 
 int trade_route_is_valid(int route_id);

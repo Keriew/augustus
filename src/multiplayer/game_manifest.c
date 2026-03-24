@@ -113,13 +113,16 @@ int mp_game_manifest_validate_local(void)
     if (!manifest.valid) {
         return 0;
     }
-    /* For MVP, just check that the scenario name is non-empty.
-     * Hash validation will be added when scenario hashing is implemented. */
     if (manifest.scenario_name[0] == '\0') {
         MP_LOG_ERROR("GAME", "Manifest validation failed: empty scenario name");
         return 0;
     }
     return 1;
+}
+
+int mp_game_manifest_has_hashes(void)
+{
+    return manifest.valid && (manifest.map_hash != 0 || manifest.scenario_hash != 0);
 }
 
 #endif /* ENABLE_MULTIPLAYER */

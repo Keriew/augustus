@@ -1866,8 +1866,41 @@ static void draw_city_name(const empire_city *city)
     if (city) {
         int x_offset = (data.panel.x_min + data.panel.x_max - 332) / 2 + 64;
         int y_offset = data.y_max - 118;
-        const uint8_t *city_name = empire_city_get_name(city);
-        text_draw_centered(city_name, x_offset, y_offset, 268, FONT_LARGE_BLACK, 0);
+
+#ifdef ENABLE_MULTIPLAYER
+        /* In multiplayer, player-owned cities show differentiated names:
+         * - Local player's city: "My Kingdom"
+         * - Remote player's city: "City of [PlayerName]"
+         * - AI/unowned cities: standard empire city name */
+        if (net_session_is_active() && data.selected_city >= 0 &&
+            empire_city_is_player_owned(data.selected_city)) {
+            if (mp_ownership_is_city_local(data.selected_city)) {
+                const uint8_t *my_city = translation_for(TR_MP_EMPIRE_MY_CITY);
+                text_draw_centered(my_city, x_offset, y_offset, 268, FONT_LARGE_BLACK, 0);
+            } else {
+                uint8_t owner_pid = mp_ownership_get_city_player_id(data.selected_city);
+                mp_player *owner = mp_player_registry_get(owner_pid);
+                if (owner && owner->active && owner->name[0]) {
+                    /* "City of PlayerName" */
+                    uint8_t display_name[128];
+                    const uint8_t *prefix = translation_for(TR_MP_EMPIRE_CITY_OF);
+                    uint8_t *end = string_copy(prefix, display_name, 128);
+                    int remaining = 128 - (int)(end - display_name);
+                    if (remaining > 1) {
+                        string_copy(string_from_ascii(owner->name), end, remaining);
+                    }
+                    text_draw_centered(display_name, x_offset, y_offset, 268, FONT_LARGE_BLACK, 0);
+                } else {
+                    const uint8_t *city_name = empire_city_get_name(city);
+                    text_draw_centered(city_name, x_offset, y_offset, 268, FONT_LARGE_BLACK, 0);
+                }
+            }
+        } else
+#endif
+        {
+            const uint8_t *city_name = empire_city_get_name(city);
+            text_draw_centered(city_name, x_offset, y_offset, 268, FONT_LARGE_BLACK, 0);
+        }
     }
 }
 
