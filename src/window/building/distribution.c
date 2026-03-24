@@ -39,6 +39,11 @@
 #include "translation/translation.h"
 #include "window/building_info.h"
 #include "window/option_popup.h"
+#ifdef ENABLE_MULTIPLAYER
+#include "multiplayer/command_types.h"
+#include "multiplayer/command_bus.h"
+#include "network/session.h"
+#endif
 
 #include <math.h>
 #include <stdio.h>
@@ -1467,6 +1472,18 @@ static void toggle_resource_state(const generic_button *button, int reverse_orde
             resource = city_resource_get_potential_foods()->items[index];
         }
         building_storage_cycle_resource_state(b->storage_id, resource, reverse_order);
+#ifdef ENABLE_MULTIPLAYER
+        if (net_session_is_active()) {
+            building_storage_state new_state = building_storage_get_state(b, resource, 0);
+            mp_command cmd = {0};
+            cmd.command_type = MP_CMD_SET_STORAGE_STATE;
+            cmd.player_id = net_session_get_local_player_id();
+            cmd.data.storage_state.building_id = b->id;
+            cmd.data.storage_state.resource = resource;
+            cmd.data.storage_state.new_state = (uint8_t)new_state;
+            mp_command_bus_submit(&cmd);
+        }
+#endif
     }
     window_invalidate();
 }
@@ -1490,6 +1507,16 @@ static void storage_toggle_permissions(const generic_button *button)
     int index = button->parameter1;
     building *b = building_get(data.building_id);
     building_storage_toggle_permission(index, b);
+#ifdef ENABLE_MULTIPLAYER
+    if (net_session_is_active()) {
+        mp_command cmd = {0};
+        cmd.command_type = MP_CMD_SET_STORAGE_PERMISSION;
+        cmd.player_id = net_session_get_local_player_id();
+        cmd.data.storage_permission.building_id = b->id;
+        cmd.data.storage_permission.permission = (uint8_t)index;
+        mp_command_bus_submit(&cmd);
+    }
+#endif
     window_invalidate();
 }
 
@@ -1497,6 +1524,16 @@ static void toggle_mantain(int param1, int param2)
 {
     building *b = building_get(data.building_id);
     building_storage_toggle_permission(BUILDING_STORAGE_PERMISSION_WORKER, b);
+#ifdef ENABLE_MULTIPLAYER
+    if (net_session_is_active()) {
+        mp_command cmd = {0};
+        cmd.command_type = MP_CMD_SET_STORAGE_PERMISSION;
+        cmd.player_id = net_session_get_local_player_id();
+        cmd.data.storage_permission.building_id = b->id;
+        cmd.data.storage_permission.permission = BUILDING_STORAGE_PERMISSION_WORKER;
+        mp_command_bus_submit(&cmd);
+    }
+#endif
     window_invalidate();
 }
 

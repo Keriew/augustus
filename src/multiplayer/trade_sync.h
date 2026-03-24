@@ -25,7 +25,8 @@ void mp_trade_sync_clear(void);
 void mp_trade_sync_emit_trader_spawned(int figure_id, int city_id, int route_id);
 void mp_trade_sync_emit_trader_reached_storage(int figure_id, int storage_building_id);
 void mp_trade_sync_emit_trader_trade_executed(int figure_id, int resource,
-                                               int amount, int buying);
+                                               int amount, int buying,
+                                               int building_id);
 void mp_trade_sync_emit_trader_returning(int figure_id);
 void mp_trade_sync_emit_trader_aborted(int figure_id, int reason);
 void mp_trade_sync_emit_trader_despawned(int figure_id);

@@ -14,8 +14,10 @@
 #include "empire/city.h"
 #include "empire/trade_route.h"
 #include "city/resource.h"
+#include "building/building.h"
 #include "building/count.h"
 #include "building/dock.h"
+#include "building/storage.h"
 #include "core/log.h"
 
 #include <string.h>
@@ -544,6 +546,41 @@ void multiplayer_empire_sync_receive_event(const uint8_t *data, uint32_t size)
                 mp_worldgen_deserialize(payload, payload_size);
             }
             log_info("Spawn table updated from host", 0, 0);
+            break;
+        }
+
+        /* Storage setting events */
+        case NET_EVENT_STORAGE_STATE_CHANGED: {
+            uint8_t player_id = net_read_u8(&s);
+            int building_id = net_read_i32(&s);
+            int resource = net_read_i32(&s);
+            uint8_t new_state = net_read_u8(&s);
+            if (!net_serializer_has_overflow(&s)) {
+                building *b = building_get(building_id);
+                if (b && b->storage_id && resource >= RESOURCE_MIN && resource < RESOURCE_MAX) {
+                    const building_storage *current = building_storage_get(b->storage_id);
+                    if (current) {
+                        building_storage updated = *current;
+                        updated.resource_state[resource].state = new_state;
+                        building_storage_set_data(b->storage_id, updated);
+                    }
+                }
+            }
+            (void)player_id;
+            break;
+        }
+
+        case NET_EVENT_STORAGE_PERMISSION_CHANGED: {
+            uint8_t player_id = net_read_u8(&s);
+            int building_id = net_read_i32(&s);
+            uint8_t permission = net_read_u8(&s);
+            if (!net_serializer_has_overflow(&s)) {
+                building *b = building_get(building_id);
+                if (b) {
+                    building_storage_toggle_permission(permission, b);
+                }
+            }
+            (void)player_id;
             break;
         }
 

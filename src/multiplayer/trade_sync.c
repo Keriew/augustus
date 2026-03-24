@@ -6,6 +6,9 @@
 #include "network/session.h"
 #include "network/serialize.h"
 #include "network/protocol.h"
+#include "building/building.h"
+#include "building/granary.h"
+#include "building/warehouse.h"
 #include "empire/city.h"
 #include "empire/trade_route.h"
 #include "game/resource.h"
@@ -149,7 +152,8 @@ void mp_trade_sync_emit_trader_reached_storage(int figure_id, int storage_buildi
 }
 
 void mp_trade_sync_emit_trader_trade_executed(int figure_id, int resource,
-                                               int amount, int buying)
+                                               int amount, int buying,
+                                               int building_id)
 {
     if (!net_session_is_host()) {
         return;
@@ -172,6 +176,7 @@ void mp_trade_sync_emit_trader_trade_executed(int figure_id, int resource,
     net_write_i32(&s, resource);
     net_write_i32(&s, amount);
     net_write_u8(&s, (uint8_t)buying);
+    net_write_i32(&s, building_id);
     net_write_u32(&s, t ? t->state_version : 0);
 
     net_session_broadcast(NET_MSG_HOST_EVENT, buf, (uint32_t)net_serializer_position(&s));
@@ -360,6 +365,7 @@ void mp_trade_sync_handle_event(uint16_t event_type,
             int resource = net_read_i32(&s);
             int amount = net_read_i32(&s);
             uint8_t buying = net_read_u8(&s);
+            int building_id = net_read_i32(&s);
             uint32_t version = net_read_u32(&s);
 
             /* Client applies the trade result from host */
@@ -368,13 +374,35 @@ void mp_trade_sync_handle_event(uint16_t event_type,
             if (trade_route_is_valid(route_id) && resource >= RESOURCE_MIN && resource < RESOURCE_MAX) {
                 trade_route_increase_traded(route_id, resource, buying);
             }
+
+            /* Apply warehouse/granary mutation on client so stock stays in sync */
+            if (building_id > 0) {
+                building *b = building_get(building_id);
+                if (b && b->state == BUILDING_STATE_IN_USE) {
+                    if (buying) {
+                        /* Trader buying = city exporting = remove from warehouse */
+                        if (b->type == BUILDING_GRANARY) {
+                            building_granary_remove_export(b, resource, amount, 0);
+                        } else if (b->type == BUILDING_WAREHOUSE) {
+                            building_warehouse_remove_export(b, resource, amount, 0);
+                        }
+                    } else {
+                        /* Trader selling = city importing = add to warehouse */
+                        if (b->type == BUILDING_GRANARY) {
+                            building_granary_add_import(b, resource, amount, 0);
+                        } else if (b->type == BUILDING_WAREHOUSE) {
+                            building_warehouse_add_import(b, resource, amount, 0);
+                        }
+                    }
+                }
+            }
+
             if (t) {
                 t->last_resource = resource;
                 t->last_amount = amount;
                 t->state_version = version;
             }
             (void)net_id;
-            (void)amount;
             break;
         }
         case NET_EVENT_TRADER_RETURNING: {

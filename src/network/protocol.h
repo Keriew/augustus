@@ -74,6 +74,8 @@ typedef enum {
     NET_EVENT_PLAYER_CITY_ONLINE,
     NET_EVENT_SPAWN_TABLE_UPDATED,
     NET_EVENT_CITY_RESOURCE_SETTING,   /* Player changed import/export/stockpile for a resource */
+    NET_EVENT_STORAGE_STATE_CHANGED,   /* Player changed warehouse/granary storage state */
+    NET_EVENT_STORAGE_PERMISSION_CHANGED, /* Player toggled warehouse/granary permission */
     NET_EVENT_COUNT
 } net_host_event_type;
 

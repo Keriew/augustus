@@ -12,6 +12,7 @@
 #include "command_bus.h"
 #include "checksum.h"
 #include "resync.h"
+#include "snapshot.h"
 #include "worldgen.h"
 #include "network/session.h"
 #include "network/serialize.h"
@@ -277,6 +278,19 @@ int mp_bootstrap_host_start_game(void)
         net_write_u8(&ss, 2);  /* normal speed */
         net_session_broadcast(NET_MSG_GAME_START_FINAL, start_buf,
                               (uint32_t)net_serializer_position(&ss));
+    }
+
+    /* 9b. Send initial full snapshot so clients have authoritative MP state */
+    {
+        uint8_t *snap_buf = (uint8_t *)malloc(MP_SNAPSHOT_MAX_SIZE);
+        if (snap_buf) {
+            uint32_t snap_size = 0;
+            if (mp_snapshot_build_full(snap_buf, MP_SNAPSHOT_MAX_SIZE, &snap_size)) {
+                net_session_broadcast(NET_MSG_FULL_SNAPSHOT, snap_buf, snap_size);
+                MP_LOG_INFO("BOOT", "Initial snapshot broadcast: %u bytes", snap_size);
+            }
+            free(snap_buf);
+        }
     }
 
     /* 10. Stop LAN discovery announcing (game is in progress) */

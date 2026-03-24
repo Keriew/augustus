@@ -453,6 +453,11 @@ static void go_to_next_storage(figure *f)
         f->action_state = FIGURE_ACTION_103_TRADE_CARAVAN_LEAVING;
         f->destination_x = exit->x;
         f->destination_y = exit->y;
+#ifdef ENABLE_MULTIPLAYER
+        if (net_session_is_active() && net_session_is_host()) {
+            mp_trade_sync_emit_trader_returning(f->id);
+        }
+#endif
     }
 }
 
@@ -512,6 +517,11 @@ void figure_trade_caravan_action(figure *f)
                 case DIR_FIGURE_LOST:
                     f->state = FIGURE_STATE_DEAD;
                     f->is_ghost = 1;
+#ifdef ENABLE_MULTIPLAYER
+                    if (net_session_is_active() && net_session_is_host()) {
+                        mp_trade_sync_emit_trader_aborted(f->id, 1);
+                    }
+#endif
                     break;
             }
             break;
@@ -520,13 +530,29 @@ void figure_trade_caravan_action(figure *f)
             if (f->wait_ticks > 10) {
                 f->wait_ticks = 0;
                 int move_on = 0;
+#ifdef ENABLE_MULTIPLAYER
+                int is_auth = !net_session_is_active() || net_session_is_host();
+#endif
                 if (figure_trade_caravan_can_buy(f, f->destination_building_id, f->empire_city_id)) {
                     int resource = trader_get_buy_resource(f->destination_building_id, f->empire_city_id);
                     if (resource) {
+#ifdef ENABLE_MULTIPLAYER
+                        if (is_auth) {
+                            trade_route_increase_traded(empire_city_get_route_id(f->empire_city_id), resource, 1);
+                            trader_record_bought_resource(f->trader_id, resource);
+                            city_health_update_sickness_level_in_building(f->destination_building_id);
+                            f->trader_amount_bought++;
+                            if (net_session_is_active()) {
+                                mp_trade_sync_emit_trader_trade_executed(f->id, resource, 1, 1, f->destination_building_id);
+                            }
+                        }
+                        /* Clients skip mutation — they apply via TRADE_EXECUTED event */
+#else
                         trade_route_increase_traded(empire_city_get_route_id(f->empire_city_id), resource, 1);
                         trader_record_bought_resource(f->trader_id, resource);
                         city_health_update_sickness_level_in_building(f->destination_building_id);
                         f->trader_amount_bought++;
+#endif
                     } else {
                         move_on++;
                     }
@@ -536,10 +562,22 @@ void figure_trade_caravan_action(figure *f)
                 if (figure_trade_caravan_can_sell(f, f->destination_building_id, f->empire_city_id)) {
                     int resource = trader_get_sell_resource(f->destination_building_id, f->empire_city_id);
                     if (resource) {
+#ifdef ENABLE_MULTIPLAYER
+                        if (is_auth) {
+                            trade_route_increase_traded(empire_city_get_route_id(f->empire_city_id), resource, 0);
+                            trader_record_sold_resource(f->trader_id, resource);
+                            city_health_update_sickness_level_in_building(f->destination_building_id);
+                            f->loads_sold_or_carrying++;
+                            if (net_session_is_active()) {
+                                mp_trade_sync_emit_trader_trade_executed(f->id, resource, 1, 0, f->destination_building_id);
+                            }
+                        }
+#else
                         trade_route_increase_traded(empire_city_get_route_id(f->empire_city_id), resource, 0);
                         trader_record_sold_resource(f->trader_id, resource);
                         city_health_update_sickness_level_in_building(f->destination_building_id);
                         f->loads_sold_or_carrying++;
+#endif
                     } else {
                         move_on++;
                     }
@@ -878,6 +916,11 @@ void figure_trade_ship_action(figure *f)
                     } else {
                         f->action_state = FIGURE_ACTION_115_TRADE_SHIP_LEAVING;
                         f->wait_ticks = 0;
+#ifdef ENABLE_MULTIPLAYER
+                        if (net_session_is_active() && net_session_is_host()) {
+                            mp_trade_sync_emit_trader_returning(f->id);
+                        }
+#endif
                         map_point river_exit = scenario_map_river_exit();
                         f->destination_x = river_exit.x;
                         f->destination_y = river_exit.y;
@@ -955,6 +998,11 @@ void figure_trade_ship_action(figure *f)
                     f->trade_ship_failed_dock_attempts = 0;
                     f->action_state = FIGURE_ACTION_115_TRADE_SHIP_LEAVING;
                     f->wait_ticks = 0;
+#ifdef ENABLE_MULTIPLAYER
+                    if (net_session_is_active() && net_session_is_host()) {
+                        mp_trade_sync_emit_trader_returning(f->id);
+                    }
+#endif
                     map_point river_entry = scenario_map_river_entry();
                     map_point river_spot;
                     if (scenario_map_has_river_exit()) {
@@ -1157,6 +1205,9 @@ void figure_trade_emit_event_if_host(const figure *f, int event_type)
     switch (event_type) {
         case 1: /* TRADER_SPAWNED */
             mp_trade_sync_emit_trader_spawned(f->id, f->empire_city_id, -1);
+            break;
+        case 3: /* TRADER_ABORTED */
+            mp_trade_sync_emit_trader_aborted(f->id, 0);
             break;
         case 5: /* TRADER_DESPAWNED */
             mp_trade_sync_emit_trader_despawned(f->id);

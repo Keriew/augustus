@@ -9,6 +9,8 @@
 #include "network/session.h"
 #include "network/serialize.h"
 #include "network/protocol.h"
+#include "building/building.h"
+#include "building/storage.h"
 #include "empire/city.h"
 #include "empire/trade_route.h"
 #include "game/resource.h"
@@ -290,6 +292,37 @@ static int validate_command(const mp_command *cmd)
             return MP_CMD_REJECT_NONE;
         }
 
+        case MP_CMD_SET_STORAGE_STATE: {
+            int bid = cmd->data.storage_state.building_id;
+            building *b = building_get(bid);
+            if (!b || b->state != BUILDING_STATE_IN_USE) {
+                return MP_CMD_REJECT_CITY_NOT_FOUND;
+            }
+            if (b->type != BUILDING_WAREHOUSE && b->type != BUILDING_GRANARY) {
+                return MP_CMD_REJECT_INVALID;
+            }
+            int res = cmd->data.storage_state.resource;
+            if (res < RESOURCE_MIN || res >= RESOURCE_MAX) {
+                return MP_CMD_REJECT_RESOURCE_INVALID;
+            }
+            if (cmd->data.storage_state.new_state >= BUILDING_STORAGE_STATE_MAX) {
+                return MP_CMD_REJECT_INVALID;
+            }
+            return MP_CMD_REJECT_NONE;
+        }
+
+        case MP_CMD_SET_STORAGE_PERMISSION: {
+            int bid = cmd->data.storage_permission.building_id;
+            building *b = building_get(bid);
+            if (!b || b->state != BUILDING_STATE_IN_USE) {
+                return MP_CMD_REJECT_CITY_NOT_FOUND;
+            }
+            if (b->type != BUILDING_WAREHOUSE && b->type != BUILDING_GRANARY) {
+                return MP_CMD_REJECT_INVALID;
+            }
+            return MP_CMD_REJECT_NONE;
+        }
+
         case MP_CMD_REQUEST_PAUSE:
         case MP_CMD_REQUEST_RESUME:
         case MP_CMD_REQUEST_SPEED:
@@ -518,6 +551,52 @@ static void apply_command(mp_command *cmd)
             net_write_i32(&es, data->resource);
             net_write_u8(&es, data->setting_type);
             net_write_i32(&es, data->value);
+            net_session_broadcast(NET_MSG_HOST_EVENT, event_buf,
+                                  (uint32_t)net_serializer_position(&es));
+            break;
+        }
+
+        case MP_CMD_SET_STORAGE_STATE: {
+            const mp_cmd_set_storage_state *data = &cmd->data.storage_state;
+            building *b = building_get(data->building_id);
+            if (b && b->storage_id) {
+                const building_storage *current = building_storage_get(b->storage_id);
+                if (current) {
+                    building_storage new_data = *current;
+                    new_data.resource_state[data->resource].state = data->new_state;
+                    building_storage_set_data(b->storage_id, new_data);
+                }
+            }
+            /* Broadcast to all clients */
+            uint8_t event_buf[32];
+            net_serializer es;
+            net_serializer_init(&es, event_buf, sizeof(event_buf));
+            net_write_u16(&es, NET_EVENT_STORAGE_STATE_CHANGED);
+            net_write_u32(&es, tick);
+            net_write_u8(&es, cmd->player_id);
+            net_write_i32(&es, data->building_id);
+            net_write_i32(&es, data->resource);
+            net_write_u8(&es, data->new_state);
+            net_session_broadcast(NET_MSG_HOST_EVENT, event_buf,
+                                  (uint32_t)net_serializer_position(&es));
+            break;
+        }
+
+        case MP_CMD_SET_STORAGE_PERMISSION: {
+            const mp_cmd_set_storage_permission *data = &cmd->data.storage_permission;
+            building *b = building_get(data->building_id);
+            if (b) {
+                building_storage_toggle_permission(data->permission, b);
+            }
+            /* Broadcast to all clients */
+            uint8_t event_buf[32];
+            net_serializer es;
+            net_serializer_init(&es, event_buf, sizeof(event_buf));
+            net_write_u16(&es, NET_EVENT_STORAGE_PERMISSION_CHANGED);
+            net_write_u32(&es, tick);
+            net_write_u8(&es, cmd->player_id);
+            net_write_i32(&es, data->building_id);
+            net_write_u8(&es, data->permission);
             net_session_broadcast(NET_MSG_HOST_EVENT, event_buf,
                                   (uint32_t)net_serializer_position(&es));
             break;

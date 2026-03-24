@@ -45,10 +45,12 @@
 
 #ifdef ENABLE_MULTIPLAYER
 #include "multiplayer/command_bus.h"
+#include "multiplayer/empire_sync.h"
 #include "multiplayer/ownership.h"
 #include "multiplayer/player_registry.h"
 #include "network/session.h"
 #include "translation/translation.h"
+#include "window/multiplayer_p2p_trade.h"
 #endif
 
 #include <math.h>
@@ -1414,6 +1416,15 @@ static void draw_city_info(const empire_object *object)
             font_t type_font = is_p2p ? FONT_NORMAL_BROWN : FONT_NORMAL_PLAIN;
             text_draw(type_text, mp_x + 40, mp_y + 16, type_font, 0);
         }
+
+        /* "Trade" button for remote player cities */
+        if (mp_ownership_is_city_remote_player(data.selected_city)) {
+            int trade_btn_x = (data.panel.x_min + data.panel.x_max - 80) / 2;
+            int trade_btn_y = mp_y + 34;
+            button_border_draw(trade_btn_x, trade_btn_y, 80, 22, data.focus_button_id == 5);
+            text_draw_centered(translation_for(TR_MP_P2P_TRADE_BUTTON_TRADE),
+                trade_btn_x, trade_btn_y + 4, 80, FONT_NORMAL_BLACK, 0);
+        }
     }
 #endif
 }
@@ -2275,6 +2286,25 @@ static void handle_input(const mouse *m, const hotkeys *h)
             break;  // Only process one button at a time
         }
     }
+
+#ifdef ENABLE_MULTIPLAYER
+    /* Handle P2P trade button click on remote player cities */
+    if (net_session_is_active() && selected_object && data.selected_city >= 0 &&
+        empire_city_is_player_owned(data.selected_city) &&
+        mp_ownership_is_city_remote_player(data.selected_city)) {
+        int mp_y = data.y_max - 198;
+        int trade_btn_x = (data.panel.x_min + data.panel.x_max - 80) / 2;
+        int trade_btn_y = mp_y + 34;
+        if (m->x >= trade_btn_x && m->x < trade_btn_x + 80 &&
+            m->y >= trade_btn_y && m->y < trade_btn_y + 22) {
+            data.focus_button_id = 5;
+            if (m->left.went_up) {
+                window_multiplayer_p2p_trade_show(data.selected_city);
+                return;
+            }
+        }
+    }
+#endif
 
     if (selected_object) {
 

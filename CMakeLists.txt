@@ -794,6 +794,7 @@ if(ENABLE_MULTIPLAYER)
         ${PROJECT_SOURCE_DIR}/src/window/multiplayer_lobby.c
         ${PROJECT_SOURCE_DIR}/src/window/multiplayer_status.c
         ${PROJECT_SOURCE_DIR}/src/window/multiplayer_chat.c
+        ${PROJECT_SOURCE_DIR}/src/window/multiplayer_p2p_trade.c
     )
 endif()
 

@@ -21,6 +21,8 @@ static const char *COMMAND_NAMES[] = {
     "OPEN_TRADE_ROUTE",
     "CLOSE_TRADE_ROUTE",
     "SET_RESOURCE_SETTING",
+    "SET_STORAGE_STATE",
+    "SET_STORAGE_PERMISSION",
     "CHAT_MESSAGE"
 };
 
@@ -90,6 +92,17 @@ void mp_command_serialize(const mp_command *cmd, uint8_t *buffer, uint32_t *size
             net_write_i32(&s, cmd->data.resource_setting.resource);
             net_write_u8(&s, cmd->data.resource_setting.setting_type);
             net_write_i32(&s, cmd->data.resource_setting.value);
+            break;
+
+        case MP_CMD_SET_STORAGE_STATE:
+            net_write_i32(&s, cmd->data.storage_state.building_id);
+            net_write_i32(&s, cmd->data.storage_state.resource);
+            net_write_u8(&s, cmd->data.storage_state.new_state);
+            break;
+
+        case MP_CMD_SET_STORAGE_PERMISSION:
+            net_write_i32(&s, cmd->data.storage_permission.building_id);
+            net_write_u8(&s, cmd->data.storage_permission.permission);
             break;
 
         case MP_CMD_CHAT_MESSAGE:
@@ -178,6 +191,17 @@ void mp_command_deserialize(mp_command *cmd, const uint8_t *buffer, uint32_t siz
             cmd->data.resource_setting.resource = net_read_i32(&s);
             cmd->data.resource_setting.setting_type = net_read_u8(&s);
             cmd->data.resource_setting.value = net_read_i32(&s);
+            break;
+
+        case MP_CMD_SET_STORAGE_STATE:
+            cmd->data.storage_state.building_id = net_read_i32(&s);
+            cmd->data.storage_state.resource = net_read_i32(&s);
+            cmd->data.storage_state.new_state = net_read_u8(&s);
+            break;
+
+        case MP_CMD_SET_STORAGE_PERMISSION:
+            cmd->data.storage_permission.building_id = net_read_i32(&s);
+            cmd->data.storage_permission.permission = net_read_u8(&s);
             break;
 
         case MP_CMD_CHAT_MESSAGE:

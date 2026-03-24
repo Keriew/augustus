@@ -45,6 +45,10 @@ typedef enum {
     /* City resource settings (import/export/stockpile) */
     MP_CMD_SET_RESOURCE_SETTING,
 
+    /* Building storage settings (warehouse/granary) */
+    MP_CMD_SET_STORAGE_STATE,      /* Change accept/reject/get state for a resource in a building */
+    MP_CMD_SET_STORAGE_PERMISSION, /* Toggle dock/worker/etc permission for a building */
+
     /* Chat */
     MP_CMD_CHAT_MESSAGE,
 
@@ -162,6 +166,25 @@ typedef struct {
     int value;              /* 0/1 for toggles, threshold amount for stockpile */
 } mp_cmd_set_resource_setting;
 
+/**
+ * Change storage state for a resource in a warehouse/granary.
+ * States: NOT_ACCEPTING=0, ACCEPTING=1, GET=2 (warehouse only),
+ *         ACCEPTING_HALF=3, ACCEPTING_QUARTER=4, ACCEPTING_3QUARTERS=5
+ */
+typedef struct {
+    int building_id;
+    int resource;
+    uint8_t new_state;       /* Building storage state enum value */
+} mp_cmd_set_storage_state;
+
+/**
+ * Toggle a permission (dock access, worker) for a warehouse/granary.
+ */
+typedef struct {
+    int building_id;
+    uint8_t permission;      /* building_storage_permission_states enum */
+} mp_cmd_set_storage_permission;
+
 typedef struct {
     char message[128];
     uint8_t sender_id;
@@ -187,6 +210,8 @@ typedef struct {
         mp_cmd_open_trade_route open_route;
         mp_cmd_close_trade_route close_route;
         mp_cmd_set_resource_setting resource_setting;
+        mp_cmd_set_storage_state storage_state;
+        mp_cmd_set_storage_permission storage_permission;
         mp_cmd_request_speed speed;
         mp_cmd_chat_message chat;
     } data;

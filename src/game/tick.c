@@ -70,7 +70,9 @@
 #include "multiplayer/checksum.h"
 #include "multiplayer/empire_sync.h"
 #include "multiplayer/trade_sync.h"
+#include "multiplayer/snapshot.h"
 #include "network/session.h"
+#include <stdlib.h>
 #endif
 
 static void advance_year(void)
@@ -258,6 +260,18 @@ void game_tick_run(void)
             if (tick % 50 == 0) {
                 mp_empire_sync_update_trade_views();
                 mp_empire_sync_broadcast_views();
+            }
+
+            /* Periodic snapshot broadcast to keep clients in sync */
+            if (tick % 250 == 0 && net_session_get_peer_count() > 0) {
+                uint8_t *snap_buf = (uint8_t *)malloc(MP_SNAPSHOT_MAX_SIZE);
+                if (snap_buf) {
+                    uint32_t snap_size = 0;
+                    if (mp_snapshot_build_full(snap_buf, MP_SNAPSHOT_MAX_SIZE, &snap_size)) {
+                        net_session_broadcast(NET_MSG_FULL_SNAPSHOT, snap_buf, snap_size);
+                    }
+                    free(snap_buf);
+                }
             }
 
             /* Periodic checksum verification */

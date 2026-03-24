@@ -21,11 +21,21 @@
 #include "figuretype/trader.h"
 #include "game/resource.h"
 #include "map/road_access.h"
+#ifdef ENABLE_MULTIPLAYER
+#include "multiplayer/trade_sync.h"
+#include "network/session.h"
+#endif
 
 #define INFINITE 10000
 
 static int try_import_resource(int building_id, int resource, int city_id, int quantity)
 {
+#ifdef ENABLE_MULTIPLAYER
+    /* Only the host performs warehouse mutations; clients wait for events */
+    if (net_session_is_active() && !net_session_is_host()) {
+        return 0;
+    }
+#endif
     building *b = building_get(building_id);
     if (b->type != BUILDING_WAREHOUSE &&
         !(resource_is_food(resource) && b->type == BUILDING_GRANARY)) {
@@ -46,11 +56,21 @@ static int try_import_resource(int building_id, int resource, int city_id, int q
         result = building_granary_add_import(b, resource, 1, 0);
         if (result) {
             trade_route_increase_traded(route_id, resource, 0);
+#ifdef ENABLE_MULTIPLAYER
+            if (net_session_is_active()) {
+                mp_trade_sync_emit_trader_trade_executed(0, resource, result, 0, building_id);
+            }
+#endif
         }
     } else if (b->type == BUILDING_WAREHOUSE) {
         result = building_warehouse_add_import(b, resource, quantity, 0);
         if (result) {
             trade_route_increase_traded(route_id, resource, 0);
+#ifdef ENABLE_MULTIPLAYER
+            if (net_session_is_active()) {
+                mp_trade_sync_emit_trader_trade_executed(0, resource, result, 0, building_id);
+            }
+#endif
         }
     }
     return result;
@@ -58,6 +78,12 @@ static int try_import_resource(int building_id, int resource, int city_id, int q
 
 static int try_export_resource(int building_id, int resource, int city_id)
 {
+#ifdef ENABLE_MULTIPLAYER
+    /* Only the host performs warehouse mutations; clients wait for events */
+    if (net_session_is_active() && !net_session_is_host()) {
+        return 0;
+    }
+#endif
     building *b = building_get(building_id);
     if (b->type != BUILDING_WAREHOUSE && b->type != BUILDING_GRANARY) {
         return 0;
@@ -71,11 +97,21 @@ static int try_export_resource(int building_id, int resource, int city_id)
         result = building_granary_remove_export(b, resource, 1, 0);
         if (result) {
             trade_route_increase_traded(empire_city_get_route_id(city_id), resource, 1);
+#ifdef ENABLE_MULTIPLAYER
+            if (net_session_is_active()) {
+                mp_trade_sync_emit_trader_trade_executed(0, resource, result, 1, building_id);
+            }
+#endif
         }
     } else if (b->type == BUILDING_WAREHOUSE) {
         result = building_warehouse_remove_export(b, resource, 1, 0);
         if (result) {
             trade_route_increase_traded(empire_city_get_route_id(city_id), resource, 1);
+#ifdef ENABLE_MULTIPLAYER
+            if (net_session_is_active()) {
+                mp_trade_sync_emit_trader_trade_executed(0, resource, result, 1, building_id);
+            }
+#endif
         }
     }
     return result;
