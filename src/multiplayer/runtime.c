@@ -6,9 +6,12 @@
 #include "mp_debug_log.h"
 #include "network/session.h"
 #include "network/discovery_lan.h"
+#include "scenario/empire.h"
 #include "core/log.h"
+#include "window/main_menu.h"
 
 static int runtime_initialized;
+static int was_in_game;
 
 void multiplayer_runtime_init(void)
 {
@@ -16,6 +19,7 @@ void multiplayer_runtime_init(void)
         return;
     }
     runtime_initialized = 1;
+    was_in_game = 0;
     MP_LOG_INFO("SESSION", "Multiplayer runtime initialized (per-frame processing enabled)");
 }
 
@@ -30,8 +34,11 @@ void multiplayer_runtime_update(void)
      * Session update only runs when there is an active session (host or client).
      * Discovery update always runs — it self-checks whether its socket is open. */
 
+    int was_active = net_session_is_active();
+    int was_playing = was_in_game;
+
     /* 1. Session I/O (TCP handshake, data, heartbeats, timeouts) */
-    if (net_session_is_active()) {
+    if (was_active) {
         net_session_update();
 
         /* Host: keep the announced player count in sync with reality */
@@ -39,6 +46,19 @@ void multiplayer_runtime_update(void)
             int peer_count = net_session_get_peer_count();
             net_discovery_update_announcing((uint8_t)(peer_count + 1)); /* +1 for host */
         }
+    }
+
+    /* Track in-game state for disconnect detection */
+    if (net_session_is_in_game()) {
+        was_in_game = 1;
+    }
+
+    /* Detect session drop while in-game: gracefully return to main menu */
+    if (was_playing && !net_session_is_active()) {
+        MP_LOG_INFO("SESSION", "Session lost while in-game — returning to main menu");
+        mp_bootstrap_reset();
+        was_in_game = 0;
+        window_main_menu_show(1);
     }
 
     /* 2. Discovery I/O (UDP announce/listen) — runs unconditionally.
@@ -52,6 +72,7 @@ void multiplayer_runtime_shutdown(void)
         return;
     }
     mp_bootstrap_reset();
+    was_in_game = 0;
     runtime_initialized = 0;
     MP_LOG_INFO("SESSION", "Multiplayer runtime shutdown");
 }

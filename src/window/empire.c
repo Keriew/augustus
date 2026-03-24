@@ -1180,9 +1180,15 @@ static void draw_trade_city_info(const empire_object *object, const empire_city 
         draw_trade_row(city, 1, x_base, y_offset, &style_sells);
         draw_trade_row(city, 0, width_sells + x_base, y_offset, &style_buys);
 
-        // Draw cost + type icon
-        open_trade_button_style style = get_open_trade_button_style(x_base, y_offset + 73, TRADE_STYLE_MAIN_BAR);
-        draw_open_trade_button(city, &style, (trade_icon_type) (city->is_sea_trade));
+        // Draw cost + type icon (skip for P2P player cities — they trade directly)
+#ifdef ENABLE_MULTIPLAYER
+        if (!(net_session_is_active() && data.selected_city >= 0 &&
+              mp_ownership_is_city_remote_player(data.selected_city)))
+#endif
+        {
+            open_trade_button_style style = get_open_trade_button_style(x_base, y_offset + 73, TRADE_STYLE_MAIN_BAR);
+            draw_open_trade_button(city, &style, (trade_icon_type) (city->is_sea_trade));
+        }
 
     }
 
@@ -1311,9 +1317,16 @@ static void draw_sidebar_city_item(const grid_box_item *item)
         style_buys.row_width -= sell_row_width; //limit the available row width by the sell row length
         draw_trade_row(city, 0, x_cursor, y_offset, &style_buys);
         y_offset += 35;
-        //recalculate the style basing on the new y_offset
-        open_trade_button_style open_trade_style_closed = get_open_trade_button_style(item->x, y_offset, TRADE_STYLE_SIDEBAR);
-        draw_open_trade_button(city, &open_trade_style_closed, (trade_icon_type) (city->is_sea_trade));
+        // Skip "Open trade route" button for P2P player cities (they trade directly)
+#ifdef ENABLE_MULTIPLAYER
+        if (!(net_session_is_active() &&
+              mp_ownership_is_city_remote_player(entry->city_id)))
+#endif
+        {
+            //recalculate the style basing on the new y_offset
+            open_trade_button_style open_trade_style_closed = get_open_trade_button_style(item->x, y_offset, TRADE_STYLE_SIDEBAR);
+            draw_open_trade_button(city, &open_trade_style_closed, (trade_icon_type) (city->is_sea_trade));
+        }
     }
     graphics_reset_clip_rectangle();
 }
@@ -1340,10 +1353,28 @@ static void draw_city_info(const empire_object *object)
             lang_text_draw_centered(47, 0, x_offset, y_offset + 42, 240, FONT_NORMAL_GREEN);
             break;
         case EMPIRE_CITY_OURS:
-            lang_text_draw_centered(47, 1, x_offset, y_offset + 42, 240, FONT_NORMAL_GREEN);
+#ifdef ENABLE_MULTIPLAYER
+            /* In multiplayer, the shared EMPIRE_CITY_OURS is not "your" city —
+             * each player's assigned EMPIRE_CITY_TRADE is their city. */
+            if (net_session_is_active()) {
+                lang_text_draw_centered(47, 12, x_offset, y_offset + 42, 240, FONT_NORMAL_GREEN);
+            } else
+#endif
+            {
+                lang_text_draw_centered(47, 1, x_offset, y_offset + 42, 240, FONT_NORMAL_GREEN);
+            }
             break;
         case EMPIRE_CITY_TRADE:
-            draw_trade_city_info(object, city);
+#ifdef ENABLE_MULTIPLAYER
+            /* In multiplayer, local player's assigned city shows "Your City" */
+            if (net_session_is_active() && data.selected_city >= 0 &&
+                mp_ownership_is_city_local(data.selected_city)) {
+                lang_text_draw_centered(47, 1, x_offset, y_offset + 42, 240, FONT_NORMAL_GREEN);
+            } else
+#endif
+            {
+                draw_trade_city_info(object, city);
+            }
             break;
     }
 
@@ -1677,6 +1708,21 @@ static void draw_empire_object(const empire_object *obj)
             image_id = empire_city_get_icon_image_id(obj->empire_city_icon); // fetch custom city icon
         }
     }
+#ifdef ENABLE_MULTIPLAYER
+    /* Multiplayer icon overrides — must run AFTER custom icon block above.
+     * Local player's city gets the blue flag; shared OURS city becomes generic. */
+    if (obj->type == EMPIRE_OBJECT_CITY && net_session_is_active()) {
+        const empire_city *mp_city = empire_city_get(empire_city_get_for_object(obj->id));
+        if (mp_city) {
+            if (mp_city->type == EMPIRE_CITY_OURS) {
+                image_id = image_group(GROUP_EMPIRE_CITY_DISTANT_ROMAN);
+            } else if (mp_city->type == EMPIRE_CITY_TRADE &&
+                       mp_ownership_is_city_local(empire_city_get_for_object(obj->id))) {
+                image_id = image_group(GROUP_EMPIRE_CITY);
+            }
+        }
+    }
+#endif
     const image *img = image_get(image_id);
     if ((((unsigned int) data.hovered_object == obj->id + 1) && obj->type == EMPIRE_OBJECT_CITY) ||
         ((empire_selected_object() == obj->id + 1) && obj->type == EMPIRE_OBJECT_CITY)) {
@@ -2138,6 +2184,15 @@ static void on_sidebar_city_click(const grid_box_item *item)
     empire_select_object_by_id(city->empire_object_id);
     grid_box_request_refresh(&sidebar_grid_box);
     window_invalidate();
+
+#ifdef ENABLE_MULTIPLAYER
+    /* Clicking a remote player city in the sidebar opens P2P trade directly */
+    if (net_session_is_active() &&
+        empire_city_is_player_owned(entry->city_id) &&
+        mp_ownership_is_city_remote_player(entry->city_id)) {
+        window_multiplayer_p2p_trade_show(entry->city_id);
+    }
+#endif
 }
 
 void handle_sidebar_dragging(const mouse *m)
@@ -2251,6 +2306,28 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 
 
+#ifdef ENABLE_MULTIPLAYER
+    /* Handle P2P trade button click BEFORE determine_selected_object(),
+     * because clicking the Trade button falls within the is_map() area
+     * and determine_selected_object would deselect the current city.
+     * data.selected_city is still valid from the draw phase. */
+    if (net_session_is_active() && data.selected_city >= 0 &&
+        empire_city_is_player_owned(data.selected_city) &&
+        mp_ownership_is_city_remote_player(data.selected_city)) {
+        int mp_y = data.y_max - 198;
+        int trade_btn_x = (data.panel.x_min + data.panel.x_max - 80) / 2;
+        int trade_btn_y = mp_y + 34;
+        if (m->x >= trade_btn_x && m->x < trade_btn_x + 80 &&
+            m->y >= trade_btn_y && m->y < trade_btn_y + 22) {
+            data.focus_button_id = 5;
+            if (m->left.went_up) {
+                window_multiplayer_p2p_trade_show(data.selected_city);
+                return;
+            }
+        }
+    }
+#endif
+
     button_id = 0;
     determine_selected_object(m);
     handle_sidebar_border(m);
@@ -2286,25 +2363,6 @@ static void handle_input(const mouse *m, const hotkeys *h)
             break;  // Only process one button at a time
         }
     }
-
-#ifdef ENABLE_MULTIPLAYER
-    /* Handle P2P trade button click on remote player cities */
-    if (net_session_is_active() && selected_object && data.selected_city >= 0 &&
-        empire_city_is_player_owned(data.selected_city) &&
-        mp_ownership_is_city_remote_player(data.selected_city)) {
-        int mp_y = data.y_max - 198;
-        int trade_btn_x = (data.panel.x_min + data.panel.x_max - 80) / 2;
-        int trade_btn_y = mp_y + 34;
-        if (m->x >= trade_btn_x && m->x < trade_btn_x + 80 &&
-            m->y >= trade_btn_y && m->y < trade_btn_y + 22) {
-            data.focus_button_id = 5;
-            if (m->left.went_up) {
-                window_multiplayer_p2p_trade_show(data.selected_city);
-                return;
-            }
-        }
-    }
-#endif
 
     if (selected_object) {
 

@@ -2104,6 +2104,16 @@ static translation_string all_strings[] = {
     {TR_MP_P2P_TRADE_SEA_PREF, "Sea"},
     {TR_MP_P2P_TRADE_LAND_PREF, "Land"},
     {TR_MP_P2P_TRADE_BUTTON_TRADE, "Trade"},
+    {TR_MP_P2P_TRADE_PRICE, "Price"},
+    {TR_MP_P2P_TRADE_LOADS, " loads"},
+    {TR_MP_P2P_TRADE_NOT_TRADING, "Not trading"},
+    {TR_MP_P2P_TRADE_ON, "On"},
+    {TR_MP_P2P_TRADE_OFF, "Off"},
+    {TR_MP_P2P_TRADE_YOUR_EXPORTS, "Your Exports:"},
+    {TR_MP_P2P_TRADE_PARTNER_EXPORTS, "Partner Exports:"},
+    {TR_MP_P2P_TRADE_WANTED, "Wanted"},
+    {TR_MP_P2P_TRADE_THEY_CAN_EXPORT, "They Can Export:"},
+    {TR_MP_P2P_TRADE_THEY_CAN_IMPORT, "They Can Import:"},
 #endif
 };
 

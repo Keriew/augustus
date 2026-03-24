@@ -36,6 +36,8 @@ typedef int socklen_t;
 
 #ifdef _WIN32
 #include <sysinfoapi.h>
+#else
+#include <signal.h>
 #endif
 
 static int tcp_initialized = 0;
@@ -52,6 +54,11 @@ int net_tcp_init(void)
         log_error("WSAStartup failed", 0, result);
         return 0;
     }
+#else
+    /* Ignore SIGPIPE so that send() on a broken socket returns -1/EPIPE
+     * instead of killing the process. Essential for multiplayer stability
+     * when a remote player disconnects unexpectedly. */
+    signal(SIGPIPE, SIG_IGN);
 #endif
     tcp_initialized = 1;
     return 1;
@@ -214,7 +221,11 @@ int net_tcp_connect(const char *host, uint16_t port)
 
 int net_tcp_send(int socket_fd, const uint8_t *data, size_t size)
 {
-    int sent = send(socket_fd, (const char *)data, (int)size, 0);
+    int flags = 0;
+#ifdef MSG_NOSIGNAL
+    flags = MSG_NOSIGNAL; /* Linux: prevent SIGPIPE per-call */
+#endif
+    int sent = send(socket_fd, (const char *)data, (int)size, flags);
     if (sent == SOCKET_ERROR) {
         if (NET_WOULD_BLOCK) {
             return 0; /* Would block - try again later */
