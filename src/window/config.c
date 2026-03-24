@@ -108,6 +108,7 @@ enum {
     RANGE_SNOW_SPEED,
     RANGE_SANDSTORM_INTENSITY,
     RANGE_SANDSTORM_SPEED,
+    RANGE_SANDSTORM_SIZE
 };
 
 enum {
@@ -172,7 +173,7 @@ static const uint8_t *display_text_snow_intensity(void);
 static const uint8_t *display_text_snow_speed(void);
 static const uint8_t *display_text_sandstorm_intensity(void);
 static const uint8_t *display_text_sandstorm_speed(void);
-
+static const uint8_t *display_text_sandstorm_size(void);
 
 // page-related helpers
 static int get_widget_count_for(unsigned int page);
@@ -311,6 +312,9 @@ static config_widget ui_widgets_by_category[CATEGORY_UI_COUNT][MAX_WIDGETS] = {
         {TYPE_NUMERICAL_RANGE, RANGE_SANDSTORM_INTENSITY, 0, display_text_sandstorm_intensity, 0, 1, ITEM_BASE_H, 2},
         {TYPE_NUMERICAL_DESC, RANGE_SANDSTORM_SPEED, TR_CONFIG_WT_SANDSTORM_SPEED, NULL, 0, 1, ITEM_BASE_H, 10},
         {TYPE_NUMERICAL_RANGE, RANGE_SANDSTORM_SPEED, 0, display_text_sandstorm_speed, 0, 1, ITEM_BASE_H, 2},
+        {TYPE_NUMERICAL_DESC, RANGE_SANDSTORM_SIZE, TR_CONFIG_WT_SANDSTORM_SIZE, NULL, 0, 1, ITEM_BASE_H, 10},
+        {TYPE_NUMERICAL_RANGE, RANGE_SANDSTORM_SIZE, 0, display_text_sandstorm_size, 0, 1, ITEM_BASE_H, 2},
+
         {TYPE_NONE}
     },
     // Empire
@@ -486,6 +490,7 @@ static numerical_range_widget ranges[] = {
     { 50, 18,   1,  10,  1, 0},   //  snow flake speed
     { 50, 18,   0, 100,  5, 0},   //  sandstorm overlay intensity %
     { 50, 18,   1,  10,  1, 0},   //  sandstorm particle speed
+    { 50, 18,   1,  20,  1, 0},   //  sandstorm size
 };
 
 //  Bottom buttons & page tabs
@@ -983,6 +988,11 @@ static const uint8_t *display_text_sandstorm_speed(void)
     string_from_int(data.display_text, data.config_values[CONFIG_WT_SANDSTORM_SPEED].new_value, 0);
     return data.display_text;
 }
+static const uint8_t *display_text_sandstorm_size(void)
+{
+    string_from_int(data.display_text, data.config_values[CONFIG_UI_WT_SANDSTORM_SIZE].new_value, 0);
+    return data.display_text;
+}
 
 //    Range value binding, custom change-action table, init
 
@@ -1010,6 +1020,7 @@ static void set_range_values(void)
     ranges[RANGE_SNOW_SPEED].value = &data.config_values[CONFIG_WT_SNOW_SPEED].new_value;
     ranges[RANGE_SANDSTORM_INTENSITY].value = &data.config_values[CONFIG_WT_SANDSTORM_INTENSITY].new_value;
     ranges[RANGE_SANDSTORM_SPEED].value = &data.config_values[CONFIG_WT_SANDSTORM_SPEED].new_value;
+    ranges[RANGE_SANDSTORM_SIZE].value = &data.config_values[CONFIG_UI_WT_SANDSTORM_SIZE].new_value;
 }
 
 static void set_custom_config_changes(void)

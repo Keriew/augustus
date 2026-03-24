@@ -68,10 +68,10 @@ int window_city_simulated_weather(weather_type weather)
     switch (weather) {
         case WEATHER_RAIN:
             return config_get(CONFIG_UI_WT_PREVIEW_RAIN);
-            // case WEATHER_SNOW:
-            //     return config_get(CONFIG_UI_WT_ENABLE_SNOW_CENTRAL);
-            // case WEATHER_SAND:
-            //     return 0; // no preview option for sandstorms yet
+        case WEATHER_SNOW:
+            return config_get(CONFIG_UI_WT_ENABLE_SNOW_CENTRAL);
+        case WEATHER_SAND:
+            return config_get(CONFIG_UI_WT_PREVIEW_SANDSTORM);
         default:
             return 0;
     }

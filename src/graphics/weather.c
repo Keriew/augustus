@@ -299,9 +299,9 @@ static void draw_sandstorm(void)
 
         graphics_draw_line(
             data.elements[i].x,
-            data.elements[i].x + 1,
+            data.elements[i].x + config_get(CONFIG_UI_WT_SANDSTORM_SIZE),
             data.elements[i].y,
-            data.elements[i].y + 1,
+            data.elements[i].y + config_get(CONFIG_UI_WT_SANDSTORM_SIZE),
             COLOR_WEATHER_SAND_PARTICLE);
 
         if (data.elements[i].x > screen_width()) {

@@ -122,6 +122,7 @@ static const char *ini_keys[] = {
     [CONFIG_UI_WT_PREVIEW_SNOW] = "ui_wt_snow_preview",
     [CONFIG_UI_WT_PREVIEW_SANDSTORM] = "ui_wt_sandstorm_preview",
     [CONFIG_UI_WT_PREVIEW_HEAVY_RAIN] = "ui_wt_preview_heavy_rain",
+    [CONFIG_UI_WT_SANDSTORM_SIZE] = "ui_wt_sandstorm_size",
 };
 
 static const char *ini_string_keys[] = {
@@ -193,6 +194,7 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_UI_WT_PREVIEW_SNOW] = 0,
     [CONFIG_UI_WT_PREVIEW_SANDSTORM] = 0,
     [CONFIG_UI_WT_PREVIEW_HEAVY_RAIN] = 0,
+    [CONFIG_UI_WT_SANDSTORM_SIZE] = 1,
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };

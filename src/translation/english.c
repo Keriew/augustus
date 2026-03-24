@@ -2033,7 +2033,8 @@ static translation_string all_strings[] = {
     {TR_CONFIG_WT_SNOW_INTENSITY, "Overlay intensity"},
     {TR_CONFIG_WT_SNOW_SPEED, "Flake speed"},
     {TR_CONFIG_WT_SANDSTORM_INTENSITY, "Overlay intensity"},
-    {TR_CONFIG_WT_SANDSTORM_SPEED, "Particle speed"}
+    {TR_CONFIG_WT_SANDSTORM_SPEED, "Particle speed" },
+    {TR_CONFIG_WT_SANDSTORM_SIZE, "Sandstorm size" }
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
