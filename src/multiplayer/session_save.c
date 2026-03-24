@@ -190,8 +190,8 @@ int mp_session_load_from_buffer(const uint8_t *buffer, uint32_t size)
                             + header.time_sync_size;
 
     if (header_wire_size + expected_total > size) {
-        log_error("Multiplayer save: buffer too small for declared domains",
-                  (int)(header_wire_size + expected_total), (int)size);
+        log_error("Multiplayer save: buffer too small for declared domains", 0,
+                  (int)(header_wire_size + expected_total));
         return 0;
     }
 
@@ -200,8 +200,8 @@ int mp_session_load_from_buffer(const uint8_t *buffer, uint32_t size)
         const uint8_t *payload_start = buffer + header_wire_size;
         uint32_t actual_checksum = compute_payload_checksum(payload_start, expected_total);
         if (actual_checksum != header.payload_checksum) {
-            log_error("Multiplayer save: payload checksum mismatch",
-                      (int)actual_checksum, (int)header.payload_checksum);
+            log_error("Multiplayer save: payload checksum mismatch", 0,
+                      (int)actual_checksum);
             return 0;
         }
         MP_LOG_INFO("SESSION_SAVE", "Payload checksum verified: 0x%08x", actual_checksum);
@@ -210,8 +210,8 @@ int mp_session_load_from_buffer(const uint8_t *buffer, uint32_t size)
     /* v4: validate total_payload_size if present */
     if (header.version >= 4 && header.total_payload_size > 0) {
         if (header.total_payload_size != expected_total) {
-            log_error("Multiplayer save: payload size mismatch",
-                      (int)header.total_payload_size, (int)expected_total);
+            log_error("Multiplayer save: payload size mismatch", 0,
+                      (int)header.total_payload_size);
             return 0;
         }
     }
@@ -336,7 +336,7 @@ int mp_session_save_is_multiplayer(const uint8_t *buffer, uint32_t size)
 int mp_session_save_read_header(const uint8_t *buffer, uint32_t size, mp_save_header *header)
 {
     if (size < HEADER_V2_SIZE) {
-        log_error("Save too small for header", (int)size, HEADER_V2_SIZE);
+        log_error("Save too small for header", 0, (int)size);
         return 0;
     }
 
