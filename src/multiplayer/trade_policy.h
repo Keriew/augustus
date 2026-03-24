@@ -71,6 +71,13 @@ void mp_trade_policy_apply_remote_setting(uint8_t player_id, int resource,
  */
 void mp_trade_policy_force_view_update(uint8_t player_id);
 
+/**
+ * Send ALL current resource trade settings (import/export) to the host.
+ * Called when a P2P route is created to ensure the host knows what
+ * this player is trading, not just subsequent changes.
+ */
+void mp_trade_policy_send_all_settings(void);
+
 #define MP_TRADE_SETTING_EXPORT  0
 #define MP_TRADE_SETTING_IMPORT  1
 #define MP_TRADE_SETTING_STOCKPILE 2

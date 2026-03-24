@@ -382,7 +382,14 @@ void empire_city_change_buying_of_resource(empire_city *city, resource_type reso
     int buys = amount != NOT_SELLING;
     city->buys_resource[resource] = buys;
     empire_object_get_full(city->empire_object_id)->city_buys_resource[resource] = amount;
-    if (city->type != EMPIRE_CITY_OURS) {
+    int set_limit = (city->type != EMPIRE_CITY_OURS);
+#ifdef ENABLE_MULTIPLAYER
+    /* In MP, player cities (OURS) also need route limits for P2P trade */
+    if (!set_limit && net_session_is_active() && city->route_id > 0) {
+        set_limit = 1;
+    }
+#endif
+    if (set_limit) {
         trade_route_set_limit(city->route_id, resource, amount, 1);
     }
 }
@@ -392,7 +399,14 @@ void empire_city_change_selling_of_resource(empire_city *city, resource_type res
     int sells = amount != NOT_SELLING;
     city->sells_resource[resource] = sells;
     empire_object_get_full(city->empire_object_id)->city_sells_resource[resource] = amount;
-    if (city->type != EMPIRE_CITY_OURS) {
+    int set_limit = (city->type != EMPIRE_CITY_OURS);
+#ifdef ENABLE_MULTIPLAYER
+    /* In MP, player cities (OURS) also need route limits for P2P trade */
+    if (!set_limit && net_session_is_active() && city->route_id > 0) {
+        set_limit = 1;
+    }
+#endif
+    if (set_limit) {
         trade_route_set_limit(city->route_id, resource, amount, 0);
     }
 }

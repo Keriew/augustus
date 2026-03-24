@@ -398,7 +398,9 @@ static void apply_command(mp_command *cmd)
              * AI cities already have a route_id from the scenario data.
              * Player-to-player routes need a freshly allocated route entry. */
             int route_id = empire_city_get_route_id(data->dest_city_id);
-            if (route_id < 0) {
+            if (route_id <= 0) {
+                /* route_id 0 is the "discarded" route from trade_route_init() —
+                 * never valid for real trade. Always allocate a fresh one. */
                 route_id = trade_route_new();
                 if (route_id < 0) {
                     log_error("Failed to allocate trade route for P2P", 0, 0);
@@ -461,6 +463,13 @@ static void apply_command(mp_command *cmd)
 
             /* Also broadcast full route state so clients get initial policy */
             mp_trade_sync_broadcast_route_state(route_id);
+
+            /* Host: sync own city trade settings into empire_city struct
+             * and force trade view update so remote cities see our exports/imports */
+            if (dest_is_player) {
+                mp_trade_policy_send_all_settings();
+                mp_trade_policy_force_view_update(cmd->player_id);
+            }
             break;
         }
 

@@ -202,4 +202,32 @@ void mp_trade_policy_force_view_update(uint8_t player_id)
                 (int)player_id);
 }
 
+void mp_trade_policy_send_all_settings(void)
+{
+    if (!net_session_is_active()) {
+        return;
+    }
+
+    MP_LOG_INFO("TRADE_POLICY", "Sending all resource trade settings to host");
+
+    /* Send the current export/import status of every storable resource.
+     * This ensures the host has the full picture of what this player
+     * exports and imports, not just changes made after connecting. */
+    for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+        if (!resource_is_storable(r)) {
+            continue;
+        }
+        int status = city_resource_trade_status(r);
+        int is_export = (status & TRADE_STATUS_EXPORT) != 0;
+        int is_import = (status & TRADE_STATUS_IMPORT) != 0;
+
+        if (is_export) {
+            mp_trade_policy_notify_setting_changed(r, MP_TRADE_SETTING_EXPORT, 1);
+        }
+        if (is_import) {
+            mp_trade_policy_notify_setting_changed(r, MP_TRADE_SETTING_IMPORT, 1);
+        }
+    }
+}
+
 #endif /* ENABLE_MULTIPLAYER */

@@ -327,6 +327,13 @@ static void handle_route_lifecycle_event(uint16_t event_type, net_serializer *s)
             }
 
             log_info("Route created by remote player", 0, route_id);
+
+            /* Send all our current trade settings so the host knows what
+             * we export/import. Without this, the host's empire_city struct
+             * for our city has empty buys/sells arrays and traders can't trade. */
+            if (mode == MP_ROUTE_PLAYER_TO_PLAYER) {
+                mp_trade_policy_send_all_settings();
+            }
             break;
         }
         case NET_EVENT_ROUTE_DELETED: {
