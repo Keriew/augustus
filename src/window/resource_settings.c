@@ -223,6 +223,12 @@ static void draw_foreground(void)
 
 static int needs_to_open_trade_route(int status)
 {
+#ifdef ENABLE_MULTIPLAYER
+    /* In multiplayer, all storable resources are freely tradeable between players */
+    if (net_session_is_active()) {
+        return 0;
+    }
+#endif
     if (status == TRADE_STATUS_IMPORT) {
         return empire_can_import_resource_potentially(data.resource) && !empire_can_import_resource(data.resource);
     }

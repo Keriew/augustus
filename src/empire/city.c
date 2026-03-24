@@ -26,6 +26,10 @@
 #include "scenario/map.h"
 #include "scenario/property.h"
 
+#ifdef ENABLE_MULTIPLAYER
+#include "network/session.h"
+#endif
+
 #include <string.h>
 
 #define RESOURCES_TO_TRADER_RATIO 60
@@ -89,6 +93,11 @@ int empire_city_get_id_by_name(const uint8_t *city_name)
 
 int empire_can_import_resource(int resource)
 {
+#ifdef ENABLE_MULTIPLAYER
+    if (net_session_is_active() && resource_is_storable(resource)) {
+        return 1;
+    }
+#endif
     empire_city *city;
     array_foreach(cities, city) {
         if (city->in_use && city->type == EMPIRE_CITY_TRADE && city->is_open && city->sells_resource[resource] == 1) {
@@ -100,6 +109,11 @@ int empire_can_import_resource(int resource)
 
 int empire_can_import_resource_potentially(int resource)
 {
+#ifdef ENABLE_MULTIPLAYER
+    if (net_session_is_active() && resource_is_storable(resource)) {
+        return 1;
+    }
+#endif
     empire_city *city;
     array_foreach(cities, city) {
         if (city->in_use && city->type == EMPIRE_CITY_TRADE && city->sells_resource[resource] == 1) {
@@ -123,6 +137,11 @@ int empire_has_access_to_resource(int resource)
 
 int empire_can_export_resource_potentially(int resource)
 {
+#ifdef ENABLE_MULTIPLAYER
+    if (net_session_is_active() && resource_is_storable(resource)) {
+        return 1;
+    }
+#endif
     empire_city *city;
     array_foreach(cities, city) {
         if (city->in_use && city->type == EMPIRE_CITY_TRADE && city->buys_resource[resource] == 1) {
@@ -134,6 +153,11 @@ int empire_can_export_resource_potentially(int resource)
 
 int empire_can_export_resource(int resource)
 {
+#ifdef ENABLE_MULTIPLAYER
+    if (net_session_is_active() && resource_is_storable(resource)) {
+        return 1;
+    }
+#endif
     empire_city *city;
     array_foreach(cities, city) {
         if (city->in_use && city->type == EMPIRE_CITY_TRADE && city->is_open && city->buys_resource[resource] == 1) {

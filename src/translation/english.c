@@ -2114,6 +2114,10 @@ static translation_string all_strings[] = {
     {TR_MP_P2P_TRADE_WANTED, "Wanted"},
     {TR_MP_P2P_TRADE_THEY_CAN_EXPORT, "They Can Export:"},
     {TR_MP_P2P_TRADE_THEY_CAN_IMPORT, "They Can Import:"},
+    {TR_MP_P2P_TRADE_THEY_SELL, "They Sell:"},
+    {TR_MP_P2P_TRADE_THEY_BUY, "They Buy:"},
+    {TR_MP_P2P_TRADE_NOTHING, "Nothing configured"},
+    {TR_MP_P2P_TRADE_MY_TRADE, "My Trade Settings"},
 #endif
 };
 

@@ -13,7 +13,9 @@
 #include "network/protocol.h"
 #include "empire/city.h"
 #include "empire/trade_route.h"
+#include "game/resource.h"
 #include "city/resource.h"
+#include "city/constants.h"
 #include "building/building.h"
 #include "building/count.h"
 #include "building/dock.h"
@@ -111,13 +113,28 @@ void mp_empire_sync_update_trade_views(void)
         }
 
         /* Update exportable/importable status for each resource */
-        for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-            view->exportable[r] = city->sells_resource[r] && city->is_open;
-            view->importable[r] = city->buys_resource[r] && city->is_open;
-
-            /* Get approximate stock for display */
-            if (mp_ownership_is_city_local(view->city_id)) {
+        if (mp_ownership_is_city_local(view->city_id)) {
+            /* Local city: read from the actual city resource trade settings,
+             * which are the authoritative source for the host's own city.
+             * Also sync back to empire_city so generate_trader() works. */
+            for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+                int status = city_resource_trade_status(r);
+                int is_export = (status & TRADE_STATUS_EXPORT) != 0;
+                int is_import = (status & TRADE_STATUS_IMPORT) != 0;
+                view->exportable[r] = is_export;
+                view->importable[r] = is_import;
                 view->stock_level[r] = city_resource_count_warehouses_amount(r);
+                /* Keep empire_city struct in sync for trader spawning */
+                city->sells_resource[r] = is_export;
+                city->buys_resource[r] = is_import;
+            }
+        } else {
+            /* Remote city: empire_city data is updated via
+             * mp_trade_policy_apply_remote_setting() when the remote
+             * player changes their trade settings. */
+            for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+                view->exportable[r] = city->sells_resource[r];
+                view->importable[r] = city->buys_resource[r];
             }
         }
 
@@ -262,7 +279,6 @@ static void handle_route_lifecycle_event(uint16_t event_type, net_serializer *s)
             int dest_city_id = net_read_i32(s);
             uint8_t dest_player_id = net_read_u8(s);
             uint8_t mode = net_read_u8(s);
-            (void)dest_city_id;
 
             /* Ensure the route entry exists locally (host allocated via trade_route_new) */
             if (!trade_route_ensure_id(route_id)) {
@@ -277,6 +293,38 @@ static void handle_route_lifecycle_event(uint16_t event_type, net_serializer *s)
             /* Bind players to route in trade_route system */
             trade_route_set_player_binding(route_id, player_id,
                 dest_player_id != 0xFF ? dest_player_id : 0xFF);
+
+            /* Set default trade route limits (mirrors host-side logic) */
+            for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+                if (resource_is_storable(r)) {
+                    trade_route_set(route_id, r, 40, 0);
+                    trade_route_set(route_id, r, 40, 1);
+                }
+            }
+
+            /* Mark involved cities as open with route_id for trader generation */
+            if (dest_city_id >= 0) {
+                empire_city *dcity = empire_city_get(dest_city_id);
+                if (dcity && dcity->in_use) {
+                    dcity->is_open = 1;
+                    if (dcity->route_id <= 0) {
+                        dcity->route_id = route_id;
+                    }
+                }
+            }
+            /* Find and configure origin city */
+            {
+                int origin_city_id = mp_empire_sync_get_city_id_for_player(player_id);
+                if (origin_city_id >= 0) {
+                    empire_city *ocity = empire_city_get(origin_city_id);
+                    if (ocity && ocity->in_use) {
+                        ocity->is_open = 1;
+                        if (ocity->route_id <= 0) {
+                            ocity->route_id = route_id;
+                        }
+                    }
+                }
+            }
 
             log_info("Route created by remote player", 0, route_id);
             break;

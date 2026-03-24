@@ -417,9 +417,37 @@ static void apply_command(mp_command *cmd)
             mp_ownership_set_route_state(route_id, MP_ROUTE_STATE_ACTIVE);
             mp_ownership_set_route_open_tick(route_id, tick);
 
-            /* Open the trade city if it's an AI city */
+            /* Open trade for the involved cities */
             if (!dest_is_player) {
                 empire_city_open_trade(data->dest_city_id, 1);
+            } else {
+                /* P2P: mark both player cities as open for trade and assign route_id.
+                 * This allows generate_trader() to spawn caravans for P2P routes. */
+                empire_city *dest_city = empire_city_get(data->dest_city_id);
+                if (dest_city && dest_city->in_use) {
+                    dest_city->is_open = 1;
+                    if (dest_city->route_id <= 0) {
+                        dest_city->route_id = route_id;
+                    }
+                }
+            }
+            {
+                empire_city *origin_city = empire_city_get(data->origin_city_id);
+                if (origin_city && origin_city->in_use) {
+                    origin_city->is_open = 1;
+                    if (origin_city->route_id <= 0) {
+                        origin_city->route_id = route_id;
+                    }
+                }
+            }
+
+            /* Set default trade route limits so generate_trader() finds
+             * trade_potential > 0. Without limits, no traders spawn. */
+            for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+                if (resource_is_storable(r)) {
+                    trade_route_set(route_id, r, 40, 0); /* sells limit */
+                    trade_route_set(route_id, r, 40, 1); /* buys limit */
+                }
             }
 
             /* Bind the route to both players */

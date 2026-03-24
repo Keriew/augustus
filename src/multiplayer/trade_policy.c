@@ -166,6 +166,23 @@ void mp_trade_policy_apply_remote_setting(uint8_t player_id, int resource,
     MP_LOG_INFO("TRADE_POLICY", "Remote setting from player %d: res=%d type=%d val=%d",
                 (int)player_id, resource, setting_type, value);
 
+    /* Update the empire_city struct for this player's city so that:
+     * 1. Trade views reflect the correct exportable/importable state
+     * 2. generate_trader() can compute trade potential for P2P routes */
+    if (resource >= RESOURCE_MIN && resource < RESOURCE_MAX) {
+        int city_id = mp_empire_sync_get_city_id_for_player(player_id);
+        if (city_id >= 0) {
+            empire_city *city = empire_city_get(city_id);
+            if (city && city->in_use) {
+                if (setting_type == MP_TRADE_SETTING_EXPORT) {
+                    city->sells_resource[resource] = value ? 1 : 0;
+                } else if (setting_type == MP_TRADE_SETTING_IMPORT) {
+                    city->buys_resource[resource] = value ? 1 : 0;
+                }
+            }
+        }
+    }
+
     /* The remote player's city settings changed. We need to update the
      * trade view so other clients see the change immediately. */
     mp_trade_policy_force_view_update(player_id);

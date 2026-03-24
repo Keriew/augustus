@@ -335,6 +335,26 @@ int mp_ownership_find_route_between(int city_a, int city_b)
     return -1;
 }
 
+int mp_ownership_find_local_city(void)
+{
+    mp_player *local = mp_player_registry_get_local();
+    if (!local) {
+        return -1;
+    }
+    for (int i = 0; i < MAX_OWNED_CITIES; i++) {
+        city_ownership *c = &ownership_data.cities[i];
+        if (!c->in_use) {
+            continue;
+        }
+        if (c->player_id == local->player_id &&
+            (c->owner_type == MP_OWNER_LOCAL_PLAYER ||
+             c->owner_type == MP_OWNER_REMOTE_PLAYER)) {
+            return c->city_id;
+        }
+    }
+    return -1;
+}
+
 int mp_ownership_count_player_routes(uint8_t player_id)
 {
     int count = 0;

@@ -84,6 +84,9 @@ uint32_t mp_ownership_get_route_open_tick(int route_id);
 /* Query: does a route exist between two cities? */
 int mp_ownership_find_route_between(int city_a, int city_b);
 
+/* Find the city owned by the local player (works on both host and client) */
+int mp_ownership_find_local_city(void);
+
 /* Count active routes for a player */
 int mp_ownership_count_player_routes(uint8_t player_id);
 
