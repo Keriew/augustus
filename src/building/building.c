@@ -79,6 +79,7 @@ int building_can_repair_type(building_type type)
         return 1;
     }
 }
+
 int building_dist(int x, int y, int w, int h, building *b)
 {
     int size = building_properties_for_type(b->type)->size;
@@ -410,7 +411,7 @@ int building_can_repair(building *b)
             return 1;
         }
     } else {
-        if (b->state != BUILDING_STATE_RUBBLE) {
+        if (b->state != BUILDING_STATE_RUBBLE && !building_properties_for_type(b->type)->shared) {
             return 0;
         } else {
             return building_can_repair_type(b->type);
@@ -418,8 +419,9 @@ int building_can_repair(building *b)
     }
 }
 
-int building_repair_cost(building *b)
+int building_repair_cost_at(int grid_offset)
 {
+    building *b = building_get(map_building_at(grid_offset));
     int og_grid_offset = 0, og_size = 0, og_type = 0;
     if (!b || !building_can_repair(b)) {
         return 0;
@@ -427,7 +429,12 @@ int building_repair_cost(building *b)
     int is_ruin = b->type == BUILDING_BURNING_RUIN || // ruins and collapsed warehouse parts all use rubble data 
         b->type == BUILDING_WAREHOUSE_SPACE || b->type == BUILDING_WAREHOUSE;
 
-    og_grid_offset = is_ruin ? b->data.rubble.og_grid_offset : b->grid_offset;
+    if (building_properties_for_type(b->type)->shared) {
+        og_grid_offset = grid_offset;
+    } else {
+        og_grid_offset = is_ruin ? b->data.rubble.og_grid_offset : b->grid_offset;
+    }
+
     og_size = is_ruin ? b->data.rubble.og_size : b->size;
     og_type = is_ruin ? b->data.rubble.og_type : b->type;
 
@@ -454,18 +461,25 @@ static int get_rubble_data(building *b, int *og_size, int *og_grid_offset, int *
         return 0;
     }
 
-    int has = b->data.rubble.og_size || b->data.rubble.og_grid_offset ||
-        b->data.rubble.og_orientation || b->data.rubble.og_type;
-
-    if (!has) {
+    if (!b->data.rubble.og_size && !b->data.rubble.og_grid_offset &&
+        !b->data.rubble.og_orientation && !b->data.rubble.og_type) {
         return 0;
-    } else {
-        if (og_size) { *og_size = b->data.rubble.og_size; }
-        if (og_grid_offset) { *og_grid_offset = b->data.rubble.og_grid_offset; }
-        if (og_orientation) { *og_orientation = b->data.rubble.og_orientation; }
-        if (og_type) { *og_type = b->data.rubble.og_type; }
-        return 1;
+    } 
+
+    if (og_size) {
+        *og_size = b->data.rubble.og_size;
     }
+    if (og_grid_offset) {
+        *og_grid_offset = b->data.rubble.og_grid_offset;
+    }
+    if (og_orientation) {
+        *og_orientation = b->data.rubble.og_orientation;
+    }
+    if (og_type) {
+        *og_type = b->data.rubble.og_type;
+    }
+
+    return 1;
 }
 
 static int is_warehouse_ruin(building *b)
@@ -537,8 +551,10 @@ static int warehouse_repair(building *b)
     return full_cost;
 }
 
-int building_repair(building *b)
+int building_repair_at(int grid_offset)
 {
+    building *b = building_get(map_building_at(grid_offset));
+
     if (!b) {
         return 0;
     }
@@ -566,8 +582,10 @@ int building_repair(building *b)
     //  Backup building data
     building_data_transfer_backup();
     building_data_transfer_copy(b, 1);
-    //  Resolve placement data 
-    int grid_offset = og_grid_offset ? og_grid_offset : b->grid_offset;
+    //  Resolve placement data
+    if (!building_properties_for_type(b->type)->shared) {
+        grid_offset = og_grid_offset ? og_grid_offset : b->grid_offset;
+    }
     int x = map_grid_offset_to_x(grid_offset);
     int y = map_grid_offset_to_y(grid_offset);
     int size = og_size ? og_size : b->size;
@@ -630,16 +648,21 @@ int building_repair(building *b)
     int full_cost = (placement_cost + placement_cost / 20);// +5%
 
     city_finance_process_construction(full_cost);
-    new_building->subtype.orientation = og_orientation;
     map_building_set_rubble_grid_building_id(grid_offset, 0, size); // remove rubble marker
     building_data_transfer_paste(new_building, 1);
-    new_building->state = BUILDING_STATE_CREATED;
+    if (!building_properties_for_type(type_to_place)->shared) {
+        new_building->subtype.orientation = og_orientation;
+        new_building->state = BUILDING_STATE_CREATED;
+        b->state = BUILDING_STATE_DELETED_BY_GAME; // mark old building as deleted
+        figure_create_explosion_cloud(new_building->x, new_building->y, og_size, 1);
+    } else {
+        figure_create_explosion_cloud(x, y, og_size, 1);
+    }
     building_data_transfer_restore_and_clear_backup();
-    figure_create_explosion_cloud(new_building->x, new_building->y, og_size, 1);
+
     if (wall) {
         map_tiles_update_all_walls(); // towers affect wall connections
     }
-    b->state = BUILDING_STATE_DELETED_BY_GAME; // mark old building as deleted
     game_undo_disable(); // not accounting for undoing repairs
     return full_cost;
 }

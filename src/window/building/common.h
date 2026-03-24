@@ -58,6 +58,7 @@ typedef struct {
     building_info_type type;
     terrain_info_type terrain_type;
     int advisor_button;
+    int grid_offset;
     int rubble_building_id;
     int show_special_orders;
     struct {

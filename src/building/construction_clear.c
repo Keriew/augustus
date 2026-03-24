@@ -397,11 +397,13 @@ static int repair_land_confirmed(int measure_only, int x_start, int y_start, int
                 }
                 if (!was_building_counted(b->id, repairable_buildings)) {
                     if (measure_only) {
-                        repair_cost += building_repair_cost(b);
+                        repair_cost += building_repair_cost_at(slice->grid_offsets[i]);
                     } else {
-                        repair_cost += building_repair(b);// Actually perform the repair
+                        repair_cost += building_repair_at(slice->grid_offsets[i]); // Actually perform the repair
                     }
-                    confirm.repairable_buildings[repairable_buildings] = b->id;
+                    if (!building_properties_for_type(b->type)->shared) {
+                        confirm.repairable_buildings[repairable_buildings] = b->id;
+                    }
                     repairable_buildings++;
                 }
             } else {

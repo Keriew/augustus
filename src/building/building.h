@@ -241,13 +241,13 @@ int building_is_storage(building_type b_type);
  * Keeping a building in the array is helpful because it holds the building's ID, and allows keeping the storage structure.
  */
 
-int building_repair(building *b);
+int building_repair_at(int grid_offset);
 
 int building_is_still_burning(building *b);
 
 int building_can_repair(building *b);
 
-int building_repair_cost(building *b);
+int building_repair_cost_at(int grid_offset);
 
 void building_clear_related_data(building *b);
 

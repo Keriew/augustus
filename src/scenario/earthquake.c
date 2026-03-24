@@ -4,12 +4,14 @@
 
 #include "building/building.h"
 #include "building/destruction.h"
+#include "building/properties.h"
 #include "city/message.h"
 #include "core/calc.h"
 #include "core/random.h"
 #include "figuretype/missile.h"
 #include "game/time.h"
 #include "map/building.h"
+#include "map/building_tiles.h"
 #include "map/data.h"
 #include "map/grid.h"
 #include "map/property.h"
@@ -84,18 +86,22 @@ static void advance_earthquake_to_tile(int x, int y)
     if (building_id) {
         building *b = building_get(building_id);
 
-        if (!b) {
-            return;
-        }
-
-        if (b->type != BUILDING_BURNING_RUIN) {
+        if (building_properties_for_type(b->type)->shared) {
+            if (b->subtype.instances > 0) {
+                b->subtype.instances--;
+            }
+            map_building_tiles_set_rubble(b->id, x, y, b->size);
+            map_building_set_rubble_grid_building_id(grid_offset, 0, b->size);
+        } else if (b->type != BUILDING_BURNING_RUIN) {
             // (fort, hippodrome, ect.)
             if (b->prev_part_building_id > 0 || b->next_part_building_id > 0) {
                 // find first part
                 building *part = b;
                 while (part->prev_part_building_id > 0) {
                     building *prev = building_get(part->prev_part_building_id);
-                    if (!prev) break;
+                    if (!prev) {
+                        break;
+                    }
                     part = prev;
                 }
                 // destroy all part
