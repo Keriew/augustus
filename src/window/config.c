@@ -1881,6 +1881,7 @@ static void draw_background(void)
 
 static void draw_foreground(void)
 {
+    window_request_refresh(); // supposed to keep animating weather during input
     graphics_in_dialog();
 
     //  tab tops & borders
