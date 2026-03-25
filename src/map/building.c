@@ -4,6 +4,7 @@
 #include "core/config.h"
 #include "game/save_version.h"
 #include "map/grid.h"
+#include "map/terrain.h"
 
 static grid_u32 buildings_grid;
 static grid_u8 damage_grid;
@@ -54,7 +55,9 @@ unsigned int map_building_rubble_building_id(int grid_offset)
 void map_building_set_rubble_grid_building_id(int grid_offset, unsigned int building_id, int size)
 {
     if (size == 1) {
-        rubble_info_grid.items[grid_offset] = building_id;
+        if (!building_id || !map_terrain_is(grid_offset, TERRAIN_WATER)) {
+            rubble_info_grid.items[grid_offset] = building_id;
+        }
         return;
     }
     int x = map_grid_offset_to_x(grid_offset);
@@ -62,7 +65,9 @@ void map_building_set_rubble_grid_building_id(int grid_offset, unsigned int buil
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
             int offset = map_grid_offset(x + i, y + j);
-            rubble_info_grid.items[offset] = building_id;
+            if (!building_id || !map_terrain_is(offset, TERRAIN_WATER)) {
+                rubble_info_grid.items[offset] = building_id;
+            }
         }
     }
 }
