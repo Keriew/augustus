@@ -23,6 +23,31 @@
 #define DRIFT_DIRECTION_LEFT -1
 
 typedef struct {
+    int min;
+    int max;
+} weather_length;
+
+static const weather_length WEATHER_MINMAX_DURATION[] = { //expressed in months, doesn't apply to thunderstorms
+    {1, 3},
+    {3, 6},
+    {6, 12}
+};
+static const int PARTICLE_SIZES_RAIN[] = { 1, 8, 15, 23, 30 }; //sets of arbitrary values for a noticeable difference
+static const int PARTICLE_SIZES_SAND[] = { 1, 6, 10, 15, 20 }; //denoted as: minmum, small, regular, large, maximum
+static const int PARTICLE_SIZES_SNOW[] = { 2, 3, 4, 6, 8 };
+static const int PARTICLE_SPEEDS_RAIN[] = { 1, 4, 8, 13, 20 }; //sets of arbitrary values for a noticeable difference
+static const int PARTICLE_SPEEDS_SNOW[] = { 1, 2, 4, 6, 10 };  //denoted as: minimum, slow, regular, fast, maximum
+static const int PARTICLE_SPEEDS_SAND[] = { 1, 3, 5, 8, 12 };
+
+
+static int get_particle_size(const int *table, int idx)
+{
+    if (idx < 0) idx = 0;
+    if (idx > 4) idx = 4;
+    return table[idx];
+}
+
+typedef struct {
     int x;
     int y;
 
@@ -49,13 +74,11 @@ static struct {
     int overlay_target;
     int overlay_color;
     int current_particle_count;
-    int snow_particle_limit;
-    int rain_particle_limit;
-    int sand_particle_limit;
     int last_elements_count;
     int last_intensity;
     int last_active;
     int is_sound_playing;
+    int weather_duration_left;
     weather_type displayed_type;
     weather_type last_type;
 
@@ -93,8 +116,8 @@ void init_weather_element(weather_element *e, int type)
 
     switch (type) {
         case WEATHER_RAIN:
-            e->length = config_get(CONFIG_WT_RAIN_LENGTH) + random_from_stdlib() % 10;
-            e->speed = config_get(CONFIG_WT_RAIN_SPEED) + random_from_stdlib() % 5;
+            e->length = get_particle_size(PARTICLE_SIZES_RAIN, config_get(CONFIG_WT_RAIN_LENGTH)) + random_from_stdlib() % 10;
+            e->speed = get_particle_size(PARTICLE_SPEEDS_RAIN, config_get(CONFIG_WT_RAIN_SPEED)) + random_from_stdlib() % 5;
             if (data.weather_config.intensity < 600) {
                 e->wind_variation = 0;
             } else {
@@ -103,11 +126,11 @@ void init_weather_element(weather_element *e, int type)
             break;
         case WEATHER_SNOW:
             e->drift_offset = random_from_stdlib() % 100;
-            e->speed = config_get(CONFIG_WT_SNOW_SPEED) + random_from_stdlib() % 2;
+            e->speed = get_particle_size(PARTICLE_SPEEDS_SNOW, config_get(CONFIG_WT_SNOW_SPEED)) + random_from_stdlib() % 4;
             e->drift_direction = (random_from_stdlib() % 2 == 0) ? DRIFT_DIRECTION_RIGHT : DRIFT_DIRECTION_LEFT;
             break;
         case WEATHER_SAND:
-            e->speed = config_get(CONFIG_WT_SANDSTORM_SPEED) + (random_from_stdlib() % 2);
+            e->speed = get_particle_size(PARTICLE_SPEEDS_SAND, config_get(CONFIG_WT_SANDSTORM_SPEED)) + (random_from_stdlib() % 2);
             e->offset = random_between_from_stdlib(0, 1000);
             break;
     }
@@ -124,9 +147,6 @@ static void weather_stop(void)
     data.weather_initialized = 0;
     data.last_elements_count = 0;
     data.current_particle_count = 0;
-    data.snow_particle_limit = 0;
-    data.rain_particle_limit = 0;
-    data.sand_particle_limit = 0;
     data.last_active = 0;
     data.last_type = WEATHER_NONE;
     data.last_intensity = 0;
@@ -212,7 +232,7 @@ static void update_overlay_alpha(void)
 
 static void render_weather_overlay(void)
 {
-    if (data.displayed_type == WEATHER_RAIN && data.last_intensity < 800) {
+    if (data.displayed_type == WEATHER_RAIN && data.current_particle_count < 800) {
         return; // no overlay for light rain
     }
 
@@ -225,7 +245,7 @@ static void render_weather_overlay(void)
     int alpha_factor = 40;
     if (data.displayed_type == WEATHER_SNOW) {
         alpha_factor = config_get(CONFIG_WT_SNOW_INTENSITY);
-    } else if (data.displayed_type == WEATHER_RAIN && data.last_intensity < 900) {
+    } else if (data.displayed_type == WEATHER_RAIN && data.current_particle_count > 800) {
         alpha_factor = config_get(CONFIG_WT_RAIN_INTENSITY);
     } else if (data.displayed_type == WEATHER_SAND) {
         alpha_factor = config_get(CONFIG_WT_SANDSTORM_INTENSITY);
@@ -252,7 +272,7 @@ static void draw_snow(void)
         return;
     }
 
-    int max_particles = data.snow_particle_limit;
+    int max_particles = data.last_elements_count;
     int count = data.current_particle_count;
     if (count > max_particles) {
         count = max_particles;
@@ -264,23 +284,26 @@ static void draw_snow(void)
             data.elements[i].y += data.elements[i].speed;
         }
 
+        int sf_size = get_particle_size(PARTICLE_SIZES_SNOW, config_get(CONFIG_UI_WT_SNOWFLAKE_SIZE));
+        int sf_half = sf_size / 2;
+        // horizontal arm of cross
         graphics_draw_line(
             data.elements[i].x,
-            data.elements[i].x + config_get(CONFIG_UI_WT_SNOWFLAKE_SIZE),
-            data.elements[i].y,
-            data.elements[i].y,
+            data.elements[i].x + sf_size,
+            data.elements[i].y + sf_half,
+            data.elements[i].y + sf_half,
             COLOR_WEATHER_SNOWFLAKE);
-
+        // vertical arm of cross
         graphics_draw_line(
-            data.elements[i].x + (config_get(CONFIG_UI_WT_SNOWFLAKE_SIZE) / 2),
-            data.elements[i].x,
+            data.elements[i].x + sf_half,
+            data.elements[i].x + sf_half,
             data.elements[i].y,
-            data.elements[i].y + config_get(CONFIG_UI_WT_SNOWFLAKE_SIZE),
+            data.elements[i].y + sf_size,
             COLOR_WEATHER_SNOWFLAKE);
 
         if (data.elements[i].y >= screen_height() || data.elements[i].x <= 0 || data.elements[i].x >= screen_width()) {
             init_weather_element(&data.elements[i], data.weather_config.type);
-            data.elements[i].y = 0;
+            data.elements[i].y = -(int) (random_from_stdlib() % 30);
         }
     }
 }
@@ -303,11 +326,12 @@ static void draw_sandstorm(void)
             data.elements[i].x += data.elements[i].speed + (wave / 10);
         }
 
+        int sd_size = get_particle_size(PARTICLE_SIZES_SAND, config_get(CONFIG_UI_WT_SANDSTORM_SIZE));
         graphics_draw_line(
             data.elements[i].x,
-            data.elements[i].x + config_get(CONFIG_UI_WT_SANDSTORM_SIZE),
+            data.elements[i].x + sd_size,
             data.elements[i].y,
-            data.elements[i].y + config_get(CONFIG_UI_WT_SANDSTORM_SIZE),
+            data.elements[i].y + sd_size,
             COLOR_WEATHER_SAND_PARTICLE);
 
         if (data.elements[i].x > screen_width()) {
@@ -381,23 +405,19 @@ void update_weather(void)
         data.weather_config.active = 1;
         // Use default intensity for preview
         set_weather(1, 600, WEATHER_RAIN);
-        data.rain_particle_limit = 600;
     } else if (config_get(CONFIG_UI_WT_PREVIEW_HEAVY_RAIN)) {
         data.weather_config.type = WEATHER_RAIN;
         data.weather_config.active = 1;
         // Use high intensity for heavy rain preview to show lightning
         set_weather(1, 999, WEATHER_RAIN);
-        data.rain_particle_limit = 999;
     } else if (config_get(CONFIG_UI_WT_PREVIEW_SNOW)) {
         data.weather_config.type = WEATHER_SNOW;
         data.weather_config.active = 1;
         set_weather(1, 3000, WEATHER_SNOW);
-        data.snow_particle_limit = 3000;
     } else if (config_get(CONFIG_UI_WT_PREVIEW_SANDSTORM)) {
         data.weather_config.type = WEATHER_SAND;
         data.weather_config.active = 1;
         set_weather(1, 3000, WEATHER_SAND);
-        data.sand_particle_limit = 3000;
     } else {
         data.weather_config.type = WEATHER_NONE;
         data.weather_config.active = 0;
@@ -423,6 +443,7 @@ void update_weather(void)
             init_weather_element(&data.elements[i], data.weather_config.type);
         }
         data.last_elements_count = target_count;
+        data.weather_initialized = 1;
     } else if (target_count == 0 && data.current_particle_count == 0) {
         if (data.elements) {
             free(data.elements);
@@ -438,15 +459,6 @@ void update_weather(void)
         }
         weather_stop();
         return;
-    }
-
-    // init
-    if (!data.weather_initialized && data.weather_config.active == 1) {
-        data.elements = malloc(sizeof(weather_element) * data.weather_config.intensity);
-        for (int i = 0; i < data.weather_config.intensity; ++i) {
-            init_weather_element(&data.elements[i], data.weather_config.type);
-        }
-        data.weather_initialized = 1;
     }
 
     // SNOW
@@ -490,17 +502,15 @@ void weather_reset(void)
 
 void city_weather_update(int month)
 {
-    static int weather_months_left = 0;
-
     int active;
     int intensity;
     weather_type type;
 
-    if (weather_months_left > 0) {
+    if (data.weather_duration_left > 0) {
         active = data.last_active;
         intensity = data.last_intensity;
         type = data.last_type;
-        weather_months_left--;
+        data.weather_duration_left--;
     } else {
         active = chance_percent(15);
         type = WEATHER_RAIN;
@@ -529,7 +539,9 @@ void city_weather_update(int month)
             intensity = 0;
             type = WEATHER_NONE;
         } else {
-            weather_months_left = 1; //add to config to enable longer weather durations
+            int duration_setting = config_get(CONFIG_UI_WT_WEATHER_DURATION);
+            data.weather_duration_left = random_between_from_stdlib(WEATHER_MINMAX_DURATION[duration_setting].min,
+                     WEATHER_MINMAX_DURATION[duration_setting].max);
             // Play sounds only if weather is enabled
             if (config_get(CONFIG_UI_DRAW_WEATHER)) {
                 if (WEATHER_RAIN == type) {

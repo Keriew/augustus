@@ -124,6 +124,7 @@ static const char *ini_keys[] = {
     [CONFIG_UI_WT_PREVIEW_HEAVY_RAIN] = "ui_wt_preview_heavy_rain",
     [CONFIG_UI_WT_SANDSTORM_SIZE] = "ui_wt_sandstorm_size",
     [CONFIG_UI_WT_SNOWFLAKE_SIZE] = "ui_wt_snowflake_size",
+    [CONFIG_UI_WT_WEATHER_DURATION] = "ui_wt_weather_duration"
 };
 
 static const char *ini_string_keys[] = {
@@ -162,10 +163,10 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_WT_SNOW_INTENSITY] = 20,
     [CONFIG_WT_RAIN_INTENSITY] = 20,
     [CONFIG_WT_SANDSTORM_INTENSITY] = 40,
-    [CONFIG_WT_RAIN_SPEED] = 4,
-    [CONFIG_WT_RAIN_LENGTH] = 10,
-    [CONFIG_WT_SNOW_SPEED] = 1,
-    [CONFIG_WT_SANDSTORM_SPEED] = 2,
+    [CONFIG_WT_RAIN_SPEED] = 1,
+    [CONFIG_WT_RAIN_LENGTH] = 2,
+    [CONFIG_WT_SNOW_SPEED] = 0,
+    [CONFIG_WT_SANDSTORM_SPEED] = 1,
     [CONFIG_UI_EMPIRE_SIDEBAR_WIDTH] = 25,
     [CONFIG_GP_CH_DEFAULT_GAME_SPEED] = 7, //0-based index, 7 points to 80%
     [CONFIG_UI_SHOW_CUSTOM_VARIABLES] = 1,
@@ -195,8 +196,9 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_UI_WT_PREVIEW_SNOW] = 0,
     [CONFIG_UI_WT_PREVIEW_SANDSTORM] = 0,
     [CONFIG_UI_WT_PREVIEW_HEAVY_RAIN] = 0,
-    [CONFIG_UI_WT_SANDSTORM_SIZE] = 1,
+    [CONFIG_UI_WT_SANDSTORM_SIZE] = 2,
     [CONFIG_UI_WT_SNOWFLAKE_SIZE] = 2,
+    [CONFIG_UI_WT_WEATHER_DURATION] = 1
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };

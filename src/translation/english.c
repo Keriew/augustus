@@ -2029,12 +2029,20 @@ static translation_string all_strings[] = {
     {TR_CONFIG_UI_WT_PREVIEW_HEAVY_RAIN, "Preview Heavy Rain" },
     {TR_CONFIG_WT_RAIN_INTENSITY, "Overlay intensity"},
     {TR_CONFIG_WT_RAIN_SPEED, "Drop speed"},
-    {TR_CONFIG_WT_RAIN_LENGTH, "Drop length"},
+    {TR_CONFIG_WT_RAIN_LENGTH, "Raindrop size"},
     {TR_CONFIG_WT_SNOW_INTENSITY, "Overlay intensity"},
     {TR_CONFIG_WT_SNOW_SPEED, "Flake speed"},
     {TR_CONFIG_WT_SANDSTORM_INTENSITY, "Overlay intensity"},
     {TR_CONFIG_WT_SANDSTORM_SPEED, "Particle speed" },
-    {TR_CONFIG_WT_SANDSTORM_SIZE, "Sandstorm size" }
+    {TR_CONFIG_WT_SANDSTORM_SIZE, "Particle size" },
+    {TR_CONFIG_WT_SNOWFLAKE_SIZE, "Snowflake size"},
+    {TR_CONFIG_WT_SIZE_MINIMUM, "Minimum"},
+    {TR_CONFIG_WT_SIZE_SMALL, "Small"},
+    {TR_CONFIG_WT_SIZE_REGULAR, "Regular"},
+    {TR_CONFIG_WT_SIZE_LARGE, "Large"},
+    {TR_CONFIG_WT_SIZE_MAXIMUM, "Maximum" },
+    {TR_CONFIG_WT_SPEED_SLOW, "Slow" },
+    {TR_CONFIG_WT_SPEED_FAST, "Fast" }
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

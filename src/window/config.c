@@ -108,7 +108,8 @@ enum {
     RANGE_SNOW_SPEED,
     RANGE_SANDSTORM_INTENSITY,
     RANGE_SANDSTORM_SPEED,
-    RANGE_SANDSTORM_SIZE
+    RANGE_SANDSTORM_SIZE,
+    RANGE_SNOWFLAKE_SIZE
 };
 
 enum {
@@ -148,6 +149,15 @@ typedef struct {
     int margin_top;  //  extra spacing before (can be used instead of TYPE_SPACE)
 } config_widget;
 
+static const translation_key speed_labels[] = {
+    TR_CONFIG_WT_SIZE_MINIMUM, TR_CONFIG_WT_SPEED_SLOW, TR_CONFIG_WT_SIZE_REGULAR,
+    TR_CONFIG_WT_SPEED_FAST, TR_CONFIG_WT_SIZE_MAXIMUM
+};
+static const translation_key size_labels[] = {
+    TR_CONFIG_WT_SIZE_MINIMUM, TR_CONFIG_WT_SIZE_SMALL, TR_CONFIG_WT_SIZE_REGULAR,
+    TR_CONFIG_WT_SIZE_LARGE, TR_CONFIG_WT_SIZE_MAXIMUM
+};
+
 static const uint8_t *display_text_language(void);
 static const uint8_t *display_text_user_directory(void);
 static const uint8_t *display_text_player_name(void);
@@ -174,6 +184,7 @@ static const uint8_t *display_text_snow_speed(void);
 static const uint8_t *display_text_sandstorm_intensity(void);
 static const uint8_t *display_text_sandstorm_speed(void);
 static const uint8_t *display_text_sandstorm_size(void);
+static const uint8_t *display_text_snowflake_size(void);
 
 // page-related helpers
 static int get_widget_count_for(unsigned int page);
@@ -306,6 +317,8 @@ static config_widget ui_widgets_by_category[CATEGORY_UI_COUNT][MAX_WIDGETS] = {
         {TYPE_NUMERICAL_RANGE, RANGE_SNOW_INTENSITY, 0, display_text_snow_intensity, 0, 1, ITEM_BASE_H, 2},
         {TYPE_NUMERICAL_DESC, RANGE_SNOW_SPEED, TR_CONFIG_WT_SNOW_SPEED, NULL, 0, 1, ITEM_BASE_H, 10},
         {TYPE_NUMERICAL_RANGE, RANGE_SNOW_SPEED, 0, display_text_snow_speed, 0, 1, ITEM_BASE_H, 2},
+        {TYPE_NUMERICAL_DESC, RANGE_SNOWFLAKE_SIZE, TR_CONFIG_WT_SNOWFLAKE_SIZE, NULL, 0, 1, ITEM_BASE_H, 10},
+        {TYPE_NUMERICAL_RANGE, RANGE_SNOWFLAKE_SIZE, 0, display_text_snowflake_size, 0, 1, ITEM_BASE_H, 2},
         {TYPE_HEADER, 0, TR_CONFIG_HEADER_SAND, NULL, 0, 1, ITEM_BASE_H, 14},
         {TYPE_CHECKBOX, CONFIG_UI_WT_PREVIEW_SANDSTORM, TR_CONFIG_UI_WT_PREVIEW_SANDSTORM, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NUMERICAL_DESC, RANGE_SANDSTORM_INTENSITY, TR_CONFIG_WT_SANDSTORM_INTENSITY, NULL, 0, 1, ITEM_BASE_H, 10},
@@ -484,13 +497,14 @@ static numerical_range_widget ranges[] = {
     { 50, 30,   1,  20,  1, 0},   //  autosave slots
     { 50, 30,   0,  TOTAL_GAME_SPEEDS - 1,  1, 0},   //  default game speed index
     { 50, 18,   0, 100,  5, 0},   //  rain overlay intensity %
-    { 50, 18,   1,  20,  1, 0},   //  rain drop speed
-    { 50, 18,   1,  30,  1, 0},   //  rain drop length
+    { 82, 14,   0,   4,  1, 0},   //  rain drop speed (index 0-4)
+    { 82, 14,   0,   4,  1, 0},   //  rain drop size (index 0-4)
     { 50, 18,   0, 100,  5, 0},   //  snow overlay intensity %
-    { 50, 18,   1,  10,  1, 0},   //  snow flake speed
+    { 82, 14,   0,   4,  1, 0},   //  snow flake speed (index 0-4)
     { 50, 18,   0, 100,  5, 0},   //  sandstorm overlay intensity %
-    { 50, 18,   1,  10,  1, 0},   //  sandstorm particle speed
-    { 50, 18,   1,  20,  1, 0},   //  sandstorm size
+    { 82, 14,   0,   4,  1, 0},   //  sandstorm particle speed (index 0-4)
+    { 82, 14,   0,   4,  1, 0},   //  sandstorm particle size (index 0-4)
+    { 82, 14,   0,   4,  1, 0},   //  snowflake size (index 0-4)
 };
 
 //  Bottom buttons & page tabs
@@ -962,13 +976,19 @@ static const uint8_t *display_text_rain_intensity(void)
 }
 static const uint8_t *display_text_rain_speed(void)
 {
-    string_from_int(data.display_text, data.config_values[CONFIG_WT_RAIN_SPEED].new_value, 0);
-    return data.display_text;
+
+    int idx = data.config_values[CONFIG_WT_RAIN_SPEED].new_value;
+    if (idx < 0) idx = 0;
+    if (idx > 4) idx = 4;
+    return translation_for(speed_labels[idx]);
 }
 static const uint8_t *display_text_rain_length(void)
 {
-    string_from_int(data.display_text, data.config_values[CONFIG_WT_RAIN_LENGTH].new_value, 0);
-    return data.display_text;
+
+    int idx = data.config_values[CONFIG_WT_RAIN_LENGTH].new_value;
+    if (idx < 0) idx = 0;
+    if (idx > 4) idx = 4;
+    return translation_for(size_labels[idx]);
 }
 static const uint8_t *display_text_snow_intensity(void)
 {
@@ -976,8 +996,11 @@ static const uint8_t *display_text_snow_intensity(void)
 }
 static const uint8_t *display_text_snow_speed(void)
 {
-    string_from_int(data.display_text, data.config_values[CONFIG_WT_SNOW_SPEED].new_value, 0);
-    return data.display_text;
+
+    int idx = data.config_values[CONFIG_WT_SNOW_SPEED].new_value;
+    if (idx < 0) idx = 0;
+    if (idx > 4) idx = 4;
+    return translation_for(speed_labels[idx]);
 }
 static const uint8_t *display_text_sandstorm_intensity(void)
 {
@@ -985,13 +1008,26 @@ static const uint8_t *display_text_sandstorm_intensity(void)
 }
 static const uint8_t *display_text_sandstorm_speed(void)
 {
-    string_from_int(data.display_text, data.config_values[CONFIG_WT_SANDSTORM_SPEED].new_value, 0);
-    return data.display_text;
+    int idx = data.config_values[CONFIG_WT_SANDSTORM_SPEED].new_value;
+    if (idx < 0) idx = 0;
+    if (idx > 4) idx = 4;
+    return translation_for(speed_labels[idx]);
 }
+
 static const uint8_t *display_text_sandstorm_size(void)
 {
-    string_from_int(data.display_text, data.config_values[CONFIG_UI_WT_SANDSTORM_SIZE].new_value, 0);
-    return data.display_text;
+    int idx = data.config_values[CONFIG_UI_WT_SANDSTORM_SIZE].new_value;
+    if (idx < 0) idx = 0;
+    if (idx > 4) idx = 4;
+    return translation_for(size_labels[idx]);
+}
+
+static const uint8_t *display_text_snowflake_size(void)
+{
+    int idx = data.config_values[CONFIG_UI_WT_SNOWFLAKE_SIZE].new_value;
+    if (idx < 0) idx = 0;
+    if (idx > 4) idx = 4;
+    return translation_for(size_labels[idx]);
 }
 
 //    Range value binding, custom change-action table, init
@@ -1021,6 +1057,7 @@ static void set_range_values(void)
     ranges[RANGE_SANDSTORM_INTENSITY].value = &data.config_values[CONFIG_WT_SANDSTORM_INTENSITY].new_value;
     ranges[RANGE_SANDSTORM_SPEED].value = &data.config_values[CONFIG_WT_SANDSTORM_SPEED].new_value;
     ranges[RANGE_SANDSTORM_SIZE].value = &data.config_values[CONFIG_UI_WT_SANDSTORM_SIZE].new_value;
+    ranges[RANGE_SNOWFLAKE_SIZE].value = &data.config_values[CONFIG_UI_WT_SNOWFLAKE_SIZE].new_value;
 }
 
 static void set_custom_config_changes(void)
@@ -1130,6 +1167,14 @@ static void fetch_original_config_values(void)
              data.config_string_values[CONFIG_STRING_ORIGINAL_PLAYER_NAME].original_value);
 
     set_player_name_width();
+}
+
+static void reset_weather_previews(void)
+{
+    config_set(CONFIG_UI_WT_PREVIEW_RAIN, 0);
+    config_set(CONFIG_UI_WT_PREVIEW_HEAVY_RAIN, 0);
+    config_set(CONFIG_UI_WT_PREVIEW_SNOW, 0);
+    config_set(CONFIG_UI_WT_PREVIEW_SANDSTORM, 0);
 }
 
 static void update_scale(void)
@@ -2120,9 +2165,9 @@ static void init(unsigned int page, unsigned int category, int show_background_i
         snprintf(data.config_string_values[i].new_value, CONFIG_STRING_VALUE_MAX, "%s", v);
     }
     fetch_original_config_values();
-
     set_custom_config_changes();
     set_range_values();
+    reset_weather_previews();
 
     //  language options (default + dirs)
 

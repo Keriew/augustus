@@ -67,7 +67,7 @@ int window_city_simulated_weather(weather_type weather)
 {
     switch (weather) {
         case WEATHER_RAIN:
-            return config_get(CONFIG_UI_WT_PREVIEW_RAIN);
+            return config_get(CONFIG_UI_WT_PREVIEW_RAIN) || config_get(CONFIG_UI_WT_PREVIEW_HEAVY_RAIN);
         case WEATHER_SNOW:
             return config_get(CONFIG_UI_WT_ENABLE_SNOW_CENTRAL);
         case WEATHER_SAND:
