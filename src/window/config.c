@@ -1936,12 +1936,10 @@ static int preview_weather_radio_buttons(int selected_key)
             CONFIG_UI_WT_PREVIEW_HEAVY_RAIN, CONFIG_UI_WT_PREVIEW_SANDSTORM };
         for (size_t i = 0; i < sizeof(radio_buttons) / sizeof(*radio_buttons); i++) {
             if (radio_buttons[i] != selected_key) {
-                //config_set(radio_buttons[i], 0);
                 data.config_values[radio_buttons[i]].new_value = 0;
             }
         }
     }
-    //update_weather();
     window_invalidate();
     return 1;
 }
