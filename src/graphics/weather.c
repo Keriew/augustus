@@ -31,7 +31,7 @@ static const int PARTICLE_SIZES_SNOW[] = { 2, 3, 4, 6, 8 };
 static const int PARTICLE_SPEEDS_RAIN[] = { 1, 4, 8, 13, 20 }; //sets of arbitrary values for a noticeable difference
 static const int PARTICLE_SPEEDS_SNOW[] = { 1, 2, 4, 6, 10 };  //denoted as: minimum, slow, regular, fast, maximum
 static const int PARTICLE_SPEEDS_SAND[] = { 1, 3, 5, 8, 12 };
-static const int WEATHER_MAX_DURATION[] = {1, 3, 6}; // expressed in months, doesn't apply to thunderstorms
+static const int WEATHER_MAX_DURATION[] = { 1, 3, 6 }; // expressed in months, doesn't apply to thunderstorms
 
 static int get_particle_size(const int *table, int idx)
 {
@@ -392,28 +392,30 @@ void update_weather(void)
 
     render_weather_overlay();
     update_current_particle_count();
-
-    if (config_get(CONFIG_UI_WT_PREVIEW_RAIN)) {
-        data.weather_config.type = WEATHER_RAIN;
-        data.weather_config.active = 1;
-        // Use default intensity for preview
-        set_weather(1, 600, WEATHER_RAIN);
-    } else if (config_get(CONFIG_UI_WT_PREVIEW_HEAVY_RAIN)) {
-        data.weather_config.type = WEATHER_RAIN;
-        data.weather_config.active = 1;
-        // Use high intensity for heavy rain preview to show lightning
-        set_weather(1, 999, WEATHER_RAIN);
-    } else if (config_get(CONFIG_UI_WT_PREVIEW_SNOW)) {
-        data.weather_config.type = WEATHER_SNOW;
-        data.weather_config.active = 1;
-        set_weather(1, 3000, WEATHER_SNOW);
-    } else if (config_get(CONFIG_UI_WT_PREVIEW_SANDSTORM)) {
-        data.weather_config.type = WEATHER_SAND;
-        data.weather_config.active = 1;
-        set_weather(1, 3000, WEATHER_SAND);
-    } else {
-        data.weather_config.type = WEATHER_NONE;
-        data.weather_config.active = 0;
+    if (window_is(WINDOW_CONFIG)) { //preview weather in config menu
+        if (config_get(CONFIG_UI_WT_PREVIEW_RAIN)) {
+            data.weather_config.type = WEATHER_RAIN;
+            data.weather_config.active = 1;
+            // Use default intensity for preview
+            set_weather(1, 600, WEATHER_RAIN);
+        } else if (config_get(CONFIG_UI_WT_PREVIEW_HEAVY_RAIN)) {
+            data.weather_config.type = WEATHER_RAIN;
+            data.weather_config.active = 1;
+            // Use high intensity for heavy rain preview to show lightning
+            set_weather(1, 999, WEATHER_RAIN);
+        } else if (config_get(CONFIG_UI_WT_PREVIEW_SNOW)) {
+            data.weather_config.type = WEATHER_SNOW;
+            data.weather_config.active = 1;
+            set_weather(1, 3000, WEATHER_SNOW);
+        } else if (config_get(CONFIG_UI_WT_PREVIEW_SANDSTORM)) {
+            data.weather_config.type = WEATHER_SAND;
+            data.weather_config.active = 1;
+            set_weather(1, 3000, WEATHER_SAND);
+        } else {
+            data.weather_config.type = WEATHER_NONE;
+            data.weather_config.active = 0;
+            weather_stop();
+        }
     }
 
     if (!config_get(CONFIG_UI_DRAW_WEATHER)) {
