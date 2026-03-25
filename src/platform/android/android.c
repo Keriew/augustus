@@ -193,7 +193,7 @@ int android_remove_file(const char *filename)
     return result;
 }
 
-JNIEXPORT void JNICALL Java_com_github_Keriew_claudius_ClaudiusMainActivity_gotDirectory(JNIEnv *env, jobject thiz)
+JNIEXPORT void JNICALL Java_com_github_dathannobrega_claudius_ClaudiusMainActivity_gotDirectory(JNIEnv *env, jobject thiz)
 {
     has_directory = 1;
 }

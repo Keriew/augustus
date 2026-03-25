@@ -246,7 +246,7 @@ static void check_hippodrome_compatibility(building *b)
     if (b->next_part_building_id && b->prev_part_building_id) {
         building *next = building_get(b->next_part_building_id);
         building *prev = building_get(b->prev_part_building_id);
-        // if orientation is different, it means that rotation was not available yet in augustus, so it should be set to 0
+        // if orientation is different, it means that rotation was not available yet in claudius, so it should be set to 0
         if (b->subtype.orientation != next->subtype.orientation || b->subtype.orientation != prev->subtype.orientation) {
             prev->subtype.orientation = 0;
             b->subtype.orientation = 0;

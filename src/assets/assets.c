@@ -46,7 +46,7 @@ void assets_init(int force_reload, color_t **main_images, int *main_image_widths
     group_set_for_external_files();
 
     // By default, if the requested image is not found, the roadblock image will be shown.
-    // This ensures compatibility with previous release versions of Augustus, which only had roadblocks
+    // This ensures compatibility with previous release versions of Claudius, which only had roadblocks
     data.roadblock_image_id = assets_get_group_id("Admin_Logistics");
     data.roadblock_image = asset_image_get_from_id(data.roadblock_image_id - IMAGE_MAIN_ENTRIES);
     data.asset_lookup[ASSET_HIGHWAY_BASE_START] = assets_get_image_id("Admin_Logistics", "Highway_Base_Start");

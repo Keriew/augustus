@@ -94,7 +94,7 @@ android {
             }
         }
     }
-    namespace 'com.github.Keriew.claudius.sdl2'
+    namespace 'com.github.dathannobrega.claudius.sdl2'
 }
 
 repositories {

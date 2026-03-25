@@ -105,7 +105,7 @@
         background-position: center;
         background-repeat: no-repeat;
         background-size: contain;
-        background-image: url(https://raw.githubusercontent.com/Keriew/augustus/master/res/claudius_512.png);
+        background-image: url(https://raw.githubusercontent.com/dathannobrega/claudius/master/res/claudius_512.png);
         opacity: 0.25;
         top: 0;
         left: 0;

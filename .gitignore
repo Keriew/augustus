@@ -44,14 +44,14 @@ local.properties
 /android/build/
 /android/*/build/
 /android/*/release/
-/android/augustus.keystore
+/android/claudius.keystore
 /android/julius.keystore
 /android/play-publisher.json
-/android/augustus/src/main/play
+/android/claudius/src/main/play
 /android/julius/src/main/play
 
 # lib files
 ext/SDL2/*.zip
 ext/SDL2/*.tar.gz
 
-res/augustus.icns
+res/claudius.icns

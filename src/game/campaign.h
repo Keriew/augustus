@@ -105,7 +105,7 @@ int game_campaign_load_scenario(int scenario_id);
  * Loads basic information about the scenario with the specific ID.
  * @param scenario_id The ID of the scenario to fetch the info.
  * @param info The stucture that will hold the info.
- * @return 1 if successful, 0 if an error occured or -1 if the file version is more recent than Augustus can load.
+ * @return 1 if successful, 0 if an error occured or -1 if the file version is more recent than Claudius can load.
  */
 int game_campaign_load_scenario_info(int scenario_id, saved_game_info *info);
 

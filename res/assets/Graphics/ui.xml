@@ -48,8 +48,8 @@
 	<!-- Note: Banner images for Construction Sites -->
 	<image id="Construction_Banner_01" src="Construction_Banner_01"/>
 	<image id="Construction_Banner_02" src="Construction_Banner_02"/>
-	<!-- Note: Banner with Augustus Logo for Main Menu  -->
-	<image id="Main Menu Banner" src="Augustus_Main_Menu_Banner_Sml"/>
+	<!-- Note: Banner with Claudius Logo for Main Menu  -->
+	<image id="Main Menu Banner" src="Claudius_Main_Menu_Banner_Sml"/>
 	<!-- Note: Border for Campaign Map Selection Screen  -->
 	<image id="Mission Selection Border" src="Map_Selection_Overlay_Border_Top"/>
 	<image src="Map_Selection_Overlay_Border_Left"/>

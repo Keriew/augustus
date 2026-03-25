@@ -104,7 +104,7 @@ typedef enum {
     // extra mouse buttons - sdl 2 natively supports only 5 buttons
     KEY_TYPE_MOUSE_BUTTON_4,
     KEY_TYPE_MOUSE_BUTTON_5,
-    // but more can be added via handling event.button > 5 - precise handling has to be added to augustus.c
+    // but more can be added via handling event.button > 5 - precise handling has to be added to claudius.c
     KEY_TYPE_MOUSE_BUTTON_6,
     KEY_TYPE_MOUSE_BUTTON_7,
     KEY_TYPE_MOUSE_BUTTON_8,

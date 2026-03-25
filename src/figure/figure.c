@@ -618,7 +618,7 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
         f->last_destinatation_id = buffer_read_i16(buf);
     }
     // The following code should only be executed if the savegame includes figure information that is not 
-    // supported on this specific version of Augustus. The extra bytes in the buffer must be skipped in order
+    // supported on this specific version of Claudius. The extra bytes in the buffer must be skipped in order
     // to prevent reading bogus data for the next figure
     if (figure_buf_size > FIGURE_CURRENT_BUFFER_SIZE) {
         buffer_skip(buf, figure_buf_size - FIGURE_CURRENT_BUFFER_SIZE);

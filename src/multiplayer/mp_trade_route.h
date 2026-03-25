@@ -64,8 +64,8 @@ typedef struct {
     uint8_t dest_player_id;         /* 0xFF if AI city */
     int dest_city_id;
 
-    /* underlying Augustus route_id (from trade_route_new() or empire_city.route_id) */
-    int augustus_route_id;
+    /* underlying Claudius route_id (from trade_route_new() or empire_city.route_id) */
+    int claudius_route_id;
 
     /* mode and transport */
     uint8_t is_player_to_player;    /* 1 if both endpoints are player cities */
@@ -93,7 +93,7 @@ void mp_trade_route_clear(void);
 /* Host-only: create a new route instance, returns instance_id or 0 on failure */
 uint32_t mp_trade_route_create(uint8_t origin_player_id, int origin_city_id,
                                 uint8_t dest_player_id, int dest_city_id,
-                                int augustus_route_id, uint32_t network_route_id,
+                                int claudius_route_id, uint32_t network_route_id,
                                 mp_trade_route_transport transport);
 
 /* Delete / disable / enable */
@@ -103,7 +103,7 @@ int mp_trade_route_set_status(uint32_t instance_id, mp_trade_route_status status
 /* ---- Queries ---- */
 mp_trade_route_instance *mp_trade_route_get(uint32_t instance_id);
 mp_trade_route_instance *mp_trade_route_find_by_endpoints(int origin_city_id, int dest_city_id);
-mp_trade_route_instance *mp_trade_route_find_by_augustus_route(int augustus_route_id);
+mp_trade_route_instance *mp_trade_route_find_by_claudius_route(int claudius_route_id);
 int mp_trade_route_count_player_routes(uint8_t player_id);
 int mp_trade_route_count_active(void);
 

@@ -9,7 +9,7 @@
  * Host-authoritative trade execution layer.
  *
  * This is the single orchestration point for all multiplayer trade transactions.
- * It sits above the Augustus core economic engine and enforces:
+ * It sits above the Claudius core economic engine and enforces:
  *   - Validation before any stock mutation
  *   - Atomic commit (remove from origin + add to destination)
  *   - Route quota tracking

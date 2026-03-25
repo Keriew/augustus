@@ -885,7 +885,7 @@ static translation_string all_strings[] = {
     {TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TITLE, "파일이 존재하지 않습니다"},
     {TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TEXT, "선택한 파일이 존재하지 않습니다. \n다른 파일을 선택해 주세요."},
 	{TR_SAVE_DIALOG_INVALID_FILE, "유효하지 않은 파일"},
-    {TR_SAVE_DIALOG_INVALID_FILE_DESC, "불러오려는 저장 게임이 유효하지 않습니다.\n\n저장은 버그로 인해 손상되었을 수 있습니다.\n\n이 저장 파일이 유효한 것이 확실하다면, 다음 링크로 버그를 제보해주세요:\n\nhttps://github.com/Keriew/augustus/issues/new\n\n저장 파일도 첨부해주세요."},
+    {TR_SAVE_DIALOG_INVALID_FILE_DESC, "불러오려는 저장 게임이 유효하지 않습니다.\n\n저장은 버그로 인해 손상되었을 수 있습니다.\n\n이 저장 파일이 유효한 것이 확실하다면, 다음 링크로 버그를 제보해주세요:\n\nhttps://github.com/dathannobrega/claudius/issues/new\n\n저장 파일도 첨부해주세요."},
     {TR_SAVE_DIALOG_INCOMPATIBLE_VERSION, "호환되지 않는 버전"},
     {TR_SAVE_DIALOG_NEW_FILE, "새 파일"},
     {TR_SAVE_DIALOG_SELECT_FILE, "파일을 선택하세요"},

@@ -1305,7 +1305,7 @@ static translation_string all_strings[] = {
     {TR_RESOURCE_STONE, "Kamień"},
     {TR_SAVE_DIALOG_FILTER, "Filtr"},
     {TR_SAVE_DIALOG_INCOMPATIBLE_VERSION, "Niekompatybilna wersja"},
-    {TR_SAVE_DIALOG_INVALID_FILE_DESC, "Zapis gry, który próbujesz wczytać, jest nieprawidłowy.\n\nZapis mógł zostać uszkodzony z powodu błędu.\n\nJeśli jesteś pewien, że to powinien być prawidłowy zapis, zgłoś błąd na adres:\n\nhttps ://github.com/Keriew/augustus/issues/new\n\nProszę załączyć również zapis."},
+    {TR_SAVE_DIALOG_INVALID_FILE_DESC, "Zapis gry, który próbujesz wczytać, jest nieprawidłowy.\n\nZapis mógł zostać uszkodzony z powodu błędu.\n\nJeśli jesteś pewien, że to powinien być prawidłowy zapis, zgłoś błąd na adres:\n\nhttps ://github.com/dathannobrega/claudius/issues/new\n\nProszę załączyć również zapis."},
     {TR_SAVE_DIALOG_NEW_FILE, "Nowy plik"},
     {TR_SAVE_DIALOG_OVERWRITE_FILE, "Nadpisać plik?"},
     {TR_SAVE_DIALOG_OVERWRITE_FILE_DESC, "Ten plik już istnieje. Nadpisać?"},

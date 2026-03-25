@@ -886,7 +886,7 @@ static translation_string all_strings[] = {
     {TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TITLE, "Il file non esiste"},
     {TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TEXT, "Il file selezionato non esiste.\nSeleziona un file diverso."},
     {TR_SAVE_DIALOG_INVALID_FILE, "File non valido"},
-    {TR_SAVE_DIALOG_INVALID_FILE_DESC, "Il salvataggio che stai cercando di aprire non è valido.\n\nIl file potrebbe risultare corrotto a causa di un bug.\n\nSe sei sicuro che il salvataggio sia valido, per favore segnala il problema a:\n\nhttps://github.com/Keriew/augustus/issues/new\n\nPer favore ricorda di allegare anche il file alla segnalazione."},
+    {TR_SAVE_DIALOG_INVALID_FILE_DESC, "Il salvataggio che stai cercando di aprire non è valido.\n\nIl file potrebbe risultare corrotto a causa di un bug.\n\nSe sei sicuro che il salvataggio sia valido, per favore segnala il problema a:\n\nhttps://github.com/dathannobrega/claudius/issues/new\n\nPer favore ricorda di allegare anche il file alla segnalazione."},
     {TR_SAVE_DIALOG_INCOMPATIBLE_VERSION, "Versione incompatibile"},
     {TR_SAVE_DIALOG_NEW_FILE, "Nuovo File"},
     {TR_SAVE_DIALOG_SELECT_FILE, "Seleziona un file"},

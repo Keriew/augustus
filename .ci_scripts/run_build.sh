@@ -29,7 +29,7 @@ case "$BUILD_TARGET" in
 	xcodebuild clean build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO -scheme claudius
 	;;
 "flatpak")
-	flatpak-builder repo res/com.github.keriew.claudius.json --install-deps-from=flathub --keep-build-dirs
+	flatpak-builder repo res/com.github.dathannobrega.claudius.json --install-deps-from=flathub --keep-build-dirs
 	cp .flatpak-builder/build/claudius/res/version.txt res/version.txt
 	;;
 "appimage")

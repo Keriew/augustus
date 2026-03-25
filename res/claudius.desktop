@@ -3,7 +3,7 @@
 Type=Application
 Version=1.0
 Exec=claudius
-Icon=com.github.keriew.claudius
+Icon=com.github.dathannobrega.claudius
 Name=Claudius
 GenericName=Roman city management game
 Comment=Open Source re-implementation of Caesar 3.

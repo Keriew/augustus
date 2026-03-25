@@ -841,7 +841,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_PALISADE_GATE, "Πύλη ξύλινου τείχους"},
     {TR_BUILDING_PALISADE_GATE_DESC, "Αυτή η στενή ξύλινη πύλη ελέγχει τη μετακίνηση των ανθρώπων μέσα και έξω από την άμυνα της πόλης σας."},
     {TR_SAVE_DIALOG_INVALID_FILE, "Άκυρο αρχείο"},
-	{TR_SAVE_DIALOG_INVALID_FILE_DESC, "Η αποθήκευση που προσπαθείτε να φορτώσετε είναι άκυρη.\n\nΗ αποθήκευση ενδέχεται να έχει καταστραφεί λόγω σφάλματος.\n\nΕάν είστε σίγουροι ότι πρόκειται για έγκυρη αποθήκευση, αναφέρετε το σφάλμα στο:\n\n\nhttps://github.com/Keriew/augustus/issues/new\n\n\nΠαρακαλούμε επισυνάψτε και την αποθήκευση."},
+	{TR_SAVE_DIALOG_INVALID_FILE_DESC, "Η αποθήκευση που προσπαθείτε να φορτώσετε είναι άκυρη.\n\nΗ αποθήκευση ενδέχεται να έχει καταστραφεί λόγω σφάλματος.\n\nΕάν είστε σίγουροι ότι πρόκειται για έγκυρη αποθήκευση, αναφέρετε το σφάλμα στο:\n\n\nhttps://github.com/dathannobrega/claudius/issues/new\n\n\nΠαρακαλούμε επισυνάψτε και την αποθήκευση."},
     {TR_SAVE_DIALOG_INCOMPATIBLE_VERSION, "Μη συμβατή έκδοση"},
 	{TR_SAVE_DIALOG_NEW_FILE, "Νέο αρχείο"},
     {TR_SAVE_DIALOG_SELECT_FILE, "Επιλέξτε ένα αρχείο"},

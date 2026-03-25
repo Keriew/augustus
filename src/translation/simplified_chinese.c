@@ -877,7 +877,7 @@ static translation_string all_strings[] = {
     {TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TITLE, "文件不存在"},
     {TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TEXT, "文件不存在\n请选择其他文件"},
     {TR_SAVE_DIALOG_INVALID_FILE, "无效文件"},
-    {TR_SAVE_DIALOG_INVALID_FILE_DESC, "您尝试加载的游戏存档无效。\n\n该保存文件可能由于某个bug而遭到损坏。\n\n如果您确定这是个有效的保存操作，请将此问题报告给：\n\nhttps://github.com/Keriew/augustus/issues/new\n\n并附上存档。"},
+    {TR_SAVE_DIALOG_INVALID_FILE_DESC, "您尝试加载的游戏存档无效。\n\n该保存文件可能由于某个bug而遭到损坏。\n\n如果您确定这是个有效的保存操作，请将此问题报告给：\n\nhttps://github.com/dathannobrega/claudius/issues/new\n\n并附上存档。"},
     {TR_SAVE_DIALOG_INCOMPATIBLE_VERSION, "游戏版本不匹配"},
     {TR_SAVE_DIALOG_NEW_FILE, "新建文件"},
     {TR_SAVE_DIALOG_SELECT_FILE, "选择文件"},

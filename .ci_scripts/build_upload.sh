@@ -32,7 +32,7 @@ case "$DEPLOY" in
   PACKAGE=linux-flatpak
   DEPLOY_FILE=claudius-$VERSION-linux.flatpak
   flatpak build-export export repo
-  flatpak build-bundle export claudius.flatpak com.github.keriew.claudius --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
+  flatpak build-bundle export claudius.flatpak com.github.dathannobrega.claudius --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
   cp claudius.flatpak "deploy/$DEPLOY_FILE"
   ;;
 "vita")
@@ -95,5 +95,5 @@ then
   exit
 fi
 
-curl -u "$UPLOAD_TOKEN" -T deploy/$DEPLOY_FILE https://augustus.josecadete.net/upload/$REPO/$PACKAGE/$VERSION/$DEPLOY_FILE
-echo "Uploaded. URL: https://augustus.josecadete.net/$REPO.html" 
+curl -u "$UPLOAD_TOKEN" -T deploy/$DEPLOY_FILE https://claudius.datan.com.br/upload/$REPO/$PACKAGE/$VERSION/$DEPLOY_FILE
+echo "Uploaded. URL: https://claudius.datan.com.br/$REPO.html" 

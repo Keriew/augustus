@@ -886,7 +886,7 @@ static translation_string all_strings[] = {
     {TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TITLE, "Le fichier n'existe pas"},
     {TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TEXT, "Le fichier choisi n'existe pas.\nVeuillez sélectionner un autre fichier."},
     {TR_SAVE_DIALOG_INVALID_FILE, "Fichier non valide"},
-    {TR_SAVE_DIALOG_INVALID_FILE_DESC, "Cette sauvegarde n'est pas valide.\n\nCelle-ci a pu être corrompue en raison d'un bug.\n\nSi vous êtes sûr(e) qu'il s'agit d'une sauvegarde valide, veuillez signaler le bug sur :\n\nhttps://github.com/Keriew/augustus/issues/new\n\nMerci de joindre le fichier de sauvegarde."},
+    {TR_SAVE_DIALOG_INVALID_FILE_DESC, "Cette sauvegarde n'est pas valide.\n\nCelle-ci a pu être corrompue en raison d'un bug.\n\nSi vous êtes sûr(e) qu'il s'agit d'une sauvegarde valide, veuillez signaler le bug sur :\n\nhttps://github.com/dathannobrega/claudius/issues/new\n\nMerci de joindre le fichier de sauvegarde."},
     {TR_SAVE_DIALOG_INCOMPATIBLE_VERSION, "Version incompatible"},
     {TR_SAVE_DIALOG_NEW_FILE, "Nouveau fichier"},
     {TR_SAVE_DIALOG_SELECT_FILE, "Choisir un fichier"},

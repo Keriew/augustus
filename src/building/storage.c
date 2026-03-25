@@ -656,7 +656,7 @@ void building_storage_load_state(buffer *buf, int version)
     int includes_storage_size = version > SAVE_GAME_LAST_STATIC_VERSION;
     int num_resources = RESOURCE_MAX_LEGACY;
 
-    if (includes_storage_size) { // Augustus 4.0 
+    if (includes_storage_size) { // Claudius 4.0 
         storage_buf_size = buffer_read_i32(buf);
         buf_size -= 4;
         num_resources = storage_buf_size - STORAGE_STATIC_BUFFER_SIZE;

@@ -863,7 +863,7 @@ static translation_string all_strings[] = {
 																	  
 																													
     {TR_SAVE_DIALOG_INVALID_FILE, "Archivo inválido"},
-    {TR_SAVE_DIALOG_INVALID_FILE_DESC, "La partida guardada que estás intentando cargar no es válido.\n\nLa partida guardada puede haberse corrompido debido a un error.\n\nSi estás seguro de que es un juego guardado válido, por favor, informa del error a:\n\nhttps://github.com/Keriew/augustus/issues/new\n\nPor favor, adjunta también el juego guardado."},
+    {TR_SAVE_DIALOG_INVALID_FILE_DESC, "La partida guardada que estás intentando cargar no es válido.\n\nLa partida guardada puede haberse corrompido debido a un error.\n\nSi estás seguro de que es un juego guardado válido, por favor, informa del error a:\n\nhttps://github.com/dathannobrega/claudius/issues/new\n\nPor favor, adjunta también el juego guardado."},
     {TR_SAVE_DIALOG_INCOMPATIBLE_VERSION, "Versión incompatible"},
     {TR_SAVE_DIALOG_NEW_FILE, "Nuevo archivo"},
     {TR_SAVE_DIALOG_SELECT_FILE, "Seleccione un archivo"},

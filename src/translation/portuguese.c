@@ -1288,7 +1288,7 @@ static translation_string all_strings[] = {
     {TR_RESOURCE_SAND, "Areia"},
     {TR_RESOURCE_STONE, "Pedra"},
     {TR_SAVE_DIALOG_FILTER, "Filtrar"},
-    {TR_SAVE_DIALOG_INVALID_FILE_DESC, "O arquivo selecionado é inválido.\n\nO arquivo pode ter se corrompido devido a um erro.\n\nSe você tem certeza de que este arquivo é válido, por favor reporte o erro em:\n\nhttps://github.com/Keriew/augustus/issues/new\n\nPor favor, anexe o arquivo salvo."},
+    {TR_SAVE_DIALOG_INVALID_FILE_DESC, "O arquivo selecionado é inválido.\n\nO arquivo pode ter se corrompido devido a um erro.\n\nSe você tem certeza de que este arquivo é válido, por favor reporte o erro em:\n\nhttps://github.com/dathannobrega/claudius/issues/new\n\nPor favor, anexe o arquivo salvo."},
     {TR_SAVE_DIALOG_NEW_FILE, "Novo arquivo"},
     {TR_SAVE_DIALOG_OVERWRITE_FILE, "Substituir arquivo?"},
     {TR_SAVE_DIALOG_OVERWRITE_FILE_DESC, "O arquivo já existe. Substituir?"},

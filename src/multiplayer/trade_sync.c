@@ -172,11 +172,11 @@ void mp_trade_sync_emit_trader_trade_executed(int figure_id, int resource,
         t->state_version++;
     }
 
-    /* Resolve route_instance_id from the Augustus route */
+    /* Resolve route_instance_id from the Claudius route */
     uint32_t route_instance_id = 0;
     int route_id = t ? t->route_id : mp_ownership_get_trader_route(figure_id);
     if (route_id >= 0) {
-        mp_trade_route_instance *mpr = mp_trade_route_find_by_augustus_route(route_id);
+        mp_trade_route_instance *mpr = mp_trade_route_find_by_claudius_route(route_id);
         if (mpr) {
             route_instance_id = mpr->instance_id;
             /* Also record in the mp_trade_route counters */

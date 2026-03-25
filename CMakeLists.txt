@@ -976,7 +976,7 @@ if(APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "ios")
         MACOSX_PACKAGE_LOCATION "Resources")
 
     # setting variables that will populate Info.plist
-    set(MACOSX_BUNDLE_GUI_IDENTIFIER "pl.Keriew.claudius")
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.github.dathannobrega.claudius")
     set(MACOSX_BUNDLE_BUNDLE_NAME ${USER_FRIENDLY_NAME})
     set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum OS X deployment version" FORCE)
     set(MACOSX_BUNDLE_ICON_FILE "claudius.icns")
@@ -1030,14 +1030,14 @@ if(${TARGET_PLATFORM} STREQUAL "ios")
 
         MACOSX_BUNDLE_BUNDLE_NAME  ${USER_FRIENDLY_NAME}
         MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}${VERSION_REVISION}"
-        MACOSX_BUNDLE_GUI_IDENTIFIER "com.github.keriew.claudius"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.github.dathannobrega.claudius"
         MACOSX_BUNDLE_INFO_PLIST "${PROJECT_SOURCE_DIR}/res/ios/Info.plist"
         MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
         MACOSX_BUNDLE_UI_LAUNCH_STORYBOARD_NAME "LaunchScreen"
         OUTPUT_NAME "${PROJECT_NAME}"
         XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
         XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY 1,2
-        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.github.keriew.claudius"
+        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.github.dathannobrega.claudius"
     )
     set(CMAKE_OSX_DEPLOYMENT_TARGET "14.0" CACHE STRING "Minimum OS X deployment version" FORCE)
     set_source_files_properties(${PROJECT_SOURCE_DIR}/res/ios/Assets.xcassets PROPERTIES
@@ -1124,7 +1124,7 @@ elseif(NINTENDO_SWITCH)
 
 nx_generate_nacp (${PROJECT_NAME}.nacp
     NAME   "Claudius"
-    AUTHOR "Keriew"
+    AUTHOR "dathannobrega"
 )
 
 nx_create_nro (${PROJECT_NAME}
@@ -1172,12 +1172,12 @@ else()
     endif()
 
     if(UNIX AND NOT APPLE)
-        install(FILES "res/claudius.desktop" DESTINATION "share/applications" RENAME "com.github.keriew.claudius.desktop")
-        install(FILES "res/claudius.metainfo.xml" DESTINATION "share/metainfo" RENAME "com.github.keriew.claudius.metainfo.xml")
-        install(FILES "res/claudius_32.png" DESTINATION "share/icons/hicolor/32x32/apps" RENAME "com.github.keriew.claudius.png")
-        install(FILES "res/claudius_48.png" DESTINATION "share/icons/hicolor/48x48/apps" RENAME "com.github.keriew.claudius.png")
-        install(FILES "res/claudius_256.png" DESTINATION "share/icons/hicolor/256x256/apps" RENAME "com.github.keriew.claudius.png")
-        install(FILES "res/claudius_512.png" DESTINATION "share/icons/hicolor/512x512/apps" RENAME "com.github.keriew.claudius.png")
+        install(FILES "res/claudius.desktop" DESTINATION "share/applications" RENAME "com.github.dathannobrega.claudius.desktop")
+        install(FILES "res/claudius.metainfo.xml" DESTINATION "share/metainfo" RENAME "com.github.dathannobrega.claudius.metainfo.xml")
+        install(FILES "res/claudius_32.png" DESTINATION "share/icons/hicolor/32x32/apps" RENAME "com.github.dathannobrega.claudius.png")
+        install(FILES "res/claudius_48.png" DESTINATION "share/icons/hicolor/48x48/apps" RENAME "com.github.dathannobrega.claudius.png")
+        install(FILES "res/claudius_256.png" DESTINATION "share/icons/hicolor/256x256/apps" RENAME "com.github.dathannobrega.claudius.png")
+        install(FILES "res/claudius_512.png" DESTINATION "share/icons/hicolor/512x512/apps" RENAME "com.github.dathannobrega.claudius.png")
         install(DIRECTORY "${ASSETS_DIR}/" DESTINATION "share/claudius-game/assets")
     endif()
 

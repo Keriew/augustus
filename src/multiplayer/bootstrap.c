@@ -89,7 +89,7 @@ static uint32_t generate_session_seed(void)
 
 static int load_scenario_locally(const char *scenario_name)
 {
-    /* Convert ASCII scenario name to uint8_t for Augustus API */
+    /* Convert ASCII scenario name to uint8_t for Claudius API */
     uint8_t name_buf[MP_MANIFEST_SCENARIO_NAME_MAX];
     string_copy(string_from_ascii(scenario_name), name_buf,
                 MP_MANIFEST_SCENARIO_NAME_MAX);

@@ -54,7 +54,7 @@ void mp_ownership_set_city_online(int city_id, int online);
 
 /**
  * Create a route entry in the ownership table. Returns the allocated route slot index,
- * or -1 on failure. The route_id is the Augustus internal trade_route ID.
+ * or -1 on failure. The route_id is the Claudius internal trade_route ID.
  */
 int mp_ownership_create_route(int route_id, mp_route_owner_mode mode,
                                uint8_t origin_player_id, uint8_t dest_player_id,

@@ -886,7 +886,7 @@ static translation_string all_strings[] = {
     {TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TITLE, "Файл не существует"},
     {TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TEXT, "Выбранный файл не существует.\nПожалуйста, выберите другой файл."},
     {TR_SAVE_DIALOG_INVALID_FILE, "Недействительный файл"},
-    {TR_SAVE_DIALOG_INVALID_FILE_DESC, "Сохранение, которое вы пытаетесь загрузить, недействительно.\n\nВозможно, сохранение было повреждено из-за глюка.\n\nЕсли вы уверены, что это должно быть корректное сохранение, сообщите об ошибке по адресу:\n\nhttps://github.com/Keriew/augustus/issues/new\n\nПожалуйста, прикрепите сохранение."},
+    {TR_SAVE_DIALOG_INVALID_FILE_DESC, "Сохранение, которое вы пытаетесь загрузить, недействительно.\n\nВозможно, сохранение было повреждено из-за глюка.\n\nЕсли вы уверены, что это должно быть корректное сохранение, сообщите об ошибке по адресу:\n\nhttps://github.com/dathannobrega/claudius/issues/new\n\nПожалуйста, прикрепите сохранение."},
     {TR_SAVE_DIALOG_INCOMPATIBLE_VERSION, "Несовместимая версия"},
     {TR_SAVE_DIALOG_NEW_FILE, "Новый файл"},
     {TR_SAVE_DIALOG_SELECT_FILE, "Выберите файл"},

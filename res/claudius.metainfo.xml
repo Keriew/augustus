@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-	<id>com.github.keriew.claudius</id>
+	<id>com.github.dathannobrega.claudius</id>
 	<metadata_license>CC0-1.0</metadata_license>
 	<project_license>AGPL-3.0</project_license>
 	<name>Claudius</name>
@@ -26,48 +26,48 @@
 	    </ul>
 		<p>Claudius requires the original assets (graphics, sounds, etc) from Caesar 3 to run. It optionally supports the high-quality MP3 files once provided on the Sierra website.</p>
 	</description>
-	<launchable type="desktop-id">com.github.keriew.claudius.desktop</launchable>
+	<launchable type="desktop-id">com.github.dathannobrega.claudius.desktop</launchable>
 	<screenshots>
 		<screenshot type="default">
-			<image type="source">https://raw.githubusercontent.com/keriew/augustus/master/doc/main-image.png</image>
+			<image type="source">https://raw.githubusercontent.com/dathannobrega/claudius/master/doc/main-image.png</image>
 			<caption>A full city in Claudius</caption>
 		</screenshot>
 	</screenshots>
 	<releases>
 		<release version="4.0.0" date="2023-12-28">
-			<url>https://github.com/Keriew/augustus/releases/tag/v4.0.0</url>
+			<url>https://github.com/dathannobrega/claudius/releases/tag/v4.0.0</url>
 		</release>
 		<release version="3.2.0" date="2022-09-22">
-			<url>https://github.com/Keriew/augustus/releases/tag/v3.2.0</url>
+			<url>https://github.com/dathannobrega/claudius/releases/tag/v3.2.0</url>
 		</release>
 		<release version="3.1.0" date="2021-11-25">
-			<url>https://github.com/Keriew/augustus/releases/tag/v3.1.0</url>
+			<url>https://github.com/dathannobrega/claudius/releases/tag/v3.1.0</url>
 		</release>
 		<release version="3.0.1" date="2021-05-17">
-			<url>https://github.com/Keriew/augustus/releases/tag/v3.0.1</url>
+			<url>https://github.com/dathannobrega/claudius/releases/tag/v3.0.1</url>
 		</release>
 		<release version="2.0.1" date="2020-11-16">
-			<url>https://github.com/Keriew/augustus/releases/tag/v2.0.1</url>
+			<url>https://github.com/dathannobrega/claudius/releases/tag/v2.0.1</url>
 		</release>
 		<release version="2.0.0" date="2020-11-12">
-			<url>https://github.com/Keriew/augustus/releases/tag/v2.0.0</url>
+			<url>https://github.com/dathannobrega/claudius/releases/tag/v2.0.0</url>
 		</release>
 		<release version="1.4.1a" date="2020-06-09">
-			<url>https://github.com/Keriew/augustus/releases/tag/v1.4.1a</url>
+			<url>https://github.com/dathannobrega/claudius/releases/tag/v1.4.1a</url>
 		</release>
 		<release version="1.4.1" date="2020-06-09">
-			<url>https://github.com/Keriew/augustus/releases/tag/v1.4.1</url>
+			<url>https://github.com/dathannobrega/claudius/releases/tag/v1.4.1</url>
 		</release>
 		<release version="1.4.0" date="2020-06-05">
-			<url>https://github.com/Keriew/augustus/releases/tag/v1.4.0</url>
+			<url>https://github.com/dathannobrega/claudius/releases/tag/v1.4.0</url>
 		</release>
 		<release version="1.3.1" date="2020-02-24"/>
 		<release version="1.3.0" date="2020-02-14"/>
 	</releases>
-	<url type="homepage">https://github.com/Keriew/augustus</url>
- 	<url type="bugtracker">https://github.com/Keriew/augustus/issues</url>
-	<url type="help">https://github.com/Keriew/augustus/blob/master/res/manual/augustus_manual_en_4_0.pdf</url>
-	<developer id="com.github.keriew">
+	<url type="homepage">https://github.com/dathannobrega/claudius</url>
+ 	<url type="bugtracker">https://github.com/dathannobrega/claudius/issues</url>
+	<url type="help">https://github.com/dathannobrega/claudius/blob/master/res/manual/claudius_manual_en_4_0.pdf</url>
+	<developer id="com.github.dathannobrega">
 		<name>Claudius Dev Team</name>
 	</developer>
 	<content_rating type="oars-1.1">

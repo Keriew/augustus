@@ -421,7 +421,7 @@ static void apply_command(mp_command *cmd)
             /* Allocate network route ID */
             uint32_t network_id = mp_ownership_allocate_network_route_id();
 
-            /* Find or create a trade route in the Augustus system.
+            /* Find or create a trade route in the Claudius system.
              * AI cities already have a route_id from the scenario data.
              * Player-to-player routes need a freshly allocated route entry. */
             int route_id = empire_city_get_route_id(data->dest_city_id);
@@ -495,7 +495,7 @@ static void apply_command(mp_command *cmd)
                     dest_is_player ? dest_player : 0xFF, data->dest_city_id,
                     route_id, network_id, transport_type);
                 if (inst_id != MP_TRADE_ROUTE_INVALID_ID) {
-                    /* Set initial resource policies matching the Augustus route defaults */
+                    /* Set initial resource policies matching the Claudius route defaults */
                     for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
                         if (resource_is_storable(r)) {
                             mp_trade_route_set_resource_export(inst_id, r, 1, 40);
@@ -529,7 +529,7 @@ static void apply_command(mp_command *cmd)
             mp_ownership_clear_route_traders(route_id);
             /* Also delete the mp_trade_route_instance if it exists */
             {
-                mp_trade_route_instance *mpr = mp_trade_route_find_by_augustus_route(route_id);
+                mp_trade_route_instance *mpr = mp_trade_route_find_by_claudius_route(route_id);
                 if (mpr) {
                     mp_trade_route_delete(mpr->instance_id);
                 }

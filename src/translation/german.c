@@ -32,7 +32,7 @@ static translation_string all_strings[] = {
     {TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TITLE, "Datei nicht vorhanden."},
     {TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TEXT, "Die ausgewählte Datei ist nicht vorhanden.\nBitte wählen Sie eine andere Datei aus."},
     {TR_SAVE_DIALOG_INVALID_FILE, "Ungültige Datei"},
-	{TR_SAVE_DIALOG_INVALID_FILE_DESC, "Der Spielstand, den Sie zu laden versuchen, ist ungültig.\n\nDer Spielstand wurde möglicherweise aufgrund eines Fehlers beschädigt.\n\nWenn Sie sich sicher sind, dass dies ein gültiger Spielstand sein sollte, melden Sie den Fehler bitte an:\n\nhttps://github.com/Keriew/augustus/issues/new\n\nBitte fügen Sie auch den Spielstand als Datei hinzu."},
+	{TR_SAVE_DIALOG_INVALID_FILE_DESC, "Der Spielstand, den Sie zu laden versuchen, ist ungültig.\n\nDer Spielstand wurde möglicherweise aufgrund eines Fehlers beschädigt.\n\nWenn Sie sich sicher sind, dass dies ein gültiger Spielstand sein sollte, melden Sie den Fehler bitte an:\n\nhttps://github.com/dathannobrega/claudius/issues/new\n\nBitte fügen Sie auch den Spielstand als Datei hinzu."},
     {TR_SAVE_DIALOG_INCOMPATIBLE_VERSION, "Inkompatible Version" },
     {TR_SAVE_DIALOG_NEW_FILE, "Neue Datei"},
 	{TR_SAVE_DIALOG_SELECT_FILE, "Eine Datei auswählen"},

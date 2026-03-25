@@ -1024,7 +1024,7 @@ static translation_string all_strings[] = {
     {TR_RESOURCE_SAND, "Sand"},
     {TR_RESOURCE_STONE, "Sten"},
     {TR_SAVE_DIALOG_FILTER, "Filter"},
-    {TR_SAVE_DIALOG_INVALID_FILE_DESC, "Sparfilen du försöker ladda är ogiltig.\n\nSparfilen kan vara korrupt som resultat av en bug.\n\nOm du är säker på att det här är en giltig sparfil, var god och rapportera buggen till:\n\nhttps://github.com/Keriew/augustus/issues/new\n\nBifoga även sparfilen."},
+    {TR_SAVE_DIALOG_INVALID_FILE_DESC, "Sparfilen du försöker ladda är ogiltig.\n\nSparfilen kan vara korrupt som resultat av en bug.\n\nOm du är säker på att det här är en giltig sparfil, var god och rapportera buggen till:\n\nhttps://github.com/dathannobrega/claudius/issues/new\n\nBifoga även sparfilen."},
     {TR_SAVE_DIALOG_NEW_FILE, "Ny fil"},
     {TR_SAVE_DIALOG_OVERWRITE_FILE, "Skriv över filen?"},
     {TR_SAVE_DIALOG_OVERWRITE_FILE_DESC, "Filen finns redan. Skriv över den?"},

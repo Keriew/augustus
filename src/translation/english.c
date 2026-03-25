@@ -886,7 +886,7 @@ static translation_string all_strings[] = {
     {TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TITLE, "File does not exist"},
     {TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TEXT, "The selected file does not exist.\nPlease select a different file."},
     {TR_SAVE_DIALOG_INVALID_FILE, "Invalid file"},
-    {TR_SAVE_DIALOG_INVALID_FILE_DESC, "The savegame you're trying to load is invalid.\n\nThe save may have been corrupted due to a bug.\n\nIf you're sure this should be a valid save, please report the bug to:\n\nhttps://github.com/Keriew/augustus/issues/new\n\nPlease attach the save as well."},
+    {TR_SAVE_DIALOG_INVALID_FILE_DESC, "The savegame you're trying to load is invalid.\n\nThe save may have been corrupted due to a bug.\n\nIf you're sure this should be a valid save, please report the bug to:\n\nhttps://github.com/dathannobrega/claudius/issues/new\n\nPlease attach the save as well."},
     {TR_SAVE_DIALOG_INCOMPATIBLE_VERSION, "Incompatible version"},
     {TR_SAVE_DIALOG_NEW_FILE, "New file"},
     {TR_SAVE_DIALOG_SELECT_FILE, "Select a file"},

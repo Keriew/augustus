@@ -1669,7 +1669,7 @@ int game_file_io_read_save_game_from_buffer(buffer *buf)
     resource_version_t resource_version;
     if (get_savegame_versions_from_buffer(buf, &save_version, &resource_version)) {
         if (save_version > SAVE_GAME_CURRENT_VERSION || resource_version > RESOURCE_CURRENT_VERSION) {
-            log_error("Newer save game version than supported. Please update Augustus. Version:", 0, save_version);
+            log_error("Newer save game version than supported. Please update Claudius. Version:", 0, save_version);
             return FILE_LOAD_INCOMPATIBLE_VERSION;
         }
         log_info("Savegame version", 0, save_version);
@@ -1702,7 +1702,7 @@ int game_file_io_read_saved_game(const char *filename, int offset)
     resource_version_t resource_version;
     if (get_savegame_versions(fp, &save_version, &resource_version)) {
         if (save_version > SAVE_GAME_CURRENT_VERSION || resource_version > RESOURCE_CURRENT_VERSION) {
-            log_error("Newer save game version than supported. Please update Augustus. Version:", 0, save_version);
+            log_error("Newer save game version than supported. Please update Claudius. Version:", 0, save_version);
             file_close(fp);
             return FILE_LOAD_INCOMPATIBLE_VERSION;
         }
@@ -1897,7 +1897,7 @@ int game_file_io_read_saved_game_info_from_buffer(buffer *buf, saved_game_info *
     resource_version_t resource_version;
     if (get_savegame_versions_from_buffer(buf, &save_version, &resource_version)) {
         if (save_version > SAVE_GAME_CURRENT_VERSION || resource_version > RESOURCE_CURRENT_VERSION) {
-            log_error("Newer save game version than supported. Please update Augustus. Version:", 0, save_version);
+            log_error("Newer save game version than supported. Please update Claudius. Version:", 0, save_version);
             return FILE_LOAD_INCOMPATIBLE_VERSION;
         }
         log_info("Savegame version", 0, save_version);

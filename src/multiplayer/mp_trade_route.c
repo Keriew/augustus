@@ -38,7 +38,7 @@ static mp_trade_route_instance *alloc_route(void)
 
 uint32_t mp_trade_route_create(uint8_t origin_player_id, int origin_city_id,
                                 uint8_t dest_player_id, int dest_city_id,
-                                int augustus_route_id, uint32_t network_route_id,
+                                int claudius_route_id, uint32_t network_route_id,
                                 mp_trade_route_transport transport)
 {
     mp_trade_route_instance *r = alloc_route();
@@ -55,7 +55,7 @@ uint32_t mp_trade_route_create(uint8_t origin_player_id, int origin_city_id,
     r->origin_city_id = origin_city_id;
     r->dest_player_id = dest_player_id;
     r->dest_city_id = dest_city_id;
-    r->augustus_route_id = augustus_route_id;
+    r->claudius_route_id = claudius_route_id;
     r->is_player_to_player = (dest_player_id != 0xFF) ? 1 : 0;
     r->transport = transport;
     r->status = MP_TROUTE_ACTIVE;
@@ -72,7 +72,7 @@ uint32_t mp_trade_route_create(uint8_t origin_player_id, int origin_city_id,
     route_data.count++;
     MP_LOG_INFO("MP_TRADE_ROUTE", "Created route #%u: player %d city %d -> player %d city %d (aug_route=%d)",
                 r->instance_id, origin_player_id, origin_city_id,
-                dest_player_id, dest_city_id, augustus_route_id);
+                dest_player_id, dest_city_id, claudius_route_id);
     return r->instance_id;
 }
 
@@ -129,11 +129,11 @@ mp_trade_route_instance *mp_trade_route_find_by_endpoints(int origin_city_id, in
     return 0;
 }
 
-mp_trade_route_instance *mp_trade_route_find_by_augustus_route(int augustus_route_id)
+mp_trade_route_instance *mp_trade_route_find_by_claudius_route(int claudius_route_id)
 {
     for (int i = 0; i < MP_TRADE_ROUTE_MAX; i++) {
         mp_trade_route_instance *r = &route_data.routes[i];
-        if (r->in_use && r->augustus_route_id == augustus_route_id) {
+        if (r->in_use && r->claudius_route_id == claudius_route_id) {
             return r;
         }
     }
@@ -367,7 +367,7 @@ void mp_trade_route_serialize(uint8_t *buffer, uint32_t *out_size, uint32_t max_
         net_write_i32(&s, r->origin_city_id);
         net_write_u8(&s, r->dest_player_id);
         net_write_i32(&s, r->dest_city_id);
-        net_write_i32(&s, r->augustus_route_id);
+        net_write_i32(&s, r->claudius_route_id);
         net_write_u8(&s, r->is_player_to_player);
         net_write_u8(&s, (uint8_t)r->transport);
         net_write_u8(&s, (uint8_t)r->status);
@@ -418,7 +418,7 @@ void mp_trade_route_deserialize(const uint8_t *buffer, uint32_t size)
         r->origin_city_id = net_read_i32(&s);
         r->dest_player_id = net_read_u8(&s);
         r->dest_city_id = net_read_i32(&s);
-        r->augustus_route_id = net_read_i32(&s);
+        r->claudius_route_id = net_read_i32(&s);
         r->is_player_to_player = net_read_u8(&s);
         r->transport = (mp_trade_route_transport)net_read_u8(&s);
         r->status = (mp_trade_route_status)net_read_u8(&s);

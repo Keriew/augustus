@@ -21,7 +21,7 @@ static void display_crash_message(void)
         "The piece of code that caused the crash has been saved to claudius-log.txt.\n\n"
 #endif
         "If you can, please create an issue by going to:\n\n"
-        "https://github.com/Keriew/augustus/issues/new \n\n"
+        "https://github.com/dathannobrega/claudius/issues/new \n\n"
         "Please attach "
 #ifdef HAS_STACK_TRACE
         "claudius-log.txt and "

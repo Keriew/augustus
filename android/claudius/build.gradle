@@ -70,7 +70,7 @@ android {
 
     defaultConfig {
         compileSdk 35
-        applicationId "com.github.Keriew.claudius"
+        applicationId "com.github.dathannobrega.claudius"
         minSdkVersion 21
         targetSdkVersion 35
 
@@ -140,7 +140,7 @@ android {
             path "../../CMakeLists.txt"
         }
     }
-    namespace 'com.github.Keriew.claudius'
+    namespace 'com.github.dathannobrega.claudius'
 }
 
 /** play {

@@ -108,11 +108,11 @@ if (!$env:UPLOAD_TOKEN) {
 }
 
 echo "Uploading $deploy_file to $repo/$suffix/$version"
-curl -u "$env:UPLOAD_TOKEN" -T "deploy/$deploy_file" "https://augustus.josecadete.net/upload/$repo/$suffix/$version/${deploy_file}"
+curl -u "$env:UPLOAD_TOKEN" -T "deploy/$deploy_file" "https://claudius.datan.com.br/upload/$repo/$suffix/$version/${deploy_file}"
 if (!$?) {
     throw "Unable to upload"
 }
-echo "Uploaded. URL: https://augustus.josecadete.net/$repo.html"
+echo "Uploaded. URL: https://claudius.datan.com.br/$repo.html"
 
 if ($suffix -ne "windows") {
     exit
@@ -146,7 +146,7 @@ $assets_file = "assets-$version-$repo.zip"
 7z a "$assets_file" assets
 
 echo "Uploading $assets_file to $repo/windows/$version"
-curl -u "$env:UPLOAD_TOKEN" -T "$assets_file" "https://augustus.josecadete.net/upload/$repo/assets/$version/${assets_file}"
+curl -u "$env:UPLOAD_TOKEN" -T "$assets_file" "https://claudius.datan.com.br/upload/$repo/assets/$version/${assets_file}"
 if (!$?) {
     throw "Unable to upload assets"
 }

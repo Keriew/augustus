@@ -240,7 +240,7 @@ void building_state_save_to_buffer(buffer *buf, const building *b)
     // New building state code should always be added at the end to preserve savegame retrocompatibility
     // Also, don't forget to update BUILDING_STATE_CURRENT_BUFFER_SIZE and if possible, add a new macro like
     // BUILDING_STATE_NEW_FEATURE_BUFFER_SIZE with the full building state buffer size including all added features
-    // up until that point in Augustus' development
+    // up until that point in Claudius' development
 }
 
 static void read_type_data(buffer *buf, building *b, int version)
@@ -740,7 +740,7 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     }
 
     // The following code should only be executed if the savegame includes building information that is not 
-    // supported on this specific version of Augustus. The extra bytes in the buffer must be skipped in order
+    // supported on this specific version of Claudius. The extra bytes in the buffer must be skipped in order
     // to prevent reading bogus data for the next building
     if (building_buf_size > BUILDING_STATE_CURRENT_BUFFER_SIZE) {
         buffer_skip(buf, building_buf_size - BUILDING_STATE_CURRENT_BUFFER_SIZE);

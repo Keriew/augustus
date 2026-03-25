@@ -302,10 +302,10 @@ mp_trade_exec_result mp_trade_commit_transaction(uint32_t route_instance_id,
         mp_trade_route_rollback_import(route_instance_id, resource, diff);
     }
 
-    /* Also update the underlying Augustus trade route if it exists */
-    if (route->augustus_route_id >= 0 && trade_route_is_valid(route->augustus_route_id)) {
-        trade_route_increase_traded(route->augustus_route_id, resource, 1); /* buying */
-        trade_route_increase_traded(route->augustus_route_id, resource, 0); /* selling */
+    /* Also update the underlying Claudius trade route if it exists */
+    if (route->claudius_route_id >= 0 && trade_route_is_valid(route->claudius_route_id)) {
+        trade_route_increase_traded(route->claudius_route_id, resource, 1); /* buying */
+        trade_route_increase_traded(route->claudius_route_id, resource, 0); /* selling */
     }
 
     route->last_trade_tick = net_session_get_authoritative_tick();
@@ -381,7 +381,7 @@ void mp_trade_recover_trader_cargo(int figure_id)
 
     /* Find a warehouse in the origin city to return cargo to */
     int origin_city_id = mp_ownership_get_trader_origin_city(figure_id);
-    mp_trade_route_instance *mpr = mp_trade_route_find_by_augustus_route(route_id);
+    mp_trade_route_instance *mpr = mp_trade_route_find_by_claudius_route(route_id);
 
     /* Check trader's loaded resources and return them */
     if (f->trader_id > 0) {
@@ -450,7 +450,7 @@ void mp_trade_recover_trader_cargo(int figure_id)
  * For routes whose traders are at storage, this triggers the trade execution.
  *
  * Note: The actual per-tick trader execution still happens through the
- * Augustus figure action system (trader.c). This function handles the
+ * Claudius figure action system (trader.c). This function handles the
  * mp_trade_route_instance bookkeeping and ensures deterministic ordering.
  */
 void mp_trade_execute_tick(uint32_t current_tick)

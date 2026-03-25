@@ -121,7 +121,7 @@ const dir_info *platform_file_manager_cache_get_dir_info(const char *dir)
 
 void platform_file_manager_cache_update_file_info(const char *filename)
 {
-    // Augustus only modifies files in the base dir
+    // Claudius only modifies files in the base dir
     if (!base_dir_info) {
         return;
     }
@@ -150,7 +150,7 @@ void platform_file_manager_cache_update_file_info(const char *filename)
 
 void platform_file_manager_cache_delete_file_info(const char *filename)
 {
-    // Augustus only deletes files from the base dir
+    // Claudius only deletes files from the base dir
     if (!base_dir_info) {
         return;
     }
